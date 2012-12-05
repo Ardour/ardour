@@ -55,6 +55,7 @@ EditorSummary::EditorSummary (Editor* e)
 	  _old_follow_playhead (false)
 {
 	Region::RegionPropertyChanged.connect (region_property_connection, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
+	Route::RemoteControlIDChange.connect (route_ctrl_id_connection, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
 	_editor->playhead_cursor->PositionChanged.connect (position_connection, invalidator (*this), boost::bind (&EditorSummary::playhead_position_changed, this, _1), gui_context());
 
 	add_events (Gdk::POINTER_MOTION_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
@@ -562,7 +563,7 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 		}
 
 		set_editor (x, y);
-		set_cursor (_start_position);
+		// set_cursor (_start_position);
 
 	} else if (_zoom_dragging) {
 
@@ -687,7 +688,7 @@ EditorSummary::set_editor (double const x, double const y)
 		   as it also means that we won't change these variables if an idle handler
 		   is merely pending but not executing.  But c'est la vie.
 		*/
-
+		
 		return;
 	}
 
@@ -906,9 +907,9 @@ EditorSummary::playhead_position_changed (framepos_t p)
 	int const o = int (_last_playhead);
 	int const n = int (playhead_frame_to_position (p));
 	if (_session && o != n) {
-		int a = min (o, n);
+		int a = max(2, min (o, n));
 		int b = max (o, n);
-		set_overlays_dirty (a - 1, 0, b + 1, get_height ());
+		set_overlays_dirty (a - 2, 0, b + 2, get_height ());
 	}
 }
 

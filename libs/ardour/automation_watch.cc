@@ -28,8 +28,6 @@
 
 using namespace ARDOUR;
 using namespace PBD;
-using std::cerr;
-using std::endl;
 
 AutomationWatch* AutomationWatch::_instance = 0;
 
@@ -65,8 +63,8 @@ void
 AutomationWatch::add_automation_watch (boost::shared_ptr<AutomationControl> ac)
 {
 	Glib::Threads::Mutex::Lock lm (automation_watch_lock);
-	DEBUG_TRACE (DEBUG::Automation, string_compose ("now watching control %1 for automation\n", ac->name()));
-	automation_watches.push_back (ac);
+	DEBUG_TRACE (DEBUG::Automation, string_compose ("now watching control %1 for automation, astate = %2\n", ac->name(), enum_2_string (ac->automation_state())));
+	automation_watches.insert (ac);
 
 	/* if an automation control is added here while the transport is
 	 * rolling, make sure that it knows that there is a write pass going
@@ -104,7 +102,7 @@ AutomationWatch::remove_automation_watch (boost::shared_ptr<AutomationControl> a
 {
 	Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 	DEBUG_TRACE (DEBUG::Automation, string_compose ("remove control %1 from automation watch\n", ac->name()));
-	automation_watches.remove (ac);
+	automation_watches.erase (ac);
 	ac->list()->set_in_write_pass (false);
 }
 
@@ -117,7 +115,7 @@ AutomationWatch::timer ()
 
 	{
 		Glib::Threads::Mutex::Lock lm (automation_watch_lock);
-		
+
 		framepos_t time = _session->audible_frame ();
 
 		for (AutomationWatches::iterator aw = automation_watches.begin(); aw != automation_watches.end(); ++aw) {
@@ -134,7 +132,7 @@ void
 AutomationWatch::thread ()
 {
 	while (_run_thread) {
-		usleep (100000); // Config->get_automation_interval() * 10);
+		usleep ((useconds_t) floor (Config->get_automation_interval_msecs() * 1000));
 		timer ();
 	}
 }

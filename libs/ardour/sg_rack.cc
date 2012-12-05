@@ -53,7 +53,7 @@ SoundGridRack::SoundGridRack (Session& s, Route& r, const std::string& name)
                 _cluster_type = eClusterType_GroupTrack;
         }
 
-        int32_t process_group = 0;
+        int32_t process_group = 1;
 
         /* XXX eventually these need to be discovered from the route which sets them during a graph sort 
          */
@@ -66,7 +66,7 @@ SoundGridRack::SoundGridRack (Session& s, Route& r, const std::string& name)
                 process_group = 5;
         } else if (dynamic_cast<Track*>(&_route) == 0) {
                 /* this is a bus, and busses run after tracks */
-                process_group = 1;
+                process_group = 2;
         }
 
         if (SoundGrid::instance().add_rack (_cluster_type, process_group, r.n_outputs().n_audio(), _rack_id)) { 
@@ -84,6 +84,15 @@ SoundGridRack::~SoundGridRack ()
 {
         if (_rack_id == UINT32_MAX) {
                 return;
+        }
+
+        PortSet& ports (_route.output()->ports());
+
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Removing SG/JACK mapping for outputs of %1 with %2 outputs\n", 
+                                                       _route.name(), ports.num_ports()));
+
+        for (PortSet::iterator p = ports.begin(); p != ports.end(); ++p) {
+                SoundGrid::instance().drop_sg_jack_mapping (p->name());
         }
 
         DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Destroying SG Chainer for %1\n", _route.name()));
@@ -126,6 +135,10 @@ SoundGridRack::make_connections ()
         for (PortSet::iterator p = ports.begin(); p != ports.end(); ++p, ++channel) {
 
                 DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Looking at output %1\n", p->name()));
+
+                if (channel > 0) {
+                        continue;
+                }
 
                 if (p->type() != DataType::AUDIO) {
                         continue;
@@ -189,9 +202,10 @@ SoundGridRack::make_connections ()
                         /* wire normal tracks and busses to the master bus */
 
                         SoundGrid::instance().connect (SoundGrid::TrackOutputPort (_rack_id, channel), 
-                                                       //SoundGrid::PseudoPhysicalOutputPort (channel)
-                                                       SoundGrid::BusInputPort (master_out->rack_id(), channel));
+                                                       SoundGrid::PseudoPhysicalOutputPort (channel));
+                                                       //SoundGrid::BusInputPort (master_out->rack_id(), channel));
                 }
+                
         }
                 
         return 0;

@@ -195,9 +195,21 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 	int32_t original_veclen;
 	int32_t npoints;
 
+	if (veclen == 0) {
+		return;
+	}
+
 	if ((npoints = _list.events().size()) == 0) {
-		for (i = 0; i < veclen; ++i) {
+		/* no events in list, so just fill the entire array with the default value */
+		for (int32_t i = 0; i < veclen; ++i) {
 			vec[i] = _list.default_value();
+		}
+		return;
+	}
+
+	if (npoints == 1) {
+		for (int32_t i = 0; i < veclen; ++i) {
+			vec[i] = _list.events().front()->value;
 		}
 		return;
 	}
@@ -207,13 +219,23 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 	max_x = _list.events().back()->when;
 	min_x = _list.events().front()->when;
 
-	lx = max (min_x, x0);
-
-	if (x1 < 0) {
-		x1 = _list.events().back()->when;
+	if (x0 > max_x) {
+		/* totally past the end - just fill the entire array with the final value */	
+		for (int32_t i = 0; i < veclen; ++i) {
+			vec[i] = _list.events().back()->value;
+		}
+		return;
 	}
 
-	hx = min (max_x, x1);
+	if (x1 < min_x) {
+		/* totally before the first event - fill the entire array with
+		 * the initial value.
+		 */
+		for (int32_t i = 0; i < veclen; ++i) {
+			vec[i] = _list.events().front()->value;
+		}
+		return;
+	}
 
 	original_veclen = veclen;
 
@@ -224,16 +246,16 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		*/
 
 		double frac = (min_x - x0) / (x1 - x0);
-		int32_t subveclen = (int32_t) floor (veclen * frac);
+		int64_t fill_len = (int64_t) floor (veclen * frac);
 
-		subveclen = min (subveclen, veclen);
-
-		for (i = 0; i < subveclen; ++i) {
+		fill_len = min (fill_len, (int64_t)veclen);
+		
+		for (i = 0; i < fill_len; ++i) {
 			vec[i] = _list.events().front()->value;
 		}
 
-		veclen -= subveclen;
-		vec += subveclen;
+		veclen -= fill_len;
+		vec += fill_len;
 	}
 
 	if (veclen && x1 > max_x) {
@@ -241,36 +263,21 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		/* fill some end section of the array with the default or final value */
 
 		double frac = (x1 - max_x) / (x1 - x0);
-
-		int32_t subveclen = (int32_t) floor (original_veclen * frac);
-
+		int64_t fill_len = (int64_t) floor (original_veclen * frac);
 		float val;
 
-		subveclen = min (subveclen, veclen);
-
+		fill_len = min (fill_len, (int64_t)veclen);
 		val = _list.events().back()->value;
 
-		i = veclen - subveclen;
-
-		for (i = veclen - subveclen; i < veclen; ++i) {
+		for (i = veclen - fill_len; i < veclen; ++i) {
 			vec[i] = val;
 		}
 
-		veclen -= subveclen;
+		veclen -= fill_len;
 	}
 
-	if (veclen == 0) {
-		return;
-	}
-
-	if (npoints == 1) {
-
-		for (i = 0; i < veclen; ++i) {
-			vec[i] = _list.events().front()->value;
-		}
-		return;
-	}
-
+	lx = max (min_x, x0);
+	hx = min (max_x, x1);
 
 	if (npoints == 2) {
 

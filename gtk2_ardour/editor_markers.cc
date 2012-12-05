@@ -1175,11 +1175,9 @@ Editor::marker_menu_set_from_selection ()
 
 			/* if range selection use first to last */
 
-			if (mouse_mode == Editing::MouseRange) {
-				if (!selection->time.empty()) {
-					l->set_start (selection->time.start());
-					l->set_end (selection->time.end_frame());
-				}
+			if (!selection->time.empty()) {
+				l->set_start (selection->time.start());
+				l->set_end (selection->time.end_frame());
 			}
 			else {
 				if (!selection->regions.empty()) {

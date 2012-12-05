@@ -60,6 +60,9 @@ LTC_Slave::LTC_Slave (Session& s)
 	memset(&prev_frame, 0, sizeof(LTCFrameExt));
 
 	decoder = ltc_decoder_create((int) frames_per_ltc_frame, 128 /*queue size*/);
+
+	session.config.ParameterChanged.connect_same_thread (config_connection, boost::bind (&LTC_Slave::parameter_changed, this, _1));
+	parse_timecode_offset();
 	reset();
 	resync_latency();
 	session.Xrun.connect_same_thread (port_connections, boost::bind (&LTC_Slave::resync_xrun, this));
@@ -69,12 +72,34 @@ LTC_Slave::LTC_Slave (Session& s)
 LTC_Slave::~LTC_Slave()
 {
 	port_connections.drop_connections();
+	config_connection.disconnect();
 
 	if (did_reset_tc_format) {
 		session.config.set_timecode_format (saved_tc_format);
 	}
 
 	ltc_decoder_free(decoder);
+}
+
+void
+LTC_Slave::parse_timecode_offset() {
+	Timecode::Time offset_tc;
+	Timecode::parse_timecode_format(session.config.get_slave_timecode_offset(), offset_tc);
+	offset_tc.rate = session.timecode_frames_per_second();
+	offset_tc.drop = session.timecode_drop_frames();
+	session.timecode_to_sample(offset_tc, timecode_offset, false, false);
+	timecode_negative_offset = offset_tc.negative;
+}
+
+void
+LTC_Slave::parameter_changed (std::string const & p)
+{
+	if (p == "slave-timecode-offset"
+			|| p == "subframes-per-frame"
+			|| p == "timecode-format"
+			) {
+		parse_timecode_offset();
+	}
 }
 
 ARDOUR::framecnt_t
@@ -175,9 +200,9 @@ LTC_Slave::detect_discontinuity(LTCFrameExt *frame, int fps, bool fuzzy) {
 	}
 
 	if (frame->reverse) {
-		ltc_frame_decrement(&prev_frame.ltc, fps , 0);
+		ltc_frame_decrement(&prev_frame.ltc, fps, LTC_TV_525_60, 0);
 	} else {
-		ltc_frame_increment(&prev_frame.ltc, fps , 0);
+		ltc_frame_increment(&prev_frame.ltc, fps, LTC_TV_525_60, 0);
 	}
 	if (!equal_ltc_frame_time(&prev_frame.ltc, &frame->ltc)) {
 		discontinuity_detected = true;
@@ -273,6 +298,7 @@ void
 LTC_Slave::process_ltc(framepos_t const now)
 {
 	LTCFrameExt frame;
+	enum LTC_TV_STANDARD tv_standard = LTC_TV_625_50;
 	while (ltc_decoder_read(decoder, &frame)) {
 		SMPTETimecode stime;
 
@@ -312,15 +338,34 @@ LTC_Slave::process_ltc(framepos_t const now)
 		 * is expected to start at the end of the current frame
 		 */
 		int fps_i = ceil(timecode.rate);
+
+		switch(fps_i) {
+			case 30:
+				if (timecode.drop) {
+					tv_standard = LTC_TV_525_60;
+				} else {
+					tv_standard = LTC_TV_1125_60;
+				}
+				break;
+			case 25:
+				tv_standard = LTC_TV_625_50;
+				break;
+			default:
+				tv_standard = LTC_TV_FILM_24; /* == LTC_TV_1125_60 == no offset, 24,30fps BGF */
+				break;
+		}
+
 		if (!frame.reverse) {
-			ltc_frame_increment(&frame.ltc, fps_i , 0);
+			ltc_frame_increment(&frame.ltc, fps_i, tv_standard, 0);
 			ltc_frame_to_time(&stime, &frame.ltc, 0);
 			transport_direction = 1;
+			frame.off_start -= ltc_frame_alignment(session.frames_per_timecode_frame(), tv_standard);
+			frame.off_end -= ltc_frame_alignment(session.frames_per_timecode_frame(), tv_standard);
 		} else {
-			ltc_frame_decrement(&frame.ltc, fps_i , 0);
+			ltc_frame_decrement(&frame.ltc, fps_i, tv_standard, 0);
 			int off = frame.off_end - frame.off_start;
-			frame.off_start += off;
-			frame.off_end += off;
+			frame.off_start += off - ltc_frame_alignment(session.frames_per_timecode_frame(), tv_standard);
+			frame.off_end += off - ltc_frame_alignment(session.frames_per_timecode_frame(), tv_standard);
 			transport_direction = -1;
 		}
 
@@ -334,7 +379,7 @@ LTC_Slave::process_ltc(framepos_t const now)
 		Timecode::timecode_to_sample (timecode, ltc_frame, true, false,
 			double(session.frame_rate()),
 			session.config.get_subframes_per_frame(),
-			session.config.get_timecode_offset_negative(), session.config.get_timecode_offset()
+			timecode_negative_offset, timecode_offset
 			);
 
 		framepos_t cur_timestamp = frame.off_end + 1;
@@ -532,7 +577,7 @@ std::string
 LTC_Slave::approximate_current_position() const
 {
 	if (last_timestamp == 0) {
-		return " --:--:--:--";
+		return " \u2012\u2012:\u2012\u2012:\u2012\u2012:\u2012\u2012";
 	}
 	return Timecode::timecode_format_time(timecode);
 }
@@ -540,14 +585,14 @@ LTC_Slave::approximate_current_position() const
 std::string
 LTC_Slave::approximate_current_delta() const
 {
-	char delta[24];
+	char delta[80];
 	if (last_timestamp == 0 || engine_dll_initstate == 0) {
 		snprintf(delta, sizeof(delta), "\u2012\u2012\u2012\u2012");
 	} else if ((monotonic_cnt - last_timestamp) > 2 * frames_per_ltc_frame) {
-		snprintf(delta, sizeof(delta), "flywheel");
+		snprintf(delta, sizeof(delta), _("flywheel"));
 	} else {
-		snprintf(delta, sizeof(delta), "%s%4" PRIi64 " sm",
-				PLUSMINUS(-current_delta), abs(current_delta));
+		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%" PRIi64 "</span> sm",
+				LEADINGZERO(abs(current_delta)), PLUSMINUS(-current_delta), abs(current_delta));
 	}
 	return std::string(delta);
 }

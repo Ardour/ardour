@@ -56,17 +56,22 @@ using namespace Timecode;
  * This filter is adaptive so that fast vari-speed signals
  * will not be affected by it.
  */
-#define LTC_RISE_TIME(speed) MIN (100, MAX(25, (4000000 / ((speed==0)?1:speed) / engine().frame_rate())))
+#define LTC_RISE_TIME(speed) MIN (100, MAX(40, (4000000 / ((speed==0)?1:speed) / engine().frame_rate())))
+
+#define TV_STANDARD(tcf) \
+	(timecode_to_frames_per_second(tcf)==25.0 ? LTC_TV_625_50 : \
+	 timecode_has_drop_frames(tcf)? LTC_TV_525_60 : LTC_TV_FILM_24)
 
 void
 Session::ltc_tx_initialize()
 {
 	ltc_enc_tcformat = config.get_timecode_format();
 
+	ltc_tx_parse_offset();
 	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX init sr: %1 fps: %2\n", nominal_frame_rate(), timecode_to_frames_per_second(ltc_enc_tcformat)));
 	ltc_encoder = ltc_encoder_create(nominal_frame_rate(),
 			timecode_to_frames_per_second(ltc_enc_tcformat),
-			-2);
+			TV_STANDARD(ltc_enc_tcformat), 0);
 
 	ltc_encoder_set_bufsize(ltc_encoder, nominal_frame_rate(), 23.0);
 	ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME(1.0));
@@ -119,6 +124,16 @@ Session::ltc_tx_reset()
 }
 
 void
+Session::ltc_tx_parse_offset() {
+	Timecode::Time offset_tc;
+	Timecode::parse_timecode_format(config.get_timecode_generator_offset(), offset_tc);
+	offset_tc.rate = timecode_frames_per_second();
+	offset_tc.drop = timecode_drop_frames();
+	timecode_to_sample(offset_tc, ltc_timecode_offset, false, false);
+	ltc_timecode_negative_offset = !offset_tc.negative;
+}
+
+void
 Session::ltc_tx_recalculate_position()
 {
 	SMPTETimecode enctc;
@@ -135,7 +150,7 @@ Session::ltc_tx_recalculate_position()
 	Timecode::timecode_to_sample (a3tc, ltc_enc_pos, true, false,
 		(double)frame_rate(),
 		config.get_subframes_per_frame(),
-		config.get_timecode_offset_negative(), config.get_timecode_offset()
+		ltc_timecode_negative_offset, ltc_timecode_offset
 		);
 	restarting = false;
 }
@@ -197,13 +212,17 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	TimecodeFormat cur_timecode = config.get_timecode_format();
 	if (cur_timecode != ltc_enc_tcformat) {
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX1: TC format mismatch - reinit sr: %1 fps: %2\n", nominal_frame_rate(), timecode_to_frames_per_second(cur_timecode)));
-		if (ltc_encoder_reinit(ltc_encoder, nominal_frame_rate(), timecode_to_frames_per_second(cur_timecode), -2)) {
+		if (ltc_encoder_reinit(ltc_encoder, nominal_frame_rate(),
+					timecode_to_frames_per_second(cur_timecode), 
+					TV_STANDARD(cur_timecode), 0
+					)) {
 			PBD::error << _("LTC encoder: invalid framerate - LTC encoding is disabled for the remainder of this session.") << endmsg;
 			ltc_tx_cleanup();
 			return;
 		}
 		ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME(ltc_speed));
 		ltc_enc_tcformat = cur_timecode;
+		ltc_tx_parse_offset();
 		ltc_tx_reset();
 	}
 
@@ -225,6 +244,9 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	 * therefore the offset depends on the direction of transport.
 	 */
 	framepos_t cycle_start_frame = (current_speed < 0) ? (start_frame - ltc_out_latency.max) : (start_frame + ltc_out_latency.max);
+
+	/* LTC TV standard offset */
+	cycle_start_frame -= ltc_frame_alignment(frames_per_timecode_frame(), TV_STANDARD(cur_timecode));
 
 	/* cycle-start may become negative due to latency compensation */
 	if (cycle_start_frame < 0) { cycle_start_frame = 0; }
@@ -365,14 +387,14 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 			timecode_drop_frames(),
 			(double)frame_rate(),
 			config.get_subframes_per_frame(),
-			config.get_timecode_offset_negative(), config.get_timecode_offset()
+			ltc_timecode_negative_offset, ltc_timecode_offset
 			);
 
 	/* convert timecode back to sample-position */
 	Timecode::timecode_to_sample (tc_start, tc_sample_start, true, false,
 		(double)frame_rate(),
 		config.get_subframes_per_frame(),
-		config.get_timecode_offset_negative(), config.get_timecode_offset()
+		ltc_timecode_negative_offset, ltc_timecode_offset
 		);
 
 	/* difference between current frame and TC frame in samples */

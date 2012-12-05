@@ -76,6 +76,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	framepos_t current_time (framepos_t position = 0) const;
 	framepos_t current_duration (framepos_t position = 0) const;
 	void set_session (ARDOUR::Session *s);
+        void set_negative_allowed (bool yn); 
 
 	sigc::signal<void> ValueChanged;
 	sigc::signal<void> mode_changed;
@@ -103,6 +104,9 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	int              layout_x_offset;
 	int              em_width;
 	bool             _edit_by_click_field;
+	int              _mode_width[4]; /* enum Mode entries */
+        bool             _negative_allowed;
+        bool             edit_is_negative;
 
 	Glib::RefPtr<Pango::Layout> _layout;
 	Glib::RefPtr<Pango::Layout> _left_layout;
@@ -114,7 +118,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	Pango::AttrList normal_attributes;
 	Pango::AttrList editing_attributes;
 	Pango::AttrList info_attributes;
-	Pango::AttrList small_info_attributes;
 
 	int first_height;
 	int first_width;
@@ -124,6 +127,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	int upper_height;
 	double mode_based_info_ratio;
 	double corner_radius;
+	uint32_t font_size;
 
 	static const double info_font_scale_factor;
 	static const double separator_height;
@@ -182,6 +186,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void on_size_allocate (Gtk::Allocation&);
 	bool on_focus_out_event (GdkEventFocus*);
 
+	void set_slave_info ();
 	void set_timecode (framepos_t, bool);
 	void set_bbt (framepos_t, bool);
 	void set_minsec (framepos_t, bool);
@@ -193,13 +198,14 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool bbt_validate_edit (const std::string&);
 	bool minsec_validate_edit (const std::string&);
 
-	framepos_t frames_from_timecode_string (const std::string&) const;
+        framepos_t frames_from_timecode_string (const std::string&) const;
 	framepos_t frames_from_bbt_string (framepos_t, const std::string&) const;
 	framepos_t frame_duration_from_bbt_string (framepos_t, const std::string&) const;
 	framepos_t frames_from_minsec_string (const std::string&) const;
 	framepos_t frames_from_audioframes_string (const std::string&) const;
 
 	void session_configuration_changed (std::string);
+	void session_property_changed (const PBD::PropertyChange&);
 
 	Field index_to_field () const;
 

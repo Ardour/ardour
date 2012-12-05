@@ -51,9 +51,15 @@ MainClock::build_ops_menu ()
 	ops_items.push_back (CheckMenuElem (_("Display delta to edit cursor"), sigc::mem_fun (*this, &MainClock::display_delta_to_edit_cursor)));
 	CheckMenuItem* c = dynamic_cast<CheckMenuItem *> (&ops_items.back());
 	if (_primary) {
-		c->set_active (ARDOUR::Config->get_primary_clock_delta_edit_cursor ());
+		if (ARDOUR::Config->get_primary_clock_delta_edit_cursor ()) {
+			ARDOUR::Config->set_primary_clock_delta_edit_cursor (false);
+			c->set_active (true);
+		}
 	} else {
-		c->set_active (ARDOUR::Config->get_secondary_clock_delta_edit_cursor ());
+		if (ARDOUR::Config->get_secondary_clock_delta_edit_cursor ()) {
+			ARDOUR::Config->set_secondary_clock_delta_edit_cursor (false);
+			c->set_active (true);
+		}
 	}
 }
 

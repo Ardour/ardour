@@ -22,6 +22,7 @@
 
 #include <sigc++/bind.h>
 #include <gtkmm/stock.h>
+#include <gtkmm/messagedialog.h>
 #include <gtkmm/separator.h>
 #include <gtkmm/table.h>
 
@@ -258,6 +259,13 @@ AddRouteDialog::track_type_chosen ()
 		instrument_label.set_sensitive (true);
 		break;
 	case MixedTrack:
+          	{
+			MessageDialog msg (_("Audio+MIDI tracks are intended for use <b>ONLY</b> with plugins that use both audio and MIDI input data\n\n"
+					     "If you do not plan to use such a plugin, then use a normal audio or MIDI track instead."),
+					   true, MESSAGE_INFO, BUTTONS_OK, true);
+			msg.set_position (WIN_POS_MOUSE);
+			msg.run ();
+	        }
 		channel_combo.set_sensitive (true);
 		mode_combo.set_sensitive (true);
 		instrument_combo.set_sensitive (true);

@@ -122,6 +122,7 @@ private:
 	bool _old_follow_playhead;
 
 	PBD::ScopedConnectionList position_connection;
+	PBD::ScopedConnection route_ctrl_id_connection;
 	PBD::ScopedConnectionList region_property_connection;
 };
 

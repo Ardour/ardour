@@ -192,8 +192,8 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 			_lv2_buffers.push_back(
 				std::make_pair(false, lv2_evbuf_new(buffer_capacity,
 				                                    LV2_EVBUF_EVENT,
-				                                    LV2Plugin::_chunk_type,
-				                                    LV2Plugin::_sequence_type)));
+				                                    LV2Plugin::urids.atom_Chunk,
+				                                    LV2Plugin::urids.atom_Sequence)));
 		}
 	}
 #endif
@@ -257,34 +257,11 @@ BufferSet::get_lv2_midi(bool input, size_t i, bool old_api)
 {
 	assert(count().get(DataType::MIDI) > i);
 
-	MidiBuffer&            mbuf  = get_midi(i);
 	LV2Buffers::value_type b     = _lv2_buffers.at(i * 2 + (input ? 0 : 1));
 	LV2_Evbuf*             evbuf = b.second;
-	lv2_evbuf_set_type(evbuf, old_api ? LV2_EVBUF_EVENT : LV2_EVBUF_ATOM);
 
+	lv2_evbuf_set_type(evbuf, old_api ? LV2_EVBUF_EVENT : LV2_EVBUF_ATOM);
 	lv2_evbuf_reset(evbuf, input);
-	if (input) {
-		DEBUG_TRACE(PBD::DEBUG::LV2,
-		            string_compose("%1 bytes of MIDI waiting @ %2\n",
-		                           mbuf.size(), (void*) mbuf.data()));
-		
-		LV2_Evbuf_Iterator i    = lv2_evbuf_begin(evbuf);
-		const uint32_t     type = LV2Plugin::midi_event_type();
-		for (MidiBuffer::iterator e = mbuf.begin(); e != mbuf.end(); ++e) {
-			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
-#ifndef NDEBUG
-			DEBUG_TRACE(PBD::DEBUG::LV2,
-			            string_compose("\tMIDI event of size %1 @ %2\n",
-			                           ev.size(), ev.time()));
-			for (uint16_t x = 0; x < ev.size(); ++x) {
-				std::stringstream ss;
-				ss << "\t\tev[" << x << "] = " << std::hex << (int) ev.buffer()[x] << std::dec << std::endl;
-				DEBUG_TRACE (PBD::DEBUG::LV2, ss.str());
-			}
-#endif
-			lv2_evbuf_write(&i, ev.time(), 0, type, ev.size(), ev.buffer());
-		}
-	}
 	return evbuf;
 }
 
@@ -311,7 +288,10 @@ BufferSet::flush_lv2_midi(bool input, size_t i)
 			DEBUG_TRACE (PBD::DEBUG::LV2, string_compose ("\tByte[%1] = %2\n", x, (int) data[x]));
 		}
 #endif
-		mbuf.push_back(frames, size, data);
+		if (type == LV2Plugin::urids.midi_MidiEvent) {
+			// TODO: Make Ardour event buffers generic so plugins can communicate
+			mbuf.push_back(frames, size, data);
+		}
 	}
 }
 

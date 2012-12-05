@@ -2169,6 +2169,55 @@ Editor::play_selection ()
 	_session->request_play_range (&selection->time, true);
 }
 
+framepos_t
+Editor::get_preroll ()
+{
+	return 1.0 /*Config->get_edit_preroll_seconds()*/ * _session->frame_rate();
+}
+
+
+void
+Editor::maybe_locate_with_edit_preroll ( framepos_t location )
+{
+	if ( _session->transport_rolling() || !Config->get_always_play_range() )
+		return;
+
+	location -= get_preroll();
+	
+	//don't try to locate before the beginning of time
+	if ( location < 0 ) 
+		location = 0;
+		
+	//if follow_playhead is on, keep the playhead on the screen
+	if ( _follow_playhead )
+		if ( location < leftmost_frame ) 
+			location = leftmost_frame;
+
+	_session->request_locate( location );
+}
+
+void
+Editor::play_with_preroll ()
+{
+	if (selection->time.empty()) {
+		return;
+	} else {
+		framepos_t preroll = get_preroll();
+		
+		framepos_t start = 0;
+		if (selection->time[clicked_selection].start > preroll)
+			start = selection->time[clicked_selection].start - preroll;
+		
+		framepos_t end = selection->time[clicked_selection].end + preroll;
+		
+		AudioRange ar (start, end, 0);
+		list<AudioRange> lar;
+		lar.push_back (ar);
+
+		_session->request_play_range (&lar, true);
+	}
+}
+
 void
 Editor::play_location (Location& location)
 {
@@ -2676,7 +2725,7 @@ Editor::separate_region_from_selection ()
 	   returns a single range.
 	*/
 
-	if (mouse_mode == MouseRange && !selection->time.empty()) {
+	if (!selection->time.empty()) {
 
 		separate_regions_between (selection->time);
 
@@ -3237,8 +3286,10 @@ Editor::trim_region (bool front)
 
 			if (front) {
 				(*i)->region()->trim_front (where);
+				maybe_locate_with_edit_preroll ( where );
 			} else {
 				(*i)->region()->trim_end (where);
+				maybe_locate_with_edit_preroll ( where );
 			}
 
 			_session->add_command (new StatefulDiffCommand ((*i)->region()));
@@ -3590,7 +3641,7 @@ Editor::copy ()
 bool
 Editor::can_cut_copy () const
 {
-	switch (current_mouse_mode()) {
+	switch (effective_mouse_mode()) {
 
 	case MouseObject:
 		if (!selection->regions.empty() || !selection->points.empty()) {
@@ -3649,7 +3700,8 @@ Editor::cut_copy (CutCopyOp op)
 		}
 	}
 
-	cut_buffer->clear ();
+	if ( op != Clear )  //"Delete" doesn't change copy/paste buf
+		cut_buffer->clear ();
 
 	if (entered_marker) {
 
@@ -3668,7 +3720,7 @@ Editor::cut_copy (CutCopyOp op)
 
 	if (internal_editing()) {
 
-		switch (current_mouse_mode()) {
+		switch (effective_mouse_mode()) {
 		case MouseObject:
 		case MouseRange:
 			cut_copy_midi (op);
@@ -3679,19 +3731,62 @@ Editor::cut_copy (CutCopyOp op)
 
 	} else {
 
-		RegionSelection rs;
+	RegionSelection rs; 
 
-		/* we only want to cut regions if some are selected */
+	/* we only want to cut regions if some are selected */
 
-		if (doing_object_stuff()) {
-			rs = get_regions_from_selection ();
+	if (!selection->regions.empty()) {
+		rs = get_regions_from_selection ();
+	}
+
+	switch (effective_mouse_mode()) {
+/*
+ * 		case MouseGain: {
+			//find regions's gain line
+			AudioRegionView *rview = dynamic_cast<AudioRegionView*>(clicked_regionview);
+				AutomationTimeAxisView *tview = dynamic_cast<AutomationTimeAxisView*>(clicked_trackview);
+			if (rview) {
+				AudioRegionGainLine *line = rview->get_gain_line();
+				if (!line) break;
+				
+				//cut region gain points in the selection
+				AutomationList& alist (line->the_list());
+				XMLNode &before = alist.get_state();
+				AutomationList* what_we_got = 0;
+				if ((what_we_got = alist.cut (selection->time.front().start - rview->audio_region()->position(), selection->time.front().end - rview->audio_region()->position())) != 0) {
+					session->add_command(new MementoCommand<AutomationList>(alist, &before, &alist.get_state()));
+					delete what_we_got;
+					what_we_got = 0;
+				}
+				
+				rview->set_envelope_visible(true);
+				rview->audio_region()->set_envelope_active(true);
+				
+			} else if (tview) {
+				AutomationLine *line = *(tview->lines.begin());
+				if (!line) break;
+				
+				//cut auto points in the selection
+				AutomationList& alist (line->the_list());
+				XMLNode &before = alist.get_state();
+				AutomationList* what_we_got = 0;
+				if ((what_we_got = alist.cut (selection->time.front().start, selection->time.front().end)) != 0) {
+					session->add_command(new MementoCommand<AutomationList>(alist, &before, &alist.get_state()));
+					delete what_we_got;
+					what_we_got = 0;
+				}		
+			} else
+				break;
+		} break;
+*/			
+		case MouseObject: 
+		case MouseRange:
 			if (!rs.empty() || !selection->points.empty()) {
-
 				begin_reversible_command (opname + _(" objects"));
 
 				if (!rs.empty()) {
 					cut_copy_regions (op, rs);
-
+					
 					if (op == Cut || op == Delete) {
 						selection->clear_regions ();
 					}
@@ -3704,16 +3799,11 @@ Editor::cut_copy (CutCopyOp op)
 						selection->clear_points ();
 					}
 				}
-				commit_reversible_command ();
-				goto out;
-			}
-			if (!selection->time.empty() && (_join_object_range_state == JOIN_OBJECT_RANGE_NONE)) {
-				/* don't cause suprises */
-				goto out;
-			}
-		}
 
-		if (doing_range_stuff()) {
+				commit_reversible_command ();	
+				break;
+			} 
+			
 			if (selection->time.empty()) {
 				framepos_t start, end;
 				if (!get_edit_op_range (start, end)) {
@@ -3721,18 +3811,22 @@ Editor::cut_copy (CutCopyOp op)
 				}
 				selection->set (start, end);
 			}
-
+				
 			begin_reversible_command (opname + _(" range"));
 			cut_copy_ranges (op);
 			commit_reversible_command ();
-
+			
 			if (op == Cut || op == Delete) {
 				selection->clear_time ();
 			}
+
+			break;
+			
+		default:
+			break;
 		}
 	}
 
-  out:
 	if (op == Delete || op == Cut || op == Clear) {
 		_drags->abort ();
 	}
@@ -4746,8 +4840,6 @@ Editor::insert_patch_change (bool from_context)
 
 	const framepos_t p = get_preferred_edit_position (false, from_context);
 
-	cerr << "Got " << rs.size() << " regions to add patch change to\n";
-
 	/* XXX: bit of a hack; use the MIDNAM from the first selected region;
 	   there may be more than one, but the PatchChangeDialog can only offer
 	   one set of patch menus.
@@ -5386,14 +5478,15 @@ Editor::set_playhead_cursor ()
 			_session->request_locate (where, _session->transport_rolling());
 		}
 	}
+
+	if ( Config->get_always_play_range() )
+		cancel_time_selection();
 }
 
 void
 Editor::split_region ()
 {
-	if (((mouse_mode == MouseRange) ||
-	     (mouse_mode != MouseObject && _join_object_range_state == JOIN_OBJECT_RANGE_RANGE)) &&
-	    !selection->time.empty()) {
+	if ( !selection->time.empty()) {
 		separate_regions_between (selection->time);
 		return;
 	}
@@ -6828,3 +6921,26 @@ Editor::uncombine_regions ()
 	commit_reversible_command ();
 }
 
+void
+Editor::toggle_midi_input_active (bool flip_others)
+{
+	bool onoff;
+	boost::shared_ptr<RouteList> rl (new RouteList);
+
+	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(*i);
+
+		if (!rtav) {
+			continue;
+		}
+
+		boost::shared_ptr<MidiTrack> mt = rtav->midi_track();
+
+		if (mt) {
+			rl->push_back (rtav->route());
+			onoff = !mt->input_active();
+		}
+	}
+	
+	_session->set_exclusive_input_active (rl, onoff, flip_others);
+}

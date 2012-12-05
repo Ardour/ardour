@@ -899,9 +899,7 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 
 	}
 
-	if (_editor->session() && Config->get_always_play_range()) {
-		_editor->session()->request_locate (_editor->get_selection().regions.start());
-	}
+	_editor->maybe_locate_with_edit_preroll (_editor->get_selection().regions.start());
 }
 
 void
@@ -1792,6 +1790,13 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 			}
 		}
 
+		if (_operation == StartTrim) {
+			_editor->maybe_locate_with_edit_preroll ( _views.begin()->view->region()->position() );
+		}
+		if (_operation == EndTrim) {
+			_editor->maybe_locate_with_edit_preroll ( _views.begin()->view->region()->position() + _views.begin()->view->region()->length() );
+		}
+	
 		if (!_editor->selection->selected (_primary)) {
 			_primary->thaw_after_trim ();
 		} else {
@@ -2884,7 +2889,6 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 	cx_frames = min (cx_frames, _point->line().maximum_time());
 
 	float const fraction = 1.0 - (cy / _point->line().height());
-
 	bool const push = Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier);
 
 	_point->line().drag_motion (_editor->frame_to_unit_unrounded (cx_frames), fraction, false, push);
@@ -3457,10 +3461,15 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		framepos_t grab = grab_frame ();
 
 		if (first_move) {
-			_editor->snap_to (grab);
+			grab = adjusted_current_frame (event, false);
+			if (grab < pending_position) {
+				_editor->snap_to (grab, -1);
+			}  else {
+				_editor->snap_to (grab, 1);
+			}
 		}
 
-		if (pending_position < grab_frame()) {
+		if (pending_position < grab) {
 			start = pending_position;
 			end = grab;
 		} else {
@@ -3592,13 +3601,11 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		/* XXX what if its a music time selection? */
 		if (s) {
-			if ((s->config.get_auto_play() || (s->get_play_range() && s->transport_rolling()))) {
+			if ( s->get_play_range() && s->transport_rolling() ) {
 				s->request_play_range (&_editor->selection->time, true);
 			} else {
-				if (Config->get_always_play_range()) {
-					if (_editor->doing_range_stuff()) {
-						s->request_locate (_editor->get_selection().time.start());
-					} 
+				if (Config->get_always_play_range() && !s->transport_rolling()) {
+					s->request_locate (_editor->get_selection().time.start());
 				}
 			}
 		}
@@ -3606,28 +3613,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 	} else {
 		/* just a click, no pointer movement.
 		 */
-
-		if (Keyboard::no_modifier_keys_pressed (&event->button)) {
-			if (!_time_selection_at_start) {
-				if (_editor->clicked_regionview) {
-					if (_editor->get_selection().selected (_editor->clicked_regionview)) {
-						/* range select the entire current
-						   region selection
-						*/
-						_editor->select_range (_editor->get_selection().regions.start(), 
-								       _editor->get_selection().regions.end_frame());
-					} else {
-						/* range select this (unselected)
-						 * region
-						 */
-						_editor->select_range (_editor->clicked_regionview->region()->position(), 
-								       _editor->clicked_regionview->region()->last_frame());
-					}
-				}
-			} else {
-				_editor->selection->clear_time();
-			}
-		}
+		_editor->selection->clear_time();
 
 		if (_editor->clicked_axisview && !_editor->selection->selected (_editor->clicked_axisview)) {
 			_editor->selection->set (_editor->clicked_axisview);
@@ -3637,11 +3623,6 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 			s->request_stop (false, false);
 		}
 
-		if (Config->get_always_play_range()) {
-			if (_editor->doing_range_stuff()) {
-				s->request_locate (_editor->get_selection().time.start());
-			} 
-		}
 	}
 
 	_editor->stop_canvas_autoscroll ();
@@ -3718,7 +3699,7 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 		crect = _editor->cd_marker_bar_drag_rect;
 		break;
 	default:
-		cerr << "Error: unknown range marker op passed to Editor::drag_range_markerbar_op ()" << endl;
+		error << string_compose (_("programming_error: %1"), "Error: unknown range marker op passed to Editor::drag_range_markerbar_op ()") << endmsg;
 		return;
 		break;
 	}
@@ -4295,7 +4276,6 @@ AutomationRangeDrag::motion (GdkEvent*, bool /*first_move*/)
 
 	for (list<Line>::iterator l = _lines.begin(); l != _lines.end(); ++l) {
 		float const f = y_fraction (l->line, _drags->current_pointer_y());
-
 		/* we are ignoring x position for this drag, so we can just pass in anything */
 		l->line->drag_motion (0, f, true, false);
 		show_verbose_cursor_text (l->line->get_verbose_cursor_relative_string (l->original_fraction, f));

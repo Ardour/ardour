@@ -161,7 +161,7 @@ MixerStrip::init ()
 	output_button.set_name ("mixer strip button");
 	Gtkmm2ext::set_size_request_to_display_given_text (output_button, longest_label.c_str(), 4, 4);
 
-	ARDOUR_UI::instance()->set_tip (&meter_point_button, _("Select metering point"), "");
+	ARDOUR_UI::instance()->set_tip (&meter_point_button, _("Click to select metering point"), "");
 	meter_point_button.set_name ("mixer strip button");
 
 	/* TRANSLATORS: this string should be longest of the strings
@@ -632,8 +632,8 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			panners.short_astate_string(_route->panner()->automation_state()));
 		}
 		
-		solo_isolated_led->set_text (_("i"));
-		solo_safe_led->set_text (_("L"));
+		solo_isolated_led->set_text (_("iso"));
+		solo_safe_led->set_text (_("Lck"));
 
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
 		set_size_request (max (50, gpm.get_gm_width()), -1);
@@ -1069,10 +1069,10 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 
 	if (for_input) {
 		io_count = route->n_inputs().n_total();
-		tooltip << string_compose (_("<b>INPUT</b> to %1"), route->name());
+		tooltip << string_compose (_("<b>INPUT</b> to %1"), Glib::Markup::escape_text(route->name()));
 	} else {
 		io_count = route->n_outputs().n_total();
-		tooltip << string_compose (_("<b>OUTPUT</b> from %1"), route->name());
+		tooltip << string_compose (_("<b>OUTPUT</b> from %1"), Glib::Markup::escape_text(route->name()));
 	}
 
 
@@ -1092,9 +1092,9 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 				string& connection_name (*i);
 
 				if (io_connection_count == 0) {
-					tooltip << endl << port->name().substr(port->name().find("/") + 1) << " -> " << connection_name;
+					tooltip << endl << Glib::Markup::escape_text(port->name().substr(port->name().find("/") + 1)) << " -> " << Glib::Markup::escape_text(connection_name);
 				} else {
-					tooltip << ", " << connection_name;
+					tooltip << ", " << Glib::Markup::escape_text(connection_name);
 				}
 
 				if (connection_name.find("ardour:") == 0) {
@@ -1680,28 +1680,58 @@ MixerStrip::engine_running ()
 string
 MixerStrip::meter_point_string (MeterPoint mp)
 {
-	switch (mp) {
-	case MeterInput:
-		return _("in");
+	switch (_width) {
+	case Wide:
+		switch (mp) {
+		case MeterInput:
+			return _("in");
+			break;
+			
+		case MeterPreFader:
+			return _("pre");
+			break;
+			
+		case MeterPostFader:
+			return _("post");
+			break;
+			
+		case MeterOutput:
+			return _("out");
+			break;
+			
+		case MeterCustom:
+		default:
+			return _("custom");
+			break;
+		}
 		break;
-
-	case MeterPreFader:
-		return _("pre");
-		break;
-
-	case MeterPostFader:
-		return _("post");
-		break;
-
-	case MeterOutput:
-		return _("out");
-		break;
-
-	case MeterCustom:
-	default:
-		return _("custom");
+	case Narrow:
+		switch (mp) {
+		case MeterInput:
+			return _("in");
+			break;
+			
+		case MeterPreFader:
+			return _("pr");
+			break;
+			
+		case MeterPostFader:
+			return _("po");
+			break;
+			
+		case MeterOutput:
+			return _("o");
+			break;
+			
+		case MeterCustom:
+		default:
+			return _("c");
+			break;
+		}
 		break;
 	}
+
+	return string();
 }
 
 /** Called when the metering point has changed */
@@ -1884,8 +1914,13 @@ MixerStrip::set_button_names ()
 		break;
 
 	}
-}
 
+	if (_route) {
+		meter_point_button.set_text (meter_point_string (_route->meter_point()));
+	} else {
+		meter_point_button.set_text ("");
+	}
+}
 
 PluginSelector*
 MixerStrip::plugin_selector()
@@ -1915,22 +1950,12 @@ MixerStrip::input_active_button_release (GdkEventButton* ev)
 		return true;
 	}
 
-	if (mt->input_active()) {
-		if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
-			/* turn all other tracks using this input off */
-			_session->set_exclusive_input_active (mt, false);
-		} else {
-			mt->set_input_active (false);
-		}
+	boost::shared_ptr<RouteList> rl (new RouteList);
 
-	} else {
-		if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
-			/* turn all other tracks using this input on */
-			_session->set_exclusive_input_active (mt, true);
-		} else {
-			mt->set_input_active (true);
-		}
-	}
+	rl->push_back (route());
+
+	_session->set_exclusive_input_active (rl, !mt->input_active(),
+					      Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier)));
 
 	return true;
 }

@@ -43,12 +43,6 @@ using Timecode::BBT_Time;
 Meter    TempoMap::_default_meter (4.0, 4.0);
 Tempo    TempoMap::_default_tempo (120.0);
 
-double 
-Tempo::frames_per_beat (framecnt_t sr) const
-{
-	return  (60.0 * sr) / _beats_per_minute;
-}
-
 /***********************************************************************/
 
 double 
@@ -920,7 +914,7 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 
 			if (!(current < (*next_metric)->start())) {
 
-			  set_metrics:
+		set_metrics:
 				if (((ts = dynamic_cast<TempoSection*> (*next_metric)) != 0)) {
 
 					tempo = ts;
@@ -945,7 +939,7 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 						double next_beat_frames = tempo->frames_per_beat (_frame_rate);					
 						
 						DEBUG_TRACE (DEBUG::TempoMath, string_compose ("bumped into non-beat-aligned tempo metric at %1 = %2, adjust next beat using %3\n",
-											       tempo->start(), current_frame, tempo->bar_offset()));
+						                                               tempo->start(), current_frame, tempo->bar_offset()));
 						
 						/* back up to previous beat */
 						current_frame -= beat_frames;
@@ -955,7 +949,7 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 						 * bar start 
 						 */
 						tempo->set_frame (bar_start_frame + 
-								  llrint ((ts->bar_offset() * meter->divisions_per_bar() * beat_frames)));
+						                  llrint ((ts->bar_offset() * meter->divisions_per_bar() * beat_frames)));
 						
 						/* advance to the location of
 						 * the new (adjusted) beat. do
@@ -980,7 +974,7 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 					} else {
 						
 						DEBUG_TRACE (DEBUG::TempoMath, string_compose ("bumped into beat-aligned tempo metric at %1 = %2\n",
-											       tempo->start(), current_frame));
+						                                               tempo->start(), current_frame));
 						tempo->set_frame (current_frame);
 					}
 
@@ -993,7 +987,7 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 					 */
 					
 					DEBUG_TRACE (DEBUG::TempoMath, string_compose ("bumped into meter section at %1 vs %2 (%3)\n",
-										       meter->start(), current, current_frame));
+					                                               meter->start(), current, current_frame));
 					
 					assert (current.beats == 1);
 
@@ -1003,13 +997,13 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 				beat_frames = meter->frames_per_grid (*tempo, _frame_rate);
 				
 				DEBUG_TRACE (DEBUG::TempoMath, string_compose ("New metric with beat frames = %1 dpb %2 meter %3 tempo %4\n", 
-									       beat_frames, meter->divisions_per_bar(), *((Meter*)meter), *((Tempo*)tempo)));
+				                                               beat_frames, meter->divisions_per_bar(), *((Meter*)meter), *((Tempo*)tempo)));
 			
 				++next_metric;
 
 				if (next_metric != metrics.end() && ((*next_metric)->start() == current)) {
 					/* same position so go back and set this one up before advancing
-					*/
+					 */
 					goto set_metrics;
 				}
 
@@ -1029,7 +1023,7 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 			/* no more metrics - we've timestamped them all, stop here */
 			if (end == max_framepos) {
 				DEBUG_TRACE (DEBUG::TempoMath, string_compose ("stop extending map now that we've reach the end @ %1|%2 = %3\n",
-									       current.bars, current.beats, current_frame));
+				                                               current.bars, current.beats, current_frame));
 				break;
 			}
 		}
@@ -1037,12 +1031,10 @@ TempoMap::_extend_map (TempoSection* tempo, MeterSection* meter,
 }
 
 TempoMetric
-TempoMap::metric_at (framepos_t frame) const
+TempoMap::metric_at (framepos_t frame, Metrics::const_iterator* last) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	TempoMetric m (first_meter(), first_tempo());
-	const Meter* meter;
-	const Tempo* tempo;
 
 	/* at this point, we are *guaranteed* to have m.meter and m.tempo pointing
 	   at something, because we insert the default tempo and meter during
@@ -1057,14 +1049,11 @@ TempoMap::metric_at (framepos_t frame) const
 			break;
 		}
 
-		if ((tempo = dynamic_cast<const TempoSection*>(*i)) != 0) {
-			m.set_tempo (*tempo);
-		} else if ((meter = dynamic_cast<const MeterSection*>(*i)) != 0) {
-			m.set_meter (*meter);
-		}
+		m.set_metric(*i);
 
-		m.set_frame ((*i)->frame ());
-		m.set_start ((*i)->start ());
+		if (last) {
+			*last = i;
+		}
 	}
 	
 	return m;
@@ -1075,8 +1064,6 @@ TempoMap::metric_at (BBT_Time bbt) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	TempoMetric m (first_meter(), first_tempo());
-	const Meter* meter;
-	const Tempo* tempo;
 
 	/* at this point, we are *guaranteed* to have m.meter and m.tempo pointing
 	   at something, because we insert the default tempo and meter during
@@ -1093,14 +1080,7 @@ TempoMap::metric_at (BBT_Time bbt) const
 			break;
 		}
 
-		if ((tempo = dynamic_cast<const TempoSection*>(*i)) != 0) {
-			m.set_tempo (*tempo);
-		} else if ((meter = dynamic_cast<const MeterSection*>(*i)) != 0) {
-			m.set_meter (*meter);
-		}
-
-		m.set_frame ((*i)->frame ());
-		m.set_start (section_start);
+		m.set_metric (*i);
 	}
 
 	return m;
@@ -1152,7 +1132,7 @@ TempoMap::bbt_time (framepos_t frame, BBT_Time& bbt, const BBTPointList::const_i
 		bbt.ticks = 0;
 	} else {
 		bbt.ticks = llrint (((frame - (*i).frame) / (*i).tempo->frames_per_beat(_frame_rate)) *
-				    BBT_Time::ticks_per_beat);
+		                    BBT_Time::ticks_per_beat);
 	}
 }
 
@@ -1856,8 +1836,9 @@ TempoMap::framepos_plus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 	   next_tempo  -> first tempo after "pos", possibly metrics.end()
 	*/
 
-	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("frame %1 plus %2 beats, start with tempo = %3 @ %4\n",
-						       pos, beats, *((Tempo*)tempo), tempo->frame()));
+	DEBUG_TRACE (DEBUG::TempoMath,
+	             string_compose ("frame %1 plus %2 beats, start with tempo = %3 @ %4\n",
+	                             pos, beats, *((const Tempo*)tempo), tempo->frame()));
 
 	while (beats) {
 
@@ -1887,7 +1868,7 @@ TempoMap::framepos_plus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 			tempo = dynamic_cast<const TempoSection*>(*next_tempo);
 
 			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("\tnew tempo = %1 @ %2 fpb = %3\n",
-								       *((Tempo*)tempo), tempo->frame(),
+								       *((const Tempo*)tempo), tempo->frame(),
 								       tempo->frames_per_beat (_frame_rate)));
 
 			while (next_tempo != metrics.end ()) {
@@ -1955,9 +1936,10 @@ TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("frame %1 minus %2 beats, start with tempo = %3 @ %4 prev at beg? %5\n",
-						       pos, beats, *((Tempo*)tempo), tempo->frame(),
-						       prev_tempo == metrics.rend()));
+	DEBUG_TRACE (DEBUG::TempoMath,
+	             string_compose ("frame %1 minus %2 beats, start with tempo = %3 @ %4 prev at beg? %5\n",
+	                             pos, beats, *((const Tempo*)tempo), tempo->frame(),
+	                             prev_tempo == metrics.rend()));
 
 	/* We now have:
 
@@ -1992,9 +1974,10 @@ TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 
 			tempo = dynamic_cast<const TempoSection*>(*prev_tempo);
 
-			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("\tnew tempo = %1 @ %2 fpb = %3\n",
-								       *((Tempo*)tempo), tempo->frame(),
-								       tempo->frames_per_beat (_frame_rate)));
+			DEBUG_TRACE (DEBUG::TempoMath,
+			             string_compose ("\tnew tempo = %1 @ %2 fpb = %3\n",
+			                             *((const Tempo*)tempo), tempo->frame(),
+			                             tempo->frames_per_beat (_frame_rate)));
 
 			while (prev_tempo != metrics.rend ()) {
 
@@ -2184,8 +2167,9 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 
 	assert (tempo);
 
-	DEBUG_TRACE (DEBUG::TempoMath, string_compose ("frame %1 walk by %2 frames, start with tempo = %3 @ %4\n",
-						       pos, distance, *((Tempo*)tempo), tempo->frame()));
+	DEBUG_TRACE (DEBUG::TempoMath,
+	             string_compose ("frame %1 walk by %2 frames, start with tempo = %3 @ %4\n",
+	                             pos, distance, *((const Tempo*)tempo), tempo->frame()));
 	
 	Evoral::MusicalTime beats = 0;
 
@@ -2226,9 +2210,10 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 
 			tempo = dynamic_cast<const TempoSection*>(*next_tempo);
 
-			DEBUG_TRACE (DEBUG::TempoMath, string_compose ("\tnew tempo = %1 @ %2 fpb = %3\n",
-								       *((Tempo*)tempo), tempo->frame(),
-								       tempo->frames_per_beat (_frame_rate)));
+			DEBUG_TRACE (DEBUG::TempoMath,
+			             string_compose ("\tnew tempo = %1 @ %2 fpb = %3\n",
+			                             *((const Tempo*)tempo), tempo->frame(),
+			                             tempo->frames_per_beat (_frame_rate)));
 
 			while (next_tempo != metrics.end ()) {
 
@@ -2335,9 +2320,9 @@ operator<< (std::ostream& o, const MetricSection& section) {
 	const MeterSection* ms;
 
 	if ((ts = dynamic_cast<const TempoSection*> (&section)) != 0) {
-		o << *((Tempo*) ts);
+		o << *((const Tempo*) ts);
 	} else if ((ms = dynamic_cast<const MeterSection*> (&section)) != 0) {
-		o << *((Meter*) ms);
+		o << *((const Meter*) ms);
 	}
 
 	return o;

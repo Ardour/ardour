@@ -3,6 +3,7 @@
   <Press>
      <Binding key="s" action="Mixer/solo"/>
      <Binding key="m" action="Mixer/mute"/>
+     <Binding key="Secondary-i" action="Mixer/toggle-midi-input-active"/>
      <Binding key="r" action="Mixer/recenable"/>
      <Binding key="0" action="Mixer/unity-gain"/>
      <Binding key="Up" action="Mixer/increment-gain"/>

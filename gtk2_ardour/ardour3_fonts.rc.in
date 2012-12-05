@@ -13,6 +13,11 @@ style "small_text"
  	font_name = "@FONT_SMALL@"
 }
 
+style "small_mono_text"
+{
+ 	font_name = "bold monospace @FONT_SMALL@"
+}
+
 style "small_italic_text"
 {
 	font_name = "italic @FONT_SMALL@"
@@ -50,6 +55,11 @@ style "large_bold_text"
  	font_name = "bold @FONT_LARGE@"
 }
 
+style "large_bold_mono_text"
+{
+ 	font_name = "bold monospace @FONT_BIGGER@"
+}
+
 style "larger_text"
 {
  	font_name = "@FONT_LARGE@"
@@ -58,6 +68,11 @@ style "larger_text"
 style "massive_text"
 {
  	font_name = "@FONT_MASSIVE@"
+}
+
+style "monospace massive_text"
+{
+  	font_name = "bold monospace @FONT_MASSIVE@"
 }
 
 style "larger_bold_text"

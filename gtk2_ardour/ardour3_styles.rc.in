@@ -562,11 +562,17 @@ style "warning_message" = "medium_text"
 style "medium_entry" = "medium_text"
 {
 	fg[NORMAL] = @@COLPREFIX@_text
-	fg[ACTIVE] = @@COLPREFIX@_text
+	fg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
 	fg[SELECTED] = @@COLPREFIX@_fg_selected
-	
+
+	text[NORMAL] = @@COLPREFIX@_text
+	text[ACTIVE] = @@COLPREFIX@_text
+	text[SELECTED] = @@COLPREFIX@_fg_selected
+
 	bg[NORMAL] = @@COLPREFIX@_base
-	
+	bg[SELECTED] = @@COLPREFIX@_base
+	bg[SELECTED] = @@COLPREFIX@_bg_selected
+
 	base[NORMAL] = @@COLPREFIX@_base
 	base[ACTIVE] = @@COLPREFIX@_base
 	base[SELECTED] = @@COLPREFIX@_bg_selected
@@ -574,40 +580,52 @@ style "medium_entry" = "medium_text"
 
 style "medium_entry_noselection_fg" = "medium_entry"
 {
+        # this seems wrong to me, but the light theme uses it
 	fg[SELECTED] = @@COLPREFIX@_contrasting_indicator
 }
 
 style "medium_entry_noselection_bg" = "medium_entry"
 {
+        # this seems wrong to me, but the light theme uses it
 	bg[SELECTED] = @@COLPREFIX@_text
 }
 
 style "medium_bold_entry"  = "medium_bold_text"
 {
 	fg[NORMAL] = @@COLPREFIX@_text
-	fg[ACTIVE] = @@COLPREFIX@_text
+	fg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
+	fg[SELECTED] = @@COLPREFIX@_fg_selected
 	
+	text[NORMAL] = @@COLPREFIX@_text
+	text[ACTIVE] = @@COLPREFIX@_text
+	text[SELECTED] = @@COLPREFIX@_fg_selected
+
 	bg[NORMAL] = @@COLPREFIX@_base
+	bg[SELECTED] = @@COLPREFIX@_base
+	bg[SELECTED] = @@COLPREFIX@_base
 	
 	base[NORMAL] = @@COLPREFIX@_base
 	base[ACTIVE] = @@COLPREFIX@_base
-	base[SELECTED] = @@COLPREFIX@_base
+	base[SELECTED] = @@COLPREFIX@_bg_selected
 }
 
 style "small_entry" = "small_text"
 {
 	fg[NORMAL] = @@COLPREFIX@_text
 	fg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
-	fg[SELECTED] = @@COLPREFIX@_contrasting_indicator
+	fg[SELECTED] = @@COLPREFIX@_fg_selected
+
 	text[NORMAL] = @@COLPREFIX@_text
-	text[ACTIVE] = @@COLPREFIX@_contrasting_indicator
+	text[ACTIVE] = @@COLPREFIX@_text
 	text[SELECTED] = @@COLPREFIX@_fg_selected
+
 	bg[NORMAL] = @@COLPREFIX@_base
 	bg[SELECTED] = @@COLPREFIX@_base
-	bg[SELECTED] = @@COLPREFIX@_base
+	bg[SELECTED] = @@COLPREFIX@_bg_selected
+
 	base[NORMAL] = @@COLPREFIX@_base
 	base[ACTIVE] = @@COLPREFIX@_base
-	base[SELECTED] = @@COLPREFIX@_base
+	base[SELECTED] = @@COLPREFIX@_bg_selected
 }
 
 style "red_active_small_entry" = "small_entry"
@@ -619,13 +637,20 @@ style "red_active_small_entry" = "small_entry"
 style "small_bold_entry" = "small_bold_text"
 {
 	fg[NORMAL] = @@COLPREFIX@_text
-	fg[ACTIVE] = @@COLPREFIX@_text
-	
+	fg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
+	fg[SELECTED] = @@COLPREFIX@_fg_selected
+
+	text[NORMAL] = @@COLPREFIX@_text
+	text[ACTIVE] = @@COLPREFIX@_text
+	text[SELECTED] = @@COLPREFIX@_fg_selected
+
 	bg[NORMAL] = @@COLPREFIX@_base
-	
+	bg[SELECTED] = @@COLPREFIX@_base
+	bg[SELECTED] = @@COLPREFIX@_bg_selected
+
 	base[NORMAL] = @@COLPREFIX@_base
 	base[ACTIVE] = @@COLPREFIX@_base
-	base[SELECTED] = @@COLPREFIX@_base
+	base[SELECTED] = @@COLPREFIX@_bg_selected
 }
 
 style "small_red_on_black_entry"  = "small_bold_text"
@@ -839,6 +864,9 @@ style "peak_display_peaked_entry" = "small_text"
 	fg[NORMAL] = @@COLPREFIX@_text
 	fg[ACTIVE] = @@COLPREFIX@_text
 	fg[SELECTED] = @@COLPREFIX@_text
+	text[NORMAL] = @@COLPREFIX@_text
+	text[ACTIVE] = @@COLPREFIX@_text
+	text[SELECTED] = @@COLPREFIX@_text
 
         bg[NORMAL] = @@COLPREFIX@_bright_indicator
         bg[ACTIVE] = @@COLPREFIX@_bright_indicator

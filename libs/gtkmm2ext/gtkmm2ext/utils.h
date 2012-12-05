@@ -110,6 +110,8 @@ namespace Gtkmm2ext {
 	Gtk::Label* left_aligned_label (std::string const &);
 
 	void set_no_tooltip_whatsoever (Gtk::Widget &);
+	void enable_tooltips ();
+	void disable_tooltips ();
 };
 
 #endif /*  __gtkmm2ext_utils_h__ */

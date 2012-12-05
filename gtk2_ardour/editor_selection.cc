@@ -962,9 +962,7 @@ Editor::track_selection_changed ()
 			(*j)->set_selected (find (selection->tracks.begin(), selection->tracks.end(), j->get()) != selection->tracks.end());
 		}
 
-		if (yn &&
-		    ((mouse_mode == MouseRange) ||
-		     ((mouse_mode == MouseObject) && (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT)))) {
+		if (yn) {
 			(*i)->reshow_selection (selection->time);
 		} else {
 			(*i)->hide_selection ();
@@ -1298,8 +1296,8 @@ Editor::region_selection_changed ()
 		sensitize_all_region_actions (true);
 	}
 
-	if (_session && Config->get_always_play_range() && !_session->transport_rolling() && !selection->regions.empty()) {
-		_session->request_locate (selection->regions.start());
+	if (_session && !_session->transport_rolling() && !selection->regions.empty()) {
+		maybe_locate_with_edit_preroll (selection->regions.start());
 	}
 }
 
@@ -1354,17 +1352,48 @@ Editor::select_all (Selection::Operation op)
 {
 	list<Selectable *> touched;
 
-	if (_internal_editing) {
-		select_all_internal_edit (op);
-		return;
+	TrackViewList ts;
+
+	if (selection->tracks.empty()) {
+		if (entered_track) {
+			ts.push_back (entered_track);
+		} else {
+			ts = track_views;
+		}
+	} else {
+		ts = selection->tracks;
 	}
 
-	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+	if (_internal_editing) {
+
+		bool midi_selected = false;
+
+		for (TrackViewList::iterator iter = ts.begin(); iter != ts.end(); ++iter) {
+			if ((*iter)->hidden()) {
+				continue;
+			}
+			
+			RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*iter);
+
+			if (rtav && rtav->is_midi_track()) {
+				midi_selected = true;
+				break;
+			}
+		}
+
+		if (midi_selected) {
+			select_all_internal_edit (op);
+			return;
+		}
+	}
+
+	for (TrackViewList::iterator iter = ts.begin(); iter != ts.end(); ++iter) {
 		if ((*iter)->hidden()) {
 			continue;
 		}
 		(*iter)->get_selectables (0, max_framepos, 0, DBL_MAX, touched);
 	}
+
 	begin_reversible_command (_("select all"));
 	switch (op) {
 	case Selection::Add:
@@ -1770,7 +1799,7 @@ Editor::select_range_between ()
 	framepos_t start;
 	framepos_t end;
 
-	if (mouse_mode == MouseRange && !selection->time.empty()) {
+	if ( !selection->time.empty() ) {
 		selection->clear_time ();
 	}
 
@@ -1788,9 +1817,9 @@ Editor::get_edit_op_range (framepos_t& start, framepos_t& end) const
 	framepos_t m;
 	bool ignored;
 
-	/* in range mode, use any existing selection */
+	/* if an explicit range exists, use it */
 
-	if (mouse_mode == MouseRange && !selection->time.empty()) {
+	if (!selection->time.empty()) {
 		/* we know that these are ordered */
 		start = selection->time.start();
 		end = selection->time.end_frame();

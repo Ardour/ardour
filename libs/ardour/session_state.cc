@@ -206,6 +206,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_play_range = false;
 	_exporting = false;
 	pending_abort = false;
+	_adding_routes_in_progress = false;
 	destructive_index = 0;
 	first_file_data_format_reset = true;
 	first_file_header_format_reset = true;
@@ -2586,7 +2587,7 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 		ripped = ripped.substr (0, ripped.length() - 1);
 	}
 
-	state_files = scanner (ripped, accept_all_state_files, (void *) 0, false, true);
+	state_files = scanner (ripped, accept_all_state_files, (void *) 0, true, true);
 
 	if (state_files == 0) {
 		/* impossible! */
@@ -3565,6 +3566,10 @@ Session::config_changed (std::string p, bool ours)
 		reconnect_ltc_input ();
 	} else if (p == "ltc-sink-port") {
 		reconnect_ltc_output ();
+#ifdef HAVE_LTC
+	} else if (p == "timecode-generator-offset") {
+		ltc_tx_parse_offset();
+#endif
 	}
 
 	set_dirty ();

@@ -13,7 +13,10 @@ CairoPacker::draw_background (Gtk::Widget& w, GdkEventExpose*)
 		
 		Cairo::RefPtr<Cairo::Context> context = win->create_cairo_context();
 		w.translate_coordinates (*window_parent, 0, 0, x, y);
-		context->set_source_rgba (0.149, 0.149, 0.149, 1.0);
+
+		Gdk::Color bg = get_bg ();
+
+		context->set_source_rgba (bg.get_red_p(), bg.get_green_p(), bg.get_blue_p(), 1.0);
 		Gtkmm2ext::rounded_rectangle (context, x, y, w.get_allocation().get_width(), w.get_allocation().get_height(), 9);
 		context->fill ();
 	}
@@ -21,13 +24,19 @@ CairoPacker::draw_background (Gtk::Widget& w, GdkEventExpose*)
 
 CairoHPacker::CairoHPacker ()
 {
-	Gdk::Color bg;
+}
 
-	bg.set_red (lrint (0.149 * 65535));
-	bg.set_green (lrint (0.149 * 65535));
-	bg.set_blue (lrint (0.149 * 65535));
+void
+CairoHPacker::on_realize ()
+{
+	HBox::on_realize ();
+	CairoWidget::provide_background_for_cairo_widget (*this, get_bg ());
+}
 
-	CairoWidget::provide_background_for_cairo_widget (*this, bg);
+Gdk::Color
+CairoHPacker::get_bg () const
+{
+	return get_style()->get_bg (Gtk::STATE_NORMAL);
 }
 
 bool
@@ -39,13 +48,6 @@ CairoHPacker::on_expose_event (GdkEventExpose* ev)
 
 CairoVPacker::CairoVPacker ()
 {
-	Gdk::Color bg;
-
-	bg.set_red (lrint (0.149 * 65535));
-	bg.set_green (lrint (0.149 * 65535));
-	bg.set_blue (lrint (0.149 * 65535));
-
-	CairoWidget::provide_background_for_cairo_widget (*this, bg);
 }
 
 bool
@@ -53,4 +55,17 @@ CairoVPacker::on_expose_event (GdkEventExpose* ev)
 {
 	draw_background (*this, ev);
 	return VBox::on_expose_event (ev);
+}
+
+void
+CairoVPacker::on_realize ()
+{
+	VBox::on_realize ();
+	CairoWidget::provide_background_for_cairo_widget (*this, get_bg());
+}
+
+Gdk::Color
+CairoVPacker::get_bg () const
+{
+	return get_style()->get_bg (Gtk::STATE_NORMAL);
 }

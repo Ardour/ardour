@@ -759,12 +759,11 @@ EngineControl::setup_engine ()
 		error << string_compose (_("cannot open JACK rc file %1 to store parameters"), jackdrc_path) << endmsg;
 		return -1;
 	}
-	cerr << "JACK COMMAND: ";
+
 	for (vector<string>::iterator i = args.begin(); i != args.end(); ++i) {
-		cerr << (*i) << ' ';
 		jackdrc << (*i) << ' ';
 	}
-	cerr << endl;
+
 	jackdrc << endl;
 	jackdrc.close ();
 

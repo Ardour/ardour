@@ -69,6 +69,17 @@ when the pull up/down setting is non-zero."));
 			}
 		}
 
+		/* activating a slave is a session-property.
+		 * The slave type is a RC property.
+		 * When the slave is active is must not be reconfigured.
+		 * This is a UI limitation, imposed by audio-clock and
+		 * status displays which combine RC-config & session-properties.
+		 *
+		 * Notficy RCOptionEditor by emitting a signal if the active
+		 * status changed:
+		 */
+		Config->ParameterChanged("sync-source");
+
 		ActionManager::toggle_config_state_foo ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::set_external_sync), sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
 	}
 }
@@ -310,16 +321,18 @@ ARDOUR_UI::parameter_changed (std::string p)
 			sync_button.set_text (_("Internal"));
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (true);
+			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (true);
 		} else {
 			sync_button.set_text (sync_source_to_string (Config->get_sync_source(), true));
 			/* XXX need to make auto-play is off as well as insensitive */
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
+			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (false);
 		}
 
 	} else if (p == "always-play-range") {
 
-		ActionManager::map_some_state ("Transport", "AlwaysPlayRange", &RCConfiguration::get_always_play_range);
+		ActionManager::map_some_state ("Transport", "ToggleFollowEdits", &RCConfiguration::get_always_play_range);
 
 	} else if (p == "send-mtc") {
 

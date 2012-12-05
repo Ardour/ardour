@@ -54,9 +54,10 @@
 
 #include "ardour/audio_library.h"
 
+using namespace PBD;
+
 static const std::string base_url = "http://www.freesound.org/api";
 static const std::string api_key = "9d77cb8d841b4bcfa960e1aae62224eb"; // ardour3
-
 
 //------------------------------------------------------------------------
 Mootcher::Mootcher()
@@ -180,12 +181,11 @@ std::string Mootcher::doRequest(std::string uri, std::string params)
 	}
 		
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str() );
-	std::cerr << "doRequest: " << url << std::endl;
 	
 	// perform online request
 	CURLcode res = curl_easy_perform(curl);
 	if( res != 0 ) {
-		std::cerr << "curl error " << res << " (" << curl_easy_strerror(res) << ")" << std::endl;
+		error << string_compose (_("curl error %1 (%2)"), res, curl_easy_strerror(res)) << endmsg;
 		return "";
 	}
 
@@ -235,8 +235,6 @@ std::string Mootcher::getSoundResourceFile(std::string ID)
 	std::string xml;
 
 
-	std::cerr << "getSoundResourceFile(" << ID << ")" << std::endl;
-
 	// download the xmlfile into xml_page
 	xml = doRequest("/sounds/" + ID, "");
 
@@ -246,12 +244,12 @@ std::string Mootcher::getSoundResourceFile(std::string ID)
 
 	// if the page is not a valid xml document with a 'freesound' root
 	if (freesound == NULL) {
-		std::cerr << "getSoundResourceFile: There is no valid root in the xml file" << std::endl;
+		error << _("getSoundResourceFile: There is no valid root in the xml file") << endmsg;
 		return "";
 	}
 
 	if (strcmp(doc.root()->name().c_str(), "response") != 0) {
-		std::cerr << "getSoundResourceFile: root =" << doc.root()->name() << ", != response" << std::endl;
+		error << string_compose (_("getSoundResourceFile: root = %1, != response"), doc.root()->name()) << endmsg;
 		return "";
 	}
 
@@ -302,7 +300,6 @@ std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID,
 	if (testFile) {  
 		fseek (testFile , 0 , SEEK_END);
 		if (ftell (testFile) > 256) {
-			std::cerr << "audio file " << audioFileName << " already exists" << std::endl;
 			fclose (testFile);
 			return audioFileName;
 		}
@@ -337,7 +334,6 @@ std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID,
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, audioFileWrite);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, theFile);
 
-	std::cerr << "downloading " << audioFileName << " from " << audioURL << "..." << std::endl;
 	/* hack to get rid of the barber-pole stripes */
 	caller->freesound_progress_bar.hide();
 	caller->freesound_progress_bar.show();
@@ -358,11 +354,10 @@ std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID,
 	caller->freesound_progress_bar.set_text("");
 	
 	if( res != 0 ) {
-		std::cerr <<  "curl error " << res << " (" << curl_easy_strerror(res) << ")" << std::endl;
+		error <<  string_compose (_("curl error %1 (%2)"), res, curl_easy_strerror(res)) << endmsg;
 		remove( audioFileName.c_str() );  
 		return "";
 	} else {
-		std::cerr << "done!" << std::endl;
 		// now download the tags &c.
 		getSoundResourceFile(ID);
 	}
@@ -387,7 +382,6 @@ SoundFileBrowser *sfb = (SoundFileBrowser *) caller;
 	while (Glib::MainContext::get_default()->iteration (false)) {
 		/* do nothing */
 	}
-	std::cerr << "progress: " << dlnow << " of " << dltotal << " \r";
 	return 0;
 }
 

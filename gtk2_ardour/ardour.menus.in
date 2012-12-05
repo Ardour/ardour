@@ -11,6 +11,7 @@
   <accelerator action='track-solo-toggle'/>
   <accelerator action='track-mute-toggle'/>
   <accelerator action='toggle-edit-mode'/>
+  <accelerator action='toggle-midi-input-active'/>
   
   <menubar name='Main' action='MainMenu'>
     <menu name='Session' action='Session'>
@@ -59,6 +60,7 @@
         <menuitem action='main-menu-play-selected-regions'/>
         <menuitem action='play-edit-range'/>
         <menuitem action='PlaySelection'/>
+        <menuitem action='PlayPreroll'/>
         <menuitem action='play-from-edit-point-and-return'/>
         <menuitem action='Loop'/>
       </menu>
@@ -143,12 +145,14 @@
       <menuitem action='TogglePunchIn'/>
       <menuitem action='TogglePunchOut'/>
       <menuitem action='ToggleAutoInput'/>
+      <menuitem action='ToggleFollowEdits'/>
       <menuitem action='ToggleAutoPlay'/>
       <menuitem action='ToggleAutoReturn'/>
       <menuitem action='ToggleClick'/>
       <menuitem action='toggle-follow-playhead'/>
+      <menuitem action='ToggleFollowEdits'/>
       <menuitem action='panic'/>
-      <separator/>
+     <separator/>
     </menu>
 
     <menu name='Edit' action='Edit'>
@@ -219,6 +223,7 @@
         <menuitem action='set-tempo-from-region'/>
         <menuitem action='set-tempo-from-edit-range'/>
       </menu>
+      <menuitem action='set-mouse-mode-object-range'/>
 #ifndef GTKOSX
       <separator/>
       <menuitem action='ToggleRCOptionsEditor'/>

@@ -48,6 +48,8 @@ TimeInfoBox::TimeInfoBox ()
 	, syncing_selection (false)
 	, syncing_punch (false)
 {
+	set_name (X_("TimeInfoBox"));
+
 	selection_start = new AudioClock ("selection-start", false, "selection", false, false, false, false);
 	selection_end = new AudioClock ("selection-end", false, "selection", false, false, false, false);
 	selection_length = new AudioClock ("selection-length", false, "selection", false, false, true, false);
@@ -84,7 +86,7 @@ TimeInfoBox::TimeInfoBox ()
 	Gtk::Label* l;
 
 	selection_title.set_name ("TimeInfoSelectionTitle");
-	left.attach (selection_title, 0, 2, 0, 1);
+	left.attach (selection_title, 1, 2, 0, 1);
 	l = manage (new Label);
 	l->set_text (_("Start"));
 	l->set_alignment (1.0, 0.5);
@@ -120,7 +122,7 @@ TimeInfoBox::TimeInfoBox ()
 	Gtkmm2ext::UI::instance()->set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 
 	punch_title.set_name ("TimeInfoSelectionTitle");
-	right.attach (punch_title, 2, 4, 0, 1);
+	right.attach (punch_title, 3, 4, 0, 1);
         right.attach (punch_in_button, 2, 3, 1, 2, FILL, SHRINK);
         right.attach (*punch_start, 3, 4, 1, 2);
         right.attach (punch_out_button, 2, 3, 2, 3, FILL, SHRINK);

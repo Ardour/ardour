@@ -152,7 +152,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	, rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable))
 
 	, auto_return_button (ArdourButton::led_default_elements)
-	, auto_play_button (ArdourButton::led_default_elements)
+	, follow_edits_button (ArdourButton::led_default_elements)
 	, auto_input_button (ArdourButton::led_default_elements)
 
 	, auditioning_alert_button (_("audition"))
@@ -205,9 +205,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	original_big_clock_height = -1;
 	original_big_clock_font_size = 0;
 
-	roll_button.set_elements (ArdourButton::Element (ArdourButton::Body|ArdourButton::Text));
-	play_selection_button.set_elements (ArdourButton::Element (ArdourButton::Body|ArdourButton::Text));
-	
 	roll_button.set_controllable (roll_controllable);
 	stop_button.set_controllable (stop_controllable);
 	goto_start_button.set_controllable (goto_start_controllable);
@@ -402,7 +399,7 @@ ARDOUR_UI::post_engine ()
 		vector<string>::iterator n;
 		vector<string>::iterator k;
 		for (n = names.begin(), k = keys.begin(); n != names.end(); ++n, ++k) {
-			cerr << "Action: " << (*n) << " bound to " << (*k) << endl;
+			cout << "Action: " << (*n) << " bound to " << (*k) << endl;
 		}
 
 		exit (0);
@@ -1086,8 +1083,9 @@ ARDOUR_UI::update_timecode_format ()
 	if (_session) {
 		bool matching;
 		TimecodeSlave* tcslave;
+		SyncSource sync_src = Config->get_sync_source();
 
-		if ((tcslave = dynamic_cast<TimecodeSlave*>(_session->slave())) != 0) {
+		if ((sync_src == LTC || sync_src == MTC) && (tcslave = dynamic_cast<TimecodeSlave*>(_session->slave())) != 0) {
 			matching = (tcslave->apparent_timecode_format() == _session->config.get_timecode_format());
 		} else {
 			matching = true;
@@ -1633,14 +1631,17 @@ ARDOUR_UI::transport_roll ()
 		_session->request_play_range (0, true);
 	}
 
-	if (Config->get_always_play_range()) {
-		_session->request_play_range (&editor->get_selection().time, true);
-	}
-
 	if (!rolling) {
 		_session->request_transport_speed (1.0f);
 	}
 }
+
+bool
+ARDOUR_UI::get_smart_mode() const
+{
+	return ( editor->get_smart_mode() );
+}
+
 
 void
 ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
@@ -1692,7 +1693,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		if (rolling) {
 			_session->request_stop (with_abort, true);
 		} else {
-			if (Config->get_always_play_range ()) {
+			if ( Config->get_always_play_range() ) {
 				_session->request_play_range (&editor->get_selection().time, true);
 			}
 
@@ -1736,6 +1737,15 @@ ARDOUR_UI::transport_play_selection ()
 	}
 
 	editor->play_selection ();
+}
+
+void
+ARDOUR_UI::transport_play_preroll ()
+{
+	if (!_session) {
+		return;
+	}
+	editor->play_with_preroll ();
 }
 
 void
@@ -2955,23 +2965,23 @@ require some unused files to continue to exist."));
 	double space_adjusted = 0;
 
 	if (rep.space < 1000) {
-		bprefix = X_("");
+		bprefix = _("");
 		space_adjusted = rep.space;
 	} else if (rep.space < 1000000) {
-		bprefix = X_("kilo");
+		bprefix = _("kilo");
 		space_adjusted = truncf((float)rep.space / 1000.0);
 	} else if (rep.space < 1000000 * 1000) {
-		bprefix = X_("mega");
+		bprefix = _("mega");
 		space_adjusted = truncf((float)rep.space / (1000.0 * 1000.0));
 	} else {
-		bprefix = X_("giga");
+		bprefix = _("giga");
 		space_adjusted = truncf((float)rep.space / (1000.0 * 1000 * 1000.0));
 	}
 
 	if (removed > 1) {
-		txt.set_text (string_compose (plural_msg, removed, dead_directory, space_adjusted, bprefix, PROGRAM_NAME));
+		txt.set_markup (string_compose (plural_msg, removed, Glib::Markup::escape_text (dead_directory), space_adjusted, bprefix, PROGRAM_NAME));
 	} else {
-		txt.set_text (string_compose (singular_msg, removed, dead_directory, space_adjusted, bprefix, PROGRAM_NAME));
+		txt.set_markup (string_compose (singular_msg, removed, Glib::Markup::escape_text (dead_directory), space_adjusted, bprefix, PROGRAM_NAME));
 	}
 
 	dhbox.pack_start (*dimage, true, false, 5);
@@ -3069,20 +3079,16 @@ Clean-up will move all unused files to a \"dead\" location."));
 				 _("Cleaned Files"),
 				 _("\
 The following %1 files were not in use and \n\
-have been moved to:\n\n\
-%2\n\n\
-After a restart of %5,\n\n\
-Session -> Clean-up -> Flush Wastebasket\n\n\
-will release an additional\n\
-%3 %4bytes of disk space.\n"),
+have been moved to: %2\n\n\
+After a restart of %5\n\n\
+<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n\n\
+will release an additional %3 %4bytes of disk space.\n"),
 				 _("\
 The following file was not in use and \n\
-has been moved to:\n				\
-%2\n\n\
-After a restart of %5,\n\n\
-Session -> Clean-up -> Flush Wastebasket\n\n\
-will release an additional\n\
-%3 %4bytes of disk space.\n"
+has been moved to: %2\n\n\
+After a restart of %5\n\n\
+<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n\n\
+will release an additional %3 %4bytes of disk space.\n"
 					 ));
 
 }
@@ -3103,11 +3109,9 @@ ARDOUR_UI::flush_trash ()
 
 	display_cleanup_results (rep,
 				 _("deleted file"),
-				 _("The following %1 files were deleted from\n\
-%2,\n\
+				 _("The following %1 files were deleted from %2,\n\
 releasing %3 %4bytes of disk space"),
-				 _("The following file was deleted from\n\
-%2,\n\
+				 _("The following file was deleted from %2,\n\
 releasing %3 %4bytes of disk space"));
 }
 

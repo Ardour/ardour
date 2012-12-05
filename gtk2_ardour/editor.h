@@ -286,6 +286,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool extend_selection_to_track (TimeAxisView&);
 
 	void play_selection ();
+	framepos_t get_preroll ();
+	void maybe_locate_with_edit_preroll (framepos_t);
+	void play_with_preroll ();
 	void select_all_in_track (Selection::Operation op);
 	void select_all (Selection::Operation op);
 	void invert_selection_in_track ();
@@ -806,7 +809,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void update_just_timecode ();
 	void compute_fixed_ruler_scale (); //calculates the RulerScale of the fixed rulers
 	void update_fixed_rulers ();
-	void update_tempo_based_rulers ();
+        void update_tempo_based_rulers (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
+					ARDOUR::TempoMap::BBTPointList::const_iterator& end);
 	void popup_ruler_menu (framepos_t where = 0, ItemType type = RegionItem);
 	void update_ruler_visibility ();
 	void set_ruler_visible (RulerType, bool);
@@ -870,7 +874,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	gint bbt_nmarks;
 	uint32_t bbt_bar_helper_on;
 	uint32_t bbt_accent_modulo;
-	void compute_bbt_ruler_scale (framepos_t lower, framepos_t upper);
+        void compute_bbt_ruler_scale (framepos_t lower, framepos_t upper,
+				      ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin,
+				      ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end);
 
 	gint metric_get_timecode (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	gint metric_get_bbt (GtkCustomRulerMark **, gdouble, gdouble, gint);
@@ -1247,6 +1253,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	boost::shared_ptr<ARDOUR::AudioTrack> get_nth_selected_audio_track (int nth) const;
 	boost::shared_ptr<ARDOUR::MidiTrack> get_nth_selected_midi_track (int nth) const;
 
+        void toggle_midi_input_active (bool flip_others);
+
 	ARDOUR::InterThreadInfo* current_interthread_info;
 
 	AnalysisWindow* analysis_window;
@@ -1473,15 +1481,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/// true if we are in fullscreen mode
 	bool _maximised;
 
-	ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
-	ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
-
 	TempoLines* tempo_lines;
 
 	ArdourCanvas::Group* time_line_group;
 
 	void hide_measures ();
-	void draw_measures ();
+        void draw_measures (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
+			    ARDOUR::TempoMap::BBTPointList::const_iterator& end);
 	bool redraw_measures ();
 
 	void new_tempo_section ();
@@ -1546,7 +1552,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void remove_metric_marks ();
 	void draw_metric_marks (const ARDOUR::Metrics& metrics);
 
-	void compute_current_bbt_points (framepos_t left, framepos_t right);
+        void compute_current_bbt_points (framepos_t left, framepos_t right, 
+					 ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
+					 ARDOUR::TempoMap::BBTPointList::const_iterator& end);
+
 	void tempo_map_changed (const PBD::PropertyChange&);
 	void redisplay_tempo (bool immediate_redraw);
 
@@ -1560,9 +1569,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void editor_list_button_toggled ();
 
 	AudioClock*               zoom_range_clock;
-	ArdourButton              zoom_in_button;
-	ArdourButton              zoom_out_button;
-	ArdourButton              zoom_out_full_button;
+	Gtk::Button              zoom_in_button;
+	Gtk::Button              zoom_out_button;
+	Gtk::Button              zoom_out_full_button;
 
 	Gtk::Button              tav_expand_button;
 	Gtk::Button              tav_shrink_button;
@@ -1581,11 +1590,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourButton mouse_timefx_button;
 	ArdourButton mouse_audition_button;
 
-	ButtonJoiner* smart_mode_joiner;
+	ArdourButton smart_mode_button;
 	Glib::RefPtr<Gtk::ToggleAction> smart_mode_action;
 
 	void                     mouse_mode_toggled (Editing::MouseMode m);
-	void			 mouse_mode_object_range_toggled () {}
+	void			 mouse_mode_object_range_toggled ();
 	bool                     ignore_mouse_mode_toggle;
 
 	ArdourButton internal_edit_button;
@@ -1671,6 +1680,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void marker_selection_changed ();
 
 	void cancel_selection ();
+	void cancel_time_selection ();
+
+	bool get_smart_mode() const;
 
 	bool audio_region_selection_covers (framepos_t where);
 
@@ -2091,16 +2103,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool _following_mixer_selection;
 
 	int time_fx (ARDOUR::RegionList&, float val, bool pitching);
-
-	bool doing_range_stuff() const {
-		return (mouse_mode == Editing::MouseRange && (_join_object_range_state == JOIN_OBJECT_RANGE_NONE)) ||
-			_join_object_range_state == JOIN_OBJECT_RANGE_RANGE;
-	}
-	
-	bool doing_object_stuff() const {
-		return (mouse_mode == Editing::MouseObject && (_join_object_range_state == JOIN_OBJECT_RANGE_NONE)) ||
-			_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT;
-	}
 
 	void toggle_sound_midi_notes ();
 

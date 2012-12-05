@@ -881,6 +881,7 @@ RCOptionEditor::RCOptionEditor ()
 	/* MISC */
 
         uint32_t hwcpus = hardware_concurrency ();
+	BoolOption* bo;
 
         if (hwcpus > 1) {
                 add_option (_("Misc"), new OptionEditorHeading (_("DSP CPU Utilization")));
@@ -971,6 +972,15 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_automation_thinning_factor),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_thinning_factor),
 		     0, 1000, 1, 20
+		     ));
+
+	add_option (_("Misc"),
+	     new SpinOption<double> (
+		     "automation-interval-msecs",
+		     _("Automation sampling interval (milliseconds)"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_automation_interval_msecs),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_interval_msecs),
+		     1, 1000, 1, 20
 		     ));
 
 	/* TRANSPORT */
@@ -1105,6 +1115,8 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Transport"), _sync_source_2997);
 
+	add_option (_("Transport"), new OptionEditorHeading (S_("LTC Reader")));
+
 	_ltc_port = new ComboStringOption (
 		"ltc-source-port",
 		_("LTC incoming port"),
@@ -1152,10 +1164,10 @@ RCOptionEditor::RCOptionEditor ()
 		 _("Specify the Peak Volume of the generated LTC signal in dbFS. A good value is  0dBu ^= -18dbFS in an EBU calibrated system"));
 
 	add_option (_("Transport"), _ltc_volume_slider);
+	parameter_changed ("send-ltc");
 #endif
 
 	parameter_changed ("sync-source");
-	parameter_changed ("send-ltc");
 
 	/* EDITOR */
 
@@ -1183,13 +1195,19 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_track_meters)
 		     ));
 
-	add_option (_("Editor"),
-	     new BoolOption (
+	bo = new BoolOption (
 		     "use-overlap-equivalency",
 		     _("Use overlap equivalency for regions"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_overlap_equivalency),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_overlap_equivalency)
-		     ));
+		     );
+
+	add_option (_("Editor"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), 
+					    string_compose (_("When extending region selection across a group, %1 must decide which regions are equivalent"
+							      "\n\nIf enabled, regions are considered \"equivalent\" if they overlap on the timeline."
+							      "\n\nIf disabled, regions are considered \"equivalent\" only if have the same start time, length and position"),
+							    PROGRAM_NAME));
 
 	add_option (_("Editor"),
 	     new BoolOption (
@@ -1289,13 +1307,16 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_editor_and_mixer_selection)
 		     ));
 
-	add_option (_("Editor"),
-	     new BoolOption (
+	bo = new BoolOption (
 		     "name-new-markers",
 		     _("Name new markers"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_name_new_markers),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_name_new_markers)
-		     ));
+		);
+	
+	add_option (_("Editor"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), _("If enabled, popup a dialog when a new marker is created to allow its name to be set as it is created."
+								"\n\nYou can always rename markers by right-clicking on them"));
 
 	add_option (_("Editor"),
 	    new BoolOption (
@@ -1707,6 +1728,14 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_widget_prelight)
 		     ));
 
+	add_option (S_("GUI"),
+	     new BoolOption (
+		     "use-tooltips",
+		     _("Show tooltips if mouse hovers over a control"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_tooltips),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_tooltips)
+		     ));
+
 #ifndef GTKOSX
 	/* font scaling does nothing with GDK/Quartz */
 	add_option (S_("GUI"), new FontScalingOptions (_rc_config));
@@ -1795,6 +1824,10 @@ RCOptionEditor::parameter_changed (string const & p)
 		_solo_control_is_listen_control->set_sensitive (s);
 		_listen_position->set_sensitive (s);
 	} else if (p == "sync-source") {
+		_sync_source->set_sensitive (true);
+		if (_session) {
+			_sync_source->set_sensitive (_session->config.get_external_sync());
+		}
 		switch(Config->get_sync_source()) {
 		case ARDOUR::MTC:
 		case ARDOUR::LTC:

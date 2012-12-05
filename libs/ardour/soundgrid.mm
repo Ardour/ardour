@@ -121,7 +121,8 @@ SoundGrid::initialize (void* window_handle, uint32_t max_tracks, uint32_t max_bu
         mixer_limits.m_clusterConfigs[eClusterType_InputTrack].m_uiIndexNum = max_tracks;
         mixer_limits.m_clusterConfigs[eClusterType_GroupTrack].m_uiIndexNum = max_busses + physical_outputs;
         
-        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Initializing SG Core with %1 tracks\n", max_tracks));
+        DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Initialized SG Core for %1 input racks and %2 group racks\n", 
+                                                       max_tracks, max_busses + physical_outputs));
         
         char execpath[MAXPATHLEN+1];
         uint32_t pathsz = sizeof (execpath);
@@ -240,11 +241,21 @@ SoundGrid::configure_driver (uint32_t inputs, uint32_t outputs, uint32_t tracks)
 
     for (uint32_t n = 0; n < outputs; ++n) {
             uint32_t handle; 
+            const uint32_t channels = 2;
+            const uint32_t pgroup = 7; // these should run last no matter what
 
-            /* process group is set to 7, because these should run last no matter what
-             */
+            if (add_rack (eClusterType_GroupTrack, pgroup, channels, handle)) {
+                    error << string_compose (_("Cannot create mixing channel for driver output %1"), n) << endmsg;
+                    return -1;
+            }
+    }
 
-            if (add_rack (eClusterType_GroupTrack, 0, 1, handle)) {
+    for (uint32_t n = 0; n < outputs; ++n) {
+            uint32_t handle; 
+            const uint32_t channels = 1;
+            const uint32_t pgroup = 2;
+
+            if (add_rack (eClusterType_InputTrack, pgroup, channels, handle)) {
                     error << string_compose (_("Cannot create mixing channel for driver output %1"), n) << endmsg;
                     return -1;
             }
@@ -307,12 +318,24 @@ SoundGrid::configure_driver (uint32_t inputs, uint32_t outputs, uint32_t tracks)
 
             WSAssignmentsCommand outputsCommand;
             Init_WSAddAssignmentsCommand(&outputsCommand, outputs, (WSDControllerHandle)this, 0);
+
+#define INDIRECT_VIA_TRACK
             
             for (uint32_t n = 0; n < outputs; ++n) {
-                    
+
                     ARDOUR::SoundGrid::DriverInputPort src (n);   // writable driver/JACK channel/port
+#ifndef INDIRECT_VIA_TRACK
                     ARDOUR::SoundGrid::PseudoPhysicalOutputPort dst (n);  // physical channel where the signal should go
                     connect (src, dst);
+#else
+                    ARDOUR::SoundGrid::TrackInputPort dst (n, 0);  // physical channel where the signal should go
+                    connect (src, dst);
+
+                    ARDOUR::SoundGrid::TrackOutputPort src2 (n, 0);
+                    ARDOUR::SoundGrid::PseudoPhysicalOutputPortXX dst2 (n);
+                    connect (src2, dst2);
+#endif
+
 #if 0
                     WSAudioAssignment &assignment (outputsCommand.in_Assignments.m_aAssignments[n]);
                     
@@ -862,11 +885,10 @@ SoundGrid::sg_port_as_jack_port (const Port& sgport)
     return jack_port;
 }
 
-#if 0
 void
 SoundGrid::drop_sg_jack_mapping (const string& jack_port)
 {
-        jack_soundgrid_map.remove (jack_port);
+        jack_soundgrid_map.erase (jack_port);
 
         for (SG_JACKMap::iterator i = soundgrid_jack_map.begin(); i != soundgrid_jack_map.end(); ++i) {
                 if (i->second == jack_port) {
@@ -874,7 +896,6 @@ SoundGrid::drop_sg_jack_mapping (const string& jack_port)
                 }
         }
 }
-#endif
 
 int
 SoundGrid::connect (const Port& src, const Port& dst)
@@ -966,9 +987,12 @@ SoundGrid::configure_io (uint32_t cluster_type, uint32_t rack_id, uint32_t chann
     configEvent.controlID.sectionControlID.channelIndex = wvEnum_Unknown;
     configEvent.controlID.sectionControlID.controlID = eControlID_Input_MonoStereo;
 
-    if (set (&configEvent, "I/O configure")) {
+#if 0
+    if (set (&configEvent, string_compose ("I/O configure ctype %1 id %2 to have %3 channels", 
+                                           cluster_type, rack_id, channels))) {
             return -1;
     }
+#endif
     
     return 0;
 }

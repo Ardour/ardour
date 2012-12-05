@@ -87,8 +87,6 @@ AutomationControl::set_automation_state (AutoState as)
 {
 	if (as != alist()->automation_state()) {
 
-		cerr << name() << " setting automation state to " << enum_2_string (as) << endl;
-
 		alist()->set_automation_state (as);
 
 		if (as == Write) {
@@ -120,14 +118,14 @@ void
 AutomationControl::start_touch(double when)
 {
 	set_touching (true);
-	AutomationWatch::instance().add_automation_watch (shared_from_this());
 	alist()->start_touch(when);
+	AutomationWatch::instance().add_automation_watch (shared_from_this());
 }
 
 void
 AutomationControl::stop_touch(bool mark, double when)
 {
 	set_touching (false);
-	AutomationWatch::instance().remove_automation_watch (shared_from_this());
 	alist()->stop_touch (mark, when);
+	AutomationWatch::instance().remove_automation_watch (shared_from_this());
 }

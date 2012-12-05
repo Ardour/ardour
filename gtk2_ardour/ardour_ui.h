@@ -140,6 +140,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	ARDOUR::Session* the_session() { return _session; }
 
+	bool get_smart_mode () const;
+	
 	int get_session_parameters (bool quit_on_cancel, bool should_be_new = false, std::string load_template = "");
 	int  build_session_from_nsd (const std::string& session_name, const std::string& session_path);
 	bool ask_about_loading_existing_session (const std::string& session_path);
@@ -418,8 +420,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ArdourButton play_selection_button;
 	ArdourButton rec_button;
 
-	ButtonJoiner* transport_joiner;
-
 	void toggle_external_sync ();
 	void toggle_time_master ();
 	void toggle_video_sync ();
@@ -427,7 +427,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ShuttleControl* shuttle_box;
 
 	ArdourButton auto_return_button;
-	ArdourButton auto_play_button;
+	ArdourButton follow_edits_button;
 	ArdourButton auto_input_button;
 	ArdourButton click_button;
 	ArdourButton sync_button;
@@ -446,7 +446,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void soloing_changed (bool);
 	void auditioning_changed (bool);
 	void _auditioning_changed (bool);
-
+	
 	bool solo_alert_press (GdkEventButton* ev);
 	bool audition_alert_press (GdkEventButton* ev);
 	bool feedback_alert_press (GdkEventButton *);
@@ -546,6 +546,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void transport_record (bool roll);
 	void transport_roll ();
 	void transport_play_selection();
+	void transport_play_preroll(); 
 	void transport_forward (int option);
 	void transport_rewind (int option);
 	void transport_loop ();

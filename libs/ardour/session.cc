@@ -1342,8 +1342,6 @@ Session::set_frame_rate (framecnt_t frames_per_second)
 
 	sync_time_vars();
 
-	Automatable::set_automation_interval (ceil ((double) frames_per_second * (0.001 * Config->get_automation_interval())));
-
 	clear_clicks ();
 
 	// XXX we need some equivalent to this, somehow
@@ -2139,6 +2137,31 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 void
 Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect, bool save)
 {
+	try {
+		PBD::Unwinder<bool> aip (_adding_routes_in_progress, true);
+		add_routes_inner (new_routes, input_auto_connect, output_auto_connect);
+
+	} catch (...) {
+		error << _("Adding new tracks/busses failed") << endmsg;
+	}
+
+	graph_reordered ();
+
+	update_latency (true);
+	update_latency (false);
+		
+	set_dirty();
+	
+	if (save) {
+		save_state (_current_snapshot_name);
+	}
+	
+	RouteAdded (new_routes); /* EMIT SIGNAL */
+}
+
+void
+Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect)
+{
         ChanCount existing_inputs;
         ChanCount existing_outputs;
 	uint32_t order = next_control_id();
@@ -2196,6 +2219,7 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 			}
 		}
 
+
 		if (input_auto_connect || output_auto_connect) {
 			auto_connect_route (r, existing_inputs, existing_outputs, true, input_auto_connect);
 		}
@@ -2204,7 +2228,7 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 		   reasonable defaults because they also affect the remote control
 		   ID in most situations.
 		*/
-		
+
 		if (!r->has_order_key (EditorSort)) {
 			if (r->is_hidden()) {
 				/* use an arbitrarily high value */
@@ -2220,31 +2244,18 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 	}
 
 	if (_monitor_out && IO::connecting_legal) {
-
-		{
-			Glib::Threads::Mutex::Lock lm (_engine.process_lock());		
-			
-			for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
-				if ((*x)->is_monitor()) {
+		Glib::Threads::Mutex::Lock lm (_engine.process_lock());		
+		
+		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
+			if ((*x)->is_monitor()) {
+				/* relax */
+			} else if ((*x)->is_master()) {
 					/* relax */
-				} else if ((*x)->is_master()) {
-					/* relax */
-				} else {
-					(*x)->enable_monitor_send ();
-				}
+			} else {
+				(*x)->enable_monitor_send ();
 			}
 		}
-
-		resort_routes ();
 	}
-
-	set_dirty();
-
-	if (save) {
-		save_state (_current_snapshot_name);
-	}
-
-	RouteAdded (new_routes); /* EMIT SIGNAL */
 }
 
 void
@@ -2554,14 +2565,17 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 		DEBUG_TRACE (DEBUG::Solo, string_compose ("check feed from %1\n", (*i)->name()));
 		
 		if ((*i)->feeds (route, &via_sends_only)) {
+			DEBUG_TRACE (DEBUG::Solo, string_compose ("\tthere is a feed from %1\n", (*i)->name()));
 			if (!via_sends_only) {
 				if (!route->soloed_by_others_upstream()) {
 					(*i)->mod_solo_by_others_downstream (delta);
 				}
+			} else {
+				DEBUG_TRACE (DEBUG::Solo, string_compose ("\tthere is a send-only feed from %1\n", (*i)->name()));
 			}
 			in_signal_flow = true;
 		} else {
-			DEBUG_TRACE (DEBUG::Solo, "\tno feed from\n");
+			DEBUG_TRACE (DEBUG::Solo, string_compose ("\tno feed from %1\n", (*i)->name()));
 		}
 		
 		DEBUG_TRACE (DEBUG::Solo, string_compose ("check feed to %1\n", (*i)->name()));
@@ -2582,7 +2596,11 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 				if (!route->soloed_by_others_downstream()) {
 					DEBUG_TRACE (DEBUG::Solo, string_compose ("\tmod %1 by %2\n", (*i)->name(), delta));
 					(*i)->mod_solo_by_others_upstream (delta);
+				} else {
+					DEBUG_TRACE (DEBUG::Solo, "\talready soloed by others downstream\n");
 				}
+			} else {
+				DEBUG_TRACE (DEBUG::Solo, string_compose ("\tfeed to %1 ignored, sends-only\n", (*i)->name()));
 			}
 			in_signal_flow = true;
 		} else {
@@ -2604,7 +2622,7 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 	*/
 
 	for (RouteList::iterator i = uninvolved.begin(); i != uninvolved.end(); ++i) {
-		DEBUG_TRACE (DEBUG::Solo, string_compose ("mute change for %1\n", (*i)->name()));
+		DEBUG_TRACE (DEBUG::Solo, string_compose ("mute change for %1, which neither feeds or is fed by %2\n", (*i)->name(), route->name()));
 		(*i)->mute_changed (this);
 	}
 
@@ -2654,6 +2672,9 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 		_solo_isolated_cnt = isolated;
 		IsolatedChanged (); /* EMIT SIGNAL */
 	}
+
+	DEBUG_TRACE (DEBUG::Solo, string_compose ("solo state updated by session, soloed? %1 listeners %2 isolated %3\n",
+						  something_soloed, listeners, isolated));
 }
 
 boost::shared_ptr<RouteList>
@@ -2689,44 +2710,68 @@ Session::io_name_is_legal (const std::string& name)
 }
 
 void
-Session::set_exclusive_input_active (boost::shared_ptr<Route> rt, bool /*others_on*/)
+Session::set_exclusive_input_active (boost::shared_ptr<RouteList> rl, bool onoff, bool flip_others)
 {
-	RouteList rl;
+	RouteList rl2;
 	vector<string> connections;
 
-	PortSet& ps (rt->input()->ports());
+	/* if we are passed only a single route and we're not told to turn
+	 * others off, then just do the simple thing.
+	 */
 
-	for (PortSet::iterator p = ps.begin(); p != ps.end(); ++p) {
-		p->get_connections (connections);
-	}
-
-	for (vector<string>::iterator s = connections.begin(); s != connections.end(); ++s) {
-		routes_using_input_from (*s, rl);
-	}
-
-	/* scan all relevant routes to see if others are on or off */
-
-	bool others_are_already_on = false;
-
-	for (RouteList::iterator r = rl.begin(); r != rl.end(); ++r) {
-		if ((*r) != rt) {
-			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (*r);
-			if (mt) {
-				if (mt->input_active()) {
-					others_are_already_on = true;
-					break;
-				}
-			}
+	if (flip_others == false && rl->size() == 1) {
+		boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (rl->front());
+		if (mt) {
+			mt->set_input_active (onoff);
+			return;
 		}
 	}
 
-	/* globally reverse other routes */
+	for (RouteList::iterator rt = rl->begin(); rt != rl->end(); ++rt) {
 
-	for (RouteList::iterator r = rl.begin(); r != rl.end(); ++r) {
-		if ((*r) != rt) {
+		PortSet& ps ((*rt)->input()->ports());
+		
+		for (PortSet::iterator p = ps.begin(); p != ps.end(); ++p) {
+			p->get_connections (connections);
+		}
+		
+		for (vector<string>::iterator s = connections.begin(); s != connections.end(); ++s) {
+			routes_using_input_from (*s, rl2);
+		}
+		
+		/* scan all relevant routes to see if others are on or off */
+		
+		bool others_are_already_on = false;
+		
+		for (RouteList::iterator r = rl2.begin(); r != rl2.end(); ++r) {
+
 			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (*r);
-			if (mt) {
-				mt->set_input_active (!others_are_already_on);
+
+			if (!mt) {
+				continue;
+			}
+
+			if ((*r) != (*rt)) {
+				if (mt->input_active()) {
+					others_are_already_on = true;
+				}
+			} else {
+				/* this one needs changing */
+				mt->set_input_active (onoff);
+			}
+		}
+		
+		if (flip_others) {
+
+			/* globally reverse other routes */
+			
+			for (RouteList::iterator r = rl2.begin(); r != rl2.end(); ++r) {
+				if ((*r) != (*rt)) {
+					boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (*r);
+					if (mt) {
+						mt->set_input_active (!others_are_already_on);
+					}
+				}
 			}
 		}
 	}
@@ -2735,7 +2780,7 @@ Session::set_exclusive_input_active (boost::shared_ptr<Route> rt, bool /*others_
 void
 Session::routes_using_input_from (const string& str, RouteList& rl)
 {
-	boost::shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<RouteList> r = routes.reader();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->input()->connected_to (str)) {
@@ -3522,7 +3567,7 @@ Session::graph_reordered ()
 	   from a set_state() call or creating new tracks. Ditto for deletion.
 	*/
 
-	if (_state_of_the_state & (InitialConnecting|Deletion)) {
+	if ((_state_of_the_state & (InitialConnecting|Deletion)) || _adding_routes_in_progress) {
 		return;
 	}
 
@@ -4364,7 +4409,7 @@ Session::source_search_path (DataType type) const
 	if (session_dirs.size() == 1) {
 		switch (type) {
 		case DataType::AUDIO:
-			s.push_back ( _session_dir->sound_path());
+			s.push_back (_session_dir->sound_path());
 			break;
 		case DataType::MIDI:
 			s.push_back (_session_dir->midi_path());
@@ -4387,7 +4432,9 @@ Session::source_search_path (DataType type) const
 	if (type == DataType::AUDIO) {
 		const string sound_path_2X = _session_dir->sound_path_2X();
 		if (Glib::file_test (sound_path_2X, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
-			s.push_back (sound_path_2X);
+			if (find (s.begin(), s.end(), sound_path_2X) == s.end()) {
+				s.push_back (sound_path_2X);
+			}
 		}
 	}
 
@@ -4406,16 +4453,7 @@ Session::source_search_path (DataType type) const
 	}
 
 	for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
-
-		vector<string>::iterator si;
-
-		for (si = s.begin(); si != s.end(); ++si) {
-			if ((*si) == *i) {
-				break;
-			}
-		}
-
-		if (si == s.end()) {
+		if (find (s.begin(), s.end(), *i) == s.end()) {
 			s.push_back (*i);
 		}
 	}
@@ -4509,7 +4547,7 @@ Session::update_latency (bool playback)
 {
 	DEBUG_TRACE (DEBUG::Latency, string_compose ("JACK latency callback: %1\n", (playback ? "PLAYBACK" : "CAPTURE")));
 
-	if (_state_of_the_state & (InitialConnecting|Deletion)) {
+	if ((_state_of_the_state & (InitialConnecting|Deletion)) || _adding_routes_in_progress) {
 		return;
 	}
 

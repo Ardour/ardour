@@ -535,18 +535,21 @@ private:
 class ClockOption : public Option
 {
 public:
-	ClockOption (std::string const &, std::string const &, sigc::slot<ARDOUR::framecnt_t>, sigc::slot<bool, ARDOUR::framecnt_t>);
+	ClockOption (std::string const &, std::string const &, sigc::slot<std::string>, sigc::slot<bool, std::string>);
 	void set_state_from_config ();
 	void add_to_page (OptionEditorPage *);
 	void set_session (ARDOUR::Session *);
 
         Gtk::Widget& tip_widget() { return _clock; }
+        AudioClock& clock() { return _clock; }
 
 private:
+	void save_clock_time ();
 	Gtk::Label _label;
 	AudioClock _clock;
-	sigc::slot<ARDOUR::framecnt_t> _get;
-	sigc::slot<bool, ARDOUR::framecnt_t> _set;
+	sigc::slot<std::string> _get;
+	sigc::slot<bool, std::string> _set;
+	ARDOUR::Session *_session;
 };
 
 class DirectoryOption : public Option

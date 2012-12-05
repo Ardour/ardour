@@ -72,42 +72,53 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Timecode"), spf);
 
-	ComboOption<float>* vpu = new ComboOption<float> (
+	_vpu = new ComboOption<float> (
 		"video-pullup",
 		_("Pull-up / pull-down"),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::get_video_pullup),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_video_pullup)
 		);
 
-	vpu->add (4.1667 + 0.1, _("4.1667 + 0.1%"));
-	vpu->add (4.1667, _("4.1667"));
-	vpu->add (4.1667 - 0.1, _("4.1667 - 0.1%"));
-	vpu->add (0.1, _("0.1"));
-	vpu->add (0, _("none"));
-	vpu->add (-0.1, _("-0.1"));
-	vpu->add (-4.1667 + 0.1, _("-4.1667 + 0.1%"));
-	vpu->add (-4.1667, _("-4.1667"));
-	vpu->add (-4.1667 - 0.1, _("-4.1667 - 0.1%"));
+	_vpu->add (4.1667 + 0.1, _("4.1667 + 0.1%"));
+	_vpu->add (4.1667, _("4.1667"));
+	_vpu->add (4.1667 - 0.1, _("4.1667 - 0.1%"));
+	_vpu->add (0.1, _("0.1"));
+	_vpu->add (0, _("none"));
+	_vpu->add (-0.1, _("-0.1"));
+	_vpu->add (-4.1667 + 0.1, _("-4.1667 + 0.1%"));
+	_vpu->add (-4.1667, _("-4.1667"));
+	_vpu->add (-4.1667 - 0.1, _("-4.1667 - 0.1%"));
 
-	add_option (_("Timecode"), vpu);
+	add_option (_("Timecode"), _vpu);
 
-	ClockOption* co = new ClockOption (
-		"timecode-offset",
-		_("Timecode offset"),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::get_timecode_offset),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::set_timecode_offset)
+
+	add_option (_("Timecode"), new OptionEditorHeading (_("Ext Timecode Offsets")));
+
+	ClockOption* sco = new ClockOption (
+		"slave-timecode-offset",
+		_("Slave Timecode offset"),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_slave_timecode_offset),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_slave_timecode_offset)
 		);
 
-	co->set_session (_session);
+	sco->set_session (_session);
+	sco->clock().set_negative_allowed (true);
+	Gtkmm2ext::UI::instance()->set_tip (sco->tip_widget(), _("The specified offset is added to the received timecode (MTC or LTC)."));
 
-	add_option (_("Timecode"), co);
+	add_option (_("Timecode"), sco);
 
-	add_option (_("Timecode"), new BoolOption (
-			    "timecode-offset-negative",
-			    _("Timecode Offset Negative"),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_timecode_offset_negative),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_timecode_offset_negative)
-			    ));
+	ClockOption* gco = new ClockOption (
+		"timecode-generator-offset",
+		_("Timecode Generator offset"),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_timecode_generator_offset),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_timecode_generator_offset)
+		);
+
+	gco->set_session (_session);
+	gco->clock().set_negative_allowed (true);
+	Gtkmm2ext::UI::instance()->set_tip (gco->tip_widget(), _("Specify an offset which is added to the generated timecode (so far only LTC)."));
+
+	add_option (_("Timecode"), gco);
 
 	add_option (_("Timecode"), new OptionEditorHeading (_("JACK Transport/Time Settings")));
 
@@ -292,6 +303,18 @@ void
 SessionOptionEditor::parameter_changed (std::string const & p)
 {
 	OptionEditor::parameter_changed (p);
+	if (p == "external-sync") {
+		if (Config->get_sync_source() == JACK) {
+			_vpu->set_sensitive(!_session_config->get_external_sync());
+		} else {
+			_vpu->set_sensitive(true);
+		}
+	}
+	if (p == "timecode-format") {
+		/* update offset clocks */
+		parameter_changed("timecode-generator-offset");
+		parameter_changed("slave-timecode-offset");
+	}
 }
 
 /* the presence of absence of a monitor section is not really a regular session

@@ -154,6 +154,7 @@ private:
 
 	bool _ignore_reorder;
 	bool _no_redisplay;
+        bool _adding_routes;
 
 	Gtk::Menu* _menu;
         Gtk::Widget* old_focus;

@@ -23,6 +23,7 @@
 #include "pbd/file_utils.h"
 
 #include "gtkmm2ext/tearoff.h"
+#include "gtkmm2ext/utils.h"
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/profile.h"
@@ -403,6 +404,12 @@ Editor::register_actions ()
 	Glib::RefPtr<ActionGroup> mouse_mode_actions = ActionGroup::create (X_("MouseMode"));
 	RadioAction::Group mouse_mode_group;
 
+	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Smart Object Mode"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));	
+	smart_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
+	smart_mode_button.set_related_action (smart_mode_action);
+	smart_mode_button.set_text (_("Smart"));
+	smart_mode_button.set_name ("mouse mode button");
+
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Object Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseObject));
 	mouse_move_button.set_related_action (act);
 	mouse_move_button.set_image (::get_icon("tool_object"));
@@ -417,9 +424,6 @@ Editor::register_actions ()
 	mouse_draw_button.set_related_action (act);
 	mouse_draw_button.set_image (::get_icon("midi_tool_pencil"));
 	mouse_draw_button.set_name ("mouse mode button");
-
-	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Link Object / Range Tools"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));	
-	smart_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("Gain Tool"), sigc::bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseGain));	
 	mouse_gain_button.set_related_action (act);
@@ -534,7 +538,7 @@ Editor::register_actions ()
 	ruler_meter_action->set_active (true);
 	ruler_tempo_action->set_active (true);
 	ruler_marker_action->set_active (true);
-	ruler_range_action->set_active (false);
+	ruler_range_action->set_active (true);
 	ruler_loop_punch_action->set_active (true);
 	ruler_loop_punch_action->set_active (true);
 	if (Profile->get_sae()) {
@@ -622,6 +626,9 @@ Editor::register_actions ()
 	act = ActionManager::register_toggle_action (editor_actions, X_("ToggleLogoVisibility"), _("Show Logo"), sigc::mem_fun (*this, &Editor::toggle_logo_visibility));
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 	tact->set_active (true);
+
+	ActionManager::register_action (editor_actions, X_("toggle-midi-input-active"), _("Toggle MIDI Input Active for Editor-Selected Tracks/Busses"), 
+				   sigc::bind (sigc::mem_fun (*this, &Editor::toggle_midi_input_active), false));
 
 	ActionManager::add_action_group (rl_actions);
 	ActionManager::add_action_group (ruler_actions);
@@ -1485,6 +1492,15 @@ Editor::parameter_changed (std::string p)
 	} else if (p == "remote-model") {
 		if (_routes) {
 			_routes->reset_remote_control_ids ();
+		}
+	} else if (p == "use-tooltips") {
+
+		/* this doesn't really belong here but it has to go somewhere */
+
+		if (Config->get_use_tooltips()) {
+			Gtkmm2ext::enable_tooltips ();
+		} else {
+			Gtkmm2ext::disable_tooltips ();
 		}
 	}
 }

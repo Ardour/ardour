@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 # Variables for 'waf dist'
-VERSION = '3.0beta5'
+VERSION = '3.0rc1'
 APPNAME = 'Ardour3'
 
 # Mandatory variables
@@ -162,6 +162,14 @@ def set_compiler_flags (conf,opt):
                 conf.env['build_target'] = 'i686'
     else:
         conf.env['build_target'] = opt.dist_target
+
+    if conf.env['build_target'] == 'snowleopard':
+        #
+        # stupid OS X 10.6 has a bug in math.h that prevents llrint and friends
+        # from being visible.
+        # 
+        debug_flags.append ('-U__STRICT_ANSI__')
+        optimization_flags.append ('-U__STRICT_ANSI__')
 
     if cpu == 'powerpc' and conf.env['build_target'] != 'none':
         #

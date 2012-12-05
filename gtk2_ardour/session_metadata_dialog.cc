@@ -24,6 +24,7 @@
 #include <gtkmm2ext/utils.h>
 
 #include "pbd/xml++.h"
+#include "pbd/error.h"
 
 #include "ardour/session.h"
 #include "ardour/session_utils.h"
@@ -32,6 +33,7 @@
 
 using namespace std;
 using namespace Glib;
+using namespace PBD;
 
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
 
@@ -326,7 +328,7 @@ void
 SessionMetadataSetImportable::load_extra_data (ARDOUR::SessionMetadata const & data)
 {
 	if (!_session) {
-		std::cerr << "Programming error: no session set for SessionMetaDataSetImportable (in load_data)!" << std::endl;
+		error << string_compose (_("programming error: %1"), "no session set for SessionMetaDataSetImportable (in load_data)!") << endmsg;
 		return;
 	}
 
@@ -374,7 +376,7 @@ void
 SessionMetadataSetImportable::save_data ()
 {
 	if (!_session) {
-		std::cerr << "Programming error: no session set for SessionMetaDataSetImportable (in import_data)!" << std::endl;
+		error << string_compose (_("programming error: %1"), "no session set for SessionMetaDataSetImportable (in import_data)!") << endmsg;
 		return;
 	}
 
@@ -430,7 +432,7 @@ void
 SessionMetadataDialog<DataSet>::init_data ( bool skip_user )
 {
 	if (!_session) {
-		std::cerr << "Programming error: no session set for SessionMetaDataDialog (in init_data)!" << std::endl;
+		error << string_compose (_("programming error: %1"), "no session set for SessionMetaDataDialog (in init_data)!") << endmsg;
 		return;
 	}
 
@@ -711,7 +713,7 @@ void
 SessionMetadataImporter::run ()
 {
 	if (!_session) {
-		std::cerr << "Programming error: no session set for SessionMetaDataImporter (in run)!" << std::endl;
+		error << string_compose (_("programming error: %1"), "no session set for SessionMetaDataImporter (in run)!") << endmsg;
 		return;
 	}
 

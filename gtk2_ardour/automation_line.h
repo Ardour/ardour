@@ -80,10 +80,10 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	bool control_points_adjacent (double xval, uint32_t& before, uint32_t& after);
 
 	/* dragging API */
-	virtual void start_drag_single (ControlPoint*, double, float);
-	virtual void start_drag_line (uint32_t, uint32_t, float);
-	virtual void start_drag_multiple (std::list<ControlPoint*>, float, XMLNode *);
-	virtual std::pair<double, float> drag_motion (double, float, bool, bool);
+        virtual void start_drag_single (ControlPoint*, double, float);
+        virtual void start_drag_line (uint32_t, uint32_t, float);
+        virtual void start_drag_multiple (std::list<ControlPoint*>, float, XMLNode *);
+        virtual std::pair<double, float> drag_motion (double, float, bool, bool with_push);
 	virtual void end_drag ();
 
 	ControlPoint* nth (uint32_t);
@@ -182,9 +182,26 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	ArdourCanvas::Points        line_points; /* coordinates for canvas line */
 	std::vector<ControlPoint*>  control_points; /* visible control points */
 
+        class ContiguousControlPoints : public std::list<ControlPoint*> {
+	  public:
+	    ContiguousControlPoints (AutomationLine& al);
+	    double clamp_dx (double dx);
+	    void move (double dx, double dy);
+	    void compute_x_bounds ();
+	  private:
+	    AutomationLine& line;
+	    double before_x;
+	    double after_x;
+	};
+
+        friend class ContiguousControlPoints;
+
+	typedef boost::shared_ptr<ContiguousControlPoints> CCP;
+        std::vector<CCP> contiguous_points;
+
 	void sync_model_with_view_point (ControlPoint&);
 	void sync_model_with_view_points (std::list<ControlPoint*>);
-	void start_drag_common (double, float);
+        void start_drag_common (double, float);
 
 	virtual void change_model (ARDOUR::AutomationList::iterator, double x, double y);
 

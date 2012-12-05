@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <limits>
 
 #include <cmath>
 #include <cstdlib>
@@ -51,7 +52,9 @@
 #include <lilv/lilv.h>
 
 #include "lv2/lv2plug.in/ns/ext/atom/atom.h"
+#include "lv2/lv2plug.in/ns/ext/atom/forge.h"
 #include "lv2/lv2plug.in/ns/ext/log/log.h"
+#include "lv2/lv2plug.in/ns/ext/midi/midi.h"
 #include "lv2/lv2plug.in/ns/ext/port-props/port-props.h"
 #include "lv2/lv2plug.in/ns/ext/presets/presets.h"
 #include "lv2/lv2plug.in/ns/ext/state/state.h"
@@ -69,27 +72,36 @@
 #include <suil/suil.h>
 #endif
 
+/** The number of MIDI buffers that will fit in a UI/worker comm buffer.
+    This needs to be roughly the number of cycles the UI will get around to
+    actually processing the traffic.  Lower values are flakier but save memory.
+*/
+static const size_t NBUFS = 4;
+
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
 URIMap LV2Plugin::_uri_map;
-uint32_t LV2Plugin::_midi_event_type = _uri_map.uri_to_id(
-	"http://lv2plug.in/ns/ext/midi#MidiEvent");
-uint32_t LV2Plugin::_chunk_type = _uri_map.uri_to_id(
-	LV2_ATOM__Chunk);
-uint32_t LV2Plugin::_sequence_type = _uri_map.uri_to_id(
-	LV2_ATOM__Sequence);
-uint32_t LV2Plugin::_event_transfer_type = _uri_map.uri_to_id(
-	LV2_ATOM__eventTransfer);
-uint32_t LV2Plugin::_path_type = _uri_map.uri_to_id(
-	LV2_ATOM__Path);
-uint32_t LV2Plugin::_log_Error = _uri_map.uri_to_id(
-	LV2_LOG__Error);
-uint32_t LV2Plugin::_log_Warning = _uri_map.uri_to_id(
-	LV2_LOG__Warning);
-uint32_t LV2Plugin::_log_Note = _uri_map.uri_to_id(
-	LV2_LOG__Note);
+
+LV2Plugin::URIDs LV2Plugin::urids = {
+	_uri_map.uri_to_id(LV2_ATOM__Chunk),
+	_uri_map.uri_to_id(LV2_ATOM__Path),
+	_uri_map.uri_to_id(LV2_ATOM__Sequence),
+	_uri_map.uri_to_id(LV2_ATOM__eventTransfer),
+	_uri_map.uri_to_id(LV2_LOG__Error),
+	_uri_map.uri_to_id(LV2_LOG__Note),
+	_uri_map.uri_to_id(LV2_LOG__Warning),
+	_uri_map.uri_to_id(LV2_MIDI__MidiEvent),
+	_uri_map.uri_to_id(LV2_TIME__Position),
+	_uri_map.uri_to_id(LV2_TIME__bar),
+	_uri_map.uri_to_id(LV2_TIME__barBeat),
+	_uri_map.uri_to_id(LV2_TIME__beatUnit),
+	_uri_map.uri_to_id(LV2_TIME__beatsPerBar),
+	_uri_map.uri_to_id(LV2_TIME__beatsPerMinute),
+	_uri_map.uri_to_id(LV2_TIME__frame),
+	_uri_map.uri_to_id(LV2_TIME__speed)
+};
 
 class LV2World : boost::noncopyable {
 public:
@@ -102,8 +114,8 @@ public:
 	LilvNode* atom_Chunk;
 	LilvNode* atom_Sequence;
 	LilvNode* atom_bufferType;
-	LilvNode* atom_supports;
 	LilvNode* atom_eventTransfer;
+	LilvNode* atom_supports;
 	LilvNode* ev_EventPort;
 	LilvNode* ext_logarithmic;
 	LilvNode* lv2_AudioPort;
@@ -117,6 +129,7 @@ public:
 	LilvNode* lv2_toggled;
 	LilvNode* midi_MidiEvent;
 	LilvNode* rdfs_comment;
+	LilvNode* time_Position;
 	LilvNode* ui_GtkUI;
 	LilvNode* ui_external;
 };
@@ -169,14 +182,14 @@ log_vprintf(LV2_Log_Handle handle,
 {
 	char* str = NULL;
 	const int ret = g_vasprintf(&str, fmt, args);
-	if (type == LV2Plugin::_log_Error) {
+	if (type == LV2Plugin::urids.log_Error) {
 		error << str << endmsg;
-	} else if (type == LV2Plugin::_log_Warning) {
+	} else if (type == LV2Plugin::urids.log_Warning) {
 		warning << str << endmsg;
-	} else if (type == LV2Plugin::_log_Note) {
+	} else if (type == LV2Plugin::urids.log_Note) {
 		info << str << endmsg;
 	}
-	// TODO: Togglable log:Trace message support
+	// TODO: Toggleable log:Trace message support
 	return ret;
 }
 
@@ -211,6 +224,7 @@ struct LV2Plugin::Impl {
 	LilvInstance*               instance;
 	const LV2_Worker_Interface* work_iface;
 	LilvState*                  state;
+	LV2_Atom_Forge              forge;
 };
 
 LV2Plugin::LV2Plugin (AudioEngine& engine,
@@ -260,6 +274,8 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_bpm_control_port       = 0;
 	_freewheel_control_port = 0;
 	_latency_control_port   = 0;
+	_next_cycle_start       = std::numeric_limits<framepos_t>::max();
+	_next_cycle_speed       = 1.0;
 	_block_length           = _engine.frames_per_cycle();
 	_seq_size               = _engine.raw_buffer_size(DataType::MIDI);
 	_state_version          = 0;
@@ -293,6 +309,8 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_features[4] = _uri_map.urid_map_feature();
 	_features[5] = _uri_map.urid_unmap_feature();
 	_features[6] = &_log_feature;
+
+	lv2_atom_forge_init(&_impl->forge, _uri_map.urid_map());
 
 	unsigned n_features = 7;
 #ifdef HAVE_NEW_LV2
@@ -328,7 +346,8 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	if (lilv_plugin_has_feature(plugin, worker_schedule)) {
 		LV2_Worker_Schedule* schedule = (LV2_Worker_Schedule*)malloc(
 			sizeof(LV2_Worker_Schedule));
-		_worker                     = new Worker(this, 4096);
+		size_t buf_size = _session.engine().raw_buffer_size(DataType::MIDI) * NBUFS;
+		_worker                     = new Worker(this, buf_size);
 		schedule->handle            = this;
 		schedule->schedule_work     = work_schedule;
 		_work_schedule_feature.data = schedule;
@@ -385,19 +404,22 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 			flags |= PORT_AUDIO;
 		} else if (lilv_port_is_a(_impl->plugin, port, _world.ev_EventPort)) {
 			flags |= PORT_EVENT;
+			flags |= PORT_MIDI;  // We assume old event API ports are for MIDI
 		} else if (lilv_port_is_a(_impl->plugin, port, _world.atom_AtomPort)) {
 			LilvNodes* buffer_types = lilv_port_get_value(
 				_impl->plugin, port, _world.atom_bufferType);
 			LilvNodes* atom_supports = lilv_port_get_value(
 				_impl->plugin, port, _world.atom_supports);
 
-				if (lilv_nodes_contains(buffer_types, _world.atom_Sequence)
-						&& lilv_nodes_contains(atom_supports, _world.midi_MidiEvent)
-						) {
-					flags |= PORT_MESSAGE;
-				} else {
-					flags |= PORT_ATOM;
+			if (lilv_nodes_contains(buffer_types, _world.atom_Sequence)) {
+				flags |= PORT_SEQUENCE;
+				if (lilv_nodes_contains(atom_supports, _world.midi_MidiEvent)) {
+					flags |= PORT_MIDI;
 				}
+				if (lilv_nodes_contains(atom_supports, _world.time_Position)) {
+					flags |= PORT_POSITION;
+				}
+			}
 			lilv_nodes_free(buffer_types);
 			lilv_nodes_free(atom_supports);
 		} else {
@@ -801,9 +823,6 @@ LV2Plugin::lv2_state_make_path(LV2_State_Make_Path_Handle handle,
 	DEBUG_TRACE(DEBUG::LV2, string_compose("new file path %1 => %2\n",
 	                                       path, abs_path));
 
-	std::cerr << "MAKE PATH " << path
-	          << " => " << g_strndup(abs_path.c_str(), abs_path.length())
-	          << std::endl;
 	return g_strndup(abs_path.c_str(), abs_path.length());
 }
 
@@ -848,12 +867,9 @@ LV2Plugin::add_state(XMLNode* root) const
 	}
 
 	if (_has_state_interface) {
-		cout << "LV2 " << name() << " has state interface" << endl;
 		// Provisionally increment state version and create directory
 		const std::string new_dir = state_dir(++_state_version);
 		g_mkdir_with_parents(new_dir.c_str(), 0744);
-
-		cout << "NEW DIR: " << new_dir << endl;
 
 		LilvState* state = lilv_state_new_from_instance(
 			_impl->plugin,
@@ -864,7 +880,7 @@ LV2Plugin::add_state(XMLNode* root) const
 			_session.externals_dir().c_str(),
 			new_dir.c_str(),
 			NULL,
-			(void*)this,
+			const_cast<LV2Plugin*>(this),
 			0,
 			NULL);
 
@@ -879,19 +895,14 @@ LV2Plugin::add_state(XMLNode* root) const
 
 			lilv_state_free(_impl->state);
 			_impl->state = state;
-
-			cout << "Saved LV2 state to " << state_dir(_state_version) << endl;
 		} else {
 			// State is identical, decrement version and nuke directory
-			cout << "LV2 state identical, not saving" << endl;
 			lilv_state_free(state);
 			remove_directory(new_dir);
 			--_state_version;
 		}
 
 		root->add_property("state-dir", string_compose("state%1", _state_version));
-	} else {
-		cout << "LV2 " << name() << " has no state interface." << endl;
 	}
 }
 
@@ -973,7 +984,6 @@ ARDOUR::lv2plugin_get_port_value(const char* port_symbol,
                                  uint32_t*   size,
                                  uint32_t*   type)
 {
-	// cerr << "get_port_value(" << port_symbol << ", ...) ... ";
 	LV2Plugin *plugin = (LV2Plugin *) user_data;
 
 	uint32_t index = plugin->port_index(port_symbol);
@@ -983,14 +993,11 @@ ARDOUR::lv2plugin_get_port_value(const char* port_symbol,
 			*size = sizeof(float);
 			*type = plugin->_uri_map.uri_to_id(LV2_ATOM__Float);
 			value = &plugin->_shadow_data[index];
-			// cerr << "index="<< index << ",*size=" << *size << ",*type=" << *type << ",*value=" << *value << endl;
 
 			return value;
 		}
-		// cerr << "port is not input control port! ";
 	}
 
-	// cerr << "returning NULL!" << endl;
 	*size = *type = 0;
 	return NULL;
 }
@@ -999,8 +1006,6 @@ ARDOUR::lv2plugin_get_port_value(const char* port_symbol,
 std::string
 LV2Plugin::do_save_preset(string name)
 {
-	// cerr << "LV2Plugin::do_save_preset(" << name << ")" << endl;
-
 	string pset_uri = uri();
 	pset_uri += "#";
 	pset_uri += name;
@@ -1062,20 +1067,15 @@ bool
 LV2Plugin::has_message_output() const
 {
 	for (uint32_t i = 0; i < num_ports(); ++i) {
-		if ((_port_flags[i] & (PORT_MESSAGE|PORT_ATOM)) && _port_flags[i] & PORT_OUTPUT) {
+		if ((_port_flags[i] & PORT_SEQUENCE) &&
+		    (_port_flags[i] & PORT_OUTPUT)) {
 			return true;
 		}
 	}
 	return false;
 }
 
-uint32_t
-LV2Plugin::atom_eventTransfer() const
-{
-	return _event_transfer_type;
-}
-
-void
+bool
 LV2Plugin::write_to(RingBuffer<uint8_t>* dest,
                     uint32_t             index,
                     uint32_t             protocol,
@@ -1091,38 +1091,46 @@ LV2Plugin::write_to(RingBuffer<uint8_t>* dest,
 	msg->size     = size;
 	memcpy(msg + 1, body, size);
 
-	if (dest->write(buf, buf_size) != buf_size) {
-		error << "Error writing to UI=>Plugin RingBuffer" << endmsg;
-	}
+	return (dest->write(buf, buf_size) == buf_size);
 }
 
-void
+bool
 LV2Plugin::write_from_ui(uint32_t       index,
                          uint32_t       protocol,
                          uint32_t       size,
                          const uint8_t* body)
 {
 	if (!_from_ui) {
-		_from_ui = new RingBuffer<uint8_t>(4096);
+		_from_ui = new RingBuffer<uint8_t>(
+			_session.engine().raw_buffer_size(DataType::MIDI) * NBUFS);
 	}
 
-	write_to(_from_ui, index, protocol, size, body);
+	if (!write_to(_from_ui, index, protocol, size, body)) {
+		error << "Error writing from UI to plugin" << endmsg;
+		return false;
+	}
+	return true;
 }
 
-void
+bool
 LV2Plugin::write_to_ui(uint32_t       index,
                        uint32_t       protocol,
                        uint32_t       size,
                        const uint8_t* body)
 {
-	write_to(_to_ui, index, protocol, size, body);
+	if (!write_to(_to_ui, index, protocol, size, body)) {
+		error << "Error writing from plugin to UI" << endmsg;
+		return false;
+	}
+	return true;
 }
 
 void
 LV2Plugin::enable_ui_emmission()
 {
 	if (!_to_ui) {
-		_to_ui = new RingBuffer<uint8_t>(4096);
+		_to_ui = new RingBuffer<uint8_t>(
+			_session.engine().raw_buffer_size(DataType::MIDI) * NBUFS);
 	}
 }
 
@@ -1237,7 +1245,6 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 			plugin_dir(),
 			Glib::build_filename(prop->value(), "state.ttl"));
 
-		cout << "Loading LV2 state from " << state_file << endl;
 		LilvState* state = lilv_state_new_from_file(
 			_world.world, _uri_map.urid_map(), NULL, state_file.c_str());
 
@@ -1408,10 +1415,48 @@ LV2Plugin::allocate_atom_event_buffers()
 	_atom_ev_buffers = (LV2_Evbuf**) malloc((total_atom_buffers + 1) * sizeof(LV2_Evbuf*));
 	for (int i = 0; i < total_atom_buffers; ++i ) {
 		_atom_ev_buffers[i] = lv2_evbuf_new(32768, LV2_EVBUF_ATOM,
-				LV2Plugin::_chunk_type, LV2Plugin::_sequence_type);
+				LV2Plugin::urids.atom_Chunk, LV2Plugin::urids.atom_Sequence);
 	}
 	_atom_ev_buffers[total_atom_buffers] = 0;
 	return;
+}
+
+/** Write an ardour position/time/tempo/meter as an LV2 event.
+ * @return true on success.
+ */
+static bool
+write_position(LV2_Atom_Forge*     forge,
+               LV2_Evbuf*          buf,
+               const TempoMetric&  t,
+               Timecode::BBT_Time& bbt,
+               double              speed,
+               framepos_t          position,
+               framecnt_t          offset)
+{
+	uint8_t pos_buf[256];
+	lv2_atom_forge_set_buffer(forge, pos_buf, sizeof(pos_buf));
+	LV2_Atom_Forge_Frame frame;
+	lv2_atom_forge_blank(forge, &frame, 1, LV2Plugin::urids.time_Position);
+	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_frame, 0);
+	lv2_atom_forge_long(forge, position);
+	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_speed, 0);
+	lv2_atom_forge_float(forge, speed);
+	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_barBeat, 0);
+	lv2_atom_forge_float(forge, bbt.beats - 1 +
+	                     (bbt.ticks / Timecode::BBT_Time::ticks_per_beat));
+	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_bar, 0);
+	lv2_atom_forge_float(forge, bbt.bars - 1);
+	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_beatUnit, 0);
+	lv2_atom_forge_float(forge, t.meter().note_divisor());
+	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_beatsPerBar, 0);
+	lv2_atom_forge_float(forge, t.meter().divisions_per_bar());
+	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_beatsPerMinute, 0);
+	lv2_atom_forge_float(forge, t.tempo().beats_per_minute());
+
+	LV2_Evbuf_Iterator    end  = lv2_evbuf_end(buf);
+	const LV2_Atom* const atom = (const LV2_Atom*)pos_buf;
+	return lv2_evbuf_write(&end, offset, 0, atom->type, atom->size,
+	                       (const uint8_t*)(atom + 1));
 }
 
 int
@@ -1424,14 +1469,16 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 	cycles_t then = get_cycles();
 
+	TempoMap&               tmap     = _session.tempo_map();
+	Metrics::const_iterator metric_i = tmap.metrics_end();
+	TempoMetric             tmetric  = tmap.metric_at(_session.transport_frame(), &metric_i);
+
 	if (_freewheel_control_port) {
-		*_freewheel_control_port = _session.engine().freewheeling ();
+		*_freewheel_control_port = _session.engine().freewheeling();
 	}
 
 	if (_bpm_control_port) {
-		TempoMap& tmap (_session.tempo_map ());
-		Tempo tempo = tmap.tempo_at (_session.transport_frame () + offset);
-		*_bpm_control_port = tempo.beats_per_minute ();
+		*_bpm_control_port = tmetric.tempo().beats_per_minute();
 	}
 
 	ChanCount bufs_count;
@@ -1440,17 +1487,18 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	BufferSet& silent_bufs  = _session.get_silent_buffers(bufs_count);
 	BufferSet& scratch_bufs = _session.get_scratch_buffers(bufs_count);
 	uint32_t const num_ports = parameter_count();
+	uint32_t const nil_index = std::numeric_limits<uint32_t>::max();
 
 	uint32_t audio_in_index  = 0;
 	uint32_t audio_out_index = 0;
 	uint32_t midi_in_index   = 0;
 	uint32_t midi_out_index  = 0;
 	uint32_t atom_port_index = 0;
-	bool valid;
 	for (uint32_t port_index = 0; port_index < num_ports; ++port_index) {
 		void*     buf   = NULL;
-		uint32_t  index = 0;
+		uint32_t  index = nil_index;
 		PortFlags flags = _port_flags[port_index];
+		bool      valid = false;
 		if (flags & PORT_AUDIO) {
 			if (flags & PORT_INPUT) {
 				index = in_map.get(DataType::AUDIO, audio_in_index++, &valid);
@@ -1463,35 +1511,78 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					? bufs.get_audio(index).data(offset)
 					: scratch_bufs.get_audio(0).data(offset);
 			}
-		} else if (flags & (PORT_EVENT|PORT_MESSAGE)) {
+		} else if (flags & (PORT_EVENT|PORT_SEQUENCE)) {
 			/* FIXME: The checks here for bufs.count().n_midi() > index shouldn't
 			   be necessary, but the mapping is illegal in some cases.  Ideally
 			   that should be fixed, but this is easier...
 			*/
-			if (flags & PORT_INPUT) {
-				index = in_map.get(DataType::MIDI, midi_in_index++, &valid);
-				_ev_buffers[port_index] = (valid && bufs.count().n_midi() > index)
-					? bufs.get_lv2_midi(true, index, flags & PORT_EVENT)
-					: silent_bufs.get_lv2_midi(true, 0, flags & PORT_EVENT);
-				buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
-			} else {
-				index = out_map.get(DataType::MIDI, midi_out_index++, &valid);
-				_ev_buffers[port_index] = (valid && bufs.count().n_midi() > index)
-					? bufs.get_lv2_midi(false, index, flags & PORT_EVENT)
-					: scratch_bufs.get_lv2_midi(false, 0, flags & PORT_EVENT);
-				buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
-			}
-		} else if (flags & (PORT_ATOM)) {
-			assert(_atom_ev_buffers && _atom_ev_buffers[atom_port_index]);
-			if (flags & PORT_INPUT) {
+			if (flags & PORT_MIDI) {
+				if (flags & PORT_INPUT) {
+					index = in_map.get(DataType::MIDI, midi_in_index++, &valid);
+				} else {
+					index = out_map.get(DataType::MIDI, midi_out_index++, &valid);
+				}
+				if (valid && bufs.count().n_midi() > index) {
+					_ev_buffers[port_index] = bufs.get_lv2_midi(
+						(flags & PORT_INPUT), index, (flags & PORT_EVENT));
+				}
+			} else if ((flags & PORT_POSITION) && (flags & PORT_INPUT)) {
 				lv2_evbuf_reset(_atom_ev_buffers[atom_port_index], true);
 				_ev_buffers[port_index] = _atom_ev_buffers[atom_port_index++];
-			} else {
-				lv2_evbuf_reset(_atom_ev_buffers[atom_port_index], false);
-				_ev_buffers[port_index] = _atom_ev_buffers[atom_port_index++];
+				valid                   = true;
+			}
+
+			if (valid && (flags & PORT_INPUT)) {
+				Timecode::BBT_Time bbt;
+				if ((flags & PORT_POSITION)) {
+					if (_session.transport_frame() != _next_cycle_start ||
+					    _session.transport_speed() != _next_cycle_speed) {
+						// Transport has changed, write position at cycle start
+						tmap.bbt_time(_session.transport_frame(), bbt);
+						write_position(&_impl->forge, _ev_buffers[port_index],
+						               tmetric, bbt, _session.transport_speed(),
+						               _session.transport_frame(), 0);
+					}
+				}
+
+				// Get MIDI iterator range (empty range if no MIDI)
+				MidiBuffer::iterator m = (index != nil_index)
+					? bufs.get_midi(index).begin()
+					: silent_bufs.get_midi(0).end();
+				MidiBuffer::iterator m_end = (index != nil_index)
+					? bufs.get_midi(index).end()
+					: m;
+
+				// Now merge MIDI and any transport events into the buffer
+				LV2_Evbuf_Iterator i    = lv2_evbuf_end(_ev_buffers[port_index]);
+				const uint32_t     type = LV2Plugin::urids.midi_MidiEvent;
+				const framepos_t   tend = _session.transport_frame() + nframes;
+				++metric_i;
+				while (m != m_end || (metric_i != tmap.metrics_end() &&
+				                      (*metric_i)->frame() < tend)) {
+					MetricSection* metric = (metric_i != tmap.metrics_end())
+						? *metric_i : NULL;
+					if (m != m_end && (!metric || metric->frame() > (*m).time())) {
+						const Evoral::MIDIEvent<framepos_t> ev(*m, false);
+						LV2_Evbuf_Iterator eend = lv2_evbuf_end(_ev_buffers[port_index]);
+						lv2_evbuf_write(&eend, ev.time(), 0, type, ev.size(), ev.buffer());
+						++m;
+					} else {
+						tmetric.set_metric(metric);
+						bbt = metric->start();
+						write_position(&_impl->forge, _ev_buffers[port_index],
+						               tmetric, bbt, _session.transport_speed(),
+						               metric->frame(),
+						               metric->frame() - _session.transport_frame());
+						++metric_i;
+					}
+				}
+			} else if (!valid) {
+				// Nothing we understand or care about, connect to scratch
+				_ev_buffers[port_index] = silent_bufs.get_lv2_midi(
+					(flags & PORT_INPUT), 0, (flags & PORT_EVENT));
 			}
 			buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);
-			assert(buf);
 		} else {
 			continue;  // Control port, leave buffer alone
 		}
@@ -1512,13 +1603,13 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				error << "Error reading from UI=>Plugin RingBuffer" << endmsg;
 				break;
 			}
-			if (msg.protocol == _event_transfer_type) {
+			if (msg.protocol == urids.atom_eventTransfer) {
 				LV2_Evbuf*            buf  = _ev_buffers[msg.index];
 				LV2_Evbuf_Iterator    i    = lv2_evbuf_end(buf);
 				const LV2_Atom* const atom = (const LV2_Atom*)body;
 				if (!lv2_evbuf_write(&i, nframes, 0, atom->type, atom->size,
 				                (const uint8_t*)(atom + 1))) {
-					cerr << "LV2: failed to write data to event buffer\n";
+					error << "Failed to write data to LV2 event buffer\n";
 				}
 			} else {
 				error << "Received unknown message type from UI" << endmsg;
@@ -1532,9 +1623,10 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	midi_out_index = 0;
 	for (uint32_t port_index = 0; port_index < num_ports; ++port_index) {
 		PortFlags flags = _port_flags[port_index];
+		bool      valid = false;
 
 		// Flush MIDI (write back to Ardour MIDI buffers)
-		if ((flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_MESSAGE))) {
+		if ((flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE))) {
 			const uint32_t buf_index = out_map.get(
 				DataType::MIDI, midi_out_index++, &valid);
 			if (valid) {
@@ -1543,7 +1635,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		}
 
 		// Write messages to UI
-		if (_to_ui && (flags & PORT_OUTPUT) && (flags & (PORT_MESSAGE|PORT_ATOM))) {
+		if (_to_ui && (flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE))) {
 			LV2_Evbuf* buf = _ev_buffers[port_index];
 			for (LV2_Evbuf_Iterator i = lv2_evbuf_begin(buf);
 			     lv2_evbuf_is_valid(i);
@@ -1551,7 +1643,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				uint32_t frames, subframes, type, size;
 				uint8_t* data;
 				lv2_evbuf_get(i, &frames, &subframes, &type, &size, &data);
-				write_to_ui(port_index, _event_transfer_type,
+				write_to_ui(port_index, urids.atom_eventTransfer,
 				            size + sizeof(LV2_Atom),
 				            data - sizeof(LV2_Atom));
 			}
@@ -1560,6 +1652,10 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 	cycles_t now = get_cycles();
 	set_cycles((uint32_t)(now - then));
+
+	// Update expected transport information for next cycle so we can detect changes
+	_next_cycle_speed = _session.transport_speed();
+	_next_cycle_start = _session.transport_frame() + (nframes * _next_cycle_speed);
 
 	return 0;
 }
@@ -1736,6 +1832,7 @@ LV2World::LV2World()
 	lv2_enumeration    = lilv_new_uri(world, LV2_CORE__enumeration);
 	midi_MidiEvent     = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
 	rdfs_comment       = lilv_new_uri(world, LILV_NS_RDFS "comment");
+	time_Position      = lilv_new_uri(world, LV2_TIME__Position);
 	ui_GtkUI           = lilv_new_uri(world, LV2_UI__GtkUI);
 	ui_external        = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
 }
@@ -1803,8 +1900,10 @@ LV2PluginInfo::discover()
 		LV2PluginInfoPtr  info(new LV2PluginInfo((const void*)p));
 
 		LilvNode* name = lilv_plugin_get_name(p);
-		if (!name) {
-			cerr << "LV2: invalid plugin\n";
+		if (!name || !lilv_plugin_get_port_by_index(p, 0)) {
+			warning << "Ignoring invalid LV2 plugin "
+			        << lilv_node_as_string(lilv_plugin_get_uri(p))
+			        << endmsg;
 			continue;
 		}
 

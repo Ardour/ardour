@@ -130,6 +130,8 @@ ArdourStartup::ArdourStartup (bool require_new,
 		if (!window_icons.empty ()) {
 			set_default_icon_list (window_icons);
 		}
+
+		set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 		
 		// setup_prerelease_page ();
 		

@@ -220,7 +220,13 @@ Auditioner::output_changed (IOChange change, void* /*src*/)
 		string phys;
 		vector<string> connections;
 		vector<string> outputs;
+                
+                if (_output->ports().num_ports (DataType::AUDIO) == 0) {
+                        return;
+                }
+
 		_session.engine().get_physical_outputs (DataType::AUDIO, outputs);
+
 		if (_output->nth (0)->get_connections (connections)) {
 			if (outputs.size() > 0) {
 				phys = outputs[0];

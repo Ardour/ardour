@@ -69,6 +69,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	: EditorComponent (e)
         , _ignore_reorder (false)
         , _no_redisplay (false)
+        , _adding_routes (false)
         , _menu (0)
         , old_focus (0)
         , selection_countdown (0)
@@ -600,8 +601,11 @@ void
 EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 {
 	TreeModel::Row row;
+	PBD::Unwinder<bool> at (_adding_routes, true);
 
 	suspend_redisplay ();
+
+	_display.set_model (Glib::RefPtr<ListStore>());
 
 	for (list<RouteTimeAxisView*>::iterator x = routes.begin(); x != routes.end(); ++x) {
 
@@ -653,6 +657,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		(*x)->route()->solo_isolated_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_isolate_display, this), gui_context());
 		(*x)->route()->solo_safe_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_safe_display, this), gui_context());
 		(*x)->route()->active_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_active_display, this), gui_context ());
+
 	}
 
 	update_rec_display ();
@@ -662,7 +667,9 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 	update_solo_safe_display ();
 	update_input_active_display ();
 	update_active_display ();
+
 	resume_redisplay ();
+	_display.set_model (_model);
 
 	/* now update route order keys from the treeview/track display order */
 
@@ -672,7 +679,9 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 void
 EditorRoutes::handle_gui_changes (string const & what, void*)
 {
-	ENSURE_GUI_THREAD (*this, &EditorRoutes::handle_gui_changes, what, src)
+	if (_adding_routes) {
+		return;
+	}
 
 	if (what == "track_height") {
 		/* Optional :make tracks change height while it happens, instead

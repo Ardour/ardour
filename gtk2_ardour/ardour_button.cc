@@ -59,9 +59,12 @@ ArdourButton::ArdourButton (Element e)
 	, _diameter (11.0)
 	, _corner_radius (5.0)
 	, _corner_mask (0xf)
-	, edge_pattern (0)
-	, active_pattern (0)
-	, inactive_pattern (0)
+	, border_color (0)
+	, fill_color_active (0)
+	, fill_color_inactive (0)
+	, fill_pattern (0)
+	, fill_pattern_active (0)
+	, shine_pattern (0)
 	, led_inset_pattern (0)
 	, reflection_pattern (0)
 	, _led_rect (0)
@@ -80,11 +83,14 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, _text_width (0)
 	, _text_height (0)
 	, _diameter (11.0)
-	, _corner_radius (9.0)
+	, _corner_radius (5.0)
 	, _corner_mask (0xf)
-	, edge_pattern (0)
-	, active_pattern (0)
-	, inactive_pattern (0)
+	, border_color (0)
+	, fill_color_active (0)
+	, fill_color_inactive (0)
+	, fill_pattern (0)
+	, fill_pattern_active (0)
+	, shine_pattern (0)
 	, led_inset_pattern (0)
 	, reflection_pattern (0)
 	, _led_rect (0)
@@ -101,17 +107,26 @@ ArdourButton::~ArdourButton()
 {
 	delete _led_rect;
 
-	if (edge_pattern) {
-		cairo_pattern_destroy (edge_pattern);
+	if (shine_pattern) {
+		cairo_pattern_destroy (shine_pattern);
 	}
 
-	if (active_pattern) {
-		cairo_pattern_destroy (active_pattern);
+	if (fill_pattern) {
+		cairo_pattern_destroy (fill_pattern);
+	}
+	
+	if (fill_pattern_active) {
+		cairo_pattern_destroy (fill_pattern_active);
+	}
+	
+	if (led_inset_pattern) {
+		cairo_pattern_destroy (led_inset_pattern);
+	}
+	
+	if (reflection_pattern) {
+		cairo_pattern_destroy (reflection_pattern);
 	}
 
-	if (inactive_pattern) {
-		cairo_pattern_destroy (inactive_pattern);
-	}
 }
 
 void
@@ -169,9 +184,13 @@ ArdourButton::render (cairo_t* cr)
 		_diameter = std::min (get_width(), get_height());
 	}
 
+	float r,g,b,a;
+
 	if (_elements & Edge) {
 		rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
-		cairo_set_source (cr, edge_pattern);
+		UINT_TO_RGBA (border_color, &r, &g, &b, &a);
+		//cairo_set_source_rgba (cr, r/255.0,g/255.0,b/255.0,a/255.0);  //TODO:  why doesn't this work?
+		cairo_set_source_rgba (cr, 0,0,0,0.9);
 		cairo_fill (cr);
 	}
 
@@ -179,21 +198,51 @@ ArdourButton::render (cairo_t* cr)
 		if (_elements & Edge) {
 			rounded_function (cr, 1, 1, get_width()-2, get_height()-2, _corner_radius - 1.0);
 		} else {
-			rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius - 1.0);
+			rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
 		}
 
 		if (active_state() == Gtkmm2ext::ImplicitActive) {
-			cairo_set_source (cr, inactive_pattern);
+			//background color
+			cairo_set_source (cr, fill_pattern);
 			cairo_fill_preserve (cr);
+
+			//border
+			UINT_TO_RGBA (fill_color_active, &r, &g, &b, &a);
 			cairo_set_line_width (cr, 2.0);
-			cairo_set_source (cr, active_pattern);
+//			rounded_function (cr, 3, 3, get_width()-6, get_height()-6, _corner_radius - 1.0);
+			cairo_set_source_rgba (cr, r/255.0, g/255.0, b/255.0, a/255.0);
 			cairo_stroke (cr);
+
+			//reflection
+			if (!_flat_buttons) {
+				rounded_function (cr, 2, 2, get_width()-4, get_height()/2-2, _corner_radius - 1.0);
+				cairo_set_source (cr, shine_pattern);
+				cairo_fill (cr);
+			}
 		} else if (active_state() == Gtkmm2ext::ExplicitActive) {
-			cairo_set_source (cr, active_pattern);
+
+			//background color
+			cairo_set_source (cr, fill_pattern_active);
 			cairo_fill (cr);
+
+			//reflection
+			if (!_flat_buttons) {
+				rounded_function (cr, 2, 2, get_width()-4, get_height()/2-2, _corner_radius - 1.0);
+				cairo_set_source (cr, shine_pattern);
+				cairo_fill (cr);
+			}
 		} else {
-			cairo_set_source (cr, inactive_pattern);
+
+			//background color
+			cairo_set_source (cr, fill_pattern);
 			cairo_fill (cr);
+
+			//reflection
+			if (!_flat_buttons) {
+				rounded_function (cr, 2, 2, get_width()-4, get_height()/2-2, _corner_radius - 1.0);
+				cairo_set_source (cr, shine_pattern);
+				cairo_fill (cr);
+			}		
 		}
 	}
 
@@ -213,7 +262,7 @@ ArdourButton::render (cairo_t* cr)
 	int text_margin;
 
 	if (get_width() < 75) {
-		text_margin = 3;
+		text_margin = 5;
 	} else {
 		text_margin = 10;
 	}
@@ -373,54 +422,34 @@ ArdourButton::set_colors ()
 	 * color/pattern used there will vary depending on that
 	 */
 	
-	if (edge_pattern) {
-		cairo_pattern_destroy (edge_pattern);
-		edge_pattern = 0;
+	fill_color_active = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end active", get_name()));
+	fill_color_inactive = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end", get_name()));
+	border_color = ARDOUR_UI::config()->color_by_name ( "button border" );
+
+	if (shine_pattern) {
+		cairo_pattern_destroy (shine_pattern);
+		shine_pattern = 0;
 	}
 
-	if (_elements & Edge) {
-
-		edge_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height());
-		if (visual_state() & Gtkmm2ext::Selected) {
-			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: border start selected", get_name()));
-			if (_flat_buttons) {
-				end_color = start_color;
-			} else {
-				end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: border end selected", get_name()));
-			}
-		} else {
-			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: border start", get_name()));
-			if (_flat_buttons) {
-				end_color = start_color;
-			} else {
-				end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: border end", get_name()));
-			}
-		}
-		UINT_TO_RGBA (start_color, &r, &g, &b, &a);
-		cairo_pattern_add_color_stop_rgba (edge_pattern, 0, r/255.0,g/255.0,b/255.0, 0.7);
-		UINT_TO_RGBA (end_color, &r, &g, &b, &a);
-		cairo_pattern_add_color_stop_rgba (edge_pattern, 1, r/255.0,g/255.0,b/255.0, 0.7);
+	if (fill_pattern) {
+		cairo_pattern_destroy (fill_pattern);
+		fill_pattern = 0;
 	}
 
-	if (active_pattern) {
-		cairo_pattern_destroy (active_pattern);
-		active_pattern = 0;
-	}
-
-	if (inactive_pattern) {
-		cairo_pattern_destroy (inactive_pattern);
-		inactive_pattern = 0;
+	if (fill_pattern_active) {
+		cairo_pattern_destroy (fill_pattern_active);
+		fill_pattern_active = 0;
 	}
 
 	if (_elements & Body) {
 
-		active_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height());
+		shine_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height()/2-2);
 		start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start active", get_name()));
 
 		if (_flat_buttons) {
 			end_color = start_color;
 		} else {
-			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end active", get_name()));
+			end_color = fill_color_active;
 		}
 		UINT_TO_RGBA (start_color, &r, &g, &b, &a);
 
@@ -429,21 +458,33 @@ ArdourButton::set_colors ()
 		active_b = b/255.0;
 		active_a = a/255.0;
 
-		cairo_pattern_add_color_stop_rgba (active_pattern, 0, r/255.0,g/255.0,b/255.0, a/255.0);
-		UINT_TO_RGBA (end_color, &r, &g, &b, &a);
-		cairo_pattern_add_color_stop_rgba (active_pattern, 1, r/255.0,g/255.0,b/255.0, a/255.0);
+		cairo_pattern_add_color_stop_rgba (shine_pattern, 0, 1,1,1,0.1);
+		cairo_pattern_add_color_stop_rgba (shine_pattern, 0.2, 1,1,1,0.4);
+		cairo_pattern_add_color_stop_rgba (shine_pattern, 1, 1,1,1,0.1);
 
-		inactive_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height());
+		fill_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height()-3);
 		start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start", get_name()));
 		if (_flat_buttons) {
 			end_color = start_color;
 		} else {
-			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end", get_name()));
+			end_color = fill_color_inactive;
 		}
 		UINT_TO_RGBA (start_color, &r, &g, &b, &a);
-		cairo_pattern_add_color_stop_rgba (inactive_pattern, 0, r/255.0,g/255.0,b/255.0, a/255.0);
+		cairo_pattern_add_color_stop_rgba (fill_pattern, 0, r/255.0,g/255.0,b/255.0, a/255.0);
 		UINT_TO_RGBA (end_color, &r, &g, &b, &a);
-		cairo_pattern_add_color_stop_rgba (inactive_pattern, 1, r/255.0,g/255.0,b/255.0, a/255.0);
+		cairo_pattern_add_color_stop_rgba (fill_pattern, 1, r/255.0,g/255.0,b/255.0, a/255.0);
+
+		fill_pattern_active = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height()-3);
+		start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start active", get_name()));
+		if (_flat_buttons) {
+			end_color = start_color;
+		} else {
+			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end active", get_name()));
+		}
+		UINT_TO_RGBA (start_color, &r, &g, &b, &a);
+		cairo_pattern_add_color_stop_rgba (fill_pattern_active, 0, r/255.0,g/255.0,b/255.0, a/255.0);
+		UINT_TO_RGBA (end_color, &r, &g, &b, &a);
+		cairo_pattern_add_color_stop_rgba (fill_pattern_active, 1, r/255.0,g/255.0,b/255.0, a/255.0);
 	}
 
 	if (led_inset_pattern) {

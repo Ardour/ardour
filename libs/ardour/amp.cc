@@ -38,12 +38,16 @@
 
 using namespace ARDOUR;
 using namespace PBD;
+using std::min;
+
+/* gain range of -inf to +6dB, default 0dB */
+const float Amp::max_gain_coefficient = 1.99526231f;
 
 Amp::Amp (Session& s
 #if HAVE_SOUNDGRID
           , SoundGridRack* sr
 #endif
-        )
+	)
 	: Processor(s, "Amp")
 	, _apply_gain(true)
 	, _apply_gain_automation(false)
@@ -54,8 +58,7 @@ Amp::Amp (Session& s
 #endif
 {
 	Evoral::Parameter p (GainAutomation);
-	/* gain range of -inf to +6dB, default 0dB */
-	p.set_range (0, 1.99526231f, 1, false);
+	p.set_range (0, max_gain_coefficient, 1, false);
 	boost::shared_ptr<AutomationList> gl (new AutomationList (p));
 	_gain_control = boost::shared_ptr<GainControl> (new GainControl (X_("gaincontrol"), s, this, p, gl));
 	_gain_control->set_flags (Controllable::GainLike);
@@ -131,7 +134,7 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 				for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
 
 					MidiBuffer& mb (*i);
-
+					
 					for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
 						Evoral::MIDIEvent<MidiBuffer::TimeType> ev = *m;
 						if (ev.is_note_on()) {
@@ -189,7 +192,7 @@ Amp::apply_gain (BufferSet& bufs, framecnt_t nframes, gain_t initial, gain_t tar
 			Evoral::MIDIEvent<MidiBuffer::TimeType> ev = *m;
 
 			if (ev.is_note_on()) {
-				gain_t scale = delta * (ev.time()/(double) nframes);
+				const gain_t scale = delta * (ev.time()/(double) nframes);
 				ev.scale_velocity (initial+scale);
 			}
 		}
@@ -388,10 +391,7 @@ Amp::inc_gain (gain_t factor, void *src)
 void
 Amp::set_gain (gain_t val, void *src)
 {
-	// max gain at about +6dB (10.0 ^ ( 6 dB * 0.05))
-	if (val > 1.99526231f) {
-		val = 1.99526231f;
-	}
+	val = min (val, max_gain_coefficient);
 
 	if (src != _gain_control.get()) {
 		_gain_control->set_value (val);
@@ -433,9 +433,8 @@ Amp::set_state (const XMLNode& node, int version)
 void
 Amp::GainControl::set_value (double val)
 {
-	// max gain at about +6dB (10.0 ^ ( 6 dB * 0.05))
-	if (val > 1.99526231) {
-		val = 1.99526231;
+	if (val > max_gain_coefficient) {
+		val = max_gain_coefficient;
 	}
 
 #if HAVE_SOUNDGRID

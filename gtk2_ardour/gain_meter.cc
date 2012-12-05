@@ -119,8 +119,8 @@ GainMeterBase::GainMeterBase (Session* s,
 	meter_metric_area.signal_button_press_event().connect (sigc::mem_fun (*this, &GainMeterBase::level_meter_button_press));
 	meter_metric_area.add_events (Gdk::BUTTON_PRESS_MASK);
 
-	gain_slider->signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_press));
-	gain_slider->signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_release));
+	gain_slider->signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_press), false);
+	gain_slider->signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::gain_slider_button_release), false);
 	gain_slider->set_name ("GainFader");
 
 	gain_display.set_name ("MixerStripGainDisplay");
@@ -264,9 +264,9 @@ GainMeterBase::setup_gain_adjustment ()
 		_data_type = DataType::MIDI;
 		gain_adjustment.set_lower (0.0);
 		gain_adjustment.set_upper (2.0);
-		gain_adjustment.set_step_increment (0.05);
-		gain_adjustment.set_page_increment (0.1);
-		gain_slider->set_default_value (1);
+		gain_adjustment.set_step_increment (1.0/128.0);
+		gain_adjustment.set_page_increment (10.0/128.0);
+		gain_slider->set_default_value (1.0);
 	}
 
 	ignore_toggle = false;
@@ -396,17 +396,28 @@ GainMeterBase::gain_activated ()
 {
 	float f;
 
-	if (sscanf (gain_display.get_text().c_str(), "%f", &f) == 1) {
+	{
+		// Switch to user's preferred locale so that
+		// if they use different LC_NUMERIC conventions,
+		// we will honor them.
 
-		/* clamp to displayable values */
-
-		f = min (f, 6.0f);
-
-		_amp->set_gain (dB_to_coefficient(f), this);
-
-		if (gain_display.has_focus()) {
-			PublicEditor::instance().reset_focus();
+		PBD::LocaleGuard lg ("");
+		if (sscanf (gain_display.get_text().c_str(), "%f", &f) != 1) {
+			return;
 		}
+	}
+
+	/* clamp to displayable values */
+	if (_data_type == DataType::AUDIO) {
+		f = min (f, 6.0f);
+		_amp->set_gain (dB_to_coefficient(f), this);
+	} else {
+		f = min (fabs (f), 2.0f);
+		_amp->set_gain (f, this);
+	}
+
+	if (gain_display.has_focus()) {
+		PublicEditor::instance().reset_focus();
 	}
 }
 
@@ -436,15 +447,14 @@ GainMeterBase::show_gain ()
 void
 GainMeterBase::gain_adjusted ()
 {
-	gain_t value = 0;
+	gain_t value;
 
-	switch (_data_type) {
-	case DataType::AUDIO:
+	/* convert from adjustment range (0..1) to gain coefficient */
+
+	if (_data_type == DataType::AUDIO) {
 		value = slider_position_to_gain_with_max (gain_adjustment.get_value(), Config->get_max_gain());
-		break;
-	case DataType::MIDI:
-		value = gain_adjustment.get_value ();
-		break;
+	} else {
+		value = gain_adjustment.get_value();
 	}
 	
 	if (!ignore_toggle) {
@@ -652,14 +662,14 @@ GainMeterBase::gain_slider_button_press (GdkEventButton* ev)
 		return false;
 	}
 
-	return true;
+	return false;
 }
 
 bool
 GainMeterBase::gain_slider_button_release (GdkEventButton*)
 {
 	_amp->gain_control()->stop_touch (false, _amp->session().transport_frame());
-	return true;
+	return false;
 }
 
 gint

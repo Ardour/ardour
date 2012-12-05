@@ -862,19 +862,19 @@ SoundFileBrowser::freesound_search()
 		XMLNode *root = doc.root();
 
 		if (!root) {
-			cerr << "no root XML node!" << endl;
+			error << "no root XML node!" << endmsg;
 			break;
 		}
 
 		if ( strcmp(root->name().c_str(), "response") != 0) {
-			cerr << "root node name == " << root->name() << ", != \"response\"!" << endl;
+			error << string_compose ("root node name == %1 != \"response\"", root->name()) << endmsg;
 			break;
 		}
 
 		XMLNode *sounds_root = root->child("sounds");
 		
 		if (!sounds_root) {
-			cerr << "no child node \"sounds\" found!" << endl;
+			error << "no child node \"sounds\" found!" << endmsg;
 			break;
 		}
 		
@@ -884,7 +884,7 @@ SoundFileBrowser::freesound_search()
 		for (niter = sounds.begin(); niter != sounds.end(); ++niter) {
 			node = *niter;
 			if( strcmp( node->name().c_str(), "resource") != 0 ){
-				cerr << "node->name()=" << node->name() << ",!= \"resource\"!" << endl;
+				error << string_compose ("node->name()=%1 != \"resource\"", node->name()) << endmsg;
 				freesound_search_cancel = true;
 				break;
 			}

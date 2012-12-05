@@ -94,6 +94,9 @@ class AudioRegionView : public RegionView
 	void reset_fade_in_shape_width (framecnt_t);
 	void reset_fade_out_shape_width (framecnt_t);
 
+	framepos_t get_fade_in_shape_width ();
+	framepos_t get_fade_out_shape_width ();
+
 	void show_fade_line(framepos_t pos);
 	void hide_fade_line();
 

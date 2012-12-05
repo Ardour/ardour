@@ -251,7 +251,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::shared_ptr<Route> route_by_id (PBD::ID);
 	boost::shared_ptr<Route> route_by_remote_id (uint32_t id);
 	boost::shared_ptr<Track> track_by_diskstream_id (PBD::ID);
-	void routes_using_input_from (const std::string& str, RouteList& rl);
+        void routes_using_input_from (const std::string& str, RouteList& rl);
 
 	bool route_name_unique (std::string) const;
 	bool route_name_internal (std::string) const;
@@ -361,7 +361,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		return mtc_timecode_bits;   /* encoding of SMTPE type for MTC */
 	}
 
-	float timecode_frames_per_second() const;
+	double timecode_frames_per_second() const;
 	bool timecode_drop_frames() const;
 
 	/* Locations */
@@ -616,8 +616,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void set_listen (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_record_enabled (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_solo_isolated (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
-	void set_exclusive_input_active (boost::shared_ptr<Route> rt, bool others_on);
 	void set_monitoring (boost::shared_ptr<RouteList>, MonitorChoice, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
+        void set_exclusive_input_active (boost::shared_ptr<RouteList> rt, bool onoff, bool flip_others=false);
 
 	PBD::Signal1<void,bool> SoloActive;
 	PBD::Signal0<void> SoloChanged;
@@ -1203,6 +1203,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	framepos_t        ltc_enc_off;
 	bool              restarting;
 
+	framepos_t        ltc_timecode_offset;
+	bool              ltc_timecode_negative_offset;
+
 	jack_latency_range_t ltc_out_latency;
 
 	void ltc_tx_initialize();
@@ -1210,6 +1213,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void ltc_tx_reset();
 	void ltc_tx_resync_latency();
 	void ltc_tx_recalculate_position();
+	void ltc_tx_parse_offset();
 	void ltc_tx_send_time_code_for_cycle (framepos_t, framepos_t, double, double, pframes_t nframes);
 #endif
 
@@ -1265,6 +1269,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	SerializedRCUManager<RouteList>  routes;
 
 	void add_routes (RouteList&, bool input_auto_connect, bool output_auto_connect, bool save);
+        void add_routes_inner (RouteList&, bool input_auto_connect, bool output_auto_connect);
+        bool _adding_routes_in_progress;
 	uint32_t destructive_index;
 
 	boost::shared_ptr<Route> XMLRouteFactory (const XMLNode&, int);

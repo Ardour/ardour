@@ -84,7 +84,7 @@ soundgrid_shutdown ()
 static bool
 soundgrid_driver_init (uint32_t max_phys_inputs, uint32_t max_phys_outputs, uint32_t max_tracks)
 {
-        wait_dialog->set_secondary_text (_("Nearly ready..."), true);
+        wait_dialog->set_secondary_text (_("Configuring CoreAudio driver ..."), true);
         pbar->hide ();
 
         Gtkmm2ext::UI::instance()->flush_pending ();
@@ -161,8 +161,8 @@ soundgrid_init (uint32_t max_phys_inputs, uint32_t max_phys_outputs,
                                                  max_plugins));
 
         
-        wait_dialog = new Gtk::MessageDialog (_("<b>Please wait while SoundGrid is initialized (approx 6 seconds)</b>"),
-                                              true, /* use markup */
+        wait_dialog = new Gtk::MessageDialog (_("Please wait a few seconds while your SoundGrid is configured"),
+                                              false, /* use markup */
                                               Gtk::MESSAGE_WARNING,
                                               Gtk::BUTTONS_NONE, 
                                               true); /* modal */

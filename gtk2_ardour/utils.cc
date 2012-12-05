@@ -25,6 +25,8 @@
 #include <pango/pangocairo.h> // for fontmap resolution control for GnomeCanvas
 
 #include <cstdlib>
+#include <clocale>
+#include <cstring>
 #include <cctype>
 #include <fstream>
 #include <list>
@@ -226,7 +228,7 @@ get_font_for_style (string widgetname)
 
 	Glib::RefPtr<const Pango::Layout> layout = foobar.get_layout();
 
-	PangoFontDescription *pfd = (PangoFontDescription *)pango_layout_get_font_description(const_cast<PangoLayout *>(layout->gobj()));
+	PangoFontDescription *pfd = const_cast<PangoFontDescription *> (pango_layout_get_font_description(const_cast<PangoLayout *>(layout->gobj())));
 
 	if (!pfd) {
 
@@ -549,7 +551,7 @@ get_icon (const char* cname)
 	} catch (const Gdk::PixbufError &e) {
 		cerr << "Caught PixbufError: " << e.what() << endl;
 	} catch (...) {
-		g_message("Caught ... ");
+		error << string_compose (_("Caught exception while loading icon named %1"), cname) << endmsg;
 	}
 
 	return img;
@@ -586,11 +588,44 @@ longest (vector<string>& strings)
 bool
 key_is_legal_for_numeric_entry (guint keyval)
 {
+	/* we assume that this does not change over the life of the process 
+	 */
+
+	static int comma_decimal = -1;
+
 	switch (keyval) {
-	case GDK_minus:
-	case GDK_plus:
 	case GDK_period:
 	case GDK_comma:
+		if (comma_decimal < 0) {
+			std::lconv* lc = std::localeconv();
+			if (strchr (lc->decimal_point, ',') != 0) {
+				comma_decimal = 1;
+			} else {
+				comma_decimal = 0;
+			}
+		}
+		break;
+	default:
+		break;
+	}
+
+	switch (keyval) {
+	case GDK_period:
+		if (comma_decimal) {
+			return false;
+		} else {
+			return true;
+		}
+		break;
+	case GDK_comma:
+		if (comma_decimal) {
+			return true;
+		} else {
+			return false;
+		}
+		break;
+	case GDK_minus:
+	case GDK_plus:
 	case GDK_0:
 	case GDK_1:
 	case GDK_2:

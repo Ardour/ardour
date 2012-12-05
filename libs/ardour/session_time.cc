@@ -51,7 +51,7 @@ Session::bbt_time (framepos_t when, Timecode::BBT_Time& bbt)
 
 /* Timecode TIME */
 
-float
+double
 Session::timecode_frames_per_second() const
 {
 	return Timecode::timecode_to_frames_per_second (config.get_timecode_format());
@@ -95,6 +95,9 @@ Session::sync_time_vars ()
 		}
 		break;
 	};
+#ifdef HAVE_LTC
+	ltc_tx_parse_offset();
+#endif
 }
 
 void

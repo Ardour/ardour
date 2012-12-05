@@ -86,6 +86,7 @@ public:
 	typedef EventList::iterator iterator;
 	typedef EventList::reverse_iterator reverse_iterator;
 	typedef EventList::const_iterator const_iterator;
+	typedef EventList::const_reverse_iterator const_reverse_iterator;
 
 	ControlList (const Parameter& id);
 	ControlList (const ControlList&);
@@ -157,6 +158,10 @@ public:
 	const_iterator      begin() const { return _events.begin(); }
 	iterator            end()         { return _events.end(); }
 	const_iterator      end()   const { return _events.end(); }
+	reverse_iterator            rbegin()       { return _events.rbegin(); }
+	const_reverse_iterator      rbegin() const { return _events.rbegin(); }
+	reverse_iterator            rend()         { return _events.rend(); }
+	const_reverse_iterator      rend()   const { return _events.rend(); }
 	ControlEvent*       back()        { return _events.back(); }
 	const ControlEvent* back()  const { return _events.back(); }
 	ControlEvent*       front()       { return _events.front(); }

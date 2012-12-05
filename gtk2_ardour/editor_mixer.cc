@@ -22,6 +22,7 @@
 #endif
 
 #include <glibmm/miscutils.h>
+#include <gtkmm/messagedialog.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
 
@@ -74,6 +75,23 @@ Editor::show_editor_mixer (bool yn)
 	boost::shared_ptr<ARDOUR::Route> r;
 
 	show_editor_mixer_when_tracks_arrive = false;
+
+	if (yn) {
+		Glib::RefPtr<Gdk::Window> win = get_window ();
+		Glib::RefPtr<Gdk::Screen> screen;
+		
+		if (get_window()) {
+			 screen = win->get_screen();
+		} else {
+			screen = Gdk::Screen::get_default();
+		}
+
+		if (screen && screen->get_height() < 700) {
+			Gtk::MessageDialog msg (_("This screen is not tall enough to display the editor mixer"));
+			msg.run ();
+			return;
+		}
+	}
 
 	if (!_session) {
 		show_editor_mixer_when_tracks_arrive = yn;

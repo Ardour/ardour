@@ -38,8 +38,9 @@
 #include <ltc.h>
 #endif
 
-// used for approximate_current_delta():
-#define PLUSMINUS(A) ( ((A)<0) ? "\u2012" : (((A)>0) ? "+" : "\u00B1") )
+/* used for approximate_current_delta(): */
+#define PLUSMINUS(A) ( ((A)<0) ? "-" : (((A)>0) ? "+" : "\u00B1") )
+#define LEADINGZERO(A) ( (A)<10 ? "    " : (A)<100 ? "   " : (A)<1000 ? "  " : (A)<10000 ? " " : "" )
 
 namespace MIDI {
 	class Port;
@@ -246,6 +247,9 @@ class TimecodeSlave : public Slave {
        of the TC source position.
     */
     virtual std::string approximate_current_position() const = 0;
+
+    framepos_t        timecode_offset;
+    bool              timecode_negative_offset;
 };
 
 class MTC_Slave : public TimecodeSlave {
@@ -273,6 +277,7 @@ class MTC_Slave : public TimecodeSlave {
 	Session&    session;
 	MIDI::Port* port;
 	PBD::ScopedConnectionList port_connections;
+	PBD::ScopedConnection     config_connection;
 	bool        can_notify_on_unknown_rate;
 
 	static const int frame_tolerance;
@@ -326,6 +331,8 @@ class MTC_Slave : public TimecodeSlave {
 	bool outside_window (framepos_t) const;
 	void init_mtc_dll(framepos_t, double);
 	void init_engine_dll (framepos_t, framepos_t);
+	void parse_timecode_offset();
+	void parameter_changed(std::string const & p);
 };
 
 #ifdef HAVE_LTC
@@ -358,6 +365,8 @@ public:
 	void reset();
 	void resync_xrun();
 	void resync_latency();
+	void parse_timecode_offset();
+	void parameter_changed(std::string const & p);
 
 	Session&       session;
 	bool           did_reset_tc_format;
@@ -383,6 +392,7 @@ public:
 	Timecode::TimecodeFormat a3e_timecode;
 
 	PBD::ScopedConnectionList port_connections;
+	PBD::ScopedConnection     config_connection;
 	jack_latency_range_t      ltc_slave_latency;
 
 	/* DLL - chase LTC */

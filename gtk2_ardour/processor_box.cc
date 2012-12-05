@@ -1893,7 +1893,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 		}
 
 		catch (...) {
-			cerr << "plugin insert constructor failed\n";
+			error << _("plugin insert constructor failed") << endmsg;
 		}
 	}
 

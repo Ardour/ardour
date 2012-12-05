@@ -66,7 +66,11 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	switch (direction) {
 	case GDK_SCROLL_UP:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+			//for mouse-wheel zoom, force zoom-focus to mouse
+			Editing::ZoomFocus temp_focus = zoom_focus;
+			zoom_focus = Editing::ZoomFocusMouse;
 			temporal_zoom_step (false);
+			zoom_focus = temp_focus;
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 			direction = GDK_SCROLL_LEFT;
@@ -91,7 +95,11 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 
 	case GDK_SCROLL_DOWN:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+			//for mouse-wheel zoom, force zoom-focus to mouse
+			Editing::ZoomFocus temp_focus = zoom_focus;
+			zoom_focus = Editing::ZoomFocusMouse;
 			temporal_zoom_step (true);
+			zoom_focus = temp_focus;
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 			direction = GDK_SCROLL_RIGHT;
@@ -468,6 +476,7 @@ Editor::canvas_fade_in_handle_event (GdkEvent *event, ArdourCanvas::Item* item, 
 
 	case GDK_BUTTON_RELEASE:
 		ret = button_release_handler (item, event, FadeInHandleItem);
+		maybe_locate_with_edit_preroll ( rv->region()->position() );
 		break;
 
 	case GDK_MOTION_NOTIFY:
@@ -549,6 +558,7 @@ Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item,
 
 	case GDK_BUTTON_RELEASE:
 		ret = button_release_handler (item, event, FadeOutHandleItem);
+		maybe_locate_with_edit_preroll ( rv->region()->last_frame() - rv->get_fade_out_shape_width() );
 		break;
 
 	case GDK_MOTION_NOTIFY:

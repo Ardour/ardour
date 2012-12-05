@@ -208,7 +208,13 @@ class SoundGrid : public boost::noncopyable
                     : Port (eClusterType_GroupTrack, channel,
                             eControlType_Input, 0, eControlID_Input_Assignment_Left, 0, Port::Pre) {}
         };
-        
+
+        struct PseudoPhysicalOutputPortXX : public Port {
+            PseudoPhysicalOutputPortXX (uint32_t channel) 
+                    : Port (eClusterType_GroupTrack, channel,
+                            eControlType_Input, 0, eControlID_Input_Assignment_Left, wvEnum_Unknown, Port::Pre) {}
+        };
+
         struct TrackInputPort : public Port {
                 TrackInputPort (uint32_t chainer_id, uint32_t channel) 
                         : Port (eClusterType_InputTrack, chainer_id, 
@@ -239,6 +245,8 @@ class SoundGrid : public boost::noncopyable
 
         std::string sg_port_as_jack_port (const Port& port);
         bool        jack_port_as_sg_port (const std::string& jack_port, Port& result);
+
+        void        drop_sg_jack_mapping (const std::string& jack_port);
 
         void parameter_updated (WEParamType paramID);
 

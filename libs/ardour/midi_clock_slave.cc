@@ -359,12 +359,12 @@ MIDIClock_Slave::resolution() const
 std::string
 MIDIClock_Slave::approximate_current_delta() const
 {
-	char delta[24];
+	char delta[80];
 	if (last_timestamp == 0 || _starting) {
 		snprintf(delta, sizeof(delta), "\u2012\u2012\u2012\u2012");
 	} else {
-		snprintf(delta, sizeof(delta), "%s%4" PRIi64 " sm",
-				PLUSMINUS(-current_delta), abs(current_delta));
+		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%" PRIi64 "</span> sm",
+				LEADINGZERO(abs(current_delta)), PLUSMINUS(-current_delta), abs(current_delta));
 	}
 	return std::string(delta);
 }
