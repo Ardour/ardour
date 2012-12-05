@@ -75,7 +75,7 @@ class RegionLayeringOrderEditor : public ArdourWindow
 	PublicEditor& editor;
 	TimeAxisView* _time_axis_view;
 
-	void row_activated (const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
+        void row_selected ();
 	void refill ();
 	void playlist_modified ();
 };

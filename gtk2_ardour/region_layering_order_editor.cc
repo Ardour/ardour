@@ -20,6 +20,9 @@
 #include <gtkmm/table.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/alignment.h>
+
+#include "pbd/stateful_diff_command.h"
+
 #include "ardour/region.h"
 
 #include "gui_thread.h"
@@ -80,7 +83,7 @@ RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
         info_table->attach (track_label, 0, 1, 0, 1, FILL, FILL);
         info_table->attach (track_name_label, 1, 2, 0, 1, FILL, FILL);
         info_table->attach (clock_label, 0, 1, 1, 2, FILL, FILL);
-        info_table->attach (clock, 1, 2, 1, 2, FILL, FILL);
+        info_table->attach (clock, 1, 2, 1, 2, Gtk::AttachOptions(0), FILL);
 
 	Gtk::VBox* vbox = Gtk::manage (new Gtk::VBox ());
 	vbox->set_spacing (12);
@@ -92,8 +95,8 @@ RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
         scroller_table->set_name ("RegionLayeringOrderTable");
 
 	layering_order_display.set_name ("RegionLayeringOrderDisplay");
-
-	layering_order_display.signal_row_activated ().connect (mem_fun (*this, &RegionLayeringOrderEditor::row_activated));
+	layering_order_display.get_selection()->set_mode (SELECTION_SINGLE);
+	layering_order_display.get_selection()->signal_changed ().connect (mem_fun (*this, &RegionLayeringOrderEditor::row_selected));
 
 	layering_order_display.grab_focus ();
 
@@ -107,13 +110,14 @@ RegionLayeringOrderEditor::~RegionLayeringOrderEditor ()
 }
 
 void
-RegionLayeringOrderEditor::row_activated (const TreeModel::Path& path, TreeViewColumn*)
+RegionLayeringOrderEditor::row_selected ()
 {
 	if (in_row_change) {
 		return;
 	}
 
-	TreeModel::iterator iter = layering_order_model->get_iter (path);
+	Glib::RefPtr<TreeSelection> selection = layering_order_display.get_selection();
+	TreeModel::iterator iter = selection->get_selected(); // only used with Gtk::SELECTION_SINGLE
 
 	if (!iter) {
 		return;
@@ -124,9 +128,14 @@ RegionLayeringOrderEditor::row_activated (const TreeModel::Path& path, TreeViewC
 	
 	vector<RegionView*> eq;
 	editor.get_equivalent_regions (rv, eq, Properties::edit.property_id);
+
+	/* XXX this should be reversible, really */
 	
 	for (vector<RegionView*>::iterator i = eq.begin(); i != eq.end(); ++i) {
-		(*i)->region()->raise_to_top ();
+		boost::shared_ptr<Playlist> pl = (*i)->region()->playlist();
+		if (pl) {
+			pl->raise_region_to_top ((*i)->region());
+		}
 	}
 }
 
