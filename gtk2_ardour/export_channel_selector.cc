@@ -571,6 +571,18 @@ TrackExportChannelSelector::fill_list()
 
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
 		Route * route = it->get();
+		if(!dynamic_cast<Track *>(route)) {
+			// not a track, must be a bus
+			if ((*it)->is_master () || (*it)->is_monitor ()) {
+				continue;
+			}
+			// not monitor or master bus
+					
+			add_track(route);
+		}
+	}
+	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
+		Route * route = it->get();
 		if(dynamic_cast<AudioTrack *>(route)) {
 			add_track(route);
 		}
