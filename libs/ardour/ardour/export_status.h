@@ -40,7 +40,6 @@ class ExportStatus {
 	volatile bool           stop;
 	volatile bool           running;
 
-	PBD::Signal0<void>      Aborting;
 	void abort (bool error_occurred = false);
 	bool aborted () const { return _aborted; }
 	bool errors () const { return _errors; }
@@ -48,6 +47,8 @@ class ExportStatus {
 	PBD::Signal0<void>      Finished;
 	void finish ();
 	bool finished () const { return _finished; }
+
+        void cleanup ();
 
 	/* Progress info */
 

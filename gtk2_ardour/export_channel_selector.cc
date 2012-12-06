@@ -570,34 +570,31 @@ TrackExportChannelSelector::fill_list()
 	RouteList routes = *_session->get_routes();
 
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
-		Route * route = it->get();
-		if(!dynamic_cast<Track *>(route)) {
+		if (!boost::dynamic_pointer_cast<Track>(*it)) {
 			// not a track, must be a bus
 			if ((*it)->is_master () || (*it)->is_monitor ()) {
 				continue;
 			}
 			// not monitor or master bus
-					
-			add_track(route);
+			add_track (*it);
 		}
 	}
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
-		Route * route = it->get();
-		if(dynamic_cast<AudioTrack *>(route)) {
-			add_track(route);
+		if (boost::dynamic_pointer_cast<AudioTrack>(*it)) {
+			add_track (*it);
 		}
 	}
 }
 
 void
-TrackExportChannelSelector::add_track(Route * route)
+TrackExportChannelSelector::add_track (boost::shared_ptr<Route> route)
 {
 	Gtk::TreeModel::iterator iter = track_list->append();
 	Gtk::TreeModel::Row row = *iter;
 
 	row[track_cols.selected] = true;
 	row[track_cols.label] = route->name();
-	row[track_cols.track] = route;
+	row[track_cols.route] = route;
 }
 
 void
@@ -614,13 +611,13 @@ TrackExportChannelSelector::update_config()
 
 		ExportProfileManager::ChannelConfigStatePtr state = manager->add_channel_config();
 
-		Route * track = row[track_cols.track];
+		boost::shared_ptr<Route> route = row[track_cols.route];
 
 		/* Output of track code. TODO make this an option also
-		uint32_t outs = track->n_ports().n_audio();
+		uint32_t outs = route->n_ports().n_audio();
 		for (uint32_t i = 0; i < outs; ++i) {
-			AudioPort * port = track->audio (i);
-			if(port) {
+			AudioPort * port = route->audio (i);
+			if (port) {
 				ExportChannelPtr channel (new PortExportChannel ());
 				PortExportChannel * pec = static_cast<PortExportChannel *> (channel.get());
 				pec->add_port(port);
@@ -630,9 +627,9 @@ TrackExportChannelSelector::update_config()
 		*/
 
 		std::list<ExportChannelPtr> list;
-		RouteExportChannel::create_from_route (list, *track);
+		RouteExportChannel::create_from_route (list, route);
 		state->config->register_channels (list);
-		state->config->set_name(track->name());
+		state->config->set_name (route->name());
 	}
 
 	CriticalSelectionChanged ();

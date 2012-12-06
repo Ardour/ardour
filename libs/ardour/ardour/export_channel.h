@@ -161,7 +161,7 @@ class RouteExportChannel : public ExportChannel
 	                   boost::shared_ptr<ProcessorRemover> remover);
 	~RouteExportChannel();
 
-	static void create_from_route(std::list<ExportChannelPtr> & result, Route & route);
+        static void create_from_route(std::list<ExportChannelPtr> & result, boost::shared_ptr<Route> route);
 
   public: // ExportChannel interface
 	void set_max_buffer_size(framecnt_t frames);
@@ -179,11 +179,11 @@ class RouteExportChannel : public ExportChannel
 	// Removes the processor from the track when deleted
 	class ProcessorRemover {
 	  public:
-		ProcessorRemover (Route & route, boost::shared_ptr<CapturingProcessor> processor)
+   	         ProcessorRemover (boost::shared_ptr<Route> route, boost::shared_ptr<CapturingProcessor> processor)
 			: route (route), processor (processor) {}
 		~ProcessorRemover();
 	  private:
-		Route & route;
+                boost::shared_ptr<Route> route;
 		boost::shared_ptr<CapturingProcessor> processor;
 	};
 

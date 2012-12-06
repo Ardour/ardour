@@ -21,6 +21,9 @@
 #include <string>
 #include "ardour/export_filename.h"
 
+#include <glibmm/miscutils.h>
+#include <glibmm/fileutils.h>
+
 #include "pbd/xml++.h"
 #include "pbd/convert.h"
 #include "pbd/enumwriter.h"
@@ -101,15 +104,24 @@ ExportFilename::set_state (const XMLNode & node)
 	folder = "";
 
 	if ((prop = child->property ("relative"))) {
-		if (!prop->value().compare ("true")) {
+		if (string_is_affirmative (prop->value())) {
 			folder = session.session_directory().root_path();
 		}
 	}
 
 	if ((prop = child->property ("path"))) {
-		folder += prop->value();
+		std::string tmp;
+		tmp = Glib::build_filename (folder, prop->value());
+		if (!Glib::file_test (tmp, Glib::FILE_TEST_EXISTS)) {
+			warning << string_compose (_("Existing export folder for this session (%1) does not exist - ignored"), tmp) << endmsg;
+		} else {
+			folder = tmp;
+		}
 	}
-
+	
+	if (folder.empty()) {
+		folder = session.session_directory().export_path();
+	}
 
 	pair = get_field (node, "label");
 	include_label = pair.first;
@@ -140,10 +152,8 @@ ExportFilename::set_state (const XMLNode & node)
 string
 ExportFilename::get_path (ExportFormatSpecPtr format) const
 {
-	string path = folder;
+	string path;
 	bool filename_empty = true;
-
-	path += "/";
 
 	if (include_session) {
 		path += filename_empty ? "" : "_";
@@ -198,7 +208,7 @@ ExportFilename::get_path (ExportFormatSpecPtr format) const
 	path += ".";
 	path += format->extension ();
 
-	return path;
+	return Glib::build_filename (folder, path);
 }
 
 string

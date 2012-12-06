@@ -21,6 +21,8 @@
 
 #include <sigc++/signal.h>
 
+#include <gtkmm/messagedialog.h>
+
 #include "ardour/audioregion.h"
 #include "ardour/export_status.h"
 #include "ardour/export_handler.h"
@@ -93,8 +95,6 @@ ExportDialog::set_session (ARDOUR::Session* s)
 	timespan_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings_and_example_filename));
 	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings_and_example_filename));
 	file_notebook->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings_and_example_filename));
-
-	status->Aborting.connect (abort_connection, invalidator (*this), boost::bind (&ExportDialog::notify_errors, this), gui_context());
 
 	update_warnings_and_example_filename ();
 }
@@ -323,6 +323,7 @@ ExportDialog::show_progress ()
 	progress_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ExportDialog::progress_timeout), 100);
 
 	gtk_main_iteration ();
+
 	while (status->running) {
 		if (gtk_events_pending()) {
 			gtk_main_iteration ();
@@ -339,9 +340,11 @@ ExportDialog::show_progress ()
 			ns->nag ();
 			delete ns;
 		}
-		
-		status->finish ();
+	} else {
+		notify_errors ();
 	}
+
+	status->finish ();
 }
 
 gint
