@@ -3311,8 +3311,15 @@ Editor::duplicate_range (bool with_dialog)
 		times = adjustment.get_value();
 	}
 
-	if (selection->time.length() != 0) {
-		duplicate_selection (times);
+	if ((current_mouse_mode() == Editing::MouseRange)) {
+		if (selection->time.length()) {
+			duplicate_selection (times);
+		}
+	} else if (get_smart_mode()) {
+		if (selection->time.length()) {
+			duplicate_selection (times);
+		} else 
+			duplicate_some_regions (rs, times);
 	} else {
 		duplicate_some_regions (rs, times);
 	}

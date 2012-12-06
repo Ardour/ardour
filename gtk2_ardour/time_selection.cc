@@ -103,5 +103,9 @@ TimeSelection::end_frame ()
 framecnt_t
 TimeSelection::length()
 {
+	if (empty()) {
+		return 0;
+	}
+
 	return end_frame() - start() + 1;
 }
