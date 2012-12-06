@@ -40,6 +40,8 @@ class PixFader : public Gtk::DrawingArea
 
 	void set_default_value (float);
 
+	void create_patterns ();
+
   protected:
 	Gtk::Adjustment& adjustment;
 
@@ -69,6 +71,10 @@ class PixFader : public Gtk::DrawingArea
         Cairo::RefPtr<Cairo::Context> belt_context[STATES];
         Cairo::RefPtr<Cairo::ImageSurface> belt_surface[STATES];
         Glib::RefPtr<Gdk::Pixbuf> pixbuf[STATES];
+
+	Cairo::RefPtr<Cairo::Pattern> pattern;
+	Cairo::RefPtr<Cairo::Pattern> shine_pattern;
+
 	int span, girth;
 	int _orien;
         float left_r;

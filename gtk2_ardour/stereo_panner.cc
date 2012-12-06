@@ -146,7 +146,7 @@ StereoPanner::on_expose_event (GdkEventExpose*)
 	/* background */
 
 	context->set_source_rgba (UINT_RGBA_R_FLT(b), UINT_RGBA_G_FLT(b), UINT_RGBA_B_FLT(b), UINT_RGBA_A_FLT(b));
-	rounded_rectangle (context, 0, 0, width, height, corner_radius);
+	cairo_rectangle (context->cobj(), 0, 0, width, height);
 	context->fill ();
 
 	/* the usable width is reduced from the real width, because we need space for

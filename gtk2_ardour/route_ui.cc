@@ -1787,10 +1787,11 @@ RouteUI::setup_invert_buttons ()
 
 	for (uint32_t i = 0; i < to_add; ++i) {
 		ArdourButton* b = manage (new ArdourButton);
+		b->set_size_request(20,20);
 		b->signal_button_press_event().connect (sigc::mem_fun (*this, &RouteUI::invert_press));
 		b->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::invert_release), i));
 
-		b->set_name (X_("mixer strip button"));
+		b->set_name (X_("invert button"));
 		if (to_add == 1) {
 			if (N > 1) {
 				b->set_text (string_compose (X_("Ø (%1)"), N));

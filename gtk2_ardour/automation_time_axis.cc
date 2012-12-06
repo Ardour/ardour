@@ -181,6 +181,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	controls_table.attach (auto_button, 6, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
 	if (_controller) {
+		_controller.get()->set_size_request(-1, 24);
 		/* add bar controller */
 		controls_table.attach (*_controller.get(), 0, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		/* note that this handler connects *before* the default handler */
