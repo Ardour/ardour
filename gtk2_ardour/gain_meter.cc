@@ -135,8 +135,8 @@ GainMeterBase::GainMeterBase (Session* s,
 	peak_display.set_label (_("-inf"));
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
 
-	gain_automation_style_button.set_name ("MixerAutomationModeButton");
-	gain_automation_state_button.set_name ("MixerAutomationPlaybackButton");
+	gain_automation_style_button.set_name ("mixer strip button");
+	gain_automation_state_button.set_name ("mixer strip button");
 
 	ARDOUR_UI::instance()->set_tip (gain_automation_state_button, _("Fader automation mode"));
 	ARDOUR_UI::instance()->set_tip (gain_automation_style_button, _("Fader automation type"));
@@ -163,6 +163,16 @@ GainMeterBase::GainMeterBase (Session* s,
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &GainMeterBase::on_theme_changed));
 	ColorsChanged.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), false));
 	DPIReset.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), true));
+	
+//	PBD::ScopedConnection _config_connection;
+//	Config->ParameterChanged.connect ( _config_connection, MISSING_INVALIDATOR, boost::bind(&GainMeterBase::set_flat_buttons, this, _1), gui_context() );
+}
+
+void
+GainMeterBase::set_flat_buttons ()
+{
+printf("set_flat_butt\n");
+//	gain_slider->set_flat_buttons( ARDOUR_UI::config()->flat_buttons.get() );
 }
 
 GainMeterBase::~GainMeterBase ()
@@ -771,10 +781,10 @@ GainMeterBase::gain_automation_style_changed ()
 {
 	switch (_width) {
 	case Wide:
-		gain_automation_style_button.set_label (astyle_string(_amp->gain_control()->alist()->automation_style()));
+		gain_automation_style_button.set_text (astyle_string(_amp->gain_control()->alist()->automation_style()));
 		break;
 	case Narrow:
-		gain_automation_style_button.set_label  (short_astyle_string(_amp->gain_control()->alist()->automation_style()));
+		gain_automation_style_button.set_text  (short_astyle_string(_amp->gain_control()->alist()->automation_style()));
 		break;
 	}
 }
@@ -788,10 +798,10 @@ GainMeterBase::gain_automation_state_changed ()
 
 	switch (_width) {
 	case Wide:
-		gain_automation_state_button.set_label (astate_string(_amp->gain_control()->alist()->automation_state()));
+		gain_automation_state_button.set_text (astate_string(_amp->gain_control()->alist()->automation_state()));
 		break;
 	case Narrow:
-		gain_automation_state_button.set_label (short_astate_string(_amp->gain_control()->alist()->automation_state()));
+		gain_automation_state_button.set_text (short_astate_string(_amp->gain_control()->alist()->automation_state()));
 		break;
 	}
 
@@ -861,13 +871,13 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	, gain_display_box(true, 0)
 	, hbox(true, 2)
 {
-	gain_display_box.pack_start (gain_display, true, true);
+//	gain_display_box.pack_start (gain_display, true, true);
 
 	meter_metric_area.set_name ("AudioTrackMetrics");
 	set_size_request_to_display_given_text (meter_metric_area, "-127", 0, 0);
 
-	gain_automation_style_button.set_name ("MixerAutomationModeButton");
-	gain_automation_state_button.set_name ("MixerAutomationPlaybackButton");
+	gain_automation_style_button.set_name ("mixer strip button");
+	gain_automation_state_button.set_name ("mixer strip button");
 
 	ARDOUR_UI::instance()->set_tip (gain_automation_state_button, _("Fader automation mode"));
 	ARDOUR_UI::instance()->set_tip (gain_automation_style_button, _("Fader automation type"));
@@ -908,13 +918,13 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 		hbox.remove (meter_alignment);
 	}
 
-	if (peak_display.get_parent()) {
-		gain_display_box.remove (peak_display);
-	}
+//	if (peak_display.get_parent()) {
+//		gain_display_box.remove (peak_display);
+//	}
 
-	if (gain_automation_state_button.get_parent()) {
-		fader_vbox->remove (gain_automation_state_button);
-	}
+//	if (gain_automation_state_button.get_parent()) {
+//		fader_vbox->remove (gain_automation_state_button);
+//	}
 
 	GainMeterBase::set_controls (r, meter, amp);
 
@@ -932,12 +942,12 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 	   pack some route-dependent stuff.
 	*/
 
-	gain_display_box.pack_end (peak_display, true, true);
+//	gain_display_box.pack_end (peak_display, true, true);
 	hbox.pack_start (meter_alignment, true, true);
 
-	if (r && !r->is_hidden()) {
-		fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
-	}
+//	if (r && !r->is_hidden()) {
+//		fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
+//	}
 
 	setup_meters ();
 	hbox.show_all ();

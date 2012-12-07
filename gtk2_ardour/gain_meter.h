@@ -38,6 +38,8 @@
 #include "ardour/types.h"
 #include "ardour/session_handle.h"
 
+#include "ardour_button.h"
+
 #include "gtkmm2ext/click_box.h"
 #include "gtkmm2ext/focus_entry.h"
 #include "gtkmm2ext/slider_controller.h"
@@ -81,6 +83,8 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	void set_meter_strip_name (const char * name);
 	void set_fader_name (const char * name);
 
+	void set_flat_buttons ();
+
 	virtual void setup_meters (int len=0);
 
 	boost::shared_ptr<PBD::Controllable> get_controllable();
@@ -114,8 +118,8 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 
 	sigc::connection gain_watching;
 
-	Gtk::Button gain_automation_style_button;
-	Gtk::ToggleButton gain_automation_state_button;
+	ArdourButton gain_automation_style_button;
+	ArdourButton gain_automation_state_button;
 
 	Gtk::Menu gain_astate_menu;
 	Gtk::Menu gain_astyle_menu;

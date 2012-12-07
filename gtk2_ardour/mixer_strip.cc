@@ -242,7 +242,8 @@ MixerStrip::init ()
 
 	bottom_button_table.set_spacings (2);
 	bottom_button_table.set_homogeneous (true);
-	bottom_button_table.attach (group_button, 0, 1, 0, 1);
+//	bottom_button_table.attach (group_button, 0, 1, 0, 1);
+	bottom_button_table.attach (gpm.gain_automation_state_button, 0, 1, 0, 1);
 
 	name_button.set_name ("mixer strip button");
 	name_button.set_text (" "); /* non empty text, forces creation of the layout */
@@ -399,6 +400,14 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	revert_to_default_display ();
 
+	if (gpm.gain_display.get_parent()) {
+		middle_button_table.remove (gpm.gain_display);
+	}
+
+	if (gpm.peak_display.get_parent()) {
+		middle_button_table.remove (gpm.peak_display);
+	}
+
 	if (solo_button->get_parent()) {
 		middle_button_table.remove (*solo_button);
 	}
@@ -538,6 +547,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	gpm.reset_peak_display ();
+	gpm.gain_display.show ();
+	gpm.peak_display.show ();
 
 	width_button.show();
 	width_hide_box.show();
@@ -554,6 +565,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	name_button.show();
 	_comment_button.show();
 	group_button.show();
+	gpm.gain_automation_state_button.show();
 
 	parameter_changed ("mixer-strip-visibility");
 
@@ -593,14 +605,24 @@ MixerStrip::set_width_enum (Width w, void* owner)
 
 	switch (w) {
 	case Wide:
+		if (!gpm.peak_display.get_parent()) {
+			middle_button_table.attach (gpm.peak_display,1,2,1,2);
+		}
+		if (gpm.gain_display.get_parent()) {
+			middle_button_table.remove (gpm.gain_display);
+		}
+		if (!gpm.gain_display.get_parent()) {
+			middle_button_table.attach (gpm.gain_display,0,1,1,2);
+		}
+
 		if (show_sends_button)  {
 			show_sends_button->set_text (_("Aux\nSends"));
 			show_sends_button->layout()->set_alignment (Pango::ALIGN_CENTER);
 		}
 
-		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (
+		gpm.gain_automation_style_button.set_text (
 				gpm.astyle_string(gain_automation->automation_style()));
-		((Gtk::Label*)gpm.gain_automation_state_button.get_child())->set_text (
+		gpm.gain_automation_state_button.set_text (
 				gpm.astate_string(gain_automation->automation_state()));
 
 		if (_route->panner()) {
@@ -618,6 +640,17 @@ MixerStrip::set_width_enum (Width w, void* owner)
 		break;
 
 	case Narrow:
+		if (gpm.peak_display.get_parent()) {
+			middle_button_table.remove (gpm.peak_display);
+		}
+
+		if (gpm.gain_display.get_parent()) {
+			middle_button_table.remove (gpm.gain_display);
+		}
+		if (!gpm.gain_display.get_parent()) {
+			middle_button_table.attach (gpm.gain_display,0,2,1,2);
+		}
+
 		if (show_sends_button) {
 			show_sends_button->set_text (_("Snd"));
 		}

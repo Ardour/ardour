@@ -285,8 +285,8 @@ BarController::create_patterns ()
 	float rheight = darea.get_height()-2;
 
  	cairo_pattern_t* pat = cairo_pattern_create_linear (0.0, 0.0, 0.0, rheight);
-	cairo_pattern_add_color_stop_rgba (pat, 0, r*0.3,g*0.3,b*0.3, 1.0);
-	cairo_pattern_add_color_stop_rgba (pat, 1, r, g, b, 1.0);
+	cairo_pattern_add_color_stop_rgba (pat, 0, r*0.8,g*0.8,b*0.8, 1.0);
+	cairo_pattern_add_color_stop_rgba (pat, 1, r*0.6,g*0.6,b*0.6, 1.0);
 	Cairo::RefPtr<Cairo::Pattern> p (new Cairo::Pattern (pat, false));
 	pattern = p;
 	cairo_pattern_destroy(pat);
@@ -439,44 +439,26 @@ BarController::expose (GdkEventExpose* /*event*/)
 		w = darea.get_width() - 2;
 		h = darea.get_height() - 2;
 
-		x2 = (gint) floor (w * (0.1+0.9*fract));
+		x2 = (gint) floor (w * fract);
 		y2 = h;
 		radius = 4;
+		if (x2 < 8) x2 = 8;
 
-                /* border */
+		/* border */
 
-                c = get_style()->get_bg (get_state());
-                r = c.get_red_p ();
-                g = c.get_green_p ();
-                b = c.get_blue_p ();
-                context->set_source_rgb (0,0,0);
-                rounded_rectangle (context, 0, 0, darea.get_width(), darea.get_height() , radius);
-                context->fill ();
+		context->set_source_rgb (0,0,0);
+		cairo_rectangle (context->cobj(), 0, 0, darea.get_width(), darea.get_height());
+		context->fill ();
 
 		/* draw active box */
 
-                c = get_style()->get_fg (get_state());
-                r = c.get_red_p ();
-                g = c.get_green_p ();
-                b = c.get_blue_p ();
-                context->set_source (pattern);
-                rounded_rectangle (context, 1, 1, x2, y2, radius-1.5);
-                context->fill ();
+		context->set_source (pattern);
+		rounded_rectangle (context, 1, 1, x2, y2, radius-1.5);
+		context->fill ();
 
-                context->set_source (shine_pattern);
-                rounded_rectangle (context, 2, 3, x2-2, y2-8, radius-2);
-                context->fill ();
-
-		/* draw inactive box */
-
-//                c = get_style()->get_fg (STATE_INSENSITIVE);
- //               r = c.get_red_p ();
-  //              g = c.get_green_p ();
-   //             b = c.get_blue_p ();
-    //            context->set_source_rgb (r, g, b);
-     //           rounded_rectangle (context, 1 + x2, 1 + y1, w - x2, y2);
-      //          context->fill ();
-
+//		context->set_source (shine_pattern);
+//		rounded_rectangle (context, 2, 3, x2-2, y2-8, radius-2);
+//		context->fill ();
 		break;
 
 	case RightToLeft:

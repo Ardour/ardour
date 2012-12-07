@@ -79,7 +79,7 @@ EditorRegions::EditorRegions (Editor* e)
 {
 	_display.set_size_request (100, -1);
 	_display.set_rules_hint (true);
-	_display.set_name ("LHSList");
+	_display.set_name ("EditGroupList");
 
 	/* Try to prevent single mouse presses from initiating edits.
 	   This relies on a hack in gtktreeview.c:gtk_treeview_button_press()

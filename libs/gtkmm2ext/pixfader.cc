@@ -23,10 +23,14 @@
 #include "gtkmm2ext/pixfader.h"
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/rgb_macros.h"
+#include "gtkmm2ext/utils.h"
 
 using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace std;
+
+#define CORNER_RADIUS 4
+#define FADER_RESERVE (2*CORNER_RADIUS)
 
 PixFader::PixFader (
 	Glib::RefPtr<Gdk::Pixbuf> belt,
@@ -41,6 +45,10 @@ PixFader::PixFader (
 	pixbuf[NORMAL] = belt;
 	pixbuf[DESENSITISED] = belt_desensitised;
 	
+	pattern = 0;
+	shine_pattern = 0;
+	
+	_hovering = false;
 	dragging = false;
 	default_value = adjustment.get_value();
 	last_drawn = -1;
@@ -49,9 +57,9 @@ PixFader::PixFader (
 	view.y = 0;
 
 	if (orientation == VERT) {
-		view.width = girth = pixbuf[0]->get_width();
+		view.width = girth = 24;
 	} else {
-		view.height = girth = pixbuf[0]->get_height();
+		view.height = girth = 24;
 	}
 
 	set_fader_length (fader_length);
@@ -103,65 +111,92 @@ PixFader::set_border_colors (uint32_t left, uint32_t right)
         right_b = b/255.0;
 }
 
+void
+PixFader::create_patterns ()
+{
+	Gdk::Color c = get_style()->get_fg (get_state());
+    float r, g, b;
+	r = c.get_red_p ();
+	g = c.get_green_p ();
+	b = c.get_blue_p ();
+
+ 	if (_orien == VERT) {
+		pattern = cairo_pattern_create_linear (0.0, 0.0, get_width(), 0);
+		cairo_pattern_add_color_stop_rgba (pattern, 0, r*0.8,g*0.8,b*0.8, 1.0);
+		cairo_pattern_add_color_stop_rgba (pattern, 1, r*0.6,g*0.6,b*0.6, 1.0);
+
+		shine_pattern = cairo_pattern_create_linear (0.0, 0.0, 15, 0);
+		cairo_pattern_add_color_stop_rgba (shine_pattern, 0, 1,1,1,0.0);
+		cairo_pattern_add_color_stop_rgba (shine_pattern, 0.2, 1,1,1,0.3);
+		cairo_pattern_add_color_stop_rgba (shine_pattern, 0.5, 1,1,1,0.0);
+		cairo_pattern_add_color_stop_rgba (shine_pattern, 1, 1,1,1,0.0);
+	} else {
+		float rheight = get_height();
+	
+		pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, rheight);
+		cairo_pattern_add_color_stop_rgba (pattern, 0, r*0.8,g*0.8,b*0.8, 1.0);
+		cairo_pattern_add_color_stop_rgba (pattern, 1, r*0.6,g*0.6,b*0.6, 1.0);
+
+		shine_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, rheight);
+		cairo_pattern_add_color_stop_rgba (shine_pattern, 0, 1,1,1,0.0);
+		cairo_pattern_add_color_stop_rgba (shine_pattern, 0.2, 1,1,1,0.3);
+		cairo_pattern_add_color_stop_rgba (shine_pattern, 0.5, 1,1,1,0.0);
+		cairo_pattern_add_color_stop_rgba (shine_pattern, 1, 1,1,1,0.0);
+	}
+	
+}
+
 bool
 PixFader::on_expose_event (GdkEventExpose* ev)
 {
-	int const pi = get_sensitive() ? NORMAL : DESENSITISED;
-	
-        Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
-	int srcx, srcy;
-	int const ds = display_span ();
-	int offset_into_pixbuf = (int) floor (span / ((float) span / ds));
+	Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
+	cairo_t* cr = context->cobj();
 
-	/* account for fader lengths that are shorter than the fader pixbuf */
-	if (_orien == VERT) {
-		offset_into_pixbuf += pixbuf[pi]->get_height() / 2 - view.height;
-	} else {
-		offset_into_pixbuf += pixbuf[pi]->get_width() / 2 - view.width;
+	if (!pattern) {
+		create_patterns();
 	}
-
-        context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-        context->clip ();
 	
-        if (_orien == VERT) {
-                srcx = 0;
-                srcy = offset_into_pixbuf;
-        } else {
-                srcx = offset_into_pixbuf;
-                srcy = 0;
-        }
+//	int const pi = get_sensitive() ? NORMAL : DESENSITISED;
+	
+	int ds = display_span ();
 
-        /* fader */
+	float w = get_width();
+	float h = get_height();
+	float radius = CORNER_RADIUS;
 
-        context->save();
-        context->set_source (belt_surface[pi], -srcx, -srcy);
-        context->rectangle (0, 0, get_width(), get_height());
-        context->clip ();
-        context->paint();
-        context->restore();
+	/* black border */
 
-        /* bounding box lines (2 colors for nicer visuals) */
-        
-        /* top and left side */
+	cairo_set_source_rgb (cr, 0,0,0);
+	cairo_rectangle (cr, 0, 0, w, h);
+	cairo_fill (cr);
 
-        context->set_line_width (1);
-        context->set_source_rgb (left_r, left_g, left_b);
-        context->move_to (view.width - 1, 0); /* upper right */
-        context->line_to (0, 0);              /* upper left */
-        context->line_to (0, view.height - 1);/* lower left */
-        context->stroke ();
+	/* draw active box */
 
-        /* bottom & right side */
+	if (_orien == VERT) {
+		if (ds > h - FADER_RESERVE)
+			ds = h - FADER_RESERVE;
 
-        context->set_line_width (1);
-        context->set_source_rgb (right_r, right_g, right_b);
-        context->move_to (0, view.height - 0.5); /* lower left */
-        context->line_to (view.width - 0.5, view.height - 0.5); /* lower right */
-        context->line_to (view.width - 0.5, 0); /* upper right */
-        context->stroke ();
+		cairo_set_source (cr, pattern);
+		Gtkmm2ext::rounded_rectangle (cr, 1, 1+ds, w-2, h-(1+ds)-1, radius-1.5);
+		cairo_fill (cr);
 
+//		cairo_set_source (cr, shine_pattern);
+//		Gtkmm2ext::rounded_rectangle (cr, 2, ds, w-4, h-(1+ds)-1, radius-1.5);
+//		cairo_fill (cr);
+	} else {
+		if (ds < FADER_RESERVE)
+			ds = FADER_RESERVE;
+
+		cairo_set_source (cr, pattern);
+		Gtkmm2ext::rounded_rectangle (cr, 1, 1, ds-1, h-2, radius-1.5);
+		cairo_fill (cr);
+
+//		cairo_set_source (cr, shine_pattern);
+//		Gtkmm2ext::rounded_rectangle (cr, 2, 3, ds-1, 15, radius-1.5);
+//		cairo_fill (cr);
+	}
+	
 	/* always draw the unity-position line */
-
 
 	if (_orien == VERT) {
                 context->set_line_width (1); 
@@ -173,9 +208,17 @@ PixFader::on_expose_event (GdkEventExpose* ev)
                 context->set_line_width (1); 
                 context->set_source_rgb (0.0, 1.0, 0.0);
                 context->move_to (unity_loc, 1);
-                context->line_to (unity_loc, girth - 1);
+                context->line_to (unity_loc, girth);
                 context->stroke ();
 	}
+
+//	if (Config->get_widget_prelight()) {  //pixfader does not have access to config
+		if (_hovering) {
+			Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), 3);
+			cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
+			cairo_fill (cr);
+		}
+//	}
 
 	last_drawn = ds;
 
@@ -187,6 +230,21 @@ PixFader::on_size_request (GtkRequisition* req)
 {
 	req->width = view.width;
 	req->height = view.height;
+}
+
+void
+PixFader::on_size_allocate (Gtk::Allocation& alloc)
+{
+	DrawingArea::on_size_allocate(alloc);
+	if (_orien == VERT) {
+		view.height = span = alloc.get_height();
+	} else {
+		view.width = span = alloc.get_width();
+	}
+
+	update_unity_position ();
+
+	queue_draw ();
 }
 
 bool
@@ -370,7 +428,14 @@ int
 PixFader::display_span ()
 {
 	float fract = (adjustment.get_value () - adjustment.get_lower()) / ((adjustment.get_upper() - adjustment.get_lower()));
-	return (_orien != VERT) ? (int)floor (span * (1.0 - fract)) : (int)floor (span * fract);
+	int ds;
+	if (_orien == VERT) {
+		ds = (int)floor ( span * (1.0 - fract));
+	} else {
+		ds = (int)floor (span * fract);
+	}
+	
+	return ds;
 }
 
 void
@@ -402,14 +467,18 @@ PixFader::update_unity_position ()
 bool
 PixFader::on_enter_notify_event (GdkEventCrossing*)
 {
+	_hovering = true;
 	Keyboard::magic_widget_grab_focus ();
+	queue_draw ();
 	return false;
 }
 
 bool
 PixFader::on_leave_notify_event (GdkEventCrossing*)
 {
+	_hovering = false;
 	Keyboard::magic_widget_drop_focus();
+	queue_draw ();
 	return false;
 }
 
