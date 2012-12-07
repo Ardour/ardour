@@ -3072,8 +3072,6 @@ Route::flush_processors ()
 void
 Route::set_meter_point (MeterPoint p, bool force)
 {
-	/* CAN BE CALLED FROM PROCESS CONTEXT */
-
 	if (_meter_point == p && !force) {
 		return;
 	}

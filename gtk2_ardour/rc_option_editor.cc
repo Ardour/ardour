@@ -1450,14 +1450,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Audio"),
 	     new BoolOption (
-		     "do-not-record-plugins",
-		     _("Disable plugins during recording"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_do_not_record_plugins),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_do_not_record_plugins)
-		     ));
-
-	add_option (_("Audio"),
-	     new BoolOption (
 		     "new-plugins-active",
 		     _("Make new plugins active"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_new_plugins_active),

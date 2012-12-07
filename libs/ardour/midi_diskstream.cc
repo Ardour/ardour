@@ -1021,7 +1021,7 @@ MidiDiskstream::finish_capture ()
 void
 MidiDiskstream::set_record_enabled (bool yn)
 {
-	if (!recordable() || !_session.record_enabling_legal()) {
+	if (!recordable() || !_session.record_enabling_legal() || _io->n_ports().n_midi() == 0) {
 		return;
 	}
 
@@ -1040,12 +1040,14 @@ MidiDiskstream::set_record_enabled (bool yn)
 	}
 }
 
-void
-MidiDiskstream::engage_record_enable ()
+bool
+MidiDiskstream::prep_record_enable ()
 {
-	bool const rolling = _session.transport_speed() != 0.0f;
+	if (!recordable() || !_session.record_enabling_legal() || _io->n_ports().n_midi() == 0) {
+		return false;
+	}
 
-	g_atomic_int_set (&_record_enabled, 1);
+	bool const rolling = _session.transport_speed() != 0.0f;
 
 	boost::shared_ptr<MidiPort> sp = _source_port.lock ();
 	
@@ -1054,13 +1056,17 @@ MidiDiskstream::engage_record_enable ()
 	}
 
 	RecordEnableChanged (); /* EMIT SIGNAL */
+
+	return true;
 }
 
-void
-MidiDiskstream::disengage_record_enable ()
+bool
+MidiDiskstream::prep_record_disable ()
 {
 	g_atomic_int_set (&_record_enabled, 0);
 	RecordEnableChanged (); /* EMIT SIGNAL */
+
+	return true;
 }
 
 XMLNode&
