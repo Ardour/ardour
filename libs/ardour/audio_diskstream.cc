@@ -1661,6 +1661,8 @@ AudioDiskstream::set_record_enabled (bool yn)
 		} else {
 			disengage_record_enable ();
 		}
+
+		RecordEnableChanged (); /* EMIT SIGNAL */
 	}
 }
 
@@ -1697,8 +1699,6 @@ AudioDiskstream::prep_record_enable ()
 		}
 	}
 
-	RecordEnableChanged (); /* EMIT SIGNAL */
-
 	return true;
 }
 
@@ -1712,7 +1712,6 @@ AudioDiskstream::prep_record_disable ()
 		}
 	}
 	capturing_sources.clear ();
-	RecordEnableChanged (); /* EMIT SIGNAL */
 
 	return true;
 }

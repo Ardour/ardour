@@ -279,11 +279,7 @@ Track::set_record_enabled (bool yn, void *src)
 		return;
 	}
 
-	if (yn) {
-		_diskstream->engage_record_enable();
-	} else {
-		_diskstream->disengage_record_enable();
-	}
+	_diskstream->set_record_enabled (yn);
 
 	_rec_enable_control->Changed ();
 }
