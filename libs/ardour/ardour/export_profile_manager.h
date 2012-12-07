@@ -50,7 +50,15 @@ class ExportProfileManager
 {
   public:
 
-	ExportProfileManager (Session & s, std::string xml_node_name);
+	enum ExportType {
+		RegularExport,
+		RangeExport,
+		SelectionExport,
+		RegionExport,
+		StemExport
+	};
+
+	ExportProfileManager (Session & s, ExportType type);
 	~ExportProfileManager ();
 
 	void load_profile ();
@@ -70,7 +78,8 @@ class ExportProfileManager
 	typedef std::pair<PBD::UUID, std::string> FilePair;
 	typedef std::map<PBD::UUID, std::string> FileMap;
 
-	std::string const xml_node_name;
+	ExportType type;
+	std::string xml_node_name;
 	HandlerPtr  handler;
 	Session &   session;
 

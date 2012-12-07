@@ -60,7 +60,7 @@ using namespace Gtk;
 void
 Editor::export_audio ()
 {
-	ExportDialog dialog (*this, _("Export"), X_("ExportProfile"));
+	ExportDialog dialog (*this, _("Export"), ExportProfileManager::RegularExport);
 	dialog.set_session (_session);
 	dialog.run();
 }
