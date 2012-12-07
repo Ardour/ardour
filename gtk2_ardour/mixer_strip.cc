@@ -655,9 +655,9 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			show_sends_button->set_text (_("Snd"));
 		}
 
-		((Gtk::Label*)gpm.gain_automation_style_button.get_child())->set_text (
+		gpm.gain_automation_style_button.set_text (
 				gpm.short_astyle_string(gain_automation->automation_style()));
-		((Gtk::Label*)gpm.gain_automation_state_button.get_child())->set_text (
+		gpm.gain_automation_state_button.set_text (
 				gpm.short_astate_string(gain_automation->automation_state()));
 
 		if (_route->panner()) {
