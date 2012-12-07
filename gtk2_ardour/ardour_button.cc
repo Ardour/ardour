@@ -477,10 +477,10 @@ ArdourButton::set_colors ()
 		cairo_pattern_add_color_stop_rgba (shine_pattern, 1, 1,1,1,0.1);
 
 		fill_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height()-3);
-		start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start", get_name()));
 		if (_flat_buttons) {
-			end_color = start_color;
+			end_color = start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end", get_name()));
 		} else {
+			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start", get_name()));
 			end_color = fill_color_inactive;
 		}
 		UINT_TO_RGBA (start_color, &r, &g, &b, &a);
@@ -489,10 +489,10 @@ ArdourButton::set_colors ()
 		cairo_pattern_add_color_stop_rgba (fill_pattern, 1, r/255.0,g/255.0,b/255.0, a/255.0);
 
 		fill_pattern_active = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height()-3);
-		start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start active", get_name()));
 		if (_flat_buttons) {
-			end_color = start_color;
+			end_color = start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end active", get_name()));
 		} else {
+			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start active", get_name()));
 			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end active", get_name()));
 		}
 		UINT_TO_RGBA (start_color, &r, &g, &b, &a);
