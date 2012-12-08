@@ -1518,6 +1518,7 @@ void
 Editor::reset_focus ()
 {
 	track_canvas->grab_focus();
+	cerr << "Track canvas now has focus? " << track_canvas->has_focus() << endl;
 }
 
 void
