@@ -430,6 +430,9 @@ GainMeterBase::gain_activated ()
 
 	if (gain_display.has_focus()) {
 		PublicEditor::instance().reset_focus();
+		cerr << "reset focus\n";
+	} else {
+		cerr << "leave focus alone\n";
 	}
 }
 
