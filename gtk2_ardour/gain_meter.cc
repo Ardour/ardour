@@ -406,8 +406,6 @@ GainMeterBase::gain_activated ()
 {
 	float f;
 
-	cerr << "GAin display activated\n";
-
 	{
 		// Switch to user's preferred locale so that
 		// if they use different LC_NUMERIC conventions,
@@ -430,9 +428,6 @@ GainMeterBase::gain_activated ()
 
 	if (gain_display.has_focus()) {
 		PublicEditor::instance().reset_focus();
-		cerr << "reset focus\n";
-	} else {
-		cerr << "leave focus alone\n";
 	}
 }
 
