@@ -406,6 +406,8 @@ GainMeterBase::gain_activated ()
 {
 	float f;
 
+	cerr << "GAin display activated\n";
+
 	{
 		// Switch to user's preferred locale so that
 		// if they use different LC_NUMERIC conventions,
