@@ -598,7 +598,6 @@ key_is_legal_for_numeric_entry (guint keyval)
 	case GDK_comma:
 		if (comma_decimal < 0) {
 			std::lconv* lc = std::localeconv();
-			cerr << "***** Locale decimal point = [" << lc->decimal_point << "]\n";
 			if (strchr (lc->decimal_point, ',') != 0) {
 				comma_decimal = 1;
 			} else {
@@ -611,6 +610,9 @@ key_is_legal_for_numeric_entry (guint keyval)
 	}
 
 	switch (keyval) {
+	case GDK_decimalpoint:
+		return true;
+
 	case GDK_period:
 		if (comma_decimal) {
 			return false;
