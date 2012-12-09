@@ -249,7 +249,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		int64_t fill_len = (int64_t) floor (veclen * frac);
 
 		fill_len = min (fill_len, (int64_t)veclen);
-		
+
 		for (i = 0; i < fill_len; ++i) {
 			vec[i] = _list.events().front()->value;
 		}
@@ -389,10 +389,28 @@ Curve::multipoint_eval (double x)
 			return _list.events().back()->value;
 		}
 
+		ControlEvent* after = (*range.second);
+		range.second--;
+		ControlEvent* before = (*range.second);
+
+		double vdelta = after->value - before->value;
+
+		if (vdelta == 0.0) {
+			return before->value;
+		}
+
+		double tdelta = x - before->when;
+		double trange = after->when - before->when;
+
+		return before->value + (vdelta * (tdelta / trange));
+
+#if 0
 		double x2 = x * x;
 		ControlEvent* ev = *range.second;
 
-		return ev->coeff[0] + (ev->coeff[1] * x) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x);
+		return = ev->coeff[0] + (ev->coeff[1] * x) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x);
+#endif
+
 	}
 
 	/* x is a control point in the data */
