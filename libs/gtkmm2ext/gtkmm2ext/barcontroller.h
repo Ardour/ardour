@@ -22,6 +22,7 @@
 #include <gtkmm/frame.h>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm2ext/binding_proxy.h>
+#include <cairo.h>
 
 
 namespace Gtkmm2ext {
@@ -31,7 +32,7 @@ class BarController : public Gtk::Frame
   public:
 	BarController (Gtk::Adjustment& adj, boost::shared_ptr<PBD::Controllable>);
 
-	virtual ~BarController () {}
+	virtual ~BarController ();
 
 	enum barStyle {
 		LeftToRight,
@@ -89,6 +90,10 @@ class BarController : public Gtk::Frame
 		return "";
 	}
 	
+	void create_patterns();
+	Cairo::RefPtr<Cairo::Pattern> pattern;
+	Cairo::RefPtr<Cairo::Pattern> shine_pattern;
+
 	virtual bool button_press (GdkEventButton *);
 	virtual bool button_release (GdkEventButton *);
 	virtual bool motion (GdkEventMotion *);

@@ -941,7 +941,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void process_without_events (pframes_t);
 	void process_with_events    (pframes_t);
 	void process_audition       (pframes_t);
-	void process_export         (pframes_t);
+        int  process_export         (pframes_t);
 	int  process_export_fw      (pframes_t);
 
 	void block_processing() { g_atomic_int_set (&processing_prohibited, 1); }
@@ -983,6 +983,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int  pre_export ();
 	int  stop_audio_export ();
 	void finalize_audio_export ();
+	void finalize_export_internal (bool stop_freewheel);
 	bool _pre_export_mmc_enabled;
 
 	PBD::ScopedConnection export_freewheel_connection;

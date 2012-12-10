@@ -184,9 +184,9 @@ class MidiDiskstream : public Diskstream
 	void adjust_playback_buffering () {}
 	void adjust_capture_buffering () {}
 
-	void engage_record_enable ();
-	void disengage_record_enable ();
-
+	bool prep_record_enable ();
+	bool prep_record_disable ();
+    
 	MidiRingBuffer<framepos_t>*  _playback_buf;
 	MidiRingBuffer<framepos_t>*  _capture_buf;
 	boost::weak_ptr<MidiPort>    _source_port;

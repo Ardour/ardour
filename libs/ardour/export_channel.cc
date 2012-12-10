@@ -214,9 +214,9 @@ RouteExportChannel::~RouteExportChannel()
 }
 
 void
-RouteExportChannel::create_from_route(std::list<ExportChannelPtr> & result, Route & route)
+RouteExportChannel::create_from_route(std::list<ExportChannelPtr> & result, boost::shared_ptr<Route> route)
 {
-	boost::shared_ptr<CapturingProcessor> processor = route.add_export_point();
+	boost::shared_ptr<CapturingProcessor> processor = route->add_export_point();
 	uint32_t channels = processor->input_streams().n_audio();
 
 	boost::shared_ptr<ProcessorRemover> remover (new ProcessorRemover (route, processor));
@@ -271,5 +271,5 @@ RouteExportChannel::operator< (ExportChannel const & other) const
 
 RouteExportChannel::ProcessorRemover::~ProcessorRemover()
 {
-	route.remove_processor (processor);
+	route->remove_processor (processor);
 }

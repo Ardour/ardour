@@ -3232,7 +3232,13 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 			}
 		} 
 
-		if (do_deselect) {
+		/* do not deselect if Primary or Tertiary (toggle-select or
+		 * extend-select are pressed.
+		 */
+
+		if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier) && 
+		    !Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier) && 
+		    do_deselect) {
 			deselect_things ();
 		}
 

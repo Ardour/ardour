@@ -117,7 +117,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, Canvas& c
 	, playlist_action_menu (0)
 	, mode_menu (0)
 	, color_mode_menu (0)
-	, gm (sess, slider, slider_desensitised, true, 115)
+	, gm (sess, slider, slider_desensitised, true, 125)
 	, _ignore_set_layer_display (false)
 {
 }
@@ -205,11 +205,11 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
         }
 
 	controls_table.attach (route_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	Gtk::VBox* pad = manage (new Gtk::VBox);
-	pad->pack_start (gm.get_gain_slider(), false, false);
-	pad->pack_start (*manage (new Gtk::Label), true, true);
-	pad->show_all ();
-	controls_table.attach (*pad, 0, 5, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+//	Gtk::VBox* pad = manage (new Gtk::VBox);
+//	pad->pack_start (gm.get_gain_slider(), false, false);
+//	pad->pack_start (*manage (new Gtk::Label), true, true);
+//	pad->show_all ();
+	controls_table.attach (gm.get_gain_slider(), 0, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 3, 0);
 
 	ARDOUR_UI::instance()->set_tip(*solo_button,_("Solo"));
 	ARDOUR_UI::instance()->set_tip(*mute_button,_("Mute"));
@@ -261,7 +261,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	route_group_menu = new RouteGroupMenu (_session, plist);
 
 	gm.get_gain_slider().signal_scroll_event().connect(sigc::mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
-	gm.get_gain_slider().set_name ("TrackGainFader");
+	gm.get_gain_slider().set_name ("GainFader");
 
 	gm.get_level_meter().signal_scroll_event().connect (sigc::mem_fun (*this, &RouteTimeAxisView::controls_ebox_scroll), false);
 

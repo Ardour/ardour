@@ -183,6 +183,25 @@ Session::set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, SessionEv
 		return;
 	}
 
+	/* do the non-RT part of rec-enabling first - the RT part will be done
+	 * on the next process cycle. This does mean that theoretically we are
+	 * doing things provisionally on the assumption that the rec-enable
+	 * change will work, but this had better be a solid assumption for
+	 * other reasons.
+	 */
+
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		if ((*i)->is_hidden()) {
+			continue;
+		}
+
+		boost::shared_ptr<Track> t;
+
+		if ((t = boost::dynamic_pointer_cast<Track>(*i)) != 0) {
+			t->prep_record_enabled (yn, (group_override ? (void*) t->route_group() : (void *) this));
+		}
+	}
+
 	queue_event (get_rt_event (rl, yn, after, group_override, &Session::rt_set_record_enabled));
 }
 

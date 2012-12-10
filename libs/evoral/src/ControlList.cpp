@@ -517,12 +517,24 @@ ControlList::add (double when, double value)
 			} else {
 				
 				/* not in a write pass: figure out the iterator we should insert in front of */
-				
+
+				DEBUG_TRACE (DEBUG::ControlList, string_compose ("compute MRI for position %1\n", when));
 				ControlEvent cp (when, 0.0f);
 				most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 			}
-		} 
-		
+
+		} else {
+
+			/* not in a write pass, adding a point within existing
+			 * data: figure out the iterator we should insert in
+			 * front of 
+			 */
+			
+			DEBUG_TRACE (DEBUG::ControlList, string_compose ("compute(b) MRI for position %1\n", when));
+			ControlEvent cp (when, 0.0f);
+			most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+		}
+
 		/* OK, now we're really ready to add a new point
 		 */
 

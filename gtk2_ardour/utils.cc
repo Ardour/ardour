@@ -610,6 +610,10 @@ key_is_legal_for_numeric_entry (guint keyval)
 	}
 
 	switch (keyval) {
+	case GDK_decimalpoint:
+	case GDK_KP_Separator:
+		return true;
+
 	case GDK_period:
 		if (comma_decimal) {
 			return false;

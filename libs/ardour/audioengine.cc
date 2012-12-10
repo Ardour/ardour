@@ -549,16 +549,13 @@ AudioEngine::process_callback (pframes_t nframes)
 	}
 
 	/* test if we are freewheeling and there are freewheel signals connected.
-           ardour should act normally even when freewheeling unless /it/ is exporting */
-
+           ardour should act normally even when freewheeling unless /it/ is
+           exporting 
+	*/
 
 	if (_freewheeling && !Freewheel.empty()) {
-		/* emit the Freewheel signal and stop freewheeling in the event of trouble
-		 */
-                boost::optional<int> r = Freewheel (nframes);
-		if (r.get_value_or (0)) {
-			jack_set_freewheel (_priv_jack, false);
-		}
+
+                Freewheel (nframes);
 
 	} else {
 		MIDI::Manager::instance()->cycle_start(nframes);

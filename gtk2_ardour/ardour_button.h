@@ -14,7 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #ifndef __gtk2_ardour_ardour_button_h__
@@ -38,6 +37,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 		Body = 0x2,
 		Text = 0x4,
 		Indicator = 0x8,
+		FlatFace = 0x10,
 	};
 
 	static Element default_elements;
@@ -53,7 +53,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 
 	enum Tweaks {
 		ShowClick = 0x1,
-		NoModel = 0x4,
+		NoModel = 0x2,
 	};
 
 	Tweaks tweaks() const { return _tweaks; }
@@ -64,6 +64,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 
 	Element elements() const { return _elements; }
 	void set_elements (Element);
+	void add_elements (Element);
 	
 	void set_corner_radius (float);
 	void set_rounded_corner_mask (int);
@@ -116,6 +117,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	float _corner_radius;
 	int   _corner_mask;
 
+	uint32_t bg_color;
 	uint32_t border_color;
 	uint32_t fill_color_active;
 	uint32_t fill_color_inactive;

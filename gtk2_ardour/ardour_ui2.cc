@@ -241,8 +241,10 @@ ARDOUR_UI::setup_transport ()
 						  static_cast<Widget*> (&transport_frame), 1));
 
 	auto_return_button.set_text(_("Auto Return"));
+
 	follow_edits_button.set_text(_("Follow Edits"));
-	auto_input_button.set_text (_("Auto Input"));
+
+//	auto_input_button.set_text (_("Auto Input"));
 
 	click_button.set_image (get_icon (X_("metronome")));
 	act = ActionManager::get_action ("Transport", "ToggleClick");
@@ -335,6 +337,8 @@ ARDOUR_UI::setup_transport ()
 	transport_button_size_group->add_widget (roll_button);
 	transport_button_size_group->add_widget (stop_button);
 
+	goto_start_button.set_size_request (-1, 40);
+
 	HBox* tbox1 = manage (new HBox);
 	HBox* tbox2 = manage (new HBox);
 	HBox* tbox = manage (new HBox);
@@ -349,14 +353,11 @@ ARDOUR_UI::setup_transport ()
 	tbox2->set_spacing (2);
 	tbox->set_spacing (2);
 
+	tbox1->pack_start (midi_panic_button, false, false, 5);
 	tbox1->pack_start (click_button, false, false, 5);
-	tbox1->pack_start (midi_panic_button, false, false);
 	tbox1->pack_start (goto_start_button, false, false);
 	tbox1->pack_start (goto_end_button, false, false);
 	tbox1->pack_start (auto_loop_button, false, false);
-
-	play_selection_button.set_rounded_corner_mask (0x1); /* upper left only */
-	roll_button.set_rounded_corner_mask (0x2); /* upper right only */
 
 	tbox2->pack_start (play_selection_button, false, false);
 	tbox2->pack_start (roll_button, false, false);
@@ -387,7 +388,7 @@ ARDOUR_UI::setup_transport ()
 
 	VBox* transport_vbox = manage (new VBox);
 	transport_vbox->set_name ("TransportBase");
-	transport_vbox->set_border_width (3);
+	transport_vbox->set_border_width (0);
 	transport_vbox->set_spacing (3);
 	transport_vbox->pack_start (*tbox, true, true, 0);
 	transport_vbox->pack_start (*shuttle_box, false, false, 0);

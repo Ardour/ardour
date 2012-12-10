@@ -232,6 +232,10 @@ Session::destroy ()
 
 	_state_of_the_state = StateOfTheState (CannotSave|Deletion);
 
+	/* disconnect from any and all signals that we are connected to */
+
+	drop_connections ();
+
 	_engine.remove_session ();
 
 	/* deregister all ports - there will be no process or any other

@@ -17,7 +17,7 @@ CairoPacker::draw_background (Gtk::Widget& w, GdkEventExpose*)
 		Gdk::Color bg = get_bg ();
 
 		context->set_source_rgba (bg.get_red_p(), bg.get_green_p(), bg.get_blue_p(), 1.0);
-		Gtkmm2ext::rounded_rectangle (context, x, y, w.get_allocation().get_width(), w.get_allocation().get_height(), 9);
+		Gtkmm2ext::rounded_rectangle (context, x, y, w.get_allocation().get_width(), w.get_allocation().get_height(), 4);
 		context->fill ();
 	}
 }

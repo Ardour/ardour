@@ -242,9 +242,9 @@ class AudioDiskstream : public Diskstream
 	void adjust_playback_buffering ();
 	void adjust_capture_buffering ();
 
-	void engage_record_enable ();
-	void disengage_record_enable ();
-
+        bool prep_record_enable ();
+	bool prep_record_disable ();
+    
 	// Working buffers for do_refill (butler thread)
 	static void allocate_working_buffers();
 	static void free_working_buffers();

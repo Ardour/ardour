@@ -652,11 +652,13 @@ Editor::Editor ()
 
 	/* nudge stuff */
 
-	nudge_forward_button.add (*(manage (new Image (::get_icon("nudge_right")))));
-	nudge_backward_button.add (*(manage (new Image (::get_icon("nudge_left")))));
+	nudge_forward_button.set_name ("zoom button");
+	nudge_forward_button.add_elements (ArdourButton::FlatFace);
+	nudge_forward_button.set_image(::get_icon("nudge_right"));
 
-	nudge_forward_button.set_name ("TransportButton");
-	nudge_backward_button.set_name ("TransportButton");
+	nudge_backward_button.set_name ("zoom button");
+	nudge_backward_button.add_elements (ArdourButton::FlatFace);
+	nudge_backward_button.set_image(::get_icon("nudge_left"));
 
 	fade_context_menu.set_name ("ArdourContextMenu");
 
@@ -2857,7 +2859,7 @@ Editor::setup_toolbar ()
 	mouse_mode_size_group->add_widget (internal_edit_button);
 
 	/* make them just a bit bigger */
-	mouse_move_button.set_size_request (-1, 25);
+	mouse_move_button.set_size_request (-1, 30);
 
 	mouse_mode_hbox->set_spacing (2);
 
@@ -2916,19 +2918,25 @@ Editor::setup_toolbar ()
 	RefPtr<Action> act;
 
 	zoom_in_button.set_name ("zoom button");
-	zoom_in_button.add (*(manage (new Image (::get_icon ("zoom_in")))));
+	zoom_in_button.add_elements ( ArdourButton::FlatFace );
+	zoom_in_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
+	zoom_in_button.set_image(::get_icon ("zoom_in"));
 	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-in"));
-	act->connect_proxy (zoom_in_button);
+	zoom_in_button.set_related_action (act);
 
 	zoom_out_button.set_name ("zoom button");
-	zoom_out_button.add (*(manage (new Image (::get_icon ("zoom_out")))));
+	zoom_out_button.add_elements ( ArdourButton::FlatFace );
+	zoom_out_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
+	zoom_out_button.set_image(::get_icon ("zoom_out"));
 	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-out"));
-	act->connect_proxy (zoom_out_button);
+	zoom_out_button.set_related_action (act);
 
 	zoom_out_full_button.set_name ("zoom button");
-	zoom_out_full_button.add (*(manage (new Image (::get_icon ("zoom_full")))));
+	zoom_out_full_button.add_elements ( ArdourButton::FlatFace );
+	zoom_out_full_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
+	zoom_out_full_button.set_image(::get_icon ("zoom_full"));
 	act = ActionManager::get_action (X_("Editor"), X_("zoom-to-session"));
-	act->connect_proxy (zoom_out_full_button);
+	zoom_out_full_button.set_related_action (act);
 
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
 	set_popdown_strings (zoom_focus_selector, zoom_focus_strings);
@@ -2941,17 +2949,21 @@ Editor::setup_toolbar ()
 	_zoom_box.pack_start (zoom_focus_selector, false, false);
 
 	/* Track zoom buttons */
-	tav_expand_button.set_name ("TrackHeightButton");
+	tav_expand_button.set_name ("zoom button");
+	tav_expand_button.add_elements ( ArdourButton::FlatFace );
+	tav_expand_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 	tav_expand_button.set_size_request (-1, 20);
-	tav_expand_button.add (*(manage (new Image (::get_icon ("tav_exp")))));
+	tav_expand_button.set_image(::get_icon ("tav_exp"));
 	act = ActionManager::get_action (X_("Editor"), X_("expand-tracks"));
-	act->connect_proxy (tav_expand_button);
+	tav_expand_button.set_related_action (act);
 
-	tav_shrink_button.set_name ("TrackHeightButton");
+	tav_shrink_button.set_name ("zoom button");
+	tav_shrink_button.add_elements ( ArdourButton::FlatFace );
+	tav_shrink_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 	tav_shrink_button.set_size_request (-1, 20);
-	tav_shrink_button.add (*(manage (new Image (::get_icon ("tav_shrink")))));
+	tav_shrink_button.set_image(::get_icon ("tav_shrink"));
 	act = ActionManager::get_action (X_("Editor"), X_("shrink-tracks"));
-	act->connect_proxy (tav_shrink_button);
+	tav_shrink_button.set_related_action (act);
 
 	_zoom_box.pack_start (tav_shrink_button);
 	_zoom_box.pack_start (tav_expand_button);
@@ -2967,7 +2979,7 @@ Editor::setup_toolbar ()
 	_zoom_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
 						    &_zoom_tearoff->tearoff_window(), 0));
 
-	snap_box.set_spacing (1);
+	snap_box.set_spacing (2);
 	snap_box.set_border_width (2);
 
 	snap_type_selector.set_name ("SnapTypeSelector");
@@ -2994,6 +3006,9 @@ Editor::setup_toolbar ()
 
 	nudge_forward_button.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::nudge_forward_release), false);
 	nudge_backward_button.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::nudge_backward_release), false);
+
+	nudge_forward_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
+	nudge_backward_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
 
 	nudge_box->pack_start (nudge_backward_button, false, false);
 	nudge_box->pack_start (nudge_forward_button, false, false);
@@ -3311,8 +3326,15 @@ Editor::duplicate_range (bool with_dialog)
 		times = adjustment.get_value();
 	}
 
-	if (selection->time.length() != 0) {
-		duplicate_selection (times);
+	if ((current_mouse_mode() == Editing::MouseRange)) {
+		if (selection->time.length()) {
+			duplicate_selection (times);
+		}
+	} else if (get_smart_mode()) {
+		if (selection->time.length()) {
+			duplicate_selection (times);
+		} else 
+			duplicate_some_regions (rs, times);
 	} else {
 		duplicate_some_regions (rs, times);
 	}

@@ -21,6 +21,8 @@
 
 #include <sigc++/signal.h>
 
+#include <gtkmm/messagedialog.h>
+
 #include "ardour/audioregion.h"
 #include "ardour/export_status.h"
 #include "ardour/export_handler.h"
@@ -35,9 +37,9 @@ using namespace ARDOUR;
 using namespace PBD;
 using std::string;
 
-ExportDialog::ExportDialog (PublicEditor & editor, std::string title, std::string xml_node_name)
+ExportDialog::ExportDialog (PublicEditor & editor, std::string title, ARDOUR::ExportProfileManager::ExportType type)
   : ArdourDialog (title)
-  , xml_node_name (xml_node_name)
+  , type (type)
   , editor (editor)
 
   , warn_label ("", Gtk::ALIGN_LEFT)
@@ -62,7 +64,7 @@ ExportDialog::set_session (ARDOUR::Session* s)
 	handler = _session->get_export_handler ();
 	status = _session->get_export_status ();
 
-	profile_manager.reset (new ExportProfileManager (*_session, xml_node_name));
+	profile_manager.reset (new ExportProfileManager (*_session, type));
 
 	/* Possibly init stuff in derived classes */
 
@@ -93,8 +95,6 @@ ExportDialog::set_session (ARDOUR::Session* s)
 	timespan_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings_and_example_filename));
 	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings_and_example_filename));
 	file_notebook->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings_and_example_filename));
-
-	status->Aborting.connect (abort_connection, invalidator (*this), boost::bind (&ExportDialog::notify_errors, this), gui_context());
 
 	update_warnings_and_example_filename ();
 }
@@ -323,6 +323,7 @@ ExportDialog::show_progress ()
 	progress_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ExportDialog::progress_timeout), 100);
 
 	gtk_main_iteration ();
+
 	while (status->running) {
 		if (gtk_events_pending()) {
 			gtk_main_iteration ();
@@ -339,9 +340,11 @@ ExportDialog::show_progress ()
 			ns->nag ();
 			delete ns;
 		}
-		
-		status->finish ();
+	} else {
+		notify_errors ();
 	}
+
+	status->finish ();
 }
 
 gint
@@ -400,7 +403,7 @@ ExportDialog::add_warning (string const & text)
 /*** Dialog specializations ***/
 
 ExportRangeDialog::ExportRangeDialog (PublicEditor & editor, string range_id) :
-  ExportDialog (editor, _("Export Range"), X_("RangeExportProfile")),
+  ExportDialog (editor, _("Export Range"), ExportProfileManager::RangeExport),
   range_id (range_id)
 {}
 
@@ -414,7 +417,7 @@ ExportRangeDialog::init_components ()
 }
 
 ExportSelectionDialog::ExportSelectionDialog (PublicEditor & editor) :
-  ExportDialog (editor, _("Export Selection"), X_("SelectionExportProfile"))
+  ExportDialog (editor, _("Export Selection"), ExportProfileManager::SelectionExport)
 {}
 
 void
@@ -427,7 +430,7 @@ ExportSelectionDialog::init_components ()
 }
 
 ExportRegionDialog::ExportRegionDialog (PublicEditor & editor, ARDOUR::AudioRegion const & region, ARDOUR::AudioTrack & track) :
-  ExportDialog (editor, _("Export Region"), X_("RegionExportProfile")),
+  ExportDialog (editor, _("Export Region"), ExportProfileManager::RegionExport),
   region (region),
   track (track)
 {}
@@ -452,7 +455,7 @@ ExportRegionDialog::init_components ()
 }
 
 StemExportDialog::StemExportDialog (PublicEditor & editor)
-  : ExportDialog(editor, _("Stem Export"), X_("StemExportProfile"))
+  : ExportDialog(editor, _("Stem Export"), ExportProfileManager::StemExport)
 {
 
 }

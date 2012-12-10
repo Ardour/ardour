@@ -27,20 +27,22 @@
 #include <cctype>
 
 #include <gtkmm.h>
-#include <pbd/error.h>
-#include <pbd/touchable.h>
-#include <pbd/failed_constructor.h>
-#include <pbd/pthread_utils.h>
-#include <pbd/replace_all.h>
 
-#include <gtkmm2ext/application.h>
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/textviewer.h>
-#include <gtkmm2ext/popup.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/window_title.h>
-#include <gtkmm2ext/actions.h>
-#include <gtkmm2ext/activatable.h>
+#include "pbd/error.h"
+#include "pbd/touchable.h"
+#include "pbd/failed_constructor.h"
+#include "pbd/pthread_utils.h"
+#include "pbd/replace_all.h"
+
+#include "gtkmm2ext/application.h"
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/textviewer.h"
+#include "gtkmm2ext/popup.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/window_title.h"
+#include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/activatable.h"
+#include "gtkmm2ext/actions.h"
 
 #include "i18n.h"
 
@@ -352,14 +354,11 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 		Gtk::AccelKey key;
 		ustring ap = action->get_accel_path();
 		if (!ap.empty()) {
-			bool has_key = ActionManager::lookup_entry(ap, key);
-			if (has_key) {
-				string  abbrev = key.get_abbrev();
-				if (!abbrev.empty()) {
-					replace_all (abbrev, "<", "");
-					replace_all (abbrev, ">", "-");
-					msg.append(_("\n\nKey: ")).append (abbrev);
-				}
+			string shortcut = ActionManager::get_key_representation (ap, key);
+			if (!shortcut.empty()) {
+				replace_all (shortcut, "<", "");
+				replace_all (shortcut, ">", "-");
+				msg.append(_("\n\nShortcut: ")).append (shortcut);
 			}
 		}
 	}

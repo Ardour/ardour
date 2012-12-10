@@ -408,41 +408,49 @@ Editor::register_actions ()
 	smart_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
 	smart_mode_button.set_related_action (smart_mode_action);
 	smart_mode_button.set_text (_("Smart"));
+	smart_mode_button.add_elements ( ArdourButton::FlatFace );
 	smart_mode_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Object Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseObject));
 	mouse_move_button.set_related_action (act);
 	mouse_move_button.set_image (::get_icon("tool_object"));
+	mouse_move_button.add_elements ( ArdourButton::FlatFace );
 	mouse_move_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));	
 	mouse_select_button.set_related_action (act);
 	mouse_select_button.set_image (::get_icon("tool_range"));
+	mouse_select_button.add_elements ( ArdourButton::FlatFace );
 	mouse_select_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseDraw));	
 	mouse_draw_button.set_related_action (act);
 	mouse_draw_button.set_image (::get_icon("midi_tool_pencil"));
+	mouse_draw_button.add_elements ( ArdourButton::FlatFace );
 	mouse_draw_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("Gain Tool"), sigc::bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseGain));	
 	mouse_gain_button.set_related_action (act);
 	mouse_gain_button.set_image (::get_icon("tool_gain"));
+	mouse_gain_button.add_elements ( ArdourButton::FlatFace );
 	mouse_gain_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("Zoom Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseZoom));	
 	mouse_zoom_button.set_related_action (act);
 	mouse_zoom_button.set_image (::get_icon("tool_zoom"));
+	mouse_zoom_button.add_elements ( ArdourButton::FlatFace );
 	mouse_zoom_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-audition", _("Audition Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));	
 	mouse_audition_button.set_related_action (act);
 	mouse_audition_button.set_image (::get_icon("tool_audition"));
+	mouse_audition_button.add_elements ( ArdourButton::FlatFace );
 	mouse_audition_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));	
 	mouse_timefx_button.set_related_action (act);
 	mouse_timefx_button.set_image (::get_icon("tool_stretch"));
+	mouse_timefx_button.add_elements ( ArdourButton::FlatFace );
 	mouse_timefx_button.set_name ("mouse mode button");
 
 	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Step Mouse Mode"), sigc::bind (sigc::mem_fun(*this, &Editor::step_mouse_mode), true));
@@ -450,6 +458,7 @@ Editor::register_actions ()
 	act = ActionManager::register_toggle_action (mouse_mode_actions, "toggle-internal-edit", _("Edit MIDI"), sigc::mem_fun(*this, &Editor::toggle_internal_editing));
 	internal_edit_button.set_related_action (act);
 	internal_edit_button.set_image (::get_icon("tool_note"));
+	internal_edit_button.add_elements ( ArdourButton::FlatFace );
 	internal_edit_button.set_name ("mouse mode button");
 
 	RadioAction::Group edit_point_group;

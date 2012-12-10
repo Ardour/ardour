@@ -27,6 +27,9 @@
 
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/gui_thread.h"
+#include "gtkmm2ext/cairocell.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/rgb_macros.h"
 
 #include "ardour_ui.h"
 #include "rgb_macros.h"
@@ -52,6 +55,7 @@ ShuttleControl::ShuttleControl ()
 	ARDOUR_UI::instance()->set_tip (*this, _("Shuttle speed control (Context-click for options)"));
 
 	pattern = 0;
+	shine_pattern = 0;
 	last_shuttle_request = 0;
 	last_speed_displayed = -99999999;
 	shuttle_grabbed = false;
@@ -61,10 +65,11 @@ ShuttleControl::ShuttleControl ()
 	shuttle_style_menu = 0;
 	shuttle_unit_menu = 0;
 	shuttle_context_menu = 0;
+	_hovering = false;
 
 	set_flags (CAN_FOCUS);
 	add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
-	set_size_request (100, 15);
+	set_size_request (85, 20);
 	set_name (X_("ShuttleControl"));
 
 	Config->ParameterChanged.connect (parameter_connection, MISSING_INVALIDATOR, boost::bind (&ShuttleControl::parameter_changed, this, _1), gui_context());
@@ -77,6 +82,7 @@ ShuttleControl::ShuttleControl ()
 ShuttleControl::~ShuttleControl ()
 {
 	cairo_pattern_destroy (pattern);
+	cairo_pattern_destroy (shine_pattern);
 }
 
 void
@@ -98,22 +104,26 @@ ShuttleControl::on_size_allocate (Gtk::Allocation& alloc)
 	if (pattern) {
 		cairo_pattern_destroy (pattern);
 		pattern = 0;
+		cairo_pattern_destroy (shine_pattern);
+		shine_pattern = 0;
 	}
 
-	pattern = cairo_pattern_create_linear (0, 0, alloc.get_width(), alloc.get_height());
+	CairoWidget::on_size_allocate ( alloc);
 
-	/* add 3 color stops */
-
+	//background
+	pattern = cairo_pattern_create_linear (0, 0, 0, alloc.get_height());
 	uint32_t col = ARDOUR_UI::config()->canvasvar_Shuttle.get();
-
 	int r,b,g,a;
 	UINT_TO_RGBA(col, &r, &g, &b, &a);
+	cairo_pattern_add_color_stop_rgb (pattern, 0.0, r/400.0, g/400.0, b/400.0);
+	cairo_pattern_add_color_stop_rgb (pattern, 0.4, r/255.0, g/255.0, b/255.0);
+	cairo_pattern_add_color_stop_rgb (pattern, 1.0, r/512.0, g/512.0, b/512.0);
 
-	cairo_pattern_add_color_stop_rgb (pattern, 0.0, 0, 0, 0);
-	cairo_pattern_add_color_stop_rgb (pattern, 0.5, r/255.0, g/255.0, b/255.0);
-	cairo_pattern_add_color_stop_rgb (pattern, 1.0, 0, 0, 0);
-
-	DrawingArea::on_size_allocate (alloc);
+	//reflection
+	shine_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, 10);
+	cairo_pattern_add_color_stop_rgba (shine_pattern, 0, 1,1,1,0.0);
+	cairo_pattern_add_color_stop_rgba (shine_pattern, 0.2, 1,1,1,0.4);
+	cairo_pattern_add_color_stop_rgba (shine_pattern, 1, 1,1,1,0.1);
 }
 
 void
@@ -489,21 +499,17 @@ ShuttleControl::use_shuttle_fract (bool force)
 	_session->request_transport_speed_nonzero (speed, true);
 }
 
-bool
-ShuttleControl::on_expose_event (GdkEventExpose*)
+void
+ShuttleControl::render (cairo_t* cr)
 {
 	cairo_text_extents_t extents;
-	Glib::RefPtr<Gdk::Window> win (get_window());
-	Glib::RefPtr<Gtk::Style> style (get_style());
 
-	cairo_t* cr = gdk_cairo_create (win->gobj());
-
-	cairo_set_source (cr, pattern);
-	cairo_rectangle (cr, 0.0, 0.0, get_width(), get_height());
-	cairo_fill_preserve (cr);
-
-	cairo_set_source_rgb (cr, 0, 0, 0.0);
-	cairo_stroke (cr);
+	//black border
+	cairo_set_source_rgb (cr, 0, 0.0, 0.0);
+	rounded_rectangle (cr, 0, 0, get_width(), get_height(), 4);
+//	cairo_fill_preserve (cr);
+//	cairo_stroke (cr);
+	cairo_fill (cr);
 
 	float speed = 0.0;
 
@@ -512,12 +518,23 @@ ShuttleControl::on_expose_event (GdkEventExpose*)
 	}
 
 	/* Marker */
-
-	double visual_fraction = std::min (1.0f, speed/shuttle_max_speed);
-	double x = (get_width() / 2.0) + (0.5 * (get_width() * visual_fraction));
-	cairo_move_to (cr, x, 1);
-	cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
-	cairo_line_to (cr, x, get_height()-1);
+	float visual_fraction = std::min (1.0f, speed/shuttle_max_speed);
+	float marker_size = get_height()-4;
+	float avail_width = get_width() - marker_size;
+	float x = get_width()*0.5 + visual_fraction * avail_width*0.5;
+	float offset = x - marker_size*0.5;
+//	cairo_set_source_rgb (cr, 0, 1, 0.0);
+	cairo_set_source (cr, pattern);
+	if (speed == 1.0) {
+		cairo_move_to( cr, offset-4, 2);
+		cairo_line_to( cr, offset+4, 2+marker_size*0.5);
+		cairo_line_to( cr, offset-4, 2+marker_size);
+		cairo_line_to( cr, offset-4, 2);
+	} else if ( speed ==0.0 )
+		rounded_rectangle (cr, offset, 4, marker_size-2, marker_size-2, 1);
+	else
+		cairo_arc (cr, offset + marker_size*0.5, 2 + marker_size*0.5, marker_size*0.5, 0, 360);
+	cairo_set_line_width (cr, 2);
 	cairo_stroke (cr);
 
 	/* speed text */
@@ -556,9 +573,10 @@ ShuttleControl::on_expose_event (GdkEventExpose*)
 
 	last_speed_displayed = speed;
 
-	cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
+	cairo_set_source_rgb (cr, 0.6, 0.6, 0.6);
 	cairo_text_extents (cr, buf, &extents);
-	cairo_move_to (cr, 10, extents.height + 2);
+	cairo_move_to (cr, 10, extents.height + 4);
+	cairo_set_font_size (cr, 13.0);
 	cairo_show_text (cr, buf);
 
 	/* style text */
@@ -574,13 +592,24 @@ ShuttleControl::on_expose_event (GdkEventExpose*)
 	}
 
 	cairo_text_extents (cr, buf, &extents);
-
-	cairo_move_to (cr, get_width() - (fabs(extents.x_advance) + 5), extents.height + 2);
+	cairo_move_to (cr, get_width() - (fabs(extents.x_advance) + 5), extents.height + 4);
 	cairo_show_text (cr, buf);
 
-	cairo_destroy (cr);
+	float _corner_radius = 4.0;
 
-	return true;
+/*	//reflection
+	float rheight = 10.0;
+	Gtkmm2ext::rounded_rectangle (cr, 2, 1, get_width()-4, rheight, _corner_radius);
+	cairo_set_source (cr, shine_pattern);
+	cairo_fill (cr);
+*/
+	if (ARDOUR::Config->get_widget_prelight()) {
+		if (_hovering) {
+			rounded_rectangle (cr, 1, 1, get_width()-2, get_height()-2, _corner_radius);
+			cairo_set_source_rgba (cr, 1, 1, 1, 0.2);
+			cairo_fill (cr);
+		}
+	}
 }
 
 void
@@ -675,4 +704,29 @@ ShuttleControl::parameter_changed (std::string p)
 	} else if (p == "shuttle-units") {
 		queue_draw ();
 	}
+}
+
+
+bool
+ShuttleControl::on_enter_notify_event (GdkEventCrossing* ev)
+{
+	_hovering = true;
+
+	if (ARDOUR::Config->get_widget_prelight()) {
+		queue_draw ();
+	}
+
+	return CairoWidget::on_enter_notify_event (ev);
+}
+
+bool
+ShuttleControl::on_leave_notify_event (GdkEventCrossing* ev)
+{
+	_hovering = false;
+
+	if (ARDOUR::Config->get_widget_prelight()) {
+		queue_draw ();
+	}
+
+	return CairoWidget::on_leave_notify_event (ev);
 }

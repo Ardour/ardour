@@ -727,3 +727,16 @@ Diskstream::prepare_to_stop (framepos_t pos)
 {
         last_recordable_frame = pos + _capture_offset;
 }
+
+void
+Diskstream::engage_record_enable ()
+{
+	g_atomic_int_set (&_record_enabled, 1);
+}
+
+void
+Diskstream::disengage_record_enable ()
+{
+	g_atomic_int_set (&_record_enabled, 0);
+}
+

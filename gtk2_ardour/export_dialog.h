@@ -47,7 +47,7 @@ class ExportDialog : public ArdourDialog {
 
   public:
 
-	ExportDialog (PublicEditor & editor, std::string title, std::string xml_node_name);
+	ExportDialog (PublicEditor & editor, std::string title, ARDOUR::ExportProfileManager::ExportType type);
 	~ExportDialog ();
 
 	void set_session (ARDOUR::Session* s);
@@ -65,7 +65,7 @@ class ExportDialog : public ArdourDialog {
 	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
 
-	std::string     xml_node_name;
+	ARDOUR::ExportProfileManager::ExportType type;
 	HandlerPtr      handler;
 	ManagerPtr      profile_manager;
 
@@ -111,7 +111,6 @@ class ExportDialog : public ArdourDialog {
 
 	PublicEditor &  editor;
 	StatusPtr       status;
-	PBD::ScopedConnection abort_connection;
 
 	/*** GUI components ***/
 

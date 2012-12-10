@@ -32,7 +32,7 @@ namespace Gtk {
 
 #include "ardour/types.h"
 
-class ShuttleControl : public Gtk::DrawingArea, public ARDOUR::SessionHandlePtr
+class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 {
   public:
 	ShuttleControl ();
@@ -55,6 +55,7 @@ class ShuttleControl : public Gtk::DrawingArea, public ARDOUR::SessionHandlePtr
 	boost::shared_ptr<ShuttleControllable> controllable() const { return _controllable; }
 
   protected:
+	bool _hovering;
 	float  shuttle_max_speed;
 	float  last_speed_displayed;
 	bool   shuttle_grabbed;
@@ -62,6 +63,7 @@ class ShuttleControl : public Gtk::DrawingArea, public ARDOUR::SessionHandlePtr
 	float shuttle_fract;
 	boost::shared_ptr<ShuttleControllable> _controllable;
 	cairo_pattern_t* pattern;
+	cairo_pattern_t* shine_pattern;
 	ARDOUR::microseconds_t last_shuttle_request;
 	PBD::ScopedConnection parameter_connection;
 	Gtk::Menu*        shuttle_unit_menu;
@@ -75,11 +77,15 @@ class ShuttleControl : public Gtk::DrawingArea, public ARDOUR::SessionHandlePtr
 	void shuttle_unit_clicked ();
 	void set_shuttle_max_speed (float);
 
+	bool on_enter_notify_event (GdkEventCrossing*);
+	bool on_leave_notify_event (GdkEventCrossing*);
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event(GdkEventButton*);
 	bool on_scroll_event (GdkEventScroll*);
 	bool on_motion_notify_event(GdkEventMotion*);
-	bool on_expose_event(GdkEventExpose*);
+
+	void render (cairo_t *);
+
 	void on_size_allocate (Gtk::Allocation&);
 	bool on_query_tooltip (int, int, bool, const Glib::RefPtr<Gtk::Tooltip>&);
 

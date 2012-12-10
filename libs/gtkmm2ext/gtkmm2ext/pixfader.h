@@ -44,6 +44,7 @@ class PixFader : public Gtk::DrawingArea
 	Gtk::Adjustment& adjustment;
 
 	void on_size_request (GtkRequisition*);
+	void on_size_allocate (Gtk::Allocation& alloc);
 
 	bool on_expose_event (GdkEventExpose*);
 	bool on_button_press_event (GdkEventButton*);
@@ -69,6 +70,7 @@ class PixFader : public Gtk::DrawingArea
         Cairo::RefPtr<Cairo::Context> belt_context[STATES];
         Cairo::RefPtr<Cairo::ImageSurface> belt_surface[STATES];
         Glib::RefPtr<Gdk::Pixbuf> pixbuf[STATES];
+
 	int span, girth;
 	int _orien;
         float left_r;
@@ -79,6 +81,12 @@ class PixFader : public Gtk::DrawingArea
         float right_b;
 
 	GdkRectangle view;
+
+	void create_patterns();
+	cairo_pattern_t* pattern;
+	cairo_pattern_t* shine_pattern;
+
+	bool _hovering;
 
 	GdkWindow* grab_window;
 	double grab_loc;

@@ -89,7 +89,6 @@ Session::pre_export ()
 
 	_exporting = true;
 	export_status->running = true;
-	export_status->Aborting.connect_same_thread (*this, boost::bind (&Session::stop_audio_export, this));
 	export_status->Finished.connect_same_thread (*this, boost::bind (&Session::finalize_audio_export, this));
 	
 	/* disable MMC output early */
@@ -157,7 +156,7 @@ Session::start_audio_export (framepos_t position)
 	return _engine.freewheel (true);
 }
 
-void
+int
 Session::process_export (pframes_t nframes)
 {
 	if (_export_rolling && export_status->stop) {
@@ -183,25 +182,28 @@ Session::process_export (pframes_t nframes)
 	} catch (std::exception & e) {
 		error << string_compose (_("Export ended unexpectedly: %1"), e.what()) << endmsg;
 		export_status->abort (true);
+		return -1;
 	}
+
+	return 0;
 }
 
 int
 Session::process_export_fw (pframes_t nframes)
 {
-
 	if (!_export_started) {
-		_export_started=true;
+		_export_started = true;
 		set_transport_speed (1.0, false);
 		butler_transport_work ();
 		g_atomic_int_set (&_butler->should_do_transport_work, 0);
 		post_transport ();
 		return 0;
 	}
-
+	
         _engine.main_thread()->get_buffers ();
 	process_export (nframes);
         _engine.main_thread()->drop_buffers ();
+
 	return 0;
 }
 
@@ -217,23 +219,22 @@ Session::stop_audio_export ()
 	_export_rolling = false;
 	_butler->schedule_transport_work ();
 
-	if (export_status->aborted()) {
-		finalize_audio_export ();
-	}
-
 	return 0;
-
 }
 
 void
 Session::finalize_audio_export ()
 {
 	_exporting = false;
-	_export_rolling = false;
+
+	if (_export_rolling) {
+		stop_audio_export ();
+	}
 
 	/* Clean up */
 
 	_engine.freewheel (false);
+
 	export_freewheel_connection.disconnect();
 	
 	MIDI::Manager::instance()->mmc()->enable_send (_pre_export_mmc_enabled);

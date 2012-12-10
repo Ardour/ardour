@@ -97,6 +97,9 @@ Mixer_UI::Mixer_UI ()
 
 	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::sync_treeview_from_order_keys, this, _1), gui_context());
 
+	scroller.set_can_default (true);
+	set_default (scroller);
+
 	scroller_base.set_flags (Gtk::CAN_FOCUS);
 	scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	scroller_base.set_name ("MixerWindow");
@@ -123,7 +126,7 @@ Mixer_UI::Mixer_UI ()
 	group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	group_display.get_column (0)->set_expand(true);
 	group_display.get_column (1)->set_expand(false);
-	group_display.set_name ("LHSList");
+	group_display.set_name ("EditGroupList");
 	group_display.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
 	group_display.set_reorderable (true);
 	group_display.set_headers_visible (true);
@@ -1791,7 +1794,7 @@ Mixer_UI::setup_track_display ()
 	track_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	track_display.get_column (0)->set_expand(true);
 	track_display.get_column (1)->set_expand(false);
-	track_display.set_name (X_("LHSList"));
+	track_display.set_name (X_("EditGroupList"));
 	track_display.get_selection()->set_mode (Gtk::SELECTION_NONE);
 	track_display.set_reorderable (true);
 	track_display.set_headers_visible (true);
@@ -1935,3 +1938,4 @@ Mixer_UI::toggle_midi_input_active (bool flip_others)
 	
 	_session->set_exclusive_input_active (rl, onoff, flip_others);
 }
+

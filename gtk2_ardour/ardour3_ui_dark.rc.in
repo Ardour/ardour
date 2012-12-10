@@ -201,7 +201,7 @@ style "default" = "medium_text"
 
 style "track_controls_inactive" 
 {
-	bg[NORMAL] =      { 0.60, 0.60, 0.66 }
+	bg[NORMAL] =      { 0.60, 0.20, 0.26 }
 	bg[ACTIVE] =      { 0.60, 0.60, 0.66 }
 	bg[INSENSITIVE] = { 0.60, 0.60, 0.66 }
 	bg[SELECTED] =    { 0.60, 0.60, 0.66 }

@@ -243,6 +243,12 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	virtual void use_destructive_playlist () {}
 	virtual void prepare_to_stop (framepos_t pos);
 
+	void engage_record_enable ();
+	void disengage_record_enable ();
+
+        virtual bool prep_record_enable () = 0;
+        virtual bool prep_record_disable () = 0;
+
 	void calculate_record_range (
 		Evoral::OverlapType ot, framepos_t transport_frame, framecnt_t nframes,
 		framecnt_t& rec_nframes, framecnt_t& rec_offset

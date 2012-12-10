@@ -85,7 +85,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, info_height (0)
 	, upper_height (0)
 	, mode_based_info_ratio (1.0)
-	, corner_radius (9)
+	, corner_radius (4)
 	, font_size (10240)
 	, editing (false)
 	, bbt_reference_time (-1)
@@ -94,7 +94,6 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, last_sdelta (0)
 	, dragging (false)
 	, drag_field (Field (0))
-
 {
 	set_flags (CAN_FOCUS);
 

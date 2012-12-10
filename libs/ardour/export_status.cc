@@ -18,6 +18,8 @@
 
 */
 
+#include <pbd/stacktrace.h>
+
 #include "ardour/export_status.h"
 
 namespace ARDOUR
@@ -59,7 +61,6 @@ ExportStatus::abort (bool error_occurred)
 	_finished = true;
 	_errors = _errors || error_occurred;
 	running = false;
-	Aborting ();
 }
 
 void
@@ -67,7 +68,7 @@ ExportStatus::finish ()
 {
 	_finished = true;
 	running = false;
-	Finished();
+	Finished(); /* EMIT SIGNAL */
 }
 
 } // namespace ARDOUR

@@ -1569,12 +1569,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void editor_list_button_toggled ();
 
 	AudioClock*               zoom_range_clock;
-	Gtk::Button              zoom_in_button;
-	Gtk::Button              zoom_out_button;
-	Gtk::Button              zoom_out_full_button;
 
-	Gtk::Button              tav_expand_button;
-	Gtk::Button              tav_shrink_button;
+	ArdourButton              zoom_in_button;
+	ArdourButton              zoom_out_button;
+	ArdourButton              zoom_out_full_button;
+
+	ArdourButton              tav_expand_button;
+	ArdourButton              tav_shrink_button;
 
 	Gtk::VBox                toolbar_clock_vbox;
 	Gtk::VBox                toolbar_selection_clock_vbox;
@@ -1931,8 +1932,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* nudge */
 
-	Gtk::Button      nudge_forward_button;
-	Gtk::Button      nudge_backward_button;
+	ArdourButton      nudge_forward_button;
+	ArdourButton      nudge_backward_button;
 	Gtk::HBox        nudge_hbox;
 	Gtk::VBox        nudge_vbox;
 	AudioClock*       nudge_clock;

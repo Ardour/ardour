@@ -1661,16 +1661,27 @@ AudioDiskstream::set_record_enabled (bool yn)
 		} else {
 			disengage_record_enable ();
 		}
+
+		RecordEnableChanged (); /* EMIT SIGNAL */
 	}
 }
 
-void
-AudioDiskstream::engage_record_enable ()
+bool
+AudioDiskstream::prep_record_enable ()
 {
+	if (!recordable() || !_session.record_enabling_legal() || _io->n_ports().n_audio() == 0) {
+		return false;
+	}
+
+	/* can't rec-enable in destructive mode if transport is before start */
+
+	if (destructive() && _session.transport_frame() < _session.current_start_frame()) {
+		return false;
+	}
+
 	bool rolling = _session.transport_speed() != 0.0f;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
-	g_atomic_int_set (&_record_enabled, 1);
 	capturing_sources.clear ();
 
 	if (Config->get_monitoring_model() == HardwareMonitoring) {
@@ -1688,13 +1699,12 @@ AudioDiskstream::engage_record_enable ()
 		}
 	}
 
-	RecordEnableChanged (); /* EMIT SIGNAL */
+	return true;
 }
 
-void
-AudioDiskstream::disengage_record_enable ()
+bool
+AudioDiskstream::prep_record_disable ()
 {
-	g_atomic_int_set (&_record_enabled, 0);
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	if (Config->get_monitoring_model() == HardwareMonitoring) {
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
@@ -1702,7 +1712,8 @@ AudioDiskstream::disengage_record_enable ()
 		}
 	}
 	capturing_sources.clear ();
-	RecordEnableChanged (); /* EMIT SIGNAL */
+
+	return true;
 }
 
 XMLNode&

@@ -46,8 +46,6 @@ Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, Data
 {
 	_freeze_record.state = NoFreeze;
         _declickable = true;
-
-	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Track::parameter_changed, this, _1));
 }
 
 Track::~Track ()
@@ -100,19 +98,6 @@ Track::state (bool full)
 	root.add_property (X_("saved-meter-point"), enum_2_string (_saved_meter_point));
 	root.add_child_nocopy (_rec_enable_control->get_state());
 	root.add_child_nocopy (_diskstream->get_state ());
-
-	if (!_deactivated_processors.empty ()) {
-		XMLNode* node = new XMLNode (X_("DeactivatedProcessors"));
-		for (list<boost::weak_ptr<Processor> >::iterator i = _deactivated_processors.begin(); i != _deactivated_processors.end(); ++i) {
-			boost::shared_ptr<Processor> p = i->lock ();
-			if (p) {
-				XMLNode* c = new XMLNode (X_("Processor"));
-				c->add_property (X_("id"), p->id().to_s());
-				node->add_child_nocopy (*c);
-			}
-		}
-		root.add_child_nocopy (*node);
-	}
 	
 	return root;
 }	
@@ -150,18 +135,6 @@ Track::set_state (const XMLNode& node, int version)
 		if (child->name() == Controllable::xml_node_name && (prop = child->property ("name")) != 0) {
 			if (prop->value() == X_("recenable")) {
 				_rec_enable_control->set_state (*child, version);
-			}
-		}
-
-		if (child->name() == X_("DeactivatedProcessors")) {
-			XMLNodeList dp = child->children ();
-			for (XMLNodeConstIterator i = dp.begin(); i != dp.end(); ++i) {
-				assert ((*i)->name() == X_("Processor"));
-				XMLProperty* prop = (*i)->property (X_("id"));
-				boost::shared_ptr<Processor> p = processor_by_id (PBD::ID (prop->value ()));
-				if (p) {
-					_deactivated_processors.push_back (p);
-				}
 			}
 		}
 	}
@@ -250,29 +223,42 @@ Track::can_record()
 	return will_record;
 }
 
-/* Turn off visible processors (except Fader), keeping track of the old states */
 void
-Track::deactivate_visible_processors ()
+Track::prep_record_enabled (bool yn, void *src)
 {
-	_deactivated_processors.clear ();
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
-	
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if ((*i)->active() && (*i)->display_to_user() && boost::dynamic_pointer_cast<Amp> (*i) == 0) {
-			(*i)->deactivate ();
-			_deactivated_processors.push_back (*i);
-		}
+	if (!_session.writable()) {
+		return;
 	}
-}
 
-/* Turn deactivated processors back on again */
-void
-Track::activate_deactivated_processors ()
-{
-	for (list<boost::weak_ptr<Processor> >::iterator i = _deactivated_processors.begin(); i != _deactivated_processors.end(); ++i) {
-		boost::shared_ptr<Processor> p = i->lock ();
-		if (p) {
-			p->activate ();
+	if (_freeze_record.state == Frozen) {
+		return;
+	}
+
+	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_recenable()) {
+		_route_group->apply (&Track::prep_record_enabled, yn, _route_group);
+		return;
+	}
+
+	/* keep track of the meter point as it was before we rec-enabled */
+	if (!_diskstream->record_enabled()) {
+		_saved_meter_point = _meter_point;
+	}
+
+	bool will_follow;
+	
+	if (yn) {
+		will_follow = _diskstream->prep_record_enable ();
+	} else {
+		will_follow = _diskstream->prep_record_disable ();
+	}
+
+	if (will_follow) {
+		if (yn) {
+			if (_meter_point != MeterCustom) {
+				set_meter_point (MeterInput);
+			}
+		} else {
+			set_meter_point (_saved_meter_point);
 		}
 	}
 }
@@ -293,32 +279,10 @@ Track::set_record_enabled (bool yn, void *src)
 		return;
 	}
 
-	/* keep track of the meter point as it was before we rec-enabled */
-	if (!_diskstream->record_enabled()) {
-		_saved_meter_point = _meter_point;
-	}
-
-	if (Config->get_do_not_record_plugins ()) {
-		if (yn) {
-			deactivate_visible_processors ();
-		} else {
-			activate_deactivated_processors ();
-		}
-	}
-
 	_diskstream->set_record_enabled (yn);
-
-	if (_diskstream->record_enabled()) {
-		if (_meter_point != MeterCustom) {
-			set_meter_point (MeterInput);
-		}
-	} else {
-		set_meter_point (_saved_meter_point);
-	}
 
 	_rec_enable_control->Changed ();
 }
-
 
 bool
 Track::set_name (const string& str)
@@ -950,22 +914,6 @@ Track::set_monitoring (MonitorChoice mc)
 	}
 }
 
-void
-Track::parameter_changed (string p)
-{
-	if (p != "do-not-record-plugins") {
-		return;
-	}
-
-	if (record_enabled ()) {
-		if (Config->get_do_not_record_plugins ()) {
-			deactivate_visible_processors ();
-		} else {
-			activate_deactivated_processors ();
-		}
-	}
-}
-	
 MeterState
 Track::metering_state () const
 {
