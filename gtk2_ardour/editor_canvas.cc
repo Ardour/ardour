@@ -106,6 +106,9 @@ Editor::initialize_canvas ()
 		track_canvas = new ArdourCanvas::CanvasAA ();
 	}
 
+	track_canvas->set_can_default (true);
+	set_default (*track_canvas);
+
 	ArdourCanvas::init ();
 	ardour_canvas_type_init ();
 

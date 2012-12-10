@@ -427,7 +427,20 @@ GainMeterBase::gain_activated ()
 	}
 
 	if (gain_display.has_focus()) {
-		PublicEditor::instance().reset_focus();
+		Gtk::Widget* w = gain_display.get_toplevel();
+		if (w) {
+			Gtk::Window* win = dynamic_cast<Gtk::Window*> (w);
+
+			/* sigh. gtkmm doesn't wrap get_default_widget() */
+
+			if (win) {
+				GtkWidget* f = gtk_window_get_default_widget (win->gobj());
+				if (f) {
+					gtk_widget_grab_focus (f);
+					return;
+				}
+			}
+		}
 	}
 }
 

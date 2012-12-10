@@ -97,6 +97,9 @@ Mixer_UI::Mixer_UI ()
 
 	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::sync_treeview_from_order_keys, this, _1), gui_context());
 
+	scroller.set_can_default (true);
+	set_default (scroller);
+
 	scroller_base.set_flags (Gtk::CAN_FOCUS);
 	scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	scroller_base.set_name ("MixerWindow");
@@ -1935,3 +1938,4 @@ Mixer_UI::toggle_midi_input_active (bool flip_others)
 	
 	_session->set_exclusive_input_active (rl, onoff, flip_others);
 }
+
