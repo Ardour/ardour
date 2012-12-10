@@ -29,7 +29,7 @@ GetOptions ("platform=s" => \$platform,
 	    "accelmap" => \$make_accelmap,
 	    "merge=s" => \$merge_from);
 
-if ($platform eq "osx") {
+if ($platform eq "darwin") {
 
     $gtk_modifier_map{'PRIMARY'} = 'Primary';
     $gtk_modifier_map{'SECONDARY'} = 'Control';
