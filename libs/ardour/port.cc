@@ -169,6 +169,8 @@ Port::connect (std::string const & other)
 		return r;
 	}
 
+        cerr << "Port::connect " << name() << " <=> " << other << endl;
+
 	if (sends_output ()) {
 		r = jack_connect (_engine->jack (), this_shrt.c_str (), other_shrt.c_str ());
 	} else {

@@ -202,8 +202,7 @@ SoundGridRack::make_connections ()
                         /* wire normal tracks and busses to the master bus */
 
                         SoundGrid::instance().connect (SoundGrid::TrackOutputPort (_rack_id, channel), 
-                                                       SoundGrid::PseudoPhysicalOutputPort (channel));
-                                                       //SoundGrid::BusInputPort (master_out->rack_id(), channel));
+                                                       SoundGrid::PseudoPhysicalOutputPortXX (channel));
                 }
                 
         }

@@ -87,9 +87,9 @@ SoundGrid::~SoundGrid()
 }
 
 bool
-SoundGrid::initialized() const 
+SoundGrid::initialized()
 {
-        return (_sg != 0);
+        return _instance && _instance->_sg;
 }
 
 bool
@@ -237,6 +237,9 @@ SoundGrid::configure_driver (uint32_t inputs, uint32_t outputs, uint32_t tracks)
        These are the ONLY chainers that talk to the physical outputs, anything
        else that wants to route to a physical output must go via the corresponding
        PseudoPhysicalOutputPort (which corresponds to one of these GroupTracks).
+
+       As of early December 2012, mono grouptracks do not function correctly, so
+       use stereo but only connect/assign their left channel.
      */
 
     for (uint32_t n = 0; n < outputs; ++n) {
@@ -313,45 +316,69 @@ SoundGrid::configure_driver (uint32_t inputs, uint32_t outputs, uint32_t tracks)
     }
 
     if (outputs) {
-            
-            DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("setting up wiring for %1 outputs\n", outputs));
+            int ret;
 
-            WSAssignmentsCommand outputsCommand;
-            Init_WSAddAssignmentsCommand(&outputsCommand, outputs, (WSDControllerHandle)this, 0);
+            DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("setting up wiring for %1 driver playback channels, part one\n", outputs));
 
-#define INDIRECT_VIA_TRACK
-            
+#if 0
+            WSAssignmentsCommand outputsCommand1;
+            Init_WSAddAssignmentsCommand(&outputsCommand1, outputs, (WSDControllerHandle)this, 0);
+#endif
+
             for (uint32_t n = 0; n < outputs; ++n) {
 
                     ARDOUR::SoundGrid::DriverInputPort src (n);   // writable driver/JACK channel/port
-#ifndef INDIRECT_VIA_TRACK
-                    ARDOUR::SoundGrid::PseudoPhysicalOutputPort dst (n);  // physical channel where the signal should go
-                    connect (src, dst);
-#else
                     ARDOUR::SoundGrid::TrackInputPort dst (n, 0);  // physical channel where the signal should go
-                    connect (src, dst);
-
-                    ARDOUR::SoundGrid::TrackOutputPort src2 (n, 0);
-                    ARDOUR::SoundGrid::PseudoPhysicalOutputPortXX dst2 (n);
-                    connect (src2, dst2);
-#endif
 
 #if 0
-                    WSAudioAssignment &assignment (outputsCommand.in_Assignments.m_aAssignments[n]);
+                    WSAudioAssignment& assignment (outputsCommand1.in_Assignments.m_aAssignments[n]);
                     
                     src.set_source (assignment);
                     dst.set_destination (assignment);
 #endif
+                    connect (src, dst);
             }
-#if 0            
-            int ret = command (&outputsCommand.m_command);
+#if 0
+            ret = command (&outputsCommand1.m_command);
             
-            Dispose_WSAudioAssignmentBatch (&outputsCommand.in_Assignments);
+            Dispose_WSAudioAssignmentBatch (&outputsCommand1.in_Assignments);
             
             if (ret != 0) {
                     return -1;
             }
 #endif
+
+            DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("setting up wiring for %1 driver playback channels, part two\n", outputs));
+
+#if 0
+            WSAssignmentsCommand outputsCommand2;
+            Init_WSAddAssignmentsCommand(&outputsCommand2, outputs, (WSDControllerHandle)this, 0);
+#endif
+
+            for (uint32_t n = 0; n < outputs; ++n) {
+
+                    ARDOUR::SoundGrid::TrackOutputPort src (n, 0); // track output
+                    ARDOUR::SoundGrid::PseudoPhysicalOutputPortXX dst (n); // group track that mixes for physical out N
+
+#if 0
+                    WSAudioAssignment& assignment (outputsCommand2.in_Assignments.m_aAssignments[n]);
+
+                    src.set_source (assignment);
+                    dst.set_destination (assignment);
+#endif
+                    connect (src, dst);
+            }
+
+#if 0
+            ret = command (&outputsCommand2.m_command);
+            
+            Dispose_WSAudioAssignmentBatch (&outputsCommand2.in_Assignments);
+            
+            if (ret != 0) {
+                    return -1;
+            }
+#endif
+
     }
 
     _driver_configured = true;
@@ -382,7 +409,6 @@ void
 SoundGrid::_finalize (void* p, int state)
 {
         EventCompletionClosure* ecc = (EventCompletionClosure*) p;
-        cerr << ecc->id << ": " << ecc->name << " finished, state = " << state << endl;
         ecc->func (state);
         delete ecc;
 }
@@ -782,11 +808,6 @@ SoundGrid::sg_port_as_jack_port (const Port& sgport)
         
         if (x != soundgrid_jack_map.end()) {
                 DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("sgport %1 found in SG/Jack map as %2\n", sgport, x->second));
-
-                for (SG_JACKMap::iterator nn = soundgrid_jack_map.begin(); nn != soundgrid_jack_map.end(); ++nn) {
-                        cerr << "SG_JACKMAP " << nn->first << " => " << nn->second << endl;
-                }
-
                 return x->second;
         }
         
@@ -987,12 +1008,10 @@ SoundGrid::configure_io (uint32_t cluster_type, uint32_t rack_id, uint32_t chann
     configEvent.controlID.sectionControlID.channelIndex = wvEnum_Unknown;
     configEvent.controlID.sectionControlID.controlID = eControlID_Input_MonoStereo;
 
-#if 0
     if (set (&configEvent, string_compose ("I/O configure ctype %1 id %2 to have %3 channels", 
                                            cluster_type, rack_id, channels))) {
             return -1;
     }
-#endif
     
     return 0;
 }

@@ -42,6 +42,13 @@
 #include "ardour/session.h"
 #include "ardour/user_bundle.h"
 
+#ifdef HAVE_SOUNDGRID
+#include "ardour/port_insert.h"
+#include "ardour/profile.h"
+#include "ardour/return.h"
+#include "ardour/send.h"
+#endif
+
 #include "i18n.h"
 
 #define BLOCK_PROCESS_CALLBACK() Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock())
@@ -225,6 +232,19 @@ IO::connect (boost::shared_ptr<Port> our_port, string other_port, void* src)
 	if (other_port.length() == 0 || our_port == 0) {
 		return 0;
 	}
+
+#if 0 // def HAVE_SOUNDGRID
+        if (direction() == Output && !AudioEngine::instance()->port_is_mine (other_port) && Profile->get_soundgrid()) {
+                /* When using soundgrid, there are no outbound JACK connections except from sends, returns, inserts.
+                   All outbound audio is routed into the soundgrid first and then from there to final destinations.
+                 */
+                   
+                if (!dynamic_cast<Send*>(this) && !dynamic_cast<Return*>(this) && !dynamic_cast<PortInsert*>(this)) {
+                        return 0;
+                }
+                cerr << "Skip connecting " << our_port->name() << " to " << other_port << endl;
+        }
+#endif
 
 	{
 		Glib::Threads::Mutex::Lock lm (io_lock);

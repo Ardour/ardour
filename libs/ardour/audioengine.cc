@@ -942,6 +942,8 @@ AudioEngine::connect (const string& source, const string& destination)
 		}
 	}
 
+        cerr << "AE::connect " << source << " =>" << destination << endl;
+
 	string s = make_port_name_non_relative (source);
 	string d = make_port_name_non_relative (destination);
 
@@ -1272,11 +1274,17 @@ AudioEngine::get_physical (DataType type, unsigned long flags, vector<string>& p
 
                 if (Profile->get_soundgrid()) {
                         uint32_t limit;
+                        
+                        cerr << "physical starts with " << phy.size() << endl;
+                        
                         if (flags & JackPortIsOutput) {
                                 limit = SoundGrid::instance().physical_outputs();
+                                cerr << "output limit is " << limit << endl;
                         } else {
                                 limit = SoundGrid::instance().physical_inputs();
+                                cerr << "input limit is " << limit << endl;
                         }
+
 
                         while (phy.size() > limit) {
                                 phy.pop_back ();

@@ -47,7 +47,7 @@ class SoundGrid : public boost::noncopyable
                         uint32_t physical_inputs, uint32_t physical_outputs, uint32_t max_plugins_per_rack);
         int teardown ();
 
-        bool initialized () const;
+        static bool initialized ();
         bool driver_configured() const;
 
 	static SoundGrid& instance();

@@ -154,6 +154,10 @@ soundgrid_init (uint32_t max_phys_inputs, uint32_t max_phys_outputs,
                 uint32_t max_tracks, uint32_t max_busses,
                 uint32_t max_plugins)
 {
+        if (ARDOUR::SoundGrid::initialized()) {
+                return 0;
+        }
+
         Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (soundgrid_initialize), 
                                                  max_tracks, max_busses, 
                                                  max_phys_inputs,

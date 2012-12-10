@@ -809,6 +809,20 @@ EngineControl::enumerate_devices (const string& driver)
 	}
 }
 
+vector<string>
+EngineControl::enumerate_netjack_devices ()
+{
+	vector<string> devs;
+	return devs;
+}
+
+vector<string>
+EngineControl::enumerate_dummy_devices ()
+{
+	vector<string> devs;
+	return devs;
+}
+
 #ifdef __APPLE__
 static OSStatus
 getDeviceUIDFromID( AudioDeviceID id, char *name, size_t nsize)
@@ -986,19 +1000,8 @@ EngineControl::enumerate_oss_devices ()
 	vector<string> devs;
 	return devs;
 }
-vector<string>
-EngineControl::enumerate_dummy_devices ()
-{
-	vector<string> devs;
-	return devs;
-}
-vector<string>
-EngineControl::enumerate_netjack_devices ()
-{
-	vector<string> devs;
-	return devs;
-}
 #endif
+
 
 void
 EngineControl::interface_changed ()
