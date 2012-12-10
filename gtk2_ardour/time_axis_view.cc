@@ -1249,13 +1249,13 @@ TimeAxisView::preset_height (Height h)
 {
 	switch (h) {
 	case HeightLargest:
-		return (button_height * 2) + extra_height + 250;
+		return (button_height * 2) + extra_height + 260;
 	case HeightLarger:
-		return (button_height * 2) + extra_height + 150;
+		return (button_height * 2) + extra_height + 160;
 	case HeightLarge:
-		return (button_height * 2) + extra_height + 50;
+		return (button_height * 2) + extra_height + 60;
 	case HeightNormal:
-		return (button_height * 2) + extra_height;
+		return (button_height * 2) + extra_height + 10;
 	case HeightSmall:
 		return button_height + extra_height;
 	}
