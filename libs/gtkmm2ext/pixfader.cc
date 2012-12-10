@@ -305,6 +305,11 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 			remove_modal_grab();
 			dragging = false;
 
+			if (!_hovering) {
+				Keyboard::magic_widget_drop_focus();
+				queue_draw ();
+			}
+
 			if (ev_pos == grab_start) {
 
 				/* no motion - just a click */
@@ -499,9 +504,11 @@ PixFader::on_enter_notify_event (GdkEventCrossing*)
 bool
 PixFader::on_leave_notify_event (GdkEventCrossing*)
 {
-	_hovering = false;
-	Keyboard::magic_widget_drop_focus();
-	queue_draw ();
+	if (!dragging) {
+		_hovering = false;
+		Keyboard::magic_widget_drop_focus();
+		queue_draw ();
+	}
 	return false;
 }
 
