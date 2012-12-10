@@ -40,7 +40,17 @@ class PixFader : public Gtk::DrawingArea
 
 	void set_default_value (float);
 
+	void set_text (const std::string&);
+
   protected:
+	Glib::RefPtr<Pango::Layout> _layout;
+	std::string                 _text;
+	int   _text_width;
+	int   _text_height;
+	double text_r;
+	double text_g;
+	double text_b;
+
 	Gtk::Adjustment& adjustment;
 
 	void on_size_request (GtkRequisition*);

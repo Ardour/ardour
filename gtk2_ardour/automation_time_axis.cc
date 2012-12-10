@@ -153,16 +153,9 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		set_height (preset_height (HeightNormal));
 	}
 
-	/* rearrange the name display */
-
-	controls_table.remove (name_hbox);
-	controls_table.attach (name_hbox, 1, 6, 0, 1,  Gtk::FILL|Gtk::EXPAND,  Gtk::FILL|Gtk::EXPAND, 3, 0);
-
-	/* we never show these for automation tracks, so make
-	   life easier and remove them.
-	*/
-
-	hide_name_entry();
+	/* for automation tracks, the label does not swap with an entry box. remove all that stuff */
+	if ( name_label.get_parent() )
+		name_hbox.remove(name_label);
 
 	name_label.set_text (_name);
 	name_label.set_alignment (Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
@@ -178,12 +171,13 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	/* add the buttons */
 	controls_table.attach (hide_button, 0, 1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-	controls_table.attach (auto_button, 6, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	controls_table.attach (name_label, 0, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	controls_table.attach (auto_button, 6, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
 	if (_controller) {
 		_controller.get()->set_size_request(-1, 24);
 		/* add bar controller */
-		controls_table.attach (*_controller.get(), 0, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (*_controller.get(), 1, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		/* note that this handler connects *before* the default handler */
 		_controller->event_widget().signal_scroll_event().connect (mem_fun (*this, &AutomationTimeAxisView::controls_ebox_scroll), false);
 	}
@@ -427,21 +421,15 @@ AutomationTimeAxisView::set_height (uint32_t h)
 		first_call_to_set_height = false;
 
 		if (h >= preset_height (HeightNormal)) {
-			hide_name_entry ();
-			show_name_label ();
-			name_hbox.show_all ();
-
+			name_label.show();
 			auto_button.show();
 			hide_button.show_all();
 
 		} else if (h >= preset_height (HeightSmall)) {
 			controls_table.hide_all ();
 			hide_name_entry ();
-			show_name_label ();
-			name_hbox.show_all ();
-
+			name_label.hide();
 			auto_button.hide();
-			hide_button.hide();
 		}
 	}
 

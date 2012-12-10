@@ -143,7 +143,17 @@ PixFader::create_patterns ()
 		cairo_pattern_add_color_stop_rgba (shine_pattern, 0.5, 1,1,1,0.0);
 		cairo_pattern_add_color_stop_rgba (shine_pattern, 1, 1,1,1,0.0);
 	}
-	
+
+	if ( !_text.empty()) {
+		_layout->get_pixel_size (_text_width, _text_height);
+	} else {
+		_text_width = 0;
+		_text_height = 0;
+	}
+	c = get_style()->get_text (get_state());
+	text_r = c.get_red_p ();
+	text_g = c.get_green_p ();
+	text_b = c.get_blue_p ();
 }
 
 bool
@@ -196,22 +206,34 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 //		cairo_fill (cr);
 	}
 	
-	/* always draw the unity-position line */
-
-	if (_orien == VERT) {
-                context->set_line_width (1); 
-                context->set_source_rgb (0.0, 1.0, 0.0);
-                context->move_to (1, unity_loc);
-                context->line_to (girth, unity_loc);
-                context->stroke ();
-	} else {
-                context->set_line_width (1); 
-                context->set_source_rgb (0.0, 1.0, 0.0);
-                context->move_to (unity_loc, 1);
-                context->line_to (unity_loc, girth);
-                context->stroke ();
+	/* draw the unity-position line if it's not at either end*/
+	if (unity_loc > 0) {
+		if ( _orien == VERT && unity_loc < h ) {
+					context->set_line_width (1); 
+					context->set_source_rgb (0.0, 1.0, 0.0);
+					context->move_to (1, unity_loc);
+					context->line_to (girth, unity_loc);
+					context->stroke ();
+		} else if ( unity_loc < w ){
+					context->set_line_width (1); 
+					context->set_source_rgb (0.0, 1.0, 0.0);
+					context->move_to (unity_loc, 1);
+					context->line_to (unity_loc, girth);
+					context->stroke ();
+		}
 	}
+	
+	if ( !_text.empty() ) {
 
+		cairo_new_path (cr);	
+
+		/* center text */
+		cairo_move_to (cr, (get_width() - _text_width)/2.0, get_height()/2.0 - _text_height/2.0);
+
+		cairo_set_source_rgba (cr, text_r, text_g, text_b, 0.9);
+		pango_cairo_show_layout (cr, _layout->gobj());
+	} 
+	
 //	if (Config->get_widget_prelight()) {  //pixfader does not have access to config
 		if (_hovering) {
 			Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), 3);
@@ -243,7 +265,8 @@ PixFader::on_size_allocate (Gtk::Allocation& alloc)
 	}
 
 	update_unity_position ();
-
+	create_patterns();
+	
 	queue_draw ();
 }
 
@@ -499,3 +522,20 @@ PixFader::set_default_value (float d)
 	default_value = d;
 	update_unity_position ();
 }
+
+void
+PixFader::set_text (const std::string& str)
+{
+	_text = str;
+
+ 	if (!_layout && !_text.empty()) {
+		_layout = Pango::Layout::create (get_pango_context());
+	} 
+
+	if (_layout) {
+		_layout->set_text (str);
+	}
+
+	queue_resize ();
+}
+

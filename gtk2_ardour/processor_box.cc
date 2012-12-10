@@ -432,9 +432,13 @@ ProcessorEntry::Control::Control (Glib::RefPtr<Gdk::Pixbuf> s, Glib::RefPtr<Gdk:
 
 	} else {
 		
-		box.pack_start (_label);
-		_label.show ();
-		_label.set_text (_name);
+		_slider.set_name ("PluginSlider");
+		_slider.set_size_request (-1, 20);
+		_slider.set_text (_name);
+
+//		box.pack_start (_label);
+//		_label.show ();
+//		_label.set_text (_name);
 		box.pack_start (_slider);
 		_slider.show ();
 
