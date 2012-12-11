@@ -4293,7 +4293,7 @@ Editor::idle_visual_changer ()
 					    current_bbt_points_begin, current_bbt_points_end);
 		compute_bbt_ruler_scale (pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_frames(),
 					 current_bbt_points_begin, current_bbt_points_end);
-		update_tempo_based_rulers (current_bbt_points_end, current_bbt_points_begin);
+		update_tempo_based_rulers (current_bbt_points_begin, current_bbt_points_end);
 	}
 	if (p & VisualChange::TimeOrigin) {
 		set_horizontal_position (pending_visual_change.time_origin / frames_per_unit);
