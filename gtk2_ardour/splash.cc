@@ -198,11 +198,15 @@ Splash::message (const string& msg)
 
 	layout->set_markup (str);
 	Glib::RefPtr<Gdk::Window> win = darea.get_window();
-
+	
 	if (win) {
                 expose_done = false;
 
-		win->invalidate_rect (Gdk::Rectangle (0, darea.get_height() - 30, darea.get_width(), 30), true);
+		if (win->is_visible ()) {
+			win->invalidate_rect (Gdk::Rectangle (0, darea.get_height() - 30, darea.get_width(), 30), true);
+		} else {
+			darea.queue_draw ();
+		}
 
                 while (!expose_done) {
                         gtk_main_iteration ();
