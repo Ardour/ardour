@@ -54,6 +54,7 @@ JackMIDIPort::JackMIDIPort (string const & name, Flags flags, jack_client_t* jac
 	, _nframes_this_cycle (0)
 	, _jack_client (jack_client)
 	, _jack_port (0)
+	, _last_write_timestamp (0)
 	, output_fifo (512)
 	, input_fifo (1024)
 	, xthread (true)
@@ -68,6 +69,7 @@ JackMIDIPort::JackMIDIPort (const XMLNode& node, jack_client_t* jack_client)
 	, _nframes_this_cycle (0)
 	, _jack_client (jack_client)
 	, _jack_port (0)
+	, _last_write_timestamp (0)
 	, output_fifo (512)
 	, input_fifo (1024)
 	, xthread (true)
@@ -255,8 +257,7 @@ JackMIDIPort::write (const byte * msg, size_t msglen, timestamp_t timestamp)
 
 	} else {
 
-		// XXX This had to be temporarily commented out to make export work again
-		if (!(timestamp < _nframes_this_cycle)) {
+		if (timestamp >= _nframes_this_cycle) {
 			std::cerr << "attempting to write MIDI event of " << msglen << " bytes at time "
 				  << timestamp << " of " << _nframes_this_cycle
 				  << " (this will not work - needs a code fix)"
@@ -268,17 +269,21 @@ JackMIDIPort::write (const byte * msg, size_t msglen, timestamp_t timestamp)
 				timestamp = _last_write_timestamp;
 			} 
 
-			if (jack_midi_event_write (jack_port_get_buffer (_jack_port, _nframes_this_cycle), 
-						timestamp, msg, msglen) == 0) {
+			if ((ret = jack_midi_event_write (jack_port_get_buffer (_jack_port, _nframes_this_cycle), 
+							  timestamp, msg, msglen)) == 0) {
 				ret = msglen;
 				_last_write_timestamp = timestamp;
 
 			} else {
-				ret = 0;
-				cerr << "write of " << msglen << " failed, port holds "
+				cerr << "write of " << msglen << " @ " << timestamp << " failed, port holds "
 					<< jack_midi_get_event_count (jack_port_get_buffer (_jack_port, _nframes_this_cycle))
-					<< endl;
-				// PBD::stacktrace (cerr, 20);
+				     << " port is " << _jack_port
+				     << " ntf = " << _nframes_this_cycle
+				     << " buf = " << jack_port_get_buffer (_jack_port, _nframes_this_cycle)
+				     << " ret = " << ret
+				     << endl;
+				PBD::stacktrace (cerr, 20);
+				ret = 0;
 			}
 		} else {
 			cerr << "write to JACK midi port failed: not currently in a process cycle." << endl;
