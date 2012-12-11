@@ -57,7 +57,7 @@ style "large_bold_text"
 
 style "large_bold_mono_text"
 {
- 	font_name = "bold monospace @FONT_BIGGER@"
+ 	font_name = "@BOLD_MONOSPACE@ @FONT_BIGGER@"
 }
 
 style "larger_text"
@@ -72,7 +72,7 @@ style "massive_text"
 
 style "monospace massive_text"
 {
-  	font_name = "bold monospace @FONT_MASSIVE@"
+  	font_name = "@BOLD_MONOSPACE@ @FONT_MASSIVE@"
 }
 
 style "larger_bold_text"

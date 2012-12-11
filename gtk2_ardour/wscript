@@ -511,7 +511,8 @@ def build(bld):
                 'LARGE' : '18',
                 'LARGER' : '28',
                 'HUGER' : '36',
-                'MASSIVE' : '60'
+                'MASSIVE' : '60',
+                'BOLD_MONOSPACE' : 'monospace'
         }
     else: # Linux/X11 fonts
         basefont = '' # unspecified - use system defaults
@@ -525,8 +526,9 @@ def build(bld):
                 'LARGE' : '18',
                 'LARGER' : '24',
                 'HUGER' : '34',
-                'MASSIVE' : '60'
-        }
+                'MASSIVE' : '60',
+                'BOLD_MONOSPACE' : 'bold monospace'
+       }
 
     # Set up font substitution dictionary
     # @FONT_XXXX@
