@@ -2454,6 +2454,9 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 				session_path = ARDOUR_COMMAND_LINE::session_name;
 				session_name = Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name);
 			}
+		} else {
+			session_path = "";
+			session_name = "";
 		}
 
 		delete _startup;
