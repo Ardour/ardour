@@ -502,7 +502,6 @@ def build(bld):
     if bld.is_defined('GTKOSX'): # OS X fonts
         basefont = ""
         font_sizes = {
-                'TINY' : '7',
                 'SMALLER' : '9',
                 'SMALL' : '10',
                 'NORMAL' : '11',
@@ -517,7 +516,6 @@ def build(bld):
     else: # Linux/X11 fonts
         basefont = '' # unspecified - use system defaults
         font_sizes = {
-                'TINY' : '6',
                 'SMALLER' : '8',
                 'SMALL' : '9',
                 'NORMAL' : '10',

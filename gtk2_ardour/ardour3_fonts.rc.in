@@ -1,8 +1,3 @@
-style "smallest_text"
-{
-	font_name = "@FONT_TINY@"
-}
-
 style "very_small_text"
 {
  	font_name = "@FONT_SMALLER@"
