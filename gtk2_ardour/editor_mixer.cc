@@ -80,7 +80,7 @@ Editor::show_editor_mixer (bool yn)
 		Glib::RefPtr<Gdk::Window> win = get_window ();
 		Glib::RefPtr<Gdk::Screen> screen;
 		
-		if (get_window()) {
+		if (win) {
 			 screen = win->get_screen();
 		} else {
 			screen = Gdk::Screen::get_default();
