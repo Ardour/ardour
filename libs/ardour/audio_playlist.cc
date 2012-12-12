@@ -207,6 +207,10 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, fr
 	for (RegionList::iterator i = all->begin(); i != all->end(); ++i) {
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*i);
 
+		/* muted regions don't figure into it at all */
+		if ( ar->muted() )
+			continue;
+
 		/* Work out which bits of this region need to be read;
 		   first, trim to the range we are reading...
 		*/
