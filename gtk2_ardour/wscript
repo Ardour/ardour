@@ -511,6 +511,8 @@ def build(bld):
                 'LARGER' : '28',
                 'HUGER' : '36',
                 'MASSIVE' : '60',
+        }
+        font_names = {
                 'BOLD_MONOSPACE' : 'monospace'
         }
     else: # Linux/X11 fonts
@@ -525,8 +527,10 @@ def build(bld):
                 'LARGER' : '24',
                 'HUGER' : '34',
                 'MASSIVE' : '60',
+        }
+        font_names = {
                 'BOLD_MONOSPACE' : 'bold monospace'
-       }
+        }
 
     # Set up font substitution dictionary
     # @FONT_XXXX@
@@ -547,6 +551,12 @@ def build(bld):
             key = "_".join (['FONT_SIZE',sizename])
             dark_rc_subst_dict[key] = points
             light_rc_subst_dict[key] = points
+
+    # various font names, eg @BOLD_MONOSPACE@
+    for font_sym,text in iter(font_names.items()):
+        key = font_sym
+        dark_rc_subst_dict[key] = text
+        light_rc_subst_dict[key] = text
 
     # RC files
     dark_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme(
