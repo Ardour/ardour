@@ -77,9 +77,11 @@ class PixFader : public Gtk::DrawingArea
 		STATES
 	};
 	
+#if 0
         Cairo::RefPtr<Cairo::Context> belt_context[STATES];
         Cairo::RefPtr<Cairo::ImageSurface> belt_surface[STATES];
         Glib::RefPtr<Gdk::Pixbuf> pixbuf[STATES];
+#endif
 
 	int span, girth;
 	int _orien;

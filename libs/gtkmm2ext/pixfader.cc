@@ -42,8 +42,10 @@ PixFader::PixFader (
 	: adjustment (adj),
 	  _orien(orientation)
 {
+#if 0
 	pixbuf[NORMAL] = belt;
 	pixbuf[DESENSITISED] = belt_desensitised;
+#endif
 	
 	pattern = 0;
 	shine_pattern = 0;
@@ -69,6 +71,7 @@ PixFader::PixFader (
 	adjustment.signal_value_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
 	adjustment.signal_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
 
+#if 0
 	for (int i = 0; i < STATES; ++i) {
 		Cairo::Format format;
 			
@@ -83,6 +86,7 @@ PixFader::PixFader (
 		Gdk::Cairo::set_source_pixbuf (belt_context[i], pixbuf[i], 0.0, 0.0);
 		belt_context[i]->paint();
 	}
+#endif
 	
         left_r = 0;
         left_g = 0;
