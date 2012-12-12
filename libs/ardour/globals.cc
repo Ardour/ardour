@@ -113,7 +113,6 @@ mix_buffers_with_gain_t ARDOUR::mix_buffers_with_gain = 0;
 mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain = 0;
 
 PBD::Signal1<void,std::string> ARDOUR::BootMessage;
-PBD::Signal0<void> ARDOUR::GUIIdle;
 
 namespace ARDOUR {
 extern void setup_enum_writer ();
