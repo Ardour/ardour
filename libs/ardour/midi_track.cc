@@ -772,30 +772,3 @@ MidiTrack::set_monitoring (MonitorChoice mc)
 	}
 }
 
-MonitorState
-MidiTrack::monitoring_state () const
-{
-	return Track::monitoring_state();
-
-	/* Explicit requests */
-	
-	if (_monitoring & MonitorInput) {
-		return MonitoringInput;
-	}
-		
-	if (_monitoring & MonitorDisk) {
-		return MonitoringDisk;
-	}
-
-	if (_session.transport_rolling()) {
-		return MonitoringDisk;
-	} 
-
-	/* the return value here doesn't mean that we're actually monitoring
-	 * input, let alone input *audio*. but it means that we are NOT 
-	 * monitoring silence. this allows us to still hear any audio generated
-	 * by using internal generation techniques
-	 */
-
-	return MonitoringInput;
-}

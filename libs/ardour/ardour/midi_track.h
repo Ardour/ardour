@@ -102,7 +102,6 @@ public:
 	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
 
 	void set_monitoring (MonitorChoice);
-	MonitorState monitoring_state () const;
 
 	void set_input_active (bool);
 	bool input_active () const;
