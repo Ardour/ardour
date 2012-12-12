@@ -201,17 +201,26 @@ ArdourButton::render (cairo_t* cr)
 		}
 
 		if (active_state() == Gtkmm2ext::ImplicitActive) {
-			//background color
-			cairo_set_source (cr, fill_pattern);
-			cairo_fill (cr);
 
-			//border
-			UINT_TO_RGBA (fill_color_active, &r, &g, &b, &a);
-			cairo_set_line_width (cr, 1.0);
-			rounded_function (cr, 2, 2, get_width()-4, get_height()-4, _corner_radius - 1.5);
-			cairo_set_source_rgba (cr, r/255.0, g/255.0, b/255.0, a/255.0);
-			cairo_stroke (cr);
-
+			if (_tweaks & ImplicitUsesSolidColor) {
+				// note: with this tweak, implicit-active
+				// background color uses "led active" color
+				UINT_TO_RGBA (fill_color_active, &r, &g, &b, &a);
+				cairo_set_source_rgba (cr, r/255.0, g/255.0, b/255.0, a/255.0);
+				cairo_fill (cr);
+			} else {
+				//background color
+				cairo_set_source (cr, fill_pattern);
+				cairo_fill (cr);
+				
+				//border
+				UINT_TO_RGBA (fill_color_active, &r, &g, &b, &a);
+				cairo_set_line_width (cr, 1.0);
+				rounded_function (cr, 2, 2, get_width()-4, get_height()-4, _corner_radius - 1.5);
+				cairo_set_source_rgba (cr, r/255.0, g/255.0, b/255.0, a/255.0);
+				cairo_stroke (cr);
+			}
+				
 		} else if (active_state() == Gtkmm2ext::ExplicitActive || ((_elements & Indicator)==Indicator) ) {
 
 			//background color
@@ -431,11 +440,11 @@ ArdourButton::set_colors ()
 	uint32_t text_color;
 	uint32_t led_color;
 
-	/* we use the edge of the button to show Selected state, so the
-	 * color/pattern used there will vary depending on that
-	 */
-	
-	fill_color_active = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end active", get_name()));
+	if (_tweaks & ImplicitUsesSolidColor) {
+		fill_color_active = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led active", get_name()));
+	} else {
+		fill_color_active = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end active", get_name()));
+	}
 	fill_color_inactive = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end", get_name()));
 	border_color = ARDOUR_UI::config()->color_by_name ( "button border" );
 
@@ -457,7 +466,7 @@ ArdourButton::set_colors ()
 	if (_elements & Body) {
 
 		start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start active", get_name()));
-
+		
 		if (_flat_buttons) {
 			end_color = start_color;
 		} else {
@@ -521,7 +530,7 @@ ArdourButton::set_colors ()
 	
 	/* text and LED colors */
 
-	if (active_state() == Gtkmm2ext::ExplicitActive) {
+	if (active_state() == Gtkmm2ext::ExplicitActive || ((_tweaks & ImplicitUsesSolidColor) && active_state() == Gtkmm2ext::ImplicitActive)) {
 		text_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: text active", get_name()));
 		led_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led active", get_name()));
 	} else {

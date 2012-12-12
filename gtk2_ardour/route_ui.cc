@@ -120,6 +120,7 @@ RouteUI::init ()
 
 	rec_enable_button = manage (new ArdourButton);
 	rec_enable_button->set_name ("record enable button");
+	rec_enable_button->set_tweaks (ArdourButton::ImplicitUsesSolidColor);
 	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
 
 	show_sends_button = manage (new ArdourButton);
