@@ -2012,6 +2012,8 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 			bus->add_internal_return ();
 
 			ret.push_back (bus);
+			
+			ARDOUR::GUIIdle ();
 		}
 
 
@@ -2242,6 +2244,8 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 				order++;
 			}
 		}
+
+		ARDOUR::GUIIdle ();
 	}
 
 	if (_monitor_out && IO::connecting_legal) {

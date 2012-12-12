@@ -48,6 +48,7 @@ namespace ARDOUR {
 	class AudioEngine;
 
 	extern PBD::Signal1<void,std::string> BootMessage;
+	extern PBD::Signal0<void> GUIIdle;
 
 	int init (bool with_vst, bool try_optimization);
 	void init_post_engine ();

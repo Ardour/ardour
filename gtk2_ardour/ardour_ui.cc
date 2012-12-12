@@ -325,6 +325,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	_process_thread->init ();
 
 	DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
+
+	ARDOUR::GUIIdle.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&Gtkmm2ext::UI::flush_pending, this), gui_context());
 }
 
 int
@@ -3148,16 +3150,6 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 		return;
 	}
 
-	if (count > 8) {
-		/* 8 is arbitrary - we just need a threshold for where
-		   we start caring that this operation might take
-		   a long time
-		*/
-		flush_pending();
-		flush_pending();
-		flush_pending();
-	}
-	
 	string template_path = add_route_dialog->track_template();
 
 	if (!template_path.empty()) {
@@ -3170,7 +3162,6 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	string name_template = add_route_dialog->name_template ();
 	PluginInfoPtr instrument = add_route_dialog->requested_instrument ();
 	RouteGroup* route_group = add_route_dialog->route_group ();
-
 	AutoConnectOption oac = Config->get_output_auto_connect();
 
 	if (oac & AutoConnectMaster) {
