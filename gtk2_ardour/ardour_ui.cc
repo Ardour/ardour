@@ -326,7 +326,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
 
-	ARDOUR::GUIIdle.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&Gtkmm2ext::UI::flush_pending, this), gui_context());
+	// ARDOUR::GUIIdle.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&Gtkmm2ext::UI::flush_pending, this), gui_context());
 }
 
 int
