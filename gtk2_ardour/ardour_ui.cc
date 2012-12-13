@@ -325,9 +325,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	_process_thread->init ();
 
 	DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
-
-	// ARDOUR::GUIIdle.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&Gtkmm2ext::UI::flush_pending, this), gui_context());
 }
+
 
 int
 ARDOUR_UI::create_engine ()
@@ -3150,6 +3149,12 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 		return;
 	}
 
+	PBD::ScopedConnection idle_connection;
+
+	if (count > 8) {
+		ARDOUR::GUIIdle.connect (idle_connection, MISSING_INVALIDATOR, boost::bind (&Gtkmm2ext::UI::flush_pending, this), gui_context());
+	}
+
 	string template_path = add_route_dialog->track_template();
 
 	if (!template_path.empty()) {
@@ -3187,6 +3192,8 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 		session_add_audio_bus (input_chan.n_audio(), output_chan.n_audio(), route_group, count, name_template);
 		break;
 	}
+
+	/* idle connection will end at scope end */
 }
 
 XMLNode*
