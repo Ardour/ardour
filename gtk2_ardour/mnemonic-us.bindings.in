@@ -32,7 +32,7 @@ $ARDOUR Shortcuts \linebreak Mnemonic US-Keypad
 %wvis Window Visibility
 
 %eep Editing with Edit Point
-Most edit functions operate on a single "Edit Point". The edit point can be any of: playhead (default), the mouse or an active marker. The choice of Edit Point is by default linked to the Zoom Focus.
+Most edit functions operate on a single "Edit Point". The edit point can be any of: playhead (default), the mouse or an active marker. The choice of Edit Point (by default) also sets the Zoom Focus.
 
 %aep Aligning with the Edit Point
 Align operations move regions so that their start/end/sync point is at the edit point. "Relative" operations
@@ -332,6 +332,7 @@ This mode provides many different operations on both regions and control points,
 
 ;; numbers
 
+@eep|Editor/cycle-zoom-focus|1|cycle to next zoom focus
 @eep|Editor/cycle-snap-mode|2|cycle to next grid snap mode
 @eep|Editor/prev-snap-choice|3|use next grid unit
 @eep|Editor/prev-snap-choice-music-only|<@PRIMARY@>3|use previous grid unit

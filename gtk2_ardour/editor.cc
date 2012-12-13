@@ -3579,6 +3579,31 @@ Editor::set_zoom_focus (ZoomFocus f)
 }
 
 void
+Editor::cycle_zoom_focus ()
+{
+	switch (zoom_focus) {
+	case ZoomFocusLeft:
+		set_zoom_focus (ZoomFocusRight);
+		break;
+	case ZoomFocusRight:
+		set_zoom_focus (ZoomFocusCenter);
+		break;
+	case ZoomFocusCenter:
+		set_zoom_focus (ZoomFocusPlayhead);
+		break;
+	case ZoomFocusPlayhead:
+		set_zoom_focus (ZoomFocusMouse);
+		break;
+	case ZoomFocusMouse:
+		set_zoom_focus (ZoomFocusEdit);
+		break;
+	case ZoomFocusEdit:
+		set_zoom_focus (ZoomFocusLeft);
+		break;
+	}
+}
+
+void
 Editor::ensure_float (Window& win)
 {
 	win.set_transient_for (*this);
