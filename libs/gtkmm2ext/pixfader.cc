@@ -318,8 +318,6 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 
 				/* no motion - just a click */
 
-				cerr << "no motion click\n";
-
 				if (ev->state & Keyboard::TertiaryModifier) {
 					adjustment.set_value (default_value);
 				} else if (ev->state & Keyboard::GainFineScaleModifier) {
