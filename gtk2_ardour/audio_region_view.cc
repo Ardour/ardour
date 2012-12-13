@@ -77,7 +77,6 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 	, fade_out_shape(0)
 	, fade_in_handle(0)
 	, fade_out_handle(0)
-	, fade_position_line(0)
 	, start_xfade_in (0)
 	, start_xfade_out (0)
 	, start_xfade_rect (0)
@@ -100,7 +99,6 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView
 	, fade_out_shape(0)
 	, fade_in_handle(0)
 	, fade_out_handle(0)
-	, fade_position_line(0)
 	, start_xfade_in (0)
 	, start_xfade_out (0)
 	, start_xfade_rect (0)
@@ -121,7 +119,6 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_pt
 	, fade_out_shape(0)
 	, fade_in_handle(0)
 	, fade_out_handle(0)
-	, fade_position_line(0)
 	, start_xfade_in (0)
 	, start_xfade_out (0)
 	, start_xfade_rect (0)
@@ -178,13 +175,6 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 		fade_out_handle->property_outline_color_rgba() = RGBA_TO_UINT (0, 0, 0, 0);
 
 		fade_out_handle->set_data ("regionview", this);
-
-		fade_position_line = new ArdourCanvas::SimpleLine (*group);
-		fade_position_line->property_color_rgba() = 0xBBBBBBAA;
-		fade_position_line->property_y1() = 7;
-		fade_position_line->property_y2() = _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1;
-
-		fade_position_line->hide();
 	}
 
 	setup_fade_handle_positions ();
@@ -285,12 +275,6 @@ AudioRegionView::region_changed (const PropertyChange& what_changed)
 	}
 	if (what_changed.contains (ARDOUR::Properties::fade_out_active)) {
 		fade_out_active_changed ();
-	}
-	if (what_changed.contains (ARDOUR::Properties::fade_in_is_xfade)) {
-		fade_in_changed ();
-	}
-	if (what_changed.contains (ARDOUR::Properties::fade_out_is_xfade)) {
-		fade_out_changed ();
 	}
 	if (what_changed.contains (ARDOUR::Properties::envelope_active)) {
 		envelope_active_changed ();
@@ -523,16 +507,6 @@ AudioRegionView::set_height (gdouble height)
 		(*l).second->property_points() = points;
 	}
 
-	if (fade_position_line) {
-
-		if (height < NAME_HIGHLIGHT_THRESH) {
-			fade_position_line->property_y2() = _height - 1;
-		}
-		else {
-			fade_position_line->property_y2() = _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1;
-		}
-	}
-
 	if (name_pixbuf) {
 		name_pixbuf->raise_to_top();
 	}
@@ -554,25 +528,7 @@ AudioRegionView::reset_fade_in_shape ()
 void
 AudioRegionView::reset_fade_in_shape_width (framecnt_t width)
 {
-	if (dragging()) {
-		return;
-	}
-
-	if (audio_region()->fade_in_is_xfade()) {
-		if (fade_in_handle) {
-			fade_in_handle->hide ();
-			fade_in_shape->hide ();
-		}
-		redraw_start_xfade ();
-		return;
-	} else {
-		if (start_xfade_in) {
-			start_xfade_in->hide ();
-			start_xfade_out->hide ();
-			start_xfade_rect->hide ();
-			_start_xfade_visible = false;
-		}
-	}
+	redraw_start_xfade ();
 
 	if (fade_in_handle == 0) {
 		return;
@@ -590,12 +546,6 @@ AudioRegionView::reset_fade_in_shape_width (framecnt_t width)
 	double const pwidth = rint (width / samples_per_unit);
 	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
 	double h;
-
-	if (_height < 5) {
-		fade_in_shape->hide();
-		fade_in_handle->hide();
-		return;
-	}
 
 	double const handle_center = pwidth;
 
@@ -620,7 +570,7 @@ AudioRegionView::reset_fade_in_shape_width (framecnt_t width)
 	if (_height >= NAME_HIGHLIGHT_THRESH) {
 		h = _height - NAME_HIGHLIGHT_SIZE - 2;
 	} else {
-		h = _height;
+		h = _height - 2;
 	}
 
 	/* points *MUST* be in anti-clockwise order */
@@ -663,26 +613,7 @@ AudioRegionView::reset_fade_out_shape ()
 void
 AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
 {
-	if (dragging() && audio_region()->fade_out_is_xfade()) {
-		/* we hide xfades while dragging regions */
-		return;
-	}
-
-	if (audio_region()->fade_out_is_xfade()) {
-		if (fade_out_handle) {
-			fade_out_handle->hide ();
-			fade_out_shape->hide ();
-		}
-		redraw_end_xfade ();
-		return;
-	} else {
-		if (end_xfade_in) {
-			end_xfade_in->hide ();
-			end_xfade_out->hide ();
-			end_xfade_rect->hide ();
-			_end_xfade_visible = false;
-		}
-	}
+	redraw_end_xfade ();
 
 	if (fade_out_handle == 0) {
 		return;
@@ -700,12 +631,6 @@ AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
 	double const pwidth = rint (width / samples_per_unit);
 	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
 	double h;
-
-	if (_height < 5) {
-		fade_out_shape->hide();
-		fade_out_handle->hide();
-		return;
-	}
 
 	double const handle_center = (_region->length() - width) / samples_per_unit;
 
@@ -732,7 +657,7 @@ AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
 	if (_height >= NAME_HIGHLIGHT_THRESH) {
 		h = _height - NAME_HIGHLIGHT_SIZE - 2;
 	} else {
-		h = _height;
+		h = _height - 2;
 	}
 
 	/* points *MUST* be in anti-clockwise order */
@@ -1346,23 +1271,6 @@ AudioRegionView::show_region_editor ()
 	editor->show_all();
 }
 
-
-void
-AudioRegionView::show_fade_line (framepos_t pos)
-{
-	fade_position_line->property_x1() = trackview.editor().frame_to_pixel (pos);
-	fade_position_line->property_x2() = trackview.editor().frame_to_pixel (pos);
-	fade_position_line->show ();
-	fade_position_line->raise_to_top ();
-}
-
-void
-AudioRegionView::hide_fade_line ()
-{
-	fade_position_line->hide ();
-}
-
-
 void
 AudioRegionView::transients_changed ()
 {
@@ -1480,15 +1388,7 @@ AudioRegionView::redraw_start_xfade ()
 		return;
 	}
 
-	if (!ar->fade_in_is_xfade()) {
-		if (start_xfade_in) {
-			start_xfade_in->hide ();
-			start_xfade_out->hide ();
-			start_xfade_rect->hide ();
-			_start_xfade_visible = false;
-		}
-		return;
-	}
+	show_start_xfade();
 
 	redraw_start_xfade_to (ar, ar->fade_in()->back()->when);
 }
@@ -1511,7 +1411,7 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 	if (!start_xfade_out) {
 		start_xfade_out = new ArdourCanvas::Line (*group);
 		start_xfade_out->property_width_pixels() = 1;
-		uint32_t col = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_GainLine.get(), 125);
+		uint32_t col = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_GainLine.get(), 255);
 		start_xfade_out->property_fill_color_rgba() = col;
 	}
 
@@ -1527,7 +1427,13 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 
 	Points* points = get_canvas_points ("xfade edit redraw", npoints);
 	boost::scoped_array<float> vec (new float[npoints]);
-	double effective_height = _height - NAME_HIGHLIGHT_SIZE - 1.0;
+
+	double effective_height;
+	if (_height >= NAME_HIGHLIGHT_THRESH) {
+		effective_height = _height - NAME_HIGHLIGHT_SIZE - 2;
+	} else {
+		effective_height = _height - 2;
+	}
 
 	ar->fade_in()->curve().get_vector (0, ar->fade_in()->back()->when, vec.get(), npoints);
 
@@ -1542,7 +1448,6 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 	start_xfade_rect->property_x2() = ((*points)[npoints-1]).get_x();
 	start_xfade_rect->property_y2() = effective_height;
 	start_xfade_rect->show ();
-	start_xfade_rect->raise_to_top ();
 
 	start_xfade_in->property_points() = *points;
 	start_xfade_in->show ();
@@ -1575,7 +1480,9 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 	start_xfade_out->show ();
 	start_xfade_out->raise_to_top ();
 
-	_start_xfade_visible = true;
+	start_xfade_rect->raise_to_top ();  //this needs to be topmost so the lines don't steal mouse focus
+
+	show_start_xfade();
 
 	delete points;
 }
@@ -1589,15 +1496,7 @@ AudioRegionView::redraw_end_xfade ()
 		return;
 	}
 
-	if (!ar->fade_out_is_xfade()) {
-		if (end_xfade_in) {
-			end_xfade_in->hide ();
-			end_xfade_out->hide ();
-			end_xfade_rect->hide ();
-			_end_xfade_visible = false;
-		}
-		return;
-	}
+	show_end_xfade();
 
 	redraw_end_xfade_to (ar, ar->fade_out()->back()->when);
 }
@@ -1620,7 +1519,7 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 	if (!end_xfade_out) {
 		end_xfade_out = new ArdourCanvas::Line (*group);
 		end_xfade_out->property_width_pixels() = 1;
-		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_GainLine.get(), 125);
+		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_GainLine.get(), 255);
 		end_xfade_out->property_fill_color_rgba() = col;
 	}
 
@@ -1640,7 +1539,13 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 	ar->fade_out()->curve().get_vector (0, ar->fade_out()->back()->when, vec.get(), npoints);
 
 	double rend = trackview.editor().frame_to_pixel (_region->length() - len);
-	double effective_height = _height - NAME_HIGHLIGHT_SIZE - 1;
+
+	double effective_height;
+	if (_height >= NAME_HIGHLIGHT_THRESH) {
+		effective_height = _height - NAME_HIGHLIGHT_SIZE - 2;
+	} else {
+		effective_height = _height - 2;
+	}
 
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Gnome::Art::Point &p ((*points)[pci++]);
@@ -1653,7 +1558,6 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 	end_xfade_rect->property_x2() = ((*points)[npoints-1]).get_x();
 	end_xfade_rect->property_y2() = effective_height;
 	end_xfade_rect->show ();
-	end_xfade_rect->raise_to_top ();
 
 	end_xfade_in->property_points() = *points;
 	end_xfade_in->show ();
@@ -1686,7 +1590,9 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 	end_xfade_out->show ();
 	end_xfade_out->raise_to_top ();
 
-	_end_xfade_visible = true;
+	end_xfade_rect->raise_to_top ();  //this needs to be topmost so the lines don't steal mouse focus
+
+	show_end_xfade();
 
 	delete points;
 }
@@ -1773,15 +1679,8 @@ void
 AudioRegionView::drag_start ()
 {
 	TimeAxisViewItem::drag_start ();
-	AudioTimeAxisView* atav = dynamic_cast<AudioTimeAxisView*> (&trackview);
 
-	if (atav) {
-		AudioStreamView* av = atav->audio_view();
-		if (av) {
-			/* this will hide our xfades too */
-			_hidden_xfades = av->hide_xfades_with (audio_region());
-		}
-	}
+	//we used to hide xfades here.  I don't see the point with the new model, but we can re-implement if needed
 }
 
 void
@@ -1789,16 +1688,7 @@ AudioRegionView::drag_end ()
 {
 	TimeAxisViewItem::drag_end ();
 
-	for (list<AudioRegionView*>::iterator i = _hidden_xfades.first.begin(); i != _hidden_xfades.first.end(); ++i) {
-		(*i)->show_start_xfade ();
-	}
-
-	for (list<AudioRegionView*>::iterator i = _hidden_xfades.second.begin(); i != _hidden_xfades.second.end(); ++i) {
-		(*i)->show_end_xfade ();
-	}
-	
-	_hidden_xfades.first.clear ();
-	_hidden_xfades.second.clear ();
+	//see comment for drag_start
 }
 
 void

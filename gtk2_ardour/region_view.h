@@ -107,12 +107,12 @@ class RegionView : public TimeAxisViewItem
 	/** Called when a front trim is about to begin */
 	virtual void trim_front_starting () {}
 
-	void trim_front (framepos_t, bool);
+	bool trim_front (framepos_t, bool);
 
 	/** Called when a start trim has finished */
 	virtual void trim_front_ending () {}
 
-	void trim_end (framepos_t, bool);
+	bool trim_end (framepos_t, bool);
 	void trim_contents (framepos_t, bool, bool);
 	virtual void thaw_after_trim ();
 

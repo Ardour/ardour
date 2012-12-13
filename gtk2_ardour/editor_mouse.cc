@@ -922,11 +922,13 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 
 			case StartCrossFadeItem:
-				_drags->set (new CrossfadeEdgeDrag (this, reinterpret_cast<AudioRegionView*>(item->get_data("regionview")), item, true), event, 0);
-				break;
-
 			case EndCrossFadeItem:
-				_drags->set (new CrossfadeEdgeDrag (this, reinterpret_cast<AudioRegionView*>(item->get_data("regionview")), item, false), event, 0);
+				/* we might allow user to grab inside the fade to trim a region with preserve_fade_anchor.  for not this is not fully implemented */ 
+//				if (!clicked_regionview->region()->locked()) {
+//					RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
+//					_drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer(), true), event);
+//					return true;
+//				}
 				break;
 
 			case FeatureLineItem:

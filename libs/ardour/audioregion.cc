@@ -62,10 +62,6 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> fade_in_active;
 		PBD::PropertyDescriptor<bool> fade_out_active;
 		PBD::PropertyDescriptor<float> scale_amplitude;
-		PBD::PropertyDescriptor<bool> fade_out_is_xfade;
-		PBD::PropertyDescriptor<bool> fade_out_is_short;
-		PBD::PropertyDescriptor<bool> fade_in_is_xfade;
-		PBD::PropertyDescriptor<bool> fade_in_is_short;
 		PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_in;
 		PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > inverse_fade_in;
 		PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_out;
@@ -161,14 +157,6 @@ AudioRegion::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-out-active = %1\n", 	Properties::fade_out_active.property_id));
 	Properties::scale_amplitude.property_id = g_quark_from_static_string (X_("scale-amplitude"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for scale-amplitude = %1\n", 	Properties::scale_amplitude.property_id));
-	Properties::fade_out_is_xfade.property_id = g_quark_from_static_string (X_("fade-out-is-xfade"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-out-is-xfade = %1\n", 	Properties::fade_out_is_xfade.property_id));
-	Properties::fade_out_is_short.property_id = g_quark_from_static_string (X_("fade-out-is-short"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-out-is-short = %1\n", 	Properties::fade_out_is_short.property_id));
-	Properties::fade_in_is_xfade.property_id = g_quark_from_static_string (X_("fade-in-is-xfade"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-in-is-xfade = %1\n", 	Properties::fade_in_is_xfade.property_id));
-	Properties::fade_in_is_short.property_id = g_quark_from_static_string (X_("fade-in-is-short"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-in-is-short = %1\n", 	Properties::fade_in_is_short.property_id));
 	Properties::fade_in.property_id = g_quark_from_static_string (X_("FadeIn"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for FadeIn = %1\n",		Properties::fade_in.property_id));
 	Properties::inverse_fade_in.property_id = g_quark_from_static_string (X_("InverseFadeIn"));
@@ -192,10 +180,6 @@ AudioRegion::register_properties ()
 	add_property (_fade_in_active);
 	add_property (_fade_out_active);
 	add_property (_scale_amplitude);
-	add_property (_fade_out_is_xfade);
-	add_property (_fade_out_is_short);
-	add_property (_fade_in_is_xfade);
-	add_property (_fade_in_is_short);
 	add_property (_fade_in);
 	add_property (_inverse_fade_in);
 	add_property (_fade_out);
@@ -210,10 +194,6 @@ AudioRegion::register_properties ()
 	, _fade_in_active (Properties::fade_in_active, true) \
 	, _fade_out_active (Properties::fade_out_active, true) \
 	, _scale_amplitude (Properties::scale_amplitude, 1.0) \
-	, _fade_in_is_xfade (Properties::fade_in_is_xfade, false) \
-	, _fade_out_is_xfade (Properties::fade_out_is_xfade, false) \
-	, _fade_in_is_short (Properties::fade_in_is_short, false) \
-	, _fade_out_is_short (Properties::fade_out_is_short, false) \
 	, _fade_in (Properties::fade_in, boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation)))) \
 	, _inverse_fade_in (Properties::inverse_fade_in, boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation)))) \
 	, _fade_out (Properties::fade_out, boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeOutAutomation)))) \
@@ -226,10 +206,6 @@ AudioRegion::register_properties ()
 	, _fade_in_active (Properties::fade_in_active, other->_fade_in_active) \
 	, _fade_out_active (Properties::fade_out_active, other->_fade_out_active) \
 	, _scale_amplitude (Properties::scale_amplitude, other->_scale_amplitude) \
-	, _fade_in_is_xfade (Properties::fade_in_is_xfade, other->_fade_in_is_xfade) \
-	, _fade_out_is_xfade (Properties::fade_out_is_xfade, other->_fade_out_is_xfade) \
-	, _fade_in_is_short (Properties::fade_in_is_short, other->_fade_in_is_short) \
-	, _fade_out_is_short (Properties::fade_out_is_short, other->_fade_out_is_short) \
 	, _fade_in (Properties::fade_in, boost::shared_ptr<AutomationList> (new AutomationList (*other->_fade_in.val()))) \
 	, _inverse_fade_in (Properties::fade_in, boost::shared_ptr<AutomationList> (new AutomationList (*other->_inverse_fade_in.val()))) \
 	, _fade_out (Properties::fade_in, boost::shared_ptr<AutomationList> (new AutomationList (*other->_fade_out.val()))) \
@@ -505,11 +481,6 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 		return 0;
 	}
 
-	if (muted()) {
-		return 0; /* read nothing */
-	}
-
-	
 	/* WORK OUT WHERE TO GET DATA FROM */
 
 	framecnt_t to_read;
@@ -916,12 +887,6 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 				}
 			}
 
-			/* legacy a3 */
-
-			if ((prop = child->property ("is-xfade")) != 0) {
-				_fade_in_is_xfade = string_is_affirmative (prop->value());
-			}
-
 		} else if (child->name() == "FadeOut") {
 
 			_fade_out->clear ();
@@ -942,13 +907,7 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 					set_fade_out_active (false);
 				}
 			}
-
-			/* legacy a3 */
-
-			if ((prop = child->property ("is-xfade")) != 0) {
-				_fade_out_is_xfade = string_is_affirmative (prop->value());
-			}
-			
+	
 		} else if (child->name() == "InvFadeIn") {
 			XMLNode* grandchild = child->child ("AutomationList");
 			if (grandchild) {
@@ -1170,20 +1129,6 @@ AudioRegion::set_fade_in_length (framecnt_t len)
 			_inverse_fade_in->extend_to (len);
 		}
 
-		if (_session.config.get_xfade_model() == FullCrossfade &&
-		    _session.config.get_auto_xfade() && 
-		    _fade_in_is_xfade && !_fade_in_is_short) {
-
-			/* trim a single other region below us to the new start
-			   of the fade.
-			*/
-
-			boost::shared_ptr<Region> other = get_single_other_xfade_region (true);
-			if (other) {
-				other->trim_end (position() + len);
-			}
-		}
-
 		_default_fade_in = false;
 		send_change (PropertyChange (Properties::fade_in));
 	}
@@ -1208,20 +1153,6 @@ AudioRegion::set_fade_out_length (framecnt_t len)
 			_inverse_fade_out->extend_to (len);
 		}
 		_default_fade_out = false;
-		
-		if (_session.config.get_xfade_model() == FullCrossfade &&
-		    _session.config.get_auto_xfade() && 
-		    _fade_out_is_xfade && !_fade_out_is_short) {
-
-			/* trim a single other region below us to the new start
-			   of the fade.
-			*/
-
-			boost::shared_ptr<Region> other = get_single_other_xfade_region (false);
-			if (other) {
-				other->trim_front (last_frame() - len);
-			}
-		}
 
 		send_change (PropertyChange (Properties::fade_out));
 	}
@@ -1264,8 +1195,6 @@ void
 AudioRegion::set_default_fade_in ()
 {
 	_fade_in_suspended = 0;
-	_fade_in_is_xfade = false;
-	_fade_in_is_short = true;
 	set_fade_in (FadeLinear, 64);
 }
 
@@ -1273,8 +1202,6 @@ void
 AudioRegion::set_default_fade_out ()
 {
 	_fade_out_suspended = 0;
-	_fade_out_is_xfade = false;
-	_fade_out_is_short = true;
 	set_fade_out (FadeLinear, 64);
 }
 
@@ -1841,51 +1768,6 @@ Evoral::Range<framepos_t>
 AudioRegion::body_range () const
 {
 	return Evoral::Range<framepos_t> (first_frame() + _fade_in->back()->when + 1, last_frame() - _fade_out->back()->when);
-}
-
-void
-AudioRegion::set_fade_in_is_xfade (bool yn)
-{
-	if (yn == _fade_in_is_xfade) {
-		return;
-	}
-
-	_fade_in_is_xfade = yn;
-	send_change (PropertyChange (Properties::fade_in_is_xfade));
-}
-
-void
-AudioRegion::set_fade_out_is_xfade (bool yn)
-{
-	if (yn == _fade_out_is_xfade) {
-		return;
-	}
-
-	_fade_out_is_xfade = yn;
-	send_change (PropertyChange (Properties::fade_out_is_xfade));
-}
-
-void
-AudioRegion::set_fade_in_is_short (bool yn)
-{
-	if (yn == _fade_in_is_short) {
-		return;
-	}
-
-	_fade_in_is_short = yn;
-	send_change (PropertyChange (Properties::fade_in_is_short));
-
-}
-
-void
-AudioRegion::set_fade_out_is_short (bool yn)
-{
-	if (yn == _fade_out_is_short) {
-		return;
-	}
-
-	_fade_out_is_short = yn;
-	send_change (PropertyChange (Properties::fade_out_is_short));
 }
 
 boost::shared_ptr<Region>

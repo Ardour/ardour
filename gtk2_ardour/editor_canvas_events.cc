@@ -383,7 +383,10 @@ Editor::canvas_start_xfade_event (GdkEvent *event, ArdourCanvas::Item* item, Aud
 
 	}
 
-	return typed_event (item, event, StartCrossFadeItem);
+	/* In Mixbus, the crossfade area is used to trim the region while leaving the fade anchor intact (see preserve_fade_anchor)*/
+	/* however in A3 this feature is unfinished, and it might be better to do it with a modifier-trim instead, anyway */
+	/* if we return RegionItem here then we avoid the issue until it is resolved later */
+	return typed_event (item, event, RegionItem); // StartCrossFadeItem);
 }
 
 bool

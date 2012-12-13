@@ -751,10 +751,6 @@ Playlist::flush_notifications (bool from_undo)
 
 	 notify_region_added (region);
 
-	 if (!holding_state ()) {
-		 check_crossfades (region->range ());
-	 }
-
 	 region->PropertyChanged.connect_same_thread (region_state_changed_connections, boost::bind (&Playlist::region_changed_proxy, this, _1, boost::weak_ptr<Region> (region)));
 
 	 return true;
@@ -1095,8 +1091,6 @@ Playlist::flush_notifications (bool from_undo)
 
 		 in_partition = false;
 	 }
-
-	 check_crossfades (Evoral::Range<framepos_t> (start, end));
  }
 
  boost::shared_ptr<Playlist>
@@ -1551,10 +1545,6 @@ Playlist::flush_notifications (bool from_undo)
 	 if (what_changed.contains (bounds)) {
 		 region_bounds_changed (what_changed, region);
 		 save = !(_splicing || _nudging);
-	 }
-
-	 if (what_changed.contains (our_interests) && !what_changed.contains (pos_and_length)) {
-		 check_crossfades (region->range ());
 	 }
 
 	 if (what_changed.contains (Properties::position) && !what_changed.contains (Properties::length)) {
@@ -2100,15 +2090,6 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 
 	if (seen_region_nodes && regions.empty()) {
 		ret = -1;
-	} else {
-
-		/* update dependents, which was not done during add_region_internal
-		   due to in_set_state being true
-		*/
-		
-		for (RegionList::iterator r = regions.begin(); r != regions.end(); ++r) {
-			check_crossfades ((*r)->range ());
-		}
 	}
 		
 	thaw ();
@@ -2421,7 +2402,6 @@ Playlist::raise_region (boost::shared_ptr<Region> region)
 {
 	set_layer (region, region->layer() + 1.5);
 	relayer ();
-	check_crossfades (region->range ());
 }
 
 void
@@ -2429,7 +2409,6 @@ Playlist::lower_region (boost::shared_ptr<Region> region)
 {
 	set_layer (region, region->layer() - 1.5);
 	relayer ();
-	check_crossfades (region->range ());
 }
 
 void
@@ -2437,7 +2416,6 @@ Playlist::raise_region_to_top (boost::shared_ptr<Region> region)
 {
 	set_layer (region, DBL_MAX);
 	relayer ();
-	check_crossfades (region->range ());
 }
 
 void
@@ -2445,7 +2423,6 @@ Playlist::lower_region_to_bottom (boost::shared_ptr<Region> region)
 {
 	set_layer (region, -0.5);
 	relayer ();
-	check_crossfades (region->range ());
 }
 
 void
@@ -3114,10 +3091,6 @@ restart:
 				goto restart;
 			}
 		}
-	}
-
-	for (list<Evoral::Range<framepos_t> >::iterator i = ranges.begin(); i != ranges.end(); ++i) {
-		check_crossfades (*i);
 	}
 }
 

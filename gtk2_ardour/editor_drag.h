@@ -515,7 +515,7 @@ public:
 		ContentsTrim,
 	};
 
-	TrimDrag (Editor *, ArdourCanvas::Item *, RegionView*, std::list<RegionView*> const &);
+	TrimDrag (Editor *, ArdourCanvas::Item *, RegionView*, std::list<RegionView*> const &, bool preserve_fade_anchor = false);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -531,6 +531,8 @@ public:
 private:
 
 	Operation _operation;
+	
+	bool _preserve_fade_anchor;
 };
 
 /** Meter marker drag */

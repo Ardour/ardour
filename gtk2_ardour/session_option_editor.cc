@@ -131,21 +131,9 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	/* FADES */
 
-	ComboOption<CrossfadeModel>* cfm = new ComboOption<CrossfadeModel> (
-		"xfade-model",
-		_("Crossfades are created"),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::get_xfade_model),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::set_xfade_model)
-		);
-
-	cfm->add (FullCrossfade, _("to span entire overlap"));
-	cfm->add (ShortCrossfade, _("short"));
-
-	add_option (_("Fades"), cfm);
-
 	ComboOption<CrossfadeChoice>* cfc = new ComboOption<CrossfadeChoice> (
 		"xfade-choice",
-		_("Crossfade type"),
+		_("Default crossfade type"),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::get_xfade_choice),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_xfade_choice)
 		);
@@ -157,28 +145,12 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	add_option (_("Fades"), cfc);
 
 	add_option (_("Fades"), new SpinOption<float> (
-		_("short-xfade-seconds"),
-		_("Short crossfade length"),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::get_short_xfade_seconds),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::set_short_xfade_seconds),
-		0, 1000, 1, 10,
-		_("ms"), 0.001
-			    ));
-
-	add_option (_("Fades"), new SpinOption<float> (
 		_("destructive-xfade-seconds"),
 		_("Destructive crossfade length"),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::get_destructive_xfade_msecs),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_destructive_xfade_msecs),
 		0, 1000, 1, 10,
 		_("ms")
-			    ));
-
-	add_option (_("Fades"), new BoolOption (
-			    "auto-xfade",
-			    _("Create crossfades automatically"),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_auto_xfade),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_auto_xfade)
 			    ));
 
 	add_option (_("Fades"), new BoolOption (
@@ -243,7 +215,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
         add_option (_("Monitoring"), new BoolOption (
 			    "auto-input",
-			    _("Monitoring automatically follows transport state (\"auto-input\")"),
+			    _("Track Input Monitoring automatically follows transport state (\"auto-input\")"),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_auto_input),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_auto_input)
 			    ));

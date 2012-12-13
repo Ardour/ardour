@@ -336,7 +336,6 @@ public:
 	void splice_locked (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude);
 	void splice_unlocked (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude);
 
-	virtual void check_crossfades (Evoral::Range<framepos_t>) {}
 	virtual void remove_dependents (boost::shared_ptr<Region> /*region*/) {}
 
 	virtual XMLNode& state (bool);

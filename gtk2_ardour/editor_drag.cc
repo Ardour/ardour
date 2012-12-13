@@ -1597,10 +1597,11 @@ NoteResizeDrag::aborted (bool)
 	}
 }
 
-TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
+TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool preserve_fade_anchor)
 	: RegionDrag (e, i, p, v)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TrimDrag\n");
+	_preserve_fade_anchor = preserve_fade_anchor;
 }
 
 void
@@ -1722,13 +1723,43 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	switch (_operation) {
 	case StartTrim:
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			i->view->trim_front (i->initial_position + dt, non_overlap_trim);
+			bool changed = i->view->trim_front (i->initial_position + dt, non_overlap_trim);
+			if (changed && _preserve_fade_anchor) {
+				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
+				if (arv) {
+					double distance;
+					double new_length;
+					framecnt_t len;
+					boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+					distance = _drags->current_pointer_x() - grab_x();
+					len = ar->fade_in()->back()->when;
+					new_length = len - _editor->unit_to_frame (distance);
+					new_length = ar->verify_xfade_bounds (new_length, true  /*START*/ );
+					arv->reset_fade_in_shape_width (new_length);  //the grey shape
+					arv->redraw_start_xfade_to (ar, new_length);  //the green lines & blue rect
+				}
+			}
 		}
 		break;
 
 	case EndTrim:
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			i->view->trim_end (i->initial_end + dt, non_overlap_trim);
+			bool changed = i->view->trim_end (i->initial_end + dt, non_overlap_trim);
+			if (changed && _preserve_fade_anchor) {
+				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
+				if (arv) {
+					double distance;
+					double new_length;
+					framecnt_t len;
+					boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+					distance = grab_x() - _drags->current_pointer_x();
+					len = ar->fade_out()->back()->when;
+					new_length = len - _editor->unit_to_frame (distance);
+					new_length = ar->verify_xfade_bounds (new_length, false  /*END*/ );
+					arv->reset_fade_out_shape_width (new_length);  //the grey shape
+					arv->redraw_end_xfade_to (ar, new_length);  //the green lines & blue rect (must do this after)
+				}
+			}
 		}
 		break;
 
@@ -1780,20 +1811,49 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (movement_occurred) {
 		motion (event, false);
 
-		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			i->view->drag_end ();
-		}
-
-		/* This must happen before the region's StatefulDiffCommand is created, as it may
-		   `correct' (ahem) the region's _start from being negative to being zero.  It
-		   needs to be zero in the undo record.
-		*/
 		if (_operation == StartTrim) {
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				i->view->trim_front_ending ();
+				{
+					/* This must happen before the region's StatefulDiffCommand is created, as it may
+					   `correct' (ahem) the region's _start from being negative to being zero.  It
+					   needs to be zero in the undo record.
+					*/
+					i->view->trim_front_ending ();
+				}
+				if (_preserve_fade_anchor) {
+					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
+					if (arv) {
+						double distance;
+						double new_length;
+						framecnt_t len;
+						boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+						distance = _drags->current_pointer_x() - grab_x();
+						len = ar->fade_in()->back()->when;
+						new_length = len - _editor->unit_to_frame (distance);
+						new_length = ar->verify_xfade_bounds (new_length, true  /*START*/ );
+						ar->set_fade_in_length(new_length);
+					}
+				}
+			}
+		} else if (_operation == EndTrim) {
+			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+				if (_preserve_fade_anchor) {
+					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
+					if (arv) {
+						double distance;
+						double new_length;
+						framecnt_t len;
+						boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+						distance = _drags->current_pointer_x() - grab_x();
+						len = ar->fade_out()->back()->when;
+						new_length = len - _editor->unit_to_frame (distance);
+						new_length = ar->verify_xfade_bounds (new_length, false  /*END*/ );
+						ar->set_fade_out_length(new_length);
+					}
+				}
 			}
 		}
-
+		
 		if (_operation == StartTrim) {
 			_editor->maybe_locate_with_edit_preroll ( _views.begin()->view->region()->position() );
 		}
@@ -2254,8 +2314,6 @@ FadeInDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	boost::shared_ptr<AudioRegion> const r = arv->audio_region ();
 
 	show_verbose_cursor_duration (r->position(), r->position() + r->fade_in()->back()->when, 32);
-
-	arv->show_fade_line((framepos_t) r->fade_in()->back()->when);
 }
 
 void
@@ -2292,7 +2350,8 @@ FadeInDrag::motion (GdkEvent* event, bool)
 		}
 
 		tmp->reset_fade_in_shape_width (fade_length);
-		tmp->show_fade_line((framecnt_t) fade_length);
+		boost::shared_ptr<AudioRegion> ar (tmp->audio_region());
+		tmp->redraw_start_xfade_to (ar, fade_length);
 	}
 
 	show_verbose_cursor_duration (region->position(), region->position() + fade_length, 32);
@@ -2334,7 +2393,6 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		tmp->audio_region()->set_fade_in_length (fade_length);
 		tmp->audio_region()->set_fade_in_active (true);
-		tmp->hide_fade_line();
 
 		XMLNode &after = alist->get_state();
 		_editor->session()->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
@@ -2354,7 +2412,6 @@ FadeInDrag::aborted (bool)
 		}
 
 		tmp->reset_fade_in_shape_width (tmp->audio_region()->fade_in()->back()->when);
-		tmp->hide_fade_line();
 	}
 }
 
@@ -2373,8 +2430,6 @@ FadeOutDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	boost::shared_ptr<AudioRegion> r = arv->audio_region ();
 
 	show_verbose_cursor_duration (r->last_frame() - r->fade_out()->back()->when, r->last_frame());
-
-	arv->show_fade_line(r->length() - r->fade_out()->back()->when);
 }
 
 void
@@ -2413,7 +2468,8 @@ FadeOutDrag::motion (GdkEvent* event, bool)
 		}
 
 		tmp->reset_fade_out_shape_width (fade_length);
-		tmp->show_fade_line(region->length() - fade_length);
+		boost::shared_ptr<AudioRegion> ar (tmp->audio_region());
+		tmp->redraw_end_xfade_to (ar, fade_length);
 	}
 
 	show_verbose_cursor_duration (region->last_frame() - fade_length, region->last_frame());
@@ -2457,7 +2513,6 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		tmp->audio_region()->set_fade_out_length (fade_length);
 		tmp->audio_region()->set_fade_out_active (true);
-		tmp->hide_fade_line();
 
 		XMLNode &after = alist->get_state();
 		_editor->session()->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
@@ -2477,7 +2532,6 @@ FadeOutDrag::aborted (bool)
 		}
 
 		tmp->reset_fade_out_shape_width (tmp->audio_region()->fade_out()->back()->when);
-		tmp->hide_fade_line();
 	}
 }
 
@@ -4583,6 +4637,7 @@ CrossfadeEdgeDrag::CrossfadeEdgeDrag (Editor* e, AudioRegionView* rv, ArdourCanv
 	, arv (rv)
 	, start (start_yn)
 {
+	std::cout << ("CrossfadeEdgeDrag is DEPRECATED.  See TrimDrag::preserve_fade_anchor") << endl;
 }
 
 void

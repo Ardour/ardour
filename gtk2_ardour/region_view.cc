@@ -834,11 +834,11 @@ RegionView::update_coverage_frames (LayerDisplay d)
 	}
 }
 
-void
+bool
 RegionView::trim_front (framepos_t new_bound, bool no_overlap)
 {
 	if (_region->locked()) {
-		return;
+		return false;
 	}
 
 	RouteTimeAxisView& rtv = dynamic_cast<RouteTimeAxisView&> (trackview);
@@ -866,13 +866,15 @@ RegionView::trim_front (framepos_t new_bound, bool no_overlap)
 	}
 
 	region_changed (ARDOUR::bounds_change);
+
+	return (pre_trim_first_frame != _region->first_frame());  //return true if we actually changed something
 }
 
-void
+bool
 RegionView::trim_end (framepos_t new_bound, bool no_overlap)
 {
 	if (_region->locked()) {
-		return;
+		return false;
 	}
 
 	RouteTimeAxisView& rtv = dynamic_cast<RouteTimeAxisView&> (trackview);
@@ -903,6 +905,8 @@ RegionView::trim_end (framepos_t new_bound, bool no_overlap)
 	} else {
 		region_changed (PropertyChange (ARDOUR::Properties::length));
 	}
+
+	return (pre_trim_last_frame != _region->last_frame());  //return true if we actually changed something
 }
 
 
