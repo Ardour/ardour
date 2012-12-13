@@ -346,13 +346,13 @@ Selection::toggle (framepos_t start, framepos_t end)
 
 	/* XXX this implementation is incorrect */
 
-	time.push_back (AudioRange (start, end, next_time_id++));
+	time.push_back (AudioRange (start, end, ++next_time_id));
 	time.consolidate ();
 	time.sort (cmp);
 
 	TimeChanged ();
 
-	return next_time_id - 1;
+	return next_time_id;
 }
 
 void
@@ -522,13 +522,13 @@ Selection::add (framepos_t start, framepos_t end)
 
 	/* XXX this implementation is incorrect */
 
-	time.push_back (AudioRange (start, end, next_time_id++));
+	time.push_back (AudioRange (start, end, ++next_time_id));
 	time.consolidate ();
 	time.sort (cmp);
 
 	TimeChanged ();
 
-	return next_time_id - 1;
+	return next_time_id;
 }
 
 void
