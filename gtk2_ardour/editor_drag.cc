@@ -1780,6 +1780,10 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (movement_occurred) {
 		motion (event, false);
 
+		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+			i->view->drag_end ();
+		}
+
 		/* This must happen before the region's StatefulDiffCommand is created, as it may
 		   `correct' (ahem) the region's _start from being negative to being zero.  It
 		   needs to be zero in the undo record.
@@ -1822,16 +1826,13 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 				}
 			}
 		}
+
 		for (set<boost::shared_ptr<Playlist> >::iterator p = _editor->motion_frozen_playlists.begin(); p != _editor->motion_frozen_playlists.end(); ++p) {
 			(*p)->thaw ();
 		}
 
 		_editor->motion_frozen_playlists.clear ();
 		_editor->commit_reversible_command();
-
-		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			i->view->drag_end ();
-		}
 
 	} else {
 		/* no mouse movement */
