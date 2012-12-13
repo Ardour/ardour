@@ -862,7 +862,8 @@ public:
 		CreateSelection,
 		SelectionStartTrim,
 		SelectionEndTrim,
-		SelectionMove
+		SelectionMove,
+		SelectionExtend
 	};
 
 	SelectionDrag (Editor *, ArdourCanvas::Item *, Operation);
@@ -876,11 +877,14 @@ public:
 
 private:
 	Operation _operation;
-	bool _copy;
+	bool _add;
+	bool _extend;
 	int _original_pointer_time_axis;
 	int _last_pointer_time_axis;
 	std::list<TimeAxisView*> _added_time_axes;
 	bool _time_selection_at_start;
+        framepos_t start_at_start;
+        framepos_t end_at_start;
 };
 
 /** Range marker drag */

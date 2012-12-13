@@ -532,6 +532,21 @@ Selection::add (framepos_t start, framepos_t end)
 }
 
 void
+Selection::move_time (framecnt_t distance)
+{
+	if (distance == 0) {
+		return;
+	}
+
+	for (list<AudioRange>::iterator i = time.begin(); i != time.end(); ++i) {
+		(*i).start += distance;
+		(*i).end += distance;
+	}
+
+	TimeChanged ();
+}
+
+void
 Selection::replace (uint32_t sid, framepos_t start, framepos_t end)
 {
 	clear_objects();  //enforce object/range exclusivity

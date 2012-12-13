@@ -598,22 +598,24 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 
 	switch (item_type) {
 	case RegionItem:
-		if (press) {
-			if (mouse_mode != MouseRange) {
-				set_selected_regionview_from_click (press, op);
-			} else {
-				/* don't change the selection unless the
-				   clicked track is not currently selected. if
-				   so, "collapse" the selection to just this
-				   track
-				*/
-				if (!selection->selected (clicked_axisview)) {
-					set_selected_track_as_side_effect (Selection::Set);
+		if (!get_smart_mode() || (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT)) {
+			if (press) {
+				if (mouse_mode != MouseRange) {
+					set_selected_regionview_from_click (press, op);
+				} else {
+					/* don't change the selection unless the
+					   clicked track is not currently selected. if
+					   so, "collapse" the selection to just this
+					   track
+					*/
+					if (!selection->selected (clicked_axisview)) {
+						set_selected_track_as_side_effect (Selection::Set);
+					}
 				}
-			}
-		} else {
-			if (mouse_mode != MouseRange) {
-				set_selected_regionview_from_click (press, op);
+			} else {
+				if (mouse_mode != MouseRange) {
+					set_selected_regionview_from_click (press, op);
+				}
 			}
 		}
 		break;
@@ -800,9 +802,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case SelectionItem:
-			if (Keyboard::modifier_state_contains
-			    (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier))) {
-				// contains and not equals because I can't use alt as a modifier alone.
+			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
 				start_selection_grab (item, event);
 			} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::SecondaryModifier)) {
 				/* grab selection for moving */
@@ -831,7 +831,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					return true;
 				} 
 			} else {
-				_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
+				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier)) {
+					_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionExtend), event);
+				} else {
+					_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
+				}
 				return true;
 			}
 			break;
@@ -855,7 +859,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		default:
 			if (!internal_editing()) {
-				_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
+				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier)) {
+					_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionExtend), event);
+				} else {
+					_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
+				}
 			}
 		}
 		return true;

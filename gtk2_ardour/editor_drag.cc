@@ -3421,12 +3421,18 @@ ScrubDrag::aborted (bool)
 SelectionDrag::SelectionDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
 	: Drag (e, i)
 	, _operation (o)
-	, _copy (false)
+	, _add (false)
+	, _extend (false)
 	, _original_pointer_time_axis (-1)
 	, _last_pointer_time_axis (-1)
 	, _time_selection_at_start (!_editor->get_selection().time.empty())
 {
 	DEBUG_TRACE (DEBUG::Drags, "New SelectionDrag\n");
+	
+	if (_time_selection_at_start) {
+		start_at_start = _editor->get_selection().time.start();
+		end_at_start = _editor->get_selection().time.end_frame();
+	}
 }
 
 void
@@ -3440,10 +3446,10 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 
 	switch (_operation) {
 	case CreateSelection:
-		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
-			_copy = true;
+		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::CopyModifier)) {
+			_add = true;
 		} else {
-			_copy = false;
+			_add = false;
 		}
 		cursor = _editor->cursors()->selector;
 		Drag::start_grab (event, cursor);
@@ -3464,6 +3470,10 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		break;
 
 	case SelectionMove:
+		Drag::start_grab (event, cursor);
+		break;
+
+	case SelectionExtend:
 		Drag::start_grab (event, cursor);
 		break;
 	}
@@ -3493,6 +3503,9 @@ SelectionDrag::setup_pointer_frame_offset ()
 	case SelectionEndTrim:
 		_pointer_frame_offset = raw_grab_frame() - _editor->selection->time[_editor->clicked_selection].end;
 		break;
+
+	case SelectionExtend:
+		break;
 	}
 }
 
@@ -3501,7 +3514,8 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 {
 	framepos_t start = 0;
 	framepos_t end = 0;
-	framecnt_t length;
+	framecnt_t length = 0;
+	framecnt_t distance = 0;
 
 	pair<TimeAxisView*, int> const pending_time_axis = _editor->trackview_by_y_position (_drags->current_pointer_y ());
 	if (pending_time_axis.first == 0) {
@@ -3544,12 +3558,12 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
 		if (first_move) {
 
-			if (_copy) {
+			if (_add) {
 				/* adding to the selection */
 				_editor->set_selected_track_as_side_effect (Selection::Add);
 				//_editor->selection->add (_editor->clicked_axisview);
 				_editor->clicked_selection = _editor->selection->add (start, end);
-				_copy = false;
+				_add = false;
 			} else {
 				/* new selection */
 
@@ -3617,19 +3631,22 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		}
 
 		break;
-
+		
 	case SelectionMove:
 
 		start = _editor->selection->time[_editor->clicked_selection].start;
 		end = _editor->selection->time[_editor->clicked_selection].end;
 
 		length = end - start;
-
+		distance = pending_position - start;
 		start = pending_position;
 		_editor->snap_to (start);
 
 		end = start + length;
 
+		break;
+
+	case SelectionExtend:
 		break;
 	}
 
@@ -3638,7 +3655,15 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	if (start != end) {
-		_editor->selection->replace (_editor->clicked_selection, start, end);
+		switch (_operation) {
+		case SelectionMove:	
+			if (_time_selection_at_start) {
+				_editor->selection->move_time (distance);
+			}
+			break;
+		default:
+			_editor->selection->replace (_editor->clicked_selection, start, end);
+		}
 	}
 
 	if (_operation == SelectionMove) {
@@ -3674,12 +3699,30 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 	} else {
 		/* just a click, no pointer movement.
 		 */
-		_editor->selection->clear_time();
+
+		if (_operation == SelectionExtend) {
+			if (_time_selection_at_start) {
+				framepos_t pos = adjusted_current_frame (event, false);
+				framepos_t start = min (pos, start_at_start);
+				framepos_t end = max (pos, end_at_start);
+				_editor->selection->set (start, end);
+			}
+		} else {
+			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::CopyModifier)) {
+				if (_editor->clicked_selection) {
+					_editor->selection->remove (_editor->clicked_selection);
+				}
+			} else {
+				if (!_editor->clicked_selection) {
+					_editor->selection->clear_time();
+				}
+			}
+		}
 
 		if (_editor->clicked_axisview && !_editor->selection->selected (_editor->clicked_axisview)) {
 			_editor->selection->set (_editor->clicked_axisview);
 		}
-
+			
 		if (s && s->get_play_range () && s->transport_rolling()) {
 			s->request_stop (false, false);
 		}
