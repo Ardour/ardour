@@ -859,7 +859,7 @@ Selection::set (framepos_t start, framepos_t end)
 	}
 
 	if (time.empty()) {
-		time.push_back (AudioRange (start, end, next_time_id++));
+		time.push_back (AudioRange (start, end, ++next_time_id));
 	} else {
 		/* reuse the first entry, and remove all the rest */
 
@@ -895,7 +895,7 @@ Selection::set_preserving_all_ranges (framepos_t start, framepos_t end)
 	}
 
 	if (time.empty ()) {
-		time.push_back (AudioRange (start, end, next_time_id++));
+		time.push_back (AudioRange (start, end, ++next_time_id));
 	} else {
 		time.sort (AudioRangeComparator ());
 		time.front().start = start;
