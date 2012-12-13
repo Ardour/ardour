@@ -201,18 +201,15 @@ ArdourButton::render (cairo_t* cr)
 		}
 
 		if (active_state() == Gtkmm2ext::ImplicitActive) {
-
-			if (_tweaks & ImplicitUsesSolidColor) {
-				// note: with this tweak, implicit-active
-				// background color uses "led active" color
-				UINT_TO_RGBA (fill_color_active, &r, &g, &b, &a);
-				cairo_set_source_rgba (cr, r/255.0, g/255.0, b/255.0, a/255.0);
-				cairo_fill (cr);
-			} else {
-				//background color
+			
+			if (!(_tweaks & ImplicitUsesSolidColor)) {
 				cairo_set_source (cr, fill_pattern);
-				cairo_fill (cr);
-				
+			} else {
+				cairo_set_source (cr, fill_pattern_active);
+			}
+			cairo_fill (cr);
+			
+			if (!(_tweaks & ImplicitUsesSolidColor)) {
 				//border
 				UINT_TO_RGBA (fill_color_active, &r, &g, &b, &a);
 				cairo_set_line_width (cr, 1.0);
@@ -440,7 +437,7 @@ ArdourButton::set_colors ()
 	uint32_t text_color;
 	uint32_t led_color;
 
-	if (_tweaks & ImplicitUsesSolidColor) {
+	if (active_state() == Gtkmm2ext::ImplicitActive && (_tweaks & ImplicitUsesSolidColor)) {
 		fill_color_active = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led active", get_name()));
 	} else {
 		fill_color_active = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end active", get_name()));
@@ -499,10 +496,19 @@ ArdourButton::set_colors ()
 
 		fill_pattern_active = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height()-3);
 		if (_flat_buttons) {
-			end_color = start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end active", get_name()));
+			if (active_state() == Gtkmm2ext::ImplicitActive && (_tweaks & ImplicitUsesSolidColor)) {
+				end_color = start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led active", get_name()));
+			} else {
+				end_color = start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end active", get_name()));
+			}
 		} else {
-			start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start active", get_name()));
-			end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end active", get_name()));
+			if (active_state() == Gtkmm2ext::ImplicitActive && (_tweaks & ImplicitUsesSolidColor)) {
+				start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led", get_name()));
+				end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: led active", get_name()));
+			} else {
+				start_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill start active", get_name()));
+				end_color = ARDOUR_UI::config()->color_by_name (string_compose ("%1: fill end active", get_name()));
+			}
 		}
 		UINT_TO_RGBA (start_color, &r, &g, &b, &a);
 		cairo_pattern_add_color_stop_rgba (fill_pattern_active, 0, r/255.0,g/255.0,b/255.0, a/255.0);
