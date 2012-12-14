@@ -532,7 +532,7 @@ public:
 		_dpi_adjustment (50, 50, 250, 1, 10),
 		_dpi_slider (_dpi_adjustment)
 	{
-		_dpi_adjustment.set_value (_rc_config->get_font_scale () / 1024);
+		_dpi_adjustment.set_value (floor (_rc_config->get_font_scale () / 1024));
 
 		Label* l = manage (new Label (_("Font scaling:")));
 		l->set_name ("OptionsLabel");
@@ -551,7 +551,7 @@ public:
 	void parameter_changed (string const & p)
 	{
 		if (p == "font-scale") {
-			_dpi_adjustment.set_value (_rc_config->get_font_scale() / 1024);
+			_dpi_adjustment.set_value (floor (_rc_config->get_font_scale() / 1024));
 		}
 	}
 
@@ -1747,7 +1747,6 @@ RCOptionEditor::RCOptionEditor ()
 	_mixer_strip_visibility.add (0, X_("SoloSafe"), _("Solo Safe"));
 	_mixer_strip_visibility.add (0, X_("SoloIsolated"), _("Solo Isolated"));
 	_mixer_strip_visibility.add (0, X_("Comments"), _("Comments"));
-	_mixer_strip_visibility.add (0, X_("Group"), _("Group"));
 	_mixer_strip_visibility.add (0, X_("MeterPoint"), _("Meter Point"));
 	
 	add_option (
