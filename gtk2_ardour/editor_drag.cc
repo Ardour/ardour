@@ -3730,6 +3730,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 
 	_editor->stop_canvas_autoscroll ();
+	_editor->clicked_selection = 0;
 }
 
 void
