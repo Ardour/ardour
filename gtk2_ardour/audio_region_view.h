@@ -91,8 +91,8 @@ class AudioRegionView : public RegionView
 
 	GhostRegion* add_ghost (TimeAxisView&);
 
-	void reset_fade_in_shape_width (framecnt_t);
-	void reset_fade_out_shape_width (framecnt_t);
+	void reset_fade_in_shape_width (boost::shared_ptr<ARDOUR::AudioRegion> ar, framecnt_t);
+	void reset_fade_out_shape_width (boost::shared_ptr<ARDOUR::AudioRegion> ar, framecnt_t);
 
 	framepos_t get_fade_in_shape_width ();
 	framepos_t get_fade_out_shape_width ();

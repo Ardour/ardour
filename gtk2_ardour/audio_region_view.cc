@@ -522,14 +522,12 @@ AudioRegionView::reset_fade_shapes ()
 void
 AudioRegionView::reset_fade_in_shape ()
 {
-	reset_fade_in_shape_width ((framecnt_t) audio_region()->fade_in()->back()->when);
+	reset_fade_in_shape_width (audio_region(), (framecnt_t) audio_region()->fade_in()->back()->when);
 }
 
 void
-AudioRegionView::reset_fade_in_shape_width (framecnt_t width)
+AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, framecnt_t width)
 {
-	redraw_start_xfade ();
-
 	if (fade_in_handle == 0) {
 		return;
 	}
@@ -602,19 +600,20 @@ AudioRegionView::reset_fade_in_shape_width (framecnt_t width)
 	if (frame_handle_start) {
 		frame_handle_start->raise_to_top();
 	}
+
+	redraw_start_xfade_to ( ar, width);
+
 }
 
 void
 AudioRegionView::reset_fade_out_shape ()
 {
-	reset_fade_out_shape_width ((framecnt_t) audio_region()->fade_out()->back()->when);
+	reset_fade_out_shape_width (audio_region(), (framecnt_t) audio_region()->fade_out()->back()->when);
 }
 
 void
-AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
+AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, framecnt_t width)
 {
-	redraw_end_xfade ();
-
 	if (fade_out_handle == 0) {
 		return;
 	}
@@ -691,6 +690,8 @@ AudioRegionView::reset_fade_out_shape_width (framecnt_t width)
 	if (frame_handle_end) {
 		frame_handle_end->raise_to_top();
 	}
+
+	redraw_end_xfade_to (ar, width);
 }
 
 framepos_t
@@ -1411,7 +1412,7 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 	if (!start_xfade_out) {
 		start_xfade_out = new ArdourCanvas::Line (*group);
 		start_xfade_out->property_width_pixels() = 1;
-		uint32_t col = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_GainLine.get(), 255);
+		uint32_t col = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_GainLine.get(), 128);
 		start_xfade_out->property_fill_color_rgba() = col;
 	}
 
@@ -1519,7 +1520,7 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 	if (!end_xfade_out) {
 		end_xfade_out = new ArdourCanvas::Line (*group);
 		end_xfade_out->property_width_pixels() = 1;
-		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_GainLine.get(), 255);
+		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_GainLine.get(), 128);
 		end_xfade_out->property_fill_color_rgba() = col;
 	}
 

@@ -138,9 +138,8 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_xfade_choice)
 		);
 
-	cfc->add (ConstantPowerMinus3dB, _("constant power (-3dB)"));
-	cfc->add (ConstantPowerMinus6dB, _("constant power (-6dB)"));
-	cfc->add (RegionFades, _("use existing region fade shape"));
+	cfc->add (ConstantPowerMinus3dB, _("Constant power (-3dB) crossfade"));
+	cfc->add (ConstantPowerMinus6dB, _("Linear (-6dB) crossfade"));
 
 	add_option (_("Fades"), cfc);
 

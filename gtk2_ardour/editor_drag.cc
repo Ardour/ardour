@@ -1735,8 +1735,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 					len = ar->fade_in()->back()->when;
 					new_length = len - _editor->unit_to_frame (distance);
 					new_length = ar->verify_xfade_bounds (new_length, true  /*START*/ );
-					arv->reset_fade_in_shape_width (new_length);  //the grey shape
-					arv->redraw_start_xfade_to (ar, new_length);  //the green lines & blue rect
+					arv->reset_fade_in_shape_width (ar, new_length);  //the grey shape
 				}
 			}
 		}
@@ -1756,8 +1755,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 					len = ar->fade_out()->back()->when;
 					new_length = len - _editor->unit_to_frame (distance);
 					new_length = ar->verify_xfade_bounds (new_length, false  /*END*/ );
-					arv->reset_fade_out_shape_width (new_length);  //the grey shape
-					arv->redraw_end_xfade_to (ar, new_length);  //the green lines & blue rect (must do this after)
+					arv->reset_fade_out_shape_width (ar, new_length);  //the grey shape
 				}
 			}
 		}
@@ -2349,9 +2347,7 @@ FadeInDrag::motion (GdkEvent* event, bool)
 			continue;
 		}
 
-		tmp->reset_fade_in_shape_width (fade_length);
-		boost::shared_ptr<AudioRegion> ar (tmp->audio_region());
-		tmp->redraw_start_xfade_to (ar, fade_length);
+		tmp->reset_fade_in_shape_width (tmp->audio_region(), fade_length);
 	}
 
 	show_verbose_cursor_duration (region->position(), region->position() + fade_length, 32);
@@ -2411,7 +2407,7 @@ FadeInDrag::aborted (bool)
 			continue;
 		}
 
-		tmp->reset_fade_in_shape_width (tmp->audio_region()->fade_in()->back()->when);
+		tmp->reset_fade_in_shape_width (tmp->audio_region(), tmp->audio_region()->fade_in()->back()->when);
 	}
 }
 
@@ -2467,9 +2463,7 @@ FadeOutDrag::motion (GdkEvent* event, bool)
 			continue;
 		}
 
-		tmp->reset_fade_out_shape_width (fade_length);
-		boost::shared_ptr<AudioRegion> ar (tmp->audio_region());
-		tmp->redraw_end_xfade_to (ar, fade_length);
+		tmp->reset_fade_out_shape_width (tmp->audio_region(), fade_length);
 	}
 
 	show_verbose_cursor_duration (region->last_frame() - fade_length, region->last_frame());
@@ -2531,7 +2525,7 @@ FadeOutDrag::aborted (bool)
 			continue;
 		}
 
-		tmp->reset_fade_out_shape_width (tmp->audio_region()->fade_out()->back()->when);
+		tmp->reset_fade_out_shape_width (tmp->audio_region(), tmp->audio_region()->fade_out()->back()->when);
 	}
 }
 
