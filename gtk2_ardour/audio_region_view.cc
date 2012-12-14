@@ -552,6 +552,7 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 	fade_in_handle->property_x2() = handle_center + handle_size;
 
 	if (pwidth < 5) {
+		hide_start_xfade();
 		fade_in_shape->hide();
 		return;
 	}
@@ -596,12 +597,12 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 	fade_in_shape->property_points() = *points;
 	delete points;
 
+	redraw_start_xfade_to ( ar, width);
+
 	/* ensure trim handle stays on top */
 	if (frame_handle_start) {
 		frame_handle_start->raise_to_top();
 	}
-
-	redraw_start_xfade_to ( ar, width);
 
 }
 
@@ -642,6 +643,7 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 	/* don't show shape if its too small */
 
 	if (pwidth < 5) {
+		hide_end_xfade();
 		fade_out_shape->hide();
 		return;
 	}
@@ -686,12 +688,13 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 	fade_out_shape->property_points() = *points;
 	delete points;
 
+	redraw_end_xfade_to (ar, width);
+
 	/* ensure trim handle stays on top */
 	if (frame_handle_end) {
 		frame_handle_end->raise_to_top();
 	}
 
-	redraw_end_xfade_to (ar, width);
 }
 
 framepos_t
