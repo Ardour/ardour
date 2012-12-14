@@ -48,6 +48,7 @@
 #include "midi++/types.h"
 
 #include "timecode/time.h"
+#include "ltc/ltc.h"
 
 #include "ardour/ardour.h"
 #include "ardour/chan_count.h"
@@ -64,9 +65,6 @@
 #include <jack/session.h>
 #endif
 
-#ifdef HAVE_LTC
-#include <ltc.h>
-#endif
 
 class XMLTree;
 class XMLNode;
@@ -1189,7 +1187,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	int send_midi_time_code_for_cycle (framepos_t, framepos_t, pframes_t nframes);
 
-#ifdef HAVE_LTC
 	LTCEncoder*       ltc_encoder;
 	ltcsnd_sample_t*  ltc_enc_buf;
 
@@ -1216,7 +1213,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void ltc_tx_recalculate_position();
 	void ltc_tx_parse_offset();
 	void ltc_tx_send_time_code_for_cycle (framepos_t, framepos_t, double, double, pframes_t nframes);
-#endif
 
 	void reset_record_status ();
 

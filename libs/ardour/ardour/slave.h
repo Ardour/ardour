@@ -29,14 +29,12 @@
 #include "pbd/signals.h"
 
 #include "timecode/time.h"
+#include "ltc/ltc.h"
 
 #include "ardour/types.h"
 #include "midi++/parser.h"
 #include "midi++/types.h"
 
-#ifdef HAVE_LTC
-#include <ltc.h>
-#endif
 
 /* used for approximate_current_delta(): */
 #define PLUSMINUS(A) ( ((A)<0) ? "-" : (((A)>0) ? "+" : "\u00B1") )
@@ -335,7 +333,6 @@ class MTC_Slave : public TimecodeSlave {
 	void parameter_changed(std::string const & p);
 };
 
-#ifdef HAVE_LTC
 class LTC_Slave : public TimecodeSlave {
 public:
 	LTC_Slave (Session&);
@@ -403,7 +400,6 @@ public:
 	double e2; ///< second order loop error
 	double b, c; ///< DLL filter coefficients
 };
-#endif
 
 class MIDIClock_Slave : public Slave {
   public:

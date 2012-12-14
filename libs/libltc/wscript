@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+from waflib import TaskGen
+import os
+import sys
+
+# Version of this package (even if built as a child)
+MAJOR = '1'
+MINOR = '1'
+MICRO = '1'
+LIBLTC_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+LIBLTC_LIB_VERSION = '1.1.1'
+
+# Variables for 'waf dist'
+APPNAME = 'libltc'
+VERSION = LIBLTC_VERSION
+I18N_PACKAGE = 'libltc'
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    conf.load('compiler_c')
+    autowaf.configure(conf)
+
+def build(bld):
+    obj = bld(features = 'c cshlib')
+    obj.source = '''
+              ltc.c
+              timecode.c
+              encoder.c
+              decoder.c
+    '''
+
+    obj.export_includes = ['.']
+    obj.includes     = ['.']
+    obj.name         = 'libltc'
+    obj.target       = 'ltc'
+    obj.vnum         = LIBLTC_LIB_VERSION
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    obj.defines     = ['PACKAGE="' + I18N_PACKAGE + '"']
+
+def shutdown():
+    autowaf.shutdown()

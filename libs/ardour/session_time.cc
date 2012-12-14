@@ -95,9 +95,7 @@ Session::sync_time_vars ()
 		}
 		break;
 	};
-#ifdef HAVE_LTC
 	ltc_tx_parse_offset();
-#endif
 }
 
 void

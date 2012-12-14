@@ -23,6 +23,7 @@ children = [
         'libs/qm-dsp',
         'libs/vamp-plugins',
         'libs/taglib',
+        'libs/libltc',
         'libs/rubberband',
         'libs/surfaces',
         'libs/panners',
@@ -726,6 +727,7 @@ def build(bld):
     bld.path.find_dir ('libs/vamp-sdk/vamp-sdk')
     bld.path.find_dir ('libs/surfaces/control_protocol/control_protocol')
     bld.path.find_dir ('libs/timecode/timecode')
+    bld.path.find_dir ('libs/libltc/ltc')
     bld.path.find_dir ('libs/rubberband/rubberband')
     bld.path.find_dir ('libs/gtkmm2ext/gtkmm2ext')
     bld.path.find_dir ('libs/ardour/ardour')

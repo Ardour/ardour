@@ -484,9 +484,7 @@ ARDOUR::get_available_sync_options ()
 	ret.push_back (JACK);
 	ret.push_back (MTC);
 	ret.push_back (MIDIClock);
-#ifdef HAVE_LTC
 	ret.push_back (LTC);
-#endif
 
 	return ret;
 }

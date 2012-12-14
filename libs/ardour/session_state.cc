@@ -367,9 +367,7 @@ Session::second_stage_init ()
 
 	MIDI::Name::MidiPatchManager::instance().set_session (this);
 
-#ifdef HAVE_LTC
 	ltc_tx_initialize();
-#endif
 	/* initial program change will be delivered later; see ::config_changed() */
 
 	_state_of_the_state = Clean;
@@ -3566,10 +3564,8 @@ Session::config_changed (std::string p, bool ours)
 		reconnect_ltc_input ();
 	} else if (p == "ltc-sink-port") {
 		reconnect_ltc_output ();
-#ifdef HAVE_LTC
 	} else if (p == "timecode-generator-offset") {
 		ltc_tx_parse_offset();
-#endif
 	}
 
 	set_dirty ();

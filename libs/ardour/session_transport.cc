@@ -1386,7 +1386,6 @@ Session::switch_to_sync_source (SyncSource src)
 		break;
 
 	case LTC:
-#ifdef HAVE_LTC
 		if (_slave && dynamic_cast<LTC_Slave*>(_slave)) {
 			return;
 		}
@@ -1398,9 +1397,7 @@ Session::switch_to_sync_source (SyncSource src)
 		catch (failed_constructor& err) {
 			return;
 		}
-#else
-		return;
-#endif
+
 		break;
 
 	case MIDIClock:

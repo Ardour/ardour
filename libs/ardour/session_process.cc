@@ -116,9 +116,7 @@ Session::no_roll (pframes_t nframes)
 		_click_io->silence (nframes);
 	}
 
-#ifdef HAVE_LTC
 	ltc_tx_send_time_code_for_cycle (_transport_frame, end_frame, _target_transport_speed, _transport_speed, nframes);
-#endif
 
 	if (_process_graph) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/no-roll\n");
@@ -793,9 +791,7 @@ Session::process_without_events (pframes_t nframes)
 
 	if (!_exporting && _slave) {
 		if (!follow_slave (nframes)) {
-#ifdef HAVE_LTC
 			ltc_tx_send_time_code_for_cycle (_transport_frame, _transport_frame, 0, 0 , nframes);
-#endif
 			return;
 		}
 	}
@@ -817,9 +813,7 @@ Session::process_without_events (pframes_t nframes)
 		send_midi_time_code_for_cycle (_transport_frame, _transport_frame + frames_moved, nframes);
 	}
 
-#ifdef HAVE_LTC
 	ltc_tx_send_time_code_for_cycle (_transport_frame, _transport_frame + frames_moved, _target_transport_speed, _transport_speed, nframes);
-#endif
 
 	framepos_t const stop_limit = compute_stop_limit ();
 
