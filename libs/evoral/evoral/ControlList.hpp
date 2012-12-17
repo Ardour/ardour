@@ -65,24 +65,12 @@ public:
 	double* coeff; ///< double[4] allocated by Curve as needed
 };
 
-
-/** Pool allocator for control lists that does not use a lock
- * and allocates 8k blocks of new pointers at a time
- */
-typedef boost::fast_pool_allocator<
-	ControlEvent*,
-	boost::default_user_allocator_new_delete,
-	boost::details::pool::null_mutex,
-	8192>
-ControlEventAllocator;
-
-
 /** A list (sequence) of time-stamped values for a control
  */
 class ControlList
 {
 public:
-	typedef std::list<ControlEvent*,ControlEventAllocator> EventList;
+	typedef std::list<ControlEvent*> EventList;
 	typedef EventList::iterator iterator;
 	typedef EventList::reverse_iterator reverse_iterator;
 	typedef EventList::const_iterator const_iterator;
