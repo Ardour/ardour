@@ -273,7 +273,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'libgnomecanvasmm-2.6',
                       uselib_store='GNOMECANVASMM', atleast_version='2.16')
     autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
-    autowaf.check_pkg(conf, 'x11', uselib_store='X11', atleast_version='1.3', mandatory=False)
+    autowaf.check_pkg(conf, 'x11', uselib_store='X11', atleast_version='1.1', mandatory=False)
 
     conf.write_config_header('gtk2ardour-config.h', remove=False)
 
