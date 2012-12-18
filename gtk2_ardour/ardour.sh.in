@@ -47,6 +47,12 @@ export ARDOUR_DATA_PATH=@DATADIR@/ardour3
 export ARDOUR_CONFIG_PATH=@SYSCONFDIR@/ardour3
 export ARDOUR_DLL_PATH=@LIBDIR@/ardour3
 
+#
+# VAMP has its own lookup path
+# 
+
+export VAMP_PATH=@LIBDIR@/ardour3/vamp
+
 if [ $# -gt 0 ] ; then
     case $1 in
         -g|--gdb) GDB=gdb; shift ;;
