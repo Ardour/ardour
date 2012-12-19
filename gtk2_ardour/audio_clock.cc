@@ -569,28 +569,30 @@ AudioClock::show_edit_status (int length)
 void
 AudioClock::start_edit (Field f)
 {
-	pre_edit_string = _layout->get_text ();
-	if (!insert_map.empty()) {
-		edit_string = pre_edit_string;
-	} else {
-		edit_string.clear ();
-		_layout->set_text ("");
+	if (!editing) {
+		pre_edit_string = _layout->get_text ();
+		if (!insert_map.empty()) {
+			edit_string = pre_edit_string;
+		} else {
+			edit_string.clear ();
+			_layout->set_text ("");
+		}
+		
+		input_string.clear ();
+		editing = true;
+		edit_is_negative = false;
+		
+		if (f) {
+			input_string = get_field (f);
+			show_edit_status (merge_input_and_edit_string ());
+			_layout->set_text (edit_string);
+		}
+		
+		queue_draw ();
+
+		Keyboard::magic_widget_grab_focus ();
+		grab_focus ();
 	}
-
-	input_string.clear ();
-	editing = true;
-	edit_is_negative = false;
-
-	if (f) {
-		input_string = get_field (f);
-		show_edit_status (merge_input_and_edit_string ());
-		_layout->set_text (edit_string);
-	}
-
-	queue_draw ();
-
-	Keyboard::magic_widget_grab_focus ();
-	grab_focus ();
 }
 
 string
@@ -1445,7 +1447,7 @@ AudioClock::on_key_press_event (GdkEventKey* ev)
 	if (edit_is_negative) {
 		edit_string.replace(0,1,"-");
 	} else {
-		if (pre_edit_string.at(0) == '-') {
+		if (!pre_edit_string.empty() && (pre_edit_string.at(0) == '-')) {
 			edit_string.replace(0,1,"_");
 		} else {
 			edit_string.replace(0,1," ");
