@@ -5869,7 +5869,9 @@ Editor::define_one_bar (framepos_t start, framepos_t end)
 	} else if (t.frame() == start) {
 		_session->tempo_map().change_existing_tempo_at (start, beats_per_minute, t.note_type());
 	} else {
-		_session->tempo_map().add_tempo (Tempo (beats_per_minute, t.note_type()), start);
+		Timecode::BBT_Time bbt;
+		_session->tempo_map().bbt_time (start, bbt);
+		_session->tempo_map().add_tempo (Tempo (beats_per_minute, t.note_type()), bbt);
 	}
 
 	XMLNode& after (_session->tempo_map().get_state());
