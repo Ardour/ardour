@@ -4114,6 +4114,12 @@ boost::shared_ptr<Processor>
 Route::the_instrument () const
 {
 	Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+	return the_instrument_unlocked ();
+}
+
+boost::shared_ptr<Processor>
+Route::the_instrument_unlocked () const
+{
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if (boost::dynamic_pointer_cast<PluginInsert>(*i)) {
 			if ((*i)->input_streams().n_midi() > 0 &&
@@ -4124,6 +4130,8 @@ Route::the_instrument () const
 	}
 	return boost::shared_ptr<Processor>();
 }
+
+
 
 void
 Route::non_realtime_locate (framepos_t pos)

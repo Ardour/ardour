@@ -51,7 +51,7 @@ class Track : public Route, public PublicDiskstream
 
 	virtual void set_monitoring (MonitorChoice);
 	MonitorChoice monitoring_choice() const { return _monitoring; }
-	MonitorState monitoring_state () const;
+        MonitorState monitoring_state () const;
 	PBD::Signal0<void> MonitoringChanged;
 
 	MeterState metering_state () const;

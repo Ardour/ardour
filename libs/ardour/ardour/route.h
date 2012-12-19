@@ -527,6 +527,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	boost::shared_ptr<Amp>       _amp;
 	boost::shared_ptr<PeakMeter> _meter;
 
+	boost::shared_ptr<Processor> the_instrument_unlocked() const;
+
   private:
 	int set_state_2X (const XMLNode&, int);
 	void set_processor_state_2X (XMLNodeList const &, int);

@@ -352,7 +352,9 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
 		MidiBuffer& mbuf (bufs.get_midi (0));
 
-		/* we are a MIDI track, so we always start the chain with a single-channel diskstream */
+		/* we are a MIDI track, so we always start the chain with a
+		 * single-MIDI-channel diskstream 
+		 */
 		ChanCount c;
 		c.set_audio (0);
 		c.set_midi (1);
@@ -772,3 +774,12 @@ MidiTrack::set_monitoring (MonitorChoice mc)
 	}
 }
 
+MonitorState
+MidiTrack::monitoring_state () const
+{
+	MonitorState ms = Track::monitoring_state();
+	if (ms == MonitoringSilence) {
+		return MonitoringInput;
+	} 
+	return ms;
+}
