@@ -496,7 +496,7 @@ GenericMidiControlProtocol::get_state ()
 		   file.
 		*/
 
-		if ((*i)->learned()) {
+		if ((*i)->get_controllable() && (*i)->learned()) {
 			children->add_child_nocopy ((*i)->get_state());
 		}
 	}
