@@ -848,15 +848,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 			break;
 
-		case LeftFrameHandle:
-		case RightFrameHandle:
-			if (!internal_editing() && !clicked_regionview->region()->locked()) {
-				RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
-				_drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer()), event);
-				return true;
-			}
-			break;
-
 		default:
 			if (!internal_editing()) {
 				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier)) {
