@@ -1037,6 +1037,8 @@ MidiDiskstream::set_record_enabled (bool yn)
 		} else {
 			disengage_record_enable ();
 		}
+		
+		RecordEnableChanged (); /* EMIT SIGNAL */
 	}
 }
 
@@ -1055,16 +1057,12 @@ MidiDiskstream::prep_record_enable ()
 		sp->request_jack_monitors_input (!(_session.config.get_auto_input() && rolling));
 	}
 
-	RecordEnableChanged (); /* EMIT SIGNAL */
-
 	return true;
 }
 
 bool
 MidiDiskstream::prep_record_disable ()
 {
-	g_atomic_int_set (&_record_enabled, 0);
-	RecordEnableChanged (); /* EMIT SIGNAL */
 
 	return true;
 }
