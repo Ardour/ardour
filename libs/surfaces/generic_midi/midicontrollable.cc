@@ -163,6 +163,14 @@ MIDIControllable::control_to_midi (float val)
 	float control_max = controllable->upper ();
 	const float control_range = control_max - control_min;
 
+	if (controllable->is_toggle()) {
+		if (val >= (control_min + (control_range/2.0f))) {
+			return max_value_for_type();
+		} else {
+			return 0;
+		}
+	}
+
 	return (val - control_min) / control_range * max_value_for_type ();
 }
 
