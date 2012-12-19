@@ -583,7 +583,7 @@ AutomationLine::start_drag_common (double x, float fraction)
  *  @return x position and y fraction that were actually used (once clamped).
  */
 pair<double, float>
-AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool with_push)
+AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool with_push, uint32_t& final_index)
 {
 	if (_drag_points.empty()) {
 		return pair<double,float> (x,fraction);
@@ -662,8 +662,9 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 			(*ccp)->move (dx, dy);
 		}
 		if (with_push) {
-			uint32_t i = contiguous_points.back()->back()->view_index () + 1;
+			final_index = contiguous_points.back()->back()->view_index () + 1;
 			ControlPoint* p;
+			uint32_t i = final_index;
 			while ((p = nth (i)) != 0 && p->can_slide()) {
 				p->move_to (p->get_x() + dx, p->get_y(), ControlPoint::Full);
 				reset_line_coords (*p);
@@ -688,7 +689,7 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 
 /** Should be called to indicate the end of a drag */
 void
-AutomationLine::end_drag ()
+AutomationLine::end_drag (bool with_push, uint32_t final_index)
 {
 	if (!_drag_had_movement) {
 		return;
@@ -696,6 +697,16 @@ AutomationLine::end_drag ()
 
 	alist->freeze ();
 	sync_model_with_view_points (_drag_points);
+
+	if (with_push) {
+		ControlPoint* p;
+		uint32_t i = final_index;
+		while ((p = nth (i)) != 0 && p->can_slide()) {
+			sync_model_with_view_point (*p);
+			++i;
+		}
+	}
+
 	alist->thaw ();
 
 	update_pending = false;

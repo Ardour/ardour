@@ -2885,6 +2885,8 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	_editor->verbose_cursor()->show ();
 
+	_pushing = Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier);
+
 	if (!_point->can_slide ()) {
 		_x_constrained = true;
 	}
@@ -2938,9 +2940,8 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 	cx_frames = min (cx_frames, _point->line().maximum_time());
 
 	float const fraction = 1.0 - (cy / _point->line().height());
-	bool const push = Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier);
 
-	_point->line().drag_motion (_editor->frame_to_unit_unrounded (cx_frames), fraction, false, push);
+	_point->line().drag_motion (_editor->frame_to_unit_unrounded (cx_frames), fraction, false, _pushing, _final_index);
 
 	_editor->verbose_cursor()->set_text (_point->line().get_verbose_cursor_string (fraction));
 }
@@ -2960,7 +2961,7 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 		motion (event, false);
 	}
 
-	_point->line().end_drag ();
+	_point->line().end_drag (_pushing, _final_index);
 	_editor->session()->commit_reversible_command ();
 }
 
@@ -3051,10 +3052,10 @@ LineDrag::motion (GdkEvent* event, bool)
 	cy = min ((double) _line->height(), cy);
 
 	double const fraction = 1.0 - (cy / _line->height());
-	bool const push = !Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier);
+	uint32_t ignored;
 
 	/* we are ignoring x position for this drag, so we can just pass in anything */
-	_line->drag_motion (0, fraction, true, push);
+	_line->drag_motion (0, fraction, true, false, ignored);
 
 	_editor->verbose_cursor()->set_text (_line->get_verbose_cursor_string (fraction));
 }
@@ -3063,7 +3064,7 @@ void
 LineDrag::finished (GdkEvent* event, bool)
 {
 	motion (event, false);
-	_line->end_drag ();
+	_line->end_drag (false, 0);
 	_editor->session()->commit_reversible_command ();
 }
 
@@ -4376,7 +4377,8 @@ AutomationRangeDrag::motion (GdkEvent*, bool /*first_move*/)
 	for (list<Line>::iterator l = _lines.begin(); l != _lines.end(); ++l) {
 		float const f = y_fraction (l->line, _drags->current_pointer_y());
 		/* we are ignoring x position for this drag, so we can just pass in anything */
-		l->line->drag_motion (0, f, true, false);
+		uint32_t ignored;
+		l->line->drag_motion (0, f, true, false, ignored);
 		show_verbose_cursor_text (l->line->get_verbose_cursor_relative_string (l->original_fraction, f));
 	}
 }
@@ -4390,7 +4392,7 @@ AutomationRangeDrag::finished (GdkEvent* event, bool)
 
 	motion (event, false);
 	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-		i->line->end_drag ();
+		i->line->end_drag (false, 0);
 	}
 
 	_editor->session()->commit_reversible_command ();

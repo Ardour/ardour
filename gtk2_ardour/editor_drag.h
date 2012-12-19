@@ -706,6 +706,8 @@ private:
 	double _fixed_grab_y;
 	double _cumulative_x_drag;
 	double _cumulative_y_drag;
+        bool     _pushing;
+        uint32_t _final_index;
 	static double _zero_gain_fraction;
 };
 
