@@ -2935,8 +2935,8 @@ MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush, bool al
 
 	if (!allow_smush) {
 		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-			if ((*i)->note()->velocity() + delta == 0 || (*i)->note()->velocity() + delta == 127) {
-				return;
+			if ((*i)->note()->velocity() < -delta || (*i)->note()->velocity() + delta > 127) {
+				goto cursor_label;
 			}
 		}
 	}
@@ -2964,6 +2964,7 @@ MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush, bool al
 
 	apply_diff();
 
+  cursor_label:
 	if (!_selection.empty()) {
 		char buf[24];
 		snprintf (buf, sizeof (buf), "Vel %d",
