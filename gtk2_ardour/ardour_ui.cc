@@ -686,12 +686,14 @@ ARDOUR_UI::check_memory_locking ()
 						  "and it is normally controlled by /etc/security/limits.conf"),
 						PROGRAM_NAME).c_str());
 
+				msg.set_default_response (RESPONSE_OK);
+
 				VBox* vbox = msg.get_vbox();
 				HBox hbox;
 				CheckButton cb (_("Do not show this window again"));
 
 				cb.signal_toggled().connect (sigc::mem_fun (*this, &ARDOUR_UI::no_memory_warning));
-
+				
 				hbox.pack_start (cb, true, false);
 				vbox->pack_start (hbox);
 				cb.show();
