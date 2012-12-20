@@ -39,6 +39,7 @@
 class XMLNode;
 
 std::string legalize_for_path (const std::string& str);
+std::string legalize_for_universal_path (const std::string& str);
 std::string legalize_for_path_2X (const std::string& str);
 XMLNode* find_named_node (const XMLNode& node, std::string name);
 std::string bool_as_string (bool);
