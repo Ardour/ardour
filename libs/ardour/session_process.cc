@@ -349,6 +349,7 @@ Session::process_with_events (pframes_t nframes)
 	}
 
 	end_frame = _transport_frame + frames_moved;
+	_transport_frame = std::max((ARDOUR::framepos_t) 0, _transport_frame);
 
 	{
 		SessionEvent* this_event;
