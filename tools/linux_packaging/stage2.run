@@ -262,6 +262,9 @@ else
 	fi
 fi
 
+FILESYSTEM_TYPE=$(df -P -T "${PKG_PATH}" | grep / | awk '{print $2}')
+echo "Bundle is on ${FILESYSTEM_TYPE} filesystem"
+
 #####################
 # Unpack the bundle
 #####################
@@ -277,7 +280,16 @@ if [ ! -e ${PGM_NAME}_${ARCH}-*.tar.bz2 ]; then
 	exit 1
 fi
 
-tar -xjf ${PGM_NAME}_${ARCH}-*.tar.bz2
+if ! tar -xjf ${PGM_NAME}_${ARCH}-*.tar.bz2; then
+	echo ""
+	echo "!!! ERROR !!! Can't unpack ${ARCH} bundle file."
+	echo ""
+	read -p "Press ENTER to exit installer:" BLAH
+	exit 1
+else
+	echo "Bundle unpacked"
+fi
+
 BUNDLE_DIR=$(basename `find -maxdepth 1 -type d -name "${PGM_NAME}_${ARCH}-*"`)
 
 
@@ -640,10 +652,8 @@ then
 	then
 		echo ""
 		echo "!!! WARNING !!! - Your system seems to use frequency scaling."
-		echo "This can have a serious impact on audio latency. You have two choices:"
-		echo "(1) turn it off, e.g. by chosing the 'performance' governor."
-		echo "(2) Use the HPET clocksource by passing \"-c h\" to JACK"
-		echo "(this second option only works on relatively recent computers)"
+		echo "This can have a serious impact on audio latency."
+		echo "For best results turn it off, e.g. by chosing the 'performance' governor."
 		echo ""
 		read -p "Press ENTER to continue:" BLAH
 	fi
