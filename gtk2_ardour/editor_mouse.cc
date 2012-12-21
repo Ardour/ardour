@@ -199,6 +199,10 @@ Editor::which_grabber_cursor ()
 		case MouseTimeFX:
 			c = _cursors->midi_resize;
 			break;
+			
+		case MouseRange:
+			c = _cursors->grabber_note;
+			break;
 
 		default:
 			break;
@@ -250,6 +254,9 @@ Editor::set_canvas_cursor ()
 	switch (mouse_mode) {
 	case MouseRange:
 		current_canvas_cursor = _cursors->selector;
+		if (_internal_editing) {
+			current_canvas_cursor = which_grabber_cursor();
+		}
 		break;
 
 	case MouseObject:
@@ -281,19 +288,21 @@ Editor::set_canvas_cursor ()
 		break;
 	}
 
-	switch (_join_object_range_state) {
-	case JOIN_OBJECT_RANGE_NONE:
-		break;
-	case JOIN_OBJECT_RANGE_OBJECT:
-		current_canvas_cursor = which_grabber_cursor ();
-		break;
-	case JOIN_OBJECT_RANGE_RANGE:
-		current_canvas_cursor = _cursors->selector;
-		break;
+	if (!_internal_editing) {
+		switch (_join_object_range_state) {
+		case JOIN_OBJECT_RANGE_NONE:
+			break;
+		case JOIN_OBJECT_RANGE_OBJECT:
+			current_canvas_cursor = which_grabber_cursor ();
+			break;
+		case JOIN_OBJECT_RANGE_RANGE:
+			current_canvas_cursor = _cursors->selector;
+			break;
+		}
 	}
 
 	/* up-down cursor as a cue that automation can be dragged up and down when in join object/range mode */
-	if ( get_smart_mode() ) {
+	if (!_internal_editing && get_smart_mode() ) {
 		double x, y;
 		get_pointer_position (x, y);
 		ArdourCanvas::Item* i = track_canvas->get_item_at (x, y);
@@ -2252,11 +2261,12 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 
 	JoinObjectRangeState const old = _join_object_range_state;
 	update_join_object_range_location (event->motion.x, event->motion.y);
-	if (_join_object_range_state != old) {
+
+	if (!_internal_editing && _join_object_range_state != old) {
 		set_canvas_cursor ();
 	}
 
-	if (_over_region_trim_target) {
+	if (!_internal_editing && _over_region_trim_target) {
 		set_canvas_cursor_for_region_view (event->motion.x, entered_regionview);
 	}
 
