@@ -211,11 +211,16 @@ std::string Mootcher::searchText(std::string query, int page, std::string filter
 		snprintf(buf, 23, "p=%d&", page);
 		params += buf;
 	}
-	
-	params += "q=" + query;	
 
-	if (filter != "")
-		params += "&f=" + filter;
+	char *eq = curl_easy_escape(curl, query.c_str(), query.length());
+	params += "q=" + std::string(eq);
+	free(eq);
+
+	if (filter != "") {
+		char *ef = curl_easy_escape(curl, filter.c_str(), filter.length());
+		params += "&f=" + std::string(ef);
+		free(ef);
+	}
 	
 	if (sort)
 		params += "&s=" + sortMethodString(sort);
