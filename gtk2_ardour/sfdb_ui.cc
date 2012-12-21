@@ -522,13 +522,12 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		Label* label;
 
 		passbox = manage(new HBox);
-		passbox->set_border_width (12);
-		passbox->set_spacing (3);
+		passbox->set_spacing (6);
 
 		label = manage (new Label);
 		label->set_text (_("Tags:"));
 		passbox->pack_start (*label, false, false);
-		passbox->pack_start (freesound_entry, false, false);
+		passbox->pack_start (freesound_entry, true, true);
 
 		label = manage (new Label);
 		label->set_text (_("Sort:"));
@@ -550,7 +549,6 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		freesound_sort.set_active(0);
 
 		passbox->pack_start (freesound_search_btn, false, false);
-		passbox->pack_start (freesound_progress_bar);
 		passbox->pack_end   (freesound_stop_btn, false, false);
 		freesound_stop_btn.set_label(_("Stop"));
 		
@@ -559,7 +557,9 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		scroll->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
 		vbox = manage(new VBox);
+		vbox->set_spacing (3);
 		vbox->pack_start (*passbox, PACK_SHRINK);
+		vbox->pack_start (freesound_progress_bar, PACK_SHRINK);
 		vbox->pack_start (*scroll);
 
 		freesound_list_view.append_column(_("ID")      , freesound_list_columns.id);
@@ -792,6 +792,9 @@ SoundFileBrowser::freesound_list_view_selected ()
 			set_response_sensitive (RESPONSE_OK, false);
 		}
 
+		freesound_progress_bar.set_text(
+				string_compose(_("found %1 matche(s)"), matches));
+
 		preview.setup_labels (file);
 	}
 #endif
@@ -841,6 +844,7 @@ SoundFileBrowser::freesound_search()
 {
 #ifdef FREESOUND
 	freesound_list->clear();
+	matches = 0;
 
 	string search_string = freesound_entry.get_text ();
 	enum sortMethod sort_method = (enum sortMethod) freesound_sort.get_active_row_number();
@@ -848,11 +852,19 @@ SoundFileBrowser::freesound_search()
 	GdkCursor *prev_cursor;
 	prev_cursor = gdk_window_get_cursor (get_window()->gobj());
 	gdk_window_set_cursor (get_window()->gobj(), gdk_cursor_new(GDK_WATCH));
+	freesound_progress_bar.set_fraction(0.0);
 	gdk_flush();
-	for (int page = 1; page <= 99; page++ ) {
+
+	int freesound_n_pages = 1;
+	for (int page = 1; page <= 99 && page <= freesound_n_pages; page++ ) {
 		
 		std::string prog;
-		prog = string_compose (_("Page %1"), page);
+		if (freesound_n_pages > 1) {
+			freesound_progress_bar.set_fraction(page/(float)freesound_n_pages);
+			prog = string_compose (_("Searching Page %1 of %2, click Stop to cancel"), page, freesound_n_pages);
+		} else {
+			prog = _("Searching, click Stop to cancel");
+		}
 		freesound_progress_bar.set_text(prog);
 		while (Glib::MainContext::get_default()->iteration (false)) {
 			/* do nothing */
@@ -881,6 +893,13 @@ SoundFileBrowser::freesound_search()
 		if ( strcmp(root->name().c_str(), "response") != 0) {
 			error << string_compose ("root node name == %1 != \"response\"", root->name()) << endmsg;
 			break;
+		}
+
+		//find out how many pages are available to search
+		XMLNode *res = root->child("num_pages");
+		if (res) {
+			string result = res->child("text")->content();
+			freesound_n_pages = atoi(result.c_str());
 		}
 
 		XMLNode *sounds_root = root->child("sounds");
@@ -981,6 +1000,7 @@ SoundFileBrowser::freesound_search()
 				row[freesound_list_columns.filesize] = bsize;
 				row[freesound_list_columns.smplrate] = srt;
 				row[freesound_list_columns.license ] = shortlicense;
+				matches++;
 
 			}
 		}
@@ -992,7 +1012,9 @@ SoundFileBrowser::freesound_search()
 
 	gdk_window_set_cursor (get_window()->gobj(), prev_cursor);
 
-	freesound_progress_bar.set_text("");
+	freesound_progress_bar.set_fraction(0.0);
+	freesound_progress_bar.set_text(
+			string_compose(_("found %1 matche(s)"), matches));
 
 #endif
 }

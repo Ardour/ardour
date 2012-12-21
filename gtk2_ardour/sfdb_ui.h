@@ -187,6 +187,7 @@ class SoundFileBrowser : public ArdourDialog
 
   protected:
 	bool resetting_ourselves;
+	int matches;
 
 	Gtk::FileFilter audio_and_midi_filter;
 	Gtk::FileFilter audio_filter;
