@@ -128,12 +128,16 @@ class SoundFileBrowser : public ArdourDialog
 		Gtk::TreeModelColumn<std::string> uri;
 		Gtk::TreeModelColumn<std::string> filename;
 		Gtk::TreeModelColumn<std::string> duration;
+		Gtk::TreeModelColumn<std::string> filesize;
+		Gtk::TreeModelColumn<std::string> smplrate;
 
 		FreesoundColumns() {
 			add(id); 
 			add(filename); 
 			add(uri);
 			add(duration);
+			add(filesize);
+			add(smplrate);
 		}
 	};
 

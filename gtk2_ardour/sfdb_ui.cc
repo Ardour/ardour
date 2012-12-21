@@ -523,7 +523,7 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 
 		passbox = manage(new HBox);
 		passbox->set_border_width (12);
-		passbox->set_spacing (6);
+		passbox->set_spacing (3);
 
 		label = manage (new Label);
 		label->set_text (_("Tags:"));
@@ -566,7 +566,13 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		freesound_list_view.append_column(_("Filename"), freesound_list_columns.filename);
 		// freesound_list_view.append_column(_("URI")     , freesound_list_columns.uri);
 		freesound_list_view.append_column(_("Duration"), freesound_list_columns.duration);
+		freesound_list_view.append_column(_("Size"), freesound_list_columns.filesize);
+		freesound_list_view.append_column(_("Samplerate"), freesound_list_columns.smplrate);
+		freesound_list_view.get_column(0)->set_alignment(0.5);
 		freesound_list_view.get_column(1)->set_expand(true);
+		freesound_list_view.get_column(2)->set_alignment(0.5);
+		freesound_list_view.get_column(3)->set_alignment(0.5);
+		freesound_list_view.get_column(4)->set_alignment(0.5);
 
 		freesound_list_view.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_list_view_selected));
 
@@ -844,7 +850,7 @@ SoundFileBrowser::freesound_search()
 	for (int page = 1; page <= 99; page++ ) {
 		
 		std::string prog;
-		prog = string_compose (_("Page %1, [Stop]->"), page);
+		prog = string_compose (_("Page %1"), page);
 		freesound_progress_bar.set_text(prog);
 		while (Glib::MainContext::get_default()->iteration (false)) {
 			/* do nothing */
@@ -853,7 +859,11 @@ SoundFileBrowser::freesound_search()
 		std::string theString = mootcher->searchText(
 			search_string, 
 			page,
-			"", // filter, could do, e.g. "type:wav"
+#ifdef GTKOSX
+			"", // OSX eats anything incl mp3
+#else
+			"type:wav OR type:aiff OR type:flac OR type:aif OR type:ogg OR type:oga",
+#endif
 			sort_method
 		);
 
@@ -900,13 +910,17 @@ SoundFileBrowser::freesound_search()
 			XMLNode *uri_node = node->child ("serve");
 			XMLNode *ofn_node = node->child ("original_filename");
 			XMLNode *dur_node = node->child ("duration");
+			XMLNode *siz_node = node->child ("filesize");
+			XMLNode *srt_node = node->child ("samplerate");
 
-			if (id_node && uri_node && ofn_node && dur_node) {
+			if (id_node && uri_node && ofn_node && dur_node && siz_node && srt_node) {
 				
 				std::string  id =  id_node->child("text")->content();
 				std::string uri = uri_node->child("text")->content();
 				std::string ofn = ofn_node->child("text")->content();
 				std::string dur = dur_node->child("text")->content();
+				std::string siz = siz_node->child("text")->content();
+				std::string srt = srt_node->child("text")->content();
 
 				std::string r;
 				// cerr << "id=" << id << ",uri=" << uri << ",ofn=" << ofn << ",dur=" << dur << endl;
@@ -924,6 +938,20 @@ SoundFileBrowser::freesound_search()
 					);
 				}
 
+				double size_bytes = atof(siz.c_str());
+				char bsize[32];
+				if (size_bytes < 1000) {
+					sprintf(bsize, "%.0f %s", size_bytes, _("B"));
+				} else if (size_bytes < 1000000 ) {
+					sprintf(bsize, "%.1f %s", size_bytes / 1000.0, _("kB"));
+				} else if (size_bytes < 10000000) {
+					sprintf(bsize, "%.1f %s", size_bytes / 1000000.0, _("MB"));
+				} else if (size_bytes < 1000000000) {
+					sprintf(bsize, "%.2f %s", size_bytes / 1000000.0, _("MB"));
+				} else {
+					sprintf(bsize, "%.2f %s", size_bytes / 1000000000.0, _("GB"));
+				}
+
  				TreeModel::iterator new_row = freesound_list->append();
 				TreeModel::Row row = *new_row;
 				
@@ -931,6 +959,8 @@ SoundFileBrowser::freesound_search()
 				row[freesound_list_columns.uri     ] = uri;
 				row[freesound_list_columns.filename] = ofn;
 				row[freesound_list_columns.duration] = duration_hhmmss;
+				row[freesound_list_columns.filesize] = bsize;
+				row[freesound_list_columns.smplrate] = srt;
 
 			}
 		}

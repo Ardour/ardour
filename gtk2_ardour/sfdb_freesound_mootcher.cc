@@ -213,7 +213,7 @@ std::string Mootcher::searchText(std::string query, int page, std::string filter
 	}
 
 	char *eq = curl_easy_escape(curl, query.c_str(), query.length());
-	params += "q=" + std::string(eq);
+	params += "q=\"" + std::string(eq) + "\"";
 	free(eq);
 
 	if (filter != "") {
@@ -225,7 +225,7 @@ std::string Mootcher::searchText(std::string query, int page, std::string filter
 	if (sort)
 		params += "&s=" + sortMethodString(sort);
 
-	params += "&fields=id,original_filename,duration,serve";	
+	params += "&fields=id,original_filename,duration,filesize,samplerate,serve";
 
 	return doRequest("/sounds/search", params);
 }
@@ -344,7 +344,7 @@ std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID,
 	caller->freesound_progress_bar.show();
 
 	std::string prog;
-	prog = string_compose (_("%1: [Stop]->"), originalFileName);
+	prog = string_compose (_("%1"), originalFileName);
 	caller->freesound_progress_bar.set_text(prog);
 
 	curl_easy_setopt (curl, CURLOPT_NOPROGRESS, 0); // turn on the progress bar
