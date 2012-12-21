@@ -568,11 +568,13 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		freesound_list_view.append_column(_("Duration"), freesound_list_columns.duration);
 		freesound_list_view.append_column(_("Size"), freesound_list_columns.filesize);
 		freesound_list_view.append_column(_("Samplerate"), freesound_list_columns.smplrate);
+		freesound_list_view.append_column(_("License"), freesound_list_columns.license);
 		freesound_list_view.get_column(0)->set_alignment(0.5);
 		freesound_list_view.get_column(1)->set_expand(true);
 		freesound_list_view.get_column(2)->set_alignment(0.5);
 		freesound_list_view.get_column(3)->set_alignment(0.5);
 		freesound_list_view.get_column(4)->set_alignment(0.5);
+		freesound_list_view.get_column(5)->set_alignment(0.5);
 
 		freesound_list_view.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_list_view_selected));
 
@@ -912,6 +914,7 @@ SoundFileBrowser::freesound_search()
 			XMLNode *dur_node = node->child ("duration");
 			XMLNode *siz_node = node->child ("filesize");
 			XMLNode *srt_node = node->child ("samplerate");
+			XMLNode *lic_node = node->child ("license");
 
 			if (id_node && uri_node && ofn_node && dur_node && siz_node && srt_node) {
 				
@@ -921,6 +924,7 @@ SoundFileBrowser::freesound_search()
 				std::string dur = dur_node->child("text")->content();
 				std::string siz = siz_node->child("text")->content();
 				std::string srt = srt_node->child("text")->content();
+				std::string lic = lic_node->child("text")->content();
 
 				std::string r;
 				// cerr << "id=" << id << ",uri=" << uri << ",ofn=" << ofn << ",dur=" << dur << endl;
@@ -952,6 +956,21 @@ SoundFileBrowser::freesound_search()
 					sprintf(bsize, "%.2f %s", size_bytes / 1000000000.0, _("GB"));
 				}
 
+				/* see http://www.freesound.org/help/faq/#licenses */
+				char shortlicense[64];
+				if(!lic.compare(0, 42, "http://creativecommons.org/licenses/by-nc/")){
+					sprintf(shortlicense, "CC-BY-NC");
+				} else if(!lic.compare(0, 39, "http://creativecommons.org/licenses/by/")) {
+					sprintf(shortlicense, "CC-BY");
+				} else if(!lic.compare("http://creativecommons.org/licenses/sampling+/1.0/")) {
+					sprintf(shortlicense, "sampling+");
+				} else if(!lic.compare(0, 40, "http://creativecommons.org/publicdomain/")) {
+					sprintf(shortlicense, "PD");
+				} else {
+					snprintf(shortlicense, 64, "%s", lic.c_str());
+					shortlicense[63]= '\0';
+				}
+
  				TreeModel::iterator new_row = freesound_list->append();
 				TreeModel::Row row = *new_row;
 				
@@ -961,6 +980,7 @@ SoundFileBrowser::freesound_search()
 				row[freesound_list_columns.duration] = duration_hhmmss;
 				row[freesound_list_columns.filesize] = bsize;
 				row[freesound_list_columns.smplrate] = srt;
+				row[freesound_list_columns.license ] = shortlicense;
 
 			}
 		}

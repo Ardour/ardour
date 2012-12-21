@@ -225,7 +225,7 @@ std::string Mootcher::searchText(std::string query, int page, std::string filter
 	if (sort)
 		params += "&s=" + sortMethodString(sort);
 
-	params += "&fields=id,original_filename,duration,filesize,samplerate,serve";
+	params += "&fields=id,original_filename,duration,filesize,samplerate,license,serve";
 
 	return doRequest("/sounds/search", params);
 }
