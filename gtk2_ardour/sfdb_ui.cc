@@ -879,6 +879,11 @@ SoundFileBrowser::freesound_search()
 		}
 		
 		XMLNodeList sounds = sounds_root->children();
+		if (sounds.size() == 0) {
+			/* nothing found */
+			break;
+		}
+
 		XMLNodeConstIterator niter;
 		XMLNode *node;
 		for (niter = sounds.begin(); niter != sounds.end(); ++niter) {
