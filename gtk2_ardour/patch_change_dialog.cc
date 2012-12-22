@@ -44,7 +44,8 @@ PatchChangeDialog::PatchChangeDialog (
 	ARDOUR::Session* session,
 	Evoral::PatchChange<Evoral::MusicalTime> const & patch,
 	ARDOUR::InstrumentInfo& info,
-	const Gtk::BuiltinStockID& ok
+	const Gtk::BuiltinStockID& ok,
+	bool allow_delete
 	)
 	: ArdourDialog (_("Patch Change"), true)
 	, _time_converter (tc)
@@ -114,6 +115,9 @@ PatchChangeDialog::PatchChangeDialog (
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (ok, RESPONSE_ACCEPT);
+	if (allow_delete) {
+		add_button (Stock::DELETE, RESPONSE_REJECT);
+	}
 	set_default_response (RESPONSE_ACCEPT);
 
 	fill_bank_combo ();

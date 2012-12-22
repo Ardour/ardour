@@ -1141,6 +1141,9 @@ Editor::sensitize_the_right_region_actions ()
 		_region_actions->get_action("show-region-properties")->set_sensitive (false);
 		_region_actions->get_action("rename-region")->set_sensitive (false);
 		if (have_audio) {
+			/* XXX need to check whether there is than 1 per
+			   playlist, because otherwise this makes no sense.
+			*/
 			_region_actions->get_action("combine-regions")->set_sensitive (true);
 		} else {
 			_region_actions->get_action("combine-regions")->set_sensitive (false);

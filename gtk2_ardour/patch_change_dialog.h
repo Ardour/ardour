@@ -45,7 +45,8 @@ public:
 		ARDOUR::Session *,
 		Evoral::PatchChange<Evoral::MusicalTime> const &,
 		ARDOUR::InstrumentInfo&,
-		const Gtk::BuiltinStockID &
+		const Gtk::BuiltinStockID &,
+		bool allow_delete = false
 		);
 
 	Evoral::PatchChange<Evoral::MusicalTime> patch () const;

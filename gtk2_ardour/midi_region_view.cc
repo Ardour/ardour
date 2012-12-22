@@ -3783,11 +3783,19 @@ MidiRegionView::trim_front_ending ()
 void
 MidiRegionView::edit_patch_change (ArdourCanvas::CanvasPatchChange* pc)
 {
-	PatchChangeDialog d (&_source_relative_time_converter, trackview.session(), *pc->patch (), instrument_info(), Gtk::Stock::APPLY);
+	PatchChangeDialog d (&_source_relative_time_converter, trackview.session(), *pc->patch (), instrument_info(), Gtk::Stock::APPLY, true);
 
         d.set_position (Gtk::WIN_POS_MOUSE);
+	
+	int response = d.run();
 
-	if (d.run () != Gtk::RESPONSE_ACCEPT) {
+	switch (response) {
+	case Gtk::RESPONSE_ACCEPT:
+		break;
+	case Gtk::RESPONSE_REJECT:
+		delete_patch_change (pc);
+		return;
+	default:
 		return;
 	}
 
