@@ -105,7 +105,7 @@ private:
 
 	void click_browse_clicked ()
 	{
-		SoundFileChooser sfdb (*_parent, _("Choose Click"));
+		SoundFileChooser sfdb (_("Choose Click"));
 
 		if (sfdb.run () == RESPONSE_OK) {
 			click_chosen (sfdb.get_filename());
@@ -125,7 +125,7 @@ private:
 	
 	void click_emphasis_browse_clicked ()
 	{
-		SoundFileChooser sfdb (*_parent, _("Choose Click Emphasis"));
+		SoundFileChooser sfdb (_("Choose Click Emphasis"));
 
 		sfdb.show_all ();
 		sfdb.present ();

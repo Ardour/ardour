@@ -152,7 +152,7 @@ class SoundFileBrowser : public ArdourWindow
 	Gtk::Button freesound_stop_btn;
 
   public:
-	SoundFileBrowser (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, bool persistent);
+	SoundFileBrowser (std::string title, ARDOUR::Session* _s, bool persistent);
 	virtual ~SoundFileBrowser ();
 
         int run ();
@@ -248,7 +248,7 @@ class SoundFileBrowser : public ArdourWindow
 class SoundFileChooser : public SoundFileBrowser
 {
   public:
-	SoundFileChooser (Gtk::Window& parent, std::string title, ARDOUR::Session* _s = 0);
+	SoundFileChooser (std::string title, ARDOUR::Session* _s = 0);
 	virtual ~SoundFileChooser () {};
 
 	std::string get_filename ();
@@ -261,7 +261,7 @@ class SoundFileOmega : public SoundFileBrowser
 {
 
   public:
-	SoundFileOmega (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, 
+	SoundFileOmega (std::string title, ARDOUR::Session* _s, 
 			uint32_t selected_audio_tracks, uint32_t selected_midi_tracks,
 			bool persistent,
 			Editing::ImportMode mode_hint = Editing::ImportAsTrack);

@@ -414,8 +414,8 @@ SoundFileBox::save_tags (const vector<string>& tags)
 	Library->save_changes ();
 }
 
-SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::Session* s, bool persistent)
-	: ArdourWindow (parent, title)
+SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persistent)
+	: ArdourWindow (title)
 	, found_list (ListStore::create(found_list_columns))
 	, freesound_list (ListStore::create(freesound_list_columns))
 	, chooser (FILE_CHOOSER_ACTION_OPEN)
@@ -613,6 +613,8 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	Gtkmm2ext::UI::instance()->set_tip (cancel_button, _("Press to close this window without importing any files"));
 
 	vpacker.pack_end (*button_box, false, false);
+
+	set_wmclass (X_("import"), PROGRAM_NAME);
 }
 
 SoundFileBrowser::~SoundFileBrowser ()
@@ -1460,8 +1462,8 @@ SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths
 	return ret;
 }
 
-SoundFileChooser::SoundFileChooser (Gtk::Window& parent, string title, ARDOUR::Session* s)
-	: SoundFileBrowser (parent, title, s, false)
+SoundFileChooser::SoundFileChooser (string title, ARDOUR::Session* s)
+	: SoundFileBrowser (title, s, false)
 {
 	chooser.set_select_multiple (false);
 	found_list_view.get_selection()->set_mode (SELECTION_SINGLE);
@@ -1497,12 +1499,12 @@ SoundFileChooser::get_filename ()
 	return paths.front();
 }
 
-SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Session* s, 
+SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s, 
 				uint32_t selected_audio_tracks, 
 				uint32_t selected_midi_tracks, 
 				bool persistent,
 				Editing::ImportMode mode_hint)
-	: SoundFileBrowser (parent, title, s, persistent)
+	: SoundFileBrowser (title, s, persistent)
 	, copy_files_btn ( _("Copy files to session"))
 	, selected_audio_track_cnt (selected_audio_tracks)
 	, selected_midi_track_cnt (selected_midi_tracks)
