@@ -221,6 +221,13 @@ SndFileSource::open ()
 
 	bool bwf_info_exists = _broadcast_info->load_from_file (sf);
 
+	if (_file_is_new && _length == 0 && writable() && !bwf_info_exists) {
+		/* newly created files will not have a BWF header at this point in time.
+		 * Import will have called Source::set_timeline_position() if one exists
+		 * in the original. */
+		header_position_offset = _timeline_position;
+	}
+
 	/* Set our timeline position to either the time reference from a BWF header or the current
 	   start of the session.
 	*/
