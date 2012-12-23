@@ -107,9 +107,6 @@ private:
 	{
 		SoundFileChooser sfdb (*_parent, _("Choose Click"));
 
-		sfdb.show_all ();
-		sfdb.present ();
-
 		if (sfdb.run () == RESPONSE_OK) {
 			click_chosen (sfdb.get_filename());
 		}

@@ -323,7 +323,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
 	double             get_current_zoom () const { return frames_per_unit; }
         void               cycle_zoom_focus ();
-
 	void temporal_zoom_step (bool coarser);
 	void tav_zoom_step (bool coarser);
 	void tav_zoom_smooth (bool coarser, bool force_all);
