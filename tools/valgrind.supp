@@ -1,0 +1,137 @@
+{
+  name
+  Memcheck:Leak
+  fun:*alloc
+  obj:/usr/lib/*.so.*
+}
+{
+  name
+  Memcheck:Leak
+  fun:*alloc
+  obj:/usr/lib/*-linux-gnu/*.so.*
+}
+{
+  name
+  Memcheck:Cond
+  fun:*
+  obj:/usr/lib/*.so.*
+}
+{
+  name
+  Memcheck:Cond
+  fun:*
+  obj:/lib/*-linux-gnu/*.so.*
+}
+{
+  name
+  Memcheck:Cond
+  fun:*
+  obj:/usr/lib/*-linux-gnu/*.so.*
+}
+{
+  name
+  Memcheck:Cond
+  obj:/usr/lib/*-linux-gnu/*.so.*
+  obj:*
+}
+{
+  name
+  Memcheck:Value4
+  fun:*
+  obj:/lib/*.so.*
+}
+{
+  name
+  Memcheck:Value4
+  fun:*
+  obj:/usr/lib/*.so.*
+}
+{
+  name
+  Memcheck:Value4
+  obj:/usr/lib/*-linux-gnu/*.so.*
+}
+{
+  name
+  Memcheck:Value4
+  fun:*
+  obj:/lib/*-linux-gnu/*.so.*
+}
+{
+  name
+  Memcheck:Value8
+  fun:*
+  obj:/lib/*.so.*
+}
+{
+  name
+  Memcheck:Value8
+  fun:*
+  obj:/lib/*-linux-gnu/*.so.*
+}
+{
+  name
+  Memcheck:Value8
+  obj:/usr/lib/*-linux-gnu/*.so.*
+}
+{
+  name
+  Memcheck:Addr4
+  obj:/lib/*-linux-gnu/*.so.*
+}
+{
+  name
+  Memcheck:Addr4
+  obj:/usr/lib/*-linux-gnu/*.so.*
+}
+{
+  name
+  Memcheck:Addr8
+  obj:/lib/*-linux-gnu/*.so.*
+}
+{
+  name
+  Memcheck:Addr8
+  obj:/usr/lib/*-linux-gnu/*.so.*
+}
+{
+  name
+  Memcheck:Param
+  write(buf)
+  obj:/lib/*-linux-gnu/i686/cmov/libpthread-2.13.so
+  obj:/usr/lib/*-linux-gnu/libjack.so.0.1.0
+  fun:*
+}
+{
+  <name>
+  Memcheck:Cond
+  fun:apply_queued_setting
+  fun:gtk_rc_parse_any
+  fun:gtk_rc_context_parse_one_file
+  fun:gtk_rc_context_parse_file
+  fun:gtk_rc_parse
+}
+{
+  <known gtk leaks>
+  Memcheck:Leak
+  fun:malloc
+  fun:standard_malloc
+  fun:g_malloc
+  fun:g_strdup
+  fun:gtk_label_set_text
+}
+{
+  <gdk pixbuf sux>
+  Memcheck:Leak
+  fun:malloc
+  fun:standard_malloc
+  fun:g_try_malloc
+  fun:gdk_pixbuf_new
+}
+{
+  <ladspa free>
+  Memcheck:Leak
+  fun:*
+  fun:ladspa_descriptor
+  fun:*
+}

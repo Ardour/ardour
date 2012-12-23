@@ -1,5 +1,14 @@
 #!/bin/sh
+VALGRIND_OPTIONS="$VALGRIND_OPTIONS --num-callers=50"
+VALGRIND_OPTIONS="$VALGRIND_OPTIONS --error-limit=no"
+VALGRIND_OPTIONS="$VALGRIND_OPTIONS --leak-check=full --leak-resolution=high"
+#VALGRIND_OPTIONS="$VALGRIND_OPTIONS --log-file=/tmp/ardour-%p.log"
+#VALGRIND_OPTIONS="$VALGRIND_OPTIONS --gen-suppressions=all"
+
 . `dirname "$0"`/../build/gtk2_ardour/ardev_common_waf.sh
 LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 export ARDOUR_RUNNING_UNDER_VALGRIND=TRUE
-exec valgrind  --error-limit=no --num-callers=50 --tool=memcheck $TOP/$EXECUTABLE --novst "$@"
+exec valgrind --tool=memcheck \
+	$VALGRIND_OPTIONS \
+	--suppressions=`dirname "$0"`/../tools/valgrind.supp \
+	$TOP/$EXECUTABLE --novst "$@"
