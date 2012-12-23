@@ -224,8 +224,8 @@ Diskstream::realtime_set_speed (double sp, bool global)
 
 	if (new_speed != _actual_speed) {
 
-		framecnt_t required_wrap_size = (framecnt_t) floor (_session.get_block_size() *
-                                                                  fabs (new_speed)) + 1;
+		framecnt_t required_wrap_size = (framecnt_t) ceil (_session.get_block_size() *
+                                                                  fabs (new_speed)) + 2;
 
 		if (required_wrap_size > wrap_buffer_size) {
 			_buffer_reallocation_required = true;
