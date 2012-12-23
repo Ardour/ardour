@@ -327,7 +327,7 @@ if [ ! -f /usr/include/fftw3.h ] ; then
 fi
 tar xf aubio-0.3.2.tar.gz 
    (set -e && cd aubio-0.3.2 && sed '/no-long-double/d' < ./configure > ./configure.XXX && mv ./configure.XXX ./configure && chmod +x ./configure && \
-       CFLAGS="$GLOBAL_CFLAGS -I$PREFIX" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && MAKEFLAGS=-j1 make install) || die "aubio build failed"
+       CFLAGS="$GLOBAL_CFLAGS -I$PREFIX" LDFLAGS="$GLOBAL_LDFLAGS -lm" ./configure --prefix=$PREFIX && make && MAKEFLAGS=-j1 make install) || die "aubio build failed"
 if [ x$remove_fftw3_h != x ] ; then
     sudo rm /usr/include/fftw3.h
 fi
