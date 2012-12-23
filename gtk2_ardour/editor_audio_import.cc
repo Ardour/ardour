@@ -194,6 +194,7 @@ Editor::external_audio_dialog ()
 			sfbrowser->clear_selection ();
 			keepRunning = true;
 		}
+		paths.clear();
 
 	} while (keepRunning);
 }
