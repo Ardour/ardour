@@ -222,9 +222,9 @@ if [ ! -f lilv-0.14.4.tar.bz2 ] ; then
     echo Lilv
     fetch_as_is http://download.drobilla.net/lilv-0.14.4.tar.bz2
 fi
-if [ ! -f suil-0.6.6.tar.bz2 ] ; then
+if [ ! -f suil-0.6.10.tar.bz2 ] ; then
     echo Suil
-    fetch_as_is http://download.drobilla.net/suil-0.6.6.tar.bz2
+    fetch_as_is http://download.drobilla.net/suil-0.6.10.tar.bz2
 fi
 if [ ! -f curl-7.25.0.tar.bz2 ] ; then
     echo curl
@@ -354,8 +354,8 @@ tar xf sratom-0.4.0.tar.bz2 && \
     (set -e && cd sratom-0.4.0 && ./waf configure --prefix=$PREFIX && ./waf build && ./waf install  && fix_install_name $PREFIX/lib/libsratom-0.dylib) || die "sratom build failed"
 tar xf lilv-0.14.4.tar.bz2 && \
     (set -e && cd lilv-0.14.4 && ./waf configure --prefix=$PREFIX --default-lv2-path='~/.lv2:/usr/local/lib/lv2:/usr/local/lib64/lv2:/usr/lib/lv2:/usr/lib64/lv2' && ./waf build && ./waf install && fix_install_name $PREFIX/lib/liblilv-0.dylib) || die "lilv build failed"
-tar xf suil-0.6.6.tar.bz2 && \
-    (set -e && cd suil-0.6.6 && CFLAGS="-I$PREFIX/include" ./waf configure --prefix=$PREFIX && ./waf && ./waf install && fix_install_name $PREFIX/lib/libsuil-0.dylib) || die "suil build failed"
+tar xf suil-0.6.10.tar.bz2 && \
+    (set -e && cd suil-0.6.10 && CFLAGS="-I$PREFIX/include" ./waf configure --prefix=$PREFIX && ./waf && ./waf install && fix_install_name $PREFIX/lib/libsuil-0.dylib) || die "suil build failed"
 
 # two post-install hacks
 
