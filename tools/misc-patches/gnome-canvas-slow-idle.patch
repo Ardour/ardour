@@ -1,5 +1,5 @@
 --- libgnomecanvas/gnome-canvas.c	2011-01-31 07:19:30.000000000 -0500
-+++ ../../libgnomecanvas-2.30.3/libgnomecanvas/gnome-canvas.c	2012-11-19 13:10:20.552383069 -0500
++++ libgnomecanvas/gnome-canvas.c	2012-11-19 13:10:20.552383069 -0500
 @@ -75,6 +75,7 @@
  
  #include <config.h>
