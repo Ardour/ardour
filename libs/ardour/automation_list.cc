@@ -456,6 +456,7 @@ AutomationList::set_state (const XMLNode& node, int version)
                 if (_state == Write) {
                         _state = Off;
                 }
+		automation_state_changed(_state);
 	} else {
 		_state = Off;
 	}
