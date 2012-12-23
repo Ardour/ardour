@@ -600,10 +600,17 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	button_box->set_layout (BUTTONBOX_END);
 	button_box->pack_start (cancel_button, false, false);
 	cancel_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &SoundFileBrowser::do_something), RESPONSE_CANCEL));
-	button_box->pack_start (apply_button, false, false);
-	apply_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &SoundFileBrowser::do_something), RESPONSE_APPLY));
+	if (persistent) {
+		button_box->pack_start (apply_button, false, false);
+		apply_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &SoundFileBrowser::do_something), RESPONSE_APPLY));
+	}
+
 	button_box->pack_start (ok_button, false, false);
 	ok_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &SoundFileBrowser::do_something), RESPONSE_OK));
+
+	Gtkmm2ext::UI::instance()->set_tip (ok_button, _("Press to import selected files and close this window"));
+	Gtkmm2ext::UI::instance()->set_tip (apply_button, _("Press to import selected files and leave this window open"));
+	Gtkmm2ext::UI::instance()->set_tip (cancel_button, _("Press to close this window without importing any files"));
 
 	vpacker.pack_end (*button_box, false, false);
 }
@@ -627,6 +634,13 @@ SoundFileBrowser::run ()
 	}
 
 	return _status;
+}
+
+void
+SoundFileBrowser::set_action_sensitive (bool yn)
+{
+	ok_button.set_sensitive (yn);
+	apply_button.set_sensitive (yn);
 }
 
 void
@@ -762,7 +776,7 @@ void
 SoundFileBrowser::found_list_view_selected ()
 {
 	if (!reset_options ()) {
-		ok_button.set_sensitive (false);
+		set_action_sensitive (false);
 	} else {
 		string file;
 
@@ -772,9 +786,9 @@ SoundFileBrowser::found_list_view_selected ()
 			TreeIter iter = found_list->get_iter(*rows.begin());
 			file = (*iter)[found_list_columns.pathname];
 			chooser.set_filename (file);
-			ok_button.set_sensitive (true);
+			set_action_sensitive (true);
 		} else {
-			ok_button.set_sensitive (false);
+			set_action_sensitive (false);
 		}
 
 		preview.setup_labels (file);
@@ -788,7 +802,7 @@ SoundFileBrowser::freesound_list_view_selected ()
 
 #ifdef FREESOUND
 	if (!reset_options ()) {
-		ok_button.set_sensitive (false);
+		set_action_sensitive (false);
 	} else {
 
 		string file;
@@ -814,10 +828,10 @@ SoundFileBrowser::freesound_list_view_selected ()
 
 			if (file != "") {
 				chooser.set_filename (file);
-				ok_button.set_sensitive (true);
+				set_action_sensitive (true);
 			}
 		} else {
-			ok_button.set_sensitive (false);
+			set_action_sensitive (false);
 		}
 
 		freesound_progress_bar.set_text(
@@ -1742,12 +1756,12 @@ SoundFileOmega::file_selection_changed ()
 	}
 
 	if (!reset_options ()) {
-		ok_button.set_sensitive (false);
+		set_action_sensitive (false);
 	} else {
 		if (chooser.get_filenames().size() > 0) {
-			ok_button.set_sensitive (true);
+			set_action_sensitive (true);
 		} else {
-			ok_button.set_sensitive (false);
+			set_action_sensitive (false);
 		}
 	}
 }
