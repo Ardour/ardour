@@ -618,6 +618,8 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecn
 					   as our current_playback_buffer.
 					*/
 
+					assert(wrap_buffer_size >= chaninfo->playback_vector.len[0] + chaninfo->playback_vector.len[1]);
+
 					/* Copy buf[0] from playback_buf */
 					memcpy ((char *) chaninfo->playback_wrap_buffer,
 							chaninfo->playback_vector.buf[0],
