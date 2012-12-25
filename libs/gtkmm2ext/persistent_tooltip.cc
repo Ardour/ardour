@@ -128,13 +128,21 @@ PersistentTooltip::show ()
 	
 	set_tip (_tip);
 
-        if (!_window->is_visible ()) {
-                /* move the window a little away from the mouse */
-                int rx, ry;
-                _target->get_window()->get_origin (rx, ry);
-                _window->move (rx, ry + _target->get_height());
-                _window->present ();
-        }
+	if (!_window->is_visible ()) {
+		int rx, ry, sw;
+		sw= gdk_screen_width();
+		_target->get_window()->get_origin (rx, ry);
+		_window->move (rx, ry + _target->get_height());
+		_window->present ();
+
+		/* the window needs to be realized first
+		 * for _window->get_width() to be correct.
+		 */
+		if (sw < rx + _window->get_width()) {
+			rx = sw - _window->get_width();
+			_window->move (rx, ry + _target->get_height());
+		}
+	}
 }
 
 void
