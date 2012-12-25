@@ -322,7 +322,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 					adjustment.set_value (default_value);
 				} else if (ev->state & Keyboard::GainFineScaleModifier) {
 					adjustment.set_value (adjustment.get_lower());
-				} else if ((_orien == VERT && ev_pos < span - display_span()) || (_orien == HORIZ && ev_pos > span - display_span())) {
+				} else if ((_orien == VERT && ev_pos < display_span()) || (_orien == HORIZ && ev_pos > display_span())) {
 					/* above the current display height, remember X Window coords */
 					adjustment.set_value (adjustment.get_value() + adjustment.get_step_increment());
 				} else {
