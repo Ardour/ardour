@@ -275,6 +275,7 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 	dragging_left = false;
 	dragging_right = false;
 	_dragging = false;
+	_tooltip.target_stop_drag ();
 	accumulated_delta = 0;
 	detented = false;
 
@@ -352,6 +353,7 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 		}
 
 		_dragging = false;
+		_tooltip.target_stop_drag ();
 
 	} else if (ev->type == GDK_BUTTON_PRESS) {
 
