@@ -4025,7 +4025,7 @@ Editor::new_playlists (TimeAxisView* v)
 	begin_reversible_command (_("new playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists->get (playlists);
-	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), v, ARDOUR::Properties::edit.property_id);
+	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), v, ARDOUR::Properties::select.property_id);
 	commit_reversible_command ();
 }
 
@@ -4041,7 +4041,7 @@ Editor::copy_playlists (TimeAxisView* v)
 	begin_reversible_command (_("copy playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists->get (playlists);
-	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), v, ARDOUR::Properties::edit.property_id);
+	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), v, ARDOUR::Properties::select.property_id);
 	commit_reversible_command ();
 }
 
@@ -4056,7 +4056,7 @@ Editor::clear_playlists (TimeAxisView* v)
 	begin_reversible_command (_("clear playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists->get (playlists);
-	mapover_tracks (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), v, ARDOUR::Properties::edit.property_id);
+	mapover_tracks (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), v, ARDOUR::Properties::select.property_id);
 	commit_reversible_command ();
 }
 
@@ -4546,7 +4546,7 @@ Editor::get_regions_after (RegionSelection& rs, framepos_t where, const TrackVie
 RegionSelection
 Editor::get_regions_from_selection ()
 {
-	return get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.property_id);
+	return get_equivalent_regions (selection->regions, ARDOUR::Properties::select.property_id);
 }
 
 /** Get regions using the following method:
@@ -4594,7 +4594,7 @@ Editor::get_regions_from_selection_and_edit_point ()
 	/* Add any other regions that are in the same
 	   edit-activated route group as one of our regions.
 	 */
-	regions = get_equivalent_regions (regions, ARDOUR::Properties::edit.property_id);
+	regions = get_equivalent_regions (regions, ARDOUR::Properties::select.property_id);
 	framepos_t const where = get_preferred_edit_position ();
 
 	if (_route_groups->all_group_active_button().get_active() && tracks.empty()) {
@@ -4644,7 +4644,7 @@ Editor::get_regions_from_selection_and_entered ()
 		regions.add (entered_regionview);
 	}
 
-	return get_equivalent_regions (regions, ARDOUR::Properties::edit.property_id);
+	return get_equivalent_regions (regions, ARDOUR::Properties::select.property_id);
 }
 
 void

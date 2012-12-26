@@ -172,7 +172,6 @@ EditorGroupTabs::default_properties () const
 	plist.add (Properties::mute, true);
 	plist.add (Properties::solo, true);
 	plist.add (Properties::recenable, true);
-	plist.add (Properties::edit, true);
 
 	return plist;
 }

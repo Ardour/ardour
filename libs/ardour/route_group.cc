@@ -46,7 +46,6 @@ namespace ARDOUR {
 		PropertyDescriptor<bool> solo;
 		PropertyDescriptor<bool> recenable;
 		PropertyDescriptor<bool> select;
-		PropertyDescriptor<bool> edit;
 		PropertyDescriptor<bool> route_active;
 		PropertyDescriptor<bool> color;
 		PropertyDescriptor<bool> monitoring;
@@ -72,8 +71,6 @@ RouteGroup::make_property_quarks ()
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for recenable = %1\n", 	Properties::recenable.property_id));
 	Properties::select.property_id = g_quark_from_static_string (X_("select"));
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for select = %1\n", 	Properties::select.property_id));
-	Properties::edit.property_id = g_quark_from_static_string (X_("edit"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for edit = %1\n", 	Properties::edit.property_id));
 	Properties::route_active.property_id = g_quark_from_static_string (X_("route-active"));
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for route-active = %1\n", Properties::route_active.property_id));
 	Properties::color.property_id = g_quark_from_static_string (X_("color"));
@@ -90,7 +87,6 @@ RouteGroup::make_property_quarks ()
 	, _solo (Properties::solo, false) \
 	, _recenable (Properties::recenable, false) \
 	, _select (Properties::select, false) \
-	, _edit (Properties::edit, false) \
 	, _route_active (Properties::route_active, false) \
 	, _color (Properties::color, false) \
 	, _monitoring (Properties::monitoring, false)
@@ -110,7 +106,6 @@ RouteGroup::RouteGroup (Session& s, const string &n)
 	add_property (_solo);
 	add_property (_recenable);
 	add_property (_select);
-	add_property (_edit);
 	add_property (_route_active);
 	add_property (_color);
 	add_property (_monitoring);
@@ -286,7 +281,6 @@ RouteGroup::set_state_2X (const XMLNode& node, int /*version*/)
 		_mute = true;
 		_solo = true;
 		_recenable = true;
-		_edit = false;
 		_route_active = true;
 		_color = false;
 	} else if (node.name() == "EditGroup") {
@@ -294,7 +288,6 @@ RouteGroup::set_state_2X (const XMLNode& node, int /*version*/)
 		_mute = false;
 		_solo = false;
 		_recenable = false;
-		_edit = true;
 		_route_active = false;
 		_color = false;
 	}
@@ -350,16 +343,6 @@ RouteGroup::set_select (bool yn)
 	}
 	_select = yn;
 	send_change (PropertyChange (Properties::select));
-}
-
-void
-RouteGroup::set_edit (bool yn)
-{
-	if (is_edit() == yn) {
-		return;
-	}
-	_edit = yn;
-	send_change (PropertyChange (Properties::edit));
 }
 
 void

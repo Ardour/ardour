@@ -42,7 +42,6 @@ namespace Properties {
 	extern PBD::PropertyDescriptor<bool> solo;
 	extern PBD::PropertyDescriptor<bool> recenable;
 	extern PBD::PropertyDescriptor<bool> select;
-	extern PBD::PropertyDescriptor<bool> edit;
 	extern PBD::PropertyDescriptor<bool> route_active;
 	extern PBD::PropertyDescriptor<bool> color;
 	extern PBD::PropertyDescriptor<bool> monitoring;
@@ -71,7 +70,6 @@ class RouteGroup : public SessionObject
 	bool is_solo () const { return _solo.val(); }
 	bool is_recenable () const { return _recenable.val(); }
 	bool is_select () const { return _select.val(); }
-	bool is_edit () const { return _edit.val(); }
 	bool is_route_active () const { return _route_active.val(); }
 	bool is_color () const { return _color.val(); }
 	bool is_monitoring() const { return _monitoring.val(); }
@@ -91,7 +89,6 @@ class RouteGroup : public SessionObject
 	void set_solo (bool yn);
 	void set_recenable (bool yn);
 	void set_select (bool yn);
-	void set_edit (bool yn);
 	void set_route_active (bool yn);
 	void set_color (bool yn);
 	void set_monitoring (bool yn);
@@ -147,7 +144,6 @@ private:
 	PBD::Property<bool> _solo;
 	PBD::Property<bool> _recenable;
 	PBD::Property<bool> _select;
-	PBD::Property<bool> _edit;
 	PBD::Property<bool> _route_active;
 	PBD::Property<bool> _color;
 	PBD::Property<bool> _monitoring;

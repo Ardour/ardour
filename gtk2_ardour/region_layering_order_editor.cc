@@ -127,7 +127,7 @@ RegionLayeringOrderEditor::row_selected ()
 	RegionView* rv = row[layering_order_columns.region_view];
 	
 	vector<RegionView*> eq;
-	editor.get_equivalent_regions (rv, eq, Properties::edit.property_id);
+	editor.get_equivalent_regions (rv, eq, Properties::select.property_id);
 
 	/* XXX this should be reversible, really */
 	

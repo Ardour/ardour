@@ -43,7 +43,6 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	, _solo (_("Soloing"))
 	, _rec_enable (_("Record enable"))
 	, _select (_("Selection"))
-	, _edit (_("Editing"))
 	, _route_active (_("Active state"))
 	, _share_color (_("Color"))
 	, _share_monitoring (_("Monitoring"))
@@ -103,7 +102,6 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	_solo.set_active (_group->is_solo());
 	_rec_enable.set_active (_group->is_recenable());
 	_select.set_active (_group->is_select());
-	_edit.set_active (_group->is_edit());
 	_route_active.set_active (_group->is_route_active());
 	_share_color.set_active (_group->is_color());
 	_share_monitoring.set_active (_group->is_monitoring());
@@ -117,14 +115,13 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
  	_solo.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
  	_rec_enable.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
  	_select.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
- 	_edit.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
  	_route_active.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_share_color.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	_share_monitoring.signal_toggled().connect (sigc::mem_fun (*this, &RouteGroupDialog::update));
 	
 	gain_toggled ();
 
-	Table* table = manage (new Table (12, 4, false));
+	Table* table = manage (new Table (11, 4, false));
 	table->set_row_spacings	(6);
 
 	l = manage (new Label ("", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
@@ -142,10 +139,9 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	table->attach (_solo, 1, 3, 4, 5, Gtk::FILL, Gtk::FILL, 0, 0);
 	table->attach (_rec_enable, 1, 3, 5, 6, Gtk::FILL, Gtk::FILL, 0, 0);
 	table->attach (_select, 1, 3, 6, 7, Gtk::FILL, Gtk::FILL, 0, 0);
-	table->attach (_edit, 1, 3, 7, 8, Gtk::FILL, Gtk::FILL, 0, 0);
-	table->attach (_route_active, 1, 3, 8, 9, Gtk::FILL, Gtk::FILL, 0, 0);
-	table->attach (_share_color, 1, 3, 9, 10, Gtk::FILL, Gtk::FILL, 0, 0);
-	table->attach (_share_monitoring, 1, 3, 10, 11, Gtk::FILL, Gtk::FILL, 0, 0);
+	table->attach (_route_active, 1, 3, 7, 8, Gtk::FILL, Gtk::FILL, 0, 0);
+	table->attach (_share_color, 1, 3, 8, 9, Gtk::FILL, Gtk::FILL, 0, 0);
+	table->attach (_share_monitoring, 1, 3, 9, 10, Gtk::FILL, Gtk::FILL, 0, 0);
 
 	options_box->pack_start (*table, false, true);
 	main_vbox->pack_start (*options_box, false, true);
@@ -208,7 +204,6 @@ RouteGroupDialog::update ()
 	plist.add (Properties::mute, _mute.get_active());
 	plist.add (Properties::solo, _solo.get_active ());
 	plist.add (Properties::select, _select.get_active());
-	plist.add (Properties::edit, _edit.get_active());
 	plist.add (Properties::route_active, _route_active.get_active());
 	plist.add (Properties::relative, _relative.get_active());
 	plist.add (Properties::active, _active.get_active());
