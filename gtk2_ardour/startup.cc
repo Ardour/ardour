@@ -429,8 +429,9 @@ ArdourStartup::setup_monitoring_choice_page ()
 
 	HBox* hbox = manage (new HBox);
 	VBox* vbox = manage (new VBox);
-	RadioButton::Group g (monitor_via_hardware_button.get_group());
-	monitor_via_ardour_button.set_group (g);
+	/* first button will be on by default */
+	RadioButton::Group g (monitor_via_ardour_button.get_group());
+	monitor_via_hardware_button.set_group (g);
 
 	monitor_label.set_markup(_("\
 While recording instruments or vocals, you probably want to listen to the\n\
