@@ -114,9 +114,6 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/set-fade-out-length|backslash|set fade out length
 @rop|Region/toggle-region-fade-out|<@PRIMARY@>backslash|toggle fade out active
 
-@eep|Region/trim-from-start|<@TERTIARY@>braceleft|trim region start to edit point
-@eep|Region/trim-to-end|<@TERTIARY@>braceright|trim region end to edit point
-
 @eep|Editor/trim-to-previous-region|<@PRIMARY@>j|trim region to end of prev region
 @eep|Editor/trim-to-next-region|<@PRIMARY@>k|trim region to start of next region
 
