@@ -428,7 +428,7 @@ ARDOUR_UI::post_engine ()
 #ifndef GTKOSX
 	/* OS X provides a nearly-always visible wallclock, so don't be stupid */
 	update_wall_clock ();
-	Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::update_wall_clock), 60000);
+	Glib::signal_timeout().connect_seconds (sigc::mem_fun(*this, &ARDOUR_UI::update_wall_clock), 1000);
 #endif
 
 	update_disk_space ();
@@ -1101,13 +1101,16 @@ ARDOUR_UI::update_wall_clock ()
 {
 	time_t now;
 	struct tm *tm_now;
-	char buf[16];
+	static int last_min = -1;
 
 	time (&now);
 	tm_now = localtime (&now);
-
-	sprintf (buf, "%02d:%02d", tm_now->tm_hour, tm_now->tm_min);
-	wall_clock_label.set_text (buf);
+	if (last_min != tm_now->tm_min) {
+		char buf[16];
+		sprintf (buf, "%02d:%02d", tm_now->tm_hour, tm_now->tm_min);
+		wall_clock_label.set_text (buf);
+		last_min = tm_now->tm_min;
+	}
 
 	return TRUE;
 }
