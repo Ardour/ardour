@@ -428,7 +428,7 @@ ARDOUR_UI::post_engine ()
 #ifndef GTKOSX
 	/* OS X provides a nearly-always visible wallclock, so don't be stupid */
 	update_wall_clock ();
-	Glib::signal_timeout().connect_seconds (sigc::mem_fun(*this, &ARDOUR_UI::update_wall_clock), 1000);
+	Glib::signal_timeout().connect_seconds (sigc::mem_fun(*this, &ARDOUR_UI::update_wall_clock), 1);
 #endif
 
 	update_disk_space ();
