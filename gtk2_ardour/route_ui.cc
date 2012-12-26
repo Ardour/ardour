@@ -1335,18 +1335,26 @@ RouteUI::choose_color ()
 void
 RouteUI::set_color (const Gdk::Color & c)
 {
-	char buf[64];
+	RouteGroup* g = _route->route_group ();
 
-	_color = c;
+	/* leave _color alone in the group case so that tracks can retain their
+	 * own pre-group colors.
+	 */
 
-	snprintf (buf, sizeof (buf), "%d:%d:%d", c.get_red(), c.get_green(), c.get_blue());
-
-	/* note: we use the route state ID here so that color is the same for both
-	   the time axis view and the mixer strip
-	*/
-	
-	gui_object_state().set_property<string> (route_state_id(), X_("color"), buf);
-	_route->gui_changed ("color", (void *) 0); /* EMIT_SIGNAL */
+	if (g && g->is_color()) {
+		GroupTabs::set_group_color (g, c);
+	} else {
+		char buf[64];
+		_color = c;
+		snprintf (buf, sizeof (buf), "%d:%d:%d", c.get_red(), c.get_green(), c.get_blue());
+		
+		/* note: we use the route state ID here so that color is the same for both
+		   the time axis view and the mixer strip
+		*/
+		
+		gui_object_state().set_property<string> (route_state_id(), X_("color"), buf);
+		_route->gui_changed ("color", (void *) 0); /* EMIT_SIGNAL */
+	}
 }
 
 /** @return GUI state ID for things that are common to the route in all its representations */
