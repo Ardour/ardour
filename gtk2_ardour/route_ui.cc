@@ -1335,8 +1335,6 @@ RouteUI::choose_color ()
 void
 RouteUI::set_color (const Gdk::Color & c)
 {
-	RouteGroup* g = _route->route_group ();
-
 	/* leave _color alone in the group case so that tracks can retain their
 	 * own pre-group colors.
 	 */
