@@ -112,8 +112,8 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	*/
 
 	name_entry.set_name ("EditorTrackNameDisplay");
-	name_entry.signal_button_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_button_release));
-	name_entry.signal_button_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_button_press));
+	name_entry.signal_button_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_button_release), false);
+	name_entry.signal_button_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_button_press), false);
 	name_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_release));
 	name_entry.signal_activate().connect (sigc::mem_fun(*this, &TimeAxisView::name_entry_activated));
 	name_entry.signal_focus_in_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_focus_in));
@@ -683,12 +683,30 @@ TimeAxisView::name_entry_changed ()
 }
 
 bool
+TimeAxisView::can_edit_name () const
+{
+	return true;
+}
+
+bool
 TimeAxisView::name_entry_button_press (GdkEventButton *ev)
 {
 	if (ev->button == 3) {
 		return true;
 	}
-	return false;
+
+	if (ev->button == 1) {
+		if (ev->type == GDK_2BUTTON_PRESS) {
+			if (can_edit_name()) {
+				name_entry.grab_focus ();
+				name_entry.start_editing ((GdkEvent*) ev);
+			}
+		} else {
+			conditionally_add_to_selection ();
+		}
+	}
+
+	return true;
 }
 
 bool

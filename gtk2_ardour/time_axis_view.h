@@ -214,6 +214,8 @@ class TimeAxisView : public virtual AxisView
 	std::string controls_base_unselected_name;
 	std::string controls_base_selected_name;
 
+        virtual bool can_edit_name() const;
+
 	bool name_entry_button_press (GdkEventButton *ev);
 	bool name_entry_button_release (GdkEventButton *ev);
 	bool name_entry_key_release (GdkEventKey *ev);

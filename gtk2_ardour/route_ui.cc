@@ -229,14 +229,18 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		rec_enable_button->show();
  		rec_enable_button->set_controllable (t->rec_enable_control());
 
-		update_rec_display ();
-
                 if (is_midi_track()) {
                         midi_track()->StepEditStatusChange.connect (route_connections, invalidator (*this),
                                                                     boost::bind (&RouteUI::step_edit_changed, this, _1), gui_context());
                 }
 
-	}
+	} 
+
+	/* this will work for busses and tracks, and needs to be called to
+	   set up the name entry/name label display.
+	*/
+
+	update_rec_display ();
 
 	if (is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);

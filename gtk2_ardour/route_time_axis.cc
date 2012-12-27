@@ -246,7 +246,8 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 		/* pick up the correct freeze state */
 		map_frozen ();
-	}
+
+	} 
 
 	_editor.ZoomChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
 	_editor.HorizontalPositionChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::horizontal_position_changed));
@@ -263,9 +264,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	gm.get_gain_slider().set_name ("GainFader");
 
 	gm.get_level_meter().signal_scroll_event().connect (sigc::mem_fun (*this, &RouteTimeAxisView::controls_ebox_scroll), false);
-
-	show_name_entry ();
-	hide_name_label ();
 }
 
 RouteTimeAxisView::~RouteTimeAxisView ()
@@ -2174,11 +2172,26 @@ RouteTimeAxisView::reset_processor_automation_curves ()
 	}
 }
 
+bool
+RouteTimeAxisView::can_edit_name () const
+{
+	/* we do not allow track name changes if it is record enabled
+	 */
+	return !_route->record_enabled();
+}
+
 void
 RouteTimeAxisView::update_rec_display ()
 {
 	RouteUI::update_rec_display ();
-	name_entry.set_sensitive (!_route->record_enabled());
+
+	if (_route->record_enabled()) {
+		hide_name_entry ();
+		show_name_label ();
+	} else {
+		hide_name_label ();
+		show_name_entry ();
+	}
 }
 
 void
