@@ -184,7 +184,6 @@ class ArdourStartup : public Gtk::Assistant {
 	Gtk::Entry new_name_entry;
 	Gtk::FileChooserButton new_folder_chooser;
 	Gtk::FileChooserButton session_template_chooser;
-        void new_name_mapped ();
 
 	struct SessionTemplateColumns : public Gtk::TreeModel::ColumnRecord {
 		SessionTemplateColumns () {

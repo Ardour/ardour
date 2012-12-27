@@ -31,6 +31,7 @@
 #include "pbd/file_utils.h"
 #include "pbd/replace_all.h"
 #include "pbd/whitespace.h"
+#include "pbd/stacktrace.h"
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/recent_sessions.h"
@@ -719,13 +720,6 @@ ArdourStartup::populate_session_templates ()
 	}
 }
 
-static bool
-lost_name_entry_focus (GdkEventFocus*)
-{
-	// cerr << "lost focus\n";
-	return false;
-}
-
 void
 ArdourStartup::setup_new_session_page ()
 {
@@ -790,7 +784,7 @@ ArdourStartup::setup_new_session_page ()
 #endif
 
 		vbox1->pack_start (*hbox2, false, false);
-
+		
 		session_new_vbox.pack_start (*vbox1, false, false);
 
 		/* --- */
@@ -890,16 +884,6 @@ ArdourStartup::setup_new_session_page ()
 	if (more_new_session_options_button.get_active()) {
 		set_page_type (session_vbox, ASSISTANT_PAGE_CONTENT);
 	}
-
-	new_name_entry.signal_map().connect (sigc::mem_fun (*this, &ArdourStartup::new_name_mapped));
-	new_name_entry.signal_focus_out_event().connect (sigc::ptr_fun (lost_name_entry_focus));
-}
-
-void
-ArdourStartup::new_name_mapped ()
-{
-	// cerr << "Grab new name focus\n";
-	new_name_entry.grab_focus ();
 }
 
 void
