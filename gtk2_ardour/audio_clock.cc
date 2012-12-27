@@ -80,6 +80,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, foreground_attr (0)
 	, first_height (0)
 	, first_width (0)
+	, style_resets_first (true)
 	, layout_height (0)
 	, layout_width (0)
 	, info_height (0)
@@ -550,8 +551,15 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 		req->height += separator_height;
 	}
 
-	first_height = req->height;
-	first_width = req->width;
+	if (_fixed_width) {
+		first_height = req->height;
+		first_width = req->width;
+	} else {
+		if (first_width == 0) {
+			first_height = req->height;
+			first_width = req->width;
+		}
+	}
 }
 
 void
@@ -2213,8 +2221,13 @@ void
 AudioClock::on_style_changed (const Glib::RefPtr<Gtk::Style>& old_style)
 {
 	CairoWidget::on_style_changed (old_style);
-	first_width = 0;
-	first_height = 0;
+	if (style_resets_first) {
+		first_width = 0;
+		first_height = 0;
+	}
+	if (!_fixed_width) {
+		style_resets_first = false;
+	}
 	set_font ();
 	set_colors ();
 }

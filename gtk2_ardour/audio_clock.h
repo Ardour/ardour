@@ -121,6 +121,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	int first_height;
 	int first_width;
+        bool style_resets_first;
 	int layout_height;
 	int layout_width;
 	int info_height;
