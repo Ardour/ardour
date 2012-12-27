@@ -200,11 +200,13 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	add_option (_("Media"), new OptionEditorHeading (_("File locations")));
 
         SearchPathOption* spo = new SearchPathOption ("audio-search-path", _("Search for audio files in:"),
+						      _session->path(),
                                                       sigc::mem_fun (*_session_config, &SessionConfiguration::get_audio_search_path),
                                                       sigc::mem_fun (*_session_config, &SessionConfiguration::set_audio_search_path));
         add_option (_("Media"), spo);
 
         spo = new SearchPathOption ("midi-search-path", _("Search for MIDI files in:"),
+				    _session->path(),
                                     sigc::mem_fun (*_session_config, &SessionConfiguration::get_midi_search_path),
                                     sigc::mem_fun (*_session_config, &SessionConfiguration::set_midi_search_path));
 

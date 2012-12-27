@@ -18,6 +18,8 @@
 
 #include "pbd/strsplit.h"
 #include "pbd/compose.h"
+#include "pbd/shortpath.h"
+
 #include "search_path_option.h"
 #include "i18n.h"
 
@@ -25,6 +27,7 @@ using namespace std;
 using namespace Gtk;
 
 SearchPathOption::SearchPathOption (const string& pathname, const string& label,
+				    const string& default_path,
                                     sigc::slot<std::string> get, sigc::slot<bool, std::string> set)
         : Option (pathname, label)
         , _get (get)
@@ -45,7 +48,7 @@ SearchPathOption::SearchPathOption (const string& pathname, const string& label,
         vbox.pack_end (*hbox);
 
         session_label.set_use_markup (true);
-        session_label.set_markup (string_compose ("<i>%1</i>", _("the session folder")));
+        session_label.set_markup (string_compose ("<i>%1 (%2)</i>", _("the session folder"), short_path (default_path, 32)));
         session_label.set_alignment (0.0, 0.5);
         session_label.show ();
 
