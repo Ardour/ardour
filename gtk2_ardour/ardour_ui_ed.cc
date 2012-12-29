@@ -644,7 +644,6 @@ ARDOUR_UI::setup_clock ()
 	ARDOUR_UI::Clock.connect (sigc::mem_fun (big_clock, &AudioClock::set));
 
 	big_clock->set_corner_radius (0.0);
-	big_clock->set_fixed_width (false);
 	big_clock->mode_changed.connect (sigc::mem_fun (*this, &ARDOUR_UI::big_clock_reset_aspect_ratio));
 
 	big_clock_window->set (new Window (WINDOW_TOPLEVEL), false);

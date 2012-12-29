@@ -70,8 +70,6 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, editable (allow_edit)
 	, _follows_playhead (follows_playhead)
 	, _off (false)
-	, _fixed_width (true)
-	, layout_x_offset (0)
 	, em_width (0)
 	, _edit_by_click_field (false)
 	, _negative_allowed (false)
@@ -144,7 +142,15 @@ AudioClock::set_widget_name (const string& str)
 void
 AudioClock::on_realize ()
 {
+	Gtk::Requisition req;
+
 	CairoWidget::on_realize ();
+	
+	set_clock_dimensions (req);
+
+	first_width = req.width;
+	first_height = req.height;
+
 	set_font ();
 	set_colors ();
 }
@@ -293,12 +299,7 @@ AudioClock::render (cairo_t* cr)
 		cairo_fill (cr);
 	}
 
-	if (!_fixed_width) {
-		cairo_move_to (cr, layout_x_offset, 0);
-	} else {
-		int xcenter = layout_x_offset > 0 ? 0 : (get_width() - _mode_width[_mode]) /2;
-		cairo_move_to (cr, layout_x_offset + xcenter, (upper_height - layout_height) / 2.0);
-	}
+	cairo_move_to (cr, (get_width() - layout_width) / 2.0, (upper_height - layout_height) / 2.0);
 
 	pango_cairo_show_layout (cr, _layout->gobj());
 
@@ -380,7 +381,7 @@ AudioClock::render (cairo_t* cr)
 	if (editing) {
 		if (!insert_map.empty()) {
 
-			int xcenter = layout_x_offset > 0 ? 0 : (get_width() - _mode_width[_mode]) /2;
+			int xcenter = (get_width() - layout_width) /2;
 
 			if (input_string.length() < insert_map.size()) {
 				Pango::Rectangle cursor;
@@ -395,18 +396,11 @@ AudioClock::render (cairo_t* cr)
 				}
 
 				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
-				if (!_fixed_width) {
-					cairo_rectangle (cr,
-							 min (get_width() - 2.0,
-							      (double) cursor.get_x()/PANGO_SCALE + layout_x_offset + xcenter + em_width), 0,
-							 2.0, cursor.get_height()/PANGO_SCALE);
-				} else {
-					cairo_rectangle (cr,
-							 min (get_width() - 2.0,
-							      (double) layout_x_offset + xcenter + cursor.get_x()/PANGO_SCALE + em_width),
-							 (upper_height - layout_height)/2.0,
-							 2.0, cursor.get_height()/PANGO_SCALE);
-				}
+				cairo_rectangle (cr,
+						 min (get_width() - 2.0,
+						      (double) xcenter + cursor.get_x()/PANGO_SCALE + em_width),
+						 (upper_height - layout_height)/2.0,
+						 2.0, cursor.get_height()/PANGO_SCALE);
 				cairo_fill (cr);
 			} else {
 				/* we've entered all possible digits, no cursor */
@@ -415,17 +409,10 @@ AudioClock::render (cairo_t* cr)
 		} else {
 			if (input_string.empty()) {
 				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
-				if (!_fixed_width) {
-					cairo_rectangle (cr,
-							 (get_width()/2.0),
-							 0,
-							 2.0, upper_height);
-				} else {
-					cairo_rectangle (cr,
-							 (get_width()/2.0),
-							 (upper_height - layout_height)/2.0,
-							 2.0, upper_height);
-				}
+				cairo_rectangle (cr,
+						 (get_width()/2.0),
+						 (upper_height - layout_height)/2.0,
+						 2.0, upper_height);
 				cairo_fill (cr);
 			}
 		}
@@ -442,17 +429,31 @@ AudioClock::on_size_allocate (Gtk::Allocation& alloc)
 	} else {
 		upper_height = get_height();
 	}
+}
 
-	if (_fixed_width) {
-		/* center display in available space
-		 * NB. this only works if the containing widget is not the
-		 * layout itself (eg. the session->property dialog)
-		 */
-		layout_x_offset = (get_width() - layout_width)/2.0;
+void
+AudioClock::set_clock_dimensions (Gtk::Requisition& req)
+{
+	Glib::RefPtr<Pango::Layout> tmp;
+	Glib::RefPtr<Gtk::Style> style = get_style ();
+	Pango::FontDescription font;
+
+	tmp = Pango::Layout::create (get_pango_context());
+
+	if (!is_realized()) {
+		font = get_font_for_style (get_name());
 	} else {
-		/* left justify */
-		layout_x_offset = 0;
+		font = style->get_font();
 	}
+
+	tmp->set_font_description (font);
+
+	/* this string is the longest thing we will ever display */
+	tmp->set_text (" 88:88:88,888");
+	tmp->get_pixel_size (req.width, req.height);
+
+	layout_height = req.height;
+	layout_width = req.width;
 }
 
 void
@@ -469,60 +470,7 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 		return;
 	}
 
-	Glib::RefPtr<Pango::Layout> tmp;
-	Glib::RefPtr<Gtk::Style> style = get_style ();
-	Pango::FontDescription font;
-
-	tmp = Pango::Layout::create (get_pango_context());
-
-	if (!is_realized()) {
-		font = get_font_for_style (get_name());
-	} else {
-		font = style->get_font();
-	}
-
-	tmp->set_font_description (font);
-
-	if (_fixed_width) {
-		int ignored;
-		tmp->set_text ("-88:88:88:88");
-		tmp->get_pixel_size (_mode_width[Timecode], ignored);
-		tmp->set_text (" 88888|88|8888");
-		tmp->get_pixel_size (_mode_width[BBT], ignored);
-		tmp->set_text (" 88:88:88,888");
-		tmp->get_pixel_size (_mode_width[MinSec], ignored);
-		tmp->set_text (" 8888888888");
-		tmp->get_pixel_size (_mode_width[Frames], ignored);
-
-		/* this string is the longest thing we will ever display,
-		   it does not include the BBT bar char that may descend
-			 below the baseline.
-			 note; depending on BPM setting this may actually
-			 not be sufficient for 24h worth of BBT
-		*/
-
-		tmp->set_text (" 88888888888::,");
-	} else {
-		switch (_mode) {
-		case Timecode:
-			tmp->set_text ("-88:88:88:88");
-			break;
-		case BBT:
-			tmp->set_text (" 88888|88|8888");
-			break;
-		case MinSec:
-			tmp->set_text (" 88:88:88,888");
-			break;
-		case Frames:
-			tmp->set_text (" 8888888888");
-			break;
-		}
-	}
-
-	tmp->get_pixel_size (req->width, req->height);
-
-	layout_height = req->height;
-	layout_width = req->width;
+	set_clock_dimensions (*req);
 
 	/* now tackle height, for which we need to know the height of the lower
 	 * layout
@@ -530,7 +478,20 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 
 	if (_left_layout) {
 
+		Glib::RefPtr<Pango::Layout> tmp;
+		Glib::RefPtr<Gtk::Style> style = get_style ();
+		Pango::FontDescription font;
 		int w;
+		
+		tmp = Pango::Layout::create (get_pango_context());
+		
+		if (!is_realized()) {
+			font = get_font_for_style (get_name());
+		} else {
+			font = style->get_font();
+		}
+		
+		tmp->set_font_description (font);
 
 		font.set_size ((int) lrint (font.get_size() * info_font_scale_factor));
 		font.set_weight (Pango::WEIGHT_NORMAL);
@@ -549,16 +510,6 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 
 		req->height += info_height;
 		req->height += separator_height;
-	}
-
-	if (_fixed_width) {
-		first_height = req->height;
-		first_width = req->width;
-	} else {
-		if (first_width == 0) {
-			first_height = req->height;
-			first_width = req->width;
-		}
 	}
 }
 
@@ -1595,10 +1546,10 @@ AudioClock::on_button_press_event (GdkEventButton *ev)
 			/* the text has been centered vertically, so adjust
 			 * x and y.
 			 */
-			int xcenter = !_fixed_width || layout_x_offset > 0 ? 0 : (get_width() - _mode_width[_mode]) /2;
+			int xcenter = (get_width() - layout_width) /2;
 
 			y = ev->y - ((upper_height - layout_height)/2);
-			x = ev->x - layout_x_offset - xcenter;
+			x = ev->x - xcenter;
 
 			if (!_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
 				/* pretend it is a character on the far right */
@@ -1640,11 +1591,11 @@ AudioClock::on_button_release_event (GdkEventButton *ev)
 
 					if (_edit_by_click_field) {
 
-						int xcenter = !_fixed_width || layout_x_offset > 0 ? 0 : (get_width() - _mode_width[_mode]) /2;
+						int xcenter = (get_width() - layout_width) /2;
 						int index = 0;
 						int trailing;
 						int y = ev->y - ((upper_height - layout_height)/2);
-						int x = ev->x - layout_x_offset - xcenter;
+						int x = ev->x - xcenter;
 						Field f;
 
 						if (!_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
@@ -1711,9 +1662,9 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 	 * x and y.
 	 */
 
-	int xcenter = !_fixed_width || layout_x_offset > 0 ? 0 : (get_width() - _mode_width[_mode]) /2;
+	int xcenter = (get_width() - layout_width) /2;
 	y = ev->y - ((upper_height - layout_height)/2);
-	x = ev->x - layout_x_offset - xcenter;
+	x = ev->x - xcenter;
 
 	if (!_layout->xy_to_index (x * PANGO_SCALE, y * PANGO_SCALE, index, trailing)) {
 		/* not in the main layout */
@@ -2201,13 +2152,6 @@ AudioClock::set_mode (Mode m)
                 ModeChanged (); /* EMIT SIGNAL (the static one)*/
         }
 
-	if (!_fixed_width) {
-		/* display is different, allow us to resize */
-		first_width = 0;
-		first_height = 0;
-		queue_resize ();
-	}
-
         mode_changed (); /* EMIT SIGNAL (the member one) */
 }
 
@@ -2221,13 +2165,10 @@ void
 AudioClock::on_style_changed (const Glib::RefPtr<Gtk::Style>& old_style)
 {
 	CairoWidget::on_style_changed (old_style);
-	if (style_resets_first) {
-		first_width = 0;
-		first_height = 0;
-	}
-	if (!_fixed_width) {
-		style_resets_first = false;
-	}
+
+	Gtk::Requisition req;
+	set_clock_dimensions (req);
+
 	set_font ();
 	set_colors ();
 }
@@ -2278,12 +2219,6 @@ AudioClock::set_corner_radius (double r)
 	first_width = 0;
 	first_height = 0;
 	queue_resize ();
-}
-
-void
-AudioClock::set_fixed_width (bool yn)
-{
-	_fixed_width = yn;
 }
 
 void
