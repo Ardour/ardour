@@ -260,6 +260,9 @@ ShuttleControl::on_button_press_event (GdkEventButton* ev)
 			shuttle_grabbed = true;
 			shuttle_speed_on_grab = _session->transport_speed ();
 			mouse_shuttle (ev->x, true);
+			gdk_pointer_grab(ev->window,false,
+					GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
+					NULL,NULL,ev->time);
 		}
 		break;
 
@@ -284,6 +287,7 @@ ShuttleControl::on_button_release_event (GdkEventButton* ev)
 		if (shuttle_grabbed) {
 			shuttle_grabbed = false;
 			remove_modal_grab ();
+			gdk_pointer_ungrab (GDK_CURRENT_TIME);
 			
 			if (Config->get_shuttle_behaviour() == Sprung) {
 				_session->request_transport_speed (shuttle_speed_on_grab);
