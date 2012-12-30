@@ -258,6 +258,16 @@ Session::realtime_stop (bool abort, bool clear_state)
 
 	reset_slave_state ();
 
+	/* XXX hack alert - hot-fix when playing backwards and hitting zero.
+	 * This is probably not the right place for a long term solution of the issue.
+	 *
+	 * "hitting zero should just stop, and even if it didn't, pressing play should put the transport
+	 * into forward play speed regardless.  Nothing else makes sense." (oofus on #ardour, 20121230)
+	 */
+	if (_transport_frame == 0 && _transport_speed < 0 ) {
+			_default_transport_speed = 1.0;
+	}
+
 	_transport_speed = 0;
 	_target_transport_speed = 0;
 
