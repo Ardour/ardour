@@ -290,6 +290,9 @@ ShuttleControl::on_button_release_event (GdkEventButton* ev)
 			gdk_pointer_ungrab (GDK_CURRENT_TIME);
 			
 			if (Config->get_shuttle_behaviour() == Sprung) {
+				if (shuttle_speed_on_grab == 0 ) {
+					_session->request_transport_speed (1.0);
+				}
 				_session->request_transport_speed (shuttle_speed_on_grab);
 			} else {
 				mouse_shuttle (ev->x, true);
@@ -500,7 +503,7 @@ ShuttleControl::use_shuttle_fract (bool force)
 		speed = shuttle_max_speed * shuttle_fract;
 	}
 
-	_session->request_transport_speed_nonzero (speed, true);
+	_session->request_transport_speed_nonzero (speed, Config->get_shuttle_behaviour() == Wheel);
 }
 
 void
