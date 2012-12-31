@@ -434,8 +434,12 @@ MackieControlProtocol::periodic ()
 
 	now_usecs = (now.tv_sec * 1000000) + now.tv_usec;
 
-	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		(*s)->periodic (now_usecs);
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+			(*s)->periodic (now_usecs);
+		}
 	}
 
 	update_timecode_display ();
@@ -470,6 +474,8 @@ MackieControlProtocol::update_timecode_beats_led()
 void 
 MackieControlProtocol::update_global_button (int id, LedState ls)
 {
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
 	if (!_device_info.has_global_controls()) {
 		return;
 	}
@@ -488,6 +494,8 @@ MackieControlProtocol::update_global_button (int id, LedState ls)
 void 
 MackieControlProtocol::update_global_led (int id, LedState ls)
 {
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
 	if (!_device_info.has_global_controls()) {
 		return;
 	}
@@ -524,6 +532,8 @@ MackieControlProtocol::update_surfaces()
 void
 MackieControlProtocol::initialize()
 {
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
 	if (surfaces.empty()) {
 		return;
 	}
@@ -593,13 +603,16 @@ MackieControlProtocol::set_device (const string& device_name, bool allow_activat
 {
 	map<string,DeviceInfo>::iterator d = DeviceInfo::device_info.find (device_name);
 
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("new device chosen %1, activation allowed ? %2\n",
+							   device_name, allow_activation));
+
 	if (d == DeviceInfo::device_info.end()) {
 		return;
 	}
 	
 	if (_active) {
 		clear_ports ();
-		surfaces.clear ();	
+		clear_surfaces ();
 	}
 
 	_device_info = d->second;
@@ -632,7 +645,11 @@ MackieControlProtocol::create_surfaces ()
 	for (uint32_t n = 0; n < 1 + _device_info.extenders(); ++n) {
 
 		boost::shared_ptr<Surface> surface (new Surface (*this, device_name, n, stype));
-		surfaces.push_back (surface);
+
+		{
+			Glib::Threads::Mutex::Lock lm (surfaces_lock);
+			surfaces.push_back (surface);
+		}
 
 		/* next device will be an extender */
 		
@@ -685,7 +702,7 @@ MackieControlProtocol::close()
 	route_connections.drop_connections ();
 	periodic_connection.disconnect ();
 
-	surfaces.clear ();
+	clear_surfaces();
 }
 
 XMLNode& 
@@ -806,6 +823,8 @@ MackieControlProtocol::format_timecode_timecode (framepos_t now_frame)
 void 
 MackieControlProtocol::update_timecode_display()
 {
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
 	if (surfaces.empty()) {
 		return;
 	}
@@ -878,7 +897,12 @@ MackieControlProtocol::notify_route_added (ARDOUR::RouteList & rl)
 void 
 MackieControlProtocol::notify_solo_active_changed (bool active)
 {
-	boost::shared_ptr<Surface> surface = surfaces.front();
+	boost::shared_ptr<Surface> surface;
+
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		surface = surfaces.front ();
+	}
 	
 	map<int,Control*>::iterator x = surface->controls_by_device_independent_id.find (Led::RudeSolo);
 	if (x != surface->controls_by_device_independent_id.end()) {
@@ -937,6 +961,8 @@ MackieControlProtocol::notify_transport_state_changed()
 void 
 MackieControlProtocol::notify_metering_state_changed()
 {
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->notify_metering_state_changed ();
 	}	
@@ -948,8 +974,14 @@ MackieControlProtocol::notify_record_state_changed ()
 	if (!_device_info.has_global_controls()) {
 		return;
 	}
-	boost::shared_ptr<Surface> surface = surfaces.front();
 
+	boost::shared_ptr<Surface> surface;
+
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		surface = surfaces.front();
+	}
+		
 	/* rec is a tristate */
 
 	map<int,Control*>::iterator x = surface->controls_by_device_independent_id.find (Button::Record);
@@ -1220,6 +1252,8 @@ MackieControlProtocol::clear_ports ()
 void
 MackieControlProtocol::set_view_mode (ViewMode m)
 {
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
 	_view_mode = m;
 
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
@@ -1231,6 +1265,8 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 void
 MackieControlProtocol::set_flip_mode (bool yn)
 {
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
 	_flip_mode = yn;
 	
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
@@ -1257,6 +1293,8 @@ MackieControlProtocol::force_special_route_to_strip (boost::shared_ptr<Route> r,
 		return;
 	}
 
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		if ((*s)->number() == surface) {
 			Strip* strip = (*s)->nth_strip (strip_number);
@@ -1277,7 +1315,6 @@ MackieControlProtocol::gui_track_selection_changed (ARDOUR::RouteNotificationLis
 void
 MackieControlProtocol::_gui_track_selection_changed (ARDOUR::RouteNotificationList* rl, bool save_list)
 {
-
 	/* We need to keep a list of the most recently selected routes around,
 	   but we are not allowed to keep shared_ptr<Route> unless we want to
 	   handle the complexities of route deletion. So instead, the GUI sends
@@ -1296,8 +1333,12 @@ MackieControlProtocol::_gui_track_selection_changed (ARDOUR::RouteNotificationLi
 		}
 	}
 
-	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		(*s)->gui_selection_changed (srl);
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		
+		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+			(*s)->gui_selection_changed (srl);
+		}
 	}
 	
 	if (save_list) {
@@ -1471,6 +1512,8 @@ MackieControlProtocol::pull_route_range (DownButtonList& down, RouteList& select
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("PRR %5 in list %1.%2 - %3.%4\n", first_surface, first_strip, last_surface, last_strip,
 							   down.size()));
 	
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
 	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		
 		if ((*s)->number() >= first_surface && (*s)->number() <= last_surface) {
@@ -1526,8 +1569,15 @@ void
 MackieControlProtocol::ipmidi_restart ()
 {
 	clear_ports ();
-	surfaces.clear ();	
+	clear_surfaces ();
 	create_surfaces ();
 	switch_banks (_current_initial_bank, true);
 	needs_ipmidi_restart = false;
+}
+
+void
+MackieControlProtocol::clear_surfaces ()
+{
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	surfaces.clear ();	
 }
