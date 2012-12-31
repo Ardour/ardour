@@ -524,6 +524,10 @@ MackieControlProtocol::update_surfaces()
 void
 MackieControlProtocol::initialize()
 {
+	if (surfaces.empty()) {
+		return;
+	}
+
 	if (!surfaces.front()->active ()) {
 		return;
 	}
