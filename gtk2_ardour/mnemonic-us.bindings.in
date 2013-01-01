@@ -95,7 +95,7 @@ This mode provides many different operations on both regions and control points,
 @eep|Editor/edit-cursor-to-previous-region-sync|apostrophe|EP to prev region sync
 @eep|Editor/edit-cursor-to-next-region-sync|semicolon|EP to next region sync
 @eep|Editor/cycle-edit-point|grave|next EP w/o marker
-@eep|Editor/cycle-edit-point-with-marker|<@PRIMARY@>asciicircum|next EP w/marker
+@eep|Editor/cycle-edit-point-with-marker|<@PRIMARY@>grave|next EP w/marker
 
 @aep|Editor/move-range-start-to-previous-region-boundary|less|range start to prev region edge
 @aep|Editor/move-range-start-to-next-region-boundary|<@PRIMARY@>less|range start to next region edge
