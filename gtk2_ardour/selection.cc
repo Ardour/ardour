@@ -1129,7 +1129,7 @@ void
 Selection::set (Marker* m)
 {
 	clear_time ();  //enforce region/object exclusivity
-	clear_objects();
+	markers.clear ();
 
 	add (m);
 }
@@ -1137,8 +1137,6 @@ Selection::set (Marker* m)
 void
 Selection::toggle (Marker* m)
 {
-	clear_time ();  //enforce region/object exclusivity
-
 	MarkerSelection::iterator i;
 
 	if ((i = find (markers.begin(), markers.end(), m)) == markers.end()) {

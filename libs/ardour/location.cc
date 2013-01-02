@@ -105,6 +105,21 @@ Location::Location (Session& s, const XMLNode& node)
 	assert (_end >= 0);
 }
 
+bool
+Location::operator== (const Location& other)
+{
+	if (_name != other._name ||
+	    _start != other._start ||
+	    _end != other._end ||
+	    _bbt_start != other._bbt_start ||
+	    _bbt_end != other._bbt_end ||
+	    _flags != other._flags ||
+	    _position_lock_style != other._position_lock_style) {
+		return false;
+	}
+	return true;
+}
+
 Location*
 Location::operator= (const Location& other)
 {
@@ -140,6 +155,10 @@ Location::operator= (const Location& other)
 int
 Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 {
+	if (s < 0) {
+		return -1;
+	}
+
 	if (_locked) {
 		return -1;
 	}
@@ -196,6 +215,10 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 int
 Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 {
+	if (e < 0) {
+		return -1;
+	}
+
 	if (_locked) {
 		return -1;
 	}
@@ -224,6 +247,7 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 	}
 
 	if (e != _end) {
+
 		framepos_t const old = _end;
 
 		_end = e;
@@ -245,6 +269,10 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 int
 Location::set (framepos_t start, framepos_t end, bool allow_bbt_recompute)
 {
+	if (start < 0 || end < 0) {
+		return -1;
+	}
+
 	/* check validity */
 	if (((is_auto_punch() || is_auto_loop()) && start >= end) || (!is_mark() && start > end)) {
 		return -1;
@@ -260,6 +288,10 @@ Location::set (framepos_t start, framepos_t end, bool allow_bbt_recompute)
 int
 Location::move_to (framepos_t pos)
 {
+	if (pos < 0) {
+		return -1;
+	}
+
 	if (_locked) {
 		return -1;
 	}

@@ -682,7 +682,16 @@ private:
 	void update_item (ARDOUR::Location *);
 
 	Marker* _marker; ///< marker being dragged
-	std::list<ARDOUR::Location*> _copied_locations;
+
+        struct CopiedLocationMarkerInfo {
+	    ARDOUR::Location* location;
+	    std::vector<Marker*> markers;
+	    bool    move_both;
+	    CopiedLocationMarkerInfo (ARDOUR::Location* l, Marker* m);
+	};
+
+        typedef std::list<CopiedLocationMarkerInfo> CopiedLocationInfo;
+        CopiedLocationInfo _copied_locations;
  	ArdourCanvas::Points _points;
 };
 

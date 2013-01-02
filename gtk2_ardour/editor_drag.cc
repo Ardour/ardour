@@ -2543,9 +2543,16 @@ MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
 
 MarkerDrag::~MarkerDrag ()
 {
-	for (list<Location*>::iterator i = _copied_locations.begin(); i != _copied_locations.end(); ++i) {
-		delete *i;
+	for (CopiedLocationInfo::iterator i = _copied_locations.begin(); i != _copied_locations.end(); ++i) {
+		delete i->location;
 	}
+}
+
+MarkerDrag::CopiedLocationMarkerInfo::CopiedLocationMarkerInfo (Location* l, Marker* m)
+{
+	location = new Location (*l);
+	markers.push_back (m);
+	move_both = false;
 }
 
 void
@@ -2573,7 +2580,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	switch (op) {
 	case Selection::Toggle:
-		_editor->selection->toggle (_marker);
+		/* we toggle on the button release */
 		break;
 	case Selection::Set:
 		if (!_editor->selection->selected (_marker)) {
@@ -2615,11 +2622,37 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		break;
 	}
 
-	/* Set up copies for us to manipulate during the drag */
+	/* Set up copies for us to manipulate during the drag 
+	 */
 
 	for (MarkerSelection::iterator i = _editor->selection->markers.begin(); i != _editor->selection->markers.end(); ++i) {
+
 		Location* l = _editor->find_location_from_marker (*i, is_start);
-		_copied_locations.push_back (new Location (*l));
+
+		if (!l) {
+			continue;
+		}
+
+		if (l->is_mark()) {
+			_copied_locations.push_back (CopiedLocationMarkerInfo (l, *i));
+		} else {
+			/* range: check that the other end of the range isn't
+			   already there.
+			*/
+			CopiedLocationInfo::iterator x;
+			for (x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
+				if (*(*x).location == *l) {
+					break;
+				}
+			}
+			if (x == _copied_locations.end()) {
+				_copied_locations.push_back (CopiedLocationMarkerInfo (l, *i));
+			} else {
+				(*x).markers.push_back (*i);
+				(*x).move_both = true;
+			}
+		}
+			
 	}
 }
 
@@ -2637,33 +2670,31 @@ MarkerDrag::motion (GdkEvent* event, bool)
 	framecnt_t f_delta = 0;
 	bool is_start;
 	bool move_both = false;
-	Marker* marker;
 	Location *real_location;
 	Location *copy_location = 0;
 
 	framepos_t const newframe = adjusted_current_frame (event);
-
 	framepos_t next = newframe;
 
 	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 		move_both = true;
 	}
 
-	MarkerSelection::iterator i;
-	list<Location*>::iterator x;
+	CopiedLocationInfo::iterator x;
 
 	/* find the marker we're dragging, and compute the delta */
 
-	for (i = _editor->selection->markers.begin(), x = _copied_locations.begin();
-	     x != _copied_locations.end() && i != _editor->selection->markers.end();
-	     ++i, ++x) {
+	for (x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
 
-		copy_location = *x;
-		marker = *i;
+		copy_location = (*x).location;
 
-		if (marker == _marker) {
+		if (find (x->markers.begin(), x->markers.end(), _marker) != x->markers.end()) {
 
-			if ((real_location = _editor->find_location_from_marker (marker, is_start)) == 0) {
+			/* this marker is represented by this
+			 * CopiedLocationMarkerInfo 
+			 */
+
+			if ((real_location = _editor->find_location_from_marker (_marker, is_start)) == 0) {
 				/* que pasa ?? */
 				return;
 			}
@@ -2673,7 +2704,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 			} else {
 
 
-				switch (marker->type()) {
+				switch (_marker->type()) {
 				case Marker::SessionStart:
 				case Marker::RangeStart:
 				case Marker::LoopStart:
@@ -2692,27 +2723,25 @@ MarkerDrag::motion (GdkEvent* event, bool)
 					return;
 				}
 			}
+
 			break;
 		}
 	}
 
-	if (i == _editor->selection->markers.end()) {
+	if (x == _copied_locations.end()) {
 		/* hmm, impossible - we didn't find the dragged marker */
 		return;
 	}
 
 	/* now move them all */
 
-	for (i = _editor->selection->markers.begin(), x = _copied_locations.begin();
-	     x != _copied_locations.end() && i != _editor->selection->markers.end();
-	     ++i, ++x) {
+	for (x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
 
-		copy_location = *x;
-		marker = *i;
+		copy_location = x->location;
 
 		/* call this to find out if its the start or end */
 
-		if ((real_location = _editor->find_location_from_marker (marker, is_start)) == 0) {
+		if ((real_location = _editor->find_location_from_marker (x->markers.front(), is_start)) == 0) {
 			continue;
 		}
 
@@ -2727,13 +2756,22 @@ MarkerDrag::motion (GdkEvent* event, bool)
 			copy_location->set_start (copy_location->start() + f_delta);
 
 		} else {
-
+			
 			framepos_t new_start = copy_location->start() + f_delta;
 			framepos_t new_end = copy_location->end() + f_delta;
+			
+			/* if we are moving multiple markers, we can have
+			 * forced earlier ones back before zero ... don't
+			 * do this 
+			 */
+
+			if (new_start < 0 || new_end < 0) {
+				continue;
+			}
 
 			if (is_start) { // start-of-range marker
-
-				if (move_both) {
+				
+				if (move_both || (*x).move_both) {
 					copy_location->set_start (new_start);
 					copy_location->set_end (new_end);
 				} else 	if (new_start < copy_location->end()) {
@@ -2746,7 +2784,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 
 			} else { // end marker
 
-				if (move_both) {
+				if (move_both || (*x).move_both) {
 					copy_location->set_end (new_end);
 					copy_location->set_start (new_start);
 				} else if (new_end > copy_location->start()) {
@@ -2760,12 +2798,20 @@ MarkerDrag::motion (GdkEvent* event, bool)
 		}
 
 		update_item (copy_location);
-
+		
+		/* now lookup the actual GUI items used to display this
+		 * location and move them to wherever the copy of the location
+		 * is now. This means that the logic in ARDOUR::Location is
+		 * still enforced, even though we are not (yet) modifying 
+		 * the real Location itself.
+		 */
+		
 		Editor::LocationMarkers* lm = _editor->find_location_markers (real_location);
 
 		if (lm) {
 			lm->set_position (copy_location->start(), copy_location->end());
 		}
+
 	}
 
 	assert (!_copied_locations.empty());
@@ -2796,6 +2842,10 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 			break;
 
 		case Selection::Toggle:
+			/* we toggle on the button release, click only */
+			_editor->selection->toggle (_marker);
+			break;
+
 		case Selection::Extend:
 		case Selection::Add:
 			break;
@@ -2810,7 +2860,7 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	XMLNode &before = _editor->session()->locations()->get_state();
 
 	MarkerSelection::iterator i;
-	list<Location*>::iterator x;
+	CopiedLocationInfo::iterator x;
 	bool is_start;
 
 	for (i = _editor->selection->markers.begin(), x = _copied_locations.begin();
@@ -2826,9 +2876,9 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 			}
 
 			if (location->is_mark()) {
-				location->set_start ((*x)->start());
+				location->set_start (((*x).location)->start());
 			} else {
-				location->set ((*x)->start(), (*x)->end());
+				location->set (((*x).location)->start(), ((*x).location)->end());
 			}
 		}
 	}

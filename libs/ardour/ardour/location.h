@@ -56,6 +56,8 @@ class Location : public SessionHandleRef, public PBD::StatefulDestructible
 	Location (const Location& other);
 	Location (Session &, const XMLNode&);
 	Location* operator= (const Location& other);
+    
+        bool operator==(const Location& other);
 
 	bool locked() const { return _locked; }
 	void lock ();
