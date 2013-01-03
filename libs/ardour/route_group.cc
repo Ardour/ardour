@@ -507,6 +507,12 @@ RouteGroup::destroy_subgroup ()
 }
 
 bool
+RouteGroup::has_subgroup() const
+{
+	return subgroup_bus != 0;
+}
+
+bool
 RouteGroup::enabled_property (PBD::PropertyID prop)
 {
 	OwnedPropertyList::iterator i = _properties->find (prop);

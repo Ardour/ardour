@@ -319,7 +319,11 @@ GroupTabs::get_menu (RouteGroup* g)
 		items.push_back (MenuElem (_("Collect Group"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::collect), g)));
 		items.push_back (MenuElem (_("Remove Group"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::remove_group), g)));
 		items.push_back (SeparatorElem());
-		items.push_back (MenuElem (_("Add New Subgroup Bus"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, false, PreFader)));
+		if (g->has_subgroup()) {
+			items.push_back (MenuElem (_("Remove Subgroup Bus"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::un_subgroup), g)));
+		} else {
+			items.push_back (MenuElem (_("Add New Subgroup Bus"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, false, PreFader)));
+		}
 		items.push_back (MenuElem (_("Add New Aux Bus (pre-fader)"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, true, PreFader)));
 		items.push_back (MenuElem (_("Add New Aux Bus (post-fader)"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, true, PostFader)));
 	}
@@ -432,6 +436,12 @@ void
 GroupTabs::subgroup (RouteGroup* g, bool aux, Placement placement)
 {
 	g->make_subgroup (aux, placement);
+}
+
+void
+GroupTabs::un_subgroup (RouteGroup* g)
+{
+	g->destroy_subgroup ();
 }
 
 struct CollectSorter {

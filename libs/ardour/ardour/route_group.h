@@ -118,6 +118,7 @@ class RouteGroup : public SessionObject
 		changed();
 	}
 
+        bool has_subgroup() const;
 	void make_subgroup (bool, Placement);
 	void destroy_subgroup ();
 
