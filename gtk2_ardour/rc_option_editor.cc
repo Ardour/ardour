@@ -392,7 +392,7 @@ public:
 			}
 		}
 
-		l = manage (left_aligned_label (_("Toggle snap using:")));
+		l = manage (left_aligned_label (_("Ignore snap using:")));
 		l->set_name ("OptionsLabel");
 
 		t->attach (*l, 0, 1, 3, 4, FILL | EXPAND, FILL);
