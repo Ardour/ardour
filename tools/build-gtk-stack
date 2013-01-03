@@ -240,9 +240,9 @@ if [ ! -f gnome-doc-utils-0.20.6.tar.bz2 ] ; then
     echo gnome-doc
     fetch_as_is http://ftp.acc.umu.se/pub/gnome/sources/gnome-doc-utils/0.20/gnome-doc-utils-0.20.6.tar.bz2
 fi
-if [ ! -f pixman-0.24.4.tar.gz ] ; then
+if [ ! -f pixman-0.28.2.tar.gz ] ; then
     echo pixman
-    fetch_as_is http://cgit.freedesktop.org/pixman/snapshot/pixman-0.24.4.tar.gz
+    fetch_as_is http://cgit.freedesktop.org/pixman/snapshot/pixman-0.28.2.tar.gz
 fi
 if [ ! -f libffi-3.0.10.tar.gz ] ; then
     echo ffi
@@ -256,9 +256,9 @@ if [ ! -f fontconfig-2.8.0.tar.gz ] ; then
     echo fontconfig
     fetch_as_is http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.8.0.tar.gz
 fi
-if [ ! -f cairo-1.10.2.tar.gz ] ; then
+if [ ! -f cairo-1.12.8.tar.xz ] ; then
     echo cairo
-    fetch_as_is http://cairographics.org/releases/cairo-1.10.2.tar.gz
+    fetch_as_is http://cairographics.org/releases/cairo-1.12.8.tar.xz
 fi
 if [ ! -f pango-1.29.5.tar.bz2 ] ; then
     echo pango
@@ -402,7 +402,7 @@ tar xf gtk-osx-docbook-1.0.tar.gz && (cd gtk-osx-docbook-1.0 && JHBUILD_PREFIX=$
 # gnome-doc-utils is not parallel-build safe so turn off make -j2
 tar xf gnome-doc-utils-0.20.6.tar.bz2 && (cd gnome-doc-utils-0.20.6 && PYTHONPATH=$PREFIX/lib/python2.7/site-packages CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF --disable-scrollkeeper && PYTHONPATH=$PREFIX/lib/python2.7/site-packages MAKEFLAGS= make && PYTHONPATH=$PREFIX/lib/python2.7/site-packages MAKEFLAGS= make install) || die "gnome build failed"
 tar xf gtk-doc-1.18.tar.bz2 && (cd gtk-doc-1.18 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure --disable-scrollkeeper --with-xml-catalog=$PREFIX/etc/xml/catalog --prefix=$PREFIX && PYTHONPATH=$PREFIX/lib/python2.7/site-packages make && make install) || die "gtk build failed"
-tar xf pixman-0.24.4.tar.gz && (cd pixman-0.24.4 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" sh ./autogen.sh --prefix=$PREFIX && make && make install) || die "pixman build failed"
+tar xf pixman-0.28.2.tar.gz && (cd pixman-0.28.2 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" sh ./autogen.sh --prefix=$PREFIX && make && make install) || die "pixman build failed"
 
 if [ x$OSX = x ] ; then
     freetype_bytecode_patch=$this_script_dir/misc-patches/freetype-bytecode.patch
@@ -420,9 +420,9 @@ if [ x$OSX = x ] ; then
     # to the issue.
     #
     cairo_gradient_patch=$this_script_dir/misc-patches/cairo-gradients.patch
-    tar xf cairo-1.10.2.tar.gz && (cd cairo-1.10.2 && patch -p4 < $cairo_gradient_patch && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $CAIRO_CONF && make && make install) || die "cairo build failed"
+    tar xf cairo-1.12.8.tar.xz && (cd cairo-1.12.8 && patch -p4 < $cairo_gradient_patch && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $CAIRO_CONF && make && make install) || die "cairo build failed"
 else 
-    tar xf cairo-1.10.2.tar.gz && (cd cairo-1.10.2 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $CAIRO_CONF && make && make install) || die "cairo build failed"
+    tar xf cairo-1.12.8.tar.xz && (cd cairo-1.12.8 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $CAIRO_CONF && make && make install) || die "cairo build failed"
 fi
 
 tar xf pango-1.29.5.tar.bz2 && (cd pango-1.29.5 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $PANGO_CONF && make && make install) || die "pango build failed"
