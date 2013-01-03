@@ -2966,7 +2966,7 @@ require some unused files to continue to exist."));
 	double space_adjusted = 0;
 
 	if (rep.space < 1000) {
-		bprefix = _("");
+		bprefix = X_("");
 		space_adjusted = rep.space;
 	} else if (rep.space < 1000000) {
 		bprefix = _("kilo");

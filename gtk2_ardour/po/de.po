@@ -2,14 +2,13 @@
 # Copyright (C) 2003 Paul Davis
 # This file is distributed under the same license as the gtk-ardour package.
 #
-#: ardour_ui.cc:2969
 # Karsten Petersen <kapet@kapet.de>, 2003.
 # Edgar Aichinger <edgar.aichinger@aon.at>, 2008, 2012, 2013.
 msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-02 15:56+0100\n"
+"POT-Creation-Date: 2013-01-03 08:22-0500\n"
 "PO-Revision-Date: 2013-01-02 18:39+0100\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
@@ -443,7 +442,7 @@ msgstr "Audio-Busse"
 msgid "Add:"
 msgstr "Erstelle:"
 
-#: add_route_dialog.cc:117 startup.cc:800 time_fx_dialog.cc:92
+#: add_route_dialog.cc:117 startup.cc:808 time_fx_dialog.cc:92
 msgid "<b>Options</b>"
 msgstr "<b>Optionen</b>"
 
@@ -491,8 +490,8 @@ msgid ""
 "If you do not plan to use such a plugin, then use a normal audio or MIDI "
 "track instead."
 msgstr ""
-"Audio+MIDI Spuren sind <b>NUR</b> für den Gebrauch mit Plugins "
-"gedacht, die sowohl Audio als auch MIDI Eingangsdaten nützen\n"
+"Audio+MIDI Spuren sind <b>NUR</b> für den Gebrauch mit Plugins gedacht, die "
+"sowohl Audio als auch MIDI Eingangsdaten nützen\n"
 "\n"
 "Falls Sie nicht vorhaben, so ein Plugin zu benutzen, verwenden Sie "
 "stattdessen eine normale Audio- oder MIDI-Spur"
@@ -667,7 +666,7 @@ msgstr "Konnte %1 nicht initialisieren."
 msgid "Starting audio engine"
 msgstr "Starte Audio Engine"
 
-#: ardour_ui.cc:640 startup.cc:612
+#: ardour_ui.cc:640 startup.cc:620
 msgid "%1 is ready for use"
 msgstr "%1 ist bereit"
 
@@ -860,7 +859,7 @@ msgstr "Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"
 msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
 msgstr "Timecode|TC: <span foreground=\"%s\">%s</span>"
 
-#: ardour_ui.cc:1204 ardour_ui.cc:1213 startup.cc:1011
+#: ardour_ui.cc:1204 ardour_ui.cc:1213 startup.cc:1019
 msgid "Recent Sessions"
 msgstr "Zuletzt verwendete Projekte"
 
@@ -877,7 +876,7 @@ msgid "Open Session"
 msgstr "Projekt öffnen"
 
 #: ardour_ui.cc:1340 session_import_dialog.cc:169
-#: session_metadata_dialog.cc:729 startup.cc:1040
+#: session_metadata_dialog.cc:729 startup.cc:1048
 msgid "%1 sessions"
 msgstr "%1projekte"
 
@@ -1403,11 +1402,10 @@ msgid ""
 "details."
 msgstr ""
 "<b>Primäre Uhr</b> Rechtsklick um Anzeigemodus zu setzen. Klick zum "
-"Bearbeiten, Klick"
-"+Mausbewegung auf eine Ziffer oder Maus-Über+Scrollrad zum Ändern.\n"
-"Text editieren: überschreibt von rechts nach links <tt>Esc</tt>: Abbruch; <tt>"
-"Eingabe</tt>: "
-"Bestätige; hänge '+' or '-' an, um Deltzeiten einzugeben.\n"
+"Bearbeiten, Klick+Mausbewegung auf eine Ziffer oder Maus-Über+Scrollrad zum "
+"Ändern.\n"
+"Text editieren: überschreibt von rechts nach links <tt>Esc</tt>: Abbruch; "
+"<tt>Eingabe</tt>: Bestätige; hänge '+' or '-' an, um Deltzeiten einzugeben.\n"
 "Siehe <span color=\"blue\">http://ardour.org/a3_features_clocks</span> für "
 "Einzelheiten."
 
@@ -1421,11 +1419,10 @@ msgid ""
 "details."
 msgstr ""
 "<b>Sekundäre Uhr</b> Rechtsklick um Anzeigemodus zu setzen. Klick zum "
-"Bearbeiten, Klick"
-"+Mausbewegung auf eine Ziffer oder Maus-Über+Scrollrad zum Ändern.\n"
-"Text editieren: überschreibt von rechts nach links <tt>Esc</tt>: Abbruch; <tt>"
-"Eingabe</tt>: "
-"Bestätige; hänge '+' or '-' an, um Deltzeiten einzugeben.\n"
+"Bearbeiten, Klick+Mausbewegung auf eine Ziffer oder Maus-Über+Scrollrad zum "
+"Ändern.\n"
+"Text editieren: überschreibt von rechts nach links <tt>Esc</tt>: Abbruch; "
+"<tt>Eingabe</tt>: Bestätige; hänge '+' or '-' an, um Deltzeiten einzugeben.\n"
 "Siehe <span color=\"blue\">http://ardour.org/a3_features_clocks</span> für "
 "Einzelheiten."
 
@@ -1811,7 +1808,7 @@ msgstr "Rückwärts (langsam)"
 msgid "Rewind (Fast)"
 msgstr "Rückwärts (schnell)"
 
-#: ardour_ui_ed.cc:340 startup.cc:695
+#: ardour_ui_ed.cc:340 startup.cc:703
 msgid "Forward"
 msgstr "Vorwärts (beschleunigen)"
 
@@ -4380,23 +4377,23 @@ msgstr "Ändere Fade-In Länge"
 msgid "change fade out length"
 msgstr "Fade-Out verändern"
 
-#: editor_drag.cc:2809
+#: editor_drag.cc:2859
 msgid "move marker"
 msgstr "Marker bewegen"
 
-#: editor_drag.cc:3372
+#: editor_drag.cc:3422
 msgid "An error occurred while executing time stretch operation"
 msgstr "Beim Ausführen der Timestretch-Operation trat ein Fehler auf"
 
-#: editor_drag.cc:3802
+#: editor_drag.cc:3852
 msgid "programming_error: %1"
 msgstr "Programmierfehler: %1"
 
-#: editor_drag.cc:3872 editor_markers.cc:681
+#: editor_drag.cc:3922 editor_markers.cc:681
 msgid "new range marker"
 msgstr "Neuer Bereich"
 
-#: editor_drag.cc:4553
+#: editor_drag.cc:4603
 msgid "rubberband selection"
 msgstr "Bereichsauswahl"
 
@@ -8406,7 +8403,8 @@ msgid "Insert note using:"
 msgstr "Note einfügen:"
 
 #: rc_option_editor.cc:395
-msgid "Toggle snap using:"
+#, fuzzy
+msgid "Ignore snap using:"
 msgstr "Einrasten mit:"
 
 #: rc_option_editor.cc:411
@@ -8539,8 +8537,8 @@ msgid ""
 "<b>When disabled</b> Ardour will continue to roll past the session end "
 "marker at all times"
 msgstr ""
-"<b>Falls an</b>, und Ardour </b>nimmt nicht auf</b>, wird es bei "
-"Erreichen ds Projektende-Markers die Wiedergabe stoppen\n"
+"<b>Falls an</b>, und Ardour </b>nimmt nicht auf</b>, wird es bei Erreichen "
+"ds Projektende-Markers die Wiedergabe stoppen\n"
 "\n"
 "<b>Falls aus</b> , wird Ardour am Ende des Projektes immer weiterlaufen"
 
@@ -8559,12 +8557,12 @@ msgid ""
 "delay"
 msgstr ""
 "<b>Falls an</b>, wird dies vorauslesen und am Schleifen-Endpunkt "
-"zurückspringen, "
-"wodurch eine Neupositionierung am Schleifenende vermieden wird\n"
+"zurückspringen, wodurch eine Neupositionierung am Schleifenende vermieden "
+"wird\n"
 "\n"
 "<b>Falls aus</b>, wird bei Erreichen des Schleifen-Endes zum Anfang der "
-"Schleife "
-"gesprungen, was oft einen hörbaren Klick oder kurze Verzögerung verursacht"
+"Schleife gesprungen, was oft einen hörbaren Klick oder kurze Verzögerung "
+"verursacht"
 
 #: rc_option_editor.cc:1039
 msgid "Disable per-track record disarm while rolling"
@@ -8588,8 +8586,7 @@ msgid ""
 "when fast-forwarding or rewinding through some kinds of audio"
 msgstr ""
 "Dies wird die unangenehme Steigerung der wahrgenommenen Lautstärke "
-"verringern, "
-"die bei manchem Material bei Vor/Rücklauf auftritt"
+"verringern, die bei manchem Material bei Vor/Rücklauf auftritt"
 
 #: rc_option_editor.cc:1056
 msgid "Sync/Slave"
@@ -8617,17 +8614,13 @@ msgid ""
 "the external timecode standard and the session standard."
 msgstr ""
 "Diese Option bestimmt den Wert der Videoframerate <i>während der "
-"Synchronisation</i> "
-"mit einer externen Timecode-Quelle. "
-"\n"
+"Synchronisation</i> mit einer externen Timecode-Quelle. \n"
 "<b>Falls an</b>, wird die Videoframerate des Projektes an die der externen "
-"Timecode-Quelle angepasst. "
-"\n"
+"Timecode-Quelle angepasst. \n"
 "<b>Falls aus</b>, wird die Videoframerate des Projektes nicht geändert. "
-"Stattdessen wird "
-"die Anzeige der Framerate in der Uhr rot blinken und Ardour wird zwischen den "
-"Standards der "
-"externen Quelle und des Projektes konvertieren."
+"Stattdessen wird die Anzeige der Framerate in der Uhr rot blinken und Ardour "
+"wird zwischen den Standards der externen Quelle und des Projektes "
+"konvertieren."
 
 #: rc_option_editor.cc:1086
 msgid "External timecode is sync locked"
@@ -8658,19 +8651,14 @@ msgid ""
 "using exactly 29.97 fps has zero timecode drift.\n"
 msgstr ""
 "<b>Falls an</b>, erwarten wir, daß die externe Timecode-Quelle festläuft mit "
-"29.97 fps "
-"(statt 30000/1001).\n"
+"29.97 fps (statt 30000/1001).\n"
 "SMPTE 12M-1999 spezifiziert 29.97df as 30000/1001. Die Spezifikation erwähnt "
-"darüber hinaus, "
-"daß Drop-frame Timecode einen Fehler von -86ms im Zeitraum von 24 Stunden "
-"akkumuliert.\n"
+"darüber hinaus, daß Drop-frame Timecode einen Fehler von -86ms im Zeitraum "
+"von 24 Stunden akkumuliert.\n"
 "Drop-frame Timecode würde für einer NTSC Farb-Framerate von 30 * 0.9990 (ie "
-"29.970000) "
-"exakt kompensieren. Das ist nicht die tatsächliche Rate, jedoch benutzen "
-"manche Hersteller "
-"diese - der Spezifikation widersprechend - da bei der Variante mit exakt "
-"29.97 fps kein "
-"Timecode-Drift auftritt.\n"
+"29.970000) exakt kompensieren. Das ist nicht die tatsächliche Rate, jedoch "
+"benutzen manche Hersteller diese - der Spezifikation widersprechend - da bei "
+"der Variante mit exakt 29.97 fps kein Timecode-Drift auftritt.\n"
 
 #: rc_option_editor.cc:1115
 msgid "LTC Reader"
@@ -8697,8 +8685,8 @@ msgid ""
 "<b>When enabled</b> Ardour will continue to send LTC information even when "
 "the transport (playhead) is not moving"
 msgstr ""
-"<b>Falls an</b>, wird Ardour weiterhin LTC-Information senden, sogar wenn der "
-"Transport (Positionszeiger) stillsteht"
+"<b>Falls an</b>, wird Ardour weiterhin LTC-Information senden, sogar wenn "
+"der Transport (Positionszeiger) stillsteht"
 
 #: rc_option_editor.cc:1161
 msgid ""
@@ -8706,8 +8694,7 @@ msgid ""
 "is  0dBu ^= -18dbFS in an EBU calibrated system"
 msgstr ""
 "Geben Sie den Spitzenwert des erzeugten LTC-Signals in dbFS an. Ein guter "
-"Wert "
-"für ein EBU-kalibriertes System ist 0dBu ^= -18dbFS"
+"Wert für ein EBU-kalibriertes System ist 0dBu ^= -18dbFS"
 
 #: rc_option_editor.cc:1174
 msgid "Link selection of regions and tracks"
@@ -8736,12 +8723,11 @@ msgid ""
 "If disabled, regions are considered \"equivalent\" only if have the same "
 "start time, length and position"
 msgstr ""
-"Wenn Bereichsauswahlen quer über eine Gruppe erweitert werden, muß %1"
-"entscheiden, welche Regionen äquivalent sind\n"
+"Wenn Bereichsauswahlen quer über eine Gruppe erweitert werden, muß "
+"%1entscheiden, welche Regionen äquivalent sind\n"
 "\n"
 "Falls an, werden Regionen als \"äquivalent\" betrachtet, wenn sie sich auf "
-"der  "
-"Zeitleiste überlappen.\n"
+"der  Zeitleiste überlappen.\n"
 "\n"
 "Falls aus, werden Region nur dann als \"äquivalent\" betrachtet, wenn sie "
 "identische Startzeit, Länge und Position haben"
@@ -10296,8 +10282,8 @@ msgstr "Suche hier nach MIDI-Dateien:"
 msgid ""
 "Track Input Monitoring automatically follows transport state (\"auto-input\")"
 msgstr ""
-"Spur-Eingangs-Monitoring folgt automatisch dem Transportstatus "
-"(\"auto-input\")"
+"Spur-Eingangs-Monitoring folgt automatisch dem Transportstatus (\"auto-input"
+"\")"
 
 #: session_option_editor.cc:226
 msgid "Use monitor section in this session"
@@ -10714,15 +10700,15 @@ msgstr "Lautsprecher entfernen"
 msgid "Azimuth:"
 msgstr "Azimut:"
 
-#: startup.cc:72
+#: startup.cc:77
 msgid "Create a new session"
 msgstr "Neues Projekt erzeugen"
 
-#: startup.cc:73
+#: startup.cc:78
 msgid "Open an existing session"
 msgstr "Vorhandenes Projekt öffnen"
 
-#: startup.cc:74
+#: startup.cc:79
 msgid ""
 "Use an external mixer or the hardware mixer of your audio interface.\n"
 "Ardour will play NO role in monitoring"
@@ -10730,15 +10716,15 @@ msgstr ""
 "Verwende einen externen Mixer oder den Hardwaremixer der Audiohardware.\n"
 "Ardour wird das Monitoring NICHT übernehmen."
 
-#: startup.cc:76
+#: startup.cc:81
 msgid "Ask %1 to play back material as it is being recorded"
 msgstr "%1 soll laufende Aufnahmen wiedergeben"
 
-#: startup.cc:79
+#: startup.cc:84
 msgid "I'd like more options for this session"
 msgstr "Erweiterte Optionen für dieses Projekt"
 
-#: startup.cc:195
+#: startup.cc:202
 msgid ""
 "<b>Welcome to this BETA release of Ardour 3.0</b>\n"
 "\n"
@@ -10793,15 +10779,15 @@ msgstr ""
 "\n"
 "                http://ardour.org/support\n"
 
-#: startup.cc:221
+#: startup.cc:228
 msgid "This is a BETA RELEASE"
 msgstr "Dies ist ein BETA RELEASE"
 
-#: startup.cc:327
+#: startup.cc:335
 msgid "Audio / MIDI Setup"
 msgstr "Audio / MIDI Einstellungen"
 
-#: startup.cc:339
+#: startup.cc:347
 msgid ""
 "<span size=\"larger\">%1 is a digital audio workstation. You can use it to "
 "record, edit and mix multi-track audio. You can produce your own CDs, mix "
@@ -10818,15 +10804,15 @@ msgstr ""
 "Es gibt ein paar Dinge, die vor dem ersten Programmstart konfiguriert werden "
 "müssen.</span>"
 
-#: startup.cc:365
+#: startup.cc:373
 msgid "Welcome to %1"
 msgstr "Willkommen zu %1"
 
-#: startup.cc:388
+#: startup.cc:396
 msgid "Default folder for %1 sessions"
 msgstr "Standardordner für %1 Projekte"
 
-#: startup.cc:394
+#: startup.cc:402
 msgid ""
 "Each project that you work on with %1 has its own folder.\n"
 "These can require a lot of disk space if you are recording audio.\n"
@@ -10843,11 +10829,11 @@ msgstr ""
 "<i>(Neue Projekte können überall abgespeichert werden, dies ist nur die "
 "Vorgabe)</i>"
 
-#: startup.cc:416
+#: startup.cc:424
 msgid "Default folder for new sessions"
 msgstr "Standardordner für neue Projekte"
 
-#: startup.cc:437
+#: startup.cc:445
 msgid ""
 "While recording instruments or vocals, you probably want to listen to the\n"
 "signal as well as record it. This is called \"monitoring\". There are\n"
@@ -10872,15 +10858,15 @@ msgstr ""
 "\n"
 "<i>If you do not understand what this is about, just accept the default.</i>"
 
-#: startup.cc:458
+#: startup.cc:466
 msgid "Monitoring Choices"
 msgstr "Auswahl des Monitoring"
 
-#: startup.cc:481
+#: startup.cc:489
 msgid "Use a Master bus directly"
 msgstr "Nutze den Master-Bus direkt"
 
-#: startup.cc:483
+#: startup.cc:491
 msgid ""
 "Connect the Master bus directly to your hardware outputs. This is preferable "
 "for simple usage."
@@ -10888,11 +10874,11 @@ msgstr ""
 "Verbinde den Master-Bus direkt mit den Audioausgängen. Wird für "
 "einfacheAnwendungen empfohlen."
 
-#: startup.cc:492
+#: startup.cc:500
 msgid "Use an additional Monitor bus"
 msgstr "Nutze einen zusätzlichen Monitor-Bus"
 
-#: startup.cc:495
+#: startup.cc:503
 msgid ""
 "Use a Monitor bus between Master bus and hardware outputs for \n"
 "greater control in monitoring without affecting the mix."
@@ -10900,7 +10886,7 @@ msgstr ""
 "Nutze einen Monitor-Bus zwischen Master-Bus und Audioausgängen, um mehr\n"
 "Möglichkeiten für das Monitoring zu bekommen, ohne den Mix zu beeinflussen."
 
-#: startup.cc:517
+#: startup.cc:525
 msgid ""
 "<i>You can change this preference at any time via the Preferences dialog.\n"
 "You can also add or remove the monitor section to/from any session.</i>\n"
@@ -10914,103 +10900,103 @@ msgstr ""
 "\n"
 "</i>Im Zweifelsfall akzeptieren Sie die Voreinstellung.</i>"
 
-#: startup.cc:528
+#: startup.cc:536
 msgid "Monitor Section"
 msgstr "Monitorsektion"
 
-#: startup.cc:568
+#: startup.cc:576
 msgid "What would you like to do ?"
 msgstr "Was möchten Sie tun?"
 
-#: startup.cc:697
+#: startup.cc:705
 msgid "Open"
 msgstr "Öffnen"
 
-#: startup.cc:743
+#: startup.cc:751
 msgid "Session name:"
 msgstr "Projektname:"
 
-#: startup.cc:766
+#: startup.cc:774
 msgid "Create session folder in:"
 msgstr "Ort des Projektverzeichnisses:"
 
-#: startup.cc:780
+#: startup.cc:788
 msgid "Select folder for session"
 msgstr "Ordner für Projekt wählen"
 
-#: startup.cc:812
+#: startup.cc:820
 msgid "Use this template"
 msgstr "Diese Vorlage verwenden"
 
-#: startup.cc:815
+#: startup.cc:823
 msgid "no template"
 msgstr "keine Vorlage"
 
-#: startup.cc:843
+#: startup.cc:851
 msgid "Use an existing session as a template:"
 msgstr "Ein vorhandenes Projekt als Vorlage verwenden:"
 
-#: startup.cc:855
+#: startup.cc:863
 msgid "Select template"
 msgstr "Vorlage auswählen"
 
-#: startup.cc:881
+#: startup.cc:889
 msgid "New Session"
 msgstr "Neues Projekt"
 
-#: startup.cc:1034
+#: startup.cc:1042
 msgid "Select session file"
 msgstr "Projektdatei auswählen"
 
-#: startup.cc:1050
+#: startup.cc:1058
 msgid "Browse:"
 msgstr "Durchsuchen:"
 
-#: startup.cc:1059
+#: startup.cc:1067
 msgid "Select a session"
 msgstr "Projekt auswählen"
 
-#: startup.cc:1085 startup.cc:1086 startup.cc:1087
+#: startup.cc:1093 startup.cc:1094 startup.cc:1095
 msgid "channels"
 msgstr "Kanäle"
 
-#: startup.cc:1101
+#: startup.cc:1109
 msgid "<b>Busses</b>"
 msgstr "<b>Busse</b>"
 
-#: startup.cc:1102
+#: startup.cc:1110
 msgid "<b>Inputs</b>"
 msgstr "<b>Eingänge</b>"
 
-#: startup.cc:1103
+#: startup.cc:1111
 msgid "<b>Outputs</b>"
 msgstr "<b>Ausgänge</b>"
 
-#: startup.cc:1111
+#: startup.cc:1119
 msgid "Create master bus"
 msgstr "Master-Bus erstellen"
 
-#: startup.cc:1121
+#: startup.cc:1129
 msgid "Automatically connect to physical inputs"
 msgstr "Automatisch mit Audioeingängen verbinden"
 
-#: startup.cc:1128 startup.cc:1187
+#: startup.cc:1136 startup.cc:1195
 msgid "Use only"
 msgstr "Benutze nur"
 
-#: startup.cc:1181
+#: startup.cc:1189
 msgid "Automatically connect outputs"
 msgstr "Ausgänge automatisch verbinden"
 
-#: startup.cc:1203
+#: startup.cc:1211
 msgid "... to master bus"
 msgstr "... mit dem Master-Bus"
 
-#: startup.cc:1213
+#: startup.cc:1221
 msgid "... to physical outputs"
 msgstr "... mit den Audioausgängen"
 
-#: startup.cc:1263
+#: startup.cc:1271
 msgid "Advanced Session Options"
 msgstr "Erweiterte Einstellungen"
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-09-12 17:28-0400\n"
+"POT-Creation-Date: 2013-01-03 08:18-0500\n"
 "PO-Revision-Date: 2004-05-17 20:36+0200\n"
 "Last-Translator: Chris Ross <chris.ross@tebibyte.org>\n"
 "Language-Team: Portuguese\n"
@@ -29,7 +29,7 @@ msgstr "Operar controladora de MIDI agora"
 msgid "button cannot watch state of non-existing Controllable\n"
 msgstr ""
 
-#: gtk_ui.cc:105
+#: gtk_ui.cc:107
 msgid "Log"
 msgstr ""
 
@@ -37,14 +37,14 @@ msgstr ""
 msgid ""
 "\n"
 "\n"
-"Key: "
+"Shortcut: "
 msgstr ""
 
-#: gtk_ui.cc:634
+#: gtk_ui.cc:633
 msgid "Press To Exit"
 msgstr ""
 
-#: gtk_ui.cc:670
+#: gtk_ui.cc:669
 msgid "I'm sorry %1, I can't do that"
 msgstr ""
 

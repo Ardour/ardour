@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk2_ardour 3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-01 21:07+0100\n"
+"POT-Creation-Date: 2013-01-03 08:22-0500\n"
 "PO-Revision-Date: 2013-01-01 21:10+0100\n"
 "Last-Translator: Eivind Ødegård <meinmycell-lists@yahoo.no>\n"
 "Language-Team:  <i18n-nn@lister.ping.uio.no>\n"
@@ -388,8 +388,7 @@ msgstr "Oppsett"
 msgid "Loading menus from %1"
 msgstr "Lastar menyar frå %1"
 
-#: actions.cc:83
-#: actions.cc:84
+#: actions.cc:83 actions.cc:84
 msgid "badly formatted UI definition file: %1"
 msgstr "Feilformatert grensesnittdefinisjonsfil: %1"
 
@@ -397,13 +396,11 @@ msgstr "Feilformatert grensesnittdefinisjonsfil: %1"
 msgid "%1 menu definition file not found"
 msgstr "Fann ikkje menydefinisjonsfila til %1"
 
-#: actions.cc:90
-#: actions.cc:91
+#: actions.cc:90 actions.cc:91
 msgid "%1 will not work without a valid ardour.menus file"
 msgstr "%1 verkar ikkje utan ei gyldig ardour.menus-fil"
 
-#: add_route_dialog.cc:53
-#: route_params_ui.cc:503
+#: add_route_dialog.cc:53 route_params_ui.cc:503
 msgid "Add Track or Bus"
 msgstr "Legg til spor eller buss"
 
@@ -439,15 +436,11 @@ msgstr "Bussar"
 msgid "Add:"
 msgstr "Legg til:"
 
-#: add_route_dialog.cc:117
-#: startup.cc:800
-#: time_fx_dialog.cc:92
+#: add_route_dialog.cc:117 startup.cc:808 time_fx_dialog.cc:92
 msgid "<b>Options</b>"
 msgstr "<b>Val</b>"
 
-#: add_route_dialog.cc:127
-#: bundle_manager.cc:194
-#: region_editor.cc:49
+#: add_route_dialog.cc:127 bundle_manager.cc:194 region_editor.cc:49
 #: route_group_dialog.cc:66
 msgid "Name:"
 msgstr "Namn:"
@@ -456,82 +449,57 @@ msgstr "Namn:"
 msgid "Group:"
 msgstr "Gruppe:"
 
-#: add_route_dialog.cc:218
-#: add_route_dialog.cc:227
-#: rc_option_editor.cc:1328
-#: rc_option_editor.cc:1330
-#: rc_option_editor.cc:1332
-#: rc_option_editor.cc:1334
-#: rc_option_editor.cc:1358
-#: rc_option_editor.cc:1360
-#: rc_option_editor.cc:1368
-#: rc_option_editor.cc:1370
-#: rc_option_editor.cc:1388
-#: rc_option_editor.cc:1401
-#: rc_option_editor.cc:1403
-#: rc_option_editor.cc:1405
-#: rc_option_editor.cc:1436
-#: rc_option_editor.cc:1438
-#: rc_option_editor.cc:1440
-#: rc_option_editor.cc:1448
-#: rc_option_editor.cc:1456
-#: rc_option_editor.cc:1464
+#: add_route_dialog.cc:218 add_route_dialog.cc:227 rc_option_editor.cc:1328
+#: rc_option_editor.cc:1330 rc_option_editor.cc:1332 rc_option_editor.cc:1334
+#: rc_option_editor.cc:1358 rc_option_editor.cc:1360 rc_option_editor.cc:1368
+#: rc_option_editor.cc:1370 rc_option_editor.cc:1388 rc_option_editor.cc:1401
+#: rc_option_editor.cc:1403 rc_option_editor.cc:1405 rc_option_editor.cc:1436
+#: rc_option_editor.cc:1438 rc_option_editor.cc:1440 rc_option_editor.cc:1448
+#: rc_option_editor.cc:1456 rc_option_editor.cc:1464
 msgid "Audio"
 msgstr "Lyd"
 
-#: add_route_dialog.cc:219
-#: add_route_dialog.cc:230
-#: editor_actions.cc:105
-#: missing_file_dialog.cc:55
-#: rc_option_editor.cc:1587
-#: rc_option_editor.cc:1595
-#: rc_option_editor.cc:1603
-#: rc_option_editor.cc:1612
-#: rc_option_editor.cc:1620
-#: rc_option_editor.cc:1628
-#: rc_option_editor.cc:1636
-#: rc_option_editor.cc:1645
-#: rc_option_editor.cc:1654
-#: rc_option_editor.cc:1663
-#: rc_option_editor.cc:1671
+#: add_route_dialog.cc:219 add_route_dialog.cc:230 editor_actions.cc:105
+#: missing_file_dialog.cc:55 rc_option_editor.cc:1587 rc_option_editor.cc:1595
+#: rc_option_editor.cc:1603 rc_option_editor.cc:1612 rc_option_editor.cc:1620
+#: rc_option_editor.cc:1628 rc_option_editor.cc:1636 rc_option_editor.cc:1645
+#: rc_option_editor.cc:1654 rc_option_editor.cc:1663 rc_option_editor.cc:1671
 #: rc_option_editor.cc:1679
 msgid "MIDI"
 msgstr "MIDI"
 
-#: add_route_dialog.cc:220
-#: add_route_dialog.cc:233
+#: add_route_dialog.cc:220 add_route_dialog.cc:233
 msgid "Audio+MIDI"
 msgstr "Lyd+MIDI"
 
-#: add_route_dialog.cc:221
-#: add_route_dialog.cc:236
+#: add_route_dialog.cc:221 add_route_dialog.cc:236
 msgid "Bus"
 msgstr "Buss"
 
 #: add_route_dialog.cc:263
 msgid ""
-"Audio+MIDI tracks are intended for use <b>ONLY</b> with plugins that use both audio and MIDI input data\n"
+"Audio+MIDI tracks are intended for use <b>ONLY</b> with plugins that use "
+"both audio and MIDI input data\n"
 "\n"
-"If you do not plan to use such a plugin, then use a normal audio or MIDI track instead."
+"If you do not plan to use such a plugin, then use a normal audio or MIDI "
+"track instead."
 msgstr ""
-"Audio+MIDI-spor er <b>BERRE</b> til bruk med utvidingar som kan ta både lyd- og MIDI-data.\n"
+"Audio+MIDI-spor er <b>BERRE</b> til bruk med utvidingar som kan ta både lyd- "
+"og MIDI-data.\n"
 "\n"
-"Viss du ikkje planlegg å bruka slike utvidingar, bør du bruka eit vanleg lyd- eller MIDI-spor i staden."
+"Viss du ikkje planlegg å bruka slike utvidingar, bør du bruka eit vanleg "
+"lyd- eller MIDI-spor i staden."
 
-#: add_route_dialog.cc:307
-#: add_route_dialog.cc:326
-#: editor_actions.cc:385
+#: add_route_dialog.cc:307 add_route_dialog.cc:326 editor_actions.cc:385
 #: time_axis_view.cc:1318
 msgid "Normal"
 msgstr "Normal"
 
-#: add_route_dialog.cc:310
-#: add_route_dialog.cc:328
+#: add_route_dialog.cc:310 add_route_dialog.cc:328
 msgid "Non Layered"
 msgstr "Ikkje lagdelt"
 
-#: add_route_dialog.cc:311
-#: add_route_dialog.cc:330
+#: add_route_dialog.cc:311 add_route_dialog.cc:330
 msgid "Tape"
 msgstr "Band"
 
@@ -567,19 +535,15 @@ msgstr "8 kanalar"
 msgid "12 Channel"
 msgstr "12 kanalar"
 
-#: add_route_dialog.cc:463
-#: mixer_strip.cc:2125
+#: add_route_dialog.cc:463 mixer_strip.cc:2125
 msgid "Custom"
 msgstr "Eigen"
 
-#: add_route_dialog.cc:496
-#: add_route_dialog.cc:510
-#: route_group_menu.cc:81
+#: add_route_dialog.cc:496 add_route_dialog.cc:510 route_group_menu.cc:81
 msgid "New Group..."
 msgstr "Ny gruppe..."
 
-#: add_route_dialog.cc:500
-#: route_group_menu.cc:85
+#: add_route_dialog.cc:500 route_group_menu.cc:85
 msgid "No Group"
 msgstr "Inga gruppe"
 
@@ -609,8 +573,7 @@ msgstr ""
 "\n"
 "Vel kva stig du vil henta fila frå."
 
-#: ambiguous_file_dialog.cc:45
-#: missing_file_dialog.cc:45
+#: ambiguous_file_dialog.cc:45 missing_file_dialog.cc:45
 msgid "Done"
 msgstr "Ferdig"
 
@@ -650,21 +613,16 @@ msgstr "Normaliser verdiar"
 msgid "FFT analysis window"
 msgstr "FFT-analyserute"
 
-#: analysis_window.cc:60
-#: editor.cc:1866
+#: analysis_window.cc:60 editor.cc:1866
 msgid "Spectral Analysis"
 msgstr "Spektrumanalyse"
 
-#: analysis_window.cc:67
-#: editor_actions.cc:138
-#: export_channel_selector.cc:543
+#: analysis_window.cc:67 editor_actions.cc:138 export_channel_selector.cc:543
 #: session_metadata_dialog.cc:546
 msgid "Track"
 msgstr "Spor"
 
-#: analysis_window.cc:68
-#: editor_actions.cc:585
-#: mixer_ui.cc:124
+#: analysis_window.cc:68 editor_actions.cc:585 mixer_ui.cc:124
 #: mixer_ui.cc:1792
 msgid "Show"
 msgstr "Vis"
@@ -701,20 +659,23 @@ msgstr "greidde ikkje starta %1."
 msgid "Starting audio engine"
 msgstr "Startar lydmaskin"
 
-#: ardour_ui.cc:640
-#: startup.cc:612
+#: ardour_ui.cc:640 startup.cc:620
 msgid "%1 is ready for use"
 msgstr "%1 er klar til bruk"
 
 #: ardour_ui.cc:682
 msgid ""
-"WARNING: Your system has a limit for maximum amount of locked memory. This might cause %1 to run out of memory before your system runs out of memory. \n"
+"WARNING: Your system has a limit for maximum amount of locked memory. This "
+"might cause %1 to run out of memory before your system runs out of memory. \n"
 "\n"
-"You can view the memory limit with 'ulimit -l', and it is normally controlled by /etc/security/limits.conf"
+"You can view the memory limit with 'ulimit -l', and it is normally "
+"controlled by /etc/security/limits.conf"
 msgstr ""
-"MERK: Datamaskina di har ei grense for kor mykje minne som kan låsast. Dette kan føra til at %1 går tom for minne før maskina ditt gjer det. \n"
+"MERK: Datamaskina di har ei grense for kor mykje minne som kan låsast. Dette "
+"kan føra til at %1 går tom for minne før maskina ditt gjer det. \n"
 "\n"
-"Du kan finna ut kva minnegrensa er med 'ulimit -l'. Minnegrensa er vanlegvis kontrollert av /etc/security/limits.conf"
+"Du kan finna ut kva minnegrensa er med 'ulimit -l'. Minnegrensa er vanlegvis "
+"kontrollert av /etc/security/limits.conf"
 
 #: ardour_ui.cc:693
 msgid "Do not show this window again"
@@ -824,8 +785,7 @@ msgstr "WAV"
 msgid "WAV64"
 msgstr "WAV64"
 
-#: ardour_ui.cc:935
-#: session_option_editor.cc:196
+#: ardour_ui.cc:935 session_option_editor.cc:196
 msgid "CAF"
 msgstr "CAF"
 
@@ -860,8 +820,14 @@ msgstr "DSP: <span foreground=\"%s\">%5.1f%%</span>"
 
 #: ardour_ui.cc:996
 #, c-format
-msgid "Buffers: <span foreground=\"green\">p:</span><span foreground=\"%s\">%<PRIu32>%%</span> <span foreground=\"green\">c:</span><span foreground=\"%s\">%<PRIu32>%%</span>"
-msgstr "Bufrar: <span foreground=\"green\">p:</span><span foreground=\"%s\">%<PRIu32>%%</span> <span foreground=\"green\">c:</span><span foreground=\"%s\">%<PRIu32>%%</span>"
+msgid ""
+"Buffers: <span foreground=\"green\">p:</span><span foreground=\"%s\">"
+"%<PRIu32>%%</span> <span foreground=\"green\">c:</span><span foreground=\"%s"
+"\">%<PRIu32>%%</span>"
+msgstr ""
+"Bufrar: <span foreground=\"green\">p:</span><span foreground=\"%s\">%<PRIu32>"
+"%%</span> <span foreground=\"green\">c:</span><span foreground=\"%s\">"
+"%<PRIu32>%%</span>"
 
 #: ardour_ui.cc:1032
 msgid "Disk: <span foreground=\"green\">Unknown</span>"
@@ -885,9 +851,7 @@ msgstr "Disk: <span foreground=\"%s\">%02dt:%02dm:%02ds</span>"
 msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
 msgstr "Tidskode|TC: <span foreground=\"%s\">%s</span>"
 
-#: ardour_ui.cc:1204
-#: ardour_ui.cc:1213
-#: startup.cc:1011
+#: ardour_ui.cc:1204 ardour_ui.cc:1213 startup.cc:1019
 msgid "Recent Sessions"
 msgstr "Siste øktene"
 
@@ -903,16 +867,16 @@ msgstr ""
 msgid "Open Session"
 msgstr "Opna økt"
 
-#: ardour_ui.cc:1340
-#: session_import_dialog.cc:169
-#: session_metadata_dialog.cc:729
-#: startup.cc:1040
+#: ardour_ui.cc:1340 session_import_dialog.cc:169
+#: session_metadata_dialog.cc:729 startup.cc:1048
 msgid "%1 sessions"
 msgstr "%1 økter"
 
 #: ardour_ui.cc:1377
 msgid "You cannot add a track without a session already loaded."
-msgstr "Du kan ikkje leggja til eit spor eller ein buss når du ikkje har ei økt innlasta."
+msgstr ""
+"Du kan ikkje leggja til eit spor eller ein buss når du ikkje har ei økt "
+"innlasta."
 
 #: ardour_ui.cc:1386
 msgid "could not create a new mixed track"
@@ -922,8 +886,7 @@ msgstr "greidde ikkje laga nytt miksa spor"
 msgid "could not create %1 new mixed tracks"
 msgstr "greidde ikkje laga %1 nye miksa spor"
 
-#: ardour_ui.cc:1395
-#: ardour_ui.cc:1463
+#: ardour_ui.cc:1395 ardour_ui.cc:1463
 msgid ""
 "There are insufficient JACK ports available\n"
 "to create a new track or bus.\n"
@@ -937,7 +900,9 @@ msgstr ""
 
 #: ardour_ui.cc:1430
 msgid "You cannot add a track or bus without a session already loaded."
-msgstr "Du kan ikkje leggja til eit spor eller ein buss når du ikkje har ei økt innlasta."
+msgstr ""
+"Du kan ikkje leggja til eit spor eller ein buss når du ikkje har ei økt "
+"innlasta."
 
 #: ardour_ui.cc:1440
 msgid "could not create a new audio track"
@@ -947,13 +912,11 @@ msgstr "greidde ikkje laga nytt lydspor"
 msgid "could only create %1 of %2 new audio %3"
 msgstr "greidde berre laga %1 av %2 nye lyd%3"
 
-#: ardour_ui.cc:1443
-#: editor_ops.cc:6459
+#: ardour_ui.cc:1443 editor_ops.cc:6459
 msgid "tracks"
 msgstr "spor"
 
-#: ardour_ui.cc:1443
-#: editor_ops.cc:6465
+#: ardour_ui.cc:1443 editor_ops.cc:6465
 msgid "busses"
 msgstr "bussar"
 
@@ -1035,9 +998,7 @@ msgstr "Døyp om økt"
 msgid "New session name"
 msgstr "Nytt øktnamn"
 
-#: ardour_ui.cc:2155
-#: ardour_ui.cc:2531
-#: ardour_ui.cc:2576
+#: ardour_ui.cc:2155 ardour_ui.cc:2531 ardour_ui.cc:2576
 msgid ""
 "To ensure compatibility with various systems\n"
 "session names may not contain a '%1' character"
@@ -1046,7 +1007,8 @@ msgstr ""
 "kan ikkje namn på økter innehalda teiknet '%1'"
 
 #: ardour_ui.cc:2163
-msgid "That name is already in use by another directory/folder. Please try again."
+msgid ""
+"That name is already in use by another directory/folder. Please try again."
 msgstr "Dette namnet er alt i bruk på ei anna mappe. Prøv på nytt."
 
 #: ardour_ui.cc:2172
@@ -1119,10 +1081,7 @@ msgstr "Greidde ikkje laga økt i \"%1\""
 msgid "No files were ready for clean-up"
 msgstr "Ingen filer var klare for rydding"
 
-#: ardour_ui.cc:2912
-#: ardour_ui.cc:2922
-#: ardour_ui.cc:3039
-#: ardour_ui.cc:3046
+#: ardour_ui.cc:2912 ardour_ui.cc:2922 ardour_ui.cc:3039 ardour_ui.cc:3046
 #: ardour_ui_ed.cc:104
 msgid "Clean-up"
 msgstr "Opprydding"
@@ -1377,7 +1336,8 @@ msgstr "Spel lykkje-området"
 msgid ""
 "MIDI Panic\n"
 "Send note off and reset controller messages on all MIDI channels"
-msgstr "MIDI-panikknSend note av og nullstill kontrollmeldingar på alle MIDI-kanalar"
+msgstr ""
+"MIDI-panikknSend note av og nullstill kontrollmeldingar på alle MIDI-kanalar"
 
 #: ardour_ui2.cc:135
 msgid "Return to last playback start when stopped"
@@ -1395,8 +1355,7 @@ msgstr "Fornuftig inngangslytting"
 msgid "Enable/Disable audio click"
 msgstr "Slå på/av lydklikk"
 
-#: ardour_ui2.cc:139
-#: monitor_section.cc:82
+#: ardour_ui2.cc:139 monitor_section.cc:82
 msgid ""
 "When active, something is soloed.\n"
 "Click to de-solo everything"
@@ -1418,23 +1377,37 @@ msgstr "Når denne er på, er det ei rundgangssløyfe."
 
 #: ardour_ui2.cc:142
 msgid ""
-"<b>Primary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\n"
-"Text edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"
-"See <span color=\"blue\">http://ardour.org/a3_features_clocks</span> for details."
+"<b>Primary Clock</b> right-click to set display mode. Click to edit, click"
+"+drag a digit or mouse-over+scroll wheel to modify.\n"
+"Text edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: "
+"confirm; postfix the edit with '+' or '-' to enter delta times.\n"
+"See <span color=\"blue\">http://ardour.org/a3_features_clocks</span> for "
+"details."
 msgstr ""
-"<b>Hovudklokke</b> høgreklikk for å velja visingsmodus. Klikk for å redigera, klikk+dra eller mus-over + mushjul for å endra.\n"
-"Tekstredigering: høgre-til-venstre-overskriving <tt>Esc</tt>: avbryt; <tt>Enter</tt>: stadfest; set '+' eller '-' etter for å skriva inn delta-tider.\n"
-"Sjå <span color=\"blue\">http://ardour.org/a3_features_clocks</span> for fleire opplysingar."
+"<b>Hovudklokke</b> høgreklikk for å velja visingsmodus. Klikk for å "
+"redigera, klikk+dra eller mus-over + mushjul for å endra.\n"
+"Tekstredigering: høgre-til-venstre-overskriving <tt>Esc</tt>: avbryt; "
+"<tt>Enter</tt>: stadfest; set '+' eller '-' etter for å skriva inn delta-"
+"tider.\n"
+"Sjå <span color=\"blue\">http://ardour.org/a3_features_clocks</span> for "
+"fleire opplysingar."
 
 #: ardour_ui2.cc:143
 msgid ""
-"<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\n"
-"Text edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"
-"See <span color=\"blue\">http://ardour.org/a3_features_clocks</span> for details."
+"<b>Secondary Clock</b> right-click to set display mode. Click to edit, click"
+"+drag a digit or mouse-over+scroll wheel to modify.\n"
+"Text edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: "
+"confirm; postfix the edit with '+' or '-' to enter delta times.\n"
+"See <span color=\"blue\">http://ardour.org/a3_features_clocks</span> for "
+"details."
 msgstr ""
-"<b>Sekundærklokke</b> høgreklikk for å velja visingsmodus. Klikk for å redigera, klikk+dra eller mus-over + mushjul for å endra.\n"
-"Tekstredigering: høgre-til-venstre-overskriving <tt>Esc</tt>: avbryt; <tt>Enter</tt>: stadfest; set '+' eller '-' etter for å skriva inn delta-tider.\n"
-"Sjå <span color=\"blue\">http://ardour.org/a3_features_clocks</span> for fleire opplysingar."
+"<b>Sekundærklokke</b> høgreklikk for å velja visingsmodus. Klikk for å "
+"redigera, klikk+dra eller mus-over + mushjul for å endra.\n"
+"Tekstredigering: høgre-til-venstre-overskriving <tt>Esc</tt>: avbryt; "
+"<tt>Enter</tt>: stadfest; set '+' eller '-' etter for å skriva inn delta-"
+"tider.\n"
+"Sjå <span color=\"blue\">http://ardour.org/a3_features_clocks</span> for "
+"fleire opplysingar."
 
 #: ardour_ui2.cc:175
 msgid "[ERROR]: "
@@ -1448,39 +1421,23 @@ msgstr "[ÅTVARING]:"
 msgid "[INFO]: "
 msgstr "[INFO]:"
 
-#: ardour_ui2.cc:243
-#: ardour_ui_ed.cc:405
+#: ardour_ui2.cc:243 ardour_ui_ed.cc:405
 msgid "Auto Return"
 msgstr "Autoretur"
 
-#: ardour_ui2.cc:245
-#: ardour_ui_ed.cc:408
+#: ardour_ui2.cc:245 ardour_ui_ed.cc:408
 msgid "Follow Edits"
 msgstr "Fylg endringar"
 
-#: ardour_ui2.cc:631
-#: rc_option_editor.cc:884
-#: rc_option_editor.cc:902
-#: rc_option_editor.cc:905
-#: rc_option_editor.cc:907
-#: rc_option_editor.cc:909
-#: rc_option_editor.cc:917
-#: rc_option_editor.cc:925
-#: rc_option_editor.cc:927
-#: rc_option_editor.cc:935
-#: rc_option_editor.cc:942
-#: rc_option_editor.cc:951
-#: rc_option_editor.cc:953
-#: rc_option_editor.cc:955
-#: rc_option_editor.cc:963
-#: rc_option_editor.cc:965
-#: rc_option_editor.cc:974
-#: session_option_editor.cc:233
-#: session_option_editor.cc:235
-#: session_option_editor.cc:256
-#: session_option_editor.cc:258
-#: session_option_editor.cc:260
-#: session_option_editor.cc:267
+#: ardour_ui2.cc:631 rc_option_editor.cc:884 rc_option_editor.cc:902
+#: rc_option_editor.cc:905 rc_option_editor.cc:907 rc_option_editor.cc:909
+#: rc_option_editor.cc:917 rc_option_editor.cc:925 rc_option_editor.cc:927
+#: rc_option_editor.cc:935 rc_option_editor.cc:942 rc_option_editor.cc:951
+#: rc_option_editor.cc:953 rc_option_editor.cc:955 rc_option_editor.cc:963
+#: rc_option_editor.cc:965 rc_option_editor.cc:974
+#: session_option_editor.cc:233 session_option_editor.cc:235
+#: session_option_editor.cc:256 session_option_editor.cc:258
+#: session_option_editor.cc:260 session_option_editor.cc:267
 msgid "Misc"
 msgstr "Ymse"
 
@@ -1516,15 +1473,12 @@ msgstr "Lagra og lukk"
 msgid "Session"
 msgstr "Økt"
 
-#: ardour_ui_ed.cc:106
-#: editor_actions.cc:134
-#: editor_regions.cc:115
+#: ardour_ui_ed.cc:106 editor_actions.cc:134 editor_regions.cc:115
 #: port_group.cc:457
 msgid "Sync"
 msgstr "Synk"
 
-#: ardour_ui_ed.cc:107
-#: engine_dialog.cc:363
+#: ardour_ui_ed.cc:107 engine_dialog.cc:363
 msgid "Options"
 msgstr "Val"
 
@@ -1548,8 +1502,7 @@ msgstr "Lydfilformat"
 msgid "File Type"
 msgstr "Filtype"
 
-#: ardour_ui_ed.cc:113
-#: export_format_dialog.cc:65
+#: ardour_ui_ed.cc:113 export_format_dialog.cc:65
 msgid "Sample Format"
 msgstr "Punktformat"
 
@@ -1557,14 +1510,11 @@ msgstr "Punktformat"
 msgid "Control Surfaces"
 msgstr "Kontrollflater"
 
-#: ardour_ui_ed.cc:115
-#: rc_option_editor.cc:1438
-#: route_time_axis.cc:418
+#: ardour_ui_ed.cc:115 rc_option_editor.cc:1438 route_time_axis.cc:418
 msgid "Plugins"
 msgstr "Utvidingar"
 
-#: ardour_ui_ed.cc:116
-#: rc_option_editor.cc:1767
+#: ardour_ui_ed.cc:116 rc_option_editor.cc:1767
 msgid "Metering"
 msgstr "Nivåmåling"
 
@@ -1580,8 +1530,7 @@ msgstr "Haldetid"
 msgid "Denormal Handling"
 msgstr "Handtering av unormale hendingar"
 
-#: ardour_ui_ed.cc:123
-#: route_time_axis.cc:1499
+#: ardour_ui_ed.cc:123 route_time_axis.cc:1499
 msgid "New..."
 msgstr "Ny..."
 
@@ -1593,9 +1542,7 @@ msgstr "Opna..."
 msgid "Recent..."
 msgstr "Siste..."
 
-#: ardour_ui_ed.cc:127
-#: panner_editor.cc:29
-#: playlist_selector.cc:65
+#: ardour_ui_ed.cc:127 panner_editor.cc:29 playlist_selector.cc:65
 msgid "Close"
 msgstr "Lukk"
 
@@ -1615,12 +1562,8 @@ msgstr "Snøggbilete..."
 msgid "Save As..."
 msgstr "Lagra som..."
 
-#: ardour_ui_ed.cc:154
-#: editor_actions.cc:1560
-#: editor_markers.cc:859
-#: editor_snapshots.cc:123
-#: mixer_strip.cc:1470
-#: route_time_axis.cc:1495
+#: ardour_ui_ed.cc:154 editor_actions.cc:1560 editor_markers.cc:859
+#: editor_snapshots.cc:123 mixer_strip.cc:1470 route_time_axis.cc:1495
 msgid "Rename..."
 msgstr "Døyp om..."
 
@@ -1648,9 +1591,7 @@ msgstr "Eksporter økta til lydfil(er)..."
 msgid "Stem export..."
 msgstr "Staveksport..."
 
-#: ardour_ui_ed.cc:176
-#: editor_export_audio.cc:63
-#: export_dialog.cc:129
+#: ardour_ui_ed.cc:176 editor_export_audio.cc:63 export_dialog.cc:129
 msgid "Export"
 msgstr "Eksporter"
 
@@ -1662,14 +1603,11 @@ msgstr "Rydd bort ubrukte kjelder..."
 msgid "Flush Wastebasket"
 msgstr "Tøm søppelkorga"
 
-#: ardour_ui_ed.cc:190
-#: keyeditor.cc:253
-#: rc_option_editor.cc:1352
+#: ardour_ui_ed.cc:190 keyeditor.cc:253 rc_option_editor.cc:1352
 msgid "JACK"
 msgstr "JACK"
 
-#: ardour_ui_ed.cc:191
-#: route_params_ui.cc:104
+#: ardour_ui_ed.cc:191 route_params_ui.cc:104
 msgid "Latency"
 msgstr "Treigskap"
 
@@ -1677,11 +1615,8 @@ msgstr "Treigskap"
 msgid "Reconnect"
 msgstr "Kopla til att"
 
-#: ardour_ui_ed.cc:196
-#: global_port_matrix.cc:198
-#: io_selector.cc:210
-#: mixer_strip.cc:730
-#: mixer_strip.cc:856
+#: ardour_ui_ed.cc:196 global_port_matrix.cc:198 io_selector.cc:210
+#: mixer_strip.cc:730 mixer_strip.cc:856
 msgid "Disconnect"
 msgstr "Kopla frå"
 
@@ -1697,9 +1632,7 @@ msgstr "Gje redigeringa mest plass"
 msgid "Show Toolbars"
 msgstr "Vis verktylinene"
 
-#: ardour_ui_ed.cc:231
-#: mixer_ui.cc:1862
-#: mixer_ui.cc:1868
+#: ardour_ui_ed.cc:231 mixer_ui.cc:1862 mixer_ui.cc:1868
 msgid "Window|Mixer"
 msgstr "Vindauga|miksar"
 
@@ -1715,39 +1648,31 @@ msgstr "Innstillingar"
 msgid "Properties"
 msgstr "Eigenskapar"
 
-#: ardour_ui_ed.cc:235
-#: route_params_ui.cc:57
-#: route_params_ui.cc:604
+#: ardour_ui_ed.cc:235 route_params_ui.cc:57 route_params_ui.cc:604
 msgid "Tracks and Busses"
 msgstr "Spor og bussar"
 
-#: ardour_ui_ed.cc:238
-#: location_ui.cc:1133
+#: ardour_ui_ed.cc:238 location_ui.cc:1133
 msgid "Locations"
 msgstr "Stader"
 
-#: ardour_ui_ed.cc:240
-#: ardour_ui_ed.cc:655
+#: ardour_ui_ed.cc:240 ardour_ui_ed.cc:655
 msgid "Big Clock"
 msgstr "Stor klokke"
 
-#: ardour_ui_ed.cc:242
-#: speaker_dialog.cc:36
+#: ardour_ui_ed.cc:242 speaker_dialog.cc:36
 msgid "Speaker Configuration"
 msgstr "Høgtalaroppsett"
 
-#: ardour_ui_ed.cc:244
-#: global_port_matrix.cc:164
+#: ardour_ui_ed.cc:244 global_port_matrix.cc:164
 msgid "Audio Connection Manager"
 msgstr "Lydtilkoplingar"
 
-#: ardour_ui_ed.cc:246
-#: global_port_matrix.cc:167
+#: ardour_ui_ed.cc:246 global_port_matrix.cc:167
 msgid "MIDI Connection Manager"
 msgstr "MIDI-tilkoplingar"
 
-#: ardour_ui_ed.cc:248
-#: midi_tracer.cc:39
+#: ardour_ui_ed.cc:248 midi_tracer.cc:39
 msgid "MIDI Tracer"
 msgstr "MIDI-sporar"
 
@@ -1767,19 +1692,15 @@ msgstr "Hjelp|Rettleiing"
 msgid "Reference"
 msgstr "Referanse"
 
-#: ardour_ui_ed.cc:255
-#: theme_manager.cc:55
-#: theme_manager.cc:62
+#: ardour_ui_ed.cc:255 theme_manager.cc:55 theme_manager.cc:62
 msgid "Theme Manager"
 msgstr "Temabehandlar"
 
-#: ardour_ui_ed.cc:256
-#: keyeditor.cc:53
+#: ardour_ui_ed.cc:256 keyeditor.cc:53
 msgid "Key Bindings"
 msgstr "Snøggtastar"
 
-#: ardour_ui_ed.cc:257
-#: bundle_manager.cc:265
+#: ardour_ui_ed.cc:257 bundle_manager.cc:265
 msgid "Bundle Manager"
 msgstr "Bundelordnar"
 
@@ -1795,36 +1716,21 @@ msgstr "Legg til lydbuss"
 msgid "Add MIDI Track"
 msgstr "Legg til MIDI-spor"
 
-#: ardour_ui_ed.cc:269
-#: plugin_ui.cc:461
+#: ardour_ui_ed.cc:269 plugin_ui.cc:461
 msgid "Save"
 msgstr "Lagre"
 
-#: ardour_ui_ed.cc:277
-#: rc_option_editor.cc:994
-#: rc_option_editor.cc:1003
-#: rc_option_editor.cc:1012
-#: rc_option_editor.cc:1023
-#: rc_option_editor.cc:1035
-#: rc_option_editor.cc:1044
-#: rc_option_editor.cc:1054
-#: rc_option_editor.cc:1056
-#: rc_option_editor.cc:1066
-#: rc_option_editor.cc:1082
-#: rc_option_editor.cc:1095
-#: rc_option_editor.cc:1113
-#: rc_option_editor.cc:1115
-#: rc_option_editor.cc:1129
-#: rc_option_editor.cc:1133
-#: rc_option_editor.cc:1135
-#: rc_option_editor.cc:1152
+#: ardour_ui_ed.cc:277 rc_option_editor.cc:994 rc_option_editor.cc:1003
+#: rc_option_editor.cc:1012 rc_option_editor.cc:1023 rc_option_editor.cc:1035
+#: rc_option_editor.cc:1044 rc_option_editor.cc:1054 rc_option_editor.cc:1056
+#: rc_option_editor.cc:1066 rc_option_editor.cc:1082 rc_option_editor.cc:1095
+#: rc_option_editor.cc:1113 rc_option_editor.cc:1115 rc_option_editor.cc:1129
+#: rc_option_editor.cc:1133 rc_option_editor.cc:1135 rc_option_editor.cc:1152
 #: rc_option_editor.cc:1163
 msgid "Transport"
 msgstr "Speling"
 
-#: ardour_ui_ed.cc:283
-#: engine_dialog.cc:85
-#: sfdb_ui.cc:557
+#: ardour_ui_ed.cc:283 engine_dialog.cc:85 sfdb_ui.cc:557
 msgid "Stop"
 msgstr "Stopp"
 
@@ -1884,8 +1790,7 @@ msgstr "Spol sakte bakover"
 msgid "Rewind (Fast)"
 msgstr "Spol fort bakover"
 
-#: ardour_ui_ed.cc:340
-#: startup.cc:695
+#: ardour_ui_ed.cc:340 startup.cc:703
 msgid "Forward"
 msgstr "Framover"
 
@@ -1917,39 +1822,25 @@ msgstr "Gå til Veggur"
 msgid "Focus On Clock"
 msgstr "Fokuser på klokka"
 
-#: ardour_ui_ed.cc:366
-#: ardour_ui_ed.cc:375
-#: audio_clock.cc:2045
-#: editor.cc:240
-#: editor_actions.cc:544
-#: export_timespan_selector.cc:88
-#: session_option_editor.cc:41
-#: session_option_editor.cc:61
-#: session_option_editor.cc:73
-#: session_option_editor.cc:92
-#: session_option_editor.cc:95
-#: session_option_editor.cc:108
-#: session_option_editor.cc:121
-#: session_option_editor.cc:123
+#: ardour_ui_ed.cc:366 ardour_ui_ed.cc:375 audio_clock.cc:2045 editor.cc:240
+#: editor_actions.cc:544 export_timespan_selector.cc:88
+#: session_option_editor.cc:41 session_option_editor.cc:61
+#: session_option_editor.cc:73 session_option_editor.cc:92
+#: session_option_editor.cc:95 session_option_editor.cc:108
+#: session_option_editor.cc:121 session_option_editor.cc:123
 #: session_option_editor.cc:125
 msgid "Timecode"
 msgstr "Tidskode"
 
-#: ardour_ui_ed.cc:368
-#: ardour_ui_ed.cc:377
-#: editor_actions.cc:542
+#: ardour_ui_ed.cc:368 ardour_ui_ed.cc:377 editor_actions.cc:542
 msgid "Bars & Beats"
 msgstr "Takter og taktslag"
 
-#: ardour_ui_ed.cc:370
-#: ardour_ui_ed.cc:379
+#: ardour_ui_ed.cc:370 ardour_ui_ed.cc:379
 msgid "Minutes & Seconds"
 msgstr "Minutt og sekund"
 
-#: ardour_ui_ed.cc:372
-#: ardour_ui_ed.cc:381
-#: audio_clock.cc:2049
-#: editor.cc:241
+#: ardour_ui_ed.cc:372 ardour_ui_ed.cc:381 audio_clock.cc:2049 editor.cc:241
 #: editor_actions.cc:543
 msgid "Samples"
 msgstr "Punktprøver"
@@ -1958,9 +1849,7 @@ msgstr "Punktprøver"
 msgid "Punch In"
 msgstr "Slå inn"
 
-#: ardour_ui_ed.cc:385
-#: mixer_strip.cc:1896
-#: route_ui.cc:132
+#: ardour_ui_ed.cc:385 mixer_strip.cc:1896 route_ui.cc:132
 #: time_info_box.cc:113
 msgid "In"
 msgstr "Inn"
@@ -1969,8 +1858,7 @@ msgstr "Inn"
 msgid "Punch Out"
 msgstr "Slå ut"
 
-#: ardour_ui_ed.cc:389
-#: time_info_box.cc:114
+#: ardour_ui_ed.cc:389 time_info_box.cc:114
 msgid "Out"
 msgstr "Ut"
 
@@ -1982,8 +1870,7 @@ msgstr "Slå inn og ut"
 msgid "In/Out"
 msgstr "Inn/ut"
 
-#: ardour_ui_ed.cc:396
-#: rc_option_editor.cc:951
+#: ardour_ui_ed.cc:396 rc_option_editor.cc:951
 msgid "Click"
 msgstr "Klikk"
 
@@ -2011,8 +1898,7 @@ msgstr "Skru på/av opptak for spor %1"
 msgid "Percentage"
 msgstr "Prosent"
 
-#: ardour_ui_ed.cc:430
-#: shuttle_control.cc:168
+#: ardour_ui_ed.cc:430 shuttle_control.cc:168
 msgid "Semitones"
 msgstr "Halvtonar"
 
@@ -2028,8 +1914,7 @@ msgstr "Send MMC (Midi Machine Control)"
 msgid "Use MMC"
 msgstr "Bruk MMC (Midi Machine Control)"
 
-#: ardour_ui_ed.cc:440
-#: rc_option_editor.cc:1590
+#: ardour_ui_ed.cc:440 rc_option_editor.cc:1590
 msgid "Send MIDI Clock"
 msgstr "Send MIDI-klokke"
 
@@ -2093,8 +1978,7 @@ msgstr "Skru på/av ekstern posisjonssynk"
 msgid "Sync to JACK is not possible: video pull up/down is set"
 msgstr "Ikkje mogleg å synka til JACK: opp- og nedtrekk for video er fastsett"
 
-#: audio_clock.cc:1011
-#: audio_clock.cc:1030
+#: audio_clock.cc:1011 audio_clock.cc:1030
 msgid "--pending--"
 msgstr "--ventar--"
 
@@ -2102,8 +1986,7 @@ msgstr "--ventar--"
 msgid "SR"
 msgstr "SR"
 
-#: audio_clock.cc:1088
-#: audio_clock.cc:1092
+#: audio_clock.cc:1088 audio_clock.cc:1092
 msgid "Pull"
 msgstr "Dra"
 
@@ -2112,43 +1995,31 @@ msgstr "Dra"
 msgid "%+.4f%%"
 msgstr "%+.4f%%"
 
-#: audio_clock.cc:1236
-#: editor.cc:242
-#: editor_actions.cc:135
+#: audio_clock.cc:1236 editor.cc:242 editor_actions.cc:135
 #: editor_actions.cc:536
 msgid "Tempo"
 msgstr "Tempo"
 
-#: audio_clock.cc:1240
-#: editor.cc:243
-#: editor_actions.cc:537
+#: audio_clock.cc:1240 editor.cc:243 editor_actions.cc:537
 msgid "Meter"
 msgstr "Taktart"
 
-#: audio_clock.cc:1818
-#: audio_streamview.cc:116
-#: editor_actions.cc:878
-#: midi_region_view.cc:3034
-#: session_metadata_dialog.cc:331
-#: session_metadata_dialog.cc:379
-#: session_metadata_dialog.cc:435
+#: audio_clock.cc:1818 audio_streamview.cc:116 editor_actions.cc:878
+#: midi_region_view.cc:3034 session_metadata_dialog.cc:331
+#: session_metadata_dialog.cc:379 session_metadata_dialog.cc:435
 #: session_metadata_dialog.cc:716
 msgid "programming error: %1"
 msgstr "Programmeringsfeil: %1"
 
-#: audio_clock.cc:1951
-#: audio_clock.cc:1979
+#: audio_clock.cc:1951 audio_clock.cc:1979
 msgid "programming error: %1 %2"
 msgstr "programmeringsfeil: %1 %2"
 
-#: audio_clock.cc:2047
-#: editor.cc:239
-#: export_timespan_selector.cc:98
+#: audio_clock.cc:2047 editor.cc:239 export_timespan_selector.cc:98
 msgid "Bars:Beats"
 msgstr "Takter:Taktslag"
 
-#: audio_clock.cc:2048
-#: export_timespan_selector.cc:93
+#: audio_clock.cc:2048 export_timespan_selector.cc:93
 msgid "Minutes:Seconds"
 msgstr "Minutt:sekund"
 
@@ -2160,11 +2031,8 @@ msgstr "Set ut frå spelehovudet"
 msgid "Locate to This Time"
 msgstr "Gå hit"
 
-#: audio_region_editor.cc:63
-#: control_point_dialog.cc:49
-#: rhythm_ferret.cc:106
-#: rhythm_ferret.cc:111
-#: rhythm_ferret.cc:116
+#: audio_region_editor.cc:63 control_point_dialog.cc:49 rhythm_ferret.cc:106
+#: rhythm_ferret.cc:111 rhythm_ferret.cc:116
 msgid "dB"
 msgstr "dB"
 
@@ -2172,8 +2040,7 @@ msgstr "dB"
 msgid "Region gain:"
 msgstr "Bolkvolum:"
 
-#: audio_region_editor.cc:76
-#: export_format_dialog.cc:43
+#: audio_region_editor.cc:76 export_format_dialog.cc:43
 msgid "dBFS"
 msgstr "duFS"
 
@@ -2197,18 +2064,15 @@ msgstr "Volum"
 msgid "Pan"
 msgstr "Panorering"
 
-#: automation_line.cc:252
-#: automation_line.cc:435
+#: automation_line.cc:252 automation_line.cc:435
 msgid "automation event move"
 msgstr "flytt automasjonspunkt"
 
-#: automation_line.cc:462
-#: automation_line.cc:483
+#: automation_line.cc:462 automation_line.cc:483
 msgid "automation range move"
 msgstr "flytt automasjonsområde"
 
-#: automation_line.cc:814
-#: region_gain_line.cc:73
+#: automation_line.cc:814 region_gain_line.cc:73
 msgid "remove control point"
 msgstr "fjern kontrollpunkt"
 
@@ -2216,8 +2080,7 @@ msgstr "fjern kontrollpunkt"
 msgid "Ignoring illegal points on AutomationLine \"%1\""
 msgstr "Ser bort frå ulovlege punkt på Automasjonslinja \"%1\""
 
-#: automation_region_view.cc:160
-#: automation_time_axis.cc:581
+#: automation_region_view.cc:160 automation_time_axis.cc:581
 msgid "add automation event"
 msgstr "legg til ei automasjonshending"
 
@@ -2229,52 +2092,32 @@ msgstr "automasjonstilstand"
 msgid "hide track"
 msgstr "gøym spor"
 
-#: automation_time_axis.cc:250
-#: automation_time_axis.cc:302
-#: automation_time_axis.cc:494
-#: gain_meter.cc:222
-#: generic_pluginui.cc:452
-#: generic_pluginui.cc:729
-#: panner_ui.cc:150
+#: automation_time_axis.cc:250 automation_time_axis.cc:302
+#: automation_time_axis.cc:494 gain_meter.cc:222 generic_pluginui.cc:452
+#: generic_pluginui.cc:729 panner_ui.cc:150
 msgid "Automation|Manual"
 msgstr "Automasjon|Manuell"
 
-#: automation_time_axis.cc:252
-#: automation_time_axis.cc:313
-#: automation_time_axis.cc:499
-#: editor.cc:1943
-#: editor.cc:2020
-#: editor_actions.cc:118
-#: editor_actions.cc:1704
-#: gain_meter.cc:225
-#: generic_pluginui.cc:455
-#: generic_pluginui.cc:731
-#: panner_ui.cc:153
+#: automation_time_axis.cc:252 automation_time_axis.cc:313
+#: automation_time_axis.cc:499 editor.cc:1943 editor.cc:2020
+#: editor_actions.cc:118 editor_actions.cc:1704 gain_meter.cc:225
+#: generic_pluginui.cc:455 generic_pluginui.cc:731 panner_ui.cc:153
 msgid "Play"
 msgstr "Spel"
 
-#: automation_time_axis.cc:254
-#: automation_time_axis.cc:324
-#: automation_time_axis.cc:504
-#: gain_meter.cc:228
-#: generic_pluginui.cc:458
-#: generic_pluginui.cc:733
-#: panner_ui.cc:156
+#: automation_time_axis.cc:254 automation_time_axis.cc:324
+#: automation_time_axis.cc:504 gain_meter.cc:228 generic_pluginui.cc:458
+#: generic_pluginui.cc:733 panner_ui.cc:156
 msgid "Write"
 msgstr "Skriv"
 
-#: automation_time_axis.cc:256
-#: automation_time_axis.cc:335
-#: automation_time_axis.cc:509
-#: gain_meter.cc:231
-#: generic_pluginui.cc:461
-#: generic_pluginui.cc:735
-#: panner_ui.cc:159
+#: automation_time_axis.cc:256 automation_time_axis.cc:335
+#: automation_time_axis.cc:509 gain_meter.cc:231 generic_pluginui.cc:461
+#: generic_pluginui.cc:735 panner_ui.cc:159
 msgid "Touch"
 msgstr "Rør"
 
-#: automation_time_axis.cc:346
-#: generic_pluginui.cc:464
+#: automation_time_axis.cc:346 generic_pluginui.cc:464
 msgid "???"
 msgstr "???"
 
@@ -2282,11 +2125,8 @@ msgstr "???"
 msgid "clear automation"
 msgstr "tøm automasjon"
 
-#: automation_time_axis.cc:483
-#: editor_actions.cc:582
-#: editor_markers.cc:858
-#: location_ui.cc:54
-#: route_time_axis.cc:725
+#: automation_time_axis.cc:483 editor_actions.cc:582 editor_markers.cc:858
+#: location_ui.cc:54 route_time_axis.cc:725
 msgid "Hide"
 msgstr "Gøym"
 
@@ -2302,18 +2142,12 @@ msgstr "Tilstand"
 msgid "Discrete"
 msgstr "Diskret"
 
-#: automation_time_axis.cc:535
-#: editor.cc:1467
-#: editor.cc:1474
-#: editor.cc:1530
-#: editor.cc:1536
-#: export_format_dialog.cc:476
+#: automation_time_axis.cc:535 editor.cc:1467 editor.cc:1474 editor.cc:1530
+#: editor.cc:1536 export_format_dialog.cc:476
 msgid "Linear"
 msgstr "Rettlinja"
 
-#: automation_time_axis.cc:541
-#: rhythm_ferret.cc:91
-#: route_time_axis.cc:660
+#: automation_time_axis.cc:541 rhythm_ferret.cc:91 route_time_axis.cc:660
 #: shuttle_control.cc:187
 msgid "Mode"
 msgstr "Modus"
@@ -2330,44 +2164,29 @@ msgstr "Endra bundelen"
 msgid "Direction:"
 msgstr "Retning:"
 
-#: bundle_manager.cc:207
-#: bundle_manager.cc:211
-#: mixer_strip.cc:156
+#: bundle_manager.cc:207 bundle_manager.cc:211 mixer_strip.cc:156
 #: mixer_strip.cc:2121
 msgid "Input"
 msgstr "Inngang"
 
-#: bundle_manager.cc:208
-#: bundle_manager.cc:213
-#: bundle_manager.cc:247
-#: mixer_strip.cc:161
-#: mixer_strip.cc:2124
+#: bundle_manager.cc:208 bundle_manager.cc:213 bundle_manager.cc:247
+#: mixer_strip.cc:161 mixer_strip.cc:2124
 msgid "Output"
 msgstr "Utgang"
 
-#: bundle_manager.cc:266
-#: editor.cc:1984
-#: editor_actions.cc:90
+#: bundle_manager.cc:266 editor.cc:1984 editor_actions.cc:90
 #: editor_actions.cc:100
 msgid "Edit"
 msgstr "Rediger"
 
-#: bundle_manager.cc:267
-#: editor.cc:5510
-#: editor_actions.cc:310
-#: editor_actions.cc:368
-#: plugin_ui.cc:462
-#: processor_box.cc:2214
+#: bundle_manager.cc:267 editor.cc:5510 editor_actions.cc:310
+#: editor_actions.cc:368 plugin_ui.cc:462 processor_box.cc:2214
 #: route_time_axis.cc:730
 msgid "Delete"
 msgstr "Slett"
 
-#: bundle_manager.cc:273
-#: bundle_manager.cc:441
-#: editor_route_groups.cc:96
-#: editor_routes.cc:202
-#: midi_list_editor.cc:106
-#: rc_option_editor.cc:656
+#: bundle_manager.cc:273 bundle_manager.cc:441 editor_route_groups.cc:96
+#: editor_routes.cc:202 midi_list_editor.cc:106 rc_option_editor.cc:656
 #: session_metadata_dialog.cc:525
 msgid "Name"
 msgstr "Namn"
@@ -2388,43 +2207,35 @@ msgstr "Legg til kanal"
 msgid "Rename Channel"
 msgstr "Døyp om kanalen"
 
-#: canvas-simpleline.c:111
-#: canvas-simplerect.c:106
+#: canvas-simpleline.c:111 canvas-simplerect.c:106
 msgid "x1"
 msgstr "x1"
 
-#: canvas-simpleline.c:112
-#: canvas-simplerect.c:107
+#: canvas-simpleline.c:112 canvas-simplerect.c:107
 msgid "x coordinate of upper left corner of rect"
 msgstr "x-koordinaten for det øvste venstre hjørnet av rektanglet"
 
-#: canvas-simpleline.c:121
-#: canvas-simplerect.c:116
+#: canvas-simpleline.c:121 canvas-simplerect.c:116
 msgid "y1"
 msgstr "y1"
 
-#: canvas-simpleline.c:122
-#: canvas-simplerect.c:117
+#: canvas-simpleline.c:122 canvas-simplerect.c:117
 msgid "y coordinate of upper left corner of rect "
 msgstr "y-koordinaten for det øvste venstre hjørnet av rektanglet"
 
-#: canvas-simpleline.c:132
-#: canvas-simplerect.c:127
+#: canvas-simpleline.c:132 canvas-simplerect.c:127
 msgid "x2"
 msgstr "x2"
 
-#: canvas-simpleline.c:133
-#: canvas-simplerect.c:128
+#: canvas-simpleline.c:133 canvas-simplerect.c:128
 msgid "x coordinate of lower right corner of rect"
 msgstr "x-koordinaten for det nedste høgre hjørnet til rektanglet"
 
-#: canvas-simpleline.c:142
-#: canvas-simplerect.c:137
+#: canvas-simpleline.c:142 canvas-simplerect.c:137
 msgid "y2"
 msgstr "y2"
 
-#: canvas-simpleline.c:143
-#: canvas-simplerect.c:138
+#: canvas-simpleline.c:143 canvas-simplerect.c:138
 msgid "y coordinate of lower right corner of rect "
 msgstr "y-koordinaten for det nedste høgre hjørnet til rektanglet"
 
@@ -2520,9 +2331,7 @@ msgstr "Gje notane denne tida"
 msgid "Set selected notes to this length"
 msgstr "Gje notane denne lengda"
 
-#: edit_note_dialog.cc:58
-#: midi_list_editor.cc:104
-#: patch_change_dialog.cc:90
+#: edit_note_dialog.cc:58 midi_list_editor.cc:104 patch_change_dialog.cc:90
 #: step_entry.cc:393
 msgid "Channel"
 msgstr "Kanal"
@@ -2531,23 +2340,17 @@ msgstr "Kanal"
 msgid "Pitch"
 msgstr "Tonehøgd"
 
-#: edit_note_dialog.cc:78
-#: step_entry.cc:407
+#: edit_note_dialog.cc:78 step_entry.cc:407
 msgid "Velocity"
 msgstr "Fart"
 
-#: edit_note_dialog.cc:88
-#: patch_change_dialog.cc:66
+#: edit_note_dialog.cc:88 patch_change_dialog.cc:66
 msgid "Time"
 msgstr "Tid"
 
-#: edit_note_dialog.cc:98
-#: editor_regions.cc:114
-#: export_timespan_selector.cc:361
-#: export_timespan_selector.cc:425
-#: location_ui.cc:312
-#: midi_list_editor.cc:114
-#: time_info_box.cc:105
+#: edit_note_dialog.cc:98 editor_regions.cc:114
+#: export_timespan_selector.cc:361 export_timespan_selector.cc:425
+#: location_ui.cc:312 midi_list_editor.cc:114 time_info_box.cc:105
 msgid "Length"
 msgstr "Lengd"
 
@@ -2555,234 +2358,164 @@ msgstr "Lengd"
 msgid "edit note"
 msgstr "endra noten"
 
-#: editor.cc:140
-#: editor.cc:3433
+#: editor.cc:140 editor.cc:3433
 msgid "CD Frames"
 msgstr "CD-rammer"
 
-#: editor.cc:141
-#: editor.cc:3435
+#: editor.cc:141 editor.cc:3435
 msgid "Timecode Frames"
 msgstr "Tidskoderammer"
 
-#: editor.cc:142
-#: editor.cc:3437
+#: editor.cc:142 editor.cc:3437
 msgid "Timecode Seconds"
 msgstr "Tidskodesekund"
 
-#: editor.cc:143
-#: editor.cc:3439
+#: editor.cc:143 editor.cc:3439
 msgid "Timecode Minutes"
 msgstr "Tidskodeminutt"
 
-#: editor.cc:144
-#: editor.cc:3441
+#: editor.cc:144 editor.cc:3441
 msgid "Seconds"
 msgstr "Sekund"
 
-#: editor.cc:145
-#: editor.cc:3443
+#: editor.cc:145 editor.cc:3443
 msgid "Minutes"
 msgstr "Minutt"
 
-#: editor.cc:146
-#: editor.cc:3417
-#: quantize_dialog.cc:37
-#: quantize_dialog.cc:141
+#: editor.cc:146 editor.cc:3417 quantize_dialog.cc:37 quantize_dialog.cc:141
 msgid "Beats/128"
 msgstr "Slag/128"
 
-#: editor.cc:147
-#: editor.cc:3415
-#: quantize_dialog.cc:38
-#: quantize_dialog.cc:143
+#: editor.cc:147 editor.cc:3415 quantize_dialog.cc:38 quantize_dialog.cc:143
 msgid "Beats/64"
 msgstr "Slag/64"
 
-#: editor.cc:148
-#: editor.cc:3413
-#: quantize_dialog.cc:39
-#: quantize_dialog.cc:145
+#: editor.cc:148 editor.cc:3413 quantize_dialog.cc:39 quantize_dialog.cc:145
 msgid "Beats/32"
 msgstr "Slag/32"
 
-#: editor.cc:149
-#: editor.cc:3411
+#: editor.cc:149 editor.cc:3411
 msgid "Beats/28"
 msgstr "Slag/28"
 
-#: editor.cc:150
-#: editor.cc:3409
+#: editor.cc:150 editor.cc:3409
 msgid "Beats/24"
 msgstr "Slag/24"
 
-#: editor.cc:151
-#: editor.cc:3407
+#: editor.cc:151 editor.cc:3407
 msgid "Beats/20"
 msgstr "Slag/20"
 
-#: editor.cc:152
-#: editor.cc:3405
-#: quantize_dialog.cc:40
-#: quantize_dialog.cc:147
+#: editor.cc:152 editor.cc:3405 quantize_dialog.cc:40 quantize_dialog.cc:147
 msgid "Beats/16"
 msgstr "Slag/16"
 
-#: editor.cc:153
-#: editor.cc:3403
+#: editor.cc:153 editor.cc:3403
 msgid "Beats/14"
 msgstr "Slag/14"
 
-#: editor.cc:154
-#: editor.cc:3401
+#: editor.cc:154 editor.cc:3401
 msgid "Beats/12"
 msgstr "Slag/12"
 
-#: editor.cc:155
-#: editor.cc:3399
+#: editor.cc:155 editor.cc:3399
 msgid "Beats/10"
 msgstr "Slag/10"
 
-#: editor.cc:156
-#: editor.cc:3397
-#: quantize_dialog.cc:41
-#: quantize_dialog.cc:149
+#: editor.cc:156 editor.cc:3397 quantize_dialog.cc:41 quantize_dialog.cc:149
 msgid "Beats/8"
 msgstr "Slag/8"
 
-#: editor.cc:157
-#: editor.cc:3395
+#: editor.cc:157 editor.cc:3395
 msgid "Beats/7"
 msgstr "Slag/7"
 
-#: editor.cc:158
-#: editor.cc:3393
+#: editor.cc:158 editor.cc:3393
 msgid "Beats/6"
 msgstr "Slag/6"
 
-#: editor.cc:159
-#: editor.cc:3391
+#: editor.cc:159 editor.cc:3391
 msgid "Beats/5"
 msgstr "Slag/5"
 
-#: editor.cc:160
-#: editor.cc:3389
-#: quantize_dialog.cc:42
-#: quantize_dialog.cc:151
+#: editor.cc:160 editor.cc:3389 quantize_dialog.cc:42 quantize_dialog.cc:151
 msgid "Beats/4"
 msgstr "Slag/4"
 
-#: editor.cc:161
-#: editor.cc:3387
-#: quantize_dialog.cc:43
-#: quantize_dialog.cc:153
+#: editor.cc:161 editor.cc:3387 quantize_dialog.cc:43 quantize_dialog.cc:153
 msgid "Beats/3"
 msgstr "Slag/3"
 
-#: editor.cc:162
-#: editor.cc:3385
-#: quantize_dialog.cc:44
-#: quantize_dialog.cc:155
+#: editor.cc:162 editor.cc:3385 quantize_dialog.cc:44 quantize_dialog.cc:155
 msgid "Beats/2"
 msgstr "Slag/2"
 
-#: editor.cc:163
-#: editor.cc:3419
-#: quantize_dialog.cc:45
-#: quantize_dialog.cc:157
+#: editor.cc:163 editor.cc:3419 quantize_dialog.cc:45 quantize_dialog.cc:157
 msgid "Beats"
 msgstr "Slag"
 
-#: editor.cc:164
-#: editor.cc:3421
+#: editor.cc:164 editor.cc:3421
 msgid "Bars"
 msgstr "Takter"
 
-#: editor.cc:165
-#: editor.cc:3423
+#: editor.cc:165 editor.cc:3423
 msgid "Marks"
 msgstr "Merke"
 
-#: editor.cc:166
-#: editor.cc:3425
+#: editor.cc:166 editor.cc:3425
 msgid "Region starts"
 msgstr "Bolk-startar"
 
-#: editor.cc:167
-#: editor.cc:3427
+#: editor.cc:167 editor.cc:3427
 msgid "Region ends"
 msgstr "Bolk-endar"
 
-#: editor.cc:168
-#: editor.cc:3431
+#: editor.cc:168 editor.cc:3431
 msgid "Region syncs"
 msgstr "Bolk-synkar"
 
-#: editor.cc:169
-#: editor.cc:3429
+#: editor.cc:169 editor.cc:3429
 msgid "Region bounds"
 msgstr "Bolkgrenser"
 
-#: editor.cc:174
-#: editor.cc:3459
-#: editor_actions.cc:485
+#: editor.cc:174 editor.cc:3459 editor_actions.cc:485
 msgid "No Grid"
 msgstr "Ikkje vis rutenett"
 
-#: editor.cc:175
-#: editor.cc:3461
-#: editor_actions.cc:486
+#: editor.cc:175 editor.cc:3461 editor_actions.cc:486
 msgid "Grid"
 msgstr "Rutenett"
 
-#: editor.cc:176
-#: editor.cc:3463
-#: editor_actions.cc:487
+#: editor.cc:176 editor.cc:3463 editor_actions.cc:487
 msgid "Magnetic"
 msgstr "Magnetisk"
 
-#: editor.cc:181
-#: editor.cc:191
-#: editor.cc:3502
-#: editor.cc:3527
-#: editor_actions.cc:117
-#: editor_actions.cc:468
+#: editor.cc:181 editor.cc:191 editor.cc:3502 editor.cc:3527
+#: editor_actions.cc:117 editor_actions.cc:468
 msgid "Playhead"
 msgstr "Spelehovudet"
 
-#: editor.cc:182
-#: editor.cc:3500
-#: editor_actions.cc:470
+#: editor.cc:182 editor.cc:3500 editor_actions.cc:470
 msgid "Marker"
 msgstr "Markør"
 
-#: editor.cc:183
-#: editor.cc:192
-#: editor.cc:3529
-#: editor_actions.cc:469
+#: editor.cc:183 editor.cc:192 editor.cc:3529 editor_actions.cc:469
 msgid "Mouse"
 msgstr "Mus"
 
-#: editor.cc:188
-#: editor.cc:3521
-#: mono_panner_editor.cc:42
+#: editor.cc:188 editor.cc:3521 mono_panner_editor.cc:42
 msgid "Left"
 msgstr "Venstre"
 
-#: editor.cc:189
-#: editor.cc:3523
-#: mono_panner_editor.cc:47
+#: editor.cc:189 editor.cc:3523 mono_panner_editor.cc:47
 msgid "Right"
 msgstr "Høgre"
 
-#: editor.cc:190
-#: editor.cc:3525
+#: editor.cc:190 editor.cc:3525
 msgid "Center"
 msgstr "Midten"
 
-#: editor.cc:193
-#: editor.cc:3092
-#: editor.cc:3531
+#: editor.cc:193 editor.cc:3092 editor.cc:3531
 msgid "Edit point"
 msgstr "Redigeringspunkt"
 
@@ -2830,8 +2563,7 @@ msgstr "Områdemarkørar"
 msgid "Loop/Punch Ranges"
 msgstr "Lykkje-/innslagsområde"
 
-#: editor.cc:247
-#: editor_actions.cc:540
+#: editor.cc:247 editor_actions.cc:540
 msgid "CD Markers"
 msgstr "CD-markørar"
 
@@ -2859,40 +2591,22 @@ msgstr "Spor- og bussgrupper"
 msgid "Ranges & Marks"
 msgstr "Område og merke"
 
-#: editor.cc:688
-#: editor.cc:5361
-#: rc_option_editor.cc:1171
-#: rc_option_editor.cc:1179
-#: rc_option_editor.cc:1187
-#: rc_option_editor.cc:1202
-#: rc_option_editor.cc:1209
-#: rc_option_editor.cc:1217
-#: rc_option_editor.cc:1225
-#: rc_option_editor.cc:1245
-#: rc_option_editor.cc:1257
-#: rc_option_editor.cc:1259
-#: rc_option_editor.cc:1267
-#: rc_option_editor.cc:1275
-#: rc_option_editor.cc:1283
-#: rc_option_editor.cc:1291
-#: rc_option_editor.cc:1299
-#: rc_option_editor.cc:1314
+#: editor.cc:688 editor.cc:5361 rc_option_editor.cc:1171
+#: rc_option_editor.cc:1179 rc_option_editor.cc:1187 rc_option_editor.cc:1202
+#: rc_option_editor.cc:1209 rc_option_editor.cc:1217 rc_option_editor.cc:1225
+#: rc_option_editor.cc:1245 rc_option_editor.cc:1257 rc_option_editor.cc:1259
+#: rc_option_editor.cc:1267 rc_option_editor.cc:1275 rc_option_editor.cc:1283
+#: rc_option_editor.cc:1291 rc_option_editor.cc:1299 rc_option_editor.cc:1314
 #: rc_option_editor.cc:1318
 msgid "Editor"
 msgstr "Redigering"
 
-#: editor.cc:1225
-#: editor.cc:1235
-#: editor.cc:4421
-#: editor_actions.cc:130
+#: editor.cc:1225 editor.cc:1235 editor.cc:4421 editor_actions.cc:130
 #: editor_actions.cc:1652
 msgid "Loop"
 msgstr "Spel i lykkje"
 
-#: editor.cc:1241
-#: editor.cc:1251
-#: editor.cc:4448
-#: editor_actions.cc:131
+#: editor.cc:1241 editor.cc:1251 editor.cc:4448 editor_actions.cc:131
 #: time_info_box.cc:67
 msgid "Punch"
 msgstr "Slå inn/ut"
@@ -2905,60 +2619,45 @@ msgstr "Lineært (for særs nivårett materiale)"
 msgid "ConstantPower"
 msgstr "Konstantkraft"
 
-#: editor.cc:1381
-#: editor.cc:1502
-#: editor.cc:1564
+#: editor.cc:1381 editor.cc:1502 editor.cc:1564
 msgid "Symmetric"
 msgstr "Symmetrisk"
 
-#: editor.cc:1391
-#: editor.cc:1484
-#: editor.cc:1546
+#: editor.cc:1391 editor.cc:1484 editor.cc:1546
 msgid "Slow"
 msgstr "Sakte"
 
-#: editor.cc:1400
-#: editor.cc:1493
-#: editor.cc:1555
-#: sfdb_ui.cc:1601
+#: editor.cc:1400 editor.cc:1493 editor.cc:1555 sfdb_ui.cc:1601
 #: sfdb_ui.cc:1710
 msgid "Fast"
 msgstr "Fort"
 
 #: editor.cc:1447
 msgid "programming error: fade in canvas item has no regionview data pointer!"
-msgstr "Programmeringsfeil: Inntoningslerretet har ingen datapeikarar for bolkvising!"
+msgstr ""
+"Programmeringsfeil: Inntoningslerretet har ingen datapeikarar for bolkvising!"
 
-#: editor.cc:1458
-#: editor.cc:1522
+#: editor.cc:1458 editor.cc:1522
 msgid "Deactivate"
 msgstr "Slå av"
 
-#: editor.cc:1460
-#: editor.cc:1524
+#: editor.cc:1460 editor.cc:1524
 msgid "Activate"
 msgstr "Slå på"
 
-#: editor.cc:1468
-#: editor.cc:1531
+#: editor.cc:1468 editor.cc:1531
 msgid "Slowest"
 msgstr "Saktast"
 
-#: editor.cc:1509
-#: editor.cc:1571
+#: editor.cc:1509 editor.cc:1571
 msgid "Constant Power"
 msgstr "Konstant kraft"
 
-#: editor.cc:1582
-#: route_time_axis.cc:1887
-#: selection.cc:1009
-#: selection.cc:1064
+#: editor.cc:1582 route_time_axis.cc:1887 selection.cc:1009 selection.cc:1064
 msgid "programming error: "
 msgstr "programmeringsfeil: "
 
-#: editor.cc:1683
-#: editor.cc:1691
-#: editor_ops.cc:3522
+#: editor.cc:1683 editor.cc:1691 editor_ops.cc:3522
 msgid "Freeze"
 msgstr "Frys"
 
@@ -2970,33 +2669,27 @@ msgstr "U-frys"
 msgid "Selected Regions"
 msgstr "Valde bolkar"
 
-#: editor.cc:1862
-#: editor_markers.cc:896
+#: editor.cc:1862 editor_markers.cc:896
 msgid "Play Range"
 msgstr "Spel området"
 
-#: editor.cc:1863
-#: editor_markers.cc:900
+#: editor.cc:1863 editor_markers.cc:900
 msgid "Loop Range"
 msgstr "Spel området i lykkje"
 
-#: editor.cc:1872
-#: editor_actions.cc:332
+#: editor.cc:1872 editor_actions.cc:332
 msgid "Move Range Start to Previous Region Boundary"
 msgstr "Flytt områdestarten til førre bolkgrense"
 
-#: editor.cc:1879
-#: editor_actions.cc:339
+#: editor.cc:1879 editor_actions.cc:339
 msgid "Move Range Start to Next Region Boundary"
 msgstr "Flytt områdestarten til neste bolkgrense"
 
-#: editor.cc:1886
-#: editor_actions.cc:346
+#: editor.cc:1886 editor_actions.cc:346
 msgid "Move Range End to Previous Region Boundary"
 msgstr "Flytt områdeslutten til førre bolkgrense"
 
-#: editor.cc:1893
-#: editor_actions.cc:353
+#: editor.cc:1893 editor_actions.cc:353
 msgid "Move Range End to Next Region Boundary"
 msgstr "Flytt områdeslutten til neste bolkgrense"
 
@@ -3008,8 +2701,7 @@ msgstr "Gjer om til område-på-staden"
 msgid "Convert to Region in Region List"
 msgstr "Gjer om til bolk i bolklista"
 
-#: editor.cc:1903
-#: editor_markers.cc:927
+#: editor.cc:1903 editor_markers.cc:927
 msgid "Select All in Range"
 msgstr "Vel alt innan området"
 
@@ -3033,8 +2725,7 @@ msgstr "Skjer bolken til området"
 msgid "Fill Range with Region"
 msgstr "Fyll området med bolken"
 
-#: editor.cc:1915
-#: editor_actions.cc:289
+#: editor.cc:1915 editor_actions.cc:289
 msgid "Duplicate Range"
 msgstr "Klon området"
 
@@ -3054,19 +2745,15 @@ msgstr "Miks ned området til bolkliste"
 msgid "Bounce Range to Region List With Processing"
 msgstr "Miks ned området til bolkliste med prosessering"
 
-#: editor.cc:1922
-#: editor_markers.cc:910
+#: editor.cc:1922 editor_markers.cc:910
 msgid "Export Range..."
 msgstr "Eksporter området..."
 
-#: editor.cc:1937
-#: editor.cc:2018
-#: editor_actions.cc:281
+#: editor.cc:1937 editor.cc:2018 editor_actions.cc:281
 msgid "Play From Edit Point"
 msgstr "Spel frå redigeringspunktet"
 
-#: editor.cc:1938
-#: editor.cc:2019
+#: editor.cc:1938 editor.cc:2019
 msgid "Play From Start"
 msgstr "Spel frå starten"
 
@@ -3078,27 +2765,20 @@ msgstr "Spel bolken"
 msgid "Loop Region"
 msgstr "Spel bolken i lykkje"
 
-#: editor.cc:1951
-#: editor.cc:2028
+#: editor.cc:1951 editor.cc:2028
 msgid "Select All in Track"
 msgstr "Vel heile sporet"
 
-#: editor.cc:1952
-#: editor.cc:2029
-#: editor_actions.cc:185
-#: export_timespan_selector.cc:53
-#: processor_box.cc:2222
+#: editor.cc:1952 editor.cc:2029 editor_actions.cc:185
+#: export_timespan_selector.cc:53 processor_box.cc:2222
 msgid "Select All"
 msgstr "Vel alt"
 
-#: editor.cc:1953
-#: editor.cc:2030
+#: editor.cc:1953 editor.cc:2030
 msgid "Invert Selection in Track"
 msgstr "Omvend valet i sporet"
 
-#: editor.cc:1954
-#: editor.cc:2031
-#: editor_actions.cc:187
+#: editor.cc:1954 editor.cc:2031 editor_actions.cc:187
 msgid "Invert Selection"
 msgstr "Omvend utvalet"
 
@@ -3110,25 +2790,19 @@ msgstr "Gjer lykkje-området til eige område"
 msgid "Set Range to Punch Range"
 msgstr "Gjer innslagsområdet til eige område"
 
-#: editor.cc:1959
-#: editor.cc:2033
-#: editor_actions.cc:188
+#: editor.cc:1959 editor.cc:2033 editor_actions.cc:188
 msgid "Select All After Edit Point"
 msgstr "Vel alt etter redigeringspunktet"
 
-#: editor.cc:1960
-#: editor.cc:2034
-#: editor_actions.cc:189
+#: editor.cc:1960 editor.cc:2034 editor_actions.cc:189
 msgid "Select All Before Edit Point"
 msgstr "Vel alt før redigeringspunktet"
 
-#: editor.cc:1961
-#: editor.cc:2035
+#: editor.cc:1961 editor.cc:2035
 msgid "Select All After Playhead"
 msgstr "Vel alt etter spelehovudet"
 
-#: editor.cc:1962
-#: editor.cc:2036
+#: editor.cc:1962 editor.cc:2036
 msgid "Select All Before Playhead"
 msgstr "Vel alt før spelehovudet"
 
@@ -3144,36 +2818,23 @@ msgstr "Vel alt innanfor spelehovudet og redigeringspunktet"
 msgid "Select Range Between Playhead and Edit Point"
 msgstr "Vel område mellom spelehovudet og redigeringspunktet"
 
-#: editor.cc:1967
-#: editor.cc:2038
-#: editor_actions.cc:127
-#: editor_actions.cc:128
+#: editor.cc:1967 editor.cc:2038 editor_actions.cc:127 editor_actions.cc:128
 msgid "Select"
 msgstr "Vel"
 
-#: editor.cc:1975
-#: editor.cc:2046
-#: editor_actions.cc:309
-#: processor_box.cc:2207
+#: editor.cc:1975 editor.cc:2046 editor_actions.cc:309 processor_box.cc:2207
 msgid "Cut"
 msgstr "Klypp ut"
 
-#: editor.cc:1976
-#: editor.cc:2047
-#: editor_actions.cc:312
-#: processor_box.cc:2210
+#: editor.cc:1976 editor.cc:2047 editor_actions.cc:312 processor_box.cc:2210
 msgid "Copy"
 msgstr "Kopier"
 
-#: editor.cc:1977
-#: editor.cc:2048
-#: editor_actions.cc:313
-#: processor_box.cc:2218
+#: editor.cc:1977 editor.cc:2048 editor_actions.cc:313 processor_box.cc:2218
 msgid "Paste"
 msgstr "Lim inn"
 
-#: editor.cc:1981
-#: editor_actions.cc:87
+#: editor.cc:1981 editor_actions.cc:87
 msgid "Align"
 msgstr "Juster"
 
@@ -3189,28 +2850,23 @@ msgstr "Set inn den valde bolken"
 msgid "Insert Existing Media"
 msgstr "Set inn eksisterande media"
 
-#: editor.cc:1999
-#: editor.cc:2055
+#: editor.cc:1999 editor.cc:2055
 msgid "Nudge Entire Track Later"
 msgstr "Skubb heile sporet seinare"
 
-#: editor.cc:2000
-#: editor.cc:2056
+#: editor.cc:2000 editor.cc:2056
 msgid "Nudge Track After Edit Point Later"
 msgstr "Skubb sporet etter redigeringspunktet seinare"
 
-#: editor.cc:2001
-#: editor.cc:2057
+#: editor.cc:2001 editor.cc:2057
 msgid "Nudge Entire Track Earlier"
 msgstr "Skubb heile sporet tidlegare"
 
-#: editor.cc:2002
-#: editor.cc:2058
+#: editor.cc:2002 editor.cc:2058
 msgid "Nudge Track After Edit Point Earlier"
 msgstr "Skubb sporet etter redigeringspunktet tidlegare"
 
-#: editor.cc:2004
-#: editor.cc:2060
+#: editor.cc:2004 editor.cc:2060
 msgid "Nudge"
 msgstr "Skubb"
 
@@ -3266,18 +2922,15 @@ msgstr "Skubb bolken/markeringa seinare"
 msgid "Nudge Region/Selection Earlier"
 msgstr "Skubb bolken/markeringa tidlegare"
 
-#: editor.cc:3084
-#: editor_actions.cc:242
+#: editor.cc:3084 editor_actions.cc:242
 msgid "Zoom In"
 msgstr "Zoom inn"
 
-#: editor.cc:3085
-#: editor_actions.cc:241
+#: editor.cc:3085 editor_actions.cc:241
 msgid "Zoom Out"
 msgstr "Zoom ut"
 
-#: editor.cc:3086
-#: editor_actions.cc:243
+#: editor.cc:3086 editor_actions.cc:243
 msgid "Zoom to Session"
 msgstr "Zoom til heile økta"
 
@@ -3317,8 +2970,7 @@ msgstr ""
 msgid "malformed URL passed to drag-n-drop code"
 msgstr "feilforma adresse sendt til dra-og-slepp-koden"
 
-#: editor.cc:3258
-#: editor_actions.cc:291
+#: editor.cc:3258 editor_actions.cc:291
 msgid "Command|Undo"
 msgstr "Kommando|Angra"
 
@@ -3326,8 +2978,7 @@ msgstr "Kommando|Angra"
 msgid "Command|Undo (%1)"
 msgstr "Kommando|Angra (%1)"
 
-#: editor.cc:3267
-#: editor_actions.cc:292
+#: editor.cc:3267 editor_actions.cc:292
 msgid "Redo"
 msgstr "Gjer omatt"
 
@@ -3335,10 +2986,7 @@ msgstr "Gjer omatt"
 msgid "Redo (%1)"
 msgstr "Gjer omatt (%1)"
 
-#: editor.cc:3288
-#: editor.cc:3312
-#: editor_actions.cc:106
-#: editor_actions.cc:1633
+#: editor.cc:3288 editor.cc:3312 editor_actions.cc:106 editor_actions.cc:1633
 msgid "Duplicate"
 msgstr "Klon"
 
@@ -3368,11 +3016,8 @@ msgstr "Slett speleliste"
 msgid "Keep Playlist"
 msgstr "Ha speleliste"
 
-#: editor.cc:3881
-#: editor_audio_import.cc:579
-#: editor_ops.cc:5832
-#: processor_box.cc:1960
-#: processor_box.cc:1985
+#: editor.cc:3881 editor_audio_import.cc:579 editor_ops.cc:5832
+#: processor_box.cc:1960 processor_box.cc:1985
 msgid "Cancel"
 msgstr "Avbryt"
 
@@ -3392,10 +3037,7 @@ msgstr "tøm spelelister"
 msgid "Please wait while %1 loads visual data."
 msgstr "Vent medan %1 lastar visuelle data"
 
-#: editor.cc:5509
-#: editor_markers.cc:942
-#: panner_ui.cc:393
-#: processor_box.cc:2238
+#: editor.cc:5509 editor_markers.cc:942 panner_ui.cc:393 processor_box.cc:2238
 msgid "Edit..."
 msgstr "Endra..."
 
@@ -3431,9 +3073,7 @@ msgstr "Ton ut"
 msgid "Latch"
 msgstr "Lask"
 
-#: editor_actions.cc:97
-#: editor_regions.cc:111
-#: region_editor.cc:45
+#: editor_actions.cc:97 editor_regions.cc:111 region_editor.cc:45
 msgid "Region"
 msgstr "Bolk"
 
@@ -3441,37 +3081,26 @@ msgstr "Bolk"
 msgid "Layering"
 msgstr "Lag"
 
-#: editor_actions.cc:99
-#: editor_regions.cc:112
-#: gtk-custom-ruler.c:152
+#: editor_actions.cc:99 editor_regions.cc:112 gtk-custom-ruler.c:152
 #: stereo_panner_editor.cc:44
 msgid "Position"
 msgstr "Posisjon"
 
-#: editor_actions.cc:101
-#: gain_meter.cc:150
-#: gain_meter.cc:784
-#: panner_ui.cc:177
+#: editor_actions.cc:101 gain_meter.cc:150 gain_meter.cc:784 panner_ui.cc:177
 #: panner_ui.cc:586
 msgid "Trim"
 msgstr "Skjer til"
 
-#: editor_actions.cc:102
-#: editor_actions.cc:122
-#: route_group_dialog.cc:40
+#: editor_actions.cc:102 editor_actions.cc:122 route_group_dialog.cc:40
 msgid "Gain"
 msgstr "Innvolum"
 
-#: editor_actions.cc:103
-#: editor_actions.cc:538
+#: editor_actions.cc:103 editor_actions.cc:538
 msgid "Ranges"
 msgstr "Område"
 
-#: editor_actions.cc:104
-#: editor_actions.cc:1629
-#: session_option_editor.cc:144
-#: session_option_editor.cc:146
-#: session_option_editor.cc:155
+#: editor_actions.cc:104 editor_actions.cc:1629 session_option_editor.cc:144
+#: session_option_editor.cc:146 session_option_editor.cc:155
 #: session_option_editor.cc:162
 msgid "Fades"
 msgstr "Toningar"
@@ -3480,8 +3109,7 @@ msgstr "Toningar"
 msgid "Link"
 msgstr "Lenkje"
 
-#: editor_actions.cc:108
-#: editor_actions.cc:141
+#: editor_actions.cc:108 editor_actions.cc:141
 msgid "Zoom Focus"
 msgstr "Zoom-fokus"
 
@@ -3489,8 +3117,7 @@ msgstr "Zoom-fokus"
 msgid "Locate to Markers"
 msgstr "Gå til markørar"
 
-#: editor_actions.cc:110
-#: editor_actions.cc:539
+#: editor_actions.cc:110 editor_actions.cc:539
 msgid "Markers"
 msgstr "Markørar"
 
@@ -3502,8 +3129,7 @@ msgstr "Slepp nivåtoppar"
 msgid "Meter hold"
 msgstr "Hald nivåtoppar"
 
-#: editor_actions.cc:113
-#: session_option_editor.cc:233
+#: editor_actions.cc:113 session_option_editor.cc:233
 msgid "MIDI Options"
 msgstr "MIDI-oppsett"
 
@@ -3511,11 +3137,8 @@ msgstr "MIDI-oppsett"
 msgid "Misc Options"
 msgstr "Ymse val"
 
-#: editor_actions.cc:115
-#: rc_option_editor.cc:1332
-#: route_group_dialog.cc:48
-#: session_option_editor.cc:217
-#: session_option_editor.cc:224
+#: editor_actions.cc:115 rc_option_editor.cc:1332 route_group_dialog.cc:48
+#: session_option_editor.cc:217 session_option_editor.cc:224
 msgid "Monitoring"
 msgstr "Lytting"
 
@@ -3551,14 +3174,11 @@ msgstr "Rull"
 msgid "Secondary Clock"
 msgstr "Sekundærklokke"
 
-#: editor_actions.cc:129
-#: editor_actions.cc:297
+#: editor_actions.cc:129 editor_actions.cc:297
 msgid "Separate"
 msgstr "Skil"
 
-#: editor_actions.cc:132
-#: mixer_strip.cc:1908
-#: route_time_axis.cc:214
+#: editor_actions.cc:132 mixer_strip.cc:1908 route_time_axis.cc:214
 #: route_time_axis.cc:2429
 msgid "Solo"
 msgstr "Solo"
@@ -3571,8 +3191,7 @@ msgstr "Underruter"
 msgid "Timecode fps"
 msgstr "Tidskode-RPS"
 
-#: editor_actions.cc:137
-#: route_time_axis.cc:443
+#: editor_actions.cc:137 route_time_axis.cc:443
 msgid "Height"
 msgstr "Høgd"
 
@@ -3696,9 +3315,7 @@ msgstr "Spelehovudet til starten på området"
 msgid "Playhead to Range End"
 msgstr "Spelehovudet til slutten av området"
 
-#: editor_actions.cc:186
-#: export_timespan_selector.cc:61
-#: processor_box.cc:2224
+#: editor_actions.cc:186 export_timespan_selector.cc:61 processor_box.cc:2224
 msgid "Deselect All"
 msgstr "Fjern markering"
 
@@ -3902,8 +3519,7 @@ msgstr "Aktiv markør til musa"
 msgid "Export Audio"
 msgstr "Eksporter lyd"
 
-#: editor_actions.cc:295
-#: export_dialog.cc:406
+#: editor_actions.cc:295 export_dialog.cc:406
 msgid "Export Range"
 msgstr "Eksporter området"
 
@@ -3915,8 +3531,7 @@ msgstr "Gjer innslagsområdet til eige område"
 msgid "Separate Using Loop Range"
 msgstr "Gjer lykkje-området til eige område"
 
-#: editor_actions.cc:306
-#: editor_actions.cc:323
+#: editor_actions.cc:306 editor_actions.cc:323
 msgid "Crop"
 msgstr "Skjer til"
 
@@ -3960,8 +3575,7 @@ msgstr "Fjern siste opptaket "
 msgid "Stationary Playhead"
 msgstr "Fast spelehovud"
 
-#: editor_actions.cc:362
-#: insert_time_dialog.cc:32
+#: editor_actions.cc:362 insert_time_dialog.cc:32
 msgid "Insert Time"
 msgstr "Set inn tid"
 
@@ -3969,12 +3583,8 @@ msgstr "Set inn tid"
 msgid "Toggle Active"
 msgstr "Slå av/på"
 
-#: editor_actions.cc:370
-#: editor_actions.cc:1557
-#: editor_markers.cc:877
-#: editor_markers.cc:943
-#: editor_snapshots.cc:121
-#: mixer_strip.cc:1494
+#: editor_actions.cc:370 editor_actions.cc:1557 editor_markers.cc:877
+#: editor_markers.cc:943 editor_snapshots.cc:121 mixer_strip.cc:1494
 #: route_time_axis.cc:727
 msgid "Remove"
 msgstr "Fjern"
@@ -3983,23 +3593,19 @@ msgstr "Fjern"
 msgid "Fit Selected Tracks"
 msgstr "Tilpass dei valde spora"
 
-#: editor_actions.cc:376
-#: time_axis_view.cc:1315
+#: editor_actions.cc:376 time_axis_view.cc:1315
 msgid "Largest"
 msgstr "Størst"
 
-#: editor_actions.cc:379
-#: time_axis_view.cc:1316
+#: editor_actions.cc:379 time_axis_view.cc:1316
 msgid "Larger"
 msgstr "Større"
 
-#: editor_actions.cc:382
-#: time_axis_view.cc:1317
+#: editor_actions.cc:382 time_axis_view.cc:1317
 msgid "Large"
 msgstr "Stor"
 
-#: editor_actions.cc:388
-#: time_axis_view.cc:1319
+#: editor_actions.cc:388 time_axis_view.cc:1319
 msgid "Small"
 msgstr "Liten"
 
@@ -4095,9 +3701,7 @@ msgstr "Spleis"
 msgid "Slide"
 msgstr "Gli"
 
-#: editor_actions.cc:478
-#: editor_actions.cc:1578
-#: editor_markers.cc:861
+#: editor_actions.cc:478 editor_actions.cc:1578 editor_markers.cc:861
 #: location_ui.cc:55
 msgid "Lock"
 msgstr "Lås"
@@ -4270,14 +3874,11 @@ msgstr "Min:sek"
 msgid "Sort"
 msgstr "Sorter"
 
-#: editor_actions.cc:579
-#: region_editor.cc:50
+#: editor_actions.cc:579 region_editor.cc:50
 msgid "Audition"
 msgstr "Lytt"
 
-#: editor_actions.cc:588
-#: editor_routes.cc:470
-#: mixer_ui.cc:1160
+#: editor_actions.cc:588 editor_routes.cc:470 mixer_ui.cc:1160
 msgid "Show All"
 msgstr "Vis alle"
 
@@ -4337,10 +3938,8 @@ msgstr "Etter kjeldefilsystemet"
 msgid "Remove Unused"
 msgstr "Fjern ubrukte"
 
-#: editor_actions.cc:621
-#: editor_audio_import.cc:279
-#: session_import_dialog.cc:74
-#: session_import_dialog.cc:94
+#: editor_actions.cc:621 editor_audio_import.cc:279
+#: session_import_dialog.cc:74 session_import_dialog.cc:94
 #: session_metadata_dialog.cc:297
 msgid "Import"
 msgstr "Importer"
@@ -4349,8 +3948,7 @@ msgstr "Importer"
 msgid "Import to Region List..."
 msgstr "Importer til bolklista..."
 
-#: editor_actions.cc:627
-#: session_import_dialog.cc:43
+#: editor_actions.cc:627 session_import_dialog.cc:43
 msgid "Import From Session"
 msgstr "Importer frå økt"
 
@@ -4382,14 +3980,9 @@ msgstr "Lastar redigerinsbindingar frå %1"
 msgid "Could not find editor.bindings in search path %1"
 msgstr "Fann ikkje editor.bindings i søkjestigen %1"
 
-#: editor_actions.cc:867
-#: editor_actions.cc:1263
-#: editor_actions.cc:1274
-#: editor_actions.cc:1327
-#: editor_actions.cc:1338
-#: editor_actions.cc:1385
-#: editor_actions.cc:1395
-#: editor_regions.cc:1564
+#: editor_actions.cc:867 editor_actions.cc:1263 editor_actions.cc:1274
+#: editor_actions.cc:1327 editor_actions.cc:1338 editor_actions.cc:1385
+#: editor_actions.cc:1395 editor_regions.cc:1564
 msgid "programming error: %1: %2"
 msgstr "Programmeringsfeil: %1: %2"
 
@@ -4401,8 +3994,7 @@ msgstr "Hev"
 msgid "Raise to Top"
 msgstr "Hev til toppen"
 
-#: editor_actions.cc:1569
-#: gtk-custom-ruler.c:132
+#: editor_actions.cc:1569 gtk-custom-ruler.c:132
 msgid "Lower"
 msgstr "Lægste"
 
@@ -4414,8 +4006,7 @@ msgstr "Senk til botnen"
 msgid "Move to Original Position"
 msgstr "Flytt til opphavleg plass"
 
-#: editor_actions.cc:1583
-#: editor_markers.cc:868
+#: editor_actions.cc:1583 editor_markers.cc:868
 msgid "Glue to Bars and Beats"
 msgstr "Lim til takter og taktslag"
 
@@ -4423,9 +4014,7 @@ msgstr "Lim til takter og taktslag"
 msgid "Remove Sync"
 msgstr "Fjern synk"
 
-#: editor_actions.cc:1591
-#: mixer_strip.cc:1895
-#: route_time_axis.cc:215
+#: editor_actions.cc:1591 mixer_strip.cc:1895 route_time_axis.cc:215
 msgid "Mute"
 msgstr "Demp"
 
@@ -4461,13 +4050,11 @@ msgstr "Transponer..."
 msgid "Opaque"
 msgstr "Heildekkjande"
 
-#: editor_actions.cc:1619
-#: editor_regions.cc:116
+#: editor_actions.cc:1619 editor_regions.cc:116
 msgid "Fade In"
 msgstr "Ton inn"
 
-#: editor_actions.cc:1624
-#: editor_regions.cc:117
+#: editor_actions.cc:1624 editor_regions.cc:117
 msgid "Fade Out"
 msgstr "Ton ut"
 
@@ -4479,8 +4066,7 @@ msgstr "Multi-kopier..."
 msgid "Fill Track"
 msgstr "Fyll sporet"
 
-#: editor_actions.cc:1648
-#: editor_markers.cc:957
+#: editor_actions.cc:1648 editor_markers.cc:957
 msgid "Set Loop Range"
 msgstr "Set lykkje-område"
 
@@ -4576,8 +4162,7 @@ msgstr "Omhylling på"
 msgid "Quantize..."
 msgstr "Gitterfordel..."
 
-#: editor_actions.cc:1725
-#: editor_actions.cc:1726
+#: editor_actions.cc:1725 editor_actions.cc:1726
 msgid "Insert Patch Change..."
 msgstr "Set inn koplingsendring..."
 
@@ -4673,28 +4258,34 @@ msgstr "Juster synk"
 msgid "Align Sync Relative"
 msgstr "Juster synken relativt"
 
-#: editor_actions.cc:1808
-#: editor_actions.cc:1811
+#: editor_actions.cc:1808 editor_actions.cc:1811
 msgid "Choose Top..."
 msgstr "Vel topp..."
 
-#: editor_audio_import.cc:77
-#: editor_audio_import.cc:99
+#: editor_audio_import.cc:77 editor_audio_import.cc:99
 msgid "You can't import or embed an audiofile until you have a session loaded."
-msgstr "Du kan ikkje importera eller setja inn ei lydfil før du har opna ei økt."
+msgstr ""
+"Du kan ikkje importera eller setja inn ei lydfil før du har opna ei økt."
 
-#: editor_audio_import.cc:83
-#: editor_audio_import.cc:127
+#: editor_audio_import.cc:83 editor_audio_import.cc:127
 msgid "Add Existing Media"
 msgstr "Legg til eksisterande media"
 
 #: editor_audio_import.cc:177
-msgid "The session already contains a source file named %1.  Do you want to import %1 as a new file, or skip it?"
-msgstr "Denne økta bruker alt ei kjeldefil som heiter %1. Vil du importera %1 som ny fil, eller hoppa over ho?"
+msgid ""
+"The session already contains a source file named %1.  Do you want to import "
+"%1 as a new file, or skip it?"
+msgstr ""
+"Denne økta bruker alt ei kjeldefil som heiter %1. Vil du importera %1 som ny "
+"fil, eller hoppa over ho?"
 
 #: editor_audio_import.cc:179
-msgid "The session already contains a source file named %1.  Do you want to import %2 as a new source, or skip it?"
-msgstr "Denne økta bruker alt ei kjeldefil som heiter %1. Vil du importera %2 som ny fil, eller hoppa over ho?"
+msgid ""
+"The session already contains a source file named %1.  Do you want to import "
+"%2 as a new source, or skip it?"
+msgstr ""
+"Denne økta bruker alt ei kjeldefil som heiter %1. Vil du importera %2 som ny "
+"fil, eller hoppa over ho?"
 
 #: editor_audio_import.cc:279
 msgid "Cancel Import"
@@ -4716,14 +4307,12 @@ msgstr "Ikkje set inn"
 msgid "Embed all without questions"
 msgstr "Set inn alle utan å spørja"
 
-#: editor_audio_import.cc:554
-#: editor_audio_import.cc:583
+#: editor_audio_import.cc:554 editor_audio_import.cc:583
 #: export_format_dialog.cc:58
 msgid "Sample rate"
 msgstr "Punktfrekvens"
 
-#: editor_audio_import.cc:555
-#: editor_audio_import.cc:584
+#: editor_audio_import.cc:555 editor_audio_import.cc:584
 msgid ""
 "%1\n"
 "This audiofile's sample rate doesn't match the session sample rate!"
@@ -4767,24 +4356,23 @@ msgstr "endra inntoningslengd"
 msgid "change fade out length"
 msgstr "endra uttoningslengd"
 
-#: editor_drag.cc:2809
+#: editor_drag.cc:2859
 msgid "move marker"
 msgstr "flytt markør"
 
-#: editor_drag.cc:3372
+#: editor_drag.cc:3422
 msgid "An error occurred while executing time stretch operation"
 msgstr "Feil med tidsstrekkinga"
 
-#: editor_drag.cc:3802
+#: editor_drag.cc:3852
 msgid "programming_error: %1"
 msgstr "programming_error: %1"
 
-#: editor_drag.cc:3872
-#: editor_markers.cc:681
+#: editor_drag.cc:3922 editor_markers.cc:681
 msgid "new range marker"
 msgstr "nytt områdemerke"
 
-#: editor_drag.cc:4553
+#: editor_drag.cc:4603
 msgid "rubberband selection"
 msgstr "gummistrikkval"
 
@@ -4804,8 +4392,7 @@ msgstr "Farge på gruppefane"
 msgid "Name of Group"
 msgstr "Namn på gruppa"
 
-#: editor_route_groups.cc:97
-#: editor_routes.cc:203
+#: editor_route_groups.cc:97 editor_routes.cc:203
 msgid "V"
 msgstr "V"
 
@@ -4853,8 +4440,7 @@ msgstr "Solo|S"
 msgid "Sharing Solo?"
 msgstr "Deler solo?"
 
-#: editor_route_groups.cc:103
-#: mixer_strip.cc:1894
+#: editor_route_groups.cc:103 mixer_strip.cc:1894
 msgid "Rec"
 msgstr "Ta opp"
 
@@ -4890,35 +4476,21 @@ msgstr "Deler aktiv-status?"
 msgid "Activate this button to operate on all tracks when none are selected."
 msgstr "Slå på denne knappen for å operera på alle spor når ingen er valde."
 
-#: editor_route_groups.cc:442
-#: mixer_ui.cc:1448
+#: editor_route_groups.cc:442 mixer_ui.cc:1448
 msgid "unnamed"
 msgstr "utan namn"
 
-#: editor_export_audio.cc:90
-#: editor_markers.cc:696
-#: editor_markers.cc:783
-#: editor_markers.cc:969
-#: editor_markers.cc:987
-#: editor_markers.cc:1005
-#: editor_markers.cc:1024
-#: editor_markers.cc:1043
-#: editor_markers.cc:1073
-#: editor_markers.cc:1104
-#: editor_markers.cc:1134
-#: editor_markers.cc:1162
-#: editor_markers.cc:1199
-#: editor_markers.cc:1224
-#: editor_markers.cc:1275
-#: editor_markers.cc:1319
-#: editor_markers.cc:1345
-#: editor_markers.cc:1522
+#: editor_export_audio.cc:90 editor_markers.cc:696 editor_markers.cc:783
+#: editor_markers.cc:969 editor_markers.cc:987 editor_markers.cc:1005
+#: editor_markers.cc:1024 editor_markers.cc:1043 editor_markers.cc:1073
+#: editor_markers.cc:1104 editor_markers.cc:1134 editor_markers.cc:1162
+#: editor_markers.cc:1199 editor_markers.cc:1224 editor_markers.cc:1275
+#: editor_markers.cc:1319 editor_markers.cc:1345 editor_markers.cc:1522
 #: editor_mouse.cc:2522
 msgid "programming error: marker canvas item has no marker object pointer!"
 msgstr "Programmeringsfeil: markørpalettobjekt har ingen merkeobjektpeikar!"
 
-#: editor_export_audio.cc:143
-#: editor_export_audio.cc:148
+#: editor_export_audio.cc:143 editor_export_audio.cc:148
 msgid "File Exists!"
 msgstr "Fila eksisterer!"
 
@@ -4938,12 +4510,8 @@ msgstr "start"
 msgid "end"
 msgstr "slutt"
 
-#: editor_markers.cc:647
-#: editor_ops.cc:1743
-#: editor_ops.cc:1763
-#: editor_ops.cc:1787
-#: editor_ops.cc:1814
-#: location_ui.cc:1004
+#: editor_markers.cc:647 editor_ops.cc:1743 editor_ops.cc:1763
+#: editor_ops.cc:1787 editor_ops.cc:1814 location_ui.cc:1004
 msgid "add marker"
 msgstr "legg til merke"
 
@@ -4951,8 +4519,7 @@ msgstr "legg til merke"
 msgid "range"
 msgstr "område"
 
-#: editor_markers.cc:714
-#: location_ui.cc:839
+#: editor_markers.cc:714 location_ui.cc:839
 msgid "remove marker"
 msgstr "fjern markør"
 
@@ -5016,8 +4583,7 @@ msgstr "Vel område"
 msgid "Set Punch Range"
 msgstr "Set innslagsområde"
 
-#: editor_markers.cc:1359
-#: editor_ops.cc:1698
+#: editor_markers.cc:1359 editor_ops.cc:1698
 msgid "New Name:"
 msgstr "Nytt namn:"
 
@@ -5029,12 +4595,8 @@ msgstr "Døyp om merke"
 msgid "Rename Range"
 msgstr "Døyp om området"
 
-#: editor_markers.cc:1371
-#: editor_mouse.cc:2554
-#: processor_box.cc:1764
-#: processor_box.cc:2220
-#: route_time_axis.cc:994
-#: route_ui.cc:1477
+#: editor_markers.cc:1371 editor_mouse.cc:2554 processor_box.cc:1764
+#: processor_box.cc:2220 route_time_axis.cc:994 route_ui.cc:1477
 msgid "Rename"
 msgstr "Døyp om"
 
@@ -5058,11 +4620,13 @@ msgstr "Denne skjermen er ikkje høg nok til å visa redigeringsmiksaren"
 msgid "Editor::event_frame() used on unhandled event type %1"
 msgstr "Redigering: event_frame() brukt på uhandtert handlingstype %1"
 
-#: editor_mouse.cc:2292
-#: editor_mouse.cc:2317
-#: editor_mouse.cc:2330
-msgid "programming error: control point canvas item has no control point object pointer!"
-msgstr "Programmeringsfeil: objektet på kontrollpunktpaletten har ingen kontrollpunktpeikar!"
+#: editor_mouse.cc:2292 editor_mouse.cc:2317 editor_mouse.cc:2330
+msgid ""
+"programming error: control point canvas item has no control point object "
+"pointer!"
+msgstr ""
+"Programmeringsfeil: objektet på kontrollpunktpaletten har ingen "
+"kontrollpunktpeikar!"
 
 #: editor_mouse.cc:2460
 msgid "start point trim"
@@ -5088,8 +4652,7 @@ msgstr "endra utval"
 msgid "nudge regions forward"
 msgstr "skubb bolkane framover"
 
-#: editor_ops.cc:320
-#: editor_ops.cc:405
+#: editor_ops.cc:320 editor_ops.cc:405
 msgid "nudge location forward"
 msgstr "skubb staden framover"
 
@@ -5157,8 +4720,7 @@ msgstr "hev bolken til øvste laget"
 msgid "lower regions"
 msgstr "senk bolkane"
 
-#: editor_ops.cc:2278
-#: editor_ops.cc:2286
+#: editor_ops.cc:2278 editor_ops.cc:2286
 msgid "lower region"
 msgstr "senk bolken"
 
@@ -5170,9 +4732,7 @@ msgstr "senk bolkane til botnlaget"
 msgid "Rename Region"
 msgstr "Døyp om bolken"
 
-#: editor_ops.cc:2371
-#: processor_box.cc:1762
-#: route_ui.cc:1475
+#: editor_ops.cc:2371 processor_box.cc:1762 route_ui.cc:1475
 msgid "New name:"
 msgstr "Nytt namn:"
 
@@ -5238,11 +4798,15 @@ msgstr "skjer til bolken"
 
 #: editor_ops.cc:3492
 msgid ""
-"This track/bus cannot be frozen because the signal adds or loses channels before reaching the outputs.\n"
-"This is typically caused by plugins that generate stereo output from mono input or vice versa."
+"This track/bus cannot be frozen because the signal adds or loses channels "
+"before reaching the outputs.\n"
+"This is typically caused by plugins that generate stereo output from mono "
+"input or vice versa."
 msgstr ""
-"Du kan ikkje frysa dette sporet/bussen fordi signalet legg til eller mistar kanalar før det kjem til utgangane.\n"
-"Dette kjem vanlegvis av utvidingar som lagar stereo-utsignal frå mono-innsignal, eller omvendt."
+"Du kan ikkje frysa dette sporet/bussen fordi signalet legg til eller mistar "
+"kanalar før det kjem til utgangane.\n"
+"Dette kjem vanlegvis av utvidingar som lagar stereo-utsignal frå mono-"
+"innsignal, eller omvendt."
 
 #: editor_ops.cc:3495
 msgid "Cannot freeze"
@@ -5260,7 +4824,8 @@ msgstr ""
 "\n"
 "Dette sporet har minst ein send/retur/innsmett som del av signalflyten.\n"
 "\n"
-"Viss du frys det, vil du berre påverka signalet til fyrste send/retur/innsmett."
+"Viss du frys det, vil du berre påverka signalet til fyrste send/retur/"
+"innsmett."
 
 #: editor_ops.cc:3505
 msgid "Freeze anyway"
@@ -5280,11 +4845,14 @@ msgstr "Avbryt frysing"
 
 #: editor_ops.cc:3553
 msgid ""
-"You can't perform this operation because the processing of the signal will cause one or more of the tracks will end up with a region with more channels than this track has inputs.\n"
+"You can't perform this operation because the processing of the signal will "
+"cause one or more of the tracks will end up with a region with more channels "
+"than this track has inputs.\n"
 "\n"
 "You can do this without processing, which is a different operation."
 msgstr ""
-"Du kan ikkje utføra denne handlinga, av di då vil eitt eller fleire spor få ein bolk med fleire kanalar enn dette sporet har inngangar.\n"
+"Du kan ikkje utføra denne handlinga, av di då vil eitt eller fleire spor få "
+"ein bolk med fleire kanalar enn dette sporet har inngangar.\n"
 "\n"
 "Du kan gjera dette utan signalhandsaming. Det er ei anna handling."
 
@@ -5320,8 +4888,7 @@ msgstr " objekt"
 msgid " range"
 msgstr " område"
 
-#: editor_ops.cc:3957
-#: editor_ops.cc:3984
+#: editor_ops.cc:3957 editor_ops.cc:3984
 msgid "remove region"
 msgstr "fjern bolken"
 
@@ -5341,11 +4908,8 @@ msgstr ""
 "Vil du verkeleg øydeleggja siste innspelinga?\n"
 "(Dette er endeleg og kan ikkje angrast)"
 
-#: editor_ops.cc:4509
-#: editor_ops.cc:6488
-#: editor_regions.cc:460
-#: editor_snapshots.cc:158
-#: route_ui.cc:1419
+#: editor_ops.cc:4509 editor_ops.cc:6488 editor_regions.cc:460
+#: editor_snapshots.cc:158 route_ui.cc:1419
 msgid "No, do nothing."
 msgstr "Nei, ikkje gjer noko."
 
@@ -5455,7 +5019,9 @@ msgstr "Definer ei takt"
 
 #: editor_ops.cc:5838
 msgid "Do you want to set the global tempo or add a new tempo marker?"
-msgstr "Vil du setja tempoet for heile prosjektet, eller leggja til ein ny tempomarkør?"
+msgstr ""
+"Vil du setja tempoet for heile prosjektet, eller leggja til ein ny "
+"tempomarkør?"
 
 #: editor_ops.cc:5864
 msgid "set tempo from region"
@@ -5513,9 +5079,7 @@ msgstr "Steng gap mellom bolkane"
 msgid "Crossfade length"
 msgstr "Krysstoningslengd"
 
-#: editor_ops.cc:6189
-#: editor_ops.cc:6200
-#: rhythm_ferret.cc:101
+#: editor_ops.cc:6189 editor_ops.cc:6200 rhythm_ferret.cc:101
 #: session_option_editor.cc:152
 msgid "ms"
 msgstr "ms"
@@ -5532,13 +5096,11 @@ msgstr "Ok"
 msgid "close region gaps"
 msgstr "steng gap mellom bolkane"
 
-#: editor_ops.cc:6437
-#: route_ui.cc:1393
+#: editor_ops.cc:6437 route_ui.cc:1393
 msgid "That would be bad news ...."
 msgstr "Det ville vore dårleg nytt..."
 
-#: editor_ops.cc:6442
-#: route_ui.cc:1398
+#: editor_ops.cc:6442 route_ui.cc:1398
 msgid ""
 "Removing the master or monitor bus is such a bad idea\n"
 "that %1 is not going to allow it.\n"
@@ -5554,13 +5116,11 @@ msgstr ""
 "redigerer du ardour.rc-fila, og set\n"
 "\"allow-special-bus-removal\"-valet til \"yes\""
 
-#: editor_ops.cc:6461
-#: route_ui.cc:1759
+#: editor_ops.cc:6461 route_ui.cc:1759
 msgid "track"
 msgstr "spor"
 
-#: editor_ops.cc:6467
-#: route_ui.cc:1759
+#: editor_ops.cc:6467 route_ui.cc:1759
 msgid "bus"
 msgstr "buss"
 
@@ -5602,14 +5162,11 @@ msgstr ""
 msgid "Yes, remove them."
 msgstr "Ja, slett dei."
 
-#: editor_ops.cc:6492
-#: editor_snapshots.cc:159
-#: route_ui.cc:1420
+#: editor_ops.cc:6492 editor_snapshots.cc:159 route_ui.cc:1420
 msgid "Yes, remove it."
 msgstr "Ja, slett det."
 
-#: editor_ops.cc:6497
-#: editor_ops.cc:6499
+#: editor_ops.cc:6497 editor_ops.cc:6499
 msgid "Remove %1"
 msgstr "Fjern %1"
 
@@ -5650,9 +5207,7 @@ msgstr "Bolknamn, med tal på kanalar i [hakeparentesar]"
 msgid "Position of start of region"
 msgstr "Kvar bolken startar"
 
-#: editor_regions.cc:113
-#: editor_regions.cc:854
-#: time_info_box.cc:98
+#: editor_regions.cc:113 editor_regions.cc:854 time_info_box.cc:98
 msgid "End"
 msgstr "Slutt"
 
@@ -5670,15 +5225,15 @@ msgstr "Plassering for bolk-synkpunktet, relativt til bolkstarten"
 
 #: editor_regions.cc:116
 msgid "Length of region fade-in (units: secondary clock), () if disabled"
-msgstr "Lengd på inntoninga på bolken (eining: sekundærklokke), () viss avskrudd"
+msgstr ""
+"Lengd på inntoninga på bolken (eining: sekundærklokke), () viss avskrudd"
 
 #: editor_regions.cc:117
 msgid "Length of region fade-out (units: secondary clock), () if dsisabled"
-msgstr "Lengd på uttoninga på bolken (eining: sekundærklokke), () viss avskrudd"
+msgstr ""
+"Lengd på uttoninga på bolken (eining: sekundærklokke), () viss avskrudd"
 
-#: editor_regions.cc:118
-#: mono_panner.cc:179
-#: stereo_panner.cc:217
+#: editor_regions.cc:118 mono_panner.cc:179 stereo_panner.cc:217
 #: stereo_panner.cc:240
 msgid "L"
 msgstr "V"
@@ -5695,12 +5250,8 @@ msgstr "G"
 msgid "Region position glued to Bars|Beats time?"
 msgstr "Er bolkplasseringa limt til takter|taktslag-tida?"
 
-#: editor_regions.cc:120
-#: editor_routes.cc:207
-#: gain_meter.cc:752
-#: mixer_strip.cc:1924
-#: panner_ui.cc:554
-#: stereo_panner.cc:237
+#: editor_regions.cc:120 editor_routes.cc:207 gain_meter.cc:752
+#: mixer_strip.cc:1924 panner_ui.cc:554 stereo_panner.cc:237
 msgid "M"
 msgstr "M"
 
@@ -5716,9 +5267,7 @@ msgstr "O"
 msgid "Region opaque (blocks regions below it from being heard)?"
 msgstr "Er bolken gjennomsiktig? (Det hindrar at du høyrer bolkar under han.)"
 
-#: editor_regions.cc:310
-#: editor_regions.cc:315
-#: editor_regions.cc:317
+#: editor_regions.cc:310 editor_regions.cc:315 editor_regions.cc:317
 msgid "Hidden"
 msgstr "Gøymt"
 
@@ -5742,21 +5291,16 @@ msgstr "Ja, slett"
 msgid "Remove unused regions"
 msgstr "Fjern ubrukte bolkar"
 
-#: editor_regions.cc:821
-#: editor_regions.cc:835
-#: editor_regions.cc:849
+#: editor_regions.cc:821 editor_regions.cc:835 editor_regions.cc:849
 msgid "Mult."
 msgstr "Dobl."
 
-#: editor_regions.cc:852
-#: engine_dialog.cc:84
-#: midi_list_editor.cc:103
+#: editor_regions.cc:852 engine_dialog.cc:84 midi_list_editor.cc:103
 #: time_info_box.cc:91
 msgid "Start"
 msgstr "Start"
 
-#: editor_regions.cc:870
-#: editor_regions.cc:886
+#: editor_regions.cc:870 editor_regions.cc:886
 msgid "Multiple"
 msgstr "Mangedoble"
 
@@ -5764,8 +5308,7 @@ msgstr "Mangedoble"
 msgid "MISSING "
 msgstr "MANGLAR"
 
-#: editor_routes.cc:178
-#: editor_routes.cc:210
+#: editor_routes.cc:178 editor_routes.cc:210
 msgid "SS"
 msgstr "SS"
 
@@ -5777,9 +5320,7 @@ msgstr "Namn på spor/buss"
 msgid "Track/Bus visible ?"
 msgstr "Er sporet/bussen synleg?"
 
-#: editor_routes.cc:204
-#: mixer_strip.cc:1941
-#: route_time_axis.cc:2419
+#: editor_routes.cc:204 mixer_strip.cc:1941 route_time_axis.cc:2419
 msgid "A"
 msgstr "A"
 
@@ -5787,8 +5328,7 @@ msgstr "A"
 msgid "Track/Bus active ?"
 msgstr "Er sporet/bussen aktiv?"
 
-#: editor_routes.cc:205
-#: mixer_strip.cc:1925
+#: editor_routes.cc:205 mixer_strip.cc:1925
 msgid "I"
 msgstr "I"
 
@@ -5796,11 +5336,8 @@ msgstr "I"
 msgid "MIDI input enabled"
 msgstr "MIDI-inngang skrudd på"
 
-#: editor_routes.cc:206
-#: mixer_strip.cc:1923
-#: mono_panner.cc:198
-#: stereo_panner.cc:215
-#: stereo_panner.cc:242
+#: editor_routes.cc:206 mixer_strip.cc:1923 mono_panner.cc:198
+#: stereo_panner.cc:215 stereo_panner.cc:242
 msgid "R"
 msgstr "R"
 
@@ -5812,8 +5349,7 @@ msgstr "Opptak skrudd på"
 msgid "Muted"
 msgstr "Dempa"
 
-#: editor_routes.cc:208
-#: mixer_strip.cc:1937
+#: editor_routes.cc:208 mixer_strip.cc:1937
 msgid "S"
 msgstr "S"
 
@@ -5825,9 +5361,7 @@ msgstr "Solo"
 msgid "SI"
 msgstr "SI"
 
-#: editor_routes.cc:209
-#: mixer_strip.cc:351
-#: rc_option_editor.cc:1745
+#: editor_routes.cc:209 mixer_strip.cc:351 rc_option_editor.cc:1745
 msgid "Solo Isolated"
 msgstr "Isolert solo"
 
@@ -5835,28 +5369,23 @@ msgstr "Isolert solo"
 msgid "Solo Safe (Locked)"
 msgstr "Solo-sikker (låst)"
 
-#: editor_routes.cc:471
-#: mixer_ui.cc:1161
+#: editor_routes.cc:471 mixer_ui.cc:1161
 msgid "Hide All"
 msgstr "Gøym alle"
 
-#: editor_routes.cc:472
-#: mixer_ui.cc:1162
+#: editor_routes.cc:472 mixer_ui.cc:1162
 msgid "Show All Audio Tracks"
 msgstr "Vis alle lydpsor"
 
-#: editor_routes.cc:473
-#: mixer_ui.cc:1163
+#: editor_routes.cc:473 mixer_ui.cc:1163
 msgid "Hide All Audio Tracks"
 msgstr "Gøym alle lydspor"
 
-#: editor_routes.cc:474
-#: mixer_ui.cc:1164
+#: editor_routes.cc:474 mixer_ui.cc:1164
 msgid "Show All Audio Busses"
 msgstr "Vis alle bussar"
 
-#: editor_routes.cc:475
-#: mixer_ui.cc:1165
+#: editor_routes.cc:475 mixer_ui.cc:1165
 msgid "Hide All Audio Busses"
 msgstr "Gøym alle bussar"
 
@@ -5900,18 +5429,15 @@ msgstr "Vis område"
 msgid "New CD track marker"
 msgstr "Ny CD-spormarkør"
 
-#: editor_rulers.cc:362
-#: tempo_dialog.cc:40
+#: editor_rulers.cc:362 tempo_dialog.cc:40
 msgid "New Tempo"
 msgstr "Nytt tempo"
 
-#: editor_rulers.cc:367
-#: tempo_dialog.cc:255
+#: editor_rulers.cc:367 tempo_dialog.cc:255
 msgid "New Meter"
 msgstr "Ny taktart"
 
-#: editor_selection.cc:889
-#: editor_selection.cc:932
+#: editor_selection.cc:889 editor_selection.cc:932
 msgid "set selected regions"
 msgstr "fastset valde bolkar"
 
@@ -5987,8 +5513,7 @@ msgstr ""
 msgid "Remove snapshot"
 msgstr "Fjern snøggbilete"
 
-#: editor_tempodisplay.cc:208
-#: editor_tempodisplay.cc:251
+#: editor_tempodisplay.cc:208 editor_tempodisplay.cc:251
 msgid "add"
 msgstr "legg til"
 
@@ -6000,40 +5525,39 @@ msgstr "legg til tempomerke"
 msgid "add meter mark"
 msgstr "legg til taktartsmerke"
 
-#: editor_tempodisplay.cc:291
-#: editor_tempodisplay.cc:374
+#: editor_tempodisplay.cc:291 editor_tempodisplay.cc:374
 #: editor_tempodisplay.cc:393
-msgid "programming error: tempo marker canvas item has no marker object pointer!"
-msgstr "Programmeringsfeil: objektet på tempomarkørpaletten har ingen tempomarkørpeikar!"
+msgid ""
+"programming error: tempo marker canvas item has no marker object pointer!"
+msgstr ""
+"Programmeringsfeil: objektet på tempomarkørpaletten har ingen "
+"tempomarkørpeikar!"
 
-#: editor_tempodisplay.cc:296
-#: editor_tempodisplay.cc:379
+#: editor_tempodisplay.cc:296 editor_tempodisplay.cc:379
 msgid "programming error: marker for tempo is not a tempo marker!"
 msgstr "Programmeringsfeil: markøren for tempo er ikkje ingen tempomarkør!"
 
-#: editor_tempodisplay.cc:308
-#: editor_tempodisplay.cc:340
+#: editor_tempodisplay.cc:308 editor_tempodisplay.cc:340
 msgid "done"
 msgstr "ferdig"
 
-#: editor_tempodisplay.cc:329
-#: editor_tempodisplay.cc:359
+#: editor_tempodisplay.cc:329 editor_tempodisplay.cc:359
 msgid "replace tempo mark"
 msgstr "byt ut tempomerke"
 
-#: editor_tempodisplay.cc:398
-#: editor_tempodisplay.cc:430
+#: editor_tempodisplay.cc:398 editor_tempodisplay.cc:430
 msgid "programming error: marker for meter is not a meter marker!"
 msgstr "Programmeringsfeil: taktartmarkøren er ikkje ein taktartmarkør!"
 
-#: editor_tempodisplay.cc:408
-#: editor_tempodisplay.cc:442
+#: editor_tempodisplay.cc:408 editor_tempodisplay.cc:442
 msgid "remove tempo mark"
 msgstr "fjern tempomerke"
 
 #: editor_tempodisplay.cc:425
-msgid "programming error: meter marker canvas item has no marker object pointer!"
-msgstr "Programmeringsfeil: objektet for taktartmarkøren har ingen markørpeikar!"
+msgid ""
+"programming error: meter marker canvas item has no marker object pointer!"
+msgstr ""
+"Programmeringsfeil: objektet for taktartmarkøren har ingen markørpeikar!"
 
 #: editor_timefx.cc:68
 msgid "stretch/shrink"
@@ -6111,28 +5635,21 @@ msgstr "96000Hz"
 msgid "192000Hz"
 msgstr "192000Hz"
 
-#: engine_dialog.cc:127
-#: engine_dialog.cc:132
-#: engine_dialog.cc:167
-#: engine_dialog.cc:550
-#: midi_channel_selector.cc:147
-#: rc_option_editor.cc:1125
+#: engine_dialog.cc:127 engine_dialog.cc:132 engine_dialog.cc:167
+#: engine_dialog.cc:550 midi_channel_selector.cc:147 rc_option_editor.cc:1125
 #: sfdb_ui.cc:544
 msgid "None"
 msgstr "Ingen"
 
-#: engine_dialog.cc:128
-#: engine_dialog.cc:551
+#: engine_dialog.cc:128 engine_dialog.cc:551
 msgid "Triangular"
 msgstr "Trekantbølgje"
 
-#: engine_dialog.cc:129
-#: engine_dialog.cc:553
+#: engine_dialog.cc:129 engine_dialog.cc:553
 msgid "Rectangular"
 msgstr "Firkantbølgje"
 
-#: engine_dialog.cc:130
-#: engine_dialog.cc:555
+#: engine_dialog.cc:130 engine_dialog.cc:555
 msgid "Shaped"
 msgstr "Forma"
 
@@ -6144,25 +5661,19 @@ msgstr "Avspeling/opptak på 1 eining"
 msgid "Playback/recording on 2 devices"
 msgstr "Avspeling/opptak på 2 einingar"
 
-#: engine_dialog.cc:158
-#: engine_dialog.cc:491
-#: engine_dialog.cc:965
+#: engine_dialog.cc:158 engine_dialog.cc:491 engine_dialog.cc:965
 msgid "Playback only"
 msgstr "Berre avspeling"
 
-#: engine_dialog.cc:159
-#: engine_dialog.cc:493
-#: engine_dialog.cc:968
+#: engine_dialog.cc:159 engine_dialog.cc:493 engine_dialog.cc:968
 msgid "Recording only"
 msgstr "Berre opptak"
 
-#: engine_dialog.cc:168
-#: engine_dialog.cc:569
+#: engine_dialog.cc:168 engine_dialog.cc:569
 msgid "seq"
 msgstr "sekv"
 
-#: engine_dialog.cc:169
-#: engine_dialog.cc:571
+#: engine_dialog.cc:169 engine_dialog.cc:571
 msgid "raw"
 msgstr "rå"
 
@@ -6174,10 +5685,7 @@ msgstr "Drivar:"
 msgid "Audio Interface:"
 msgstr "Lydkort:"
 
-#: engine_dialog.cc:185
-#: sfdb_ui.cc:148
-#: sfdb_ui.cc:261
-#: sfdb_ui.cc:266
+#: engine_dialog.cc:185 sfdb_ui.cc:148 sfdb_ui.cc:261 sfdb_ui.cc:266
 msgid "Sample rate:"
 msgstr "Punktfrekvens:"
 
@@ -6197,8 +5705,7 @@ msgstr "Omrentleg treigskap:"
 msgid "Audio mode:"
 msgstr "Lydmodus:"
 
-#: engine_dialog.cc:278
-#: engine_dialog.cc:402
+#: engine_dialog.cc:278 engine_dialog.cc:402
 msgid "Ignore"
 msgstr "Oversjå"
 
@@ -6219,8 +5726,10 @@ msgid "Dither:"
 msgstr "Utjamning:"
 
 #: engine_dialog.cc:313
-msgid "No JACK server found anywhere on this system. Please install JACK and restart"
-msgstr "Fann ingen JACK-tenar på denne maskina. Installer JACK og start på nytt."
+msgid ""
+"No JACK server found anywhere on this system. Please install JACK and restart"
+msgstr ""
+"Fann ingen JACK-tenar på denne maskina. Installer JACK og start på nytt."
 
 #: engine_dialog.cc:321
 msgid "Server:"
@@ -6238,8 +5747,7 @@ msgstr "Uteining:"
 msgid "Hardware input latency:"
 msgstr "Treigskap for maskinvare-inngangar:"
 
-#: engine_dialog.cc:345
-#: engine_dialog.cc:351
+#: engine_dialog.cc:345 engine_dialog.cc:351
 msgid "samples"
 msgstr "punkt"
 
@@ -6255,14 +5763,11 @@ msgstr "Eining"
 msgid "Advanced"
 msgstr "Avansert"
 
-#: engine_dialog.cc:471
-#: engine_dialog.cc:959
+#: engine_dialog.cc:471 engine_dialog.cc:959
 msgid "Playback/Recording on 1 Device"
 msgstr "Avspeling/opptak på 1 eining"
 
-#: engine_dialog.cc:475
-#: engine_dialog.cc:528
-#: engine_dialog.cc:962
+#: engine_dialog.cc:475 engine_dialog.cc:528 engine_dialog.cc:962
 msgid "Playback/Recording on 2 Devices"
 msgstr "Avspeling/opptak på 2 einingar"
 
@@ -6322,10 +5827,10 @@ msgstr "Lydoppsett-verdien for %1 manglar data"
 
 #: engine_dialog.cc:1320
 msgid "configuration files contain a JACK server path that doesn't exist (%1)"
-msgstr "oppsettsfilene inneheld ein ikkje-eksisterande stig til JACK-tenaren (%1)"
+msgstr ""
+"oppsettsfilene inneheld ein ikkje-eksisterande stig til JACK-tenaren (%1)"
 
-#: export_channel_selector.cc:45
-#: sfdb_ui.cc:146
+#: export_channel_selector.cc:45 sfdb_ui.cc:146
 msgid "Channels:"
 msgstr "Kanalar:"
 
@@ -6350,15 +5855,18 @@ msgid "Track output (channels: %1)"
 msgstr "Sporutgang (kanalar: %1)"
 
 #: export_dialog.cc:46
-msgid "<span color=\"#ffa755\">Some already existing files will be overwritten.</span>"
-msgstr "<span color=\"#ffa755\">Dette skriv over nokre filer som finst frå før.</span>"
+msgid ""
+"<span color=\"#ffa755\">Some already existing files will be overwritten.</"
+"span>"
+msgstr ""
+"<span color=\"#ffa755\">Dette skriv over nokre filer som finst frå før.</"
+"span>"
 
 #: export_dialog.cc:47
 msgid "List files"
 msgstr "List opp filer"
 
-#: export_dialog.cc:164
-#: export_timespan_selector.cc:357
+#: export_dialog.cc:164 export_timespan_selector.cc:357
 #: export_timespan_selector.cc:421
 msgid "Time Span"
 msgstr "Tidsomfang"
@@ -6399,8 +5907,7 @@ msgstr "Normaliserer '%3' (tidsomfang %1 av %2)"
 msgid "Exporting '%3' (timespan %1 of %2)"
 msgstr "Eksporterer '%3' (tidsomfang %1 av %2)"
 
-#: export_dialog.cc:383
-#: export_dialog.cc:385
+#: export_dialog.cc:383 export_dialog.cc:385
 msgid "<span color=\"#ffa755\">Error: "
 msgstr "<span color=\"#ffa755\">Feil: "
 
@@ -6468,8 +5975,7 @@ msgstr "Utgåve:"
 msgid "Folder:"
 msgstr "Mappe:"
 
-#: export_filename_selector.cc:37
-#: session_import_dialog.cc:44
+#: export_filename_selector.cc:37 session_import_dialog.cc:44
 msgid "Browse"
 msgstr "Bla gjennom"
 
@@ -6478,18 +5984,20 @@ msgid "<i>Build filename(s) from these components:</i>"
 msgstr "<i>Lag filnamn av desse byggeklossane:</i>"
 
 #: export_filename_selector.cc:212
-msgid "<small><i>Sorry, no example filename can be shown at the moment</i></small>"
-msgstr "<small><i>Me kan diverre ikkje visa noko døme på filnamn no</i></small>"
+msgid ""
+"<small><i>Sorry, no example filename can be shown at the moment</i></small>"
+msgstr ""
+"<small><i>Me kan diverre ikkje visa noko døme på filnamn no</i></small>"
 
 #: export_filename_selector.cc:214
 msgid "<small><i>Current (approximate) filename: \"%1\"</i></small>"
 msgstr "<small><i>(Omtrentleg) filnamn: \"%1\"</i></small>"
 
-#: export_filename_selector.cc:250
-#: export_filename_selector.cc:336
+#: export_filename_selector.cc:250 export_filename_selector.cc:336
 msgid ""
 "%1: this is only the directory/folder name, not the filename.\n"
-"The filename will be chosen from the information just above the folder selector."
+"The filename will be chosen from the information just above the folder "
+"selector."
 msgstr ""
 "%1: dette er berre namnet på katalogen/mappa, ikkje på fila.\n"
 "Filnamnet vel du ut frå informasjonen rett over mappevalet."
@@ -6510,8 +6018,7 @@ msgstr "Endra eksportformatprofilen"
 msgid "Label: "
 msgstr "Merke:"
 
-#: export_format_dialog.cc:41
-#: normalize_dialog.cc:42
+#: export_format_dialog.cc:41 normalize_dialog.cc:42
 msgid "Normalize to:"
 msgstr "Normaliser til:"
 
@@ -6615,31 +6122,23 @@ msgstr "Vis tider som:"
 msgid " to "
 msgstr "til"
 
-#: export_timespan_selector.cc:350
-#: export_timespan_selector.cc:411
+#: export_timespan_selector.cc:350 export_timespan_selector.cc:411
 msgid "Range"
 msgstr "Område"
 
-#: gain_meter.cc:135
-#: gain_meter.cc:457
-#: gain_meter.cc:849
+#: gain_meter.cc:135 gain_meter.cc:457 gain_meter.cc:849
 msgid "-inf"
 msgstr "-ꝏ"
 
-#: gain_meter.cc:141
-#: gain_meter.cc:895
+#: gain_meter.cc:141 gain_meter.cc:895
 msgid "Fader automation mode"
 msgstr "Volumautomasjonsmodus"
 
-#: gain_meter.cc:142
-#: gain_meter.cc:896
+#: gain_meter.cc:142 gain_meter.cc:896
 msgid "Fader automation type"
 msgstr "Automasjonstype for volum"
 
-#: gain_meter.cc:151
-#: gain_meter.cc:788
-#: panner_ui.cc:178
-#: panner_ui.cc:590
+#: gain_meter.cc:151 gain_meter.cc:788 panner_ui.cc:178 panner_ui.cc:590
 msgid "Abs"
 msgstr "Abs"
 
@@ -6647,20 +6146,16 @@ msgstr "Abs"
 msgid "-Inf"
 msgstr "-ꝏ"
 
-#: gain_meter.cc:755
-#: mixer_strip.cc:1944
-#: panner_ui.cc:557
+#: gain_meter.cc:755 mixer_strip.cc:1944 panner_ui.cc:557
 #: route_time_axis.cc:2423
 msgid "P"
 msgstr "S"
 
-#: gain_meter.cc:758
-#: panner_ui.cc:560
+#: gain_meter.cc:758 panner_ui.cc:560
 msgid "T"
 msgstr "T"
 
-#: gain_meter.cc:761
-#: panner_ui.cc:563
+#: gain_meter.cc:761 panner_ui.cc:563
 msgid "W"
 msgstr "W"
 
@@ -6672,9 +6167,7 @@ msgstr "<span size=\"large\">Ferdiginnstillingar</span>"
 msgid "Switches"
 msgstr "Brytarar"
 
-#: generic_pluginui.cc:242
-#: generic_pluginui.cc:372
-#: processor_box.cc:2197
+#: generic_pluginui.cc:242 generic_pluginui.cc:372 processor_box.cc:2197
 msgid "Controls"
 msgstr "Kontrollar"
 
@@ -6694,8 +6187,7 @@ msgstr "Automasjonskontroll"
 msgid "Mgnual"
 msgstr "Mgnual"
 
-#: global_port_matrix.cc:204
-#: io_selector.cc:216
+#: global_port_matrix.cc:204 io_selector.cc:216
 msgid "port"
 msgstr "port"
 
@@ -6855,13 +6347,11 @@ msgstr "%1-utgang"
 msgid "your own"
 msgstr "din eigen"
 
-#: keyboard.cc:129
-#: keyboard.cc:153
+#: keyboard.cc:129 keyboard.cc:153
 msgid "Default keybindings not found - %1 will be hard to use!"
 msgstr "Fann ingen standardsnøggtastar. Då blir det ikkje lett å bruka %1!"
 
-#: keyboard.cc:132
-#: keyboard.cc:156
+#: keyboard.cc:132 keyboard.cc:156
 msgid "Key bindings file \"%1\" not found. Default bindings used instead"
 msgstr "Fann ikkje snøggtastfila \"%1\". Bruker standardsnøggtastar i staden."
 
@@ -6879,7 +6369,8 @@ msgstr "Snarveg"
 
 #: keyeditor.cc:86
 msgid "Select an action, then press the key(s) to (re)set its shortcut"
-msgstr "Vel ei handling. Så trykkjer du tasten/tastane som skal utføra handlinga."
+msgstr ""
+"Vel ei handling. Så trykkjer du tasten/tastane som skal utføra handlinga."
 
 #: keyeditor.cc:251
 msgid "Main_menu"
@@ -6913,19 +6404,15 @@ msgstr "msek"
 msgid "period"
 msgstr "periode"
 
-#: latency_gui.cc:71
-#: panner_ui.cc:392
+#: latency_gui.cc:71 panner_ui.cc:392
 msgid "Reset"
 msgstr "Nullstill"
 
-#: latency_gui.cc:150
-#: rhythm_ferret.cc:255
-#: sfdb_ui.cc:1729
+#: latency_gui.cc:150 rhythm_ferret.cc:255 sfdb_ui.cc:1729
 msgid "programming error: %1 (%2)"
 msgstr "Programmeringsfeil: %1 (%2)"
 
-#: location_ui.cc:49
-#: location_ui.cc:51
+#: location_ui.cc:49 location_ui.cc:51
 msgid "Use PH"
 msgstr "Bruk PH"
 
@@ -7031,18 +6518,15 @@ msgstr ""
 "\n"
 "Sjå over om nokon av desse gjeld, og start eventuelt (omatt) JACK."
 
-#: main.cc:185
-#: main.cc:274
+#: main.cc:185 main.cc:274
 msgid "cannot create user ardour folder %1 (%2)"
 msgstr "greier ikkje laga ardourmappa %1 (%2)"
 
-#: main.cc:192
-#: main.cc:281
+#: main.cc:192 main.cc:281
 msgid "cannot open pango.rc file %1"
 msgstr "greier ikkje opna pango.rc-fila %1"
 
-#: main.cc:312
-#: main.cc:328
+#: main.cc:312 main.cc:328
 msgid "JACK exited"
 msgstr "JACK vart avslutta"
 
@@ -7087,8 +6571,12 @@ msgid "Copyright (C) 1999-2012 Paul Davis"
 msgstr "Copyright (C) 1999-2012 Paul Davis"
 
 #: main.cc:431
-msgid "Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker, Robin Gareus"
-msgstr "Nokre deler (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker, Robin Gareus"
+msgid ""
+"Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
+"Baker, Robin Gareus"
+msgstr ""
+"Nokre deler (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker, Robin "
+"Gareus"
 
 #: main.cc:433
 msgid "%1 comes with ABSOLUTELY NO WARRANTY"
@@ -7096,7 +6584,9 @@ msgstr "%1 har ABSOLUTT INGEN GARANTI"
 
 #: main.cc:434
 msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
-msgstr "mogleik for sal eller bruk til eit spesielt føremål er heller ikkje garantert."
+msgstr ""
+"mogleik for sal eller bruk til eit spesielt føremål er heller ikkje "
+"garantert."
 
 #: main.cc:435
 msgid "This is free software, and you are welcome to redistribute it "
@@ -7104,7 +6594,8 @@ msgstr "Dette er gratis programvare, og du må gjerne gje henne vidare"
 
 #: main.cc:436
 msgid "under certain conditions; see the source for copying conditions."
-msgstr "på visse vilkår, sjå kjeldekoden for kopierings- og vidareformidlingsvilkår. "
+msgstr ""
+"på visse vilkår, sjå kjeldekoden for kopierings- og vidareformidlingsvilkår. "
 
 #: main.cc:445
 msgid "Cannot xinstall SIGPIPE error handler"
@@ -7250,8 +6741,7 @@ msgstr "legg til note"
 msgid "step add"
 msgstr "steg legg til"
 
-#: midi_region_view.cc:1877
-#: midi_region_view.cc:1897
+#: midi_region_view.cc:1877 midi_region_view.cc:1897
 msgid "alter patch change"
 msgstr "endra koplingsendring"
 
@@ -7315,8 +6805,7 @@ msgstr "Program:"
 msgid "Channel:"
 msgstr "Kanal:"
 
-#: midi_region_view.cc:3343
-#: midi_region_view.cc:3345
+#: midi_region_view.cc:3343 midi_region_view.cc:3345
 msgid "paste"
 msgstr "lim inn"
 
@@ -7364,18 +6853,15 @@ msgstr "Kontrollarar"
 msgid "No MIDI Channels selected"
 msgstr "Ingen MIDI-kanalar er valde"
 
-#: midi_time_axis.cc:529
-#: midi_time_axis.cc:656
+#: midi_time_axis.cc:529 midi_time_axis.cc:656
 msgid "Hide all channels"
 msgstr "Gøym alle kanalar"
 
-#: midi_time_axis.cc:532
-#: midi_time_axis.cc:659
+#: midi_time_axis.cc:532 midi_time_axis.cc:659
 msgid "Show all channels"
 msgstr "Vis alle kanalar"
 
-#: midi_time_axis.cc:542
-#: midi_time_axis.cc:669
+#: midi_time_axis.cc:542 midi_time_axis.cc:669
 msgid "Channel %1"
 msgstr "Kanal %1"
 
@@ -7415,8 +6901,7 @@ msgstr "Auto-rull"
 msgid "Decimal"
 msgstr "Desimal"
 
-#: midi_tracer.cc:53
-#: rc_option_editor.cc:659
+#: midi_tracer.cc:53 rc_option_editor.cc:659
 msgid "Enabled"
 msgstr "På"
 
@@ -7544,8 +7029,7 @@ msgstr "Skru av/på dei valde signalprosessane"
 msgid "Toggle Selected Plugins"
 msgstr "Skru av/på dei valde utvidingane"
 
-#: mixer_actor.cc:72
-#: mixer_actor.cc:73
+#: mixer_actor.cc:72 mixer_actor.cc:73
 msgid "Scroll Mixer Window to the left"
 msgstr "Rull miksarvindauga til venstre"
 
@@ -7561,16 +7045,11 @@ msgstr "Lasta miksarbindingar frå %1"
 msgid "Could not find mixer.bindings in search path %1"
 msgstr "Fann ikkje mixer.bindings i søkjestigen %1"
 
-#: mixer_strip.cc:91
-#: mixer_strip.cc:119
-#: mixer_strip.cc:1726
+#: mixer_strip.cc:91 mixer_strip.cc:119 mixer_strip.cc:1726
 msgid "pre"
 msgstr "før"
 
-#: mixer_strip.cc:93
-#: mixer_strip.cc:121
-#: mixer_strip.cc:352
-#: mixer_strip.cc:1298
+#: mixer_strip.cc:93 mixer_strip.cc:121 mixer_strip.cc:352 mixer_strip.cc:1298
 #: rc_option_editor.cc:1746
 msgid "Comments"
 msgstr "Kommentarar"
@@ -7607,14 +7086,11 @@ msgstr "Isoler solo"
 msgid "Lock Solo Status"
 msgstr "Lås solostatus"
 
-#: mixer_strip.cc:201
-#: mixer_strip.cc:636
+#: mixer_strip.cc:201 mixer_strip.cc:636
 msgid "lock"
 msgstr "lås"
 
-#: mixer_strip.cc:202
-#: mixer_strip.cc:635
-#: mixer_strip.cc:670
+#: mixer_strip.cc:202 mixer_strip.cc:635 mixer_strip.cc:670
 msgid "iso"
 msgstr "iso"
 
@@ -7622,25 +7098,19 @@ msgstr "iso"
 msgid "Mix group"
 msgstr "Miksgruppe"
 
-#: mixer_strip.cc:349
-#: rc_option_editor.cc:1743
+#: mixer_strip.cc:349 rc_option_editor.cc:1743
 msgid "Phase Invert"
 msgstr "Polaritetsvending"
 
-#: mixer_strip.cc:350
-#: rc_option_editor.cc:1744
-#: route_ui.cc:1155
+#: mixer_strip.cc:350 rc_option_editor.cc:1744 route_ui.cc:1155
 msgid "Solo Safe"
 msgstr "Solo-sikker"
 
-#: mixer_strip.cc:353
-#: mixer_ui.cc:123
-#: route_time_axis.cc:690
+#: mixer_strip.cc:353 mixer_ui.cc:123 route_time_axis.cc:690
 msgid "Group"
 msgstr "Gruppe"
 
-#: mixer_strip.cc:354
-#: rc_option_editor.cc:1747
+#: mixer_strip.cc:354 rc_option_editor.cc:1747
 msgid "Meter Point"
 msgstr "Mælepunkt"
 
@@ -7664,9 +7134,7 @@ msgstr "Snd"
 msgid "Lck"
 msgstr "Lås"
 
-#: mixer_strip.cc:712
-#: mixer_strip.cc:840
-#: processor_box.cc:2125
+#: mixer_strip.cc:712 mixer_strip.cc:840 processor_box.cc:2125
 msgid "Not connected to JACK - no I/O changes are possible"
 msgstr "Ikkje tilkopla JACK - I/U-endringar er ikkje mogleg"
 
@@ -7718,9 +7186,7 @@ msgstr "Merknader …"
 msgid "Save As Template..."
 msgstr "Lagra som mal..."
 
-#: mixer_strip.cc:1474
-#: route_group_dialog.cc:39
-#: route_time_axis.cc:713
+#: mixer_strip.cc:1474 route_group_dialog.cc:39 route_time_axis.cc:713
 msgid "Active"
 msgstr "Aktiv"
 
@@ -7732,13 +7198,11 @@ msgstr "Juster treigskap..."
 msgid "Protect Against Denormals"
 msgstr "Vern mot unormalar"
 
-#: mixer_strip.cc:1490
-#: route_time_axis.cc:448
+#: mixer_strip.cc:1490 route_time_axis.cc:448
 msgid "Remote Control ID..."
 msgstr "Fjernstyrings-ID..."
 
-#: mixer_strip.cc:1722
-#: mixer_strip.cc:1746
+#: mixer_strip.cc:1722 mixer_strip.cc:1746
 msgid "in"
 msgstr "inn"
 
@@ -7770,18 +7234,15 @@ msgstr ""
 msgid "c"
 msgstr ""
 
-#: mixer_strip.cc:1897
-#: route_ui.cc:138
+#: mixer_strip.cc:1897 route_ui.cc:138
 msgid "Disk"
 msgstr "Disk"
 
-#: mixer_strip.cc:1912
-#: monitor_section.cc:44
+#: mixer_strip.cc:1912 monitor_section.cc:44
 msgid "AFL"
 msgstr "EL"
 
-#: mixer_strip.cc:1915
-#: monitor_section.cc:45
+#: mixer_strip.cc:1915 monitor_section.cc:45
 msgid "PFL"
 msgstr "FL"
 
@@ -7937,10 +7398,8 @@ msgstr "Snu lytting kan %1"
 msgid "Mono Panner"
 msgstr "Monopanorering"
 
-#: mono_panner_editor.cc:44
-#: mono_panner_editor.cc:49
-#: stereo_panner_editor.cc:46
-#: stereo_panner_editor.cc:51
+#: mono_panner_editor.cc:44 mono_panner_editor.cc:49
+#: stereo_panner_editor.cc:46 stereo_panner_editor.cc:51
 msgid "%"
 msgstr "%"
 
@@ -7973,7 +7432,8 @@ msgid ""
 "Congratulations on your session export.\n"
 "\n"
 "It looks as if you may already be a subscriber. If so, thanks, and sorry\n"
-"to bother you again about this - I'm working on improving our subscriber system\n"
+"to bother you again about this - I'm working on improving our subscriber "
+"system\n"
 "so that I don't have to keep annoying you with this message.\n"
 "\n"
 "If you're not a subscriber, perhaps you might consider supporting my work\n"
@@ -7984,11 +7444,13 @@ msgstr ""
 "Til lukke med vellukka eksport av økta.\n"
 "\n"
 "Det ser ut som du alt er abonnent på Ardour. Viss du er det, seier me takk,\n"
-"og orsakar at me plagar deg med dette ein gong til - eg jobbar med å utbetra\n"
+"og orsakar at me plagar deg med dette ein gong til - eg jobbar med å "
+"utbetra\n"
 "abonnentsystemet, så eg slepp forstyrra deg med denne meldinga.\n"
 "\n"
 "Viss du ikkje abonnerer, kan du kanskje vurdera å støtta arbeidet mitt med\n"
-"Ardour ved å gje ei eingongsgåve eller teikna eit abonnement. Ingenting skjer\n"
+"Ardour ved å gje ei eingongsgåve eller teikna eit abonnement. Ingenting "
+"skjer\n"
 "viss du vel å ikkje abonnera, men me kan vanskeleg halda fram å laga Ardour\n"
 "utan ei stabil inntekt. Takk for at du bruker Ardour!"
 
@@ -7996,16 +7458,21 @@ msgstr ""
 msgid ""
 "Congratulations on your session export.\n"
 "\n"
-"I hope you find Ardour a useful tool. I'd like to ask you to consider supporting\n"
+"I hope you find Ardour a useful tool. I'd like to ask you to consider "
+"supporting\n"
 "its development with either a one-time donation or subscription. Nothing\n"
-"will happen if you choose not to do so. However Ardour's continuing development\n"
+"will happen if you choose not to do so. However Ardour's continuing "
+"development\n"
 "relies on a stable, sustainable income stream. Thanks for using Ardour!"
 msgstr ""
 "Til lukke med vellukka eksport av økta.\n"
 "\n"
-"Eg vonar du synest Ardour er eit nyttig program. Eg vil gjerne be deg vurdera\n"
-"å støtta programutviklinga, anten ved ei eingongsgåve eller ved å teikna eit abonnement.\n"
-"Det vil ikkje skje noko om du vel å ikkje bidra, men me kan vanskeleg halda fram med\n"
+"Eg vonar du synest Ardour er eit nyttig program. Eg vil gjerne be deg "
+"vurdera\n"
+"å støtta programutviklinga, anten ved ei eingongsgåve eller ved å teikna eit "
+"abonnement.\n"
+"Det vil ikkje skje noko om du vel å ikkje bidra, men me kan vanskeleg halda "
+"fram med\n"
 "å laga Ardour utan stabile inntekter. Takk for at du bruker Ardour!"
 
 #: new_plugin_preset_dialog.cc:29
@@ -8028,8 +7495,7 @@ msgstr "Normaliser bolkane"
 msgid "Normalize region"
 msgstr "Normaliser bolken"
 
-#: normalize_dialog.cc:49
-#: strip_silence_dialog.cc:70
+#: normalize_dialog.cc:49 strip_silence_dialog.cc:70
 msgid "dbFS"
 msgstr "dbFS"
 
@@ -8062,20 +7528,31 @@ msgid "  -h, --help                  Print this message\n"
 msgstr "  -h, --help                         Vis denne meldinga\n"
 
 #: opts.cc:60
-msgid "  -b, --bindings              Print all possible keyboard binding names\n"
-msgstr "  -b, --bindings                   Vis alle moglege tastekombinasjonar\n"
+msgid ""
+"  -b, --bindings              Print all possible keyboard binding names\n"
+msgstr ""
+"  -b, --bindings                   Vis alle moglege tastekombinasjonar\n"
 
 #: opts.cc:61
-msgid "  -c, --name <name>           Use a specific jack client name, default is ardour\n"
-msgstr "  -c, --name  name                 Bruk eit spesielt JACK-klientnamn, standard: ardour\n"
+msgid ""
+"  -c, --name <name>           Use a specific jack client name, default is "
+"ardour\n"
+msgstr ""
+"  -c, --name  name                 Bruk eit spesielt JACK-klientnamn, "
+"standard: ardour\n"
 
 #: opts.cc:62
-msgid "  -d, --disable-plugins       Disable all plugins in an existing session\n"
+msgid ""
+"  -d, --disable-plugins       Disable all plugins in an existing session\n"
 msgstr "  -d, --disable-plugins           Skru av alle utvidingar i ei økt\n"
 
 #: opts.cc:63
-msgid "  -D, --debug <options>       Set debug flags. Use \"-D list\" to see available options\n"
-msgstr "  -D, --debug <val>       Set avlusingsflagg. Bruk \"-D list\" for å sjå kva val som finst\n"
+msgid ""
+"  -D, --debug <options>       Set debug flags. Use \"-D list\" to see "
+"available options\n"
+msgstr ""
+"  -D, --debug <val>       Set avlusingsflagg. Bruk \"-D list\" for å sjå kva "
+"val som finst\n"
 
 #: opts.cc:64
 msgid "  -n, --no-splash             Do not show splash screen\n"
@@ -8086,12 +7563,15 @@ msgid "  -m, --menus file            Use \"file\" to define menus\n"
 msgstr "  -m, --menus file                 Bruk \"fil\" for Ardour-menyar\n"
 
 #: opts.cc:66
-msgid "  -N, --new session-name      Create a new session from the command line\n"
+msgid ""
+"  -N, --new session-name      Create a new session from the command line\n"
 msgstr "  -N, --new session-name           Lag ei ny økt frå kommandolinja\n"
 
 #: opts.cc:67
 msgid "  -O, --no-hw-optimizations   Disable h/w specific optimizations\n"
-msgstr "  -O, --no-hw-optimizations        Ikkje bruk spesialinnstillingar for maskinvara di\n"
+msgstr ""
+"  -O, --no-hw-optimizations        Ikkje bruk spesialinnstillingar for "
+"maskinvara di\n"
 
 #: opts.cc:68
 msgid "  -S, --sync                  Draw the gui synchronously \n"
@@ -8102,24 +7582,29 @@ msgid "  -V, --novst                 Do not use VST support\n"
 msgstr "  -V, --novst                      Slå av VST-støtta\n"
 
 #: opts.cc:72
-msgid "  -E, --save <file>           Load the specified session, save it to <file> and then quit\n"
-msgstr "  -E, --save <fil>           Last økta, lagra ho til <file> og avslutt\n"
+msgid ""
+"  -E, --save <file>           Load the specified session, save it to <file> "
+"and then quit\n"
+msgstr ""
+"  -E, --save <fil>           Last økta, lagra ho til <file> og avslutt\n"
 
 #: opts.cc:73
 msgid "  -C, --curvetest filename    Curve algorithm debugger\n"
 msgstr "  -C, --curvetest filename         Kurvealgoritme-avlusing\n"
 
 #: opts.cc:74
-msgid "  -k, --keybindings filename  Name of key bindings to load (default is ~/.ardour3/ardour.bindings)\n"
-msgstr "  -k, --keybindings-filename      Namn på snøggtastfil som skal lastast (standard er ~/.ardour3/ardour.bindings)\n"
+msgid ""
+"  -k, --keybindings filename  Name of key bindings to load (default is ~/."
+"ardour3/ardour.bindings)\n"
+msgstr ""
+"  -k, --keybindings-filename      Namn på snøggtastfil som skal lastast "
+"(standard er ~/.ardour3/ardour.bindings)\n"
 
 #: panner2d.cc:781
 msgid "Panner (2D)"
 msgstr "Panorering (2D)"
 
-#: panner2d.cc:783
-#: panner_ui.cc:384
-#: plugin_ui.cc:494
+#: panner2d.cc:783 panner_ui.cc:384 plugin_ui.cc:494
 msgid "Bypass"
 msgstr "Forbikopla"
 
@@ -8136,7 +7621,8 @@ msgid "Pan automation type"
 msgstr "pan-automasjonstype"
 
 #: panner_ui.cc:295
-msgid "No panner user interface is currently available for %1-in/2out tracks/busses"
+msgid ""
+"No panner user interface is currently available for %1-in/2out tracks/busses"
 msgstr "Det finst inga panoreringsflate for spor/bussar med %1 inn/ 2 ut"
 
 #: playlist_selector.cc:43
@@ -8163,8 +7649,7 @@ msgstr "ikkje tildelt"
 msgid "Imported"
 msgstr "Importert"
 
-#: plugin_eq_gui.cc:75
-#: plugin_eq_gui.cc:99
+#: plugin_eq_gui.cc:75 plugin_eq_gui.cc:99
 msgid "dB scale"
 msgstr "db-skala"
 
@@ -8172,40 +7657,31 @@ msgstr "db-skala"
 msgid "Show phase"
 msgstr "Vis fase"
 
-#: plugin_selector.cc:53
-#: plugin_selector.cc:221
+#: plugin_selector.cc:53 plugin_selector.cc:221
 msgid "Name contains"
 msgstr "Namnet inneheld"
 
-#: plugin_selector.cc:54
-#: plugin_selector.cc:225
+#: plugin_selector.cc:54 plugin_selector.cc:225
 msgid "Type contains"
 msgstr "Typen inneheld"
 
-#: plugin_selector.cc:55
-#: plugin_selector.cc:223
+#: plugin_selector.cc:55 plugin_selector.cc:223
 msgid "Category contains"
 msgstr "Kategorien inneheld"
 
-#: plugin_selector.cc:56
-#: plugin_selector.cc:245
+#: plugin_selector.cc:56 plugin_selector.cc:245
 msgid "Author contains"
 msgstr "Opphavsperson inneheld"
 
-#: plugin_selector.cc:57
-#: plugin_selector.cc:247
+#: plugin_selector.cc:57 plugin_selector.cc:247
 msgid "Library contains"
 msgstr "Biblioteket inneheld"
 
-#: plugin_selector.cc:58
-#: plugin_selector.cc:211
-#: plugin_selector.cc:522
+#: plugin_selector.cc:58 plugin_selector.cc:211 plugin_selector.cc:522
 msgid "Favorites only"
 msgstr "Berre favorittar"
 
-#: plugin_selector.cc:59
-#: plugin_selector.cc:215
-#: plugin_selector.cc:522
+#: plugin_selector.cc:59 plugin_selector.cc:215 plugin_selector.cc:522
 msgid "Hidden only"
 msgstr "Berre gøymt"
 
@@ -8273,9 +7749,7 @@ msgstr "Oppdater utvidingar"
 msgid "Insert Plugin(s)"
 msgstr "Set inn utviding(ar)"
 
-#: plugin_selector.cc:321
-#: plugin_selector.cc:322
-#: plugin_selector.cc:323
+#: plugin_selector.cc:321 plugin_selector.cc:322 plugin_selector.cc:323
 #: plugin_selector.cc:324
 msgid "variable"
 msgstr "variabel"
@@ -8310,18 +7784,25 @@ msgstr "Etter kategori"
 msgid "Eh? LADSPA plugins don't have editors!"
 msgstr "Hm? LADSPA-utvidingar har ikkje redigering!"
 
-#: plugin_ui.cc:127
-#: plugin_ui.cc:270
-msgid "unknown type of editor-supplying plugin (note: no VST support in this version of ardour)"
-msgstr "ukjend type utviding (tips: VST-utvidingar er ikkje støtta i denne versjonen av Ardour)"
+#: plugin_ui.cc:127 plugin_ui.cc:270
+msgid ""
+"unknown type of editor-supplying plugin (note: no VST support in this "
+"version of ardour)"
+msgstr ""
+"ukjend type utviding (tips: VST-utvidingar er ikkje støtta i denne versjonen "
+"av Ardour)"
 
 #: plugin_ui.cc:130
 msgid "unknown type of editor-supplying plugin"
 msgstr "ukjent redigerbar utvidingstype"
 
 #: plugin_ui.cc:300
-msgid "unknown type of editor-supplying plugin (note: no linuxVST support in this version of ardour)"
-msgstr "ukjend type utviding med redigering (tips: linuxVST-utvidingar er ikkje støtta i denne versjonen av Ardour)"
+msgid ""
+"unknown type of editor-supplying plugin (note: no linuxVST support in this "
+"version of ardour)"
+msgstr ""
+"ukjend type utviding med redigering (tips: linuxVST-utvidingar er ikkje "
+"støtta i denne versjonen av Ardour)"
 
 #: plugin_ui.cc:372
 msgid "create_lv2_editor called on non-LV2 plugin"
@@ -8363,10 +7844,13 @@ msgstr "Slett dette ferdigoppsett"
 msgid "Disable signal processing by the plugin"
 msgstr "Skru av signalhandsaminga åt utvidinga"
 
-#: plugin_ui.cc:509
-#: plugin_ui.cc:675
-msgid "Click to allow the plugin to receive keyboard events that %1 would normally use as a shortcut"
-msgstr "Klikk for å gje utvidinga lov til å ta imot tastetrykk som %1 vanlegvis bruker som snøggtastar"
+#: plugin_ui.cc:509 plugin_ui.cc:675
+msgid ""
+"Click to allow the plugin to receive keyboard events that %1 would normally "
+"use as a shortcut"
+msgstr ""
+"Klikk for å gje utvidinga lov til å ta imot tastetrykk som %1 vanlegvis "
+"bruker som snøggtastar"
 
 #: plugin_ui.cc:510
 msgid "Click to enable/disable this plugin"
@@ -8412,13 +7896,11 @@ msgstr "%1 ymse"
 msgid "Other"
 msgstr "Anna"
 
-#: port_group.cc:430
-#: port_group.cc:431
+#: port_group.cc:430 port_group.cc:431
 msgid "LTC Out"
 msgstr "LTC ut"
 
-#: port_group.cc:434
-#: port_group.cc:435
+#: port_group.cc:434 port_group.cc:435
 msgid "LTC In"
 msgstr "LTC inn"
 
@@ -8478,8 +7960,7 @@ msgstr "Send/utgang"
 msgid "Return/Input"
 msgstr "Tilbake/inngang"
 
-#: port_insert_ui.cc:71
-#: port_insert_ui.cc:99
+#: port_insert_ui.cc:71 port_insert_ui.cc:99
 msgid "Disconnected from audio engine"
 msgstr "Ikkje tilkopla lydmotoren"
 
@@ -8495,18 +7976,15 @@ msgstr "Lyttar etter signal..."
 msgid "Port Insert "
 msgstr "Portinnstikk"
 
-#: port_matrix.cc:323
-#: port_matrix.cc:342
+#: port_matrix.cc:323 port_matrix.cc:342
 msgid "<b>Sources</b>"
 msgstr "<b>Kjelder</b>"
 
-#: port_matrix.cc:324
-#: port_matrix.cc:343
+#: port_matrix.cc:324 port_matrix.cc:343
 msgid "<b>Destinations</b>"
 msgstr "<b>Mål</b>"
 
-#: port_matrix.cc:419
-#: port_matrix.cc:427
+#: port_matrix.cc:419 port_matrix.cc:427
 #, c-format
 msgid "Add %s %s"
 msgstr "Legg til %s %s"
@@ -8520,8 +7998,7 @@ msgstr "Døyp om '%s'..."
 msgid "Remove all"
 msgstr "Fjern alt"
 
-#: port_matrix.cc:471
-#: port_matrix.cc:483
+#: port_matrix.cc:471 port_matrix.cc:483
 #, c-format
 msgid "%s all"
 msgstr "%s alt"
@@ -8539,8 +8016,12 @@ msgid "Flip"
 msgstr "Flipp"
 
 #: port_matrix.cc:702
-msgid "It is not possible to add a port here, as the first processor in the track or buss cannot support the new configuration."
-msgstr "Du kan ikkje leggja til ein port her, fordi den fyrste signalprosessen på sporet eller bussen ikkje godtek det nye oppsettet."
+msgid ""
+"It is not possible to add a port here, as the first processor in the track "
+"or buss cannot support the new configuration."
+msgstr ""
+"Du kan ikkje leggja til ein port her, fordi den fyrste signalprosessen på "
+"sporet eller bussen ikkje godtek det nye oppsettet."
 
 #: port_matrix.cc:705
 msgid "Cannot add port"
@@ -8551,8 +8032,12 @@ msgid "Port removal not allowed"
 msgstr "Ikkje lov å fjerna portar"
 
 #: port_matrix.cc:728
-msgid "This port cannot be removed, as the first plugin in the track or buss cannot accept the new number of inputs."
-msgstr "Du kan ikkje fjerna denne porten, fordi den fyrste utvidinga på sporet eller bussen ikkje godtek det nye talet på inngangar."
+msgid ""
+"This port cannot be removed, as the first plugin in the track or buss cannot "
+"accept the new number of inputs."
+msgstr ""
+"Du kan ikkje fjerna denne porten, fordi den fyrste utvidinga på sporet eller "
+"bussen ikkje godtek det nye talet på inngangar."
 
 #: port_matrix.cc:945
 #, c-format
@@ -8588,9 +8073,7 @@ msgstr "Gøym alle kontrollar"
 msgid "on"
 msgstr "på"
 
-#: processor_box.cc:479
-#: rc_option_editor.cc:1776
-#: rc_option_editor.cc:1790
+#: processor_box.cc:479 rc_option_editor.cc:1776 rc_option_editor.cc:1790
 msgid "off"
 msgstr "av"
 
@@ -8602,8 +8085,7 @@ msgstr ""
 "Høgreklikk for å leggja til/fjerna/redigera\n"
 "utvidingar, innstikk, send og meir"
 
-#: processor_box.cc:1180
-#: processor_box.cc:1573
+#: processor_box.cc:1180 processor_box.cc:1573
 msgid "Plugin Incompatibility"
 msgstr "Utvidinga samsvarar ikkje"
 
@@ -8703,13 +8185,11 @@ msgstr ""
 "Vil du verkeleg fjerna alle handsamingar frå %1?\n"
 "(Du kan ikkje angra)"
 
-#: processor_box.cc:1961
-#: processor_box.cc:1986
+#: processor_box.cc:1961 processor_box.cc:1986
 msgid "Yes, remove them all"
 msgstr "Ja, slett alle"
 
-#: processor_box.cc:1963
-#: processor_box.cc:1988
+#: processor_box.cc:1963 processor_box.cc:1988
 msgid "Remove processors"
 msgstr "Fjern handsamingar"
 
@@ -8789,13 +8269,11 @@ msgstr "Laskbank"
 msgid "Patch"
 msgstr "Lask"
 
-#: patch_change_dialog.cc:98
-#: step_entry.cc:429
+#: patch_change_dialog.cc:98 step_entry.cc:429
 msgid "Program"
 msgstr "Program"
 
-#: patch_change_dialog.cc:106
-#: step_entry.cc:421
+#: patch_change_dialog.cc:106 step_entry.cc:421
 msgid "Bank"
 msgstr "Bank"
 
@@ -8803,8 +8281,7 @@ msgstr "Bank"
 msgid "main grid"
 msgstr "hovudgitter"
 
-#: quantize_dialog.cc:52
-#: quantize_dialog.cc:109
+#: quantize_dialog.cc:52 quantize_dialog.cc:109
 msgid "Quantize"
 msgstr "Gitterfordel"
 
@@ -8832,8 +8309,7 @@ msgstr "Fest noteslutten"
 msgid "Click audio file:"
 msgstr "Klikk-lydfil:"
 
-#: rc_option_editor.cc:72
-#: rc_option_editor.cc:79
+#: rc_option_editor.cc:72 rc_option_editor.cc:79
 msgid "Browse..."
 msgstr "Bla gjennom..."
 
@@ -8857,8 +8333,7 @@ msgstr "Øvre grense for angrelogg er"
 msgid "Save undo history of"
 msgstr "Lagra angreloggen for"
 
-#: rc_option_editor.cc:170
-#: rc_option_editor.cc:177
+#: rc_option_editor.cc:170 rc_option_editor.cc:177
 msgid "commands"
 msgstr "kommandoar"
 
@@ -8866,9 +8341,7 @@ msgstr "kommandoar"
 msgid "Edit using:"
 msgstr "Rediger med:"
 
-#: rc_option_editor.cc:321
-#: rc_option_editor.cc:347
-#: rc_option_editor.cc:374
+#: rc_option_editor.cc:321 rc_option_editor.cc:347 rc_option_editor.cc:374
 msgid "+ button"
 msgstr "+ museknapp"
 
@@ -8881,7 +8354,8 @@ msgid "Insert note using:"
 msgstr "Set inn note med:"
 
 #: rc_option_editor.cc:395
-msgid "Toggle snap using:"
+#, fuzzy
+msgid "Ignore snap using:"
 msgstr "Skru på festing med:"
 
 #: rc_option_editor.cc:411
@@ -8906,7 +8380,8 @@ msgstr "Tilbakeføring"
 
 #: rc_option_editor.cc:665
 msgid "Double-click on a name to edit settings for an enabled protocol"
-msgstr "Dobbelklikk på eit namn for å redigera innstillingane for ein aktiv protokoll"
+msgstr ""
+"Dobbelklikk på eit namn for å redigera innstillingane for ein aktiv protokoll"
 
 #: rc_option_editor.cc:874
 msgid "%1 Preferences"
@@ -8968,9 +8443,7 @@ msgstr "Største tal på samtidige økter"
 msgid "Click gain level"
 msgstr "Klikkvolum"
 
-#: rc_option_editor.cc:963
-#: route_time_axis.cc:221
-#: route_time_axis.cc:693
+#: rc_option_editor.cc:963 route_time_axis.cc:221 route_time_axis.cc:693
 msgid "Automation"
 msgstr "Automasjon"
 
@@ -8991,8 +8464,12 @@ msgid "Stop recording when an xrun occurs"
 msgstr "Stopp opptak ved xrun-hendingar"
 
 #: rc_option_editor.cc:1002
-msgid "<b>When enabled</b> Ardour will stop recording if an over- or underrun is detected by the audio engine"
-msgstr "<b>Når dette er på</b> vil Ardour stoppa opptaket viss lydmaskina oppfattar over- eller underflyt i bufferen"
+msgid ""
+"<b>When enabled</b> Ardour will stop recording if an over- or underrun is "
+"detected by the audio engine"
+msgstr ""
+"<b>Når dette er på</b> vil Ardour stoppa opptaket viss lydmaskina oppfattar "
+"over- eller underflyt i bufferen"
 
 #: rc_option_editor.cc:1007
 msgid "Create markers where xruns occur"
@@ -9004,43 +8481,63 @@ msgstr "Stopp ved slutten av økta"
 
 #: rc_option_editor.cc:1020
 msgid ""
-"<b>When enabled</b> if Ardour is <b>not recording</b>, it will stop the transport when it reaches the current session end marker\n"
+"<b>When enabled</b> if Ardour is <b>not recording</b>, it will stop the "
+"transport when it reaches the current session end marker\n"
 "\n"
-"<b>When disabled</b> Ardour will continue to roll past the session end marker at all times"
+"<b>When disabled</b> Ardour will continue to roll past the session end "
+"marker at all times"
 msgstr ""
-"<b>Når dette er på</b>, og Ardour <b>ikkje tek opp</b>, vil transporten stogga når han kjem til sluttmarkøren for denne økta\n"
+"<b>Når dette er på</b>, og Ardour <b>ikkje tek opp</b>, vil transporten "
+"stogga når han kjem til sluttmarkøren for denne økta\n"
 "\n"
 "<b>Når dette er av</b>, vil Ardour halda fram forbi sluttmarkøren."
 
 #: rc_option_editor.cc:1027
 msgid "Do seamless looping (not possible when slaved to MTC, JACK etc)"
-msgstr "Bruk saumlaus lykkje (ikkje mogleg når me er bundne til MTC, JACK osb.)"
+msgstr ""
+"Bruk saumlaus lykkje (ikkje mogleg når me er bundne til MTC, JACK osb.)"
 
 #: rc_option_editor.cc:1031
 msgid ""
-"<b>When enabled</b> this will loop by reading ahead and wrapping around at the loop point, preventing any need to do a transport locate at the end of the loop\n"
+"<b>When enabled</b> this will loop by reading ahead and wrapping around at "
+"the loop point, preventing any need to do a transport locate at the end of "
+"the loop\n"
 "\n"
-"<b>When disabled</b> looping is done by locating back to the start of the loop when Ardour reaches the end which will often cause a small click or delay"
+"<b>When disabled</b> looping is done by locating back to the start of the "
+"loop when Ardour reaches the end which will often cause a small click or "
+"delay"
 msgstr ""
-"<b>Når dette er på</b>, vil lykkja spela ved å lesa framover og fletta ved lykkjepunktet, slik at du ikkje treng å plassera spelemerket ved enden av lykkja\n"
+"<b>Når dette er på</b>, vil lykkja spela ved å lesa framover og fletta ved "
+"lykkjepunktet, slik at du ikkje treng å plassera spelemerket ved enden av "
+"lykkja\n"
 "\n"
-"<b>Når dette er av</b>, spelar du lykkjer ved å gå tilbake til starten av lykkja når Ardour kjem til slutten. Det vil ofte gje eit lite klikk eller ei pause"
+"<b>Når dette er av</b>, spelar du lykkjer ved å gå tilbake til starten av "
+"lykkja når Ardour kjem til slutten. Det vil ofte gje eit lite klikk eller ei "
+"pause"
 
 #: rc_option_editor.cc:1039
 msgid "Disable per-track record disarm while rolling"
 msgstr "Ikkje tillat å skru av opptaksstatusen per spor under avspeling"
 
 #: rc_option_editor.cc:1043
-msgid "<b>When enabled</b> this will prevent you from accidentally stopping specific tracks recording during a take"
-msgstr "<b>Når dette er på</b>, vil du ikkje kunna slå av opptak for bestemte spor ved eit uhell medan du tek opp"
+msgid ""
+"<b>When enabled</b> this will prevent you from accidentally stopping "
+"specific tracks recording during a take"
+msgstr ""
+"<b>Når dette er på</b>, vil du ikkje kunna slå av opptak for bestemte spor "
+"ved eit uhell medan du tek opp"
 
 #: rc_option_editor.cc:1048
 msgid "12dB gain reduction during fast-forward and fast-rewind"
 msgstr "12dB demping ved spoling"
 
 #: rc_option_editor.cc:1052
-msgid "This will reduce the unpleasant increase in perceived volume that occurs when fast-forwarding or rewinding through some kinds of audio"
-msgstr "Dette reduserer den ubehagelege auken i oppfatta volum som kjem når du spolar framover eller bakover gjennom nokre typar lyd"
+msgid ""
+"This will reduce the unpleasant increase in perceived volume that occurs "
+"when fast-forwarding or rewinding through some kinds of audio"
+msgstr ""
+"Dette reduserer den ubehagelege auken i oppfatta volum som kjem når du "
+"spolar framover eller bakover gjennom nokre typar lyd"
 
 #: rc_option_editor.cc:1056
 msgid "Sync/Slave"
@@ -9056,25 +8553,39 @@ msgstr "Tilpass raten for videorammene i denne økta til ekstern tidskode"
 
 #: rc_option_editor.cc:1076
 msgid ""
-"This option controls the value of the video frame rate <i>while chasing</i> an external timecode source.\n"
+"This option controls the value of the video frame rate <i>while chasing</i> "
+"an external timecode source.\n"
 "\n"
-"<b>When enabled</b> the session video frame rate will be changed to match that of the selected external timecode source.\n"
+"<b>When enabled</b> the session video frame rate will be changed to match "
+"that of the selected external timecode source.\n"
 "\n"
-"<b>When disabled</b> the session video frame rate will not be changed to match that of the selected external timecode source.Instead the frame rate indication in the main clock will flash red and Ardour will convert between the external timecode standard and the session standard."
+"<b>When disabled</b> the session video frame rate will not be changed to "
+"match that of the selected external timecode source.Instead the frame rate "
+"indication in the main clock will flash red and Ardour will convert between "
+"the external timecode standard and the session standard."
 msgstr ""
-"Med dette valet kontrollerer du raten til videorammene, <i>som fylgjer</i> ei ekstern tidskodekjelde.\n"
+"Med dette valet kontrollerer du raten til videorammene, <i>som fylgjer</i> "
+"ei ekstern tidskodekjelde.\n"
 "\n"
-"<b>Når dette er på</b>, vil videoramme-raten bli endra slik at han passar til den eksterne tidskodekjelda.\n"
+"<b>Når dette er på</b>, vil videoramme-raten bli endra slik at han passar "
+"til den eksterne tidskodekjelda.\n"
 "\n"
-"<b>Når det er av</b> , vil ramme-raten ikkje bli endra så han passar til den eksterne tidskodekjelda. I staden vil rateindikateoren i hovudklokka blinka raudt, og Ardour vil omdanna mellom den eksterne tidskodestandarden og øktstandarden."
+"<b>Når det er av</b> , vil ramme-raten ikkje bli endra så han passar til den "
+"eksterne tidskodekjelda. I staden vil rateindikateoren i hovudklokka blinka "
+"raudt, og Ardour vil omdanna mellom den eksterne tidskodestandarden og "
+"øktstandarden."
 
 #: rc_option_editor.cc:1086
 msgid "External timecode is sync locked"
 msgstr "Ekstern tidskode er låst til synk"
 
 #: rc_option_editor.cc:1092
-msgid "<b>When enabled</b> indicates that the selected external timecode source shares sync (Black &amp; Burst, Wordclock, etc) with the audio interface."
-msgstr "<b>Når dette er på</b>, viser det at den valde eksterne tidskodekjelda deler synk (Black &amp; burst, Wordclock, osfr.) med lydkortet."
+msgid ""
+"<b>When enabled</b> indicates that the selected external timecode source "
+"shares sync (Black &amp; Burst, Wordclock, etc) with the audio interface."
+msgstr ""
+"<b>Når dette er på</b>, viser det at den valde eksterne tidskodekjelda deler "
+"synk (Black &amp; burst, Wordclock, osfr.) med lydkortet."
 
 #: rc_option_editor.cc:1099
 msgid "Lock to 29.9700 fps instead of 30000/1001"
@@ -9082,13 +8593,26 @@ msgstr "Lås til 29,9700 fps i staden for 30000/1001"
 
 #: rc_option_editor.cc:1105
 msgid ""
-"<b>When enabled</b> the external timecode source is assumed to use 29.97 fps instead of 30000/1001.\n"
-"SMPTE 12M-1999 specifies 29.97df as 30000/1001. The spec further mentions that drop-frame timecode has an accumulated error of -86ms over a 24-hour period.\n"
-"Drop-frame timecode would compensate exactly for a NTSC color frame rate of 30 * 0.9990 (ie 29.970000). That is not the actual rate, however some vendor use that rate - despite it being against the specs - because the variant of using exactly 29.97 fps has zero timecode drift.\n"
+"<b>When enabled</b> the external timecode source is assumed to use 29.97 fps "
+"instead of 30000/1001.\n"
+"SMPTE 12M-1999 specifies 29.97df as 30000/1001. The spec further mentions "
+"that drop-frame timecode has an accumulated error of -86ms over a 24-hour "
+"period.\n"
+"Drop-frame timecode would compensate exactly for a NTSC color frame rate of "
+"30 * 0.9990 (ie 29.970000). That is not the actual rate, however some vendor "
+"use that rate - despite it being against the specs - because the variant of "
+"using exactly 29.97 fps has zero timecode drift.\n"
 msgstr ""
-"<b>Når dette er på</b>, vil Ardour gå ut frå at den eksterne tidskodekjelda bruker 29.97 fps i staden for 30000/1001.\n"
-"SMPTE 12M-1999 definerer 29.97df som 30000/1001. Spesifikasjonen nemner elles at droppramme-tidskoden har ein akkumulert feilrate på -86ms i løpet av 24 timar.\n"
-"Droppramme-tidskode ville ha kompensert nøyaktig for ein NTSC-farge-rammerate på 30 * 0,9990 (dvs 29,970000). Det er ikkje den faktiske raten, sjølv om nokre produsentar bruker han - sjølv om han ikkje fylgjer spesifikasjonen - fordi varianten med nøyaktig 29,97 har null i tidskodedrift.\n"
+"<b>Når dette er på</b>, vil Ardour gå ut frå at den eksterne tidskodekjelda "
+"bruker 29.97 fps i staden for 30000/1001.\n"
+"SMPTE 12M-1999 definerer 29.97df som 30000/1001. Spesifikasjonen nemner "
+"elles at droppramme-tidskoden har ein akkumulert feilrate på -86ms i løpet "
+"av 24 timar.\n"
+"Droppramme-tidskode ville ha kompensert nøyaktig for ein NTSC-farge-"
+"rammerate på 30 * 0,9990 (dvs 29,970000). Det er ikkje den faktiske raten, "
+"sjølv om nokre produsentar bruker han - sjølv om han ikkje fylgjer "
+"spesifikasjonen - fordi varianten med nøyaktig 29,97 har null i "
+"tidskodedrift.\n"
 
 #: rc_option_editor.cc:1115
 msgid "LTC Reader"
@@ -9111,12 +8635,20 @@ msgid "send LTC while stopped"
 msgstr "send LTC når stoppa"
 
 #: rc_option_editor.cc:1151
-msgid "<b>When enabled</b> Ardour will continue to send LTC information even when the transport (playhead) is not moving"
-msgstr "<b>Når dette er på</b>, vil Ardour halda fram å senda LTC-informasjon sjølv når transporten (spelehovudet) ikkje rører seg"
+msgid ""
+"<b>When enabled</b> Ardour will continue to send LTC information even when "
+"the transport (playhead) is not moving"
+msgstr ""
+"<b>Når dette er på</b>, vil Ardour halda fram å senda LTC-informasjon sjølv "
+"når transporten (spelehovudet) ikkje rører seg"
 
 #: rc_option_editor.cc:1161
-msgid "Specify the Peak Volume of the generated LTC signal in dbFS. A good value is  0dBu ^= -18dbFS in an EBU calibrated system"
-msgstr "Gjev toppvolumet til dei genererte LTC-signala i dbFS. Ein bra verdi er  0dBu ^= -18dbFS i eit EBU-kalibrert system"
+msgid ""
+"Specify the Peak Volume of the generated LTC signal in dbFS. A good value "
+"is  0dBu ^= -18dbFS in an EBU calibrated system"
+msgstr ""
+"Gjev toppvolumet til dei genererte LTC-signala i dbFS. Ein bra verdi er  "
+"0dBu ^= -18dbFS i eit EBU-kalibrert system"
 
 #: rc_option_editor.cc:1174
 msgid "Link selection of regions and tracks"
@@ -9136,17 +8668,23 @@ msgstr "Bruk overlapp-likskap for bolkar"
 
 #: rc_option_editor.cc:1204
 msgid ""
-"When extending region selection across a group, %1 must decide which regions are equivalent\n"
+"When extending region selection across a group, %1 must decide which regions "
+"are equivalent\n"
 "\n"
-"If enabled, regions are considered \"equivalent\" if they overlap on the timeline.\n"
+"If enabled, regions are considered \"equivalent\" if they overlap on the "
+"timeline.\n"
 "\n"
-"If disabled, regions are considered \"equivalent\" only if have the same start time, length and position"
+"If disabled, regions are considered \"equivalent\" only if have the same "
+"start time, length and position"
 msgstr ""
-"Når du utvidar eit bolkval over ei gruppe, må, %1 avgjera kva bolkar som er samsvarande\n"
+"Når du utvidar eit bolkval over ei gruppe, må, %1 avgjera kva bolkar som er "
+"samsvarande\n"
 "\n"
-"Viss dette er på, blir bolkane sett som «samsvarande» viss dei overlappar på tidslinja.\n"
+"Viss dette er på, blir bolkane sett som «samsvarande» viss dei overlappar på "
+"tidslinja.\n"
 "\n"
-"Viss dette er av, blir bolkane sett som «samsvarande» berre viss dei har same starttid, lengd og plassering."
+"Viss dette er av, blir bolkane sett som «samsvarande» berre viss dei har "
+"same starttid, lengd og plassering."
 
 #: rc_option_editor.cc:1212
 msgid "Make rubberband selection rectangle snap to the grid"
@@ -9222,11 +8760,13 @@ msgstr "Døyp nye markørar"
 
 #: rc_option_editor.cc:1315
 msgid ""
-"If enabled, popup a dialog when a new marker is created to allow its name to be set as it is created.\n"
+"If enabled, popup a dialog when a new marker is created to allow its name to "
+"be set as it is created.\n"
 "\n"
 "You can always rename markers by right-clicking on them"
 msgstr ""
-"VIss dette er på, vil det koma eit oppsprettvindauga når du lagar ein markør, slik at du kan gje han namn medan du lagar han.\n"
+"VIss dette er på, vil det koma eit oppsprettvindauga når du lagar ein "
+"markør, slik at du kan gje han namn medan du lagar han.\n"
 "\n"
 "Du kan alltid døypa om markørar ved å høgreklikka på dei."
 
@@ -9274,8 +8814,7 @@ msgstr "Kopla sporinngangane"
 msgid "automatically to physical inputs"
 msgstr "automatisk til fysiske inngangar"
 
-#: rc_option_editor.cc:1386
-#: rc_option_editor.cc:1399
+#: rc_option_editor.cc:1386 rc_option_editor.cc:1399
 msgid "manually"
 msgstr "manuelt"
 
@@ -9335,18 +8874,10 @@ msgstr "Skru på automatisk analyse av lyd"
 msgid "Replicate missing region channels"
 msgstr "Kopier manglande bolk-kanalar"
 
-#: rc_option_editor.cc:1474
-#: rc_option_editor.cc:1489
-#: rc_option_editor.cc:1501
-#: rc_option_editor.cc:1513
-#: rc_option_editor.cc:1525
-#: rc_option_editor.cc:1529
-#: rc_option_editor.cc:1537
-#: rc_option_editor.cc:1545
-#: rc_option_editor.cc:1553
-#: rc_option_editor.cc:1555
-#: rc_option_editor.cc:1563
-#: rc_option_editor.cc:1571
+#: rc_option_editor.cc:1474 rc_option_editor.cc:1489 rc_option_editor.cc:1501
+#: rc_option_editor.cc:1513 rc_option_editor.cc:1525 rc_option_editor.cc:1529
+#: rc_option_editor.cc:1537 rc_option_editor.cc:1545 rc_option_editor.cc:1553
+#: rc_option_editor.cc:1555 rc_option_editor.cc:1563 rc_option_editor.cc:1571
 #: rc_option_editor.cc:1579
 msgid "Solo / mute"
 msgstr "Solo / demp"
@@ -9471,11 +9002,8 @@ msgstr "Aldri vis periodiske MIDI-meldingar (MTC, MIDI-klokke)"
 msgid "Sound MIDI notes as they are selected"
 msgstr "Lytt på MIDI-notar medan du vel dei"
 
-#: rc_option_editor.cc:1689
-#: rc_option_editor.cc:1691
-#: rc_option_editor.cc:1693
-#: rc_option_editor.cc:1695
-#: rc_option_editor.cc:1708
+#: rc_option_editor.cc:1689 rc_option_editor.cc:1691 rc_option_editor.cc:1693
+#: rc_option_editor.cc:1695 rc_option_editor.cc:1708
 msgid "User interaction"
 msgstr "Brukarsamhandling"
 
@@ -9503,15 +9031,9 @@ msgstr "fylgjer miksaren"
 msgid "follows order of editor"
 msgstr "fylgjer redigeringa"
 
-#: rc_option_editor.cc:1712
-#: rc_option_editor.cc:1720
-#: rc_option_editor.cc:1730
-#: rc_option_editor.cc:1732
-#: rc_option_editor.cc:1750
-#: rc_option_editor.cc:1759
-#: rc_option_editor.cc:1767
-#: rc_option_editor.cc:1781
-#: rc_option_editor.cc:1798
+#: rc_option_editor.cc:1712 rc_option_editor.cc:1720 rc_option_editor.cc:1730
+#: rc_option_editor.cc:1732 rc_option_editor.cc:1750 rc_option_editor.cc:1759
+#: rc_option_editor.cc:1767 rc_option_editor.cc:1781 rc_option_editor.cc:1798
 msgid "GUI"
 msgstr "Brukarflate"
 
@@ -9543,8 +9065,7 @@ msgstr "Hald nivåtoppar"
 msgid "short"
 msgstr "kort"
 
-#: rc_option_editor.cc:1778
-#: rc_option_editor.cc:1793
+#: rc_option_editor.cc:1778 rc_option_editor.cc:1793
 msgid "medium"
 msgstr "middels"
 
@@ -9580,8 +9101,7 @@ msgstr "snøggast"
 msgid "audition this region"
 msgstr "lytt på denne bolken"
 
-#: region_editor.cc:87
-#: region_layering_order_editor.cc:74
+#: region_editor.cc:87 region_layering_order_editor.cc:74
 msgid "Position:"
 msgstr "Posisjon:"
 
@@ -9589,8 +9109,7 @@ msgstr "Posisjon:"
 msgid "End:"
 msgstr "Slutt:"
 
-#: region_editor.cc:91
-#: sfdb_ui.cc:140
+#: region_editor.cc:91 sfdb_ui.cc:140
 msgid "Length:"
 msgstr "Lengd:"
 
@@ -9630,8 +9149,7 @@ msgstr "endre boksluttposisjon"
 msgid "change region length"
 msgstr "endre bolklengd"
 
-#: region_editor.cc:403
-#: region_editor.cc:415
+#: region_editor.cc:403 region_editor.cc:415
 msgid "change region sync point"
 msgstr "endre bolksynkposisjon"
 
@@ -9655,18 +9173,15 @@ msgstr "Vel toppbolk"
 msgid "SilenceText"
 msgstr "StilleTekst"
 
-#: region_view.cc:290
-#: region_view.cc:309
+#: region_view.cc:290 region_view.cc:309
 msgid "minutes"
 msgstr "minutt"
 
-#: region_view.cc:293
-#: region_view.cc:312
+#: region_view.cc:293 region_view.cc:312
 msgid "msecs"
 msgstr "msek"
 
-#: region_view.cc:296
-#: region_view.cc:315
+#: region_view.cc:296 region_view.cc:315
 msgid "secs"
 msgstr "sek"
 
@@ -9756,8 +9271,7 @@ msgstr "Leitefunksjon"
 msgid "Trigger gap"
 msgstr "Brytargap"
 
-#: rhythm_ferret.cc:104
-#: strip_silence_dialog.cc:68
+#: rhythm_ferret.cc:104 strip_silence_dialog.cc:68
 msgid "Threshold"
 msgstr "Dørstokk"
 
@@ -9801,8 +9315,7 @@ msgstr "Solo"
 msgid "Record enable"
 msgstr "Skru på/av opptak"
 
-#: route_group_dialog.cc:45
-#: time_info_box.cc:66
+#: route_group_dialog.cc:45 time_info_box.cc:66
 msgid "Selection"
 msgstr "Utval"
 
@@ -9810,9 +9323,7 @@ msgstr "Utval"
 msgid "Active state"
 msgstr "Aktiv status"
 
-#: route_group_dialog.cc:47
-#: route_group_dialog.cc:77
-#: theme_manager.cc:69
+#: route_group_dialog.cc:47 route_group_dialog.cc:77 theme_manager.cc:69
 msgid "Color"
 msgstr "Farge"
 
@@ -9825,7 +9336,8 @@ msgid "<b>Sharing</b>"
 msgstr "<b>Deler</b>"
 
 #: route_group_dialog.cc:183
-msgid "A route group of this name already exists.  Please use a different name."
+msgid ""
+"A route group of this name already exists.  Please use a different name."
 msgstr "Det finst alt ei rutegruppe med det namnet. Vel eit anna namn."
 
 #: route_params_ui.cc:82
@@ -9848,8 +9360,7 @@ msgstr "Utvidingar, innstikk og send"
 msgid "route display list item for renamed route not found!"
 msgstr "fann ikkje rutevisingslisteobjekt for omdøypt rute!"
 
-#: route_params_ui.cc:258
-#: route_params_ui.cc:286
+#: route_params_ui.cc:258 route_params_ui.cc:286
 #, c-format
 msgid "Playback delay: %<PRId64> samples"
 msgstr "Avspelingsseinking: %<PRId64> punkt"
@@ -9858,8 +9369,7 @@ msgstr "Avspelingsseinking: %<PRId64> punkt"
 msgid "NO TRACK"
 msgstr "IKKJE NOKO SPOR"
 
-#: route_params_ui.cc:611
-#: route_params_ui.cc:612
+#: route_params_ui.cc:611 route_params_ui.cc:612
 msgid "No Track or Bus Selected"
 msgstr "Ingen spor eller bussar valde"
 
@@ -9959,8 +9469,7 @@ msgstr "Ikkje lagdelt modus"
 msgid "Color Mode"
 msgstr "Fargemodus"
 
-#: route_time_axis.cc:671
-#: route_time_axis.cc:1611
+#: route_time_axis.cc:671 route_time_axis.cc:1611
 msgid "Playlist"
 msgstr "Speleliste"
 
@@ -9976,8 +9485,7 @@ msgstr "Nytt namn på spelelista:"
 msgid "New Copy Playlist"
 msgstr "Ny spelelistekopi"
 
-#: route_time_axis.cc:1078
-#: route_time_axis.cc:1131
+#: route_time_axis.cc:1078 route_time_axis.cc:1131
 msgid "Name for new playlist:"
 msgstr "Namn på den nye spelelista:"
 
@@ -9987,7 +9495,8 @@ msgstr "Ny speleliste"
 
 #: route_time_axis.cc:1319
 msgid "You cannot create a track with that name as it is reserved for %1"
-msgstr "Du kan ikkje laga eit spor med det namnet, fordi det er halde att for %1"
+msgstr ""
+"Du kan ikkje laga eit spor med det namnet, fordi det er halde att for %1"
 
 #: route_time_axis.cc:1500
 msgid "New Copy..."
@@ -10021,10 +9530,10 @@ msgstr "Underlag"
 msgid "Remove \"%1\""
 msgstr "Fjern \"%1\""
 
-#: route_time_axis.cc:2352
-#: route_time_axis.cc:2389
+#: route_time_axis.cc:2352 route_time_axis.cc:2389
 msgid "programming error: underlay reference pointer pairs are inconsistent!"
-msgstr "Programmeringsfeil: underlags-tilvisingspeikarpar er ikkje samanhengande!"
+msgstr ""
+"Programmeringsfeil: underlags-tilvisingspeikarpar er ikkje samanhengande!"
 
 #: route_time_axis.cc:2420
 msgid "After-fade listen (AFL)"
@@ -10249,22 +9758,28 @@ msgid ""
 "\n"
 "Remote Control IDs are currently determined by track/bus ordering in %1\n"
 "\n"
-"%4Use the User Interaction tab of the Preferences window if you want to change this%5"
+"%4Use the User Interaction tab of the Preferences window if you want to "
+"change this%5"
 msgstr ""
 "Fjernkontroll-IDen for %6 er: %3\n"
 "\n"
 "\n"
 "Fjernkontroll-IDane blir avgjorde av spor-/bussrekkjefylgja i %1\n"
 "\n"
-"%4Sjå på brukarsamhandling-fana i vindauga for innstillingar viss du vil endra dette%5"
+"%4Sjå på brukarsamhandling-fana i vindauga for innstillingar viss du vil "
+"endra dette%5"
 
 #: route_ui.cc:1758
 msgid "the mixer"
 msgstr "miksaren"
 
 #: route_ui.cc:1813
-msgid "Left-click to invert (phase reverse) channel %1 of this track.  Right-click to show menu."
-msgstr "Venstreklikk for å fasevenda kanal %1 på dette sporet. Høgreklikk for å sjå menyen."
+msgid ""
+"Left-click to invert (phase reverse) channel %1 of this track.  Right-click "
+"to show menu."
+msgstr ""
+"Venstreklikk for å fasevenda kanal %1 på dette sporet. Høgreklikk for å sjå "
+"menyen."
 
 #: route_ui.cc:1815
 msgid "Click to show a menu of channels for inversion (phase reverse)"
@@ -10298,8 +9813,7 @@ msgstr "Element"
 msgid "Cannot load XML for session from %1"
 msgstr "Greier ikkje lasta XML-fil for økta frå %1"
 
-#: session_import_dialog.cc:127
-#: session_import_dialog.cc:211
+#: session_import_dialog.cc:127 session_import_dialog.cc:211
 msgid "Some elements had errors in them. Please see the log for details"
 msgstr "Feil på nokre element. Sjå loggfila for fleire opplysningar"
 
@@ -10371,8 +9885,7 @@ msgstr "Kommentar"
 msgid "Copyright"
 msgstr "Copyright"
 
-#: session_metadata_dialog.cc:580
-#: session_metadata_dialog.cc:585
+#: session_metadata_dialog.cc:580 session_metadata_dialog.cc:585
 msgid "Album"
 msgstr "Album"
 
@@ -10609,16 +10122,21 @@ msgid "Timecode Generator offset"
 msgstr "Tidskodegenerator-avvvik"
 
 #: session_option_editor.cc:119
-msgid "Specify an offset which is added to the generated timecode (so far only LTC)."
-msgstr "Skriv inn eit avvik som blir lagt til den genererte tidskoden (til no berre LTC)."
+msgid ""
+"Specify an offset which is added to the generated timecode (so far only LTC)."
+msgstr ""
+"Skriv inn eit avvik som blir lagt til den genererte tidskoden (til no berre "
+"LTC)."
 
 #: session_option_editor.cc:123
 msgid "JACK Transport/Time Settings"
 msgstr "Innstillingar for JACK-transport og -tid"
 
 #: session_option_editor.cc:127
-msgid "%1 is JACK Time Master (provides Bar|Beat|Tick and other information to JACK)"
-msgstr "%1 er JACK-tidsstyrar (gjev Takt|taktslag|tikk og andre opplysingar til JACK)"
+msgid ""
+"%1 is JACK Time Master (provides Bar|Beat|Tick and other information to JACK)"
+msgstr ""
+"%1 er JACK-tidsstyrar (gjev Takt|taktslag|tikk og andre opplysingar til JACK)"
 
 #: session_option_editor.cc:136
 msgid "Default crossfade type"
@@ -10648,12 +10166,9 @@ msgstr "Bolktoningar på"
 msgid "Region fades visible"
 msgstr "Bolktoningane er synlege"
 
-#: session_option_editor.cc:171
-#: session_option_editor.cc:184
-#: session_option_editor.cc:198
-#: session_option_editor.cc:200
-#: session_option_editor.cc:206
-#: session_option_editor.cc:213
+#: session_option_editor.cc:171 session_option_editor.cc:184
+#: session_option_editor.cc:198 session_option_editor.cc:200
+#: session_option_editor.cc:206 session_option_editor.cc:213
 msgid "Media"
 msgstr "Media"
 
@@ -10706,8 +10221,10 @@ msgid "Search for MIDI files in:"
 msgstr "Sjå etter MIDI-filer i:"
 
 #: session_option_editor.cc:219
-msgid "Track Input Monitoring automatically follows transport state (\"auto-input\")"
-msgstr "Lytting til sporinnngangen fylgjer automatisk transportstatus («autoinngang»)"
+msgid ""
+"Track Input Monitoring automatically follows transport state (\"auto-input\")"
+msgstr ""
+"Lytting til sporinnngangen fylgjer automatisk transportstatus («autoinngang»)"
 
 #: session_option_editor.cc:226
 msgid "Use monitor section in this session"
@@ -10761,24 +10278,19 @@ msgstr "Lim nye markørar til takter og taktslag"
 msgid "Glue new regions to bars and beats"
 msgstr "Lim nye bolkar til takter og taktslag"
 
-#: sfdb_ui.cc:87
-#: sfdb_ui.cc:107
-#: sfdb_ui.cc:116
+#: sfdb_ui.cc:87 sfdb_ui.cc:107 sfdb_ui.cc:116
 msgid "as new tracks"
 msgstr "som nytt spor"
 
-#: sfdb_ui.cc:89
-#: sfdb_ui.cc:109
+#: sfdb_ui.cc:89 sfdb_ui.cc:109
 msgid "to selected tracks"
 msgstr "til valde spor"
 
-#: sfdb_ui.cc:91
-#: sfdb_ui.cc:111
+#: sfdb_ui.cc:91 sfdb_ui.cc:111
 msgid "to region list"
 msgstr "til bolklista"
 
-#: sfdb_ui.cc:93
-#: sfdb_ui.cc:113
+#: sfdb_ui.cc:93 sfdb_ui.cc:113
 msgid "as new tape tracks"
 msgstr "som nytt bandspor"
 
@@ -10790,8 +10302,7 @@ msgstr "programmeringsfeil: ukjend importmodusstreng %1"
 msgid "Auto-play"
 msgstr "Autospel"
 
-#: sfdb_ui.cc:130
-#: sfdb_ui.cc:237
+#: sfdb_ui.cc:130 sfdb_ui.cc:237
 msgid "<b>Sound File Information</b>"
 msgstr "<b>Lydfilinformasjon</b>"
 
@@ -10803,8 +10314,7 @@ msgstr "Tidsstempel:"
 msgid "Format:"
 msgstr "Format:"
 
-#: sfdb_ui.cc:183
-#: sfdb_ui.cc:532
+#: sfdb_ui.cc:183 sfdb_ui.cc:532
 msgid "Tags:"
 msgstr "Knaggar:"
 
@@ -10824,8 +10334,7 @@ msgstr "Fekk ikkje tilgang til lydfil: "
 msgid "SoundFileBox: Could not tokenize string: "
 msgstr "SoundFileBox: Greidde ikkje laga teikn av strengen: "
 
-#: sfdb_ui.cc:423
-#: sfdb_ui.cc:425
+#: sfdb_ui.cc:423 sfdb_ui.cc:425
 msgid "Search"
 msgstr "Søk"
 
@@ -10957,8 +10466,7 @@ msgstr "B"
 msgid "kB"
 msgstr "kB"
 
-#: sfdb_ui.cc:1016
-#: sfdb_ui.cc:1018
+#: sfdb_ui.cc:1016 sfdb_ui.cc:1018
 msgid "MB"
 msgstr "MB"
 
@@ -10978,48 +10486,35 @@ msgstr "Fann eitt treff."
 msgid "Found %1 matche(s)"
 msgstr "Fann %1 treff."
 
-#: sfdb_ui.cc:1273
-#: sfdb_ui.cc:1580
-#: sfdb_ui.cc:1630
-#: sfdb_ui.cc:1648
+#: sfdb_ui.cc:1273 sfdb_ui.cc:1580 sfdb_ui.cc:1630 sfdb_ui.cc:1648
 msgid "one track per file"
 msgstr "Eitt spor per fil"
 
-#: sfdb_ui.cc:1276
-#: sfdb_ui.cc:1631
-#: sfdb_ui.cc:1649
+#: sfdb_ui.cc:1276 sfdb_ui.cc:1631 sfdb_ui.cc:1649
 msgid "one track per channel"
 msgstr "Eitt spor per kanal"
 
-#: sfdb_ui.cc:1284
-#: sfdb_ui.cc:1633
-#: sfdb_ui.cc:1650
+#: sfdb_ui.cc:1284 sfdb_ui.cc:1633 sfdb_ui.cc:1650
 msgid "sequence files"
 msgstr "sekvensfiler"
 
-#: sfdb_ui.cc:1287
-#: sfdb_ui.cc:1638
+#: sfdb_ui.cc:1287 sfdb_ui.cc:1638
 msgid "all files in one track"
 msgstr "alle filene i eitt spor"
 
-#: sfdb_ui.cc:1288
-#: sfdb_ui.cc:1632
+#: sfdb_ui.cc:1288 sfdb_ui.cc:1632
 msgid "merge files"
 msgstr "flett filer"
 
-#: sfdb_ui.cc:1294
-#: sfdb_ui.cc:1635
+#: sfdb_ui.cc:1294 sfdb_ui.cc:1635
 msgid "one region per file"
 msgstr "ein bolk per fil"
 
-#: sfdb_ui.cc:1297
-#: sfdb_ui.cc:1636
+#: sfdb_ui.cc:1297 sfdb_ui.cc:1636
 msgid "one region per channel"
 msgstr "ein bolk for kvar kanal"
 
-#: sfdb_ui.cc:1302
-#: sfdb_ui.cc:1637
-#: sfdb_ui.cc:1651
+#: sfdb_ui.cc:1302 sfdb_ui.cc:1637 sfdb_ui.cc:1651
 msgid "all files in one region"
 msgstr "alle filene i ein bolk"
 
@@ -11035,18 +10530,15 @@ msgstr ""
 msgid "Copy files to session"
 msgstr "Kopier filer til økta"
 
-#: sfdb_ui.cc:1525
-#: sfdb_ui.cc:1688
+#: sfdb_ui.cc:1525 sfdb_ui.cc:1688
 msgid "file timestamp"
 msgstr "filtidsstempel"
 
-#: sfdb_ui.cc:1526
-#: sfdb_ui.cc:1690
+#: sfdb_ui.cc:1526 sfdb_ui.cc:1690
 msgid "edit point"
 msgstr "redigeringspunkt"
 
-#: sfdb_ui.cc:1527
-#: sfdb_ui.cc:1692
+#: sfdb_ui.cc:1527 sfdb_ui.cc:1692
 msgid "playhead"
 msgstr "spelehovud"
 
@@ -11070,18 +10562,15 @@ msgstr "<b>Punktlegging</b>"
 msgid "<b>Conversion quality</b>"
 msgstr "<b>Omkodingskvalitet</b>"
 
-#: sfdb_ui.cc:1598
-#: sfdb_ui.cc:1704
+#: sfdb_ui.cc:1598 sfdb_ui.cc:1704
 msgid "Best"
 msgstr "Best"
 
-#: sfdb_ui.cc:1599
-#: sfdb_ui.cc:1706
+#: sfdb_ui.cc:1599 sfdb_ui.cc:1706
 msgid "Good"
 msgstr "God"
 
-#: sfdb_ui.cc:1600
-#: sfdb_ui.cc:1708
+#: sfdb_ui.cc:1600 sfdb_ui.cc:1708
 msgid "Quick"
 msgstr "Snøgg"
 
@@ -11101,13 +10590,11 @@ msgstr "Prosent"
 msgid "Units"
 msgstr "Einingar"
 
-#: shuttle_control.cc:178
-#: shuttle_control.cc:594
+#: shuttle_control.cc:178 shuttle_control.cc:594
 msgid "Sprung"
 msgstr "Fjør"
 
-#: shuttle_control.cc:182
-#: shuttle_control.cc:597
+#: shuttle_control.cc:182 shuttle_control.cc:597
 msgid "Wheel"
 msgstr "Hjul"
 
@@ -11149,15 +10636,15 @@ msgstr "Fjern høgtalar"
 msgid "Azimuth:"
 msgstr "Asimut:"
 
-#: startup.cc:72
+#: startup.cc:77
 msgid "Create a new session"
 msgstr "Lag ei ny økt"
 
-#: startup.cc:73
+#: startup.cc:78
 msgid "Open an existing session"
 msgstr "Opna ei eksisterande økt"
 
-#: startup.cc:74
+#: startup.cc:79
 msgid ""
 "Use an external mixer or the hardware mixer of your audio interface.\n"
 "Ardour will play NO role in monitoring"
@@ -11165,15 +10652,15 @@ msgstr ""
 "Bruk ein ekstern miksar eller maskinvaremiksaren på lydkortet ditt.\n"
 "Ardour spelar INGA rolle i lyttinga"
 
-#: startup.cc:76
+#: startup.cc:81
 msgid "Ask %1 to play back material as it is being recorded"
 msgstr "Be %1 om å spela det som blir teke opp"
 
-#: startup.cc:79
+#: startup.cc:84
 msgid "I'd like more options for this session"
 msgstr "Eg vil gjerne ha fleire val for denne økta"
 
-#: startup.cc:195
+#: startup.cc:202
 msgid ""
 "<b>Welcome to this BETA release of Ardour 3.0</b>\n"
 "\n"
@@ -11181,14 +10668,18 @@ msgid ""
 "as well as general workflow improvements, before this can be considered\n"
 "release software. So, a few guidelines:\n"
 "\n"
-"1) Please do <b>NOT</b> use this software with the expectation that it is stable or reliable\n"
+"1) Please do <b>NOT</b> use this software with the expectation that it is "
+"stable or reliable\n"
 "   though it may be so, depending on your workflow.\n"
 "2) Please see http://ardour.org/a3_features for a guide to new features.\n"
 "3) <b>Please do NOT use the forums at ardour.org to report issues</b>.\n"
-"4) Please <b>DO</b> use the bugtracker at http://tracker.ardour.org/ to report issues\n"
+"4) Please <b>DO</b> use the bugtracker at http://tracker.ardour.org/ to "
+"report issues\n"
 "   making sure to note the product version number as 3.0-beta.\n"
-"5) Please <b>DO</b> use the ardour-users mailing list to discuss ideas and pass on comments.\n"
-"6) Please <b>DO</b> join us on IRC for real time discussions about ardour3. You\n"
+"5) Please <b>DO</b> use the ardour-users mailing list to discuss ideas and "
+"pass on comments.\n"
+"6) Please <b>DO</b> join us on IRC for real time discussions about ardour3. "
+"You\n"
 "   can get there directly from Ardour via the Help->Chat menu option.\n"
 "\n"
 "Full information on all the above can be found on the support page at\n"
@@ -11201,13 +10692,16 @@ msgstr ""
 "til liks med mange utbetringar, før dette kan kallast ferdig programvare.\n"
 "Difor må du få eit par retningsliner:\n"
 "\n"
-"1) Ver god å <b>IKKJE</b> bruka dette programmet til kritisk produksjon, sjølv om\n"
+"1) Ver god å <b>IKKJE</b> bruka dette programmet til kritisk produksjon, "
+"sjølv om\n"
 "   programmet kan køyra stabilt.\n"
 "2) Les http://ardour.org/a3_features for å læra om nye eigenskapar.\n"
 "3) <b>IKKJE bruk foruma på ardour.org for å rapportera feil</b>.\n"
-"4) I staden, <b>HUGS</b> å bruka avlusaren på http://tracker.ardour.org/ for å rapportera feil,\n"
+"4) I staden, <b>HUGS</b> å bruka avlusaren på http://tracker.ardour.org/ for "
+"å rapportera feil,\n"
 "   og bruk versjonsnummeret 3.0-beta.\n"
-"5) <b>HUGS</b> å bruka ardour-users-epostlista for å utveksla idear og røynsler.\n"
+"5) <b>HUGS</b> å bruka ardour-users-epostlista for å utveksla idear og "
+"røynsler.\n"
 "6) Ver snill å <b>BLI MED</b> på IRC for å diskutera ardour3 i sanntid.\n"
 "   Du kan koma direkte dit via Hjelp->Prat-menyvalet.\n"
 "\n"
@@ -11215,33 +10709,39 @@ msgstr ""
 "\n"
 "                http://ardour.org/support\n"
 
-#: startup.cc:221
+#: startup.cc:228
 msgid "This is a BETA RELEASE"
 msgstr "Dette er ei BETA-utgåve"
 
-#: startup.cc:327
+#: startup.cc:335
 msgid "Audio / MIDI Setup"
 msgstr "Lyd / MIDI-oppsett"
 
-#: startup.cc:339
+#: startup.cc:347
 msgid ""
-"<span size=\"larger\">%1 is a digital audio workstation. You can use it to record, edit and mix multi-track audio. You can produce your own CDs, mix video soundtracks, or experiment with new ideas about music and sound. \n"
+"<span size=\"larger\">%1 is a digital audio workstation. You can use it to "
+"record, edit and mix multi-track audio. You can produce your own CDs, mix "
+"video soundtracks, or experiment with new ideas about music and sound. \n"
 "\n"
-"There are a few things that need to be configured before you start using the program.</span> "
+"There are a few things that need to be configured before you start using the "
+"program.</span> "
 msgstr ""
-"<span size=\"larger\">%1 er ein digital lydarbeidsstasjon. Du kan bruka han til å ta opp, redigera og miksa fleirsporslyd. Du kan laga dine eigne CDar, miksa filmlyd, eller berre eksperimentera med nye idear kring musikk og lyd.\n"
+"<span size=\"larger\">%1 er ein digital lydarbeidsstasjon. Du kan bruka han "
+"til å ta opp, redigera og miksa fleirsporslyd. Du kan laga dine eigne CDar, "
+"miksa filmlyd, eller berre eksperimentera med nye idear kring musikk og "
+"lyd.\n"
 "\n"
 "Me må gjera nokre val før du byrjar å bruka programmet.</span>"
 
-#: startup.cc:365
+#: startup.cc:373
 msgid "Welcome to %1"
 msgstr "Velkomen til %1"
 
-#: startup.cc:388
+#: startup.cc:396
 msgid "Default folder for %1 sessions"
 msgstr "Standardmappa for %1-økter"
 
-#: startup.cc:394
+#: startup.cc:402
 msgid ""
 "Each project that you work on with %1 has its own folder.\n"
 "These can require a lot of disk space if you are recording audio.\n"
@@ -11257,11 +10757,11 @@ msgstr ""
 "\n"
 "<i>(Du kan lagra prosjekt kvar som helst, dette er berre standardvalet)</i>"
 
-#: startup.cc:416
+#: startup.cc:424
 msgid "Default folder for new sessions"
 msgstr "Standardmappe for nye økter"
 
-#: startup.cc:437
+#: startup.cc:445
 msgid ""
 "While recording instruments or vocals, you probably want to listen to the\n"
 "signal as well as record it. This is called \"monitoring\". There are\n"
@@ -11269,7 +10769,8 @@ msgid ""
 "configuration of that equipment. The two most common are presented here.\n"
 "Please choose whichever one is right for your setup.\n"
 "\n"
-"<i>(You can change this preference at any time, via the Preferences dialog)</i>\n"
+"<i>(You can change this preference at any time, via the Preferences dialog)</"
+"i>\n"
 "\n"
 "<i>If you do not understand what this is about, just accept the default.</i>"
 msgstr ""
@@ -11280,23 +10781,27 @@ msgstr ""
 "\n"
 "<i>(Du kan endra dette i Innstillingar-ruta seinare)</i>"
 
-#: startup.cc:458
+#: startup.cc:466
 msgid "Monitoring Choices"
 msgstr "Lyttingsval"
 
-#: startup.cc:481
+#: startup.cc:489
 msgid "Use a Master bus directly"
 msgstr "Bruk hovudbuss direkte"
 
-#: startup.cc:483
-msgid "Connect the Master bus directly to your hardware outputs. This is preferable for simple usage."
-msgstr "Kopla hovudbussen direkte til maskinvareutgangane. Best for grunnleggande bruk."
+#: startup.cc:491
+msgid ""
+"Connect the Master bus directly to your hardware outputs. This is preferable "
+"for simple usage."
+msgstr ""
+"Kopla hovudbussen direkte til maskinvareutgangane. Best for grunnleggande "
+"bruk."
 
-#: startup.cc:492
+#: startup.cc:500
 msgid "Use an additional Monitor bus"
 msgstr "Bruk eigen lyttebuss i tillegg"
 
-#: startup.cc:495
+#: startup.cc:503
 msgid ""
 "Use a Monitor bus between Master bus and hardware outputs for \n"
 "greater control in monitoring without affecting the mix."
@@ -11304,7 +10809,7 @@ msgstr ""
 "Bruk ein lyttebuss mellom hovudbussen og maskinvareutgangane\n"
 "for å ha betre kontroll med lyttinga utan å påverka miksen."
 
-#: startup.cc:517
+#: startup.cc:525
 msgid ""
 "<i>You can change this preference at any time via the Preferences dialog.\n"
 "You can also add or remove the monitor section to/from any session.</i>\n"
@@ -11312,110 +10817,108 @@ msgid ""
 "<i>If you do not understand what this is about, just accept the default.</i>"
 msgstr ""
 "<i>Du kan endra dette når som helst i innstillingane.\n"
-"Det går òg an å fjerna eller leggja til monitoravdelinga frå/til andre økter.</i>\n"
+"Det går òg an å fjerna eller leggja til monitoravdelinga frå/til andre økter."
+"</i>\n"
 "\n"
 "<i>Viss du ikkje skjønar kva dette er til, kan du bruka standardvala.</i>"
 
-#: startup.cc:528
+#: startup.cc:536
 msgid "Monitor Section"
 msgstr "Lytteavdeling"
 
-#: startup.cc:568
+#: startup.cc:576
 msgid "What would you like to do ?"
 msgstr "Kva vil du gjera?"
 
-#: startup.cc:697
+#: startup.cc:705
 msgid "Open"
 msgstr "Opna"
 
-#: startup.cc:743
+#: startup.cc:751
 msgid "Session name:"
 msgstr "Namn på økta:"
 
-#: startup.cc:766
+#: startup.cc:774
 msgid "Create session folder in:"
 msgstr "Lag øktmappa i :"
 
-#: startup.cc:780
+#: startup.cc:788
 msgid "Select folder for session"
 msgstr "Vel mappe for økta"
 
-#: startup.cc:812
+#: startup.cc:820
 msgid "Use this template"
 msgstr "Bruk denne malen"
 
-#: startup.cc:815
+#: startup.cc:823
 msgid "no template"
 msgstr "ingen mal"
 
-#: startup.cc:843
+#: startup.cc:851
 msgid "Use an existing session as a template:"
 msgstr "Bruk ei eksisterande økt som mal:"
 
-#: startup.cc:855
+#: startup.cc:863
 msgid "Select template"
 msgstr "Vel mal"
 
-#: startup.cc:881
+#: startup.cc:889
 msgid "New Session"
 msgstr "Ny økt"
 
-#: startup.cc:1034
+#: startup.cc:1042
 msgid "Select session file"
 msgstr "Vel øktfil"
 
-#: startup.cc:1050
+#: startup.cc:1058
 msgid "Browse:"
 msgstr "Bla gjennom:"
 
-#: startup.cc:1059
+#: startup.cc:1067
 msgid "Select a session"
 msgstr "Vel ei økt"
 
-#: startup.cc:1085
-#: startup.cc:1086
-#: startup.cc:1087
+#: startup.cc:1093 startup.cc:1094 startup.cc:1095
 msgid "channels"
 msgstr "kanalar"
 
-#: startup.cc:1101
+#: startup.cc:1109
 msgid "<b>Busses</b>"
 msgstr "<b>Bussar</b>"
 
-#: startup.cc:1102
+#: startup.cc:1110
 msgid "<b>Inputs</b>"
 msgstr "<b>Ingangar</b>"
 
-#: startup.cc:1103
+#: startup.cc:1111
 msgid "<b>Outputs</b>"
 msgstr "<b>Utgangar</b>"
 
-#: startup.cc:1111
+#: startup.cc:1119
 msgid "Create master bus"
 msgstr "Lag hovudbuss"
 
-#: startup.cc:1121
+#: startup.cc:1129
 msgid "Automatically connect to physical inputs"
 msgstr "Kopla automatisk til fysiske inngangar"
 
-#: startup.cc:1128
-#: startup.cc:1187
+#: startup.cc:1136 startup.cc:1195
 msgid "Use only"
 msgstr "Bruk berre"
 
-#: startup.cc:1181
+#: startup.cc:1189
 msgid "Automatically connect outputs"
 msgstr "Kopla utgangane automatisk"
 
-#: startup.cc:1203
+#: startup.cc:1211
 msgid "... to master bus"
 msgstr "... til hovudbussen"
 
-#: startup.cc:1213
+#: startup.cc:1221
 msgid "... to physical outputs"
 msgstr "... til fysiske utgangar"
 
-#: startup.cc:1263
+#: startup.cc:1271
 msgid "Advanced Session Options"
 msgstr "Avanserte innstillingar for økta"
 
@@ -11451,8 +10954,7 @@ msgstr "g-pause"
 msgid "back"
 msgstr "tilbake"
 
-#: step_entry.cc:81
-#: step_entry.cc:84
+#: step_entry.cc:81 step_entry.cc:84
 msgid "+"
 msgstr "+"
 
@@ -11564,13 +11066,11 @@ msgstr "Set inn bankendringsmelding"
 msgid "Insert a program change message"
 msgstr "Set inn ei programendringsmelding"
 
-#: step_entry.cc:342
-#: step_entry.cc:701
+#: step_entry.cc:342 step_entry.cc:701
 msgid "Move Insert Position Back by Note Length"
 msgstr "Flytt Set inn-posisjonen bakover med ei notelengd"
 
-#: step_entry.cc:343
-#: step_entry.cc:699
+#: step_entry.cc:343 step_entry.cc:699
 msgid "Move Insert Position to Edit Point"
 msgstr "Flytt Set inn-posisjonen til redigeringspunktet"
 
@@ -11638,8 +11138,7 @@ msgstr "Set inn pause på ei notelengd"
 msgid "Insert a Snap-length Rest"
 msgstr "Set inn pause på ei festelengd"
 
-#: step_entry.cc:615
-#: step_entry.cc:616
+#: step_entry.cc:615 step_entry.cc:616
 msgid "Move to next octave"
 msgstr "Flytt til neste oktav"
 
@@ -11775,8 +11274,7 @@ msgstr "Bruk mezzo forte som notevolum"
 msgid "Set Note Velocity to Forte"
 msgstr "Bruk forte som notevolum"
 
-#: step_entry.cc:676
-#: step_entry.cc:678
+#: step_entry.cc:676 step_entry.cc:678
 msgid "Set Note Velocity to Fortississimo"
 msgstr "Bruk forte fortissimo som notevolum"
 
@@ -11828,18 +11326,15 @@ msgstr "Minstelengd"
 msgid "Fade length"
 msgstr "Toningslengd"
 
-#: tempo_dialog.cc:43
-#: tempo_dialog.cc:58
+#: tempo_dialog.cc:43 tempo_dialog.cc:58
 msgid "bar:"
 msgstr "takt:"
 
-#: tempo_dialog.cc:44
-#: tempo_dialog.cc:59
+#: tempo_dialog.cc:44 tempo_dialog.cc:59
 msgid "beat:"
 msgstr "slag:"
 
-#: tempo_dialog.cc:45
-#: tempo_dialog.cc:60
+#: tempo_dialog.cc:45 tempo_dialog.cc:60
 msgid "Pulse note"
 msgstr "Pulsnote"
 
@@ -11847,65 +11342,47 @@ msgstr "Pulsnote"
 msgid "Edit Tempo"
 msgstr "Endra tempo"
 
-#: tempo_dialog.cc:76
-#: tempo_dialog.cc:77
-#: tempo_dialog.cc:282
+#: tempo_dialog.cc:76 tempo_dialog.cc:77 tempo_dialog.cc:282
 #: tempo_dialog.cc:283
 msgid "whole"
 msgstr "heil"
 
-#: tempo_dialog.cc:78
-#: tempo_dialog.cc:79
-#: tempo_dialog.cc:284
+#: tempo_dialog.cc:78 tempo_dialog.cc:79 tempo_dialog.cc:284
 #: tempo_dialog.cc:285
 msgid "second"
 msgstr "andre"
 
-#: tempo_dialog.cc:80
-#: tempo_dialog.cc:81
-#: tempo_dialog.cc:286
+#: tempo_dialog.cc:80 tempo_dialog.cc:81 tempo_dialog.cc:286
 #: tempo_dialog.cc:287
 msgid "third"
 msgstr "tredjedel"
 
-#: tempo_dialog.cc:82
-#: tempo_dialog.cc:83
-#: tempo_dialog.cc:288
+#: tempo_dialog.cc:82 tempo_dialog.cc:83 tempo_dialog.cc:288
 #: tempo_dialog.cc:289
 msgid "quarter"
 msgstr "fjerdedel"
 
-#: tempo_dialog.cc:84
-#: tempo_dialog.cc:85
-#: tempo_dialog.cc:290
+#: tempo_dialog.cc:84 tempo_dialog.cc:85 tempo_dialog.cc:290
 #: tempo_dialog.cc:291
 msgid "eighth"
 msgstr "åttendel"
 
-#: tempo_dialog.cc:86
-#: tempo_dialog.cc:87
-#: tempo_dialog.cc:292
+#: tempo_dialog.cc:86 tempo_dialog.cc:87 tempo_dialog.cc:292
 #: tempo_dialog.cc:293
 msgid "sixteenth"
 msgstr "sekstendel"
 
-#: tempo_dialog.cc:88
-#: tempo_dialog.cc:89
-#: tempo_dialog.cc:294
+#: tempo_dialog.cc:88 tempo_dialog.cc:89 tempo_dialog.cc:294
 #: tempo_dialog.cc:295
 msgid "thirty-second"
 msgstr "toogtredvedel"
 
-#: tempo_dialog.cc:90
-#: tempo_dialog.cc:91
-#: tempo_dialog.cc:296
+#: tempo_dialog.cc:90 tempo_dialog.cc:91 tempo_dialog.cc:296
 #: tempo_dialog.cc:297
 msgid "sixty-fourth"
 msgstr "sekstifiredel"
 
-#: tempo_dialog.cc:92
-#: tempo_dialog.cc:93
-#: tempo_dialog.cc:298
+#: tempo_dialog.cc:92 tempo_dialog.cc:93 tempo_dialog.cc:298
 #: tempo_dialog.cc:299
 msgid "one-hundred-twenty-eighth"
 msgstr "hundreogtjueåttedel"
@@ -12010,13 +11487,11 @@ msgstr "Endra tonehøgd på lydmaterialet"
 msgid "Time Stretch Audio"
 msgstr "Tidsstrekk lydmaterialet"
 
-#: time_fx_dialog.cc:105
-#: transpose_dialog.cc:41
+#: time_fx_dialog.cc:105 transpose_dialog.cc:41
 msgid "Octaves:"
 msgstr "Oktavar:"
 
-#: time_fx_dialog.cc:110
-#: transpose_dialog.cc:46
+#: time_fx_dialog.cc:110 transpose_dialog.cc:46
 msgid "Semitones:"
 msgstr "Halvtonar:"
 
@@ -12028,8 +11503,7 @@ msgstr "Cent:"
 msgid "Time|Shift"
 msgstr "Tid|Forskyv"
 
-#: time_fx_dialog.cc:147
-#: time_fx_dialog.cc:150
+#: time_fx_dialog.cc:147 time_fx_dialog.cc:150
 msgid "TimeFXButton"
 msgstr "TidsFXknapp"
 
@@ -12061,18 +11535,15 @@ msgstr "Transponer MIDI"
 msgid "Transpose"
 msgstr "Transponer"
 
-#: ui_config.cc:82
-#: ui_config.cc:113
+#: ui_config.cc:82 ui_config.cc:113
 msgid "Loading default ui configuration file %1"
 msgstr "Lastar standard brukarflatefil %1"
 
-#: ui_config.cc:85
-#: ui_config.cc:116
+#: ui_config.cc:85 ui_config.cc:116
 msgid "cannot read default ui configuration file \"%1\""
 msgstr "greier ikkje lesa standardbrukarflatefila \"%1\""
 
-#: ui_config.cc:90
-#: ui_config.cc:121
+#: ui_config.cc:90 ui_config.cc:121
 msgid "default ui configuration file \"%1\" not loaded successfully."
 msgstr "standardbrukarflatefila \"%1\" vart ikkje lasta."
 
@@ -12096,8 +11567,7 @@ msgstr "finn inga grensesnitt-oppsettsfil, lerretet vil verka øydelagt."
 msgid "Config file %1 not saved"
 msgstr "Oppsettsfila %1 vart ikkje lagra"
 
-#: utils.cc:110
-#: utils.cc:153
+#: utils.cc:110 utils.cc:153
 msgid "bad XPM header %1"
 msgstr "Feil med XPM-tittellinja %1"
 

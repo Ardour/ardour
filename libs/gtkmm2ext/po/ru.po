@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-07-15 09:17+0400\n"
+"POT-Creation-Date: 2013-01-03 08:18-0500\n"
 "PO-Revision-Date: 2012-07-15 14:08+0400\n"
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
@@ -32,7 +32,7 @@ msgstr "включить MIDI-контроллер"
 msgid "button cannot watch state of non-existing Controllable\n"
 msgstr ""
 
-#: gtk_ui.cc:105
+#: gtk_ui.cc:107
 msgid "Log"
 msgstr "Журнал"
 
@@ -40,17 +40,14 @@ msgstr "Журнал"
 msgid ""
 "\n"
 "\n"
-"Key: "
+"Shortcut: "
 msgstr ""
-"\n"
-"\n"
-"Клавиша: "
 
-#: gtk_ui.cc:634
+#: gtk_ui.cc:633
 msgid "Press To Exit"
 msgstr "Нажмите для выхода"
 
-#: gtk_ui.cc:670
+#: gtk_ui.cc:669
 msgid "I'm sorry %1, I can't do that"
 msgstr ""
 
@@ -97,6 +94,15 @@ msgstr ""
 #: textviewer.cc:34
 msgid "Close"
 msgstr "Закрыть"
+
+#~ msgid ""
+#~ "\n"
+#~ "\n"
+#~ "Key: "
+#~ msgstr ""
+#~ "\n"
+#~ "\n"
+#~ "Клавиша: "
 
 #~ msgid "OK"
 #~ msgstr "ОК"

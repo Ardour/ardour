@@ -1,10 +1,11 @@
+# translation of libgtkmm2ext to German
 # Copyright (C) YEAR "Paul Davis"
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Edgar Aichinger <edgar.aichinger@aon.at>, 2013.
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: libgtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-12-20 10:09+0100\n"
 "PO-Revision-Date: 2013-01-02 16:27+0100\n"
@@ -27,9 +28,9 @@ msgstr "Jetzt den Kontroller bedienen"
 
 #: bindable_button.cc:48
 msgid "button cannot watch state of non-existing Controllable\n"
-msgstr ""
+msgstr
 "Die Schaltfläche kann den Status eines nichtexistenten Kontroller-Zieles "
-"nicht beobachten"
+"nicht beobachten\n"
 
 #: gtk_ui.cc:107
 msgid "Log"
