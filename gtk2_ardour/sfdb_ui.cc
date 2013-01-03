@@ -1058,15 +1058,10 @@ SoundFileBrowser::freesound_search()
 	gdk_window_set_cursor (get_window()->gobj(), prev_cursor);
 
 	freesound_progress_bar.set_fraction(0.0);
-	switch (matches) {
-		case 0:
-			freesound_progress_bar.set_text(_("Search returned no results."));
-			break;
-		case 1:
-			freesound_progress_bar.set_text(_("Found one match."));
-			break;
-		default:
-			freesound_progress_bar.set_text(string_compose(_("Found %1 matche(s)"), matches));
+	if (matches == 0) {
+		freesound_progress_bar.set_text(_("Search returned no results."));
+	} else {
+		freesound_progress_bar.set_text(string_compose(P_("Found %1 match", "Found %1 matches", matches), matches));
 	}
 	freesound_list_view.get_column(1)->set_sizing(TREE_VIEW_COLUMN_AUTOSIZE);
 #endif
