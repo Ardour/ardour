@@ -837,7 +837,7 @@ SoundFileBrowser::freesound_list_view_selected ()
 		}
 
 		freesound_progress_bar.set_text(
-				string_compose(_("found %1 matche(s)"), matches));
+			string_compose(P_("found %1 match", "found %1 matches", matches), matches));
 
 		preview.setup_labels (file);
 	}
