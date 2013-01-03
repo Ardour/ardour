@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-03 08:29-0500\n"
+"POT-Creation-Date: 2013-01-03 11:16-0500\n"
 "PO-Revision-Date: 2013-01-03 08:29-0500\n"
 "Last-Translator: Rui-huai Zhang <zrhzrh>\n"
 "Language-Team: zrhzrh <zrhzrh@mail.ustc.edu.cn>\n"
@@ -849,7 +849,7 @@ msgstr "无法创建新的MIDI音轨"
 msgid "could not create %1 new mixed tracks"
 msgstr "无法创建 %1 新的MIDI音轨"
 
-#: ardour_ui.cc:1395 ardour_ui.cc:1463
+#: ardour_ui.cc:1395 ardour_ui.cc:1456
 msgid ""
 "There are insufficient JACK ports available\n"
 "to create a new track or bus.\n"
@@ -864,31 +864,7 @@ msgstr ""
 msgid "You cannot add a track or bus without a session already loaded."
 msgstr "您只能在已载入的会话或总线中添加音轨和总线"
 
-#: ardour_ui.cc:1440
-msgid "could not create a new audio track"
-msgstr "无法新建音频音轨"
-
-#: ardour_ui.cc:1442
-msgid "could only create %1 of %2 new audio %3"
-msgstr ""
-
-#: ardour_ui.cc:1443 editor_ops.cc:6459
-msgid "tracks"
-msgstr "音轨"
-
-#: ardour_ui.cc:1443 editor_ops.cc:6465
-msgid "busses"
-msgstr "总线"
-
-#: ardour_ui.cc:1453
-msgid "could not create a new audio bus"
-msgstr "无法新建音频总线"
-
-#: ardour_ui.cc:1455
-msgid "could not create %1 new audio busses"
-msgstr "无法新建 %1 新的音频总线"
-
-#: ardour_ui.cc:1572
+#: ardour_ui.cc:1565
 #, fuzzy
 msgid ""
 "Please create one or more tracks before trying to record.\n"
@@ -897,7 +873,7 @@ msgstr ""
 "在录音之前，请创建至少一个音轨\n"
 "请查看会话菜单."
 
-#: ardour_ui.cc:1962
+#: ardour_ui.cc:1955
 msgid ""
 "The audio backend (JACK) was shutdown because:\n"
 "\n"
@@ -907,7 +883,7 @@ msgstr ""
 "\n"
 "%1"
 
-#: ardour_ui.cc:1964
+#: ardour_ui.cc:1957
 msgid ""
 "JACK has either been shutdown or it\n"
 "disconnected %1 because %1\n"
@@ -918,19 +894,19 @@ msgstr ""
 "原因是 %1 不够快.\n"
 "尝试重启JACK，重新连接并且保存会话."
 
-#: ardour_ui.cc:1989
+#: ardour_ui.cc:1982
 msgid "Unable to start the session running"
 msgstr "无法启动会话"
 
-#: ardour_ui.cc:2065
+#: ardour_ui.cc:2058
 msgid "Take Snapshot"
 msgstr "快照"
 
-#: ardour_ui.cc:2066
+#: ardour_ui.cc:2059
 msgid "Name of new snapshot"
 msgstr "新建快照的名称"
 
-#: ardour_ui.cc:2090
+#: ardour_ui.cc:2083
 #, fuzzy
 msgid ""
 "To ensure compatibility with various systems\n"
@@ -939,27 +915,27 @@ msgstr ""
 "为了确保在不同系统的兼容性\n"
 "快照文件名不要包含字符 '/'"
 
-#: ardour_ui.cc:2102
+#: ardour_ui.cc:2095
 msgid "Confirm Snapshot Overwrite"
 msgstr "确定覆盖快照"
 
-#: ardour_ui.cc:2103
+#: ardour_ui.cc:2096
 msgid "A snapshot already exists with that name.  Do you want to overwrite it?"
 msgstr "已存在同名快照. 覆盖之?"
 
-#: ardour_ui.cc:2106
+#: ardour_ui.cc:2099
 msgid "Overwrite"
 msgstr "覆盖"
 
-#: ardour_ui.cc:2140
+#: ardour_ui.cc:2133
 msgid "Rename Session"
 msgstr "重命名会话"
 
-#: ardour_ui.cc:2141
+#: ardour_ui.cc:2134
 msgid "New session name"
 msgstr "新建快照的名称"
 
-#: ardour_ui.cc:2155 ardour_ui.cc:2531 ardour_ui.cc:2576
+#: ardour_ui.cc:2148 ardour_ui.cc:2524 ardour_ui.cc:2569
 #, fuzzy
 msgid ""
 "To ensure compatibility with various systems\n"
@@ -968,12 +944,12 @@ msgstr ""
 "为了确保在不同系统的兼容性\n"
 "会话文件名不要包含字符 '/'"
 
-#: ardour_ui.cc:2163
+#: ardour_ui.cc:2156
 msgid ""
 "That name is already in use by another directory/folder. Please try again."
 msgstr "此名称已被另一个文件夹使用. 请再尝试一遍."
 
-#: ardour_ui.cc:2172
+#: ardour_ui.cc:2165
 msgid ""
 "Renaming this session failed.\n"
 "Things could be seriously messed up at this point"
@@ -981,19 +957,19 @@ msgstr ""
 "重命名会话失败.\n"
 "从现在开始事情将会变得乱七八糟"
 
-#: ardour_ui.cc:2287
+#: ardour_ui.cc:2280
 msgid "Save Template"
 msgstr "保存模板..."
 
-#: ardour_ui.cc:2288
+#: ardour_ui.cc:2281
 msgid "Name for template:"
 msgstr "模板名:"
 
-#: ardour_ui.cc:2289
+#: ardour_ui.cc:2282
 msgid "-template"
 msgstr "-模板"
 
-#: ardour_ui.cc:2327
+#: ardour_ui.cc:2320
 msgid ""
 "This session\n"
 "%1\n"
@@ -1003,52 +979,52 @@ msgstr ""
 "%1\n"
 "已存在. 打开它?"
 
-#: ardour_ui.cc:2337
+#: ardour_ui.cc:2330
 msgid "Open Existing Session"
 msgstr "打开已存在的会话"
 
-#: ardour_ui.cc:2567
+#: ardour_ui.cc:2560
 msgid "There is no existing session at \"%1\""
 msgstr " \"%1\" 没有会话文件"
 
-#: ardour_ui.cc:2654
+#: ardour_ui.cc:2647
 msgid "Please wait while %1 loads your session"
 msgstr "请等待 %1 载入会话"
 
-#: ardour_ui.cc:2669
+#: ardour_ui.cc:2662
 msgid "Port Registration Error"
 msgstr "端口(port)注册错误"
 
-#: ardour_ui.cc:2670
+#: ardour_ui.cc:2663
 msgid "Click the Close button to try again."
 msgstr "单击关闭按钮，再尝试一遍"
 
-#: ardour_ui.cc:2691
+#: ardour_ui.cc:2684
 msgid "Session \"%1 (snapshot %2)\" did not load successfully"
 msgstr "会话  \"%1 (快照 %2)\" 装载失败."
 
-#: ardour_ui.cc:2697
+#: ardour_ui.cc:2690
 msgid "Loading Error"
 msgstr "装载错误"
 
-#: ardour_ui.cc:2698
+#: ardour_ui.cc:2691
 msgid "Click the Refresh button to try again."
 msgstr "单击刷新按钮,再尝试一遍"
 
-#: ardour_ui.cc:2780
+#: ardour_ui.cc:2773
 msgid "Could not create session in \"%1\""
 msgstr "在 \"%1\" 无法创建会话"
 
-#: ardour_ui.cc:2908
+#: ardour_ui.cc:2901
 msgid "No files were ready for clean-up"
 msgstr "没有可以清空的文件"
 
-#: ardour_ui.cc:2912 ardour_ui.cc:2922 ardour_ui.cc:3039 ardour_ui.cc:3046
+#: ardour_ui.cc:2905 ardour_ui.cc:2915 ardour_ui.cc:3032 ardour_ui.cc:3039
 #: ardour_ui_ed.cc:104
 msgid "Clean-up"
 msgstr "清空"
 
-#: ardour_ui.cc:2913
+#: ardour_ui.cc:2906
 msgid ""
 "If this seems suprising, \n"
 "check for any existing snapshots.\n"
@@ -1056,23 +1032,23 @@ msgid ""
 "require some unused files to continue to exist."
 msgstr ""
 
-#: ardour_ui.cc:2972
+#: ardour_ui.cc:2965
 msgid "kilo"
 msgstr ""
 
-#: ardour_ui.cc:2975
+#: ardour_ui.cc:2968
 msgid "mega"
 msgstr ""
 
-#: ardour_ui.cc:2978
+#: ardour_ui.cc:2971
 msgid "giga"
 msgstr ""
 
-#: ardour_ui.cc:3034
+#: ardour_ui.cc:3027
 msgid "Are you sure you want to clean-up?"
 msgstr "您确认要删除这些文件吗"
 
-#: ardour_ui.cc:3041
+#: ardour_ui.cc:3034
 msgid ""
 "Clean-up is a destructive operation.\n"
 "ALL undo/redo information will be lost if you clean-up.\n"
@@ -1082,15 +1058,15 @@ msgstr ""
 "如果你清空了, 所有的撤销/重复信息将会丢失.\n"
 "清空将会把所有未使用过的文件弄到 \"死亡\" 位置"
 
-#: ardour_ui.cc:3049
+#: ardour_ui.cc:3042
 msgid "CleanupDialog"
 msgstr "清空对话框"
 
-#: ardour_ui.cc:3080
+#: ardour_ui.cc:3073
 msgid "Cleaned Files"
 msgstr "清除文件"
 
-#: ardour_ui.cc:3081
+#: ardour_ui.cc:3074
 #, fuzzy
 msgid ""
 "The following %1 files were not in use and \n"
@@ -1114,7 +1090,7 @@ msgstr ""
 "将会释放额外的\n"
 "%3 %4bytes 的磁盘空间.\n"
 
-#: ardour_ui.cc:3087
+#: ardour_ui.cc:3080
 #, fuzzy
 msgid ""
 "The following file was not in use and \n"
@@ -1137,11 +1113,11 @@ msgstr ""
 "将会释放额外的\n"
 "%3 %4bytes 的磁盘空间.\n"
 
-#: ardour_ui.cc:3112
+#: ardour_ui.cc:3105
 msgid "deleted file"
 msgstr "删除文件"
 
-#: ardour_ui.cc:3113
+#: ardour_ui.cc:3106
 #, fuzzy
 msgid ""
 "The following %1 files were deleted from %2,\n"
@@ -1151,7 +1127,7 @@ msgstr ""
 "%2,\n"
 "释放出 %3 %4 bytes 的磁盘空间"
 
-#: ardour_ui.cc:3115
+#: ardour_ui.cc:3108
 #, fuzzy
 msgid ""
 "The following file was deleted from %2,\n"
@@ -1161,11 +1137,11 @@ msgstr ""
 "%2,\n"
 "释放出 %3 %4 bytes 的磁盘空间"
 
-#: ardour_ui.cc:3270
+#: ardour_ui.cc:3263
 msgid "Recording was stopped because your system could not keep up."
 msgstr "您的系统无法继续, 录音停止."
 
-#: ardour_ui.cc:3299
+#: ardour_ui.cc:3292
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1178,7 +1154,7 @@ msgstr ""
 "\n"
 "确切地说, 磁盘的读写速度无法跟上录音速度\n"
 
-#: ardour_ui.cc:3318
+#: ardour_ui.cc:3311
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1191,11 +1167,11 @@ msgstr ""
 "\n"
 "确切地说, 磁盘的读写速度无法跟上播放速度\n"
 
-#: ardour_ui.cc:3358
+#: ardour_ui.cc:3351
 msgid "Crash Recovery"
 msgstr "崩溃恢复"
 
-#: ardour_ui.cc:3359
+#: ardour_ui.cc:3352
 #, fuzzy
 msgid ""
 "This session appears to have been in\n"
@@ -1212,19 +1188,19 @@ msgstr ""
 "Ardour可以为你恢复一些捕捉到的音频\n"
 "你也可以忽略它. 请你选择.\n"
 
-#: ardour_ui.cc:3371
+#: ardour_ui.cc:3364
 msgid "Ignore crash data"
 msgstr "忽略崩毁的数据"
 
-#: ardour_ui.cc:3372
+#: ardour_ui.cc:3365
 msgid "Recover from crash"
 msgstr "恢复到崩溃前"
 
-#: ardour_ui.cc:3392
+#: ardour_ui.cc:3385
 msgid "Sample Rate Mismatch"
 msgstr "采样率不匹配"
 
-#: ardour_ui.cc:3393
+#: ardour_ui.cc:3386
 #, fuzzy
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
@@ -1235,31 +1211,31 @@ msgstr ""
 "\n"
 "当前音频引擎的采样率为 %2 Hz.\n"
 
-#: ardour_ui.cc:3402
+#: ardour_ui.cc:3395
 msgid "Do not load session"
 msgstr "不要装载会话"
 
-#: ardour_ui.cc:3403
+#: ardour_ui.cc:3396
 msgid "Load session anyway"
 msgstr "转载会话"
 
-#: ardour_ui.cc:3424
+#: ardour_ui.cc:3417
 msgid "Could not disconnect from JACK"
 msgstr "无法断开JACK的连接"
 
-#: ardour_ui.cc:3437
+#: ardour_ui.cc:3430
 msgid "Could not reconnect to JACK"
 msgstr "无法重新连接到JACK"
 
-#: ardour_ui.cc:3658
+#: ardour_ui.cc:3651
 msgid "Translations disabled"
 msgstr "取消翻译功能"
 
-#: ardour_ui.cc:3658
+#: ardour_ui.cc:3651
 msgid "Translations enabled"
 msgstr "开启翻译功能"
 
-#: ardour_ui.cc:3662
+#: ardour_ui.cc:3655
 msgid "You must restart %1 for this to take effect."
 msgstr "请重启 %1 使之生效."
 
@@ -5096,9 +5072,17 @@ msgid ""
 "\"allow-special-bus-removal\" option to be \"yes\""
 msgstr ""
 
+#: editor_ops.cc:6459
+msgid "tracks"
+msgstr "音轨"
+
 #: editor_ops.cc:6461 route_ui.cc:1759
 msgid "track"
 msgstr "音轨"
+
+#: editor_ops.cc:6465
+msgid "busses"
+msgstr "总线"
 
 #: editor_ops.cc:6467 route_ui.cc:1759
 msgid "bus"
@@ -11544,6 +11528,15 @@ msgstr ""
 #: verbose_cursor.cc:45
 msgid "VerboseCanvasCursor"
 msgstr ""
+
+#~ msgid "could not create a new audio track"
+#~ msgstr "无法新建音频音轨"
+
+#~ msgid "could not create a new audio bus"
+#~ msgstr "无法新建音频总线"
+
+#~ msgid "could not create %1 new audio busses"
+#~ msgstr "无法新建 %1 新的音频总线"
 
 #~ msgid "the width"
 #~ msgstr "宽度"

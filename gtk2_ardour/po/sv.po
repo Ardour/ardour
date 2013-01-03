@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ardour-gtk 1.0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-03 08:22-0500\n"
+"POT-Creation-Date: 2013-01-03 11:16-0500\n"
 "PO-Revision-Date: 2006-06-26 23:57+GMT+1\n"
 "Last-Translator: Petter Sundlöf <petter.sundlof@findus.dhs.org>\n"
 "Language-Team: Svenska <sv@li.org>\n"
@@ -858,7 +858,7 @@ msgstr "kunde inte skapa nytt ljudspår"
 msgid "could not create %1 new mixed tracks"
 msgstr "kunde inte skapa nytt ljudspår"
 
-#: ardour_ui.cc:1395 ardour_ui.cc:1463
+#: ardour_ui.cc:1395 ardour_ui.cc:1456
 #, fuzzy
 msgid ""
 "There are insufficient JACK ports available\n"
@@ -876,35 +876,7 @@ msgstr ""
 msgid "You cannot add a track or bus without a session already loaded."
 msgstr "Du kan inte lägga till ett spår utan en session laddad."
 
-#: ardour_ui.cc:1440
-#, fuzzy
-msgid "could not create a new audio track"
-msgstr "kunde inte skapa nytt ljudspår"
-
-#: ardour_ui.cc:1442
-#, fuzzy
-msgid "could only create %1 of %2 new audio %3"
-msgstr "kunde inte skapa ny ljudbuss"
-
-#: ardour_ui.cc:1443 editor_ops.cc:6459
-msgid "tracks"
-msgstr "spår"
-
-#: ardour_ui.cc:1443 editor_ops.cc:6465
-msgid "busses"
-msgstr "buss(ar)"
-
-#: ardour_ui.cc:1453
-#, fuzzy
-msgid "could not create a new audio bus"
-msgstr "kunde inte skapa nytt ljudspår"
-
-#: ardour_ui.cc:1455
-#, fuzzy
-msgid "could not create %1 new audio busses"
-msgstr "kunde inte skapa nytt ljudspår"
-
-#: ardour_ui.cc:1572
+#: ardour_ui.cc:1565
 #, fuzzy
 msgid ""
 "Please create one or more tracks before trying to record.\n"
@@ -914,14 +886,14 @@ msgstr ""
 "innan du försöker spela in.\n"
 "Se Session-menyn."
 
-#: ardour_ui.cc:1962
+#: ardour_ui.cc:1955
 msgid ""
 "The audio backend (JACK) was shutdown because:\n"
 "\n"
 "%1"
 msgstr ""
 
-#: ardour_ui.cc:1964
+#: ardour_ui.cc:1957
 #, fuzzy
 msgid ""
 "JACK has either been shutdown or it\n"
@@ -934,79 +906,79 @@ msgstr ""
 "Ardour inte var snabb nog. Du kan spara\n"
 "och/eller försöka återansluta till JACK ."
 
-#: ardour_ui.cc:1989
+#: ardour_ui.cc:1982
 msgid "Unable to start the session running"
 msgstr "Kan ej starta sessionen"
 
-#: ardour_ui.cc:2065
+#: ardour_ui.cc:2058
 msgid "Take Snapshot"
 msgstr "Gör ögonblickskopia"
 
-#: ardour_ui.cc:2066
+#: ardour_ui.cc:2059
 msgid "Name of new snapshot"
 msgstr "Namnge ny ögonblickskopia"
 
-#: ardour_ui.cc:2090
+#: ardour_ui.cc:2083
 msgid ""
 "To ensure compatibility with various systems\n"
 "snapshot names may not contain a '%1' character"
 msgstr ""
 
-#: ardour_ui.cc:2102
+#: ardour_ui.cc:2095
 msgid "Confirm Snapshot Overwrite"
 msgstr ""
 
-#: ardour_ui.cc:2103
+#: ardour_ui.cc:2096
 #, fuzzy
 msgid "A snapshot already exists with that name.  Do you want to overwrite it?"
 msgstr "Filen existerar redan, vill du skriva över den?"
 
-#: ardour_ui.cc:2106
+#: ardour_ui.cc:2099
 msgid "Overwrite"
 msgstr ""
 
-#: ardour_ui.cc:2140
+#: ardour_ui.cc:2133
 #, fuzzy
 msgid "Rename Session"
 msgstr "Byt namn på region"
 
-#: ardour_ui.cc:2141
+#: ardour_ui.cc:2134
 #, fuzzy
 msgid "New session name"
 msgstr "Sessionens namn:"
 
-#: ardour_ui.cc:2155 ardour_ui.cc:2531 ardour_ui.cc:2576
+#: ardour_ui.cc:2148 ardour_ui.cc:2524 ardour_ui.cc:2569
 msgid ""
 "To ensure compatibility with various systems\n"
 "session names may not contain a '%1' character"
 msgstr ""
 
-#: ardour_ui.cc:2163
+#: ardour_ui.cc:2156
 msgid ""
 "That name is already in use by another directory/folder. Please try again."
 msgstr ""
 
-#: ardour_ui.cc:2172
+#: ardour_ui.cc:2165
 msgid ""
 "Renaming this session failed.\n"
 "Things could be seriously messed up at this point"
 msgstr ""
 
-#: ardour_ui.cc:2287
+#: ardour_ui.cc:2280
 #, fuzzy
 msgid "Save Template"
 msgstr "Spara mall..."
 
-#: ardour_ui.cc:2288
+#: ardour_ui.cc:2281
 #, fuzzy
 msgid "Name for template:"
 msgstr "Namn för mixmall: "
 
-#: ardour_ui.cc:2289
+#: ardour_ui.cc:2282
 msgid "-template"
 msgstr "-mall"
 
-#: ardour_ui.cc:2327
+#: ardour_ui.cc:2320
 #, fuzzy
 msgid ""
 "This session\n"
@@ -1014,59 +986,59 @@ msgid ""
 "already exists. Do you want to open it?"
 msgstr "Filen existerar redan, vill du skriva över den?"
 
-#: ardour_ui.cc:2337
+#: ardour_ui.cc:2330
 #, fuzzy
 msgid "Open Existing Session"
 msgstr "Öppna en existerande session"
 
-#: ardour_ui.cc:2567
+#: ardour_ui.cc:2560
 #, fuzzy
 msgid "There is no existing session at \"%1\""
 msgstr "Öppna en existerande session"
 
-#: ardour_ui.cc:2654
+#: ardour_ui.cc:2647
 #, fuzzy
 msgid "Please wait while %1 loads your session"
 msgstr "Vänta medan Ardour laddar din session"
 
-#: ardour_ui.cc:2669
+#: ardour_ui.cc:2662
 msgid "Port Registration Error"
 msgstr ""
 
-#: ardour_ui.cc:2670
+#: ardour_ui.cc:2663
 msgid "Click the Close button to try again."
 msgstr ""
 
-#: ardour_ui.cc:2691
+#: ardour_ui.cc:2684
 msgid "Session \"%1 (snapshot %2)\" did not load successfully"
 msgstr "Session \"%1 (ögonblickskopia %2)\" kunde inte laddas"
 
-#: ardour_ui.cc:2697
+#: ardour_ui.cc:2690
 #, fuzzy
 msgid "Loading Error"
 msgstr "programmeringsfel: "
 
-#: ardour_ui.cc:2698
+#: ardour_ui.cc:2691
 msgid "Click the Refresh button to try again."
 msgstr ""
 
-#: ardour_ui.cc:2780
+#: ardour_ui.cc:2773
 #, fuzzy
 msgid "Could not create session in \"%1\""
 msgstr "kunde inte ladda kommandopromptssessionen \"%1\""
 
-#: ardour_ui.cc:2908
+#: ardour_ui.cc:2901
 #, fuzzy
 msgid "No files were ready for clean-up"
 msgstr "Inga ljudfiler var redo för rensning"
 
-#: ardour_ui.cc:2912 ardour_ui.cc:2922 ardour_ui.cc:3039 ardour_ui.cc:3046
+#: ardour_ui.cc:2905 ardour_ui.cc:2915 ardour_ui.cc:3032 ardour_ui.cc:3039
 #: ardour_ui_ed.cc:104
 #, fuzzy
 msgid "Clean-up"
 msgstr "Upprensning"
 
-#: ardour_ui.cc:2913
+#: ardour_ui.cc:2906
 msgid ""
 "If this seems suprising, \n"
 "check for any existing snapshots.\n"
@@ -1077,24 +1049,24 @@ msgstr ""
 "ögonblickskopior. Dessa kan använda regioner som\n"
 "använder oanvända filer för att kunna fungera."
 
-#: ardour_ui.cc:2972
+#: ardour_ui.cc:2965
 msgid "kilo"
 msgstr ""
 
-#: ardour_ui.cc:2975
+#: ardour_ui.cc:2968
 msgid "mega"
 msgstr ""
 
-#: ardour_ui.cc:2978
+#: ardour_ui.cc:2971
 msgid "giga"
 msgstr ""
 
-#: ardour_ui.cc:3034
+#: ardour_ui.cc:3027
 #, fuzzy
 msgid "Are you sure you want to clean-up?"
 msgstr "Är du säker på att du vill rensa upp?"
 
-#: ardour_ui.cc:3041
+#: ardour_ui.cc:3034
 #, fuzzy
 msgid ""
 "Clean-up is a destructive operation.\n"
@@ -1105,16 +1077,16 @@ msgstr ""
 "ALL ångra-/gör om-information kommer att gå förlorad om du rensar.\n"
 "Oanvända filer kommer att flyttas till \"dead_sounds\" i sessionens mapp."
 
-#: ardour_ui.cc:3049
+#: ardour_ui.cc:3042
 msgid "CleanupDialog"
 msgstr "Rensadialog"
 
-#: ardour_ui.cc:3080
+#: ardour_ui.cc:3073
 #, fuzzy
 msgid "Cleaned Files"
 msgstr "rensade filer"
 
-#: ardour_ui.cc:3081
+#: ardour_ui.cc:3074
 #, fuzzy
 msgid ""
 "The following %1 files were not in use and \n"
@@ -1134,7 +1106,7 @@ msgstr ""
 "frigöra ytterligarel\n"
 "%4 %5byte diskutrymme.\n"
 
-#: ardour_ui.cc:3087
+#: ardour_ui.cc:3080
 #, fuzzy
 msgid ""
 "The following file was not in use and \n"
@@ -1154,11 +1126,11 @@ msgstr ""
 "frigöra ytterligarel\n"
 "%4 %5byte diskutrymme.\n"
 
-#: ardour_ui.cc:3112
+#: ardour_ui.cc:3105
 msgid "deleted file"
 msgstr "raderad fil"
 
-#: ardour_ui.cc:3113
+#: ardour_ui.cc:3106
 #, fuzzy
 msgid ""
 "The following %1 files were deleted from %2,\n"
@@ -1168,7 +1140,7 @@ msgstr ""
 "%3,\n"
 "vilket frigjorde %4 %5byte diskutrymme"
 
-#: ardour_ui.cc:3115
+#: ardour_ui.cc:3108
 #, fuzzy
 msgid ""
 "The following file was deleted from %2,\n"
@@ -1178,11 +1150,11 @@ msgstr ""
 "%3,\n"
 "vilket frigjorde %4 %5byte diskutrymme"
 
-#: ardour_ui.cc:3270
+#: ardour_ui.cc:3263
 msgid "Recording was stopped because your system could not keep up."
 msgstr "Inspelningen stoppades eftersom ditt system inte kunde hänga med."
 
-#: ardour_ui.cc:3299
+#: ardour_ui.cc:3292
 #, fuzzy
 msgid ""
 "The disk system on your computer\n"
@@ -1197,7 +1169,7 @@ msgstr ""
 "Närmare bestämt, det kunde inte skriva data till disk\n"
 "snabbt nog för att matcha inspelningen.\n"
 
-#: ardour_ui.cc:3318
+#: ardour_ui.cc:3311
 #, fuzzy
 msgid ""
 "The disk system on your computer\n"
@@ -1212,11 +1184,11 @@ msgstr ""
 "Närmare bestämt, det kunde inte läsa data från disk\n"
 "snabbt nog för att matcha uppspelningen.\n"
 
-#: ardour_ui.cc:3358
+#: ardour_ui.cc:3351
 msgid "Crash Recovery"
 msgstr ""
 
-#: ardour_ui.cc:3359
+#: ardour_ui.cc:3352
 #, fuzzy
 msgid ""
 "This session appears to have been in\n"
@@ -1235,53 +1207,53 @@ msgstr ""
 "dig, eller ignorera dem. Markera\n"
 "vad du vill göra.\n"
 
-#: ardour_ui.cc:3371
+#: ardour_ui.cc:3364
 msgid "Ignore crash data"
 msgstr "Ignorera kraschdata"
 
-#: ardour_ui.cc:3372
+#: ardour_ui.cc:3365
 msgid "Recover from crash"
 msgstr "Återhämta från krasch"
 
-#: ardour_ui.cc:3392
+#: ardour_ui.cc:3385
 #, fuzzy
 msgid "Sample Rate Mismatch"
 msgstr "Samplingsfrekvens"
 
-#: ardour_ui.cc:3393
+#: ardour_ui.cc:3386
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
 "%2 is currently running at %3 Hz.  If you load this session,\n"
 "audio may be played at the wrong sample rate.\n"
 msgstr ""
 
-#: ardour_ui.cc:3402
+#: ardour_ui.cc:3395
 #, fuzzy
 msgid "Do not load session"
 msgstr "Zooma in/ut till hela sessionen"
 
-#: ardour_ui.cc:3403
+#: ardour_ui.cc:3396
 #, fuzzy
 msgid "Load session anyway"
 msgstr "vid början"
 
-#: ardour_ui.cc:3424
+#: ardour_ui.cc:3417
 msgid "Could not disconnect from JACK"
 msgstr "Kunde inte koppla loss från JACK"
 
-#: ardour_ui.cc:3437
+#: ardour_ui.cc:3430
 msgid "Could not reconnect to JACK"
 msgstr "Kunde inte återansluta till JACK"
 
-#: ardour_ui.cc:3658
+#: ardour_ui.cc:3651
 msgid "Translations disabled"
 msgstr ""
 
-#: ardour_ui.cc:3658
+#: ardour_ui.cc:3651
 msgid "Translations enabled"
 msgstr ""
 
-#: ardour_ui.cc:3662
+#: ardour_ui.cc:3655
 msgid "You must restart %1 for this to take effect."
 msgstr ""
 
@@ -5268,10 +5240,18 @@ msgid ""
 "\"allow-special-bus-removal\" option to be \"yes\""
 msgstr ""
 
+#: editor_ops.cc:6459
+msgid "tracks"
+msgstr "spår"
+
 #: editor_ops.cc:6461 route_ui.cc:1759
 #, fuzzy
 msgid "track"
 msgstr "spår"
+
+#: editor_ops.cc:6465
+msgid "busses"
+msgstr "buss(ar)"
 
 #: editor_ops.cc:6467 route_ui.cc:1759
 #, fuzzy
@@ -11984,6 +11964,22 @@ msgstr ""
 #: verbose_cursor.cc:45
 msgid "VerboseCanvasCursor"
 msgstr ""
+
+#, fuzzy
+#~ msgid "could not create a new audio track"
+#~ msgstr "kunde inte skapa nytt ljudspår"
+
+#, fuzzy
+#~ msgid "could only create %1 of %2 new audio %3"
+#~ msgstr "kunde inte skapa ny ljudbuss"
+
+#, fuzzy
+#~ msgid "could not create a new audio bus"
+#~ msgstr "kunde inte skapa nytt ljudspår"
+
+#, fuzzy
+#~ msgid "could not create %1 new audio busses"
+#~ msgstr "kunde inte skapa nytt ljudspår"
 
 #, fuzzy
 #~ msgid "Always Play Range Selection (if any)"

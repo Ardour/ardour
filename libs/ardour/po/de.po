@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-02 13:19+0100\n"
+"POT-Creation-Date: 2013-01-03 11:16-0500\n"
 "PO-Revision-Date: 2013-01-03 15:06+0100\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
@@ -85,8 +85,8 @@ msgstr ""
 #: audio_diskstream.cc:2181
 msgid "%1: cannot create whole-file region from pending capture sources"
 msgstr ""
-"%1: kann aus vorläufigen Aufnahmequellen keine Region für die komplette Datei "
-"erzeugen"
+"%1: kann aus vorläufigen Aufnahmequellen keine Region für die komplette "
+"Datei erzeugen"
 
 #: audio_library.cc:71
 msgid "Could not open %1.  Audio Library not saved"
@@ -98,8 +98,7 @@ msgid ""
 "- crossfade discarded"
 msgstr ""
 "An der veralteten Überblendung war eine einzublendende Region beteiligt, die "
-"aber in Wiedergabeliste \"%1\" nicht existiert"
-"- Überblendung verworfen"
+"aber in Wiedergabeliste \"%1\" nicht existiert- Überblendung verworfen"
 
 #: audio_playlist.cc:520
 msgid ""
@@ -107,8 +106,7 @@ msgid ""
 "- crossfade discarded"
 msgstr ""
 "An der veralteten Überblendung war eine auszublendende Region beteiligt, die "
-"aber in Wiedergabeliste \"%1\" nicht existiert"
-"- Überblendung verworfen"
+"aber in Wiedergabeliste \"%1\" nicht existiert- Überblendung verworfen"
 
 #: audio_playlist_importer.cc:68
 msgid "Audio Playlists"
@@ -125,8 +123,8 @@ msgstr "Regionen"
 #: audio_playlist_importer.cc:174 audio_track_importer.cc:245
 msgid "A playlist with this name already exists, please rename it."
 msgstr ""
-"Es gibt bereits eine Wiedergabeliste mit diesem Namen, bitte benennen Sie sie "
-"um."
+"Es gibt bereits eine Wiedergabeliste mit diesem Namen, bitte benennen Sie "
+"sie um."
 
 #: audio_playlist_importer.cc:183
 msgid "badly-formed XML in imported playlist"
@@ -225,8 +223,8 @@ msgid ""
 "a port with the name \"%1\" already exists: check for duplicated track/bus "
 "names"
 msgstr ""
-"Ein Port mit Namen \"%1\" existiert bereits: Prüfen Sie auf doppelte "
-"Spur/Busnamen"
+"Ein Port mit Namen \"%1\" existiert bereits: Prüfen Sie auf doppelte Spur/"
+"Busnamen"
 
 #: audioengine.cc:846
 msgid ""
@@ -284,16 +282,15 @@ msgid ""
 msgstr ""
 "Sie haben eine Operation ausgelöst, die Audio-Analyse verlangt.\n"
 "\n"
-"Momentan haben Sie \"auto-analyse-audio\" deaktiviert, weshalb"
-"Transienten-Daten bei Bedarf jedesmal neu erzeugt werden müssen.\n"
+"Momentan haben Sie \"auto-analyse-audio\" deaktiviert, weshalbTransienten-"
+"Daten bei Bedarf jedesmal neu erzeugt werden müssen.\n"
 "\n"
-"Wenn Sie öfters mit Transienten-Daten arbeiten, "
-"sollten Sie möglicherweise \"auto-analyse-audio\" einschalten und Ardour neu "
-"starten.\n"
+"Wenn Sie öfters mit Transienten-Daten arbeiten, sollten Sie möglicherweise "
+"\"auto-analyse-audio\" einschalten und Ardour neu starten.\n"
 "\n"
-"Dieser Dialog wird nicht wieder erscheinen. Jedoch könnten Sie bei dieser und "
-"zukünftigen Operation(en) zur Transienten-Bestimmung eine leichte Verzögerung "
-"bemerken.\n"
+"Dieser Dialog wird nicht wieder erscheinen. Jedoch könnten Sie bei dieser "
+"und zukünftigen Operation(en) zur Transienten-Bestimmung eine leichte "
+"Verzögerung bemerken.\n"
 
 #: audiosource.cc:199
 msgid "cannot rename peakfile for %1 from %2 to %3 (%4)"
@@ -319,8 +316,8 @@ msgstr "AudioSource: kann Pfad für Peaks (b) \"%1\" nicht öffnen (%2)"
 msgid ""
 "AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"
 msgstr ""
-"AudioSource[%1]: peak read - kann %2 Samples bei Offset %3 von %4 nicht "
-"lesen(%5)"
+"AudioSource[%1]: peak read - kann %2 Samples bei Offset %3 von %4 nicht lesen"
+"(%5)"
 
 #: audiosource.cc:667
 msgid "%1: could not write read raw data for peak computation (%2)"
@@ -385,8 +382,8 @@ msgstr ""
 msgid ""
 "AutomationList: passed XML node called %1, not \"AutomationList\" - ignored"
 msgstr ""
-"AutomationList: XML-Knoten mit Namen %1, nicht \"AutomationList\" übergeben - "
-"ignoriert"
+"AutomationList: XML-Knoten mit Namen %1, nicht \"AutomationList\" übergeben "
+"- ignoriert"
 
 #: butler.cc:91
 msgid "Cannot create transport request signal pipe (%1)"
@@ -700,8 +697,8 @@ msgid ""
 "%1 supports only %2 channels, but you have %3 channels in your channel "
 "configuration"
 msgstr ""
-"% unterstützt nur %2 Kanäle, in Ihrer Kanalkonfiguration befinden sich jedoch "
-"%3 Kanäle"
+"% unterstützt nur %2 Kanäle, in Ihrer Kanalkonfiguration befinden sich "
+"jedoch %3 Kanäle"
 
 #: file_source.cc:196 session_state.cc:2885
 msgid ""
@@ -1021,47 +1018,47 @@ msgstr ""
 msgid "Could not locate HOME.  Preset not saved."
 msgstr ""
 
-#: location.cc:296
+#: location.cc:328
 msgid "You cannot put a CD marker at this position"
 msgstr ""
 
-#: location.cc:418
+#: location.cc:450
 msgid "incorrect XML node passed to Location::set_state"
 msgstr ""
 
-#: location.cc:423
+#: location.cc:455
 msgid "XML node for Location has no ID information"
 msgstr ""
 
-#: location.cc:427
+#: location.cc:459
 msgid "XML node for Location has no name information"
 msgstr ""
 
-#: location.cc:434
+#: location.cc:466
 msgid "XML node for Location has no start information"
 msgstr ""
 
-#: location.cc:445
+#: location.cc:477
 msgid "XML node for Location has no end information"
 msgstr ""
 
-#: location.cc:452
+#: location.cc:484
 msgid "XML node for Location has no flags information"
 msgstr ""
 
-#: location.cc:626
+#: location.cc:658
 msgid "Locations: attempt to use unknown location as selected location"
 msgstr ""
 
-#: location.cc:797
+#: location.cc:829
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr ""
 
-#: location.cc:810 session.cc:4337 session_state.cc:1108
+#: location.cc:842 session.cc:4337 session_state.cc:1108
 msgid "session"
 msgstr ""
 
-#: location.cc:875
+#: location.cc:907
 msgid "could not load location from session file - ignored"
 msgstr ""
 
@@ -2555,4 +2552,3 @@ msgstr ""
 #: utils.cc:699
 msgid "cannot open directory %1 (%2)"
 msgstr ""
-

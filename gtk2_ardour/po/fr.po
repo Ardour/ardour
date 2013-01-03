@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 2.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-03 08:22-0500\n"
+"POT-Creation-Date: 2013-01-03 11:16-0500\n"
 "PO-Revision-Date: 2011-07-03 19:53+0200\n"
 "Last-Translator: Romain Arnaud <roming22@gmail.com>\n"
 "Language-Team: American English <kde-i18n-doc@kde.org>\n"
@@ -891,7 +891,7 @@ msgstr "ne peut créer une nouvelle piste MIDI"
 msgid "could not create %1 new mixed tracks"
 msgstr "ne peut créer %1 nouvelles pistes MIDI"
 
-#: ardour_ui.cc:1395 ardour_ui.cc:1463
+#: ardour_ui.cc:1395 ardour_ui.cc:1456
 msgid ""
 "There are insufficient JACK ports available\n"
 "to create a new track or bus.\n"
@@ -908,33 +908,7 @@ msgid "You cannot add a track or bus without a session already loaded."
 msgstr ""
 "Vous ne pouvez pas ajouter une piste ou un bus sans avoir ouvert une session."
 
-#: ardour_ui.cc:1440
-msgid "could not create a new audio track"
-msgstr "impossible de créer une nouvelle piste audio"
-
-#: ardour_ui.cc:1442
-msgid "could only create %1 of %2 new audio %3"
-msgstr "Ardour n'a pu créer que %1 %3 audio au lieu de %2"
-
-#: ardour_ui.cc:1443 editor_ops.cc:6459
-msgid "tracks"
-msgstr "pistes"
-
-#: ardour_ui.cc:1443 editor_ops.cc:6465
-msgid "busses"
-msgstr "bus"
-
-#: ardour_ui.cc:1453
-#, fuzzy
-msgid "could not create a new audio bus"
-msgstr "impossible de créer une nouvelle piste audio"
-
-#: ardour_ui.cc:1455
-#, fuzzy
-msgid "could not create %1 new audio busses"
-msgstr "impossible de créer %1 nouvelles pistes audios"
-
-#: ardour_ui.cc:1572
+#: ardour_ui.cc:1565
 #, fuzzy
 msgid ""
 "Please create one or more tracks before trying to record.\n"
@@ -943,7 +917,7 @@ msgstr ""
 "Pour pouvoir enregistrer, vous devez ajouter au moins une piste.\n"
 "Rendez-vous dans le menu « Session »."
 
-#: ardour_ui.cc:1962
+#: ardour_ui.cc:1955
 msgid ""
 "The audio backend (JACK) was shutdown because:\n"
 "\n"
@@ -953,7 +927,7 @@ msgstr ""
 "\n"
 "%1"
 
-#: ardour_ui.cc:1964
+#: ardour_ui.cc:1957
 msgid ""
 "JACK has either been shutdown or it\n"
 "disconnected %1 because %1\n"
@@ -965,19 +939,19 @@ msgstr ""
 "Essayer de redémarrer JACK, de reconnecter\n"
 " %1 à JACK, et de sauver la session."
 
-#: ardour_ui.cc:1989
+#: ardour_ui.cc:1982
 msgid "Unable to start the session running"
 msgstr "Impossible de lancer la session"
 
-#: ardour_ui.cc:2065
+#: ardour_ui.cc:2058
 msgid "Take Snapshot"
 msgstr "Prendre un cliché..."
 
-#: ardour_ui.cc:2066
+#: ardour_ui.cc:2059
 msgid "Name of new snapshot"
 msgstr "Nom du nouveau cliché"
 
-#: ardour_ui.cc:2090
+#: ardour_ui.cc:2083
 #, fuzzy
 msgid ""
 "To ensure compatibility with various systems\n"
@@ -987,29 +961,29 @@ msgstr ""
 "systèmes, les noms de cliché ne peuvent pas\n"
 "utiliser le caractère '/' "
 
-#: ardour_ui.cc:2102
+#: ardour_ui.cc:2095
 msgid "Confirm Snapshot Overwrite"
 msgstr "Confirmer l'ecrasement du cliché"
 
-#: ardour_ui.cc:2103
+#: ardour_ui.cc:2096
 msgid "A snapshot already exists with that name.  Do you want to overwrite it?"
 msgstr "Le fichier existe déjà. Voulez-vous l'écraser ?"
 
-#: ardour_ui.cc:2106
+#: ardour_ui.cc:2099
 msgid "Overwrite"
 msgstr "Écraser"
 
-#: ardour_ui.cc:2140
+#: ardour_ui.cc:2133
 #, fuzzy
 msgid "Rename Session"
 msgstr "renommer la région"
 
-#: ardour_ui.cc:2141
+#: ardour_ui.cc:2134
 #, fuzzy
 msgid "New session name"
 msgstr "Nom de la session:"
 
-#: ardour_ui.cc:2155 ardour_ui.cc:2531 ardour_ui.cc:2576
+#: ardour_ui.cc:2148 ardour_ui.cc:2524 ardour_ui.cc:2569
 #, fuzzy
 msgid ""
 "To ensure compatibility with various systems\n"
@@ -1018,30 +992,30 @@ msgstr ""
 "Afin d'assurer la compatibilité sur différents systèmes\n"
 "les noms de sessions ne peuvent pas comporter le signe '/'"
 
-#: ardour_ui.cc:2163
+#: ardour_ui.cc:2156
 msgid ""
 "That name is already in use by another directory/folder. Please try again."
 msgstr ""
 
-#: ardour_ui.cc:2172
+#: ardour_ui.cc:2165
 msgid ""
 "Renaming this session failed.\n"
 "Things could be seriously messed up at this point"
 msgstr ""
 
-#: ardour_ui.cc:2287
+#: ardour_ui.cc:2280
 msgid "Save Template"
 msgstr "Enregistrer comme modèle"
 
-#: ardour_ui.cc:2288
+#: ardour_ui.cc:2281
 msgid "Name for template:"
 msgstr "Nom du modèle:"
 
-#: ardour_ui.cc:2289
+#: ardour_ui.cc:2282
 msgid "-template"
 msgstr "-modèle"
 
-#: ardour_ui.cc:2327
+#: ardour_ui.cc:2320
 msgid ""
 "This session\n"
 "%1\n"
@@ -1051,52 +1025,52 @@ msgstr ""
 "%1\n"
 "Voulez-vous l'ouvrir ?"
 
-#: ardour_ui.cc:2337
+#: ardour_ui.cc:2330
 msgid "Open Existing Session"
 msgstr "Ouvrir une session"
 
-#: ardour_ui.cc:2567
+#: ardour_ui.cc:2560
 msgid "There is no existing session at \"%1\""
 msgstr "Aucune session n'existe dans \"%1\""
 
-#: ardour_ui.cc:2654
+#: ardour_ui.cc:2647
 msgid "Please wait while %1 loads your session"
 msgstr "Veuillez patienter pendant que %1 ouvre la session"
 
-#: ardour_ui.cc:2669
+#: ardour_ui.cc:2662
 msgid "Port Registration Error"
 msgstr ""
 
-#: ardour_ui.cc:2670
+#: ardour_ui.cc:2663
 msgid "Click the Close button to try again."
 msgstr "Cliquez sur le bouton \"Fermer\" pour réessayer."
 
-#: ardour_ui.cc:2691
+#: ardour_ui.cc:2684
 msgid "Session \"%1 (snapshot %2)\" did not load successfully"
 msgstr "La session « %1 (cliché %2) » ne s'est pas chargée correctement"
 
-#: ardour_ui.cc:2697
+#: ardour_ui.cc:2690
 msgid "Loading Error"
 msgstr "Erreur de chargement"
 
-#: ardour_ui.cc:2698
+#: ardour_ui.cc:2691
 msgid "Click the Refresh button to try again."
 msgstr "Cliquez sur le bouton \"Rafraîchir\" pour réessayer."
 
-#: ardour_ui.cc:2780
+#: ardour_ui.cc:2773
 msgid "Could not create session in \"%1\""
 msgstr "Impossible de créer une session dans « %1 »"
 
-#: ardour_ui.cc:2908
+#: ardour_ui.cc:2901
 msgid "No files were ready for clean-up"
 msgstr "Aucun fichier audio à nettoyer"
 
-#: ardour_ui.cc:2912 ardour_ui.cc:2922 ardour_ui.cc:3039 ardour_ui.cc:3046
+#: ardour_ui.cc:2905 ardour_ui.cc:2915 ardour_ui.cc:3032 ardour_ui.cc:3039
 #: ardour_ui_ed.cc:104
 msgid "Clean-up"
 msgstr "Nettoyer"
 
-#: ardour_ui.cc:2913
+#: ardour_ui.cc:2906
 msgid ""
 "If this seems suprising, \n"
 "check for any existing snapshots.\n"
@@ -1107,23 +1081,23 @@ msgstr ""
 "Ceux-ci peuvent contenir des régions ayant besoin de certains\n"
 "fichiers audio inutilisés pour exister."
 
-#: ardour_ui.cc:2972
+#: ardour_ui.cc:2965
 msgid "kilo"
 msgstr ""
 
-#: ardour_ui.cc:2975
+#: ardour_ui.cc:2968
 msgid "mega"
 msgstr ""
 
-#: ardour_ui.cc:2978
+#: ardour_ui.cc:2971
 msgid "giga"
 msgstr ""
 
-#: ardour_ui.cc:3034
+#: ardour_ui.cc:3027
 msgid "Are you sure you want to clean-up?"
 msgstr "Voulez-vous vraiment lancer le nettoyage ?"
 
-#: ardour_ui.cc:3041
+#: ardour_ui.cc:3034
 msgid ""
 "Clean-up is a destructive operation.\n"
 "ALL undo/redo information will be lost if you clean-up.\n"
@@ -1133,15 +1107,15 @@ msgstr ""
 "TOUTES les opérations d'annulation seront perdues.\n"
 "Les fichiers audio inutilisés seront déplacés dans un dossier \"dead\"."
 
-#: ardour_ui.cc:3049
+#: ardour_ui.cc:3042
 msgid "CleanupDialog"
 msgstr "Fenêtre de nettoyage"
 
-#: ardour_ui.cc:3080
+#: ardour_ui.cc:3073
 msgid "Cleaned Files"
 msgstr "Fichiers nettoyés"
 
-#: ardour_ui.cc:3081
+#: ardour_ui.cc:3074
 #, fuzzy
 msgid ""
 "The following %1 files were not in use and \n"
@@ -1164,7 +1138,7 @@ msgstr ""
 "libérera un espace supplémentaire de\n"
 "%3 %4octets.\n"
 
-#: ardour_ui.cc:3087
+#: ardour_ui.cc:3080
 #, fuzzy
 msgid ""
 "The following file was not in use and \n"
@@ -1187,11 +1161,11 @@ msgstr ""
 "libérera un espace supplémentaire de\n"
 "%3 %4octets.\n"
 
-#: ardour_ui.cc:3112
+#: ardour_ui.cc:3105
 msgid "deleted file"
 msgstr "Fichier effacé"
 
-#: ardour_ui.cc:3113
+#: ardour_ui.cc:3106
 #, fuzzy
 msgid ""
 "The following %1 files were deleted from %2,\n"
@@ -1201,7 +1175,7 @@ msgstr ""
 "de %2,\n"
 "libérant %3 %4octets d'espace disque."
 
-#: ardour_ui.cc:3115
+#: ardour_ui.cc:3108
 #, fuzzy
 msgid ""
 "The following file was deleted from %2,\n"
@@ -1211,12 +1185,12 @@ msgstr ""
 "%2,\n"
 "libérant %3 %4octets d'espace disque."
 
-#: ardour_ui.cc:3270
+#: ardour_ui.cc:3263
 msgid "Recording was stopped because your system could not keep up."
 msgstr ""
 "L'enregistrement s'est arrêté car votre système n'était pas assez rapide."
 
-#: ardour_ui.cc:3299
+#: ardour_ui.cc:3292
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1230,7 +1204,7 @@ msgstr ""
 "L'enregistrement génère un débit de\n"
 "données trop important.\n"
 
-#: ardour_ui.cc:3318
+#: ardour_ui.cc:3311
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1244,11 +1218,11 @@ msgstr ""
 "La lecture génère un débit de\n"
 "données trop important.\n"
 
-#: ardour_ui.cc:3358
+#: ardour_ui.cc:3351
 msgid "Crash Recovery"
 msgstr "Récupération après un crash"
 
-#: ardour_ui.cc:3359
+#: ardour_ui.cc:3352
 #, fuzzy
 msgid ""
 "This session appears to have been in\n"
@@ -1264,19 +1238,19 @@ msgstr ""
 "\n"
 "Vous pouvez récupérer ou ignorer les données de l'enregistrement.\n"
 
-#: ardour_ui.cc:3371
+#: ardour_ui.cc:3364
 msgid "Ignore crash data"
 msgstr "Ignorer les données"
 
-#: ardour_ui.cc:3372
+#: ardour_ui.cc:3365
 msgid "Recover from crash"
 msgstr "Récupérer les données"
 
-#: ardour_ui.cc:3392
+#: ardour_ui.cc:3385
 msgid "Sample Rate Mismatch"
 msgstr "Mauvais taux d'échantillonnage "
 
-#: ardour_ui.cc:3393
+#: ardour_ui.cc:3386
 #, fuzzy
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
@@ -1287,31 +1261,31 @@ msgstr ""
 "\n"
 "Le moteur audio fonctionne actuellement à %2 Hz\n"
 
-#: ardour_ui.cc:3402
+#: ardour_ui.cc:3395
 msgid "Do not load session"
 msgstr "Ne pas charger la session"
 
-#: ardour_ui.cc:3403
+#: ardour_ui.cc:3396
 msgid "Load session anyway"
 msgstr "Charger quand-même la session"
 
-#: ardour_ui.cc:3424
+#: ardour_ui.cc:3417
 msgid "Could not disconnect from JACK"
 msgstr "Impossible de se déconnecter de JACK"
 
-#: ardour_ui.cc:3437
+#: ardour_ui.cc:3430
 msgid "Could not reconnect to JACK"
 msgstr "Impossible de se reconnecter à JACK"
 
-#: ardour_ui.cc:3658
+#: ardour_ui.cc:3651
 msgid "Translations disabled"
 msgstr "Traductions désactivées"
 
-#: ardour_ui.cc:3658
+#: ardour_ui.cc:3651
 msgid "Translations enabled"
 msgstr "Traduction activés"
 
-#: ardour_ui.cc:3662
+#: ardour_ui.cc:3655
 msgid "You must restart %1 for this to take effect."
 msgstr "%1 doit être redémarré pour que cette action soit prise en compte."
 
@@ -5281,9 +5255,17 @@ msgstr ""
 "Si vous voulez vraiment le faire, éditez le fichier ardour.rc\n"
 "et passez l'option \"allow-special-bus-removal\" à \"yes\""
 
+#: editor_ops.cc:6459
+msgid "tracks"
+msgstr "pistes"
+
 #: editor_ops.cc:6461 route_ui.cc:1759
 msgid "track"
 msgstr "piste"
+
+#: editor_ops.cc:6465
+msgid "busses"
+msgstr "bus"
 
 #: editor_ops.cc:6467 route_ui.cc:1759
 msgid "bus"
@@ -11979,6 +11961,20 @@ msgstr ""
 #: verbose_cursor.cc:45
 msgid "VerboseCanvasCursor"
 msgstr "VerboseCanvasCursor"
+
+#~ msgid "could not create a new audio track"
+#~ msgstr "impossible de créer une nouvelle piste audio"
+
+#~ msgid "could only create %1 of %2 new audio %3"
+#~ msgstr "Ardour n'a pu créer que %1 %3 audio au lieu de %2"
+
+#, fuzzy
+#~ msgid "could not create a new audio bus"
+#~ msgstr "impossible de créer une nouvelle piste audio"
+
+#, fuzzy
+#~ msgid "could not create %1 new audio busses"
+#~ msgstr "impossible de créer %1 nouvelles pistes audios"
 
 #, fuzzy
 #~ msgid "Always Play Range Selection (if any)"

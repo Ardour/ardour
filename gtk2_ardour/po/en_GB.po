@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-03 08:22-0500\n"
+"POT-Creation-Date: 2013-01-03 11:16-0500\n"
 "PO-Revision-Date: 2011-12-08 15:38+0100\n"
 "Last-Translator: Colin Fletcher <colin.m.fletcher@googlemail.com>\n"
 "Language-Team: UK English <colin.m.fletcher@googlemail.com>\n"
@@ -810,7 +810,7 @@ msgstr ""
 msgid "could not create %1 new mixed tracks"
 msgstr ""
 
-#: ardour_ui.cc:1395 ardour_ui.cc:1463
+#: ardour_ui.cc:1395 ardour_ui.cc:1456
 msgid ""
 "There are insufficient JACK ports available\n"
 "to create a new track or bus.\n"
@@ -822,44 +822,20 @@ msgstr ""
 msgid "You cannot add a track or bus without a session already loaded."
 msgstr ""
 
-#: ardour_ui.cc:1440
-msgid "could not create a new audio track"
-msgstr ""
-
-#: ardour_ui.cc:1442
-msgid "could only create %1 of %2 new audio %3"
-msgstr ""
-
-#: ardour_ui.cc:1443 editor_ops.cc:6459
-msgid "tracks"
-msgstr ""
-
-#: ardour_ui.cc:1443 editor_ops.cc:6465
-msgid "busses"
-msgstr ""
-
-#: ardour_ui.cc:1453
-msgid "could not create a new audio bus"
-msgstr ""
-
-#: ardour_ui.cc:1455
-msgid "could not create %1 new audio busses"
-msgstr ""
-
-#: ardour_ui.cc:1572
+#: ardour_ui.cc:1565
 msgid ""
 "Please create one or more tracks before trying to record.\n"
 "You can do this with the \"Add Track or Bus\" option in the Session menu."
 msgstr ""
 
-#: ardour_ui.cc:1962
+#: ardour_ui.cc:1955
 msgid ""
 "The audio backend (JACK) was shutdown because:\n"
 "\n"
 "%1"
 msgstr ""
 
-#: ardour_ui.cc:1964
+#: ardour_ui.cc:1957
 msgid ""
 "JACK has either been shutdown or it\n"
 "disconnected %1 because %1\n"
@@ -867,126 +843,126 @@ msgid ""
 "JACK, reconnect and save the session."
 msgstr ""
 
-#: ardour_ui.cc:1989
+#: ardour_ui.cc:1982
 msgid "Unable to start the session running"
 msgstr ""
 
-#: ardour_ui.cc:2065
+#: ardour_ui.cc:2058
 msgid "Take Snapshot"
 msgstr ""
 
-#: ardour_ui.cc:2066
+#: ardour_ui.cc:2059
 msgid "Name of new snapshot"
 msgstr ""
 
-#: ardour_ui.cc:2090
+#: ardour_ui.cc:2083
 msgid ""
 "To ensure compatibility with various systems\n"
 "snapshot names may not contain a '%1' character"
 msgstr ""
 
-#: ardour_ui.cc:2102
+#: ardour_ui.cc:2095
 msgid "Confirm Snapshot Overwrite"
 msgstr ""
 
-#: ardour_ui.cc:2103
+#: ardour_ui.cc:2096
 msgid "A snapshot already exists with that name.  Do you want to overwrite it?"
 msgstr ""
 
-#: ardour_ui.cc:2106
+#: ardour_ui.cc:2099
 msgid "Overwrite"
 msgstr ""
 
-#: ardour_ui.cc:2140
+#: ardour_ui.cc:2133
 msgid "Rename Session"
 msgstr ""
 
-#: ardour_ui.cc:2141
+#: ardour_ui.cc:2134
 msgid "New session name"
 msgstr ""
 
-#: ardour_ui.cc:2155 ardour_ui.cc:2531 ardour_ui.cc:2576
+#: ardour_ui.cc:2148 ardour_ui.cc:2524 ardour_ui.cc:2569
 msgid ""
 "To ensure compatibility with various systems\n"
 "session names may not contain a '%1' character"
 msgstr ""
 
-#: ardour_ui.cc:2163
+#: ardour_ui.cc:2156
 msgid ""
 "That name is already in use by another directory/folder. Please try again."
 msgstr ""
 
-#: ardour_ui.cc:2172
+#: ardour_ui.cc:2165
 msgid ""
 "Renaming this session failed.\n"
 "Things could be seriously messed up at this point"
 msgstr ""
 
-#: ardour_ui.cc:2287
+#: ardour_ui.cc:2280
 msgid "Save Template"
 msgstr ""
 
-#: ardour_ui.cc:2288
+#: ardour_ui.cc:2281
 msgid "Name for template:"
 msgstr ""
 
-#: ardour_ui.cc:2289
+#: ardour_ui.cc:2282
 msgid "-template"
 msgstr ""
 
-#: ardour_ui.cc:2327
+#: ardour_ui.cc:2320
 msgid ""
 "This session\n"
 "%1\n"
 "already exists. Do you want to open it?"
 msgstr ""
 
-#: ardour_ui.cc:2337
+#: ardour_ui.cc:2330
 msgid "Open Existing Session"
 msgstr ""
 
-#: ardour_ui.cc:2567
+#: ardour_ui.cc:2560
 msgid "There is no existing session at \"%1\""
 msgstr ""
 
-#: ardour_ui.cc:2654
+#: ardour_ui.cc:2647
 msgid "Please wait while %1 loads your session"
 msgstr ""
 
-#: ardour_ui.cc:2669
+#: ardour_ui.cc:2662
 msgid "Port Registration Error"
 msgstr ""
 
-#: ardour_ui.cc:2670
+#: ardour_ui.cc:2663
 msgid "Click the Close button to try again."
 msgstr ""
 
-#: ardour_ui.cc:2691
+#: ardour_ui.cc:2684
 msgid "Session \"%1 (snapshot %2)\" did not load successfully"
 msgstr ""
 
-#: ardour_ui.cc:2697
+#: ardour_ui.cc:2690
 msgid "Loading Error"
 msgstr ""
 
-#: ardour_ui.cc:2698
+#: ardour_ui.cc:2691
 msgid "Click the Refresh button to try again."
 msgstr ""
 
-#: ardour_ui.cc:2780
+#: ardour_ui.cc:2773
 msgid "Could not create session in \"%1\""
 msgstr ""
 
-#: ardour_ui.cc:2908
+#: ardour_ui.cc:2901
 msgid "No files were ready for clean-up"
 msgstr ""
 
-#: ardour_ui.cc:2912 ardour_ui.cc:2922 ardour_ui.cc:3039 ardour_ui.cc:3046
+#: ardour_ui.cc:2905 ardour_ui.cc:2915 ardour_ui.cc:3032 ardour_ui.cc:3039
 #: ardour_ui_ed.cc:104
 msgid "Clean-up"
 msgstr ""
 
-#: ardour_ui.cc:2913
+#: ardour_ui.cc:2906
 msgid ""
 "If this seems suprising, \n"
 "check for any existing snapshots.\n"
@@ -994,38 +970,38 @@ msgid ""
 "require some unused files to continue to exist."
 msgstr ""
 
-#: ardour_ui.cc:2972
+#: ardour_ui.cc:2965
 msgid "kilo"
 msgstr ""
 
-#: ardour_ui.cc:2975
+#: ardour_ui.cc:2968
 msgid "mega"
 msgstr ""
 
-#: ardour_ui.cc:2978
+#: ardour_ui.cc:2971
 msgid "giga"
 msgstr ""
 
-#: ardour_ui.cc:3034
+#: ardour_ui.cc:3027
 msgid "Are you sure you want to clean-up?"
 msgstr ""
 
-#: ardour_ui.cc:3041
+#: ardour_ui.cc:3034
 msgid ""
 "Clean-up is a destructive operation.\n"
 "ALL undo/redo information will be lost if you clean-up.\n"
 "Clean-up will move all unused files to a \"dead\" location."
 msgstr ""
 
-#: ardour_ui.cc:3049
+#: ardour_ui.cc:3042
 msgid "CleanupDialog"
 msgstr ""
 
-#: ardour_ui.cc:3080
+#: ardour_ui.cc:3073
 msgid "Cleaned Files"
 msgstr ""
 
-#: ardour_ui.cc:3081
+#: ardour_ui.cc:3074
 msgid ""
 "The following %1 files were not in use and \n"
 "have been moved to: %2\n"
@@ -1037,7 +1013,7 @@ msgid ""
 "will release an additional %3 %4bytes of disk space.\n"
 msgstr ""
 
-#: ardour_ui.cc:3087
+#: ardour_ui.cc:3080
 msgid ""
 "The following file was not in use and \n"
 "has been moved to: %2\n"
@@ -1049,27 +1025,27 @@ msgid ""
 "will release an additional %3 %4bytes of disk space.\n"
 msgstr ""
 
-#: ardour_ui.cc:3112
+#: ardour_ui.cc:3105
 msgid "deleted file"
 msgstr ""
 
-#: ardour_ui.cc:3113
+#: ardour_ui.cc:3106
 msgid ""
 "The following %1 files were deleted from %2,\n"
 "releasing %3 %4bytes of disk space"
 msgstr ""
 
-#: ardour_ui.cc:3115
+#: ardour_ui.cc:3108
 msgid ""
 "The following file was deleted from %2,\n"
 "releasing %3 %4bytes of disk space"
 msgstr ""
 
-#: ardour_ui.cc:3270
+#: ardour_ui.cc:3263
 msgid "Recording was stopped because your system could not keep up."
 msgstr ""
 
-#: ardour_ui.cc:3299
+#: ardour_ui.cc:3292
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1078,7 +1054,7 @@ msgid ""
 "quickly enough to keep up with recording.\n"
 msgstr ""
 
-#: ardour_ui.cc:3318
+#: ardour_ui.cc:3311
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1087,11 +1063,11 @@ msgid ""
 "quickly enough to keep up with playback.\n"
 msgstr ""
 
-#: ardour_ui.cc:3358
+#: ardour_ui.cc:3351
 msgid "Crash Recovery"
 msgstr ""
 
-#: ardour_ui.cc:3359
+#: ardour_ui.cc:3352
 msgid ""
 "This session appears to have been in\n"
 "middle of recording when ardour or\n"
@@ -1102,50 +1078,50 @@ msgid ""
 "what you would like to do.\n"
 msgstr ""
 
-#: ardour_ui.cc:3371
+#: ardour_ui.cc:3364
 msgid "Ignore crash data"
 msgstr ""
 
-#: ardour_ui.cc:3372
+#: ardour_ui.cc:3365
 msgid "Recover from crash"
 msgstr ""
 
-#: ardour_ui.cc:3392
+#: ardour_ui.cc:3385
 msgid "Sample Rate Mismatch"
 msgstr ""
 
-#: ardour_ui.cc:3393
+#: ardour_ui.cc:3386
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
 "%2 is currently running at %3 Hz.  If you load this session,\n"
 "audio may be played at the wrong sample rate.\n"
 msgstr ""
 
-#: ardour_ui.cc:3402
+#: ardour_ui.cc:3395
 msgid "Do not load session"
 msgstr ""
 
-#: ardour_ui.cc:3403
+#: ardour_ui.cc:3396
 msgid "Load session anyway"
 msgstr ""
 
-#: ardour_ui.cc:3424
+#: ardour_ui.cc:3417
 msgid "Could not disconnect from JACK"
 msgstr ""
 
-#: ardour_ui.cc:3437
+#: ardour_ui.cc:3430
 msgid "Could not reconnect to JACK"
 msgstr ""
 
-#: ardour_ui.cc:3658
+#: ardour_ui.cc:3651
 msgid "Translations disabled"
 msgstr ""
 
-#: ardour_ui.cc:3658
+#: ardour_ui.cc:3651
 msgid "Translations enabled"
 msgstr ""
 
-#: ardour_ui.cc:3662
+#: ardour_ui.cc:3655
 msgid "You must restart %1 for this to take effect."
 msgstr ""
 
@@ -4909,8 +4885,16 @@ msgid ""
 "\"allow-special-bus-removal\" option to be \"yes\""
 msgstr ""
 
+#: editor_ops.cc:6459
+msgid "tracks"
+msgstr ""
+
 #: editor_ops.cc:6461 route_ui.cc:1759
 msgid "track"
+msgstr ""
+
+#: editor_ops.cc:6465
+msgid "busses"
 msgstr ""
 
 #: editor_ops.cc:6467 route_ui.cc:1759
