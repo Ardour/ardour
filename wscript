@@ -600,7 +600,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2')
     autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0')
 
-    conf.check_cc(function_name='dlopen', header_name='dlfcn.h', linkflags='-ldl', uselib_store='DL')
+    conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
 
     # Tell everyone that this is a waf build
 
