@@ -1436,7 +1436,7 @@ ARDOUR_UI::session_add_audio_route (
 			tracks = _session->new_audio_track (input_channels, output_channels, mode, route_group, how_many, name_template);
 
 			if (tracks.size() != how_many) {
-				error << string_compose (P_("could not create new audio track", "could not create %1 new audio tracks", how_many), how_many) 
+				error << string_compose (P_("could not create %1 new audio track", "could not create %1 new audio tracks", how_many), how_many) 
 				      << endmsg;
 			}
 
@@ -1445,7 +1445,7 @@ ARDOUR_UI::session_add_audio_route (
 			routes = _session->new_audio_route (input_channels, output_channels, route_group, how_many, name_template);
 
 			if (routes.size() != how_many) {
-				error << string_compose (P_("could not create new audio bus", "could not create %1 new audio busses", how_many), how_many)
+				error << string_compose (P_("could not create %1 new audio bus", "could not create %1 new audio busses", how_many), how_many)
 				      << endmsg;
 			}
 		}
