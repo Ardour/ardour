@@ -796,7 +796,9 @@ Ardour and choose the relevant device then."
 
 	return devs;
 }
-#ifndef __FreeBSD__
+#else
+
+#if !defined(__FreeBSD__)
 vector<string>
 EngineControl::enumerate_alsa_devices ()
 {
