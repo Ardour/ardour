@@ -290,6 +290,9 @@ PixFader::on_button_press_event (GdkEventButton* ev)
 	grab_start = (_orien == VERT) ? ev->y : ev->x;
 	grab_window = ev->window;
 	dragging = true;
+	gdk_pointer_grab(ev->window,false,
+			GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
+			NULL,NULL,ev->time);
 
 	if (ev->button == 2) {
 		set_adjustment_from_event (ev);
@@ -308,6 +311,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 		if (dragging) {
 			remove_modal_grab();
 			dragging = false;
+			gdk_pointer_ungrab (GDK_CURRENT_TIME);
 
 			if (!_hovering) {
 				Keyboard::magic_widget_drop_focus();
@@ -338,6 +342,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 			remove_modal_grab();
 			dragging = false;
 			set_adjustment_from_event (ev);
+			gdk_pointer_ungrab (GDK_CURRENT_TIME);
 		}
 		break;
 
