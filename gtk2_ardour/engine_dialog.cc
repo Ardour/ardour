@@ -35,7 +35,7 @@
 #include <CoreFoundation/CFString.h>
 #include <sys/param.h>
 #include <mach-o/dyld.h>
-#else
+#elif !defined(__FreeBSD__)
 #include <alsa/asoundlib.h>
 #endif
 
@@ -139,7 +139,9 @@ EngineControl::EngineControl ()
 #ifdef __APPLE__
 	strings.push_back (X_("CoreAudio"));
 #else
+#ifndef __FreeBSD__
 	strings.push_back (X_("ALSA"));
+#endif
 	strings.push_back (X_("OSS"));
 	strings.push_back (X_("FreeBoB"));
 	strings.push_back (X_("FFADO"));
@@ -192,7 +194,7 @@ EngineControl::EngineControl ()
 	basic_packer.attach (period_size_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
 	label = manage (left_aligned_label (_("Number of buffers:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (periods_spinner, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
@@ -212,7 +214,7 @@ EngineControl::EngineControl ()
 	row++;
 	/* no audio mode with CoreAudio, its duplex or nuthin' */
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
 	label = manage (left_aligned_label (_("Audio mode:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (audio_mode_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
@@ -252,7 +254,7 @@ EngineControl::EngineControl ()
 
 #if PROVIDE_TOO_MANY_OPTIONS
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
 	options_packer.attach (no_memory_lock_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 	options_packer.attach (unlock_memory_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
@@ -300,7 +302,7 @@ EngineControl::EngineControl ()
 	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
 	label = manage (left_aligned_label (_("Dither:")));
 	options_packer.attach (dither_mode_combo, 1, 2, row, row + 1, FILL|EXPAND, AttachOptions(0));
 	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
@@ -329,7 +331,7 @@ EngineControl::EngineControl ()
 	device_packer.set_spacings (6);
 	row = 0;
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
 	label = manage (left_aligned_label (_("Input device:")));
 	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (input_device_combo, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
@@ -664,7 +666,7 @@ EngineControl::enumerate_devices (const string& driver)
 		devices[driver] = enumerate_coreaudio_devices ();
 #endif
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
 	} else if (driver == "ALSA") {
 		devices[driver] = enumerate_alsa_devices ();
 	} else if (driver == "FreeBOB") {
@@ -794,7 +796,7 @@ Ardour and choose the relevant device then."
 
 	return devs;
 }
-#else
+#ifndef __FreeBSD__
 vector<string>
 EngineControl::enumerate_alsa_devices ()
 {
@@ -838,6 +840,7 @@ EngineControl::enumerate_alsa_devices ()
 
 	return devs;
 }
+#endif
 
 vector<string>
 EngineControl::enumerate_ffado_devices ()
@@ -937,7 +940,7 @@ void
 EngineControl::redisplay_latency ()
 {
 	uint32_t rate = get_rate();
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__FreeBSD__)
 	float periods = 2;
 #else
 	float periods = periods_adjustment.get_value();

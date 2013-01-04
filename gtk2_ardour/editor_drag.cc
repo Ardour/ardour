@@ -1480,7 +1480,7 @@ RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 			   place snapped notes at the start of the region.
 			*/
 
-			framecnt_t const len = abs (f - grab_frame () - 1);
+			framecnt_t const len = (int) fabs (f - grab_frame () - 1);
 			_region->set_length (len < 1 ? 1 : len);
 		}
 	}
@@ -4694,7 +4694,7 @@ NoteCreateDrag::finished (GdkEvent*, bool had_movement)
 	}
 	
 	framepos_t const start = min (_note[0], _note[1]);
-	framecnt_t length = abs (_note[0] - _note[1]);
+	framecnt_t length = (int) fabs (_note[0] - _note[1]);
 
 	framecnt_t const g = grid_frames (start);
 	double const one_tick = 1 / Timecode::BBT_Time::ticks_per_beat;

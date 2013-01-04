@@ -34,6 +34,8 @@
 #include <sched.h>
 #include "ardour/vestige/aeffectx.h"
 
+#ifdef WITH_ALSA
+
 snd_seq_t *
 create_sequencer (const char* client_name, bool isinput)
 {
@@ -185,6 +187,6 @@ void stop_midireceiver (JackVST *jvst)
 	pthread_join (jvst->midi_thread,NULL);
 	snd_seq_close (jvst->seq);
 }
-
+#endif
 
 

@@ -25,6 +25,7 @@
 #ifdef __linux__
 #include <unistd.h>
 #elif defined(__APPLE__) || defined(__FreeBSD__)
+#include <sys/stddef.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #endif

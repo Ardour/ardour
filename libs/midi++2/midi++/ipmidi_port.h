@@ -23,6 +23,17 @@
 #include <iostream>
 #if defined(WIN32)
 #include <winsock.h>
+#elif defined(__FREE_BSD__)
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/_sockaddr_storage.h>
+#include <arpa/inet.h>
+#include <netinet/ip_carp.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <net/if.h>
+#include <net/route.h>
 #else
 #include <arpa/inet.h>
 #include <net/if.h>

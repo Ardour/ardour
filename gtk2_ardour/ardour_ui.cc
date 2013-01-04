@@ -35,6 +35,8 @@
 #include <iostream>
 
 #include <sys/resource.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
 
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/accelmap.h>
@@ -662,8 +664,14 @@ ARDOUR_UI::check_memory_locking ()
 		struct rlimit limits;
 		int64_t ram;
 		long pages, page_size;
-
-		if ((page_size = sysconf (_SC_PAGESIZE)) < 0 ||(pages = sysconf (_SC_PHYS_PAGES)) < 0) {
+#ifdef __FreeBSD__
+		size_t pages_len=sizeof(pages);
+		if ((page_size = getpagesize()) < 0 ||
+				sysctlbyname("hw.availpages", &pages, &pages_len, NULL, 0))
+#else
+		if ((page_size = sysconf (_SC_PAGESIZE)) < 0 ||(pages = sysconf (_SC_PHYS_PAGES)) < 0)
+#endif
+		{
 			ram = 0;
 		} else {
 			ram = (int64_t) pages * (int64_t) page_size;
@@ -683,8 +691,14 @@ ARDOUR_UI::check_memory_locking ()
 						  "This might cause %1 to run out of memory before your system "
 						  "runs out of memory. \n\n"
 						  "You can view the memory limit with 'ulimit -l', "
-						  "and it is normally controlled by /etc/security/limits.conf"),
-						PROGRAM_NAME).c_str());
+						  "and it is normally controlled by %2"),
+						PROGRAM_NAME).c_str(), 
+#ifdef __FreeBSD__
+					X_("/etc/login.conf")
+#else
+					X_(" /etc/security/limits.conf")
+#endif
+					);
 
 				msg.set_default_response (RESPONSE_OK);
 
