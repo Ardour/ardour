@@ -1128,7 +1128,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Transport"), _ltc_port);
 
-#ifdef HAVE_LTC
 	// TODO; rather disable this button than not compile it..
 	add_option (_("Transport"), new OptionEditorHeading (S_("LTC Generator")));
 
@@ -1162,7 +1161,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Transport"), _ltc_volume_slider);
 	parameter_changed ("send-ltc");
-#endif
 
 	parameter_changed ("sync-source");
 
@@ -1829,12 +1827,10 @@ RCOptionEditor::parameter_changed (string const & p)
 			_sync_source_2997->set_sensitive (false);
 			break;
 		}
-#ifdef HAVE_LTC
 	} else if (p == "send-ltc") {
 		bool const s = Config->get_send_ltc ();
 		_ltc_send_continuously->set_sensitive (s);
 		_ltc_volume_slider->set_sensitive (s);
-#endif /*HAVE_LTC*/
 	}
 }
 
