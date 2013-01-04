@@ -538,6 +538,7 @@ GainMeterBase::update_gain_sensitive ()
 {
 	bool x = !(_amp->gain_control()->alist()->automation_state() & Play);
 	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (x);
+	gain_slider->create_patterns();
 }
 
 static MeterPoint

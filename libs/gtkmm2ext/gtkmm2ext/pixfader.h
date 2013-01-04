@@ -38,6 +38,8 @@ class PixFader : public Gtk::DrawingArea
 	void set_fader_length (int);
         void set_border_colors (uint32_t rgba_left, uint32_t rgba_right);
 
+	void create_patterns();
+
 	void set_default_value (float);
 
 	void set_text (const std::string&);
@@ -94,7 +96,6 @@ class PixFader : public Gtk::DrawingArea
 
 	GdkRectangle view;
 
-	void create_patterns();
 	cairo_pattern_t* pattern;
 	cairo_pattern_t* shine_pattern;
 
