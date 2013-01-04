@@ -83,7 +83,7 @@ EngineControl::EngineControl ()
 	  verbose_output_button (_("Verbose output")),
 	  start_button (_("Start")),
 	  stop_button (_("Stop")),
-#ifdef __APPLE__
+#ifdef __APPLE___
 	  basic_packer (5, 2),
 	  options_packer (4, 2),
 	  device_packer (4, 2)
@@ -937,7 +937,7 @@ void
 EngineControl::redisplay_latency ()
 {
 	uint32_t rate = get_rate();
-#ifdef __APPLE_
+#ifdef __APPLE__
 	float periods = 2;
 #else
 	float periods = periods_adjustment.get_value();
