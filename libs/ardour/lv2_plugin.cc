@@ -368,8 +368,12 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_data_access_extension_data.extension_data = _impl->instance->lv2_descriptor->extension_data;
 	_data_access_feature.data                  = &_data_access_extension_data;
 
-	_impl->work_iface = (const LV2_Worker_Interface*)extension_data(
-		LV2_WORKER__interface);
+	LilvNode* worker_iface_uri = lilv_new_uri(_world.world, LV2_WORKER__interface);
+	if (lilv_plugin_has_extension_data(plugin, worker_iface_uri)) {
+		_impl->work_iface = (const LV2_Worker_Interface*)extension_data(
+			LV2_WORKER__interface);
+	}
+	lilv_node_free(worker_iface_uri);
 
 	if (lilv_plugin_has_feature(plugin, _world.lv2_inPlaceBroken)) {
 		error << string_compose(
