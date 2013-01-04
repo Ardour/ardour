@@ -132,6 +132,7 @@ public:
 	void remove_region_by_source (boost::shared_ptr<Source>);
 	void get_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
 	void get_region_list_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
+	void get_source_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
 	void replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Region> newr, framepos_t pos);
 	void split_region (boost::shared_ptr<Region>, framepos_t position);
 	void split (framepos_t at);

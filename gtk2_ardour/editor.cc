@@ -4648,7 +4648,7 @@ Editor::get_regions_from_selection_and_entered ()
 }
 
 void
-Editor::get_regions_corresponding_to (boost::shared_ptr<Region> region, vector<RegionView*>& regions)
+Editor::get_regions_corresponding_to (boost::shared_ptr<Region> region, vector<RegionView*>& regions, bool src_comparison)
 {
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 
@@ -4667,7 +4667,11 @@ Editor::get_regions_corresponding_to (boost::shared_ptr<Region> region, vector<R
 			}
 
 			if ((pl = (tr->playlist())) != 0) {
-				pl->get_region_list_equivalent_regions (region, results);
+				if (src_comparison) {
+					pl->get_source_equivalent_regions (region, results);
+				} else {
+					pl->get_region_list_equivalent_regions (region, results);
+				}
 			}
 
 			for (vector<boost::shared_ptr<Region> >::iterator ir = results.begin(); ir != results.end(); ++ir) {

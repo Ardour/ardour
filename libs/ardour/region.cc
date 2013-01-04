@@ -1407,6 +1407,25 @@ Region::source_equivalent (boost::shared_ptr<const Region> other) const
 	return true;
 }
 
+bool
+Region::any_source_equivalent (boost::shared_ptr<const Region> other) const
+{
+	if (!other) {
+		return false;
+	}
+
+	SourceList::const_iterator i;
+	SourceList::const_iterator io;
+
+	for (i = _sources.begin(), io = other->_sources.begin(); i != _sources.end() && io != other->_sources.end(); ++i, ++io) {
+		if ((*i)->id() == (*io)->id()) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 std::string
 Region::source_string () const
 {

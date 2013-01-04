@@ -200,6 +200,7 @@ class Region
 	bool overlap_equivalent (boost::shared_ptr<const Region>) const;
 	bool region_list_equivalent (boost::shared_ptr<const Region>) const;
 	bool source_equivalent (boost::shared_ptr<const Region>) const;
+	bool any_source_equivalent (boost::shared_ptr<const Region>) const;
 	bool uses_source (boost::shared_ptr<const Source>) const;
 
 	std::string source_string () const;

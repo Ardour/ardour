@@ -845,6 +845,17 @@ Playlist::flush_notifications (bool from_undo)
  }
 
  void
+ Playlist::get_source_equivalent_regions (boost::shared_ptr<Region> other, vector<boost::shared_ptr<Region> >& results)
+ {
+	 for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+
+		 if ((*i) && (*i)->any_source_equivalent (other)) {
+			 results.push_back (*i);
+		 }
+	 }
+ }
+
+ void
  Playlist::partition (framepos_t start, framepos_t end, bool cut)
  {
 	 RegionList thawlist;

@@ -890,7 +890,7 @@ AudioClock::end_edit_relative (bool add)
 }
 
 void
-AudioClock::session_property_changed (const PropertyChange& p)
+AudioClock::session_property_changed (const PropertyChange&)
 {
 	set (last_when, true);
 }

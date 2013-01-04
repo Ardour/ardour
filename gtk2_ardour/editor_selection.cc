@@ -880,7 +880,7 @@ Editor::set_selected_regionview_from_region_list (boost::shared_ptr<Region> regi
 {
 	vector<RegionView*> all_equivalent_regions;
 
-	get_regions_corresponding_to (region, all_equivalent_regions);
+	get_regions_corresponding_to (region, all_equivalent_regions, region->whole_file());
 
 	if (all_equivalent_regions.empty()) {
 		return;
