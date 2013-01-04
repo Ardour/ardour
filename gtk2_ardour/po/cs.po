@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-03 11:16-0500\n"
+"POT-Creation-Date: 2013-01-04 11:01-0500\n"
 "PO-Revision-Date: 2012-09-16 11:47+0200\n"
 "Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
 "Language-Team: Czech <kde-i18n-doc@kde.org>\n"
@@ -455,22 +455,22 @@ msgstr "Název:"
 msgid "Group:"
 msgstr "Skupina:"
 
-#: add_route_dialog.cc:218 add_route_dialog.cc:227 rc_option_editor.cc:1328
-#: rc_option_editor.cc:1330 rc_option_editor.cc:1332 rc_option_editor.cc:1334
-#: rc_option_editor.cc:1358 rc_option_editor.cc:1360 rc_option_editor.cc:1368
-#: rc_option_editor.cc:1370 rc_option_editor.cc:1388 rc_option_editor.cc:1401
-#: rc_option_editor.cc:1403 rc_option_editor.cc:1405 rc_option_editor.cc:1436
-#: rc_option_editor.cc:1438 rc_option_editor.cc:1440 rc_option_editor.cc:1448
-#: rc_option_editor.cc:1456 rc_option_editor.cc:1464
+#: add_route_dialog.cc:218 add_route_dialog.cc:227 rc_option_editor.cc:1326
+#: rc_option_editor.cc:1328 rc_option_editor.cc:1330 rc_option_editor.cc:1332
+#: rc_option_editor.cc:1356 rc_option_editor.cc:1358 rc_option_editor.cc:1366
+#: rc_option_editor.cc:1368 rc_option_editor.cc:1386 rc_option_editor.cc:1399
+#: rc_option_editor.cc:1401 rc_option_editor.cc:1403 rc_option_editor.cc:1434
+#: rc_option_editor.cc:1436 rc_option_editor.cc:1438 rc_option_editor.cc:1446
+#: rc_option_editor.cc:1454 rc_option_editor.cc:1462
 msgid "Audio"
 msgstr "Zvuk"
 
 #: add_route_dialog.cc:219 add_route_dialog.cc:230 editor_actions.cc:105
-#: missing_file_dialog.cc:55 rc_option_editor.cc:1587 rc_option_editor.cc:1595
-#: rc_option_editor.cc:1603 rc_option_editor.cc:1612 rc_option_editor.cc:1620
-#: rc_option_editor.cc:1628 rc_option_editor.cc:1636 rc_option_editor.cc:1645
-#: rc_option_editor.cc:1654 rc_option_editor.cc:1663 rc_option_editor.cc:1671
-#: rc_option_editor.cc:1679
+#: missing_file_dialog.cc:55 rc_option_editor.cc:1585 rc_option_editor.cc:1593
+#: rc_option_editor.cc:1601 rc_option_editor.cc:1610 rc_option_editor.cc:1618
+#: rc_option_editor.cc:1626 rc_option_editor.cc:1634 rc_option_editor.cc:1643
+#: rc_option_editor.cc:1652 rc_option_editor.cc:1661 rc_option_editor.cc:1669
+#: rc_option_editor.cc:1677
 msgid "MIDI"
 msgstr "MIDI"
 
@@ -904,6 +904,20 @@ msgstr ""
 msgid "You cannot add a track or bus without a session already loaded."
 msgstr ""
 "Stopy nebo sběrnice můžete přidat až teprve tehdy, když bylo sezení nahráno."
+
+#: ardour_ui.cc:1439
+#, fuzzy
+msgid "could not create new audio track"
+msgid_plural "could not create %1 new audio tracks"
+msgstr[0] "Nelze vytvořit novou stopu"
+msgstr[1] "Nelze vytvořit novou stopu"
+
+#: ardour_ui.cc:1448
+#, fuzzy
+msgid "could not create new audio bus"
+msgid_plural "could not create %1 new audio busses"
+msgstr[0] "Nepodařilo se vytvořit novou zvukovou sběrnici"
+msgstr[1] "Nepodařilo se vytvořit novou zvukovou sběrnici"
 
 #: ardour_ui.cc:1565
 msgid ""
@@ -1492,11 +1506,11 @@ msgstr "Vzorkovací formát"
 msgid "Control Surfaces"
 msgstr "Ovládací spínače"
 
-#: ardour_ui_ed.cc:115 rc_option_editor.cc:1438 route_time_axis.cc:418
+#: ardour_ui_ed.cc:115 rc_option_editor.cc:1436 route_time_axis.cc:418
 msgid "Plugins"
 msgstr "Přídavné moduly"
 
-#: ardour_ui_ed.cc:116 rc_option_editor.cc:1767
+#: ardour_ui_ed.cc:116 rc_option_editor.cc:1765
 msgid "Metering"
 msgstr "Ukazatel hladiny"
 
@@ -1585,7 +1599,7 @@ msgstr "Odstranit nepoužívané zdroje..."
 msgid "Flush Wastebasket"
 msgstr "Vyprázdnit koš"
 
-#: ardour_ui_ed.cc:190 keyeditor.cc:253 rc_option_editor.cc:1352
+#: ardour_ui_ed.cc:190 keyeditor.cc:253 rc_option_editor.cc:1350
 msgid "JACK"
 msgstr "JACK"
 
@@ -1707,8 +1721,8 @@ msgstr "Uložit"
 #: rc_option_editor.cc:1044 rc_option_editor.cc:1054 rc_option_editor.cc:1056
 #: rc_option_editor.cc:1066 rc_option_editor.cc:1082 rc_option_editor.cc:1095
 #: rc_option_editor.cc:1113 rc_option_editor.cc:1115 rc_option_editor.cc:1129
-#: rc_option_editor.cc:1133 rc_option_editor.cc:1135 rc_option_editor.cc:1152
-#: rc_option_editor.cc:1163
+#: rc_option_editor.cc:1132 rc_option_editor.cc:1134 rc_option_editor.cc:1151
+#: rc_option_editor.cc:1162
 msgid "Transport"
 msgstr "Přesun"
 
@@ -1897,7 +1911,7 @@ msgstr "Poslat MMC"
 msgid "Use MMC"
 msgstr "Použít MMC"
 
-#: ardour_ui_ed.cc:440 rc_option_editor.cc:1590
+#: ardour_ui_ed.cc:440 rc_option_editor.cc:1588
 msgid "Send MIDI Clock"
 msgstr "Poslat čas MIDI"
 
@@ -2577,13 +2591,13 @@ msgstr "Skupiny stopy a sběrnice"
 msgid "Ranges & Marks"
 msgstr "Rozsahy a značky"
 
-#: editor.cc:688 editor.cc:5361 rc_option_editor.cc:1171
-#: rc_option_editor.cc:1179 rc_option_editor.cc:1187 rc_option_editor.cc:1202
-#: rc_option_editor.cc:1209 rc_option_editor.cc:1217 rc_option_editor.cc:1225
-#: rc_option_editor.cc:1245 rc_option_editor.cc:1257 rc_option_editor.cc:1259
-#: rc_option_editor.cc:1267 rc_option_editor.cc:1275 rc_option_editor.cc:1283
-#: rc_option_editor.cc:1291 rc_option_editor.cc:1299 rc_option_editor.cc:1314
-#: rc_option_editor.cc:1318
+#: editor.cc:688 editor.cc:5361 rc_option_editor.cc:1169
+#: rc_option_editor.cc:1177 rc_option_editor.cc:1185 rc_option_editor.cc:1200
+#: rc_option_editor.cc:1207 rc_option_editor.cc:1215 rc_option_editor.cc:1223
+#: rc_option_editor.cc:1243 rc_option_editor.cc:1255 rc_option_editor.cc:1257
+#: rc_option_editor.cc:1265 rc_option_editor.cc:1273 rc_option_editor.cc:1281
+#: rc_option_editor.cc:1289 rc_option_editor.cc:1297 rc_option_editor.cc:1312
+#: rc_option_editor.cc:1316
 msgid "Editor"
 msgstr "Editor"
 
@@ -2613,8 +2627,8 @@ msgstr "Souměrný"
 msgid "Slow"
 msgstr "Pomalu"
 
-#: editor.cc:1400 editor.cc:1493 editor.cc:1555 sfdb_ui.cc:1601
-#: sfdb_ui.cc:1710
+#: editor.cc:1400 editor.cc:1493 editor.cc:1555 sfdb_ui.cc:1596
+#: sfdb_ui.cc:1705
 msgid "Fast"
 msgstr "Rychle"
 
@@ -3127,7 +3141,7 @@ msgstr "Volby pro MIDI"
 msgid "Misc Options"
 msgstr "Různé volby"
 
-#: editor_actions.cc:115 rc_option_editor.cc:1332 route_group_dialog.cc:48
+#: editor_actions.cc:115 rc_option_editor.cc:1330 route_group_dialog.cc:48
 #: session_option_editor.cc:217 session_option_editor.cc:224
 msgid "Monitoring"
 msgstr "Sledování"
@@ -5368,7 +5382,7 @@ msgstr "Sólo"
 msgid "SI"
 msgstr "SamS"
 
-#: editor_routes.cc:209 mixer_strip.cc:351 rc_option_editor.cc:1745
+#: editor_routes.cc:209 mixer_strip.cc:351 rc_option_editor.cc:1743
 msgid "Solo Isolated"
 msgstr "Samostatné sólo"
 
@@ -6236,23 +6250,28 @@ msgstr "Sebrat skupinu"
 msgid "Remove Group"
 msgstr "Odstranit skupinu"
 
-#: group_tabs.cc:322
+#: group_tabs.cc:323
+#, fuzzy
+msgid "Remove Subgroup Bus"
+msgstr "Přidat novou sběrnici podskupiny"
+
+#: group_tabs.cc:325
 msgid "Add New Subgroup Bus"
 msgstr "Přidat novou sběrnici podskupiny"
 
-#: group_tabs.cc:323
+#: group_tabs.cc:327
 msgid "Add New Aux Bus (pre-fader)"
 msgstr "Přidat novou pomocnou sběrnici (před-prolínač)"
 
-#: group_tabs.cc:324
+#: group_tabs.cc:328
 msgid "Add New Aux Bus (post-fader)"
 msgstr "Přidat novou pomocnou sběrnici (po-prolínač)"
 
-#: group_tabs.cc:330
+#: group_tabs.cc:334
 msgid "Enable All Groups"
 msgstr "Povolit všechny skupiny"
 
-#: group_tabs.cc:331
+#: group_tabs.cc:335
 msgid "Disable All Groups"
 msgstr "Zakázat všechny skupiny"
 
@@ -6425,7 +6444,7 @@ msgstr "Údobí"
 msgid "Reset"
 msgstr "Nastavit znovu"
 
-#: latency_gui.cc:150 rhythm_ferret.cc:255 sfdb_ui.cc:1729
+#: latency_gui.cc:150 rhythm_ferret.cc:255 sfdb_ui.cc:1724
 msgid "programming error: %1 (%2)"
 msgstr "Chyba v programování: %1 (%2)"
 
@@ -7068,7 +7087,7 @@ msgid "pre"
 msgstr "Před"
 
 #: mixer_strip.cc:93 mixer_strip.cc:121 mixer_strip.cc:352 mixer_strip.cc:1298
-#: rc_option_editor.cc:1746
+#: rc_option_editor.cc:1744
 msgid "Comments"
 msgstr "Poznámka"
 
@@ -7117,11 +7136,11 @@ msgstr "Sam"
 msgid "Mix group"
 msgstr "Skupina směsi"
 
-#: mixer_strip.cc:349 rc_option_editor.cc:1743
+#: mixer_strip.cc:349 rc_option_editor.cc:1741
 msgid "Phase Invert"
 msgstr "Obrácení fáze"
 
-#: mixer_strip.cc:350 rc_option_editor.cc:1744 route_ui.cc:1155
+#: mixer_strip.cc:350 rc_option_editor.cc:1742 route_ui.cc:1155
 msgid "Solo Safe"
 msgstr "Zajištěné sólo"
 
@@ -7129,7 +7148,7 @@ msgstr "Zajištěné sólo"
 msgid "Group"
 msgstr "Skupina"
 
-#: mixer_strip.cc:354 rc_option_editor.cc:1747
+#: mixer_strip.cc:354 rc_option_editor.cc:1745
 msgid "Meter Point"
 msgstr "Měřicí bod"
 
@@ -8110,7 +8129,7 @@ msgstr "Skrýt všechny ovládací prvky"
 msgid "on"
 msgstr "Zapnuto"
 
-#: processor_box.cc:479 rc_option_editor.cc:1776 rc_option_editor.cc:1790
+#: processor_box.cc:479 rc_option_editor.cc:1774 rc_option_editor.cc:1788
 msgid "off"
 msgstr "Vypnuto"
 
@@ -8623,50 +8642,50 @@ msgstr "Prolínač"
 msgid "LTC incoming port"
 msgstr ""
 
-#: rc_option_editor.cc:1133
+#: rc_option_editor.cc:1132
 #, fuzzy
 msgid "LTC Generator"
 msgstr "Tvůrce"
 
-#: rc_option_editor.cc:1138
+#: rc_option_editor.cc:1137
 #, fuzzy
 msgid "Enable LTC generator"
 msgstr "Povolit překlady"
 
-#: rc_option_editor.cc:1145
+#: rc_option_editor.cc:1144
 msgid "send LTC while stopped"
 msgstr ""
 
-#: rc_option_editor.cc:1151
+#: rc_option_editor.cc:1150
 msgid ""
 "<b>When enabled</b> Ardour will continue to send LTC information even when "
 "the transport (playhead) is not moving"
 msgstr ""
 
-#: rc_option_editor.cc:1161
+#: rc_option_editor.cc:1160
 msgid ""
 "Specify the Peak Volume of the generated LTC signal in dbFS. A good value "
 "is  0dBu ^= -18dbFS in an EBU calibrated system"
 msgstr ""
 
-#: rc_option_editor.cc:1174
+#: rc_option_editor.cc:1172
 msgid "Link selection of regions and tracks"
 msgstr "Spojit výběr oblastí a stop"
 
-#: rc_option_editor.cc:1182
+#: rc_option_editor.cc:1180
 msgid "Move relevant automation when audio regions are moved"
 msgstr ""
 "Přesunout související automatizaci, když jsou zvukové oblasti přesunuty"
 
-#: rc_option_editor.cc:1190
+#: rc_option_editor.cc:1188
 msgid "Show meters on tracks in the editor"
 msgstr "Ukázat měřidla na stopách v editoru"
 
-#: rc_option_editor.cc:1197
+#: rc_option_editor.cc:1195
 msgid "Use overlap equivalency for regions"
 msgstr "Použít pro oblasti stejný rozsah překrytí"
 
-#: rc_option_editor.cc:1204
+#: rc_option_editor.cc:1202
 msgid ""
 "When extending region selection across a group, %1 must decide which regions "
 "are equivalent\n"
@@ -8678,79 +8697,79 @@ msgid ""
 "start time, length and position"
 msgstr ""
 
-#: rc_option_editor.cc:1212
+#: rc_option_editor.cc:1210
 msgid "Make rubberband selection rectangle snap to the grid"
 msgstr "Udělat z pružného výběru oblasti obdélníkové zapadnutí do mřížky"
 
-#: rc_option_editor.cc:1220
+#: rc_option_editor.cc:1218
 msgid "Show waveforms in regions"
 msgstr "Ukázat tvary vln v oblastech"
 
-#: rc_option_editor.cc:1228
+#: rc_option_editor.cc:1226
 msgid "Show gain envelopes in audio regions"
 msgstr "Ukázat obálky zesílení v oblastech zvuku"
 
-#: rc_option_editor.cc:1229
+#: rc_option_editor.cc:1227
 msgid "in all modes"
 msgstr "Ve všech režimech"
 
-#: rc_option_editor.cc:1230
+#: rc_option_editor.cc:1228
 msgid "only in region gain mode"
 msgstr "Pouze v režimu zesílení oblasti"
 
-#: rc_option_editor.cc:1237
+#: rc_option_editor.cc:1235
 msgid "Waveform scale"
 msgstr "Velikost tvaru vlny"
 
-#: rc_option_editor.cc:1242
+#: rc_option_editor.cc:1240
 msgid "linear"
 msgstr "Přímý"
 
-#: rc_option_editor.cc:1243
+#: rc_option_editor.cc:1241
 msgid "logarithmic"
 msgstr "Logaritmický"
 
-#: rc_option_editor.cc:1249
+#: rc_option_editor.cc:1247
 msgid "Waveform shape"
 msgstr "Podoba tvaru vlny"
 
-#: rc_option_editor.cc:1254
+#: rc_option_editor.cc:1252
 msgid "traditional"
 msgstr "Tradiční"
 
-#: rc_option_editor.cc:1255
+#: rc_option_editor.cc:1253
 msgid "rectified"
 msgstr "Narovnaná"
 
-#: rc_option_editor.cc:1262
+#: rc_option_editor.cc:1260
 msgid "Show waveforms for audio while it is being recorded"
 msgstr "Ukázat tvary vln zvuku, když je nahráván"
 
-#: rc_option_editor.cc:1270
+#: rc_option_editor.cc:1268
 msgid "Show zoom toolbar"
 msgstr "Ukázat nástrojový pruh pro zvětšení"
 
-#: rc_option_editor.cc:1278
+#: rc_option_editor.cc:1276
 msgid "Color regions using their track's color"
 msgstr "Obarvit oblasti barvou jejich stopy"
 
-#: rc_option_editor.cc:1286
+#: rc_option_editor.cc:1284
 msgid "Update editor window during drags of the summary"
 msgstr "Obnovit okno editoru během tažení shrnutí"
 
-#: rc_option_editor.cc:1294
+#: rc_option_editor.cc:1292
 msgid "Synchronise editor and mixer track order"
 msgstr "Seřídit pořadí stop v editoru a ve směšovači"
 
-#: rc_option_editor.cc:1302
+#: rc_option_editor.cc:1300
 msgid "Synchronise editor and mixer selection"
 msgstr "Seřídit výběr v editoru a ve směšovači"
 
-#: rc_option_editor.cc:1309
+#: rc_option_editor.cc:1307
 msgid "Name new markers"
 msgstr "Pojmenovat nové značky"
 
-#: rc_option_editor.cc:1315
+#: rc_option_editor.cc:1313
 msgid ""
 "If enabled, popup a dialog when a new marker is created to allow its name to "
 "be set as it is created.\n"
@@ -8758,335 +8777,335 @@ msgid ""
 "You can always rename markers by right-clicking on them"
 msgstr ""
 
-#: rc_option_editor.cc:1321
+#: rc_option_editor.cc:1319
 msgid "Auto-scroll editor window when dragging near its edges"
 msgstr "Automaticky projíždět okno editoru při tažení blízko jeho okrajů"
 
-#: rc_option_editor.cc:1328
+#: rc_option_editor.cc:1326
 msgid "Buffering"
 msgstr "Ukládání do vyrovnávací paměti"
 
-#: rc_option_editor.cc:1337
+#: rc_option_editor.cc:1335
 msgid "Use a monitor bus (allows AFL/PFL and more control)"
 msgstr "Použít sledovací sběrnici (umožňuje AFL/PFL a více kontroly)"
 
-#: rc_option_editor.cc:1344
+#: rc_option_editor.cc:1342
 msgid "Record monitoring handled by"
 msgstr "Sledování nahrávání řízené"
 
-#: rc_option_editor.cc:1355
+#: rc_option_editor.cc:1353
 msgid "ardour"
 msgstr "ardour"
 
-#: rc_option_editor.cc:1356
+#: rc_option_editor.cc:1354
 msgid "audio hardware"
 msgstr "Zvukové technické vybavení"
 
-#: rc_option_editor.cc:1363
+#: rc_option_editor.cc:1361
 msgid "Tape machine mode"
 msgstr "Režim páskového stroje"
 
-#: rc_option_editor.cc:1368
+#: rc_option_editor.cc:1366
 msgid "Connection of tracks and busses"
 msgstr "Spojení stop a sběrnic"
 
-#: rc_option_editor.cc:1373
+#: rc_option_editor.cc:1371
 msgid "Auto-connect master/monitor busses"
 msgstr "Automaticky spojit hlavní/sledovací sběrnice"
 
-#: rc_option_editor.cc:1380
+#: rc_option_editor.cc:1378
 msgid "Connect track inputs"
 msgstr "Spojit vstupy stop"
 
-#: rc_option_editor.cc:1385
+#: rc_option_editor.cc:1383
 msgid "automatically to physical inputs"
 msgstr "Automaticky s fyzickými vstupy"
 
-#: rc_option_editor.cc:1386 rc_option_editor.cc:1399
+#: rc_option_editor.cc:1384 rc_option_editor.cc:1397
 msgid "manually"
 msgstr "Ručně"
 
-#: rc_option_editor.cc:1392
+#: rc_option_editor.cc:1390
 msgid "Connect track and bus outputs"
 msgstr "Spojit výstupy stop a sběrnic"
 
-#: rc_option_editor.cc:1397
+#: rc_option_editor.cc:1395
 msgid "automatically to physical outputs"
 msgstr "Automaticky s fyzickými výstupy"
 
-#: rc_option_editor.cc:1398
+#: rc_option_editor.cc:1396
 msgid "automatically to master bus"
 msgstr "Automaticky s hlavní sběrnicí"
 
-#: rc_option_editor.cc:1403
+#: rc_option_editor.cc:1401
 msgid "Denormals"
 msgstr "Neobvyklé hodnoty"
 
-#: rc_option_editor.cc:1408
+#: rc_option_editor.cc:1406
 msgid "Use DC bias to protect against denormals"
 msgstr ""
 "Použít předpětí přímého proudu (DC bias) pro ochranu proti neobvyklým "
 "hodnotám"
 
-#: rc_option_editor.cc:1415
+#: rc_option_editor.cc:1413
 msgid "Processor handling"
 msgstr "Řízení zpracování"
 
-#: rc_option_editor.cc:1420
+#: rc_option_editor.cc:1418
 msgid "no processor handling"
 msgstr "Žádné řízení zpracování"
 
-#: rc_option_editor.cc:1425
+#: rc_option_editor.cc:1423
 msgid "use FlushToZero"
 msgstr "Použít ZrudnoutKNule"
 
-#: rc_option_editor.cc:1429
+#: rc_option_editor.cc:1427
 msgid "use DenormalsAreZero"
 msgstr "Použít NeobvykléHodnotyJsouNula"
 
-#: rc_option_editor.cc:1433
+#: rc_option_editor.cc:1431
 msgid "use FlushToZero and DenormalsAreZero"
 msgstr "Použít ZrudnoutKNule a NeobvykléHodnotyJsouNula"
 
-#: rc_option_editor.cc:1443
+#: rc_option_editor.cc:1441
 msgid "Silence plugins when the transport is stopped"
 msgstr "Ztišit přídavné moduly, když je přesun zastaven "
 
-#: rc_option_editor.cc:1451
+#: rc_option_editor.cc:1449
 msgid "Make new plugins active"
 msgstr "Uvést nové přídavné moduly do činnosti"
 
-#: rc_option_editor.cc:1459
+#: rc_option_editor.cc:1457
 msgid "Enable automatic analysis of audio"
 msgstr "Povolit automatický rozbor zvuku"
 
-#: rc_option_editor.cc:1467
+#: rc_option_editor.cc:1465
 msgid "Replicate missing region channels"
 msgstr "Zreprodukovat chybějící kanály oblasti"
 
-#: rc_option_editor.cc:1474 rc_option_editor.cc:1489 rc_option_editor.cc:1501
-#: rc_option_editor.cc:1513 rc_option_editor.cc:1525 rc_option_editor.cc:1529
-#: rc_option_editor.cc:1537 rc_option_editor.cc:1545 rc_option_editor.cc:1553
-#: rc_option_editor.cc:1555 rc_option_editor.cc:1563 rc_option_editor.cc:1571
-#: rc_option_editor.cc:1579
+#: rc_option_editor.cc:1472 rc_option_editor.cc:1487 rc_option_editor.cc:1499
+#: rc_option_editor.cc:1511 rc_option_editor.cc:1523 rc_option_editor.cc:1527
+#: rc_option_editor.cc:1535 rc_option_editor.cc:1543 rc_option_editor.cc:1551
+#: rc_option_editor.cc:1553 rc_option_editor.cc:1561 rc_option_editor.cc:1569
+#: rc_option_editor.cc:1577
 msgid "Solo / mute"
 msgstr "Sólo/Ztlumit"
 
-#: rc_option_editor.cc:1477
+#: rc_option_editor.cc:1475
 msgid "Solo-in-place mute cut (dB)"
 msgstr "Vyjmutí ztlumení sóla (dB)"
 
-#: rc_option_editor.cc:1484
+#: rc_option_editor.cc:1482
 msgid "Solo controls are Listen controls"
 msgstr "Ovládací prvky pro sólo jsou ovládacími prvky pro poslech"
 
-#: rc_option_editor.cc:1493
+#: rc_option_editor.cc:1491
 msgid "Listen Position"
 msgstr "Poloha poslechu"
 
-#: rc_option_editor.cc:1498
+#: rc_option_editor.cc:1496
 msgid "after-fader (AFL)"
 msgstr "Po-prolínač (AFL)"
 
-#: rc_option_editor.cc:1499
+#: rc_option_editor.cc:1497
 msgid "pre-fader (PFL)"
 msgstr "Před-prolínač (PFL)"
 
-#: rc_option_editor.cc:1505
+#: rc_option_editor.cc:1503
 msgid "PFL signals come from"
 msgstr "PFL signály přicházejí z"
 
-#: rc_option_editor.cc:1510
+#: rc_option_editor.cc:1508
 msgid "before pre-fader processors"
 msgstr "Zpracovatelé před před-prolínače"
 
-#: rc_option_editor.cc:1511
+#: rc_option_editor.cc:1509
 msgid "pre-fader but after pre-fader processors"
 msgstr "Zpracovatelé před-prolínače ale po před-prolínače"
 
-#: rc_option_editor.cc:1517
+#: rc_option_editor.cc:1515
 msgid "AFL signals come from"
 msgstr "AFL signály přicházejí z"
 
-#: rc_option_editor.cc:1522
+#: rc_option_editor.cc:1520
 msgid "immediately post-fader"
 msgstr "Okamžitě po-prolínač"
 
-#: rc_option_editor.cc:1523
+#: rc_option_editor.cc:1521
 msgid "after post-fader processors (before pan)"
 msgstr "Zpracovatelé po po-prolínače (před vyvážením)"
 
-#: rc_option_editor.cc:1532
+#: rc_option_editor.cc:1530
 msgid "Exclusive solo"
 msgstr "Výhradní sólo"
 
-#: rc_option_editor.cc:1540
+#: rc_option_editor.cc:1538
 msgid "Show solo muting"
 msgstr "Sólo ukázat jako oněmělé"
 
-#: rc_option_editor.cc:1548
+#: rc_option_editor.cc:1546
 msgid "Soloing overrides muting"
 msgstr "Sólo má přednost před ztlumením"
 
-#: rc_option_editor.cc:1553
+#: rc_option_editor.cc:1551
 msgid "Default track / bus muting options"
 msgstr "Výchozí volby pro ztlumení stopy/sběrnice"
 
-#: rc_option_editor.cc:1558
+#: rc_option_editor.cc:1556
 msgid "Mute affects pre-fader sends"
 msgstr "Ztlumení ovlivní odeslání před-prolínače"
 
-#: rc_option_editor.cc:1566
+#: rc_option_editor.cc:1564
 msgid "Mute affects post-fader sends"
 msgstr "Ztlumení ovlivní odeslání po-prolínače"
 
-#: rc_option_editor.cc:1574
+#: rc_option_editor.cc:1572
 msgid "Mute affects control outputs"
 msgstr "Ztlumení ovlivní ovládací výstupy"
 
-#: rc_option_editor.cc:1582
+#: rc_option_editor.cc:1580
 msgid "Mute affects main outputs"
 msgstr "Ztlumení ovlivní hlavní výstupy"
 
-#: rc_option_editor.cc:1598
+#: rc_option_editor.cc:1596
 msgid "Send MIDI Time Code"
 msgstr "Poslat časový kód MIDI"
 
-#: rc_option_editor.cc:1606
+#: rc_option_editor.cc:1604
 msgid "Percentage either side of normal transport speed to transmit MTC"
 msgstr ""
 "Procento kterékoli strany běžné rychlosti přesunu k odeslání časového kódu "
 "MIDI (MTC)"
 
-#: rc_option_editor.cc:1615
+#: rc_option_editor.cc:1613
 msgid "Obey MIDI Machine Control commands"
 msgstr "Dodržovat příkazy pro ovládání stroje MIDI"
 
-#: rc_option_editor.cc:1623
+#: rc_option_editor.cc:1621
 msgid "Send MIDI Machine Control commands"
 msgstr "Poslat příkazy pro ovládání stroje MIDI"
 
-#: rc_option_editor.cc:1631
+#: rc_option_editor.cc:1629
 msgid "Send MIDI control feedback"
 msgstr "Poslat zpětnou vazbu k ovládání MIDI"
 
-#: rc_option_editor.cc:1639
+#: rc_option_editor.cc:1637
 msgid "Inbound MMC device ID"
 msgstr "ID zařízení MMC (ovládání stroje MIDI) na vstupu"
 
-#: rc_option_editor.cc:1648
+#: rc_option_editor.cc:1646
 msgid "Outbound MMC device ID"
 msgstr "ID zařízení MMC (ovládání stroje MIDI) na výstupu"
 
-#: rc_option_editor.cc:1657
+#: rc_option_editor.cc:1655
 msgid "Initial program change"
 msgstr "Počáteční změna programu"
 
-#: rc_option_editor.cc:1666
+#: rc_option_editor.cc:1664
 msgid "Display first MIDI bank/program as 0"
 msgstr "Zobrazit první banku/program MIDI jako 0"
 
-#: rc_option_editor.cc:1674
+#: rc_option_editor.cc:1672
 msgid "Never display periodic MIDI messages (MTC, MIDI Clock)"
 msgstr "Nikdy nezobrazovat periodické zprávy MIDI (MTC, hodiny MIDI)"
 
-#: rc_option_editor.cc:1682
+#: rc_option_editor.cc:1680
 msgid "Sound MIDI notes as they are selected"
 msgstr "Zahrát noty MIDI, když jsou vybrány"
 
-#: rc_option_editor.cc:1689 rc_option_editor.cc:1691 rc_option_editor.cc:1693
-#: rc_option_editor.cc:1695 rc_option_editor.cc:1708
+#: rc_option_editor.cc:1687 rc_option_editor.cc:1689 rc_option_editor.cc:1691
+#: rc_option_editor.cc:1693 rc_option_editor.cc:1706
 msgid "User interaction"
 msgstr "Uživatelská interakce"
 
-#: rc_option_editor.cc:1689
+#: rc_option_editor.cc:1687
 msgid "Keyboard"
 msgstr "Klávesnice"
 
-#: rc_option_editor.cc:1693
+#: rc_option_editor.cc:1691
 msgid "Control surfaces"
 msgstr "Ovládací spínače"
 
-#: rc_option_editor.cc:1699
+#: rc_option_editor.cc:1697
 msgid "Control surface remote ID"
 msgstr "ID vzdálené ovládací plochy"
 
-#: rc_option_editor.cc:1704
+#: rc_option_editor.cc:1702
 msgid "assigned by user"
 msgstr "určeno uživatelem"
 
-#: rc_option_editor.cc:1705
+#: rc_option_editor.cc:1703
 msgid "follows order of mixer"
 msgstr "následuje pořadí ve směšovači"
 
-#: rc_option_editor.cc:1706
+#: rc_option_editor.cc:1704
 msgid "follows order of editor"
 msgstr "následuje pořadí v editoru"
 
-#: rc_option_editor.cc:1712 rc_option_editor.cc:1720 rc_option_editor.cc:1730
-#: rc_option_editor.cc:1732 rc_option_editor.cc:1750 rc_option_editor.cc:1759
-#: rc_option_editor.cc:1767 rc_option_editor.cc:1781 rc_option_editor.cc:1798
+#: rc_option_editor.cc:1710 rc_option_editor.cc:1718 rc_option_editor.cc:1728
+#: rc_option_editor.cc:1730 rc_option_editor.cc:1748 rc_option_editor.cc:1757
+#: rc_option_editor.cc:1765 rc_option_editor.cc:1779 rc_option_editor.cc:1796
 #, fuzzy
 msgid "GUI"
 msgstr "URI"
 
-#: rc_option_editor.cc:1715
+#: rc_option_editor.cc:1713
 msgid "Graphically indicate mouse pointer hovering over various widgets"
 msgstr "Obrazově naznačovat přejetí ukazatele myši nad různými prvky"
 
-#: rc_option_editor.cc:1723
+#: rc_option_editor.cc:1721
 msgid "Show tooltips if mouse hovers over a control"
 msgstr ""
 
-#: rc_option_editor.cc:1735
+#: rc_option_editor.cc:1733
 msgid "Use plugins' own interfaces instead of Ardour's"
 msgstr "Použít vlastní rozhraní přídavných modulů, namísto rozhraní Ardouru"
 
-#: rc_option_editor.cc:1752
+#: rc_option_editor.cc:1750
 msgid "Mixer Strip"
 msgstr "Proužek směšovače"
 
-#: rc_option_editor.cc:1762
+#: rc_option_editor.cc:1760
 msgid "Use narrow strips in the mixer by default"
 msgstr "Použít úzké proužky ve směšovači jako výchozí"
 
-#: rc_option_editor.cc:1771
+#: rc_option_editor.cc:1769
 msgid "Meter hold time"
 msgstr "Čas držení měřidla"
 
-#: rc_option_editor.cc:1777
+#: rc_option_editor.cc:1775
 msgid "short"
 msgstr "Krátký"
 
-#: rc_option_editor.cc:1778 rc_option_editor.cc:1793
+#: rc_option_editor.cc:1776 rc_option_editor.cc:1791
 msgid "medium"
 msgstr "Střední"
 
-#: rc_option_editor.cc:1779
+#: rc_option_editor.cc:1777
 msgid "long"
 msgstr "Dlouhý"
 
-#: rc_option_editor.cc:1785
+#: rc_option_editor.cc:1783
 msgid "Meter fall-off"
 msgstr "Klesání měřidla"
 
-#: rc_option_editor.cc:1791
+#: rc_option_editor.cc:1789
 msgid "slowest"
 msgstr "Nejpomalejší"
 
-#: rc_option_editor.cc:1792
+#: rc_option_editor.cc:1790
 msgid "slow"
 msgstr "Pomalý"
 
-#: rc_option_editor.cc:1794
+#: rc_option_editor.cc:1792
 msgid "fast"
 msgstr "Rychlý"
 
-#: rc_option_editor.cc:1795
+#: rc_option_editor.cc:1793
 msgid "faster"
 msgstr "Rychlejší"
 
-#: rc_option_editor.cc:1796
+#: rc_option_editor.cc:1794
 msgid "fastest"
 msgstr "Nejrychlejší"
 
@@ -10446,8 +10465,10 @@ msgid "Press to close this window without importing any files"
 msgstr ""
 
 #: sfdb_ui.cc:840
-msgid "found %1 matche(s)"
-msgstr ""
+msgid "found %1 match"
+msgid_plural "found %1 matches"
+msgstr[0] ""
+msgstr[1] ""
 
 #: sfdb_ui.cc:855
 msgid "SoundFileBrowser: Could not tokenize string: "
@@ -10480,51 +10501,49 @@ msgstr "Z"
 msgid "GB"
 msgstr "Př"
 
-#: sfdb_ui.cc:1063
+#: sfdb_ui.cc:1062
 msgid "Search returned no results."
 msgstr ""
 
-#: sfdb_ui.cc:1066
-msgid "Found one match."
-msgstr ""
+#: sfdb_ui.cc:1064
+msgid "Found %1 match"
+msgid_plural "Found %1 matches"
+msgstr[0] ""
+msgstr[1] ""
 
-#: sfdb_ui.cc:1069
-msgid "Found %1 matche(s)"
-msgstr ""
-
-#: sfdb_ui.cc:1273 sfdb_ui.cc:1580 sfdb_ui.cc:1630 sfdb_ui.cc:1648
+#: sfdb_ui.cc:1268 sfdb_ui.cc:1575 sfdb_ui.cc:1625 sfdb_ui.cc:1643
 msgid "one track per file"
 msgstr "Jedna stopa na soubor"
 
-#: sfdb_ui.cc:1276 sfdb_ui.cc:1631 sfdb_ui.cc:1649
+#: sfdb_ui.cc:1271 sfdb_ui.cc:1626 sfdb_ui.cc:1644
 msgid "one track per channel"
 msgstr "Jedna stopa na kanál"
 
-#: sfdb_ui.cc:1284 sfdb_ui.cc:1633 sfdb_ui.cc:1650
+#: sfdb_ui.cc:1279 sfdb_ui.cc:1628 sfdb_ui.cc:1645
 msgid "sequence files"
 msgstr "Soubory seřadit vedle sebe"
 
-#: sfdb_ui.cc:1287 sfdb_ui.cc:1638
+#: sfdb_ui.cc:1282 sfdb_ui.cc:1633
 msgid "all files in one track"
 msgstr "Všechny soubory do jedné stopy"
 
-#: sfdb_ui.cc:1288 sfdb_ui.cc:1632
+#: sfdb_ui.cc:1283 sfdb_ui.cc:1627
 msgid "merge files"
 msgstr "Sloučit soubory"
 
-#: sfdb_ui.cc:1294 sfdb_ui.cc:1635
+#: sfdb_ui.cc:1289 sfdb_ui.cc:1630
 msgid "one region per file"
 msgstr "Jedna oblast na soubor"
 
-#: sfdb_ui.cc:1297 sfdb_ui.cc:1636
+#: sfdb_ui.cc:1292 sfdb_ui.cc:1631
 msgid "one region per channel"
 msgstr "Jedna oblast na kanál"
 
-#: sfdb_ui.cc:1302 sfdb_ui.cc:1637 sfdb_ui.cc:1651
+#: sfdb_ui.cc:1297 sfdb_ui.cc:1632 sfdb_ui.cc:1646
 msgid "all files in one region"
 msgstr "Všechny soubory v jedné oblasti"
 
-#: sfdb_ui.cc:1368
+#: sfdb_ui.cc:1363
 msgid ""
 "One or more of the selected files\n"
 "cannot be used by %1"
@@ -10532,58 +10551,58 @@ msgstr ""
 "Jeden nebo více vybraných souborů\n"
 "nemůže být použito %1"
 
-#: sfdb_ui.cc:1508
+#: sfdb_ui.cc:1503
 msgid "Copy files to session"
 msgstr "Zkopírovat soubory do sezení"
 
-#: sfdb_ui.cc:1525 sfdb_ui.cc:1688
+#: sfdb_ui.cc:1520 sfdb_ui.cc:1683
 msgid "file timestamp"
 msgstr "Časové razítko souboru"
 
-#: sfdb_ui.cc:1526 sfdb_ui.cc:1690
+#: sfdb_ui.cc:1521 sfdb_ui.cc:1685
 msgid "edit point"
 msgstr "Pracovní bod"
 
-#: sfdb_ui.cc:1527 sfdb_ui.cc:1692
+#: sfdb_ui.cc:1522 sfdb_ui.cc:1687
 msgid "playhead"
 msgstr "Ukazatel polohy"
 
-#: sfdb_ui.cc:1528
+#: sfdb_ui.cc:1523
 msgid "session start"
 msgstr "Začátek sezení"
 
-#: sfdb_ui.cc:1533
+#: sfdb_ui.cc:1528
 msgid "<b>Add files as ...</b>"
 msgstr ""
 
-#: sfdb_ui.cc:1555
+#: sfdb_ui.cc:1550
 #, fuzzy
 msgid "<b>Insert at</b>"
 msgstr "Vložit v:"
 
-#: sfdb_ui.cc:1568
+#: sfdb_ui.cc:1563
 #, fuzzy
 msgid "<b>Mapping</b>"
 msgstr "<b>Sdílení</b>"
 
-#: sfdb_ui.cc:1586
+#: sfdb_ui.cc:1581
 #, fuzzy
 msgid "<b>Conversion quality</b>"
 msgstr "Kvalita převodu:"
 
-#: sfdb_ui.cc:1598 sfdb_ui.cc:1704
+#: sfdb_ui.cc:1593 sfdb_ui.cc:1699
 msgid "Best"
 msgstr "Nejlepší"
 
-#: sfdb_ui.cc:1599 sfdb_ui.cc:1706
+#: sfdb_ui.cc:1594 sfdb_ui.cc:1701
 msgid "Good"
 msgstr "Dobrá"
 
-#: sfdb_ui.cc:1600 sfdb_ui.cc:1708
+#: sfdb_ui.cc:1595 sfdb_ui.cc:1703
 msgid "Quick"
 msgstr "Rychlý převod"
 
-#: sfdb_ui.cc:1602
+#: sfdb_ui.cc:1597
 msgid "Fastest"
 msgstr "Co nejrychleji"
 
@@ -11597,14 +11616,8 @@ msgstr ""
 msgid "VerboseCanvasCursor"
 msgstr "Ukazovátko podrobného plátna"
 
-#~ msgid "could not create a new audio track"
-#~ msgstr "Nelze vytvořit novou stopu"
-
 #~ msgid "could only create %1 of %2 new audio %3"
 #~ msgstr "Lze vytvořit jen %1 ze %2 nových %3"
-
-#~ msgid "could not create a new audio bus"
-#~ msgstr "Nepodařilo se vytvořit novou zvukovou sběrnici"
 
 #~ msgid "could not create %1 new audio busses"
 #~ msgstr "Nepodařilo se vytvořit %1 nové zvukové sběrnice"

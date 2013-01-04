@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-03 11:16-0500\n"
+"POT-Creation-Date: 2013-01-04 11:01-0500\n"
 "PO-Revision-Date: 2013-01-03 08:29-0500\n"
 "Last-Translator: Rui-huai Zhang <zrhzrh>\n"
 "Language-Team: zrhzrh <zrhzrh@mail.ustc.edu.cn>\n"
@@ -421,22 +421,22 @@ msgstr "名称:"
 msgid "Group:"
 msgstr "分组:"
 
-#: add_route_dialog.cc:218 add_route_dialog.cc:227 rc_option_editor.cc:1328
-#: rc_option_editor.cc:1330 rc_option_editor.cc:1332 rc_option_editor.cc:1334
-#: rc_option_editor.cc:1358 rc_option_editor.cc:1360 rc_option_editor.cc:1368
-#: rc_option_editor.cc:1370 rc_option_editor.cc:1388 rc_option_editor.cc:1401
-#: rc_option_editor.cc:1403 rc_option_editor.cc:1405 rc_option_editor.cc:1436
-#: rc_option_editor.cc:1438 rc_option_editor.cc:1440 rc_option_editor.cc:1448
-#: rc_option_editor.cc:1456 rc_option_editor.cc:1464
+#: add_route_dialog.cc:218 add_route_dialog.cc:227 rc_option_editor.cc:1326
+#: rc_option_editor.cc:1328 rc_option_editor.cc:1330 rc_option_editor.cc:1332
+#: rc_option_editor.cc:1356 rc_option_editor.cc:1358 rc_option_editor.cc:1366
+#: rc_option_editor.cc:1368 rc_option_editor.cc:1386 rc_option_editor.cc:1399
+#: rc_option_editor.cc:1401 rc_option_editor.cc:1403 rc_option_editor.cc:1434
+#: rc_option_editor.cc:1436 rc_option_editor.cc:1438 rc_option_editor.cc:1446
+#: rc_option_editor.cc:1454 rc_option_editor.cc:1462
 msgid "Audio"
 msgstr "音频"
 
 #: add_route_dialog.cc:219 add_route_dialog.cc:230 editor_actions.cc:105
-#: missing_file_dialog.cc:55 rc_option_editor.cc:1587 rc_option_editor.cc:1595
-#: rc_option_editor.cc:1603 rc_option_editor.cc:1612 rc_option_editor.cc:1620
-#: rc_option_editor.cc:1628 rc_option_editor.cc:1636 rc_option_editor.cc:1645
-#: rc_option_editor.cc:1654 rc_option_editor.cc:1663 rc_option_editor.cc:1671
-#: rc_option_editor.cc:1679
+#: missing_file_dialog.cc:55 rc_option_editor.cc:1585 rc_option_editor.cc:1593
+#: rc_option_editor.cc:1601 rc_option_editor.cc:1610 rc_option_editor.cc:1618
+#: rc_option_editor.cc:1626 rc_option_editor.cc:1634 rc_option_editor.cc:1643
+#: rc_option_editor.cc:1652 rc_option_editor.cc:1661 rc_option_editor.cc:1669
+#: rc_option_editor.cc:1677
 msgid "MIDI"
 msgstr "MIDI"
 
@@ -863,6 +863,20 @@ msgstr ""
 #: ardour_ui.cc:1430
 msgid "You cannot add a track or bus without a session already loaded."
 msgstr "您只能在已载入的会话或总线中添加音轨和总线"
+
+#: ardour_ui.cc:1439
+#, fuzzy
+msgid "could not create new audio track"
+msgid_plural "could not create %1 new audio tracks"
+msgstr[0] "无法新建音频音轨"
+msgstr[1] "无法新建音频音轨"
+
+#: ardour_ui.cc:1448
+#, fuzzy
+msgid "could not create new audio bus"
+msgid_plural "could not create %1 new audio busses"
+msgstr[0] "无法新建音频总线"
+msgstr[1] "无法新建音频总线"
 
 #: ardour_ui.cc:1565
 #, fuzzy
@@ -1437,11 +1451,11 @@ msgstr "采样格式"
 msgid "Control Surfaces"
 msgstr "控制表面"
 
-#: ardour_ui_ed.cc:115 rc_option_editor.cc:1438 route_time_axis.cc:418
+#: ardour_ui_ed.cc:115 rc_option_editor.cc:1436 route_time_axis.cc:418
 msgid "Plugins"
 msgstr "插件"
 
-#: ardour_ui_ed.cc:116 rc_option_editor.cc:1767
+#: ardour_ui_ed.cc:116 rc_option_editor.cc:1765
 msgid "Metering"
 msgstr ""
 
@@ -1530,7 +1544,7 @@ msgstr "清空未使用的源..."
 msgid "Flush Wastebasket"
 msgstr "清空回收站"
 
-#: ardour_ui_ed.cc:190 keyeditor.cc:253 rc_option_editor.cc:1352
+#: ardour_ui_ed.cc:190 keyeditor.cc:253 rc_option_editor.cc:1350
 msgid "JACK"
 msgstr "JACK"
 
@@ -1655,8 +1669,8 @@ msgstr "保存"
 #: rc_option_editor.cc:1044 rc_option_editor.cc:1054 rc_option_editor.cc:1056
 #: rc_option_editor.cc:1066 rc_option_editor.cc:1082 rc_option_editor.cc:1095
 #: rc_option_editor.cc:1113 rc_option_editor.cc:1115 rc_option_editor.cc:1129
-#: rc_option_editor.cc:1133 rc_option_editor.cc:1135 rc_option_editor.cc:1152
-#: rc_option_editor.cc:1163
+#: rc_option_editor.cc:1132 rc_option_editor.cc:1134 rc_option_editor.cc:1151
+#: rc_option_editor.cc:1162
 msgid "Transport"
 msgstr ""
 
@@ -1845,7 +1859,7 @@ msgstr "发送MMC"
 msgid "Use MMC"
 msgstr "使用MMC"
 
-#: ardour_ui_ed.cc:440 rc_option_editor.cc:1590
+#: ardour_ui_ed.cc:440 rc_option_editor.cc:1588
 msgid "Send MIDI Clock"
 msgstr "发送MIDI时钟"
 
@@ -2530,13 +2544,13 @@ msgstr "音轨&总线"
 msgid "Ranges & Marks"
 msgstr ""
 
-#: editor.cc:688 editor.cc:5361 rc_option_editor.cc:1171
-#: rc_option_editor.cc:1179 rc_option_editor.cc:1187 rc_option_editor.cc:1202
-#: rc_option_editor.cc:1209 rc_option_editor.cc:1217 rc_option_editor.cc:1225
-#: rc_option_editor.cc:1245 rc_option_editor.cc:1257 rc_option_editor.cc:1259
-#: rc_option_editor.cc:1267 rc_option_editor.cc:1275 rc_option_editor.cc:1283
-#: rc_option_editor.cc:1291 rc_option_editor.cc:1299 rc_option_editor.cc:1314
-#: rc_option_editor.cc:1318
+#: editor.cc:688 editor.cc:5361 rc_option_editor.cc:1169
+#: rc_option_editor.cc:1177 rc_option_editor.cc:1185 rc_option_editor.cc:1200
+#: rc_option_editor.cc:1207 rc_option_editor.cc:1215 rc_option_editor.cc:1223
+#: rc_option_editor.cc:1243 rc_option_editor.cc:1255 rc_option_editor.cc:1257
+#: rc_option_editor.cc:1265 rc_option_editor.cc:1273 rc_option_editor.cc:1281
+#: rc_option_editor.cc:1289 rc_option_editor.cc:1297 rc_option_editor.cc:1312
+#: rc_option_editor.cc:1316
 msgid "Editor"
 msgstr "编辑器"
 
@@ -2566,8 +2580,8 @@ msgstr ""
 msgid "Slow"
 msgstr "慢"
 
-#: editor.cc:1400 editor.cc:1493 editor.cc:1555 sfdb_ui.cc:1601
-#: sfdb_ui.cc:1710
+#: editor.cc:1400 editor.cc:1493 editor.cc:1555 sfdb_ui.cc:1596
+#: sfdb_ui.cc:1705
 msgid "Fast"
 msgstr "快"
 
@@ -3075,7 +3089,7 @@ msgstr "MIDI选项"
 msgid "Misc Options"
 msgstr "其他选项"
 
-#: editor_actions.cc:115 rc_option_editor.cc:1332 route_group_dialog.cc:48
+#: editor_actions.cc:115 rc_option_editor.cc:1330 route_group_dialog.cc:48
 #: session_option_editor.cc:217 session_option_editor.cc:224
 msgid "Monitoring"
 msgstr "监控中"
@@ -5333,7 +5347,7 @@ msgstr "独奏..."
 msgid "SI"
 msgstr ""
 
-#: editor_routes.cc:209 mixer_strip.cc:351 rc_option_editor.cc:1745
+#: editor_routes.cc:209 mixer_strip.cc:351 rc_option_editor.cc:1743
 #, fuzzy
 msgid "Solo Isolated"
 msgstr "Solo隔离"
@@ -6190,23 +6204,28 @@ msgstr "没有群组"
 msgid "Remove Group"
 msgstr "移除总线"
 
-#: group_tabs.cc:322
+#: group_tabs.cc:323
+#, fuzzy
+msgid "Remove Subgroup Bus"
+msgstr "移除总线"
+
+#: group_tabs.cc:325
 msgid "Add New Subgroup Bus"
 msgstr ""
 
-#: group_tabs.cc:323
+#: group_tabs.cc:327
 msgid "Add New Aux Bus (pre-fader)"
 msgstr ""
 
-#: group_tabs.cc:324
+#: group_tabs.cc:328
 msgid "Add New Aux Bus (post-fader)"
 msgstr ""
 
-#: group_tabs.cc:330
+#: group_tabs.cc:334
 msgid "Enable All Groups"
 msgstr ""
 
-#: group_tabs.cc:331
+#: group_tabs.cc:335
 #, fuzzy
 msgid "Disable All Groups"
 msgstr "禁用所有"
@@ -6378,7 +6397,7 @@ msgstr ""
 msgid "Reset"
 msgstr "预设"
 
-#: latency_gui.cc:150 rhythm_ferret.cc:255 sfdb_ui.cc:1729
+#: latency_gui.cc:150 rhythm_ferret.cc:255 sfdb_ui.cc:1724
 msgid "programming error: %1 (%2)"
 msgstr "程序错误: %1 (%2)"
 
@@ -7051,7 +7070,7 @@ msgid "pre"
 msgstr ""
 
 #: mixer_strip.cc:93 mixer_strip.cc:121 mixer_strip.cc:352 mixer_strip.cc:1298
-#: rc_option_editor.cc:1746
+#: rc_option_editor.cc:1744
 #, fuzzy
 msgid "Comments"
 msgstr "注释"
@@ -7100,12 +7119,12 @@ msgstr ""
 msgid "Mix group"
 msgstr ""
 
-#: mixer_strip.cc:349 rc_option_editor.cc:1743
+#: mixer_strip.cc:349 rc_option_editor.cc:1741
 #, fuzzy
 msgid "Phase Invert"
 msgstr "反转"
 
-#: mixer_strip.cc:350 rc_option_editor.cc:1744 route_ui.cc:1155
+#: mixer_strip.cc:350 rc_option_editor.cc:1742 route_ui.cc:1155
 msgid "Solo Safe"
 msgstr "Solo安全"
 
@@ -7113,7 +7132,7 @@ msgstr "Solo安全"
 msgid "Group"
 msgstr "组"
 
-#: mixer_strip.cc:354 rc_option_editor.cc:1747
+#: mixer_strip.cc:354 rc_option_editor.cc:1745
 #, fuzzy
 msgid "Meter Point"
 msgstr "编辑点"
@@ -8056,7 +8075,7 @@ msgstr "隐藏所有自动化"
 msgid "on"
 msgstr "完成"
 
-#: processor_box.cc:479 rc_option_editor.cc:1776 rc_option_editor.cc:1790
+#: processor_box.cc:479 rc_option_editor.cc:1774 rc_option_editor.cc:1788
 msgid "off"
 msgstr ""
 
@@ -8560,49 +8579,49 @@ msgstr ""
 msgid "LTC incoming port"
 msgstr ""
 
-#: rc_option_editor.cc:1133
+#: rc_option_editor.cc:1132
 #, fuzzy
 msgid "LTC Generator"
 msgstr "创建者"
 
-#: rc_option_editor.cc:1138
+#: rc_option_editor.cc:1137
 #, fuzzy
 msgid "Enable LTC generator"
 msgstr "Povolit překlady"
 
-#: rc_option_editor.cc:1145
+#: rc_option_editor.cc:1144
 msgid "send LTC while stopped"
 msgstr ""
 
-#: rc_option_editor.cc:1151
+#: rc_option_editor.cc:1150
 msgid ""
 "<b>When enabled</b> Ardour will continue to send LTC information even when "
 "the transport (playhead) is not moving"
 msgstr ""
 
-#: rc_option_editor.cc:1161
+#: rc_option_editor.cc:1160
 msgid ""
 "Specify the Peak Volume of the generated LTC signal in dbFS. A good value "
 "is  0dBu ^= -18dbFS in an EBU calibrated system"
 msgstr ""
 
-#: rc_option_editor.cc:1174
+#: rc_option_editor.cc:1172
 msgid "Link selection of regions and tracks"
 msgstr "链接所选的区域和音轨"
 
-#: rc_option_editor.cc:1182
+#: rc_option_editor.cc:1180
 msgid "Move relevant automation when audio regions are moved"
 msgstr "当音频区域移除时移除相应自动化"
 
-#: rc_option_editor.cc:1190
+#: rc_option_editor.cc:1188
 msgid "Show meters on tracks in the editor"
 msgstr "在编辑器的音轨显示仪表"
 
-#: rc_option_editor.cc:1197
+#: rc_option_editor.cc:1195
 msgid "Use overlap equivalency for regions"
 msgstr "区域使用重叠等同"
 
-#: rc_option_editor.cc:1204
+#: rc_option_editor.cc:1202
 msgid ""
 "When extending region selection across a group, %1 must decide which regions "
 "are equivalent\n"
@@ -8614,80 +8633,80 @@ msgid ""
 "start time, length and position"
 msgstr ""
 
-#: rc_option_editor.cc:1212
+#: rc_option_editor.cc:1210
 msgid "Make rubberband selection rectangle snap to the grid"
 msgstr ""
 
-#: rc_option_editor.cc:1220
+#: rc_option_editor.cc:1218
 msgid "Show waveforms in regions"
 msgstr "显示区域的波形"
 
-#: rc_option_editor.cc:1228
+#: rc_option_editor.cc:1226
 #, fuzzy
 msgid "Show gain envelopes in audio regions"
 msgstr "显示区域的波形"
 
-#: rc_option_editor.cc:1229
+#: rc_option_editor.cc:1227
 msgid "in all modes"
 msgstr ""
 
-#: rc_option_editor.cc:1230
+#: rc_option_editor.cc:1228
 msgid "only in region gain mode"
 msgstr ""
 
-#: rc_option_editor.cc:1237
+#: rc_option_editor.cc:1235
 msgid "Waveform scale"
 msgstr "波形标尺"
 
-#: rc_option_editor.cc:1242
+#: rc_option_editor.cc:1240
 msgid "linear"
 msgstr "先行"
 
-#: rc_option_editor.cc:1243
+#: rc_option_editor.cc:1241
 msgid "logarithmic"
 msgstr "对数"
 
-#: rc_option_editor.cc:1249
+#: rc_option_editor.cc:1247
 msgid "Waveform shape"
 msgstr "波形形状"
 
-#: rc_option_editor.cc:1254
+#: rc_option_editor.cc:1252
 msgid "traditional"
 msgstr "传统的"
 
-#: rc_option_editor.cc:1255
+#: rc_option_editor.cc:1253
 msgid "rectified"
 msgstr "整流的"
 
-#: rc_option_editor.cc:1262
+#: rc_option_editor.cc:1260
 msgid "Show waveforms for audio while it is being recorded"
 msgstr "在录制音频的时候显示波形"
 
-#: rc_option_editor.cc:1270
+#: rc_option_editor.cc:1268
 msgid "Show zoom toolbar"
 msgstr "显示缩放工具栏"
 
-#: rc_option_editor.cc:1278
+#: rc_option_editor.cc:1276
 msgid "Color regions using their track's color"
 msgstr ""
 
-#: rc_option_editor.cc:1286
+#: rc_option_editor.cc:1284
 msgid "Update editor window during drags of the summary"
 msgstr ""
 
-#: rc_option_editor.cc:1294
+#: rc_option_editor.cc:1292
 msgid "Synchronise editor and mixer track order"
 msgstr ""
 
-#: rc_option_editor.cc:1302
+#: rc_option_editor.cc:1300
 msgid "Synchronise editor and mixer selection"
 msgstr ""
 
-#: rc_option_editor.cc:1309
+#: rc_option_editor.cc:1307
 msgid "Name new markers"
 msgstr "命名新标签"
 
-#: rc_option_editor.cc:1315
+#: rc_option_editor.cc:1313
 msgid ""
 "If enabled, popup a dialog when a new marker is created to allow its name to "
 "be set as it is created.\n"
@@ -8695,334 +8714,334 @@ msgid ""
 "You can always rename markers by right-clicking on them"
 msgstr ""
 
-#: rc_option_editor.cc:1321
+#: rc_option_editor.cc:1319
 msgid "Auto-scroll editor window when dragging near its edges"
 msgstr ""
 
-#: rc_option_editor.cc:1328
+#: rc_option_editor.cc:1326
 msgid "Buffering"
 msgstr "缓冲中"
 
-#: rc_option_editor.cc:1337
+#: rc_option_editor.cc:1335
 msgid "Use a monitor bus (allows AFL/PFL and more control)"
 msgstr "使用监视总线 (允许AFL/PFL和更多的控制)"
 
-#: rc_option_editor.cc:1344
+#: rc_option_editor.cc:1342
 msgid "Record monitoring handled by"
 msgstr ""
 
-#: rc_option_editor.cc:1355
+#: rc_option_editor.cc:1353
 msgid "ardour"
 msgstr "ardour"
 
-#: rc_option_editor.cc:1356
+#: rc_option_editor.cc:1354
 msgid "audio hardware"
 msgstr "音频硬件"
 
-#: rc_option_editor.cc:1363
+#: rc_option_editor.cc:1361
 msgid "Tape machine mode"
 msgstr "磁带机模式"
 
-#: rc_option_editor.cc:1368
+#: rc_option_editor.cc:1366
 msgid "Connection of tracks and busses"
 msgstr "音轨和总线的连接"
 
-#: rc_option_editor.cc:1373
+#: rc_option_editor.cc:1371
 msgid "Auto-connect master/monitor busses"
 msgstr "自动连接 主控/监视 总线"
 
-#: rc_option_editor.cc:1380
+#: rc_option_editor.cc:1378
 msgid "Connect track inputs"
 msgstr "链接音轨输入"
 
-#: rc_option_editor.cc:1385
+#: rc_option_editor.cc:1383
 msgid "automatically to physical inputs"
 msgstr "自动物理数入"
 
-#: rc_option_editor.cc:1386 rc_option_editor.cc:1399
+#: rc_option_editor.cc:1384 rc_option_editor.cc:1397
 msgid "manually"
 msgstr "手动"
 
-#: rc_option_editor.cc:1392
+#: rc_option_editor.cc:1390
 msgid "Connect track and bus outputs"
 msgstr "链接音轨和总线的输出"
 
-#: rc_option_editor.cc:1397
+#: rc_option_editor.cc:1395
 msgid "automatically to physical outputs"
 msgstr "自动物理数出"
 
-#: rc_option_editor.cc:1398
+#: rc_option_editor.cc:1396
 msgid "automatically to master bus"
 msgstr "自动化主控总线"
 
-#: rc_option_editor.cc:1403
+#: rc_option_editor.cc:1401
 msgid "Denormals"
 msgstr "异常"
 
-#: rc_option_editor.cc:1408
+#: rc_option_editor.cc:1406
 msgid "Use DC bias to protect against denormals"
 msgstr "使用偏压直流放置异常"
 
-#: rc_option_editor.cc:1415
+#: rc_option_editor.cc:1413
 msgid "Processor handling"
 msgstr "处理器处理"
 
-#: rc_option_editor.cc:1420
+#: rc_option_editor.cc:1418
 msgid "no processor handling"
 msgstr "无处理器处理"
 
-#: rc_option_editor.cc:1425
+#: rc_option_editor.cc:1423
 msgid "use FlushToZero"
 msgstr ""
 
-#: rc_option_editor.cc:1429
+#: rc_option_editor.cc:1427
 msgid "use DenormalsAreZero"
 msgstr ""
 
-#: rc_option_editor.cc:1433
+#: rc_option_editor.cc:1431
 msgid "use FlushToZero and DenormalsAreZero"
 msgstr ""
 
-#: rc_option_editor.cc:1443
+#: rc_option_editor.cc:1441
 #, fuzzy
 msgid "Silence plugins when the transport is stopped"
 msgstr "当运输停止时停止插件"
 
-#: rc_option_editor.cc:1451
+#: rc_option_editor.cc:1449
 msgid "Make new plugins active"
 msgstr "启用新插件"
 
-#: rc_option_editor.cc:1459
+#: rc_option_editor.cc:1457
 msgid "Enable automatic analysis of audio"
 msgstr "启用音频自动分析"
 
-#: rc_option_editor.cc:1467
+#: rc_option_editor.cc:1465
 msgid "Replicate missing region channels"
 msgstr "复制遗失的区域通道"
 
-#: rc_option_editor.cc:1474 rc_option_editor.cc:1489 rc_option_editor.cc:1501
-#: rc_option_editor.cc:1513 rc_option_editor.cc:1525 rc_option_editor.cc:1529
-#: rc_option_editor.cc:1537 rc_option_editor.cc:1545 rc_option_editor.cc:1553
-#: rc_option_editor.cc:1555 rc_option_editor.cc:1563 rc_option_editor.cc:1571
-#: rc_option_editor.cc:1579
+#: rc_option_editor.cc:1472 rc_option_editor.cc:1487 rc_option_editor.cc:1499
+#: rc_option_editor.cc:1511 rc_option_editor.cc:1523 rc_option_editor.cc:1527
+#: rc_option_editor.cc:1535 rc_option_editor.cc:1543 rc_option_editor.cc:1551
+#: rc_option_editor.cc:1553 rc_option_editor.cc:1561 rc_option_editor.cc:1569
+#: rc_option_editor.cc:1577
 msgid "Solo / mute"
 msgstr "独奏/静音"
 
-#: rc_option_editor.cc:1477
+#: rc_option_editor.cc:1475
 msgid "Solo-in-place mute cut (dB)"
 msgstr ""
 
-#: rc_option_editor.cc:1484
+#: rc_option_editor.cc:1482
 msgid "Solo controls are Listen controls"
 msgstr ""
 
-#: rc_option_editor.cc:1493
+#: rc_option_editor.cc:1491
 msgid "Listen Position"
 msgstr ""
 
-#: rc_option_editor.cc:1498
+#: rc_option_editor.cc:1496
 msgid "after-fader (AFL)"
 msgstr ""
 
-#: rc_option_editor.cc:1499
+#: rc_option_editor.cc:1497
 msgid "pre-fader (PFL)"
 msgstr ""
 
-#: rc_option_editor.cc:1505
+#: rc_option_editor.cc:1503
 msgid "PFL signals come from"
 msgstr ""
 
-#: rc_option_editor.cc:1510
+#: rc_option_editor.cc:1508
 msgid "before pre-fader processors"
 msgstr ""
 
-#: rc_option_editor.cc:1511
+#: rc_option_editor.cc:1509
 msgid "pre-fader but after pre-fader processors"
 msgstr ""
 
-#: rc_option_editor.cc:1517
+#: rc_option_editor.cc:1515
 msgid "AFL signals come from"
 msgstr ""
 
-#: rc_option_editor.cc:1522
+#: rc_option_editor.cc:1520
 msgid "immediately post-fader"
 msgstr ""
 
-#: rc_option_editor.cc:1523
+#: rc_option_editor.cc:1521
 msgid "after post-fader processors (before pan)"
 msgstr ""
 
-#: rc_option_editor.cc:1532
+#: rc_option_editor.cc:1530
 msgid "Exclusive solo"
 msgstr "执行solo"
 
-#: rc_option_editor.cc:1540
+#: rc_option_editor.cc:1538
 msgid "Show solo muting"
 msgstr ""
 
-#: rc_option_editor.cc:1548
+#: rc_option_editor.cc:1546
 msgid "Soloing overrides muting"
 msgstr ""
 
-#: rc_option_editor.cc:1553
+#: rc_option_editor.cc:1551
 msgid "Default track / bus muting options"
 msgstr "默认 音轨/总线 静音选项"
 
-#: rc_option_editor.cc:1558
+#: rc_option_editor.cc:1556
 msgid "Mute affects pre-fader sends"
 msgstr ""
 
-#: rc_option_editor.cc:1566
+#: rc_option_editor.cc:1564
 msgid "Mute affects post-fader sends"
 msgstr ""
 
-#: rc_option_editor.cc:1574
+#: rc_option_editor.cc:1572
 msgid "Mute affects control outputs"
 msgstr ""
 
-#: rc_option_editor.cc:1582
+#: rc_option_editor.cc:1580
 msgid "Mute affects main outputs"
 msgstr " ovlivní hlavní výstupy"
 
-#: rc_option_editor.cc:1598
+#: rc_option_editor.cc:1596
 msgid "Send MIDI Time Code"
 msgstr "发送MIDI时间码"
 
-#: rc_option_editor.cc:1606
+#: rc_option_editor.cc:1604
 msgid "Percentage either side of normal transport speed to transmit MTC"
 msgstr ""
 
-#: rc_option_editor.cc:1615
+#: rc_option_editor.cc:1613
 msgid "Obey MIDI Machine Control commands"
 msgstr "遵守MIDI机器控制命令(MTC commands)"
 
-#: rc_option_editor.cc:1623
+#: rc_option_editor.cc:1621
 msgid "Send MIDI Machine Control commands"
 msgstr "发送MIDI机器控制命令(MTC commands)"
 
-#: rc_option_editor.cc:1631
+#: rc_option_editor.cc:1629
 msgid "Send MIDI control feedback"
 msgstr "发送MIDI控制反馈"
 
-#: rc_option_editor.cc:1639
+#: rc_option_editor.cc:1637
 msgid "Inbound MMC device ID"
 msgstr "向内的MMC设备ID"
 
-#: rc_option_editor.cc:1648
+#: rc_option_editor.cc:1646
 msgid "Outbound MMC device ID"
 msgstr "向外的MMC设备ID"
 
-#: rc_option_editor.cc:1657
+#: rc_option_editor.cc:1655
 msgid "Initial program change"
 msgstr "初始程序改变"
 
-#: rc_option_editor.cc:1666
+#: rc_option_editor.cc:1664
 msgid "Display first MIDI bank/program as 0"
 msgstr ""
 
-#: rc_option_editor.cc:1674
+#: rc_option_editor.cc:1672
 msgid "Never display periodic MIDI messages (MTC, MIDI Clock)"
 msgstr ""
 
-#: rc_option_editor.cc:1682
+#: rc_option_editor.cc:1680
 #, fuzzy
 msgid "Sound MIDI notes as they are selected"
 msgstr "没有选择MIDI通道"
 
-#: rc_option_editor.cc:1689 rc_option_editor.cc:1691 rc_option_editor.cc:1693
-#: rc_option_editor.cc:1695 rc_option_editor.cc:1708
+#: rc_option_editor.cc:1687 rc_option_editor.cc:1689 rc_option_editor.cc:1691
+#: rc_option_editor.cc:1693 rc_option_editor.cc:1706
 #, fuzzy
 msgid "User interaction"
 msgstr "区域操作"
 
-#: rc_option_editor.cc:1689
+#: rc_option_editor.cc:1687
 msgid "Keyboard"
 msgstr "键盘"
 
-#: rc_option_editor.cc:1693
+#: rc_option_editor.cc:1691
 msgid "Control surfaces"
 msgstr "控制表面"
 
-#: rc_option_editor.cc:1699
+#: rc_option_editor.cc:1697
 msgid "Control surface remote ID"
 msgstr "控制表面移动的ID"
 
-#: rc_option_editor.cc:1704
+#: rc_option_editor.cc:1702
 msgid "assigned by user"
 msgstr "由用户指定"
 
-#: rc_option_editor.cc:1705
+#: rc_option_editor.cc:1703
 msgid "follows order of mixer"
 msgstr "混音器的如下顺序"
 
-#: rc_option_editor.cc:1706
+#: rc_option_editor.cc:1704
 msgid "follows order of editor"
 msgstr "编辑器的如下顺序"
 
-#: rc_option_editor.cc:1712 rc_option_editor.cc:1720 rc_option_editor.cc:1730
-#: rc_option_editor.cc:1732 rc_option_editor.cc:1750 rc_option_editor.cc:1759
-#: rc_option_editor.cc:1767 rc_option_editor.cc:1781 rc_option_editor.cc:1798
+#: rc_option_editor.cc:1710 rc_option_editor.cc:1718 rc_option_editor.cc:1728
+#: rc_option_editor.cc:1730 rc_option_editor.cc:1748 rc_option_editor.cc:1757
+#: rc_option_editor.cc:1765 rc_option_editor.cc:1779 rc_option_editor.cc:1796
 msgid "GUI"
 msgstr ""
 
-#: rc_option_editor.cc:1715
+#: rc_option_editor.cc:1713
 msgid "Graphically indicate mouse pointer hovering over various widgets"
 msgstr ""
 
-#: rc_option_editor.cc:1723
+#: rc_option_editor.cc:1721
 msgid "Show tooltips if mouse hovers over a control"
 msgstr ""
 
-#: rc_option_editor.cc:1735
+#: rc_option_editor.cc:1733
 msgid "Use plugins' own interfaces instead of Ardour's"
 msgstr ""
 
-#: rc_option_editor.cc:1752
+#: rc_option_editor.cc:1750
 #, fuzzy
 msgid "Mixer Strip"
 msgstr "混音器"
 
-#: rc_option_editor.cc:1762
+#: rc_option_editor.cc:1760
 msgid "Use narrow strips in the mixer by default"
 msgstr ""
 
-#: rc_option_editor.cc:1771
+#: rc_option_editor.cc:1769
 msgid "Meter hold time"
 msgstr ""
 
-#: rc_option_editor.cc:1777
+#: rc_option_editor.cc:1775
 msgid "short"
 msgstr "短"
 
-#: rc_option_editor.cc:1778 rc_option_editor.cc:1793
+#: rc_option_editor.cc:1776 rc_option_editor.cc:1791
 msgid "medium"
 msgstr "中"
 
-#: rc_option_editor.cc:1779
+#: rc_option_editor.cc:1777
 msgid "long"
 msgstr "长"
 
-#: rc_option_editor.cc:1785
+#: rc_option_editor.cc:1783
 msgid "Meter fall-off"
 msgstr ""
 
-#: rc_option_editor.cc:1791
+#: rc_option_editor.cc:1789
 msgid "slowest"
 msgstr "最慢"
 
-#: rc_option_editor.cc:1792
+#: rc_option_editor.cc:1790
 msgid "slow"
 msgstr "慢"
 
-#: rc_option_editor.cc:1794
+#: rc_option_editor.cc:1792
 msgid "fast"
 msgstr "快"
 
-#: rc_option_editor.cc:1795
+#: rc_option_editor.cc:1793
 msgid "faster"
 msgstr "较快"
 
-#: rc_option_editor.cc:1796
+#: rc_option_editor.cc:1794
 msgid "fastest"
 msgstr "最快"
 
@@ -10386,8 +10405,10 @@ msgid "Press to close this window without importing any files"
 msgstr ""
 
 #: sfdb_ui.cc:840
-msgid "found %1 matche(s)"
-msgstr ""
+msgid "found %1 match"
+msgid_plural "found %1 matches"
+msgstr[0] ""
+msgstr[1] ""
 
 #: sfdb_ui.cc:855
 msgid "SoundFileBrowser: Could not tokenize string: "
@@ -10417,51 +10438,49 @@ msgstr ""
 msgid "GB"
 msgstr ""
 
-#: sfdb_ui.cc:1063
+#: sfdb_ui.cc:1062
 msgid "Search returned no results."
 msgstr ""
 
-#: sfdb_ui.cc:1066
-msgid "Found one match."
-msgstr ""
+#: sfdb_ui.cc:1064
+msgid "Found %1 match"
+msgid_plural "Found %1 matches"
+msgstr[0] ""
+msgstr[1] ""
 
-#: sfdb_ui.cc:1069
-msgid "Found %1 matche(s)"
-msgstr ""
-
-#: sfdb_ui.cc:1273 sfdb_ui.cc:1580 sfdb_ui.cc:1630 sfdb_ui.cc:1648
+#: sfdb_ui.cc:1268 sfdb_ui.cc:1575 sfdb_ui.cc:1625 sfdb_ui.cc:1643
 msgid "one track per file"
 msgstr "1音轨/1文件"
 
-#: sfdb_ui.cc:1276 sfdb_ui.cc:1631 sfdb_ui.cc:1649
+#: sfdb_ui.cc:1271 sfdb_ui.cc:1626 sfdb_ui.cc:1644
 msgid "one track per channel"
 msgstr "1音轨/1声道"
 
-#: sfdb_ui.cc:1284 sfdb_ui.cc:1633 sfdb_ui.cc:1650
+#: sfdb_ui.cc:1279 sfdb_ui.cc:1628 sfdb_ui.cc:1645
 msgid "sequence files"
 msgstr "顺序文件"
 
-#: sfdb_ui.cc:1287 sfdb_ui.cc:1638
+#: sfdb_ui.cc:1282 sfdb_ui.cc:1633
 msgid "all files in one track"
 msgstr "所有文件在一个音轨上"
 
-#: sfdb_ui.cc:1288 sfdb_ui.cc:1632
+#: sfdb_ui.cc:1283 sfdb_ui.cc:1627
 msgid "merge files"
 msgstr "合并文件"
 
-#: sfdb_ui.cc:1294 sfdb_ui.cc:1635
+#: sfdb_ui.cc:1289 sfdb_ui.cc:1630
 msgid "one region per file"
 msgstr "1区域/1文件"
 
-#: sfdb_ui.cc:1297 sfdb_ui.cc:1636
+#: sfdb_ui.cc:1292 sfdb_ui.cc:1631
 msgid "one region per channel"
 msgstr "1区域/1声道"
 
-#: sfdb_ui.cc:1302 sfdb_ui.cc:1637 sfdb_ui.cc:1651
+#: sfdb_ui.cc:1297 sfdb_ui.cc:1632 sfdb_ui.cc:1646
 msgid "all files in one region"
 msgstr "所有文件在一个区域"
 
-#: sfdb_ui.cc:1368
+#: sfdb_ui.cc:1363
 msgid ""
 "One or more of the selected files\n"
 "cannot be used by %1"
@@ -10469,58 +10488,58 @@ msgstr ""
 "一个或多个所选文件\n"
 "不能被用于 %1"
 
-#: sfdb_ui.cc:1508
+#: sfdb_ui.cc:1503
 msgid "Copy files to session"
 msgstr "复制文件到会话"
 
-#: sfdb_ui.cc:1525 sfdb_ui.cc:1688
+#: sfdb_ui.cc:1520 sfdb_ui.cc:1683
 msgid "file timestamp"
 msgstr "文件时间戳"
 
-#: sfdb_ui.cc:1526 sfdb_ui.cc:1690
+#: sfdb_ui.cc:1521 sfdb_ui.cc:1685
 msgid "edit point"
 msgstr "编辑点"
 
-#: sfdb_ui.cc:1527 sfdb_ui.cc:1692
+#: sfdb_ui.cc:1522 sfdb_ui.cc:1687
 msgid "playhead"
 msgstr "播放头"
 
-#: sfdb_ui.cc:1528
+#: sfdb_ui.cc:1523
 msgid "session start"
 msgstr "开始会话"
 
-#: sfdb_ui.cc:1533
+#: sfdb_ui.cc:1528
 msgid "<b>Add files as ...</b>"
 msgstr ""
 
-#: sfdb_ui.cc:1555
+#: sfdb_ui.cc:1550
 #, fuzzy
 msgid "<b>Insert at</b>"
 msgstr "插入于:"
 
-#: sfdb_ui.cc:1568
+#: sfdb_ui.cc:1563
 #, fuzzy
 msgid "<b>Mapping</b>"
 msgstr "<b>共享中</b>"
 
-#: sfdb_ui.cc:1586
+#: sfdb_ui.cc:1581
 #, fuzzy
 msgid "<b>Conversion quality</b>"
 msgstr "采样率转换质量"
 
-#: sfdb_ui.cc:1598 sfdb_ui.cc:1704
+#: sfdb_ui.cc:1593 sfdb_ui.cc:1699
 msgid "Best"
 msgstr "最佳质量"
 
-#: sfdb_ui.cc:1599 sfdb_ui.cc:1706
+#: sfdb_ui.cc:1594 sfdb_ui.cc:1701
 msgid "Good"
 msgstr "高质量"
 
-#: sfdb_ui.cc:1600 sfdb_ui.cc:1708
+#: sfdb_ui.cc:1595 sfdb_ui.cc:1703
 msgid "Quick"
 msgstr "速度优先"
 
-#: sfdb_ui.cc:1602
+#: sfdb_ui.cc:1597
 msgid "Fastest"
 msgstr "最快"
 
@@ -11528,12 +11547,6 @@ msgstr ""
 #: verbose_cursor.cc:45
 msgid "VerboseCanvasCursor"
 msgstr ""
-
-#~ msgid "could not create a new audio track"
-#~ msgstr "无法新建音频音轨"
-
-#~ msgid "could not create a new audio bus"
-#~ msgstr "无法新建音频总线"
 
 #~ msgid "could not create %1 new audio busses"
 #~ msgstr "无法新建 %1 新的音频总线"
