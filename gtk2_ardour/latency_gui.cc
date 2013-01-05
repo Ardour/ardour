@@ -51,9 +51,10 @@ LatencyBarController::get_label (double&)
 	std::stringstream s;
 
 	if (nframes < (_latency_gui->sample_rate / 1000.0)) {
-		s << ((framepos_t) rint (nframes)) << " samples";
+		const framepos_t nf = (framepos_t) rint (nframes);
+		s << string_compose (P_("%1 sample", "%1 samples", nf), nf);
 	} else {
-		s << std::fixed << std::setprecision (2) << (nframes / (_latency_gui->sample_rate / 1000.0)) << " msecs";
+		s << std::fixed << std::setprecision (2) << (nframes / (_latency_gui->sample_rate / 1000.0)) << " ms";
 	}
 
 	return s.str ();
