@@ -1369,7 +1369,7 @@ Editor::fill_xfade_menu (Menu_Helpers::MenuList& items, bool start)
 	
 	items.push_back (
 		ImageMenuElem (
-			_("ConstantPower"),
+			_("Constant power"),
 			*(*images)[FadeConstantPower],
 			sigc::bind (sigc::mem_fun (*this, emf), FadeConstantPower)
 			));
