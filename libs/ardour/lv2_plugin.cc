@@ -1447,9 +1447,9 @@ write_position(LV2_Atom_Forge*     forge,
 	lv2_atom_forge_float(forge, bbt.beats - 1 +
 	                     (bbt.ticks / Timecode::BBT_Time::ticks_per_beat));
 	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_bar, 0);
-	lv2_atom_forge_float(forge, bbt.bars - 1);
+	lv2_atom_forge_long(forge, bbt.bars - 1);
 	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_beatUnit, 0);
-	lv2_atom_forge_float(forge, t.meter().note_divisor());
+	lv2_atom_forge_int(forge, t.meter().note_divisor());
 	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_beatsPerBar, 0);
 	lv2_atom_forge_float(forge, t.meter().divisions_per_bar());
 	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_beatsPerMinute, 0);
