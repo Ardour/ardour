@@ -69,6 +69,8 @@ when the pull up/down setting is non-zero."));
 			}
 		}
 
+		ActionManager::toggle_config_state_foo ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::set_external_sync), sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
+
 		/* activating a slave is a session-property.
 		 * The slave type is a RC property.
 		 * When the slave is active is must not be reconfigured.
@@ -79,8 +81,6 @@ when the pull up/down setting is non-zero."));
 		 * status changed:
 		 */
 		Config->ParameterChanged("sync-source");
-
-		ActionManager::toggle_config_state_foo ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::set_external_sync), sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
 	}
 }
 

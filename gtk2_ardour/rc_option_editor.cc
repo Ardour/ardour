@@ -1812,7 +1812,7 @@ RCOptionEditor::parameter_changed (string const & p)
 	} else if (p == "sync-source") {
 		_sync_source->set_sensitive (true);
 		if (_session) {
-			_sync_source->set_sensitive (_session->config.get_external_sync());
+			_sync_source->set_sensitive (!_session->config.get_external_sync());
 		}
 		switch(Config->get_sync_source()) {
 		case ARDOUR::MTC:
