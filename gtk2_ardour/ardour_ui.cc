@@ -1396,11 +1396,7 @@ ARDOUR_UI::session_add_mixed_track (const ChanCount& input, const ChanCount& out
 		tracks = _session->new_midi_track (input, output, instrument, ARDOUR::Normal, route_group, how_many, name_template);
 		
 		if (tracks.size() != how_many) {
-			if (how_many == 1) {
-				error << _("could not create a new mixed track") << endmsg;
-			} else {
-				error << string_compose (_("could not create %1 new mixed tracks"), how_many) << endmsg;
-			}
+			error << string_compose(P_("could not create %1 new mixed track", "could not create %1 new mixed tracks", how_many), how_many) << endmsg;
 		}
 	}
 
