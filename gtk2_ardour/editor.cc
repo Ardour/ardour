@@ -1506,7 +1506,7 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 				
 			items.push_back (
 				ImageMenuElem (
-					_("Constant Power"),
+					_("Constant power"),
 					*_fade_in_images[FadeConstantPower],
 					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeConstantPower)
 					));
@@ -1568,7 +1568,7 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 
 			items.push_back (
 				ImageMenuElem (
-					_("Constant Power"),
+					_("Constant power"),
 					*_fade_out_images[FadeConstantPower],
 					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeConstantPower)
 					));
