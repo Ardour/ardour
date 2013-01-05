@@ -546,7 +546,7 @@ PlugUIBase::set_latency_label ()
 	string t;
 
 	if (l < sr / 1000) {
-		t = string_compose (_("latency (%1 samples)"), l);
+		t = string_compose (P_("latency (%1 sample)", "latency (%1 samples)", l), l);
 	} else {
 		t = string_compose (_("latency (%1 ms)"), (float) l / ((float) sr / 1000.0f));
 	}
