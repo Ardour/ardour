@@ -1153,7 +1153,7 @@ RCOptionEditor::RCOptionEditor ()
   _ltc_volume_adjustment = new Gtk::Adjustment(-18, -50, 0, .5, 5);
 	_ltc_volume_adjustment->set_value (20 * log10(_rc_config->get_ltc_output_volume()));
 	_ltc_volume_adjustment->signal_value_changed().connect (sigc::mem_fun (*this, &RCOptionEditor::ltc_generator_volume_changed));
-	_ltc_volume_slider = new HSliderOption("ltcvol", ("LTC generator level:"), *_ltc_volume_adjustment);
+	_ltc_volume_slider = new HSliderOption("ltcvol", _("LTC generator level"), *_ltc_volume_adjustment);
 
 	Gtkmm2ext::UI::instance()->set_tip
 		(_ltc_volume_slider->tip_widget(),
