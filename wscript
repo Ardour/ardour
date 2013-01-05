@@ -46,11 +46,13 @@ i18n_children = [
         'libs/gtkmm2ext',
 ]
 
-if sys.platform != 'darwin':
+if sys.platform == 'linux':
     children += [ 'tools/sanity_check' ]
     lxvst_default = True
-else:
+elif sys.platform == 'darwin':
     children += [ 'libs/appleutility' ]
+    lxvst_default = False
+else:
     lxvst_default = False
 
 # Version stuff
