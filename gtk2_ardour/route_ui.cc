@@ -1755,7 +1755,7 @@ RouteUI::open_remote_control_id_dialog ()
 			l->set_markup (string_compose (_("The remote control ID of %6 is: %3\n\n\n"
 							 "Remote Control IDs are currently determined by track/bus ordering in %1\n\n"
 							 "%4Use the User Interaction tab of the Preferences window if you want to change this%5"),
-						       (Config->get_remote_model() == MixerOrdered ? _("the mixer") : ("the editor")),
+						       (Config->get_remote_model() == MixerOrdered ? _("the mixer") : _("the editor")),
 						       (is_track() ? _("track") : _("bus")),
 						       _route->remote_control_id(),
 						       "<span size=\"small\" style=\"italic\">",

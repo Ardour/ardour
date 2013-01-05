@@ -329,7 +329,7 @@ TimeAxisViewItem::set_duration (framecnt_t dur, void* src)
 {
 	if ((dur > max_item_duration) || (dur < min_item_duration)) {
 		warning << string_compose (
-				P_("new duration %1 frame is out of bounds for %2", "new duration %1 frames is out of bounds for %2", dur),
+				P_("new duration %1 frame is out of bounds for %2", "new duration of %1 frames is out of bounds for %2", dur),
 				get_item_name(), dur)
 			<< endmsg;
 		return false;
