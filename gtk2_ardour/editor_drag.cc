@@ -2760,15 +2760,6 @@ MarkerDrag::motion (GdkEvent* event, bool)
 			framepos_t new_start = copy_location->start() + f_delta;
 			framepos_t new_end = copy_location->end() + f_delta;
 			
-			/* if we are moving multiple markers, we can have
-			 * forced earlier ones back before zero ... don't
-			 * do this 
-			 */
-
-			if (new_start < 0 || new_end < 0) {
-				continue;
-			}
-
 			if (is_start) { // start-of-range marker
 				
 				if (move_both || (*x).move_both) {
