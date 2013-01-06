@@ -46,7 +46,7 @@ i18n_children = [
         'libs/gtkmm2ext',
 ]
 
-if sys.platform == 'linux':
+if sys.platform == 'linux2':
     children += [ 'tools/sanity_check' ]
     lxvst_default = True
 elif sys.platform == 'darwin':
