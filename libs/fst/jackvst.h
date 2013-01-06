@@ -6,7 +6,7 @@
 #include <jack/jack.h>
 #include <jack/ringbuffer.h>
 #include <fst.h>
-#ifdef WITH_ALSA
+#ifdef HAVE_ALSA
 #include <alsa/asoundlib.h>
 #endif
 
@@ -30,9 +30,9 @@ struct _JackVST {
 
     int want_midi;
     pthread_t          midi_thread;
-#ifdef WITH_ALSA
+#ifdef HAVE_ALSA
     snd_seq_t*         seq;
-#endif WITH_ALSA
+#endif
     int                midiquit;
     jack_ringbuffer_t* event_queue;
     struct VstEvents*  events;
