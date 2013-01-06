@@ -72,6 +72,7 @@ ControlProtocolManager::set_session (Session* s)
 
 		for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 			if ((*i)->requested || (*i)->mandatory) {
+				
 				instantiate (**i);
 				(*i)->requested = false;
 
@@ -344,12 +345,7 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 			ControlProtocolInfo* cpi = cpi_by_name (prop->value());
 			
 			if (cpi) {
-				
-				if (!(*citer)->children().empty()) {
-					cpi->state = new XMLNode (*((*citer)->children().front ()));
-				} else {
-					cpi->state = 0;
-				}
+				cpi->state = new XMLNode (**citer);
 				
 				if (active) {
 					if (_session) {
