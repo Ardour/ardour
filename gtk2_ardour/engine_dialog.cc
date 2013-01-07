@@ -470,11 +470,11 @@ EngineControl::build_command_line (vector<string>& cmd)
 	if (!using_coreaudio) {
 		str = audio_mode_combo.get_active_text();
 
-		if (str == _("Playback/Recording on 1 Device")) {
+		if (str == _("Playback/recording on 1 device")) {
 
 			/* relax */
 
-		} else if (str == _("Playback/Recording on 2 Devices")) {
+		} else if (str == _("Playback/recording on 2 devices")) {
 
 			string input_device = get_device_name (driver, input_device_combo.get_active_text());
 			string output_device = get_device_name (driver, output_device_combo.get_active_text());
@@ -527,7 +527,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 	if (using_alsa) {
 
-		if (audio_mode_combo.get_active_text() != _("Playback/Recording on 2 Devices")) {
+		if (audio_mode_combo.get_active_text() != _("Playback/recording on 2 devices")) {
 
 			string device = get_device_name (driver, interface_combo.get_active_text());
 			if (device.empty()) {
@@ -961,10 +961,10 @@ EngineControl::audio_mode_changed ()
 {
 	std::string str = audio_mode_combo.get_active_text();
 
-	if (str == _("Playback/Recording on 1 Device")) {
+	if (str == _("Playback/recording on 1 device")) {
 		input_device_combo.set_sensitive (false);
 		output_device_combo.set_sensitive (false);
-	} else if (str == _("Playback/Recording on 2 Devices")) {
+	} else if (str == _("Playback/recording on 2 devices")) {
 		input_device_combo.set_sensitive (true);
 		output_device_combo.set_sensitive (true);
 	} else if (str == _("Playback only")) {
