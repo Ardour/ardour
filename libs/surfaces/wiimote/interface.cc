@@ -1,52 +1,50 @@
-#include <pbd/failed_constructor.h>
+/*
+    Copyright (C) 2009-2013 Paul Davis
+    Authors: Sampo Savolainen, Jannis Pohlmann
 
-#include "control_protocol/control_protocol.h"
-#include "wiimote.h"
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
+#include "pbd/failed_constructor.h"
+#include "pbd/error.h"
 
 #include "ardour/session.h"
+#include "control_protocol/control_protocol.h"
+
+#include "wiimote.h"
 
 using namespace ARDOUR;
-
-static WiimoteControlProtocol *foo;
+using namespace PBD;
 
 ControlProtocol*
-new_wiimote_protocol (ControlProtocolDescriptor* descriptor, Session* s)
+new_wiimote_protocol (ControlProtocolDescriptor*, Session* s)
 {
-	WiimoteControlProtocol* wmcp;
-		
-	try {
-		wmcp =  new WiimoteControlProtocol (*s);
-	} catch (failed_constructor& err) {
-		return 0;
-	}
-	
-	if (wmcp-> set_active (true)) {
-		delete wmcp;
-		return 0;
-	}
-
-	foo = wmcp;
-
+	WiimoteControlProtocol* wmcp = new WiimoteControlProtocol (*s);
+	wmcp->set_active (true);
 	return wmcp;
 }
 
 void
-wiimote_control_protocol_cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count, union cwiid_mesg mesg[], struct timespec *t)
+delete_wiimote_protocol (ControlProtocolDescriptor* /*descriptor*/, ControlProtocol* cp)
 {
-	assert(foo != 0);
-
-	foo->wiimote_callback(wiimote,mesg_count,mesg,t);
-}
-
-void
-delete_wiimote_protocol (ControlProtocolDescriptor* descriptor, ControlProtocol* cp)
-{
-	foo = 0;
 	delete cp;
 }
 
 bool
-probe_wiimote_protocol (ControlProtocolDescriptor* descriptor)
+probe_wiimote_protocol (ControlProtocolDescriptor*)
 {
 	return WiimoteControlProtocol::probe ();
 }
@@ -62,12 +60,14 @@ static ControlProtocolDescriptor wiimote_descriptor = {
 	initialize : new_wiimote_protocol,
 	destroy : delete_wiimote_protocol
 };
-	
+
 
 extern "C" {
-ControlProtocolDescriptor* 
+
+ControlProtocolDescriptor*
 protocol_descriptor () {
 	return &wiimote_descriptor;
 }
+
 }
 

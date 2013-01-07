@@ -438,8 +438,6 @@ def options(opt):
                     help='Add revision information to executable name inside the build directory')
     opt.add_option('--windows-vst', action='store_true', default=False, dest='windows_vst',
                     help='Compile with support for Windows VST')
-    opt.add_option('--wiimote', action='store_true', default=False, dest='wiimote',
-                    help='Build the wiimote control surface')
     opt.add_option('--windows-key', type='string', action='store', dest='windows_key', default='Mod4><Super',
                     help='X Modifier(s) (Mod1,Mod2, etc) for the Windows key (X11 builds only). ' +
                     'Multiple modifiers must be separated by \'><\'')

@@ -51,16 +51,16 @@ def configure(conf):
     conf.check_cc (header_name='linux/input.h', define_name='BUILD_POWERMATE',mandatory=False)
     autowaf.check_pkg (conf, 'liblo', mandatory=False, uselib_store="LO", atleast_version="0.24")
 
-    if Options.options.wiimote:
-        conf.check_cc (header_name='cwiid.h', define_name='HAVE_CWIID_H')
-        if not conf.is_defined('HAVE_CWIID_H'):
-            print('WIIMOTE configured but you are missing libcwiid!')
-            sys.exit(1)
-        conf.check_cc (header_name='bluetooth/bluetooth.h', define_name='HAVE_BLUETOOTH_H')
-        if not conf.is_defined('HAVE_BLUETOOTH_H'):
-            print('WIIMOTE configured but you are missing the libbluetooth headers needed to compile wiimote support!')
-            sys.exit(1)
-        conf.define ('BUILD_WIIMOTE', 1)
+    conf.check_cc (header_name='cwiid.h', define_name='HAVE_CWIID_H',mandatory=False)
+    if conf.is_defined('HAVE_CWIID_H'):
+        conf.check_cc (header_name='bluetooth/bluetooth.h', define_name='HAVE_BLUETOOTH_H',mandatory=False)
+        if conf.is_defined('HAVE_BLUETOOTH_H'):
+            autowaf.check_pkg(conf, 'cwiid', uselib_store='CWIID', atleast_version='0.6.00')
+            conf.define ('BUILD_WIIMOTE', 1)
+        else:
+            print('You are missing the libbluetooth headers needed to compile wiimote support')
+    else:
+            print('You are missing the cwiid headers needed to compile wiimote support')
 
 def build(bld):
     bld.recurse('control_protocol')

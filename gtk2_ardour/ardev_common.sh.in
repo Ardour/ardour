@@ -12,7 +12,7 @@ libs=$TOP/@LIBS@
 
 
 export ARDOUR_PATH=$TOP/gtk2_ardour/icons:$TOP/gtk2_ardour/pixmaps:$TOP/build/gtk2_ardour:$TOP/gtk2_ardour:.
-export ARDOUR_SURFACES_PATH=$libs/surfaces/osc:$libs/surfaces/generic_midi:$libs/surfaces/tranzport:$libs/surfaces/powermate:$libs/surfaces/mackie
+export ARDOUR_SURFACES_PATH=$libs/surfaces/osc:$libs/surfaces/generic_midi:$libs/surfaces/tranzport:$libs/surfaces/powermate:$libs/surfaces/mackie:$libs/surfaces/wiimote
 export ARDOUR_PANNER_PATH=$libs/panners/2in2out:$libs/panners/1in2out:$libs/panners/vbap
 export ARDOUR_DATA_PATH=$TOP/build:$TOP/gtk2_ardour:$TOP/build/gtk2_ardour:.
 export ARDOUR_MIDIMAPS_PATH=$TOP/midi_maps:.
