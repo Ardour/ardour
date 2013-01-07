@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-03 08:18-0500\n"
+"POT-Creation-Date: 2013-01-07 14:22-0500\n"
 "PO-Revision-Date: 2011-09-13 22:43+0100\n"
 "Last-Translator: Eivind Ødegård <meinmycell-lists@yahoo.no>\n"
 "Language-Team: Nynorsk <i18n-nn@lister.ping.uio.no>\n"
@@ -409,36 +409,36 @@ msgstr "Butler-førlesingsfeil på dstream %1"
 msgid "Butler write-behind failure on dstream %1"
 msgstr "Butler-etterskrivingsfeil på dstream %1"
 
-#: control_protocol_manager.cc:131
+#: control_protocol_manager.cc:132
 msgid "control protocol name \"%1\" has no descriptor"
 msgstr "kontrollprotokollnamnet \"%1\" har inga skildring"
 
-#: control_protocol_manager.cc:136
+#: control_protocol_manager.cc:137
 msgid "control protocol name \"%1\" could not be initialized"
 msgstr "kontrollprotokollnamnet \"%1\" greidde ikkje starta opp"
 
-#: control_protocol_manager.cc:196
+#: control_protocol_manager.cc:197
 msgid "Instantiating mandatory control protocol %1"
 msgstr "Lagar obligatorisk kontrollprotokolløkt %1"
 
-#: control_protocol_manager.cc:217
+#: control_protocol_manager.cc:218
 #, fuzzy
 msgid "looking for control protocols in %1\n"
 msgstr "ser etter kontrollprotokollar i %1\n"
 
-#: control_protocol_manager.cc:242
+#: control_protocol_manager.cc:243
 msgid "Control protocol %1 not usable"
 msgstr "Kontrollprotokollen %1 er ikkje brukande"
 
-#: control_protocol_manager.cc:259
+#: control_protocol_manager.cc:260
 msgid "Control surface protocol discovered: \"%1\""
 msgstr "Kontrollflateprotokollen \"%1\" oppdaga"
 
-#: control_protocol_manager.cc:277
+#: control_protocol_manager.cc:278
 msgid "ControlProtocolManager: cannot load module \"%1\" (%2)"
 msgstr "Kontrollprotokollstyring: kan ikkje lasta modulen \"%1\" (%2)"
 
-#: control_protocol_manager.cc:285
+#: control_protocol_manager.cc:286
 msgid "ControlProtocolManager: module \"%1\" has no descriptor function."
 msgstr "Kontrollprotokollstyring: modulen \"%1\" har ingen skildringsfunksjon."
 
@@ -1339,11 +1339,11 @@ msgstr ""
 msgid "panner plugin node has no type information!"
 msgstr "tilleggsprogrampunktet for panoreringa har ingen typeinformasjon!"
 
-#: playlist.cc:2059
+#: playlist.cc:2070
 msgid "region state node has no ID, ignored"
 msgstr "områdestatusnoden har ingen ID, ser bort frå"
 
-#: playlist.cc:2077
+#: playlist.cc:2088
 msgid "Playlist: cannot create region from XML"
 msgstr "Speleliste: greier ikkje laga bolk frå XML"
 

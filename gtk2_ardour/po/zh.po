@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-04 11:01-0500\n"
+"POT-Creation-Date: 2013-01-07 14:22-0500\n"
 "PO-Revision-Date: 2013-01-03 08:29-0500\n"
 "Last-Translator: Rui-huai Zhang <zrhzrh>\n"
 "Language-Team: zrhzrh <zrhzrh@mail.ustc.edu.cn>\n"
@@ -603,66 +603,67 @@ msgstr "重新分析数据"
 msgid "button cannot watch state of non-existing Controllable\n"
 msgstr ""
 
-#: ardour_ui.cc:158
+#: ardour_ui.cc:160
 #, fuzzy
 msgid "audition"
 msgstr "监听"
 
-#: ardour_ui.cc:159
+#: ardour_ui.cc:161
 msgid "solo"
 msgstr ""
 
-#: ardour_ui.cc:160
+#: ardour_ui.cc:162
 #, fuzzy
 msgid "feedback"
 msgstr "反馈"
 
-#: ardour_ui.cc:162
+#: ardour_ui.cc:164
 msgid "Errors"
 msgstr "错误"
 
-#: ardour_ui.cc:280
+#: ardour_ui.cc:282
 msgid "could not initialize %1."
 msgstr "无法初始化 %1."
 
-#: ardour_ui.cc:340
+#: ardour_ui.cc:342
 msgid "Starting audio engine"
 msgstr "启动音频引擎"
 
-#: ardour_ui.cc:640 startup.cc:620
+#: ardour_ui.cc:642 startup.cc:620
 msgid "%1 is ready for use"
 msgstr "%1 准备就绪"
 
-#: ardour_ui.cc:682
+#: ardour_ui.cc:690
+#, fuzzy
 msgid ""
 "WARNING: Your system has a limit for maximum amount of locked memory. This "
 "might cause %1 to run out of memory before your system runs out of memory. \n"
 "\n"
 "You can view the memory limit with 'ulimit -l', and it is normally "
-"controlled by /etc/security/limits.conf"
+"controlled by %2"
 msgstr ""
 "警告: 你的系统内存受到最大限的保护这可能导致运行 %1 时内存溢出 你可以用命"
 "令'ulimit -l'查看内存的限制.\n"
 "\n"
 "此命令由 /etc/security/limits.conf 控制."
 
-#: ardour_ui.cc:693
+#: ardour_ui.cc:707
 msgid "Do not show this window again"
 msgstr "不再显示此窗口"
 
-#: ardour_ui.cc:734
+#: ardour_ui.cc:748
 msgid "Don't quit"
 msgstr "不退出"
 
-#: ardour_ui.cc:735
+#: ardour_ui.cc:749
 msgid "Just quit"
 msgstr "不保存而退出"
 
-#: ardour_ui.cc:736
+#: ardour_ui.cc:750
 msgid "Save and quit"
 msgstr "保存并退出"
 
-#: ardour_ui.cc:746
+#: ardour_ui.cc:760
 #, fuzzy
 msgid ""
 "%1 was unable to save your session.\n"
@@ -672,16 +673,16 @@ msgid ""
 "\"Just quit\" option."
 msgstr "Ardour 无法保存此会话.\n"
 
-#: ardour_ui.cc:772
+#: ardour_ui.cc:786
 #, fuzzy
 msgid "Please wait while %1 cleans up..."
 msgstr "请等待，%1 载入可视化数据"
 
-#: ardour_ui.cc:790
+#: ardour_ui.cc:804
 msgid "Unsaved Session"
 msgstr "未保存的会话"
 
-#: ardour_ui.cc:811
+#: ardour_ui.cc:825
 msgid ""
 "The session \"%1\"\n"
 "has not been saved.\n"
@@ -698,7 +699,7 @@ msgstr ""
 "\n"
 "你想干吗?"
 
-#: ardour_ui.cc:814
+#: ardour_ui.cc:828
 msgid ""
 "The snapshot \"%1\"\n"
 "has not been saved.\n"
@@ -715,76 +716,76 @@ msgstr ""
 "\n"
 "你想干吗?"
 
-#: ardour_ui.cc:828
+#: ardour_ui.cc:842
 msgid "Prompter"
 msgstr ""
 
-#: ardour_ui.cc:893
+#: ardour_ui.cc:907
 msgid "disconnected"
 msgstr "取消连接"
 
-#: ardour_ui.cc:900
+#: ardour_ui.cc:914
 #, c-format
 msgid "JACK: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"
 msgstr ""
 
-#: ardour_ui.cc:904
+#: ardour_ui.cc:918
 #, c-format
 msgid "JACK: <span foreground=\"green\">%<PRId64> kHz / %4.1f ms</span>"
 msgstr ""
 
-#: ardour_ui.cc:922
+#: ardour_ui.cc:936
 #, fuzzy
 msgid "File:"
 msgstr "文件开始:"
 
-#: ardour_ui.cc:926
+#: ardour_ui.cc:940
 msgid "BWF"
 msgstr ""
 
-#: ardour_ui.cc:929
+#: ardour_ui.cc:943
 #, fuzzy
 msgid "WAV"
 msgstr "WAVE"
 
-#: ardour_ui.cc:932
+#: ardour_ui.cc:946
 msgid "WAV64"
 msgstr ""
 
-#: ardour_ui.cc:935 session_option_editor.cc:196
+#: ardour_ui.cc:949 session_option_editor.cc:196
 msgid "CAF"
 msgstr "CAF"
 
-#: ardour_ui.cc:938
+#: ardour_ui.cc:952
 msgid "AIFF"
 msgstr ""
 
-#: ardour_ui.cc:941
+#: ardour_ui.cc:955
 msgid "iXML"
 msgstr ""
 
-#: ardour_ui.cc:944
+#: ardour_ui.cc:958
 msgid "RF64"
 msgstr ""
 
-#: ardour_ui.cc:952
+#: ardour_ui.cc:966
 msgid "32-float"
 msgstr ""
 
-#: ardour_ui.cc:955
+#: ardour_ui.cc:969
 msgid "24-int"
 msgstr ""
 
-#: ardour_ui.cc:958
+#: ardour_ui.cc:972
 msgid "16-int"
 msgstr ""
 
-#: ardour_ui.cc:977
+#: ardour_ui.cc:991
 #, c-format
 msgid "DSP: <span foreground=\"%s\">%5.1f%%</span>"
 msgstr ""
 
-#: ardour_ui.cc:996
+#: ardour_ui.cc:1010
 #, c-format
 msgid ""
 "Buffers: <span foreground=\"green\">p:</span><span foreground=\"%s\">"
@@ -792,33 +793,33 @@ msgid ""
 "\">%<PRIu32>%%</span>"
 msgstr ""
 
-#: ardour_ui.cc:1032
+#: ardour_ui.cc:1046
 msgid "Disk: <span foreground=\"green\">Unknown</span>"
 msgstr ""
 
-#: ardour_ui.cc:1034
+#: ardour_ui.cc:1048
 msgid "Disk: <span foreground=\"green\">24hrs+</span>"
 msgstr ""
 
-#: ardour_ui.cc:1052
+#: ardour_ui.cc:1066
 msgid "Disk: <span foreground=\"green\">&gt;24 hrs</span>"
 msgstr ""
 
-#: ardour_ui.cc:1063
+#: ardour_ui.cc:1077
 #, c-format
 msgid "Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"
 msgstr ""
 
-#: ardour_ui.cc:1089
+#: ardour_ui.cc:1103
 #, c-format
 msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
 msgstr ""
 
-#: ardour_ui.cc:1204 ardour_ui.cc:1213 startup.cc:1019
+#: ardour_ui.cc:1218 ardour_ui.cc:1227 startup.cc:1019
 msgid "Recent Sessions"
 msgstr "最近的会话"
 
-#: ardour_ui.cc:1295
+#: ardour_ui.cc:1309
 msgid ""
 "%1 is not connected to JACK\n"
 "You cannot open or close sessions in this condition"
@@ -826,30 +827,27 @@ msgstr ""
 "%1 未连接到 JACK.\n"
 "再此情况下，你无法打开或关闭会话"
 
-#: ardour_ui.cc:1322
+#: ardour_ui.cc:1336
 msgid "Open Session"
 msgstr "打开会话"
 
-#: ardour_ui.cc:1340 session_import_dialog.cc:169
+#: ardour_ui.cc:1354 session_import_dialog.cc:169
 #: session_metadata_dialog.cc:729 startup.cc:1048
 msgid "%1 sessions"
 msgstr "%1 会话"
 
-#: ardour_ui.cc:1377
+#: ardour_ui.cc:1391
 msgid "You cannot add a track without a session already loaded."
 msgstr "您只能在已载入的会话中添加音轨"
 
-#: ardour_ui.cc:1386
+#: ardour_ui.cc:1399
 #, fuzzy
-msgid "could not create a new mixed track"
-msgstr "无法创建新的MIDI音轨"
+msgid "could not create %1 new mixed track"
+msgid_plural "could not create %1 new mixed tracks"
+msgstr[0] "无法创建 %1 新的MIDI音轨"
+msgstr[1] "无法创建 %1 新的MIDI音轨"
 
-#: ardour_ui.cc:1388
-#, fuzzy
-msgid "could not create %1 new mixed tracks"
-msgstr "无法创建 %1 新的MIDI音轨"
-
-#: ardour_ui.cc:1395 ardour_ui.cc:1456
+#: ardour_ui.cc:1405 ardour_ui.cc:1466
 msgid ""
 "There are insufficient JACK ports available\n"
 "to create a new track or bus.\n"
@@ -860,25 +858,25 @@ msgstr ""
 "无法继续新建音轨或总线\n"
 "请保存 %1，重新启动JACK带来更多的端口.\n"
 
-#: ardour_ui.cc:1430
+#: ardour_ui.cc:1440
 msgid "You cannot add a track or bus without a session already loaded."
 msgstr "您只能在已载入的会话或总线中添加音轨和总线"
 
-#: ardour_ui.cc:1439
+#: ardour_ui.cc:1449
 #, fuzzy
-msgid "could not create new audio track"
+msgid "could not create %1 new audio track"
 msgid_plural "could not create %1 new audio tracks"
 msgstr[0] "无法新建音频音轨"
 msgstr[1] "无法新建音频音轨"
 
-#: ardour_ui.cc:1448
+#: ardour_ui.cc:1458
 #, fuzzy
-msgid "could not create new audio bus"
+msgid "could not create %1 new audio bus"
 msgid_plural "could not create %1 new audio busses"
-msgstr[0] "无法新建音频总线"
-msgstr[1] "无法新建音频总线"
+msgstr[0] "无法新建 %1 新的音频总线"
+msgstr[1] "无法新建 %1 新的音频总线"
 
-#: ardour_ui.cc:1565
+#: ardour_ui.cc:1575
 #, fuzzy
 msgid ""
 "Please create one or more tracks before trying to record.\n"
@@ -887,7 +885,7 @@ msgstr ""
 "在录音之前，请创建至少一个音轨\n"
 "请查看会话菜单."
 
-#: ardour_ui.cc:1955
+#: ardour_ui.cc:1965
 msgid ""
 "The audio backend (JACK) was shutdown because:\n"
 "\n"
@@ -897,7 +895,7 @@ msgstr ""
 "\n"
 "%1"
 
-#: ardour_ui.cc:1957
+#: ardour_ui.cc:1967
 msgid ""
 "JACK has either been shutdown or it\n"
 "disconnected %1 because %1\n"
@@ -908,19 +906,19 @@ msgstr ""
 "原因是 %1 不够快.\n"
 "尝试重启JACK，重新连接并且保存会话."
 
-#: ardour_ui.cc:1982
+#: ardour_ui.cc:1992
 msgid "Unable to start the session running"
 msgstr "无法启动会话"
 
-#: ardour_ui.cc:2058
+#: ardour_ui.cc:2068
 msgid "Take Snapshot"
 msgstr "快照"
 
-#: ardour_ui.cc:2059
+#: ardour_ui.cc:2069
 msgid "Name of new snapshot"
 msgstr "新建快照的名称"
 
-#: ardour_ui.cc:2083
+#: ardour_ui.cc:2093
 #, fuzzy
 msgid ""
 "To ensure compatibility with various systems\n"
@@ -929,27 +927,27 @@ msgstr ""
 "为了确保在不同系统的兼容性\n"
 "快照文件名不要包含字符 '/'"
 
-#: ardour_ui.cc:2095
+#: ardour_ui.cc:2105
 msgid "Confirm Snapshot Overwrite"
 msgstr "确定覆盖快照"
 
-#: ardour_ui.cc:2096
+#: ardour_ui.cc:2106
 msgid "A snapshot already exists with that name.  Do you want to overwrite it?"
 msgstr "已存在同名快照. 覆盖之?"
 
-#: ardour_ui.cc:2099
+#: ardour_ui.cc:2109
 msgid "Overwrite"
 msgstr "覆盖"
 
-#: ardour_ui.cc:2133
+#: ardour_ui.cc:2143
 msgid "Rename Session"
 msgstr "重命名会话"
 
-#: ardour_ui.cc:2134
+#: ardour_ui.cc:2144
 msgid "New session name"
 msgstr "新建快照的名称"
 
-#: ardour_ui.cc:2148 ardour_ui.cc:2524 ardour_ui.cc:2569
+#: ardour_ui.cc:2158 ardour_ui.cc:2534 ardour_ui.cc:2579
 #, fuzzy
 msgid ""
 "To ensure compatibility with various systems\n"
@@ -958,12 +956,12 @@ msgstr ""
 "为了确保在不同系统的兼容性\n"
 "会话文件名不要包含字符 '/'"
 
-#: ardour_ui.cc:2156
+#: ardour_ui.cc:2166
 msgid ""
 "That name is already in use by another directory/folder. Please try again."
 msgstr "此名称已被另一个文件夹使用. 请再尝试一遍."
 
-#: ardour_ui.cc:2165
+#: ardour_ui.cc:2175
 msgid ""
 "Renaming this session failed.\n"
 "Things could be seriously messed up at this point"
@@ -971,19 +969,19 @@ msgstr ""
 "重命名会话失败.\n"
 "从现在开始事情将会变得乱七八糟"
 
-#: ardour_ui.cc:2280
+#: ardour_ui.cc:2290
 msgid "Save Template"
 msgstr "保存模板..."
 
-#: ardour_ui.cc:2281
+#: ardour_ui.cc:2291
 msgid "Name for template:"
 msgstr "模板名:"
 
-#: ardour_ui.cc:2282
+#: ardour_ui.cc:2292
 msgid "-template"
 msgstr "-模板"
 
-#: ardour_ui.cc:2320
+#: ardour_ui.cc:2330
 msgid ""
 "This session\n"
 "%1\n"
@@ -993,52 +991,52 @@ msgstr ""
 "%1\n"
 "已存在. 打开它?"
 
-#: ardour_ui.cc:2330
+#: ardour_ui.cc:2340
 msgid "Open Existing Session"
 msgstr "打开已存在的会话"
 
-#: ardour_ui.cc:2560
+#: ardour_ui.cc:2570
 msgid "There is no existing session at \"%1\""
 msgstr " \"%1\" 没有会话文件"
 
-#: ardour_ui.cc:2647
+#: ardour_ui.cc:2657
 msgid "Please wait while %1 loads your session"
 msgstr "请等待 %1 载入会话"
 
-#: ardour_ui.cc:2662
+#: ardour_ui.cc:2672
 msgid "Port Registration Error"
 msgstr "端口(port)注册错误"
 
-#: ardour_ui.cc:2663
+#: ardour_ui.cc:2673
 msgid "Click the Close button to try again."
 msgstr "单击关闭按钮，再尝试一遍"
 
-#: ardour_ui.cc:2684
+#: ardour_ui.cc:2694
 msgid "Session \"%1 (snapshot %2)\" did not load successfully"
 msgstr "会话  \"%1 (快照 %2)\" 装载失败."
 
-#: ardour_ui.cc:2690
+#: ardour_ui.cc:2700
 msgid "Loading Error"
 msgstr "装载错误"
 
-#: ardour_ui.cc:2691
+#: ardour_ui.cc:2701
 msgid "Click the Refresh button to try again."
 msgstr "单击刷新按钮,再尝试一遍"
 
-#: ardour_ui.cc:2773
+#: ardour_ui.cc:2783
 msgid "Could not create session in \"%1\""
 msgstr "在 \"%1\" 无法创建会话"
 
-#: ardour_ui.cc:2901
+#: ardour_ui.cc:2910
 msgid "No files were ready for clean-up"
 msgstr "没有可以清空的文件"
 
-#: ardour_ui.cc:2905 ardour_ui.cc:2915 ardour_ui.cc:3032 ardour_ui.cc:3039
+#: ardour_ui.cc:2914 ardour_ui.cc:2924 ardour_ui.cc:3057 ardour_ui.cc:3064
 #: ardour_ui_ed.cc:104
 msgid "Clean-up"
 msgstr "清空"
 
-#: ardour_ui.cc:2906
+#: ardour_ui.cc:2915
 msgid ""
 "If this seems suprising, \n"
 "check for any existing snapshots.\n"
@@ -1046,65 +1044,36 @@ msgid ""
 "require some unused files to continue to exist."
 msgstr ""
 
-#: ardour_ui.cc:2965
+#: ardour_ui.cc:2974
 msgid "kilo"
 msgstr ""
 
-#: ardour_ui.cc:2968
+#: ardour_ui.cc:2977
 msgid "mega"
 msgstr ""
 
-#: ardour_ui.cc:2971
+#: ardour_ui.cc:2980
 msgid "giga"
 msgstr ""
 
-#: ardour_ui.cc:3027
-msgid "Are you sure you want to clean-up?"
-msgstr "您确认要删除这些文件吗"
-
-#: ardour_ui.cc:3034
-msgid ""
-"Clean-up is a destructive operation.\n"
-"ALL undo/redo information will be lost if you clean-up.\n"
-"Clean-up will move all unused files to a \"dead\" location."
-msgstr ""
-"清空是毁灭性的操作.\n"
-"如果你清空了, 所有的撤销/重复信息将会丢失.\n"
-"清空将会把所有未使用过的文件弄到 \"死亡\" 位置"
-
-#: ardour_ui.cc:3042
-msgid "CleanupDialog"
-msgstr "清空对话框"
-
-#: ardour_ui.cc:3073
-msgid "Cleaned Files"
-msgstr "清除文件"
-
-#: ardour_ui.cc:3074
+#: ardour_ui.cc:2985
 #, fuzzy
 msgid ""
-"The following %1 files were not in use and \n"
-"have been moved to: %2\n"
-"\n"
-"After a restart of %5\n"
-"\n"
-"<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n"
-"\n"
-"will release an additional %3 %4bytes of disk space.\n"
-msgstr ""
-"以下文件 %1 没被用到,\n"
-"并且被移动到:\n"
-"\n"
-"%2\n"
-"\n"
-"重启Ardour后\n"
-"\n"
-"会话 -> 清空 -> 回收站\n"
-"\n"
-"将会释放额外的\n"
-"%3 %4bytes 的磁盘空间.\n"
+"The following file was deleted from %2,\n"
+"releasing %3 %4bytes of disk space"
+msgid_plural ""
+"The following %1 files were deleted from %2,\n"
+"releasing %3 %4bytes of disk space"
+msgstr[0] ""
+"下列文件被删除于\n"
+"%2,\n"
+"释放出 %3 %4 bytes 的磁盘空间"
+msgstr[1] ""
+"下列文件被删除于\n"
+"%2,\n"
+"释放出 %3 %4 bytes 的磁盘空间"
 
-#: ardour_ui.cc:3080
+#: ardour_ui.cc:2992
 #, fuzzy
 msgid ""
 "The following file was not in use and \n"
@@ -1115,7 +1084,27 @@ msgid ""
 "<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n"
 "\n"
 "will release an additional %3 %4bytes of disk space.\n"
-msgstr ""
+msgid_plural ""
+"The following %1 files were not in use and \n"
+"have been moved to: %2\n"
+"\n"
+"After a restart of %5\n"
+"\n"
+"<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n"
+"\n"
+"will release an additional %3 %4bytes of disk space.\n"
+msgstr[0] ""
+"以下文件 %1 没被用到,\n"
+"并且被移动到:\n"
+"\t\t\t\t%2\n"
+"\n"
+"重启Ardour后\n"
+"\n"
+"会话 -> 清空 -> 回收站\n"
+"\n"
+"将会释放额外的\n"
+"%3 %4bytes 的磁盘空间.\n"
+msgstr[1] ""
 "以下文件 %1 没被用到,\n"
 "并且被移动到:\n"
 "\t\t\t\t%2\n"
@@ -1127,35 +1116,37 @@ msgstr ""
 "将会释放额外的\n"
 "%3 %4bytes 的磁盘空间.\n"
 
-#: ardour_ui.cc:3105
+#: ardour_ui.cc:3052
+msgid "Are you sure you want to clean-up?"
+msgstr "您确认要删除这些文件吗"
+
+#: ardour_ui.cc:3059
+msgid ""
+"Clean-up is a destructive operation.\n"
+"ALL undo/redo information will be lost if you clean-up.\n"
+"Clean-up will move all unused files to a \"dead\" location."
+msgstr ""
+"清空是毁灭性的操作.\n"
+"如果你清空了, 所有的撤销/重复信息将会丢失.\n"
+"清空将会把所有未使用过的文件弄到 \"死亡\" 位置"
+
+#: ardour_ui.cc:3067
+msgid "CleanupDialog"
+msgstr "清空对话框"
+
+#: ardour_ui.cc:3097
+msgid "Cleaned Files"
+msgstr "清除文件"
+
+#: ardour_ui.cc:3114
 msgid "deleted file"
 msgstr "删除文件"
 
-#: ardour_ui.cc:3106
-#, fuzzy
-msgid ""
-"The following %1 files were deleted from %2,\n"
-"releasing %3 %4bytes of disk space"
-msgstr ""
-"下列文件 %1 被删除于\n"
-"%2,\n"
-"释放出 %3 %4 bytes 的磁盘空间"
-
-#: ardour_ui.cc:3108
-#, fuzzy
-msgid ""
-"The following file was deleted from %2,\n"
-"releasing %3 %4bytes of disk space"
-msgstr ""
-"下列文件被删除于\n"
-"%2,\n"
-"释放出 %3 %4 bytes 的磁盘空间"
-
-#: ardour_ui.cc:3263
+#: ardour_ui.cc:3268
 msgid "Recording was stopped because your system could not keep up."
 msgstr "您的系统无法继续, 录音停止."
 
-#: ardour_ui.cc:3292
+#: ardour_ui.cc:3297
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1168,7 +1159,7 @@ msgstr ""
 "\n"
 "确切地说, 磁盘的读写速度无法跟上录音速度\n"
 
-#: ardour_ui.cc:3311
+#: ardour_ui.cc:3316
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1181,11 +1172,11 @@ msgstr ""
 "\n"
 "确切地说, 磁盘的读写速度无法跟上播放速度\n"
 
-#: ardour_ui.cc:3351
+#: ardour_ui.cc:3356
 msgid "Crash Recovery"
 msgstr "崩溃恢复"
 
-#: ardour_ui.cc:3352
+#: ardour_ui.cc:3357
 #, fuzzy
 msgid ""
 "This session appears to have been in\n"
@@ -1202,19 +1193,19 @@ msgstr ""
 "Ardour可以为你恢复一些捕捉到的音频\n"
 "你也可以忽略它. 请你选择.\n"
 
-#: ardour_ui.cc:3364
+#: ardour_ui.cc:3369
 msgid "Ignore crash data"
 msgstr "忽略崩毁的数据"
 
-#: ardour_ui.cc:3365
+#: ardour_ui.cc:3370
 msgid "Recover from crash"
 msgstr "恢复到崩溃前"
 
-#: ardour_ui.cc:3385
+#: ardour_ui.cc:3390
 msgid "Sample Rate Mismatch"
 msgstr "采样率不匹配"
 
-#: ardour_ui.cc:3386
+#: ardour_ui.cc:3391
 #, fuzzy
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
@@ -1225,31 +1216,31 @@ msgstr ""
 "\n"
 "当前音频引擎的采样率为 %2 Hz.\n"
 
-#: ardour_ui.cc:3395
+#: ardour_ui.cc:3400
 msgid "Do not load session"
 msgstr "不要装载会话"
 
-#: ardour_ui.cc:3396
+#: ardour_ui.cc:3401
 msgid "Load session anyway"
 msgstr "转载会话"
 
-#: ardour_ui.cc:3417
+#: ardour_ui.cc:3422
 msgid "Could not disconnect from JACK"
 msgstr "无法断开JACK的连接"
 
-#: ardour_ui.cc:3430
+#: ardour_ui.cc:3435
 msgid "Could not reconnect to JACK"
 msgstr "无法重新连接到JACK"
 
-#: ardour_ui.cc:3651
+#: ardour_ui.cc:3656
 msgid "Translations disabled"
 msgstr "取消翻译功能"
 
-#: ardour_ui.cc:3651
+#: ardour_ui.cc:3656
 msgid "Translations enabled"
 msgstr "开启翻译功能"
 
-#: ardour_ui.cc:3655
+#: ardour_ui.cc:3660
 msgid "You must restart %1 for this to take effect."
 msgstr "请重启 %1 使之生效."
 
@@ -1419,7 +1410,7 @@ msgstr "会话"
 msgid "Sync"
 msgstr "同步"
 
-#: ardour_ui_ed.cc:107 engine_dialog.cc:363
+#: ardour_ui_ed.cc:107 engine_dialog.cc:365
 msgid "Options"
 msgstr "选项"
 
@@ -2126,7 +2117,7 @@ msgstr "输出"
 msgid "Edit"
 msgstr "编辑"
 
-#: bundle_manager.cc:267 editor.cc:5510 editor_actions.cc:310
+#: bundle_manager.cc:267 editor.cc:5514 editor_actions.cc:310
 #: editor_actions.cc:368 plugin_ui.cc:462 processor_box.cc:2214
 #: route_time_axis.cc:730
 msgid "Delete"
@@ -2544,7 +2535,7 @@ msgstr "音轨&总线"
 msgid "Ranges & Marks"
 msgstr ""
 
-#: editor.cc:688 editor.cc:5361 rc_option_editor.cc:1169
+#: editor.cc:688 editor.cc:5365 rc_option_editor.cc:1169
 #: rc_option_editor.cc:1177 rc_option_editor.cc:1185 rc_option_editor.cc:1200
 #: rc_option_editor.cc:1207 rc_option_editor.cc:1215 rc_option_editor.cc:1223
 #: rc_option_editor.cc:1243 rc_option_editor.cc:1255 rc_option_editor.cc:1257
@@ -2568,8 +2559,8 @@ msgstr ""
 msgid "Linear (for highly correlated material)"
 msgstr ""
 
-#: editor.cc:1372
-msgid "ConstantPower"
+#: editor.cc:1372 editor.cc:1509 editor.cc:1571
+msgid "Constant power"
 msgstr ""
 
 #: editor.cc:1381 editor.cc:1502 editor.cc:1564
@@ -2600,10 +2591,6 @@ msgstr "激活"
 #: editor.cc:1468 editor.cc:1531
 msgid "Slowest"
 msgstr "最慢"
-
-#: editor.cc:1509 editor.cc:1571
-msgid "Constant Power"
-msgstr ""
 
 #: editor.cc:1582 route_time_axis.cc:1887 selection.cc:1009 selection.cc:1064
 msgid "programming error: "
@@ -2984,12 +2971,12 @@ msgstr "复制播放列表"
 msgid "clear playlists"
 msgstr "清除播放列表"
 
-#: editor.cc:4703
+#: editor.cc:4707
 #, fuzzy
 msgid "Please wait while %1 loads visual data."
 msgstr "请等待，%1 载入可视化数据"
 
-#: editor.cc:5509 editor_markers.cc:942 panner_ui.cc:393 processor_box.cc:2238
+#: editor.cc:5513 editor_markers.cc:942 panner_ui.cc:393 processor_box.cc:2238
 msgid "Edit..."
 msgstr "编辑..."
 
@@ -3038,7 +3025,7 @@ msgstr ""
 msgid "Position"
 msgstr "位置"
 
-#: editor_actions.cc:101 gain_meter.cc:150 gain_meter.cc:784 panner_ui.cc:177
+#: editor_actions.cc:101 gain_meter.cc:150 gain_meter.cc:785 panner_ui.cc:177
 #: panner_ui.cc:586
 msgid "Trim"
 msgstr ""
@@ -3945,7 +3932,7 @@ msgstr ""
 
 #: editor_actions.cc:867 editor_actions.cc:1263 editor_actions.cc:1274
 #: editor_actions.cc:1327 editor_actions.cc:1338 editor_actions.cc:1385
-#: editor_actions.cc:1395 editor_regions.cc:1564
+#: editor_actions.cc:1395 editor_regions.cc:1559
 msgid "programming error: %1: %2"
 msgstr "程序错误: %1: %2"
 
@@ -4322,24 +4309,24 @@ msgstr "改变渐入长度"
 msgid "change fade out length"
 msgstr "改变渐出长度"
 
-#: editor_drag.cc:2859
+#: editor_drag.cc:2850
 msgid "move marker"
 msgstr "移动标记"
 
-#: editor_drag.cc:3422
+#: editor_drag.cc:3413
 msgid "An error occurred while executing time stretch operation"
 msgstr "当执行时间延伸操作时出现错误"
 
-#: editor_drag.cc:3852
+#: editor_drag.cc:3843
 #, fuzzy
 msgid "programming_error: %1"
 msgstr "程序错误: %1"
 
-#: editor_drag.cc:3922 editor_markers.cc:681
+#: editor_drag.cc:3913 editor_markers.cc:681
 msgid "new range marker"
 msgstr "新范围标记"
 
-#: editor_drag.cc:4603
+#: editor_drag.cc:4594
 msgid "rubberband selection"
 msgstr ""
 
@@ -5186,7 +5173,7 @@ msgstr ""
 msgid "Position of start of region"
 msgstr "转至会话起点"
 
-#: editor_regions.cc:113 editor_regions.cc:854 time_info_box.cc:98
+#: editor_regions.cc:113 editor_regions.cc:849 time_info_box.cc:98
 msgid "End"
 msgstr "结束"
 
@@ -5230,7 +5217,7 @@ msgstr ""
 msgid "Region position glued to Bars|Beats time?"
 msgstr ""
 
-#: editor_regions.cc:120 editor_routes.cc:207 gain_meter.cc:752
+#: editor_regions.cc:120 editor_routes.cc:207 gain_meter.cc:753
 #: mixer_strip.cc:1924 panner_ui.cc:554 stereo_panner.cc:237
 msgid "M"
 msgstr ""
@@ -5270,20 +5257,20 @@ msgstr "确定移除."
 msgid "Remove unused regions"
 msgstr "移除没用的区域"
 
-#: editor_regions.cc:821 editor_regions.cc:835 editor_regions.cc:849
+#: editor_regions.cc:816 editor_regions.cc:830 editor_regions.cc:844
 msgid "Mult."
 msgstr "多"
 
-#: editor_regions.cc:852 engine_dialog.cc:84 midi_list_editor.cc:103
+#: editor_regions.cc:847 engine_dialog.cc:84 midi_list_editor.cc:103
 #: time_info_box.cc:91
 msgid "Start"
 msgstr "开始"
 
-#: editor_regions.cc:870 editor_regions.cc:886
+#: editor_regions.cc:865 editor_regions.cc:881
 msgid "Multiple"
 msgstr "多"
 
-#: editor_regions.cc:955
+#: editor_regions.cc:950
 msgid "MISSING "
 msgstr "找不到"
 
@@ -5625,148 +5612,148 @@ msgstr "96000 Hz"
 msgid "192000Hz"
 msgstr "192000 Hz"
 
-#: engine_dialog.cc:127 engine_dialog.cc:132 engine_dialog.cc:167
-#: engine_dialog.cc:550 midi_channel_selector.cc:147 rc_option_editor.cc:1125
+#: engine_dialog.cc:127 engine_dialog.cc:132 engine_dialog.cc:169
+#: engine_dialog.cc:552 midi_channel_selector.cc:147 rc_option_editor.cc:1125
 #: sfdb_ui.cc:544
 msgid "None"
 msgstr ""
 
-#: engine_dialog.cc:128 engine_dialog.cc:551
+#: engine_dialog.cc:128 engine_dialog.cc:553
 msgid "Triangular"
 msgstr "三角形"
 
-#: engine_dialog.cc:129 engine_dialog.cc:553
+#: engine_dialog.cc:129 engine_dialog.cc:555
 msgid "Rectangular"
 msgstr "矩形"
 
-#: engine_dialog.cc:130 engine_dialog.cc:555
+#: engine_dialog.cc:130 engine_dialog.cc:557
 msgid "Shaped"
 msgstr "形状"
 
-#: engine_dialog.cc:156
+#: engine_dialog.cc:158
 msgid "Playback/recording on 1 device"
 msgstr "在设备1 播放/录音"
 
-#: engine_dialog.cc:157
+#: engine_dialog.cc:159
 msgid "Playback/recording on 2 devices"
 msgstr "在设备2 播放/录音"
 
-#: engine_dialog.cc:158 engine_dialog.cc:491 engine_dialog.cc:965
+#: engine_dialog.cc:160 engine_dialog.cc:493 engine_dialog.cc:970
 msgid "Playback only"
 msgstr "仅播放"
 
-#: engine_dialog.cc:159 engine_dialog.cc:493 engine_dialog.cc:968
+#: engine_dialog.cc:161 engine_dialog.cc:495 engine_dialog.cc:973
 msgid "Recording only"
 msgstr "仅录音"
 
-#: engine_dialog.cc:168 engine_dialog.cc:569
+#: engine_dialog.cc:170 engine_dialog.cc:571
 msgid "seq"
 msgstr ""
 
-#: engine_dialog.cc:169 engine_dialog.cc:571
+#: engine_dialog.cc:171 engine_dialog.cc:573
 msgid "raw"
 msgstr ""
 
-#: engine_dialog.cc:175
+#: engine_dialog.cc:177
 msgid "Driver:"
 msgstr "驱动:"
 
-#: engine_dialog.cc:180
+#: engine_dialog.cc:182
 #, fuzzy
 msgid "Audio Interface:"
 msgstr "接口:"
 
-#: engine_dialog.cc:185 sfdb_ui.cc:148 sfdb_ui.cc:261 sfdb_ui.cc:266
+#: engine_dialog.cc:187 sfdb_ui.cc:148 sfdb_ui.cc:261 sfdb_ui.cc:266
 msgid "Sample rate:"
 msgstr "采样率:"
 
-#: engine_dialog.cc:190
+#: engine_dialog.cc:192
 msgid "Buffer size:"
 msgstr "缓冲区大小:"
 
-#: engine_dialog.cc:196
+#: engine_dialog.cc:198
 msgid "Number of buffers:"
 msgstr "缓冲区数量:"
 
-#: engine_dialog.cc:203
+#: engine_dialog.cc:205
 msgid "Approximate latency:"
 msgstr "大约延迟:"
 
-#: engine_dialog.cc:216
+#: engine_dialog.cc:218
 msgid "Audio mode:"
 msgstr "音频模式:"
 
-#: engine_dialog.cc:278 engine_dialog.cc:402
+#: engine_dialog.cc:280 engine_dialog.cc:404
 msgid "Ignore"
 msgstr "忽略"
 
-#: engine_dialog.cc:286
+#: engine_dialog.cc:288
 msgid "Client timeout"
 msgstr "客户端超时"
 
-#: engine_dialog.cc:293
+#: engine_dialog.cc:295
 msgid "Number of ports:"
 msgstr "端口数量:"
 
-#: engine_dialog.cc:298
+#: engine_dialog.cc:300
 msgid "MIDI driver:"
 msgstr "MIDI驱动:"
 
-#: engine_dialog.cc:304
+#: engine_dialog.cc:306
 msgid "Dither:"
 msgstr ""
 
-#: engine_dialog.cc:313
+#: engine_dialog.cc:315
 msgid ""
 "No JACK server found anywhere on this system. Please install JACK and restart"
 msgstr ""
 "No JACK server found anywhere on this system. Please install JACK and restart"
 
-#: engine_dialog.cc:321
+#: engine_dialog.cc:323
 msgid "Server:"
 msgstr "服务器:"
 
-#: engine_dialog.cc:333
+#: engine_dialog.cc:335
 msgid "Input device:"
 msgstr "输入设备:"
 
-#: engine_dialog.cc:337
+#: engine_dialog.cc:339
 msgid "Output device:"
 msgstr "输出设备:"
 
-#: engine_dialog.cc:342
+#: engine_dialog.cc:344
 msgid "Hardware input latency:"
 msgstr "硬件输入延迟:"
 
-#: engine_dialog.cc:345 engine_dialog.cc:351
+#: engine_dialog.cc:347 engine_dialog.cc:353
 msgid "samples"
 msgstr "采样"
 
-#: engine_dialog.cc:348
+#: engine_dialog.cc:350
 msgid "Hardware output latency:"
 msgstr "硬件输出延迟:"
 
-#: engine_dialog.cc:362
+#: engine_dialog.cc:364
 msgid "Device"
 msgstr "设备"
 
-#: engine_dialog.cc:364
+#: engine_dialog.cc:366
 msgid "Advanced"
 msgstr "高级"
 
-#: engine_dialog.cc:471 engine_dialog.cc:959
+#: engine_dialog.cc:473 engine_dialog.cc:964
 msgid "Playback/Recording on 1 Device"
 msgstr "在一个设备上回放/录音"
 
-#: engine_dialog.cc:475 engine_dialog.cc:528 engine_dialog.cc:962
+#: engine_dialog.cc:477 engine_dialog.cc:530 engine_dialog.cc:967
 msgid "Playback/Recording on 2 Devices"
 msgstr "在两个设备上回放/录音"
 
-#: engine_dialog.cc:641
+#: engine_dialog.cc:643
 msgid "cannot open JACK rc file %1 to store parameters"
 msgstr "无法打开JACK的rc文件%1来储存参数"
 
-#: engine_dialog.cc:775
+#: engine_dialog.cc:777
 msgid ""
 "You do not have any audio devices capable of\n"
 "simultaneous playback and recording.\n"
@@ -5783,27 +5770,27 @@ msgid ""
 "Ardour and choose the relevant device then."
 msgstr ""
 
-#: engine_dialog.cc:788
+#: engine_dialog.cc:790
 msgid "No suitable audio devices"
 msgstr "没有合适的音频设备"
 
-#: engine_dialog.cc:1002
+#: engine_dialog.cc:1007
 msgid "JACK appears to be missing from the %1 bundle"
 msgstr "JACK%1"
 
-#: engine_dialog.cc:1072
+#: engine_dialog.cc:1077
 msgid "You need to choose an audio device first."
 msgstr "你需要先选择一个音频设备"
 
-#: engine_dialog.cc:1089
+#: engine_dialog.cc:1094
 msgid "Audio device \"%1\" not known on this computer."
 msgstr "电脑无法识别音频设备 %1"
 
-#: engine_dialog.cc:1241
+#: engine_dialog.cc:1246
 msgid "AudioSetup value for %1 is missing data"
 msgstr ""
 
-#: engine_dialog.cc:1320
+#: engine_dialog.cc:1325
 msgid "configuration files contain a JACK server path that doesn't exist (%1)"
 msgstr ""
 
@@ -6103,19 +6090,19 @@ msgstr "到"
 msgid "Range"
 msgstr "范围"
 
-#: gain_meter.cc:135 gain_meter.cc:457 gain_meter.cc:849
+#: gain_meter.cc:135 gain_meter.cc:457 gain_meter.cc:850
 msgid "-inf"
 msgstr ""
 
-#: gain_meter.cc:141 gain_meter.cc:895
+#: gain_meter.cc:141 gain_meter.cc:896
 msgid "Fader automation mode"
 msgstr ""
 
-#: gain_meter.cc:142 gain_meter.cc:896
+#: gain_meter.cc:142 gain_meter.cc:897
 msgid "Fader automation type"
 msgstr ""
 
-#: gain_meter.cc:151 gain_meter.cc:788 panner_ui.cc:178 panner_ui.cc:590
+#: gain_meter.cc:151 gain_meter.cc:789 panner_ui.cc:178 panner_ui.cc:590
 msgid "Abs"
 msgstr ""
 
@@ -6123,16 +6110,16 @@ msgstr ""
 msgid "-Inf"
 msgstr ""
 
-#: gain_meter.cc:755 mixer_strip.cc:1944 panner_ui.cc:557
+#: gain_meter.cc:756 mixer_strip.cc:1944 panner_ui.cc:557
 #: route_time_axis.cc:2423
 msgid "P"
 msgstr ""
 
-#: gain_meter.cc:758 panner_ui.cc:560
+#: gain_meter.cc:759 panner_ui.cc:560
 msgid "T"
 msgstr ""
 
-#: gain_meter.cc:761 panner_ui.cc:563
+#: gain_meter.cc:762 panner_ui.cc:563
 msgid "W"
 msgstr ""
 
@@ -6393,11 +6380,18 @@ msgstr "毫秒数"
 msgid "period"
 msgstr ""
 
-#: latency_gui.cc:71 panner_ui.cc:392
+#: latency_gui.cc:55
+#, fuzzy
+msgid "%1 sample"
+msgid_plural "%1 samples"
+msgstr[0] "采样"
+msgstr[1] "采样"
+
+#: latency_gui.cc:72 panner_ui.cc:392
 msgid "Reset"
 msgstr "预设"
 
-#: latency_gui.cc:150 rhythm_ferret.cc:255 sfdb_ui.cc:1724
+#: latency_gui.cc:151 rhythm_ferret.cc:255 sfdb_ui.cc:1724
 msgid "programming error: %1 (%2)"
 msgstr "程序错误: %1 (%2)"
 
@@ -7858,8 +7852,11 @@ msgid "Click to enable/disable this plugin"
 msgstr "单击来启用/禁用此插件"
 
 #: plugin_ui.cc:549
-msgid "latency (%1 samples)"
-msgstr "延迟 (%1 采样)"
+#, fuzzy
+msgid "latency (%1 sample)"
+msgid_plural "latency (%1 samples)"
+msgstr[0] "延迟 (%1 采样)"
+msgstr[1] "延迟 (%1 采样)"
 
 #: plugin_ui.cc:551
 msgid "latency (%1 ms)"
@@ -8598,6 +8595,11 @@ msgid ""
 "<b>When enabled</b> Ardour will continue to send LTC information even when "
 "the transport (playhead) is not moving"
 msgstr ""
+
+#: rc_option_editor.cc:1156
+#, fuzzy
+msgid "LTC generator level"
+msgstr "创建者"
 
 #: rc_option_editor.cc:1160
 msgid ""
@@ -9720,6 +9722,11 @@ msgstr ""
 #, fuzzy
 msgid "the mixer"
 msgstr "混音师"
+
+#: route_ui.cc:1758
+#, fuzzy
+msgid "the editor"
+msgstr "高度"
 
 #: route_ui.cc:1813
 msgid ""
@@ -11408,9 +11415,11 @@ msgstr "在搜索路径 %2 下找不到用户界面样式文件 %1 . %3 看起�
 msgid "gTortnam"
 msgstr ""
 
-#: time_axis_view_item.cc:331
-msgid "new duration %1 frames is out of bounds for %2"
-msgstr ""
+#: time_axis_view_item.cc:332
+msgid "new duration %1 frame is out of bounds for %2"
+msgid_plural "new duration of %1 frames is out of bounds for %2"
+msgstr[0] ""
+msgstr[1] ""
 
 #: time_fx_dialog.cc:62
 msgid "Quick but Ugly"
@@ -11548,17 +11557,53 @@ msgstr ""
 msgid "VerboseCanvasCursor"
 msgstr ""
 
-#~ msgid "could not create %1 new audio busses"
-#~ msgstr "无法新建 %1 新的音频总线"
+#, fuzzy
+#~ msgid "could not create a new mixed track"
+#~ msgstr "无法创建新的MIDI音轨"
+
+#, fuzzy
+#~ msgid "could not create new audio bus"
+#~ msgid_plural "could not create %1 new audio busses"
+#~ msgstr[0] "无法新建音频总线"
+#~ msgstr[1] "无法新建音频总线"
+
+#, fuzzy
+#~ msgid ""
+#~ "The following %1 files were not in use and \n"
+#~ "have been moved to: %2\n"
+#~ "\n"
+#~ "After a restart of %5\n"
+#~ "\n"
+#~ "<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n"
+#~ "\n"
+#~ "will release an additional %3 %4bytes of disk space.\n"
+#~ msgstr ""
+#~ "以下文件 %1 没被用到,\n"
+#~ "并且被移动到:\n"
+#~ "\n"
+#~ "%2\n"
+#~ "\n"
+#~ "重启Ardour后\n"
+#~ "\n"
+#~ "会话 -> 清空 -> 回收站\n"
+#~ "\n"
+#~ "将会释放额外的\n"
+#~ "%3 %4bytes 的磁盘空间.\n"
+
+#, fuzzy
+#~ msgid ""
+#~ "The following %1 files were deleted from %2,\n"
+#~ "releasing %3 %4bytes of disk space"
+#~ msgstr ""
+#~ "下列文件 %1 被删除于\n"
+#~ "%2,\n"
+#~ "释放出 %3 %4 bytes 的磁盘空间"
 
 #~ msgid "the width"
 #~ msgstr "宽度"
 
 #~ msgid "drawn width"
 #~ msgstr "画宽"
-
-#~ msgid "the height"
-#~ msgstr "高度"
 
 #~ msgid "Display Height"
 #~ msgstr "窗口高度"

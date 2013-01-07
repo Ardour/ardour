@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 0.664.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-03 08:18-0500\n"
+"POT-Creation-Date: 2013-01-07 14:22-0500\n"
 "PO-Revision-Date: 2007-04-16 00:38+0200\n"
 "Last-Translator: Klearchos Gourgourinis <muadib@in.gr>\n"
 "Language-Team: Hellenic(Greek)\n"
@@ -410,35 +410,35 @@ msgstr "Αποτυχία προανάγνωσης Butler στο dstream %1"
 msgid "Butler write-behind failure on dstream %1"
 msgstr "Αποτυχία οπισθεγγραφής Butler στο dstream %1"
 
-#: control_protocol_manager.cc:131
+#: control_protocol_manager.cc:132
 msgid "control protocol name \"%1\" has no descriptor"
 msgstr "Το όνομα πρωτοκόλλου ελέγχου \"%1\" δεν έχει descriptor"
 
-#: control_protocol_manager.cc:136
+#: control_protocol_manager.cc:137
 msgid "control protocol name \"%1\" could not be initialized"
 msgstr "Το όνομα πρωτοκόλλου ελέγχου \"%1\" ήταν αδύνατο να αρχίσει"
 
-#: control_protocol_manager.cc:196
+#: control_protocol_manager.cc:197
 msgid "Instantiating mandatory control protocol %1"
 msgstr ""
 
-#: control_protocol_manager.cc:217
+#: control_protocol_manager.cc:218
 msgid "looking for control protocols in %1\n"
 msgstr ""
 
-#: control_protocol_manager.cc:242
+#: control_protocol_manager.cc:243
 msgid "Control protocol %1 not usable"
 msgstr "Πρωτόκολλο ελέγχου %1 μη χρησιμοποιήσιμο"
 
-#: control_protocol_manager.cc:259
+#: control_protocol_manager.cc:260
 msgid "Control surface protocol discovered: \"%1\""
 msgstr ""
 
-#: control_protocol_manager.cc:277
+#: control_protocol_manager.cc:278
 msgid "ControlProtocolManager: cannot load module \"%1\" (%2)"
 msgstr "ControlProtocolManager: δεν μπορώ να φορτώσω το module \"%1\" (%2)"
 
-#: control_protocol_manager.cc:285
+#: control_protocol_manager.cc:286
 msgid "ControlProtocolManager: module \"%1\" has no descriptor function."
 msgstr "ControlProtocolManager: το module \"%1\" δεν έχει descriptor function."
 
@@ -1372,11 +1372,11 @@ msgstr "Άγνωστο plugin για panner \"%1\" ευρέθη στην κατ�
 msgid "panner plugin node has no type information!"
 msgstr "ο κόμβος για τα plugin του panner δεν  έχει πληροφορίες τύπου!"
 
-#: playlist.cc:2059
+#: playlist.cc:2070
 msgid "region state node has no ID, ignored"
 msgstr ""
 
-#: playlist.cc:2077
+#: playlist.cc:2088
 #, fuzzy
 msgid "Playlist: cannot create region from XML"
 msgstr "Playlist: αδύνατη η δημιουργία Περιοχής από αρχείο καταστάσεως"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-04 11:01-0500\n"
+"POT-Creation-Date: 2013-01-07 14:22-0500\n"
 "PO-Revision-Date: 2013-01-02 18:39+0100\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
@@ -642,41 +642,42 @@ msgid "button cannot watch state of non-existing Controllable\n"
 msgstr ""
 "Button kan den Status des nichtexistenten Controllable nicht verfolgen\n"
 
-#: ardour_ui.cc:158
+#: ardour_ui.cc:160
 msgid "audition"
 msgstr "Vorhören"
 
-#: ardour_ui.cc:159
+#: ardour_ui.cc:161
 msgid "solo"
 msgstr "solo"
 
-#: ardour_ui.cc:160
+#: ardour_ui.cc:162
 msgid "feedback"
 msgstr "feedback"
 
-#: ardour_ui.cc:162
+#: ardour_ui.cc:164
 msgid "Errors"
 msgstr "Fehlermeldungen"
 
-#: ardour_ui.cc:280
+#: ardour_ui.cc:282
 msgid "could not initialize %1."
 msgstr "Konnte %1 nicht initialisieren."
 
-#: ardour_ui.cc:340
+#: ardour_ui.cc:342
 msgid "Starting audio engine"
 msgstr "Starte Audio Engine"
 
-#: ardour_ui.cc:640 startup.cc:620
+#: ardour_ui.cc:642 startup.cc:620
 msgid "%1 is ready for use"
 msgstr "%1 ist bereit"
 
-#: ardour_ui.cc:682
+#: ardour_ui.cc:690
+#, fuzzy
 msgid ""
 "WARNING: Your system has a limit for maximum amount of locked memory. This "
 "might cause %1 to run out of memory before your system runs out of memory. \n"
 "\n"
 "You can view the memory limit with 'ulimit -l', and it is normally "
-"controlled by /etc/security/limits.conf"
+"controlled by %2"
 msgstr ""
 "WARNUNG: Ihr System hat eine Begrenzung für die Reservierung von "
 "Arbeitsspeicher eingestellt. Dies könnte dazu führen, dass Ardour zu schnell "
@@ -685,23 +686,23 @@ msgstr ""
 "Sie können die Speicherbegrenzung mit 'ulimit -l' einsehen und normalerweise "
 "in /etc/security/limits.conf verändern."
 
-#: ardour_ui.cc:693
+#: ardour_ui.cc:707
 msgid "Do not show this window again"
 msgstr "Diese Meldung nicht wieder anzeigen"
 
-#: ardour_ui.cc:734
+#: ardour_ui.cc:748
 msgid "Don't quit"
 msgstr "Abbrechen"
 
-#: ardour_ui.cc:735
+#: ardour_ui.cc:749
 msgid "Just quit"
 msgstr "Ohne speichern beenden"
 
-#: ardour_ui.cc:736
+#: ardour_ui.cc:750
 msgid "Save and quit"
 msgstr "Speichern und beenden"
 
-#: ardour_ui.cc:746
+#: ardour_ui.cc:760
 msgid ""
 "%1 was unable to save your session.\n"
 "\n"
@@ -715,15 +716,15 @@ msgstr ""
 "\n"
 "\"Trotzdem beenden\"."
 
-#: ardour_ui.cc:772
+#: ardour_ui.cc:786
 msgid "Please wait while %1 cleans up..."
 msgstr "Bitte warten Sie, während %1 aufräumt."
 
-#: ardour_ui.cc:790
+#: ardour_ui.cc:804
 msgid "Unsaved Session"
 msgstr "Nicht gespeichertes Projekt"
 
-#: ardour_ui.cc:811
+#: ardour_ui.cc:825
 msgid ""
 "The session \"%1\"\n"
 "has not been saved.\n"
@@ -741,7 +742,7 @@ msgstr ""
 "\n"
 "Wie wollen Sie vorgehen?"
 
-#: ardour_ui.cc:814
+#: ardour_ui.cc:828
 msgid ""
 "The snapshot \"%1\"\n"
 "has not been saved.\n"
@@ -759,74 +760,74 @@ msgstr ""
 "\n"
 "Wie wollen Sie vorgehen?"
 
-#: ardour_ui.cc:828
+#: ardour_ui.cc:842
 msgid "Prompter"
 msgstr "Frage"
 
-#: ardour_ui.cc:893
+#: ardour_ui.cc:907
 msgid "disconnected"
 msgstr "getrennt"
 
-#: ardour_ui.cc:900
+#: ardour_ui.cc:914
 #, c-format
 msgid "JACK: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"
 msgstr "JACK: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"
 
-#: ardour_ui.cc:904
+#: ardour_ui.cc:918
 #, c-format
 msgid "JACK: <span foreground=\"green\">%<PRId64> kHz / %4.1f ms</span>"
 msgstr "JACK: <span foreground=\"green\">%<PRId64> kHz / %4.1f ms</span>"
 
-#: ardour_ui.cc:922
+#: ardour_ui.cc:936
 msgid "File:"
 msgstr "Datei:"
 
-#: ardour_ui.cc:926
+#: ardour_ui.cc:940
 msgid "BWF"
 msgstr "BWF"
 
-#: ardour_ui.cc:929
+#: ardour_ui.cc:943
 msgid "WAV"
 msgstr "WAV"
 
-#: ardour_ui.cc:932
+#: ardour_ui.cc:946
 msgid "WAV64"
 msgstr "WAV64"
 
-#: ardour_ui.cc:935 session_option_editor.cc:196
+#: ardour_ui.cc:949 session_option_editor.cc:196
 msgid "CAF"
 msgstr "CAF"
 
-#: ardour_ui.cc:938
+#: ardour_ui.cc:952
 msgid "AIFF"
 msgstr "AIFF"
 
-#: ardour_ui.cc:941
+#: ardour_ui.cc:955
 msgid "iXML"
 msgstr "iXML"
 
-#: ardour_ui.cc:944
+#: ardour_ui.cc:958
 msgid "RF64"
 msgstr "RF64"
 
-#: ardour_ui.cc:952
+#: ardour_ui.cc:966
 msgid "32-float"
 msgstr "32-float"
 
-#: ardour_ui.cc:955
+#: ardour_ui.cc:969
 msgid "24-int"
 msgstr "24-int"
 
-#: ardour_ui.cc:958
+#: ardour_ui.cc:972
 msgid "16-int"
 msgstr "16-int"
 
-#: ardour_ui.cc:977
+#: ardour_ui.cc:991
 #, c-format
 msgid "DSP: <span foreground=\"%s\">%5.1f%%</span>"
 msgstr "DSP: <span foreground=\"%s\">%5.1f%%</span>"
 
-#: ardour_ui.cc:996
+#: ardour_ui.cc:1010
 #, c-format
 msgid ""
 "Buffers: <span foreground=\"green\">p:</span><span foreground=\"%s\">"
@@ -837,33 +838,33 @@ msgstr ""
 "%%</span> <span foreground=\"green\">c:</span><span foreground=\"%s\">"
 "%<PRIu32>%%</span>"
 
-#: ardour_ui.cc:1032
+#: ardour_ui.cc:1046
 msgid "Disk: <span foreground=\"green\">Unknown</span>"
 msgstr "Disk: <span foreground=\"green\">Unbekannt</span>"
 
-#: ardour_ui.cc:1034
+#: ardour_ui.cc:1048
 msgid "Disk: <span foreground=\"green\">24hrs+</span>"
 msgstr "Disk: <span foreground=\"green\">24h+</span>"
 
-#: ardour_ui.cc:1052
+#: ardour_ui.cc:1066
 msgid "Disk: <span foreground=\"green\">&gt;24 hrs</span>"
 msgstr "Disk: <span foreground=\"green\">&gt;24 h</span>"
 
-#: ardour_ui.cc:1063
+#: ardour_ui.cc:1077
 #, c-format
 msgid "Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"
 msgstr "Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"
 
-#: ardour_ui.cc:1089
+#: ardour_ui.cc:1103
 #, c-format
 msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
 msgstr "Timecode|TC: <span foreground=\"%s\">%s</span>"
 
-#: ardour_ui.cc:1204 ardour_ui.cc:1213 startup.cc:1019
+#: ardour_ui.cc:1218 ardour_ui.cc:1227 startup.cc:1019
 msgid "Recent Sessions"
 msgstr "Zuletzt verwendete Projekte"
 
-#: ardour_ui.cc:1295
+#: ardour_ui.cc:1309
 msgid ""
 "%1 is not connected to JACK\n"
 "You cannot open or close sessions in this condition"
@@ -871,29 +872,28 @@ msgstr ""
 "%1 ist derzeit nicht mit JACK verbunden.\n"
 "Es ist nicht möglich, Projekte zu öffnen oder zu schließen."
 
-#: ardour_ui.cc:1322
+#: ardour_ui.cc:1336
 msgid "Open Session"
 msgstr "Projekt öffnen"
 
-#: ardour_ui.cc:1340 session_import_dialog.cc:169
+#: ardour_ui.cc:1354 session_import_dialog.cc:169
 #: session_metadata_dialog.cc:729 startup.cc:1048
 msgid "%1 sessions"
 msgstr "%1projekte"
 
-#: ardour_ui.cc:1377
+#: ardour_ui.cc:1391
 msgid "You cannot add a track without a session already loaded."
 msgstr ""
 "Sie können erst Spuren oder Busse hinzufügen, wenn ein Projekt geladen wurde."
 
-#: ardour_ui.cc:1386
-msgid "could not create a new mixed track"
-msgstr "Konnte keine neue Audio+MIDI-Spur erstellen."
+#: ardour_ui.cc:1399
+#, fuzzy
+msgid "could not create %1 new mixed track"
+msgid_plural "could not create %1 new mixed tracks"
+msgstr[0] "Konnte %1 neue Audio+MIDI-Spur(en) nicht erstellen"
+msgstr[1] "Konnte %1 neue Audio+MIDI-Spur(en) nicht erstellen"
 
-#: ardour_ui.cc:1388
-msgid "could not create %1 new mixed tracks"
-msgstr "Konnte %1 neue Audio+MIDI-Spur(en) nicht erstellen"
-
-#: ardour_ui.cc:1395 ardour_ui.cc:1456
+#: ardour_ui.cc:1405 ardour_ui.cc:1466
 msgid ""
 "There are insufficient JACK ports available\n"
 "to create a new track or bus.\n"
@@ -906,26 +906,26 @@ msgstr ""
 "%1 und starten Sie JACK mit einer größeren\n"
 "Anzahl Ports neu."
 
-#: ardour_ui.cc:1430
+#: ardour_ui.cc:1440
 msgid "You cannot add a track or bus without a session already loaded."
 msgstr ""
 "Sie können erst Spuren oder Busse hinzufügen, wenn ein Projekt geladen wurde."
 
-#: ardour_ui.cc:1439
+#: ardour_ui.cc:1449
 #, fuzzy
-msgid "could not create new audio track"
+msgid "could not create %1 new audio track"
 msgid_plural "could not create %1 new audio tracks"
 msgstr[0] "Konnte neue Spur nicht erstellen."
 msgstr[1] "Konnte neue Spur nicht erstellen."
 
-#: ardour_ui.cc:1448
+#: ardour_ui.cc:1458
 #, fuzzy
-msgid "could not create new audio bus"
+msgid "could not create %1 new audio bus"
 msgid_plural "could not create %1 new audio busses"
-msgstr[0] "Konnte keinen neuen Audiobus erstellen."
-msgstr[1] "Konnte keinen neuen Audiobus erstellen."
+msgstr[0] "Konnte %1 neue Spur(en) nicht erstellen"
+msgstr[1] "Konnte %1 neue Spur(en) nicht erstellen"
 
-#: ardour_ui.cc:1565
+#: ardour_ui.cc:1575
 msgid ""
 "Please create one or more tracks before trying to record.\n"
 "You can do this with the \"Add Track or Bus\" option in the Session menu."
@@ -934,7 +934,7 @@ msgstr ""
 "bevor Sie aufnehmen. Die geht über \"Spur/Bus hinzufügen\"\n"
 "im Menüpunkt Projekt."
 
-#: ardour_ui.cc:1955
+#: ardour_ui.cc:1965
 msgid ""
 "The audio backend (JACK) was shutdown because:\n"
 "\n"
@@ -944,7 +944,7 @@ msgstr ""
 "\n"
 "%1"
 
-#: ardour_ui.cc:1957
+#: ardour_ui.cc:1967
 msgid ""
 "JACK has either been shutdown or it\n"
 "disconnected %1 because %1\n"
@@ -956,19 +956,19 @@ msgstr ""
 "war. Sie sollten versuchen, JACK neu zu starten,\n"
 "neu zu verbinden, und das Projekt zu speichern."
 
-#: ardour_ui.cc:1982
+#: ardour_ui.cc:1992
 msgid "Unable to start the session running"
 msgstr "Konnte das aktuelle Projekt nicht starten"
 
-#: ardour_ui.cc:2058
+#: ardour_ui.cc:2068
 msgid "Take Snapshot"
 msgstr "Schnappschuss machen"
 
-#: ardour_ui.cc:2059
+#: ardour_ui.cc:2069
 msgid "Name of new snapshot"
 msgstr "Name für neuen Schnappschuss"
 
-#: ardour_ui.cc:2083
+#: ardour_ui.cc:2093
 msgid ""
 "To ensure compatibility with various systems\n"
 "snapshot names may not contain a '%1' character"
@@ -976,28 +976,28 @@ msgstr ""
 "Um die Kompatibilität mit verschiedenen Systemen sicher zu stellen,\n"
 "dürfen Namen von Schnappschüssen kein '%1'-Zeichen enthalten"
 
-#: ardour_ui.cc:2095
+#: ardour_ui.cc:2105
 msgid "Confirm Snapshot Overwrite"
 msgstr "Bestätige das Überschreiben des Schnappschusses"
 
-#: ardour_ui.cc:2096
+#: ardour_ui.cc:2106
 msgid "A snapshot already exists with that name.  Do you want to overwrite it?"
 msgstr ""
 "Ein Schnappschuss mit diesem existiert bereits. Wollen Sie ihn überschreiben?"
 
-#: ardour_ui.cc:2099
+#: ardour_ui.cc:2109
 msgid "Overwrite"
 msgstr "Überschreibe"
 
-#: ardour_ui.cc:2133
+#: ardour_ui.cc:2143
 msgid "Rename Session"
 msgstr "Projekt umbenennen"
 
-#: ardour_ui.cc:2134
+#: ardour_ui.cc:2144
 msgid "New session name"
 msgstr "Neuer Projektname"
 
-#: ardour_ui.cc:2148 ardour_ui.cc:2524 ardour_ui.cc:2569
+#: ardour_ui.cc:2158 ardour_ui.cc:2534 ardour_ui.cc:2579
 msgid ""
 "To ensure compatibility with various systems\n"
 "session names may not contain a '%1' character"
@@ -1005,14 +1005,14 @@ msgstr ""
 "Um die Kompatibilität mit verschiedenen Systemen sicher zu stellen,\n"
 "dürfen Projektnamen kein '%1'-Zeichen enthalten"
 
-#: ardour_ui.cc:2156
+#: ardour_ui.cc:2166
 msgid ""
 "That name is already in use by another directory/folder. Please try again."
 msgstr ""
 "Dieser Name wird schon von einem anderen Verzeichnis/Ordner benutzt. Bitte "
 "nochmal versuchen."
 
-#: ardour_ui.cc:2165
+#: ardour_ui.cc:2175
 msgid ""
 "Renaming this session failed.\n"
 "Things could be seriously messed up at this point"
@@ -1020,19 +1020,19 @@ msgstr ""
 "Das Umbenennen des Projekts ist fehlgeschlagen.\n"
 "Dies könnte auf schwerwiegende Probleme hinweisen."
 
-#: ardour_ui.cc:2280
+#: ardour_ui.cc:2290
 msgid "Save Template"
 msgstr "Als Vorlage Speichern"
 
-#: ardour_ui.cc:2281
+#: ardour_ui.cc:2291
 msgid "Name for template:"
 msgstr "Name für Vorlage"
 
-#: ardour_ui.cc:2282
+#: ardour_ui.cc:2292
 msgid "-template"
 msgstr "Vorlage"
 
-#: ardour_ui.cc:2320
+#: ardour_ui.cc:2330
 msgid ""
 "This session\n"
 "%1\n"
@@ -1042,52 +1042,52 @@ msgstr ""
 "%1\n"
 "existiert bereits. Wollen Sie sie öffnen?"
 
-#: ardour_ui.cc:2330
+#: ardour_ui.cc:2340
 msgid "Open Existing Session"
 msgstr "Vorhandenes Projekt öffnen"
 
-#: ardour_ui.cc:2560
+#: ardour_ui.cc:2570
 msgid "There is no existing session at \"%1\""
 msgstr "Es gibt kein Projekt an folgender Stelle: \"%1\""
 
-#: ardour_ui.cc:2647
+#: ardour_ui.cc:2657
 msgid "Please wait while %1 loads your session"
 msgstr "Bitte warten Sie, während %1 das Projekt lädt"
 
-#: ardour_ui.cc:2662
+#: ardour_ui.cc:2672
 msgid "Port Registration Error"
 msgstr "Fehler bei der Registrierung von Ports"
 
-#: ardour_ui.cc:2663
+#: ardour_ui.cc:2673
 msgid "Click the Close button to try again."
 msgstr "Klicken Sie auf Schließen, um es erneut zu versuchen."
 
-#: ardour_ui.cc:2684
+#: ardour_ui.cc:2694
 msgid "Session \"%1 (snapshot %2)\" did not load successfully"
 msgstr "Projekt  \"%1 (Schnappschuss %2)\" konnte nicht geladen werden."
 
-#: ardour_ui.cc:2690
+#: ardour_ui.cc:2700
 msgid "Loading Error"
 msgstr "Fehler beim Laden"
 
-#: ardour_ui.cc:2691
+#: ardour_ui.cc:2701
 msgid "Click the Refresh button to try again."
 msgstr "Klicken Sie auf Aktualisieren, um es erneut zu versuchen."
 
-#: ardour_ui.cc:2773
+#: ardour_ui.cc:2783
 msgid "Could not create session in \"%1\""
 msgstr "Konnte kein Projekt in \"%1\" anlegen"
 
-#: ardour_ui.cc:2901
+#: ardour_ui.cc:2910
 msgid "No files were ready for clean-up"
 msgstr "Keine Audiodateien zum Aufräumen vorhanden"
 
-#: ardour_ui.cc:2905 ardour_ui.cc:2915 ardour_ui.cc:3032 ardour_ui.cc:3039
+#: ardour_ui.cc:2914 ardour_ui.cc:2924 ardour_ui.cc:3057 ardour_ui.cc:3064
 #: ardour_ui_ed.cc:104
 msgid "Clean-up"
 msgstr "Aufräumen"
 
-#: ardour_ui.cc:2906
+#: ardour_ui.cc:2915
 msgid ""
 "If this seems suprising, \n"
 "check for any existing snapshots.\n"
@@ -1099,23 +1099,77 @@ msgstr ""
 "sind sie wahrscheinlich noch in einem\n"
 "älteren Schnappschuss als Region eingebunden."
 
-#: ardour_ui.cc:2965
+#: ardour_ui.cc:2974
 msgid "kilo"
 msgstr "kilo"
 
-#: ardour_ui.cc:2968
+#: ardour_ui.cc:2977
 msgid "mega"
 msgstr "mega"
 
-#: ardour_ui.cc:2971
+#: ardour_ui.cc:2980
 msgid "giga"
 msgstr "giga"
 
-#: ardour_ui.cc:3027
+#: ardour_ui.cc:2985
+#, fuzzy
+msgid ""
+"The following file was deleted from %2,\n"
+"releasing %3 %4bytes of disk space"
+msgid_plural ""
+"The following %1 files were deleted from %2,\n"
+"releasing %3 %4bytes of disk space"
+msgstr[0] ""
+"Die folgende Datei wurde von %2\n"
+"gelöscht und gab %3 %4bytes Speicherplatz frei"
+msgstr[1] ""
+"Die folgende Datei wurde von %2\n"
+"gelöscht und gab %3 %4bytes Speicherplatz frei"
+
+#: ardour_ui.cc:2992
+#, fuzzy
+msgid ""
+"The following file was not in use and \n"
+"has been moved to: %2\n"
+"\n"
+"After a restart of %5\n"
+"\n"
+"<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n"
+"\n"
+"will release an additional %3 %4bytes of disk space.\n"
+msgid_plural ""
+"The following %1 files were not in use and \n"
+"have been moved to: %2\n"
+"\n"
+"After a restart of %5\n"
+"\n"
+"<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n"
+"\n"
+"will release an additional %3 %4bytes of disk space.\n"
+msgstr[0] ""
+"Die folgende Datei war unbenutzt\n"
+"und wurde verschoben nach: %2\n"
+"\n"
+"Nach einem Neustart von %5 kann über\n"
+"\n"
+"<span face=\"mono\">Projekt -> Aufräumen -> Müll leeren</span>\n"
+"\n"
+"%3 %4bytes Speicherplatz freigegeben werden.\n"
+msgstr[1] ""
+"Die folgende Datei war unbenutzt\n"
+"und wurde verschoben nach: %2\n"
+"\n"
+"Nach einem Neustart von %5 kann über\n"
+"\n"
+"<span face=\"mono\">Projekt -> Aufräumen -> Müll leeren</span>\n"
+"\n"
+"%3 %4bytes Speicherplatz freigegeben werden.\n"
+
+#: ardour_ui.cc:3052
 msgid "Are you sure you want to clean-up?"
 msgstr "Sind Sie sicher, dass Sie aufräumen wollen?"
 
-#: ardour_ui.cc:3034
+#: ardour_ui.cc:3059
 msgid ""
 "Clean-up is a destructive operation.\n"
 "ALL undo/redo information will be lost if you clean-up.\n"
@@ -1127,80 +1181,24 @@ msgstr ""
 "Nach dem Aufräumen werden alle nicht benötigten Audiodateien in den \"dead "
 "sounds\" Ordner verschoben."
 
-#: ardour_ui.cc:3042
+#: ardour_ui.cc:3067
 msgid "CleanupDialog"
 msgstr "Aufräumdialog"
 
-#: ardour_ui.cc:3073
+#: ardour_ui.cc:3097
 msgid "Cleaned Files"
 msgstr "Aufgeräumte Dateien"
 
-#: ardour_ui.cc:3074
-msgid ""
-"The following %1 files were not in use and \n"
-"have been moved to: %2\n"
-"\n"
-"After a restart of %5\n"
-"\n"
-"<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n"
-"\n"
-"will release an additional %3 %4bytes of disk space.\n"
-msgstr ""
-"Die folgenden %1 Dateien waren unbenutzt\n"
-"und wurden verschoben nach: %2\n"
-"\n"
-"Nach einem Neustart von %5 kann über\n"
-"\n"
-"<span face=\"mono\">Projekt -> Aufräumen -> Müll leeren</span>\n"
-"\n"
-"%3 %4bytes Speicherplatz freigegeben werden.\n"
-
-#: ardour_ui.cc:3080
-msgid ""
-"The following file was not in use and \n"
-"has been moved to: %2\n"
-"\n"
-"After a restart of %5\n"
-"\n"
-"<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n"
-"\n"
-"will release an additional %3 %4bytes of disk space.\n"
-msgstr ""
-"Die folgende Datei war unbenutzt\n"
-"und wurde verschoben nach: %2\n"
-"\n"
-"Nach einem Neustart von %5 kann über\n"
-"\n"
-"<span face=\"mono\">Projekt -> Aufräumen -> Müll leeren</span>\n"
-"\n"
-"%3 %4bytes Speicherplatz freigegeben werden.\n"
-
-#: ardour_ui.cc:3105
+#: ardour_ui.cc:3114
 msgid "deleted file"
 msgstr "gelöschte Datei"
 
-#: ardour_ui.cc:3106
-msgid ""
-"The following %1 files were deleted from %2,\n"
-"releasing %3 %4bytes of disk space"
-msgstr ""
-"Die folgenden %1 Dateien wurden von %2\n"
-"gelöscht und gaben %3 %4bytes Speicherplatz frei"
-
-#: ardour_ui.cc:3108
-msgid ""
-"The following file was deleted from %2,\n"
-"releasing %3 %4bytes of disk space"
-msgstr ""
-"Die folgende Datei wurde von %2\n"
-"gelöscht und gab %3 %4bytes Speicherplatz frei"
-
-#: ardour_ui.cc:3263
+#: ardour_ui.cc:3268
 msgid "Recording was stopped because your system could not keep up."
 msgstr ""
 "Die Aufnahme wurde gestoppt, da Ihr System nicht schnell genug folgen konnte."
 
-#: ardour_ui.cc:3292
+#: ardour_ui.cc:3297
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1214,7 +1212,7 @@ msgstr ""
 "Die Daten konnten nicht schnell genug geschrieben\n"
 "werden, um die Aufnahme fortzuführen.\n"
 
-#: ardour_ui.cc:3311
+#: ardour_ui.cc:3316
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1228,11 +1226,11 @@ msgstr ""
 "Die Daten konnten nicht schnell genug gelesen\n"
 "werden, um die Wiedergabe aufrechtzuerhalten.\n"
 
-#: ardour_ui.cc:3351
+#: ardour_ui.cc:3356
 msgid "Crash Recovery"
 msgstr "Wiederherstellung"
 
-#: ardour_ui.cc:3352
+#: ardour_ui.cc:3357
 msgid ""
 "This session appears to have been in\n"
 "middle of recording when ardour or\n"
@@ -1250,19 +1248,19 @@ msgstr ""
 "für Sie wiederherstellen oder sie verwerfen.\n"
 "Bitte entscheiden Sie, wie Sie vorgehen möchten.\n"
 
-#: ardour_ui.cc:3364
+#: ardour_ui.cc:3369
 msgid "Ignore crash data"
 msgstr "Daten verwerfen"
 
-#: ardour_ui.cc:3365
+#: ardour_ui.cc:3370
 msgid "Recover from crash"
 msgstr "Daten wiederherstellen"
 
-#: ardour_ui.cc:3385
+#: ardour_ui.cc:3390
 msgid "Sample Rate Mismatch"
 msgstr "Samplerate passt nicht"
 
-#: ardour_ui.cc:3386
+#: ardour_ui.cc:3391
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
 "%2 is currently running at %3 Hz.  If you load this session,\n"
@@ -1273,31 +1271,31 @@ msgstr ""
 "%2 läuft derzeit mit %3 Hz. Wenn Sie dieses Projekt laden, \n"
 "wird Ihr Audiomaterial mit der falschen Samplerate abgespielt.\n"
 
-#: ardour_ui.cc:3395
+#: ardour_ui.cc:3400
 msgid "Do not load session"
 msgstr "Projekt nicht laden"
 
-#: ardour_ui.cc:3396
+#: ardour_ui.cc:3401
 msgid "Load session anyway"
 msgstr "Projekt trotzdem laden"
 
-#: ardour_ui.cc:3417
+#: ardour_ui.cc:3422
 msgid "Could not disconnect from JACK"
 msgstr "Konnte Verbindung mit JACK nicht trennen"
 
-#: ardour_ui.cc:3430
+#: ardour_ui.cc:3435
 msgid "Could not reconnect to JACK"
 msgstr "Konnte nicht erneut zu JACK verbinden"
 
-#: ardour_ui.cc:3651
+#: ardour_ui.cc:3656
 msgid "Translations disabled"
 msgstr "Übersetzungen sind deaktiviert"
 
-#: ardour_ui.cc:3651
+#: ardour_ui.cc:3656
 msgid "Translations enabled"
 msgstr "Übersetzungen sind aktiviert"
 
-#: ardour_ui.cc:3655
+#: ardour_ui.cc:3660
 msgid "You must restart %1 for this to take effect."
 msgstr "%1 muss neu gestartet werden, damit die Änderungen übernommen werden."
 
@@ -1486,7 +1484,7 @@ msgstr "Projekt"
 msgid "Sync"
 msgstr "Sync"
 
-#: ardour_ui_ed.cc:107 engine_dialog.cc:363
+#: ardour_ui_ed.cc:107 engine_dialog.cc:365
 msgid "Options"
 msgstr "Optionen"
 
@@ -2187,7 +2185,7 @@ msgstr "Ausgang"
 msgid "Edit"
 msgstr "Bearbeiten"
 
-#: bundle_manager.cc:267 editor.cc:5510 editor_actions.cc:310
+#: bundle_manager.cc:267 editor.cc:5514 editor_actions.cc:310
 #: editor_actions.cc:368 plugin_ui.cc:462 processor_box.cc:2214
 #: route_time_axis.cc:730
 msgid "Delete"
@@ -2599,7 +2597,7 @@ msgstr "Spuren & Bus-Gruppen"
 msgid "Ranges & Marks"
 msgstr "Bereiche & Marker"
 
-#: editor.cc:688 editor.cc:5361 rc_option_editor.cc:1169
+#: editor.cc:688 editor.cc:5365 rc_option_editor.cc:1169
 #: rc_option_editor.cc:1177 rc_option_editor.cc:1185 rc_option_editor.cc:1200
 #: rc_option_editor.cc:1207 rc_option_editor.cc:1215 rc_option_editor.cc:1223
 #: rc_option_editor.cc:1243 rc_option_editor.cc:1255 rc_option_editor.cc:1257
@@ -2623,8 +2621,9 @@ msgstr "Punch"
 msgid "Linear (for highly correlated material)"
 msgstr "Linear (für stark korreliertes Material)"
 
-#: editor.cc:1372
-msgid "ConstantPower"
+#: editor.cc:1372 editor.cc:1509 editor.cc:1571
+#, fuzzy
+msgid "Constant power"
 msgstr "Konstante Energie"
 
 #: editor.cc:1381 editor.cc:1502 editor.cc:1564
@@ -2655,10 +2654,6 @@ msgstr "Aktivieren"
 #: editor.cc:1468 editor.cc:1531
 msgid "Slowest"
 msgstr "Sehr langsam"
-
-#: editor.cc:1509 editor.cc:1571
-msgid "Constant Power"
-msgstr "Konstante Energie"
 
 #: editor.cc:1582 route_time_axis.cc:1887 selection.cc:1009 selection.cc:1064
 msgid "programming error: "
@@ -3043,11 +3038,11 @@ msgstr "Wiedergabelisten kopieren"
 msgid "clear playlists"
 msgstr "Wiedergabelisten zurücksetzen"
 
-#: editor.cc:4703
+#: editor.cc:4707
 msgid "Please wait while %1 loads visual data."
 msgstr "Bitte warten Sie, während %1 die Daten zur Anzeige des Projekts lädt."
 
-#: editor.cc:5509 editor_markers.cc:942 panner_ui.cc:393 processor_box.cc:2238
+#: editor.cc:5513 editor_markers.cc:942 panner_ui.cc:393 processor_box.cc:2238
 msgid "Edit..."
 msgstr "Bearbeiten..."
 
@@ -3096,7 +3091,7 @@ msgstr "Layering"
 msgid "Position"
 msgstr "Position"
 
-#: editor_actions.cc:101 gain_meter.cc:150 gain_meter.cc:784 panner_ui.cc:177
+#: editor_actions.cc:101 gain_meter.cc:150 gain_meter.cc:785 panner_ui.cc:177
 #: panner_ui.cc:586
 msgid "Trim"
 msgstr "Anpassen"
@@ -3992,7 +3987,7 @@ msgstr "Konnte editor.bindings im Suchpfad %1 nicht finden"
 
 #: editor_actions.cc:867 editor_actions.cc:1263 editor_actions.cc:1274
 #: editor_actions.cc:1327 editor_actions.cc:1338 editor_actions.cc:1385
-#: editor_actions.cc:1395 editor_regions.cc:1564
+#: editor_actions.cc:1395 editor_regions.cc:1559
 msgid "programming error: %1: %2"
 msgstr "Programmierfehler: %1: %2"
 
@@ -4367,23 +4362,23 @@ msgstr "Ändere Fade-In Länge"
 msgid "change fade out length"
 msgstr "Fade-Out verändern"
 
-#: editor_drag.cc:2859
+#: editor_drag.cc:2850
 msgid "move marker"
 msgstr "Marker bewegen"
 
-#: editor_drag.cc:3422
+#: editor_drag.cc:3413
 msgid "An error occurred while executing time stretch operation"
 msgstr "Beim Ausführen der Timestretch-Operation trat ein Fehler auf"
 
-#: editor_drag.cc:3852
+#: editor_drag.cc:3843
 msgid "programming_error: %1"
 msgstr "Programmierfehler: %1"
 
-#: editor_drag.cc:3922 editor_markers.cc:681
+#: editor_drag.cc:3913 editor_markers.cc:681
 msgid "new range marker"
 msgstr "Neuer Bereich"
 
-#: editor_drag.cc:4603
+#: editor_drag.cc:4594
 msgid "rubberband selection"
 msgstr "Bereichsauswahl"
 
@@ -5226,7 +5221,7 @@ msgstr "Name der Region, mit Kanalzahl in []"
 msgid "Position of start of region"
 msgstr "Position des Regionen-Anfangs"
 
-#: editor_regions.cc:113 editor_regions.cc:854 time_info_box.cc:98
+#: editor_regions.cc:113 editor_regions.cc:849 time_info_box.cc:98
 msgid "End"
 msgstr "Ende"
 
@@ -5268,7 +5263,7 @@ msgstr "G"
 msgid "Region position glued to Bars|Beats time?"
 msgstr "Regionenposition an Takt und Schäge gebunden?"
 
-#: editor_regions.cc:120 editor_routes.cc:207 gain_meter.cc:752
+#: editor_regions.cc:120 editor_routes.cc:207 gain_meter.cc:753
 #: mixer_strip.cc:1924 panner_ui.cc:554 stereo_panner.cc:237
 msgid "M"
 msgstr "M"
@@ -5309,20 +5304,20 @@ msgstr "Ja, entfernen."
 msgid "Remove unused regions"
 msgstr "Ungenutzte Regionen entfernen"
 
-#: editor_regions.cc:821 editor_regions.cc:835 editor_regions.cc:849
+#: editor_regions.cc:816 editor_regions.cc:830 editor_regions.cc:844
 msgid "Mult."
 msgstr "Viele"
 
-#: editor_regions.cc:852 engine_dialog.cc:84 midi_list_editor.cc:103
+#: editor_regions.cc:847 engine_dialog.cc:84 midi_list_editor.cc:103
 #: time_info_box.cc:91
 msgid "Start"
 msgstr "Start"
 
-#: editor_regions.cc:870 editor_regions.cc:886
+#: editor_regions.cc:865 editor_regions.cc:881
 msgid "Multiple"
 msgstr "Viele"
 
-#: editor_regions.cc:955
+#: editor_regions.cc:950
 msgid "MISSING "
 msgstr "FEHLT"
 
@@ -5654,148 +5649,148 @@ msgstr "96000 Hz"
 msgid "192000Hz"
 msgstr "192000 Hz"
 
-#: engine_dialog.cc:127 engine_dialog.cc:132 engine_dialog.cc:167
-#: engine_dialog.cc:550 midi_channel_selector.cc:147 rc_option_editor.cc:1125
+#: engine_dialog.cc:127 engine_dialog.cc:132 engine_dialog.cc:169
+#: engine_dialog.cc:552 midi_channel_selector.cc:147 rc_option_editor.cc:1125
 #: sfdb_ui.cc:544
 msgid "None"
 msgstr "Kein"
 
-#: engine_dialog.cc:128 engine_dialog.cc:551
+#: engine_dialog.cc:128 engine_dialog.cc:553
 msgid "Triangular"
 msgstr "dreieckig"
 
-#: engine_dialog.cc:129 engine_dialog.cc:553
+#: engine_dialog.cc:129 engine_dialog.cc:555
 msgid "Rectangular"
 msgstr "rechteckig"
 
-#: engine_dialog.cc:130 engine_dialog.cc:555
+#: engine_dialog.cc:130 engine_dialog.cc:557
 msgid "Shaped"
 msgstr "shaped"
 
-#: engine_dialog.cc:156
+#: engine_dialog.cc:158
 msgid "Playback/recording on 1 device"
 msgstr "Wiedergabe/Aufnahme mit einem Gerät"
 
-#: engine_dialog.cc:157
+#: engine_dialog.cc:159
 msgid "Playback/recording on 2 devices"
 msgstr "Wiedergabe/Aufnahme mit zwei Geräten"
 
-#: engine_dialog.cc:158 engine_dialog.cc:491 engine_dialog.cc:965
+#: engine_dialog.cc:160 engine_dialog.cc:493 engine_dialog.cc:970
 msgid "Playback only"
 msgstr "Nur Wiedergabe"
 
-#: engine_dialog.cc:159 engine_dialog.cc:493 engine_dialog.cc:968
+#: engine_dialog.cc:161 engine_dialog.cc:495 engine_dialog.cc:973
 msgid "Recording only"
 msgstr "Nur Aufnahme"
 
-#: engine_dialog.cc:168 engine_dialog.cc:569
+#: engine_dialog.cc:170 engine_dialog.cc:571
 msgid "seq"
 msgstr "seq"
 
-#: engine_dialog.cc:169 engine_dialog.cc:571
+#: engine_dialog.cc:171 engine_dialog.cc:573
 msgid "raw"
 msgstr "raw"
 
-#: engine_dialog.cc:175
+#: engine_dialog.cc:177
 msgid "Driver:"
 msgstr "Treiber:"
 
-#: engine_dialog.cc:180
+#: engine_dialog.cc:182
 msgid "Audio Interface:"
 msgstr "Audio-Schnittstelle:"
 
-#: engine_dialog.cc:185 sfdb_ui.cc:148 sfdb_ui.cc:261 sfdb_ui.cc:266
+#: engine_dialog.cc:187 sfdb_ui.cc:148 sfdb_ui.cc:261 sfdb_ui.cc:266
 msgid "Sample rate:"
 msgstr "Samplerate:"
 
-#: engine_dialog.cc:190
+#: engine_dialog.cc:192
 msgid "Buffer size:"
 msgstr "Puffergröße"
 
-#: engine_dialog.cc:196
+#: engine_dialog.cc:198
 msgid "Number of buffers:"
 msgstr "Pufferanzahl:"
 
-#: engine_dialog.cc:203
+#: engine_dialog.cc:205
 msgid "Approximate latency:"
 msgstr "Latenz (ca.)"
 
-#: engine_dialog.cc:216
+#: engine_dialog.cc:218
 msgid "Audio mode:"
 msgstr "Audio-Modus:"
 
-#: engine_dialog.cc:278 engine_dialog.cc:402
+#: engine_dialog.cc:280 engine_dialog.cc:404
 msgid "Ignore"
 msgstr "ignorieren"
 
-#: engine_dialog.cc:286
+#: engine_dialog.cc:288
 msgid "Client timeout"
 msgstr "Client Timeout"
 
-#: engine_dialog.cc:293
+#: engine_dialog.cc:295
 msgid "Number of ports:"
 msgstr "Portanzahl"
 
-#: engine_dialog.cc:298
+#: engine_dialog.cc:300
 msgid "MIDI driver:"
 msgstr "MIDI-Treiber:"
 
-#: engine_dialog.cc:304
+#: engine_dialog.cc:306
 msgid "Dither:"
 msgstr "Dithering:"
 
-#: engine_dialog.cc:313
+#: engine_dialog.cc:315
 msgid ""
 "No JACK server found anywhere on this system. Please install JACK and restart"
 msgstr ""
 "Es wurde kein JACK Server auf diesem System gefunden. Bitte installieren Sie "
 "JACK und starten Sie Ardour neu."
 
-#: engine_dialog.cc:321
+#: engine_dialog.cc:323
 msgid "Server:"
 msgstr "Server:"
 
-#: engine_dialog.cc:333
+#: engine_dialog.cc:335
 msgid "Input device:"
 msgstr "Eingangsgerät:"
 
-#: engine_dialog.cc:337
+#: engine_dialog.cc:339
 msgid "Output device:"
 msgstr "Ausgabegerät:"
 
-#: engine_dialog.cc:342
+#: engine_dialog.cc:344
 msgid "Hardware input latency:"
 msgstr "Hardware Eingangslatenz (Samples)"
 
-#: engine_dialog.cc:345 engine_dialog.cc:351
+#: engine_dialog.cc:347 engine_dialog.cc:353
 msgid "samples"
 msgstr "Samples"
 
-#: engine_dialog.cc:348
+#: engine_dialog.cc:350
 msgid "Hardware output latency:"
 msgstr "Hardware Ausgangslatenz (Samples)"
 
-#: engine_dialog.cc:362
+#: engine_dialog.cc:364
 msgid "Device"
 msgstr "Gerät"
 
-#: engine_dialog.cc:364
+#: engine_dialog.cc:366
 msgid "Advanced"
 msgstr "Erweitert"
 
-#: engine_dialog.cc:471 engine_dialog.cc:959
+#: engine_dialog.cc:473 engine_dialog.cc:964
 msgid "Playback/Recording on 1 Device"
 msgstr "Wiedergabe/Aufnahme mit einem Gerät"
 
-#: engine_dialog.cc:475 engine_dialog.cc:528 engine_dialog.cc:962
+#: engine_dialog.cc:477 engine_dialog.cc:530 engine_dialog.cc:967
 msgid "Playback/Recording on 2 Devices"
 msgstr "Wiedergabe/Aufnahme mit zwei Geräten"
 
-#: engine_dialog.cc:641
+#: engine_dialog.cc:643
 msgid "cannot open JACK rc file %1 to store parameters"
 msgstr "kann die JACK rc-Datei %1 nicht öffnen, um die Parameter zu sichern"
 
-#: engine_dialog.cc:775
+#: engine_dialog.cc:777
 msgid ""
 "You do not have any audio devices capable of\n"
 "simultaneous playback and recording.\n"
@@ -5827,27 +5822,27 @@ msgstr ""
 "können Sie JACK vor dem Starten von Ardour aufrufen und das entsprechende "
 "Gerät auswählen."
 
-#: engine_dialog.cc:788
+#: engine_dialog.cc:790
 msgid "No suitable audio devices"
 msgstr "Keine passenden Audiogeräte."
 
-#: engine_dialog.cc:1002
+#: engine_dialog.cc:1007
 msgid "JACK appears to be missing from the %1 bundle"
 msgstr "JACK scheint im %1-Paket zu fehlen."
 
-#: engine_dialog.cc:1072
+#: engine_dialog.cc:1077
 msgid "You need to choose an audio device first."
 msgstr "Sie müssen zuerst ein Audiogerät auswählen."
 
-#: engine_dialog.cc:1089
+#: engine_dialog.cc:1094
 msgid "Audio device \"%1\" not known on this computer."
 msgstr "Audiogerät %1 scheint auf diesem Computer nicht vorhanden zu sein."
 
-#: engine_dialog.cc:1241
+#: engine_dialog.cc:1246
 msgid "AudioSetup value for %1 is missing data"
 msgstr "Es fehlen Daten zum AudioSetup-Wert von %1"
 
-#: engine_dialog.cc:1320
+#: engine_dialog.cc:1325
 msgid "configuration files contain a JACK server path that doesn't exist (%1)"
 msgstr ""
 "die Konfiguration enthält einen JACK-Serverpfad, der nicht existiert (%1)"
@@ -6150,19 +6145,19 @@ msgstr " bis"
 msgid "Range"
 msgstr "Bereiche"
 
-#: gain_meter.cc:135 gain_meter.cc:457 gain_meter.cc:849
+#: gain_meter.cc:135 gain_meter.cc:457 gain_meter.cc:850
 msgid "-inf"
 msgstr "-inf"
 
-#: gain_meter.cc:141 gain_meter.cc:895
+#: gain_meter.cc:141 gain_meter.cc:896
 msgid "Fader automation mode"
 msgstr "Fader Automationsmodus"
 
-#: gain_meter.cc:142 gain_meter.cc:896
+#: gain_meter.cc:142 gain_meter.cc:897
 msgid "Fader automation type"
 msgstr "Fader-Automationstyp"
 
-#: gain_meter.cc:151 gain_meter.cc:788 panner_ui.cc:178 panner_ui.cc:590
+#: gain_meter.cc:151 gain_meter.cc:789 panner_ui.cc:178 panner_ui.cc:590
 msgid "Abs"
 msgstr "Abs"
 
@@ -6170,16 +6165,16 @@ msgstr "Abs"
 msgid "-Inf"
 msgstr "-Inf"
 
-#: gain_meter.cc:755 mixer_strip.cc:1944 panner_ui.cc:557
+#: gain_meter.cc:756 mixer_strip.cc:1944 panner_ui.cc:557
 #: route_time_axis.cc:2423
 msgid "P"
 msgstr "P"
 
-#: gain_meter.cc:758 panner_ui.cc:560
+#: gain_meter.cc:759 panner_ui.cc:560
 msgid "T"
 msgstr "T"
 
-#: gain_meter.cc:761 panner_ui.cc:563
+#: gain_meter.cc:762 panner_ui.cc:563
 msgid "W"
 msgstr "W"
 
@@ -6438,11 +6433,18 @@ msgstr "ms"
 msgid "period"
 msgstr "Periode"
 
-#: latency_gui.cc:71 panner_ui.cc:392
+#: latency_gui.cc:55
+#, fuzzy
+msgid "%1 sample"
+msgid_plural "%1 samples"
+msgstr[0] "Sample"
+msgstr[1] "Sample"
+
+#: latency_gui.cc:72 panner_ui.cc:392
 msgid "Reset"
 msgstr "Zurücksetzen"
 
-#: latency_gui.cc:150 rhythm_ferret.cc:255 sfdb_ui.cc:1724
+#: latency_gui.cc:151 rhythm_ferret.cc:255 sfdb_ui.cc:1724
 msgid "programming error: %1 (%2)"
 msgstr "Programmierfehler: %1 (%2)"
 
@@ -7907,8 +7909,11 @@ msgid "Click to enable/disable this plugin"
 msgstr "Klicke, um dieses Plugin zu ein/auszuschalten"
 
 #: plugin_ui.cc:549
-msgid "latency (%1 samples)"
-msgstr "Latenz (%1 Samples)"
+#, fuzzy
+msgid "latency (%1 sample)"
+msgid_plural "latency (%1 samples)"
+msgstr[0] "Latenz (%1 Samples)"
+msgstr[1] "Latenz (%1 Samples)"
 
 #: plugin_ui.cc:551
 msgid "latency (%1 ms)"
@@ -8690,6 +8695,11 @@ msgid ""
 msgstr ""
 "<b>Falls an</b>, wird Ardour weiterhin LTC-Information senden, sogar wenn "
 "der Transport (Positionszeiger) stillsteht"
+
+#: rc_option_editor.cc:1156
+#, fuzzy
+msgid "LTC generator level"
+msgstr "LTC-Generator"
 
 #: rc_option_editor.cc:1160
 msgid ""
@@ -9828,6 +9838,11 @@ msgstr ""
 #: route_ui.cc:1758
 msgid "the mixer"
 msgstr "der Mixer"
+
+#: route_ui.cc:1758
+#, fuzzy
+msgid "the editor"
+msgstr "Editor"
 
 #: route_ui.cc:1813
 msgid ""
@@ -11536,9 +11551,12 @@ msgstr ""
 msgid "gTortnam"
 msgstr "gTortnam"
 
-#: time_axis_view_item.cc:331
-msgid "new duration %1 frames is out of bounds for %2"
-msgstr "Neue Dauer %1 Frames ist außerhalb des erlaubten Bereichs %2"
+#: time_axis_view_item.cc:332
+#, fuzzy
+msgid "new duration %1 frame is out of bounds for %2"
+msgid_plural "new duration of %1 frames is out of bounds for %2"
+msgstr[0] "Neue Dauer %1 Frames ist außerhalb des erlaubten Bereichs %2"
+msgstr[1] "Neue Dauer %1 Frames ist außerhalb des erlaubten Bereichs %2"
 
 #: time_fx_dialog.cc:62
 msgid "Quick but Ugly"
@@ -11683,14 +11701,49 @@ msgstr ""
 msgid "VerboseCanvasCursor"
 msgstr "Ausführlicher Canvas-Cursor"
 
+#~ msgid "could not create a new mixed track"
+#~ msgstr "Konnte keine neue Audio+MIDI-Spur erstellen."
+
+#, fuzzy
+#~ msgid "could not create new audio bus"
+#~ msgid_plural "could not create %1 new audio busses"
+#~ msgstr[0] "Konnte keinen neuen Audiobus erstellen."
+#~ msgstr[1] "Konnte keinen neuen Audiobus erstellen."
+
+#~ msgid ""
+#~ "The following %1 files were not in use and \n"
+#~ "have been moved to: %2\n"
+#~ "\n"
+#~ "After a restart of %5\n"
+#~ "\n"
+#~ "<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n"
+#~ "\n"
+#~ "will release an additional %3 %4bytes of disk space.\n"
+#~ msgstr ""
+#~ "Die folgenden %1 Dateien waren unbenutzt\n"
+#~ "und wurden verschoben nach: %2\n"
+#~ "\n"
+#~ "Nach einem Neustart von %5 kann über\n"
+#~ "\n"
+#~ "<span face=\"mono\">Projekt -> Aufräumen -> Müll leeren</span>\n"
+#~ "\n"
+#~ "%3 %4bytes Speicherplatz freigegeben werden.\n"
+
+#~ msgid ""
+#~ "The following %1 files were deleted from %2,\n"
+#~ "releasing %3 %4bytes of disk space"
+#~ msgstr ""
+#~ "Die folgenden %1 Dateien wurden von %2\n"
+#~ "gelöscht und gaben %3 %4bytes Speicherplatz frei"
+
+#~ msgid "ConstantPower"
+#~ msgstr "Konstante Energie"
+
 #~ msgid "Found one match."
 #~ msgstr "Ein Treffer gefunden."
 
 #~ msgid "could only create %1 of %2 new audio %3"
 #~ msgstr "Konnte nur %1 von %2 neuen %3 erstellen"
-
-#~ msgid "could not create %1 new audio busses"
-#~ msgstr "Konnte %1 neue Spur(en) nicht erstellen"
 
 #~ msgid "Always Play Range Selection (if any)"
 #~ msgstr "Immer Bereichsauswahl wiedergeben"
@@ -11887,9 +11940,6 @@ msgstr "Ausführlicher Canvas-Cursor"
 
 #~ msgid "Nudge Backward by Capture Offset"
 #~ msgstr "Schritt nach hinten um Aufnahme-Offset"
-
-#~ msgid "editor"
-#~ msgstr "Editor"
 
 #~ msgid ""
 #~ "This route cannot be frozen because it has more outputs than inputs.  You "
