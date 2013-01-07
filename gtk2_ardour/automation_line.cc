@@ -507,15 +507,22 @@ AutomationLine::ContiguousControlPoints::ContiguousControlPoints (AutomationLine
 void
 AutomationLine::ContiguousControlPoints::compute_x_bounds ()
 {
-	if (!empty()) {
+	uint32_t sz = size();
+
+	if (sz > 0 && sz < line.npoints()) {
+
 		/* determine the limits on x-axis motion for this 
 		   contiguous range of control points
 		*/
-		
+
 		if (front()->view_index() > 0) {
 			before_x = line.nth (front()->view_index() - 1)->get_x();
 		}
-		
+
+		/* if our last point has a point after it in the line,
+		   we have an "after" bound
+		*/
+
 		if (back()->view_index() < (line.npoints() - 2)) {
 			after_x = line.nth (back()->view_index() + 1)->get_x();
 		}
@@ -674,8 +681,10 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 
 		/* update actual line coordinates (will queue a redraw)
 		 */
-		
-		line->property_points() = line_points;
+
+		if (line_points.size() > 1) {
+			line->property_points() = line_points;
+		}
 	}
 	
 	_drag_distance += dx;
