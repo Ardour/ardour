@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-07 14:22-0500\n"
+"POT-Creation-Date: 2013-01-07 18:11-0500\n"
 "PO-Revision-Date: 2013-01-03 08:29-0500\n"
 "Last-Translator: Rui-huai Zhang <zrhzrh>\n"
 "Language-Team: zrhzrh <zrhzrh@mail.ustc.edu.cn>\n"
@@ -2009,11 +2009,11 @@ msgstr "自动化事件移动"
 msgid "automation range move"
 msgstr "自动化范围移动"
 
-#: automation_line.cc:814 region_gain_line.cc:73
+#: automation_line.cc:823 region_gain_line.cc:73
 msgid "remove control point"
 msgstr "移除控制点"
 
-#: automation_line.cc:932
+#: automation_line.cc:941
 msgid "Ignoring illegal points on AutomationLine \"%1\""
 msgstr "忽略非法位置在AutomationLine: \"%1\""
 
@@ -11017,11 +11017,11 @@ msgstr ""
 msgid "Insert a program change message"
 msgstr ""
 
-#: step_entry.cc:342 step_entry.cc:701
+#: step_entry.cc:342 step_entry.cc:699
 msgid "Move Insert Position Back by Note Length"
 msgstr "把插入位置向前移动一个音符的长度"
 
-#: step_entry.cc:343 step_entry.cc:699
+#: step_entry.cc:343 step_entry.cc:697
 msgid "Move Insert Position to Edit Point"
 msgstr "把插入位置移移至编辑位置"
 
@@ -11033,227 +11033,227 @@ msgstr "1/音符"
 msgid "Octave"
 msgstr "八度"
 
-#: step_entry.cc:599
+#: step_entry.cc:597
 msgid "Insert Note A"
 msgstr "插入音符A"
 
-#: step_entry.cc:600
+#: step_entry.cc:598
 msgid "Insert Note A-sharp"
 msgstr "插入音符A#"
 
-#: step_entry.cc:601
+#: step_entry.cc:599
 msgid "Insert Note B"
 msgstr "插入音符B"
 
-#: step_entry.cc:602
+#: step_entry.cc:600
 msgid "Insert Note C"
 msgstr "插入音符C"
 
-#: step_entry.cc:603
+#: step_entry.cc:601
 msgid "Insert Note C-sharp"
 msgstr "插入音符C#"
 
-#: step_entry.cc:604
+#: step_entry.cc:602
 msgid "Insert Note D"
 msgstr "插入音符D"
 
-#: step_entry.cc:605
+#: step_entry.cc:603
 msgid "Insert Note D-sharp"
 msgstr "插入音符D#"
 
-#: step_entry.cc:606
+#: step_entry.cc:604
 msgid "Insert Note E"
 msgstr "插入音符E"
 
-#: step_entry.cc:607
+#: step_entry.cc:605
 msgid "Insert Note F"
 msgstr "插入音符F"
 
-#: step_entry.cc:608
+#: step_entry.cc:606
 msgid "Insert Note F-sharp"
 msgstr "插入音符F#"
 
-#: step_entry.cc:609
+#: step_entry.cc:607
 msgid "Insert Note G"
 msgstr "插入音符G"
 
-#: step_entry.cc:610
+#: step_entry.cc:608
 msgid "Insert Note G-sharp"
 msgstr "插入音符G#"
 
-#: step_entry.cc:612
+#: step_entry.cc:610
 msgid "Insert a Note-length Rest"
 msgstr "插入一个全休止符"
 
-#: step_entry.cc:613
+#: step_entry.cc:611
 msgid "Insert a Snap-length Rest"
 msgstr "插入一个锁定长度的休止符"
 
-#: step_entry.cc:615 step_entry.cc:616
+#: step_entry.cc:613 step_entry.cc:614
 msgid "Move to next octave"
 msgstr "移动到下一个八度"
 
-#: step_entry.cc:618
+#: step_entry.cc:616
 msgid "Move to Next Note Length"
 msgstr "向后移动一个音符"
 
-#: step_entry.cc:619
+#: step_entry.cc:617
 msgid "Move to Previous Note Length"
 msgstr "向前移动一个音符"
 
-#: step_entry.cc:621
+#: step_entry.cc:619
 msgid "Increase Note Length"
 msgstr "增加音符长度"
 
-#: step_entry.cc:622
+#: step_entry.cc:620
 msgid "Decrease Note Length"
 msgstr "降低音符长度"
 
-#: step_entry.cc:624
+#: step_entry.cc:622
 msgid "Move to Next Note Velocity"
 msgstr "移动到下一个音符力度"
 
-#: step_entry.cc:625
+#: step_entry.cc:623
 msgid "Move to Previous Note Velocity"
 msgstr "移动到上一个音符力度"
 
-#: step_entry.cc:627
+#: step_entry.cc:625
 msgid "Increase Note Velocity"
 msgstr "增加音符力度"
 
-#: step_entry.cc:628
+#: step_entry.cc:626
 msgid "Decrease Note Velocity"
 msgstr "降低音符力度"
 
-#: step_entry.cc:630
+#: step_entry.cc:628
 msgid "Switch to the 1st octave"
 msgstr "切换到第一个八度"
 
-#: step_entry.cc:631
+#: step_entry.cc:629
 msgid "Switch to the 2nd octave"
 msgstr "切换到第二个八度"
 
-#: step_entry.cc:632
+#: step_entry.cc:630
 msgid "Switch to the 3rd octave"
 msgstr "切换到第三个八度"
 
-#: step_entry.cc:633
+#: step_entry.cc:631
 msgid "Switch to the 4th octave"
 msgstr "切换到第四个八度"
 
-#: step_entry.cc:634
+#: step_entry.cc:632
 msgid "Switch to the 5th octave"
 msgstr "切换到第五个八度"
 
-#: step_entry.cc:635
+#: step_entry.cc:633
 msgid "Switch to the 6th octave"
 msgstr "切换到第六个八度"
 
-#: step_entry.cc:636
+#: step_entry.cc:634
 msgid "Switch to the 7th octave"
 msgstr "切换到第七个八度"
 
-#: step_entry.cc:637
+#: step_entry.cc:635
 msgid "Switch to the 8th octave"
 msgstr "切换到第八个八度"
 
-#: step_entry.cc:638
+#: step_entry.cc:636
 msgid "Switch to the 9th octave"
 msgstr "切换到第九个八度"
 
-#: step_entry.cc:639
+#: step_entry.cc:637
 msgid "Switch to the 10th octave"
 msgstr "切换到第十个八度"
 
-#: step_entry.cc:640
+#: step_entry.cc:638
 msgid "Switch to the 11th octave"
 msgstr "切换到第十一个八度"
 
-#: step_entry.cc:645
+#: step_entry.cc:643
 msgid "Set Note Length to Whole"
 msgstr "设置为全音符"
 
-#: step_entry.cc:647
+#: step_entry.cc:645
 msgid "Set Note Length to 1/2"
 msgstr "设置为二分音符"
 
-#: step_entry.cc:649
+#: step_entry.cc:647
 msgid "Set Note Length to 1/3"
 msgstr "设置为三分音符"
 
-#: step_entry.cc:651
+#: step_entry.cc:649
 msgid "Set Note Length to 1/4"
 msgstr "设置为四分音符"
 
-#: step_entry.cc:653
+#: step_entry.cc:651
 msgid "Set Note Length to 1/8"
 msgstr "设置为八分音符"
 
-#: step_entry.cc:655
+#: step_entry.cc:653
 msgid "Set Note Length to 1/16"
 msgstr "设置为十六分音符"
 
-#: step_entry.cc:657
+#: step_entry.cc:655
 msgid "Set Note Length to 1/32"
 msgstr "设置为三十二分音符"
 
-#: step_entry.cc:659
+#: step_entry.cc:657
 msgid "Set Note Length to 1/64"
 msgstr "设置为六十四分音符"
 
-#: step_entry.cc:664
+#: step_entry.cc:662
 msgid "Set Note Velocity to Pianississimo"
 msgstr "设置音符力度为最弱音"
 
-#: step_entry.cc:666
+#: step_entry.cc:664
 msgid "Set Note Velocity to Pianissimo"
 msgstr "设置音符力度为极弱音"
 
-#: step_entry.cc:668
+#: step_entry.cc:666
 msgid "Set Note Velocity to Piano"
 msgstr "设置音符力度为弱音"
 
-#: step_entry.cc:670
+#: step_entry.cc:668
 msgid "Set Note Velocity to Mezzo-Piano"
 msgstr "设置音符力度为中弱音"
 
-#: step_entry.cc:672
+#: step_entry.cc:670
 msgid "Set Note Velocity to Mezzo-Forte"
 msgstr "设置音符力度为中强音"
 
-#: step_entry.cc:674
+#: step_entry.cc:672
 msgid "Set Note Velocity to Forte"
 msgstr "设置音符力度为强音"
 
-#: step_entry.cc:676 step_entry.cc:678
+#: step_entry.cc:674 step_entry.cc:676
 msgid "Set Note Velocity to Fortississimo"
 msgstr "设置音符力度为最强音"
 
-#: step_entry.cc:680
+#: step_entry.cc:678
 msgid "Toggle Triple Notes"
 msgstr ""
 
-#: step_entry.cc:685
+#: step_entry.cc:683
 msgid "No Dotted Notes"
 msgstr ""
 
-#: step_entry.cc:687
+#: step_entry.cc:685
 msgid "Toggled Dotted Notes"
 msgstr ""
 
-#: step_entry.cc:689
+#: step_entry.cc:687
 msgid "Toggled Double-Dotted Notes"
 msgstr ""
 
-#: step_entry.cc:691
+#: step_entry.cc:689
 msgid "Toggled Triple-Dotted Notes"
 msgstr ""
 
-#: step_entry.cc:694
+#: step_entry.cc:692
 msgid "Toggle Chord Entry"
 msgstr ""
 
-#: step_entry.cc:696
+#: step_entry.cc:694
 msgid "Sustain Selected Notes by Note Length"
 msgstr "通过音符长度保持选择音符"
 

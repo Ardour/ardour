@@ -7,8 +7,13 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 3\n"
 "Report-Msgid-Bugs-To: \n"
+<<<<<<< .mine
+"POT-Creation-Date: 2013-01-07 23:22+0400\n"
+"PO-Revision-Date: 2013-01-05 12:34+0300\n"
+=======
 "POT-Creation-Date: 2013-01-07 14:22-0500\n"
 "PO-Revision-Date: 2012-07-15 15:36+0400\n"
+>>>>>>> .r13801
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
 "Language: \n"
@@ -186,11 +191,11 @@ msgstr ""
 
 #: audioanalyser.cc:31
 msgid "cannot load VAMP plugin \"%1\""
-msgstr ""
+msgstr "Не удалось загрузить модуль VAMP под названием \"%1\""
 
 #: audioanalyser.cc:51
 msgid "VAMP Plugin \"%1\" could not be loaded"
-msgstr ""
+msgstr "Не удалось загрузить модуль VAMP под названием \"%1\""
 
 #: audioengine.cc:186
 msgid ""
@@ -466,7 +471,7 @@ msgstr "Без времени"
 
 #: export_filename.cc:231
 msgid "Invalid time format"
-msgstr ""
+msgstr "Некорректный формат времени"
 
 #: export_filename.cc:240
 msgid "No Date"
@@ -474,11 +479,11 @@ msgstr "Без даты"
 
 #: export_filename.cc:255
 msgid "Invalid date format"
-msgstr ""
+msgstr "Некорректный формат даты"
 
 #: export_format_manager.cc:57
 msgid "CD"
-msgstr ""
+msgstr "CD"
 
 #: export_format_manager.cc:66
 msgid "DVD-A"
@@ -486,7 +491,7 @@ msgstr "DVD-A"
 
 #: export_format_manager.cc:80
 msgid "iPod"
-msgstr ""
+msgstr "iPod"
 
 #: export_format_manager.cc:91
 msgid "Something else"
@@ -514,19 +519,19 @@ msgstr "Частота сеанса"
 
 #: export_format_specification.cc:533
 msgid "normalize"
-msgstr ""
+msgstr "нормировка"
 
 #: export_format_specification.cc:537
 msgid "trim"
-msgstr ""
+msgstr "обрезка"
 
 #: export_format_specification.cc:539
 msgid "trim start"
-msgstr ""
+msgstr "обрезка начала"
 
 #: export_format_specification.cc:541
 msgid "trim end"
-msgstr ""
+msgstr "обрезка конца"
 
 #: export_formats.cc:49
 msgid "Shaped Noise"
@@ -546,39 +551,39 @@ msgstr "Нет"
 
 #: export_formats.cc:159
 msgid "8bit"
-msgstr ""
+msgstr "8bit"
 
 #: export_formats.cc:161
 msgid "16bit"
-msgstr ""
+msgstr "16bit"
 
 #: export_formats.cc:163
 msgid "24bit"
-msgstr ""
+msgstr "24bit"
 
 #: export_formats.cc:165
 msgid "32bit"
-msgstr ""
+msgstr "32bit"
 
 #: export_formats.cc:167
 msgid "float"
-msgstr ""
+msgstr "float"
 
 #: export_formats.cc:169
 msgid "double"
-msgstr ""
+msgstr "double"
 
 #: export_formats.cc:171
 msgid "8bit unsigned"
-msgstr ""
+msgstr "8bit unsigned"
 
 #: export_formats.cc:173
 msgid "Vorbis sample format"
-msgstr ""
+msgstr "Формат сэмплов Vorbis"
 
 #: export_formats.cc:175
 msgid "No sample format"
-msgstr ""
+msgstr "Без формата сэмплов"
 
 #: export_handler.cc:313
 msgid "Editor: cannot open \"%1\" as export file for CD marker file"
@@ -783,7 +788,7 @@ msgstr "Ресэмплинг %1 из %2КГц в %3КГц"
 
 #: import.cc:270
 msgid "Copying %1"
-msgstr ""
+msgstr "Копируется %1"
 
 #: import.cc:447
 msgid "Track %1 of %2 contained no usable MIDI data"
@@ -791,7 +796,7 @@ msgstr ""
 
 #: import.cc:454
 msgid "MIDI file %1 was not readable (no reason available"
-msgstr ""
+msgstr "MIDI-файл %1 нечитаем по неизвестной причине"
 
 #: import.cc:500
 msgid "Import: cannot open input sound file \"%1\""
@@ -803,7 +808,7 @@ msgstr ""
 
 #: import.cc:550
 msgid "Loading MIDI file %1"
-msgstr ""
+msgstr "Загружается MIDI-файл %1"
 
 #: import.cc:615
 msgid "Failed to remove some files after failed/cancelled import operation"
@@ -1017,17 +1022,19 @@ msgstr ""
 
 #: location_importer.cc:61
 msgid "Locations"
-msgstr ""
+msgstr "Позиции"
 
 #: location_importer.cc:123
 msgid "Location: "
-msgstr ""
+msgstr "Позиция:"
 
 #: location_importer.cc:125
 msgid ""
 "Range\n"
 "start: "
 msgstr ""
+"Начало\n"
+"области: "
 
 #: location_importer.cc:126
 msgid ""
@@ -1545,7 +1552,7 @@ msgstr ""
 
 #: session.cc:467
 msgid "Set up standard connections"
-msgstr ""
+msgstr "Настройка обычных соединений"
 
 #: session.cc:488
 #, c-format
@@ -1569,11 +1576,11 @@ msgstr ""
 
 #: session.cc:567
 msgid "Setup signal flow and plugins"
-msgstr ""
+msgstr "Настройка модулей и звукового потока"
 
 #: session.cc:611
 msgid "Connect to engine"
-msgstr ""
+msgstr "Соединение со звуковым движком"
 
 #: session.cc:642
 msgid "cannot connect master output %1 to %2"
@@ -1655,7 +1662,7 @@ msgstr ""
 
 #: session.cc:2146
 msgid "Adding new tracks/busses failed"
-msgstr ""
+msgstr "Не удалось добавить новые дорожки/шины"
 
 #: session.cc:3247
 msgid "FATAL ERROR! Could not find a suitable version of %1 for a rename"
@@ -1940,7 +1947,7 @@ msgstr ""
 
 #: session_state.cc:1442
 msgid "Loaded track/bus %1"
-msgstr ""
+msgstr "Загружена дорожка/шина %1"
 
 #: session_state.cc:1540
 msgid "Could not find diskstream for route"
@@ -2197,23 +2204,23 @@ msgstr ".raw"
 
 #: sndfile_helpers.cc:64
 msgid "Signed 16 bit PCM"
-msgstr ""
+msgstr "Signed 16 bit PCM"
 
 #: sndfile_helpers.cc:65
 msgid "Signed 24 bit PCM"
-msgstr ""
+msgstr "Signed 24 bit PCM"
 
 #: sndfile_helpers.cc:66
 msgid "Signed 32 bit PCM"
-msgstr ""
+msgstr "Signed 32 bit PCM"
 
 #: sndfile_helpers.cc:67
 msgid "Signed 8 bit PCM"
-msgstr ""
+msgstr "Signed 8 bit PCM"
 
 #: sndfile_helpers.cc:68
 msgid "32 bit float"
-msgstr ""
+msgstr "32 bit float"
 
 #: sndfile_helpers.cc:81
 msgid "Little-endian (Intel)"
@@ -2499,9 +2506,8 @@ msgid "M-Clock"
 msgstr ""
 
 #: utils.cc:524
-#, fuzzy
 msgid "LTC"
-msgstr "MTC"
+msgstr "LTC"
 
 #: utils.cc:684
 msgid "programming error: unknown native header format: %1"

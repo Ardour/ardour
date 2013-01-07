@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ardour-gtk 1.0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-07 14:22-0500\n"
+"POT-Creation-Date: 2013-01-07 18:11-0500\n"
 "PO-Revision-Date: 2006-06-26 23:57+GMT+1\n"
 "Last-Translator: Petter Sundlöf <petter.sundlof@findus.dhs.org>\n"
 "Language-Team: Svenska <sv@li.org>\n"
@@ -2054,11 +2054,11 @@ msgstr "automatiseringshändelse: förflyttning"
 msgid "automation range move"
 msgstr "automatiseringsomfång: dragning"
 
-#: automation_line.cc:814 region_gain_line.cc:73
+#: automation_line.cc:823 region_gain_line.cc:73
 msgid "remove control point"
 msgstr "ta bort kontrollpunkt"
 
-#: automation_line.cc:932
+#: automation_line.cc:941
 msgid "Ignoring illegal points on AutomationLine \"%1\""
 msgstr ""
 
@@ -11412,11 +11412,11 @@ msgstr ""
 msgid "Insert a program change message"
 msgstr "Initiell programändring"
 
-#: step_entry.cc:342 step_entry.cc:701
+#: step_entry.cc:342 step_entry.cc:699
 msgid "Move Insert Position Back by Note Length"
 msgstr ""
 
-#: step_entry.cc:343 step_entry.cc:699
+#: step_entry.cc:343 step_entry.cc:697
 msgid "Move Insert Position to Edit Point"
 msgstr ""
 
@@ -11429,246 +11429,246 @@ msgstr ""
 msgid "Octave"
 msgstr "Oktaver"
 
-#: step_entry.cc:599
+#: step_entry.cc:597
 #, fuzzy
 msgid "Insert Note A"
 msgstr "Infoga vid:"
 
-#: step_entry.cc:600
+#: step_entry.cc:598
 msgid "Insert Note A-sharp"
 msgstr ""
 
-#: step_entry.cc:601
+#: step_entry.cc:599
 #, fuzzy
 msgid "Insert Note B"
 msgstr "Infoga vid:"
 
-#: step_entry.cc:602
+#: step_entry.cc:600
 #, fuzzy
 msgid "Insert Note C"
 msgstr "Infoga vid:"
 
-#: step_entry.cc:603
+#: step_entry.cc:601
 msgid "Insert Note C-sharp"
 msgstr ""
 
-#: step_entry.cc:604
+#: step_entry.cc:602
 #, fuzzy
 msgid "Insert Note D"
 msgstr "Infoga vid:"
 
-#: step_entry.cc:605
+#: step_entry.cc:603
 msgid "Insert Note D-sharp"
 msgstr ""
 
-#: step_entry.cc:606
+#: step_entry.cc:604
 #, fuzzy
 msgid "Insert Note E"
 msgstr "Infoga vid:"
 
-#: step_entry.cc:607
+#: step_entry.cc:605
 #, fuzzy
 msgid "Insert Note F"
 msgstr "Infoga vid:"
 
-#: step_entry.cc:608
+#: step_entry.cc:606
 msgid "Insert Note F-sharp"
 msgstr ""
 
-#: step_entry.cc:609
+#: step_entry.cc:607
 #, fuzzy
 msgid "Insert Note G"
 msgstr "Infoga vid:"
 
-#: step_entry.cc:610
+#: step_entry.cc:608
 msgid "Insert Note G-sharp"
 msgstr ""
 
-#: step_entry.cc:612
+#: step_entry.cc:610
 msgid "Insert a Note-length Rest"
 msgstr ""
 
-#: step_entry.cc:613
+#: step_entry.cc:611
 msgid "Insert a Snap-length Rest"
 msgstr ""
 
-#: step_entry.cc:615 step_entry.cc:616
+#: step_entry.cc:613 step_entry.cc:614
 msgid "Move to next octave"
 msgstr ""
 
-#: step_entry.cc:618
+#: step_entry.cc:616
 #, fuzzy
 msgid "Move to Next Note Length"
 msgstr "Välj uttoningslängd"
 
-#: step_entry.cc:619
+#: step_entry.cc:617
 #, fuzzy
 msgid "Move to Previous Note Length"
 msgstr "till föregående regionens slut"
 
-#: step_entry.cc:621
+#: step_entry.cc:619
 #, fuzzy
 msgid "Increase Note Length"
 msgstr "ändra uttoningslängd"
 
-#: step_entry.cc:622
+#: step_entry.cc:620
 #, fuzzy
 msgid "Decrease Note Length"
 msgstr "ändra uttoningslängd"
 
-#: step_entry.cc:624
+#: step_entry.cc:622
 msgid "Move to Next Note Velocity"
 msgstr ""
 
-#: step_entry.cc:625
+#: step_entry.cc:623
 msgid "Move to Previous Note Velocity"
 msgstr ""
 
-#: step_entry.cc:627
+#: step_entry.cc:625
 msgid "Increase Note Velocity"
 msgstr ""
 
-#: step_entry.cc:628
+#: step_entry.cc:626
 msgid "Decrease Note Velocity"
 msgstr ""
 
-#: step_entry.cc:630
+#: step_entry.cc:628
 msgid "Switch to the 1st octave"
 msgstr ""
 
-#: step_entry.cc:631
+#: step_entry.cc:629
 msgid "Switch to the 2nd octave"
 msgstr ""
 
-#: step_entry.cc:632
+#: step_entry.cc:630
 msgid "Switch to the 3rd octave"
 msgstr ""
 
-#: step_entry.cc:633
+#: step_entry.cc:631
 msgid "Switch to the 4th octave"
 msgstr ""
 
-#: step_entry.cc:634
+#: step_entry.cc:632
 msgid "Switch to the 5th octave"
 msgstr ""
 
-#: step_entry.cc:635
+#: step_entry.cc:633
 msgid "Switch to the 6th octave"
 msgstr ""
 
-#: step_entry.cc:636
+#: step_entry.cc:634
 msgid "Switch to the 7th octave"
 msgstr ""
 
-#: step_entry.cc:637
+#: step_entry.cc:635
 msgid "Switch to the 8th octave"
 msgstr ""
 
-#: step_entry.cc:638
+#: step_entry.cc:636
 msgid "Switch to the 9th octave"
 msgstr ""
 
-#: step_entry.cc:639
+#: step_entry.cc:637
 msgid "Switch to the 10th octave"
 msgstr ""
 
-#: step_entry.cc:640
+#: step_entry.cc:638
 msgid "Switch to the 11th octave"
 msgstr ""
 
-#: step_entry.cc:645
+#: step_entry.cc:643
 msgid "Set Note Length to Whole"
 msgstr ""
 
-#: step_entry.cc:647
+#: step_entry.cc:645
 #, fuzzy
 msgid "Set Note Length to 1/2"
 msgstr "Välj intoningslängd"
 
-#: step_entry.cc:649
+#: step_entry.cc:647
 #, fuzzy
 msgid "Set Note Length to 1/3"
 msgstr "Välj intoningslängd"
 
-#: step_entry.cc:651
+#: step_entry.cc:649
 #, fuzzy
 msgid "Set Note Length to 1/4"
 msgstr "Välj intoningslängd"
 
-#: step_entry.cc:653
+#: step_entry.cc:651
 #, fuzzy
 msgid "Set Note Length to 1/8"
 msgstr "Välj intoningslängd"
 
-#: step_entry.cc:655
+#: step_entry.cc:653
 msgid "Set Note Length to 1/16"
 msgstr ""
 
-#: step_entry.cc:657
+#: step_entry.cc:655
 msgid "Set Note Length to 1/32"
 msgstr ""
 
-#: step_entry.cc:659
+#: step_entry.cc:657
 msgid "Set Note Length to 1/64"
 msgstr ""
 
-#: step_entry.cc:664
+#: step_entry.cc:662
 msgid "Set Note Velocity to Pianississimo"
 msgstr ""
 
-#: step_entry.cc:666
+#: step_entry.cc:664
 msgid "Set Note Velocity to Pianissimo"
 msgstr ""
 
-#: step_entry.cc:668
+#: step_entry.cc:666
 msgid "Set Note Velocity to Piano"
 msgstr ""
 
-#: step_entry.cc:670
+#: step_entry.cc:668
 msgid "Set Note Velocity to Mezzo-Piano"
 msgstr ""
 
-#: step_entry.cc:672
+#: step_entry.cc:670
 msgid "Set Note Velocity to Mezzo-Forte"
 msgstr ""
 
-#: step_entry.cc:674
+#: step_entry.cc:672
 msgid "Set Note Velocity to Forte"
 msgstr ""
 
-#: step_entry.cc:676 step_entry.cc:678
+#: step_entry.cc:674 step_entry.cc:676
 msgid "Set Note Velocity to Fortississimo"
 msgstr ""
 
-#: step_entry.cc:680
+#: step_entry.cc:678
 #, fuzzy
 msgid "Toggle Triple Notes"
 msgstr "Skifta redigeringsläge"
 
-#: step_entry.cc:685
+#: step_entry.cc:683
 #, fuzzy
 msgid "No Dotted Notes"
 msgstr "Ślå an noter"
 
-#: step_entry.cc:687
+#: step_entry.cc:685
 #, fuzzy
 msgid "Toggled Dotted Notes"
 msgstr "Skifta redigeringsläge"
 
-#: step_entry.cc:689
+#: step_entry.cc:687
 msgid "Toggled Double-Dotted Notes"
 msgstr ""
 
-#: step_entry.cc:691
+#: step_entry.cc:689
 msgid "Toggled Triple-Dotted Notes"
 msgstr ""
 
-#: step_entry.cc:694
+#: step_entry.cc:692
 #, fuzzy
 msgid "Toggle Chord Entry"
 msgstr "Växla tillåt inspelning"
 
-#: step_entry.cc:696
+#: step_entry.cc:694
 msgid "Sustain Selected Notes by Note Length"
 msgstr ""
 
