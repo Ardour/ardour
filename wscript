@@ -636,9 +636,6 @@ def configure(conf):
         conf.env['LXVST_SUPPORT'] = True
     if bool(conf.env['JACK_SESSION']):
         conf.define('HAVE_JACK_SESSION', 1)
-    if opts.wiimote:
-        conf.define('WIIMOTE', 1)
-        conf.env['WIIMOTE'] = True
     conf.define('WINDOWS_KEY', opts.windows_key)
     conf.env['PROGRAM_NAME'] = opts.program_name
     if opts.rt_alloc_debug:
@@ -707,7 +704,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Universal binary',      opts.universal)
     write_config_text('Generic x86 CPU',       opts.generic)
     write_config_text('Windows VST support',   opts.windows_vst)
-    write_config_text('Wiimote support',       opts.wiimote)
+    write_config_text('Wiimote support',       conf.is_defined('BUILD_WIIMOTE'))
     write_config_text('Windows key',           opts.windows_key)
 
     write_config_text('C compiler flags',      conf.env['CFLAGS'])
