@@ -3551,7 +3551,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 			if (rtv && rtv->track() && replace && enable_processing && !rtv->track()->bounceable (rtv->track()->main_outs(), false)) {
 				MessageDialog d (
 					_("You can't perform this operation because the processing of the signal "
-					  "will cause one or more of the tracks will end up with a region with more channels than this track has inputs.\n\n"
+					  "will cause one or more of the tracks to end up with a region with more channels than this track has inputs.\n\n"
 					  "You can do this without processing, which is a different operation.")
 					);
 				d.set_title (_("Cannot bounce"));

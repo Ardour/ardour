@@ -1106,7 +1106,7 @@ RCOptionEditor::RCOptionEditor ()
 			 "SMPTE 12M-1999 specifies 29.97df as 30000/1001. The spec further mentions that "
 			 "drop-frame timecode has an accumulated error of -86ms over a 24-hour period.\n"
 			 "Drop-frame timecode would compensate exactly for a NTSC color frame rate of 30 * 0.9990 (ie 29.970000). "
-			 "That is not the actual rate, however some vendor use that rate - despite it being against the specs - "
+			 "That is not the actual rate. However, some vendors use that rate - despite it being against the specs - "
 			 "because the variant of using exactly 29.97 fps has zero timecode drift.\n"
 			 ));
 
