@@ -58,7 +58,8 @@ else:
 # Version stuff
 
 def fetch_svn_revision (path):
-    cmd = "LANG= svn info " + path + " | awk '/^Revision:/ { print $2}'"
+    # the fifth line has the revision number. we can't grep because of i18n issues changing the string
+    cmd = "svn info " + path + " | sed -n '5s/^[^:]*:[ \t][ \t]*//p'"
     return subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
 
 def fetch_gcc_version (CC):
