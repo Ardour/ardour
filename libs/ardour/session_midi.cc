@@ -509,25 +509,23 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 		assert (msg_time >= start_frame);
 		assert (msg_time < end_frame);
 
-		if (msg_time >= start_frame) {
-			/* convert from session frames back to JACK frames using the transport speed */
-			pframes_t const out_stamp = (msg_time - start_frame) / _transport_speed;
-			assert (out_stamp < nframes);
+		/* convert from session frames back to JACK frames using the transport speed */
+		pframes_t const out_stamp = (msg_time - start_frame) / _transport_speed;
+		assert (out_stamp < nframes);
 
-			if (MIDI::Manager::instance()->mtc_output_port()->midimsg (mtc_msg, 2, out_stamp)) {
-				error << string_compose(_("Session: cannot send quarter-frame MTC message (%1)"), strerror (errno))
-							<< endmsg;
-				return -1;
-			}
+		if (MIDI::Manager::instance()->mtc_output_port()->midimsg (mtc_msg, 2, out_stamp)) {
+			error << string_compose(_("Session: cannot send quarter-frame MTC message (%1)"), strerror (errno))
+						<< endmsg;
+			return -1;
+		}
 
 #ifndef NDEBUG
-			DEBUG_STR_DECL(foo)
-			DEBUG_STR_APPEND(foo,"sending ");
-			DEBUG_STR_APPEND(foo, transmitting_timecode_time);
-			DEBUG_TRACE (DEBUG::MTC, string_compose ("%1 qfm = %2, stamp = %3\n", DEBUG_STR(foo).str(), next_quarter_frame_to_send,
-								 out_stamp));
+		DEBUG_STR_DECL(foo)
+		DEBUG_STR_APPEND(foo,"sending ");
+		DEBUG_STR_APPEND(foo, transmitting_timecode_time);
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("%1 qfm = %2, stamp = %3\n", DEBUG_STR(foo).str(), next_quarter_frame_to_send,
+							 out_stamp));
 #endif
-		}
 
 		// Increment quarter frame counter
 		next_quarter_frame_to_send++;
