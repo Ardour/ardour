@@ -7,13 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-<<<<<<< .mine
 "POT-Creation-Date: 2013-01-07 23:22+0400\n"
 "PO-Revision-Date: 2013-01-05 12:34+0300\n"
-=======
-"POT-Creation-Date: 2013-01-07 14:22-0500\n"
-"PO-Revision-Date: 2012-07-15 15:36+0400\n"
->>>>>>> .r13801
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
 "Language: \n"
