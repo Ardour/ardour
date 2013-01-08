@@ -360,6 +360,8 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		c.set_midi (1);
 		bufs.set_count (c);
 
+		assert (nframes > 0);
+
 		diskstream->get_playback (mbuf, nframes);
 
 		/* append immediate messages to the first MIDI buffer (thus sending it to the first output port) */

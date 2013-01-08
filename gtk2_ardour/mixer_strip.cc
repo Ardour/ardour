@@ -941,7 +941,7 @@ MixerStrip::bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle> c)
 }
 
 void
-MixerStrip::maybe_add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const & current)
+MixerStrip::maybe_add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const& /*current*/)
 {
 	using namespace Menu_Helpers;
 
@@ -969,7 +969,7 @@ MixerStrip::maybe_add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, ARDOUR:
 }
 
 void
-MixerStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const & current)
+MixerStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const& /*current*/)
 {
 	using namespace Menu_Helpers;
 

@@ -256,9 +256,8 @@ Plugin::connect_and_run (BufferSet& bufs,
 		/* Track notes that we are sending to the plugin */
 
 		MidiBuffer& b = bufs.get_midi (0);
-		bool looped;
 
-		_tracker.track (b.begin(), b.end(), looped);
+		_tracker.track (b.begin(), b.end());
 
 		if (_have_pending_stop_events) {
 			/* Transmit note-offs that are pending from the last transport stop */
@@ -339,7 +338,7 @@ Plugin::clear_preset ()
 
 /** @param val `plugin' value */
 void
-Plugin::set_parameter (uint32_t which, float val)
+Plugin::set_parameter (uint32_t which, float)
 {
 	_parameter_changed_since_last_preset = true;
 	_session.set_dirty ();

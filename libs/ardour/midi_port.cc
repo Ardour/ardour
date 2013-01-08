@@ -170,11 +170,6 @@ MidiPort::flush_buffers (pframes_t nframes)
 
 			assert (ev.time() < (nframes + _global_port_buffer_offset + _port_buffer_offset));
 
-			if (ev.event_type() == LoopEventType) {
-				resolve_notes (jack_buffer, ev.time());
-				continue;
-			}
-
 			if (ev.time() >= _global_port_buffer_offset + _port_buffer_offset) {
 				if (jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size()) != 0) {
 					cerr << "write failed, drop flushed note off on the floor, time "

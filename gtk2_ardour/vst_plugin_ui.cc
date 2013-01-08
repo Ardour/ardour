@@ -79,7 +79,7 @@ VSTPluginUI::package (Gtk::Window& win)
 }
 
 bool
-VSTPluginUI::configure_handler (GdkEventConfigure* ev)
+VSTPluginUI::configure_handler (GdkEventConfigure*)
 {
 	XEvent event;
 	gint x, y;

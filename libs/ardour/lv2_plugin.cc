@@ -175,7 +175,7 @@ work_respond(LV2_Worker_Respond_Handle handle,
 /* log extension */
 
 static int
-log_vprintf(LV2_Log_Handle handle,
+log_vprintf(LV2_Log_Handle /*handle*/,
             LV2_URID       type,
             const char*    fmt,
             va_list        args)

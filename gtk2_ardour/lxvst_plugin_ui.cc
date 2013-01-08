@@ -46,7 +46,7 @@ LXVSTPluginUI::~LXVSTPluginUI ()
 
 
 bool
-LXVSTPluginUI::start_updating (GdkEventAny* ignored)
+LXVSTPluginUI::start_updating (GdkEventAny*)
 {
 	_screen_update_connection.disconnect();
 	_screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (mem_fun(*this, &LXVSTPluginUI::resize_callback));
@@ -54,7 +54,7 @@ LXVSTPluginUI::start_updating (GdkEventAny* ignored)
 }
 
 bool
-LXVSTPluginUI::stop_updating (GdkEventAny* ignored)
+LXVSTPluginUI::stop_updating (GdkEventAny*)
 {
 	_screen_update_connection.disconnect();
 	return false;
@@ -116,7 +116,7 @@ LXVSTPluginUI::package (Gtk::Window& win)
 }
 
 void
-LXVSTPluginUI::forward_key_event (GdkEventKey* ev)
+LXVSTPluginUI::forward_key_event (GdkEventKey*)
 {
 	std::cerr << "LXVSTPluginUI : keypress forwarding to linuxVSTs unsupported" << std::endl;
 }
@@ -163,7 +163,7 @@ static error_handler_t vstfx_error_handler;
 static error_handler_t gtk_error_handler;
 
 static int 
-gtk_xerror_handler (Display* disp, XErrorEvent* ev)
+gtk_xerror_handler (Display*, XErrorEvent*)
 {
 	std::cerr << "** ERROR ** LXVSTPluginUI : Trapped an X Window System Error" << std::endl;
 	

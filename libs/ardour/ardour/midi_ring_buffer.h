@@ -79,7 +79,8 @@ public:
 	}
 
 	void reset_tracker ();
-	
+        void loop_resolve (MidiBuffer& dst, framepos_t);
+
 protected:
 	inline bool is_channel_event(uint8_t event_type_byte) {
 		// mask out channel information

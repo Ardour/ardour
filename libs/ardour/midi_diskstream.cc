@@ -613,7 +613,7 @@ MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 					id(), this_read, start) << endmsg;
 			return -1;
 		}
-
+		
 		g_atomic_int_add (&_frames_written_to_ringbuffer, this_read);
 
 		if (reversed) {
@@ -625,11 +625,9 @@ MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 		} else {
 
 			/* if we read to the end of the loop, go back to the beginning */
-
 			if (reloop) {
 				// Synthesize LoopEvent here, because the next events
 				// written will have non-monotonic timestamps.
-				_playback_buf->write(loop_end - 1, LoopEventType, sizeof (framepos_t), (uint8_t *) &loop_start);
 				start = loop_start;
 			} else {
 				start += this_read;
@@ -1297,23 +1295,77 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 	dst.clear();
 	assert(dst.size() == 0);
 
-#ifndef NDEBUG
-	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
-		             "%1 MDS pre-read read %4..%5 from %2 write to %3\n", _name,
-		             _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr(), playback_sample, playback_sample + nframes));
-//        cerr << "================\n";
-//        _playback_buf->dump (cerr);
-//        cerr << "----------------\n";
+	Location* loc = loop_location;
 
-	const size_t events_read = _playback_buf->read (dst, playback_sample, playback_sample + nframes);
+	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
+		             "%1 MDS pre-read read %8 @ %4..%5 from %2 write to %3, LOOPED ? %6-%7\n", _name,
+		             _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr(), playback_sample, playback_sample + nframes, 
+			     (loc ? loc->start() : -1), (loc ? loc->end() : -1), nframes));
+
+        // cerr << "================\n";
+        // _playback_buf->dump (cerr);
+        // cerr << "----------------\n";
+
+	size_t events_read = 0;	
+
+	if (loc) {
+		framepos_t effective_start;
+
+		if (playback_sample >= loc->end()) {
+			effective_start = loc->start() + ((playback_sample - loc->end()) % loc->length());
+		} else {
+			effective_start = playback_sample;
+		}
+		
+		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("looped, effective start adjusted to %1\n", effective_start));
+
+		if (effective_start == loc->start()) {
+			/* We need to turn off notes that may extend
+			   beyond the loop end.
+			*/
+
+			_playback_buf->loop_resolve (dst, 0);
+		}
+
+		if (loc->end() >= effective_start && loc->end() < effective_start + nframes) {
+			/* end of loop is within the range we are reading, so
+			   split the read in two, and lie about the location
+			   for the 2nd read
+			*/
+			framecnt_t first, second;
+
+			first = loc->end() - effective_start;
+			second = nframes - first;
+
+			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read for eff %1 end %2: %3 and %4\n",
+									      effective_start, loc->end(), first, second));
+
+			if (first) {
+				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #1, from %1 for %2\n",
+										      effective_start, first));
+				events_read = _playback_buf->read (dst, effective_start, first);
+			} 
+
+			if (second) {
+				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #2, from %1 for %2\n",
+										      loc->start(), second));
+				events_read += _playback_buf->read (dst, loc->start(), second);
+			}
+								    
+		} else {
+			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #3, adjusted start as %1 for %2\n",
+									      effective_start, nframes));
+			events_read = _playback_buf->read (dst, effective_start, effective_start + nframes);
+		}
+	} else {
+		events_read = _playback_buf->read (dst, playback_sample, playback_sample + nframes);
+	}
+
 	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
 		             "%1 MDS events read %2 range %3 .. %4 rspace %5 wspace %6 r@%7 w@%8\n",
 		             _name, events_read, playback_sample, playback_sample + nframes,
 		             _playback_buf->read_space(), _playback_buf->write_space(),
 			     _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr()));
-#else
-	_playback_buf->read (dst, playback_sample, playback_sample + nframes);
-#endif
 
 	g_atomic_int_add (&_frames_read_from_ringbuffer, nframes);
 }
