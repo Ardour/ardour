@@ -358,25 +358,53 @@ Session::send_full_time_code (framepos_t const t)
 
 	_send_timecode_update = false;
 
-	if (_engine.freewheeling() || !Config->get_send_mtc() || _slave) {
+	if (_engine.freewheeling() || !Config->get_send_mtc()) {
+		return 0;
+	}
+	if (_slave && !_slave->locked()) {
 		return 0;
 	}
 
 	// Get timecode time for the given time
 	sample_to_timecode (t, timecode, true /* use_offset */, false /* no subframes */);
 
+	// sample-align outbound to rounded (no subframes) timecode
+	timecode_to_sample(timecode, outbound_mtc_timecode_frame, true, false);
+
 	transmitting_timecode_time = timecode;
-	outbound_mtc_timecode_frame = t;
+
+	framecnt_t const quarter_frame_duration = ((framecnt_t) _frames_per_timecode_frame) >> 2;
+	if (ceil((t - outbound_mtc_timecode_frame) / quarter_frame_duration) > 0) {
+		Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
+		outbound_mtc_timecode_frame += _frames_per_timecode_frame;
+	}
+
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("Full MTC TC %1\n", outbound_mtc_timecode_frame));
 
 	// I don't understand this bit yet.. [DR]
+	// I do [rg]:
+	// according to MTC spec 24, 30 drop and 30 non-drop TC, the frame-number represented by 8 quarter frames must be even.
 	if (((mtc_timecode_bits >> 5) != MIDI::MTC_25_FPS) && (transmitting_timecode_time.frames % 2)) {
 		// start MTC quarter frame transmission on an even frame
 		Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
 		outbound_mtc_timecode_frame += _frames_per_timecode_frame;
 	}
 
-	// Compensate for audio latency
+#if 0 // compensate for audio latency  -- disabled [rg]
+	/* this needs more thought and work.
+	 * the proper solution will be to just offset MTC by the MIDI port's latency.
+	 *
+	 * using worst_playback_latency() is wrong when the generated MTC is used to sync
+	 * clients which send audio to Ardour for recording.
+	 * worst_capture_latency() vs. worst_playback_latency()
+	 *
+	 * NB. similarly to session_ltc, the offset should be subtracted from the timecode to send,
+	 * instead of being added to timestamp when to send the timecode.
+	 * Otherwise the timestamp may not fall into the jack-cycle of the current _transport frame.
+	 * and no MTC QF will be sent.
+	 */
 	outbound_mtc_timecode_frame += worst_playback_latency();
+#endif
 	next_quarter_frame_to_send = 0;
 
 	// Sync slave to the same Timecode time as we are on
@@ -412,9 +440,11 @@ Session::send_full_time_code (framepos_t const t)
 int
 Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_frame, pframes_t nframes)
 {
-	// XXX only if _slave == MTC_slave; we could generate MTC from jack or LTC
-	if (_engine.freewheeling() || _slave || !_send_qf_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
+	if (_engine.freewheeling() || !_send_qf_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
 		// cerr << "(MTC) Not sending MTC\n";
+		return 0;
+	}
+	if (_slave && !_slave->locked()) {
 		return 0;
 	}
 
@@ -432,10 +462,14 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 	/* Duration of one quarter frame */
 	framecnt_t const quarter_frame_duration = ((framecnt_t) _frames_per_timecode_frame) >> 2;
 
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("TF %1 SF %2 NQ %3 FD %4\n", start_frame, outbound_mtc_timecode_frame,
-						 next_quarter_frame_to_send, quarter_frame_duration));
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("TF %1 SF %2 MT %3 QF %4 QD %5\n",
+				_transport_frame, start_frame, outbound_mtc_timecode_frame,
+				next_quarter_frame_to_send, quarter_frame_duration));
 
-	assert ((outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration)) >= _transport_frame);
+	if ((outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration)) < _transport_frame) {
+		send_full_time_code (_transport_frame);
+		return 0;
+	}
 
 	/* Send quarter frames for this cycle */
 	while (end_frame > (outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration))) {
@@ -475,23 +509,25 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 		assert (msg_time >= start_frame);
 		assert (msg_time < end_frame);
 
-		/* convert from session frames back to JACK frames using the transport speed */
-		pframes_t const out_stamp = (msg_time - start_frame) / _transport_speed;
-		assert (out_stamp < nframes);
+		if (msg_time >= start_frame) {
+			/* convert from session frames back to JACK frames using the transport speed */
+			pframes_t const out_stamp = (msg_time - start_frame) / _transport_speed;
+			assert (out_stamp < nframes);
 
-		if (MIDI::Manager::instance()->mtc_output_port()->midimsg (mtc_msg, 2, out_stamp)) {
-			error << string_compose(_("Session: cannot send quarter-frame MTC message (%1)"), strerror (errno))
-			      << endmsg;
-			return -1;
-		}
+			if (MIDI::Manager::instance()->mtc_output_port()->midimsg (mtc_msg, 2, out_stamp)) {
+				error << string_compose(_("Session: cannot send quarter-frame MTC message (%1)"), strerror (errno))
+							<< endmsg;
+				return -1;
+			}
 
 #ifndef NDEBUG
-		DEBUG_STR_DECL(foo)
-		DEBUG_STR_APPEND(foo,"sending ");
-		DEBUG_STR_APPEND(foo, transmitting_timecode_time);
-		DEBUG_TRACE (DEBUG::MTC, string_compose ("%1 qfm = %2, stamp = %3\n", DEBUG_STR(foo).str(), next_quarter_frame_to_send,
-							 out_stamp));
+			DEBUG_STR_DECL(foo)
+			DEBUG_STR_APPEND(foo,"sending ");
+			DEBUG_STR_APPEND(foo, transmitting_timecode_time);
+			DEBUG_TRACE (DEBUG::MTC, string_compose ("%1 qfm = %2, stamp = %3\n", DEBUG_STR(foo).str(), next_quarter_frame_to_send,
+								 out_stamp));
 #endif
+		}
 
 		// Increment quarter frame counter
 		next_quarter_frame_to_send++;
