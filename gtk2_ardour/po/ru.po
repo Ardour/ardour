@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-07 18:11-0500\n"
+"POT-Creation-Date: 2013-01-08 08:15-0500\n"
 "PO-Revision-Date: 2013-01-08 02:10+0300\n"
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
@@ -447,7 +447,7 @@ msgstr "Добавить:"
 msgid "<b>Options</b>"
 msgstr "<b>Параметры</b>"
 
-#: add_route_dialog.cc:127 bundle_manager.cc:194 region_editor.cc:49
+#: add_route_dialog.cc:127 bundle_manager.cc:194 region_editor.cc:50
 #: route_group_dialog.cc:66
 msgid "Name:"
 msgstr "Имя:"
@@ -1640,7 +1640,7 @@ msgstr "Свойства"
 msgid "Tracks and Busses"
 msgstr "Дорожки и шины"
 
-#: ardour_ui_ed.cc:238 location_ui.cc:1133
+#: ardour_ui_ed.cc:238 location_ui.cc:1134
 msgid "Locations"
 msgstr "Позиции"
 
@@ -2112,7 +2112,7 @@ msgid "clear automation"
 msgstr "Очистить автоматизацию"
 
 #: automation_time_axis.cc:483 editor_actions.cc:582 editor_markers.cc:858
-#: location_ui.cc:54 route_time_axis.cc:725
+#: location_ui.cc:55 route_time_axis.cc:725
 msgid "Hide"
 msgstr "Скрыть"
 
@@ -2336,7 +2336,7 @@ msgstr "Время"
 
 #: edit_note_dialog.cc:98 editor_regions.cc:114
 #: export_timespan_selector.cc:361 export_timespan_selector.cc:425
-#: location_ui.cc:312 midi_list_editor.cc:114 time_info_box.cc:105
+#: location_ui.cc:313 midi_list_editor.cc:114 time_info_box.cc:105
 msgid "Length"
 msgstr "Длительность"
 
@@ -3052,7 +3052,7 @@ msgstr "Фейд"
 msgid "Latch"
 msgstr ""
 
-#: editor_actions.cc:97 editor_regions.cc:111 region_editor.cc:45
+#: editor_actions.cc:97 editor_regions.cc:111 region_editor.cc:46
 msgid "Region"
 msgstr "Область"
 
@@ -3681,7 +3681,7 @@ msgid "Slide"
 msgstr "Скольжение"
 
 #: editor_actions.cc:478 editor_actions.cc:1578 editor_markers.cc:861
-#: location_ui.cc:55
+#: location_ui.cc:56
 msgid "Lock"
 msgstr "Блок"
 
@@ -3853,7 +3853,7 @@ msgstr "Мин:С"
 msgid "Sort"
 msgstr "Сортировать"
 
-#: editor_actions.cc:579 region_editor.cc:50
+#: editor_actions.cc:579 region_editor.cc:51
 msgid "Audition"
 msgstr "Контроль"
 
@@ -4491,7 +4491,7 @@ msgid "end"
 msgstr "Конец"
 
 #: editor_markers.cc:647 editor_ops.cc:1743 editor_ops.cc:1763
-#: editor_ops.cc:1787 editor_ops.cc:1814 location_ui.cc:1004
+#: editor_ops.cc:1787 editor_ops.cc:1814 location_ui.cc:1005
 msgid "add marker"
 msgstr "добавка маркера"
 
@@ -4499,7 +4499,7 @@ msgstr "добавка маркера"
 msgid "range"
 msgstr "область"
 
-#: editor_markers.cc:714 location_ui.cc:839
+#: editor_markers.cc:714 location_ui.cc:840
 msgid "remove marker"
 msgstr "удаление маркера"
 
@@ -6361,87 +6361,87 @@ msgstr "Сбросить"
 msgid "programming error: %1 (%2)"
 msgstr "Ошибка в программе: %1 (%2)"
 
-#: location_ui.cc:49 location_ui.cc:51
+#: location_ui.cc:50 location_ui.cc:52
 msgid "Use PH"
 msgstr "Исп. УВ"
 
-#: location_ui.cc:53
+#: location_ui.cc:54
 msgid "CD"
 msgstr "CD"
 
-#: location_ui.cc:56
+#: location_ui.cc:57
 msgid "Glue"
 msgstr "Приклеить"
 
-#: location_ui.cc:84
+#: location_ui.cc:85
 msgid "Performer:"
 msgstr "Исполнитель:"
 
-#: location_ui.cc:85
+#: location_ui.cc:86
 msgid "Composer:"
 msgstr "Композитор:"
 
-#: location_ui.cc:87
+#: location_ui.cc:88
 msgid "Pre-Emphasis"
 msgstr ""
 
-#: location_ui.cc:309
+#: location_ui.cc:310
 msgid "Remove this range"
 msgstr "Удалить эту область"
 
-#: location_ui.cc:310
+#: location_ui.cc:311
 msgid "Start time - middle click to locate here"
 msgstr ""
 
-#: location_ui.cc:311
+#: location_ui.cc:312
 msgid "End time - middle click to locate here"
 msgstr ""
 
-#: location_ui.cc:314
+#: location_ui.cc:315
 msgid "Set range start from playhead location"
 msgstr ""
 
-#: location_ui.cc:315
+#: location_ui.cc:316
 msgid "Set range end from playhead location"
 msgstr ""
 
-#: location_ui.cc:319
+#: location_ui.cc:320
 msgid "Remove this marker"
 msgstr "Удалить этот маркер"
 
-#: location_ui.cc:320
+#: location_ui.cc:321
 msgid "Position - middle click to locate here"
 msgstr ""
 
-#: location_ui.cc:322
+#: location_ui.cc:323
 msgid "Set marker time from playhead location"
 msgstr ""
 
-#: location_ui.cc:461
+#: location_ui.cc:462
 msgid "You cannot put a CD marker at the start of the session"
 msgstr "Размещение маркера CD в начале сеанса невозможно"
 
-#: location_ui.cc:707
+#: location_ui.cc:708
 msgid "New Marker"
 msgstr "Создать маркер"
 
-#: location_ui.cc:708
+#: location_ui.cc:709
 msgid "New Range"
 msgstr "Создать область"
 
-#: location_ui.cc:721
+#: location_ui.cc:722
 msgid "<b>Loop/Punch Ranges</b>"
 msgstr "<b>Области петель/врезок</b>"
 
-#: location_ui.cc:746
+#: location_ui.cc:747
 msgid "<b>Markers (Including CD Index)</b>"
 msgstr "<b>Маркеры (включая индекс CD)</b>"
 
-#: location_ui.cc:781
+#: location_ui.cc:782
 msgid "<b>Ranges (Including CD Track Ranges)</b>"
 msgstr "<b>Области (включая области дорожек CD)</b>"
 
-#: location_ui.cc:1023
+#: location_ui.cc:1024
 msgid "add range marker"
 msgstr "добавка маркера выделения"
 
@@ -8973,59 +8973,59 @@ msgstr "Ещё более быстрее"
 msgid "fastest"
 msgstr "Скорейшее"
 
-#: region_editor.cc:78
+#: region_editor.cc:79
 msgid "audition this region"
 msgstr "прослушать область"
 
-#: region_editor.cc:87 region_layering_order_editor.cc:74
+#: region_editor.cc:88 region_layering_order_editor.cc:74
 msgid "Position:"
 msgstr "Позиция:"
 
-#: region_editor.cc:89
+#: region_editor.cc:90
 msgid "End:"
 msgstr "Конец:"
 
-#: region_editor.cc:91 sfdb_ui.cc:140
+#: region_editor.cc:92 sfdb_ui.cc:140
 msgid "Length:"
 msgstr "Длительность:"
 
-#: region_editor.cc:93
+#: region_editor.cc:94
 msgid "Sync point (relative to region):"
 msgstr "Точка синхронизации (относительно области):"
 
-#: region_editor.cc:95
+#: region_editor.cc:96
 msgid "Sync point (absolute):"
 msgstr "Точка синхронизации (абсолютная:"
 
-#: region_editor.cc:97
+#: region_editor.cc:98
 msgid "File start:"
 msgstr "Начало файла:"
 
-#: region_editor.cc:101
+#: region_editor.cc:102
 msgid "Sources:"
 msgstr "Источники:"
 
-#: region_editor.cc:103
+#: region_editor.cc:104
 msgid "Source:"
 msgstr "Источник:"
 
-#: region_editor.cc:166
+#: region_editor.cc:167
 msgid "Region '%1'"
 msgstr "Область %1"
 
-#: region_editor.cc:273
+#: region_editor.cc:274
 msgid "change region start position"
 msgstr "смена позиции начала области"
 
-#: region_editor.cc:289
+#: region_editor.cc:290
 msgid "change region end position"
 msgstr "смена позиции конца области"
 
-#: region_editor.cc:309
+#: region_editor.cc:310
 msgid "change region length"
 msgstr "смена длительности области"
 
-#: region_editor.cc:403 region_editor.cc:415
+#: region_editor.cc:404 region_editor.cc:416
 msgid "change region sync point"
 msgstr "смена синхронизатора областей"
 

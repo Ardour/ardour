@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-07 18:11-0500\n"
+"POT-Creation-Date: 2013-01-08 08:15-0500\n"
 "PO-Revision-Date: 2012-09-16 11:47+0200\n"
 "Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
 "Language-Team: Czech <kde-i18n-doc@kde.org>\n"
@@ -446,7 +446,7 @@ msgstr "Přidat:"
 msgid "<b>Options</b>"
 msgstr "<b>Volby</b>"
 
-#: add_route_dialog.cc:127 bundle_manager.cc:194 region_editor.cc:49
+#: add_route_dialog.cc:127 bundle_manager.cc:194 region_editor.cc:50
 #: route_group_dialog.cc:66
 msgid "Name:"
 msgstr "Název:"
@@ -1642,7 +1642,7 @@ msgstr "Vlastnosti"
 msgid "Tracks and Busses"
 msgstr "Stopy a sběrnice"
 
-#: ardour_ui_ed.cc:238 location_ui.cc:1133
+#: ardour_ui_ed.cc:238 location_ui.cc:1134
 msgid "Locations"
 msgstr "Místa"
 
@@ -2120,7 +2120,7 @@ msgid "clear automation"
 msgstr "Vyprázdnit automatizaci"
 
 #: automation_time_axis.cc:483 editor_actions.cc:582 editor_markers.cc:858
-#: location_ui.cc:54 route_time_axis.cc:725
+#: location_ui.cc:55 route_time_axis.cc:725
 msgid "Hide"
 msgstr "Skrýt"
 
@@ -2344,7 +2344,7 @@ msgstr "Čas"
 
 #: edit_note_dialog.cc:98 editor_regions.cc:114
 #: export_timespan_selector.cc:361 export_timespan_selector.cc:425
-#: location_ui.cc:312 midi_list_editor.cc:114 time_info_box.cc:105
+#: location_ui.cc:313 midi_list_editor.cc:114 time_info_box.cc:105
 msgid "Length"
 msgstr "Délka"
 
@@ -3068,7 +3068,7 @@ msgstr "Zesílit/Zeslabit"
 msgid "Latch"
 msgstr "Zaklapnout"
 
-#: editor_actions.cc:97 editor_regions.cc:111 region_editor.cc:45
+#: editor_actions.cc:97 editor_regions.cc:111 region_editor.cc:46
 msgid "Region"
 msgstr "Oblast"
 
@@ -3698,7 +3698,7 @@ msgid "Slide"
 msgstr "Vsunout"
 
 #: editor_actions.cc:478 editor_actions.cc:1578 editor_markers.cc:861
-#: location_ui.cc:55
+#: location_ui.cc:56
 msgid "Lock"
 msgstr "Zamknout"
 
@@ -3870,7 +3870,7 @@ msgstr "Min:Sek"
 msgid "Sort"
 msgstr "Třídit"
 
-#: editor_actions.cc:579 region_editor.cc:50
+#: editor_actions.cc:579 region_editor.cc:51
 msgid "Audition"
 msgstr "Poslech"
 
@@ -4514,7 +4514,7 @@ msgid "end"
 msgstr "Konec"
 
 #: editor_markers.cc:647 editor_ops.cc:1743 editor_ops.cc:1763
-#: editor_ops.cc:1787 editor_ops.cc:1814 location_ui.cc:1004
+#: editor_ops.cc:1787 editor_ops.cc:1814 location_ui.cc:1005
 msgid "add marker"
 msgstr "Přidat značku"
 
@@ -4522,7 +4522,7 @@ msgstr "Přidat značku"
 msgid "range"
 msgstr "Rozsah"
 
-#: editor_markers.cc:714 location_ui.cc:839
+#: editor_markers.cc:714 location_ui.cc:840
 msgid "remove marker"
 msgstr "Odstranit značky"
 
@@ -6446,87 +6446,87 @@ msgstr "Nastavit znovu"
 msgid "programming error: %1 (%2)"
 msgstr "Chyba v programování: %1 (%2)"
 
-#: location_ui.cc:49 location_ui.cc:51
+#: location_ui.cc:50 location_ui.cc:52
 msgid "Use PH"
 msgstr "Použít PH"
 
-#: location_ui.cc:53
+#: location_ui.cc:54
 msgid "CD"
 msgstr "CD"
 
-#: location_ui.cc:56
+#: location_ui.cc:57
 msgid "Glue"
 msgstr "Přilepit"
 
-#: location_ui.cc:84
+#: location_ui.cc:85
 msgid "Performer:"
 msgstr "Účinkující:"
 
-#: location_ui.cc:85
+#: location_ui.cc:86
 msgid "Composer:"
 msgstr "Skladatel:"
 
-#: location_ui.cc:87
+#: location_ui.cc:88
 msgid "Pre-Emphasis"
 msgstr "Předzdůraznění"
 
-#: location_ui.cc:309
+#: location_ui.cc:310
 msgid "Remove this range"
 msgstr "Odstranit tento rozsah"
 
-#: location_ui.cc:310
+#: location_ui.cc:311
 msgid "Start time - middle click to locate here"
 msgstr "Čas začátku - klepnutí prostředním tlačítkem myši pro postavení se sem"
 
-#: location_ui.cc:311
+#: location_ui.cc:312
 msgid "End time - middle click to locate here"
 msgstr "Čas konce - klepnutí prostředním tlačítkem myši pro postavení se sem"
 
-#: location_ui.cc:314
+#: location_ui.cc:315
 msgid "Set range start from playhead location"
 msgstr "Nastavit začátek rozsahu z místa ukazatele polohy"
 
-#: location_ui.cc:315
+#: location_ui.cc:316
 msgid "Set range end from playhead location"
 msgstr "Nastavit konec rozsahu z místa ukazatele polohy"
 
-#: location_ui.cc:319
+#: location_ui.cc:320
 msgid "Remove this marker"
 msgstr "Odstranit tuto značku"
 
-#: location_ui.cc:320
+#: location_ui.cc:321
 msgid "Position - middle click to locate here"
 msgstr "Poloha - klepnutí prostředním tlačítkem myši pro postavení se sem"
 
-#: location_ui.cc:322
+#: location_ui.cc:323
 msgid "Set marker time from playhead location"
 msgstr "Nastavit čas značky z místa ukazatele polohy"
 
-#: location_ui.cc:461
+#: location_ui.cc:462
 msgid "You cannot put a CD marker at the start of the session"
 msgstr "Na začátku sezení nemůžete zřídit žádnou značku na CD"
 
-#: location_ui.cc:707
+#: location_ui.cc:708
 msgid "New Marker"
 msgstr "Nová značka"
 
-#: location_ui.cc:708
+#: location_ui.cc:709
 msgid "New Range"
 msgstr "Nový rozsah"
 
-#: location_ui.cc:721
+#: location_ui.cc:722
 msgid "<b>Loop/Punch Ranges</b>"
 msgstr "<b>Rozsahy smyčky/přepsání</b>"
 
-#: location_ui.cc:746
+#: location_ui.cc:747
 msgid "<b>Markers (Including CD Index)</b>"
 msgstr "<b>Značky (včetně rejstříku CD)</b>"
 
-#: location_ui.cc:781
+#: location_ui.cc:782
 msgid "<b>Ranges (Including CD Track Ranges)</b>"
 msgstr "<b>Značky (včetně rozsahů stop CD)</b>"
 
-#: location_ui.cc:1023
+#: location_ui.cc:1024
 msgid "add range marker"
 msgstr "Přidat značku rozsahu"
 
@@ -9115,59 +9115,59 @@ msgstr "Rychlejší"
 msgid "fastest"
 msgstr "Nejrychlejší"
 
-#: region_editor.cc:78
+#: region_editor.cc:79
 msgid "audition this region"
 msgstr "Poslech této oblasti"
 
-#: region_editor.cc:87 region_layering_order_editor.cc:74
+#: region_editor.cc:88 region_layering_order_editor.cc:74
 msgid "Position:"
 msgstr "Poloha:"
 
-#: region_editor.cc:89
+#: region_editor.cc:90
 msgid "End:"
 msgstr "Konec:"
 
-#: region_editor.cc:91 sfdb_ui.cc:140
+#: region_editor.cc:92 sfdb_ui.cc:140
 msgid "Length:"
 msgstr "Délka:"
 
-#: region_editor.cc:93
+#: region_editor.cc:94
 msgid "Sync point (relative to region):"
 msgstr "Bod zapadnutí (poměrný k oblasti):"
 
-#: region_editor.cc:95
+#: region_editor.cc:96
 msgid "Sync point (absolute):"
 msgstr "Bod zapadnutí (absolutní):"
 
-#: region_editor.cc:97
+#: region_editor.cc:98
 msgid "File start:"
 msgstr "Začátek souboru:"
 
-#: region_editor.cc:101
+#: region_editor.cc:102
 msgid "Sources:"
 msgstr "Zdroje:"
 
-#: region_editor.cc:103
+#: region_editor.cc:104
 msgid "Source:"
 msgstr "Zdroj:"
 
-#: region_editor.cc:166
+#: region_editor.cc:167
 msgid "Region '%1'"
 msgstr "Oblast '%1'"
 
-#: region_editor.cc:273
+#: region_editor.cc:274
 msgid "change region start position"
 msgstr "Změnit začáteční polohu oblasti"
 
-#: region_editor.cc:289
+#: region_editor.cc:290
 msgid "change region end position"
 msgstr "Změnit koncovou polohu oblasti"
 
-#: region_editor.cc:309
+#: region_editor.cc:310
 msgid "change region length"
 msgstr "Změnit délku oblasti"
 
-#: region_editor.cc:403 region_editor.cc:415
+#: region_editor.cc:404 region_editor.cc:416
 msgid "change region sync point"
 msgstr "Změnit bod zapadnutí oblasti"
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk2_ardour 3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-07 18:11-0500\n"
+"POT-Creation-Date: 2013-01-08 08:15-0500\n"
 "PO-Revision-Date: 2013-01-05 14:48+0100\n"
 "Last-Translator: Eivind Ødegård <meinmycell-lists@yahoo.no>\n"
 "Language-Team:  <i18n-nn@lister.ping.uio.no>\n"
@@ -440,7 +440,7 @@ msgstr "Legg til:"
 msgid "<b>Options</b>"
 msgstr "<b>Val</b>"
 
-#: add_route_dialog.cc:127 bundle_manager.cc:194 region_editor.cc:49
+#: add_route_dialog.cc:127 bundle_manager.cc:194 region_editor.cc:50
 #: route_group_dialog.cc:66
 msgid "Name:"
 msgstr "Namn:"
@@ -1636,7 +1636,7 @@ msgstr "Eigenskapar"
 msgid "Tracks and Busses"
 msgstr "Spor og bussar"
 
-#: ardour_ui_ed.cc:238 location_ui.cc:1133
+#: ardour_ui_ed.cc:238 location_ui.cc:1134
 msgid "Locations"
 msgstr "Stader"
 
@@ -2110,7 +2110,7 @@ msgid "clear automation"
 msgstr "tøm automasjon"
 
 #: automation_time_axis.cc:483 editor_actions.cc:582 editor_markers.cc:858
-#: location_ui.cc:54 route_time_axis.cc:725
+#: location_ui.cc:55 route_time_axis.cc:725
 msgid "Hide"
 msgstr "Gøym"
 
@@ -2334,7 +2334,7 @@ msgstr "Tid"
 
 #: edit_note_dialog.cc:98 editor_regions.cc:114
 #: export_timespan_selector.cc:361 export_timespan_selector.cc:425
-#: location_ui.cc:312 midi_list_editor.cc:114 time_info_box.cc:105
+#: location_ui.cc:313 midi_list_editor.cc:114 time_info_box.cc:105
 msgid "Length"
 msgstr "Lengd"
 
@@ -3054,7 +3054,7 @@ msgstr "Ton ut"
 msgid "Latch"
 msgstr "Lask"
 
-#: editor_actions.cc:97 editor_regions.cc:111 region_editor.cc:45
+#: editor_actions.cc:97 editor_regions.cc:111 region_editor.cc:46
 msgid "Region"
 msgstr "Bolk"
 
@@ -3683,7 +3683,7 @@ msgid "Slide"
 msgstr "Gli"
 
 #: editor_actions.cc:478 editor_actions.cc:1578 editor_markers.cc:861
-#: location_ui.cc:55
+#: location_ui.cc:56
 msgid "Lock"
 msgstr "Lås"
 
@@ -3855,7 +3855,7 @@ msgstr "Min:sek"
 msgid "Sort"
 msgstr "Sorter"
 
-#: editor_actions.cc:579 region_editor.cc:50
+#: editor_actions.cc:579 region_editor.cc:51
 msgid "Audition"
 msgstr "Lytt"
 
@@ -4492,7 +4492,7 @@ msgid "end"
 msgstr "slutt"
 
 #: editor_markers.cc:647 editor_ops.cc:1743 editor_ops.cc:1763
-#: editor_ops.cc:1787 editor_ops.cc:1814 location_ui.cc:1004
+#: editor_ops.cc:1787 editor_ops.cc:1814 location_ui.cc:1005
 msgid "add marker"
 msgstr "legg til merke"
 
@@ -4500,7 +4500,7 @@ msgstr "legg til merke"
 msgid "range"
 msgstr "område"
 
-#: editor_markers.cc:714 location_ui.cc:839
+#: editor_markers.cc:714 location_ui.cc:840
 msgid "remove marker"
 msgstr "fjern markør"
 
@@ -6411,87 +6411,87 @@ msgstr "Nullstill"
 msgid "programming error: %1 (%2)"
 msgstr "Programmeringsfeil: %1 (%2)"
 
-#: location_ui.cc:49 location_ui.cc:51
+#: location_ui.cc:50 location_ui.cc:52
 msgid "Use PH"
 msgstr "Bruk PH"
 
-#: location_ui.cc:53
+#: location_ui.cc:54
 msgid "CD"
 msgstr "CD"
 
-#: location_ui.cc:56
+#: location_ui.cc:57
 msgid "Glue"
 msgstr "Lim"
 
-#: location_ui.cc:84
+#: location_ui.cc:85
 msgid "Performer:"
 msgstr "Utøvar:"
 
-#: location_ui.cc:85
+#: location_ui.cc:86
 msgid "Composer:"
 msgstr "Komponist:"
 
-#: location_ui.cc:87
+#: location_ui.cc:88
 msgid "Pre-Emphasis"
 msgstr "Før-framheving for CD"
 
-#: location_ui.cc:309
+#: location_ui.cc:310
 msgid "Remove this range"
 msgstr "Fjern dette området"
 
-#: location_ui.cc:310
+#: location_ui.cc:311
 msgid "Start time - middle click to locate here"
 msgstr "Starttid - midtklikk for å gå hit"
 
-#: location_ui.cc:311
+#: location_ui.cc:312
 msgid "End time - middle click to locate here"
 msgstr "Sluttid - midtklikk for å gå hit"
 
-#: location_ui.cc:314
+#: location_ui.cc:315
 msgid "Set range start from playhead location"
 msgstr "Set områdestart ved spelehovudet"
 
-#: location_ui.cc:315
+#: location_ui.cc:316
 msgid "Set range end from playhead location"
 msgstr "Set områdeslutt ved spelehovudet"
 
-#: location_ui.cc:319
+#: location_ui.cc:320
 msgid "Remove this marker"
 msgstr "Fjern denne markøren"
 
-#: location_ui.cc:320
+#: location_ui.cc:321
 msgid "Position - middle click to locate here"
 msgstr "Posisjon - midtklikk for å gå hit"
 
-#: location_ui.cc:322
+#: location_ui.cc:323
 msgid "Set marker time from playhead location"
 msgstr "Set markørtid ved spelehovudet"
 
-#: location_ui.cc:461
+#: location_ui.cc:462
 msgid "You cannot put a CD marker at the start of the session"
 msgstr "Du kan ikkje leggja ein CD-markør på starten av økta"
 
-#: location_ui.cc:707
+#: location_ui.cc:708
 msgid "New Marker"
 msgstr "Nytt merke"
 
-#: location_ui.cc:708
+#: location_ui.cc:709
 msgid "New Range"
 msgstr "Nytt område"
 
-#: location_ui.cc:721
+#: location_ui.cc:722
 msgid "<b>Loop/Punch Ranges</b>"
 msgstr "<b>Lykkje-/innslagsområde</b>"
 
-#: location_ui.cc:746
+#: location_ui.cc:747
 msgid "<b>Markers (Including CD Index)</b>"
 msgstr "<b>Markørar (inkl. CD-indeks)</b>"
 
-#: location_ui.cc:781
+#: location_ui.cc:782
 msgid "<b>Ranges (Including CD Track Ranges)</b>"
 msgstr "<b>Bolkar (inkl. CD-sporbolkar)</b>"
 
-#: location_ui.cc:1023
+#: location_ui.cc:1024
 msgid "add range marker"
 msgstr "legg til områdemarkørar"
 
@@ -9101,59 +9101,59 @@ msgstr "snøggare"
 msgid "fastest"
 msgstr "snøggast"
 
-#: region_editor.cc:78
+#: region_editor.cc:79
 msgid "audition this region"
 msgstr "lytt på denne bolken"
 
-#: region_editor.cc:87 region_layering_order_editor.cc:74
+#: region_editor.cc:88 region_layering_order_editor.cc:74
 msgid "Position:"
 msgstr "Posisjon:"
 
-#: region_editor.cc:89
+#: region_editor.cc:90
 msgid "End:"
 msgstr "Slutt:"
 
-#: region_editor.cc:91 sfdb_ui.cc:140
+#: region_editor.cc:92 sfdb_ui.cc:140
 msgid "Length:"
 msgstr "Lengd:"
 
-#: region_editor.cc:93
+#: region_editor.cc:94
 msgid "Sync point (relative to region):"
 msgstr "Synkpunkt (relativt plassert til bolken):"
 
-#: region_editor.cc:95
+#: region_editor.cc:96
 msgid "Sync point (absolute):"
 msgstr "Synkpunkt (absolutt):"
 
-#: region_editor.cc:97
+#: region_editor.cc:98
 msgid "File start:"
 msgstr "Filstart:"
 
-#: region_editor.cc:101
+#: region_editor.cc:102
 msgid "Sources:"
 msgstr "Kjelder:"
 
-#: region_editor.cc:103
+#: region_editor.cc:104
 msgid "Source:"
 msgstr "Kjelde:"
 
-#: region_editor.cc:166
+#: region_editor.cc:167
 msgid "Region '%1'"
 msgstr "Bolk '%1'"
 
-#: region_editor.cc:273
+#: region_editor.cc:274
 msgid "change region start position"
 msgstr "endre bolkstartposisjon"
 
-#: region_editor.cc:289
+#: region_editor.cc:290
 msgid "change region end position"
 msgstr "endre boksluttposisjon"
 
-#: region_editor.cc:309
+#: region_editor.cc:310
 msgid "change region length"
 msgstr "endre bolklengd"
 
-#: region_editor.cc:403 region_editor.cc:415
+#: region_editor.cc:404 region_editor.cc:416
 msgid "change region sync point"
 msgstr "endre bolksynkposisjon"
 

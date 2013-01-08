@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-07 18:11-0500\n"
+"POT-Creation-Date: 2013-01-08 08:15-0500\n"
 "PO-Revision-Date: 2013-01-03 08:29-0500\n"
 "Last-Translator: Rui-huai Zhang <zrhzrh>\n"
 "Language-Team: zrhzrh <zrhzrh@mail.ustc.edu.cn>\n"
@@ -412,7 +412,7 @@ msgstr "添加:"
 msgid "<b>Options</b>"
 msgstr "<b>选项</b>"
 
-#: add_route_dialog.cc:127 bundle_manager.cc:194 region_editor.cc:49
+#: add_route_dialog.cc:127 bundle_manager.cc:194 region_editor.cc:50
 #: route_group_dialog.cc:66
 msgid "Name:"
 msgstr "名称:"
@@ -1586,7 +1586,7 @@ msgstr "属性"
 msgid "Tracks and Busses"
 msgstr "音轨和总线"
 
-#: ardour_ui_ed.cc:238 location_ui.cc:1133
+#: ardour_ui_ed.cc:238 location_ui.cc:1134
 msgid "Locations"
 msgstr "位置"
 
@@ -2064,7 +2064,7 @@ msgid "clear automation"
 msgstr "清除自动化"
 
 #: automation_time_axis.cc:483 editor_actions.cc:582 editor_markers.cc:858
-#: location_ui.cc:54 route_time_axis.cc:725
+#: location_ui.cc:55 route_time_axis.cc:725
 msgid "Hide"
 msgstr "隐藏"
 
@@ -2293,7 +2293,7 @@ msgstr "时间"
 
 #: edit_note_dialog.cc:98 editor_regions.cc:114
 #: export_timespan_selector.cc:361 export_timespan_selector.cc:425
-#: location_ui.cc:312 midi_list_editor.cc:114 time_info_box.cc:105
+#: location_ui.cc:313 midi_list_editor.cc:114 time_info_box.cc:105
 msgid "Length"
 msgstr "长度"
 
@@ -3012,7 +3012,7 @@ msgstr ""
 msgid "Latch"
 msgstr ""
 
-#: editor_actions.cc:97 editor_regions.cc:111 region_editor.cc:45
+#: editor_actions.cc:97 editor_regions.cc:111 region_editor.cc:46
 msgid "Region"
 msgstr "区域"
 
@@ -3648,7 +3648,7 @@ msgid "Slide"
 msgstr ""
 
 #: editor_actions.cc:478 editor_actions.cc:1578 editor_markers.cc:861
-#: location_ui.cc:55
+#: location_ui.cc:56
 msgid "Lock"
 msgstr ""
 
@@ -3822,7 +3822,7 @@ msgstr "分:秒"
 msgid "Sort"
 msgstr "整理"
 
-#: editor_actions.cc:579 region_editor.cc:50
+#: editor_actions.cc:579 region_editor.cc:51
 msgid "Audition"
 msgstr "监听"
 
@@ -4480,7 +4480,7 @@ msgid "end"
 msgstr "结束"
 
 #: editor_markers.cc:647 editor_ops.cc:1743 editor_ops.cc:1763
-#: editor_ops.cc:1787 editor_ops.cc:1814 location_ui.cc:1004
+#: editor_ops.cc:1787 editor_ops.cc:1814 location_ui.cc:1005
 msgid "add marker"
 msgstr "添加标记"
 
@@ -4489,7 +4489,7 @@ msgstr "添加标记"
 msgid "range"
 msgstr "范围"
 
-#: editor_markers.cc:714 location_ui.cc:839
+#: editor_markers.cc:714 location_ui.cc:840
 msgid "remove marker"
 msgstr "移除标记"
 
@@ -6395,92 +6395,92 @@ msgstr "预设"
 msgid "programming error: %1 (%2)"
 msgstr "程序错误: %1 (%2)"
 
-#: location_ui.cc:49 location_ui.cc:51
+#: location_ui.cc:50 location_ui.cc:52
 msgid "Use PH"
 msgstr "使用 PH"
 
-#: location_ui.cc:53
+#: location_ui.cc:54
 msgid "CD"
 msgstr "CD"
 
-#: location_ui.cc:56
+#: location_ui.cc:57
 msgid "Glue"
 msgstr ""
 
-#: location_ui.cc:84
+#: location_ui.cc:85
 msgid "Performer:"
 msgstr ""
 
-#: location_ui.cc:85
+#: location_ui.cc:86
 msgid "Composer:"
 msgstr ""
 
-#: location_ui.cc:87
+#: location_ui.cc:88
 msgid "Pre-Emphasis"
 msgstr ""
 
-#: location_ui.cc:309
+#: location_ui.cc:310
 #, fuzzy
 msgid "Remove this range"
 msgstr "忘记此范围"
 
-#: location_ui.cc:310
+#: location_ui.cc:311
 msgid "Start time - middle click to locate here"
 msgstr ""
 
-#: location_ui.cc:311
+#: location_ui.cc:312
 msgid "End time - middle click to locate here"
 msgstr ""
 
-#: location_ui.cc:314
+#: location_ui.cc:315
 #, fuzzy
 msgid "Set range start from playhead location"
 msgstr "从播放头设置范围标记"
 
-#: location_ui.cc:315
+#: location_ui.cc:316
 #, fuzzy
 msgid "Set range end from playhead location"
 msgstr "从区间选择设置范围"
 
-#: location_ui.cc:319
+#: location_ui.cc:320
 #, fuzzy
 msgid "Remove this marker"
 msgstr "忘记这个标记"
 
-#: location_ui.cc:320
+#: location_ui.cc:321
 msgid "Position - middle click to locate here"
 msgstr ""
 
-#: location_ui.cc:322
+#: location_ui.cc:323
 #, fuzzy
 msgid "Set marker time from playhead location"
 msgstr "从区间选择设置范围"
 
-#: location_ui.cc:461
+#: location_ui.cc:462
 msgid "You cannot put a CD marker at the start of the session"
 msgstr "无法在会话开始放置CD标记"
 
-#: location_ui.cc:707
+#: location_ui.cc:708
 msgid "New Marker"
 msgstr "新标记"
 
-#: location_ui.cc:708
+#: location_ui.cc:709
 msgid "New Range"
 msgstr "新范围"
 
-#: location_ui.cc:721
+#: location_ui.cc:722
 msgid "<b>Loop/Punch Ranges</b>"
 msgstr "<b>循环/Punch 范围</b>"
 
-#: location_ui.cc:746
+#: location_ui.cc:747
 msgid "<b>Markers (Including CD Index)</b>"
 msgstr "<b>标记(包括CD索引)</b>"
 
-#: location_ui.cc:781
+#: location_ui.cc:782
 msgid "<b>Ranges (Including CD Track Ranges)</b>"
 msgstr "<b>范围(包括CD轨道区间)</b>"
 
-#: location_ui.cc:1023
+#: location_ui.cc:1024
 msgid "add range marker"
 msgstr "添加范围标记"
 
@@ -9047,59 +9047,59 @@ msgstr "较快"
 msgid "fastest"
 msgstr "最快"
 
-#: region_editor.cc:78
+#: region_editor.cc:79
 msgid "audition this region"
 msgstr "监听此区域"
 
-#: region_editor.cc:87 region_layering_order_editor.cc:74
+#: region_editor.cc:88 region_layering_order_editor.cc:74
 msgid "Position:"
 msgstr "位置:"
 
-#: region_editor.cc:89
+#: region_editor.cc:90
 msgid "End:"
 msgstr "终点:"
 
-#: region_editor.cc:91 sfdb_ui.cc:140
+#: region_editor.cc:92 sfdb_ui.cc:140
 msgid "Length:"
 msgstr "长度:"
 
-#: region_editor.cc:93
+#: region_editor.cc:94
 msgid "Sync point (relative to region):"
 msgstr "同步点 (相对于区域):"
 
-#: region_editor.cc:95
+#: region_editor.cc:96
 msgid "Sync point (absolute):"
 msgstr "同步点 (绝对的):"
 
-#: region_editor.cc:97
+#: region_editor.cc:98
 msgid "File start:"
 msgstr "文件开始:"
 
-#: region_editor.cc:101
+#: region_editor.cc:102
 msgid "Sources:"
 msgstr "源:"
 
-#: region_editor.cc:103
+#: region_editor.cc:104
 msgid "Source:"
 msgstr "源:"
 
-#: region_editor.cc:166
+#: region_editor.cc:167
 msgid "Region '%1'"
 msgstr "区域 '%1'"
 
-#: region_editor.cc:273
+#: region_editor.cc:274
 msgid "change region start position"
 msgstr "改变区域开始位置"
 
-#: region_editor.cc:289
+#: region_editor.cc:290
 msgid "change region end position"
 msgstr "改变区域结束位置"
 
-#: region_editor.cc:309
+#: region_editor.cc:310
 msgid "change region length"
 msgstr "改变区域长度"
 
-#: region_editor.cc:403 region_editor.cc:415
+#: region_editor.cc:404 region_editor.cc:416
 msgid "change region sync point"
 msgstr "改变区域同步点"
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-07 18:11-0500\n"
+"POT-Creation-Date: 2013-01-08 08:15-0500\n"
 "PO-Revision-Date: 2013-01-02 18:39+0100\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
@@ -446,7 +446,7 @@ msgstr "Erstelle:"
 msgid "<b>Options</b>"
 msgstr "<b>Optionen</b>"
 
-#: add_route_dialog.cc:127 bundle_manager.cc:194 region_editor.cc:49
+#: add_route_dialog.cc:127 bundle_manager.cc:194 region_editor.cc:50
 #: route_group_dialog.cc:66
 msgid "Name:"
 msgstr "Name:"
@@ -1658,7 +1658,7 @@ msgstr "Projekteinstellungen"
 msgid "Tracks and Busses"
 msgstr "Spuren/Busse"
 
-#: ardour_ui_ed.cc:238 location_ui.cc:1133
+#: ardour_ui_ed.cc:238 location_ui.cc:1134
 msgid "Locations"
 msgstr "Positionen"
 
@@ -2132,7 +2132,7 @@ msgid "clear automation"
 msgstr "Automation zurücksetzen"
 
 #: automation_time_axis.cc:483 editor_actions.cc:582 editor_markers.cc:858
-#: location_ui.cc:54 route_time_axis.cc:725
+#: location_ui.cc:55 route_time_axis.cc:725
 msgid "Hide"
 msgstr "Verbergen"
 
@@ -2356,7 +2356,7 @@ msgstr "Zeitpunkt"
 
 #: edit_note_dialog.cc:98 editor_regions.cc:114
 #: export_timespan_selector.cc:361 export_timespan_selector.cc:425
-#: location_ui.cc:312 midi_list_editor.cc:114 time_info_box.cc:105
+#: location_ui.cc:313 midi_list_editor.cc:114 time_info_box.cc:105
 msgid "Length"
 msgstr "Länge"
 
@@ -3078,7 +3078,7 @@ msgstr "Fade"
 msgid "Latch"
 msgstr "Latch"
 
-#: editor_actions.cc:97 editor_regions.cc:111 region_editor.cc:45
+#: editor_actions.cc:97 editor_regions.cc:111 region_editor.cc:46
 msgid "Region"
 msgstr "Region"
 
@@ -3707,7 +3707,7 @@ msgid "Slide"
 msgstr "Slide"
 
 #: editor_actions.cc:478 editor_actions.cc:1578 editor_markers.cc:861
-#: location_ui.cc:55
+#: location_ui.cc:56
 msgid "Lock"
 msgstr "Sperren"
 
@@ -3879,7 +3879,7 @@ msgstr "Min:Sek"
 msgid "Sort"
 msgstr "Sortieren"
 
-#: editor_actions.cc:579 region_editor.cc:50
+#: editor_actions.cc:579 region_editor.cc:51
 msgid "Audition"
 msgstr "Vorhören"
 
@@ -4518,7 +4518,7 @@ msgid "end"
 msgstr "Ende"
 
 #: editor_markers.cc:647 editor_ops.cc:1743 editor_ops.cc:1763
-#: editor_ops.cc:1787 editor_ops.cc:1814 location_ui.cc:1004
+#: editor_ops.cc:1787 editor_ops.cc:1814 location_ui.cc:1005
 msgid "add marker"
 msgstr "Marker hinzufügen"
 
@@ -4526,7 +4526,7 @@ msgstr "Marker hinzufügen"
 msgid "range"
 msgstr "Bereich"
 
-#: editor_markers.cc:714 location_ui.cc:839
+#: editor_markers.cc:714 location_ui.cc:840
 msgid "remove marker"
 msgstr "Marker entfernen"
 
@@ -6448,87 +6448,87 @@ msgstr "Zurücksetzen"
 msgid "programming error: %1 (%2)"
 msgstr "Programmierfehler: %1 (%2)"
 
-#: location_ui.cc:49 location_ui.cc:51
+#: location_ui.cc:50 location_ui.cc:52
 msgid "Use PH"
 msgstr "zu PZ"
 
-#: location_ui.cc:53
+#: location_ui.cc:54
 msgid "CD"
 msgstr "CD"
 
-#: location_ui.cc:56
+#: location_ui.cc:57
 msgid "Glue"
 msgstr "Bindung"
 
-#: location_ui.cc:84
+#: location_ui.cc:85
 msgid "Performer:"
 msgstr "Vortragender:"
 
-#: location_ui.cc:85
+#: location_ui.cc:86
 msgid "Composer:"
 msgstr "Komponist:"
 
-#: location_ui.cc:87
+#: location_ui.cc:88
 msgid "Pre-Emphasis"
 msgstr "Präemphase"
 
-#: location_ui.cc:309
+#: location_ui.cc:310
 msgid "Remove this range"
 msgstr "Diesen Bereich entfernen"
 
-#: location_ui.cc:310
+#: location_ui.cc:311
 msgid "Start time - middle click to locate here"
 msgstr "Startzeit - Mittelklick, um hierher zu positionieren"
 
-#: location_ui.cc:311
+#: location_ui.cc:312
 msgid "End time - middle click to locate here"
 msgstr "Endzeit - Mittelklick, um hierher zu positionieren"
 
-#: location_ui.cc:314
+#: location_ui.cc:315
 msgid "Set range start from playhead location"
 msgstr "Bereichsbeginn auf Positionszeiger setzen"
 
-#: location_ui.cc:315
+#: location_ui.cc:316
 msgid "Set range end from playhead location"
 msgstr "Bereichsende auf Positionszeiger setzen"
 
-#: location_ui.cc:319
+#: location_ui.cc:320
 msgid "Remove this marker"
 msgstr "Diesen Marker entfernen"
 
-#: location_ui.cc:320
+#: location_ui.cc:321
 msgid "Position - middle click to locate here"
 msgstr "Position - Mittelklick, um hierher zu positionieren"
 
-#: location_ui.cc:322
+#: location_ui.cc:323
 msgid "Set marker time from playhead location"
 msgstr "Markerposition auf Positionszeiger setzen"
 
-#: location_ui.cc:461
+#: location_ui.cc:462
 msgid "You cannot put a CD marker at the start of the session"
 msgstr "Sie können keinen CD-Marker am Anfang des Projekts erstellen"
 
-#: location_ui.cc:707
+#: location_ui.cc:708
 msgid "New Marker"
 msgstr "Neuer Marker"
 
-#: location_ui.cc:708
+#: location_ui.cc:709
 msgid "New Range"
 msgstr "Neuer Bereich"
 
-#: location_ui.cc:721
+#: location_ui.cc:722
 msgid "<b>Loop/Punch Ranges</b>"
 msgstr "<b>Schleifen/Punch-Bereiche</b>"
 
-#: location_ui.cc:746
+#: location_ui.cc:747
 msgid "<b>Markers (Including CD Index)</b>"
 msgstr "<b>Marker (Inclusive CD Index)</b>"
 
-#: location_ui.cc:781
+#: location_ui.cc:782
 msgid "<b>Ranges (Including CD Track Ranges)</b>"
 msgstr "<b>Bereiche (Inclusive CD Track-Bereichen)</b>"
 
-#: location_ui.cc:1023
+#: location_ui.cc:1024
 msgid "add range marker"
 msgstr "Bereich hinzufügen"
 
@@ -9159,59 +9159,59 @@ msgstr "Schneller"
 msgid "fastest"
 msgstr "Schnellstmöglich"
 
-#: region_editor.cc:78
+#: region_editor.cc:79
 msgid "audition this region"
 msgstr "Diese Region Vorhören"
 
-#: region_editor.cc:87 region_layering_order_editor.cc:74
+#: region_editor.cc:88 region_layering_order_editor.cc:74
 msgid "Position:"
 msgstr "Position:"
 
-#: region_editor.cc:89
+#: region_editor.cc:90
 msgid "End:"
 msgstr "Ende:"
 
-#: region_editor.cc:91 sfdb_ui.cc:140
+#: region_editor.cc:92 sfdb_ui.cc:140
 msgid "Length:"
 msgstr "Länge:"
 
-#: region_editor.cc:93
+#: region_editor.cc:94
 msgid "Sync point (relative to region):"
 msgstr "Synchronisationspunkt (relativ zur Region)"
 
-#: region_editor.cc:95
+#: region_editor.cc:96
 msgid "Sync point (absolute):"
 msgstr "Synchronisationspunkt (absolut)"
 
-#: region_editor.cc:97
+#: region_editor.cc:98
 msgid "File start:"
 msgstr "Dateibeginn:"
 
-#: region_editor.cc:101
+#: region_editor.cc:102
 msgid "Sources:"
 msgstr "Quellen:"
 
-#: region_editor.cc:103
+#: region_editor.cc:104
 msgid "Source:"
 msgstr "Quelle:"
 
-#: region_editor.cc:166
+#: region_editor.cc:167
 msgid "Region '%1'"
 msgstr "Region '%1'"
 
-#: region_editor.cc:273
+#: region_editor.cc:274
 msgid "change region start position"
 msgstr "Startposition der Region ändern"
 
-#: region_editor.cc:289
+#: region_editor.cc:290
 msgid "change region end position"
 msgstr "Endposition der Region ändern"
 
-#: region_editor.cc:309
+#: region_editor.cc:310
 msgid "change region length"
 msgstr "Länge der Region verändern"
 
-#: region_editor.cc:403 region_editor.cc:415
+#: region_editor.cc:404 region_editor.cc:416
 msgid "change region sync point"
 msgstr "Synchronisationspunkt der Region ändern"
 
