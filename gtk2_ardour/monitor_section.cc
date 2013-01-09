@@ -682,23 +682,23 @@ MonitorSection::register_actions ()
 
         for (uint32_t chn = 1; chn <= 16; ++chn) {
 
-                action_name = string_compose (X_("monitor-cut-%1"), chn);
+                action_name = string_compose (X_("monitor-cut-%1"), chn-1);
                 action_descr = string_compose (_("Cut monitor channel %1"), chn);
                 ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(),
                                                        sigc::bind (sigc::mem_fun (*this, &MonitorSection::cut_channel), chn));
 
-                action_name = string_compose (X_("monitor-dim-%1"), chn);
-                action_descr = string_compose (_("Dim monitor channel %1"), chn+1);
+                action_name = string_compose (X_("monitor-dim-%1"), chn-1);
+                action_descr = string_compose (_("Dim monitor channel %1"), chn);
                 ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(),
                                                        sigc::bind (sigc::mem_fun (*this, &MonitorSection::dim_channel), chn));
 
-                action_name = string_compose (X_("monitor-solo-%1"), chn);
-                action_descr = string_compose (_("Solo monitor channel %1"), chn+1);
+                action_name = string_compose (X_("monitor-solo-%1"), chn-1);
+                action_descr = string_compose (_("Solo monitor channel %1"), chn);
                 ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(),
                                                        sigc::bind (sigc::mem_fun (*this, &MonitorSection::solo_channel), chn));
 
-                action_name = string_compose (X_("monitor-invert-%1"), chn);
-                action_descr = string_compose (_("Invert monitor channel %1"), chn+1);
+                action_name = string_compose (X_("monitor-invert-%1"), chn-1);
+                action_descr = string_compose (_("Invert monitor channel %1"), chn);
                 ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(),
                                                        sigc::bind (sigc::mem_fun (*this, &MonitorSection::invert_channel), chn));
 
@@ -908,7 +908,7 @@ MonitorSection::map_state ()
 
                 char action_name[32];
 
-                snprintf (action_name, sizeof (action_name), "monitor-cut-%u", n+1);
+                snprintf (action_name, sizeof (action_name), "monitor-cut-%u", n);
                 act = ActionManager::get_action (X_("Monitor"), action_name);
                 if (act) {
                         Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
@@ -917,7 +917,7 @@ MonitorSection::map_state ()
                         }
                 }
 
-                snprintf (action_name, sizeof (action_name), "monitor-dim-%u", n+1);
+                snprintf (action_name, sizeof (action_name), "monitor-dim-%u", n);
                 act = ActionManager::get_action (X_("Monitor"), action_name);
                 if (act) {
                         Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
@@ -926,7 +926,7 @@ MonitorSection::map_state ()
                         }
                 }
 
-                snprintf (action_name, sizeof (action_name), "monitor-solo-%u", n+1);
+                snprintf (action_name, sizeof (action_name), "monitor-solo-%u", n);
                 act = ActionManager::get_action (X_("Monitor"), action_name);
                 if (act) {
                         Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
@@ -935,7 +935,7 @@ MonitorSection::map_state ()
                         }
                 }
 
-                snprintf (action_name, sizeof (action_name), "monitor-invert-%u", n+1);
+                snprintf (action_name, sizeof (action_name), "monitor-invert-%u", n);
                 act = ActionManager::get_action (X_("Monitor"), action_name);
                 if (act) {
                         Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
