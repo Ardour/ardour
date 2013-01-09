@@ -685,7 +685,7 @@ Session::remove_state (string snapshot_name)
 
 	// and delete it
 	if (g_remove (xml_path.c_str()) != 0) {
-		error << string_compose(_("Could not remove state file at path \"%1\" (%2)"),
+		error << string_compose(_("Could not remove session file at path \"%1\" (%2)"),
 				xml_path, g_strerror (errno)) << endmsg;
 	}
 }
@@ -807,7 +807,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	if (!tree.write (tmp_path)) {
 		error << string_compose (_("state could not be saved to %1"), tmp_path) << endmsg;
 		if (g_remove (tmp_path.c_str()) != 0) {
-			error << string_compose(_("Could not remove temporary state file at path \"%1\" (%2)"),
+			error << string_compose(_("Could not remove temporary session file at path \"%1\" (%2)"),
 					tmp_path, g_strerror (errno)) << endmsg;
 		}
 		return -1;
@@ -818,7 +818,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 			error << string_compose (_("could not rename temporary session file %1 to %2"),
 					tmp_path, xml_path) << endmsg;
 			if (g_remove (tmp_path.c_str()) != 0) {
-				error << string_compose(_("Could not remove temporary state file at path \"%1\" (%2)"),
+				error << string_compose(_("Could not remove temporary session file at path \"%1\" (%2)"),
 						tmp_path, g_strerror (errno)) << endmsg;
 			}
 			return -1;
@@ -883,7 +883,7 @@ Session::load_state (string snapshot_name)
 	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 		xmlpath = Glib::build_filename (_session_dir->root_path(), legalize_for_path (snapshot_name) + statefile_suffix);
 		if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
-                        error << string_compose(_("%1: session state information file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
+                        error << string_compose(_("%1: session file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
                         return 1;
                 }
         }
@@ -895,7 +895,7 @@ Session::load_state (string snapshot_name)
 	_writable = exists_and_writable (xmlpath);
 
 	if (!state_tree->read (xmlpath)) {
-		error << string_compose(_("Could not understand ardour file %1"), xmlpath) << endmsg;
+		error << string_compose(_("Could not understand session file %1"), xmlpath) << endmsg;
 		delete state_tree;
 		state_tree = 0;
 		return -1;
@@ -1659,7 +1659,7 @@ Session::load_nested_sources (const XMLNode& node)
 
 			XMLProperty* prop = (*niter)->property (X_("id"));
 			if (!prop) {
-				error << _("Nested source has no ID info in session state file! (ignored)") << endmsg;
+				error << _("Nested source has no ID info in session file! (ignored)") << endmsg;
 				continue;
 			}
 
@@ -2258,7 +2258,7 @@ Session::load_bundles (XMLNode const & node)
 		} else if ((*niter)->name() == "OutputBundle") {
 			add_bundle (boost::shared_ptr<UserBundle> (new UserBundle (**niter, false)));
 		} else {
-			error << string_compose(_("Unknown node \"%1\" found in Bundles list from state file"), (*niter)->name()) << endmsg;
+			error << string_compose(_("Unknown node \"%1\" found in Bundles list from session file"), (*niter)->name()) << endmsg;
 			return -1;
 		}
 	}

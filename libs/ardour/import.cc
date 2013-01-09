@@ -451,7 +451,7 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 		}
 
 	} catch (...) {
-		error << string_compose (_("MIDI file %1 was not readable (no reason available"), source->file_path()) << endmsg;
+		error << string_compose (_("MIDI file %1 was not readable (no reason available)"), source->file_path()) << endmsg;
 	}
 
 	if (buf) {

@@ -84,7 +84,7 @@ Session::memento_command_factory(XMLNode *n)
     }
 
     if (!child) {
-	error << _("Tried to reconstitute a MementoCommand with no contents, failing. id=") << id.to_s() << endmsg;
+	error << _("Tried to reconstitute a MementoCommand with no contents, failing. id=%1") << id.to_s() << endmsg;
 	return 0;
     }
 
