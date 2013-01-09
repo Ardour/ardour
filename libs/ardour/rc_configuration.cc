@@ -103,7 +103,7 @@ RCConfiguration::load_state ()
 				return -1;
 			}
 		} else {
-			error << string_compose (_("your system %1 configuration file is empty. This probably means that there as an error installing %1"), PROGRAM_NAME) << endmsg;
+			error << string_compose (_("Your system %1 configuration file is empty. This probably means that there was an error installing %1"), PROGRAM_NAME) << endmsg;
 		}
 	}
 

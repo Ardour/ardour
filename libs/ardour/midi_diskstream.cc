@@ -212,7 +212,7 @@ MidiDiskstream::find_and_use_playlist (const string& name)
 	}
 
 	if (!playlist) {
-		error << string_compose(_("MidiDiskstream: Playlist \"%1\" isn't an midi playlist"), name) << endmsg;
+		error << string_compose(_("MidiDiskstream: Playlist \"%1\" isn't a midi playlist"), name) << endmsg;
 		return -1;
 	}
 

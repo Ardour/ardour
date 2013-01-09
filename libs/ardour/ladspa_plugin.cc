@@ -293,8 +293,8 @@ LadspaPlugin::set_parameter (uint32_t which, float val)
 #endif
 
 	} else {
-		warning << string_compose (_("illegal parameter number used with plugin \"%1\". This may"
-					     "indicate a change in the plugin design, and presets may be"
+		warning << string_compose (_("illegal parameter number used with plugin \"%1\". This may "
+					     "indicate a change in the plugin design, and presets may be "
 					     "invalid"), name())
 			<< endmsg;
 	}

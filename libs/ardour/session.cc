@@ -1694,7 +1694,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 
 		catch (AudioEngine::PortRegistrationFailure& pfe) {
 
-			error << string_compose (_("No more JACK ports are available. You will need to stop %1 and restart JACK with ports if you need this many tracks."), PROGRAM_NAME) << endmsg;
+			error << string_compose (_("No more JACK ports are available. You will need to stop %1 and restart JACK with more ports if you need this many tracks."), PROGRAM_NAME) << endmsg;
 			goto failed;
 		}
 
