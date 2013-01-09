@@ -216,7 +216,7 @@ if [ ! -f jpegsrc.v8d.tar.gz ] ; then
     echo jpeg
     fetch_as_is http://www.ijg.org/files/jpegsrc.v8d.tar.gz
 fi
-if [ ! -f ] ; then
+if [ ! -f ExtUtils-MakeMaker-6.64.tar.gz ] ; then
     echo perl make maker
     fetch_as ExtUtils-MakeMaker-6.64.tar.gz http://search.cpan.org/CPAN/authors/id/M/MS/MSCHWERN/ExtUtils-MakeMaker-6.64.tar.gz
 fi
