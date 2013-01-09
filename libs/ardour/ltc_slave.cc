@@ -95,7 +95,6 @@ void
 LTC_Slave::parameter_changed (std::string const & p)
 {
 	if (p == "slave-timecode-offset"
-			|| p == "subframes-per-frame"
 			|| p == "timecode-format"
 			) {
 		parse_timecode_offset();

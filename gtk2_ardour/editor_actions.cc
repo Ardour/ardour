@@ -1447,8 +1447,6 @@ Editor::parameter_changed (std::string p)
 		update_region_fade_visibility ();
 	} else if (p == "edit-mode") {
 		edit_mode_selector.set_active_text (edit_mode_to_string (Config->get_edit_mode()));
-	} else if (p == "subframes-per-frame") {
-		update_just_timecode ();
 	} else if (p == "show-track-meters") {
 		toggle_meter_updating();
 	} else if (p == "show-summary") {

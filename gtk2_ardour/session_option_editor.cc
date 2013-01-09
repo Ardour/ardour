@@ -60,18 +60,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Timecode"), smf);
 
-	ComboOption<uint32_t>* spf = new ComboOption<uint32_t> (
-		"subframes-per-frame",
-		_("Subframes per frame"),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::get_subframes_per_frame),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::set_subframes_per_frame)
-		);
-
-	spf->add (80, _("80"));
-	spf->add (100, _("100"));
-
-	add_option (_("Timecode"), spf);
-
 	_vpu = new ComboOption<float> (
 		"video-pullup",
 		_("Pull-up / pull-down"),
