@@ -1,14 +1,13 @@
-# translation of libgtkmm2ext to German
 # Copyright (C) YEAR "Paul Davis"
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Edgar Aichinger <edgar.aichinger@aon.at>, 2013.
 msgid ""
 msgstr ""
-"Project-Id-Version: libgtkmm2ext\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-12-20 10:09+0100\n"
-"PO-Revision-Date: 2013-01-02 16:27+0100\n"
+"PO-Revision-Date: 2013-01-09 17:19+0100\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -28,9 +27,9 @@ msgstr "Jetzt den Kontroller bedienen"
 
 #: bindable_button.cc:48
 msgid "button cannot watch state of non-existing Controllable\n"
-msgstr
-"Die Schaltfläche kann den Status eines nichtexistenten Kontroller-Zieles "
-"nicht beobachten\n"
+msgstr ""
+"Schaltfläche kann den Status des nichtexistenten Kontrollzieles nicht "
+"verfolgen\n"
 
 #: gtk_ui.cc:107
 msgid "Log"
@@ -52,7 +51,7 @@ msgstr "Zum Beenden drücken"
 
 #: gtk_ui.cc:669
 msgid "I'm sorry %1, I can't do that"
-msgstr "Leider kann ich das nicht tun, lieber %1"
+msgstr "Leider kann ich das nicht tun, %1"
 
 #: keyboard.cc:68
 msgid "Command"
@@ -99,4 +98,5 @@ msgstr "Klicken, um an das Hauptfenster anzudocken"
 #: textviewer.cc:34
 msgid "Close"
 msgstr "Schließen"
+
 
