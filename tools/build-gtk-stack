@@ -65,6 +65,8 @@ mkdir -p $PREFIX
 export MAKEFLAGS=-j$parallel
 PATH=$PREFIX/bin:$PATH
 
+export PERL5LIB=$PREFIX/lib/perl/5.8.8:$PREFIX/lib/perl/5.8
+
 OSX=
 
 if uname -a | grep --silent arwin ; then
@@ -215,6 +217,10 @@ fi
 if [ ! -f jpegsrc.v8d.tar.gz ] ; then
     echo jpeg
     fetch_as_is http://www.ijg.org/files/jpegsrc.v8d.tar.gz
+fi
+if [ ! -f ExtUtils-MakeMaker-6.64.tar.gz ] ; then
+    echo perl make maker
+    fetch_as ExtUtils-MakeMaker-6.64.tar.gz http://search.cpan.org/CPAN/authors/id/M/MS/MSCHWERN/ExtUtils-MakeMaker-6.64.tar.gz
 fi
 if [ ! -f XML-Parser-2.41.tar.gz ] ; then
     echo perl xml parser
