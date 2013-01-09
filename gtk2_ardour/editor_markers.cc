@@ -901,7 +901,8 @@ Editor::build_range_marker_menu (bool loop_or_punch, bool session)
 	}
 	items.push_back (MenuElem (_("Set Range Mark from Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
 	if (!Profile->get_sae()) {
-		items.push_back (MenuElem (_("Set Range from Range Selection"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_selection)));
+		items.push_back (MenuElem (_("Set Range from Range/Region Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_menu_set_from_selection), false)));
+		items.push_back (MenuElem (_("Set Range from Region Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_menu_set_from_selection), true)));
 	}
 
 	items.push_back (MenuElem (_("Zoom to Range"), sigc::mem_fun (*this, &Editor::marker_menu_zoom_to_range)));
@@ -1154,7 +1155,7 @@ Editor::marker_menu_set_from_playhead ()
 }
 
 void
-Editor::marker_menu_set_from_selection ()
+Editor::marker_menu_set_from_selection (bool force_regions)
 {
 	Marker* marker;
 
@@ -1175,7 +1176,7 @@ Editor::marker_menu_set_from_selection ()
 
 			/* if range selection use first to last */
 
-			if (!selection->time.empty()) {
+			if (!selection->time.empty() && !force_regions) {
 				l->set_start (selection->time.start());
 				l->set_end (selection->time.end_frame());
 			}
