@@ -43,8 +43,7 @@ PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length)
 	dragging = false;
 	default_value = adjustment.get_value();
 	last_drawn = -1;
-
-	girth = 24;
+	girth = 23;
 
 	set_fader_length (fader_length);
 
@@ -85,11 +84,21 @@ PixFader::create_patterns ()
 {
 	Gdk::Color c = get_style()->get_fg (get_state());
 	float r, g, b;
+
+	if (pattern) {
+		cairo_pattern_destroy (pattern);
+	}
+
+	if (shine_pattern) {
+		cairo_pattern_destroy (shine_pattern);
+	}
+
 	r = c.get_red_p ();
 	g = c.get_green_p ();
 	b = c.get_blue_p ();
 
  	if (_orien == VERT) {
+
 		pattern = cairo_pattern_create_linear (0.0, 0.0, get_width(), 0);
 		cairo_pattern_add_color_stop_rgba (pattern, 0, r*0.8,g*0.8,b*0.8, 1.0);
 		cairo_pattern_add_color_stop_rgba (pattern, 1, r*0.6,g*0.6,b*0.6, 1.0);
@@ -99,14 +108,14 @@ PixFader::create_patterns ()
 		cairo_pattern_add_color_stop_rgba (shine_pattern, 0.2, 1,1,1,0.3);
 		cairo_pattern_add_color_stop_rgba (shine_pattern, 0.5, 1,1,1,0.0);
 		cairo_pattern_add_color_stop_rgba (shine_pattern, 1, 1,1,1,0.0);
+
 	} else {
-		float rheight = get_height();
-	
-		pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, rheight);
+
+		pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height());
 		cairo_pattern_add_color_stop_rgba (pattern, 0, r*0.8,g*0.8,b*0.8, 1.0);
 		cairo_pattern_add_color_stop_rgba (pattern, 1, r*0.6,g*0.6,b*0.6, 1.0);
 
-		shine_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, rheight);
+		shine_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height());
 		cairo_pattern_add_color_stop_rgba (shine_pattern, 0, 1,1,1,0.0);
 		cairo_pattern_add_color_stop_rgba (shine_pattern, 0.2, 1,1,1,0.3);
 		cairo_pattern_add_color_stop_rgba (shine_pattern, 0.5, 1,1,1,0.0);
@@ -119,7 +128,9 @@ PixFader::create_patterns ()
 		_text_width = 0;
 		_text_height = 0;
 	}
+
 	c = get_style()->get_text (get_state());
+
 	text_r = c.get_red_p ();
 	text_g = c.get_green_p ();
 	text_b = c.get_blue_p ();
@@ -152,43 +163,43 @@ PixFader::on_expose_event (GdkEventExpose*)
 	/* draw active box */
 
 	if (_orien == VERT) {
+
 		if (ds > h - FADER_RESERVE)
 			ds = h - FADER_RESERVE;
 
 		cairo_set_source (cr, pattern);
-		Gtkmm2ext::rounded_rectangle (cr, 1, 1+ds, w-2, h-(1+ds)-1, radius-1.5);
+		Gtkmm2ext::rounded_top_half_rectangle (cr, 1, 1+ds, w-1, h-(1+ds)-1, radius-1.5);
 		cairo_fill (cr);
 
-//		cairo_set_source (cr, shine_pattern);
-//		Gtkmm2ext::rounded_rectangle (cr, 2, ds, w-4, h-(1+ds)-1, radius-1.5);
-//		cairo_fill (cr);
 	} else {
+
 		if (ds < FADER_RESERVE)
 			ds = FADER_RESERVE;
 
 		cairo_set_source (cr, pattern);
-		Gtkmm2ext::rounded_rectangle (cr, 1, 1, ds-1, h-2, radius-1.5);
+		Gtkmm2ext::rounded_right_half_rectangle (cr, 1, 1, ds-1, h-1, radius-1.5);
 		cairo_fill (cr);
 
-//		cairo_set_source (cr, shine_pattern);
-//		Gtkmm2ext::rounded_rectangle (cr, 2, 3, ds-1, 15, radius-1.5);
-//		cairo_fill (cr);
 	}
 	
 	/* draw the unity-position line if it's not at either end*/
 	if (unity_loc > 0) {
-		if ( _orien == VERT && unity_loc < h ) {
+		if ( _orien == VERT) {
+			if (unity_loc < h ) {
 					context->set_line_width (1); 
 					context->set_source_rgb (0.0, 1.0, 0.0);
 					context->move_to (1, unity_loc);
 					context->line_to (girth, unity_loc);
 					context->stroke ();
-		} else if ( unity_loc < w ){
-					context->set_line_width (1); 
-					context->set_source_rgb (0.0, 1.0, 0.0);
-					context->move_to (unity_loc, 1);
-					context->line_to (unity_loc, girth);
-					context->stroke ();
+			}
+		} else {
+			if ( unity_loc < w ){
+				context->set_line_width (1); 
+				context->set_source_rgb (0.0, 1.0, 0.0);
+				context->move_to (unity_loc, 1);
+				context->line_to (unity_loc, girth);
+				context->stroke ();
+			}
 		}
 	}
 	
