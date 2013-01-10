@@ -32,7 +32,7 @@ namespace Gtkmm2ext {
 class PixFader : public Gtk::DrawingArea
 {
   public:
-	PixFader (Glib::RefPtr<Gdk::Pixbuf>, Glib::RefPtr<Gdk::Pixbuf>, Gtk::Adjustment& adjustment, int orientation, int);
+	PixFader (Gtk::Adjustment& adjustment, int orientation, int);
 	virtual ~PixFader ();
 
 	void set_fader_length (int);
@@ -79,12 +79,6 @@ class PixFader : public Gtk::DrawingArea
 		STATES
 	};
 	
-#if 0
-        Cairo::RefPtr<Cairo::Context> belt_context[STATES];
-        Cairo::RefPtr<Cairo::ImageSurface> belt_surface[STATES];
-        Glib::RefPtr<Gdk::Pixbuf> pixbuf[STATES];
-#endif
-
 	int span, girth;
 	int _orien;
         float left_r;
@@ -93,8 +87,6 @@ class PixFader : public Gtk::DrawingArea
         float right_r;
         float right_g;
         float right_b;
-
-	GdkRectangle view;
 
 	cairo_pattern_t* pattern;
 	cairo_pattern_t* shine_pattern;

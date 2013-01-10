@@ -142,8 +142,6 @@ public:
 
 	std::string state_id() const;
 
-	static void setup_slider_pix ();
-
 protected:
 	friend class StreamView;
 
@@ -288,9 +286,6 @@ protected:
 	void post_construct ();
 
 	GainMeterBase gm;
-
-	static Glib::RefPtr<Gdk::Pixbuf> slider;
-	static Glib::RefPtr<Gdk::Pixbuf> slider_desensitised;
 
 	XMLNode* underlay_xml_node;
 	bool set_underlay_state();

@@ -32,21 +32,10 @@ using namespace std;
 #define CORNER_RADIUS 4
 #define FADER_RESERVE (2*CORNER_RADIUS)
 
-PixFader::PixFader (
-	Glib::RefPtr<Gdk::Pixbuf> belt,
-	Glib::RefPtr<Gdk::Pixbuf> belt_desensitised,
-	Gtk::Adjustment& adj,
-	int orientation,
-	int fader_length
-	)
-	: adjustment (adj),
-	  _orien(orientation)
+PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length)
+	: adjustment (adj)
+	, _orien (orientation)
 {
-#if 0
-	pixbuf[NORMAL] = belt;
-	pixbuf[DESENSITISED] = belt_desensitised;
-#endif
-	
 	pattern = 0;
 	shine_pattern = 0;
 	
@@ -55,14 +44,7 @@ PixFader::PixFader (
 	default_value = adjustment.get_value();
 	last_drawn = -1;
 
-	view.x = 0;
-	view.y = 0;
-
-	if (orientation == VERT) {
-		view.width = girth = 24;
-	} else {
-		view.height = girth = 24;
-	}
+	girth = 24;
 
 	set_fader_length (fader_length);
 
@@ -70,23 +52,6 @@ PixFader::PixFader (
 
 	adjustment.signal_value_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
 	adjustment.signal_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
-
-#if 0
-	for (int i = 0; i < STATES; ++i) {
-		Cairo::Format format;
-			
-		if (pixbuf[i]->get_has_alpha()) {
-			format = Cairo::FORMAT_ARGB32;
-		} else {
-			format = Cairo::FORMAT_RGB24;
-		}
-
-		belt_surface[i] = Cairo::ImageSurface::create (format, pixbuf[i]->get_width(), pixbuf[i]->get_height());
-		belt_context[i] = Cairo::Context::create (belt_surface[i]);
-		Gdk::Cairo::set_source_pixbuf (belt_context[i], pixbuf[i], 0.0, 0.0);
-		belt_context[i]->paint();
-	}
-#endif
 	
         left_r = 0;
         left_g = 0;
@@ -119,7 +84,7 @@ void
 PixFader::create_patterns ()
 {
 	Gdk::Color c = get_style()->get_fg (get_state());
-    float r, g, b;
+	float r, g, b;
 	r = c.get_red_p ();
 	g = c.get_green_p ();
 	b = c.get_blue_p ();
@@ -161,7 +126,7 @@ PixFader::create_patterns ()
 }
 
 bool
-PixFader::on_expose_event (GdkEventExpose* ev)
+PixFader::on_expose_event (GdkEventExpose*)
 {
 	Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
 	cairo_t* cr = context->cobj();
@@ -254,18 +219,24 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 void
 PixFader::on_size_request (GtkRequisition* req)
 {
-	req->width = view.width;
-	req->height = view.height;
+	if (_orien == VERT) {
+		req->width = girth;
+		req->height = span;
+	} else {
+		req->height = girth;
+		req->width = span;
+	}
 }
 
 void
 PixFader::on_size_allocate (Gtk::Allocation& alloc)
 {
 	DrawingArea::on_size_allocate(alloc);
+
 	if (_orien == VERT) {
-		view.height = span = alloc.get_height();
+		span = alloc.get_height();
 	} else {
-		view.width = span = alloc.get_width();
+		span = alloc.get_width();
 	}
 
 	update_unity_position ();
@@ -479,9 +450,9 @@ void
 PixFader::set_fader_length (int l)
 {
 	if (_orien == VERT) {
-		view.height = span = l;
+		span = l;
 	} else {
-		view.width = span = l;
+		span = l;
 	}
 
 	update_unity_position ();
@@ -493,9 +464,9 @@ void
 PixFader::update_unity_position ()
 {
 	if (_orien == VERT) {
-		unity_loc = (int) rint (view.height * (1 - (default_value / (adjustment.get_upper() - adjustment.get_lower())))) - 1;
+		unity_loc = (int) rint (span * (1 - (default_value / (adjustment.get_upper() - adjustment.get_lower())))) - 1;
 	} else {
-		unity_loc = (int) rint (default_value * view.width);
+		unity_loc = (int) rint (default_value * span);
 	}
 
 	queue_draw ();

@@ -522,8 +522,6 @@ private:
 
 	Gtk::Adjustment _db_adjustment;
 	Gtkmm2ext::HSliderController* _db_slider;
-	Glib::RefPtr<Gdk::Pixbuf> _pix;
-	Glib::RefPtr<Gdk::Pixbuf> _pix_desensitised;
 	Gtk::Entry _db_display;
 	Gtk::Label _label;
 	Gtk::HBox _box;

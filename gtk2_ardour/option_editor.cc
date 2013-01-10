@@ -224,21 +224,7 @@ FaderOption::FaderOption (string const & i, string const & n, sigc::slot<gain_t>
 	, _get (g)
 	, _set (s)
 {
-	_pix = ::get_icon (X_("fader_belt_h"));
-	if (_pix == 0) {
-		throw failed_constructor ();
-	}
-
-	_pix_desensitised = ::get_icon (X_("fader_belt_h_desensitised"));
-	if (_pix_desensitised == 0) {
-		throw failed_constructor ();
-	}
-	
-	_db_slider = manage (new HSliderController (_pix,
-						    _pix_desensitised,
-						    &_db_adjustment,
-						    115,
-						    false));
+	_db_slider = manage (new HSliderController (&_db_adjustment, 115, false));
 
 	_label.set_text (n + ":");
 	_label.set_name (X_("OptionsLabel"));

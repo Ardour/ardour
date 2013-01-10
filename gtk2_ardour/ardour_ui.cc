@@ -273,9 +273,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 		setup_gtk_ardour_enums ();
 		setup_profile ();
 
-		GainMeter::setup_slider_pix ();
-		RouteTimeAxisView::setup_slider_pix ();
-		ProcessorEntry::setup_slider_pix ();
 		SessionEvent::create_per_thread_pool ("GUI", 512);
 
 	} catch (failed_constructor& err) {

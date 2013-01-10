@@ -39,7 +39,7 @@ namespace Gtkmm2ext {
 class SliderController : public Gtkmm2ext::PixFader
 {
   public:
-	SliderController (Glib::RefPtr<Gdk::Pixbuf>, Glib::RefPtr<Gdk::Pixbuf>, Gtk::Adjustment* adj, int orientation, int);
+	SliderController (Gtk::Adjustment* adj, int orientation, int);
 	
         virtual ~SliderController () {}
 
@@ -53,8 +53,6 @@ class SliderController : public Gtkmm2ext::PixFader
 
   protected:
 	BindingProxy binding_proxy;
-	Glib::RefPtr<Gdk::Pixbuf> slider;
-	Glib::RefPtr<Gdk::Pixbuf> rail;
 	Gtk::SpinButton     spin;
 	Gtk::Frame          spin_frame;
 	Gtk::HBox           spin_hbox;
@@ -65,19 +63,13 @@ class SliderController : public Gtkmm2ext::PixFader
 class VSliderController : public SliderController
 {
   public:
-	VSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
-			   Glib::RefPtr<Gdk::Pixbuf> image_desensitised,
-			   Gtk::Adjustment *adj, int,
-			   bool with_numeric = true);
+	VSliderController (Gtk::Adjustment *adj, int, bool with_numeric = true);
 };
 
 class HSliderController : public SliderController
 {
   public:
-	HSliderController (Glib::RefPtr<Gdk::Pixbuf> image,
-			   Glib::RefPtr<Gdk::Pixbuf> image_desensitised,
-			   Gtk::Adjustment *adj, int,
-			   bool with_numeric = true);
+	HSliderController (Gtk::Adjustment *adj, int, bool with_numeric = true);
 };
 
 

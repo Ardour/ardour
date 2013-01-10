@@ -85,21 +85,6 @@ using namespace Editing;
 using namespace std;
 using std::list;
 
-Glib::RefPtr<Gdk::Pixbuf> RouteTimeAxisView::slider;
-Glib::RefPtr<Gdk::Pixbuf> RouteTimeAxisView::slider_desensitised;
-
-void
-RouteTimeAxisView::setup_slider_pix ()
-{
-	if ((slider = ::get_icon ("fader_belt_h_medium")) == 0) {
-		throw failed_constructor ();
-	}
-
-	if ((slider_desensitised = ::get_icon ("fader_belt_h_medium_desensitised")) == 0) {
-		throw failed_constructor ();
-	}
-}
-
 RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, Canvas& canvas)
 	: AxisView(sess)
 	, RouteUI(sess)
@@ -117,7 +102,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, Canvas& c
 	, playlist_action_menu (0)
 	, mode_menu (0)
 	, color_mode_menu (0)
-	, gm (sess, slider, slider_desensitised, true, 125)
+	, gm (sess, true, 125)
 	, _ignore_set_layer_display (false)
 {
 }

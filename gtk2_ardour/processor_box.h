@@ -131,17 +131,12 @@ public:
 	std::string state_id () const;
 	Gtk::Menu* build_controls_menu ();
 
-	static void setup_slider_pix ();
-
 protected:
 	ArdourButton _button;
 	Gtk::VBox _vbox;
 	Position _position;
 
 	virtual void setup_visuals ();
-
-	static Glib::RefPtr<Gdk::Pixbuf> _slider_pixbuf;
-	static Glib::RefPtr<Gdk::Pixbuf> _slider_pixbuf_desensitised;
 
 private:
 	void led_clicked();
@@ -159,7 +154,7 @@ private:
 
 	class Control : public sigc::trackable {
 	public:
-		Control (Glib::RefPtr<Gdk::Pixbuf>, Glib::RefPtr<Gdk::Pixbuf>, boost::shared_ptr<ARDOUR::AutomationControl>, std::string const &);
+		Control (boost::shared_ptr<ARDOUR::AutomationControl>, std::string const &);
 
 		void set_pixel_width (int);
 		void set_visible (bool);
