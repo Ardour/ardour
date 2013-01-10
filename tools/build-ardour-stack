@@ -206,9 +206,9 @@ if [ ! -f lv2-1.2.0.tar.bz2 ] ; then
     echo LV2
     fetch_as_is http://lv2plug.in/spec/lv2-1.2.0.tar.bz2
 fi
-if [ ! -f serd-0.18.0.tar.bz2 ] ; then
+if [ ! -f serd-0.18.2.tar.bz2 ] ; then
     echo Serd
-    fetch_as_is http://download.drobilla.net/serd-0.18.0.tar.bz2
+    fetch_as_is http://download.drobilla.net/serd-0.18.2.tar.bz2
 fi
 if [ ! -f sord-0.10.4.tar.bz2 ] ; then
     echo Sord
@@ -346,8 +346,8 @@ tar xf isodate-0.4.0.tar.gz && \
 
 tar xf lv2-1.2.0.tar.bz2 && \
     (set -e && cd lv2-1.2.0 && unset MACOSX_DEPLOYMENT_TARGET && ./waf configure --prefix=$PREFIX --copy-headers && ./waf build && sudo ./waf install) || die "LV2 build failed"
-tar xf serd-0.18.0.tar.bz2 && \
-    (set -e && cd serd-0.18.0 && ./waf configure --prefix=$PREFIX && ./waf build && ./waf install && fix_install_name $PREFIX/lib/libserd-0.dylib) || die "serd build failed"
+tar xf serd-0.18.2.tar.bz2 && \
+    (set -e && cd serd-0.18.2 && ./waf configure --prefix=$PREFIX && ./waf build && ./waf install && fix_install_name $PREFIX/lib/libserd-0.dylib) || die "serd build failed"
 tar xf sord-0.10.4.tar.bz2 && \
     (set -e && cd sord-0.10.4 && ./waf configure --prefix=$PREFIX  && ./waf build && ./waf install && fix_install_name $PREFIX/lib/libsord-0.dylib) || die "sord build failed"
 tar xf sratom-0.4.0.tar.bz2 && \
