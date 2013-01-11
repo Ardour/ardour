@@ -62,7 +62,7 @@ sigc::signal<void,RouteGroup*> GainMeterBase::ResetGroupPeakDisplays;
 
 GainMeter::MetricPatterns GainMeter::metric_patterns;
 
-GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length)
+GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int fader_girth)
 	: gain_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0.0, 1.0, 0.01, 0.1)
 	, gain_automation_style_button ("")
 	, gain_automation_state_button ("")
@@ -81,9 +81,9 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length)
 	_width = Wide;
 
 	if (horizontal) {
-		gain_slider = manage (new HSliderController (&gain_adjustment, fader_length, false));
+		gain_slider = manage (new HSliderController (&gain_adjustment, fader_length, fader_girth, false));
 	} else {
-		gain_slider = manage (new VSliderController (&gain_adjustment, fader_length, false));
+		gain_slider = manage (new VSliderController (&gain_adjustment, fader_length, fader_girth, false));
 	}
 
 	level_meter = new LevelMeter(_session);
@@ -500,10 +500,7 @@ GainMeterBase::set_meter_strip_name (const char * name)
 void
 GainMeterBase::set_fader_name (const char * name)
 {
-        uint32_t rgb_active = rgba_from_style (name, 0xff, 0, 0xff, 0, "bg", STATE_ACTIVE, false);
-        uint32_t rgb_normal = rgba_from_style (name, 0xff, 0xff, 0, 0, "bg", STATE_NORMAL, false);
-
-	gain_slider->set_border_colors (rgb_normal, rgb_active);
+	gain_slider->set_name (name);
 }
 
 void
@@ -511,7 +508,6 @@ GainMeterBase::update_gain_sensitive ()
 {
 	bool x = !(_amp->gain_control()->alist()->automation_state() & Play);
 	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (x);
-	gain_slider->create_patterns();
 }
 
 static MeterPoint
@@ -854,7 +850,7 @@ GainMeterBase::on_theme_changed()
 }
 
 GainMeter::GainMeter (Session* s, int fader_length)
-	: GainMeterBase (s, false, fader_length)
+	: GainMeterBase (s, false, fader_length, 24)
 	, gain_display_box(true, 0)
 	, hbox(true, 2)
 {

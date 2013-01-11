@@ -68,8 +68,13 @@ style "small_red_active_and_selected_button" = "small_button"
 
 style "gain_fader"
 {
-        bg[NORMAL] = shade (0.7, @@COLPREFIX@_lightest)
-	bg[ACTIVE] = shade (0.705, @@COLPREFIX@_lightest)
+        bg[NORMAL] = shade (0.7, @@COLPREFIX@_bg)
+	bg[ACTIVE] = shade (0.705, @@COLPREFIX@_bg)
+	bg[INSENSITIVE] = shade (0.705, @@COLPREFIX@_bg)
+
+        fg[INSENSITIVE] = shade (0.7, @@COLPREFIX@_bright_color)
+        fg[NORMAL] = shade (0.7, @@COLPREFIX@_bright_color)
+	fg[ACTIVE] = shade (0.705, @@COLPREFIX@_bright_color)
 }
 
 #MSR and related buttons

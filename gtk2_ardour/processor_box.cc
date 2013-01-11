@@ -394,7 +394,7 @@ ProcessorEntry::toggle_control_visibility (Control* c)
 ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string const & n)
 	: _control (c)
 	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)
-	, _slider (&_adjustment, 0, false)
+	, _slider (&_adjustment, 0, 13, false)
 	, _slider_persistant_tooltip (&_slider)
 	, _button (ArdourButton::Element (ArdourButton::Text | ArdourButton::Indicator))
 	, _ignore_ui_adjustment (false)
@@ -417,7 +417,6 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 	} else {
 		
 		_slider.set_name ("PluginSlider");
-		_slider.set_size_request (-1, 13);
 		_slider.set_text (_name);
 
 //		box.pack_start (_label);

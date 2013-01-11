@@ -67,7 +67,7 @@ namespace Gtk {
 class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 {
   public:
-        GainMeterBase (ARDOUR::Session*, bool horizontal, int);
+        GainMeterBase (ARDOUR::Session*, bool horizontal, int, int);
 	virtual ~GainMeterBase ();
 
 	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
@@ -200,7 +200,7 @@ private:
 class GainMeter : public GainMeterBase, public Gtk::VBox
 {
   public:
-	GainMeter (ARDOUR::Session*, int);
+         GainMeter (ARDOUR::Session*, int);
 	~GainMeter () {}
 
 	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,

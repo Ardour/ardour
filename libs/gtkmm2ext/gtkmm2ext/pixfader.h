@@ -32,16 +32,11 @@ namespace Gtkmm2ext {
 class PixFader : public Gtk::DrawingArea
 {
   public:
-	PixFader (Gtk::Adjustment& adjustment, int orientation, int);
+        PixFader (Gtk::Adjustment& adjustment, int orientation, int span, int girth);
 	virtual ~PixFader ();
 
 	void set_fader_length (int);
-        void set_border_colors (uint32_t rgba_left, uint32_t rgba_right);
-
-	void create_patterns();
-
 	void set_default_value (float);
-
 	void set_text (const std::string&);
 
   protected:
@@ -65,31 +60,19 @@ class PixFader : public Gtk::DrawingArea
 	bool on_scroll_event (GdkEventScroll* ev);
 	bool on_enter_notify_event (GdkEventCrossing* ev);
 	bool on_leave_notify_event (GdkEventCrossing* ev);
+        void on_state_changed (Gtk::StateType);
 
 	enum Orientation {
-		VERT=1,
-		HORIZ=2,
+		VERT,
+		HORIZ,
 	};
 
   private:
-
-	enum State {
-		NORMAL,
-		DESENSITISED,
-		STATES
-	};
-	
 	int span, girth;
 	int _orien;
-        float left_r;
-        float left_g;
-        float left_b;
-        float right_r;
-        float right_g;
-        float right_b;
 
 	cairo_pattern_t* pattern;
-	cairo_pattern_t* shine_pattern;
+	cairo_pattern_t* texture_pattern;
 
 	bool _hovering;
 
@@ -105,6 +88,8 @@ class PixFader : public Gtk::DrawingArea
 	int display_span ();
 	void set_adjustment_from_event (GdkEventButton *);
 	void update_unity_position ();
+        void free_patterns ();
+	void create_patterns();
 };
 
 

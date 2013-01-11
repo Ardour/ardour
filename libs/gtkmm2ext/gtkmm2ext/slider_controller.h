@@ -39,7 +39,7 @@ namespace Gtkmm2ext {
 class SliderController : public Gtkmm2ext::PixFader
 {
   public:
-	SliderController (Gtk::Adjustment* adj, int orientation, int);
+        SliderController (Gtk::Adjustment* adj, int orientation, int, int);
 	
         virtual ~SliderController () {}
 
@@ -63,13 +63,13 @@ class SliderController : public Gtkmm2ext::PixFader
 class VSliderController : public SliderController
 {
   public:
-	VSliderController (Gtk::Adjustment *adj, int, bool with_numeric = true);
+        VSliderController (Gtk::Adjustment *adj, int, int, bool with_numeric = true);
 };
 
 class HSliderController : public SliderController
 {
   public:
-	HSliderController (Gtk::Adjustment *adj, int, bool with_numeric = true);
+	HSliderController (Gtk::Adjustment *adj, int, int, bool with_numeric = true);
 };
 
 

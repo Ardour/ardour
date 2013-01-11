@@ -102,7 +102,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, Canvas& c
 	, playlist_action_menu (0)
 	, mode_menu (0)
 	, color_mode_menu (0)
-	, gm (sess, true, 125)
+	, gm (sess, true, 125, 18)
 	, _ignore_set_layer_display (false)
 {
 }
@@ -194,7 +194,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 //	pad->pack_start (gm.get_gain_slider(), false, false);
 //	pad->pack_start (*manage (new Gtk::Label), true, true);
 //	pad->show_all ();
-	controls_table.attach (gm.get_gain_slider(), 0, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 3, 0);
+	controls_table.attach (gm.get_gain_slider(), 0, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::AttachOptions (0), 3, 0);
 
 	ARDOUR_UI::instance()->set_tip(*solo_button,_("Solo"));
 	ARDOUR_UI::instance()->set_tip(*mute_button,_("Mute"));

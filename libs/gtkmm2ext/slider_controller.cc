@@ -28,8 +28,8 @@
 using namespace Gtkmm2ext;
 using namespace PBD;
 
-SliderController::SliderController (Gtk::Adjustment *adj, int orientation, int fader_length)
-	: PixFader (*adj, orientation, fader_length)
+SliderController::SliderController (Gtk::Adjustment *adj, int orientation, int fader_length, int fader_girth)
+	: PixFader (*adj, orientation, fader_length, fader_girth)
 	, spin (*adj, 0, 2)
 {			  
 	spin.set_name ("SliderControllerValue");
@@ -54,9 +54,9 @@ SliderController::on_button_press_event (GdkEventButton *ev)
 	return PixFader::on_button_press_event (ev);
 }
 
-VSliderController::VSliderController (Gtk::Adjustment *adj, int fader_length, bool with_numeric)
+VSliderController::VSliderController (Gtk::Adjustment *adj, int fader_length, int fader_girth, bool with_numeric)
 
-	: SliderController (adj, VERT, fader_length)
+	: SliderController (adj, VERT, fader_length, fader_girth)
 {
 	if (with_numeric) {
 		spin_frame.add (spin);
@@ -67,10 +67,10 @@ VSliderController::VSliderController (Gtk::Adjustment *adj, int fader_length, bo
 	}
 }
 
-HSliderController::HSliderController (Gtk::Adjustment *adj, int fader_length,
+HSliderController::HSliderController (Gtk::Adjustment *adj, int fader_length, int fader_girth,
 				      bool with_numeric)
 	
-	: SliderController (adj, HORIZ, fader_length)
+	: SliderController (adj, HORIZ, fader_length, fader_girth)
 {
 	if (with_numeric) {
 		spin_frame.add (spin);
