@@ -84,7 +84,7 @@ PixFader::create_patterns ()
 
 	cairo_surface_t* texture_surface;
 	cairo_t* tc = 0;
-	const double texture_margin = 3.0;
+	const double texture_margin = 4.0;
 
  	if (_orien == VERT) {
 
@@ -96,7 +96,7 @@ PixFader::create_patterns ()
 			texture_surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, girth, 6);
 			tc = cairo_create (texture_surface);
 			
-			for (double x = texture_margin; x < girth - texture_margin; x += 3.0) {
+			for (double x = texture_margin; x < girth - texture_margin; x += 4.0) {
 				cairo_set_source_rgba (tc, 0.533, 0.533, 0.580, 1.0);
 				cairo_rectangle (tc, x, 2, 2, 2);
 				cairo_fill (tc);
@@ -116,7 +116,7 @@ PixFader::create_patterns ()
 		cairo_pattern_add_color_stop_rgba (pattern, 1, r*0.6,g*0.6,b*0.6, 1.0);
 
 		if (girth > 10) {
-			for (double y = texture_margin; y < girth - texture_margin; y += 3) {
+			for (double y = texture_margin; y < girth - texture_margin; y += 4.0) {
 				cairo_set_source_rgba (tc, 0.533, 0.533, 0.580, 1.0);
 				cairo_rectangle (tc, 0, y, 2, 2);
 				cairo_fill (tc);
