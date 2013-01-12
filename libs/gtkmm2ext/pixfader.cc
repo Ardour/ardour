@@ -198,7 +198,7 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 		cairo_set_source (cr, pattern);
 		cairo_matrix_init_translate (&matrix, 0, (h - ds));
 		cairo_pattern_set_matrix (pattern, &matrix);
-		cairo_rectangle (cr, 0, 0, w, h);
+		Gtkmm2ext::rounded_rectangle (cr, 0, 0, w, h, CORNER_RADIUS-1.5);
 		cairo_fill (cr);
 
 	} else {
@@ -222,7 +222,7 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 		cairo_set_source (cr, pattern);
 		cairo_matrix_init_translate (&matrix, w - ds, 0);
 		cairo_pattern_set_matrix (pattern, &matrix);
-		cairo_rectangle (cr, 0, 0, w, h);
+		Gtkmm2ext::rounded_rectangle (cr, 0, 0, w, h, CORNER_RADIUS-1.5);
 		cairo_fill (cr);
 	}
 		
