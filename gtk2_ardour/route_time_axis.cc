@@ -166,8 +166,10 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
                 if (is_midi_track()) {
                         ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record (Right-click for Step Edit)"));
+			gm.set_fader_name ("MidiTrackFader");
                 } else {
                         ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record"));
+			gm.set_fader_name ("AudioTrackFader");
                 }
 
 		rec_enable_button->set_sensitive (_session->writable());
@@ -175,7 +177,9 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		/* set playlist button tip to the current playlist, and make it update when it changes */
 		update_playlist_tip ();
 		track()->PlaylistChanged.connect (*this, invalidator (*this), ui_bind(&RouteTimeAxisView::update_playlist_tip, this), gui_context());
-		
+
+	} else {
+		gm.set_fader_name ("AudioBusFader");
 	}
 	
 	controls_hbox.pack_start(gm.get_level_meter(), false, false);
@@ -190,10 +194,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
         }
 
 	controls_table.attach (route_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-//	Gtk::VBox* pad = manage (new Gtk::VBox);
-//	pad->pack_start (gm.get_gain_slider(), false, false);
-//	pad->pack_start (*manage (new Gtk::Label), true, true);
-//	pad->show_all ();
 	controls_table.attach (gm.get_gain_slider(), 0, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::AttachOptions (0), 3, 0);
 
 	ARDOUR_UI::instance()->set_tip(*solo_button,_("Solo"));
@@ -246,7 +246,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	route_group_menu = new RouteGroupMenu (_session, plist);
 
 	// gm.get_gain_slider().signal_scroll_event().connect(sigc::mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
-	gm.get_gain_slider().set_name ("GainFader");
 
 	gm.get_level_meter().signal_scroll_event().connect (sigc::mem_fun (*this, &RouteTimeAxisView::controls_ebox_scroll), false);
 }

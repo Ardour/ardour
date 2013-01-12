@@ -73,67 +73,88 @@ PixFader::free_patterns ()
 void
 PixFader::create_patterns ()
 {
-	Gdk::Color c = get_style()->get_fg (get_state());
-	float r, g, b;
-
 	free_patterns ();
 
-	r = c.get_red_p ();
-	g = c.get_green_p ();
-	b = c.get_blue_p ();
+	Gdk::Color c = get_style()->get_fg (get_state());
+	float fr, fg, fb;
+	float br, bg, bb;
 
-	cairo_surface_t* texture_surface;
+	fr = c.get_red_p ();
+	fg = c.get_green_p ();
+	fb = c.get_blue_p ();
+
+	c = get_style()->get_bg (get_state());
+
+	br = c.get_red_p ();
+	bg = c.get_green_p ();
+	bb = c.get_blue_p ();
+
+	cairo_surface_t* surface;
 	cairo_t* tc = 0;
-	const double texture_margin = 4.0;
+	float radius = CORNER_RADIUS;
+
+	double w = get_width();
 
  	if (_orien == VERT) {
+		
+		surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, get_width(), get_height() * 2.0);
+		tc = cairo_create (surface);
 
-		pattern = cairo_pattern_create_linear (0.0, 0.0, get_width(), 0);
-		cairo_pattern_add_color_stop_rgba (pattern, 0, r*0.8,g*0.8,b*0.8, 1.0);
-		cairo_pattern_add_color_stop_rgba (pattern, 1, r*0.6,g*0.6,b*0.6, 1.0);
+		/* paint background + border */
 
-		if (girth > 10) {
-			texture_surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, girth, 6);
-			tc = cairo_create (texture_surface);
-			
-			for (double x = texture_margin; x < girth - texture_margin; x += 4.0) {
-				cairo_set_source_rgba (tc, 0.533, 0.533, 0.580, 1.0);
-				cairo_rectangle (tc, x, 2, 2, 2);
-				cairo_fill (tc);
-				cairo_set_source_rgba (tc, 0.337, 0.345, 0.349, 1.0);
-				cairo_rectangle (tc, x, 2, 1, 1);
-				cairo_fill (tc);
-			}
-		}
+		cairo_pattern_t* shade_pattern = cairo_pattern_create_linear (0.0, 0.0, get_width(), 0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, br*0.8,bg*0.8,bb*0.8, 1.0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, br*0.6,bg*0.6,bb*0.6, 1.0);
+		cairo_set_source (tc, shade_pattern);
+		cairo_rectangle (tc, 0, 0, get_width(), get_height() * 2.0);
+		cairo_fill (tc);
+
+		cairo_pattern_destroy (shade_pattern);
+		
+		/* paint lower shade */
+		
+		w -= 2.0;
+
+		shade_pattern = cairo_pattern_create_linear (0.0, 0.0, w, 0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, fr*0.8,fg*0.8,fb*0.8, 1.0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, fr*0.6,fg*0.6,fb*0.6, 1.0);
+		cairo_set_source (tc, shade_pattern);
+		Gtkmm2ext::rounded_top_half_rectangle (tc, 1.0, get_height(), w, get_height(), radius-1.5);
+		cairo_fill (tc);
+
+		cairo_pattern_destroy (shade_pattern);
+
+		pattern = cairo_pattern_create_for_surface (surface);
 
 	} else {
 
-		texture_surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 6, girth);
-		tc = cairo_create (texture_surface);
+		surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, get_width() * 2.0, get_height());
+		tc = cairo_create (surface);
 
-		pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height());
-		cairo_pattern_add_color_stop_rgba (pattern, 0, r*0.8,g*0.8,b*0.8, 1.0);
-		cairo_pattern_add_color_stop_rgba (pattern, 1, r*0.6,g*0.6,b*0.6, 1.0);
+		/* paint right shade (background section)*/
 
-		if (girth > 10) {
-			for (double y = texture_margin; y < girth - texture_margin; y += 4.0) {
-				cairo_set_source_rgba (tc, 0.533, 0.533, 0.580, 1.0);
-				cairo_rectangle (tc, 0, y, 2, 2);
-				cairo_fill (tc);
-				cairo_set_source_rgba (tc, 0.337, 0.345, 0.349, 1.0);
-				cairo_rectangle (tc, 0, y, 1, 1);
-				cairo_fill (tc);
-			}
-		}
-	}
+		cairo_pattern_t* shade_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height());
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, br*0.8,bg*0.8,bb*0.8, 1.0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, br*0.6,bg*0.6,bb*0.6, 1.0);
+		cairo_set_source (tc, shade_pattern);
+		cairo_rectangle (tc, 0, 0, get_width() * 2.0, get_height());
+		cairo_fill (tc);
 
-	if (texture_surface) {
-		texture_pattern = cairo_pattern_create_for_surface (texture_surface);
-		cairo_pattern_set_extend (texture_pattern, CAIRO_EXTEND_REPEAT);
+		/* paint left shade (active section/foreground) */
 		
-		cairo_destroy (tc);
-		cairo_surface_destroy (texture_surface);
+		shade_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, get_height());
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, fr*0.8,fg*0.8,fb*0.8, 1.0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, fr*0.6,fg*0.6,fb*0.6, 1.0);
+		cairo_set_source (tc, shade_pattern);
+		Gtkmm2ext::rounded_right_half_rectangle (tc, 0, 1, get_width(), get_height() - 2.0, radius-1.5);
+		cairo_fill (tc);
+		cairo_pattern_destroy (shade_pattern);
+		
+		pattern = cairo_pattern_create_for_surface (surface);
 	}
+
+	cairo_destroy (tc);
+	cairo_surface_destroy (surface);
 
 	if ( !_text.empty()) {
 		_layout->get_pixel_size (_text_width, _text_height);
@@ -162,21 +183,10 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 		create_patterns();
 	}
 	
-//	int const pi = get_sensitive() ? NORMAL : DESENSITISED;
-	
 	int ds = display_span ();
-
 	float w = get_width();
 	float h = get_height();
-	float radius = CORNER_RADIUS;
 
-	/* background/ border */
-	cairo_set_source_rgb (cr, 0.290, 0.286, 0.337);
-	cairo_rectangle (cr, 0, 0, w, h);
-	cairo_fill (cr);
-
-	/* draw active box */
-	
 	cairo_matrix_t matrix;
 
 	if (_orien == VERT) {
@@ -186,19 +196,10 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 		}
 
 		cairo_set_source (cr, pattern);
-		Gtkmm2ext::rounded_top_half_rectangle (cr, 1, 1+ds, w-1, h-(1+ds)-1, radius-1.5);
+		cairo_matrix_init_translate (&matrix, 0, (h - ds));
+		cairo_pattern_set_matrix (pattern, &matrix);
+		cairo_rectangle (cr, 0, 0, w, h);
 		cairo_fill (cr);
-		
-		if (texture_pattern) {
-			cairo_save (cr);
-			cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
-			cairo_set_source (cr, texture_pattern);
-			cairo_matrix_init_translate (&matrix, -1, -(1+ds));
-			cairo_pattern_set_matrix (texture_pattern, &matrix);
-			cairo_rectangle (cr, 1, 1+ds, w-1, h-(1+ds)-1);
-			cairo_fill (cr);
-			cairo_restore (cr);
-		}
 
 	} else {
 
@@ -206,20 +207,23 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 			ds = FADER_RESERVE;
 		}
 
+		/*
+		  if ds == w, the pattern does not need to be translated
+		  if ds == 0 (or FADER_RESERVE), the pattern needs to be moved
+   		      w to the left, which is -w in pattern space, and w in
+		      user space
+		  if ds == 10, then the pattern needs to be moved w - 10
+		      to the left, which is -(w-10) in pattern space, which 
+		      is (w - 10) in user space
+
+		  thus: translation = (w - ds)
+		 */
+
 		cairo_set_source (cr, pattern);
-		Gtkmm2ext::rounded_right_half_rectangle (cr, 1, 1, ds-1, h-1, radius-1.5);
+		cairo_matrix_init_translate (&matrix, w - ds, 0);
+		cairo_pattern_set_matrix (pattern, &matrix);
+		cairo_rectangle (cr, 0, 0, w, h);
 		cairo_fill (cr);
-		
-		if (texture_pattern) {
-			cairo_save (cr);
-			cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
-			cairo_set_source (cr, texture_pattern);
-			cairo_matrix_init_translate (&matrix, -1, -1);
-			cairo_pattern_set_matrix (texture_pattern, &matrix);
-			cairo_rectangle (cr, 1, 1, ds-1, h-1);
-			cairo_fill (cr);
-			cairo_restore (cr);
-		}
 	}
 		
 	/* draw the unity-position line if it's not at either end*/
@@ -229,7 +233,7 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 					context->set_line_width (1); 
 					context->set_source_rgb (0.0, 1.0, 0.0);
 					context->move_to (1, unity_loc);
-					context->line_to (girth, unity_loc);
+					context->line_to (girth - 2.0, unity_loc);
 					context->stroke ();
 			}
 		} else {
@@ -237,7 +241,7 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 				context->set_line_width (1); 
 				context->set_source_rgb (0.0, 1.0, 0.0);
 				context->move_to (unity_loc, 1);
-				context->line_to (unity_loc, girth);
+				context->line_to (unity_loc, girth - 2.0);
 				context->stroke ();
 			}
 		}
@@ -257,7 +261,7 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 //	if (Config->get_widget_prelight()) {  //pixfader does not have access to config
 		if (_hovering) {
 			Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), 3);
-			cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
+			cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.1);
 			cairo_fill (cr);
 		}
 //	}
