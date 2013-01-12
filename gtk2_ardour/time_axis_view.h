@@ -281,7 +281,6 @@ class TimeAxisView : public virtual AxisView
 	virtual void selection_click (GdkEventButton*);
 
 	bool _hidden;
-	bool _has_state;
 	bool in_destructor;
 	NamePackingBits name_packing;
 

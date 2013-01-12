@@ -70,10 +70,22 @@ PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess)
 	, controls_table (2, 8)
+	, height (0)
+	, last_name_entry_key_press_event (0)
+	, display_menu (0)
+	, parent (rent)
+	, selection_group (0)
+	, _hidden (false)
+	, in_destructor (false)
+	, name_packing (NamePackingBits (0))
 	, _size_menu (0)
+	, _canvas_display (0)
 	, _y_position (0)
 	, _editor (ed)
+	, control_parent (0)
 	, _order (0)
+	, _effective_height (0)
+	, _resize_drag_start (-1)
 	, _preresize_cursor (0)
 	, _have_preresize_cursor (false)
 	, _ghost_group (0)
@@ -93,17 +105,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	_ghost_group = new Group (*_canvas_display);
 	_ghost_group->lower_to_bottom();
 	_ghost_group->show();
-
-	control_parent = 0;
-	display_menu = 0;
-	_hidden = false;
-	in_destructor = false;
-	height = 0;
-	_effective_height = 0;
-	parent = rent;
-	last_name_entry_key_press_event = 0;
-	name_packing = NamePackingBits (0);
-	_resize_drag_start = -1;
 
 	/*
 	  Create the standard LHS Controls
@@ -357,6 +358,28 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 bool
 TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 {
+	if (event->button == 1) {
+		if (event->type == GDK_2BUTTON_PRESS) {
+			/* see if it is inside the name label */
+			if (name_label.is_ancestor (controls_ebox)) {
+				int nlx;
+				int nly;
+				controls_ebox.translate_coordinates (name_label, event->x, event->y, nlx, nly);
+				Gtk::Allocation a = name_label.get_allocation ();
+				if (nlx > 0 && nlx < a.get_width() && 
+				    nly > 0 && nly < a.get_height()) {
+					hide_name_label ();
+					show_name_entry ();
+					if (can_edit_name()) {
+						name_entry.grab_focus ();
+						name_entry.start_editing ((GdkEvent*) event);
+					}
+					return true;
+				}
+			}
+		}
+	}
+
 	if (maybe_set_cursor (event->y) > 0) {
 		_resize_drag_start = event->y_root;
 	}
@@ -532,6 +555,8 @@ TimeAxisView::set_height (uint32_t h)
 		/* resize the selection rect */
 		show_selection (_editor.get_selection().time);
 	}
+
+	show_name_label ();
 }
 
 bool
@@ -650,6 +675,8 @@ TimeAxisView::name_entry_focus_in (GdkEventFocus*)
 bool
 TimeAxisView::name_entry_focus_out (GdkEventFocus*)
 {
+	cerr << "NEFO\n";
+
 	/* clean up */
 
 	last_name_entry_key_press_event = 0;
@@ -680,6 +707,9 @@ TimeAxisView::name_entry_activated ()
 void
 TimeAxisView::name_entry_changed ()
 {
+	cerr << "swithcing back to name labnel\n";
+	hide_name_entry ();
+	show_name_label ();
 }
 
 bool
@@ -696,12 +726,7 @@ TimeAxisView::name_entry_button_press (GdkEventButton *ev)
 	}
 
 	if (ev->button == 1) {
-		if (ev->type == GDK_2BUTTON_PRESS) {
-			if (can_edit_name()) {
-				name_entry.grab_focus ();
-				name_entry.start_editing ((GdkEvent*) ev);
-			}
-		} else {
+		if (ev->type != GDK_2BUTTON_PRESS) {
 			conditionally_add_to_selection ();
 		}
 	}
@@ -1135,7 +1160,7 @@ TimeAxisView::compute_heights ()
 void
 TimeAxisView::show_name_label ()
 {
-	if (!(name_packing & NameLabelPacked)) {
+	if (!(name_packing & NameLabelPacked) && name_label.get_parent() == 0) {
 		name_hbox.pack_start (name_label, true, true);
 		name_packing = NamePackingBits (name_packing | NameLabelPacked);
 		name_hbox.show ();

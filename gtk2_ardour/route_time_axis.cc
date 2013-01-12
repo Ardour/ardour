@@ -1286,6 +1286,8 @@ RouteTimeAxisView::playlist () const
 void
 RouteTimeAxisView::name_entry_changed ()
 {
+	TimeAxisView::name_entry_changed ();
+
 	string x = name_entry.get_text ();
 
 	if (x == _route->name()) {
@@ -2168,14 +2170,6 @@ void
 RouteTimeAxisView::update_rec_display ()
 {
 	RouteUI::update_rec_display ();
-
-	if (_route->record_enabled()) {
-		hide_name_entry ();
-		show_name_label ();
-	} else {
-		hide_name_label ();
-		show_name_entry ();
-	}
 }
 
 void

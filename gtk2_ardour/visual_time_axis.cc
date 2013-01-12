@@ -148,17 +148,13 @@ VisualTimeAxis::set_height(uint32_t h)
 {
 	TimeAxisView::set_height(h);
 
+	show_name_label ();
+
 	if (h >= hNormal) {
-		hide_name_label ();
-		show_name_entry ();
 		other_button_hbox.show_all() ;
 	} else if (h >= hSmaller) {
-		hide_name_label ();
-		show_name_entry ();
 		other_button_hbox.hide_all() ;
 	} else if (h >= hSmall) {
-		hide_name_entry ();
-		show_name_label ();
 		other_button_hbox.hide_all() ;
 	}
 }
@@ -339,9 +335,9 @@ VisualTimeAxis::start_time_axis_rename()
 void
 VisualTimeAxis::label_view()
 {
-	name_label.set_text(time_axis_name) ;
-	name_entry.set_text(time_axis_name) ;
-	ARDOUR_UI::instance()->set_tip(name_entry, time_axis_name) ;
+	name_label.set_text (time_axis_name);
+	name_entry.set_text (time_axis_name);
+	ARDOUR_UI::instance()->set_tip (name_entry, Glib::Markup::escape_text (time_axis_name));
 }
 
 
@@ -351,6 +347,8 @@ VisualTimeAxis::label_view()
 void
 VisualTimeAxis::name_entry_changed()
 {
+	TimeAxisView::name_entry_changed ();
+
 	string x = name_entry.get_text ();
 
 	if (x == time_axis_name) {
@@ -365,7 +363,7 @@ VisualTimeAxis::name_entry_changed()
 	}
 
 	if (!editor.get_named_time_axis(x)) {
-		set_time_axis_name(x, this);
+		set_time_axis_name (x, this);
 	} else {
 		ARDOUR_UI::instance()->popup_error (_("A track already exists with that name"));
 		name_entry.set_text(time_axis_name);

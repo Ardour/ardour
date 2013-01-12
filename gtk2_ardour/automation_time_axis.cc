@@ -154,8 +154,9 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	}
 
 	/* for automation tracks, the label does not swap with an entry box. remove all that stuff */
-	if ( name_label.get_parent() )
-		name_hbox.remove(name_label);
+	if (name_label.get_parent()) {
+		hide_name_label ();
+	}
 
 	name_label.set_text (_name);
 	name_label.set_alignment (Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
@@ -421,14 +422,15 @@ AutomationTimeAxisView::set_height (uint32_t h)
 		first_call_to_set_height = false;
 
 		if (h >= preset_height (HeightNormal)) {
-			name_label.show();
+			show_name_label ();
+			hide_name_entry ();
 			auto_button.show();
 			hide_button.show_all();
 
 		} else if (h >= preset_height (HeightSmall)) {
 			controls_table.hide_all ();
 			hide_name_entry ();
-			name_label.hide();
+			hide_name_label ();
 			auto_button.hide();
 		}
 	}
