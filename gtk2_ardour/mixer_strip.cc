@@ -207,7 +207,7 @@ MixerStrip::init ()
         top_button_table.attach (*monitor_disk_button, 1, 2, 0, 1);
 	top_button_table.show ();
 
-	rec_solo_table.set_homogeneous (false);
+	rec_solo_table.set_homogeneous (true);
 	rec_solo_table.set_row_spacings (2);
 	rec_solo_table.set_col_spacings (2);
         rec_solo_table.attach (*solo_isolated_led, 1, 2, 0, 1);
