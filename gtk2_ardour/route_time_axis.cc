@@ -111,6 +111,8 @@ void
 RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
+
+	show_name_label ();
 	
 	gm.set_controls (_route, _route->shared_peak_meter(), _route->amp());
 	gm.get_level_meter().set_no_show_all();
@@ -321,15 +323,15 @@ RouteTimeAxisView::label_view ()
 {
 	string x = _route->name();
 
-	if (x != name_entry.get_text()) {
-		name_entry.set_text (x);
+	if (name_entry && x != name_entry->get_text()) {
+		name_entry->set_text (x);
+		ARDOUR_UI::instance()->set_tip (*name_entry, Glib::Markup::escape_text(x));
 	}
 
 	if (x != name_label.get_text()) {
 		name_label.set_text (x);
 	}
 
-	ARDOUR_UI::instance()->set_tip (name_entry, Glib::Markup::escape_text(x));
 }
 
 void
@@ -1288,7 +1290,7 @@ RouteTimeAxisView::name_entry_changed ()
 {
 	TimeAxisView::name_entry_changed ();
 
-	string x = name_entry.get_text ();
+	string x = name_entry->get_text ();
 
 	if (x == _route->name()) {
 		return;
@@ -1297,18 +1299,18 @@ RouteTimeAxisView::name_entry_changed ()
 	strip_whitespace_edges (x);
 
 	if (x.length() == 0) {
-		name_entry.set_text (_route->name());
+		name_entry->set_text (_route->name());
 		return;
 	}
 
 	if (_session->route_name_internal (x)) {
 		ARDOUR_UI::instance()->popup_error (string_compose (_("You cannot create a track with that name as it is reserved for %1"),
 								    PROGRAM_NAME));
-		name_entry.grab_focus ();
+		name_entry->grab_focus ();
 	} else if (RouteUI::verify_new_route_name (x)) {
 		_route->set_name (x);
 	} else {
-		name_entry.grab_focus ();
+		name_entry->grab_focus ();
 	}
 }
 

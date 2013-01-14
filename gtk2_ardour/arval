@@ -1,7 +1,7 @@
 #!/bin/sh
 VALGRIND_OPTIONS="$VALGRIND_OPTIONS --num-callers=50"
 VALGRIND_OPTIONS="$VALGRIND_OPTIONS --error-limit=no"
-VALGRIND_OPTIONS="$VALGRIND_OPTIONS --leak-check=full --leak-resolution=high"
+#VALGRIND_OPTIONS="$VALGRIND_OPTIONS --leak-check=full --leak-resolution=high"
 #VALGRIND_OPTIONS="$VALGRIND_OPTIONS --log-file=/tmp/ardour-%p.log"
 #VALGRIND_OPTIONS="$VALGRIND_OPTIONS --gen-suppressions=all"
 
