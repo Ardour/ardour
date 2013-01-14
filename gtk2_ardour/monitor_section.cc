@@ -682,22 +682,22 @@ MonitorSection::register_actions ()
 
         for (uint32_t chn = 1; chn <= 16; ++chn) {
 
-                action_name = string_compose (X_("monitor-cut-%1"), chn-1);
+                action_name = string_compose (X_("monitor-cut-%1"), chn);
                 action_descr = string_compose (_("Cut monitor channel %1"), chn);
                 ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(),
                                                        sigc::bind (sigc::mem_fun (*this, &MonitorSection::cut_channel), chn));
 
-                action_name = string_compose (X_("monitor-dim-%1"), chn-1);
+                action_name = string_compose (X_("monitor-dim-%1"), chn);
                 action_descr = string_compose (_("Dim monitor channel %1"), chn);
                 ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(),
                                                        sigc::bind (sigc::mem_fun (*this, &MonitorSection::dim_channel), chn));
 
-                action_name = string_compose (X_("monitor-solo-%1"), chn-1);
+                action_name = string_compose (X_("monitor-solo-%1"), chn);
                 action_descr = string_compose (_("Solo monitor channel %1"), chn);
                 ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(),
                                                        sigc::bind (sigc::mem_fun (*this, &MonitorSection::solo_channel), chn));
 
-                action_name = string_compose (X_("monitor-invert-%1"), chn-1);
+                action_name = string_compose (X_("monitor-invert-%1"), chn);
                 action_descr = string_compose (_("Invert monitor channel %1"), chn);
                 ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(),
                                                        sigc::bind (sigc::mem_fun (*this, &MonitorSection::invert_channel), chn));
