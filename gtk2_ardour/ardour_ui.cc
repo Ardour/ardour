@@ -3383,7 +3383,7 @@ int
 ARDOUR_UI::sr_mismatch_dialog (framecnt_t desired, framecnt_t actual)
 {
  	HBox* hbox = new HBox();
-	Image* image = new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG);
+	Image* image = new Image (Stock::DIALOG_WARNING, ICON_SIZE_DIALOG);
 	ArdourDialog dialog (_("Sample Rate Mismatch"), true);
 	Label  message (string_compose (_("\
 This session was created with a sample rate of %1 Hz, but\n\
