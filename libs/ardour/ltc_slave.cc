@@ -294,7 +294,7 @@ LTC_Slave::detect_ltc_fps(int frameno, bool df)
 }
 
 void
-LTC_Slave::process_ltc(framepos_t const now)
+LTC_Slave::process_ltc(framepos_t const /*now*/)
 {
 	LTCFrameExt frame;
 	enum LTC_TV_STANDARD tv_standard = LTC_TV_625_50;

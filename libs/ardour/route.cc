@@ -303,7 +303,7 @@ Route::sync_order_keys (RouteSortOrderKey base)
 }
 
 void
-Route::set_remote_control_id_from_order_key (RouteSortOrderKey key, uint32_t rid)
+Route::set_remote_control_id_from_order_key (RouteSortOrderKey /*key*/, uint32_t rid)
 {
 	if (is_master() || is_monitor() || is_hidden()) {
 		/* hard-coded remote IDs, or no remote ID */
@@ -2892,7 +2892,7 @@ Route::direct_feeds_according_to_graph (boost::shared_ptr<Route> other, bool* vi
 
 /** Called from the (non-realtime) butler thread when the transport is stopped */
 void
-Route::nonrealtime_handle_transport_stopped (bool /*abort_ignored*/, bool did_locate, bool can_flush_processors)
+Route::nonrealtime_handle_transport_stopped (bool /*abort_ignored*/, bool /*did_locate*/, bool can_flush_processors)
 {
 	framepos_t now = _session.transport_frame();
 
