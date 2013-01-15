@@ -305,7 +305,6 @@ ArdourStartup::session_folder ()
 
 	if (ic_new_session_button.get_active()) {
 		std::string legal_session_folder_name = legalize_for_path (new_name_entry.get_text());
-		cerr << "using NFC @ " << &new_folder_chooser << ' ' << new_folder_chooser.get_current_folder() << " file " << new_folder_chooser.get_filename() << endl;
 		return Glib::build_filename (new_folder_chooser.get_current_folder(), legal_session_folder_name);
 	} else if (_existing_session_chooser_used) {
 		/* existing session chosen from file chooser */

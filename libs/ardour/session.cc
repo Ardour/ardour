@@ -1634,8 +1634,6 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 	RouteList new_routes;
 	list<boost::shared_ptr<MidiTrack> > ret;
 
-	cerr << "Adding MIDI track with in = " << input << " out = " << output << endl;
-
 	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("MIDI");
 
 	while (how_many) {
