@@ -60,7 +60,7 @@ ControlList::ControlList (const Parameter& id)
 	_changed_when_thawed = false;
 	_min_yval = id.min();
 	_max_yval = id.max();
-	_default_value = 0;
+	_default_value = id.normal();
 	_lookup_cache.left = -1;
 	_lookup_cache.range.first = _events.end();
 	_search_cache.left = -1;
@@ -355,7 +355,7 @@ ControlList::start_write_pass (double when)
 }
 
 void
-ControlList::write_pass_finished (double when)
+ControlList::write_pass_finished (double /*when*/)
 {
 	if (did_write_during_pass) {
 		thin ();
