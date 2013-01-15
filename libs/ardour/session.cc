@@ -1077,7 +1077,7 @@ Session::set_auto_loop_location (Location* location)
 	}
 
 	if (location->end() <= location->start()) {
-		error << _("Session: you can't use a mark for auto loop") << endmsg;
+		error << _("You cannot use this location for auto-loop because it has zero or negative length") << endmsg;
 		return;
 	}
 
