@@ -37,8 +37,8 @@
 #@color midi_track #445033
 #@color audio_bus #262c35
 
-#@color send_fg #30F7B0
-#@color send_bg #C4C4B8
+#@color send_fg #9FD5C1
+#@color send_bg #33445e
 
 #@color processor_frame_selected #E2CC33
 #@color processor_fader #666666
