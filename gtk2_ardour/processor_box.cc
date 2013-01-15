@@ -1815,16 +1815,41 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		XMLProperty const * type = (*niter)->property ("type");
+		XMLProperty const * role = (*niter)->property ("role");
 		assert (type);
+		assert (role);
 
 		boost::shared_ptr<Processor> p;
 		try {
 			if (type->value() == "meter" ||
 			    type->value() == "main-outs" ||
 			    type->value() == "amp" ||
-			    type->value() == "intsend" || type->value() == "intreturn") {
-				/* do not paste meter, main outs, amp or internal send/returns */
+			    type->value() == "intreturn") {
+				/* do not paste meter, main outs, amp or internal returns */
 				continue;
+
+			} else if (type->value() == "intsend") {
+				
+				/* aux sends are OK, but those used for
+				 * other purposes, are not.
+				 */
+
+				if (role->value() != "Aux") {
+					continue;
+				}
+
+				XMLNode n (**niter);
+                                InternalSend* s = new InternalSend (*_session, _route->pannable(), _route->mute_master(),
+								    boost::shared_ptr<Route>(), Delivery::Aux); 
+
+				IOProcessor::prepare_for_reset (n, s->name());
+
+                                if (s->set_state (n, Stateful::loading_state_version)) {
+                                        delete s;
+                                        return;
+                                }
+
+				p.reset (s);
 
 			} else if (type->value() == "send") {
 
