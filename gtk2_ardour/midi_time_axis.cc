@@ -626,6 +626,41 @@ MidiTimeAxisView::build_controller_menu ()
 		}
 	}
 
+	using namespace MIDI::Name;
+	const string& model = _midnam_model_selector.get_active_text();
+	boost::shared_ptr<MIDINameDocument> midnam = MidiPatchManager::instance()
+		.document_by_model(model);
+	boost::shared_ptr<MasterDeviceNames> device_names;
+	if (midnam && !midnam->master_device_names_by_model().empty()) {
+		device_names = boost::shared_ptr<MasterDeviceNames>(
+			midnam->master_device_names_by_model().begin()->second);
+	}
+
+	if (device_names && !device_names->controls().empty()) {
+		/* Controllers names available from the midnam file, generate a custom controller menu */
+		for (MasterDeviceNames::ControlNameLists::const_iterator l = device_names->controls().begin();
+		     l != device_names->controls().end(); ++l) {
+			boost::shared_ptr<ControlNameList> name_list = *l;
+
+			int       chn        = 0;  // TODO
+			Menu*     group_menu = manage(new Menu());
+			MenuList& group_items(group_menu->items());
+
+			for (ControlNameList::Controls::const_iterator c = (*l)->controls().begin();
+			     c != (*l)->controls().end(); ++c) {
+				Evoral::Parameter fully_qualified_param(MidiCCAutomation, chn, atoi((*c)->number().c_str()));
+				group_items.push_back(
+					CheckMenuElem(string_compose("<b>%1</b>: %2 [%3]",
+					                             (*c)->number(), (*c)->name(), int(chn)),
+					              sigc::bind(sigc::mem_fun(*this, &RouteTimeAxisView::toggle_automation_track),
+					                         fully_qualified_param)));
+				dynamic_cast<Label*> (group_items.back().get_child())->set_use_markup (true);
+			}
+			items.push_back(MenuElem(name_list->name(), *group_menu));
+		}
+		return;
+	}
+
 	/* loop over all 127 MIDI controllers, in groups of 16; except don't offer
 	   bank select controllers, as they are handled by the `patch' code */
 

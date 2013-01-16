@@ -129,7 +129,6 @@ Patch::set_state (const XMLTree&, const XMLNode& node)
 		_id.program_number = PBD::atoi(program_change);
 	}
 
-
 	return 0;
 }
 
@@ -142,7 +141,6 @@ Note::get_state (void)
 
 	return *node;
 }
-
 
 int
 Note::set_state (const XMLTree&, const XMLNode& node)
@@ -179,6 +177,52 @@ NoteNameList::set_state (const XMLTree& tree, const XMLNode& node)
 	return 0;
 }
 
+XMLNode&
+Control::get_state (void)
+{
+	XMLNode* node = new XMLNode("Control");
+	node->add_property("Type",   _type);
+	node->add_property("Number", _number);
+	node->add_property("Name",   _name);
+
+	return *node;
+}
+
+int
+Control::set_state (const XMLTree&, const XMLNode& node)
+{
+	assert(node.name() == "Control");
+	_type   = node.property("Type")->value();
+	_number = node.property("Number")->value();
+	_name   = node.property("Name")->value();
+
+	return 0;
+}
+
+XMLNode&
+ControlNameList::get_state (void)
+{
+	XMLNode* node = new XMLNode("ControlNameList");
+	node->add_property("Name", _name);
+
+	return *node;
+}
+
+int
+ControlNameList::set_state (const XMLTree& tree, const XMLNode& node)
+{
+	assert(node.name() == "ControlNameList");
+	_name = node.property("Name")->value();
+
+	for (XMLNodeList::const_iterator i = node.children().begin();
+	     i != node.children().end(); ++i) {
+		boost::shared_ptr<Control> control(new Control());
+		control->set_state (tree, *(*i));
+		_controls.push_back(control);
+	}
+
+	return 0;
+}
 
 XMLNode&
 PatchBank::get_state (void)
@@ -427,7 +471,7 @@ MasterDeviceNames::find_patch(std::string mode, uint8_t channel, PatchPrimaryKey
 }
 
 int
-MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode& a_node)
+MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode&)
 {
 	// Manufacturer
 	boost::shared_ptr<XMLSharedNodeList> manufacturer = tree.find("//Manufacturer");
@@ -477,6 +521,16 @@ MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode& a_node)
 		boost::shared_ptr<NoteNameList> note_name_list(new NoteNameList());
 		note_name_list->set_state (tree, *(*i));
 		_note_name_lists.push_back(note_name_list);
+	}
+
+	// ControlNameLists
+	boost::shared_ptr<XMLSharedNodeList> control_name_lists = tree.find("//ControlNameList");
+	for (XMLSharedNodeList::iterator i = control_name_lists->begin();
+	     i != control_name_lists->end();
+	     ++i) {
+		boost::shared_ptr<ControlNameList> control_name_list(new ControlNameList());
+		control_name_list->set_state (tree, *(*i));
+		_control_name_lists.push_back(control_name_list);
 	}
 
 	// global/post-facto PatchNameLists
@@ -544,7 +598,7 @@ MIDINameDocument::MIDINameDocument (const string& filename)
 }
 
 int
-MIDINameDocument::set_state (const XMLTree& tree, const XMLNode& a_node)
+MIDINameDocument::set_state (const XMLTree& tree, const XMLNode&)
 {
 	// Author
 

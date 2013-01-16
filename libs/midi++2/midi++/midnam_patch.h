@@ -255,6 +255,57 @@ private:
 	Notes  _notes;
 };
 
+class Control
+{
+public:
+	Control() {}
+	Control(const std::string& type,
+	        const std::string& number,
+	        const std::string& name)
+		: _type(type)
+		, _number(number)
+		, _name(name)
+	{}
+
+	const std::string& type()   const { return _type; }
+	const std::string& number() const { return _number; }
+	const std::string& name()   const { return _name; }
+
+	void set_type(const std::string& type)     { _type = type; }
+	void set_number(const std::string& number) { _number = number; }
+	void set_name(const std::string& name)     { _name = name; }
+
+	XMLNode& get_state(void);
+	int      set_state(const XMLTree&, const XMLNode&);
+
+private:
+	std::string _type;
+	std::string _number;
+	std::string _name;
+};
+
+class ControlNameList 
+{
+public:
+	typedef std::list< boost::shared_ptr<Control> > Controls;
+
+	ControlNameList() {}
+	ControlNameList(const std::string& name) : _name(name) {}
+
+	const std::string& name() const { return _name; }
+
+	void set_name(const std::string name) { _name = name; }
+
+	const Controls& controls() const { return _controls; }
+
+	XMLNode& get_state(void);
+	int      set_state(const XMLTree&, const XMLNode&);
+
+private:
+	std::string _name;
+	Controls    _controls;
+};
+
 class CustomDeviceMode
 {
 public:
@@ -291,6 +342,7 @@ public:
 	/// maps name to ChannelNameSet
 	typedef std::map<std::string, boost::shared_ptr<ChannelNameSet> >    ChannelNameSets;
 	typedef std::list<boost::shared_ptr<NoteNameList> >                  NoteNameLists;
+	typedef std::list<boost::shared_ptr<ControlNameList> >               ControlNameLists;
 	typedef std::map<std::string, PatchBank::PatchNameList>              PatchNameLists;
 	
 	MasterDeviceNames() {};
@@ -301,7 +353,9 @@ public:
 	
 	const Models& models() const { return _models; }
 	void set_models(const Models some_models) { _models = some_models; }
-	
+
+	const ControlNameLists& controls() const { return _control_name_lists; }
+
 	const CustomDeviceModeNames& custom_device_mode_names() const { return _custom_device_mode_names; }
 	
 	boost::shared_ptr<CustomDeviceMode> custom_device_mode_by_name(std::string mode_name);
@@ -319,6 +373,7 @@ private:
 	ChannelNameSets       _channel_name_sets;
 	NoteNameLists         _note_name_lists;
 	PatchNameLists        _patch_name_lists;
+	ControlNameLists      _control_name_lists;
 };
 
 class MIDINameDocument
