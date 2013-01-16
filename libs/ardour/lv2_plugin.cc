@@ -214,7 +214,7 @@ struct LV2Plugin::Impl {
 	/** Find the LV2 input port with the given designation.
 	 * If found, bufptrs[port_index] will be set to bufptr.
 	 */
-	LilvPort* designated_input (const char* uri, void** bufptrs[], void** bufptr);
+	const LilvPort* designated_input (const char* uri, void** bufptrs[], void** bufptr);
 
 	const LilvPlugin*           plugin;
 	const LilvUI*               ui;
@@ -1797,10 +1797,10 @@ LV2Plugin::latency_compute_run()
 	deactivate();
 }
 
-LilvPort*
+const LilvPort*
 LV2Plugin::Impl::designated_input (const char* uri, void** bufptrs[], void** bufptr)
 {
-	LilvPort* port        = NULL;
+	const LilvPort* port = NULL;
 	LilvNode* designation = lilv_new_uri(_world.world, uri);
 	port = lilv_plugin_get_port_by_designation(
 		plugin, _world.lv2_InputPort, designation);
