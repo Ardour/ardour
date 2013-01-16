@@ -191,11 +191,11 @@ if [ ! -f rdflib-3.2.0.tar.gz ] ; then
 fi
 if [ ! -f setuptools-0.6c11.tar.gz ] ; then
     echo python setuptools
-    curl -L -o setuptools-0.6c11.tar.gz http://pypi.python.org/packages/source/s/setuptools/setuptools-0.6c11.tar.gz#md5=7df2a529a074f613b509fb44feefe74e
+    fetch_as setuptools-0.6c11.tar.gz http://pypi.python.org/packages/source/s/setuptools/setuptools-0.6c11.tar.gz#md5=7df2a529a074f613b509fb44feefe74e
 fi    
 if [ ! -f isodate-0.4.0.tar.gz ] ; then
     echo python isodate
-    curl -L -o isodate-0.4.0.tar.gz  http://pypi.python.org/packages/source/i/isodate/isodate-0.4.0.tar.gz#md5=74eb2ffca6ab3318d6627f25f88e24e5
+    fetch_as isodate-0.4.0.tar.gz  http://pypi.python.org/packages/source/i/isodate/isodate-0.4.0.tar.gz#md5=74eb2ffca6ab3318d6627f25f88e24e5
 fi
 if [ ! -d LRDF ] ; then
     echo LRDF
