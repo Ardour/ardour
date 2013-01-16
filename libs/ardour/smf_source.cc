@@ -24,6 +24,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
+#include <regex.h>
 
 #include "pbd/pathscanner.h"
 #include "pbd/stl_delete.h"
@@ -449,7 +450,22 @@ SMFSource::mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::Musical
 bool
 SMFSource::safe_midi_file_extension (const string& file)
 {
-	return (file.rfind(".mid") != string::npos) || (file.rfind (".MID") != string::npos);
+	static regex_t compiled_pattern;
+	static bool compile = true;
+	const int nmatches = 2;
+	regmatch_t matches[nmatches];
+	
+	if (compile && regcomp (&compiled_pattern, "[mM][iI][dD]$", REG_EXTENDED)) {
+		return false;
+	} else {
+		compile = false;
+	}
+	
+	if (regexec (&compiled_pattern, file.c_str(), nmatches, matches, 0)) {
+		return false;
+	}
+
+	return true;
 }
 
 void

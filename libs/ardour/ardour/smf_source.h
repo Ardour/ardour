@@ -45,7 +45,7 @@ public:
 
 	virtual ~SMFSource ();
 
-	bool safe_file_extension (const std::string& path) const {
+        bool safe_file_extension (const std::string& path) const {
 		return safe_midi_file_extension(path);
 	}
 
