@@ -429,22 +429,21 @@ MackieControlProtocol::frm_left_press (Button &)
 	// can use first_mark_before/after as well
 	unsigned long elapsed = _frm_left_last.restart();
 
-	Location * loc = session->locations()->first_location_before (session->transport_frame());
-
+	framepos_t pos = session->locations()->first_mark_before (session->transport_frame());
+	
 	// allow a quick double to go past a previous mark
-	if (session->transport_rolling() && elapsed < 500 && loc != 0) {
-		Location * loc_two_back = session->locations()->first_location_before (loc->start());
-		if (loc_two_back != 0)
-		{
-			loc = loc_two_back;
+	if (session->transport_rolling() && elapsed < 500 && pos >= 0) {
+		framepos_t pos_two_back = session->locations()->first_mark_before (pos);
+		if (pos_two_back >= 0) {
+			pos = pos_two_back;
 		}
 	}
 
 	// move to the location, if it's valid
-	if (loc != 0) {
-		session->request_locate (loc->start(), session->transport_rolling());
+	if (pos >= 0) {
+		session->request_locate (pos, session->transport_rolling());
 	} else {
-		session->request_locate (session->locations()->session_range_location()->start(), session->transport_rolling());
+		session->request_locate (session->current_start_frame(), session->transport_rolling());
 	}
 
 	return on;
@@ -460,12 +459,12 @@ LedState
 MackieControlProtocol::frm_right_press (Button &)
 {
 	// can use first_mark_before/after as well
-	Location * loc = session->locations()->first_location_after (session->transport_frame());
+	framepos_t pos = session->locations()->first_mark_after (session->transport_frame());
 	
-	if (loc != 0) {
-		session->request_locate (loc->start(), session->transport_rolling());
+	if (pos >= 0) {
+		session->request_locate (pos, session->transport_rolling());
 	} else {
-		session->request_locate (session->locations()->session_range_location()->end(), session->transport_rolling());
+		session->request_locate (session->current_end_frame(), session->transport_rolling());
 	}
 		
 	return on;

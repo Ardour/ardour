@@ -1846,13 +1846,13 @@ Editor::jump_forward_to_mark ()
 		return;
 	}
 
-	Location *location = _session->locations()->first_location_after (playhead_cursor->current_frame);
+	framepos_t pos = _session->locations()->first_mark_after (playhead_cursor->current_frame);
 
-	if (location) {
-		_session->request_locate (location->start(), _session->transport_rolling());
-	} else {
-		_session->request_locate (_session->current_end_frame());
+	if (pos < 0) {
+		return;
 	}
+	
+	_session->request_locate (pos, _session->transport_rolling());
 }
 
 void
@@ -1862,13 +1862,13 @@ Editor::jump_backward_to_mark ()
 		return;
 	}
 
-	Location *location = _session->locations()->first_location_before (playhead_cursor->current_frame);
+	framepos_t pos = _session->locations()->first_mark_before (playhead_cursor->current_frame);
 
-	if (location) {
-		_session->request_locate (location->start(), _session->transport_rolling());
-	} else {
-		_session->goto_start ();
+	if (pos < 0) {
+		return;
 	}
+
+	_session->request_locate (pos, _session->transport_rolling());
 }
 
 void

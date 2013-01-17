@@ -171,10 +171,10 @@ BasicUI::save_state ()
 void
 BasicUI::prev_marker ()
 {
-	Location *location = session->locations()->first_location_before (session->transport_frame());
+	framepos_t pos = session->locations()->first_mark_before (session->transport_frame());
 	
-	if (location) {
-		session->request_locate (location->start(), session->transport_rolling());
+	if (pos >= 0) {
+		session->request_locate (pos, session->transport_rolling());
 	} else {
 		session->goto_start ();
 	}
@@ -183,12 +183,12 @@ BasicUI::prev_marker ()
 void
 BasicUI::next_marker ()
 {
-	Location *location = session->locations()->first_location_after (session->transport_frame());
+	framepos_t pos = session->locations()->first_mark_after (session->transport_frame());
 
-	if (location) {
-		session->request_locate (location->start(), session->transport_rolling());
+	if (pos >= 0) {
+		session->request_locate (pos, session->transport_rolling());
 	} else {
-		session->request_locate (session->current_end_frame());
+		session->goto_end();
 	}
 }
 
