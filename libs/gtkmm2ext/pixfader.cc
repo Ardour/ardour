@@ -88,6 +88,19 @@ PixFader::create_patterns ()
 	bg = c.get_green_p ();
 	bb = c.get_blue_p ();
 
+	if ( !_text.empty()) {
+		_layout->get_pixel_size (_text_width, _text_height);
+	} else {
+		_text_width = 0;
+		_text_height = 0;
+	}
+
+	c = get_style()->get_text (get_state());
+
+	text_r = c.get_red_p ();
+	text_g = c.get_green_p ();
+	text_b = c.get_blue_p ();
+
 	cairo_surface_t* surface;
 	cairo_t* tc = 0;
 	float radius = CORNER_RADIUS;
@@ -163,19 +176,6 @@ PixFader::create_patterns ()
 
 	cairo_destroy (tc);
 	cairo_surface_destroy (surface);
-
-	if ( !_text.empty()) {
-		_layout->get_pixel_size (_text_width, _text_height);
-	} else {
-		_text_width = 0;
-		_text_height = 0;
-	}
-
-	c = get_style()->get_text (get_state());
-
-	text_r = c.get_red_p ();
-	text_g = c.get_green_p ();
-	text_b = c.get_blue_p ();
 }
 
 bool
@@ -261,7 +261,6 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 
 		/* center text */
 		cairo_move_to (cr, (get_width() - _text_width)/2.0, get_height()/2.0 - _text_height/2.0);
-
 		cairo_set_source_rgba (cr, text_r, text_g, text_b, 0.9);
 		pango_cairo_show_layout (cr, _layout->gobj());
 	} 
@@ -583,6 +582,7 @@ PixFader::set_text (const std::string& str)
 
 	if (_layout) {
 		_layout->set_text (str);
+		_layout->get_pixel_size (_text_width, _text_height);
 	}
 
 	queue_resize ();
