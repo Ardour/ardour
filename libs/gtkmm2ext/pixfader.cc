@@ -291,8 +291,10 @@ PixFader::on_size_allocate (Gtk::Allocation& alloc)
 
 	if (_orien == VERT) {
 		girth = alloc.get_width ();
+		span = alloc.get_height ();
 	} else {
 		girth = alloc.get_height ();
+		span = alloc.get_width ();
 	}
 
 	update_unity_position ();
