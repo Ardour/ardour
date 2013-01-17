@@ -33,13 +33,14 @@ using namespace std;
 #define CORNER_RADIUS 4
 #define FADER_RESERVE (2*CORNER_RADIUS)
 
+std::list<PixFader::FaderImage*> PixFader::_patterns;
+
 PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length, int fader_girth)
 	: adjustment (adj)
 	, span (fader_length)
 	, girth (fader_girth)
 	, _orien (orientation)
 	, pattern (0)
-	, texture_pattern (0)
 	, _hovering (false)
 	, last_drawn (-1)
 	, dragging (false)
@@ -55,27 +56,24 @@ PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length, int
 
 PixFader::~PixFader ()
 {
-	free_patterns ();
 }
 
-void
-PixFader::free_patterns ()
+cairo_pattern_t*
+PixFader::find_pattern (double afr, double afg, double afb, 
+			double abr, double abg, double abb, 
+			int w, int h)
 {
-	if (pattern) {
-		cairo_pattern_destroy (pattern);
-		pattern = 0;
+	for (list<FaderImage*>::iterator f = _patterns.begin(); f != _patterns.end(); ++f) {
+		if ((*f)->matches (afr, afg, afb, abr, abg, abb, w, h)) {
+			return (*f)->pattern;
+		}
 	}
-	if (texture_pattern) {
-		cairo_pattern_destroy (texture_pattern);
-		texture_pattern = 0;
-	}
+	return 0;
 }
 
 void
 PixFader::create_patterns ()
 {
-	free_patterns ();
-
 	Gdk::Color c = get_style()->get_fg (get_state());
 	float fr, fg, fb;
 	float br, bg, bb;
@@ -95,6 +93,11 @@ PixFader::create_patterns ()
 	float radius = CORNER_RADIUS;
 
 	double w = get_width();
+
+	if ((pattern = find_pattern (fr, fg, fb, br, bg, bb, get_width(), get_height())) != 0) {
+		/* found it - use it */
+		return;
+	}
 
  	if (_orien == VERT) {
 		
@@ -153,6 +156,10 @@ PixFader::create_patterns ()
 		
 		pattern = cairo_pattern_create_for_surface (surface);
 	}
+
+	/* cache it for others to use */
+
+	_patterns.push_back (new FaderImage (pattern, fr, fg, fb, br, bg, bb, get_width(), get_height()));
 
 	cairo_destroy (tc);
 	cairo_surface_destroy (surface);

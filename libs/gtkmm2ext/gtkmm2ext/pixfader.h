@@ -70,9 +70,52 @@ class PixFader : public Gtk::DrawingArea
   private:
 	int span, girth;
 	int _orien;
+        cairo_pattern_t* pattern;
 
-	cairo_pattern_t* pattern;
-	cairo_pattern_t* texture_pattern;
+        struct FaderImage {
+	    cairo_pattern_t* pattern;
+	    double fr;
+	    double fg;
+	    double fb;
+	    double br;
+	    double bg;
+	    double bb;
+	    int width;
+	    int height;
+
+	    FaderImage (cairo_pattern_t* p, 
+			double afr, double afg, double afb, 
+			double abr, double abg, double abb,
+			int w, int h) 
+		    : pattern (p)
+		    , fr (afr)
+		    , fg (afg)
+		    , fb (afb)
+		    , br (abr)
+		    , bg (abg)
+		    , bb (abb)
+		    , width (w)
+		    , height (h)
+	    {}
+
+	    bool matches (double afr, double afg, double afb, 
+			  double abr, double abg, double abb,
+			  int w, int h) {
+		    return width == w && 
+			    height == h &&
+			    afr == fr &&
+			    afg == fg && 
+			    afb == fb &&
+			    abr == br &&
+			    abg == bg && 
+			    abb == bb;
+	    }
+	};
+
+        static std::list<FaderImage*> _patterns;
+        static cairo_pattern_t* find_pattern (double afr, double afg, double afb, 
+					      double abr, double abg, double abb, 
+					      int w, int h);
 
 	bool _hovering;
 
@@ -88,7 +131,6 @@ class PixFader : public Gtk::DrawingArea
 	int display_span ();
 	void set_adjustment_from_event (GdkEventButton *);
 	void update_unity_position ();
-        void free_patterns ();
 	void create_patterns();
 };
 
