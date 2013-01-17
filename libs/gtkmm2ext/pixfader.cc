@@ -20,6 +20,7 @@
 
 
 #include <iostream>
+
 #include "gtkmm2ext/pixfader.h"
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/rgb_macros.h"
@@ -289,10 +290,8 @@ PixFader::on_size_allocate (Gtk::Allocation& alloc)
 	DrawingArea::on_size_allocate(alloc);
 
 	if (_orien == VERT) {
-		span = alloc.get_height();
 		girth = alloc.get_width ();
 	} else {
-		span = alloc.get_width();
 		girth = alloc.get_height ();
 	}
 
@@ -510,7 +509,7 @@ PixFader::set_fader_length (int l)
 {
 	span = l;
 	update_unity_position ();
-	queue_draw ();
+	queue_resize ();
 }
 
 void
