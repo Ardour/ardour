@@ -691,6 +691,8 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 	, _placement (-1)
 	, _visible_prefader_processors (0)
 	, _rr_selection(rsel)
+	, _redisplay_pending (false)
+
 {
 	set_session (sess);
 
@@ -843,7 +845,8 @@ ProcessorBox::set_width (Width w)
 		(*i)->set_enum_width (w);
 	}
 
-	redisplay_processors ();
+	_redisplay_pending = true;
+	
 }
 
 Gtk::Menu*
@@ -2501,9 +2504,14 @@ ProcessorBox::on_size_allocate (Allocation& a)
 {
 	HBox::on_size_allocate (a);
 
-	list<ProcessorEntry*> children = processor_display.children ();
-	for (list<ProcessorEntry*>::const_iterator i = children.begin(); i != children.end(); ++i) {
-		(*i)->set_pixel_width (a.get_width ());
+	if (_redisplay_pending) {
+		_redisplay_pending = false;
+		redisplay_processors ();
+	} else {
+		list<ProcessorEntry*> children = processor_display.children ();
+		for (list<ProcessorEntry*>::const_iterator i = children.begin(); i != children.end(); ++i) {
+			(*i)->set_pixel_width (a.get_width ());
+		}
 	}
 }
 

@@ -300,6 +300,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void object_drop (Gtkmm2ext::DnDVBox<ProcessorEntry> *, ProcessorEntry *, Glib::RefPtr<Gdk::DragContext> const &);
 
 	Width _width;
+        bool  _redisplay_pending;
 
 	Gtk::Menu *processor_menu;
 	gint processor_menu_map_handler (GdkEventAny *ev);
