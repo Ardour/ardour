@@ -362,7 +362,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 					adjustment.set_value (adjustment.get_value() - adjustment.get_step_increment());
 				}
 			}
-
+			return true;
 		} 
 		break;
 		
@@ -372,6 +372,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 			dragging = false;
 			set_adjustment_from_event (ev);
 			gdk_pointer_ungrab (GDK_CURRENT_TIME);
+			return true;
 		}
 		break;
 
