@@ -1820,7 +1820,6 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 		XMLProperty const * type = (*niter)->property ("type");
 		XMLProperty const * role = (*niter)->property ("role");
 		assert (type);
-		assert (role);
 
 		boost::shared_ptr<Processor> p;
 		try {
@@ -1836,6 +1835,8 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				/* aux sends are OK, but those used for
 				 * other purposes, are not.
 				 */
+				
+				assert (role);
 
 				if (role->value() != "Aux") {
 					continue;
