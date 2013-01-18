@@ -28,11 +28,16 @@
 #include <time.h>
 #include <unistd.h>
 #include <pthread.h>
+
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <glibmm/miscutils.h>
+#include <glibmm/fileutils.h>
 
 #include "ardour/linux_vst_support.h"
 #include "pbd/error.h"
+
+#include "i18n.h"
 
 /***********************************************************/
 /* VSTFX - A set of modules for managing linux VST plugins */
@@ -81,10 +86,10 @@ vstfx_new ()
 	
 	/*Mutexes*/
 	
-	pthread_mutex_init (&vstfx->lock, NULL);
-	pthread_cond_init (&vstfx->window_status_change, NULL);
-	pthread_cond_init (&vstfx->plugin_dispatcher_called, NULL);
-	pthread_cond_init (&vstfx->window_created, NULL);
+	pthread_mutex_init (&vstfx->lock, 0);
+	pthread_cond_init (&vstfx->window_status_change, 0);
+	pthread_cond_init (&vstfx->plugin_dispatcher_called, 0);
+	pthread_cond_init (&vstfx->window_created, 0);
 
 	/*Safe values*/
 	
@@ -95,8 +100,8 @@ vstfx_new ()
 	vstfx->program_set_without_editor = 0;
 	vstfx->linux_window = 0;
 	vstfx->linux_plugin_ui_window = 0;
-	vstfx->eventProc = NULL;
-	vstfx->extra_data = NULL;
+	vstfx->eventProc = 0;
+	vstfx->extra_data = 0;
 	vstfx->want_resize = 0;
 	
 	return vstfx;
@@ -118,8 +123,14 @@ void* vstfx_load_vst_library(const char* path)
 	you get some occasional failures to load - dlerror reports
 	invalid arguments*/
 
-	if ((dll = dlopen (path, RTLD_LOCAL | RTLD_LAZY)) != NULL)
+	if ((dll = dlopen (path, RTLD_LOCAL | RTLD_LAZY)) != 0) {
 		return dll;
+	}
+
+	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+		PBD::error << string_compose (_("Could not open existing LXVST plugin: %1"), dlerror()) << endmsg;
+		return 0;
+	}
 		
 	/*We didn't find the library so try and get the path specified in the
 	env variable LXVST_PATH*/
@@ -128,15 +139,15 @@ void* vstfx_load_vst_library(const char* path)
 	
 	/*Path not specified - not much more we can do*/
 	
-	if (envdup == NULL)
-		return NULL;
+	if (envdup == 0)
+		return 0;
 	
 	/*Copy the path into envdup*/
 		
 	envdup = strdup (envdup);
 	
-	if (envdup == NULL)
-		return NULL;
+	if (envdup == 0)
+		return 0;
 		
 	len2 = strlen(path);
 
@@ -144,7 +155,7 @@ void* vstfx_load_vst_library(const char* path)
 
 	lxvst_path = strtok (envdup, ":");
 	
-	while (lxvst_path != NULL)
+	while (lxvst_path != 0)
 	{
 		vstfx_error ("\"%s\"", lxvst_path);
 		len1 = strlen(lxvst_path);
@@ -157,7 +168,7 @@ void* vstfx_load_vst_library(const char* path)
 
 		/*Try and load the library*/
 
-		if ((dll = dlopen(full_path, RTLD_LOCAL | RTLD_LAZY)) != NULL)
+		if ((dll = dlopen(full_path, RTLD_LOCAL | RTLD_LAZY)) != 0)
 		{
 			/*Succeeded */
 			break;
@@ -165,7 +176,7 @@ void* vstfx_load_vst_library(const char* path)
 	
 		/*Try again*/
 
-		lxvst_path = strtok (NULL, ":");
+		lxvst_path = strtok (0, ":");
 	}
 
 	/*Free the path*/
@@ -181,7 +192,7 @@ void* vstfx_load_vst_library(const char* path)
 VSTHandle *
 vstfx_load (const char *path)
 {
-	char* buf = NULL;
+	char* buf = 0;
 	VSTHandle* fhandle;
 	int i;
 	
@@ -191,7 +202,7 @@ vstfx_load (const char *path)
 	
 	/*See if we have .so appended to the path - if not we need to make sure it is added*/
 	
-	if (strstr (path, ".so") == NULL)
+	if (strstr (path, ".so") == 0)
 	{
 
 		/*Append the .so to the path - Make sure the path has enough space*/
@@ -227,26 +238,26 @@ vstfx_load (const char *path)
 
 	/*call load_vstfx_library to actually load the .so into memory*/
 
-	if ((fhandle->dll = vstfx_load_vst_library (buf)) == NULL)
+	if ((fhandle->dll = vstfx_load_vst_library (buf)) == 0)
 	{
 		vstfx_unload (fhandle);
 		
 		free(buf);
 		
-		return NULL;
+		return 0;
 	}
 
 	/*Find the main entry point into the plugin*/
 
-	if ((fhandle->main_entry = (main_entry_t) dlsym(fhandle->dll, "main")) == NULL)
+	if ((fhandle->main_entry = (main_entry_t) dlsym(fhandle->dll, "main")) == 0)
 	{
-		/*If it can't be found, unload the plugin and return a NULL handle*/
+		/*If it can't be found, unload the plugin and return a 0 handle*/
 		
 		vstfx_unload (fhandle);
 		
 		free(buf);
 		
-		return NULL;
+		return 0;
 	}
 
 	free(buf);
@@ -274,13 +285,13 @@ vstfx_unload (VSTHandle* fhandle)
 	if (fhandle->dll)
 	{
 		dlclose(fhandle->dll);
-		fhandle->dll = NULL;
+		fhandle->dll = 0;
 	}
 
 	if (fhandle->nameptr)
 	{
 		free (fhandle->nameptr);
-		fhandle->name = NULL;
+		fhandle->name = 0;
 	}
 	
 	/*Don't need the plugin handle any more*/
@@ -296,17 +307,17 @@ vstfx_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 {
 	VSTState* vstfx = vstfx_new ();
 
-	if(fhandle == NULL)
+	if(fhandle == 0)
 	{
-	    vstfx_error( "** ERROR ** VSTFX : The handle was NULL\n" );
-	    return NULL;
+	    vstfx_error( "** ERROR ** VSTFX : The handle was 0\n" );
+	    return 0;
 	}
 
-	if ((vstfx->plugin = fhandle->main_entry (amc)) == NULL) 
+	if ((vstfx->plugin = fhandle->main_entry (amc)) == 0) 
 	{
 		vstfx_error ("** ERROR ** VSTFX : %s could not be instantiated :(\n", fhandle->name);
 		free (vstfx);
-		return NULL;
+		return 0;
 	}
 	
 	vstfx->handle = fhandle;
@@ -316,7 +327,7 @@ vstfx_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 	{
 		vstfx_error ("** ERROR ** VSTFX : %s is not a VST plugin\n", fhandle->name);
 		free (vstfx);
-		return NULL;
+		return 0;
 	}
 	
 	vstfx->plugin->dispatcher (vstfx->plugin, effOpen, 0, 0, 0, 0);
@@ -324,7 +335,7 @@ vstfx_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 	/*May or May not need to 'switch the plugin on' here - unlikely
 	since FST doesn't and most plugins start up 'On' by default - I think this is the least of our worries*/
 	
-	//vstfx->plugin->dispatcher (vstfx->plugin, effMainsChanged, 0, 1, NULL, 0);
+	//vstfx->plugin->dispatcher (vstfx->plugin, effMainsChanged, 0, 1, 0, 0);
 	
 	vstfx->vst_version = vstfx->plugin->dispatcher (vstfx->plugin, effGetVstVersion, 0, 0, 0, 0);
 	
@@ -342,7 +353,7 @@ void vstfx_close (VSTState* vstfx)
 	
 	if(vstfx->plugin)
 	{
-		vstfx->plugin->dispatcher (vstfx->plugin, effMainsChanged, 0, 0, NULL, 0);
+		vstfx->plugin->dispatcher (vstfx->plugin, effMainsChanged, 0, 0, 0, 0);
 		
 		/*Calling dispatcher with effClose will cause the plugin's destructor to
 		be called, which will also remove the editor if it exists*/
@@ -366,14 +377,14 @@ void vstfx_close (VSTState* vstfx)
 		return;
 	}
 	
-	/*Valid plugin loaded - so we can unload it and NULL the pointer
+	/*Valid plugin loaded - so we can unload it and 0 the pointer
 	to it.  We can't free the handle here because we don't know what else
 	might need it.  It should be / is freed when the plugin is deleted*/
 
 	if (vstfx->handle->dll)
 	{
 		dlclose(vstfx->handle->dll); //dlclose keeps its own reference count
-		vstfx->handle->dll = NULL;
+		vstfx->handle->dll = 0;
 	}
 }
 
