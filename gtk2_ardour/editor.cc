@@ -44,6 +44,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/unknown_type.h"
 #include "pbd/unwind.h"
+#include "pbd/stacktrace.h"
 
 #include <glibmm/miscutils.h>
 #include <gtkmm/image.h>
@@ -2139,8 +2140,15 @@ Editor::set_snap_to (SnapType st)
 void
 Editor::set_snap_mode (SnapMode mode)
 {
-	_snap_mode = mode;
 	string str = snap_mode_strings[(int)mode];
+
+	if (_internal_editing) {
+		internal_snap_mode = mode;
+	} else {
+		pre_internal_snap_mode = mode;
+	}
+
+	_snap_mode = mode;
 
 	if (str != snap_mode_selector.get_active_text ()) {
 		snap_mode_selector.set_active_text (str);
@@ -2288,6 +2296,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	if ((prop = node.property ("pre-internal-snap-to"))) {
 		pre_internal_snap_type = (SnapType) string_2_enum (prop->value(), pre_internal_snap_type);
 	}
+
 
 	if ((prop = node.property ("pre-internal-snap-mode"))) {
 		pre_internal_snap_mode = (SnapMode) string_2_enum (prop->value(), pre_internal_snap_mode);
