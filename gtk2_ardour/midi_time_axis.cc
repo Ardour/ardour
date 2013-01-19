@@ -234,22 +234,28 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	_midi_controls_box.set_homogeneous(false);
 	_midi_controls_box.set_border_width (10);
+
 	if (!patch_manager.all_models().empty()) {
 		_channel_selector.set_border_width(2);
+		_channel_selector.show_all ();
+
 		_midi_controls_box.resize(3, 2);
 		_midi_controls_box.attach(_channel_selector, 0, 2, 0, 1);
-
+		
 		_midi_controls_box.attach(*manage(new HSeparator()), 0, 2, 1, 2);
 
 		_midnam_model_selector.set_size_request(22, 30);
 		_midnam_model_selector.set_border_width(2);
+		_midnam_model_selector.show ();
 		_midi_controls_box.attach(_midnam_model_selector, 0, 1, 2, 3);
 
 		_midnam_custom_device_mode_selector.set_size_request(10, 30);
 		_midnam_custom_device_mode_selector.set_border_width(2);
+		_midnam_custom_device_mode_selector.show ();
 		_midi_controls_box.attach(_midnam_custom_device_mode_selector, 0, 1, 3, 4);
 	} else {
 		_midi_controls_box.attach(_channel_selector, 0, 1, 0, 1);
+		_channel_selector.show_all ();
 	}
 
 	model_changed();
