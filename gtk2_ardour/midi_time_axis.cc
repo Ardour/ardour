@@ -148,6 +148,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		                               atoi (gui_property ("note-range-max").c_str()),
 		                               true);
 	}
+
 	midi_view()->NoteRangeChanged.connect (
 		sigc::mem_fun (*this, &MidiTimeAxisView::note_range_changed));
 	_view->ContentsHeightChanged.connect (
@@ -226,6 +227,10 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		_midnam_model_selector.append_text(m->c_str());
 	}
 
+	if (gui_property (X_("midnam-model-name")).empty()) {
+		set_gui_property (X_("midnam-model-name"), "Generic");
+	}
+
 	_midnam_model_selector.set_active_text (gui_property (X_("midnam-model-name")));
 	_midnam_custom_device_mode_selector.set_active_text (gui_property (X_("midnam-custom-device-mode")));
 
@@ -252,6 +257,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		_midnam_custom_device_mode_selector.set_size_request(10, 30);
 		_midnam_custom_device_mode_selector.set_border_width(2);
 		_midnam_custom_device_mode_selector.show ();
+
 		_midi_controls_box.attach(_midnam_custom_device_mode_selector, 0, 1, 3, 4);
 	} else {
 		_midi_controls_box.attach(_channel_selector, 0, 1, 0, 1);
@@ -265,7 +271,6 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		sigc::mem_fun(*this, &MidiTimeAxisView::model_changed));
 	_midnam_custom_device_mode_selector.signal_changed().connect(
 		sigc::mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed));
-
 
 	controls_vbox.pack_start(_midi_controls_box, false, false);
 
