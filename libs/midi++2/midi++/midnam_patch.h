@@ -333,7 +333,7 @@ private:
 class MasterDeviceNames
 {
 public:
-	typedef std::list<std::string>                                       Models;
+	typedef std::set<std::string>                                        Models;
 	/// maps name to CustomDeviceMode
 	typedef std::map<std::string, boost::shared_ptr<CustomDeviceMode> >  CustomDeviceModes;
 	typedef std::list<std::string>                                       CustomDeviceModeNames;

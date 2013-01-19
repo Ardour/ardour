@@ -83,7 +83,7 @@ MidiPatchManager::add_session_patches ()
 			_documents[device->first] = document;
 			// build a list of all master devices from all documents
 			_master_devices_by_model[device->first] = device->second;
-			_all_models.push_back(device->first);
+			_all_models.insert(device->first);
 
 			// make sure there are no double model names
 			// TODO: handle this gracefully.
@@ -119,7 +119,7 @@ MidiPatchManager::refresh()
 			_documents[device->first] = document;
 			// build a list of all master devices from all documents
 			_master_devices_by_model[device->first] = device->second;
-			_all_models.push_back(device->first);
+			_all_models.insert(device->first);
 
 			// make sure there are no double model names
 			// TODO: handle this gracefully.

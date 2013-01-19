@@ -490,7 +490,7 @@ MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode&)
 		assert(contents.size() == 1);
 		XMLNode * content = *(contents.begin());
 		assert(content->is_content());
-		_models.push_back(content->content());
+		_models.insert(content->content());
 	}
 
 	// CustomDeviceModes
@@ -634,7 +634,7 @@ MIDINameDocument::set_state (const XMLTree& tree, const XMLNode&)
 				std::pair<std::string, boost::shared_ptr<MasterDeviceNames> >
 				(*model,      master_device_names));
 			
-			_all_models.push_back(*model);
+			_all_models.insert(*model);
 		}
 	}
 
