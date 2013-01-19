@@ -1,13 +1,16 @@
 Please preserve the following when adding files here:
 
-All documents except the two standard MIDI ones have the conventional naming
-scheme Manufacturer_Model.midnam, with spaces replaced with underscores.
+All documents except MIDI.midnam have the conventional naming scheme
+Manufacturer_Model.midnam, with spaces replaced with underscores.
 
-All documents validate against MIDINameDocument10.dtd.  Please ensure any
-changes or additions do not break the documents.  To check, run:
+All documents validate against MIDINameDocument10.dtd.  Often the DOCTYPE needs
+to be updated to the standard one, many old .midnam files use outdated versions
+with broken links.
 
-xmllint --dtdvalid MIDINameDocument10.dtd My_Device.midnam > /dev/null
+To validate a document, run:
+
+xmllint --dtdvalid MIDINameDocument10.dtd Acme_Synthomatic.midnam > /dev/null
 
 The same tool can be used to format the file nicely:
 
-xmllint --format My_Device.ugly.midnam > My_Device.midnam
+xmllint --format My_Device.ugly.midnam > Acme_Synthomatic.midnam
