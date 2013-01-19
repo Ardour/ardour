@@ -238,7 +238,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 		_midnam_custom_device_mode_selector.set_size_request(10, 30);
 		_midnam_custom_device_mode_selector.set_border_width(2);
-		_midi_controls_box.attach(_midnam_custom_device_mode_selector, 1, 2, 2, 3);
+		_midi_controls_box.attach(_midnam_custom_device_mode_selector, 0, 1, 3, 4);
 	} else {
 		_midi_controls_box.attach(_channel_selector, 0, 1, 0, 1);
 	}
@@ -341,9 +341,14 @@ MidiTimeAxisView::model_changed()
 
 	_midnam_custom_device_mode_selector.clear_items();
 
-	for (std::list<std::string>::const_iterator i = device_modes.begin();
-			i != device_modes.end(); ++i) {
-		_midnam_custom_device_mode_selector.append_text(*i);
+	if (device_modes.size() < 2) {
+		_midnam_custom_device_mode_selector.hide();
+	} else {
+		_midnam_custom_device_mode_selector.show();
+		for (std::list<std::string>::const_iterator i = device_modes.begin();
+		     i != device_modes.end(); ++i) {
+			_midnam_custom_device_mode_selector.append_text(*i);
+		}
 	}
 
 	_midnam_custom_device_mode_selector.set_active(0);
@@ -369,7 +374,7 @@ void
 MidiTimeAxisView::set_height (uint32_t h)
 {
 	if (h >= MIDI_CONTROLS_BOX_MIN_HEIGHT) {
-		_midi_controls_box.show_all ();
+		_midi_controls_box.show ();
 	} else {
 		_midi_controls_box.hide();
 	}
