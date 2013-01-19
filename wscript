@@ -58,9 +58,8 @@ else:
 # Version stuff
 
 def fetch_svn_revision (path):
-    # the fifth line has the revision number. we can't grep because of i18n issues changing the string
-    cmd = "svn info " + path + " | sed -n '5s/^[^:]*:[ \t][ \t]*//p'"
-    return subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
+    cmd = "svnversion | cut -d: -f1"
+    return subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].rstrip(os.linesep)
 
 def fetch_gcc_version (CC):
     cmd = "LANG= %s --version" % CC
@@ -111,7 +110,7 @@ def create_stored_revision():
     try:
         text =  '#include "ardour/svn_revision.h"\n'
         text += 'namespace ARDOUR { const char* svn_revision = \"%s\"; }\n' % rev
-        print('Writing svn revision info to libs/ardour/svn_revision.cc')
+        print('Writing svn revision info to libs/ardour/svn_revision.cc using ', rev)
         o = open('libs/ardour/svn_revision.cc', 'w')
         o.write(text)
         o.close()
