@@ -111,6 +111,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void build_automation_action_menu (bool);
 	Gtk::Menu* build_note_mode_menu();
 	Gtk::Menu* build_color_mode_menu();
+	
+	boost::shared_ptr<MIDI::Name::MasterDeviceNames> get_device_names(const std::string& model);
 
 	void set_note_mode (ARDOUR::NoteMode mode, bool apply_to_selection = false);
 	void set_color_mode (ARDOUR::ColorMode, bool force = false, bool redisplay = true, bool apply_to_selection = false);

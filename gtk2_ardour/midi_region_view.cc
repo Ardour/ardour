@@ -1232,7 +1232,7 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_c
 			continue;
 		}
 
-		string patch_name = instrument_info().get_patch_name ((*i)->bank(), (*i)->program(), channel);
+		const string patch_name = instrument_info().get_patch_name ((*i)->bank(), (*i)->program(), channel);
 		add_canvas_patch_change (*i, patch_name, active_channel);
 	}
 }

@@ -453,8 +453,6 @@ CustomDeviceMode::get_state(void)
 boost::shared_ptr<CustomDeviceMode> 
 MasterDeviceNames::custom_device_mode_by_name(std::string mode_name)
 {
-	// can't assert this, since in many of the patch files the mode name is empty
-	//assert(mode_name != "");
 	return _custom_device_modes[mode_name];
 }
 

@@ -231,6 +231,15 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		set_gui_property (X_("midnam-model-name"), "Generic");
 	}
 
+	if (gui_property (X_("midnam-custom-device-mode")).empty()) {
+		boost::shared_ptr<MIDI::Name::MasterDeviceNames> device_names = get_device_names(
+			gui_property (X_("midnam-model-name")));
+		if (device_names) {
+			set_gui_property (X_("midnam-custom-device-mode"),
+			                  *device_names->custom_device_mode_names().begin());
+		}
+	}
+
 	_midnam_model_selector.set_active_text (gui_property (X_("midnam-model-name")));
 	_midnam_custom_device_mode_selector.set_active_text (gui_property (X_("midnam-custom-device-mode")));
 
@@ -373,14 +382,9 @@ MidiTimeAxisView::model_changed()
 
 	_midnam_custom_device_mode_selector.clear_items();
 
-	if (device_modes.size() < 2) {
-		_midnam_custom_device_mode_selector.hide();
-	} else {
-		_midnam_custom_device_mode_selector.show();
-		for (std::list<std::string>::const_iterator i = device_modes.begin();
-		     i != device_modes.end(); ++i) {
-			_midnam_custom_device_mode_selector.append_text(*i);
-		}
+	for (std::list<std::string>::const_iterator i = device_modes.begin();
+	     i != device_modes.end(); ++i) {
+		_midnam_custom_device_mode_selector.append_text(*i);
 	}
 
 	_midnam_custom_device_mode_selector.set_active(0);
@@ -756,6 +760,19 @@ MidiTimeAxisView::add_multi_channel_controller_item(Menu_Helpers::MenuList& ctl_
 	dynamic_cast<Label*> (ctl_items.back().get_child())->set_use_markup (true);
 }
 
+boost::shared_ptr<MIDI::Name::MasterDeviceNames>
+MidiTimeAxisView::get_device_names(const std::string& model)
+{
+	using namespace MIDI::Name;
+	boost::shared_ptr<MIDINameDocument> midnam = MidiPatchManager::instance()
+		.document_by_model(model);
+	if (midnam) {
+		return midnam->master_device_names(model);
+	} else {
+		return boost::shared_ptr<MasterDeviceNames>();
+	}
+}
+
 void
 MidiTimeAxisView::build_controller_menu ()
 {
@@ -790,15 +807,9 @@ MidiTimeAxisView::build_controller_menu ()
 	}
 
 	using namespace MIDI::Name;
-	const Glib::ustring model = _midnam_model_selector.get_active_text();
-	boost::shared_ptr<MIDINameDocument> midnam = MidiPatchManager::instance()
-		.document_by_model(model);
-	boost::shared_ptr<MasterDeviceNames> device_names;
+	boost::shared_ptr<MasterDeviceNames> device_names = get_device_names(
+		_midnam_model_selector.get_active_text());
 
-	if (midnam) {
-		device_names = midnam->master_device_names(model);
-	}
-	
 	if (device_names && !device_names->controls().empty()) {
 		/* Controllers names available in midnam file, generate fancy menu */
 		unsigned n_items  = 0;
