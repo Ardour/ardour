@@ -782,9 +782,12 @@ MidiTimeAxisView::build_controller_menu ()
 	const Glib::ustring model = _midnam_model_selector.get_active_text();
 	boost::shared_ptr<MIDINameDocument> midnam = MidiPatchManager::instance()
 		.document_by_model(model);
-	boost::shared_ptr<MasterDeviceNames> device_names = midnam->master_device_names(
-		model);
+	boost::shared_ptr<MasterDeviceNames> device_names;
 
+	if (midnam) {
+		device_names = midnam->master_device_names(model);
+	}
+	
 	if (device_names && !device_names->controls().empty()) {
 		/* Controllers names available in midnam file, generate fancy menu */
 		unsigned n_items  = 0;
@@ -793,7 +796,7 @@ MidiTimeAxisView::build_controller_menu ()
 		     l != device_names->controls().end(); ++l) {
 			boost::shared_ptr<ControlNameList> name_list = *l;
 			Menu*                              ctl_menu  = NULL;
-
+			
 			for (ControlNameList::Controls::const_iterator c = (*l)->controls().begin();
 			     c != (*l)->controls().end(); ++c) {
 				const int ctl = atoi((*c)->number().c_str());
@@ -801,12 +804,12 @@ MidiTimeAxisView::build_controller_menu ()
 					/* Skip bank select controllers since they're handled specially */
 					continue;
 				}
-
+				
 				if (n_items == 0) {
 					/* Create a new submenu */
 					ctl_menu = manage (new Menu);
 				}
-
+				
 				MenuList& ctl_items (ctl_menu->items());
 				if (chn_cnt > 1) {
 					add_multi_channel_controller_item(ctl_items, ctl, (*c)->name());
