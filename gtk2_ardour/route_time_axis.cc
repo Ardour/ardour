@@ -112,8 +112,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
 
-	show_name_label ();
-	
 	gm.set_controls (_route, _route->shared_peak_meter(), _route->amp());
 	gm.get_level_meter().set_no_show_all();
 	gm.get_level_meter().setup_meters(50);
@@ -322,11 +320,6 @@ void
 RouteTimeAxisView::label_view ()
 {
 	string x = _route->name();
-
-	if (name_entry && x != name_entry->get_text()) {
-		name_entry->set_text (x);
-		ARDOUR_UI::instance()->set_tip (*name_entry, Glib::Markup::escape_text(x));
-	}
 
 	if (x != name_label.get_text()) {
 		name_label.set_text (x);

@@ -153,6 +153,12 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		set_height (preset_height (HeightNormal));
 	}
 
+	/* repack the name label */
+
+	if (name_label.get_parent()) {
+		name_label.get_parent()->remove (name_label);
+	}
+	
 	name_label.set_text (_name);
 	name_label.set_alignment (Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
         name_label.set_name (X_("TrackParameterName"));

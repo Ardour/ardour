@@ -30,10 +30,12 @@
 #include "pbd/error.h"
 #include "pbd/convert.h"
 
+#include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/selector.h>
 
 #include "ardour_ui.h"
+#include "ardour_dialog.h"
 #include "global_signals.h"
 #include "gui_thread.h"
 #include "public_editor.h"
@@ -70,7 +72,6 @@ PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess)
 	, controls_table (2, 8)
-	, name_entry (0)
 	, _name_editing (false)
 	, height (0)
 	, display_menu (0)
@@ -82,7 +83,8 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	, _canvas_display (0)
 	, _y_position (0)
 	, _editor (ed)
-	, last_name_entry_key_press_event (0)
+	, name_editor (0)
+	, name_entry (0)
 	, control_parent (0)
 	, _order (0)
 	, _effective_height (0)
@@ -112,13 +114,10 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	name_label.set_alignment (0.0, 0.5);
 	ARDOUR_UI::instance()->set_tip (name_label, _("Track/Bus name (double click to edit)"));
 						      
-	/* typically, either name_label OR name_entry are visible,
-	   but not both. its up to derived classes to show/hide them as they
-	   wish.
-	*/
-
+	name_hbox.pack_start (name_label, true, true);
 	name_hbox.show ();
-
+	name_label.show ();
+	
 	controls_table.set_size_request (200);
 	controls_table.set_row_spacings (2);
 	controls_table.set_col_spacings (2);
@@ -354,7 +353,7 @@ TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 			controls_ebox.translate_coordinates (name_label, event->x, event->y, nlx, nly);
 			Gtk::Allocation a = name_label.get_allocation ();
 			if (nlx > 0 && nlx < a.get_width() && nly > 0 && nly < a.get_height()) {
-				begin_name_edit ((GdkEvent*) event);
+				begin_name_edit ();
 				_ebox_release_can_act = false;
 				return true;
 			}
@@ -546,17 +545,27 @@ TimeAxisView::set_height (uint32_t h)
 }
 
 bool
+TimeAxisView::name_entry_key_press (GdkEventKey* ev)
+{
+	/* steal escape, tabs from GTK */
+
+	switch (ev->keyval) {
+	case GDK_Escape:
+	case GDK_ISO_Left_Tab:
+	case GDK_Tab:
+		return true;
+	}
+	return false;
+}
+
+bool
 TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 {
 	TrackViewList::iterator i;
 
 	switch (ev->keyval) {
 	case GDK_Escape:
-		// revert back to the way it was because
-		// name_entry_changed() will still be called as we drop focus.
-		name_entry->set_text (name_label.get_text());
-		// moving the focus will trigger everything else 
-		controls_ebox.grab_focus ();
+		name_editor->response (RESPONSE_CANCEL);
 		return true;
 
 	/* Shift+Tab Keys Pressed. Note that for Shift+Tab, GDK actually
@@ -565,138 +574,133 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 	 */
 	case GDK_ISO_Left_Tab:
 	case GDK_Tab:
-	{
-		TrackViewList const & allviews = _editor.get_track_views ();
-		TrackViewList::const_iterator i = find (allviews.begin(), allviews.end(), this);
-
-		if (ev->keyval == GDK_Tab) {
-			if (i != allviews.end()) {
-
-				do {
-					if (++i == allviews.end()) {
-						return true;
-					}
-
-					RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
-
-					if (rtav && rtav->route()->record_enabled()) {
-						continue;
-					}
-
-					if (!(*i)->hidden()) {
-						break;
-					}
-
-				} while (true);
-			}
-		} else {
-			if (i != allviews.begin()) {
-				do {
-					if (i == allviews.begin()) {
-						return true;
-					}
-
-					--i;
-
-					RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
-
-					if (rtav && rtav->route()->record_enabled()) {
-						continue;
-					}
-
-					if (!(*i)->hidden()) {
-						break;
-					}
-
-				} while (true);
-			}
-		}
-
-		/* moving the focus will trigger everything else that is needed */
-
-		if ((i != allviews.end()) && (*i != this) && !(*i)->hidden()) {
-			_editor.ensure_time_axis_view_is_visible (**i);
-			(*i)->begin_name_edit ((GdkEvent*) ev);
-		} else {
-			controls_ebox.grab_focus ();
-		}
-		
-	}
-	return true;
-
-	case GDK_Up:
-	case GDK_Down:
-		controls_ebox.grab_focus ();
+		name_editor->response (RESPONSE_ACCEPT);
 		return true;
-
 	default:
 		break;
 	}
-
-#ifdef TIMEOUT_NAME_EDIT
-	/* adapt the timeout to reflect the user's typing speed */
-
-	guint32 name_entry_timeout;
-
-	if (last_name_entry_key_press_event) {
-		/* timeout is 1/2 second or 5 times their current inter-char typing speed */
-		name_entry_timeout = std::max (500U, (5 * (ev->time - last_name_entry_key_press_event)));
-	} else {
-		/* start with a 1 second timeout */
-		name_entry_timeout = 1000;
-	}
-
-	last_name_entry_key_press_event = ev->time;
-
-	/* wait 1 seconds and if no more keys are pressed, act as if they pressed enter */
-
-	name_entry_key_timeout.disconnect();
-	name_entry_key_timeout = Glib::signal_timeout().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_timed_out), name_entry_timeout);
-#endif
-
 
 	return false;
 }
 
 void
-TimeAxisView::begin_name_edit (GdkEvent* event)
+TimeAxisView::begin_name_edit ()
 {
-	if (_name_editing) {
+	if (name_editor) {
 		return;
 	}
 
 	if (can_edit_name()) {
 
-		_name_editing = true;
+		Gtk::Widget* w = name_label.get_toplevel();
+		Gtk::Window* win = dynamic_cast<Gtk::Window*>(w);
+		
+		if (!win) {
+			return;
+		}
 
-		show_name_entry ();
+		name_editor = new ArdourDialog (*win, string_compose (_("Edit name for %1"), name()), true);
+		name_editor->add_button (_("Cancel"), RESPONSE_CANCEL);
+		name_editor->add_button (_("Save"), RESPONSE_OK);
+		name_editor->add_button (_("Save & Edit Next"), RESPONSE_ACCEPT);
+
+		name_entry = manage (new Gtkmm2ext::FocusEntry);
+		
+		name_entry->set_name ("EditorTrackNameDisplay");
+		name_entry->signal_key_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_press), false);
+		name_entry->signal_key_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_release), false);
+		name_entry->set_text (name_label.get_text());
+		name_entry->signal_activate().connect (sigc::bind (sigc::mem_fun (*name_editor, &ArdourDialog::response), RESPONSE_OK));
+
+		Gtk::HBox* hbox = manage (new HBox);
+		Gtk::Label* label = manage (new Label (_("New name")));
+
+		hbox->pack_start (*label, false, false);
+		hbox->pack_start (*name_entry, true, true);
+		name_editor->get_vbox()->pack_start (*hbox, false, false);
+
+		label->show();
+		name_entry->show ();
+		hbox->show ();
+
 		name_entry->select_region (0, -1);
 		name_entry->set_state (STATE_SELECTED);
 		name_entry->grab_focus ();
-		name_entry->start_editing (event);
+		name_entry->start_editing (0);
+
+		name_editor->signal_response().connect (sigc::mem_fun (*this, &TimeAxisView::end_name_edit));
+
+		name_editor->set_position (WIN_POS_MOUSE);
+		name_editor->present ();
+
+		/* move it to line up with the name label, and some distance to
+		 * the right of it
+		 */
+
+		int x, y;
+		int wx, wy;
+
+		name_label.translate_coordinates (_editor, 0, 0, x, y);
+		_editor.get_position (wx, wy);
+
+		name_editor->move (wx + x + 250, wy + y);
 	}
 }
 
 void
-TimeAxisView::end_name_edit (bool push_focus)
+TimeAxisView::end_name_edit (int response)
 {
-	if (!_name_editing) {
+	if (!name_editor) {
 		return;
 	}
+	
+	bool edit_next = false;
 
-	if (can_edit_name()) {
+	switch (response) {
+	case RESPONSE_CANCEL:
+		break;
+	case RESPONSE_OK:
+		name_entry_changed ();
+		break;
+	case RESPONSE_ACCEPT:
+		name_entry_changed ();
+		edit_next = true;
+	}
 
-		_name_editing = false;
+	delete_when_idle (name_editor);
 
-		last_name_entry_key_press_event = 0;
-		name_entry_key_timeout.disconnect ();
+	name_editor = 0;
+	name_entry = 0;
+
+	if (edit_next) {
+
+		TrackViewList const & allviews = _editor.get_track_views ();
+		TrackViewList::const_iterator i = find (allviews.begin(), allviews.end(), this);
 		
-		if (push_focus) {
-			controls_ebox.grab_focus ();
+		if (i != allviews.end()) {
+			
+			do {
+				if (++i == allviews.end()) {
+					return;
+				}
+				
+				RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
+			
+				if (rtav && rtav->route()->record_enabled()) {
+					continue;
+				}
+				
+				if (!(*i)->hidden()) {
+					break;
+				}
+				
+			} while (true);
 		}
 
-		show_name_label ();
-		name_entry_changed ();
+		if ((i != allviews.end()) && (*i != this) && !(*i)->hidden()) {
+			_editor.ensure_time_axis_view_is_visible (**i);
+			(*i)->begin_name_edit ();
+		} 
 	}
 }
 
@@ -706,62 +710,9 @@ TimeAxisView::name_entry_changed ()
 }
 
 bool
-TimeAxisView::name_entry_focus_in (GdkEventFocus* ev)
-{
-	begin_name_edit ((GdkEvent*) ev);
-	return false;
-}
-
-bool
-TimeAxisView::name_entry_focus_out (GdkEventFocus*)
-{
-	end_name_edit (false);
-	return false;
-}
-
-bool
-TimeAxisView::name_entry_key_timed_out ()
-{
-	name_entry_activated();
-	return false;
-}
-
-void
-TimeAxisView::name_entry_activated ()
-{
-	end_name_edit (true);
-}
-
-bool
 TimeAxisView::can_edit_name () const
 {
 	return true;
-}
-
-bool
-TimeAxisView::name_entry_button_press (GdkEventButton *ev)
-{
-	if (ev->button == 3) {
-		return true;
-	}
-
-	if (ev->button == 1) {
-		if (ev->type != GDK_2BUTTON_PRESS) {
-			conditionally_add_to_selection ();
-		}
-	}
-
-	return true;
-}
-
-bool
-TimeAxisView::name_entry_button_release (GdkEventButton *ev)
-{
-	if (ev->button == 3) {
-		popup_display_menu (ev->time);
-		return true;
-	}
-	return false;
 }
 
 void
@@ -1175,55 +1126,6 @@ TimeAxisView::compute_heights ()
 
 	// height required to show 1 row of buttons
 	button_height = req.height;
-}
-
-void
-TimeAxisView::show_name_label ()
-{
-	if (name_entry && name_entry->is_ancestor (name_hbox)) {
-		name_hbox.remove (*name_entry);
-	}
-
-	if (!name_label.is_ancestor (name_hbox) && name_label.get_parent() == 0) {
-		name_hbox.pack_start (name_label, true, true);
-		name_hbox.show ();
-		name_label.show ();
-	}
-}
-
-void
-TimeAxisView::show_name_entry ()
-{
-	if (!name_entry) {
-		/*
-		  Create the standard LHS Controls
-		  We create the top-level container and name add the name label here,
-		  subclasses can add to the layout as required
-		*/
-
-		name_entry = new Gtkmm2ext::FocusEntry;
-		
-		name_entry->set_name ("EditorTrackNameDisplay");
-		name_entry->signal_button_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_button_release), false);
-		name_entry->signal_button_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_button_press), false);
-		name_entry->signal_key_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_release));
-		name_entry->signal_activate().connect (sigc::mem_fun(*this, &TimeAxisView::name_entry_activated));
-		name_entry->signal_focus_in_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_focus_in));
-		name_entry->signal_focus_out_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_focus_out));
-		Gtkmm2ext::set_size_request_to_display_given_text (*name_entry, N_("gTortnam"), 10, 10); // just represents a short name
-
-		name_entry->set_text (name_label.get_text());
-	}
-
-	if (name_label.is_ancestor (name_hbox)) {
-		name_hbox.remove (name_label);
-	}
-
-	if (!name_entry->is_ancestor (name_hbox) && name_label.get_parent() == 0) {
-		name_hbox.pack_start (*name_entry, true, true);
-		name_hbox.show ();
-		name_entry->show ();
-	}
 }
 
 void

@@ -148,8 +148,6 @@ VisualTimeAxis::set_height(uint32_t h)
 {
 	TimeAxisView::set_height(h);
 
-	show_name_label ();
-
 	if (h >= hNormal) {
 		other_button_hbox.show_all() ;
 	} else if (h >= hSmaller) {

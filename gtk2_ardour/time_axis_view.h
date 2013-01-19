@@ -68,6 +68,7 @@ class Selectable;
 class RegionView;
 class GhostRegion;
 class StreamView;
+class ArdourDialog;
 
 /** Abstract base class for time-axis views (horizontal editor 'strips')
  *
@@ -115,9 +116,6 @@ class TimeAxisView : public virtual AxisView
 	uint32_t current_height() const { return height; }
 
 	void idle_resize (uint32_t);
-
-	void show_name_label ();
-	void show_name_entry ();
 
 	virtual guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	virtual void hide ();
@@ -204,7 +202,6 @@ class TimeAxisView : public virtual AxisView
 	Gtk::VBox              controls_vbox;
 	Gtk::VBox              time_axis_vbox;
 	Gtk::HBox              name_hbox;
- 	Gtkmm2ext::FocusEntry* name_entry;
 	Gtk::Label             name_label;
         bool                  _name_editing;
         uint32_t               height;  /* in canvas units */
@@ -225,22 +222,17 @@ class TimeAxisView : public virtual AxisView
 
         virtual bool can_edit_name() const;
 
-	bool name_entry_button_press (GdkEventButton *ev);
-	bool name_entry_button_release (GdkEventButton *ev);
 	bool name_entry_key_release (GdkEventKey *ev);
-	void name_entry_activated ();
-	sigc::connection name_entry_key_timeout;
-	bool name_entry_key_timed_out ();
-	guint32 last_name_entry_key_press_event;
+	bool name_entry_key_press (GdkEventKey *ev);
 
-        void begin_name_edit (GdkEvent*);
-        void end_name_edit (bool push_focus);
+        ArdourDialog* name_editor;
+        Gtk::Entry* name_entry;
+        void begin_name_edit ();
+        void end_name_edit (int);
 
 	/* derived classes can override these */
 
 	virtual void name_entry_changed ();
-	virtual bool name_entry_focus_in (GdkEventFocus *ev);
-	virtual bool name_entry_focus_out (GdkEventFocus *ev);
 
 	/** Handle mouse relaese on our LHS control name ebox.
 	 *
