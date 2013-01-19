@@ -1,0 +1,162 @@
+<!--
+	XML DTD for MIDINameDocument
+	
+	Version 1.0, 19 January 2003
+	
+	Formal Public Identifier:
+		"-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN"
+	URI:
+		"http://www.midi.org/dtds/MIDINameDocument10.dtd"
+-->
+
+<!--
+	ENTITIES - used internally
+-->
+
+<!ENTITY % namelist "PatchNameList | NoteNameList | ControlNameList | ValueNameList">
+<!ENTITY % noteorctl_listorref "(NoteNameList | UsesNoteNameList)?, (ControlNameList | 
+								UsesControlNameList)?">
+
+<!--
+	ELEMENTS AND ATTRIBUTES
+-->
+
+<!ELEMENT MIDINameDocument	(Author, (MasterDeviceNames+ | ExtendingDeviceNames+ | 
+							StandardDeviceMode+)) >
+
+<!ELEMENT Author (#PCDATA)>
+
+<!ELEMENT MasterDeviceNames		(((Manufacturer, Model+) | Device), 
+								(CustomDeviceMode | SupportsStandardDeviceMode)+, 
+								ChannelNameSet*, (%namelist;)*) >
+
+<!ELEMENT ExtendingDeviceNames	(((Manufacturer, Model+)? | Device), (%namelist;)+) >
+
+<!ELEMENT Manufacturer (#PCDATA)>
+
+<!ELEMENT Model (#PCDATA)>
+
+<!ELEMENT Device EMPTY>
+<!ATTLIST Device
+				Name		CDATA	#REQUIRED
+				UniqueID	NMTOKEN	#REQUIRED>
+
+<!ELEMENT StandardDeviceMode (DeviceModeEnable?, DeviceModeDisable?, ChannelNameSetAssignments, 
+								ChannelNameSet+, (%namelist;)*) >
+<!ATTLIST StandardDeviceMode
+				Name	CDATA	#REQUIRED>
+
+<!ELEMENT CustomDeviceMode (DeviceModeEnable?, DeviceModeDisable?, ChannelNameSetAssignments, 
+								(%namelist;)*) >
+<!ATTLIST CustomDeviceMode
+				Name	CDATA	#REQUIRED>
+
+<!ELEMENT DeviceModeEnable	(MIDICommands)>
+<!ELEMENT DeviceModeDisable	(MIDICommands)>
+
+<!ELEMENT SupportsStandardDeviceMode EMPTY>
+<!ATTLIST SupportsStandardDeviceMode
+				Name	CDATA	#REQUIRED>
+
+<!ELEMENT ChannelNameSetAssignments (ChannelNameSetAssign+)>
+<!ELEMENT ChannelNameSetAssign EMPTY>
+<!ATTLIST ChannelNameSetAssign
+				Channel		NMTOKEN			#REQUIRED
+				NameSet		CDATA			#REQUIRED>
+
+<!ELEMENT ChannelNameSet	(AvailableForChannels, %noteorctl_listorref;, PatchBank+) >
+<!ATTLIST ChannelNameSet
+				Name		CDATA			#REQUIRED>
+
+<!ELEMENT AvailableForChannels (AvailableChannel+)>
+<!ELEMENT AvailableChannel EMPTY>
+<!ATTLIST AvailableChannel
+				Channel		NMTOKEN			#REQUIRED
+				Available	(false | true)	"true">
+
+<!ELEMENT PatchBank (MIDICommands?, (UsesPatchNameList | PatchNameList))>
+<!ATTLIST PatchBank
+				Name		CDATA			#IMPLIED
+				ROM			(false | true)	"false">
+
+<!ELEMENT UsesPatchNameList EMPTY>
+<!ATTLIST UsesPatchNameList
+				Name	CDATA	#REQUIRED>
+
+<!ELEMENT PatchNameList (Patch*)>
+<!ATTLIST PatchNameList
+				Name	CDATA	#IMPLIED>
+
+<!ELEMENT Patch (PatchMIDICommands?, ChannelNameSetAssignments?, %noteorctl_listorref; ) >
+<!ATTLIST Patch
+				Number			CDATA	#REQUIRED
+				Name			CDATA	#REQUIRED
+				ProgramChange	NMTOKEN	#IMPLIED>
+
+<!ELEMENT UsesNoteNameList EMPTY>
+<!ATTLIST UsesNoteNameList
+				Name	CDATA	#REQUIRED>
+
+<!ELEMENT NoteNameList (NoteGroup | Note)+>
+<!ATTLIST NoteNameList
+				Name	CDATA	#IMPLIED>
+
+<!ELEMENT NoteGroup (Note*)>
+<!ATTLIST NoteGroup
+				Name	CDATA	#IMPLIED>
+
+<!ELEMENT Note EMPTY>
+<!ATTLIST Note
+				Number	NMTOKEN	#REQUIRED
+				Name	CDATA	#REQUIRED>
+
+<!ELEMENT UsesControlNameList EMPTY>
+<!ATTLIST UsesControlNameList
+				Name	CDATA	#REQUIRED>
+
+<!ELEMENT ControlNameList (Control+)>
+<!ATTLIST ControlNameList
+				Name	CDATA	#IMPLIED>
+
+<!ELEMENT Control (Values?)>
+<!ATTLIST Control
+				Type	(7bit | 14bit | RPN | NRPN)	"7bit"
+				Number	NMTOKEN						#REQUIRED
+				Name	CDATA						#REQUIRED>
+
+<!ELEMENT Values (ValueNameList | UsesValueNameList)?>
+<!ATTLIST Values
+				Min		NMTOKEN	#REQUIRED
+				Max		NMTOKEN	#REQUIRED
+				Default	NMTOKEN	#IMPLIED
+				Units	NMTOKEN	#IMPLIED
+				Mapping	NMTOKEN	#IMPLIED>
+
+<!ELEMENT UsesValueNameList EMPTY>
+<!ATTLIST UsesValueNameList
+				Name	CDATA	#REQUIRED>
+
+<!ELEMENT ValueNameList (Value+)>
+<!ATTLIST ValueNameList
+				Name	CDATA	#IMPLIED>
+
+<!ELEMENT Value EMPTY>
+<!ATTLIST Value
+				Number	NMTOKEN	#REQUIRED
+				Name	CDATA	#REQUIRED>
+
+<!--
+	Include MIDI.dtd, defining elements referenced by MIDICommands
+-->
+<!ENTITY % ChannelRequired "#IMPLIED">
+<!ENTITY % MIDIDTD PUBLIC	"-//MIDI Manufacturers Association//DTD MIDIEvents 1.0//EN"
+							"http://www.midi.org/dtds/MIDIEvents10.dtd" >
+%MIDIDTD;
+
+<!ELEMENT MIDICommands (MIDIDelay | %MIDIChannelMessage; | SysEx)+ >
+<!ELEMENT PatchMIDICommands (MIDIDelay | %MIDIChannelMessage; )+ >
+
+<!ELEMENT MIDIDelay EMPTY>
+<!ATTLIST MIDIDelay
+				Milliseconds	CDATA	#REQUIRED>
+
