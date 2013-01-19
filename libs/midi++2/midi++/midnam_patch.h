@@ -387,6 +387,8 @@ public:
 	const std::string& author() const { return _author; }
 	void set_author(const std::string an_author) { _author = an_author; }
 	
+	boost::shared_ptr<MasterDeviceNames> master_device_names(const std::string& model);
+
 	const MasterDeviceNamesList& master_device_names_by_model() const { return _master_device_names_list; }
 	
 	const MasterDeviceNames::Models& all_models() const { return _all_models; }

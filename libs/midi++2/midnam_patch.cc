@@ -216,9 +216,11 @@ ControlNameList::set_state (const XMLTree& tree, const XMLNode& node)
 
 	for (XMLNodeList::const_iterator i = node.children().begin();
 	     i != node.children().end(); ++i) {
-		boost::shared_ptr<Control> control(new Control());
-		control->set_state (tree, *(*i));
-		_controls.push_back(control);
+		if ((*i)->name() != "comment") {
+			boost::shared_ptr<Control> control(new Control());
+			control->set_state (tree, *(*i));
+			_controls.push_back(control);
+		}
 	}
 
 	return 0;
@@ -644,6 +646,16 @@ MIDINameDocument::get_state(void)
 {
 	static XMLNode nothing("<nothing>");
 	return nothing;
+}
+
+boost::shared_ptr<MasterDeviceNames>
+MIDINameDocument::master_device_names(const std::string& model)
+{
+	MasterDeviceNamesList::const_iterator m = _master_device_names_list.find(model);
+	if (m != _master_device_names_list.end()) {
+		return boost::shared_ptr<MasterDeviceNames>(m->second);
+	}
+	return boost::shared_ptr<MasterDeviceNames>();
 }
 
 const char* general_midi_program_names[128] = {

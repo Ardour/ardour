@@ -227,13 +227,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	_midnam_model_selector.set_active_text (gui_property (X_("midnam-model-name")));
-	model_changed();
 	_midnam_custom_device_mode_selector.set_active_text (gui_property (X_("midnam-custom-device-mode")));
-
-	_midnam_model_selector.signal_changed().connect(
-		sigc::mem_fun(*this, &MidiTimeAxisView::model_changed));
-	_midnam_custom_device_mode_selector.signal_changed().connect(
-		sigc::mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed));
 
 	ARDOUR_UI::instance()->set_tip (_midnam_model_selector, _("External MIDI Device"));
 	ARDOUR_UI::instance()->set_tip (_midnam_custom_device_mode_selector, _("External Device Mode"));
@@ -257,6 +251,15 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	} else {
 		_midi_controls_box.attach(_channel_selector, 0, 1, 0, 1);
 	}
+
+	model_changed();
+	custom_device_mode_changed();
+
+	_midnam_model_selector.signal_changed().connect(
+		sigc::mem_fun(*this, &MidiTimeAxisView::model_changed));
+	_midnam_custom_device_mode_selector.signal_changed().connect(
+		sigc::mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed));
+
 
 	controls_vbox.pack_start(_midi_controls_box, false, false);
 
@@ -354,7 +357,7 @@ MidiTimeAxisView::model_changed()
 	const Glib::ustring model = _midnam_model_selector.get_active_text();
 	set_gui_property (X_("midnam-model-name"), model);
 
-	std::list<std::string> device_modes = MIDI::Name::MidiPatchManager::instance()
+	const std::list<std::string> device_modes = MIDI::Name::MidiPatchManager::instance()
 		.custom_device_mode_names_by_model(model);
 
 	_midnam_custom_device_mode_selector.clear_items();
@@ -643,6 +646,105 @@ MidiTimeAxisView::add_channel_command_menu_item (Menu_Helpers::MenuList& items,
 	}
 }
 
+/** Add a single menu item for a controller on one channel. */
+void
+MidiTimeAxisView::add_single_channel_controller_item(Menu_Helpers::MenuList& ctl_items,
+                                                     int                     ctl,
+                                                     const std::string&      name)
+{
+	using namespace Menu_Helpers;
+
+	const uint16_t selected_channels = _channel_selector.get_selected_channels();
+	for (uint8_t chn = 0; chn < 16; chn++) {
+		if (selected_channels & (0x0001 << chn)) {
+
+			Evoral::Parameter fully_qualified_param (MidiCCAutomation, chn, ctl);
+			ctl_items.push_back (
+				CheckMenuElem (
+					string_compose ("<b>%1</b>: %2 [%3]", ctl, name, int (chn)),
+					sigc::bind (
+						sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
+						fully_qualified_param)));
+			dynamic_cast<Label*> (ctl_items.back().get_child())->set_use_markup (true);
+
+			boost::shared_ptr<AutomationTimeAxisView> track = automation_child (
+				fully_qualified_param);
+
+			bool visible = false;
+			if (track) {
+				if (track->marked_for_display()) {
+					visible = true;
+				}
+			}
+
+			CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&ctl_items.back());
+			_controller_menu_map[fully_qualified_param] = cmi;
+			cmi->set_active (visible);
+
+			/* one channel only */
+			break;
+		}
+	}
+}
+
+/** Add a submenu with 1 item per channel for a controller on many channels. */
+void
+MidiTimeAxisView::add_multi_channel_controller_item(Menu_Helpers::MenuList& ctl_items,
+                                                    int                     ctl,
+                                                    const std::string&      name)
+{
+	using namespace Menu_Helpers;
+
+	const uint16_t selected_channels = _channel_selector.get_selected_channels();
+
+	Menu* chn_menu = manage (new Menu);
+	MenuList& chn_items (chn_menu->items());
+
+	/* add a couple of items to hide/show this controller on all channels */
+
+	Evoral::Parameter param_without_channel (MidiCCAutomation, 0, ctl);
+	chn_items.push_back (
+		MenuElem (_("Hide all channels"),
+		          sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::change_all_channel_tracks_visibility),
+		                      false, param_without_channel)));
+	chn_items.push_back (
+		MenuElem (_("Show all channels"),
+		          sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::change_all_channel_tracks_visibility),
+		                      true, param_without_channel)));
+
+	for (uint8_t chn = 0; chn < 16; chn++) {
+		if (selected_channels & (0x0001 << chn)) {
+
+			/* for each selected channel, add a menu item for this controller */
+
+			Evoral::Parameter fully_qualified_param (MidiCCAutomation, chn, ctl);
+			chn_items.push_back (
+				CheckMenuElem (string_compose (_("Channel %1"), chn+1),
+				               sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
+				                           fully_qualified_param)));
+
+			boost::shared_ptr<AutomationTimeAxisView> track = automation_child (
+				fully_qualified_param);
+			bool visible = false;
+
+			if (track) {
+				if (track->marked_for_display()) {
+					visible = true;
+				}
+			}
+
+			CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&chn_items.back());
+			_controller_menu_map[fully_qualified_param] = cmi;
+			cmi->set_active (visible);
+		}
+	}
+
+	/* add the per-channel menu to the list of controllers, with the name of the controller */
+	ctl_items.push_back (MenuElem (string_compose ("<b>%1</b>: %2", ctl, name),
+	                               *chn_menu));
+	dynamic_cast<Label*> (ctl_items.back().get_child())->set_use_markup (true);
+}
+
 void
 MidiTimeAxisView::build_controller_menu ()
 {
@@ -680,146 +782,76 @@ MidiTimeAxisView::build_controller_menu ()
 	const Glib::ustring model = _midnam_model_selector.get_active_text();
 	boost::shared_ptr<MIDINameDocument> midnam = MidiPatchManager::instance()
 		.document_by_model(model);
-	boost::shared_ptr<MasterDeviceNames> device_names;
-	if (midnam && !midnam->master_device_names_by_model().empty()) {
-		device_names = boost::shared_ptr<MasterDeviceNames>(
-			midnam->master_device_names_by_model().begin()->second);
-	}
+	boost::shared_ptr<MasterDeviceNames> device_names = midnam->master_device_names(
+		model);
 
 	if (device_names && !device_names->controls().empty()) {
-		/* Controllers names available from the midnam file,
-		   generate a custom controller menu */
+		/* Controllers names available in midnam file, generate fancy menu */
+		unsigned n_items  = 0;
+		unsigned n_groups = 0;
 		for (MasterDeviceNames::ControlNameLists::const_iterator l = device_names->controls().begin();
 		     l != device_names->controls().end(); ++l) {
 			boost::shared_ptr<ControlNameList> name_list = *l;
-
-			int       chn        = 0;  // TODO
-			Menu*     group_menu = manage(new Menu());
-			MenuList& group_items(group_menu->items());
+			Menu*                              ctl_menu  = NULL;
 
 			for (ControlNameList::Controls::const_iterator c = (*l)->controls().begin();
 			     c != (*l)->controls().end(); ++c) {
-				Evoral::Parameter fully_qualified_param(MidiCCAutomation, chn, atoi((*c)->number().c_str()));
-				group_items.push_back(
-					CheckMenuElem(string_compose("<b>%1</b>: %2 [%3]",
-					                             (*c)->number(), (*c)->name(), int(chn)),
-					              sigc::bind(
-						              sigc::mem_fun(*this, &RouteTimeAxisView::toggle_automation_track),
-						              fully_qualified_param)));
-				dynamic_cast<Label*> (group_items.back().get_child())->set_use_markup (true);
-			}
-			items.push_back(MenuElem(name_list->name(), *group_menu));
-		}
-		return;
-	}
-
-	/* loop over all 127 MIDI controllers, in groups of 16; except don't offer
-	   bank select controllers, as they are handled by the `patch' code */
-
-	for (int i = 0; i < 127; i += 16) {
-
-		Menu* ctl_menu = manage (new Menu);
-		MenuList& ctl_items (ctl_menu->items());
-
-		/* for each controller, consider whether to create a submenu or a single item */
-
-		for (int ctl = i; ctl < i+16; ++ctl) {
-
-			if (ctl == MIDI_CTL_MSB_BANK || ctl == MIDI_CTL_LSB_BANK) {
-				continue;
-			}
-
-			if (chn_cnt > 1) {
-
-				/* multiple channels - create a submenu, with 1 item per channel */
-
-				Menu* chn_menu = manage (new Menu);
-				MenuList& chn_items (chn_menu->items());
-
-				/* add a couple of items to hide/show this controller on all channels */
-
-				Evoral::Parameter param_without_channel (MidiCCAutomation, 0, ctl);
-				chn_items.push_back (
-					MenuElem (_("Hide all channels"),
-					          sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::change_all_channel_tracks_visibility),
-					                      false, param_without_channel)));
-				chn_items.push_back (
-					MenuElem (_("Show all channels"),
-					          sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::change_all_channel_tracks_visibility),
-					                      true, param_without_channel)));
-
-				for (uint8_t chn = 0; chn < 16; chn++) {
-					if (selected_channels & (0x0001 << chn)) {
-
-						/* for each selected channel, add a menu item for this controller */
-
-						Evoral::Parameter fully_qualified_param (MidiCCAutomation, chn, ctl);
-						chn_items.push_back (
-							CheckMenuElem (string_compose (_("Channel %1"), chn+1),
-							               sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
-							                           fully_qualified_param)));
-
-						boost::shared_ptr<AutomationTimeAxisView> track = automation_child (
-							fully_qualified_param);
-						bool visible = false;
-
-						if (track) {
-							if (track->marked_for_display()) {
-								visible = true;
-							}
-						}
-
-						CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&chn_items.back());
-						_controller_menu_map[fully_qualified_param] = cmi;
-						cmi->set_active (visible);
-					}
+				const int ctl = atoi((*c)->number().c_str());
+				if (ctl == MIDI_CTL_MSB_BANK || ctl == MIDI_CTL_LSB_BANK) {
+					/* Skip bank select controllers since they're handled specially */
+					continue;
 				}
 
-				/* add the per-channel menu to the list of controllers, with the name of the controller */
-				ctl_items.push_back (MenuElem (string_compose ("<b>%1</b>: %2", ctl, midi_name (ctl)),
-				                               *chn_menu));
-				dynamic_cast<Label*> (ctl_items.back().get_child())->set_use_markup (true);
+				if (n_items == 0) {
+					/* Create a new submenu */
+					ctl_menu = manage (new Menu);
+				}
 
-			} else {
-
-				/* just one channel - create a single menu item for this ctl+channel combination */
-
-				for (uint8_t chn = 0; chn < 16; chn++) {
-					if (selected_channels & (0x0001 << chn)) {
-
-						Evoral::Parameter fully_qualified_param (MidiCCAutomation, chn, ctl);
-						ctl_items.push_back (
-							CheckMenuElem (
-								string_compose ("<b>%1</b>: %2 [%3]", ctl, midi_name (ctl), int (chn)),
-								sigc::bind (
-									sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
-									fully_qualified_param)));
-						dynamic_cast<Label*> (ctl_items.back().get_child())->set_use_markup (true);
-
-						boost::shared_ptr<AutomationTimeAxisView> track = automation_child (
-							fully_qualified_param);
-
-						bool visible = false;
-						if (track) {
-							if (track->marked_for_display()) {
-								visible = true;
-							}
-						}
-
-						CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&ctl_items.back());
-						_controller_menu_map[fully_qualified_param] = cmi;
-						cmi->set_active (visible);
-
-						/* one channel only */
-						break;
-					}
+				MenuList& ctl_items (ctl_menu->items());
+				if (chn_cnt > 1) {
+					add_multi_channel_controller_item(ctl_items, ctl, (*c)->name());
+				} else {
+					add_single_channel_controller_item(ctl_items, ctl, (*c)->name());
+				}
+				
+				if (++n_items == 16 || c == (*l)->controls().end()) {
+					/* Submenu has 16 items, add it to controller menu and reset */
+					items.push_back(
+						MenuElem(string_compose(_("Controllers %1-%2"),
+						                        (16 * n_groups), (16 * n_groups) + n_items - 1),
+						         *ctl_menu));
+					ctl_menu = NULL;
+					n_items  = 0;
+					++n_groups;
 				}
 			}
 		}
+	} else {
+		/* No controllers names, generate generic numeric menu */
+		for (int i = 0; i < 127; i += 16) {
+			Menu*     ctl_menu = manage (new Menu);
+			MenuList& ctl_items (ctl_menu->items());
 
-		/* add the menu for this block of controllers to the overall controller menu */
+			for (int ctl = i; ctl < i+16; ++ctl) {
+				if (ctl == MIDI_CTL_MSB_BANK || ctl == MIDI_CTL_LSB_BANK) {
+					/* Skip bank select controllers since they're handled specially */
+					continue;
+				}
 
-		items.push_back (MenuElem (string_compose (_("Controllers %1-%2"), i, i+15), *ctl_menu));
+				if (chn_cnt > 1) {
+					add_multi_channel_controller_item(
+						ctl_items, ctl, string_compose(_("Controller %1"), ctl));
+				} else {
+					add_single_channel_controller_item(
+						ctl_items, ctl, string_compose(_("Controller %1"), ctl));
+				}
+			}
+
+			/* Add submenu for this block of controllers to controller menu */
+			items.push_back (
+				MenuElem (string_compose (_("Controllers %1-%2"), i, i + 15),
+				          *ctl_menu));
+		}
 	}
 }
 
