@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE MIDINameDocument
-	PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 0.7//EN"
-	""
-	>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
 
 <MIDINameDocument>
 	<Author></Author>
