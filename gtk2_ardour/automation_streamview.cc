@@ -252,6 +252,7 @@ AutomationStreamView::interpolation () const
 	if (v) {
 		return v->line()->the_list()->interpolation ();
 	}
+	return AutomationList::Linear;
 }
 
 /** Clear all automation displayed in this view */
