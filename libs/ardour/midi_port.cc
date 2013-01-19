@@ -173,7 +173,8 @@ MidiPort::flush_buffers (pframes_t nframes)
 				}
 			} else {
 				cerr << "drop flushed event on the floor, time " << ev
-				     << " to early for " << _global_port_buffer_offset + _port_buffer_offset << endl;
+				     << " to early for " << _global_port_buffer_offset 
+				     << " + " << _port_buffer_offset << endl;
 			}
 		}
 	}
