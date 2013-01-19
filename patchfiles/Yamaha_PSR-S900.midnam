@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <MIDINameDocument>
   <Author>Hans Baier</Author>
   <MasterDeviceNames>
@@ -894,7 +895,7 @@
               <ProgramChange Number="25"/>
             </PatchMIDICommands>
           </Patch>
-          <Patch Number="51" Name="CampﬁreGtr">
+          <Patch Number="51" Name="Camp&#xFB01;reGtr">
             <PatchMIDICommands>
               <ControlChange Control="0" Value="0"/>
               <ControlChange Control="32" Value="115"/>

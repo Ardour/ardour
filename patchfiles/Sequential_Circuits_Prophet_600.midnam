@@ -1,188 +1,182 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
-
 <MIDINameDocument>
-	<Author></Author>
-	<MasterDeviceNames>
-		<Manufacturer>Sequential Circuits</Manufacturer>
-		<Model>Prophet 600</Model>
-		<CustomDeviceMode Name="">
-			<ChannelNameSetAssignments>
-				<ChannelNameSetAssign Channel="1" NameSet="Presets" />
-				<ChannelNameSetAssign Channel="2" NameSet="Presets" />
-				<ChannelNameSetAssign Channel="3" NameSet="Presets" />
-				<ChannelNameSetAssign Channel="4" NameSet="Presets" />
-				<ChannelNameSetAssign Channel="5" NameSet="Presets" />
-				<ChannelNameSetAssign Channel="6" NameSet="Presets" />
-				<ChannelNameSetAssign Channel="7" NameSet="Presets" />
-				<ChannelNameSetAssign Channel="8" NameSet="Presets" />
-				<ChannelNameSetAssign Channel="9" NameSet="Presets" />
-				<ChannelNameSetAssign Channel="10" NameSet="Presets" />
-				<ChannelNameSetAssign Channel="11" NameSet="Presets" />
-				<ChannelNameSetAssign Channel="12" NameSet="Presets" />
-				<ChannelNameSetAssign Channel="13" NameSet="Presets" />
-				<ChannelNameSetAssign Channel="14" NameSet="Presets" />
-				<ChannelNameSetAssign Channel="15" NameSet="Presets" />
-				<ChannelNameSetAssign Channel="16" NameSet="Presets" />
-			</ChannelNameSetAssignments>
-
-		</CustomDeviceMode>
-		<ChannelNameSet Name="Presets">
-			<AvailableForChannels>
-				<AvailableChannel Channel="1" Available="true" />
-				<AvailableChannel Channel="2" Available="true" />
-				<AvailableChannel Channel="3" Available="true" />
-				<AvailableChannel Channel="4" Available="true" />
-				<AvailableChannel Channel="5" Available="true" />
-				<AvailableChannel Channel="6" Available="true" />
-				<AvailableChannel Channel="7" Available="true" />
-				<AvailableChannel Channel="8" Available="true" />
-				<AvailableChannel Channel="9" Available="true" />
-				<AvailableChannel Channel="10" Available="true" />
-				<AvailableChannel Channel="11" Available="true" />
-				<AvailableChannel Channel="12" Available="true" />
-				<AvailableChannel Channel="13" Available="true" />
-				<AvailableChannel Channel="14" Available="true" />
-				<AvailableChannel Channel="15" Available="true" />
-				<AvailableChannel Channel="16" Available="true" />
-			</AvailableForChannels>
-
-			<PatchBank Name="Presets " ROM="false">
-				<UsesPatchNameList Name="Presets " />
-			</PatchBank>
-		</ChannelNameSet>
-
-		<PatchNameList Name="Presets ">
-			<Patch Number="1" Name="00  Classical Brass" ProgramChange="0" />
-			<Patch Number="2" Name="01  Brass 1" ProgramChange="1" />
-			<Patch Number="3" Name="02  Brass 2" ProgramChange="2" />
-			<Patch Number="4" Name="03  Bach Trumpet" ProgramChange="3" />
-			<Patch Number="5" Name="04  Brass 3" ProgramChange="4" />
-			<Patch Number="6" Name="05  Slow Brass" ProgramChange="5" />
-			<Patch Number="7" Name="06  Synth Brass" ProgramChange="6" />
-			<Patch Number="8" Name="07  Mellow Horns" ProgramChange="7" />
-			<Patch Number="9" Name="08  Dynamic Horns" ProgramChange="8" />
-			<Patch Number="10" Name="09  Royal Brass 1" ProgramChange="9" />
-			<Patch Number="11" Name="10  Electric Brass" ProgramChange="10" />
-			<Patch Number="12" Name="11  ResSynthTrumpet" ProgramChange="11" />
-			<Patch Number="13" Name="12  Tight Tuba Brass" ProgramChange="12" />
-			<Patch Number="14" Name="13  Straight Brass" ProgramChange="13" />
-			<Patch Number="15" Name="14  Synth-trumpet" ProgramChange="14" />
-			<Patch Number="16" Name="15  Square VCA Brass" ProgramChange="15" />
-			<Patch Number="17" Name="16  Perc. Brass Synth" ProgramChange="16" />
-			<Patch Number="18" Name="17  Staccato Sextet" ProgramChange="17" />
-			<Patch Number="19" Name="18  Mixed-Wave Brass" ProgramChange="18" />
-			<Patch Number="20" Name="19  Tabla-Bell" ProgramChange="19" />
-			<Patch Number="21" Name="20  Strings 1" ProgramChange="20" />
-			<Patch Number="22" Name="21  Muted Strings" ProgramChange="21" />
-			<Patch Number="23" Name="22  Arco Strings" ProgramChange="22" />
-			<Patch Number="24" Name="23  Strings 2" ProgramChange="23" />
-			<Patch Number="25" Name="24  Classic Strings" ProgramChange="24" />
-			<Patch Number="26" Name="25  Deep Strings" ProgramChange="25" />
-			<Patch Number="27" Name="26  Meditative Strings" ProgramChange="26" />
-			<Patch Number="28" Name="27  Space Clarinets" ProgramChange="27" />
-			<Patch Number="29" Name="28  Flute" ProgramChange="28" />
-			<Patch Number="30" Name="29  Whistle" ProgramChange="29" />
-			<Patch Number="31" Name="30  Chorus-Guitar" ProgramChange="30" />
-			<Patch Number="32" Name="31  Guitar-Synth" ProgramChange="31" />
-			<Patch Number="33" Name="32  Harrison Guitar" ProgramChange="32" />
-			<Patch Number="34" Name="33  Volume ped. Guitar" ProgramChange="33" />
-			<Patch Number="35" Name="34  Soft Guitar-Synth" ProgramChange="34" />
-			<Patch Number="36" Name="35  Res. Guitar-Synth" ProgramChange="35" />
-			<Patch Number="37" Name="36  Staccato guitar" ProgramChange="36" />
-			<Patch Number="38" Name="37  Perc. Guitar-Synth" ProgramChange="37" />
-			<Patch Number="39" Name="38  PWM Guitar-Synth" ProgramChange="38" />
-			<Patch Number="40" Name="39  Synth. 12-String" ProgramChange="39" />
-			<Patch Number="41" Name="40  Organ 1" ProgramChange="40" />
-			<Patch Number="42" Name="41  Organ Chorus" ProgramChange="41" />
-			<Patch Number="43" Name="42  Cathedral organ" ProgramChange="42" />
-			<Patch Number="44" Name="43  Organ-Perc. 1" ProgramChange="43" />
-			<Patch Number="45" Name="44  Organ-Perc. 2" ProgramChange="44" />
-			<Patch Number="46" Name="45  Full organ" ProgramChange="45" />
-			<Patch Number="47" Name="46  Cutting-organ" ProgramChange="46" />
-			<Patch Number="48" Name="47  Lucky Man" ProgramChange="47" />
-			<Patch Number="49" Name="48  Low plucky" ProgramChange="48" />
-			<Patch Number="50" Name="49  Smooth Poly-Sync" ProgramChange="49" />
-			<Patch Number="51" Name="50  Chorus Piano" ProgramChange="50" />
-			<Patch Number="52" Name="51  Bright piano" ProgramChange="51" />
-			<Patch Number="53" Name="52  Accoustic piano" ProgramChange="52" />
-			<Patch Number="54" Name="53  Res. Square-Wave" ProgramChange="53" />
-			<Patch Number="55" Name="54  Triangle Piano" ProgramChange="54" />
-			<Patch Number="56" Name="55  SawTooth Piano" ProgramChange="55" />
-			<Patch Number="57" Name="56  Deep bells" ProgramChange="56" />
-			<Patch Number="58" Name="57  Natural vibes" ProgramChange="57" />
-			<Patch Number="59" Name="58  Spacenspiel" ProgramChange="58" />
-			<Patch Number="60" Name="59  Perc.5ths oct. rel." ProgramChange="59" />
-			<Patch Number="61" Name="60  Bass PolySynth" ProgramChange="60" />
-			<Patch Number="62" Name="61  Bass 5ths" ProgramChange="61" />
-			<Patch Number="63" Name="62  PercSynth-Bass 1" ProgramChange="62" />
-			<Patch Number="64" Name="63  PercSynth-Bass 2" ProgramChange="63" />
-			<Patch Number="65" Name="64  Bassline" ProgramChange="64" />
-			<Patch Number="66" Name="65  Synth-Slap" ProgramChange="65" />
-			<Patch Number="67" Name="66  RB Bassline" ProgramChange="66" />
-			<Patch Number="68" Name="67  Funk Sustain Bass" ProgramChange="67" />
-			<Patch Number="69" Name="68  Dark Bassline" ProgramChange="68" />
-			<Patch Number="70" Name="69  Fullblown Bass" ProgramChange="69" />
-			<Patch Number="71" Name="70  Tight Res.Lead" ProgramChange="70" />
-			<Patch Number="72" Name="71  Duke of 5ths" ProgramChange="71" />
-			<Patch Number="73" Name="72  Res. Doubling" ProgramChange="72" />
-			<Patch Number="74" Name="73  Mini-Glide" ProgramChange="73" />
-			<Patch Number="75" Name="74  SustainChorusLead" ProgramChange="74" />
-			<Patch Number="76" Name="75  Electric Bass" ProgramChange="75" />
-			<Patch Number="77" Name="76  StaccatoBassLead" ProgramChange="76" />
-			<Patch Number="78" Name="77  Slap Bass 5ths" ProgramChange="77" />
-			<Patch Number="79" Name="78  Mini Lead-Bass" ProgramChange="78" />
-			<Patch Number="80" Name="79  ClssicSqureWave" ProgramChange="79" />
-			<Patch Number="81" Name="80  Sawtooth Lead" ProgramChange="80" />
-			<Patch Number="82" Name="81  Funky Lead" ProgramChange="81" />
-			<Patch Number="83" Name="82  Mini Lead" ProgramChange="82" />
-			<Patch Number="84" Name="83  5ths Lead-bass" ProgramChange="83" />
-			<Patch Number="85" Name="84  Clav 1" ProgramChange="84" />
-			<Patch Number="86" Name="85  Harpsichord" ProgramChange="85" />
-			<Patch Number="87" Name="86  Mellow Clav" ProgramChange="86" />
-			<Patch Number="88" Name="87  Res. Clav-Synth" ProgramChange="87" />
-			<Patch Number="89" Name="88  Sitar 1" ProgramChange="88" />
-			<Patch Number="90" Name="89  Sitar 2 (melody)" ProgramChange="89" />
-			<Patch Number="91" Name="90  Harp-Celeste" ProgramChange="90" />
-			<Patch Number="92" Name="91  Deep Chorus Funk" ProgramChange="91" />
-			<Patch Number="93" Name="92  Arco-Strings H" ProgramChange="92" />
-			<Patch Number="94" Name="93  Perc. Lunar" ProgramChange="93" />
-			<Patch Number="95" Name="94  Synth-Sweep" ProgramChange="94" />
-			<Patch Number="96" Name="95  Res. Square-wave" ProgramChange="95" />
-			<Patch Number="97" Name="96  Stabilitooth" ProgramChange="96" />
-			<Patch Number="98" Name="97  Square-wave Lead" ProgramChange="97" />
-			<Patch Number="99" Name="98  Classic Res.Synth" ProgramChange="98" />
-			<Patch Number="100" Name="99  Funky Cross-Mod" ProgramChange="99" />
-			<Patch Number="101" Name="" ProgramChange="100" />
-			<Patch Number="102" Name="" ProgramChange="101" />
-			<Patch Number="103" Name="" ProgramChange="102" />
-			<Patch Number="104" Name="" ProgramChange="103" />
-			<Patch Number="105" Name="" ProgramChange="104" />
-			<Patch Number="106" Name="" ProgramChange="105" />
-			<Patch Number="107" Name="" ProgramChange="106" />
-			<Patch Number="108" Name="" ProgramChange="107" />
-			<Patch Number="109" Name="" ProgramChange="108" />
-			<Patch Number="110" Name="" ProgramChange="109" />
-			<Patch Number="111" Name="" ProgramChange="110" />
-			<Patch Number="112" Name="" ProgramChange="111" />
-			<Patch Number="113" Name="" ProgramChange="112" />
-			<Patch Number="114" Name="" ProgramChange="113" />
-			<Patch Number="115" Name="" ProgramChange="114" />
-			<Patch Number="116" Name="" ProgramChange="115" />
-			<Patch Number="117" Name="" ProgramChange="116" />
-			<Patch Number="118" Name="" ProgramChange="117" />
-			<Patch Number="119" Name="" ProgramChange="118" />
-			<Patch Number="120" Name="" ProgramChange="119" />
-			<Patch Number="121" Name="" ProgramChange="120" />
-			<Patch Number="122" Name="" ProgramChange="121" />
-			<Patch Number="123" Name="" ProgramChange="122" />
-			<Patch Number="124" Name="" ProgramChange="123" />
-			<Patch Number="125" Name="" ProgramChange="124" />
-			<Patch Number="126" Name="" ProgramChange="125" />
-			<Patch Number="127" Name="" ProgramChange="126" />
-			<Patch Number="128" Name="" ProgramChange="127" />
-			
-		</PatchNameList>
-
-	</MasterDeviceNames>
+  <Author/>
+  <MasterDeviceNames>
+    <Manufacturer>Sequential Circuits</Manufacturer>
+    <Model>Prophet 600</Model>
+    <CustomDeviceMode Name="">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Presets"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Presets">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Presets " ROM="false">
+        <UsesPatchNameList Name="Presets "/>
+      </PatchBank>
+    </ChannelNameSet>
+    <PatchNameList Name="Presets ">
+      <Patch Number="1" Name="00  Classical Brass" ProgramChange="0"/>
+      <Patch Number="2" Name="01  Brass 1" ProgramChange="1"/>
+      <Patch Number="3" Name="02  Brass 2" ProgramChange="2"/>
+      <Patch Number="4" Name="03  Bach Trumpet" ProgramChange="3"/>
+      <Patch Number="5" Name="04  Brass 3" ProgramChange="4"/>
+      <Patch Number="6" Name="05  Slow Brass" ProgramChange="5"/>
+      <Patch Number="7" Name="06  Synth Brass" ProgramChange="6"/>
+      <Patch Number="8" Name="07  Mellow Horns" ProgramChange="7"/>
+      <Patch Number="9" Name="08  Dynamic Horns" ProgramChange="8"/>
+      <Patch Number="10" Name="09  Royal Brass 1" ProgramChange="9"/>
+      <Patch Number="11" Name="10  Electric Brass" ProgramChange="10"/>
+      <Patch Number="12" Name="11  ResSynthTrumpet" ProgramChange="11"/>
+      <Patch Number="13" Name="12  Tight Tuba Brass" ProgramChange="12"/>
+      <Patch Number="14" Name="13  Straight Brass" ProgramChange="13"/>
+      <Patch Number="15" Name="14  Synth-trumpet" ProgramChange="14"/>
+      <Patch Number="16" Name="15  Square VCA Brass" ProgramChange="15"/>
+      <Patch Number="17" Name="16  Perc. Brass Synth" ProgramChange="16"/>
+      <Patch Number="18" Name="17  Staccato Sextet" ProgramChange="17"/>
+      <Patch Number="19" Name="18  Mixed-Wave Brass" ProgramChange="18"/>
+      <Patch Number="20" Name="19  Tabla-Bell" ProgramChange="19"/>
+      <Patch Number="21" Name="20  Strings 1" ProgramChange="20"/>
+      <Patch Number="22" Name="21  Muted Strings" ProgramChange="21"/>
+      <Patch Number="23" Name="22  Arco Strings" ProgramChange="22"/>
+      <Patch Number="24" Name="23  Strings 2" ProgramChange="23"/>
+      <Patch Number="25" Name="24  Classic Strings" ProgramChange="24"/>
+      <Patch Number="26" Name="25  Deep Strings" ProgramChange="25"/>
+      <Patch Number="27" Name="26  Meditative Strings" ProgramChange="26"/>
+      <Patch Number="28" Name="27  Space Clarinets" ProgramChange="27"/>
+      <Patch Number="29" Name="28  Flute" ProgramChange="28"/>
+      <Patch Number="30" Name="29  Whistle" ProgramChange="29"/>
+      <Patch Number="31" Name="30  Chorus-Guitar" ProgramChange="30"/>
+      <Patch Number="32" Name="31  Guitar-Synth" ProgramChange="31"/>
+      <Patch Number="33" Name="32  Harrison Guitar" ProgramChange="32"/>
+      <Patch Number="34" Name="33  Volume ped. Guitar" ProgramChange="33"/>
+      <Patch Number="35" Name="34  Soft Guitar-Synth" ProgramChange="34"/>
+      <Patch Number="36" Name="35  Res. Guitar-Synth" ProgramChange="35"/>
+      <Patch Number="37" Name="36  Staccato guitar" ProgramChange="36"/>
+      <Patch Number="38" Name="37  Perc. Guitar-Synth" ProgramChange="37"/>
+      <Patch Number="39" Name="38  PWM Guitar-Synth" ProgramChange="38"/>
+      <Patch Number="40" Name="39  Synth. 12-String" ProgramChange="39"/>
+      <Patch Number="41" Name="40  Organ 1" ProgramChange="40"/>
+      <Patch Number="42" Name="41  Organ Chorus" ProgramChange="41"/>
+      <Patch Number="43" Name="42  Cathedral organ" ProgramChange="42"/>
+      <Patch Number="44" Name="43  Organ-Perc. 1" ProgramChange="43"/>
+      <Patch Number="45" Name="44  Organ-Perc. 2" ProgramChange="44"/>
+      <Patch Number="46" Name="45  Full organ" ProgramChange="45"/>
+      <Patch Number="47" Name="46  Cutting-organ" ProgramChange="46"/>
+      <Patch Number="48" Name="47  Lucky Man" ProgramChange="47"/>
+      <Patch Number="49" Name="48  Low plucky" ProgramChange="48"/>
+      <Patch Number="50" Name="49  Smooth Poly-Sync" ProgramChange="49"/>
+      <Patch Number="51" Name="50  Chorus Piano" ProgramChange="50"/>
+      <Patch Number="52" Name="51  Bright piano" ProgramChange="51"/>
+      <Patch Number="53" Name="52  Accoustic piano" ProgramChange="52"/>
+      <Patch Number="54" Name="53  Res. Square-Wave" ProgramChange="53"/>
+      <Patch Number="55" Name="54  Triangle Piano" ProgramChange="54"/>
+      <Patch Number="56" Name="55  SawTooth Piano" ProgramChange="55"/>
+      <Patch Number="57" Name="56  Deep bells" ProgramChange="56"/>
+      <Patch Number="58" Name="57  Natural vibes" ProgramChange="57"/>
+      <Patch Number="59" Name="58  Spacenspiel" ProgramChange="58"/>
+      <Patch Number="60" Name="59  Perc.5ths oct. rel." ProgramChange="59"/>
+      <Patch Number="61" Name="60  Bass PolySynth" ProgramChange="60"/>
+      <Patch Number="62" Name="61  Bass 5ths" ProgramChange="61"/>
+      <Patch Number="63" Name="62  PercSynth-Bass 1" ProgramChange="62"/>
+      <Patch Number="64" Name="63  PercSynth-Bass 2" ProgramChange="63"/>
+      <Patch Number="65" Name="64  Bassline" ProgramChange="64"/>
+      <Patch Number="66" Name="65  Synth-Slap" ProgramChange="65"/>
+      <Patch Number="67" Name="66  RB Bassline" ProgramChange="66"/>
+      <Patch Number="68" Name="67  Funk Sustain Bass" ProgramChange="67"/>
+      <Patch Number="69" Name="68  Dark Bassline" ProgramChange="68"/>
+      <Patch Number="70" Name="69  Fullblown Bass" ProgramChange="69"/>
+      <Patch Number="71" Name="70  Tight Res.Lead" ProgramChange="70"/>
+      <Patch Number="72" Name="71  Duke of 5ths" ProgramChange="71"/>
+      <Patch Number="73" Name="72  Res. Doubling" ProgramChange="72"/>
+      <Patch Number="74" Name="73  Mini-Glide" ProgramChange="73"/>
+      <Patch Number="75" Name="74  SustainChorusLead" ProgramChange="74"/>
+      <Patch Number="76" Name="75  Electric Bass" ProgramChange="75"/>
+      <Patch Number="77" Name="76  StaccatoBassLead" ProgramChange="76"/>
+      <Patch Number="78" Name="77  Slap Bass 5ths" ProgramChange="77"/>
+      <Patch Number="79" Name="78  Mini Lead-Bass" ProgramChange="78"/>
+      <Patch Number="80" Name="79  ClssicSqureWave" ProgramChange="79"/>
+      <Patch Number="81" Name="80  Sawtooth Lead" ProgramChange="80"/>
+      <Patch Number="82" Name="81  Funky Lead" ProgramChange="81"/>
+      <Patch Number="83" Name="82  Mini Lead" ProgramChange="82"/>
+      <Patch Number="84" Name="83  5ths Lead-bass" ProgramChange="83"/>
+      <Patch Number="85" Name="84  Clav 1" ProgramChange="84"/>
+      <Patch Number="86" Name="85  Harpsichord" ProgramChange="85"/>
+      <Patch Number="87" Name="86  Mellow Clav" ProgramChange="86"/>
+      <Patch Number="88" Name="87  Res. Clav-Synth" ProgramChange="87"/>
+      <Patch Number="89" Name="88  Sitar 1" ProgramChange="88"/>
+      <Patch Number="90" Name="89  Sitar 2 (melody)" ProgramChange="89"/>
+      <Patch Number="91" Name="90  Harp-Celeste" ProgramChange="90"/>
+      <Patch Number="92" Name="91  Deep Chorus Funk" ProgramChange="91"/>
+      <Patch Number="93" Name="92  Arco-Strings H" ProgramChange="92"/>
+      <Patch Number="94" Name="93  Perc. Lunar" ProgramChange="93"/>
+      <Patch Number="95" Name="94  Synth-Sweep" ProgramChange="94"/>
+      <Patch Number="96" Name="95  Res. Square-wave" ProgramChange="95"/>
+      <Patch Number="97" Name="96  Stabilitooth" ProgramChange="96"/>
+      <Patch Number="98" Name="97  Square-wave Lead" ProgramChange="97"/>
+      <Patch Number="99" Name="98  Classic Res.Synth" ProgramChange="98"/>
+      <Patch Number="100" Name="99  Funky Cross-Mod" ProgramChange="99"/>
+      <Patch Number="101" Name="" ProgramChange="100"/>
+      <Patch Number="102" Name="" ProgramChange="101"/>
+      <Patch Number="103" Name="" ProgramChange="102"/>
+      <Patch Number="104" Name="" ProgramChange="103"/>
+      <Patch Number="105" Name="" ProgramChange="104"/>
+      <Patch Number="106" Name="" ProgramChange="105"/>
+      <Patch Number="107" Name="" ProgramChange="106"/>
+      <Patch Number="108" Name="" ProgramChange="107"/>
+      <Patch Number="109" Name="" ProgramChange="108"/>
+      <Patch Number="110" Name="" ProgramChange="109"/>
+      <Patch Number="111" Name="" ProgramChange="110"/>
+      <Patch Number="112" Name="" ProgramChange="111"/>
+      <Patch Number="113" Name="" ProgramChange="112"/>
+      <Patch Number="114" Name="" ProgramChange="113"/>
+      <Patch Number="115" Name="" ProgramChange="114"/>
+      <Patch Number="116" Name="" ProgramChange="115"/>
+      <Patch Number="117" Name="" ProgramChange="116"/>
+      <Patch Number="118" Name="" ProgramChange="117"/>
+      <Patch Number="119" Name="" ProgramChange="118"/>
+      <Patch Number="120" Name="" ProgramChange="119"/>
+      <Patch Number="121" Name="" ProgramChange="120"/>
+      <Patch Number="122" Name="" ProgramChange="121"/>
+      <Patch Number="123" Name="" ProgramChange="122"/>
+      <Patch Number="124" Name="" ProgramChange="123"/>
+      <Patch Number="125" Name="" ProgramChange="124"/>
+      <Patch Number="126" Name="" ProgramChange="125"/>
+      <Patch Number="127" Name="" ProgramChange="126"/>
+      <Patch Number="128" Name="" ProgramChange="127"/>
+    </PatchNameList>
+  </MasterDeviceNames>
 </MIDINameDocument>
