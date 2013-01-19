@@ -268,9 +268,9 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_channel_selector.mode_changed.connect(
 		sigc::mem_fun(*this, &MidiTimeAxisView::set_channel_mode));
 
-	string prop = gui_property ("color-mode");
-	if (!prop.empty()) {
-		_color_mode = ColorMode (string_2_enum(prop, _color_mode));
+	const string color_mode = gui_property ("color-mode");
+	if (!color_mode.empty()) {
+		_color_mode = ColorMode (string_2_enum(color_mode, _color_mode));
 		if (_color_mode == ChannelColors) {
 			_channel_selector.set_channel_colors(CanvasNoteEvent::midi_channel_colors);
 		}
@@ -278,9 +278,9 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	set_color_mode (_color_mode, true, false);
 
-	prop = gui_property ("note-mode");
-	if (!prop.empty()) {
-		_note_mode = NoteMode (string_2_enum (prop, _note_mode));
+	const string note_mode = gui_property ("note-mode");
+	if (!note_mode.empty()) {
+		_note_mode = NoteMode (string_2_enum (note_mode, _note_mode));
 		if (_percussion_mode_item) {
 			_percussion_mode_item->set_active (_note_mode == Percussive);
 		}
@@ -290,7 +290,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	 * that should exist, and create the children.
 	 */
 
-	list<string> gui_ids = gui_object_state().all_ids ();
+	const list<string> gui_ids = gui_object_state().all_ids ();
 	for (list<string>::const_iterator i = gui_ids.begin(); i != gui_ids.end(); ++i) {
 		PBD::ID route_id;
 		bool has_parameter;
@@ -351,7 +351,7 @@ MidiTimeAxisView::check_step_edit ()
 void
 MidiTimeAxisView::model_changed()
 {
-	string model = _midnam_model_selector.get_active_text();
+	const Glib::ustring model = _midnam_model_selector.get_active_text();
 	set_gui_property (X_("midnam-model-name"), model);
 
 	std::list<std::string> device_modes = MIDI::Name::MidiPatchManager::instance()
@@ -374,12 +374,18 @@ MidiTimeAxisView::model_changed()
 	_route->instrument_info().set_external_instrument (
 		_midnam_model_selector.get_active_text(),
 		_midnam_custom_device_mode_selector.get_active_text());
+
+	// Rebuild controller menu
+	_controller_menu_map.clear ();
+	delete controller_menu;
+	controller_menu = 0;
+	build_automation_action_menu(false);
 }
 
 void
 MidiTimeAxisView::custom_device_mode_changed()
 {
-	string mode = _midnam_custom_device_mode_selector.get_active_text();
+	const Glib::ustring mode = _midnam_custom_device_mode_selector.get_active_text();
 	set_gui_property (X_("midnam-custom-device-mode"), mode);
 	_route->instrument_info().set_external_instrument (
 		_midnam_model_selector.get_active_text(), mode);
@@ -517,7 +523,7 @@ MidiTimeAxisView::build_automation_action_menu (bool for_selection)
 void
 MidiTimeAxisView::change_all_channel_tracks_visibility (bool yn, Evoral::Parameter param)
 {
-	uint16_t selected_channels = _channel_selector.get_selected_channels();
+	const uint16_t selected_channels = _channel_selector.get_selected_channels();
 
 	for (uint8_t chn = 0; chn < 16; chn++) {
 		if (selected_channels & (0x0001 << chn)) {
@@ -544,7 +550,7 @@ MidiTimeAxisView::add_channel_command_menu_item (Menu_Helpers::MenuList& items,
 	   structure if there is more than 1 selected.
 	 */
 
-	uint16_t selected_channels = _channel_selector.get_selected_channels();
+	const uint16_t selected_channels = _channel_selector.get_selected_channels();
 	int chn_cnt = 0;
 
 	for (uint8_t chn = 0; chn < 16; chn++) {
@@ -655,7 +661,7 @@ MidiTimeAxisView::build_controller_menu ()
 	   combination covering the currently selected channels for this track
 	*/
 
-	uint16_t selected_channels = _channel_selector.get_selected_channels();
+	const uint16_t selected_channels = _channel_selector.get_selected_channels();
 
 	/* count the number of selected channels because we will build a different menu
 	   structure if there is more than 1 selected.
@@ -671,7 +677,7 @@ MidiTimeAxisView::build_controller_menu ()
 	}
 
 	using namespace MIDI::Name;
-	const string& model = _midnam_model_selector.get_active_text();
+	const Glib::ustring model = _midnam_model_selector.get_active_text();
 	boost::shared_ptr<MIDINameDocument> midnam = MidiPatchManager::instance()
 		.document_by_model(model);
 	boost::shared_ptr<MasterDeviceNames> device_names;
@@ -937,7 +943,7 @@ MidiTimeAxisView::update_range()
 {
 	MidiGhostRegion* mgr;
 
-	for(list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
+	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 		if ((mgr = dynamic_cast<MidiGhostRegion*>(*i)) != 0) {
 			mgr->update_range();
 		}
@@ -1114,7 +1120,7 @@ MidiTimeAxisView::add_note_selection (uint8_t note)
 		return;
 	}
 
-	uint16_t chn_mask = _channel_selector.get_selected_channels();
+	const uint16_t chn_mask = _channel_selector.get_selected_channels();
 
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
@@ -1134,7 +1140,7 @@ MidiTimeAxisView::extend_note_selection (uint8_t note)
 		return;
 	}
 
-	uint16_t chn_mask = _channel_selector.get_selected_channels();
+	const uint16_t chn_mask = _channel_selector.get_selected_channels();
 
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
@@ -1154,7 +1160,7 @@ MidiTimeAxisView::toggle_note_selection (uint8_t note)
 		return;
 	}
 
-	uint16_t chn_mask = _channel_selector.get_selected_channels();
+	const uint16_t chn_mask = _channel_selector.get_selected_channels();
 
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
@@ -1198,7 +1204,7 @@ MidiTimeAxisView::set_channel_mode (ChannelMode, uint16_t)
 	   the right ones.
 	*/
 
-	uint16_t selected_channels = _channel_selector.get_selected_channels();
+	const uint16_t selected_channels = _channel_selector.get_selected_channels();
 	bool changed = false;
 
 	no_redraw = true;

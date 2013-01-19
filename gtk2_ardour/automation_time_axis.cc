@@ -146,7 +146,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	ARDOUR_UI::instance()->set_tip(auto_button, _("automation state"));
 	ARDOUR_UI::instance()->set_tip(hide_button, _("hide track"));
 
-	string str = gui_property ("height");
+	const string str = gui_property ("height");
 	if (!str.empty()) {
 		set_height (atoi (str));
 	} else {
