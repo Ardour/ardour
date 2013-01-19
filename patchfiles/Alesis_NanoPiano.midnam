@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
 <MIDINameDocument>
-  <Author> Wally Smith July 8, 2003</Author>
+  <Author>Wally Smith</Author>
   <MasterDeviceNames>
     <Manufacturer>Alesis</Manufacturer>
     <Model>NanoPiano</Model>

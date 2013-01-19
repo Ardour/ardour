@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
 <MIDINameDocument>
-  <Author>File generated with CherryPicker by Rob Martin 2003</Author>
+  <Author>Rob Martin</Author>
   <MasterDeviceNames>
     <Manufacturer>Yamaha</Manufacturer>
     <Model>PSR-275</Model>

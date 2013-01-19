@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
 <MIDINameDocument>
-  <Author>Roland Patch Script Builder - Created by Jeff Gibbs</Author>
+  <Author>Jeff Gibbs</Author>
   <MasterDeviceNames>
     <Manufacturer>Roland</Manufacturer>
     <Model>Fantom-Xa</Model>
