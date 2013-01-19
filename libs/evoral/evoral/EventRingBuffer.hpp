@@ -116,7 +116,7 @@ template<typename Time>
 inline uint32_t
 EventRingBuffer<Time>::write(Time time, EventType type, uint32_t size, const uint8_t* buf)
 {
-	if (write_space() < (sizeof(Time) + sizeof(EventType) + sizeof(uint32_t) + size)) {
+	if (!buf || write_space() < (sizeof(Time) + sizeof(EventType) + sizeof(uint32_t) + size)) {
 		return 0;
 	} else {
 		PBD::RingBufferNPT<uint8_t>::write ((uint8_t*)&time, sizeof(Time));

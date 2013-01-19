@@ -43,7 +43,6 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 	}
 
 	T                 ev_time;
-	Evoral::EventType ev_type;
 	uint32_t          ev_size;
 	size_t            count = 0;
 	const size_t      prefix_size = sizeof(T) + sizeof(Evoral::EventType) + sizeof(uint32_t);
@@ -58,7 +57,6 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		assert (this->peek (peekbuf, prefix_size));
 
 		ev_time = *((T*) peekbuf);
-		ev_type = *((Evoral::EventType*)(peekbuf + sizeof (T)));
 		ev_size = *((uint32_t*)(peekbuf + sizeof(T) + sizeof (Evoral::EventType)));
 
 		if (ev_time >= end) {

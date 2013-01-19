@@ -17,7 +17,6 @@
 */
 
 #include <cmath>
-#include <cassert>
 #include <utility>
 
 #include <gtkmm.h>
@@ -48,6 +47,8 @@
 #include "selection.h"
 #include "simplerect.h"
 #include "utils.h"
+
+#include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -400,7 +401,6 @@ MidiStreamView::apply_note_range_to_regions ()
 void
 MidiStreamView::update_note_range(uint8_t note_num)
 {
-	assert(note_num <= 127);
 	_data_note_min = min(_data_note_min, note_num);
 	_data_note_max = max(_data_note_max, note_num);
 }
@@ -461,21 +461,23 @@ MidiStreamView::setup_rec_box ()
 
 				boost::shared_ptr<MidiRegion> region (boost::dynamic_pointer_cast<MidiRegion>
 				                                      (RegionFactory::create (sources, plist, false)));
+				if (region) {
+					region->set_start (_trackview.track()->current_capture_start()
+					                   - _trackview.track()->get_capture_start_frame (0));
+					region->set_position (_trackview.track()->current_capture_start());
+					RegionView* rv = add_region_view_internal (region, false);
+					MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
+					mrv->begin_write ();
 
-				assert(region);
-				region->set_start (_trackview.track()->current_capture_start() - _trackview.track()->get_capture_start_frame (0));
-				region->set_position (_trackview.track()->current_capture_start());
-				RegionView* rv = add_region_view_internal (region, false);
-				MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
-				mrv->begin_write ();
+				
+					/* rec region will be destroyed in setup_rec_box */
+					rec_regions.push_back (make_pair (region, rv));
 
-				rec_regions.push_back (make_pair (region, rv));
-
-				// rec regions are destroyed in setup_rec_box
-
-				/* we add the region later */
-
-				setup_new_rec_layer_time (region);
+					/* we add the region later */
+					setup_new_rec_layer_time (region);
+				} else {
+					error << _("failed to create MIDI region") << endmsg;
+				}
 			}
 
 			/* start a new rec box */
@@ -485,8 +487,6 @@ MidiStreamView::setup_rec_box ()
 			gdouble const xstart = _trackview.editor().frame_to_pixel (frame_pos);
 			gdouble const xend = xstart;
 			uint32_t fill_color;
-
-			assert(_trackview.midi_track()->mode() == Normal);
 
 			fill_color = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 
@@ -661,7 +661,8 @@ MidiStreamView::leave_internal_edit_mode ()
 	StreamView::leave_internal_edit_mode ();
 	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*i);
-		assert (mrv);
-		mrv->clear_selection ();
+		if (mrv) {
+			mrv->clear_selection ();
+		}
 	}
 }

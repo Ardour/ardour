@@ -18,7 +18,6 @@
 */
 
 #include <cmath>
-#include <cassert>
 #include <algorithm>
 #include <ostream>
 
@@ -915,13 +914,14 @@ MidiRegionView::show_list_editor ()
 void
 MidiRegionView::create_note_at (framepos_t t, double y, double length, bool snap_t)
 {
+	if (length < 2 * DBL_EPSILON) {
+		return;
+	}
+
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	MidiStreamView* const view = mtv->midi_view();
 
-	double note = view->y_to_note(y);
-
-	assert(note >= 0.0);
-	assert(note <= 127.0);
+	const double note = view->y_to_note(y);
 
 	// Start of note in frames relative to region start
 	if (snap_t) {
@@ -929,13 +929,11 @@ MidiRegionView::create_note_at (framepos_t t, double y, double length, bool snap
 		t = snap_frame_to_grid_underneath (t, grid_frames);
 	}
 
-	assert (t >= 0);
-	assert (length != 0);
-
-	const boost::shared_ptr<NoteType> new_note (new NoteType (mtv->get_channel_for_add (),
-	                                                          region_frames_to_region_beats(t + _region->start()), 
-								  length,
-	                                                          (uint8_t)note, 0x40));
+	const boost::shared_ptr<NoteType> new_note (
+		new NoteType (mtv->get_channel_for_add (),
+		              region_frames_to_region_beats(t + _region->start()), 
+		              length,
+		              (uint8_t)note, 0x40));
 
 	if (_model->contains (new_note)) {
 		return;
@@ -1285,7 +1283,6 @@ MidiRegionView::display_sysexes()
 			boost::static_pointer_cast<const Evoral::MIDIEvent<Evoral::MusicalTime> > (*i);
 
 		Evoral::MusicalTime time = (*i)->time();
-		assert (time >= 0);
 
 		if (mev) {
 			if (mev->is_spp() || mev->is_mtc_quarter() || mev->is_mtc_full()) {
@@ -1367,7 +1364,6 @@ void
 MidiRegionView::reset_width_dependent_items (double pixel_width)
 {
 	RegionView::reset_width_dependent_items(pixel_width);
-	assert(_pixel_width == pixel_width);
 
 	if (_enable_display) {
 		redisplay_model();
@@ -1495,9 +1491,11 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 void
 MidiRegionView::begin_write()
 {
-	assert(!_active_notes);
+	if (_active_notes) {
+		delete[] _active_notes;
+	}
 	_active_notes = new CanvasNote*[128];
-	for (unsigned i=0; i < 128; ++i) {
+	for (unsigned i = 0; i < 128; ++i) {
 		_active_notes[i] = 0;
 	}
 }
@@ -1657,8 +1655,7 @@ MidiRegionView::update_note (CanvasNote* ev, bool update_ghost_regions)
 	ev->property_y2() = y1 + floor(midi_stream_view()->note_height());
 
 	if (note->length() == 0) {
-		if (_active_notes) {
-			assert(note->note() < 128);
+		if (_active_notes && note->note() < 128) {
 			// If this note is already active there's a stuck note,
 			// finish the old note rectangle
 			if (_active_notes[note->note()]) {
@@ -1711,9 +1708,6 @@ void
 MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 {
 	CanvasNoteEvent* event = 0;
-
-	assert(note->time() >= 0);
-	assert(midi_view()->note_mode() == Sustained || midi_view()->note_mode() == Percussive);
 
 	//ArdourCanvas::Group* const group = (ArdourCanvas::Group*) get_canvas_group();
 
@@ -1816,8 +1810,6 @@ MidiRegionView::step_sustain (Evoral::MusicalTime beats)
 void
 MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const string& displaytext, bool active_channel)
 {
-	assert (patch->time() >= 0);
-
 	framecnt_t region_frames = source_beats_to_region_frames (patch->time());
 	const double x = trackview.editor().frame_to_pixel (region_frames);
 
@@ -1868,7 +1860,10 @@ MidiRegionView::get_patch_key_at (double time, uint8_t channel, MIDI::Name::Patc
 		key.bank_number = key.program_number = 0;
 	}
 
-	assert (key.is_sane());
+	if (!key.is_sane()) {
+		error << string_compose(_("insane MIDI patch key %1:%2"),
+		                        key.bank_number, key.program_number) << endmsg;
+	}
 }
 
 void
@@ -2436,11 +2431,9 @@ MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 void
 MidiRegionView::note_dropped(CanvasNoteEvent *, frameoffset_t dt, int8_t dnote)
 {
-	assert (!_selection.empty());
-
 	uint8_t lowest_note_in_selection  = 127;
 	uint8_t highest_note_in_selection = 0;
-	uint8_t highest_note_difference = 0;
+	uint8_t highest_note_difference   = 0;
 
 	// find highest and lowest notes first
 
@@ -3714,11 +3707,10 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 
 	for (MidiBuffer::iterator i = buf->begin(); i != buf->end(); ++i) {
 		Evoral::MIDIEvent<MidiBuffer::TimeType> const ev (*i, false);
-		assert (ev.buffer ());
 
-		if(ev.is_channel_event()) {
+		if (ev.is_channel_event()) {
 			if (_last_channel_mode == FilterChannels) {
-				if(((uint16_t(1) << ev.channel()) & _last_channel_selection) == 0) {
+				if (((uint16_t(1) << ev.channel()) & _last_channel_selection) == 0) {
 					continue;
 				}
 			}

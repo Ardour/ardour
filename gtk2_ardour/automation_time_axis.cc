@@ -192,8 +192,9 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	/* ask for notifications of any new RegionViews */
 	if (show_regions) {
 
-		assert(_view);
-		_view->attach ();
+		if (_view) {
+			_view->attach ();
+		}
 
 	} else {
 		/* no regions, just a single line for the entire track (e.g. bus gain) */
@@ -706,9 +707,7 @@ AutomationTimeAxisView::clear_lines ()
 void
 AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 {
-	assert(line);
-	assert(!_line);
-	if (_control) {
+	if (_control && line) {
 		assert(line->the_list() == _control->list());
 		
 		_control->alist()->automation_state_changed.connect (

@@ -1078,9 +1078,6 @@ MidiTimeAxisView::route_active_changed ()
 			controls_base_unselected_name = "MidiTrackControlsBaseInactiveUnselected";
 		}
 	} else {
-
-		throw; // wha?
-
 		if (_route->active()) {
 			controls_ebox.set_name ("BusControlsBaseUnselected");
 			controls_base_selected_name = "BusControlsBaseSelected";

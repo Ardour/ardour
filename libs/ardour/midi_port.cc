@@ -47,8 +47,6 @@ MidiPort::cycle_start (pframes_t nframes)
 
 	_buffer->clear ();
 
-	assert (_buffer->size () == 0);
-
 	if (sends_output ()) {
 		jack_midi_clear_buffer (jack_port_get_buffer (_jack_port, nframes));
 	}
@@ -67,8 +65,6 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 
 			void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
 			const pframes_t event_count = jack_midi_get_event_count (jack_buffer);
-			
-			assert (event_count < _buffer->capacity());
 			
 			/* suck all relevant MIDI events from the JACK MIDI port buffer
 			   into our MidiBuffer

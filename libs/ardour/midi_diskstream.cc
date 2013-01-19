@@ -83,7 +83,9 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 
 	in_set_state = false;
 
-	assert(!destructive());
+	if (destructive()) {
+		throw failed_constructor();
+	}
 }
 
 MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
@@ -125,8 +127,6 @@ MidiDiskstream::init ()
 	_capture_buf = new MidiRingBuffer<framepos_t>(size);
 
 	_n_channels = ChanCount(DataType::MIDI, 1);
-
-	assert(recordable());
 }
 
 MidiDiskstream::~MidiDiskstream ()
@@ -222,9 +222,9 @@ MidiDiskstream::find_and_use_playlist (const string& name)
 int
 MidiDiskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 {
-	assert(boost::dynamic_pointer_cast<MidiPlaylist>(playlist));
-
-	Diskstream::use_playlist(playlist);
+	if (boost::dynamic_pointer_cast<MidiPlaylist>(playlist)) {
+		Diskstream::use_playlist(playlist);
+	}
 
 	return 0;
 }
@@ -258,8 +258,6 @@ MidiDiskstream::use_new_playlist ()
 int
 MidiDiskstream::use_copy_playlist ()
 {
-	assert(midi_playlist());
-
 	if (destructive()) {
 		return 0;
 	}
@@ -286,10 +284,7 @@ MidiDiskstream::use_copy_playlist ()
 int
 MidiDiskstream::set_destructive (bool yn)
 {
-	yn = 0; // stop pedantic gcc complaints about unused parameter
-	assert( ! destructive());
-	assert( ! yn);
-	return -1;
+	return yn ? -1 : 0;
 }
 
 void
@@ -356,7 +351,6 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt
 		MidiBuffer& buf = sp->get_midi_buffer(nframes);
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 			const Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
-			assert(ev.buffer());
 #ifndef NDEBUG
 			if (DEBUG::MidiIO & PBD::debug_bits) {
 				const uint8_t* __data = ev.buffer();
@@ -667,12 +661,11 @@ MidiDiskstream::do_refill ()
 		return 0;
 	}
 
-	// At this point we...
-	assert(_playback_buf->write_space() > 0); // ... have something to write to, and
-	assert(file_frame <= max_framepos); // ... something to write
+	/* no space to write */
+	if (_playback_buf->write_space() == 0) {
+		return 0;
+	}
 
-	// now calculate how much time is in the ringbuffer.
-	// and lets write as much as we need to get this to be midi_readahead;
 	uint32_t frames_read = g_atomic_int_get(&_frames_read_from_ringbuffer);
 	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
 	if ((frames_written - frames_read) >= midi_readahead) {
@@ -713,8 +706,6 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 	if (!_write_source) {
 		return 0;
 	}
-
-	assert (!destructive());
 
 	total = _session.transport_frame() - _write_source->last_write_end();
 
@@ -804,8 +795,6 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 		/* new source set up in "out" below */
 
 	} else {
-
-		assert(_write_source);
 
 		framecnt_t total_capture = 0;
 		for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
@@ -993,9 +982,6 @@ MidiDiskstream::finish_capture ()
 		return;
 	}
 
-	// Why must we destroy?
-	assert(!destructive());
-
 	CaptureInfo* ci = new CaptureInfo;
 
 	ci->start  = capture_start_frame;
@@ -1022,8 +1008,6 @@ MidiDiskstream::set_record_enabled (bool yn)
 	if (!recordable() || !_session.record_enabling_legal() || _io->n_ports().n_midi() == 0) {
 		return;
 	}
-
-	assert(!destructive());
 
 	/* yes, i know that this not proof against race conditions, but its
 	   good enough. i think.
@@ -1116,8 +1100,6 @@ MidiDiskstream::set_state (const XMLNode& node, int version)
 	in_set_state = true;
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		assert ((*niter)->name() != IO::state_node_name);
-
 		if ((*niter)->name() == X_("CapturingSources")) {
 			capture_pending_node = *niter;
 		}
@@ -1158,8 +1140,6 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 	if (!_session.writable() || !recordable()) {
 		return 1;
 	}
-
-	assert(n == 0);
 
 	_write_source.reset();
 
@@ -1293,7 +1273,6 @@ void
 MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 {
 	dst.clear();
-	assert(dst.size() == 0);
 
 	Location* loc = loop_location;
 
