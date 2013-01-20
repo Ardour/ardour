@@ -1851,12 +1851,17 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 				}
 			}
 		}
-		
-		if (_operation == StartTrim) {
-			_editor->maybe_locate_with_edit_preroll ( _views.begin()->view->region()->position() );
-		}
-		if (_operation == EndTrim) {
-			_editor->maybe_locate_with_edit_preroll ( _views.begin()->view->region()->position() + _views.begin()->view->region()->length() );
+
+		if (!_views.empty()) {
+			if (_operation == StartTrim) {
+				_editor->maybe_locate_with_edit_preroll(
+					_views.begin()->view->region()->position());
+			}
+			if (_operation == EndTrim) {
+				_editor->maybe_locate_with_edit_preroll(
+					_views.begin()->view->region()->position() +
+					_views.begin()->view->region()->length());
+			}
 		}
 	
 		if (!_editor->selection->selected (_primary)) {
