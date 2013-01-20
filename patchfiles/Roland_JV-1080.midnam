@@ -12,25 +12,25 @@
         </MIDICommands>
       </DeviceModeEnable>
       <ChannelNameSetAssignments>
-        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
-        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
-        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
-        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
-        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
-        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
-        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
-        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
-        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
-        <ChannelNameSetAssign Channel="10" NameSet="Name Set 2"/>
-        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
-        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
-        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
-        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
-        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
-        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="1" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Drums"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Patches"/>
       </ChannelNameSetAssignments>
     </CustomDeviceMode>
-    <ChannelNameSet Name="Name Set 1">
+    <ChannelNameSet Name="Patches">
       <AvailableForChannels>
         <AvailableChannel Channel="1" Available="true"/>
         <AvailableChannel Channel="2" Available="true"/>
@@ -1814,7 +1814,7 @@
         </PatchNameList>
       </PatchBank>
     </ChannelNameSet>
-    <ChannelNameSet Name="Name Set 2">
+    <ChannelNameSet Name="Drums">
       <AvailableForChannels>
         <AvailableChannel Channel="1" Available="false"/>
         <AvailableChannel Channel="2" Available="false"/>
@@ -1851,8 +1851,6 @@
       </PatchBank>
     </ChannelNameSet>
     <NoteNameList Name="User Kit A: HouseDrumSet">
-      <NoteGroup Name="Hi-Hat">
-			</NoteGroup>
       <NoteGroup Name="Conga Hi Mute/Open">
         <Note Number="62" Name="Cga Mute Hi"/>
         <Note Number="63" Name="Cga Open Hi"/>
@@ -1933,8 +1931,6 @@
       <Note Number="98" Name="MC500 Beep 2"/>
     </NoteNameList>
     <NoteNameList Name="User Kit B: JazzDrumSet1">
-      <NoteGroup Name="Hi-Hat">
-			</NoteGroup>
       <NoteGroup Name="Conga Hi Mute/Open">
         <Note Number="62" Name="Cga Mute Hi"/>
         <Note Number="63" Name="Cga Open Hi"/>
@@ -2013,8 +2009,6 @@
       <Note Number="98" Name="Metronome 1"/>
     </NoteNameList>
     <NoteNameList Name="Preset Kit A: PopDrumSet1">
-      <NoteGroup Name="Hi-Hat">
-			</NoteGroup>
       <NoteGroup Name="Conga Hi Mute/Open">
         <Note Number="62" Name="Cga Slap"/>
         <Note Number="63" Name="Cga Open Hi"/>
@@ -2093,8 +2087,6 @@
       <Note Number="98" Name="Metronome 1"/>
     </NoteNameList>
     <NoteNameList Name="Preset Kit A: PopDrumSet2">
-      <NoteGroup Name="Hi-Hat">
-			</NoteGroup>
       <NoteGroup Name="Conga Hi Mute/Open">
         <Note Number="62" Name="Cga Slap"/>
         <Note Number="63" Name="Cga Open Hi"/>
@@ -2167,8 +2159,6 @@
       <Note Number="98" Name="Metronome 1"/>
     </NoteNameList>
     <NoteNameList Name="Preset Kit B: PowerDrumSet">
-      <NoteGroup Name="Hi-Hat">
-			</NoteGroup>
       <NoteGroup Name="Conga Hi Mute/Open">
         <Note Number="62" Name="Cga Mute Hi"/>
         <Note Number="63" Name="Cga Open Hi"/>
@@ -2177,8 +2167,6 @@
         <Note Number="67" Name="Agogo-1"/>
         <Note Number="68" Name="Agogo-2"/>
       </NoteGroup>
-      <NoteGroup Name="Whistle">
-			</NoteGroup>
       <NoteGroup Name="Guiro">
         <Note Number="73" Name="Long Guiro"/>
         <Note Number="74" Name="Long Guiro"/>
@@ -2249,8 +2237,6 @@
       <Note Number="98" Name="Metronome 1"/>
     </NoteNameList>
     <NoteNameList Name="Preset Kit B: RaveDrumSet">
-      <NoteGroup Name="Hi-Hat">
-			</NoteGroup>
       <NoteGroup Name="Agogo">
         <Note Number="66" Name="Agogo"/>
         <Note Number="68" Name="Agogo"/>
@@ -2319,8 +2305,6 @@
       <Note Number="98" Name="Metronome 2"/>
     </NoteNameList>
     <NoteNameList Name="Preset Kit C: JazzDrumSet2">
-      <NoteGroup Name="Hi-Hat">
-			</NoteGroup>
       <NoteGroup Name="Conga Hi Mute/Open">
         <Note Number="62" Name="Cga Mute Hi"/>
         <Note Number="63" Name="Cga Open Hi"/>
@@ -2477,8 +2461,6 @@
       <Note Number="97" Name="Brush Roll"/>
     </NoteNameList>
     <NoteNameList Name="Preset Kit D: GMDrumSet">
-      <NoteGroup Name="Hi-Hat">
-			</NoteGroup>
       <NoteGroup Name="Conga Hi Mute/Open">
         <Note Number="62" Name="Cga Mute Hi"/>
         <Note Number="63" Name="Cga Open Hi"/>
@@ -2554,8 +2536,6 @@
       <Note Number="98" Name="Brush Slap"/>
     </NoteNameList>
     <NoteNameList Name="Preset Kit D: BrushDrumSet">
-      <NoteGroup Name="Hi-Hat">
-			</NoteGroup>
       <NoteGroup Name="Conga Hi Mute/Open">
         <Note Number="62" Name="Cga Slap"/>
         <Note Number="63" Name="Cga Open Hi"/>
