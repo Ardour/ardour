@@ -25,6 +25,8 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "midi++/midnam_patch.h"
+
 #include "ardour/midi_patch_manager.h"
 #include "ardour/beats_frames_converter.h"
 #include "ardour/instrument_info.h"
@@ -255,8 +257,8 @@ PatchChangeDialog::fill_patch_combo ()
 		return;
 	}
 
-	const MIDI::Name::PatchBank::PatchNameList& patches = _current_patch_bank->patch_name_list ();
-	for (MIDI::Name::PatchBank::PatchNameList::const_iterator j = patches.begin(); j != patches.end(); ++j) {
+	const MIDI::Name::PatchNameList& patches = _current_patch_bank->patch_name_list ();
+	for (MIDI::Name::PatchNameList::const_iterator j = patches.begin(); j != patches.end(); ++j) {
 		string n = (*j)->name ();
 		boost::replace_all (n, "_", " ");
 		_patch_combo.append_text (n);
@@ -278,8 +280,8 @@ PatchChangeDialog::set_active_patch_combo ()
 		return;
 	}
 	
-	const MIDI::Name::PatchBank::PatchNameList& patches = _current_patch_bank->patch_name_list ();
-	for (MIDI::Name::PatchBank::PatchNameList::const_iterator j = patches.begin(); j != patches.end(); ++j) {
+	const MIDI::Name::PatchNameList& patches = _current_patch_bank->patch_name_list ();
+	for (MIDI::Name::PatchNameList::const_iterator j = patches.begin(); j != patches.end(); ++j) {
 		string n = (*j)->name ();
 		boost::replace_all (n, "_", " ");
 
@@ -305,9 +307,9 @@ PatchChangeDialog::patch_combo_changed ()
 		return;
 	}
 
-	const MIDI::Name::PatchBank::PatchNameList& patches = _current_patch_bank->patch_name_list ();
+	const MIDI::Name::PatchNameList& patches = _current_patch_bank->patch_name_list ();
 
-	for (MIDI::Name::PatchBank::PatchNameList::const_iterator j = patches.begin(); j != patches.end(); ++j) {
+	for (MIDI::Name::PatchNameList::const_iterator j = patches.begin(); j != patches.end(); ++j) {
 		string n = (*j)->name ();
 		boost::replace_all (n, "_", " ");
 

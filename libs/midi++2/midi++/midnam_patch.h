@@ -88,8 +88,8 @@ public:
 	Patch (std::string a_name = std::string(), uint8_t a_number = 0, uint16_t bank_number = 0);
 	virtual ~Patch() {};
 
-	const std::string& name() const         { return _name; }
-	void set_name(const std::string a_name) { _name = a_name; }
+	const std::string& name() const        { return _name; }
+	void set_name(const std::string& name) { _name = name; }
 	
 	const std::string& note_list_name() const  { return _note_list_name; }
 
@@ -110,16 +110,16 @@ private:
 	std::string     _note_list_name;
 };
 
+typedef std::list<boost::shared_ptr<Patch> > PatchNameList;
+
 class PatchBank 
 {
 public:
-	typedef std::list<boost::shared_ptr<Patch> > PatchNameList;
-
 	PatchBank (uint16_t n = 0, std::string a_name = std::string()) : _name(a_name), _number (n) {};
 	virtual ~PatchBank() { }
 
-	const std::string& name() const               { return _name; }
-	void set_name(const std::string a_name)       { _name = a_name; }
+	const std::string& name() const          { return _name; }
+	void set_name(const std::string& a_name) { _name = a_name; }
 
 	int number() const { return _number; }
 
@@ -148,10 +148,10 @@ public:
 
 	ChannelNameSet() {};
 	virtual ~ChannelNameSet() {};
-	ChannelNameSet(std::string a_name) : _name(a_name) {};
+	ChannelNameSet(std::string& name) : _name(name) {};
 
-	const std::string& name() const          { return _name; }
-	void set_name(const std::string a_name)  { _name = a_name; }
+	const std::string& name() const        { return _name; }
+	void set_name(const std::string& name) { _name = name; }
 	
 	const PatchBanks& patch_banks() const    { return _patch_banks; }
 
@@ -197,23 +197,26 @@ public:
 		return boost::shared_ptr<Patch>();
 	}
 
-	const std::string& note_list_name() const { return _note_list_name; }
+	const std::string& note_list_name()    const { return _note_list_name; }
+	const std::string& control_list_name() const { return _control_list_name; }
 
 	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 
 	void set_patch_banks (const PatchBanks&);
-	void use_patch_name_list (const PatchBank::PatchNameList&);
+	void use_patch_name_list (const PatchNameList&);
 
 private:
 	friend std::ostream& operator<< (std::ostream&, const ChannelNameSet&);
-	std::string _name;
+
+	std::string          _name;
 	AvailableForChannels _available_for_channels;
 	PatchBanks           _patch_banks;
 	PatchMap             _patch_map;
 	PatchList            _patch_list;
 	std::string          _patch_list_name;
 	std::string          _note_list_name;
+	std::string          _control_list_name;
 };
 
 std::ostream& operator<< (std::ostream&, const ChannelNameSet&);
@@ -264,7 +267,7 @@ class Control
 public:
 	Control() {}
 	Control(const std::string& type,
-	        const std::string& number,
+	        const uint16_t     number,
 	        const std::string& name)
 		: _type(type)
 		, _number(number)
@@ -272,33 +275,35 @@ public:
 	{}
 
 	const std::string& type()   const { return _type; }
-	const std::string& number() const { return _number; }
+	uint16_t           number() const { return _number; }
 	const std::string& name()   const { return _name; }
 
-	void set_type(const std::string& type)     { _type = type; }
-	void set_number(const std::string& number) { _number = number; }
-	void set_name(const std::string& name)     { _name = name; }
+	void set_type(const std::string& type) { _type = type; }
+	void set_number(uint16_t number)       { _number = number; }
+	void set_name(const std::string& name) { _name = name; }
 
 	XMLNode& get_state(void);
 	int      set_state(const XMLTree&, const XMLNode&);
 
 private:
 	std::string _type;
-	std::string _number;
+	uint16_t    _number;
 	std::string _name;
 };
 
 class ControlNameList 
 {
 public:
-	typedef std::list< boost::shared_ptr<Control> > Controls;
+	typedef std::map<uint16_t, boost::shared_ptr<Control> > Controls;
 
 	ControlNameList() {}
 	ControlNameList(const std::string& name) : _name(name) {}
 
 	const std::string& name() const { return _name; }
 
-	void set_name(const std::string name) { _name = name; }
+	void set_name(const std::string& name) { _name = name; }
+
+	boost::shared_ptr<const Control> control(uint16_t num) const;
 
 	const Controls& controls() const { return _controls; }
 
@@ -316,15 +321,15 @@ public:
 	CustomDeviceMode() {};
 	virtual ~CustomDeviceMode() {};
 
-	const std::string& name() const          { return _name; }
-	void set_name(const std::string a_name)  { _name = a_name; }
+	const std::string& name() const        { return _name; }
+	void set_name(const std::string& name) { _name = name; }
 
 	
 	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 	
 	/// Note: channel here is 0-based while in the MIDNAM-file it's 1-based
-	std::string channel_name_set_name_by_channel(uint8_t channel) {
+	const std::string& channel_name_set_name_by_channel(uint8_t channel) {
 		assert(channel <= 15);
 		return _channel_name_set_assignments[channel]; 
 	}
@@ -339,21 +344,21 @@ private:
 class MasterDeviceNames
 {
 public:
-	typedef std::set<std::string>                                        Models;
+	typedef std::set<std::string>                                       Models;
 	/// maps name to CustomDeviceMode
-	typedef std::map<std::string, boost::shared_ptr<CustomDeviceMode> >  CustomDeviceModes;
-	typedef std::list<std::string>                                       CustomDeviceModeNames;
+	typedef std::map<std::string, boost::shared_ptr<CustomDeviceMode> > CustomDeviceModes;
+	typedef std::list<std::string>                                      CustomDeviceModeNames;
 	/// maps name to ChannelNameSet
-	typedef std::map<std::string, boost::shared_ptr<ChannelNameSet> >    ChannelNameSets;
-	typedef std::map<std::string, boost::shared_ptr<NoteNameList> >      NoteNameLists;
-	typedef std::list<boost::shared_ptr<ControlNameList> >               ControlNameLists;
-	typedef std::map<std::string, PatchBank::PatchNameList>              PatchNameLists;
+	typedef std::map<std::string, boost::shared_ptr<ChannelNameSet> >   ChannelNameSets;
+	typedef std::map<std::string, boost::shared_ptr<NoteNameList> >     NoteNameLists;
+	typedef std::map<std::string, boost::shared_ptr<ControlNameList> >  ControlNameLists;
+	typedef std::map<std::string, PatchNameList>                        PatchNameLists;
 	
 	MasterDeviceNames() {};
 	virtual ~MasterDeviceNames() {};
 	
 	const std::string& manufacturer() const { return _manufacturer; }
-	void set_manufacturer(const std::string a_manufacturer) { _manufacturer = a_manufacturer; }
+	void set_manufacturer(const std::string& manufacturer) { _manufacturer = manufacturer; }
 	
 	const Models& models() const { return _models; }
 	void set_models(const Models some_models) { _models = some_models; }
@@ -366,8 +371,9 @@ public:
 	boost::shared_ptr<ChannelNameSet> channel_name_set_by_device_mode_and_channel(const std::string& mode, uint8_t channel);
 	boost::shared_ptr<Patch> find_patch(const std::string& mode, uint8_t channel, const PatchPrimaryKey& key);
 
-	boost::shared_ptr<NoteNameList>   note_name_list(const std::string& name);
-	boost::shared_ptr<ChannelNameSet> channel_name_set(const std::string& name);
+	boost::shared_ptr<ControlNameList> control_name_list(const std::string& name);
+	boost::shared_ptr<NoteNameList>    note_name_list(const std::string& name);
+	boost::shared_ptr<ChannelNameSet>  channel_name_set(const std::string& name);
 
 	std::string note_name(const std::string& mode_name,
 	                      uint8_t            channel,
@@ -396,11 +402,11 @@ public:
 	typedef std::map<std::string, boost::shared_ptr<MasterDeviceNames> > MasterDeviceNamesList;
 	
 	MIDINameDocument() {}
-	MIDINameDocument(const std::string &filename);
+	MIDINameDocument(const std::string& filename);
 	virtual ~MIDINameDocument() {};
 
 	const std::string& author() const { return _author; }
-	void set_author(const std::string an_author) { _author = an_author; }
+	void set_author(const std::string& author) { _author = author; }
 	
 	boost::shared_ptr<MasterDeviceNames> master_device_names(const std::string& model);
 

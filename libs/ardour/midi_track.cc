@@ -525,6 +525,13 @@ MidiTrack::set_note_mode (NoteMode m)
 	midi_diskstream()->set_note_mode(m);
 }
 
+std::string
+MidiTrack::describe_parameter (Evoral::Parameter param)
+{
+	const std::string str(instrument_info().get_controller_name(param));
+	return str.empty() ? Automatable::describe_parameter(param) : str;
+}
+
 void
 MidiTrack::midi_panic()
 {

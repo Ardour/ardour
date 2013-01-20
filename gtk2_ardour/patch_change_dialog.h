@@ -20,7 +20,7 @@
 
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/comboboxtext.h>
-#include "midi++/midnam_patch.h"
+
 #include "evoral/PatchChange.hpp"
 #include "ardour_dialog.h"
 #include "audio_clock.h"

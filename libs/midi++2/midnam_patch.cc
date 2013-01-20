@@ -240,11 +240,11 @@ Control::get_state (void)
 }
 
 int
-Control::set_state (const XMLTree&, const XMLNode& node)
+Control::set_state (const XMLTree& tree, const XMLNode& node)
 {
 	assert(node.name() == "Control");
 	_type   = node.property("Type")->value();
-	_number = node.property("Number")->value();
+	_number = string_to_int(tree, node.property("Number")->value());
 	_name   = node.property("Name")->value();
 
 	return 0;
@@ -265,16 +265,33 @@ ControlNameList::set_state (const XMLTree& tree, const XMLNode& node)
 	assert(node.name() == "ControlNameList");
 	_name = node.property("Name")->value();
 
+	_controls.clear();
 	for (XMLNodeList::const_iterator i = node.children().begin();
 	     i != node.children().end(); ++i) {
-		if ((*i)->name() != "comment") {
+		if ((*i)->name() == "Control") {
 			boost::shared_ptr<Control> control(new Control());
 			control->set_state (tree, *(*i));
-			_controls.push_back(control);
+			if (_controls.find(control->number()) == _controls.end()) {
+				_controls.insert(make_pair(control->number(), control));
+			} else {
+				PBD::warning << string_compose("%1: Duplicate control %2 ignored",
+				                               tree.filename(), control->number())
+				             << endmsg;
+			}
 		}
 	}
 
 	return 0;
+}
+
+boost::shared_ptr<const Control>
+ControlNameList::control(uint16_t num) const
+{
+	Controls::const_iterator i = _controls.find(num);
+	if (i != _controls.end()) {
+		return i->second;
+	}
+	return boost::shared_ptr<const Control>();
 }
 
 XMLNode&
@@ -357,7 +374,7 @@ operator<< (std::ostream& os, const ChannelNameSet& cns)
 	
 	for (ChannelNameSet::PatchBanks::const_iterator pbi = cns._patch_banks.begin(); pbi != cns._patch_banks.end(); ++pbi) {
 		os << "\tPatch Bank " << (*pbi)->name() << " with " << (*pbi)->patch_name_list().size() << " patches\n";
-		for (PatchBank::PatchNameList::const_iterator pni = (*pbi)->patch_name_list().begin(); pni != (*pbi)->patch_name_list().end(); ++pni) {
+		for (PatchNameList::const_iterator pni = (*pbi)->patch_name_list().begin(); pni != (*pbi)->patch_name_list().end(); ++pni) {
 			os << "\t\tPatch name " << (*pni)->name() << " prog " << (int) (*pni)->program_number() << " bank " << (*pni)->bank_number() << endl;
 		}
 	}
@@ -376,7 +393,7 @@ ChannelNameSet::set_patch_banks (const ChannelNameSet::PatchBanks& pb)
 	_available_for_channels.clear ();
 	
 	for (PatchBanks::const_iterator pbi = _patch_banks.begin(); pbi != _patch_banks.end(); ++pbi) {
-		for (PatchBank::PatchNameList::const_iterator pni = (*pbi)->patch_name_list().begin(); pni != (*pbi)->patch_name_list().end(); ++pni) {
+		for (PatchNameList::const_iterator pni = (*pbi)->patch_name_list().begin(); pni != (*pbi)->patch_name_list().end(); ++pni) {
 			_patch_map[(*pni)->patch_primary_key()] = (*pni);
 			_patch_list.push_back ((*pni)->patch_primary_key());
 		}
@@ -388,9 +405,9 @@ ChannelNameSet::set_patch_banks (const ChannelNameSet::PatchBanks& pb)
 }
 
 void
-ChannelNameSet::use_patch_name_list (const PatchBank::PatchNameList& pnl)
+ChannelNameSet::use_patch_name_list (const PatchNameList& pnl)
 {
-	for (PatchBank::PatchNameList::const_iterator p = pnl.begin(); p != pnl.end(); ++p) {
+	for (PatchNameList::const_iterator p = pnl.begin(); p != pnl.end(); ++p) {
 		_patch_map[(*p)->patch_primary_key()] = (*p);
 		_patch_list.push_back ((*p)->patch_primary_key());
 	}
@@ -431,7 +448,7 @@ int
 ChannelNameSet::set_state (const XMLTree& tree, const XMLNode& node)
 {
 	assert(node.name() == "ChannelNameSet");
-	_name   = node.property("Name")->value();
+	_name = node.property("Name")->value();
 
 	const XMLNodeList children = node.children();
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
@@ -440,29 +457,27 @@ ChannelNameSet::set_state (const XMLTree& tree, const XMLNode& node)
 		if (node->name() == "AvailableForChannels") {
 			boost::shared_ptr<XMLSharedNodeList> channels =
 				tree.find("//AvailableChannel[@Available = 'true']/@Channel", node);
-			for(XMLSharedNodeList::const_iterator i = channels->begin();
+			for (XMLSharedNodeList::const_iterator i = channels->begin();
 			    i != channels->end();
 			    ++i) {
 				_available_for_channels.insert(
 					string_to_int(tree, (*i)->attribute_value()));
 			}
-		}
-
-		if (node->name() == "PatchBank") {
+		} else if (node->name() == "PatchBank") {
 			boost::shared_ptr<PatchBank> bank (new PatchBank ());
 			bank->set_state(tree, *node);
 			_patch_banks.push_back(bank);
-			const PatchBank::PatchNameList& patches = bank->patch_name_list();
-			for (PatchBank::PatchNameList::const_iterator patch = patches.begin();
+			const PatchNameList& patches = bank->patch_name_list();
+			for (PatchNameList::const_iterator patch = patches.begin();
 			     patch != patches.end();
 			     ++patch) {
 				_patch_map[(*patch)->patch_primary_key()] = *patch;
 				_patch_list.push_back((*patch)->patch_primary_key());
 			}
-		}
-
-		if (node->name() == "UsesNoteNameList") {
+		} else if (node->name() == "UsesNoteNameList") {
 			_note_list_name = node->property ("Name")->value();
+		} else if (node->name() == "UsesControlNameList") {
+			_control_list_name = node->property ("Name")->value();
 		}
 	}
 
@@ -478,7 +493,7 @@ CustomDeviceMode::set_state(const XMLTree& tree, const XMLNode& a_node)
 
 	boost::shared_ptr<XMLSharedNodeList> channel_name_set_assignments =
 		tree.find("//ChannelNameSetAssign", const_cast<XMLNode *>(&a_node));
-	for(XMLSharedNodeList::const_iterator i = channel_name_set_assignments->begin();
+	for (XMLSharedNodeList::const_iterator i = channel_name_set_assignments->begin();
 	    i != channel_name_set_assignments->end();
 	    ++i) {
 		const int     channel  = string_to_int(tree, (*i)->property("Channel")->value());
@@ -534,6 +549,16 @@ MasterDeviceNames::channel_name_set(const std::string& name)
 		return i->second;
 	}
 	return boost::shared_ptr<ChannelNameSet>();
+}
+
+boost::shared_ptr<ControlNameList>
+MasterDeviceNames::control_name_list(const std::string& name)
+{
+	ControlNameLists::const_iterator i = _control_name_lists.find(name);
+	if (i != _control_name_lists.end()) {
+		return i->second;
+	}
+	return boost::shared_ptr<ControlNameList>();
 }
 
 boost::shared_ptr<NoteNameList>
@@ -631,7 +656,7 @@ MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode&)
 	     ++i) {
 		boost::shared_ptr<NoteNameList> note_name_list(new NoteNameList());
 		note_name_list->set_state (tree, *(*i));
-		_note_name_lists[(*i)->property ("Name")->value()] = note_name_list;
+		_note_name_lists[note_name_list->name()] = note_name_list;
 	}
 
 	// ControlNameLists
@@ -641,7 +666,7 @@ MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode&)
 	     ++i) {
 		boost::shared_ptr<ControlNameList> control_name_list(new ControlNameList());
 		control_name_list->set_state (tree, *(*i));
-		_control_name_lists.push_back(control_name_list);
+		_control_name_lists[control_name_list->name()] = control_name_list;
 	}
 
 	// global/post-facto PatchNameLists
@@ -650,7 +675,7 @@ MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode&)
 	     i != patch_name_lists->end();
 	     ++i) {
 
-		PatchBank::PatchNameList patch_name_list;
+		PatchNameList patch_name_list;
 		const XMLNodeList patches = (*i)->children();
 
 		for (XMLNodeList::const_iterator p = patches.begin(); p != patches.end(); ++p) {

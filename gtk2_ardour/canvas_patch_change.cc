@@ -25,6 +25,7 @@
 
 #include "gtkmm2ext/keyboard.h"
 #include "ardour/instrument_info.h"
+#include "midi++/midnam_patch.h"
 
 #include "ardour_ui.h"
 #include "midi_region_view.h"
@@ -92,10 +93,10 @@ CanvasPatchChange::initialize_popup_menus()
 		     ++bank) {
 			Gtk::Menu& patch_bank_menu = *manage(new Gtk::Menu());
 			
-			const PatchBank::PatchNameList& patches = (*bank)->patch_name_list();
+			const PatchNameList& patches = (*bank)->patch_name_list();
 			Gtk::Menu::MenuList& patch_menus = patch_bank_menu.items();
 			
-			for (PatchBank::PatchNameList::const_iterator patch = patches.begin();
+			for (PatchNameList::const_iterator patch = patches.begin();
 			     patch != patches.end();
 			     ++patch) {
 				std::string name = (*patch)->name();
@@ -119,10 +120,10 @@ CanvasPatchChange::initialize_popup_menus()
 	} else {
 		/* only one patch bank, so make it the initial menu */
 
-		const PatchBank::PatchNameList& patches = patch_banks.front()->patch_name_list();
+		const PatchNameList& patches = patch_banks.front()->patch_name_list();
 		Gtk::Menu::MenuList& patch_menus = _popup.items();
 		
-		for (PatchBank::PatchNameList::const_iterator patch = patches.begin();
+		for (PatchNameList::const_iterator patch = patches.begin();
 		     patch != patches.end();
 		     ++patch) {
 			std::string name = (*patch)->name();

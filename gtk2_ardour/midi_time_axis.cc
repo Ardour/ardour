@@ -55,8 +55,6 @@
 #include "ardour/track.h"
 #include "ardour/types.h"
 
-#include "midi++/names.h"
-
 #include "ardour_ui.h"
 #include "ardour_button.h"
 #include "automation_line.h"
@@ -829,14 +827,17 @@ MidiTimeAxisView::build_controller_menu ()
 		/* Controllers names available in midnam file, generate fancy menu */
 		unsigned n_items  = 0;
 		unsigned n_groups = 0;
+
+		/* TODO: This is not correct, should look up the currently applicable ControlNameList
+		   and only build a menu for that one. */
 		for (MasterDeviceNames::ControlNameLists::const_iterator l = device_names->controls().begin();
 		     l != device_names->controls().end(); ++l) {
-			boost::shared_ptr<ControlNameList> name_list = *l;
+			boost::shared_ptr<ControlNameList> name_list = l->second;
 			Menu*                              ctl_menu  = NULL;
 			
-			for (ControlNameList::Controls::const_iterator c = (*l)->controls().begin();
-			     c != (*l)->controls().end(); ++c) {
-				const int ctl = atoi((*c)->number().c_str());
+			for (ControlNameList::Controls::const_iterator c = name_list->controls().begin();
+			     c != name_list->controls().end(); ++c) {
+				const uint16_t ctl = c->second->number();
 				if (ctl == MIDI_CTL_MSB_BANK || ctl == MIDI_CTL_LSB_BANK) {
 					/* Skip bank select controllers since they're handled specially */
 					continue;
@@ -849,12 +850,12 @@ MidiTimeAxisView::build_controller_menu ()
 				
 				MenuList& ctl_items (ctl_menu->items());
 				if (chn_cnt > 1) {
-					add_multi_channel_controller_item(ctl_items, ctl, (*c)->name());
+					add_multi_channel_controller_item(ctl_items, ctl, c->second->name());
 				} else {
-					add_single_channel_controller_item(ctl_items, ctl, (*c)->name());
+					add_single_channel_controller_item(ctl_items, ctl, c->second->name());
 				}
 				
-				if (++n_items == 16 || c == (*l)->controls().end()) {
+				if (++n_items == 16 || c == name_list->controls().end()) {
 					/* Submenu has 16 items, add it to controller menu and reset */
 					items.push_back(
 						MenuElem(string_compose(_("Controllers %1-%2"),

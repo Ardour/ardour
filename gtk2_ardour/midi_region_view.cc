@@ -1820,10 +1820,9 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const 
 		                      displaytext,
 		                      height,
 		                      x, 1.0,
-				      instrument_info(),
+		                      instrument_info(),
 		                      patch,
-				      active_channel)
-		          );
+		                      active_channel));
 
 	if (patch_change->width() < _pixel_width) {
 		// Show unless patch change is beyond the region bounds

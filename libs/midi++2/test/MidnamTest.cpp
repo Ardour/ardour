@@ -77,7 +77,7 @@ MidnamTest::protools_patchfile_test()
 
     bank = banks2.front();
     CPPUNIT_ASSERT_EQUAL(string("Drum sets"), bank->name());
-    const PatchBank::PatchNameList& plist2 = bank->patch_name_list();
+    const PatchNameList& plist2 = bank->patch_name_list();
     CPPUNIT_ASSERT(plist2.size() == 49);
 }
 
@@ -136,9 +136,9 @@ MidnamTest::yamaha_PSRS900_patchfile_test()
                 CPPUNIT_ASSERT(banks1.size() > 1);
 
                 boost::shared_ptr<PatchBank> bank = banks1.front();
-                const PatchBank::PatchNameList& list = bank->patch_name_list();
+                const PatchNameList& list = bank->patch_name_list();
 
-                for(PatchBank::PatchNameList::const_iterator p = list.begin(); p != list.end(); ++p) {
+                for(PatchNameList::const_iterator p = list.begin(); p != list.end(); ++p) {
 
                 if (ns == string("GM+XG")) {
                     cerr << "got Patch with name " << (*p)->name() << " bank " << (*p)->bank_number() << " program " << (int)(*p)->program_number() << endl;

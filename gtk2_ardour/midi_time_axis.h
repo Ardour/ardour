@@ -41,6 +41,13 @@
 #include "midi_streamview.h"
 #include "midi_channel_selector.h"
 
+namespace MIDI {
+namespace Name {
+class MasterDeviceNames;
+class CustomDeviceMode;
+}
+}
+
 namespace ARDOUR {
 	class Session;
 	class RouteGroup;
@@ -68,8 +75,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	void set_height (uint32_t);
 
-        void enter_internal_edit_mode ();
-        void leave_internal_edit_mode ();
+	void enter_internal_edit_mode ();
+	void leave_internal_edit_mode ();
 
 	boost::shared_ptr<ARDOUR::MidiRegion> add_region (ARDOUR::framepos_t, ARDOUR::framecnt_t, bool);
 
@@ -93,8 +100,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
 
-        StepEditor* step_editor() { return _step_editor; }
-        void check_step_edit ();
+	StepEditor* step_editor() { return _step_editor; }
+	void check_step_edit ();
 
 	void first_idle ();
 
@@ -168,7 +175,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	/** parameter -> menu item map for the controller menu */
 	ParameterMenuMap _controller_menu_map;
 
-        StepEditor* _step_editor;
+	StepEditor* _step_editor;
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

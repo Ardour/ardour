@@ -60,10 +60,18 @@ public:
 
 	bool bounceable (boost::shared_ptr<Processor>, bool) const { return false; }
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
-	boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&, 
-						boost::shared_ptr<Processor> endpoint, bool include_endpoint);
-	int export_stuff (BufferSet& bufs, framepos_t start_frame, framecnt_t end_frame, 
-			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export);
+	boost::shared_ptr<Region> bounce_range (framepos_t                   start,
+	                                        framepos_t                   end,
+	                                        InterThreadInfo&             iti,
+	                                        boost::shared_ptr<Processor> endpoint,
+	                                        bool                         include_endpoint);
+
+	int export_stuff (BufferSet&                   bufs,
+	                  framepos_t                   start_frame,
+	                  framecnt_t                   end_frame,
+	                  boost::shared_ptr<Processor> endpoint,
+	                  bool                         include_endpoint,
+	                  bool                         for_export);
 
 	int set_state (const XMLNode&, int version);
 
@@ -86,6 +94,8 @@ public:
 	NoteMode note_mode() const { return _note_mode; }
 	void set_note_mode (NoteMode m);
 
+	std::string describe_parameter (Evoral::Parameter param);
+
 	bool step_editing() const { return _step_editing; }
 	void set_step_editing (bool yn);
 	MidiRingBuffer<framepos_t>& step_edit_ring_buffer() { return _step_edit_ring_buffer; }
@@ -102,7 +112,7 @@ public:
 	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
 
 	void set_monitoring (MonitorChoice);
-        MonitorState monitoring_state () const;
+	MonitorState monitoring_state () const;
 
 	void set_input_active (bool);
 	bool input_active () const;
