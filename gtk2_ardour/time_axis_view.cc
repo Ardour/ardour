@@ -613,7 +613,7 @@ TimeAxisView::begin_name_edit ()
 		name_entry->signal_activate().connect (sigc::bind (sigc::mem_fun (*name_editor, &ArdourDialog::response), RESPONSE_OK));
 
 		Gtk::HBox* hbox = manage (new HBox);
-		Gtk::Label* label = manage (new Label (_("New name")));
+		Gtk::Label* label = manage (new Label (_("New name:" " ")));
 
 		hbox->pack_start (*label, false, false);
 		hbox->pack_start (*name_entry, true, true);
