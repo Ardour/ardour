@@ -1845,16 +1845,28 @@ MidiRegionView::patch_change_to_patch_key (MidiModel::PatchChangePtr p)
 	return MIDI::Name::PatchPrimaryKey (p->program(), p->bank());
 }
 
+/// Return true iff @p pc applies to the given time on the given channel.
+static bool
+patch_applies (const ARDOUR::MidiModel::constPatchChangePtr pc, double time, uint8_t channel)
+{
+	return pc->time() <= time && pc->channel() == channel;
+}
+	
 void 
 MidiRegionView::get_patch_key_at (double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const
 {
+	// The earliest event not before time
 	MidiModel::PatchChanges::iterator i = _model->patch_change_lower_bound (time);
-	while (i != _model->patch_changes().end() && (*i)->channel() != channel) {
-		++i;
+
+	// Go backwards until we find the latest PC for this channel, or the start
+	while (i != _model->patch_changes().begin() &&
+	       (i == _model->patch_changes().end() ||
+	        !patch_applies(*i, time, channel))) {
+		--i;
 	}
 
-	if (i != _model->patch_changes().end()) {
-		key.bank_number = (*i)->bank();
+	if (patch_applies(*i, time, channel)) {
+		key.bank_number    = (*i)->bank();
 		key.program_number = (*i)->program ();
 	} else {
 		key.bank_number = key.program_number = 0;
