@@ -197,6 +197,8 @@ public:
 		return boost::shared_ptr<Patch>();
 	}
 
+	const std::string& note_list_name() const { return _note_list_name; }
+
 	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 
@@ -211,6 +213,7 @@ private:
 	PatchMap             _patch_map;
 	PatchList            _patch_list;
 	std::string          _patch_list_name;
+	std::string          _note_list_name;
 };
 
 std::ostream& operator<< (std::ostream&, const ChannelNameSet&);

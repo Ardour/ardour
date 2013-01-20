@@ -38,7 +38,7 @@
         <ChannelNameSetAssign Channel="7" NameSet="General MIDI Voices"/>
         <ChannelNameSetAssign Channel="8" NameSet="General MIDI Voices"/>
         <ChannelNameSetAssign Channel="9" NameSet="General MIDI Voices"/>
-        <ChannelNameSetAssign Channel="10" NameSet="General MIDI Voices"/>
+        <ChannelNameSetAssign Channel="10" NameSet="General MIDI Drums"/>
         <ChannelNameSetAssign Channel="11" NameSet="General MIDI Voices"/>
         <ChannelNameSetAssign Channel="12" NameSet="General MIDI Voices"/>
         <ChannelNameSetAssign Channel="13" NameSet="General MIDI Voices"/>
@@ -95,6 +95,19 @@
           <ControlChange Control="32" Value="0"/>
         </MIDICommands>
         <UsesPatchNameList Name="General MIDI Patches"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <ChannelNameSet Name="General MIDI Drums">
+      <AvailableForChannels>
+        <AvailableChannel Channel="10" Available="true"/>
+      </AvailableForChannels>
+      <UsesNoteNameList Name="General MIDI Drums"/>
+      <PatchBank Name="Patches" ROM="false">
+        <MIDICommands>
+          <ControlChange Control="120" Value="120"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="General MIDI Drum Patches"/>
       </PatchBank>
     </ChannelNameSet>
     <PatchNameList Name="Unnamed Patches">
@@ -357,6 +370,18 @@
       <Patch Number="126" Name="Applause" ProgramChange="126"/>
       <Patch Number="127" Name="Gunshot" ProgramChange="127"/>
     </PatchNameList>
+    <PatchNameList Name="General MIDI Drum Patches">
+      <Patch Number="1" Name="Standard Kit" ProgramChange="1"/>
+      <Patch Number="9" Name="Room Kit" ProgramChange="9"/>
+      <Patch Number="17" Name="Power Kit" ProgramChange="17"/>
+      <Patch Number="25" Name="Electronic Kit" ProgramChange="25"/>
+      <Patch Number="26" Name="TR-808 Kit" ProgramChange="26"/>
+      <Patch Number="33" Name="Jazz Kit" ProgramChange="33"/>
+      <Patch Number="41" Name="Brush Kit" ProgramChange="41"/>
+      <Patch Number="49" Name="Orchestra Kit" ProgramChange="49"/>
+      <Patch Number="57" Name="Sound FX Kit" ProgramChange="57"/>
+      <Patch Number="128" Name="CM-64/CM-32L" ProgramChange="128"/>
+    </PatchNameList>
     <ControlNameList Name="Controls">
       <Control Type="7bit" Number="0" Name="Bank Select"/>
       <Control Type="7bit" Number="1" Name="Modulation Wheel or Lever"/>
@@ -487,5 +512,54 @@
       <Control Type="7bit" Number="126" Name="[Channel Mode Message] Mono Mode On (+ poly off, + all notes off)"/>
       <Control Type="7bit" Number="127" Name="[Channel Mode Message] Poly Mode On (+ mono off, +all notes off) 0"/>
     </ControlNameList>
+    <NoteNameList Name="General MIDI Drums">
+      <Note Number="35" Name="Bass Drum 2"/>
+      <Note Number="36" Name="Bass Drum 1"/>
+      <Note Number="37" Name="Side Stick/Rimshot"/>
+      <Note Number="38" Name="Snare Drum 1"/>
+      <Note Number="39" Name="Hand Clap"/>
+      <Note Number="40" Name="Snare Drum 2"/>
+      <Note Number="41" Name="Low Tom 2"/>
+      <Note Number="42" Name="Closed Hi-hat"/>
+      <Note Number="43" Name="Low Tom 1"/>
+      <Note Number="44" Name="Pedal Hi-hat"/>
+      <Note Number="45" Name="Mid Tom 2"/>
+      <Note Number="46" Name="Open Hi-hat"/>
+      <Note Number="47" Name="Mid Tom 1"/>
+      <Note Number="48" Name="High Tom 2"/>
+      <Note Number="49" Name="Crash Cymbal 1"/>
+      <Note Number="50" Name="High Tom 1"/>
+      <Note Number="51" Name="Ride Cymbal 1"/>
+      <Note Number="52" Name="Chinese Cymbal"/>
+      <Note Number="53" Name="Ride Bell"/>
+      <Note Number="54" Name="Tambourine"/>
+      <Note Number="55" Name="Splash Cymbal"/>
+      <Note Number="56" Name="Cowbell"/>
+      <Note Number="57" Name="Crash Cymbal 2"/>
+      <Note Number="58" Name="Vibra Slap"/>
+      <Note Number="59" Name="Ride Cymbal 2"/>
+      <Note Number="60" Name="High Bongo"/>
+      <Note Number="61" Name="Low Bongo"/>
+      <Note Number="62" Name="Mute High Conga"/>
+      <Note Number="63" Name="Open High Conga"/>
+      <Note Number="64" Name="Low Conga"/>
+      <Note Number="65" Name="High Timbale"/>
+      <Note Number="66" Name="Low Timbale"/>
+      <Note Number="67" Name="High Agogô"/>
+      <Note Number="68" Name="Low Agogô"/>
+      <Note Number="69" Name="Cabasa"/>
+      <Note Number="70" Name="Maracas"/>
+      <Note Number="71" Name="Short Whistle"/>
+      <Note Number="72" Name="Long Whistle"/>
+      <Note Number="73" Name="Short Güiro"/>
+      <Note Number="74" Name="Long Güiro"/>
+      <Note Number="75" Name="Claves"/>
+      <Note Number="76" Name="High Wood Block"/>
+      <Note Number="77" Name="Low Wood Block"/>
+      <Note Number="78" Name="Mute Cuíca"/>
+      <Note Number="79" Name="Open Cuíca"/>
+      <Note Number="80" Name="Mute Triangle"/>
+      <Note Number="81" Name="Open Triangle"/>
+    </NoteNameList>
   </MasterDeviceNames>
 </MIDINameDocument>

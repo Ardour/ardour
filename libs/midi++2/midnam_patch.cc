@@ -435,6 +435,10 @@ ChannelNameSet::set_state (const XMLTree& tree, const XMLNode& node)
 				_patch_list.push_back((*patch)->patch_primary_key());
 			}
 		}
+
+		if (node->name() == "UsesNoteNameList") {
+			_note_list_name = node->property ("Name")->value();
+		}
 	}
 
 	return 0;
@@ -536,6 +540,14 @@ MasterDeviceNames::note_name(const std::string& mode_name,
 
 	boost::shared_ptr<const NoteNameList> note_names(
 		note_name_list(patch->note_list_name()));
+	if (!note_names) {
+		/* No note names specific to this patch, check the ChannelNameSet */
+		boost::shared_ptr<ChannelNameSet> chan_names = channel_name_set_by_device_mode_and_channel(
+			mode_name, channel);
+		if (chan_names) {
+			note_names = note_name_list(chan_names->note_list_name());
+		}
+	}
 	if (!note_names) {
 		return "";
 	}
