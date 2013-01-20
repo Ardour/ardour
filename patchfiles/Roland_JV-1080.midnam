@@ -2552,9 +2552,6 @@
       <Note Number="96" Name="Natural SN2"/>
       <Note Number="97" Name="808 SN"/>
       <Note Number="98" Name="Brush Slap"/>
-      <Note Number="96" Name="Brush Swish"/>
-      <Note Number="97" Name="Brush Roll"/>
-      <Note Number="98" Name="SN Roll"/>
     </NoteNameList>
     <NoteNameList Name="Preset Kit D: BrushDrumSet">
       <NoteGroup Name="Hi-Hat">
