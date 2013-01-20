@@ -141,7 +141,7 @@ XMLNode&
 Note::get_state (void)
 {
 	XMLNode* node = new XMLNode("Note");
-	node->add_property("Number", _number);
+	node->add_property("Number", _number + 1);
 	node->add_property("Name",   _name);
 
 	return *node;
@@ -153,10 +153,11 @@ Note::set_state (const XMLTree&, const XMLNode& node)
 	assert(node.name() == "Note");
 
 	/* If the note number is junk, this will pull a number from the start, or
-	   return zero if there isn't one.  Better error detection would be a good
-	   idea, but the duplicate check in NoteNameList::set_state() will probably
-	   catch really broken files anyway. */
-	_number = atoi(node.property("Number")->value().c_str());
+	   return zero if there isn't one.  The decrement will make that zero
+	   illegal since note numbers in the file are one-based.  Better error
+	   detection would be a good idea, but the duplicate check in
+	   NoteNameList::set_state() will probably catch most errors anyway. */
+	_number = atoi(node.property("Number")->value().c_str()) - 1;
 	_name   = node.property("Name")->value();
 
 	return 0;
