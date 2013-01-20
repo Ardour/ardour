@@ -883,6 +883,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				return true;
 			}
 			break;
+		case StreamItem:
+			if (internal_editing()) {
+				if (dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
+					_drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
+				}
+				return true;
+			}
+			break;
 
 		default:
 			break;
@@ -1335,13 +1343,10 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		case RangeMarkerBarItem:
 		case CdMarkerBarItem:
 		case TransportMarkerBarItem:
+		case StreamItem:
 			/* button press on these events never does anything to
 			   change the editing mode.
 			*/
-			break;
-			
-		case StreamItem:
-			leave_internal_edit_mode = true;
 			break;
 
 		default:
