@@ -362,9 +362,9 @@ public:
 
 	const CustomDeviceModeNames& custom_device_mode_names() const { return _custom_device_mode_names; }
 	
-	boost::shared_ptr<CustomDeviceMode> custom_device_mode_by_name(std::string mode_name);
-	boost::shared_ptr<ChannelNameSet> channel_name_set_by_device_mode_and_channel(std::string mode, uint8_t channel);
-	boost::shared_ptr<Patch> find_patch(std::string mode, uint8_t channel, const PatchPrimaryKey& key);
+	boost::shared_ptr<CustomDeviceMode> custom_device_mode_by_name(const std::string& mode_name);
+	boost::shared_ptr<ChannelNameSet> channel_name_set_by_device_mode_and_channel(const std::string& mode, uint8_t channel);
+	boost::shared_ptr<Patch> find_patch(const std::string& mode, uint8_t channel, const PatchPrimaryKey& key);
 
 	boost::shared_ptr<NoteNameList>   note_name_list(const std::string& name);
 	boost::shared_ptr<ChannelNameSet> channel_name_set(const std::string& name);

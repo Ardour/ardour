@@ -14,9 +14,9 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id$
 */
+
+#include <stdlib.h>
 
 #include <algorithm>
 #include <iostream>
@@ -42,7 +42,21 @@ Patch::Patch (std::string name, uint8_t p_number, uint16_t b_number)
 {
 }
 
-int initialize_primary_key_from_commands (PatchPrimaryKey& id, const XMLNode* node)
+static int
+string_to_int(const XMLTree& tree, const std::string& str)
+{
+	char*     endptr = NULL;
+	const int i      = strtol(str.c_str(), &endptr, 10);
+	if (str.empty() || *endptr != '\0') {
+		PBD::error << string_compose("%1: Bad number `%2'", tree.filename(), str)
+		           << endmsg;
+	}
+	return i;
+}
+
+static int
+initialize_primary_key_from_commands (
+	const XMLTree& tree, PatchPrimaryKey& id, const XMLNode* node)
 {
 	id.bank_number = 0;
 
@@ -51,21 +65,19 @@ int initialize_primary_key_from_commands (PatchPrimaryKey& id, const XMLNode* no
 
 		XMLNode* node = *i;
 		if (node->name() == "ControlChange") {
-			string control = node->property("Control")->value();
-			assert(control != "");
-			string value = node->property("Value")->value();
-			assert(value != "");
+			const string& control = node->property("Control")->value();
+			const string& value   = node->property("Value")->value();
 
 			if (control == "0") {
-				id.bank_number |= (PBD::atoi (value)) << 7;
+				id.bank_number |= string_to_int(tree, value) << 7;
 			} else if (control == "32") {
-				id.bank_number |= PBD::atoi (value);
+				id.bank_number |= string_to_int(tree, value);
 			}
 
 		} else if (node->name() == "ProgramChange") {
-			string number = node->property("Number")->value();
+			const string& number = node->property("Number")->value();
 			assert(number != "");
-			id.program_number = PBD::atoi(number);
+			id.program_number = string_to_int(tree, number);
 		}
 	}
 
@@ -96,37 +108,33 @@ Patch::get_state (void)
 }
 
 int
-Patch::set_state (const XMLTree&, const XMLNode& node)
+Patch::set_state (const XMLTree& tree, const XMLNode& node)
 {
 	if (node.name() != "Patch") {
 		cerr << "Incorrect node " << node.name() << " handed to Patch" << endl;
 		return -1;
 	}
 
-	const XMLProperty* prop = node.property ("Number");
+	/* Note there is a "Number" attribute, but it's really more like a label
+	   and is often not numeric.  We currently do not use it. */
 
-	if (!prop) {
+	const XMLProperty* program_change = node.property("ProgramChange");
+	if (program_change) {
+		_id.program_number = string_to_int(tree, program_change->value());
+	}
+
+	const XMLProperty* name = node.property("Name");
+	if (!name) {
 		return -1;
 	}
-	_id.program_number = PBD::atoi (prop->value());
-
-	prop = node.property ("Name");
-
-	if (!prop) {
-		return -1;
-	}
-	_name   = prop->value();
+	_name = name->value();
 
 	XMLNode* commands = node.child("PatchMIDICommands");
-
 	if (commands) {
-		if (initialize_primary_key_from_commands(_id, commands)) {
-			return -1;
+		if (initialize_primary_key_from_commands(tree, _id, commands) &&
+		    !program_change) {
+			return -1;  // Failed to find a program number anywhere
 		}
-	} else {
-		string program_change = node.property("ProgramChange")->value();
-		assert(program_change.length());
-		_id.program_number = PBD::atoi(program_change);
 	}
 	
 	XMLNode* use_note_name_list = node.child("UsesNoteNameList");
@@ -152,20 +160,16 @@ Note::set_state (const XMLTree& tree, const XMLNode& node)
 {
 	assert(node.name() == "Note");
 
-	/* If the note number is junk, this will pull a number from the start, or
-	   return zero if there isn't one.  The decrement will make that zero
-	   illegal since note numbers in the file are one-based.  Better error
-	   detection would be a good idea, but the duplicate check in
-	   NoteNameList::set_state() will probably catch most errors anyway. */
-	_number = atoi(node.property("Number")->value().c_str()) - 1;
-	_name   = node.property("Name")->value();
-
-	if (_number > 127) {
+	const int num = string_to_int(tree, node.property("Number")->value());
+	if (num < 1 || num > 128) {
 		PBD::warning << string_compose("%1: Note number %2 (%3) out of range",
-		                               tree.filename(), (int)_number, _name)
+		                               tree.filename(), num, _name)
 		             << endmsg;
 		return -1;
 	}
+
+	_number = num - 1;
+	_name   = node.property("Name")->value();
 
 	return 0;
 }
@@ -297,7 +301,7 @@ PatchBank::set_state (const XMLTree& tree, const XMLNode& node)
 	XMLNode* commands = node.child("MIDICommands");
 	if (commands) {
 		PatchPrimaryKey id (0, 0);
-		if (initialize_primary_key_from_commands (id, commands)) {
+		if (initialize_primary_key_from_commands (tree, id, commands)) {
 			return -1;
 		}
 		_number = id.bank_number;
@@ -439,7 +443,8 @@ ChannelNameSet::set_state (const XMLTree& tree, const XMLNode& node)
 			for(XMLSharedNodeList::const_iterator i = channels->begin();
 			    i != channels->end();
 			    ++i) {
-				_available_for_channels.insert(atoi((*i)->attribute_value().c_str()));
+				_available_for_channels.insert(
+					string_to_int(tree, (*i)->attribute_value()));
 			}
 		}
 
@@ -476,8 +481,8 @@ CustomDeviceMode::set_state(const XMLTree& tree, const XMLNode& a_node)
 	for(XMLSharedNodeList::const_iterator i = channel_name_set_assignments->begin();
 	    i != channel_name_set_assignments->end();
 	    ++i) {
-		int channel = atoi((*i)->property("Channel")->value().c_str());
-		string name_set = (*i)->property("NameSet")->value();
+		const int     channel  = string_to_int(tree, (*i)->property("Channel")->value());
+		const string& name_set = (*i)->property("NameSet")->value();
 		assert( 1 <= channel && channel <= 16 );
 		_channel_name_set_assignments[channel - 1] = name_set;
 	}
@@ -502,13 +507,13 @@ CustomDeviceMode::get_state(void)
 }
 
 boost::shared_ptr<CustomDeviceMode> 
-MasterDeviceNames::custom_device_mode_by_name(std::string mode_name)
+MasterDeviceNames::custom_device_mode_by_name(const std::string& mode_name)
 {
 	return _custom_device_modes[mode_name];
 }
 
 boost::shared_ptr<ChannelNameSet> 
-MasterDeviceNames::channel_name_set_by_device_mode_and_channel(std::string mode, uint8_t channel)
+MasterDeviceNames::channel_name_set_by_device_mode_and_channel(const std::string& mode, uint8_t channel)
 {
 	boost::shared_ptr<CustomDeviceMode> cdm = custom_device_mode_by_name(mode);
 	boost::shared_ptr<ChannelNameSet> cns =  _channel_name_sets[cdm->channel_name_set_name_by_channel(channel)];
@@ -516,7 +521,7 @@ MasterDeviceNames::channel_name_set_by_device_mode_and_channel(std::string mode,
 }
 
 boost::shared_ptr<Patch> 
-MasterDeviceNames::find_patch(std::string mode, uint8_t channel, const PatchPrimaryKey& key) 
+MasterDeviceNames::find_patch(const std::string& mode, uint8_t channel, const PatchPrimaryKey& key) 
 {
 	return channel_name_set_by_device_mode_and_channel(mode, channel)->find_patch(key);
 }
@@ -668,7 +673,7 @@ MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode&)
 		PatchNameLists::iterator p;
 
 		for (ChannelNameSet::PatchBanks::iterator pb = pbs.begin(); pb != pbs.end(); ++pb) {
-			std::string pln = (*pb)->patch_list_name();
+			const std::string& pln = (*pb)->patch_list_name();
 			if (!pln.empty()) {
 				if ((p = _patch_name_lists.find (pln)) != _patch_name_lists.end()) {
 					if ((*pb)->set_patch_name_list (p->second)) {
