@@ -882,8 +882,6 @@
       </PatchBank>
     </ChannelNameSet>
     <NoteNameList Name="P2123 Pop Kit">
-      <NoteGroup Name="HiHat">
-			</NoteGroup>
       <NoteGroup Name="Conga Hi Mute/Open">
         <Note Number="62" Name="Conga Sl"/>
         <Note Number="63" Name="Conga H"/>
@@ -961,8 +959,6 @@
       <Note Number="84" Name="BellTree"/>
     </NoteNameList>
     <NoteNameList Name="P2124 Velocity Kit">
-      <NoteGroup Name="HiHat">
-			</NoteGroup>
       <NoteGroup Name="Conga Hi Mute/Open">
         <Note Number="62" Name="Conga Sl"/>
         <Note Number="63" Name="Conga H"/>
@@ -1040,8 +1036,6 @@
       <Note Number="84" Name="BellTree"/>
     </NoteNameList>
     <NoteNameList Name="P2125 Rock Kit">
-      <NoteGroup Name="HiHat">
-			</NoteGroup>
       <NoteGroup Name="Conga Hi Mute/Open">
         <Note Number="62" Name="Conga Sl"/>
         <Note Number="63" Name="Conga H"/>
@@ -1119,8 +1113,6 @@
       <Note Number="84" Name="BellTree"/>
     </NoteNameList>
     <NoteNameList Name="P2126 Jazzy Kit">
-      <NoteGroup Name="HiHat">
-			</NoteGroup>
       <NoteGroup Name="Conga Hi Mute/Open">
         <Note Number="62" Name="Conga Sl"/>
         <Note Number="63" Name="Conga H"/>
@@ -1198,8 +1190,6 @@
       <Note Number="84" Name="BellTree"/>
     </NoteNameList>
     <NoteNameList Name="P2127 House Kit">
-      <NoteGroup Name="HiHat">
-			</NoteGroup>
       <Note Number="28" Name="Crash 1"/>
       <Note Number="29" Name="BassDr Hi"/>
       <Note Number="30" Name="Conga"/>
@@ -1266,8 +1256,6 @@
       <Note Number="91" Name="BdDeep"/>
     </NoteNameList>
     <NoteNameList Name="P2128 Tech Kit">
-      <NoteGroup Name="HiHat">
-			</NoteGroup>
       <Note Number="28" Name="Crash"/>
       <Note Number="29" Name="Snare GM"/>
       <Note Number="30" Name="Dist Kick"/>
@@ -1334,8 +1322,6 @@
       <Note Number="91" Name="BD Deep"/>
     </NoteNameList>
     <NoteNameList Name="12126 Alien Kit">
-      <NoteGroup Name="HiHat">
-			</NoteGroup>
       <Note Number="28" Name="Crash"/>
       <Note Number="29" Name="Snare GM"/>
       <Note Number="30" Name="Dist Kick"/>
@@ -1472,8 +1458,6 @@
       <Note Number="91" Name="BelAir"/>
     </NoteNameList>
     <NoteNameList Name="12128 Street Kit">
-      <NoteGroup Name="HiHat">
-			</NoteGroup>
       <Note Number="24" Name="T8Bd"/>
       <Note Number="25" Name="T8Snare"/>
       <Note Number="26" Name="SdPrmH"/>

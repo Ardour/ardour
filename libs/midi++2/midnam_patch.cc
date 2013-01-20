@@ -148,7 +148,7 @@ Note::get_state (void)
 }
 
 int
-Note::set_state (const XMLTree&, const XMLNode& node)
+Note::set_state (const XMLTree& tree, const XMLNode& node)
 {
 	assert(node.name() == "Note");
 
@@ -159,6 +159,13 @@ Note::set_state (const XMLTree&, const XMLNode& node)
 	   NoteNameList::set_state() will probably catch most errors anyway. */
 	_number = atoi(node.property("Number")->value().c_str()) - 1;
 	_name   = node.property("Name")->value();
+
+	if (_number > 127) {
+		PBD::warning << string_compose("%1: Note number %2 (%3) out of range",
+		                               tree.filename(), (int)_number, _name)
+		             << endmsg;
+		return -1;
+	}
 
 	return 0;
 }
@@ -172,6 +179,22 @@ NoteNameList::get_state (void)
 	return *node;
 }
 
+static void
+add_note_from_xml (NoteNameList::Notes& notes, const XMLTree& tree, const XMLNode& node)
+{
+	boost::shared_ptr<Note> note(new Note());
+	if (!note->set_state (tree, node)) {
+		if (!notes[note->number()]) {
+			notes[note->number()] = note;
+		} else {
+			PBD::warning
+				<< string_compose("%1: Duplicate note number %2 (%3) ignored",
+				                  tree.filename(), (int)note->number(), note->name())
+				<< endmsg;
+		}
+	}
+}
+
 int
 NoteNameList::set_state (const XMLTree& tree, const XMLNode& node)
 {
@@ -182,22 +205,19 @@ NoteNameList::set_state (const XMLTree& tree, const XMLNode& node)
 
 	for (XMLNodeList::const_iterator i = node.children().begin();
 	     i != node.children().end(); ++i) {
-		if ((*i)->name() != "Note") {
-			continue;
-		}
-		boost::shared_ptr<Note> note(new Note());
-		note->set_state (tree, *(*i));
-		if (note->number() > 127) {
-			PBD::warning << string_compose("%1: Note number %2 (%3) out of range",
-			                               tree.filename(), (int)note->number(), note->name())
-			             << endmsg;
-		} else if (_notes[note->number()]) {
-			PBD::warning <<
-				string_compose("%1: Duplicate note number %2 (%3) ignored",
-				               tree.filename(), (int)note->number(), note->name())
-			             << endmsg;
-		} else {
-			_notes[note->number()] = note;
+		if ((*i)->name() == "Note") {
+			add_note_from_xml(_notes, tree, **i);
+		} else if ((*i)->name() == "NoteGroup") {
+			for (XMLNodeList::const_iterator j = (*i)->children().begin();
+			     j != (*i)->children().end(); ++j) {
+				if ((*j)->name() == "Note") {
+					add_note_from_xml(_notes, tree, **j);
+				} else {
+					PBD::warning << string_compose("%1: Invalid NoteGroup child %2 ignored",
+					                               tree.filename(), (*j)->name())
+					             << endmsg;
+				}
+			}
 		}
 	}
 
