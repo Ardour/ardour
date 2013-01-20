@@ -187,13 +187,13 @@ NoteNameList::set_state (const XMLTree& tree, const XMLNode& node)
 		boost::shared_ptr<Note> note(new Note());
 		note->set_state (tree, *(*i));
 		if (note->number() > 127) {
-			PBD::warning << string_compose("Note number %1 in %3 out of range",
-			                               (int)note->number(), tree.filename())
+			PBD::warning << string_compose("%1: Note number %2 (%3) out of range",
+			                               tree.filename(), (int)note->number(), note->name())
 			             << endmsg;
 		} else if (_notes[note->number()]) {
 			PBD::warning <<
-				string_compose("Duplicate note number %1 name %2 in %3 ignored",
-				               (int)note->number(), note->name(), tree.filename())
+				string_compose("%1: Duplicate note number %2 (%3) ignored",
+				               tree.filename(), (int)note->number(), note->name())
 			             << endmsg;
 		} else {
 			_notes[note->number()] = note;
@@ -667,6 +667,7 @@ MIDINameDocument::MIDINameDocument (const string& filename)
 		throw failed_constructor ();
 	}
 
+	_document.set_filename (filename);
 	set_state (_document, *_document.root());
 }
 
