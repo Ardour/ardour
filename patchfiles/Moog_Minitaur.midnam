@@ -154,8 +154,8 @@
       <!-- Filter -->
       <Control Type="7bit" Number="19" Name="Cutoff (Coarse)"/>
       <Control Type="7bit" Number="51" Name="Cutoff (Fine)"/>
-      <Control Type="7bit" Number="19" Name="Resonance (Coarse)"/>
-      <Control Type="7bit" Number="51" Name="Resonance (Fine)"/>
+      <Control Type="7bit" Number="21" Name="Resonance (Coarse)"/>
+      <Control Type="7bit" Number="53" Name="Resonance (Fine)"/>
       <Control Type="7bit" Number="22" Name="EG Amount (Coarse)"/>
       <Control Type="7bit" Number="50" Name="EG Amount (Fine)"/>
       <Control Type="7bit" Number="20" Name="KB Track (Coarse)"/>
