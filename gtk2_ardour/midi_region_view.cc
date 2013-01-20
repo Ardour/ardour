@@ -1865,7 +1865,7 @@ MidiRegionView::get_patch_key_at (double time, uint8_t channel, MIDI::Name::Patc
 		--i;
 	}
 
-	if (patch_applies(*i, time, channel)) {
+	if (i != _model->patch_changes().end() && patch_applies(*i, time, channel)) {
 		key.bank_number    = (*i)->bank();
 		key.program_number = (*i)->program ();
 	} else {
