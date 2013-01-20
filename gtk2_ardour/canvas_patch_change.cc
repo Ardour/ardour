@@ -143,6 +143,14 @@ CanvasPatchChange::on_patch_menu_selected(const PatchPrimaryKey& key)
 	_region.change_patch_change (*this, key);
 }
 
+static bool
+in_edit_mode(Editor* editor)
+{
+	return (editor->internal_editing() &&
+	        (editor->current_mouse_mode() == Editing::MouseObject ||
+	         editor->current_mouse_mode() == Editing::MouseDraw));
+}
+
 bool
 CanvasPatchChange::on_event (GdkEvent* ev)
 {
@@ -152,7 +160,7 @@ CanvasPatchChange::on_event (GdkEvent* ev)
 	case GDK_BUTTON_PRESS:
 		/* XXX: icky dcast */
 		e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
-		if (e->current_mouse_mode() == Editing::MouseObject && e->internal_editing()) {
+		if (in_edit_mode(e)) {
 
 			if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
 
@@ -214,7 +222,7 @@ CanvasPatchChange::on_event (GdkEvent* ev)
 	case GDK_SCROLL:
 		/* XXX: icky dcast */
 		e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
-		if (e->current_mouse_mode() == Editing::MouseObject && e->internal_editing()) {
+		if (in_edit_mode(e)) {
 			if (ev->scroll.direction == GDK_SCROLL_UP) {
 				if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
 					_region.previous_bank (*this);
