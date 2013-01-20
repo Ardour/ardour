@@ -2284,43 +2284,18 @@ MidiRegionView::note_deselected(ArdourCanvas::CanvasNoteEvent* ev)
 void
 MidiRegionView::update_drag_selection(double x1, double x2, double y1, double y2, bool extend)
 {
-	if (x1 > x2) {
-		swap (x1, x2);
-	}
-
-	if (y1 > y2) {
-		swap (y1, y2);
-	}
-
 	// TODO: Make this faster by storing the last updated selection rect, and only
 	// adjusting things that are in the area that appears/disappeared.
 	// We probably need a tree to be able to find events in O(log(n)) time.
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-
-		/* check if any corner of the note is inside the rect
-
-		   Notes:
-		   1) this is computing "touched by", not "contained by" the rect.
-		   2) this does not require that events be sorted in time.
-		*/
-
-		const double ix1 = (*i)->x1();
-		const double ix2 = (*i)->x2();
-		const double iy1 = (*i)->y1();
-		const double iy2 = (*i)->y2();
-
-		if ((ix1 >= x1 && ix1 <= x2 && iy1 >= y1 && iy1 <= y2) ||
-		    (ix1 >= x1 && ix1 <= x2 && iy2 >= y1 && iy2 <= y2) ||
-		    (ix2 >= x1 && ix2 <= x2 && iy1 >= y1 && iy1 <= y2) ||
-		    (ix2 >= x1 && ix2 <= x2 && iy2 >= y1 && iy2 <= y2)) {
-
-			// Inside rectangle
+		if ((*i)->x1() < x2 && (*i)->x2() > x1 && (*i)->y1() < y2 && (*i)->y2() > y1) {
+			// Rectangles intersect
 			if (!(*i)->selected()) {
 				add_to_selection (*i);
 			}
 		} else if ((*i)->selected() && !extend) {
-			// Not inside rectangle
+			// Rectangles do not intersect
 			remove_from_selection (*i);
 		}
 	}
@@ -2338,21 +2313,12 @@ MidiRegionView::update_vertical_drag_selection (double y1, double y2, bool exten
 	// We probably need a tree to be able to find events in O(log(n)) time.
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-
-		/* check if any corner of the note is inside the rect
-
-		   Notes:
-		   1) this is computing "touched by", not "contained by" the rect.
-		   2) this does not require that events be sorted in time.
-		*/
-
 		if (((*i)->y1() >= y1 && (*i)->y1() <= y2)) {
 			// within y- (note-) range
 			if (!(*i)->selected()) {
 				add_to_selection (*i);
 			}
 		} else if ((*i)->selected() && !extend) {
-			// Not inside rectangle
 			remove_from_selection (*i);
 		}
 	}
