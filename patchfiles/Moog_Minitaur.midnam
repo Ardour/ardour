@@ -138,7 +138,7 @@
       <Control Type="7bit" Number="17" Name="VCO 2 Freq (Coarse)"/>
       <Control Type="7bit" Number="49" Name="VCO 2 Freq (Fine)"/>
       <Control Type="7bit" Number="18" Name="VCO 2 Beat (Coarse)"/>
-      <Control Type="7bit" Number="50" Name="VCO 2 Beat (Fine)"/>
+      <!-- Duplicate <Control Type="7bit" Number="50" Name="VCO 2 Beat (Fine)"/> -->
       <Control Type="7bit" Number="81" Name="Note Sync"/>
       <Control Type="7bit" Number="5" Name="Glide Rate"/>
       <Control Type="7bit" Number="65" Name="Glide Switch"/>
@@ -157,7 +157,7 @@
       <Control Type="7bit" Number="21" Name="Resonance (Coarse)"/>
       <Control Type="7bit" Number="53" Name="Resonance (Fine)"/>
       <Control Type="7bit" Number="22" Name="EG Amount (Coarse)"/>
-      <Control Type="7bit" Number="50" Name="EG Amount (Fine)"/>
+      <!-- Duplicate <Control Type="7bit" Number="50" Name="EG Amount (Fine)"/> -->
       <Control Type="7bit" Number="20" Name="KB Track (Coarse)"/>
       <Control Type="7bit" Number="54" Name="KB Track (Fine)"/>
       <Control Type="7bit" Number="89" Name="Filter Velocity Sensitivity"/>
@@ -190,7 +190,7 @@
       <Control Type="7bit" Number="108" Name="Bend Down Amount"/>
       <!-- Control -->
       <Control Type="7bit" Number="122" Name="Local Control Off"/>
-      <Control Type="7bit" Number="122" Name="All Sounds Off"/>
+      <Control Type="7bit" Number="120" Name="All Sounds Off"/>
       <Control Type="7bit" Number="123" Name="All Notes Off"/>
     </ControlNameList>
   </MasterDeviceNames>

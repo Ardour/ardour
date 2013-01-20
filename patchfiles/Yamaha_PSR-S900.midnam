@@ -2,7 +2,7 @@
 <MIDINameDocument>
   <Author>Hans Baier</Author>
   <MasterDeviceNames>
-    <Manufacturer>YAMAHA</Manufacturer>
+    <Manufacturer>Yamaha</Manufacturer>
     <Model>PSR-S900</Model>
     <CustomDeviceMode Name="Standard">
       <ChannelNameSetAssignments>
