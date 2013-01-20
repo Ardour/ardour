@@ -80,6 +80,9 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	ARDOUR::NoteMode  note_mode() const { return _note_mode; }
 	ARDOUR::ColorMode color_mode() const { return _color_mode; }
 
+	boost::shared_ptr<MIDI::Name::MasterDeviceNames> get_device_names();
+	boost::shared_ptr<MIDI::Name::CustomDeviceMode> get_device_mode();
+
 	void update_range();
 
 	sigc::signal<void, ARDOUR::ChannelMode, uint16_t>& signal_channel_mode_changed() {
@@ -112,8 +115,6 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	Gtk::Menu* build_note_mode_menu();
 	Gtk::Menu* build_color_mode_menu();
 	
-	boost::shared_ptr<MIDI::Name::MasterDeviceNames> get_device_names(const std::string& model);
-
 	void set_note_mode (ARDOUR::NoteMode mode, bool apply_to_selection = false);
 	void set_color_mode (ARDOUR::ColorMode, bool force = false, bool redisplay = true, bool apply_to_selection = false);
 	void set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection = false);

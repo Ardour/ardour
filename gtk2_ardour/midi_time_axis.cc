@@ -232,8 +232,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	if (gui_property (X_("midnam-custom-device-mode")).empty()) {
-		boost::shared_ptr<MIDI::Name::MasterDeviceNames> device_names = get_device_names(
-			gui_property (X_("midnam-model-name")));
+		boost::shared_ptr<MIDI::Name::MasterDeviceNames> device_names = get_device_names();
 		if (device_names) {
 			set_gui_property (X_("midnam-custom-device-mode"),
 			                  *device_names->custom_device_mode_names().begin());
@@ -760,10 +759,27 @@ MidiTimeAxisView::add_multi_channel_controller_item(Menu_Helpers::MenuList& ctl_
 	dynamic_cast<Label*> (ctl_items.back().get_child())->set_use_markup (true);
 }
 
-boost::shared_ptr<MIDI::Name::MasterDeviceNames>
-MidiTimeAxisView::get_device_names(const std::string& model)
+boost::shared_ptr<MIDI::Name::CustomDeviceMode>
+MidiTimeAxisView::get_device_mode()
 {
 	using namespace MIDI::Name;
+
+	boost::shared_ptr<MasterDeviceNames> device_names = get_device_names();
+	if (!device_names) {
+		return boost::shared_ptr<MIDI::Name::CustomDeviceMode>();
+	}
+
+	return device_names->custom_device_mode_by_name(
+		gui_property (X_("midnam-custom-device-mode")));
+}
+
+boost::shared_ptr<MIDI::Name::MasterDeviceNames>
+MidiTimeAxisView::get_device_names()
+{
+	using namespace MIDI::Name;
+
+	const std::string model = gui_property (X_("midnam-model-name"));
+
 	boost::shared_ptr<MIDINameDocument> midnam = MidiPatchManager::instance()
 		.document_by_model(model);
 	if (midnam) {
@@ -807,8 +823,7 @@ MidiTimeAxisView::build_controller_menu ()
 	}
 
 	using namespace MIDI::Name;
-	boost::shared_ptr<MasterDeviceNames> device_names = get_device_names(
-		_midnam_model_selector.get_active_text());
+	boost::shared_ptr<MasterDeviceNames> device_names = get_device_names();
 
 	if (device_names && !device_names->controls().empty()) {
 		/* Controllers names available in midnam file, generate fancy menu */

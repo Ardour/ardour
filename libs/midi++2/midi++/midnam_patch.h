@@ -26,6 +26,7 @@
 #include <list>
 #include <set>
 #include <map>
+#include <vector>
 
 #include <stdint.h>
 
@@ -44,12 +45,12 @@ public:
 	int bank_number;
 	int program_number;
 
-		PatchPrimaryKey (uint8_t a_program_number = 0, uint16_t a_bank_number = 0) {
+	PatchPrimaryKey (uint8_t a_program_number = 0, uint16_t a_bank_number = 0) {
 		bank_number = std::min (a_bank_number, (uint16_t) 16384);
 		program_number = std::min (a_program_number, (uint8_t) 127);
 	}
 	
-	bool is_sane() { 	
+	bool is_sane() const { 	
 		return ((bank_number >= 0) && (bank_number <= 16384) && 
 			(program_number >=0 ) && (program_number <= 127));
 	}
@@ -87,13 +88,15 @@ public:
 	Patch (std::string a_name = std::string(), uint8_t a_number = 0, uint16_t bank_number = 0);
 	virtual ~Patch() {};
 
-	const std::string& name() const          { return _name; }
-	void set_name(const std::string a_name)       { _name = a_name; }
+	const std::string& name() const         { return _name; }
+	void set_name(const std::string a_name) { _name = a_name; }
+	
+	const std::string& note_list_name() const  { return _note_list_name; }
 
-	uint8_t program_number() const       { return _id.program_number; }
-	void set_program_number(uint8_t n)   { _id.program_number = n; }
+	uint8_t program_number() const     { return _id.program_number; }
+	void set_program_number(uint8_t n) { _id.program_number = n; }
 
-	uint16_t bank_number() const       { return _id.bank_number; }
+	uint16_t bank_number() const      { return _id.bank_number; }
 	void set_bank_number (uint16_t n) { _id.bank_number = n; }
 
 	const PatchPrimaryKey&   patch_primary_key()   const { return _id; }
@@ -104,6 +107,7 @@ public:
 private:
 	std::string     _name;
 	PatchPrimaryKey _id;
+	std::string     _note_list_name;
 };
 
 class PatchBank 
@@ -155,12 +159,12 @@ public:
 		return _available_for_channels.find(channel) != _available_for_channels.end(); 
 	}
 	
-	boost::shared_ptr<Patch> find_patch(PatchPrimaryKey& key) {
+	boost::shared_ptr<Patch> find_patch(const PatchPrimaryKey& key) {
 		assert(key.is_sane());
 		return _patch_map[key];
 	}
 	
-	boost::shared_ptr<Patch> previous_patch(PatchPrimaryKey& key) {
+	boost::shared_ptr<Patch> previous_patch(const PatchPrimaryKey& key) {
 		assert(key.is_sane());
 		for (PatchList::const_iterator i = _patch_list.begin();
 			 i != _patch_list.end();
@@ -176,7 +180,7 @@ public:
 		return boost::shared_ptr<Patch>();
 	}
 	
-	boost::shared_ptr<Patch> next_patch(PatchPrimaryKey& key) {
+	boost::shared_ptr<Patch> next_patch(const PatchPrimaryKey& key) {
 		assert(key.is_sane());
 		for (PatchList::const_iterator i = _patch_list.begin();
 			 i != _patch_list.end();
@@ -214,43 +218,42 @@ std::ostream& operator<< (std::ostream&, const ChannelNameSet&);
 class Note
 {
 public:
-	Note() {};
-	Note(std::string a_number, std::string a_name) : _number(a_number), _name(a_name) {};
-	~Note() {};
+	Note() {}
+	Note(uint8_t number, const std::string& name) : _number(number), _name(name) {}
 
-	const std::string& name() const               { return _name; }
-	void set_name(const std::string a_name)       { _name = a_name; }
+	const std::string& name() const        { return _name; }
+	void set_name(const std::string& name) { _name = name; }
 
-	const std::string& number() const             { return _number; }
-	void set_number(const std::string a_number)   { _number = a_number; }
+	uint8_t number() const             { return _number; }
+	void    set_number(uint8_t number) { _number = number; }
 
 	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 
 private:
-	std::string _number;
+	uint8_t     _number;
 	std::string _name;
 };
 
 class NoteNameList 
 {
 public:
-	typedef std::list<boost::shared_ptr<Note> > Notes;
-	NoteNameList() {};
-	NoteNameList (std::string a_name) : _name(a_name) {};
-	~NoteNameList() {};
+	typedef std::vector< boost::shared_ptr<Note> > Notes;
 
-	const std::string& name() const          { return _name; }
-	void set_name(const std::string a_name)       { _name = a_name; }
+	NoteNameList() { _notes.resize(128); }
+	NoteNameList (const std::string& name) : _name(name) { _notes.resize(128); }
 
-	const Notes& notes() const { return _notes; }
+	const std::string& name() const  { return _name; }
+	const Notes&       notes() const { return _notes; }
+
+	void set_name(const std::string& name) { _name = name; }
 
 	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 
 private:
 	std::string _name;
-	Notes  _notes;
+	Notes       _notes;
 };
 
 class Control
@@ -339,7 +342,7 @@ public:
 	typedef std::list<std::string>                                       CustomDeviceModeNames;
 	/// maps name to ChannelNameSet
 	typedef std::map<std::string, boost::shared_ptr<ChannelNameSet> >    ChannelNameSets;
-	typedef std::list<boost::shared_ptr<NoteNameList> >                  NoteNameLists;
+	typedef std::map<std::string, boost::shared_ptr<NoteNameList> >      NoteNameLists;
 	typedef std::list<boost::shared_ptr<ControlNameList> >               ControlNameLists;
 	typedef std::map<std::string, PatchBank::PatchNameList>              PatchNameLists;
 	
@@ -358,8 +361,17 @@ public:
 	
 	boost::shared_ptr<CustomDeviceMode> custom_device_mode_by_name(std::string mode_name);
 	boost::shared_ptr<ChannelNameSet> channel_name_set_by_device_mode_and_channel(std::string mode, uint8_t channel);
-	boost::shared_ptr<Patch> find_patch(std::string mode, uint8_t channel, PatchPrimaryKey& key);
-	
+	boost::shared_ptr<Patch> find_patch(std::string mode, uint8_t channel, const PatchPrimaryKey& key);
+
+	boost::shared_ptr<NoteNameList>   note_name_list(const std::string& name);
+	boost::shared_ptr<ChannelNameSet> channel_name_set(const std::string& name);
+
+	std::string note_name(const std::string& mode_name,
+	                      uint8_t            channel,
+	                      uint16_t           bank,
+	                      uint8_t            program,
+	                      uint8_t            number);
+
 	XMLNode& get_state (void);
 	int      set_state (const XMLTree&, const XMLNode&);
 	

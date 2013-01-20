@@ -128,6 +128,11 @@ Patch::set_state (const XMLTree&, const XMLNode& node)
 		assert(program_change.length());
 		_id.program_number = PBD::atoi(program_change);
 	}
+	
+	XMLNode* use_note_name_list = node.child("UsesNoteNameList");
+	if (use_note_name_list) {
+		_note_list_name = use_note_name_list->property ("Name")->value();
+	}
 
 	return 0;
 }
@@ -146,7 +151,12 @@ int
 Note::set_state (const XMLTree&, const XMLNode& node)
 {
 	assert(node.name() == "Note");
-	_number = node.property("Number")->value();
+
+	/* If the note number is junk, this will pull a number from the start, or
+	   return zero if there isn't one.  Better error detection would be a good
+	   idea, but the duplicate check in NoteNameList::set_state() will probably
+	   catch really broken files anyway. */
+	_number = atoi(node.property("Number")->value().c_str());
 	_name   = node.property("Name")->value();
 
 	return 0;
@@ -156,7 +166,7 @@ XMLNode&
 NoteNameList::get_state (void)
 {
 	XMLNode* node = new XMLNode("NoteNameList");
-	node->add_property("Name",   _name);
+	node->add_property("Name", _name);
 
 	return *node;
 }
@@ -165,13 +175,29 @@ int
 NoteNameList::set_state (const XMLTree& tree, const XMLNode& node)
 {
 	assert(node.name() == "NoteNameList");
-	_name   = node.property("Name")->value();
+	_name = node.property("Name")->value();
+	_notes.clear();
+	_notes.resize(128);
 
-	boost::shared_ptr<XMLSharedNodeList> notes = tree.find("//Note");
-	for (XMLSharedNodeList::const_iterator i = notes->begin(); i != notes->end(); ++i) {
+	for (XMLNodeList::const_iterator i = node.children().begin();
+	     i != node.children().end(); ++i) {
+		if ((*i)->name() != "Note") {
+			continue;
+		}
 		boost::shared_ptr<Note> note(new Note());
 		note->set_state (tree, *(*i));
-		_notes.push_back(note);
+		if (note->number() > 127) {
+			PBD::warning << string_compose("Note number %1 in %3 out of range",
+			                               (int)note->number(), tree.filename())
+			             << endmsg;
+		} else if (_notes[note->number()]) {
+			PBD::warning <<
+				string_compose("Duplicate note number %1 name %2 in %3 ignored",
+				               (int)note->number(), note->name(), tree.filename())
+			             << endmsg;
+		} else {
+			_notes[note->number()] = note;
+		}
 	}
 
 	return 0;
@@ -465,9 +491,56 @@ MasterDeviceNames::channel_name_set_by_device_mode_and_channel(std::string mode,
 }
 
 boost::shared_ptr<Patch> 
-MasterDeviceNames::find_patch(std::string mode, uint8_t channel, PatchPrimaryKey& key) 
+MasterDeviceNames::find_patch(std::string mode, uint8_t channel, const PatchPrimaryKey& key) 
 {
 	return channel_name_set_by_device_mode_and_channel(mode, channel)->find_patch(key);
+}
+
+boost::shared_ptr<ChannelNameSet>
+MasterDeviceNames::channel_name_set(const std::string& name)
+{
+	ChannelNameSets::const_iterator i = _channel_name_sets.find(name);
+	if (i != _channel_name_sets.end()) {
+		return i->second;
+	}
+	return boost::shared_ptr<ChannelNameSet>();
+}
+
+boost::shared_ptr<NoteNameList>
+MasterDeviceNames::note_name_list(const std::string& name)
+{
+	NoteNameLists::const_iterator i = _note_name_lists.find(name);
+	if (i != _note_name_lists.end()) {
+		return i->second;
+	}
+	return boost::shared_ptr<NoteNameList>();
+}
+
+std::string
+MasterDeviceNames::note_name(const std::string& mode_name,
+                             uint8_t            channel,
+                             uint16_t           bank,
+                             uint8_t            program,
+                             uint8_t            number)
+{
+	if (number > 127) {
+		return "";
+	}
+
+	boost::shared_ptr<const Patch> patch(
+		find_patch(mode_name, channel, PatchPrimaryKey(program, bank)));
+	if (!patch) {
+		return "";
+	}
+
+	boost::shared_ptr<const NoteNameList> note_names(
+		note_name_list(patch->note_list_name()));
+	if (!note_names) {
+		return "";
+	}
+
+	boost::shared_ptr<const Note> note(note_names->notes()[number]);
+	return note ? note->name() : "";
 }
 
 int
@@ -520,7 +593,7 @@ MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode&)
 	     ++i) {
 		boost::shared_ptr<NoteNameList> note_name_list(new NoteNameList());
 		note_name_list->set_state (tree, *(*i));
-		_note_name_lists.push_back(note_name_list);
+		_note_name_lists[(*i)->property ("Name")->value()] = note_name_list;
 	}
 
 	// ControlNameLists

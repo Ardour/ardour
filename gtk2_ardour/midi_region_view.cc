@@ -1846,7 +1846,7 @@ MidiRegionView::patch_change_to_patch_key (MidiModel::PatchChangePtr p)
 }
 
 void 
-MidiRegionView::get_patch_key_at (double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key)
+MidiRegionView::get_patch_key_at (double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const
 {
 	MidiModel::PatchChanges::iterator i = _model->patch_change_lower_bound (time);
 	while (i != _model->patch_changes().end() && (*i)->channel() != channel) {
@@ -3808,14 +3808,32 @@ MidiRegionView::delete_sysex (CanvasSysEx* sysex)
 void
 MidiRegionView::show_verbose_cursor (boost::shared_ptr<NoteType> n) const
 {
-	char buf[24];
-	snprintf (buf, sizeof (buf), "%s (%d) Chn %d\nVel %d",
-	          Evoral::midi_note_name (n->note()).c_str(),
+	using namespace MIDI::Name;
+
+	std::string name;
+
+	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	if (mtv) {
+		boost::shared_ptr<MasterDeviceNames> device_names(mtv->get_device_names());
+		if (device_names) {
+			MIDI::Name::PatchPrimaryKey patch_key;
+			get_patch_key_at(n->time(), n->channel(), patch_key);
+			name = device_names->note_name(mtv->gui_property(X_("midnam-custom-device-mode")),
+			                               n->channel(),
+			                               patch_key.bank_number,
+			                               patch_key.program_number,
+			                               n->note());
+		}
+	}
+
+	char buf[128];
+	snprintf (buf, sizeof (buf), "%d %s\nCh %d Vel %d",
 	          (int) n->note (),
+	          name.empty() ? Evoral::midi_note_name (n->note()).c_str() : name.c_str(),
 	          (int) n->channel() + 1,
 	          (int) n->velocity());
 
-	show_verbose_cursor (buf, 10, 20);
+	show_verbose_cursor(buf, 10, 20);
 }
 
 void
