@@ -40,27 +40,27 @@ using namespace std;
 /** @param x x position in pixels.
  */
 CanvasPatchChange::CanvasPatchChange(
-		MidiRegionView& region,
-		Group&          parent,
-		const string&   text,
-		double          height,
-		double          x,
-		double          y,
-		ARDOUR::InstrumentInfo& info,
-		ARDOUR::MidiModel::PatchChangePtr patch,
-		bool active_channel)
+	MidiRegionView&                   region,
+	Group&                            parent,
+	const string&                     text,
+	double                            height,
+	double                            x,
+	double                            y,
+	ARDOUR::InstrumentInfo&           info,
+	ARDOUR::MidiModel::PatchChangePtr patch,
+	bool                              active_channel)
 	: CanvasFlag(
-			region,
-			parent,
-			height,
-			active_channel ?
-			ARDOUR_UI::config()->canvasvar_MidiPatchChangeOutline.get() :
-			ARDOUR_UI::config()->canvasvar_MidiPatchChangeInactiveChannelOutline.get(),
-			active_channel ?
-			ARDOUR_UI::config()->canvasvar_MidiPatchChangeFill.get() :
-			ARDOUR_UI::config()->canvasvar_MidiPatchChangeInactiveChannelFill.get(),
-			x,
-			y)
+		region,
+		parent,
+		height,
+		active_channel ?
+		ARDOUR_UI::config()->canvasvar_MidiPatchChangeOutline.get() :
+		ARDOUR_UI::config()->canvasvar_MidiPatchChangeInactiveChannelOutline.get(),
+		active_channel ?
+		ARDOUR_UI::config()->canvasvar_MidiPatchChangeFill.get() :
+		ARDOUR_UI::config()->canvasvar_MidiPatchChangeInactiveChannelFill.get(),
+		x,
+		y)
 	, _info (info)
 	, _patch (patch)
 	, _popup_initialized(false)
@@ -104,9 +104,8 @@ CanvasPatchChange::initialize_popup_menus()
 				patch_menus.push_back(
 					Gtk::Menu_Helpers::MenuElem(
 						name,
-						sigc::bind(
-							sigc::mem_fun(*this, &CanvasPatchChange::on_patch_menu_selected),
-							(*patch)->patch_primary_key())) );
+						sigc::bind(sigc::mem_fun(*this, &CanvasPatchChange::on_patch_menu_selected),
+						           (*patch)->patch_primary_key())) );
 			}
 			
 			std::string name = (*bank)->name();
@@ -129,10 +128,11 @@ CanvasPatchChange::initialize_popup_menus()
 			std::string name = (*patch)->name();
 			boost::replace_all (name, "_", " ");
 			
-			patch_menus.push_back (Gtk::Menu_Helpers::MenuElem (name, 
-									    sigc::bind (
-										    sigc::mem_fun(*this, &CanvasPatchChange::on_patch_menu_selected),
-										    (*patch)->patch_primary_key())));
+			patch_menus.push_back (
+				Gtk::Menu_Helpers::MenuElem (
+					name,
+					sigc::bind (sigc::mem_fun(*this, &CanvasPatchChange::on_patch_menu_selected),
+					            (*patch)->patch_primary_key())));
 		}
 	}
 }
@@ -235,12 +235,12 @@ CanvasPatchChange::on_event (GdkEvent* ev)
 
 	case GDK_ENTER_NOTIFY:
 		_region.patch_entered (this);
-                return true;
+		return true;
 		break;
 
 	case GDK_LEAVE_NOTIFY:
 		_region.patch_left (this);
-                return true;
+		return true;
 		break;
 
 	default:
