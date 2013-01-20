@@ -40,13 +40,12 @@ using namespace Gtkmm2ext;
 
 /** @param tc If non-0, a time converter for this patch change.  If 0, time control will be desensitized */
 PatchChangeDialog::PatchChangeDialog (
-	const ARDOUR::BeatsFramesConverter* tc,
-	ARDOUR::Session* session,
+	const ARDOUR::BeatsFramesConverter*              tc,
+	ARDOUR::Session*                                 session,
 	Evoral::PatchChange<Evoral::MusicalTime> const & patch,
-	ARDOUR::InstrumentInfo& info,
-	const Gtk::BuiltinStockID& ok,
-	bool allow_delete
-	)
+	ARDOUR::InstrumentInfo&                          info,
+	const Gtk::BuiltinStockID&                       ok,
+	bool                                             allow_delete)
 	: ArdourDialog (_("Patch Change"), true)
 	, _time_converter (tc)
 	, _info (info)
@@ -160,6 +159,8 @@ PatchChangeDialog::patch () const
 void
 PatchChangeDialog::fill_bank_combo ()
 {
+	_bank_combo.clear ();
+
 	boost::shared_ptr<MIDI::Name::ChannelNameSet> cns = _info.get_patches (_channel.get_value_as_int() - 1);
 
 	if (!cns) {
