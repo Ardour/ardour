@@ -3174,9 +3174,9 @@ MidiRegionView::patch_entered (ArdourCanvas::CanvasPatchChange* p)
 {
 	ostringstream s;
 	/* XXX should get patch name if we can */
-	s << _("Bank:") << (p->patch()->bank() + MIDI_BP_ZERO) << '\n' 
-	  << _("Program:") << ((int) p->patch()->program()) + MIDI_BP_ZERO << '\n' 
-	  << _("Channel:") << ((int) p->patch()->channel() + 1);
+	s << _("Bank ") << (p->patch()->bank() + MIDI_BP_ZERO) << '\n' 
+	  << _("Program ") << ((int) p->patch()->program()) + MIDI_BP_ZERO << '\n' 
+	  << _("Channel ") << ((int) p->patch()->channel() + 1);
 	show_verbose_cursor (s.str(), 10, 20);
 	p->grab_focus();
 }
