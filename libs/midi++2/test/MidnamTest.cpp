@@ -17,7 +17,7 @@ static string const prefix = "../../../patchfiles/";
 void
 MidnamTest::protools_patchfile_test()
 {
-    XMLTree xmldoc(prefix + "ProtoolsPatchFile.midnam");
+    XMLTree xmldoc(prefix + "Roland_SC-88_Pro.midnam");
     boost::shared_ptr<XMLSharedNodeList> result = xmldoc.find(
             "//MIDINameDocument");
     CPPUNIT_ASSERT(result->size() == 1);
@@ -25,18 +25,18 @@ MidnamTest::protools_patchfile_test()
     result = xmldoc.find("//ChannelNameSet");
     CPPUNIT_ASSERT(result->size() == 2);
 
-    MIDINameDocument doc(prefix + "ProtoolsPatchFile.midnam");
+    MIDINameDocument doc(prefix + "Roland_SC-88_Pro.midnam");
     CPPUNIT_ASSERT(doc.all_models().size() == 1);
     CPPUNIT_ASSERT(doc.author().find("Mark of the Unicorn") == 0);
 
-    const string model = doc.all_models().front();
+    const string model = *doc.all_models().begin();
     CPPUNIT_ASSERT_EQUAL(string("SC-88 Pro"), model);
     boost::shared_ptr<MasterDeviceNames> masterDeviceNames =
             doc.master_device_names_by_model().find(model)->second;
     CPPUNIT_ASSERT_EQUAL(string("Roland"), masterDeviceNames->manufacturer());
 
     string modename = masterDeviceNames->custom_device_mode_names().front();
-    CPPUNIT_ASSERT_EQUAL(string("Mode 1"), modename);
+    CPPUNIT_ASSERT_EQUAL(string("Default"), modename);
 
     boost::shared_ptr<CustomDeviceMode> mode =
             masterDeviceNames->custom_device_mode_by_name(modename);
@@ -72,7 +72,7 @@ MidnamTest::protools_patchfile_test()
 
     boost::shared_ptr<PatchBank> bank = banks1.front();
     CPPUNIT_ASSERT_EQUAL(string("Piano"), bank->name());
-    const PatchBank::PatchNameList& plist1 = bank->patch_name_list();
+    const PatchNameList& plist1 = bank->patch_name_list();
     CPPUNIT_ASSERT(plist1.size() == 110);
 
     bank = banks2.front();
@@ -84,7 +84,7 @@ MidnamTest::protools_patchfile_test()
 void
 MidnamTest::yamaha_PSRS900_patchfile_test()
 {
-    XMLTree xmldoc(prefix + "Yamaha-PSR-S900.midnam");
+    XMLTree xmldoc(prefix + "Yamaha_PSR-S900.midnam");
     boost::shared_ptr<XMLSharedNodeList> result = xmldoc.find(
             "//MIDINameDocument");
     CPPUNIT_ASSERT(result->size() == 1);
@@ -92,15 +92,15 @@ MidnamTest::yamaha_PSRS900_patchfile_test()
     result = xmldoc.find("//ChannelNameSet");
     CPPUNIT_ASSERT(result->size() == 3);
 
-    MIDINameDocument doc(prefix + "Yamaha-PSR-S900.midnam");
+    MIDINameDocument doc(prefix + "Yamaha_PSR-S900.midnam");
     CPPUNIT_ASSERT(doc.all_models().size() == 1);
     CPPUNIT_ASSERT(doc.author().find("Hans Baier") == 0);
 
-    const string model = doc.all_models().front();
+    const string model = *doc.all_models().begin();
     CPPUNIT_ASSERT_EQUAL(string("PSR-S900"), model);
     boost::shared_ptr<MasterDeviceNames> masterDeviceNames =
             doc.master_device_names_by_model().find(model)->second;
-    CPPUNIT_ASSERT_EQUAL(string("YAMAHA"), masterDeviceNames->manufacturer());
+    CPPUNIT_ASSERT_EQUAL(string("Yamaha"), masterDeviceNames->manufacturer());
 
     const MasterDeviceNames::CustomDeviceModeNames& modes = masterDeviceNames->custom_device_mode_names();
     CPPUNIT_ASSERT(masterDeviceNames->custom_device_mode_names().size() == 3);
