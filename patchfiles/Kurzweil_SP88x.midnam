@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>Kurzweil</Manufacturer>
     <Model>SP88x</Model>
-    <CustomDeviceMode Name="">
+    <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="1" NameSet="Voices"/>
         <ChannelNameSetAssign Channel="2" NameSet="Voices"/>

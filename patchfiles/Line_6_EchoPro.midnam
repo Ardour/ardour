@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>Line 6</Manufacturer>
     <Model>EchoPro</Model>
-    <CustomDeviceMode Name="Mode 1">
+    <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
         <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>

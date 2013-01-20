@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>Alesis</Manufacturer>
     <Model>NanoPiano</Model>
-    <CustomDeviceMode Name="Mode 2">
+    <CustomDeviceMode Name="Default">
       <DeviceModeEnable>
         <MIDICommands>
           <SysEx>F0 00 00 0E 0E 10 00 05 00 01 F7</SysEx>

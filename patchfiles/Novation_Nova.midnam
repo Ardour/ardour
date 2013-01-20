@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>Novation</Manufacturer>
     <Model>Nova</Model>
-    <CustomDeviceMode Name="Mode 1">
+    <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="1" NameSet="Patch"/>
         <ChannelNameSetAssign Channel="2" NameSet="Patch"/>
@@ -15,7 +15,7 @@
         <ChannelNameSetAssign Channel="6" NameSet="Patch"/>
       </ChannelNameSetAssignments>
     </CustomDeviceMode>
-    <CustomDeviceMode Name="Mode 2">
+    <CustomDeviceMode Name="Performance">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="16" NameSet="Performance"/>
       </ChannelNameSetAssignments>

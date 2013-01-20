@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>Sequential Circuits</Manufacturer>
     <Model>Prophet 600</Model>
-    <CustomDeviceMode Name="">
+    <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="1" NameSet="Presets"/>
         <ChannelNameSetAssign Channel="2" NameSet="Presets"/>

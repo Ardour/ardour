@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>E-mu</Manufacturer>
     <Model>Proteus 2000</Model>
-    <CustomDeviceMode Name="">
+    <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="1" NameSet="Patches"/>
         <ChannelNameSetAssign Channel="2" NameSet="Patches"/>

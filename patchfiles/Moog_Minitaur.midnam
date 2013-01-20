@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>Moog</Manufacturer>
     <Model>Minitaur</Model>
-    <CustomDeviceMode Name="Mode">
+    <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="1" NameSet="Names"/>
       </ChannelNameSetAssignments>

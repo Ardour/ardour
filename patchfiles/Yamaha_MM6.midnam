@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>Yamaha</Manufacturer>
     <Model>MM6</Model>
-    <CustomDeviceMode Name="">
+    <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="1" NameSet="Programs"/>
         <ChannelNameSetAssign Channel="2" NameSet="Programs"/>

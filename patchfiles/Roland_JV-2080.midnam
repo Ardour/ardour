@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>Roland</Manufacturer>
     <Model>JV-2080</Model>
-    <CustomDeviceMode Name="Mode 1">
+    <CustomDeviceMode Name="Default">
       <DeviceModeEnable>
         <MIDICommands>
           <SysEx>F0 41<SysExDeviceID/> 6a 12 00 00 00 00 00 00 F7</SysEx>

@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>Korg</Manufacturer>
     <Model>ER-1</Model>
-    <CustomDeviceMode Name="Mode 1">
+    <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="1" NameSet="Presets"/>
         <ChannelNameSetAssign Channel="2" NameSet="Presets"/>

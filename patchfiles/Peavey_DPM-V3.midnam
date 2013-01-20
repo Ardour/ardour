@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>Peavey</Manufacturer>
     <Model>DPM-V3</Model>
-    <CustomDeviceMode Name="">
+    <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="1" NameSet="PresetA"/>
         <ChannelNameSetAssign Channel="2" NameSet="PresetA"/>

@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>Roland</Manufacturer>
     <Model>GR-1</Model>
-    <CustomDeviceMode Name="">
+    <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="1" NameSet="Patches"/>
         <ChannelNameSetAssign Channel="2" NameSet="Patches"/>

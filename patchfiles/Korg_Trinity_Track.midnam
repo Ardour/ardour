@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>Korg</Manufacturer>
     <Model>Trinity</Model>
-    <CustomDeviceMode Name="">
+    <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="1" NameSet="Programs"/>
         <ChannelNameSetAssign Channel="2" NameSet="Programs"/>

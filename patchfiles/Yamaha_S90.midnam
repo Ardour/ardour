@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>Yamaha</Manufacturer>
     <Model>S90</Model>
-    <CustomDeviceMode Name="">
+    <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="1" NameSet="Presets"/>
         <ChannelNameSetAssign Channel="2" NameSet="Presets"/>

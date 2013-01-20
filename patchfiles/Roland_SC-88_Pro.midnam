@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>Roland</Manufacturer>
     <Model>SC-88 Pro</Model>
-    <CustomDeviceMode Name="Mode 1">
+    <CustomDeviceMode Name="Default">
       <DeviceModeEnable>
         <MIDICommands>
           <SysEx>F0 41 <SysExDeviceID Offset="00"/> 42 12 40 00 7F 00 41 F7</SysEx>

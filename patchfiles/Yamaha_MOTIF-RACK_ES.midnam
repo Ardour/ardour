@@ -3,9 +3,9 @@
 <MIDINameDocument>
   <Author>Rob Martin</Author>
   <MasterDeviceNames>
-    <Manufacturer>YAMAHA</Manufacturer>
-    <Model>YAMAHA MOTIF-RACK ES</Model>
-    <CustomDeviceMode Name="Mode 1">
+    <Manufacturer>Yamaha</Manufacturer>
+    <Model>MOTIF-RACK ES</Model>
+    <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="1" NameSet="Patches"/>
         <ChannelNameSetAssign Channel="2" NameSet="Patches"/>

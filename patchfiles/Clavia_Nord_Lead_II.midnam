@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>Clavia</Manufacturer>
     <Model>Nord Lead II</Model>
-    <CustomDeviceMode Name="">
+    <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="1" NameSet="Programs"/>
         <ChannelNameSetAssign Channel="2" NameSet="Programs"/>
