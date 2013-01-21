@@ -215,7 +215,7 @@ lotsa_files_please ()
 }
 
 int
-ARDOUR::init (bool use_windows_vst, bool try_optimization)
+ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir)
 {
 	if (!Glib::thread_supported()) {
 		Glib::thread_init();
@@ -224,7 +224,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization)
 	// this really should be in PBD::init..if there was one
 	Gio::init ();
 
-	(void) bindtextdomain(PACKAGE, LOCALEDIR);
+	(void) bindtextdomain(PACKAGE, localedir);
 
 	PBD::ID::init ();
 	SessionEvent::init_event_pool ();

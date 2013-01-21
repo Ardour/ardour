@@ -116,7 +116,7 @@ namespace ARDOUR {
 class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 {
   public:
-	ARDOUR_UI (int *argcp, char **argvp[]);
+        ARDOUR_UI (int *argcp, char **argvp[], const char* localedir);
 	~ARDOUR_UI();
 
 	bool run_startup (bool should_be_new, std::string load_template);

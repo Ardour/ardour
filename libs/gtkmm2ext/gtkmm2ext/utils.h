@@ -45,7 +45,7 @@ namespace Gtk {
 }
 
 namespace Gtkmm2ext {
-	void init ();
+	void init (const char*);
 
 	std::string fit_to_pixels (const std::string&, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses = false);
 	std::pair<std::string, double> fit_to_pixels (cairo_t *, std::string, double);

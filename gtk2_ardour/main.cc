@@ -148,6 +148,14 @@ fixup_bundle_environment (int, char* [])
 
 	bundle_dir = Glib::path_get_dirname (exec_dir);
 
+	/* force localedir into the bundle */
+
+	vector<string> lpath;
+	lpath.push_back (bundle_dir);
+	lpath.push_back ("share");
+	lpath.push_back ("locale");
+	localedir = strdup (Glib::build_filename (lpath).c_str());
+
 	export_search_path (bundle_dir, "ARDOUR_DLL_PATH", "/lib");
 
 	/* inside an OS X .app bundle, there is no difference
@@ -223,6 +231,14 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	std::string path;
 	std::string dir_path = Glib::path_get_dirname (Glib::path_get_dirname (argv[0]));
 	std::string userconfigdir = user_config_directory();
+
+	/* force localedir into the bundle */
+
+	vector<string> lpath;
+	lpath.push_back (dir_path);
+	lpath.push_back ("share");
+	lpath.push_back ("locale");
+	localedir = strdup (Glib::build_filename (lpath).c_str());
 
 	/* note that this function is POSIX/Linux specific, so using / as
 	   a dir separator in this context is just fine.
@@ -446,7 +462,7 @@ int main (int argc, char *argv[])
 	}
 
 	try {
-		ui = new ARDOUR_UI (&argc, &argv);
+		ui = new ARDOUR_UI (&argc, &argv, localedir);
 	} catch (failed_constructor& err) {
 		error << _("could not create ARDOUR GUI") << endmsg;
 		exit (1);

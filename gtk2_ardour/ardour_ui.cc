@@ -131,7 +131,7 @@ sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
 sigc::signal<void, framepos_t, bool, framepos_t> ARDOUR_UI::Clock;
 
-ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
+ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
 
@@ -167,7 +167,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	, _feedback_exists (false)
 
 {
-	Gtkmm2ext::init();
+	Gtkmm2ext::init(localedir);
 
 	about = 0;
 	splash = 0;
@@ -266,7 +266,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	/* lets get this party started */
 
 	try {
-		if (ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization)) {
+		if (ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization, localedir)) {
 			throw failed_constructor ();
 		}
 

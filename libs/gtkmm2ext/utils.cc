@@ -37,10 +37,10 @@
 using namespace std;
 
 void
-Gtkmm2ext::init ()
+Gtkmm2ext::init (const char* localedir)
 {
 	// Necessary for gettext
-	(void) bindtextdomain(PACKAGE, LOCALEDIR);
+	(void) bindtextdomain(PACKAGE, localedir);
 }
 
 void
