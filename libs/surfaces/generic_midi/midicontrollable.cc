@@ -122,7 +122,11 @@ MIDIControllable::set_controllable (Controllable* c)
 
 	controllable = c;
 
-	last_controllable_value = controllable->get_value();
+	if (controllable) {
+		last_controllable_value = controllable->get_value();
+	} else {
+		last_controllable_value = 0.0f; // is there a better value?
+	}
 
 	if (controllable) {
 		controllable->Destroyed.connect (controllable_death_connection, MISSING_INVALIDATOR,
