@@ -25,7 +25,6 @@
 #include "evoral/EventRingBuffer.hpp"
 
 #include "ardour/types.h"
-#include "ardour/buffer.h"
 #include "ardour/midi_state_tracker.h"
 
 namespace ARDOUR {

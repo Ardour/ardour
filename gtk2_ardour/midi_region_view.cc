@@ -30,10 +30,11 @@
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
 
-#include "ardour/midi_region.h"
-#include "ardour/midi_source.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_patch_manager.h"
+#include "ardour/midi_region.h"
+#include "ardour/midi_source.h"
+#include "ardour/midi_track.h"
 #include "ardour/session.h"
 
 #include "evoral/Parameter.hpp"

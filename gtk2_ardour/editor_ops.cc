@@ -44,6 +44,7 @@
 #include "ardour/dB.h"
 #include "ardour/location.h"
 #include "ardour/midi_region.h"
+#include "ardour/midi_track.h"
 #include "ardour/operations.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/quantize.h"

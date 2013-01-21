@@ -20,19 +20,18 @@
 #ifndef __ardour_midi_track_h__
 #define __ardour_midi_track_h__
 
-#include "ardour/interthread_info.h"
 #include "ardour/track.h"
 #include "ardour/midi_ring_buffer.h"
-#include "ardour/midi_state_tracker.h"
 
 namespace ARDOUR
 {
 
-class Session;
+class InterThreadInfo;
 class MidiDiskstream;
 class MidiPlaylist;
 class RouteGroup;
 class SMFSource;
+class Session;
 
 class MidiTrack : public Track
 {

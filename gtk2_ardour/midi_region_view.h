@@ -27,9 +27,7 @@
 
 #include "pbd/signals.h"
 
-#include "ardour/midi_track.h"
 #include "ardour/midi_model.h"
-#include "ardour/diskstream.h"
 #include "ardour/types.h"
 
 #include "editing.h"
