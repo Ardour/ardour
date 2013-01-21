@@ -981,7 +981,7 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 }
 
 void
-MidiDiskstream::transport_looped (framepos_t transport_frame)
+MidiDiskstream::transport_looped (framepos_t)
 {
 	/* Here we only keep track of the number of captured loops so monotonic
 	   event times can be delivered to the write source in process().  Trying
