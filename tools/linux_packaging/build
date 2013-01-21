@@ -486,7 +486,7 @@ echo "Copying other stuff to $APPDIR  ..."
 cp $BUILD_ROOT/gtk2_ardour/mnemonic-us.bindings  $Etc
 cp $BUILD_ROOT/gtk2_ardour/ardour.menus $Etc
 cp ../../ardour_system.rc $Etc/ardour_system.rc
-cp $BUILD_ROOT/gtk2_ardour/ardour3*.rc $Etc
+cp $BUILD_ROOT/gtk2_ardour/ardour3_ui_*.rc $Etc
 
 # these are copied straight from the source tree
 
