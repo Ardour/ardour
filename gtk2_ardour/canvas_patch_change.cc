@@ -155,28 +155,28 @@ in_edit_mode(Editor* editor)
 bool
 CanvasPatchChange::on_event (GdkEvent* ev)
 {
-	Editor* e;
+	/* XXX: icky dcast */
+	Editor* e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
+	
+	if (!in_edit_mode(e)) {
+		return false;
+	}
 
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
-		/* XXX: icky dcast */
-		e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
-		if (in_edit_mode(e)) {
-
-			if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
-
-				_region.delete_patch_change (this);
-				return true;
-
-			} else if (Gtkmm2ext::Keyboard::is_edit_event (&ev->button)) {
-
-				_region.edit_patch_change (this);
-				return true;
-
-			} else if (ev->button.button == 1) {
-				e->drags()->set (new PatchChangeDrag (e, this, &_region), ev);
-				return true;
-			}
+		if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
+			
+			_region.delete_patch_change (this);
+			return true;
+			
+		} else if (Gtkmm2ext::Keyboard::is_edit_event (&ev->button)) {
+			
+			_region.edit_patch_change (this);
+			return true;
+			
+		} else if (ev->button.button == 1) {
+			e->drags()->set (new PatchChangeDrag (e, this, &_region), ev);
+			return true;
 		}
 
 		if (ev->button.button == 3) {
@@ -221,26 +221,20 @@ CanvasPatchChange::on_event (GdkEvent* ev)
 		break;
 
 	case GDK_SCROLL:
-		/* XXX: icky dcast */
-		e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
-		if (in_edit_mode(e)) {
-			if (ev->scroll.direction == GDK_SCROLL_UP) {
-				if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
-					_region.previous_bank (*this);
-				} else {
-					_region.previous_patch (*this);
-				}
-			} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
+		if (ev->scroll.direction == GDK_SCROLL_UP) {
+			if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
+				_region.previous_bank (*this);
+			} else {
+				_region.previous_patch (*this);
+			}
+		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
 				if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
 					_region.next_bank (*this);
 				} else {
 					_region.next_patch (*this);
 				}
-			}
-			return true;
-			break;
 		}
-		break;
+		return true;
 
 	case GDK_ENTER_NOTIFY:
 		_region.patch_entered (this);
