@@ -195,6 +195,7 @@ class MidiDiskstream : public Diskstream
 	volatile gint                _frames_written_to_ringbuffer;
 	volatile gint                _frames_read_from_ringbuffer;
 	volatile gint                _frames_pending_write;
+	volatile gint                _num_captured_loops;
 
 	/** A buffer that we use to put newly-arrived MIDI data in for
 	    the GUI to read (so that it can update itself).

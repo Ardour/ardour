@@ -59,7 +59,8 @@ MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 	, _model_iter_valid(false)
 	, _length_beats(0.0)
 	, _last_read_end(0)
-	, _last_write_end(0)
+	, _capture_length(0)
+	, _capture_loop_length(0)
 {
 }
 
@@ -69,7 +70,8 @@ MidiSource::MidiSource (Session& s, const XMLNode& node)
 	, _model_iter_valid(false)
 	, _length_beats(0.0)
 	, _last_read_end(0)
-	, _last_write_end(0)
+	, _capture_length(0)
+	, _capture_loop_length(0)
 {
 	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
@@ -266,7 +268,7 @@ MidiSource::midi_write (MidiRingBuffer<framepos_t>& source,
 	if (cnt == max_framecnt) {
 		_last_read_end = 0;
 	} else {
-		_last_write_end += cnt;
+		_capture_length += cnt;
 	}
 
 	return ret;
@@ -284,10 +286,12 @@ MidiSource::mark_streaming_midi_write_started (NoteMode mode)
 }
 
 void
-MidiSource::mark_write_starting_now ()
+MidiSource::mark_write_starting_now (framecnt_t position,
+                                     framecnt_t capture_length,
+                                     framecnt_t loop_length)
 {
 	/* I'm not sure if this is the best way to approach this, but
-	   _last_write_end needs to be set up with the transport frame
+	   _capture_length needs to be set up with the transport frame
 	   when a record actually starts, as it is used by
 	   SMFSource::write_unlocked to decide whether incoming notes
 	   are within the correct time range.
@@ -297,8 +301,12 @@ MidiSource::mark_write_starting_now ()
 	   because it is not RT-safe.
 	*/
 
-	set_timeline_position (_session.transport_frame ());
-	_last_write_end = _session.transport_frame ();
+	set_timeline_position(position);
+	_capture_length      = capture_length;
+	_capture_loop_length = loop_length;
+
+	BeatsFramesConverter converter(_session.tempo_map(), position);
+	_length_beats = converter.from(capture_length);
 }
 
 void

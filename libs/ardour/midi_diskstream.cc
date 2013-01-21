@@ -74,6 +74,7 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 	, _frames_written_to_ringbuffer(0)
 	, _frames_read_from_ringbuffer(0)
 	, _frames_pending_write(0)
+	, _num_captured_loops(0)
 	, _gui_feed_buffer(AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
 	in_set_state = true;
@@ -97,6 +98,7 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 	, _frames_written_to_ringbuffer(0)
 	, _frames_read_from_ringbuffer(0)
 	, _frames_pending_write(0)
+	, _num_captured_loops(0)
 	, _gui_feed_buffer(AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
 	in_set_state = true;
@@ -200,9 +202,7 @@ MidiDiskstream::non_realtime_input_change ()
 	}
 
 	g_atomic_int_set(&_frames_pending_write, 0);
-	if (_write_source) {
-		_write_source->set_last_write_end (_session.transport_frame());
-	}
+	g_atomic_int_set(&_num_captured_loops, 0);
 }
 
 int
@@ -299,6 +299,26 @@ MidiDiskstream::set_note_mode (NoteMode m)
 		_write_source->model()->set_note_mode(m);
 }
 
+/** Get the start, end, and length of a location "atomically".
+ *
+ * Note: Locations don't get deleted, so all we care about when I say "atomic"
+ * is that we are always pointing to the same one and using start/length values
+ * obtained just once.  Use this function to achieve this since location being
+ * a parameter achieves this.
+ */
+static void
+get_location_times(const Location* location,
+                   framepos_t*     start,
+                   framepos_t*     end,
+                   framepos_t*     length)
+{
+	if (location) {
+		*start  = location->start();
+		*end    = location->end();
+		*length = *end - *start;
+	}
+}
+
 int
 MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt_t& playback_distance)
 {
@@ -330,6 +350,12 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt
 		return 1;
 	}
 
+	const Location* const loop_loc    = loop_location;
+	framepos_t            loop_start  = 0;
+	framepos_t            loop_end    = 0;
+	framepos_t            loop_length = 0;
+	get_location_times(loop_loc, &loop_start, &loop_end, &loop_length);
+
 	adjust_capture_position = 0;
 
 	if (nominally_recording || (re && was_recording && _session.get_record_enabled() && _session.config.get_punch_in())) {
@@ -338,9 +364,19 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt
 		calculate_record_range(ot, transport_frame, nframes, rec_nframes, rec_offset);
 
 		if (rec_nframes && !was_recording) {
-			_write_source->mark_write_starting_now ();
+			if (loop_loc) {
+				/* Loop recording, so pretend the capture started at the loop
+				   start rgardless of what time it is now, so the source starts
+				   at the loop start and can handle time wrapping around.
+				   Otherwise, start the source right now as usual.
+				*/
+				capture_captured    = transport_frame - loop_start;
+				capture_start_frame = loop_start;
+			}
+			_write_source->mark_write_starting_now(
+				capture_start_frame, capture_captured, loop_length);
 			g_atomic_int_set(&_frames_pending_write, 0);
-			capture_captured = 0;
+			g_atomic_int_set(&_num_captured_loops, 0);
 			was_recording = true;
 		}
 	}
@@ -370,7 +406,18 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt
 				DEBUG_TRACE (DEBUG::MidiIO, DEBUG_STR(a).str());
 			}
 #endif
-			_capture_buf->write(ev.time() + transport_frame, ev.type(), ev.size(), ev.buffer());
+			/* Write events to the capture buffer in frames from session start,
+			   but ignoring looping so event time progresses monotonically.
+			   The source knows the loop length so it knows exactly where the
+			   event occurs in the series of recorded loops and can implement
+			   any desirable behaviour.  We don't want to send event with
+			   transport time here since that way the source can not
+			   reconstruct their actual time; future clever MIDI looping should
+			   probabl be implemented in the source instead of here.
+			*/
+			const framecnt_t loop_offset = _num_captured_loops * loop_length;
+			_capture_buf->write(transport_frame + loop_offset + ev.time(),
+			                    ev.type(), ev.size(), ev.buffer());
 		}
 		g_atomic_int_add(&_frames_pending_write, nframes);
 
@@ -551,29 +598,17 @@ MidiDiskstream::internal_playback_seek (framecnt_t distance)
 int
 MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 {
-	framecnt_t this_read = 0;
-	bool reloop = false;
-	framepos_t loop_end = 0;
-	framepos_t loop_start = 0;
-	Location *loc = 0;
+	framecnt_t this_read   = 0;
+	bool       reloop      = false;
+	framepos_t loop_end    = 0;
+	framepos_t loop_start  = 0;
+	framecnt_t loop_length = 0;
+	Location*  loc         = 0;
 
 	if (!reversed) {
 
-		framecnt_t loop_length = 0;
-
-		/* Make the use of a Location atomic for this read operation.
-
-		   Note: Locations don't get deleted, so all we care about
-		   when I say "atomic" is that we are always pointing to
-		   the same one and using a start/length values obtained
-		   just once.
-		*/
-
-		if ((loc = loop_location) != 0) {
-			loop_start = loc->start();
-			loop_end = loc->end();
-			loop_length = loop_end - loop_start;
-		}
+		loc = loop_location;
+		get_location_times(loc, &loop_start, &loop_end, &loop_length);
 
 		/* if we are looping, ensure that the first frame we read is at the correct
 		   position within the loop.
@@ -948,33 +983,15 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 void
 MidiDiskstream::transport_looped (framepos_t transport_frame)
 {
+	/* Here we only keep track of the number of captured loops so monotonic
+	   event times can be delivered to the write source in process().  Trying
+	   to be clever here is a world of trouble, it is better to simply record
+	   the input in a straightforward non-destructive way.  In the future when
+	   we want to implement more clever MIDI looping modes it should be done in
+	   the Source and/or entirely after the capture is finished.
+	*/
 	if (was_recording) {
-
-		// adjust the capture length knowing that the data will be recorded to disk
-		// only necessary after the first loop where we're recording
-		if (capture_info.size() == 0) {
-			capture_captured += _capture_offset;
-
-			if (_alignment_style == ExistingMaterial) {
-				capture_captured += _session.worst_output_latency();
-			} else {
-				capture_captured += _roll_delay;
-			}
-		}
-
-		finish_capture ();
-
-		// the next region will start recording via the normal mechanism
-		// we'll set the start position to the current transport pos
-		// no latency adjustment or capture offset needs to be made, as that already happened the first time
-		capture_start_frame = transport_frame;
-		first_recordable_frame = transport_frame; // mild lie
-		last_recordable_frame = max_framepos;
-		was_recording = true;
-	}
-
-	if (!Config->get_seamless_loop()) {
-		reset_tracker ();
+		g_atomic_int_add(&_num_captured_loops, 1);
 	}
 }
 

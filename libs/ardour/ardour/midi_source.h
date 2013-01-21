@@ -88,7 +88,20 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 	virtual void mark_streaming_midi_write_started (NoteMode mode);
 	virtual void mark_streaming_write_started ();
 	virtual void mark_streaming_write_completed ();
-	void mark_write_starting_now ();
+
+	/** Mark write starting with the given time parameters.
+	 *
+	 * This is called by MidiDiskStream::process before writing to the capture
+	 * buffer which will be later read by midi_read().
+	 *
+	 * @param position The timeline position the source now starts at.
+	 * @param capture_length The current length of the capture, which may not
+	 * be zero if record is armed while rolling.
+	 * @param loop_length The loop length if looping, otherwise zero.
+	 */
+	void mark_write_starting_now (framecnt_t position,
+	                              framecnt_t capture_length,
+	                              framecnt_t loop_length);
 
 	/* like ::mark_streaming_write_completed() but with more arguments to
 	 * allow control over MIDI-specific behaviour. Expected to be used only
@@ -103,9 +116,6 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 
 	std::string captured_for() const               { return _captured_for; }
 	void        set_captured_for (std::string str) { _captured_for = str; }
-
-	framepos_t last_write_end() const { return _last_write_end; }
-	void set_last_write_end (framepos_t pos) { _last_write_end = pos; }
 
 	static PBD::Signal1<void,MidiSource*> MidiSourceCreated;
 
@@ -157,11 +167,16 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 	                                  framecnt_t                     cnt,
 	                                  MidiStateTracker*              tracker) const = 0;
 
-	virtual framecnt_t write_unlocked (MidiRingBuffer<framepos_t>& dst,
+	/** Write data to this source from a MidiRingBuffer.
+	 *  @param source Buffer to read from.
+	 *  @param position This source's start position in session frames.
+	 *  @param cnt The duration of this block to write for.
+	 */
+	virtual framecnt_t write_unlocked (MidiRingBuffer<framepos_t>& source,
 	                                   framepos_t                  position,
 	                                   framecnt_t                  cnt) = 0;
 
-	std::string      _captured_for;
+	std::string _captured_for;
 
 	boost::shared_ptr<MidiModel> _model;
 	bool                         _writing;
@@ -171,7 +186,12 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 
 	mutable double     _length_beats;
 	mutable framepos_t _last_read_end;
-	framepos_t         _last_write_end;
+
+	/** The total duration of the current capture. */
+	framepos_t _capture_length;
+
+	/** Length of transport loop during current capture, or zero. */
+	framepos_t _capture_loop_length;
 
 	/** Map of interpolation styles to use for Parameters; if they are not in this map,
 	 *  the correct interpolation style can be obtained from EventTypeMap::interpolation_of ()
