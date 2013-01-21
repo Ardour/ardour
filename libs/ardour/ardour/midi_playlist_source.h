@@ -61,13 +61,14 @@ protected:
 	void flush_midi();
 
 	framecnt_t read_unlocked (Evoral::EventSink<framepos_t>& dst,
-	                          framepos_t position,
-	                          framepos_t start, framecnt_t cnt,
-	                          MidiStateTracker* tracker) const;
+	                          framepos_t                     position,
+	                          framepos_t                     start,
+	                          framecnt_t                     cnt,
+	                          MidiStateTracker*              tracker) const;
 
 	framecnt_t write_unlocked (MidiRingBuffer<framepos_t>& dst,
-	                           framepos_t position,
-	                           framecnt_t cnt);
+	                           framepos_t                  position,
+	                           framecnt_t                  cnt);
 
 private:
 	int set_state (const XMLNode&, int version, bool with_descendants);
