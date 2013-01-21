@@ -112,7 +112,13 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	name_label.set_name ("TrackLabel");
 	name_label.set_alignment (0.0, 0.5);
 	ARDOUR_UI::instance()->set_tip (name_label, _("Track/Bus name (double click to edit)"));
-						      
+
+	Gtk::Entry* an_entry = new Gtk::Entry;
+	Gtk::Requisition req;
+	an_entry->size_request (req);
+	name_label.set_size_request (-1, req.height);
+	delete an_entry;
+
 	name_hbox.pack_start (name_label, true, true);
 	name_hbox.show ();
 	name_label.show ();
@@ -641,9 +647,16 @@ TimeAxisView::end_name_edit (int response)
 		edit_next = true;
 	}
 
-	/* this will delete the name_entry */
-	name_hbox.remove (*name_entry);
+	/* this will delete the name_entry. but it will also drop focus, which
+	 * will cause another callback to this function, so set name_entry = 0
+	 * first to ensure we don't double-remove etc. etc.
+	 */
+
+	Gtk::Entry* tmp = name_entry;
 	name_entry = 0;
+	name_hbox.remove (*tmp);
+
+	/* put the name label back */
 
 	name_hbox.pack_start (name_label);
 	name_label.show ();
