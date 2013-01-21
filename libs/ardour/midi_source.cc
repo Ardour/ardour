@@ -254,21 +254,19 @@ MidiSource::midi_read (Evoral::EventSink<framepos_t>& dst, framepos_t source_sta
 	}
 }
 
-/** Write data from a MidiRingBuffer to this source.
- *  @param source Source to read from.
- *  @param source_start This source's start position in session frames.
- */
 framecnt_t
-MidiSource::midi_write (MidiRingBuffer<framepos_t>& source, framepos_t source_start, framecnt_t duration)
+MidiSource::midi_write (MidiRingBuffer<framepos_t>& source,
+                        framepos_t                  source_start,
+                        framecnt_t                  cnt)
 {
 	Glib::Threads::Mutex::Lock lm (_lock);
 
-	const framecnt_t ret = write_unlocked (source, source_start, duration);
+	const framecnt_t ret = write_unlocked (source, source_start, cnt);
 
-	if (duration == max_framecnt) {
+	if (cnt == max_framecnt) {
 		_last_read_end = 0;
 	} else {
-		_last_write_end += duration;
+		_last_write_end += cnt;
 	}
 
 	return ret;

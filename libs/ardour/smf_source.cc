@@ -65,7 +65,7 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 		throw failed_constructor ();
 	}
 
-        /* file is not opened until write */
+	/* file is not opened until write */
 }
 
 /** Constructor used for existing internal-to-session files. */
@@ -90,7 +90,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 		throw failed_constructor ();
 	}
 
-        _open = true;
+	_open = true;
 }
 
 SMFSource::~SMFSource ()
@@ -104,25 +104,27 @@ int
 SMFSource::open_for_write ()
 {
 	if (create (_path)) {
-                return -1;
-        }
-        _open = true;
-        return 0;
+		return -1;
+	}
+	_open = true;
+	return 0;
 }
 
 /** All stamps in audio frames */
 framecnt_t
-SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination, framepos_t const source_start,
-			  framepos_t start, framecnt_t duration,
-			  MidiStateTracker* tracker) const
+SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination,
+                          framepos_t const               source_start,
+                          framepos_t                     start,
+                          framecnt_t                     duration,
+                          MidiStateTracker*              tracker) const
 {
 	int      ret  = 0;
 	uint64_t time = 0; // in SMF ticks, 1 tick per _ppqn
 
-        if (writable() && !_open) {
-                /* nothing to read since nothing has ben written */
-                return duration;
-        }
+	if (writable() && !_open) {
+		/* nothing to read since nothing has ben written */
+		return duration;
+	}
 
 	DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked: start %1 duration %2\n", start, duration));
 
@@ -214,11 +216,13 @@ SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination, framepos_t
  *  @param position This source's start position in session frames.
  */
 framecnt_t
-SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source, framepos_t position, framecnt_t duration)
+SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source,
+                           framepos_t                  position,
+                           framecnt_t                  duration)
 {
-        if (!_writing) {
-                mark_streaming_write_started ();
-        }
+	if (!_writing) {
+		mark_streaming_write_started ();
+	}
 
 	framepos_t        time;
 	Evoral::EventType type;
@@ -405,13 +409,13 @@ SMFSource::set_state (const XMLNode& node, int version)
 void
 SMFSource::mark_streaming_midi_write_started (NoteMode mode)
 {
-        /* CALLER MUST HOLD LOCK */
+	/* CALLER MUST HOLD LOCK */
 
-        if (!_open && open_for_write()) {
-                error << string_compose (_("cannot open MIDI file %1 for write"), _path) << endmsg;
-                /* XXX should probably throw or return something */
-                return;
-        }
+	if (!_open && open_for_write()) {
+		error << string_compose (_("cannot open MIDI file %1 for write"), _path) << endmsg;
+		/* XXX should probably throw or return something */
+		return;
+	}
 
 	MidiSource::mark_streaming_midi_write_started (mode);
 	Evoral::SMF::begin_write ();
@@ -489,9 +493,9 @@ SMFSource::load_model (bool lock, bool force_reload)
 		_model->clear();
 	}
 
-        if (writable() && !_open) {
-                return;
-        }
+	if (writable() && !_open) {
+		return;
+	}
 
 	_model->start_write();
 	Evoral::SMF::seek_to_start();

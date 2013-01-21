@@ -61,19 +61,25 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 	 * \param tracker an optional pointer to MidiStateTracker object, for note on/off tracking
 	 */
 	virtual framecnt_t midi_read (Evoral::EventSink<framepos_t>& dst,
-				      framepos_t source_start,
-				      framepos_t start, framecnt_t cnt,
-				      MidiStateTracker*,
-				      std::set<Evoral::Parameter> const &) const;
+	                              framepos_t                     source_start,
+	                              framepos_t                     start,
+	                              framecnt_t                     cnt,
+	                              MidiStateTracker*              tracker,
+	                              std::set<Evoral::Parameter> const &) const;
 
+	/** Write data from a MidiRingBuffer to this source.
+	 *  @param source Source to read from.
+	 *  @param source_start This source's start position in session frames.
+	 *  @param cnt The length of time to write.
+	 */
 	virtual framecnt_t midi_write (MidiRingBuffer<framepos_t>& src,
-				       framepos_t source_start,
-				       framecnt_t cnt);
+	                               framepos_t                  source_start,
+	                               framecnt_t                  cnt);
 
 	virtual void append_event_unlocked_beats(const Evoral::Event<Evoral::MusicalTime>& ev) = 0;
 
 	virtual void append_event_unlocked_frames(const Evoral::Event<framepos_t>& ev,
-			framepos_t source_start) = 0;
+	                                          framepos_t                       source_start) = 0;
 
 	virtual bool       empty () const;
 	virtual framecnt_t length (framepos_t pos) const;
@@ -89,7 +95,9 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 	 * when recording actual MIDI input, rather then when importing files
 	 * etc.
 	 */
-	virtual void mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption, Evoral::MusicalTime when = 0);
+	virtual void mark_midi_streaming_write_completed (
+		Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption stuck_option,
+		Evoral::MusicalTime                                    when = 0);
 
 	virtual void session_saved();
 
@@ -144,13 +152,14 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 	virtual void flush_midi() = 0;
 
 	virtual framecnt_t read_unlocked (Evoral::EventSink<framepos_t>& dst,
-					  framepos_t position,
-					  framepos_t start, framecnt_t cnt,
-					  MidiStateTracker* tracker) const = 0;
+	                                  framepos_t                     position,
+	                                  framepos_t                     start,
+	                                  framecnt_t                     cnt,
+	                                  MidiStateTracker*              tracker) const = 0;
 
 	virtual framecnt_t write_unlocked (MidiRingBuffer<framepos_t>& dst,
-					   framepos_t position,
-					   framecnt_t cnt) = 0;
+	                                   framepos_t                  position,
+	                                   framecnt_t                  cnt) = 0;
 
 	std::string      _captured_for;
 
