@@ -494,8 +494,8 @@ MidiDiskstream::commit (framecnt_t playback_distance)
 		adjust_capture_position = 0;
 	}
 
-	uint32_t frames_read = g_atomic_int_get(&_frames_read_from_ringbuffer);
-	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
+	uint32_t frames_read = g_atomic_int_get(const_cast<gint*>(&_frames_read_from_ringbuffer));
+	uint32_t frames_written = g_atomic_int_get(const_cast<gint*>(&_frames_written_to_ringbuffer));
 
 	/*
 	  cerr << name() << " MDS written: " << frames_written << " - read: " << frames_read <<

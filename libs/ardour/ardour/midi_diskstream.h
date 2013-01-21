@@ -192,8 +192,8 @@ class MidiDiskstream : public Diskstream
 	boost::weak_ptr<MidiPort>    _source_port;
 	boost::shared_ptr<SMFSource> _write_source;
 	NoteMode                     _note_mode;
-	volatile gint                _frames_written_to_ringbuffer;
-	volatile gint                _frames_read_from_ringbuffer;
+	gint                         _frames_written_to_ringbuffer;
+	gint                         _frames_read_from_ringbuffer;
 	volatile gint                _frames_pending_write;
 	volatile gint                _num_captured_loops;
 
