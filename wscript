@@ -69,10 +69,12 @@ def fetch_gcc_version (CC):
     return version
 
 def fetch_git_revision (path):
-    cmd = "LANG= git log --abbrev HEAD^..HEAD " + path
+    cmd = "LANG= git log --abbrev HEAD^..HEAD"
     output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
     o = output[0].decode('utf-8')
     rev = o.replace ("commit", "git")[0:10]
+    cmd = "LANG= git log --abbrev -n1 --grep 'git-svn-id'"
+    output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
     for line in output:
         try:
             if "git-svn-id" in line:
