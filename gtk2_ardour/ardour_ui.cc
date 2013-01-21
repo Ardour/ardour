@@ -1970,8 +1970,9 @@ JACK, reconnect and save the session."), PROGRAM_NAME);
 
 	MessageDialog msg (*editor, msgstr);
 	pop_back_splash (msg);
+	msg.set_keep_above (true);
 	msg.run ();
-
+	
 	if (free_reason) {
 		free (const_cast<char*> (reason));
 	}
