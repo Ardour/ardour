@@ -224,8 +224,8 @@ class TimeAxisView : public virtual AxisView
 
 	bool name_entry_key_release (GdkEventKey *ev);
 	bool name_entry_key_press (GdkEventKey *ev);
+	bool name_entry_focus_out (GdkEventFocus *ev);
 
-        ArdourDialog* name_editor;
         Gtk::Entry* name_entry;
         void begin_name_edit ();
         void end_name_edit (int);

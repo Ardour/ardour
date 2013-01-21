@@ -83,7 +83,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	, _canvas_display (0)
 	, _y_position (0)
 	, _editor (ed)
-	, name_editor (0)
 	, name_entry (0)
 	, control_parent (0)
 	, _order (0)
@@ -565,7 +564,7 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 
 	switch (ev->keyval) {
 	case GDK_Escape:
-		name_editor->response (RESPONSE_CANCEL);
+		end_name_edit (RESPONSE_CANCEL);
 		return true;
 
 	/* Shift+Tab Keys Pressed. Note that for Shift+Tab, GDK actually
@@ -574,7 +573,7 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 	 */
 	case GDK_ISO_Left_Tab:
 	case GDK_Tab:
-		name_editor->response (RESPONSE_ACCEPT);
+		end_name_edit (RESPONSE_ACCEPT);
 		return true;
 	default:
 		break;
@@ -583,74 +582,49 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 	return false;
 }
 
+bool
+TimeAxisView::name_entry_focus_out (GdkEventFocus*)
+{
+	end_name_edit (RESPONSE_ACCEPT);
+	return false;
+}
+
 void
 TimeAxisView::begin_name_edit ()
 {
-	if (name_editor) {
+	if (name_entry) {
 		return;
 	}
 
 	if (can_edit_name()) {
-
-		Gtk::Widget* w = name_label.get_toplevel();
-		Gtk::Window* win = dynamic_cast<Gtk::Window*>(w);
-		
-		if (!win) {
-			return;
-		}
-
-		name_editor = new ArdourDialog (*win, string_compose (_("Edit name for %1"), name()), true);
-		name_editor->add_button (_("Cancel"), RESPONSE_CANCEL);
-		name_editor->add_button (_("Save"), RESPONSE_OK);
-		name_editor->add_button (_("Save & Edit Next"), RESPONSE_ACCEPT);
 
 		name_entry = manage (new Gtkmm2ext::FocusEntry);
 		
 		name_entry->set_name ("EditorTrackNameDisplay");
 		name_entry->signal_key_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_press), false);
 		name_entry->signal_key_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_release), false);
+		name_entry->signal_focus_out_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_focus_out));
 		name_entry->set_text (name_label.get_text());
-		name_entry->signal_activate().connect (sigc::bind (sigc::mem_fun (*name_editor, &ArdourDialog::response), RESPONSE_OK));
+		name_entry->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisView::end_name_edit), RESPONSE_OK));
 
-		Gtk::HBox* hbox = manage (new HBox);
-		Gtk::Label* label = manage (new Label (_("New name:" " ")));
-
-		hbox->pack_start (*label, false, false);
-		hbox->pack_start (*name_entry, true, true);
-		name_editor->get_vbox()->pack_start (*hbox, false, false);
-
-		label->show();
+		if (name_label.is_ancestor (name_hbox)) {
+			name_hbox.remove (name_label);
+		}
+		
+		name_hbox.pack_start (*name_entry);
 		name_entry->show ();
-		hbox->show ();
 
 		name_entry->select_region (0, -1);
 		name_entry->set_state (STATE_SELECTED);
 		name_entry->grab_focus ();
 		name_entry->start_editing (0);
-
-		name_editor->signal_response().connect (sigc::mem_fun (*this, &TimeAxisView::end_name_edit));
-
-		name_editor->set_position (WIN_POS_MOUSE);
-		name_editor->present ();
-
-		/* move it to line up with the name label, and some distance to
-		 * the right of it
-		 */
-
-		int x, y;
-		int wx, wy;
-
-		name_label.translate_coordinates (_editor, 0, 0, x, y);
-		_editor.get_position (wx, wy);
-
-		name_editor->move (wx + x + 250, wy + y);
 	}
 }
 
 void
 TimeAxisView::end_name_edit (int response)
 {
-	if (!name_editor) {
+	if (!name_entry) {
 		return;
 	}
 	
@@ -667,10 +641,12 @@ TimeAxisView::end_name_edit (int response)
 		edit_next = true;
 	}
 
-	delete_when_idle (name_editor);
-
-	name_editor = 0;
+	/* this will delete the name_entry */
+	name_hbox.remove (*name_entry);
 	name_entry = 0;
+
+	name_hbox.pack_start (name_label);
+	name_label.show ();
 
 	if (edit_next) {
 
