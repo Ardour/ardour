@@ -61,6 +61,7 @@ class PixFader : public Gtk::DrawingArea
 	bool on_enter_notify_event (GdkEventCrossing* ev);
 	bool on_leave_notify_event (GdkEventCrossing* ev);
         void on_state_changed (Gtk::StateType);
+        void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 
 	enum Orientation {
 		VERT,

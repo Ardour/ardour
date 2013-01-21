@@ -106,6 +106,10 @@ PixFader::create_patterns ()
 	float radius = CORNER_RADIUS;
 
 	double w = get_width();
+	
+	if (w <= 1 || get_height() <= 1) {
+		return;
+	}
 
 	if ((pattern = find_pattern (fr, fg, fb, br, bg, bb, get_width(), get_height())) != 0) {
 		/* found it - use it */
@@ -190,7 +194,7 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 	if (!pattern) {
 		create_patterns();
 	}
-	
+
 	int ds = display_span ();
 	float w = get_width();
 	float h = get_height();
@@ -304,11 +308,6 @@ PixFader::on_size_allocate (Gtk::Allocation& alloc)
 	}
 
 	update_unity_position ();
-
-	if (is_realized()) {
-		create_patterns();
-		queue_draw ();
-	}
 }
 
 bool
@@ -593,4 +592,20 @@ PixFader::on_state_changed (Gtk::StateType old_state)
 {
 	Widget::on_state_changed (old_state);
 	create_patterns ();
+}
+
+void
+PixFader::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
+{
+	if (_layout) {
+		std::string txt = _layout->get_text();
+		_layout.clear (); // drop reference to existing layout
+		set_text (txt);
+	}
+
+	/* remember that all patterns are cached and not owned by an individual
+	   pixfader. we will lazily create a new pattern when needed.
+	*/
+
+	pattern = 0;
 }
