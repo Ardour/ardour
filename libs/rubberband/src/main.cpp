@@ -43,7 +43,7 @@ using RubberBand::usleep;
 
 double tempo_convert(const char *str)
 {
-    char *d = strchr((char *)str, ':');
+    const char *d = strchr((char *)str, ':');
 
     if (!d || !*d) {
         double m = atof(str);
