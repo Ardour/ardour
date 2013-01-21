@@ -419,9 +419,6 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 		_slider.set_name ("PluginSlider");
 		_slider.set_text (_name);
 
-//		box.pack_start (_label);
-//		_label.show ();
-//		_label.set_text (_name);
 		box.pack_start (_slider);
 		_slider.show ();
 
@@ -464,10 +461,12 @@ ProcessorEntry::Control::set_tooltip ()
 		s << setprecision(2) << fixed;
 		s << c->internal_to_user (c->get_value ());
 	}
+
+	string sm = Glib::Markup::escape_text (s.str());
 	
-	ARDOUR_UI::instance()->set_tip (_label, s.str ());
-	_slider_persistant_tooltip.set_tip (s.str ());
-	ARDOUR_UI::instance()->set_tip (_button, s.str ());
+	ARDOUR_UI::instance()->set_tip (_label, sm);
+	_slider_persistant_tooltip.set_tip (sm);
+	ARDOUR_UI::instance()->set_tip (_button, sm);
 }
 
 void
