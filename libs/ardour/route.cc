@@ -1952,7 +1952,7 @@ Route::state(bool full_state)
 			boost::shared_ptr<InternalSend> is;
 
 			if ((is = boost::dynamic_pointer_cast<InternalSend> (*i)) != 0) {
-				if (is->role() == Delivery::Aux || is->role() == Delivery::Listen) {
+				if (is->role() == Delivery::Listen) {
 					continue;
 				}
 			}
