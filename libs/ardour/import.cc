@@ -420,10 +420,11 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 					first = false;
 				}
 
-				smfs->append_event_unlocked_beats(Evoral::Event<double>(0,
-				                                                        (double)t / (double)source->ppqn(),
-				                                                        size,
-				                                                        buf));
+				smfs->append_event_unlocked_beats(
+					Evoral::Event<double>(0,
+					                      (double)t / (double)source->ppqn(),
+					                      size,
+					                      buf));
 
 				if (status.progress < 0.99) {
 					status.progress += 0.01;

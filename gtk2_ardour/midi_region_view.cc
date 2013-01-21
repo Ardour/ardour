@@ -3701,10 +3701,8 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 		Evoral::MusicalTime const time_beats = converter.from (ev.time () - converter.origin_b ());
 
 		if (ev.type() == MIDI_CMD_NOTE_ON) {
-
 			boost::shared_ptr<NoteType> note (
-				new NoteType (ev.channel(), time_beats, 0, ev.note(), ev.velocity())
-			                                  );
+				new NoteType (ev.channel(), time_beats, 0, ev.note(), ev.velocity()));
 
 			add_note (note, true);
 
