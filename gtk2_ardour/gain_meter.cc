@@ -904,10 +904,6 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 		hbox.remove (meter_alignment);
 	}
 
-	if (peak_display.get_parent()) {
-		peak_display.get_parent()->remove (peak_display);
-	}
-
 //	if (gain_automation_state_button.get_parent()) {
 //		fader_vbox->remove (gain_automation_state_button);
 //	}
@@ -928,7 +924,6 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 	   pack some route-dependent stuff.
 	*/
 
-	gain_display_box.pack_end (peak_display, true, true);
 	hbox.pack_start (meter_alignment, true, true);
 
 //	if (r && !r->is_hidden()) {

@@ -400,13 +400,19 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	revert_to_default_display ();
 
-	if (gpm.gain_display.get_parent()) {
-		gpm.gain_display.get_parent()->remove (gpm.gain_display);
-	}
-
+	/* unpack these from the parent and stuff them into our own
+	   table
+	*/
+	
 	if (gpm.peak_display.get_parent()) {
 		gpm.peak_display.get_parent()->remove (gpm.peak_display);
 	}
+	if (gpm.gain_display.get_parent()) {
+		gpm.gain_display.get_parent()->remove (gpm.gain_display);
+	}
+	
+	middle_button_table.attach (gpm.gain_display,0,1,1,2);
+	middle_button_table.attach (gpm.peak_display,1,2,1,2);
 
 	if (solo_button->get_parent()) {
 		middle_button_table.remove (*solo_button);
@@ -602,20 +608,6 @@ MixerStrip::set_width_enum (Width w, void* owner)
 	}
 
 	set_button_names ();
-
-	/* unpack these from the parent and stuff them into our own
-	   table
-	*/
-	
-	if (gpm.peak_display.get_parent()) {
-		gpm.peak_display.get_parent()->remove (gpm.peak_display);
-	}
-	if (gpm.gain_display.get_parent()) {
-		gpm.gain_display.get_parent()->remove (gpm.gain_display);
-	}
-	
-	middle_button_table.attach (gpm.gain_display,0,1,1,2);
-	middle_button_table.attach (gpm.peak_display,1,2,1,2);
 
 	switch (w) {
 	case Wide:
