@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-09 17:13+0100\n"
-"PO-Revision-Date: 2013-01-09 17:18+0100\n"
+"POT-Creation-Date: 2013-01-17 14:04+0100\n"
+"PO-Revision-Date: 2013-01-18 00:09+0100\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -137,7 +137,7 @@ msgstr "Audio-Wiedergabelisten (unbenutzt)"
 #: audio_playlist_source.cc:171 audiosource.cc:913 file_source.cc:527
 #: midi_playlist_source.cc:144 midi_playlist_source.cc:152
 #: midi_playlist_source.cc:159 midi_source.cc:365 plugin_insert.cc:644
-#: session.cc:2447 session.cc:2480 session.cc:3625 session_handle.cc:87
+#: session.cc:2445 session.cc:2478 session.cc:3623 session_handle.cc:87
 #: sndfilesource.cc:121
 msgid "programming error: %1"
 msgstr "Programmierfehler: %1"
@@ -198,11 +198,11 @@ msgstr "schlecht geformtes XML in importierter Spur"
 msgid "Error Importing Audio track %1"
 msgstr "Fehler beim Import von Audiospur %1"
 
-#: audioanalyser.cc:31
+#: audioanalyser.cc:50
 msgid "cannot load VAMP plugin \"%1\""
 msgstr "kann VAMP-Plugin \"%1\" nicht laden"
 
-#: audioanalyser.cc:51
+#: audioanalyser.cc:70
 msgid "VAMP Plugin \"%1\" could not be loaded"
 msgstr "VAMP-Plugin \"%1\" konnte nicht geladen werden"
 
@@ -226,7 +226,7 @@ msgstr ""
 "Ein Port mit Namen \"%1\" existiert bereits: Prüfen Sie auf doppelte Spur/"
 "Busnamen"
 
-#: audioengine.cc:846 session.cc:1697
+#: audioengine.cc:846 session.cc:1695
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
@@ -418,35 +418,35 @@ msgstr "Butler-Lesefehler bei dstream %1"
 msgid "Butler write-behind failure on dstream %1"
 msgstr "Butler-Schreibfehler bei dstream %1"
 
-#: control_protocol_manager.cc:132
+#: control_protocol_manager.cc:134
 msgid "control protocol name \"%1\" has no descriptor"
 msgstr "Kontrollprotokollname \"%1\" hat keine Beschreibung"
 
-#: control_protocol_manager.cc:137
+#: control_protocol_manager.cc:141
 msgid "control protocol name \"%1\" could not be initialized"
 msgstr "Kontrollprotokoll \"%1\" konnte nicht initialisiert werden"
 
-#: control_protocol_manager.cc:197
+#: control_protocol_manager.cc:201
 msgid "Instantiating mandatory control protocol %1"
 msgstr "Instanziere erforderliches Kontrollprotokoll %1"
 
-#: control_protocol_manager.cc:218
+#: control_protocol_manager.cc:222
 msgid "looking for control protocols in %1\n"
 msgstr "suche nach Kontrollprotokollen in %1\n"
 
-#: control_protocol_manager.cc:243
+#: control_protocol_manager.cc:247
 msgid "Control protocol %1 not usable"
 msgstr "Kontrollprotokoll %1 nicht benutzbar"
 
-#: control_protocol_manager.cc:260
-msgid "Control surface protocol discovered: \"%1\""
-msgstr "Protokoll für Kontrolloberfläche entdeckt: \"%1\""
+#: control_protocol_manager.cc:264
+msgid "Control surface protocol discovered: \"%1\"\n"
+msgstr "Protokoll für Kontrolloberfläche entdeckt: \"%1\"\n"
 
-#: control_protocol_manager.cc:278
+#: control_protocol_manager.cc:282
 msgid "ControlProtocolManager: cannot load module \"%1\" (%2)"
 msgstr "ControlProtocolManager: kann Modul \"%1\" nicht laden (%2)"
 
-#: control_protocol_manager.cc:286
+#: control_protocol_manager.cc:290
 msgid "ControlProtocolManager: module \"%1\" has no descriptor function."
 msgstr ""
 "ControlProtocolManager: Modul \"%1\" hat keine Funktion zur Beschreibung."
@@ -467,7 +467,7 @@ msgstr "kann CPU-Takt in /proc/cpuinfo nicht finden"
 msgid "audio"
 msgstr "Audio"
 
-#: data_type.cc:28 session.cc:1639 session.cc:1642
+#: data_type.cc:28 session.cc:1637 session.cc:1640
 msgid "MIDI"
 msgstr "MIDI"
 
@@ -582,7 +582,7 @@ msgstr "Dreieck"
 msgid "Rectangular"
 msgstr "Rechteck"
 
-#: export_formats.cc:52 session.cc:4836 session.cc:4852
+#: export_formats.cc:52 session.cc:4834 session.cc:4850
 msgid "None"
 msgstr "Kein"
 
@@ -780,27 +780,27 @@ msgstr "Filter: Fehler beim Erzeugen des neuen Dateinamens aus %1"
 msgid "filter: error creating new file %1 (%2)"
 msgstr "Filter: Fehler beim Erzeugen der neuen Datei %1 (%2)"
 
-#: find_session.cc:32
+#: find_session.cc:51
 msgid "Could not resolve path: %1 (%2)"
 msgstr "Konnte den Pfad: %1 nicht auflösen (%2)"
 
-#: find_session.cc:44
+#: find_session.cc:63
 msgid "cannot check session path %1 (%2)"
 msgstr "Kann Projektpfad %1 nicht überprüfen (%2)"
 
-#: find_session.cc:70
+#: find_session.cc:89
 msgid "cannot check statefile %1 (%2)"
 msgstr "Kann die Projektdatei %1 nicht überprüfen (%2)"
 
-#: find_session.cc:106
+#: find_session.cc:125
 msgid "%1 is not a snapshot file"
 msgstr "%1 ist keine Schnappschussdatei"
 
-#: find_session.cc:123
+#: find_session.cc:142
 msgid "cannot determine current working directory (%1)"
 msgstr "kann momentanes Arbeitsverzeichnis nicht bestimmen (%1)"
 
-#: find_session.cc:140
+#: find_session.cc:159
 msgid "unknown file type for session %1"
 msgstr "Unbekannter Dateityp für Projekt %1"
 
@@ -897,11 +897,11 @@ msgstr "unkorrekter XML-Knoten \"%1\" an IO Objekt weitergereicht"
 
 #: io.cc:706
 msgid "in"
-msgstr "ein"
+msgstr "in"
 
 #: io.cc:706
 msgid "out"
-msgstr "aus"
+msgstr "out"
 
 #: io.cc:707
 msgid "input"
@@ -955,12 +955,12 @@ msgstr "%s %u"
 #: io.cc:1457
 #, c-format
 msgid "%s in"
-msgstr "%s ein"
+msgstr "%s in"
 
 #: io.cc:1459
 #, c-format
 msgid "%s out"
-msgstr "%s aus"
+msgstr "%s out"
 
 #: io.cc:1534 session.cc:491 session.cc:520
 msgid "mono"
@@ -1071,7 +1071,7 @@ msgstr ""
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "unkorrekter XML-Modus an Locations::set_state weitergereicht"
 
-#: location.cc:842 session.cc:4337 session_state.cc:1108
+#: location.cc:842 session.cc:4335 session_state.cc:1108
 msgid "session"
 msgstr "Projekt"
 
@@ -1650,22 +1650,22 @@ msgstr "Richte Standard-Verbindungen ein"
 #: session.cc:488
 #, c-format
 msgid "out %<PRIu32>"
-msgstr "aus %<PRIu32>"
+msgstr "out %<PRIu32>"
 
 #: session.cc:502
 #, c-format
 msgid "out %<PRIu32>+%<PRIu32>"
-msgstr "aus %<PRIu32>+%<PRIu32>"
+msgstr "out %<PRIu32>+%<PRIu32>"
 
 #: session.cc:517
 #, c-format
 msgid "in %<PRIu32>"
-msgstr "ein %<PRIu32>"
+msgstr "in %<PRIu32>"
 
 #: session.cc:531
 #, c-format
 msgid "in %<PRIu32>+%<PRIu32>"
-msgstr "ein %<PRIu32>+%<PRIu32>"
+msgstr "in %<PRIu32>+%<PRIu32>"
 
 #: session.cc:567
 msgid "Setup signal flow and plugins"
@@ -1707,87 +1707,91 @@ msgstr ""
 "Ende) "
 
 #: session.cc:1080
-msgid "Session: you can't use a mark for auto loop"
-msgstr "Session: Sie können diesen Marker nicht für Auto-Loop verwenden "
+msgid ""
+"You cannot use this location for auto-loop because it has zero or negative "
+"length"
+msgstr ""
+"Sie können diese Position nicht für \"automatische Schleife\" verwenden, da "
+"sie keine oder eine negative Länge hat"
 
 #: session.cc:1393
 msgid "feedback loop setup between %1 and %2"
 msgstr "Feedbackschleife zwischen %1 und %2 erkannt"
 
-#: session.cc:1691
+#: session.cc:1689
 msgid "Session: could not create new midi track."
 msgstr "Session: konnte keine neue MIDI-Spur erzeugen."
 
-#: session.cc:1874 session.cc:1877
+#: session.cc:1872 session.cc:1875
 msgid "Audio"
 msgstr "Audio"
 
-#: session.cc:1901 session.cc:1909 session.cc:1986 session.cc:1994
+#: session.cc:1899 session.cc:1907 session.cc:1984 session.cc:1992
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr "kann %1 ein/%2 aus für neue Audiospur nicht konfigurieren"
 
-#: session.cc:1932
+#: session.cc:1930
 msgid "Session: could not create new audio track."
 msgstr "Session: konnte keine neue Audios.pur erzeugen"
 
-#: session.cc:1964 session.cc:1967
+#: session.cc:1962 session.cc:1965
 msgid "Bus"
 msgstr "Bus"
 
-#: session.cc:2017
+#: session.cc:2015
 msgid "Session: could not create new audio route."
 msgstr "Session: konnte keine neueAudio-Route  erzeugen"
 
-#: session.cc:2070
+#: session.cc:2068
 msgid "Session: UINT_MAX routes? impossible!"
 msgstr "Session: UINT_MAX Routen? unmöglich!"
 
-#: session.cc:2091
+#: session.cc:2089
 msgid "Session: cannot create track/bus from template description"
 msgstr "Session: Kann die Route aus der Vorlagenbeschreibung nicht erzeugen"
 
-#: session.cc:2117
+#: session.cc:2115
 msgid "Session: could not create new route from template"
 msgstr "Session: konnte keine neue Route aus der Vorlage erzeugen."
 
-#: session.cc:2146
+#: session.cc:2144
 msgid "Adding new tracks/busses failed"
 msgstr "Fehler beim Hinzufügen neuer Spuren/Busse"
 
-#: session.cc:3247
+#: session.cc:3245
 msgid "FATAL ERROR! Could not find a suitable version of %1 for a rename"
 msgstr ""
 "FATALER FEHLER! Konnte keine passende Version von %1 zum Umbenennen finden"
 
-#: session.cc:3367 session.cc:3425
+#: session.cc:3365 session.cc:3423
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr "Es gibt bereits %1 Aufnahmen für %2, was ich als zu viele erachte."
 
-#: session.cc:3815
+#: session.cc:3813
 msgid "send ID %1 appears to be in use already"
 msgstr "Send ID %1 ist offenbar schon in Gebrauch"
 
-#: session.cc:3827
+#: session.cc:3825
 msgid "aux send ID %1 appears to be in use already"
 msgstr "Aux-Send ID %1 ist offenbar schon in Gebrauch"
 
-#: session.cc:3839
+#: session.cc:3837
 msgid "return ID %1 appears to be in use already"
 msgstr "Return ID %1 ist offenbar schon in Gebrauch"
 
-#: session.cc:3851
+#: session.cc:3849
 msgid "insert ID %1 appears to be in use already"
 msgstr "Insert ID %1 ist offenbar schon in Gebrauch"
 
-#: session.cc:3978
+#: session.cc:3976
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr "Kann einen Bereich mit Ende <= Start nicht schreiben (z.B. %1 <= %2)"
 
-#: session.cc:4007
+#: session.cc:4005
 msgid "too many bounced versions of playlist \"%1\""
 msgstr "zu viele gebouncete Versionen der Wiedergabeliste \"%1\""
 
-#: session.cc:4017
+#: session.cc:4015
 msgid "cannot create new audio file \"%1\" for %2"
 msgstr "kann keine neue Audiodatei \"%1\" für %2 erzeugen"
 
@@ -1802,8 +1806,8 @@ msgstr "kann Daten der Metronom-Audiodatei nicht lesen"
 #: session_command.cc:87
 msgid "Tried to reconstitute a MementoCommand with no contents, failing. id=%1"
 msgstr ""
-"Der Versuch, ein MementoCommand ohne Inhalt wiederherzustellen, schlug "
-"fehl. ID=%1"
+"Der Versuch, ein MementoCommand ohne Inhalt wiederherzustellen, schlug fehl. "
+"ID=%1"
 
 #: session_command.cc:148
 msgid ""
@@ -2259,7 +2263,7 @@ msgstr "Unbekannter JACK-Transportstatus im Sync-Callback"
 msgid "Cannot loop - no loop range defined"
 msgstr "Kann nicht loopen - kein Schleifenbereich definieert"
 
-#: session_transport.cc:736
+#: session_transport.cc:727
 msgid ""
 "Seamless looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
@@ -2268,7 +2272,7 @@ msgstr ""
 "benutzt.\n"
 "Ändern Sie die Konfigurationsoption"
 
-#: session_transport.cc:1101
+#: session_transport.cc:1092
 msgid ""
 "Global varispeed cannot be supported while %1 is connected to JACK transport "
 "control"
@@ -2276,15 +2280,15 @@ msgstr ""
 "Globales Varispeed ist nicht möglich, solange %1 mit JACK Transport "
 "verbunden ist."
 
-#: smf_source.cc:252
+#: smf_source.cc:253
 msgid "Unable to read event prefix, corrupt MIDI ring buffer"
 msgstr "Kann Ereignisprefix nicht lesen, korrupter MIDI-Ringbuffer"
 
-#: smf_source.cc:263
+#: smf_source.cc:264
 msgid "Read time/size but not buffer, corrupt MIDI ring buffer"
 msgstr "time/size gelesen, aber nicht buffer, korrupter MIDI-Ringbuffer"
 
-#: smf_source.cc:410
+#: smf_source.cc:411
 msgid "cannot open MIDI file %1 for write"
 msgstr "kann MIDI-Datei %1 nicht zum Schreiben öffnen"
 
@@ -2611,24 +2615,24 @@ msgstr ""
 "Dies wird die aktuelle Tempo Map ersetzen!\n"
 "Wollen Sie das wirklich tun?"
 
-#: user_bundle.cc:28
+#: user_bundle.cc:47
 msgid "Node for Bundle has no \"name\" property"
 msgstr "Knoten für Bündel hat keine Eigenschaft \"name\""
 
-#: user_bundle.cc:40 user_bundle.cc:61
+#: user_bundle.cc:59 user_bundle.cc:80
 #, c-format
 msgid "Unknown node \"%s\" in Bundle"
 msgstr "Unbekannter Knoten \"%s\" im Bündel"
 
-#: user_bundle.cc:45
+#: user_bundle.cc:64
 msgid "Node for Channel has no \"name\" property"
 msgstr "Knoten für Kanal hat keine Eigenschaft \"name\""
 
-#: user_bundle.cc:51
+#: user_bundle.cc:70
 msgid "Node for Channel has no \"type\" property"
 msgstr "Knoten für Kanal hat keine Eigenschaft \"type\""
 
-#: user_bundle.cc:66
+#: user_bundle.cc:85
 msgid "Node for Port has no \"name\" property"
 msgstr "Knoten für Port hat keine Eigenschaft \"name\""
 
@@ -2683,6 +2687,9 @@ msgstr "Programmierfehler: unbekanntes natives Dateikopfformat: %1"
 #: utils.cc:699
 msgid "cannot open directory %1 (%2)"
 msgstr "kann Verzeichnis %1 nicht öffnen (%2)"
+
+#~ msgid "Session: you can't use a mark for auto loop"
+#~ msgstr "Session: Sie können diesen Marker nicht für Auto-Loop verwenden "
 
 #~ msgid ""
 #~ "No more JACK ports are available. You will need to stop %1 and restart "
