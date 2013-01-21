@@ -974,19 +974,19 @@ ArdourStartup::redisplay_recent_sessions ()
 			// add the children
 
 			for (std::vector<std::string>::iterator i2 = state_file_names.begin();
-					i2 != state_file_names.end(); ++i2)
-			{
+					i2 != state_file_names.end(); ++i2) {
 
 				Gtk::TreeModel::Row child_row = *(recent_session_model->append (row.children()));
 
 				child_row[recent_session_columns.visible_name] = *i2;
 				child_row[recent_session_columns.fullpath] = fullpath;
+				child_row[recent_session_columns.tip] = Glib::Markup::escape_text (fullpath);
 				++session_snapshot_count;
 			}
 		}
 	}
 
-	recent_session_display.set_tooltip_column(1); // recent_session_columns.fullpath 
+	recent_session_display.set_tooltip_column(1); // recent_session_columns.tip 
 	recent_session_display.set_model (recent_session_model);
 	return session_snapshot_count;
 	// return rs.size();
