@@ -73,6 +73,7 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 	, _note_mode(Sustained)
 	, _frames_written_to_ringbuffer(0)
 	, _frames_read_from_ringbuffer(0)
+	, _frames_pending_write(0)
 	, _gui_feed_buffer(AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
 	in_set_state = true;
@@ -95,6 +96,7 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 	, _note_mode(Sustained)
 	, _frames_written_to_ringbuffer(0)
 	, _frames_read_from_ringbuffer(0)
+	, _frames_pending_write(0)
 	, _gui_feed_buffer(AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
 	in_set_state = true;
@@ -197,6 +199,7 @@ MidiDiskstream::non_realtime_input_change ()
 		seek (_session.transport_frame());
 	}
 
+	g_atomic_int_set(&_frames_pending_write, 0);
 	if (_write_source) {
 		_write_source->set_last_write_end (_session.transport_frame());
 	}
@@ -336,6 +339,7 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt
 
 		if (rec_nframes && !was_recording) {
 			_write_source->mark_write_starting_now ();
+			g_atomic_int_set(&_frames_pending_write, 0);
 			capture_captured = 0;
 			was_recording = true;
 		}
@@ -368,6 +372,7 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt
 #endif
 			_capture_buf->write(ev.time() + transport_frame, ev.type(), ev.size(), ev.buffer());
 		}
+		g_atomic_int_add(&_frames_pending_write, nframes);
 
 		if (buf.size() != 0) {
 			Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex, Glib::Threads::TRY_LOCK);
@@ -700,14 +705,13 @@ int
 MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 {
 	framecnt_t to_write;
-	framecnt_t total;
 	int32_t ret = 0;
 
 	if (!_write_source) {
 		return 0;
 	}
 
-	total = _session.transport_frame() - _write_source->last_write_end();
+	const framecnt_t total = g_atomic_int_get(&_frames_pending_write);
 
 	if (total == 0 || 
 	    _capture_buf->read_space() == 0 || 
@@ -742,6 +746,7 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 			error << string_compose(_("MidiDiskstream %1: cannot write to disk"), id()) << endmsg;
 			return -1;
 		} 
+		g_atomic_int_add(&_frames_pending_write, -to_write);
 	}
 
 out:
