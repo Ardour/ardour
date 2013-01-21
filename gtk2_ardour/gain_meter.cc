@@ -854,7 +854,10 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	, gain_display_box(true, 0)
 	, hbox(true, 2)
 {
-//	gain_display_box.pack_start (gain_display, true, true);
+	if (gain_display.get_parent()) {
+		gain_display.get_parent()->remove (gain_display);
+	}
+	gain_display_box.pack_start (gain_display, true, true);
 
 	meter_metric_area.set_name ("AudioTrackMetrics");
 	set_size_request_to_display_given_text (meter_metric_area, "-127", 0, 0);
@@ -901,9 +904,9 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 		hbox.remove (meter_alignment);
 	}
 
-//	if (peak_display.get_parent()) {
-//		gain_display_box.remove (peak_display);
-//	}
+	if (peak_display.get_parent()) {
+		peak_display.get_parent()->remove (peak_display);
+	}
 
 //	if (gain_automation_state_button.get_parent()) {
 //		fader_vbox->remove (gain_automation_state_button);
@@ -925,7 +928,7 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 	   pack some route-dependent stuff.
 	*/
 
-//	gain_display_box.pack_end (peak_display, true, true);
+	gain_display_box.pack_end (peak_display, true, true);
 	hbox.pack_start (meter_alignment, true, true);
 
 //	if (r && !r->is_hidden()) {

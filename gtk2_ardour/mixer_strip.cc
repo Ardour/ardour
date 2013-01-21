@@ -401,11 +401,11 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	revert_to_default_display ();
 
 	if (gpm.gain_display.get_parent()) {
-		middle_button_table.remove (gpm.gain_display);
+		gpm.gain_display.get_parent()->remove (gpm.gain_display);
 	}
 
 	if (gpm.peak_display.get_parent()) {
-		middle_button_table.remove (gpm.peak_display);
+		gpm.peak_display.get_parent()->remove (gpm.peak_display);
 	}
 
 	if (solo_button->get_parent()) {
@@ -603,17 +603,22 @@ MixerStrip::set_width_enum (Width w, void* owner)
 
 	set_button_names ();
 
+	/* unpack these from the parent and stuff them into our own
+	   table
+	*/
+	
+	if (gpm.peak_display.get_parent()) {
+		gpm.peak_display.get_parent()->remove (gpm.peak_display);
+	}
+	if (gpm.gain_display.get_parent()) {
+		gpm.gain_display.get_parent()->remove (gpm.gain_display);
+	}
+	
+	middle_button_table.attach (gpm.gain_display,0,1,1,2);
+	middle_button_table.attach (gpm.peak_display,1,2,1,2);
+
 	switch (w) {
 	case Wide:
-		if (!gpm.peak_display.get_parent()) {
-			middle_button_table.attach (gpm.peak_display,1,2,1,2);
-		}
-		if (gpm.gain_display.get_parent()) {
-			middle_button_table.remove (gpm.gain_display);
-		}
-		if (!gpm.gain_display.get_parent()) {
-			middle_button_table.attach (gpm.gain_display,0,1,1,2);
-		}
 
 		if (show_sends_button)  {
 			show_sends_button->set_text (_("Aux\nSends"));
@@ -640,16 +645,6 @@ MixerStrip::set_width_enum (Width w, void* owner)
 		break;
 
 	case Narrow:
-		if (gpm.peak_display.get_parent()) {
-			middle_button_table.remove (gpm.peak_display);
-		}
-
-		if (gpm.gain_display.get_parent()) {
-			middle_button_table.remove (gpm.gain_display);
-		}
-		if (!gpm.gain_display.get_parent()) {
-			middle_button_table.attach (gpm.gain_display,0,2,1,2);
-		}
 
 		if (show_sends_button) {
 			show_sends_button->set_text (_("Snd"));

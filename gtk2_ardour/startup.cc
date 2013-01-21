@@ -63,12 +63,6 @@ static string poor_mans_glob (string path)
 	return copy;
 }
 
-static void show_me (Gtk::FileChooserButton* fcb)
-{
-	cerr << " Current folder of " << fcb << " changed to " << fcb->get_current_folder() << endl;
-}
-
-
 ArdourStartup::ArdourStartup (bool require_new, const std::string& session_name, const std::string& session_path, const std::string& template_name)
 	: _response (RESPONSE_OK)
 	, config_modified (false)
@@ -98,8 +92,6 @@ Ardour will play NO role in monitoring"))
 	new_user = !Glib::file_test (been_here_before_path(), Glib::FILE_TEST_EXISTS);
 	need_audio_setup = EngineControl::need_setup ();
 	need_session_info = (session_name.empty() || require_new);
-
-	new_folder_chooser.signal_current_folder_changed().connect (sigc::bind (sigc::ptr_fun (show_me), &new_folder_chooser));
 
 	_provided_session_name = session_name;
 	_provided_session_path = session_path;
