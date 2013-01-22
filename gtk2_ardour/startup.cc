@@ -958,6 +958,7 @@ ArdourStartup::redisplay_recent_sessions ()
 
 		row[recent_session_columns.visible_name] = Glib::path_get_basename (fullpath);
 		row[recent_session_columns.fullpath] = fullpath;
+		row[recent_session_columns.tip] = Glib::Markup::escape_text (fullpath);
 		
 		++session_snapshot_count;
 

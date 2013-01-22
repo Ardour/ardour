@@ -1188,6 +1188,7 @@ ARDOUR_UI::redisplay_recent_sessions ()
 
 		row[recent_session_columns.visible_name] = Glib::path_get_basename (fullpath);
 		row[recent_session_columns.fullpath] = fullpath;
+		row[recent_session_columns.tip] = Glib::Markup::escape_text (fullpath);
 
 		if (state_file_names.size() > 1) {
 
@@ -1201,11 +1202,12 @@ ARDOUR_UI::redisplay_recent_sessions ()
 
 				child_row[recent_session_columns.visible_name] = *i2;
 				child_row[recent_session_columns.fullpath] = fullpath;
+				child_row[recent_session_columns.tip] = Glib::Markup::escape_text (fullpath);
 			}
 		}
 	}
 
-	recent_session_display.set_tooltip_column(1); // recent_session_columns.fullpath
+	recent_session_display.set_tooltip_column(1); // recent_session_columns.tip
 	recent_session_display.set_model (recent_session_model);
 }
 

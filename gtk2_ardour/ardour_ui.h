@@ -466,9 +466,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	struct RecentSessionModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    RecentSessionModelColumns() {
 		    add (visible_name);
+		    add (tip);
 		    add (fullpath);
 	    }
 	    Gtk::TreeModelColumn<std::string> visible_name;
+	    Gtk::TreeModelColumn<std::string> tip;
 	    Gtk::TreeModelColumn<std::string> fullpath;
 	};
 
