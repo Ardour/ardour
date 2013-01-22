@@ -238,7 +238,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	lpath.push_back (dir_path);
 	lpath.push_back ("share");
 	lpath.push_back ("locale");
-	localedir = strdup (Glib::build_filename (lpath).c_str());
+	localedir = realpath (Glib::build_filename (lpath).c_str(), NULL);
 
 	/* note that this function is POSIX/Linux specific, so using / as
 	   a dir separator in this context is just fine.
@@ -397,6 +397,9 @@ int main (int argc, char *argv[])
 	windows_vst_gui_init (&argc, &argv);
 #endif
 
+#ifdef ENABLE_NLS
+	cerr << "bnd txt domain to " << localedir << endl;
+
 	(void) bindtextdomain (PACKAGE, localedir);
 	/* our i18n translations are all in UTF-8, so make sure
 	   that even if the user locale doesn't specify UTF-8,
@@ -404,6 +407,7 @@ int main (int argc, char *argv[])
 	*/
 	(void) bind_textdomain_codeset (PACKAGE,"UTF-8");
 	(void) textdomain (PACKAGE);
+#endif
 
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 
