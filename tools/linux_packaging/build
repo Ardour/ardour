@@ -241,12 +241,21 @@ if test x$WITH_NLS != x ; then
 	echo "I hope you remembered to run scons msgupdate!"
 	LINGUAS=
 
-        for dl in gtk2_ardour libs/ardour libs/gtkmm2ext ; do 
-	    files=`find ../../$dl -name "*.mo"`
+        for pkg in gtk2_ardour libs/ardour libs/gtkmm2ext ; do 
+	    files=`find ../../$pkg -name "*.mo"`
+
+            #
+            # the package name is appended with a number so that
+            # it can be parallel installed during a regular install
+            # with older (and newer) versions. it is just the major
+            # number of the release (i.e. leading digits)
+            #
+
+            vsuffix=`echo $release_version | sed 's/^\([0-9][0-9]*\).*/\1/'`
 
 	    if [ -z "$files" ]; then
 		echo ""
-		echo "!!!! WARNING !!!! - Did not find any .mo files in ../../$dl"
+		echo "!!!! WARNING !!!! - Did not find any .mo files in ../../$pkg"
 		echo ""
 	    fi
  
@@ -255,8 +264,8 @@ if test x$WITH_NLS != x ; then
 		echo $file
 		lang=`basename $file | sed 's/\.mo//'`
 		mkdir -p $Locale/$lang/LC_MESSAGES
-		cp $file $Locale/$lang/LC_MESSAGES/`basename $file`
-                echo Copying message catalog for $lang into $Locale/$lang/LC_MESSAGES/`basename $file`
+		cp $file $Locale/$lang/LC_MESSAGES/`basename $pkg`$vsuffix
+		echo copy $file to $Locale/$lang/LC_MESSAGES/`basename $pkg`$vsuffix
                 if echo $LINGUAS | grep $lang >/dev/null 2>&1 ; then
                     :
                 else 
