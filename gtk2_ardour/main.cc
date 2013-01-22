@@ -398,7 +398,7 @@ int main (int argc, char *argv[])
 #endif
 
 #ifdef ENABLE_NLS
-	cerr << "bnd txt domain to " << localedir << endl;
+	cerr << "bnd txt domain [" << PACKAGE << "] to " << localedir << endl;
 
 	(void) bindtextdomain (PACKAGE, localedir);
 	/* our i18n translations are all in UTF-8, so make sure
