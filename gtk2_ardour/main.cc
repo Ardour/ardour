@@ -148,14 +148,22 @@ fixup_bundle_environment (int, char* [])
 
 	bundle_dir = Glib::path_get_dirname (exec_dir);
 
-	/* force localedir into the bundle */
-
-	vector<string> lpath;
-	lpath.push_back (bundle_dir);
-	lpath.push_back ("share");
-	lpath.push_back ("locale");
-	localedir = strdup (Glib::build_filename (lpath).c_str());
-
+#ifdef ENABLE_NLS
+	if (ARDOUR::translations_are_disabled ()) {
+		localedir = "/this/cannot/exist";
+		export_search_path (bundle_dir, "GTK_LOCALEDIR", "/Resources/locale");
+	} else {
+		/* force localedir into the bundle */
+		
+		vector<string> lpath;
+		lpath.push_back (bundle_dir);
+		lpath.push_back ("share");
+		lpath.push_back ("locale");
+		localedir = strdup (Glib::build_filename (lpath).c_str());
+		export_search_path (bundle_dir, "GTK_LOCALEDIR", "/Resources/locale");
+	}
+#endif
+		
 	export_search_path (bundle_dir, "ARDOUR_DLL_PATH", "/lib");
 
 	/* inside an OS X .app bundle, there is no difference
@@ -176,10 +184,6 @@ fixup_bundle_environment (int, char* [])
 	 */
 
 	unsetenv ("GTK_RC_FILES");
-
-	if (!ARDOUR::translations_are_disabled ()) {
-		export_search_path (bundle_dir, "GTK_LOCALEDIR", "/Resources/locale");
-	}
 
 	/* write a pango.rc file and tell pango to use it. we'd love
 	   to put this into the PROGRAM_NAME.app bundle and leave it there,
@@ -232,13 +236,20 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	std::string dir_path = Glib::path_get_dirname (Glib::path_get_dirname (argv[0]));
 	std::string userconfigdir = user_config_directory();
 
-	/* force localedir into the bundle */
-
-	vector<string> lpath;
-	lpath.push_back (dir_path);
-	lpath.push_back ("share");
-	lpath.push_back ("locale");
-	localedir = realpath (Glib::build_filename (lpath).c_str(), NULL);
+#ifdef ENABLE_NLS
+	if (ARDOUR::translations_are_disabled ()) {
+		localedir = "/this/cannot/exist";
+		export_search_path (dir_path, "GTK_LOCALEDIR", "/this/cannot/exist");
+	} else {
+		/* force localedir into the bundle */
+		vector<string> lpath;
+		lpath.push_back (dir_path);
+		lpath.push_back ("share");
+		lpath.push_back ("locale");
+		localedir = realpath (Glib::build_filename (lpath).c_str(), NULL);
+		export_search_path (dir_path, "GTK_LOCALEDIR", "/share/locale");
+	}
+#endif
 
 	/* note that this function is POSIX/Linux specific, so using / as
 	   a dir separator in this context is just fine.
@@ -258,10 +269,6 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	 */
 
 	unsetenv ("GTK_RC_FILES");
-
-	if (!ARDOUR::translations_are_disabled ()) {
-		export_search_path (dir_path, "GTK_LOCALEDIR", "/share/locale");
-	}
 
 	/* Tell fontconfig where to find fonts.conf. Use the system version
 	   if it exists, otherwise use the stuff we included in the bundle
@@ -388,7 +395,9 @@ int main (int argc, char *argv[])
 		Glib::thread_init();
 	}
 
+#ifdef ENABLE_NLS
 	gtk_set_locale ();
+#endif
 
 #ifdef WINDOWS_VST_SUPPORT
 	/* this does some magic that is needed to make GTK and Wine's own
@@ -406,7 +415,6 @@ int main (int argc, char *argv[])
 	   we use that when handling them.
 	*/
 	(void) bind_textdomain_codeset (PACKAGE,"UTF-8");
-	(void) textdomain (PACKAGE);
 #endif
 
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);

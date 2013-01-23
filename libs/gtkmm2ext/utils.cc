@@ -39,8 +39,9 @@ using namespace std;
 void
 Gtkmm2ext::init (const char* localedir)
 {
-	// Necessary for gettext
+#ifdef ENABLE_NLS
 	(void) bindtextdomain(PACKAGE, localedir);
+#endif
 }
 
 void

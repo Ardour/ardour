@@ -224,7 +224,9 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	// this really should be in PBD::init..if there was one
 	Gio::init ();
 
+#ifdef ENABLE_NLS
 	(void) bindtextdomain(PACKAGE, localedir);
+#endif
 
 	PBD::ID::init ();
 	SessionEvent::init_event_pool ();
