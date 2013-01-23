@@ -578,6 +578,9 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 	 * ev->state.
 	 */
 	case GDK_ISO_Left_Tab:
+		end_name_edit (RESPONSE_APPLY);
+		return true;
+
 	case GDK_Tab:
 		end_name_edit (RESPONSE_ACCEPT);
 		return true;
@@ -591,7 +594,7 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 bool
 TimeAxisView::name_entry_focus_out (GdkEventFocus*)
 {
-	end_name_edit (RESPONSE_ACCEPT);
+	end_name_edit (RESPONSE_OK);
 	return false;
 }
 
@@ -635,6 +638,7 @@ TimeAxisView::end_name_edit (int response)
 	}
 	
 	bool edit_next = false;
+	bool edit_prev = false;
 
 	switch (response) {
 	case RESPONSE_CANCEL:
@@ -645,6 +649,9 @@ TimeAxisView::end_name_edit (int response)
 	case RESPONSE_ACCEPT:
 		name_entry_changed ();
 		edit_next = true;
+	case RESPONSE_APPLY:
+		name_entry_changed ();
+		edit_prev = true;
 	}
 
 	/* this will delete the name_entry. but it will also drop focus, which
@@ -686,6 +693,37 @@ TimeAxisView::end_name_edit (int response)
 			} while (true);
 		}
 
+		if ((i != allviews.end()) && (*i != this) && !(*i)->hidden()) {
+			_editor.ensure_time_axis_view_is_visible (**i);
+			(*i)->begin_name_edit ();
+		} 
+
+	} else if (edit_prev) {
+
+		TrackViewList const & allviews = _editor.get_track_views ();
+		TrackViewList::const_iterator i = find (allviews.begin(), allviews.end(), this);
+		
+		if (i != allviews.begin()) {
+			do {
+				if (i == allviews.begin()) {
+					return;
+				}
+				
+				--i;
+				
+				RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
+				
+				if (rtav && rtav->route()->record_enabled()) {
+					continue;
+				}
+				
+				if (!(*i)->hidden()) {
+					break;
+				}
+				
+			} while (true);
+		}
+		
 		if ((i != allviews.end()) && (*i != this) && !(*i)->hidden()) {
 			_editor.ensure_time_axis_view_is_visible (**i);
 			(*i)->begin_name_edit ();
