@@ -3629,43 +3629,6 @@ ARDOUR_UI::setup_profile ()
 	}
 }
 
-void
-ARDOUR_UI::toggle_translations ()
-{
-	using namespace Glib;
-
-	RefPtr<Action> act = ActionManager::get_action (X_("Main"), X_("EnableTranslation"));
-	if (act) {
-		RefPtr<ToggleAction> ract = RefPtr<ToggleAction>::cast_dynamic (act);
-		if (ract) {
-
-			string i18n_killer = ARDOUR::translation_kill_path();
-
-			bool already_enabled = !ARDOUR::translations_are_disabled ();
-
-			if (ract->get_active ()) {
-				/* we don't care about errors */
-				int fd = ::open (i18n_killer.c_str(), O_RDONLY|O_CREAT, 0644);
-				close (fd);
-			} else {
-				/* we don't care about errors */
-				unlink (i18n_killer.c_str());
-			}
-
-			if (already_enabled != ract->get_active()) {
-				MessageDialog win (already_enabled ? _("Translations disabled") : _("Translations enabled"),
-				                   false,
-				                   Gtk::MESSAGE_WARNING,
-				                   Gtk::BUTTONS_OK);
-				win.set_secondary_text (string_compose (_("You must restart %1 for this to take effect."), PROGRAM_NAME));
-				win.set_position (Gtk::WIN_POS_CENTER);
-				win.present ();
-				win.run ();
-			}
-		}
-	}
-}
-
 /** Add a window proxy to our list, so that its state will be saved.
  *  This call also causes the window to be created and opened if its
  *  state was saved as `visible'.
