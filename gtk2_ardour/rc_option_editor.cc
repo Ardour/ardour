@@ -1199,10 +1199,9 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Editor"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), 
-					    string_compose (_("When extending region selection across a group, %1 must decide which regions are equivalent"
-							      "\n\nIf enabled, regions are considered \"equivalent\" if they overlap on the timeline."
-							      "\n\nIf disabled, regions are considered \"equivalent\" only if have the same start time, length and position"),
-							    PROGRAM_NAME));
+					    _("Regions in active edit groups are edited together:"
+					      "\n\n<b>If enabled</b>, whenever they overlap in time"
+					      "\n\n<b>If disabled</b>, only if they have identical length, position and origin"));
 
 	add_option (_("Editor"),
 	     new BoolOption (
