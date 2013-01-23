@@ -23,7 +23,7 @@ CURRENT_SESSION_FILE_VERSION = 3001
 # Variables for 'waf dist'
 APPNAME = 'libardour3'
 VERSION = LIBARDOUR_VERSION
-I18N_PACKAGE = 'libardour3'
+I18N_PACKAGE = 'ardour3'
 
 # Mandatory variables
 top = '.'
