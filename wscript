@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 # Variables for 'waf dist'
-VERSION = '3.0rc1'
+VERSION = '3.0rc2'
 APPNAME = 'Ardour3'
 
 # Mandatory variables
@@ -483,18 +483,28 @@ def configure(conf):
     #
     user_gtk_root = os.path.expanduser ('~/gtk/inst')
     pkg_config_path = os.getenv('PKG_CONFIG_PATH')
-    if not os.path.isfile ('/usr/include/libintl.h') or (pkg_config_path is not None and pkg_config_path.find (user_gtk_root) >= 0):
-        # XXXX hack hack hack
-        prefinclude = ''.join ([ '-I', user_gtk_root + '/include'])
-        preflib = ''.join ([ '-L', user_gtk_root + '/lib'])
-        conf.env.append_value('CFLAGS', [ prefinclude ])
-        conf.env.append_value('CXXFLAGS',  [prefinclude ])
-        conf.env.append_value('LINKFLAGS', [ preflib ])
-        conf.define ('NEED_INTL', 1)
-        autowaf.display_msg(conf, 'Will use explicit linkage against libintl in ' + user_gtk_root, 'yes')
+    if os.path.isfile ('/usr/include/libintl.h'):
+        # libintl is part of the system., so use it
+        autowaf.display_msg(conf, 'Will reply on libintl built into libc', 'yes')
     else:
-        autowaf.display_msg(conf, 'Will use explicit linkage against libintl in ', 'no')
+        if (pkg_config_path is not None):
+            # told to search for pkgconfig files
+            if pkg_config_path.find (user_gtk_root) >= 0:
+                # told to search user_gtk_root
+                prefinclude = ''.join ([ '-I', user_gtk_root + '/include'])
+                preflib = ''.join ([ '-L', user_gtk_root + '/lib'])
+                conf.env.append_value('CFLAGS', [ prefinclude ])
+                conf.env.append_value('CXXFLAGS',  [prefinclude ])
+                conf.env.append_value('LINKFLAGS', [ preflib ])
+                conf.define ('NEED_INTL', 1)
+                autowaf.display_msg(conf, 'Will use explicit linkage against libintl in ' + user_gtk_root, 'yes')
+            else:
+                print ('\n\n**** Cannot locate libintl.h and PKG_CONFIG_PATH does not include ', user_gtk_root, '- this needs fixing before the build can continue')
+                sys.exit (-1)
+        else:
+                print ('\n\n**** Cannot locate libintl.h and PKG_CONFIG_PATH is not set - this needs fixing before the build can continue')
 
+            
     user_ardour_root = os.path.expanduser ('~/a3/inst')
     if pkg_config_path is not None and os.getenv('PKG_CONFIG_PATH').find (user_ardour_root) >= 0:
         # XXXX hack hack hack
