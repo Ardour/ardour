@@ -480,28 +480,46 @@ ARDOUR::translation_enable_path ()
 bool
 ARDOUR::translations_are_enabled ()
 {
-        if (Glib::file_test (translation_enable_path(), Glib::FILE_TEST_EXISTS)) {
-		return true;
-	} 
+	int fd = ::open (ARDOUR::translation_enable_path().c_str(), O_RDONLY);
 
-	return translate_by_default;
+	if (fd < 0) {
+		return translate_by_default;
+	}
+
+	char c;
+	bool ret = false;
+
+	if (::read (fd, &c, 1) == 1 && c == '1') {
+		ret = true;
+	}
+
+	::close (fd);
+
+	return ret;
 }
 
 bool
 ARDOUR::set_translations_enabled (bool yn)
 {
 	string i18n_enabler = ARDOUR::translation_enable_path();
+	int fd = ::open (i18n_enabler.c_str(), O_WRONLY|O_CREAT|O_TRUNC, 0644);
 
-	if (yn) {
-		int fd = ::open (i18n_enabler.c_str(), O_RDONLY|O_CREAT, 0644);
-		if (fd >= 0) {
-			close (fd);
-			return true;
-		} 
+	if (fd < 0) {
 		return false;
-	} 
+	}
+	
+	char c;
+	
+	if (yn) {
+		c = '1';
+	} else {
+		c = '0';
+	}
+	
+	::write (fd, &c, 1);
+	::close (fd);
 
-	return unlink (i18n_enabler.c_str()) == 0;
+	return true;
 }
 
 
