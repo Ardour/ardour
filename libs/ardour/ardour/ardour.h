@@ -62,8 +62,10 @@ namespace ARDOUR {
 
 	void find_bindings_files (std::map<std::string,std::string>&);
 
-	std::string translation_kill_path ();
-	bool translations_are_disabled ();
+	/* these only impact bundled installations */
+	std::string translation_enable_path ();
+	bool translations_are_enabled ();
+	bool set_translations_enabled (bool);
 
 	static inline microseconds_t get_microseconds () {
 		return (microseconds_t) jack_get_time();

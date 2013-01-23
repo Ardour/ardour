@@ -1684,6 +1684,17 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* USER INTERACTION */
 
+	if (getenv ("ARDOUR_BUNDLED")) {
+		add_option (_("User interaction"), 
+			    new BoolOption (
+				    "enable-translation",
+				    string_compose (_("Use translations of %1 messages\n"
+						      "   <i>(requires a restart of %1 to take effect)</i>\n"
+						      "   <i>(if available for your language preferences)</i>"), PROGRAM_NAME),
+				    sigc::ptr_fun (ARDOUR::translations_are_enabled),
+				    sigc::ptr_fun (ARDOUR::set_translations_enabled)));
+	}
+
 	add_option (_("User interaction"), new OptionEditorHeading (_("Keyboard")));
 
 	add_option (_("User interaction"), new KeyboardOptions);

@@ -21,6 +21,7 @@
 #endif
 
 #include <cstdio> // Needed so that libraptor (included in lrdf) won't complain
+#include <cstdlib>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>
@@ -465,18 +466,44 @@ ARDOUR::setup_fpu ()
 #endif
 }
 
+/* this can be changed to modify the translation behaviour for
+   cases where the user has never expressed a preference.
+*/
+static const bool translate_by_default = true;
+
 string
-ARDOUR::translation_kill_path ()
+ARDOUR::translation_enable_path ()
 {
-        return Glib::build_filename (user_config_directory(), ".love_is_the_language_of_audio");
+        return Glib::build_filename (user_config_directory(), ".translate");
 }
 
 bool
-ARDOUR::translations_are_disabled ()
+ARDOUR::translations_are_enabled ()
 {
-        /* if file does not exist, we don't translate (bundled ardour only) */
-        return Glib::file_test (translation_kill_path(), Glib::FILE_TEST_EXISTS) == false;
+        if (Glib::file_test (translation_enable_path(), Glib::FILE_TEST_EXISTS)) {
+		return true;
+	} 
+
+	return translate_by_default;
 }
+
+bool
+ARDOUR::set_translations_enabled (bool yn)
+{
+	string i18n_enabler = ARDOUR::translation_enable_path();
+
+	if (yn) {
+		int fd = ::open (i18n_enabler.c_str(), O_RDONLY|O_CREAT, 0644);
+		if (fd >= 0) {
+			close (fd);
+			return true;
+		} 
+		return false;
+	} 
+
+	return unlink (i18n_enabler.c_str()) == 0;
+}
+
 
 vector<SyncSource>
 ARDOUR::get_available_sync_options ()

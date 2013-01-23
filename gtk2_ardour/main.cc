@@ -149,7 +149,7 @@ fixup_bundle_environment (int, char* [])
 	bundle_dir = Glib::path_get_dirname (exec_dir);
 
 #ifdef ENABLE_NLS
-	if (ARDOUR::translations_are_disabled ()) {
+	if (!ARDOUR::translations_are_enabled ()) {
 		localedir = "/this/cannot/exist";
 		export_search_path (bundle_dir, "GTK_LOCALEDIR", "/Resources/locale");
 	} else {
@@ -237,7 +237,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	std::string userconfigdir = user_config_directory();
 
 #ifdef ENABLE_NLS
-	if (ARDOUR::translations_are_disabled ()) {
+	if (!ARDOUR::translations_are_enabled ()) {
 		localedir = "/this/cannot/exist";
 		export_search_path (dir_path, "GTK_LOCALEDIR", "/this/cannot/exist");
 	} else {
