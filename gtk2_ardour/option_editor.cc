@@ -113,7 +113,10 @@ BoolOption::BoolOption (string const & i, string const & n, sigc::slot<bool> g, 
 	  _get (g),
 	  _set (s)
 {
-	_button = manage (new CheckButton (n));
+	_button = manage (new CheckButton);
+	_label = manage (new Label);
+	_label->set_markup (n);
+	_button->add (*_label);
 	_button->set_active (_get ());
 	_button->signal_toggled().connect (sigc::mem_fun (*this, &BoolOption::toggled));
 }
