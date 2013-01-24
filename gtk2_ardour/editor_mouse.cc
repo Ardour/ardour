@@ -799,6 +799,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		eff = MouseObject;
 	}
 
+	/* there is no Range mode when in internal edit mode */
+	if (eff == MouseRange && internal_editing()) {
+		eff = MouseObject;
+	}
+
 	switch (eff) {
 	case MouseRange:
 		switch (item_type) {
