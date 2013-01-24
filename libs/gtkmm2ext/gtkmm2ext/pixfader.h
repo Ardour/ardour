@@ -35,7 +35,6 @@ class PixFader : public Gtk::DrawingArea
         PixFader (Gtk::Adjustment& adjustment, int orientation, int span, int girth);
 	virtual ~PixFader ();
 
-	void set_fader_length (int);
 	void set_default_value (float);
 	void set_text (const std::string&);
 

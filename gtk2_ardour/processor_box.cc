@@ -297,14 +297,6 @@ ProcessorEntry::name (Width w) const
 }
 
 void
-ProcessorEntry::set_pixel_width (int p)
-{
-	for (list<Control*>::iterator i = _controls.begin(); i != _controls.end(); ++i) {
-		(*i)->set_pixel_width (p);
-	}
-}
-
-void
 ProcessorEntry::show_all_controls ()
 {
 	for (list<Control*>::iterator i = _controls.begin(); i != _controls.end(); ++i) {
@@ -467,12 +459,6 @@ ProcessorEntry::Control::set_tooltip ()
 	ARDOUR_UI::instance()->set_tip (_label, sm);
 	_slider_persistant_tooltip.set_tip (sm);
 	ARDOUR_UI::instance()->set_tip (_button, sm);
-}
-
-void
-ProcessorEntry::Control::set_pixel_width (int p)
-{
-	_slider.set_fader_length (p);
 }
 
 void
@@ -705,7 +691,6 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 
 	processor_display.set_flags (CAN_FOCUS);
 	processor_display.set_name ("ProcessorList");
-	processor_display.set_size_request (48, -1);
 	processor_display.set_data ("processorbox", this);
 	processor_display.set_spacing (2);
 
@@ -844,8 +829,7 @@ ProcessorBox::set_width (Width w)
 		(*i)->set_enum_width (w);
 	}
 
-	_redisplay_pending = true;
-	
+	queue_resize ();
 }
 
 Gtk::Menu*
@@ -1356,7 +1340,6 @@ ProcessorBox::redisplay_processors ()
 
 	if (_visible_prefader_processors == 0) { // fader only
 		BlankProcessorEntry* bpe = new BlankProcessorEntry (this, _width);
-		bpe->set_pixel_width (get_allocation().get_width());
 		processor_display.add_child (bpe);
 	}
 
@@ -1480,8 +1463,6 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 	} else {
 		e = new ProcessorEntry (this, processor, _width);
 	}
-
-	e->set_pixel_width (get_allocation().get_width());
 
 	/* Set up this entry's state from the GUIObjectState */
 	XMLNode* proc = entry_gui_object_state (e);
@@ -2497,22 +2478,6 @@ ProcessorBox::generate_processor_title (boost::shared_ptr<PluginInsert> pi)
 	}
 
 	return string_compose(_("%1: %2 (by %3)"), _route->name(), pi->name(), maker);
-}
-
-void
-ProcessorBox::on_size_allocate (Allocation& a)
-{
-	HBox::on_size_allocate (a);
-
-	if (_redisplay_pending) {
-		_redisplay_pending = false;
-		redisplay_processors ();
-	} else {
-		list<ProcessorEntry*> children = processor_display.children ();
-		for (list<ProcessorEntry*>::const_iterator i = children.begin(); i != children.end(); ++i) {
-			(*i)->set_pixel_width (a.get_width ());
-		}
-	}
 }
 
 /** @param p Processor.

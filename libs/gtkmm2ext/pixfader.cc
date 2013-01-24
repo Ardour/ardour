@@ -21,6 +21,8 @@
 
 #include <iostream>
 
+#include "pbd/stacktrace.h"
+
 #include "gtkmm2ext/pixfader.h"
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/rgb_macros.h"
@@ -280,12 +282,11 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 			}
 		}
 	}
-	
+
 	if ( !_text.empty() ) {
 
-		cairo_new_path (cr);	
-
 		/* center text */
+		cairo_new_path (cr);
 		cairo_move_to (cr, (get_width() - _text_width)/2.0, get_height()/2.0 - _text_height/2.0);
 		cairo_set_source_rgba (cr, text_r, text_g, text_b, 0.9);
 		pango_cairo_show_layout (cr, _layout->gobj());
@@ -308,11 +309,11 @@ void
 PixFader::on_size_request (GtkRequisition* req)
 {
 	if (_orien == VERT) {
-		req->width = girth;
-		req->height = span;
+		req->width = (girth ? girth : -1);
+		req->height = (span ? span : -1);
 	} else {
-		req->height = girth;
-		req->width = span;
+		req->height = (girth ? girth : -1);
+		req->width = (span ? span : -1);
 	}
 }
 
@@ -327,6 +328,11 @@ PixFader::on_size_allocate (Gtk::Allocation& alloc)
 	} else {
 		girth = alloc.get_height ();
 		span = alloc.get_width ();
+	}
+
+	if (is_realized()) {
+		/* recreate patterns in case we've changed size */
+		create_patterns ();
 	}
 
 	update_unity_position ();
@@ -532,14 +538,6 @@ PixFader::display_span ()
 	}
 	
 	return ds;
-}
-
-void
-PixFader::set_fader_length (int l)
-{
-	span = l;
-	update_unity_position ();
-	queue_resize ();
 }
 
 void
