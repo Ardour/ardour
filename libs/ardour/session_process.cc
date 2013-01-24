@@ -1173,6 +1173,11 @@ Session::compute_stop_limit () const
 	if (!Config->get_stop_at_session_end ()) {
 		return max_framepos;
 	}
+
+	if (_slave) {
+		return max_framepos;
+	}
+
 	
 	bool const punching_in = (config.get_punch_in () && _locations->auto_punch_location());
 	bool const punching_out = (config.get_punch_out () && _locations->auto_punch_location());
