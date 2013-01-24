@@ -188,12 +188,34 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 	Cairo::RefPtr<Cairo::Context> context = get_window()->create_cairo_context();
 	cairo_t* cr = context->cobj();
 
-	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	cairo_clip (cr);
-
 	if (!pattern) {
 		create_patterns();
 	}
+
+	if (!pattern) {
+
+		/* this isn't supposed to be happen, but some wackiness whereby
+		   the pixfader ends up with a 1xN or Nx1 size allocation
+		   leads to it. the basic wackiness needs fixing but we
+		   shouldn't crash. just fill in the expose area with 
+		   our bg color.
+		*/
+
+		Gdk::Color c = get_style()->get_bg (get_state());
+		float br, bg, bb;
+
+		br = c.get_red_p ();
+		bg = c.get_green_p ();
+		bb = c.get_blue_p ();
+		cairo_set_source_rgb (cr, br, bg, bb);
+		cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+		cairo_fill (cr);
+
+		return true;
+	}
+		   
+	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	cairo_clip (cr);
 
 	int ds = display_span ();
 	float w = get_width();
