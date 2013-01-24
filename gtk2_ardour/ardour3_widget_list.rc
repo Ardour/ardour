@@ -74,7 +74,7 @@ widget "*MixerSoloButton-alternate2" style:highest "mixer_solo_button_alternate2
 widget "*MixerSoloButton-active" style:highest "mixer_solo_button_active"
 widget "*TrackLoopButton*" style:highest "track_loop_button"
 widget "*PanAutomationLineSelector*" style:highest "multiline_combo"
-widget "*EditorTimeButton*" style:highest "time_button"
+widget "*EditorRulerLabel*" style:highest "ruler_label"
 widget "*MixerInvertButton*" style:highest "mixer_invert_button"
 widget "*MixerInvertButton.*" style:highest "mixer_invert_button"
 widget "*MixerAutomationRecordingButton*" style:highest "very_small_button"

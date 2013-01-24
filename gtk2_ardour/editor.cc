@@ -384,67 +384,67 @@ Editor::Editor ()
 	set_zoom_focus (ZoomFocusLeft);
 	zoom_range_clock->ValueChanged.connect (sigc::mem_fun(*this, &Editor::zoom_adjustment_changed));
 
-	bbt_label.set_name ("EditorTimeButton");
+	bbt_label.set_name ("EditorRulerLabel");
 	bbt_label.set_size_request (-1, (int)timebar_height);
 	bbt_label.set_alignment (1.0, 0.5);
 	bbt_label.set_padding (5,0);
 	bbt_label.hide ();
 	bbt_label.set_no_show_all();
-	minsec_label.set_name ("EditorTimeButton");
+	minsec_label.set_name ("EditorRulerLabel");
 	minsec_label.set_size_request (-1, (int)timebar_height);
 	minsec_label.set_alignment (1.0, 0.5);
 	minsec_label.set_padding (5,0);
 	minsec_label.hide ();
 	minsec_label.set_no_show_all();
-	timecode_label.set_name ("EditorTimeButton");
+	timecode_label.set_name ("EditorRulerLabel");
 	timecode_label.set_size_request (-1, (int)timebar_height);
 	timecode_label.set_alignment (1.0, 0.5);
 	timecode_label.set_padding (5,0);
 	timecode_label.hide ();
 	timecode_label.set_no_show_all();
-	samples_label.set_name ("EditorTimeButton");
+	samples_label.set_name ("EditorRulerLabel");
 	samples_label.set_size_request (-1, (int)timebar_height);
 	samples_label.set_alignment (1.0, 0.5);
 	samples_label.set_padding (5,0);
 	samples_label.hide ();
 	samples_label.set_no_show_all();
 
-	tempo_label.set_name ("EditorTimeButton");
+	tempo_label.set_name ("EditorRulerLabel");
 	tempo_label.set_size_request (-1, (int)timebar_height);
 	tempo_label.set_alignment (1.0, 0.5);
 	tempo_label.set_padding (5,0);
 	tempo_label.hide();
 	tempo_label.set_no_show_all();
 
-	meter_label.set_name ("EditorTimeButton");
+	meter_label.set_name ("EditorRulerLabel");
 	meter_label.set_size_request (-1, (int)timebar_height);
 	meter_label.set_alignment (1.0, 0.5);
 	meter_label.set_padding (5,0);
 	meter_label.hide();
 	meter_label.set_no_show_all();
 
-	mark_label.set_name ("EditorTimeButton");
+	mark_label.set_name ("EditorRulerLabel");
 	mark_label.set_size_request (-1, (int)timebar_height);
 	mark_label.set_alignment (1.0, 0.5);
 	mark_label.set_padding (5,0);
 	mark_label.hide();
 	mark_label.set_no_show_all();
 
-	cd_mark_label.set_name ("EditorTimeButton");
+	cd_mark_label.set_name ("EditorRulerLabel");
 	cd_mark_label.set_size_request (-1, (int)timebar_height);
 	cd_mark_label.set_alignment (1.0, 0.5);
 	cd_mark_label.set_padding (5,0);
 	cd_mark_label.hide();
 	cd_mark_label.set_no_show_all();
 
-	range_mark_label.set_name ("EditorTimeButton");
+	range_mark_label.set_name ("EditorRulerLabel");
 	range_mark_label.set_size_request (-1, (int)timebar_height);
 	range_mark_label.set_alignment (1.0, 0.5);
 	range_mark_label.set_padding (5,0);
 	range_mark_label.hide();
 	range_mark_label.set_no_show_all();
 
-	transport_mark_label.set_name ("EditorTimeButton");
+	transport_mark_label.set_name ("EditorRulerLabel");
 	transport_mark_label.set_size_request (-1, (int)timebar_height);
 	transport_mark_label.set_alignment (1.0, 0.5);
 	transport_mark_label.set_padding (5,0);

@@ -361,9 +361,9 @@ style "mixer_red_active_button" = "very_small_button"
  	bg[INSENSITIVE] = { 0.16, 0.16, 0.21 }
 }
 
-style "time_button" = "default_button"
+style "ruler_label" = "small_bold_text"
 {
-	font_name = "@FONT_SMALL@"
+        fg[NORMAL] = @@COLPREFIX@_light_text_on_dark
 }
 
 style "transport_button"
