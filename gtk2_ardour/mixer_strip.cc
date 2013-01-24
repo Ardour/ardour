@@ -629,8 +629,6 @@ MixerStrip::set_width_enum (Width w, void* owner)
 					panners.astate_string(_route->panner()->automation_state()));
 		}
 
-		solo_isolated_led->set_text (_("iso"));
-		solo_safe_led->set_text (_("lock"));
 
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, longest_label.c_str(), 2, 2);
 		set_size_request (-1, -1);
@@ -653,9 +651,6 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (
 			panners.short_astate_string(_route->panner()->automation_state()));
 		}
-		
-		solo_isolated_led->set_text (_("iso"));
-		solo_safe_led->set_text (_("Lck"));
 
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
 		set_size_request (max (50, gpm.get_gm_width()), -1);
@@ -1904,6 +1899,8 @@ MixerStrip::set_button_names ()
 				}
 			}
 		}
+		solo_isolated_led->set_text (_("iso"));
+		solo_safe_led->set_text (_("lock"));
 		break;
 
 	default:
@@ -1933,8 +1930,9 @@ MixerStrip::set_button_names ()
 				}
 			}
 		}
+		solo_isolated_led->set_text (_("i"));
+		solo_safe_led->set_text (_("L"));
 		break;
-
 	}
 
 	if (_route) {
