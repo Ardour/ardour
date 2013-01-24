@@ -879,6 +879,7 @@ RCOptionEditor::RCOptionEditor ()
 
         uint32_t hwcpus = hardware_concurrency ();
 	BoolOption* bo;
+	BoolComboOption* bco;
 
         if (hwcpus > 1) {
                 add_option (_("Misc"), new OptionEditorHeading (_("DSP CPU Utilization")));
@@ -1150,7 +1151,7 @@ RCOptionEditor::RCOptionEditor ()
 		 _("<b>When enabled</b> Ardour will continue to send LTC information even when the transport (playhead) is not moving"));
 	add_option (_("Transport"), _ltc_send_continuously);
 
-  _ltc_volume_adjustment = new Gtk::Adjustment(-18, -50, 0, .5, 5);
+	_ltc_volume_adjustment = new Gtk::Adjustment(-18, -50, 0, .5, 5);
 	_ltc_volume_adjustment->set_value (20 * log10(_rc_config->get_ltc_output_volume()));
 	_ltc_volume_adjustment->signal_value_changed().connect (sigc::mem_fun (*this, &RCOptionEditor::ltc_generator_volume_changed));
 	_ltc_volume_slider = new HSliderOption("ltcvol", _("LTC generator level"), *_ltc_volume_adjustment);
@@ -1190,18 +1191,16 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_track_meters)
 		     ));
 
-	bo = new BoolOption (
+	bco = new BoolComboOption (
 		     "use-overlap-equivalency",
-		     _("Use overlap equivalency for regions"),
+		     _("Regions in active edit groups are edited together"),
+		     _("whenever they overlap in time"),
+		     _("only if they have identical length, position and origin"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_overlap_equivalency),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_overlap_equivalency)
 		     );
 
-	add_option (_("Editor"), bo);
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), 
-					    _("Regions in active edit groups are edited together:"
-					      "\n\n<b>If enabled</b>, whenever they overlap in time"
-					      "\n\n<b>If disabled</b>, only if they have identical length, position and origin"));
+	add_option (_("Editor"), bco);
 
 	add_option (_("Editor"),
 	     new BoolOption (
