@@ -65,11 +65,7 @@ mkdir -p $PREFIX
 export MAKEFLAGS=-j$parallel
 PATH=$PREFIX/bin:$PATH
 
-#
-# tell perl to look in our $PREFIX tree for additional perl modules
-#
 PERLVERSION=`perl -e 'printf "%vd\n", $^V;'`
-export PERL5LIB=$PREFIX/lib/perl/$PERLVERSION:$PREFIX/share/perl/$PERLVERSION
 
 OSX=
 
@@ -78,6 +74,10 @@ if uname -a | grep --silent arwin ; then
     # its OS X! run for the hills !!
 
     OSX=1
+
+    
+    # tell perl to look in our $PREFIX tree for additional perl modules
+    export PERL5LIB=$PREFIX/System/Library/Perl/$PERLVERSION
 
     export DYLD_FALLBACK_LIBRARY_PATH=$PREFIX/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}
     # force compilation to use 10.4 APIs only. could be overkill, but better safe than sorry
@@ -105,6 +105,9 @@ if uname -a | grep --silent arwin ; then
     explicit_intl=yes
 
 else 
+
+    # tell perl to look in our $PREFIX tree for additional perl modules
+    export PERL5LIB=$PREFIX/lib/perl/$PERLVERSION:$PREFIX/share/perl/$PERLVERSION
 
     export LD_LIBRARY_PATH=$PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
     GLOBAL_CFLAGS=
