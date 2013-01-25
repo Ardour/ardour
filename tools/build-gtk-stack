@@ -65,7 +65,11 @@ mkdir -p $PREFIX
 export MAKEFLAGS=-j$parallel
 PATH=$PREFIX/bin:$PATH
 
-export PERL5LIB=$PREFIX/lib/perl/5.8.8:$PREFIX/lib/perl/5.8:$PREFIX/share/perl/5.8.8:$PREFIX/share/perl/5.8
+#
+# tell perl to look in our $PREFIX tree for additional perl modules
+#
+PERLVERSION=`perl -e 'printf "%vd\n", $^V;'`
+export PERL5LIB=$PREFIX/lib/perl/$PERLVERSION:$PREFIX/share/perl/$PERLVERSION
 
 OSX=
 
