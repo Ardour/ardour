@@ -837,27 +837,24 @@ MidiTimeAxisView::build_controller_menu ()
 			for (ControlNameList::Controls::const_iterator c = name_list->controls().begin();
 			     c != name_list->controls().end();) {
 				const uint16_t ctl = c->second->number();
-				if (ctl == MIDI_CTL_MSB_BANK || ctl == MIDI_CTL_LSB_BANK) {
+				if (ctl != MIDI_CTL_MSB_BANK && ctl != MIDI_CTL_LSB_BANK) {
 					/* Skip bank select controllers since they're handled specially */
-					/* FIXME: If this is the last control, the last submenu might be lost */
-					continue;
-				}
+					if (n_items == 0) {
+						/* Create a new submenu */
+						ctl_menu = manage (new Menu);
+					}
 				
-				if (n_items == 0) {
-					/* Create a new submenu */
-					ctl_menu = manage (new Menu);
-				}
-				
-				MenuList& ctl_items (ctl_menu->items());
-				if (chn_cnt > 1) {
-					add_multi_channel_controller_item(ctl_items, ctl, c->second->name());
-				} else {
-					add_single_channel_controller_item(ctl_items, ctl, c->second->name());
+					MenuList& ctl_items (ctl_menu->items());
+					if (chn_cnt > 1) {
+						add_multi_channel_controller_item(ctl_items, ctl, c->second->name());
+					} else {
+						add_single_channel_controller_item(ctl_items, ctl, c->second->name());
+					}
 				}
 
 				++c;
-				if (++n_items == 16 || c == name_list->controls().end()) {
-					/* Submenu has 16 items, add it to controller menu and reset */
+				if (ctl_menu && (++n_items == 16 || c == name_list->controls().end())) {
+					/* Submenu has 16 items or we're done, add it to controller menu and reset */
 					items.push_back(
 						MenuElem(string_compose(_("Controllers %1-%2"),
 						                        (16 * n_groups), (16 * n_groups) + n_items - 1),
