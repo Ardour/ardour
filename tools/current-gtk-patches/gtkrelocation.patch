@@ -1,0 +1,473 @@
+commit 256085a45e93ec6bf8d9590a893c15c9320ccfe3
+Author: Paul Davis <paul@linuxaudiosystems.com>
+Date:   Sat Jan 26 14:20:45 2013 -0500
+
+    initial version of GTK relocation patch, provides relocation on Linux and OSX. Windows code for this exists but has not been merged into gtkrelocation.c
+
+diff --git a/configure.ac b/configure.ac
+index e777ed0..70e4719 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1253,22 +1253,31 @@ else
+   AM_CONDITIONAL(USE_WIN32, false)
+ fi
+ 
++AC_ARG_ENABLE(relocation,
++              [AS_HELP_STRING([--enable-relocation],
++                              [enable bundle-based relocation functions])],
++                              [allow_relocation=yes])
++
++# --enable-quartz-relocation is a legacy flag that should eventually
++# be removed when the only relocation flag is just --enable-relocation.
++# for now, it has the same effect as --enable-relocation
+ AC_ARG_ENABLE(quartz-relocation,
+               [AS_HELP_STRING([--enable-quartz-relocation],
+                               [enable bundle-based relocation functions])],
+-                              [quartz_relocation=yes])
++                              [allow_relocation=yes])
+ 
+ if test "x$gdktarget" = "xquartz"; then
+   GDK_EXTRA_LIBS="$GDK_EXTRA_LIBS -framework Cocoa"
+   AM_CONDITIONAL(USE_QUARTZ, true)
+-  if test "x$quartz_relocation" = xyes; then
+-    AC_DEFINE([QUARTZ_RELOCATION], [1], [Use NSBundle functions to determine load paths for libraries, translations, etc.])
+-  fi
+-
+ else
+   AM_CONDITIONAL(USE_QUARTZ, false)
+ fi
+ 
++if test "x$allow_relocation" = xyes; then
++   AC_DEFINE([ALLOW_RELOCATION], [1], [Determine load paths for libraries, translations, etc. at runtime instead of build time])
++   AM_CONDITIONAL(USE_RELOCATION, true)
++fi
++
+ if test "x$gdktarget" = "xdirectfb"; then
+   DIRECTFB_REQUIRED_VERSION=1.0.0
+   AC_MSG_CHECKING(for DirectFB)
+diff --git a/gtk/Makefile.am b/gtk/Makefile.am
+index 908291f..1f16830 100644
+--- a/gtk/Makefile.am
++++ b/gtk/Makefile.am
+@@ -758,6 +758,10 @@ endif
+ endif
+ endif
+ 
++if USE_RELOCATION
++gtk_c_sources += gtkrelocation.c
++endif
++
+ if USE_QUARTZ
+ gtk_clipboard_dnd_c_sources = gtkclipboard-quartz.c gtkdnd-quartz.c gtkquartz.c
+ gtk_clipboard_dnd_h_sources = gtkquartz.h
+diff --git a/gtk/gtkprivate.h b/gtk/gtkprivate.h
+index 6386c32..88a3bb8 100644
+--- a/gtk/gtkprivate.h
++++ b/gtk/gtkprivate.h
+@@ -74,8 +74,7 @@ typedef enum
+ #define GTK_PRIVATE_SET_FLAG(wid,flag)    G_STMT_START{ (GTK_PRIVATE_FLAGS (wid) |= (PRIVATE_ ## flag)); }G_STMT_END
+ #define GTK_PRIVATE_UNSET_FLAG(wid,flag)  G_STMT_START{ (GTK_PRIVATE_FLAGS (wid) &= ~(PRIVATE_ ## flag)); }G_STMT_END
+ 
+-#if defined G_OS_WIN32 \
+-  || (defined GDK_WINDOWING_QUARTZ && defined QUARTZ_RELOCATION)
++#if defined G_OS_WIN32 || defined ALLOW_RELOCATION
+ 
+ const gchar *_gtk_get_datadir ();
+ const gchar *_gtk_get_libdir ();
+@@ -94,7 +93,7 @@ const gchar *_gtk_get_data_prefix ();
+ #undef GTK_DATA_PREFIX
+ #define GTK_DATA_PREFIX _gtk_get_data_prefix ()
+ 
+-#endif /* G_OS_WIN32 */
++#endif /* G_OS_WIN32 or ALLOW_RELOCATION */
+ 
+ gboolean _gtk_fnmatch (const char *pattern,
+ 		       const char *string,
+diff --git a/gtk/gtkquartz.c b/gtk/gtkquartz.c
+index 2f8122a..a650489 100644
+--- a/gtk/gtkquartz.c
++++ b/gtk/gtkquartz.c
+@@ -331,85 +331,3 @@ _gtk_quartz_set_selection_data_for_pasteboard (NSPasteboard     *pasteboard,
+                                        freeWhenDone:NO]
+                                             forType:type];
+ }
+-
+-/*
+- * Bundle-based functions for various directories. These almost work
+- * even when the application isn't in a bundle, becuase mainBundle
+- * paths point to the bin directory in that case. It's a simple matter
+- * to test for that and remove the last element.
+- */
+-
+-static const gchar *
+-get_bundle_path (void)
+-{
+-  static gchar *path = NULL;
+-
+-  if (path == NULL)
+-    {
+-      NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+-      gchar *resource_path = g_strdup ([[[NSBundle mainBundle] resourcePath] UTF8String]);
+-      gchar *base;
+-      [pool drain];
+-
+-      base = g_path_get_basename (resource_path);
+-      if (strcmp (base, "bin") == 0)
+-	path = g_path_get_dirname (resource_path);
+-      else
+-	path = strdup (resource_path);
+-
+-      g_free (resource_path);
+-      g_free (base);
+-    }
+-
+-  return path;
+-}
+-
+-const gchar *
+-_gtk_get_datadir (void)
+-{
+-  static gchar *path = NULL;
+-
+-  if (path == NULL)
+-    path = g_build_filename (get_bundle_path (), "share", NULL);
+-
+-  return path;
+-}
+-
+-const gchar *
+-_gtk_get_libdir (void)
+-{
+-  static gchar *path = NULL;
+-
+-  if (path == NULL)
+-    path = g_build_filename (get_bundle_path (), "lib", NULL);
+-
+-  return path;
+-}
+-
+-const gchar *
+-_gtk_get_localedir (void)
+-{
+-  static gchar *path = NULL;
+-
+-  if (path == NULL)
+-    path = g_build_filename (get_bundle_path (), "share", "locale", NULL);
+-
+-  return path;
+-}
+-
+-const gchar *
+-_gtk_get_sysconfdir (void)
+-{
+-  static gchar *path = NULL;
+-
+-  if (path == NULL)
+-    path = g_build_filename (get_bundle_path (), "etc", NULL);
+-
+-  return path;
+-}
+-
+-const gchar *
+-_gtk_get_data_prefix (void)
+-{
+-  return get_bundle_path ();
+-}
+diff --git a/gtk/gtkrelocation.c b/gtk/gtkrelocation.c
+new file mode 100644
+index 0000000..0109841
+--- /dev/null
++++ b/gtk/gtkrelocation.c
+@@ -0,0 +1,292 @@
++/* gtklinuxrelocation: functions used to provide relocation on Linux
++ *
++ * Copyright (C) 2013 Whomsoever
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, write to the
++ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
++ * Boston, MA 02111-1307, USA.
++ */
++
++#include "config.h"
++
++#include <unistd.h>
++#include <sys/types.h>
++#include <errno.h>
++#include <stdio.h>
++#include <string.h>
++#include <glib.h>
++#include <glib/gstdio.h>
++
++#include "gtkalias.h"
++
++#ifdef G_OS_WIN32
++
++/* include relevant code here  */
++
++#elif defined (__APPLE__)
++
++static const gchar *
++get_bundle_path (void)
++{
++  static gchar *path = NULL;
++
++  if (path == NULL)
++    {
++      NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
++      gchar *resource_path = g_strdup ([[[NSBundle mainBundle] resourcePath] UTF8String]);
++      gchar *base;
++      [pool drain];
++
++      base = g_path_get_basename (resource_path);
++      if (strcmp (base, "bin") == 0)
++	path = g_path_get_dirname (resource_path);
++      else
++	path = strdup (resource_path);
++
++      g_free (resource_path);
++      g_free (base);
++    }
++
++  return path;
++}
++
++#else /* linux */
++
++/*
++ * Find the canonical filename of the executable. Returns the filename
++ * (which must be freed) or NULL on error. If the parameter 'error' is
++ * not NULL, the error code will be stored there, if an error occured.
++ */
++static char *
++_br_find_exe (gint *error)
++{
++        char *path, *path2, *line, *result;
++        size_t buf_size;
++        ssize_t size;
++        struct stat stat_buf;
++        FILE *f;
++
++        /* Read from /proc/self/exe (symlink) */
++        if (sizeof (path) > SSIZE_MAX)
++                buf_size = SSIZE_MAX - 1;
++        else
++                buf_size = PATH_MAX - 1;
++        path = g_try_new (char, buf_size);
++        if (path == NULL) {
++                /* Cannot allocate memory. */
++                if (error)
++                        *error = ENOMEM;
++                return NULL;
++        }
++        path2 = g_try_new (char, buf_size);
++        if (path2 == NULL) {
++                /* Cannot allocate memory. */
++                if (error)
++                        *error = ENOMEM;
++                g_free (path);
++                return NULL;
++        }
++
++        strncpy (path2, "/proc/self/exe", buf_size - 1);
++
++        while (1) {
++                int i;
++
++                size = readlink (path2, path, buf_size - 1);
++                if (size == -1) {
++                        /* Error. */
++                        g_free (path2);
++                        break;
++                }
++
++                /* readlink() success. */
++                path[size] = '\0';
++
++                /* Check whether the symlink's target is also a symlink.
++                 * We want to get the final target. */
++                i = stat (path, &stat_buf);
++                if (i == -1) {
++                        /* Error. */
++                        g_free (path2);
++                        break;
++                }
++
++                /* stat() success. */
++                if (!S_ISLNK (stat_buf.st_mode)) {
++                        /* path is not a symlink. Done. */
++                        g_free (path2);
++                        return path;
++                }
++
++                /* path is a symlink. Continue loop and resolve this. */
++                strncpy (path, path2, buf_size - 1);
++        }
++
++
++        /* readlink() or stat() failed; this can happen when the program is
++         * running in Valgrind 2.2. Read from /proc/self/maps as fallback. */
++
++        buf_size = PATH_MAX + 128;
++        line = (char *) g_try_realloc (path, buf_size);
++        if (line == NULL) {
++                /* Cannot allocate memory. */
++                g_free (path);
++                if (error)
++                        *error = ENOMEM;
++                return NULL;
++        }
++
++        f = g_fopen ("/proc/self/maps", "r");
++        if (f == NULL) {
++                g_free (line);
++                if (error)
++                        *error = ENOENT;
++                return NULL;
++        }
++
++        /* The first entry should be the executable name. */
++        result = fgets (line, (int) buf_size, f);
++        if (result == NULL) {
++                fclose (f);
++                g_free (line);
++                if (error)
++                        *error = EIO;
++                return NULL;
++        }
++
++        /* Get rid of newline character. */
++        buf_size = strlen (line);
++        if (buf_size <= 0) {
++                /* Huh? An empty string? */
++                fclose (f);
++                g_free (line);
++                if (error)
++                        *error = ENOENT;
++                return NULL;
++        }
++        if (line[buf_size - 1] == 10)
++                line[buf_size - 1] = 0;
++
++        /* Extract the filename; it is always an absolute path. */
++        path = strchr (line, '/');
++
++        /* Sanity check. */
++        if (strstr (line, " r-xp ") == NULL || path == NULL) {
++                fclose (f);
++                g_free (line);
++                if (error)
++                        *error = EIO;
++                return NULL;
++        }
++
++        path = g_strdup (path);
++        g_free (line);
++        fclose (f);
++        return path;
++}
++
++static const gchar *
++get_bundle_path (void)
++{
++  static gchar *path = NULL;
++  
++  if (path == NULL)
++          path = (gchar*) g_getenv ("GTK_BUNDLEDIR");     
++
++  if (path == NULL)
++    {
++      int err;            
++      path = _br_find_exe (&err);
++
++      if (path) 
++        {      
++           char* opath = path;
++           char* dir = g_path_get_dirname (path);
++
++           path = g_path_get_dirname (dir);
++
++           g_free (opath);
++
++           if (dir[0] == '.' && dir[1] == '\0')
++              g_free (dir);
++        }
++
++    }
++
++  return path;
++}
++
++#endif
++
++const gchar *
++_gtk_get_datadir (void)
++{
++  static const gchar *path = NULL;
++
++  if (path == NULL)
++     path = g_getenv ("GTK_DATADIR");     
++
++  if (path == NULL)
++    path = g_build_filename (get_bundle_path (), "share", NULL);
++
++  return path;
++}
++
++const gchar *
++_gtk_get_libdir (void)
++{
++  static const gchar *path = NULL;
++
++  if (path == NULL)
++     path = g_getenv ("GTK_LIBDIR");     
++
++  if (path == NULL)
++    path = g_build_filename (get_bundle_path (), "lib", NULL);
++
++  return path;
++}
++
++const gchar *
++_gtk_get_localedir (void)
++{
++  static const gchar *path = NULL;
++
++  if (path == NULL)
++     path = g_getenv ("GTK_LOCALEDIR");     
++
++  if (path == NULL)
++    path = g_build_filename (get_bundle_path (), "share", "locale", NULL);
++
++  return path;
++}
++
++const gchar *
++_gtk_get_sysconfdir (void)
++{
++  static const gchar *path = NULL;
++
++  if (path == NULL)
++     path = g_getenv ("GTK_SYSCONFDIR");     
++
++  if (path == NULL)
++    path = g_build_filename (get_bundle_path (), "etc", NULL);
++
++  return path;
++}
++
++const gchar *
++_gtk_get_data_prefix (void)
++{
++  return get_bundle_path ();
++}
