@@ -54,7 +54,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		/* this cannot fail, because we've already verified that there
 		   is prefix_space to read
 		*/
-		assert (this->peek (peekbuf, prefix_size));
+		this->peek (peekbuf, prefix_size);
 
 		ev_time = *((T*) peekbuf);
 		ev_size = *((uint32_t*)(peekbuf + sizeof(T) + sizeof (Evoral::EventType)));
