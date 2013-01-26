@@ -217,7 +217,6 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		}
 	}
 
-
 	MIDI::Name::MidiPatchManager& patch_manager = MIDI::Name::MidiPatchManager::instance();
 
 	MIDI::Name::MasterDeviceNames::Models::const_iterator m = patch_manager.all_models().begin();
@@ -836,10 +835,11 @@ MidiTimeAxisView::build_controller_menu ()
 			Menu*                              ctl_menu  = NULL;
 			
 			for (ControlNameList::Controls::const_iterator c = name_list->controls().begin();
-			     c != name_list->controls().end(); ++c) {
+			     c != name_list->controls().end();) {
 				const uint16_t ctl = c->second->number();
 				if (ctl == MIDI_CTL_MSB_BANK || ctl == MIDI_CTL_LSB_BANK) {
 					/* Skip bank select controllers since they're handled specially */
+					/* FIXME: If this is the last control, the last submenu might be lost */
 					continue;
 				}
 				
@@ -854,7 +854,8 @@ MidiTimeAxisView::build_controller_menu ()
 				} else {
 					add_single_channel_controller_item(ctl_items, ctl, c->second->name());
 				}
-				
+
+				++c;
 				if (++n_items == 16 || c == name_list->controls().end()) {
 					/* Submenu has 16 items, add it to controller menu and reset */
 					items.push_back(
@@ -1387,7 +1388,6 @@ MidiTimeAxisView::stop_step_editing ()
 		_step_editor->stop_step_editing ();
 	}
 }
-
 
 /** @return channel (counted from 0) to add an event to, based on the current setting
  *  of the channel selector.
