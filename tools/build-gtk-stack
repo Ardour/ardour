@@ -107,7 +107,9 @@ if uname -a | grep --silent arwin ; then
 else 
 
     # tell perl to look in our $PREFIX tree for additional perl modules
-    export PERL5LIB=$PREFIX/lib/perl/$PERLVERSION:$PREFIX/share/perl/$PERLVERSION
+    # Some idiotic Perl modules install into MAJOR.MINOR rather than MAJOR.MINOR.MICRO
+    PERL_STUPIDVERSION=`echo $PERLVERSION | sed 's/\.[0-9][0-9]*$//'`
+    export PERL5LIB=$PREFIX/lib/perl/$PERLVERSION:$PREFIX/lib/perl/$PERL_STUPIDVERSION:$PREFIX/share/perl/$PERLVERSION:$PREFIX/share/perl/$PERL_STUPIDVERSION
 
     export LD_LIBRARY_PATH=$PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
     GLOBAL_CFLAGS=
