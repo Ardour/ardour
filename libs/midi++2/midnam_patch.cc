@@ -243,7 +243,11 @@ int
 Control::set_state (const XMLTree& tree, const XMLNode& node)
 {
 	assert(node.name() == "Control");
-	_type   = node.property("Type")->value();
+	if (node.property("Type")) {
+		_type = node.property("Type")->value();
+	} else {
+		_type = "7bit";
+	}
 	_number = string_to_int(tree, node.property("Number")->value());
 	_name   = node.property("Name")->value();
 
