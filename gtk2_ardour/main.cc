@@ -151,7 +151,6 @@ fixup_bundle_environment (int, char* [])
 #ifdef ENABLE_NLS
 	if (!ARDOUR::translations_are_enabled ()) {
 		localedir = "/this/cannot/exist";
-		export_search_path (bundle_dir, "GTK_LOCALEDIR", "/Resources/locale");
 	} else {
 		/* force localedir into the bundle */
 		
@@ -160,7 +159,6 @@ fixup_bundle_environment (int, char* [])
 		lpath.push_back ("share");
 		lpath.push_back ("locale");
 		localedir = strdup (Glib::build_filename (lpath).c_str());
-		export_search_path (bundle_dir, "GTK_LOCALEDIR", "/Resources/locale");
 	}
 #endif
 		
@@ -239,7 +237,6 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 #ifdef ENABLE_NLS
 	if (!ARDOUR::translations_are_enabled ()) {
 		localedir = "/this/cannot/exist";
-		export_search_path (dir_path, "GTK_LOCALEDIR", "/this/cannot/exist");
 	} else {
 		/* force localedir into the bundle */
 		vector<string> lpath;
@@ -247,7 +244,6 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 		lpath.push_back ("share");
 		lpath.push_back ("locale");
 		localedir = realpath (Glib::build_filename (lpath).c_str(), NULL);
-		export_search_path (dir_path, "GTK_LOCALEDIR", "/share/locale");
 	}
 #endif
 
