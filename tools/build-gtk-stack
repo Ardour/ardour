@@ -314,7 +314,7 @@ if [ x$patch != x ] ; then
     if uname -a | grep --silent arwin ; then
         patches=`ls $this_script_dir/current-gtk-patches/*.patch`
     else
-        patches=`$this_script_dir/current-gtk-patches/gtkrelocation.patch`
+        patches=$this_script_dir/current-gtk-patches/gtkrelocation.patch
     fi
         
     for patch in $patches ; do
