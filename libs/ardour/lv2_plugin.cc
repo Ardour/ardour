@@ -288,6 +288,8 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_log_feature.URI             = LV2_LOG__log;
 	_work_schedule_feature.URI   = LV2_WORKER__schedule;
 	_work_schedule_feature.data  = NULL;
+	_def_state_feature.URI       = LV2_STATE_PREFIX "loadDefaultState";  // Post LV2-1.2.0
+	_def_state_feature.data      = NULL;
 
 	const LilvPlugin* plugin = _impl->plugin;
 
@@ -309,10 +311,11 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_features[4] = _uri_map.urid_map_feature();
 	_features[5] = _uri_map.urid_unmap_feature();
 	_features[6] = &_log_feature;
+	_features[7] = &_def_state_feature;
 
 	lv2_atom_forge_init(&_impl->forge, _uri_map.urid_map());
 
-	unsigned n_features = 7;
+	unsigned n_features = 8;
 #ifdef HAVE_NEW_LV2
 	LV2_URID atom_Int = _uri_map.uri_to_id(LV2_ATOM__Int);
 	LV2_Options_Option options[] = {
@@ -382,6 +385,13 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 		lilv_node_free(_impl->name);
 		lilv_node_free(_impl->author);
 		throw failed_constructor();
+	}
+
+	// Load default state
+	LilvState* state = lilv_state_new_from_world(
+		_world.world, _uri_map.urid_map(), lilv_plugin_get_uri(_impl->plugin));
+	if (state) {
+		lilv_state_restore(state, _impl->instance, NULL, NULL, 0, NULL);
 	}
 
 	_sample_rate = rate;
