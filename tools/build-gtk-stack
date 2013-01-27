@@ -40,8 +40,8 @@ while [ $# -gt 0 ] ; do
         --clean*) clean=1 ; shift ;;
         --space*) makespace=1 ; shift ;;
         --prefix*) PREFIX=`echo $1 | sed 's/--prefix=//'` ; shift ;;
-        --patch*) patch_gtk_osx=1 ; shift ;;
-        --unpatch*) patch_gtk_osx=1 ; unpatch=-R; shift ;;
+        --patch*) patch=1 ; shift ;;
+        --unpatch*) patch=1 ; unpatch=-R; shift ;;
         -j*) parallel=`echo $1 | sed 's/-j//'` ; shift ;;
         *) echo "Unknown argument $1" ; exit 1 ;;   
     esac
@@ -306,12 +306,17 @@ if [ ! -d gtk+ ] ; then
     (cd gtk+ && git checkout --track -b gtk-2-24 origin/gtk-2-24)
 fi
 
-if [ x$patch_gtk_osx != x ] ; then
+if [ x$patch != x ] ; then
 
     cd gtk+
     echo "Testing ($unpatch) patches ... "
 
-    patches=`ls $this_script_dir/current-gtk-patches/*.patch`
+    if uname -a | grep --silent arwin ; then
+        patches=`ls $this_script_dir/current-gtk-patches/*.patch`
+    else
+        patches=`$this_script_dir/current-gtk-patches/gtkrelocation.patch`
+    fi
+        
     for patch in $patches ; do
         if patch $unpatch --dry-run -p1 < $patch ; then
 	    :
@@ -320,7 +325,7 @@ if [ x$patch_gtk_osx != x ] ; then
 	    exit 1
         fi
     done
-
+    
     echo "Applying ($unpatch) patches ..."
     for patch in $patches ; do
         patch $unpatch -p1 < $patch
@@ -460,7 +465,10 @@ fi
 # now gtk itself
 # 
 #
-(cd gtk+ && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" sh autogen.sh --enable-maintainer-mode --prefix=$PREFIX --libdir=$PREFIX/lib --disable-cups --disable-papi --disable-introspection --with-gdktarget=$GTK_BACKEND && make && make install) || die "GTK build failed"
+(cd gtk+ && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" \
+    sh autogen.sh --enable-maintainer-mode --prefix=$PREFIX --libdir=$PREFIX/lib \
+    --disable-cups --disable-papi --disable-introspection --enable-relocation \
+    --with-gdktarget=$GTK_BACKEND && make && make install) || die "GTK build failed"
 
 #
 # now gtk-engines
