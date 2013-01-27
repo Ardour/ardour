@@ -212,9 +212,9 @@ if [ ! -f libxml2-2.7.8.tar.gz ] ; then
     echo libxml2
     fetch_as_is ftp://xmlsoft.org/libxslt/libxml2-2.7.8.tar.gz
 fi
-if [ ! -f libxslt-1.1.26.tar.gz ] ; then
+if [ ! -f libxslt-1.1.28.tar.gz ] ; then
     echo libxslt
-    fetch_as_is ftp://xmlsoft.org/libxslt/libxslt-1.1.26.tar.gz
+    fetch_as_is ftp://xmlsoft.org/libxslt/libxslt-1.1.28.tar.gz
 fi
 if [ ! -f tiff-4.0.1.tar.gz ] ; then
     echo tiff
@@ -362,7 +362,7 @@ tar  xf expat-2.1.0.tar.gz && (cd expat-2.1.0  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS=
 # clean up afterwards to reset ownership on dirs and files created under $PREFIX as root
 # 
 tar  xf libxml2-2.7.8.tar.gz && (cd libxml2-2.7.8 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF --with-zlib=$PREFIX ${PYTHON:+--with-python=$PYTHON} && make && sudo make install && sudo chown -R `whoami` $PREFIX) || die "libxml2 build failed"
-tar  xf libxslt-1.1.26.tar.gz && (cd libxslt-1.1.26 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libxslt build failed"
+tar  xf libxslt-1.1.28.tar.gz && (cd libxslt-1.1.28 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libxslt build failed"
 tar  xf readline-6.2.tar.gz && (cd readline-6.2  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS -lncurses" ./configure $GLOBAL_CONF && make && make install) || die "readline build failed"
 
 #
