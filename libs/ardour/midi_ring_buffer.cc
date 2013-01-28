@@ -78,7 +78,8 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		this->increment_read_ptr (prefix_size);
 
 		uint8_t status;
-		assert (this->peek (&status, sizeof(uint8_t))); // If this failed, buffer is corrupt, all hope is lost
+		bool r = this->peek (&status, sizeof(uint8_t)); 
+		assert (r); // If this failed, buffer is corrupt, all hope is lost
 
 		// Ignore event if it doesn't match channel filter
 		if (is_channel_event(status) && get_channel_mode() == FilterChannels) {
