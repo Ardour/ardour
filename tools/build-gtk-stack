@@ -316,11 +316,11 @@ if [ x$patch != x ] ; then
     if uname -a | grep --silent arwin ; then
         patches=`ls $this_script_dir/current-gtk-patches/*.patch`
     else
-        patches=$this_script_dir/current-gtk-patches/gtkrelocation.patch
+        patches="$this_script_dir/current-gtk-patches/gtkrelocation.patch"
     fi
         
     for patch in $patches ; do
-        if patch $unpatch --dry-run -p1 < $patch ; then
+        if patch $unpatch --dry-run -p1 < "$patch" ; then
 	    :
 	else
             echo "$? : Patch $patch no longer applies ($unpatch) cleanly."
@@ -330,7 +330,7 @@ if [ x$patch != x ] ; then
     
     echo "Applying ($unpatch) patches ..."
     for patch in $patches ; do
-        patch $unpatch -p1 < $patch
+        patch $unpatch -p1 < "$patch"
     done
     exit 0
 fi
