@@ -1,0 +1,583 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Jonathan Stowe</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Jomox</Manufacturer>
+    <Model>MBase 11</Model>
+    <CustomDeviceMode Name="Default">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Names"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Names">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+      </AvailableForChannels>
+      <UsesControlNameList Name="Controls"/>
+      <PatchBank Name="User Patches Bank 1">
+        <MIDICommands>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="User Bank 1 Patch Names"/>
+      </PatchBank>
+      <PatchBank Name="User Patches Bank 2">
+        <MIDICommands>
+          <ControlChange Control="32" Value="1"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="User Bank 2 Patch Names"/>
+      </PatchBank>
+      <PatchBank Name="User Patches Bank 3">
+        <MIDICommands>
+          <ControlChange Control="32" Value="2"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="User Bank 3 Patch Names"/>
+      </PatchBank>
+      <PatchBank Name="User Patches Bank 4">
+        <MIDICommands>
+          <ControlChange Control="32" Value="3"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="User Bank 4 Patch Names"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <PatchNameList Name="User Bank 1 Patch Names">
+      <Patch Number="1" Name="Patch 1" ProgramChange="0"/>
+      <Patch Number="2" Name="Patch 2" ProgramChange="1"/>
+      <Patch Number="3" Name="Patch 3" ProgramChange="2"/>
+      <Patch Number="4" Name="Patch 4" ProgramChange="3"/>
+      <Patch Number="5" Name="Patch 5" ProgramChange="4"/>
+      <Patch Number="6" Name="Patch 6" ProgramChange="5"/>
+      <Patch Number="7" Name="Patch 7" ProgramChange="6"/>
+      <Patch Number="8" Name="Patch 8" ProgramChange="7"/>
+      <Patch Number="9" Name="Patch 9" ProgramChange="8"/>
+      <Patch Number="10" Name="Patch 10" ProgramChange="9"/>
+      <Patch Number="11" Name="Patch 11" ProgramChange="10"/>
+      <Patch Number="12" Name="Patch 12" ProgramChange="11"/>
+      <Patch Number="13" Name="Patch 13" ProgramChange="12"/>
+      <Patch Number="14" Name="Patch 14" ProgramChange="13"/>
+      <Patch Number="15" Name="Patch 15" ProgramChange="14"/>
+      <Patch Number="16" Name="Patch 16" ProgramChange="15"/>
+      <Patch Number="17" Name="Patch 17" ProgramChange="16"/>
+      <Patch Number="18" Name="Patch 18" ProgramChange="17"/>
+      <Patch Number="19" Name="Patch 19" ProgramChange="18"/>
+      <Patch Number="20" Name="Patch 20" ProgramChange="19"/>
+      <Patch Number="21" Name="Patch 21" ProgramChange="20"/>
+      <Patch Number="22" Name="Patch 22" ProgramChange="21"/>
+      <Patch Number="23" Name="Patch 23" ProgramChange="22"/>
+      <Patch Number="24" Name="Patch 24" ProgramChange="23"/>
+      <Patch Number="25" Name="Patch 25" ProgramChange="24"/>
+      <Patch Number="26" Name="Patch 26" ProgramChange="25"/>
+      <Patch Number="27" Name="Patch 27" ProgramChange="26"/>
+      <Patch Number="28" Name="Patch 28" ProgramChange="27"/>
+      <Patch Number="29" Name="Patch 29" ProgramChange="28"/>
+      <Patch Number="30" Name="Patch 30" ProgramChange="29"/>
+      <Patch Number="31" Name="Patch 31" ProgramChange="30"/>
+      <Patch Number="32" Name="Patch 32" ProgramChange="31"/>
+      <Patch Number="33" Name="Patch 33" ProgramChange="32"/>
+      <Patch Number="34" Name="Patch 34" ProgramChange="33"/>
+      <Patch Number="35" Name="Patch 35" ProgramChange="34"/>
+      <Patch Number="36" Name="Patch 36" ProgramChange="35"/>
+      <Patch Number="37" Name="Patch 37" ProgramChange="36"/>
+      <Patch Number="38" Name="Patch 38" ProgramChange="37"/>
+      <Patch Number="39" Name="Patch 39" ProgramChange="38"/>
+      <Patch Number="40" Name="Patch 40" ProgramChange="39"/>
+      <Patch Number="41" Name="Patch 41" ProgramChange="40"/>
+      <Patch Number="42" Name="Patch 42" ProgramChange="41"/>
+      <Patch Number="43" Name="Patch 43" ProgramChange="42"/>
+      <Patch Number="44" Name="Patch 44" ProgramChange="43"/>
+      <Patch Number="45" Name="Patch 45" ProgramChange="44"/>
+      <Patch Number="46" Name="Patch 46" ProgramChange="45"/>
+      <Patch Number="47" Name="Patch 47" ProgramChange="46"/>
+      <Patch Number="48" Name="Patch 48" ProgramChange="47"/>
+      <Patch Number="49" Name="Patch 49" ProgramChange="48"/>
+      <Patch Number="50" Name="Patch 50" ProgramChange="49"/>
+      <Patch Number="51" Name="Patch 51" ProgramChange="50"/>
+      <Patch Number="52" Name="Patch 52" ProgramChange="51"/>
+      <Patch Number="53" Name="Patch 53" ProgramChange="52"/>
+      <Patch Number="54" Name="Patch 54" ProgramChange="53"/>
+      <Patch Number="55" Name="Patch 55" ProgramChange="54"/>
+      <Patch Number="56" Name="Patch 56" ProgramChange="55"/>
+      <Patch Number="57" Name="Patch 57" ProgramChange="56"/>
+      <Patch Number="58" Name="Patch 58" ProgramChange="57"/>
+      <Patch Number="59" Name="Patch 59" ProgramChange="58"/>
+      <Patch Number="60" Name="Patch 60" ProgramChange="59"/>
+      <Patch Number="61" Name="Patch 61" ProgramChange="60"/>
+      <Patch Number="62" Name="Patch 62" ProgramChange="61"/>
+      <Patch Number="63" Name="Patch 63" ProgramChange="62"/>
+      <Patch Number="64" Name="Patch 64" ProgramChange="63"/>
+      <Patch Number="65" Name="Patch 65" ProgramChange="64"/>
+      <Patch Number="66" Name="Patch 66" ProgramChange="65"/>
+      <Patch Number="67" Name="Patch 67" ProgramChange="66"/>
+      <Patch Number="68" Name="Patch 68" ProgramChange="67"/>
+      <Patch Number="69" Name="Patch 69" ProgramChange="68"/>
+      <Patch Number="70" Name="Patch 70" ProgramChange="69"/>
+      <Patch Number="71" Name="Patch 71" ProgramChange="70"/>
+      <Patch Number="72" Name="Patch 72" ProgramChange="71"/>
+      <Patch Number="73" Name="Patch 73" ProgramChange="72"/>
+      <Patch Number="74" Name="Patch 74" ProgramChange="73"/>
+      <Patch Number="75" Name="Patch 75" ProgramChange="74"/>
+      <Patch Number="76" Name="Patch 76" ProgramChange="75"/>
+      <Patch Number="77" Name="Patch 77" ProgramChange="76"/>
+      <Patch Number="78" Name="Patch 78" ProgramChange="77"/>
+      <Patch Number="79" Name="Patch 79" ProgramChange="78"/>
+      <Patch Number="80" Name="Patch 80" ProgramChange="79"/>
+      <Patch Number="81" Name="Patch 81" ProgramChange="80"/>
+      <Patch Number="82" Name="Patch 82" ProgramChange="81"/>
+      <Patch Number="83" Name="Patch 83" ProgramChange="82"/>
+      <Patch Number="84" Name="Patch 84" ProgramChange="83"/>
+      <Patch Number="85" Name="Patch 85" ProgramChange="84"/>
+      <Patch Number="86" Name="Patch 86" ProgramChange="85"/>
+      <Patch Number="87" Name="Patch 87" ProgramChange="86"/>
+      <Patch Number="88" Name="Patch 88" ProgramChange="87"/>
+      <Patch Number="89" Name="Patch 89" ProgramChange="88"/>
+      <Patch Number="90" Name="Patch 90" ProgramChange="89"/>
+      <Patch Number="91" Name="Patch 91" ProgramChange="90"/>
+      <Patch Number="92" Name="Patch 92" ProgramChange="91"/>
+      <Patch Number="93" Name="Patch 93" ProgramChange="92"/>
+      <Patch Number="94" Name="Patch 94" ProgramChange="93"/>
+      <Patch Number="95" Name="Patch 95" ProgramChange="94"/>
+      <Patch Number="96" Name="Patch 96" ProgramChange="95"/>
+      <Patch Number="97" Name="Patch 97" ProgramChange="96"/>
+      <Patch Number="98" Name="Patch 98" ProgramChange="97"/>
+      <Patch Number="99" Name="Patch 99" ProgramChange="98"/>
+      <Patch Number="100" Name="Patch 100" ProgramChange="99"/>
+      <Patch Number="101" Name="Patch 101" ProgramChange="100"/>
+      <Patch Number="102" Name="Patch 102" ProgramChange="101"/>
+      <Patch Number="103" Name="Patch 103" ProgramChange="102"/>
+      <Patch Number="104" Name="Patch 104" ProgramChange="103"/>
+      <Patch Number="105" Name="Patch 105" ProgramChange="104"/>
+      <Patch Number="106" Name="Patch 106" ProgramChange="105"/>
+      <Patch Number="107" Name="Patch 107" ProgramChange="106"/>
+      <Patch Number="108" Name="Patch 108" ProgramChange="107"/>
+      <Patch Number="109" Name="Patch 109" ProgramChange="108"/>
+      <Patch Number="110" Name="Patch 110" ProgramChange="109"/>
+      <Patch Number="111" Name="Patch 111" ProgramChange="110"/>
+      <Patch Number="112" Name="Patch 112" ProgramChange="111"/>
+      <Patch Number="113" Name="Patch 113" ProgramChange="112"/>
+      <Patch Number="114" Name="Patch 114" ProgramChange="113"/>
+      <Patch Number="115" Name="Patch 115" ProgramChange="114"/>
+      <Patch Number="116" Name="Patch 116" ProgramChange="115"/>
+      <Patch Number="117" Name="Patch 117" ProgramChange="116"/>
+      <Patch Number="118" Name="Patch 118" ProgramChange="117"/>
+      <Patch Number="119" Name="Patch 119" ProgramChange="118"/>
+      <Patch Number="120" Name="Patch 120" ProgramChange="119"/>
+      <Patch Number="121" Name="Patch 121" ProgramChange="120"/>
+      <Patch Number="122" Name="Patch 122" ProgramChange="121"/>
+      <Patch Number="123" Name="Patch 123" ProgramChange="122"/>
+      <Patch Number="124" Name="Patch 124" ProgramChange="123"/>
+      <Patch Number="125" Name="Patch 125" ProgramChange="124"/>
+      <Patch Number="126" Name="Patch 126" ProgramChange="125"/>
+      <Patch Number="127" Name="Patch 127" ProgramChange="126"/>
+      <Patch Number="128" Name="Patch 128" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="User Bank 2 Patch Names">
+      <Patch Number="1" Name="Patch 1" ProgramChange="0"/>
+      <Patch Number="2" Name="Patch 2" ProgramChange="1"/>
+      <Patch Number="3" Name="Patch 3" ProgramChange="2"/>
+      <Patch Number="4" Name="Patch 4" ProgramChange="3"/>
+      <Patch Number="5" Name="Patch 5" ProgramChange="4"/>
+      <Patch Number="6" Name="Patch 6" ProgramChange="5"/>
+      <Patch Number="7" Name="Patch 7" ProgramChange="6"/>
+      <Patch Number="8" Name="Patch 8" ProgramChange="7"/>
+      <Patch Number="9" Name="Patch 9" ProgramChange="8"/>
+      <Patch Number="10" Name="Patch 10" ProgramChange="9"/>
+      <Patch Number="11" Name="Patch 11" ProgramChange="10"/>
+      <Patch Number="12" Name="Patch 12" ProgramChange="11"/>
+      <Patch Number="13" Name="Patch 13" ProgramChange="12"/>
+      <Patch Number="14" Name="Patch 14" ProgramChange="13"/>
+      <Patch Number="15" Name="Patch 15" ProgramChange="14"/>
+      <Patch Number="16" Name="Patch 16" ProgramChange="15"/>
+      <Patch Number="17" Name="Patch 17" ProgramChange="16"/>
+      <Patch Number="18" Name="Patch 18" ProgramChange="17"/>
+      <Patch Number="19" Name="Patch 19" ProgramChange="18"/>
+      <Patch Number="20" Name="Patch 20" ProgramChange="19"/>
+      <Patch Number="21" Name="Patch 21" ProgramChange="20"/>
+      <Patch Number="22" Name="Patch 22" ProgramChange="21"/>
+      <Patch Number="23" Name="Patch 23" ProgramChange="22"/>
+      <Patch Number="24" Name="Patch 24" ProgramChange="23"/>
+      <Patch Number="25" Name="Patch 25" ProgramChange="24"/>
+      <Patch Number="26" Name="Patch 26" ProgramChange="25"/>
+      <Patch Number="27" Name="Patch 27" ProgramChange="26"/>
+      <Patch Number="28" Name="Patch 28" ProgramChange="27"/>
+      <Patch Number="29" Name="Patch 29" ProgramChange="28"/>
+      <Patch Number="30" Name="Patch 30" ProgramChange="29"/>
+      <Patch Number="31" Name="Patch 31" ProgramChange="30"/>
+      <Patch Number="32" Name="Patch 32" ProgramChange="31"/>
+      <Patch Number="33" Name="Patch 33" ProgramChange="32"/>
+      <Patch Number="34" Name="Patch 34" ProgramChange="33"/>
+      <Patch Number="35" Name="Patch 35" ProgramChange="34"/>
+      <Patch Number="36" Name="Patch 36" ProgramChange="35"/>
+      <Patch Number="37" Name="Patch 37" ProgramChange="36"/>
+      <Patch Number="38" Name="Patch 38" ProgramChange="37"/>
+      <Patch Number="39" Name="Patch 39" ProgramChange="38"/>
+      <Patch Number="40" Name="Patch 40" ProgramChange="39"/>
+      <Patch Number="41" Name="Patch 41" ProgramChange="40"/>
+      <Patch Number="42" Name="Patch 42" ProgramChange="41"/>
+      <Patch Number="43" Name="Patch 43" ProgramChange="42"/>
+      <Patch Number="44" Name="Patch 44" ProgramChange="43"/>
+      <Patch Number="45" Name="Patch 45" ProgramChange="44"/>
+      <Patch Number="46" Name="Patch 46" ProgramChange="45"/>
+      <Patch Number="47" Name="Patch 47" ProgramChange="46"/>
+      <Patch Number="48" Name="Patch 48" ProgramChange="47"/>
+      <Patch Number="49" Name="Patch 49" ProgramChange="48"/>
+      <Patch Number="50" Name="Patch 50" ProgramChange="49"/>
+      <Patch Number="51" Name="Patch 51" ProgramChange="50"/>
+      <Patch Number="52" Name="Patch 52" ProgramChange="51"/>
+      <Patch Number="53" Name="Patch 53" ProgramChange="52"/>
+      <Patch Number="54" Name="Patch 54" ProgramChange="53"/>
+      <Patch Number="55" Name="Patch 55" ProgramChange="54"/>
+      <Patch Number="56" Name="Patch 56" ProgramChange="55"/>
+      <Patch Number="57" Name="Patch 57" ProgramChange="56"/>
+      <Patch Number="58" Name="Patch 58" ProgramChange="57"/>
+      <Patch Number="59" Name="Patch 59" ProgramChange="58"/>
+      <Patch Number="60" Name="Patch 60" ProgramChange="59"/>
+      <Patch Number="61" Name="Patch 61" ProgramChange="60"/>
+      <Patch Number="62" Name="Patch 62" ProgramChange="61"/>
+      <Patch Number="63" Name="Patch 63" ProgramChange="62"/>
+      <Patch Number="64" Name="Patch 64" ProgramChange="63"/>
+      <Patch Number="65" Name="Patch 65" ProgramChange="64"/>
+      <Patch Number="66" Name="Patch 66" ProgramChange="65"/>
+      <Patch Number="67" Name="Patch 67" ProgramChange="66"/>
+      <Patch Number="68" Name="Patch 68" ProgramChange="67"/>
+      <Patch Number="69" Name="Patch 69" ProgramChange="68"/>
+      <Patch Number="70" Name="Patch 70" ProgramChange="69"/>
+      <Patch Number="71" Name="Patch 71" ProgramChange="70"/>
+      <Patch Number="72" Name="Patch 72" ProgramChange="71"/>
+      <Patch Number="73" Name="Patch 73" ProgramChange="72"/>
+      <Patch Number="74" Name="Patch 74" ProgramChange="73"/>
+      <Patch Number="75" Name="Patch 75" ProgramChange="74"/>
+      <Patch Number="76" Name="Patch 76" ProgramChange="75"/>
+      <Patch Number="77" Name="Patch 77" ProgramChange="76"/>
+      <Patch Number="78" Name="Patch 78" ProgramChange="77"/>
+      <Patch Number="79" Name="Patch 79" ProgramChange="78"/>
+      <Patch Number="80" Name="Patch 80" ProgramChange="79"/>
+      <Patch Number="81" Name="Patch 81" ProgramChange="80"/>
+      <Patch Number="82" Name="Patch 82" ProgramChange="81"/>
+      <Patch Number="83" Name="Patch 83" ProgramChange="82"/>
+      <Patch Number="84" Name="Patch 84" ProgramChange="83"/>
+      <Patch Number="85" Name="Patch 85" ProgramChange="84"/>
+      <Patch Number="86" Name="Patch 86" ProgramChange="85"/>
+      <Patch Number="87" Name="Patch 87" ProgramChange="86"/>
+      <Patch Number="88" Name="Patch 88" ProgramChange="87"/>
+      <Patch Number="89" Name="Patch 89" ProgramChange="88"/>
+      <Patch Number="90" Name="Patch 90" ProgramChange="89"/>
+      <Patch Number="91" Name="Patch 91" ProgramChange="90"/>
+      <Patch Number="92" Name="Patch 92" ProgramChange="91"/>
+      <Patch Number="93" Name="Patch 93" ProgramChange="92"/>
+      <Patch Number="94" Name="Patch 94" ProgramChange="93"/>
+      <Patch Number="95" Name="Patch 95" ProgramChange="94"/>
+      <Patch Number="96" Name="Patch 96" ProgramChange="95"/>
+      <Patch Number="97" Name="Patch 97" ProgramChange="96"/>
+      <Patch Number="98" Name="Patch 98" ProgramChange="97"/>
+      <Patch Number="99" Name="Patch 99" ProgramChange="98"/>
+      <Patch Number="100" Name="Patch 100" ProgramChange="99"/>
+      <Patch Number="101" Name="Patch 101" ProgramChange="100"/>
+      <Patch Number="102" Name="Patch 102" ProgramChange="101"/>
+      <Patch Number="103" Name="Patch 103" ProgramChange="102"/>
+      <Patch Number="104" Name="Patch 104" ProgramChange="103"/>
+      <Patch Number="105" Name="Patch 105" ProgramChange="104"/>
+      <Patch Number="106" Name="Patch 106" ProgramChange="105"/>
+      <Patch Number="107" Name="Patch 107" ProgramChange="106"/>
+      <Patch Number="108" Name="Patch 108" ProgramChange="107"/>
+      <Patch Number="109" Name="Patch 109" ProgramChange="108"/>
+      <Patch Number="110" Name="Patch 110" ProgramChange="109"/>
+      <Patch Number="111" Name="Patch 111" ProgramChange="110"/>
+      <Patch Number="112" Name="Patch 112" ProgramChange="111"/>
+      <Patch Number="113" Name="Patch 113" ProgramChange="112"/>
+      <Patch Number="114" Name="Patch 114" ProgramChange="113"/>
+      <Patch Number="115" Name="Patch 115" ProgramChange="114"/>
+      <Patch Number="116" Name="Patch 116" ProgramChange="115"/>
+      <Patch Number="117" Name="Patch 117" ProgramChange="116"/>
+      <Patch Number="118" Name="Patch 118" ProgramChange="117"/>
+      <Patch Number="119" Name="Patch 119" ProgramChange="118"/>
+      <Patch Number="120" Name="Patch 120" ProgramChange="119"/>
+      <Patch Number="121" Name="Patch 121" ProgramChange="120"/>
+      <Patch Number="122" Name="Patch 122" ProgramChange="121"/>
+      <Patch Number="123" Name="Patch 123" ProgramChange="122"/>
+      <Patch Number="124" Name="Patch 124" ProgramChange="123"/>
+      <Patch Number="125" Name="Patch 125" ProgramChange="124"/>
+      <Patch Number="126" Name="Patch 126" ProgramChange="125"/>
+      <Patch Number="127" Name="Patch 127" ProgramChange="126"/>
+      <Patch Number="128" Name="Patch 128" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="User Bank 3 Patch Names">
+      <Patch Number="1" Name="Patch 1" ProgramChange="0"/>
+      <Patch Number="2" Name="Patch 2" ProgramChange="1"/>
+      <Patch Number="3" Name="Patch 3" ProgramChange="2"/>
+      <Patch Number="4" Name="Patch 4" ProgramChange="3"/>
+      <Patch Number="5" Name="Patch 5" ProgramChange="4"/>
+      <Patch Number="6" Name="Patch 6" ProgramChange="5"/>
+      <Patch Number="7" Name="Patch 7" ProgramChange="6"/>
+      <Patch Number="8" Name="Patch 8" ProgramChange="7"/>
+      <Patch Number="9" Name="Patch 9" ProgramChange="8"/>
+      <Patch Number="10" Name="Patch 10" ProgramChange="9"/>
+      <Patch Number="11" Name="Patch 11" ProgramChange="10"/>
+      <Patch Number="12" Name="Patch 12" ProgramChange="11"/>
+      <Patch Number="13" Name="Patch 13" ProgramChange="12"/>
+      <Patch Number="14" Name="Patch 14" ProgramChange="13"/>
+      <Patch Number="15" Name="Patch 15" ProgramChange="14"/>
+      <Patch Number="16" Name="Patch 16" ProgramChange="15"/>
+      <Patch Number="17" Name="Patch 17" ProgramChange="16"/>
+      <Patch Number="18" Name="Patch 18" ProgramChange="17"/>
+      <Patch Number="19" Name="Patch 19" ProgramChange="18"/>
+      <Patch Number="20" Name="Patch 20" ProgramChange="19"/>
+      <Patch Number="21" Name="Patch 21" ProgramChange="20"/>
+      <Patch Number="22" Name="Patch 22" ProgramChange="21"/>
+      <Patch Number="23" Name="Patch 23" ProgramChange="22"/>
+      <Patch Number="24" Name="Patch 24" ProgramChange="23"/>
+      <Patch Number="25" Name="Patch 25" ProgramChange="24"/>
+      <Patch Number="26" Name="Patch 26" ProgramChange="25"/>
+      <Patch Number="27" Name="Patch 27" ProgramChange="26"/>
+      <Patch Number="28" Name="Patch 28" ProgramChange="27"/>
+      <Patch Number="29" Name="Patch 29" ProgramChange="28"/>
+      <Patch Number="30" Name="Patch 30" ProgramChange="29"/>
+      <Patch Number="31" Name="Patch 31" ProgramChange="30"/>
+      <Patch Number="32" Name="Patch 32" ProgramChange="31"/>
+      <Patch Number="33" Name="Patch 33" ProgramChange="32"/>
+      <Patch Number="34" Name="Patch 34" ProgramChange="33"/>
+      <Patch Number="35" Name="Patch 35" ProgramChange="34"/>
+      <Patch Number="36" Name="Patch 36" ProgramChange="35"/>
+      <Patch Number="37" Name="Patch 37" ProgramChange="36"/>
+      <Patch Number="38" Name="Patch 38" ProgramChange="37"/>
+      <Patch Number="39" Name="Patch 39" ProgramChange="38"/>
+      <Patch Number="40" Name="Patch 40" ProgramChange="39"/>
+      <Patch Number="41" Name="Patch 41" ProgramChange="40"/>
+      <Patch Number="42" Name="Patch 42" ProgramChange="41"/>
+      <Patch Number="43" Name="Patch 43" ProgramChange="42"/>
+      <Patch Number="44" Name="Patch 44" ProgramChange="43"/>
+      <Patch Number="45" Name="Patch 45" ProgramChange="44"/>
+      <Patch Number="46" Name="Patch 46" ProgramChange="45"/>
+      <Patch Number="47" Name="Patch 47" ProgramChange="46"/>
+      <Patch Number="48" Name="Patch 48" ProgramChange="47"/>
+      <Patch Number="49" Name="Patch 49" ProgramChange="48"/>
+      <Patch Number="50" Name="Patch 50" ProgramChange="49"/>
+      <Patch Number="51" Name="Patch 51" ProgramChange="50"/>
+      <Patch Number="52" Name="Patch 52" ProgramChange="51"/>
+      <Patch Number="53" Name="Patch 53" ProgramChange="52"/>
+      <Patch Number="54" Name="Patch 54" ProgramChange="53"/>
+      <Patch Number="55" Name="Patch 55" ProgramChange="54"/>
+      <Patch Number="56" Name="Patch 56" ProgramChange="55"/>
+      <Patch Number="57" Name="Patch 57" ProgramChange="56"/>
+      <Patch Number="58" Name="Patch 58" ProgramChange="57"/>
+      <Patch Number="59" Name="Patch 59" ProgramChange="58"/>
+      <Patch Number="60" Name="Patch 60" ProgramChange="59"/>
+      <Patch Number="61" Name="Patch 61" ProgramChange="60"/>
+      <Patch Number="62" Name="Patch 62" ProgramChange="61"/>
+      <Patch Number="63" Name="Patch 63" ProgramChange="62"/>
+      <Patch Number="64" Name="Patch 64" ProgramChange="63"/>
+      <Patch Number="65" Name="Patch 65" ProgramChange="64"/>
+      <Patch Number="66" Name="Patch 66" ProgramChange="65"/>
+      <Patch Number="67" Name="Patch 67" ProgramChange="66"/>
+      <Patch Number="68" Name="Patch 68" ProgramChange="67"/>
+      <Patch Number="69" Name="Patch 69" ProgramChange="68"/>
+      <Patch Number="70" Name="Patch 70" ProgramChange="69"/>
+      <Patch Number="71" Name="Patch 71" ProgramChange="70"/>
+      <Patch Number="72" Name="Patch 72" ProgramChange="71"/>
+      <Patch Number="73" Name="Patch 73" ProgramChange="72"/>
+      <Patch Number="74" Name="Patch 74" ProgramChange="73"/>
+      <Patch Number="75" Name="Patch 75" ProgramChange="74"/>
+      <Patch Number="76" Name="Patch 76" ProgramChange="75"/>
+      <Patch Number="77" Name="Patch 77" ProgramChange="76"/>
+      <Patch Number="78" Name="Patch 78" ProgramChange="77"/>
+      <Patch Number="79" Name="Patch 79" ProgramChange="78"/>
+      <Patch Number="80" Name="Patch 80" ProgramChange="79"/>
+      <Patch Number="81" Name="Patch 81" ProgramChange="80"/>
+      <Patch Number="82" Name="Patch 82" ProgramChange="81"/>
+      <Patch Number="83" Name="Patch 83" ProgramChange="82"/>
+      <Patch Number="84" Name="Patch 84" ProgramChange="83"/>
+      <Patch Number="85" Name="Patch 85" ProgramChange="84"/>
+      <Patch Number="86" Name="Patch 86" ProgramChange="85"/>
+      <Patch Number="87" Name="Patch 87" ProgramChange="86"/>
+      <Patch Number="88" Name="Patch 88" ProgramChange="87"/>
+      <Patch Number="89" Name="Patch 89" ProgramChange="88"/>
+      <Patch Number="90" Name="Patch 90" ProgramChange="89"/>
+      <Patch Number="91" Name="Patch 91" ProgramChange="90"/>
+      <Patch Number="92" Name="Patch 92" ProgramChange="91"/>
+      <Patch Number="93" Name="Patch 93" ProgramChange="92"/>
+      <Patch Number="94" Name="Patch 94" ProgramChange="93"/>
+      <Patch Number="95" Name="Patch 95" ProgramChange="94"/>
+      <Patch Number="96" Name="Patch 96" ProgramChange="95"/>
+      <Patch Number="97" Name="Patch 97" ProgramChange="96"/>
+      <Patch Number="98" Name="Patch 98" ProgramChange="97"/>
+      <Patch Number="99" Name="Patch 99" ProgramChange="98"/>
+      <Patch Number="100" Name="Patch 100" ProgramChange="99"/>
+      <Patch Number="101" Name="Patch 101" ProgramChange="100"/>
+      <Patch Number="102" Name="Patch 102" ProgramChange="101"/>
+      <Patch Number="103" Name="Patch 103" ProgramChange="102"/>
+      <Patch Number="104" Name="Patch 104" ProgramChange="103"/>
+      <Patch Number="105" Name="Patch 105" ProgramChange="104"/>
+      <Patch Number="106" Name="Patch 106" ProgramChange="105"/>
+      <Patch Number="107" Name="Patch 107" ProgramChange="106"/>
+      <Patch Number="108" Name="Patch 108" ProgramChange="107"/>
+      <Patch Number="109" Name="Patch 109" ProgramChange="108"/>
+      <Patch Number="110" Name="Patch 110" ProgramChange="109"/>
+      <Patch Number="111" Name="Patch 111" ProgramChange="110"/>
+      <Patch Number="112" Name="Patch 112" ProgramChange="111"/>
+      <Patch Number="113" Name="Patch 113" ProgramChange="112"/>
+      <Patch Number="114" Name="Patch 114" ProgramChange="113"/>
+      <Patch Number="115" Name="Patch 115" ProgramChange="114"/>
+      <Patch Number="116" Name="Patch 116" ProgramChange="115"/>
+      <Patch Number="117" Name="Patch 117" ProgramChange="116"/>
+      <Patch Number="118" Name="Patch 118" ProgramChange="117"/>
+      <Patch Number="119" Name="Patch 119" ProgramChange="118"/>
+      <Patch Number="120" Name="Patch 120" ProgramChange="119"/>
+      <Patch Number="121" Name="Patch 121" ProgramChange="120"/>
+      <Patch Number="122" Name="Patch 122" ProgramChange="121"/>
+      <Patch Number="123" Name="Patch 123" ProgramChange="122"/>
+      <Patch Number="124" Name="Patch 124" ProgramChange="123"/>
+      <Patch Number="125" Name="Patch 125" ProgramChange="124"/>
+      <Patch Number="126" Name="Patch 126" ProgramChange="125"/>
+      <Patch Number="127" Name="Patch 127" ProgramChange="126"/>
+      <Patch Number="128" Name="Patch 128" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="User Bank 4 Patch Names">
+      <Patch Number="1" Name="Patch 1" ProgramChange="0"/>
+      <Patch Number="2" Name="Patch 2" ProgramChange="1"/>
+      <Patch Number="3" Name="Patch 3" ProgramChange="2"/>
+      <Patch Number="4" Name="Patch 4" ProgramChange="3"/>
+      <Patch Number="5" Name="Patch 5" ProgramChange="4"/>
+      <Patch Number="6" Name="Patch 6" ProgramChange="5"/>
+      <Patch Number="7" Name="Patch 7" ProgramChange="6"/>
+      <Patch Number="8" Name="Patch 8" ProgramChange="7"/>
+      <Patch Number="9" Name="Patch 9" ProgramChange="8"/>
+      <Patch Number="10" Name="Patch 10" ProgramChange="9"/>
+      <Patch Number="11" Name="Patch 11" ProgramChange="10"/>
+      <Patch Number="12" Name="Patch 12" ProgramChange="11"/>
+      <Patch Number="13" Name="Patch 13" ProgramChange="12"/>
+      <Patch Number="14" Name="Patch 14" ProgramChange="13"/>
+      <Patch Number="15" Name="Patch 15" ProgramChange="14"/>
+      <Patch Number="16" Name="Patch 16" ProgramChange="15"/>
+      <Patch Number="17" Name="Patch 17" ProgramChange="16"/>
+      <Patch Number="18" Name="Patch 18" ProgramChange="17"/>
+      <Patch Number="19" Name="Patch 19" ProgramChange="18"/>
+      <Patch Number="20" Name="Patch 20" ProgramChange="19"/>
+      <Patch Number="21" Name="Patch 21" ProgramChange="20"/>
+      <Patch Number="22" Name="Patch 22" ProgramChange="21"/>
+      <Patch Number="23" Name="Patch 23" ProgramChange="22"/>
+      <Patch Number="24" Name="Patch 24" ProgramChange="23"/>
+      <Patch Number="25" Name="Patch 25" ProgramChange="24"/>
+      <Patch Number="26" Name="Patch 26" ProgramChange="25"/>
+      <Patch Number="27" Name="Patch 27" ProgramChange="26"/>
+      <Patch Number="28" Name="Patch 28" ProgramChange="27"/>
+      <Patch Number="29" Name="Patch 29" ProgramChange="28"/>
+      <Patch Number="30" Name="Patch 30" ProgramChange="29"/>
+      <Patch Number="31" Name="Patch 31" ProgramChange="30"/>
+      <Patch Number="32" Name="Patch 32" ProgramChange="31"/>
+      <Patch Number="33" Name="Patch 33" ProgramChange="32"/>
+      <Patch Number="34" Name="Patch 34" ProgramChange="33"/>
+      <Patch Number="35" Name="Patch 35" ProgramChange="34"/>
+      <Patch Number="36" Name="Patch 36" ProgramChange="35"/>
+      <Patch Number="37" Name="Patch 37" ProgramChange="36"/>
+      <Patch Number="38" Name="Patch 38" ProgramChange="37"/>
+      <Patch Number="39" Name="Patch 39" ProgramChange="38"/>
+      <Patch Number="40" Name="Patch 40" ProgramChange="39"/>
+      <Patch Number="41" Name="Patch 41" ProgramChange="40"/>
+      <Patch Number="42" Name="Patch 42" ProgramChange="41"/>
+      <Patch Number="43" Name="Patch 43" ProgramChange="42"/>
+      <Patch Number="44" Name="Patch 44" ProgramChange="43"/>
+      <Patch Number="45" Name="Patch 45" ProgramChange="44"/>
+      <Patch Number="46" Name="Patch 46" ProgramChange="45"/>
+      <Patch Number="47" Name="Patch 47" ProgramChange="46"/>
+      <Patch Number="48" Name="Patch 48" ProgramChange="47"/>
+      <Patch Number="49" Name="Patch 49" ProgramChange="48"/>
+      <Patch Number="50" Name="Patch 50" ProgramChange="49"/>
+      <Patch Number="51" Name="Patch 51" ProgramChange="50"/>
+      <Patch Number="52" Name="Patch 52" ProgramChange="51"/>
+      <Patch Number="53" Name="Patch 53" ProgramChange="52"/>
+      <Patch Number="54" Name="Patch 54" ProgramChange="53"/>
+      <Patch Number="55" Name="Patch 55" ProgramChange="54"/>
+      <Patch Number="56" Name="Patch 56" ProgramChange="55"/>
+      <Patch Number="57" Name="Patch 57" ProgramChange="56"/>
+      <Patch Number="58" Name="Patch 58" ProgramChange="57"/>
+      <Patch Number="59" Name="Patch 59" ProgramChange="58"/>
+      <Patch Number="60" Name="Patch 60" ProgramChange="59"/>
+      <Patch Number="61" Name="Patch 61" ProgramChange="60"/>
+      <Patch Number="62" Name="Patch 62" ProgramChange="61"/>
+      <Patch Number="63" Name="Patch 63" ProgramChange="62"/>
+      <Patch Number="64" Name="Patch 64" ProgramChange="63"/>
+      <Patch Number="65" Name="Patch 65" ProgramChange="64"/>
+      <Patch Number="66" Name="Patch 66" ProgramChange="65"/>
+      <Patch Number="67" Name="Patch 67" ProgramChange="66"/>
+      <Patch Number="68" Name="Patch 68" ProgramChange="67"/>
+      <Patch Number="69" Name="Patch 69" ProgramChange="68"/>
+      <Patch Number="70" Name="Patch 70" ProgramChange="69"/>
+      <Patch Number="71" Name="Patch 71" ProgramChange="70"/>
+      <Patch Number="72" Name="Patch 72" ProgramChange="71"/>
+      <Patch Number="73" Name="Patch 73" ProgramChange="72"/>
+      <Patch Number="74" Name="Patch 74" ProgramChange="73"/>
+      <Patch Number="75" Name="Patch 75" ProgramChange="74"/>
+      <Patch Number="76" Name="Patch 76" ProgramChange="75"/>
+      <Patch Number="77" Name="Patch 77" ProgramChange="76"/>
+      <Patch Number="78" Name="Patch 78" ProgramChange="77"/>
+      <Patch Number="79" Name="Patch 79" ProgramChange="78"/>
+      <Patch Number="80" Name="Patch 80" ProgramChange="79"/>
+      <Patch Number="81" Name="Patch 81" ProgramChange="80"/>
+      <Patch Number="82" Name="Patch 82" ProgramChange="81"/>
+      <Patch Number="83" Name="Patch 83" ProgramChange="82"/>
+      <Patch Number="84" Name="Patch 84" ProgramChange="83"/>
+      <Patch Number="85" Name="Patch 85" ProgramChange="84"/>
+      <Patch Number="86" Name="Patch 86" ProgramChange="85"/>
+      <Patch Number="87" Name="Patch 87" ProgramChange="86"/>
+      <Patch Number="88" Name="Patch 88" ProgramChange="87"/>
+      <Patch Number="89" Name="Patch 89" ProgramChange="88"/>
+      <Patch Number="90" Name="Patch 90" ProgramChange="89"/>
+      <Patch Number="91" Name="Patch 91" ProgramChange="90"/>
+      <Patch Number="92" Name="Patch 92" ProgramChange="91"/>
+      <Patch Number="93" Name="Patch 93" ProgramChange="92"/>
+      <Patch Number="94" Name="Patch 94" ProgramChange="93"/>
+      <Patch Number="95" Name="Patch 95" ProgramChange="94"/>
+      <Patch Number="96" Name="Patch 96" ProgramChange="95"/>
+      <Patch Number="97" Name="Patch 97" ProgramChange="96"/>
+      <Patch Number="98" Name="Patch 98" ProgramChange="97"/>
+      <Patch Number="99" Name="Patch 99" ProgramChange="98"/>
+      <Patch Number="100" Name="Patch 100" ProgramChange="99"/>
+      <Patch Number="101" Name="Patch 101" ProgramChange="100"/>
+      <Patch Number="102" Name="Patch 102" ProgramChange="101"/>
+      <Patch Number="103" Name="Patch 103" ProgramChange="102"/>
+      <Patch Number="104" Name="Patch 104" ProgramChange="103"/>
+      <Patch Number="105" Name="Patch 105" ProgramChange="104"/>
+      <Patch Number="106" Name="Patch 106" ProgramChange="105"/>
+      <Patch Number="107" Name="Patch 107" ProgramChange="106"/>
+      <Patch Number="108" Name="Patch 108" ProgramChange="107"/>
+      <Patch Number="109" Name="Patch 109" ProgramChange="108"/>
+      <Patch Number="110" Name="Patch 110" ProgramChange="109"/>
+      <Patch Number="111" Name="Patch 111" ProgramChange="110"/>
+      <Patch Number="112" Name="Patch 112" ProgramChange="111"/>
+      <Patch Number="113" Name="Patch 113" ProgramChange="112"/>
+      <Patch Number="114" Name="Patch 114" ProgramChange="113"/>
+      <Patch Number="115" Name="Patch 115" ProgramChange="114"/>
+      <Patch Number="116" Name="Patch 116" ProgramChange="115"/>
+      <Patch Number="117" Name="Patch 117" ProgramChange="116"/>
+      <Patch Number="118" Name="Patch 118" ProgramChange="117"/>
+      <Patch Number="119" Name="Patch 119" ProgramChange="118"/>
+      <Patch Number="120" Name="Patch 120" ProgramChange="119"/>
+      <Patch Number="121" Name="Patch 121" ProgramChange="120"/>
+      <Patch Number="122" Name="Patch 122" ProgramChange="121"/>
+      <Patch Number="123" Name="Patch 123" ProgramChange="122"/>
+      <Patch Number="124" Name="Patch 124" ProgramChange="123"/>
+      <Patch Number="125" Name="Patch 125" ProgramChange="124"/>
+      <Patch Number="126" Name="Patch 126" ProgramChange="125"/>
+      <Patch Number="127" Name="Patch 127" ProgramChange="126"/>
+      <Patch Number="128" Name="Patch 128" ProgramChange="127"/>
+    </PatchNameList>
+    <ControlNameList Name="Controls">
+      <Control Type="7bit" Number="100" Name="Tune"/>
+      <Control Type="7bit" Number="101" Name="Pitch"/>
+      <Control Type="7bit" Number="102" Name="Decay"/>
+      <Control Type="7bit" Number="103" Name="Harmonics"/>
+      <Control Type="7bit" Number="104" Name="Pulse"/>
+      <Control Type="7bit" Number="105" Name="Noise"/>
+      <Control Type="7bit" Number="106" Name="Attack"/>
+      <Control Type="7bit" Number="107" Name="EQ"/>
+      <Control Type="7bit" Number="113" Name="Compression"/>
+      <Control Type="7bit" Number="114" Name="Gate Time"/>
+      <Control Type="7bit" Number="115" Name="Metal Noise"/>
+      <Control Type="7bit" Number="117" Name="Volume"/>
+      <Control Type="7bit" Number="120" Name="LFO Sync"/>
+      <Control Type="7bit" Number="123" Name="LFO One Shot"/>
+      <Control Type="7bit" Number="121" Name="LFO Intensity"/>
+      <Control Type="7bit" Number="122" Name="LFO Rate"/>
+    </ControlNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>
+
