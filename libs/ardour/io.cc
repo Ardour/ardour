@@ -1342,9 +1342,9 @@ IO::build_legal_port_name (DataType type)
 	string suffix;
 
 	if (type == DataType::AUDIO) {
-		suffix = _("audio");
+		suffix = X_("audio");
 	} else if (type == DataType::MIDI) {
-		suffix = _("midi");
+		suffix = X_("midi");
 	} else {
 		throw unknown_type();
 	}
