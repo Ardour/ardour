@@ -363,6 +363,20 @@ tar  xf expat-2.1.0.tar.gz && (cd expat-2.1.0  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS=
 # 
 tar  xf libxml2-2.7.8.tar.gz && (cd libxml2-2.7.8 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF --with-zlib=$PREFIX ${PYTHON:+--with-python=$PYTHON} && make && sudo make install && sudo chown -R `whoami` $PREFIX) || die "libxml2 build failed"
 tar  xf libxslt-1.1.28.tar.gz && (cd libxslt-1.1.28 && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "libxslt build failed"
+
+# hackety-frakkin-hack ....
+# we need to force xsltproc to never rely on network access during this build, so we have to hack up
+# a script to do this
+mv $PREFIX/bin/xsltproc $PREFIX/bin/xsltproc.bin
+cat <<EOF >$PREFIX/bin/xsltproc
+#!/bin/sh
+exec xsltproc.bin --nonet "\$@"
+EOF
+chmod a+x $PREFIX/bin/xsltproc
+#
+# now returning you to some semblance of sanity ...
+#  
+
 tar  xf readline-6.2.tar.gz && (cd readline-6.2  && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS -lncurses" ./configure $GLOBAL_CONF && make && make install) || die "readline build failed"
 
 #
