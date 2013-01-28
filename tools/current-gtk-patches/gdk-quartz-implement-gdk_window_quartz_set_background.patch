@@ -1,0 +1,81 @@
+From a61b5362e3f156e6e07255d3f466a8758dda80c5 Mon Sep 17 00:00:00 2001
+From: Kristian Rietveld <kris@loopnest.org>
+Date: Fri, 28 Dec 2012 23:01:48 +0100
+Subject: [PATCH] quartz: implement gdk_window_quartz_set_background
+
+If a background color is set through this method, we of course prefer to
+use this above Cocoa's default window background color.
+---
+ gdk/quartz/GdkQuartzView.c    |    9 ++++++++-
+ gdk/quartz/gdkwindow-quartz.c |   19 ++++++++++++++++---
+ gdk/quartz/gdkwindow-quartz.h |    4 ++++
+ 3 files changed, 28 insertions(+), 4 deletions(-)
+
+diff --git a/gdk/quartz/GdkQuartzView.c b/gdk/quartz/GdkQuartzView.c
+index 77ff5d7..8a1b359 100644
+--- a/gdk/quartz/GdkQuartzView.c
++++ b/gdk/quartz/GdkQuartzView.c
+@@ -97,7 +97,14 @@
+        */
+       [NSGraphicsContext saveGraphicsState];
+ 
+-      [[NSColor windowBackgroundColor] setFill];
++      if (impl->background_color_set)
++        [[NSColor colorWithDeviceRed:impl->background_color.red / 65535.0
++                               green:impl->background_color.green / 65535.0
++                                blue:impl->background_color.blue / 65535.0
++                               alpha:1.0]
++         setFill];
++      else
++        [[NSColor windowBackgroundColor] setFill];
+       [NSBezierPath fillRect:rect];
+ 
+       [NSGraphicsContext restoreGraphicsState];
+diff --git a/gdk/quartz/gdkwindow-quartz.c b/gdk/quartz/gdkwindow-quartz.c
+index 7302090..7272a8b 100644
+--- a/gdk/quartz/gdkwindow-quartz.c
++++ b/gdk/quartz/gdkwindow-quartz.c
+@@ -1723,9 +1723,22 @@ static void
+ gdk_window_quartz_set_background (GdkWindow      *window,
+                                   const GdkColor *color)
+ {
+-  /* FIXME: We could theoretically set the background color for toplevels
+-   * here. (Currently we draw the background before emitting expose events)
+-   */
++  GdkWindowImplQuartz *impl;
++  GdkWindowObject *private;
++
++  if (GDK_WINDOW_DESTROYED (window))
++    return;
++
++  private = GDK_WINDOW_OBJECT (window);
++  impl = GDK_WINDOW_IMPL_QUARTZ (private->impl);
++
++  if (color)
++    {
++      impl->background_color = *color;
++      impl->background_color_set = TRUE;
++    }
++  else
++    impl->background_color_set = FALSE;
+ }
+ 
+ static void
+diff --git a/gdk/quartz/gdkwindow-quartz.h b/gdk/quartz/gdkwindow-quartz.h
+index 4a0e27a..ed9dfe3 100644
+--- a/gdk/quartz/gdkwindow-quartz.h
++++ b/gdk/quartz/gdkwindow-quartz.h
+@@ -60,6 +60,10 @@ struct _GdkWindowImplQuartz
+   GList *sorted_children;
+ 
+   GdkRegion *needs_display_region;
++
++  GdkColor background_color;
++
++  guint background_color_set : 1;
+ };
+  
+ struct _GdkWindowImplQuartzClass 
+-- 
+1.7.4.4
+
