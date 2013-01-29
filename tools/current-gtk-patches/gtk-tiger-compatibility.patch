@@ -1,3 +1,5 @@
+diff --git a/gdk/quartz/gdkimage-quartz.c b/gdk/quartz/gdkimage-quartz.c
+index 1d4f8d7..3ca3cf0 100644
 --- a/gdk/quartz/gdkimage-quartz.c
 +++ b/gdk/quartz/gdkimage-quartz.c
 @@ -137,6 +137,9 @@ _gdk_quartz_image_copy_to_image (GdkDrawable *drawable,
@@ -8,7 +10,7 @@
 +         return image;
 +#else
            /* Special case for the root window. */
-          CGRect rect = CGRectMake (src_x, src_y, width, height);
+ 	  CGRect rect = CGRectMake (src_x, src_y, width, height);
            CGImageRef root_image_ref = CGWindowListCreateImage (rect,
 @@ -145,6 +148,7 @@ _gdk_quartz_image_copy_to_image (GdkDrawable *drawable,
                                                                 kCGWindowImageDefault);
@@ -18,3 +20,23 @@
          }
        else
          {
+diff --git a/gtk/gtkclipboard-quartz.c b/gtk/gtkclipboard-quartz.c
+index cd6f878..19a9898 100644
+--- a/gtk/gtkclipboard-quartz.c
++++ b/gtk/gtkclipboard-quartz.c
+@@ -25,6 +25,15 @@
+ 
+ #import <Cocoa/Cocoa.h>
+ 
++/* NSInteger only exists in Leopard and newer.  This check has to be
++ * done after inclusion of the system headers.  If NSInteger has not
++ * been defined, we know for sure that we are on 32-bit.
++ */
++#ifndef NSINTEGER_DEFINED
++typedef int NSInteger;
++typedef unsigned int NSUInteger;
++#endif
++
+ #include "gtkclipboard.h"
+ #include "gtkinvisible.h"
+ #include "gtkmain.h"
