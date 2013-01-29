@@ -333,7 +333,13 @@ static void load_custom_fonts() {
 
 	FcConfig *config = FcInitLoadConfigAndFonts();
 	FcBool ret = FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_mono_file.c_str()));
+	if (ret == FcFalse) {
+		cerr << _("Cannot load ArdourMono TrueType font.") << endl;
+	}
 	ret = FcConfigSetCurrent(config);
+	if (ret == FcFalse) {
+		cerr << _("Failed to set fontconfig configuration.") << endl;
+	}
 }
 
 static gboolean
