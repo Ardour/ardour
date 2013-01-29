@@ -50,6 +50,8 @@
 #include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/utils.h>
 
+#include <fontconfig/fontconfig.h>
+
 #include "version.h"
 #include "utils.h"
 #include "ardour_ui.h"
@@ -323,6 +325,17 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 
 #endif
 
+static void load_custom_fonts() {
+	std::string ardour_mono_file;
+	if (!find_file_in_search_path (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
+		cerr << _("Cannot find ArdourMono TrueType font") << endl;
+	}
+
+	FcConfig *config = FcInitLoadConfigAndFonts();
+	FcBool ret = FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_mono_file.c_str()));
+	ret = FcConfigSetCurrent(config);
+}
+
 static gboolean
 tell_about_jack_death (void* /* ignored */)
 {
@@ -386,6 +399,8 @@ int main (int argc, char *argv[])
 #endif
 {
 	fixup_bundle_environment (argc, argv);
+
+	load_custom_fonts(); /* needs to happend before any gtk and pango init calls */
 
 	if (!Glib::thread_supported()) {
 		Glib::thread_init();

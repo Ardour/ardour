@@ -273,6 +273,7 @@ def configure(conf):
                       uselib_store='GNOMECANVASMM', atleast_version='2.16')
     autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
     autowaf.check_pkg(conf, 'x11', uselib_store='X11', atleast_version='1.1', mandatory=False)
+    autowaf.check_pkg(conf, 'fontconfig', uselib_store='FONTCONFIG')
 
     conf.write_config_header('gtk2ardour-config.h', remove=False)
 
@@ -393,7 +394,7 @@ def build(bld):
 
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
-    obj.uselib       = 'UUID FLAC GLIBMM GTHREAD GTK OGG ALSA CURL DL'
+    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG ALSA CURL DL'
     obj.uselib       += ' GTKMM GNOMECANVASMM GNOMECANVAS '
     obj.uselib       += ' AUDIOUNITS OSX GTKOSX '
     obj.use          = [ 'libpbd',
@@ -528,7 +529,7 @@ def build(bld):
                 'MASSIVE' : '60',
         }
         font_names = {
-                'BOLD_MONOSPACE' : 'monospace bold'
+                'BOLD_MONOSPACE' : 'ArdourMono'
         }
 
     # Set up font substitution dictionary
@@ -659,6 +660,7 @@ def build(bld):
     bld.install_files('${DATADIR}/ardour3/icons', bld.path.ant_glob('icons/*.png'))
     bld.install_files('${DATADIR}/ardour3/pixmaps', bld.path.ant_glob('pixmaps/*.xpm'))
     bld.install_files('${DATADIR}/ardour3', 'splash.png')
+    bld.install_files('${DATADIR}/ardour3', 'ArdourMono.ttf')
 
     # Default UI configuration
     bld.install_files('${SYSCONFDIR}/ardour3', 'ardour3_ui_default.conf')
