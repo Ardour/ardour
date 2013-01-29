@@ -10,7 +10,7 @@ style "small_text"
 
 style "small_mono_text"
 {
- 	font_name = "bold monospace @FONT_SMALL@"
+	font_name = "monospace bold @FONT_SMALL@"
 }
 
 style "small_italic_text"

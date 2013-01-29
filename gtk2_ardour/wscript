@@ -528,7 +528,7 @@ def build(bld):
                 'MASSIVE' : '60',
         }
         font_names = {
-                'BOLD_MONOSPACE' : 'bold monospace'
+                'BOLD_MONOSPACE' : 'monospace bold'
         }
 
     # Set up font substitution dictionary
