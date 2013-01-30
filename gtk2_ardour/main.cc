@@ -276,11 +276,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 		setenv ("FONTCONFIG_FILE", "/etc/fonts/fonts.conf", 1);
 		setenv ("FONTCONFIG_PATH", "/etc/fonts", 1);
 	} else {
-		/* use the one included in the bundle */
-		
-		path = Glib::build_filename (dir_path, "etc/fonts/fonts.conf");
-		setenv ("FONTCONFIG_FILE", path.c_str(), 1);
-		export_search_path (dir_path, "FONTCONFIG_PATH", "/etc/fonts");
+		error << _("No fontconfig file found on your system. Things may looked very odd or ugly") << endmsg;
 	}
 
 	/* write a pango.rc file and tell pango to use it. we'd love
