@@ -130,8 +130,9 @@ Ardour will play NO role in monitoring"))
 
 		set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 		
-		// setup_prerelease_page ();
-		
+#ifdef __APPLE__
+		setup_prerelease_page ();
+#endif
 		if (new_user) {
 			
 			setup_new_user_page ();
@@ -192,13 +193,11 @@ ArdourStartup::setup_prerelease_page ()
         VBox* vbox = manage (new VBox);
         Label* label = manage (new Label);
         label->set_markup (_("<b>Welcome to this BETA release of Ardour 3.0</b>\n\n\
-There are still several issues and bugs to be worked on,\n\
-as well as general workflow improvements, before this can be considered\n\
-release software. So, a few guidelines:\n\
+Ardour 3.0 has been released for Linux but because of the lack of testers,\n\
+it is still at the beta stage on OS X. So, a few guidelines:\n\
 \n\
 1) Please do <b>NOT</b> use this software with the expectation that it is stable or reliable\n\
    though it may be so, depending on your workflow.\n\
-2) Please see http://ardour.org/a3_features for a guide to new features.\n\
 3) <b>Please do NOT use the forums at ardour.org to report issues</b>.\n\
 4) Please <b>DO</b> use the bugtracker at http://tracker.ardour.org/ to report issues\n\
    making sure to note the product version number as 3.0-beta.\n\
