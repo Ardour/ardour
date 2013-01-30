@@ -10,7 +10,7 @@ style "small_text"
 
 style "small_mono_text"
 {
-	font_name = "ArdourMono @FONT_SMALL@"
+	font_name = "@MONOSPACE@ @FONT_SMALL@"
 }
 
 style "small_italic_text"
@@ -35,7 +35,7 @@ style "medium_text"
 
 style "medium_monospace_text"
 {
-        font_name = "ArdourMono @FONT_SIZE_NORMAL@"
+        font_name = "@MONOSPACE@ @FONT_SIZE_NORMAL@"
 }
 
 style "red_medium_text" = "medium_text"
