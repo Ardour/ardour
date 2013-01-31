@@ -217,6 +217,30 @@ fixup_bundle_environment (int, char* [])
 	setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (bundle_dir, "Resources/gdk-pixbuf.loaders").c_str(), 1);
 }
 
+#include <Carbon/Carbon.h>
+
+static void load_custom_fonts() {
+#if 0 // untested OSX code
+	std::string ardour_mono_file;
+
+	if (!find_file_in_search_path (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
+		cerr << _("Cannot find ArdourMono TrueType font") << endl;
+	}
+
+	CFStringRef ttf;
+	CFURLRef fontURL;
+	CFErrorRef error;
+	ttf = CFStringCreateWithBytes(
+			kCFAllocatorDefault, ardour_mono_filec_str(),
+			ardour_mono_file.length(),
+			kCFStringEncodingUTF8, FALSE);
+	fontURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, ttf, kCFURLPOSIXPathStyle, TRUE);
+	if (CTFontManagerRegisterFontsForURL(fontURL, kCTFontManagerScopeProcess, &error) != true) {
+		cerr << _("Cannot load ArdourMono TrueType font.") << endl;
+	}
+#endif
+}
+
 #else
 
 void
@@ -319,8 +343,6 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 
 }
 
-#endif
-
 static void load_custom_fonts() {
 	std::string ardour_mono_file;
 	if (!find_file_in_search_path (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
@@ -337,6 +359,8 @@ static void load_custom_fonts() {
 		cerr << _("Failed to set fontconfig configuration.") << endl;
 	}
 }
+
+#endif
 
 static gboolean
 tell_about_jack_death (void* /* ignored */)
