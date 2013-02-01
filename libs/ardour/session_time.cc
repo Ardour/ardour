@@ -227,10 +227,6 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 {
 	Timecode::BBT_Time bbt;
 
-	if (pos->frame != _transport_frame) {
-		cerr << "ARDOUR says " << _transport_frame << " JACK says " << pos->frame << endl;
-	}
-
 	/* BBT info */
 
 	if (_tempo_map) {
