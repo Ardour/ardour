@@ -57,16 +57,12 @@ SampleFormatConverter<int32_t>::init (framecnt_t max_frames, int type, int data_
 	if(throw_level (ThrowObject) && data_width < 24) {
 		throw Exception (*this, "Trying to use SampleFormatConverter<int32_t> for data widths < 24");
 	}
-	
+
 	init_common (max_frames);
-	
-	if (data_width == 24) {
-		dither = gdither_new ((GDitherType) type, channels, GDither32bit, data_width);
-	} else if (data_width == 32) {
-		dither = gdither_new (GDitherNone, channels, GDitherFloat, data_width);
-	} else if (throw_level (ThrowObject)) {
-		throw Exception (*this, "Unsupported data width");
-	}
+
+	// GDither is broken with GDither32bit if the dither depth
+	// is bigger than 24, so lets just use that...
+	dither = gdither_new (GDitherNone, channels, GDither32bit, 24);
 }
 
 template <>
