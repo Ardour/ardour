@@ -59,7 +59,8 @@ else:
 
 def fetch_svn_revision (path):
     cmd = "svnversion | cut -d: -f1"
-    return subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].rstrip(os.linesep)
+    output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].decode(sys.stdout.encoding)
+    return output.rstrip(os.linesep)
 
 def fetch_gcc_version (CC):
     cmd = "LANG= %s --version" % CC
@@ -112,7 +113,7 @@ def create_stored_revision():
     try:
         text =  '#include "ardour/svn_revision.h"\n'
         text += 'namespace ARDOUR { const char* svn_revision = \"%s\"; }\n' % rev
-        print('Writing svn revision info to libs/ardour/svn_revision.cc using ', rev)
+        print('Writing svn revision info to libs/ardour/svn_revision.cc using ' + rev)
         o = open('libs/ardour/svn_revision.cc', 'w')
         o.write(text)
         o.close()
