@@ -105,8 +105,8 @@ Session::start_audio_export (framepos_t position)
 {
 	if (!_exporting) {
 		pre_export ();
-		_export_started = false;
 	}
+	_export_started = false;
 
 	/* We're about to call Track::seek, so the butler must have finished everything
 	   up otherwise it could be doing do_refill in its thread while we are doing
