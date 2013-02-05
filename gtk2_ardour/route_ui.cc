@@ -319,11 +319,32 @@ RouteUI::mute_press (GdkEventButton* ev)
 
 				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-					if (_mute_release) {
-						_mute_release->routes = _session->get_routes ();
+					/* toggle mute on everything (but
+					 * exclude the master and monitor)
+					 *
+					 * because we are going to erase
+					 * elements of the list we need to work
+					 * on a copy.
+					 */
+					
+					boost::shared_ptr<RouteList> rl = _session->get_routes ();
+					boost::shared_ptr<RouteList> copy (new RouteList);
+
+					*copy = *rl;
+
+					for (RouteList::iterator i = copy->begin(); i != copy->end(); ) {
+						if ((*i)->is_master() || (*i)->is_monitor()) {
+							i = copy->erase (i);
+						} else {
+							++i;
+						}
 					}
 
-					_session->set_mute (_session->get_routes(), !_route->muted());
+					if (_mute_release) {
+						_mute_release->routes = copy;
+					}
+
+					_session->set_mute (copy, !_route->muted());
 
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -331,12 +352,16 @@ RouteUI::mute_press (GdkEventButton* ev)
 					   NOTE: Primary-button2 is MIDI learn.
 					*/
 
+
 					if (ev->button == 1 && _route->route_group()) {
+
+						boost::shared_ptr<RouteList> rl = _route->route_group()->route_list();
+						
 						if (_mute_release) {
-							_mute_release->routes = _session->get_routes ();
+							_mute_release->routes = rl;
 						}
 
-						_session->set_mute (_session->get_routes(), !_route->muted(), Session::rt_cleanup, true);
+						_session->set_mute (rl, !_route->muted(), Session::rt_cleanup, true);
 					}
 
 				} else {
