@@ -105,7 +105,7 @@ StereoPanner::set_tooltip ()
 	*/
 
 	char buf[64];
-	snprintf (buf, sizeof (buf), "L:%3d R:%3d Width:%d%%", (int) rint (100.0 * (1.0 - pos)),
+	snprintf (buf, sizeof (buf), _("L:%3d R:%3d Width:%d%%"), (int) rint (100.0 * (1.0 - pos)),
 	          (int) rint (100.0 * pos),
 	          (int) floor (100.0 * width_control->get_value()));
 	_tooltip.set_tip (buf);

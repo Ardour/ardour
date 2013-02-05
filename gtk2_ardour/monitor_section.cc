@@ -675,22 +675,22 @@ MonitorSection::register_actions ()
         monitor_actions = ActionGroup::create (X_("Monitor"));
 	ActionManager::add_action_group (monitor_actions);
 
-        ActionManager::register_toggle_action (monitor_actions, "monitor-mono", "", "Switch monitor to mono",
+        ActionManager::register_toggle_action (monitor_actions, "monitor-mono", "", _("Switch monitor to mono"),
                                                sigc::mem_fun (*this, &MonitorSection::mono));
 
-        ActionManager::register_toggle_action (monitor_actions, "monitor-cut-all", "", "Cut monitor",
+        ActionManager::register_toggle_action (monitor_actions, "monitor-cut-all", "", _("Cut monitor"),
                                                sigc::mem_fun (*this, &MonitorSection::cut_all));
 
-        ActionManager::register_toggle_action (monitor_actions, "monitor-dim-all", "", "Dim monitor",
+        ActionManager::register_toggle_action (monitor_actions, "monitor-dim-all", "", _("Dim monitor"),
                                                sigc::mem_fun (*this, &MonitorSection::dim_all));
 
-        act = ActionManager::register_toggle_action (monitor_actions, "toggle-exclusive-solo", "", "Toggle exclusive solo mode",
+        act = ActionManager::register_toggle_action (monitor_actions, "toggle-exclusive-solo", "", _("Toggle exclusive solo mode"),
                                                sigc::mem_fun (*this, &MonitorSection::toggle_exclusive_solo));
 
         Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
         tact->set_active (Config->get_exclusive_solo());
 
-        act = ActionManager::register_toggle_action (monitor_actions, "toggle-mute-overrides-solo", "", "Toggle mute overrides solo mode",
+        act = ActionManager::register_toggle_action (monitor_actions, "toggle-mute-overrides-solo", "", _("Toggle mute overrides solo mode"),
                                                      sigc::mem_fun (*this, &MonitorSection::toggle_mute_overrides_solo));
 
         tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
@@ -727,11 +727,11 @@ MonitorSection::register_actions ()
         Glib::RefPtr<ActionGroup> solo_actions = ActionGroup::create (X_("Solo"));
         RadioAction::Group solo_group;
 
-        ActionManager::register_radio_action (solo_actions, solo_group, "solo-use-in-place", "", "In-place solo",
+        ActionManager::register_radio_action (solo_actions, solo_group, "solo-use-in-place", "", _("In-place solo"),
                                               sigc::mem_fun (*this, &MonitorSection::solo_use_in_place));
-        ActionManager::register_radio_action (solo_actions, solo_group, "solo-use-afl", "", "After Fade Listen (AFL) solo",
+        ActionManager::register_radio_action (solo_actions, solo_group, "solo-use-afl", "", _("After Fade Listen (AFL) solo"),
                                               sigc::mem_fun (*this, &MonitorSection::solo_use_afl));
-        ActionManager::register_radio_action (solo_actions, solo_group, "solo-use-pfl", "", "Pre Fade Listen (PFL) solo",
+        ActionManager::register_radio_action (solo_actions, solo_group, "solo-use-pfl", "", _("Pre Fade Listen (PFL) solo"),
                                               sigc::mem_fun (*this, &MonitorSection::solo_use_pfl));
 
 	ActionManager::add_action_group (solo_actions);

@@ -98,7 +98,7 @@ MonoPanner::set_tooltip ()
         */
 
         char buf[64];
-        snprintf (buf, sizeof (buf), "L:%3d R:%3d",
+        snprintf (buf, sizeof (buf), _("L:%3d R:%3d"),
                   (int) rint (100.0 * (1.0 - pos)),
                   (int) rint (100.0 * pos));
         _tooltip.set_tip (buf);
