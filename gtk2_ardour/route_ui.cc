@@ -327,10 +327,9 @@ RouteUI::mute_press (GdkEventButton* ev)
 					 * on a copy.
 					 */
 					
-					boost::shared_ptr<RouteList> rl = _session->get_routes ();
 					boost::shared_ptr<RouteList> copy (new RouteList);
 
-					*copy = *rl;
+					*copy = *_session->get_routes ();
 
 					for (RouteList::iterator i = copy->begin(); i != copy->end(); ) {
 						if ((*i)->is_master() || (*i)->is_monitor()) {
@@ -352,13 +351,20 @@ RouteUI::mute_press (GdkEventButton* ev)
 					   NOTE: Primary-button2 is MIDI learn.
 					*/
 
+					boost::shared_ptr<RouteList> rl;
 
-					if (ev->button == 1 && _route->route_group()) {
+					if (ev->button == 1) { 
 
-						boost::shared_ptr<RouteList> rl = _route->route_group()->route_list();
-						
-						if (_mute_release) {
-							_mute_release->routes = rl;
+						if (_route->route_group()) {
+							
+							rl = _route->route_group()->route_list();
+							
+							if (_mute_release) {
+								_mute_release->routes = rl;
+							}
+						} else {
+							rl.reset (new RouteList);
+							rl->push_back (_route);
 						}
 
 						_session->set_mute (rl, !_route->muted(), Session::rt_cleanup, true);
@@ -370,7 +376,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 
 					boost::shared_ptr<RouteList> rl (new RouteList);
 					rl->push_back (_route);
-
+					
 					if (_mute_release) {
 						_mute_release->routes = rl;
 					}
@@ -493,16 +499,30 @@ RouteUI::solo_press(GdkEventButton* ev)
 					   NOTE: Primary-button2 is MIDI learn.
 					*/
 
-					if (ev->button == 1 && _route->route_group()) {
+					/* Primary-button1 applies change to the mix group even if it is not active
+					   NOTE: Primary-button2 is MIDI learn.
+					*/
 
-						if (_solo_release) {
-							_solo_release->routes = _route->route_group()->route_list();
+					boost::shared_ptr<RouteList> rl;
+
+					if (ev->button == 1) { 
+
+						if (_route->route_group()) {
+							
+							rl = _route->route_group()->route_list();
+							
+							if (_solo_release) {
+								_solo_release->routes = rl;
+							}
+						} else {
+							rl.reset (new RouteList);
+							rl->push_back (_route);
 						}
 
 						if (Config->get_solo_control_is_listen_control()) {
-							_session->set_listen (_route->route_group()->route_list(), !_route->listening_via_monitor(),  Session::rt_cleanup, true);
+							_session->set_listen (rl, !_route->listening_via_monitor(),  Session::rt_cleanup, true);
 						} else {
-							_session->set_solo (_route->route_group()->route_list(), !_route->self_soloed(),  Session::rt_cleanup, true);
+							_session->set_solo (rl, !_route->self_soloed(),  Session::rt_cleanup, true);
 						}
 					}
 
@@ -594,8 +614,21 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 			/* Primary-button1 applies change to the route group (even if it is not active)
 			   NOTE: Primary-button2 is MIDI learn.
 			*/
-			if (ev->button == 1 && _route->route_group()) {
-				_session->set_record_enabled (_route->route_group()->route_list(), !rec_enable_button->active_state(), Session::rt_cleanup, true);
+
+			if (ev->button == 1) {
+
+				boost::shared_ptr<RouteList> rl;
+				
+				if (_route->route_group()) {
+					
+					rl = _route->route_group()->route_list();
+					
+				} else {
+					rl.reset (new RouteList);
+					rl->push_back (_route);
+				}
+				
+				_session->set_record_enabled (rl, !rec_enable_button->active_state(), Session::rt_cleanup, true);
 			}
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
