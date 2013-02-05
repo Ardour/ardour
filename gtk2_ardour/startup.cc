@@ -70,8 +70,8 @@ ArdourStartup::ArdourStartup (bool require_new, const std::string& session_name,
 	, default_dir_chooser (0)
 	, ic_new_session_button (_("Create a new session"))
 	, ic_existing_session_button (_("Open an existing session"))
-	, monitor_via_hardware_button (_("Use an external mixer or the hardware mixer of your audio interface.\n\
-Ardour will play NO role in monitoring"))
+	, monitor_via_hardware_button (string_compose (_("Use an external mixer or the hardware mixer of your audio interface.\n"
+							 "%1 will play NO role in monitoring"), PROGRAM_NAME))
 	, monitor_via_ardour_button (string_compose (_("Ask %1 to play back material as it is being recorded"), PROGRAM_NAME))
 	, engine_dialog (0)
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)

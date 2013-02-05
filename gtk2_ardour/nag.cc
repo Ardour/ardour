@@ -37,7 +37,7 @@ using namespace Glib;
 using namespace Gtk;
 
 NagScreen::NagScreen (std::string /*context*/, bool maybe_sub)
-	: ArdourDialog (_("Support Ardour Development"), true)
+	: ArdourDialog (string_compose (_("Support %1 Development"), PROGRAM_NAME), true)
 	, donate_button (button_group, _("I'd like to make a one-time donation"))
 	, subscribe_button (button_group, _("Tell me more about becoming a subscriber"))
 	, existing_button (button_group, _("I'm already a subscriber!"))

@@ -774,7 +774,7 @@ EngineControl::enumerate_coreaudio_devices ()
 
 
 	if (devs.size() == 0) {
-		MessageDialog msg (_("\
+		MessageDialog msg (string_compose (_("\
 You do not have any audio devices capable of\n\
 simultaneous playback and recording.\n\n\
 Please use Applications -> Utilities -> Audio MIDI Setup\n\
@@ -784,8 +784,8 @@ Please send email to Apple and ask them why new Macs\n\
 have no duplex audio device.\n\n\
 Alternatively, if you really want just playback\n\
 or recording but not both, start JACK before running\n\
-Ardour and choose the relevant device then."
-					   ),
+%1 and choose the relevant device then."
+							   ), PROGRAM_NAME),
 				   true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
 		msg.set_title (_("No suitable audio devices"));
 		msg.set_position (Gtk::WIN_POS_MOUSE);

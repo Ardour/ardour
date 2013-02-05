@@ -94,6 +94,7 @@ MotionFeedback::MotionFeedback (Glib::RefPtr<Gdk::Pixbuf> pix,
 		hpacker = manage (new HBox);
 		hpacker->pack_start (*value_packer, true, false);
 		hpacker->show ();
+		hpacker->set_border_width (6);
 
 		pack_start (*hpacker, false, false);
 

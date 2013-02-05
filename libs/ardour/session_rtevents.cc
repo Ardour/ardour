@@ -150,7 +150,7 @@ void
 Session::rt_set_mute (boost::shared_ptr<RouteList> rl, bool yn, bool /*group_override*/)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if (!(*i)->is_master() && !(*i)->is_monitor() && !(*i)->is_hidden()) {
+		if (!(*i)->is_monitor() && !(*i)->is_hidden()) {
 			(*i)->set_mute (yn, this);
 		}
 	}

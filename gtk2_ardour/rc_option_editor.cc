@@ -1000,7 +1000,9 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_recording_on_xrun),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_recording_on_xrun)
 		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _("<b>When enabled</b> Ardour will stop recording if an over- or underrun is detected by the audio engine"));
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), 
+					    string_compose (_("<b>When enabled</b> %1 will stop recording if an over- or underrun is detected by the audio engine"),
+							    PROGRAM_NAME));
 	add_option (_("Transport"), tsf);
 
 	tsf = new BoolOption (
@@ -1018,9 +1020,11 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_at_session_end),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_at_session_end)
 		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _("<b>When enabled</b> if Ardour is <b>not recording</b>, it will stop the transport "
-						   "when it reaches the current session end marker\n\n"
-						   "<b>When disabled</b> Ardour will continue to roll past the session end marker at all times"));
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), 
+					    string_compose (_("<b>When enabled</b> if %1 is <b>not recording</b>, it will stop the transport "
+							      "when it reaches the current session end marker\n\n"
+							      "<b>When disabled</b> %1 will continue to roll past the session end marker at all times"),
+							    PROGRAM_NAME));
 	add_option (_("Transport"), tsf);
 
 	tsf = new BoolOption (
@@ -1029,10 +1033,11 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_seamless_loop),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_seamless_loop)
 		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), _("<b>When enabled</b> this will loop by reading ahead and wrapping around at the loop point, "
-						   "preventing any need to do a transport locate at the end of the loop\n\n"
-						   "<b>When disabled</b> looping is done by locating back to the start of the loop when Ardour reaches the end "
-						   "which will often cause a small click or delay"));
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), 
+					    string_compose (_("<b>When enabled</b> this will loop by reading ahead and wrapping around at the loop point, "
+							      "preventing any need to do a transport locate at the end of the loop\n\n"
+							      "<b>When disabled</b> looping is done by locating back to the start of the loop when %1 reaches the end "
+							      "which will often cause a small click or delay"), PROGRAM_NAME));
 	add_option (_("Transport"), tsf);
 
 	tsf = new BoolOption (
@@ -1074,11 +1079,11 @@ RCOptionEditor::RCOptionEditor ()
 		     );
 	Gtkmm2ext::UI::instance()->set_tip 
 		(_sync_framerate->tip_widget(),
-		 _("This option controls the value of the video frame rate <i>while chasing</i> an external timecode source.\n\n"
-		   "<b>When enabled</b> the session video frame rate will be changed to match that of the selected external timecode source.\n\n"
-		   "<b>When disabled</b> the session video frame rate will not be changed to match that of the selected external timecode source."
-		   "Instead the frame rate indication in the main clock will flash red and Ardour will convert between the external "
-		   "timecode standard and the session standard."));
+		 string_compose (_("This option controls the value of the video frame rate <i>while chasing</i> an external timecode source.\n\n"
+				   "<b>When enabled</b> the session video frame rate will be changed to match that of the selected external timecode source.\n\n"
+				   "<b>When disabled</b> the session video frame rate will not be changed to match that of the selected external timecode source."
+				   "Instead the frame rate indication in the main clock will flash red and %1 will convert between the external "
+				   "timecode standard and the session standard."), PROGRAM_NAME));
 
 	add_option (_("Transport"), _sync_framerate);
 
@@ -1148,7 +1153,7 @@ RCOptionEditor::RCOptionEditor ()
 			    );
 	Gtkmm2ext::UI::instance()->set_tip
 		(_ltc_send_continuously->tip_widget(),
-		 _("<b>When enabled</b> Ardour will continue to send LTC information even when the transport (playhead) is not moving"));
+		 string_compose (_("<b>When enabled</b> %1 will continue to send LTC information even when the transport (playhead) is not moving"), PROGRAM_NAME));
 	add_option (_("Transport"), _ltc_send_continuously);
 
 	_ltc_volume_adjustment = new Gtk::Adjustment(-18, -50, 0, .5, 5);
@@ -1739,7 +1744,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (S_("GUI"),
 		    new BoolOption (
 			    "use-own-plugin-gui",
-			    _("Use plugins' own interfaces instead of Ardour's"),
+			    string_compose (_("Use plugins' own interfaces instead of %s's"), PROGRAM_NAME),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_plugin_own_gui),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_plugin_own_gui)
 			    ));

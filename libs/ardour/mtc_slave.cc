@@ -389,9 +389,10 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 
 			if (cur_timecode != tc_format && ! printed_timecode_warning) {
 				if (ceil(Timecode::timecode_to_frames_per_second(cur_timecode)) != ceil(Timecode::timecode_to_frames_per_second(tc_format))) {
-					warning << string_compose(_("Session and MTC framerate mismatch: MTC:%1 Ardour:%2."),
-							Timecode::timecode_format_name(tc_format),
-							Timecode::timecode_format_name(cur_timecode))
+					warning << string_compose(_("Session and MTC framerate mismatch: MTC:%1 %2:%3."),
+								  Timecode::timecode_format_name(tc_format),
+								  PROGRAM_NAME,
+								  Timecode::timecode_format_name(cur_timecode))
 						<< endmsg;
 				}
 				printed_timecode_warning = true;

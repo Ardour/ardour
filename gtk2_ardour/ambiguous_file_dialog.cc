@@ -32,7 +32,7 @@ AmbiguousFileDialog::AmbiguousFileDialog (const string& file, const vector<strin
 	get_vbox()->set_spacing (6);
 
 	Label* l = manage (new Label);
-	l->set_markup (string_compose (_("Ardour has found the file <i>%1</i> in the following places:\n\n"), file));
+	l->set_markup (string_compose (_("%1 has found the file <i>%2</i> in the following places:\n\n"), PROGRAM_NAME, file));
 	get_vbox()->pack_start (*l);
 
 	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {

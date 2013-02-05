@@ -329,7 +329,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 		}
 
 	} catch (runtime_error& err) {
-		error << _("timefx code failure. please notify ardour-developers.") << endmsg;
+		error << string_compose (_("programming error: %1"), X_("timefx code failure")) << endmsg;
 		error << err.what() << endmsg;
 		goto out;
 	}

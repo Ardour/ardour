@@ -80,13 +80,13 @@ gui_jack_error ()
 	                   false,
 	                   Gtk::MESSAGE_INFO,
 	                   Gtk::BUTTONS_NONE);
-win.set_secondary_text(_("There are several possible reasons:\n\
+	win.set_secondary_text(string_compose (_("There are several possible reasons:\n\
 \n\
 1) JACK is not running.\n\
 2) JACK is running as another user, perhaps root.\n\
-3) There is already another client called \"ardour\".\n\
+3) There is already another client called \"%1\".\n\
 \n\
-Please consider the possibilities, and perhaps (re)start JACK."));
+Please consider the possibilities, and perhaps (re)start JACK."), PROGRAM_NAME));
 
 	win.add_button (Stock::QUIT, RESPONSE_CLOSE);
 	win.set_default_response (RESPONSE_CLOSE);
@@ -194,7 +194,7 @@ fixup_bundle_environment (int, char* [])
 	*/
 
 	if (g_mkdir_with_parents (userconfigdir.c_str(), 0755) < 0) {
-		error << string_compose (_("cannot create user ardour folder %1 (%2)"), userconfigdir, strerror (errno))
+		error << string_compose (_("cannot create user %3 folder %1 (%2)"), userconfigdir, strerror (errno), PROGRAM_NAME)
 		      << endmsg;
 	} else {
 		
@@ -312,7 +312,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	*/
 
 	if (g_mkdir_with_parents (userconfigdir.c_str(), 0755) < 0) {
-		error << string_compose (_("cannot create user ardour folder %1 (%2)"), userconfigdir, strerror (errno))
+		error << string_compose (_("cannot create user %3 folder %1 (%2)"), userconfigdir, strerror (errno), PROGRAM_NAME)
 		      << endmsg;
 	} else {
 		
@@ -513,7 +513,7 @@ int main (int argc, char *argv[])
 	try {
 		ui = new ARDOUR_UI (&argc, &argv, localedir);
 	} catch (failed_constructor& err) {
-		error << _("could not create ARDOUR GUI") << endmsg;
+		error << string_compose (_("could not create %1 GUI"), PROGRAM_NAME) << endmsg;
 		exit (1);
 	}
 
