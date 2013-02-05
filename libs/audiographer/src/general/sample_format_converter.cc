@@ -52,7 +52,7 @@ SampleFormatConverter<float>::init (framecnt_t max_frames, int /* type */, int d
 
 template <>
 void
-SampleFormatConverter<int32_t>::init (framecnt_t max_frames, int type, int data_width)
+SampleFormatConverter<int32_t>::init (framecnt_t max_frames, int /*type*/, int data_width)
 {
 	if(throw_level (ThrowObject) && data_width < 24) {
 		throw Exception (*this, "Trying to use SampleFormatConverter<int32_t> for data widths < 24");
