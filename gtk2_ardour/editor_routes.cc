@@ -1206,10 +1206,12 @@ EditorRoutes::key_press (GdkEventKey* ev)
                 break;
 
         case 's':
-		if (Config->get_solo_control_is_listen_control()) {
-			_session->set_listen (rl, !rl->front()->listening_via_monitor(), Session::rt_cleanup);
-		} else {
-			_session->set_solo (rl, !rl->front()->self_soloed(), Session::rt_cleanup);
+                if (get_relevant_routes (rl)) {
+			if (Config->get_solo_control_is_listen_control()) {
+				_session->set_listen (rl, !rl->front()->listening_via_monitor(), Session::rt_cleanup);
+			} else {
+				_session->set_solo (rl, !rl->front()->self_soloed(), Session::rt_cleanup);
+			}
 		}
                 return true;
                 break;
