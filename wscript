@@ -37,7 +37,8 @@ children = [
         'export',
         'midi_maps',
         'mcp',
-        'manual'
+        'manual',
+        'patchfiles'
 ]
 
 i18n_children = [
