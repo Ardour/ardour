@@ -509,6 +509,8 @@ echo ""
 echo "Checking to see if Jack is installed"
 echo ""
 
+JACK_INSTALLED="f"
+
 if ! which jackd > /dev/null;
 then
 	echo ""
@@ -521,17 +523,67 @@ then
 	then
 		echo "Attempting to install Jack"
 		SystemInstall "jackd"
-
+		
 		if [ $? -ne 0 ];
 		then
 			echo ""
 			read -p "Press ENTER to continue:" BLAH
+		else
+			JACK_INSTALLED="t"
 		fi
 	fi
 else
-	echo "Jack OK"
+	JACK_INSTALLED="t"
+	echo "Jack already present"
 fi
 
+# Check to see if Jack is new enough to operate correctly.
+
+if [ "t" = ${JACK_INSTALLED} ];
+then
+	JACK_VERSION_OK="f"
+	JACK_VER_STRING=$(jackd --version | grep -e "jackd.*protocol")
+	JACK_NAME=$(echo $JACK_VER_STRING | awk '{print $1}')
+	JACK_VERSION=$(echo $JACK_VER_STRING | awk '{print $3}')
+	JACK_VERSION_MAJOR=$(echo $JACK_VERSION | awk 'BEGIN{FS="."}{print $1}')
+	JACK_VERSION_MIDDLE=$(echo $JACK_VERSION | awk 'BEGIN{FS="."}{print $2}')
+	JACK_VERSION_MINOR=$(echo $JACK_VERSION | awk 'BEGIN{FS="."}{print $3}')
+
+	if [ "jackd" = ${JACK_NAME} ];
+	then
+		if [ 0 -le ${JACK_VERSION_MAJOR}  -a  121 -le ${JACK_VERSION_MIDDLE}  -a  3 -le ${JACK_VERSION_MINOR} ];
+		then
+			JACK_VERSION_OK="t"
+		fi
+	elif [ "jackdmp" = ${JACK_NAME} ];
+	then
+		if [ 1 -le ${JACK_VERSION_MAJOR}  -a  9 -le ${JACK_VERSION_MIDDLE}  -a  8 -le ${JACK_VERSION_MINOR} ];
+		then
+			JACK_VERSION_OK="t"
+		fi
+	fi
+
+	if [ "t" = ${JACK_VERSION_OK} ];
+	then
+		echo ""
+		echo "Jack Version Check OK (${JACK_VER_STRING})"
+		echo ""
+	else
+		echo ""
+		echo "!!! WARNING !!! - The version of Jack on this system is too old!"
+		echo "Using an old version of Jack is not recommened. Please update"
+		echo "Jack for best results."
+		echo ""
+		echo "System Jack version:"
+		echo "   ${JACK_VER_STRING}"
+		echo ""
+		echo "Recommened minimum versions:"
+		echo "   Jack1 - 0.121.3"
+		echo "   Jack2 - 1.9.8"
+		echo ""
+		read -p "Press ENTER to continue:" BLAH
+	fi
+fi
 
 if ! which qjackctl > /dev/null;
 then
