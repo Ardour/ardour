@@ -368,10 +368,11 @@ def build(bld):
                              'libardour_cp',
                              'libgtk2_ardour',
                              'libgtkmm2ext',
-                             'libtaglib' ]
+                             'libtaglib',
+                             'pthread' ]
         obj.target = 'ardour-3.0-vst.exe.so'
         obj.includes  = [ '../libs/fst', '.' ]
-        obj.linkflags = ['-mwindows', '-Wl,--export-dynamic', '-lpthread']
+        obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
         obj.defines = ['_POSIX_SOURCE', 'USE_WS_PREFIX']
         obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
         # end of the wine executable
