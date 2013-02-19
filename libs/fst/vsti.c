@@ -34,7 +34,7 @@
 #include <sched.h>
 #include "ardour/vestige/aeffectx.h"
 
-#ifdef HAVE_ALSA
+#ifdef HAVE_ALSAMIDIVSTIXXX // not used in ardour 3
 
 snd_seq_t *
 create_sequencer (const char* client_name, bool isinput)

@@ -368,8 +368,7 @@ def build(bld):
                              'libardour_cp',
                              'libgtk2_ardour',
                              'libgtkmm2ext',
-                             'libtaglib',
-                             'pthread' ]
+                             'libtaglib']
         obj.target = 'ardour-3.0-vst.exe.so'
         obj.includes  = [ '../libs/fst', '.' ]
         obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
