@@ -60,7 +60,7 @@ else:
 
 def fetch_svn_revision (path):
     cmd = "svnversion | cut -d: -f1"
-    output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0];
+    output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].decode (sys.getdefaultencoding())
     return output.rstrip(os.linesep)
 
 def fetch_gcc_version (CC):
