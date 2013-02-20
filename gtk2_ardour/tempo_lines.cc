@@ -146,9 +146,8 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 			}
 
 			xpos = rint(((nframes64_t)(*i).frame) / (double)frames_per_unit);
-			if (inserted_last_time && !_lines.empty()) {
-				li = _lines.lower_bound(xpos); // first line >= xpos
-			}
+
+                        li = _lines.lower_bound(xpos); // first line >= xpos
                              
 			line = (li != _lines.end()) ? li->second : NULL;
 			assert(!line || line->property_x1() == li->first);
@@ -215,33 +214,35 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 				// Create a new line
 			} else if (_lines.size() < needed || _lines.size() < MAX_CACHED_LINES) {
 				//cout << "*** CREATING LINE" << endl;
-				assert(_lines.find(xpos) == _lines.end());
-				line = new ArdourCanvas::SimpleLine (*_group);
-				line->property_x1() = xpos;
-				line->property_x2() = xpos;
-				line->property_y1() = 0.0;
-				line->property_y2() = _height;
-				line->property_color_rgba() = color;
-				_lines.insert(make_pair(xpos, line));
-				inserted_last_time = true;
+				if (_lines.find(xpos) == _lines.end()) {
+                                        line = new ArdourCanvas::SimpleLine (*_group);
+                                        line->property_x1() = xpos;
+                                        line->property_x2() = xpos;
+                                        line->property_y1() = 0.0;
+                                        line->property_y2() = _height;
+                                        line->property_color_rgba() = color;
+                                        _lines.insert(make_pair(xpos, line));
+                                        inserted_last_time = true;
+                                }
 
 				// Steal from the left
 			} else {
 				//cout << "*** STEALING FROM LEFT" << endl;
-				assert(_lines.find(xpos) == _lines.end());
-				Lines::iterator steal = _lines.begin();
-				line = steal->second;
-				_lines.erase(steal);
-				line->property_color_rgba() = color;
-				line->property_x1() = xpos;
-				line->property_x2() = xpos;
-				_lines.insert(make_pair(xpos, line));
-				inserted_last_time = true; // search next time
-				invalidated = true;
-                               
-				// Shift clean range right
-				_clean_left = max(_clean_left, steal->first);
-				_clean_right = max(_clean_right, xpos);
+				if (_lines.find(xpos) == _lines.end()) {
+                                        Lines::iterator steal = _lines.begin();
+                                        line = steal->second;
+                                        _lines.erase(steal);
+                                        line->property_color_rgba() = color;
+                                        line->property_x1() = xpos;
+                                        line->property_x2() = xpos;
+                                        _lines.insert(make_pair(xpos, line));
+                                        inserted_last_time = true; // search next time
+                                        invalidated = true;
+                                        
+                                        // Shift clean range right
+                                        _clean_left = max(_clean_left, steal->first);
+                                        _clean_right = max(_clean_right, xpos);
+                                }
 			}
 
 			break;
