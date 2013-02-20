@@ -1,25 +1,113 @@
-#!/bin/bash
+#!/bin/bash -vx
+
+clean=
+makespace=
+parallel=2
+PREFIX=$HOME/a3/inst
+this_script_dir="`/usr/bin/dirname \"$0\"`"
 
 function die () {
     echo $*
     exit 1
 }
 
-function fetch_as_is() {
-    if uname -a | grep --silent arwin ; then
-        curl -LO $1
-    else
-        wget --no-check-certificate $1
-    fi
-}
-
 function fetch_as () {
+    if [ -f $1 ] ; then
+        return
+    fi
     if uname -a | grep --silent arwin ; then
         curl -L -o $1 $2
     else
         wget --no-check-certificate -O $1 $2
     fi
 }
+
+function defmod {
+    if [ $# -ne 4 -a $# -ne 6 -a $# -ne 5 ] ; then
+        echo "Incorrect number of arguments ($#) passed to defmod (5, 6 or 7) for $1"
+        exit 1
+    fi
+
+    name=$1 ; shift
+
+    if [ x$target_mods != x ] ; then
+        if echo $target_mods | grep --silent $name ; then
+            :
+        else
+            echo "Skipping $name ..."
+            return
+        fi
+    fi
+
+    need_unpacked=1
+
+    if [ $# -eq 3 ] ; then
+        eval "MOD_${name}_name=\"$name\"" 
+        eval "MOD_${name}_version=\"$1\"" ; shift
+        eval "MOD_${name}_source=\"$1\"" ; shift
+        eval "MOD_${name}_compression=\"$1\"" ; shift
+    elif [ $# -eq 4 ] ; then
+        eval "MOD_${name}_name=\"$1\"" ; shift
+        eval "MOD_${name}_version=\"$1\"" ; shift
+        eval "MOD_${name}_source=\"$1\"" ; shift
+        eval "MOD_${name}_compression=\"$1\"" ; shift
+    elif [ $# -eq 5 ] ; then
+        eval "MOD_${name}_name=\"$1\"" ; shift
+        eval "MOD_${name}_version=\"$1\"" ; shift
+        eval "MOD_${name}_source=\"$1\"" ; shift
+        eval "MOD_${name}_compression=\"$1\"" ; shift
+        eval "MOD_${name}_unpacked=\"$1\""; shift
+        need_unpacked=0
+    fi
+
+    eval "if [ x\"\$MOD_${name}_version\" = x ] ; then \
+             MOD_${name}_wholename=\"\$MOD_${name}_name\" ; \
+          else \
+             MOD_${name}_wholename=\"\$MOD_${name}_name-\$MOD_${name}_version\"; \
+          fi"
+
+    if [ $need_unpacked = 1 ] ; then
+        eval "MOD_${name}_unpacked=\$MOD_${name}_wholename"
+    fi
+
+    eval "MOD_${name}_url=\$MOD_${name}_source\$MOD_${name}_wholename.tar.\$MOD_${name}_compression"
+    eval "MOD_${name}_local_tarball=\`basename \$MOD_${name}_url\`"
+
+    MODS="$MODS $name"
+}
+
+function built() {
+    m=$1
+    built=1 # false in shell terms
+
+    # if it already unpacked, assume it is built
+    eval "if [ -d \$MOD_${m}_unpacked ] ; then \
+            built=0 ; 
+          fi"
+
+    return $built
+}
+
+function basic_builder() {
+    m=$1
+
+    if built $m ; then
+        return
+    fi
+
+    # get busy ...
+    eval "tar xf \$MOD_${m}_local_tarball && (cd \$MOD_${m}_unpacked && CFLAGS=\"$GLOBAL_CFLAGS\" LDFLAGS=\"$GLOBAL_LDFLAGS\" ./configure $GLOBAL_CONF && PATH=/usr/bin:$PATH make && make install) || die $m build failed"
+}
+
+function waf_builder() {
+    m=$1
+    
+    if built $m ; then
+        return;
+    fi
+    eval "tar xf \$MOD_${m}_local_tarball && (cd \$MOD_${m}_unpacked && ./waf configure --prefix=$PREFIX && ./waf build && ./waf install && fix_install_name $PREFIX/lib/lib${m}-0.dylib) || die $m build failed"
+}
+
 
 function fix_install_name () {
     #
@@ -34,12 +122,6 @@ function fix_install_name () {
     fi
 }
 
-clean=
-makespace=
-parallel=2
-PREFIX=$HOME/a3/inst
-this_script_dir="`/usr/bin/dirname \"$0\"`"
-
 while [ $# -gt 0 ] ; do
    case $1 in
     --clean*) clean=1 ; shift ;;
@@ -48,7 +130,6 @@ while [ $# -gt 0 ] ; do
     -j*) parallel=`echo $1 | sed 's/-j//'` ; shift ;;
    esac
 done
-
 
 if [ x$clean != x -o x$makespace != x ] ; then
     if [ ! -d LRDF ] ; then 
@@ -62,6 +143,55 @@ if [ x$clean != x -o x$makespace != x ] ; then
         sudo rm -rf $PREFIX
     fi
     exit 0
+fi
+
+# DEFINING MODULES
+# 
+# 3 possible formats
+#
+# NAME VERSION URL_FOR_DOWNLOAD_DIR COMPRESSION_TYPE
+# NAME PACKAGE_NAME VERSION URL_FOR_DOWNLOAD_DIR COMPRESSION_TYPE
+# NAME PACKAGE_NAME VERSION URL_FOR_DOWNLOAD_DIR COMPRESSION_TYPE UNPACKED_NAME
+#
+# the first form is the most common
+# the second form is required where the package name includes characters not allowed
+#    in shell variables. here, the first NAME should define a legal shell variable name
+# the third form is required for libraries like boost whose packaging and naming is totally inconsistent
+#    with normal practice
+#
+
+defmod boost boost_1_49_0 '' http://sourceforge.net/projects/boost/files/boost/1.49.0/ bz2 boost_1_49_0
+defmod fftw 3.3.1 http://www.fftw.org/ gz
+defmod libsigcpp libsigc++ 2.2.10 http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.2/ xz
+defmod glibmm 2.32.0 http://ftp.gnome.org/pub/GNOME/sources/glibmm/2.32/ xz
+defmod cairomm 1.10.0 http://cairographics.org/releases/ gz
+defmod pangomm 2.28.4 http://ftp.acc.umu.se/pub/gnome/sources/pangomm/2.28/ xz
+defmod atkmm 2.22.6 http://ftp.gnome.org/pub/GNOME/sources/atkmm/2.22/ xz
+defmod gtkmm 2.24.2 http://ftp.acc.umu.se/pub/GNOME/sources/gtkmm/2.24/ xz
+defmod libart_lgpl 2.3.21 http://ftp.gnome.org/pub/gnome/sources/libart_lgpl/2.3/ bz2
+defmod libgnomecanvas 2.30.3 http://ftp.gnome.org/pub/gnome/sources/libgnomecanvas/2.30/ bz2
+defmod liblo 0.25 http://downloads.sourceforge.net/liblo/ gz
+defmod raptor2 2.0.6 http://download.librdf.org/source/ gz
+defmod rasqal 0.9.28 http://download.librdf.org/source/ gz
+defmod redland 1.0.15 http://download.librdf.org/source/ gz
+defmod libogg 1.3.0 http://downloads.xiph.org/releases/ogg/ xz
+defmod flac 1.2.1 http://downloads.xiph.org/releases/flac/ gz
+defmod libvorbis 1.3.2 http://downloads.xiph.org/releases/vorbis/ bz2
+defmod libsamplerate 0.1.8 http://www.mega-nerd.com/SRC/ gz
+defmod libsndfile 1.0.25 http://www.mega-nerd.com/libsndfile/files/ gz
+defmod aubio 0.3.2 http://aubio.org/pub/ gz
+defmod rdflib 3.2.0 http://rdflib.googlecode.com/files/ gz
+defmod setuptools 0.6c11 http://pypi.python.org/packages/source/s/setuptools/ gz
+defmod isodate 0.4.0 http://pypi.python.org/packages/source/i/isodate/ gz
+defmod lv2 1.2.0 http://lv2plug.in/spec/ bz2
+defmod serd 0.18.2 http://download.drobilla.net/ bz2
+defmod sord 0.12.0 http://download.drobilla.net/ bz2
+defmod sratom 0.4.2 http://download.drobilla.net/ bz2
+defmod lilv 0.16.0 http://download.drobilla.net/ bz2
+defmod suil 0.6.10 http://download.drobilla.net/ bz2
+defmod curl 7.25.0 http://curl.haxx.se/download/ bz2
+if [ x$OSX = x ] ; then
+    defmod util_linux util-linux 2.21 http://www.kernel.org/pub/linux/utils/util-linux/v2.21/ xz
 fi
 
 mkdir -p $PREFIX
@@ -99,223 +229,74 @@ fi
 set -e
 
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
+GLOBAL_CONF="--prefix=$PREFIX"
 
-if [ ! -f boost_1_49_0.tar.bz2 ] ; then 
-    echo boost
-    fetch_as boost_1_49_0.tar.bz2 http://sourceforge.net/projects/boost/files/boost/1.49.0/boost_1_49_0.tar.bz2/download
-fi
-if [ ! -f fftw-3.3.1.tar.gz ] ; then
-    echo fftw
-    fetch_as_is http://www.fftw.org/fftw-3.3.1.tar.gz
-fi
-if [ ! -f libsigc++-2.2.10.tar.xz ] ; then 
-    echo sigc++
-    fetch_as_is http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.2/libsigc++-2.2.10.tar.xz
-fi
-if [ ! -f glibmm-2.32.0.tar.xz ] ; then
-    echo glibmm
-    fetch_as_is http://ftp.gnome.org/pub/GNOME/sources/glibmm/2.32/glibmm-2.32.0.tar.xz
-fi
-if [ ! -f cairomm-1.10.0.tar.gz ] ; then
-    echo cairomm
-    fetch_as_is http://cairographics.org/releases/cairomm-1.10.0.tar.gz
-fi
-if [ ! -f pangomm-2.28.4.tar.xz ] ; then 
-    echo pangomm
-    fetch_as_is http://ftp.acc.umu.se/pub/gnome/sources/pangomm/2.28/pangomm-2.28.4.tar.xz    
-fi
-if [ ! -f atkmm-2.22.6.tar.xz ] ; then 
-    echo atkmm
-    fetch_as_is http://ftp.gnome.org/pub/GNOME/sources/atkmm/2.22/atkmm-2.22.6.tar.xz
-fi
-if [ ! -f gtkmm-2.24.2.tar.xz ] ; then
-    echo gtkmm
-    fetch_as_is http://ftp.acc.umu.se/pub/GNOME/sources/gtkmm/2.24/gtkmm-2.24.2.tar.xz
-fi
-if [ ! -f libart_lgpl-2.3.21.tar.bz2 ] ; then 
-    echo libart_lgpl
-    fetch_as_is http://ftp.gnome.org/pub/gnome/sources/libart_lgpl/2.3/libart_lgpl-2.3.21.tar.bz2
-fi
-if [ ! -f libgnomecanvas-2.30.3.tar.bz2 ] ; then 
-    echo libgnomecanvas
-    fetch_as_is http://ftp.gnome.org/pub/gnome/sources/libgnomecanvas/2.30/libgnomecanvas-2.30.3.tar.bz2
-fi
-if [ ! -f libgnomecanvasmm-2.26.0.tar.bz2 ] ; then
-    echo libgnomecanvasmm
-    fetch_as_is http://ftp.acc.umu.se/pub/GNOME/sources/libgnomecanvasmm/2.26/libgnomecanvasmm-2.26.0.tar.bz2
-fi
-
-if [ ! -f liblo-0.26.tar.gz ] ; then 
-    echo liblo
-    fetch_as_is http://downloads.sourceforge.net/liblo/liblo-0.26.tar.gz
-fi
-if [ ! -f raptor2-2.0.6.tar.gz ] ; then 
-    echo raptor
-    fetch_as_is http://download.librdf.org/source/raptor2-2.0.6.tar.gz
-fi
-if [ ! -f rasqal-0.9.28.tar.gz ] ; then 
-    echo rasqal 
-    fetch_as_is http://download.librdf.org/source/rasqal-0.9.28.tar.gz
-fi
-if [ ! -f  redland-1.0.15.tar.gz ] ; then 
-    echo librdf
-    fetch_as_is http://download.librdf.org/source/redland-1.0.15.tar.gz
-fi
-if [ ! -f libogg-1.3.0.tar.xz ] ; then
-    echo libogg
-    fetch_as_is http://downloads.xiph.org/releases/ogg/libogg-1.3.0.tar.xz
-fi
-if [ ! -f flac-1.2.1.tar.gz ] ; then
-    echo flac
-    fetch_as_is http://downloads.xiph.org/releases/flac/flac-1.2.1.tar.gz
-fi
-if [ ! -f libvorbis-1.3.2.tar.bz2 ] ; then
-    echo libvorbis
-    fetch_as_is http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.2.tar.bz2
-fi
-if [ ! -f libsamplerate-0.1.8.tar.gz  ] ; then
-    echo libsamplerate
-    fetch_as_is http://www.mega-nerd.com/SRC/libsamplerate-0.1.8.tar.gz
-fi
-if [ ! -f libsndfile-1.0.25.tar.gz ] ; then 
-    echo libsndfile
-    fetch_as_is http://www.mega-nerd.com/libsndfile/files/libsndfile-1.0.25.tar.gz
-fi
-if [ ! -f aubio-0.3.2.tar.gz ] ; then
-    echo aubio
-    fetch_as_is http://aubio.org/pub/aubio-0.3.2.tar.gz
-fi
-if [ ! -f rdflib-3.2.0.tar.gz ] ; then
-    echo python rdflib
-    fetch_as_is http://rdflib.googlecode.com/files/rdflib-3.2.0.tar.gz
-fi
-if [ ! -f setuptools-0.6c11.tar.gz ] ; then
-    echo python setuptools
-    fetch_as setuptools-0.6c11.tar.gz http://pypi.python.org/packages/source/s/setuptools/setuptools-0.6c11.tar.gz#md5=7df2a529a074f613b509fb44feefe74e
-fi    
-if [ ! -f isodate-0.4.0.tar.gz ] ; then
-    echo python isodate
-    fetch_as isodate-0.4.0.tar.gz  http://pypi.python.org/packages/source/i/isodate/isodate-0.4.0.tar.gz#md5=74eb2ffca6ab3318d6627f25f88e24e5
-fi
 if [ ! -d LRDF ] ; then
     echo LRDF
     git clone git://github.com/swh/LRDF.git
 fi
 
-if [ ! -f lv2-1.2.0.tar.bz2 ] ; then
-    echo LV2
-    fetch_as_is http://lv2plug.in/spec/lv2-1.2.0.tar.bz2
-fi
-if [ ! -f serd-0.18.2.tar.bz2 ] ; then
-    echo Serd
-    fetch_as_is http://download.drobilla.net/serd-0.18.2.tar.bz2
-fi
-if [ ! -f sord-0.10.4.tar.bz2 ] ; then
-    echo Sord
-    fetch_as_is http://download.drobilla.net/sord-0.10.4.tar.bz2
-fi
-if [ ! -f sratom-0.4.0.tar.bz2 ] ; then
-    echo Sratom
-    fetch_as_is http://download.drobilla.net/sratom-0.4.0.tar.bz2
-fi
-if [ ! -f lilv-0.14.4.tar.bz2 ] ; then
-    echo Lilv
-    fetch_as_is http://download.drobilla.net/lilv-0.14.4.tar.bz2
-fi
-if [ ! -f suil-0.6.10.tar.bz2 ] ; then
-    echo Suil
-    fetch_as_is http://download.drobilla.net/suil-0.6.10.tar.bz2
-fi
-if [ ! -f curl-7.25.0.tar.bz2 ] ; then
-    echo curl
-    fetch_as_is http://curl.haxx.se/download/curl-7.25.0.tar.bz2
+for m in $MODS ; do
+    eval "fetch_as \$MOD_${m}_local_tarball \$MOD_${m}_url || die \"downloading $m failed\""
+done
+
+if [ x$OSX = x ] ; then
+    tar xf $MOD_util_linux_local_tarball  && \
+        (set -e && cd $MOD_util_linux_unpacked && ./configure --prefix=$PREFIX --enable-shared --disable-most-builds --without-ncurses --enable-libuuid && cd libuuid && make && make install) || die "uuid build failed"
 fi
 
-if [ x$OSX = x ] ; then 
-    if [ ! -f  util-linux-2.21.tar.xz ] ; then
-        echo util-linux/uuid
-        fetch_as_is http://www.kernel.org/pub/linux/utils/util-linux/v2.21/util-linux-2.21.tar.xz
-    fi
-    
-    tar xf util-linux-2.21.tar.xz && \
-        (set -e && cd util-linux-2.21 && ./configure --prefix=$PREFIX --enable-shared --disable-most-builds --without-ncurses --enable-libuuid && cd libuuid && make && make install) || die "uuid build failed"
-fi
+tar xf $MOD_boost_local_tarball && \
+  (set -e && cd $MOD_boost_unpacked && ./bootstrap.sh --prefix=$PREFIX --with-libraries=exception && ./b2 && ./b2 install) || die "boost build failed"
 
+basic_builder curl
 
-tar xf boost_1_49_0.tar.bz2 && \
-  (set -e && cd boost_1_49_0 && ./bootstrap.sh --prefix=$PREFIX --with-libraries=exception && ./b2 && ./b2 install) || die "boost build failed"
+tar xf $MOD_fftw_local_tarball && \
+   (set -e && cd $MOD_fftw_unpacked && ./configure --prefix=$PREFIX --enable-shared && make && make install && make clean && ./configure --prefix=$PREFIX --enable-shared --enable-single && make && make install) || die "fftw build failed"
 
-tar xf curl-7.25.0.tar.bz2 && \
-    (set -e && cd curl-7.25.0 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "curl build failed"
-
-tar xf fftw-3.3.1.tar.gz && \
-   (set -e && cd fftw-3.3.1 && ./configure --prefix=$PREFIX --enable-shared && make && make install && make clean && ./configure --prefix=$PREFIX --enable-shared --enable-single && make && make install) || die "fftw build failed"
-
-tar xf libsigc++-2.2.10.tar.xz && \
-    (set -e && cd libsigc++-2.2.10 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "sigc++ build failed"
-tar xf glibmm-2.32.0.tar.xz && \
-    (set -e && cd glibmm-2.32.0 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "glibmm build failed"
-tar xf cairomm-1.10.0.tar.gz && \
-    (set -e && cd cairomm-1.10.0 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "cairomm build failed"
-tar xf pangomm-2.28.4.tar.xz && \
-    (set -e && cd pangomm-2.28.4 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "pangomm build failed"
-tar xf atkmm-2.22.6.tar.xz && \
-    (set -e && cd atkmm-2.22.6 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "atkmm build failed"
-
-tar xf gtkmm-2.24.2.tar.xz && \
-   (set -e && cd gtkmm-2.24.2 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-documentation && make && make install) || die "gtkmm build failed"
-tar xf libart_lgpl-2.3.21.tar.bz2 && \
-    (set -e && cd libart_lgpl-2.3.21 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "libart build failed"
+basic_builder libsigcpp
+basic_builder glibmm
+basic_builder cairomm
+basic_builder pangomm
+basic_builder atkmm
+basic_builder gtkmm
+basic_builder libart_lgpl
 
 gnomecanvas_patch=$this_script_dir/misc-patches/gnome-canvas-slow-idle.patch
 
-tar xf libgnomecanvas-2.30.3.tar.bz2 && \
-    (set -e && cd libgnomecanvas-2.30.3 && patch -p0 < $gnomecanvas_patch && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "gnomecanvas build failed"
-tar xf libgnomecanvasmm-2.26.0.tar.bz2 && \
-    (set -e && cd libgnomecanvasmm-2.26.0 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "gnomecanvasmm build failed"
+tar xf $MOD_libgnomecanvas_local_tarball && \
+    (set -e && cd $MOD_libgnomecanvas_unpacked && patch -p0 < $gnomecanvas_patch && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "gnomecanvas build failed"
 
-
-tar xf liblo-0.26.tar.gz && \
-    (set -e && cd liblo-0.26 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "liblo build failed"
-
-tar xf raptor2-2.0.6.tar.gz && \
-    (set -e && cd raptor2-2.0.6 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "raptor build failed"
-
-tar xf rasqal-0.9.28.tar.gz && \
-    (set -e && cd rasqal-0.9.28 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "rasqal build failed"
-
-tar xf redland-1.0.15.tar.gz && \
-    (set -e && cd redland-1.0.15 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "redland build failed"
-
-tar xf libogg-1.3.0.tar.xz && \
-    (set -e && cd libogg-1.3.0 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "ogg build failed"
+basic_builder libgnomecanvasmm
+basic_builder liblo
+basic_builder raptor2
+basic_builder rasqal
+basic_builder redland
+basic_builder libogg
 
 # FLAC will not build correctly on OS X Lion with asm optimization enabled, so lets at least force SSE
 if [ x$OSX != x ] ; then
-    tar xf flac-1.2.1.tar.gz && \
-        (set -e && cd flac-1.2.1 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-cpplibs --disable-asm-optimizations --enable-sse --disable-debug && make && make install) || die "flac build failed"
+    tar xf $MOD_flac_local_tarball && \
+        (set -e && cd $MOD_flac_unpacked && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-cpplibs --disable-asm-optimizations --enable-sse --disable-debug && make && make install) || die "flac build failed"
 else
-    tar xf flac-1.2.1.tar.gz && \
-        (set -e && cd flac-1.2.1 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-cpplibs --disable-debug && make && make install) || die "flac build failed"
+    tar xf $MOD_flac_local_tarball && \
+        (set -e && cd $MOD_flac_unpacked && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-cpplibs --disable-debug && make && make install) || die "flac build failed"
 fi
 
-tar xf libvorbis-1.3.2.tar.bz2 && \
-    (set -e && cd libvorbis-1.3.2 && CXXFLAGS="$GLOBAL_CFLAGS" CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "vorbis build failed"
+basic_builder libvorbis
 
 sndfile_patch=$this_script_dir/misc-patches/libsndfile-1.0.25.patch
 
 if [ x$OSX != x ] ; then
     # sndfile-play incorrectly includes <Carbon.h> which no longer works on Lion
-    tar xf libsndfile-1.0.25.tar.gz && \
-        (set -e && cd libsndfile-1.0.25 && patch -p0 < $sndfile_patch && CFLAGS="$GLOBAL_CFLAGS -I/System/Library/Frameworks/Carbon.framework/Headers" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-silent-rules && make && make install) || die "sndfile build failed"
+    tar xf $MOD_libsndfile_local_tarball && \
+        (set -e && cd $MOD_libsndfile_unpacked && patch -p0 < $sndfile_patch && CFLAGS="$GLOBAL_CFLAGS -I/System/Library/Frameworks/Carbon.framework/Headers" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-silent-rules && make && make install) || die "sndfile build failed"
     # samplerate incorrectly includes <Carbon.h> which no longer works on Lion
-tar xf libsamplerate-0.1.8.tar.gz && \
-    (set -e && cd libsamplerate-0.1.8 && CFLAGS="$GLOBAL_CFLAGS -I/System/Library/Frameworks/Carbon.framework/Headers" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "samplerate build failed"
+    tar xf $MOD_libsamplerate_local_tarball && \
+    (set -e && cd $MOD_libsamplerate_unpacked && CFLAGS="$GLOBAL_CFLAGS -I/System/Library/Frameworks/Carbon.framework/Headers" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "samplerate build failed"
 else 
-    tar xf libsndfile-1.0.25.tar.gz && \
-        (set -e && cd libsndfile-1.0.25 && patch -p0 < $sndfile_patch && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-silent-rules && make && make install) || die "sndfile build failed"
-    tar xf libsamplerate-0.1.8.tar.gz && \
-        (set -e && cd libsamplerate-0.1.8 && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX && make && make install) || die "samplerate build failed"
+    tar xf $MOD_libsndfile_local_tarball && \
+        (set -e && cd $MOD_libsndfile_unpacked && patch -p0 < $sndfile_patch && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" ./configure --prefix=$PREFIX --disable-silent-rules && make && make install) || die "sndfile build failed"
+    basic_builder libsamplerate
 fi
 
 # aubio has an old version of install.sh which can exit with an error during parallel make install
@@ -325,37 +306,37 @@ if [ ! -f /usr/include/fftw3.h ] ; then
     remove_fftw3_h=y
     sudo ln -s $PREFIX/include/fftw3.h /usr/include
 fi
-tar xf aubio-0.3.2.tar.gz 
-   (set -e && cd aubio-0.3.2 && sed '/no-long-double/d' < ./configure > ./configure.XXX && mv ./configure.XXX ./configure && chmod +x ./configure && \
+tar xf $MOD_aubio_local_tarball &&  
+   (set -e && cd $MOD_aubio_unpacked && sed '/no-long-double/d' < ./configure > ./configure.XXX && mv ./configure.XXX ./configure && chmod +x ./configure && \
        CFLAGS="$GLOBAL_CFLAGS -I$PREFIX" LDFLAGS="$GLOBAL_LDFLAGS -lm" ./configure --prefix=$PREFIX && make && MAKEFLAGS=-j1 make install) || die "aubio build failed"
 if [ x$remove_fftw3_h != x ] ; then
     sudo rm /usr/include/fftw3.h
 fi
 
 # these python lib wants to install to a system-wide location
-tar xf rdflib-3.2.0.tar.gz && \
-    (set -e && cd rdflib-3.2.0 && unset MACOSX_DEPLOYMENT_TARGET && python ./setup.py build && sudo python ./setup.py install)
-tar xf setuptools-0.6c11.tar.gz && \
-    (set -e && cd setuptools-0.6c11 && unset MACOSX_DEPLOYMENT_TARGET && python ./setup.py build && sudo python ./setup.py install)
-tar xf isodate-0.4.0.tar.gz && \
-    (set -e && cd isodate-0.4.0 && unset MACOSX_DEPLOYMENT_TARGET && python ./setup.py build && sudo python ./setup.py install)
+tar xf $MOD_rdflib_local_tarball && \
+    (set -e && cd $MOD_rdflib_unpacked && unset MACOSX_DEPLOYMENT_TARGET && python ./setup.py build && sudo python ./setup.py install)
+tar xf $MOD_setuptools_local_tarball && \
+    (set -e && cd $MOD_setuptools_unpacked && unset MACOSX_DEPLOYMENT_TARGET && python ./setup.py build && sudo python ./setup.py install)
+tar xf $MOD_isodate_local_tarball && \
+    (set -e && cd $MOD_isodate_unpacked && unset MACOSX_DEPLOYMENT_TARGET && python ./setup.py build && sudo python ./setup.py install)
 
 (set -e && cd LRDF && \
   sed 's/glibtoolize/libtoolize/g' < autogen.sh > ag.sh && mv ag.sh autogen.sh && \
   CFLAGS="$GLOBAL_CFLAGS -I$PREFIX/include" LDFLAGS="$GLOBAL_LDFLAGS" sh ./autogen.sh --prefix=$PREFIX && make && make install) || die "LRDF build failed"
 
-tar xf lv2-1.2.0.tar.bz2 && \
-    (set -e && cd lv2-1.2.0 && unset MACOSX_DEPLOYMENT_TARGET && ./waf configure --prefix=$PREFIX --copy-headers && ./waf build && sudo ./waf install) || die "LV2 build failed"
-tar xf serd-0.18.2.tar.bz2 && \
-    (set -e && cd serd-0.18.2 && ./waf configure --prefix=$PREFIX && ./waf build && ./waf install && fix_install_name $PREFIX/lib/libserd-0.dylib) || die "serd build failed"
-tar xf sord-0.10.4.tar.bz2 && \
-    (set -e && cd sord-0.10.4 && ./waf configure --prefix=$PREFIX  && ./waf build && ./waf install && fix_install_name $PREFIX/lib/libsord-0.dylib) || die "sord build failed"
-tar xf sratom-0.4.0.tar.bz2 && \
-    (set -e && cd sratom-0.4.0 && ./waf configure --prefix=$PREFIX && ./waf build && ./waf install  && fix_install_name $PREFIX/lib/libsratom-0.dylib) || die "sratom build failed"
-tar xf lilv-0.14.4.tar.bz2 && \
-    (set -e && cd lilv-0.14.4 && ./waf configure --prefix=$PREFIX --default-lv2-path='~/.lv2:/usr/local/lib/lv2:/usr/local/lib64/lv2:/usr/lib/lv2:/usr/lib64/lv2' && ./waf build && ./waf install && fix_install_name $PREFIX/lib/liblilv-0.dylib) || die "lilv build failed"
-tar xf suil-0.6.10.tar.bz2 && \
-    (set -e && cd suil-0.6.10 && CFLAGS="-I$PREFIX/include" ./waf configure --prefix=$PREFIX && ./waf && ./waf install && fix_install_name $PREFIX/lib/libsuil-0.dylib) || die "suil build failed"
+tar xf $MOD_lv2_local_tarball && \
+    (set -e && cd $MOD_lv2_unpacked && unset MACOSX_DEPLOYMENT_TARGET && ./waf configure --prefix=$PREFIX --copy-headers && ./waf build && sudo ./waf install) || die "LV2 build failed"
+
+waf_builder serd
+waf_builder sord
+waf_builder sratom
+
+tar xf $MOD_lilv_local_tarball && \
+    (set -e && cd $MOD_lilv_unpacked && ./waf configure --prefix=$PREFIX --default-lv2-path='~/.lv2:/usr/local/lib/lv2:/usr/local/lib64/lv2:/usr/lib/lv2:/usr/lib64/lv2' && ./waf build && ./waf install && fix_install_name $PREFIX/lib/liblilv-0.dylib) || die "lilv build failed"
+
+tar xf $MOD_suil_local_tarball && \
+    (set -e && cd $MOD_suil_unpacked && CFLAGS="-I$PREFIX/include" ./waf configure --prefix=$PREFIX && ./waf && ./waf install && fix_install_name $PREFIX/lib/libsuil-0.dylib) || die "suil build failed"
 
 # two post-install hacks
 
