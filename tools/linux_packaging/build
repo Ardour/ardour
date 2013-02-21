@@ -1,4 +1,4 @@
-#!/bin/bash -vx
+#!/bin/bash
 
 # script for pulling together a Linux app bundle.
 #
