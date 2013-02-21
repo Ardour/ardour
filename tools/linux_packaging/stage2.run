@@ -551,13 +551,37 @@ then
 
 	if [ "jackd" = ${JACK_NAME} ];
 	then
-		if [ 0 -le ${JACK_VERSION_MAJOR}  -a  121 -le ${JACK_VERSION_MIDDLE}  -a  3 -le ${JACK_VERSION_MINOR} ];
+		if [ ${JACK_VERSION_MAJOR} -eq 0 ];
+		then
+			if [ ${JACK_VERSION_MIDDLE} -eq 121 ];
+			then
+				if [ ${JACK_VERSION_MINOR} -ge 3 ];
+				then
+					JACK_VERSION_OK="t"
+				fi
+			elif [ ${JACK_VERSION_MIDDLE} -gt 121 ];
+			then
+				JACK_VERSION_OK="t"
+			fi
+		elif [ ${JACK_VERSION_MAJOR} -gt 0 ];
 		then
 			JACK_VERSION_OK="t"
 		fi
 	elif [ "jackdmp" = ${JACK_NAME} ];
 	then
-		if [ 1 -le ${JACK_VERSION_MAJOR}  -a  9 -le ${JACK_VERSION_MIDDLE}  -a  8 -le ${JACK_VERSION_MINOR} ];
+		if [ ${JACK_VERSION_MAJOR} -eq 1 ];
+		then
+			if [ ${JACK_VERSION_MIDDLE} -eq 9 ];
+			then
+				if [ ${JACK_VERSION_MINOR} -ge 8 ];
+				then
+					JACK_VERSION_OK="t"
+				fi
+			elif [ ${JACK_VERSION_MIDDLE} -gt 9 ];
+			then
+				JACK_VERSION_OK="t"
+			fi
+		elif [ ${JACK_VERSION_MAJOR} -gt 1 ];
 		then
 			JACK_VERSION_OK="t"
 		fi
