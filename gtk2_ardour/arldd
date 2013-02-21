@@ -1,4 +1,3 @@
 #!/bin/sh
 . `dirname "$0"`/../build/gtk2_ardour/ardev_common_waf.sh
-LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 exec ldd $TOP/$EXECUTABLE
