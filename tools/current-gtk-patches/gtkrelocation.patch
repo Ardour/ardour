@@ -178,7 +178,7 @@ new file mode 100644
 index 0000000..0109841
 --- /dev/null
 +++ b/gtk/gtkrelocation.c
-@@ -0,0 +1,292 @@
+@@ -0,0 +1,294 @@
 +/* gtklinuxrelocation: functions used to provide relocation on Linux
 + *
 + * Copyright (C) 2013 Whomsoever
@@ -216,6 +216,8 @@ index 0000000..0109841
 +/* include relevant code here  */
 +
 +#elif defined (__APPLE__)
++
++#include <Foundation/Foundation.h>
 +
 +static const gchar *
 +get_bundle_path (void)
