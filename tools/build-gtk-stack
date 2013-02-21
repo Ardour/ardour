@@ -306,8 +306,12 @@ fi
 
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
 
-tar xf $MOD_xz_local_tarball && (cd $MOD_xz_unpacked && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include" ./configure $GLOBAL_CONF && make && make install) || die "xz build failed"
-tar xf $MOD_tar_local_tarball && (cd $MOD_tar_unpacked && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include" ./configure $GLOBAL_CONF && make && make install) || die "tar build failed"
+#
+# until we've got a new version of tar, we need to specify the compression type, which is a PITA
+#
+
+tar jxf $MOD_xz_local_tarball && (cd $MOD_xz_unpacked && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include" ./configure $GLOBAL_CONF && make && make install) || die "xz build failed"
+tar jxf $MOD_tar_local_tarball && (cd $MOD_tar_unpacked && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include" ./configure $GLOBAL_CONF && make && make install) || die "tar build failed"
 
 # make sure we pick up the new version of tar that we just installed into $PREFIX
 hash tar
