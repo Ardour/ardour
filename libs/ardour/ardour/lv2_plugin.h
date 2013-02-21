@@ -154,7 +154,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	/** Find the LV2 input port with the given designation.
 	 * If found, bufptrs[port_index] will be set to bufptr.
 	 */
-	LilvPort* designated_input (const char* uri, void** bufptrs[], void** bufptr);
+        const LilvPort* designated_input (const char* uri, void** bufptrs[], void** bufptr);
 };
 
 

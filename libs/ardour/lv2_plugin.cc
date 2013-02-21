@@ -644,10 +644,10 @@ LV2Plugin::latency_compute_run ()
 	deactivate ();
 }
 
-LilvPort*
+const LilvPort*
 LV2Plugin::designated_input (const char* uri, void** bufptrs[], void** bufptr)
 {
-	LilvPort* port = NULL;
+	const LilvPort* port = NULL;
 #ifdef HAVE_NEW_LILV
 	LilvNode* designation = lilv_new_uri(_world.world, uri);
 	port = lilv_plugin_get_port_by_designation(
