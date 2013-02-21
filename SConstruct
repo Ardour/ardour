@@ -35,6 +35,7 @@ opts.AddVariables(
     ('WINDOWS_KEY', 'Set X Modifier (Mod1,Mod2,Mod3,Mod4,Mod5) for "Windows" key', 'Mod4><Super'),
     ('PROGRAM_NAME', 'Set program name (default is "Ardour")', 'Ardour'),
     ('DIST_LIBDIR', 'Explicitly set library dir. If not set, Fedora-style defaults are used (typically lib or lib64)', ''),
+    ('BOOST_PREFIX', 'What prefix was boost installed in? (default is empty, implying /usr)', ''),
     PathVariable('DESTDIR', 'Set the intermediate install "prefix"', '/'),
     PathVariable('PREFIX', 'Set the install "prefix"', '/usr/local'),
     EnumVariable('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', 
@@ -54,7 +55,7 @@ opts.AddVariables(
     BoolVariable('NLS', 'Set to turn on i18n support', 1),
     BoolVariable('SURFACES', 'Build support for control surfaces', 1),
     BoolVariable('WIIMOTE', 'Build the wiimote control surface', 0),
-    BoolVariable('SYSLIBS', 'USE AT YOUR OWN RISK: CANCELS ALL SUPPORT FROM ARDOUR AUTHORS: Use existing system versions of various libraries instead of internal ones', 0),
+    BoolVariable('SYSLIBS', 'Use existing system versions of various libraries instead of internal ones', 1),
     BoolVariable('UNIVERSAL', 'Compile as universal binary.  Requires that external libraries are already universal.', 0),
     BoolVariable('VERSIONED', 'Add revision information to ardour/gtk executable name inside the build directory', 0),
     BoolVariable('VST', 'Compile with support for VST', 0),
@@ -90,7 +91,7 @@ class LibraryInfo(Environment):
 	self.Replace(CPPPATH = list(Set(self.get('CPPPATH',[]))))
         #doing LINKFLAGS breaks -framework
         #doing LIBS break link order dependency
-    
+
     def ENV_update(self, src_ENV):
         for k in src_ENV.keys():
             if k in self['ENV'].keys() and k in [ 'PATH', 'LD_LIBRARY_PATH',
@@ -899,23 +900,48 @@ env.Append(CCFLAGS="-D__STDC_FORMAT_MACROS")
 #
 
 def prep_libcheck(topenv, libinfo):
-    if os.path.exists (os.path.expanduser ('~/gtk/inst')):
-	#
-        # build-gtk-stack puts the GTK stack under ~/gtk/inst
-        # build-ardour-stack puts other Ardour deps under ~/a3/inst
-        #
-        # things need to build with this in mind
-        #
-        GTKROOT = os.path.expanduser ('~/gtk/inst')
-        ARDOURDEP_ROOT = os.path.expanduser ('~/a3/inst')
-        libinfo.Append(CPPPATH= [ GTKROOT + "/include" ], LINKFLAGS= "-L" + GTKROOT + "/lib")
-        libinfo.Append(CPPPATH= [ ARDOURDEP_ROOT + "/include" ] , LINKFLAGS= "-L" + ARDOURDEP_ROOT + "/lib")
-        topenv['NEED_LIBINTL'] = True
-    else:
+    #
+    # build-gtk-stack puts the GTK stack under ~/gtk/inst
+    # build-ardour-stack puts other Ardour deps under ~/a3/inst
+
+    pkg_config_path = os.getenv('PKG_CONFIG_PATH')
+
+    GTKROOT = os.path.expanduser ('~/gtk/inst')
+
+    if (pkg_config_path is not None) and pkg_config_path.find (GTKROOT) >= 0:
+            # told to search user_gtk_root
+            libinfo.Append(CPPPATH= [ GTKROOT + "/include" ], LINKFLAGS= "-L" + GTKROOT + "/lib")
+
+    # libintl may or may not be trivially locatable. On OS X this is always
+    # true. On Linux it will depend on whether we're on a normal Linux distro,
+    # in which case libintl.h is going to be available in /usr/include and
+    # the library itself is part of glibc, or on a bare-bones build system
+    # where we need to pick it up from the GTK dependency stack.
+    #
+
+    if os.path.isfile ('/usr/include/libintl.h'):
+        # libintl is part of the system., so use it
+        print 'Will reply on libintl built into libc'
         topenv['NEED_LIBINTL'] = False
+    else:
+        if (pkg_config_path is not None):
+            # told to search for pkgconfig files
+            if pkg_config_path.find (GTKROOT) >= 0:
+                topenv['NEED_LIBINTL'] = True
+                print 'Will rely on explicit linkage against libintl in ' + GTKROOT
+            else:
+                print '\n\n**** Cannot locate libintl.h and PKG_CONFIG_PATH does not include ', GTKROOT, '- this needs fixing before the build can continue'
+                sys.exit (-1)
+        else:
+                print '\n\n**** Cannot locate libintl.h and PKG_CONFIG_PATH is not set - this needs fixing before the build can continue'
+
+    ARDOURDEP_ROOT = os.path.expanduser ('~/a3/inst')
+    if pkg_config_path is not None and pkg_config_path.find (ARDOURDEP_ROOT) >= 0:
+        # told to search ARDOURDEP_ROOT area
+        libinfo.Append(CPPPATH= [ ARDOURDEP_ROOT + "/include" ] , LINKFLAGS= "-L" + ARDOURDEP_ROOT + "/lib")
+        print 'Will build against private Ardour dependency stack in ' + ARDOURDEP_ROOT
         
 prep_libcheck(env, env)
-
 
 #
 # these are part of the Ardour source tree because they are C++
@@ -992,8 +1018,14 @@ if env['WIIMOTE']:
 # boost (we don't link against boost, just use some header files)
 
 libraries['boost'] = LibraryInfo ()
+
 prep_libcheck(env, libraries['boost'])
-libraries['boost'].Append(CPPPATH="/usr/local/include", LIBPATH="/usr/local/lib",CCFLAGS="-DBOOST_SYSTEM_NO_DEPRECATED",CXXFLAGS="-DBOOST_SYSTEM_NO_DEPRECATED")
+
+libraries['boost'].Append(CCFLAGS="-DBOOST_SYSTEM_NO_DEPRECATED",CXXFLAGS="-DBOOST_SYSTEM_NO_DEPRECATED")
+
+if env['BOOST_PREFIX'] != '':
+    libraries['boost'].Append(CPPPATH=env['BOOST_PREFIX'] + "/include", LIBPATH= env['BOOST_PREFIX'] + "/lib")
+
 conf = Configure (libraries['boost'])
 if conf.CheckHeader ('boost/shared_ptr.hpp', language='CXX') == False:
         print "Boost header files do not appear to be installed. You also might be running a buggy version of scons. Try scons 0.97 if you can."
