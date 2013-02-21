@@ -284,8 +284,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	export_search_path (dir_path, "LADSPA_PATH", "/plugins");
 	export_search_path (dir_path, "VAMP_PATH", "/lib");
 	export_search_path (dir_path, "SUIL_MODULE_DIR", "/lib");
-
-	export_search_path (dir_path, "GTK_PATH", "/lib/clearlooks");
+	export_search_path (dir_path, "GTK_PATH", "/lib/gtkengines");
 
 	/* unset GTK_RC_FILES so that we only load the RC files that we define
 	 */
