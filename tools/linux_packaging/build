@@ -328,7 +328,7 @@ cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so $Libraries
 (cd $GTK_ENGINE_DIR && ln -s ../../libclearlooks.so . )
 
 cp $GTKSTACK_ROOT/lib/gtk-2.0/2.10.0/engines/libpixmap.so $Libraries
-(cd $$GTK_ENGINE_DIR && ln -s ../../libpixmap.so . )
+(cd $GTK_ENGINE_DIR && ln -s ../../libpixmap.so . )
 
 # LADSPA
 if test x$WITH_LADSPA != x ; then
