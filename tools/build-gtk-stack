@@ -368,9 +368,9 @@ tar xf $MOD_tiff_local_tarball && (cd $MOD_tiff_unpacked && CFLAGS="$GLOBAL_CFLA
 basic_builder libpng
 basic_builder jpeg
 
-tar xf $MOD_makemaker_local_tarball && (cd $MOD_makemaker_unpacked && unset MACOSX_DEPLOYMENT_TARGET && perl Makefile.PL PREFIX=$PREFIX && make && make install) || die "ExtUtils::MakeMaker build failed"
-tar xf $MOD_xmlparser_local_tarball && (cd $MOD_xmlparser_unpacked && unset MACOSX_DEPLOYMENT_TARGET && perl Makefile.PL EXPATINCPATH=$PREFIX/include EXPATLIBPATH=$PREFIX/lib PREFIX=$PREFIX && make && make install) || die "XML-Parser build failed"
-tar xf $MOD_xmlsimple_local_tarball && (cd $MOD_xmlsimple_unpacked && unset MACOSX_DEPLOYMENT_TARGET && perl Makefile.PL PREFIX=$PREFIX && make && make install) || die "XML-Simple build failed"
+#tar xf $MOD_makemaker_local_tarball && (cd $MOD_makemaker_unpacked && unset MACOSX_DEPLOYMENT_TARGET && perl Makefile.PL PREFIX=$PREFIX && make && make install) || die "ExtUtils::MakeMaker build failed"
+#tar xf $MOD_xmlparser_local_tarball && (cd $MOD_xmlparser_unpacked && unset MACOSX_DEPLOYMENT_TARGET && perl Makefile.PL EXPATINCPATH=$PREFIX/include EXPATLIBPATH=$PREFIX/lib PREFIX=$PREFIX && make && make install) || die "XML-Parser build failed"
+#tar xf $MOD_xmlsimple_local_tarball && (cd $MOD_xmlsimple_unpacked && unset MACOSX_DEPLOYMENT_TARGET && perl Makefile.PL PREFIX=$PREFIX && make && make install) || die "XML-Simple build failed"
 
 if uname -a | grep --silent arwin ; then
 #
