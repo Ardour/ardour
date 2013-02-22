@@ -60,6 +60,10 @@
 
 #include "i18n.h"
 
+#ifdef __APPLE__
+#include <Carbon/Carbon.h>
+#endif
+
 using namespace std;
 using namespace Gtk;
 using namespace ARDOUR_COMMAND_LINE;
@@ -217,10 +221,7 @@ fixup_bundle_environment (int, char* [])
 	setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (bundle_dir, "Resources/gdk-pixbuf.loaders").c_str(), 1);
 }
 
-#include <Carbon/Carbon.h>
-
 static void load_custom_fonts() {
-#if 0 // untested OSX code
 	std::string ardour_mono_file;
 
 	if (!find_file_in_search_path (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
@@ -231,14 +232,13 @@ static void load_custom_fonts() {
 	CFURLRef fontURL;
 	CFErrorRef error;
 	ttf = CFStringCreateWithBytes(
-			kCFAllocatorDefault, ardour_mono_filec_str(),
+			kCFAllocatorDefault, (UInt8*) ardour_mono_file.c_str(),
 			ardour_mono_file.length(),
 			kCFStringEncodingUTF8, FALSE);
 	fontURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, ttf, kCFURLPOSIXPathStyle, TRUE);
 	if (CTFontManagerRegisterFontsForURL(fontURL, kCTFontManagerScopeProcess, &error) != true) {
 		cerr << _("Cannot load ArdourMono TrueType font.") << endl;
 	}
-#endif
 }
 
 #else
