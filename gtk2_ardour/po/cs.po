@@ -1,15 +1,15 @@
 # Czech translations for gtk-ardour
 # Copyright (C) 2003 Paul Davis
 # This file is distributed under the same license as the gtk-ardour package.
-# 
+#
 # Pavel Fric <pavelfric@seznam.cz>, 2009, 2010, 2011.
-# Pavel Fric <pavelfric@seznam.cz>, 2010, 2012.
+# Pavel Fric <pavelfric@seznam.cz>, 2010, 2012, 2013.
 msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-01-08 08:15-0500\n"
-"PO-Revision-Date: 2012-09-16 11:47+0200\n"
+"PO-Revision-Date: 2013-02-09 12:28+0100\n"
 "Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
 "Language-Team: Czech <kde-i18n-doc@kde.org>\n"
 "Language: cs\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 1.4\n"
+"X-Generator: Lokalize 1.5\n"
 "X-Poedit-Country: Czech Republic\n"
 "X-Poedit-Basepath: ../../\n"
 "X-Poedit-SearchPath-0: gtk2_ardour\n"
@@ -490,6 +490,11 @@ msgid ""
 "If you do not plan to use such a plugin, then use a normal audio or MIDI "
 "track instead."
 msgstr ""
+"Audio+MIDI stopy jsou zamýšleny pro použití <b>POUZE</b> s přídavnými "
+"moduly, které používají jako vstupní data jak audio tak MIDI.\n"
+"\n"
+"Pokud takový přídavný modul nemáte v úmyslu používat, potom namísto toho "
+"použijte normální zvukovou nebo MIDI stopu."
 
 #: add_route_dialog.cc:307 add_route_dialog.cc:326 editor_actions.cc:385
 #: time_axis_view.cc:1318
@@ -665,7 +670,6 @@ msgid "%1 is ready for use"
 msgstr "%1 je připraven pro použití"
 
 #: ardour_ui.cc:690
-#, fuzzy
 msgid ""
 "WARNING: Your system has a limit for maximum amount of locked memory. This "
 "might cause %1 to run out of memory before your system runs out of memory. \n"
@@ -673,12 +677,12 @@ msgid ""
 "You can view the memory limit with 'ulimit -l', and it is normally "
 "controlled by %2"
 msgstr ""
-"VAROVÁNÍ: Váš systém má nastaveno omezení pro největší množství pracovní "
-"paměti (operační, vnitřní). Toto může vést až k tomu, že %1 nebude mít "
+"VAROVÁNÍ: Váš systém má nastaveno omezení pro největší množství zamknuté "
+"paměti. Toto může vést až k tomu, že %1 nebude mít "
 "dostatek paměti ještě předtím, než bude paměť chybět systému.\n"
 "\n"
-"Můžete se podívat na omezení pro paměť pomocí příkazu 'ulimit -l' a obvykle "
-"toto nastavení změnit v /etc/security/limits.conf."
+"Můžete se podívat na omezení pro paměť pomocí příkazu 'ulimit -l', a obvykle "
+"můžete toto nastavení změnit %2."
 
 #: ardour_ui.cc:707
 msgid "Do not show this window again"
@@ -851,10 +855,9 @@ msgid "Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"
 msgstr "Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"
 
 #: ardour_ui.cc:1103
-#, fuzzy, c-format
+#, c-format
 msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
-msgstr ""
-"Digitální zpracování signálu (DSP): <span foreground=\"%s\">%5.1f%%</span>"
+msgstr "Časový kód|ČK: <span foreground=\"%s\">%s</span>"
 
 #: ardour_ui.cc:1218 ardour_ui.cc:1227 startup.cc:1019
 msgid "Recent Sessions"
@@ -882,10 +885,9 @@ msgid "You cannot add a track without a session already loaded."
 msgstr "Stopy můžete přidat až teprve tehdy, když bylo sezení nahráno."
 
 #: ardour_ui.cc:1399
-#, fuzzy
 msgid "could not create %1 new mixed track"
 msgid_plural "could not create %1 new mixed tracks"
-msgstr[0] "Nepodařilo se vytvořit %1 nové smíchané stopy"
+msgstr[0] "Nepodařilo se vytvořit %1 novou smíchanou stopu"
 msgstr[1] "Nepodařilo se vytvořit %1 nové smíchané stopy"
 
 #: ardour_ui.cc:1405 ardour_ui.cc:1466
@@ -906,17 +908,15 @@ msgstr ""
 "Stopy nebo sběrnice můžete přidat až teprve tehdy, když bylo sezení nahráno."
 
 #: ardour_ui.cc:1449
-#, fuzzy
 msgid "could not create %1 new audio track"
 msgid_plural "could not create %1 new audio tracks"
-msgstr[0] "Nelze vytvořit novou stopu"
-msgstr[1] "Nelze vytvořit novou stopu"
+msgstr[0] "Nelze vytvořit %1 novou zvukovou stopu"
+msgstr[1] "Nelze vytvořit %1 nové zvukové stopy"
 
 #: ardour_ui.cc:1458
-#, fuzzy
 msgid "could not create %1 new audio bus"
 msgid_plural "could not create %1 new audio busses"
-msgstr[0] "Nepodařilo se vytvořit %1 nové zvukové sběrnice"
+msgstr[0] "Nepodařilo se vytvořit %1 novou zvukovou sběrnici"
 msgstr[1] "Nepodařilo se vytvořit %1 nové zvukové sběrnice"
 
 #: ardour_ui.cc:1575
@@ -1092,18 +1092,17 @@ msgstr ""
 
 #: ardour_ui.cc:2974
 msgid "kilo"
-msgstr ""
+msgstr "kilo"
 
 #: ardour_ui.cc:2977
 msgid "mega"
-msgstr ""
+msgstr "mega"
 
 #: ardour_ui.cc:2980
 msgid "giga"
-msgstr ""
+msgstr "giga"
 
 #: ardour_ui.cc:2985
-#, fuzzy
 msgid ""
 "The following file was deleted from %2,\n"
 "releasing %3 %4bytes of disk space"
@@ -1111,16 +1110,13 @@ msgid_plural ""
 "The following %1 files were deleted from %2,\n"
 "releasing %3 %4bytes of disk space"
 msgstr[0] ""
-"Následující soubor byl smazánz\n"
-"%2,\n"
+"Následující soubor byl smazán z %2,\n"
 "a tím se na disku uvolnilo %3 %4 bajtů ukládacího prostoru"
 msgstr[1] ""
-"Následující soubor byl smazánz\n"
-"%2,\n"
+"Následující soubor byl smazán z %2,\n"
 "a tím se na disku uvolnilo %3 %4 bajtů ukládacího prostoru"
 
 #: ardour_ui.cc:2992
-#, fuzzy
 msgid ""
 "The following file was not in use and \n"
 "has been moved to: %2\n"
@@ -1140,29 +1136,23 @@ msgid_plural ""
 "\n"
 "will release an additional %3 %4bytes of disk space.\n"
 msgstr[0] ""
-"Následující %1 soubor nebyl používán a\n"
-"byl přesunut do:\n"
-"\t\t\t\t%2. \n"
-"\n"
+"Následující soubor nebyl používán a\n"
+"byl přesunut do: %2. \n"
 "\n"
 "Po znovuspuštění %5,\n"
 "\n"
-"Sezení -> Udělat pořádek -> Vyprázdnit koš\n"
+"<span face=\"mono\">Sezení -> Udělat pořádek -> Vyprázdnit koš</span>\n"
 "\n"
-"uvolní se na disku dalších\n"
-"%3 %4 bajtů ukládacího prostoru.\n"
+"uvolní se na disku dalších %3 %4 bajtů ukládacího prostoru.\n"
 msgstr[1] ""
-"Následující %1 soubor nebyl používán a\n"
-"byl přesunut do:\n"
-"\t\t\t\t%2. \n"
-"\n"
+"Následující %1 soubory nebyly používány a\n"
+"byly přesunuty do: %2. \n"
 "\n"
 "Po znovuspuštění %5,\n"
 "\n"
-"Sezení -> Udělat pořádek -> Vyprázdnit koš\n"
+"<span face=\"mono\">Sezení -> Udělat pořádek -> Vyprázdnit koš</span>\n"
 "\n"
-"uvolní se na disku dalších\n"
-"%3 %4 bajtů ukládacího prostoru.\n"
+"uvolní se na disku dalších %3 %4 bajtů ukládacího prostoru.\n"
 
 #: ardour_ui.cc:3052
 msgid "Are you sure you want to clean-up?"
@@ -1346,9 +1336,8 @@ msgid "Return to last playback start when stopped"
 msgstr "Při zastavení se vrátit na začátek posledního přehrávání"
 
 #: ardour_ui2.cc:136
-#, fuzzy
 msgid "Playhead follows Range Selections and Edits"
-msgstr "Ukazatele polohy na začátek rozsahu výběru"
+msgstr "Ukazatele polohy následuje výběry rozsahu a úpravy"
 
 #: ardour_ui2.cc:137
 msgid "Be sensible about input monitoring"
@@ -1387,6 +1376,14 @@ msgid ""
 "See <span color=\"blue\">http://ardour.org/a3_features_clocks</span> for "
 "details."
 msgstr ""
+"<b>Hlavní údaj o čase</b> klepnutí pravým tlačítkem myši pro nastavení "
+"režimu zobrazení. Klepněte pro úpravy, klepněte+táhněte číslici nebo myš "
+"umístit nad+pohybovat kolečkem myši pro změnu údaje.\n"
+"Úpravy textu: přepis zprava doleva <tt>Esc</tt>: zrušit; <tt>Enter</tt>: "
+"potvrdit; úpravy připojit '+' nebo '-' pro zadání časů delta (nárůst "
+"proměnné).\n"
+"Podrobnosti hledejte na <span color=\"blue\">"
+"http://ardour.org/a3_features_clocks</span>."
 
 #: ardour_ui2.cc:143
 msgid ""
@@ -1397,6 +1394,14 @@ msgid ""
 "See <span color=\"blue\">http://ardour.org/a3_features_clocks</span> for "
 "details."
 msgstr ""
+"<b>Vedlejší údaj o čase</b> klepnutí pravým tlačítkem myši pro nastavení "
+"režimu zobrazení. Klepněte pro úpravy, klepněte+táhněte číslici nebo myš "
+"umístit nad+pohybovat kolečkem myši pro změnu údaje.\n"
+"Úpravy textu: přepis zprava doleva <tt>Esc</tt>: zrušit; <tt>Enter</tt>: "
+"potvrdit; úpravy připojit '+' nebo '-' pro zadání časů delta (nárůst "
+"proměnné).\n"
+"Podrobnosti hledejte na <span color=\"blue\">"
+"http://ardour.org/a3_features_clocks</span>."
 
 #: ardour_ui2.cc:175
 msgid "[ERROR]: "
@@ -1415,9 +1420,8 @@ msgid "Auto Return"
 msgstr "Automatický návrat"
 
 #: ardour_ui2.cc:245 ardour_ui_ed.cc:408
-#, fuzzy
 msgid "Follow Edits"
-msgstr "Ukázat editor"
+msgstr "Následovat úpravy"
 
 #: ardour_ui2.cc:631 rc_option_editor.cc:884 rc_option_editor.cc:902
 #: rc_option_editor.cc:905 rc_option_editor.cc:907 rc_option_editor.cc:909
@@ -1446,6 +1450,7 @@ msgstr "Znovu nahrát průběh sezení"
 #: ardour_ui_dependents.cc:125
 msgid "This screen is not tall enough to display the mixer window"
 msgstr ""
+"Tato obrazovka není dostatečně velká na to, aby zobrazila okno směšovače"
 
 #: ardour_ui_dialogs.cc:217
 msgid "Don't close"
@@ -1757,9 +1762,8 @@ msgid "Play Selected Range"
 msgstr "Přehrát vybraný rozsah"
 
 #: ardour_ui_ed.cc:320
-#, fuzzy
 msgid "Play Selection w/Preroll"
-msgstr "Přehrávat vybranou oblast"
+msgstr "Přehrávat vybranou oblast s přetáčením vpřed"
 
 #: ardour_ui_ed.cc:324
 msgid "Enable Record"
@@ -1942,9 +1946,8 @@ msgid "JACK Sampling Rate and Latency"
 msgstr "Vzorkovací kmitočet a prodleva JACK"
 
 #: ardour_ui_ed.cc:604
-#, fuzzy
 msgid "Timecode Format"
-msgstr "Snímky časového kódu"
+msgstr "Formát časového kódu"
 
 #: ardour_ui_ed.cc:605
 msgid "File Format"
@@ -1971,23 +1974,21 @@ msgid "Sync to JACK is not possible: video pull up/down is set"
 msgstr "Seřízení k JACKovi není možné: je nastaveno vytáhnutí/stáhnutí videa"
 
 #: audio_clock.cc:1011 audio_clock.cc:1030
-#, fuzzy
 msgid "--pending--"
-msgstr "Vzestupný"
+msgstr "--čekající na vyřízení--"
 
 #: audio_clock.cc:1082
-#, fuzzy
 msgid "SR"
-msgstr "N"
+msgstr "SR"
 
 #: audio_clock.cc:1088 audio_clock.cc:1092
 msgid "Pull"
-msgstr ""
+msgstr "Táhnout"
 
 #: audio_clock.cc:1090
 #, c-format
 msgid "%+.4f%%"
-msgstr ""
+msgstr "%+.4f%%"
 
 #: audio_clock.cc:1236 editor.cc:242 editor_actions.cc:135
 #: editor_actions.cc:536
@@ -2610,7 +2611,6 @@ msgid "Linear (for highly correlated material)"
 msgstr "Lineární (pro vysoce souvztažný materiál)"
 
 #: editor.cc:1372 editor.cc:1509 editor.cc:1571
-#, fuzzy
 msgid "Constant power"
 msgstr "Neměnná síla"
 
@@ -2864,17 +2864,15 @@ msgstr "Postrčit"
 
 #: editor.cc:3072
 msgid "Smart Mode (add Range functions to Object mode)"
-msgstr ""
+msgstr "Chytrý režim (přidat funkce rozsahu do předmětového režimu)"
 
 #: editor.cc:3073
-#, fuzzy
 msgid "Object Mode (select/move Objects)"
-msgstr "Chytrý režim (Vybrat/Posunout předměty + rozsahy)"
+msgstr "Předmětový režim (Vybrat/Posunout předměty)"
 
 #: editor.cc:3074
-#, fuzzy
 msgid "Range Mode (select/move Ranges)"
-msgstr "Chytrý režim (Vybrat/Posunout předměty + rozsahy)"
+msgstr "Rozsahový režim (Vybrat/Posunout rozsahy)"
 
 #: editor.cc:3075
 msgid "Draw/Edit MIDI Notes"
@@ -2898,7 +2896,7 @@ msgstr "Poslouchat vybrané oblasti"
 
 #: editor.cc:3080
 msgid "Note Level Editing"
-msgstr ""
+msgstr "Upravit na úrovni not"
 
 #: editor.cc:3081
 msgid ""
@@ -3633,17 +3631,16 @@ msgid "Zoom Focus Edit Point"
 msgstr "Srovnat pohled na bod úprav"
 
 #: editor_actions.cc:404
-#, fuzzy
 msgid "Next Zoom Focus"
-msgstr "Pohled na střed"
+msgstr "Další srovnání pohledu"
 
 #: editor_actions.cc:410
 msgid "Smart Object Mode"
-msgstr ""
+msgstr "Chytrý předmětový režim"
 
 #: editor_actions.cc:413
 msgid "Smart"
-msgstr ""
+msgstr "Chytrý"
 
 #: editor_actions.cc:417
 msgid "Object Tool"
@@ -3965,9 +3962,8 @@ msgid "Show Logo"
 msgstr "Ukázat logo"
 
 #: editor_actions.cc:642
-#, fuzzy
 msgid "Toggle MIDI Input Active for Editor-Selected Tracks/Busses"
-msgstr "Přepnout ztlumení u ve směšovači vybraných stop/sběrnic"
+msgstr "Přepnout vstup MIDI pro v editoru vybrané stopy/sběrnice"
 
 #: editor_actions.cc:665
 msgid "Loaded editor bindings from %1"
@@ -4363,7 +4359,6 @@ msgid "An error occurred while executing time stretch operation"
 msgstr "Při provádění operace protáhnutí času se vyskytla chyba"
 
 #: editor_drag.cc:3843
-#, fuzzy
 msgid "programming_error: %1"
 msgstr "Chyba v programování: %1"
 
@@ -4460,13 +4455,12 @@ msgid "selection|Sel"
 msgstr "Výběr|V"
 
 #: editor_route_groups.cc:105
-#, fuzzy
 msgid "Sharing Selected/Editing Status?"
-msgstr "Sdílení vybraného stavu?"
+msgstr "Sdílení stavu vybráno/úpravy?"
 
 #: editor_route_groups.cc:106
 msgid "active|A"
-msgstr "Činné|Č"
+msgstr "Činný|Č"
 
 #: editor_route_groups.cc:106
 msgid "Sharing Active Status?"
@@ -4618,6 +4612,7 @@ msgstr "Nastavit rozsah přepsání"
 #: editor_mixer.cc:90
 msgid "This screen is not tall enough to display the editor mixer"
 msgstr ""
+"Tato obrazovka není dostatečně velká na to, aby zobrazila směšovač editoru"
 
 #: editor_mouse.cc:172
 msgid "Editor::event_frame() used on unhandled event type %1"
@@ -6242,9 +6237,8 @@ msgid "Remove Group"
 msgstr "Odstranit skupinu"
 
 #: group_tabs.cc:323
-#, fuzzy
 msgid "Remove Subgroup Bus"
-msgstr "Přidat novou sběrnici podskupiny"
+msgstr "Odstranit sběrnici podskupiny"
 
 #: group_tabs.cc:325
 msgid "Add New Subgroup Bus"
@@ -6432,11 +6426,10 @@ msgid "period"
 msgstr "Údobí"
 
 #: latency_gui.cc:55
-#, fuzzy
 msgid "%1 sample"
 msgid_plural "%1 samples"
-msgstr[0] "Vzorek"
-msgstr[1] "Vzorek"
+msgstr[0] "%1 vzorek"
+msgstr[1] "%1 vzorků"
 
 #: latency_gui.cc:72 panner_ui.cc:392
 msgid "Reset"
@@ -6606,13 +6599,12 @@ msgid "Copyright (C) 1999-2012 Paul Davis"
 msgstr "Autorské právo (C) 1999-2012 Paul Davis"
 
 #: main.cc:431
-#, fuzzy
 msgid ""
 "Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
 "Baker, Robin Gareus"
 msgstr ""
 "Některé části: autorské právo (C) Steve Harris, Ari Johnson, Brett Viren, "
-"Joel Baker"
+"Joel Baker, Robin Gareus"
 
 #: main.cc:433
 msgid "%1 comes with ABSOLUTELY NO WARRANTY"
@@ -6843,9 +6835,8 @@ msgid "paste"
 msgstr "Vložit"
 
 #: midi_region_view.cc:3808
-#, fuzzy
 msgid "delete sysex"
-msgstr "Smazat notu"
+msgstr "Smazat SysEx"
 
 #: midi_time_axis.cc:223
 msgid "External MIDI Device"
@@ -7068,9 +7059,8 @@ msgid "Scroll Mixer Window to the left"
 msgstr "Projíždět okno se směšovačem doleva"
 
 #: mixer_actor.cc:75
-#, fuzzy
 msgid "Toggle MIDI Input Active for Mixer-Selected Tracks/Busses"
-msgstr "Přepnout ztlumení u ve směšovači vybraných stop/sběrnic"
+msgstr "Přepnout vstup MIDI pro ve směšovači vybrané stopy/sběrnice"
 
 #: mixer_actor.cc:90
 msgid "Loaded mixer bindings from %1"
@@ -7106,9 +7096,8 @@ msgid "Hide this mixer strip"
 msgstr "Skrýt tento proužek směšovače"
 
 #: mixer_strip.cc:165
-#, fuzzy
 msgid "Click to select metering point"
-msgstr "Vybrat bod pro měření"
+msgstr "Vybrat měřicí bod ukazatele hladin"
 
 #: mixer_strip.cc:171
 msgid "tupni"
@@ -7167,7 +7156,6 @@ msgid "Snd"
 msgstr "Posl"
 
 #: mixer_strip.cc:671
-#, fuzzy
 msgid "Lck"
 msgstr "Zamknout"
 
@@ -7257,23 +7245,20 @@ msgid "custom"
 msgstr "Vlastní"
 
 #: mixer_strip.cc:1750
-#, fuzzy
 msgid "pr"
-msgstr "Před"
+msgstr "Pre"
 
 #: mixer_strip.cc:1754
-#, fuzzy
 msgid "po"
-msgstr "se"
+msgstr "Po"
 
 #: mixer_strip.cc:1758
-#, fuzzy
 msgid "o"
-msgstr "Zapnuto"
+msgstr "o"
 
 #: mixer_strip.cc:1763
 msgid "c"
-msgstr ""
+msgstr "c"
 
 #: mixer_strip.cc:1897 route_ui.cc:138
 msgid "Disk"
@@ -7911,10 +7896,9 @@ msgid "Click to enable/disable this plugin"
 msgstr "Povolit/Zakázat tento přídavný modul"
 
 #: plugin_ui.cc:549
-#, fuzzy
 msgid "latency (%1 sample)"
 msgid_plural "latency (%1 samples)"
-msgstr[0] "Prodleva (%1 vzorků)"
+msgstr[0] "Prodleva (%1 vzorky)"
 msgstr[1] "Prodleva (%1 vzorků)"
 
 #: plugin_ui.cc:551
@@ -7955,11 +7939,11 @@ msgstr "Jiné"
 
 #: port_group.cc:430 port_group.cc:431
 msgid "LTC Out"
-msgstr ""
+msgstr "Výstup LTC"
 
 #: port_group.cc:434 port_group.cc:435
 msgid "LTC In"
-msgstr ""
+msgstr "Vstup LTC"
 
 #: port_group.cc:463
 msgid "MTC in"
@@ -8224,7 +8208,7 @@ msgstr ""
 
 #: processor_box.cc:1900
 msgid "plugin insert constructor failed"
-msgstr ""
+msgstr "Vložení přídavného modulu se nezdařilo"
 
 #: processor_box.cc:1911
 msgid ""
@@ -8413,9 +8397,8 @@ msgid "Insert note using:"
 msgstr "Vložit notu pomocí:"
 
 #: rc_option_editor.cc:395
-#, fuzzy
 msgid "Ignore snap using:"
-msgstr "Přepnout zapadnutí pomocí:"
+msgstr "Přehlížet zapadnutí pomocí:"
 
 #: rc_option_editor.cc:411
 msgid "Keyboard layout:"
@@ -8511,7 +8494,7 @@ msgstr "Faktor prostřihávání (větší hodnota => méně dat)"
 
 #: rc_option_editor.cc:977
 msgid "Automation sampling interval (milliseconds)"
-msgstr ""
+msgstr "Interval pro automatizaci (v milisekundách)"
 
 #: rc_option_editor.cc:989
 msgid "Keep record-enable engaged on stop"
@@ -8526,6 +8509,8 @@ msgid ""
 "<b>When enabled</b> Ardour will stop recording if an over- or underrun is "
 "detected by the audio engine"
 msgstr ""
+"<b>Když je povoleno</b>, Ardour zastaví nahrávání, pokud je zjištěno "
+"přetečení nebo podtečení"
 
 #: rc_option_editor.cc:1007
 msgid "Create markers where xruns occur"
@@ -8543,10 +8528,14 @@ msgid ""
 "<b>When disabled</b> Ardour will continue to roll past the session end "
 "marker at all times"
 msgstr ""
+"<b>Když je povoleno</b>, a Ardour <b>nenahrává</b>, je při "
+"dosažení značky konce sezení přehrávání zastaveno.\n"
+"\n"
+"<b>Když je zakázáno</b> Ardour bude pokračovat vždy až na konec sezení"
 
 #: rc_option_editor.cc:1027
 msgid "Do seamless looping (not possible when slaved to MTC, JACK etc)"
-msgstr "Dělat jednolitou smyčku (není možné v případě otročení MTC, JACK atd.)"
+msgstr "Dělat souvislou smyčku (není možné, když MTC, JACK atd. jsou hlavní)"
 
 #: rc_option_editor.cc:1031
 msgid ""
@@ -8558,31 +8547,41 @@ msgid ""
 "loop when Ardour reaches the end which will often cause a small click or "
 "delay"
 msgstr ""
+"<b>Když je povoleno</b>, bude se číst vpřed a na koncovém bodu smyčky "
+"se skočí zpět, čímž se vyhne novému umístění na konci smyčky.\n"
+"\n"
+"<b>Když je zakázáno</b>, skočí se při dosažení konce smyčky na začátek "
+"smyčky, "
+"což často způsobí slyšitelné prasknutí nebo zpoždění"
 
 #: rc_option_editor.cc:1039
 msgid "Disable per-track record disarm while rolling"
-msgstr "Zakázat odzbrojení nahrávání na stopu při rolování"
+msgstr "Zakázat při nahrávání stav nahrávání jednotlivé stopy"
 
 #: rc_option_editor.cc:1043
 msgid ""
 "<b>When enabled</b> this will prevent you from accidentally stopping "
 "specific tracks recording during a take"
 msgstr ""
+"<b>Když je povoleno</b>, zabrání vám to v nechtěném zastavení nahrávání "
+"určitých stop"
 
 #: rc_option_editor.cc:1048
 msgid "12dB gain reduction during fast-forward and fast-rewind"
 msgstr ""
-"Při přetáčení rychle dopředu a rychle dozadu snížení hladinu zvuku o 12dB"
+"Při přetáčení rychle dopředu a rychle dozadu snížit hladinu zvuku o 12dB"
 
 #: rc_option_editor.cc:1052
 msgid ""
 "This will reduce the unpleasant increase in perceived volume that occurs "
 "when fast-forwarding or rewinding through some kinds of audio"
 msgstr ""
+"Toto omezí nepříjemné zvýšení vnímané hlasitosti, které se vyskytuje u "
+"některého materiálu při přetáčení vpřed/zpětném chodu"
 
 #: rc_option_editor.cc:1056
 msgid "Sync/Slave"
-msgstr ""
+msgstr "Sync/Slave"
 
 #: rc_option_editor.cc:1060
 msgid "External timecode source"
@@ -8590,7 +8589,7 @@ msgstr "Vnější zdroj časového kódu"
 
 #: rc_option_editor.cc:1070
 msgid "Match session video frame rate to external timecode"
-msgstr ""
+msgstr "Přizpůsobit rychlost snímkování obrazu vnějšímu časovému kódu"
 
 #: rc_option_editor.cc:1076
 msgid ""
@@ -8605,21 +8604,34 @@ msgid ""
 "indication in the main clock will flash red and Ardour will convert between "
 "the external timecode standard and the session standard."
 msgstr ""
+"Tato volba řídí hodnotu rychlosti snímkování obrazu <i>během seřizování</i> "
+"s vnějším zdrojem časového kódu.\n"
+"\n"
+"<b>Když je povoleno</b> rychlost snímkování obrazu sezení bude změněna tak, "
+"aby "
+"odpovídala vybranému vnějšímu zdroji časového kódu.\n"
+"\n"
+"<b>Když je zakázáno</b>, rychlost snímkování obrazu sezení nebude změněna "
+"tak, aby "
+"odpovídala vybranému vnějšímu zdroji časového kódu. Místo toho ukazatel "
+"rychlosti snímkování v hlavních hodinách zčervená a Ardour bude převádět mezi "
+"standardem vnějšího časového kódu a standardem sezení."
 
 #: rc_option_editor.cc:1086
-#, fuzzy
 msgid "External timecode is sync locked"
-msgstr "Vnější zdroj časového kódu"
+msgstr "Vnější časový kód je pevně seřízen"
 
 #: rc_option_editor.cc:1092
 msgid ""
 "<b>When enabled</b> indicates that the selected external timecode source "
 "shares sync (Black &amp; Burst, Wordclock, etc) with the audio interface."
 msgstr ""
+"<b>Když je povoleno</b>, ukazuje to, že vybraný vnější zdroj časového kódu "
+"běží seřízeně (Black &amp; Burst, Wordclock atd.) se zvukovým rozhraním."
 
 #: rc_option_editor.cc:1099
 msgid "Lock to 29.9700 fps instead of 30000/1001"
-msgstr ""
+msgstr "Pevně na 29.9700 fps namísto 30000/1001"
 
 #: rc_option_editor.cc:1105
 msgid ""
@@ -8633,46 +8645,57 @@ msgid ""
 "use that rate - despite it being against the specs - because the variant of "
 "using exactly 29.97 fps has zero timecode drift.\n"
 msgstr ""
+"<b>Když je povoleno</b>, očekává se, že vnější zdroj časového kódu používá "
+"29.97 fps "
+"místo 30000/1001.\n"
+"SMPTE 12M-1999 stanovuje 29.97df jako 30000/1001. Specifikace dále zmiňuje, "
+"že časový kód zahazování snímků akumuluje chybu -86ms v časovém úseku "
+"24 hodin.\n"
+"Časový kód zahazování snímků by přesně vyrovnával rychlost snímkování barev "
+"NTSC 30 * 0.9990 (odpovídá 29.970000). To je není skutečná rychlost, nicméně "
+"někteří výrobci tuto rychlost používají - i když je to proti specifikaci - "
+"protože při "
+"variantě s 29.97 fps se nevyskytuje žádný posuv časového kódu.\n"
 
 #: rc_option_editor.cc:1115
-#, fuzzy
 msgid "LTC Reader"
-msgstr "Prolínač"
+msgstr "Čtečka LTC"
 
 #: rc_option_editor.cc:1119
 msgid "LTC incoming port"
-msgstr ""
+msgstr "Vstupní přípojka LTC"
 
 #: rc_option_editor.cc:1132
-#, fuzzy
 msgid "LTC Generator"
-msgstr "Tvůrce"
+msgstr "Generátor LTC"
 
 #: rc_option_editor.cc:1137
-#, fuzzy
 msgid "Enable LTC generator"
-msgstr "Povolit překlady"
+msgstr "Povolit generátor LTC"
 
 #: rc_option_editor.cc:1144
 msgid "send LTC while stopped"
-msgstr ""
+msgstr "Poslat LTC, když přehrávání stojí"
 
 #: rc_option_editor.cc:1150
 msgid ""
 "<b>When enabled</b> Ardour will continue to send LTC information even when "
 "the transport (playhead) is not moving"
 msgstr ""
+"<b>Když je povoleno</b>, Ardour bude pokračovat v posílání informací LTC, "
+"i když se ukazatel polohy přehrávání nepohybuje"
 
 #: rc_option_editor.cc:1156
-#, fuzzy
 msgid "LTC generator level"
-msgstr "Tvůrce"
+msgstr "Hlasitost generátoru LTC"
 
 #: rc_option_editor.cc:1160
 msgid ""
 "Specify the Peak Volume of the generated LTC signal in dbFS. A good value "
 "is  0dBu ^= -18dbFS in an EBU calibrated system"
 msgstr ""
+"Zadejte hodnotu vrcholu vytvořeného signálu LTC v dbFS. Dobrou hodnotou "
+"pro kalibrovaný systém EBU je 0dBu ^= -18dbFS"
 
 #: rc_option_editor.cc:1172
 msgid "Link selection of regions and tracks"
@@ -8702,6 +8725,16 @@ msgid ""
 "If disabled, regions are considered \"equivalent\" only if have the same "
 "start time, length and position"
 msgstr ""
+"Při rozšíření výběru oblasti přes skupinu, %1 musí rozhodnout, které "
+"oblasti jsou odpovídající.\n"
+"\n"
+"Když je povoleno, oblasti se považují za \"odpovídající\", pokud se "
+"překrývají na "
+"časové ose.\n"
+"\n"
+"Když je zakázáno, oblasti se považují za \"odpovídající\", jen když mají "
+"stejný "
+"začáteční čas, délku a polohu"
 
 #: rc_option_editor.cc:1210
 msgid "Make rubberband selection rectangle snap to the grid"
@@ -8782,6 +8815,10 @@ msgid ""
 "\n"
 "You can always rename markers by right-clicking on them"
 msgstr ""
+"Když je povoleno, je při vytvoření nové značky zobrazen dialog, "
+"aby bylo možné ihned upravit název této značky.\n"
+"\n"
+"Značky můžete vždy klepnutím pravým tlačítkem myši na ně přejmenovat"
 
 #: rc_option_editor.cc:1319
 msgid "Auto-scroll editor window when dragging near its edges"
@@ -9051,9 +9088,8 @@ msgstr "následuje pořadí v editoru"
 #: rc_option_editor.cc:1710 rc_option_editor.cc:1718 rc_option_editor.cc:1728
 #: rc_option_editor.cc:1730 rc_option_editor.cc:1748 rc_option_editor.cc:1757
 #: rc_option_editor.cc:1765 rc_option_editor.cc:1779 rc_option_editor.cc:1796
-#, fuzzy
 msgid "GUI"
-msgstr "URI"
+msgstr "GUI"
 
 #: rc_option_editor.cc:1713
 msgid "Graphically indicate mouse pointer hovering over various widgets"
@@ -9061,7 +9097,7 @@ msgstr "Obrazově naznačovat přejetí ukazatele myši nad různými prvky"
 
 #: rc_option_editor.cc:1721
 msgid "Show tooltips if mouse hovers over a control"
-msgstr ""
+msgstr "Ukázat nástrojové rady, když myš přejede nad prvkem"
 
 #: rc_option_editor.cc:1733
 msgid "Use plugins' own interfaces instead of Ardour's"
@@ -9758,19 +9794,20 @@ msgid ""
 "\n"
 "The remote control ID of %3 cannot be changed."
 msgstr ""
+"ID dálkového ovládání %1 je: %2\n"
+"\n"
+"\n"
+"ID dálkového ovládání %3 nelze změnit."
 
 #: route_ui.cc:1753
-#, fuzzy
 msgid "the master bus"
-msgstr "Vytvořit hlavní sběrnici"
+msgstr "Hlavní sběrnice"
 
 #: route_ui.cc:1753
-#, fuzzy
 msgid "the monitor bus"
-msgstr "Vytvořit hlavní sběrnici"
+msgstr "Sledovací sběrnice"
 
 #: route_ui.cc:1755
-#, fuzzy
 msgid ""
 "The remote control ID of %6 is: %3\n"
 "\n"
@@ -9780,20 +9817,19 @@ msgid ""
 "%4Use the User Interaction tab of the Preferences window if you want to "
 "change this%5"
 msgstr ""
+"ID dálkového ovládání %6 je: %3\n"
+"\n\n"
 "ID dálkového ovládání jsou v současnosti určeny pořadím stopy/sběrnice v %1\n"
 "\n"
-"Toto %2 má ID dálkového ovládání %3\n"
 "\n"
-"\n"
-"<span size=\"small\" style=\"italic\">Použijte kartu Uživatelská interakce "
-"okna Nastavení, pokud to chcete změnit</span>"
+"%4Použijte kartu Uživatelská interakce "
+"v okně pro Nastavení, pokud to chcete změnit%5"
 
 #: route_ui.cc:1758
 msgid "the mixer"
 msgstr "Směšovač"
 
 #: route_ui.cc:1758
-#, fuzzy
 msgid "the editor"
 msgstr "Editor"
 
@@ -10048,9 +10084,8 @@ msgid "24"
 msgstr "24"
 
 #: session_option_editor.cc:52
-#, fuzzy
 msgid "24.975"
-msgstr "24,976"
+msgstr "24.975"
 
 #: session_option_editor.cc:53
 msgid "25"
@@ -10133,28 +10168,26 @@ msgid "-4.1667 - 0.1%"
 msgstr "-4.1667 - 0.1%"
 
 #: session_option_editor.cc:95
-#, fuzzy
 msgid "Ext Timecode Offsets"
-msgstr "Posun časového kódu"
+msgstr "Vnější posuny časového kódu"
 
 #: session_option_editor.cc:99
-#, fuzzy
 msgid "Slave Timecode offset"
-msgstr "Posun časového kódu"
+msgstr "Pomocný posun časového kódu"
 
 #: session_option_editor.cc:106
 msgid "The specified offset is added to the received timecode (MTC or LTC)."
-msgstr ""
+msgstr "Stanovený posun je přidán k přijatému časovému kódu (MTC nebo LTC)."
 
 #: session_option_editor.cc:112
-#, fuzzy
 msgid "Timecode Generator offset"
-msgstr "Posun časového kódu"
+msgstr "Posun přidaný k vytvořenému časovému kódu"
 
 #: session_option_editor.cc:119
 msgid ""
 "Specify an offset which is added to the generated timecode (so far only LTC)."
 msgstr ""
+"Zadejte posun, který je přidán k vytvořenému časovému kódu (nyní jen LTC)."
 
 #: session_option_editor.cc:123
 msgid "JACK Transport/Time Settings"
@@ -10168,18 +10201,16 @@ msgstr ""
 "pro JACK)"
 
 #: session_option_editor.cc:136
-#, fuzzy
 msgid "Default crossfade type"
-msgstr "Typ prolínání"
+msgstr "Výchozí typ prolínání"
 
 #: session_option_editor.cc:141
-#, fuzzy
 msgid "Constant power (-3dB) crossfade"
-msgstr "Neměnná síla (-3dB)"
+msgstr "Prolínání s neměnnou silou (-3dB)"
 
 #: session_option_editor.cc:142
 msgid "Linear (-6dB) crossfade"
-msgstr ""
+msgstr "Lineární prolínání (-6dB)"
 
 #: session_option_editor.cc:147
 msgid "destructive-xfade-seconds"
@@ -10252,10 +10283,10 @@ msgid "Search for MIDI files in:"
 msgstr "MIDI soubory hledat v:"
 
 #: session_option_editor.cc:219
-#, fuzzy
 msgid ""
 "Track Input Monitoring automatically follows transport state (\"auto-input\")"
-msgstr "Sledování automaticky následuje stav přesunu (\"auto-input\")"
+msgstr ""
+"Sledování vstupu stopy automaticky následuje stav přehrávání (\"auto-input\")"
 
 #: session_option_editor.cc:226
 msgid "Use monitor section in this session"
@@ -10446,18 +10477,16 @@ msgid "Duration"
 msgstr "Doba trvání"
 
 #: sfdb_ui.cc:573
-#, fuzzy
 msgid "Size"
-msgstr "Největší velikost"
+msgstr "Velikost"
 
 #: sfdb_ui.cc:574
-#, fuzzy
 msgid "Samplerate"
 msgstr "Vzorkovací kmitočet"
 
 #: sfdb_ui.cc:575
 msgid "License"
-msgstr ""
+msgstr "Licence"
 
 #: sfdb_ui.cc:590
 msgid "Search Freesound"
@@ -10465,21 +10494,21 @@ msgstr "Hledat volné zvuky"
 
 #: sfdb_ui.cc:611
 msgid "Press to import selected files and close this window"
-msgstr ""
+msgstr "Stiskněte pro zavedení vybraných souborů a zavřete toto okno"
 
 #: sfdb_ui.cc:612
 msgid "Press to import selected files and leave this window open"
-msgstr ""
+msgstr "Stiskněte pro zavedení vybraných souborů a ponechte toto okno otevřené"
 
 #: sfdb_ui.cc:613
 msgid "Press to close this window without importing any files"
-msgstr ""
+msgstr "Stiskněte pro zavření tohoto okna bez zavedení jakýchkoli souborů"
 
 #: sfdb_ui.cc:840
 msgid "found %1 match"
 msgid_plural "found %1 matches"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Nalezena %1 shoda"
+msgstr[1] "Nalezeny %1 shody"
 
 #: sfdb_ui.cc:855
 msgid "SoundFileBrowser: Could not tokenize string: "
@@ -10487,40 +10516,37 @@ msgstr "Prohlížeč zvukových souborů: Nelze rozebrat řetězec znaků:"
 
 #: sfdb_ui.cc:909
 msgid "Searching Page %1 of %2, click Stop to cancel"
-msgstr ""
+msgstr "Prohledává se strana %1 z %2, klepněte na Zastavit pro přerušení"
 
 #: sfdb_ui.cc:911
 msgid "Searching, click Stop to cancel"
-msgstr ""
+msgstr "Prohledává se, klepněte na Zastavit pro přerušení"
 
 #: sfdb_ui.cc:1012
-#, fuzzy
 msgid "B"
-msgstr "dB"
+msgstr "B"
 
 #: sfdb_ui.cc:1014
 msgid "kB"
-msgstr ""
+msgstr "kB "
 
 #: sfdb_ui.cc:1016 sfdb_ui.cc:1018
-#, fuzzy
 msgid "MB"
-msgstr "Z"
+msgstr "MB"
 
 #: sfdb_ui.cc:1020
-#, fuzzy
 msgid "GB"
-msgstr "Př"
+msgstr "GB"
 
 #: sfdb_ui.cc:1062
 msgid "Search returned no results."
-msgstr ""
+msgstr "Hledání nevrátilo žádné výsledky."
 
 #: sfdb_ui.cc:1064
 msgid "Found %1 match"
 msgid_plural "Found %1 matches"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Nalezena %1 shoda"
+msgstr[1] "Nalezeny %1 shody"
 
 #: sfdb_ui.cc:1268 sfdb_ui.cc:1575 sfdb_ui.cc:1625 sfdb_ui.cc:1643
 msgid "one track per file"
@@ -10584,22 +10610,19 @@ msgstr "Začátek sezení"
 
 #: sfdb_ui.cc:1528
 msgid "<b>Add files as ...</b>"
-msgstr ""
+msgstr "<b>Přidat soubory jako...</b>"
 
 #: sfdb_ui.cc:1550
-#, fuzzy
 msgid "<b>Insert at</b>"
-msgstr "Vložit v:"
+msgstr "<b>Vložit v</b>"
 
 #: sfdb_ui.cc:1563
-#, fuzzy
 msgid "<b>Mapping</b>"
-msgstr "<b>Sdílení</b>"
+msgstr "<b>Přiřazení</b>"
 
 #: sfdb_ui.cc:1581
-#, fuzzy
 msgid "<b>Conversion quality</b>"
-msgstr "Kvalita převodu:"
+msgstr "<b>Kvalita převodu</b>"
 
 #: sfdb_ui.cc:1593 sfdb_ui.cc:1699
 msgid "Best"
@@ -10924,7 +10947,6 @@ msgid "Create master bus"
 msgstr "Vytvořit hlavní sběrnici"
 
 #: startup.cc:1129
-#, fuzzy
 msgid "Automatically connect to physical inputs"
 msgstr "Automaticky spojit s fyzickými vstupy"
 
@@ -11480,11 +11502,10 @@ msgid "gTortnam"
 msgstr "gTortnam"
 
 #: time_axis_view_item.cc:332
-#, fuzzy
 msgid "new duration %1 frame is out of bounds for %2"
 msgid_plural "new duration of %1 frames is out of bounds for %2"
 msgstr[0] "Nová doba trvání %1 snímků je mimo dovolenou oblast %2"
-msgstr[1] "Nová doba trvání %1 snímků je mimo dovolenou oblast %2"
+msgstr[1] "Nová doba trvání %1 snímků je mimo dovolenou oblast pro %2"
 
 #: time_fx_dialog.cc:62
 msgid "Quick but Ugly"
@@ -11624,7 +11645,7 @@ msgstr "Nelze najít obrázek s ikonou pro %1 pomocí %2"
 
 #: utils.cc:554
 msgid "Caught exception while loading icon named %1"
-msgstr ""
+msgstr "během nahrávání ikony s názvem %1 byla zachycena výjimka"
 
 #: verbose_cursor.cc:45
 msgid "VerboseCanvasCursor"
