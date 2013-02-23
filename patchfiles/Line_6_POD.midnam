@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>CherryPicker</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Line 6</Manufacturer>
+    <Model>POD</Model>
+    <CustomDeviceMode Name="">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Programs"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Programs"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Programs"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Programs"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Programs"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Programs"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Programs"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Programs"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Programs"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Programs"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Programs"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Programs"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Programs"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Programs"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Programs"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Programs"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Programs">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Program">
+        <UsesPatchNameList Name="Program"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <PatchNameList Name="Program">
+      <Patch Number="1A" Name="Plexi Lead" ProgramChange="0"/>
+      <Patch Number="1B" Name="Class A-30 TB" ProgramChange="1"/>
+      <Patch Number="1C" Name="Treadplate" ProgramChange="2"/>
+      <Patch Number="1D" Name="Line 6 Clean" ProgramChange="3"/>
+      <Patch Number="2A" Name="Bridge of Sighs" ProgramChange="4"/>
+      <Patch Number="2B" Name="Blackface Lux" ProgramChange="5"/>
+      <Patch Number="2C" Name="Eruption" ProgramChange="6"/>
+      <Patch Number="2D" Name="BohemianRhapsody" ProgramChange="7"/>
+      <Patch Number="3A" Name="Purple Haze Solo" ProgramChange="8"/>
+      <Patch Number="3B" Name="Cold Shot" ProgramChange="9"/>
+      <Patch Number="3C" Name="Brit J-800" ProgramChange="10"/>
+      <Patch Number="3D" Name="Tweed B-Man" ProgramChange="11"/>
+      <Patch Number="4A" Name="Agro Flange" ProgramChange="12"/>
+      <Patch Number="4B" Name="StreetsHavNoName" ProgramChange="13"/>
+      <Patch Number="4C" Name="Iron Man" ProgramChange="14"/>
+      <Patch Number="4D" Name="Chorus Shimmer" ProgramChange="15"/>
+      <Patch Number="5A" Name="X Tone" ProgramChange="16"/>
+      <Patch Number="5B" Name="Run Like Hell" ProgramChange="17"/>
+      <Patch Number="5C" Name="Plush" ProgramChange="18"/>
+      <Patch Number="5D" Name="Nowhere Man" ProgramChange="19"/>
+      <Patch Number="6A" Name="Phaze Funk" ProgramChange="20"/>
+      <Patch Number="6B" Name="The Rover" ProgramChange="21"/>
+      <Patch Number="6C" Name="ReelinInTheYears" ProgramChange="22"/>
+      <Patch Number="6D" Name="Variac Plexi" ProgramChange="23"/>
+      <Patch Number="7A" Name="That's Alright" ProgramChange="24"/>
+      <Patch Number="7B" Name="Boutique Combo" ProgramChange="25"/>
+      <Patch Number="7C" Name="Phase The Music" ProgramChange="26"/>
+      <Patch Number="7D" Name="18 Watts" ProgramChange="27"/>
+      <Patch Number="8A" Name="Round and Round" ProgramChange="28"/>
+      <Patch Number="8B" Name="Auto-Wah" ProgramChange="29"/>
+      <Patch Number="8C" Name="Plexi Jumped" ProgramChange="30"/>
+      <Patch Number="8D" Name="Cliffs Of Dover" ProgramChange="31"/>
+      <Patch Number="9A" Name="FX/Square Chorus" ProgramChange="32"/>
+      <Patch Number="9B" Name="FX/Screamin'Faze" ProgramChange="33"/>
+      <Patch Number="9C" Name="FX/Tape Echo" ProgramChange="34"/>
+      <Patch Number="9D" Name="FX/Tube Drive" ProgramChange="35"/>
+      <Patch Number="10A" Name="FX/Sub Octave" ProgramChange="36"/>
+      <Patch Number="10B" Name="FX/Low Rez Slap" ProgramChange="37"/>
+      <Patch Number="10C" Name="FX/Facial Fuzz" ProgramChange="38"/>
+      <Patch Number="10D" Name="FX/Octave Bend" ProgramChange="39"/>
+      <Patch Number="11A" Name="FX/Super Tubes" ProgramChange="40"/>
+      <Patch Number="11B" Name="FX/Echo Platter" ProgramChange="41"/>
+      <Patch Number="11C" Name="FX/Stone Age" ProgramChange="42"/>
+      <Patch Number="11D" Name="FX/4th and 5th" ProgramChange="43"/>
+      <Patch Number="12A" Name="FX/Treadplated" ProgramChange="44"/>
+      <Patch Number="12B" Name="FX/Synth Lead" ProgramChange="45"/>
+      <Patch Number="12C" Name="FX/Pi a'la Mod" ProgramChange="46"/>
+      <Patch Number="12D" Name="FX/Fifth Below" ProgramChange="47"/>
+      <Patch Number="13A" Name="FX/KingSpringVrb" ProgramChange="48"/>
+      <Patch Number="13B" Name="FX/Lumpy Phuzz" ProgramChange="49"/>
+      <Patch Number="13C" Name="FX/Square Flange" ProgramChange="50"/>
+      <Patch Number="13D" Name="FX/AutoWahPreamp" ProgramChange="51"/>
+      <Patch Number="14A" Name="FX/Reverse" ProgramChange="52"/>
+      <Patch Number="14B" Name="FX/Rotary Drum" ProgramChange="53"/>
+      <Patch Number="14C" Name="FX/Killer Z" ProgramChange="54"/>
+      <Patch Number="14D" Name="FX/Phase-O-Matic" ProgramChange="55"/>
+      <Patch Number="15A" Name="FX/Zen Driver" ProgramChange="56"/>
+      <Patch Number="15B" Name="FX/Phaze Eko" ProgramChange="57"/>
+      <Patch Number="15C" Name="FX/Square Thang" ProgramChange="58"/>
+      <Patch Number="15D" Name="FX/Sub Octaves" ProgramChange="59"/>
+      <Patch Number="16A" Name="FX/Opto Tremolo" ProgramChange="60"/>
+      <Patch Number="16B" Name="FX/Synth Harmony" ProgramChange="61"/>
+      <Patch Number="16C" Name="FX/Chorus Color" ProgramChange="62"/>
+      <Patch Number="16D" Name="FX/So Long" ProgramChange="63"/>
+      <Patch Number="17A" Name="VAR/SpankRthm" ProgramChange="64"/>
+      <Patch Number="17B" Name="VAR/SoapbarCrnch" ProgramChange="65"/>
+      <Patch Number="17C" Name="VAR/JumboAcoust" ProgramChange="66"/>
+      <Patch Number="17D" Name="VAR/Sitar" ProgramChange="67"/>
+      <Patch Number="18A" Name="VAR/BluesSemi" ProgramChange="68"/>
+      <Patch Number="18B" Name="VAR/T-Model" ProgramChange="69"/>
+      <Patch Number="18C" Name="VAR/ Jazz 400" ProgramChange="70"/>
+      <Patch Number="18D" Name="VAR/SpecialLead" ProgramChange="71"/>
+      <Patch Number="19A" Name="VAR/Electric12" ProgramChange="72"/>
+      <Patch Number="19B" Name="VAR/InsaneLester" ProgramChange="73"/>
+      <Patch Number="19C" Name="VAR/Banjo" ProgramChange="74"/>
+      <Patch Number="19D" Name="VAR/R-Billy" ProgramChange="75"/>
+      <Patch Number="20A" Name="VAR/Poker Face" ProgramChange="76"/>
+      <Patch Number="20B" Name="VAR/SpankLead" ProgramChange="77"/>
+      <Patch Number="20C" Name="VAR/DreadChorus" ProgramChange="78"/>
+      <Patch Number="20D" Name="VAR/360Jangle" ProgramChange="79"/>
+      <Patch Number="21A" Name="Blizzard" ProgramChange="80"/>
+      <Patch Number="21B" Name="Jeff Beck Marsha" ProgramChange="81"/>
+      <Patch Number="21C" Name="FX/Tube Drive" ProgramChange="82"/>
+      <Patch Number="21D" Name="FX/Tube Drive" ProgramChange="83"/>
+    </PatchNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>
