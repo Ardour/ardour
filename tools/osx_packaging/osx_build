@@ -493,15 +493,82 @@ echo "Building DMG ..."
 # UC_DMG=$APPNAME-${release_version}-${svn_version}-UC.dmg
 # FINAL_DMG=$APPNAME-${release_version}-${svn_version}.dmg
 UC_DMG=$APPNAME-${release_version}-${svn_version}.dmg
+VOLNAME=$APPNAME-$release_version
 
-rm -f $UC_DMG
-echo hdiutil create $UC_DMG -volname $APPNAME-$release_version -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
-hdiutil create $UC_DMG -volname $APPNAME-$release_version -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
+# TODO use mktemp
+MNTPATH=`mktemp -d -t ardourimg`
+TMPDMG=`mktemp -t ardour`
+ICNSTMP=`mktemp -t ardouricon`
+DMGSIZE=$[ `du -sm "$PRODUCT_PKG_DIR" | cut -f 1` * 1049 / 1000 + 3 ]
 
-# compress it
-# echo "Compressing DMG ..."
-# rm -f $FINAL_DMG
-# hdiutil convert $UC_DMG -format UDBZ -o $FINAL_DMG
+rm -f $UC_DMG "$TMPDMG" "${TMPDMG}.dmg" "$ICNSTMP"
+rm -rf "$MNTPATH"
+mkdir -p "$MNTPATH"
+
+TMPDMG="${TMPDMG}.dmg"
+
+hdiutil create -megabytes $DMGSIZE "$TMPDMG"
+DiskDevice=$(hdid -nomount "$TMPDMG" | grep Apple_HFS | cut -f 1 -d ' ')
+newfs_hfs -v "${VOLNAME}" "${DiskDevice}"
+mount -t hfs "${DiskDevice}" "${MNTPATH}"
+
+cp -r ${PRODUCT_PKG_DIR}/${APPDIR} "${MNTPATH}" || exit
+mkdir "${MNTPATH}/.background"
+cp -vi dmgbg.png "${MNTPATH}/.background/dmgbg.png"
+
+echo "setting DMG background ..."
+
+echo '
+   tell application "Finder"
+     tell disk "'${VOLNAME}'"
+           open
+           set current view of container window to icon view
+           set toolbar visible of container window to false
+           set statusbar visible of container window to false
+           set the bounds of container window to {400, 200, 800, 440}
+           set theViewOptions to the icon view options of container window
+           set arrangement of theViewOptions to not arranged
+           set icon size of theViewOptions to 64
+           set background picture of theViewOptions to file ".background:dmgbg.png"
+           make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
+           set position of item "'${APPDIR}'" of container window to {90, 100}
+           set position of item "Applications" of container window to {310, 100}
+           close
+           open
+           update without registering applications
+           delay 5
+           eject
+     end tell
+   end tell
+' | osascript
+
+chmod -Rf go-w "${MNTPATH}"
+sync
+
+echo "compressing Image ..."
+
+# Umount the image
+umount "${DiskDevice}"
+hdiutil eject "${DiskDevice}"
+# Create a read-only version, use zlib compression
+hdiutil convert -format UDZO "${TMPDMG}" -imagekey zlib-level=9 -o "${UC_DMG}"
+# Delete the temporary files
+rm "$TMPDMG"
+rmdir "$MNTPATH"
+
+echo "setting file icon ..."
+
+cp ${PRODUCT_PKG_DIR}/$Resources/appIcon.icns ${ICNSTMP}.icns
+/usr/bin/sips -i ${ICNSTMP}.icns
+/Developer/Tools/DeRez -only icns ${ICNSTMP}.icns > ${ICNSTMP}.rsrc
+/Developer/Tools/Rez -append ${ICNSTMP}.rsrc -o "$UC_DMG"
+/Developer/Tools/SetFile -a C "$UC_DMG"
+
+rm ${ICNSTMP}.icns ${ICNSTMP}.rsrc
+
+echo
+echo "packaging suceeded."
+ls -l "$UC_DMG"
 
 echo "Done."
-
+exit
