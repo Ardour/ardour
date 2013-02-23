@@ -60,7 +60,7 @@
 
 #include "i18n.h"
 
-#ifdef __APPLE__
+#if (defined __APPLE__ && defined OSX_CUSTOM_FONT)
 #include <Carbon/Carbon.h>
 #endif
 
@@ -222,6 +222,7 @@ fixup_bundle_environment (int, char* [])
 }
 
 static void load_custom_fonts() {
+#ifdef OSX_CUSTOM_FONT
 	std::string ardour_mono_file;
 
 	if (!find_file_in_search_path (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
@@ -239,6 +240,7 @@ static void load_custom_fonts() {
 	if (CTFontManagerRegisterFontsForURL(fontURL, kCTFontManagerScopeProcess, &error) != true) {
 		cerr << _("Cannot load ArdourMono TrueType font.") << endl;
 	}
+#endif
 }
 
 #else
