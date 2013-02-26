@@ -232,7 +232,7 @@ fi
 
 set -e
 
-export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
+export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
 GLOBAL_CONF="--prefix=$PREFIX"
 
 if [ ! -d LRDF ] ; then
