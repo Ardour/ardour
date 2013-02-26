@@ -400,7 +400,7 @@ fi
 # step three: rebuild glib 
 #
 if [ x$explicit_intl != x ] ; then 
-    # still need CFLAGS and LDFLAGS in order to find libintl
+    # still need LDFLAGS in order to find libintl
     tar xf $MOD_glib_local_tarball && (cd $MOD_glib_unpacked && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib -lintl" CFLAGS="$GLOBAL_CFLAGS -I$PREFIX/include" ./configure --prefix=$PREFIX && make && make install) || die "glib build failed"
 else 
     tar xf $MOD_glib_local_tarball && (cd $MOD_glib_unpacked && LDFLAGS="$GLOBAL_LDFLAGS" CFLAGS="$GLOBAL_CFLAGS" ./configure --prefix=$PREFIX  && make V=1 && make install) || die "glib build failed"
@@ -447,16 +447,17 @@ tar xf $MOD_pango_local_tarball && (cd $MOD_pango_unpacked && CFLAGS=$GLOBAL_CFL
 
 tar xf $MOD_gdkpixbuf_local_tarball && (cd $MOD_gdkpixbuf_unpacked && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "gdk-pixbuf build failed"
 # gobject-introspection uses #include <libintl.h> and there's no way to force the "scanner" to look outside the system tree
+
+
 if [ x$explicit_intl != x ] ; then
-    remove_link=0
-    if [ ! -f /usr/include/libintl.h ] ; then 
-        sudo ln -s $PREFIX/include/libintl.h /usr/include
-        remove_link=1
-    fi
-    tar xf $MOD_gobjectintrospection_local_tarball && (cd $MOD_gobjectintrospection_unpacked && LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib -lintl" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "gobject-introspection build failed"
-    if [ $remove_link = 1 ] ; then
-        sudo rm /usr/include/libintl.h
-    fi
+    
+    #
+    # g-ir-scanner will go looking for <libintl.h> which means we need to inject -I$PREFIX/include into it
+    # 
+
+    tar xf $MOD_gobjectintrospection_local_tarball && (cd $MOD_gobjectintrospection_unpacked &&  \
+     ./configure $GLOBAL_CONF CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS -L$PREFIX/lib -lintl" && make INTROSPECTION_SCANNER_ARGS="-I$PREFIX/include" && make install) || die "gobject-introspection build failed"
+
 else
     basic_builder gobjectintrospection
 fi
