@@ -399,6 +399,8 @@ def options(opt):
                     help='Compile without support for AU Plugins with only CARBON UI (needed for 64bit)')
     opt.add_option('--boost-sp-debug', action='store_true', default=False, dest='boost_sp_debug',
                     help='Compile with Boost shared pointer debugging')
+    opt.add_option('--depstack-root', type='string', default='~', dest='depstack_root',
+                    help='Directory/folder where dependency stack trees (gtk, a3) can be found (defaults to ~)')
     opt.add_option('--dist-target', type='string', default='auto', dest='dist_target',
                     help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,powerpc,tiger,leopard]')
     opt.add_option('--fpu-optimization', action='store_true', default=True, dest='fpu_optimization',
@@ -477,39 +479,34 @@ def configure(conf):
         print('Please use a different version or re-configure with --debug')
         exit (1)
 
-    # libintl may or may not be trivially locatable. On OS X this is always
-    # true. On Linux it will depend on whether we're on a normal Linux distro,
-    # in which case libintl.h is going to be available in /usr/include and
-    # the library itself is part of glibc, or on a bare-bones build system
-    # where we need to pick it up from the GTK dependency stack.
+    # systems with glibc have libintl builtin. systems without require explicit
+    # linkage against libintl.
     #
-    user_gtk_root = os.path.expanduser ('~/gtk/inst')
-    pkg_config_path = os.getenv('PKG_CONFIG_PATH')
-    if os.path.isfile ('/usr/include/libintl.h'):
-        # libintl is part of the system., so use it
-        autowaf.display_msg(conf, 'Will reply on libintl built into libc', 'yes')
-    else:
-        if (pkg_config_path is not None):
-            # told to search for pkgconfig files
-            if pkg_config_path.find (user_gtk_root) >= 0:
-                # told to search user_gtk_root
-                prefinclude = ''.join ([ '-I', user_gtk_root + '/include'])
-                preflib = ''.join ([ '-L', user_gtk_root + '/lib'])
-                conf.env.append_value('CFLAGS', [ prefinclude ])
-                conf.env.append_value('CXXFLAGS',  [prefinclude ])
-                conf.env.append_value('LINKFLAGS', [ preflib ])
-                conf.define ('NEED_INTL', 1)
-                autowaf.display_msg(conf, 'Will use explicit linkage against libintl in ' + user_gtk_root, 'yes')
-            else:
-                print ('\n\n**** Cannot locate libintl.h and PKG_CONFIG_PATH does not include ', user_gtk_root, '- this needs fixing before the build can continue')
-                sys.exit (-1)
-        else:
-                print ('\n\n**** Cannot locate libintl.h and PKG_CONFIG_PATH is not set - this needs fixing before the build can continue')
 
+    pkg_config_path = os.getenv('PKG_CONFIG_PATH')
+    user_gtk_root = os.path.expanduser (Options.options.depstack_root + '/gtk/inst')
+
+    if pkg_config_path is not None and pkg_config_path.find (user_gtk_root) >= 0:
+        # told to search user_gtk_root
+        prefinclude = ''.join ([ '-I', user_gtk_root + '/include'])
+        preflib = ''.join ([ '-L', user_gtk_root + '/lib'])
+        conf.env.append_value('CFLAGS', [ prefinclude ])
+        conf.env.append_value('CXXFLAGS',  [prefinclude ])
+        conf.env.append_value('LINKFLAGS', [ preflib ])
+        autowaf.display_msg(conf, 'Will build against private GTK dependency stack in ' + user_gtk_root, 'yes')
+    else:
+        autowaf.display_msg(conf, 'Will build against private GTK dependency stack', 'no')
+
+    if sys.platform == 'darwin':
+        conf.define ('NEED_INTL', 1)
+        autowaf.display_msg(conf, 'Will use explicit linkage against libintl in ' + user_gtk_root, 'yes')
+    else:
+        # libintl is part of the system, so use it
+        autowaf.display_msg(conf, 'Will rely on libintl built into libc', 'yes')
             
-    user_ardour_root = os.path.expanduser ('~/a3/inst')
-    if pkg_config_path is not None and os.getenv('PKG_CONFIG_PATH').find (user_ardour_root) >= 0:
-        # XXXX hack hack hack
+    user_ardour_root = os.path.expanduser (Options.options.depstack_root + '/a3/inst')
+    if pkg_config_path is not None and pkg_config_path.find (user_ardour_root) >= 0:
+        # told to search user_ardour_root
         prefinclude = ''.join ([ '-I', user_ardour_root + '/include'])
         preflib = ''.join ([ '-L', user_ardour_root + '/lib'])
         conf.env.append_value('CFLAGS', [ prefinclude ])
@@ -518,7 +515,7 @@ def configure(conf):
         autowaf.display_msg(conf, 'Will build against private Ardour dependency stack in ' + user_ardour_root, 'yes')
     else:
         autowaf.display_msg(conf, 'Will build against private Ardour dependency stack', 'no')
-
+        
     if sys.platform == 'darwin':
 
         # this is required, potentially, for anything we link and then relocate into a bundle
