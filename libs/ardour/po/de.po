@@ -6,10 +6,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-17 14:04+0100\n"
-"PO-Revision-Date: 2013-01-18 00:09+0100\n"
-"Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
-"Language-Team: German <kde-i18n-de@kde.org>\n"
+"POT-Creation-Date: 2013-02-05 19:32+0100\n"
+"PO-Revision-Date: 2013-02-05 19:52+0100\n"
+"Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
+"Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.5\n"
 
-#: amp.cc:60 automatable.cc:160
+#: amp.cc:60 automatable.cc:158
 msgid "Fader"
 msgstr "Fader"
 
@@ -69,7 +69,7 @@ msgstr "Programmierfehler: %1"
 msgid "AudioDiskstream: channel %1 out of range"
 msgstr "AudioDiskstream: Kanal %1 Bereichsüberschreitung"
 
-#: audio_diskstream.cc:1854 midi_diskstream.cc:1176
+#: audio_diskstream.cc:1854 midi_diskstream.cc:1178
 msgid "%1:%2 new capture file not initialized correctly"
 msgstr "%1:%2 neue Aufnahmedatei nicht korrekt initialisiert"
 
@@ -136,9 +136,9 @@ msgstr "Audio-Wiedergabelisten (unbenutzt)"
 
 #: audio_playlist_source.cc:171 audiosource.cc:913 file_source.cc:527
 #: midi_playlist_source.cc:144 midi_playlist_source.cc:152
-#: midi_playlist_source.cc:159 midi_source.cc:365 plugin_insert.cc:644
-#: session.cc:2445 session.cc:2478 session.cc:3623 session_handle.cc:87
-#: sndfilesource.cc:121
+#: midi_playlist_source.cc:159 midi_source.cc:371 plugin_insert.cc:644
+#: rb_effect.cc:332 session.cc:2445 session.cc:2478 session.cc:3623
+#: session_handle.cc:87 sndfilesource.cc:121
 msgid "programming error: %1"
 msgstr "Programmierfehler: %1"
 
@@ -347,15 +347,15 @@ msgstr "Abhören von Nicht-Audio Regionen wird noch nicht unterstützt"
 msgid "Cannot setup auditioner processing flow for %1 channels"
 msgstr "Kann den Abhör-Signalfluss für %1 Kanäle nicht einrichten"
 
-#: automatable.cc:83
+#: automatable.cc:81
 msgid "Automation node has no path property"
 msgstr "Automationsknoten hat keine Eigenschaft \"Pfad\""
 
-#: automatable.cc:103
+#: automatable.cc:101
 msgid "cannot open %2 to load automation data (%3)"
 msgstr "kann %2 nicht öffnen, um Automationsdaten zu laden (%3)"
 
-#: automatable.cc:131
+#: automatable.cc:129
 msgid "cannot load automation data from %2"
 msgstr "kann Automationsdaten von %2 nicht laden"
 
@@ -463,7 +463,7 @@ msgstr "CycleTimer::get_mhz(): kann CPU-Takt in /proc/cpuinfo nicht finden"
 msgid "cannot locate cpu MHz in /proc/cpuinfo"
 msgstr "kann CPU-Takt in /proc/cpuinfo nicht finden"
 
-#: data_type.cc:27 io.cc:1345
+#: data_type.cc:27
 msgid "audio"
 msgstr "Audio"
 
@@ -804,24 +804,24 @@ msgstr "kann momentanes Arbeitsverzeichnis nicht bestimmen (%1)"
 msgid "unknown file type for session %1"
 msgstr "Unbekannter Dateityp für Projekt %1"
 
-#: globals.cc:203
+#: globals.cc:204
 msgid "Could not set system open files limit to \"unlimited\""
 msgstr ""
 "Konnte die Systemgrenze für offene Dateien nicht auf \"unbeschränkt\" setzen"
 
-#: globals.cc:205
+#: globals.cc:206
 msgid "Could not set system open files limit to %1"
 msgstr "Konnte die Systemgrenze für offene Dateien nicht auf %1 setzen"
 
-#: globals.cc:209
+#: globals.cc:210
 msgid "Your system is configured to limit %1 to only %2 open files"
 msgstr "Ihre Systemkonfiguration beschränkt %1 auf nur %2 offene Dateien"
 
-#: globals.cc:213
+#: globals.cc:214
 msgid "Could not get system open files limit (%1)"
 msgstr "Konnte die Grenze für offene Dateien nicht erhalten (%1)"
 
-#: globals.cc:264
+#: globals.cc:267
 msgid "Loading configuration"
 msgstr "Lade Konfiguration"
 
@@ -841,37 +841,37 @@ msgstr "Resample %1 von %2kHz nach %3kHz"
 msgid "Copying %1"
 msgstr "Kopiere %1"
 
-#: import.cc:447
+#: import.cc:448
 msgid "Track %1 of %2 contained no usable MIDI data"
 msgstr "Spur %1 von %2 beinhaltet keine brauchbaren MIDI-Daten"
 
-#: import.cc:454
+#: import.cc:455
 msgid "MIDI file %1 was not readable (no reason available)"
 msgstr "MIDI-Datei %1 war unlesbar (keine Ursache ermittelbar)"
 
-#: import.cc:500
+#: import.cc:501
 msgid "Import: cannot open input sound file \"%1\""
 msgstr "Import: kann Audiodatei \"%1\" nicht öffnen"
 
-#: import.cc:511
+#: import.cc:512
 msgid "Import: error opening MIDI file"
 msgstr "Import: Fehler beim Öffnen der MIDI-Datei"
 
-#: import.cc:550
+#: import.cc:551
 msgid "Loading MIDI file %1"
 msgstr "Lade MIDI-Datei %1"
 
-#: import.cc:615
+#: import.cc:616
 msgid "Failed to remove some files after failed/cancelled import operation"
 msgstr ""
 "Konnte einige Dateien nach fehlgeschlagenem/abgebrochenem Import nicht "
 "löschen"
 
-#: instrument_info.cc:40 instrument_info.cc:62
+#: instrument_info.cc:40 instrument_info.cc:61
 msgid "Unknown"
 msgstr "Unbekannt"
 
-#: instrument_info.cc:205
+#: instrument_info.cc:230
 msgid "preset %1 (bank %2)"
 msgstr "Preset %1 (Bank %2)"
 
@@ -942,10 +942,6 @@ msgstr "IO: schlecht geformte Zeichenkette in XML-Knoten für Ausgänge \"%1\""
 #: io.cc:1065
 msgid "IO: bad output string in XML node \"%1\""
 msgstr "IO: schlechte Zeichenkette für Ausgang in XML-Knoten \"%1\""
-
-#: io.cc:1347
-msgid "midi"
-msgstr "midi"
 
 #: io.cc:1410
 #, c-format
@@ -1143,43 +1139,43 @@ msgstr ""
 msgid "flywheel"
 msgstr "Schwungrad"
 
-#: midi_diskstream.cc:162
+#: midi_diskstream.cc:166
 msgid ""
 "%1: I/O configuration change %4 requested to use %2, but channel setup is %3"
 msgstr ""
 "%1: E/A-Konfigurationsänderung %4 will %2 verwenden, aber Kanalzahl ist %3"
 
-#: midi_diskstream.cc:215
+#: midi_diskstream.cc:218
 msgid "MidiDiskstream: Playlist \"%1\" isn't a midi playlist"
 msgstr "MidiDiskstream: Wiedergabeliste \"%1\" ist keine MIDI-Wiedergabeliste"
 
-#: midi_diskstream.cc:268
+#: midi_diskstream.cc:269
 msgid "MidiDiskstream %1: there is no existing playlist to make a copy of!"
 msgstr "MidiDiskstream %1: es gibt keine Wiedergabeliste zum Kopieren!"
 
-#: midi_diskstream.cc:612
+#: midi_diskstream.cc:646
 msgid "MidiDiskstream %1: cannot read %2 from playlist at frame %3"
 msgstr ""
 "MidiDiskstream %1: kann %2 nicht von Wiedergabeliste bei Frame %3 lesen"
 
-#: midi_diskstream.cc:751
+#: midi_diskstream.cc:781
 msgid "MidiDiskstream %1: cannot write to disk"
 msgstr "MidiDiskstream %1: kann nicht auf Disk schreiben"
 
-#: midi_diskstream.cc:784
+#: midi_diskstream.cc:815
 msgid "MidiDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr ""
 "MidiDiskstream \"%1\": kann aufgenommene Daten nicht auf Disk schreiben!"
 
-#: midi_diskstream.cc:873
+#: midi_diskstream.cc:902
 msgid "%1: could not create region for complete midi file"
 msgstr "%1: konnte Region für die komplette MIDI-Datei nicht erzeugen"
 
-#: midi_diskstream.cc:910
+#: midi_diskstream.cc:939
 msgid "MidiDiskstream: could not create region for captured midi!"
 msgstr "MidiDiskstream: konnte Region für aufgenommenes MIDI nicht erzeugen"
 
-#: midi_diskstream.cc:1139
+#: midi_diskstream.cc:1143
 msgid "MidiDiskstream: XML property channel-mask out of range"
 msgstr "MidiDiskstream: Wertüberschreitung der XML-Eigenschaft Kanalmaske"
 
@@ -1198,21 +1194,29 @@ msgstr ""
 msgid "transpose"
 msgstr "transponieren"
 
-#: midi_source.cc:123
+#: midi_patch_manager.cc:126
+msgid "Duplicate MIDI device `%1' in `%2' ignored"
+msgstr "Doppeltes MIDI-Gerät '%1' in '%2' ignoriert"
+
+#: midi_source.cc:125
 msgid "Missing parameter property on InterpolationStyle"
 msgstr "Fehlende Eigenschaft \"parameter\" bei InterpolationStyle"
 
-#: midi_source.cc:130
+#: midi_source.cc:132
 msgid "Missing style property on InterpolationStyle"
 msgstr "Fehlende Eigenschaft \"style\" bei InterpolationStyle"
 
-#: midi_source.cc:142
+#: midi_source.cc:144
 msgid "Missing parameter property on AutomationState"
 msgstr "Fehlende Eigenschaft \"parameter\" bei AutomationState"
 
-#: midi_source.cc:149
+#: midi_source.cc:151
 msgid "Missing state property on AutomationState"
 msgstr "Fehlende Eigenschaft \"state\" bei AutomationState"
+
+#: midi_stretch.cc:85
+msgid "MIDI stretch created non-MIDI source"
+msgstr "MIDI Streckung erzeugte Nicht-MIDI Quelle"
 
 #: monitor_processor.cc:53
 msgid "monitor dim"
@@ -1267,9 +1271,8 @@ msgid "Session framerate adjusted from %1 TO: MTC's %2."
 msgstr "Projekt-Framerate von %1 auf die von MTC: %2 geändert"
 
 #: mtc_slave.cc:392
-msgid "Session and MTC framerate mismatch: MTC:%1 Ardour:%2."
-msgstr ""
-"Framerate von Projekt und MTC stimmen nicht überein: MTC: %1 Ardour: %2"
+msgid "Session and MTC framerate mismatch: MTC:%1 %2:%3."
+msgstr "Framerate von Projekt und MTC stimmen nicht überein: MTC: %1 %2: %3"
 
 #: operations.cc:24
 msgid "capture"
@@ -1428,19 +1431,19 @@ msgstr "LADSPA: Modul \"%1\" hat keine Beschreibungsfunktion."
 
 #: plugin_manager.cc:600
 msgid ""
-"VST plugin %1 does not support processReplacing, and so cannot be used in "
-"ardour at this time"
+"VST plugin %1 does not support processReplacing, and so cannot be used in %2 "
+"at this time"
 msgstr ""
 "VST-Plugin %1 unterstützt kein processReplacing und kann daher zur Zeit "
-"nicht mit Ardour benützt werden"
+"nicht mit %2 benützt werden"
 
 #: plugin_manager.cc:704
 msgid ""
 "linuxVST plugin %1 does not support processReplacing, and so cannot be used "
-"in ardour at this time"
+"in %2 at this time"
 msgstr ""
 "linuxVST-Plugin %1 unterstützt kein processReplacing und kann daher zur Zeit "
-"nicht mit Ardour benützt werden"
+"nicht mit %2 benützt werden"
 
 #: plugin_manager.cc:865
 msgid "unknown plugin status type \"%1\" - all entries ignored"
@@ -1590,10 +1593,6 @@ msgstr ""
 #: rb_effect.cc:303 rb_effect.cc:325
 msgid "error writing tempo-adjusted data to %1"
 msgstr "Fehler beim Schreiben der tempo-angepassten Daten nach %1"
-
-#: rb_effect.cc:332
-msgid "timefx code failure. please notify ardour-developers."
-msgstr "Fehler im TimeFX Code. Bitte verständigen Sie die Ardour-Entwickler."
 
 #: send.cc:59
 msgid "aux %1"
@@ -2280,15 +2279,23 @@ msgstr ""
 "Globales Varispeed ist nicht möglich, solange %1 mit JACK Transport "
 "verbunden ist."
 
-#: smf_source.cc:253
-msgid "Unable to read event prefix, corrupt MIDI ring buffer"
+#: smf_source.cc:252
+msgid "Unable to read event prefix, corrupt MIDI ring"
 msgstr "Kann Ereignisprefix nicht lesen, korrupter MIDI-Ringbuffer"
 
-#: smf_source.cc:264
-msgid "Read time/size but not buffer, corrupt MIDI ring buffer"
+#: smf_source.cc:265
+msgid "Event has time and size but no body, corrupt MIDI ring"
 msgstr "time/size gelesen, aber nicht buffer, korrupter MIDI-Ringbuffer"
 
-#: smf_source.cc:411
+#: smf_source.cc:271
+msgid "Event time is before MIDI source position"
+msgstr "Event-Zeitpunkt befindet sich vor MIDI Quellposition"
+
+#: smf_source.cc:306 smf_source.cc:345
+msgid "Skipping event with unordered time %1"
+msgstr "Überspringe Event mit Zeitpunkt %1 ausserhalb der Reihenfolge"
+
+#: smf_source.cc:410
 msgid "cannot open MIDI file %1 for write"
 msgstr "kann MIDI-Datei %1 nicht zum Schreiben öffnen"
 
@@ -2687,16 +2694,3 @@ msgstr "Programmierfehler: unbekanntes natives Dateikopfformat: %1"
 #: utils.cc:699
 msgid "cannot open directory %1 (%2)"
 msgstr "kann Verzeichnis %1 nicht öffnen (%2)"
-
-#~ msgid "Session: you can't use a mark for auto loop"
-#~ msgstr "Session: Sie können diesen Marker nicht für Auto-Loop verwenden "
-
-#~ msgid ""
-#~ "No more JACK ports are available. You will need to stop %1 and restart "
-#~ "JACK with ports if you need this many tracks."
-#~ msgstr ""
-#~ "Keine JACK-Ports mehr verfügbar. Sie müssen %1 stoppen und JACK mit mehr "
-#~ "Ports neustarten, wenn Sie so viele Spuren benötigen."
-
-#~ msgid "Could not understand ardour file %1"
-#~ msgstr "Konnte die Projektdatei %1 nicht verstehen"

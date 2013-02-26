@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-02-02 22:26+0100\n"
-"PO-Revision-Date: 2013-02-02 22:39+0100\n"
+"POT-Creation-Date: 2013-02-06 00:25+0100\n"
+"PO-Revision-Date: 2013-02-06 01:28+0100\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
@@ -400,7 +400,7 @@ msgstr "die UI Definitionsdatei %1 ist falsch formatiert"
 
 #: actions.cc:86
 msgid "%1 menu definition file not found"
-msgstr "Konnte die Ardour Menü-Definitionsdatei nicht finden"
+msgstr "Konnte die %1 Menü-Definitionsdatei nicht finden"
 
 #: actions.cc:90 actions.cc:91
 msgid "%1 will not work without a valid ardour.menus file"
@@ -455,22 +455,22 @@ msgstr "Name:"
 msgid "Group:"
 msgstr "Gruppe:"
 
-#: add_route_dialog.cc:218 add_route_dialog.cc:227 rc_option_editor.cc:1324
-#: rc_option_editor.cc:1326 rc_option_editor.cc:1328 rc_option_editor.cc:1330
-#: rc_option_editor.cc:1354 rc_option_editor.cc:1356 rc_option_editor.cc:1364
-#: rc_option_editor.cc:1366 rc_option_editor.cc:1384 rc_option_editor.cc:1397
-#: rc_option_editor.cc:1399 rc_option_editor.cc:1401 rc_option_editor.cc:1432
-#: rc_option_editor.cc:1434 rc_option_editor.cc:1436 rc_option_editor.cc:1444
-#: rc_option_editor.cc:1452 rc_option_editor.cc:1460
+#: add_route_dialog.cc:218 add_route_dialog.cc:227 rc_option_editor.cc:1329
+#: rc_option_editor.cc:1331 rc_option_editor.cc:1333 rc_option_editor.cc:1335
+#: rc_option_editor.cc:1359 rc_option_editor.cc:1361 rc_option_editor.cc:1369
+#: rc_option_editor.cc:1371 rc_option_editor.cc:1389 rc_option_editor.cc:1402
+#: rc_option_editor.cc:1404 rc_option_editor.cc:1406 rc_option_editor.cc:1437
+#: rc_option_editor.cc:1439 rc_option_editor.cc:1441 rc_option_editor.cc:1449
+#: rc_option_editor.cc:1457 rc_option_editor.cc:1465
 msgid "Audio"
 msgstr "Audio"
 
 #: add_route_dialog.cc:219 add_route_dialog.cc:230 editor_actions.cc:105
-#: missing_file_dialog.cc:55 rc_option_editor.cc:1583 rc_option_editor.cc:1591
-#: rc_option_editor.cc:1599 rc_option_editor.cc:1608 rc_option_editor.cc:1616
-#: rc_option_editor.cc:1624 rc_option_editor.cc:1632 rc_option_editor.cc:1641
-#: rc_option_editor.cc:1650 rc_option_editor.cc:1659 rc_option_editor.cc:1667
-#: rc_option_editor.cc:1675
+#: missing_file_dialog.cc:55 rc_option_editor.cc:1588 rc_option_editor.cc:1596
+#: rc_option_editor.cc:1604 rc_option_editor.cc:1613 rc_option_editor.cc:1621
+#: rc_option_editor.cc:1629 rc_option_editor.cc:1637 rc_option_editor.cc:1646
+#: rc_option_editor.cc:1655 rc_option_editor.cc:1664 rc_option_editor.cc:1672
+#: rc_option_editor.cc:1680
 msgid "MIDI"
 msgstr "MIDI"
 
@@ -563,10 +563,10 @@ msgstr "Mehrdeutige Datei"
 
 #: ambiguous_file_dialog.cc:35
 msgid ""
-"Ardour has found the file <i>%1</i> in the following places:\n"
+"%1 has found the file <i>%2</i> in the following places:\n"
 "\n"
 msgstr ""
-"Ardour hat die Datei <i>%1</i> an den folgenden Orten gefunden:\n"
+"%1 hat die Datei <i>%2</i> an den folgenden Orten gefunden:\n"
 "\n"
 
 #: ambiguous_file_dialog.cc:43
@@ -1202,7 +1202,7 @@ msgid ""
 "quickly enough to keep up with recording.\n"
 msgstr ""
 "Ihre Festplatte war nicht schnell genug,\n"
-"um Ardour zu folgen.\n"
+"um %1 zu folgen.\n"
 "\n"
 "Die Daten konnten nicht schnell genug geschrieben\n"
 "werden, um die Aufnahme fortzuführen.\n"
@@ -1216,7 +1216,7 @@ msgid ""
 "quickly enough to keep up with playback.\n"
 msgstr ""
 "Ihre Festplatte war nicht schnell genug,\n"
-"um Ardour zu folgen.\n"
+"um %1 zu folgen.\n"
 "\n"
 "Die Daten konnten nicht schnell genug gelesen\n"
 "werden, um die Wiedergabe aufrechtzuerhalten.\n"
@@ -1239,7 +1239,7 @@ msgstr ""
 "einer Aufnahme abgebrochen oder\n"
 "geschlossen wurde.\n"
 "\n"
-"Ardour kann die aufgenommenen Audiodaten\n"
+"%1 kann die aufgenommenen Audiodaten\n"
 "für Sie wiederherstellen oder sie verwerfen.\n"
 "Bitte entscheiden Sie, wie Sie vorgehen möchten.\n"
 
@@ -1348,8 +1348,8 @@ msgid ""
 "When active, something is soloed.\n"
 "Click to de-solo everything"
 msgstr ""
-"Wird aktiv, wenn eine Spur Solo läuft.\n"
-"Schaltet bei Klick Solo aus."
+"Wenn aktiv, ist etwas auf Solo geschalten.\n"
+"Klick schaltet Solo überall aus."
 
 #: ardour_ui2.cc:140
 msgid ""
@@ -1501,11 +1501,11 @@ msgstr "Sampleformat"
 msgid "Control Surfaces"
 msgstr "Eingabegeräte / Controller"
 
-#: ardour_ui_ed.cc:115 rc_option_editor.cc:1434 route_time_axis.cc:397
+#: ardour_ui_ed.cc:115 rc_option_editor.cc:1439 route_time_axis.cc:397
 msgid "Plugins"
 msgstr "Plugins"
 
-#: ardour_ui_ed.cc:116 rc_option_editor.cc:1774
+#: ardour_ui_ed.cc:116 rc_option_editor.cc:1779
 msgid "Metering"
 msgstr "Pegelanzeige"
 
@@ -1594,7 +1594,7 @@ msgstr "Nicht benutzte Dateien entfernen..."
 msgid "Flush Wastebasket"
 msgstr "Müll leeren"
 
-#: ardour_ui_ed.cc:190 keyeditor.cc:253 rc_option_editor.cc:1348
+#: ardour_ui_ed.cc:190 keyeditor.cc:253 rc_option_editor.cc:1353
 msgid "JACK"
 msgstr "JACK"
 
@@ -1669,7 +1669,7 @@ msgstr "Midisignale überwachen"
 
 #: ardour_ui_ed.cc:250
 msgid "About"
-msgstr "Über Ardour..."
+msgstr "Über..."
 
 #: ardour_ui_ed.cc:251
 msgid "Chat"
@@ -1711,13 +1711,13 @@ msgstr "Midispur hinzufügen"
 msgid "Save"
 msgstr "Speichern"
 
-#: ardour_ui_ed.cc:277 rc_option_editor.cc:995 rc_option_editor.cc:1004
-#: rc_option_editor.cc:1013 rc_option_editor.cc:1024 rc_option_editor.cc:1036
-#: rc_option_editor.cc:1045 rc_option_editor.cc:1055 rc_option_editor.cc:1057
-#: rc_option_editor.cc:1067 rc_option_editor.cc:1083 rc_option_editor.cc:1096
-#: rc_option_editor.cc:1114 rc_option_editor.cc:1116 rc_option_editor.cc:1130
-#: rc_option_editor.cc:1133 rc_option_editor.cc:1135 rc_option_editor.cc:1152
-#: rc_option_editor.cc:1163
+#: ardour_ui_ed.cc:277 rc_option_editor.cc:995 rc_option_editor.cc:1006
+#: rc_option_editor.cc:1015 rc_option_editor.cc:1028 rc_option_editor.cc:1041
+#: rc_option_editor.cc:1050 rc_option_editor.cc:1060 rc_option_editor.cc:1062
+#: rc_option_editor.cc:1072 rc_option_editor.cc:1088 rc_option_editor.cc:1101
+#: rc_option_editor.cc:1119 rc_option_editor.cc:1121 rc_option_editor.cc:1135
+#: rc_option_editor.cc:1138 rc_option_editor.cc:1140 rc_option_editor.cc:1157
+#: rc_option_editor.cc:1168
 msgid "Transport"
 msgstr "Transport"
 
@@ -1904,7 +1904,7 @@ msgstr "MMC senden"
 msgid "Use MMC"
 msgstr "Benutze MMC"
 
-#: ardour_ui_ed.cc:440 rc_option_editor.cc:1586
+#: ardour_ui_ed.cc:440 rc_option_editor.cc:1591
 msgid "Send MIDI Clock"
 msgstr "MIDI Clock senden"
 
@@ -2577,20 +2577,20 @@ msgstr "Spuren & Bus-Gruppen"
 msgid "Ranges & Marks"
 msgstr "Bereiche & Marker"
 
-#: editor.cc:689 editor.cc:5374 rc_option_editor.cc:1170
-#: rc_option_editor.cc:1178 rc_option_editor.cc:1186 rc_option_editor.cc:1203
-#: rc_option_editor.cc:1205 rc_option_editor.cc:1213 rc_option_editor.cc:1221
-#: rc_option_editor.cc:1241 rc_option_editor.cc:1253 rc_option_editor.cc:1255
-#: rc_option_editor.cc:1263 rc_option_editor.cc:1271 rc_option_editor.cc:1279
-#: rc_option_editor.cc:1287 rc_option_editor.cc:1295 rc_option_editor.cc:1310
-#: rc_option_editor.cc:1314
+#: editor.cc:689 editor.cc:5374 rc_option_editor.cc:1175
+#: rc_option_editor.cc:1183 rc_option_editor.cc:1191 rc_option_editor.cc:1208
+#: rc_option_editor.cc:1210 rc_option_editor.cc:1218 rc_option_editor.cc:1226
+#: rc_option_editor.cc:1246 rc_option_editor.cc:1258 rc_option_editor.cc:1260
+#: rc_option_editor.cc:1268 rc_option_editor.cc:1276 rc_option_editor.cc:1284
+#: rc_option_editor.cc:1292 rc_option_editor.cc:1300 rc_option_editor.cc:1315
+#: rc_option_editor.cc:1319
 msgid "Editor"
 msgstr "Editor"
 
 #: editor.cc:1226 editor.cc:1236 editor.cc:4430 editor_actions.cc:130
 #: editor_actions.cc:1650
 msgid "Loop"
-msgstr "In Schleife wiedergeben"
+msgstr "Schleife"
 
 #: editor.cc:1242 editor.cc:1252 editor.cc:4457 editor_actions.cc:131
 #: time_info_box.cc:67
@@ -3121,7 +3121,7 @@ msgstr "MIDI Optionen"
 msgid "Misc Options"
 msgstr "Sonstiges"
 
-#: editor_actions.cc:115 rc_option_editor.cc:1328 route_group_dialog.cc:48
+#: editor_actions.cc:115 rc_option_editor.cc:1333 route_group_dialog.cc:48
 #: session_option_editor.cc:205 session_option_editor.cc:212
 msgid "Monitoring"
 msgstr "Monitoring"
@@ -3345,7 +3345,7 @@ msgstr "Mute umschalten"
 
 #: editor_actions.cc:208
 msgid "Toggle Solo Isolate"
-msgstr "Solo Isolate umschalten"
+msgstr "Isoliertes Solo umschalten"
 
 #: editor_actions.cc:213
 msgid "Save View %1"
@@ -4582,7 +4582,7 @@ msgid "Rename Range"
 msgstr "Bereich umbenennen"
 
 #: editor_markers.cc:1364 editor_mouse.cc:2564 processor_box.cc:1731
-#: processor_box.cc:2213 route_time_axis.cc:973 route_ui.cc:1477
+#: processor_box.cc:2213 route_time_axis.cc:973 route_ui.cc:1535
 msgid "Rename"
 msgstr "Umbenennen"
 
@@ -4719,7 +4719,7 @@ msgstr "Regionen ganz nach unten"
 msgid "Rename Region"
 msgstr "Region umbenennen"
 
-#: editor_ops.cc:2372 processor_box.cc:1729 route_ui.cc:1475
+#: editor_ops.cc:2372 processor_box.cc:1729 route_ui.cc:1533
 msgid "New name:"
 msgstr "Neuer Name: "
 
@@ -4896,7 +4896,7 @@ msgstr ""
 "(Dies kann nicht rückgängig gemacht werden!)"
 
 #: editor_ops.cc:4510 editor_ops.cc:6489 editor_regions.cc:460
-#: editor_snapshots.cc:158 route_ui.cc:1419
+#: editor_snapshots.cc:158 route_ui.cc:1477
 msgid "No, do nothing."
 msgstr "Nein, nichts machen."
 
@@ -5080,11 +5080,11 @@ msgstr "Ok"
 msgid "close region gaps"
 msgstr "Schließe Lücken zwischen Regionen"
 
-#: editor_ops.cc:6438 route_ui.cc:1393
+#: editor_ops.cc:6438 route_ui.cc:1451
 msgid "That would be bad news ...."
 msgstr "Lieber nicht!"
 
-#: editor_ops.cc:6443 route_ui.cc:1398
+#: editor_ops.cc:6443 route_ui.cc:1456
 msgid ""
 "Removing the master or monitor bus is such a bad idea\n"
 "that %1 is not going to allow it.\n"
@@ -5104,7 +5104,7 @@ msgstr ""
 msgid "tracks"
 msgstr "Spuren"
 
-#: editor_ops.cc:6462 route_ui.cc:1759
+#: editor_ops.cc:6462 route_ui.cc:1817
 msgid "track"
 msgstr "Spur"
 
@@ -5112,7 +5112,7 @@ msgstr "Spur"
 msgid "busses"
 msgstr "Audio-Busse"
 
-#: editor_ops.cc:6468 route_ui.cc:1759
+#: editor_ops.cc:6468 route_ui.cc:1817
 msgid "bus"
 msgstr "Bus"
 
@@ -5157,7 +5157,7 @@ msgstr ""
 msgid "Yes, remove them."
 msgstr "Ja, entfernen."
 
-#: editor_ops.cc:6493 editor_snapshots.cc:159 route_ui.cc:1420
+#: editor_ops.cc:6493 editor_snapshots.cc:159 route_ui.cc:1478
 msgid "Yes, remove it."
 msgstr "Ja, entfernen."
 
@@ -5341,7 +5341,7 @@ msgstr "Aufnahme bereit"
 
 #: editor_routes.cc:207
 msgid "Muted"
-msgstr "Mute ein"
+msgstr "Stumm"
 
 #: editor_routes.cc:208 mixer_strip.cc:1921
 msgid "S"
@@ -5355,9 +5355,9 @@ msgstr "Solo ein"
 msgid "SI"
 msgstr "SI"
 
-#: editor_routes.cc:209 mixer_strip.cc:351 rc_option_editor.cc:1752
+#: editor_routes.cc:209 mixer_strip.cc:351 rc_option_editor.cc:1757
 msgid "Solo Isolated"
-msgstr "Solo Isolated"
+msgstr "Isoliertes Solo"
 
 #: editor_routes.cc:210
 msgid "Solo Safe (Locked)"
@@ -5631,7 +5631,7 @@ msgid "192000Hz"
 msgstr "192000 Hz"
 
 #: engine_dialog.cc:127 engine_dialog.cc:132 engine_dialog.cc:169
-#: engine_dialog.cc:552 midi_channel_selector.cc:149 rc_option_editor.cc:1126
+#: engine_dialog.cc:552 midi_channel_selector.cc:149 rc_option_editor.cc:1131
 #: sfdb_ui.cc:544
 msgid "None"
 msgstr "Kein"
@@ -5726,7 +5726,7 @@ msgid ""
 "No JACK server found anywhere on this system. Please install JACK and restart"
 msgstr ""
 "Es wurde kein JACK Server auf diesem System gefunden. Bitte installieren Sie "
-"JACK und starten Sie Ardour neu."
+"JACK vor einem Neuversuch."
 
 #: engine_dialog.cc:323
 msgid "Server:"
@@ -5778,23 +5778,22 @@ msgid ""
 "\n"
 "Alternatively, if you really want just playback\n"
 "or recording but not both, start JACK before running\n"
-"Ardour and choose the relevant device then."
+"%1 and choose the relevant device then."
 msgstr ""
-"Sie haben keine Soundkarte, die\n"
-"gleichzeitiges Abspielen und Aufnehmen unterstützt.\n"
+"Sie haben keine Soundkarte, die gleichzeitiges\n"
+"Abspielen und Aufnehmen unterstützt.\n"
 "\n"
-"Gehen Sie auf\n"
-"Programme>Dienstprogramme>Audio-Midi-Setup>Hauptgerät hinzufügen oder "
-"löschen\n"
-"oder installiere Sie ein geeignetes Audiointerface.\n"
+"Benützen Sie Programme>Dienstprogramme>Audio-Midi-Setup\n"
+" um ein kombiniertes Gerät zu erzeugen, oder installieren Sie ein\n"
+"geeignetes Audiointerface.\n"
 "\n"
 "Bitte senden Sie eine E-Mail an Apple und fragen Sie, warum Sie\n"
 "keine Duplex Soundkarte in Ihrem Mac haben.\n"
 "\n"
 "Wenn Sie Audiomaterial wirklich nicht gleichzeitig aufnehmen und wiedergeben "
 "wollen,\n"
-"können Sie JACK vor dem Starten von Ardour aufrufen und das entsprechende "
-"Gerät auswählen."
+"können Sie JACK vor dem Starten von %1 aufrufen und das entsprechende Gerät "
+"auswählen."
 
 #: engine_dialog.cc:790
 msgid "No suitable audio devices"
@@ -6514,7 +6513,7 @@ msgid ""
 "\n"
 "1) JACK is not running.\n"
 "2) JACK is running as another user, perhaps root.\n"
-"3) There is already another client called \"ardour\".\n"
+"3) There is already another client called \"%1\".\n"
 "\n"
 "Please consider the possibilities, and perhaps (re)start JACK."
 msgstr ""
@@ -6523,13 +6522,13 @@ msgstr ""
 "1) JACK läuft nicht.\n"
 "2) JACK wurde unter einem anderen Benutzer gestartet, möglicherweise als "
 "root.\n"
-"3) Es gibt bereits einen anderen Client mit der Bezeichnung \"ardour\".\n"
+"3) Es gibt bereits einen anderen Client mit der Bezeichnung \"%1\".\n"
 "\n"
 "Betrachten Sie bitte diese Möglichkeiten und starten Sie ggf. JACK neu."
 
 #: main.cc:197 main.cc:315
-msgid "cannot create user ardour folder %1 (%2)"
-msgstr "Kann benutzerspezifischen Ardour-Ordner %1 nicht erstellen:  %2"
+msgid "cannot create user %3 folder %1 (%2)"
+msgstr "Kann benutzerspezifischen %3-Ordner %1 nicht erstellen:  %2"
 
 #: main.cc:204 main.cc:322
 msgid "cannot open pango.rc file %1"
@@ -6632,8 +6631,8 @@ msgid "Cannot xinstall SIGPIPE error handler"
 msgstr "Kann die SIGPIPE Fehlerbehandlung nicht installieren"
 
 #: main.cc:516
-msgid "could not create ARDOUR GUI"
-msgstr "konnte das grafische Ardour User Interface nicht erstellen"
+msgid "could not create %1 GUI"
+msgstr "konnte das %1 GUI nicht erstellen"
 
 #: main_clock.cc:51
 msgid "Display delta to edit cursor"
@@ -7025,7 +7024,7 @@ msgstr "Im Mixer ausgewählte Spuren/Busse auf Solo schalten"
 
 #: mixer_actor.cc:56
 msgid "Toggle Mute on Mixer-Selected Tracks/Busses"
-msgstr "Im Mixer ausgewählte Spuren/Busse auf Mute schalten"
+msgstr "Stummschaltung der im Mixer ausgewählten Spuren/Busse ändern"
 
 #: mixer_actor.cc:57
 msgid "Toggle Rec-enable on Mixer-Selected Tracks/Busses"
@@ -7092,7 +7091,7 @@ msgid "pre"
 msgstr "Pre"
 
 #: mixer_strip.cc:93 mixer_strip.cc:121 mixer_strip.cc:352 mixer_strip.cc:1280
-#: rc_option_editor.cc:1753
+#: rc_option_editor.cc:1758
 msgid "Comments"
 msgstr "Kommentare"
 
@@ -7140,11 +7139,11 @@ msgstr "iso"
 msgid "Mix group"
 msgstr "Bearbeitungsgruppe"
 
-#: mixer_strip.cc:349 rc_option_editor.cc:1750
+#: mixer_strip.cc:349 rc_option_editor.cc:1755
 msgid "Phase Invert"
 msgstr "Phaseninvertierung"
 
-#: mixer_strip.cc:350 rc_option_editor.cc:1751 route_ui.cc:1155
+#: mixer_strip.cc:350 rc_option_editor.cc:1756 route_ui.cc:1213
 msgid "Solo Safe"
 msgstr "Solo sperren"
 
@@ -7152,7 +7151,7 @@ msgstr "Solo sperren"
 msgid "Group"
 msgstr "Gruppe"
 
-#: mixer_strip.cc:354 rc_option_editor.cc:1754
+#: mixer_strip.cc:354 rc_option_editor.cc:1759
 msgid "Meter Point"
 msgstr "Abgreifpunkt der Pegelanzeige"
 
@@ -7335,8 +7334,8 @@ msgid ""
 "When active, something is solo-isolated.\n"
 "Click to de-isolate everything"
 msgstr ""
-"Wird aktiv, wenn eine Spur Solo läuft.\n"
-"Schaltet bei Klick Solo aus."
+"Wenn aktiv, ist etwas auf isoliertes Solo geschalten.\n"
+"Klick, schaltet isoliertes Solo überall aus."
 
 #: monitor_section.cc:107
 msgid ""
@@ -7380,8 +7379,7 @@ msgstr "SiP Cut"
 
 #: monitor_section.cc:176
 msgid "Gain reduction to use when dimming monitor outputs"
-msgstr ""
-"Lautstärkereduzierung, die beim Dimmen der Monitorausgänge verwendet wird"
+msgstr "Lautstärkereduzierung beim Abschwächen der Monitorausgänge"
 
 #: monitor_section.cc:181
 msgid "Dim"
@@ -7405,12 +7403,12 @@ msgid ""
 "If enabled, solo will override mute\n"
 "(a soloed & muted track or bus will be audible)"
 msgstr ""
-"Wenn aktiviert, überschreibt Solo Mute\n"
+"Wenn aktiviert, hat Solo Priorität über Mute\n"
 "(eine Spur mit aktiviertem Mute & Solo ist hörbar)"
 
 #: monitor_section.cc:227
 msgid "mute"
-msgstr "Mute"
+msgstr "mute"
 
 #: monitor_section.cc:238
 msgid "dim"
@@ -7424,13 +7422,33 @@ msgstr "Mono"
 msgid "Monitor"
 msgstr "Monitor"
 
+#: monitor_section.cc:678
+msgid "Switch monitor to mono"
+msgstr "Monitor auf Mono schalten"
+
+#: monitor_section.cc:681
+msgid "Cut monitor"
+msgstr "Monitor stummschalten"
+
+#: monitor_section.cc:684
+msgid "Dim monitor"
+msgstr "Monitor abschwächen"
+
+#: monitor_section.cc:687
+msgid "Toggle exclusive solo mode"
+msgstr "Exklusives Solo umschalten"
+
+#: monitor_section.cc:693
+msgid "Toggle mute overrides solo mode"
+msgstr "Mute-Status hat höhere Priorität als Solo-Modus"
+
 #: monitor_section.cc:705
 msgid "Cut monitor channel %1"
-msgstr "Mute Monitorkanal %1"
+msgstr "Monitorkanal %1 stummschalten"
 
 #: monitor_section.cc:710
 msgid "Dim monitor channel %1"
-msgstr "Dimme Monitorkanal %1"
+msgstr "Monitorkanal %1 abschwächen"
 
 #: monitor_section.cc:715
 msgid "Solo monitor channel %1"
@@ -7439,6 +7457,23 @@ msgstr "Monitorkanal %1 Solo"
 #: monitor_section.cc:720
 msgid "Invert monitor channel %1"
 msgstr "Invertiere Monitorkanal %1"
+
+#: monitor_section.cc:730
+msgid "In-place solo"
+msgstr "In-Place Solo"
+
+#: monitor_section.cc:732
+msgid "After Fade Listen (AFL) solo"
+msgstr "Solo nach Fader (AFL) abhören"
+
+#: monitor_section.cc:734
+msgid "Pre Fade Listen (PFL) solo"
+msgstr "Solo vor Fader (PFL) abhören"
+
+#: mono_panner.cc:101
+#, c-format
+msgid "L:%3d R:%3d"
+msgstr "L:%3d R:%3d"
 
 #: mono_panner_editor.cc:33
 msgid "Mono Panner"
@@ -7450,8 +7485,8 @@ msgid "%"
 msgstr "%"
 
 #: nag.cc:40
-msgid "Support Ardour Development"
-msgstr "Unterstütze die Entwicklung von Ardour"
+msgid "Support %1 Development"
+msgstr "Unterstütze die Entwicklung von %1"
 
 #: nag.cc:41
 msgid "I'd like to make a one-time donation"
@@ -7459,12 +7494,11 @@ msgstr "Ich möchte etwas spenden"
 
 #: nag.cc:42
 msgid "Tell me more about becoming a subscriber"
-msgstr ""
-"Erzähle mir mehr über eine dauerhafte Unterstützung (Abonnement) von Ardour!"
+msgstr "Ich möchte mehr über dauerhafte Unterstützung (Abonnement) wissen"
 
 #: nag.cc:43
 msgid "I'm already a subscriber!"
-msgstr "Ich unterstützte Ardour schon regelmäßig finanziell!"
+msgstr "Ich bin schon Abonnent!"
 
 #: nag.cc:44
 msgid "Ask about this the next time I export"
@@ -7488,7 +7522,7 @@ msgid ""
 "happen if you choose not to do so. However Ardour's continuing development\n"
 "relies on a stable, sustainable income stream. Thanks for using Ardour!"
 msgstr ""
-"Herzlichen Glückwunsch zu Ihrem Export aus Ardour.\n"
+"Herzlichen Glückwunsch zu Ihrem Projektexport.\n"
 "\n"
 "Es sieht so aus, als wären Sie schon ein Abonnent/eine Abonnentin. Wenn ja,\n"
 "dann vielen Dank und Entschuldigung für die Störung - ich arbeite daran, "
@@ -7516,7 +7550,7 @@ msgid ""
 "development\n"
 "relies on a stable, sustainable income stream. Thanks for using Ardour!"
 msgstr ""
-"Herzlichen Glückwunsch zu Ihrem Export aus Ardour.\n"
+"Herzlichen Glückwunsch zu Ihrem Projektexport.\n"
 "\n"
 "Ich hoffe, dass Ardour ein nützliches Werkzeug für Sie ist. Ich möchte Sie\n"
 "darum bitten, Ardours Entwicklung entweder durch eine einmalige Spende\n"
@@ -7842,10 +7876,10 @@ msgstr "Merkwürdig... LADSPA-Plugins sollten kein GUI haben!"
 #: plugin_ui.cc:127 plugin_ui.cc:270
 msgid ""
 "unknown type of editor-supplying plugin (note: no VST support in this "
-"version of ardour)"
+"version of %1)"
 msgstr ""
-"Unbekannter Plugintyp (Hinweis: diese Ardour-Version unterstützt keine VST-"
-"Plugins)"
+"Unbekannter Plugintyp mit eigenem Editor (Hinweis: diese %1-Version "
+"unterstützt keine VST-Plugins)"
 
 #: plugin_ui.cc:130
 msgid "unknown type of editor-supplying plugin"
@@ -7854,10 +7888,10 @@ msgstr "Unbekannter Plugintyp"
 #: plugin_ui.cc:300
 msgid ""
 "unknown type of editor-supplying plugin (note: no linuxVST support in this "
-"version of ardour)"
+"version of %1)"
 msgstr ""
-"Unbekannter Plugintyp (Hinweis: diese Ardour-Version unterstützt keine "
-"linuxVST-Plugins)"
+"Unbekannter Plugintyp mit eigenem Editor (Hinweis: diese %1-Version "
+"unterstützt keine linuxVST-Plugins)"
 
 #: plugin_ui.cc:372
 msgid "create_lv2_editor called on non-LV2 plugin"
@@ -8130,7 +8164,7 @@ msgstr "Alle Regler verbergen"
 msgid "on"
 msgstr "an"
 
-#: processor_box.cc:451 rc_option_editor.cc:1783 rc_option_editor.cc:1797
+#: processor_box.cc:451 rc_option_editor.cc:1788 rc_option_editor.cc:1802
 msgid "off"
 msgstr "Aus"
 
@@ -8522,62 +8556,61 @@ msgstr "Aufnahme bleibt nach Stopp aktiviert"
 msgid "Stop recording when an xrun occurs"
 msgstr "Aufnahme bei xrun stoppen"
 
-#: rc_option_editor.cc:1003
+#: rc_option_editor.cc:1004
 msgid ""
-"<b>When enabled</b> Ardour will stop recording if an over- or underrun is "
+"<b>When enabled</b> %1 will stop recording if an over- or underrun is "
 "detected by the audio engine"
 msgstr ""
-"<b>Falls an</b>, wird Ardour Aufnahmen bei Auftreten von Over- oder "
-"Underruns  abbrechen"
+"<b>Falls an</b>, wird %1 Aufnahmen bei Auftreten von Over- oder Underruns  "
+"abbrechen"
 
-#: rc_option_editor.cc:1008
+#: rc_option_editor.cc:1010
 msgid "Create markers where xruns occur"
 msgstr "Bei xrun Marker erzeugen"
 
-#: rc_option_editor.cc:1017
+#: rc_option_editor.cc:1019
 msgid "Stop at the end of the session"
 msgstr "Am Ende des Projektes anhalten"
 
-#: rc_option_editor.cc:1021
+#: rc_option_editor.cc:1024
 msgid ""
-"<b>When enabled</b> if Ardour is <b>not recording</b>, it will stop the "
+"<b>When enabled</b> if %1 is <b>not recording</b>, it will stop the "
 "transport when it reaches the current session end marker\n"
 "\n"
-"<b>When disabled</b> Ardour will continue to roll past the session end "
-"marker at all times"
+"<b>When disabled</b> %1 will continue to roll past the session end marker at "
+"all times"
 msgstr ""
-"<b>Falls an</b>, und Ardour </b>nimmt nicht auf</b>, wird es bei Erreichen "
-"ds Projektende-Markers die Wiedergabe stoppen\n"
+"<b>Falls an</b>, und %1 </b>nimmt nicht auf</b>, wird es bei Erreichen ds "
+"Projektende-Markers die Wiedergabe stoppen\n"
 "\n"
 "<b>Falls aus</b> , wird Ardour am Ende des Projektes immer weiterlaufen"
 
-#: rc_option_editor.cc:1028
+#: rc_option_editor.cc:1032
 msgid "Do seamless looping (not possible when slaved to MTC, JACK etc)"
 msgstr "Nahtlose Schleifen (nicht möglich wenn MTC, JACK etc. Master sind)"
 
-#: rc_option_editor.cc:1032
+#: rc_option_editor.cc:1037
 msgid ""
 "<b>When enabled</b> this will loop by reading ahead and wrapping around at "
 "the loop point, preventing any need to do a transport locate at the end of "
 "the loop\n"
 "\n"
 "<b>When disabled</b> looping is done by locating back to the start of the "
-"loop when Ardour reaches the end which will often cause a small click or "
-"delay"
+"loop when %1 reaches the end which will often cause a small click or delay"
 msgstr ""
 "<b>Falls an</b>, wird dies vorauslesen und am Schleifenendpunkt "
 "zurückspringen, wodurch eine Neupositionierung am Schleifenende vermieden "
 "wird\n"
 "\n"
-"<b>Falls aus</b>, wird bei Erreichen des Schleifenendes zum Anfang der "
-"Schleife gesprungen, was oft einen hörbaren Klick oder kurze Verzögerung "
+"<b>Falls aus</b>, wird %1 bei Erreichen des Schleifenendes zum Anfang der "
+"Schleife springen, was oft einen hörbaren Klick oder kurze Verzögerung "
 "verursacht"
 
-#: rc_option_editor.cc:1040
+#: rc_option_editor.cc:1045
 msgid "Disable per-track record disarm while rolling"
 msgstr "Während der Aufnahme Aufnahmestatus einzelner Spuren sperren"
 
-#: rc_option_editor.cc:1044
+#: rc_option_editor.cc:1049
 msgid ""
 "<b>When enabled</b> this will prevent you from accidentally stopping "
 "specific tracks recording during a take"
@@ -8585,11 +8618,11 @@ msgstr ""
 "<b>Wenn eingeschaltet</b> , hindert Sie dies daran, während eines "
 "Aufnahmevorgangs unabsichtlich bei einzelnen Spuren die Aufnahme zu beenden"
 
-#: rc_option_editor.cc:1049
+#: rc_option_editor.cc:1054
 msgid "12dB gain reduction during fast-forward and fast-rewind"
 msgstr "Beim Spulen Pegel um 12dB absenken"
 
-#: rc_option_editor.cc:1053
+#: rc_option_editor.cc:1058
 msgid ""
 "This will reduce the unpleasant increase in perceived volume that occurs "
 "when fast-forwarding or rewinding through some kinds of audio"
@@ -8597,19 +8630,19 @@ msgstr ""
 "Dies wird die unangenehme Steigerung der wahrgenommenen Lautstärke "
 "verringern, die bei manchem Material bei Vor/Rücklauf auftritt"
 
-#: rc_option_editor.cc:1057
+#: rc_option_editor.cc:1062
 msgid "Sync/Slave"
 msgstr "Sync/Slave"
 
-#: rc_option_editor.cc:1061
+#: rc_option_editor.cc:1066
 msgid "External timecode source"
 msgstr "Externe Timecode-Quelle"
 
-#: rc_option_editor.cc:1071
+#: rc_option_editor.cc:1076
 msgid "Match session video frame rate to external timecode"
 msgstr "Videoframerate des Projekts an externen Timecode anpassen"
 
-#: rc_option_editor.cc:1077
+#: rc_option_editor.cc:1082
 msgid ""
 "This option controls the value of the video frame rate <i>while chasing</i> "
 "an external timecode source.\n"
@@ -8619,23 +8652,25 @@ msgid ""
 "\n"
 "<b>When disabled</b> the session video frame rate will not be changed to "
 "match that of the selected external timecode source.Instead the frame rate "
-"indication in the main clock will flash red and Ardour will convert between "
-"the external timecode standard and the session standard."
+"indication in the main clock will flash red and %1 will convert between the "
+"external timecode standard and the session standard."
 msgstr ""
 "Diese Option bestimmt den Wert der Videoframerate <i>während der "
 "Synchronisation</i> mit einer externen Timecode-Quelle. \n"
+"\n"
 "<b>Falls an</b>, wird die Videoframerate des Projektes an die der externen "
 "Timecode-Quelle angepasst. \n"
+"\n"
 "<b>Falls aus</b>, wird die Videoframerate des Projektes nicht geändert. "
-"Stattdessen wird die Anzeige der Framerate in der Uhr rot blinken und Ardour "
+"Stattdessen wird die Anzeige der Framerate in der Uhr rot blinken und %1 "
 "wird zwischen den Standards der externen Quelle und des Projektes "
 "konvertieren."
 
-#: rc_option_editor.cc:1087
+#: rc_option_editor.cc:1092
 msgid "External timecode is sync locked"
 msgstr "Externe Timecode-Quelle ist starr synchronisiert"
 
-#: rc_option_editor.cc:1093
+#: rc_option_editor.cc:1098
 msgid ""
 "<b>When enabled</b> indicates that the selected external timecode source "
 "shares sync (Black &amp; Burst, Wordclock, etc) with the audio interface."
@@ -8643,11 +8678,11 @@ msgstr ""
 "<b>Falls an</b>, zeigt dies an, daß die ausgewählte externe Timecode-Quelle "
 "synchron zum Audio-Interface läuft (Black &amp; Burst, Wordclock, etc)."
 
-#: rc_option_editor.cc:1100
+#: rc_option_editor.cc:1105
 msgid "Lock to 29.9700 fps instead of 30000/1001"
 msgstr "Fest auf 29.9700 fps statt 30000/1001"
 
-#: rc_option_editor.cc:1106
+#: rc_option_editor.cc:1111
 msgid ""
 "<b>When enabled</b> the external timecode source is assumed to use 29.97 fps "
 "instead of 30000/1001.\n"
@@ -8670,39 +8705,39 @@ msgstr ""
 "widersprechend - da bei der Variante mit exakt 29.97 fps kein Timecode-Drift "
 "auftritt.\n"
 
-#: rc_option_editor.cc:1116
+#: rc_option_editor.cc:1121
 msgid "LTC Reader"
 msgstr "LTC-Leser"
 
-#: rc_option_editor.cc:1120
+#: rc_option_editor.cc:1125
 msgid "LTC incoming port"
 msgstr "LTC Eingangsport"
 
-#: rc_option_editor.cc:1133
+#: rc_option_editor.cc:1138
 msgid "LTC Generator"
 msgstr "LTC-Generator"
 
-#: rc_option_editor.cc:1138
+#: rc_option_editor.cc:1143
 msgid "Enable LTC generator"
 msgstr "LTC-Generator aktivieren"
 
-#: rc_option_editor.cc:1145
+#: rc_option_editor.cc:1150
 msgid "send LTC while stopped"
 msgstr "LTC senden, wenn Transport steht"
 
-#: rc_option_editor.cc:1151
+#: rc_option_editor.cc:1156
 msgid ""
-"<b>When enabled</b> Ardour will continue to send LTC information even when "
-"the transport (playhead) is not moving"
+"<b>When enabled</b> %1 will continue to send LTC information even when the "
+"transport (playhead) is not moving"
 msgstr ""
-"<b>Falls an</b>, wird Ardour weiterhin LTC-Information senden, sogar wenn "
-"der Transport (Positionszeiger) stillsteht"
+"<b>Falls an</b>, wird %1 weiterhin LTC-Information senden, sogar wenn der "
+"Transport (Positionszeiger) stillsteht"
 
-#: rc_option_editor.cc:1157
+#: rc_option_editor.cc:1162
 msgid "LTC generator level"
 msgstr "LTC-Generator-Lautstärke"
 
-#: rc_option_editor.cc:1161
+#: rc_option_editor.cc:1166
 msgid ""
 "Specify the Peak Volume of the generated LTC signal in dbFS. A good value "
 "is  0dBu ^= -18dbFS in an EBU calibrated system"
@@ -8710,104 +8745,104 @@ msgstr ""
 "Geben Sie den Spitzenwert des erzeugten LTC-Signals in dbFS an. Ein guter "
 "Wert für ein EBU-kalibriertes System ist 0dBu ^= -18dbFS"
 
-#: rc_option_editor.cc:1173
+#: rc_option_editor.cc:1178
 msgid "Link selection of regions and tracks"
 msgstr "Auswahl von Spuren und Regionen verbinden"
 
-#: rc_option_editor.cc:1181
+#: rc_option_editor.cc:1186
 msgid "Move relevant automation when audio regions are moved"
 msgstr "Verschiebe relevante Automationen mit Region"
 
-#: rc_option_editor.cc:1189
+#: rc_option_editor.cc:1194
 msgid "Show meters on tracks in the editor"
 msgstr "Aktiviere Pegelanzeigen im Editor"
 
-#: rc_option_editor.cc:1196
+#: rc_option_editor.cc:1201
 msgid "Regions in active edit groups are edited together"
 msgstr "Regionen der aktiven Bearbeitungsgruppen werden gemeinsam bearbeitet"
 
-#: rc_option_editor.cc:1197
+#: rc_option_editor.cc:1202
 msgid "whenever they overlap in time"
 msgstr "immer, wenn sie sich auf der Zeitachse überlappen"
 
-#: rc_option_editor.cc:1198
+#: rc_option_editor.cc:1203
 msgid "only if they have identical length, position and origin"
 msgstr "nur bei identischer Länge, Position und Herkunft"
 
-#: rc_option_editor.cc:1208
+#: rc_option_editor.cc:1213
 msgid "Make rubberband selection rectangle snap to the grid"
 msgstr "Die Auswahl von Rubberband an Raster ausrichten"
 
-#: rc_option_editor.cc:1216
+#: rc_option_editor.cc:1221
 msgid "Show waveforms in regions"
 msgstr "Zeige Waveformen in Regionen an"
 
-#: rc_option_editor.cc:1224
+#: rc_option_editor.cc:1229
 msgid "Show gain envelopes in audio regions"
 msgstr "Zeige Lautstärkekurven in Regionen an"
 
-#: rc_option_editor.cc:1225
+#: rc_option_editor.cc:1230
 msgid "in all modes"
 msgstr "in allen Modi"
 
-#: rc_option_editor.cc:1226
+#: rc_option_editor.cc:1231
 msgid "only in region gain mode"
 msgstr "nur im Region-Gain Modus"
 
-#: rc_option_editor.cc:1233
+#: rc_option_editor.cc:1238
 msgid "Waveform scale"
 msgstr "Waveform Skalierung"
 
-#: rc_option_editor.cc:1238
+#: rc_option_editor.cc:1243
 msgid "linear"
 msgstr "Linear"
 
-#: rc_option_editor.cc:1239
+#: rc_option_editor.cc:1244
 msgid "logarithmic"
 msgstr "Logarithmisch"
 
-#: rc_option_editor.cc:1245
+#: rc_option_editor.cc:1250
 msgid "Waveform shape"
 msgstr "Waveform Anzeige"
 
-#: rc_option_editor.cc:1250
+#: rc_option_editor.cc:1255
 msgid "traditional"
 msgstr "Traditionell"
 
-#: rc_option_editor.cc:1251
+#: rc_option_editor.cc:1256
 msgid "rectified"
 msgstr "Rectified"
 
-#: rc_option_editor.cc:1258
+#: rc_option_editor.cc:1263
 msgid "Show waveforms for audio while it is being recorded"
 msgstr "Zeichne Waveform während der Aufnahme"
 
-#: rc_option_editor.cc:1266
+#: rc_option_editor.cc:1271
 msgid "Show zoom toolbar"
 msgstr "Zeige Zoom Toolbar"
 
-#: rc_option_editor.cc:1274
+#: rc_option_editor.cc:1279
 msgid "Color regions using their track's color"
 msgstr "Färbe Regionen in der Spurfarbe ein"
 
-#: rc_option_editor.cc:1282
+#: rc_option_editor.cc:1287
 msgid "Update editor window during drags of the summary"
 msgstr ""
 "Aktualisiere das Editorfenster, während die Projektübersicht verändert wird"
 
-#: rc_option_editor.cc:1290
+#: rc_option_editor.cc:1295
 msgid "Synchronise editor and mixer track order"
 msgstr "Einheitliche Reihenfolge der Spuren im Editor und Mixer"
 
-#: rc_option_editor.cc:1298
+#: rc_option_editor.cc:1303
 msgid "Synchronise editor and mixer selection"
 msgstr "Synchronisiere Auswahl der Spuren im Editor und Mixer"
 
-#: rc_option_editor.cc:1305
+#: rc_option_editor.cc:1310
 msgid "Name new markers"
 msgstr "Neue Marker benennen"
 
-#: rc_option_editor.cc:1311
+#: rc_option_editor.cc:1316
 msgid ""
 "If enabled, popup a dialog when a new marker is created to allow its name to "
 "be set as it is created.\n"
@@ -8819,246 +8854,246 @@ msgstr ""
 "\n"
 "Marker können jederzeit per Rechtsklick umbenannt werden"
 
-#: rc_option_editor.cc:1317
+#: rc_option_editor.cc:1322
 msgid "Auto-scroll editor window when dragging near its edges"
 msgstr "Bei Mausziehen nahe den Rändern das Editorfenster automatisch scrollen"
 
-#: rc_option_editor.cc:1324
+#: rc_option_editor.cc:1329
 msgid "Buffering"
 msgstr "Pufferung"
 
-#: rc_option_editor.cc:1333
+#: rc_option_editor.cc:1338
 msgid "Use a monitor bus (allows AFL/PFL and more control)"
 msgstr "Benutze einen Monitor-Bus (ermöglicht AFL/PFL und mehr)"
 
-#: rc_option_editor.cc:1340
+#: rc_option_editor.cc:1345
 msgid "Record monitoring handled by"
 msgstr "Aufnahmemonitoring wird verwaltet von"
 
-#: rc_option_editor.cc:1351
+#: rc_option_editor.cc:1356
 msgid "ardour"
 msgstr "Ardour"
 
-#: rc_option_editor.cc:1352
+#: rc_option_editor.cc:1357
 msgid "audio hardware"
 msgstr "Audiohardware"
 
-#: rc_option_editor.cc:1359
+#: rc_option_editor.cc:1364
 msgid "Tape machine mode"
 msgstr "Bandmaschinen-Modus"
 
-#: rc_option_editor.cc:1364
+#: rc_option_editor.cc:1369
 msgid "Connection of tracks and busses"
 msgstr "Verbindung von Spuren und Bussen"
 
-#: rc_option_editor.cc:1369
+#: rc_option_editor.cc:1374
 msgid "Auto-connect master/monitor busses"
 msgstr "Master/Monitor-Busse automatisch verbinden"
 
-#: rc_option_editor.cc:1376
+#: rc_option_editor.cc:1381
 msgid "Connect track inputs"
 msgstr "Verbinde Spureingänge"
 
-#: rc_option_editor.cc:1381
+#: rc_option_editor.cc:1386
 msgid "automatically to physical inputs"
 msgstr "automatisch mit Audioeingängen"
 
-#: rc_option_editor.cc:1382 rc_option_editor.cc:1395
+#: rc_option_editor.cc:1387 rc_option_editor.cc:1400
 msgid "manually"
 msgstr "manuell"
 
-#: rc_option_editor.cc:1388
+#: rc_option_editor.cc:1393
 msgid "Connect track and bus outputs"
 msgstr "Verbinde Spur- und Busausgänge"
 
-#: rc_option_editor.cc:1393
+#: rc_option_editor.cc:1398
 msgid "automatically to physical outputs"
 msgstr "automatisch mit Audioausgängen"
 
-#: rc_option_editor.cc:1394
+#: rc_option_editor.cc:1399
 msgid "automatically to master bus"
 msgstr "automatisch mit dem Master-Bus"
 
-#: rc_option_editor.cc:1399
+#: rc_option_editor.cc:1404
 msgid "Denormals"
 msgstr "Denormals"
 
-#: rc_option_editor.cc:1404
+#: rc_option_editor.cc:1409
 msgid "Use DC bias to protect against denormals"
 msgstr "Nutze DC bias als Schutz vor Denormals"
 
-#: rc_option_editor.cc:1411
+#: rc_option_editor.cc:1416
 msgid "Processor handling"
 msgstr "Umgang des Prozessors mit Denormals"
 
-#: rc_option_editor.cc:1416
+#: rc_option_editor.cc:1421
 msgid "no processor handling"
 msgstr "Keine Korrekturen"
 
-#: rc_option_editor.cc:1421
+#: rc_option_editor.cc:1426
 msgid "use FlushToZero"
 msgstr "Benutze FlushToZero"
 
-#: rc_option_editor.cc:1425
+#: rc_option_editor.cc:1430
 msgid "use DenormalsAreZero"
 msgstr "Benutze DenormalsAreZero"
 
-#: rc_option_editor.cc:1429
+#: rc_option_editor.cc:1434
 msgid "use FlushToZero and DenormalsAreZero"
 msgstr "Benutze FlushToZero & DenormalsAreZero"
 
-#: rc_option_editor.cc:1439
+#: rc_option_editor.cc:1444
 msgid "Silence plugins when the transport is stopped"
 msgstr "Deaktiviere Plugins, wenn der Transport gestoppt ist."
 
-#: rc_option_editor.cc:1447
+#: rc_option_editor.cc:1452
 msgid "Make new plugins active"
 msgstr "Neue Plugins sind aktiv"
 
-#: rc_option_editor.cc:1455
+#: rc_option_editor.cc:1460
 msgid "Enable automatic analysis of audio"
 msgstr "Audiodaten automatisch analysieren"
 
-#: rc_option_editor.cc:1463
+#: rc_option_editor.cc:1468
 msgid "Replicate missing region channels"
 msgstr "Fehlende Kanäle von Regionen ersetzen"
 
-#: rc_option_editor.cc:1470 rc_option_editor.cc:1485 rc_option_editor.cc:1497
-#: rc_option_editor.cc:1509 rc_option_editor.cc:1521 rc_option_editor.cc:1525
-#: rc_option_editor.cc:1533 rc_option_editor.cc:1541 rc_option_editor.cc:1549
-#: rc_option_editor.cc:1551 rc_option_editor.cc:1559 rc_option_editor.cc:1567
-#: rc_option_editor.cc:1575
+#: rc_option_editor.cc:1475 rc_option_editor.cc:1490 rc_option_editor.cc:1502
+#: rc_option_editor.cc:1514 rc_option_editor.cc:1526 rc_option_editor.cc:1530
+#: rc_option_editor.cc:1538 rc_option_editor.cc:1546 rc_option_editor.cc:1554
+#: rc_option_editor.cc:1556 rc_option_editor.cc:1564 rc_option_editor.cc:1572
+#: rc_option_editor.cc:1580
 msgid "Solo / mute"
 msgstr "Solo / Mute"
 
-#: rc_option_editor.cc:1473
+#: rc_option_editor.cc:1478
 msgid "Solo-in-place mute cut (dB)"
-msgstr "Solo-in-place mute cut (dB)"
+msgstr "Solo-in-Place Mute Dämpfung (dB)"
 
-#: rc_option_editor.cc:1480
+#: rc_option_editor.cc:1485
 msgid "Solo controls are Listen controls"
 msgstr "Solo-Schalter arbeiten als AFL/PFL"
 
-#: rc_option_editor.cc:1489
+#: rc_option_editor.cc:1494
 msgid "Listen Position"
 msgstr "Abhörpunkt"
 
-#: rc_option_editor.cc:1494
+#: rc_option_editor.cc:1499
 msgid "after-fader (AFL)"
 msgstr "After-Fader (AFL)"
 
-#: rc_option_editor.cc:1495
+#: rc_option_editor.cc:1500
 msgid "pre-fader (PFL)"
 msgstr "Pre-Fader (PFL)"
 
-#: rc_option_editor.cc:1501
+#: rc_option_editor.cc:1506
 msgid "PFL signals come from"
 msgstr "Abgreifpunkt der PFL Signale"
 
-#: rc_option_editor.cc:1506
+#: rc_option_editor.cc:1511
 msgid "before pre-fader processors"
 msgstr "Vor den Pre-Fader Effekten"
 
-#: rc_option_editor.cc:1507
+#: rc_option_editor.cc:1512
 msgid "pre-fader but after pre-fader processors"
 msgstr "Pre-Fader, aber nach den Effekten"
 
-#: rc_option_editor.cc:1513
+#: rc_option_editor.cc:1518
 msgid "AFL signals come from"
 msgstr "Abgreifpunkt der AFL Signale"
 
-#: rc_option_editor.cc:1518
+#: rc_option_editor.cc:1523
 msgid "immediately post-fader"
 msgstr "Direkt nach dem Fader"
 
-#: rc_option_editor.cc:1519
+#: rc_option_editor.cc:1524
 msgid "after post-fader processors (before pan)"
 msgstr "Nach den Post-Fader Effekten (vor Pan)"
 
-#: rc_option_editor.cc:1528
+#: rc_option_editor.cc:1533
 msgid "Exclusive solo"
 msgstr "Exclusives Solo"
 
-#: rc_option_editor.cc:1536
+#: rc_option_editor.cc:1541
 msgid "Show solo muting"
 msgstr "Solo auf anderen Kanälen als Mute anzeigen"
 
-#: rc_option_editor.cc:1544
+#: rc_option_editor.cc:1549
 msgid "Soloing overrides muting"
 msgstr "Solo ist trotz Mute hörbar"
 
-#: rc_option_editor.cc:1549
+#: rc_option_editor.cc:1554
 msgid "Default track / bus muting options"
 msgstr "Standardeinstellungen für Mute von Spuren / Bussen"
 
-#: rc_option_editor.cc:1554
+#: rc_option_editor.cc:1559
 msgid "Mute affects pre-fader sends"
-msgstr "Schalte Pre-Fader Sends ab"
+msgstr "Mute schaltet Pre-Fader Sends stumm"
 
-#: rc_option_editor.cc:1562
+#: rc_option_editor.cc:1567
 msgid "Mute affects post-fader sends"
-msgstr "Schalte Post-Fader Sends ab"
+msgstr "Mute schaltet Post-Fader Sends stumm"
 
-#: rc_option_editor.cc:1570
+#: rc_option_editor.cc:1575
 msgid "Mute affects control outputs"
-msgstr "Schalte Abhörausgang ab"
+msgstr "Mute schaltet Abhörausgänge stumm"
 
-#: rc_option_editor.cc:1578
+#: rc_option_editor.cc:1583
 msgid "Mute affects main outputs"
-msgstr "Schalte Spurausgang ab"
+msgstr "Mute schaltet Hauptausgänge stumm"
 
-#: rc_option_editor.cc:1594
+#: rc_option_editor.cc:1599
 msgid "Send MIDI Time Code"
 msgstr "Sende MIDI Time Code"
 
-#: rc_option_editor.cc:1602
+#: rc_option_editor.cc:1607
 msgid "Percentage either side of normal transport speed to transmit MTC"
 msgstr ""
 "Prozentzahl beiderseits der normalen Transportgeschwindigkeit, bis zu der "
 "MTC übertragen wird"
 
-#: rc_option_editor.cc:1611
+#: rc_option_editor.cc:1616
 msgid "Obey MIDI Machine Control commands"
 msgstr "MIDI Machine Control Commands empfangen"
 
-#: rc_option_editor.cc:1619
+#: rc_option_editor.cc:1624
 msgid "Send MIDI Machine Control commands"
 msgstr "MIDI Machine Control Commands senden"
 
-#: rc_option_editor.cc:1627
+#: rc_option_editor.cc:1632
 msgid "Send MIDI control feedback"
 msgstr "MIDI Control Feedback senden"
 
-#: rc_option_editor.cc:1635
+#: rc_option_editor.cc:1640
 msgid "Inbound MMC device ID"
 msgstr "ID des eingehenden MMC-Geräts"
 
-#: rc_option_editor.cc:1644
+#: rc_option_editor.cc:1649
 msgid "Outbound MMC device ID"
 msgstr "ID des ausgehenden MMC-Geräts"
 
-#: rc_option_editor.cc:1653
+#: rc_option_editor.cc:1658
 msgid "Initial program change"
 msgstr "Erstmaliger Programmwechsel"
 
-#: rc_option_editor.cc:1662
+#: rc_option_editor.cc:1667
 msgid "Display first MIDI bank/program as 0"
 msgstr "Erste(s) MIDI Bank/Programm als 0 anzeigen"
 
-#: rc_option_editor.cc:1670
+#: rc_option_editor.cc:1675
 msgid "Never display periodic MIDI messages (MTC, MIDI Clock)"
 msgstr "Periodische MIDI Nachrichten nie anzeigen (MTC, MIDI Clock)"
 
-#: rc_option_editor.cc:1678
+#: rc_option_editor.cc:1683
 msgid "Sound MIDI notes as they are selected"
 msgstr "MIDI Noten ertönen bei Auswahl"
 
-#: rc_option_editor.cc:1686 rc_option_editor.cc:1696 rc_option_editor.cc:1698
-#: rc_option_editor.cc:1700 rc_option_editor.cc:1702 rc_option_editor.cc:1715
+#: rc_option_editor.cc:1691 rc_option_editor.cc:1701 rc_option_editor.cc:1703
+#: rc_option_editor.cc:1705 rc_option_editor.cc:1707 rc_option_editor.cc:1720
 msgid "User interaction"
 msgstr "Benutzerinteraktion"
 
-#: rc_option_editor.cc:1689
+#: rc_option_editor.cc:1694
 msgid ""
 "Use translations of %1 messages\n"
 "   <i>(requires a restart of %1 to take effect)</i>\n"
@@ -9068,93 +9103,93 @@ msgstr ""
 "   <i>(erfordert Neustart von %1)</i>\n"
 "   <i>(falls für Ihre gewünschte Sprache verfügbar)</i>"
 
-#: rc_option_editor.cc:1696
+#: rc_option_editor.cc:1701
 msgid "Keyboard"
 msgstr "Tastatur"
 
-#: rc_option_editor.cc:1700
+#: rc_option_editor.cc:1705
 msgid "Control surfaces"
 msgstr "Eingabegeräte / Controller"
 
-#: rc_option_editor.cc:1706
+#: rc_option_editor.cc:1711
 msgid "Control surface remote ID"
 msgstr "Remote ID des Eingabegeräts"
 
-#: rc_option_editor.cc:1711
+#: rc_option_editor.cc:1716
 msgid "assigned by user"
 msgstr "vom Benutzer festgelegt"
 
-#: rc_option_editor.cc:1712
+#: rc_option_editor.cc:1717
 msgid "follows order of mixer"
 msgstr "folgt Reihenfolge im Mixer"
 
-#: rc_option_editor.cc:1713
+#: rc_option_editor.cc:1718
 msgid "follows order of editor"
 msgstr "folgt Reihenfolge im Editor"
 
-#: rc_option_editor.cc:1719 rc_option_editor.cc:1727 rc_option_editor.cc:1737
-#: rc_option_editor.cc:1739 rc_option_editor.cc:1757 rc_option_editor.cc:1766
-#: rc_option_editor.cc:1774 rc_option_editor.cc:1788 rc_option_editor.cc:1805
+#: rc_option_editor.cc:1724 rc_option_editor.cc:1732 rc_option_editor.cc:1742
+#: rc_option_editor.cc:1744 rc_option_editor.cc:1762 rc_option_editor.cc:1771
+#: rc_option_editor.cc:1779 rc_option_editor.cc:1793 rc_option_editor.cc:1810
 msgid "GUI"
 msgstr "GUI"
 
-#: rc_option_editor.cc:1722
+#: rc_option_editor.cc:1727
 msgid "Graphically indicate mouse pointer hovering over various widgets"
 msgstr "Mouseover-Effekt über verschiedenen Anzeigen"
 
-#: rc_option_editor.cc:1730
+#: rc_option_editor.cc:1735
 msgid "Show tooltips if mouse hovers over a control"
 msgstr "Zeige Tooltips, wenn die Maus über einem Element schwebt"
 
-#: rc_option_editor.cc:1742
-msgid "Use plugins' own interfaces instead of Ardour's"
-msgstr "Statt der von Ardour bereitgestellten GUIs die der Plugins verwenden"
+#: rc_option_editor.cc:1747
+msgid "Use plugins' own interfaces instead of %1's"
+msgstr "Statt der von %1 bereitgestellten GUIs die der Plugins verwenden"
 
-#: rc_option_editor.cc:1759
+#: rc_option_editor.cc:1764
 msgid "Mixer Strip"
 msgstr "Anzeige im Channel strip"
 
-#: rc_option_editor.cc:1769
+#: rc_option_editor.cc:1774
 msgid "Use narrow strips in the mixer by default"
 msgstr "Standardmäßig schmale Mixer-Kanalzüge verwenden"
 
-#: rc_option_editor.cc:1778
+#: rc_option_editor.cc:1783
 msgid "Meter hold time"
 msgstr "Pegelanzeige halten"
 
-#: rc_option_editor.cc:1784
+#: rc_option_editor.cc:1789
 msgid "short"
 msgstr "Kurz"
 
-#: rc_option_editor.cc:1785 rc_option_editor.cc:1800
+#: rc_option_editor.cc:1790 rc_option_editor.cc:1805
 msgid "medium"
 msgstr "Mittel"
 
-#: rc_option_editor.cc:1786
+#: rc_option_editor.cc:1791
 msgid "long"
 msgstr "Lange"
 
-#: rc_option_editor.cc:1792
+#: rc_option_editor.cc:1797
 msgid "Meter fall-off"
 msgstr "Abfall der Pegelanzeige"
 
-#: rc_option_editor.cc:1798
+#: rc_option_editor.cc:1803
 msgid "slowest"
 msgstr "Am langsamstem"
 
-#: rc_option_editor.cc:1799
+#: rc_option_editor.cc:1804
 msgid "slow"
 msgstr "Langsam"
 
-#: rc_option_editor.cc:1801
+#: rc_option_editor.cc:1806
 msgid "fast"
 msgstr "Schnell"
 
-#: rc_option_editor.cc:1802
+#: rc_option_editor.cc:1807
 msgid "faster"
 msgstr "Schneller"
 
-#: rc_option_editor.cc:1803
+#: rc_option_editor.cc:1808
 msgid "fastest"
 msgstr "Schnellstmöglich"
 
@@ -9621,7 +9656,7 @@ msgstr "Diese Spur stummschalten"
 
 #: route_ui.cc:118
 msgid "Mute other (non-soloed) tracks"
-msgstr "Andere Spuren stummschalten"
+msgstr "Andere (nicht Solo-)Spuren stummschalten"
 
 #: route_ui.cc:124
 msgid "Enable recording on this track"
@@ -9639,83 +9674,83 @@ msgstr "Eingang abhören"
 msgid "Monitor playback"
 msgstr "Vorhandenes Material abhören"
 
-#: route_ui.cc:541
+#: route_ui.cc:586
 msgid "Not connected to JACK - cannot engage record"
 msgstr "Nicht mit JACK verbunden - konnte die Aufnahme nicht starten"
 
-#: route_ui.cc:723
+#: route_ui.cc:781
 msgid "Step Entry"
 msgstr "Eingabemodus (Step Entry)"
 
-#: route_ui.cc:796
+#: route_ui.cc:854
 msgid "Assign all tracks (prefader)"
 msgstr "Alle Audiospuren zuweisen (Pre-Fader)"
 
-#: route_ui.cc:800
+#: route_ui.cc:858
 msgid "Assign all tracks and buses (prefader)"
 msgstr "Alle Audiospuren und Busse zuweisen (Pre-Fader)"
 
-#: route_ui.cc:804
+#: route_ui.cc:862
 msgid "Assign all tracks (postfader)"
 msgstr "Alle Audiospuren zuweisen (Post-Fader)"
 
-#: route_ui.cc:808
+#: route_ui.cc:866
 msgid "Assign all tracks and buses (postfader)"
 msgstr "Alle Audiospuren und Busse zuweisen (Post-Fader)"
 
-#: route_ui.cc:812
+#: route_ui.cc:870
 msgid "Assign selected tracks (prefader)"
 msgstr "Ausgewählte Audiospuren zuweisen (Pre-Fader)"
 
-#: route_ui.cc:816
+#: route_ui.cc:874
 msgid "Assign selected tracks and buses (prefader)"
 msgstr "Ausgewählte Audiospuren und Busse zuweisen (Pre-Fader)"
 
-#: route_ui.cc:819
+#: route_ui.cc:877
 msgid "Assign selected tracks (postfader)"
 msgstr "Ausgewählte Audiospuren zuweisen (Post-Fader)"
 
-#: route_ui.cc:823
+#: route_ui.cc:881
 msgid "Assign selected tracks and buses (postfader)"
 msgstr "Ausgewählte Audiospuren und Busse zuweisen (Post-Fader)"
 
-#: route_ui.cc:826
+#: route_ui.cc:884
 msgid "Copy track/bus gains to sends"
 msgstr "Lautstärken der Spuren/Busse auf ihre Sends kopieren"
 
-#: route_ui.cc:827
+#: route_ui.cc:885
 msgid "Set sends gain to -inf"
 msgstr "Setze Sends-Lautstärken to -inf"
 
-#: route_ui.cc:828
+#: route_ui.cc:886
 msgid "Set sends gain to 0dB"
 msgstr "Setze Sends-Lautstärken to 0dB"
 
-#: route_ui.cc:1148
+#: route_ui.cc:1206
 msgid "Solo Isolate"
-msgstr "Solo isolieren"
+msgstr "Isoliertes Solo"
 
-#: route_ui.cc:1177
+#: route_ui.cc:1235
 msgid "Pre Fader"
 msgstr "Pre Fader"
 
-#: route_ui.cc:1183
+#: route_ui.cc:1241
 msgid "Post Fader"
 msgstr "Post Fader"
 
-#: route_ui.cc:1189
+#: route_ui.cc:1247
 msgid "Control Outs"
 msgstr "Vorhörausgang"
 
-#: route_ui.cc:1195
+#: route_ui.cc:1253
 msgid "Main Outs"
 msgstr "Hauptausgänge"
 
-#: route_ui.cc:1327
+#: route_ui.cc:1385
 msgid "Color Selection"
 msgstr "Farbauswahl"
 
-#: route_ui.cc:1414
+#: route_ui.cc:1472
 msgid ""
 "Do you really want to remove track \"%1\" ?\n"
 "\n"
@@ -9729,7 +9764,7 @@ msgstr ""
 "\n"
 "(Dies kann nicht rückgängig gemacht werden!)"
 
-#: route_ui.cc:1416
+#: route_ui.cc:1474
 msgid ""
 "Do you really want to remove bus \"%1\" ?\n"
 "\n"
@@ -9738,15 +9773,15 @@ msgstr ""
 "Wollen Sie den Bus \"%1\" wirklich löschen?\n"
 "(Dies kann nicht rückgängig gemacht werden!)"
 
-#: route_ui.cc:1424
+#: route_ui.cc:1482
 msgid "Remove track"
 msgstr "Spur löschen"
 
-#: route_ui.cc:1426
+#: route_ui.cc:1484
 msgid "Remove bus"
 msgstr "Bus löschen"
 
-#: route_ui.cc:1453
+#: route_ui.cc:1511
 msgid ""
 "The use of colons (':') is discouraged in track and bus names.\n"
 "Do you want to use this new name?"
@@ -9755,47 +9790,47 @@ msgstr ""
 "wird nicht empfohlen.\n"
 "Wollen Sie diesen neuen Namen verwenden?"
 
-#: route_ui.cc:1457
+#: route_ui.cc:1515
 msgid "Use the new name"
 msgstr "Neuen Namen verwenden"
 
-#: route_ui.cc:1458
+#: route_ui.cc:1516
 msgid "Re-edit the name"
 msgstr "Namen bearbeiten"
 
-#: route_ui.cc:1471
+#: route_ui.cc:1529
 msgid "Rename Track"
 msgstr "Spur umbenennen"
 
-#: route_ui.cc:1473
+#: route_ui.cc:1531
 msgid "Rename Bus"
 msgstr "Bus umbenennen"
 
-#: route_ui.cc:1632
+#: route_ui.cc:1690
 msgid " latency"
 msgstr " Latenz"
 
-#: route_ui.cc:1645
+#: route_ui.cc:1703
 msgid "Cannot create route template directory %1"
 msgstr "Kann das Vorlagenverzeichnis für Spuren/Busse %1 nicht erzeugen"
 
-#: route_ui.cc:1651
+#: route_ui.cc:1709
 msgid "Save As Template"
 msgstr "Als Vorlage speichern"
 
-#: route_ui.cc:1652
+#: route_ui.cc:1710
 msgid "Template name:"
 msgstr "Name der Vorlage:"
 
-#: route_ui.cc:1725
+#: route_ui.cc:1783
 msgid "Remote Control ID"
 msgstr "ID für Fernsteuerung"
 
-#: route_ui.cc:1735
+#: route_ui.cc:1793
 msgid "Remote control ID:"
 msgstr "ID für Fernsteuerung:"
 
-#: route_ui.cc:1749
+#: route_ui.cc:1807
 msgid ""
 "The remote control ID of %1 is: %2\n"
 "\n"
@@ -9807,15 +9842,15 @@ msgstr ""
 "\n"
 "Die Fernbedienungs-ID von %3 kann nicht geändert werden."
 
-#: route_ui.cc:1753
+#: route_ui.cc:1811
 msgid "the master bus"
 msgstr "der Master-Bus"
 
-#: route_ui.cc:1753
+#: route_ui.cc:1811
 msgid "the monitor bus"
 msgstr "der Monitor-Bus"
 
-#: route_ui.cc:1755
+#: route_ui.cc:1813
 msgid ""
 "The remote control ID of %6 is: %3\n"
 "\n"
@@ -9834,15 +9869,15 @@ msgstr ""
 "%4Sie können dies im Tab \"Benutzerinteraktion\" im Fenster Einstellungen "
 "ändern%5"
 
-#: route_ui.cc:1758
+#: route_ui.cc:1816
 msgid "the mixer"
 msgstr "der Mixer"
 
-#: route_ui.cc:1758
+#: route_ui.cc:1816
 msgid "the editor"
 msgstr "der Editor"
 
-#: route_ui.cc:1813
+#: route_ui.cc:1871
 msgid ""
 "Left-click to invert (phase reverse) channel %1 of this track.  Right-click "
 "to show menu."
@@ -9850,7 +9885,7 @@ msgstr ""
 "Linksklick, um die Phase von Kanal %1 zu invertieren. Rechtsklick zeigt das "
 "Menü."
 
-#: route_ui.cc:1815
+#: route_ui.cc:1873
 msgid "Click to show a menu of channels for inversion (phase reverse)"
 msgstr ""
 "Klicken, um ein Menü zum Invertieren der Kanäle (Phasendrehung) anzuzeigen"
@@ -10715,10 +10750,10 @@ msgstr "Vorhandenes Projekt öffnen"
 #: startup.cc:73
 msgid ""
 "Use an external mixer or the hardware mixer of your audio interface.\n"
-"Ardour will play NO role in monitoring"
+"%1 will play NO role in monitoring"
 msgstr ""
 "Verwende einen externen Mixer oder den Hardwaremixer der Audiohardware.\n"
-"Ardour wird das Monitoring NICHT übernehmen."
+"%1 wird das Monitoring NICHT übernehmen."
 
 #: startup.cc:75
 msgid "Ask %1 to play back material as it is being recorded"
@@ -11387,6 +11422,11 @@ msgstr "Akkordeingabe aktivieren"
 msgid "Sustain Selected Notes by Note Length"
 msgstr "Ausgewählte Noten ertönen über Notenlänge"
 
+#: stereo_panner.cc:108
+#, c-format
+msgid "L:%3d R:%3d Width:%d%%"
+msgstr "L:%3d R:%3d Breite:%d%%"
+
 #: stereo_panner_editor.cc:35
 msgid "Stereo Panner"
 msgstr "Stereo Panner"
@@ -11684,2004 +11724,3 @@ msgstr ""
 msgid "VerboseCanvasCursor"
 msgstr "Ausführlicher Canvas-Cursor"
 
-#~ msgid "Translations disabled"
-#~ msgstr "Übersetzungen sind deaktiviert"
-
-#~ msgid "Translations enabled"
-#~ msgstr "Übersetzungen sind aktiviert"
-
-#~ msgid "You must restart %1 for this to take effect."
-#~ msgstr ""
-#~ "%1 muss neu gestartet werden, damit die Änderungen übernommen werden."
-
-#~ msgid "Enable Translations"
-#~ msgstr "Übersetzungen aktivieren"
-
-#~ msgid "Bank:"
-#~ msgstr "Bank:"
-
-#~ msgid "Program:"
-#~ msgstr "Programm:"
-
-#~ msgid "Channel:"
-#~ msgstr "Kanal:"
-
-#~ msgid "Lck"
-#~ msgstr "Sp"
-
-#~ msgid "Use overlap equivalency for regions"
-#~ msgstr "Benutze Überlappung als Äquivalenz für Regionen"
-
-#~ msgid ""
-#~ "When extending region selection across a group, %1 must decide which "
-#~ "regions are equivalent\n"
-#~ "\n"
-#~ "If enabled, regions are considered \"equivalent\" if they overlap on the "
-#~ "timeline.\n"
-#~ "\n"
-#~ "If disabled, regions are considered \"equivalent\" only if have the same "
-#~ "start time, length and position"
-#~ msgstr ""
-#~ "Wenn Bereichsauswahlen quer über eine Gruppe erweitert werden, muß %1 "
-#~ "entscheiden, welche Regionen äquivalent sind\n"
-#~ "\n"
-#~ "Falls an, werden Regionen als \"äquivalent\" betrachtet, wenn sie sich "
-#~ "auf der  Zeitleiste überlappen.\n"
-#~ "\n"
-#~ "Falls aus, werden Region nur dann als \"äquivalent\" betrachtet, wenn sie "
-#~ "identische Startzeit, Länge und Position haben"
-
-#~ msgid "gTortnam"
-#~ msgstr "gTortnam"
-
-#~ msgid "Locate to Range Mark"
-#~ msgstr "Positionszeiger zu Bereichsmarker"
-
-#~ msgid "Play from Range Mark"
-#~ msgstr "Wiedergabe ab Bereichsmarker"
-
-#~ msgid "Subframes per frame"
-#~ msgstr "Subframes per frame"
-
-#~ msgid "80"
-#~ msgstr "80"
-
-#~ msgid "100"
-#~ msgstr "100"
-
-#~ msgid "Playback/Recording on 1 Device"
-#~ msgstr "Wiedergabe/Aufnahme mit einem Gerät"
-
-#~ msgid "Playback/Recording on 2 Devices"
-#~ msgstr "Wiedergabe/Aufnahme mit zwei Geräten"
-
-#~ msgid "could not create a new mixed track"
-#~ msgstr "Konnte keine neue Audio+MIDI-Spur erstellen."
-
-#, fuzzy
-#~ msgid "could not create new audio bus"
-#~ msgid_plural "could not create %1 new audio busses"
-#~ msgstr[0] "Konnte keinen neuen Audiobus erstellen."
-#~ msgstr[1] "Konnte keinen neuen Audiobus erstellen."
-
-#~ msgid ""
-#~ "The following %1 files were not in use and \n"
-#~ "have been moved to: %2\n"
-#~ "\n"
-#~ "After a restart of %5\n"
-#~ "\n"
-#~ "<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n"
-#~ "\n"
-#~ "will release an additional %3 %4bytes of disk space.\n"
-#~ msgstr ""
-#~ "Die folgenden %1 Dateien waren unbenutzt\n"
-#~ "und wurden verschoben nach: %2\n"
-#~ "\n"
-#~ "Nach einem Neustart von %5 kann über\n"
-#~ "\n"
-#~ "<span face=\"mono\">Projekt -> Aufräumen -> Müll leeren</span>\n"
-#~ "\n"
-#~ "%3 %4bytes Speicherplatz freigegeben werden.\n"
-
-#~ msgid ""
-#~ "The following %1 files were deleted from %2,\n"
-#~ "releasing %3 %4bytes of disk space"
-#~ msgstr ""
-#~ "Die folgenden %1 Dateien wurden von %2\n"
-#~ "gelöscht und gaben %3 %4bytes Speicherplatz frei"
-
-#~ msgid "ConstantPower"
-#~ msgstr "Konstante Energie"
-
-#~ msgid "Found one match."
-#~ msgstr "Ein Treffer gefunden."
-
-#~ msgid "could only create %1 of %2 new audio %3"
-#~ msgstr "Konnte nur %1 von %2 neuen %3 erstellen"
-
-#~ msgid "Always Play Range Selection (if any)"
-#~ msgstr "Immer Bereichsauswahl wiedergeben"
-
-#~ msgid "Start playback after any locate"
-#~ msgstr "Startet die Wiedergabe nach setzen des Positionszeigers"
-
-#~ msgid "Always Play Range"
-#~ msgstr "Immer Bereich wiedergeben"
-
-#~ msgid "pullup: \\u2012"
-#~ msgstr "pullup: \\u2012"
-
-#~ msgid "pullup %-6.4f"
-#~ msgstr "pullup %-6.4f"
-
-#~ msgid "Select/Move Objects"
-#~ msgstr "Objekte auswählen/verschieben"
-
-#~ msgid "Select/Move Ranges"
-#~ msgstr "Editierbereich auswählen/ändern"
-
-#~ msgid "Edit Region Contents (e.g. notes)"
-#~ msgstr "Inhalt von Regionen editieren (z.B. Noten)"
-
-#~ msgid "Link Object / Range Tools"
-#~ msgstr "Editierbereich auswählen/ändern"
-
-#~ msgid "editing|E"
-#~ msgstr "Bearbeitung|E"
-
-#~ msgid "Sharing Editing?"
-#~ msgstr "Bearbeitung teilen?"
-
-#~ msgid "Disable plugins during recording"
-#~ msgstr "Plugins während der Aufnahme deaktivieren"
-
-#~ msgid "Visual|Interface"
-#~ msgstr "Interface"
-
-#~ msgid "Editing"
-#~ msgstr "Bearbeitung"
-
-#~ msgid "Timecode source shares sample clock with audio interface"
-#~ msgstr ""
-#~ "Timecode-Quelle nutzt die gleiche Sample-Clock wie das Audiointerface"
-
-#~ msgid "Timecode Offset Negative"
-#~ msgstr "Negatives Timecode-Offset"
-
-#~ msgid "Crossfades are created"
-#~ msgstr "Länge von Crossfades"
-
-#~ msgid "to span entire overlap"
-#~ msgstr "Gesamte Überlappung"
-
-#~ msgid "constant power (-6dB)"
-#~ msgstr "Konstante Energie (-6dB)"
-
-#~ msgid "use existing region fade shape"
-#~ msgstr "Vorhandene Fade-Form verwenden:"
-
-#~ msgid "short-xfade-seconds"
-#~ msgstr "kurze Xfade-Sekunden"
-
-#~ msgid "Short crossfade length"
-#~ msgstr "Länge für kurze Crossfades"
-
-#~ msgid "Create crossfades automatically"
-#~ msgstr "Erzeuge Crossfades automatisch"
-
-#~ msgid "Page %1, [Stop]->"
-#~ msgstr "Seite %1, [Stop]->"
-
-#~ msgid "Add files:"
-#~ msgstr "Hinzufügen:"
-
-#~ msgid "Mapping:"
-#~ msgstr "Zuordnung:"
-
-#~ msgid "Add MIDI Controller Track"
-#~ msgstr "Füge Midi Controller Spur hinzu"
-
-#~ msgid "%1 could not start JACK"
-#~ msgstr "%1 konnte JACK nicht starten"
-
-#~ msgid ""
-#~ "There are several possible reasons:\n"
-#~ "\n"
-#~ "1) You requested audio parameters that are not supported..\n"
-#~ "2) JACK is running as another user.\n"
-#~ "\n"
-#~ "Please consider the possibilities, and perhaps try different parameters."
-#~ msgstr ""
-#~ "Dafür kann es verschiedene Gründe geben:\n"
-#~ "\n"
-#~ "1) Sie haben nicht unterstützte Audioeinstellungen gewählt.\n"
-#~ "2) JACK wurde unter einem anderen Benutzer gestartet.\n"
-#~ "\n"
-#~ "Betrachten Sie bitte diese Möglichkeiten und verwenden sie ggf. andere "
-#~ "Einstellungen."
-
-#~ msgid ""
-#~ "To ensure compatibility with various systems\n"
-#~ "session names may not contain a '/' character"
-#~ msgstr ""
-#~ "Um die Kompatibilität mit verschiedenen Systemen sicher zu stellen,\n"
-#~ "dürfen Projektnamen kein '/' Zeichen enthalten"
-
-#~ msgid ""
-#~ "To ensure compatibility with various systems\n"
-#~ "session names may not contain a '\\' character"
-#~ msgstr ""
-#~ "Um die Kompatibilität mit verschiedenen Systemen sicher zu stellen,\n"
-#~ "dürfen Projektnamen kein '\\' Zeichen enthalten"
-
-#~ msgid "Toolbars when Maximised"
-#~ msgstr "Symbolleisten wenn maximiert"
-
-#~ msgid "Hide All Crossfades"
-#~ msgstr "Alle Crossfades verbergen"
-
-#~ msgid "Show All Crossfades"
-#~ msgstr "Alle Crossfades zeigen"
-
-#~ msgid "Edit Crossfade"
-#~ msgstr "Crossfade editieren"
-
-#~ msgid "Out (dry)"
-#~ msgstr "Out (dry)"
-
-#~ msgid "In (dry)"
-#~ msgstr "In (dry)"
-
-#~ msgid "With Pre-roll"
-#~ msgstr "mit Pre-Roll"
-
-#~ msgid "With Post-roll"
-#~ msgstr "mit Post-Roll"
-
-#~ msgid "Edit crossfade"
-#~ msgstr "Crossfade editieren"
-
-#~ msgid "Route Groups"
-#~ msgstr "Bearbeitungsgruppen"
-
-#~ msgid "Unmute"
-#~ msgstr "Unmute"
-
-#~ msgid "Convert to Short"
-#~ msgstr "In kurzen Crossfade umwandeln"
-
-#~ msgid "Convert to Full"
-#~ msgstr "In langen Crossfade umwandeln"
-
-#~ msgid "Nudge Entire Track Backward"
-#~ msgstr "Gesamte Spur schrittweise nach hinten"
-
-#~ msgid "Nudge Track After Edit Point Backward"
-#~ msgstr "Spur nach Arbeitspunkt schrittweise nach hinten"
-
-#~ msgid "Nudge Region/Selection Backwards"
-#~ msgstr "Region/Auswahl schrittweise nach hinten"
-
-#~ msgid "Change crossfade active state"
-#~ msgstr "Crossfades de/aktivieren"
-
-#~ msgid "Change crossfade length"
-#~ msgstr "Länge des Crossfades ändern"
-
-#~ msgid "Jump Forward to Mark"
-#~ msgstr "Zum nächsten Marker springen"
-
-#~ msgid "Jump Backward to Mark"
-#~ msgstr "Zum vorherigen Marker springen"
-
-#~ msgid "Nudge Next Backward"
-#~ msgstr "Nächste Region Schritt rückwärts"
-
-#~ msgid "Forward to Grid"
-#~ msgstr "Vorwärts auf Raster"
-
-#~ msgid "Backward to Grid"
-#~ msgstr "Rückwärts auf Raster"
-
-#~ msgid "Move Backwards to Transient"
-#~ msgstr "Zum vorherigen Transienten"
-
-#~ msgid "Fork"
-#~ msgstr "Fork"
-
-#~ msgid "Nudge Backward by Capture Offset"
-#~ msgstr "Schritt nach hinten um Aufnahme-Offset"
-
-#~ msgid ""
-#~ "This route cannot be frozen because it has more outputs than inputs.  You "
-#~ "can fix this by increasing the number of inputs."
-#~ msgstr ""
-#~ "Diese Spur kann nicht eingefroren werden, da sie mehr Ausgänge als "
-#~ "Eingänge hat. Sie können die Anzahl der Eingänge erhöhen, um dies zu "
-#~ "beheben."
-
-#~ msgid "Realtime Priority"
-#~ msgstr "Realtime Priorität"
-
-#~ msgid "Advanced options"
-#~ msgstr "Erweiterte Einstellungen"
-
-#~ msgid "Include in Filename(s):"
-#~ msgstr "In Dateinamen einfügen:"
-
-#~ msgid "Could not create user configuration directory"
-#~ msgstr "Konnte Ordner für die Benutzerkonfiguration nicht erstellen."
-
-#~ msgid "MIDI Thru"
-#~ msgstr "MIDI Thru"
-
-#~ msgid "signal"
-#~ msgstr "Signal"
-
-#~ msgid "close"
-#~ msgstr "Schließen"
-
-#~ msgid "Legato"
-#~ msgstr "Legato"
-
-#~ msgid "Groove"
-#~ msgstr "Groove"
-
-#~ msgid "Quantize Type"
-#~ msgstr "Quantisierungstyp"
-
-#~ msgid "Secondary clock delta to edit cursor"
-#~ msgstr ""
-#~ "Sekundäre Zeitanzeige zeigt Abstand zwischen Positionszeiger und "
-#~ "Arbeitspunkt"
-
-#~ msgid "Route active state"
-#~ msgstr "Einschaltzustand"
-
-#~ msgid "Crossfades active"
-#~ msgstr "Crossfades sind aktiv"
-
-#~ msgid "Crossfades visible"
-#~ msgstr "Crossfades sind sichtbar"
-
-#~ msgid "Broadcast WAVE metadata"
-#~ msgstr "Broadcast WAVE Metadaten"
-
-#~ msgid "Page:"
-#~ msgstr "Seite:"
-
-#~ msgid "<b>Open a recent session</b>"
-#~ msgstr "Kürzlich verwendetes Projekt öffnen"
-
-#~ msgid "<b>Browse for existing sessions</b>"
-#~ msgstr "Nach vorhandenen Projekten suchen"
-
-#~ msgid "Strict Linear"
-#~ msgstr "Linear"
-
-#~ msgid "no style found for %1, using red"
-#~ msgstr "Kein Stil für %1 gefunden, verwende rot"
-
-#~ msgid "unknown style attribute %1 requested for color; using \"red\""
-#~ msgstr ""
-#~ "Unbekanntes Stil-Attribute für Farbe verlagt; stattdessen wir lieber \"rot"
-#~ "\" verwendet"
-
-#~ msgid "Envelope Visible"
-#~ msgstr "Lautstärkekurve sichtbar"
-
-#~ msgid "region gain envelope visible"
-#~ msgstr "Lautstärkekurve sichtbar"
-
-#~ msgid ""
-#~ "Russian:\n"
-#~ "\t Igor Blinov <pitstop@nm.ru>\n"
-#~ msgstr ""
-#~ "Russian:\n"
-#~ "\t Igor Blinov <pitstop@nm.ru>\n"
-
-#~ msgid ""
-#~ "To ensure compatibility with various systems\n"
-#~ "snapshot names may not contain a '\\' character"
-#~ msgstr ""
-#~ "Um die Kompatibilität mit verschiedenen Systemen sicher zu stellen,\n"
-#~ "dürfen Namen von Schnappschüssen kein '\\' Zeichen enthalten"
-
-#~ msgid ""
-#~ "To ensure compatibility with various systems\n"
-#~ "snapshot names may not contain a ':' character"
-#~ msgstr ""
-#~ "Um die Kompatibilität mit verschiedenen Systemen sicher zu stellen,\n"
-#~ "dürfen Namen von Schnappschüssen kein ':' Zeichen enthalten"
-
-#~ msgid "Sorry, MIDI Busses are not supported at this time."
-#~ msgstr "Entschuldigung, MIDI Busse werden momentan nicht unterstützt."
-
-#~ msgid "Mixer"
-#~ msgstr "Mixer"
-
-#~ msgid "Undo"
-#~ msgstr "Rückgängig"
-
-#~ msgid "Add Range Marker(s)"
-#~ msgstr "Bereichsmarker einfügen"
-
-#~ msgid "E"
-#~ msgstr "B"
-
-#~ msgid "time stretch"
-#~ msgstr "Time-Stretch"
-
-#~ msgid "Input channels:"
-#~ msgstr "Eingangskanäle:"
-
-#~ msgid "Output channels:"
-#~ msgstr "Ausgangskanäle:"
-
-#~ msgid "New From"
-#~ msgstr "Neu aus"
-
-#~ msgid "Move tempo and meter changes"
-#~ msgstr "Tempo und Taktwechsel mitbewegen"
-
-#~ msgid "Option-"
-#~ msgstr "Option-"
-
-#~ msgid "Shift-"
-#~ msgstr "Shift-"
-
-#~ msgid "Control-"
-#~ msgstr "Strg-"
-
-#~ msgid "SCMS"
-#~ msgstr "SCMS"
-
-#~ msgid "Set value to playhead"
-#~ msgstr "Wert auf Positionszeiger setzen"
-
-#~ msgid "Jump to the end of this range"
-#~ msgstr "An das Ende des Bereichs springen"
-
-#~ msgid "Jump to the start of this range"
-#~ msgstr "An den Anfang des Bereichs springen"
-
-#~ msgid "End time"
-#~ msgstr "Endzeit"
-
-#~ msgid "Store this many lines: "
-#~ msgstr "Gespeicherte Zeilen:"
-
-#~ msgid "New send"
-#~ msgstr "Neuer Send"
-
-#~ msgid "New Send ..."
-#~ msgstr "Send einfügen..."
-
-#~ msgid "Layering (in overlaid mode)"
-#~ msgstr "Layering (im normalen overlaid-Modus)"
-
-#~ msgid "Layering model"
-#~ msgstr "Layering-Schema"
-
-#~ msgid "later is higher"
-#~ msgstr "Später beginnende Region liegt oben"
-
-#~ msgid "most recently moved or added is higher"
-#~ msgstr "Zuletzt bewegte/hinzugefügte Region liegt oben"
-
-#~ msgid "most recently added is higher"
-#~ msgstr "Manuell / Zuletzt hinzugefügte Region liegt oben"
-
-#~ msgid ""
-#~ "<i><small>(You can change this preference at any time, via the "
-#~ "Preferences dialog)</small></i>"
-#~ msgstr ""
-#~ "<i><small>(Diese Einstellung kann jederzeit über die globalen "
-#~ "Einstellungen geändert werden)</small></i>"
-
-#~ msgid "second (2)"
-#~ msgstr "Halbe (2)"
-
-#~ msgid "eighth (8)"
-#~ msgstr "Achtel (8)"
-
-#~ msgid "garbaged note type entry (%1)"
-#~ msgstr "Fehlerhafter Notentyp (%1)"
-
-#~ msgid "EXT"
-#~ msgstr "EXT"
-
-#~ msgid "FPS"
-#~ msgstr "FPS"
-
-#~ msgid " "
-#~ msgstr " "
-
-#~ msgid "Activate all"
-#~ msgstr "Alle aktivieren"
-
-#~ msgid ""
-#~ "pre\n"
-#~ "roll"
-#~ msgstr ""
-#~ "pre\n"
-#~ "roll"
-
-#~ msgid ""
-#~ "post\n"
-#~ "roll"
-#~ msgstr ""
-#~ "post\n"
-#~ "roll"
-
-#~ msgid ""
-#~ "time\n"
-#~ "master"
-#~ msgstr ""
-#~ "Time\n"
-#~ "Master"
-
-#~ msgid "AUDITION"
-#~ msgstr "VORHÖREN"
-
-#~ msgid "SOLO"
-#~ msgstr "SOLO"
-
-#~ msgid "%.1f kHz / %4.1f ms"
-#~ msgstr "%.1f kHz / %4.1f ms"
-
-#, fuzzy
-#~ msgid "%<PRId64> kHz / %4.1f ms"
-#~ msgstr "%u kHz / %4.1f ms"
-
-#~ msgid "DSP: %5.1f%%"
-#~ msgstr "DSP: %5.1f%%"
-
-#~ msgid "Buffers p:%<PRIu32>%% c:%<PRIu32>%%"
-#~ msgstr "Buffer p:%<PRIu32>%% c:%<PRIu32>%%"
-
-#~ msgid "Disk: 24hrs+"
-#~ msgstr "HD: >24 Std."
-
-#, fuzzy
-#~ msgid "Does %1 control the time?"
-#~ msgstr "Bestimmt Ardour die Time?"
-
-#, fuzzy
-#~ msgid "External"
-#~ msgstr "intern"
-
-#~ msgid "automation"
-#~ msgstr "Automation"
-
-#, fuzzy
-#~ msgid "Delete Unused"
-#~ msgstr "Entfernen mit"
-
-#~ msgid "No devices found for driver \"%1\""
-#~ msgstr "Keine Treiber für das Gerät \"%1\" gefunden."
-
-#, fuzzy
-#~ msgid "Solo/Mute"
-#~ msgstr "Mute"
-
-#, fuzzy
-#~ msgid "MIDI control"
-#~ msgstr ""
-#~ "MIDI Parameter\n"
-#~ "Steuerung"
-
-#~ msgid "A track already exists with that name"
-#~ msgstr "Es existiert bereits eine Spur mit diesem Namen"
-
-#~ msgid "r"
-#~ msgstr "r"
-
-#~ msgid "Password:"
-#~ msgstr "Passwort"
-
-#~ msgid "Cancelling.."
-#~ msgstr "Abbrechen..."
-
-#~ msgid "unknown track height name \"%1\" in XML GUI information"
-#~ msgstr "Unbekannte Spurhöhe \"%1\" in der XML GUI Information"
-
-#~ msgid "Off"
-#~ msgstr "Aus"
-
-#~ msgid "Smaller"
-#~ msgstr "Kleiner"
-
-#~ msgid "quit"
-#~ msgstr "Beenden"
-
-#~ msgid "session"
-#~ msgstr "Das Projekt"
-
-#~ msgid "snapshot"
-#~ msgstr "Der Schnappschuss"
-
-#, fuzzy
-#~ msgid "Save Mix Template"
-#~ msgstr "Als Vorlage Speichern..."
-
-#, fuzzy
-#~ msgid ""
-#~ "Welcome to %1.\n"
-#~ "\n"
-#~ "The program will take a bit longer to start up\n"
-#~ "while the system fonts are checked.\n"
-#~ "\n"
-#~ "This will only be done once, and you will\n"
-#~ "not see this message again\n"
-#~ msgstr ""
-#~ "Willkommen bei Ardour.\n"
-#~ "\n"
-#~ "Der Programmstart wird etwas länger dauern,\n"
-#~ "da die Systemschriften geprüft werden.\n"
-#~ "\n"
-#~ "Diese Meldung wird nur dieses eine Mal\n"
-#~ "auftauchen.\n"
-
-#~ msgid "Clean Up"
-#~ msgstr "Aufräumen"
-
-#~ msgid "Select semitones or %%-age for speed display"
-#~ msgstr "Geschwindigkeitsanzeige als Prozent oder Halbtöne einstellen"
-
-#~ msgid "Current transport speed"
-#~ msgstr "Geschwindigkeitsanzeige"
-
-#~ msgid "stop"
-#~ msgstr "Stop"
-
-#~ msgid "-0.55"
-#~ msgstr "-0.55"
-
-#~ msgid "Cleanup"
-#~ msgstr "Aufräumen"
-
-#, fuzzy
-#~ msgid "DSP: 100.0%"
-#~ msgstr "DSP: %5.1f%%"
-
-#~ msgid "ST"
-#~ msgstr "HT"
-
-#~ msgid "Extend Range to End of Region"
-#~ msgstr "Bereich vergrößern bis zum Ende der Region "
-
-#~ msgid "Extend Range to Start of Region"
-#~ msgstr "Bereich vergrößern bis zum Anfang der Region "
-
-#, fuzzy
-#~ msgid "Key Mouse"
-#~ msgstr "Maus"
-
-#~ msgid "goto"
-#~ msgstr "Gehe zu"
-
-#~ msgid "Center Active Marker"
-#~ msgstr "Marker zentrieren"
-
-#~ msgid "Brush at Mouse"
-#~ msgstr "Pinsel an Mausposition (Brush)"
-
-#~ msgid "Bounce"
-#~ msgstr "Bounce"
-
-#~ msgid "fixed time region copy"
-#~ msgstr "Region zeitgleich kopieren"
-
-#~ msgid "region copy"
-#~ msgstr "Region kopieren"
-
-#~ msgid "timestretch"
-#~ msgstr "Time-Stretch"
-
-#~ msgid "extend selection"
-#~ msgstr "Auswahl erweitern"
-
-#~ msgid "Clear tempo"
-#~ msgstr "Tempo zurücksetzen"
-
-#~ msgid "Clear meter"
-#~ msgstr "Taktart zurücksetzen"
-
-#, fuzzy
-#~ msgid "Default Channel"
-#~ msgstr "3 Kanäle"
-
-#~ msgid "input"
-#~ msgstr "Input"
-
-#, fuzzy
-#~ msgid "Inserts, sends & plugins:"
-#~ msgstr "Pre-Fader Inserts, Sends & Plugins:"
-
-#, fuzzy
-#~ msgid ""
-#~ "Do you really want to remove bus \"%1\" ?\n"
-#~ "\n"
-#~ "You may also lose the playlist used by this track.\n"
-#~ "\n"
-#~ "(This action cannot be undone, and the session file will be overwritten)"
-#~ msgstr ""
-#~ "Wollen Sie wirklich die Spur \"%1\" löschen?\n"
-#~ "\n"
-#~ "Sie werden auch die Wiedergabeliste, die diese Spur benutzt verlieren.\n"
-#~ "(Dies kann nicht rückgängig gemacht werden!)"
-
-#, fuzzy
-#~ msgid "insert file"
-#~ msgstr "Audiodatei einfügen"
-
-#~ msgid "region drag"
-#~ msgstr "Region verschieben"
-
-#~ msgid "Drag region brush"
-#~ msgstr "Region Brush ziehen"
-
-#~ msgid "selection grab"
-#~ msgstr "Auswählen"
-
-#~ msgid "region fill"
-#~ msgstr "Region füllen"
-
-#~ msgid "fill selection"
-#~ msgstr "Auswahl füllen"
-
-#~ msgid "duplicate region"
-#~ msgstr "Region duplizieren"
-
-#, fuzzy
-#~ msgid "C"
-#~ msgstr "CD"
-
-#~ msgid "link"
-#~ msgstr "link"
-
-#~ msgid "panning link control"
-#~ msgstr "Pan-Regler verbinden"
-
-#~ msgid "panning link direction"
-#~ msgstr "Richtung der Verbindung"
-
-#~ msgid "Reset all"
-#~ msgstr "Alle zurücksetzen"
-
-#, fuzzy
-#~ msgid "Set tempo map"
-#~ msgstr "Tempowechsel einfügen"
-
-#~ msgid "pixbuf"
-#~ msgstr "Pixbuffer"
-
-#~ msgid "the pixbuf"
-#~ msgstr "Pixbuffer"
-
-#~ msgid "x"
-#~ msgstr "x"
-
-#~ msgid "y"
-#~ msgstr "y"
-
-#~ msgid "the width"
-#~ msgstr "Breite"
-
-#~ msgid "drawwidth"
-#~ msgstr "gezeichnete Breite"
-
-#~ msgid "drawn width"
-#~ msgstr "gezeichnete Breite"
-
-#~ msgid "height"
-#~ msgstr "Höhe"
-
-#~ msgid "the height"
-#~ msgstr "Höhe"
-
-#~ msgid "anchor"
-#~ msgstr "Anker"
-
-#~ msgid "the anchor"
-#~ msgstr "Anker"
-
-#, fuzzy
-#~ msgid "frames_per_unit of ruler"
-#~ msgstr "Obere Grenze für das Lineal"
-
-#~ msgid "fill color"
-#~ msgstr "Füllfarbe"
-
-#~ msgid "color of tick"
-#~ msgstr "Häkchenfarbe"
-
-#~ msgid "ardour: export ranges"
-#~ msgstr "ardour: Bereiche Exportieren"
-
-#~ msgid "Export to Directory"
-#~ msgstr "In Verzeichnis exportieren"
-
-#~ msgid "Please enter a valid target directory."
-#~ msgstr "Bitte geben Sie ein gültiges Zielverzeichis an."
-
-#~ msgid "Please select an existing target directory. Files are not allowed!"
-#~ msgstr ""
-#~ "Bitte wählen Sie ein vorhandenes Zielverzeichnis aus.\n"
-#~ "Dateien sind nicht möglich."
-
-#~ msgid "Cannot write file in: "
-#~ msgstr "Konnte Datei nicht in Verzeichnis  schreiben:"
-
-#~ msgid "NAME:"
-#~ msgstr "Name:"
-
-#~ msgid "play"
-#~ msgstr "Play"
-
-#~ msgid "START:"
-#~ msgstr "Beginn:"
-
-#~ msgid "END:"
-#~ msgstr "Ende:"
-
-#~ msgid "LENGTH:"
-#~ msgstr "Länge:"
-
-#~ msgid "Primary clock"
-#~ msgstr "Primäre Zeitanzeige"
-
-#~ msgid "secondary clock"
-#~ msgstr "Sekundäre Zeitanzeige"
-
-#~ msgid "programming error: start_grab called without drag item"
-#~ msgstr "Programmierfehler: start_grab called without drag item"
-
-#~ msgid ""
-#~ "programming error: fade out canvas item has no regionview data pointer!"
-#~ msgstr ""
-#~ "Programmierfehler: fade out canvas item has no regionview data pointer!"
-
-#~ msgid "programming error: cursor canvas item has no cursor data pointer!"
-#~ msgstr "Programmierfehler: cursor canvas item has no cursor data pointer!"
-
-#~ msgid "move region(s)"
-#~ msgstr "Region(en) bewegen"
-
-#~ msgid "move selection"
-#~ msgstr "Auswahl bewegen"
-
-#~ msgid "Import/Export"
-#~ msgstr "Import/Export"
-
-#~ msgid "Export selection to audiofile..."
-#~ msgstr "Exportiere Auswahlbereich als Audio-Datei..."
-
-#~ msgid "Export range markers to audiofile..."
-#~ msgstr "Exportiere Bereiche als Audio-Datei..."
-
-#~ msgid "Show Mixer"
-#~ msgstr "Mixer anzeigen"
-
-#~ msgid "Track/Bus Inspector"
-#~ msgstr "Verbindungen"
-
-#~ msgid "Toggle Record Enable Track2"
-#~ msgstr "Aufnahme aktivieren für Spur 2"
-
-#~ msgid "Toggle Record Enable Track3"
-#~ msgstr "Aufnahme aktivieren für Spur 3"
-
-#~ msgid "Toggle Record Enable Track4"
-#~ msgstr "Aufnahme aktivieren für Spur 4"
-
-#~ msgid "Toggle Record Enable Track5"
-#~ msgstr "Aufnahme aktivieren für Spur 5"
-
-#~ msgid "Toggle Record Enable Track6"
-#~ msgstr "Aufnahme aktivieren für Spur 6"
-
-#~ msgid "Toggle Record Enable Track7"
-#~ msgstr "Aufnahme aktivieren für Spur 7"
-
-#~ msgid "Toggle Record Enable Track8"
-#~ msgstr "Aufnahme aktivieren für Spur 8"
-
-#~ msgid "Toggle Record Enable Track9"
-#~ msgstr "Aufnahme aktivieren für Spur 9"
-
-#~ msgid "Toggle Record Enable Track10"
-#~ msgstr "Aufnahme aktivieren für Spur 10"
-
-#~ msgid "Toggle Record Enable Track11"
-#~ msgstr "Aufnahme aktivieren für Spur 11"
-
-#~ msgid "Toggle Record Enable Track12"
-#~ msgstr "Aufnahme aktivieren für Spur 12"
-
-#~ msgid "Toggle Record Enable Track13"
-#~ msgstr "Aufnahme aktivieren für Spur 13"
-
-#~ msgid "Toggle Record Enable Track14"
-#~ msgstr "Aufnahme aktivieren für Spur 14"
-
-#~ msgid "Toggle Record Enable Track15"
-#~ msgstr "Aufnahme aktivieren für Spur 15"
-
-#~ msgid "Toggle Record Enable Track16"
-#~ msgstr "Aufnahme aktivieren für Spur 16"
-
-#~ msgid "Toggle Record Enable Track17"
-#~ msgstr "Aufnahme aktivieren für Spur 17"
-
-#~ msgid "Toggle Record Enable Track18"
-#~ msgstr "Aufnahme aktivieren für Spur 18"
-
-#~ msgid "Toggle Record Enable Track19"
-#~ msgstr "Aufnahme aktivieren für Spur 19"
-
-#~ msgid "Toggle Record Enable Track20"
-#~ msgstr "Aufnahme aktivieren für Spur 20"
-
-#~ msgid "Toggle Record Enable Track21"
-#~ msgstr "Aufnahme aktivieren für Spur 21"
-
-#~ msgid "Toggle Record Enable Track22"
-#~ msgstr "Aufnahme aktivieren für Spur 22"
-
-#~ msgid "Toggle Record Enable Track23"
-#~ msgstr "Aufnahme aktivieren für Spur 23"
-
-#~ msgid "Toggle Record Enable Track24"
-#~ msgstr "Aufnahme aktivieren für Spur 24"
-
-#~ msgid "Toggle Record Enable Track25"
-#~ msgstr "Aufnahme aktivieren für Spur 25"
-
-#~ msgid "Toggle Record Enable Track26"
-#~ msgstr "Aufnahme aktivieren für Spur 26"
-
-#~ msgid "Toggle Record Enable Track27"
-#~ msgstr "Aufnahme aktivieren für Spur 27"
-
-#~ msgid "Toggle Record Enable Track28"
-#~ msgstr "Aufnahme aktivieren für Spur 28"
-
-#~ msgid "Toggle Record Enable Track29"
-#~ msgstr "Aufnahme aktivieren für Spur 29"
-
-#~ msgid "Toggle Record Enable Track30"
-#~ msgstr "Aufnahme aktivieren für Spur 30"
-
-#~ msgid "Toggle Record Enable Track31"
-#~ msgstr "Aufnahme aktivieren für Spur 31"
-
-#~ msgid "Toggle Record Enable Track32"
-#~ msgstr "Aufnahme aktivieren für Spur 32"
-
-#~ msgid "Use OSC"
-#~ msgstr "Aktiviere OSC"
-
-#~ msgid "Stop transport at session end"
-#~ msgstr "Transport am Ende des Projekts stoppen"
-
-#~ msgid "Region equivalents overlap"
-#~ msgstr "Region entspricht Überdeckung"
-
-#~ msgid "Enable Editor Meters"
-#~ msgstr "Aktiviere Pegelanzeigen im Editor"
-
-#~ msgid "Rubberbanding Snaps to Grid"
-#~ msgstr "Time-Stretch schnappt auf Raster ein"
-
-#~ msgid "Auto-analyse new audio"
-#~ msgstr "Neue Audiodaten automatisch analysieren"
-
-#~ msgid "Use DC bias"
-#~ msgstr "Benutze DC bias"
-
-#~ msgid "Latched solo"
-#~ msgstr "Latch Solo"
-
-#~ msgid "JACK does monitoring"
-#~ msgstr "Monitoring mit JACK"
-
-#~ msgid "Ardour does monitoring"
-#~ msgstr "Monitoring mit Ardour"
-
-#~ msgid "Audio Hardware does monitoring"
-#~ msgstr "Hardware Monitoring"
-
-#~ msgid "Auto-connect inputs to physical inputs"
-#~ msgstr "Eingänge automatisch mit Audioeingängen verbinden"
-
-#~ msgid "Manually connect inputs"
-#~ msgstr "Eingänge manuell verbinden"
-
-#~ msgid "Auto-connect outputs to physical outs"
-#~ msgstr "Ausgänge automatisch mit Audioausgängen verbinden"
-
-#~ msgid "Auto Rebind Controls"
-#~ msgstr "Controller automatisch anbinden"
-
-#~ msgid "redirect automation created for non-plugin"
-#~ msgstr "Redirect-Automation für ein nicht-Plugin erstellt"
-
-#~ msgid "Show waveforms"
-#~ msgstr "Wellenformen zeigen"
-
-#~ msgid "Waveform"
-#~ msgstr "Wellenform"
-
-#~ msgid "gain"
-#~ msgstr "Gain"
-
-#~ msgid "pan"
-#~ msgstr "Pan"
-
-#~ msgid "programming error: no ImageFrameView selected"
-#~ msgstr "Programmierfehler: kein ImageFrameView ausgewählt"
-
-#~ msgid "programming error: no MarkerView selected"
-#~ msgstr "Programmierfehler: kein MarkerView ausgewählt"
-
-#~ msgid "h"
-#~ msgstr "h"
-
-#~ msgid "track height"
-#~ msgstr "Anzeigehöhe"
-
-#~ msgid "clear track"
-#~ msgstr "Spur zurücksetzen"
-
-#~ msgid "add gain automation event"
-#~ msgstr "Punkt in die Lautstärkekurve einfügen"
-
-#~ msgid "Add existing audio"
-#~ msgstr "Audio importieren"
-
-#~ msgid ""
-#~ "A source file %1 already exists. This operation will not update that "
-#~ "source but import the file %2 as a new source, please confirm."
-#~ msgstr ""
-#~ "Die Datei %1 existiert bereits. Dieser Vorgang wird die ursprüngliche "
-#~ "Datei nicht beibehalten, sondern die Datei %2 als neue Datei importiern."
-
-#~ msgid "importing %1"
-#~ msgstr "importiere %1"
-
-#~ msgid "1.5 seconds"
-#~ msgstr "1,5 Sekunden"
-
-#~ msgid "2 seconds"
-#~ msgstr "2 Sekunden"
-
-#~ msgid "2.5 seconds"
-#~ msgstr "2,5 Sekunden"
-
-#~ msgid "3 seconds"
-#~ msgstr "3 Sekunden"
-
-#~ msgid "Recent:"
-#~ msgstr "Zuletzt verwendet:"
-
-#~ msgid "Session Control"
-#~ msgstr "Projektübersicht"
-
-#~ msgid "select directory"
-#~ msgstr "Verzeichnis auswählen"
-
-#~ msgid ""
-#~ "programming error: unknown solo model in ARDOUR_UI::set_solo_model: %1"
-#~ msgstr ""
-#~ "Programmierfehler: unbekannte Solo-Einstellung in ARDOUR_UI::"
-#~ "set_solo_model: %1"
-
-#~ msgid ""
-#~ "programming error: unknown remote model in ARDOUR_UI::set_remote_model: %1"
-#~ msgstr ""
-#~ "Programmierfehler: unbekanntes Fernsteuerungsmodell in ARDOUR_UI::"
-#~ "set_remote_model: %1"
-
-#~ msgid ""
-#~ "programming error: unknown monitor model in ARDOUR_UI::set_monitor_model: "
-#~ "%1"
-#~ msgstr ""
-#~ "Programmierfehler: unbekannte Monitoring-Einstellung in ARDOUR_UI::"
-#~ "set_monitor_model: %1"
-
-#~ msgid ""
-#~ "programming error: unknown denormal model in ARDOUR_UI::"
-#~ "set_denormal_model: %1"
-#~ msgstr ""
-#~ "Programmierfehler: unknown denormal model in ARDOUR_UI::"
-#~ "set_denormal_model: %1"
-
-#~ msgid ""
-#~ "programming error: unknown file header format passed to ARDOUR_UI::"
-#~ "map_file_data_format: %1"
-#~ msgstr ""
-#~ "Programmierfehler: unbekanntes Dateiheaderformat übergeben an ARDOUR_UI::"
-#~ "map_file_data_format: %1"
-
-#~ msgid ""
-#~ "programming error: unknown file data format passed to ARDOUR_UI::"
-#~ "map_file_data_format: %1"
-#~ msgstr ""
-#~ "Programmierfehler: unbekanntes Dateiformat übergeben an ARDOUR_UI::"
-#~ "map_file_data_format: %1"
-
-#~ msgid ""
-#~ "Ardour comes with ABSOLUTELY NO WARRANTY\n"
-#~ "This is free software, and you are welcome to redistribute it\n"
-#~ "under certain conditions; see the file COPYING for details.\n"
-#~ msgstr ""
-#~ "Ardour wird Ihnen OHNE JEGLICHE GEWÄHRLEISTUNG zur Verfügung gestellt.\n"
-#~ "Dies ist freie Software und Sie dürfen sie gerne weiterverbreiten,\n"
-#~ "solange Sie sich an die Bedingungen, die in der Datei COPYING aufgeführt "
-#~ "sind halten.\n"
-
-#~ msgid "You need to select which line to edit"
-#~ msgstr "Sie müssen die entsprechende Automationslinie auswählen"
-
-#~ msgid "add pan automation event"
-#~ msgstr "Pan-Automationspunkt einfügen"
-
-#~ msgid "Semitones (12TET)"
-#~ msgstr "Halbtöne"
-
-#~ msgid "Add Input"
-#~ msgstr "Hinzufügen"
-
-#~ msgid "Add Output"
-#~ msgstr "Hinzufügen"
-
-#~ msgid "Remove Output"
-#~ msgstr "Entfernen"
-
-#~ msgid "Disconnect All"
-#~ msgstr "Alle trennen"
-
-#~ msgid "Available connections"
-#~ msgstr "Verfügbare Verbindungen"
-
-#~ msgid "Name for Chunk:"
-#~ msgstr "Name für Abschnitt:"
-
-#~ msgid "Create Chunk"
-#~ msgstr "Abschnitt erzeugen"
-
-#~ msgid "Forget it"
-#~ msgstr "Abbrechen"
-
-#~ msgid "No selectable material found in the currently selected time range"
-#~ msgstr "Konnte im ausgewählten Bereich kein auswählbares Material finden"
-
-#~ msgid "ardour: weird plugin dialog"
-#~ msgstr "ardour: Merkwürdiger Plugin-Dialog"
-
-#~ msgid ""
-#~ "You attempted to add a plugin (%1).\n"
-#~ "The plugin has %2 inputs\n"
-#~ "but at the insertion point, there are\n"
-#~ "%3 active signal streams.\n"
-#~ "\n"
-#~ "This makes no sense - you are throwing away\n"
-#~ "part of the signal."
-#~ msgstr ""
-#~ "Sie möchten ein Plugin hinzufügen (%1).\n"
-#~ "Dieses Plugin besitzt %2 Eingänge,\n"
-#~ "doch an dieser Position existieren\n"
-#~ "%3 aktive Signale.\n"
-#~ "\n"
-#~ "Das ist nicht möglich - es würden Teile\n"
-#~ "des Signals fehlen."
-
-#~ msgid ""
-#~ "You attempted to add a plugin (%1).\n"
-#~ "The plugin has %2 inputs\n"
-#~ "but at the insertion point there are\n"
-#~ "only %3 active signal streams.\n"
-#~ "\n"
-#~ "This makes no sense - unless the plugin supports\n"
-#~ "side-chain inputs. A future version of Ardour will\n"
-#~ "support this type of configuration."
-#~ msgstr ""
-#~ "Sie möchten ein Plugin hinzufügen (%1).\n"
-#~ "Dieses Plugin besitzt %2 Eingänge,\n"
-#~ "doch an dieser Position existieren\n"
-#~ "nur %3 aktive Signale.\n"
-#~ "\n"
-#~ "Das ist nicht möglich - außer, wenn dieses Plugin\n"
-#~ "Side-Chain-Eingänge unterstützt. Dies wird in einer\n"
-#~ "der nächsten Versionen von Ardour möglich sein."
-
-#~ msgid ""
-#~ "You attempted to add a plugin (%1).\n"
-#~ "\n"
-#~ "The I/O configuration doesn't make sense:\n"
-#~ "\n"
-#~ "The plugin has %2 inputs and %3 outputs.\n"
-#~ "The track/bus has %4 inputs and %5 outputs.\n"
-#~ "The insertion point, has %6 active signals.\n"
-#~ "\n"
-#~ "Ardour does not understand what to do in such situations.\n"
-#~ msgstr ""
-#~ "Sie möchten ein Plugin hinzufügen (%1).\n"
-#~ "\n"
-#~ "Die Ein-/Ausgangskonfiguration ist aber nicht möglich:\n"
-#~ "\n"
-#~ "Das Plugin besitzt %2 Eingänge und %3 Ausgänge.\n"
-#~ "Diese Spur besitzt %4 Eingänge und %5 Ausgänge.\n"
-#~ "An dieser Position existieren %6 aktive Signale.\n"
-#~ "\n"
-#~ "Ardour kann mit dieser Situation nicht umgehen.\n"
-
-#~ msgid "Post-fader inserts, sends & plugins:"
-#~ msgstr "Post-Fader Inserts, Sends & Plugins:"
-
-#~ msgid "rename redirect"
-#~ msgstr "Redirect umbenennen"
-
-#~ msgid ""
-#~ "Do you really want to remove all pre-fader redirects from this track?\n"
-#~ "(this cannot be undone)"
-#~ msgstr ""
-#~ "Wollen Sie wirklich alle Pre-Fader-Redirects von dieser Spur entfernen?\n"
-#~ "(Dies kann nicht rückgängig gemacht werden)"
-
-#~ msgid ""
-#~ "Do you really want to remove all post-fader redirects from this track?\n"
-#~ "(this cannot be undone)"
-#~ msgstr ""
-#~ "Wollen Sie wirklich alle Post-Fader-Redirects von dieser Spur entfernen?\n"
-#~ "(Dies kann nicht rückgängig gemacht werden)"
-
-#~ msgid "v"
-#~ msgstr "v"
-
-#~ msgid "Display Height"
-#~ msgstr "Anzeigehöhe"
-
-#~ msgid "ardour: color selection"
-#~ msgstr "ardour: Farbe auswählen"
-
-#~ msgid ""
-#~ "Do you really want to remove track \"%1\" ?\n"
-#~ "(cannot be undone)"
-#~ msgstr ""
-#~ "Wollen Sie wirklich die Spur \"%1\" löschen?\n"
-#~ "(Kann nicht rückgängig gemacht werden!)"
-
-#~ msgid "ardour: x-fade edit"
-#~ msgstr "ardour: Crossfade Editor"
-
-#~ msgid "Chunks"
-#~ msgstr "Teile"
-
-#~ msgid "Popup region editor"
-#~ msgstr "Regioneneditor öffnen"
-
-#~ msgid "Define sync point"
-#~ msgstr "Einrastpunkt definieren"
-
-#~ msgid "Original position"
-#~ msgstr "Ursprungsposition"
-
-#~ msgid "Nudge fwd"
-#~ msgstr "Schritt nach vorne"
-
-#~ msgid "Nudge bwd"
-#~ msgstr "Schritt nach hinten"
-
-#~ msgid "Nudge bwd by capture offset"
-#~ msgstr "Schritt nach hinten um Aufnahme-Offset"
-
-#~ msgid "Start to edit point"
-#~ msgstr "Von Anfang bis Arbeitspunkt"
-
-#~ msgid "Edit point to end"
-#~ msgstr "Von Arbeitspunkt bis Ende"
-
-#~ msgid "Play range"
-#~ msgstr "Bereich abspielen"
-
-#~ msgid "Loop range"
-#~ msgstr "Bereich in Schleife abspielen"
-
-#~ msgid "Select all in range"
-#~ msgstr "Alles im Bereich auswählen"
-
-#~ msgid "Set loop from selection"
-#~ msgstr "Schleife aus Auswahl erstellen"
-
-#~ msgid "Set punch from selection"
-#~ msgstr "Punch-Bereich aus Auswahl erstellen"
-
-#~ msgid "Duplicate range"
-#~ msgstr "Bereich duplizieren"
-
-#~ msgid "Create chunk from range"
-#~ msgstr "Abschnitt aus Bereich erstellen..."
-
-#~ msgid "Export range"
-#~ msgstr "Bereich exportieren"
-
-#~ msgid "Play from edit point"
-#~ msgstr "Wiedergabe ab Arbeitspunkt"
-
-#~ msgid "Insert chunk"
-#~ msgstr "Abschnitt einfügen"
-
-#~ msgid "Nudge entire track bwd"
-#~ msgstr "Gesamte Spur schrittweise nach hinten"
-
-#~ msgid "Nudge track after edit point bwd"
-#~ msgstr "Spur nach Arbeitspunkt schrittweise nach hinten"
-
-#~ msgid "Select all after playhead"
-#~ msgstr "Alles nach Positionszeiger auswählen"
-
-#~ msgid "Select all before playhead"
-#~ msgstr "Alles vor Positionszeiger auswählen"
-
-#~ msgid "SMPTE Seconds"
-#~ msgstr "SMPTE-Sekunden"
-
-#~ msgid "Magnetic Snap"
-#~ msgstr "Magnetisch einrasten"
-
-#~ msgid "Splice Edit"
-#~ msgstr "Splice Edit"
-
-#~ msgid "Slide Edit"
-#~ msgstr "Slide Edit"
-
-#, fuzzy
-#~ msgid "Lock Edit"
-#~ msgstr "Positionszeiger zum Arbeitspunkt"
-
-#~ msgid "SMPTE Frames"
-#~ msgstr "SMPTE-Frames"
-
-#~ msgid "SMPTE Minutes"
-#~ msgstr "SMPTE-Minuten"
-
-#~ msgid "Shortcut Editor"
-#~ msgstr "Tastenkürzel - Editor"
-
-#~ msgid "ardour: add track/bus"
-#~ msgstr "ardour: Füge Spur/Bus hinzu"
-
-#~ msgid "Name (template)"
-#~ msgstr "Name für Mixer-Vorlage"
-
-#~ msgid "ardour: export region"
-#~ msgstr "ardour: Region Exportieren"
-
-#~ msgid "Varispeed"
-#~ msgstr "Varispeed"
-
-#~ msgid "comments"
-#~ msgstr "Kommentare"
-
-#~ msgid "*comments*"
-#~ msgstr "*Kommentare*"
-
-#~ msgid "could not register new ports required for that connection"
-#~ msgstr "Konnte die Ports, die diese Verbindung benötigt nicht registrieren"
-
-#~ msgid " Input"
-#~ msgstr "Eingang"
-
-#~ msgid "Invert Polarity"
-#~ msgstr "Polarität umkehren"
-
-#~ msgid "Go"
-#~ msgstr "Gehe zu"
-
-#~ msgid "Add New Location"
-#~ msgstr "Neue Position hinzufügen"
-
-#~ msgid "Location (CD Index) Markers"
-#~ msgstr "Positionsmarker (CD Index)"
-
-#~ msgid "Range (CD Track) Markers"
-#~ msgstr "Bereiche (CD Tracks)"
-
-#~ msgid "Play (double click)"
-#~ msgstr "Play"
-
-#~ msgid "n/a"
-#~ msgstr "n/a"
-
-#~ msgid "at edit point"
-#~ msgstr "Arbeitspunkt"
-
-#~ msgid "at playhead"
-#~ msgstr "Positionszeiger"
-
-#~ msgid ""
-#~ "There is no selection to export.\n"
-#~ "\n"
-#~ "Select a selection using the range mouse mode"
-#~ msgstr ""
-#~ "Es wurde keine Auswahlbereich zum Exportieren erstellt.\n"
-#~ "\n"
-#~ "Erstellen Sie eine Auswahl mit dem Bereichswerkzeug"
-
-#~ msgid ""
-#~ "There are no ranges to export.\n"
-#~ "\n"
-#~ "Create 1 or more ranges by dragging the mouse in the range bar"
-#~ msgstr ""
-#~ "Es gibt keine Bereiche, die exportiert werden können.\n"
-#~ "\n"
-#~ "Erstellen Sie einen oder mehrere Bereiche, indem Sie den Mauszeiger in "
-#~ "der Bereichleiste ziehen"
-
-#~ msgid "Link Region/Track Selection"
-#~ msgstr "Spurauswahl folgt Auswahl der Region"
-
-#~ msgid "Break drag"
-#~ msgstr "Verschieben abbrechen"
-
-#~ msgid "Use Region Fades (global)"
-#~ msgstr "Regionen-Fades global benutzen"
-
-#~ msgid "Show Region Fades"
-#~ msgstr "Fades anzeigen"
-
-#~ msgid "Toggle Region Fade In"
-#~ msgstr "Fade-In (de-)aktivieren"
-
-#~ msgid "Toggle Region Fade Out"
-#~ msgstr "Fade-Out (de-)aktivieren"
-
-#~ msgid "Toggle Region Fades"
-#~ msgstr "Überblenden von Region (de-)aktivieren"
-
-#~ msgid "Save View 2"
-#~ msgstr "Ansicht 2 speichern"
-
-#~ msgid "Goto View 2"
-#~ msgstr "Ansicht 2 aufrufen"
-
-#~ msgid "Save View 3"
-#~ msgstr "Ansicht 3 speichern"
-
-#~ msgid "Goto View 3"
-#~ msgstr "Ansicht 3 aufrufen"
-
-#~ msgid "Save View 4"
-#~ msgstr "Ansicht 4 speichern"
-
-#~ msgid "Goto View 4"
-#~ msgstr "Ansicht 4 aufrufen"
-
-#~ msgid "Save View 5"
-#~ msgstr "Ansicht 5 speichern"
-
-#~ msgid "Goto View 5"
-#~ msgstr "Ansicht 5 aufrufen"
-
-#~ msgid "Save View 6"
-#~ msgstr "Ansicht 6 speichern"
-
-#~ msgid "Goto View 6"
-#~ msgstr "Ansicht 6 aufrufen"
-
-#~ msgid "Save View 7"
-#~ msgstr "Ansicht 7 speichern"
-
-#~ msgid "Goto View 7"
-#~ msgstr "Ansicht 7 aufrufen"
-
-#~ msgid "Save View 8"
-#~ msgstr "Ansicht 8 speichern"
-
-#~ msgid "Goto View 8"
-#~ msgstr "Ansicht 8 aufrufen"
-
-#~ msgid "Save View 9"
-#~ msgstr "Ansicht 9 speichern"
-
-#~ msgid "Goto View 9"
-#~ msgstr "Ansicht 9 aufrufen"
-
-#~ msgid "Save View 10"
-#~ msgstr "Ansicht 10 speichern"
-
-#~ msgid "Goto View 10"
-#~ msgstr "Ansicht 10 aufrufen"
-
-#~ msgid "Save View 11"
-#~ msgstr "Ansicht 11 speichern"
-
-#~ msgid "Goto View 11"
-#~ msgstr "Ansicht 11 aufrufen"
-
-#~ msgid "Save View 12"
-#~ msgstr "Ansicht 12 speichern"
-
-#~ msgid "Goto View 12"
-#~ msgstr "Ansicht 12 aufrufen"
-
-#~ msgid "Locate to Mark 2"
-#~ msgstr "Positionszeiger zu Marker 2 setzen"
-
-#~ msgid "Locate to Mark 3"
-#~ msgstr "Positionszeiger zu Marker 3 setzen"
-
-#~ msgid "Locate to Mark 4"
-#~ msgstr "Positionszeiger zu Marker 4 setzen"
-
-#~ msgid "Locate to Mark 5"
-#~ msgstr "Positionszeiger zu Marker 5 setzen"
-
-#~ msgid "Locate to Mark 6"
-#~ msgstr "Positionszeiger zu Marker 6 setzen"
-
-#~ msgid "Locate to Mark 7"
-#~ msgstr "Positionszeiger zu Marker 7 setzen"
-
-#~ msgid "Locate to Mark 8"
-#~ msgstr "Positionszeiger zu Marker 8 setzen"
-
-#~ msgid "Locate to Mark 9"
-#~ msgstr "Positionszeiger zu Marker 9 setzen"
-
-#~ msgid "Start To Edit Point"
-#~ msgstr "Von Anfang bis Arbeitspunkt"
-
-#~ msgid "Edit Point To End"
-#~ msgstr "Von Arbeitspunkt bis Ende"
-
-#~ msgid "Set Loop From Region"
-#~ msgstr "Schleife aus Region erstellen"
-
-#~ msgid "Set Punch From Region"
-#~ msgstr "Punch-Bereich aus Region erstellen"
-
-#~ msgid "Toggle Opaque"
-#~ msgstr "Deckend"
-
-#~ msgid "Toggle Fade In Active"
-#~ msgstr "Fade-In aktivieren"
-
-#~ msgid "Toggle Fade Out Active"
-#~ msgstr "Fade-Out aktivieren"
-
-#~ msgid "Align Regions End"
-#~ msgstr "Regionenenden ausrichten"
-
-#~ msgid "Align Regions End Relative"
-#~ msgstr "Regionenenden relativ ausrichten"
-
-#~ msgid "Align Regions Sync Relative"
-#~ msgstr "Regionen-Einrastpunkt relativ ausrichten"
-
-#~ msgid "Duplicate Region"
-#~ msgstr "Region duplizieren"
-
-#~ msgid "Multi-Duplicate Region"
-#~ msgstr "Region mehrfach duplizieren"
-
-#~ msgid "Insert Region"
-#~ msgstr "Einfügen"
-
-#~ msgid "Auto-Rename"
-#~ msgstr "Automatisch umbenennen"
-
-#~ msgid "Remove Region Sync"
-#~ msgstr "Synchronisation entfernen"
-
-#~ msgid "Glue Region To Bars&Beats"
-#~ msgstr "Region an an Takte und Schläge binden"
-
-#~ msgid "Mute/Unmute Region"
-#~ msgstr "Region stummschalten"
-
-#~ msgid "Insert Chunk"
-#~ msgstr "Abschnitt einfügen"
-
-#~ msgid "Split At Edit Point"
-#~ msgstr "Am Arbeitspunkt trennen"
-
-#~ msgid "Snap to SMPTE frame"
-#~ msgstr "An SMPTE-Frames einrasten"
-
-#~ msgid "Snap to SMPTE seconds"
-#~ msgstr "An SMPTE-Sekunden einrasten"
-
-#~ msgid "Snap to SMPTE minutes"
-#~ msgstr "An SMPTE-Minuten einrasten"
-
-#~ msgid "Show Waveforms"
-#~ msgstr "Wellenformen zeigen"
-
-#~ msgid "Show Waveforms While Recording"
-#~ msgstr "Wellenformen beim Aufnehmen zeigen"
-
-#~ msgid "- 0.1%"
-#~ msgstr "- 0,1%"
-
-#~ msgid "100 per frame"
-#~ msgstr "100 pro Frame"
-
-#~ msgid "Configuraton is using unhandled subframes per frame value: %1"
-#~ msgstr ""
-#~ "Diese Konfiguration benutzt einen unzulässigen Wert für Subframes pro "
-#~ "Frame: %1"
-
-#~ msgid "Unknown"
-#~ msgstr "Unknown"
-
-#~ msgid "Ardour key bindings file not found at \"%1\" or contains errors."
-#~ msgstr ""
-#~ "Konnte die Datei mit den Tastaturzuweisungen nicht an der Stelle \"%1\" "
-#~ "finden, oder sie ist fehlerhaft."
-
-#~ msgid "ardour: connections"
-#~ msgstr "ardour: Verbindungen"
-
-#~ msgid "Input Connections"
-#~ msgstr "Verbindungen der Eingänge"
-
-#~ msgid "Output Connections"
-#~ msgstr "Verbindungen der Ausgänge"
-
-#~ msgid "New Input"
-#~ msgstr "Neuer Eingang"
-
-#~ msgid "New Output"
-#~ msgstr "Neuer Ausgang"
-
-#~ msgid "Add Port"
-#~ msgstr "Port hinzufügen"
-
-#~ msgid "in %d"
-#~ msgstr "In %d"
-
-#~ msgid "out %d"
-#~ msgstr "Out %d"
-
-#~ msgid "Name for new connection:"
-#~ msgstr "Name für neue Verbindung:"
-
-#~ msgid "rec-enable change"
-#~ msgstr "Aufnahmestatus ändern"
-
-#~ msgid "mix group solo  change"
-#~ msgstr "Mixergruppe Solo-Status ändern"
-
-#~ msgid "mix group mute change"
-#~ msgstr "Mixergruppe Mute-Status ändern"
-
-#~ msgid "mix group rec-enable change"
-#~ msgstr "Mixergruppe Aufnahmestatus ändern"
-
-#~ msgid "New Name: "
-#~ msgstr "Neuer Name: "
-
-#~ msgid "CD Marker File Type"
-#~ msgstr "CD-Marker"
-
-#~ msgid "Sample Endianness"
-#~ msgstr "Bytefolge"
-
-#~ msgid "Sample Rate"
-#~ msgstr "Samplerate"
-
-#~ msgid "Conversion Quality"
-#~ msgstr "SR-Konvertierung"
-
-#~ msgid "Dither Type"
-#~ msgstr "Dithering"
-
-#~ msgid "Export CD Marker File Only"
-#~ msgstr "Nur CD-Marker exportieren"
-
-#~ msgid "Specific tracks ..."
-#~ msgstr "Alle Spuren..."
-
-#~ msgid "22.05kHz"
-#~ msgstr "22,05 kHz"
-
-#~ msgid "44.1kHz"
-#~ msgstr "44,1 kHz"
-
-#~ msgid "48kHz"
-#~ msgstr "48 kHz"
-
-#~ msgid "88.2kHz"
-#~ msgstr "88,2 kHz"
-
-#~ msgid "96kHz"
-#~ msgstr "96 kHz"
-
-#~ msgid "192kHz"
-#~ msgstr "192 kHz"
-
-#~ msgid "Editor: cannot open \"%1\" as export file for CD toc file"
-#~ msgstr ""
-#~ "Editor: Kann \"%1\" nicht nicht zum Export für CD-Inhaltsverzeichnis "
-#~ "(TOC) öffnen."
-
-#~ msgid "Editor: cannot open \"%1\" as export file for CD cue file"
-#~ msgstr "Editor: Kann \"%1\" nicht zum Export für CD CUE-Datei öffnen."
-
-#~ msgid "TOC"
-#~ msgstr "TOC"
-
-#~ msgid "Ardour cannot export audio when disconnected"
-#~ msgstr ""
-#~ "Ardour kann nicht exportieren, wenn keine Verbindung zu JACK besteht."
-
-#~ msgid "Please enter a valid filename."
-#~ msgstr "Bitte geben Sie einen gültigen Dateinamen ein."
-
-#~ msgid "Please specify a complete filename for the audio file."
-#~ msgstr "Bitte geben Sie einen kompletten Dateinamen für die Audiodatei ein."
-
-#~ msgid "better"
-#~ msgstr "besser"
-
-#~ msgid "intermediate"
-#~ msgstr "mittelmäßig"
-
-#~ msgid "Name New Location Marker"
-#~ msgstr "Marker benennen"
-
-#~ msgid "naturalize"
-#~ msgstr "zur Ursprungsposition setzen"
-
-#~ msgid "trim region start to edit point"
-#~ msgstr "Regionanfang bis Arbeitspunkt abschneiden"
-
-#~ msgid "trim region end to edit point"
-#~ msgstr "Regionende bis Arbeitspunkt abschneiden"
-
-#~ msgid "paste chunk"
-#~ msgstr "Abschnitt einfügen"
-
-#~ msgid "clear playlist"
-#~ msgstr "Wiedergabeliste zurücksetzen"
-
-#~ msgid "toggle fade in active"
-#~ msgstr "Fade-In aktivieren"
-
-#~ msgid "toggle fade out active"
-#~ msgstr "Fade-Out aktivieren"
-
-#~ msgid "Do you really want to remove %1 %2?"
-#~ msgstr ""
-#~ "Wollen Sie den Bus \"%1\" wirklich löschen?\n"
-#~ "(Dies kann nicht rückgängig gemacht werden!)"
-
-#~ msgid "Move"
-#~ msgstr "Verschieben"
-
-#~ msgid "Split & Later Section Moves"
-#~ msgstr "Teilen & hinteren Teil verschieben"
-
-#~ msgid "Post-fader Redirects"
-#~ msgstr "Post-Fader Redirects"
-
-#~ msgid "Unlock"
-#~ msgstr "Entsperren"
-
-#~ msgid "ardour: save session?"
-#~ msgstr "ardour: Projekt speichern?"
-
-#~ msgid "Ardour sessions"
-#~ msgstr "Ardour-Projekte"
-
-#~ msgid "Patience is a virtue.\n"
-#~ msgstr "Geduld ist eine Tugend.\n"
-
-#~ msgid ""
-#~ "You do not have write access to this session.\n"
-#~ "This prevents the session from being loaded."
-#~ msgstr ""
-#~ "Sie haben keinen Schreibzugriff auf dieses Projekt.\n"
-#~ "Dadurch kann das Projekt nicht geladen werden."
-
-#~ msgid "ardour: cleanup"
-#~ msgstr "ardour: Aufräumen"
-
-#~ msgid "files were"
-#~ msgstr "folgenden Dateien wurden"
-
-#~ msgid "file was"
-#~ msgstr "folgende Datei wurde"
-
-#~ msgid "ardour: plugins"
-#~ msgstr "ardour: Plugins"
-
-#~ msgid "# Inputs"
-#~ msgstr "Eingänge"
-
-#~ msgid "# Outputs"
-#~ msgstr "Ausgänge"
-
-#~ msgid "Bar"
-#~ msgstr "Takt"
-
-#~ msgid "Beat"
-#~ msgstr "Schlag"
-
-#~ msgid "thirtq-second (32)"
-#~ msgstr "Zweiunddreissigstel (32)"
-
-#~ msgid "Paths/Files"
-#~ msgstr "Pfade"
-
-#~ msgid "Kbd/Mouse"
-#~ msgstr "Tastatur/Maus"
-
-#~ msgid "session RAID path"
-#~ msgstr "Projektverzeichnis (RAID)"
-
-#~ msgid "History depth (commands)"
-#~ msgstr "Anzahl der Befehle, die rückgängig gemacht werden können"
-
-#~ msgid "Saved history depth (commands)"
-#~ msgstr "Anzahl der Befehle, die im Verlauf gespeichert werden"
-
-#~ msgid "SMPTE Offset"
-#~ msgstr "SMPTE Offset"
-
-#~ msgid "Offline"
-#~ msgstr "Offline"
-
-#~ msgid ""
-#~ "Trace\n"
-#~ "Input"
-#~ msgstr ""
-#~ "Verfolge\n"
-#~ "Eingang"
-
-#~ msgid ""
-#~ "Trace\n"
-#~ "Output"
-#~ msgstr ""
-#~ "Verfolge\n"
-#~ "Ausgang"
-
-#~ msgid "MTC"
-#~ msgstr "MTC"
-
-#~ msgid "MMC"
-#~ msgstr "MMC"
-
-#~ msgid "online"
-#~ msgstr "Online"
-
-#~ msgid "offline"
-#~ msgstr "Offline"
-
-#~ msgid "output"
-#~ msgstr "Ausgang"
-
-#~ msgid ""
-#~ "The auditioner is a dedicated mixer strip used\n"
-#~ "for listening to specific regions outside the context\n"
-#~ "of the overall mix. It can be connected just like any\n"
-#~ "other mixer strip."
-#~ msgstr ""
-#~ "Der Vorhör-Bus ist ein spezieller Mixer-Kanal,\n"
-#~ "mit dem ausgewählte Regionen unabhängig\n"
-#~ "vom Gesamt-Mix abgehört werden können.\n"
-#~ "Dieser Bus lässt sich wie jeder andere Mixer-Kanal\n"
-#~ "verbinden."
-
-#~ msgid "Analysis"
-#~ msgstr "Analyse"
-
-#~ msgid "0.5 seconds"
-#~ msgstr "0,5 Sekunden"
-
-#~ msgid "SIGPIPE received - JACK has probably died"
-#~ msgstr "SIGPIPE empfangen - möglicherweise ist JACK abgestürzt"
-
-#~ msgid "Ardour/GTK "
-#~ msgstr "Ardour/GTK "
-
-#~ msgid "programmer error: %1 %2"
-#~ msgstr "Programmierfehler: %1 %2"
-
-#~ msgid "Unknown action name: %1"
-#~ msgstr "Unbekannte Aktionsbezeichnung: %1"
-
-#~ msgid "Manual Setup"
-#~ msgstr "Manuell"
-
-#~ msgid ""
-#~ "\n"
-#~ "\n"
-#~ "No session named \"%1\" exists.\n"
-#~ "To create it from the command line, start ardour as:\n"
-#~ "   ardour --new %1"
-#~ msgstr ""
-#~ "\n"
-#~ "\n"
-#~ "Es existiert kein Projekt mit dem Namen \"%1\".\n"
-#~ "Um es von der Kommandozeile aus zu erstellen, starten Sie ardour mit:\n"
-#~ "   ardour --new %1"
-
-#~ msgid "Ardour cannot understand \"%1\" as a session name"
-#~ msgstr "Ardour kann \"%1\" nicht als Projektnamen benutzen"
-
-#~ msgid "KeyMouse Actions"
-#~ msgstr "Tastatur/Maus-Befehle"
-
-#~ msgid "Data"
-#~ msgstr "Datenformat"
-
-#~ msgid "Software monitoring"
-#~ msgstr "Software Monitoring"
-
-#~ msgid "External monitoring"
-#~ msgstr "Externes Monitoring"
-
-#~ msgid "Analyze region"
-#~ msgstr "Analysiere Region"
-
-#~ msgid "Analyze range"
-#~ msgstr "Bereich analysieren"
-
-#~ msgid "Bounce range"
-#~ msgstr "Bereich Bouncen"
-
-#~ msgid "Duplicate how many times?"
-#~ msgstr "Wie häufig duplizieren?"
-
-#~ msgid "to Center"
-#~ msgstr "zur Mitte"
-
-#~ msgid "Reverse Region"
-#~ msgstr "Rückwärts"
-
-#~ msgid "Add External Audio"
-#~ msgstr "Audio importieren..."
-
-#~ msgid ""
-#~ " This is destructive, will possibly delete audio files\n"
-#~ "It cannot be undone\n"
-#~ "Do you really want to destroy %1 ?"
-#~ msgstr ""
-#~ " Diese Aktion ist destruktiv und löscht möglicherweise Audiodateien\n"
-#~ "Dies kann nicht rückgängig gemacht werden\n"
-#~ "Wollen Sie %1 wirklich löschen ?"
-
-#~ msgid "these regions"
-#~ msgstr "diese Region"
-
-#~ msgid "this region"
-#~ msgstr "diese Region"
-
-#~ msgid "Yes, destroy them."
-#~ msgstr "Ja, entfernen."
-
-#~ msgid "cannot set loop: no region selected"
-#~ msgstr "Kann keine Schleife erstellen: keine Region ausgewählt"
-
-#~ msgid "best"
-#~ msgstr "bestmöglich"
-
-#~ msgid "Shaped Noise"
-#~ msgstr "Shaped Noise"
-
-#~ msgid "stereo"
-#~ msgstr "Stereo"
-
-#~ msgid "CUE"
-#~ msgstr "CUE"
-
-#~ msgid "Binding"
-#~ msgstr "Zugewiesene Taste"
-
-#~ msgid "BPM denominator"
-#~ msgstr "BPM Zählzeit"
