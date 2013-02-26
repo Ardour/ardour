@@ -10,7 +10,6 @@ libs=$TOP/@LIBS@
 # can find all the components. 
 #
 
-
 export ARDOUR_PATH=$TOP/gtk2_ardour/icons:$TOP/gtk2_ardour/pixmaps:$TOP/build/gtk2_ardour:$TOP/gtk2_ardour:.
 export ARDOUR_SURFACES_PATH=$libs/surfaces/osc:$libs/surfaces/generic_midi:$libs/surfaces/tranzport:$libs/surfaces/powermate:$libs/surfaces/mackie:$libs/surfaces/wiimote
 export ARDOUR_PANNER_PATH=$libs/panners/2in2out:$libs/panners/1in2out:$libs/panners/vbap
@@ -27,7 +26,7 @@ export ARDOUR_EXPORT_FORMATS_PATH=$TOP/export:.
 export ARDOUR_CONFIG_PATH=$TOP:$TOP/gtk2_ardour:$TOP/build:$TOP/build/gtk2_ardour
 export ARDOUR_DLL_PATH=$libs
 
-export GTK_PATH=~/.ardour3:$libs
+export GTK_PATH=~/.ardour3:$libs/clearlooks-newer
 export VAMP_PATH=$libs/vamp-plugins${VAMP_PATH:+:$VAMP_PATH}
 
 export LD_LIBRARY_PATH=$libs/qm-dsp:$libs/vamp-sdk:$libs/surfaces:$libs/surfaces/control_protocol:$libs/ardour:$libs/midi++2:$libs/pbd:$libs/rubberband:$libs/soundtouch:$libs/gtkmm2ext:$libs/gnomecanvas:$libs/libsndfile:$libs/appleutility:$libs/taglib:$libs/evoral:$libs/evoral/src/libsmf:$libs/audiographer:$libs/timecode:$libs/libltc:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
