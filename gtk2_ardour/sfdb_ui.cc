@@ -1695,7 +1695,7 @@ SoundFileOmega::get_position() const
 SrcQuality
 SoundFileOmega::get_src_quality() const
 {
-	string str = where_combo.get_active_text();
+	string str = src_combo.get_active_text();
 
 	if (str == _("Best")) {
 		return SrcBest;
