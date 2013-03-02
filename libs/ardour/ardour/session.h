@@ -1169,7 +1169,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	MIDI::byte mtc_msg[16];
 	MIDI::byte mtc_timecode_bits;   /* encoding of SMTPE type for MTC */
 	MIDI::byte midi_msg[16];
-	framepos_t outbound_mtc_timecode_frame;
+	double outbound_mtc_timecode_frame;
 	Timecode::Time transmitting_timecode_time;
 	int next_quarter_frame_to_send;
 

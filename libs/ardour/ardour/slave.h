@@ -240,7 +240,7 @@ class TimecodeSlave : public Slave {
     virtual Timecode::TimecodeFormat apparent_timecode_format() const = 0;
 
     /* this is intended to be used by a UI and polled from a timeout. it should
-       return a string describing the current position of the TC source. it 
+       return a string describing the current position of the TC source. it
        should NOT do any computation, but should use a cached value
        of the TC source position.
     */
@@ -282,6 +282,7 @@ class MTC_Slave : public TimecodeSlave {
 
 	SafeTime       current;
 	framepos_t     mtc_frame;               /* current time */
+	double         mtc_frame_dll;
 	framepos_t     last_inbound_frame;      /* when we got it; audio clocked */
 	MIDI::byte     last_mtc_fps_byte;
 	framepos_t     window_begin;

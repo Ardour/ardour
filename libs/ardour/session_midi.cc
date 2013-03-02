@@ -369,12 +369,14 @@ Session::send_full_time_code (framepos_t const t)
 	sample_to_timecode (t, timecode, true /* use_offset */, false /* no subframes */);
 
 	// sample-align outbound to rounded (no subframes) timecode
-	timecode_to_sample(timecode, outbound_mtc_timecode_frame, true, false);
+	framepos_t mtc_tc;
+	timecode_to_sample(timecode, mtc_tc, true, false);
+	outbound_mtc_timecode_frame = mtc_tc;
 
 	transmitting_timecode_time = timecode;
 
-	framecnt_t const quarter_frame_duration = ((framecnt_t) _frames_per_timecode_frame) >> 2;
-	if (ceil((t - outbound_mtc_timecode_frame) / quarter_frame_duration) > 0) {
+	double const quarter_frame_duration = ((framecnt_t) _frames_per_timecode_frame) / 4.0;
+	if (ceil((t - mtc_tc) / quarter_frame_duration) > 0) {
 		Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
 		outbound_mtc_timecode_frame += _frames_per_timecode_frame;
 	}
@@ -460,19 +462,19 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 	assert (next_quarter_frame_to_send <= 7);
 
 	/* Duration of one quarter frame */
-	framecnt_t const quarter_frame_duration = ((framecnt_t) _frames_per_timecode_frame) >> 2;
+	double const quarter_frame_duration = _frames_per_timecode_frame / 4.0;
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("TF %1 SF %2 MT %3 QF %4 QD %5\n",
 				_transport_frame, start_frame, outbound_mtc_timecode_frame,
 				next_quarter_frame_to_send, quarter_frame_duration));
 
-	if ((outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration)) < _transport_frame) {
+	if (rint(outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration)) < _transport_frame) {
 		send_full_time_code (_transport_frame);
 		return 0;
 	}
 
 	/* Send quarter frames for this cycle */
-	while (end_frame > (outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration))) {
+	while (end_frame > rint(outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration))) {
 
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("next frame to send: %1\n", next_quarter_frame_to_send));
 
@@ -503,7 +505,7 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 				break;
 		}
 
-		const framepos_t msg_time = outbound_mtc_timecode_frame	+ (quarter_frame_duration * next_quarter_frame_to_send);
+		const framepos_t msg_time = rint(outbound_mtc_timecode_frame	+ (quarter_frame_duration * next_quarter_frame_to_send));
 
 		// This message must fall within this block or something is broken
 		assert (msg_time >= start_frame);
@@ -538,7 +540,7 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 			Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
 			// Re-calculate timing of first quarter frame
 			//timecode_to_sample( transmitting_timecode_time, outbound_mtc_timecode_frame, true /* use_offset */, false );
-			outbound_mtc_timecode_frame += 8 * quarter_frame_duration;
+			outbound_mtc_timecode_frame += 2.0 * _frames_per_timecode_frame;
 		}
 	}
 
