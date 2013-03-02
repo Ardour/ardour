@@ -293,6 +293,10 @@ SessionOptionEditor::set_use_monitor_section (bool yn)
 		_session->remove_monitor_section ();
 	}
 
+	/* store this choice for any new sessions */
+	
+	Config->set_use_monitor_bus (yn);
+
 	return had_monitor_section != yn;
 }
 

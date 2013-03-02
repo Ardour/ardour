@@ -1332,14 +1332,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Monitoring")));
 
-	add_option (_("Audio"),
-	     new BoolOption (
-		     "use-monitor-bus",
-		     _("Use a monitor bus (allows AFL/PFL and more control)"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_monitor_bus),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_monitor_bus)
-		     ));
-
 	ComboOption<MonitorModel>* mm = new ComboOption<MonitorModel> (
 		"monitoring-model",
 		_("Record monitoring handled by"),
