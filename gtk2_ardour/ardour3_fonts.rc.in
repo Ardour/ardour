@@ -10,7 +10,7 @@ style "small_text"
 
 style "small_mono_text"
 {
-	font_name = "@MONOSPACE@ @FONT_SMALL@"
+	font_name = "@MONOSPACE@ @FONT_SMALLER@"
 }
 
 style "small_italic_text"
