@@ -1126,7 +1126,18 @@ Region::state ()
 	LocaleGuard lg (X_("POSIX"));
 	const char* fe = NULL;
 
-	add_properties (*node);
+	/* custom version of 'add_properties (*node);'
+	 * skip values that have have dedicated save functions
+	 * in AudioRegion::state()
+	 */
+	for (OwnedPropertyList::iterator i = _properties->begin(); i != _properties->end(); ++i) {
+		if (!strcmp(i->second->property_name(), (const char*)"Envelope")) continue;
+		if (!strcmp(i->second->property_name(), (const char*)"FadeIn")) continue;
+		if (!strcmp(i->second->property_name(), (const char*)"FadeOut")) continue;
+		if (!strcmp(i->second->property_name(), (const char*)"InverseFadeIn")) continue;
+		if (!strcmp(i->second->property_name(), (const char*)"InverseFadeOut")) continue;
+		i->second->get_value (*node);
+	}
 
 	id().print (buf, sizeof (buf));
 	node->add_property ("id", buf);

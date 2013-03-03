@@ -764,8 +764,6 @@ AudioRegion::state ()
 	snprintf (buf, sizeof (buf), "%u", (uint32_t) _sources.size());
 	node.add_property ("channels", buf);
 
-	Stateful::add_properties (node);
-
 	child = node.add_child ("Envelope");
 
 	bool default_env = false;
@@ -796,7 +794,7 @@ AudioRegion::state ()
 	}
 
 	if (_inverse_fade_in) {
-		child = node.add_child (X_("InvFadeIn"));
+		child = node.add_child (X_("InverseFadeIn"));
 		child->add_child_nocopy (_inverse_fade_in->get_state ());
 	}
 
@@ -809,7 +807,7 @@ AudioRegion::state ()
 	}
 
 	if (_inverse_fade_out) {
-		child = node.add_child (X_("InvFadeOut"));
+		child = node.add_child (X_("InverseFadeOut"));
 		child->add_child_nocopy (_inverse_fade_out->get_state ());
 	}
 
@@ -908,12 +906,12 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 				}
 			}
 	
-		} else if (child->name() == "InvFadeIn") {
+		} else if (child->name() == "InverseFadeIn") {
 			XMLNode* grandchild = child->child ("AutomationList");
 			if (grandchild) {
 				_inverse_fade_in->set_state (*grandchild, version);
 			}
-		} else if (child->name() == "InvFadeOut") {
+		} else if (child->name() == "InverseFadeOut") {
 			XMLNode* grandchild = child->child ("AutomationList");
 			if (grandchild) {
 				_inverse_fade_out->set_state (*grandchild, version);
