@@ -409,6 +409,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 			secondary_clock->set_editable (true);
 			secondary_clock->set_widget_name ("secondary");
 		}
+	} else if (p == "super-rapid-clock-update") {
+		stop_clocking ();
+		start_clocking ();
 	}
 }
 

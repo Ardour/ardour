@@ -2009,7 +2009,11 @@ ARDOUR_UI::update_clocks ()
 void
 ARDOUR_UI::start_clocking ()
 {
-	clock_signal_connection = RapidScreenUpdate.connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
+	if (Config->get_super_rapid_clock_update()) {
+		clock_signal_connection = SuperRapidScreenUpdate.connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
+	} else {
+		clock_signal_connection = RapidScreenUpdate.connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
+	}
 }
 
 void
