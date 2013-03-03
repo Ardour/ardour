@@ -1046,7 +1046,7 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 	bool negative = false;
 
 	if (_off) {
-		_layout->set_text ("\u2012\u2012\u2012\u2012\u2012\u2012\u2012\u2012\u2012\u2012");
+		_layout->set_text (" ----------");
 
 		if (_left_layout) {
 			_left_layout->set_text ("");
@@ -1106,7 +1106,7 @@ AudioClock::set_minsec (framepos_t when, bool /*force*/)
 	bool negative = false;
 
 	if (_off) {
-		_layout->set_text ("\u2012\u2012:\u2012\u2012:\u2012\u2012.\u2012\u2012\u2012");
+		_layout->set_text (" --:--:--.---");
 
 		if (_left_layout) {
 			_left_layout->set_text ("");
@@ -1147,7 +1147,7 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 	bool negative = false;
 
 	if (_off) {
-		_layout->set_text ("\u2012\u2012:\u2012\u2012:\u2012\u2012:\u2012\u2012");
+		_layout->set_text (" --:--:--:--");
 		if (_left_layout) {
 			_left_layout->set_text ("");
 			_right_layout->set_text ("");
@@ -1182,7 +1182,7 @@ AudioClock::set_bbt (framepos_t when, bool /*force*/)
 	bool negative = false;
 
 	if (_off) {
-		_layout->set_text ("\u2012\u2012\u2012|\u2012\u2012|\u2012\u2012\u2012\u2012");
+		_layout->set_text (" ---|--|----");
 		if (_left_layout) {
 			_left_layout->set_text ("");
 			_right_layout->set_text ("");

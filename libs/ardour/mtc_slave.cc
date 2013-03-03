@@ -687,7 +687,7 @@ MTC_Slave::approximate_current_position() const
 	SafeTime last;
 	read_current (&last);
 	if (last.timestamp == 0 || reset_pending) {
-		return " \u2012\u2012:\u2012\u2012:\u2012\u2012:\u2012\u2012";
+		return " --:--:--:--";
 	}
 	return Timecode::timecode_format_sampletime(
 		last.position,
