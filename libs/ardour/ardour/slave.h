@@ -38,7 +38,7 @@
 
 /* used for approximate_current_delta(): */
 #define PLUSMINUS(A) ( ((A)<0) ? "-" : (((A)>0) ? "+" : "\u00B1") )
-#define LEADINGZERO(A) ( (A)<10 ? "    " : (A)<100 ? "   " : (A)<1000 ? "  " : (A)<10000 ? " " : "" )
+#define LEADINGZERO(A) ( (A)<10 ? "   " : (A)<100 ? "  " : (A)<1000 ? " " : "" )
 
 namespace MIDI {
 	class Port;

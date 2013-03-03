@@ -53,13 +53,13 @@ using Gtkmm2ext::Keyboard;
 
 sigc::signal<void> AudioClock::ModeChanged;
 vector<AudioClock*> AudioClock::clocks;
-const double AudioClock::info_font_scale_factor = 0.5;
+const double AudioClock::info_font_scale_factor = 0.50;
 const double AudioClock::separator_height = 0.0;
 const double AudioClock::x_leading_padding = 6.0;
 
 #define BBT_BAR_CHAR "|"
 #define BBT_SCANF_FORMAT "%" PRIu32 "%*c%" PRIu32 "%*c%" PRIu32
-#define INFO_FONT_SIZE ((int)round(font_size * info_font_scale_factor))
+#define INFO_FONT_SIZE ((int)lrint(font_size * info_font_scale_factor))
 
 AudioClock::AudioClock (const string& clock_name, bool transient, const string& widget_name,
 			bool allow_edit, bool follows_playhead, bool duration, bool with_info)
@@ -178,7 +178,7 @@ AudioClock::set_font ()
 	/* now a smaller version of the same font */
 
 	delete font_attr;
-	font.set_size ((int) lrint (font_size * info_font_scale_factor));
+	font.set_size (INFO_FONT_SIZE);
 	font.set_weight (Pango::WEIGHT_NORMAL);
 	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 
@@ -493,7 +493,7 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 		
 		tmp->set_font_description (font);
 
-		font.set_size ((int) lrint (font.get_size() * info_font_scale_factor));
+		font.set_size (INFO_FONT_SIZE);
 		font.set_weight (Pango::WEIGHT_NORMAL);
 		tmp->set_font_description (font);
 
@@ -2104,7 +2104,7 @@ AudioClock::set_mode (Mode m)
 
 	switch (_mode) {
 	case Timecode:
-		mode_based_info_ratio = 0.5;
+		mode_based_info_ratio = 0.6;
 		insert_map.push_back (11);
 		insert_map.push_back (10);
 		insert_map.push_back (8);
@@ -2129,7 +2129,7 @@ AudioClock::set_mode (Mode m)
 		break;
 
 	case MinSec:
-		mode_based_info_ratio = 0.5;
+		mode_based_info_ratio = 0.6;
 		insert_map.push_back (12);
 		insert_map.push_back (11);
 		insert_map.push_back (10);
@@ -2142,7 +2142,7 @@ AudioClock::set_mode (Mode m)
 		break;
 
 	case Frames:
-		mode_based_info_ratio = 0.5;
+		mode_based_info_ratio = 0.45;
 		break;
 	}
 
