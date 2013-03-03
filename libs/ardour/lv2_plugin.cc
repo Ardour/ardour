@@ -394,7 +394,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	// Load default state
 	LilvState* state = lilv_state_new_from_world(
 		_world.world, _uri_map.urid_map(), lilv_plugin_get_uri(_impl->plugin));
-	if (state) {
+	if (state && _has_state_interface) {
 		lilv_state_restore(state, _impl->instance, NULL, NULL, 0, NULL);
 	}
 #endif
