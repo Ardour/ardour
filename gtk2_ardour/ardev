@@ -1,6 +1,5 @@
 #!/bin/sh
 . `dirname "$0"`/../build/gtk2_ardour/ardev_common_waf.sh
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 export UBUNTU_MENUPROXY=""
 echo execute in `pwd`
 exec $TOP/$EXECUTABLE "$@"

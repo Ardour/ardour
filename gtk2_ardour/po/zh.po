@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-08 08:15-0500\n"
+"POT-Creation-Date: 2013-03-03 11:35-0500\n"
 "PO-Revision-Date: 2013-01-03 08:29-0500\n"
 "Last-Translator: Rui-huai Zhang <zrhzrh>\n"
 "Language-Team: zrhzrh <zrhzrh@mail.ustc.edu.cn>\n"
@@ -335,7 +335,7 @@ msgid ""
 msgstr ""
 
 #: about.cc:578
-msgid "Copyright (C) 1999-2012 Paul Davis\n"
+msgid "Copyright (C) 1999-2013 Paul Davis\n"
 msgstr ""
 
 #: about.cc:582
@@ -408,7 +408,7 @@ msgstr "总线"
 msgid "Add:"
 msgstr "添加:"
 
-#: add_route_dialog.cc:117 startup.cc:808 time_fx_dialog.cc:92
+#: add_route_dialog.cc:117 startup.cc:798 time_fx_dialog.cc:92
 msgid "<b>Options</b>"
 msgstr "<b>选项</b>"
 
@@ -421,22 +421,22 @@ msgstr "名称:"
 msgid "Group:"
 msgstr "分组:"
 
-#: add_route_dialog.cc:218 add_route_dialog.cc:227 rc_option_editor.cc:1326
-#: rc_option_editor.cc:1328 rc_option_editor.cc:1330 rc_option_editor.cc:1332
-#: rc_option_editor.cc:1356 rc_option_editor.cc:1358 rc_option_editor.cc:1366
-#: rc_option_editor.cc:1368 rc_option_editor.cc:1386 rc_option_editor.cc:1399
-#: rc_option_editor.cc:1401 rc_option_editor.cc:1403 rc_option_editor.cc:1434
-#: rc_option_editor.cc:1436 rc_option_editor.cc:1438 rc_option_editor.cc:1446
-#: rc_option_editor.cc:1454 rc_option_editor.cc:1462
+#: add_route_dialog.cc:218 add_route_dialog.cc:227 rc_option_editor.cc:1329
+#: rc_option_editor.cc:1331 rc_option_editor.cc:1333 rc_option_editor.cc:1351
+#: rc_option_editor.cc:1353 rc_option_editor.cc:1361 rc_option_editor.cc:1363
+#: rc_option_editor.cc:1381 rc_option_editor.cc:1394 rc_option_editor.cc:1396
+#: rc_option_editor.cc:1398 rc_option_editor.cc:1429 rc_option_editor.cc:1431
+#: rc_option_editor.cc:1433 rc_option_editor.cc:1441 rc_option_editor.cc:1449
+#: rc_option_editor.cc:1457
 msgid "Audio"
 msgstr "音频"
 
 #: add_route_dialog.cc:219 add_route_dialog.cc:230 editor_actions.cc:105
-#: missing_file_dialog.cc:55 rc_option_editor.cc:1585 rc_option_editor.cc:1593
-#: rc_option_editor.cc:1601 rc_option_editor.cc:1610 rc_option_editor.cc:1618
-#: rc_option_editor.cc:1626 rc_option_editor.cc:1634 rc_option_editor.cc:1643
-#: rc_option_editor.cc:1652 rc_option_editor.cc:1661 rc_option_editor.cc:1669
-#: rc_option_editor.cc:1677
+#: missing_file_dialog.cc:55 rc_option_editor.cc:1580 rc_option_editor.cc:1588
+#: rc_option_editor.cc:1596 rc_option_editor.cc:1605 rc_option_editor.cc:1613
+#: rc_option_editor.cc:1621 rc_option_editor.cc:1629 rc_option_editor.cc:1638
+#: rc_option_editor.cc:1647 rc_option_editor.cc:1656 rc_option_editor.cc:1664
+#: rc_option_editor.cc:1672
 msgid "MIDI"
 msgstr "MIDI"
 
@@ -459,7 +459,7 @@ msgid ""
 msgstr ""
 
 #: add_route_dialog.cc:307 add_route_dialog.cc:326 editor_actions.cc:385
-#: time_axis_view.cc:1318
+#: time_axis_view.cc:1301
 msgid "Normal"
 msgstr "普通"
 
@@ -503,7 +503,7 @@ msgstr "八声道"
 msgid "12 Channel"
 msgstr "十二声道"
 
-#: add_route_dialog.cc:463 mixer_strip.cc:2125
+#: add_route_dialog.cc:463 mixer_strip.cc:2110
 msgid "Custom"
 msgstr "自定义"
 
@@ -524,8 +524,9 @@ msgid "Ambiguous File"
 msgstr "模糊的文件"
 
 #: ambiguous_file_dialog.cc:35
+#, fuzzy
 msgid ""
-"Ardour has found the file <i>%1</i> in the following places:\n"
+"%1 has found the file <i>%2</i> in the following places:\n"
 "\n"
 msgstr ""
 "Ardour 已经在下列地方找到文件<i>%1</i>:\n"
@@ -581,7 +582,7 @@ msgstr "归一化值"
 msgid "FFT analysis window"
 msgstr "快速傅立叶变换分析视窗"
 
-#: analysis_window.cc:60 editor.cc:1866
+#: analysis_window.cc:60 editor.cc:1867
 msgid "Spectral Analysis"
 msgstr "频谱分析"
 
@@ -621,19 +622,19 @@ msgstr "反馈"
 msgid "Errors"
 msgstr "错误"
 
-#: ardour_ui.cc:282
+#: ardour_ui.cc:279
 msgid "could not initialize %1."
 msgstr "无法初始化 %1."
 
-#: ardour_ui.cc:342
+#: ardour_ui.cc:339
 msgid "Starting audio engine"
 msgstr "启动音频引擎"
 
-#: ardour_ui.cc:642 startup.cc:620
+#: ardour_ui.cc:639 startup.cc:610
 msgid "%1 is ready for use"
 msgstr "%1 准备就绪"
 
-#: ardour_ui.cc:690
+#: ardour_ui.cc:687
 #, fuzzy
 msgid ""
 "WARNING: Your system has a limit for maximum amount of locked memory. This "
@@ -647,23 +648,23 @@ msgstr ""
 "\n"
 "此命令由 /etc/security/limits.conf 控制."
 
-#: ardour_ui.cc:707
+#: ardour_ui.cc:704
 msgid "Do not show this window again"
 msgstr "不再显示此窗口"
 
-#: ardour_ui.cc:748
+#: ardour_ui.cc:745
 msgid "Don't quit"
 msgstr "不退出"
 
-#: ardour_ui.cc:749
+#: ardour_ui.cc:746
 msgid "Just quit"
 msgstr "不保存而退出"
 
-#: ardour_ui.cc:750
+#: ardour_ui.cc:747
 msgid "Save and quit"
 msgstr "保存并退出"
 
-#: ardour_ui.cc:760
+#: ardour_ui.cc:757
 #, fuzzy
 msgid ""
 "%1 was unable to save your session.\n"
@@ -673,16 +674,16 @@ msgid ""
 "\"Just quit\" option."
 msgstr "Ardour 无法保存此会话.\n"
 
-#: ardour_ui.cc:786
+#: ardour_ui.cc:783
 #, fuzzy
 msgid "Please wait while %1 cleans up..."
 msgstr "请等待，%1 载入可视化数据"
 
-#: ardour_ui.cc:804
+#: ardour_ui.cc:801
 msgid "Unsaved Session"
 msgstr "未保存的会话"
 
-#: ardour_ui.cc:825
+#: ardour_ui.cc:822
 msgid ""
 "The session \"%1\"\n"
 "has not been saved.\n"
@@ -699,7 +700,7 @@ msgstr ""
 "\n"
 "你想干吗?"
 
-#: ardour_ui.cc:828
+#: ardour_ui.cc:825
 msgid ""
 "The snapshot \"%1\"\n"
 "has not been saved.\n"
@@ -716,76 +717,76 @@ msgstr ""
 "\n"
 "你想干吗?"
 
-#: ardour_ui.cc:842
+#: ardour_ui.cc:839
 msgid "Prompter"
 msgstr ""
 
-#: ardour_ui.cc:907
+#: ardour_ui.cc:904
 msgid "disconnected"
 msgstr "取消连接"
 
-#: ardour_ui.cc:914
+#: ardour_ui.cc:911
 #, c-format
 msgid "JACK: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"
 msgstr ""
 
-#: ardour_ui.cc:918
+#: ardour_ui.cc:915
 #, c-format
 msgid "JACK: <span foreground=\"green\">%<PRId64> kHz / %4.1f ms</span>"
 msgstr ""
 
-#: ardour_ui.cc:936
+#: ardour_ui.cc:933
 #, fuzzy
 msgid "File:"
 msgstr "文件开始:"
 
-#: ardour_ui.cc:940
+#: ardour_ui.cc:937
 msgid "BWF"
 msgstr ""
 
-#: ardour_ui.cc:943
+#: ardour_ui.cc:940
 #, fuzzy
 msgid "WAV"
 msgstr "WAVE"
 
-#: ardour_ui.cc:946
+#: ardour_ui.cc:943
 msgid "WAV64"
 msgstr ""
 
-#: ardour_ui.cc:949 session_option_editor.cc:196
+#: ardour_ui.cc:946 session_option_editor.cc:184
 msgid "CAF"
 msgstr "CAF"
 
-#: ardour_ui.cc:952
+#: ardour_ui.cc:949
 msgid "AIFF"
 msgstr ""
 
-#: ardour_ui.cc:955
+#: ardour_ui.cc:952
 msgid "iXML"
 msgstr ""
 
-#: ardour_ui.cc:958
+#: ardour_ui.cc:955
 msgid "RF64"
 msgstr ""
 
-#: ardour_ui.cc:966
+#: ardour_ui.cc:963
 msgid "32-float"
 msgstr ""
 
-#: ardour_ui.cc:969
+#: ardour_ui.cc:966
 msgid "24-int"
 msgstr ""
 
-#: ardour_ui.cc:972
+#: ardour_ui.cc:969
 msgid "16-int"
 msgstr ""
 
-#: ardour_ui.cc:991
+#: ardour_ui.cc:988
 #, c-format
 msgid "DSP: <span foreground=\"%s\">%5.1f%%</span>"
 msgstr ""
 
-#: ardour_ui.cc:1010
+#: ardour_ui.cc:1007
 #, c-format
 msgid ""
 "Buffers: <span foreground=\"green\">p:</span><span foreground=\"%s\">"
@@ -793,33 +794,33 @@ msgid ""
 "\">%<PRIu32>%%</span>"
 msgstr ""
 
-#: ardour_ui.cc:1046
+#: ardour_ui.cc:1043
 msgid "Disk: <span foreground=\"green\">Unknown</span>"
 msgstr ""
 
-#: ardour_ui.cc:1048
+#: ardour_ui.cc:1045
 msgid "Disk: <span foreground=\"green\">24hrs+</span>"
 msgstr ""
 
-#: ardour_ui.cc:1066
+#: ardour_ui.cc:1063
 msgid "Disk: <span foreground=\"green\">&gt;24 hrs</span>"
 msgstr ""
 
-#: ardour_ui.cc:1077
+#: ardour_ui.cc:1074
 #, c-format
 msgid "Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"
 msgstr ""
 
-#: ardour_ui.cc:1103
+#: ardour_ui.cc:1100
 #, c-format
 msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
 msgstr ""
 
-#: ardour_ui.cc:1218 ardour_ui.cc:1227 startup.cc:1019
+#: ardour_ui.cc:1217 ardour_ui.cc:1226 startup.cc:1010
 msgid "Recent Sessions"
 msgstr "最近的会话"
 
-#: ardour_ui.cc:1309
+#: ardour_ui.cc:1308
 msgid ""
 "%1 is not connected to JACK\n"
 "You cannot open or close sessions in this condition"
@@ -827,27 +828,27 @@ msgstr ""
 "%1 未连接到 JACK.\n"
 "再此情况下，你无法打开或关闭会话"
 
-#: ardour_ui.cc:1336
+#: ardour_ui.cc:1335
 msgid "Open Session"
 msgstr "打开会话"
 
-#: ardour_ui.cc:1354 session_import_dialog.cc:169
-#: session_metadata_dialog.cc:729 startup.cc:1048
+#: ardour_ui.cc:1353 session_import_dialog.cc:169
+#: session_metadata_dialog.cc:729 startup.cc:1039
 msgid "%1 sessions"
 msgstr "%1 会话"
 
-#: ardour_ui.cc:1391
+#: ardour_ui.cc:1390
 msgid "You cannot add a track without a session already loaded."
 msgstr "您只能在已载入的会话中添加音轨"
 
-#: ardour_ui.cc:1399
+#: ardour_ui.cc:1398
 #, fuzzy
 msgid "could not create %1 new mixed track"
 msgid_plural "could not create %1 new mixed tracks"
 msgstr[0] "无法创建 %1 新的MIDI音轨"
 msgstr[1] "无法创建 %1 新的MIDI音轨"
 
-#: ardour_ui.cc:1405 ardour_ui.cc:1466
+#: ardour_ui.cc:1404 ardour_ui.cc:1465
 msgid ""
 "There are insufficient JACK ports available\n"
 "to create a new track or bus.\n"
@@ -858,25 +859,25 @@ msgstr ""
 "无法继续新建音轨或总线\n"
 "请保存 %1，重新启动JACK带来更多的端口.\n"
 
-#: ardour_ui.cc:1440
+#: ardour_ui.cc:1439
 msgid "You cannot add a track or bus without a session already loaded."
 msgstr "您只能在已载入的会话或总线中添加音轨和总线"
 
-#: ardour_ui.cc:1449
+#: ardour_ui.cc:1448
 #, fuzzy
 msgid "could not create %1 new audio track"
 msgid_plural "could not create %1 new audio tracks"
 msgstr[0] "无法新建音频音轨"
 msgstr[1] "无法新建音频音轨"
 
-#: ardour_ui.cc:1458
+#: ardour_ui.cc:1457
 #, fuzzy
 msgid "could not create %1 new audio bus"
 msgid_plural "could not create %1 new audio busses"
 msgstr[0] "无法新建 %1 新的音频总线"
 msgstr[1] "无法新建 %1 新的音频总线"
 
-#: ardour_ui.cc:1575
+#: ardour_ui.cc:1574
 #, fuzzy
 msgid ""
 "Please create one or more tracks before trying to record.\n"
@@ -885,7 +886,7 @@ msgstr ""
 "在录音之前，请创建至少一个音轨\n"
 "请查看会话菜单."
 
-#: ardour_ui.cc:1965
+#: ardour_ui.cc:1964
 msgid ""
 "The audio backend (JACK) was shutdown because:\n"
 "\n"
@@ -895,7 +896,7 @@ msgstr ""
 "\n"
 "%1"
 
-#: ardour_ui.cc:1967
+#: ardour_ui.cc:1966
 msgid ""
 "JACK has either been shutdown or it\n"
 "disconnected %1 because %1\n"
@@ -910,15 +911,15 @@ msgstr ""
 msgid "Unable to start the session running"
 msgstr "无法启动会话"
 
-#: ardour_ui.cc:2068
+#: ardour_ui.cc:2072
 msgid "Take Snapshot"
 msgstr "快照"
 
-#: ardour_ui.cc:2069
+#: ardour_ui.cc:2073
 msgid "Name of new snapshot"
 msgstr "新建快照的名称"
 
-#: ardour_ui.cc:2093
+#: ardour_ui.cc:2097
 #, fuzzy
 msgid ""
 "To ensure compatibility with various systems\n"
@@ -927,27 +928,27 @@ msgstr ""
 "为了确保在不同系统的兼容性\n"
 "快照文件名不要包含字符 '/'"
 
-#: ardour_ui.cc:2105
+#: ardour_ui.cc:2109
 msgid "Confirm Snapshot Overwrite"
 msgstr "确定覆盖快照"
 
-#: ardour_ui.cc:2106
+#: ardour_ui.cc:2110
 msgid "A snapshot already exists with that name.  Do you want to overwrite it?"
 msgstr "已存在同名快照. 覆盖之?"
 
-#: ardour_ui.cc:2109
+#: ardour_ui.cc:2113
 msgid "Overwrite"
 msgstr "覆盖"
 
-#: ardour_ui.cc:2143
+#: ardour_ui.cc:2147
 msgid "Rename Session"
 msgstr "重命名会话"
 
-#: ardour_ui.cc:2144
+#: ardour_ui.cc:2148
 msgid "New session name"
 msgstr "新建快照的名称"
 
-#: ardour_ui.cc:2158 ardour_ui.cc:2534 ardour_ui.cc:2579
+#: ardour_ui.cc:2162 ardour_ui.cc:2538 ardour_ui.cc:2583
 #, fuzzy
 msgid ""
 "To ensure compatibility with various systems\n"
@@ -956,12 +957,12 @@ msgstr ""
 "为了确保在不同系统的兼容性\n"
 "会话文件名不要包含字符 '/'"
 
-#: ardour_ui.cc:2166
+#: ardour_ui.cc:2170
 msgid ""
 "That name is already in use by another directory/folder. Please try again."
 msgstr "此名称已被另一个文件夹使用. 请再尝试一遍."
 
-#: ardour_ui.cc:2175
+#: ardour_ui.cc:2179
 msgid ""
 "Renaming this session failed.\n"
 "Things could be seriously messed up at this point"
@@ -969,19 +970,19 @@ msgstr ""
 "重命名会话失败.\n"
 "从现在开始事情将会变得乱七八糟"
 
-#: ardour_ui.cc:2290
+#: ardour_ui.cc:2294
 msgid "Save Template"
 msgstr "保存模板..."
 
-#: ardour_ui.cc:2291
+#: ardour_ui.cc:2295
 msgid "Name for template:"
 msgstr "模板名:"
 
-#: ardour_ui.cc:2292
+#: ardour_ui.cc:2296
 msgid "-template"
 msgstr "-模板"
 
-#: ardour_ui.cc:2330
+#: ardour_ui.cc:2334
 msgid ""
 "This session\n"
 "%1\n"
@@ -991,52 +992,52 @@ msgstr ""
 "%1\n"
 "已存在. 打开它?"
 
-#: ardour_ui.cc:2340
+#: ardour_ui.cc:2344
 msgid "Open Existing Session"
 msgstr "打开已存在的会话"
 
-#: ardour_ui.cc:2570
+#: ardour_ui.cc:2574
 msgid "There is no existing session at \"%1\""
 msgstr " \"%1\" 没有会话文件"
 
-#: ardour_ui.cc:2657
+#: ardour_ui.cc:2661
 msgid "Please wait while %1 loads your session"
 msgstr "请等待 %1 载入会话"
 
-#: ardour_ui.cc:2672
+#: ardour_ui.cc:2676
 msgid "Port Registration Error"
 msgstr "端口(port)注册错误"
 
-#: ardour_ui.cc:2673
+#: ardour_ui.cc:2677
 msgid "Click the Close button to try again."
 msgstr "单击关闭按钮，再尝试一遍"
 
-#: ardour_ui.cc:2694
+#: ardour_ui.cc:2698
 msgid "Session \"%1 (snapshot %2)\" did not load successfully"
 msgstr "会话  \"%1 (快照 %2)\" 装载失败."
 
-#: ardour_ui.cc:2700
+#: ardour_ui.cc:2704
 msgid "Loading Error"
 msgstr "装载错误"
 
-#: ardour_ui.cc:2701
+#: ardour_ui.cc:2705
 msgid "Click the Refresh button to try again."
 msgstr "单击刷新按钮,再尝试一遍"
 
-#: ardour_ui.cc:2783
+#: ardour_ui.cc:2787
 msgid "Could not create session in \"%1\""
 msgstr "在 \"%1\" 无法创建会话"
 
-#: ardour_ui.cc:2910
+#: ardour_ui.cc:2914
 msgid "No files were ready for clean-up"
 msgstr "没有可以清空的文件"
 
-#: ardour_ui.cc:2914 ardour_ui.cc:2924 ardour_ui.cc:3057 ardour_ui.cc:3064
+#: ardour_ui.cc:2918 ardour_ui.cc:2928 ardour_ui.cc:3061 ardour_ui.cc:3068
 #: ardour_ui_ed.cc:104
 msgid "Clean-up"
 msgstr "清空"
 
-#: ardour_ui.cc:2915
+#: ardour_ui.cc:2919
 msgid ""
 "If this seems suprising, \n"
 "check for any existing snapshots.\n"
@@ -1044,19 +1045,19 @@ msgid ""
 "require some unused files to continue to exist."
 msgstr ""
 
-#: ardour_ui.cc:2974
+#: ardour_ui.cc:2978
 msgid "kilo"
 msgstr ""
 
-#: ardour_ui.cc:2977
+#: ardour_ui.cc:2981
 msgid "mega"
 msgstr ""
 
-#: ardour_ui.cc:2980
+#: ardour_ui.cc:2984
 msgid "giga"
 msgstr ""
 
-#: ardour_ui.cc:2985
+#: ardour_ui.cc:2989
 #, fuzzy
 msgid ""
 "The following file was deleted from %2,\n"
@@ -1073,7 +1074,7 @@ msgstr[1] ""
 "%2,\n"
 "释放出 %3 %4 bytes 的磁盘空间"
 
-#: ardour_ui.cc:2992
+#: ardour_ui.cc:2996
 #, fuzzy
 msgid ""
 "The following file was not in use and \n"
@@ -1116,11 +1117,11 @@ msgstr[1] ""
 "将会释放额外的\n"
 "%3 %4bytes 的磁盘空间.\n"
 
-#: ardour_ui.cc:3052
+#: ardour_ui.cc:3056
 msgid "Are you sure you want to clean-up?"
 msgstr "您确认要删除这些文件吗"
 
-#: ardour_ui.cc:3059
+#: ardour_ui.cc:3063
 msgid ""
 "Clean-up is a destructive operation.\n"
 "ALL undo/redo information will be lost if you clean-up.\n"
@@ -1130,23 +1131,23 @@ msgstr ""
 "如果你清空了, 所有的撤销/重复信息将会丢失.\n"
 "清空将会把所有未使用过的文件弄到 \"死亡\" 位置"
 
-#: ardour_ui.cc:3067
+#: ardour_ui.cc:3071
 msgid "CleanupDialog"
 msgstr "清空对话框"
 
-#: ardour_ui.cc:3097
+#: ardour_ui.cc:3101
 msgid "Cleaned Files"
 msgstr "清除文件"
 
-#: ardour_ui.cc:3114
+#: ardour_ui.cc:3118
 msgid "deleted file"
 msgstr "删除文件"
 
-#: ardour_ui.cc:3268
+#: ardour_ui.cc:3272
 msgid "Recording was stopped because your system could not keep up."
 msgstr "您的系统无法继续, 录音停止."
 
-#: ardour_ui.cc:3297
+#: ardour_ui.cc:3301
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1159,7 +1160,7 @@ msgstr ""
 "\n"
 "确切地说, 磁盘的读写速度无法跟上录音速度\n"
 
-#: ardour_ui.cc:3316
+#: ardour_ui.cc:3320
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1172,15 +1173,15 @@ msgstr ""
 "\n"
 "确切地说, 磁盘的读写速度无法跟上播放速度\n"
 
-#: ardour_ui.cc:3356
+#: ardour_ui.cc:3360
 msgid "Crash Recovery"
 msgstr "崩溃恢复"
 
-#: ardour_ui.cc:3357
+#: ardour_ui.cc:3361
 #, fuzzy
 msgid ""
-"This session appears to have been in\n"
-"middle of recording when ardour or\n"
+"This session appears to have been in the\n"
+"middle of recording when %1 or\n"
 "the computer was shutdown.\n"
 "\n"
 "%1 can recover any captured audio for\n"
@@ -1193,19 +1194,19 @@ msgstr ""
 "Ardour可以为你恢复一些捕捉到的音频\n"
 "你也可以忽略它. 请你选择.\n"
 
-#: ardour_ui.cc:3369
+#: ardour_ui.cc:3373
 msgid "Ignore crash data"
 msgstr "忽略崩毁的数据"
 
-#: ardour_ui.cc:3370
+#: ardour_ui.cc:3374
 msgid "Recover from crash"
 msgstr "恢复到崩溃前"
 
-#: ardour_ui.cc:3390
+#: ardour_ui.cc:3394
 msgid "Sample Rate Mismatch"
 msgstr "采样率不匹配"
 
-#: ardour_ui.cc:3391
+#: ardour_ui.cc:3395
 #, fuzzy
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
@@ -1216,33 +1217,21 @@ msgstr ""
 "\n"
 "当前音频引擎的采样率为 %2 Hz.\n"
 
-#: ardour_ui.cc:3400
+#: ardour_ui.cc:3404
 msgid "Do not load session"
 msgstr "不要装载会话"
 
-#: ardour_ui.cc:3401
+#: ardour_ui.cc:3405
 msgid "Load session anyway"
 msgstr "转载会话"
 
-#: ardour_ui.cc:3422
+#: ardour_ui.cc:3426
 msgid "Could not disconnect from JACK"
 msgstr "无法断开JACK的连接"
 
-#: ardour_ui.cc:3435
+#: ardour_ui.cc:3439
 msgid "Could not reconnect to JACK"
 msgstr "无法重新连接到JACK"
-
-#: ardour_ui.cc:3656
-msgid "Translations disabled"
-msgstr "取消翻译功能"
-
-#: ardour_ui.cc:3656
-msgid "Translations enabled"
-msgstr "开启翻译功能"
-
-#: ardour_ui.cc:3660
-msgid "You must restart %1 for this to take effect."
-msgstr "请重启 %1 使之生效."
 
 #: ardour_ui2.cc:72
 msgid "UI: cannot setup editor"
@@ -1303,7 +1292,7 @@ msgstr ""
 msgid "Enable/Disable audio click"
 msgstr ""
 
-#: ardour_ui2.cc:139 monitor_section.cc:82
+#: ardour_ui2.cc:139 monitor_section.cc:101
 msgid ""
 "When active, something is soloed.\n"
 "Click to de-solo everything"
@@ -1361,15 +1350,15 @@ msgstr "自动返回"
 msgid "Follow Edits"
 msgstr ""
 
-#: ardour_ui2.cc:631 rc_option_editor.cc:884 rc_option_editor.cc:902
-#: rc_option_editor.cc:905 rc_option_editor.cc:907 rc_option_editor.cc:909
-#: rc_option_editor.cc:917 rc_option_editor.cc:925 rc_option_editor.cc:927
-#: rc_option_editor.cc:935 rc_option_editor.cc:942 rc_option_editor.cc:951
-#: rc_option_editor.cc:953 rc_option_editor.cc:955 rc_option_editor.cc:963
-#: rc_option_editor.cc:965 rc_option_editor.cc:974
-#: session_option_editor.cc:233 session_option_editor.cc:235
-#: session_option_editor.cc:256 session_option_editor.cc:258
-#: session_option_editor.cc:260 session_option_editor.cc:267
+#: ardour_ui2.cc:631 rc_option_editor.cc:885 rc_option_editor.cc:903
+#: rc_option_editor.cc:906 rc_option_editor.cc:908 rc_option_editor.cc:910
+#: rc_option_editor.cc:918 rc_option_editor.cc:926 rc_option_editor.cc:928
+#: rc_option_editor.cc:936 rc_option_editor.cc:943 rc_option_editor.cc:952
+#: rc_option_editor.cc:954 rc_option_editor.cc:956 rc_option_editor.cc:964
+#: rc_option_editor.cc:966 rc_option_editor.cc:975
+#: session_option_editor.cc:221 session_option_editor.cc:223
+#: session_option_editor.cc:244 session_option_editor.cc:246
+#: session_option_editor.cc:248 session_option_editor.cc:255
 msgid "Misc"
 msgstr "杂项"
 
@@ -1442,11 +1431,11 @@ msgstr "采样格式"
 msgid "Control Surfaces"
 msgstr "控制表面"
 
-#: ardour_ui_ed.cc:115 rc_option_editor.cc:1436 route_time_axis.cc:418
+#: ardour_ui_ed.cc:115 rc_option_editor.cc:1431 route_time_axis.cc:397
 msgid "Plugins"
 msgstr "插件"
 
-#: ardour_ui_ed.cc:116 rc_option_editor.cc:1765
+#: ardour_ui_ed.cc:116 rc_option_editor.cc:1779
 msgid "Metering"
 msgstr ""
 
@@ -1462,7 +1451,7 @@ msgstr ""
 msgid "Denormal Handling"
 msgstr ""
 
-#: ardour_ui_ed.cc:123 route_time_axis.cc:1499
+#: ardour_ui_ed.cc:123 route_time_axis.cc:1480
 msgid "New..."
 msgstr "新建..."
 
@@ -1494,8 +1483,8 @@ msgstr "快照..."
 msgid "Save As..."
 msgstr "另存为..."
 
-#: ardour_ui_ed.cc:154 editor_actions.cc:1560 editor_markers.cc:859
-#: editor_snapshots.cc:123 mixer_strip.cc:1470 route_time_axis.cc:1495
+#: ardour_ui_ed.cc:154 editor_actions.cc:1558 editor_markers.cc:859
+#: editor_snapshots.cc:123 mixer_strip.cc:1452 route_time_axis.cc:1476
 msgid "Rename..."
 msgstr "重命名..."
 
@@ -1535,7 +1524,7 @@ msgstr "清空未使用的源..."
 msgid "Flush Wastebasket"
 msgstr "清空回收站"
 
-#: ardour_ui_ed.cc:190 keyeditor.cc:253 rc_option_editor.cc:1350
+#: ardour_ui_ed.cc:190 keyeditor.cc:253 rc_option_editor.cc:1345
 msgid "JACK"
 msgstr "JACK"
 
@@ -1548,7 +1537,7 @@ msgid "Reconnect"
 msgstr "重新链接"
 
 #: ardour_ui_ed.cc:196 global_port_matrix.cc:198 io_selector.cc:210
-#: mixer_strip.cc:730 mixer_strip.cc:856
+#: mixer_strip.cc:712 mixer_strip.cc:838
 msgid "Disconnect"
 msgstr "取消连接"
 
@@ -1590,7 +1579,7 @@ msgstr "音轨和总线"
 msgid "Locations"
 msgstr "位置"
 
-#: ardour_ui_ed.cc:240 ardour_ui_ed.cc:655
+#: ardour_ui_ed.cc:240 ardour_ui_ed.cc:644
 msgid "Big Clock"
 msgstr "大时钟"
 
@@ -1655,13 +1644,13 @@ msgstr "添加MIDI音轨"
 msgid "Save"
 msgstr "保存"
 
-#: ardour_ui_ed.cc:277 rc_option_editor.cc:994 rc_option_editor.cc:1003
-#: rc_option_editor.cc:1012 rc_option_editor.cc:1023 rc_option_editor.cc:1035
-#: rc_option_editor.cc:1044 rc_option_editor.cc:1054 rc_option_editor.cc:1056
-#: rc_option_editor.cc:1066 rc_option_editor.cc:1082 rc_option_editor.cc:1095
-#: rc_option_editor.cc:1113 rc_option_editor.cc:1115 rc_option_editor.cc:1129
-#: rc_option_editor.cc:1132 rc_option_editor.cc:1134 rc_option_editor.cc:1151
-#: rc_option_editor.cc:1162
+#: ardour_ui_ed.cc:277 rc_option_editor.cc:995 rc_option_editor.cc:1006
+#: rc_option_editor.cc:1015 rc_option_editor.cc:1028 rc_option_editor.cc:1041
+#: rc_option_editor.cc:1050 rc_option_editor.cc:1060 rc_option_editor.cc:1062
+#: rc_option_editor.cc:1072 rc_option_editor.cc:1088 rc_option_editor.cc:1101
+#: rc_option_editor.cc:1119 rc_option_editor.cc:1121 rc_option_editor.cc:1135
+#: rc_option_editor.cc:1138 rc_option_editor.cc:1140 rc_option_editor.cc:1157
+#: rc_option_editor.cc:1168
 msgid "Transport"
 msgstr ""
 
@@ -1726,7 +1715,7 @@ msgstr "倒带(慢速)"
 msgid "Rewind (Fast)"
 msgstr "倒带(快速)"
 
-#: ardour_ui_ed.cc:340 startup.cc:703
+#: ardour_ui_ed.cc:340 startup.cc:693
 msgid "Forward"
 msgstr "快进"
 
@@ -1758,13 +1747,12 @@ msgstr "转到确切的本地时间"
 msgid "Focus On Clock"
 msgstr "锁定时间指针"
 
-#: ardour_ui_ed.cc:366 ardour_ui_ed.cc:375 audio_clock.cc:2045 editor.cc:240
+#: ardour_ui_ed.cc:366 ardour_ui_ed.cc:375 audio_clock.cc:2045 editor.cc:241
 #: editor_actions.cc:544 export_timespan_selector.cc:88
 #: session_option_editor.cc:41 session_option_editor.cc:61
-#: session_option_editor.cc:73 session_option_editor.cc:92
-#: session_option_editor.cc:95 session_option_editor.cc:108
-#: session_option_editor.cc:121 session_option_editor.cc:123
-#: session_option_editor.cc:125
+#: session_option_editor.cc:80 session_option_editor.cc:83
+#: session_option_editor.cc:96 session_option_editor.cc:109
+#: session_option_editor.cc:111 session_option_editor.cc:113
 msgid "Timecode"
 msgstr "时间码"
 
@@ -1776,7 +1764,7 @@ msgstr "小节 & 拍子"
 msgid "Minutes & Seconds"
 msgstr "分&秒"
 
-#: ardour_ui_ed.cc:372 ardour_ui_ed.cc:381 audio_clock.cc:2049 editor.cc:241
+#: ardour_ui_ed.cc:372 ardour_ui_ed.cc:381 audio_clock.cc:2049 editor.cc:242
 #: editor_actions.cc:543
 msgid "Samples"
 msgstr "采样"
@@ -1785,7 +1773,7 @@ msgstr "采样"
 msgid "Punch In"
 msgstr "切入"
 
-#: ardour_ui_ed.cc:385 mixer_strip.cc:1896 route_ui.cc:132
+#: ardour_ui_ed.cc:385 mixer_strip.cc:1878 route_ui.cc:132
 #: time_info_box.cc:113
 msgid "In"
 msgstr ""
@@ -1806,7 +1794,7 @@ msgstr "切入/切出"
 msgid "In/Out"
 msgstr "入/出"
 
-#: ardour_ui_ed.cc:396 rc_option_editor.cc:951
+#: ardour_ui_ed.cc:396 rc_option_editor.cc:952
 msgid "Click"
 msgstr "点击"
 
@@ -1850,7 +1838,7 @@ msgstr "发送MMC"
 msgid "Use MMC"
 msgstr "使用MMC"
 
-#: ardour_ui_ed.cc:440 rc_option_editor.cc:1588
+#: ardour_ui_ed.cc:440 rc_option_editor.cc:1583
 msgid "Send MIDI Clock"
 msgstr "发送MIDI时钟"
 
@@ -1858,40 +1846,36 @@ msgstr "发送MIDI时钟"
 msgid "Send MIDI Feedback"
 msgstr "发送MIDI反馈"
 
-#: ardour_ui_ed.cc:447
-msgid "Enable Translations"
-msgstr "Povolit překlady"
-
-#: ardour_ui_ed.cc:459
+#: ardour_ui_ed.cc:448
 msgid "Panic"
 msgstr ""
 
-#: ardour_ui_ed.cc:599
+#: ardour_ui_ed.cc:588
 msgid "Wall Clock"
 msgstr "本地时间"
 
-#: ardour_ui_ed.cc:600
+#: ardour_ui_ed.cc:589
 msgid "Disk Space"
 msgstr "盘空间"
 
-#: ardour_ui_ed.cc:601
+#: ardour_ui_ed.cc:590
 msgid "DSP"
 msgstr "数字信号处理"
 
-#: ardour_ui_ed.cc:602
+#: ardour_ui_ed.cc:591
 msgid "Buffers"
 msgstr "缓冲"
 
-#: ardour_ui_ed.cc:603
+#: ardour_ui_ed.cc:592
 msgid "JACK Sampling Rate and Latency"
 msgstr "JACK采样率和延迟"
 
-#: ardour_ui_ed.cc:604
+#: ardour_ui_ed.cc:593
 #, fuzzy
 msgid "Timecode Format"
 msgstr "时间码框架"
 
-#: ardour_ui_ed.cc:605
+#: ardour_ui_ed.cc:594
 msgid "File Format"
 msgstr "文件格式"
 
@@ -1905,11 +1889,11 @@ msgstr ""
 msgid "Internal"
 msgstr "内部的"
 
-#: ardour_ui_options.cc:469
+#: ardour_ui_options.cc:472
 msgid "Enable/Disable external positional sync"
 msgstr "启用/禁用外部位置同步"
 
-#: ardour_ui_options.cc:471
+#: ardour_ui_options.cc:474
 msgid "Sync to JACK is not possible: video pull up/down is set"
 msgstr ""
 
@@ -1931,17 +1915,17 @@ msgstr ""
 msgid "%+.4f%%"
 msgstr ""
 
-#: audio_clock.cc:1236 editor.cc:242 editor_actions.cc:135
+#: audio_clock.cc:1236 editor.cc:243 editor_actions.cc:135
 #: editor_actions.cc:536
 msgid "Tempo"
 msgstr "节奏"
 
-#: audio_clock.cc:1240 editor.cc:243 editor_actions.cc:537
+#: audio_clock.cc:1240 editor.cc:244 editor_actions.cc:537
 msgid "Meter"
 msgstr "标尺"
 
 #: audio_clock.cc:1818 audio_streamview.cc:116 editor_actions.cc:878
-#: midi_region_view.cc:3034 session_metadata_dialog.cc:331
+#: midi_region_view.cc:3005 session_metadata_dialog.cc:331
 #: session_metadata_dialog.cc:379 session_metadata_dialog.cc:435
 #: session_metadata_dialog.cc:716
 msgid "programming error: %1"
@@ -1952,7 +1936,7 @@ msgstr "程序错误: %1"
 msgid "programming error: %1 %2"
 msgstr "程序错误: %1: %2"
 
-#: audio_clock.cc:2047 editor.cc:239 export_timespan_selector.cc:98
+#: audio_clock.cc:2047 editor.cc:240 export_timespan_selector.cc:98
 msgid "Bars:Beats"
 msgstr "小节:拍子"
 
@@ -1968,8 +1952,8 @@ msgstr "从播放头设置"
 msgid "Locate to This Time"
 msgstr "放置此时间"
 
-#: audio_region_editor.cc:63 control_point_dialog.cc:49 rhythm_ferret.cc:106
-#: rhythm_ferret.cc:111 rhythm_ferret.cc:116
+#: audio_region_editor.cc:63 control_point_dialog.cc:49 rhythm_ferret.cc:125
+#: rhythm_ferret.cc:130 rhythm_ferret.cc:135
 msgid "dB"
 msgstr ""
 
@@ -2017,7 +2001,7 @@ msgstr "移除控制点"
 msgid "Ignoring illegal points on AutomationLine \"%1\""
 msgstr "忽略非法位置在AutomationLine: \"%1\""
 
-#: automation_region_view.cc:160 automation_time_axis.cc:581
+#: automation_region_view.cc:160 automation_time_axis.cc:583
 msgid "add automation event"
 msgstr "添加自动化事件"
 
@@ -2029,63 +2013,63 @@ msgstr "自动化状态"
 msgid "hide track"
 msgstr "隐藏音轨"
 
-#: automation_time_axis.cc:250 automation_time_axis.cc:302
-#: automation_time_axis.cc:494 gain_meter.cc:222 generic_pluginui.cc:452
+#: automation_time_axis.cc:255 automation_time_axis.cc:307
+#: automation_time_axis.cc:496 gain_meter.cc:195 generic_pluginui.cc:452
 #: generic_pluginui.cc:729 panner_ui.cc:150
 #, fuzzy
 msgid "Automation|Manual"
 msgstr "自动化"
 
-#: automation_time_axis.cc:252 automation_time_axis.cc:313
-#: automation_time_axis.cc:499 editor.cc:1943 editor.cc:2020
-#: editor_actions.cc:118 editor_actions.cc:1704 gain_meter.cc:225
+#: automation_time_axis.cc:257 automation_time_axis.cc:318
+#: automation_time_axis.cc:501 editor.cc:1944 editor.cc:2021
+#: editor_actions.cc:118 editor_actions.cc:1702 gain_meter.cc:198
 #: generic_pluginui.cc:455 generic_pluginui.cc:731 panner_ui.cc:153
 msgid "Play"
 msgstr "播放"
 
-#: automation_time_axis.cc:254 automation_time_axis.cc:324
-#: automation_time_axis.cc:504 gain_meter.cc:228 generic_pluginui.cc:458
+#: automation_time_axis.cc:259 automation_time_axis.cc:329
+#: automation_time_axis.cc:506 gain_meter.cc:201 generic_pluginui.cc:458
 #: generic_pluginui.cc:733 panner_ui.cc:156
 msgid "Write"
 msgstr ""
 
-#: automation_time_axis.cc:256 automation_time_axis.cc:335
-#: automation_time_axis.cc:509 gain_meter.cc:231 generic_pluginui.cc:461
+#: automation_time_axis.cc:261 automation_time_axis.cc:340
+#: automation_time_axis.cc:511 gain_meter.cc:204 generic_pluginui.cc:461
 #: generic_pluginui.cc:735 panner_ui.cc:159
 msgid "Touch"
 msgstr ""
 
-#: automation_time_axis.cc:346 generic_pluginui.cc:464
+#: automation_time_axis.cc:351 generic_pluginui.cc:464
 msgid "???"
 msgstr "???"
 
-#: automation_time_axis.cc:387
+#: automation_time_axis.cc:392
 msgid "clear automation"
 msgstr "清除自动化"
 
-#: automation_time_axis.cc:483 editor_actions.cc:582 editor_markers.cc:858
-#: location_ui.cc:55 route_time_axis.cc:725
+#: automation_time_axis.cc:485 editor_actions.cc:582 editor_markers.cc:858
+#: location_ui.cc:55 route_time_axis.cc:704
 msgid "Hide"
 msgstr "隐藏"
 
-#: automation_time_axis.cc:485
+#: automation_time_axis.cc:487
 msgid "Clear"
 msgstr "清除"
 
-#: automation_time_axis.cc:514
+#: automation_time_axis.cc:516
 msgid "State"
 msgstr "状态"
 
-#: automation_time_axis.cc:529
+#: automation_time_axis.cc:531
 msgid "Discrete"
 msgstr "离散"
 
-#: automation_time_axis.cc:535 editor.cc:1467 editor.cc:1474 editor.cc:1530
-#: editor.cc:1536 export_format_dialog.cc:476
+#: automation_time_axis.cc:537 editor.cc:1468 editor.cc:1475 editor.cc:1531
+#: editor.cc:1537 export_format_dialog.cc:476
 msgid "Linear"
 msgstr "先行"
 
-#: automation_time_axis.cc:541 rhythm_ferret.cc:91 route_time_axis.cc:660
+#: automation_time_axis.cc:543 rhythm_ferret.cc:110 route_time_axis.cc:639
 #: shuttle_control.cc:187
 msgid "Mode"
 msgstr "模式"
@@ -2103,23 +2087,23 @@ msgid "Direction:"
 msgstr "方向:"
 
 #: bundle_manager.cc:207 bundle_manager.cc:211 mixer_strip.cc:156
-#: mixer_strip.cc:2121
+#: mixer_strip.cc:2106
 msgid "Input"
 msgstr "输入"
 
 #: bundle_manager.cc:208 bundle_manager.cc:213 bundle_manager.cc:247
-#: mixer_strip.cc:161 mixer_strip.cc:2124
+#: mixer_strip.cc:161 mixer_strip.cc:2109
 msgid "Output"
 msgstr "输出"
 
-#: bundle_manager.cc:266 editor.cc:1984 editor_actions.cc:90
+#: bundle_manager.cc:266 editor.cc:1985 editor_actions.cc:90
 #: editor_actions.cc:100
 msgid "Edit"
 msgstr "编辑"
 
-#: bundle_manager.cc:267 editor.cc:5514 editor_actions.cc:310
-#: editor_actions.cc:368 plugin_ui.cc:462 processor_box.cc:2214
-#: route_time_axis.cc:730
+#: bundle_manager.cc:267 editor.cc:5523 editor_actions.cc:310
+#: editor_actions.cc:368 plugin_ui.cc:462 processor_box.cc:2207
+#: route_time_axis.cc:709
 msgid "Delete"
 msgstr "删除"
 
@@ -2274,7 +2258,7 @@ msgstr "延伸所选音符的长度"
 msgid "Set selected notes to this length"
 msgstr "延伸所选音符的长度"
 
-#: edit_note_dialog.cc:58 midi_list_editor.cc:104 patch_change_dialog.cc:90
+#: edit_note_dialog.cc:58 midi_list_editor.cc:104 patch_change_dialog.cc:91
 #: step_entry.cc:393
 msgid "Channel"
 msgstr "音轨"
@@ -2287,7 +2271,7 @@ msgstr "调子"
 msgid "Velocity"
 msgstr "力度"
 
-#: edit_note_dialog.cc:88 patch_change_dialog.cc:66
+#: edit_note_dialog.cc:88 patch_change_dialog.cc:67
 msgid "Time"
 msgstr "时间"
 
@@ -2301,682 +2285,682 @@ msgstr "长度"
 msgid "edit note"
 msgstr "编辑音符"
 
-#: editor.cc:140 editor.cc:3433
+#: editor.cc:141 editor.cc:3442
 msgid "CD Frames"
 msgstr "CD框架"
 
-#: editor.cc:141 editor.cc:3435
+#: editor.cc:142 editor.cc:3444
 msgid "Timecode Frames"
 msgstr "时间码框架"
 
-#: editor.cc:142 editor.cc:3437
+#: editor.cc:143 editor.cc:3446
 msgid "Timecode Seconds"
 msgstr "时间码秒"
 
-#: editor.cc:143 editor.cc:3439
+#: editor.cc:144 editor.cc:3448
 msgid "Timecode Minutes"
 msgstr "时间码分"
 
-#: editor.cc:144 editor.cc:3441
+#: editor.cc:145 editor.cc:3450
 msgid "Seconds"
 msgstr "秒"
 
-#: editor.cc:145 editor.cc:3443
+#: editor.cc:146 editor.cc:3452
 msgid "Minutes"
 msgstr "分"
 
-#: editor.cc:146 editor.cc:3417 quantize_dialog.cc:37 quantize_dialog.cc:141
+#: editor.cc:147 editor.cc:3426 quantize_dialog.cc:37 quantize_dialog.cc:141
 msgid "Beats/128"
 msgstr "节拍/128"
 
-#: editor.cc:147 editor.cc:3415 quantize_dialog.cc:38 quantize_dialog.cc:143
+#: editor.cc:148 editor.cc:3424 quantize_dialog.cc:38 quantize_dialog.cc:143
 msgid "Beats/64"
 msgstr "节拍/64"
 
-#: editor.cc:148 editor.cc:3413 quantize_dialog.cc:39 quantize_dialog.cc:145
+#: editor.cc:149 editor.cc:3422 quantize_dialog.cc:39 quantize_dialog.cc:145
 msgid "Beats/32"
 msgstr "节拍/32"
 
-#: editor.cc:149 editor.cc:3411
+#: editor.cc:150 editor.cc:3420
 msgid "Beats/28"
 msgstr "节拍/28"
 
-#: editor.cc:150 editor.cc:3409
+#: editor.cc:151 editor.cc:3418
 msgid "Beats/24"
 msgstr "节拍/24"
 
-#: editor.cc:151 editor.cc:3407
+#: editor.cc:152 editor.cc:3416
 msgid "Beats/20"
 msgstr "节拍/20"
 
-#: editor.cc:152 editor.cc:3405 quantize_dialog.cc:40 quantize_dialog.cc:147
+#: editor.cc:153 editor.cc:3414 quantize_dialog.cc:40 quantize_dialog.cc:147
 msgid "Beats/16"
 msgstr "节拍/16"
 
-#: editor.cc:153 editor.cc:3403
+#: editor.cc:154 editor.cc:3412
 msgid "Beats/14"
 msgstr "节拍/14"
 
-#: editor.cc:154 editor.cc:3401
+#: editor.cc:155 editor.cc:3410
 msgid "Beats/12"
 msgstr "节拍/12"
 
-#: editor.cc:155 editor.cc:3399
+#: editor.cc:156 editor.cc:3408
 msgid "Beats/10"
 msgstr "节拍/10"
 
-#: editor.cc:156 editor.cc:3397 quantize_dialog.cc:41 quantize_dialog.cc:149
+#: editor.cc:157 editor.cc:3406 quantize_dialog.cc:41 quantize_dialog.cc:149
 msgid "Beats/8"
 msgstr "节拍/8"
 
-#: editor.cc:157 editor.cc:3395
+#: editor.cc:158 editor.cc:3404
 msgid "Beats/7"
 msgstr "节拍/7"
 
-#: editor.cc:158 editor.cc:3393
+#: editor.cc:159 editor.cc:3402
 msgid "Beats/6"
 msgstr "节拍/6"
 
-#: editor.cc:159 editor.cc:3391
+#: editor.cc:160 editor.cc:3400
 msgid "Beats/5"
 msgstr "节拍/5"
 
-#: editor.cc:160 editor.cc:3389 quantize_dialog.cc:42 quantize_dialog.cc:151
+#: editor.cc:161 editor.cc:3398 quantize_dialog.cc:42 quantize_dialog.cc:151
 msgid "Beats/4"
 msgstr "节拍/4"
 
-#: editor.cc:161 editor.cc:3387 quantize_dialog.cc:43 quantize_dialog.cc:153
+#: editor.cc:162 editor.cc:3396 quantize_dialog.cc:43 quantize_dialog.cc:153
 msgid "Beats/3"
 msgstr "节拍/3"
 
-#: editor.cc:162 editor.cc:3385 quantize_dialog.cc:44 quantize_dialog.cc:155
+#: editor.cc:163 editor.cc:3394 quantize_dialog.cc:44 quantize_dialog.cc:155
 msgid "Beats/2"
 msgstr "节拍/2"
 
-#: editor.cc:163 editor.cc:3419 quantize_dialog.cc:45 quantize_dialog.cc:157
+#: editor.cc:164 editor.cc:3428 quantize_dialog.cc:45 quantize_dialog.cc:157
 msgid "Beats"
 msgstr "节拍"
 
-#: editor.cc:164 editor.cc:3421
+#: editor.cc:165 editor.cc:3430
 msgid "Bars"
 msgstr "小节"
 
-#: editor.cc:165 editor.cc:3423
+#: editor.cc:166 editor.cc:3432
 msgid "Marks"
 msgstr "标记"
 
-#: editor.cc:166 editor.cc:3425
+#: editor.cc:167 editor.cc:3434
 msgid "Region starts"
 msgstr "区域开始"
 
-#: editor.cc:167 editor.cc:3427
+#: editor.cc:168 editor.cc:3436
 msgid "Region ends"
 msgstr "区域结束"
 
-#: editor.cc:168 editor.cc:3431
+#: editor.cc:169 editor.cc:3440
 msgid "Region syncs"
 msgstr "区域同步"
 
-#: editor.cc:169 editor.cc:3429
+#: editor.cc:170 editor.cc:3438
 msgid "Region bounds"
 msgstr "区域界限"
 
-#: editor.cc:174 editor.cc:3459 editor_actions.cc:485
+#: editor.cc:175 editor.cc:3468 editor_actions.cc:485
 msgid "No Grid"
 msgstr "无网格"
 
-#: editor.cc:175 editor.cc:3461 editor_actions.cc:486
+#: editor.cc:176 editor.cc:3470 editor_actions.cc:486
 msgid "Grid"
 msgstr "网格"
 
-#: editor.cc:176 editor.cc:3463 editor_actions.cc:487
+#: editor.cc:177 editor.cc:3472 editor_actions.cc:487
 msgid "Magnetic"
 msgstr "磁性"
 
-#: editor.cc:181 editor.cc:191 editor.cc:3502 editor.cc:3527
+#: editor.cc:182 editor.cc:192 editor.cc:3511 editor.cc:3536
 #: editor_actions.cc:117 editor_actions.cc:468
 msgid "Playhead"
 msgstr "播放头"
 
-#: editor.cc:182 editor.cc:3500 editor_actions.cc:470
+#: editor.cc:183 editor.cc:3509 editor_actions.cc:470
 msgid "Marker"
 msgstr "标记"
 
-#: editor.cc:183 editor.cc:192 editor.cc:3529 editor_actions.cc:469
+#: editor.cc:184 editor.cc:193 editor.cc:3538 editor_actions.cc:469
 msgid "Mouse"
 msgstr "鼠"
 
-#: editor.cc:188 editor.cc:3521 mono_panner_editor.cc:42
+#: editor.cc:189 editor.cc:3530 mono_panner_editor.cc:42
 msgid "Left"
 msgstr "左"
 
-#: editor.cc:189 editor.cc:3523 mono_panner_editor.cc:47
+#: editor.cc:190 editor.cc:3532 mono_panner_editor.cc:47
 msgid "Right"
 msgstr "右"
 
-#: editor.cc:190 editor.cc:3525
+#: editor.cc:191 editor.cc:3534
 msgid "Center"
 msgstr "中"
 
-#: editor.cc:193 editor.cc:3092 editor.cc:3531
+#: editor.cc:194 editor.cc:3101 editor.cc:3540
 msgid "Edit point"
 msgstr "编辑点"
 
-#: editor.cc:199
+#: editor.cc:200
 msgid "Mushy"
 msgstr ""
 
-#: editor.cc:200
+#: editor.cc:201
 msgid "Smooth"
 msgstr ""
 
-#: editor.cc:201
+#: editor.cc:202
 msgid "Balanced multitimbral mixture"
 msgstr ""
 
-#: editor.cc:202
+#: editor.cc:203
 msgid "Unpitched percussion with stable notes"
 msgstr ""
 
-#: editor.cc:203
+#: editor.cc:204
 msgid "Crisp monophonic instrumental"
 msgstr ""
 
-#: editor.cc:204
+#: editor.cc:205
 msgid "Unpitched solo percussion"
 msgstr ""
 
-#: editor.cc:205
+#: editor.cc:206
 msgid "Resample without preserving pitch"
 msgstr ""
 
-#: editor.cc:238
+#: editor.cc:239
 msgid "Mins:Secs"
 msgstr "分:秒"
 
-#: editor.cc:244
+#: editor.cc:245
 msgid "Location Markers"
 msgstr "位置标记"
 
-#: editor.cc:245
+#: editor.cc:246
 msgid "Range Markers"
 msgstr "范围标记"
 
-#: editor.cc:246
+#: editor.cc:247
 msgid "Loop/Punch Ranges"
 msgstr "循环/Punch 范围"
 
-#: editor.cc:247 editor_actions.cc:540
+#: editor.cc:248 editor_actions.cc:540
 msgid "CD Markers"
 msgstr "CD标记"
 
-#: editor.cc:262
+#: editor.cc:263
 msgid "mode"
 msgstr ""
 
-#: editor.cc:540
+#: editor.cc:541
 msgid "Regions"
 msgstr ""
 
-#: editor.cc:541
+#: editor.cc:542
 msgid "Tracks & Busses"
 msgstr "音轨&总线"
 
-#: editor.cc:542
+#: editor.cc:543
 msgid "Snapshots"
 msgstr ""
 
-#: editor.cc:543
+#: editor.cc:544
 #, fuzzy
 msgid "Track & Bus Groups"
 msgstr "音轨&总线"
 
-#: editor.cc:544
+#: editor.cc:545
 msgid "Ranges & Marks"
 msgstr ""
 
-#: editor.cc:688 editor.cc:5365 rc_option_editor.cc:1169
-#: rc_option_editor.cc:1177 rc_option_editor.cc:1185 rc_option_editor.cc:1200
-#: rc_option_editor.cc:1207 rc_option_editor.cc:1215 rc_option_editor.cc:1223
-#: rc_option_editor.cc:1243 rc_option_editor.cc:1255 rc_option_editor.cc:1257
-#: rc_option_editor.cc:1265 rc_option_editor.cc:1273 rc_option_editor.cc:1281
-#: rc_option_editor.cc:1289 rc_option_editor.cc:1297 rc_option_editor.cc:1312
-#: rc_option_editor.cc:1316
+#: editor.cc:689 editor.cc:5374 rc_option_editor.cc:1175
+#: rc_option_editor.cc:1183 rc_option_editor.cc:1191 rc_option_editor.cc:1208
+#: rc_option_editor.cc:1210 rc_option_editor.cc:1218 rc_option_editor.cc:1226
+#: rc_option_editor.cc:1246 rc_option_editor.cc:1258 rc_option_editor.cc:1260
+#: rc_option_editor.cc:1268 rc_option_editor.cc:1276 rc_option_editor.cc:1284
+#: rc_option_editor.cc:1292 rc_option_editor.cc:1300 rc_option_editor.cc:1315
+#: rc_option_editor.cc:1319
 msgid "Editor"
 msgstr "编辑器"
 
-#: editor.cc:1225 editor.cc:1235 editor.cc:4421 editor_actions.cc:130
-#: editor_actions.cc:1652
+#: editor.cc:1226 editor.cc:1236 editor.cc:4430 editor_actions.cc:130
+#: editor_actions.cc:1650
 msgid "Loop"
 msgstr "循环"
 
-#: editor.cc:1241 editor.cc:1251 editor.cc:4448 editor_actions.cc:131
+#: editor.cc:1242 editor.cc:1252 editor.cc:4457 editor_actions.cc:131
 #: time_info_box.cc:67
 msgid "Punch"
 msgstr ""
 
-#: editor.cc:1362
+#: editor.cc:1363
 msgid "Linear (for highly correlated material)"
 msgstr ""
 
-#: editor.cc:1372 editor.cc:1509 editor.cc:1571
+#: editor.cc:1373 editor.cc:1510 editor.cc:1572
 msgid "Constant power"
 msgstr ""
 
-#: editor.cc:1381 editor.cc:1502 editor.cc:1564
+#: editor.cc:1382 editor.cc:1503 editor.cc:1565
 msgid "Symmetric"
 msgstr ""
 
-#: editor.cc:1391 editor.cc:1484 editor.cc:1546
+#: editor.cc:1392 editor.cc:1485 editor.cc:1547
 msgid "Slow"
 msgstr "慢"
 
-#: editor.cc:1400 editor.cc:1493 editor.cc:1555 sfdb_ui.cc:1596
-#: sfdb_ui.cc:1705
+#: editor.cc:1401 editor.cc:1494 editor.cc:1556 sfdb_ui.cc:1597
+#: sfdb_ui.cc:1706
 msgid "Fast"
 msgstr "快"
 
-#: editor.cc:1447
+#: editor.cc:1448
 msgid "programming error: fade in canvas item has no regionview data pointer!"
 msgstr ""
 
-#: editor.cc:1458 editor.cc:1522
+#: editor.cc:1459 editor.cc:1523
 msgid "Deactivate"
 msgstr "取消激活"
 
-#: editor.cc:1460 editor.cc:1524
+#: editor.cc:1461 editor.cc:1525
 msgid "Activate"
 msgstr "激活"
 
-#: editor.cc:1468 editor.cc:1531
+#: editor.cc:1469 editor.cc:1532
 msgid "Slowest"
 msgstr "最慢"
 
-#: editor.cc:1582 route_time_axis.cc:1887 selection.cc:1009 selection.cc:1064
+#: editor.cc:1583 route_time_axis.cc:1868 selection.cc:1009 selection.cc:1064
 msgid "programming error: "
 msgstr "程序错误:"
 
-#: editor.cc:1683 editor.cc:1691 editor_ops.cc:3522
+#: editor.cc:1684 editor.cc:1692 editor_ops.cc:3523
 msgid "Freeze"
 msgstr "冻结"
 
-#: editor.cc:1687
+#: editor.cc:1688
 msgid "Unfreeze"
 msgstr "取消冻结"
 
-#: editor.cc:1826
+#: editor.cc:1827
 msgid "Selected Regions"
 msgstr "已选择的区域"
 
-#: editor.cc:1862 editor_markers.cc:896
+#: editor.cc:1863 editor_markers.cc:896
 msgid "Play Range"
 msgstr "播放范围"
 
-#: editor.cc:1863 editor_markers.cc:900
+#: editor.cc:1864 editor_markers.cc:899
 msgid "Loop Range"
 msgstr "循环范围"
 
-#: editor.cc:1872 editor_actions.cc:332
+#: editor.cc:1873 editor_actions.cc:332
 msgid "Move Range Start to Previous Region Boundary"
 msgstr ""
 
-#: editor.cc:1879 editor_actions.cc:339
+#: editor.cc:1880 editor_actions.cc:339
 msgid "Move Range Start to Next Region Boundary"
 msgstr ""
 
-#: editor.cc:1886 editor_actions.cc:346
+#: editor.cc:1887 editor_actions.cc:346
 msgid "Move Range End to Previous Region Boundary"
 msgstr ""
 
-#: editor.cc:1893 editor_actions.cc:353
+#: editor.cc:1894 editor_actions.cc:353
 msgid "Move Range End to Next Region Boundary"
 msgstr ""
 
-#: editor.cc:1899
+#: editor.cc:1900
 msgid "Convert to Region In-Place"
 msgstr "在此转换至区域"
 
-#: editor.cc:1900
+#: editor.cc:1901
 msgid "Convert to Region in Region List"
 msgstr "在区域列表转换至区域"
 
-#: editor.cc:1903 editor_markers.cc:927
+#: editor.cc:1904 editor_markers.cc:926
 msgid "Select All in Range"
 msgstr "在范围选择所有"
 
-#: editor.cc:1906
+#: editor.cc:1907
 msgid "Set Loop from Range"
 msgstr "从范围设置循环"
 
-#: editor.cc:1907
+#: editor.cc:1908
 msgid "Set Punch from Range"
 msgstr "从范围设置Punch"
 
-#: editor.cc:1910
+#: editor.cc:1911
 msgid "Add Range Markers"
 msgstr "添加范围标记"
 
-#: editor.cc:1913
+#: editor.cc:1914
 msgid "Crop Region to Range"
 msgstr "裁剪区域到范围"
 
-#: editor.cc:1914
+#: editor.cc:1915
 msgid "Fill Range with Region"
 msgstr "用区域填充范围"
 
-#: editor.cc:1915 editor_actions.cc:289
+#: editor.cc:1916 editor_actions.cc:289
 msgid "Duplicate Range"
 msgstr "复制范围"
 
-#: editor.cc:1918
+#: editor.cc:1919
 msgid "Consolidate Range"
 msgstr "合并范围"
 
-#: editor.cc:1919
+#: editor.cc:1920
 msgid "Consolidate Range With Processing"
 msgstr ""
 
-#: editor.cc:1920
+#: editor.cc:1921
 msgid "Bounce Range to Region List"
 msgstr ""
 
-#: editor.cc:1921
+#: editor.cc:1922
 msgid "Bounce Range to Region List With Processing"
 msgstr ""
 
-#: editor.cc:1922 editor_markers.cc:910
+#: editor.cc:1923 editor_markers.cc:909
 msgid "Export Range..."
 msgstr "导出范围"
 
-#: editor.cc:1937 editor.cc:2018 editor_actions.cc:281
+#: editor.cc:1938 editor.cc:2019 editor_actions.cc:281
 msgid "Play From Edit Point"
 msgstr "从编辑点播放"
 
-#: editor.cc:1938 editor.cc:2019
+#: editor.cc:1939 editor.cc:2020
 msgid "Play From Start"
 msgstr "从开始播放"
 
-#: editor.cc:1939
+#: editor.cc:1940
 msgid "Play Region"
 msgstr "播放区域"
 
-#: editor.cc:1941
+#: editor.cc:1942
 msgid "Loop Region"
 msgstr "循环区域"
 
-#: editor.cc:1951 editor.cc:2028
+#: editor.cc:1952 editor.cc:2029
 msgid "Select All in Track"
 msgstr "在音轨选择所有"
 
-#: editor.cc:1952 editor.cc:2029 editor_actions.cc:185
-#: export_timespan_selector.cc:53 processor_box.cc:2222
+#: editor.cc:1953 editor.cc:2030 editor_actions.cc:185
+#: export_timespan_selector.cc:53 processor_box.cc:2215
 msgid "Select All"
 msgstr "选择所有"
 
-#: editor.cc:1953 editor.cc:2030
+#: editor.cc:1954 editor.cc:2031
 msgid "Invert Selection in Track"
 msgstr "在音轨反转选区"
 
-#: editor.cc:1954 editor.cc:2031 editor_actions.cc:187
+#: editor.cc:1955 editor.cc:2032 editor_actions.cc:187
 msgid "Invert Selection"
 msgstr "反转选区"
 
-#: editor.cc:1956
+#: editor.cc:1957
 msgid "Set Range to Loop Range"
 msgstr "设置范围到循环范围"
 
-#: editor.cc:1957
+#: editor.cc:1958
 msgid "Set Range to Punch Range"
 msgstr "设置范围到Punch区间"
 
-#: editor.cc:1959 editor.cc:2033 editor_actions.cc:188
+#: editor.cc:1960 editor.cc:2034 editor_actions.cc:188
 msgid "Select All After Edit Point"
 msgstr "在编辑点后选择所有"
 
-#: editor.cc:1960 editor.cc:2034 editor_actions.cc:189
+#: editor.cc:1961 editor.cc:2035 editor_actions.cc:189
 msgid "Select All Before Edit Point"
 msgstr "在编辑点前选择所有"
 
-#: editor.cc:1961 editor.cc:2035
+#: editor.cc:1962 editor.cc:2036
 msgid "Select All After Playhead"
 msgstr "播放头后选择所有"
 
-#: editor.cc:1962 editor.cc:2036
+#: editor.cc:1963 editor.cc:2037
 msgid "Select All Before Playhead"
 msgstr "播放头前选择所有"
 
-#: editor.cc:1963
+#: editor.cc:1964
 msgid "Select All Between Playhead and Edit Point"
 msgstr "播放头和编辑点间选择所有"
 
-#: editor.cc:1964
+#: editor.cc:1965
 msgid "Select All Within Playhead and Edit Point"
 msgstr "播放头和编辑点内选择所有"
 
-#: editor.cc:1965
+#: editor.cc:1966
 msgid "Select Range Between Playhead and Edit Point"
 msgstr "播放头和编辑点间选择范围"
 
-#: editor.cc:1967 editor.cc:2038 editor_actions.cc:127 editor_actions.cc:128
+#: editor.cc:1968 editor.cc:2039 editor_actions.cc:127 editor_actions.cc:128
 msgid "Select"
 msgstr "选择"
 
-#: editor.cc:1975 editor.cc:2046 editor_actions.cc:309 processor_box.cc:2207
+#: editor.cc:1976 editor.cc:2047 editor_actions.cc:309 processor_box.cc:2200
 msgid "Cut"
 msgstr "剪切"
 
-#: editor.cc:1976 editor.cc:2047 editor_actions.cc:312 processor_box.cc:2210
+#: editor.cc:1977 editor.cc:2048 editor_actions.cc:312 processor_box.cc:2203
 msgid "Copy"
 msgstr "复制"
 
-#: editor.cc:1977 editor.cc:2048 editor_actions.cc:313 processor_box.cc:2218
+#: editor.cc:1978 editor.cc:2049 editor_actions.cc:313 processor_box.cc:2211
 msgid "Paste"
 msgstr "粘贴"
 
-#: editor.cc:1981 editor_actions.cc:87
+#: editor.cc:1982 editor_actions.cc:87
 msgid "Align"
 msgstr "对齐"
 
-#: editor.cc:1982
+#: editor.cc:1983
 msgid "Align Relative"
 msgstr "相对对齐"
 
-#: editor.cc:1989
+#: editor.cc:1990
 msgid "Insert Selected Region"
 msgstr "插入已选择的区域"
 
-#: editor.cc:1990
+#: editor.cc:1991
 msgid "Insert Existing Media"
 msgstr "插入已存在的媒体"
 
-#: editor.cc:1999 editor.cc:2055
+#: editor.cc:2000 editor.cc:2056
 msgid "Nudge Entire Track Later"
 msgstr ""
 
-#: editor.cc:2000 editor.cc:2056
+#: editor.cc:2001 editor.cc:2057
 #, fuzzy
 msgid "Nudge Track After Edit Point Later"
 msgstr "在编辑点后选择所有"
 
-#: editor.cc:2001 editor.cc:2057
+#: editor.cc:2002 editor.cc:2058
 msgid "Nudge Entire Track Earlier"
 msgstr ""
 
-#: editor.cc:2002 editor.cc:2058
+#: editor.cc:2003 editor.cc:2059
 #, fuzzy
 msgid "Nudge Track After Edit Point Earlier"
 msgstr "在编辑点后选择所有"
 
-#: editor.cc:2004 editor.cc:2060
+#: editor.cc:2005 editor.cc:2061
 msgid "Nudge"
 msgstr ""
 
-#: editor.cc:3072
+#: editor.cc:3081
 msgid "Smart Mode (add Range functions to Object mode)"
 msgstr ""
 
-#: editor.cc:3073
+#: editor.cc:3082
 #, fuzzy
 msgid "Object Mode (select/move Objects)"
 msgstr "选择/移动 对象"
 
-#: editor.cc:3074
+#: editor.cc:3083
 #, fuzzy
 msgid "Range Mode (select/move Ranges)"
 msgstr "选择/移动范围"
 
-#: editor.cc:3075
+#: editor.cc:3084
 msgid "Draw/Edit MIDI Notes"
 msgstr "绘画/编辑MIDI音符"
 
-#: editor.cc:3076
+#: editor.cc:3085
 msgid "Draw Region Gain"
 msgstr "绘制区域增益"
 
-#: editor.cc:3077
+#: editor.cc:3086
 msgid "Select Zoom Range"
 msgstr "选择变焦范围"
 
-#: editor.cc:3078
+#: editor.cc:3087
 msgid "Stretch/Shrink Regions and MIDI Notes"
 msgstr "伸/缩区域和MIDI音符"
 
-#: editor.cc:3079
+#: editor.cc:3088
 msgid "Listen to Specific Regions"
 msgstr "听特定区域"
 
-#: editor.cc:3080
+#: editor.cc:3089
 msgid "Note Level Editing"
 msgstr ""
 
-#: editor.cc:3081
+#: editor.cc:3090
 msgid ""
 "Groups: click to (de)activate\n"
 "Context-click for other operations"
 msgstr ""
 
-#: editor.cc:3082
+#: editor.cc:3091
 msgid "Nudge Region/Selection Later"
 msgstr ""
 
-#: editor.cc:3083
+#: editor.cc:3092
 msgid "Nudge Region/Selection Earlier"
 msgstr ""
 
-#: editor.cc:3084 editor_actions.cc:242
+#: editor.cc:3093 editor_actions.cc:242
 msgid "Zoom In"
 msgstr "放大"
 
-#: editor.cc:3085 editor_actions.cc:241
+#: editor.cc:3094 editor_actions.cc:241
 msgid "Zoom Out"
 msgstr "缩小"
 
-#: editor.cc:3086 editor_actions.cc:243
+#: editor.cc:3095 editor_actions.cc:243
 msgid "Zoom to Session"
 msgstr "缩放到会话"
 
-#: editor.cc:3087
+#: editor.cc:3096
 msgid "Zoom focus"
 msgstr "缩放到焦点"
 
-#: editor.cc:3088
+#: editor.cc:3097
 msgid "Expand Tracks"
 msgstr "扩展音轨"
 
-#: editor.cc:3089
+#: editor.cc:3098
 msgid "Shrink Tracks"
 msgstr "收缩音轨"
 
-#: editor.cc:3090
+#: editor.cc:3099
 msgid "Snap/Grid Units"
 msgstr ""
 
-#: editor.cc:3091
+#: editor.cc:3100
 msgid "Snap/Grid Mode"
 msgstr ""
 
-#: editor.cc:3093
+#: editor.cc:3102
 msgid "Edit Mode"
 msgstr "编辑模式"
 
-#: editor.cc:3094
+#: editor.cc:3103
 msgid ""
 "Nudge Clock\n"
 "(controls distance used to nudge regions and selections)"
 msgstr ""
 
-#: editor.cc:3196
+#: editor.cc:3205
 msgid "malformed URL passed to drag-n-drop code"
 msgstr ""
 
-#: editor.cc:3258 editor_actions.cc:291
+#: editor.cc:3267 editor_actions.cc:291
 #, fuzzy
 msgid "Command|Undo"
 msgstr "命令-"
 
-#: editor.cc:3260
+#: editor.cc:3269
 #, fuzzy
 msgid "Command|Undo (%1)"
 msgstr "撤销 (%1)"
 
-#: editor.cc:3267 editor_actions.cc:292
+#: editor.cc:3276 editor_actions.cc:292
 msgid "Redo"
 msgstr "重做"
 
-#: editor.cc:3269
+#: editor.cc:3278
 msgid "Redo (%1)"
 msgstr "重做 (%1)"
 
-#: editor.cc:3288 editor.cc:3312 editor_actions.cc:106 editor_actions.cc:1633
+#: editor.cc:3297 editor.cc:3321 editor_actions.cc:106 editor_actions.cc:1631
 msgid "Duplicate"
 msgstr "复制"
 
-#: editor.cc:3289
+#: editor.cc:3298
 msgid "Number of duplications:"
 msgstr "复制的数量:"
 
-#: editor.cc:3868
+#: editor.cc:3877
 msgid "Playlist Deletion"
 msgstr "播放列表删除"
 
-#: editor.cc:3869
+#: editor.cc:3878
 msgid ""
 "Playlist %1 is currently unused.\n"
 "If it is kept, its audio files will not be cleaned.\n"
 "If it is deleted, audio files used by it alone will be cleaned."
 msgstr ""
 
-#: editor.cc:3879
+#: editor.cc:3888
 msgid "Delete Playlist"
 msgstr "删除播放列表"
 
-#: editor.cc:3880
+#: editor.cc:3889
 msgid "Keep Playlist"
 msgstr "保持播放列表"
 
-#: editor.cc:3881 editor_audio_import.cc:579 editor_ops.cc:5832
-#: processor_box.cc:1960 processor_box.cc:1985
+#: editor.cc:3890 editor_audio_import.cc:579 editor_ops.cc:5833
+#: processor_box.cc:1953 processor_box.cc:1978
 msgid "Cancel"
 msgstr "取消"
 
-#: editor.cc:4025
+#: editor.cc:4034
 msgid "new playlists"
 msgstr "新播放列表"
 
-#: editor.cc:4041
+#: editor.cc:4050
 msgid "copy playlists"
 msgstr "复制播放列表"
 
-#: editor.cc:4056
+#: editor.cc:4065
 msgid "clear playlists"
 msgstr "清除播放列表"
 
-#: editor.cc:4707
+#: editor.cc:4716
 #, fuzzy
 msgid "Please wait while %1 loads visual data."
 msgstr "请等待，%1 载入可视化数据"
 
-#: editor.cc:5513 editor_markers.cc:942 panner_ui.cc:393 processor_box.cc:2238
+#: editor.cc:5522 editor_markers.cc:941 panner_ui.cc:393 processor_box.cc:2231
 msgid "Edit..."
 msgstr "编辑..."
 
@@ -3025,7 +3009,7 @@ msgstr ""
 msgid "Position"
 msgstr "位置"
 
-#: editor_actions.cc:101 gain_meter.cc:150 gain_meter.cc:785 panner_ui.cc:177
+#: editor_actions.cc:101 gain_meter.cc:123 gain_meter.cc:754 panner_ui.cc:177
 #: panner_ui.cc:586
 msgid "Trim"
 msgstr ""
@@ -3038,9 +3022,9 @@ msgstr "增益"
 msgid "Ranges"
 msgstr "范围"
 
-#: editor_actions.cc:104 editor_actions.cc:1629 session_option_editor.cc:144
-#: session_option_editor.cc:146 session_option_editor.cc:155
-#: session_option_editor.cc:162
+#: editor_actions.cc:104 editor_actions.cc:1627 session_option_editor.cc:132
+#: session_option_editor.cc:134 session_option_editor.cc:143
+#: session_option_editor.cc:150
 msgid "Fades"
 msgstr ""
 
@@ -3068,7 +3052,7 @@ msgstr "标尺衰减"
 msgid "Meter hold"
 msgstr "标尺保持"
 
-#: editor_actions.cc:113 session_option_editor.cc:233
+#: editor_actions.cc:113 session_option_editor.cc:221
 msgid "MIDI Options"
 msgstr "MIDI选项"
 
@@ -3076,8 +3060,8 @@ msgstr "MIDI选项"
 msgid "Misc Options"
 msgstr "其他选项"
 
-#: editor_actions.cc:115 rc_option_editor.cc:1330 route_group_dialog.cc:48
-#: session_option_editor.cc:217 session_option_editor.cc:224
+#: editor_actions.cc:115 rc_option_editor.cc:1333 route_group_dialog.cc:48
+#: session_option_editor.cc:205 session_option_editor.cc:212
 msgid "Monitoring"
 msgstr "监控中"
 
@@ -3117,8 +3101,8 @@ msgstr "第二时钟"
 msgid "Separate"
 msgstr "分离"
 
-#: editor_actions.cc:132 mixer_strip.cc:1908 route_time_axis.cc:214
-#: route_time_axis.cc:2429
+#: editor_actions.cc:132 mixer_strip.cc:1890 route_time_axis.cc:199
+#: route_time_axis.cc:2402
 msgid "Solo"
 msgstr ""
 
@@ -3130,7 +3114,7 @@ msgstr "子框架"
 msgid "Timecode fps"
 msgstr "时间码FPS"
 
-#: editor_actions.cc:137 route_time_axis.cc:443
+#: editor_actions.cc:137 route_time_axis.cc:422
 msgid "Height"
 msgstr "高度"
 
@@ -3255,7 +3239,7 @@ msgstr "播放头到范围开始"
 msgid "Playhead to Range End"
 msgstr "播放头到范围结束"
 
-#: editor_actions.cc:186 export_timespan_selector.cc:61 processor_box.cc:2224
+#: editor_actions.cc:186 export_timespan_selector.cc:61 processor_box.cc:2217
 msgid "Deselect All"
 msgstr "反选所有"
 
@@ -3527,9 +3511,9 @@ msgstr ""
 msgid "Toggle Active"
 msgstr ""
 
-#: editor_actions.cc:370 editor_actions.cc:1557 editor_markers.cc:877
-#: editor_markers.cc:943 editor_snapshots.cc:121 mixer_strip.cc:1494
-#: route_time_axis.cc:727
+#: editor_actions.cc:370 editor_actions.cc:1555 editor_markers.cc:877
+#: editor_markers.cc:942 editor_snapshots.cc:121 mixer_strip.cc:1476
+#: route_time_axis.cc:706
 msgid "Remove"
 msgstr "移除"
 
@@ -3537,19 +3521,19 @@ msgstr "移除"
 msgid "Fit Selected Tracks"
 msgstr ""
 
-#: editor_actions.cc:376 time_axis_view.cc:1315
+#: editor_actions.cc:376 time_axis_view.cc:1298
 msgid "Largest"
 msgstr "最大的"
 
-#: editor_actions.cc:379 time_axis_view.cc:1316
+#: editor_actions.cc:379 time_axis_view.cc:1299
 msgid "Larger"
 msgstr "更大的"
 
-#: editor_actions.cc:382 time_axis_view.cc:1317
+#: editor_actions.cc:382 time_axis_view.cc:1300
 msgid "Large"
 msgstr "大"
 
-#: editor_actions.cc:388 time_axis_view.cc:1319
+#: editor_actions.cc:388 time_axis_view.cc:1302
 msgid "Small"
 msgstr "小"
 
@@ -3647,7 +3631,7 @@ msgstr ""
 msgid "Slide"
 msgstr ""
 
-#: editor_actions.cc:478 editor_actions.cc:1578 editor_markers.cc:861
+#: editor_actions.cc:478 editor_actions.cc:1576 editor_markers.cc:861
 #: location_ui.cc:56
 msgid "Lock"
 msgstr ""
@@ -3936,283 +3920,283 @@ msgstr ""
 msgid "programming error: %1: %2"
 msgstr "程序错误: %1: %2"
 
-#: editor_actions.cc:1563
+#: editor_actions.cc:1561
 msgid "Raise"
 msgstr "上升"
 
-#: editor_actions.cc:1566
+#: editor_actions.cc:1564
 msgid "Raise to Top"
 msgstr "上升到顶"
 
-#: editor_actions.cc:1569 gtk-custom-ruler.c:132
+#: editor_actions.cc:1567 gtk-custom-ruler.c:132
 msgid "Lower"
 msgstr ""
 
-#: editor_actions.cc:1572
+#: editor_actions.cc:1570
 msgid "Lower to Bottom"
 msgstr ""
 
-#: editor_actions.cc:1575
+#: editor_actions.cc:1573
 msgid "Move to Original Position"
 msgstr ""
 
-#: editor_actions.cc:1583 editor_markers.cc:868
+#: editor_actions.cc:1581 editor_markers.cc:868
 msgid "Glue to Bars and Beats"
 msgstr ""
 
-#: editor_actions.cc:1588
+#: editor_actions.cc:1586
 msgid "Remove Sync"
 msgstr "移除同步"
 
-#: editor_actions.cc:1591 mixer_strip.cc:1895 route_time_axis.cc:215
+#: editor_actions.cc:1589 mixer_strip.cc:1877 route_time_axis.cc:200
 msgid "Mute"
 msgstr "静音"
 
-#: editor_actions.cc:1594
+#: editor_actions.cc:1592
 msgid "Normalize..."
 msgstr "标准化..."
 
-#: editor_actions.cc:1597
+#: editor_actions.cc:1595
 msgid "Reverse"
 msgstr "反转"
 
-#: editor_actions.cc:1600
+#: editor_actions.cc:1598
 msgid "Make Mono Regions"
 msgstr ""
 
-#: editor_actions.cc:1603
+#: editor_actions.cc:1601
 msgid "Boost Gain"
 msgstr "提高增益"
 
-#: editor_actions.cc:1606
+#: editor_actions.cc:1604
 msgid "Cut Gain"
 msgstr ""
 
-#: editor_actions.cc:1609
+#: editor_actions.cc:1607
 msgid "Pitch Shift..."
 msgstr "基音转移"
 
-#: editor_actions.cc:1612
+#: editor_actions.cc:1610
 msgid "Transpose..."
 msgstr ""
 
-#: editor_actions.cc:1615
+#: editor_actions.cc:1613
 msgid "Opaque"
 msgstr "不透明度"
 
-#: editor_actions.cc:1619 editor_regions.cc:116
+#: editor_actions.cc:1617 editor_regions.cc:116
 msgid "Fade In"
 msgstr "淡入"
 
-#: editor_actions.cc:1624 editor_regions.cc:117
+#: editor_actions.cc:1622 editor_regions.cc:117
 msgid "Fade Out"
 msgstr "淡出"
 
-#: editor_actions.cc:1639
+#: editor_actions.cc:1637
 msgid "Multi-Duplicate..."
 msgstr "多复制..."
 
-#: editor_actions.cc:1644
+#: editor_actions.cc:1642
 msgid "Fill Track"
 msgstr "填充音轨"
 
-#: editor_actions.cc:1648 editor_markers.cc:957
+#: editor_actions.cc:1646 editor_markers.cc:956
 msgid "Set Loop Range"
 msgstr "设置循环范围"
 
-#: editor_actions.cc:1655
+#: editor_actions.cc:1653
 msgid "Set Punch"
 msgstr "设置Punch"
 
-#: editor_actions.cc:1659
+#: editor_actions.cc:1657
 #, fuzzy
 msgid "Add Single Range Marker"
 msgstr "添加一个范围标记"
 
-#: editor_actions.cc:1664
+#: editor_actions.cc:1662
 #, fuzzy
 msgid "Add Range Marker Per Region"
 msgstr "添加范围标记"
 
-#: editor_actions.cc:1668
+#: editor_actions.cc:1666
 #, fuzzy
 msgid "Snap Position To Grid"
 msgstr "对齐到网络"
 
-#: editor_actions.cc:1671
+#: editor_actions.cc:1669
 msgid "Close Gaps"
 msgstr ""
 
-#: editor_actions.cc:1674
+#: editor_actions.cc:1672
 msgid "Rhythm Ferret..."
 msgstr ""
 
-#: editor_actions.cc:1677
+#: editor_actions.cc:1675
 msgid "Export..."
 msgstr "导出..."
 
-#: editor_actions.cc:1683
+#: editor_actions.cc:1681
 msgid "Separate Under"
 msgstr ""
 
-#: editor_actions.cc:1687
+#: editor_actions.cc:1685
 msgid "Set Fade In Length"
 msgstr "设置淡入长度"
 
-#: editor_actions.cc:1688
+#: editor_actions.cc:1686
 msgid "Set Fade Out Length"
 msgstr "设置淡出长度"
 
-#: editor_actions.cc:1689
+#: editor_actions.cc:1687
 msgid "Set Tempo from Region = Bar"
 msgstr "从区域设置节奏=小节"
 
-#: editor_actions.cc:1694
+#: editor_actions.cc:1692
 msgid "Split at Percussion Onsets"
 msgstr ""
 
-#: editor_actions.cc:1699
+#: editor_actions.cc:1697
 msgid "List Editor..."
 msgstr "编辑列表"
 
-#: editor_actions.cc:1702
+#: editor_actions.cc:1700
 msgid "Properties..."
 msgstr "属性..."
 
-#: editor_actions.cc:1706
+#: editor_actions.cc:1704
 msgid "Bounce (with processing)"
 msgstr ""
 
-#: editor_actions.cc:1707
+#: editor_actions.cc:1705
 msgid "Bounce (without processing)"
 msgstr ""
 
-#: editor_actions.cc:1708
+#: editor_actions.cc:1706
 msgid "Combine"
 msgstr ""
 
-#: editor_actions.cc:1709
+#: editor_actions.cc:1707
 msgid "Uncombine"
 msgstr ""
 
-#: editor_actions.cc:1711
+#: editor_actions.cc:1709
 msgid "Spectral Analysis..."
 msgstr "频谱分析..."
 
-#: editor_actions.cc:1713
+#: editor_actions.cc:1711
 msgid "Reset Envelope"
 msgstr "重置包络线"
 
-#: editor_actions.cc:1715
+#: editor_actions.cc:1713
 msgid "Reset Gain"
 msgstr "预设增益"
 
-#: editor_actions.cc:1720
+#: editor_actions.cc:1718
 msgid "Envelope Active"
 msgstr "激活包络线"
 
-#: editor_actions.cc:1724
+#: editor_actions.cc:1722
 #, fuzzy
 msgid "Quantize..."
 msgstr "量化"
 
-#: editor_actions.cc:1725 editor_actions.cc:1726
+#: editor_actions.cc:1723 editor_actions.cc:1724
 msgid "Insert Patch Change..."
 msgstr ""
 
-#: editor_actions.cc:1727
+#: editor_actions.cc:1725
 msgid "Unlink from other copies"
 msgstr ""
 
-#: editor_actions.cc:1728
+#: editor_actions.cc:1726
 msgid "Strip Silence..."
 msgstr ""
 
-#: editor_actions.cc:1729
+#: editor_actions.cc:1727
 msgid "Set Range Selection"
 msgstr ""
 
-#: editor_actions.cc:1731
+#: editor_actions.cc:1729
 msgid "Nudge Later"
 msgstr ""
 
-#: editor_actions.cc:1732
+#: editor_actions.cc:1730
 msgid "Nudge Earlier"
 msgstr ""
 
-#: editor_actions.cc:1737
+#: editor_actions.cc:1735
 msgid "Nudge Later by Capture Offset"
 msgstr ""
 
-#: editor_actions.cc:1744
+#: editor_actions.cc:1742
 msgid "Nudge Earlier by Capture Offset"
 msgstr ""
 
-#: editor_actions.cc:1748
+#: editor_actions.cc:1746
 msgid "Trim to Loop"
 msgstr ""
 
-#: editor_actions.cc:1749
+#: editor_actions.cc:1747
 msgid "Trim to Punch"
 msgstr ""
 
-#: editor_actions.cc:1751
+#: editor_actions.cc:1749
 msgid "Trim to Previous"
 msgstr ""
 
-#: editor_actions.cc:1752
+#: editor_actions.cc:1750
 msgid "Trim to Next"
 msgstr ""
 
-#: editor_actions.cc:1759
+#: editor_actions.cc:1757
 msgid "Insert Region From Region List"
 msgstr ""
 
-#: editor_actions.cc:1765
+#: editor_actions.cc:1763
 msgid "Set Sync Position"
 msgstr "设置同步位置"
 
-#: editor_actions.cc:1766
+#: editor_actions.cc:1764
 msgid "Place Transient"
 msgstr ""
 
-#: editor_actions.cc:1767
+#: editor_actions.cc:1765
 msgid "Split"
 msgstr ""
 
-#: editor_actions.cc:1768
+#: editor_actions.cc:1766
 msgid "Trim Start at Edit Point"
 msgstr ""
 
-#: editor_actions.cc:1769
+#: editor_actions.cc:1767
 msgid "Trim End at Edit Point"
 msgstr ""
 
-#: editor_actions.cc:1774
+#: editor_actions.cc:1772
 msgid "Align Start"
 msgstr ""
 
-#: editor_actions.cc:1781
+#: editor_actions.cc:1779
 msgid "Align Start Relative"
 msgstr ""
 
-#: editor_actions.cc:1785
+#: editor_actions.cc:1783
 msgid "Align End"
 msgstr ""
 
-#: editor_actions.cc:1790
+#: editor_actions.cc:1788
 msgid "Align End Relative"
 msgstr ""
 
-#: editor_actions.cc:1797
+#: editor_actions.cc:1795
 msgid "Align Sync"
 msgstr ""
 
-#: editor_actions.cc:1804
+#: editor_actions.cc:1802
 msgid "Align Sync Relative"
 msgstr ""
 
-#: editor_actions.cc:1808 editor_actions.cc:1811
+#: editor_actions.cc:1806 editor_actions.cc:1809
 msgid "Choose Top..."
 msgstr ""
 
@@ -4285,48 +4269,48 @@ msgstr "无法打开%1"
 msgid "fixed time region drag"
 msgstr "固定时间区域拖拽"
 
-#: editor_drag.cc:2033
+#: editor_drag.cc:2038
 msgid "copy meter mark"
 msgstr "复制标尺标记"
 
-#: editor_drag.cc:2041
+#: editor_drag.cc:2046
 msgid "move meter mark"
 msgstr "移动标尺标记"
 
-#: editor_drag.cc:2153
+#: editor_drag.cc:2158
 msgid "copy tempo mark"
 msgstr "复制节奏标记"
 
-#: editor_drag.cc:2161
+#: editor_drag.cc:2166
 msgid "move tempo mark"
 msgstr "移动节奏标记"
 
-#: editor_drag.cc:2377
+#: editor_drag.cc:2382
 msgid "change fade in length"
 msgstr "改变渐入长度"
 
-#: editor_drag.cc:2495
+#: editor_drag.cc:2500
 msgid "change fade out length"
 msgstr "改变渐出长度"
 
-#: editor_drag.cc:2850
+#: editor_drag.cc:2855
 msgid "move marker"
 msgstr "移动标记"
 
-#: editor_drag.cc:3413
+#: editor_drag.cc:3418
 msgid "An error occurred while executing time stretch operation"
 msgstr "当执行时间延伸操作时出现错误"
 
-#: editor_drag.cc:3843
+#: editor_drag.cc:3848
 #, fuzzy
 msgid "programming_error: %1"
 msgstr "程序错误: %1"
 
-#: editor_drag.cc:3913 editor_markers.cc:681
+#: editor_drag.cc:3918 editor_markers.cc:681
 msgid "new range marker"
 msgstr "新范围标记"
 
-#: editor_drag.cc:4594
+#: editor_drag.cc:4599
 msgid "rubberband selection"
 msgstr ""
 
@@ -4403,7 +4387,7 @@ msgstr ""
 msgid "Sharing Solo?"
 msgstr ""
 
-#: editor_route_groups.cc:103 mixer_strip.cc:1894
+#: editor_route_groups.cc:103 mixer_strip.cc:1876
 msgid "Rec"
 msgstr ""
 
@@ -4448,12 +4432,12 @@ msgid "unnamed"
 msgstr "未命名的"
 
 #: editor_export_audio.cc:90 editor_markers.cc:696 editor_markers.cc:783
-#: editor_markers.cc:969 editor_markers.cc:987 editor_markers.cc:1005
-#: editor_markers.cc:1024 editor_markers.cc:1043 editor_markers.cc:1073
-#: editor_markers.cc:1104 editor_markers.cc:1134 editor_markers.cc:1162
-#: editor_markers.cc:1199 editor_markers.cc:1224 editor_markers.cc:1275
-#: editor_markers.cc:1319 editor_markers.cc:1345 editor_markers.cc:1522
-#: editor_mouse.cc:2522
+#: editor_markers.cc:968 editor_markers.cc:986 editor_markers.cc:1004
+#: editor_markers.cc:1023 editor_markers.cc:1042 editor_markers.cc:1072
+#: editor_markers.cc:1103 editor_markers.cc:1133 editor_markers.cc:1161
+#: editor_markers.cc:1192 editor_markers.cc:1217 editor_markers.cc:1268
+#: editor_markers.cc:1312 editor_markers.cc:1338 editor_markers.cc:1515
+#: editor_mouse.cc:2532
 msgid "programming error: marker canvas item has no marker object pointer!"
 msgstr ""
 
@@ -4479,8 +4463,8 @@ msgstr "开始"
 msgid "end"
 msgstr "结束"
 
-#: editor_markers.cc:647 editor_ops.cc:1743 editor_ops.cc:1763
-#: editor_ops.cc:1787 editor_ops.cc:1814 location_ui.cc:1005
+#: editor_markers.cc:647 editor_ops.cc:1744 editor_ops.cc:1764
+#: editor_ops.cc:1788 editor_ops.cc:1815 location_ui.cc:1005
 msgid "add marker"
 msgstr "添加标记"
 
@@ -4510,76 +4494,80 @@ msgid "Create Range to Next Marker"
 msgstr "创建范围到下一个标记"
 
 #: editor_markers.cc:897
-msgid "Locate to Range Mark"
-msgstr "定位到范围标记"
+#, fuzzy
+msgid "Locate to Marker"
+msgstr "定位到标记"
 
 #: editor_markers.cc:898
-msgid "Play from Range Mark"
-msgstr "从范围标记播放"
+#, fuzzy
+msgid "Play from Marker"
+msgstr "从这儿播放"
 
-#: editor_markers.cc:902
-msgid "Set Range Mark from Playhead"
+#: editor_markers.cc:901
+#, fuzzy
+msgid "Set Marker from Playhead"
 msgstr "从播放头设置范围标记"
 
-#: editor_markers.cc:904
-msgid "Set Range from Range Selection"
+#: editor_markers.cc:903
+#, fuzzy
+msgid "Set Range from Selection"
 msgstr "从区间选择设置范围"
 
-#: editor_markers.cc:907
+#: editor_markers.cc:906
 #, fuzzy
 msgid "Zoom to Range"
 msgstr "音符范围"
 
-#: editor_markers.cc:914
+#: editor_markers.cc:913
 msgid "Hide Range"
 msgstr "隐藏范围"
 
-#: editor_markers.cc:915
+#: editor_markers.cc:914
 msgid "Rename Range..."
 msgstr "重命名范围..."
 
-#: editor_markers.cc:919
+#: editor_markers.cc:918
 msgid "Remove Range"
 msgstr "移除范围"
 
-#: editor_markers.cc:926
+#: editor_markers.cc:925
 msgid "Separate Regions in Range"
 msgstr "在范围中分离区域"
 
-#: editor_markers.cc:929
+#: editor_markers.cc:928
 msgid "Select Range"
 msgstr "选择范围"
 
-#: editor_markers.cc:958
+#: editor_markers.cc:957
 msgid "Set Punch Range"
 msgstr "设置Punch范围"
 
-#: editor_markers.cc:1359 editor_ops.cc:1698
+#: editor_markers.cc:1352 editor_ops.cc:1699
 msgid "New Name:"
 msgstr "新名称："
 
-#: editor_markers.cc:1362
+#: editor_markers.cc:1355
 msgid "Rename Mark"
 msgstr "重命名标记"
 
-#: editor_markers.cc:1364
+#: editor_markers.cc:1357
 msgid "Rename Range"
 msgstr "重命名范围"
 
-#: editor_markers.cc:1371 editor_mouse.cc:2554 processor_box.cc:1764
-#: processor_box.cc:2220 route_time_axis.cc:994 route_ui.cc:1477
+#: editor_markers.cc:1364 editor_mouse.cc:2564 processor_box.cc:1731
+#: processor_box.cc:2213 route_time_axis.cc:973 route_ui.cc:1535
 msgid "Rename"
 msgstr "重命名"
 
-#: editor_markers.cc:1384
+#: editor_markers.cc:1377
 msgid "rename marker"
 msgstr "重命名标记"
 
-#: editor_markers.cc:1407
+#: editor_markers.cc:1400
 msgid "set loop range"
 msgstr "设置循环范围"
 
-#: editor_markers.cc:1413
+#: editor_markers.cc:1406
 msgid "set punch range"
 msgstr "设置冲击范围"
 
@@ -4591,188 +4579,188 @@ msgstr ""
 msgid "Editor::event_frame() used on unhandled event type %1"
 msgstr ""
 
-#: editor_mouse.cc:2292 editor_mouse.cc:2317 editor_mouse.cc:2330
+#: editor_mouse.cc:2302 editor_mouse.cc:2327 editor_mouse.cc:2340
 msgid ""
 "programming error: control point canvas item has no control point object "
 "pointer!"
 msgstr ""
 
-#: editor_mouse.cc:2460
+#: editor_mouse.cc:2470
 msgid "start point trim"
 msgstr "起始点修剪"
 
-#: editor_mouse.cc:2485
+#: editor_mouse.cc:2495
 msgid "End point trim"
 msgstr "终止点修剪"
 
-#: editor_mouse.cc:2552
+#: editor_mouse.cc:2562
 msgid "Name for region:"
 msgstr "区域名："
 
-#: editor_ops.cc:139
+#: editor_ops.cc:140
 msgid "split"
 msgstr "分离"
 
-#: editor_ops.cc:255
+#: editor_ops.cc:256
 msgid "alter selection"
 msgstr "转换选区"
 
-#: editor_ops.cc:297
+#: editor_ops.cc:298
 msgid "nudge regions forward"
 msgstr ""
 
-#: editor_ops.cc:320 editor_ops.cc:405
+#: editor_ops.cc:321 editor_ops.cc:406
 msgid "nudge location forward"
 msgstr ""
 
-#: editor_ops.cc:378
+#: editor_ops.cc:379
 msgid "nudge regions backward"
 msgstr ""
 
-#: editor_ops.cc:467
+#: editor_ops.cc:468
 msgid "nudge forward"
 msgstr ""
 
-#: editor_ops.cc:491
+#: editor_ops.cc:492
 msgid "nudge backward"
 msgstr ""
 
-#: editor_ops.cc:556
+#: editor_ops.cc:557
 msgid "build_region_boundary_cache called with snap_type = %1"
 msgstr ""
 
-#: editor_ops.cc:1700
+#: editor_ops.cc:1701
 msgid "New Location Marker"
 msgstr "新位置标记"
 
-#: editor_ops.cc:1787
+#: editor_ops.cc:1788
 msgid "add markers"
 msgstr "添加一些标记"
 
-#: editor_ops.cc:1893
+#: editor_ops.cc:1894
 msgid "clear markers"
 msgstr "清除表己"
 
-#: editor_ops.cc:1906
+#: editor_ops.cc:1907
 msgid "clear ranges"
 msgstr "清除范围"
 
-#: editor_ops.cc:1928
+#: editor_ops.cc:1929
 msgid "clear locations"
 msgstr "清除位置"
 
-#: editor_ops.cc:1999
+#: editor_ops.cc:2000
 msgid "insert dragged region"
 msgstr "插入拖拽区域"
 
-#: editor_ops.cc:2077
+#: editor_ops.cc:2078
 msgid "insert region"
 msgstr "摄入区域"
 
-#: editor_ops.cc:2260
+#: editor_ops.cc:2261
 #, fuzzy
 msgid "raise regions"
 msgstr "标准化区域"
 
-#: editor_ops.cc:2262
+#: editor_ops.cc:2263
 #, fuzzy
 msgid "raise region"
 msgstr "摄入区域"
 
-#: editor_ops.cc:2268
+#: editor_ops.cc:2269
 #, fuzzy
 msgid "raise regions to top"
 msgstr "标准化区域"
 
-#: editor_ops.cc:2270
+#: editor_ops.cc:2271
 #, fuzzy
 msgid "raise region to top"
 msgstr "上升到顶"
 
-#: editor_ops.cc:2276
+#: editor_ops.cc:2277
 #, fuzzy
 msgid "lower regions"
 msgstr "关闭区间空白"
 
-#: editor_ops.cc:2278 editor_ops.cc:2286
+#: editor_ops.cc:2279 editor_ops.cc:2287
 #, fuzzy
 msgid "lower region"
 msgstr "摄入区域"
 
-#: editor_ops.cc:2284
+#: editor_ops.cc:2285
 #, fuzzy
 msgid "lower regions to bottom"
 msgstr "移动区域到原始位置"
 
-#: editor_ops.cc:2369
+#: editor_ops.cc:2370
 msgid "Rename Region"
 msgstr "重命名区域"
 
-#: editor_ops.cc:2371 processor_box.cc:1762 route_ui.cc:1475
+#: editor_ops.cc:2372 processor_box.cc:1729 route_ui.cc:1533
 msgid "New name:"
 msgstr "新名字:"
 
-#: editor_ops.cc:2682
+#: editor_ops.cc:2683
 msgid "separate"
 msgstr "分离"
 
-#: editor_ops.cc:2795
+#: editor_ops.cc:2796
 msgid "separate region under"
 msgstr "分离区域于"
 
-#: editor_ops.cc:2916
+#: editor_ops.cc:2917
 msgid "trim to selection"
 msgstr "修剪选取"
 
-#: editor_ops.cc:3052
+#: editor_ops.cc:3053
 msgid "set sync point"
 msgstr "设置同步点"
 
-#: editor_ops.cc:3076
+#: editor_ops.cc:3077
 msgid "remove region sync"
 msgstr "移除区域同步"
 
-#: editor_ops.cc:3098
+#: editor_ops.cc:3099
 msgid "move regions to original position"
 msgstr "移动区域到原始位置"
 
-#: editor_ops.cc:3100
+#: editor_ops.cc:3101
 msgid "move region to original position"
 msgstr "移动区域到原始位置"
 
-#: editor_ops.cc:3121
+#: editor_ops.cc:3122
 msgid "align selection"
 msgstr "对齐选择"
 
-#: editor_ops.cc:3195
+#: editor_ops.cc:3196
 msgid "align selection (relative)"
 msgstr "对其选择(相关的)"
 
-#: editor_ops.cc:3229
+#: editor_ops.cc:3230
 msgid "align region"
 msgstr "对其区域"
 
-#: editor_ops.cc:3280
+#: editor_ops.cc:3281
 msgid "trim front"
 msgstr ""
 
-#: editor_ops.cc:3280
+#: editor_ops.cc:3281
 msgid "trim back"
 msgstr ""
 
-#: editor_ops.cc:3310
+#: editor_ops.cc:3311
 msgid "trim to loop"
 msgstr ""
 
-#: editor_ops.cc:3320
+#: editor_ops.cc:3321
 msgid "trim to punch"
 msgstr ""
 
-#: editor_ops.cc:3382
+#: editor_ops.cc:3383
 msgid "trim to region"
 msgstr ""
 
-#: editor_ops.cc:3492
+#: editor_ops.cc:3493
 msgid ""
 "This track/bus cannot be frozen because the signal adds or loses channels "
 "before reaching the outputs.\n"
@@ -4780,11 +4768,11 @@ msgid ""
 "input or vice versa."
 msgstr ""
 
-#: editor_ops.cc:3495
+#: editor_ops.cc:3496
 msgid "Cannot freeze"
 msgstr "无法冻结"
 
-#: editor_ops.cc:3501
+#: editor_ops.cc:3502
 msgid ""
 "<b>%1</b>\n"
 "\n"
@@ -4793,79 +4781,79 @@ msgid ""
 "Freezing will only process the signal as far as the first send/insert/return."
 msgstr ""
 
-#: editor_ops.cc:3505
+#: editor_ops.cc:3506
 #, fuzzy
 msgid "Freeze anyway"
 msgstr "冻结"
 
-#: editor_ops.cc:3506
+#: editor_ops.cc:3507
 #, fuzzy
 msgid "Don't freeze"
 msgstr "无法冻结"
 
-#: editor_ops.cc:3507
+#: editor_ops.cc:3508
 #, fuzzy
 msgid "Freeze Limits"
 msgstr "冻结"
 
-#: editor_ops.cc:3522
+#: editor_ops.cc:3523
 msgid "Cancel Freeze"
 msgstr "取消冻结"
 
-#: editor_ops.cc:3553
+#: editor_ops.cc:3554
 msgid ""
 "You can't perform this operation because the processing of the signal will "
-"cause one or more of the tracks will end up with a region with more channels "
+"cause one or more of the tracks to end up with a region with more channels "
 "than this track has inputs.\n"
 "\n"
 "You can do this without processing, which is a different operation."
 msgstr ""
 
-#: editor_ops.cc:3557
+#: editor_ops.cc:3558
 msgid "Cannot bounce"
 msgstr ""
 
-#: editor_ops.cc:3568
+#: editor_ops.cc:3569
 msgid "bounce range"
 msgstr ""
 
-#: editor_ops.cc:3678
+#: editor_ops.cc:3679
 msgid "delete"
 msgstr "删除"
 
-#: editor_ops.cc:3681
+#: editor_ops.cc:3682
 msgid "cut"
 msgstr "剪切"
 
-#: editor_ops.cc:3684
+#: editor_ops.cc:3685
 msgid "copy"
 msgstr "复制"
 
-#: editor_ops.cc:3687
+#: editor_ops.cc:3688
 msgid "clear"
 msgstr "清除"
 
-#: editor_ops.cc:3785
+#: editor_ops.cc:3786
 msgid " objects"
 msgstr "对象"
 
-#: editor_ops.cc:3815
+#: editor_ops.cc:3816
 msgid " range"
 msgstr "范围"
 
-#: editor_ops.cc:3957 editor_ops.cc:3984
+#: editor_ops.cc:3958 editor_ops.cc:3985
 msgid "remove region"
 msgstr "删除区间"
 
-#: editor_ops.cc:4391
+#: editor_ops.cc:4392
 msgid "duplicate selection"
 msgstr "重复选择"
 
-#: editor_ops.cc:4469
+#: editor_ops.cc:4470
 msgid "nudge track"
 msgstr ""
 
-#: editor_ops.cc:4506
+#: editor_ops.cc:4507
 msgid ""
 "Do you really want to destroy the last capture?\n"
 "(This is destructive and cannot be undone)"
@@ -4873,128 +4861,128 @@ msgstr ""
 "你确定销毁最后的录音?\n"
 "(这个操作有毁灭性, 不能撤销!)"
 
-#: editor_ops.cc:4509 editor_ops.cc:6488 editor_regions.cc:460
-#: editor_snapshots.cc:158 route_ui.cc:1419
+#: editor_ops.cc:4510 editor_ops.cc:6489 editor_regions.cc:460
+#: editor_snapshots.cc:158 route_ui.cc:1477
 msgid "No, do nothing."
 msgstr "不, 什么都不做."
 
-#: editor_ops.cc:4510
+#: editor_ops.cc:4511
 msgid "Yes, destroy it."
 msgstr "是, 销毁它."
 
-#: editor_ops.cc:4512
+#: editor_ops.cc:4513
 msgid "Destroy last capture"
 msgstr "销毁最后的录音"
 
-#: editor_ops.cc:4573
+#: editor_ops.cc:4574
 msgid "normalize"
 msgstr "标准化"
 
-#: editor_ops.cc:4668
+#: editor_ops.cc:4669
 msgid "reverse regions"
 msgstr "倒置区域"
 
-#: editor_ops.cc:4702
+#: editor_ops.cc:4703
 msgid "strip silence"
 msgstr ""
 
-#: editor_ops.cc:4763
+#: editor_ops.cc:4764
 msgid "Fork Region(s)"
 msgstr ""
 
-#: editor_ops.cc:4963
+#: editor_ops.cc:4964
 msgid "reset region gain"
 msgstr "重设区域增益"
 
-#: editor_ops.cc:5016
+#: editor_ops.cc:5017
 msgid "region gain envelope active"
 msgstr "区域增益包络启用"
 
-#: editor_ops.cc:5043
+#: editor_ops.cc:5044
 msgid "toggle region lock"
 msgstr "切换区域锁定"
 
-#: editor_ops.cc:5067
+#: editor_ops.cc:5068
 msgid "region lock style"
 msgstr "区域锁定风格"
 
-#: editor_ops.cc:5092
+#: editor_ops.cc:5093
 msgid "change region opacity"
 msgstr "改变区域的不透明度"
 
-#: editor_ops.cc:5207
+#: editor_ops.cc:5208
 msgid "set fade in length"
 msgstr "设置淡入长度"
 
-#: editor_ops.cc:5214
+#: editor_ops.cc:5215
 msgid "set fade out length"
 msgstr "设置淡出长度"
 
-#: editor_ops.cc:5259
+#: editor_ops.cc:5260
 msgid "set fade in shape"
 msgstr "设置淡入形状"
 
-#: editor_ops.cc:5290
+#: editor_ops.cc:5291
 msgid "set fade out shape"
 msgstr "设置淡出形状"
 
-#: editor_ops.cc:5320
+#: editor_ops.cc:5321
 msgid "set fade in active"
 msgstr "设置淡入启用"
 
-#: editor_ops.cc:5349
+#: editor_ops.cc:5350
 msgid "set fade out active"
 msgstr "设置淡出长度"
 
-#: editor_ops.cc:5614
+#: editor_ops.cc:5615
 msgid "set loop range from selection"
 msgstr "从选择设置循环范围"
 
-#: editor_ops.cc:5636
+#: editor_ops.cc:5637
 msgid "set loop range from edit range"
 msgstr "从编辑范围设置循环范围"
 
-#: editor_ops.cc:5665
+#: editor_ops.cc:5666
 msgid "set loop range from region"
 msgstr "从范围设置循环范围"
 
-#: editor_ops.cc:5683
+#: editor_ops.cc:5684
 msgid "set punch range from selection"
 msgstr "从选择设置punch范围"
 
-#: editor_ops.cc:5700
+#: editor_ops.cc:5701
 msgid "set punch range from edit range"
 msgstr "从编辑范围设置punch区间"
 
-#: editor_ops.cc:5724
+#: editor_ops.cc:5725
 msgid "set punch range from region"
 msgstr "从区域设置punch范围"
 
-#: editor_ops.cc:5833
+#: editor_ops.cc:5834
 msgid "Add new marker"
 msgstr "添加新标记"
 
-#: editor_ops.cc:5834
+#: editor_ops.cc:5835
 msgid "Set global tempo"
 msgstr "设置全局速度"
 
-#: editor_ops.cc:5837
+#: editor_ops.cc:5838
 msgid "Define one bar"
 msgstr "定义一个bar"
 
-#: editor_ops.cc:5838
+#: editor_ops.cc:5839
 msgid "Do you want to set the global tempo or add a new tempo marker?"
 msgstr "你是否想要设置全局速度或添加一个新的速度标签？"
 
-#: editor_ops.cc:5864
+#: editor_ops.cc:5865
 msgid "set tempo from region"
 msgstr "从区域设置速度"
 
-#: editor_ops.cc:5894
+#: editor_ops.cc:5895
 msgid "split regions"
 msgstr "分离区域"
 
-#: editor_ops.cc:5936
+#: editor_ops.cc:5937
 msgid ""
 "You are about to split\n"
 "%1\n"
@@ -5006,11 +4994,11 @@ msgstr ""
 " %2 断.\n"
 "这需要一些时间."
 
-#: editor_ops.cc:5943
+#: editor_ops.cc:5944
 msgid "Call for the Ferret!"
 msgstr ""
 
-#: editor_ops.cc:5944
+#: editor_ops.cc:5945
 msgid ""
 "Press OK to continue with this split operation\n"
 "or ask the Ferret dialog to tune the analysis"
@@ -5018,52 +5006,52 @@ msgstr ""
 "按OK来继续分离操作\n"
 "or ask the Ferret dialog to tune the analysis"
 
-#: editor_ops.cc:5946
+#: editor_ops.cc:5947
 msgid "Press OK to continue with this split operation"
 msgstr "按OK来继续分离操作"
 
-#: editor_ops.cc:5949
+#: editor_ops.cc:5950
 msgid "Excessive split?"
 msgstr "过多的分离？"
 
-#: editor_ops.cc:6101
+#: editor_ops.cc:6102
 msgid "place transient"
 msgstr ""
 
-#: editor_ops.cc:6136
+#: editor_ops.cc:6137
 msgid "snap regions to grid"
 msgstr ""
 
-#: editor_ops.cc:6175
+#: editor_ops.cc:6176
 msgid "Close Region Gaps"
 msgstr "关闭区域空白"
 
-#: editor_ops.cc:6180
+#: editor_ops.cc:6181
 msgid "Crossfade length"
 msgstr "交叉淡入淡出长度"
 
-#: editor_ops.cc:6189 editor_ops.cc:6200 rhythm_ferret.cc:101
-#: session_option_editor.cc:152
+#: editor_ops.cc:6190 editor_ops.cc:6201 rhythm_ferret.cc:120
+#: session_option_editor.cc:140
 msgid "ms"
 msgstr ""
 
-#: editor_ops.cc:6191
+#: editor_ops.cc:6192
 msgid "Pull-back length"
 msgstr ""
 
-#: editor_ops.cc:6204
+#: editor_ops.cc:6205
 msgid "Ok"
 msgstr ""
 
-#: editor_ops.cc:6219
+#: editor_ops.cc:6220
 msgid "close region gaps"
 msgstr "关闭区间空白"
 
-#: editor_ops.cc:6437 route_ui.cc:1393
+#: editor_ops.cc:6438 route_ui.cc:1451
 msgid "That would be bad news ...."
 msgstr ""
 
-#: editor_ops.cc:6442 route_ui.cc:1398
+#: editor_ops.cc:6443 route_ui.cc:1456
 msgid ""
 "Removing the master or monitor bus is such a bad idea\n"
 "that %1 is not going to allow it.\n"
@@ -5073,23 +5061,23 @@ msgid ""
 "\"allow-special-bus-removal\" option to be \"yes\""
 msgstr ""
 
-#: editor_ops.cc:6459
+#: editor_ops.cc:6460
 msgid "tracks"
 msgstr "音轨"
 
-#: editor_ops.cc:6461 route_ui.cc:1759
+#: editor_ops.cc:6462 route_ui.cc:1817
 msgid "track"
 msgstr "音轨"
 
-#: editor_ops.cc:6465
+#: editor_ops.cc:6466
 msgid "busses"
 msgstr "总线"
 
-#: editor_ops.cc:6467 route_ui.cc:1759
+#: editor_ops.cc:6468 route_ui.cc:1817
 msgid "bus"
 msgstr "总线"
 
-#: editor_ops.cc:6472
+#: editor_ops.cc:6473
 msgid ""
 "Do you really want to remove %1 %2 and %3 %4?\n"
 "(You may also lose the playlists associated with the %2)\n"
@@ -5101,7 +5089,7 @@ msgstr ""
 "\n"
 "此动作不可撤销, 而且此会话文件将会被重新写入!"
 
-#: editor_ops.cc:6477
+#: editor_ops.cc:6478
 msgid ""
 "Do you really want to remove %1 %2?\n"
 "(You may also lose the playlists associated with the %2)\n"
@@ -5113,7 +5101,7 @@ msgstr ""
 "\n"
 "此动作不可撤销, 而且此会话文件将会被重新写入!"
 
-#: editor_ops.cc:6483
+#: editor_ops.cc:6484
 msgid ""
 "Do you really want to remove %1 %2?\n"
 "\n"
@@ -5123,44 +5111,44 @@ msgstr ""
 "\n"
 "此动作不可撤销, 而且此会话文件将会被重新写入!"
 
-#: editor_ops.cc:6490
+#: editor_ops.cc:6491
 msgid "Yes, remove them."
 msgstr "是的, 移除他们."
 
-#: editor_ops.cc:6492 editor_snapshots.cc:159 route_ui.cc:1420
+#: editor_ops.cc:6493 editor_snapshots.cc:159 route_ui.cc:1478
 msgid "Yes, remove it."
 msgstr "使得, 移除它."
 
-#: editor_ops.cc:6497 editor_ops.cc:6499
+#: editor_ops.cc:6498 editor_ops.cc:6500
 msgid "Remove %1"
 msgstr "移除 %1"
 
-#: editor_ops.cc:6558
+#: editor_ops.cc:6559
 msgid "insert time"
 msgstr "插入时间"
 
-#: editor_ops.cc:6715
+#: editor_ops.cc:6716
 msgid "There are too many tracks to fit in the current window"
 msgstr "现在的窗口可能容纳不下这么多的音轨."
 
-#: editor_ops.cc:6815
+#: editor_ops.cc:6816
 #, c-format
 msgid "Saved view %u"
 msgstr "保存视图 %u"
 
-#: editor_ops.cc:6840
+#: editor_ops.cc:6841
 msgid "mute regions"
 msgstr "这些区域静音"
 
-#: editor_ops.cc:6842
+#: editor_ops.cc:6843
 msgid "mute region"
 msgstr "区域静音"
 
-#: editor_ops.cc:6879
+#: editor_ops.cc:6880
 msgid "combine regions"
 msgstr "组合这些区域"
 
-#: editor_ops.cc:6917
+#: editor_ops.cc:6918
 msgid "uncombine regions"
 msgstr "取消这些区域的组合"
 
@@ -5199,8 +5187,8 @@ msgstr ""
 msgid "Length of region fade-out (units: secondary clock), () if dsisabled"
 msgstr ""
 
-#: editor_regions.cc:118 mono_panner.cc:179 stereo_panner.cc:217
-#: stereo_panner.cc:240
+#: editor_regions.cc:118 mixer_strip.cc:1934 mono_panner.cc:179
+#: stereo_panner.cc:217 stereo_panner.cc:240
 msgid "L"
 msgstr ""
 
@@ -5217,8 +5205,8 @@ msgstr ""
 msgid "Region position glued to Bars|Beats time?"
 msgstr ""
 
-#: editor_regions.cc:120 editor_routes.cc:207 gain_meter.cc:753
-#: mixer_strip.cc:1924 panner_ui.cc:554 stereo_panner.cc:237
+#: editor_regions.cc:120 editor_routes.cc:207 gain_meter.cc:722
+#: mixer_strip.cc:1908 panner_ui.cc:554 stereo_panner.cc:237
 msgid "M"
 msgstr ""
 
@@ -5288,7 +5276,7 @@ msgstr "音轨/总线"
 msgid "Track/Bus visible ?"
 msgstr "音轨/总线"
 
-#: editor_routes.cc:204 mixer_strip.cc:1941 route_time_axis.cc:2419
+#: editor_routes.cc:204 mixer_strip.cc:1925 route_time_axis.cc:2392
 msgid "A"
 msgstr ""
 
@@ -5297,7 +5285,7 @@ msgstr ""
 msgid "Track/Bus active ?"
 msgstr "音轨/总线"
 
-#: editor_routes.cc:205 mixer_strip.cc:1925
+#: editor_routes.cc:205 mixer_strip.cc:1909
 msgid "I"
 msgstr ""
 
@@ -5306,7 +5294,7 @@ msgstr ""
 msgid "MIDI input enabled"
 msgstr "\t%1 MIDI inputs\n"
 
-#: editor_routes.cc:206 mixer_strip.cc:1923 mono_panner.cc:198
+#: editor_routes.cc:206 mixer_strip.cc:1907 mono_panner.cc:198
 #: stereo_panner.cc:215 stereo_panner.cc:242
 msgid "R"
 msgstr ""
@@ -5321,7 +5309,7 @@ msgstr "启用录音"
 msgid "Muted"
 msgstr "静音"
 
-#: editor_routes.cc:208 mixer_strip.cc:1937
+#: editor_routes.cc:208 mixer_strip.cc:1921
 msgid "S"
 msgstr ""
 
@@ -5334,7 +5322,7 @@ msgstr "独奏..."
 msgid "SI"
 msgstr ""
 
-#: editor_routes.cc:209 mixer_strip.cc:351 rc_option_editor.cc:1743
+#: editor_routes.cc:209 mixer_strip.cc:351 rc_option_editor.cc:1757
 #, fuzzy
 msgid "Solo Isolated"
 msgstr "Solo隔离"
@@ -5613,7 +5601,7 @@ msgid "192000Hz"
 msgstr "192000 Hz"
 
 #: engine_dialog.cc:127 engine_dialog.cc:132 engine_dialog.cc:169
-#: engine_dialog.cc:552 midi_channel_selector.cc:147 rc_option_editor.cc:1125
+#: engine_dialog.cc:552 midi_channel_selector.cc:149 rc_option_editor.cc:1131
 #: sfdb_ui.cc:544
 msgid "None"
 msgstr ""
@@ -5630,11 +5618,12 @@ msgstr "矩形"
 msgid "Shaped"
 msgstr "形状"
 
-#: engine_dialog.cc:158
+#: engine_dialog.cc:158 engine_dialog.cc:473 engine_dialog.cc:964
 msgid "Playback/recording on 1 device"
 msgstr "在设备1 播放/录音"
 
-#: engine_dialog.cc:159
+#: engine_dialog.cc:159 engine_dialog.cc:477 engine_dialog.cc:530
+#: engine_dialog.cc:967
 msgid "Playback/recording on 2 devices"
 msgstr "在设备2 播放/录音"
 
@@ -5741,14 +5730,6 @@ msgstr "设备"
 msgid "Advanced"
 msgstr "高级"
 
-#: engine_dialog.cc:473 engine_dialog.cc:964
-msgid "Playback/Recording on 1 Device"
-msgstr "在一个设备上回放/录音"
-
-#: engine_dialog.cc:477 engine_dialog.cc:530 engine_dialog.cc:967
-msgid "Playback/Recording on 2 Devices"
-msgstr "在两个设备上回放/录音"
-
 #: engine_dialog.cc:643
 msgid "cannot open JACK rc file %1 to store parameters"
 msgstr "无法打开JACK的rc文件%1来储存参数"
@@ -5767,7 +5748,7 @@ msgid ""
 "\n"
 "Alternatively, if you really want just playback\n"
 "or recording but not both, start JACK before running\n"
-"Ardour and choose the relevant device then."
+"%1 and choose the relevant device then."
 msgstr ""
 
 #: engine_dialog.cc:790
@@ -6090,36 +6071,36 @@ msgstr "到"
 msgid "Range"
 msgstr "范围"
 
-#: gain_meter.cc:135 gain_meter.cc:457 gain_meter.cc:850
+#: gain_meter.cc:108 gain_meter.cc:430 gain_meter.cc:819
 msgid "-inf"
 msgstr ""
 
-#: gain_meter.cc:141 gain_meter.cc:896
+#: gain_meter.cc:114 gain_meter.cc:868
 msgid "Fader automation mode"
 msgstr ""
 
-#: gain_meter.cc:142 gain_meter.cc:897
+#: gain_meter.cc:115 gain_meter.cc:869
 msgid "Fader automation type"
 msgstr ""
 
-#: gain_meter.cc:151 gain_meter.cc:789 panner_ui.cc:178 panner_ui.cc:590
+#: gain_meter.cc:124 gain_meter.cc:758 panner_ui.cc:178 panner_ui.cc:590
 msgid "Abs"
 msgstr ""
 
-#: gain_meter.cc:360
+#: gain_meter.cc:333
 msgid "-Inf"
 msgstr ""
 
-#: gain_meter.cc:756 mixer_strip.cc:1944 panner_ui.cc:557
-#: route_time_axis.cc:2423
+#: gain_meter.cc:725 mixer_strip.cc:1928 panner_ui.cc:557
+#: route_time_axis.cc:2396
 msgid "P"
 msgstr ""
 
-#: gain_meter.cc:759 panner_ui.cc:560
+#: gain_meter.cc:728 panner_ui.cc:560
 msgid "T"
 msgstr ""
 
-#: gain_meter.cc:762 panner_ui.cc:563
+#: gain_meter.cc:731 panner_ui.cc:563
 msgid "W"
 msgstr ""
 
@@ -6131,7 +6112,7 @@ msgstr "<span size=\"large\">预设</span>"
 msgid "Switches"
 msgstr ""
 
-#: generic_pluginui.cc:242 generic_pluginui.cc:372 processor_box.cc:2197
+#: generic_pluginui.cc:242 generic_pluginui.cc:372 processor_box.cc:2190
 msgid "Controls"
 msgstr "控制"
 
@@ -6391,7 +6372,7 @@ msgstr[1] "采样"
 msgid "Reset"
 msgstr "预设"
 
-#: latency_gui.cc:151 rhythm_ferret.cc:255 sfdb_ui.cc:1724
+#: latency_gui.cc:151 rhythm_ferret.cc:274 sfdb_ui.cc:1725
 msgid "programming error: %1 (%2)"
 msgstr "程序错误: %1 (%2)"
 
@@ -6484,17 +6465,18 @@ msgstr "<b>范围(包括CD轨道区间)</b>"
 msgid "add range marker"
 msgstr "添加范围标记"
 
-#: main.cc:77
+#: main.cc:83
 msgid "%1 could not connect to JACK."
 msgstr "%1 无法连接到JACK"
 
-#: main.cc:81
+#: main.cc:87
+#, fuzzy
 msgid ""
 "There are several possible reasons:\n"
 "\n"
 "1) JACK is not running.\n"
 "2) JACK is running as another user, perhaps root.\n"
-"3) There is already another client called \"ardour\".\n"
+"3) There is already another client called \"%1\".\n"
 "\n"
 "Please consider the possibilities, and perhaps (re)start JACK."
 msgstr ""
@@ -6506,19 +6488,37 @@ msgstr ""
 "\n"
 "请考虑以上原因, 可能还要(重)启动JACK."
 
-#: main.cc:185 main.cc:274
-msgid "cannot create user ardour folder %1 (%2)"
+#: main.cc:201 main.cc:316
+#, fuzzy
+msgid "cannot create user %3 folder %1 (%2)"
 msgstr "无法创建用户Ardour文件夹 %1 (%2)"
 
-#: main.cc:192 main.cc:281
+#: main.cc:208 main.cc:323
 msgid "cannot open pango.rc file %1"
 msgstr "无法打开pango.rc 文件 %1"
 
-#: main.cc:312 main.cc:328
+#: main.cc:229 main.cc:350
+msgid "Cannot find ArdourMono TrueType font"
+msgstr ""
+
+#: main.cc:241 main.cc:356
+msgid "Cannot load ArdourMono TrueType font."
+msgstr ""
+
+#: main.cc:304
+msgid ""
+"No fontconfig file found on your system. Things may looked very odd or ugly"
+msgstr ""
+
+#: main.cc:360
+msgid "Failed to set fontconfig configuration."
+msgstr ""
+
+#: main.cc:371 main.cc:387
 msgid "JACK exited"
 msgstr "JACK已经退出"
 
-#: main.cc:315
+#: main.cc:374
 msgid ""
 "JACK exited unexpectedly, and without notifying %1.\n"
 "\n"
@@ -6532,7 +6532,7 @@ msgstr ""
 "\n"
 "单击OK退出 %1."
 
-#: main.cc:330
+#: main.cc:389
 msgid ""
 "JACK exited unexpectedly, and without notifying %1.\n"
 "\n"
@@ -6546,46 +6546,47 @@ msgstr ""
 "然后连接到%1, 或者现在退出%1.\n"
 "现在你没办法保存会话, 因为你的连接信息可能会丢失.\n"
 
-#: main.cc:417
+#: main.cc:483
 msgid " (built using "
 msgstr ""
 
-#: main.cc:420
+#: main.cc:486
 msgid " and GCC version "
 msgstr ""
 
-#: main.cc:430
+#: main.cc:496
 msgid "Copyright (C) 1999-2012 Paul Davis"
 msgstr ""
 
-#: main.cc:431
+#: main.cc:497
 msgid ""
 "Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
 "Baker, Robin Gareus"
 msgstr ""
 
-#: main.cc:433
+#: main.cc:499
 msgid "%1 comes with ABSOLUTELY NO WARRANTY"
 msgstr ""
 
-#: main.cc:434
+#: main.cc:500
 msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 msgstr ""
 
-#: main.cc:435
+#: main.cc:501
 msgid "This is free software, and you are welcome to redistribute it "
 msgstr ""
 
-#: main.cc:436
+#: main.cc:502
 msgid "under certain conditions; see the source for copying conditions."
 msgstr ""
 
-#: main.cc:445
+#: main.cc:511
 msgid "Cannot xinstall SIGPIPE error handler"
 msgstr ""
 
-#: main.cc:451
-msgid "could not create ARDOUR GUI"
+#: main.cc:517
+#, fuzzy
+msgid "could not create %1 GUI"
 msgstr "无法创建Ardour用户图形界面"
 
 #: main_clock.cc:51
@@ -6597,15 +6598,15 @@ msgstr ""
 msgid "MarkerText"
 msgstr "标记"
 
-#: midi_channel_selector.cc:143
+#: midi_channel_selector.cc:145
 msgid "All"
 msgstr "所有"
 
-#: midi_channel_selector.cc:151
+#: midi_channel_selector.cc:153
 msgid "Invert"
 msgstr "反转"
 
-#: midi_channel_selector.cc:155
+#: midi_channel_selector.cc:157
 msgid "Force"
 msgstr ""
 
@@ -6712,15 +6713,15 @@ msgstr "改变力度"
 msgid "change note length"
 msgstr "改变音符长度"
 
-#: midi_port_dialog.cc:20
+#: midi_port_dialog.cc:39
 msgid "Add MIDI Port"
 msgstr "添加MIDI端口"
 
-#: midi_port_dialog.cc:21
+#: midi_port_dialog.cc:40
 msgid "Port name:"
 msgstr "端口名称:"
 
-#: midi_port_dialog.cc:27
+#: midi_port_dialog.cc:46
 msgid "MidiPortDialog"
 msgstr ""
 
@@ -6733,162 +6734,177 @@ msgstr "声道编辑"
 msgid "velocity edit"
 msgstr "力度"
 
-#: midi_region_view.cc:946
+#: midi_region_view.cc:945
 #, fuzzy
 msgid "add note"
 msgstr "编辑音符"
 
-#: midi_region_view.cc:1798
+#: midi_region_view.cc:1793
 msgid "step add"
 msgstr "步增"
 
-#: midi_region_view.cc:1877 midi_region_view.cc:1897
+#: midi_region_view.cc:1876
+msgid "insane MIDI patch key %1:%2"
+msgstr ""
+
+#: midi_region_view.cc:1884 midi_region_view.cc:1904
 msgid "alter patch change"
 msgstr ""
 
-#: midi_region_view.cc:1931
+#: midi_region_view.cc:1938
 msgid "add patch change"
 msgstr ""
 
-#: midi_region_view.cc:1949
+#: midi_region_view.cc:1956
 msgid "move patch change"
 msgstr ""
 
-#: midi_region_view.cc:1960
+#: midi_region_view.cc:1967
 msgid "delete patch change"
 msgstr "删除"
 
-#: midi_region_view.cc:2029
+#: midi_region_view.cc:2036
 msgid "delete selection"
 msgstr "删除选取"
 
-#: midi_region_view.cc:2045
+#: midi_region_view.cc:2052
 msgid "delete note"
 msgstr "删除音符"
 
-#: midi_region_view.cc:2468
+#: midi_region_view.cc:2439
 msgid "move notes"
 msgstr "移动音符"
 
-#: midi_region_view.cc:2690
+#: midi_region_view.cc:2661
 msgid "resize notes"
 msgstr "重设音符大小"
 
-#: midi_region_view.cc:2944
+#: midi_region_view.cc:2915
 msgid "change velocities"
 msgstr "改变力度"
 
-#: midi_region_view.cc:3010
+#: midi_region_view.cc:2981
 msgid "transpose"
 msgstr ""
 
-#: midi_region_view.cc:3044
+#: midi_region_view.cc:3015
 msgid "change note lengths"
 msgstr "改变音符长度"
 
-#: midi_region_view.cc:3113
+#: midi_region_view.cc:3084
 msgid "nudge"
 msgstr "微调"
 
-#: midi_region_view.cc:3128
+#: midi_region_view.cc:3099
 msgid "change channel"
 msgstr "改变声道"
 
-#: midi_region_view.cc:3173
-msgid "Bank:"
+#: midi_region_view.cc:3144
+msgid "Bank "
 msgstr ""
 
-#: midi_region_view.cc:3174
-msgid "Program:"
+#: midi_region_view.cc:3145
+#, fuzzy
+msgid "Program "
 msgstr "程序："
 
-#: midi_region_view.cc:3175
-msgid "Channel:"
-msgstr "声道"
+#: midi_region_view.cc:3146
+#, fuzzy
+msgid "Channel "
+msgstr "音轨"
 
-#: midi_region_view.cc:3343 midi_region_view.cc:3345
+#: midi_region_view.cc:3314 midi_region_view.cc:3316
 msgid "paste"
 msgstr "粘贴"
 
-#: midi_region_view.cc:3808
+#: midi_region_view.cc:3776
 #, fuzzy
 msgid "delete sysex"
 msgstr "删除音符"
 
-#: midi_time_axis.cc:223
+#: midi_streamview.cc:479
+msgid "failed to create MIDI region"
+msgstr ""
+
+#: midi_time_axis.cc:242
 msgid "External MIDI Device"
 msgstr ""
 
-#: midi_time_axis.cc:224
+#: midi_time_axis.cc:243
 #, fuzzy
 msgid "External Device Mode"
 msgstr "外部时间码源"
 
-#: midi_time_axis.cc:413
+#: midi_time_axis.cc:460
 msgid "Show Full Range"
 msgstr "显示所有范围"
 
-#: midi_time_axis.cc:417
+#: midi_time_axis.cc:465
 msgid "Fit Contents"
 msgstr "放置内容"
 
-#: midi_time_axis.cc:421
+#: midi_time_axis.cc:469
 msgid "Note Range"
 msgstr "音符范围"
 
-#: midi_time_axis.cc:422
+#: midi_time_axis.cc:470
 msgid "Note Mode"
 msgstr "音符模式"
 
-#: midi_time_axis.cc:460
+#: midi_time_axis.cc:510
 msgid "Bender"
 msgstr ""
 
-#: midi_time_axis.cc:462
+#: midi_time_axis.cc:514
 msgid "Pressure"
 msgstr ""
 
-#: midi_time_axis.cc:473
+#: midi_time_axis.cc:527
 msgid "Controllers"
 msgstr ""
 
-#: midi_time_axis.cc:476
+#: midi_time_axis.cc:532
 msgid "No MIDI Channels selected"
 msgstr "没有选择MIDI通道"
 
-#: midi_time_axis.cc:529 midi_time_axis.cc:656
+#: midi_time_axis.cc:589 midi_time_axis.cc:718
 msgid "Hide all channels"
 msgstr "隐藏所有通道"
 
-#: midi_time_axis.cc:532 midi_time_axis.cc:659
+#: midi_time_axis.cc:593 midi_time_axis.cc:722
 msgid "Show all channels"
 msgstr "显示所有通道"
 
-#: midi_time_axis.cc:542 midi_time_axis.cc:669
+#: midi_time_axis.cc:604 midi_time_axis.cc:733
 msgid "Channel %1"
 msgstr "通道 %1"
 
-#: midi_time_axis.cc:731
+#: midi_time_axis.cc:859 midi_time_axis.cc:891
 msgid "Controllers %1-%2"
 msgstr "控制器 %1-%2"
 
-#: midi_time_axis.cc:745
+#: midi_time_axis.cc:882 midi_time_axis.cc:885
+#, fuzzy
+msgid "Controller %1"
+msgstr "控制器 %1-%2"
+
+#: midi_time_axis.cc:908
 msgid "Sustained"
 msgstr "保持"
 
-#: midi_time_axis.cc:750
+#: midi_time_axis.cc:915
 msgid "Percussive"
 msgstr ""
 
-#: midi_time_axis.cc:768
+#: midi_time_axis.cc:935
 msgid "Meter Colors"
 msgstr "标尺颜色"
 
-#: midi_time_axis.cc:774
+#: midi_time_axis.cc:942
 msgid "Channel Colors"
 msgstr "通道颜色"
 
-#: midi_time_axis.cc:780
+#: midi_time_axis.cc:949
 msgid "Track Color"
 msgstr "音轨颜色"
 
@@ -7059,12 +7075,12 @@ msgstr "载入菜单 %1"
 msgid "Could not find mixer.bindings in search path %1"
 msgstr ""
 
-#: mixer_strip.cc:91 mixer_strip.cc:119 mixer_strip.cc:1726
+#: mixer_strip.cc:91 mixer_strip.cc:119 mixer_strip.cc:1708
 msgid "pre"
 msgstr ""
 
-#: mixer_strip.cc:93 mixer_strip.cc:121 mixer_strip.cc:352 mixer_strip.cc:1298
-#: rc_option_editor.cc:1744
+#: mixer_strip.cc:93 mixer_strip.cc:121 mixer_strip.cc:352 mixer_strip.cc:1280
+#: rc_option_editor.cc:1758
 #, fuzzy
 msgid "Comments"
 msgstr "注释"
@@ -7101,11 +7117,11 @@ msgstr ""
 msgid "Lock Solo Status"
 msgstr ""
 
-#: mixer_strip.cc:201 mixer_strip.cc:636
+#: mixer_strip.cc:201 mixer_strip.cc:1903
 msgid "lock"
 msgstr ""
 
-#: mixer_strip.cc:202 mixer_strip.cc:635 mixer_strip.cc:670
+#: mixer_strip.cc:202 mixer_strip.cc:1902
 msgid "iso"
 msgstr ""
 
@@ -7113,165 +7129,165 @@ msgstr ""
 msgid "Mix group"
 msgstr ""
 
-#: mixer_strip.cc:349 rc_option_editor.cc:1741
+#: mixer_strip.cc:349 rc_option_editor.cc:1755
 #, fuzzy
 msgid "Phase Invert"
 msgstr "反转"
 
-#: mixer_strip.cc:350 rc_option_editor.cc:1742 route_ui.cc:1155
+#: mixer_strip.cc:350 rc_option_editor.cc:1756 route_ui.cc:1213
 msgid "Solo Safe"
 msgstr "Solo安全"
 
-#: mixer_strip.cc:353 mixer_ui.cc:123 route_time_axis.cc:690
+#: mixer_strip.cc:353 mixer_ui.cc:123 route_time_axis.cc:669
 msgid "Group"
 msgstr "组"
 
-#: mixer_strip.cc:354 rc_option_editor.cc:1745
+#: mixer_strip.cc:354 rc_option_editor.cc:1759
 #, fuzzy
 msgid "Meter Point"
 msgstr "编辑点"
 
-#: mixer_strip.cc:460
+#: mixer_strip.cc:466
 msgid "Enable/Disable MIDI input"
 msgstr "启用/禁用MIDI输入"
 
-#: mixer_strip.cc:619
+#: mixer_strip.cc:616
 msgid ""
 "Aux\n"
 "Sends"
 msgstr ""
 
-#: mixer_strip.cc:655
+#: mixer_strip.cc:640
 msgid "Snd"
 msgstr ""
 
-#: mixer_strip.cc:671
-msgid "Lck"
-msgstr ""
-
-#: mixer_strip.cc:712 mixer_strip.cc:840 processor_box.cc:2125
+#: mixer_strip.cc:694 mixer_strip.cc:822 processor_box.cc:2118
 msgid "Not connected to JACK - no I/O changes are possible"
 msgstr ""
 
-#: mixer_strip.cc:1107
+#: mixer_strip.cc:1089
 msgid "<b>INPUT</b> to %1"
 msgstr ""
 
-#: mixer_strip.cc:1110
+#: mixer_strip.cc:1092
 msgid "<b>OUTPUT</b> from %1"
 msgstr ""
 
-#: mixer_strip.cc:1185
+#: mixer_strip.cc:1167
 msgid "Disconnected"
 msgstr "失去连接"
 
-#: mixer_strip.cc:1301
+#: mixer_strip.cc:1283
 #, fuzzy
 msgid "*Comments*"
 msgstr "注释"
 
-#: mixer_strip.cc:1308
+#: mixer_strip.cc:1290
 #, fuzzy
 msgid "Cmt"
 msgstr "剪切"
 
-#: mixer_strip.cc:1311
+#: mixer_strip.cc:1293
 msgid "*Cmt*"
 msgstr ""
 
-#: mixer_strip.cc:1317
+#: mixer_strip.cc:1299
 msgid "Click to Add/Edit Comments"
 msgstr ""
 
-#: mixer_strip.cc:1356
+#: mixer_strip.cc:1338
 msgid ": comment editor"
 msgstr ": 注释编辑器"
 
-#: mixer_strip.cc:1434
+#: mixer_strip.cc:1416
 msgid "Grp"
 msgstr "组"
 
-#: mixer_strip.cc:1437
+#: mixer_strip.cc:1419
 msgid "~G"
 msgstr "~G"
 
-#: mixer_strip.cc:1466
+#: mixer_strip.cc:1448
 msgid "Comments..."
 msgstr "注释..."
 
-#: mixer_strip.cc:1468
+#: mixer_strip.cc:1450
 msgid "Save As Template..."
 msgstr "保存为模板..."
 
-#: mixer_strip.cc:1474 route_group_dialog.cc:39 route_time_axis.cc:713
+#: mixer_strip.cc:1456 route_group_dialog.cc:39 route_time_axis.cc:692
 msgid "Active"
 msgstr "启用(Active)"
 
-#: mixer_strip.cc:1481
+#: mixer_strip.cc:1463
 msgid "Adjust Latency..."
 msgstr "调整延迟..."
 
-#: mixer_strip.cc:1484
+#: mixer_strip.cc:1466
 msgid "Protect Against Denormals"
 msgstr ""
 
-#: mixer_strip.cc:1490 route_time_axis.cc:448
+#: mixer_strip.cc:1472 route_time_axis.cc:427
 msgid "Remote Control ID..."
 msgstr ""
 
-#: mixer_strip.cc:1722 mixer_strip.cc:1746
+#: mixer_strip.cc:1704 mixer_strip.cc:1728
 msgid "in"
 msgstr ""
 
-#: mixer_strip.cc:1730
+#: mixer_strip.cc:1712
 msgid "post"
 msgstr ""
 
-#: mixer_strip.cc:1734
+#: mixer_strip.cc:1716
 msgid "out"
 msgstr ""
 
-#: mixer_strip.cc:1739
+#: mixer_strip.cc:1721
 msgid "custom"
 msgstr ""
 
-#: mixer_strip.cc:1750
+#: mixer_strip.cc:1732
 msgid "pr"
 msgstr ""
 
-#: mixer_strip.cc:1754
+#: mixer_strip.cc:1736
 msgid "po"
 msgstr ""
 
-#: mixer_strip.cc:1758
+#: mixer_strip.cc:1740
 msgid "o"
 msgstr ""
 
-#: mixer_strip.cc:1763
+#: mixer_strip.cc:1745
 msgid "c"
 msgstr ""
 
-#: mixer_strip.cc:1897 route_ui.cc:138
+#: mixer_strip.cc:1879 route_ui.cc:138
 msgid "Disk"
 msgstr ""
 
-#: mixer_strip.cc:1912 monitor_section.cc:44
+#: mixer_strip.cc:1894 monitor_section.cc:63
 msgid "AFL"
 msgstr ""
 
-#: mixer_strip.cc:1915 monitor_section.cc:45
+#: mixer_strip.cc:1897 monitor_section.cc:64
 msgid "PFL"
 msgstr ""
 
-#: mixer_strip.cc:1926
+#: mixer_strip.cc:1910
 msgid "D"
 msgstr ""
 
-#: mixer_strip.cc:2122
+#: mixer_strip.cc:1933
+msgid "i"
+msgstr ""
+
+#: mixer_strip.cc:2107
 msgid "Pre-fader"
 msgstr ""
 
-#: mixer_strip.cc:2123
+#: mixer_strip.cc:2108
 #, fuzzy
 msgid "Post-fader"
 msgstr "交叉淡入淡出"
@@ -7288,29 +7304,29 @@ msgstr ""
 msgid "Strips"
 msgstr ""
 
-#: monitor_section.cc:43
+#: monitor_section.cc:62
 msgid "SiP"
 msgstr ""
 
-#: monitor_section.cc:67
+#: monitor_section.cc:86
 msgid "soloing"
 msgstr ""
 
-#: monitor_section.cc:71
+#: monitor_section.cc:90
 msgid "isolated"
 msgstr ""
 
-#: monitor_section.cc:75
+#: monitor_section.cc:94
 msgid "auditioning"
 msgstr "监听中"
 
-#: monitor_section.cc:85
+#: monitor_section.cc:104
 msgid ""
 "When active, something is solo-isolated.\n"
 "Click to de-isolate everything"
 msgstr ""
 
-#: monitor_section.cc:88
+#: monitor_section.cc:107
 msgid ""
 "When active, auditioning is active.\n"
 "Click to stop the audition"
@@ -7318,95 +7334,136 @@ msgstr ""
 "启用时, 监听正在进行.\n"
 "点击来停止监听."
 
-#: monitor_section.cc:105
+#: monitor_section.cc:124
 msgid "Solo controls affect solo-in-place"
 msgstr ""
 
-#: monitor_section.cc:111
+#: monitor_section.cc:130
 msgid "Solo controls toggle after-fader-listen"
 msgstr ""
 
-#: monitor_section.cc:117
+#: monitor_section.cc:136
 msgid "Solo controls toggle pre-fader-listen"
 msgstr ""
 
-#: monitor_section.cc:125
+#: monitor_section.cc:144
 msgid "Gain increase for soloed signals (0dB is normal)"
 msgstr ""
 
-#: monitor_section.cc:131
+#: monitor_section.cc:150
 msgid "Solo Boost"
 msgstr ""
 
-#: monitor_section.cc:143
+#: monitor_section.cc:162
 msgid ""
 "Gain reduction non-soloed signals\n"
 "A value above -inf dB causes \"solo-in-front\""
 msgstr ""
 
-#: monitor_section.cc:145
+#: monitor_section.cc:164
 msgid "SiP Cut"
 msgstr ""
 
-#: monitor_section.cc:157
+#: monitor_section.cc:176
 msgid "Gain reduction to use when dimming monitor outputs"
 msgstr ""
 
-#: monitor_section.cc:162
+#: monitor_section.cc:181
 msgid "Dim"
 msgstr ""
 
-#: monitor_section.cc:171
+#: monitor_section.cc:190
 #, fuzzy
 msgid "excl. solo"
 msgstr "执行solo"
 
-#: monitor_section.cc:173
+#: monitor_section.cc:192
 msgid "Exclusive solo means that only 1 solo is active at a time"
 msgstr ""
 
-#: monitor_section.cc:180
+#: monitor_section.cc:199
 #, fuzzy
 msgid "solo » mute"
 msgstr "独奏/静音"
 
-#: monitor_section.cc:182
+#: monitor_section.cc:201
 msgid ""
 "If enabled, solo will override mute\n"
 "(a soloed & muted track or bus will be audible)"
 msgstr ""
 
-#: monitor_section.cc:208
+#: monitor_section.cc:227
 #, fuzzy
 msgid "mute"
 msgstr "取消静音"
 
-#: monitor_section.cc:219
+#: monitor_section.cc:238
 msgid "dim"
 msgstr ""
 
-#: monitor_section.cc:226
+#: monitor_section.cc:245
 msgid "mono"
 msgstr "单声道"
 
-#: monitor_section.cc:247
+#: monitor_section.cc:266
 msgid "Monitor"
 msgstr ""
 
-#: monitor_section.cc:686
+#: monitor_section.cc:678
+#, fuzzy
+msgid "Switch monitor to mono"
+msgstr "切换到第二个八度"
+
+#: monitor_section.cc:681
+#, fuzzy
+msgid "Cut monitor"
+msgstr "监控中"
+
+#: monitor_section.cc:684
+#, fuzzy
+msgid "Dim monitor"
+msgstr "监控中"
+
+#: monitor_section.cc:687
+#, fuzzy
+msgid "Toggle exclusive solo mode"
+msgstr "执行solo"
+
+#: monitor_section.cc:693
+msgid "Toggle mute overrides solo mode"
+msgstr ""
+
+#: monitor_section.cc:705
 msgid "Cut monitor channel %1"
 msgstr ""
 
-#: monitor_section.cc:691
+#: monitor_section.cc:710
 msgid "Dim monitor channel %1"
 msgstr ""
 
-#: monitor_section.cc:696
+#: monitor_section.cc:715
 msgid "Solo monitor channel %1"
 msgstr ""
 
-#: monitor_section.cc:701
+#: monitor_section.cc:720
 msgid "Invert monitor channel %1"
+msgstr ""
+
+#: monitor_section.cc:730
+msgid "In-place solo"
+msgstr ""
+
+#: monitor_section.cc:732
+msgid "After Fade Listen (AFL) solo"
+msgstr ""
+
+#: monitor_section.cc:734
+msgid "Pre Fade Listen (PFL) solo"
+msgstr ""
+
+#: mono_panner.cc:101
+#, c-format
+msgid "L:%3d R:%3d"
 msgstr ""
 
 #: mono_panner_editor.cc:33
@@ -7418,31 +7475,32 @@ msgstr ""
 msgid "%"
 msgstr ""
 
-#: nag.cc:21
-msgid "Support Ardour Development"
+#: nag.cc:40
+#, fuzzy
+msgid "Support %1 Development"
 msgstr "支持Ardour的开发"
 
-#: nag.cc:22
+#: nag.cc:41
 msgid "I'd like to make a one-time donation"
 msgstr "我想来个一次性捐赠"
 
-#: nag.cc:23
+#: nag.cc:42
 msgid "Tell me more about becoming a subscriber"
 msgstr "跟我讲讲关于成为订购者"
 
-#: nag.cc:24
+#: nag.cc:43
 msgid "I'm already a subscriber!"
 msgstr "我已经是订购者了"
 
-#: nag.cc:25
+#: nag.cc:44
 msgid "Ask about this the next time I export"
 msgstr "在下次导出时提醒我一下"
 
-#: nag.cc:26
+#: nag.cc:45
 msgid "Never ever ask me about this again"
 msgstr "以后别再问我了"
 
-#: nag.cc:29
+#: nag.cc:48
 msgid ""
 "Congratulations on your session export.\n"
 "\n"
@@ -7466,7 +7524,7 @@ msgstr ""
 "不管怎样, Ardour不断的开发需要一个稳定持续的资金来源.\n"
 "谢谢您的使用!"
 
-#: nag.cc:38
+#: nag.cc:57
 msgid ""
 "Congratulations on your session export.\n"
 "\n"
@@ -7786,9 +7844,10 @@ msgid "Eh? LADSPA plugins don't have editors!"
 msgstr "呃?LADSPA插件没有编辑器"
 
 #: plugin_ui.cc:127 plugin_ui.cc:270
+#, fuzzy
 msgid ""
 "unknown type of editor-supplying plugin (note: no VST support in this "
-"version of ardour)"
+"version of %1)"
 msgstr "未知类型编辑器插件 (提示: 此版本的Ardour没有VST支持)"
 
 #: plugin_ui.cc:130
@@ -7796,9 +7855,10 @@ msgid "unknown type of editor-supplying plugin"
 msgstr "未知类型编辑器插件"
 
 #: plugin_ui.cc:300
+#, fuzzy
 msgid ""
 "unknown type of editor-supplying plugin (note: no linuxVST support in this "
-"version of ardour)"
+"version of %1)"
 msgstr "未知类型编辑器插件 (提示: 此版本的Ardour没有LinuxVST支持)"
 
 #: plugin_ui.cc:372
@@ -8057,40 +8117,40 @@ msgstr "没有连接的端口"
 msgid "There are no %1 ports to connect."
 msgstr "没有 %1 端口可连接."
 
-#: processor_box.cc:382
+#: processor_box.cc:358
 #, fuzzy
 msgid "Show All Controls"
 msgstr "显示所有的自动化"
 
-#: processor_box.cc:386
+#: processor_box.cc:362
 #, fuzzy
 msgid "Hide All Controls"
 msgstr "隐藏所有自动化"
 
-#: processor_box.cc:479
+#: processor_box.cc:451
 #, fuzzy
 msgid "on"
 msgstr "完成"
 
-#: processor_box.cc:479 rc_option_editor.cc:1774 rc_option_editor.cc:1788
+#: processor_box.cc:451 rc_option_editor.cc:1788 rc_option_editor.cc:1802
 msgid "off"
 msgstr ""
 
-#: processor_box.cc:746
+#: processor_box.cc:716
 msgid ""
 "Right-click to add/remove/edit\n"
 "plugins,inserts,sends and more"
 msgstr ""
 
-#: processor_box.cc:1180 processor_box.cc:1573
+#: processor_box.cc:1150 processor_box.cc:1540
 msgid "Plugin Incompatibility"
 msgstr "插件不匹配"
 
-#: processor_box.cc:1183
+#: processor_box.cc:1153
 msgid "You attempted to add the plugin \"%1\" in slot %2.\n"
 msgstr ""
 
-#: processor_box.cc:1189
+#: processor_box.cc:1159
 msgid ""
 "\n"
 "This plugin has:\n"
@@ -8098,41 +8158,41 @@ msgstr ""
 "\n"
 "此插件:\n"
 
-#: processor_box.cc:1192
+#: processor_box.cc:1162
 #, fuzzy
 msgid "\t%1 MIDI input\n"
 msgid_plural "\t%1 MIDI inputs\n"
 msgstr[0] "\t%1 MIDI inputs\n"
 msgstr[1] "\t%1 MIDI inputs\n"
 
-#: processor_box.cc:1196
+#: processor_box.cc:1166
 #, fuzzy
 msgid "\t%1 audio input\n"
 msgid_plural "\t%1 audio inputs\n"
 msgstr[0] "\t%1 audio inputs\n"
 msgstr[1] "\t%1 audio inputs\n"
 
-#: processor_box.cc:1199
+#: processor_box.cc:1169
 msgid ""
 "\n"
 "but at the insertion point, there are:\n"
 msgstr ""
 
-#: processor_box.cc:1202
+#: processor_box.cc:1172
 #, fuzzy
 msgid "\t%1 MIDI channel\n"
 msgid_plural "\t%1 MIDI channels\n"
 msgstr[0] "\t%1 MIDI channels\n"
 msgstr[1] "\t%1 MIDI channels\n"
 
-#: processor_box.cc:1206
+#: processor_box.cc:1176
 #, fuzzy
 msgid "\t%1 audio channel\n"
 msgid_plural "\t%1 audio channels\n"
 msgstr[0] "\t%1 audio channels\n"
 msgstr[1] "\t%1 audio channels\n"
 
-#: processor_box.cc:1209
+#: processor_box.cc:1179
 msgid ""
 "\n"
 "%1 is unable to insert this plugin here.\n"
@@ -8140,37 +8200,37 @@ msgstr ""
 "\n"
 "%1 无法再次插入插件."
 
-#: processor_box.cc:1246
+#: processor_box.cc:1216
 msgid "Cannot set up new send: %1"
 msgstr ""
 
-#: processor_box.cc:1576
+#: processor_box.cc:1543
 msgid ""
 "You cannot reorder these plugins/sends/inserts\n"
 "in that way because the inputs and\n"
 "outputs will not work correctly."
 msgstr ""
 
-#: processor_box.cc:1761
+#: processor_box.cc:1728
 msgid "Rename Processor"
 msgstr "重命名处理器"
 
-#: processor_box.cc:1792
+#: processor_box.cc:1759
 msgid "At least 100 IO objects exist with a name like %1 - name not changed"
 msgstr "至少有100个IO(输入输出)对象存在着这样的%1的名称 -名称没有改变"
 
-#: processor_box.cc:1900
+#: processor_box.cc:1893
 msgid "plugin insert constructor failed"
 msgstr ""
 
-#: processor_box.cc:1911
+#: processor_box.cc:1904
 msgid ""
 "Copying the set of processors on the clipboard failed,\n"
 "probably because the I/O configuration of the plugins\n"
 "could not match the configuration of this track."
 msgstr ""
 
-#: processor_box.cc:1957
+#: processor_box.cc:1950
 msgid ""
 "Do you really want to remove all processors from %1?\n"
 "(this cannot be undone)"
@@ -8178,92 +8238,92 @@ msgstr ""
 "你真想要移除所有处理器从 %1?\n"
 "(此操作不可撤销)"
 
-#: processor_box.cc:1961 processor_box.cc:1986
+#: processor_box.cc:1954 processor_box.cc:1979
 msgid "Yes, remove them all"
 msgstr "确定移除所有"
 
-#: processor_box.cc:1963 processor_box.cc:1988
+#: processor_box.cc:1956 processor_box.cc:1981
 msgid "Remove processors"
 msgstr "移除处理器"
 
-#: processor_box.cc:1978
+#: processor_box.cc:1971
 msgid ""
 "Do you really want to remove all pre-fader processors from %1?\n"
 "(this cannot be undone)"
 msgstr ""
 
-#: processor_box.cc:1981
+#: processor_box.cc:1974
 msgid ""
 "Do you really want to remove all post-fader processors from %1?\n"
 "(this cannot be undone)"
 msgstr ""
 
-#: processor_box.cc:2185
+#: processor_box.cc:2178
 msgid "New Plugin"
 msgstr "新插件"
 
-#: processor_box.cc:2188
+#: processor_box.cc:2181
 msgid "New Insert"
 msgstr "新插入"
 
-#: processor_box.cc:2191
+#: processor_box.cc:2184
 msgid "New External Send ..."
 msgstr ""
 
-#: processor_box.cc:2195
+#: processor_box.cc:2188
 msgid "New Aux Send ..."
 msgstr ""
 
-#: processor_box.cc:2199
+#: processor_box.cc:2192
 msgid "Clear (all)"
 msgstr "清除(所有)"
 
-#: processor_box.cc:2201
+#: processor_box.cc:2194
 msgid "Clear (pre-fader)"
 msgstr ""
 
-#: processor_box.cc:2203
+#: processor_box.cc:2196
 msgid "Clear (post-fader)"
 msgstr ""
 
-#: processor_box.cc:2229
+#: processor_box.cc:2222
 msgid "Activate All"
 msgstr "激活所有"
 
-#: processor_box.cc:2231
+#: processor_box.cc:2224
 #, fuzzy
 msgid "Deactivate All"
 msgstr "取消激活所有"
 
-#: processor_box.cc:2233
+#: processor_box.cc:2226
 msgid "A/B Plugins"
 msgstr "A/B 插件"
 
-#: processor_box.cc:2242
+#: processor_box.cc:2235
 msgid "Edit with basic controls..."
 msgstr ""
 
-#: processor_box.cc:2488
+#: processor_box.cc:2481
 msgid "%1: %2 (by %3)"
 msgstr ""
 
-#: patch_change_dialog.cc:50
+#: patch_change_dialog.cc:51
 msgid "Patch Change"
 msgstr ""
 
-#: patch_change_dialog.cc:76
+#: patch_change_dialog.cc:77
 msgid "Patch Bank"
 msgstr ""
 
-#: patch_change_dialog.cc:83
+#: patch_change_dialog.cc:84
 msgid "Patch"
 msgstr ""
 
-#: patch_change_dialog.cc:98 step_entry.cc:429
+#: patch_change_dialog.cc:99 step_entry.cc:429
 msgid "Program"
 msgstr ""
 
-#: patch_change_dialog.cc:106 step_entry.cc:421
+#: patch_change_dialog.cc:107 step_entry.cc:421
 msgid "Bank"
 msgstr ""
 
@@ -8376,157 +8436,156 @@ msgstr "双击名称来标记已启用的协议设置"
 msgid "%1 Preferences"
 msgstr "%1 首选项"
 
-#: rc_option_editor.cc:884
+#: rc_option_editor.cc:885
 msgid "DSP CPU Utilization"
 msgstr "DSP的CPU使用率"
 
-#: rc_option_editor.cc:888
+#: rc_option_editor.cc:889
 msgid "Signal processing uses"
 msgstr "信号处理使用"
 
-#: rc_option_editor.cc:893
+#: rc_option_editor.cc:894
 msgid "all but one processor"
 msgstr "除了一个处理器"
 
-#: rc_option_editor.cc:894
+#: rc_option_editor.cc:895
 msgid "all available processors"
 msgstr "所有可用的处理器"
 
-#: rc_option_editor.cc:897
+#: rc_option_editor.cc:898
 msgid "%1 processors"
 msgstr "％1 处理器"
 
-#: rc_option_editor.cc:900
+#: rc_option_editor.cc:901
 msgid "This setting will only take effect when %1 is restarted."
 msgstr ""
 
-#: rc_option_editor.cc:905
+#: rc_option_editor.cc:906
 #, fuzzy
 msgid "Options|Undo"
 msgstr "选项"
 
-#: rc_option_editor.cc:912
+#: rc_option_editor.cc:913
 msgid "Verify removal of last capture"
 msgstr "确认移除最后的录音"
 
-#: rc_option_editor.cc:920
+#: rc_option_editor.cc:921
 msgid "Make periodic backups of the session file"
 msgstr "定期备份会话文件"
 
-#: rc_option_editor.cc:925
+#: rc_option_editor.cc:926
 #, fuzzy
 msgid "Session Management"
 msgstr "会话名称:"
 
-#: rc_option_editor.cc:930
+#: rc_option_editor.cc:931
 msgid "Always copy imported files"
 msgstr "总是复制导入的文件"
 
-#: rc_option_editor.cc:937
+#: rc_option_editor.cc:938
 #, fuzzy
 msgid "Default folder for new sessions:"
 msgstr "会话文件默认的文件夹"
 
-#: rc_option_editor.cc:945
+#: rc_option_editor.cc:946
 msgid "Maximum number of recent sessions"
 msgstr ""
 
-#: rc_option_editor.cc:958
+#: rc_option_editor.cc:959
 #, fuzzy
 msgid "Click gain level"
 msgstr "单击音频文件:"
 
-#: rc_option_editor.cc:963 route_time_axis.cc:221 route_time_axis.cc:693
+#: rc_option_editor.cc:964 route_time_axis.cc:206 route_time_axis.cc:672
 msgid "Automation"
 msgstr "自动化"
 
-#: rc_option_editor.cc:968
+#: rc_option_editor.cc:969
 msgid "Thinning factor (larger value => less data)"
 msgstr ""
 
-#: rc_option_editor.cc:977
+#: rc_option_editor.cc:978
 msgid "Automation sampling interval (milliseconds)"
 msgstr ""
 
-#: rc_option_editor.cc:989
+#: rc_option_editor.cc:990
 msgid "Keep record-enable engaged on stop"
 msgstr ""
 
-#: rc_option_editor.cc:998
+#: rc_option_editor.cc:999
 msgid "Stop recording when an xrun occurs"
 msgstr "在xruns出现时停止录音"
 
-#: rc_option_editor.cc:1002
+#: rc_option_editor.cc:1004
 msgid ""
-"<b>When enabled</b> Ardour will stop recording if an over- or underrun is "
+"<b>When enabled</b> %1 will stop recording if an over- or underrun is "
 "detected by the audio engine"
 msgstr ""
 
-#: rc_option_editor.cc:1007
+#: rc_option_editor.cc:1010
 msgid "Create markers where xruns occur"
 msgstr "在xruns出现时创建标记"
 
-#: rc_option_editor.cc:1016
+#: rc_option_editor.cc:1019
 msgid "Stop at the end of the session"
 msgstr "在会话结尾停止"
 
-#: rc_option_editor.cc:1020
+#: rc_option_editor.cc:1024
 msgid ""
-"<b>When enabled</b> if Ardour is <b>not recording</b>, it will stop the "
+"<b>When enabled</b> if %1 is <b>not recording</b>, it will stop the "
 "transport when it reaches the current session end marker\n"
 "\n"
-"<b>When disabled</b> Ardour will continue to roll past the session end "
-"marker at all times"
+"<b>When disabled</b> %1 will continue to roll past the session end marker at "
+"all times"
 msgstr ""
 
-#: rc_option_editor.cc:1027
+#: rc_option_editor.cc:1032
 msgid "Do seamless looping (not possible when slaved to MTC, JACK etc)"
 msgstr ""
 
-#: rc_option_editor.cc:1031
+#: rc_option_editor.cc:1037
 msgid ""
 "<b>When enabled</b> this will loop by reading ahead and wrapping around at "
 "the loop point, preventing any need to do a transport locate at the end of "
 "the loop\n"
 "\n"
 "<b>When disabled</b> looping is done by locating back to the start of the "
-"loop when Ardour reaches the end which will often cause a small click or "
-"delay"
+"loop when %1 reaches the end which will often cause a small click or delay"
 msgstr ""
 
-#: rc_option_editor.cc:1039
+#: rc_option_editor.cc:1045
 msgid "Disable per-track record disarm while rolling"
 msgstr ""
 
-#: rc_option_editor.cc:1043
+#: rc_option_editor.cc:1049
 msgid ""
 "<b>When enabled</b> this will prevent you from accidentally stopping "
 "specific tracks recording during a take"
 msgstr ""
 
-#: rc_option_editor.cc:1048
+#: rc_option_editor.cc:1054
 msgid "12dB gain reduction during fast-forward and fast-rewind"
 msgstr "快进和倒带时有12dB的增益减少"
 
-#: rc_option_editor.cc:1052
+#: rc_option_editor.cc:1058
 msgid ""
 "This will reduce the unpleasant increase in perceived volume that occurs "
 "when fast-forwarding or rewinding through some kinds of audio"
 msgstr ""
 
-#: rc_option_editor.cc:1056
+#: rc_option_editor.cc:1062
 msgid "Sync/Slave"
 msgstr ""
 
-#: rc_option_editor.cc:1060
+#: rc_option_editor.cc:1066
 msgid "External timecode source"
 msgstr "外部时间码源"
 
-#: rc_option_editor.cc:1070
+#: rc_option_editor.cc:1076
 msgid "Match session video frame rate to external timecode"
 msgstr ""
 
-#: rc_option_editor.cc:1076
+#: rc_option_editor.cc:1082
 msgid ""
 "This option controls the value of the video frame rate <i>while chasing</i> "
 "an external timecode source.\n"
@@ -8536,26 +8595,26 @@ msgid ""
 "\n"
 "<b>When disabled</b> the session video frame rate will not be changed to "
 "match that of the selected external timecode source.Instead the frame rate "
-"indication in the main clock will flash red and Ardour will convert between "
-"the external timecode standard and the session standard."
+"indication in the main clock will flash red and %1 will convert between the "
+"external timecode standard and the session standard."
 msgstr ""
 
-#: rc_option_editor.cc:1086
+#: rc_option_editor.cc:1092
 #, fuzzy
 msgid "External timecode is sync locked"
 msgstr "外部时间码源"
 
-#: rc_option_editor.cc:1092
+#: rc_option_editor.cc:1098
 msgid ""
 "<b>When enabled</b> indicates that the selected external timecode source "
 "shares sync (Black &amp; Burst, Wordclock, etc) with the audio interface."
 msgstr ""
 
-#: rc_option_editor.cc:1099
+#: rc_option_editor.cc:1105
 msgid "Lock to 29.9700 fps instead of 30000/1001"
 msgstr ""
 
-#: rc_option_editor.cc:1105
+#: rc_option_editor.cc:1111
 msgid ""
 "<b>When enabled</b> the external timecode source is assumed to use 29.97 fps "
 "instead of 30000/1001.\n"
@@ -8563,152 +8622,149 @@ msgid ""
 "that drop-frame timecode has an accumulated error of -86ms over a 24-hour "
 "period.\n"
 "Drop-frame timecode would compensate exactly for a NTSC color frame rate of "
-"30 * 0.9990 (ie 29.970000). That is not the actual rate, however some vendor "
-"use that rate - despite it being against the specs - because the variant of "
-"using exactly 29.97 fps has zero timecode drift.\n"
+"30 * 0.9990 (ie 29.970000). That is not the actual rate. However, some "
+"vendors use that rate - despite it being against the specs - because the "
+"variant of using exactly 29.97 fps has zero timecode drift.\n"
 msgstr ""
 
-#: rc_option_editor.cc:1115
+#: rc_option_editor.cc:1121
 msgid "LTC Reader"
 msgstr ""
 
-#: rc_option_editor.cc:1119
+#: rc_option_editor.cc:1125
 msgid "LTC incoming port"
 msgstr ""
 
-#: rc_option_editor.cc:1132
+#: rc_option_editor.cc:1138
 #, fuzzy
 msgid "LTC Generator"
 msgstr "创建者"
 
-#: rc_option_editor.cc:1137
+#: rc_option_editor.cc:1143
 #, fuzzy
 msgid "Enable LTC generator"
 msgstr "Povolit překlady"
 
-#: rc_option_editor.cc:1144
+#: rc_option_editor.cc:1150
 msgid "send LTC while stopped"
 msgstr ""
 
-#: rc_option_editor.cc:1150
+#: rc_option_editor.cc:1156
 msgid ""
-"<b>When enabled</b> Ardour will continue to send LTC information even when "
-"the transport (playhead) is not moving"
+"<b>When enabled</b> %1 will continue to send LTC information even when the "
+"transport (playhead) is not moving"
 msgstr ""
 
-#: rc_option_editor.cc:1156
+#: rc_option_editor.cc:1162
 #, fuzzy
 msgid "LTC generator level"
 msgstr "创建者"
 
-#: rc_option_editor.cc:1160
+#: rc_option_editor.cc:1166
 msgid ""
 "Specify the Peak Volume of the generated LTC signal in dbFS. A good value "
 "is  0dBu ^= -18dbFS in an EBU calibrated system"
 msgstr ""
 
-#: rc_option_editor.cc:1172
+#: rc_option_editor.cc:1178
 msgid "Link selection of regions and tracks"
 msgstr "链接所选的区域和音轨"
 
-#: rc_option_editor.cc:1180
+#: rc_option_editor.cc:1186
 msgid "Move relevant automation when audio regions are moved"
 msgstr "当音频区域移除时移除相应自动化"
 
-#: rc_option_editor.cc:1188
+#: rc_option_editor.cc:1194
 msgid "Show meters on tracks in the editor"
 msgstr "在编辑器的音轨显示仪表"
 
-#: rc_option_editor.cc:1195
-msgid "Use overlap equivalency for regions"
-msgstr "区域使用重叠等同"
-
-#: rc_option_editor.cc:1202
-msgid ""
-"When extending region selection across a group, %1 must decide which regions "
-"are equivalent\n"
-"\n"
-"If enabled, regions are considered \"equivalent\" if they overlap on the "
-"timeline.\n"
-"\n"
-"If disabled, regions are considered \"equivalent\" only if have the same "
-"start time, length and position"
+#: rc_option_editor.cc:1201
+msgid "Regions in active edit groups are edited together"
 msgstr ""
 
-#: rc_option_editor.cc:1210
+#: rc_option_editor.cc:1202
+#, fuzzy
+msgid "whenever they overlap in time"
+msgstr "缩短已存在的新音符"
+
+#: rc_option_editor.cc:1203
+msgid "only if they have identical length, position and origin"
+msgstr ""
+
+#: rc_option_editor.cc:1213
 msgid "Make rubberband selection rectangle snap to the grid"
 msgstr ""
 
-#: rc_option_editor.cc:1218
+#: rc_option_editor.cc:1221
 msgid "Show waveforms in regions"
 msgstr "显示区域的波形"
 
-#: rc_option_editor.cc:1226
+#: rc_option_editor.cc:1229
 #, fuzzy
 msgid "Show gain envelopes in audio regions"
 msgstr "显示区域的波形"
 
-#: rc_option_editor.cc:1227
+#: rc_option_editor.cc:1230
 msgid "in all modes"
 msgstr ""
 
-#: rc_option_editor.cc:1228
+#: rc_option_editor.cc:1231
 msgid "only in region gain mode"
 msgstr ""
 
-#: rc_option_editor.cc:1235
+#: rc_option_editor.cc:1238
 msgid "Waveform scale"
 msgstr "波形标尺"
 
-#: rc_option_editor.cc:1240
+#: rc_option_editor.cc:1243
 msgid "linear"
 msgstr "先行"
 
-#: rc_option_editor.cc:1241
+#: rc_option_editor.cc:1244
 msgid "logarithmic"
 msgstr "对数"
 
-#: rc_option_editor.cc:1247
+#: rc_option_editor.cc:1250
 msgid "Waveform shape"
 msgstr "波形形状"
 
-#: rc_option_editor.cc:1252
+#: rc_option_editor.cc:1255
 msgid "traditional"
 msgstr "传统的"
 
-#: rc_option_editor.cc:1253
+#: rc_option_editor.cc:1256
 msgid "rectified"
 msgstr "整流的"
 
-#: rc_option_editor.cc:1260
+#: rc_option_editor.cc:1263
 msgid "Show waveforms for audio while it is being recorded"
 msgstr "在录制音频的时候显示波形"
 
-#: rc_option_editor.cc:1268
+#: rc_option_editor.cc:1271
 msgid "Show zoom toolbar"
 msgstr "显示缩放工具栏"
 
-#: rc_option_editor.cc:1276
+#: rc_option_editor.cc:1279
 msgid "Color regions using their track's color"
 msgstr ""
 
-#: rc_option_editor.cc:1284
+#: rc_option_editor.cc:1287
 msgid "Update editor window during drags of the summary"
 msgstr ""
 
-#: rc_option_editor.cc:1292
+#: rc_option_editor.cc:1295
 msgid "Synchronise editor and mixer track order"
 msgstr ""
 
-#: rc_option_editor.cc:1300
+#: rc_option_editor.cc:1303
 msgid "Synchronise editor and mixer selection"
 msgstr ""
 
-#: rc_option_editor.cc:1307
+#: rc_option_editor.cc:1310
 msgid "Name new markers"
 msgstr "命名新标签"
 
-#: rc_option_editor.cc:1313
+#: rc_option_editor.cc:1316
 msgid ""
 "If enabled, popup a dialog when a new marker is created to allow its name to "
 "be set as it is created.\n"
@@ -8716,334 +8772,342 @@ msgid ""
 "You can always rename markers by right-clicking on them"
 msgstr ""
 
-#: rc_option_editor.cc:1319
+#: rc_option_editor.cc:1322
 msgid "Auto-scroll editor window when dragging near its edges"
 msgstr ""
 
-#: rc_option_editor.cc:1326
+#: rc_option_editor.cc:1329
 msgid "Buffering"
 msgstr "缓冲中"
 
-#: rc_option_editor.cc:1335
-msgid "Use a monitor bus (allows AFL/PFL and more control)"
-msgstr "使用监视总线 (允许AFL/PFL和更多的控制)"
-
-#: rc_option_editor.cc:1342
+#: rc_option_editor.cc:1337
 msgid "Record monitoring handled by"
 msgstr ""
 
-#: rc_option_editor.cc:1353
+#: rc_option_editor.cc:1348
 msgid "ardour"
 msgstr "ardour"
 
-#: rc_option_editor.cc:1354
+#: rc_option_editor.cc:1349
 msgid "audio hardware"
 msgstr "音频硬件"
 
-#: rc_option_editor.cc:1361
+#: rc_option_editor.cc:1356
 msgid "Tape machine mode"
 msgstr "磁带机模式"
 
-#: rc_option_editor.cc:1366
+#: rc_option_editor.cc:1361
 msgid "Connection of tracks and busses"
 msgstr "音轨和总线的连接"
 
-#: rc_option_editor.cc:1371
+#: rc_option_editor.cc:1366
 msgid "Auto-connect master/monitor busses"
 msgstr "自动连接 主控/监视 总线"
 
-#: rc_option_editor.cc:1378
+#: rc_option_editor.cc:1373
 msgid "Connect track inputs"
 msgstr "链接音轨输入"
 
-#: rc_option_editor.cc:1383
+#: rc_option_editor.cc:1378
 msgid "automatically to physical inputs"
 msgstr "自动物理数入"
 
-#: rc_option_editor.cc:1384 rc_option_editor.cc:1397
+#: rc_option_editor.cc:1379 rc_option_editor.cc:1392
 msgid "manually"
 msgstr "手动"
 
-#: rc_option_editor.cc:1390
+#: rc_option_editor.cc:1385
 msgid "Connect track and bus outputs"
 msgstr "链接音轨和总线的输出"
 
-#: rc_option_editor.cc:1395
+#: rc_option_editor.cc:1390
 msgid "automatically to physical outputs"
 msgstr "自动物理数出"
 
-#: rc_option_editor.cc:1396
+#: rc_option_editor.cc:1391
 msgid "automatically to master bus"
 msgstr "自动化主控总线"
 
-#: rc_option_editor.cc:1401
+#: rc_option_editor.cc:1396
 msgid "Denormals"
 msgstr "异常"
 
-#: rc_option_editor.cc:1406
+#: rc_option_editor.cc:1401
 msgid "Use DC bias to protect against denormals"
 msgstr "使用偏压直流放置异常"
 
-#: rc_option_editor.cc:1413
+#: rc_option_editor.cc:1408
 msgid "Processor handling"
 msgstr "处理器处理"
 
-#: rc_option_editor.cc:1418
+#: rc_option_editor.cc:1413
 msgid "no processor handling"
 msgstr "无处理器处理"
 
-#: rc_option_editor.cc:1423
+#: rc_option_editor.cc:1418
 msgid "use FlushToZero"
 msgstr ""
 
-#: rc_option_editor.cc:1427
+#: rc_option_editor.cc:1422
 msgid "use DenormalsAreZero"
 msgstr ""
 
-#: rc_option_editor.cc:1431
+#: rc_option_editor.cc:1426
 msgid "use FlushToZero and DenormalsAreZero"
 msgstr ""
 
-#: rc_option_editor.cc:1441
+#: rc_option_editor.cc:1436
 #, fuzzy
 msgid "Silence plugins when the transport is stopped"
 msgstr "当运输停止时停止插件"
 
-#: rc_option_editor.cc:1449
+#: rc_option_editor.cc:1444
 msgid "Make new plugins active"
 msgstr "启用新插件"
 
-#: rc_option_editor.cc:1457
+#: rc_option_editor.cc:1452
 msgid "Enable automatic analysis of audio"
 msgstr "启用音频自动分析"
 
-#: rc_option_editor.cc:1465
+#: rc_option_editor.cc:1460
 msgid "Replicate missing region channels"
 msgstr "复制遗失的区域通道"
 
-#: rc_option_editor.cc:1472 rc_option_editor.cc:1487 rc_option_editor.cc:1499
-#: rc_option_editor.cc:1511 rc_option_editor.cc:1523 rc_option_editor.cc:1527
-#: rc_option_editor.cc:1535 rc_option_editor.cc:1543 rc_option_editor.cc:1551
-#: rc_option_editor.cc:1553 rc_option_editor.cc:1561 rc_option_editor.cc:1569
-#: rc_option_editor.cc:1577
+#: rc_option_editor.cc:1467 rc_option_editor.cc:1482 rc_option_editor.cc:1494
+#: rc_option_editor.cc:1506 rc_option_editor.cc:1518 rc_option_editor.cc:1522
+#: rc_option_editor.cc:1530 rc_option_editor.cc:1538 rc_option_editor.cc:1546
+#: rc_option_editor.cc:1548 rc_option_editor.cc:1556 rc_option_editor.cc:1564
+#: rc_option_editor.cc:1572
 msgid "Solo / mute"
 msgstr "独奏/静音"
 
-#: rc_option_editor.cc:1475
+#: rc_option_editor.cc:1470
 msgid "Solo-in-place mute cut (dB)"
 msgstr ""
 
-#: rc_option_editor.cc:1482
+#: rc_option_editor.cc:1477
 msgid "Solo controls are Listen controls"
 msgstr ""
 
-#: rc_option_editor.cc:1491
+#: rc_option_editor.cc:1486
 msgid "Listen Position"
 msgstr ""
 
-#: rc_option_editor.cc:1496
+#: rc_option_editor.cc:1491
 msgid "after-fader (AFL)"
 msgstr ""
 
-#: rc_option_editor.cc:1497
+#: rc_option_editor.cc:1492
 msgid "pre-fader (PFL)"
 msgstr ""
 
-#: rc_option_editor.cc:1503
+#: rc_option_editor.cc:1498
 msgid "PFL signals come from"
 msgstr ""
 
-#: rc_option_editor.cc:1508
+#: rc_option_editor.cc:1503
 msgid "before pre-fader processors"
 msgstr ""
 
-#: rc_option_editor.cc:1509
+#: rc_option_editor.cc:1504
 msgid "pre-fader but after pre-fader processors"
 msgstr ""
 
-#: rc_option_editor.cc:1515
+#: rc_option_editor.cc:1510
 msgid "AFL signals come from"
 msgstr ""
 
-#: rc_option_editor.cc:1520
+#: rc_option_editor.cc:1515
 msgid "immediately post-fader"
 msgstr ""
 
-#: rc_option_editor.cc:1521
+#: rc_option_editor.cc:1516
 msgid "after post-fader processors (before pan)"
 msgstr ""
 
-#: rc_option_editor.cc:1530
+#: rc_option_editor.cc:1525
 msgid "Exclusive solo"
 msgstr "执行solo"
 
-#: rc_option_editor.cc:1538
+#: rc_option_editor.cc:1533
 msgid "Show solo muting"
 msgstr ""
 
-#: rc_option_editor.cc:1546
+#: rc_option_editor.cc:1541
 msgid "Soloing overrides muting"
 msgstr ""
 
-#: rc_option_editor.cc:1551
+#: rc_option_editor.cc:1546
 msgid "Default track / bus muting options"
 msgstr "默认 音轨/总线 静音选项"
 
-#: rc_option_editor.cc:1556
+#: rc_option_editor.cc:1551
 msgid "Mute affects pre-fader sends"
 msgstr ""
 
-#: rc_option_editor.cc:1564
+#: rc_option_editor.cc:1559
 msgid "Mute affects post-fader sends"
 msgstr ""
 
-#: rc_option_editor.cc:1572
+#: rc_option_editor.cc:1567
 msgid "Mute affects control outputs"
 msgstr ""
 
-#: rc_option_editor.cc:1580
+#: rc_option_editor.cc:1575
 msgid "Mute affects main outputs"
 msgstr " ovlivní hlavní výstupy"
 
-#: rc_option_editor.cc:1596
+#: rc_option_editor.cc:1591
 msgid "Send MIDI Time Code"
 msgstr "发送MIDI时间码"
 
-#: rc_option_editor.cc:1604
+#: rc_option_editor.cc:1599
 msgid "Percentage either side of normal transport speed to transmit MTC"
 msgstr ""
 
-#: rc_option_editor.cc:1613
+#: rc_option_editor.cc:1608
 msgid "Obey MIDI Machine Control commands"
 msgstr "遵守MIDI机器控制命令(MTC commands)"
 
-#: rc_option_editor.cc:1621
+#: rc_option_editor.cc:1616
 msgid "Send MIDI Machine Control commands"
 msgstr "发送MIDI机器控制命令(MTC commands)"
 
-#: rc_option_editor.cc:1629
+#: rc_option_editor.cc:1624
 msgid "Send MIDI control feedback"
 msgstr "发送MIDI控制反馈"
 
-#: rc_option_editor.cc:1637
+#: rc_option_editor.cc:1632
 msgid "Inbound MMC device ID"
 msgstr "向内的MMC设备ID"
 
-#: rc_option_editor.cc:1646
+#: rc_option_editor.cc:1641
 msgid "Outbound MMC device ID"
 msgstr "向外的MMC设备ID"
 
-#: rc_option_editor.cc:1655
+#: rc_option_editor.cc:1650
 msgid "Initial program change"
 msgstr "初始程序改变"
 
-#: rc_option_editor.cc:1664
+#: rc_option_editor.cc:1659
 msgid "Display first MIDI bank/program as 0"
 msgstr ""
 
-#: rc_option_editor.cc:1672
+#: rc_option_editor.cc:1667
 msgid "Never display periodic MIDI messages (MTC, MIDI Clock)"
 msgstr ""
 
-#: rc_option_editor.cc:1680
+#: rc_option_editor.cc:1675
 #, fuzzy
 msgid "Sound MIDI notes as they are selected"
 msgstr "没有选择MIDI通道"
 
-#: rc_option_editor.cc:1687 rc_option_editor.cc:1689 rc_option_editor.cc:1691
-#: rc_option_editor.cc:1693 rc_option_editor.cc:1706
+#: rc_option_editor.cc:1683 rc_option_editor.cc:1693 rc_option_editor.cc:1695
+#: rc_option_editor.cc:1697 rc_option_editor.cc:1699 rc_option_editor.cc:1712
 #, fuzzy
 msgid "User interaction"
 msgstr "区域操作"
 
-#: rc_option_editor.cc:1687
+#: rc_option_editor.cc:1686
+msgid ""
+"Use translations of %1 messages\n"
+"   <i>(requires a restart of %1 to take effect)</i>\n"
+"   <i>(if available for your language preferences)</i>"
+msgstr ""
+
+#: rc_option_editor.cc:1693
 msgid "Keyboard"
 msgstr "键盘"
 
-#: rc_option_editor.cc:1691
+#: rc_option_editor.cc:1697
 msgid "Control surfaces"
 msgstr "控制表面"
 
-#: rc_option_editor.cc:1697
+#: rc_option_editor.cc:1703
 msgid "Control surface remote ID"
 msgstr "控制表面移动的ID"
 
-#: rc_option_editor.cc:1702
+#: rc_option_editor.cc:1708
 msgid "assigned by user"
 msgstr "由用户指定"
 
-#: rc_option_editor.cc:1703
+#: rc_option_editor.cc:1709
 msgid "follows order of mixer"
 msgstr "混音器的如下顺序"
 
-#: rc_option_editor.cc:1704
+#: rc_option_editor.cc:1710
 msgid "follows order of editor"
 msgstr "编辑器的如下顺序"
 
-#: rc_option_editor.cc:1710 rc_option_editor.cc:1718 rc_option_editor.cc:1728
-#: rc_option_editor.cc:1730 rc_option_editor.cc:1748 rc_option_editor.cc:1757
-#: rc_option_editor.cc:1765 rc_option_editor.cc:1779 rc_option_editor.cc:1796
+#: rc_option_editor.cc:1716 rc_option_editor.cc:1724 rc_option_editor.cc:1734
+#: rc_option_editor.cc:1736 rc_option_editor.cc:1744 rc_option_editor.cc:1762
+#: rc_option_editor.cc:1771 rc_option_editor.cc:1779 rc_option_editor.cc:1793
+#: rc_option_editor.cc:1810
 msgid "GUI"
 msgstr ""
 
-#: rc_option_editor.cc:1713
+#: rc_option_editor.cc:1719
 msgid "Graphically indicate mouse pointer hovering over various widgets"
 msgstr ""
 
-#: rc_option_editor.cc:1721
+#: rc_option_editor.cc:1727
 msgid "Show tooltips if mouse hovers over a control"
 msgstr ""
 
-#: rc_option_editor.cc:1733
-msgid "Use plugins' own interfaces instead of Ardour's"
+#: rc_option_editor.cc:1739
+msgid "Use plugins' own interfaces instead of %1's"
 msgstr ""
 
-#: rc_option_editor.cc:1750
+#: rc_option_editor.cc:1747
+msgid "update transport clock display every 40ms instead of every 100ms"
+msgstr ""
+
+#: rc_option_editor.cc:1764
 #, fuzzy
 msgid "Mixer Strip"
 msgstr "混音器"
 
-#: rc_option_editor.cc:1760
+#: rc_option_editor.cc:1774
 msgid "Use narrow strips in the mixer by default"
 msgstr ""
 
-#: rc_option_editor.cc:1769
+#: rc_option_editor.cc:1783
 msgid "Meter hold time"
 msgstr ""
 
-#: rc_option_editor.cc:1775
+#: rc_option_editor.cc:1789
 msgid "short"
 msgstr "短"
 
-#: rc_option_editor.cc:1776 rc_option_editor.cc:1791
+#: rc_option_editor.cc:1790 rc_option_editor.cc:1805
 msgid "medium"
 msgstr "中"
 
-#: rc_option_editor.cc:1777
+#: rc_option_editor.cc:1791
 msgid "long"
 msgstr "长"
 
-#: rc_option_editor.cc:1783
+#: rc_option_editor.cc:1797
 msgid "Meter fall-off"
 msgstr ""
 
-#: rc_option_editor.cc:1789
+#: rc_option_editor.cc:1803
 msgid "slowest"
 msgstr "最慢"
 
-#: rc_option_editor.cc:1790
+#: rc_option_editor.cc:1804
 msgid "slow"
 msgstr "慢"
 
-#: rc_option_editor.cc:1792
+#: rc_option_editor.cc:1806
 msgid "fast"
 msgstr "快"
 
-#: rc_option_editor.cc:1793
+#: rc_option_editor.cc:1807
 msgid "faster"
 msgstr "较快"
 
-#: rc_option_editor.cc:1794
+#: rc_option_editor.cc:1808
 msgid "fastest"
 msgstr "最快"
 
@@ -9158,97 +9222,97 @@ msgstr ""
 msgid "Return "
 msgstr "返回"
 
-#: rhythm_ferret.cc:30
+#: rhythm_ferret.cc:49
 #, fuzzy
 msgid "Percussive Onset"
 msgstr "百分比 '%'"
 
-#: rhythm_ferret.cc:31
+#: rhythm_ferret.cc:50
 #, fuzzy
 msgid "Note Onset"
 msgstr "音符范围"
 
-#: rhythm_ferret.cc:36
+#: rhythm_ferret.cc:55
 msgid "Energy Based"
 msgstr ""
 
-#: rhythm_ferret.cc:37
+#: rhythm_ferret.cc:56
 msgid "Spectral Difference"
 msgstr ""
 
-#: rhythm_ferret.cc:38
+#: rhythm_ferret.cc:57
 msgid "High-Frequency Content"
 msgstr ""
 
-#: rhythm_ferret.cc:39
+#: rhythm_ferret.cc:58
 msgid "Complex Domain"
 msgstr ""
 
-#: rhythm_ferret.cc:40
+#: rhythm_ferret.cc:59
 #, fuzzy
 msgid "Phase Deviation"
 msgstr "播放列表删除"
 
-#: rhythm_ferret.cc:41
+#: rhythm_ferret.cc:60
 msgid "Kullback-Liebler"
 msgstr ""
 
-#: rhythm_ferret.cc:42
+#: rhythm_ferret.cc:61
 msgid "Modified Kullback-Liebler"
 msgstr ""
 
-#: rhythm_ferret.cc:47
+#: rhythm_ferret.cc:66
 #, fuzzy
 msgid "Split region"
 msgstr "分离区域"
 
-#: rhythm_ferret.cc:48
+#: rhythm_ferret.cc:67
 #, fuzzy
 msgid "Snap regions"
 msgstr "分离区域"
 
-#: rhythm_ferret.cc:49
+#: rhythm_ferret.cc:68
 #, fuzzy
 msgid "Conform regions"
 msgstr "标准化区域"
 
-#: rhythm_ferret.cc:54
+#: rhythm_ferret.cc:73
 msgid "Rhythm Ferret"
 msgstr "节奏搜索"
 
-#: rhythm_ferret.cc:60
+#: rhythm_ferret.cc:79
 msgid "Analyze"
 msgstr "分析"
 
-#: rhythm_ferret.cc:95
+#: rhythm_ferret.cc:114
 msgid "Detection function"
 msgstr "检测功能"
 
-#: rhythm_ferret.cc:99
+#: rhythm_ferret.cc:118
 msgid "Trigger gap"
 msgstr "触发间隙"
 
-#: rhythm_ferret.cc:104 strip_silence_dialog.cc:68
+#: rhythm_ferret.cc:123 strip_silence_dialog.cc:68
 msgid "Threshold"
 msgstr "阈值"
 
-#: rhythm_ferret.cc:109
+#: rhythm_ferret.cc:128
 msgid "Peak threshold"
 msgstr "峰阈值"
 
-#: rhythm_ferret.cc:114
+#: rhythm_ferret.cc:133
 msgid "Silence threshold"
 msgstr "无声阈值"
 
-#: rhythm_ferret.cc:119
+#: rhythm_ferret.cc:138
 msgid "Sensitivity"
 msgstr "灵敏度"
 
-#: rhythm_ferret.cc:123
+#: rhythm_ferret.cc:142
 msgid "Operation"
 msgstr "操作"
 
-#: rhythm_ferret.cc:337
+#: rhythm_ferret.cc:356
 msgid "split regions (rhythm ferret)"
 msgstr "分离区域 (节奏搜索)"
 
@@ -9332,180 +9396,180 @@ msgstr "没有音轨"
 msgid "No Track or Bus Selected"
 msgstr "没有选择音轨或总线"
 
-#: route_time_axis.cc:111
+#: route_time_axis.cc:96
 msgid "g"
 msgstr ""
 
-#: route_time_axis.cc:112
+#: route_time_axis.cc:97
 msgid "p"
 msgstr ""
 
-#: route_time_axis.cc:113
+#: route_time_axis.cc:98
 msgid "a"
 msgstr ""
 
-#: route_time_axis.cc:183
+#: route_time_axis.cc:168
 msgid "Record (Right-click for Step Edit)"
 msgstr "录音(右键单步调整)"
 
-#: route_time_axis.cc:185
+#: route_time_axis.cc:171
 msgid "Record"
 msgstr "录制"
 
-#: route_time_axis.cc:216
+#: route_time_axis.cc:201
 msgid "Route Group"
 msgstr ""
 
-#: route_time_axis.cc:219
+#: route_time_axis.cc:204
 #, fuzzy
 msgid "MIDI Controllers and Automation"
 msgstr "MIDI控制输入"
 
-#: route_time_axis.cc:402
+#: route_time_axis.cc:381
 msgid "Show All Automation"
 msgstr "显示所有的自动化"
 
-#: route_time_axis.cc:405
+#: route_time_axis.cc:384
 msgid "Show Existing Automation"
 msgstr "显示已有的自动化"
 
-#: route_time_axis.cc:408
+#: route_time_axis.cc:387
 msgid "Hide All Automation"
 msgstr "隐藏所有自动化"
 
-#: route_time_axis.cc:437
+#: route_time_axis.cc:416
 msgid "Color..."
 msgstr "颜色..."
 
-#: route_time_axis.cc:494
+#: route_time_axis.cc:473
 msgid "Overlaid"
 msgstr "重叠"
 
-#: route_time_axis.cc:500
+#: route_time_axis.cc:479
 msgid "Stacked"
 msgstr ""
 
-#: route_time_axis.cc:508
+#: route_time_axis.cc:487
 msgid "Layers"
 msgstr "层"
 
-#: route_time_axis.cc:577
+#: route_time_axis.cc:556
 msgid "Automatic (based on I/O connections)"
 msgstr "自动的(基于I/O连接)"
 
-#: route_time_axis.cc:586
+#: route_time_axis.cc:565
 msgid "(Currently: Existing Material)"
 msgstr "(当前：现有材料)"
 
-#: route_time_axis.cc:589
+#: route_time_axis.cc:568
 msgid "(Currently: Capture Time)"
 msgstr "(当前：捕获时间)"
 
-#: route_time_axis.cc:597
+#: route_time_axis.cc:576
 msgid "Align With Existing Material"
 msgstr "与已有材料对齐"
 
-#: route_time_axis.cc:602
+#: route_time_axis.cc:581
 msgid "Align With Capture Time"
 msgstr "与捕获时间对齐"
 
-#: route_time_axis.cc:607
+#: route_time_axis.cc:586
 msgid "Alignment"
 msgstr "对齐"
 
-#: route_time_axis.cc:642
+#: route_time_axis.cc:621
 msgid "Normal Mode"
 msgstr "一般模式"
 
-#: route_time_axis.cc:648
+#: route_time_axis.cc:627
 msgid "Tape Mode"
 msgstr "磁带模式"
 
-#: route_time_axis.cc:654
+#: route_time_axis.cc:633
 msgid "Non-Layered Mode"
 msgstr "非底层模式"
 
-#: route_time_axis.cc:665
+#: route_time_axis.cc:644
 msgid "Color Mode"
 msgstr "颜色模式"
 
-#: route_time_axis.cc:671 route_time_axis.cc:1611
+#: route_time_axis.cc:650 route_time_axis.cc:1592
 msgid "Playlist"
 msgstr "播放列表"
 
-#: route_time_axis.cc:991
+#: route_time_axis.cc:970
 msgid "Rename Playlist"
 msgstr "重命名播放列表"
 
-#: route_time_axis.cc:992
+#: route_time_axis.cc:971
 msgid "New name for playlist:"
 msgstr "新的播放列表名称"
 
-#: route_time_axis.cc:1077
+#: route_time_axis.cc:1056
 msgid "New Copy Playlist"
 msgstr "新拷贝播放列表"
 
-#: route_time_axis.cc:1078 route_time_axis.cc:1131
+#: route_time_axis.cc:1057 route_time_axis.cc:1110
 msgid "Name for new playlist:"
 msgstr "新播放列表名"
 
-#: route_time_axis.cc:1130
+#: route_time_axis.cc:1109
 msgid "New Playlist"
 msgstr "新的播放列表"
 
-#: route_time_axis.cc:1319
+#: route_time_axis.cc:1300
 msgid "You cannot create a track with that name as it is reserved for %1"
 msgstr "无法创建音轨，因为"
 
-#: route_time_axis.cc:1500
+#: route_time_axis.cc:1481
 msgid "New Copy..."
 msgstr "新拷贝"
 
-#: route_time_axis.cc:1504
+#: route_time_axis.cc:1485
 msgid "New Take"
 msgstr ""
 
-#: route_time_axis.cc:1505
+#: route_time_axis.cc:1486
 msgid "Copy Take"
 msgstr ""
 
-#: route_time_axis.cc:1510
+#: route_time_axis.cc:1491
 msgid "Clear Current"
 msgstr "清除当前"
 
-#: route_time_axis.cc:1513
+#: route_time_axis.cc:1494
 msgid "Select From All..."
 msgstr "选择所有"
 
-#: route_time_axis.cc:1601
+#: route_time_axis.cc:1582
 msgid "Take: %1.%2"
 msgstr ""
 
-#: route_time_axis.cc:2299
+#: route_time_axis.cc:2272
 msgid "Underlays"
 msgstr "底层"
 
-#: route_time_axis.cc:2302
+#: route_time_axis.cc:2275
 msgid "Remove \"%1\""
 msgstr "移除 \"%1\""
 
-#: route_time_axis.cc:2352 route_time_axis.cc:2389
+#: route_time_axis.cc:2325 route_time_axis.cc:2362
 msgid "programming error: underlay reference pointer pairs are inconsistent!"
 msgstr "程序错误：底层参考指针对不一致"
 
-#: route_time_axis.cc:2420
+#: route_time_axis.cc:2393
 msgid "After-fade listen (AFL)"
 msgstr ""
 
-#: route_time_axis.cc:2424
+#: route_time_axis.cc:2397
 msgid "Pre-fade listen (PFL)"
 msgstr ""
 
-#: route_time_axis.cc:2428
+#: route_time_axis.cc:2401
 msgid "s"
 msgstr ""
 
-#: route_time_axis.cc:2432
+#: route_time_axis.cc:2405
 msgid "m"
 msgstr ""
 
@@ -9533,83 +9597,83 @@ msgstr "监听输入"
 msgid "Monitor playback"
 msgstr "监听回放"
 
-#: route_ui.cc:541
+#: route_ui.cc:586
 msgid "Not connected to JACK - cannot engage record"
 msgstr ""
 
-#: route_ui.cc:723
+#: route_ui.cc:781
 msgid "Step Entry"
 msgstr ""
 
-#: route_ui.cc:796
+#: route_ui.cc:854
 msgid "Assign all tracks (prefader)"
 msgstr ""
 
-#: route_ui.cc:800
+#: route_ui.cc:858
 msgid "Assign all tracks and buses (prefader)"
 msgstr ""
 
-#: route_ui.cc:804
+#: route_ui.cc:862
 msgid "Assign all tracks (postfader)"
 msgstr ""
 
-#: route_ui.cc:808
+#: route_ui.cc:866
 msgid "Assign all tracks and buses (postfader)"
 msgstr ""
 
-#: route_ui.cc:812
+#: route_ui.cc:870
 msgid "Assign selected tracks (prefader)"
 msgstr ""
 
-#: route_ui.cc:816
+#: route_ui.cc:874
 msgid "Assign selected tracks and buses (prefader)"
 msgstr ""
 
-#: route_ui.cc:819
+#: route_ui.cc:877
 msgid "Assign selected tracks (postfader)"
 msgstr ""
 
-#: route_ui.cc:823
+#: route_ui.cc:881
 msgid "Assign selected tracks and buses (postfader)"
 msgstr ""
 
-#: route_ui.cc:826
+#: route_ui.cc:884
 msgid "Copy track/bus gains to sends"
 msgstr ""
 
-#: route_ui.cc:827
+#: route_ui.cc:885
 msgid "Set sends gain to -inf"
 msgstr ""
 
-#: route_ui.cc:828
+#: route_ui.cc:886
 msgid "Set sends gain to 0dB"
 msgstr ""
 
-#: route_ui.cc:1148
+#: route_ui.cc:1206
 msgid "Solo Isolate"
 msgstr "Solo隔离"
 
-#: route_ui.cc:1177
+#: route_ui.cc:1235
 msgid "Pre Fader"
 msgstr ""
 
-#: route_ui.cc:1183
+#: route_ui.cc:1241
 msgid "Post Fader"
 msgstr ""
 
-#: route_ui.cc:1189
+#: route_ui.cc:1247
 msgid "Control Outs"
 msgstr ""
 
-#: route_ui.cc:1195
+#: route_ui.cc:1253
 msgid "Main Outs"
 msgstr ""
 
-#: route_ui.cc:1327
+#: route_ui.cc:1385
 msgid "Color Selection"
 msgstr "颜色选择"
 
-#: route_ui.cc:1414
+#: route_ui.cc:1472
 msgid ""
 "Do you really want to remove track \"%1\" ?\n"
 "\n"
@@ -9623,7 +9687,7 @@ msgstr ""
 "\n"
 "(此动作不可撤销, 而且此会话文件将会被重新写入!)"
 
-#: route_ui.cc:1416
+#: route_ui.cc:1474
 msgid ""
 "Do you really want to remove bus \"%1\" ?\n"
 "\n"
@@ -9633,15 +9697,15 @@ msgstr ""
 "\n"
 "(此动作不可撤销, 而且此会话文件将会被重新写入!)"
 
-#: route_ui.cc:1424
+#: route_ui.cc:1482
 msgid "Remove track"
 msgstr "移除音轨"
 
-#: route_ui.cc:1426
+#: route_ui.cc:1484
 msgid "Remove bus"
 msgstr "移除总线"
 
-#: route_ui.cc:1453
+#: route_ui.cc:1511
 msgid ""
 "The use of colons (':') is discouraged in track and bus names.\n"
 "Do you want to use this new name?"
@@ -9649,47 +9713,47 @@ msgstr ""
 "不建议使用 ':' 作为音轨和总线名称.\n"
 "你确定使用这个名称?"
 
-#: route_ui.cc:1457
+#: route_ui.cc:1515
 msgid "Use the new name"
 msgstr "使用新名称"
 
-#: route_ui.cc:1458
+#: route_ui.cc:1516
 msgid "Re-edit the name"
 msgstr "重新编辑名称"
 
-#: route_ui.cc:1471
+#: route_ui.cc:1529
 msgid "Rename Track"
 msgstr "重命名音轨"
 
-#: route_ui.cc:1473
+#: route_ui.cc:1531
 msgid "Rename Bus"
 msgstr "重命名总线"
 
-#: route_ui.cc:1632
+#: route_ui.cc:1690
 msgid " latency"
 msgstr " 延迟"
 
-#: route_ui.cc:1645
+#: route_ui.cc:1703
 msgid "Cannot create route template directory %1"
 msgstr "无法创建模板根目录%1"
 
-#: route_ui.cc:1651
+#: route_ui.cc:1709
 msgid "Save As Template"
 msgstr "另存为模板"
 
-#: route_ui.cc:1652
+#: route_ui.cc:1710
 msgid "Template name:"
 msgstr "模板名称:"
 
-#: route_ui.cc:1725
+#: route_ui.cc:1783
 msgid "Remote Control ID"
 msgstr "移除控制ID"
 
-#: route_ui.cc:1735
+#: route_ui.cc:1793
 msgid "Remote control ID:"
 msgstr "移除控制ID:"
 
-#: route_ui.cc:1749
+#: route_ui.cc:1807
 msgid ""
 "The remote control ID of %1 is: %2\n"
 "\n"
@@ -9697,17 +9761,17 @@ msgid ""
 "The remote control ID of %3 cannot be changed."
 msgstr ""
 
-#: route_ui.cc:1753
+#: route_ui.cc:1811
 #, fuzzy
 msgid "the master bus"
 msgstr "创建主控总线"
 
-#: route_ui.cc:1753
+#: route_ui.cc:1811
 #, fuzzy
 msgid "the monitor bus"
 msgstr "创建主控总线"
 
-#: route_ui.cc:1755
+#: route_ui.cc:1813
 msgid ""
 "The remote control ID of %6 is: %3\n"
 "\n"
@@ -9718,23 +9782,23 @@ msgid ""
 "change this%5"
 msgstr ""
 
-#: route_ui.cc:1758
+#: route_ui.cc:1816
 #, fuzzy
 msgid "the mixer"
 msgstr "混音师"
 
-#: route_ui.cc:1758
+#: route_ui.cc:1816
 #, fuzzy
 msgid "the editor"
 msgstr "高度"
 
-#: route_ui.cc:1813
+#: route_ui.cc:1871
 msgid ""
 "Left-click to invert (phase reverse) channel %1 of this track.  Right-click "
 "to show menu."
 msgstr ""
 
-#: route_ui.cc:1815
+#: route_ui.cc:1873
 msgid "Click to show a menu of channels for inversion (phase reverse)"
 msgstr ""
 
@@ -10010,188 +10074,176 @@ msgid "60"
 msgstr "60"
 
 #: session_option_editor.cc:65
-msgid "Subframes per frame"
-msgstr "每帧的子帧数"
-
-#: session_option_editor.cc:70
-msgid "80"
-msgstr "80"
-
-#: session_option_editor.cc:71
-msgid "100"
-msgstr "100"
-
-#: session_option_editor.cc:77
 msgid "Pull-up / pull-down"
 msgstr "上拉/下拉"
 
-#: session_option_editor.cc:82
+#: session_option_editor.cc:70
 msgid "4.1667 + 0.1%"
 msgstr "4.1667 + 0.1%"
 
-#: session_option_editor.cc:83
+#: session_option_editor.cc:71
 msgid "4.1667"
 msgstr "4.1667"
 
-#: session_option_editor.cc:84
+#: session_option_editor.cc:72
 msgid "4.1667 - 0.1%"
 msgstr "4.1667 - 0.1%"
 
-#: session_option_editor.cc:85
+#: session_option_editor.cc:73
 msgid "0.1"
 msgstr "0.1"
 
-#: session_option_editor.cc:86
+#: session_option_editor.cc:74
 msgid "none"
 msgstr ""
 
-#: session_option_editor.cc:87
+#: session_option_editor.cc:75
 msgid "-0.1"
 msgstr "-0.1"
 
-#: session_option_editor.cc:88
+#: session_option_editor.cc:76
 msgid "-4.1667 + 0.1%"
 msgstr "-4.1667 + 0.1%"
 
-#: session_option_editor.cc:89
+#: session_option_editor.cc:77
 msgid "-4.1667"
 msgstr "-4.1667"
 
-#: session_option_editor.cc:90
+#: session_option_editor.cc:78
 msgid "-4.1667 - 0.1%"
 msgstr "-4.1667 - 0.1%"
 
-#: session_option_editor.cc:95
+#: session_option_editor.cc:83
 #, fuzzy
 msgid "Ext Timecode Offsets"
 msgstr "时间码便宜"
 
-#: session_option_editor.cc:99
+#: session_option_editor.cc:87
 #, fuzzy
 msgid "Slave Timecode offset"
 msgstr "时间码便宜"
 
-#: session_option_editor.cc:106
+#: session_option_editor.cc:94
 msgid "The specified offset is added to the received timecode (MTC or LTC)."
 msgstr ""
 
-#: session_option_editor.cc:112
+#: session_option_editor.cc:100
 #, fuzzy
 msgid "Timecode Generator offset"
 msgstr "时间码便宜"
 
-#: session_option_editor.cc:119
+#: session_option_editor.cc:107
 msgid ""
 "Specify an offset which is added to the generated timecode (so far only LTC)."
 msgstr ""
 
-#: session_option_editor.cc:123
+#: session_option_editor.cc:111
 msgid "JACK Transport/Time Settings"
 msgstr ""
 
-#: session_option_editor.cc:127
+#: session_option_editor.cc:115
 msgid ""
 "%1 is JACK Time Master (provides Bar|Beat|Tick and other information to JACK)"
 msgstr ""
 
-#: session_option_editor.cc:136
+#: session_option_editor.cc:124
 #, fuzzy
 msgid "Default crossfade type"
 msgstr "销毁交叉淡入淡出长度"
 
-#: session_option_editor.cc:141
+#: session_option_editor.cc:129
 msgid "Constant power (-3dB) crossfade"
 msgstr ""
 
-#: session_option_editor.cc:142
+#: session_option_editor.cc:130
 msgid "Linear (-6dB) crossfade"
 msgstr ""
 
-#: session_option_editor.cc:147
+#: session_option_editor.cc:135
 msgid "destructive-xfade-seconds"
 msgstr ""
 
-#: session_option_editor.cc:148
+#: session_option_editor.cc:136
 msgid "Destructive crossfade length"
 msgstr "销毁交叉淡入淡出长度"
 
-#: session_option_editor.cc:157
+#: session_option_editor.cc:145
 msgid "Region fades active"
 msgstr "区域淡入淡出活动"
 
-#: session_option_editor.cc:164
+#: session_option_editor.cc:152
 msgid "Region fades visible"
 msgstr "区域淡入淡出可见"
 
-#: session_option_editor.cc:171 session_option_editor.cc:184
-#: session_option_editor.cc:198 session_option_editor.cc:200
-#: session_option_editor.cc:206 session_option_editor.cc:213
+#: session_option_editor.cc:159 session_option_editor.cc:172
+#: session_option_editor.cc:186 session_option_editor.cc:188
+#: session_option_editor.cc:194 session_option_editor.cc:201
 msgid "Media"
 msgstr "媒体"
 
-#: session_option_editor.cc:171
+#: session_option_editor.cc:159
 msgid "Audio file format"
 msgstr "音频文件格式"
 
-#: session_option_editor.cc:175
+#: session_option_editor.cc:163
 msgid "Sample format"
 msgstr "采样格式"
 
-#: session_option_editor.cc:180
+#: session_option_editor.cc:168
 msgid "32-bit floating point"
 msgstr "32位浮点"
 
-#: session_option_editor.cc:181
+#: session_option_editor.cc:169
 msgid "24-bit integer"
 msgstr "24位整形"
 
-#: session_option_editor.cc:182
+#: session_option_editor.cc:170
 msgid "16-bit integer"
 msgstr "16位整形"
 
-#: session_option_editor.cc:188
+#: session_option_editor.cc:176
 msgid "File type"
 msgstr "文件类型"
 
-#: session_option_editor.cc:193
+#: session_option_editor.cc:181
 msgid "Broadcast WAVE"
 msgstr "广播WAVE(Broadcast WAVE)"
 
-#: session_option_editor.cc:194
+#: session_option_editor.cc:182
 msgid "WAVE"
 msgstr "WAVE"
 
-#: session_option_editor.cc:195
+#: session_option_editor.cc:183
 msgid "WAVE-64"
 msgstr "WAVE-64"
 
-#: session_option_editor.cc:200
+#: session_option_editor.cc:188
 msgid "File locations"
 msgstr "文件位置"
 
-#: session_option_editor.cc:202
+#: session_option_editor.cc:190
 msgid "Search for audio files in:"
 msgstr "音频文件搜索位置:"
 
-#: session_option_editor.cc:208
+#: session_option_editor.cc:196
 msgid "Search for MIDI files in:"
 msgstr "MIDI文件搜索文职:"
 
-#: session_option_editor.cc:219
+#: session_option_editor.cc:207
 msgid ""
 "Track Input Monitoring automatically follows transport state (\"auto-input\")"
 msgstr ""
 
-#: session_option_editor.cc:226
+#: session_option_editor.cc:214
 #, fuzzy
 msgid "Use monitor section in this session"
 msgstr "我想要关于这个会话的更多选项"
 
-#: session_option_editor.cc:237
+#: session_option_editor.cc:225
 msgid "MIDI region copies are independent"
 msgstr ""
 
-#: session_option_editor.cc:244
+#: session_option_editor.cc:232
 #, fuzzy
 msgid ""
 "Policy for handling overlapping notes\n"
@@ -10200,39 +10252,39 @@ msgstr ""
 "处理相同音符和\n"
 "声道重叠的策略"
 
-#: session_option_editor.cc:249
+#: session_option_editor.cc:237
 msgid "never allow them"
 msgstr "从不允许"
 
-#: session_option_editor.cc:250
+#: session_option_editor.cc:238
 msgid "don't do anything in particular"
 msgstr "不做任何特殊处理"
 
-#: session_option_editor.cc:251
+#: session_option_editor.cc:239
 msgid "replace any overlapped existing note"
 msgstr "替换所有已存在的重叠音符"
 
-#: session_option_editor.cc:252
+#: session_option_editor.cc:240
 msgid "shorten the overlapped existing note"
 msgstr "缩短已存在的重叠音符"
 
-#: session_option_editor.cc:253
+#: session_option_editor.cc:241
 msgid "shorten the overlapping new note"
 msgstr "缩短已存在的新音符"
 
-#: session_option_editor.cc:254
+#: session_option_editor.cc:242
 msgid "replace both overlapping notes with a single note"
 msgstr "把重叠的音符替换为一个单音符"
 
-#: session_option_editor.cc:258
+#: session_option_editor.cc:246
 msgid "Glue to bars and beats"
 msgstr ""
 
-#: session_option_editor.cc:262
+#: session_option_editor.cc:250
 msgid "Glue new markers to bars and beats"
 msgstr ""
 
-#: session_option_editor.cc:269
+#: session_option_editor.cc:257
 msgid "Glue new regions to bars and beats"
 msgstr ""
 
@@ -10411,83 +10463,83 @@ msgstr ""
 msgid "Press to close this window without importing any files"
 msgstr ""
 
-#: sfdb_ui.cc:840
+#: sfdb_ui.cc:841
 msgid "found %1 match"
 msgid_plural "found %1 matches"
 msgstr[0] ""
 msgstr[1] ""
 
-#: sfdb_ui.cc:855
+#: sfdb_ui.cc:856
 msgid "SoundFileBrowser: Could not tokenize string: "
 msgstr "SoundFileBrowser: 无法标记化字符串"
 
-#: sfdb_ui.cc:909
+#: sfdb_ui.cc:910
 msgid "Searching Page %1 of %2, click Stop to cancel"
 msgstr ""
 
-#: sfdb_ui.cc:911
+#: sfdb_ui.cc:912
 msgid "Searching, click Stop to cancel"
 msgstr ""
 
-#: sfdb_ui.cc:1012
+#: sfdb_ui.cc:1013
 msgid "B"
 msgstr ""
 
-#: sfdb_ui.cc:1014
+#: sfdb_ui.cc:1015
 msgid "kB"
 msgstr ""
 
-#: sfdb_ui.cc:1016 sfdb_ui.cc:1018
+#: sfdb_ui.cc:1017 sfdb_ui.cc:1019
 msgid "MB"
 msgstr ""
 
-#: sfdb_ui.cc:1020
+#: sfdb_ui.cc:1021
 msgid "GB"
 msgstr ""
 
-#: sfdb_ui.cc:1062
+#: sfdb_ui.cc:1063
 msgid "Search returned no results."
 msgstr ""
 
-#: sfdb_ui.cc:1064
+#: sfdb_ui.cc:1065
 msgid "Found %1 match"
 msgid_plural "Found %1 matches"
 msgstr[0] ""
 msgstr[1] ""
 
-#: sfdb_ui.cc:1268 sfdb_ui.cc:1575 sfdb_ui.cc:1625 sfdb_ui.cc:1643
+#: sfdb_ui.cc:1269 sfdb_ui.cc:1576 sfdb_ui.cc:1626 sfdb_ui.cc:1644
 msgid "one track per file"
 msgstr "1音轨/1文件"
 
-#: sfdb_ui.cc:1271 sfdb_ui.cc:1626 sfdb_ui.cc:1644
+#: sfdb_ui.cc:1272 sfdb_ui.cc:1627 sfdb_ui.cc:1645
 msgid "one track per channel"
 msgstr "1音轨/1声道"
 
-#: sfdb_ui.cc:1279 sfdb_ui.cc:1628 sfdb_ui.cc:1645
+#: sfdb_ui.cc:1280 sfdb_ui.cc:1629 sfdb_ui.cc:1646
 msgid "sequence files"
 msgstr "顺序文件"
 
-#: sfdb_ui.cc:1282 sfdb_ui.cc:1633
+#: sfdb_ui.cc:1283 sfdb_ui.cc:1634
 msgid "all files in one track"
 msgstr "所有文件在一个音轨上"
 
-#: sfdb_ui.cc:1283 sfdb_ui.cc:1627
+#: sfdb_ui.cc:1284 sfdb_ui.cc:1628
 msgid "merge files"
 msgstr "合并文件"
 
-#: sfdb_ui.cc:1289 sfdb_ui.cc:1630
+#: sfdb_ui.cc:1290 sfdb_ui.cc:1631
 msgid "one region per file"
 msgstr "1区域/1文件"
 
-#: sfdb_ui.cc:1292 sfdb_ui.cc:1631
+#: sfdb_ui.cc:1293 sfdb_ui.cc:1632
 msgid "one region per channel"
 msgstr "1区域/1声道"
 
-#: sfdb_ui.cc:1297 sfdb_ui.cc:1632 sfdb_ui.cc:1646
+#: sfdb_ui.cc:1298 sfdb_ui.cc:1633 sfdb_ui.cc:1647
 msgid "all files in one region"
 msgstr "所有文件在一个区域"
 
-#: sfdb_ui.cc:1363
+#: sfdb_ui.cc:1364
 msgid ""
 "One or more of the selected files\n"
 "cannot be used by %1"
@@ -10495,58 +10547,58 @@ msgstr ""
 "一个或多个所选文件\n"
 "不能被用于 %1"
 
-#: sfdb_ui.cc:1503
+#: sfdb_ui.cc:1504
 msgid "Copy files to session"
 msgstr "复制文件到会话"
 
-#: sfdb_ui.cc:1520 sfdb_ui.cc:1683
+#: sfdb_ui.cc:1521 sfdb_ui.cc:1684
 msgid "file timestamp"
 msgstr "文件时间戳"
 
-#: sfdb_ui.cc:1521 sfdb_ui.cc:1685
+#: sfdb_ui.cc:1522 sfdb_ui.cc:1686
 msgid "edit point"
 msgstr "编辑点"
 
-#: sfdb_ui.cc:1522 sfdb_ui.cc:1687
+#: sfdb_ui.cc:1523 sfdb_ui.cc:1688
 msgid "playhead"
 msgstr "播放头"
 
-#: sfdb_ui.cc:1523
+#: sfdb_ui.cc:1524
 msgid "session start"
 msgstr "开始会话"
 
-#: sfdb_ui.cc:1528
+#: sfdb_ui.cc:1529
 msgid "<b>Add files as ...</b>"
 msgstr ""
 
-#: sfdb_ui.cc:1550
+#: sfdb_ui.cc:1551
 #, fuzzy
 msgid "<b>Insert at</b>"
 msgstr "插入于:"
 
-#: sfdb_ui.cc:1563
+#: sfdb_ui.cc:1564
 #, fuzzy
 msgid "<b>Mapping</b>"
 msgstr "<b>共享中</b>"
 
-#: sfdb_ui.cc:1581
+#: sfdb_ui.cc:1582
 #, fuzzy
 msgid "<b>Conversion quality</b>"
 msgstr "采样率转换质量"
 
-#: sfdb_ui.cc:1593 sfdb_ui.cc:1699
+#: sfdb_ui.cc:1594 sfdb_ui.cc:1700
 msgid "Best"
 msgstr "最佳质量"
 
-#: sfdb_ui.cc:1594 sfdb_ui.cc:1701
+#: sfdb_ui.cc:1595 sfdb_ui.cc:1702
 msgid "Good"
 msgstr "高质量"
 
-#: sfdb_ui.cc:1595 sfdb_ui.cc:1703
+#: sfdb_ui.cc:1596 sfdb_ui.cc:1704
 msgid "Quick"
 msgstr "速度优先"
 
-#: sfdb_ui.cc:1597
+#: sfdb_ui.cc:1598
 msgid "Fastest"
 msgstr "最快"
 
@@ -10562,11 +10614,11 @@ msgstr "百分比 '%'"
 msgid "Units"
 msgstr "单元"
 
-#: shuttle_control.cc:178 shuttle_control.cc:594
+#: shuttle_control.cc:178 shuttle_control.cc:598
 msgid "Sprung"
 msgstr ""
 
-#: shuttle_control.cc:182 shuttle_control.cc:597
+#: shuttle_control.cc:182 shuttle_control.cc:601
 msgid "Wheel"
 msgstr ""
 
@@ -10574,21 +10626,21 @@ msgstr ""
 msgid "Maximum speed"
 msgstr "速度最大化"
 
-#: shuttle_control.cc:556
+#: shuttle_control.cc:560
 msgid "Playing"
 msgstr "正在播放"
 
-#: shuttle_control.cc:571
+#: shuttle_control.cc:575
 #, c-format
 msgid "<<< %+d semitones"
 msgstr "<<< %+d 半音"
 
-#: shuttle_control.cc:573
+#: shuttle_control.cc:577
 #, c-format
 msgid ">>> %+d semitones"
 msgstr ">>> %+d semitones"
 
-#: shuttle_control.cc:578
+#: shuttle_control.cc:582
 msgid "Stopped"
 msgstr "已停止"
 
@@ -10608,44 +10660,43 @@ msgstr "起初扬声器"
 msgid "Azimuth:"
 msgstr ""
 
-#: startup.cc:77
+#: startup.cc:71
 #, fuzzy
 msgid "Create a new session"
 msgstr "打开一个新建的会话"
 
-#: startup.cc:78
+#: startup.cc:72
 msgid "Open an existing session"
 msgstr "打开一个已存在的会话"
 
-#: startup.cc:79
+#: startup.cc:73
+#, fuzzy
 msgid ""
 "Use an external mixer or the hardware mixer of your audio interface.\n"
-"Ardour will play NO role in monitoring"
+"%1 will play NO role in monitoring"
 msgstr ""
 "用一个外部的混音器或者音频接口的硬件混音器.\n"
 "Ardour将没有控制作用."
 
-#: startup.cc:81
+#: startup.cc:75
 #, fuzzy
 msgid "Ask %1 to play back material as it is being recorded"
 msgstr "当 %1 录音时, 询问回放介质"
 
-#: startup.cc:84
+#: startup.cc:78
 msgid "I'd like more options for this session"
 msgstr "我想要关于这个会话的更多选项"
 
-#: startup.cc:202
+#: startup.cc:195
 msgid ""
 "<b>Welcome to this BETA release of Ardour 3.0</b>\n"
 "\n"
-"There are still several issues and bugs to be worked on,\n"
-"as well as general workflow improvements, before this can be considered\n"
-"release software. So, a few guidelines:\n"
+"Ardour 3.0 has been released for Linux but because of the lack of testers,\n"
+"it is still at the beta stage on OS X. So, a few guidelines:\n"
 "\n"
 "1) Please do <b>NOT</b> use this software with the expectation that it is "
 "stable or reliable\n"
 "   though it may be so, depending on your workflow.\n"
-"2) Please see http://ardour.org/a3_features for a guide to new features.\n"
 "3) <b>Please do NOT use the forums at ardour.org to report issues</b>.\n"
 "4) Please <b>DO</b> use the bugtracker at http://tracker.ardour.org/ to "
 "report issues\n"
@@ -10661,16 +10712,16 @@ msgid ""
 "                http://ardour.org/support\n"
 msgstr ""
 
-#: startup.cc:228
+#: startup.cc:219
 #, fuzzy
 msgid "This is a BETA RELEASE"
 msgstr "这是Alpha版"
 
-#: startup.cc:335
+#: startup.cc:325
 msgid "Audio / MIDI Setup"
 msgstr "音频/MIDI设置"
 
-#: startup.cc:347
+#: startup.cc:337
 #, fuzzy
 msgid ""
 "<span size=\"larger\">%1 is a digital audio workstation. You can use it to "
@@ -10686,15 +10737,15 @@ msgstr ""
 "\n"
 "在开始用这个程序之前得先配置一些东西.</span>"
 
-#: startup.cc:373
+#: startup.cc:363
 msgid "Welcome to %1"
 msgstr "欢迎进入 %1"
 
-#: startup.cc:396
+#: startup.cc:386
 msgid "Default folder for %1 sessions"
 msgstr "会话 %1 的默认文件夹"
 
-#: startup.cc:402
+#: startup.cc:392
 msgid ""
 "Each project that you work on with %1 has its own folder.\n"
 "These can require a lot of disk space if you are recording audio.\n"
@@ -10710,11 +10761,11 @@ msgstr ""
 "\n"
 "<i>(你可以把新的会话存放在任何位置, 这只是默认的文件夹)</i>"
 
-#: startup.cc:424
+#: startup.cc:414
 msgid "Default folder for new sessions"
 msgstr "会话文件默认的文件夹"
 
-#: startup.cc:445
+#: startup.cc:435
 #, fuzzy
 msgid ""
 "While recording instruments or vocals, you probably want to listen to the\n"
@@ -10735,15 +10786,15 @@ msgstr ""
 "\n"
 "<i>(你可以通过首选项对话框随时改变这个首选项)</i>"
 
-#: startup.cc:466
+#: startup.cc:456
 msgid "Monitoring Choices"
 msgstr "检控选择"
 
-#: startup.cc:489
+#: startup.cc:479
 msgid "Use a Master bus directly"
 msgstr "直接用主控总线"
 
-#: startup.cc:491
+#: startup.cc:481
 #, fuzzy
 msgid ""
 "Connect the Master bus directly to your hardware outputs. This is preferable "
@@ -10752,11 +10803,11 @@ msgstr ""
 "直接连接主控总线到硬件输出.\n"
 "<i>适合于简单的使用</i>."
 
-#: startup.cc:500
+#: startup.cc:490
 msgid "Use an additional Monitor bus"
 msgstr "用一个额外的主控总线"
 
-#: startup.cc:503
+#: startup.cc:493
 msgid ""
 "Use a Monitor bus between Master bus and hardware outputs for \n"
 "greater control in monitoring without affecting the mix."
@@ -10764,7 +10815,7 @@ msgstr ""
 "用一个监控总线\n"
 "监控时有更好的控制, 不影响混音"
 
-#: startup.cc:525
+#: startup.cc:515
 msgid ""
 "<i>You can change this preference at any time via the Preferences dialog.\n"
 "You can also add or remove the monitor section to/from any session.</i>\n"
@@ -10772,104 +10823,104 @@ msgid ""
 "<i>If you do not understand what this is about, just accept the default.</i>"
 msgstr ""
 
-#: startup.cc:536
+#: startup.cc:526
 msgid "Monitor Section"
 msgstr "监控部分"
 
-#: startup.cc:576
+#: startup.cc:566
 msgid "What would you like to do ?"
 msgstr "你想干什么?"
 
-#: startup.cc:705
+#: startup.cc:695
 msgid "Open"
 msgstr "打开 "
 
-#: startup.cc:751
+#: startup.cc:741
 msgid "Session name:"
 msgstr "会话名称:"
 
-#: startup.cc:774
+#: startup.cc:764
 msgid "Create session folder in:"
 msgstr "在创建会话文件夹:"
 
-#: startup.cc:788
+#: startup.cc:778
 msgid "Select folder for session"
 msgstr "为会话选择一个文件夹"
 
-#: startup.cc:820
+#: startup.cc:810
 msgid "Use this template"
 msgstr "使用此模板"
 
-#: startup.cc:823
+#: startup.cc:813
 msgid "no template"
 msgstr "没有模板"
 
-#: startup.cc:851
+#: startup.cc:841
 msgid "Use an existing session as a template:"
 msgstr "使用一个存在的会话当作模板"
 
-#: startup.cc:863
+#: startup.cc:853
 msgid "Select template"
 msgstr "选择模板"
 
-#: startup.cc:889
+#: startup.cc:879
 msgid "New Session"
 msgstr "新会话"
 
-#: startup.cc:1042
+#: startup.cc:1033
 msgid "Select session file"
 msgstr "选择会话文件"
 
-#: startup.cc:1058
+#: startup.cc:1049
 msgid "Browse:"
 msgstr "浏览:"
 
-#: startup.cc:1067
+#: startup.cc:1058
 msgid "Select a session"
 msgstr "选择一个会话"
 
-#: startup.cc:1093 startup.cc:1094 startup.cc:1095
+#: startup.cc:1084 startup.cc:1085 startup.cc:1086
 msgid "channels"
 msgstr "声道"
 
-#: startup.cc:1109
+#: startup.cc:1100
 msgid "<b>Busses</b>"
 msgstr "<b>总线</b>"
 
-#: startup.cc:1110
+#: startup.cc:1101
 msgid "<b>Inputs</b>"
 msgstr "<b>输入</b>"
 
-#: startup.cc:1111
+#: startup.cc:1102
 msgid "<b>Outputs</b>"
 msgstr "<b>输出</b>"
 
-#: startup.cc:1119
+#: startup.cc:1110
 msgid "Create master bus"
 msgstr "创建主控总线"
 
-#: startup.cc:1129
+#: startup.cc:1120
 #, fuzzy
 msgid "Automatically connect to physical inputs"
 msgstr "自动连接物理输入"
 
-#: startup.cc:1136 startup.cc:1195
+#: startup.cc:1127 startup.cc:1186
 msgid "Use only"
 msgstr "仅使用"
 
-#: startup.cc:1189
+#: startup.cc:1180
 msgid "Automatically connect outputs"
 msgstr "自动连接到输出"
 
-#: startup.cc:1211
+#: startup.cc:1202
 msgid "... to master bus"
 msgstr "... 到主控总线"
 
-#: startup.cc:1221
+#: startup.cc:1212
 msgid "... to physical outputs"
 msgstr "... 到物理输出"
 
-#: startup.cc:1271
+#: startup.cc:1262
 msgid "Advanced Session Options"
 msgstr "高级会话选项"
 
@@ -11257,6 +11308,11 @@ msgstr ""
 msgid "Sustain Selected Notes by Note Length"
 msgstr "通过音符长度保持选择音符"
 
+#: stereo_panner.cc:108
+#, c-format
+msgid "L:%3d R:%3d Width:%d%%"
+msgstr ""
+
 #: stereo_panner_editor.cc:35
 #, fuzzy
 msgid "Stereo Panner"
@@ -11411,8 +11467,8 @@ msgstr "对象"
 msgid "Unable to find UI style file %1 in search path %2. %3 will look strange"
 msgstr "在搜索路径 %2 下找不到用户界面样式文件 %1 . %3 看起来会怪怪地"
 
-#: time_axis_view.cc:121
-msgid "gTortnam"
+#: time_axis_view.cc:114
+msgid "Track/Bus name (double click to edit)"
 msgstr ""
 
 #: time_axis_view_item.cc:332
@@ -11556,6 +11612,48 @@ msgstr ""
 #: verbose_cursor.cc:45
 msgid "VerboseCanvasCursor"
 msgstr ""
+
+#~ msgid "Translations disabled"
+#~ msgstr "取消翻译功能"
+
+#~ msgid "Translations enabled"
+#~ msgstr "开启翻译功能"
+
+#~ msgid "You must restart %1 for this to take effect."
+#~ msgstr "请重启 %1 使之生效."
+
+#~ msgid "Enable Translations"
+#~ msgstr "Povolit překlady"
+
+#~ msgid "Locate to Range Mark"
+#~ msgstr "定位到范围标记"
+
+#~ msgid "Play from Range Mark"
+#~ msgstr "从范围标记播放"
+
+#~ msgid "Playback/Recording on 1 Device"
+#~ msgstr "在一个设备上回放/录音"
+
+#~ msgid "Playback/Recording on 2 Devices"
+#~ msgstr "在两个设备上回放/录音"
+
+#~ msgid "Channel:"
+#~ msgstr "声道"
+
+#~ msgid "Use overlap equivalency for regions"
+#~ msgstr "区域使用重叠等同"
+
+#~ msgid "Use a monitor bus (allows AFL/PFL and more control)"
+#~ msgstr "使用监视总线 (允许AFL/PFL和更多的控制)"
+
+#~ msgid "Subframes per frame"
+#~ msgstr "每帧的子帧数"
+
+#~ msgid "80"
+#~ msgstr "80"
+
+#~ msgid "100"
+#~ msgstr "100"
 
 #, fuzzy
 #~ msgid "could not create a new mixed track"

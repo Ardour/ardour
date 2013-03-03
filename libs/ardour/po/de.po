@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-02-05 19:32+0100\n"
+"POT-Creation-Date: 2013-03-03 11:35-0500\n"
 "PO-Revision-Date: 2013-02-05 19:52+0100\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
@@ -266,7 +266,7 @@ msgstr "Aufruf von get_ports vor dem Start der Engine"
 msgid "failed to connect to JACK"
 msgstr "Verbindung zu JACK fehlgeschlagen"
 
-#: audioregion.cc:1636
+#: audioregion.cc:1643
 msgid ""
 "You have requested an operation that requires audio analysis.\n"
 "\n"
@@ -700,7 +700,7 @@ msgstr ""
 "% unterstützt nur %2 Kanäle, in Ihrer Kanalkonfiguration befinden sich "
 "jedoch %3 Kanäle"
 
-#: file_source.cc:196 session_state.cc:2885
+#: file_source.cc:196 session_state.cc:2889
 msgid ""
 "there are already 1000 files with names like %1; versioning discontinued"
 msgstr ""
@@ -1067,7 +1067,7 @@ msgstr ""
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "unkorrekter XML-Modus an Locations::set_state weitergereicht"
 
-#: location.cc:842 session.cc:4335 session_state.cc:1108
+#: location.cc:842 session.cc:4335 session_state.cc:1112
 msgid "session"
 msgstr "Projekt"
 
@@ -1254,11 +1254,11 @@ msgstr "Polaritätsschalter"
 msgid "solo control"
 msgstr "Solo-Schalter"
 
-#: mtc_slave.cc:234
+#: mtc_slave.cc:235
 msgid "MTC Slave: atomic read of current time failed, sleeping!"
 msgstr "MTC Slave: Fehler beim atomisches Lesen der momentanen Zeit, schlafe!"
 
-#: mtc_slave.cc:358
+#: mtc_slave.cc:359
 msgid ""
 "Unknown rate/drop value %1 in incoming MTC stream, session values used "
 "instead"
@@ -1266,11 +1266,11 @@ msgstr ""
 "Unbekannter Wert %1 für Rate/Abfall in eingehendem MTC-Datenstrom, verwende "
 "Projektwerte"
 
-#: mtc_slave.cc:378
+#: mtc_slave.cc:379
 msgid "Session framerate adjusted from %1 TO: MTC's %2."
 msgstr "Projekt-Framerate von %1 auf die von MTC: %2 geändert"
 
-#: mtc_slave.cc:392
+#: mtc_slave.cc:393
 msgid "Session and MTC framerate mismatch: MTC:%1 %2:%3."
 msgstr "Framerate von Projekt und MTC stimmen nicht überein: MTC: %1 %2: %3"
 
@@ -1853,11 +1853,11 @@ msgstr ""
 "LTC-Kodierer: ungültige Framerate - das Kodieren von LTC wird für den "
 "restlichen Teil dieses Projekts ausgesetzt."
 
-#: session_midi.cc:425
+#: session_midi.cc:427
 msgid "Session: could not send full MIDI time code"
 msgstr "Session: konnte vollständigen MIDI-Timecode nicht senden"
 
-#: session_midi.cc:517
+#: session_midi.cc:519
 msgid "Session: cannot send quarter-frame MTC message (%1)"
 msgstr "Session: kann quarter-frame MTC-Nachricht nicht senden (%1)"
 
@@ -1995,116 +1995,116 @@ msgstr ""
 "Kopiere alte Projektdatei %1 nach %2\n"
 "Benutzen Sie von jetzt an %2 mit %3-Versionen vor 2.0"
 
-#: session_state.cc:1202
+#: session_state.cc:1206
 msgid "programming error: Session: incorrect XML node sent to set_state()"
 msgstr ""
 "Programmierfehler: Session: Inkorrekter XML-Knoten an send_state() gesendet"
 
-#: session_state.cc:1251
+#: session_state.cc:1255
 msgid "Session: XML state has no options section"
 msgstr "Session: XML hat keinen Abschnitt \"options\""
 
-#: session_state.cc:1256
+#: session_state.cc:1260
 msgid "Session: XML state has no metadata section"
 msgstr "Session: XML hat keinen Abschnitt \"metadata\""
 
-#: session_state.cc:1267
+#: session_state.cc:1271
 msgid "Session: XML state has no sources section"
 msgstr "Session: XML hat keinen Abschnitt \"sources\""
 
-#: session_state.cc:1274
+#: session_state.cc:1278
 msgid "Session: XML state has no Tempo Map section"
 msgstr "Session: XML hat keinen Abschnitt \"Tempo Map\""
 
-#: session_state.cc:1281
+#: session_state.cc:1285
 msgid "Session: XML state has no locations section"
 msgstr "Session: XML hat keinen Abschnitt \"locations\""
 
-#: session_state.cc:1307
+#: session_state.cc:1311
 msgid "Session: XML state has no Regions section"
 msgstr "Session: XML hat keinen Abschnitt \"Regions\""
 
-#: session_state.cc:1314
+#: session_state.cc:1318
 msgid "Session: XML state has no playlists section"
 msgstr "Session: XML hat keinen Abschnitt \"playlists\""
 
-#: session_state.cc:1334
+#: session_state.cc:1338
 msgid "Session: XML state has no bundles section"
 msgstr "Session: XML hat keinen Abschnitt \"bundles\""
 
-#: session_state.cc:1346
+#: session_state.cc:1350
 msgid "Session: XML state has no diskstreams section"
 msgstr "Session: XML hat keinen Abschnitt \"diskstreams\""
 
-#: session_state.cc:1354
+#: session_state.cc:1358
 msgid "Session: XML state has no routes section"
 msgstr "Session: XML hat keinen Abschnitt \"routes\""
 
-#: session_state.cc:1366
+#: session_state.cc:1370
 msgid "Session: XML state has no route groups section"
 msgstr "Session: XML hat keinen Abschnitt \"route groups\""
 
-#: session_state.cc:1375
+#: session_state.cc:1379
 msgid "Session: XML state has no edit groups section"
 msgstr "Session: XML hat keinen Abschnitt \"edit groups\""
 
-#: session_state.cc:1382
+#: session_state.cc:1386
 msgid "Session: XML state has no mix groups section"
 msgstr "Session: XML hat keinen Abschnitt \"mix groups\""
 
-#: session_state.cc:1390
+#: session_state.cc:1394
 msgid "Session: XML state has no click section"
 msgstr "Session: XML hat keinen Abschnitt \"click\""
 
-#: session_state.cc:1438
+#: session_state.cc:1442
 msgid "Session: cannot create Route from XML description."
 msgstr "Session: Kann die Route aus der XML-Beschreibung nicht erzeugen"
 
-#: session_state.cc:1442
+#: session_state.cc:1446
 msgid "Loaded track/bus %1"
 msgstr "Spur/Bus %1 wurde geladen"
 
-#: session_state.cc:1540
+#: session_state.cc:1544
 msgid "Could not find diskstream for route"
 msgstr "Konnte Diskstream für Route nicht finden"
 
-#: session_state.cc:1594
+#: session_state.cc:1598
 msgid "Session: cannot create Region from XML description."
 msgstr "Session: kann Region nicht aus XML-Beschreibung erzeugen"
 
-#: session_state.cc:1598
+#: session_state.cc:1602
 msgid "Can not load state for region '%1'"
 msgstr "Kann Status für Region '%1' nicht laden"
 
-#: session_state.cc:1634
+#: session_state.cc:1638
 msgid "Regions in compound description not found (ID's %1 and %2): ignored"
 msgstr ""
 "Regionen der Verbindungsbeschreibung nicht gefunden (IDs %1 and %2): "
 "ignoriert"
 
-#: session_state.cc:1662
+#: session_state.cc:1666
 msgid "Nested source has no ID info in session file! (ignored)"
 msgstr ""
 "Verschachtelte Quelle hat keine ID-Information in Projektdatei! (ignoriert)"
 
-#: session_state.cc:1674
+#: session_state.cc:1678
 msgid "Cannot reconstruct nested source for region %1"
 msgstr "Kann verschachtelte Quelle für Region %1 nicht wiederherstellen"
 
-#: session_state.cc:1736
+#: session_state.cc:1740
 msgid "Session: XMLNode describing a AudioRegion is incomplete (no source)"
 msgstr ""
 "Session: XML-Knoten zur Beschreibung einer Audioregion ist unvollständig "
 "(Quelle fehlt)"
 
-#: session_state.cc:1744 session_state.cc:1765 session_state.cc:1785
+#: session_state.cc:1748 session_state.cc:1769 session_state.cc:1789
 msgid ""
 "Session: XMLNode describing a AudioRegion references an unknown source id =%1"
 msgstr ""
 "Session: XML-Knoten zur Beschreibung einer Audioregion referenziert eine "
 "unbekannte Quell-ID =%1"
 
-#: session_state.cc:1750 session_state.cc:1771 session_state.cc:1791
+#: session_state.cc:1754 session_state.cc:1775 session_state.cc:1795
 msgid ""
 "Session: XMLNode describing a AudioRegion references a non-audio source id ="
 "%1"
@@ -2112,7 +2112,7 @@ msgstr ""
 "Session: XML-Knoten zur Beschreibung einer Audioregion referenziert eine "
 "Nicht-Audio Quell-ID =%1"
 
-#: session_state.cc:1814
+#: session_state.cc:1818
 msgid ""
 "Session: XMLNode describing an AudioRegion is missing some master sources; "
 "ignored"
@@ -2120,27 +2120,27 @@ msgstr ""
 "Session: dem XML-Knoten zur Beschreibung einer Audioregion fehlen einige "
 "Hauptquellen; ignoriert"
 
-#: session_state.cc:1848
+#: session_state.cc:1852
 msgid "Session: XMLNode describing a MidiRegion is incomplete (no source)"
 msgstr ""
 "Session: XML-Knoten zur Beschreibung einer MIDI-Region ist unvollständig "
 "(Quelle fehlt)"
 
-#: session_state.cc:1856
+#: session_state.cc:1860
 msgid ""
 "Session: XMLNode describing a MidiRegion references an unknown source id =%1"
 msgstr ""
 "Session: XML-Knoten zur Beschreibung einer MIDI-Region referenziert eine "
 "unbekannte Quell-ID =%1"
 
-#: session_state.cc:1862
+#: session_state.cc:1866
 msgid ""
 "Session: XMLNode describing a MidiRegion references a non-midi source id =%1"
 msgstr ""
 "Session: XML-Knoten zur Beschreibung einer MIDI-Region referenziert eine "
 "Nicht-MIDI Quell-ID =%1"
 
-#: session_state.cc:1930
+#: session_state.cc:1934
 msgid ""
 "cannot create new file from region name \"%1\" with ident = \"%2\": too many "
 "existing files with similar names"
@@ -2148,109 +2148,109 @@ msgstr ""
 "kann keine neue Datei aus dem Regionennamen \"%1\" mit ident = \"%2\" "
 "erzeugen: zu viele Dateien mit ähnlichen Namen existieren"
 
-#: session_state.cc:1953
+#: session_state.cc:1957
 msgid "Session: cannot create Source from XML description."
 msgstr "Session: Kann Quelle aus der XML-Beschreibung nicht erzeugen"
 
-#: session_state.cc:1987
+#: session_state.cc:1991
 msgid "A sound file is missing. It will be replaced by silence."
 msgstr "Eine Audiodatei fehlt. Sie wird durch Stille ersetzt werden."
 
-#: session_state.cc:2010
+#: session_state.cc:2014
 msgid "Found a sound file that cannot be used by %1. Talk to the progammers."
 msgstr ""
 "Eine nicht mit %1 benutzbare Audiodatei wurde gefunden. Sprechen Sie mit den "
 "Programmierern."
 
-#: session_state.cc:2027
+#: session_state.cc:2031
 msgid "Could not create templates directory \"%1\" (%2)"
 msgstr "Konnte Vorlagenverzeichnis \"%1\" nicht erzeugen (%2)"
 
-#: session_state.cc:2040
+#: session_state.cc:2044
 msgid "Template \"%1\" already exists - new version not created"
 msgstr "Vorlage \"%1\" existiert bereits - neue Version wurde nicht erzeugt"
 
-#: session_state.cc:2046
+#: session_state.cc:2050
 msgid "Could not create directory for Session template\"%1\" (%2)"
 msgstr "Konnte kein Verzeichnis für Projektvorlage \"%1\" erzeugen (%2)"
 
-#: session_state.cc:2056
+#: session_state.cc:2060
 msgid "template not saved"
 msgstr "Vorlage nicht gesichert"
 
-#: session_state.cc:2066
+#: session_state.cc:2070
 msgid "Could not create directory for Session template plugin state\"%1\" (%2)"
 msgstr ""
 "Konnte Verzeichnis für Projektvorlagen-Pluginstatus \"%1\" nicht erzeugen "
 "(%2)"
 
-#: session_state.cc:2261
+#: session_state.cc:2265
 msgid "Unknown node \"%1\" found in Bundles list from session file"
 msgstr "Unbekannter Knoten \"%1\" in Bündelliste der Projektdatei gefunden"
 
-#: session_state.cc:2803 session_state.cc:2809
+#: session_state.cc:2807 session_state.cc:2813
 msgid "Cannot expand path %1 (%2)"
 msgstr "Kann Pfad %1 nicht expandieren (%2)"
 
-#: session_state.cc:2862
+#: session_state.cc:2866
 msgid "Session: cannot create dead file folder \"%1\" (%2)"
 msgstr "Session: kann den Mülleimer \"%1\" nicht erzeugen (%2)"
 
-#: session_state.cc:2901
+#: session_state.cc:2905
 msgid "cannot rename unused file source from %1 to %2 (%3)"
 msgstr "kann unbenutzte Dateiquelle nicht von %1 nach %2 umbenennen (%3)"
 
-#: session_state.cc:2919
+#: session_state.cc:2923
 msgid "cannot remove peakfile %1 for %2 (%3)"
 msgstr "kann Peakdatei %1 für %2 nicht entfernen (%3)"
 
-#: session_state.cc:3221
+#: session_state.cc:3225
 msgid "could not backup old history file, current history not saved"
 msgstr ""
 "konnte kein Backup der alten Aktionsliste erstellen, momentane Aktionsliste "
 "ungesichert"
 
-#: session_state.cc:3234
+#: session_state.cc:3238
 msgid "history could not be saved to %1"
 msgstr "Aktionsliste konnte nicht nach %1 gesichert werden"
 
-#: session_state.cc:3237
+#: session_state.cc:3241
 msgid "Could not remove history file at path \"%1\" (%2)"
 msgstr "Konnte Aktionslistendatei im Pfad \"%1\" nicht entfernen (%2)"
 
-#: session_state.cc:3241
+#: session_state.cc:3245
 msgid "could not restore history file from backup %1 (%2)"
 msgstr "konnte Aktionslistendatei nicht aus dem Backup %1 restaurieren (%2)"
 
-#: session_state.cc:3266
+#: session_state.cc:3270
 msgid "%1: no history file \"%2\" for this session."
 msgstr "%1: keine Aktionslistendatei \"%2\" für dieses Projekt."
 
-#: session_state.cc:3272
+#: session_state.cc:3276
 msgid "Could not understand session history file \"%1\""
 msgstr "Konnte Projekt-Aktionslistendatei \"%1\" nicht verstehen"
 
-#: session_state.cc:3314
+#: session_state.cc:3318
 msgid "Failed to downcast MidiSource for NoteDiffCommand"
 msgstr "MidiSource für NoteDiffCommand nicht auffindbar"
 
-#: session_state.cc:3325
+#: session_state.cc:3329
 msgid "Failed to downcast MidiSource for SysExDiffCommand"
 msgstr "MidiSource für SysExDiffCommand nicht auffindbar"
 
-#: session_state.cc:3336
+#: session_state.cc:3340
 msgid "Failed to downcast MidiSource for PatchChangeDiffCommand"
 msgstr "MidiSource für PatchChangeDiffCommand nicht auffindbar"
 
-#: session_state.cc:3344
+#: session_state.cc:3348
 msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
 msgstr "Konnte im XML-Knoten \"%1\" keinen Befehl erkennen."
 
-#: session_state.cc:3596
+#: session_state.cc:3600
 msgid "Session: unknown diskstream type in XML"
 msgstr "Session: Unbekannter Diskstream  im XML"
 
-#: session_state.cc:3601
+#: session_state.cc:3605
 msgid "Session: could not load diskstream via XML state"
 msgstr "Session: konnte Diskstream nicht via XML-Status laden"
 

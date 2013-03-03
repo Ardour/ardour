@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.99beta23\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-03 08:18-0500\n"
+"POT-Creation-Date: 2013-03-03 11:35-0500\n"
 "PO-Revision-Date: 2005-01-11\n"
 "Last-Translator: Muadibas\n"
 "Language-Team: Hellenic(Greek) <LL@li.org>\n"
@@ -77,7 +77,7 @@ msgid "Unknown"
 msgstr ""
 
 #: keyboard.cc:534
-msgid "Ardour key bindings file not found at \"%1\" or contains errors."
+msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 
 #: tearoff.cc:57
