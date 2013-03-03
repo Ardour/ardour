@@ -754,15 +754,24 @@ AudioRegion::read_from_sources (SourceList const & srcs, framecnt_t limit, Sampl
 }
 
 XMLNode&
-AudioRegion::state ()
+AudioRegion::get_basic_state ()
 {
 	XMLNode& node (Region::state ());
-	XMLNode *child;
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
 	snprintf (buf, sizeof (buf), "%u", (uint32_t) _sources.size());
 	node.add_property ("channels", buf);
+
+	return node;
+}
+
+XMLNode&
+AudioRegion::state ()
+{
+	XMLNode& node (get_basic_state());
+	XMLNode *child;
+	LocaleGuard lg (X_("POSIX"));
 
 	child = node.add_child ("Envelope");
 

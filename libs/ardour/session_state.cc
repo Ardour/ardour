@@ -1078,7 +1078,11 @@ Session::state (bool full_state)
                         boost::shared_ptr<Region> r = i->second;
                         /* only store regions not attached to playlists */
                         if (r->playlist() == 0) {
-                                child->add_child_nocopy (r->get_state ());
+				if (boost::dynamic_pointer_cast<AudioRegion>(r)) {
+					child->add_child_nocopy ((boost::dynamic_pointer_cast<AudioRegion>(r))->get_basic_state ());
+				} else {
+					child->add_child_nocopy (r->get_state ());
+				}
                         }
                 }
 
