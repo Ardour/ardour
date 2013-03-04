@@ -45,7 +45,7 @@ class Splash : public Gtk::Window
 	bool expose (GdkEventExpose*);
 	bool on_button_release_event (GdkEventButton*);
 	void on_realize ();
-
+        bool on_map_event (GdkEventAny*);
 	void message (const std::string& msg);
 
   private:
@@ -59,6 +59,7 @@ class Splash : public Gtk::Window
 	PBD::ScopedConnection msg_connection;
 
         bool expose_done;
+        bool expose_is_the_one;
         bool idle_after_expose ();
 };
 
