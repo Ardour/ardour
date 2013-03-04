@@ -3727,10 +3727,17 @@ ARDOUR_UI::midi_panic ()
 void
 ARDOUR_UI::session_format_mismatch (std::string xml_path, std::string backup_path)
 {
-	MessageDialog msg (string_compose (_("This is a session from an older version of Ardour.\n\n"
-					     "Ardour has copied the old session file\n\n%1\n\nto\n\n%2\n\n"
-					     "Use %2 with older versions of %3 from now on"),
-					   xml_path, backup_path, PROGRAM_NAME));
+	const char* start_big = "<span size=\"x-large\" weight=\"bold\">";
+	const char* end_big = "</span>";
+	const char* start_mono = "<tt>";
+	const char* end_mono = "</tt>";
+
+	MessageDialog msg (string_compose (_("%4This is a session from an older version of Ardour%5\n\n"
+					     "Ardour has copied the old session file\n\n%6%1%7\n\nto\n\n%6%2%7\n\n"
+					     "From now on, use the -2000 version with older versions of %3"),
+					   xml_path, backup_path, PROGRAM_NAME,
+					   start_big, end_big,
+					   start_mono, end_mono), true);
 
 	msg.run ();
 }
