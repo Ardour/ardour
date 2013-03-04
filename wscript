@@ -7,8 +7,11 @@ import string
 import subprocess
 import sys
 
-# Variables for 'waf dist'
-VERSION = '3.0rc2'
+if sys.platform == 'darwin':
+    VERSION = '3.0beta6'
+else:
+    VERSION = '3.0rc3'
+
 APPNAME = 'Ardour3'
 
 # Mandatory variables
