@@ -642,6 +642,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void disk_overrun_handler ();
 	void disk_underrun_handler ();
 
+        void session_format_mismatch (std::string, std::string);
+
 	void session_dialog (std::string);
 	int pending_state_dialog ();
 	int sr_mismatch_dialog (ARDOUR::framecnt_t, ARDOUR::framecnt_t);

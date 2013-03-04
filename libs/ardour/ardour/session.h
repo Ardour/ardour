@@ -845,6 +845,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/** Emitted when the session wants Ardour to quit */
 	static PBD::Signal0<void> Quit;
 
+        /** Emitted when Ardour is asked to load a session in an older session
+	 * format, and makes a backup copy.
+	 */
+        static PBD::Signal2<void,std::string,std::string> VersionMismatch;
+
         boost::shared_ptr<Port> ltc_input_port() const;
         boost::shared_ptr<Port> ltc_output_port() const;
 

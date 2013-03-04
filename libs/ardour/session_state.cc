@@ -938,9 +938,7 @@ Session::load_state (string snapshot_name)
 
 		if (!Glib::file_test (backup_path, Glib::FILE_TEST_EXISTS)) {
 			
-			info << string_compose (_("Copying old session file %1 to %2\nUse %2 with %3 versions before 2.0 from now on"),
-						xmlpath, backup_path, PROGRAM_NAME)
-			     << endmsg;
+			VersionMismatch (xmlpath, backup_path);
 			
 			if (!copy_file (xmlpath, backup_path)) {;
 				return -1;

@@ -234,6 +234,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	ARDOUR::Diskstream::DiskOverrun.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::disk_overrun_handler, this), gui_context());
 	ARDOUR::Diskstream::DiskUnderrun.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::disk_underrun_handler, this), gui_context());
 
+	ARDOUR::Session::VersionMismatch.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_format_mismatch, this, _1, _2), gui_context());
+
 	/* handle dialog requests */
 
 	ARDOUR::Session::Dialog.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_dialog, this, _1), gui_context());
@@ -3720,4 +3722,15 @@ ARDOUR_UI::midi_panic ()
 	if (_session) {
 		_session->midi_panic();
 	}
+}
+
+void
+ARDOUR_UI::session_format_mismatch (std::string xml_path, std::string backup_path)
+{
+	MessageDialog msg (string_compose (_("This is a session from an older version of Ardour.\n\n"
+					     "Ardour has copied the old session file\n\n%1\n\nto\n\n%2\n\n"
+					     "Use %2 with older versions of %3 from now on"),
+					   xml_path, backup_path, PROGRAM_NAME));
+
+	msg.run ();
 }

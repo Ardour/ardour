@@ -404,6 +404,8 @@ Where would you like new %1 sessions to be stored by default?\n\n\
 	vbox->pack_start (*txt, false, false);
 	vbox->pack_start (*hbox, false, true);
 
+	cerr << "Setting defaultDIR session dir to [" << Config->get_default_session_parent_dir() << "]\n";
+
 	default_dir_chooser->set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 	default_dir_chooser->signal_current_folder_changed().connect (sigc::mem_fun (*this, &ArdourStartup::default_dir_changed));
 	default_dir_chooser->show ();
@@ -719,8 +721,25 @@ ArdourStartup::populate_session_templates ()
 }
 
 void
+showmecf (GtkWidget* fc)
+{
+        printf ("current folder just changed to %s\n", gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER(fc)));
+        printf ("current filename is currently %s\n", gtk_file_chooser_get_filename (GTK_FILE_CHOOSER(fc)));
+        printf ("widget name is %s\n", gtk_widget_get_name (fc));
+
+}
+void
+showmefs (GtkWidget * fcb)
+{
+        printf ("file set, currently %s\n", gtk_file_chooser_get_filename (GTK_FILE_CHOOSER(fcb)));
+}
+
+void
 ArdourStartup::setup_new_session_page ()
 {
+        g_signal_connect (G_OBJECT(new_folder_chooser.gobj()), "current-folder-changed", G_CALLBACK (showmecf), G_OBJECT(new_folder_chooser.gobj()));
+        g_signal_connect (G_OBJECT(new_folder_chooser.gobj()), "file-set", G_CALLBACK (showmefs), G_OBJECT(new_folder_chooser.gobj()));
+
 	if (!session_hbox.get_children().empty()) {
 		session_hbox.remove (**session_hbox.get_children().begin());
 	}
@@ -773,11 +792,13 @@ ArdourStartup::setup_new_session_page ()
 			new_folder_chooser.set_current_folder (session_parent_dir);
 			new_folder_chooser.add_shortcut_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 		} else {
-			new_folder_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
+			//new_folder_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
+			new_folder_chooser.set_current_folder ("/usr/local");
 		}
+		new_folder_chooser.show ();
 		new_folder_chooser.set_title (_("Select folder for session"));
 
-#ifdef GTKOSX
+#ifdef __APPLE__
 		new_folder_chooser.add_shortcut_folder ("/Volumes");
 #endif
 

@@ -119,6 +119,7 @@ PBD::Signal1<int,boost::shared_ptr<Playlist> > Session::AskAboutPlaylistDeletion
 PBD::Signal0<void> Session::Quit;
 PBD::Signal0<void> Session::FeedbackDetected;
 PBD::Signal0<void> Session::SuccessfulGraphSort;
+PBD::Signal2<void,std::string,std::string> Session::VersionMismatch;
 
 static void clean_up_session_event (SessionEvent* ev) { delete ev; }
 const SessionEvent::RTeventCallback Session::rt_cleanup (clean_up_session_event);
