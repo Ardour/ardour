@@ -62,7 +62,7 @@ while [ $# -gt 0 ] ; do
     esac
 done
 
-#release_version=`grep -m 1 '^VERSION' ../../wscript | cut -d' ' -f 3 | sed "s/'//g"`
+#release_version=`grep -m 1 '[^A-Za-z_]OSX_VERSION = ' ../../wscript | cut -d' ' -f 3 | sed "s/'//g"`
 release_version=3.0
 svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d' ' -f 8 | sed 's/[^0-9]//g'`
 echo "Version is $release_version / $svn_version"
