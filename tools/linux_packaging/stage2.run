@@ -456,6 +456,7 @@ then
 	${SUPER} xdg-icon-resource install --context apps --size 22 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_22px.png ${ICON_NAME}
 	${SUPER} xdg-icon-resource install --context apps --size 32 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_32px.png ${ICON_NAME}
 	${SUPER} xdg-icon-resource install --context apps --size 48 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_48px.png ${ICON_NAME}
+	${SUPER} xdg-icon-resource install --context apps --size 256 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_256px.png ${ICON_NAME}
 
 	if [ -e ${ICON_PATH}/${PGM_NAME_LOWER}_icon.svg -a -d /usr/share/icons/hicolor/scalable/apps ]; 
 	then
