@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 clean=
 makespace=
@@ -344,12 +344,14 @@ basic_builder libxslt
 # hackety-frakkin-hack ....
 # we need to force xsltproc to never rely on network access during this build, so we have to hack up
 # a script to do this
-mv $PREFIX/bin/xsltproc $PREFIX/bin/xsltproc.bin
-cat <<EOF >$PREFIX/bin/xsltproc
+if ! file $PREFIX/bin/xsltproc | grep --silent "POSIX shell script"; then
+	mv $PREFIX/bin/xsltproc $PREFIX/bin/xsltproc.bin
+	cat <<EOF >$PREFIX/bin/xsltproc
 #!/bin/sh
 exec xsltproc.bin --nonet "\$@"
 EOF
-chmod a+x $PREFIX/bin/xsltproc
+	chmod a+x $PREFIX/bin/xsltproc
+fi
 #
 # now returning you to some semblance of sanity ...
 #  
