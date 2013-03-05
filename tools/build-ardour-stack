@@ -184,6 +184,7 @@ defmod aubio 0.3.2 http://aubio.org/pub/ gz
 defmod rdflib 3.2.0 http://rdflib.googlecode.com/files/ gz
 defmod setuptools 0.6c11 http://pypi.python.org/packages/source/s/setuptools/ gz
 defmod isodate 0.4.0 http://pypi.python.org/packages/source/i/isodate/ gz
+defmod pcre 8.32 http://downloads.sourceforge.net/project/pcre/pcre/8.32/ bz2
 defmod lv2 1.2.0 http://lv2plug.in/spec/ bz2
 defmod serd 0.18.2 http://download.drobilla.net/ bz2
 defmod sord 0.12.0 http://download.drobilla.net/ bz2
@@ -328,6 +329,8 @@ tar xf $MOD_isodate_local_tarball && \
 (set -e && cd LRDF && \
   sed 's/glibtoolize/libtoolize/g' < autogen.sh > ag.sh && mv ag.sh autogen.sh && \
   CFLAGS="$GLOBAL_CFLAGS -I$PREFIX/include" LDFLAGS="$GLOBAL_LDFLAGS" sh ./autogen.sh --prefix=$PREFIX && make && make install) || die "LRDF build failed"
+
+basic_builder pcre
 
 tar xf $MOD_lv2_local_tarball && \
     (set -e && cd $MOD_lv2_unpacked && unset MACOSX_DEPLOYMENT_TARGET && ./waf configure --prefix=$PREFIX --copy-headers && ./waf build && sudo ./waf install) || die "LV2 build failed"
