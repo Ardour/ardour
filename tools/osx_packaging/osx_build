@@ -390,6 +390,7 @@ cp -r ../../gtk2_ardour/pixmaps $Resources
 
 # shared stuff
 cp -R ../../gtk2_ardour/splash.png $Shared
+cp -R ../../gtk2_ardour/ArdourMono.ttf $Shared
 
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type dir`; do
