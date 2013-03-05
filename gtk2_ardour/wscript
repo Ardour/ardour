@@ -513,7 +513,7 @@ def build(bld):
                 'MASSIVE' : '60',
         }
         font_names = {
-                'MONOSPACE' : 'monospace',
+                'MONOSPACE' : 'ArdourMono',
         }
     else: # Linux/X11 fonts
         basefont = '' # unspecified - use system defaults
