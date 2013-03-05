@@ -60,7 +60,7 @@
 
 #include "i18n.h"
 
-#if (defined __APPLE__ && defined OSX_CUSTOM_FONT)
+#ifdef __APPLE__
 #include <Carbon/Carbon.h>
 #endif
 
