@@ -1,3 +1,18 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI +ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
 # translation of Ardour UI into Russian
 # Copyright (C) 2004 Paul Davis
 # This file is distributed under the same license as the gtk-ardour package.
@@ -1328,9 +1343,9 @@ msgstr "Не удалось соединиться с сервером JACK"
 
 #: ardour_ui.cc:3735
 msgid ""
-"%4This is a session from an older version of Ardour%5\n"
+"%4This is a session from an older version of %3%5\n"
 "\n"
-"Ardour has copied the old session file\n"
+"%3 has copied the old session file\n"
 "\n"
 "%6%1%7\n"
 "\n"

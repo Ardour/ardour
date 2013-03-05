@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-03-03 11:35-0500\n"
-"PO-Revision-Date: 2013-02-06 01:28+0100\n"
+"POT-Creation-Date: 2013-03-05 12:05+0100\n"
+"PO-Revision-Date: 2013-03-05 12:38+0100\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
@@ -442,7 +442,7 @@ msgstr "Audio-Busse"
 msgid "Add:"
 msgstr "Erstelle:"
 
-#: add_route_dialog.cc:117 startup.cc:798 time_fx_dialog.cc:92
+#: add_route_dialog.cc:117 startup.cc:819 time_fx_dialog.cc:92
 msgid "<b>Options</b>"
 msgstr "<b>Optionen</b>"
 
@@ -659,19 +659,19 @@ msgstr "feedback"
 msgid "Errors"
 msgstr "Fehlermeldungen"
 
-#: ardour_ui.cc:279
+#: ardour_ui.cc:281
 msgid "could not initialize %1."
 msgstr "Konnte %1 nicht initialisieren."
 
-#: ardour_ui.cc:339
+#: ardour_ui.cc:341
 msgid "Starting audio engine"
 msgstr "Starte Audio-Engine"
 
-#: ardour_ui.cc:639 startup.cc:610
+#: ardour_ui.cc:641 startup.cc:612
 msgid "%1 is ready for use"
 msgstr "%1 ist bereit"
 
-#: ardour_ui.cc:687
+#: ardour_ui.cc:689
 msgid ""
 "WARNING: Your system has a limit for maximum amount of locked memory. This "
 "might cause %1 to run out of memory before your system runs out of memory. \n"
@@ -686,23 +686,23 @@ msgstr ""
 "Sie können die Speicherbegrenzung mit 'ulimit -l' einsehen und normalerweise "
 "in %2 verändern."
 
-#: ardour_ui.cc:704
+#: ardour_ui.cc:706
 msgid "Do not show this window again"
 msgstr "Diese Meldung nicht wieder anzeigen"
 
-#: ardour_ui.cc:745
+#: ardour_ui.cc:747
 msgid "Don't quit"
 msgstr "Abbrechen"
 
-#: ardour_ui.cc:746
+#: ardour_ui.cc:748
 msgid "Just quit"
 msgstr "Nur beenden"
 
-#: ardour_ui.cc:747
+#: ardour_ui.cc:749
 msgid "Save and quit"
 msgstr "Speichern und beenden"
 
-#: ardour_ui.cc:757
+#: ardour_ui.cc:759
 msgid ""
 "%1 was unable to save your session.\n"
 "\n"
@@ -716,15 +716,15 @@ msgstr ""
 "\n"
 "\"Trotzdem beenden\"."
 
-#: ardour_ui.cc:783
+#: ardour_ui.cc:785
 msgid "Please wait while %1 cleans up..."
 msgstr "Bitte warten Sie, während %1 aufräumt."
 
-#: ardour_ui.cc:801
+#: ardour_ui.cc:803
 msgid "Unsaved Session"
 msgstr "Nicht gespeichertes Projekt"
 
-#: ardour_ui.cc:822
+#: ardour_ui.cc:824
 msgid ""
 "The session \"%1\"\n"
 "has not been saved.\n"
@@ -742,7 +742,7 @@ msgstr ""
 "\n"
 "Wie wollen Sie vorgehen?"
 
-#: ardour_ui.cc:825
+#: ardour_ui.cc:827
 msgid ""
 "The snapshot \"%1\"\n"
 "has not been saved.\n"
@@ -760,74 +760,74 @@ msgstr ""
 "\n"
 "Wie wollen Sie vorgehen?"
 
-#: ardour_ui.cc:839
+#: ardour_ui.cc:841
 msgid "Prompter"
 msgstr "Frage"
 
-#: ardour_ui.cc:904
+#: ardour_ui.cc:906
 msgid "disconnected"
 msgstr "getrennt"
 
-#: ardour_ui.cc:911
+#: ardour_ui.cc:913
 #, c-format
 msgid "JACK: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"
 msgstr "JACK: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"
 
-#: ardour_ui.cc:915
+#: ardour_ui.cc:917
 #, c-format
 msgid "JACK: <span foreground=\"green\">%<PRId64> kHz / %4.1f ms</span>"
 msgstr "JACK: <span foreground=\"green\">%<PRId64> kHz / %4.1f ms</span>"
 
-#: ardour_ui.cc:933
+#: ardour_ui.cc:935
 msgid "File:"
 msgstr "Datei:"
 
-#: ardour_ui.cc:937
+#: ardour_ui.cc:939
 msgid "BWF"
 msgstr "BWF"
 
-#: ardour_ui.cc:940
+#: ardour_ui.cc:942
 msgid "WAV"
 msgstr "WAV"
 
-#: ardour_ui.cc:943
+#: ardour_ui.cc:945
 msgid "WAV64"
 msgstr "WAV64"
 
-#: ardour_ui.cc:946 session_option_editor.cc:184
+#: ardour_ui.cc:948 session_option_editor.cc:184
 msgid "CAF"
 msgstr "CAF"
 
-#: ardour_ui.cc:949
+#: ardour_ui.cc:951
 msgid "AIFF"
 msgstr "AIFF"
 
-#: ardour_ui.cc:952
+#: ardour_ui.cc:954
 msgid "iXML"
 msgstr "iXML"
 
-#: ardour_ui.cc:955
+#: ardour_ui.cc:957
 msgid "RF64"
 msgstr "RF64"
 
-#: ardour_ui.cc:963
+#: ardour_ui.cc:965
 msgid "32-float"
 msgstr "32-float"
 
-#: ardour_ui.cc:966
+#: ardour_ui.cc:968
 msgid "24-int"
 msgstr "24-int"
 
-#: ardour_ui.cc:969
+#: ardour_ui.cc:971
 msgid "16-int"
 msgstr "16-int"
 
-#: ardour_ui.cc:988
+#: ardour_ui.cc:990
 #, c-format
 msgid "DSP: <span foreground=\"%s\">%5.1f%%</span>"
 msgstr "DSP: <span foreground=\"%s\">%5.1f%%</span>"
 
-#: ardour_ui.cc:1007
+#: ardour_ui.cc:1009
 #, c-format
 msgid ""
 "Buffers: <span foreground=\"green\">p:</span><span foreground=\"%s\">"
@@ -838,33 +838,33 @@ msgstr ""
 "%%</span> <span foreground=\"green\">c:</span><span foreground=\"%s\">"
 "%<PRIu32>%%</span>"
 
-#: ardour_ui.cc:1043
+#: ardour_ui.cc:1045
 msgid "Disk: <span foreground=\"green\">Unknown</span>"
 msgstr "Disk: <span foreground=\"green\">Unbekannt</span>"
 
-#: ardour_ui.cc:1045
+#: ardour_ui.cc:1047
 msgid "Disk: <span foreground=\"green\">24hrs+</span>"
 msgstr "Disk: <span foreground=\"green\">24h+</span>"
 
-#: ardour_ui.cc:1063
+#: ardour_ui.cc:1065
 msgid "Disk: <span foreground=\"green\">&gt;24 hrs</span>"
 msgstr "Disk: <span foreground=\"green\">&gt;24 h</span>"
 
-#: ardour_ui.cc:1074
+#: ardour_ui.cc:1076
 #, c-format
 msgid "Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"
 msgstr "Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"
 
-#: ardour_ui.cc:1100
+#: ardour_ui.cc:1102
 #, c-format
 msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
 msgstr "Timecode|TC: <span foreground=\"%s\">%s</span>"
 
-#: ardour_ui.cc:1217 ardour_ui.cc:1226 startup.cc:1010
+#: ardour_ui.cc:1219 ardour_ui.cc:1228 startup.cc:1031
 msgid "Recent Sessions"
 msgstr "Zuletzt verwendete Projekte"
 
-#: ardour_ui.cc:1308
+#: ardour_ui.cc:1310
 msgid ""
 "%1 is not connected to JACK\n"
 "You cannot open or close sessions in this condition"
@@ -872,27 +872,27 @@ msgstr ""
 "%1 ist derzeit nicht mit JACK verbunden.\n"
 "Es ist nicht möglich, Projekte zu öffnen oder zu schließen."
 
-#: ardour_ui.cc:1335
+#: ardour_ui.cc:1337
 msgid "Open Session"
 msgstr "Projekt öffnen"
 
-#: ardour_ui.cc:1353 session_import_dialog.cc:169
-#: session_metadata_dialog.cc:729 startup.cc:1039
+#: ardour_ui.cc:1355 session_import_dialog.cc:169
+#: session_metadata_dialog.cc:729 startup.cc:1060
 msgid "%1 sessions"
 msgstr "%1projekte"
 
-#: ardour_ui.cc:1390
+#: ardour_ui.cc:1392
 msgid "You cannot add a track without a session already loaded."
 msgstr ""
 "Sie können erst Spuren oder Busse hinzufügen, wenn ein Projekt geladen wurde."
 
-#: ardour_ui.cc:1398
+#: ardour_ui.cc:1400
 msgid "could not create %1 new mixed track"
 msgid_plural "could not create %1 new mixed tracks"
 msgstr[0] "konnte %1 neue Audio+MIDI-Spur nicht erstellen"
 msgstr[1] "konnte %1 neue Audio+MIDI-Spuren nicht erstellen"
 
-#: ardour_ui.cc:1404 ardour_ui.cc:1465
+#: ardour_ui.cc:1406 ardour_ui.cc:1467
 msgid ""
 "There are insufficient JACK ports available\n"
 "to create a new track or bus.\n"
@@ -905,24 +905,24 @@ msgstr ""
 "%1 und starten Sie JACK mit einer größeren\n"
 "Anzahl Ports neu."
 
-#: ardour_ui.cc:1439
+#: ardour_ui.cc:1441
 msgid "You cannot add a track or bus without a session already loaded."
 msgstr ""
 "Sie können erst Spuren oder Busse hinzufügen, wenn ein Projekt geladen wurde."
 
-#: ardour_ui.cc:1448
+#: ardour_ui.cc:1450
 msgid "could not create %1 new audio track"
 msgid_plural "could not create %1 new audio tracks"
 msgstr[0] "konnte %1 neue Audiospur nicht erstellen."
 msgstr[1] "konnte %1 neue Audiospuren nicht erstellen."
 
-#: ardour_ui.cc:1457
+#: ardour_ui.cc:1459
 msgid "could not create %1 new audio bus"
 msgid_plural "could not create %1 new audio busses"
 msgstr[0] "konnte %1 neuen Audiobus nicht erstellen"
 msgstr[1] "konnte %1 neue Audiobusse nicht erstellen"
 
-#: ardour_ui.cc:1574
+#: ardour_ui.cc:1576
 msgid ""
 "Please create one or more tracks before trying to record.\n"
 "You can do this with the \"Add Track or Bus\" option in the Session menu."
@@ -931,7 +931,7 @@ msgstr ""
 "bevor Sie aufnehmen. Die geht über \"Spur/Bus hinzufügen\"\n"
 "im Menüpunkt Projekt."
 
-#: ardour_ui.cc:1964
+#: ardour_ui.cc:1966
 msgid ""
 "The audio backend (JACK) was shutdown because:\n"
 "\n"
@@ -941,7 +941,7 @@ msgstr ""
 "\n"
 "%1"
 
-#: ardour_ui.cc:1966
+#: ardour_ui.cc:1968
 msgid ""
 "JACK has either been shutdown or it\n"
 "disconnected %1 because %1\n"
@@ -953,19 +953,19 @@ msgstr ""
 "war. Sie sollten versuchen, JACK neu zu starten,\n"
 "neu zu verbinden, und das Projekt zu speichern."
 
-#: ardour_ui.cc:1992
+#: ardour_ui.cc:1994
 msgid "Unable to start the session running"
 msgstr "Konnte das aktuelle Projekt nicht starten"
 
-#: ardour_ui.cc:2072
+#: ardour_ui.cc:2074
 msgid "Take Snapshot"
 msgstr "Schnappschuss machen"
 
-#: ardour_ui.cc:2073
+#: ardour_ui.cc:2075
 msgid "Name of new snapshot"
 msgstr "Name für neuen Schnappschuss"
 
-#: ardour_ui.cc:2097
+#: ardour_ui.cc:2099
 msgid ""
 "To ensure compatibility with various systems\n"
 "snapshot names may not contain a '%1' character"
@@ -973,28 +973,28 @@ msgstr ""
 "Um die Kompatibilität mit verschiedenen Systemen sicher zu stellen,\n"
 "dürfen Namen von Schnappschüssen kein '%1'-Zeichen enthalten"
 
-#: ardour_ui.cc:2109
+#: ardour_ui.cc:2111
 msgid "Confirm Snapshot Overwrite"
 msgstr "Bestätige das Überschreiben des Schnappschusses"
 
-#: ardour_ui.cc:2110
+#: ardour_ui.cc:2112
 msgid "A snapshot already exists with that name.  Do you want to overwrite it?"
 msgstr ""
 "Ein Schnappschuss mit diesem existiert bereits. Wollen Sie ihn überschreiben?"
 
-#: ardour_ui.cc:2113
+#: ardour_ui.cc:2115
 msgid "Overwrite"
 msgstr "Überschreibe"
 
-#: ardour_ui.cc:2147
+#: ardour_ui.cc:2149
 msgid "Rename Session"
 msgstr "Projekt umbenennen"
 
-#: ardour_ui.cc:2148
+#: ardour_ui.cc:2150
 msgid "New session name"
 msgstr "Neuer Projektname"
 
-#: ardour_ui.cc:2162 ardour_ui.cc:2538 ardour_ui.cc:2583
+#: ardour_ui.cc:2164 ardour_ui.cc:2540 ardour_ui.cc:2585
 msgid ""
 "To ensure compatibility with various systems\n"
 "session names may not contain a '%1' character"
@@ -1002,14 +1002,14 @@ msgstr ""
 "Um die Kompatibilität mit verschiedenen Systemen sicher zu stellen,\n"
 "dürfen Projektnamen kein '%1'-Zeichen enthalten"
 
-#: ardour_ui.cc:2170
+#: ardour_ui.cc:2172
 msgid ""
 "That name is already in use by another directory/folder. Please try again."
 msgstr ""
 "Dieser Name wird schon von einem anderen Verzeichnis/Ordner benutzt. Bitte "
 "nochmal versuchen."
 
-#: ardour_ui.cc:2179
+#: ardour_ui.cc:2181
 msgid ""
 "Renaming this session failed.\n"
 "Things could be seriously messed up at this point"
@@ -1017,19 +1017,19 @@ msgstr ""
 "Das Umbenennen des Projekts ist fehlgeschlagen.\n"
 "Dies könnte auf schwerwiegende Probleme hinweisen."
 
-#: ardour_ui.cc:2294
+#: ardour_ui.cc:2296
 msgid "Save Template"
 msgstr "Als Vorlage Speichern"
 
-#: ardour_ui.cc:2295
+#: ardour_ui.cc:2297
 msgid "Name for template:"
 msgstr "Name für Vorlage"
 
-#: ardour_ui.cc:2296
+#: ardour_ui.cc:2298
 msgid "-template"
 msgstr "Vorlage"
 
-#: ardour_ui.cc:2334
+#: ardour_ui.cc:2336
 msgid ""
 "This session\n"
 "%1\n"
@@ -1039,52 +1039,52 @@ msgstr ""
 "%1\n"
 "existiert bereits. Wollen Sie sie öffnen?"
 
-#: ardour_ui.cc:2344
+#: ardour_ui.cc:2346
 msgid "Open Existing Session"
 msgstr "Vorhandenes Projekt öffnen"
 
-#: ardour_ui.cc:2574
+#: ardour_ui.cc:2576
 msgid "There is no existing session at \"%1\""
 msgstr "Es gibt kein Projekt an folgender Stelle: \"%1\""
 
-#: ardour_ui.cc:2661
+#: ardour_ui.cc:2663
 msgid "Please wait while %1 loads your session"
 msgstr "Bitte warten Sie, während %1 das Projekt lädt"
 
-#: ardour_ui.cc:2676
+#: ardour_ui.cc:2678
 msgid "Port Registration Error"
 msgstr "Fehler bei der Registrierung von Ports"
 
-#: ardour_ui.cc:2677
+#: ardour_ui.cc:2679
 msgid "Click the Close button to try again."
 msgstr "Klicken Sie auf Schließen, um es erneut zu versuchen."
 
-#: ardour_ui.cc:2698
+#: ardour_ui.cc:2700
 msgid "Session \"%1 (snapshot %2)\" did not load successfully"
 msgstr "Projekt  \"%1 (Schnappschuss %2)\" konnte nicht geladen werden."
 
-#: ardour_ui.cc:2704
+#: ardour_ui.cc:2706
 msgid "Loading Error"
 msgstr "Fehler beim Laden"
 
-#: ardour_ui.cc:2705
+#: ardour_ui.cc:2707
 msgid "Click the Refresh button to try again."
 msgstr "Klicken Sie auf Aktualisieren, um es erneut zu versuchen."
 
-#: ardour_ui.cc:2787
+#: ardour_ui.cc:2789
 msgid "Could not create session in \"%1\""
 msgstr "Konnte kein Projekt in \"%1\" anlegen"
 
-#: ardour_ui.cc:2914
+#: ardour_ui.cc:2916
 msgid "No files were ready for clean-up"
 msgstr "Keine Audiodateien zum Aufräumen vorhanden"
 
-#: ardour_ui.cc:2918 ardour_ui.cc:2928 ardour_ui.cc:3061 ardour_ui.cc:3068
+#: ardour_ui.cc:2920 ardour_ui.cc:2930 ardour_ui.cc:3063 ardour_ui.cc:3070
 #: ardour_ui_ed.cc:104
 msgid "Clean-up"
 msgstr "Aufräumen"
 
-#: ardour_ui.cc:2919
+#: ardour_ui.cc:2921
 msgid ""
 "If this seems suprising, \n"
 "check for any existing snapshots.\n"
@@ -1096,19 +1096,19 @@ msgstr ""
 "sind sie wahrscheinlich noch in einem\n"
 "älteren Schnappschuss als Region eingebunden."
 
-#: ardour_ui.cc:2978
+#: ardour_ui.cc:2980
 msgid "kilo"
 msgstr "kilo"
 
-#: ardour_ui.cc:2981
+#: ardour_ui.cc:2983
 msgid "mega"
 msgstr "mega"
 
-#: ardour_ui.cc:2984
+#: ardour_ui.cc:2986
 msgid "giga"
 msgstr "giga"
 
-#: ardour_ui.cc:2989
+#: ardour_ui.cc:2991
 msgid ""
 "The following file was deleted from %2,\n"
 "releasing %3 %4bytes of disk space"
@@ -1122,7 +1122,7 @@ msgstr[1] ""
 "Die folgenden %1 Dateien wurden von %2\n"
 "gelöscht und gaben %3 %4bytes Speicherplatz frei"
 
-#: ardour_ui.cc:2996
+#: ardour_ui.cc:2998
 msgid ""
 "The following file was not in use and \n"
 "has been moved to: %2\n"
@@ -1160,11 +1160,11 @@ msgstr[1] ""
 "\n"
 "%3 %4bytes Speicherplatz freigegeben werden.\n"
 
-#: ardour_ui.cc:3056
+#: ardour_ui.cc:3058
 msgid "Are you sure you want to clean-up?"
 msgstr "Wollen Sie wirklich aufräumen?"
 
-#: ardour_ui.cc:3063
+#: ardour_ui.cc:3065
 msgid ""
 "Clean-up is a destructive operation.\n"
 "ALL undo/redo information will be lost if you clean-up.\n"
@@ -1176,24 +1176,24 @@ msgstr ""
 "Nach dem Aufräumen werden alle nicht benötigten Audiodateien in den \"dead "
 "sounds\" Ordner verschoben."
 
-#: ardour_ui.cc:3071
+#: ardour_ui.cc:3073
 msgid "CleanupDialog"
 msgstr "Aufräumdialog"
 
-#: ardour_ui.cc:3101
+#: ardour_ui.cc:3103
 msgid "Cleaned Files"
 msgstr "Aufgeräumte Dateien"
 
-#: ardour_ui.cc:3118
+#: ardour_ui.cc:3120
 msgid "deleted file"
 msgstr "gelöschte Datei"
 
-#: ardour_ui.cc:3272
+#: ardour_ui.cc:3274
 msgid "Recording was stopped because your system could not keep up."
 msgstr ""
 "Die Aufnahme wurde gestoppt, da Ihr System nicht schnell genug folgen konnte."
 
-#: ardour_ui.cc:3301
+#: ardour_ui.cc:3303
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1207,7 +1207,7 @@ msgstr ""
 "Die Daten konnten nicht schnell genug geschrieben\n"
 "werden, um die Aufnahme fortzuführen.\n"
 
-#: ardour_ui.cc:3320
+#: ardour_ui.cc:3322
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1221,11 +1221,11 @@ msgstr ""
 "Die Daten konnten nicht schnell genug gelesen\n"
 "werden, um die Wiedergabe aufrechtzuerhalten.\n"
 
-#: ardour_ui.cc:3360
+#: ardour_ui.cc:3362
 msgid "Crash Recovery"
 msgstr "Wiederherstellung"
 
-#: ardour_ui.cc:3361
+#: ardour_ui.cc:3363
 msgid ""
 "This session appears to have been in the\n"
 "middle of recording when %1 or\n"
@@ -1243,19 +1243,19 @@ msgstr ""
 "für Sie wiederherstellen oder sie verwerfen.\n"
 "Bitte entscheiden Sie, wie Sie vorgehen möchten.\n"
 
-#: ardour_ui.cc:3373
+#: ardour_ui.cc:3375
 msgid "Ignore crash data"
 msgstr "Daten verwerfen"
 
-#: ardour_ui.cc:3374
+#: ardour_ui.cc:3376
 msgid "Recover from crash"
 msgstr "Daten wiederherstellen"
 
-#: ardour_ui.cc:3394
+#: ardour_ui.cc:3396
 msgid "Sample Rate Mismatch"
 msgstr "Samplerate passt nicht"
 
-#: ardour_ui.cc:3395
+#: ardour_ui.cc:3397
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
 "%2 is currently running at %3 Hz.  If you load this session,\n"
@@ -1266,21 +1266,48 @@ msgstr ""
 "%2 läuft derzeit mit %3 Hz. Wenn Sie dieses Projekt laden, \n"
 "wird Ihr Audiomaterial mit der falschen Samplerate abgespielt.\n"
 
-#: ardour_ui.cc:3404
+#: ardour_ui.cc:3406
 msgid "Do not load session"
 msgstr "Projekt nicht laden"
 
-#: ardour_ui.cc:3405
+#: ardour_ui.cc:3407
 msgid "Load session anyway"
 msgstr "Projekt trotzdem laden"
 
-#: ardour_ui.cc:3426
+#: ardour_ui.cc:3428
 msgid "Could not disconnect from JACK"
 msgstr "Konnte Verbindung mit JACK nicht trennen"
 
-#: ardour_ui.cc:3439
+#: ardour_ui.cc:3441
 msgid "Could not reconnect to JACK"
 msgstr "Konnte nicht erneut zu JACK verbinden"
+
+#: ardour_ui.cc:3735
+msgid ""
+"%4This is a session from an older version of %3%5\n"
+"\n"
+"%3 has copied the old session file\n"
+"\n"
+"%6%1%7\n"
+"\n"
+"to\n"
+"\n"
+"%6%2%7\n"
+"\n"
+"From now on, use the -2000 version with older versions of %3"
+msgstr ""
+"%4Dies ist ein Projekt, das mit einer älteren Version von %3 erstellt "
+"wurde%5\n"
+"\n"
+"%3 hat die alte Projektdatei\n"
+"\n"
+"%6%1%7\n"
+"\n"
+"nach\n"
+"\n"
+"%6%2%7 kopiert.\n"
+"\n"
+"Benutzen Sie von nun an die -2000 Version mit älteren Versionen von %3"
 
 #: ardour_ui2.cc:72
 msgid "UI: cannot setup editor"
@@ -1665,7 +1692,7 @@ msgstr "Midi Verbindungsmanager"
 
 #: ardour_ui_ed.cc:248 midi_tracer.cc:39
 msgid "MIDI Tracer"
-msgstr "Midisignale überwachen"
+msgstr "Midisignale verfolgen"
 
 #: ardour_ui_ed.cc:250
 msgid "About"
@@ -1781,7 +1808,7 @@ msgstr "Rückwärts (langsam)"
 msgid "Rewind (Fast)"
 msgstr "Rückwärts (schnell)"
 
-#: ardour_ui_ed.cc:340 startup.cc:693
+#: ardour_ui_ed.cc:340 startup.cc:695
 msgid "Forward"
 msgstr "Vorwärts (beschleunigen)"
 
@@ -1813,7 +1840,7 @@ msgstr "Zur lokalen Uhrzeit springen"
 msgid "Focus On Clock"
 msgstr "Fokus auf Zeitanzeige setzen"
 
-#: ardour_ui_ed.cc:366 ardour_ui_ed.cc:375 audio_clock.cc:2045 editor.cc:241
+#: ardour_ui_ed.cc:366 ardour_ui_ed.cc:375 audio_clock.cc:2046 editor.cc:241
 #: editor_actions.cc:544 export_timespan_selector.cc:88
 #: session_option_editor.cc:41 session_option_editor.cc:61
 #: session_option_editor.cc:80 session_option_editor.cc:83
@@ -1830,7 +1857,7 @@ msgstr "Takte & Schläge"
 msgid "Minutes & Seconds"
 msgstr "Minuten & Sekunden"
 
-#: ardour_ui_ed.cc:372 ardour_ui_ed.cc:381 audio_clock.cc:2049 editor.cc:242
+#: ardour_ui_ed.cc:372 ardour_ui_ed.cc:381 audio_clock.cc:2050 editor.cc:242
 #: editor_actions.cc:543
 msgid "Samples"
 msgstr "Samples"
@@ -1964,56 +1991,56 @@ msgstr "Aktiviere/Deaktiviere externe Positionssynchronisierung"
 msgid "Sync to JACK is not possible: video pull up/down is set"
 msgstr "Synchronisation ist nicht möglich: Video pull-up/down ist aktiviert"
 
-#: audio_clock.cc:1011 audio_clock.cc:1030
+#: audio_clock.cc:1012 audio_clock.cc:1031
 msgid "--pending--"
 msgstr "--wartend--"
 
-#: audio_clock.cc:1082
+#: audio_clock.cc:1083
 msgid "SR"
 msgstr "SR"
 
-#: audio_clock.cc:1088 audio_clock.cc:1092
+#: audio_clock.cc:1089 audio_clock.cc:1093
 msgid "Pull"
 msgstr "Ziehen"
 
-#: audio_clock.cc:1090
+#: audio_clock.cc:1091
 #, c-format
 msgid "%+.4f%%"
 msgstr "%+.4f%%"
 
-#: audio_clock.cc:1236 editor.cc:243 editor_actions.cc:135
+#: audio_clock.cc:1237 editor.cc:243 editor_actions.cc:135
 #: editor_actions.cc:536
 msgid "Tempo"
 msgstr "Tempo"
 
-#: audio_clock.cc:1240 editor.cc:244 editor_actions.cc:537
+#: audio_clock.cc:1241 editor.cc:244 editor_actions.cc:537
 msgid "Meter"
 msgstr "Taktart"
 
-#: audio_clock.cc:1818 audio_streamview.cc:116 editor_actions.cc:878
+#: audio_clock.cc:1819 audio_streamview.cc:116 editor_actions.cc:878
 #: midi_region_view.cc:3005 session_metadata_dialog.cc:331
 #: session_metadata_dialog.cc:379 session_metadata_dialog.cc:435
 #: session_metadata_dialog.cc:716
 msgid "programming error: %1"
 msgstr "Programmierfehler: %1"
 
-#: audio_clock.cc:1951 audio_clock.cc:1979
+#: audio_clock.cc:1952 audio_clock.cc:1980
 msgid "programming error: %1 %2"
 msgstr "Programmierfehler: %1 %2"
 
-#: audio_clock.cc:2047 editor.cc:240 export_timespan_selector.cc:98
+#: audio_clock.cc:2048 editor.cc:240 export_timespan_selector.cc:98
 msgid "Bars:Beats"
 msgstr "Takte:Schläge"
 
-#: audio_clock.cc:2048 export_timespan_selector.cc:93
+#: audio_clock.cc:2049 export_timespan_selector.cc:93
 msgid "Minutes:Seconds"
 msgstr "Minuten:Sekunden"
 
-#: audio_clock.cc:2053
+#: audio_clock.cc:2054
 msgid "Set From Playhead"
 msgstr "Ab Positionszeiger"
 
-#: audio_clock.cc:2054
+#: audio_clock.cc:2055
 msgid "Locate to This Time"
 msgstr "Positionszeiger hierhin setzen"
 
@@ -4359,7 +4386,7 @@ msgstr "Neuer Bereich"
 
 #: editor_drag.cc:4599
 msgid "rubberband selection"
-msgstr "Bereichsauswahl"
+msgstr "Gummiband-Auswahl"
 
 #: editor_route_groups.cc:66
 msgid "No Selection = All Tracks?"
@@ -6526,38 +6553,38 @@ msgstr ""
 "\n"
 "Betrachten Sie bitte diese Möglichkeiten und starten Sie ggf. JACK neu."
 
-#: main.cc:201 main.cc:316
+#: main.cc:201 main.cc:314
 msgid "cannot create user %3 folder %1 (%2)"
 msgstr "Kann benutzerspezifischen %3-Ordner %1 nicht erstellen:  %2"
 
-#: main.cc:208 main.cc:323
+#: main.cc:208 main.cc:321
 msgid "cannot open pango.rc file %1"
 msgstr "kann die Datei pango.rc nicht öffnen %1"
 
-#: main.cc:229 main.cc:350
+#: main.cc:228 main.cc:348
 msgid "Cannot find ArdourMono TrueType font"
 msgstr "Kann den TrueType-Font ArdourMono nicht finden"
 
-#: main.cc:241 main.cc:356
+#: main.cc:240 main.cc:354
 msgid "Cannot load ArdourMono TrueType font."
 msgstr "Kann den TrueType-Font ArdourMono nicht laden."
 
-#: main.cc:304
+#: main.cc:302
 msgid ""
 "No fontconfig file found on your system. Things may looked very odd or ugly"
 msgstr ""
 "Keine fontconfig-Datei auf Ihrem System gefunden. Das kann zu seltsamem oder "
 "hässlichem Aussehen führen"
 
-#: main.cc:360
+#: main.cc:358
 msgid "Failed to set fontconfig configuration."
 msgstr "Fontconfig-Konfiguration gescheitert."
 
-#: main.cc:371 main.cc:387
+#: main.cc:369 main.cc:385
 msgid "JACK exited"
 msgstr "JACK wurde beendet"
 
-#: main.cc:374
+#: main.cc:372
 msgid ""
 "JACK exited unexpectedly, and without notifying %1.\n"
 "\n"
@@ -6572,7 +6599,7 @@ msgstr ""
 "\n"
 "Klicke OK, um %1 zu verlassen."
 
-#: main.cc:389
+#: main.cc:387
 msgid ""
 "JACK exited unexpectedly, and without notifying %1.\n"
 "\n"
@@ -6587,19 +6614,19 @@ msgstr ""
 "Momentan läßt sich das Projekt nicht speichern, da alle Informationen\n"
 "über Verbindungen verloren gehen würden.\n"
 
-#: main.cc:483
+#: main.cc:481
 msgid " (built using "
 msgstr " (kompiliert mit Version "
 
-#: main.cc:486
+#: main.cc:484
 msgid " and GCC version "
 msgstr " und GCC Version"
 
-#: main.cc:496
+#: main.cc:494
 msgid "Copyright (C) 1999-2012 Paul Davis"
 msgstr "Copyright (C) 1999-2012 Paul Davis"
 
-#: main.cc:497
+#: main.cc:495
 msgid ""
 "Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
 "Baker, Robin Gareus"
@@ -6607,30 +6634,30 @@ msgstr ""
 "Einige Teile Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
 "Baker, Robin Gareus"
 
-#: main.cc:499
+#: main.cc:497
 msgid "%1 comes with ABSOLUTELY NO WARRANTY"
 msgstr "%1 wird Ihnen ohne jegliche Gewährleistung"
 
-#: main.cc:500
+#: main.cc:498
 msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 msgstr ""
 "für allgemeine oder spezielle Gebrauchstauglichkeit zur Verfügung gestellt."
 
-#: main.cc:501
+#: main.cc:499
 msgid "This is free software, and you are welcome to redistribute it "
 msgstr "Dies ist freie Software, die Sie gerne weitergeben dürfen"
 
-#: main.cc:502
+#: main.cc:500
 msgid "under certain conditions; see the source for copying conditions."
 msgstr ""
 "solange Sie sich an die Bedingungen, die in der Datei COPYING aufgeführt "
 "sind halten."
 
-#: main.cc:511
+#: main.cc:509
 msgid "Cannot xinstall SIGPIPE error handler"
 msgstr "Kann die SIGPIPE Fehlerbehandlung nicht installieren"
 
-#: main.cc:517
+#: main.cc:515
 msgid "could not create %1 GUI"
 msgstr "konnte das %1 GUI nicht erstellen"
 
@@ -8771,11 +8798,11 @@ msgstr "nur bei identischer Länge, Position und Herkunft"
 
 #: rc_option_editor.cc:1213
 msgid "Make rubberband selection rectangle snap to the grid"
-msgstr "Die Auswahl von Rubberband an Raster ausrichten"
+msgstr "Gummiband-Auswahl an Raster ausrichten"
 
 #: rc_option_editor.cc:1221
 msgid "Show waveforms in regions"
-msgstr "Zeige Waveformen in Regionen an"
+msgstr "Zeige Wellenformen in Regionen"
 
 #: rc_option_editor.cc:1229
 msgid "Show gain envelopes in audio regions"
@@ -8791,7 +8818,7 @@ msgstr "nur im Region-Gain Modus"
 
 #: rc_option_editor.cc:1238
 msgid "Waveform scale"
-msgstr "Waveform Skalierung"
+msgstr "Wellenformskalierung"
 
 #: rc_option_editor.cc:1243
 msgid "linear"
@@ -8803,7 +8830,7 @@ msgstr "Logarithmisch"
 
 #: rc_option_editor.cc:1250
 msgid "Waveform shape"
-msgstr "Waveform Anzeige"
+msgstr "Wellenform Anzeigeart"
 
 #: rc_option_editor.cc:1255
 msgid "traditional"
@@ -8815,7 +8842,7 @@ msgstr "Rectified"
 
 #: rc_option_editor.cc:1263
 msgid "Show waveforms for audio while it is being recorded"
-msgstr "Zeichne Waveform während der Aufnahme"
+msgstr "Zeige bei Aufnahmen die Wellenformen des aufgenommenen Audiomaterials"
 
 #: rc_option_editor.cc:1271
 msgid "Show zoom toolbar"
@@ -9144,7 +9171,7 @@ msgstr "Statt der von %1 bereitgestellten GUIs die der Plugins verwenden"
 
 #: rc_option_editor.cc:1747
 msgid "update transport clock display every 40ms instead of every 100ms"
-msgstr ""
+msgstr "Auffrischen der Transport-Zeitanzeige alle 40ms statt 100ms"
 
 #: rc_option_editor.cc:1764
 msgid "Mixer Strip"
@@ -10868,11 +10895,11 @@ msgstr ""
 "<i>(Neue Projekte können überall abgespeichert werden, dies ist nur die "
 "Vorgabe)</i>"
 
-#: startup.cc:414
+#: startup.cc:416
 msgid "Default folder for new sessions"
 msgstr "Standardordner für neue Projekte"
 
-#: startup.cc:435
+#: startup.cc:437
 msgid ""
 "While recording instruments or vocals, you probably want to listen to the\n"
 "signal as well as record it. This is called \"monitoring\". There are\n"
@@ -10897,15 +10924,15 @@ msgstr ""
 "\n"
 "<i>If you do not understand what this is about, just accept the default.</i>"
 
-#: startup.cc:456
+#: startup.cc:458
 msgid "Monitoring Choices"
 msgstr "Auswahl des Monitoring"
 
-#: startup.cc:479
+#: startup.cc:481
 msgid "Use a Master bus directly"
 msgstr "Nutze den Master-Bus direkt"
 
-#: startup.cc:481
+#: startup.cc:483
 msgid ""
 "Connect the Master bus directly to your hardware outputs. This is preferable "
 "for simple usage."
@@ -10913,11 +10940,11 @@ msgstr ""
 "Verbinde den Master-Bus direkt mit den Audioausgängen. Wird für "
 "einfacheAnwendungen empfohlen."
 
-#: startup.cc:490
+#: startup.cc:492
 msgid "Use an additional Monitor bus"
 msgstr "Nutze einen zusätzlichen Monitor-Bus"
 
-#: startup.cc:493
+#: startup.cc:495
 msgid ""
 "Use a Monitor bus between Master bus and hardware outputs for \n"
 "greater control in monitoring without affecting the mix."
@@ -10925,7 +10952,7 @@ msgstr ""
 "Nutze einen Monitor-Bus zwischen Master-Bus und Audioausgängen, um mehr\n"
 "Möglichkeiten für das Monitoring zu bekommen, ohne den Mix zu beeinflussen."
 
-#: startup.cc:515
+#: startup.cc:517
 msgid ""
 "<i>You can change this preference at any time via the Preferences dialog.\n"
 "You can also add or remove the monitor section to/from any session.</i>\n"
@@ -10939,103 +10966,103 @@ msgstr ""
 "\n"
 "</i>Im Zweifelsfall akzeptieren Sie die Voreinstellung.</i>"
 
-#: startup.cc:526
+#: startup.cc:528
 msgid "Monitor Section"
 msgstr "Monitorsektion"
 
-#: startup.cc:566
+#: startup.cc:568
 msgid "What would you like to do ?"
 msgstr "Was möchten Sie tun?"
 
-#: startup.cc:695
+#: startup.cc:697
 msgid "Open"
 msgstr "Öffnen"
 
-#: startup.cc:741
+#: startup.cc:760
 msgid "Session name:"
 msgstr "Projektname:"
 
-#: startup.cc:764
+#: startup.cc:783
 msgid "Create session folder in:"
 msgstr "Ort des Projektverzeichnisses:"
 
-#: startup.cc:778
+#: startup.cc:799
 msgid "Select folder for session"
 msgstr "Ordner für Projekt wählen"
 
-#: startup.cc:810
+#: startup.cc:831
 msgid "Use this template"
 msgstr "Diese Vorlage verwenden"
 
-#: startup.cc:813
+#: startup.cc:834
 msgid "no template"
 msgstr "keine Vorlage"
 
-#: startup.cc:841
+#: startup.cc:862
 msgid "Use an existing session as a template:"
 msgstr "Ein vorhandenes Projekt als Vorlage verwenden:"
 
-#: startup.cc:853
+#: startup.cc:874
 msgid "Select template"
 msgstr "Vorlage auswählen"
 
-#: startup.cc:879
+#: startup.cc:900
 msgid "New Session"
 msgstr "Neues Projekt"
 
-#: startup.cc:1033
+#: startup.cc:1054
 msgid "Select session file"
 msgstr "Projektdatei auswählen"
 
-#: startup.cc:1049
+#: startup.cc:1070
 msgid "Browse:"
 msgstr "Durchsuchen:"
 
-#: startup.cc:1058
+#: startup.cc:1079
 msgid "Select a session"
 msgstr "Projekt auswählen"
 
-#: startup.cc:1084 startup.cc:1085 startup.cc:1086
+#: startup.cc:1105 startup.cc:1106 startup.cc:1107
 msgid "channels"
 msgstr "Kanäle"
 
-#: startup.cc:1100
+#: startup.cc:1121
 msgid "<b>Busses</b>"
 msgstr "<b>Busse</b>"
 
-#: startup.cc:1101
+#: startup.cc:1122
 msgid "<b>Inputs</b>"
 msgstr "<b>Eingänge</b>"
 
-#: startup.cc:1102
+#: startup.cc:1123
 msgid "<b>Outputs</b>"
 msgstr "<b>Ausgänge</b>"
 
-#: startup.cc:1110
+#: startup.cc:1131
 msgid "Create master bus"
 msgstr "Master-Bus erstellen"
 
-#: startup.cc:1120
+#: startup.cc:1141
 msgid "Automatically connect to physical inputs"
 msgstr "Automatisch mit Audioeingängen verbinden"
 
-#: startup.cc:1127 startup.cc:1186
+#: startup.cc:1148 startup.cc:1207
 msgid "Use only"
 msgstr "Benutze nur"
 
-#: startup.cc:1180
+#: startup.cc:1201
 msgid "Automatically connect outputs"
 msgstr "Ausgänge automatisch verbinden"
 
-#: startup.cc:1202
+#: startup.cc:1223
 msgid "... to master bus"
 msgstr "... mit dem Master-Bus"
 
-#: startup.cc:1212
+#: startup.cc:1233
 msgid "... to physical outputs"
 msgstr "... mit den Audioausgängen"
 
-#: startup.cc:1262
+#: startup.cc:1283
 msgid "Advanced Session Options"
 msgstr "Erweiterte Einstellungen"
 
@@ -11559,7 +11586,7 @@ msgstr "Zeichne \"flache\" Schaltflächen"
 
 #: theme_manager.cc:60
 msgid "Draw waveforms with color gradient"
-msgstr "Zeige Waveformen mit Farbverlauf an"
+msgstr "Zeichne Wellenformen mit Farbverlauf"
 
 #: theme_manager.cc:66
 msgid "Object"
