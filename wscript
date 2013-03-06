@@ -281,7 +281,7 @@ def set_compiler_flags (conf,opt):
     # a single way to test if we're on OS X
     #
 
-    if conf.env['build_target'] in ['panther', 'tiger', 'leopard' ]:
+    if conf.env['build_target'] in ['panther', 'tiger', 'leopard', 'snowleopard', 'lion', 'mountainlion' ]:
         conf.define ('IS_OSX', 1)
         # force tiger or later, to avoid issues on PPC which defaults
         # back to 10.1 if we don't tell it otherwise.

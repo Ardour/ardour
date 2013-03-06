@@ -2078,7 +2078,7 @@ Session::save_template (string template_name)
 void
 Session::refresh_disk_space ()
 {
-#if HAVE_SYS_VFS_H && HAVE_SYS_STATVFS_H
+#if __APPLE__ || (HAVE_SYS_VFS_H && HAVE_SYS_STATVFS_H)
 	
 	Glib::Threads::Mutex::Lock lm (space_lock);
 
