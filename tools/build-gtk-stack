@@ -190,7 +190,7 @@ PATH=$PREFIX/bin:$PATH
 PERLVERSION=`perl -e 'printf "%vd\n", $^V;'`
 
 PYVERS=`python --version 2>&1 | cut -d ' ' -f 2 | cut -b 1-3`
-export PYTHONPATH=$PREFIX/python${PYVERS}/site-packages/:${PYTHONPATH:+:$PYTHONPATH}
+export PYTHONPATH=$PREFIX/lib/python${PYVERS}/site-packages/:${PYTHONPATH:+:$PYTHONPATH}
 
 OSX=
 
@@ -424,8 +424,8 @@ basic_builder atk
 tar xf $MOD_gnomecommon_local_tarball && (cd $MOD_gnomecommon_unpacked && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && export MAKEFLAGS= make && MAKEFLAGS= make install) || die "gnome-common build failed"
 tar xf $MOD_gtkosxdocbook_local_tarball && (cd $MOD_gtkosxdocbook_unpacked && JHBUILD_PREFIX=$PREFIX make install) || die "gtk build failed"
 # gnome-doc-utils is not parallel-build safe so turn off make -j2
-tar xf $MOD_gnomedocutils_local_tarball && (cd $MOD_gnomedocutils_unpacked && PYTHONPATH=$PREFIX/lib/python${PYVERS}/site-packages CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF --disable-scrollkeeper && PYTHONPATH=$PREFIX/lib/python${PYVERS}/site-packages MAKEFLAGS= make && PYTHONPATH=$PREFIX/lib/python${PYVERS}/site-packages MAKEFLAGS= make install) || die "gnome-doc-utils build failed"
-tar xf $MOD_gtkdoc_local_tarball && (cd $MOD_gtkdoc_unpacked && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure --disable-scrollkeeper --with-xml-catalog=$PREFIX/etc/xml/catalog --prefix=$PREFIX && PYTHONPATH=$PREFIX/lib/python${PYVERS}/site-packages make && make install) || die "gtk build failed"
+tar xf $MOD_gnomedocutils_local_tarball && (cd $MOD_gnomedocutils_unpacked && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF --disable-scrollkeeper && MAKEFLAGS= make && MAKEFLAGS= make install) || die "gnome-doc-utils build failed"
+tar xf $MOD_gtkdoc_local_tarball && (cd $MOD_gtkdoc_unpacked && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure --disable-scrollkeeper --with-xml-catalog=$PREFIX/etc/xml/catalog --prefix=$PREFIX && make && make install) || die "gtk build failed"
 tar xf $MOD_pixman_local_tarball && (cd $MOD_pixman_unpacked && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" sh ./autogen.sh --prefix=$PREFIX && make && make install) || die "pixman build failed"
 
 if [ x$OSX = x ] ; then
