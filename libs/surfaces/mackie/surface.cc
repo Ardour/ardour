@@ -698,6 +698,8 @@ Surface::write (const MidiByteArray& data)
 {
 	if (_active) {
 		_port->write (data);
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, "surface not active, write ignored\n");
 	}
 }
 

@@ -146,7 +146,8 @@ public:
 	void next_jog_mode ();
 	void set_jog_mode (Mackie::JogWheel::Mode);
   
-  void notify_metering_state_changed();
+        void notify_metering_state_changed();
+	void turn_it_on ();
 
   protected:
 	
@@ -170,7 +171,6 @@ public:
 	void init_strips (uint32_t n);
 	void setup_master ();
 	void master_gain_changed ();
-	void turn_it_on ();
 };
 
 }

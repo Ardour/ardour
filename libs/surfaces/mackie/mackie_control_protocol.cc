@@ -178,6 +178,12 @@ MackieControlProtocol::midi_connectivity_established ()
 	for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
 		(*si)->say_hello ();
 	}
+
+	if (_device_info.no_handshake()) {
+		for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
+			(*si)->turn_it_on ();
+		}
+	}
 }
 
 // go to the previous track.
@@ -532,21 +538,23 @@ MackieControlProtocol::update_surfaces()
 void
 MackieControlProtocol::initialize()
 {
-	Glib::Threads::Mutex::Lock lm (surfaces_lock);
-
-	if (surfaces.empty()) {
-		return;
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		
+		if (surfaces.empty()) {
+			return;
+		}
+		
+		if (!surfaces.front()->active ()) {
+			return;
+		}
+		
+		// sometimes the jog wheel is a pot
+		if (_device_info.has_jog_wheel()) {
+			surfaces.front()->blank_jog_ring ();
+		}
 	}
 
-	if (!surfaces.front()->active ()) {
-		return;
-	}
-
-	// sometimes the jog wheel is a pot
-	if (_device_info.has_jog_wheel()) {
-		surfaces.front()->blank_jog_ring ();
-	}
-	
 	// update global buttons and displays
 
 	notify_record_state_changed();
