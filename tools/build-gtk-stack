@@ -337,7 +337,7 @@ basic_builder flex
 basic_builder bison
 basic_builder expat
 
-tar xf $MOD_libxml2_local_tarball && (cd $MOD_libxml2_unpacked && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF --with-zlib=$PREFIX && make && make install) || die "libxml2 build failed"
+tar xf $MOD_libxml2_local_tarball && (cd $MOD_libxml2_unpacked && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" sh -vx ./configure $GLOBAL_CONF --with-zlib=$PREFIX && make && make install) || die "libxml2 build failed"
 
 basic_builder libxslt
 
