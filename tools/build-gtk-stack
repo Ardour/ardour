@@ -341,12 +341,8 @@ basic_builder expat
 # this will fail to build python modules if Python is not a system install, so we need to supply --with-python in that case
 #
 
-pythondir=`which python`
-pythondir=`dirname $pythondir`
-WITHPYTHON=
-
-if [ x$pythondir != /usr/bin ] ; then
-    WITHPYTHON=--with-python=$pythondir
+if [ x$PYTHON != x ] ; then
+    WITHPYTHON=--with-python=$PYTHON
 fi
 
 tar xf $MOD_libxml2_local_tarball && (cd $MOD_libxml2_unpacked && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $WITHPYTHON --with-zlib=$PREFIX && make && make install) || die "libxml2 build failed"
