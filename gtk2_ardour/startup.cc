@@ -721,25 +721,8 @@ ArdourStartup::populate_session_templates ()
 }
 
 void
-showmecf (GtkWidget* fc)
-{
-        printf ("current folder just changed to %s\n", gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER(fc)));
-        printf ("current filename is currently %s\n", gtk_file_chooser_get_filename (GTK_FILE_CHOOSER(fc)));
-        printf ("widget name is %s\n", gtk_widget_get_name (fc));
-
-}
-void
-showmefs (GtkWidget * fcb)
-{
-        printf ("file set, currently %s\n", gtk_file_chooser_get_filename (GTK_FILE_CHOOSER(fcb)));
-}
-
-void
 ArdourStartup::setup_new_session_page ()
 {
-        g_signal_connect (G_OBJECT(new_folder_chooser.gobj()), "current-folder-changed", G_CALLBACK (showmecf), G_OBJECT(new_folder_chooser.gobj()));
-        g_signal_connect (G_OBJECT(new_folder_chooser.gobj()), "file-set", G_CALLBACK (showmefs), G_OBJECT(new_folder_chooser.gobj()));
-
 	if (!session_hbox.get_children().empty()) {
 		session_hbox.remove (**session_hbox.get_children().begin());
 	}
