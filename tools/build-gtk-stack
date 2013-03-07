@@ -187,10 +187,30 @@ mkdir -p $PREFIX
 export MAKEFLAGS=-j$parallel
 PATH=$PREFIX/bin:$PATH
 
+#
+# Check Perl
+#
+
 PERLVERSION=`perl -e 'printf "%vd\n", $^V;'`
+
+#
+# Check Python presence
+# 
 
 PYVERS=`python --version 2>&1 | cut -d ' ' -f 2 | cut -b 1-3`
 export PYTHONPATH=$PREFIX/lib/python${PYVERS}/site-packages/:${PYTHONPATH:+:$PYTHONPATH}
+
+if python --version 2>&1 | egrep --silent '(2\.7|2\.6)' ; then
+    :
+else
+    echo "You need at least Python 2.6 to run this script"
+    exit 1
+fi
+
+pythondir=`dirname $(which python)`
+if [ $pythondir != "/usr/bin" ] ; then
+    PYTHONPREFIX=`dirname $pythondir`
+fi
 
 OSX=
 
@@ -199,7 +219,6 @@ if uname -a | grep --silent arwin ; then
     # its OS X! run for the hills !!
 
     OSX=1
-
     
     # tell perl to look in our $PREFIX tree for additional perl modules
     export PERL5LIB=$PREFIX/System/Library/Perl/$PERLVERSION
@@ -213,20 +232,6 @@ if uname -a | grep --silent arwin ; then
     # for 10.5 and above, add to LDFLAGS
     # "-syslibroot /Developer/SDKs/MacOSX10.4u.sdk"
     export MACOSX_DEPLOYMENT_TARGET=10.4
-    # If the default python is not new enough, set PYTHON to point to a 
-    # suitably new (2.7 or later) version of Python's framework
-    #
-    # this is very crude versioning test
-    if python --version 2>&1 | grep --silent '2\.7' ; then
-	:
-    else
-	if python --version 2>&1 | grep --silent '2\.6' ; then
-	    :
-	else
-	    echo "You need at least Python 2.6 to run this script"
-	    exit 1
-	fi
-    fi
 
     CAIRO_CONF="--enable-xlib=no --enable-quartz=yes --enable-xcb=no"
     PANGO_CONF="--without-x"
@@ -261,10 +266,6 @@ else
     if python --version | grep --silent '2\.7' ; then
         echo "You do not have a new enough version of Python"
         exit 1
-    fi
-    pythondir=`dirname $(which python)`
-    if [ $pythondir != "/usr/bin" ] ; then
-        PYTHON=`dirname $pythondir`
     fi
 fi
 
@@ -338,11 +339,11 @@ basic_builder bison
 basic_builder expat
 
 #
-# this will fail to build python modules if Python is not a system install, so we need to supply --with-python in that case
+# libxml2 will fail to build python modules if Python is not a system install, so we need to supply --with-python in that case
 #
 
-if [ x$PYTHON != x ] ; then
-    WITHPYTHON=--with-python=$PYTHON
+if [ x$PYTHONPREFIX != x ] ; then
+    WITHPYTHON=--with-python=$PYTHONPREFIX
 fi
 
 tar xf $MOD_libxml2_local_tarball && (cd $MOD_libxml2_unpacked && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $WITHPYTHON --with-zlib=$PREFIX && make && make install) || die "libxml2 build failed"
