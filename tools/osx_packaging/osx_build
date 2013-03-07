@@ -274,8 +274,8 @@ echo "Copying GTK engines ..."
 cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $Frameworks
 (cd $GTK_ENGINE_DIR && ln -s ../../libclearlooks.dylib . && ln -s ../../libclearlooks.dylib libclearlooks.so)
 
-cp $GTKSTACK_ROOT/lib/gtk-2.0/2.10.0/engines/libpixmap.dylib $Frameworks
-(cd $GTK_ENGINE_DIR && ln -s ../../libpixmap.dylib . && ln -s ../../libpixmap.dylib libpixmap.so)
+cp $GTKSTACK_ROOT/lib/gtk-2.0/2.10.0/engines/libpixmap.so $Frameworks
+(cd $GTK_ENGINE_DIR && ln -s ../../libpixmap.so)
 
 
 if test x$WITH_LADSPA != x ; then
