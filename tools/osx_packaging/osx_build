@@ -265,16 +265,16 @@ rm pangorc
 gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/?@executable_path/../lib/modules/?" > $Resources/gdk-pixbuf.loaders
 
 # We rely on clearlooks, so include a version from our own build tree
-# this one is special - we will set GTK_PATH to $Libraries/gtkengines
+# this one is special - we will set GTK_PATH to $Frameworks/gtkengines
 
-GTK_ENGINE_DIR=$Libraries/gtkengines/engines
+GTK_ENGINE_DIR=$Frameworks/gtkengines/engines
 mkdir -p $GTK_ENGINE_DIR
 
 echo "Copying GTK engines ..."
-cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so $Libraries
+cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so $Frameworks
 (cd $GTK_ENGINE_DIR && ln -s ../../libclearlooks.dylib . && ln -s ../../libclearlooks.dylib libclearlooks.so)
 
-cp $GTKSTACK_ROOT/lib/gtk-2.0/2.10.0/engines/libpixmap.so $Libraries
+cp $GTKSTACK_ROOT/lib/gtk-2.0/2.10.0/engines/libpixmap.so $Frameworks
 (cd $GTK_ENGINE_DIR && ln -s ../../libpixmap.dylib . && ln -s ../../libpixmap.dylib libpixmap.so)
 
 
