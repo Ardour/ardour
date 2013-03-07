@@ -29,7 +29,7 @@ export ARDOUR_DLL_PATH=$libs
 export GTK_PATH=~/.ardour3:$libs/clearlooks-newer
 export VAMP_PATH=$libs/vamp-plugins${VAMP_PATH:+:$VAMP_PATH}
 
-export LD_LIBRARY_PATH=$libs/qm-dsp:$libs/vamp-sdk:$libs/surfaces:$libs/surfaces/control_protocol:$libs/ardour:$libs/midi++2:$libs/pbd:$libs/rubberband:$libs/soundtouch:$libs/gtkmm2ext:$libs/gnomecanvas:$libs/libsndfile:$libs/appleutility:$libs/taglib:$libs/evoral:$libs/evoral/src/libsmf:$libs/audiographer:$libs/timecode:$libs/libltc:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH=$libs/qm-dsp:$libs/vamp-sdk:$libs/surfaces:$libs/surfaces/control_protocol:$libs/ardour:$libs/midi++2:$libs/pbd:$libs/rubberband:$libs/soundtouch:$libs/gtkmm2ext:$libs/gnomecanvas:$libs/libsndfile:$libs/appleutility:$libs/taglib:$libs/evoral:$libs/evoral/src/libsmf:$libs/audiographer:$libs/timecode:$libs/libltc${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
 # DYLD_LIBRARY_PATH is for darwin.
 export DYLD_FALLBACK_LIBRARY_PATH=$LD_LIBRARY_PATH
