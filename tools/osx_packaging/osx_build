@@ -265,12 +265,18 @@ rm pangorc
 gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/?@executable_path/../lib/modules/?" > $Resources/gdk-pixbuf.loaders
 
 # We rely on clearlooks, so include a version from our own build tree
-# this one is special - we will set GTK_PATH to $Libraries/clearlooks
+# this one is special - we will set GTK_PATH to $Libraries/gtkengines
 
-echo "Copying clearlooks ..."
-cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $Frameworks
-mkdir -p $Frameworks/clearlooks/engines
-(cd $Frameworks/clearlooks/engines && ln -s ../../libclearlooks.dylib libclearlooks.dylib && ln -s ../../libclearlooks.dylib libclearlooks.so)
+GTK_ENGINE_DIR=$Libraries/gtkengines/engines
+mkdir -p $GTK_ENGINE_DIR
+
+echo "Copying GTK engines ..."
+cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so $Libraries
+(cd $GTK_ENGINE_DIR && ln -s ../../libclearlooks.dylib . && ln -s ../../libclearlooks.dylib libclearlooks.so)
+
+cp $GTKSTACK_ROOT/lib/gtk-2.0/2.10.0/engines/libpixmap.so $Libraries
+(cd $GTK_ENGINE_DIR && ln -s ../../libpixmap.dylib . && ln -s ../../libpixmap.dylib libpixmap.so)
+
 
 if test x$WITH_LADSPA != x ; then
     if test x$SAE != x ; then

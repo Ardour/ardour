@@ -318,7 +318,7 @@ rm pangorc
 gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.loaders.in
 
 # We rely on clearlooks, so include a version from our own build tree
-# this one is special - we will set GTK_PATH to $Libraries/clearlooks
+# this one is special - we will set GTK_PATH to $Libraries/gtkengines
 
 GTK_ENGINE_DIR=$Libraries/gtkengines/engines
 mkdir -p $GTK_ENGINE_DIR
