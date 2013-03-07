@@ -485,12 +485,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		at->FreezeChange.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::map_frozen, this), gui_context());
 	}
 
-	if (has_audio_outputs ()) {
-		panners.show_all ();
-	} else {
-		panners.hide_all ();
-	}
-
 	if (is_track ()) {
 
 		rec_solo_table.attach (*rec_enable_button, 0, 1, 0, 2);
@@ -538,6 +532,12 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	connect_to_pan ();
 	panners.setup_pan ();
+
+	if (has_audio_outputs ()) {
+		panners.show_all ();
+	} else {
+		panners.hide_all ();
+	}
 
 	update_diskstream_display ();
 	update_input_display ();
@@ -1230,6 +1230,13 @@ MixerStrip::update_input_display ()
 {
 	update_io_button (_route, _width, true);
   	panners.setup_pan ();
+
+	if (has_audio_outputs ()) {
+		panners.show_all ();
+	} else {
+		panners.hide_all ();
+	}
+
 }
 
 void
@@ -1238,6 +1245,12 @@ MixerStrip::update_output_display ()
 	update_io_button (_route, _width, false);
   	gpm.setup_meters ();
   	panners.setup_pan ();
+
+	if (has_audio_outputs ()) {
+		panners.show_all ();
+	} else {
+		panners.hide_all ();
+	}
 }
 
 void
@@ -1832,6 +1845,14 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	panner_ui().set_panner (_current_delivery->panner_shell(), _current_delivery->panner());
 	panner_ui().setup_pan ();
 
+	/* make sure the send has audio output */
+
+	if (_current_delivery->output() && _current_delivery->output()->n_ports().n_audio() > 0) {
+		panners.show_all ();
+	} else {
+		panners.hide_all ();
+	}
+
 	input_button.set_sensitive (false);
 	group_button.set_sensitive (false);
 	set_invert_sensitive (false);
@@ -1864,6 +1885,12 @@ MixerStrip::revert_to_default_display ()
 
 	panner_ui().set_panner (_route->main_outs()->panner_shell(), _route->main_outs()->panner());
 	panner_ui().setup_pan ();
+
+	if (has_audio_outputs ()) {
+		panners.show_all ();
+	} else {
+		panners.hide_all ();
+	}
 
 	reset_strip_style ();
 }
