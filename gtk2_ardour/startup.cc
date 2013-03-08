@@ -775,8 +775,7 @@ ArdourStartup::setup_new_session_page ()
 			new_folder_chooser.set_current_folder (session_parent_dir);
 			new_folder_chooser.add_shortcut_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 		} else {
-			//new_folder_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
-			new_folder_chooser.set_current_folder ("/usr/local");
+			new_folder_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 		}
 		new_folder_chooser.show ();
 		new_folder_chooser.set_title (_("Select folder for session"));
