@@ -80,7 +80,7 @@ _pingback (void *arg)
 
 	curl_global_init (CURL_GLOBAL_NOTHING);
 	c = curl_easy_init ();
-
+	
 	curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, curl_write_data); 
 	curl_easy_setopt(c, CURLOPT_WRITEDATA, &return_str); 
 	char errbuf[CURL_ERROR_SIZE];
@@ -153,6 +153,8 @@ _pingback (void *arg)
 				annc_file << return_str;
 			}
 		}
+	} else {
+		std::cerr << "curl failed: " << errbuff << std::endl;
 	}
 
 	curl_easy_cleanup (c);
