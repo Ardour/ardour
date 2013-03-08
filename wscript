@@ -290,11 +290,15 @@ def set_compiler_flags (conf,opt):
         
         conf.env.append_value('CFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
         conf.env.append_value('CXXFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
+        conf.env.append_value('CXXFLAGS', '-mmacosx-version-min=10.4')
+        conf.env.append_value('CFLAGS', '-mmacosx-version-min=10.4')
+
 
     elif conf.env['build_target'] in [ 'lion', 'mountainlion' ]:
         conf.env.append_value('CFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1070")
         conf.env.append_value('CXXFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1070")
-
+        conf.env.append_value('CXXFLAGS', '-mmacosx-version-min=10.7')
+        conf.env.append_value('CFLAGS', '-mmacosx-version-min=10.7')
     else:
         conf.define ('IS_OSX', 0)
 
@@ -547,14 +551,6 @@ def configure(conf):
         conf.define ('GTKOSX', 1)
         conf.define ('TOP_MENUBAR',1)
         conf.define ('GTKOSX',1)
-
-        #       Define OSX as a uselib to use when compiling
-        #       on Darwin to add all applicable flags at once
-        #
-        conf.env.append_value('CXXFLAGS_OSX', '-DMAC_OS_X_VERSION_MIN_REQUIRED=1040')
-        conf.env.append_value('CFLAGS_OSX', '-DMAC_OS_X_VERSION_MIN_REQUIRED=1040')
-        conf.env.append_value('CXXFLAGS_OSX', '-mmacosx-version-min=10.4')
-        conf.env.append_value('CFLAGS_OSX', '-mmacosx-version-min=10.4')
 
         # It would be nice to be able to use this to force back-compatibility with 10.4
         # but even by the time of 11, the 10.4 SDK is no longer available in any normal
