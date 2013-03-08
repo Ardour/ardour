@@ -164,8 +164,10 @@ def set_compiler_flags (conf,opt):
                 conf.env['build_target'] = 'leopard'
             elif re.search ("^10[.]", version) != None:
                 conf.env['build_target'] = 'snowleopard'
-            else:
+            elif re.search ("^11[.]", version) != None:
                 conf.env['build_target'] = 'lion'
+            else:
+                conf.env['build_target'] = 'mountainlion'
         else:
             if re.search ("x86_64", cpu) != None:
                 conf.env['build_target'] = 'x86_64'
@@ -281,11 +283,15 @@ def set_compiler_flags (conf,opt):
     # a single way to test if we're on OS X
     #
 
-    if conf.env['build_target'] in ['panther', 'tiger', 'leopard', 'snowleopard', 'lion', 'mountainlion' ]:
+    if conf.env['build_target'] in ['panther', 'tiger', 'leopard', 'snowleopard' ]:
         conf.define ('IS_OSX', 1)
         # force tiger or later, to avoid issues on PPC which defaults
         # back to 10.1 if we don't tell it otherwise.
+        
         conf.env.append_value('CFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
+
+    else if conf.env['build_target'] in [ 'lion', 'mountainlion' ]:
+        conf.env.append_value('CFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1070")
 
     else:
         conf.define ('IS_OSX', 0)

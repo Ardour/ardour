@@ -222,6 +222,7 @@ fixup_bundle_environment (int, char* [])
 }
 
 static void load_custom_fonts() {
+#if MAC_OS_X_VERSION_MIN_REQUIRED > 1060
 	std::string ardour_mono_file;
 
 	if (!find_file_in_search_path (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
@@ -239,6 +240,9 @@ static void load_custom_fonts() {
 	if (CTFontManagerRegisterFontsForURL(fontURL, kCTFontManagerScopeProcess, &error) != true) {
 		cerr << _("Cannot load ArdourMono TrueType font.") << endl;
 	}
+#else
+	/* no real usable API for this on OS X 10.5 or below */
+#endif
 }
 
 #else
