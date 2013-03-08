@@ -290,7 +290,7 @@ def set_compiler_flags (conf,opt):
         
         conf.env.append_value('CFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
 
-    else if conf.env['build_target'] in [ 'lion', 'mountainlion' ]:
+    elif conf.env['build_target'] in [ 'lion', 'mountainlion' ]:
         conf.env.append_value('CFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1070")
 
     else:
