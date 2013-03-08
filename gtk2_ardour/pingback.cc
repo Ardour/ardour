@@ -154,7 +154,7 @@ _pingback (void *arg)
 			}
 		}
 	} else {
-		std::cerr << "curl failed: " << errbuff << std::endl;
+		std::cerr << "curl failed: " << errbuf << std::endl;
 	}
 
 	curl_easy_cleanup (c);
