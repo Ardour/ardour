@@ -47,6 +47,7 @@ bool ARDOUR_COMMAND_LINE::finder_invoked_ardour = false;
 string ARDOUR_COMMAND_LINE::immediate_save;
 string ARDOUR_COMMAND_LINE::jack_session_uuid;
 string ARDOUR_COMMAND_LINE::load_template;
+bool ARDOUR_COMMAND_LINE::check_announcements = true;
 
 using namespace ARDOUR_COMMAND_LINE;
 
@@ -57,6 +58,7 @@ print_help (const char *execname)
 	     << _("  [SESSION_NAME]              Name of session to load\n")
 	     << _("  -v, --version               Show version information\n")
 	     << _("  -h, --help                  Print this message\n")
+	     << _("  -a, --no-announcements      Do not contact website for announcements\n")
 	     << _("  -b, --bindings              Print all possible keyboard binding names\n")
 	     << _("  -c, --name <name>           Use a specific jack client name, default is ardour\n")
 	     << _("  -d, --disable-plugins       Disable all plugins in an existing session\n")
@@ -80,7 +82,7 @@ print_help (const char *execname)
 int
 ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 {
-	const char *optstring = "bc:C:dD:hk:E:m:N:nOp:PST:U:vV";
+	const char *optstring = "abc:C:dD:hk:E:m:N:nOp:PST:U:vV";
 	const char *execname = strrchr (argv[0], '/');
 
 	if (getenv ("ARDOUR_SAE")) {
@@ -97,6 +99,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 	const struct option longopts[] = {
 		{ "version", 0, 0, 'v' },
 		{ "help", 0, 0, 'h' },
+		{ "no-announcements", 0, 0, 'a' },
 		{ "bindings", 0, 0, 'b' },
 		{ "disable-plugins", 1, 0, 'd' },
 		{ "debug", 1, 0, 'D' },
@@ -137,6 +140,10 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 			print_help (execname);
 			exit (0);
 			break;
+		case 'a':
+			check_announcements = false;
+			break;
+
 		case 'b':
 			show_key_actions = true;
 			break;

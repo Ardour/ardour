@@ -67,6 +67,7 @@
 #include "ardour/automation_watch.h"
 #include "ardour/diskstream.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/port.h"
 #include "ardour/process_thread.h"
 #include "ardour/profile.h"
@@ -101,6 +102,7 @@ typedef uint64_t microseconds_t;
 #include "mixer_ui.h"
 #include "mouse_cursors.h"
 #include "opts.h"
+#include "pingback.h"
 #include "processor_box.h"
 #include "prompter.h"
 #include "public_editor.h"
@@ -603,6 +605,33 @@ ARDOUR_UI::update_autosave ()
 }
 
 void
+ARDOUR_UI::check_announcements ()
+{
+#ifdef PHONE_HOME
+	string _annc_filename;
+
+#ifdef __APPLE__
+	_annc_filename = PROGRAM_NAME "_announcements_osx_";
+#else
+	_annc_filename = PROGRAM_NAME "_announcements_linux_";
+#endif
+	_annc_filename.append (VERSIONSTRING);
+
+	std::string path = Glib::build_filename (user_config_directory(), _annc_filename);
+	std::ifstream announce_file (path.c_str());
+	if ( announce_file.fail() )
+		_announce_string = "";
+	else {
+		std::stringstream oss;
+		oss << announce_file.rdbuf();
+		_announce_string = oss.str();
+	}
+
+	pingback (VERSIONSTRING, path);
+#endif
+}
+
+void
 ARDOUR_UI::startup ()
 {
 	Application* app = Application::instance ();
@@ -610,9 +639,9 @@ ARDOUR_UI::startup ()
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
 	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_load));
 
-#ifdef PHONE_HOME
-	call_the_mothership (VERSIONSTRING);
-#endif
+	if (ARDOUR_COMMAND_LINE::check_announcements) {
+		check_announcements ();
+	}
 
 	app->ready ();
 

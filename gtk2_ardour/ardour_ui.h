@@ -263,6 +263,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void get_process_buffers ();
 	void drop_process_buffers ();
 
+        const std::string& announce_string() const { return _announce_string; }
+
   protected:
 	friend class PublicEditor;
 
@@ -726,6 +728,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool _feedback_exists;
 
 	void resize_text_widgets ();
+
+        std::string _announce_string;
+        void check_announcements ();
 };
 
 #endif /* __ardour_gui_h__ */

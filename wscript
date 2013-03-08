@@ -444,7 +444,10 @@ def options(opt):
     opt.add_option('--nls', action='store_true', default=True, dest='nls',
                     help='Enable i18n (native language support) (default)')
     opt.add_option('--no-nls', action='store_false', dest='nls')
-    opt.add_option('--phone-home', action='store_false', default=False, dest='phone_home')
+    opt.add_option('--phone-home', action='store_true', default=True, dest='phone_home',
+                   help='Contact ardour.org at startup for new announcements')
+    opt.add_option('--no-phone-home', action='store_false', dest='phone_home',
+                   help='Do not contact ardour.org at startup for new announcements')
     opt.add_option('--stl-debug', action='store_true', default=False, dest='stl_debug',
                     help='Build with debugging for the STL')
     opt.add_option('--rt-alloc-debug', action='store_true', default=False, dest='rt_alloc_debug',
@@ -633,10 +636,11 @@ def configure(conf):
 
     # Set up waf environment and C defines
     opts = Options.options
-    if opts.debug:
-        opts.phone_home = False;   # debug builds should not call home
+    print "PH = " 
+    print opts.phone_home
     if opts.phone_home:
-        conf.env['PHONE_HOME'] = opts.phone_home
+        conf.define('PHONE_HOME', 1)
+        conf.env['PHONE_HOME'] = True
     if opts.fpu_optimization:
         conf.env['FPU_OPTIMIZATION'] = True
     if opts.freesound:

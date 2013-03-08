@@ -41,6 +41,7 @@ extern bool   finder_invoked_ardour;
 extern std::string immediate_save;
 extern std::string jack_session_uuid;
 extern std::string load_template;
+extern bool        check_announcements;
 
 extern int32_t parse_opts (int argc, char *argv[]);
 
