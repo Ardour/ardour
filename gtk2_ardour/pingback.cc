@@ -92,9 +92,9 @@ _pingback (void *arg)
 	string url;
 
 #ifdef __APPLE__
-	url = "http://community.ardour.org/pingback/osx/";
+	url = "https://community.ardour.org/pingback/osx/";
 #else
-	url = "http://community.ardour.org/pingback/linux/";
+	url = "https://community.ardour.org/pingback/linux/";
 #endif
 
 	char* v = curl_easy_escape (c, cm->version.c_str(), cm->version.length());
@@ -130,6 +130,14 @@ _pingback (void *arg)
 	return_str = "";
 
 	if (curl_easy_perform (c) == 0) {
+		int http_status; 
+
+		curl_easy_getinfo (c, CURLINFO_RESPONSE_CODE, &http_status);
+
+		if (http_status != 200) {
+			std::cerr << "Bad HTTP status" << std::endl;
+			return 0;
+		}
 
 		if ( return_str.length() > 140 ) { // like a tweet :)
 			std::cerr << "Announcement string is too long (probably behind a proxy)." << std::endl;
