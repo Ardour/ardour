@@ -127,8 +127,6 @@ _pingback (void *arg)
 	url += s;
 	free (query);
 
-	std::cerr << "ping using " << url << std::endl;
-
 	curl_easy_setopt (c, CURLOPT_URL, url.c_str());
 
 	return_str = "";
