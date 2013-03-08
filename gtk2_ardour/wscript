@@ -511,7 +511,7 @@ def build(bld):
                 'HUGER' : '36',
                 'MASSIVE' : '60',
         }
-        if bld['build_target'] == 'tiger' or bld['build_target'] == 'leopard' :
+        if bld.env['build_target'] == 'tiger' or bld.env['build_target'] == 'leopard' :
             font_names = {
                 'MONOSPACE' : 'Lucida Sans Typewriter',
             }
