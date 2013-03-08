@@ -289,9 +289,11 @@ def set_compiler_flags (conf,opt):
         # back to 10.1 if we don't tell it otherwise.
         
         conf.env.append_value('CFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
+        conf.env.append_value('CXXFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
 
     elif conf.env['build_target'] in [ 'lion', 'mountainlion' ]:
         conf.env.append_value('CFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1070")
+        conf.env.append_value('CXXFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1070")
 
     else:
         conf.define ('IS_OSX', 0)
