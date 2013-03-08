@@ -511,9 +511,14 @@ def build(bld):
                 'HUGER' : '36',
                 'MASSIVE' : '60',
         }
-        font_names = {
+        if conf.env['build_target'] == 'tiger' or conf.env['build_target'] == 'leopard' :
+            font_names = {
+                'MONOSPACE' : 'Lucida Sans Typewriter',
+            }
+        else:
+            font_names = {
                 'MONOSPACE' : 'ArdourMono',
-        }
+            }
     else: # Linux/X11 fonts
         basefont = '' # unspecified - use system defaults
         font_sizes = {
