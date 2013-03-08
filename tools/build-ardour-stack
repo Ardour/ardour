@@ -171,7 +171,7 @@ defmod gtkmm 2.24.2 http://ftp.acc.umu.se/pub/GNOME/sources/gtkmm/2.24/ xz
 defmod libart_lgpl 2.3.21 http://ftp.gnome.org/pub/gnome/sources/libart_lgpl/2.3/ bz2
 defmod libgnomecanvas 2.30.3 http://ftp.gnome.org/pub/gnome/sources/libgnomecanvas/2.30/ bz2
 defmod libgnomecanvasmm 2.26.0 http://ftp.acc.umu.se/pub/GNOME/sources/libgnomecanvasmm/2.26/ bz2
-defmod liblo 0.25 http://downloads.sourceforge.net/liblo/ gz
+defmod liblo 0.26 http://downloads.sourceforge.net/liblo/ gz
 defmod raptor2 2.0.6 http://download.librdf.org/source/ gz
 defmod rasqal 0.9.28 http://download.librdf.org/source/ gz
 defmod redland 1.0.15 http://download.librdf.org/source/ gz
