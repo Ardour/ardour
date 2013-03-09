@@ -512,19 +512,19 @@ def build(bld):
                 'HUGER' : '36',
                 'MASSIVE' : '60',
         }
-        if bld.env['build_target'] == 'tiger' or bld.env['build_target'] == 'leopard' :
-            # There is no acceptable monospace font available on older versions of OS X
-            # and no API on those versions to load TTF files that will work with 
-            # GTK/fontconfig/pango.
-            #
-            # In addition, the ArdourMono font gets clipped for some reason on OS X
-            #
-            # Moreover, Lucida Grande just seems to work even though it is not monospace
-            # so just use it.
-            #
-            font_names = {
-                'MONOSPACE' : 'Lucida Grande',
-            }
+        
+        # There is no acceptable monospace font available on older versions of OS X
+        # and no API on those versions to load TTF files that will work with 
+        # GTK/fontconfig/pango.
+        #
+        # In addition, the ArdourMono font gets clipped for some reason on OS X
+        #
+        # Moreover, Lucida Grande just seems to work even though it is not monospace
+        # so just use it.
+        #
+        font_names = {
+            'MONOSPACE' : 'Lucida Grande',
+        }
     else: # Linux/X11 fonts
         basefont = '' # unspecified - use system defaults
         font_sizes = {
