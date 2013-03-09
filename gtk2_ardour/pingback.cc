@@ -30,11 +30,14 @@
 
 #include "pbd/compose.h"
 #include "pbd/pthread_utils.h"
+
 #include "ardour/filesystem_paths.h"
+#include "ardour/rc_configuration.h"
 
 #include "pingback.h"
 
 using std::string;
+using namespace ARDOUR;
 
 static size_t
 curl_write_data (char *bufptr, size_t size, size_t nitems, void *ptr)
@@ -96,9 +99,9 @@ _pingback (void *arg)
 	string url;
 
 #ifdef __APPLE__
-	url = "https://community.ardour.org/pingback/osx/";
+	url = Config->get_osx_pingback_url ();
 #else
-	url = "https://community.ardour.org/pingback/linux/";
+	url = Config->get_linux_pingback_url ();
 #endif
 
 	char* v = curl_easy_escape (c, cm->version.c_str(), cm->version.length());

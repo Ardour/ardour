@@ -20,8 +20,11 @@
 #ifndef __libpbd_openuri_h__
 #define __libpbd_openuri_h__
 
+#include <string>
+
 namespace PBD {
         bool open_uri (const char*);
+        bool open_uri (const std::string&);
 }
 
 #endif

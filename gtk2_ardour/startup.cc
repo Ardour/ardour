@@ -32,6 +32,7 @@
 #include "pbd/replace_all.h"
 #include "pbd/whitespace.h"
 #include "pbd/stacktrace.h"
+#include "pbd/openuri.h"
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/recent_sessions.h"
@@ -551,7 +552,34 @@ ArdourStartup::setup_initial_choice_page ()
 
 	centering_vbox->pack_start (ic_new_session_button, false, true);
 	centering_vbox->pack_start (ic_existing_session_button, false, true);
+	
+	if (ARDOUR_UI::instance()->announce_string() != "" ) {
 
+		Gtk::Frame *info_frame = manage(new Gtk::Frame);
+		info_frame->set_shadow_type(SHADOW_ETCHED_OUT);
+		centering_vbox->pack_start (*info_frame, false, false, 20);
+
+		Box *info_box = manage (new VBox);
+		info_box->set_border_width (12);
+		info_box->set_spacing (6);
+		info_box->set_name("mixbus_info_box");
+
+		info_box->pack_start (info_scroller_label, false, false);
+
+		info_frame->add (*info_box);
+		info_frame->show_all();
+
+		info_scroller_count = 0;
+		info_scroller_connection = Glib::signal_timeout().connect (mem_fun(*this, &ArdourStartup::info_scroller_update), 50);
+
+		Gtk::Button *updates_button = manage (new Gtk::Button (_("Check the website for more...")));
+
+		updates_button->signal_clicked().connect (mem_fun(*this, &ArdourStartup::updates_button_clicked) );
+		ARDOUR_UI::instance()->tooltips().set_tip (*updates_button, _("Click to open the program website in your web browser"));
+
+		info_box->pack_start (*updates_button, false, false);
+	}
+	
 	ic_new_session_button.signal_button_press_event().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_clicked), false);
 	ic_new_session_button.signal_activate().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_activated), false);
 
@@ -1409,4 +1437,29 @@ ArdourStartup::been_here_before_path () const
 {
 	// XXXX use more specific version so we can catch upgrades
 	return Glib::build_filename (user_config_directory (), ".a3");
+}
+
+void
+ArdourStartup::updates_button_clicked ()
+{
+	//now open a browser window so user can see more
+	PBD::open_uri (Config->get_updates_url());
+}
+
+bool
+ArdourStartup::info_scroller_update()
+{
+	info_scroller_count++;
+
+	char buf[512];
+	snprintf (buf, std::min(info_scroller_count,sizeof(buf)-1), "%s", ARDOUR_UI::instance()->announce_string().c_str() );
+	buf[info_scroller_count] = NULL;
+	info_scroller_label.set_text (buf);
+	info_scroller_label.show();
+
+	if (info_scroller_count > ARDOUR_UI::instance()->announce_string().length()) {
+		info_scroller_connection.disconnect();
+	}
+
+	return true;
 }

@@ -295,6 +295,12 @@ class ArdourStartup : public Gtk::Assistant {
 
 	bool _existing_session_chooser_used; ///< set to true when the existing session chooser has been used
         void setup_prerelease_page ();
+
+	Gtk::Label info_scroller_label;
+        std::string::size_type info_scroller_count;
+        bool info_scroller_update();
+	sigc::connection info_scroller_connection;
+        void updates_button_clicked ();
 };
 
 #endif /* __gtk2_ardour_startup_h__ */

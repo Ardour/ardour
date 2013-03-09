@@ -2874,13 +2874,13 @@ ARDOUR_UI::show_about ()
 void
 ARDOUR_UI::launch_manual ()
 {
-	PBD::open_uri("http://ardour.org/flossmanual");
+	PBD::open_uri (Config->get_tutorial_manual_url());
 }
 
 void
 ARDOUR_UI::launch_reference ()
 {
-	PBD::open_uri ("http://ardour.org/refmanual");
+	PBD::open_uri (Config->get_reference_manual_url());
 }
 
 void

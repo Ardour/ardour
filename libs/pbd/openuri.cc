@@ -55,3 +55,8 @@ PBD::open_uri (const char* uri)
 #endif
 }
 
+bool
+PBD::open_uri (const std::string& uri) 
+{
+	return open_uri (uri.c_str());
+}
