@@ -223,10 +223,10 @@ fixup_bundle_environment (int, char* [])
 
 static void load_custom_fonts() {
 /* this code will only compile on OS X 10.6 and above, and we currently do not
- * need it anyway since we have no custom fonts on OS X. Leave it here in case
- * we ever need to comeback to it.
+ * need it for earlier versions since we fall back on a non-monospace,
+ * non-custom font.
  */
-#if 0
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
 	std::string ardour_mono_file;
 
 	if (!find_file_in_search_path (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {

@@ -513,8 +513,11 @@ def build(bld):
                 'MASSIVE' : '60',
         }
         if bld.env['build_target'] == 'tiger' or bld.env['build_target'] == 'leopard' :
+            # There is no acceptable monospace font available on older versions of OS X
+            # and no API to load TTF files that will work with GTK/fontconfig/pango.
+            # Fall back on a font that works, even though it is not monospace
             font_names = {
-                'MONOSPACE' : 'Lucida Sans Typewriter',
+                'MONOSPACE' : 'Lucida Grande',
             }
         else:
             font_names = {
