@@ -15,8 +15,8 @@ if sys.platform == 'darwin':
     OSX_VERSION = '3.0beta6'
     VERSION = '3.0beta6'
 else:
-    LINUX_VERSION = '3.0rc3'
-    VERSION = '3.0rc3'
+    LINUX_VERSION = '3.0'
+    VERSION = '3.0'
 
 APPNAME = 'Ardour3'
 
