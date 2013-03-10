@@ -209,8 +209,8 @@ CONFIG_VARIABLE (bool, show_region_gain, "show-region-gain", false)
 
 /* web addresses used in the program */
 
-CONFIG_VARIABLE (std::string, osx_pingback_url, "osx-pingback-url", "https://community.ardour.org/pingback/osx/")
-CONFIG_VARIABLE (std::string, linux_pingback_url, "linux-pingback-url", "https://community.ardour.org/pingback/linux/")
+CONFIG_VARIABLE (std::string, osx_pingback_url, "osx-pingback-url", "http://community.ardour.org/pingback/osx/")
+CONFIG_VARIABLE (std::string, linux_pingback_url, "linux-pingback-url", "http://community.ardour.org/pingback/linux/")
 CONFIG_VARIABLE (std::string, tutorial_manual_url, "tutorial-manual-url", "http://ardour.org/flossmanual")
 CONFIG_VARIABLE (std::string, reference_manual_url, "reference-manual-url", "http://manual.ardour.org/")
 CONFIG_VARIABLE (std::string, updates_url, "updates-url", "http://ardour.org/whatsnew.html")

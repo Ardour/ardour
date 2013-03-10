@@ -88,10 +88,6 @@ _pingback (void *arg)
 	curl_easy_setopt (c, CURLOPT_WRITEDATA, &return_str); 
 	char errbuf[CURL_ERROR_SIZE];
 	curl_easy_setopt (c, CURLOPT_ERRORBUFFER, errbuf); 
-	/* we really would prefer to be able to authenticate the certificate
-	   but this has issues that right now (march 2013), i don't understand.
-	*/
-	curl_easy_setopt (c, CURLOPT_SSL_VERIFYPEER, 0);
 
 	//get announcements from our server
 	std::cerr << "Checking for Announcements from ardour.org  ...\n";
