@@ -778,3 +778,5 @@ def i18n_po(bld):
 def i18n_mo(bld):
     bld.recurse (i18n_children)
 
+def tarball(bld):
+    create_stored_revision()
