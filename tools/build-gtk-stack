@@ -294,7 +294,7 @@ if [ x$patch != x ] ; then
     if uname -a | grep --silent arwin ; then
         patches=`ls $this_script_dir/current-gtk-patches/*.patch`
     else
-        patches="$this_script_dir/current-gtk-patches/gtkrelocation.patch $this_script_dir/current-gtk-patches/gtkfilechooserbutton.patch"
+        patches="$this_script_dir/current-gtk-patches/gtkrelocation.patch"
     fi
         
     for patch in $patches ; do
@@ -378,7 +378,11 @@ fi
 
 basic_builder intltool
 
-tar xf $MOD_tiff_local_tarball && (cd $MOD_tiff_unpacked && CFLAGS="$GLOBAL_CFLAGS -DHAVE_APPLE_OPENGL_FRAMEWORK" LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "tiff build failed"
+if [ x$OSX != x ] ; then
+    tar xf $MOD_tiff_local_tarball && (cd $MOD_tiff_unpacked && CFLAGS="$GLOBAL_CFLAGS -DHAVE_APPLE_OPENGL_FRAMEWORK" LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "tiff build failed"
+else
+    basic_builder libtiff
+fi
 
 basic_builder libpng
 basic_builder jpeg
