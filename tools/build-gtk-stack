@@ -381,7 +381,7 @@ basic_builder intltool
 if [ x$OSX != x ] ; then
     tar xf $MOD_tiff_local_tarball && (cd $MOD_tiff_unpacked && CFLAGS="$GLOBAL_CFLAGS -DHAVE_APPLE_OPENGL_FRAMEWORK" LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "tiff build failed"
 else
-    basic_builder libtiff
+    basic_builder tiff
 fi
 
 basic_builder libpng
