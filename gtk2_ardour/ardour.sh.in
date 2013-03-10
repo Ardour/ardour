@@ -5,7 +5,7 @@
 # and does a few checks before exec'ing the real executable.
 # 
 
-export GTK_PATH=@SYSCONFDIR@/ardour3${GTK_PATH:+:$GTK_PATH}
+export GTK_PATH=@SYSCONFDIR@/ardour3:@LIBDIR@/ardour3${GTK_PATH:+:$GTK_PATH}
 
 export LD_LIBRARY_PATH=@LIBDIR@/ardour3${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
