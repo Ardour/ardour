@@ -46,7 +46,6 @@ children = [
         'export',
         'midi_maps',
         'mcp',
-        'manual',
         'patchfiles'
 ]
 
