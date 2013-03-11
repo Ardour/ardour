@@ -635,8 +635,6 @@ def configure(conf):
 
     # Set up waf environment and C defines
     opts = Options.options
-    print "PH = " 
-    print opts.phone_home
     if opts.phone_home:
         conf.define('PHONE_HOME', 1)
         conf.env['PHONE_HOME'] = True
