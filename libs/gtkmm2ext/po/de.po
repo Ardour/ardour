@@ -1,0 +1,101 @@
+# Copyright (C) YEAR "Paul Davis"
+# This file is distributed under the same license as the PACKAGE package.
+#
+# Edgar Aichinger <edgar.aichinger@aon.at>, 2013.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-02-05 19:32+0100\n"
+"PO-Revision-Date: 2013-02-05 19:50+0100\n"
+"Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
+"Language-Team: German <ardour-dev@lists.ardour.org>\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 1.5\n"
+
+#: actions.cc:386
+msgid "Unknown action name: %1"
+msgstr "Unbekannter Aktionsname: %1"
+
+#: binding_proxy.cc:84
+msgid "operate controller now"
+msgstr "Jetzt den Kontroller bedienen"
+
+#: bindable_button.cc:48
+msgid "button cannot watch state of non-existing Controllable\n"
+msgstr ""
+"Schaltfläche kann den Status des nichtexistenten Kontrollzieles nicht "
+"verfolgen\n"
+
+#: gtk_ui.cc:107
+msgid "Log"
+msgstr "Log"
+
+#: gtk_ui.cc:361
+msgid ""
+"\n"
+"\n"
+"Shortcut: "
+msgstr ""
+"\n"
+"\n"
+"Kurzbefehl: "
+
+#: gtk_ui.cc:633
+msgid "Press To Exit"
+msgstr "Zum Beenden drücken"
+
+#: gtk_ui.cc:669
+msgid "I'm sorry %1, I can't do that"
+msgstr "Leider kann ich das nicht tun, %1"
+
+#: keyboard.cc:68
+msgid "Command"
+msgstr "Befehl"
+
+#: keyboard.cc:69 keyboard.cc:72 keyboard.cc:85 keyboard.cc:89
+msgid "Control"
+msgstr "Strg"
+
+#: keyboard.cc:70 keyboard.cc:73 keyboard.cc:87 keyboard.cc:90
+msgid "Key|Shift"
+msgstr "Key|Shift"
+
+#: keyboard.cc:71
+msgid "Option"
+msgstr "Option"
+
+#: keyboard.cc:86
+msgid "Alt"
+msgstr "Alt"
+
+#: keyboard.cc:88
+msgid "Meta"
+msgstr "Meta"
+
+#: keyboard.cc:134 keyboard.cc:523
+msgid "Unknown"
+msgstr "Unbekannt"
+
+#: keyboard.cc:534
+msgid "key bindings file not found at \"%2\" or contains errors."
+msgstr ""
+"Die Tastenkürzel-Datei \"%1\" konnte nicht gefunden werden oder enthält "
+"Fehler."
+
+#: tearoff.cc:57
+msgid "Click to tear this into its own window"
+msgstr "Klicken, um in ein eigenes Fenster abzureißen"
+
+#: tearoff.cc:63
+msgid "Click to put this back in the main window"
+msgstr "Klicken, um an das Hauptfenster anzudocken"
+
+#: textviewer.cc:34
+msgid "Close"
+msgstr "Schließen"
+

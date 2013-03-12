@@ -1,0 +1,123 @@
+# Copyright (C) 2004 Paul Davis
+# This file is distributed under the same license as the gtkmm2ext package.
+# Authors: Alexander Franca <alexander@nautae.eti.br>
+#          Chris Ross <chris.ross@tebibyte.org>
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gtkmm2ext\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-03-03 11:35-0500\n"
+"PO-Revision-Date: 2004-05-17 20:36+0200\n"
+"Last-Translator: Chris Ross <chris.ross@tebibyte.org>\n"
+"Language-Team: Portuguese\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-15\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: actions.cc:386
+msgid "Unknown action name: %1"
+msgstr ""
+
+#: binding_proxy.cc:84
+#, fuzzy
+msgid "operate controller now"
+msgstr "Operar controladora de MIDI agora"
+
+#: bindable_button.cc:48
+msgid "button cannot watch state of non-existing Controllable\n"
+msgstr ""
+
+#: gtk_ui.cc:107
+msgid "Log"
+msgstr ""
+
+#: gtk_ui.cc:361
+msgid ""
+"\n"
+"\n"
+"Shortcut: "
+msgstr ""
+
+#: gtk_ui.cc:633
+msgid "Press To Exit"
+msgstr ""
+
+#: gtk_ui.cc:669
+msgid "I'm sorry %1, I can't do that"
+msgstr ""
+
+#: keyboard.cc:68
+msgid "Command"
+msgstr ""
+
+#: keyboard.cc:69 keyboard.cc:72 keyboard.cc:85 keyboard.cc:89
+msgid "Control"
+msgstr ""
+
+#: keyboard.cc:70 keyboard.cc:73 keyboard.cc:87 keyboard.cc:90
+msgid "Key|Shift"
+msgstr ""
+
+#: keyboard.cc:71
+msgid "Option"
+msgstr ""
+
+#: keyboard.cc:86
+msgid "Alt"
+msgstr ""
+
+#: keyboard.cc:88
+msgid "Meta"
+msgstr ""
+
+#: keyboard.cc:134 keyboard.cc:523
+msgid "Unknown"
+msgstr ""
+
+#: keyboard.cc:534
+msgid "key bindings file not found at \"%2\" or contains errors."
+msgstr ""
+
+#: tearoff.cc:57
+msgid "Click to tear this into its own window"
+msgstr ""
+
+#: tearoff.cc:63
+msgid "Click to put this back in the main window"
+msgstr ""
+
+#: textviewer.cc:34
+msgid "Close"
+msgstr "Fechar"
+
+#~ msgid "OK"
+#~ msgstr "OK"
+
+#~ msgid "Location:"
+#~ msgstr "localização:"
+
+#~ msgid "Browse ..."
+#~ msgstr "Localizar ..."
+
+#~ msgid "Cancel"
+#~ msgstr "Cancelar"
+
+#~ msgid "New folder"
+#~ msgstr "Novo diretório"
+
+#~ msgid "Add to favorites"
+#~ msgstr "Adicionar a favoritos"
+
+#~ msgid "Remove from favorites"
+#~ msgstr "Remover de favoritos"
+
+#~ msgid "Show Hidden"
+#~ msgstr "Mostrar ocultos"
+
+#~ msgid "Hide browser"
+#~ msgstr "Ocultar explorador"
+
+#~ msgid "Rescan"
+#~ msgstr "Buscar de novo"

@@ -1,0 +1,107 @@
+# translation of libgtkmm2ext.po to Polish
+# Copyright (C) YEAR "Paul Davis"
+# This file is distributed under the same license as the PACKAGE package.
+#
+# Piotr Zaryk <pzaryk@gmail.com>, 2008.
+msgid ""
+msgstr ""
+"Project-Id-Version: libgtkmm2ext\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-03-03 11:35-0500\n"
+"PO-Revision-Date: 2008-04-10 10:54+0100\n"
+"Last-Translator: Piotr Zaryk <pzaryk@gmail.com>\n"
+"Language-Team: Polish <pl@li.org>\n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: actions.cc:386
+msgid "Unknown action name: %1"
+msgstr ""
+
+#: binding_proxy.cc:84
+msgid "operate controller now"
+msgstr "Teraz operuj kontrolerem"
+
+#: bindable_button.cc:48
+msgid "button cannot watch state of non-existing Controllable\n"
+msgstr ""
+
+#: gtk_ui.cc:107
+msgid "Log"
+msgstr "Log"
+
+#: gtk_ui.cc:361
+msgid ""
+"\n"
+"\n"
+"Shortcut: "
+msgstr ""
+
+#: gtk_ui.cc:633
+msgid "Press To Exit"
+msgstr "Wciśnij by zakończyć"
+
+#: gtk_ui.cc:669
+msgid "I'm sorry %1, I can't do that"
+msgstr ""
+
+#: keyboard.cc:68
+msgid "Command"
+msgstr ""
+
+#: keyboard.cc:69 keyboard.cc:72 keyboard.cc:85 keyboard.cc:89
+msgid "Control"
+msgstr ""
+
+#: keyboard.cc:70 keyboard.cc:73 keyboard.cc:87 keyboard.cc:90
+msgid "Key|Shift"
+msgstr ""
+
+#: keyboard.cc:71
+msgid "Option"
+msgstr ""
+
+#: keyboard.cc:86
+msgid "Alt"
+msgstr ""
+
+#: keyboard.cc:88
+msgid "Meta"
+msgstr ""
+
+#: keyboard.cc:134 keyboard.cc:523
+msgid "Unknown"
+msgstr ""
+
+#: keyboard.cc:534
+msgid "key bindings file not found at \"%2\" or contains errors."
+msgstr ""
+
+#: tearoff.cc:57
+msgid "Click to tear this into its own window"
+msgstr ""
+
+#: tearoff.cc:63
+msgid "Click to put this back in the main window"
+msgstr ""
+
+#: textviewer.cc:34
+msgid "Close"
+msgstr "Zamknij"
+
+#~ msgid "Error"
+#~ msgstr "Błąd"
+
+#~ msgid "+"
+#~ msgstr "+"
+
+#~ msgid "-"
+#~ msgstr "-"
+
+#~ msgid "Paths"
+#~ msgstr "Położenia"
+
+#~ msgid "Path Chooser"
+#~ msgstr "Wybór położenia"
