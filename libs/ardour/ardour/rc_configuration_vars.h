@@ -214,3 +214,11 @@ CONFIG_VARIABLE (std::string, linux_pingback_url, "linux-pingback-url", "http://
 CONFIG_VARIABLE (std::string, tutorial_manual_url, "tutorial-manual-url", "http://ardour.org/flossmanual")
 CONFIG_VARIABLE (std::string, reference_manual_url, "reference-manual-url", "http://manual.ardour.org/")
 CONFIG_VARIABLE (std::string, updates_url, "updates-url", "http://ardour.org/whatsnew.html")
+
+#ifdef WITH_VIDEOTIMELINE
+CONFIG_VARIABLE (std::string, video_server_url, "video-server-url", "http://localhost:1554")
+CONFIG_VARIABLE (std::string, video_server_docroot, "video-server-docroot", "/")
+CONFIG_VARIABLE (bool, video_monitor_setup_dialog, "video-monitor-setup-dialog", false)
+CONFIG_VARIABLE (bool, show_video_export_info, "show-video-export-info", true)
+CONFIG_VARIABLE (bool, show_video_server_dialog, "show-video-server-dialog", true)
+#endif

@@ -116,6 +116,13 @@ typedef uint64_t microseconds_t;
 #include "time_axis_view_item.h"
 #include "utils.h"
 #include "window_proxy.h"
+#ifdef WITH_VIDEOTIMELINE
+#include "video_server_dialog.h"
+#include "add_video_dialog.h"
+#include "transcode_video_dialog.h"
+#include "video_copy_dialog.h"
+#include "system_exec.h" /* to launch video-server */
+#endif
 
 #include "i18n.h"
 
@@ -195,6 +202,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	session_selector_window = 0;
 	last_key_press_time = 0;
 	add_route_dialog = 0;
+#ifdef WITH_VIDEOTIMELINE
+	add_video_dialog = 0;
+	video_server_process = 0;
+#endif
 	route_params = 0;
 	bundle_manager = 0;
 	rc_option_editor = 0;
@@ -461,6 +472,10 @@ ARDOUR_UI::~ARDOUR_UI ()
 	delete editor;
 	delete mixer;
 	delete add_route_dialog;
+#ifdef WITH_VIDEOTIMELINE
+	if (add_video_dialog) delete add_video_dialog;
+	stop_video_server();
+#endif
 }
 
 void
@@ -769,6 +784,12 @@ ARDOUR_UI::idle_finish ()
 void
 ARDOUR_UI::finish()
 {
+#ifdef WITH_VIDEOTIMELINE
+	/* close video-monitor & pending requests
+	 * would better be done in ~Editor() but that is not called..
+	 */
+	ARDOUR_UI::instance()->video_timeline->close_session();
+#endif
 	if (_session) {
 
 		if (_session->dirty()) {
@@ -804,6 +825,11 @@ If you still wish to quit, please use the\n\n\
 		point_oh_five_second_connection.disconnect ();
 		point_zero_one_second_connection.disconnect();
 	}
+
+#ifdef WITH_VIDEOTIMELINE
+	delete ARDOUR_UI::instance()->video_timeline;
+	stop_video_server();
+#endif
 
 	/* Save state before deleting the session, as that causes some
 	   windows to be destroyed before their visible state can be
@@ -2466,7 +2492,11 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	 * treat a non-dirty session this way, so that it stays visible 
 	 * as we bring up the new session dialog.
 	 */
-
+#ifdef WITH_VIDEOTIMELINE
+	if (_session && ARDOUR_UI::instance()->video_timeline) {
+		ARDOUR_UI::instance()->video_timeline->close_session();
+	}
+#endif
 	if (_session && _session->dirty()) {
 		if (unload_session (false)) {
 			/* unload cancelled by user */
@@ -2647,6 +2677,9 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 void
 ARDOUR_UI::close_session()
 {
+#ifdef WITH_VIDEOTIMELINE
+	ARDOUR_UI::instance()->video_timeline->close_session();
+#endif
 	if (!check_audioengine()) {
 		return;
 	}
@@ -3234,6 +3267,229 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	/* idle connection will end at scope end */
 }
 
+#ifdef WITH_VIDEOTIMELINE
+void
+ARDOUR_UI::stop_video_server (bool ask_confirm)
+{
+	if (!video_server_process && ask_confirm) {
+		warning << _("Video-Server was not launched by Ardour. The request to stop it is ignored.") << endmsg;
+	}
+	if (video_server_process) {
+		if(ask_confirm) {
+			ArdourDialog confirm (_("Stop Video-Server"), true);
+			Label m (_("Do you really want to stop the Video Server?"));
+			confirm.get_vbox()->pack_start (m, true, true);
+			confirm.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+			confirm.add_button (_("Yes, Stop It"), Gtk::RESPONSE_ACCEPT);
+			confirm.show_all ();
+			if (confirm.run() == RESPONSE_CANCEL) {
+				return;
+			}
+		}
+		delete video_server_process;
+		video_server_process =0;
+	}
+}
+
+void
+ARDOUR_UI::start_video_server_menu (Gtk::Window* float_window)
+{
+  ARDOUR_UI::start_video_server( float_window, true);
+}
+
+bool
+ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
+{
+	if (!_session) {
+		return false;
+	}
+	if (popup_msg) {
+		if (ARDOUR_UI::instance()->video_timeline->check_server()) {
+			if (video_server_process) {
+				popup_error(_("The Video Server is already started."));
+			} else {
+				popup_error(_("An external Video Server is configured and can be reached. Not starting a new instance."));
+			}
+		}
+	}
+
+	int firsttime = 0;
+	while (!ARDOUR_UI::instance()->video_timeline->check_server()) {
+		if (firsttime++) {
+			warning << _("Could not connect to the Video Server. Start it or configure its access URL in Edit -> Preferences.") << endmsg;
+		}
+		VideoServerDialog *video_server_dialog = new VideoServerDialog (_session);
+		if (float_window) {
+			video_server_dialog->set_transient_for (*float_window);
+		}
+
+		if (!Config->get_show_video_server_dialog() && firsttime < 2) {
+			video_server_dialog->hide();
+		} else {
+			ResponseType r = (ResponseType) video_server_dialog->run ();
+			video_server_dialog->hide();
+			if (r != RESPONSE_ACCEPT) { return false; }
+			if (video_server_dialog->show_again()) {
+				Config->set_show_video_server_dialog(false);
+			}
+		}
+
+		std::string icsd_exec = video_server_dialog->get_exec_path();
+		std::string icsd_docroot = video_server_dialog->get_docroot();
+		if (icsd_docroot.empty()) {icsd_docroot = "/";}
+
+		struct stat sb;
+		if (!lstat (icsd_docroot.c_str(), &sb) == 0 || !S_ISDIR(sb.st_mode)) {
+			warning << _("Specified docroot is not an existing directory.") << endmsg;
+			continue;
+		}
+		if ( (!lstat (icsd_exec.c_str(), &sb) == 0)
+		     || (sb.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) == 0 ) {
+			warning << _("Given Video Server is not an executable file.") << endmsg;
+			continue;
+		}
+
+		char **argp;
+		argp=(char**) calloc(9,sizeof(char*));
+		argp[0] = strdup(icsd_exec.c_str());
+		argp[1] = strdup("-P");
+		argp[2] = (char*) calloc(16,sizeof(char)); snprintf(argp[2], 16, "%s", video_server_dialog->get_listenaddr().c_str());
+		argp[3] = strdup("-p");
+		argp[4] = (char*) calloc(6,sizeof(char)); snprintf(argp[4], 6, "%i", video_server_dialog->get_listenport());
+		argp[5] = strdup("-C");
+		argp[6] = (char*) calloc(6,sizeof(char)); snprintf(argp[6], 6, "%i", video_server_dialog->get_cachesize());
+		argp[7] = strdup(icsd_docroot.c_str());
+		argp[8] = 0;
+		stop_video_server();
+
+		std::ostringstream osstream;
+		osstream << "http://localhost:" << video_server_dialog->get_listenport() << "/";
+		Config->set_video_server_url(osstream.str());
+		Config->set_video_server_docroot(icsd_docroot);
+		video_server_process = new SystemExec(icsd_exec, argp);
+		video_server_process->start();
+		sleep(1);
+	}
+	return true;
+}
+
+void
+ARDOUR_UI::add_video (Gtk::Window* float_window)
+{
+	if (!_session) {
+		return;
+	}
+
+	if (!start_video_server(float_window, false)) {
+		warning << _("Could not connect to the Video Server. Start it or configure its access URL in Edit -> Preferences.") << endmsg;
+		return;
+	}
+
+	if (add_video_dialog == 0) {
+		add_video_dialog = new AddVideoDialog (_session);
+		if (float_window) {
+			add_video_dialog->set_transient_for (*float_window);
+		}
+	}
+
+	if (add_video_dialog->is_visible()) {
+		/* we're already doing this */
+		return;
+	}
+	ResponseType r = (ResponseType) add_video_dialog->run ();
+	add_video_dialog->hide();
+	if (r != RESPONSE_ACCEPT) { return; }
+
+	bool local_file;
+	std::string path = add_video_dialog->file_name(local_file);
+	bool auto_set_session_fps = add_video_dialog->auto_set_session_fps();
+
+	if (local_file && !Glib::file_test(path, Glib::FILE_TEST_EXISTS)) {
+		warning << string_compose(_("could not open %1"), path) << endmsg;
+		return;
+	}
+	if (!local_file && path.length() == 0) {
+		warning << _("no video-file selected") << endmsg;
+		return;
+	}
+
+	switch (add_video_dialog->import_option()) {
+		case VTL_IMPORT_COPY:
+		{
+			VideoCopyDialog *video_copy_dialog;
+			video_copy_dialog = new VideoCopyDialog(_session, path);
+			//video_copy_dialog->setup_non_interactive_copy();
+			ResponseType r = (ResponseType) video_copy_dialog->run ();
+			video_copy_dialog->hide();
+			if (r != RESPONSE_ACCEPT) { return; }
+			path = video_copy_dialog->get_filename();
+			delete video_copy_dialog;
+		}
+			break;
+		case VTL_IMPORT_TRANSCODE:
+		{
+			TranscodeVideoDialog *transcode_video_dialog;
+			transcode_video_dialog = new TranscodeVideoDialog (_session, path);
+			ResponseType r = (ResponseType) transcode_video_dialog->run ();
+			transcode_video_dialog->hide();
+			if (r != RESPONSE_ACCEPT) { return; }
+			path = transcode_video_dialog->get_filename();
+			if (!transcode_video_dialog->get_audiofile().empty()) {
+				editor->embed_audio_from_video(transcode_video_dialog->get_audiofile());
+			}
+			delete transcode_video_dialog;
+		}
+			break;
+		default:
+		case VTL_IMPORT_NONE:
+			break;
+	}
+
+	if (path.empty()) {
+		/* may have been overriden by 'audio only import'
+		 * in transcode_video_dialog */
+		path = add_video_dialog->file_name(local_file);;
+	}
+
+	/* strip _session->session_directory().video_path() from video file if possible */
+	if (local_file && !path.compare(0, _session->session_directory().video_path().size(), _session->session_directory().video_path())) {
+		 path=path.substr(_session->session_directory().video_path().size());
+		 if (path.at(0) == G_DIR_SEPARATOR) {
+			 path=path.substr(1);
+		 }
+	}
+
+	video_timeline->set_update_session_fps(auto_set_session_fps);
+	if (video_timeline->video_file_info(path, local_file)) {
+		XMLNode* node = new XMLNode(X_("Videotimeline"));
+		node->add_property (X_("Filename"), path);
+		node->add_property (X_("AutoFPS"), auto_set_session_fps?X_("1"):X_("0"));
+		node->add_property (X_("LocalFile"), local_file?X_("1"):X_("0"));
+		_session->add_extra_xml (*node);
+		_session->set_dirty ();
+
+		if (add_video_dialog->launch_xjadeo() && local_file) {
+			editor->set_xjadeo_sensitive(true);
+			editor->toggle_xjadeo_proc(1);
+		} else {
+			editor->toggle_xjadeo_proc(0);
+		}
+		editor->toggle_ruler_video(true);
+	}
+}
+
+void
+ARDOUR_UI::flush_videotimeline_cache (bool localcacheonly)
+{
+	if (localcacheonly) {
+		video_timeline->vmon_update();
+	} else {
+		video_timeline->flush_cache();
+	}
+	editor->queue_visual_videotimeline_update();
+}
+#endif
+
 XMLNode*
 ARDOUR_UI::mixer_settings () const
 {
@@ -3502,6 +3758,9 @@ ARDOUR_UI::update_transport_clocks (framepos_t pos)
 	if (big_clock_window->get()) {
 		big_clock->set (pos);
 	}
+#ifdef WITH_VIDEOTIMELINE
+	ARDOUR_UI::instance()->video_timeline->manual_seek_video_monitor(pos);
+#endif
 }
 
 

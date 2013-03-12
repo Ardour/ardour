@@ -28,6 +28,9 @@ enum ItemType {
 	MarkerBarItem,
 	RangeMarkerBarItem,
 	CdMarkerBarItem,
+#ifdef WITH_VIDEOTIMELINE
+	VideoBarItem,
+#endif
 	TransportMarkerBarItem,
 	SelectionItem,
 	ControlPointItem,

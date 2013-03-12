@@ -65,6 +65,10 @@
 #include "ardour/plugin.h"
 #include "ardour/session_handle.h"
 
+#ifdef WITH_VIDEOTIMELINE
+#include "video_timeline.h"
+#endif
+
 #include "ardour_dialog.h"
 #include "ardour_button.h"
 #include "editing.h"
@@ -75,6 +79,11 @@
 
 class About;
 class AddRouteDialog;
+#ifdef WITH_VIDEOTIMELINE
+class AddVideoDialog;
+class VideoTimeLine;
+class SystemExec;
+#endif
 class ArdourStartup;
 class ArdourKeyboard;
 class AudioClock;
@@ -203,6 +212,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	TimeInfoBox* time_info_box;
 
+#ifdef WITH_VIDEOTIMELINE
+	VideoTimeLine *video_timeline;
+#endif
+
 	void store_clock_modes ();
 	void restore_clock_modes ();
 	void reset_main_clocks ();
@@ -212,6 +225,13 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void add_route (Gtk::Window* float_window);
         void add_routes_part_two ();
         void add_routes_thread ();
+#ifdef WITH_VIDEOTIMELINE
+	void add_video (Gtk::Window* float_window);
+	void start_video_server_menu (Gtk::Window* float_window);
+	bool start_video_server (Gtk::Window* float_window, bool popup_msg);
+	void stop_video_server (bool ask_confirm=false);
+	void flush_videotimeline_cache (bool localcacheonly=false);
+#endif
 
 	void session_add_audio_track (
 		int input_channels,
@@ -605,6 +625,12 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	/* route dialog */
 
 	AddRouteDialog *add_route_dialog;
+
+#ifdef WITH_VIDEOTIMELINE
+	/* video dialog */
+	AddVideoDialog *add_video_dialog;
+	SystemExec *video_server_process;
+#endif
 
 	/* Keyboard Handling */
 

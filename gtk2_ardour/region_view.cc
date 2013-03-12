@@ -386,6 +386,12 @@ RegionView::region_changed (const PropertyChange& what_changed)
 	if (what_changed.contains (ARDOUR::Properties::locked)) {
 		region_locked ();
 	}
+#ifdef WITH_VIDEOTIMELINE
+	if (what_changed.contains (ARDOUR::Properties::locked)) {
+		/* name will show locked status */
+		region_renamed ();
+	}
+#endif
 }
 
 void
@@ -578,6 +584,12 @@ RegionView::make_name () const
 		str += '{';
 		str += _region->name();
 		str += '}';
+#ifdef WITH_VIDEOTIMELINE
+	} else if (_region->video_locked()) {
+		str += '[';
+		str += _region->name();
+		str += ']';
+#endif
 	} else {
 		str = _region->name();
 	}

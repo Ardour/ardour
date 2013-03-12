@@ -1047,6 +1047,10 @@ Editor::sensitize_the_right_region_actions ()
 	bool have_midi = false;
 	bool have_locked = false;
 	bool have_unlocked = false;
+#ifdef WITH_VIDEOTIMELINE
+	bool have_video_locked = false;
+	bool have_video_unlocked = false;
+#endif
 	bool have_position_lock_style_audio = false;
 	bool have_position_lock_style_music = false;
 	bool have_muted = false;
@@ -1088,6 +1092,13 @@ Editor::sensitize_the_right_region_actions ()
 		} else {
 			have_unlocked = true;
 		}
+#ifdef WITH_VIDEOTIMELINE
+		if (r->video_locked()) {
+			have_video_locked = true;
+		} else {
+			have_video_unlocked = true;
+		}
+#endif
 
 		if (r->position_lock_style() == MusicTime) {
 			have_position_lock_style_music = true;
@@ -1211,6 +1222,14 @@ Editor::sensitize_the_right_region_actions ()
 	if (have_locked && have_unlocked) {
 		// a->set_inconsistent ();
 	}
+
+#ifdef WITH_VIDEOTIMELINE
+	a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-video-lock"));
+	a->set_active (have_video_locked && !have_video_unlocked);
+	if (have_video_locked && have_video_unlocked) {
+		// a->set_inconsistent ();
+	}
+#endif
 
 	a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-lock-style"));
 	a->set_active (have_position_lock_style_music && !have_position_lock_style_audio);

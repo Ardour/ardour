@@ -131,6 +131,9 @@ Editor::initialize_rulers ()
 	lab_children.push_back (Element(transport_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(cd_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
+#ifdef WITH_VIDEOTIMELINE
+	lab_children.push_back (Element(videotl_label, PACK_SHRINK, PACK_START));
+#endif
 
 	ruler_lab_children.push_back (Element(minsec_label, PACK_SHRINK, PACK_START));
 	ruler_children.insert (canvaspos, Element(*minsec_ruler, PACK_SHRINK, PACK_START));
@@ -368,6 +371,32 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 		ruler_items.push_back (SeparatorElem ());
 		break;
 
+#ifdef WITH_VIDEOTIMELINE
+	case VideoBarItem:
+		ruler_items.push_back (MenuElem (_("Timeline height")));
+		static_cast<MenuItem*>(&ruler_items.back())->set_sensitive(false);
+		ruler_items.push_back (CheckMenuElem (_("Large"),  sigc::bind ( sigc::mem_fun(*this, &Editor::set_video_timeline_height), 6)));
+		if (videotl_bar_height == 6) { static_cast<CheckMenuItem*>(&ruler_items.back())->set_active(true);}
+		ruler_items.push_back (CheckMenuElem (_("Normal"), sigc::bind ( sigc::mem_fun(*this, &Editor::set_video_timeline_height), 4)));
+		if (videotl_bar_height == 4) { static_cast<CheckMenuItem*>(&ruler_items.back())->set_active(true);}
+		ruler_items.push_back (CheckMenuElem (_("Small"),  sigc::bind ( sigc::mem_fun(*this, &Editor::set_video_timeline_height), 3)));
+		if (videotl_bar_height == 3) { static_cast<CheckMenuItem*>(&ruler_items.back())->set_active(true);}
+		ruler_items.push_back (SeparatorElem ());
+
+		ruler_items.push_back (MenuElem (_("Align Video Track")));
+		static_cast<MenuItem*>(&ruler_items.back())->set_sensitive(false);
+
+		ruler_items.push_back (CheckMenuElem (_("Lock")));
+		{
+		CheckMenuItem* vtl_lock = static_cast<CheckMenuItem*>(&ruler_items.back());
+		vtl_lock->set_active(is_video_timeline_locked());
+		vtl_lock->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_video_timeline_locked));
+		}
+
+		ruler_items.push_back (SeparatorElem ());
+		break;
+#endif
+
 	default:
 		break;
 	}
@@ -418,6 +447,12 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 	if (action) {
 		ruler_items.push_back (MenuElem (*action->create_menu_item()));
 	}
+#ifdef WITH_VIDEOTIMELINE
+	action = ActionManager::get_action ("Rulers", "toggle-video-ruler");
+	if (action) {
+		ruler_items.push_back (MenuElem (*action->create_menu_item()));
+	}
+#endif
 
 	editor_ruler_menu->popup (1, gtk_get_current_event_time());
 
@@ -439,6 +474,9 @@ Editor::store_ruler_visibility ()
 	node->add_property (X_("rangemarker"), ruler_range_action->get_active() ? "yes": "no");
 	node->add_property (X_("transportmarker"), ruler_loop_punch_action->get_active() ? "yes": "no");
 	node->add_property (X_("cdmarker"), ruler_cd_marker_action->get_active() ? "yes": "no");
+#ifdef WITH_VIDEOTIMELINE
+	node->add_property (X_("videotl"), ruler_video_action->get_active() ? "yes": "no");
+#endif
 
 	_session->add_extra_xml (*node);
 	_session->set_dirty ();
@@ -539,6 +577,16 @@ Editor::restore_ruler_visibility ()
 			}
 		}
 
+#ifdef WITH_VIDEOTIMELINE
+		if ((prop = node->property ("videotl")) != 0) {
+			if (string_is_affirmative (prop->value())) {
+				ruler_video_action->set_active (true);
+			} else {
+				ruler_video_action->set_active (false);
+			}
+		}
+#endif
+
 	}
 
 	no_ruler_shown_update = false;
@@ -604,6 +652,9 @@ Editor::update_ruler_visibility ()
 	transport_mark_label.hide();
 	cd_mark_label.hide();
 	mark_label.hide();
+ #ifdef WITH_VIDEOTIMELINE
+	videotl_label.hide();
+ #endif
 #endif
 	if (ruler_meter_action->get_active()) {
 		old_unit_pos = meter_group->property_y();
@@ -735,6 +786,32 @@ Editor::update_ruler_visibility ()
 		marker_group->hide();
 		mark_label.hide();
 	}
+
+#ifdef WITH_VIDEOTIMELINE
+
+	if (ruler_video_action->get_active()) {
+		old_unit_pos = videotl_group->property_y();
+		if (tbpos != old_unit_pos) {
+			videotl_group->move ( 0.0, tbpos - old_unit_pos);
+		}
+		old_unit_pos = videotl_bar_group->property_y();
+		if (tbgpos != old_unit_pos) {
+			videotl_bar_group->move ( 0.0, tbgpos - old_unit_pos);
+		}
+		videotl_bar_group->show();
+		videotl_group->show();
+		videotl_label.show();
+		tbpos += timebar_height * videotl_bar_height;
+		tbgpos += timebar_height * videotl_bar_height;
+		visible_timebars+=videotl_bar_height;
+	  queue_visual_videotimeline_update();
+	} else {
+		videotl_bar_group->hide();
+		videotl_group->hide();
+		videotl_label.hide();
+	  update_video_timeline(true);
+	}
+#endif
 
 	gdouble old_canvas_timebars_vsize = canvas_timebars_vsize;
 	canvas_timebars_vsize = (timebar_height * visible_timebars) - 1;

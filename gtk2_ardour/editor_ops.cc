@@ -5052,6 +5052,33 @@ Editor::toggle_region_lock ()
 	_session->commit_reversible_command ();
 }
 
+#ifdef WITH_VIDEOTIMELINE
+void
+Editor::toggle_region_video_lock ()
+{
+	if (_ignore_region_action) {
+		return;
+	}
+
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+
+	if (!_session || rs.empty()) {
+		return;
+	}
+
+	_session->begin_reversible_command (_("Toggle Video Lock"));
+
+	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+		(*i)->region()->clear_changes ();
+		(*i)->region()->set_video_locked (!(*i)->region()->video_locked());
+		_session->add_command (new StatefulDiffCommand ((*i)->region()));
+	}
+
+	_session->commit_reversible_command ();
+}
+#endif
+
+
 void
 Editor::toggle_region_lock_style ()
 {
