@@ -66,11 +66,6 @@ else:
 
 # Version stuff
 
-def fetch_svn_revision (path):
-    cmd = "svnversion | cut -d: -f1"
-    output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].decode (sys.getdefaultencoding())
-    return output.rstrip(os.linesep)
-
 def fetch_gcc_version (CC):
     cmd = "LANG= %s --version" % CC
     output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
@@ -78,39 +73,16 @@ def fetch_gcc_version (CC):
     version = o.split(' ')[2].split('.')
     return version
 
-def fetch_git_revision (path):
-    cmd = "LANG= git log --abbrev HEAD^..HEAD"
+def fetch_git_revision ():
+    cmd = "LANG= git describe --tags HEAD"
     output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
-    o = output[0].decode('utf-8')
-    rev = o.replace ("commit", "git")[0:10]
-    cmd = "LANG= git log --abbrev -n1 --grep 'git-svn-id'"
-    output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
-    for line in output:
-        try:
-            if "git-svn-id" in line:
-                line = line.split('@')[1].split(' ')
-                rev = line[0]
-                break
-        except:
-            pass
+    rev = output[0].decode('utf-8')
     return rev
-
-def fetch_bzr_revision (path):
-    cmd = subprocess.Popen("LANG= bzr log -l 1 " + path, stdout=subprocess.PIPE, shell=True)
-    out = cmd.communicate()[0]
-    svn = re.search('^svn revno: [0-9]*', out, re.MULTILINE)
-    str = svn.group(0)
-    chars = 'svnreio: '
-    return string.lstrip(str, chars)
 
 def create_stored_revision():
     rev = ""
-    if os.path.exists('.svn'):
-        rev = fetch_svn_revision('.');
-    elif os.path.exists('.git'):
-        rev = fetch_git_revision('.');
-    elif os.path.exists('.bzr'):
-        rev = fetch_bzr_revision('.');
+    if os.path.exists('.git'):
+        rev = fetch_git_revision();
         print("Revision: %s", rev)
     elif os.path.exists('libs/ardour/svn_revision.cc'):
         print("Using packaged svn revision")
