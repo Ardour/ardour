@@ -136,7 +136,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	char buf[PATH_MAX+1];
 	if (!realpath (fullpath.c_str(), buf) && (errno != ENOENT)) {
-		error << string_compose(_("Could not use path %1 (%s)"), buf, strerror(errno)) << endmsg;
+		error << string_compose(_("Could not use path %1 (%2)"), buf, strerror(errno)) << endmsg;
 		destroy ();
 		throw failed_constructor();
 	}
