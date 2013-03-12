@@ -33,6 +33,7 @@ class SearchPathOption : public Option
 {
   public:
         SearchPathOption (const std::string& pathname, const std::string& label,
+			  const std::string& default_path,
                           sigc::slot<std::string>, sigc::slot<bool, std::string>);
         ~SearchPathOption ();
 

@@ -204,7 +204,7 @@ AutomationList::start_touch (double when)
 }
 
 void
-AutomationList::stop_touch (bool mark, double /*when*/)
+AutomationList::stop_touch (bool mark, double)
 {
 	if (g_atomic_int_get (&_touching) == 0) {
 		/* this touch has already been stopped (probably by Automatable::transport_stopped),
@@ -456,6 +456,7 @@ AutomationList::set_state (const XMLNode& node, int version)
                 if (_state == Write) {
                         _state = Off;
                 }
+		automation_state_changed(_state);
 	} else {
 		_state = Off;
 	}

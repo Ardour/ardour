@@ -119,7 +119,6 @@ public:
 	void set_position (Position);
 	boost::shared_ptr<ARDOUR::Processor> processor () const;
 	void set_enum_width (Width);
-	virtual void set_pixel_width (int);
 
 	/** Hide any widgets that should be hidden */
 	virtual void hide_things ();
@@ -131,17 +130,12 @@ public:
 	std::string state_id () const;
 	Gtk::Menu* build_controls_menu ();
 
-	static void setup_slider_pix ();
-
 protected:
 	ArdourButton _button;
 	Gtk::VBox _vbox;
 	Position _position;
 
 	virtual void setup_visuals ();
-
-	static Glib::RefPtr<Gdk::Pixbuf> _slider_pixbuf;
-	static Glib::RefPtr<Gdk::Pixbuf> _slider_pixbuf_desensitised;
 
 private:
 	void led_clicked();
@@ -159,9 +153,8 @@ private:
 
 	class Control : public sigc::trackable {
 	public:
-		Control (Glib::RefPtr<Gdk::Pixbuf>, Glib::RefPtr<Gdk::Pixbuf>, boost::shared_ptr<ARDOUR::AutomationControl>, std::string const &);
+		Control (boost::shared_ptr<ARDOUR::AutomationControl>, std::string const &);
 
-		void set_pixel_width (int);
 		void set_visible (bool);
 		void add_state (XMLNode *) const;
 		void set_state (XMLNode const *);
@@ -305,6 +298,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void object_drop (Gtkmm2ext::DnDVBox<ProcessorEntry> *, ProcessorEntry *, Glib::RefPtr<Gdk::DragContext> const &);
 
 	Width _width;
+        bool  _redisplay_pending;
 
 	Gtk::Menu *processor_menu;
 	gint processor_menu_map_handler (GdkEventAny *ev);
@@ -371,7 +365,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	gint idle_delete_processor (boost::weak_ptr<ARDOUR::Processor>);
 
 	void weird_plugin_dialog (ARDOUR::Plugin& p, ARDOUR::Route::ProcessorStreams streams);
-	void on_size_allocate (Gtk::Allocation &);
 
 	void setup_entry_positions ();
 

@@ -23,7 +23,7 @@ CURRENT_SESSION_FILE_VERSION = 3001
 # Variables for 'waf dist'
 APPNAME = 'libardour3'
 VERSION = LIBARDOUR_VERSION
-I18N_PACKAGE = 'libardour3'
+I18N_PACKAGE = 'ardour3'
 
 # Mandatory variables
 top = '.'
@@ -63,7 +63,6 @@ libardour_sources = [
         'buffer_set.cc',
         'bundle.cc',
         'butler.cc',
-        'callback.cc',
         'capturing_processor.cc',
         'chan_count.cc',
         'chan_mapping.cc',
@@ -116,6 +115,7 @@ libardour_sources = [
         'ladspa_plugin.cc',
         'location.cc',
         'location_importer.cc',
+        'ltc_slave.cc',
         'meter.cc',
         'midi_automation_list_binder.cc',
         'midi_buffer.cc',
@@ -184,6 +184,7 @@ libardour_sources = [
         'session_events.cc',
         'session_export.cc',
         'session_handle.cc',
+        'session_ltc.cc',
         'session_metadata.cc',
         'session_midi.cc',
         'session_object.cc',
@@ -219,7 +220,7 @@ libardour_sources = [
         'user_bundle.cc',
         'utils.cc',
         'version.cc',
-        'worker.cc',
+        'worker.cc'
 ]
 
 def flac_supported():
@@ -271,6 +272,8 @@ def configure(conf):
                           atleast_version='0.2.0', mandatory=True)
         autowaf.check_pkg(conf, 'lilv-0', uselib_store='LILV',
                           atleast_version='0.14.0', mandatory=True)
+        autowaf.check_pkg(conf, 'lilv-0', uselib_store='NEW_LILV',
+                          atleast_version='0.15.0', mandatory=False)
         autowaf.check_pkg(conf, 'suil-0', uselib_store='SUIL',
                           atleast_version='0.6.0', mandatory=False)
         conf.define ('LV2_SUPPORT', 1)

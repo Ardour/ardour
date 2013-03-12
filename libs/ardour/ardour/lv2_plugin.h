@@ -237,6 +237,7 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	LV2_Feature    _log_feature;
 	LV2_Feature    _work_schedule_feature;
 	LV2_Feature    _options_feature;
+	LV2_Feature    _def_state_feature;
 
 	// Options passed to plugin
 	int32_t _block_length;

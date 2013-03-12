@@ -40,7 +40,7 @@ namespace ARDOUR
 {
 
 bool
-AudiofileTagger::tag_file (string const & filename, SessionMetadata const & metadata)
+AudiofileTagger::tag_file (std::string const & filename, SessionMetadata const & metadata)
 {
 	TagLib::FileRef file (filename.c_str());
 	TagLib::Tag & tag (*file.tag());

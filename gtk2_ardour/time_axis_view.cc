@@ -30,10 +30,12 @@
 #include "pbd/error.h"
 #include "pbd/convert.h"
 
+#include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/selector.h>
 
 #include "ardour_ui.h"
+#include "ardour_dialog.h"
 #include "global_signals.h"
 #include "gui_thread.h"
 #include "public_editor.h"
@@ -70,13 +72,26 @@ PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess)
 	, controls_table (2, 8)
+	, _name_editing (false)
+	, height (0)
+	, display_menu (0)
+	, parent (rent)
+	, selection_group (0)
+	, _hidden (false)
+	, in_destructor (false)
 	, _size_menu (0)
+	, _canvas_display (0)
 	, _y_position (0)
 	, _editor (ed)
+	, name_entry (0)
+	, control_parent (0)
 	, _order (0)
+	, _effective_height (0)
+	, _resize_drag_start (-1)
 	, _preresize_cursor (0)
 	, _have_preresize_cursor (false)
 	, _ghost_group (0)
+	, _ebox_release_can_act (true)
 {
 	if (extra_height == 0) {
 		compute_heights ();
@@ -94,42 +109,20 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	_ghost_group->lower_to_bottom();
 	_ghost_group->show();
 
-	control_parent = 0;
-	display_menu = 0;
-	_hidden = false;
-	in_destructor = false;
-	height = 0;
-	_effective_height = 0;
-	parent = rent;
-	last_name_entry_key_press_event = 0;
-	name_packing = NamePackingBits (0);
-	_resize_drag_start = -1;
-
-	/*
-	  Create the standard LHS Controls
-	  We create the top-level container and name add the name label here,
-	  subclasses can add to the layout as required
-	*/
-
-	name_entry.set_name ("EditorTrackNameDisplay");
-	name_entry.signal_button_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_button_release));
-	name_entry.signal_button_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_button_press));
-	name_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_release));
-	name_entry.signal_activate().connect (sigc::mem_fun(*this, &TimeAxisView::name_entry_activated));
-	name_entry.signal_focus_in_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_focus_in));
-	name_entry.signal_focus_out_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_focus_out));
-	Gtkmm2ext::set_size_request_to_display_given_text (name_entry, N_("gTortnam"), 10, 10); // just represents a short name
-
 	name_label.set_name ("TrackLabel");
 	name_label.set_alignment (0.0, 0.5);
+	ARDOUR_UI::instance()->set_tip (name_label, _("Track/Bus name (double click to edit)"));
 
-	/* typically, either name_label OR name_entry are visible,
-	   but not both. its up to derived classes to show/hide them as they
-	   wish.
-	*/
+	Gtk::Entry* an_entry = new Gtk::Entry;
+	Gtk::Requisition req;
+	an_entry->size_request (req);
+	name_label.set_size_request (-1, req.height);
+	delete an_entry;
 
+	name_hbox.pack_start (name_label, true, true);
 	name_hbox.show ();
-
+	name_label.show ();
+	
 	controls_table.set_size_request (200);
 	controls_table.set_row_spacings (2);
 	controls_table.set_col_spacings (2);
@@ -357,6 +350,24 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 bool
 TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 {
+	if ((event->button == 1 && event->type == GDK_2BUTTON_PRESS) || Keyboard::is_edit_event (event)) {
+		/* see if it is inside the name label */
+		if (name_label.is_ancestor (controls_ebox)) {
+			int nlx;
+			int nly;
+			controls_ebox.translate_coordinates (name_label, event->x, event->y, nlx, nly);
+			Gtk::Allocation a = name_label.get_allocation ();
+			if (nlx > 0 && nlx < a.get_width() && nly > 0 && nly < a.get_height()) {
+				begin_name_edit ();
+				_ebox_release_can_act = false;
+				return true;
+			}
+		}
+
+	}
+
+	_ebox_release_can_act = true;
+			
 	if (maybe_set_cursor (event->y) > 0) {
 		_resize_drag_start = event->y_root;
 	}
@@ -450,6 +461,10 @@ TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 		_resize_drag_start = -1;
 	}
 
+	if (!_ebox_release_can_act) {
+		return true;
+	}
+
 	switch (ev->button) {
 	case 1:
 		selection_click (ev);
@@ -535,15 +550,27 @@ TimeAxisView::set_height (uint32_t h)
 }
 
 bool
+TimeAxisView::name_entry_key_press (GdkEventKey* ev)
+{
+	/* steal escape, tabs from GTK */
+
+	switch (ev->keyval) {
+	case GDK_Escape:
+	case GDK_ISO_Left_Tab:
+	case GDK_Tab:
+		return true;
+	}
+	return false;
+}
+
+bool
 TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 {
 	TrackViewList::iterator i;
 
 	switch (ev->keyval) {
 	case GDK_Escape:
-		name_entry.select_region (0,0);
-		controls_ebox.grab_focus ();
-		name_entry_changed ();
+		end_name_edit (RESPONSE_CANCEL);
 		return true;
 
 	/* Shift+Tab Keys Pressed. Note that for Shift+Tab, GDK actually
@@ -551,130 +578,157 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 	 * ev->state.
 	 */
 	case GDK_ISO_Left_Tab:
-	case GDK_Tab:
-	{
-		name_entry_changed ();
-		TrackViewList const & allviews = _editor.get_track_views ();
-		TrackViewList::const_iterator i = find (allviews.begin(), allviews.end(), this);
-
-		if (ev->keyval == GDK_Tab) {
-			if (i != allviews.end()) {
-				do {
-					if (++i == allviews.end()) {
-						return true;
-					}
-
-					RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
-
-					if (rtav && rtav->route()->record_enabled()) {
-						continue;
-					}
-
-					if (!(*i)->hidden()) {
-						break;
-					}
-
-				} while (true);
-			}
-		} else {
-			if (i != allviews.begin()) {
-				do {
-					if (i == allviews.begin()) {
-						return true;
-					}
-
-					--i;
-
-					RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
-
-					if (rtav && rtav->route()->record_enabled()) {
-						continue;
-					}
-
-					if (!(*i)->hidden()) {
-						break;
-					}
-
-				} while (true);
-			}
-		}
-
-		if ((i != allviews.end()) && (*i != this) && !(*i)->hidden()) {
-			(*i)->name_entry.grab_focus();
-			_editor.ensure_time_axis_view_is_visible (**i);
-		}
-	}
-	return true;
-
-	case GDK_Up:
-	case GDK_Down:
-		name_entry_changed ();
+		end_name_edit (RESPONSE_APPLY);
 		return true;
 
+	case GDK_Tab:
+		end_name_edit (RESPONSE_ACCEPT);
+		return true;
 	default:
 		break;
 	}
 
-#ifdef TIMEOUT_NAME_EDIT
-	/* adapt the timeout to reflect the user's typing speed */
-
-	guint32 name_entry_timeout;
-
-	if (last_name_entry_key_press_event) {
-		/* timeout is 1/2 second or 5 times their current inter-char typing speed */
-		name_entry_timeout = std::max (500U, (5 * (ev->time - last_name_entry_key_press_event)));
-	} else {
-		/* start with a 1 second timeout */
-		name_entry_timeout = 1000;
-	}
-
-	last_name_entry_key_press_event = ev->time;
-
-	/* wait 1 seconds and if no more keys are pressed, act as if they pressed enter */
-
-	name_entry_key_timeout.disconnect();
-	name_entry_key_timeout = Glib::signal_timeout().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_timed_out), name_entry_timeout);
-#endif
-
-	return false;
-}
-
-bool
-TimeAxisView::name_entry_focus_in (GdkEventFocus*)
-{
-	name_entry.select_region (0, -1);
-	name_entry.set_state (STATE_SELECTED);
 	return false;
 }
 
 bool
 TimeAxisView::name_entry_focus_out (GdkEventFocus*)
 {
-	/* clean up */
-
-	last_name_entry_key_press_event = 0;
-	name_entry_key_timeout.disconnect ();
-	name_entry.select_region (0,0);
-	name_entry.set_state (STATE_NORMAL);
-
-	/* do the real stuff */
-
-	name_entry_changed ();
-
-	return false;
-}
-
-bool
-TimeAxisView::name_entry_key_timed_out ()
-{
-	name_entry_activated();
+	end_name_edit (RESPONSE_OK);
 	return false;
 }
 
 void
-TimeAxisView::name_entry_activated ()
+TimeAxisView::begin_name_edit ()
 {
-	controls_ebox.grab_focus();
+	if (name_entry) {
+		return;
+	}
+
+	if (can_edit_name()) {
+
+		name_entry = manage (new Gtkmm2ext::FocusEntry);
+		
+		name_entry->set_name ("EditorTrackNameDisplay");
+		name_entry->signal_key_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_press), false);
+		name_entry->signal_key_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_release), false);
+		name_entry->signal_focus_out_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_focus_out));
+		name_entry->set_text (name_label.get_text());
+		name_entry->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisView::end_name_edit), RESPONSE_OK));
+
+		if (name_label.is_ancestor (name_hbox)) {
+			name_hbox.remove (name_label);
+		}
+		
+		name_hbox.pack_start (*name_entry);
+		name_entry->show ();
+
+		name_entry->select_region (0, -1);
+		name_entry->set_state (STATE_SELECTED);
+		name_entry->grab_focus ();
+		name_entry->start_editing (0);
+	}
+}
+
+void
+TimeAxisView::end_name_edit (int response)
+{
+	if (!name_entry) {
+		return;
+	}
+	
+	bool edit_next = false;
+	bool edit_prev = false;
+
+	switch (response) {
+	case RESPONSE_CANCEL:
+		break;
+	case RESPONSE_OK:
+		name_entry_changed ();
+		break;
+	case RESPONSE_ACCEPT:
+		name_entry_changed ();
+		edit_next = true;
+	case RESPONSE_APPLY:
+		name_entry_changed ();
+		edit_prev = true;
+	}
+
+	/* this will delete the name_entry. but it will also drop focus, which
+	 * will cause another callback to this function, so set name_entry = 0
+	 * first to ensure we don't double-remove etc. etc.
+	 */
+
+	Gtk::Entry* tmp = name_entry;
+	name_entry = 0;
+	name_hbox.remove (*tmp);
+
+	/* put the name label back */
+
+	name_hbox.pack_start (name_label);
+	name_label.show ();
+
+	if (edit_next) {
+
+		TrackViewList const & allviews = _editor.get_track_views ();
+		TrackViewList::const_iterator i = find (allviews.begin(), allviews.end(), this);
+		
+		if (i != allviews.end()) {
+			
+			do {
+				if (++i == allviews.end()) {
+					return;
+				}
+				
+				RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
+			
+				if (rtav && rtav->route()->record_enabled()) {
+					continue;
+				}
+				
+				if (!(*i)->hidden()) {
+					break;
+				}
+				
+			} while (true);
+		}
+
+		if ((i != allviews.end()) && (*i != this) && !(*i)->hidden()) {
+			_editor.ensure_time_axis_view_is_visible (**i);
+			(*i)->begin_name_edit ();
+		} 
+
+	} else if (edit_prev) {
+
+		TrackViewList const & allviews = _editor.get_track_views ();
+		TrackViewList::const_iterator i = find (allviews.begin(), allviews.end(), this);
+		
+		if (i != allviews.begin()) {
+			do {
+				if (i == allviews.begin()) {
+					return;
+				}
+				
+				--i;
+				
+				RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
+				
+				if (rtav && rtav->route()->record_enabled()) {
+					continue;
+				}
+				
+				if (!(*i)->hidden()) {
+					break;
+				}
+				
+			} while (true);
+		}
+		
+		if ((i != allviews.end()) && (*i != this) && !(*i)->hidden()) {
+			_editor.ensure_time_axis_view_is_visible (**i);
+			(*i)->begin_name_edit ();
+		} 
+	}
 }
 
 void
@@ -683,22 +737,9 @@ TimeAxisView::name_entry_changed ()
 }
 
 bool
-TimeAxisView::name_entry_button_press (GdkEventButton *ev)
+TimeAxisView::can_edit_name () const
 {
-	if (ev->button == 3) {
-		return true;
-	}
-	return false;
-}
-
-bool
-TimeAxisView::name_entry_button_release (GdkEventButton *ev)
-{
-	if (ev->button == 3) {
-		popup_display_menu (ev->time);
-		return true;
-	}
-	return false;
+	return true;
 }
 
 void
@@ -1115,46 +1156,6 @@ TimeAxisView::compute_heights ()
 }
 
 void
-TimeAxisView::show_name_label ()
-{
-	if (!(name_packing & NameLabelPacked)) {
-		name_hbox.pack_start (name_label, true, true);
-		name_packing = NamePackingBits (name_packing | NameLabelPacked);
-		name_hbox.show ();
-		name_label.show ();
-	}
-}
-
-void
-TimeAxisView::show_name_entry ()
-{
-	if (!(name_packing & NameEntryPacked)) {
-		name_hbox.pack_start (name_entry, true, true);
-		name_packing = NamePackingBits (name_packing | NameEntryPacked);
-		name_hbox.show ();
-		name_entry.show ();
-	}
-}
-
-void
-TimeAxisView::hide_name_label ()
-{
-	if (name_packing & NameLabelPacked) {
-		name_hbox.remove (name_label);
-		name_packing = NamePackingBits (name_packing & ~NameLabelPacked);
-	}
-}
-
-void
-TimeAxisView::hide_name_entry ()
-{
-	if (name_packing & NameEntryPacked) {
-		name_hbox.remove (name_entry);
-		name_packing = NamePackingBits (name_packing & ~NameEntryPacked);
-	}
-}
-
-void
 TimeAxisView::color_handler ()
 {
 	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); i++) {
@@ -1249,13 +1250,13 @@ TimeAxisView::preset_height (Height h)
 {
 	switch (h) {
 	case HeightLargest:
-		return (button_height * 2) + extra_height + 250;
+		return (button_height * 2) + extra_height + 260;
 	case HeightLarger:
-		return (button_height * 2) + extra_height + 150;
+		return (button_height * 2) + extra_height + 160;
 	case HeightLarge:
-		return (button_height * 2) + extra_height + 50;
+		return (button_height * 2) + extra_height + 60;
 	case HeightNormal:
-		return (button_height * 2) + extra_height;
+		return (button_height * 2) + extra_height + 10;
 	case HeightSmall:
 		return button_height + extra_height;
 	}

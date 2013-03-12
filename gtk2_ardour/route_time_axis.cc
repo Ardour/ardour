@@ -85,21 +85,6 @@ using namespace Editing;
 using namespace std;
 using std::list;
 
-Glib::RefPtr<Gdk::Pixbuf> RouteTimeAxisView::slider;
-Glib::RefPtr<Gdk::Pixbuf> RouteTimeAxisView::slider_desensitised;
-
-void
-RouteTimeAxisView::setup_slider_pix ()
-{
-	if ((slider = ::get_icon ("fader_belt_h_medium")) == 0) {
-		throw failed_constructor ();
-	}
-
-	if ((slider_desensitised = ::get_icon ("fader_belt_h_medium_desensitised")) == 0) {
-		throw failed_constructor ();
-	}
-}
-
 RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, Canvas& canvas)
 	: AxisView(sess)
 	, RouteUI(sess)
@@ -117,7 +102,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, Canvas& c
 	, playlist_action_menu (0)
 	, mode_menu (0)
 	, color_mode_menu (0)
-	, gm (sess, slider, slider_desensitised, true, 125)
+	, gm (sess, true, 125, 18)
 	, _ignore_set_layer_display (false)
 {
 }
@@ -126,7 +111,7 @@ void
 RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
-	
+
 	gm.set_controls (_route, _route->shared_peak_meter(), _route->amp());
 	gm.get_level_meter().set_no_show_all();
 	gm.get_level_meter().setup_meters(50);
@@ -181,8 +166,10 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
                 if (is_midi_track()) {
                         ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record (Right-click for Step Edit)"));
+			gm.set_fader_name ("MidiTrackFader");
                 } else {
                         ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record"));
+			gm.set_fader_name ("AudioTrackFader");
                 }
 
 		rec_enable_button->set_sensitive (_session->writable());
@@ -190,7 +177,9 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		/* set playlist button tip to the current playlist, and make it update when it changes */
 		update_playlist_tip ();
 		track()->PlaylistChanged.connect (*this, invalidator (*this), ui_bind(&RouteTimeAxisView::update_playlist_tip, this), gui_context());
-		
+
+	} else {
+		gm.set_fader_name ("AudioBusFader");
 	}
 	
 	controls_hbox.pack_start(gm.get_level_meter(), false, false);
@@ -205,11 +194,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
         }
 
 	controls_table.attach (route_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-//	Gtk::VBox* pad = manage (new Gtk::VBox);
-//	pad->pack_start (gm.get_gain_slider(), false, false);
-//	pad->pack_start (*manage (new Gtk::Label), true, true);
-//	pad->show_all ();
-	controls_table.attach (gm.get_gain_slider(), 0, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 3, 0);
+	controls_table.attach (gm.get_gain_slider(), 0, 5, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::AttachOptions (0), 3, 0);
 
 	ARDOUR_UI::instance()->set_tip(*solo_button,_("Solo"));
 	ARDOUR_UI::instance()->set_tip(*mute_button,_("Mute"));
@@ -246,7 +231,8 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 		/* pick up the correct freeze state */
 		map_frozen ();
-	}
+
+	} 
 
 	_editor.ZoomChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
 	_editor.HorizontalPositionChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::horizontal_position_changed));
@@ -254,19 +240,14 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	PropertyList* plist = new PropertyList();
 
-	plist->add (ARDOUR::Properties::edit, true);
 	plist->add (ARDOUR::Properties::mute, true);
 	plist->add (ARDOUR::Properties::solo, true);
 
 	route_group_menu = new RouteGroupMenu (_session, plist);
 
-	gm.get_gain_slider().signal_scroll_event().connect(sigc::mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
-	gm.get_gain_slider().set_name ("GainFader");
+	// gm.get_gain_slider().signal_scroll_event().connect(sigc::mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
 
 	gm.get_level_meter().signal_scroll_event().connect (sigc::mem_fun (*this, &RouteTimeAxisView::controls_ebox_scroll), false);
-
-	show_name_entry ();
-	hide_name_label ();
 }
 
 RouteTimeAxisView::~RouteTimeAxisView ()
@@ -340,15 +321,10 @@ RouteTimeAxisView::label_view ()
 {
 	string x = _route->name();
 
-	if (x != name_entry.get_text()) {
-		name_entry.set_text (x);
-	}
-
 	if (x != name_label.get_text()) {
 		name_label.set_text (x);
 	}
 
-	ARDOUR_UI::instance()->set_tip (name_entry, Glib::Markup::escape_text(x));
 }
 
 void
@@ -1062,7 +1038,7 @@ RouteTimeAxisView::use_copy_playlist (bool prompt, vector<boost::shared_ptr<Play
 
 	name = pl->name();
 
-	if (route_group() && route_group()->is_active() && route_group()->enabled_property (ARDOUR::Properties::edit.property_id)) {
+	if (route_group() && route_group()->is_active() && route_group()->enabled_property (ARDOUR::Properties::select.property_id)) {
 		name = resolve_new_group_playlist_name(name, playlists_before_op);
 	}
 
@@ -1117,7 +1093,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 
 	name = pl->name();
 
-	if (route_group() && route_group()->is_active() && route_group()->enabled_property (ARDOUR::Properties::edit.property_id)) {
+	if (route_group() && route_group()->is_active() && route_group()->enabled_property (ARDOUR::Properties::select.property_id)) {
 		name = resolve_new_group_playlist_name(name,playlists_before_op);
 	}
 
@@ -1305,7 +1281,9 @@ RouteTimeAxisView::playlist () const
 void
 RouteTimeAxisView::name_entry_changed ()
 {
-	string x = name_entry.get_text ();
+	TimeAxisView::name_entry_changed ();
+
+	string x = name_entry->get_text ();
 
 	if (x == _route->name()) {
 		return;
@@ -1314,18 +1292,18 @@ RouteTimeAxisView::name_entry_changed ()
 	strip_whitespace_edges (x);
 
 	if (x.length() == 0) {
-		name_entry.set_text (_route->name());
+		name_entry->set_text (_route->name());
 		return;
 	}
 
 	if (_session->route_name_internal (x)) {
 		ARDOUR_UI::instance()->popup_error (string_compose (_("You cannot create a track with that name as it is reserved for %1"),
 								    PROGRAM_NAME));
-		name_entry.grab_focus ();
+		name_entry->grab_focus ();
 	} else if (RouteUI::verify_new_route_name (x)) {
 		_route->set_name (x);
 	} else {
-		name_entry.grab_focus ();
+		name_entry->grab_focus ();
 	}
 }
 
@@ -1498,7 +1476,7 @@ RouteTimeAxisView::build_playlist_menu ()
 	playlist_items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteTimeAxisView::rename_current_playlist)));
 	playlist_items.push_back (SeparatorElem());
 
-	if (!route_group() || !route_group()->is_active() || !route_group()->enabled_property (ARDOUR::Properties::edit.property_id)) {
+	if (!route_group() || !route_group()->is_active() || !route_group()->enabled_property (ARDOUR::Properties::select.property_id)) {
 		playlist_items.push_back (MenuElem (_("New..."), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::new_playlists), this)));
 		playlist_items.push_back (MenuElem (_("New Copy..."), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::copy_playlists), this)));
 
@@ -1542,7 +1520,7 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 	
 	RouteGroup* rg = route_group();
 	
-	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::edit.property_id)) {
+	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::select.property_id)) {
 		std::string group_string = "." + rg->name() + ".";
 		
 		std::string take_name = pl->name();
@@ -1588,7 +1566,7 @@ void
 RouteTimeAxisView::update_playlist_tip ()
 {
 	RouteGroup* rg = route_group ();
-	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::edit.property_id)) {
+	if (rg && rg->is_active() && rg->enabled_property (ARDOUR::Properties::select.property_id)) {
 		string group_string = "." + rg->name() + ".";
 		
 		string take_name = track()->playlist()->name();
@@ -2175,11 +2153,18 @@ RouteTimeAxisView::reset_processor_automation_curves ()
 	}
 }
 
+bool
+RouteTimeAxisView::can_edit_name () const
+{
+	/* we do not allow track name changes if it is record enabled
+	 */
+	return !_route->record_enabled();
+}
+
 void
 RouteTimeAxisView::update_rec_display ()
 {
 	RouteUI::update_rec_display ();
-	name_entry.set_sensitive (!_route->record_enabled());
 }
 
 void

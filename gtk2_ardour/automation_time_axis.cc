@@ -146,24 +146,19 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	ARDOUR_UI::instance()->set_tip(auto_button, _("automation state"));
 	ARDOUR_UI::instance()->set_tip(hide_button, _("hide track"));
 
-	string str = gui_property ("height");
+	const string str = gui_property ("height");
 	if (!str.empty()) {
 		set_height (atoi (str));
 	} else {
 		set_height (preset_height (HeightNormal));
 	}
 
-	/* rearrange the name display */
+	/* repack the name label */
 
-	controls_table.remove (name_hbox);
-	controls_table.attach (name_hbox, 1, 6, 0, 1,  Gtk::FILL|Gtk::EXPAND,  Gtk::FILL|Gtk::EXPAND, 3, 0);
-
-	/* we never show these for automation tracks, so make
-	   life easier and remove them.
-	*/
-
-	hide_name_entry();
-
+	if (name_label.get_parent()) {
+		name_label.get_parent()->remove (name_label);
+	}
+	
 	name_label.set_text (_name);
 	name_label.set_alignment (Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER);
         name_label.set_name (X_("TrackParameterName"));
@@ -178,12 +173,15 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	/* add the buttons */
 	controls_table.attach (hide_button, 0, 1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-	controls_table.attach (auto_button, 6, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	controls_table.attach (name_label, 0, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+	controls_table.attach (auto_button, 6, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+
+	name_label.show ();
 
 	if (_controller) {
 		_controller.get()->set_size_request(-1, 24);
 		/* add bar controller */
-		controls_table.attach (*_controller.get(), 0, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
+		controls_table.attach (*_controller.get(), 1, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 		/* note that this handler connects *before* the default handler */
 		_controller->event_widget().signal_scroll_event().connect (mem_fun (*this, &AutomationTimeAxisView::controls_ebox_scroll), false);
 	}
@@ -200,8 +198,9 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	/* ask for notifications of any new RegionViews */
 	if (show_regions) {
 
-		assert(_view);
-		_view->attach ();
+		if (_view) {
+			_view->attach ();
+		}
 
 	} else {
 		/* no regions, just a single line for the entire track (e.g. bus gain) */
@@ -427,21 +426,12 @@ AutomationTimeAxisView::set_height (uint32_t h)
 		first_call_to_set_height = false;
 
 		if (h >= preset_height (HeightNormal)) {
-			hide_name_entry ();
-			show_name_label ();
-			name_hbox.show_all ();
-
 			auto_button.show();
 			hide_button.show_all();
 
 		} else if (h >= preset_height (HeightSmall)) {
 			controls_table.hide_all ();
-			hide_name_entry ();
-			show_name_label ();
-			name_hbox.show_all ();
-
 			auto_button.hide();
-			hide_button.hide();
 		}
 	}
 
@@ -723,9 +713,7 @@ AutomationTimeAxisView::clear_lines ()
 void
 AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 {
-	assert(line);
-	assert(!_line);
-	if (_control) {
+	if (_control && line) {
 		assert(line->the_list() == _control->list());
 		
 		_control->alist()->automation_state_changed.connect (

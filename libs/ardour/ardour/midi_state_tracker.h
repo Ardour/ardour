@@ -37,7 +37,7 @@ class MidiStateTracker
 public:
 	MidiStateTracker();
 
-	void track (const MidiBuffer::iterator& from, const MidiBuffer::iterator& to, bool& looped);
+	void track (const MidiBuffer::iterator& from, const MidiBuffer::iterator& to);
 	void add (uint8_t note, uint8_t chn);
 	void remove (uint8_t note, uint8_t chn);
 	void resolve_notes (MidiBuffer& buffer, framepos_t time);

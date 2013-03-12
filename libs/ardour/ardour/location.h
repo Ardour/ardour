@@ -56,6 +56,8 @@ class Location : public SessionHandleRef, public PBD::StatefulDestructible
 	Location (const Location& other);
 	Location (Session &, const XMLNode&);
 	Location* operator= (const Location& other);
+    
+        bool operator==(const Location& other);
 
 	bool locked() const { return _locked; }
 	void lock ();
@@ -159,8 +161,8 @@ class Locations : public SessionHandleRef, public PBD::StatefulDestructible
 	int set_current (Location *, bool want_lock = true);
 	Location *current () const { return current_location; }
 
-	Location* first_location_before (framepos_t, bool include_special_ranges = false);
-	Location* first_location_after (framepos_t, bool include_special_ranges = false);
+        framepos_t first_mark_before (framepos_t, bool include_special_ranges = false);
+	framepos_t first_mark_after (framepos_t, bool include_special_ranges = false);
 
 	void marks_either_side (framepos_t const, framepos_t &, framepos_t &) const;
 

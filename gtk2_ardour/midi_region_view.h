@@ -27,9 +27,7 @@
 
 #include "pbd/signals.h"
 
-#include "ardour/midi_track.h"
 #include "ardour/midi_model.h"
-#include "ardour/diskstream.h"
 #include "ardour/types.h"
 
 #include "editing.h"
@@ -127,11 +125,11 @@ public:
 	 * @key a reference to an instance of MIDI::Name::PatchPrimaryKey whose fields will
 	 *        will be set according to the result of the lookup
 	 */
-        void get_patch_key_at (double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key);       
+	void get_patch_key_at (double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const;
 
-        /** Convert a given PatchChange into a PatchPrimaryKey
-         */
-        MIDI::Name::PatchPrimaryKey patch_change_to_patch_key (ARDOUR::MidiModel::PatchChangePtr);
+	/** Convert a given PatchChange into a PatchPrimaryKey
+	 */
+	MIDI::Name::PatchPrimaryKey patch_change_to_patch_key (ARDOUR::MidiModel::PatchChangePtr);
 
 	/** Change old_patch to new_patch.
 	 * @param old_patch the canvas patch change which is to be altered

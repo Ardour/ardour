@@ -597,8 +597,8 @@ PluginManager::windows_vst_discover (string path)
 	}
 
 	if (!finfo->canProcessReplacing) {
-		warning << string_compose (_("VST plugin %1 does not support processReplacing, and so cannot be used in ardour at this time"),
-				    finfo->name)
+		warning << string_compose (_("VST plugin %1 does not support processReplacing, and so cannot be used in %2 at this time"),
+					   finfo->name, PROGRAM_NAME)
 			<< endl;
 	}
 
@@ -701,8 +701,8 @@ PluginManager::lxvst_discover (string path)
 	}
 
 	if (!finfo->canProcessReplacing) {
-		warning << string_compose (_("linuxVST plugin %1 does not support processReplacing, and so cannot be used in ardour at this time"),
-				    finfo->name)
+		warning << string_compose (_("linuxVST plugin %1 does not support processReplacing, and so cannot be used in %2 at this time"),
+					   finfo->name, PROGRAM_NAME)
 			<< endl;
 	}
 

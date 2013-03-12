@@ -105,7 +105,7 @@ StereoPanner::set_tooltip ()
 	*/
 
 	char buf[64];
-	snprintf (buf, sizeof (buf), "L:%3d R:%3d Width:%d%%", (int) rint (100.0 * (1.0 - pos)),
+	snprintf (buf, sizeof (buf), _("L:%3d R:%3d Width:%d%%"), (int) rint (100.0 * (1.0 - pos)),
 	          (int) rint (100.0 * pos),
 	          (int) floor (100.0 * width_control->get_value()));
 	_tooltip.set_tip (buf);
@@ -275,6 +275,7 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 	dragging_left = false;
 	dragging_right = false;
 	_dragging = false;
+	_tooltip.target_stop_drag ();
 	accumulated_delta = 0;
 	detented = false;
 
@@ -352,6 +353,7 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 		}
 
 		_dragging = false;
+		_tooltip.target_stop_drag ();
 
 	} else if (ev->type == GDK_BUTTON_PRESS) {
 

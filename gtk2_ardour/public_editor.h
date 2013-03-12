@@ -218,6 +218,10 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 
 	virtual Editing::MouseMode effective_mouse_mode () const = 0;
 
+        /** Import existing media */
+        virtual void do_import (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, framepos_t&) = 0;
+        virtual void do_embed (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode,  framepos_t&) = 0;
+
 	/** Open main export dialog */
 	virtual void export_audio () = 0;
 

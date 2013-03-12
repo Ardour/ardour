@@ -49,8 +49,9 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress*)
 	char suffix[32];
 
 	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion>(r);
-	if (!region)
+	if (!region) {
 		return -1;
+	}
 
 	/* the name doesn't need to be super-precise, but allow for 2 fractional
 	   digits just to disambiguate close but not identical stretches.
@@ -74,16 +75,16 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress*)
 	if (make_new_sources (region, nsrcs, suffix))
 		return -1;
 
-	// FIXME: how to make a whole file region if it isn't?
-	//assert(region->whole_file());
-
 	boost::shared_ptr<MidiSource> src = region->midi_source(0);
 	src->load_model();
 
 	boost::shared_ptr<MidiModel> old_model = src->model();
 
 	boost::shared_ptr<MidiSource> new_src = boost::dynamic_pointer_cast<MidiSource>(nsrcs[0]);
-	assert(new_src);
+	if (!new_src) {
+		error << _("MIDI stretch created non-MIDI source") << endmsg;
+		return -1;
+	}
 
 	Glib::Threads::Mutex::Lock sl (new_src->mutex ());
 

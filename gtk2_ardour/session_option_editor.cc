@@ -60,18 +60,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Timecode"), smf);
 
-	ComboOption<uint32_t>* spf = new ComboOption<uint32_t> (
-		"subframes-per-frame",
-		_("Subframes per frame"),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::get_subframes_per_frame),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::set_subframes_per_frame)
-		);
-
-	spf->add (80, _("80"));
-	spf->add (100, _("100"));
-
-	add_option (_("Timecode"), spf);
-
 	_vpu = new ComboOption<float> (
 		"video-pullup",
 		_("Pull-up / pull-down"),
@@ -131,39 +119,17 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	/* FADES */
 
-	ComboOption<CrossfadeModel>* cfm = new ComboOption<CrossfadeModel> (
-		"xfade-model",
-		_("Crossfades are created"),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::get_xfade_model),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::set_xfade_model)
-		);
-
-	cfm->add (FullCrossfade, _("to span entire overlap"));
-	cfm->add (ShortCrossfade, _("short"));
-
-	add_option (_("Fades"), cfm);
-
 	ComboOption<CrossfadeChoice>* cfc = new ComboOption<CrossfadeChoice> (
 		"xfade-choice",
-		_("Crossfade type"),
+		_("Default crossfade type"),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::get_xfade_choice),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_xfade_choice)
 		);
 
-	cfc->add (ConstantPowerMinus3dB, _("constant power (-3dB)"));
-	cfc->add (ConstantPowerMinus6dB, _("constant power (-6dB)"));
-	cfc->add (RegionFades, _("use existing region fade shape"));
+	cfc->add (ConstantPowerMinus3dB, _("Constant power (-3dB) crossfade"));
+	cfc->add (ConstantPowerMinus6dB, _("Linear (-6dB) crossfade"));
 
 	add_option (_("Fades"), cfc);
-
-	add_option (_("Fades"), new SpinOption<float> (
-		_("short-xfade-seconds"),
-		_("Short crossfade length"),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::get_short_xfade_seconds),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::set_short_xfade_seconds),
-		0, 1000, 1, 10,
-		_("ms"), 0.001
-			    ));
 
 	add_option (_("Fades"), new SpinOption<float> (
 		_("destructive-xfade-seconds"),
@@ -172,13 +138,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_destructive_xfade_msecs),
 		0, 1000, 1, 10,
 		_("ms")
-			    ));
-
-	add_option (_("Fades"), new BoolOption (
-			    "auto-xfade",
-			    _("Create crossfades automatically"),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_auto_xfade),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_auto_xfade)
 			    ));
 
 	add_option (_("Fades"), new BoolOption (
@@ -229,11 +188,13 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	add_option (_("Media"), new OptionEditorHeading (_("File locations")));
 
         SearchPathOption* spo = new SearchPathOption ("audio-search-path", _("Search for audio files in:"),
+						      _session->path(),
                                                       sigc::mem_fun (*_session_config, &SessionConfiguration::get_audio_search_path),
                                                       sigc::mem_fun (*_session_config, &SessionConfiguration::set_audio_search_path));
         add_option (_("Media"), spo);
 
         spo = new SearchPathOption ("midi-search-path", _("Search for MIDI files in:"),
+				    _session->path(),
                                     sigc::mem_fun (*_session_config, &SessionConfiguration::get_midi_search_path),
                                     sigc::mem_fun (*_session_config, &SessionConfiguration::set_midi_search_path));
 
@@ -243,7 +204,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
         add_option (_("Monitoring"), new BoolOption (
 			    "auto-input",
-			    _("Monitoring automatically follows transport state (\"auto-input\")"),
+			    _("Track Input Monitoring automatically follows transport state (\"auto-input\")"),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_auto_input),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_auto_input)
 			    ));
@@ -331,6 +292,10 @@ SessionOptionEditor::set_use_monitor_section (bool yn)
 	} else {
 		_session->remove_monitor_section ();
 	}
+
+	/* store this choice for any new sessions */
+	
+	Config->set_use_monitor_bus (yn);
 
 	return had_monitor_section != yn;
 }

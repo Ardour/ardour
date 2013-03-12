@@ -105,6 +105,21 @@ Location::Location (Session& s, const XMLNode& node)
 	assert (_end >= 0);
 }
 
+bool
+Location::operator== (const Location& other)
+{
+	if (_name != other._name ||
+	    _start != other._start ||
+	    _end != other._end ||
+	    _bbt_start != other._bbt_start ||
+	    _bbt_end != other._bbt_end ||
+	    _flags != other._flags ||
+	    _position_lock_style != other._position_lock_style) {
+		return false;
+	}
+	return true;
+}
+
 Location*
 Location::operator= (const Location& other)
 {
@@ -140,6 +155,10 @@ Location::operator= (const Location& other)
 int
 Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 {
+	if (s < 0) {
+		return -1;
+	}
+
 	if (_locked) {
 		return -1;
 	}
@@ -196,6 +215,10 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 int
 Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 {
+	if (e < 0) {
+		return -1;
+	}
+
 	if (_locked) {
 		return -1;
 	}
@@ -224,6 +247,7 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 	}
 
 	if (e != _end) {
+
 		framepos_t const old = _end;
 
 		_end = e;
@@ -245,6 +269,10 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 int
 Location::set (framepos_t start, framepos_t end, bool allow_bbt_recompute)
 {
+	if (start < 0 || end < 0) {
+		return -1;
+	}
+
 	/* check validity */
 	if (((is_auto_punch() || is_auto_loop()) && start >= end) || (!is_mark() && start > end)) {
 		return -1;
@@ -260,6 +288,10 @@ Location::set (framepos_t start, framepos_t end, bool allow_bbt_recompute)
 int
 Location::move_to (framepos_t pos)
 {
+	if (pos < 0) {
+		return -1;
+	}
+
 	if (_locked) {
 		return -1;
 	}
@@ -890,72 +922,87 @@ Locations::set_state (const XMLNode& node, int version)
 	return 0;
 }
 
+
+typedef std::pair<framepos_t,Location*> LocationPair;
+
 struct LocationStartEarlierComparison
 {
-    bool operator() (Location *a, Location *b) {
-	return a->start() < b->start();
+    bool operator() (LocationPair a, LocationPair b) {
+	    return a.first < b.first;
     }
 };
 
 struct LocationStartLaterComparison
 {
-    bool operator() (Location *a, Location *b) {
-	return a->start() > b->start();
+    bool operator() (LocationPair a, LocationPair b) {
+	    return a.first > b.first;
     }
 };
 
-Location *
-Locations::first_location_before (framepos_t frame, bool include_special_ranges)
+framepos_t
+Locations::first_mark_before (framepos_t frame, bool include_special_ranges)
 {
-	LocationList locs;
-
-	{
-		Glib::Threads::Mutex::Lock lm (lock);
-		locs = locations;
+	Glib::Threads::Mutex::Lock lm (lock);
+	vector<LocationPair> locs;
+	
+	for (LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
+		locs.push_back (make_pair ((*i)->start(), (*i)));
+		if (!(*i)->is_mark()) {
+			locs.push_back (make_pair ((*i)->end(), (*i)));
+		}
 	}
 
 	LocationStartLaterComparison cmp;
-	locs.sort (cmp);
+	sort (locs.begin(), locs.end(), cmp);
 
-	/* locs is now sorted latest..earliest */
+	/* locs is sorted in ascending order */
 
-	for (LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
-		if (!include_special_ranges && ((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
+	for (vector<LocationPair>::iterator i = locs.begin(); i != locs.end(); ++i) {
+		if ((*i).second->is_hidden()) {
 			continue;
 		}
-		if (!(*i)->is_hidden() && (*i)->start() < frame) {
-			return (*i);
+		if (!include_special_ranges && ((*i).second->is_auto_loop() || (*i).second->is_auto_punch())) {
+			continue;
+		}
+		if ((*i).first < frame) {
+			return (*i).first;
 		}
 	}
 
-	return 0;
+	return -1;
 }
 
-Location *
-Locations::first_location_after (framepos_t frame, bool include_special_ranges)
+framepos_t
+Locations::first_mark_after (framepos_t frame, bool include_special_ranges)
 {
-	LocationList locs;
+	Glib::Threads::Mutex::Lock lm (lock);
+	vector<LocationPair> locs;
 
-	{
-		Glib::Threads::Mutex::Lock lm (lock);
-		locs = locations;
+	for (LocationList::iterator i = locations.begin(); i != locations.end(); ++i) {
+		locs.push_back (make_pair ((*i)->start(), (*i)));
+		if (!(*i)->is_mark()) {
+			locs.push_back (make_pair ((*i)->end(), (*i)));
+		}
 	}
 
 	LocationStartEarlierComparison cmp;
-	locs.sort (cmp);
+	sort (locs.begin(), locs.end(), cmp);
+	
+	/* locs is sorted in reverse order */
 
-	/* locs is now sorted earliest..latest */
-
-	for (LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
-		if (!include_special_ranges && ((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
+	for (vector<LocationPair>::iterator i = locs.begin(); i != locs.end(); ++i) {
+		if ((*i).second->is_hidden()) {
 			continue;
 		}
-		if (!(*i)->is_hidden() && (*i)->start() > frame) {
-			return (*i);
+		if (!include_special_ranges && ((*i).second->is_auto_loop() || (*i).second->is_auto_punch())) {
+			continue;
+		}
+		if ((*i).first > frame) {
+			return (*i).first;
 		}
 	}
 
-	return 0;
+	return -1;
 }
 
 /** Look for the `marks' (either locations which are marks, or start/end points of range markers) either

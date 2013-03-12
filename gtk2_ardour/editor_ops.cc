@@ -44,6 +44,7 @@
 #include "ardour/dB.h"
 #include "ardour/location.h"
 #include "ardour/midi_region.h"
+#include "ardour/midi_track.h"
 #include "ardour/operations.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/quantize.h"
@@ -1846,13 +1847,13 @@ Editor::jump_forward_to_mark ()
 		return;
 	}
 
-	Location *location = _session->locations()->first_location_after (playhead_cursor->current_frame);
+	framepos_t pos = _session->locations()->first_mark_after (playhead_cursor->current_frame);
 
-	if (location) {
-		_session->request_locate (location->start(), _session->transport_rolling());
-	} else {
-		_session->request_locate (_session->current_end_frame());
+	if (pos < 0) {
+		return;
 	}
+	
+	_session->request_locate (pos, _session->transport_rolling());
 }
 
 void
@@ -1862,13 +1863,13 @@ Editor::jump_backward_to_mark ()
 		return;
 	}
 
-	Location *location = _session->locations()->first_location_before (playhead_cursor->current_frame);
+	framepos_t pos = _session->locations()->first_mark_before (playhead_cursor->current_frame);
 
-	if (location) {
-		_session->request_locate (location->start(), _session->transport_rolling());
-	} else {
-		_session->goto_start ();
+	if (pos < 0) {
+		return;
 	}
+
+	_session->request_locate (pos, _session->transport_rolling());
 }
 
 void
@@ -3551,7 +3552,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 			if (rtv && rtv->track() && replace && enable_processing && !rtv->track()->bounceable (rtv->track()->main_outs(), false)) {
 				MessageDialog d (
 					_("You can't perform this operation because the processing of the signal "
-					  "will cause one or more of the tracks will end up with a region with more channels than this track has inputs.\n\n"
+					  "will cause one or more of the tracks to end up with a region with more channels than this track has inputs.\n\n"
 					  "You can do this without processing, which is a different operation.")
 					);
 				d.set_title (_("Cannot bounce"));
@@ -5869,7 +5870,9 @@ Editor::define_one_bar (framepos_t start, framepos_t end)
 	} else if (t.frame() == start) {
 		_session->tempo_map().change_existing_tempo_at (start, beats_per_minute, t.note_type());
 	} else {
-		_session->tempo_map().add_tempo (Tempo (beats_per_minute, t.note_type()), start);
+		Timecode::BBT_Time bbt;
+		_session->tempo_map().bbt_time (start, bbt);
+		_session->tempo_map().add_tempo (Tempo (beats_per_minute, t.note_type()), bbt);
 	}
 
 	XMLNode& after (_session->tempo_map().get_state());

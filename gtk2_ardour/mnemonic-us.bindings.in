@@ -32,7 +32,7 @@ $ARDOUR Shortcuts \linebreak Mnemonic US-Keypad
 %wvis Window Visibility
 
 %eep Editing with Edit Point
-Most edit functions operate on a single "Edit Point". The edit point can be any of: playhead (default), the mouse or an active marker. The choice of Edit Point is by default linked to the Zoom Focus.
+Most edit functions operate on a single "Edit Point". The edit point can be any of: playhead (default), the mouse or an active marker. The choice of Edit Point (by default) also sets the Zoom Focus.
 
 %aep Aligning with the Edit Point
 Align operations move regions so that their start/end/sync point is at the edit point. "Relative" operations
@@ -95,7 +95,7 @@ This mode provides many different operations on both regions and control points,
 @eep|Editor/edit-cursor-to-previous-region-sync|apostrophe|EP to prev region sync
 @eep|Editor/edit-cursor-to-next-region-sync|semicolon|EP to next region sync
 @eep|Editor/cycle-edit-point|grave|next EP w/o marker
-@eep|Editor/cycle-edit-point-with-marker|<@PRIMARY@>asciicircum|next EP w/marker
+@eep|Editor/cycle-edit-point-with-marker|<@PRIMARY@>grave|next EP w/marker
 
 @aep|Editor/move-range-start-to-previous-region-boundary|less|range start to prev region edge
 @aep|Editor/move-range-start-to-next-region-boundary|<@PRIMARY@>less|range start to next region edge
@@ -113,9 +113,6 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/toggle-region-fade-out|<@PRIMARY@>slash|toggle fade in active
 @rop|Region/set-fade-out-length|backslash|set fade out length
 @rop|Region/toggle-region-fade-out|<@PRIMARY@>backslash|toggle fade out active
-
-@eep|Region/trim-from-start|<@TERTIARY@>braceleft|trim region start to edit point
-@eep|Region/trim-to-end|<@TERTIARY@>braceright|trim region end to edit point
 
 @eep|Editor/trim-to-previous-region|<@PRIMARY@>j|trim region to end of prev region
 @eep|Editor/trim-to-next-region|<@PRIMARY@>k|trim region to start of next region
@@ -332,6 +329,7 @@ This mode provides many different operations on both regions and control points,
 
 ;; numbers
 
+@eep|Editor/cycle-zoom-focus|1|cycle to next zoom focus
 @eep|Editor/cycle-snap-mode|2|cycle to next grid snap mode
 @eep|Editor/prev-snap-choice|3|use next grid unit
 @eep|Editor/prev-snap-choice-music-only|<@PRIMARY@>3|use previous grid unit

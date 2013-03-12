@@ -24,6 +24,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
+#include <regex.h>
 
 #include "pbd/pathscanner.h"
 #include "pbd/stl_delete.h"
@@ -64,7 +65,7 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 		throw failed_constructor ();
 	}
 
-        /* file is not opened until write */
+	/* file is not opened until write */
 }
 
 /** Constructor used for existing internal-to-session files. */
@@ -89,7 +90,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 		throw failed_constructor ();
 	}
 
-        _open = true;
+	_open = true;
 }
 
 SMFSource::~SMFSource ()
@@ -103,25 +104,27 @@ int
 SMFSource::open_for_write ()
 {
 	if (create (_path)) {
-                return -1;
-        }
-        _open = true;
-        return 0;
+		return -1;
+	}
+	_open = true;
+	return 0;
 }
 
 /** All stamps in audio frames */
 framecnt_t
-SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination, framepos_t const source_start,
-			  framepos_t start, framecnt_t duration,
-			  MidiStateTracker* tracker) const
+SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination,
+                          framepos_t const               source_start,
+                          framepos_t                     start,
+                          framecnt_t                     duration,
+                          MidiStateTracker*              tracker) const
 {
 	int      ret  = 0;
 	uint64_t time = 0; // in SMF ticks, 1 tick per _ppqn
 
-        if (writable() && !_open) {
-                /* nothing to read since nothing has ben written */
-                return duration;
-        }
+	if (writable() && !_open) {
+		/* nothing to read since nothing has ben written */
+		return duration;
+	}
 
 	DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked: start %1 duration %2\n", start, duration));
 
@@ -208,16 +211,14 @@ SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination, framepos_t
 	return duration;
 }
 
-/** Write data to this source from a MidiRingBuffer.
- *  @param source Buffer to read from.
- *  @param position This source's start position in session frames.
- */
 framecnt_t
-SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source, framepos_t position, framecnt_t duration)
+SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source,
+                           framepos_t                  position,
+                           framecnt_t                  cnt)
 {
-        if (!_writing) {
-                mark_streaming_write_started ();
-        }
+	if (!_writing) {
+		mark_streaming_write_started ();
+	}
 
 	framepos_t        time;
 	Evoral::EventType type;
@@ -226,55 +227,57 @@ SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source, framepos_t positi
 	size_t   buf_capacity = 4;
 	uint8_t* buf          = (uint8_t*)malloc(buf_capacity);
 
-	if (_model && ! _model->writing()) {
+	if (_model && !_model->writing()) {
 		_model->start_write();
 	}
 
 	Evoral::MIDIEvent<framepos_t> ev;
-
-	// cerr << "SMFSource::write unlocked, begins writing from src buffer with _last_write_end = " << _last_write_end << " dur = " << duration << endl;
-
 	while (true) {
+		/* Get the event time, in frames since session start but ignoring looping. */
 		bool ret;
-
 		if (!(ret = source.peek ((uint8_t*)&time, sizeof (time)))) {
-			/* no more events to consider */
+			/* Ring is empty, no more events. */
 			break;
 		}
 
-		if ((duration != max_framecnt) && (time > (_last_write_end + duration))) {
-			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("SMFSource::write_unlocked: dropping event @ %1 because it is later than %2 + %3\n",
-								    time, _last_write_end, duration));
+		if ((cnt != max_framecnt) &&
+		    (time > position + _capture_length + cnt)) {
+			/* The diskstream doesn't want us to write everything, and this
+			   event is past the end of this block, so we're done for now. */
 			break;
 		}
 
+		/* Read the time, type, and size of the event. */
 		if (!(ret = source.read_prefix (&time, &type, &size))) {
-			error << _("Unable to read event prefix, corrupt MIDI ring buffer") << endmsg;
+			error << _("Unable to read event prefix, corrupt MIDI ring") << endmsg;
 			break;
 		}
 
+		/* Enlarge body buffer if necessary now that we know the size. */
 		if (size > buf_capacity) {
 			buf_capacity = size;
 			buf = (uint8_t*)realloc(buf, size);
 		}
 
+		/* Read the event body into buffer. */
 		ret = source.read_contents(size, buf);
 		if (!ret) {
-			error << _("Read time/size but not buffer, corrupt MIDI ring buffer") << endmsg;
+			error << _("Event has time and size but no body, corrupt MIDI ring") << endmsg;
 			break;
 		}
 
-		/* convert from session time to time relative to the source start */
-		assert(time >= position);
+		/* Convert event time from absolute to source relative. */
+		if (time < position) {
+			error << _("Event time is before MIDI source position") << endmsg;
+			break;
+		}
 		time -= position;
-
+			
 		ev.set(buf, size, time);
 		ev.set_event_type(EventTypeMap::instance().midi_event_type(ev.buffer()[0]));
-		ev.set_id (Evoral::next_event_id());
+		ev.set_id(Evoral::next_event_id());
 
 		if (!(ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex())) {
-			/*cerr << "SMFSource: WARNING: caller tried to write non SMF-Event of type "
-					<< std::hex << int(ev.buffer()[0]) << endl;*/
 			continue;
 		}
 
@@ -284,16 +287,14 @@ SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source, framepos_t positi
 	Evoral::SMF::flush ();
 	free (buf);
 
-	return duration;
+	return cnt;
 }
-
 
 /** Append an event with a timestamp in beats (double) */
 void
 SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 {
-	assert(_writing);
-	if (ev.size() == 0)  {
+	if (!_writing || ev.size() == 0)  {
 		return;
 	}
 
@@ -301,9 +302,9 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
                name().c_str(), ev.id(), ev.time(), ev.size());
 	       for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
 
-	assert(ev.time() >= 0);
 	if (ev.time() < _last_ev_time_beats) {
-		cerr << "SMFSource: Warning: Skipping event with non-monotonic time" << endl;
+		warning << string_compose(_("Skipping event with unordered time %1"), ev.time())
+		        << endmsg;
 		return;
 	}
 
@@ -332,9 +333,7 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 void
 SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, framepos_t position)
 {
-	assert(_writing);
-	if (ev.size() == 0)  {
-		cerr << "SMFSource: asked to append zero-size event\n";
+	if (!_writing || ev.size() == 0)  {
 		return;
 	}
 
@@ -343,7 +342,8 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, fr
 	// for (size_t i=0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");
 
 	if (ev.time() < _last_ev_time_frames) {
-		cerr << "SMFSource: Warning: Skipping event with non-monotonic time" << endl;
+		warning << string_compose(_("Skipping event with unordered time %1"), ev.time())
+		        << endmsg;
 		return;
 	}
 
@@ -404,13 +404,13 @@ SMFSource::set_state (const XMLNode& node, int version)
 void
 SMFSource::mark_streaming_midi_write_started (NoteMode mode)
 {
-        /* CALLER MUST HOLD LOCK */
+	/* CALLER MUST HOLD LOCK */
 
-        if (!_open && open_for_write()) {
-                error << string_compose (_("cannot open MIDI file %1 for write"), _path) << endmsg;
-                /* XXX should probably throw or return something */
-                return;
-        }
+	if (!_open && open_for_write()) {
+		error << string_compose (_("cannot open MIDI file %1 for write"), _path) << endmsg;
+		/* XXX should probably throw or return something */
+		return;
+	}
 
 	MidiSource::mark_streaming_midi_write_started (mode);
 	Evoral::SMF::begin_write ();
@@ -449,7 +449,22 @@ SMFSource::mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::Musical
 bool
 SMFSource::safe_midi_file_extension (const string& file)
 {
-	return (file.rfind(".mid") != string::npos) || (file.rfind (".MID") != string::npos);
+	static regex_t compiled_pattern;
+	static bool compile = true;
+	const int nmatches = 2;
+	regmatch_t matches[nmatches];
+	
+	if (compile && regcomp (&compiled_pattern, "[mM][iI][dD]$", REG_EXTENDED)) {
+		return false;
+	} else {
+		compile = false;
+	}
+	
+	if (regexec (&compiled_pattern, file.c_str(), nmatches, matches, 0)) {
+		return false;
+	}
+
+	return true;
 }
 
 void
@@ -473,9 +488,9 @@ SMFSource::load_model (bool lock, bool force_reload)
 		_model->clear();
 	}
 
-        if (writable() && !_open) {
-                return;
-        }
+	if (writable() && !_open) {
+		return;
+	}
 
 	_model->start_write();
 	Evoral::SMF::seek_to_start();

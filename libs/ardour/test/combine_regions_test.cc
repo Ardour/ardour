@@ -113,11 +113,13 @@ CombineRegionsTest::crossfadeTest1 ()
 	CPPUNIT_ASSERT_EQUAL (layer_t (0), _r[0]->layer ());
 	CPPUNIT_ASSERT_EQUAL (layer_t (1), _r[1]->layer ());
 
+#if 0
 	/* Check that the right fades have been set up */
 	CPPUNIT_ASSERT_EQUAL (false, _ar[0]->fade_in_is_xfade ());
 	CPPUNIT_ASSERT_EQUAL (false, _ar[0]->fade_out_is_xfade ());
 	CPPUNIT_ASSERT_EQUAL (true, _ar[1]->fade_in_is_xfade ());
 	CPPUNIT_ASSERT_EQUAL (false, _ar[1]->fade_out_is_xfade ());
+#endif
 
 	/* Check that the read comes back correctly */
 	check_crossfade1 ();
@@ -217,12 +219,13 @@ CombineRegionsTest::crossfadeTest2 ()
 	CPPUNIT_ASSERT_EQUAL (layer_t (1), _r[0]->layer ());
 	CPPUNIT_ASSERT_EQUAL (layer_t (0), _r[1]->layer ());
 
+#if 0
 	/* Check that the right fades have been set up */
-
 	CPPUNIT_ASSERT_EQUAL (false, _ar[0]->fade_in_is_xfade ());
 	CPPUNIT_ASSERT_EQUAL (true, _ar[0]->fade_out_is_xfade ());
 	CPPUNIT_ASSERT_EQUAL (false, _ar[1]->fade_in_is_xfade ());
 	CPPUNIT_ASSERT_EQUAL (false, _ar[1]->fade_out_is_xfade ());
+#endif
 
 	/* Check that the read comes back correctly */
 	check_crossfade2 ();

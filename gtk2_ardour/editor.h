@@ -322,7 +322,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void               set_zoom_focus (Editing::ZoomFocus);
 	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
 	double             get_current_zoom () const { return frames_per_unit; }
-
+        void               cycle_zoom_focus ();
 	void temporal_zoom_step (bool coarser);
 	void tav_zoom_step (bool coarser);
 	void tav_zoom_smooth (bool coarser, bool force_all);
@@ -435,7 +435,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void do_import (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, framepos_t&);
 	void do_embed (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode,  framepos_t&);
 
-	void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions);
+        void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions, bool src_comparison);
 
 	void center_screen (framepos_t);
 
@@ -1521,7 +1521,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void marker_menu_play_range ();
 	void marker_menu_set_playhead ();
 	void marker_menu_set_from_playhead ();
-	void marker_menu_set_from_selection ();
+	void marker_menu_set_from_selection (bool force_regions);
 	void marker_menu_range_to_next ();
 	void marker_menu_zoom_to_range ();
 	void new_transport_marker_menu_set_loop ();

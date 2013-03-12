@@ -175,9 +175,10 @@ private:
 
 	void toggled ();
 
-	sigc::slot<bool> _get; ///< slot to get the configuration variable's value
+	sigc::slot<bool>       _get; ///< slot to get the configuration variable's value
 	sigc::slot<bool, bool> _set;  ///< slot to set the configuration variable's value
-	Gtk::CheckButton* _button; ///< UI button
+	Gtk::CheckButton*      _button; ///< UI button
+	Gtk::Label*            _label; ///< label for button, so we can use markup
 };
 
 /** Component which provides the UI to handle a string option using a GTK Entry */
@@ -522,8 +523,6 @@ private:
 
 	Gtk::Adjustment _db_adjustment;
 	Gtkmm2ext::HSliderController* _db_slider;
-	Glib::RefPtr<Gdk::Pixbuf> _pix;
-	Glib::RefPtr<Gdk::Pixbuf> _pix_desensitised;
 	Gtk::Entry _db_display;
 	Gtk::Label _label;
 	Gtk::HBox _box;

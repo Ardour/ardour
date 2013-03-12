@@ -182,7 +182,10 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 
 				ccvar = (*iter)[columns.pVar];
 				ccvar->set(rgba);
+				/* mark dirty ... */
 				ARDOUR_UI::config()->set_dirty ();
+				/* but save it immediately */
+				ARDOUR_UI::config()->save_state ();
 
 				ColorsChanged(); //EMIT SIGNAL
 				break;
@@ -373,5 +376,9 @@ ThemeManager::reset_canvas_colors()
 {
 	ARDOUR_UI::config()->load_defaults();
 	setup_theme ();
+	/* mark dirty ... */
+	ARDOUR_UI::config()->set_dirty ();
+	/* but save it immediately */
+	ARDOUR_UI::config()->save_state ();
 }
 

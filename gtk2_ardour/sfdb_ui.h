@@ -46,7 +46,7 @@
 #include "ardour/audiofilesource.h"
 #include "ardour/session_handle.h"
 
-#include "ardour_dialog.h"
+#include "ardour_window.h"
 #include "editing.h"
 #include "audio_clock.h"
 
@@ -110,7 +110,7 @@ class SoundFileBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	void stop_audition ();
 };
 
-class SoundFileBrowser : public ArdourDialog
+class SoundFileBrowser : public ArdourWindow
 {
   private:
 	class FoundTagColumns : public Gtk::TreeModel::ColumnRecord
@@ -128,12 +128,18 @@ class SoundFileBrowser : public ArdourDialog
 		Gtk::TreeModelColumn<std::string> uri;
 		Gtk::TreeModelColumn<std::string> filename;
 		Gtk::TreeModelColumn<std::string> duration;
+		Gtk::TreeModelColumn<std::string> filesize;
+		Gtk::TreeModelColumn<std::string> smplrate;
+		Gtk::TreeModelColumn<std::string> license;
 
 		FreesoundColumns() {
 			add(id); 
 			add(filename); 
 			add(uri);
 			add(duration);
+			add(filesize);
+			add(smplrate);
+			add(license);
 		}
 	};
 
@@ -146,9 +152,12 @@ class SoundFileBrowser : public ArdourDialog
 	Gtk::Button freesound_stop_btn;
 
   public:
-	SoundFileBrowser (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, bool persistent);
+	SoundFileBrowser (std::string title, ARDOUR::Session* _s, bool persistent);
 	virtual ~SoundFileBrowser ();
 
+        int run ();
+        int status () const { return _status; }
+        
 	virtual void set_session (ARDOUR::Session*);
 	std::vector<std::string> get_paths ();
 
@@ -181,6 +190,9 @@ class SoundFileBrowser : public ArdourDialog
 
   protected:
 	bool resetting_ourselves;
+	int matches;
+        int _status;
+        bool _done;
 
 	Gtk::FileFilter audio_and_midi_filter;
 	Gtk::FileFilter audio_filter;
@@ -188,6 +200,11 @@ class SoundFileBrowser : public ArdourDialog
 	Gtk::FileFilter custom_filter;
 	Gtk::FileFilter matchall_filter;
 	Gtk::HBox hpacker;
+        Gtk::VBox vpacker;
+
+        Gtk::Button ok_button;
+        Gtk::Button cancel_button;
+        Gtk::Button apply_button;
 
 	static std::string persistent_folder;
 
@@ -219,17 +236,19 @@ class SoundFileBrowser : public ArdourDialog
 	bool on_midi_filter (const Gtk::FileFilter::Info& filter_info);
 	bool on_audio_and_midi_filter (const Gtk::FileFilter::Info& filter_info);
 
+        void set_action_sensitive (bool);
+
 	virtual bool reset_options() { return true; }
 
   protected:
 	void on_show();
-
+        virtual void do_something (int action);
 };
 
 class SoundFileChooser : public SoundFileBrowser
 {
   public:
-	SoundFileChooser (Gtk::Window& parent, std::string title, ARDOUR::Session* _s = 0);
+	SoundFileChooser (std::string title, ARDOUR::Session* _s = 0);
 	virtual ~SoundFileChooser () {};
 
 	std::string get_filename ();
@@ -242,7 +261,7 @@ class SoundFileOmega : public SoundFileBrowser
 {
 
   public:
-	SoundFileOmega (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, 
+	SoundFileOmega (std::string title, ARDOUR::Session* _s, 
 			uint32_t selected_audio_tracks, uint32_t selected_midi_tracks,
 			bool persistent,
 			Editing::ImportMode mode_hint = Editing::ImportAsTrack);
@@ -286,6 +305,8 @@ class SoundFileOmega : public SoundFileBrowser
 	bool reset_options ();
 	void reset_options_noret ();
 	bool bad_file_message ();
+
+        void do_something (int action);
 };
 
 #endif // __ardour_sfdb_ui_h__

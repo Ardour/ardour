@@ -48,8 +48,9 @@ namespace ARDOUR {
 	class AudioEngine;
 
 	extern PBD::Signal1<void,std::string> BootMessage;
+	extern PBD::Signal0<void> GUIIdle;
 
-	int init (bool with_vst, bool try_optimization);
+	int init (bool with_vst, bool try_optimization, const char* localedir);
 	void init_post_engine ();
 	int cleanup ();
 	bool no_auto_connect ();
@@ -61,8 +62,10 @@ namespace ARDOUR {
 
 	void find_bindings_files (std::map<std::string,std::string>&);
 
-	std::string translation_kill_path ();
-	bool translations_are_disabled ();
+	/* these only impact bundled installations */
+	std::string translation_enable_path ();
+	bool translations_are_enabled ();
+	bool set_translations_enabled (bool);
 
 	static inline microseconds_t get_microseconds () {
 		return (microseconds_t) jack_get_time();

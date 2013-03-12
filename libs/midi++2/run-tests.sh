@@ -9,8 +9,7 @@ fi
 
 # Make symlink to TakeFive.mid in build directory
 cd ../../build/libs/midi++2
-if [ "$1" == "debug" ]
-then 
+if [ "$1" == "debug" ]; then 
 	gdb ./run-tests
 else
 	./run-tests

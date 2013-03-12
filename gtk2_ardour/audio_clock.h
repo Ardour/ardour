@@ -60,7 +60,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void set_active_state (Gtkmm2ext::ActiveState s);
 	void set_editable (bool yn);
 	void set_corner_radius (double);
-	void set_fixed_width (bool);
 
 	void focus ();
 
@@ -100,11 +99,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	/** true if this clock follows the playhead, meaning that certain operations are redundant */
 	bool             _follows_playhead;
 	bool             _off;
-	bool             _fixed_width;
-	int              layout_x_offset;
 	int              em_width;
 	bool             _edit_by_click_field;
-	int              _mode_width[4]; /* enum Mode entries */
         bool             _negative_allowed;
         bool             edit_is_negative;
 
@@ -121,6 +117,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	int first_height;
 	int first_width;
+        bool style_resets_first;
 	int layout_height;
 	int layout_width;
 	int info_height;
@@ -191,6 +188,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void set_bbt (framepos_t, bool);
 	void set_minsec (framepos_t, bool);
 	void set_frames (framepos_t, bool);
+
+        void set_clock_dimensions (Gtk::Requisition&);
 
 	framepos_t get_frame_step (Field, framepos_t pos = 0, int dir = 1);
 

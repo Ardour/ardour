@@ -45,7 +45,7 @@ public:
 
 	virtual ~SMFSource ();
 
-	bool safe_file_extension (const std::string& path) const {
+        bool safe_file_extension (const std::string& path) const {
 		return safe_midi_file_extension(path);
 	}
 
@@ -76,14 +76,14 @@ public:
 	int open_for_write ();
 
 	framecnt_t read_unlocked (Evoral::EventSink<framepos_t>& dst,
-				  framepos_t position,
-				  framepos_t start,
-				  framecnt_t cnt,
-				  MidiStateTracker* tracker) const;
+	                          framepos_t                     position,
+	                          framepos_t                     start,
+	                          framecnt_t                     cnt,
+	                          MidiStateTracker*              tracker) const;
 
 	framecnt_t write_unlocked (MidiRingBuffer<framepos_t>& src,
-				   framepos_t position,
-				   framecnt_t cnt);
+	                           framepos_t                  position,
+	                           framecnt_t                  cnt);
 
 	double    _last_ev_time_beats;
 	framepos_t _last_ev_time_frames;

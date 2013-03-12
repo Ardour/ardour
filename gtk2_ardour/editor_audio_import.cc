@@ -80,7 +80,7 @@ Editor::add_external_audio_action (ImportMode mode_hint)
 	}
 
 	if (sfbrowser == 0) {
-		sfbrowser = new SoundFileOmega (*this, _("Add Existing Media"), _session, 0, true, mode_hint);
+		sfbrowser = new SoundFileOmega (_("Add Existing Media"), _session, 0, true, mode_hint);
 	} else {
 		sfbrowser->set_mode (mode_hint);
 	}
@@ -124,78 +124,12 @@ Editor::external_audio_dialog ()
 	}
 
 	if (sfbrowser == 0) {
-		sfbrowser = new SoundFileOmega (*this, _("Add Existing Media"), _session, audio_track_cnt, midi_track_cnt, true);
+		sfbrowser = new SoundFileOmega (_("Add Existing Media"), _session, audio_track_cnt, midi_track_cnt, true);
 	} else {
 		sfbrowser->reset (audio_track_cnt, midi_track_cnt);
 	}
 
 	sfbrowser->show_all ();
-
-
-	bool keepRunning;
-
-	do {
-		keepRunning = false;
-
-		int response = sfbrowser->run ();
-
-		switch (response) {
-			case RESPONSE_APPLY:
-				// leave the dialog open
-				break;
-
-			case RESPONSE_OK:
-				sfbrowser->hide ();
-				break;
-
-			default:
-				// cancel from the browser - we are done
-				sfbrowser->hide ();
-				return;
-		}
-
-		/* lets do it */
-
-		vector<string> upaths = sfbrowser->get_paths ();
-                for (vector<string>::iterator x = upaths.begin(); x != upaths.end(); ++x) {
-                        paths.push_back (*x);
-                }
-
-		ImportPosition pos = sfbrowser->get_position ();
-		ImportMode mode = sfbrowser->get_mode ();
-		ImportDisposition chns = sfbrowser->get_channel_disposition ();
-		framepos_t where;
-
-		switch (pos) {
-			case ImportAtEditPoint:
-				where = get_preferred_edit_position ();
-				break;
-			case ImportAtTimestamp:
-				where = -1;
-				break;
-			case ImportAtPlayhead:
-				where = playhead_cursor->current_frame;
-				break;
-			case ImportAtStart:
-				where = _session->current_start_frame();
-				break;
-		}
-
-		SrcQuality quality = sfbrowser->get_src_quality();
-
-
-		if (sfbrowser->copy_files_btn.get_active()) {
-			do_import (paths, chns, mode, quality, where);
-		} else {
-			do_embed (paths, chns, mode, where);
-		}
-
-		if (response == RESPONSE_APPLY) {
-			sfbrowser->clear_selection ();
-			keepRunning = true;
-		}
-
-	} while (keepRunning);
 }
 
 void

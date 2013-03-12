@@ -46,10 +46,6 @@ namespace Properties {
 	extern PBD::PropertyDescriptor<bool> fade_in_active;
 	extern PBD::PropertyDescriptor<bool> fade_out_active;
 	extern PBD::PropertyDescriptor<float> scale_amplitude;
-	extern PBD::PropertyDescriptor<bool> fade_out_is_xfade;
-	extern PBD::PropertyDescriptor<bool> fade_out_is_short;
-	extern PBD::PropertyDescriptor<bool> fade_in_is_xfade;
-	extern PBD::PropertyDescriptor<bool> fade_in_is_short;
 	extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_in;
 	extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > inverse_fade_in;
 	extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_out;
@@ -88,16 +84,6 @@ class AudioRegion : public Region
 	bool fade_in_active ()  const { return _fade_in_active; }
 	bool fade_out_active () const { return _fade_out_active; }
 
-	bool fade_in_is_xfade() const { return _fade_in_is_xfade; }
-	void set_fade_in_is_xfade (bool yn);
-	bool fade_out_is_xfade() const { return _fade_out_is_xfade; }
-	void set_fade_out_is_xfade (bool yn);
-
-	bool fade_in_is_short() const { return _fade_in_is_short; }
-	void set_fade_in_is_short (bool yn);
-	bool fade_out_is_short() const { return _fade_out_is_short; }
-	void set_fade_out_is_short (bool yn);
-
 	boost::shared_ptr<AutomationList> fade_in()  { return _fade_in.val (); }
 	boost::shared_ptr<AutomationList> inverse_fade_in()  { return _inverse_fade_in.val (); }
 	boost::shared_ptr<AutomationList> fade_out() { return _fade_out.val (); }
@@ -126,6 +112,7 @@ class AudioRegion : public Region
 	virtual framecnt_t read_raw_internal (Sample*, framepos_t, framecnt_t, int channel) const;
 
 	XMLNode& state ();
+	XMLNode& get_basic_state ();
 	int set_state (const XMLNode&, int version);
 
 	static void set_default_fade (float steepness, framecnt_t len);

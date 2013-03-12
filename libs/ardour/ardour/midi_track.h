@@ -20,19 +20,18 @@
 #ifndef __ardour_midi_track_h__
 #define __ardour_midi_track_h__
 
-#include "ardour/interthread_info.h"
 #include "ardour/track.h"
 #include "ardour/midi_ring_buffer.h"
-#include "ardour/midi_state_tracker.h"
 
 namespace ARDOUR
 {
 
-class Session;
+class InterThreadInfo;
 class MidiDiskstream;
 class MidiPlaylist;
 class RouteGroup;
 class SMFSource;
+class Session;
 
 class MidiTrack : public Track
 {
@@ -60,10 +59,18 @@ public:
 
 	bool bounceable (boost::shared_ptr<Processor>, bool) const { return false; }
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
-	boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&, 
-						boost::shared_ptr<Processor> endpoint, bool include_endpoint);
-	int export_stuff (BufferSet& bufs, framepos_t start_frame, framecnt_t end_frame, 
-			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export);
+	boost::shared_ptr<Region> bounce_range (framepos_t                   start,
+	                                        framepos_t                   end,
+	                                        InterThreadInfo&             iti,
+	                                        boost::shared_ptr<Processor> endpoint,
+	                                        bool                         include_endpoint);
+
+	int export_stuff (BufferSet&                   bufs,
+	                  framepos_t                   start_frame,
+	                  framecnt_t                   end_frame,
+	                  boost::shared_ptr<Processor> endpoint,
+	                  bool                         include_endpoint,
+	                  bool                         for_export);
 
 	int set_state (const XMLNode&, int version);
 
@@ -85,6 +92,8 @@ public:
 
 	NoteMode note_mode() const { return _note_mode; }
 	void set_note_mode (NoteMode m);
+
+	std::string describe_parameter (Evoral::Parameter param);
 
 	bool step_editing() const { return _step_editing; }
 	void set_step_editing (bool yn);

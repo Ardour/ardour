@@ -956,11 +956,6 @@ EditorRoutes::sync_treeview_from_order_keys (RouteSortOrderKey src)
 			(*i)->sync_order_keys (src);
 		}
 	}
-	
-	/* we could get here after either a change in the Mixer or Editor sort
-	 * order, but either way, the mixer order keys reflect the intended
-	 * order for the GUI, so reorder the treeview model to match it.
-	 */
 
 	/* we could get here after either a change in the Mixer or Editor sort
 	 * order, but either way, the mixer order keys reflect the intended
@@ -1211,10 +1206,12 @@ EditorRoutes::key_press (GdkEventKey* ev)
                 break;
 
         case 's':
-		if (Config->get_solo_control_is_listen_control()) {
-			_session->set_listen (rl, !rl->front()->listening_via_monitor(), Session::rt_cleanup);
-		} else {
-			_session->set_solo (rl, !rl->front()->self_soloed(), Session::rt_cleanup);
+                if (get_relevant_routes (rl)) {
+			if (Config->get_solo_control_is_listen_control()) {
+				_session->set_listen (rl, !rl->front()->listening_via_monitor(), Session::rt_cleanup);
+			} else {
+				_session->set_solo (rl, !rl->front()->self_soloed(), Session::rt_cleanup);
+			}
 		}
                 return true;
                 break;

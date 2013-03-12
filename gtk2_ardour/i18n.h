@@ -36,4 +36,8 @@
  */
 #define S_(Text) PBD::sgettext (PACKAGE, Text)
 
+/** Use this to translate strings with plural forms
+ */
+#define P_(Singular,Plural,HowMany) dngettext (PACKAGE, (Singular), (Plural), (HowMany))
+
 #endif // __i18n_h__

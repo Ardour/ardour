@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2012 Paul Davis 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #include <gdkmm/pixbuf.h>
 
 #include "pbd/compose.h"
@@ -656,22 +675,22 @@ MonitorSection::register_actions ()
         monitor_actions = ActionGroup::create (X_("Monitor"));
 	ActionManager::add_action_group (monitor_actions);
 
-        ActionManager::register_toggle_action (monitor_actions, "monitor-mono", "", "Switch monitor to mono",
+        ActionManager::register_toggle_action (monitor_actions, "monitor-mono", "", _("Switch monitor to mono"),
                                                sigc::mem_fun (*this, &MonitorSection::mono));
 
-        ActionManager::register_toggle_action (monitor_actions, "monitor-cut-all", "", "Cut monitor",
+        ActionManager::register_toggle_action (monitor_actions, "monitor-cut-all", "", _("Cut monitor"),
                                                sigc::mem_fun (*this, &MonitorSection::cut_all));
 
-        ActionManager::register_toggle_action (monitor_actions, "monitor-dim-all", "", "Dim monitor",
+        ActionManager::register_toggle_action (monitor_actions, "monitor-dim-all", "", _("Dim monitor"),
                                                sigc::mem_fun (*this, &MonitorSection::dim_all));
 
-        act = ActionManager::register_toggle_action (monitor_actions, "toggle-exclusive-solo", "", "Toggle exclusive solo mode",
+        act = ActionManager::register_toggle_action (monitor_actions, "toggle-exclusive-solo", "", _("Toggle exclusive solo mode"),
                                                sigc::mem_fun (*this, &MonitorSection::toggle_exclusive_solo));
 
         Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
         tact->set_active (Config->get_exclusive_solo());
 
-        act = ActionManager::register_toggle_action (monitor_actions, "toggle-mute-overrides-solo", "", "Toggle mute overrides solo mode",
+        act = ActionManager::register_toggle_action (monitor_actions, "toggle-mute-overrides-solo", "", _("Toggle mute overrides solo mode"),
                                                      sigc::mem_fun (*this, &MonitorSection::toggle_mute_overrides_solo));
 
         tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
@@ -688,17 +707,17 @@ MonitorSection::register_actions ()
                                                        sigc::bind (sigc::mem_fun (*this, &MonitorSection::cut_channel), chn));
 
                 action_name = string_compose (X_("monitor-dim-%1"), chn);
-                action_descr = string_compose (_("Dim monitor channel %1"), chn+1);
+                action_descr = string_compose (_("Dim monitor channel %1"), chn);
                 ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(),
                                                        sigc::bind (sigc::mem_fun (*this, &MonitorSection::dim_channel), chn));
 
                 action_name = string_compose (X_("monitor-solo-%1"), chn);
-                action_descr = string_compose (_("Solo monitor channel %1"), chn+1);
+                action_descr = string_compose (_("Solo monitor channel %1"), chn);
                 ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(),
                                                        sigc::bind (sigc::mem_fun (*this, &MonitorSection::solo_channel), chn));
 
                 action_name = string_compose (X_("monitor-invert-%1"), chn);
-                action_descr = string_compose (_("Invert monitor channel %1"), chn+1);
+                action_descr = string_compose (_("Invert monitor channel %1"), chn);
                 ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", action_descr.c_str(),
                                                        sigc::bind (sigc::mem_fun (*this, &MonitorSection::invert_channel), chn));
 
@@ -708,11 +727,11 @@ MonitorSection::register_actions ()
         Glib::RefPtr<ActionGroup> solo_actions = ActionGroup::create (X_("Solo"));
         RadioAction::Group solo_group;
 
-        ActionManager::register_radio_action (solo_actions, solo_group, "solo-use-in-place", "", "In-place solo",
+        ActionManager::register_radio_action (solo_actions, solo_group, "solo-use-in-place", "", _("In-place solo"),
                                               sigc::mem_fun (*this, &MonitorSection::solo_use_in_place));
-        ActionManager::register_radio_action (solo_actions, solo_group, "solo-use-afl", "", "After Fade Listen (AFL) solo",
+        ActionManager::register_radio_action (solo_actions, solo_group, "solo-use-afl", "", _("After Fade Listen (AFL) solo"),
                                               sigc::mem_fun (*this, &MonitorSection::solo_use_afl));
-        ActionManager::register_radio_action (solo_actions, solo_group, "solo-use-pfl", "", "Pre Fade Listen (PFL) solo",
+        ActionManager::register_radio_action (solo_actions, solo_group, "solo-use-pfl", "", _("Pre Fade Listen (PFL) solo"),
                                               sigc::mem_fun (*this, &MonitorSection::solo_use_pfl));
 
 	ActionManager::add_action_group (solo_actions);
@@ -908,7 +927,7 @@ MonitorSection::map_state ()
 
                 char action_name[32];
 
-                snprintf (action_name, sizeof (action_name), "monitor-cut-%u", n+1);
+                snprintf (action_name, sizeof (action_name), "monitor-cut-%u", n);
                 act = ActionManager::get_action (X_("Monitor"), action_name);
                 if (act) {
                         Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
@@ -917,7 +936,7 @@ MonitorSection::map_state ()
                         }
                 }
 
-                snprintf (action_name, sizeof (action_name), "monitor-dim-%u", n+1);
+                snprintf (action_name, sizeof (action_name), "monitor-dim-%u", n);
                 act = ActionManager::get_action (X_("Monitor"), action_name);
                 if (act) {
                         Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
@@ -926,7 +945,7 @@ MonitorSection::map_state ()
                         }
                 }
 
-                snprintf (action_name, sizeof (action_name), "monitor-solo-%u", n+1);
+                snprintf (action_name, sizeof (action_name), "monitor-solo-%u", n);
                 act = ActionManager::get_action (X_("Monitor"), action_name);
                 if (act) {
                         Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
@@ -935,7 +954,7 @@ MonitorSection::map_state ()
                         }
                 }
 
-                snprintf (action_name, sizeof (action_name), "monitor-invert-%u", n+1);
+                snprintf (action_name, sizeof (action_name), "monitor-invert-%u", n);
                 act = ActionManager::get_action (X_("Monitor"), action_name);
                 if (act) {
                         Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);

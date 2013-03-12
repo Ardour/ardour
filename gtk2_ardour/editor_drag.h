@@ -515,7 +515,7 @@ public:
 		ContentsTrim,
 	};
 
-	TrimDrag (Editor *, ArdourCanvas::Item *, RegionView*, std::list<RegionView*> const &);
+	TrimDrag (Editor *, ArdourCanvas::Item *, RegionView*, std::list<RegionView*> const &, bool preserve_fade_anchor = false);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -531,6 +531,8 @@ public:
 private:
 
 	Operation _operation;
+	
+	bool _preserve_fade_anchor;
 };
 
 /** Meter marker drag */
@@ -680,7 +682,16 @@ private:
 	void update_item (ARDOUR::Location *);
 
 	Marker* _marker; ///< marker being dragged
-	std::list<ARDOUR::Location*> _copied_locations;
+
+        struct CopiedLocationMarkerInfo {
+	    ARDOUR::Location* location;
+	    std::vector<Marker*> markers;
+	    bool    move_both;
+	    CopiedLocationMarkerInfo (ARDOUR::Location* l, Marker* m);
+	};
+
+        typedef std::list<CopiedLocationMarkerInfo> CopiedLocationInfo;
+        CopiedLocationInfo _copied_locations;
  	ArdourCanvas::Points _points;
 };
 
@@ -704,6 +715,8 @@ private:
 	double _fixed_grab_y;
 	double _cumulative_x_drag;
 	double _cumulative_y_drag;
+        bool     _pushing;
+        uint32_t _final_index;
 	static double _zero_gain_fraction;
 };
 
@@ -860,7 +873,8 @@ public:
 		CreateSelection,
 		SelectionStartTrim,
 		SelectionEndTrim,
-		SelectionMove
+		SelectionMove,
+		SelectionExtend
 	};
 
 	SelectionDrag (Editor *, ArdourCanvas::Item *, Operation);
@@ -874,11 +888,14 @@ public:
 
 private:
 	Operation _operation;
-	bool _copy;
+	bool _add;
+	bool _extend;
 	int _original_pointer_time_axis;
 	int _last_pointer_time_axis;
 	std::list<TimeAxisView*> _added_time_axes;
 	bool _time_selection_at_start;
+        framepos_t start_at_start;
+        framepos_t end_at_start;
 };
 
 /** Range marker drag */

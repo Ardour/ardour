@@ -40,7 +40,7 @@ class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	void map_transport_state ();
 	void update_speed_display ();
-	void set_shuttle_fract (double);
+        void set_shuttle_fract (double, bool zero_ok = false);
 	double get_shuttle_fract () const { return shuttle_fract; }
 	void set_session (ARDOUR::Session*);
 
@@ -48,6 +48,9 @@ class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 		ShuttleControllable (ShuttleControl&);
 		void set_value (double);
 		double get_value (void) const;
+
+                double lower() const { return -1.0; }
+                double upper() const { return  1.0; }
 
 		ShuttleControl& sc;
 	};
@@ -89,8 +92,8 @@ class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void on_size_allocate (Gtk::Allocation&);
 	bool on_query_tooltip (int, int, bool, const Glib::RefPtr<Gtk::Tooltip>&);
 
-	gint mouse_shuttle (double x, bool force);
-	void use_shuttle_fract (bool force);
+        gint mouse_shuttle (double x, bool force);
+        void use_shuttle_fract (bool force, bool zero_ok = false);
 	void parameter_changed (std::string);
 
 	void set_shuttle_units (ARDOUR::ShuttleUnits);

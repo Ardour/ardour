@@ -25,6 +25,7 @@
 
 #include "gtkmm2ext/keyboard.h"
 #include "ardour/instrument_info.h"
+#include "midi++/midnam_patch.h"
 
 #include "ardour_ui.h"
 #include "midi_region_view.h"
@@ -40,27 +41,27 @@ using namespace std;
 /** @param x x position in pixels.
  */
 CanvasPatchChange::CanvasPatchChange(
-		MidiRegionView& region,
-		Group&          parent,
-		const string&   text,
-		double          height,
-		double          x,
-		double          y,
-		ARDOUR::InstrumentInfo& info,
-		ARDOUR::MidiModel::PatchChangePtr patch,
-		bool active_channel)
+	MidiRegionView&                   region,
+	Group&                            parent,
+	const string&                     text,
+	double                            height,
+	double                            x,
+	double                            y,
+	ARDOUR::InstrumentInfo&           info,
+	ARDOUR::MidiModel::PatchChangePtr patch,
+	bool                              active_channel)
 	: CanvasFlag(
-			region,
-			parent,
-			height,
-			active_channel ?
-			ARDOUR_UI::config()->canvasvar_MidiPatchChangeOutline.get() :
-			ARDOUR_UI::config()->canvasvar_MidiPatchChangeInactiveChannelOutline.get(),
-			active_channel ?
-			ARDOUR_UI::config()->canvasvar_MidiPatchChangeFill.get() :
-			ARDOUR_UI::config()->canvasvar_MidiPatchChangeInactiveChannelFill.get(),
-			x,
-			y)
+		region,
+		parent,
+		height,
+		(active_channel
+		 ? ARDOUR_UI::config()->canvasvar_MidiPatchChangeOutline.get()
+		 : ARDOUR_UI::config()->canvasvar_MidiPatchChangeInactiveChannelOutline.get()),
+		(active_channel
+		 ? ARDOUR_UI::config()->canvasvar_MidiPatchChangeFill.get()
+		 : ARDOUR_UI::config()->canvasvar_MidiPatchChangeInactiveChannelFill.get()),
+		x,
+		y)
 	, _info (info)
 	, _patch (patch)
 	, _popup_initialized(false)
@@ -92,10 +93,10 @@ CanvasPatchChange::initialize_popup_menus()
 		     ++bank) {
 			Gtk::Menu& patch_bank_menu = *manage(new Gtk::Menu());
 			
-			const PatchBank::PatchNameList& patches = (*bank)->patch_name_list();
+			const PatchNameList& patches = (*bank)->patch_name_list();
 			Gtk::Menu::MenuList& patch_menus = patch_bank_menu.items();
 			
-			for (PatchBank::PatchNameList::const_iterator patch = patches.begin();
+			for (PatchNameList::const_iterator patch = patches.begin();
 			     patch != patches.end();
 			     ++patch) {
 				std::string name = (*patch)->name();
@@ -104,9 +105,8 @@ CanvasPatchChange::initialize_popup_menus()
 				patch_menus.push_back(
 					Gtk::Menu_Helpers::MenuElem(
 						name,
-						sigc::bind(
-							sigc::mem_fun(*this, &CanvasPatchChange::on_patch_menu_selected),
-							(*patch)->patch_primary_key())) );
+						sigc::bind(sigc::mem_fun(*this, &CanvasPatchChange::on_patch_menu_selected),
+						           (*patch)->patch_primary_key())) );
 			}
 			
 			std::string name = (*bank)->name();
@@ -120,19 +120,20 @@ CanvasPatchChange::initialize_popup_menus()
 	} else {
 		/* only one patch bank, so make it the initial menu */
 
-		const PatchBank::PatchNameList& patches = patch_banks.front()->patch_name_list();
+		const PatchNameList& patches = patch_banks.front()->patch_name_list();
 		Gtk::Menu::MenuList& patch_menus = _popup.items();
 		
-		for (PatchBank::PatchNameList::const_iterator patch = patches.begin();
+		for (PatchNameList::const_iterator patch = patches.begin();
 		     patch != patches.end();
 		     ++patch) {
 			std::string name = (*patch)->name();
 			boost::replace_all (name, "_", " ");
 			
-			patch_menus.push_back (Gtk::Menu_Helpers::MenuElem (name, 
-									    sigc::bind (
-										    sigc::mem_fun(*this, &CanvasPatchChange::on_patch_menu_selected),
-										    (*patch)->patch_primary_key())));
+			patch_menus.push_back (
+				Gtk::Menu_Helpers::MenuElem (
+					name,
+					sigc::bind (sigc::mem_fun(*this, &CanvasPatchChange::on_patch_menu_selected),
+					            (*patch)->patch_primary_key())));
 		}
 	}
 }
@@ -143,31 +144,39 @@ CanvasPatchChange::on_patch_menu_selected(const PatchPrimaryKey& key)
 	_region.change_patch_change (*this, key);
 }
 
+static bool
+in_edit_mode(Editor* editor)
+{
+	return (editor->internal_editing() &&
+	        (editor->current_mouse_mode() == Editing::MouseObject ||
+	         editor->current_mouse_mode() == Editing::MouseDraw));
+}
+
 bool
 CanvasPatchChange::on_event (GdkEvent* ev)
 {
-	Editor* e;
+	/* XXX: icky dcast */
+	Editor* e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
+	
+	if (!in_edit_mode(e)) {
+		return false;
+	}
 
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
-		/* XXX: icky dcast */
-		e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
-		if (e->current_mouse_mode() == Editing::MouseObject && e->internal_editing()) {
-
-			if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
-
-				_region.delete_patch_change (this);
-				return true;
-
-			} else if (Gtkmm2ext::Keyboard::is_edit_event (&ev->button)) {
-
-				_region.edit_patch_change (this);
-				return true;
-
-			} else if (ev->button.button == 1) {
-				e->drags()->set (new PatchChangeDrag (e, this, &_region), ev);
-				return true;
-			}
+		if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
+			
+			_region.delete_patch_change (this);
+			return true;
+			
+		} else if (Gtkmm2ext::Keyboard::is_edit_event (&ev->button)) {
+			
+			_region.edit_patch_change (this);
+			return true;
+			
+		} else if (ev->button.button == 1) {
+			e->drags()->set (new PatchChangeDrag (e, this, &_region), ev);
+			return true;
 		}
 
 		if (ev->button.button == 3) {
@@ -212,35 +221,29 @@ CanvasPatchChange::on_event (GdkEvent* ev)
 		break;
 
 	case GDK_SCROLL:
-		/* XXX: icky dcast */
-		e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
-		if (e->current_mouse_mode() == Editing::MouseObject && e->internal_editing()) {
-			if (ev->scroll.direction == GDK_SCROLL_UP) {
-				if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
-					_region.previous_bank (*this);
-				} else {
-					_region.previous_patch (*this);
-				}
-			} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
+		if (ev->scroll.direction == GDK_SCROLL_UP) {
+			if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
+				_region.previous_bank (*this);
+			} else {
+				_region.previous_patch (*this);
+			}
+		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
 				if (Keyboard::modifier_state_contains (ev->scroll.state, Keyboard::PrimaryModifier)) {
 					_region.next_bank (*this);
 				} else {
 					_region.next_patch (*this);
 				}
-			}
-			return true;
-			break;
 		}
-		break;
+		return true;
 
 	case GDK_ENTER_NOTIFY:
 		_region.patch_entered (this);
-                return true;
+		return true;
 		break;
 
 	case GDK_LEAVE_NOTIFY:
 		_region.patch_left (this);
-                return true;
+		return true;
 		break;
 
 	default:

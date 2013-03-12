@@ -32,15 +32,21 @@ namespace Gtkmm2ext {
 class PixFader : public Gtk::DrawingArea
 {
   public:
-	PixFader (Glib::RefPtr<Gdk::Pixbuf>, Glib::RefPtr<Gdk::Pixbuf>, Gtk::Adjustment& adjustment, int orientation, int);
+        PixFader (Gtk::Adjustment& adjustment, int orientation, int span, int girth);
 	virtual ~PixFader ();
 
-	void set_fader_length (int);
-        void set_border_colors (uint32_t rgba_left, uint32_t rgba_right);
-
 	void set_default_value (float);
+	void set_text (const std::string&);
 
   protected:
+	Glib::RefPtr<Pango::Layout> _layout;
+	std::string                 _text;
+	int   _text_width;
+	int   _text_height;
+	double text_r;
+	double text_g;
+	double text_b;
+
 	Gtk::Adjustment& adjustment;
 
 	void on_size_request (GtkRequisition*);
@@ -53,34 +59,65 @@ class PixFader : public Gtk::DrawingArea
 	bool on_scroll_event (GdkEventScroll* ev);
 	bool on_enter_notify_event (GdkEventCrossing* ev);
 	bool on_leave_notify_event (GdkEventCrossing* ev);
+        void on_state_changed (Gtk::StateType);
+        void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 
 	enum Orientation {
-		VERT=1,
-		HORIZ=2,
+		VERT,
+		HORIZ,
 	};
 
   private:
-
-	enum State {
-		NORMAL,
-		DESENSITISED,
-		STATES
-	};
-	
-        Cairo::RefPtr<Cairo::Context> belt_context[STATES];
-        Cairo::RefPtr<Cairo::ImageSurface> belt_surface[STATES];
-        Glib::RefPtr<Gdk::Pixbuf> pixbuf[STATES];
-
 	int span, girth;
 	int _orien;
-        float left_r;
-        float left_g;
-        float left_b;
-        float right_r;
-        float right_g;
-        float right_b;
+        cairo_pattern_t* pattern;
 
-	GdkRectangle view;
+        struct FaderImage {
+	    cairo_pattern_t* pattern;
+	    double fr;
+	    double fg;
+	    double fb;
+	    double br;
+	    double bg;
+	    double bb;
+	    int width;
+	    int height;
+
+	    FaderImage (cairo_pattern_t* p, 
+			double afr, double afg, double afb, 
+			double abr, double abg, double abb,
+			int w, int h) 
+		    : pattern (p)
+		    , fr (afr)
+		    , fg (afg)
+		    , fb (afb)
+		    , br (abr)
+		    , bg (abg)
+		    , bb (abb)
+		    , width (w)
+		    , height (h)
+	    {}
+
+	    bool matches (double afr, double afg, double afb, 
+			  double abr, double abg, double abb,
+			  int w, int h) {
+		    return width == w && 
+			    height == h &&
+			    afr == fr &&
+			    afg == fg && 
+			    afb == fb &&
+			    abr == br &&
+			    abg == bg && 
+			    abb == bb;
+	    }
+	};
+
+        static std::list<FaderImage*> _patterns;
+        static cairo_pattern_t* find_pattern (double afr, double afg, double afb, 
+					      double abr, double abg, double abb, 
+					      int w, int h);
+
+	bool _hovering;
 
 	void create_patterns();
 	cairo_pattern_t* pattern;
@@ -100,6 +137,7 @@ class PixFader : public Gtk::DrawingArea
 	int display_span ();
 	void set_adjustment_from_event (GdkEventButton *);
 	void update_unity_position ();
+	void create_patterns();
 };
 
 

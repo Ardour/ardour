@@ -67,8 +67,7 @@ namespace Gtk {
 class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 {
   public:
-	GainMeterBase (ARDOUR::Session*, const Glib::RefPtr<Gdk::Pixbuf>&, const Glib::RefPtr<Gdk::Pixbuf> &,
-		       bool horizontal, int);
+        GainMeterBase (ARDOUR::Session*, bool horizontal, int, int);
 	virtual ~GainMeterBase ();
 
 	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
@@ -201,7 +200,7 @@ private:
 class GainMeter : public GainMeterBase, public Gtk::VBox
 {
   public:
-	GainMeter (ARDOUR::Session*, int);
+         GainMeter (ARDOUR::Session*, int);
 	~GainMeter () {}
 
 	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
@@ -210,8 +209,6 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 
 	int get_gm_width ();
 	void setup_meters (int len=0);
-
-	static void setup_slider_pix ();
 
   protected:
 	void hide_all_meters ();
@@ -233,9 +230,6 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 	Gtk::Alignment fader_alignment;
 	Gtk::Alignment meter_alignment;
 	std::vector<ARDOUR::DataType> _types;
-
-	static Glib::RefPtr<Gdk::Pixbuf> slider;
-	static Glib::RefPtr<Gdk::Pixbuf> slider_desensitised;
 };
 
 #endif /* __ardour_gtk_gain_meter_h__ */

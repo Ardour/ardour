@@ -894,14 +894,13 @@ Editor::build_range_marker_menu (bool loop_or_punch, bool session)
 	markerMenu->set_name ("ArdourContextMenu");
 
 	items.push_back (MenuElem (_("Play Range"), sigc::mem_fun(*this, &Editor::marker_menu_play_range)));
-	items.push_back (MenuElem (_("Locate to Range Mark"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
-	items.push_back (MenuElem (_("Play from Range Mark"), sigc::mem_fun(*this, &Editor::marker_menu_play_from)));
-	if (!loop_or_punch_or_session) {
-		items.push_back (MenuElem (_("Loop Range"), sigc::mem_fun(*this, &Editor::marker_menu_loop_range)));
-	}
-	items.push_back (MenuElem (_("Set Range Mark from Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
+	items.push_back (MenuElem (_("Locate to Marker"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
+	items.push_back (MenuElem (_("Play from Marker"), sigc::mem_fun(*this, &Editor::marker_menu_play_from)));
+	items.push_back (MenuElem (_("Loop Range"), sigc::mem_fun(*this, &Editor::marker_menu_loop_range)));
+
+	items.push_back (MenuElem (_("Set Marker from Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
 	if (!Profile->get_sae()) {
-		items.push_back (MenuElem (_("Set Range from Range Selection"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_selection)));
+		items.push_back (MenuElem (_("Set Range from Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_menu_set_from_selection), false)));
 	}
 
 	items.push_back (MenuElem (_("Zoom to Range"), sigc::mem_fun (*this, &Editor::marker_menu_zoom_to_range)));
@@ -1154,7 +1153,7 @@ Editor::marker_menu_set_from_playhead ()
 }
 
 void
-Editor::marker_menu_set_from_selection ()
+Editor::marker_menu_set_from_selection (bool /*force_regions*/)
 {
 	Marker* marker;
 
@@ -1169,21 +1168,15 @@ Editor::marker_menu_set_from_selection ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
+
 			// nothing for now
-		}
-		else {
 
-			/* if range selection use first to last */
-
+		} else {
+			
 			if (!selection->time.empty()) {
-				l->set_start (selection->time.start());
-				l->set_end (selection->time.end_frame());
-			}
-			else {
-				if (!selection->regions.empty()) {
-					l->set_start (selection->regions.start());
-					l->set_end (selection->regions.end_frame());
-				}
+				l->set (selection->time.start(), selection->time.end_frame());
+			} else if (!selection->regions.empty()) {
+				l->set (selection->regions.start(), selection->regions.end_frame());
 			}
 		}
 	}

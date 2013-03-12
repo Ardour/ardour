@@ -175,7 +175,7 @@ work_respond(LV2_Worker_Respond_Handle handle,
 /* log extension */
 
 static int
-log_vprintf(LV2_Log_Handle handle,
+log_vprintf(LV2_Log_Handle /*handle*/,
             LV2_URID       type,
             const char*    fmt,
             va_list        args)
@@ -214,7 +214,7 @@ struct LV2Plugin::Impl {
 	/** Find the LV2 input port with the given designation.
 	 * If found, bufptrs[port_index] will be set to bufptr.
 	 */
-	LilvPort* designated_input (const char* uri, void** bufptrs[], void** bufptr);
+	const LilvPort* designated_input (const char* uri, void** bufptrs[], void** bufptr);
 
 	const LilvPlugin*           plugin;
 	const LilvUI*               ui;
@@ -288,6 +288,8 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_log_feature.URI             = LV2_LOG__log;
 	_work_schedule_feature.URI   = LV2_WORKER__schedule;
 	_work_schedule_feature.data  = NULL;
+	_def_state_feature.URI       = LV2_STATE_PREFIX "loadDefaultState";  // Post LV2-1.2.0
+	_def_state_feature.data      = NULL;
 
 	const LilvPlugin* plugin = _impl->plugin;
 
@@ -301,7 +303,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	lilv_node_free(state_uri);
 	lilv_node_free(state_iface_uri);
 
-	_features    = (LV2_Feature**)calloc(10, sizeof(LV2_Feature*));
+	_features    = (LV2_Feature**)calloc(11, sizeof(LV2_Feature*));
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
 	_features[2] = &_make_path_feature;
@@ -310,9 +312,13 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_features[5] = _uri_map.urid_unmap_feature();
 	_features[6] = &_log_feature;
 
+	unsigned n_features = 7;
+#ifdef HAVE_NEW_LV2
+	_features[n_features++] = &_def_state_feature;
+#endif
+
 	lv2_atom_forge_init(&_impl->forge, _uri_map.urid_map());
 
-	unsigned n_features = 7;
 #ifdef HAVE_NEW_LV2
 	LV2_URID atom_Int = _uri_map.uri_to_id(LV2_ATOM__Int);
 	LV2_Options_Option options[] = {
@@ -368,8 +374,12 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_data_access_extension_data.extension_data = _impl->instance->lv2_descriptor->extension_data;
 	_data_access_feature.data                  = &_data_access_extension_data;
 
-	_impl->work_iface = (const LV2_Worker_Interface*)extension_data(
-		LV2_WORKER__interface);
+	LilvNode* worker_iface_uri = lilv_new_uri(_world.world, LV2_WORKER__interface);
+	if (lilv_plugin_has_extension_data(plugin, worker_iface_uri)) {
+		_impl->work_iface = (const LV2_Worker_Interface*)extension_data(
+			LV2_WORKER__interface);
+	}
+	lilv_node_free(worker_iface_uri);
 
 	if (lilv_plugin_has_feature(plugin, _world.lv2_inPlaceBroken)) {
 		error << string_compose(
@@ -379,6 +389,15 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 		lilv_node_free(_impl->author);
 		throw failed_constructor();
 	}
+
+#ifdef HAVE_NEW_LILV
+	// Load default state
+	LilvState* state = lilv_state_new_from_world(
+		_world.world, _uri_map.urid_map(), lilv_plugin_get_uri(_impl->plugin));
+	if (state && _has_state_interface) {
+		lilv_state_restore(state, _impl->instance, NULL, NULL, 0, NULL);
+	}
+#endif
 
 	_sample_rate = rate;
 
@@ -1445,9 +1464,9 @@ write_position(LV2_Atom_Forge*     forge,
 	lv2_atom_forge_float(forge, bbt.beats - 1 +
 	                     (bbt.ticks / Timecode::BBT_Time::ticks_per_beat));
 	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_bar, 0);
-	lv2_atom_forge_float(forge, bbt.bars - 1);
+	lv2_atom_forge_long(forge, bbt.bars - 1);
 	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_beatUnit, 0);
-	lv2_atom_forge_float(forge, t.meter().note_divisor());
+	lv2_atom_forge_int(forge, t.meter().note_divisor());
 	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_beatsPerBar, 0);
 	lv2_atom_forge_float(forge, t.meter().divisions_per_bar());
 	lv2_atom_forge_property_head(forge, LV2Plugin::urids.time_beatsPerMinute, 0);
@@ -1795,10 +1814,10 @@ LV2Plugin::latency_compute_run()
 	deactivate();
 }
 
-LilvPort*
+const LilvPort*
 LV2Plugin::Impl::designated_input (const char* uri, void** bufptrs[], void** bufptr)
 {
-	LilvPort* port        = NULL;
+	const LilvPort* port = NULL;
 	LilvNode* designation = lilv_new_uri(_world.world, uri);
 	port = lilv_plugin_get_port_by_designation(
 		plugin, _world.lv2_InputPort, designation);

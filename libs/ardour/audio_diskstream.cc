@@ -618,6 +618,8 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecn
 					   as our current_playback_buffer.
 					*/
 
+					assert(wrap_buffer_size >= necessary_samples);
+
 					/* Copy buf[0] from playback_buf */
 					memcpy ((char *) chaninfo->playback_wrap_buffer,
 							chaninfo->playback_vector.buf[0],
@@ -1952,7 +1954,7 @@ AudioDiskstream::allocate_temporary_buffers ()
 	*/
 
 	double const sp = max (fabsf (_actual_speed), 1.2f);
-	framecnt_t required_wrap_size = (framecnt_t) floor (_session.get_block_size() * sp) + 1;
+	framecnt_t required_wrap_size = (framecnt_t) ceil (_session.get_block_size() * sp) + 2;
 
 	if (required_wrap_size > wrap_buffer_size) {
 

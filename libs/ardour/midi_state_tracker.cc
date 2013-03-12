@@ -94,18 +94,12 @@ MidiStateTracker::remove (uint8_t note, uint8_t chn)
 }
 
 void
-MidiStateTracker::track (const MidiBuffer::iterator &from, const MidiBuffer::iterator &to, bool& looped)
+MidiStateTracker::track (const MidiBuffer::iterator &from, const MidiBuffer::iterator &to)
 {
-	looped = false;
-
-	// DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 track notes, looped = %2\n", this, looped));
+	// DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 track notes\n", this));
 
 	for (MidiBuffer::iterator i = from; i != to; ++i) {
 		const Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
-		if (ev.event_type() == LoopEventType) {
-			looped = true;
-			continue;
-		}
 
 		/* catch AllNotesOff message and turn off all notes
 		 */

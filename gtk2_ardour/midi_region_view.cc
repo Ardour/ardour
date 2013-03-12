@@ -18,7 +18,6 @@
 */
 
 #include <cmath>
-#include <cassert>
 #include <algorithm>
 #include <ostream>
 
@@ -31,10 +30,11 @@
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
 
-#include "ardour/midi_region.h"
-#include "ardour/midi_source.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_patch_manager.h"
+#include "ardour/midi_region.h"
+#include "ardour/midi_source.h"
+#include "ardour/midi_track.h"
 #include "ardour/session.h"
 
 #include "evoral/Parameter.hpp"
@@ -915,13 +915,14 @@ MidiRegionView::show_list_editor ()
 void
 MidiRegionView::create_note_at (framepos_t t, double y, double length, bool snap_t)
 {
+	if (length < 2 * DBL_EPSILON) {
+		return;
+	}
+
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	MidiStreamView* const view = mtv->midi_view();
 
-	double note = view->y_to_note(y);
-
-	assert(note >= 0.0);
-	assert(note <= 127.0);
+	const double note = view->y_to_note(y);
 
 	// Start of note in frames relative to region start
 	if (snap_t) {
@@ -929,13 +930,11 @@ MidiRegionView::create_note_at (framepos_t t, double y, double length, bool snap
 		t = snap_frame_to_grid_underneath (t, grid_frames);
 	}
 
-	assert (t >= 0);
-	assert (length != 0);
-
-	const boost::shared_ptr<NoteType> new_note (new NoteType (mtv->get_channel_for_add (),
-	                                                          region_frames_to_region_beats(t + _region->start()), 
-								  length,
-	                                                          (uint8_t)note, 0x40));
+	const boost::shared_ptr<NoteType> new_note (
+		new NoteType (mtv->get_channel_for_add (),
+		              region_frames_to_region_beats(t + _region->start()), 
+		              length,
+		              (uint8_t)note, 0x40));
 
 	if (_model->contains (new_note)) {
 		return;
@@ -1234,7 +1233,7 @@ MidiRegionView::display_patch_changes_on_channel (uint8_t channel, bool active_c
 			continue;
 		}
 
-		string patch_name = instrument_info().get_patch_name ((*i)->bank(), (*i)->program(), channel);
+		const string patch_name = instrument_info().get_patch_name ((*i)->bank(), (*i)->program(), channel);
 		add_canvas_patch_change (*i, patch_name, active_channel);
 	}
 }
@@ -1285,7 +1284,6 @@ MidiRegionView::display_sysexes()
 			boost::static_pointer_cast<const Evoral::MIDIEvent<Evoral::MusicalTime> > (*i);
 
 		Evoral::MusicalTime time = (*i)->time();
-		assert (time >= 0);
 
 		if (mev) {
 			if (mev->is_spp() || mev->is_mtc_quarter() || mev->is_mtc_full()) {
@@ -1367,7 +1365,6 @@ void
 MidiRegionView::reset_width_dependent_items (double pixel_width)
 {
 	RegionView::reset_width_dependent_items(pixel_width);
-	assert(_pixel_width == pixel_width);
 
 	if (_enable_display) {
 		redisplay_model();
@@ -1495,9 +1492,11 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 void
 MidiRegionView::begin_write()
 {
-	assert(!_active_notes);
+	if (_active_notes) {
+		delete[] _active_notes;
+	}
 	_active_notes = new CanvasNote*[128];
-	for (unsigned i=0; i < 128; ++i) {
+	for (unsigned i = 0; i < 128; ++i) {
 		_active_notes[i] = 0;
 	}
 }
@@ -1657,8 +1656,7 @@ MidiRegionView::update_note (CanvasNote* ev, bool update_ghost_regions)
 	ev->property_y2() = y1 + floor(midi_stream_view()->note_height());
 
 	if (note->length() == 0) {
-		if (_active_notes) {
-			assert(note->note() < 128);
+		if (_active_notes && note->note() < 128) {
 			// If this note is already active there's a stuck note,
 			// finish the old note rectangle
 			if (_active_notes[note->note()]) {
@@ -1711,9 +1709,6 @@ void
 MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 {
 	CanvasNoteEvent* event = 0;
-
-	assert(note->time() >= 0);
-	assert(midi_view()->note_mode() == Sustained || midi_view()->note_mode() == Percussive);
 
 	//ArdourCanvas::Group* const group = (ArdourCanvas::Group*) get_canvas_group();
 
@@ -1816,8 +1811,6 @@ MidiRegionView::step_sustain (Evoral::MusicalTime beats)
 void
 MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const string& displaytext, bool active_channel)
 {
-	assert (patch->time() >= 0);
-
 	framecnt_t region_frames = source_beats_to_region_frames (patch->time());
 	const double x = trackview.editor().frame_to_pixel (region_frames);
 
@@ -1828,10 +1821,9 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const 
 		                      displaytext,
 		                      height,
 		                      x, 1.0,
-				      instrument_info(),
+		                      instrument_info(),
 		                      patch,
-				      active_channel)
-		          );
+		                      active_channel));
 
 	if (patch_change->width() < _pixel_width) {
 		// Show unless patch change is beyond the region bounds
@@ -1853,22 +1845,37 @@ MidiRegionView::patch_change_to_patch_key (MidiModel::PatchChangePtr p)
 	return MIDI::Name::PatchPrimaryKey (p->program(), p->bank());
 }
 
-void 
-MidiRegionView::get_patch_key_at (double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key)
+/// Return true iff @p pc applies to the given time on the given channel.
+static bool
+patch_applies (const ARDOUR::MidiModel::constPatchChangePtr pc, double time, uint8_t channel)
 {
+	return pc->time() <= time && pc->channel() == channel;
+}
+	
+void 
+MidiRegionView::get_patch_key_at (double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const
+{
+	// The earliest event not before time
 	MidiModel::PatchChanges::iterator i = _model->patch_change_lower_bound (time);
-	while (i != _model->patch_changes().end() && (*i)->channel() != channel) {
-		++i;
+
+	// Go backwards until we find the latest PC for this channel, or the start
+	while (i != _model->patch_changes().begin() &&
+	       (i == _model->patch_changes().end() ||
+	        !patch_applies(*i, time, channel))) {
+		--i;
 	}
 
-	if (i != _model->patch_changes().end()) {
-		key.bank_number = (*i)->bank();
+	if (i != _model->patch_changes().end() && patch_applies(*i, time, channel)) {
+		key.bank_number    = (*i)->bank();
 		key.program_number = (*i)->program ();
 	} else {
 		key.bank_number = key.program_number = 0;
 	}
 
-	assert (key.is_sane());
+	if (!key.is_sane()) {
+		error << string_compose(_("insane MIDI patch key %1:%2"),
+		                        key.bank_number, key.program_number) << endmsg;
+	}
 }
 
 void
@@ -2278,43 +2285,18 @@ MidiRegionView::note_deselected(ArdourCanvas::CanvasNoteEvent* ev)
 void
 MidiRegionView::update_drag_selection(double x1, double x2, double y1, double y2, bool extend)
 {
-	if (x1 > x2) {
-		swap (x1, x2);
-	}
-
-	if (y1 > y2) {
-		swap (y1, y2);
-	}
-
 	// TODO: Make this faster by storing the last updated selection rect, and only
 	// adjusting things that are in the area that appears/disappeared.
 	// We probably need a tree to be able to find events in O(log(n)) time.
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-
-		/* check if any corner of the note is inside the rect
-
-		   Notes:
-		   1) this is computing "touched by", not "contained by" the rect.
-		   2) this does not require that events be sorted in time.
-		*/
-
-		const double ix1 = (*i)->x1();
-		const double ix2 = (*i)->x2();
-		const double iy1 = (*i)->y1();
-		const double iy2 = (*i)->y2();
-
-		if ((ix1 >= x1 && ix1 <= x2 && iy1 >= y1 && iy1 <= y2) ||
-		    (ix1 >= x1 && ix1 <= x2 && iy2 >= y1 && iy2 <= y2) ||
-		    (ix2 >= x1 && ix2 <= x2 && iy1 >= y1 && iy1 <= y2) ||
-		    (ix2 >= x1 && ix2 <= x2 && iy2 >= y1 && iy2 <= y2)) {
-
-			// Inside rectangle
+		if ((*i)->x1() < x2 && (*i)->x2() > x1 && (*i)->y1() < y2 && (*i)->y2() > y1) {
+			// Rectangles intersect
 			if (!(*i)->selected()) {
 				add_to_selection (*i);
 			}
 		} else if ((*i)->selected() && !extend) {
-			// Not inside rectangle
+			// Rectangles do not intersect
 			remove_from_selection (*i);
 		}
 	}
@@ -2332,21 +2314,12 @@ MidiRegionView::update_vertical_drag_selection (double y1, double y2, bool exten
 	// We probably need a tree to be able to find events in O(log(n)) time.
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-
-		/* check if any corner of the note is inside the rect
-
-		   Notes:
-		   1) this is computing "touched by", not "contained by" the rect.
-		   2) this does not require that events be sorted in time.
-		*/
-
 		if (((*i)->y1() >= y1 && (*i)->y1() <= y2)) {
 			// within y- (note-) range
 			if (!(*i)->selected()) {
 				add_to_selection (*i);
 			}
 		} else if ((*i)->selected() && !extend) {
-			// Not inside rectangle
 			remove_from_selection (*i);
 		}
 	}
@@ -2436,11 +2409,9 @@ MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 void
 MidiRegionView::note_dropped(CanvasNoteEvent *, frameoffset_t dt, int8_t dnote)
 {
-	assert (!_selection.empty());
-
 	uint8_t lowest_note_in_selection  = 127;
 	uint8_t highest_note_in_selection = 0;
-	uint8_t highest_note_difference = 0;
+	uint8_t highest_note_difference   = 0;
 
 	// find highest and lowest notes first
 
@@ -2935,8 +2906,8 @@ MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush, bool al
 
 	if (!allow_smush) {
 		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-			if ((*i)->note()->velocity() + delta == 0 || (*i)->note()->velocity() + delta == 127) {
-				return;
+			if ((*i)->note()->velocity() < -delta || (*i)->note()->velocity() + delta > 127) {
+				goto cursor_label;
 			}
 		}
 	}
@@ -2964,6 +2935,7 @@ MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush, bool al
 
 	apply_diff();
 
+  cursor_label:
 	if (!_selection.empty()) {
 		char buf[24];
 		snprintf (buf, sizeof (buf), "Vel %d",
@@ -3169,9 +3141,9 @@ MidiRegionView::patch_entered (ArdourCanvas::CanvasPatchChange* p)
 {
 	ostringstream s;
 	/* XXX should get patch name if we can */
-	s << _("Bank:") << (p->patch()->bank() + MIDI_BP_ZERO) << '\n' 
-	  << _("Program:") << ((int) p->patch()->program()) + MIDI_BP_ZERO << '\n' 
-	  << _("Channel:") << ((int) p->patch()->channel() + 1);
+	s << _("Bank ") << (p->patch()->bank() + MIDI_BP_ZERO) << '\n' 
+	  << _("Program ") << ((int) p->patch()->program()) + MIDI_BP_ZERO << '\n' 
+	  << _("Channel ") << ((int) p->patch()->channel() + 1);
 	show_verbose_cursor (s.str(), 10, 20);
 	p->grab_focus();
 }
@@ -3713,7 +3685,14 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 
 	for (MidiBuffer::iterator i = buf->begin(); i != buf->end(); ++i) {
 		Evoral::MIDIEvent<MidiBuffer::TimeType> const ev (*i, false);
-		assert (ev.buffer ());
+
+		if (ev.is_channel_event()) {
+			if (_last_channel_mode == FilterChannels) {
+				if (((uint16_t(1) << ev.channel()) & _last_channel_selection) == 0) {
+					continue;
+				}
+			}
+		}
 
 		if(ev.is_channel_event()) {
 			if (_last_channel_mode == FilterChannels) {
@@ -3731,10 +3710,8 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 		Evoral::MusicalTime const time_beats = converter.from (ev.time () - converter.origin_b ());
 
 		if (ev.type() == MIDI_CMD_NOTE_ON) {
-
 			boost::shared_ptr<NoteType> note (
-				new NoteType (ev.channel(), time_beats, 0, ev.note(), ev.velocity())
-			                                  );
+				new NoteType (ev.channel(), time_beats, 0, ev.note(), ev.velocity()));
 
 			add_note (note, true);
 
@@ -3782,11 +3759,19 @@ MidiRegionView::trim_front_ending ()
 void
 MidiRegionView::edit_patch_change (ArdourCanvas::CanvasPatchChange* pc)
 {
-	PatchChangeDialog d (&_source_relative_time_converter, trackview.session(), *pc->patch (), instrument_info(), Gtk::Stock::APPLY);
+	PatchChangeDialog d (&_source_relative_time_converter, trackview.session(), *pc->patch (), instrument_info(), Gtk::Stock::APPLY, true);
 
         d.set_position (Gtk::WIN_POS_MOUSE);
+	
+	int response = d.run();
 
-	if (d.run () != Gtk::RESPONSE_ACCEPT) {
+	switch (response) {
+	case Gtk::RESPONSE_ACCEPT:
+		break;
+	case Gtk::RESPONSE_REJECT:
+		delete_patch_change (pc);
+		return;
+	default:
 		return;
 	}
 
@@ -3807,14 +3792,32 @@ MidiRegionView::delete_sysex (CanvasSysEx* sysex)
 void
 MidiRegionView::show_verbose_cursor (boost::shared_ptr<NoteType> n) const
 {
-	char buf[24];
-	snprintf (buf, sizeof (buf), "%s (%d) Chn %d\nVel %d",
-	          Evoral::midi_note_name (n->note()).c_str(),
+	using namespace MIDI::Name;
+
+	std::string name;
+
+	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	if (mtv) {
+		boost::shared_ptr<MasterDeviceNames> device_names(mtv->get_device_names());
+		if (device_names) {
+			MIDI::Name::PatchPrimaryKey patch_key;
+			get_patch_key_at(n->time(), n->channel(), patch_key);
+			name = device_names->note_name(mtv->gui_property(X_("midnam-custom-device-mode")),
+			                               n->channel(),
+			                               patch_key.bank_number,
+			                               patch_key.program_number,
+			                               n->note());
+		}
+	}
+
+	char buf[128];
+	snprintf (buf, sizeof (buf), "%d %s\nCh %d Vel %d",
 	          (int) n->note (),
+	          name.empty() ? Evoral::midi_note_name (n->note()).c_str() : name.c_str(),
 	          (int) n->channel() + 1,
 	          (int) n->velocity());
 
-	show_verbose_cursor (buf, 10, 20);
+	show_verbose_cursor(buf, 10, 20);
 }
 
 void

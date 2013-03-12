@@ -41,6 +41,13 @@
 #include "midi_streamview.h"
 #include "midi_channel_selector.h"
 
+namespace MIDI {
+namespace Name {
+class MasterDeviceNames;
+class CustomDeviceMode;
+}
+}
+
 namespace ARDOUR {
 	class Session;
 	class RouteGroup;
@@ -68,8 +75,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	void set_height (uint32_t);
 
-        void enter_internal_edit_mode ();
-        void leave_internal_edit_mode ();
+	void enter_internal_edit_mode ();
+	void leave_internal_edit_mode ();
 
 	boost::shared_ptr<ARDOUR::MidiRegion> add_region (ARDOUR::framepos_t, ARDOUR::framecnt_t, bool);
 
@@ -79,6 +86,9 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	ARDOUR::NoteMode  note_mode() const { return _note_mode; }
 	ARDOUR::ColorMode color_mode() const { return _color_mode; }
+
+	boost::shared_ptr<MIDI::Name::MasterDeviceNames> get_device_names();
+	boost::shared_ptr<MIDI::Name::CustomDeviceMode> get_device_mode();
 
 	void update_range();
 
@@ -90,8 +100,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
 
-        StepEditor* step_editor() { return _step_editor; }
-        void check_step_edit ();
+	StepEditor* step_editor() { return _step_editor; }
+	void check_step_edit ();
 
 	void first_idle ();
 
@@ -111,7 +121,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void build_automation_action_menu (bool);
 	Gtk::Menu* build_note_mode_menu();
 	Gtk::Menu* build_color_mode_menu();
-
+	
 	void set_note_mode (ARDOUR::NoteMode mode, bool apply_to_selection = false);
 	void set_color_mode (ARDOUR::ColorMode, bool force = false, bool redisplay = true, bool apply_to_selection = false);
 	void set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection = false);
@@ -143,6 +153,9 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void add_channel_command_menu_item (Gtk::Menu_Helpers::MenuList& items, const std::string& label, ARDOUR::AutomationType auto_type, uint8_t cmd);
 
 	Gtk::Menu* controller_menu;
+
+	void add_single_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
+	void add_multi_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
 	void build_controller_menu ();
 	void set_channel_mode (ARDOUR::ChannelMode, uint16_t);
 
@@ -162,7 +175,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	/** parameter -> menu item map for the controller menu */
 	ParameterMenuMap _controller_menu_map;
 
-        StepEditor* _step_editor;
+	StepEditor* _step_editor;
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

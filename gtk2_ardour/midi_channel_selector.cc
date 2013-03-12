@@ -17,7 +17,9 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <algorithm>
 #include <sstream>
+
 #include "midi_channel_selector.h"
 #include "gtkmm/separator.h"
 #include "i18n.h"
@@ -31,10 +33,10 @@ MidiChannelSelector::MidiChannelSelector(int n_rows, int n_columns, int start_ro
 	: Table(n_rows, n_columns, true)
 	, _recursion_counter(0)
 {
-	assert(n_rows >= 4);
-	assert(n_rows >= start_row + 4);
-	assert(n_columns >=4);
-	assert(n_columns >= start_column + 4);
+	n_rows    = std::max(4, n_rows);
+	n_rows    = std::max(4, start_row + 4);
+	n_columns = std::max(4, n_columns);
+	n_columns = std::max(4, start_column + 4);
 
 	property_column_spacing() = 0;
 	property_row_spacing() = 0;

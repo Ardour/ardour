@@ -138,8 +138,8 @@ MidiPlaylistSource::read_unlocked (Evoral::EventSink<framepos_t>& dst,
 
 framecnt_t
 MidiPlaylistSource::write_unlocked (MidiRingBuffer<framepos_t>&,
-				    framepos_t,
-				    framecnt_t)
+                                    framepos_t,
+                                    framecnt_t)
 {
 	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::write_unlocked() called - should be impossible") << endmsg;
 	/*NOTREACHED*/

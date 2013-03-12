@@ -420,10 +420,11 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 					first = false;
 				}
 
-				smfs->append_event_unlocked_beats(Evoral::Event<double>(0,
-				                                                        (double)t / (double)source->ppqn(),
-				                                                        size,
-				                                                        buf));
+				smfs->append_event_unlocked_beats(
+					Evoral::Event<double>(0,
+					                      (double)t / (double)source->ppqn(),
+					                      size,
+					                      buf));
 
 				if (status.progress < 0.99) {
 					status.progress += 0.01;
@@ -451,7 +452,7 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 		}
 
 	} catch (...) {
-		error << string_compose (_("MIDI file %1 was not readable (no reason available"), source->file_path()) << endmsg;
+		error << string_compose (_("MIDI file %1 was not readable (no reason available)"), source->file_path()) << endmsg;
 	}
 
 	if (buf) {

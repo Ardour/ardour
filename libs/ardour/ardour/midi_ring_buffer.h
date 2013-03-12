@@ -25,7 +25,6 @@
 #include "evoral/EventRingBuffer.hpp"
 
 #include "ardour/types.h"
-#include "ardour/buffer.h"
 #include "ardour/midi_state_tracker.h"
 
 namespace ARDOUR {
@@ -79,7 +78,8 @@ public:
 	}
 
 	void reset_tracker ();
-	
+        void loop_resolve (MidiBuffer& dst, framepos_t);
+
 protected:
 	inline bool is_channel_event(uint8_t event_type_byte) {
 		// mask out channel information

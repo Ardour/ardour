@@ -147,6 +147,10 @@ def build(bld):
         testobj.name         = 'libpbd-tests'
         if sys.platform != 'darwin':
             testobj.linkflags    = ['-lrt']
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 
 def shutdown():
     autowaf.shutdown()

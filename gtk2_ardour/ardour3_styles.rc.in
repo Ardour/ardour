@@ -68,8 +68,13 @@ style "small_red_active_and_selected_button" = "small_button"
 
 style "gain_fader"
 {
-        bg[NORMAL] = shade (0.7, @@COLPREFIX@_lightest)
-	bg[ACTIVE] = shade (0.705, @@COLPREFIX@_lightest)
+        bg[NORMAL] = shade (0.7, @@COLPREFIX@_bg)
+	bg[ACTIVE] = shade (0.705, @@COLPREFIX@_bg)
+	bg[INSENSITIVE] = shade (0.705, @@COLPREFIX@_bg)
+
+        fg[INSENSITIVE] = { 0.525, 0.521, 0.568 }
+        fg[NORMAL] = { 0.525, 0.521, 0.568 }
+	fg[ACTIVE] = { 0.525, 0.521, 0.568 }
 }
 
 #MSR and related buttons
@@ -356,9 +361,9 @@ style "mixer_red_active_button" = "very_small_button"
  	bg[INSENSITIVE] = { 0.16, 0.16, 0.21 }
 }
 
-style "time_button" = "default_button"
+style "ruler_label" = "small_bold_text"
 {
-	font_name = "@FONT_SMALL@"
+        fg[NORMAL] = @@COLPREFIX@_light_text_on_dark
 }
 
 style "transport_button"
@@ -785,7 +790,7 @@ style "plugin_slider"
 
 	fg[NORMAL] = @@COLPREFIX@_bright_color
 	fg[ACTIVE] = @@COLPREFIX@_bright_color
-	fg[INSENSITIVE] = @@COLPREFIX@_base # matches default
+	fg[INSENSITIVE] = @@COLPREFIX@_lightest # matches default
 	fg[SELECTED] = @@COLPREFIX@_bright_color
 	fg[PRELIGHT] = @@COLPREFIX@_bright_color
 

@@ -53,7 +53,6 @@
 #include "ardour/port.h"
 #include "ardour/port_insert.h"
 #include "ardour/processor.h"
-#include "ardour/profile.h"
 #include "ardour/route.h"
 #include "ardour/route_group.h"
 #include "ardour/send.h"
@@ -199,14 +198,10 @@ Route::~Route ()
 	   be half-destroyed by now
 	*/
 
-        {
-                Glib::Threads::RWLock::WriterLock lm (_processor_lock);
-                for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-                        (*i)->drop_references ();
-                }
-                
-                _processors.clear ();
-        }
+	Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		(*i)->drop_references ();
+	}
 
         delete _sg_rack;
 }
@@ -281,11 +276,11 @@ Route::has_order_key (RouteSortOrderKey key) const
 uint32_t
 Route::order_key (RouteSortOrderKey key) const
 {
-        OrderKeys::const_iterator i = order_keys.find (key);
+	OrderKeys::const_iterator i = order_keys.find (key);
 
-        if (i == order_keys.end()) {
-                return 0;
-        }
+	if (i == order_keys.end()) {
+		return 0;
+	}
 
         return i->second;
 }
@@ -1967,7 +1962,7 @@ Route::state(bool full_state)
 			boost::shared_ptr<InternalSend> is;
 
 			if ((is = boost::dynamic_pointer_cast<InternalSend> (*i)) != 0) {
-				if (is->role() == Delivery::Aux || is->role() == Delivery::Listen) {
+				if (is->role() == Delivery::Listen) {
 					continue;
 				}
 			}
@@ -4136,6 +4131,12 @@ boost::shared_ptr<Processor>
 Route::the_instrument () const
 {
 	Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+	return the_instrument_unlocked ();
+}
+
+boost::shared_ptr<Processor>
+Route::the_instrument_unlocked () const
+{
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if (boost::dynamic_pointer_cast<PluginInsert>(*i)) {
 			if ((*i)->input_streams().n_midi() > 0 &&
@@ -4146,6 +4147,8 @@ Route::the_instrument () const
 	}
 	return boost::shared_ptr<Processor>();
 }
+
+
 
 void
 Route::non_realtime_locate (framepos_t pos)

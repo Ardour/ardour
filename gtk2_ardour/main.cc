@@ -50,6 +50,8 @@
 #include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/utils.h>
 
+#include <fontconfig/fontconfig.h>
+
 #include "version.h"
 #include "utils.h"
 #include "ardour_ui.h"
@@ -57,6 +59,10 @@
 #include "enums.h"
 
 #include "i18n.h"
+
+#ifdef __APPLE__
+#include <Carbon/Carbon.h>
+#endif
 
 using namespace std;
 using namespace Gtk;
@@ -78,13 +84,13 @@ gui_jack_error ()
 	                   false,
 	                   Gtk::MESSAGE_INFO,
 	                   Gtk::BUTTONS_NONE);
-win.set_secondary_text(_("There are several possible reasons:\n\
+	win.set_secondary_text(string_compose (_("There are several possible reasons:\n\
 \n\
 1) JACK is not running.\n\
 2) JACK is running as another user, perhaps root.\n\
-3) There is already another client called \"ardour\".\n\
+3) There is already another client called \"%1\".\n\
 \n\
-Please consider the possibilities, and perhaps (re)start JACK."));
+Please consider the possibilities, and perhaps (re)start JACK."), PROGRAM_NAME));
 
 	win.add_button (Stock::QUIT, RESPONSE_CLOSE);
 	win.set_default_response (RESPONSE_CLOSE);
@@ -148,6 +154,20 @@ fixup_bundle_environment (int, char* [])
 
 	bundle_dir = Glib::path_get_dirname (exec_dir);
 
+#ifdef ENABLE_NLS
+	if (!ARDOUR::translations_are_enabled ()) {
+		localedir = "/this/cannot/exist";
+	} else {
+		/* force localedir into the bundle */
+		
+		vector<string> lpath;
+		lpath.push_back (bundle_dir);
+		lpath.push_back ("share");
+		lpath.push_back ("locale");
+		localedir = strdup (Glib::build_filename (lpath).c_str());
+	}
+#endif
+		
 	export_search_path (bundle_dir, "ARDOUR_DLL_PATH", "/lib");
 
 	/* inside an OS X .app bundle, there is no difference
@@ -162,18 +182,12 @@ fixup_bundle_environment (int, char* [])
 	export_search_path (bundle_dir, "LADSPA_PATH", "/Plugins");
 	export_search_path (bundle_dir, "VAMP_PATH", "/lib");
 	export_search_path (bundle_dir, "SUIL_MODULE_DIR", "/lib");
-	export_search_path (bundle_dir, "GTK_PATH", "/lib/clearlooks");
-
-        
+	export_search_path (bundle_dir, "GTK_PATH", "/lib/gtkengines");
 
 	/* unset GTK_RC_FILES so that we only load the RC files that we define
 	 */
 
 	unsetenv ("GTK_RC_FILES");
-
-	if (!ARDOUR::translations_are_disabled ()) {
-		export_search_path (bundle_dir, "GTK_LOCALEDIR", "/Resources/locale");
-	}
 
 	/* write a pango.rc file and tell pango to use it. we'd love
 	   to put this into the PROGRAM_NAME.app bundle and leave it there,
@@ -184,7 +198,7 @@ fixup_bundle_environment (int, char* [])
 	*/
 
 	if (g_mkdir_with_parents (userconfigdir.c_str(), 0755) < 0) {
-		error << string_compose (_("cannot create user ardour folder %1 (%2)"), userconfigdir, strerror (errno))
+		error << string_compose (_("cannot create user %3 folder %1 (%2)"), userconfigdir, strerror (errno), PROGRAM_NAME)
 		      << endmsg;
 	} else {
 		
@@ -211,6 +225,32 @@ fixup_bundle_environment (int, char* [])
 	setenv ("SOUNDGRID_PATH", Glib::build_filename (bundle_dir, "lib").c_str(), 1);
 }
 
+static void load_custom_fonts() {
+/* this code will only compile on OS X 10.6 and above, and we currently do not
+ * need it for earlier versions since we fall back on a non-monospace,
+ * non-custom font.
+ */
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
+	std::string ardour_mono_file;
+
+	if (!find_file_in_search_path (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
+		cerr << _("Cannot find ArdourMono TrueType font") << endl;
+	}
+
+	CFStringRef ttf;
+	CFURLRef fontURL;
+	CFErrorRef error;
+	ttf = CFStringCreateWithBytes(
+			kCFAllocatorDefault, (UInt8*) ardour_mono_file.c_str(),
+			ardour_mono_file.length(),
+			kCFStringEncodingUTF8, FALSE);
+	fontURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, ttf, kCFURLPOSIXPathStyle, TRUE);
+	if (CTFontManagerRegisterFontsForURL(fontURL, kCTFontManagerScopeProcess, &error) != true) {
+		cerr << _("Cannot load ArdourMono TrueType font.") << endl;
+	}
+#endif
+}
+
 #else
 
 void
@@ -230,6 +270,19 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	std::string dir_path = Glib::path_get_dirname (Glib::path_get_dirname (argv[0]));
 	std::string userconfigdir = user_config_directory();
 
+#ifdef ENABLE_NLS
+	if (!ARDOUR::translations_are_enabled ()) {
+		localedir = "/this/cannot/exist";
+	} else {
+		/* force localedir into the bundle */
+		vector<string> lpath;
+		lpath.push_back (dir_path);
+		lpath.push_back ("share");
+		lpath.push_back ("locale");
+		localedir = realpath (Glib::build_filename (lpath).c_str(), NULL);
+	}
+#endif
+
 	/* note that this function is POSIX/Linux specific, so using / as
 	   a dir separator in this context is just fine.
 	*/
@@ -241,17 +294,12 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	export_search_path (dir_path, "LADSPA_PATH", "/plugins");
 	export_search_path (dir_path, "VAMP_PATH", "/lib");
 	export_search_path (dir_path, "SUIL_MODULE_DIR", "/lib");
-
-	export_search_path (dir_path, "GTK_PATH", "/lib/clearlooks");
+	export_search_path (dir_path, "GTK_PATH", "/lib/gtkengines");
 
 	/* unset GTK_RC_FILES so that we only load the RC files that we define
 	 */
 
 	unsetenv ("GTK_RC_FILES");
-
-	if (!ARDOUR::translations_are_disabled ()) {
-		export_search_path (dir_path, "GTK_LOCALEDIR", "/share/locale");
-	}
 
 	/* Tell fontconfig where to find fonts.conf. Use the system version
 	   if it exists, otherwise use the stuff we included in the bundle
@@ -261,11 +309,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 		setenv ("FONTCONFIG_FILE", "/etc/fonts/fonts.conf", 1);
 		setenv ("FONTCONFIG_PATH", "/etc/fonts", 1);
 	} else {
-		/* use the one included in the bundle */
-		
-		path = Glib::build_filename (dir_path, "etc/fonts/fonts.conf");
-		setenv ("FONTCONFIG_FILE", path.c_str(), 1);
-		export_search_path (dir_path, "FONTCONFIG_PATH", "/etc/fonts");
+		error << _("No fontconfig file found on your system. Things may looked very odd or ugly") << endmsg;
 	}
 
 	/* write a pango.rc file and tell pango to use it. we'd love
@@ -277,7 +321,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	*/
 
 	if (g_mkdir_with_parents (userconfigdir.c_str(), 0755) < 0) {
-		error << string_compose (_("cannot create user ardour folder %1 (%2)"), userconfigdir, strerror (errno))
+		error << string_compose (_("cannot create user %3 folder %1 (%2)"), userconfigdir, strerror (errno), PROGRAM_NAME)
 		      << endmsg;
 	} else {
 		
@@ -299,6 +343,29 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 		*/
 		
 		setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (userconfigdir, "gdk-pixbuf.loaders").c_str(), 1);
+	}
+
+        /* this doesn't do much but setting it should prevent various parts of the GTK/GNU stack
+           from looking outside the bundle to find the charset.alias file.
+        */
+        setenv ("CHARSETALIASDIR", dir_path.c_str(), 1);
+
+}
+
+static void load_custom_fonts() {
+	std::string ardour_mono_file;
+	if (!find_file_in_search_path (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
+		cerr << _("Cannot find ArdourMono TrueType font") << endl;
+	}
+
+	FcConfig *config = FcInitLoadConfigAndFonts();
+	FcBool ret = FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_mono_file.c_str()));
+	if (ret == FcFalse) {
+		cerr << _("Cannot load ArdourMono TrueType font.") << endl;
+	}
+	ret = FcConfigSetCurrent(config);
+	if (ret == FcFalse) {
+		cerr << _("Failed to set fontconfig configuration.") << endl;
 	}
 
         /* this doesn't do much but setting it should prevent various parts of the GTK/GNU stack
@@ -374,11 +441,15 @@ int main (int argc, char *argv[])
 {
 	fixup_bundle_environment (argc, argv);
 
+	load_custom_fonts(); /* needs to happend before any gtk and pango init calls */
+
 	if (!Glib::thread_supported()) {
 		Glib::thread_init();
 	}
 
+#ifdef ENABLE_NLS
 	gtk_set_locale ();
+#endif
 
 #ifdef WINDOWS_VST_SUPPORT
 	/* this does some magic that is needed to make GTK and Wine's own
@@ -387,13 +458,16 @@ int main (int argc, char *argv[])
 	windows_vst_gui_init (&argc, &argv);
 #endif
 
+#ifdef ENABLE_NLS
+	cerr << "bnd txt domain [" << PACKAGE << "] to " << localedir << endl;
+
 	(void) bindtextdomain (PACKAGE, localedir);
 	/* our i18n translations are all in UTF-8, so make sure
 	   that even if the user locale doesn't specify UTF-8,
 	   we use that when handling them.
 	*/
 	(void) bind_textdomain_codeset (PACKAGE,"UTF-8");
-	(void) textdomain (PACKAGE);
+#endif
 
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 
@@ -452,9 +526,9 @@ int main (int argc, char *argv[])
 	}
 
 	try {
-		ui = new ARDOUR_UI (&argc, &argv);
+		ui = new ARDOUR_UI (&argc, &argv, localedir);
 	} catch (failed_constructor& err) {
-		error << _("could not create ARDOUR GUI") << endmsg;
+		error << string_compose (_("could not create %1 GUI"), PROGRAM_NAME) << endmsg;
 		exit (1);
 	}
 

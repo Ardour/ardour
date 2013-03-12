@@ -112,6 +112,9 @@ PannerUI::set_panner (boost::shared_ptr<PannerShell> ps, boost::shared_ptr<Panne
         delete _stereo_panner;
         _stereo_panner = 0;
 
+        delete _mono_panner;
+        _mono_panner = 0;
+
 	if (!_panner) {
 		return;
 	}
@@ -419,6 +422,8 @@ PannerUI::effective_pan_display ()
 {
         if (_stereo_panner) {
                 _stereo_panner->queue_draw ();
+        } else if (_mono_panner) {
+                _mono_panner->queue_draw ();
         } else if (twod_panner) {
                 twod_panner->queue_draw ();
         }

@@ -47,8 +47,6 @@ MidiPort::cycle_start (pframes_t nframes)
 
 	_buffer->clear ();
 
-	assert (_buffer->size () == 0);
-
 	if (sends_output ()) {
 		jack_midi_clear_buffer (jack_port_get_buffer (_jack_port, nframes));
 	}
@@ -67,8 +65,6 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 
 			void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
 			const pframes_t event_count = jack_midi_get_event_count (jack_buffer);
-			
-			assert (event_count < _buffer->capacity());
 			
 			/* suck all relevant MIDI events from the JACK MIDI port buffer
 			   into our MidiBuffer
@@ -170,11 +166,6 @@ MidiPort::flush_buffers (pframes_t nframes)
 
 			assert (ev.time() < (nframes + _global_port_buffer_offset + _port_buffer_offset));
 
-			if (ev.event_type() == LoopEventType) {
-				resolve_notes (jack_buffer, ev.time());
-				continue;
-			}
-
 			if (ev.time() >= _global_port_buffer_offset + _port_buffer_offset) {
 				if (jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size()) != 0) {
 					cerr << "write failed, drop flushed note off on the floor, time "
@@ -182,7 +173,8 @@ MidiPort::flush_buffers (pframes_t nframes)
 				}
 			} else {
 				cerr << "drop flushed event on the floor, time " << ev
-				     << " to early for " << _global_port_buffer_offset + _port_buffer_offset << endl;
+				     << " to early for " << _global_port_buffer_offset 
+				     << " + " << _port_buffer_offset << endl;
 			}
 		}
 	}

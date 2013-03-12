@@ -207,7 +207,7 @@ MixerStrip::init ()
         top_button_table.attach (*monitor_disk_button, 1, 2, 0, 1);
 	top_button_table.show ();
 
-	rec_solo_table.set_homogeneous (false);
+	rec_solo_table.set_homogeneous (true);
 	rec_solo_table.set_row_spacings (2);
 	rec_solo_table.set_col_spacings (2);
         rec_solo_table.attach (*solo_isolated_led, 1, 2, 0, 1);
@@ -400,13 +400,19 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	revert_to_default_display ();
 
-	if (gpm.gain_display.get_parent()) {
-		middle_button_table.remove (gpm.gain_display);
-	}
-
+	/* unpack these from the parent and stuff them into our own
+	   table
+	*/
+	
 	if (gpm.peak_display.get_parent()) {
-		middle_button_table.remove (gpm.peak_display);
+		gpm.peak_display.get_parent()->remove (gpm.peak_display);
 	}
+	if (gpm.gain_display.get_parent()) {
+		gpm.gain_display.get_parent()->remove (gpm.gain_display);
+	}
+	
+	middle_button_table.attach (gpm.gain_display,0,1,1,2);
+	middle_button_table.attach (gpm.peak_display,1,2,1,2);
 
 	if (solo_button->get_parent()) {
 		middle_button_table.remove (*solo_button);
@@ -479,12 +485,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		at->FreezeChange.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::map_frozen, this), gui_context());
 	}
 
-	if (has_audio_outputs ()) {
-		panners.show_all ();
-	} else {
-		panners.hide_all ();
-	}
-
 	if (is_track ()) {
 
 		rec_solo_table.attach (*rec_enable_button, 0, 1, 0, 2);
@@ -532,6 +532,12 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	connect_to_pan ();
 	panners.setup_pan ();
+
+	if (has_audio_outputs ()) {
+		panners.show_all ();
+	} else {
+		panners.hide_all ();
+	}
 
 	update_diskstream_display ();
 	update_input_display ();
@@ -605,15 +611,6 @@ MixerStrip::set_width_enum (Width w, void* owner)
 
 	switch (w) {
 	case Wide:
-		if (!gpm.peak_display.get_parent()) {
-			middle_button_table.attach (gpm.peak_display,1,2,1,2);
-		}
-		if (gpm.gain_display.get_parent()) {
-			middle_button_table.remove (gpm.gain_display);
-		}
-		if (!gpm.gain_display.get_parent()) {
-			middle_button_table.attach (gpm.gain_display,0,1,1,2);
-		}
 
 		if (show_sends_button)  {
 			show_sends_button->set_text (_("Aux\nSends"));
@@ -632,24 +629,12 @@ MixerStrip::set_width_enum (Width w, void* owner)
 					panners.astate_string(_route->panner()->automation_state()));
 		}
 
-		solo_isolated_led->set_text (_("iso"));
-		solo_safe_led->set_text (_("lock"));
 
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, longest_label.c_str(), 2, 2);
 		set_size_request (-1, -1);
 		break;
 
 	case Narrow:
-		if (gpm.peak_display.get_parent()) {
-			middle_button_table.remove (gpm.peak_display);
-		}
-
-		if (gpm.gain_display.get_parent()) {
-			middle_button_table.remove (gpm.gain_display);
-		}
-		if (!gpm.gain_display.get_parent()) {
-			middle_button_table.attach (gpm.gain_display,0,2,1,2);
-		}
 
 		if (show_sends_button) {
 			show_sends_button->set_text (_("Snd"));
@@ -666,9 +651,6 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (
 			panners.short_astate_string(_route->panner()->automation_state()));
 		}
-		
-		solo_isolated_led->set_text (_("iso"));
-		solo_safe_led->set_text (_("Lck"));
 
 		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "long", 2, 2);
 		set_size_request (max (50, gpm.get_gm_width()), -1);
@@ -941,7 +923,7 @@ MixerStrip::bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle> c)
 }
 
 void
-MixerStrip::maybe_add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const & current)
+MixerStrip::maybe_add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const& /*current*/)
 {
 	using namespace Menu_Helpers;
 
@@ -969,7 +951,7 @@ MixerStrip::maybe_add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, ARDOUR:
 }
 
 void
-MixerStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const & current)
+MixerStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const& /*current*/)
 {
 	using namespace Menu_Helpers;
 
@@ -1248,6 +1230,13 @@ MixerStrip::update_input_display ()
 {
 	update_io_button (_route, _width, true);
   	panners.setup_pan ();
+
+	if (has_audio_outputs ()) {
+		panners.show_all ();
+	} else {
+		panners.hide_all ();
+	}
+
 }
 
 void
@@ -1256,6 +1245,12 @@ MixerStrip::update_output_display ()
 	update_io_button (_route, _width, false);
   	gpm.setup_meters ();
   	panners.setup_pan ();
+
+	if (has_audio_outputs ()) {
+		panners.show_all ();
+	} else {
+		panners.hide_all ();
+	}
 }
 
 void
@@ -1850,6 +1845,14 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	panner_ui().set_panner (_current_delivery->panner_shell(), _current_delivery->panner());
 	panner_ui().setup_pan ();
 
+	/* make sure the send has audio output */
+
+	if (_current_delivery->output() && _current_delivery->output()->n_ports().n_audio() > 0) {
+		panners.show_all ();
+	} else {
+		panners.hide_all ();
+	}
+
 	input_button.set_sensitive (false);
 	group_button.set_sensitive (false);
 	set_invert_sensitive (false);
@@ -1882,6 +1885,12 @@ MixerStrip::revert_to_default_display ()
 
 	panner_ui().set_panner (_route->main_outs()->panner_shell(), _route->main_outs()->panner());
 	panner_ui().setup_pan ();
+
+	if (has_audio_outputs ()) {
+		panners.show_all ();
+	} else {
+		panners.hide_all ();
+	}
 
 	reset_strip_style ();
 }
@@ -1917,6 +1926,8 @@ MixerStrip::set_button_names ()
 				}
 			}
 		}
+		solo_isolated_led->set_text (_("iso"));
+		solo_safe_led->set_text (_("lock"));
 		break;
 
 	default:
@@ -1946,8 +1957,9 @@ MixerStrip::set_button_names ()
 				}
 			}
 		}
+		solo_isolated_led->set_text (_("i"));
+		solo_safe_led->set_text (_("L"));
 		break;
-
 	}
 
 	if (_route) {
@@ -1955,7 +1967,6 @@ MixerStrip::set_button_names ()
 	} else {
 		meter_point_button.set_text ("");
 	}
-}
 
 PluginSelector*
 MixerStrip::plugin_selector()

@@ -45,7 +45,7 @@ namespace Gtk {
 }
 
 namespace Gtkmm2ext {
-	void init ();
+	void init (const char*);
 
 	std::string fit_to_pixels (const std::string&, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses = false);
 	std::pair<std::string, double> fit_to_pixels (cairo_t *, std::string, double);
@@ -92,20 +92,26 @@ namespace Gtkmm2ext {
         int physical_screen_width (Glib::RefPtr<Gdk::Window>);
 
         void container_clear (Gtk::Container&);
+
+	/* C++ API for rounded rectangles */
+	
         void rounded_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
         void rounded_top_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
         void rounded_top_left_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
         void rounded_top_right_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
 	void rounded_top_half_rectangle (Cairo::RefPtr<Cairo::Context>, double x, double y, double w, double h, double r=10);
 	void rounded_bottom_half_rectangle (Cairo::RefPtr<Cairo::Context>, double x, double y, double w, double h, double r=10);
+	void rounded_right_half_rectangle (Cairo::RefPtr<Cairo::Context>, double x, double y, double w, double h, double r=10);
+
+	/* C API for rounded rectangles */
 
         void rounded_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
         void rounded_top_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
         void rounded_top_left_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
         void rounded_top_right_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
-
 	void rounded_top_half_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 	void rounded_bottom_half_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
+	void rounded_right_half_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 
 	Gtk::Label* left_aligned_label (std::string const &);
 

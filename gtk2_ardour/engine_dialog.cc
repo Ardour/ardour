@@ -41,7 +41,7 @@
 #include <CoreFoundation/CFString.h>
 #include <sys/param.h>
 #include <mach-o/dyld.h>
-#else
+#elif !defined(__FreeBSD__)
 #include <alsa/asoundlib.h>
 #endif
 
@@ -52,6 +52,8 @@
 
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/gtk_ui.h"
+
+#include "ardour/rc_configuration.h"
 
 #include "ardour/rc_configuration.h"
 
@@ -95,6 +97,7 @@ EngineControl::EngineControl ()
 	  verbose_output_button (_("Verbose output")),
 	  start_button (_("Start")),
 	  stop_button (_("Stop")),
+
 #ifdef __APPLE__
 	  basic_packer (7, 2),
 	  options_packer (4, 2),
@@ -168,7 +171,9 @@ EngineControl::EngineControl ()
 	strings.push_back (X_("CoreAudio"));
 	strings.push_back (X_("SoundGrid"));
 #else
+#ifndef __FreeBSD__
 	strings.push_back (X_("ALSA"));
+#endif
 	strings.push_back (X_("OSS"));
 	strings.push_back (X_("FreeBoB"));
 	strings.push_back (X_("FFADO"));
@@ -223,6 +228,7 @@ EngineControl::EngineControl ()
 	basic_packer.attach (period_size_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
 
+
 #ifdef HAVE_SOUNDGRID
 	inputs_label = manage (left_aligned_label (_("Physical input channels:")));
 	basic_packer.attach (*inputs_label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
@@ -241,9 +247,8 @@ EngineControl::EngineControl ()
 	basic_packer.attach (*busses_label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (busses_spinner, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
-#endif
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
 	label = manage (left_aligned_label (_("Number of buffers:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (periods_spinner, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
@@ -263,7 +268,7 @@ EngineControl::EngineControl ()
 	row++;
 	/* no audio mode with CoreAudio, its duplex or nuthin' */
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
 	label = manage (left_aligned_label (_("Audio mode:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (audio_mode_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
@@ -307,7 +312,7 @@ EngineControl::EngineControl ()
 
 #if PROVIDE_TOO_MANY_OPTIONS
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
 	options_packer.attach (no_memory_lock_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 	options_packer.attach (unlock_memory_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
@@ -355,7 +360,7 @@ EngineControl::EngineControl ()
 	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
 	label = manage (left_aligned_label (_("Dither:")));
 	options_packer.attach (dither_mode_combo, 1, 2, row, row + 1, FILL|EXPAND, AttachOptions(0));
 	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
@@ -384,7 +389,7 @@ EngineControl::EngineControl ()
 	device_packer.set_spacings (6);
 	row = 0;
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
 	label = manage (left_aligned_label (_("Input device:")));
 	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (input_device_combo, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
@@ -394,7 +399,6 @@ EngineControl::EngineControl ()
 	device_packer.attach (output_device_combo, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 #endif
-
 	label = manage (left_aligned_label (_("Hardware input latency:")));
 	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	device_packer.attach (input_latency, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
@@ -527,11 +531,11 @@ EngineControl::build_command_line (vector<string>& cmd)
 	if (!using_coreaudio) {
 		str = audio_mode_combo.get_active_text();
 
-		if (str == _("Playback/Recording on 1 Device")) {
+		if (str == _("Playback/recording on 1 device")) {
 
 			/* relax */
 
-		} else if (str == _("Playback/Recording on 2 Devices")) {
+		} else if (str == _("Playback/recording on 2 devices")) {
 
 			string input_device = get_device_name (driver, input_device_combo.get_active_text());
 			string output_device = get_device_name (driver, output_device_combo.get_active_text());
@@ -584,7 +588,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 	if (using_alsa) {
 
-		if (audio_mode_combo.get_active_text() != _("Playback/Recording on 2 Devices")) {
+		if (audio_mode_combo.get_active_text() != _("Playback/recording on 2 devices")) {
 
 			string device = get_device_name (driver, interface_combo.get_active_text());
 
@@ -790,9 +794,9 @@ EngineControl::enumerate_devices (const string& driver)
 	} else if (driver == "SoundGrid") {
 		devices[driver].clear ();
 
-#else
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
 
-        } else if (driver == "ALSA") {
+	} else if (driver == "ALSA") {
 		devices[driver] = enumerate_alsa_devices ();
 	} else if (driver == "FreeBOB") {
 		devices[driver] = enumerate_freebob_devices ();
@@ -912,7 +916,7 @@ EngineControl::enumerate_coreaudio_devices ()
 
 
 	if (devs.size() == 0) {
-		MessageDialog msg (_("\
+		MessageDialog msg (string_compose (_("\
 You do not have any audio devices capable of\n\
 simultaneous playback and recording.\n\n\
 Please use Applications -> Utilities -> Audio MIDI Setup\n\
@@ -922,8 +926,8 @@ Please send email to Apple and ask them why new Macs\n\
 have no duplex audio device.\n\n\
 Alternatively, if you really want just playback\n\
 or recording but not both, start JACK before running\n\
-Ardour and choose the relevant device then."
-					   ),
+%1 and choose the relevant device then."
+							   ), PROGRAM_NAME),
 				   true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
 		msg.set_title (_("No suitable audio devices"));
 		msg.set_position (Gtk::WIN_POS_MOUSE);
@@ -935,6 +939,8 @@ Ardour and choose the relevant device then."
 	return devs;
 }
 #else
+
+#if !defined(__FreeBSD__)
 vector<string>
 EngineControl::enumerate_alsa_devices ()
 {
@@ -978,6 +984,7 @@ EngineControl::enumerate_alsa_devices ()
 
 	return devs;
 }
+#endif
 
 vector<string>
 EngineControl::enumerate_ffado_devices ()
@@ -1112,7 +1119,7 @@ void
 EngineControl::redisplay_latency ()
 {
 	uint32_t rate = get_rate();
-#ifdef __APPLE_
+#if defined(__APPLE__) || defined(__FreeBSD__)
 	float periods = 2;
 #else
 	float periods = periods_adjustment.get_value();
@@ -1131,10 +1138,10 @@ EngineControl::audio_mode_changed ()
 {
 	std::string str = audio_mode_combo.get_active_text();
 
-	if (str == _("Playback/Recording on 1 Device")) {
+	if (str == _("Playback/recording on 1 device")) {
 		input_device_combo.set_sensitive (false);
 		output_device_combo.set_sensitive (false);
-	} else if (str == _("Playback/Recording on 2 Devices")) {
+	} else if (str == _("Playback/recording on 2 devices")) {
 		input_device_combo.set_sensitive (true);
 		output_device_combo.set_sensitive (true);
 	} else if (str == _("Playback only")) {

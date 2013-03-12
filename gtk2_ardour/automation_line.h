@@ -83,8 +83,8 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
         virtual void start_drag_single (ControlPoint*, double, float);
         virtual void start_drag_line (uint32_t, uint32_t, float);
         virtual void start_drag_multiple (std::list<ControlPoint*>, float, XMLNode *);
-        virtual std::pair<double, float> drag_motion (double, float, bool, bool with_push);
-	virtual void end_drag ();
+        virtual std::pair<double, float> drag_motion (double, float, bool, bool with_push, uint32_t& final_index);
+        virtual void end_drag (bool with_push, uint32_t final_index);
 
 	ControlPoint* nth (uint32_t);
 	ControlPoint const * nth (uint32_t) const;

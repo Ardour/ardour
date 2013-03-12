@@ -86,7 +86,6 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	_display.append_column ("", _columns.record);
 	_display.append_column ("", _columns.monitoring);
 	_display.append_column ("", _columns.select);
-	_display.append_column ("", _columns.edits);
 	_display.append_column ("", _columns.active_shared);
 
 	TreeViewColumn* col;
@@ -103,9 +102,8 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 		{ 7, S_("solo|S"), _("Sharing Solo?") },
 		{ 8, _("Rec"), _("Sharing Record-enable Status?") },
 		{ 9, S_("monitoring|Mon"), _("Sharing Monitoring Choice?") },
-		{ 10, S_("selection|Sel"), _("Sharing Selected Status?") },
-		{ 11, S_("editing|E"), _("Sharing Editing?") },
-		{ 12, S_("active|A"), _("Sharing Active Status?") },
+		{ 10, S_("selection|Sel"), _("Sharing Selected/Editing Status?") },
+		{ 11, S_("active|A"), _("Sharing Active Status?") },
 		{ -1, 0, 0 }
 	};
 
@@ -360,12 +358,6 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		break;
 
 	case 11:
-		val = (*iter)[_columns.edits];
-		group->set_edit (!val);
-		ret = true;
-		break;
-
-	case 12:
 		val = (*iter)[_columns.active_shared];
 		group->set_route_active (!val);
 		ret = true;
@@ -408,8 +400,6 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 	plist.add (Properties::monitoring, val);
 	val = (*iter)[_columns.select];
 	plist.add (Properties::select, val);
-	val = (*iter)[_columns.edits];
-	plist.add (Properties::edit, val);
 	val = (*iter)[_columns.active_shared];
 	plist.add (Properties::route_active, val);
 	val = (*iter)[_columns.active_state];
@@ -437,7 +427,6 @@ EditorRouteGroups::add (RouteGroup* group)
 	row[_columns.record] = group->is_recenable();
 	row[_columns.monitoring] = group->is_monitoring();
 	row[_columns.select] = group->is_select ();
-	row[_columns.edits] = group->is_edit ();
 	row[_columns.active_shared] = group->is_route_active ();
 	row[_columns.active_state] = group->is_active ();
 	row[_columns.is_visible] = !group->is_hidden();
@@ -508,7 +497,6 @@ EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange&)
 			(*iter)[_columns.record] = group->is_recenable ();
 			(*iter)[_columns.monitoring] = group->is_monitoring ();
 			(*iter)[_columns.select] = group->is_select ();
-			(*iter)[_columns.edits] = group->is_edit ();
 			(*iter)[_columns.active_shared] = group->is_route_active ();
 			(*iter)[_columns.active_state] = group->is_active ();
 			(*iter)[_columns.is_visible] = !group->is_hidden();

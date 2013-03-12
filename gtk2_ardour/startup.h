@@ -156,9 +156,11 @@ class ArdourStartup : public Gtk::Assistant {
 	struct RecentSessionModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    RecentSessionModelColumns() {
 		    add (visible_name);
+		    add (tip);
 		    add (fullpath);
 	    }
 	    Gtk::TreeModelColumn<std::string> visible_name;
+	    Gtk::TreeModelColumn<std::string> tip;
 	    Gtk::TreeModelColumn<std::string> fullpath;
 	};
 
@@ -184,7 +186,6 @@ class ArdourStartup : public Gtk::Assistant {
 	Gtk::Entry new_name_entry;
 	Gtk::FileChooserButton new_folder_chooser;
 	Gtk::FileChooserButton session_template_chooser;
-        void new_name_mapped ();
 
 	struct SessionTemplateColumns : public Gtk::TreeModel::ColumnRecord {
 		SessionTemplateColumns () {
@@ -294,6 +295,12 @@ class ArdourStartup : public Gtk::Assistant {
 
 	bool _existing_session_chooser_used; ///< set to true when the existing session chooser has been used
         void setup_prerelease_page ();
+
+	Gtk::Label info_scroller_label;
+        std::string::size_type info_scroller_count;
+        bool info_scroller_update();
+	sigc::connection info_scroller_connection;
+        void updates_button_clicked ();
 };
 
 #endif /* __gtk2_ardour_startup_h__ */

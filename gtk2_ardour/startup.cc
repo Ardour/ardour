@@ -31,6 +31,8 @@
 #include "pbd/file_utils.h"
 #include "pbd/replace_all.h"
 #include "pbd/whitespace.h"
+#include "pbd/stacktrace.h"
+#include "pbd/openuri.h"
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/recent_sessions.h"
@@ -62,19 +64,15 @@ static string poor_mans_glob (string path)
 	return copy;
 }
 
-
-ArdourStartup::ArdourStartup (bool require_new, 
-                              const std::string& session_name, 
-                              const std::string& session_path, 
-                              const std::string& template_name)
+ArdourStartup::ArdourStartup (bool require_new, const std::string& session_name, const std::string& session_path, const std::string& template_name)
 	: _response (RESPONSE_OK)
 	, config_modified (false)
 	, new_only (require_new)
 	, default_dir_chooser (0)
 	, ic_new_session_button (_("Create a new session"))
 	, ic_existing_session_button (_("Open an existing session"))
-	, monitor_via_hardware_button (_("Use an external mixer or the hardware mixer of your audio interface.\n"
-                                         "Ardour will play NO role in monitoring"))
+	, monitor_via_hardware_button (string_compose (_("Use an external mixer or the hardware mixer of your audio interface.\n"
+							 "%1 will play NO role in monitoring"), PROGRAM_NAME))
 	, monitor_via_ardour_button (string_compose (_("Ask %1 to play back material as it is being recorded"), PROGRAM_NAME))
 	, engine_dialog (0)
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
@@ -133,8 +131,9 @@ ArdourStartup::ArdourStartup (bool require_new,
 
 		set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 		
-		// setup_prerelease_page ();
-		
+#ifdef __APPLE__
+		setup_prerelease_page ();
+#endif
 		if (new_user) {
 			
 			setup_new_user_page ();
@@ -154,16 +153,12 @@ ArdourStartup::ArdourStartup (bool require_new,
 				setup_audio_page ();
 			}
 			
-                        if (need_session_info) {
-                                setup_initial_choice_page ();
-                        }
+			setup_initial_choice_page ();
 		}
 
-                if (need_session_info) {
-                        setup_session_page ();
-                        setup_more_options_page ();
-                }
-
+		setup_session_page ();
+		setup_more_options_page ();
+		
 		if (new_user) {
 			setup_final_page ();
 		}
@@ -199,13 +194,11 @@ ArdourStartup::setup_prerelease_page ()
         VBox* vbox = manage (new VBox);
         Label* label = manage (new Label);
         label->set_markup (_("<b>Welcome to this BETA release of Ardour 3.0</b>\n\n\
-There are still several issues and bugs to be worked on,\n\
-as well as general workflow improvements, before this can be considered\n\
-release software. So, a few guidelines:\n\
+Ardour 3.0 has been released for Linux but because of the lack of testers,\n\
+it is still at the beta stage on OS X. So, a few guidelines:\n\
 \n\
 1) Please do <b>NOT</b> use this software with the expectation that it is stable or reliable\n\
    though it may be so, depending on your workflow.\n\
-2) Please see http://ardour.org/a3_features for a guide to new features.\n\
 3) <b>Please do NOT use the forums at ardour.org to report issues</b>.\n\
 4) Please <b>DO</b> use the bugtracker at http://tracker.ardour.org/ to report issues\n\
    making sure to note the product version number as 3.0-beta.\n\
@@ -268,7 +261,7 @@ ArdourStartup::session_template_name ()
 std::string
 ArdourStartup::session_name (bool& should_be_new)
 {
-	if (!need_session_info) {
+	if (ready_without_display()) {
 		return _provided_session_name;
 	}
 
@@ -298,7 +291,7 @@ ArdourStartup::session_name (bool& should_be_new)
 std::string
 ArdourStartup::session_folder ()
 {
-	if (!need_session_info) {
+	if (ready_without_display()) {
 		return _provided_session_path;
 	}
 
@@ -412,6 +405,8 @@ Where would you like new %1 sessions to be stored by default?\n\n\
 	vbox->pack_start (*txt, false, false);
 	vbox->pack_start (*hbox, false, true);
 
+	cerr << "Setting defaultDIR session dir to [" << Config->get_default_session_parent_dir() << "]\n";
+
 	default_dir_chooser->set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 	default_dir_chooser->signal_current_folder_changed().connect (sigc::mem_fun (*this, &ArdourStartup::default_dir_changed));
 	default_dir_chooser->show ();
@@ -436,8 +431,9 @@ ArdourStartup::setup_monitoring_choice_page ()
 
 	HBox* hbox = manage (new HBox);
 	VBox* vbox = manage (new VBox);
-	RadioButton::Group g (monitor_via_hardware_button.get_group());
-	monitor_via_ardour_button.set_group (g);
+	/* first button will be on by default */
+	RadioButton::Group g (monitor_via_ardour_button.get_group());
+	monitor_via_hardware_button.set_group (g);
 
 	monitor_label.set_markup(_("\
 While recording instruments or vocals, you probably want to listen to the\n\
@@ -556,7 +552,34 @@ ArdourStartup::setup_initial_choice_page ()
 
 	centering_vbox->pack_start (ic_new_session_button, false, true);
 	centering_vbox->pack_start (ic_existing_session_button, false, true);
+	
+	if (ARDOUR_UI::instance()->announce_string() != "" ) {
 
+		Gtk::Frame *info_frame = manage(new Gtk::Frame);
+		info_frame->set_shadow_type(SHADOW_ETCHED_OUT);
+		centering_vbox->pack_start (*info_frame, false, false, 20);
+
+		Box *info_box = manage (new VBox);
+		info_box->set_border_width (12);
+		info_box->set_spacing (6);
+		info_box->set_name("mixbus_info_box");
+
+		info_box->pack_start (info_scroller_label, false, false);
+
+		info_frame->add (*info_box);
+		info_frame->show_all();
+
+		info_scroller_count = 0;
+		info_scroller_connection = Glib::signal_timeout().connect (mem_fun(*this, &ArdourStartup::info_scroller_update), 50);
+
+		Gtk::Button *updates_button = manage (new Gtk::Button (_("Check the website for more...")));
+
+		updates_button->signal_clicked().connect (mem_fun(*this, &ArdourStartup::updates_button_clicked) );
+		ARDOUR_UI::instance()->tooltips().set_tip (*updates_button, _("Click to open the program website in your web browser"));
+
+		info_box->pack_start (*updates_button, false, false);
+	}
+	
 	ic_new_session_button.signal_button_press_event().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_clicked), false);
 	ic_new_session_button.signal_activate().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_activated), false);
 
@@ -646,6 +669,7 @@ ArdourStartup::on_apply ()
                         set_current_page (audio_page_index);
                         return;
                 }
+
 		if (engine_dialog->setup_engine ()) {
                         set_current_page (audio_page_index);
                         return;
@@ -741,13 +765,6 @@ ArdourStartup::populate_session_templates ()
 	}
 }
 
-static bool
-lost_name_entry_focus (GdkEventFocus*)
-{
-	// cerr << "lost focus\n";
-	return false;
-}
-
 void
 ArdourStartup::setup_new_session_page ()
 {
@@ -805,14 +822,15 @@ ArdourStartup::setup_new_session_page ()
 		} else {
 			new_folder_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 		}
+		new_folder_chooser.show ();
 		new_folder_chooser.set_title (_("Select folder for session"));
 
-#ifdef GTKOSX
+#ifdef __APPLE__
 		new_folder_chooser.add_shortcut_folder ("/Volumes");
 #endif
 
 		vbox1->pack_start (*hbox2, false, false);
-
+		
 		session_new_vbox.pack_start (*vbox1, false, false);
 
 		/* --- */
@@ -912,16 +930,6 @@ ArdourStartup::setup_new_session_page ()
 	if (more_new_session_options_button.get_active()) {
 		set_page_type (session_vbox, ASSISTANT_PAGE_CONTENT);
 	}
-
-	new_name_entry.signal_map().connect (sigc::mem_fun (*this, &ArdourStartup::new_name_mapped));
-	new_name_entry.signal_focus_out_event().connect (sigc::ptr_fun (lost_name_entry_focus));
-}
-
-void
-ArdourStartup::new_name_mapped ()
-{
-	// cerr << "Grab new name focus\n";
-	new_name_entry.grab_focus ();
 }
 
 void
@@ -997,6 +1005,7 @@ ArdourStartup::redisplay_recent_sessions ()
 
 		row[recent_session_columns.visible_name] = Glib::path_get_basename (fullpath);
 		row[recent_session_columns.fullpath] = fullpath;
+		row[recent_session_columns.tip] = Glib::Markup::escape_text (fullpath);
 		
 		++session_snapshot_count;
 
@@ -1005,19 +1014,19 @@ ArdourStartup::redisplay_recent_sessions ()
 			// add the children
 
 			for (std::vector<std::string>::iterator i2 = state_file_names.begin();
-					i2 != state_file_names.end(); ++i2)
-			{
+					i2 != state_file_names.end(); ++i2) {
 
 				Gtk::TreeModel::Row child_row = *(recent_session_model->append (row.children()));
 
 				child_row[recent_session_columns.visible_name] = *i2;
 				child_row[recent_session_columns.fullpath] = fullpath;
+				child_row[recent_session_columns.tip] = Glib::Markup::escape_text (fullpath);
 				++session_snapshot_count;
 			}
 		}
 	}
 
-	recent_session_display.set_tooltip_column(1); // recent_session_columns.fullpath 
+	recent_session_display.set_tooltip_column(1); // recent_session_columns.tip 
 	recent_session_display.set_model (recent_session_model);
 	return session_snapshot_count;
 	// return rs.size();
@@ -1031,6 +1040,71 @@ ArdourStartup::recent_session_row_selected ()
 	} else {
 		set_page_complete (session_vbox, false);
 	}
+}
+
+void
+ArdourStartup::setup_existing_session_page ()
+{
+	recent_session_model = TreeStore::create (recent_session_columns);
+	redisplay_recent_sessions ();
+
+	if (!session_hbox.get_children().empty()) {
+		session_hbox.remove (**session_hbox.get_children().begin());
+	}
+
+	if (session_existing_vbox.get_children().empty()) {
+
+		recent_session_display.set_model (recent_session_model);
+		recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
+		recent_session_display.set_headers_visible (false);
+		recent_session_display.get_selection()->set_mode (SELECTION_BROWSE);
+
+		recent_session_display.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &ArdourStartup::recent_session_row_selected));
+
+		recent_scroller.add (recent_session_display);
+		recent_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+		recent_scroller.set_shadow_type	(Gtk::SHADOW_IN);
+
+		recent_session_display.show();
+
+		recent_scroller.show();
+		int cnt = redisplay_recent_sessions ();
+		recent_session_display.signal_row_activated().connect (sigc::mem_fun (*this, &ArdourStartup::recent_row_activated));
+
+		if (cnt > 4) {
+			recent_scroller.set_size_request (-1, 300);
+		}
+
+		session_existing_vbox.set_spacing (8);
+		session_existing_vbox.pack_start (recent_scroller, true, true);
+
+		existing_session_chooser.set_title (_("Select session file"));
+		existing_session_chooser.signal_file_set().connect (sigc::mem_fun (*this, &ArdourStartup::existing_session_selected));
+		existing_session_chooser.set_current_folder(poor_mans_glob (Config->get_default_session_parent_dir()));
+
+		FileFilter session_filter;
+		session_filter.add_pattern ("*.ardour");
+		session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
+		existing_session_chooser.add_filter (session_filter);
+		existing_session_chooser.set_filter (session_filter);
+		
+#ifdef GTKOSX
+		existing_session_chooser.add_shortcut_folder ("/Volumes");
+#endif
+
+		HBox* hbox = manage (new HBox);
+		hbox->set_spacing (4);
+		hbox->pack_start (*manage (new Label (_("Browse:"))), PACK_SHRINK);
+		hbox->pack_start (existing_session_chooser);
+		session_existing_vbox.pack_start (*hbox, false, false);
+		hbox->show_all ();
+	}
+
+	session_existing_vbox.show_all ();
+	session_hbox.pack_start (session_existing_vbox, true, true);
+
+	set_page_title (session_vbox, _("Select a session"));
+	set_page_type (session_vbox, ASSISTANT_PAGE_CONFIRM);
 }
 
 void
@@ -1445,4 +1519,29 @@ ArdourStartup::been_here_before_path () const
 {
 	// XXXX use more specific version so we can catch upgrades
 	return Glib::build_filename (user_config_directory (), ".a3");
+}
+
+void
+ArdourStartup::updates_button_clicked ()
+{
+	//now open a browser window so user can see more
+	PBD::open_uri (Config->get_updates_url());
+}
+
+bool
+ArdourStartup::info_scroller_update()
+{
+	info_scroller_count++;
+
+	char buf[512];
+	snprintf (buf, std::min(info_scroller_count,sizeof(buf)-1), "%s", ARDOUR_UI::instance()->announce_string().c_str() );
+	buf[info_scroller_count] = NULL;
+	info_scroller_label.set_text (buf);
+	info_scroller_label.show();
+
+	if (info_scroller_count > ARDOUR_UI::instance()->announce_string().length()) {
+		info_scroller_connection.disconnect();
+	}
+
+	return true;
 }

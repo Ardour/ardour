@@ -358,14 +358,11 @@ PluginLoader::Impl::getLibraryPathForPlugin(PluginKey plugin)
 {
     if (m_pluginLibraryNameMap.find(plugin) == m_pluginLibraryNameMap.end()) {
         if (m_allPluginsEnumerated) return "";
-        cerr << "plug " << plugin << " not found enumerate" << endl;
         enumeratePlugins(plugin);
     }
     if (m_pluginLibraryNameMap.find(plugin) == m_pluginLibraryNameMap.end()) {
-        cerr << "plug " << plugin << " not found enumerate" << endl;
         return "";
     }
-    cerr << "Did find plugin " << plugin << endl;
     return m_pluginLibraryNameMap[plugin];
 }    
 

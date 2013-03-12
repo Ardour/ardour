@@ -27,6 +27,7 @@
 
 #include "ardour_ui.h"
 #include "clock_group.h"
+#include "main_clock.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "location_ui.h"
@@ -1120,7 +1121,7 @@ LocationUI::clock_mode_from_session_instant_xml () const
 
 	XMLProperty* p = node->property (X_("clock-mode"));
 	if (!p) {
-		return AudioClock::Frames;
+		return ARDOUR_UI::instance()->secondary_clock->mode();
 	}
 	      
 	return (AudioClock::Mode) string_2_enum (p->value (), AudioClock::Mode);

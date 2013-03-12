@@ -1,3 +1,23 @@
+/*
+    Copyright (C) 2012 Paul Davis 
+    Author: Sakari Bergen
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #include "audiographer/general/sample_format_converter.h"
 
 #include "audiographer/exception.h"
@@ -32,21 +52,17 @@ SampleFormatConverter<float>::init (framecnt_t max_frames, int /* type */, int d
 
 template <>
 void
-SampleFormatConverter<int32_t>::init (framecnt_t max_frames, int type, int data_width)
+SampleFormatConverter<int32_t>::init (framecnt_t max_frames, int /*type*/, int data_width)
 {
 	if(throw_level (ThrowObject) && data_width < 24) {
 		throw Exception (*this, "Trying to use SampleFormatConverter<int32_t> for data widths < 24");
 	}
-	
+
 	init_common (max_frames);
-	
-	if (data_width == 24) {
-		dither = gdither_new ((GDitherType) type, channels, GDither32bit, data_width);
-	} else if (data_width == 32) {
-		dither = gdither_new (GDitherNone, channels, GDitherFloat, data_width);
-	} else if (throw_level (ThrowObject)) {
-		throw Exception (*this, "Unsupported data width");
-	}
+
+	// GDither is broken with GDither32bit if the dither depth
+	// is bigger than 24, so lets just use that...
+	dither = gdither_new (GDitherNone, channels, GDither32bit, 24);
 }
 
 template <>

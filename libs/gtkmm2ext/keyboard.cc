@@ -531,7 +531,7 @@ Keyboard::load_keybindings (string path)
 
 
 	} catch (...) {
-		error << string_compose (_("Ardour key bindings file not found at \"%1\" or contains errors."), path)
+		error << string_compose (_("key bindings file not found at \"%2\" or contains errors."), path)
 		      << endmsg;
 		return false;
 	}

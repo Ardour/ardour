@@ -54,6 +54,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	enum Tweaks {
 		ShowClick = 0x1,
 		NoModel = 0x2,
+		ImplicitUsesSolidColor = 0x4,
 	};
 
 	Tweaks tweaks() const { return _tweaks; }

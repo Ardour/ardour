@@ -55,7 +55,11 @@ while [ $# -gt 0 ] ; do
     esac
 done
 
+<<<<<<< HEAD
 #release_version=`grep -m 1 '^VERSION' ../../wscript | cut -d' ' -f 3 | sed "s/'//g"`
+=======
+#release_version=`grep -m 1 '[^A-Za-z_]OSX_VERSION = ' ../../wscript | cut -d' ' -f 3 | sed "s/'//g"`
+>>>>>>> master
 release_version=3.0
 svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d' ' -f 8 | sed 's/[^0-9]//g'`
 echo "Version is $release_version / $svn_version"
@@ -233,6 +237,7 @@ echo "Copying all GDK Pixbuf loaders ..."
 cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Frameworks/modules
 # charset alias file
 cp -R $GTKSTACK_ROOT/lib/charset.alias $Resources
+<<<<<<< HEAD
 
 # generate new Pango module file
 cat > pangorc <<EOF 
@@ -284,6 +289,68 @@ for f in $BUILD_ROOT/../templates/* ; do
     fi
 done
 
+=======
+
+# generate new Pango module file
+cat > pangorc <<EOF 
+[Pango]
+ModulesPath=$GTKSTACK_ROOT/lib/pango/1.6.0/modules
+EOF
+env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.6.0/modules/?@executable_path/../lib/modules/?" > $Resources/pango.modules
+rm pangorc
+
+# generate a new GDK pixbufs loaders file
+gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/?@executable_path/../lib/modules/?" > $Resources/gdk-pixbuf.loaders
+
+# We rely on clearlooks, so include a version from our own build tree
+# this one is special - we will set GTK_PATH to $Frameworks/gtkengines
+
+GTK_ENGINE_DIR=$Frameworks/gtkengines/engines
+mkdir -p $GTK_ENGINE_DIR
+
+echo "Copying GTK engines ..."
+cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $Frameworks
+(cd $GTK_ENGINE_DIR && ln -s ../../libclearlooks.dylib . && ln -s ../../libclearlooks.dylib libclearlooks.so)
+
+cp $GTKSTACK_ROOT/lib/gtk-2.0/2.10.0/engines/libpixmap.so $Frameworks
+(cd $GTK_ENGINE_DIR && ln -s ../../libpixmap.so)
+
+
+if test x$WITH_LADSPA != x ; then
+    if test x$SAE != x ; then
+	plugdir=sae_ladspa
+    elif test x$MIXBUS != x ; then
+	plugdir=mixbus_ladspa
+    else
+	plugdir=ladspa
+    fi
+    if [ -d $plugdir -a "x$(ls $plugdir)" != x ] ; then 
+        echo "Copying `ls $plugdir | wc -l` plugins ..."
+        cp -r $plugdir/* $Plugins
+    fi
+fi
+
+# Control Surface shared libraries
+cp $BUILD_ROOT/libs/surfaces/*/libardour_*.dylib $Surfaces
+cp $BUILD_ROOT/libs/surfaces/control_protocol/libardourcp*.dylib $Frameworks
+
+# Panners
+cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
+
+
+# Export Formats/Presets
+for f in $BUILD_ROOT/../export/*.preset $BUILD_ROOT/../export/*.format ; do 
+    cp "$f" $ExportFormats ; 
+done
+
+# Session and Route templates
+for f in $BUILD_ROOT/../templates/* ; do 
+    if [ -d "$f" ] ; then
+        cp -r "$f" $Templates ; 
+    fi
+done
+
+>>>>>>> master
 # MidiMaps
 # got to be careful with names here
 for x in $BUILD_ROOT/../midi_maps/*.map ; do
@@ -344,8 +411,25 @@ cp ../../gtk2_ardour/mixer.bindings $Resources
 cp ../../gtk2_ardour/step_editing.bindings $Resources
 cp $BUILD_ROOT/gtk2_ardour/ardour.menus $Resources
 
+<<<<<<< HEAD
 cp ../../ardour_system.rc $Resources/ardour_system.rc
 cp ../../instant.xml $Resources/instant.xml
+=======
+if test x$SAE != x ; then
+    cp $BUILD_ROOT/gtk2_ardour/SAE-de-keypad.bindings  $Resources
+    cp $BUILD_ROOT/gtk2_ardour/SAE-de-nokeypad.bindings  $Resources
+    cp $BUILD_ROOT/gtk2_ardour/SAE-us-keypad.bindings  $Resources
+    cp $BUILD_ROOT/gtk2_ardour/SAE-us-nokeypad.bindings  $Resources
+    cp $BUILD_ROOT/ardour_system_sae.rc $Resources/ardour_system.rc
+    echo cp $BUILD_ROOT/ardour_system_sae.rc $Resources/ardour_system.rc
+    cp $BUILD_ROOT/instant.xml.sae $Resources/instant.xml
+    echo cp $BUILD_ROOT/instant.xml.sae $Resources/instant.xml
+else
+    cp ../../ardour_system.rc $Resources/ardour_system.rc
+    cp ../../instant.xml $Resources/instant.xml
+    echo cp ../../instant.xml $Resources/instant.xml
+fi
+>>>>>>> master
 cp ../../gtk2_ardour/ardour3_ui_default.conf $Resources
 cp ../../gtk2_ardour/ardour3_ui_default.conf $Resources/ardour3_ui.conf
 cp $BUILD_ROOT/gtk2_ardour/ardour3_ui_light.rc $Resources
@@ -354,8 +438,9 @@ cp $BUILD_ROOT/gtk2_ardour/ardour3_ui_dark.rc $Resources
 cp -r ../../gtk2_ardour/icons $Resources
 cp -r ../../gtk2_ardour/pixmaps $Resources
 
-# splash screen stuff
+# shared stuff
 cp -R ../../gtk2_ardour/splash.png $Shared
+cp -R ../../gtk2_ardour/ArdourMono.ttf $Shared
 
 if [ x$WITH_SOUNDGRID != x ] ; then
     echo "Copying SoundGrid resources into app tree ..."
@@ -443,6 +528,7 @@ else
     mv $APPDIR $PRODUCT_PKG_DIR/
 fi
 
+<<<<<<< HEAD
 if [ x$DEVONLY = x ] ; then
     echo "Building DMG ..."
     
@@ -450,6 +536,89 @@ if [ x$DEVONLY = x ] ; then
     rm -f $UC_DMG
     hdiutil create $UC_DMG -volname $APPNAME-$release_version -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
 fi
+=======
+echo "Building DMG ..."
+
+# UC_DMG=$APPNAME-${release_version}-${svn_version}-UC.dmg
+# FINAL_DMG=$APPNAME-${release_version}-${svn_version}.dmg
+UC_DMG=$APPNAME-${release_version}-${svn_version}.dmg
+VOLNAME=$APPNAME-$release_version
+
+# TODO use mktemp
+MNTPATH=`mktemp -d -t ardourimg`
+TMPDMG=`mktemp -t ardour`
+ICNSTMP=`mktemp -t ardouricon`
+DMGSIZE=$[ `du -sm "$PRODUCT_PKG_DIR" | cut -f 1` * 1049 / 1000 + 3 ]
+
+rm -f $UC_DMG "$TMPDMG" "${TMPDMG}.dmg" "$ICNSTMP"
+rm -rf "$MNTPATH"
+mkdir -p "$MNTPATH"
+
+TMPDMG="${TMPDMG}.dmg"
+
+hdiutil create -megabytes $DMGSIZE "$TMPDMG"
+DiskDevice=$(hdid -nomount "$TMPDMG" | grep Apple_HFS | cut -f 1 -d ' ')
+newfs_hfs -v "${VOLNAME}" "${DiskDevice}"
+mount -t hfs "${DiskDevice}" "${MNTPATH}"
+
+cp -r ${PRODUCT_PKG_DIR}/${APPDIR} "${MNTPATH}" || exit
+mkdir "${MNTPATH}/.background"
+cp -vi dmgbg.png "${MNTPATH}/.background/dmgbg.png"
+
+echo "setting DMG background ..."
+
+echo '
+   tell application "Finder"
+     tell disk "'${VOLNAME}'"
+           open
+           set current view of container window to icon view
+           set toolbar visible of container window to false
+           set statusbar visible of container window to false
+           set the bounds of container window to {400, 200, 800, 440}
+           set theViewOptions to the icon view options of container window
+           set arrangement of theViewOptions to not arranged
+           set icon size of theViewOptions to 64
+           set background picture of theViewOptions to file ".background:dmgbg.png"
+           make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
+           set position of item "'${APPDIR}'" of container window to {90, 100}
+           set position of item "Applications" of container window to {310, 100}
+           close
+           open
+           update without registering applications
+           delay 5
+           eject
+     end tell
+   end tell
+' | osascript
+
+chmod -Rf go-w "${MNTPATH}"
+sync
+
+echo "compressing Image ..."
+
+# Umount the image
+umount "${DiskDevice}"
+hdiutil eject "${DiskDevice}"
+# Create a read-only version, use zlib compression
+hdiutil convert -format UDZO "${TMPDMG}" -imagekey zlib-level=9 -o "${UC_DMG}"
+# Delete the temporary files
+rm "$TMPDMG"
+rmdir "$MNTPATH"
+
+echo "setting file icon ..."
+
+cp ${PRODUCT_PKG_DIR}/$Resources/appIcon.icns ${ICNSTMP}.icns
+/usr/bin/sips -i ${ICNSTMP}.icns
+/Developer/Tools/DeRez -only icns ${ICNSTMP}.icns > ${ICNSTMP}.rsrc
+/Developer/Tools/Rez -append ${ICNSTMP}.rsrc -o "$UC_DMG"
+/Developer/Tools/SetFile -a C "$UC_DMG"
+
+rm ${ICNSTMP}.icns ${ICNSTMP}.rsrc
+
+echo
+echo "packaging suceeded."
+ls -l "$UC_DMG"
+>>>>>>> master
 
 echo "Done."
-
+exit

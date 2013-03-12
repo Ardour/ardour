@@ -507,15 +507,22 @@ AutomationLine::ContiguousControlPoints::ContiguousControlPoints (AutomationLine
 void
 AutomationLine::ContiguousControlPoints::compute_x_bounds ()
 {
-	if (!empty()) {
+	uint32_t sz = size();
+
+	if (sz > 0 && sz < line.npoints()) {
+
 		/* determine the limits on x-axis motion for this 
 		   contiguous range of control points
 		*/
-		
+
 		if (front()->view_index() > 0) {
 			before_x = line.nth (front()->view_index() - 1)->get_x();
 		}
-		
+
+		/* if our last point has a point after it in the line,
+		   we have an "after" bound
+		*/
+
 		if (back()->view_index() < (line.npoints() - 2)) {
 			after_x = line.nth (back()->view_index() + 1)->get_x();
 		}
@@ -583,7 +590,7 @@ AutomationLine::start_drag_common (double x, float fraction)
  *  @return x position and y fraction that were actually used (once clamped).
  */
 pair<double, float>
-AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool with_push)
+AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool with_push, uint32_t& final_index)
 {
 	if (_drag_points.empty()) {
 		return pair<double,float> (x,fraction);
@@ -662,8 +669,9 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 			(*ccp)->move (dx, dy);
 		}
 		if (with_push) {
-			uint32_t i = contiguous_points.back()->back()->view_index () + 1;
+			final_index = contiguous_points.back()->back()->view_index () + 1;
 			ControlPoint* p;
+			uint32_t i = final_index;
 			while ((p = nth (i)) != 0 && p->can_slide()) {
 				p->move_to (p->get_x() + dx, p->get_y(), ControlPoint::Full);
 				reset_line_coords (*p);
@@ -673,8 +681,10 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 
 		/* update actual line coordinates (will queue a redraw)
 		 */
-		
-		line->property_points() = line_points;
+
+		if (line_points.size() > 1) {
+			line->property_points() = line_points;
+		}
 	}
 	
 	_drag_distance += dx;
@@ -688,7 +698,7 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 
 /** Should be called to indicate the end of a drag */
 void
-AutomationLine::end_drag ()
+AutomationLine::end_drag (bool with_push, uint32_t final_index)
 {
 	if (!_drag_had_movement) {
 		return;
@@ -696,6 +706,16 @@ AutomationLine::end_drag ()
 
 	alist->freeze ();
 	sync_model_with_view_points (_drag_points);
+
+	if (with_push) {
+		ControlPoint* p;
+		uint32_t i = final_index;
+		while ((p = nth (i)) != 0 && p->can_slide()) {
+			sync_model_with_view_point (*p);
+			++i;
+		}
+	}
+
 	alist->thaw ();
 
 	update_pending = false;
@@ -977,6 +997,25 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		if (_visible && alist->interpolation() != AutomationList::Discrete) {
 			line->show();
 		}
+		
+		if (tx >= max_framepos || tx < 0 || tx >= _maximum_time) {
+			continue;
+		}
+		
+		/* convert x-coordinate to a canvas unit coordinate (this takes
+		 * zoom and scroll into account).
+		 */
+			
+		tx = trackview.editor().frame_to_unit_unrounded (tx);
+		
+		/* convert from canonical view height (0..1.0) to actual
+		 * height coordinates (using X11's top-left rooted system)
+		 */
+
+		ty = _height - (ty * _height);
+
+		add_visible_control_point (vp, pi, tx, ty, ai, np);
+		vp++;
 	}
 
 	set_selected_points (trackview.editor().get_selection().points);

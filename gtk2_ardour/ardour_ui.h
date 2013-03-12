@@ -116,7 +116,7 @@ namespace ARDOUR {
 class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 {
   public:
-	ARDOUR_UI (int *argcp, char **argvp[]);
+        ARDOUR_UI (int *argcp, char **argvp[], const char* localedir);
 	~ARDOUR_UI();
 
 	bool run_startup (bool should_be_new, std::string load_template);
@@ -210,6 +210,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void synchronize_sync_source_and_video_pullup ();
 
 	void add_route (Gtk::Window* float_window);
+        void add_routes_part_two ();
+        void add_routes_thread ();
 
 	void session_add_audio_track (
 		int input_channels,
@@ -260,6 +262,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void get_process_buffers ();
 	void drop_process_buffers ();
+
+        const std::string& announce_string() const { return _announce_string; }
 
   protected:
 	friend class PublicEditor;
@@ -464,9 +468,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	struct RecentSessionModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    RecentSessionModelColumns() {
 		    add (visible_name);
+		    add (tip);
 		    add (fullpath);
 	    }
 	    Gtk::TreeModelColumn<std::string> visible_name;
+	    Gtk::TreeModelColumn<std::string> tip;
 	    Gtk::TreeModelColumn<std::string> fullpath;
 	};
 
@@ -622,8 +628,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	Gtk::MenuItem *cleanup_item;
 
-	void display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* list_title,
-				      const std::string& plural_msg, const std::string& singular_msg);
+	void display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* list_title, const bool msg_delete);
 	void cleanup ();
 	void flush_trash ();
 
@@ -638,6 +643,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void disk_speed_dialog_gone (int ignored_response, Gtk::MessageDialog*);
 	void disk_overrun_handler ();
 	void disk_underrun_handler ();
+
+        void session_format_mismatch (std::string, std::string);
 
 	void session_dialog (std::string);
 	int pending_state_dialog ();
@@ -685,8 +692,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void loading_message (const std::string& msg);
 
-        void toggle_translations ();
-
 	PBD::ScopedConnectionList forever_connections;
 
         void step_edit_status_change (bool);
@@ -723,6 +728,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool _feedback_exists;
 
 	void resize_text_widgets ();
+
+        std::string _announce_string;
+        void check_announcements ();
 };
 
 #endif /* __ardour_gui_h__ */

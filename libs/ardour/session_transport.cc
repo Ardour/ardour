@@ -204,6 +204,7 @@ Session::realtime_stop (bool abort, bool clear_state)
 
 	if (_transport_speed < 0.0f) {
 		todo = (PostTransportWork (todo | PostTransportStop | PostTransportReverse));
+		_default_transport_speed = 1.0;
 	} else {
 		todo = PostTransportWork (todo | PostTransportStop);
 	}
@@ -1386,7 +1387,6 @@ Session::switch_to_sync_source (SyncSource src)
 		break;
 
 	case LTC:
-#ifdef HAVE_LTC
 		if (_slave && dynamic_cast<LTC_Slave*>(_slave)) {
 			return;
 		}
@@ -1398,9 +1398,7 @@ Session::switch_to_sync_source (SyncSource src)
 		catch (failed_constructor& err) {
 			return;
 		}
-#else
-		return;
-#endif
+
 		break;
 
 	case MIDIClock:

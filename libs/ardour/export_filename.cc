@@ -33,6 +33,7 @@
 #include "ardour/export_timespan.h"
 #include "ardour/export_format_specification.h"
 #include "ardour/export_channel_configuration.h"
+#include "ardour/utils.h"
 
 #include "i18n.h"
 
@@ -207,6 +208,8 @@ ExportFilename::get_path (ExportFormatSpecPtr format) const
 
 	path += ".";
 	path += format->extension ();
+
+	path = legalize_for_universal_path (path);
 
 	return Glib::build_filename (folder, path);
 }

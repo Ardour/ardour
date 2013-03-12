@@ -61,19 +61,25 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 	 * \param tracker an optional pointer to MidiStateTracker object, for note on/off tracking
 	 */
 	virtual framecnt_t midi_read (Evoral::EventSink<framepos_t>& dst,
-				      framepos_t source_start,
-				      framepos_t start, framecnt_t cnt,
-				      MidiStateTracker*,
-				      std::set<Evoral::Parameter> const &) const;
+	                              framepos_t                     source_start,
+	                              framepos_t                     start,
+	                              framecnt_t                     cnt,
+	                              MidiStateTracker*              tracker,
+	                              std::set<Evoral::Parameter> const &) const;
 
+	/** Write data from a MidiRingBuffer to this source.
+	 *  @param source Source to read from.
+	 *  @param source_start This source's start position in session frames.
+	 *  @param cnt The length of time to write.
+	 */
 	virtual framecnt_t midi_write (MidiRingBuffer<framepos_t>& src,
-				       framepos_t source_start,
-				       framecnt_t cnt);
+	                               framepos_t                  source_start,
+	                               framecnt_t                  cnt);
 
 	virtual void append_event_unlocked_beats(const Evoral::Event<Evoral::MusicalTime>& ev) = 0;
 
 	virtual void append_event_unlocked_frames(const Evoral::Event<framepos_t>& ev,
-			framepos_t source_start) = 0;
+	                                          framepos_t                       source_start) = 0;
 
 	virtual bool       empty () const;
 	virtual framecnt_t length (framepos_t pos) const;
@@ -82,22 +88,34 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 	virtual void mark_streaming_midi_write_started (NoteMode mode);
 	virtual void mark_streaming_write_started ();
 	virtual void mark_streaming_write_completed ();
-	void mark_write_starting_now ();
+
+	/** Mark write starting with the given time parameters.
+	 *
+	 * This is called by MidiDiskStream::process before writing to the capture
+	 * buffer which will be later read by midi_read().
+	 *
+	 * @param position The timeline position the source now starts at.
+	 * @param capture_length The current length of the capture, which may not
+	 * be zero if record is armed while rolling.
+	 * @param loop_length The loop length if looping, otherwise zero.
+	 */
+	void mark_write_starting_now (framecnt_t position,
+	                              framecnt_t capture_length,
+	                              framecnt_t loop_length);
 
 	/* like ::mark_streaming_write_completed() but with more arguments to
 	 * allow control over MIDI-specific behaviour. Expected to be used only
 	 * when recording actual MIDI input, rather then when importing files
 	 * etc.
 	 */
-	virtual void mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption, Evoral::MusicalTime when = 0);
+	virtual void mark_midi_streaming_write_completed (
+		Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption stuck_option,
+		Evoral::MusicalTime                                    when = 0);
 
 	virtual void session_saved();
 
 	std::string captured_for() const               { return _captured_for; }
 	void        set_captured_for (std::string str) { _captured_for = str; }
-
-	framepos_t last_write_end() const { return _last_write_end; }
-	void set_last_write_end (framepos_t pos) { _last_write_end = pos; }
 
 	static PBD::Signal1<void,MidiSource*> MidiSourceCreated;
 
@@ -144,15 +162,21 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 	virtual void flush_midi() = 0;
 
 	virtual framecnt_t read_unlocked (Evoral::EventSink<framepos_t>& dst,
-					  framepos_t position,
-					  framepos_t start, framecnt_t cnt,
-					  MidiStateTracker* tracker) const = 0;
+	                                  framepos_t                     position,
+	                                  framepos_t                     start,
+	                                  framecnt_t                     cnt,
+	                                  MidiStateTracker*              tracker) const = 0;
 
-	virtual framecnt_t write_unlocked (MidiRingBuffer<framepos_t>& dst,
-					   framepos_t position,
-					   framecnt_t cnt) = 0;
+	/** Write data to this source from a MidiRingBuffer.
+	 *  @param source Buffer to read from.
+	 *  @param position This source's start position in session frames.
+	 *  @param cnt The duration of this block to write for.
+	 */
+	virtual framecnt_t write_unlocked (MidiRingBuffer<framepos_t>& source,
+	                                   framepos_t                  position,
+	                                   framecnt_t                  cnt) = 0;
 
-	std::string      _captured_for;
+	std::string _captured_for;
 
 	boost::shared_ptr<MidiModel> _model;
 	bool                         _writing;
@@ -162,7 +186,12 @@ class MidiSource : virtual public Source, public boost::enable_shared_from_this<
 
 	mutable double     _length_beats;
 	mutable framepos_t _last_read_end;
-	framepos_t         _last_write_end;
+
+	/** The total duration of the current capture. */
+	framepos_t _capture_length;
+
+	/** Length of transport loop during current capture, or zero. */
+	framepos_t _capture_loop_length;
 
 	/** Map of interpolation styles to use for Parameters; if they are not in this map,
 	 *  the correct interpolation style can be obtained from EventTypeMap::interpolation_of ()

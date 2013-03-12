@@ -67,7 +67,7 @@ TimeInfoBox::TimeInfoBox ()
 	punch_title.set_text (_("Punch"));
 
 	set_homogeneous (false);
-	set_spacing (6);
+	set_spacing (0);
 	set_border_width (2);
 
 	pack_start (left, true, true);

@@ -95,7 +95,6 @@ void
 LTC_Slave::parameter_changed (std::string const & p)
 {
 	if (p == "slave-timecode-offset"
-			|| p == "subframes-per-frame"
 			|| p == "timecode-format"
 			) {
 		parse_timecode_offset();
@@ -295,7 +294,7 @@ LTC_Slave::detect_ltc_fps(int frameno, bool df)
 }
 
 void
-LTC_Slave::process_ltc(framepos_t const now)
+LTC_Slave::process_ltc(framepos_t const /*now*/)
 {
 	LTCFrameExt frame;
 	enum LTC_TV_STANDARD tv_standard = LTC_TV_625_50;
@@ -577,7 +576,7 @@ std::string
 LTC_Slave::approximate_current_position() const
 {
 	if (last_timestamp == 0) {
-		return " \u2012\u2012:\u2012\u2012:\u2012\u2012:\u2012\u2012";
+		return " --:--:--:--";
 	}
 	return Timecode::timecode_format_time(timecode);
 }
@@ -591,7 +590,7 @@ LTC_Slave::approximate_current_delta() const
 	} else if ((monotonic_cnt - last_timestamp) > 2 * frames_per_ltc_frame) {
 		snprintf(delta, sizeof(delta), _("flywheel"));
 	} else {
-		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%" PRIi64 "</span> sm",
+		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%" PRIi64 "</span>sm",
 				LEADINGZERO(abs(current_delta)), PLUSMINUS(-current_delta), abs(current_delta));
 	}
 	return std::string(delta);

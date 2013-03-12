@@ -60,18 +60,10 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
-/** take an arbitrary string as an argument, and return a version of it
- * suitable for use as a path (directory/folder name). This is the Ardour 3.X
- * and later version of this code. It defines a very small number
- * of characters that are not allowed in a path on any of our target
- * filesystems, and replaces any instances of them with an underscore.
- */
-
-string
-legalize_for_path (const string& str)
+static string
+replace_chars (const string& str, const string& illegal_chars)
 {
 	string::size_type pos;
-	string illegal_chars = "/\\"; /* DOS, POSIX. Yes, we're going to ignore HFS */
 	Glib::ustring legal;
 
 	/* this is the one place in Ardour where we need to iterate across
@@ -82,6 +74,66 @@ legalize_for_path (const string& str)
 	pos = 0;
 
 	while ((pos = legal.find_first_of (illegal_chars, pos)) != string::npos) {
+		legal.replace (pos, 1, "_");
+		pos += 1;
+	}
+
+	return string (legal);
+}
+/** take an arbitrary string as an argument, and return a version of it
+ * suitable for use as a path (directory/folder name). This is the Ardour 3.X
+ * and later version of this code. It defines a very small number of characters
+ * that are not allowed in a path on the build target filesystem (basically,
+ * POSIX or Windows) and replaces any instances of them with an underscore.
+ *
+ * NOTE: this is intended only to legalize for the filesystem that Ardour
+ * is running on. Export should use legalize_for_universal_path() since
+ * the goal there is to be legal across filesystems.
+ */
+string
+legalize_for_path (const string& str)
+{
+	return replace_chars (str, "/\\");
+}
+
+/** take an arbitrary string as an argument, and return a version of it
+ * suitable for use as a path (directory/folder name). This is the Ardour 3.X
+ * and later version of this code. It defines a small number
+ * of characters that are not allowed in a path on any of our target
+ * filesystems, and replaces any instances of them with an underscore.
+ *
+ * NOTE: this is intended to create paths that should be legal on
+ * ANY filesystem.
+ */
+string
+legalize_for_universal_path (const string& str)
+{
+	return replace_chars (str, "<>:\"/\\|?*");
+}
+
+/** take an arbitrary string as an argument, and return a version of it
+ * suitable for use as a path (directory/folder name). This is the Ardour 2.X
+ * version of this code, which used an approach that came to be seen as
+ * problematic: defining the characters that were allowed and replacing all
+ * others with underscores. See legalize_for_path() for the 3.X and later
+ * version.
+ */
+
+string 
+legalize_for_path_2X (const string& str)
+{
+	string::size_type pos;
+	string legal_chars = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+=: ";
+        Glib::ustring legal;
+	
+	/* this is the one place in Ardour where we need to iterate across
+	 * potential multibyte characters, and thus we need Glib::ustring
+	 */
+
+	legal = str;
+	pos = 0;
+
+	while ((pos = legal.find_first_not_of (legal_chars, pos)) != string::npos) {
 		legal.replace (pos, 1, "_");
 		pos += 1;
 	}

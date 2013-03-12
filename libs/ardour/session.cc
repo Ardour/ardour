@@ -119,6 +119,7 @@ PBD::Signal1<int,boost::shared_ptr<Playlist> > Session::AskAboutPlaylistDeletion
 PBD::Signal0<void> Session::Quit;
 PBD::Signal0<void> Session::FeedbackDetected;
 PBD::Signal0<void> Session::SuccessfulGraphSort;
+PBD::Signal2<void,std::string,std::string> Session::VersionMismatch;
 
 static void clean_up_session_event (SessionEvent* ev) { delete ev; }
 const SessionEvent::RTeventCallback Session::rt_cleanup (clean_up_session_event);
@@ -152,9 +153,7 @@ Session::Session (AudioEngine &eng,
 	, _suspend_timecode_transmission (0)
 {
 	_locations = new Locations (*this);
-#ifdef HAVE_LTC
 	ltc_encoder = NULL;
-#endif
 
 	if (how_many_dsp_threads () > 1) {
 		/* For now, only create the graph if we are using >1 DSP threads, as
@@ -244,9 +243,7 @@ Session::destroy ()
 
 	Port::PortDrop (); /* EMIT SIGNAL */
 
-#ifdef HAVE_LTC
 	ltc_tx_cleanup();
-#endif
 
 	/* clear history so that no references to objects are held any more */
 
@@ -1082,7 +1079,7 @@ Session::set_auto_loop_location (Location* location)
 	}
 
 	if (location->end() <= location->start()) {
-		error << _("Session: you can't use a mark for auto loop") << endmsg;
+		error << _("You cannot use this location for auto-loop because it has zero or negative length") << endmsg;
 		return;
 	}
 
@@ -1639,8 +1636,6 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 	RouteList new_routes;
 	list<boost::shared_ptr<MidiTrack> > ret;
 
-	cerr << "Adding MIDI track with in = " << input << " out = " << output << endl;
-
 	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("MIDI");
 
 	while (how_many) {
@@ -1699,7 +1694,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 
 		catch (AudioEngine::PortRegistrationFailure& pfe) {
 
-			error << string_compose (_("No more JACK ports are available. You will need to stop %1 and restart JACK with ports if you need this many tracks."), PROGRAM_NAME) << endmsg;
+			error << string_compose (_("No more JACK ports are available. You will need to stop %1 and restart JACK with more ports if you need this many tracks."), PROGRAM_NAME) << endmsg;
 			goto failed;
 		}
 
@@ -2013,6 +2008,8 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 			bus->add_internal_return ();
 
 			ret.push_back (bus);
+			
+			ARDOUR::GUIIdle ();
 		}
 
 
@@ -2200,8 +2197,6 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		r->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
 		r->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
 
-                cerr << "\n\nLOADING route " << r->name() << " master ? " << r->is_master() << endl;
-
 		if (r->is_master()) {
 			_master_out = r;
 		}
@@ -2245,6 +2240,8 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 				order++;
 			}
 		}
+
+		ARDOUR::GUIIdle ();
 	}
 
 	if (_monitor_out && IO::connecting_legal) {

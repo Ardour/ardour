@@ -136,7 +136,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	char buf[PATH_MAX+1];
 	if (!realpath (fullpath.c_str(), buf) && (errno != ENOENT)) {
-		error << string_compose(_("Could not use path %1 (%s)"), buf, strerror(errno)) << endmsg;
+		error << string_compose(_("Could not use path %1 (%2)"), buf, strerror(errno)) << endmsg;
 		destroy ();
 		throw failed_constructor();
 	}
@@ -367,9 +367,7 @@ Session::second_stage_init ()
 
 	MIDI::Name::MidiPatchManager::instance().set_session (this);
 
-#ifdef HAVE_LTC
 	ltc_tx_initialize();
-#endif
 	/* initial program change will be delivered later; see ::config_changed() */
 
 	_state_of_the_state = Clean;
@@ -687,7 +685,7 @@ Session::remove_state (string snapshot_name)
 
 	// and delete it
 	if (g_remove (xml_path.c_str()) != 0) {
-		error << string_compose(_("Could not remove state file at path \"%1\" (%2)"),
+		error << string_compose(_("Could not remove session file at path \"%1\" (%2)"),
 				xml_path, g_strerror (errno)) << endmsg;
 	}
 }
@@ -809,7 +807,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	if (!tree.write (tmp_path)) {
 		error << string_compose (_("state could not be saved to %1"), tmp_path) << endmsg;
 		if (g_remove (tmp_path.c_str()) != 0) {
-			error << string_compose(_("Could not remove temporary state file at path \"%1\" (%2)"),
+			error << string_compose(_("Could not remove temporary session file at path \"%1\" (%2)"),
 					tmp_path, g_strerror (errno)) << endmsg;
 		}
 		return -1;
@@ -820,7 +818,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 			error << string_compose (_("could not rename temporary session file %1 to %2"),
 					tmp_path, xml_path) << endmsg;
 			if (g_remove (tmp_path.c_str()) != 0) {
-				error << string_compose(_("Could not remove temporary state file at path \"%1\" (%2)"),
+				error << string_compose(_("Could not remove temporary session file at path \"%1\" (%2)"),
 						tmp_path, g_strerror (errno)) << endmsg;
 			}
 			return -1;
@@ -885,7 +883,7 @@ Session::load_state (string snapshot_name)
 	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 		xmlpath = Glib::build_filename (_session_dir->root_path(), legalize_for_path (snapshot_name) + statefile_suffix);
 		if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
-                        error << string_compose(_("%1: session state information file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
+                        error << string_compose(_("%1: session file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
                         return 1;
                 }
         }
@@ -897,7 +895,7 @@ Session::load_state (string snapshot_name)
 	_writable = exists_and_writable (xmlpath);
 
 	if (!state_tree->read (xmlpath)) {
-		error << string_compose(_("Could not understand ardour file %1"), xmlpath) << endmsg;
+		error << string_compose(_("Could not understand session file %1"), xmlpath) << endmsg;
 		delete state_tree;
 		state_tree = 0;
 		return -1;
@@ -940,9 +938,7 @@ Session::load_state (string snapshot_name)
 
 		if (!Glib::file_test (backup_path, Glib::FILE_TEST_EXISTS)) {
 			
-			info << string_compose (_("Copying old session file %1 to %2\nUse %2 with %3 versions before 2.0 from now on"),
-						xmlpath, backup_path, PROGRAM_NAME)
-			     << endmsg;
+			VersionMismatch (xmlpath, backup_path);
 			
 			if (!copy_file (xmlpath, backup_path)) {;
 				return -1;
@@ -1080,7 +1076,11 @@ Session::state (bool full_state)
                         boost::shared_ptr<Region> r = i->second;
                         /* only store regions not attached to playlists */
                         if (r->playlist() == 0) {
-                                child->add_child_nocopy (r->state ());
+				if (boost::dynamic_pointer_cast<AudioRegion>(r)) {
+					child->add_child_nocopy ((boost::dynamic_pointer_cast<AudioRegion>(r))->get_basic_state ());
+				} else {
+					child->add_child_nocopy (r->get_state ());
+				}
                         }
                 }
 
@@ -1661,7 +1661,7 @@ Session::load_nested_sources (const XMLNode& node)
 
 			XMLProperty* prop = (*niter)->property (X_("id"));
 			if (!prop) {
-				error << _("Nested source has no ID info in session state file! (ignored)") << endmsg;
+				error << _("Nested source has no ID info in session file! (ignored)") << endmsg;
 				continue;
 			}
 
@@ -2078,7 +2078,7 @@ Session::save_template (string template_name)
 void
 Session::refresh_disk_space ()
 {
-#if HAVE_SYS_VFS_H && HAVE_SYS_STATVFS_H
+#if __APPLE__ || (HAVE_SYS_VFS_H && HAVE_SYS_STATVFS_H)
 	
 	Glib::Threads::Mutex::Lock lm (space_lock);
 
@@ -2260,7 +2260,7 @@ Session::load_bundles (XMLNode const & node)
 		} else if ((*niter)->name() == "OutputBundle") {
 			add_bundle (boost::shared_ptr<UserBundle> (new UserBundle (**niter, false)));
 		} else {
-			error << string_compose(_("Unknown node \"%1\" found in Bundles list from state file"), (*niter)->name()) << endmsg;
+			error << string_compose(_("Unknown node \"%1\" found in Bundles list from session file"), (*niter)->name()) << endmsg;
 			return -1;
 		}
 	}
@@ -3566,10 +3566,8 @@ Session::config_changed (std::string p, bool ours)
 		reconnect_ltc_input ();
 	} else if (p == "ltc-sink-port") {
 		reconnect_ltc_output ();
-#ifdef HAVE_LTC
 	} else if (p == "timecode-generator-offset") {
 		ltc_tx_parse_offset();
-#endif
 	}
 
 	set_dirty ();

@@ -90,8 +90,6 @@ RefPtr<Action> ProcessorBox::cut_action;
 RefPtr<Action> ProcessorBox::rename_action;
 RefPtr<Action> ProcessorBox::edit_action;
 RefPtr<Action> ProcessorBox::edit_generic_action;
-Glib::RefPtr<Gdk::Pixbuf> ProcessorEntry::_slider_pixbuf;
-Glib::RefPtr<Gdk::Pixbuf> ProcessorEntry::_slider_pixbuf_desensitised;
 
 ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processor> p, Width w)
 	: _button (ArdourButton::led_default_elements)
@@ -122,12 +120,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 		set<Evoral::Parameter> p = _processor->what_can_be_automated ();
 		for (set<Evoral::Parameter>::iterator i = p.begin(); i != p.end(); ++i) {
 			
-			Control* c = new Control (
-				_slider_pixbuf,
-				_slider_pixbuf_desensitised,
-				_processor->automation_control (*i),
-				_processor->describe_parameter (*i)
-				);
+			Control* c = new Control (_processor->automation_control (*i), _processor->describe_parameter (*i));
 			
 			_controls.push_back (c);
 
@@ -304,23 +297,6 @@ ProcessorEntry::name (Width w) const
 }
 
 void
-ProcessorEntry::setup_slider_pix ()
-{
-	_slider_pixbuf = ::get_icon ("fader_belt_h_thin");
-	assert (_slider_pixbuf);
-	_slider_pixbuf_desensitised = ::get_icon ("fader_belt_h_thin_desensitised");
-	assert (_slider_pixbuf_desensitised);
-}
-
-void
-ProcessorEntry::set_pixel_width (int p)
-{
-	for (list<Control*>::iterator i = _controls.begin(); i != _controls.end(); ++i) {
-		(*i)->set_pixel_width (p);
-	}
-}
-
-void
 ProcessorEntry::show_all_controls ()
 {
 	for (list<Control*>::iterator i = _controls.begin(); i != _controls.end(); ++i) {
@@ -407,10 +383,10 @@ ProcessorEntry::toggle_control_visibility (Control* c)
 	_parent->update_gui_object_state (this);
 }
 
-ProcessorEntry::Control::Control (Glib::RefPtr<Gdk::Pixbuf> s, Glib::RefPtr<Gdk::Pixbuf> sd, boost::shared_ptr<AutomationControl> c, string const & n)
+ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string const & n)
 	: _control (c)
 	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)
-	, _slider (s, sd, &_adjustment, 0, false)
+	, _slider (&_adjustment, 0, 13, false)
 	, _slider_persistant_tooltip (&_slider)
 	, _button (ArdourButton::Element (ArdourButton::Text | ArdourButton::Indicator))
 	, _ignore_ui_adjustment (false)
@@ -432,9 +408,9 @@ ProcessorEntry::Control::Control (Glib::RefPtr<Gdk::Pixbuf> s, Glib::RefPtr<Gdk:
 
 	} else {
 		
-		box.pack_start (_label);
-		_label.show ();
-		_label.set_text (_name);
+		_slider.set_name ("PluginSlider");
+		_slider.set_text (_name);
+
 		box.pack_start (_slider);
 		_slider.show ();
 
@@ -477,16 +453,12 @@ ProcessorEntry::Control::set_tooltip ()
 		s << setprecision(2) << fixed;
 		s << c->internal_to_user (c->get_value ());
 	}
-	
-	ARDOUR_UI::instance()->set_tip (_label, s.str ());
-	_slider_persistant_tooltip.set_tip (s.str ());
-	ARDOUR_UI::instance()->set_tip (_button, s.str ());
-}
 
-void
-ProcessorEntry::Control::set_pixel_width (int p)
-{
-	_slider.set_fader_length (p);
+	string sm = Glib::Markup::escape_text (s.str());
+	
+	ARDOUR_UI::instance()->set_tip (_label, sm);
+	_slider_persistant_tooltip.set_tip (sm);
+	ARDOUR_UI::instance()->set_tip (_button, sm);
 }
 
 void
@@ -704,6 +676,8 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 	, _placement (-1)
 	, _visible_prefader_processors (0)
 	, _rr_selection(rsel)
+	, _redisplay_pending (false)
+
 {
 	set_session (sess);
 
@@ -717,8 +691,8 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 
 	processor_display.set_flags (CAN_FOCUS);
 	processor_display.set_name ("ProcessorList");
-	processor_display.set_size_request (48, -1);
 	processor_display.set_data ("processorbox", this);
+	processor_display.set_size_request (48, -1);
 	processor_display.set_spacing (2);
 
 	processor_display.signal_enter_notify_event().connect (sigc::mem_fun(*this, &ProcessorBox::enter_notify), false);
@@ -856,7 +830,7 @@ ProcessorBox::set_width (Width w)
 		(*i)->set_enum_width (w);
 	}
 
-	redisplay_processors ();
+	queue_resize ();
 }
 
 Gtk::Menu*
@@ -1367,7 +1341,6 @@ ProcessorBox::redisplay_processors ()
 
 	if (_visible_prefader_processors == 0) { // fader only
 		BlankProcessorEntry* bpe = new BlankProcessorEntry (this, _width);
-		bpe->set_pixel_width (get_allocation().get_width());
 		processor_display.add_child (bpe);
 	}
 
@@ -1491,8 +1464,6 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 	} else {
 		e = new ProcessorEntry (this, processor, _width);
 	}
-
-	e->set_pixel_width (get_allocation().get_width());
 
 	/* Set up this entry's state from the GUIObjectState */
 	XMLNode* proc = entry_gui_object_state (e);
@@ -1828,6 +1799,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		XMLProperty const * type = (*niter)->property ("type");
+		XMLProperty const * role = (*niter)->property ("role");
 		assert (type);
 
 		boost::shared_ptr<Processor> p;
@@ -1835,9 +1807,34 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 			if (type->value() == "meter" ||
 			    type->value() == "main-outs" ||
 			    type->value() == "amp" ||
-			    type->value() == "intsend" || type->value() == "intreturn") {
-				/* do not paste meter, main outs, amp or internal send/returns */
+			    type->value() == "intreturn") {
+				/* do not paste meter, main outs, amp or internal returns */
 				continue;
+
+			} else if (type->value() == "intsend") {
+				
+				/* aux sends are OK, but those used for
+				 * other purposes, are not.
+				 */
+				
+				assert (role);
+
+				if (role->value() != "Aux") {
+					continue;
+				}
+
+				XMLNode n (**niter);
+                                InternalSend* s = new InternalSend (*_session, _route->pannable(), _route->mute_master(),
+								    boost::shared_ptr<Route>(), Delivery::Aux); 
+
+				IOProcessor::prepare_for_reset (n, s->name());
+
+                                if (s->set_state (n, Stateful::loading_state_version)) {
+                                        delete s;
+                                        return;
+                                }
+
+				p.reset (s);
 
 			} else if (type->value() == "send") {
 
@@ -2482,17 +2479,6 @@ ProcessorBox::generate_processor_title (boost::shared_ptr<PluginInsert> pi)
 	}
 
 	return string_compose(_("%1: %2 (by %3)"), _route->name(), pi->name(), maker);
-}
-
-void
-ProcessorBox::on_size_allocate (Allocation& a)
-{
-	HBox::on_size_allocate (a);
-
-	list<ProcessorEntry*> children = processor_display.children ();
-	for (list<ProcessorEntry*>::const_iterator i = children.begin(); i != children.end(); ++i) {
-		(*i)->set_pixel_width (a.get_width ());
-	}
 }
 
 /** @param p Processor.

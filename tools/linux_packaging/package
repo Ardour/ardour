@@ -62,8 +62,8 @@ if [ x$DEBUG = xT ]; then
 	BUILDTYPE="dbg"
 fi
 
-release_version=`grep -m 1 '^VERSION' ../../wscript | awk '{print $3}' | sed "s/'//g"`
-svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d"'" -f 2`
+release_version=`grep -m 1 '[^A-Za-z_]LINUX_VERSION = ' ../../wscript | awk '{print $3}' | sed "s/'//g"`
+svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d'"' -f 2`
 
 X86_BUNDLE="${APPNAME}_x86-${release_version}_${svn_version}"
 X86_64_BUNDLE="${APPNAME}_x86_64-${release_version}_${svn_version}"

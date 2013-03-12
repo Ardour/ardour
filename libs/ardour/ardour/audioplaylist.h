@@ -49,8 +49,6 @@ public:
 
 protected:
 
-	void check_crossfades (Evoral::Range<framepos_t>);
-
 	void pre_combine (std::vector<boost::shared_ptr<Region> >&);
 	void post_combine (std::vector<boost::shared_ptr<Region> >&, boost::shared_ptr<Region>);
 	void pre_uncombine (std::vector<boost::shared_ptr<Region> >&, boost::shared_ptr<Region>);

@@ -1,9 +1,6 @@
 Download waf (http://code.google.com/p/waf/)
 Download autowaf (http://svn.drobilla.net/autowaf)
 
-* MAKE SURE that the --debug option is set to True by default (drobilla's
-  original sets it to False by default)
-
 From within the waf source tree, run:
 
 ./waf-light -v --make-waf --tools=misc,doxygen,/path/to/autowaf.py --prelude=''

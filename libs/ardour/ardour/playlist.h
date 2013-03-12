@@ -132,6 +132,7 @@ public:
 	void remove_region_by_source (boost::shared_ptr<Source>);
 	void get_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
 	void get_region_list_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
+	void get_source_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
 	void replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Region> newr, framepos_t pos);
 	void split_region (boost::shared_ptr<Region>, framepos_t position);
 	void split (framepos_t at);
@@ -153,7 +154,6 @@ public:
 
 	boost::shared_ptr<RegionList> regions_at (framepos_t frame);
 	uint32_t                   count_regions_at (framepos_t) const;
-	uint32_t                   count_joined_regions () const;
 	boost::shared_ptr<RegionList> regions_touched (framepos_t start, framepos_t end);
 	boost::shared_ptr<RegionList> regions_with_start_within (Evoral::Range<framepos_t>);
 	boost::shared_ptr<RegionList> regions_with_end_within (Evoral::Range<framepos_t>);
@@ -223,8 +223,6 @@ public:
 	framepos_t find_next_top_layer_position (framepos_t) const;
 	uint32_t combine_ops() const { return _combine_ops; }
 
-	uint64_t highest_layering_index () const;
-
 	void set_layer (boost::shared_ptr<Region>, double);
 
 	void set_capture_insertion_in_progress (bool yn);
@@ -280,8 +278,6 @@ public:
 	std::list< Evoral::RangeMove<framepos_t> > pending_range_moves;
 	/** Extra sections added to regions during trims */
 	std::list< Evoral::Range<framepos_t> >     pending_region_extensions;
-	bool             save_on_thaw;
-	std::string      last_save_reason;
 	uint32_t         in_set_state;
 	bool             in_undo;
 	bool             first_set_state;
@@ -297,7 +293,6 @@ public:
 	bool            _capture_insertion_underway;
 	uint32_t         subcnt;
 	PBD::ID         _orig_track_id;
-	bool             auto_partition;
 	uint32_t        _combine_ops;
 
 	void init (bool hide);
@@ -342,7 +337,6 @@ public:
 	void splice_locked (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude);
 	void splice_unlocked (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude);
 
-	virtual void check_crossfades (Evoral::Range<framepos_t>) {}
 	virtual void remove_dependents (boost::shared_ptr<Region> /*region*/) {}
 
 	virtual XMLNode& state (bool);
@@ -364,8 +358,6 @@ public:
 
 	void begin_undo ();
 	void end_undo ();
-	void unset_freeze_parent (Playlist*);
-	void unset_freeze_child (Playlist*);
 
 	void _split_region (boost::shared_ptr<Region>, framepos_t position);
 

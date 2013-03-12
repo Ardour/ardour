@@ -91,14 +91,11 @@ class AudioRegionView : public RegionView
 
 	GhostRegion* add_ghost (TimeAxisView&);
 
-	void reset_fade_in_shape_width (framecnt_t);
-	void reset_fade_out_shape_width (framecnt_t);
+	void reset_fade_in_shape_width (boost::shared_ptr<ARDOUR::AudioRegion> ar, framecnt_t);
+	void reset_fade_out_shape_width (boost::shared_ptr<ARDOUR::AudioRegion> ar, framecnt_t);
 
 	framepos_t get_fade_in_shape_width ();
 	framepos_t get_fade_out_shape_width ();
-
-	void show_fade_line(framepos_t pos);
-	void hide_fade_line();
 
 	void set_fade_visibility (bool);
 	void update_coverage_frames (LayerDisplay);
@@ -159,7 +156,16 @@ class AudioRegionView : public RegionView
 	ArdourCanvas::Polygon*           fade_out_shape;
 	ArdourCanvas::SimpleRect*        fade_in_handle; ///< fade in handle, or 0
 	ArdourCanvas::SimpleRect*        fade_out_handle; ///< fade out handle, or 0
-	ArdourCanvas::SimpleLine*        fade_position_line;
+
+	ArdourCanvas::Line *start_xfade_in;
+	ArdourCanvas::Line *start_xfade_out;
+	ArdourCanvas::SimpleRect* start_xfade_rect;
+	bool _start_xfade_visible;
+
+	ArdourCanvas::Line *end_xfade_in;
+	ArdourCanvas::Line *end_xfade_out;
+	ArdourCanvas::SimpleRect* end_xfade_rect;
+	bool _end_xfade_visible;
 
 	ArdourCanvas::Line *start_xfade_in;
 	ArdourCanvas::Line *start_xfade_out;

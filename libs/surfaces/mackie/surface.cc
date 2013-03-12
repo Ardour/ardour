@@ -1,3 +1,25 @@
+<<<<<<< HEAD
+=======
+/*
+    Copyright (C) 2012 Paul Davis 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
+>>>>>>> master
 #include <sstream>
 #include <iomanip>
 #include <iostream>
@@ -42,6 +64,7 @@ using ARDOUR::Pannable;
 using ARDOUR::AutomationControl;
 
 #define ui_context() MackieControlProtocol::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
+<<<<<<< HEAD
 
 // The MCU sysex header.4th byte Will be overwritten
 // when we get an incoming sysex that identifies
@@ -53,6 +76,19 @@ static MidiByteArray mackie_sysex_hdr  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x14);
 // the device type
 static MidiByteArray mackie_sysex_hdr_xt  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x15);
 
+=======
+
+// The MCU sysex header.4th byte Will be overwritten
+// when we get an incoming sysex that identifies
+// the device type
+static MidiByteArray mackie_sysex_hdr  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x14);
+
+// The MCU extender sysex header.4th byte Will be overwritten
+// when we get an incoming sysex that identifies
+// the device type
+static MidiByteArray mackie_sysex_hdr_xt  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x15);
+
+>>>>>>> master
 static MidiByteArray empty_midi_byte_array;
 
 Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, uint32_t number, surface_type_t stype)
@@ -289,6 +325,7 @@ Surface::blank_jog_ring ()
 			_port->write (pot->set (0.0, false, Pot::spread));
 		}
 	}
+<<<<<<< HEAD
 }
 
 float
@@ -559,7 +596,627 @@ Surface::turn_it_on ()
 			_mcp.update_global_button (Button::Read, _mcp.metering_active ());
 			_mcp.update_global_button (Button::Stop, _mcp.get_session ().transport_stopped ());
 			_mcp.update_global_button (Button::Play, (_mcp.get_session ().transport_speed () == 1.0f));
+=======
+}
+
+float
+Surface::scrub_scaling_factor () const
+{
+	return 100.0;
+}
+
+void 
+Surface::connect_to_signals ()
+{
+	if (!_connected) {
+
+
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface %1 connecting to signals on port %2\n", 
+								   number(), _port->input_port().name()));
+
+		MIDI::Parser* p = _port->input_port().parser();
+
+		/* Incoming sysex */
+		p->sysex.connect_same_thread (*this, boost::bind (&Surface::handle_midi_sysex, this, _1, _2, _3));
+		/* V-Pot messages are Controller */
+		p->controller.connect_same_thread (*this, boost::bind (&Surface::handle_midi_controller_message, this, _1, _2));
+		/* Button messages are NoteOn */
+		p->note_on.connect_same_thread (*this, boost::bind (&Surface::handle_midi_note_on_message, this, _1, _2));
+		/* Button messages are NoteOn. libmidi++ sends note-on w/velocity = 0 as note-off so catch them too */
+		p->note_off.connect_same_thread (*this, boost::bind (&Surface::handle_midi_note_on_message, this, _1, _2));
+		/* Fader messages are Pitchbend */
+		uint32_t i;
+		for (i = 0; i < _mcp.device_info().strip_cnt(); i++) {
+			p->channel_pitchbend[i].connect_same_thread (*this, boost::bind (&Surface::handle_midi_pitchbend_message, this, _1, _2, i));
+>>>>>>> master
 		}
+		// Master fader
+		p->channel_pitchbend[_mcp.device_info().strip_cnt()].connect_same_thread (*this, boost::bind (&Surface::handle_midi_pitchbend_message, this, _1, _2, _mcp.device_info().strip_cnt()));
+		
+		_connected = true;
+	}
+}
+
+void
+Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uint32_t fader_id)
+{
+	/* Pitchbend messages are fader messages. Nothing in the data we get
+	 * from the MIDI::Parser conveys the fader ID, which was given by the
+	 * channel ID in the status byte.
+	 *
+	 * Instead, we have used bind() to supply the fader-within-strip ID 
+	 * when we connected to the per-channel pitchbend events.
+	 */
+
+
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface::handle_midi_pitchbend_message on port %3, fader = %1 value = %2\n",
+							   fader_id, pb, _number));
+	
+	if (_mcp.device_info().no_handshake()) {
+		turn_it_on ();
+	}
+
+	Fader* fader = faders[fader_id];
+
+	if (fader) {
+		Strip* strip = dynamic_cast<Strip*> (&fader->group());
+		float pos = (pb >> 4)/1023.0; // only the top 10 bytes are used
+		if (strip) {
+			strip->handle_fader (*fader, pos);
+		} else {
+			DEBUG_TRACE (DEBUG::MackieControl, "Handling master fader\n");
+			/* master fader */
+			fader->set_value (pos); // alter master gain
+			_port->write (fader->set_position (pos)); // write back value (required for servo)
+		}
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, "fader not found\n");
+	}
+}
+
+void 
+Surface::handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
+{
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface::handle_midi_note_on_message %1 = %2\n", (int) ev->note_number, (int) ev->velocity));
+	
+	if (_mcp.device_info().no_handshake()) {
+		turn_it_on ();
+	}
+
+	Button* button = buttons[ev->note_number];
+
+	if (button) {
+		Strip* strip = dynamic_cast<Strip*> (&button->group());
+
+		if (strip) {
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip %1 button %2 pressed ? %3\n",
+									   strip->index(), button->name(), (ev->velocity > 64)));
+			strip->handle_button (*button, ev->velocity > 64 ? press : release);
+		} else {
+			/* global button */
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("global button %1\n", button->id()));
+			_mcp.handle_button_event (*this, *button, ev->velocity > 64 ? press : release);
+		}
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("no button found for %1\n", (int) ev->note_number));
+	}
+}
+
+void 
+Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
+{
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("SurfacePort::handle_midi_controller %1 = %2\n", (int) ev->controller_number, (int) ev->value));
+
+	if (_mcp.device_info().no_handshake()) {
+		turn_it_on ();
+	}
+
+	Pot* pot = pots[ev->controller_number];
+
+	// bit 6 gives the sign
+	float sign = (ev->value & 0x40) == 0 ? 1.0 : -1.0; 
+	// bits 0..5 give the velocity. we interpret this as "ticks
+	// moved before this message was sent"
+	float ticks = (ev->value & 0x3f);
+	if (ticks == 0) {
+		/* euphonix and perhaps other devices send zero
+		   when they mean 1, we think.
+		*/
+		ticks = 1;
+	}
+	float delta = sign * (ticks / (float) 0x3f);
+	
+	if (!pot) {
+		if (ev->controller_number == Jog::ID && _jog_wheel) {
+
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Jog wheel moved %1\n", ticks));
+			_jog_wheel->jog_event (delta);
+			return;
+		}
+
+		return;
+	}
+
+	Strip* strip = dynamic_cast<Strip*> (&pot->group());
+	if (strip) {
+		strip->handle_pot (*pot, delta);
+	} 
+}
+
+void 
+Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count)
+{
+	MidiByteArray bytes (count, raw_bytes);
+
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi_sysex: %1\n", bytes));
+
+	if (_mcp.device_info().no_handshake()) {
+		turn_it_on ();
+	}
+
+	/* always save the device type ID so that our outgoing sysex messages
+	 * are correct 
+	 */
+
+	if (_stype == mcu) {
+		mackie_sysex_hdr[4] = bytes[4];
+	} else {
+		mackie_sysex_hdr_xt[4] = bytes[4];
+	}
+
+	switch (bytes[5]) {
+	case 0x01:
+		/* MCP: Device Ready 
+		   LCP: Connection Challenge 
+		*/
+		if (bytes[4] == 0x10 || bytes[4] == 0x11) {
+			write_sysex (host_connection_query (bytes));
+		} else {
+			if (!_active) {
+				turn_it_on ();
+			}
+		}
+		break;
+
+	case 0x03: /* LCP Connection Confirmation */
+		if (bytes[4] == 0x10 || bytes[4] == 0x11) {
+			write_sysex (host_connection_confirmation (bytes));
+			_active = true;
+		}
+		break;
+
+	case 0x04: /* LCP: Confirmation Denied */
+		_active = false;
+		break;
+	default:
+		error << "MCP: unknown sysex: " << bytes << endmsg;
+	}
+}
+
+static MidiByteArray 
+calculate_challenge_response (MidiByteArray::iterator begin, MidiByteArray::iterator end)
+{
+	MidiByteArray l;
+	back_insert_iterator<MidiByteArray> back  (l);
+	copy (begin, end, back);
+	
+	MidiByteArray retval;
+	
+	// this is how to calculate the response to the challenge.
+	// from the Logic docs.
+	retval <<  (0x7f &  (l[0] +  (l[1] ^ 0xa) - l[3]));
+	retval <<  (0x7f &  ( (l[2] >> l[3]) ^  (l[0] + l[3])));
+	retval <<  (0x7f &  ((l[3] -  (l[2] << 2)) ^  (l[0] | l[1])));
+	retval <<  (0x7f &  (l[1] - l[2] +  (0xf0 ^  (l[3] << 4))));
+	
+	return retval;
+}
+
+// not used right now
+MidiByteArray 
+Surface::host_connection_query (MidiByteArray & bytes)
+{
+	MidiByteArray response;
+	
+	if (bytes[4] != 0x10 && bytes[4] != 0x11) {
+		/* not a Logic Control device - no response required */
+		return response;
+	}
+
+	// handle host connection query
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("host connection query: %1\n", bytes));
+	
+	if  (bytes.size() != 18) {
+		cerr << "expecting 18 bytes, read " << bytes << " from " << _port->input_port().name() << endl;
+		return response;
+	}
+
+	// build and send host connection reply
+	response << 0x02;
+	copy (bytes.begin() + 6, bytes.begin() + 6 + 7, back_inserter (response));
+	response << calculate_challenge_response (bytes.begin() + 6 + 7, bytes.begin() + 6 + 7 + 4);
+	return response;
+}
+
+// not used right now
+MidiByteArray 
+Surface::host_connection_confirmation (const MidiByteArray & bytes)
+{
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("host_connection_confirmation: %1\n", bytes));
+	
+	// decode host connection confirmation
+	if  (bytes.size() != 14) {
+		ostringstream os;
+		os << "expecting 14 bytes, read " << bytes << " from " << _port->input_port().name();
+		throw MackieControlException (os.str());
+	}
+	
+	// send version request
+	return MidiByteArray (2, 0x13, 0x00);
+}
+
+void
+Surface::turn_it_on ()
+{
+	if (_active) {
+		return;
+	}
+
+	_active = true;
+
+	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+		(*s)->notify_all ();
+	}
+
+	update_view_mode_display ();
+
+	if (_mcp.device_info ().has_global_controls ()) {
+		_mcp.update_global_button (Button::Read, _mcp.metering_active ());
+	}
+}
+
+void 
+Surface::handle_port_inactive (SurfacePort*)
+{
+	_active = false;
+}
+
+void 
+Surface::write_sysex (const MidiByteArray & mba)
+{
+	if (mba.empty()) {
+		return;
+	}
+
+	MidiByteArray buf;
+	buf << sysex_hdr() << mba << MIDI::eox;
+	_port->write (buf);
+}
+
+void 
+Surface::write_sysex (MIDI::byte msg)
+{
+	MidiByteArray buf;
+	buf << sysex_hdr() << msg << MIDI::eox;
+	_port->write (buf);
+}
+
+uint32_t
+Surface::n_strips (bool with_locked_strips) const
+{
+	if (with_locked_strips) {
+		return strips.size();
+	} 
+
+	uint32_t n = 0;
+
+	for (Strips::const_iterator it = strips.begin(); it != strips.end(); ++it) {
+		if (!(*it)->locked()) {
+			++n;
+		}
+	}
+	return n;
+}
+
+Strip*
+Surface::nth_strip (uint32_t n) const
+{
+	if (n > n_strips()) {
+		return 0;
+	}
+	return strips[n];
+}
+
+void
+Surface::zero_all ()
+{
+	if (_mcp.device_info().has_timecode_display ()) {
+		display_timecode (string (10, '0'), string (10, ' '));
+	}
+	
+	if (_mcp.device_info().has_two_character_display()) {
+		show_two_char_display (string (2, '0'), string (2, ' '));
+	}
+
+	if (_mcp.device_info().has_master_fader () && _master_fader) {
+		_port->write (_master_fader->zero ());
+	}
+
+	// zero all strips
+	for (Strips::iterator it = strips.begin(); it != strips.end(); ++it) {
+		(*it)->zero();
+	}
+
+	zero_controls ();
+}
+
+void
+Surface::zero_controls ()
+{
+	if (!_mcp.device_info().has_global_controls()) {
+		return;
+	}
+
+	// turn off global buttons and leds
+	// global buttons are only ever on mcu_port, so we don't have
+	// to figure out which port.
+
+	for (Controls::iterator it = controls.begin(); it != controls.end(); ++it) {
+		Control & control = **it;
+		if (!control.group().is_strip()) {
+			_port->write (control.zero());
+		}
+	}
+
+	// and the led ring for the master strip
+	blank_jog_ring ();
+
+	_last_master_gain_written = 0.0f;
+}
+
+void
+Surface::periodic (uint64_t now_usecs)
+{
+	master_gain_changed();
+	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+		(*s)->periodic (now_usecs);
+	}
+}
+
+void
+Surface::write (const MidiByteArray& data) 
+{
+	if (_active) {
+		_port->write (data);
+	} else {
+		DEBUG_TRACE (DEBUG::MackieControl, "surface not active, write ignored\n");
+	}
+}
+
+void
+Surface::map_routes (const vector<boost::shared_ptr<Route> >& routes)
+{
+	vector<boost::shared_ptr<Route> >::const_iterator r;
+	Strips::iterator s = strips.begin();
+
+	for (r = routes.begin(); r != routes.end() && s != strips.end(); ++s) {
+
+		/* don't try to assign routes to a locked strip. it won't
+		   use it anyway, but if we do, then we get out of sync
+		   with the proposed mapping.
+		*/
+
+		if (!(*s)->locked()) {
+			(*s)->set_route (*r);
+			++r;
+		}
+	}
+
+	for (; s != strips.end(); ++s) {
+		(*s)->set_route (boost::shared_ptr<Route>());
+	}
+
+
+}
+
+static char 
+translate_seven_segment (char achar)
+{
+	achar = toupper (achar);
+
+	if  (achar >= 0x40 && achar <= 0x60) {
+		return achar - 0x40;
+	} else if  (achar >= 0x21 && achar <= 0x3f) {
+		return achar;
+	} else {
+		return 0x00;
+	}
+}
+
+void
+Surface::show_two_char_display (const std::string & msg, const std::string & dots)
+{
+	if (_stype != mcu || !_mcp.device_info().has_two_character_display() || msg.length() != 2 || dots.length() != 2) {
+		return;
+	}
+	
+	MidiByteArray right (3, 0xb0, 0x4b, 0x00);
+	MidiByteArray left (3, 0xb0, 0x4a, 0x00);
+	
+	right[2] = translate_seven_segment (msg[0]) +  (dots[0] == '.' ? 0x40 : 0x00);
+	left[2] = translate_seven_segment (msg[1]) +  (dots[1] == '.' ? 0x40 : 0x00);
+	
+	_port->write (right);
+	_port->write (left);
+}
+
+void
+Surface::show_two_char_display (unsigned int value, const std::string & /*dots*/)
+{
+	ostringstream os;
+	os << setfill('0') << setw(2) << value % 100;
+	show_two_char_display (os.str());
+}
+
+void
+Surface::display_timecode (const std::string & timecode, const std::string & last_timecode)
+{
+	if (!_active || !_mcp.device_info().has_timecode_display()) {
+		return;
+	}
+	// if there's no change, send nothing, not even sysex header
+	if  (timecode == last_timecode) return;
+	
+	// length sanity checking
+	string local_timecode = timecode;
+
+	// truncate to 10 characters
+	if  (local_timecode.length() > 10) {
+		local_timecode = local_timecode.substr (0, 10);
+	}
+
+	// pad to 10 characters
+	while  (local_timecode.length() < 10) { 
+		local_timecode += " ";
+	}
+	
+	// translate characters.
+	// Only the characters that actually changed are sent.
+	int position = 0x3f;
+	int i;
+	for (i = local_timecode.length () - 1; i >= 0; i--) {
+		position++;
+		if (local_timecode[i] == last_timecode[i]) {
+			continue;
+		}
+		MidiByteArray retval (2, 0xb0, position);
+		retval << translate_seven_segment (local_timecode[i]);
+		_port->write (retval);
+	}
+}
+
+void
+Surface::update_flip_mode_display ()
+{
+	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+		(*s)->flip_mode_changed (true);
+	}
+}
+
+void
+Surface::update_view_mode_display ()
+{
+	string text;
+	int id = -1;
+
+	if (!_active) {
+		return;
+	}
+
+	switch (_mcp.view_mode()) {
+	case MackieControlProtocol::Mixer:
+		show_two_char_display ("Mx");
+		id = Button::Pan;
+		break;
+	case MackieControlProtocol::Dynamics:
+		show_two_char_display ("Dy");
+		id = Button::Dyn;
+		break;
+	case MackieControlProtocol::EQ:
+		show_two_char_display ("EQ");
+		id = Button::Eq;
+		break;
+	case MackieControlProtocol::Loop:
+		show_two_char_display ("LP");
+		id = Button::Loop;
+		break;
+	case MackieControlProtocol::AudioTracks:
+		show_two_char_display ("AT");
+		break;
+	case MackieControlProtocol::MidiTracks:
+		show_two_char_display ("MT");
+		break;
+	case MackieControlProtocol::Sends:
+		show_two_char_display ("Sn");
+		id = Button::Sends;
+		break;
+	case MackieControlProtocol::Plugins:
+		show_two_char_display ("Pl");
+		id = Button::Plugin;
+		break;
+	default:
+		break;
+	}
+
+	if (id >= 0) {
+		
+		/* we are attempting to turn a global button/LED on */
+
+		map<int,Control*>::iterator x = controls_by_device_independent_id.find (id);
+
+		if (x != controls_by_device_independent_id.end()) {
+			Button* button = dynamic_cast<Button*> (x->second);
+			if (button) {
+				_port->write (button->set_state (on));
+			}
+		}
+	}
+
+	if (!text.empty()) {
+		for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+			_port->write ((*s)->display (1, text));
+		}
+	}
+}
+
+void
+Surface::gui_selection_changed (const ARDOUR::StrongRouteNotificationList& routes)
+{
+	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+		(*s)->gui_selection_changed (routes);
+	}
+}
+
+void
+Surface::say_hello ()
+{
+	/* wakeup for Mackie Control */
+	MidiByteArray wakeup (7, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x00, MIDI::eox);
+	_port->write (wakeup);
+	wakeup[4] = 0x15; /* wakup Mackie XT */
+	_port->write (wakeup);
+	wakeup[4] = 0x10; /* wakupe Logic Control */
+	_port->write (wakeup);
+	wakeup[4] = 0x11; /* wakeup Logic Control XT */
+	_port->write (wakeup);
+}
+
+void
+Surface::next_jog_mode ()
+{
+}
+
+void
+Surface::set_jog_mode (JogWheel::Mode)
+{
+}	
+
+bool
+Surface::route_is_locked_to_strip (boost::shared_ptr<Route> r) const
+{
+	for (Strips::const_iterator s = strips.begin(); s != strips.end(); ++s) {
+		if ((*s)->route() == r && (*s)->locked()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void 
+Surface::notify_metering_state_changed()
+{
+	for (Strips::const_iterator s = strips.begin(); s != strips.end(); ++s) {
+		(*s)->notify_metering_state_changed ();
 	}
 
 	_active = true;

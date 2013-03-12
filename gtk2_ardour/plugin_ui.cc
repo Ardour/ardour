@@ -124,7 +124,7 @@ PluginUIWindow::PluginUIWindow (
 
 		default:
 #ifndef WINDOWS_VST_SUPPORT
-			error << _("unknown type of editor-supplying plugin (note: no VST support in this version of ardour)")
+			error << string_compose (_("unknown type of editor-supplying plugin (note: no VST support in this version of %1)"), PROGRAM_NAME)
 			      << endmsg;
 #else
 			error << _("unknown type of editor-supplying plugin")
@@ -267,8 +267,8 @@ PluginUIWindow::create_windows_vst_editor(boost::shared_ptr<PluginInsert>)
 	boost::shared_ptr<WindowsVSTPlugin> vp;
 
 	if ((vp = boost::dynamic_pointer_cast<WindowsVSTPlugin> (insert->plugin())) == 0) {
-		error << _("unknown type of editor-supplying plugin (note: no VST support in this version of ardour)")
-			      << endmsg;
+		error << string_compose (_("unknown type of editor-supplying plugin (note: no VST support in this version of %1)"), PROGRAM_NAME)
+		      << endmsg;
 		throw failed_constructor ();
 	} else {
 		WindowsVSTPluginUI* vpu = new WindowsVSTPluginUI (insert, vp);
@@ -297,8 +297,8 @@ PluginUIWindow::create_lxvst_editor(boost::shared_ptr<PluginInsert>)
 	boost::shared_ptr<LXVSTPlugin> lxvp;
 
 	if ((lxvp = boost::dynamic_pointer_cast<LXVSTPlugin> (insert->plugin())) == 0) {
-		error << _("unknown type of editor-supplying plugin (note: no linuxVST support in this version of ardour)")
-			      << endmsg;
+		error << string_compose (_("unknown type of editor-supplying plugin (note: no linuxVST support in this version of %1)"), PROGRAM_NAME)
+		      << endmsg;
 		throw failed_constructor ();
 	} else {
 		LXVSTPluginUI* lxvpu = new LXVSTPluginUI (insert, lxvp);
@@ -546,7 +546,7 @@ PlugUIBase::set_latency_label ()
 	string t;
 
 	if (l < sr / 1000) {
-		t = string_compose (_("latency (%1 samples)"), l);
+		t = string_compose (P_("latency (%1 sample)", "latency (%1 samples)", l), l);
 	} else {
 		t = string_compose (_("latency (%1 ms)"), (float) l / ((float) sr / 1000.0f));
 	}

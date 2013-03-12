@@ -918,7 +918,7 @@ CrossfadeEditor::build_presets ()
 	p->push_back (PresetPoint (1.0, 1.0));
 	fade_in_presets->push_back (p);
 
-	p = new Preset ("Constant Power (-3dB)", "fadein-constant-power");
+	p = new Preset ("Constant power (-3dB)", "fadein-constant-power");
 
 	p->push_back (PresetPoint (0.000000, 0.000000));
 	p->push_back (PresetPoint (0.166667, 0.282192));
@@ -1007,7 +1007,7 @@ CrossfadeEditor::build_presets ()
 	fade_out_presets->push_back (p);
 
 	// p = new Preset ("linout.xpm");
-	p = new Preset ("Constant Power (-3dB cut)", "fadeout-constant-power");
+	p = new Preset ("Constant power (-3dB cut)", "fadeout-constant-power");
 	p->push_back (PresetPoint (0.000000, 1.000000));
 	p->push_back (PresetPoint (0.166667, 0.948859));
 	p->push_back (PresetPoint (0.333333, 0.851507));

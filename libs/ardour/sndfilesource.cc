@@ -221,6 +221,13 @@ SndFileSource::open ()
 
 	bool bwf_info_exists = _broadcast_info->load_from_file (sf);
 
+	if (_file_is_new && _length == 0 && writable() && !bwf_info_exists) {
+		/* newly created files will not have a BWF header at this point in time.
+		 * Import will have called Source::set_timeline_position() if one exists
+		 * in the original. */
+		header_position_offset = _timeline_position;
+	}
+
 	/* Set our timeline position to either the time reference from a BWF header or the current
 	   start of the session.
 	*/
@@ -604,7 +611,7 @@ SndFileSource::write_float (Sample* data, framepos_t frame_pos, framecnt_t cnt)
 	if (sf == 0 || sf_seek (sf, frame_pos, SEEK_SET|SFM_WRITE) < 0) {
 		char errbuf[256];
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-		error << string_compose (_("%1: cannot seek to %2 (libsndfile error: %3"), _path, frame_pos, errbuf) << endmsg;
+		error << string_compose (_("%1: cannot seek to %2 (libsndfile error: %3)"), _path, frame_pos, errbuf) << endmsg;
 		_descriptor->release ();
 		return 0;
 	}

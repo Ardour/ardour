@@ -262,6 +262,9 @@ else
 	fi
 fi
 
+FILESYSTEM_TYPE=$(df -P -T "${PKG_PATH}" | grep / | awk '{print $2}')
+echo "Bundle is on ${FILESYSTEM_TYPE} filesystem"
+
 #####################
 # Unpack the bundle
 #####################
@@ -277,7 +280,16 @@ if [ ! -e ${PGM_NAME}_${ARCH}-*.tar.bz2 ]; then
 	exit 1
 fi
 
-tar -xjf ${PGM_NAME}_${ARCH}-*.tar.bz2
+if ! tar -xjf ${PGM_NAME}_${ARCH}-*.tar.bz2; then
+	echo ""
+	echo "!!! ERROR !!! Can't unpack ${ARCH} bundle file."
+	echo ""
+	read -p "Press ENTER to exit installer:" BLAH
+	exit 1
+else
+	echo "Bundle unpacked"
+fi
+
 BUNDLE_DIR=$(basename `find -maxdepth 1 -type d -name "${PGM_NAME}_${ARCH}-*"`)
 
 
@@ -444,6 +456,7 @@ then
 	${SUPER} xdg-icon-resource install --context apps --size 22 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_22px.png ${ICON_NAME}
 	${SUPER} xdg-icon-resource install --context apps --size 32 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_32px.png ${ICON_NAME}
 	${SUPER} xdg-icon-resource install --context apps --size 48 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_48px.png ${ICON_NAME}
+	${SUPER} xdg-icon-resource install --context apps --size 256 ${ICON_PATH}/${PGM_NAME_LOWER}_icon_256px.png ${ICON_NAME}
 
 	if [ -e ${ICON_PATH}/${PGM_NAME_LOWER}_icon.svg -a -d /usr/share/icons/hicolor/scalable/apps ]; 
 	then
@@ -497,6 +510,8 @@ echo ""
 echo "Checking to see if Jack is installed"
 echo ""
 
+JACK_INSTALLED="f"
+
 if ! which jackd > /dev/null;
 then
 	echo ""
@@ -509,17 +524,91 @@ then
 	then
 		echo "Attempting to install Jack"
 		SystemInstall "jackd"
-
+		
 		if [ $? -ne 0 ];
 		then
 			echo ""
 			read -p "Press ENTER to continue:" BLAH
+		else
+			JACK_INSTALLED="t"
 		fi
 	fi
 else
-	echo "Jack OK"
+	JACK_INSTALLED="t"
+	echo "Jack already present"
 fi
 
+# Check to see if Jack is new enough to operate correctly.
+
+if [ "t" = ${JACK_INSTALLED} ];
+then
+	JACK_VERSION_OK="f"
+	JACK_VER_STRING=$(jackd --version | grep -e "jackd.*protocol")
+	JACK_NAME=$(echo $JACK_VER_STRING | awk '{print $1}')
+	JACK_VERSION=$(echo $JACK_VER_STRING | awk '{print $3}')
+	JACK_VERSION_MAJOR=$(echo $JACK_VERSION | awk 'BEGIN{FS="."}{print $1}')
+	JACK_VERSION_MIDDLE=$(echo $JACK_VERSION | awk 'BEGIN{FS="."}{print $2}')
+	JACK_VERSION_MINOR=$(echo $JACK_VERSION | awk 'BEGIN{FS="."}{print $3}')
+
+	if [ "jackd" = ${JACK_NAME} ];
+	then
+		if [ ${JACK_VERSION_MAJOR} -eq 0 ];
+		then
+			if [ ${JACK_VERSION_MIDDLE} -eq 121 ];
+			then
+				if [ ${JACK_VERSION_MINOR} -ge 3 ];
+				then
+					JACK_VERSION_OK="t"
+				fi
+			elif [ ${JACK_VERSION_MIDDLE} -gt 121 ];
+			then
+				JACK_VERSION_OK="t"
+			fi
+		elif [ ${JACK_VERSION_MAJOR} -gt 0 ];
+		then
+			JACK_VERSION_OK="t"
+		fi
+	elif [ "jackdmp" = ${JACK_NAME} ];
+	then
+		if [ ${JACK_VERSION_MAJOR} -eq 1 ];
+		then
+			if [ ${JACK_VERSION_MIDDLE} -eq 9 ];
+			then
+				if [ ${JACK_VERSION_MINOR} -ge 8 ];
+				then
+					JACK_VERSION_OK="t"
+				fi
+			elif [ ${JACK_VERSION_MIDDLE} -gt 9 ];
+			then
+				JACK_VERSION_OK="t"
+			fi
+		elif [ ${JACK_VERSION_MAJOR} -gt 1 ];
+		then
+			JACK_VERSION_OK="t"
+		fi
+	fi
+
+	if [ "t" = ${JACK_VERSION_OK} ];
+	then
+		echo ""
+		echo "Jack Version Check OK (${JACK_VER_STRING})"
+		echo ""
+	else
+		echo ""
+		echo "!!! WARNING !!! - The version of Jack on this system is too old!"
+		echo "Using an old version of Jack is not recommened. Please update"
+		echo "Jack for best results."
+		echo ""
+		echo "System Jack version:"
+		echo "   ${JACK_VER_STRING}"
+		echo ""
+		echo "Recommened minimum versions:"
+		echo "   Jack1 - 0.121.3"
+		echo "   Jack2 - 1.9.8"
+		echo ""
+		read -p "Press ENTER to continue:" BLAH
+	fi
+fi
 
 if ! which qjackctl > /dev/null;
 then
@@ -640,10 +729,8 @@ then
 	then
 		echo ""
 		echo "!!! WARNING !!! - Your system seems to use frequency scaling."
-		echo "This can have a serious impact on audio latency. You have two choices:"
-		echo "(1) turn it off, e.g. by chosing the 'performance' governor."
-		echo "(2) Use the HPET clocksource by passing \"-c h\" to JACK"
-		echo "(this second option only works on relatively recent computers)"
+		echo "This can have a serious impact on audio latency."
+		echo "For best results turn it off, e.g. by chosing the 'performance' governor."
 		echo ""
 		read -p "Press ENTER to continue:" BLAH
 	fi

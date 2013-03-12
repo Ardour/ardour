@@ -83,6 +83,7 @@ Splash::Splash ()
 	the_splash = this;
 
         expose_done = false;
+        expose_is_the_one = false;
 
 	ARDOUR::BootMessage.connect (msg_connection, invalidator (*this), boost::bind (&Splash::boot_message, this, _1), gui_context());
 }
@@ -151,8 +152,10 @@ Splash::expose (GdkEventExpose* ev)
 	/* this must execute AFTER the GDK idle update mechanism 
 	 */
        
-	Glib::signal_idle().connect (sigc::mem_fun (this, &Splash::idle_after_expose),
-				     GDK_PRIORITY_REDRAW+2);
+	if (expose_is_the_one) {
+		Glib::signal_idle().connect (sigc::mem_fun (this, &Splash::idle_after_expose),
+					     GDK_PRIORITY_REDRAW+2);
+	}
 
 	return true;
 }
@@ -177,7 +180,8 @@ Splash::display ()
 	
 	if (!was_mapped) {
 		expose_done = false;
-	}
+		expose_is_the_one = false;
+	} 
 
 	pop_front ();
 	present ();
@@ -186,6 +190,7 @@ Splash::display ()
 		while (!expose_done) {
 			gtk_main_iteration ();
 		}
+		gdk_display_flush (gdk_display_get_default());
 	}
 }
 
@@ -198,14 +203,26 @@ Splash::message (const string& msg)
 
 	layout->set_markup (str);
 	Glib::RefPtr<Gdk::Window> win = darea.get_window();
-
+	
 	if (win) {
                 expose_done = false;
 
-		win->invalidate_rect (Gdk::Rectangle (0, darea.get_height() - 30, darea.get_width(), 30), true);
+		if (win->is_visible ()) {
+			win->invalidate_rect (Gdk::Rectangle (0, darea.get_height() - 30, darea.get_width(), 30), true);
+		} else {
+			darea.queue_draw ();
+		}
 
                 while (!expose_done) {
                         gtk_main_iteration ();
                 }
+		gdk_display_flush (gdk_display_get_default());
 	}
+}
+
+bool
+Splash::on_map_event (GdkEventAny* ev)
+{
+	expose_is_the_one = true;
+	return Window::on_map_event (ev);
 }

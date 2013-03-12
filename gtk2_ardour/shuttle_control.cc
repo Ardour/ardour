@@ -260,6 +260,9 @@ ShuttleControl::on_button_press_event (GdkEventButton* ev)
 			shuttle_grabbed = true;
 			shuttle_speed_on_grab = _session->transport_speed ();
 			mouse_shuttle (ev->x, true);
+			gdk_pointer_grab(ev->window,false,
+					GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
+					NULL,NULL,ev->time);
 		}
 		break;
 
@@ -284,8 +287,12 @@ ShuttleControl::on_button_release_event (GdkEventButton* ev)
 		if (shuttle_grabbed) {
 			shuttle_grabbed = false;
 			remove_modal_grab ();
+			gdk_pointer_ungrab (GDK_CURRENT_TIME);
 			
 			if (Config->get_shuttle_behaviour() == Sprung) {
+				if (shuttle_speed_on_grab == 0 ) {
+					_session->request_transport_speed (1.0);
+				}
 				_session->request_transport_speed (shuttle_speed_on_grab);
 			} else {
 				mouse_shuttle (ev->x, true);
@@ -420,10 +427,10 @@ ShuttleControl::mouse_shuttle (double x, bool force)
 }
 
 void
-ShuttleControl::set_shuttle_fract (double f)
+ShuttleControl::set_shuttle_fract (double f, bool zero_ok)
 {
 	shuttle_fract = f;
-	use_shuttle_fract (false);
+	use_shuttle_fract (false, zero_ok);
 }
 
 int
@@ -465,7 +472,7 @@ ShuttleControl::fract_as_semitones (float fract, bool& reverse)
 }
 
 void
-ShuttleControl::use_shuttle_fract (bool force)
+ShuttleControl::use_shuttle_fract (bool force, bool zero_ok)
 {
 	microseconds_t now = get_microseconds();
 
@@ -496,7 +503,11 @@ ShuttleControl::use_shuttle_fract (bool force)
 		speed = shuttle_max_speed * shuttle_fract;
 	}
 
-	_session->request_transport_speed_nonzero (speed, true);
+	if (zero_ok) {
+		_session->request_transport_speed (speed, Config->get_shuttle_behaviour() == Wheel);
+	} else {
+		_session->request_transport_speed_nonzero (speed, Config->get_shuttle_behaviour() == Wheel);
+	}
 }
 
 void
@@ -650,25 +661,13 @@ ShuttleControl::ShuttleControllable::ShuttleControllable (ShuttleControl& s)
 void
 ShuttleControl::ShuttleControllable::set_value (double val)
 {
-	double fract;
-
-	if (val == 0.5) {
-		fract = 0.0;
-	} else {
-		if (val < 0.5) {
-			fract = -((0.5 - val)/0.5);
-		} else {
-			fract = ((val - 0.5)/0.5);
-		}
-	}
-
-	sc.set_shuttle_fract (fract);
+	sc.set_shuttle_fract ((val - lower()) / (upper() - lower()), true);
 }
 
 double
 ShuttleControl::ShuttleControllable::get_value () const
 {
-	return sc.get_shuttle_fract ();
+	return lower() + (sc.get_shuttle_fract () * (upper() - lower()));
 }
 
 void

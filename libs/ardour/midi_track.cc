@@ -352,11 +352,15 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
 		MidiBuffer& mbuf (bufs.get_midi (0));
 
-		/* we are a MIDI track, so we always start the chain with a single-channel diskstream */
+		/* we are a MIDI track, so we always start the chain with a
+		 * single-MIDI-channel diskstream 
+		 */
 		ChanCount c;
 		c.set_audio (0);
 		c.set_midi (1);
 		bufs.set_count (c);
+
+		assert (nframes > 0);
 
 		diskstream->get_playback (mbuf, nframes);
 
@@ -519,6 +523,13 @@ MidiTrack::set_note_mode (NoteMode m)
 {
 	_note_mode = m;
 	midi_diskstream()->set_note_mode(m);
+}
+
+std::string
+MidiTrack::describe_parameter (Evoral::Parameter param)
+{
+	const std::string str(instrument_info().get_controller_name(param));
+	return str.empty() ? Automatable::describe_parameter(param) : str;
 }
 
 void
@@ -775,27 +786,9 @@ MidiTrack::set_monitoring (MonitorChoice mc)
 MonitorState
 MidiTrack::monitoring_state () const
 {
-	return Track::monitoring_state();
-
-	/* Explicit requests */
-	
-	if (_monitoring & MonitorInput) {
+	MonitorState ms = Track::monitoring_state();
+	if (ms == MonitoringSilence) {
 		return MonitoringInput;
-	}
-		
-	if (_monitoring & MonitorDisk) {
-		return MonitoringDisk;
-	}
-
-	if (_session.transport_rolling()) {
-		return MonitoringDisk;
 	} 
-
-	/* the return value here doesn't mean that we're actually monitoring
-	 * input, let alone input *audio*. but it means that we are NOT 
-	 * monitoring silence. this allows us to still hear any audio generated
-	 * by using internal generation techniques
-	 */
-
-	return MonitoringInput;
+	return ms;
 }

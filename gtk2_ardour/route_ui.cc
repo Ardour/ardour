@@ -120,6 +120,7 @@ RouteUI::init ()
 
 	rec_enable_button = manage (new ArdourButton);
 	rec_enable_button->set_name ("record enable button");
+	rec_enable_button->set_tweaks (ArdourButton::ImplicitUsesSolidColor);
 	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
 
 	show_sends_button = manage (new ArdourButton);
@@ -228,14 +229,18 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		rec_enable_button->show();
  		rec_enable_button->set_controllable (t->rec_enable_control());
 
-		update_rec_display ();
-
                 if (is_midi_track()) {
                         midi_track()->StepEditStatusChange.connect (route_connections, invalidator (*this),
                                                                     boost::bind (&RouteUI::step_edit_changed, this, _1), gui_context());
                 }
 
-	}
+	} 
+
+	/* this will work for busses and tracks, and needs to be called to
+	   set up the name entry/name label display.
+	*/
+
+	update_rec_display ();
 
 	if (is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
@@ -314,11 +319,31 @@ RouteUI::mute_press (GdkEventButton* ev)
 
 				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-					if (_mute_release) {
-						_mute_release->routes = _session->get_routes ();
+					/* toggle mute on everything (but
+					 * exclude the master and monitor)
+					 *
+					 * because we are going to erase
+					 * elements of the list we need to work
+					 * on a copy.
+					 */
+					
+					boost::shared_ptr<RouteList> copy (new RouteList);
+
+					*copy = *_session->get_routes ();
+
+					for (RouteList::iterator i = copy->begin(); i != copy->end(); ) {
+						if ((*i)->is_master() || (*i)->is_monitor()) {
+							i = copy->erase (i);
+						} else {
+							++i;
+						}
 					}
 
-					_session->set_mute (_session->get_routes(), !_route->muted());
+					if (_mute_release) {
+						_mute_release->routes = copy;
+					}
+
+					_session->set_mute (copy, !_route->muted());
 
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -326,12 +351,23 @@ RouteUI::mute_press (GdkEventButton* ev)
 					   NOTE: Primary-button2 is MIDI learn.
 					*/
 
-					if (ev->button == 1 && _route->route_group()) {
-						if (_mute_release) {
-							_mute_release->routes = _session->get_routes ();
+					boost::shared_ptr<RouteList> rl;
+
+					if (ev->button == 1) { 
+
+						if (_route->route_group()) {
+							
+							rl = _route->route_group()->route_list();
+							
+							if (_mute_release) {
+								_mute_release->routes = rl;
+							}
+						} else {
+							rl.reset (new RouteList);
+							rl->push_back (_route);
 						}
 
-						_session->set_mute (_session->get_routes(), !_route->muted(), Session::rt_cleanup, true);
+						_session->set_mute (rl, !_route->muted(), Session::rt_cleanup, true);
 					}
 
 				} else {
@@ -340,7 +376,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 
 					boost::shared_ptr<RouteList> rl (new RouteList);
 					rl->push_back (_route);
-
+					
 					if (_mute_release) {
 						_mute_release->routes = rl;
 					}
@@ -463,16 +499,30 @@ RouteUI::solo_press(GdkEventButton* ev)
 					   NOTE: Primary-button2 is MIDI learn.
 					*/
 
-					if (ev->button == 1 && _route->route_group()) {
+					/* Primary-button1 applies change to the mix group even if it is not active
+					   NOTE: Primary-button2 is MIDI learn.
+					*/
 
-						if (_solo_release) {
-							_solo_release->routes = _route->route_group()->route_list();
+					boost::shared_ptr<RouteList> rl;
+
+					if (ev->button == 1) { 
+
+						if (_route->route_group()) {
+							
+							rl = _route->route_group()->route_list();
+							
+							if (_solo_release) {
+								_solo_release->routes = rl;
+							}
+						} else {
+							rl.reset (new RouteList);
+							rl->push_back (_route);
 						}
 
 						if (Config->get_solo_control_is_listen_control()) {
-							_session->set_listen (_route->route_group()->route_list(), !_route->listening_via_monitor(),  Session::rt_cleanup, true);
+							_session->set_listen (rl, !_route->listening_via_monitor(),  Session::rt_cleanup, true);
 						} else {
-							_session->set_solo (_route->route_group()->route_list(), !_route->self_soloed(),  Session::rt_cleanup, true);
+							_session->set_solo (rl, !_route->self_soloed(),  Session::rt_cleanup, true);
 						}
 					}
 
@@ -564,8 +614,21 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 			/* Primary-button1 applies change to the route group (even if it is not active)
 			   NOTE: Primary-button2 is MIDI learn.
 			*/
-			if (ev->button == 1 && _route->route_group()) {
-				_session->set_record_enabled (_route->route_group()->route_list(), !rec_enable_button->active_state(), Session::rt_cleanup, true);
+
+			if (ev->button == 1) {
+
+				boost::shared_ptr<RouteList> rl;
+				
+				if (_route->route_group()) {
+					
+					rl = _route->route_group()->route_list();
+					
+				} else {
+					rl.reset (new RouteList);
+					rl->push_back (_route);
+				}
+				
+				_session->set_record_enabled (rl, !rec_enable_button->active_state(), Session::rt_cleanup, true);
 			}
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
@@ -1334,12 +1397,14 @@ RouteUI::choose_color ()
 void
 RouteUI::set_color (const Gdk::Color & c)
 {
+	/* leave _color alone in the group case so that tracks can retain their
+	 * own pre-group colors.
+	 */
+
 	char buf[64];
-
 	_color = c;
-
 	snprintf (buf, sizeof (buf), "%d:%d:%d", c.get_red(), c.get_green(), c.get_blue());
-
+	
 	/* note: we use the route state ID here so that color is the same for both
 	   the time axis view and the mixer strip
 	*/
@@ -1748,7 +1813,7 @@ RouteUI::open_remote_control_id_dialog ()
 			l->set_markup (string_compose (_("The remote control ID of %6 is: %3\n\n\n"
 							 "Remote Control IDs are currently determined by track/bus ordering in %1\n\n"
 							 "%4Use the User Interaction tab of the Preferences window if you want to change this%5"),
-						       (Config->get_remote_model() == MixerOrdered ? _("the mixer") : ("the editor")),
+						       (Config->get_remote_model() == MixerOrdered ? _("the mixer") : _("the editor")),
 						       (is_track() ? _("track") : _("bus")),
 						       _route->remote_control_id(),
 						       "<span size=\"small\" style=\"italic\">",

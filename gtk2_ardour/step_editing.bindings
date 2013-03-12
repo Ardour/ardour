@@ -37,6 +37,7 @@
      
      <Binding key="Tab" action="StepEditing/insert-rest"/>
      <Binding key="Primary-Tab" action="StepEditing/insert-snap-rest"/>
+     <Binding key="BackSpace" action="StepEditing/back"/>
 
      <Binding key="z" action="StepEditing/note-velocity-ppp"/>
      <Binding key="x" action="StepEditing/note-velocity-pp"/>

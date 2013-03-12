@@ -95,9 +95,7 @@ Session::sync_time_vars ()
 		}
 		break;
 	};
-#ifdef HAVE_LTC
 	ltc_tx_parse_offset();
-#endif
 }
 
 void
@@ -228,10 +226,6 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 				 int /*new_position*/)
 {
 	Timecode::BBT_Time bbt;
-
-	if (pos->frame != _transport_frame) {
-		cerr << "ARDOUR says " << _transport_frame << " JACK says " << pos->frame << endl;
-	}
 
 	/* BBT info */
 

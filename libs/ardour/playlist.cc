@@ -751,10 +751,6 @@ Playlist::flush_notifications (bool from_undo)
 
 	 notify_region_added (region);
 
-	 if (!holding_state ()) {
-		 check_crossfades (region->range ());
-	 }
-
 	 region->PropertyChanged.connect_same_thread (region_state_changed_connections, boost::bind (&Playlist::region_changed_proxy, this, _1, boost::weak_ptr<Region> (region)));
 
 	 return true;
@@ -843,6 +839,17 @@ Playlist::flush_notifications (bool from_undo)
 	 for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 
 		 if ((*i) && (*i)->region_list_equivalent (other)) {
+			 results.push_back (*i);
+		 }
+	 }
+ }
+
+ void
+ Playlist::get_source_equivalent_regions (boost::shared_ptr<Region> other, vector<boost::shared_ptr<Region> >& results)
+ {
+	 for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+
+		 if ((*i) && (*i)->any_source_equivalent (other)) {
 			 results.push_back (*i);
 		 }
 	 }
@@ -1095,8 +1102,6 @@ Playlist::flush_notifications (bool from_undo)
 
 		 in_partition = false;
 	 }
-
-	 check_crossfades (Evoral::Range<framepos_t> (start, end));
  }
 
  boost::shared_ptr<Playlist>
@@ -1551,10 +1556,6 @@ Playlist::flush_notifications (bool from_undo)
 	 if (what_changed.contains (bounds)) {
 		 region_bounds_changed (what_changed, region);
 		 save = !(_splicing || _nudging);
-	 }
-
-	 if (what_changed.contains (our_interests) && !what_changed.contains (pos_and_length)) {
-		 check_crossfades (region->range ());
 	 }
 
 	 if (what_changed.contains (Properties::position) && !what_changed.contains (Properties::length)) {
@@ -2100,15 +2101,6 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 
 	if (seen_region_nodes && regions.empty()) {
 		ret = -1;
-	} else {
-
-		/* update dependents, which was not done during add_region_internal
-		   due to in_set_state being true
-		*/
-		
-		for (RegionList::iterator r = regions.begin(); r != regions.end(); ++r) {
-			check_crossfades ((*r)->range ());
-		}
 	}
 		
 	thaw ();
@@ -3081,22 +3073,6 @@ Playlist::max_source_level () const
 	return lvl;
 }
 
-
-uint32_t
-Playlist::count_joined_regions () const
-{
-	RegionReadLock rlock (const_cast<Playlist *> (this));
-	uint32_t cnt = 0;
-
-	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		if ((*i)->max_source_level() > 0) {
-			cnt++;
-		}
-	}
-
-	return cnt;
-}
-
 void
 Playlist::set_orig_track_id (const PBD::ID& id)
 {
@@ -3130,10 +3106,6 @@ restart:
 				goto restart;
 			}
 		}
-	}
-
-	for (list<Evoral::Range<framepos_t> >::iterator i = ranges.begin(); i != ranges.end(); ++i) {
-		check_crossfades (*i);
 	}
 }
 

@@ -496,7 +496,7 @@ GenericMidiControlProtocol::get_state ()
 		   file.
 		*/
 
-		if ((*i)->learned()) {
+		if ((*i)->get_controllable() && (*i)->learned()) {
 			children->add_child_nocopy ((*i)->get_state());
 		}
 	}
@@ -544,7 +544,18 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 			return 0;
 		}
 
+<<<<<<< HEAD
+=======
+		nlist = nlist.front()->children(); // "MIDIControllable" ...
+
+		if (nlist.empty()) {
+			return 0;
+		}
+
+>>>>>>> master
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+
+			
 			
 			if ((prop = (*niter)->property ("id")) != 0) {
 
@@ -565,7 +576,6 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 				}
 			}
 		}
-
 	}
 
 	if ((prop = node.property ("binding")) != 0) {

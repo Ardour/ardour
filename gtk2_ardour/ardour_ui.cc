@@ -35,6 +35,8 @@
 #include <iostream>
 
 #include <sys/resource.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
 
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/accelmap.h>
@@ -65,6 +67,7 @@
 #include "ardour/automation_watch.h"
 #include "ardour/diskstream.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/port.h"
 #include "ardour/process_thread.h"
 #include "ardour/profile.h"
@@ -74,6 +77,7 @@
 #include "ardour/session_state_utils.h"
 #include "ardour/session_utils.h"
 #include "ardour/slave.h"
+
 #include "ardour/soundgrid.h"
 
 #include "timecode/time.h"
@@ -98,7 +102,9 @@ typedef uint64_t microseconds_t;
 #include "missing_file_dialog.h"
 #include "missing_plugin_dialog.h"
 #include "mixer_ui.h"
+#include "mouse_cursors.h"
 #include "opts.h"
+#include "pingback.h"
 #include "processor_box.h"
 #include "prompter.h"
 #include "public_editor.h"
@@ -129,7 +135,7 @@ sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
 sigc::signal<void, framepos_t, bool, framepos_t> ARDOUR_UI::Clock;
 
-ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
+ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
 
@@ -165,7 +171,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	, _feedback_exists (false)
 
 {
-	Gtkmm2ext::init();
+	Gtkmm2ext::init(localedir);
 
 	about = 0;
 	splash = 0;
@@ -232,6 +238,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	ARDOUR::Diskstream::DiskOverrun.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::disk_overrun_handler, this), gui_context());
 	ARDOUR::Diskstream::DiskUnderrun.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::disk_underrun_handler, this), gui_context());
 
+	ARDOUR::Session::VersionMismatch.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_format_mismatch, this, _1, _2), gui_context());
+
 	/* handle dialog requests */
 
 	ARDOUR::Session::Dialog.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_dialog, this, _1), gui_context());
@@ -264,16 +272,13 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	/* lets get this party started */
 
 	try {
-		if (ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization)) {
+		if (ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization, localedir)) {
 			throw failed_constructor ();
 		}
 
 		setup_gtk_ardour_enums ();
 		setup_profile ();
 
-		GainMeter::setup_slider_pix ();
-		RouteTimeAxisView::setup_slider_pix ();
-		ProcessorEntry::setup_slider_pix ();
 		SessionEvent::create_per_thread_pool ("GUI", 512);
 
 	} catch (failed_constructor& err) {
@@ -427,7 +432,7 @@ ARDOUR_UI::post_engine ()
 #ifndef GTKOSX
 	/* OS X provides a nearly-always visible wallclock, so don't be stupid */
 	update_wall_clock ();
-	Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::update_wall_clock), 60000);
+	Glib::signal_timeout().connect_seconds (sigc::mem_fun(*this, &ARDOUR_UI::update_wall_clock), 1);
 #endif
 
 	update_disk_space ();
@@ -601,6 +606,33 @@ ARDOUR_UI::update_autosave ()
 }
 
 void
+ARDOUR_UI::check_announcements ()
+{
+#ifdef PHONE_HOME
+	string _annc_filename;
+
+#ifdef __APPLE__
+	_annc_filename = PROGRAM_NAME "_announcements_osx_";
+#else
+	_annc_filename = PROGRAM_NAME "_announcements_linux_";
+#endif
+	_annc_filename.append (VERSIONSTRING);
+
+	std::string path = Glib::build_filename (user_config_directory(), _annc_filename);
+	std::ifstream announce_file (path.c_str());
+	if ( announce_file.fail() )
+		_announce_string = "";
+	else {
+		std::stringstream oss;
+		oss << announce_file.rdbuf();
+		_announce_string = oss.str();
+	}
+
+	pingback (VERSIONSTRING, path);
+#endif
+}
+
+void
 ARDOUR_UI::startup ()
 {
 	Application* app = Application::instance ();
@@ -608,9 +640,9 @@ ARDOUR_UI::startup ()
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
 	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_load));
 
-#ifdef PHONE_HOME
-	call_the_mothership (VERSIONSTRING);
-#endif
+	if (ARDOUR_COMMAND_LINE::check_announcements) {
+		check_announcements ();
+	}
 
 	app->ready ();
 
@@ -664,8 +696,14 @@ ARDOUR_UI::check_memory_locking ()
 		struct rlimit limits;
 		int64_t ram;
 		long pages, page_size;
-
-		if ((page_size = sysconf (_SC_PAGESIZE)) < 0 ||(pages = sysconf (_SC_PHYS_PAGES)) < 0) {
+#ifdef __FreeBSD__
+		size_t pages_len=sizeof(pages);
+		if ((page_size = getpagesize()) < 0 ||
+				sysctlbyname("hw.availpages", &pages, &pages_len, NULL, 0))
+#else
+		if ((page_size = sysconf (_SC_PAGESIZE)) < 0 ||(pages = sysconf (_SC_PHYS_PAGES)) < 0)
+#endif
+		{
 			ram = 0;
 		} else {
 			ram = (int64_t) pages * (int64_t) page_size;
@@ -685,15 +723,23 @@ ARDOUR_UI::check_memory_locking ()
 						  "This might cause %1 to run out of memory before your system "
 						  "runs out of memory. \n\n"
 						  "You can view the memory limit with 'ulimit -l', "
-						  "and it is normally controlled by /etc/security/limits.conf"),
-						PROGRAM_NAME).c_str());
+						  "and it is normally controlled by %2"),
+						PROGRAM_NAME).c_str(), 
+#ifdef __FreeBSD__
+					X_("/etc/login.conf")
+#else
+					X_(" /etc/security/limits.conf")
+#endif
+					);
+
+				msg.set_default_response (RESPONSE_OK);
 
 				VBox* vbox = msg.get_vbox();
 				HBox hbox;
 				CheckButton cb (_("Do not show this window again"));
 
 				cb.signal_toggled().connect (sigc::mem_fun (*this, &ARDOUR_UI::no_memory_warning));
-
+				
 				hbox.pack_start (cb, true, false);
 				vbox->pack_start (hbox);
 				cb.show();
@@ -1106,13 +1152,16 @@ ARDOUR_UI::update_wall_clock ()
 {
 	time_t now;
 	struct tm *tm_now;
-	char buf[16];
+	static int last_min = -1;
 
 	time (&now);
 	tm_now = localtime (&now);
-
-	sprintf (buf, "%02d:%02d", tm_now->tm_hour, tm_now->tm_min);
-	wall_clock_label.set_text (buf);
+	if (last_min != tm_now->tm_min) {
+		char buf[16];
+		sprintf (buf, "%02d:%02d", tm_now->tm_hour, tm_now->tm_min);
+		wall_clock_label.set_text (buf);
+		last_min = tm_now->tm_min;
+	}
 
 	return TRUE;
 }
@@ -1179,6 +1228,7 @@ ARDOUR_UI::redisplay_recent_sessions ()
 
 		row[recent_session_columns.visible_name] = Glib::path_get_basename (fullpath);
 		row[recent_session_columns.fullpath] = fullpath;
+		row[recent_session_columns.tip] = Glib::Markup::escape_text (fullpath);
 
 		if (state_file_names.size() > 1) {
 
@@ -1192,11 +1242,12 @@ ARDOUR_UI::redisplay_recent_sessions ()
 
 				child_row[recent_session_columns.visible_name] = *i2;
 				child_row[recent_session_columns.fullpath] = fullpath;
+				child_row[recent_session_columns.tip] = Glib::Markup::escape_text (fullpath);
 			}
 		}
 	}
 
-	recent_session_display.set_tooltip_column(1); // recent_session_columns.fullpath
+	recent_session_display.set_tooltip_column(1); // recent_session_columns.tip
 	recent_session_display.set_model (recent_session_model);
 }
 
@@ -1384,11 +1435,7 @@ ARDOUR_UI::session_add_mixed_track (const ChanCount& input, const ChanCount& out
 		tracks = _session->new_midi_track (input, output, instrument, ARDOUR::Normal, route_group, how_many, name_template);
 		
 		if (tracks.size() != how_many) {
-			if (how_many == 1) {
-				error << _("could not create a new mixed track") << endmsg;
-			} else {
-				error << string_compose (_("could not create %1 new mixed tracks"), how_many) << endmsg;
-			}
+			error << string_compose(P_("could not create %1 new mixed track", "could not create %1 new mixed tracks", how_many), how_many) << endmsg;
 		}
 	}
 
@@ -1438,12 +1485,8 @@ ARDOUR_UI::session_add_audio_route (
 			tracks = _session->new_audio_track (input_channels, output_channels, mode, route_group, how_many, name_template);
 
 			if (tracks.size() != how_many) {
-				if (how_many == 1) {
-					error << _("could not create a new audio track") << endmsg;
-				} else {
-					error << string_compose (_("could only create %1 of %2 new audio %3"),
-								 tracks.size(), how_many, (track ? _("tracks") : _("busses"))) << endmsg;
-				}
+				error << string_compose (P_("could not create %1 new audio track", "could not create %1 new audio tracks", how_many), how_many) 
+				      << endmsg;
 			}
 
 		} else {
@@ -1451,11 +1494,8 @@ ARDOUR_UI::session_add_audio_route (
 			routes = _session->new_audio_route (input_channels, output_channels, route_group, how_many, name_template);
 
 			if (routes.size() != how_many) {
-				if (how_many == 1) {
-					error << _("could not create a new audio bus") << endmsg;
-				} else {
-					error << string_compose (_("could not create %1 new audio busses"), how_many) << endmsg;
-				}
+				error << string_compose (P_("could not create %1 new audio bus", "could not create %1 new audio busses", how_many), how_many)
+				      << endmsg;
 			}
 		}
 	}
@@ -1972,8 +2012,9 @@ JACK, reconnect and save the session."), PROGRAM_NAME);
 
 	MessageDialog msg (*editor, msgstr);
 	pop_back_splash (msg);
+	msg.set_keep_above (true);
 	msg.run ();
-
+	
 	if (free_reason) {
 		free (const_cast<char*> (reason));
 	}
@@ -2008,7 +2049,11 @@ ARDOUR_UI::update_clocks ()
 void
 ARDOUR_UI::start_clocking ()
 {
-	clock_signal_connection = RapidScreenUpdate.connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
+	if (Config->get_super_rapid_clock_update()) {
+		clock_signal_connection = SuperRapidScreenUpdate.connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
+	} else {
+		clock_signal_connection = RapidScreenUpdate.connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
+	}
 }
 
 void
@@ -2463,6 +2508,10 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 				session_path = ARDOUR_COMMAND_LINE::session_name;
 				session_name = Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name);
 			}
+
+		} else {
+			session_path = "";
+			session_name = "";
 		}
 
 		delete _startup;
@@ -2835,13 +2884,13 @@ ARDOUR_UI::show_about ()
 void
 ARDOUR_UI::launch_manual ()
 {
-	PBD::open_uri("http://ardour.org/flossmanual");
+	PBD::open_uri (Config->get_tutorial_manual_url());
 }
 
 void
 ARDOUR_UI::launch_reference ()
 {
-	PBD::open_uri ("http://ardour.org/refmanual");
+	PBD::open_uri (Config->get_reference_manual_url());
 }
 
 void
@@ -2895,8 +2944,7 @@ ARDOUR_UI::hide_splash ()
 }
 
 void
-ARDOUR_UI::display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* list_title,
-				    const string& plural_msg, const string& singular_msg)
+ARDOUR_UI::display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* list_title, const bool msg_delete)
 {
 	size_t removed;
 
@@ -2978,10 +3026,26 @@ require some unused files to continue to exist."));
 		space_adjusted = truncf((float)rep.space / (1000.0 * 1000 * 1000.0));
 	}
 
-	if (removed > 1) {
-		txt.set_markup (string_compose (plural_msg, removed, Glib::Markup::escape_text (dead_directory), space_adjusted, bprefix, PROGRAM_NAME));
+	if (msg_delete) {
+		txt.set_markup (string_compose (P_("\
+The following file was deleted from %2,\n\
+releasing %3 %4bytes of disk space", "\
+The following %1 files were deleted from %2,\n\
+releasing %3 %4bytes of disk space", removed),
+					removed, Glib::Markup::escape_text (dead_directory), space_adjusted, bprefix, PROGRAM_NAME));
 	} else {
-		txt.set_markup (string_compose (singular_msg, removed, Glib::Markup::escape_text (dead_directory), space_adjusted, bprefix, PROGRAM_NAME));
+		txt.set_markup (string_compose (P_("\
+The following file was not in use and \n\
+has been moved to: %2\n\n\
+After a restart of %5\n\n\
+<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n\n\
+will release an additional %3 %4bytes of disk space.\n", "\
+The following %1 files were not in use and \n\
+have been moved to: %2\n\n\
+After a restart of %5\n\n\
+<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n\n\
+will release an additional %3 %4bytes of disk space.\n", removed),
+					removed, Glib::Markup::escape_text (dead_directory), space_adjusted, bprefix, PROGRAM_NAME));
 	}
 
 	dhbox.pack_start (*dimage, true, false, 5);
@@ -3075,22 +3139,7 @@ Clean-up will move all unused files to a \"dead\" location."));
 	editor->finish_cleanup ();
 
 	checker.hide();
-	display_cleanup_results (rep,
-				 _("Cleaned Files"),
-				 _("\
-The following %1 files were not in use and \n\
-have been moved to: %2\n\n\
-After a restart of %5\n\n\
-<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n\n\
-will release an additional %3 %4bytes of disk space.\n"),
-				 _("\
-The following file was not in use and \n\
-has been moved to: %2\n\n\
-After a restart of %5\n\n\
-<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n\n\
-will release an additional %3 %4bytes of disk space.\n"
-					 ));
-
+	display_cleanup_results (rep, _("Cleaned Files"), false);
 }
 
 void
@@ -3107,12 +3156,7 @@ ARDOUR_UI::flush_trash ()
 		return;
 	}
 
-	display_cleanup_results (rep,
-				 _("deleted file"),
-				 _("The following %1 files were deleted from %2,\n\
-releasing %3 %4bytes of disk space"),
-				 _("The following file was deleted from %2,\n\
-releasing %3 %4bytes of disk space"));
+	display_cleanup_results (rep, _("deleted file"), true);
 }
 
 void
@@ -3153,6 +3197,12 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 		return;
 	}
 
+	PBD::ScopedConnection idle_connection;
+
+	if (count > 8) {
+		ARDOUR::GUIIdle.connect (idle_connection, MISSING_INVALIDATOR, boost::bind (&Gtkmm2ext::UI::flush_pending, this), gui_context());
+	}
+
 	string template_path = add_route_dialog->track_template();
 
 	if (!template_path.empty()) {
@@ -3165,7 +3215,6 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	string name_template = add_route_dialog->name_template ();
 	PluginInfoPtr instrument = add_route_dialog->requested_instrument ();
 	RouteGroup* route_group = add_route_dialog->route_group ();
-
 	AutoConnectOption oac = Config->get_output_auto_connect();
 
 	if (oac & AutoConnectMaster) {
@@ -3191,6 +3240,8 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 		session_add_audio_bus (input_chan.n_audio(), output_chan.n_audio(), route_group, count, name_template);
 		break;
 	}
+
+	/* idle connection will end at scope end */
 }
 
 XMLNode*
@@ -3349,8 +3400,8 @@ ARDOUR_UI::pending_state_dialog ()
 	Image* image = new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG);
 	ArdourDialog dialog (_("Crash Recovery"), true);
 	Label  message (string_compose (_("\
-This session appears to have been in\n\
-middle of recording when ardour or\n\
+This session appears to have been in the\n\
+middle of recording when %1 or\n\
 the computer was shutdown.\n\
 \n\
 %1 can recover any captured audio for\n\
@@ -3380,7 +3431,7 @@ int
 ARDOUR_UI::sr_mismatch_dialog (framecnt_t desired, framecnt_t actual)
 {
  	HBox* hbox = new HBox();
-	Image* image = new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG);
+	Image* image = new Image (Stock::DIALOG_WARNING, ICON_SIZE_DIALOG);
 	ArdourDialog dialog (_("Sample Rate Mismatch"), true);
 	Label  message (string_compose (_("\
 This session was created with a sample rate of %1 Hz, but\n\
@@ -3623,43 +3674,6 @@ ARDOUR_UI::setup_profile ()
 	}
 }
 
-void
-ARDOUR_UI::toggle_translations ()
-{
-	using namespace Glib;
-
-	RefPtr<Action> act = ActionManager::get_action (X_("Main"), X_("EnableTranslation"));
-	if (act) {
-		RefPtr<ToggleAction> ract = RefPtr<ToggleAction>::cast_dynamic (act);
-		if (ract) {
-
-			string i18n_killer = ARDOUR::translation_kill_path();
-
-			bool already_enabled = !ARDOUR::translations_are_disabled ();
-
-			if (ract->get_active ()) {
-				/* we don't care about errors */
-				int fd = ::open (i18n_killer.c_str(), O_RDONLY|O_CREAT, 0644);
-				close (fd);
-			} else {
-				/* we don't care about errors */
-				unlink (i18n_killer.c_str());
-			}
-
-			if (already_enabled != ract->get_active()) {
-				MessageDialog win (already_enabled ? _("Translations disabled") : _("Translations enabled"),
-				                   false,
-				                   Gtk::MESSAGE_WARNING,
-				                   Gtk::BUTTONS_OK);
-				win.set_secondary_text (string_compose (_("You must restart %1 for this to take effect."), PROGRAM_NAME));
-				win.set_position (Gtk::WIN_POS_CENTER);
-				win.present ();
-				win.run ();
-			}
-		}
-	}
-}
-
 /** Add a window proxy to our list, so that its state will be saved.
  *  This call also causes the window to be created and opened if its
  *  state was saved as `visible'.
@@ -3747,4 +3761,22 @@ ARDOUR_UI::midi_panic ()
 	if (_session) {
 		_session->midi_panic();
 	}
+}
+
+void
+ARDOUR_UI::session_format_mismatch (std::string xml_path, std::string backup_path)
+{
+	const char* start_big = "<span size=\"x-large\" weight=\"bold\">";
+	const char* end_big = "</span>";
+	const char* start_mono = "<tt>";
+	const char* end_mono = "</tt>";
+
+	MessageDialog msg (string_compose (_("%4This is a session from an older version of %3%5\n\n"
+					     "%3 has copied the old session file\n\n%6%1%7\n\nto\n\n%6%2%7\n\n"
+					     "From now on, use the -2000 version with older versions of %3"),
+					   xml_path, backup_path, PROGRAM_NAME,
+					   start_big, end_big,
+					   start_mono, end_mono), true);
+
+	msg.run ();
 }

@@ -104,6 +104,7 @@ private:
 	void set_activation (ARDOUR::RouteGroup *, bool);
 	void edit_group (ARDOUR::RouteGroup *);
 	void subgroup (ARDOUR::RouteGroup *, bool, ARDOUR::Placement);
+        void un_subgroup (ARDOUR::RouteGroup *);
 	void activate_all ();
 	void disable_all ();
 	void remove_group (ARDOUR::RouteGroup *);

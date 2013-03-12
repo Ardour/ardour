@@ -35,13 +35,15 @@ def build(bld):
     obj.target = 'clearlooks'
     obj.uselib = 'GTK'
     obj.includes = '.'
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'engines')
 
     if sys.platform == 'darwin':
         # Bit of a hack: make a symlink to the .dylib that meets GTK's criteria for finding it (namely that the library must be a *.so
         # and that it must reside in a directory called `engines')
         obj = bld(target = 'engines', rule = 'mkdir -p ${TGT} && rm -f ${TGT}/libclearlooks.so && ln -s ../libclearlooks.dylib ${TGT}/libclearlooks.so')
-
+    else:
+        # this is a hack so that running ./ardev will work, since it sets GTK_PATH to include this dir and GTK will search {thisdir}/engines
+        obj = bld(target = 'engines', rule = 'mkdir -p ${TGT} && rm -f ${TGT}/libclearlooks.so && ln -s ../libclearlooks.so ${TGT}/libclearlooks.so')
 
 def shutdown():
     autowaf.shutdown()

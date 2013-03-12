@@ -551,6 +551,7 @@ EditorRegions::selection_changed ()
 		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
 
 			if ((iter = _model->get_iter (*i))) {
+
 				boost::shared_ptr<Region> region = (*iter)[_columns.region];
 
 				// they could have clicked on a row that is just a placeholder, like "Hidden"
@@ -559,18 +560,12 @@ EditorRegions::selection_changed ()
 
 				if (region) {
 
-					if (region->automatic()) {
-
-						_display.get_selection()->unselect(*i);
-
-					} else {
-						_change_connection.block (true);
-						_editor->set_selected_regionview_from_region_list (region, Selection::Add);
-
-						_change_connection.block (false);
-					}
+					_change_connection.block (true);
+					_editor->set_selected_regionview_from_region_list (region, Selection::Add);
+					_change_connection.block (false);
 				}
 			}
+			
 		}
 	} else {
 		_editor->get_selection().clear_regions ();
@@ -1300,7 +1295,7 @@ EditorRegions::name_edit (const std::string& path, const std::string& new_text)
 
 	if (region) {
 		vector<RegionView*> equivalents;
-		_editor->get_regions_corresponding_to (region, equivalents);
+		_editor->get_regions_corresponding_to (region, equivalents, false);
 
 		for (vector<RegionView*>::iterator i = equivalents.begin(); i != equivalents.end(); ++i) {
 			if (new_text != (*i)->region()->name()) {

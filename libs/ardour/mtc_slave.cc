@@ -56,6 +56,7 @@ MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 	reset_pending = 0;
 	reset_position = false;
 	mtc_frame = 0;
+	mtc_frame_dll = 0;
 	engine_dll_initstate = 0;
 	busy_guard1 = busy_guard2 = 0;
 
@@ -118,7 +119,6 @@ void
 MTC_Slave::parameter_changed (std::string const & p)
 {
 	if (p == "slave-timecode-offset"
-			|| p == "subframes-per-frame"
 			|| p == "timecode-format"
 			) {
 		parse_timecode_offset();
@@ -262,16 +262,16 @@ MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, framepos_t now)
 {
 	busy_guard1++;
 	const double qtr_d = quarter_frame_duration;
-	const framepos_t qtr = rint(qtr_d);
 
-	mtc_frame += qtr * transport_direction;
+	mtc_frame_dll += qtr_d * (double) transport_direction;
+	mtc_frame = rint(mtc_frame_dll);
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr frame %1 at %2 -> mtc_frame: %3\n", which_qtr, now, mtc_frame));
 
 	double mtc_speed = 0;
 	if (first_mtc_timestamp != 0) {
 		/* update MTC DLL and calculate speed */
-		const double e = mtc_frame - (double(transport_direction) * (double(now) - double(current.timestamp) + t0));
+		const double e = mtc_frame_dll - (double)transport_direction * ((double)now - (double)current.timestamp + t0);
 		t0 = t1;
 		t1 += b * e + e2;
 		e2 += c * e;
@@ -390,9 +390,10 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 
 			if (cur_timecode != tc_format && ! printed_timecode_warning) {
 				if (ceil(Timecode::timecode_to_frames_per_second(cur_timecode)) != ceil(Timecode::timecode_to_frames_per_second(tc_format))) {
-					warning << string_compose(_("Session and MTC framerate mismatch: MTC:%1 Ardour:%2."),
-							Timecode::timecode_format_name(tc_format),
-							Timecode::timecode_format_name(cur_timecode))
+					warning << string_compose(_("Session and MTC framerate mismatch: MTC:%1 %2:%3."),
+								  Timecode::timecode_format_name(tc_format),
+								  PROGRAM_NAME,
+								  Timecode::timecode_format_name(cur_timecode))
 						<< endmsg;
 				}
 				printed_timecode_warning = true;
@@ -463,6 +464,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 			if (first_mtc_timestamp == 0 || current.timestamp == 0) {
 				first_mtc_timestamp = now;
 				init_mtc_dll(mtc_frame, qtr);
+				mtc_frame_dll = mtc_frame;
 			}
 			current.guard1++;
 			current.position = mtc_frame;
@@ -685,7 +687,7 @@ MTC_Slave::approximate_current_position() const
 	SafeTime last;
 	read_current (&last);
 	if (last.timestamp == 0 || reset_pending) {
-		return " \u2012\u2012:\u2012\u2012:\u2012\u2012:\u2012\u2012";
+		return " --:--:--:--";
 	}
 	return Timecode::timecode_format_sampletime(
 		last.position,
@@ -703,7 +705,7 @@ MTC_Slave::approximate_current_delta() const
 	if (last.timestamp == 0 || reset_pending) {
 		snprintf(delta, sizeof(delta), "\u2012\u2012\u2012\u2012");
 	} else {
-		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%" PRIi64 "</span> sm",
+		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%" PRIi64 "</span>sm",
 				LEADINGZERO(abs(current_delta)), PLUSMINUS(-current_delta), abs(current_delta));
 	}
 	return std::string(delta);

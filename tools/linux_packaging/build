@@ -87,8 +87,8 @@ if test x$STRIP != xall -a x$STRIP != xnone -a x$STRIP != xsome ; then
     exit 1
 fi
 
-release_version=`grep -m 1 '^VERSION' ../../wscript | awk '{print $3}' | sed "s/'//g"`
-svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d"'" -f 2`
+release_version=`grep -m 1 '[^A-Za-z_]LINUX_VERSION = ' ../../wscript | awk '{ print $3 }' | sed "s/'//g"`
+svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d'"' -f 2`
 echo "Version is $release_version / $svn_version"
 info_string="$release_version/$svn_version built on `hostname` by `whoami` on `date`"
 echo "Info string is $info_string"
@@ -241,12 +241,21 @@ if test x$WITH_NLS != x ; then
 	echo "I hope you remembered to run scons msgupdate!"
 	LINGUAS=
 
-        for dl in gtk2_ardour libs/ardour libs/gtkmm2ext ; do 
-	    files=`find ../../$dl -name "*.mo"`
+        for pkg in gtk2_ardour libs/ardour libs/gtkmm2ext ; do 
+	    files=`find ../../$pkg -name "*.mo"`
+
+            #
+            # the package name is appended with a number so that
+            # it can be parallel installed during a regular install
+            # with older (and newer) versions. it is just the major
+            # number of the release (i.e. leading digits)
+            #
+
+            vsuffix=`echo $release_version | sed 's/^\([0-9][0-9]*\).*/\1/'`
 
 	    if [ -z "$files" ]; then
 		echo ""
-		echo "!!!! WARNING !!!! - Did not find any .mo files in ../../$dl"
+		echo "!!!! WARNING !!!! - Did not find any .mo files in ../../$pkg"
 		echo ""
 	    fi
  
@@ -255,7 +264,8 @@ if test x$WITH_NLS != x ; then
 		echo $file
 		lang=`basename $file | sed 's/\.mo//'`
 		mkdir -p $Locale/$lang/LC_MESSAGES
-		cp $file $Locale/$lang/LC_MESSAGES/`basename $dl`
+		cp $file $Locale/$lang/LC_MESSAGES/`basename $pkg`$vsuffix.mo
+		echo copy $file to $Locale/$lang/LC_MESSAGES/`basename $pkg`$vsuffix.mo
                 if echo $LINGUAS | grep $lang >/dev/null 2>&1 ; then
                     :
                 else 
@@ -265,7 +275,7 @@ if test x$WITH_NLS != x ; then
 	done
 
 	GTK_MESSAGES="atk10.mo gdk-pixbuf.mo gtk20-properties.mo gtk20.mo atk10.mo glib20.mo"
-	LOCALEROOT=/usr/share/locale
+	LOCALEROOT=$GTKSTACK_ROOT/share/locale
 
 	for l in $LINGUAS ; do
 		echo "Copying GTK i18n files for $l..."
@@ -288,6 +298,7 @@ fi
 #
 # Copy stuff that may be dynamically loaded
 # 
+<<<<<<< HEAD
 
 cp -R $GTKSTACK_ROOT/etc/* $Etc
 echo "Copying all Pango modules ..."
@@ -314,6 +325,39 @@ echo "Copying clearlooks ..."
 cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so $Libraries
 mkdir -p $Libraries/clearlooks/engines
 (cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks.so . )
+=======
+
+cp -R $GTKSTACK_ROOT/etc/* $Etc
+echo "Copying all Pango modules ..."
+cp -R $GTKSTACK_ROOT/lib/pango/1.6.0/modules/*.so $Modules
+echo "Copying all GDK Pixbuf loaders ..."
+cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Loaders
+
+# Generate a pango module file using the actual Pango that we're going to bundle
+
+cat > pangorc <<EOF 
+[Pango]
+ModulesPath=$GTKSTACK_ROOT/lib/pango/1.6.0/modules
+EOF
+env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.6.0/?@ROOTDIR@/?" > $Etc/pango.modules.in
+rm pangorc
+
+# Ditto for gdk-pixbuf loaders
+gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.loaders.in
+
+# We rely on clearlooks, so include a version from our own build tree
+# this one is special - we will set GTK_PATH to $Libraries/gtkengines
+
+GTK_ENGINE_DIR=$Libraries/gtkengines/engines
+mkdir -p $GTK_ENGINE_DIR
+
+echo "Copying GTK engines ..."
+cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so $Libraries
+(cd $GTK_ENGINE_DIR && ln -s ../../libclearlooks.so . )
+
+cp $GTKSTACK_ROOT/lib/gtk-2.0/2.10.0/engines/libpixmap.so $Libraries
+(cd $GTK_ENGINE_DIR && ln -s ../../libpixmap.so . )
+>>>>>>> master
 
 # LADSPA
 if test x$WITH_LADSPA != x ; then
@@ -373,7 +417,7 @@ cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.so* $Libraries
 cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Libraries
 
 OURLIBDIR=$BUILD_ROOT/libs
-OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/rubberband:$OURLIBDIR/soundtouch:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/sigc++2:$OURLIBDIR/glibmm2:$OURLIBDIR/gtkmm2/atk:$OURLIBDIR/gtkmm2/pango:$OURLIBDIR/gtkmm2/gdk:$OURLIBDIR/gtkmm2/gtk:$OURLIBDIR/libgnomecanvasmm:$OURLIBDIR/libsndfile:$OURLIBDIR/evoral:$OURLIBDIR/evoral/src/libsmf:$OURLIBDIR/audiographer:$OURLIBDIR/timecode:$OURLIBDIR/taglib:$OURLIBDIR/qm-dsp
+OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/rubberband:$OURLIBDIR/soundtouch:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/sigc++2:$OURLIBDIR/glibmm2:$OURLIBDIR/gtkmm2/atk:$OURLIBDIR/gtkmm2/pango:$OURLIBDIR/gtkmm2/gdk:$OURLIBDIR/gtkmm2/gtk:$OURLIBDIR/libgnomecanvasmm:$OURLIBDIR/libsndfile:$OURLIBDIR/evoral:$OURLIBDIR/evoral/src/libsmf:$OURLIBDIR/audiographer:$OURLIBDIR/timecode:$OURLIBDIR/taglib:$OURLIBDIR/libltc:$OURLIBDIR/qm-dsp
 
 echo $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
@@ -485,8 +529,8 @@ echo "Copying other stuff to $APPDIR  ..."
 #cp $BUILD_ROOT/gtk2_ardour/ergonomic-us.bindings	$Etc
 cp $BUILD_ROOT/gtk2_ardour/mnemonic-us.bindings  $Etc
 cp $BUILD_ROOT/gtk2_ardour/ardour.menus $Etc
-cp $BUILD_ROOT/ardour_system.rc $Etc/ardour_system.rc
-cp $BUILD_ROOT/gtk2_ardour/ardour3*.rc $Etc
+cp ../../ardour_system.rc $Etc/ardour_system.rc
+cp $BUILD_ROOT/gtk2_ardour/ardour3_ui_*.rc $Etc
 
 # these are copied straight from the source tree
 
@@ -510,6 +554,10 @@ fi
 # share stuff
 
 cp -R ../../gtk2_ardour/splash.png $Shared
+<<<<<<< HEAD
+=======
+cp -R ../../gtk2_ardour/ArdourMono.ttf $Shared
+>>>>>>> master
 
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type d`; do

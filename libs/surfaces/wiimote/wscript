@@ -26,10 +26,11 @@ def build(bld):
     '''
     obj.export_includes = ['./wiimote']
     obj.cxxflags     = '-DPACKAGE="ardour_wiimote"'
-    obj.includes     = ['.', './wiimote']
-    obj.name         = 'libwiimote'
-    obj.target       = 'wiimote'
-    obj.use          = 'libardour libardour_cp'
+    obj.includes     = ['.', '../libs']
+    obj.name         = 'libardour_wiimote'
+    obj.target       = 'ardour_wiimote'
+    obj.uselib       = 'GTKMM CWIID'
+    obj.use          = 'libardour libardour_cp libgtkmm2ext'
     obj.vnum         = LIBARDOUR_WIIMOTE_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'surfaces')
 

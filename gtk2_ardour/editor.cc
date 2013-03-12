@@ -44,6 +44,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/unknown_type.h"
 #include "pbd/unwind.h"
+#include "pbd/stacktrace.h"
 
 #include <glibmm/miscutils.h>
 #include <gtkmm/image.h>
@@ -383,67 +384,67 @@ Editor::Editor ()
 	set_zoom_focus (ZoomFocusLeft);
 	zoom_range_clock->ValueChanged.connect (sigc::mem_fun(*this, &Editor::zoom_adjustment_changed));
 
-	bbt_label.set_name ("EditorTimeButton");
+	bbt_label.set_name ("EditorRulerLabel");
 	bbt_label.set_size_request (-1, (int)timebar_height);
 	bbt_label.set_alignment (1.0, 0.5);
 	bbt_label.set_padding (5,0);
 	bbt_label.hide ();
 	bbt_label.set_no_show_all();
-	minsec_label.set_name ("EditorTimeButton");
+	minsec_label.set_name ("EditorRulerLabel");
 	minsec_label.set_size_request (-1, (int)timebar_height);
 	minsec_label.set_alignment (1.0, 0.5);
 	minsec_label.set_padding (5,0);
 	minsec_label.hide ();
 	minsec_label.set_no_show_all();
-	timecode_label.set_name ("EditorTimeButton");
+	timecode_label.set_name ("EditorRulerLabel");
 	timecode_label.set_size_request (-1, (int)timebar_height);
 	timecode_label.set_alignment (1.0, 0.5);
 	timecode_label.set_padding (5,0);
 	timecode_label.hide ();
 	timecode_label.set_no_show_all();
-	samples_label.set_name ("EditorTimeButton");
+	samples_label.set_name ("EditorRulerLabel");
 	samples_label.set_size_request (-1, (int)timebar_height);
 	samples_label.set_alignment (1.0, 0.5);
 	samples_label.set_padding (5,0);
 	samples_label.hide ();
 	samples_label.set_no_show_all();
 
-	tempo_label.set_name ("EditorTimeButton");
+	tempo_label.set_name ("EditorRulerLabel");
 	tempo_label.set_size_request (-1, (int)timebar_height);
 	tempo_label.set_alignment (1.0, 0.5);
 	tempo_label.set_padding (5,0);
 	tempo_label.hide();
 	tempo_label.set_no_show_all();
 
-	meter_label.set_name ("EditorTimeButton");
+	meter_label.set_name ("EditorRulerLabel");
 	meter_label.set_size_request (-1, (int)timebar_height);
 	meter_label.set_alignment (1.0, 0.5);
 	meter_label.set_padding (5,0);
 	meter_label.hide();
 	meter_label.set_no_show_all();
 
-	mark_label.set_name ("EditorTimeButton");
+	mark_label.set_name ("EditorRulerLabel");
 	mark_label.set_size_request (-1, (int)timebar_height);
 	mark_label.set_alignment (1.0, 0.5);
 	mark_label.set_padding (5,0);
 	mark_label.hide();
 	mark_label.set_no_show_all();
 
-	cd_mark_label.set_name ("EditorTimeButton");
+	cd_mark_label.set_name ("EditorRulerLabel");
 	cd_mark_label.set_size_request (-1, (int)timebar_height);
 	cd_mark_label.set_alignment (1.0, 0.5);
 	cd_mark_label.set_padding (5,0);
 	cd_mark_label.hide();
 	cd_mark_label.set_no_show_all();
 
-	range_mark_label.set_name ("EditorTimeButton");
+	range_mark_label.set_name ("EditorRulerLabel");
 	range_mark_label.set_size_request (-1, (int)timebar_height);
 	range_mark_label.set_alignment (1.0, 0.5);
 	range_mark_label.set_padding (5,0);
 	range_mark_label.hide();
 	range_mark_label.set_no_show_all();
 
-	transport_mark_label.set_name ("EditorTimeButton");
+	transport_mark_label.set_name ("EditorRulerLabel");
 	transport_mark_label.set_size_request (-1, (int)timebar_height);
 	transport_mark_label.set_alignment (1.0, 0.5);
 	transport_mark_label.set_padding (5,0);
@@ -1369,7 +1370,7 @@ Editor::fill_xfade_menu (Menu_Helpers::MenuList& items, bool start)
 	
 	items.push_back (
 		ImageMenuElem (
-			_("ConstantPower"),
+			_("Constant power"),
 			*(*images)[FadeConstantPower],
 			sigc::bind (sigc::mem_fun (*this, emf), FadeConstantPower)
 			));
@@ -1506,7 +1507,7 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 				
 			items.push_back (
 				ImageMenuElem (
-					_("Constant Power"),
+					_("Constant power"),
 					*_fade_in_images[FadeConstantPower],
 					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_shape), FadeConstantPower)
 					));
@@ -1568,7 +1569,7 @@ Editor::popup_fade_context_menu (int button, int32_t time, ArdourCanvas::Item* i
 
 			items.push_back (
 				ImageMenuElem (
-					_("Constant Power"),
+					_("Constant power"),
 					*_fade_out_images[FadeConstantPower],
 					sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_shape), FadeConstantPower)
 					));
@@ -2139,8 +2140,15 @@ Editor::set_snap_to (SnapType st)
 void
 Editor::set_snap_mode (SnapMode mode)
 {
-	_snap_mode = mode;
 	string str = snap_mode_strings[(int)mode];
+
+	if (_internal_editing) {
+		internal_snap_mode = mode;
+	} else {
+		pre_internal_snap_mode = mode;
+	}
+
+	_snap_mode = mode;
 
 	if (str != snap_mode_selector.get_active_text ()) {
 		snap_mode_selector.set_active_text (str);
@@ -2288,6 +2296,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	if ((prop = node.property ("pre-internal-snap-to"))) {
 		pre_internal_snap_type = (SnapType) string_2_enum (prop->value(), pre_internal_snap_type);
 	}
+
 
 	if ((prop = node.property ("pre-internal-snap-mode"))) {
 		pre_internal_snap_mode = (SnapMode) string_2_enum (prop->value(), pre_internal_snap_mode);
@@ -3579,6 +3588,31 @@ Editor::set_zoom_focus (ZoomFocus f)
 }
 
 void
+Editor::cycle_zoom_focus ()
+{
+	switch (zoom_focus) {
+	case ZoomFocusLeft:
+		set_zoom_focus (ZoomFocusRight);
+		break;
+	case ZoomFocusRight:
+		set_zoom_focus (ZoomFocusCenter);
+		break;
+	case ZoomFocusCenter:
+		set_zoom_focus (ZoomFocusPlayhead);
+		break;
+	case ZoomFocusPlayhead:
+		set_zoom_focus (ZoomFocusMouse);
+		break;
+	case ZoomFocusMouse:
+		set_zoom_focus (ZoomFocusEdit);
+		break;
+	case ZoomFocusEdit:
+		set_zoom_focus (ZoomFocusLeft);
+		break;
+	}
+}
+
+void
 Editor::ensure_float (Window& win)
 {
 	win.set_transient_for (*this);
@@ -4000,7 +4034,7 @@ Editor::new_playlists (TimeAxisView* v)
 	begin_reversible_command (_("new playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists->get (playlists);
-	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), v, ARDOUR::Properties::edit.property_id);
+	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), v, ARDOUR::Properties::select.property_id);
 	commit_reversible_command ();
 }
 
@@ -4016,7 +4050,7 @@ Editor::copy_playlists (TimeAxisView* v)
 	begin_reversible_command (_("copy playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists->get (playlists);
-	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), v, ARDOUR::Properties::edit.property_id);
+	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), v, ARDOUR::Properties::select.property_id);
 	commit_reversible_command ();
 }
 
@@ -4031,7 +4065,7 @@ Editor::clear_playlists (TimeAxisView* v)
 	begin_reversible_command (_("clear playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists->get (playlists);
-	mapover_tracks (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), v, ARDOUR::Properties::edit.property_id);
+	mapover_tracks (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), v, ARDOUR::Properties::select.property_id);
 	commit_reversible_command ();
 }
 
@@ -4293,7 +4327,7 @@ Editor::idle_visual_changer ()
 					    current_bbt_points_begin, current_bbt_points_end);
 		compute_bbt_ruler_scale (pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_frames(),
 					 current_bbt_points_begin, current_bbt_points_end);
-		update_tempo_based_rulers (current_bbt_points_end, current_bbt_points_begin);
+		update_tempo_based_rulers (current_bbt_points_begin, current_bbt_points_end);
 	}
 	if (p & VisualChange::TimeOrigin) {
 		set_horizontal_position (pending_visual_change.time_origin / frames_per_unit);
@@ -4521,7 +4555,7 @@ Editor::get_regions_after (RegionSelection& rs, framepos_t where, const TrackVie
 RegionSelection
 Editor::get_regions_from_selection ()
 {
-	return get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.property_id);
+	return get_equivalent_regions (selection->regions, ARDOUR::Properties::select.property_id);
 }
 
 /** Get regions using the following method:
@@ -4569,7 +4603,7 @@ Editor::get_regions_from_selection_and_edit_point ()
 	/* Add any other regions that are in the same
 	   edit-activated route group as one of our regions.
 	 */
-	regions = get_equivalent_regions (regions, ARDOUR::Properties::edit.property_id);
+	regions = get_equivalent_regions (regions, ARDOUR::Properties::select.property_id);
 	framepos_t const where = get_preferred_edit_position ();
 
 	if (_route_groups->all_group_active_button().get_active() && tracks.empty()) {
@@ -4619,11 +4653,11 @@ Editor::get_regions_from_selection_and_entered ()
 		regions.add (entered_regionview);
 	}
 
-	return get_equivalent_regions (regions, ARDOUR::Properties::edit.property_id);
+	return get_equivalent_regions (regions, ARDOUR::Properties::select.property_id);
 }
 
 void
-Editor::get_regions_corresponding_to (boost::shared_ptr<Region> region, vector<RegionView*>& regions)
+Editor::get_regions_corresponding_to (boost::shared_ptr<Region> region, vector<RegionView*>& regions, bool src_comparison)
 {
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 
@@ -4642,7 +4676,11 @@ Editor::get_regions_corresponding_to (boost::shared_ptr<Region> region, vector<R
 			}
 
 			if ((pl = (tr->playlist())) != 0) {
-				pl->get_region_list_equivalent_regions (region, results);
+				if (src_comparison) {
+					pl->get_source_equivalent_regions (region, results);
+				} else {
+					pl->get_region_list_equivalent_regions (region, results);
+				}
 			}
 
 			for (vector<boost::shared_ptr<Region> >::iterator ir = results.begin(); ir != results.end(); ++ir) {

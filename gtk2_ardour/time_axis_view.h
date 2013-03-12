@@ -68,6 +68,7 @@ class Selectable;
 class RegionView;
 class GhostRegion;
 class StreamView;
+class ArdourDialog;
 
 /** Abstract base class for time-axis views (horizontal editor 'strips')
  *
@@ -115,11 +116,6 @@ class TimeAxisView : public virtual AxisView
 	uint32_t current_height() const { return height; }
 
 	void idle_resize (uint32_t);
-
-	void hide_name_label ();
-	void hide_name_entry ();
-	void show_name_label ();
-	void show_name_entry ();
 
 	virtual guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	virtual void hide ();
@@ -200,33 +196,43 @@ class TimeAxisView : public virtual AxisView
 
   protected:
 	/* The Standard LHS Controls */
-	Gtk::HBox             controls_hbox;
-	Gtk::Table            controls_table;
-	Gtk::EventBox         controls_ebox;
-	Gtk::VBox             controls_vbox;
-	Gtk::VBox             time_axis_vbox;
-	Gtk::HBox             name_hbox;
-	Gtk::Frame            name_frame;
- 	Gtkmm2ext::FocusEntry name_entry;
+	Gtk::HBox              controls_hbox;
+	Gtk::Table             controls_table;
+	Gtk::EventBox          controls_ebox;
+	Gtk::VBox              controls_vbox;
+	Gtk::VBox              time_axis_vbox;
+	Gtk::HBox              name_hbox;
+	Gtk::Label             name_label;
+        bool                  _name_editing;
+        uint32_t               height;  /* in canvas units */
+	std::string            controls_base_unselected_name;
+	std::string            controls_base_selected_name;
+	Gtk::Menu*             display_menu; /* The standard LHS Track control popup-menus */
+	TimeAxisView*          parent;
+	ArdourCanvas::Group*   selection_group;
+	std::list<GhostRegion*> ghosts;
+	std::list<SelectionRect*> free_selection_rects;
+	std::list<SelectionRect*> used_selection_rects;
+	bool                  _hidden;
+	bool                   in_destructor;
+	Gtk::Menu*            _size_menu;
+	ArdourCanvas::Group*  _canvas_display;
+	double                _y_position;
+	PublicEditor&         _editor;
 
-	uint32_t height;  /* in canvas units */
+        virtual bool can_edit_name() const;
 
-	std::string controls_base_unselected_name;
-	std::string controls_base_selected_name;
-
-	bool name_entry_button_press (GdkEventButton *ev);
-	bool name_entry_button_release (GdkEventButton *ev);
 	bool name_entry_key_release (GdkEventKey *ev);
-	void name_entry_activated ();
-	sigc::connection name_entry_key_timeout;
-	bool name_entry_key_timed_out ();
-	guint32 last_name_entry_key_press_event;
+	bool name_entry_key_press (GdkEventKey *ev);
+	bool name_entry_focus_out (GdkEventFocus *ev);
+
+        Gtk::Entry* name_entry;
+        void begin_name_edit ();
+        void end_name_edit (int);
 
 	/* derived classes can override these */
 
 	virtual void name_entry_changed ();
-	virtual bool name_entry_focus_in (GdkEventFocus *ev);
-	virtual bool name_entry_focus_out (GdkEventFocus *ev);
 
 	/** Handle mouse relaese on our LHS control name ebox.
 	 *
@@ -253,14 +259,6 @@ class TimeAxisView : public virtual AxisView
 	 */
 	virtual bool handle_display_menu_map_event (GdkEventAny * /*ev*/) { return false; }
 
-	/* The standard LHS Track control popup-menus */
-
-	Gtk::Menu *display_menu;
-
-	Gtk::Label    name_label;
-
-	TimeAxisView* parent;
-
 	Children children;
 	bool is_child (TimeAxisView*);
 
@@ -269,48 +267,30 @@ class TimeAxisView : public virtual AxisView
 
 	/* selection display */
 
-	ArdourCanvas::Group      *selection_group;
-
-	std::list<GhostRegion*> ghosts;
-
-	std::list<SelectionRect*> free_selection_rects;
-	std::list<SelectionRect*> used_selection_rects;
-
 	virtual void selection_click (GdkEventButton*);
-
-	bool _hidden;
-	bool _has_state;
-	bool in_destructor;
-	NamePackingBits name_packing;
 
 	void color_handler ();
 
 	void conditionally_add_to_selection ();
 
 	void build_size_menu ();
-	Gtk::Menu* _size_menu;
-
-	ArdourCanvas::Group* _canvas_display;
-	double _y_position;
-	PublicEditor& _editor;
 
 private:
-
 	ArdourCanvas::Group* _canvas_background;
- 	Gtk::VBox* control_parent;
-	int _order;
-	uint32_t _effective_height;
-	double _resize_drag_start;
-	GdkCursor* _preresize_cursor;
-	bool       _have_preresize_cursor;
+ 	Gtk::VBox*            control_parent;
+	int                  _order;
+	uint32_t             _effective_height;
+	double               _resize_drag_start;
+	GdkCursor*           _preresize_cursor;
+	bool                 _have_preresize_cursor;
 	ArdourCanvas::Group* _ghost_group;
+        bool                  _ebox_release_can_act;
 
-	void compute_heights ();
 	static uint32_t button_height;
 	static uint32_t extra_height;
-
 	static int const _max_order;
 	
+	void compute_heights ();
 	bool maybe_set_cursor (int y);
 
 }; /* class TimeAxisView */

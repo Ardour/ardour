@@ -199,6 +199,10 @@ Editor::which_grabber_cursor ()
 		case MouseTimeFX:
 			c = _cursors->midi_resize;
 			break;
+			
+		case MouseRange:
+			c = _cursors->grabber_note;
+			break;
 
 		default:
 			break;
@@ -250,6 +254,9 @@ Editor::set_canvas_cursor ()
 	switch (mouse_mode) {
 	case MouseRange:
 		current_canvas_cursor = _cursors->selector;
+		if (_internal_editing) {
+			current_canvas_cursor = which_grabber_cursor();
+		}
 		break;
 
 	case MouseObject:
@@ -281,19 +288,21 @@ Editor::set_canvas_cursor ()
 		break;
 	}
 
-	switch (_join_object_range_state) {
-	case JOIN_OBJECT_RANGE_NONE:
-		break;
-	case JOIN_OBJECT_RANGE_OBJECT:
-		current_canvas_cursor = which_grabber_cursor ();
-		break;
-	case JOIN_OBJECT_RANGE_RANGE:
-		current_canvas_cursor = _cursors->selector;
-		break;
+	if (!_internal_editing) {
+		switch (_join_object_range_state) {
+		case JOIN_OBJECT_RANGE_NONE:
+			break;
+		case JOIN_OBJECT_RANGE_OBJECT:
+			current_canvas_cursor = which_grabber_cursor ();
+			break;
+		case JOIN_OBJECT_RANGE_RANGE:
+			current_canvas_cursor = _cursors->selector;
+			break;
+		}
 	}
 
 	/* up-down cursor as a cue that automation can be dragged up and down when in join object/range mode */
-	if ( get_smart_mode() ) {
+	if (!_internal_editing && get_smart_mode() ) {
 		double x, y;
 		get_pointer_position (x, y);
 		ArdourCanvas::Item* i = track_canvas->get_item_at (x, y);
@@ -598,17 +607,23 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 
 	switch (item_type) {
 	case RegionItem:
-		if (press) {
-			if (mouse_mode != MouseRange) {
-				set_selected_regionview_from_click (press, op);
+		if (!get_smart_mode() || (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT)) {
+			if (press) {
+				if (mouse_mode != MouseRange) {
+					set_selected_regionview_from_click (press, op);
+				} else {
+					/* don't change the selection unless the
+					   clicked track is not currently selected. if
+					   so, "collapse" the selection to just this
+					   track
+					*/
+					if (!selection->selected (clicked_axisview)) {
+						set_selected_track_as_side_effect (Selection::Set);
+					}
+				}
 			} else {
-				/* don't change the selection unless the
-				   clicked track is not currently selected. if
-				   so, "collapse" the selection to just this
-				   track
-				*/
-				if (!selection->selected (clicked_axisview)) {
-					set_selected_track_as_side_effect (Selection::Set);
+				if (mouse_mode != MouseRange) {
+					set_selected_regionview_from_click (press, op);
 				}
 			}
 		} else {
@@ -788,6 +803,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		eff = MouseObject;
 	}
 
+	/* there is no Range mode when in internal edit mode */
+	if (eff == MouseRange && internal_editing()) {
+		eff = MouseObject;
+	}
+
 	switch (eff) {
 	case MouseRange:
 		switch (item_type) {
@@ -800,9 +820,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case SelectionItem:
-			if (Keyboard::modifier_state_contains
-			    (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier))) {
-				// contains and not equals because I can't use alt as a modifier alone.
+			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
 				start_selection_grab (item, event);
 			} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::SecondaryModifier)) {
 				/* grab selection for moving */
@@ -831,23 +849,18 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					return true;
 				} 
 			} else {
-				_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
+				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier)) {
+					_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionExtend), event);
+				} else {
+					_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
+				}
 				return true;
 			}
 			break;
 
 		case RegionViewNameHighlight:
 			if (!clicked_regionview->region()->locked()) {
-				RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
-				_drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer()), event);
-				return true;
-			}
-			break;
-
-		case LeftFrameHandle:
-		case RightFrameHandle:
-			if (!internal_editing() && !clicked_regionview->region()->locked()) {
-				RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
+				RegionSelection s = get_equivalent_regions (selection->regions, Properties::select.property_id);
 				_drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer()), event);
 				return true;
 			}
@@ -855,7 +868,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		default:
 			if (!internal_editing()) {
-				_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
+				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier)) {
+					_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionExtend), event);
+				} else {
+					_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
+				}
 			}
 		}
 		return true;
@@ -871,6 +888,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					_drags->set (new NoteResizeDrag (this, item), event, current_canvas_cursor);
 				} else {
 					_drags->set (new NoteDrag (this, item), event);
+				}
+				return true;
+			}
+			break;
+		case StreamItem:
+			if (internal_editing()) {
+				if (dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
+					_drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
 				}
 				return true;
 			}
@@ -909,24 +934,26 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			switch (item_type) {
 			case FadeInHandleItem:
 			{
-				RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
+				RegionSelection s = get_equivalent_regions (selection->regions, Properties::select.property_id);
 				_drags->set (new FadeInDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), s), event, _cursors->fade_in);
 				return true;
 			}
 
 			case FadeOutHandleItem:
 			{
-				RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
+				RegionSelection s = get_equivalent_regions (selection->regions, Properties::select.property_id);
 				_drags->set (new FadeOutDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), s), event, _cursors->fade_out);
 				return true;
 			}
 
 			case StartCrossFadeItem:
-				_drags->set (new CrossfadeEdgeDrag (this, reinterpret_cast<AudioRegionView*>(item->get_data("regionview")), item, true), event, 0);
-				break;
-
 			case EndCrossFadeItem:
-				_drags->set (new CrossfadeEdgeDrag (this, reinterpret_cast<AudioRegionView*>(item->get_data("regionview")), item, false), event, 0);
+				/* we might allow user to grab inside the fade to trim a region with preserve_fade_anchor.  for not this is not fully implemented */ 
+//				if (!clicked_regionview->region()->locked()) {
+//					RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
+//					_drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer(), true), event);
+//					return true;
+//				}
 				break;
 
 			case FeatureLineItem:
@@ -978,7 +1005,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case LeftFrameHandle:
                         case RightFrameHandle:
 				if (!clicked_regionview->region()->locked()) {
-					RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
+					RegionSelection s = get_equivalent_regions (selection->regions, Properties::select.property_id);
 					_drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer()), event);
 					return true;
 				}
@@ -987,7 +1014,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case RegionViewName:
 			{
 				/* rename happens on edit clicks */
-				RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
+				RegionSelection s = get_equivalent_regions (selection->regions, Properties::select.property_id);
 				_drags->set (new TrimDrag (this, clicked_regionview->get_name_highlight(), clicked_regionview, s.by_layer()), event);
 				return true;
 				break;
@@ -1325,13 +1352,10 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		case RangeMarkerBarItem:
 		case CdMarkerBarItem:
 		case TransportMarkerBarItem:
+		case StreamItem:
 			/* button press on these events never does anything to
 			   change the editing mode.
 			*/
-			break;
-			
-		case StreamItem:
-			leave_internal_edit_mode = true;
 			break;
 
 		default:
@@ -2251,11 +2275,12 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 
 	JoinObjectRangeState const old = _join_object_range_state;
 	update_join_object_range_location (event->motion.x, event->motion.y);
-	if (_join_object_range_state != old) {
+
+	if (!_internal_editing && _join_object_range_state != old) {
 		set_canvas_cursor ();
 	}
 
-	if (_over_region_trim_target) {
+	if (!_internal_editing && _over_region_trim_target) {
 		set_canvas_cursor_for_region_view (event->motion.x, entered_regionview);
 	}
 
@@ -2625,7 +2650,7 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region
 	if (Config->get_edit_mode() == Splice) {
 		_drags->add (new RegionSpliceDrag (this, item, region_view, selection->regions.by_layer()));
 	} else {
-		RegionSelection s = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.property_id);
+		RegionSelection s = get_equivalent_regions (selection->regions, ARDOUR::Properties::select.property_id);
 		_drags->add (new RegionMoveDrag (this, item, region_view, s.by_layer(), false, false));
 	}
 
@@ -2644,7 +2669,7 @@ Editor::add_region_copy_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* r
 
 	_region_motion_group->raise_to_top ();
 
-	RegionSelection s = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.property_id);
+	RegionSelection s = get_equivalent_regions (selection->regions, ARDOUR::Properties::select.property_id);
 	_drags->add (new RegionMoveDrag (this, item, region_view, s.by_layer(), false, true));
 }
 
@@ -2661,7 +2686,7 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* 
 		return;
 	}
 
-	RegionSelection s = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.property_id);
+	RegionSelection s = get_equivalent_regions (selection->regions, ARDOUR::Properties::select.property_id);
 	_drags->add (new RegionMoveDrag (this, item, region_view, s.by_layer(), true, false));
 
 	begin_reversible_command (Operations::drag_region_brush);

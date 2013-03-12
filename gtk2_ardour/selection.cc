@@ -119,7 +119,6 @@ Selection::clear_objects ()
 	clear_playlists ();
 	clear_midi_notes ();
 	clear_midi_regions ();
-	clear_markers ();
 }
 
 void
@@ -346,13 +345,13 @@ Selection::toggle (framepos_t start, framepos_t end)
 
 	/* XXX this implementation is incorrect */
 
-	time.push_back (AudioRange (start, end, next_time_id++));
+	time.push_back (AudioRange (start, end, ++next_time_id));
 	time.consolidate ();
 	time.sort (cmp);
 
 	TimeChanged ();
 
-	return next_time_id - 1;
+	return next_time_id;
 }
 
 void
@@ -522,13 +521,28 @@ Selection::add (framepos_t start, framepos_t end)
 
 	/* XXX this implementation is incorrect */
 
-	time.push_back (AudioRange (start, end, next_time_id++));
+	time.push_back (AudioRange (start, end, ++next_time_id));
 	time.consolidate ();
 	time.sort (cmp);
 
 	TimeChanged ();
 
-	return next_time_id - 1;
+	return next_time_id;
+}
+
+void
+Selection::move_time (framecnt_t distance)
+{
+	if (distance == 0) {
+		return;
+	}
+
+	for (list<AudioRange>::iterator i = time.begin(); i != time.end(); ++i) {
+		(*i).start += distance;
+		(*i).end += distance;
+	}
+
+	TimeChanged ();
 }
 
 void
@@ -844,7 +858,7 @@ Selection::set (framepos_t start, framepos_t end)
 	}
 
 	if (time.empty()) {
-		time.push_back (AudioRange (start, end, next_time_id++));
+		time.push_back (AudioRange (start, end, ++next_time_id));
 	} else {
 		/* reuse the first entry, and remove all the rest */
 
@@ -880,7 +894,7 @@ Selection::set_preserving_all_ranges (framepos_t start, framepos_t end)
 	}
 
 	if (time.empty ()) {
-		time.push_back (AudioRange (start, end, next_time_id++));
+		time.push_back (AudioRange (start, end, ++next_time_id));
 	} else {
 		time.sort (AudioRangeComparator ());
 		time.front().start = start;
@@ -1115,7 +1129,7 @@ void
 Selection::set (Marker* m)
 {
 	clear_time ();  //enforce region/object exclusivity
-	clear_objects();
+	markers.clear ();
 
 	add (m);
 }

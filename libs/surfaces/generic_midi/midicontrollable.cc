@@ -123,6 +123,15 @@ MIDIControllable::set_controllable (Controllable* c)
 	controllable = c;
 
 	if (controllable) {
+<<<<<<< HEAD
+=======
+		last_controllable_value = controllable->get_value();
+	} else {
+		last_controllable_value = 0.0f; // is there a better value?
+	}
+
+	if (controllable) {
+>>>>>>> master
 		controllable->Destroyed.connect (controllable_death_connection, MISSING_INVALIDATOR,
 						 boost::bind (&MIDIControllable::drop_controllable, this), 
 						 MidiControlUI::instance());
@@ -162,6 +171,14 @@ MIDIControllable::control_to_midi (float val)
 	float control_min = controllable->lower ();
 	float control_max = controllable->upper ();
 	const float control_range = control_max - control_min;
+
+	if (controllable->is_toggle()) {
+		if (val >= (control_min + (control_range/2.0f))) {
+			return max_value_for_type();
+		} else {
+			return 0;
+		}
+	}
 
 	return (val - control_min) / control_range * max_value_for_type ();
 }
@@ -220,7 +237,10 @@ MIDIControllable::lookup_controllable()
 void
 MIDIControllable::drop_controllable ()
 {
+<<<<<<< HEAD
 	cerr << "removed controllable " << controllable << "\n";
+=======
+>>>>>>> master
 	set_controllable (0);
 }
 
@@ -264,6 +284,7 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 	if (control_additional == msg->controller_number) {
 
 		if (!controllable->is_toggle()) {
+
 			float new_value = msg->value;
 			float max_value = max(last_controllable_value, new_value);
 			float min_value = min(last_controllable_value, new_value);

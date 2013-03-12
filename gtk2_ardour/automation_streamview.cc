@@ -249,9 +249,10 @@ AutomationStreamView::interpolation () const
 	}
 
 	AutomationRegionView* v = dynamic_cast<AutomationRegionView*> (region_views.front());
-	assert (v);
-
-	return v->line()->the_list()->interpolation ();
+	if (v) {
+		return v->line()->the_list()->interpolation ();
+	}
+	return AutomationList::Linear;
 }
 
 /** Clear all automation displayed in this view */

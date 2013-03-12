@@ -78,7 +78,18 @@ class MultiAllocSingleReleasePool : public Pool
 
 class PerThreadPool;
 
-/** A per-thread pool of data */
+/** Management of a per-thread pool of data that is allocated by one thread and
+ *  freed by one other thread. Not safe for use when there is more than 1
+ *  reader and 1 writer. 
+ *
+ *  This is basically a wrapper around a thread-local storage instance of a 
+ *  ringbuffer, made safe for use in the case where multiple threads allocate
+ *  from the ringbuffer and a single thread "frees" the allocations.
+ * 
+ *  Rather than using locks, each thread has its own ringbuffer (and associated
+ *  data), and so it calls alloc(), passes a pointer to the result of the alloc
+ *  to another thread, which later calls push() to "free" it. 
+ */
 class CrossThreadPool : public Pool
 {
   public:
@@ -99,7 +110,7 @@ class CrossThreadPool : public Pool
 };
 
 /** A class to manage per-thread pools of memory.  One object of this class is instantiated,
- *  and then it is used to create per-thread pools as required.
+ *  and then it is used to create per-thread pools for 1 or more threads as required.
  */
 class PerThreadPool
 {

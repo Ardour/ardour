@@ -43,60 +43,26 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 	}
 
 	T                 ev_time;
-	Evoral::EventType ev_type;
 	uint32_t          ev_size;
-
-	/* If we see the end of a loop during this read, we must write the events after it
-	   to the MidiBuffer with adjusted times.  The situation is as follows:
-
-	   session frames----------------------------->
-
-	             |                            |                    |
-	        start_of_loop                   start              end_of_loop
-
-	   The MidiDiskstream::read method which will have happened before this checks for
-	   loops ending, and helpfully inserts a magic LoopEvent into the ringbuffer.  After this,
-	   the MidiDiskstream continues to write events with their proper session frame times,
-	   so after the LoopEvent event times will go backwards (ie non-monotonically).
-
-	   Once we hit end_of_loop, we need to fake it to make it look as though the loop has been
-	   immediately repeated.  Say that an event E after the end_of_loop in the ringbuffer
-	   has time E_t, which is a time in session frames.  Its offset from the start
-	   of the loop will be E_t - start_of_loop.  Its `faked' time will therefore be
-	   end_of_loop + E_t - start_of_loop.  And so its port-buffer-relative time (for
-	   writing to the MidiBuffer) will be end_of_loop + E_t - start_of_loop - start.
-
-	   The subtraction of start is already taken care of, so if we see a LoopEvent, we'll
-	   set up loop_offset to equal end_of_loop - start_of_loop, so that given an event
-	   time E_t in the ringbuffer we can get the port-buffer-relative time as
-	   E_t + offset - start.
-	*/
-
-	frameoffset_t loop_offset = 0;
-
-	size_t count = 0;
-
-	const size_t prefix_size = sizeof(T) + sizeof(Evoral::EventType) + sizeof(uint32_t);
+	size_t            count = 0;
+	const size_t      prefix_size = sizeof(T) + sizeof(Evoral::EventType) + sizeof(uint32_t);
 
 	while (this->read_space() >= prefix_size) {
 
 		uint8_t peekbuf[prefix_size];
-		bool success;
 
-		success = this->peek (peekbuf, prefix_size);
 		/* this cannot fail, because we've already verified that there
 		   is prefix_space to read
 		*/
-		assert (success);
+		this->peek (peekbuf, prefix_size);
 
 		ev_time = *((T*) peekbuf);
-		ev_type = *((Evoral::EventType*)(peekbuf + sizeof (T)));
 		ev_size = *((uint32_t*)(peekbuf + sizeof(T) + sizeof (Evoral::EventType)));
 
-		if (ev_time + loop_offset >= end) {
+		if (ev_time >= end) {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 past end @ %2\n", ev_time, end));
 			break;
-		} else if (ev_time + loop_offset < start) {
+		} else if (ev_time < start) {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 before start @ %2\n", ev_time, start));
 			this->increment_read_ptr (prefix_size);
 			this->increment_read_ptr (ev_size);
@@ -105,33 +71,17 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 in range %2 .. %3\n", ev_time, start, end));
 		}
 
-		assert(ev_time >= start);
-
 		ev_time -= start;
 		ev_time += offset;
-
-		// This event marks a loop end (i.e. the next event's timestamp
-		// will be non-monotonic). Don't write it into the buffer - the
-		// significance of this event ends here.
-		
-		if (ev_type == LoopEventType) {
-			assert (ev_size == sizeof (framepos_t));
-			framepos_t loop_start;
-			read_contents (ev_size, (uint8_t *) &loop_start);
-			loop_offset = ev_time - loop_start;
-			_tracker.resolve_notes (dst, ev_time);
-			continue;
-		}
 
 		/* we're good to go ahead and read the data now but since we
 		 * have the prefix data already, just skip over that
 		 */
 		this->increment_read_ptr (prefix_size);
-		ev_time += loop_offset;
 
 		uint8_t status;
-		success = this->peek (&status, sizeof(uint8_t));
-		assert(success); // If this failed, buffer is corrupt, all hope is lost
+		bool r = this->peek (&status, sizeof(uint8_t)); 
+		assert (r); // If this failed, buffer is corrupt, all hope is lost
 
 		// Ignore event if it doesn't match channel filter
 		if (is_channel_event(status) && get_channel_mode() == FilterChannels) {
@@ -158,7 +108,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		}
 
 		// write MIDI buffer contents
-		success = read_contents (ev_size, write_loc);
+		bool success = read_contents (ev_size, write_loc);
 
 #ifndef NDEBUG
 		if (DEBUG::MidiDiskstreamIO && PBD::debug_bits) {
@@ -308,6 +258,13 @@ void
 MidiRingBuffer<T>::reset_tracker ()
 {
 	_tracker.reset ();
+}
+
+template<typename T>
+void
+MidiRingBuffer<T>::loop_resolve (MidiBuffer& dst, framepos_t t)
+{
+	_tracker.resolve_notes (dst, t);
 }
 
 template class MidiRingBuffer<framepos_t>;

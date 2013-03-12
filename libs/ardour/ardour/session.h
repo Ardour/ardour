@@ -48,6 +48,7 @@
 #include "midi++/types.h"
 
 #include "timecode/time.h"
+#include "ltc/ltc.h"
 
 #include "ardour/ardour.h"
 #include "ardour/chan_count.h"
@@ -64,9 +65,6 @@
 #include <jack/session.h>
 #endif
 
-#ifdef HAVE_LTC
-#include <ltc.h>
-#endif
 
 class XMLTree;
 class XMLNode;
@@ -847,6 +845,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/** Emitted when the session wants Ardour to quit */
 	static PBD::Signal0<void> Quit;
 
+        /** Emitted when Ardour is asked to load a session in an older session
+	 * format, and makes a backup copy.
+	 */
+        static PBD::Signal2<void,std::string,std::string> VersionMismatch;
+
         boost::shared_ptr<Port> ltc_input_port() const;
         boost::shared_ptr<Port> ltc_output_port() const;
 
@@ -1171,7 +1174,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	MIDI::byte mtc_msg[16];
 	MIDI::byte mtc_timecode_bits;   /* encoding of SMTPE type for MTC */
 	MIDI::byte midi_msg[16];
-	framepos_t outbound_mtc_timecode_frame;
+	double outbound_mtc_timecode_frame;
 	Timecode::Time transmitting_timecode_time;
 	int next_quarter_frame_to_send;
 
@@ -1189,7 +1192,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	int send_midi_time_code_for_cycle (framepos_t, framepos_t, pframes_t nframes);
 
-#ifdef HAVE_LTC
 	LTCEncoder*       ltc_encoder;
 	ltcsnd_sample_t*  ltc_enc_buf;
 
@@ -1216,7 +1218,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void ltc_tx_recalculate_position();
 	void ltc_tx_parse_offset();
 	void ltc_tx_send_time_code_for_cycle (framepos_t, framepos_t, double, double, pframes_t nframes);
-#endif
 
 	void reset_record_status ();
 

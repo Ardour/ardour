@@ -143,6 +143,7 @@ CONFIG_VARIABLE (bool, show_track_meters, "show-track-meters", true)
 CONFIG_VARIABLE (bool, locate_while_waiting_for_sync, "locate-while-waiting-for-sync", false)
 CONFIG_VARIABLE (bool, disable_disarm_during_roll, "disable-disarm-during-roll", false)
 CONFIG_VARIABLE (bool, always_play_range, "always-play-range", false)
+CONFIG_VARIABLE (bool, super_rapid_clock_update, "super-rapid-clock-update", false)
 
 /* metering */
 
@@ -175,7 +176,7 @@ CONFIG_VARIABLE (std::string, default_bindings, "default-bindings", "ardour")
 CONFIG_VARIABLE (bool, default_narrow_ms, "default-narrow_ms", false)
 CONFIG_VARIABLE (bool, name_new_markers, "name-new-markers", false)
 CONFIG_VARIABLE (bool, rubberbanding_snaps_to_grid, "rubberbanding-snaps-to-grid", false)
-CONFIG_VARIABLE (long, font_scale, "font-scale", 102400)
+CONFIG_VARIABLE (long, font_scale, "font-scale", 81920)
 CONFIG_VARIABLE (std::string, default_session_parent_dir, "default-session-parent-dir", "~")
 CONFIG_VARIABLE (bool, show_waveforms, "show-waveforms", true)
 CONFIG_VARIABLE (bool, show_waveforms_while_recording, "show-waveforms-while-recording", true)
@@ -213,3 +214,11 @@ CONFIG_VARIABLE (uint32_t, sg_physical_outputs, "soundgrid-physical-inputs", 8)
 CONFIG_VARIABLE (uint32_t, sg_tracks, "soundgrid-tracks", 24)
 CONFIG_VARIABLE (uint32_t, sg_busses, "soundgrid-tracks", 8)
 CONFIG_VARIABLE (uint32_t, sg_plugins_per_track, "soundgrid-plugins-per-track", 8)
+
+/* web addresses used in the program */
+
+CONFIG_VARIABLE (std::string, osx_pingback_url, "osx-pingback-url", "http://community.ardour.org/pingback/osx/")
+CONFIG_VARIABLE (std::string, linux_pingback_url, "linux-pingback-url", "http://community.ardour.org/pingback/linux/")
+CONFIG_VARIABLE (std::string, tutorial_manual_url, "tutorial-manual-url", "http://ardour.org/flossmanual")
+CONFIG_VARIABLE (std::string, reference_manual_url, "reference-manual-url", "http://manual.ardour.org/")
+CONFIG_VARIABLE (std::string, updates_url, "updates-url", "http://ardour.org/whatsnew.html")

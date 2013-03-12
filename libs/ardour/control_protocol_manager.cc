@@ -72,6 +72,7 @@ ControlProtocolManager::set_session (Session* s)
 
 		for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 			if ((*i)->requested || (*i)->mandatory) {
+				
 				instantiate (**i);
 				(*i)->requested = false;
 
@@ -127,10 +128,14 @@ ControlProtocolManager::instantiate (ControlProtocolInfo& cpi)
 
 	cpi.descriptor = get_descriptor (cpi.path);
 
+ 	DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("instantiating %1\n", cpi.name));
+
 	if (cpi.descriptor == 0) {
 		error << string_compose (_("control protocol name \"%1\" has no descriptor"), cpi.name) << endmsg;
 		return 0;
 	}
+
+	DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("initializing %1\n", cpi.name));
 
 	if ((cpi.protocol = cpi.descriptor->initialize (cpi.descriptor, _session)) == 0) {
 		error << string_compose (_("control protocol name \"%1\" could not be initialized"), cpi.name) << endmsg;
@@ -256,7 +261,7 @@ ControlProtocolManager::control_protocol_discover (string path)
 			control_protocol_info.push_back (cpi);
 
 			DEBUG_TRACE (DEBUG::ControlProtocols, 
-				     string_compose(_("Control surface protocol discovered: \"%1\""), cpi->name));
+				     string_compose(_("Control surface protocol discovered: \"%1\"\n"), cpi->name));
 		}
 
 		dlclose (descriptor->module);
@@ -344,12 +349,7 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 			ControlProtocolInfo* cpi = cpi_by_name (prop->value());
 			
 			if (cpi) {
-				
-				if (!(*citer)->children().empty()) {
-					cpi->state = new XMLNode (*((*citer)->children().front ()));
-				} else {
-					cpi->state = 0;
-				}
+				cpi->state = new XMLNode (**citer);
 				
 				if (active) {
 					if (_session) {

@@ -1480,7 +1480,7 @@ RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 			   place snapped notes at the start of the region.
 			*/
 
-			framecnt_t const len = abs (f - grab_frame () - 1);
+			framecnt_t const len = (framecnt_t) fabs (f - grab_frame () - 1);
 			_region->set_length (len < 1 ? 1 : len);
 		}
 	}
@@ -1597,10 +1597,11 @@ NoteResizeDrag::aborted (bool)
 	}
 }
 
-TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
+TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool preserve_fade_anchor)
 	: RegionDrag (e, i, p, v)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TrimDrag\n");
+	_preserve_fade_anchor = preserve_fade_anchor;
 }
 
 void
@@ -1722,13 +1723,41 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	switch (_operation) {
 	case StartTrim:
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			i->view->trim_front (i->initial_position + dt, non_overlap_trim);
+			bool changed = i->view->trim_front (i->initial_position + dt, non_overlap_trim);
+			if (changed && _preserve_fade_anchor) {
+				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
+				if (arv) {
+					double distance;
+					double new_length;
+					framecnt_t len;
+					boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+					distance = _drags->current_pointer_x() - grab_x();
+					len = ar->fade_in()->back()->when;
+					new_length = len - _editor->unit_to_frame (distance);
+					new_length = ar->verify_xfade_bounds (new_length, true  /*START*/ );
+					arv->reset_fade_in_shape_width (ar, new_length);  //the grey shape
+				}
+			}
 		}
 		break;
 
 	case EndTrim:
 		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			i->view->trim_end (i->initial_end + dt, non_overlap_trim);
+			bool changed = i->view->trim_end (i->initial_end + dt, non_overlap_trim);
+			if (changed && _preserve_fade_anchor) {
+				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
+				if (arv) {
+					double distance;
+					double new_length;
+					framecnt_t len;
+					boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+					distance = grab_x() - _drags->current_pointer_x();
+					len = ar->fade_out()->back()->when;
+					new_length = len - _editor->unit_to_frame (distance);
+					new_length = ar->verify_xfade_bounds (new_length, false  /*END*/ );
+					arv->reset_fade_out_shape_width (ar, new_length);  //the grey shape
+				}
+			}
 		}
 		break;
 
@@ -1780,21 +1809,59 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (movement_occurred) {
 		motion (event, false);
 
-		/* This must happen before the region's StatefulDiffCommand is created, as it may
-		   `correct' (ahem) the region's _start from being negative to being zero.  It
-		   needs to be zero in the undo record.
-		*/
 		if (_operation == StartTrim) {
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				i->view->trim_front_ending ();
+				{
+					/* This must happen before the region's StatefulDiffCommand is created, as it may
+					   `correct' (ahem) the region's _start from being negative to being zero.  It
+					   needs to be zero in the undo record.
+					*/
+					i->view->trim_front_ending ();
+				}
+				if (_preserve_fade_anchor) {
+					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
+					if (arv) {
+						double distance;
+						double new_length;
+						framecnt_t len;
+						boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+						distance = _drags->current_pointer_x() - grab_x();
+						len = ar->fade_in()->back()->when;
+						new_length = len - _editor->unit_to_frame (distance);
+						new_length = ar->verify_xfade_bounds (new_length, true  /*START*/ );
+						ar->set_fade_in_length(new_length);
+					}
+				}
+			}
+		} else if (_operation == EndTrim) {
+			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+				if (_preserve_fade_anchor) {
+					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
+					if (arv) {
+						double distance;
+						double new_length;
+						framecnt_t len;
+						boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+						distance = _drags->current_pointer_x() - grab_x();
+						len = ar->fade_out()->back()->when;
+						new_length = len - _editor->unit_to_frame (distance);
+						new_length = ar->verify_xfade_bounds (new_length, false  /*END*/ );
+						ar->set_fade_out_length(new_length);
+					}
+				}
 			}
 		}
 
-		if (_operation == StartTrim) {
-			_editor->maybe_locate_with_edit_preroll ( _views.begin()->view->region()->position() );
-		}
-		if (_operation == EndTrim) {
-			_editor->maybe_locate_with_edit_preroll ( _views.begin()->view->region()->position() + _views.begin()->view->region()->length() );
+		if (!_views.empty()) {
+			if (_operation == StartTrim) {
+				_editor->maybe_locate_with_edit_preroll(
+					_views.begin()->view->region()->position());
+			}
+			if (_operation == EndTrim) {
+				_editor->maybe_locate_with_edit_preroll(
+					_views.begin()->view->region()->position() +
+					_views.begin()->view->region()->length());
+			}
 		}
 	
 		if (!_editor->selection->selected (_primary)) {
@@ -1822,6 +1889,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 				}
 			}
 		}
+
 		for (set<boost::shared_ptr<Playlist> >::iterator p = _editor->motion_frozen_playlists.begin(); p != _editor->motion_frozen_playlists.end(); ++p) {
 			(*p)->thaw ();
 		}
@@ -2253,8 +2321,6 @@ FadeInDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	boost::shared_ptr<AudioRegion> const r = arv->audio_region ();
 
 	show_verbose_cursor_duration (r->position(), r->position() + r->fade_in()->back()->when, 32);
-
-	arv->show_fade_line((framepos_t) r->fade_in()->back()->when);
 }
 
 void
@@ -2290,8 +2356,7 @@ FadeInDrag::motion (GdkEvent* event, bool)
 			continue;
 		}
 
-		tmp->reset_fade_in_shape_width (fade_length);
-		tmp->show_fade_line((framecnt_t) fade_length);
+		tmp->reset_fade_in_shape_width (tmp->audio_region(), fade_length);
 	}
 
 	show_verbose_cursor_duration (region->position(), region->position() + fade_length, 32);
@@ -2333,7 +2398,6 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		tmp->audio_region()->set_fade_in_length (fade_length);
 		tmp->audio_region()->set_fade_in_active (true);
-		tmp->hide_fade_line();
 
 		XMLNode &after = alist->get_state();
 		_editor->session()->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
@@ -2352,8 +2416,7 @@ FadeInDrag::aborted (bool)
 			continue;
 		}
 
-		tmp->reset_fade_in_shape_width (tmp->audio_region()->fade_in()->back()->when);
-		tmp->hide_fade_line();
+		tmp->reset_fade_in_shape_width (tmp->audio_region(), tmp->audio_region()->fade_in()->back()->when);
 	}
 }
 
@@ -2372,8 +2435,6 @@ FadeOutDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	boost::shared_ptr<AudioRegion> r = arv->audio_region ();
 
 	show_verbose_cursor_duration (r->last_frame() - r->fade_out()->back()->when, r->last_frame());
-
-	arv->show_fade_line(r->length() - r->fade_out()->back()->when);
 }
 
 void
@@ -2411,8 +2472,7 @@ FadeOutDrag::motion (GdkEvent* event, bool)
 			continue;
 		}
 
-		tmp->reset_fade_out_shape_width (fade_length);
-		tmp->show_fade_line(region->length() - fade_length);
+		tmp->reset_fade_out_shape_width (tmp->audio_region(), fade_length);
 	}
 
 	show_verbose_cursor_duration (region->last_frame() - fade_length, region->last_frame());
@@ -2456,7 +2516,6 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		tmp->audio_region()->set_fade_out_length (fade_length);
 		tmp->audio_region()->set_fade_out_active (true);
-		tmp->hide_fade_line();
 
 		XMLNode &after = alist->get_state();
 		_editor->session()->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
@@ -2475,8 +2534,7 @@ FadeOutDrag::aborted (bool)
 			continue;
 		}
 
-		tmp->reset_fade_out_shape_width (tmp->audio_region()->fade_out()->back()->when);
-		tmp->hide_fade_line();
+		tmp->reset_fade_out_shape_width (tmp->audio_region(), tmp->audio_region()->fade_out()->back()->when);
 	}
 }
 
@@ -2494,9 +2552,16 @@ MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
 
 MarkerDrag::~MarkerDrag ()
 {
-	for (list<Location*>::iterator i = _copied_locations.begin(); i != _copied_locations.end(); ++i) {
-		delete *i;
+	for (CopiedLocationInfo::iterator i = _copied_locations.begin(); i != _copied_locations.end(); ++i) {
+		delete i->location;
 	}
+}
+
+MarkerDrag::CopiedLocationMarkerInfo::CopiedLocationMarkerInfo (Location* l, Marker* m)
+{
+	location = new Location (*l);
+	markers.push_back (m);
+	move_both = false;
 }
 
 void
@@ -2524,7 +2589,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	switch (op) {
 	case Selection::Toggle:
-		_editor->selection->toggle (_marker);
+		/* we toggle on the button release */
 		break;
 	case Selection::Set:
 		if (!_editor->selection->selected (_marker)) {
@@ -2566,11 +2631,37 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		break;
 	}
 
-	/* Set up copies for us to manipulate during the drag */
+	/* Set up copies for us to manipulate during the drag 
+	 */
 
 	for (MarkerSelection::iterator i = _editor->selection->markers.begin(); i != _editor->selection->markers.end(); ++i) {
+
 		Location* l = _editor->find_location_from_marker (*i, is_start);
-		_copied_locations.push_back (new Location (*l));
+
+		if (!l) {
+			continue;
+		}
+
+		if (l->is_mark()) {
+			_copied_locations.push_back (CopiedLocationMarkerInfo (l, *i));
+		} else {
+			/* range: check that the other end of the range isn't
+			   already there.
+			*/
+			CopiedLocationInfo::iterator x;
+			for (x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
+				if (*(*x).location == *l) {
+					break;
+				}
+			}
+			if (x == _copied_locations.end()) {
+				_copied_locations.push_back (CopiedLocationMarkerInfo (l, *i));
+			} else {
+				(*x).markers.push_back (*i);
+				(*x).move_both = true;
+			}
+		}
+			
 	}
 }
 
@@ -2588,33 +2679,31 @@ MarkerDrag::motion (GdkEvent* event, bool)
 	framecnt_t f_delta = 0;
 	bool is_start;
 	bool move_both = false;
-	Marker* marker;
 	Location *real_location;
 	Location *copy_location = 0;
 
 	framepos_t const newframe = adjusted_current_frame (event);
-
 	framepos_t next = newframe;
 
 	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 		move_both = true;
 	}
 
-	MarkerSelection::iterator i;
-	list<Location*>::iterator x;
+	CopiedLocationInfo::iterator x;
 
 	/* find the marker we're dragging, and compute the delta */
 
-	for (i = _editor->selection->markers.begin(), x = _copied_locations.begin();
-	     x != _copied_locations.end() && i != _editor->selection->markers.end();
-	     ++i, ++x) {
+	for (x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
 
-		copy_location = *x;
-		marker = *i;
+		copy_location = (*x).location;
 
-		if (marker == _marker) {
+		if (find (x->markers.begin(), x->markers.end(), _marker) != x->markers.end()) {
 
-			if ((real_location = _editor->find_location_from_marker (marker, is_start)) == 0) {
+			/* this marker is represented by this
+			 * CopiedLocationMarkerInfo 
+			 */
+
+			if ((real_location = _editor->find_location_from_marker (_marker, is_start)) == 0) {
 				/* que pasa ?? */
 				return;
 			}
@@ -2624,7 +2713,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 			} else {
 
 
-				switch (marker->type()) {
+				switch (_marker->type()) {
 				case Marker::SessionStart:
 				case Marker::RangeStart:
 				case Marker::LoopStart:
@@ -2643,27 +2732,25 @@ MarkerDrag::motion (GdkEvent* event, bool)
 					return;
 				}
 			}
+
 			break;
 		}
 	}
 
-	if (i == _editor->selection->markers.end()) {
+	if (x == _copied_locations.end()) {
 		/* hmm, impossible - we didn't find the dragged marker */
 		return;
 	}
 
 	/* now move them all */
 
-	for (i = _editor->selection->markers.begin(), x = _copied_locations.begin();
-	     x != _copied_locations.end() && i != _editor->selection->markers.end();
-	     ++i, ++x) {
+	for (x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
 
-		copy_location = *x;
-		marker = *i;
+		copy_location = x->location;
 
 		/* call this to find out if its the start or end */
 
-		if ((real_location = _editor->find_location_from_marker (marker, is_start)) == 0) {
+		if ((real_location = _editor->find_location_from_marker (x->markers.front(), is_start)) == 0) {
 			continue;
 		}
 
@@ -2678,13 +2765,13 @@ MarkerDrag::motion (GdkEvent* event, bool)
 			copy_location->set_start (copy_location->start() + f_delta);
 
 		} else {
-
+			
 			framepos_t new_start = copy_location->start() + f_delta;
 			framepos_t new_end = copy_location->end() + f_delta;
-
+			
 			if (is_start) { // start-of-range marker
-
-				if (move_both) {
+				
+				if (move_both || (*x).move_both) {
 					copy_location->set_start (new_start);
 					copy_location->set_end (new_end);
 				} else 	if (new_start < copy_location->end()) {
@@ -2697,7 +2784,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 
 			} else { // end marker
 
-				if (move_both) {
+				if (move_both || (*x).move_both) {
 					copy_location->set_end (new_end);
 					copy_location->set_start (new_start);
 				} else if (new_end > copy_location->start()) {
@@ -2711,12 +2798,20 @@ MarkerDrag::motion (GdkEvent* event, bool)
 		}
 
 		update_item (copy_location);
-
+		
+		/* now lookup the actual GUI items used to display this
+		 * location and move them to wherever the copy of the location
+		 * is now. This means that the logic in ARDOUR::Location is
+		 * still enforced, even though we are not (yet) modifying 
+		 * the real Location itself.
+		 */
+		
 		Editor::LocationMarkers* lm = _editor->find_location_markers (real_location);
 
 		if (lm) {
 			lm->set_position (copy_location->start(), copy_location->end());
 		}
+
 	}
 
 	assert (!_copied_locations.empty());
@@ -2747,6 +2842,10 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 			break;
 
 		case Selection::Toggle:
+			/* we toggle on the button release, click only */
+			_editor->selection->toggle (_marker);
+			break;
+
 		case Selection::Extend:
 		case Selection::Add:
 			break;
@@ -2761,7 +2860,7 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	XMLNode &before = _editor->session()->locations()->get_state();
 
 	MarkerSelection::iterator i;
-	list<Location*>::iterator x;
+	CopiedLocationInfo::iterator x;
 	bool is_start;
 
 	for (i = _editor->selection->markers.begin(), x = _copied_locations.begin();
@@ -2777,9 +2876,9 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 			}
 
 			if (location->is_mark()) {
-				location->set_start ((*x)->start());
+				location->set_start (((*x).location)->start());
 			} else {
-				location->set ((*x)->start(), (*x)->end());
+				location->set (((*x).location)->start(), ((*x).location)->end());
 			}
 		}
 	}
@@ -2836,6 +2935,8 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	_editor->verbose_cursor()->show ();
 
+	_pushing = Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier);
+
 	if (!_point->can_slide ()) {
 		_x_constrained = true;
 	}
@@ -2889,9 +2990,8 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 	cx_frames = min (cx_frames, _point->line().maximum_time());
 
 	float const fraction = 1.0 - (cy / _point->line().height());
-	bool const push = Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier);
 
-	_point->line().drag_motion (_editor->frame_to_unit_unrounded (cx_frames), fraction, false, push);
+	_point->line().drag_motion (_editor->frame_to_unit_unrounded (cx_frames), fraction, false, _pushing, _final_index);
 
 	_editor->verbose_cursor()->set_text (_point->line().get_verbose_cursor_string (fraction));
 }
@@ -2911,7 +3011,7 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 		motion (event, false);
 	}
 
-	_point->line().end_drag ();
+	_point->line().end_drag (_pushing, _final_index);
 	_editor->session()->commit_reversible_command ();
 }
 
@@ -3002,10 +3102,10 @@ LineDrag::motion (GdkEvent* event, bool)
 	cy = min ((double) _line->height(), cy);
 
 	double const fraction = 1.0 - (cy / _line->height());
-	bool const push = !Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier);
+	uint32_t ignored;
 
 	/* we are ignoring x position for this drag, so we can just pass in anything */
-	_line->drag_motion (0, fraction, true, push);
+	_line->drag_motion (0, fraction, true, false, ignored);
 
 	_editor->verbose_cursor()->set_text (_line->get_verbose_cursor_string (fraction));
 }
@@ -3014,7 +3114,7 @@ void
 LineDrag::finished (GdkEvent* event, bool)
 {
 	motion (event, false);
-	_line->end_drag ();
+	_line->end_drag (false, 0);
 	_editor->session()->commit_reversible_command ();
 }
 
@@ -3366,12 +3466,18 @@ ScrubDrag::aborted (bool)
 SelectionDrag::SelectionDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
 	: Drag (e, i)
 	, _operation (o)
-	, _copy (false)
+	, _add (false)
+	, _extend (false)
 	, _original_pointer_time_axis (-1)
 	, _last_pointer_time_axis (-1)
 	, _time_selection_at_start (!_editor->get_selection().time.empty())
 {
 	DEBUG_TRACE (DEBUG::Drags, "New SelectionDrag\n");
+	
+	if (_time_selection_at_start) {
+		start_at_start = _editor->get_selection().time.start();
+		end_at_start = _editor->get_selection().time.end_frame();
+	}
 }
 
 void
@@ -3385,10 +3491,10 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 
 	switch (_operation) {
 	case CreateSelection:
-		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
-			_copy = true;
+		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::CopyModifier)) {
+			_add = true;
 		} else {
-			_copy = false;
+			_add = false;
 		}
 		cursor = _editor->cursors()->selector;
 		Drag::start_grab (event, cursor);
@@ -3409,6 +3515,10 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		break;
 
 	case SelectionMove:
+		Drag::start_grab (event, cursor);
+		break;
+
+	case SelectionExtend:
 		Drag::start_grab (event, cursor);
 		break;
 	}
@@ -3438,6 +3548,9 @@ SelectionDrag::setup_pointer_frame_offset ()
 	case SelectionEndTrim:
 		_pointer_frame_offset = raw_grab_frame() - _editor->selection->time[_editor->clicked_selection].end;
 		break;
+
+	case SelectionExtend:
+		break;
 	}
 }
 
@@ -3446,7 +3559,8 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 {
 	framepos_t start = 0;
 	framepos_t end = 0;
-	framecnt_t length;
+	framecnt_t length = 0;
+	framecnt_t distance = 0;
 
 	pair<TimeAxisView*, int> const pending_time_axis = _editor->trackview_by_y_position (_drags->current_pointer_y ());
 	if (pending_time_axis.first == 0) {
@@ -3489,12 +3603,12 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
 		if (first_move) {
 
-			if (_copy) {
+			if (_add) {
 				/* adding to the selection */
 				_editor->set_selected_track_as_side_effect (Selection::Add);
 				//_editor->selection->add (_editor->clicked_axisview);
 				_editor->clicked_selection = _editor->selection->add (start, end);
-				_copy = false;
+				_add = false;
 			} else {
 				/* new selection */
 
@@ -3562,19 +3676,22 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		}
 
 		break;
-
+		
 	case SelectionMove:
 
 		start = _editor->selection->time[_editor->clicked_selection].start;
 		end = _editor->selection->time[_editor->clicked_selection].end;
 
 		length = end - start;
-
+		distance = pending_position - start;
 		start = pending_position;
 		_editor->snap_to (start);
 
 		end = start + length;
 
+		break;
+
+	case SelectionExtend:
 		break;
 	}
 
@@ -3583,7 +3700,15 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	if (start != end) {
-		_editor->selection->replace (_editor->clicked_selection, start, end);
+		switch (_operation) {
+		case SelectionMove:	
+			if (_time_selection_at_start) {
+				_editor->selection->move_time (distance);
+			}
+			break;
+		default:
+			_editor->selection->replace (_editor->clicked_selection, start, end);
+		}
 	}
 
 	if (_operation == SelectionMove) {
@@ -3619,12 +3744,30 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 	} else {
 		/* just a click, no pointer movement.
 		 */
-		_editor->selection->clear_time();
+
+		if (_operation == SelectionExtend) {
+			if (_time_selection_at_start) {
+				framepos_t pos = adjusted_current_frame (event, false);
+				framepos_t start = min (pos, start_at_start);
+				framepos_t end = max (pos, end_at_start);
+				_editor->selection->set (start, end);
+			}
+		} else {
+			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::CopyModifier)) {
+				if (_editor->clicked_selection) {
+					_editor->selection->remove (_editor->clicked_selection);
+				}
+			} else {
+				if (!_editor->clicked_selection) {
+					_editor->selection->clear_time();
+				}
+			}
+		}
 
 		if (_editor->clicked_axisview && !_editor->selection->selected (_editor->clicked_axisview)) {
 			_editor->selection->set (_editor->clicked_axisview);
 		}
-
+			
 		if (s && s->get_play_range () && s->transport_rolling()) {
 			s->request_stop (false, false);
 		}
@@ -3632,6 +3775,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 
 	_editor->stop_canvas_autoscroll ();
+	_editor->clicked_selection = 0;
 }
 
 void
@@ -4283,7 +4427,8 @@ AutomationRangeDrag::motion (GdkEvent*, bool /*first_move*/)
 	for (list<Line>::iterator l = _lines.begin(); l != _lines.end(); ++l) {
 		float const f = y_fraction (l->line, _drags->current_pointer_y());
 		/* we are ignoring x position for this drag, so we can just pass in anything */
-		l->line->drag_motion (0, f, true, false);
+		uint32_t ignored;
+		l->line->drag_motion (0, f, true, false, ignored);
 		show_verbose_cursor_text (l->line->get_verbose_cursor_relative_string (l->original_fraction, f));
 	}
 }
@@ -4297,7 +4442,7 @@ AutomationRangeDrag::finished (GdkEvent* event, bool)
 
 	motion (event, false);
 	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-		i->line->end_drag ();
+		i->line->end_drag (false, 0);
 	}
 
 	_editor->session()->commit_reversible_command ();
@@ -4549,7 +4694,7 @@ NoteCreateDrag::finished (GdkEvent*, bool had_movement)
 	}
 	
 	framepos_t const start = min (_note[0], _note[1]);
-	framecnt_t length = abs (_note[0] - _note[1]);
+	framecnt_t length = (framecnt_t) fabs (_note[0] - _note[1]);
 
 	framecnt_t const g = grid_frames (start);
 	double const one_tick = 1 / Timecode::BBT_Time::ticks_per_beat;
@@ -4582,6 +4727,7 @@ CrossfadeEdgeDrag::CrossfadeEdgeDrag (Editor* e, AudioRegionView* rv, ArdourCanv
 	, arv (rv)
 	, start (start_yn)
 {
+	std::cout << ("CrossfadeEdgeDrag is DEPRECATED.  See TrimDrag::preserve_fade_anchor") << endl;
 }
 
 void

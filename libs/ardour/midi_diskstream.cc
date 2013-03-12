@@ -73,6 +73,8 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 	, _note_mode(Sustained)
 	, _frames_written_to_ringbuffer(0)
 	, _frames_read_from_ringbuffer(0)
+	, _frames_pending_write(0)
+	, _num_captured_loops(0)
 	, _gui_feed_buffer(AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
 	in_set_state = true;
@@ -83,7 +85,9 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 
 	in_set_state = false;
 
-	assert(!destructive());
+	if (destructive()) {
+		throw failed_constructor();
+	}
 }
 
 MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
@@ -93,6 +97,8 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 	, _note_mode(Sustained)
 	, _frames_written_to_ringbuffer(0)
 	, _frames_read_from_ringbuffer(0)
+	, _frames_pending_write(0)
+	, _num_captured_loops(0)
 	, _gui_feed_buffer(AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
 	in_set_state = true;
@@ -125,8 +131,6 @@ MidiDiskstream::init ()
 	_capture_buf = new MidiRingBuffer<framepos_t>(size);
 
 	_n_channels = ChanCount(DataType::MIDI, 1);
-
-	assert(recordable());
 }
 
 MidiDiskstream::~MidiDiskstream ()
@@ -197,9 +201,8 @@ MidiDiskstream::non_realtime_input_change ()
 		seek (_session.transport_frame());
 	}
 
-	if (_write_source) {
-		_write_source->set_last_write_end (_session.transport_frame());
-	}
+	g_atomic_int_set(&_frames_pending_write, 0);
+	g_atomic_int_set(&_num_captured_loops, 0);
 }
 
 int
@@ -212,7 +215,7 @@ MidiDiskstream::find_and_use_playlist (const string& name)
 	}
 
 	if (!playlist) {
-		error << string_compose(_("MidiDiskstream: Playlist \"%1\" isn't an midi playlist"), name) << endmsg;
+		error << string_compose(_("MidiDiskstream: Playlist \"%1\" isn't a midi playlist"), name) << endmsg;
 		return -1;
 	}
 
@@ -222,9 +225,9 @@ MidiDiskstream::find_and_use_playlist (const string& name)
 int
 MidiDiskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 {
-	assert(boost::dynamic_pointer_cast<MidiPlaylist>(playlist));
-
-	Diskstream::use_playlist(playlist);
+	if (boost::dynamic_pointer_cast<MidiPlaylist>(playlist)) {
+		Diskstream::use_playlist(playlist);
+	}
 
 	return 0;
 }
@@ -258,8 +261,6 @@ MidiDiskstream::use_new_playlist ()
 int
 MidiDiskstream::use_copy_playlist ()
 {
-	assert(midi_playlist());
-
 	if (destructive()) {
 		return 0;
 	}
@@ -286,10 +287,7 @@ MidiDiskstream::use_copy_playlist ()
 int
 MidiDiskstream::set_destructive (bool yn)
 {
-	yn = 0; // stop pedantic gcc complaints about unused parameter
-	assert( ! destructive());
-	assert( ! yn);
-	return -1;
+	return yn ? -1 : 0;
 }
 
 void
@@ -299,6 +297,26 @@ MidiDiskstream::set_note_mode (NoteMode m)
 	midi_playlist()->set_note_mode(m);
 	if (_write_source && _write_source->model())
 		_write_source->model()->set_note_mode(m);
+}
+
+/** Get the start, end, and length of a location "atomically".
+ *
+ * Note: Locations don't get deleted, so all we care about when I say "atomic"
+ * is that we are always pointing to the same one and using start/length values
+ * obtained just once.  Use this function to achieve this since location being
+ * a parameter achieves this.
+ */
+static void
+get_location_times(const Location* location,
+                   framepos_t*     start,
+                   framepos_t*     end,
+                   framepos_t*     length)
+{
+	if (location) {
+		*start  = location->start();
+		*end    = location->end();
+		*length = *end - *start;
+	}
 }
 
 int
@@ -332,6 +350,12 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt
 		return 1;
 	}
 
+	const Location* const loop_loc    = loop_location;
+	framepos_t            loop_start  = 0;
+	framepos_t            loop_end    = 0;
+	framepos_t            loop_length = 0;
+	get_location_times(loop_loc, &loop_start, &loop_end, &loop_length);
+
 	adjust_capture_position = 0;
 
 	if (nominally_recording || (re && was_recording && _session.get_record_enabled() && _session.config.get_punch_in())) {
@@ -340,8 +364,19 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt
 		calculate_record_range(ot, transport_frame, nframes, rec_nframes, rec_offset);
 
 		if (rec_nframes && !was_recording) {
-			_write_source->mark_write_starting_now ();
-			capture_captured = 0;
+			if (loop_loc) {
+				/* Loop recording, so pretend the capture started at the loop
+				   start rgardless of what time it is now, so the source starts
+				   at the loop start and can handle time wrapping around.
+				   Otherwise, start the source right now as usual.
+				*/
+				capture_captured    = transport_frame - loop_start;
+				capture_start_frame = loop_start;
+			}
+			_write_source->mark_write_starting_now(
+				capture_start_frame, capture_captured, loop_length);
+			g_atomic_int_set(&_frames_pending_write, 0);
+			g_atomic_int_set(&_num_captured_loops, 0);
 			was_recording = true;
 		}
 	}
@@ -356,7 +391,6 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt
 		MidiBuffer& buf = sp->get_midi_buffer(nframes);
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 			const Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
-			assert(ev.buffer());
 #ifndef NDEBUG
 			if (DEBUG::MidiIO & PBD::debug_bits) {
 				const uint8_t* __data = ev.buffer();
@@ -372,8 +406,20 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt
 				DEBUG_TRACE (DEBUG::MidiIO, DEBUG_STR(a).str());
 			}
 #endif
-			_capture_buf->write(ev.time() + transport_frame, ev.type(), ev.size(), ev.buffer());
+			/* Write events to the capture buffer in frames from session start,
+			   but ignoring looping so event time progresses monotonically.
+			   The source knows the loop length so it knows exactly where the
+			   event occurs in the series of recorded loops and can implement
+			   any desirable behaviour.  We don't want to send event with
+			   transport time here since that way the source can not
+			   reconstruct their actual time; future clever MIDI looping should
+			   probabl be implemented in the source instead of here.
+			*/
+			const framecnt_t loop_offset = _num_captured_loops * loop_length;
+			_capture_buf->write(transport_frame + loop_offset + ev.time(),
+			                    ev.type(), ev.size(), ev.buffer());
 		}
+		g_atomic_int_add(&_frames_pending_write, nframes);
 
 		if (buf.size() != 0) {
 			Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex, Glib::Threads::TRY_LOCK);
@@ -448,8 +494,8 @@ MidiDiskstream::commit (framecnt_t playback_distance)
 		adjust_capture_position = 0;
 	}
 
-	uint32_t frames_read = g_atomic_int_get(&_frames_read_from_ringbuffer);
-	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
+	uint32_t frames_read = g_atomic_int_get(const_cast<gint*>(&_frames_read_from_ringbuffer));
+	uint32_t frames_written = g_atomic_int_get(const_cast<gint*>(&_frames_written_to_ringbuffer));
 
 	/*
 	  cerr << name() << " MDS written: " << frames_written << " - read: " << frames_read <<
@@ -552,29 +598,17 @@ MidiDiskstream::internal_playback_seek (framecnt_t distance)
 int
 MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 {
-	framecnt_t this_read = 0;
-	bool reloop = false;
-	framepos_t loop_end = 0;
-	framepos_t loop_start = 0;
-	Location *loc = 0;
+	framecnt_t this_read   = 0;
+	bool       reloop      = false;
+	framepos_t loop_end    = 0;
+	framepos_t loop_start  = 0;
+	framecnt_t loop_length = 0;
+	Location*  loc         = 0;
 
 	if (!reversed) {
 
-		framecnt_t loop_length = 0;
-
-		/* Make the use of a Location atomic for this read operation.
-
-		   Note: Locations don't get deleted, so all we care about
-		   when I say "atomic" is that we are always pointing to
-		   the same one and using a start/length values obtained
-		   just once.
-		*/
-
-		if ((loc = loop_location) != 0) {
-			loop_start = loc->start();
-			loop_end = loc->end();
-			loop_length = loop_end - loop_start;
-		}
+		loc = loop_location;
+		get_location_times(loc, &loop_start, &loop_end, &loop_length);
 
 		/* if we are looping, ensure that the first frame we read is at the correct
 		   position within the loop.
@@ -613,7 +647,7 @@ MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 					id(), this_read, start) << endmsg;
 			return -1;
 		}
-
+		
 		g_atomic_int_add (&_frames_written_to_ringbuffer, this_read);
 
 		if (reversed) {
@@ -625,11 +659,9 @@ MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 		} else {
 
 			/* if we read to the end of the loop, go back to the beginning */
-
 			if (reloop) {
 				// Synthesize LoopEvent here, because the next events
 				// written will have non-monotonic timestamps.
-				_playback_buf->write(loop_end - 1, LoopEventType, sizeof (framepos_t), (uint8_t *) &loop_start);
 				start = loop_start;
 			} else {
 				start += this_read;
@@ -669,12 +701,11 @@ MidiDiskstream::do_refill ()
 		return 0;
 	}
 
-	// At this point we...
-	assert(_playback_buf->write_space() > 0); // ... have something to write to, and
-	assert(file_frame <= max_framepos); // ... something to write
+	/* no space to write */
+	if (_playback_buf->write_space() == 0) {
+		return 0;
+	}
 
-	// now calculate how much time is in the ringbuffer.
-	// and lets write as much as we need to get this to be midi_readahead;
 	uint32_t frames_read = g_atomic_int_get(&_frames_read_from_ringbuffer);
 	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
 	if ((frames_written - frames_read) >= midi_readahead) {
@@ -709,16 +740,13 @@ int
 MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 {
 	framecnt_t to_write;
-	framecnt_t total;
 	int32_t ret = 0;
 
 	if (!_write_source) {
 		return 0;
 	}
 
-	assert (!destructive());
-
-	total = _session.transport_frame() - _write_source->last_write_end();
+	const framecnt_t total = g_atomic_int_get(&_frames_pending_write);
 
 	if (total == 0 || 
 	    _capture_buf->read_space() == 0 || 
@@ -753,6 +781,7 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 			error << string_compose(_("MidiDiskstream %1: cannot write to disk"), id()) << endmsg;
 			return -1;
 		} 
+		g_atomic_int_add(&_frames_pending_write, -to_write);
 	}
 
 out:
@@ -806,8 +835,6 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 		/* new source set up in "out" below */
 
 	} else {
-
-		assert(_write_source);
 
 		framecnt_t total_capture = 0;
 		for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
@@ -954,35 +981,17 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 }
 
 void
-MidiDiskstream::transport_looped (framepos_t transport_frame)
+MidiDiskstream::transport_looped (framepos_t)
 {
+	/* Here we only keep track of the number of captured loops so monotonic
+	   event times can be delivered to the write source in process().  Trying
+	   to be clever here is a world of trouble, it is better to simply record
+	   the input in a straightforward non-destructive way.  In the future when
+	   we want to implement more clever MIDI looping modes it should be done in
+	   the Source and/or entirely after the capture is finished.
+	*/
 	if (was_recording) {
-
-		// adjust the capture length knowing that the data will be recorded to disk
-		// only necessary after the first loop where we're recording
-		if (capture_info.size() == 0) {
-			capture_captured += _capture_offset;
-
-			if (_alignment_style == ExistingMaterial) {
-				capture_captured += _session.worst_output_latency();
-			} else {
-				capture_captured += _roll_delay;
-			}
-		}
-
-		finish_capture ();
-
-		// the next region will start recording via the normal mechanism
-		// we'll set the start position to the current transport pos
-		// no latency adjustment or capture offset needs to be made, as that already happened the first time
-		capture_start_frame = transport_frame;
-		first_recordable_frame = transport_frame; // mild lie
-		last_recordable_frame = max_framepos;
-		was_recording = true;
-	}
-
-	if (!Config->get_seamless_loop()) {
-		reset_tracker ();
+		g_atomic_int_add(&_num_captured_loops, 1);
 	}
 }
 
@@ -994,9 +1003,6 @@ MidiDiskstream::finish_capture ()
 	if (capture_captured == 0) {
 		return;
 	}
-
-	// Why must we destroy?
-	assert(!destructive());
 
 	CaptureInfo* ci = new CaptureInfo;
 
@@ -1025,8 +1031,6 @@ MidiDiskstream::set_record_enabled (bool yn)
 		return;
 	}
 
-	assert(!destructive());
-
 	/* yes, i know that this not proof against race conditions, but its
 	   good enough. i think.
 	*/
@@ -1037,6 +1041,8 @@ MidiDiskstream::set_record_enabled (bool yn)
 		} else {
 			disengage_record_enable ();
 		}
+		
+		RecordEnableChanged (); /* EMIT SIGNAL */
 	}
 }
 
@@ -1055,16 +1061,12 @@ MidiDiskstream::prep_record_enable ()
 		sp->request_jack_monitors_input (!(_session.config.get_auto_input() && rolling));
 	}
 
-	RecordEnableChanged (); /* EMIT SIGNAL */
-
 	return true;
 }
 
 bool
 MidiDiskstream::prep_record_disable ()
 {
-	g_atomic_int_set (&_record_enabled, 0);
-	RecordEnableChanged (); /* EMIT SIGNAL */
 
 	return true;
 }
@@ -1120,8 +1122,6 @@ MidiDiskstream::set_state (const XMLNode& node, int version)
 	in_set_state = true;
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		assert ((*niter)->name() != IO::state_node_name);
-
 		if ((*niter)->name() == X_("CapturingSources")) {
 			capture_pending_node = *niter;
 		}
@@ -1162,8 +1162,6 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 	if (!_session.writable() || !recordable()) {
 		return 1;
 	}
-
-	assert(n == 0);
 
 	_write_source.reset();
 
@@ -1297,25 +1295,78 @@ void
 MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 {
 	dst.clear();
-	assert(dst.size() == 0);
 
-#ifndef NDEBUG
+	Location* loc = loop_location;
+
 	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
-		             "%1 MDS pre-read read %4..%5 from %2 write to %3\n", _name,
-		             _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr(), playback_sample, playback_sample + nframes));
-//        cerr << "================\n";
-//        _playback_buf->dump (cerr);
-//        cerr << "----------------\n";
+		             "%1 MDS pre-read read %8 @ %4..%5 from %2 write to %3, LOOPED ? %6-%7\n", _name,
+		             _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr(), playback_sample, playback_sample + nframes, 
+			     (loc ? loc->start() : -1), (loc ? loc->end() : -1), nframes));
 
-	const size_t events_read = _playback_buf->read (dst, playback_sample, playback_sample + nframes);
+        // cerr << "================\n";
+        // _playback_buf->dump (cerr);
+        // cerr << "----------------\n";
+
+	size_t events_read = 0;	
+
+	if (loc) {
+		framepos_t effective_start;
+
+		if (playback_sample >= loc->end()) {
+			effective_start = loc->start() + ((playback_sample - loc->end()) % loc->length());
+		} else {
+			effective_start = playback_sample;
+		}
+		
+		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("looped, effective start adjusted to %1\n", effective_start));
+
+		if (effective_start == loc->start()) {
+			/* We need to turn off notes that may extend
+			   beyond the loop end.
+			*/
+
+			_playback_buf->loop_resolve (dst, 0);
+		}
+
+		if (loc->end() >= effective_start && loc->end() < effective_start + nframes) {
+			/* end of loop is within the range we are reading, so
+			   split the read in two, and lie about the location
+			   for the 2nd read
+			*/
+			framecnt_t first, second;
+
+			first = loc->end() - effective_start;
+			second = nframes - first;
+
+			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read for eff %1 end %2: %3 and %4\n",
+									      effective_start, loc->end(), first, second));
+
+			if (first) {
+				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #1, from %1 for %2\n",
+										      effective_start, first));
+				events_read = _playback_buf->read (dst, effective_start, first);
+			} 
+
+			if (second) {
+				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #2, from %1 for %2\n",
+										      loc->start(), second));
+				events_read += _playback_buf->read (dst, loc->start(), second);
+			}
+								    
+		} else {
+			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #3, adjusted start as %1 for %2\n",
+									      effective_start, nframes));
+			events_read = _playback_buf->read (dst, effective_start, effective_start + nframes);
+		}
+	} else {
+		events_read = _playback_buf->read (dst, playback_sample, playback_sample + nframes);
+	}
+
 	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
 		             "%1 MDS events read %2 range %3 .. %4 rspace %5 wspace %6 r@%7 w@%8\n",
 		             _name, events_read, playback_sample, playback_sample + nframes,
 		             _playback_buf->read_space(), _playback_buf->write_space(),
 			     _playback_buf->get_read_ptr(), _playback_buf->get_write_ptr()));
-#else
-	_playback_buf->read (dst, playback_sample, playback_sample + nframes);
-#endif
 
 	g_atomic_int_add (&_frames_read_from_ringbuffer, nframes);
 }

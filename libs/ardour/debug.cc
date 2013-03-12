@@ -61,5 +61,6 @@ uint64_t PBD::DEBUG::SoundGrid = PBD::new_debug_bit ("soundgrid");
 uint64_t PBD::DEBUG::SGDriver = PBD::new_debug_bit ("sgdriver");
 uint64_t PBD::DEBUG::OrderKeys = PBD::new_debug_bit ("orderkeys");
 uint64_t PBD::DEBUG::Automation = PBD::new_debug_bit ("automation");
+uint64_t PBD::DEBUG::WiimoteControl = PBD::new_debug_bit ("wiimotecontrol");
 
 

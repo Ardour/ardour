@@ -77,12 +77,12 @@ SequenceTest::iteratorSeekTest ()
 	bool on = true;
 	for (Sequence<Time>::const_iterator i = seq->begin(600); i != seq->end(); ++i) {
 		if (on) {
-			CPPUNIT_ASSERT(((MIDIEvent<Time>&)*i).is_note_on());
+			CPPUNIT_ASSERT(((const MIDIEvent<Time>&)*i).is_note_on());
 			CPPUNIT_ASSERT_EQUAL(i->time(), Time((num_notes + 6) * 100));
 			++num_notes;
 			on = false;
 		} else {
-			CPPUNIT_ASSERT(((MIDIEvent<Time>&)*i).is_note_off());
+			CPPUNIT_ASSERT(((const MIDIEvent<Time>&)*i).is_note_off());
 			on = true;
 		}
 	}

@@ -185,7 +185,7 @@ ExportFormatBase::nearest_sample_rate (framecnt_t sample_rate)
 	SampleRate best_match = SR_None;
 
 	#define DO_SR_COMPARISON(rate) \
-	diff = std::abs((rate) - sample_rate); \
+	diff = std::fabs((rate) - sample_rate); \
 	if(diff < smallest_diff) { \
 		smallest_diff = diff; \
 		best_match = (rate); \

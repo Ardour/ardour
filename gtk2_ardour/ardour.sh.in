@@ -5,7 +5,7 @@
 # and does a few checks before exec'ing the real executable.
 # 
 
-export GTK_PATH=@SYSCONFDIR@/ardour3${GTK_PATH:+:$GTK_PATH}
+export GTK_PATH=@SYSCONFDIR@/ardour3:@LIBDIR@/ardour3${GTK_PATH:+:$GTK_PATH}
 
 export LD_LIBRARY_PATH=@LIBDIR@/ardour3${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
@@ -46,6 +46,12 @@ fi
 export ARDOUR_DATA_PATH=@DATADIR@/ardour3
 export ARDOUR_CONFIG_PATH=@SYSCONFDIR@/ardour3
 export ARDOUR_DLL_PATH=@LIBDIR@/ardour3
+
+#
+# VAMP has its own lookup path
+# 
+
+export VAMP_PATH=@LIBDIR@/ardour3/vamp
 
 if [ $# -gt 0 ] ; then
     case $1 in

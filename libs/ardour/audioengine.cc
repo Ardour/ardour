@@ -1132,6 +1132,7 @@ AudioEngine::halted_info (jack_status_t code, const char* reason, void *arg)
         ae->_jack = 0;
 
         if (was_running) {
+		MIDI::JackMIDIPort::JackHalted (); /* EMIT SIGNAL */
 #ifdef HAVE_JACK_ON_INFO_SHUTDOWN
                 switch (code) {
                 case JackBackendError:

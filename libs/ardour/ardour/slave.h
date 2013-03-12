@@ -29,18 +29,16 @@
 #include "pbd/signals.h"
 
 #include "timecode/time.h"
+#include "ltc/ltc.h"
 
 #include "ardour/types.h"
 #include "midi++/parser.h"
 #include "midi++/types.h"
 
-#ifdef HAVE_LTC
-#include <ltc.h>
-#endif
 
 /* used for approximate_current_delta(): */
 #define PLUSMINUS(A) ( ((A)<0) ? "-" : (((A)>0) ? "+" : "\u00B1") )
-#define LEADINGZERO(A) ( (A)<10 ? "    " : (A)<100 ? "   " : (A)<1000 ? "  " : (A)<10000 ? " " : "" )
+#define LEADINGZERO(A) ( (A)<10 ? "   " : (A)<100 ? "  " : (A)<1000 ? " " : "" )
 
 namespace MIDI {
 	class Port;
@@ -242,7 +240,7 @@ class TimecodeSlave : public Slave {
     virtual Timecode::TimecodeFormat apparent_timecode_format() const = 0;
 
     /* this is intended to be used by a UI and polled from a timeout. it should
-       return a string describing the current position of the TC source. it 
+       return a string describing the current position of the TC source. it
        should NOT do any computation, but should use a cached value
        of the TC source position.
     */
@@ -284,6 +282,7 @@ class MTC_Slave : public TimecodeSlave {
 
 	SafeTime       current;
 	framepos_t     mtc_frame;               /* current time */
+	double         mtc_frame_dll;
 	framepos_t     last_inbound_frame;      /* when we got it; audio clocked */
 	MIDI::byte     last_mtc_fps_byte;
 	framepos_t     window_begin;
@@ -335,7 +334,6 @@ class MTC_Slave : public TimecodeSlave {
 	void parameter_changed(std::string const & p);
 };
 
-#ifdef HAVE_LTC
 class LTC_Slave : public TimecodeSlave {
 public:
 	LTC_Slave (Session&);

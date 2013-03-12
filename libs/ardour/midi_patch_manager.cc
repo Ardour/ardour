@@ -83,7 +83,7 @@ MidiPatchManager::add_session_patches ()
 			_documents[device->first] = document;
 			// build a list of all master devices from all documents
 			_master_devices_by_model[device->first] = device->second;
-			_all_models.push_back(device->first);
+			_all_models.insert(device->first);
 
 			// make sure there are no double model names
 			// TODO: handle this gracefully.
@@ -109,22 +109,28 @@ MidiPatchManager::refresh()
 	info << "Loading " << result.size() << " MIDI patches from " << search_path.to_string() << endmsg;
 
 	for (vector<std::string>::iterator i = result.begin(); i != result.end(); ++i) {
-		boost::shared_ptr<MIDINameDocument> document(new MIDINameDocument(*i));
+		boost::shared_ptr<MIDINameDocument> document;
+		try {
+			document = boost::shared_ptr<MIDINameDocument>(new MIDINameDocument(*i));
+		} catch (...) {
+			error << "Error parsing MIDI patch file " << *i << endmsg;
+			continue;
+		}
 		for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
-					document->master_device_names_by_model().begin();
-				device != document->master_device_names_by_model().end();
-				++device) {
-			//cerr << "got model " << device->first << endl;
-			// have access to the documents by model name
-			_documents[device->first] = document;
-			// build a list of all master devices from all documents
+			     document->master_device_names_by_model().begin();
+		     device != document->master_device_names_by_model().end();
+		     ++device) {
+			if (_documents.find(device->first) != _documents.end()) {
+				warning << string_compose(_("Duplicate MIDI device `%1' in `%2' ignored"),
+				                          device->first, *i)
+				        << endmsg;
+				continue;
+			}
+				                      
+			_documents[device->first]               = document;
 			_master_devices_by_model[device->first] = device->second;
-			_all_models.push_back(device->first);
 
-			// make sure there are no double model names
-			// TODO: handle this gracefully.
-			assert(_documents.count(device->first) == 1);
-			assert(_master_devices_by_model.count(device->first) == 1);
+			_all_models.insert(device->first);
 		}
 	}
 

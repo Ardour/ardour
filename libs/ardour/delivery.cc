@@ -179,7 +179,10 @@ Delivery::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 bool
 Delivery::configure_io (ChanCount in, ChanCount out)
 {
-	assert (!AudioEngine::instance()->process_lock().trylock());
+#ifndef NDEBUG
+	bool r = AudioEngine::instance()->process_lock().trylock();
+	assert (!r && "trylock inside Delivery::configure_io");
+#endif
 
 	/* check configuration by comparison with our I/O port configuration, if appropriate.
 	   see ::can_support_io_configuration() for comments

@@ -20,7 +20,7 @@
 
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/comboboxtext.h>
-#include "midi++/midnam_patch.h"
+
 #include "evoral/PatchChange.hpp"
 #include "ardour_dialog.h"
 #include "audio_clock.h"
@@ -45,7 +45,8 @@ public:
 		ARDOUR::Session *,
 		Evoral::PatchChange<Evoral::MusicalTime> const &,
 		ARDOUR::InstrumentInfo&,
-		const Gtk::BuiltinStockID &
+		const Gtk::BuiltinStockID &,
+		bool allow_delete = false
 		);
 
 	Evoral::PatchChange<Evoral::MusicalTime> patch () const;

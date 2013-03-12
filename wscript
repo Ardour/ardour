@@ -7,8 +7,22 @@ import string
 import subprocess
 import sys
 
+<<<<<<< HEAD
 # Variables for 'waf dist'
 VERSION = '3.0rc1'
+=======
+#
+# build scripts need to find the right platform specific version
+# 
+
+if sys.platform == 'darwin':
+    OSX_VERSION = '3.0beta6'
+    VERSION = '3.0beta6'
+else:
+    LINUX_VERSION = '3.0'
+    VERSION = '3.0'
+
+>>>>>>> master
 APPNAME = 'Ardour3'
 
 # Mandatory variables
@@ -23,6 +37,7 @@ children = [
         'libs/qm-dsp',
         'libs/vamp-plugins',
         'libs/taglib',
+        'libs/libltc',
         'libs/rubberband',
         'libs/surfaces',
         'libs/panners',
@@ -37,7 +52,11 @@ children = [
         'export',
         'midi_maps',
         'mcp',
+<<<<<<< HEAD
         'manual'
+=======
+        'patchfiles'
+>>>>>>> master
 ]
 
 i18n_children = [
@@ -46,18 +65,16 @@ i18n_children = [
         'libs/gtkmm2ext',
 ]
 
-if sys.platform != 'darwin':
+if sys.platform == 'linux2':
     children += [ 'tools/sanity_check' ]
     lxvst_default = True
-else:
+elif sys.platform == 'darwin':
     children += [ 'libs/appleutility' ]
+    lxvst_default = False
+else:
     lxvst_default = False
 
 # Version stuff
-
-def fetch_svn_revision (path):
-    cmd = "LANG= svn info " + path + " | awk '/^Revision:/ { print $2}'"
-    return subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
 
 def fetch_gcc_version (CC):
     cmd = "LANG= %s --version" % CC
@@ -66,9 +83,10 @@ def fetch_gcc_version (CC):
     version = o.split(' ')[2].split('.')
     return version
 
-def fetch_git_revision (path):
-    cmd = "LANG= git log --abbrev HEAD^..HEAD " + path
+def fetch_git_revision ():
+    cmd = "LANG= git describe --tags HEAD"
     output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
+<<<<<<< HEAD
     o = output[0].decode('utf-8')
     rev = o.replace ("commit", "git")[0:10]
     for line in output:
@@ -79,24 +97,15 @@ def fetch_git_revision (path):
                 break
         except:
             pass
+=======
+    rev = output[0].decode('utf-8')
+>>>>>>> master
     return rev
-
-def fetch_bzr_revision (path):
-    cmd = subprocess.Popen("LANG= bzr log -l 1 " + path, stdout=subprocess.PIPE, shell=True)
-    out = cmd.communicate()[0]
-    svn = re.search('^svn revno: [0-9]*', out, re.MULTILINE)
-    str = svn.group(0)
-    chars = 'svnreio: '
-    return string.lstrip(str, chars)
 
 def create_stored_revision():
     rev = ""
-    if os.path.exists('.svn'):
-        rev = fetch_svn_revision('.');
-    elif os.path.exists('.git'):
-        rev = fetch_git_revision('.');
-    elif os.path.exists('.bzr'):
-        rev = fetch_bzr_revision('.');
+    if os.path.exists('.git'):
+        rev = fetch_git_revision();
         print("Revision: %s", rev)
     elif os.path.exists('libs/ardour/svn_revision.cc'):
         print("Using packaged svn revision")
@@ -108,7 +117,7 @@ def create_stored_revision():
     try:
         text =  '#include "ardour/svn_revision.h"\n'
         text += 'namespace ARDOUR { const char* svn_revision = \"%s\"; }\n' % rev
-        print('Writing svn revision info to libs/ardour/svn_revision.cc')
+        print('Writing svn revision info to libs/ardour/svn_revision.cc using ' + rev)
         o = open('libs/ardour/svn_revision.cc', 'w')
         o.write(text)
         o.close()
@@ -149,8 +158,15 @@ def set_compiler_flags (conf,opt):
                 conf.env['build_target'] = 'leopard'
             elif re.search ("^10[.]", version) != None:
                 conf.env['build_target'] = 'snowleopard'
+<<<<<<< HEAD
             else:
                 conf.env['build_target'] = 'lion'
+=======
+            elif re.search ("^11[.]", version) != None:
+                conf.env['build_target'] = 'lion'
+            else:
+                conf.env['build_target'] = 'mountainlion'
+>>>>>>> master
         else:
             if re.search ("x86_64", cpu) != None:
                 conf.env['build_target'] = 'x86_64'
@@ -266,12 +282,22 @@ def set_compiler_flags (conf,opt):
     # a single way to test if we're on OS X
     #
 
-    if conf.env['build_target'] in ['panther', 'tiger', 'leopard' ]:
+    if conf.env['build_target'] in ['panther', 'tiger', 'leopard', 'snowleopard' ]:
         conf.define ('IS_OSX', 1)
         # force tiger or later, to avoid issues on PPC which defaults
         # back to 10.1 if we don't tell it otherwise.
+        
         conf.env.append_value('CFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
+        conf.env.append_value('CXXFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
+        conf.env.append_value('CXXFLAGS', '-mmacosx-version-min=10.4')
+        conf.env.append_value('CFLAGS', '-mmacosx-version-min=10.4')
 
+
+    elif conf.env['build_target'] in [ 'lion', 'mountainlion' ]:
+        conf.env.append_value('CFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1070")
+        conf.env.append_value('CXXFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1070")
+        conf.env.append_value('CXXFLAGS', '-mmacosx-version-min=10.7')
+        conf.env.append_value('CFLAGS', '-mmacosx-version-min=10.7')
     else:
         conf.define ('IS_OSX', 0)
 
@@ -395,8 +421,11 @@ def options(opt):
                     help='Compile with Boost shared pointer debugging')
     opt.add_option('--depstack-root', type='string', default='~', dest='depstack_root',
                     help='Directory/folder where dependency stack trees (gtk, a3) can be found (defaults to ~)')
+<<<<<<< HEAD
     opt.add_option('--soundgrid', action='store_true', default=True, dest='soundgrid',
                     help='Compile with support for Waves SoundGrid')
+=======
+>>>>>>> master
     opt.add_option('--dist-target', type='string', default='auto', dest='dist_target',
                     help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,powerpc,tiger,leopard]')
     opt.add_option('--fpu-optimization', action='store_true', default=True, dest='fpu_optimization',
@@ -419,7 +448,10 @@ def options(opt):
     opt.add_option('--nls', action='store_true', default=True, dest='nls',
                     help='Enable i18n (native language support) (default)')
     opt.add_option('--no-nls', action='store_false', dest='nls')
-    opt.add_option('--phone-home', action='store_false', default=False, dest='phone_home')
+    opt.add_option('--phone-home', action='store_true', default=True, dest='phone_home',
+                   help='Contact ardour.org at startup for new announcements')
+    opt.add_option('--no-phone-home', action='store_false', dest='phone_home',
+                   help='Do not contact ardour.org at startup for new announcements')
     opt.add_option('--stl-debug', action='store_true', default=False, dest='stl_debug',
                     help='Build with debugging for the STL')
     opt.add_option('--rt-alloc-debug', action='store_true', default=False, dest='rt_alloc_debug',
@@ -434,14 +466,16 @@ def options(opt):
     # help='Compile with support for Frontier Designs Tranzport (if libusb is available)')
     opt.add_option('--universal', action='store_true', default=False, dest='universal',
                     help='Compile as universal binary (OS X ONLY, requires that external libraries are universal)')
+<<<<<<< HEAD
     opt.add_option('--generic', action='store_true', default=True, dest='generic',
+=======
+    opt.add_option('--generic', action='store_true', default=False, dest='generic',
+>>>>>>> master
                     help='Compile with -arch i386 (OS X ONLY)')
     opt.add_option('--versioned', action='store_true', default=False, dest='versioned',
                     help='Add revision information to executable name inside the build directory')
     opt.add_option('--windows-vst', action='store_true', default=False, dest='windows_vst',
                     help='Compile with support for Windows VST')
-    opt.add_option('--wiimote', action='store_true', default=False, dest='wiimote',
-                    help='Build the wiimote control surface')
     opt.add_option('--windows-key', type='string', action='store', dest='windows_key', default='Mod4><Super',
                     help='X Modifier(s) (Mod1,Mod2, etc) for the Windows key (X11 builds only). ' +
                     'Multiple modifiers must be separated by \'><\'')
@@ -477,6 +511,7 @@ def configure(conf):
         print('Please use a different version or re-configure with --debug')
         exit (1)
 
+<<<<<<< HEAD
     # libintl may or may not be trivially locatable. On OS X this is always
     # true. On Linux it will depend on whether we're on a normal Linux distro,
     # in which case libintl.h is going to be available in /usr/include and
@@ -511,6 +546,45 @@ def configure(conf):
 
     sg_tree = os.path.expanduser (Options.options.depstack_root + '/ardour/3.0-SG/soundgrid')
 
+=======
+    # systems with glibc have libintl builtin. systems without require explicit
+    # linkage against libintl.
+    #
+
+    pkg_config_path = os.getenv('PKG_CONFIG_PATH')
+    user_gtk_root = os.path.expanduser (Options.options.depstack_root + '/gtk/inst')
+
+    if pkg_config_path is not None and pkg_config_path.find (user_gtk_root) >= 0:
+        # told to search user_gtk_root
+        prefinclude = ''.join ([ '-I', user_gtk_root + '/include'])
+        preflib = ''.join ([ '-L', user_gtk_root + '/lib'])
+        conf.env.append_value('CFLAGS', [ prefinclude ])
+        conf.env.append_value('CXXFLAGS',  [prefinclude ])
+        conf.env.append_value('LINKFLAGS', [ preflib ])
+        autowaf.display_msg(conf, 'Will build against private GTK dependency stack in ' + user_gtk_root, 'yes')
+    else:
+        autowaf.display_msg(conf, 'Will build against private GTK dependency stack', 'no')
+
+    if sys.platform == 'darwin':
+        conf.define ('NEED_INTL', 1)
+        autowaf.display_msg(conf, 'Will use explicit linkage against libintl in ' + user_gtk_root, 'yes')
+    else:
+        # libintl is part of the system, so use it
+        autowaf.display_msg(conf, 'Will rely on libintl built into libc', 'yes')
+            
+    user_ardour_root = os.path.expanduser (Options.options.depstack_root + '/a3/inst')
+    if pkg_config_path is not None and pkg_config_path.find (user_ardour_root) >= 0:
+        # told to search user_ardour_root
+        prefinclude = ''.join ([ '-I', user_ardour_root + '/include'])
+        preflib = ''.join ([ '-L', user_ardour_root + '/lib'])
+        conf.env.append_value('CFLAGS', [ prefinclude ])
+        conf.env.append_value('CXXFLAGS',  [prefinclude ])
+        conf.env.append_value('LINKFLAGS', [ preflib ])
+        autowaf.display_msg(conf, 'Will build against private Ardour dependency stack in ' + user_ardour_root, 'yes')
+    else:
+        autowaf.display_msg(conf, 'Will build against private Ardour dependency stack', 'no')
+        
+>>>>>>> master
     if sys.platform == 'darwin':
 
         # this is required, potentially, for anything we link and then relocate into a bundle
@@ -526,6 +600,7 @@ def configure(conf):
         conf.define ('TOP_MENUBAR',1)
         conf.define ('GTKOSX',1)
 
+<<<<<<< HEAD
         #       Define OSX as a uselib to use when compiling
         #       on Darwin to add all applicable flags at once
         #
@@ -534,6 +609,8 @@ def configure(conf):
         conf.env.append_value('CXXFLAGS_OSX', '-mmacosx-version-min=10.4')
         conf.env.append_value('CFLAGS_OSX', '-mmacosx-version-min=10.4')
 
+=======
+>>>>>>> master
         # It would be nice to be able to use this to force back-compatibility with 10.4
         # but even by the time of 11, the 10.4 SDK is no longer available in any normal
         # way.
@@ -576,6 +653,7 @@ def configure(conf):
             conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Carbon'])
         else:
             print ('No Carbon support available for this build\n')
+<<<<<<< HEAD
 
     if Options.options.soundgrid:
         conf.env.append_value ('CXXFLAGS_SOUNDGRID', 
@@ -602,6 +680,8 @@ def configure(conf):
         conf.check_cxx (header_name='WavesMixerAPI/1.0/WavesMixerAPI.h', 
                         mandatory=True, use='SOUNDGRID')
         conf.define('HAVE_SOUNDGRID', 1)
+=======
+>>>>>>> master
 
     if Options.options.boost_include != '':
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.boost_include)
@@ -632,7 +712,11 @@ def configure(conf):
     autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2')
     autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0')
 
+<<<<<<< HEAD
     conf.check_cc(function_name='dlopen', header_name='dlfcn.h', linkflags='-ldl', uselib_store='DL')
+=======
+    conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
+>>>>>>> master
 
     # Tell everyone that this is a waf build
 
@@ -641,10 +725,9 @@ def configure(conf):
 
     # Set up waf environment and C defines
     opts = Options.options
-    if opts.debug:
-        opts.phone_home = False;   # debug builds should not call home
     if opts.phone_home:
-        conf.env['PHONE_HOME'] = opts.phone_home
+        conf.define('PHONE_HOME', 1)
+        conf.env['PHONE_HOME'] = True
     if opts.fpu_optimization:
         conf.env['FPU_OPTIMIZATION'] = True
     if opts.freesound:
@@ -668,9 +751,6 @@ def configure(conf):
         conf.env['LXVST_SUPPORT'] = True
     if bool(conf.env['JACK_SESSION']):
         conf.define('HAVE_JACK_SESSION', 1)
-    if opts.wiimote:
-        conf.define('WIIMOTE', 1)
-        conf.env['WIIMOTE'] = True
     conf.define('WINDOWS_KEY', opts.windows_key)
     conf.env['PROGRAM_NAME'] = opts.program_name
     if opts.rt_alloc_debug:
@@ -740,7 +820,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Universal binary',      opts.universal)
     write_config_text('Generic x86 CPU',       opts.generic)
     write_config_text('Windows VST support',   opts.windows_vst)
-    write_config_text('Wiimote support',       opts.wiimote)
+    write_config_text('Wiimote support',       conf.is_defined('BUILD_WIIMOTE'))
     write_config_text('Windows key',           opts.windows_key)
 
     write_config_text('C compiler flags',      conf.env['CFLAGS'])
@@ -760,6 +840,7 @@ def build(bld):
     bld.path.find_dir ('libs/vamp-sdk/vamp-sdk')
     bld.path.find_dir ('libs/surfaces/control_protocol/control_protocol')
     bld.path.find_dir ('libs/timecode/timecode')
+    bld.path.find_dir ('libs/libltc/ltc')
     bld.path.find_dir ('libs/rubberband/rubberband')
     bld.path.find_dir ('libs/gtkmm2ext/gtkmm2ext')
     bld.path.find_dir ('libs/ardour/ardour')
@@ -785,3 +866,8 @@ def i18n_po(bld):
 def i18n_mo(bld):
     bld.recurse (i18n_children)
 
+<<<<<<< HEAD
+=======
+def tarball(bld):
+    create_stored_revision()
+>>>>>>> master

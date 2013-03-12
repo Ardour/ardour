@@ -370,19 +370,34 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		   into the route.
 		*/
 		be_silent = true;
+
 	} else {
+
 		MonitorState const s = monitoring_state ();
 		/* we are not rolling, so be silent even if we are monitoring disk, as there
 		   will be no disk data coming in.
 		*/
-                be_silent = (s == MonitoringSilence || s == MonitoringDisk);
+		switch (s) {
+		case MonitoringSilence:
+			/* if there is an instrument, be_silent should always
+			   be false
+			*/
+			be_silent = (the_instrument_unlocked() == 0);
+			break;
+		case MonitoringDisk:
+			be_silent = true;
+			break;
+		case MonitoringInput:
+			be_silent = false;
+			break;
+		}
 	}
 	
 	if (!_have_internal_generator && metering_state() == MeteringInput) {
 		_input->process_input (_meter, start_frame, end_frame, nframes);
 	}
 
-	_amp->apply_gain_automation(false);
+	_amp->apply_gain_automation (false);
 
 	/* if have_internal_generator, or .. */
 	//_input->process_input (_meter, start_frame, end_frame, nframes);

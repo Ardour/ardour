@@ -142,8 +142,6 @@ public:
 
 	std::string state_id() const;
 
-	static void setup_slider_pix ();
-
 protected:
 	friend class StreamView;
 
@@ -232,20 +230,14 @@ protected:
 	virtual void hide_all_automation (bool apply_to_selection = false);
 
 	void timestretch (framepos_t start, framepos_t end);
-
 	void speed_changed ();
-
 	void map_frozen ();
-
 	void color_handler ();
-
 	void region_view_added (RegionView*);
-
 	void create_gain_automation_child (const Evoral::Parameter &, bool);
-
 	void setup_processor_menu_and_curves ();
-
 	void route_color_changed ();
+        bool can_edit_name() const;
 
 	boost::shared_ptr<AutomationTimeAxisView> gain_track;
 
@@ -294,9 +286,6 @@ protected:
 	void post_construct ();
 
 	GainMeterBase gm;
-
-	static Glib::RefPtr<Gdk::Pixbuf> slider;
-	static Glib::RefPtr<Gdk::Pixbuf> slider_desensitised;
 
 	XMLNode* underlay_xml_node;
 	bool set_underlay_state();

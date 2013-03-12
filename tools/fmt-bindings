@@ -22,12 +22,14 @@ $winkey = 'Mod4\>\<Super';
 $make_cheatsheet = 1;
 $make_accelmap = 0;
 $merge_from = "";
+$html = 0;
 
 GetOptions ("platform=s" => \$platform,
 	    "winkey=s" => \$winkey,
 	    "cheatsheet" => \$make_cheatsheet,
 	    "accelmap" => \$make_accelmap,
-	    "merge=s" => \$merge_from);
+	    "merge=s" => \$merge_from,
+            "html" => \$html);
 
 if ($platform eq "osx") {
 
@@ -73,6 +75,7 @@ if ($platform eq "osx") {
     $mouse_modifier_map{$winkey} => 'Win';
 }
 
+<<<<<<< HEAD
 %keycodes = (
     'asciicircum' => '\\verb=^=',
     'apostrophe' => '\'',
@@ -103,7 +106,80 @@ if ($platform eq "osx") {
     'KP_' => 'KP$\_$',
     'greater' => '>',
     'less' => '<',
+=======
+%keycodes = ();
+
+if ($html) {
+    %keycodes = (
+        'asciicircum' => '^',
+        'apostrophe' => '\'',
+        'bracketleft' => '[',
+        'bracketright' => ']',
+        'braceleft' => '{',
+        'braceright' => '}',
+        'backslash' => '\\',
+        'slash' => '/',
+        'rightanglebracket' => '&gt;',
+        'leftanglebracket' => '&lt;',
+        'ampersand' => '&',
+        'comma' => ',',
+        'period' => '.',
+        'semicolon' => ';',
+        'colon' => ':',
+        'equal' => '=',
+        'minus' => '-',
+        'plus' => '+',
+        'grave' => '`',
+        'rightarrow' => '&rarr;',
+        'leftarrow' => '&larr;',
+        'uparrow' => '&uarr;',
+        'downarrow' => '&darr;',
+        'Page_Down' => 'PageDown',
+        'Page_Up' => 'PageUp',
+        'space' => 'space',
+        'KP_Right' => 'KP-&rarr;',
+        'KP_Left' => 'KP-&larr;',
+        'KP_Up' => 'KP-&uarr;',
+        'KP_Down' => 'KP-&darr;',
+        'KP_0' => 'KP-0;',
+        'greater' => '&gt;',
+        'less' => '&lt;',
+        );
+} else {
+
+    %keycodes = (
+        'asciicircum' => '\\verb=^=',
+        'apostrophe' => '\'',
+        'bracketleft' => '[',
+        'bracketright' => ']',
+        'braceleft' => '\\{',
+        'braceright' => '\\}',
+        'backslash' => '$\\backslash$',
+        'slash' => '/',
+        'rightanglebracket' => '>',
+        'leftanglebracket' => '<',
+        'ampersand' => '\\&',
+        'comma' => ',',
+        'period' => '.',
+        'semicolon' => ';',
+        'colon' => ':',
+        'equal' => '=',
+        'minus' => '-',
+        'plus' => '+',
+        'grave' => '`',
+        'rightarrow' => '$\rightarrow$',
+        'leftarrow' => '$\\leftarrow$',
+        'uparrow' => '$\\uparrow$',
+        'downarrow' => '$\\downarrow$',
+        'Page_Down' => 'Page Down',
+        'Page_Up' => 'Page Up',
+        'space' => 'space',
+        'KP_' => 'KP$\_$',
+        'greater' => '>',
+        'less' => '<',
+>>>>>>> master
     );
+}
 
 if ($merge_from) {
     open (BINDINGS, $merge_from) || die ("merge from bindings: file not readable");
@@ -225,6 +301,102 @@ while (<>) {
 if ($make_accelmap || !$make_cheatsheet) {
     exit 0;
 }
+
+if ($html) {
+
+    @groups_sorted_by_number = sort { $group_numbering{$a} <=> $group_numbering{$b} } keys %group_numbering; 
+    
+    foreach $gk (@groups_sorted_by_number) {
+
+        if ($gk =~ /^m/) {
+            # mouse stuff - ignore
+            next;
+        }
+
+        # $bref is a reference to the array of arrays for this group
+        $bref = $group_bindings{$gk};
+        
+        if (scalar @$bref > 1) {
+            
+            $name = $group_names{$gk};
+            $name =~ s/\\linebreak.*//;
+            $name =~ s/\\&/&/;
+            $name =~ s/\$\\_\$/-/g;
+            $name =~ s/\\[a-z]+ //g;
+            $name =~ s/[{}]//g;
+            $name =~ s/\\par//g;
+
+            print "<h3>$name</h3>\n";
+
+            $gtext = $group_text{$gk};
+            $gtext =~ s/\\linebreak.*//;
+            $gtext =~ s/\\&/&/;
+            $gtext =~ s/\$\\_\$/-/g;
+            $gtext =~ s/\\[a-z]+ //g;
+            $gtext =~ s/[{}]//g;
+            $gtext =~ s/\\par//g;
+            
+            if (!($gtext eq  "")) {
+                print "$gtext\n\n";
+            }
+            
+            # ignore the first entry, which was empty
+            
+            shift (@$bref);
+            
+            # set up the list
+            
+            print "<dl class=\"bindings\">\n";
+            
+            # sort the array of arrays by the descriptive text for nicer appearance,
+            # and print them
+            
+            for $bbref (sort { @$a[1] cmp @$b[1] } @$bref) {
+                # $bbref is a reference to an array
+                
+                $binding = @$bbref[0];
+                $text = @$bbref[1];
+
+                if ($binding =~ /:/) { # mouse binding with "where" clause
+                    ($binding,$where) = split (/:/, $binding, 2);
+                }
+                
+                foreach $k (keys %cs_modifier_map) {
+                    $binding =~ s/\@$k\@/$cs_modifier_map{$k}/;
+                }
+
+                # remove braces for HTML
+
+                $binding =~ s/></\+/g;
+                $binding =~ s/^<//;
+                $binding =~ s/>/\+/;
+                
+                # substitute keycode names for something printable
+                
+                $re = qr/${ \(join'|', map quotemeta, keys %keycodes)}/;
+                $binding =~ s/($re)/$keycodes{$1}/g;
+
+                # tidy up description
+
+                $descr = @$bbref[1];
+                $descr =~ s/\\linebreak.*//;
+                $descr =~ s/\\&/&/;
+                $descr =~ s/\$\\_\$/-/g;
+                $descr =~ s/\\[a-z]+ //g;
+                $descr =~ s/[{}]//g;
+                $descr =~ s/\\par//g;
+
+                print "<dt>$descr</dt><dd>$binding</dd>\n";
+            }
+            
+            print "</dl>\n";
+        
+        }
+    }
+    print "&nbsp; <!-- remove this if more text is added below -->\n";
+    exit 0;
+}
+
 
 # Now print the cheatsheet
 

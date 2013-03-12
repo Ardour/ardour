@@ -39,7 +39,7 @@
     <Option name="show-track-meters" value="1"/>
     <Option name="default-narrow_ms" value="0"/>
     <Option name="timecode-format" value="timecode_30"/>
-    <Option name="font-scale" value="102400"/>
+    <Option name="font-scale" value="81920"/>
     <Option name="seamless-loop" value="1"/>
   </Config>
   <extra>

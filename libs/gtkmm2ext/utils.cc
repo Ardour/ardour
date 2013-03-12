@@ -37,10 +37,11 @@
 using namespace std;
 
 void
-Gtkmm2ext::init ()
+Gtkmm2ext::init (const char* localedir)
 {
-	// Necessary for gettext
-	(void) bindtextdomain(PACKAGE, LOCALEDIR);
+#ifdef ENABLE_NLS
+	(void) bindtextdomain(PACKAGE, localedir);
+#endif
 }
 
 void
@@ -413,6 +414,11 @@ Gtkmm2ext::rounded_bottom_half_rectangle (Cairo::RefPtr<Cairo::Context> context,
 {
 	rounded_bottom_half_rectangle (context->cobj(), x, y, w, h, r);
 }
+void
+Gtkmm2ext::rounded_right_half_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r)
+{
+	rounded_right_half_rectangle (context->cobj(), x, y, w, h, r);
+}
 
 void
 Gtkmm2ext::rounded_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
@@ -424,6 +430,19 @@ Gtkmm2ext::rounded_rectangle (cairo_t* cr, double x, double y, double w, double 
 	cairo_arc (cr, x + w - r, y + h - r, r, 0 * degrees, 90 * degrees);  //br
 	cairo_arc (cr, x + r, y + h - r, r, 90 * degrees, 180 * degrees);  //bl
 	cairo_arc (cr, x + r, y + r, r, 180 * degrees, 270 * degrees);  //tl
+	cairo_close_path (cr);
+}
+
+void
+Gtkmm2ext::rounded_right_half_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
+{
+	double degrees = M_PI / 180.0;
+
+	cairo_new_sub_path (cr);
+	cairo_arc (cr, x + w - r, y + r, r, -90 * degrees, 0 * degrees);  //tr
+	cairo_arc (cr, x + w - r, y + h - r, r, 0 * degrees, 90 * degrees);  //br
+	cairo_line_to (cr, x, y + h); // bl
+	cairo_line_to (cr, x, y); // tl
 	cairo_close_path (cr);
 }
 
