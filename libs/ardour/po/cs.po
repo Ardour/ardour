@@ -1,249 +1,268 @@
-# SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR "Paul Davis"
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+# Pavel Fric <pavelfric@seznam.cz>, 2013.
 msgid ""
 msgstr ""
-"Project-Id-Version: ardour\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-03-03 11:35-0500\n"
-"PO-Revision-Date: 2006-10-03 01:09+GMT+1\n"
-"Last-Translator: Petter Sundlöf <petter.sundlof@findus.dhs.org>\n"
-"Language-Team: Swedish <sv@li.org>\n"
-"Language: sv\n"
+"POT-Creation-Date: 2013-01-17 14:04+0100\n"
+"PO-Revision-Date: 2013-03-03 09:23+0100\n"
+"Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
+"Language-Team: Czech <kde-i18n-doc@kde.org>\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 1.5\n"
 
-#: amp.cc:60 automatable.cc:158
+#: amp.cc:60 automatable.cc:160
 msgid "Fader"
-msgstr "Volymreglage"
+msgstr "Prolínač"
 
 #: audio_diskstream.cc:244
 msgid "AudioDiskstream: Playlist \"%1\" isn't an audio playlist"
-msgstr ""
+msgstr "AudioDiskstream: Seznam skladeb \"%1\" není seznamem zvukových skladeb"
 
 #: audio_diskstream.cc:296
 msgid "AudioDiskstream %1: there is no existing playlist to make a copy of!"
 msgstr ""
+"AudioDiskstream %1: není žádný seznam skladeb, který by bylo lze kopírovat!"
 
 #: audio_diskstream.cc:783 audio_diskstream.cc:793
 msgid ""
 "AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"
 msgstr ""
+"AudioDiskstream %1: Při doplňování nelze číst %2 ze seznamu skladeb "
+"u snímku %3"
 
 #: audio_diskstream.cc:949
 msgid "AudioDiskstream %1: cannot read %2 from playlist at frame %3"
-msgstr ""
+msgstr "AudioDiskstream %1: Nelze číst %2 ze seznamu skladeb u snímku %3"
 
 #: audio_diskstream.cc:1318 audio_diskstream.cc:1335
 msgid "AudioDiskstream %1: cannot write to disk"
-msgstr ""
+msgstr "AudioDiskstream %1: Nelze zapisovat na disk"
 
 #: audio_diskstream.cc:1378
 msgid "AudioDiskstream \"%1\": cannot flush captured data to disk!"
-msgstr ""
+msgstr "AudioDiskstream %1: Zachycená data nelze zapisovat na disk!"
 
 #: audio_diskstream.cc:1472
 msgid "%1: could not create region for complete audio file"
-msgstr ""
+msgstr "%1: Nepodařilo se vytvořit oblast pro úplný zvukový soubor"
 
 #: audio_diskstream.cc:1506
 msgid "AudioDiskstream: could not create region for captured audio!"
 msgstr ""
+"AudioDiskstream: Nepodařilo se vytvořit oblast pro zaznamenaný zvukový "
+"materiál!"
 
 #: audio_diskstream.cc:1614
 msgid "programmer error: %1"
-msgstr ""
+msgstr "Chyba v programování: %1"
 
 #: audio_diskstream.cc:1840
 msgid "AudioDiskstream: channel %1 out of range"
-msgstr ""
+msgstr "AudioDiskstream: Kanál %1 překročení rozsahu"
 
-#: audio_diskstream.cc:1854 midi_diskstream.cc:1178
+#: audio_diskstream.cc:1854 midi_diskstream.cc:1176
 msgid "%1:%2 new capture file not initialized correctly"
-msgstr ""
+msgstr "%1:%2 nový záznamový soubor neinicializován správně"
 
 #: audio_diskstream.cc:2135
 msgid "%1: cannot restore pending capture source file %2"
-msgstr ""
+msgstr "%1: Nelze obnovit předběžný záznamový zdrojový soubor %2"
 
 #: audio_diskstream.cc:2157
 msgid "%1: incorrect number of pending sources listed - ignoring them all"
 msgstr ""
+"%1: Seznam obsahuje nesprávný počet předběžných zdrojů - všechny jsou "
+"přehlíženy"
 
 #: audio_diskstream.cc:2181
 msgid "%1: cannot create whole-file region from pending capture sources"
 msgstr ""
+"%1: Z předběžných záznamových zdrojů nelze vytvořit žádnou oblast pro úplný "
+"soubor"
 
 #: audio_library.cc:71
 msgid "Could not open %1.  Audio Library not saved"
-msgstr ""
+msgstr "Nepodařilo se otevřít %1. Zvuková knihovna nebyla uložena"
 
 #: audio_playlist.cc:504
 msgid ""
 "Legacy crossfade involved an incoming region not present in playlist \"%1\" "
 "- crossfade discarded"
 msgstr ""
+"Do prolínání byla zapojena zesilující oblast, která ale neexistuje "
+"v seznamu skladeb \"%1\" - prolínání zahozeno"
 
 #: audio_playlist.cc:520
 msgid ""
 "Legacy crossfade involved an outgoing region not present in playlist \"%1\" "
 "- crossfade discarded"
 msgstr ""
+"Do prolínání byla zapojena zeslabující oblast, která ale neexistuje "
+"v seznamu skladeb \"%1\" - prolínání zahozeno"
 
 #: audio_playlist_importer.cc:68
 msgid "Audio Playlists"
-msgstr ""
+msgstr "Seznamy zvukových skladeb"
 
 #: audio_playlist_importer.cc:161
 msgid "region"
-msgstr ""
+msgstr "Oblast"
 
 #: audio_playlist_importer.cc:163
 msgid "regions"
-msgstr ""
+msgstr "Oblasti"
 
 #: audio_playlist_importer.cc:174 audio_track_importer.cc:245
 msgid "A playlist with this name already exists, please rename it."
-msgstr ""
+msgstr "Seznam skladeb s tímto názvem již existuje. Přejmenujte jej, prosím."
 
 #: audio_playlist_importer.cc:183
 msgid "badly-formed XML in imported playlist"
-msgstr ""
+msgstr "Špatně utvořený XML v zavedeném seznamu skladeb"
 
 #: audio_playlist_importer.cc:265
 msgid "Audio Playlists (unused)"
-msgstr ""
+msgstr "Seznamy zvukových skladeb (nepoužívané)"
 
 #: audio_playlist_source.cc:171 audiosource.cc:913 file_source.cc:527
 #: midi_playlist_source.cc:144 midi_playlist_source.cc:152
-#: midi_playlist_source.cc:159 midi_source.cc:371 plugin_insert.cc:644
-#: rb_effect.cc:332 session.cc:2445 session.cc:2478 session.cc:3623
-#: session_handle.cc:87 sndfilesource.cc:121
+#: midi_playlist_source.cc:159 midi_source.cc:365 plugin_insert.cc:644
+#: session.cc:2445 session.cc:2478 session.cc:3623 session_handle.cc:87
+#: sndfilesource.cc:121
 msgid "programming error: %1"
-msgstr ""
+msgstr "Chyba v programování: %1"
 
 #: audio_region_importer.cc:75
 msgid "Audio Regions"
-msgstr ""
+msgstr "Oblasti zvuku"
 
 #: audio_region_importer.cc:145
 msgid "Length: "
-msgstr ""
+msgstr "Délka: "
 
 #: audio_region_importer.cc:147
 msgid ""
 "\n"
 "Position: "
 msgstr ""
+"\n"
+"Poloha: "
 
 #: audio_region_importer.cc:149
 msgid ""
 "\n"
 "Channels: "
 msgstr ""
+"\n"
+"Kanály: "
 
 #: audio_track.cc:167
-#, fuzzy
 msgid "Unknown bundle \"%1\" listed for input of %2"
-msgstr "Okänd anslutning \"%1\" listad för %2 av %3"
+msgstr "Neznámý kabel \"%1\" uvedený pro vstup %2"
 
 #: audio_track.cc:169
 msgid "in 1"
-msgstr ""
+msgstr "in 1"
 
 #: audio_track.cc:170
 msgid "No input bundles available as a replacement"
-msgstr ""
+msgstr "Nejsou žádné vhodné vstupní kabely jako náhrada"
 
 #: audio_track.cc:174
-#, fuzzy
 msgid "Bundle %1 was not available - \"in 1\" used instead"
-msgstr "Anslutning %1 inte tillgänglig - \"in 1\" används instället"
+msgstr "Kabel %1 nebyl dostupný - místo něj se používá \"in 1\""
 
 #: audio_track.cc:183
 msgid "improper input channel list in XML node (%1)"
-msgstr ""
+msgstr "Uzel XML (%1) obsahuje nevhodný seznam vstupních kanálů"
 
 #: audio_track_importer.cc:69
 msgid "Audio Tracks"
-msgstr ""
+msgstr "Zvukové stopy"
 
 #: audio_track_importer.cc:254 audio_track_importer.cc:260
 msgid "badly-formed XML in imported track"
-msgstr ""
+msgstr "Špatně utvořený XML v zavedené stopě"
 
 #: audio_track_importer.cc:288
 msgid "Error Importing Audio track %1"
-msgstr ""
+msgstr "Chyba při zavádění zvukové stopy %1"
 
 #: audioanalyser.cc:50
 msgid "cannot load VAMP plugin \"%1\""
-msgstr ""
+msgstr "Nelze nahrát přídavný modul VAMP \"%1\""
 
 #: audioanalyser.cc:70
 msgid "VAMP Plugin \"%1\" could not be loaded"
-msgstr ""
+msgstr "Přídavný modul VAMP \"%1\" se nepodařilo nahrát"
 
 #: audioengine.cc:186
 msgid ""
 "This version of JACK is old - you should upgrade to a newer version that "
 "supports jack_port_type_get_buffer_size()"
 msgstr ""
+"tato verze JACK je stará - Měl byste provést povýšení na novější verzi, která "
+"podporuje jack_port_type_get_buffer_size()"
 
 #: audioengine.cc:190
-#, fuzzy
 msgid "Connect session to engine"
-msgstr "Ansluter till ljudmotorn"
+msgstr "Spojit sezení se strojem"
 
 #: audioengine.cc:844
 msgid ""
 "a port with the name \"%1\" already exists: check for duplicated track/bus "
 "names"
 msgstr ""
+"Přípojka s názvem \"%1\" již existuje: Prověřte na zdvojené názvy stop/sběrnic"
 
 #: audioengine.cc:846 session.cc:1695
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
 msgstr ""
+"Nejsou dostupné další přípojky JACK. Pokud potřebujete tolik stop, musíte "
+"zastavit %1 a spustit JACK znovu s více přípojkami."
 
 #: audioengine.cc:849
-#, fuzzy
 msgid "AudioEngine: cannot register port \"%1\": %2"
-msgstr "AudioEngine: kan inte ansluta %1 (%2) till %3 (%4)"
+msgstr "AudioEngine: Nelze zaregistrovat přípojku \"%1\": %2"
 
 #: audioengine.cc:879
 msgid "unable to create port: %1"
-msgstr ""
+msgstr "Nelze vytvořit přípojku: %1"
 
 #: audioengine.cc:933
 msgid "connect called before engine was started"
-msgstr ""
+msgstr "Zavolání connect (spojení) před spuštěním stroje"
 
 #: audioengine.cc:959
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
-msgstr "AudioEngine: kan inte ansluta %1 (%2) till %3 (%4)"
+msgstr "AudioEngine: Nelze spojit %1 (%2) s %3 (%4)"
 
 #: audioengine.cc:974 audioengine.cc:1005
 msgid "disconnect called before engine was started"
-msgstr ""
+msgstr "Zavolání disconnect (odpojení) před spuštěním stroje"
 
 #: audioengine.cc:1053
 msgid "get_port_by_name() called before engine was started"
-msgstr ""
+msgstr "Zavolání get_port_by_name() před spuštěním stroje"
 
 #: audioengine.cc:1105
 msgid "get_ports called before engine was started"
-msgstr ""
+msgstr "Zavolání get_ports před spuštěním stroje"
 
 #: audioengine.cc:1428
 msgid "failed to connect to JACK"
-msgstr ""
+msgstr "Nepodařilo se spojit se s JACK"
 
-#: audioregion.cc:1643
+#: audioregion.cc:1636
 msgid ""
 "You have requested an operation that requires audio analysis.\n"
 "\n"
@@ -257,2281 +276,2407 @@ msgid ""
 "This dialog will not display again.  But you may notice a slight delay in "
 "this and future transient-detection operations.\n"
 msgstr ""
+"Požadoval jste operaci, jež vyžaduje analýzu zvuku.\n"
+"\n"
+"Nyní máte \"auto-analyse-audio\" vypnuto, což znamená, že přechodná data"
+"se musí pokaždé, když je to potřeba, vytvářet znovu.\n"
+"\n"
+"Pokud s přechodnými daty pracujete častěji, měl byste zřejmě "
+"\"auto-analyse-audio\" zapnout a Ardour spustit znovu.\n"
+"\n"
+"Tento dialog se znovu nezobrazí. Ale můžete si při této a budoucích "
+"operacích s určením přechodných dat všimnout lehkého zpoždění.\n"
 
 #: audiosource.cc:199
 msgid "cannot rename peakfile for %1 from %2 to %3 (%4)"
-msgstr ""
+msgstr "Nelze přejmenovat vrcholový soubor pro %1 z %2 na %3 (%4)"
 
 #: audiosource.cc:226
 msgid "AudioSource: cannot stat peakfile \"%1\""
-msgstr ""
+msgstr "AudioSource: Vrcholový soubor \"%1\" není zjevný"
 
 #: audiosource.cc:366
 msgid "cannot read sample data for unscaled peak computation"
-msgstr ""
+msgstr "Nelze přečíst vzorkovací data neškálovaný výpočet vrcholů"
 
 #: audiosource.cc:387
-#, fuzzy
 msgid "AudioSource: cannot open peakpath (a) \"%1\" (%2)"
-msgstr "AudioEngine: kan inte ansluta %1 (%2) till %3 (%4)"
+msgstr "AudioSource: Nelze otevřít cestu pro vrcholy (a) \"%1\" (%2)"
 
 #: audiosource.cc:463
-#, fuzzy
 msgid "AudioSource: cannot open peakpath (b) \"%1\" (%2)"
-msgstr "AudioEngine: kan inte ansluta %1 (%2) till %3 (%4)"
+msgstr "AudioSource: Nelze otevřít cestu pro vrcholy (b) \"%1\" (%2)"
 
 #: audiosource.cc:587
 msgid ""
 "AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"
 msgstr ""
+"AudioSource[%1]: čtení vrcholu - Nelze přečíst %2 vzorky při posunu %3 %4"
+"(%5)"
 
 #: audiosource.cc:667
 msgid "%1: could not write read raw data for peak computation (%2)"
 msgstr ""
+"%1: Nepodařilo se přečíst/zapsat nezpracovaná data pro výpočet vrcholů (%2)"
 
 #: audiosource.cc:706
-#, fuzzy
 msgid "AudioSource: cannot open peakpath (c) \"%1\" (%2)"
-msgstr "AudioEngine: kan inte ansluta %1 (%2) till %3 (%4)"
+msgstr "AudioSource: Nelze otevřít cestu pro vrcholy (c) \"%1\" (%2)"
 
 #: audiosource.cc:773 audiosource.cc:886
 msgid "%1: could not write peak file data (%2)"
-msgstr ""
+msgstr "%1: Nepodařilo se zapsat vrcholová data do souboru (%2)"
 
 #: audiosource.cc:924
 msgid "could not truncate peakfile %1 to %2 (error: %3)"
-msgstr ""
+msgstr "Nepodařilo se zkrátit vrcholový soubor %1 na %2 (Chyba: %3)"
 
 #: auditioner.cc:87
 msgid "no outputs available for auditioner - manual connection required"
-msgstr ""
+msgstr "Pro poslech nejsou dostupné žádné výstupy - požadováno ruční připojení"
 
 #: auditioner.cc:135
 msgid "Auditioning of non-audio regions not yet supported"
-msgstr ""
+msgstr "Poslech nezvukových oblastí ještě není podporován"
 
 #: auditioner.cc:160
 msgid "Cannot setup auditioner processing flow for %1 channels"
-msgstr ""
+msgstr "Nelze nastavit signálový tok poslechu pro %1 kanály"
 
-#: automatable.cc:81
+#: automatable.cc:83
 msgid "Automation node has no path property"
-msgstr ""
+msgstr "Uzel automatizace nemá žádnou vlastnost \"cesta\""
 
-#: automatable.cc:101
+#: automatable.cc:103
 msgid "cannot open %2 to load automation data (%3)"
-msgstr ""
+msgstr "Nelze otevřít %2 pro nahrání dat automatizace (%3)"
 
-#: automatable.cc:129
+#: automatable.cc:131
 msgid "cannot load automation data from %2"
-msgstr ""
+msgstr "Nelze nahrát data automatizace z %2"
 
 #: automation_list.cc:353
 msgid "automation list: cannot load coordinates from XML, all points ignored"
 msgstr ""
+"Seznam automatizace: Nelze nahrát souřadnice z XML. Všechny body se přehlíží"
 
 #: automation_list.cc:399
 msgid ""
 "automation list: no x-coordinate stored for control point (point ignored)"
 msgstr ""
+"Seznam automatizace: Není uložena žádná souřadnice x pro kontrolní bod (bod "
+"se přehlíží)"
 
 #: automation_list.cc:405
 msgid ""
 "automation list: no y-coordinate stored for control point (point ignored)"
 msgstr ""
+"Seznam automatizace: Není uložena žádná souřadnice y pro kontrolní bod (bod "
+"se přehlíží)"
 
 #: automation_list.cc:421
 msgid ""
 "AutomationList: passed XML node called %1, not \"AutomationList\" - ignored"
 msgstr ""
+"Seznam automatizace: Uzel XML s názvem %1, nepředán \"AutomationList\" "
+"- přehlíží se"
 
 #: butler.cc:91
 msgid "Cannot create transport request signal pipe (%1)"
 msgstr ""
+"Nelze vytvořit vedení signálu pro požadavky na přehrávání (transport) (%1)"
 
 #: butler.cc:97 butler.cc:103
 msgid "UI: cannot set O_NONBLOCK on butler request pipe (%1)"
-msgstr ""
+msgstr "UI: Nelze nastavit O_NONBLOCK pro vedení požadavku sluhy (%1)"
 
 #: butler.cc:109
 msgid "Session: could not create butler thread"
-msgstr ""
+msgstr "Sezení: Nepodařilo se vytvořit vlákno sluhy"
 
 #: butler.cc:156
 msgid "poll on butler request pipe failed (%1)"
-msgstr ""
+msgstr "průzkum na vedení požadavku sluhy se nezdařil (%1)"
 
 #: butler.cc:163
 msgid "Error on butler thread request pipe: fd=%1 err=%2"
-msgstr ""
+msgstr "Chyba ve vedení požadavku vlákna sluhy: fd=%1 err=%2"
 
 #: butler.cc:201
 msgid "Error reading from butler request pipe"
-msgstr ""
+msgstr "Chyba při čtení vedení požadavku sluhy"
 
 #: butler.cc:248
 msgid "Butler read ahead failure on dstream %1"
-msgstr ""
+msgstr "Chyba při čtení sluhy u dstream %1"
 
 #: butler.cc:285
 msgid "Butler write-behind failure on dstream %1"
-msgstr ""
+msgstr "Chyba při zápisu sluhy u dstream %1"
 
 #: control_protocol_manager.cc:134
 msgid "control protocol name \"%1\" has no descriptor"
-msgstr ""
+msgstr "Název kontrolního protokolu \"%1\" nemá žádný popis"
 
 #: control_protocol_manager.cc:141
 msgid "control protocol name \"%1\" could not be initialized"
-msgstr ""
+msgstr "Kontrolní protokol \"%1\" se nepodařilo inicializovat"
 
 #: control_protocol_manager.cc:201
 msgid "Instantiating mandatory control protocol %1"
-msgstr ""
+msgstr "Doložení povinného kontrolního protokolu %1"
 
 #: control_protocol_manager.cc:222
 msgid "looking for control protocols in %1\n"
-msgstr ""
+msgstr "Hledání kontrolního protokolu v %1\n"
 
 #: control_protocol_manager.cc:247
 msgid "Control protocol %1 not usable"
-msgstr ""
+msgstr "Kontrolní protokol %1 nepoužitelný"
 
 #: control_protocol_manager.cc:264
 msgid "Control surface protocol discovered: \"%1\"\n"
-msgstr ""
+msgstr "Protokol pro kontrolní povrch odkryt: \"%1\"\n"
 
 #: control_protocol_manager.cc:282
 msgid "ControlProtocolManager: cannot load module \"%1\" (%2)"
-msgstr ""
+msgstr "ControlProtocolManager: Nelze nahrát modul \"%1\" (%2)"
 
 #: control_protocol_manager.cc:290
 msgid "ControlProtocolManager: module \"%1\" has no descriptor function."
-msgstr ""
+msgstr "ControlProtocolManager: Modul \"%1\" nemá žádnou funkci k popisu"
 
 #: cycle_timer.cc:38
 msgid "CycleTimer::get_mhz(): can't open /proc/cpuinfo"
-msgstr ""
+msgstr "CycleTimer::get_mhz(): Nelze otevřít /proc/cpuinfo"
 
 #: cycle_timer.cc:50
 msgid "CycleTimer::get_mhz(): cannot locate cpu MHz in /proc/cpuinfo"
-msgstr ""
+msgstr "CycleTimer::get_mhz(): Nelze nalézt takt CPU (MHz) v /proc/cpuinfo"
 
 #: cycle_timer.cc:73
 msgid "cannot locate cpu MHz in /proc/cpuinfo"
-msgstr ""
+msgstr "Nelze nalézt takt CPU (MHz) v /proc/cpuinfo"
 
-#: data_type.cc:27
+#: data_type.cc:27 io.cc:1345
 msgid "audio"
-msgstr ""
+msgstr "Zvuk"
 
 #: data_type.cc:28 session.cc:1637 session.cc:1640
 msgid "MIDI"
-msgstr ""
+msgstr "MIDI"
 
 #: data_type.cc:29
 msgid "unknown"
-msgstr ""
+msgstr "Neznámý"
 
 #: delivery.cc:114
 msgid "main outs"
-msgstr ""
+msgstr "Hlavní výstupy"
 
 #: delivery.cc:117 send.cc:61
 msgid "listen"
-msgstr ""
+msgstr "Poslech"
 
 #: diskstream.cc:303
 msgid "Location \"%1\" not valid for track loop (start >= end)"
-msgstr ""
+msgstr "Časový bod \"%1\" pro smyčku stopy neplatný (Začátek >= Konec)"
 
 #: export_channel.cc:110
 msgid "Could not get port for export channel \"%1\", dropping the channel"
 msgstr ""
+"Nepodařilo se dostat žádnou přípojku pro vyváděcí kanál \"%1\". Kanál se "
+"zahazuje"
 
 #: export_failed.cc:32
 msgid "Export failed: %1"
-msgstr ""
+msgstr "Vyvedení se nezdařilo: %1"
 
 #: export_filename.cc:117
 msgid "Existing export folder for this session (%1) does not exist - ignored"
 msgstr ""
+"Stávající složka pro vyvedení pro toto sezení (%1) neexistuje - "
+"přehlíží se"
 
 #: export_filename.cc:222
 msgid "No Time"
-msgstr "Ingen tid"
+msgstr "Žádný čas"
 
 #: export_filename.cc:231
 msgid "Invalid time format"
-msgstr ""
+msgstr "Neplatný časový formát"
 
 #: export_filename.cc:240
 msgid "No Date"
-msgstr "Inget datum"
+msgstr "Žádné datum"
 
 #: export_filename.cc:255
 msgid "Invalid date format"
-msgstr ""
+msgstr "Neplatný formát data"
 
 #: export_format_manager.cc:57
 msgid "CD"
-msgstr ""
+msgstr "CD"
 
 #: export_format_manager.cc:66
 msgid "DVD-A"
-msgstr ""
+msgstr "DVD-A"
 
 #: export_format_manager.cc:80
 msgid "iPod"
-msgstr ""
+msgstr "iPod"
 
 #: export_format_manager.cc:91
 msgid "Something else"
-msgstr ""
+msgstr "Něco jiného"
 
 #: export_format_manager.cc:110
 msgid "Any"
-msgstr ""
+msgstr "Jakýkoli"
 
 #: export_format_manager.cc:111
 msgid "Lossless (linear PCM)"
-msgstr ""
+msgstr "Bezztrátový (lineární PCM)"
 
 #: export_format_manager.cc:112
 msgid "Lossy compression"
-msgstr ""
+msgstr "Ztrátová komprese"
 
 #: export_format_manager.cc:113
 msgid "Lossless compression"
-msgstr ""
+msgstr "Bezztrátová komprese"
 
 #: export_format_manager.cc:207 export_format_specification.cc:575
 msgid "Session rate"
-msgstr ""
+msgstr "Kmitočet sezení"
 
 #: export_format_specification.cc:533
 msgid "normalize"
-msgstr ""
+msgstr "Normalizovat"
 
 #: export_format_specification.cc:537
 msgid "trim"
-msgstr ""
+msgstr "Oříznout"
 
 #: export_format_specification.cc:539
 msgid "trim start"
-msgstr ""
+msgstr "Ustřihnout začátek"
 
 #: export_format_specification.cc:541
 msgid "trim end"
-msgstr ""
+msgstr "Ustřihnout konec"
 
 #: export_formats.cc:49
 msgid "Shaped Noise"
-msgstr ""
+msgstr "Nasměrovaný šum"
 
 #: export_formats.cc:50
 msgid "Triangular"
-msgstr ""
+msgstr "Trojúhelníkový"
 
 #: export_formats.cc:51
 msgid "Rectangular"
-msgstr ""
+msgstr "Obdélníkový"
 
 #: export_formats.cc:52 session.cc:4834 session.cc:4850
 msgid "None"
-msgstr ""
+msgstr "Žádný"
 
 #: export_formats.cc:159
 msgid "8bit"
-msgstr ""
+msgstr "8bit"
 
 #: export_formats.cc:161
 msgid "16bit"
-msgstr ""
+msgstr "16bit"
 
 #: export_formats.cc:163
 msgid "24bit"
-msgstr ""
+msgstr "24bit"
 
 #: export_formats.cc:165
 msgid "32bit"
-msgstr ""
+msgstr "32bit"
 
 #: export_formats.cc:167
 msgid "float"
-msgstr ""
+msgstr "float"
 
 #: export_formats.cc:169
 msgid "double"
-msgstr ""
+msgstr "dvojitý"
 
 #: export_formats.cc:171
 msgid "8bit unsigned"
-msgstr ""
+msgstr "8bit bez znaménka"
 
 #: export_formats.cc:173
 msgid "Vorbis sample format"
-msgstr ""
+msgstr "Vzorkovací formát Vorbis"
 
 #: export_formats.cc:175
 msgid "No sample format"
-msgstr ""
+msgstr "Žádný vzorkovací formát"
 
 #: export_handler.cc:313
 msgid "Editor: cannot open \"%1\" as export file for CD marker file"
-msgstr ""
+msgstr "Editor: Nelze otevřít \"%1\" jako soubor vyvedení pro značku CD"
 
 #: export_handler.cc:395 export_handler.cc:398
 msgid "an error occured while writing a TOC/CUE file: %1"
-msgstr ""
+msgstr "Při zápisu souboru TOC/CUE se vyskytla chyba:%1"
 
 #: export_handler.cc:620 export_handler.cc:678
 msgid "Cannot convert %1 to Latin-1 text"
-msgstr ""
+msgstr "Nelze převést %1 na kódování Latin-1"
 
 #: export_profile_manager.cc:94
 msgid "Searching for export formats in %1"
-msgstr ""
+msgstr "Hledání vyváděcích formátů v %1"
 
 #: export_profile_manager.cc:100
 msgid "Unable to create export format directory %1: %2"
-msgstr ""
+msgstr "Nelze vytvořit adresář %1 pro vyváděcí formáty: %2"
 
 #: export_profile_manager.cc:258
 msgid "Unable to remove export preset %1: %2"
-msgstr ""
+msgstr "Nelze odstranit přednastavení vyvádění %1: %2"
 
 #: export_profile_manager.cc:348
 msgid "Selection"
-msgstr ""
+msgstr "Výběr"
 
 #: export_profile_manager.cc:466
 msgid "Session"
-msgstr ""
+msgstr "Sezení"
 
 #: export_profile_manager.cc:587
 msgid "Unable to rename export format %1 to %2: %3"
-msgstr ""
+msgstr "Nelze přejmenovat vyváděcí formát %1 na %2: %3"
 
 #: export_profile_manager.cc:619
 msgid "Unable to remove export profile %1: %2"
-msgstr ""
+msgstr "Nelze odstranit vyváděcí profil %1: %2"
 
 #: export_profile_manager.cc:636
 msgid "empty format"
-msgstr ""
+msgstr "Prázdný formát"
 
 #: export_profile_manager.cc:805
-#, fuzzy
 msgid "No timespan has been selected!"
-msgstr "Inget format valt!"
+msgstr "Nebyl vybrán žádný časový úsek!"
 
 #: export_profile_manager.cc:809
-#, fuzzy
 msgid "No channels have been selected!"
-msgstr "Inget format valt!"
+msgstr "Nebyly vybrány žádné kanály!"
 
 #: export_profile_manager.cc:813
 msgid "Some channels are empty"
-msgstr ""
+msgstr "Některé kanály jsou prázdné"
 
 #: export_profile_manager.cc:846
 msgid "No format selected!"
-msgstr "Inget format valt!"
+msgstr "Nebyl vybrán žádný formát!"
 
 #: export_profile_manager.cc:848
 msgid "All channels are empty!"
-msgstr ""
+msgstr "Všechny kanály jsou prázdné!"
 
 #: export_profile_manager.cc:850
 msgid "One or more of the selected formats is not compatible with this system!"
-msgstr ""
+msgstr "Jeden nebo více formátu není slučitelný s tímto systémem!"
 
 #: export_profile_manager.cc:853
 msgid ""
 "%1 supports only %2 channels, but you have %3 channels in your channel "
 "configuration"
 msgstr ""
+"% podporuje jen %2 kanály, ale ve vašem nastavení kanálů se nachází %3 kanál"
 
-#: file_source.cc:196 session_state.cc:2889
+#: file_source.cc:196 session_state.cc:2885
 msgid ""
 "there are already 1000 files with names like %1; versioning discontinued"
-msgstr ""
+msgstr "Je již 1000 souborů s názvem, jako je %1; verzování skončeno"
 
 #: file_source.cc:205
 msgid "cannot rename file source from %1 to %2 (%3)"
-msgstr ""
+msgstr "Nelze přejmenovat zdroj souboru z %1 na %2 (%3)"
 
 #: file_source.cc:248 file_source.cc:376
 msgid "FileSource: search path not set"
-msgstr ""
+msgstr "Zdroj souboru: Cesta hledání nenastavena"
 
 #: file_source.cc:311 file_source.cc:446
 msgid "Filesource: cannot find required file (%1): while searching %2"
-msgstr ""
+msgstr "Zdroj souboru: Nelze najít požadovaný soubor (%1) při prohledávání %2"
 
 #: file_source.cc:438
 msgid ""
 "FileSource: \"%1\" is ambigous when searching %2\n"
 "\t"
 msgstr ""
+"Zdroj souboru: \"%1\" je při prohledávání %2 nejednoznačný\n"
+"\t"
 
 #: file_source.cc:492
 msgid "Filesource: cannot find required file (%1): %2"
-msgstr ""
+msgstr "Zdroj souboru: Nelze najít požadovaný soubor (%1): %2"
 
 #: file_source.cc:499
 msgid "Filesource: cannot check for existing file (%1): %2"
-msgstr ""
+msgstr "Zdroj souboru: U souboru (%1) nelze ověřit, zda existuje: %2"
 
 #: file_source.cc:533
 msgid ""
 "Programming error! %1 tried to rename a file over another file! It's safe to "
 "continue working, but please report this to the developers."
 msgstr ""
+"Chyba při programování! %1 se pokusil přejmenovat soubor na jiný s již "
+"existujícím "
+"názvem! Můžete bezpečně pracovat dál, ale nahlašte to, prosím, vývojářům."
 
 #: file_source.cc:538
 msgid "cannot rename file %1 to %2 (%3)"
-msgstr ""
+msgstr "Nelze přejmenovat soubor %1 na %2 (%3)"
 
 #: filesystem_paths.cc:73
 msgid "Cannot create Configuration directory %1 - cannot run"
-msgstr ""
+msgstr "Nelze vytvořit adresář pro nastavení %1 - nelze spustit"
 
 #: filesystem_paths.cc:78
 msgid ""
 "Configuration directory %1 already exists and is not a directory/folder - "
 "cannot run"
 msgstr ""
+"Adresář pro nastavení %1 již existuje, není ale žádný adresář/složka - nelze "
+"spustit"
 
 #: filesystem_paths.cc:91
 msgid "ARDOUR_DLL_PATH not set in environment - exiting\n"
-msgstr ""
+msgstr "Proměnná prostředí ARDOUR_DLL_PATH není nastavena - ukončuje se\n"
 
 #: filesystem_paths.cc:107
 msgid "ARDOUR_CONFIG_PATH not set in environment - exiting\n"
-msgstr ""
+msgstr "Proměnná prostředí ARDOUR_CONFIG_PATH není nastavena - ukončuje se\n"
 
 #: filesystem_paths.cc:127
 msgid "ARDOUR_DATA_PATH not set in environment - exiting\n"
-msgstr ""
+msgstr "Proměnná prostředí ARDOUR_DATA_PATH není nastavena - ukončuje se\n"
 
 #: filter.cc:66
 msgid "filter: error creating name for new file based on %1"
-msgstr ""
+msgstr "Filtr: Chyba při vytváření názvu pro nový soubor z %1"
 
 #: filter.cc:78
 msgid "filter: error creating new file %1 (%2)"
-msgstr ""
+msgstr "Filtr: Chyba při vytváření nového souboru %1 (%2)"
 
 #: find_session.cc:51
 msgid "Could not resolve path: %1 (%2)"
-msgstr ""
+msgstr "Nepodařilo se vyřešit cestu: %1 (%2)"
 
 #: find_session.cc:63
 msgid "cannot check session path %1 (%2)"
-msgstr ""
+msgstr "Nelze ověřit cestu sezení %1 (%2)"
 
 #: find_session.cc:89
 msgid "cannot check statefile %1 (%2)"
-msgstr ""
+msgstr "Nelze ověřit soubor sezení %1 (%2)"
 
 #: find_session.cc:125
 msgid "%1 is not a snapshot file"
-msgstr ""
+msgstr "%1 není souborem se snímkem"
 
 #: find_session.cc:142
 msgid "cannot determine current working directory (%1)"
-msgstr ""
+msgstr "Nelze určit nynější pracovní adresář (%1)"
 
 #: find_session.cc:159
 msgid "unknown file type for session %1"
-msgstr ""
+msgstr "Neznámý typ souboru pro sezení %1"
 
-#: globals.cc:204
+#: globals.cc:203
 msgid "Could not set system open files limit to \"unlimited\""
 msgstr ""
+"Nepodařilo se nastavit systémové omezení pro otevřené soubory na \"neomezeno\""
 
-#: globals.cc:206
+#: globals.cc:205
 msgid "Could not set system open files limit to %1"
-msgstr ""
+msgstr "Nepodařilo se nastavit systémové omezení pro otevřené soubory na %1"
 
-#: globals.cc:210
+#: globals.cc:209
 msgid "Your system is configured to limit %1 to only %2 open files"
-msgstr ""
+msgstr "Vaše systémové nastavení omezuje %1 na jen %2 otevřené soubory"
 
-#: globals.cc:214
+#: globals.cc:213
 msgid "Could not get system open files limit (%1)"
-msgstr ""
+msgstr "Nepodařilo se dostat systémové omezení pro otevřené soubory (%1)"
 
-#: globals.cc:267
+#: globals.cc:264
 msgid "Loading configuration"
-msgstr ""
+msgstr "Nahrává se nastavení"
 
 #: import.cc:207
 msgid "Could not find a source for %1 even though we are updating this file!"
-msgstr ""
+msgstr "Nepodařilo se najít zdroj pro %1, i když se tento soubor aktualizuje!"
 
 #: import.cc:238
 msgid "Unable to create file %1 during import"
-msgstr ""
+msgstr "Soubor %1 nelze během zavádění vytvořit"
 
 #: import.cc:264
 msgid "Resampling %1 from %2kHz to %3kHz"
-msgstr ""
+msgstr "Převzorkování %1 z %2 kHz na %3 kHz"
 
 #: import.cc:270
 msgid "Copying %1"
-msgstr ""
+msgstr "Kopíruje se %1"
 
-#: import.cc:448
+#: import.cc:447
 msgid "Track %1 of %2 contained no usable MIDI data"
-msgstr ""
+msgstr "Stopa %1 z %2 neobsahovala žádná užitečná data MIDI"
 
-#: import.cc:455
+#: import.cc:454
 msgid "MIDI file %1 was not readable (no reason available)"
-msgstr ""
+msgstr "Soubor MIDI %1 nebyl čitelný (žádná příčina se nedá určit)"
 
-#: import.cc:501
+#: import.cc:500
 msgid "Import: cannot open input sound file \"%1\""
-msgstr ""
+msgstr "Zavedení: Nelze otevřít vstupní zvukový soubor \"%1\""
 
-#: import.cc:512
+#: import.cc:511
 msgid "Import: error opening MIDI file"
-msgstr ""
+msgstr "Zavedení: Chyba při otevírání souboru MIDI"
 
-#: import.cc:551
+#: import.cc:550
 msgid "Loading MIDI file %1"
-msgstr ""
+msgstr "Nahrává se soubor MIDI %1"
 
-#: import.cc:616
+#: import.cc:615
 msgid "Failed to remove some files after failed/cancelled import operation"
 msgstr ""
+"Nepodařilo se odstranit některé soubory po nezdařeném/přerušeném zavedení"
 
-#: instrument_info.cc:40 instrument_info.cc:61
+#: instrument_info.cc:40 instrument_info.cc:62
 msgid "Unknown"
-msgstr ""
+msgstr "Neznámý"
 
-#: instrument_info.cc:230
+#: instrument_info.cc:205
 msgid "preset %1 (bank %2)"
-msgstr ""
+msgstr "Přednastavení %1 (banka %2)"
 
 #: internal_send.cc:278 internal_send.cc:279
 msgid "%1 - cannot find any track/bus with the ID %2 to connect to"
-msgstr ""
+msgstr "%1 - Nelze najít stopu/sběrnici s ID %2 ke spojení s"
 
 #: io.cc:208
 msgid "IO: cannot disconnect port %1 from %2"
-msgstr ""
+msgstr "IO: Přípojku %1 nelze oddělit od %2"
 
 #: io.cc:343 io.cc:428
 msgid "IO: cannot register input port %1"
-msgstr ""
+msgstr "IO: Nelze zapsat vstupní přípojku %1"
 
 #: io.cc:348 io.cc:433
 msgid "IO: cannot register output port %1"
-msgstr ""
+msgstr "IO: Nelze zapsat výstupní přípojku %1"
 
 #: io.cc:591 io.cc:647
 msgid "incorrect XML node \"%1\" passed to IO object"
-msgstr ""
+msgstr "Nesprávný uzel XML \"%1\" odevzdán objektu IO"
 
 #: io.cc:706
 msgid "in"
-msgstr ""
+msgstr "vst"
 
 #: io.cc:706
-#, fuzzy
 msgid "out"
-msgstr "utgång"
+msgstr "výst"
 
 #: io.cc:707
 msgid "input"
-msgstr "ingång"
+msgstr "Vstup"
 
 #: io.cc:707
 msgid "output"
-msgstr "utgång"
+msgstr "Výstup"
 
 #: io.cc:717
-#, fuzzy
 msgid "Unknown bundle \"%1\" listed for %2 of %3"
-msgstr "Okänd anslutning \"%1\" listad för %2 av %3"
+msgstr "Neznámý kabel \"%1\"uvedený pro %2 %3"
 
 #: io.cc:783
-#, fuzzy
 msgid "Bundle %1 was not available - \"%2\" used instead"
-msgstr "Anslutning %1 inte tillgänglig - \"%2\" används istället"
+msgstr "Kabel %1 nebyl dostupný - místo něj se používá \"%2\" "
 
 #: io.cc:786
 msgid "No %1 bundles available as a replacement"
-msgstr ""
+msgstr "Žádné %1 kabely dostupné jako náhrada"
 
 #: io.cc:889
 msgid "%1: cannot create I/O ports"
-msgstr ""
+msgstr "%1: Nelze vytvořit přípojky vstup/výstup"
 
 #: io.cc:1017 io.cc:1121
 msgid "IO: badly formed string in XML node for inputs \"%1\""
-msgstr ""
+msgstr "IO: Špatně utvořený řetězec v uzlu XML pro vstupy \"%1\""
 
 #: io.cc:1022 io.cc:1126
 msgid "bad input string in XML node \"%1\""
-msgstr ""
+msgstr "IO: Špatný řetězec pro vstup v uzlu XML \"%1\""
 
 #: io.cc:1060
 msgid "IO: badly formed string in XML node for outputs \"%1\""
-msgstr ""
+msgstr "IO: Špatně utvořený řetězec v uzlu XML pro výstupy \"%1\""
 
 #: io.cc:1065
 msgid "IO: bad output string in XML node \"%1\""
-msgstr ""
+msgstr "IO: Špatný řetězec pro výstup v uzlu XML \"%1\""
+
+#: io.cc:1347
+msgid "midi"
+msgstr "midi"
 
 #: io.cc:1410
 #, c-format
 msgid "%s %u"
-msgstr ""
+msgstr "%s %u"
 
 #: io.cc:1457
 #, c-format
 msgid "%s in"
-msgstr ""
+msgstr "%s vstup"
 
 #: io.cc:1459
 #, c-format
 msgid "%s out"
-msgstr ""
+msgstr "%s výstup"
 
 #: io.cc:1534 session.cc:491 session.cc:520
 msgid "mono"
-msgstr ""
+msgstr "Mono"
 
 #: io.cc:1536 session.cc:504 session.cc:534
 msgid "L"
-msgstr ""
+msgstr "L"
 
 #: io.cc:1536 session.cc:506 session.cc:536
 msgid "R"
-msgstr ""
+msgstr "P"
 
 #: io.cc:1538 io.cc:1544
 #, c-format
 msgid "%d"
-msgstr ""
+msgstr "%d"
 
 #: ladspa_plugin.cc:87
 msgid "LADSPA: module has no descriptor function."
-msgstr ""
+msgstr "LADSPA: Modul nemá žádnou funkci popisu"
 
 #: ladspa_plugin.cc:92
 msgid "LADSPA: plugin has gone away since discovery!"
-msgstr ""
+msgstr "LADSPA: Přídavný modul už není více nalezitelný!"
 
 #: ladspa_plugin.cc:99
 msgid "LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"
 msgstr ""
+"LADSPA: \"%1\" nemůže být použit, neboť nedělá žádný \"inplace processing\""
 
 #: ladspa_plugin.cc:296
 msgid ""
 "illegal parameter number used with plugin \"%1\". This may indicate a change "
 "in the plugin design, and presets may be invalid"
 msgstr ""
+"Špatné číslo parametru pro přídavný modul \"%1\". To může značit změnu v "
+"návrhu"
+"přídavného modulu, a přednastavení jsou případně neplatná"
 
 #: ladspa_plugin.cc:373 ladspa_plugin.cc:418
 msgid "Bad node sent to LadspaPlugin::set_state"
-msgstr ""
+msgstr "Špatný uzel poslán LadspaPlugin::set_state"
 
 #: ladspa_plugin.cc:386 ladspa_plugin.cc:431
 msgid "LADSPA: no ladspa port number"
-msgstr ""
+msgstr "LADSPA: Žádné číslo přípojky LADSPA"
 
 #: ladspa_plugin.cc:392 ladspa_plugin.cc:437
 msgid "LADSPA: no ladspa port data"
-msgstr ""
+msgstr "LADSPA: Žádná data přípojky LADSPA"
 
 #: ladspa_plugin.cc:707
 msgid "LADSPA: cannot load module from \"%1\""
-msgstr ""
+msgstr "LADSPA: Nelze nahrát modul z \"%1\""
 
 #: ladspa_plugin.cc:817
 msgid "Could not locate HOME.  Preset not removed."
-msgstr ""
+msgstr "Nepodařilo se najít HOME. Přednastavení neodstraněno."
 
 #: ladspa_plugin.cc:854 ladspa_plugin.cc:860
 msgid "Could not create %1.  Preset not saved. (%2)"
-msgstr ""
+msgstr "Nepodařilo se vytvořit %1. Přednastavení neuloženo. (%2)"
 
 #: ladspa_plugin.cc:867
 msgid "Error saving presets file %1."
-msgstr ""
+msgstr "Chyba při ukládání souboru s přednastavením %1."
 
 #: ladspa_plugin.cc:905
 msgid "Could not locate HOME.  Preset not saved."
-msgstr ""
+msgstr "Nepodařilo se najít HOME. Přednastavení neuloženo."
 
 #: location.cc:328
 msgid "You cannot put a CD marker at this position"
-msgstr ""
+msgstr "Na toto místo nemůžete dát žádnou značku CD"
 
 #: location.cc:450
 msgid "incorrect XML node passed to Location::set_state"
-msgstr ""
+msgstr "Nesprávný uzel XML předán dál Location::set_state"
 
 #: location.cc:455
 msgid "XML node for Location has no ID information"
-msgstr ""
+msgstr "Uzel XML pro polohu nemá žádnou informaci o ID"
 
 #: location.cc:459
 msgid "XML node for Location has no name information"
-msgstr ""
+msgstr "Uzel XML pro polohu nemá žádnou informaci o názvu"
 
 #: location.cc:466
 msgid "XML node for Location has no start information"
-msgstr ""
+msgstr "Uzel XML pro polohu nemá žádnou informaci o začátku"
 
 #: location.cc:477
 msgid "XML node for Location has no end information"
-msgstr ""
+msgstr "Uzel XML pro polohu nemá žádnou informaci o konci"
 
 #: location.cc:484
 msgid "XML node for Location has no flags information"
-msgstr ""
+msgstr "Uzel XML pro polohu nemá žádnou informaci o příznacích"
 
 #: location.cc:658
 msgid "Locations: attempt to use unknown location as selected location"
-msgstr ""
+msgstr "Locations: Pokus o použití neznámé polohy jako vybrané polohy"
 
 #: location.cc:829
 msgid "incorrect XML mode passed to Locations::set_state"
-msgstr ""
+msgstr "Nesprávný uzel XML předán dál Locations::set_state"
 
-#: location.cc:842 session.cc:4335 session_state.cc:1112
+#: location.cc:842 session.cc:4335 session_state.cc:1108
 msgid "session"
-msgstr ""
+msgstr "Sezení"
 
 #: location.cc:907
 msgid "could not load location from session file - ignored"
-msgstr ""
+msgstr "Nepodařilo se nahrát polohu ze souboru se sezením - přehlíží se"
 
 #: location_importer.cc:61
 msgid "Locations"
-msgstr ""
+msgstr "Polohy"
 
 #: location_importer.cc:123
 msgid "Location: "
-msgstr ""
+msgstr "Poloha:"
 
 #: location_importer.cc:125
 msgid ""
 "Range\n"
 "start: "
 msgstr ""
+"Začátek\n"
+"rozsahu:"
 
 #: location_importer.cc:126
 msgid ""
 "\n"
 "end: "
 msgstr ""
+"\n"
+"Konec:"
 
 #: location_importer.cc:146
 msgid ""
 "The location is the Punch range. It will be imported as a normal range.\n"
 "You may rename the imported location:"
 msgstr ""
+"Poloha je rozsahem přepsání. Bude nahrána jako normální "
+"rozsah.\n"
+"Zavedenou polohu můžete přejmenovat:"
 
 #: location_importer.cc:157
 msgid ""
 "The location is a Loop range. It will be imported as a normal range.\n"
 "You may rename the imported location:"
 msgstr ""
+"Poloha je rozsahem smyčky. Bude nahrána jako normální "
+"rozsah.\n"
+"Zavedenou polohu můžete přejmenovat:"
 
 #: location_importer.cc:168
 msgid ""
 "A location with that name already exists.\n"
 "You may rename the imported location:"
 msgstr ""
+"Poloha s tímto názvem již existuje.\n"
+"Zavedenou polohu můžete přejmenovat:"
 
 #: ltc_slave.cc:268
 msgid "Session framerate adjusted from %1 to LTC's %2."
-msgstr ""
+msgstr "Rychlost snímkování sezení změněna z %1 na %2 (LTC)."
 
 #: ltc_slave.cc:282
 msgid "Session and LTC framerate mismatch: LTC:%1 Session:%2."
-msgstr ""
+msgstr "Rychlost snímkování sezení a LTC se liší: LTC: %1 Sezení: %2."
 
 #: ltc_slave.cc:591
 #, c-format
 msgid "flywheel"
-msgstr ""
+msgstr "Setrvačník"
 
-#: midi_diskstream.cc:166
+#: midi_diskstream.cc:162
 msgid ""
 "%1: I/O configuration change %4 requested to use %2, but channel setup is %3"
 msgstr ""
+"%1: Změna nastavení vstupu/výstupu %4 použije %2, ale počet kanálů je %3"
 
-#: midi_diskstream.cc:218
+#: midi_diskstream.cc:215
 msgid "MidiDiskstream: Playlist \"%1\" isn't a midi playlist"
-msgstr ""
+msgstr "MidiDiskstream: Seznam skladeb \"%1\" není seznamem skladeb MIDI"
 
-#: midi_diskstream.cc:269
+#: midi_diskstream.cc:268
 msgid "MidiDiskstream %1: there is no existing playlist to make a copy of!"
 msgstr ""
+"MidiDiskstream %1: není žádný seznam skladeb, který by bylo lze kopírovat!"
 
-#: midi_diskstream.cc:646
+#: midi_diskstream.cc:612
 msgid "MidiDiskstream %1: cannot read %2 from playlist at frame %3"
-msgstr ""
+msgstr "MidiDiskstream %1: Nelze číst %2 ze seznamu skladeb u snímku %3"
 
-#: midi_diskstream.cc:781
+#: midi_diskstream.cc:751
 msgid "MidiDiskstream %1: cannot write to disk"
-msgstr ""
+msgstr "MidiDiskstream %1: Nelze zapisovat na disk"
 
-#: midi_diskstream.cc:815
+#: midi_diskstream.cc:784
 msgid "MidiDiskstream \"%1\": cannot flush captured data to disk!"
-msgstr ""
+msgstr "MidiDiskstream %1: Zachycená data nelze zapisovat na disk!"
 
-#: midi_diskstream.cc:902
+#: midi_diskstream.cc:873
 msgid "%1: could not create region for complete midi file"
-msgstr ""
+msgstr "%1: Nepodařilo se vytvořit oblast pro úplný soubor MIDI"
 
-#: midi_diskstream.cc:939
+#: midi_diskstream.cc:910
 msgid "MidiDiskstream: could not create region for captured midi!"
 msgstr ""
+"MidiDiskstream: Nepodařilo se vytvořit oblast pro zaznamenaný "
+"materiál MIDI!"
 
-#: midi_diskstream.cc:1143
+#: midi_diskstream.cc:1139
 msgid "MidiDiskstream: XML property channel-mask out of range"
-msgstr ""
+msgstr "MidiDiskstream: Překročení hodnoty masky kanálu vlastnosti XML"
 
 #: midi_model.cc:619
 msgid "No NoteID found for note property change - ignored"
-msgstr ""
+msgstr "Nenalezeno žádné NoteID pro změnu vlastnosti \"note\" - přehlíží se"
 
 #: midi_model.cc:875
 msgid "No SysExID found for sys-ex property change - ignored"
-msgstr ""
+msgstr "Nenalezeno žádné SysExID pro změnu vlastnosti \"sys-ex\" - přehlíží se"
 
 #: midi_model.cc:1953
 msgid "transpose"
-msgstr ""
+msgstr "Převést"
 
-#: midi_patch_manager.cc:126
-msgid "Duplicate MIDI device `%1' in `%2' ignored"
-msgstr ""
-
-#: midi_source.cc:125
+#: midi_source.cc:123
 msgid "Missing parameter property on InterpolationStyle"
-msgstr ""
+msgstr "Chybějící vlastnost \"parameter\" u InterpolationStyle"
 
-#: midi_source.cc:132
+#: midi_source.cc:130
 msgid "Missing style property on InterpolationStyle"
-msgstr ""
+msgstr "Chybějící vlastnost \"style\" u InterpolationStyle"
 
-#: midi_source.cc:144
+#: midi_source.cc:142
 msgid "Missing parameter property on AutomationState"
-msgstr ""
+msgstr "Chybějící vlastnost \"parameter\" u AutomationState"
 
-#: midi_source.cc:151
+#: midi_source.cc:149
 msgid "Missing state property on AutomationState"
-msgstr ""
-
-#: midi_stretch.cc:85
-msgid "MIDI stretch created non-MIDI source"
-msgstr ""
+msgstr "Chybějící vlastnost \"state\" u AutomationState"
 
 #: monitor_processor.cc:53
 msgid "monitor dim"
-msgstr ""
+msgstr "Utlumení sledování "
 
 #: monitor_processor.cc:54
 msgid "monitor cut"
-msgstr ""
+msgstr "Přerušení sledování "
 
 #: monitor_processor.cc:55
 msgid "monitor mono"
-msgstr ""
+msgstr "Monitor Mono"
 
 #: monitor_processor.cc:58
 msgid "monitor dim level"
-msgstr ""
+msgstr "Síla hlasitosti pro Utlumit Monitor"
 
 #: monitor_processor.cc:62
 msgid "monitor solo boost level"
-msgstr ""
+msgstr "Síla hlasitosti pro Monitor Solo Boost"
 
 #: monitor_processor.cc:512
 msgid "cut control %1"
-msgstr ""
+msgstr "Ovládání přerušení %1"
 
 #: monitor_processor.cc:513
 msgid "dim control"
-msgstr ""
+msgstr "Ovládání útlumu"
 
 #: monitor_processor.cc:514
 msgid "polarity control"
-msgstr ""
+msgstr "Ovládání polarity"
 
 #: monitor_processor.cc:515
 msgid "solo control"
-msgstr ""
+msgstr "Ovládání sóla"
 
-#: mtc_slave.cc:235
+#: mtc_slave.cc:234
 msgid "MTC Slave: atomic read of current time failed, sleeping!"
-msgstr ""
+msgstr "MTC Slave: Chyba při atomickém čtení nynějšího času, spánek!"
 
-#: mtc_slave.cc:359
+#: mtc_slave.cc:358
 msgid ""
 "Unknown rate/drop value %1 in incoming MTC stream, session values used "
 "instead"
 msgstr ""
+"Neznámá hodnota %1 pro rychlost snímkování/zahozené snímky v příchozím "
+"datovém proudu MTC, místo "
+"ní se používají hodnoty sezení"
 
-#: mtc_slave.cc:379
+#: mtc_slave.cc:378
 msgid "Session framerate adjusted from %1 TO: MTC's %2."
-msgstr ""
+msgstr "Rychlost snímkování sezení změněna z %1 na MTC: %2"
 
-#: mtc_slave.cc:393
-msgid "Session and MTC framerate mismatch: MTC:%1 %2:%3."
-msgstr ""
+#: mtc_slave.cc:392
+msgid "Session and MTC framerate mismatch: MTC:%1 Ardour:%2."
+msgstr "Rychlost snímkování sezení a MTC se neshodují: MTC: %1 Ardour: %2"
 
 #: operations.cc:24
 msgid "capture"
-msgstr ""
+msgstr "Nahrávat"
 
 #: operations.cc:25
 msgid "paste"
-msgstr ""
+msgstr "Vložit"
 
 #: operations.cc:26
 msgid "duplicate region"
-msgstr ""
+msgstr "Zdvojit oblast"
 
 #: operations.cc:27
 msgid "insert file"
-msgstr ""
+msgstr "Vložit soubor"
 
 #: operations.cc:28
 msgid "insert region"
-msgstr ""
+msgstr "Vložit oblast"
 
 #: operations.cc:29
 msgid "drag region brush"
-msgstr ""
+msgstr "Táhnout oblast štětcem"
 
 #: operations.cc:30
 msgid "region drag"
-msgstr ""
+msgstr "Táhnout oblast"
 
 #: operations.cc:31
 msgid "selection grab"
-msgstr ""
+msgstr "Vzít výběr"
 
 #: operations.cc:32
 msgid "region fill"
-msgstr ""
+msgstr "Vyplnit oblast"
 
 #: operations.cc:33
 msgid "fill selection"
-msgstr ""
+msgstr "Vyplnit výběr"
 
 #: operations.cc:34
 msgid "create region"
-msgstr ""
+msgstr "Vytvořit oblast"
 
 #: operations.cc:35
 msgid "region copy"
-msgstr ""
+msgstr "Kopírovat oblast"
 
 #: operations.cc:36
 msgid "fixed time region copy"
-msgstr ""
+msgstr "Kopírovat oblast s pevně stanoveným časem"
 
 #: pannable.cc:207
 msgid "Pannable given XML data for %1 - ignored"
-msgstr ""
+msgstr "Cíli vyvážení předána data XML pro %1 - přehlíží se"
 
 #: panner_manager.cc:76
 msgid "looking for panners in %1"
-msgstr ""
+msgstr "Hledání vyvážení v %1"
 
 #: panner_manager.cc:99
 msgid "Panner discovered: \"%1\" in %2"
-msgstr ""
+msgstr "Vyvážení nalezeno: \"%1\" v %2"
 
 #: panner_manager.cc:116
 msgid "PannerManager: cannot load module \"%1\" (%2)"
-msgstr ""
+msgstr "SprávceVyvážení: Nelze nahrát modul \"%1\" (%2)"
 
 #: panner_manager.cc:123
 msgid "PannerManager: module \"%1\" has no descriptor function."
-msgstr ""
+msgstr "SprávceVyvážení: Modul \"%1\" nemá žádnou funkci popisu"
 
 #: panner_manager.cc:186
 msgid "no panner discovered for in/out = %1/%2"
-msgstr ""
+msgstr "Nenalezeno žádné vyvážení pro vstupy/výstupy %1/%2"
 
 #: panner_shell.cc:179
 msgid "Unknown panner plugin \"%1\" found in pan state - ignored"
 msgstr ""
+"Ve stavu vyvážení nalezen neznámý přídavný modul pro vyvážení \"%1\" - "
+"přehlíží se"
 
 #: panner_shell.cc:185
 msgid "panner plugin node has no type information!"
-msgstr ""
+msgstr "Uzel přídavného modulu pro vyvážení nemá žádnou informaci o typu!"
 
 #: playlist.cc:2070
 msgid "region state node has no ID, ignored"
-msgstr ""
+msgstr "Uzel stavu oblasti nemá žádné ID, přehlíží se"
 
 #: playlist.cc:2088
 msgid "Playlist: cannot create region from XML"
-msgstr ""
+msgstr "Seznam skladeb: Nelze vytvořit oblast ze XML"
 
 #: playlist_source.cc:99
 msgid "No playlist ID in PlaylistSource XML!"
-msgstr ""
+msgstr "Žádné ID seznamu skladeb v XML zdroje seznamu skladeb!"
 
 #: playlist_source.cc:118
 msgid "Could not construct playlist for PlaylistSource from session data!"
-msgstr ""
+msgstr "Nepodařilo se sestavit seznam skladeb ze zdrojových dat sezení!"
 
 #: plugin_insert.cc:599
 msgid "programming error: "
-msgstr ""
+msgstr "Chyba v programování:"
 
 #: plugin_insert.cc:908
 msgid "XML node describing plugin is missing the `type' field"
-msgstr ""
+msgstr "Uzlu XML k popisu přídavného modulu chybí pole \"type\""
 
 #: plugin_insert.cc:923
 msgid "unknown plugin type %1 in plugin insert state"
-msgstr ""
+msgstr "Neznámý typ přídavného modulu %1 ve vkládacím stavu přídavného modulu"
 
 #: plugin_insert.cc:951
 msgid "Plugin has no unique ID field"
-msgstr ""
+msgstr "Přídavný modul nemá žádné pole pro jedinečné ID"
 
 #: plugin_insert.cc:960
 msgid ""
 "Found a reference to a plugin (\"%1\") that is unknown.\n"
 "Perhaps it was removed or moved since it was last used."
 msgstr ""
+"Nalezen odkaz na neznámý přídavný modul (\"%1\").\n"
+"Snad byl od posledního použití odstraněn nebo přesunut."
 
 #: plugin_insert.cc:1076
 msgid "PluginInsert: Auto: no ladspa port number"
-msgstr ""
+msgstr "PluginInsert: Auto: Žádné číslo přípojky LADSPA"
 
 #: plugin_insert.cc:1083
 msgid "PluginInsert: Auto: port id out of range"
-msgstr ""
+msgstr "PluginInsert: Auto: Překročení rozsahu ID přípojky"
 
 #: plugin_insert.cc:1119
 msgid "PluginInsert: automatable control %1 not found - ignored"
 msgstr ""
+"PluginInsert: automatizovatelný prvek ovládání %1 nenalezen - přehlíží se"
 
 #: plugin_manager.cc:161
 msgid "Discovering Plugins"
-msgstr ""
+msgstr "Hledání přídavných modulů"
 
 #: plugin_manager.cc:334
 msgid "Could not parse rdf file: %1"
-msgstr ""
+msgstr "Nepodařilo se zpracovat soubor RDF: %1"
 
 #: plugin_manager.cc:373
 msgid "LADSPA: cannot load module \"%1\" (%2)"
-msgstr ""
+msgstr "LADSPA: Nelze nahrát modul \"%1\" (%2)"
 
 #: plugin_manager.cc:380
 msgid "LADSPA: module \"%1\" has no descriptor function."
-msgstr ""
+msgstr "LADSPA: Modul \"%1\" nemá žádnou funkci popisu."
 
 #: plugin_manager.cc:600
 msgid ""
-"VST plugin %1 does not support processReplacing, and so cannot be used in %2 "
-"at this time"
+"VST plugin %1 does not support processReplacing, and so cannot be used in "
+"ardour at this time"
 msgstr ""
+"Přídavný modul VST %1 nepodporuje processReplacing a z toho důvodu jej nyní "
+"nelze "
+"v Ardouru použít"
 
 #: plugin_manager.cc:704
 msgid ""
 "linuxVST plugin %1 does not support processReplacing, and so cannot be used "
-"in %2 at this time"
+"in ardour at this time"
 msgstr ""
+"Přídavný modul linuxVST %1 nepodporuje processReplacing a z toho důvodu jej "
+"nyní nelze "
+"v Ardouru použít"
 
 #: plugin_manager.cc:865
 msgid "unknown plugin status type \"%1\" - all entries ignored"
 msgstr ""
+"Neznámý typ stavu přídavného modulu\"%1\" - všechny záznamy se přehlíží"
 
 #: plugin_manager.cc:882
 msgid "unknown plugin type \"%1\" - ignored"
-msgstr ""
+msgstr "Neznámý typ přídavného modulu \"%1\" - přehlíží se"
 
 #: port.cc:367
 msgid "get_connected_latency_range() called while disconnected from JACK"
-msgstr ""
+msgstr "Zavolání get_connected_latency_range() během odpojení od JACK"
 
 #: port.cc:450
 msgid "could not reregister %1"
-msgstr ""
+msgstr "Nepodařilo se znovu zaregistrovat %1"
 
 #: port_insert.cc:43
 msgid "insert %1"
-msgstr ""
+msgstr "Vložit %1"
 
 #: port_insert.cc:198
 msgid "XML node describing port insert is missing the `type' field"
-msgstr ""
+msgstr "Uzlu XML k popisu přípojky chybí pole \"type\""
 
 #: port_insert.cc:203
 msgid "non-port insert XML used for port plugin insert"
 msgstr ""
+"XML pro vložení ne-přípojky použito ke vložení přídavného modulu přípojky"
 
 #: processor.cc:207
 msgid "No %1 property flag in element %2"
-msgstr ""
+msgstr "Žádný příznak pro vlastnost \"%1\" v prvku %2"
 
 #: processor.cc:216
 msgid "No child node with active property"
-msgstr ""
+msgstr "Žádný uzel potomka s vlastností \"činný\""
 
 #: rc_configuration.cc:93
 msgid "Loading system configuration file %1"
-msgstr ""
+msgstr "Nahrává se soubor s nastavením systému %1"
 
 #: rc_configuration.cc:97
 msgid "%1: cannot read system configuration file \"%2\""
-msgstr ""
+msgstr "%1: Nelze přečíst soubor s nastavením systému \"%2\""
 
 #: rc_configuration.cc:102
 msgid "%1: system configuration file \"%2\" not loaded successfully."
-msgstr ""
+msgstr "%1: Soubor s nastavením systému \"%2\" se nepodařilo nahrát."
 
 #: rc_configuration.cc:106
 msgid ""
 "Your system %1 configuration file is empty. This probably means that there "
 "was an error installing %1"
 msgstr ""
+"Váš soubor s nastavením systému %1 je prázdný. To zřejmě znamená, "
+"že při instalaci %1 se vyskytla chyba."
 
 #: rc_configuration.cc:121
 msgid "Loading user configuration file %1"
-msgstr ""
+msgstr "Nahrává se soubor s uživatelovým nastavením %1"
 
 #: rc_configuration.cc:125
 msgid "%1: cannot read configuration file \"%2\""
-msgstr ""
+msgstr "%1: Nelze přečíst soubor s nastavením\"%2\""
 
 #: rc_configuration.cc:130
 msgid "%1: user configuration file \"%2\" not loaded successfully."
-msgstr ""
+msgstr "%1: Soubor s uživatelovým nastavením \"%2\" se nepodařilo nahrát."
 
 #: rc_configuration.cc:134
 msgid "your %1 configuration file is empty. This is not normal."
-msgstr ""
+msgstr "Váš soubor s nastavením %1 je prázdný. To není obvyklé."
 
 #: rc_configuration.cc:151
 msgid "Config file %1 not saved"
-msgstr ""
+msgstr "Soubor s nastavením %1 nebyl uložen"
 
 #: recent_sessions.cc:54
 msgid "cannot open recent session file %1 (%2)"
-msgstr ""
+msgstr "Nelze otevřít naposledy otevřený soubor sezení %1 (%2)"
 
 #: region_factory.cc:67 region_factory.cc:109 region_factory.cc:150
 #: region_factory.cc:192
 msgid ""
 "programming error: RegionFactory::create() called with unknown Region type"
 msgstr ""
+"Chyba v programování: RegionFactory::create() zavoláno s neznámým typem "
+"oblasti"
 
 #: region_factory.cc:554
 msgid "%1 compound-%2 (%3)"
-msgstr ""
+msgstr "%1 spojen-%2 (%3)"
 
 #: region_factory.cc:556
 msgid "%1 compound-%2.1 (%3)"
-msgstr ""
+msgstr "%1 spojen-%2.1 (%3)"
 
 #: region_factory.cc:618
 msgid "cannot create new name for region \"%1\""
-msgstr ""
+msgstr "Nelze vytvořit nový název pro oblast \"%1\""
 
 #: resampled_source.cc:98
 msgid "Import: %1"
-msgstr ""
+msgstr "Zavedení: %1"
 
 #: resampled_source.cc:128
 msgid "Import: src_new() failed : %1"
-msgstr ""
+msgstr "Zavedení: Chyba v src_new() : %1"
 
 #: return.cc:41
 msgid "return %1"
-msgstr ""
+msgstr "Vrácená hodnota: %1"
 
 #: route.cc:1110 route.cc:2560
 msgid "unknown Processor type \"%1\"; ignored"
-msgstr ""
+msgstr "Neznámý typ procesoru \"%1\"; přehlíží se"
 
 #: route.cc:1122
 msgid "processor could not be created. Ignored."
-msgstr ""
+msgstr "Procesor se nepodařilo vytvořit. Přehlíží se."
 
 #: route.cc:1993 route.cc:2213
 msgid "Bad node sent to Route::set_state() [%1]"
-msgstr ""
+msgstr "Špatný uzel poslán Route::set_state() [%1]"
 
 #: route.cc:2052
 msgid "Pannable state found for route (%1) without a panner!"
 msgstr ""
+"Nalezen stav cíle vyvážení pro cestu (%1), aniž by bylo nalezeno vyvážení!"
 
 #: route.cc:2116 route.cc:2120 route.cc:2327 route.cc:2331
 msgid "badly formed order key string in state file! [%1] ... ignored."
 msgstr ""
+"Špatně utvořený řetězec znaků pro klíč pořadí roztřídění v "
+"souboru sezení! [%1] ... Přehlíží se."
 
 #: route_group.cc:459
 msgid "You cannot subgroup MIDI tracks at this time"
-msgstr ""
+msgstr "Stopy MIDI nelze nyní sdružit do podskupin"
 
 #: rb_effect.cc:233 rb_effect.cc:274
 msgid "tempoize: error reading data from %1 at %2 (wanted %3, got %4)"
-msgstr ""
+msgstr "tempoize: Chyba při čtení dat z %1 v %2 (žádáno %3, obdrženo %4)"
 
 #: rb_effect.cc:303 rb_effect.cc:325
 msgid "error writing tempo-adjusted data to %1"
-msgstr ""
+msgstr "Chyba při zápisu dat s upraveným tempem do %1"
+
+#: rb_effect.cc:332
+msgid "timefx code failure. please notify ardour-developers."
+msgstr "Chyba v kódu TimeFX. Vyrozumte, prosím, vývojáře Ardouru."
 
 #: send.cc:59
 msgid "aux %1"
-msgstr ""
+msgstr "Pomocné (Aux) %1"
 
 #: send.cc:63
 msgid "send %1"
-msgstr ""
+msgstr "Poslání (send) %1"
 
 #: send.cc:65
 msgid "programming error: send created using role %1"
-msgstr ""
+msgstr "Chyba v programování: Poslání vytvořeno pomocí role %1"
 
 #: session.cc:344
 msgid "Set block size and sample rate"
-msgstr ""
+msgstr "Nastavit velikost bloku a vzorkovací kmitočet"
 
 #: session.cc:349
 msgid "Using configuration"
-msgstr ""
+msgstr "Používané nastavení"
 
 #: session.cc:374
 msgid "LTC In"
-msgstr ""
+msgstr "Vstup LTC"
 
 #: session.cc:375
 msgid "LTC Out"
-msgstr ""
+msgstr "Výstup LTC"
 
 #: session.cc:401
 msgid "LTC-in"
-msgstr ""
+msgstr "Vstup LTC"
 
 #: session.cc:402
 msgid "LTC-out"
-msgstr ""
+msgstr "Výstup LTC"
 
 #: session.cc:431
 msgid "could not setup Click I/O"
-msgstr ""
+msgstr "Nepodařilo se nastavit vstup/výstup metronomu"
 
 #: session.cc:458
 msgid "cannot setup Click I/O"
-msgstr ""
+msgstr "Nelze nastavit vstup/výstup metronomu"
 
 #: session.cc:461
 msgid "Compute I/O Latencies"
-msgstr ""
+msgstr "Vypočítat prodlevy vstupu/výstupu"
 
 #: session.cc:467
 msgid "Set up standard connections"
-msgstr ""
+msgstr "Nastavit standardní spojení"
 
 #: session.cc:488
 #, c-format
 msgid "out %<PRIu32>"
-msgstr ""
+msgstr "Výstup %<PRIu32>"
 
 #: session.cc:502
 #, c-format
 msgid "out %<PRIu32>+%<PRIu32>"
-msgstr ""
+msgstr "Výstup %<PRIu32>+%<PRIu32>"
 
 #: session.cc:517
 #, c-format
 msgid "in %<PRIu32>"
-msgstr ""
+msgstr "Vstup %<PRIu32>"
 
 #: session.cc:531
 #, c-format
 msgid "in %<PRIu32>+%<PRIu32>"
-msgstr ""
+msgstr "Vstup %<PRIu32>+%<PRIu32>"
 
 #: session.cc:567
 msgid "Setup signal flow and plugins"
-msgstr "Ställer in signalflöde och insticksprogram"
+msgstr "Nastavit signálový tok a přídavné moduly"
 
 #: session.cc:611
 msgid "Connect to engine"
-msgstr "Ansluter till ljudmotorn"
+msgstr "Spojit se strojem"
 
 #: session.cc:642
 msgid "cannot connect master output %1 to %2"
-msgstr ""
+msgstr "Nelze spojit hlavní výstup %1 s %2"
 
 #: session.cc:701
 msgid "monitor"
-msgstr ""
+msgstr "Sledování"
 
 #: session.cc:746
 msgid "cannot connect control input %1 to %2"
-msgstr ""
+msgstr "Nelze spojit vstup ovládání %1 s %2"
 
 #: session.cc:766
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
-msgstr ""
+msgstr "Upřednostňovaný vstup/výstup pro sledovací sběrnici (%1) nelze najít"
 
 #: session.cc:797
 msgid "cannot connect control output %1 to %2"
-msgstr ""
+msgstr "Nelze spojit výstup ovládání %1 s %2"
 
 #: session.cc:861
 msgid "cannot create Auditioner: no auditioning of regions possible"
-msgstr ""
+msgstr "Nelze vytvořit poslechový systém: Žádný poslech oblastí není možný"
 
 #: session.cc:1040
 msgid "Session: you can't use that location for auto punch (start <= end)"
 msgstr ""
+"Sezení: Tuto polohu nelze pro automatický přepis použít (Začátek <= "
+"Konec) "
 
 #: session.cc:1080
 msgid ""
 "You cannot use this location for auto-loop because it has zero or negative "
 "length"
 msgstr ""
+"Tuto polohu nelze pro automatickou smyčku použít, protože nemá žádnou, nebo "
+"má zápornou délku"
 
 #: session.cc:1393
 msgid "feedback loop setup between %1 and %2"
-msgstr ""
+msgstr "Smyčka zpětné vazby rozpoznána mezi %1 a %2"
 
 #: session.cc:1689
 msgid "Session: could not create new midi track."
-msgstr ""
+msgstr "Sezení: Nepodařilo se vytvořit novou stopu MIDI"
 
 #: session.cc:1872 session.cc:1875
 msgid "Audio"
-msgstr ""
+msgstr "Zvuk"
 
 #: session.cc:1899 session.cc:1907 session.cc:1984 session.cc:1992
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
-msgstr ""
+msgstr "Nelze nastavit %1 nastavení vstup/%2 výstup pro novou zvukovou stopu"
 
 #: session.cc:1930
 msgid "Session: could not create new audio track."
-msgstr ""
+msgstr "Sezení: Nepodařilo se vytvořit novou zvukovou stopu"
 
 #: session.cc:1962 session.cc:1965
 msgid "Bus"
-msgstr ""
+msgstr "Sběrnice"
 
 #: session.cc:2015
 msgid "Session: could not create new audio route."
-msgstr ""
+msgstr "Sezení: Nepodařilo se vytvořit novou zvukovou cestu"
 
 #: session.cc:2068
 msgid "Session: UINT_MAX routes? impossible!"
-msgstr ""
+msgstr "Sezení: Cesty UINT_MAX? Nemožné!"
 
 #: session.cc:2089
 msgid "Session: cannot create track/bus from template description"
-msgstr ""
+msgstr "Sezení: Nelze vytvořit stopu/sběrnici z popisu předlohy"
 
 #: session.cc:2115
 msgid "Session: could not create new route from template"
-msgstr ""
+msgstr "Sezení: Nepodařilo se vytvořit novou cestu z předlohy"
 
 #: session.cc:2144
 msgid "Adding new tracks/busses failed"
-msgstr ""
+msgstr "Chyba při přidávání nové stopy/sběrnice"
 
 #: session.cc:3245
 msgid "FATAL ERROR! Could not find a suitable version of %1 for a rename"
-msgstr ""
+msgstr "OSUDOVÁ CHYBA! Nepodařilo se najít vhodnou verzi %1 pro přejmenování"
 
 #: session.cc:3365 session.cc:3423
 msgid "There are already %1 recordings for %2, which I consider too many."
-msgstr ""
+msgstr "Již je %1 nahrávek pro %2, což je příliš mnoho."
 
 #: session.cc:3813
 msgid "send ID %1 appears to be in use already"
-msgstr ""
+msgstr "Zdá se, že ID poslání (send) %1, se již používá"
 
 #: session.cc:3825
 msgid "aux send ID %1 appears to be in use already"
-msgstr ""
+msgstr "Zdá se, že ID pomocného-poslání (aux-send) %1, se již používá"
 
 #: session.cc:3837
 msgid "return ID %1 appears to be in use already"
-msgstr ""
+msgstr "Zdá se, že ID vrácení (return) %1, se již používá"
 
 #: session.cc:3849
 msgid "insert ID %1 appears to be in use already"
-msgstr ""
+msgstr "Zdá se, že ID vložení (insert) %1, se již používá"
 
 #: session.cc:3976
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
-msgstr ""
+msgstr "Nelze zapsat oblast s Konec <= Začátek (např. %1 <= %2)"
 
 #: session.cc:4005
 msgid "too many bounced versions of playlist \"%1\""
-msgstr ""
+msgstr "Příliš mnoho odhozených verzí seznamu skladeb \"%1\""
 
 #: session.cc:4015
 msgid "cannot create new audio file \"%1\" for %2"
-msgstr ""
+msgstr "Nelze vytvořit nový zvukový soubor \"%1\" pro %2"
 
 #: session_click.cc:161
 msgid "cannot open click soundfile %1 (%2)"
-msgstr ""
+msgstr "Nelze otevřít zvukový soubor metronomu %1 (%2)"
 
 #: session_click.cc:174
 msgid "cannot read data from click soundfile"
-msgstr ""
+msgstr "Nelze přečíst data ze zvukového souboru metronomu"
 
 #: session_command.cc:87
 msgid "Tried to reconstitute a MementoCommand with no contents, failing. id=%1"
 msgstr ""
+"Pokus o znovuvytvoření příkazu Memento bez obsahu se nezdařil. "
+"ID=%1"
 
 #: session_command.cc:148
 msgid ""
 "could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"
 msgstr ""
+"Nepodařilo se vytvořit znovu příkaz Memento z uzlu XML. Typ objektu = "
+"%1 ID = %2"
 
 #: session_command.cc:177
 msgid ""
 "could not reconstitute StatefulDiffCommand from XMLNode. object type = %1 id "
 "= %2"
 msgstr ""
+"Nepodařilo se vytvořit znovu příkaz StatefullDiff z uzlu XML. Typ objektu = "
+"%1 ID = %2"
 
 #: session_directory.cc:59
 msgid "Cannot create Session directory at path %1 Error: %2"
-msgstr ""
+msgstr "Nelze vytvořit adresář se sezením v cestě %1. Chyba: %2"
 
 #: session_directory.cc:76
 msgid "Session subdirectory does not exist at path %1"
-msgstr ""
+msgstr "Adresář se sezením v cestě %1 neexistuje"
 
 #: session_events.cc:184
 msgid "Session: cannot have two events of type %1 at the same frame (%2)."
-msgstr ""
+msgstr "Sezení: Není možné mít ve stejném snímku (%2) dvě události typu %1."
 
 #: session_export.cc:126
 msgid "%1: cannot seek to %2 for export"
-msgstr ""
+msgstr "%1: Polohu souboru %2 nelze vyhledat pro vyvedení"
 
 #: session_export.cc:183
 msgid "Export ended unexpectedly: %1"
-msgstr ""
+msgstr "Vyvedení skončilo neočekávaně: %1"
 
 #: session_ltc.cc:219
 msgid ""
 "LTC encoder: invalid framerate - LTC encoding is disabled for the remainder "
 "of this session."
 msgstr ""
+"Kodér LTC: Neplatná rychlost snímkování - Kódování LTC je pro zbývající část "
+"tohoto "
+"sezení zakázáno."
 
-#: session_midi.cc:427
+#: session_midi.cc:425
 msgid "Session: could not send full MIDI time code"
-msgstr ""
+msgstr "Sezení: Nepodařilo se poslat úplný časový kód MIDI"
 
-#: session_midi.cc:519
+#: session_midi.cc:517
 msgid "Session: cannot send quarter-frame MTC message (%1)"
-msgstr ""
+msgstr "Sezení: Nelze poslat quarter-frame MTC (%1)"
 
 #: session_playlists.cc:378 session_playlists.cc:397
 msgid "Session: cannot create Playlist from XML description."
-msgstr ""
+msgstr "Sezení: Nelze vytvořit seznam skladeb z popisu XML"
 
 #: session_process.cc:135
 msgid "Session: error in no roll for %1"
-msgstr ""
+msgstr "Sezení: Chyba v no_roll pro %1"
 
 #: session_process.cc:1156
 msgid "Programming error: illegal event type in process_event (%1)"
-msgstr ""
+msgstr "Chyba v programování: Neplatný typ události v process_event (%1)"
 
 #: session_state.cc:139
 msgid "Could not use path %1 (%s)"
-msgstr ""
+msgstr "Nepodařilo se použít cestu %1 (%s)"
 
 #: session_state.cc:267
 msgid "solo cut control (dB)"
-msgstr ""
+msgstr "Nastavení Solo Cut (dB)"
 
 #: session_state.cc:360
 msgid "Reset Remote Controls"
-msgstr ""
+msgstr "Nastavit dálkové ovládání znovu"
 
 #: session_state.cc:385
 msgid "Session loading complete"
-msgstr ""
+msgstr "Nahrání sezení dokončeno"
 
 #: session_state.cc:452
 msgid "Session: cannot create session peakfile folder \"%1\" (%2)"
-msgstr ""
+msgstr "Sezení: Nelze vytvořit složku Peakfile \"%1\" (%2)"
 
 #: session_state.cc:459
 msgid "Session: cannot create session sounds dir \"%1\" (%2)"
-msgstr ""
+msgstr "Sezení: Nelze vytvořit adresář sezení pro zvuková data \"%1\" (%2)"
 
 #: session_state.cc:466
 msgid "Session: cannot create session midi dir \"%1\" (%2)"
-msgstr ""
+msgstr "Sezení: Nelze vytvořit adresář sezení pro MIDI \"%1\" (%2)"
 
 #: session_state.cc:473
 msgid "Session: cannot create session dead sounds folder \"%1\" (%2)"
 msgstr ""
+"Sezení: Nelze vytvořit odpadkový koš sezení pro zahozený zvuk \"%1\" (%2)"
 
 #: session_state.cc:480
 msgid "Session: cannot create session export folder \"%1\" (%2)"
-msgstr ""
+msgstr "Sezení: Nelze vytvořit složku sezení pro vyvedené soubory \"%1\" (%2)"
 
 #: session_state.cc:487
 msgid "Session: cannot create session analysis folder \"%1\" (%2)"
-msgstr ""
+msgstr "Sezení: Nelze vytvořit složku sezení pro data rozboru \"%1\" (%2)"
 
 #: session_state.cc:494
 msgid "Session: cannot create session plugins folder \"%1\" (%2)"
-msgstr ""
+msgstr "Sezení: Nelze vytvořit složku sezení pro přídavné moduly \"%1\" (%2)"
 
 #: session_state.cc:501
 msgid "Session: cannot create session externals folder \"%1\" (%2)"
-msgstr ""
+msgstr "Sezení: Nelze vytvořit složku sezení pro vnější \"%1\" (%2)"
 
 #: session_state.cc:515
 msgid "Session: cannot create session folder \"%1\" (%2)"
-msgstr ""
+msgstr "Sezení: Nelze vytvořit složku sezení \"%1\" (%2)"
 
 #: session_state.cc:548
 msgid "Could not open %1 for writing session template"
-msgstr ""
+msgstr "Nepodařilo se otevřít %1 pro zápis předlohy sezení"
 
 #: session_state.cc:554
 msgid "Could not open session template %1 for reading"
-msgstr ""
+msgstr "Nepodařilo se otevřít předlohu sezení %1 pro čtení"
 
 #: session_state.cc:573
 msgid "master"
-msgstr ""
+msgstr "Master"
 
 #: session_state.cc:636
 msgid "Could not remove pending capture state at path \"%1\" (%2)"
-msgstr ""
+msgstr "Nepodařilo se odstranit předběžný stav nahrávání v cestě \"%1\" (%2)"
 
 #: session_state.cc:660
 msgid "could not rename snapshot %1 to %2 (%3)"
-msgstr ""
+msgstr "Nepodařilo se přejmenovat snímek obrazovky %1 na %2 (%3)"
 
 #: session_state.cc:688
 msgid "Could not remove session file at path \"%1\" (%2)"
-msgstr ""
+msgstr "Nepodařilo se odstranit soubor se sezením v cestě \"%1\" (%2)"
 
 #: session_state.cc:759
 msgid ""
 "the %1 audio engine is not connected and state saving would lose all I/O "
 "connections. Session not saved"
 msgstr ""
+"Zvukový stroj %1 není spojen, a při ukládání stavu by došlo ke ztrátě všech "
+"spojení "
+"vstup/výstup. Sezení neuloženo"
 
 #: session_state.cc:808
 msgid "state could not be saved to %1"
-msgstr ""
+msgstr "Stav se do %1 uložit nepodařilo"
 
 #: session_state.cc:810 session_state.cc:821
 msgid "Could not remove temporary session file at path \"%1\" (%2)"
-msgstr ""
+msgstr "Nepodařilo se odstranit dočasný soubor se sezením v cestě \"%1\" (%2)"
 
 #: session_state.cc:818
 msgid "could not rename temporary session file %1 to %2"
-msgstr ""
+msgstr "Nepodařilo se přejmenovat dočasný soubor se sezením %1 na %2"
 
 #: session_state.cc:886
 msgid "%1: session file \"%2\" doesn't exist!"
-msgstr ""
+msgstr "%1: Soubor se sezením  \"%2\" neexistuje!"
 
 #: session_state.cc:898
 msgid "Could not understand session file %1"
-msgstr ""
+msgstr "Nepodařilo se porozumět souboru se sezením\"%1\""
 
 #: session_state.cc:907
 msgid "Session file %1 is not a session"
-msgstr ""
+msgstr "Soubor se sezením %1 není sezením"
 
 #: session_state.cc:941
 msgid ""
 "Copying old session file %1 to %2\n"
 "Use %2 with %3 versions before 2.0 from now on"
 msgstr ""
+"Kopíruje se starý soubor se sezením %1 do %2\n"
+"Od nynějška dál používejte %2 s verzemi %3 před 2.0"
 
-#: session_state.cc:1206
+#: session_state.cc:1202
 msgid "programming error: Session: incorrect XML node sent to set_state()"
-msgstr ""
+msgstr "Chyba v programování: Sezení: Nesprávný uzel XML poslán set_state()"
 
-#: session_state.cc:1255
+#: session_state.cc:1251
 msgid "Session: XML state has no options section"
-msgstr ""
+msgstr "Sezení: XML nemá žádnou část \"options\""
 
-#: session_state.cc:1260
+#: session_state.cc:1256
 msgid "Session: XML state has no metadata section"
-msgstr ""
+msgstr "Sezení: XML nemá žádnou část \"metadata\""
 
-#: session_state.cc:1271
+#: session_state.cc:1267
 msgid "Session: XML state has no sources section"
-msgstr ""
+msgstr "Sezení: XML nemá žádnou část \"sources\""
 
-#: session_state.cc:1278
+#: session_state.cc:1274
 msgid "Session: XML state has no Tempo Map section"
-msgstr ""
+msgstr "Sezení: XML nemá žádnou část \"Tempo Map\""
 
-#: session_state.cc:1285
+#: session_state.cc:1281
 msgid "Session: XML state has no locations section"
-msgstr ""
+msgstr "Sezení: XML nemá žádnou část \"locations\""
 
-#: session_state.cc:1311
+#: session_state.cc:1307
 msgid "Session: XML state has no Regions section"
-msgstr ""
+msgstr "Sezení: XML nemá žádnou část \"Regions\""
 
-#: session_state.cc:1318
+#: session_state.cc:1314
 msgid "Session: XML state has no playlists section"
-msgstr ""
+msgstr "Sezení: XML nemá žádnou část \"playlists\""
 
-#: session_state.cc:1338
+#: session_state.cc:1334
 msgid "Session: XML state has no bundles section"
-msgstr ""
+msgstr "Sezení: XML nemá žádnou část \"bundles\""
 
-#: session_state.cc:1350
+#: session_state.cc:1346
 msgid "Session: XML state has no diskstreams section"
-msgstr ""
+msgstr "Sezení: XML nemá žádnou část \"diskstreams\""
 
-#: session_state.cc:1358
+#: session_state.cc:1354
 msgid "Session: XML state has no routes section"
-msgstr ""
+msgstr "Sezení: XML nemá žádnou část \"routes\""
 
-#: session_state.cc:1370
+#: session_state.cc:1366
 msgid "Session: XML state has no route groups section"
-msgstr ""
+msgstr "Sezení: XML nemá žádnou část \"route groups\""
 
-#: session_state.cc:1379
+#: session_state.cc:1375
 msgid "Session: XML state has no edit groups section"
-msgstr ""
+msgstr "Sezení: XML nemá žádnou část \"edit groups\""
 
-#: session_state.cc:1386
+#: session_state.cc:1382
 msgid "Session: XML state has no mix groups section"
-msgstr ""
+msgstr "Sezení: XML nemá žádnou část \"mix groups\""
 
-#: session_state.cc:1394
+#: session_state.cc:1390
 msgid "Session: XML state has no click section"
-msgstr ""
+msgstr "Sezení: XML nemá žádnou část \"click\""
+
+#: session_state.cc:1438
+msgid "Session: cannot create Route from XML description."
+msgstr "Sezení: Nelze vytvořit cestu z popisu XML"
 
 #: session_state.cc:1442
-msgid "Session: cannot create Route from XML description."
-msgstr ""
-
-#: session_state.cc:1446
 msgid "Loaded track/bus %1"
-msgstr ""
+msgstr "Byla nahrána stopa/sběrnice %1"
 
-#: session_state.cc:1544
+#: session_state.cc:1540
 msgid "Could not find diskstream for route"
-msgstr ""
+msgstr "Nepodařilo se najít Diskstream pro cestu"
+
+#: session_state.cc:1594
+msgid "Session: cannot create Region from XML description."
+msgstr "Sezení: Nelze vytvořit oblast z popisu XML"
 
 #: session_state.cc:1598
-msgid "Session: cannot create Region from XML description."
-msgstr ""
-
-#: session_state.cc:1602
 msgid "Can not load state for region '%1'"
-msgstr ""
+msgstr "Nelze nahrát stav pro oblast '%1'"
 
-#: session_state.cc:1638
+#: session_state.cc:1634
 msgid "Regions in compound description not found (ID's %1 and %2): ignored"
 msgstr ""
+"Oblasti ve spojeném popisu nenalezeny (ID %1 a %2): "
+"přehlíží se"
 
-#: session_state.cc:1666
+#: session_state.cc:1662
 msgid "Nested source has no ID info in session file! (ignored)"
 msgstr ""
+"Vnořený zdroj nemá v souboru se sezením žádné informace ID! (přehlíží se)"
 
-#: session_state.cc:1678
+#: session_state.cc:1674
 msgid "Cannot reconstruct nested source for region %1"
-msgstr ""
+msgstr "Nelze obnovit vnořený zdroj pro oblast %1"
 
-#: session_state.cc:1740
+#: session_state.cc:1736
 msgid "Session: XMLNode describing a AudioRegion is incomplete (no source)"
 msgstr ""
+"Sezení: Uzel XML k popisu zvukové oblasti je neúplný "
+"(chybí zdroj)"
 
-#: session_state.cc:1748 session_state.cc:1769 session_state.cc:1789
+#: session_state.cc:1744 session_state.cc:1765 session_state.cc:1785
 msgid ""
 "Session: XMLNode describing a AudioRegion references an unknown source id =%1"
 msgstr ""
+"Sezení: Uzel XML k popisu zvukové oblasti odkazuje na ID neznámého zdroje =%1"
 
-#: session_state.cc:1754 session_state.cc:1775 session_state.cc:1795
+#: session_state.cc:1750 session_state.cc:1771 session_state.cc:1791
 msgid ""
 "Session: XMLNode describing a AudioRegion references a non-audio source id ="
 "%1"
 msgstr ""
+"Sezení: Uzel XML k popisu zvukové oblasti odkazuje na ID nezvukového zdroje ="
+"%1"
 
-#: session_state.cc:1818
+#: session_state.cc:1814
 msgid ""
 "Session: XMLNode describing an AudioRegion is missing some master sources; "
 "ignored"
 msgstr ""
+"Sezení: Uzlu XML k popisu zvukové oblasti chybí některé hlavní zdroje; "
+"přehlíží se"
 
-#: session_state.cc:1852
+#: session_state.cc:1848
 msgid "Session: XMLNode describing a MidiRegion is incomplete (no source)"
 msgstr ""
+"Sezení: Uzel XML k popisu oblasti MIDI je neúplný "
+"(chybí zdroj)"
 
-#: session_state.cc:1860
+#: session_state.cc:1856
 msgid ""
 "Session: XMLNode describing a MidiRegion references an unknown source id =%1"
 msgstr ""
+"Sezení: Uzel XML k popisu oblasti MIDI odkazuje na ID neznámého zdroje =%1"
 
-#: session_state.cc:1866
+#: session_state.cc:1862
 msgid ""
 "Session: XMLNode describing a MidiRegion references a non-midi source id =%1"
 msgstr ""
+"Sezení: Uzel XML k popisu oblasti MIDI odkazuje na ID ne-MIDI zdroje =%1"
 
-#: session_state.cc:1934
+#: session_state.cc:1930
 msgid ""
 "cannot create new file from region name \"%1\" with ident = \"%2\": too many "
 "existing files with similar names"
 msgstr ""
+"Nelze vytvořit nový soubor z názvu oblasti \"%1\" s ident = \"%2\": "
+"Je příliš mnoho souborů s podobnými názvy"
 
-#: session_state.cc:1957
+#: session_state.cc:1953
 msgid "Session: cannot create Source from XML description."
-msgstr ""
+msgstr "Sezení: Nelze vytvořit zdroj z popisu XML"
 
-#: session_state.cc:1991
+#: session_state.cc:1987
 msgid "A sound file is missing. It will be replaced by silence."
-msgstr ""
+msgstr "Chybí zvukový soubor. Bude nahrazen tichem."
 
-#: session_state.cc:2014
+#: session_state.cc:2010
 msgid "Found a sound file that cannot be used by %1. Talk to the progammers."
 msgstr ""
+"Byl nalezen zvukový soubor, který není použitelný %1. Promluvte si s "
+"programátory."
 
-#: session_state.cc:2031
+#: session_state.cc:2027
 msgid "Could not create templates directory \"%1\" (%2)"
-msgstr ""
+msgstr "Nepodařilo se vytvořit adresář s předlohami \"%1\" (%2)"
 
-#: session_state.cc:2044
+#: session_state.cc:2040
 msgid "Template \"%1\" already exists - new version not created"
-msgstr ""
+msgstr "Předloha \"%1\" již existuje - nová verze nebyla vytvořena"
 
-#: session_state.cc:2050
+#: session_state.cc:2046
 msgid "Could not create directory for Session template\"%1\" (%2)"
-msgstr ""
+msgstr "Nepodařilo se vytvořit adresář pro předlohu sezení \"%1\" (%2)"
 
-#: session_state.cc:2060
+#: session_state.cc:2056
 msgid "template not saved"
-msgstr ""
+msgstr "Předloha neuložena"
 
-#: session_state.cc:2070
+#: session_state.cc:2066
 msgid "Could not create directory for Session template plugin state\"%1\" (%2)"
 msgstr ""
+"Nepodařilo se vytvořit adresář pro stav přídavného modulu předlohy sezení \"%"
+"1\" (%2)"
 
-#: session_state.cc:2265
+#: session_state.cc:2261
 msgid "Unknown node \"%1\" found in Bundles list from session file"
-msgstr ""
+msgstr "Nalezen neznámý uzel \"%1\" v seznamu svazků souboru sezení"
 
-#: session_state.cc:2807 session_state.cc:2813
+#: session_state.cc:2803 session_state.cc:2809
 msgid "Cannot expand path %1 (%2)"
-msgstr ""
+msgstr "Nelze rozšířit cestu %1 (%2)"
 
-#: session_state.cc:2866
+#: session_state.cc:2862
 msgid "Session: cannot create dead file folder \"%1\" (%2)"
-msgstr ""
+msgstr "Sezení: Nelze vytvořit odpadkový koš pro zahozen soubory \"%1\" (%2)"
 
-#: session_state.cc:2905
+#: session_state.cc:2901
 msgid "cannot rename unused file source from %1 to %2 (%3)"
-msgstr ""
+msgstr "Nelze přejmenovat nepoužívaný souborový zdroj z %1 na %2 (%3)"
 
-#: session_state.cc:2923
+#: session_state.cc:2919
 msgid "cannot remove peakfile %1 for %2 (%3)"
-msgstr ""
+msgstr "Nelze odstranit vrcholový soubor %1 pro %2 (%3)"
 
-#: session_state.cc:3225
+#: session_state.cc:3221
 msgid "could not backup old history file, current history not saved"
 msgstr ""
+"Nepodařilo se vytvořit zálohu starého souboru se seznamem činností, nynější "
+"historie neuložena"
 
-#: session_state.cc:3238
+#: session_state.cc:3234
 msgid "history could not be saved to %1"
-msgstr ""
+msgstr "Nepodařilo se uložit seznam činností do %1"
 
-#: session_state.cc:3241
+#: session_state.cc:3237
 msgid "Could not remove history file at path \"%1\" (%2)"
 msgstr ""
+"Nepodařilo se odstranit soubor se seznamem činností v cestě \"%1\" (%2)"
 
-#: session_state.cc:3245
+#: session_state.cc:3241
 msgid "could not restore history file from backup %1 (%2)"
-msgstr ""
+msgstr "Nepodařilo se obnovit soubor se seznamem činností ze zálohy %1 (%2)"
 
-#: session_state.cc:3270
+#: session_state.cc:3266
 msgid "%1: no history file \"%2\" for this session."
-msgstr ""
+msgstr "%1: Žádný soubor se seznamem činností \"%2\" pro toto sezení."
 
-#: session_state.cc:3276
+#: session_state.cc:3272
 msgid "Could not understand session history file \"%1\""
-msgstr ""
+msgstr "Nepodařilo se porozumět souboru se seznamem činností sezení \"%1\""
 
-#: session_state.cc:3318
+#: session_state.cc:3314
 msgid "Failed to downcast MidiSource for NoteDiffCommand"
-msgstr ""
+msgstr "Nepodařilo se najít MidiSource pro NoteDiffCommand"
 
-#: session_state.cc:3329
+#: session_state.cc:3325
 msgid "Failed to downcast MidiSource for SysExDiffCommand"
-msgstr ""
+msgstr "Nepodařilo se najít MidiSource pro SysExDiffCommand"
 
-#: session_state.cc:3340
+#: session_state.cc:3336
 msgid "Failed to downcast MidiSource for PatchChangeDiffCommand"
-msgstr ""
+msgstr "Nepodařilo se najít MidiSource pro PatchChangeDiffCommand"
 
-#: session_state.cc:3348
+#: session_state.cc:3344
 msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
-msgstr ""
+msgstr "Nepodařilo se rozpoznat žádný příkaz v uzlu XML \"%1\"."
 
-#: session_state.cc:3600
+#: session_state.cc:3596
 msgid "Session: unknown diskstream type in XML"
-msgstr ""
+msgstr "Sezení: Neznámý typ Diskstream  v XML"
 
-#: session_state.cc:3605
+#: session_state.cc:3601
 msgid "Session: could not load diskstream via XML state"
-msgstr ""
+msgstr "Sezení: Nepodařilo se nahrát Diskstream pomocí stavu XML"
 
 #: session_time.cc:215
 msgid "Unknown JACK transport state %1 in sync callback"
-msgstr ""
+msgstr "Neznámý stav transportu JACK v Sync-Callback"
 
 #: session_transport.cc:168
 msgid "Cannot loop - no loop range defined"
-msgstr ""
+msgstr "Nelze přehrávat ve smyčce - Nestanovena žádná oblast smyčky"
 
 #: session_transport.cc:727
 msgid ""
 "Seamless looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
 msgstr ""
+"Souvislé přehrávání ve smyčce není možné, dokud %1 používá transport JACK.\n"
+"Doporučuje se změna volby v nastavení"
 
 #: session_transport.cc:1092
 msgid ""
 "Global varispeed cannot be supported while %1 is connected to JACK transport "
 "control"
 msgstr ""
+"Celkové ovládání výšky tónu při proměnlivé rychlosti přehrávání není možné, "
+"dokud je %1 spojen s transportem JACK."
 
-#: smf_source.cc:252
-msgid "Unable to read event prefix, corrupt MIDI ring"
+#: smf_source.cc:253
+msgid "Unable to read event prefix, corrupt MIDI ring buffer"
 msgstr ""
+"Nelze přečíst předponu události, poškozená kruhová vyrovnávací paměť MIDI"
 
-#: smf_source.cc:265
-msgid "Event has time and size but no body, corrupt MIDI ring"
+#: smf_source.cc:264
+msgid "Read time/size but not buffer, corrupt MIDI ring buffer"
 msgstr ""
+"Přečteny čas/velikost, ale ne vyrovnávací paměť, poškozená kruhová "
+"vyrovnávací paměť MIDI"
 
-#: smf_source.cc:271
-msgid "Event time is before MIDI source position"
-msgstr ""
-
-#: smf_source.cc:306 smf_source.cc:345
-msgid "Skipping event with unordered time %1"
-msgstr ""
-
-#: smf_source.cc:410
+#: smf_source.cc:411
 msgid "cannot open MIDI file %1 for write"
-msgstr ""
+msgstr "Nelze otevřít soubor MIDI %1 pro zápis"
 
 #: sndfile_helpers.cc:32
 msgid "WAV"
-msgstr ""
+msgstr "WAV"
 
 #: sndfile_helpers.cc:33
 msgid "AIFF"
-msgstr ""
+msgstr "AIFF"
 
 #: sndfile_helpers.cc:34
 msgid "CAF"
-msgstr ""
+msgstr "CAF"
 
 #: sndfile_helpers.cc:35
 msgid "W64 (64 bit WAV)"
-msgstr ""
+msgstr "W64 (64 bit WAV)"
 
 #: sndfile_helpers.cc:36
 msgid "FLAC"
-msgstr ""
+msgstr "FLAC"
 
 #: sndfile_helpers.cc:37
 msgid "Ogg/Vorbis"
-msgstr ""
+msgstr "Ogg/Vorbis"
 
 #: sndfile_helpers.cc:38
 msgid "raw (no header)"
-msgstr ""
+msgstr "raw (no header)"
 
 #: sndfile_helpers.cc:43
 msgid ".wav"
-msgstr ""
+msgstr ".wav"
 
 #: sndfile_helpers.cc:44
 msgid ".aiff"
-msgstr ""
+msgstr ".aiff"
 
 #: sndfile_helpers.cc:45
 msgid ".caf"
-msgstr ""
+msgstr ".caf"
 
 #: sndfile_helpers.cc:46
 msgid ".w64"
-msgstr ""
+msgstr ".w64"
 
 #: sndfile_helpers.cc:47
 msgid ".flac"
-msgstr ""
+msgstr ".flac"
 
 #: sndfile_helpers.cc:48
 msgid ".ogg"
-msgstr ""
+msgstr ".ogg"
 
 #: sndfile_helpers.cc:49
 msgid ".raw"
-msgstr ""
+msgstr ".raw"
 
 #: sndfile_helpers.cc:64
 msgid "Signed 16 bit PCM"
-msgstr ""
+msgstr "Signed 16 bit PCM"
 
 #: sndfile_helpers.cc:65
 msgid "Signed 24 bit PCM"
-msgstr ""
+msgstr "Signed 24 bit PCM"
 
 #: sndfile_helpers.cc:66
 msgid "Signed 32 bit PCM"
-msgstr ""
+msgstr "Signed 32 bit PCM"
 
 #: sndfile_helpers.cc:67
 msgid "Signed 8 bit PCM"
-msgstr ""
+msgstr "Signed 8 bit PCM"
 
 #: sndfile_helpers.cc:68
 msgid "32 bit float"
-msgstr ""
+msgstr "32 bit float"
 
 #: sndfile_helpers.cc:81
 msgid "Little-endian (Intel)"
-msgstr ""
+msgstr "Little-endian (Intel)"
 
 #: sndfile_helpers.cc:82
 msgid "Big-endian (PowerPC)"
-msgstr ""
+msgstr "Big-endian (PowerPC)"
 
 #: sndfilesource.cc:201
 msgid "SndFileSource: cannot open file \"%1\" for %2 (%3)"
-msgstr ""
+msgstr "SndFileSource: Nelze otevřít soubor \"%1\" pro %2 (%3)"
 
 #: sndfilesource.cc:209
 msgid ""
 "SndFileSource: file only contains %1 channels; %2 is invalid as a channel "
 "number"
 msgstr ""
+"SndFileSource: Soubor obsahuje jen %1 kanály, %2 je neplatným počtem kanálů"
 
 #: sndfilesource.cc:255 sndfilesource.cc:571 sndfilesource.cc:595
 msgid ""
 "cannot set broadcast info for audio file %1 (%2); dropping broadcast info "
 "for this file"
 msgstr ""
+"Nelze nastavit informace o přenosu pro zvukový soubor %1 (%2); "
+"Zahazují se informace o přenosu pro tento soubor"
 
 #: sndfilesource.cc:302
 msgid "could not allocate file %1 for reading."
-msgstr ""
+msgstr "Nepodařilo se přidělit soubor %1 pro čtení."
 
 #: sndfilesource.cc:337
 msgid "SndFileSource: could not seek to frame %1 within %2 (%3)"
-msgstr ""
+msgstr "SndFileSource: Nepodařil se vyhledat v %2 snímku %1 (%3)"
 
 #: sndfilesource.cc:347
 msgid ""
 "SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5, ret was %6)"
 msgstr ""
+"SndFileSource: @ %1 Nepodařil se číst %2 uvnitř %3 (%4) (len = %5, ret "
+"byl %6)"
 
 #: sndfilesource.cc:391 sndfilesource.cc:420
 msgid "attempt to write a non-writable audio file source (%1)"
 msgstr ""
+"Pokus o zápis zvukového zdrojového souboru chráněného proti zápisu (%1)"
 
 #: sndfilesource.cc:396 utils.cc:592 utils.cc:616 utils.cc:630 utils.cc:649
 msgid "programming error: %1 %2"
-msgstr ""
+msgstr "Chyba v programování: %1 %2"
 
 #: sndfilesource.cc:523
 msgid "attempt to flush a non-writable audio file source (%1)"
 msgstr ""
+"Pokus o uklizení zvukového zdrojového souboru chráněného proti zápisu (%1)"
 
 #: sndfilesource.cc:528
 msgid "attempt to flush an un-opened audio file source (%1)"
-msgstr ""
+msgstr "Pokus o uklizení neotevřeného zvukového zdrojového souboru (%1)"
 
 #: sndfilesource.cc:534
 msgid "could not allocate file %1 to write header"
-msgstr ""
+msgstr "Nepodařilo se přidělit soubor %1 pro zapsání hlavičky souboru"
 
 #: sndfilesource.cc:548
 msgid ""
 "attempt to store broadcast info in a non-writable audio file source (%1)"
 msgstr ""
+"Pokus o zápis informace o přenosu do zvukového zdrojového souboru chráněného "
+"proti zápisu (%1)"
 
 #: sndfilesource.cc:553
 msgid "attempt to set BWF info for an un-opened audio file source (%1)"
 msgstr ""
+"Pokus o nastavení informace BWF v neotevřeném zvukovém zdrojovém souboru (%1)"
 
 #: sndfilesource.cc:614
 msgid "%1: cannot seek to %2 (libsndfile error: %3)"
-msgstr ""
+msgstr "%1: Nelze vyhledat %2 (Chyba libsndfile: %3)"
 
 #: sndfilesource.cc:727
 msgid "SndFileSource: \"%1\" bad read retval: %2 of %5 (%3: %4)"
-msgstr ""
+msgstr "SndFileSource: \"%1\" špatná vrácená hodnota čtení: %2 z %5 (%3: %4)"
 
 #: sndfilesource.cc:740 sndfilesource.cc:790 sndfilesource.cc:797
 msgid "SndFileSource: \"%1\" bad write (%2)"
-msgstr ""
+msgstr "SndFileSource: \"%1\" špatný postup zápisu (%2)"
 
 #: sndfilesource.cc:820
 msgid ""
 "Filesource: start time is already set for existing file (%1): Cannot change "
 "start time."
 msgstr ""
+"Filesource: Začáteční čas pro existující soubor je již nastaven (%1): "
+"Začáteční čas "
+"nelze změnit."
 
 #: speakers.cc:239
 msgid "Speaker information is missing azimuth - speaker ignored"
-msgstr ""
+msgstr "Údaj pro reproduktor postrádá azimut - reproduktor se přehlíží"
 
 #: speakers.cc:245
 msgid "Speaker information is missing elevation - speaker ignored"
-msgstr ""
+msgstr "Údaj pro reproduktor postrádá vyvýšení - reproduktor se přehlíží"
 
 #: speakers.cc:251
 msgid "Speaker information is missing distance - speaker ignored"
-msgstr ""
+msgstr "Údaj pro reproduktor postrádá vzdálenost - reproduktor se přehlíží"
 
 #: tape_file_matcher.cc:46
 msgid "Cannot compile tape track regexp for use (%1)"
-msgstr ""
+msgstr "Regulární výraz stopy pásky nelze vyhodnotit k užívání (%1)"
 
 #: tempo.cc:79
 msgid "TempoSection XML node has no \"start\" property"
-msgstr ""
+msgstr "TempoSection: Uzel XML nemá žádnou vlastnost \"start\""
 
 #: tempo.cc:87
 msgid "TempoSection XML node has an illegal \"start\" value"
-msgstr ""
+msgstr "TempoSection: Uzel XML má nepřípustnou hodnotu pro \"start\""
 
 #: tempo.cc:94
 msgid "TempoSection XML node has no \"beats-per-minute\" property"
-msgstr ""
+msgstr "TempoSection: Uzel XML nemá žádnou vlastnost \"beats-per-minute\""
 
 #: tempo.cc:99
 msgid "TempoSection XML node has an illegal \"beats_per_minute\" value"
 msgstr ""
+"TempoSection: Uzel XML má nepřípustnou hodnotu pro \"beats_per_minute\""
 
 #: tempo.cc:108
 msgid "TempoSection XML node has an illegal \"note-type\" value"
-msgstr ""
+msgstr "TempoSection: Uzel XML má nepřípustnou hodnotu pro \"note-type\""
 
 #: tempo.cc:114
 msgid "TempoSection XML node has no \"movable\" property"
-msgstr ""
+msgstr "TempoSection: Uzel XML má nepřípustnou hodnotu pro \"movable\""
 
 #: tempo.cc:124
 msgid "TempoSection XML node has an illegal \"bar-offset\" value"
-msgstr ""
+msgstr "TempoSection: Uzel XML má nepřípustnou hodnotu pro \"bar-offset\""
 
 #: tempo.cc:201
 msgid "MeterSection XML node has no \"start\" property"
-msgstr ""
+msgstr "MeterSection: Uzel XML nemá žádnou vlastnost \"start\""
 
 #: tempo.cc:209
 msgid "MeterSection XML node has an illegal \"start\" value"
-msgstr ""
+msgstr "MeterSection: Uzel XML má nepřípustnou hodnotu pro \"start\""
 
 #: tempo.cc:219
 msgid ""
 "MeterSection XML node has no \"beats-per-bar\" or \"divisions-per-bar\" "
 "property"
 msgstr ""
+"MeterSection: Uzel XML nemá žádnou vlastnost \"beats-per-bar\" nebo "
+"\"divisions-per-bar\""
 
 #: tempo.cc:225
 msgid ""
 "MeterSection XML node has an illegal \"beats-per-bar\" or \"divisions-per-bar"
 "\" value"
 msgstr ""
+"MeterSection: Uzel XML má nepřípustnou hodnotu pro \"beats-per-bar\" nebo "
+"\"divisions-per-bar\""
 
 #: tempo.cc:230
 msgid "MeterSection XML node has no \"note-type\" property"
-msgstr ""
+msgstr "MeterSection: Uzel XML nemá žádnou vlastnost \"note-type\""
 
 #: tempo.cc:235
 msgid "MeterSection XML node has an illegal \"note-type\" value"
-msgstr ""
+msgstr "MeterSection: Uzel XML má nepřípustnou hodnotu pro \"note-type\""
 
 #: tempo.cc:240
 msgid "MeterSection XML node has no \"movable\" property"
-msgstr ""
+msgstr "MeterSection: Uzel XML nemá žádnou vlastnost \"movable\""
 
 #: tempo.cc:387
 msgid ""
 "Meter changes can only be positioned on the first beat of a bar. Moving from "
 "%1 to %2"
 msgstr ""
+"Změny metra lze umístit pouze na první dobu taktu. "
+"Přesunuje se z %1 na %2"
 
 #: tempo.cc:649
 msgid "no tempo sections defined in tempo map - cannot change tempo @ %1"
 msgstr ""
+"V přiřazení tempa nejsou stanoveny žádné úseky tempa - Nelze změnit tempo @ %1"
 
 #: tempo.cc:679 tempo.cc:695
 msgid "programming error: no tempo section in tempo map!"
-msgstr ""
+msgstr "Chyba v programování: Žádný úsek tempa v přiřazení tempa"
 
 #: tempo.cc:809 tempo.cc:1782
 msgid "programming error: unhandled MetricSection type"
-msgstr ""
+msgstr "Chyba v programování: Neupravený typ MetricSection"
 
 #: tempo.cc:1100
 msgid "tempo map asked for BBT time at frame %1\n"
-msgstr ""
+msgstr "Přiřazení tempa požádalo o čas BBT u snímku %1\n"
 
 #: tempo.cc:1143
 msgid "tempo map asked for frame time at bar < 1  (%1)\n"
-msgstr ""
+msgstr "Přiřazení tempa požádalo o čas snímku v taktu < 1 %1\n"
 
 #: tempo.cc:1597 tempo.cc:1611
 msgid "Tempo map: could not set new state, restoring old one."
 msgstr ""
+"Přiřazení tempa: Nepodařilo se nastavit nový stav, obnovuje se starý stav."
 
 #: tempo.cc:1632
 msgid "Multiple meter definitions found at %1"
-msgstr ""
+msgstr "V %1 nalezeno více vymezení metra"
 
 #: tempo.cc:1637
 msgid "Multiple tempo definitions found at %1"
-msgstr ""
+msgstr "V %1 nalezeno více vymezení tempa"
 
 #: tempo_map_importer.cc:52
 msgid "Tempo map"
-msgstr ""
+msgstr "Přiřazení tempa"
 
 #: tempo_map_importer.cc:60
 msgid "Tempo Map"
-msgstr ""
+msgstr "Přiřazení tempa"
 
 #: tempo_map_importer.cc:80
 msgid "Tempo marks: "
-msgstr ""
+msgstr "Značky pro tempo:"
 
 #: tempo_map_importer.cc:80
 msgid ""
 "\n"
 "Meter marks: "
 msgstr ""
+"\n"
+"Značky pro metrum:"
 
 #: tempo_map_importer.cc:89
 msgid ""
 "This will replace the current tempo map!\n"
 "Are you sure you want to do this?"
 msgstr ""
+"Toto nahradí nynější přiřazení tempa!\n"
+"Opravdu to chcete udělat?"
 
 #: user_bundle.cc:47
 msgid "Node for Bundle has no \"name\" property"
-msgstr ""
+msgstr "Uzel pro svazek nemá žádnou vlastnost \"name\""
 
 #: user_bundle.cc:59 user_bundle.cc:80
 #, c-format
 msgid "Unknown node \"%s\" in Bundle"
-msgstr ""
+msgstr "Neznámý uzel \"%s\" ve svazku"
 
 #: user_bundle.cc:64
 msgid "Node for Channel has no \"name\" property"
-msgstr ""
+msgstr "Uzel pro kanál nemá žádnou vlastnost \"name\""
 
 #: user_bundle.cc:70
 msgid "Node for Channel has no \"type\" property"
-msgstr ""
+msgstr "Uzel pro kanál nemá žádnou vlastnost \"type\""
 
 #: user_bundle.cc:85
 msgid "Node for Port has no \"name\" property"
-msgstr ""
+msgstr "Uzel pro přípojku nemá žádnou vlastnost \"name\""
 
 #: utils.cc:453 utils.cc:477
 msgid "Splice"
-msgstr "Skarv"
+msgstr "Spojit"
 
 #: utils.cc:455 utils.cc:470
 msgid "Slide"
-msgstr "Glid"
+msgstr "Vsunout"
 
 #: utils.cc:457 utils.cc:473
 msgid "Lock"
-msgstr "Lås"
+msgstr "Zamknout"
 
 #: utils.cc:460
 msgid "programming error: unknown edit mode string \"%1\""
-msgstr ""
+msgstr "Chyba v programování: neznámý řetězec pro režim úprav \"%1\""
 
 #: utils.cc:484 utils.cc:513
 msgid "MIDI Timecode"
-msgstr ""
+msgstr "Časový kód MIDI"
 
 #: utils.cc:484 utils.cc:511
 msgid "MTC"
-msgstr ""
+msgstr "MTC"
 
 #: utils.cc:488 utils.cc:520
 msgid "MIDI Clock"
-msgstr ""
+msgstr "Hodiny MIDI"
 
 #: utils.cc:492 utils.cc:507 utils.cc:527
 msgid "JACK"
-msgstr ""
+msgstr "JACK"
 
 #: utils.cc:496
 msgid "programming error: unknown sync source string \"%1\""
-msgstr ""
+msgstr "Chyba v programování: neznámý řetězec pro zdroj seřízení \"%1\""
 
 #: utils.cc:518
 msgid "M-Clock"
-msgstr ""
+msgstr "M-Clock"
 
 #: utils.cc:524
 msgid "LTC"
-msgstr ""
+msgstr "LTC"
 
 #: utils.cc:684
 msgid "programming error: unknown native header format: %1"
-msgstr ""
+msgstr "Chyba v programování: neznámý nativní formát hlavičky: %1"
 
 #: utils.cc:699
 msgid "cannot open directory %1 (%2)"
-msgstr ""
+msgstr "Nelze otevřít adresář %1 (%2)"
 
-#~ msgid "Connection %1 was not available - \"out 1\" used instead"
-#~ msgstr "Anslutning %1 inte tillgänglig - \"out 1\" används instället"
+#~ msgid "Session: you can't use a mark for auto loop"
+#~ msgstr "Session: Sie können diesen Marker nicht für Auto-Loop verwenden "
 
-#~ msgid "Splice Edit"
-#~ msgstr "Fogredigering"
+#~ msgid ""
+#~ "No more JACK ports are available. You will need to stop %1 and restart "
+#~ "JACK with ports if you need this many tracks."
+#~ msgstr ""
+#~ "Keine JACK-Ports mehr verfügbar. Sie müssen %1 stoppen und JACK mit mehr "
+#~ "Ports neustarten, wenn Sie so viele Spuren benötigen."
 
-#~ msgid "Slide Edit"
-#~ msgstr "Glidredigering"
-
-#~ msgid "Lock Edit"
-#~ msgstr "Låst redigering"
-
-#~ msgid "Internal"
-#~ msgstr "Intern"
-
-#~ msgid "Catch up with send/insert state"
-#~ msgstr "Kommer ikapp sänd/anslutningstillstånd"
-
-#~ msgid "OSC startup"
-#~ msgstr "OSC-uppstart"
-
-#~ msgid "Configuring MIDI ports"
-#~ msgstr "Konfigurerar MIDI-portar"
+#~ msgid "Could not understand ardour file %1"
+#~ msgstr "Konnte die Projektdatei %1 nicht verstehen"
