@@ -4539,7 +4539,7 @@ Editor::get_regions_after (RegionSelection& rs, framepos_t where, const TrackVie
 					RegionView* rv = rtv->view()->find_view (*i);
 
 					if (rv) {
-						rs.push_back (rv);
+						rs.add (rv);
 					}
 				}
 			}
