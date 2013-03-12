@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Ing. Andreas Neuhold hd-recording.at v03</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Eventide</Manufacturer>
+    <Model>Eclipse</Model>
+    <CustomDeviceMode Name="">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Eventide Eclipse"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Eventide Eclipse"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Eventide Eclipse"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Eventide Eclipse"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Eventide Eclipse"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Eventide Eclipse"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Eventide Eclipse"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Eventide Eclipse"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Eventide Eclipse"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Eventide Eclipse"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Eventide Eclipse"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Eventide Eclipse"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Eventide Eclipse"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Eventide Eclipse"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Eventide Eclipse"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Eventide Eclipse"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Eventide Eclipse">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Eventide Eclipse User">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Eventide Eclipse User"/>
+      </PatchBank>
+      <PatchBank Name="Eventide Eclipse 100">
+        <MIDICommands>
+          <ControlChange Control="0" Value="1"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Eventide Eclipse 100"/>
+      </PatchBank>
+      <PatchBank Name="Eventide Eclipse 200">
+        <MIDICommands>
+          <ControlChange Control="0" Value="2"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Eventide Eclipse 200"/>
+      </PatchBank>
+      <PatchBank Name="Eventide Eclipse 300">
+        <MIDICommands>
+          <ControlChange Control="0" Value="3"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Eventide Eclipse 300"/>
+      </PatchBank>
+      <PatchBank Name="Eventide Eclipse 400">
+        <MIDICommands>
+          <ControlChange Control="0" Value="4"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Eventide Eclipse 400"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <PatchNameList Name="Eventide Eclipse User">
+      <Patch Number="00" Name="00" ProgramChange="00"/>
+      <Patch Number="01" Name="01 " ProgramChange="01"/>
+      <Patch Number="02" Name="02 " ProgramChange="02"/>
+      <Patch Number="03" Name="03 " ProgramChange="03"/>
+      <Patch Number="04" Name="04 " ProgramChange="04"/>
+      <Patch Number="05" Name="05 " ProgramChange="05"/>
+      <Patch Number="06" Name="06 " ProgramChange="06"/>
+      <Patch Number="07" Name="07 " ProgramChange="07"/>
+      <Patch Number="08" Name="08 " ProgramChange="08"/>
+      <Patch Number="09" Name="09 " ProgramChange="09"/>
+      <Patch Number="12" Name="12 " ProgramChange="12"/>
+      <Patch Number="13" Name="13 " ProgramChange="13"/>
+      <Patch Number="14" Name="14 " ProgramChange="14"/>
+      <Patch Number="15" Name="15 " ProgramChange="15"/>
+      <Patch Number="16" Name="16 " ProgramChange="16"/>
+      <Patch Number="17" Name="17 " ProgramChange="17"/>
+      <Patch Number="18" Name="18 " ProgramChange="18"/>
+      <Patch Number="19" Name="19 " ProgramChange="19"/>
+      <Patch Number="20" Name="20 " ProgramChange="20"/>
+      <Patch Number="21" Name="21 " ProgramChange="21"/>
+      <Patch Number="22" Name="22 " ProgramChange="22"/>
+      <Patch Number="23" Name="23 " ProgramChange="23"/>
+      <Patch Number="24" Name="24 " ProgramChange="24"/>
+      <Patch Number="25" Name="25 " ProgramChange="25"/>
+      <Patch Number="26" Name="26 " ProgramChange="26"/>
+      <Patch Number="27" Name="27 " ProgramChange="27"/>
+      <Patch Number="28" Name="28 " ProgramChange="28"/>
+      <Patch Number="29" Name="29 " ProgramChange="29"/>
+      <Patch Number="30" Name="30 " ProgramChange="30"/>
+      <Patch Number="31" Name="31 " ProgramChange="31"/>
+      <Patch Number="32" Name="32 " ProgramChange="32"/>
+      <Patch Number="33" Name="33 " ProgramChange="33"/>
+      <Patch Number="34" Name="34 " ProgramChange="34"/>
+      <Patch Number="35" Name="35 " ProgramChange="35"/>
+      <Patch Number="36" Name="36 " ProgramChange="36"/>
+      <Patch Number="37" Name="37 " ProgramChange="37"/>
+      <Patch Number="38" Name="38 " ProgramChange="38"/>
+      <Patch Number="39" Name="39 " ProgramChange="39"/>
+      <Patch Number="40" Name="40 " ProgramChange="40"/>
+      <Patch Number="41" Name="41 " ProgramChange="41"/>
+      <Patch Number="42" Name="42 " ProgramChange="42"/>
+      <Patch Number="43" Name="43 " ProgramChange="43"/>
+      <Patch Number="44" Name="44 " ProgramChange="44"/>
+      <Patch Number="45" Name="45 " ProgramChange="45"/>
+      <Patch Number="46" Name="46 " ProgramChange="46"/>
+      <Patch Number="47" Name="47 " ProgramChange="47"/>
+      <Patch Number="48" Name="48 " ProgramChange="48"/>
+      <Patch Number="49" Name="49 " ProgramChange="49"/>
+      <Patch Number="50" Name="50 " ProgramChange="50"/>
+      <Patch Number="51" Name="51 " ProgramChange="51"/>
+      <Patch Number="52" Name="52 " ProgramChange="52"/>
+      <Patch Number="53" Name="53 " ProgramChange="53"/>
+      <Patch Number="54" Name="54 " ProgramChange="54"/>
+      <Patch Number="55" Name="55 " ProgramChange="55"/>
+      <Patch Number="56" Name="56 " ProgramChange="56"/>
+      <Patch Number="57" Name="57 " ProgramChange="57"/>
+      <Patch Number="58" Name="58 " ProgramChange="58"/>
+      <Patch Number="59" Name="59 " ProgramChange="59"/>
+      <Patch Number="60" Name="60 " ProgramChange="60"/>
+      <Patch Number="61" Name="61 " ProgramChange="61"/>
+      <Patch Number="62" Name="62 " ProgramChange="62"/>
+      <Patch Number="63" Name="63 " ProgramChange="63"/>
+      <Patch Number="64" Name="64 " ProgramChange="64"/>
+      <Patch Number="65" Name="65 " ProgramChange="65"/>
+      <Patch Number="66" Name="66 " ProgramChange="66"/>
+      <Patch Number="67" Name="67 " ProgramChange="67"/>
+      <Patch Number="68" Name="68 " ProgramChange="68"/>
+      <Patch Number="70" Name="70 " ProgramChange="70"/>
+      <Patch Number="74" Name="74 " ProgramChange="74"/>
+      <Patch Number="75" Name="75 " ProgramChange="75"/>
+      <Patch Number="76" Name="76 " ProgramChange="76"/>
+      <Patch Number="77" Name="77 " ProgramChange="77"/>
+      <Patch Number="78" Name="78 " ProgramChange="78"/>
+      <Patch Number="80" Name="80 " ProgramChange="80"/>
+      <Patch Number="81" Name="81 " ProgramChange="81"/>
+      <Patch Number="83" Name="83 " ProgramChange="83"/>
+      <Patch Number="84" Name="84 " ProgramChange="84"/>
+      <Patch Number="85" Name="85 " ProgramChange="85"/>
+      <Patch Number="86" Name="86 " ProgramChange="86"/>
+      <Patch Number="90" Name="90 " ProgramChange="90"/>
+      <Patch Number="91" Name="91 " ProgramChange="91"/>
+      <Patch Number="92" Name="92 " ProgramChange="92"/>
+      <Patch Number="93" Name="93" ProgramChange="93"/>
+      <Patch Number="94" Name="94" ProgramChange="94"/>
+      <Patch Number="95" Name="95" ProgramChange="95"/>
+      <Patch Number="96" Name="96" ProgramChange="96"/>
+      <Patch Number="97" Name="97" ProgramChange="97"/>
+      <Patch Number="98" Name="98" ProgramChange="98"/>
+      <Patch Number="99" Name="99" ProgramChange="99"/>
+    </PatchNameList>
+    <PatchNameList Name="Eventide Eclipse 100">
+      <Patch Number="00" Name="100 Mute_Series" ProgramChange="00"/>
+      <Patch Number="01" Name="101 Mute_Xfade" ProgramChange="01"/>
+      <Patch Number="02" Name="102 Thru_Series" ProgramChange="02"/>
+      <Patch Number="03" Name="103 Thru_Xfade" ProgramChange="03"/>
+      <Patch Number="04" Name="104 Banddelays" ProgramChange="04"/>
+      <Patch Number="05" Name="105 Bandtaps" ProgramChange="05"/>
+      <Patch Number="06" Name="106 Chorusdelays" ProgramChange="06"/>
+      <Patch Number="07" Name="107 Chorustaps" ProgramChange="07"/>
+      <Patch Number="08" Name="108 Combdelays" ProgramChange="08"/>
+      <Patch Number="09" Name="109 Combtaps" ProgramChange="09"/>
+      <Patch Number="12" Name="112 Ringdelays" ProgramChange="12"/>
+      <Patch Number="13" Name="113 Ringtaps" ProgramChange="13"/>
+      <Patch Number="14" Name="114 Pandelays" ProgramChange="14"/>
+      <Patch Number="15" Name="115 St Chorus" ProgramChange="15"/>
+      <Patch Number="16" Name="116 DuckedDelays" ProgramChange="16"/>
+      <Patch Number="17" Name="117 Ultratap 2" ProgramChange="17"/>
+      <Patch Number="18" Name="118 Loop10" ProgramChange="18"/>
+      <Patch Number="19" Name="119 Loop20" ProgramChange="19"/>
+      <Patch Number="20" Name="120 DualLoop5" ProgramChange="20"/>
+      <Patch Number="21" Name="121 DualLoop10" ProgramChange="21"/>
+      <Patch Number="22" Name="122 Reverse10" ProgramChange="22"/>
+      <Patch Number="23" Name="123 Reverse20" ProgramChange="23"/>
+      <Patch Number="24" Name="124 DualReverse5" ProgramChange="24"/>
+      <Patch Number="25" Name="125 DualReverse10" ProgramChange="25"/>
+      <Patch Number="26" Name="126 StereoComp" ProgramChange="26"/>
+      <Patch Number="27" Name="127 DualGates" ProgramChange="27"/>
+      <Patch Number="28" Name="128 FM Panner" ProgramChange="28"/>
+      <Patch Number="29" Name="129 FM Trem" ProgramChange="29"/>
+      <Patch Number="30" Name="130 2BandXover" ProgramChange="30"/>
+      <Patch Number="31" Name="131 Dual 4B Parametric" ProgramChange="31"/>
+      <Patch Number="32" Name="132 Dual8Band Eq" ProgramChange="32"/>
+      <Patch Number="33" Name="133 Dual Filters" ProgramChange="33"/>
+      <Patch Number="34" Name="134 Dual Modfilters" ProgramChange="34"/>
+      <Patch Number="35" Name="135 St Phaser" ProgramChange="35"/>
+      <Patch Number="36" Name="136 StereoizePhaser" ProgramChange="36"/>
+      <Patch Number="37" Name="137 DualSamp/Hold" ProgramChange="37"/>
+      <Patch Number="38" Name="138 VocalizedWa" ProgramChange="38"/>
+      <Patch Number="39" Name="139 Vocoder10" ProgramChange="39"/>
+      <Patch Number="40" Name="140 Delay8Plex" ProgramChange="40"/>
+      <Patch Number="41" Name="141 LrgDelay8Plex" ProgramChange="41"/>
+      <Patch Number="42" Name="142 Detune4Plex" ProgramChange="42"/>
+      <Patch Number="43" Name="143 Reverse4Plex" ProgramChange="43"/>
+      <Patch Number="44" Name="144 FuzzADSRPreamp" ProgramChange="44"/>
+      <Patch Number="45" Name="145 BassPreamp" ProgramChange="45"/>
+      <Patch Number="46" Name="146 OverdrivePreamp" ProgramChange="46"/>
+      <Patch Number="47" Name="147 FuzzPreamp" ProgramChange="47"/>
+      <Patch Number="48" Name="148 PolyDriver" ProgramChange="48"/>
+      <Patch Number="49" Name="149 FuzzWaWammyPre" ProgramChange="49"/>
+      <Patch Number="50" Name="150 EZPolyFuzz" ProgramChange="50"/>
+      <Patch Number="51" Name="151 PolyFuzz" ProgramChange="51"/>
+      <Patch Number="52" Name="152 FmFilterPan" ProgramChange="52"/>
+      <Patch Number="53" Name="153 LfoFilter+Pong" ProgramChange="53"/>
+      <Patch Number="54" Name="154 S/HFilter+Pong" ProgramChange="54"/>
+      <Patch Number="55" Name="155 ManifoldAlpha" ProgramChange="55"/>
+      <Patch Number="56" Name="156 ManifoldBeta" ProgramChange="56"/>
+      <Patch Number="57" Name="157 VocalProcess" ProgramChange="57"/>
+      <Patch Number="58" Name="158 AutoCorrect" ProgramChange="58"/>
+      <Patch Number="59" Name="159 DualWammy" ProgramChange="59"/>
+      <Patch Number="60" Name="160 4Detuners" ProgramChange="60"/>
+      <Patch Number="61" Name="161 ReverseCrystals" ProgramChange="61"/>
+      <Patch Number="62" Name="162 St Shifter" ProgramChange="62"/>
+      <Patch Number="63" Name="163 DiatonicShift2" ProgramChange="63"/>
+      <Patch Number="64" Name="164 MutiShift2" ProgramChange="64"/>
+      <Patch Number="65" Name="165 DualDiatonic" ProgramChange="65"/>
+      <Patch Number="66" Name="166 DualMultishift" ProgramChange="66"/>
+      <Patch Number="67" Name="167 DiatonicShift4" ProgramChange="67"/>
+      <Patch Number="68" Name="168 MultiShift4" ProgramChange="68"/>
+      <Patch Number="70" Name="170 ModFreqShift" ProgramChange="70"/>
+      <Patch Number="74" Name="174 Reverb 8" ProgramChange="74"/>
+      <Patch Number="75" Name="175 LongVerb8" ProgramChange="75"/>
+      <Patch Number="76" Name="176 Reverb 16" ProgramChange="76"/>
+      <Patch Number="77" Name="177 DenseRoom 8" ProgramChange="77"/>
+      <Patch Number="78" Name="178 DenseRoom16" ProgramChange="78"/>
+      <Patch Number="80" Name="180 St Diffusor" ProgramChange="80"/>
+      <Patch Number="81" Name="181 Diffchorus" ProgramChange="81"/>
+      <Patch Number="83" Name="183 Chordlys+Verb8" ProgramChange="83"/>
+      <Patch Number="84" Name="184 Mshift+Reverb8" ProgramChange="84"/>
+      <Patch Number="85" Name="185 Dshift+Reverb8" ProgramChange="85"/>
+      <Patch Number="86" Name="186 Stshift+Reverb8" ProgramChange="86"/>
+      <Patch Number="90" Name="190 Dither" ProgramChange="90"/>
+      <Patch Number="91" Name="191 OSC440" ProgramChange="91"/>
+      <Patch Number="92" Name="192 Tuner" ProgramChange="92"/>
+    </PatchNameList>
+    <PatchNameList Name="Eventide Eclipse 200">
+      <Patch Number="00" Name="200 Biomec 1" ProgramChange="00"/>
+      <Patch Number="01" Name="201 Biomec 2" ProgramChange="01"/>
+      <Patch Number="02" Name="202 FuzzPitch" ProgramChange="02"/>
+      <Patch Number="03" Name="203 Desert Gtr" ProgramChange="03"/>
+      <Patch Number="04" Name="204 Wide Crunch" ProgramChange="04"/>
+      <Patch Number="05" Name="205 Dominion" ProgramChange="05"/>
+      <Patch Number="06" Name="206 PolyCloudverb" ProgramChange="06"/>
+      <Patch Number="07" Name="207 LittleDemons" ProgramChange="07"/>
+      <Patch Number="08" Name="208 Mountainrange" ProgramChange="08"/>
+      <Patch Number="09" Name="209 Hemispheres" ProgramChange="09"/>
+      <Patch Number="10" Name="210 ElementalBass" ProgramChange="10"/>
+      <Patch Number="11" Name="211 GerrysBass+Tune" ProgramChange="11"/>
+      <Patch Number="12" Name="212 OD VerbedDly" ProgramChange="12"/>
+      <Patch Number="13" Name="213 Bandpong" ProgramChange="13"/>
+      <Patch Number="14" Name="214 BandCenter&amp;Pong" ProgramChange="14"/>
+      <Patch Number="15" Name="215 BandtapsL/C/R" ProgramChange="15"/>
+      <Patch Number="16" Name="216 BandtapsR/C/L" ProgramChange="16"/>
+      <Patch Number="17" Name="217 Choruspong" ProgramChange="17"/>
+      <Patch Number="18" Name="218 Ticktock" ProgramChange="18"/>
+      <Patch Number="19" Name="219 Ticktock2" ProgramChange="19"/>
+      <Patch Number="20" Name="220 Ringpong" ProgramChange="20"/>
+      <Patch Number="21" Name="221 RingpongRoom" ProgramChange="21"/>
+      <Patch Number="22" Name="222 DualCompress" ProgramChange="22"/>
+      <Patch Number="23" Name="223 Flangerator" ProgramChange="23"/>
+      <Patch Number="24" Name="224 ChorusSpace2" ProgramChange="24"/>
+      <Patch Number="25" Name="225 Brown" ProgramChange="25"/>
+      <Patch Number="26" Name="226 Browner" ProgramChange="26"/>
+      <Patch Number="27" Name="227 WIDE solo" ProgramChange="27"/>
+      <Patch Number="28" Name="228 De-Bigulator" ProgramChange="28"/>
+      <Patch Number="29" Name="229 Detunedspace" ProgramChange="29"/>
+      <Patch Number="30" Name="230 WhiplashSnare" ProgramChange="30"/>
+      <Patch Number="31" Name="231 Bob's Claps" ProgramChange="31"/>
+      <Patch Number="32" Name="232 Bob's Delay" ProgramChange="32"/>
+      <Patch Number="33" Name="233 Angelic Echos" ProgramChange="33"/>
+      <Patch Number="34" Name="234 ResonEchoes" ProgramChange="34"/>
+      <Patch Number="35" Name="235 CompressedRoom" ProgramChange="35"/>
+      <Patch Number="36" Name="236 Dual Reverbs" ProgramChange="36"/>
+      <Patch Number="37" Name="237 Phaser+Verb" ProgramChange="37"/>
+      <Patch Number="38" Name="238 TremmedVerb" ProgramChange="38"/>
+      <Patch Number="39" Name="239 LarynxDelays" ProgramChange="39"/>
+      <Patch Number="40" Name="240 Larynx 2" ProgramChange="40"/>
+      <Patch Number="41" Name="241 LatinCathedral" ProgramChange="41"/>
+      <Patch Number="42" Name="242 LarynxVerb1" ProgramChange="42"/>
+      <Patch Number="43" Name="243 LarynxVerb2" ProgramChange="43"/>
+      <Patch Number="44" Name="244 Biomec 3" ProgramChange="44"/>
+      <Patch Number="45" Name="245 ShiftedVerb1" ProgramChange="45"/>
+      <Patch Number="46" Name="246 ShiftedVerb2" ProgramChange="46"/>
+      <Patch Number="47" Name="247 ShiftedClusters" ProgramChange="47"/>
+      <Patch Number="48" Name="248 ArenaSound2" ProgramChange="48"/>
+      <Patch Number="49" Name="249 Crystal Verb" ProgramChange="49"/>
+      <Patch Number="50" Name="250 EarlyReflec1" ProgramChange="50"/>
+      <Patch Number="51" Name="251 EarlyReflec2" ProgramChange="51"/>
+      <Patch Number="52" Name="252 EarlyClust1" ProgramChange="52"/>
+      <Patch Number="53" Name="253 EarlyClust2" ProgramChange="53"/>
+      <Patch Number="54" Name="254 BostonChamber" ProgramChange="54"/>
+      <Patch Number="55" Name="255 MediumChamber" ProgramChange="55"/>
+      <Patch Number="56" Name="256 ToonChamber2" ProgramChange="56"/>
+      <Patch Number="57" Name="257 EMT Plate" ProgramChange="57"/>
+      <Patch Number="58" Name="258 MetallicPlate" ProgramChange="58"/>
+      <Patch Number="59" Name="259 StereoPlate" ProgramChange="59"/>
+      <Patch Number="60" Name="260 StPlate2&amp;Chorus" ProgramChange="60"/>
+      <Patch Number="61" Name="261 ReelRoom" ProgramChange="61"/>
+      <Patch Number="62" Name="262 UnreelRoom" ProgramChange="62"/>
+      <Patch Number="63" Name="263 MediumBooth" ProgramChange="63"/>
+      <Patch Number="64" Name="264 SweptBooth" ProgramChange="64"/>
+      <Patch Number="65" Name="265 RMX Ambience" ProgramChange="65"/>
+      <Patch Number="66" Name="266 SpongeSpring" ProgramChange="66"/>
+      <Patch Number="67" Name="267 New Air 2" ProgramChange="67"/>
+      <Patch Number="68" Name="268 SoftSmallRoom" ProgramChange="68"/>
+      <Patch Number="69" Name="269 StMike&amp;Room2" ProgramChange="69"/>
+      <Patch Number="70" Name="270 AcousticRoom2" ProgramChange="70"/>
+      <Patch Number="71" Name="271 EchoRoom" ProgramChange="71"/>
+      <Patch Number="72" Name="272 StringRoom2" ProgramChange="72"/>
+      <Patch Number="73" Name="273 BlackHole2" ProgramChange="73"/>
+      <Patch Number="74" Name="274 EchospaceOfGod" ProgramChange="74"/>
+      <Patch Number="75" Name="275 FlangeCanyon" ProgramChange="75"/>
+      <Patch Number="76" Name="276 ChorusCanyon" ProgramChange="76"/>
+      <Patch Number="77" Name="277 ReverseNonlin" ProgramChange="77"/>
+      <Patch Number="78" Name="278 Wormhole2" ProgramChange="78"/>
+      <Patch Number="79" Name="279 Diat+3rd+5th" ProgramChange="79"/>
+      <Patch Number="80" Name="280 Diat+5th+7th" ProgramChange="80"/>
+      <Patch Number="81" Name="281 Diat+4th+6th" ProgramChange="81"/>
+      <Patch Number="82" Name="282 Diat+5th+Oct" ProgramChange="82"/>
+      <Patch Number="83" Name="283 Diat-4th+5th" ProgramChange="83"/>
+      <Patch Number="84" Name="284 Diat-Oct+5th" ProgramChange="84"/>
+      <Patch Number="85" Name="285 Diat-Oct+Oct" ProgramChange="85"/>
+      <Patch Number="86" Name="286 Diat+5th+10th" ProgramChange="86"/>
+      <Patch Number="87" Name="287 E/R+Verb8" ProgramChange="87"/>
+      <Patch Number="88" Name="288 Delays+Verb8" ProgramChange="88"/>
+      <Patch Number="89" Name="289 Vibrato" ProgramChange="89"/>
+      <Patch Number="90" Name="290 BuenosNotches" ProgramChange="90"/>
+      <Patch Number="91" Name="291 DolphinTalk" ProgramChange="91"/>
+      <Patch Number="92" Name="292 Jimi James" ProgramChange="92"/>
+      <Patch Number="93" Name="293 AcidReign" ProgramChange="93"/>
+      <Patch Number="94" Name="294 AnalogDelays2" ProgramChange="94"/>
+      <Patch Number="95" Name="295 FatAsCanB" ProgramChange="95"/>
+      <Patch Number="96" Name="296 Micropitchshift" ProgramChange="96"/>
+      <Patch Number="97" Name="297 MicropitchSlap" ProgramChange="97"/>
+      <Patch Number="98" Name="298 DigDly+Wah" ProgramChange="98"/>
+      <Patch Number="99" Name="299 Thick 700's" ProgramChange="99"/>
+    </PatchNameList>
+    <PatchNameList Name="Eventide Eclipse 300">
+      <Patch Number="00" Name="300 Thick -500's" ProgramChange="00"/>
+      <Patch Number="01" Name="301 Thick 1200's" ProgramChange="01"/>
+      <Patch Number="02" Name="302 Thick -1200's" ProgramChange="02"/>
+      <Patch Number="03" Name="303 ScaryMovie" ProgramChange="03"/>
+      <Patch Number="04" Name="304 RicherChorus" ProgramChange="04"/>
+      <Patch Number="05" Name="305 JustStereo2" ProgramChange="05"/>
+      <Patch Number="06" Name="306 EchoplexingPong" ProgramChange="06"/>
+      <Patch Number="07" Name="307 Micro-Verb2" ProgramChange="07"/>
+      <Patch Number="08" Name="308 Steeplechase2" ProgramChange="08"/>
+      <Patch Number="09" Name="309 WarmFlange" ProgramChange="09"/>
+      <Patch Number="10" Name="310 Pandemonium" ProgramChange="10"/>
+      <Patch Number="11" Name="311 OpenVerb" ProgramChange="11"/>
+      <Patch Number="12" Name="312 Backwards 1" ProgramChange="12"/>
+      <Patch Number="13" Name="313 Backwards 2" ProgramChange="13"/>
+      <Patch Number="14" Name="314 Aliens" ProgramChange="14"/>
+      <Patch Number="15" Name="315 Taps L&gt;R" ProgramChange="15"/>
+      <Patch Number="16" Name="316 DeathFlange2" ProgramChange="16"/>
+      <Patch Number="17" Name="317 Undulator 2" ProgramChange="17"/>
+      <Patch Number="18" Name="318 Phase/Plex" ProgramChange="18"/>
+      <Patch Number="19" Name="319 Chorus/Ring" ProgramChange="19"/>
+      <Patch Number="20" Name="320 Crystal/Wash" ProgramChange="20"/>
+      <Patch Number="21" Name="321 GatedCorrecter" ProgramChange="21"/>
+      <Patch Number="22" Name="322 Gate V16" ProgramChange="22"/>
+      <Patch Number="23" Name="323 RealRingmod" ProgramChange="23"/>
+      <Patch Number="24" Name="324 Choralspace" ProgramChange="24"/>
+      <Patch Number="25" Name="325 Moonlight Gtr" ProgramChange="25"/>
+      <Patch Number="26" Name="326 CJ's EchoFlange" ProgramChange="26"/>
+      <Patch Number="27" Name="327 CJ's EchoPhase" ProgramChange="27"/>
+      <Patch Number="28" Name="328 TriangleFlange" ProgramChange="28"/>
+      <Patch Number="29" Name="329 CJ's Fugue" ProgramChange="29"/>
+      <Patch Number="30" Name="330 NQ Phase" ProgramChange="30"/>
+      <Patch Number="31" Name="331 Megaphone" ProgramChange="31"/>
+      <Patch Number="32" Name="332 DistortVoxFilt" ProgramChange="32"/>
+      <Patch Number="33" Name="333 SolsticeBells" ProgramChange="33"/>
+      <Patch Number="34" Name="334 Solstice2" ProgramChange="34"/>
+      <Patch Number="35" Name="335 'Aarrhh" ProgramChange="35"/>
+      <Patch Number="36" Name="336 Rich Plate" ProgramChange="36"/>
+      <Patch Number="37" Name="337 Shimmerish" ProgramChange="37"/>
+      <Patch Number="38" Name="338 FuzzySampleMe" ProgramChange="38"/>
+      <Patch Number="39" Name="339 Rainbow Drops" ProgramChange="39"/>
+      <Patch Number="40" Name="340 RingDelayWa" ProgramChange="40"/>
+      <Patch Number="41" Name="341 FilterEchos" ProgramChange="41"/>
+      <Patch Number="42" Name="342 Diamond Rain" ProgramChange="42"/>
+      <Patch Number="43" Name="343 MiniMalism" ProgramChange="43"/>
+      <Patch Number="44" Name="344 Spaced Spaces" ProgramChange="44"/>
+      <Patch Number="45" Name="345 Doubler Phased" ProgramChange="45"/>
+      <Patch Number="46" Name="346 FiltaPongVerb" ProgramChange="46"/>
+      <Patch Number="47" Name="347 ChoralFlange" ProgramChange="47"/>
+      <Patch Number="48" Name="348 Eclipsed Delays" ProgramChange="48"/>
+      <Patch Number="49" Name="349 Flangedown" ProgramChange="49"/>
+      <Patch Number="50" Name="350 Trem-A-Phase" ProgramChange="50"/>
+      <Patch Number="51" Name="351 FritterpanVerb" ProgramChange="51"/>
+      <Patch Number="52" Name="352 FuzzyFlange" ProgramChange="52"/>
+      <Patch Number="53" Name="353 Reson8Delayz" ProgramChange="53"/>
+      <Patch Number="54" Name="354 FiltaShiftVerb" ProgramChange="54"/>
+      <Patch Number="55" Name="355 BrillianceLoop" ProgramChange="55"/>
+      <Patch Number="56" Name="356 PhasedRoom" ProgramChange="56"/>
+      <Patch Number="57" Name="357 4Evers Loop" ProgramChange="57"/>
+      <Patch Number="58" Name="358 Filters Nonstop" ProgramChange="58"/>
+      <Patch Number="59" Name="359 Quintilizer" ProgramChange="59"/>
+      <Patch Number="60" Name="360 Insta-Magic" ProgramChange="60"/>
+      <Patch Number="61" Name="361 Vox-A-Verb" ProgramChange="61"/>
+      <Patch Number="62" Name="362 6th World" ProgramChange="62"/>
+      <Patch Number="63" Name="363 Octa-Fuzz" ProgramChange="63"/>
+      <Patch Number="64" Name="364 PanVerbEcho" ProgramChange="64"/>
+      <Patch Number="65" Name="365 RingerPhase" ProgramChange="65"/>
+      <Patch Number="66" Name="366 GhostingDelay" ProgramChange="66"/>
+      <Patch Number="67" Name="367 Ample Say" ProgramChange="67"/>
+      <Patch Number="68" Name="368 AmpliDetuner" ProgramChange="68"/>
+      <Patch Number="69" Name="369 AutoVox" ProgramChange="69"/>
+      <Patch Number="70" Name="370 BalancingAct" ProgramChange="70"/>
+      <Patch Number="71" Name="371 XtremeBalancing" ProgramChange="71"/>
+      <Patch Number="72" Name="372 DrumBreaker 2" ProgramChange="72"/>
+      <Patch Number="73" Name="373 DrumMangle" ProgramChange="73"/>
+      <Patch Number="74" Name="374 DynaFat" ProgramChange="74"/>
+      <Patch Number="75" Name="375 HardPolyTrem" ProgramChange="75"/>
+      <Patch Number="76" Name="376 IntelliReverse" ProgramChange="76"/>
+      <Patch Number="77" Name="377 JitterPitchVerb" ProgramChange="77"/>
+      <Patch Number="78" Name="378 JitterPitchFwd" ProgramChange="78"/>
+      <Patch Number="79" Name="379 MagicPitchRing" ProgramChange="79"/>
+      <Patch Number="80" Name="380 MgkRingTalk" ProgramChange="80"/>
+      <Patch Number="81" Name="381 Malu Reverb" ProgramChange="81"/>
+      <Patch Number="82" Name="382 MicroReverse" ProgramChange="82"/>
+      <Patch Number="83" Name="383 ParaRezoTap" ProgramChange="83"/>
+      <Patch Number="84" Name="384 PitchModRinger" ProgramChange="84"/>
+      <Patch Number="85" Name="385 PitchModTrem" ProgramChange="85"/>
+      <Patch Number="86" Name="386 PolyPitchStep" ProgramChange="86"/>
+      <Patch Number="87" Name="387 ReversePosse" ProgramChange="87"/>
+      <Patch Number="88" Name="388 RvsTapNVerb" ProgramChange="88"/>
+      <Patch Number="89" Name="389 Ring-A-Verb" ProgramChange="89"/>
+      <Patch Number="90" Name="390 RythmRingers" ProgramChange="90"/>
+      <Patch Number="91" Name="391 SeriesResoTap" ProgramChange="91"/>
+      <Patch Number="92" Name="392 TouchPhase" ProgramChange="92"/>
+      <Patch Number="93" Name="393 UglyRvsRezo" ProgramChange="93"/>
+      <Patch Number="94" Name="394 Anguish" ProgramChange="94"/>
+      <Patch Number="95" Name="395 Artifacts" ProgramChange="95"/>
+      <Patch Number="96" Name="396 BandModFilters" ProgramChange="96"/>
+      <Patch Number="97" Name="397 BandPass" ProgramChange="97"/>
+      <Patch Number="98" Name="398 BigBandTap" ProgramChange="98"/>
+      <Patch Number="99" Name="399 BouncingBall" ProgramChange="99"/>
+    </PatchNameList>
+    <PatchNameList Name="Eventide Eclipse 400">
+      <Patch Number="00" Name="400 BrittleVerb" ProgramChange="00"/>
+      <Patch Number="01" Name="401 CrazyPhazy" ProgramChange="01"/>
+      <Patch Number="02" Name="402 CreeperShift" ProgramChange="02"/>
+      <Patch Number="03" Name="403 DiffusePhaser" ProgramChange="03"/>
+      <Patch Number="04" Name="404 DrunkMusic" ProgramChange="04"/>
+      <Patch Number="05" Name="405 DuckedRobot" ProgramChange="05"/>
+      <Patch Number="06" Name="406 EnvHiLowShift" ProgramChange="06"/>
+      <Patch Number="07" Name="407 GargleTrem" ProgramChange="07"/>
+      <Patch Number="08" Name="408 HiLowFilterPan" ProgramChange="08"/>
+      <Patch Number="09" Name="409 LittleRadio" ProgramChange="09"/>
+      <Patch Number="10" Name="410 MadScientist" ProgramChange="10"/>
+      <Patch Number="11" Name="411 ModNotch" ProgramChange="11"/>
+      <Patch Number="12" Name="412 NoiseMimic" ProgramChange="12"/>
+      <Patch Number="13" Name="413 OpeningFilters" ProgramChange="13"/>
+      <Patch Number="14" Name="414 OpeningFltrPan" ProgramChange="14"/>
+      <Patch Number="15" Name="415 PulseDelay" ProgramChange="15"/>
+      <Patch Number="16" Name="416 RingMod" ProgramChange="16"/>
+      <Patch Number="17" Name="417 RobotAttack" ProgramChange="17"/>
+      <Patch Number="18" Name="418 RingTapsMod" ProgramChange="18"/>
+      <Patch Number="19" Name="419 RubberWorldDly" ProgramChange="19"/>
+      <Patch Number="20" Name="420 ScratchIt" ProgramChange="20"/>
+      <Patch Number="21" Name="421 StereoFuzz" ProgramChange="21"/>
+      <Patch Number="22" Name="422 Submerged" ProgramChange="22"/>
+      <Patch Number="23" Name="423 Swimmer" ProgramChange="23"/>
+      <Patch Number="24" Name="424 ReverbTrem" ProgramChange="24"/>
+      <Patch Number="25" Name="425 Waves" ProgramChange="25"/>
+      <Patch Number="26" Name="426 Wide Notch" ProgramChange="26"/>
+      <Patch Number="27" Name="427 XoverGate" ProgramChange="27"/>
+      <Patch Number="28" Name="428 AmbientGtr 1" ProgramChange="28"/>
+      <Patch Number="29" Name="429 AmbientGtr 2" ProgramChange="29"/>
+      <Patch Number="30" Name="430 DesertPerc 1" ProgramChange="30"/>
+      <Patch Number="31" Name="431 DesertPerc 2" ProgramChange="31"/>
+      <Patch Number="32" Name="432 Distortion D" ProgramChange="32"/>
+      <Patch Number="33" Name="433 Fifth Dominion" ProgramChange="33"/>
+      <Patch Number="34" Name="434 Pulse Guitar" ProgramChange="34"/>
+      <Patch Number="35" Name="435 Swampy Guitar" ProgramChange="35"/>
+      <Patch Number="36" Name="436 Wart Guitar" ProgramChange="36"/>
+      <Patch Number="37" Name="437 Gravely Throat" ProgramChange="37"/>
+      <Patch Number="38" Name="438 Logan’s Box" ProgramChange="38"/>
+      <Patch Number="39" Name="439 Soundwave" ProgramChange="39"/>
+      <Patch Number="40" Name="440 Voder 13" ProgramChange="40"/>
+      <Patch Number="41" Name="441 Allan Chorus" ProgramChange="41"/>
+      <Patch Number="42" Name="442 Alverman" ProgramChange="42"/>
+      <Patch Number="43" Name="443 Atavachron" ProgramChange="43"/>
+      <Patch Number="44" Name="444 Chrs/Dly/Verb" ProgramChange="44"/>
+      <Patch Number="45" Name="445 Cumulonimbus2" ProgramChange="45"/>
+      <Patch Number="46" Name="446 Earth Rise" ProgramChange="46"/>
+      <Patch Number="47" Name="447 EtherHarp" ProgramChange="47"/>
+      <Patch Number="48" Name="448 Fuzack" ProgramChange="48"/>
+      <Patch Number="49" Name="449 Gentle Giant" ProgramChange="49"/>
+      <Patch Number="50" Name="450 GTR rack" ProgramChange="50"/>
+      <Patch Number="51" Name="451 Kaizeeer" ProgramChange="51"/>
+      <Patch Number="52" Name="452 LoopKruncher" ProgramChange="52"/>
+      <Patch Number="53" Name="453 Mercury Cloud" ProgramChange="53"/>
+      <Patch Number="54" Name="454 PLEX &gt; LOOP" ProgramChange="54"/>
+      <Patch Number="55" Name="455 Polyreverse2" ProgramChange="55"/>
+      <Patch Number="56" Name="456 Splatter GTR" ProgramChange="56"/>
+      <Patch Number="57" Name="457 SRV" ProgramChange="57"/>
+      <Patch Number="58" Name="458 Venusian Girls" ProgramChange="58"/>
+      <Patch Number="59" Name="459 Big Snare1" ProgramChange="59"/>
+      <Patch Number="60" Name="460 Big Snare 2" ProgramChange="60"/>
+      <Patch Number="61" Name="461 Pcm70 Hall" ProgramChange="61"/>
+      <Patch Number="62" Name="462 FrontOfHouse" ProgramChange="62"/>
+      <Patch Number="63" Name="463 FOH for HDM" ProgramChange="63"/>
+      <Patch Number="64" Name="464 Wonderful Birds" ProgramChange="64"/>
+    </PatchNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

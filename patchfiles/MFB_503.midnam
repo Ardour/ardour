@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Jonathan Stowe</Author>
+  <MasterDeviceNames>
+    <Manufacturer>MFB</Manufacturer>
+    <Model>503</Model>
+    <CustomDeviceMode Name="Default">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Default"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Default"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Default"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Default"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Default"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Default"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Default"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Default"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Default"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Default"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Default"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Default"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Default"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Default"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Default"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Default"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Default">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <UsesNoteNameList Name="Standard Notes"/>
+      <UsesControlNameList Name="Standard Control"/>
+      <PatchBank Name="Kits" ROM="false">
+        <UsesPatchNameList Name="User Kits"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <NoteNameList Name="Standard Notes">
+      <!-- This is a bit odd because the first group are the exact tunings
+     from the current kit and the latter are tuned. -->
+      <Note Number="36" Name="Bass Drum"/>
+      <Note Number="38" Name="Snare Drum"/>
+      <Note Number="41" Name="Low Tom"/>
+      <Note Number="43" Name="Mid Tom"/>
+      <Note Number="45" Name="High Tom"/>
+      <Note Number="46" Name="Cymbal"/>
+      <Note Number="47" Name="Cymbal"/>
+      <Note Number="39" Name="Open Hi-Hat"/>
+      <Note Number="42" Name="Open Hi-Hat"/>
+      <Note Number="40" Name="Closed Hi-Hat"/>
+      <Note Number="44" Name="Closed Hi-Hat"/>
+      <!-- Tuned versions -->
+      <Note Number="48" Name="Bass Drum"/>
+      <Note Number="49" Name="Bass Drum"/>
+      <Note Number="50" Name="Bass Drum"/>
+      <Note Number="51" Name="Bass Drum"/>
+      <Note Number="52" Name="Bass Drum"/>
+      <Note Number="53" Name="Bass Drum"/>
+      <Note Number="54" Name="Bass Drum"/>
+      <Note Number="55" Name="Bass Drum"/>
+      <Note Number="56" Name="Bass Drum"/>
+      <Note Number="57" Name="Bass Drum"/>
+      <Note Number="58" Name="Bass Drum"/>
+      <Note Number="59" Name="Bass Drum"/>
+      <Note Number="60" Name="Snare Drum"/>
+      <Note Number="61" Name="Snare Drum"/>
+      <Note Number="62" Name="Snare Drum"/>
+      <Note Number="63" Name="Snare Drum"/>
+      <Note Number="64" Name="Snare Drum"/>
+      <Note Number="65" Name="Snare Drum"/>
+      <Note Number="66" Name="Snare Drum"/>
+      <Note Number="67" Name="Snare Drum"/>
+      <Note Number="68" Name="Snare Drum"/>
+      <Note Number="69" Name="Snare Drum"/>
+      <Note Number="70" Name="Snare Drum"/>
+      <Note Number="71" Name="Snare Drum"/>
+      <Note Number="72" Name="Low Tom"/>
+      <Note Number="73" Name="Low Tom"/>
+      <Note Number="78" Name="Low Tom"/>
+      <Note Number="79" Name="Low Tom"/>
+      <Note Number="74" Name="Mid Tom"/>
+      <Note Number="75" Name="Mid Tom"/>
+      <Note Number="80" Name="Mid Tom"/>
+      <Note Number="81" Name="Mid Tom"/>
+      <Note Number="76" Name="High Tom"/>
+      <Note Number="77" Name="High Tom"/>
+      <Note Number="82" Name="High Tom"/>
+      <Note Number="83" Name="High Tom"/>
+      <Note Number="84" Name="Cymbal"/>
+      <Note Number="85" Name="Cymbal"/>
+      <Note Number="86" Name="Cymbal"/>
+      <Note Number="87" Name="Cymbal"/>
+      <Note Number="88" Name="Cymbal"/>
+      <Note Number="89" Name="Cymbal"/>
+      <Note Number="90" Name="Open Hi-Hat"/>
+      <Note Number="92" Name="Open Hi-Hat"/>
+      <Note Number="94" Name="Open Hi-Hat"/>
+      <Note Number="91" Name="Closed Hi-Hat"/>
+      <Note Number="93" Name="Closed Hi-Hat"/>
+      <Note Number="95" Name="Closed Hi-Hat"/>
+    </NoteNameList>
+    <ControlNameList Name="Standard Controls">
+      <Control Type="7bit" Number="8" Name="Bass Drum Level"/>
+      <Control Type="7bit" Number="9" Name="Bass Drum Tune"/>
+      <Control Type="7bit" Number="10" Name="Bass Drum Decay"/>
+      <Control Type="7bit" Number="11" Name="Bass Drum Pitch"/>
+      <Control Type="7bit" Number="12" Name="Bass Drum Drive"/>
+      <Control Type="7bit" Number="13" Name="Bass Drum Attack"/>
+      <Control Type="7bit" Number="16" Name="Snare Drum Level"/>
+      <Control Type="7bit" Number="17" Name="Snare Drum Tune"/>
+      <Control Type="7bit" Number="18" Name="Snare Drum Decay"/>
+      <Control Type="7bit" Number="19" Name="Snare Drum Noise"/>
+      <Control Type="7bit" Number="24" Name="Low Tom Level"/>
+      <Control Type="7bit" Number="25" Name="Low Tom Tune"/>
+      <Control Type="7bit" Number="26" Name="Low Tom Decay"/>
+      <Control Type="7bit" Number="27" Name="Low Tom Pitch"/>
+      <Control Type="7bit" Number="32" Name="Mid Tom Level"/>
+      <Control Type="7bit" Number="33" Name="Mid Tom Tune"/>
+      <Control Type="7bit" Number="34" Name="Mid Tom Decay"/>
+      <Control Type="7bit" Number="35" Name="Mid Tom Pitch"/>
+      <Control Type="7bit" Number="40" Name="High Tom Level"/>
+      <Control Type="7bit" Number="41" Name="High Tom Tune"/>
+      <Control Type="7bit" Number="42" Name="High Tom Decay"/>
+      <Control Type="7bit" Number="43" Name="High Tom Pitch"/>
+      <Control Type="7bit" Number="48" Name="Cymbal Level"/>
+      <Control Type="7bit" Number="49" Name="Cymbal Mix"/>
+      <Control Type="7bit" Number="50" Name="Cymbal Decay"/>
+      <Control Type="7bit" Number="51" Name="Cymbal Tune"/>
+      <Control Type="7bit" Number="56" Name="Closed Hi-Hat Level"/>
+      <Control Type="7bit" Number="57" Name="Closed Hi-Hat Mix"/>
+      <Control Type="7bit" Number="58" Name="Open Hi-Hat Decay"/>
+      <Control Type="7bit" Number="59" Name="Closed Hi-Hat Decay"/>
+    </ControlNameList>
+    <PatchNameList Name="User Kits">
+      <Patch Number="1" Name="Kit 1" ProgramChange="0"/>
+      <Patch Number="2" Name="Kit 2" ProgramChange="1"/>
+      <Patch Number="3" Name="Kit 3" ProgramChange="2"/>
+      <Patch Number="4" Name="Kit 4" ProgramChange="3"/>
+      <Patch Number="5" Name="Kit 5" ProgramChange="4"/>
+      <Patch Number="6" Name="Kit 6" ProgramChange="5"/>
+      <Patch Number="7" Name="Kit 7" ProgramChange="6"/>
+      <Patch Number="8" Name="Kit 8" ProgramChange="7"/>
+      <Patch Number="9" Name="Kit 9" ProgramChange="8"/>
+      <Patch Number="10" Name="Kit 10" ProgramChange="9"/>
+      <Patch Number="11" Name="Kit 11" ProgramChange="10"/>
+      <Patch Number="12" Name="Kit 12" ProgramChange="11"/>
+      <Patch Number="13" Name="Kit 13" ProgramChange="12"/>
+      <Patch Number="14" Name="Kit 14" ProgramChange="13"/>
+      <Patch Number="15" Name="Kit 15" ProgramChange="14"/>
+      <Patch Number="16" Name="Kit 16" ProgramChange="15"/>
+      <Patch Number="17" Name="Kit 17" ProgramChange="16"/>
+      <Patch Number="18" Name="Kit 18" ProgramChange="17"/>
+      <Patch Number="19" Name="Kit 19" ProgramChange="18"/>
+      <Patch Number="20" Name="Kit 20" ProgramChange="19"/>
+      <Patch Number="21" Name="Kit 21" ProgramChange="20"/>
+      <Patch Number="22" Name="Kit 22" ProgramChange="21"/>
+      <Patch Number="23" Name="Kit 23" ProgramChange="22"/>
+      <Patch Number="24" Name="Kit 24" ProgramChange="23"/>
+      <Patch Number="25" Name="Kit 25" ProgramChange="24"/>
+      <Patch Number="26" Name="Kit 26" ProgramChange="25"/>
+      <Patch Number="27" Name="Kit 27" ProgramChange="26"/>
+      <Patch Number="28" Name="Kit 28" ProgramChange="27"/>
+      <Patch Number="29" Name="Kit 29" ProgramChange="28"/>
+      <Patch Number="30" Name="Kit 30" ProgramChange="29"/>
+      <Patch Number="31" Name="Kit 31" ProgramChange="30"/>
+      <Patch Number="32" Name="Kit 32" ProgramChange="31"/>
+      <Patch Number="33" Name="Kit 33" ProgramChange="32"/>
+      <Patch Number="34" Name="Kit 34" ProgramChange="33"/>
+      <Patch Number="35" Name="Kit 35" ProgramChange="34"/>
+      <Patch Number="36" Name="Kit 36" ProgramChange="35"/>
+      <Patch Number="37" Name="Kit 37" ProgramChange="36"/>
+      <Patch Number="38" Name="Kit 38" ProgramChange="37"/>
+      <Patch Number="39" Name="Kit 39" ProgramChange="38"/>
+      <Patch Number="40" Name="Kit 40" ProgramChange="39"/>
+      <Patch Number="41" Name="Kit 41" ProgramChange="40"/>
+      <Patch Number="42" Name="Kit 42" ProgramChange="41"/>
+      <Patch Number="43" Name="Kit 43" ProgramChange="42"/>
+      <Patch Number="44" Name="Kit 44" ProgramChange="43"/>
+      <Patch Number="45" Name="Kit 45" ProgramChange="44"/>
+      <Patch Number="46" Name="Kit 46" ProgramChange="45"/>
+      <Patch Number="47" Name="Kit 47" ProgramChange="46"/>
+      <Patch Number="48" Name="Kit 48" ProgramChange="47"/>
+      <Patch Number="49" Name="Kit 49" ProgramChange="48"/>
+      <Patch Number="50" Name="Kit 50" ProgramChange="49"/>
+      <Patch Number="51" Name="Kit 51" ProgramChange="50"/>
+      <Patch Number="52" Name="Kit 52" ProgramChange="51"/>
+      <Patch Number="53" Name="Kit 53" ProgramChange="52"/>
+      <Patch Number="54" Name="Kit 54" ProgramChange="53"/>
+      <Patch Number="55" Name="Kit 55" ProgramChange="54"/>
+      <Patch Number="56" Name="Kit 56" ProgramChange="55"/>
+      <Patch Number="57" Name="Kit 57" ProgramChange="56"/>
+      <Patch Number="58" Name="Kit 58" ProgramChange="57"/>
+      <Patch Number="59" Name="Kit 59" ProgramChange="58"/>
+      <Patch Number="60" Name="Kit 60" ProgramChange="59"/>
+      <Patch Number="61" Name="Kit 61" ProgramChange="60"/>
+      <Patch Number="62" Name="Kit 62" ProgramChange="61"/>
+      <Patch Number="63" Name="Kit 63" ProgramChange="62"/>
+      <Patch Number="64" Name="Kit 64" ProgramChange="63"/>
+      <Patch Number="65" Name="Kit 65" ProgramChange="64"/>
+      <Patch Number="66" Name="Kit 66" ProgramChange="65"/>
+      <Patch Number="67" Name="Kit 67" ProgramChange="66"/>
+      <Patch Number="68" Name="Kit 68" ProgramChange="67"/>
+      <Patch Number="69" Name="Kit 69" ProgramChange="68"/>
+      <Patch Number="70" Name="Kit 70" ProgramChange="69"/>
+      <Patch Number="71" Name="Kit 71" ProgramChange="70"/>
+      <Patch Number="72" Name="Kit 72" ProgramChange="71"/>
+      <Patch Number="73" Name="Kit 73" ProgramChange="72"/>
+      <Patch Number="74" Name="Kit 74" ProgramChange="73"/>
+      <Patch Number="75" Name="Kit 75" ProgramChange="74"/>
+      <Patch Number="76" Name="Kit 76" ProgramChange="75"/>
+      <Patch Number="77" Name="Kit 77" ProgramChange="76"/>
+      <Patch Number="78" Name="Kit 78" ProgramChange="77"/>
+      <Patch Number="79" Name="Kit 79" ProgramChange="78"/>
+      <Patch Number="80" Name="Kit 80" ProgramChange="79"/>
+      <Patch Number="81" Name="Kit 81" ProgramChange="80"/>
+      <Patch Number="82" Name="Kit 82" ProgramChange="81"/>
+      <Patch Number="83" Name="Kit 83" ProgramChange="82"/>
+      <Patch Number="84" Name="Kit 84" ProgramChange="83"/>
+      <Patch Number="85" Name="Kit 85" ProgramChange="84"/>
+      <Patch Number="86" Name="Kit 86" ProgramChange="85"/>
+      <Patch Number="87" Name="Kit 87" ProgramChange="86"/>
+      <Patch Number="88" Name="Kit 88" ProgramChange="87"/>
+      <Patch Number="89" Name="Kit 89" ProgramChange="88"/>
+      <Patch Number="90" Name="Kit 90" ProgramChange="89"/>
+      <Patch Number="91" Name="Kit 91" ProgramChange="90"/>
+      <Patch Number="92" Name="Kit 92" ProgramChange="91"/>
+      <Patch Number="93" Name="Kit 93" ProgramChange="92"/>
+      <Patch Number="94" Name="Kit 94" ProgramChange="93"/>
+      <Patch Number="95" Name="Kit 95" ProgramChange="94"/>
+      <Patch Number="96" Name="Kit 96" ProgramChange="95"/>
+      <Patch Number="97" Name="Kit 97" ProgramChange="96"/>
+      <Patch Number="98" Name="Kit 98" ProgramChange="97"/>
+      <Patch Number="99" Name="Kit 99" ProgramChange="98"/>
+      <Patch Number="100" Name="Kit 100" ProgramChange="99"/>
+    </PatchNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

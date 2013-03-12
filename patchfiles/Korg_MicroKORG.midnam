@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>HiStakes</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Korg</Manufacturer>
+    <Model>MicroKORG</Model>
+    <CustomDeviceMode Name="">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Patches"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Patches">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Program Names" ROM="false">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Patch N"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <PatchNameList Name="Patch N">
+      <Patch Number="C-0" Name="TRC Trancey Arpeg." ProgramChange="0"/>
+      <Patch Number="C-1" Name="TRC Acid Saw Bass" ProgramChange="1"/>
+      <Patch Number="C-2" Name="TRC Unison Saw Lead" ProgramChange="2"/>
+      <Patch Number="C-3" Name="TRC Unison HPF+LPF" ProgramChange="3"/>
+      <Patch Number="C-4" Name="TRC Weepy Lead" ProgramChange="4"/>
+      <Patch Number="C-5" Name="TRC Slippy Pad" ProgramChange="5"/>
+      <Patch Number="C-6" Name="TRC Sweep Poly Pad" ProgramChange="6"/>
+      <Patch Number="C-7" Name="TRC Filter Strings" ProgramChange="7"/>
+      <Patch Number="C-8" Name="HUS Auto House" ProgramChange="8"/>
+      <Patch Number="C-9" Name="HUS Burnin' Rave" ProgramChange="9"/>
+      <Patch Number="C-10" Name="HUS X-Mod Perc." ProgramChange="10"/>
+      <Patch Number="C-11" Name="HUS House Bass" ProgramChange="11"/>
+      <Patch Number="C-12" Name="HUS Distorted Bass" ProgramChange="12"/>
+      <Patch Number="C-13" Name="HUS Acid Square Bass" ProgramChange="13"/>
+      <Patch Number="C-14" Name="HUS Sync Bass" ProgramChange="14"/>
+      <Patch Number="C-15" Name="HUS Hard House Lead" ProgramChange="15"/>
+      <Patch Number="C-16" Name="ELC Sequence Pad" ProgramChange="16"/>
+      <Patch Number="C-17" Name="ELC Bleeps Perc." ProgramChange="17"/>
+      <Patch Number="C-18" Name="ELC Gated Sync Bass" ProgramChange="18"/>
+      <Patch Number="C-19" Name="ELC Flap &amp; Sweep" ProgramChange="19"/>
+      <Patch Number="C-20" Name="ELC Reverse Lead" ProgramChange="20"/>
+      <Patch Number="C-21" Name="ELC IDM Pad" ProgramChange="21"/>
+      <Patch Number="C-22" Name="ELC Flanger 5th Pad" ProgramChange="22"/>
+      <Patch Number="C-23" Name="ELC Voice /A/" ProgramChange="23"/>
+      <Patch Number="C-24" Name="DNB 2 Step Bass" ProgramChange="24"/>
+      <Patch Number="C-25" Name="DNB Techstep Ring bass" ProgramChange="25"/>
+      <Patch Number="C-26" Name="DNB Valve Kick Bass" ProgramChange="26"/>
+      <Patch Number="C-27" Name="DNB Drive Bass" ProgramChange="27"/>
+      <Patch Number="C-28" Name="DNB Blade Bass" ProgramChange="28"/>
+      <Patch Number="C-29" Name="DNB Sweep Sync Lead" ProgramChange="29"/>
+      <Patch Number="C-30" Name="DNB Science Lead" ProgramChange="30"/>
+      <Patch Number="C-31" Name="DNB Gated Chord" ProgramChange="31"/>
+      <Patch Number="C-32" Name="HIP Dirty Bass" ProgramChange="32"/>
+      <Patch Number="C-33" Name="HIP MG Bass 1" ProgramChange="33"/>
+      <Patch Number="C-34" Name="HIP R&amp;B Lead" ProgramChange="34"/>
+      <Patch Number="C-35" Name="HIP PWM Strings" ProgramChange="35"/>
+      <Patch Number="C-36" Name="HIP Reed Piano" ProgramChange="36"/>
+      <Patch Number="C-37" Name="HIP British Organ" ProgramChange="37"/>
+      <Patch Number="C-38" Name="HIP Synth Clav" ProgramChange="38"/>
+      <Patch Number="C-39" Name="HIP Tape Choir" ProgramChange="39"/>
+      <Patch Number="C-40" Name="RET Elektric Arpeg." ProgramChange="40"/>
+      <Patch Number="C-41" Name="RET Water Edge" ProgramChange="41"/>
+      <Patch Number="C-42" Name="RET 80's Synth Bass" ProgramChange="42"/>
+      <Patch Number="C-43" Name="RET Reverse Sync Lead" ProgramChange="43"/>
+      <Patch Number="C-44" Name="RET Bright Poly Synth" ProgramChange="44"/>
+      <Patch Number="C-45" Name="RET Poly Synth" ProgramChange="45"/>
+      <Patch Number="C-46" Name="RET Warm 4th Pad" ProgramChange="46"/>
+      <Patch Number="C-47" Name="RET Octave String" ProgramChange="47"/>
+      <Patch Number="C-48" Name="SEH Killa Beez" ProgramChange="48"/>
+      <Patch Number="C-49" Name="SEH Diginator" ProgramChange="49"/>
+      <Patch Number="C-50" Name="SEH Stutter" ProgramChange="50"/>
+      <Patch Number="C-51" Name="SEH Invaders" ProgramChange="51"/>
+      <Patch Number="C-52" Name="SEH Ring Chord" ProgramChange="52"/>
+      <Patch Number="C-53" Name="SEH Sweep min Chord" ProgramChange="53"/>
+      <Patch Number="C-54" Name="SEH Noisy Hit" ProgramChange="54"/>
+      <Patch Number="C-55" Name="SEH 4 OSC m7 Chord" ProgramChange="55"/>
+      <Patch Number="C-56" Name="VOC Male-Ahhh" ProgramChange="56"/>
+      <Patch Number="C-57" Name="VOC Male-Eeee" ProgramChange="57"/>
+      <Patch Number="C-58" Name="VOC Male-Ahhh 5th" ProgramChange="58"/>
+      <Patch Number="C-59" Name="VOC Vocoder Ensemble" ProgramChange="59"/>
+      <Patch Number="C-60" Name="VOC Vocoder Chorus" ProgramChange="60"/>
+      <Patch Number="C-61" Name="VOC Vocoder 5th" ProgramChange="61"/>
+      <Patch Number="C-62" Name="VOC Bass Vocoder" ProgramChange="62"/>
+      <Patch Number="C-63" Name="VOC Voice Changer" ProgramChange="63"/>
+      <Patch Number="C-64" Name="TRC Synth Harp" ProgramChange="64"/>
+      <Patch Number="C-65" Name="TRC Acid Ring Bass" ProgramChange="65"/>
+      <Patch Number="C-66" Name="TRC Unison Ring Lead" ProgramChange="66"/>
+      <Patch Number="C-67" Name="TRC Phaser Lead" ProgramChange="67"/>
+      <Patch Number="C-68" Name="TRC Synth Pizz" ProgramChange="68"/>
+      <Patch Number="C-69" Name="TRC Euphoric Synth" ProgramChange="69"/>
+      <Patch Number="C-70" Name="TRC Flashin' Pad" ProgramChange="70"/>
+      <Patch Number="C-71" Name="TRC Stream Pad" ProgramChange="71"/>
+      <Patch Number="C-72" Name="HUS S&amp;H Signal" ProgramChange="72"/>
+      <Patch Number="C-73" Name="HUS Dirty Motion" ProgramChange="73"/>
+      <Patch Number="C-74" Name="HUS Short Ring Perc." ProgramChange="74"/>
+      <Patch Number="C-75" Name="HUS Organ Bass" ProgramChange="75"/>
+      <Patch Number="C-76" Name="HUS Unison SQU Bass" ProgramChange="76"/>
+      <Patch Number="C-77" Name="HUS Detune Bass" ProgramChange="77"/>
+      <Patch Number="C-78" Name="HUS Short Synth Bass" ProgramChange="78"/>
+      <Patch Number="C-79" Name="HUS NRG Stab" ProgramChange="79"/>
+      <Patch Number="C-80" Name="ELC Noize Blasts" ProgramChange="80"/>
+      <Patch Number="C-81" Name="ELC Future Perc." ProgramChange="81"/>
+      <Patch Number="C-82" Name="ELC Rhythmic Pad" ProgramChange="82"/>
+      <Patch Number="C-83" Name="ELC Pump Organ" ProgramChange="83"/>
+      <Patch Number="C-84" Name="ELC Lazy Pitch" ProgramChange="84"/>
+      <Patch Number="C-85" Name="ELC BPF 4th Pad" ProgramChange="85"/>
+      <Patch Number="C-86" Name="ELC Future Pad" ProgramChange="86"/>
+      <Patch Number="C-87" Name="ELC Shadow Pad" ProgramChange="87"/>
+      <Patch Number="C-88" Name="DNB X-Mod Bass" ProgramChange="88"/>
+      <Patch Number="C-89" Name="DNB Pipe Bass" ProgramChange="89"/>
+      <Patch Number="C-90" Name="DNB Reverse Bass" ProgramChange="90"/>
+      <Patch Number="C-91" Name="DNB RingSync Bass" ProgramChange="91"/>
+      <Patch Number="C-92" Name="DNB HPF Sweep Bass" ProgramChange="92"/>
+      <Patch Number="C-93" Name="DNB Nu Skool Drop" ProgramChange="93"/>
+      <Patch Number="C-94" Name="DNB Modulation Lead" ProgramChange="94"/>
+      <Patch Number="C-95" Name="DNB Grimey Storm" ProgramChange="95"/>
+      <Patch Number="C-96" Name="HIP Dark Bass" ProgramChange="96"/>
+      <Patch Number="C-97" Name="HIP MG Bass 2" ProgramChange="97"/>
+      <Patch Number="C-98" Name="HIP Sub Bass" ProgramChange="98"/>
+      <Patch Number="C-99" Name="HIP 70's Funky Lead" ProgramChange="99"/>
+      <Patch Number="C-100" Name="HIP Rock Organ" ProgramChange="100"/>
+      <Patch Number="C-101" Name="HIP Perc. Organ" ProgramChange="101"/>
+      <Patch Number="C-102" Name="HIP Phaser Clav" ProgramChange="102"/>
+      <Patch Number="C-103" Name="HIP String machine" ProgramChange="103"/>
+      <Patch Number="C-104" Name="RET Analog Bell" ProgramChange="104"/>
+      <Patch Number="C-105" Name="RET Stairs Pad" ProgramChange="105"/>
+      <Patch Number="C-106" Name="RET Triangle Lead" ProgramChange="106"/>
+      <Patch Number="C-107" Name="RET Random Comp" ProgramChange="107"/>
+      <Patch Number="C-108" Name="RET Stab Saw" ProgramChange="108"/>
+      <Patch Number="C-109" Name="RET Square Comp" ProgramChange="109"/>
+      <Patch Number="C-110" Name="RET Detuned Comp" ProgramChange="110"/>
+      <Patch Number="C-111" Name="RET Old Strings" ProgramChange="111"/>
+      <Patch Number="C-112" Name="SEH Time Zone SFX" ProgramChange="112"/>
+      <Patch Number="C-113" Name="SEH Domin8or" ProgramChange="113"/>
+      <Patch Number="C-114" Name="SEH Thunder" ProgramChange="114"/>
+      <Patch Number="C-115" Name="SEH Cry" ProgramChange="115"/>
+      <Patch Number="C-116" Name="SEH HPF m7 Chord" ProgramChange="116"/>
+      <Patch Number="C-117" Name="SEH M3rd Chord" ProgramChange="117"/>
+      <Patch Number="C-118" Name="SEH Hardcore Hit" ProgramChange="118"/>
+      <Patch Number="C-119" Name="SEH Artcore M7 Chord" ProgramChange="119"/>
+      <Patch Number="C-120" Name="VOC Female-Ahhh" ProgramChange="120"/>
+      <Patch Number="C-121" Name="VOC Kid-Eeey" ProgramChange="121"/>
+      <Patch Number="C-122" Name="VOC Kid-Ahh (Wow)" ProgramChange="122"/>
+      <Patch Number="C-123" Name="VOC Vocoder Pulse" ProgramChange="123"/>
+      <Patch Number="C-124" Name="VOC VOcoder SQU" ProgramChange="124"/>
+      <Patch Number="C-125" Name="VOC Vocoder Wah" ProgramChange="125"/>
+      <Patch Number="C-126" Name="VOC Vocoder Vox Wave" ProgramChange="126"/>
+      <Patch Number="C-127" Name="VOC Vocoder DWGS" ProgramChange="127"/>
+    </PatchNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

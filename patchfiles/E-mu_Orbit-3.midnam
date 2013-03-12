@@ -1,0 +1,1146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Digidesign</Author>
+  <MasterDeviceNames>
+    <Manufacturer>E-mu</Manufacturer>
+    <Model>Orbit</Model>
+    <Model>Orbit V2</Model>
+    <CustomDeviceMode Name="">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Presets"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Presets">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Presets 00" ROM="false">
+        <MIDICommands>
+          <ControlChange Control="0" Value="65"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Presets 00"/>
+      </PatchBank>
+      <PatchBank Name="Presets 01" ROM="false">
+        <MIDICommands>
+          <ControlChange Control="0" Value="65"/>
+          <ControlChange Control="32" Value="1"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Presets 01"/>
+      </PatchBank>
+      <PatchBank Name="Presets 02" ROM="false">
+        <MIDICommands>
+          <ControlChange Control="0" Value="65"/>
+          <ControlChange Control="32" Value="2"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Presets 02"/>
+      </PatchBank>
+      <PatchBank Name="Presets 03" ROM="false">
+        <MIDICommands>
+          <ControlChange Control="0" Value="65"/>
+          <ControlChange Control="32" Value="3"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Presets 03"/>
+      </PatchBank>
+      <PatchBank Name="Presets 04" ROM="false">
+        <MIDICommands>
+          <ControlChange Control="0" Value="67"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Presets 04"/>
+      </PatchBank>
+      <PatchBank Name="Presets 04" ROM="false">
+        <MIDICommands>
+          <ControlChange Control="0" Value="67"/>
+          <ControlChange Control="32" Value="1"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Presets 05"/>
+      </PatchBank>
+      <PatchBank Name="Presets 04" ROM="false">
+        <MIDICommands>
+          <ControlChange Control="0" Value="67"/>
+          <ControlChange Control="32" Value="2"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Presets 06"/>
+      </PatchBank>
+      <PatchBank Name="Presets 04" ROM="false">
+        <MIDICommands>
+          <ControlChange Control="0" Value="67"/>
+          <ControlChange Control="32" Value="3"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Presets 07"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <PatchNameList Name="Presets 00">
+      <Patch Number="TeCnO-0" Name="hit:Intruder" ProgramChange="0"/>
+      <Patch Number="RAM1" Name="bpm:Voxa Move" ProgramChange="1"/>
+      <Patch Number="RAM2" Name="syn:ScreamSync 1" ProgramChange="2"/>
+      <Patch Number="RAM3" Name="kit:909 Audition" ProgramChange="3"/>
+      <Patch Number="RAM4" Name="pad:Rise to Fall" ProgramChange="4"/>
+      <Patch Number="RAM5" Name="tec:Vel Swing" ProgramChange="5"/>
+      <Patch Number="RAM6" Name="bas:T-Be Sawy 1" ProgramChange="6"/>
+      <Patch Number="RAM7" Name="pad:Thin Strings" ProgramChange="7"/>
+      <Patch Number="RAM8" Name="kit:GM Groove 1" ProgramChange="8"/>
+      <Patch Number="RAM9" Name="org:Dancy 1" ProgramChange="9"/>
+      <Patch Number="RAM10" Name="sfx:Phee Two Kay" ProgramChange="10"/>
+      <Patch Number="RAM11" Name="wnd:Panflute Sof" ProgramChange="11"/>
+      <Patch Number="RAM12" Name="kit:GM 808-1 BD1" ProgramChange="12"/>
+      <Patch Number="RAM13" Name="kit:Noise Hits" ProgramChange="13"/>
+      <Patch Number="RAM14" Name="amb:Aioon Pad" ProgramChange="14"/>
+      <Patch Number="RAM15" Name="syn:Romancer" ProgramChange="15"/>
+      <Patch Number="RAM16" Name="led:Proteo Moogy" ProgramChange="16"/>
+      <Patch Number="RAM17" Name="tec:Dutch Stab 1" ProgramChange="17"/>
+      <Patch Number="RAM18" Name="tec:Kraft Kord" ProgramChange="18"/>
+      <Patch Number="RAM19" Name="amb:Seam to Pad" ProgramChange="19"/>
+      <Patch Number="RAM20" Name="syn:80s Brass" ProgramChange="20"/>
+      <Patch Number="RAM21" Name="syn:Modulair Seq" ProgramChange="21"/>
+      <Patch Number="RAM22" Name="bas:Warm Groovy" ProgramChange="22"/>
+      <Patch Number="RAM23" Name="kit:GM 808-2 BD2" ProgramChange="23"/>
+      <Patch Number="RAM24" Name="kit:909-1 Dance" ProgramChange="24"/>
+      <Patch Number="RAM25" Name="prc:Voca Snare" ProgramChange="25"/>
+      <Patch Number="RAM26" Name="sub:Prophet" ProgramChange="26"/>
+      <Patch Number="RAM27" Name="bpm:Pad Winder" ProgramChange="27"/>
+      <Patch Number="RAM28" Name="tec:Velo VoX 1" ProgramChange="28"/>
+      <Patch Number="RAM29" Name="bas:SH-101 Choru" ProgramChange="29"/>
+      <Patch Number="RAM30" Name="kit:TeCnO 4" ProgramChange="30"/>
+      <Patch Number="RAM31" Name="bas:T-Be Distort" ProgramChange="31"/>
+      <Patch Number="RAM32" Name="kit:TeC Percus" ProgramChange="32"/>
+      <Patch Number="RAM33" Name="bpm:SemiLife" ProgramChange="33"/>
+      <Patch Number="RAM34" Name="led:Modern Fifth" ProgramChange="34"/>
+      <Patch Number="RAM35" Name="bas:Krafta Bass" ProgramChange="35"/>
+      <Patch Number="RAM36" Name="tec:Pizzi Chord" ProgramChange="36"/>
+      <Patch Number="RAM37" Name="hit:Ito 11th 1" ProgramChange="37"/>
+      <Patch Number="RAM38" Name="bpm:Vox Sequence" ProgramChange="38"/>
+      <Patch Number="RAM39" Name="syn:Juno Dance 1" ProgramChange="39"/>
+      <Patch Number="RAM40" Name="bas:Swing" ProgramChange="40"/>
+      <Patch Number="RAM41" Name="pad:Soft 2000" ProgramChange="41"/>
+      <Patch Number="RAM42" Name="tec:Velo PWM 1" ProgramChange="42"/>
+      <Patch Number="RAM43" Name="tec:Snaro Lead" ProgramChange="43"/>
+      <Patch Number="RAM44" Name="hit:Happy Major 3" ProgramChange="44"/>
+      <Patch Number="RAM45" Name="pad:Floating" ProgramChange="45"/>
+      <Patch Number="RAM46" Name="tec:Da Chord Me" ProgramChange="46"/>
+      <Patch Number="RAM47" Name="hit:Sweet 7 Pizz" ProgramChange="47"/>
+      <Patch Number="RAM48" Name="bpm:Mystical" ProgramChange="48"/>
+      <Patch Number="RAM49" Name="tec:Rogue Chord" ProgramChange="49"/>
+      <Patch Number="RAM50" Name="pad:Tron Analog" ProgramChange="50"/>
+      <Patch Number="RAM51" Name="bas:Deep mover" ProgramChange="51"/>
+      <Patch Number="RAM52" Name="bas:Deep Steady" ProgramChange="52"/>
+      <Patch Number="RAM53" Name="pad:Soft Oooh" ProgramChange="53"/>
+      <Patch Number="RAM54" Name="bas:Talky Voxa" ProgramChange="54"/>
+      <Patch Number="RAM55" Name="kit:GM Groove 2" ProgramChange="55"/>
+      <Patch Number="RAM56" Name="kit:GM Groove 3" ProgramChange="56"/>
+      <Patch Number="RAM57" Name="kit:GM TeCnO 6" ProgramChange="57"/>
+      <Patch Number="RAM58" Name="kit:GM TeCnO 7" ProgramChange="58"/>
+      <Patch Number="RAM59" Name="kit:GM TeCnO 8" ProgramChange="59"/>
+      <Patch Number="RAM60" Name="tec:Z-PlaneChord" ProgramChange="60"/>
+      <Patch Number="RAM61" Name="hit:Expensive" ProgramChange="61"/>
+      <Patch Number="RAM62" Name="hit:Sweet Maj7 1" ProgramChange="62"/>
+      <Patch Number="RAM63" Name="bpm:Pad Sequence" ProgramChange="63"/>
+      <Patch Number="RAM64" Name="syn:Micro Dream" ProgramChange="64"/>
+      <Patch Number="RAM65" Name="amb:Soft to Lead" ProgramChange="65"/>
+      <Patch Number="RAM66" Name="kit:GM909-2 HH2" ProgramChange="66"/>
+      <Patch Number="RAM67" Name="sfx:EMU TeCnO" ProgramChange="67"/>
+      <Patch Number="RAM68" Name="sfx:Proteus 2000" ProgramChange="68"/>
+      <Patch Number="RAM69" Name="tec:Velo Sync" ProgramChange="69"/>
+      <Patch Number="RAM70" Name="bas:T-Be Pulsy 1" ProgramChange="70"/>
+      <Patch Number="RAM71" Name="tec:Super Juno1" ProgramChange="71"/>
+      <Patch Number="RAM72" Name="hit:TeCnOMajor2" ProgramChange="72"/>
+      <Patch Number="RAM73" Name="syn:Tune Wood" ProgramChange="73"/>
+      <Patch Number="RAM74" Name="tec:Velo PWM 2" ProgramChange="74"/>
+      <Patch Number="RAM75" Name="bas:Digital Wave" ProgramChange="75"/>
+      <Patch Number="RAM76" Name="vox:Ya How Split" ProgramChange="76"/>
+      <Patch Number="RAM77" Name="sfx:Time Travel" ProgramChange="77"/>
+      <Patch Number="RAM78" Name="sfx:Spectr Waves" ProgramChange="78"/>
+      <Patch Number="RAM79" Name="syn:Prophet Sync" ProgramChange="79"/>
+      <Patch Number="RAM80" Name="pad:Soft Rise" ProgramChange="80"/>
+      <Patch Number="RAM81" Name="bas:Bottle Octav" ProgramChange="81"/>
+      <Patch Number="RAM82" Name="pad:Z-Plane 2000" ProgramChange="82"/>
+      <Patch Number="RAM83" Name="hit:TeCnO Major5" ProgramChange="83"/>
+      <Patch Number="RAM84" Name="hit:BE Minor 1" ProgramChange="84"/>
+      <Patch Number="RAM85" Name="bas:Square it" ProgramChange="85"/>
+      <Patch Number="RAM86" Name="sub:Fend Mini" ProgramChange="86"/>
+      <Patch Number="RAM87" Name="bas:Fend Reso" ProgramChange="87"/>
+      <Patch Number="RAM88" Name="bpm:Z-Plan Trip" ProgramChange="88"/>
+      <Patch Number="RAM89" Name="prc:VintageMetal" ProgramChange="89"/>
+      <Patch Number="RAM90" Name="amb:Sea Flutes" ProgramChange="90"/>
+      <Patch Number="RAM91" Name="sub:Rogua Deep" ProgramChange="91"/>
+      <Patch Number="RAM92" Name="sfx:Reso Dive 1" ProgramChange="92"/>
+      <Patch Number="RAM93" Name="bas:Rogue Da" ProgramChange="93"/>
+      <Patch Number="RAM94" Name="hit:Big Minor 3" ProgramChange="94"/>
+      <Patch Number="RAM95" Name="hit:Soft Major 2" ProgramChange="95"/>
+      <Patch Number="RAM96" Name="wnd:Bottle Me" ProgramChange="96"/>
+      <Patch Number="RAM97" Name="hit:Prophecies" ProgramChange="97"/>
+      <Patch Number="RAM98" Name="sfx:Sha Dive" ProgramChange="98"/>
+      <Patch Number="RAM99" Name="hit:Amb Minor 1" ProgramChange="99"/>
+      <Patch Number="RAM100" Name="hit:Amb Minor Re" ProgramChange="100"/>
+      <Patch Number="RAM101" Name="pad:Water Lake" ProgramChange="101"/>
+      <Patch Number="RAM102" Name="kit:GM909-1HH1" ProgramChange="102"/>
+      <Patch Number="RAM103" Name="kit:GM CR-78 1" ProgramChange="103"/>
+      <Patch Number="RAM104" Name="kit:GM Dance 1" ProgramChange="104"/>
+      <Patch Number="RAM105" Name="kit:GM Dance 2" ProgramChange="105"/>
+      <Patch Number="RAM106" Name="kit:GM TeCnO 1" ProgramChange="106"/>
+      <Patch Number="RAM107" Name="kit:GM TeCnO 2" ProgramChange="107"/>
+      <Patch Number="RAM108" Name="kit:GM 808 Hip 1" ProgramChange="108"/>
+      <Patch Number="RAM109" Name="kit:GM 808 Hip 2" ProgramChange="109"/>
+      <Patch Number="RAM110" Name="kit:GM Dance 3" ProgramChange="110"/>
+      <Patch Number="RAM111" Name="kit:GM Dance 4" ProgramChange="111"/>
+      <Patch Number="RAM112" Name="kit:GM Dance 5" ProgramChange="112"/>
+      <Patch Number="RAM113" Name="kit:GM TeCnO 3" ProgramChange="113"/>
+      <Patch Number="RAM114" Name="kit:GM TeCnO 4" ProgramChange="114"/>
+      <Patch Number="RAM115" Name="kit:GM TeCnO 5" ProgramChange="115"/>
+      <Patch Number="RAM116" Name="amb:Human Dive" ProgramChange="116"/>
+      <Patch Number="RAM117" Name="bas:To B@ss" ProgramChange="117"/>
+      <Patch Number="RAM118" Name="bas:Mini Dow" ProgramChange="118"/>
+      <Patch Number="RAM119" Name="bas:T-Be Sawy 2" ProgramChange="119"/>
+      <Patch Number="RAM120" Name="tec:Swap Lead" ProgramChange="120"/>
+      <Patch Number="RAM121" Name="syn:Waves Rising" ProgramChange="121"/>
+      <Patch Number="RAM122" Name="bas:TeC B@ss Oct" ProgramChange="122"/>
+      <Patch Number="RAM123" Name="bas:TeC Layer" ProgramChange="123"/>
+      <Patch Number="RAM124" Name="bas:TeC Attack" ProgramChange="124"/>
+      <Patch Number="RAM125" Name="sub:Low B@ss" ProgramChange="125"/>
+      <Patch Number="RAM126" Name="bas:To Puls" ProgramChange="126"/>
+      <Patch Number="RAM127" Name="bpm:Org Sequence" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="Presets 01">
+      <Patch Number="TeCnO-1" Name="bas:To B@ss 2" ProgramChange="0"/>
+      <Patch Number="RAM129" Name="bas:To B@ss 3" ProgramChange="1"/>
+      <Patch Number="RAM130" Name="bas:To B@ss 4" ProgramChange="2"/>
+      <Patch Number="RAM131" Name="bas:Dofty" ProgramChange="3"/>
+      <Patch Number="RAM132" Name="org:Dancy 2" ProgramChange="4"/>
+      <Patch Number="RAM133" Name="org:Dancy 3" ProgramChange="5"/>
+      <Patch Number="RAM134" Name="org:Dancy 4" ProgramChange="6"/>
+      <Patch Number="RAM135" Name="org:Dancy 5" ProgramChange="7"/>
+      <Patch Number="RAM136" Name="org:Dancy 6" ProgramChange="8"/>
+      <Patch Number="RAM137" Name="org:Dancy 7" ProgramChange="9"/>
+      <Patch Number="RAM138" Name="org:Dancy 8" ProgramChange="10"/>
+      <Patch Number="RAM139" Name="org:Dancy 9" ProgramChange="11"/>
+      <Patch Number="RAM140" Name="org:Dancy 10" ProgramChange="12"/>
+      <Patch Number="RAM141" Name="org:Dancy 11" ProgramChange="13"/>
+      <Patch Number="RAM142" Name="org:Dancy 12" ProgramChange="14"/>
+      <Patch Number="RAM143" Name="org:The Dance" ProgramChange="15"/>
+      <Patch Number="RAM144" Name="org:Filtrosa" ProgramChange="16"/>
+      <Patch Number="RAM145" Name="org:Syntha" ProgramChange="17"/>
+      <Patch Number="RAM146" Name="org:Deep Fi -Bass" ProgramChange="18"/>
+      <Patch Number="RAM147" Name="org:Bliss Filter" ProgramChange="19"/>
+      <Patch Number="RAM148" Name="org:Major Chord" ProgramChange="20"/>
+      <Patch Number="RAM149" Name="org:Minor Chord" ProgramChange="21"/>
+      <Patch Number="RAM150" Name="org:Major Chord 2" ProgramChange="22"/>
+      <Patch Number="RAM151" Name="org:Minor Chord 2" ProgramChange="23"/>
+      <Patch Number="RAM152" Name="org:Drop Dance" ProgramChange="24"/>
+      <Patch Number="RAM153" Name="org:Kraft Work" ProgramChange="25"/>
+      <Patch Number="RAM154" Name="prc:Disco BD" ProgramChange="26"/>
+      <Patch Number="RAM155" Name="bas:SH-101 1" ProgramChange="27"/>
+      <Patch Number="RAM156" Name="sfx:Music By..." ProgramChange="28"/>
+      <Patch Number="RAM157" Name="bpm:Compute Me" ProgramChange="29"/>
+      <Patch Number="RAM158" Name="bas:Fendo Reso 2" ProgramChange="30"/>
+      <Patch Number="RAM159" Name="bas:Mini XX" ProgramChange="31"/>
+      <Patch Number="RAM160" Name="tec:Dutch Filtro" ProgramChange="32"/>
+      <Patch Number="RAM161" Name="syn:Hall Synth" ProgramChange="33"/>
+      <Patch Number="RAM162" Name="tec:Inspector" ProgramChange="34"/>
+      <Patch Number="RAM163" Name="bas:To-Mo Bass" ProgramChange="35"/>
+      <Patch Number="RAM164" Name="orc:Pizzicato" ProgramChange="36"/>
+      <Patch Number="RAM165" Name="bas:To Low Bass" ProgramChange="37"/>
+      <Patch Number="RAM166" Name="sub:Digital Deep" ProgramChange="38"/>
+      <Patch Number="RAM167" Name="syn:Juno Dance 2" ProgramChange="39"/>
+      <Patch Number="RAM168" Name="bpm:Octave Movy" ProgramChange="40"/>
+      <Patch Number="RAM169" Name="hit:Big Minor 1" ProgramChange="41"/>
+      <Patch Number="RAM170" Name="bpm:WoWoW Me" ProgramChange="42"/>
+      <Patch Number="RAM171" Name="hit:Amb Minor 2" ProgramChange="43"/>
+      <Patch Number="RAM172" Name="tec:Spiriment" ProgramChange="44"/>
+      <Patch Number="RAM173" Name="sfx:Reso Dive 4" ProgramChange="45"/>
+      <Patch Number="RAM174" Name="orc:Pizzicato Oc" ProgramChange="46"/>
+      <Patch Number="RAM175" Name="orc:TeC Pizzi 1" ProgramChange="47"/>
+      <Patch Number="RAM176" Name="orc:TeC Pizzi 2" ProgramChange="48"/>
+      <Patch Number="RAM177" Name="orc:TeC Pizzi 3" ProgramChange="49"/>
+      <Patch Number="RAM178" Name="orc:TeC Pizzi 4" ProgramChange="50"/>
+      <Patch Number="RAM179" Name="sub:Prophet Deep" ProgramChange="51"/>
+      <Patch Number="RAM180" Name="bas:T-Be Sawy 3" ProgramChange="52"/>
+      <Patch Number="RAM181" Name="pad:Soft Proteus" ProgramChange="53"/>
+      <Patch Number="RAM182" Name="bas:Mini Q" ProgramChange="54"/>
+      <Patch Number="RAM183" Name="vox:Aa Ie Deep" ProgramChange="55"/>
+      <Patch Number="RAM184" Name="tec:Watch Out" ProgramChange="56"/>
+      <Patch Number="RAM185" Name="bas:T-Be Sawy 4" ProgramChange="57"/>
+      <Patch Number="RAM186" Name="vox:Ten Sea Sea" ProgramChange="58"/>
+      <Patch Number="RAM187" Name="sfx:Prophet Swap" ProgramChange="59"/>
+      <Patch Number="RAM188" Name="tec:Phase Thin" ProgramChange="60"/>
+      <Patch Number="RAM189" Name="vox:Oie The Moi" ProgramChange="61"/>
+      <Patch Number="RAM190" Name="vox:Oie" ProgramChange="62"/>
+      <Patch Number="RAM191" Name="vox:Moi" ProgramChange="63"/>
+      <Patch Number="RAM192" Name="hit:Big Minor 4" ProgramChange="64"/>
+      <Patch Number="RAM193" Name="hit:Happy Major 1" ProgramChange="65"/>
+      <Patch Number="RAM194" Name="hit:Happy Major 2" ProgramChange="66"/>
+      <Patch Number="RAM195" Name="kit:TeCnO 4 #4" ProgramChange="67"/>
+      <Patch Number="RAM196" Name="kit:TeCnO 5 #3" ProgramChange="68"/>
+      <Patch Number="RAM197" Name="kit:TeCnO 6 #3" ProgramChange="69"/>
+      <Patch Number="RAM198" Name="kit:TeCnO 6 #4" ProgramChange="70"/>
+      <Patch Number="RAM199" Name="hit:Happy Major 4" ProgramChange="71"/>
+      <Patch Number="RAM200" Name="hit:TuT Minor 2" ProgramChange="72"/>
+      <Patch Number="RAM201" Name="hit:TuT Minor 3" ProgramChange="73"/>
+      <Patch Number="RAM202" Name="wnd:Bottle Two" ProgramChange="74"/>
+      <Patch Number="RAM203" Name="hit:TeC Maj Pizz" ProgramChange="75"/>
+      <Patch Number="RAM204" Name="tec:Dominate" ProgramChange="76"/>
+      <Patch Number="RAM205" Name="sfx:Tune Tectos" ProgramChange="77"/>
+      <Patch Number="RAM206" Name="sfx:Hollow Noise" ProgramChange="78"/>
+      <Patch Number="RAM207" Name="sfx:The Dutch" ProgramChange="79"/>
+      <Patch Number="RAM208" Name="sfx:DJ re Loop" ProgramChange="80"/>
+      <Patch Number="RAM209" Name="sfx:Weirdo Cymb" ProgramChange="81"/>
+      <Patch Number="RAM210" Name="syn:PPG My Bell" ProgramChange="82"/>
+      <Patch Number="RAM211" Name="hit:Big Minor 2" ProgramChange="83"/>
+      <Patch Number="RAM212" Name="hit:Soft Major 1" ProgramChange="84"/>
+      <Patch Number="RAM213" Name="hit:TeCnO Major 1" ProgramChange="85"/>
+      <Patch Number="RAM214" Name="hit:TeCnO Major 3" ProgramChange="86"/>
+      <Patch Number="RAM215" Name="hit:TeCnO Major 4" ProgramChange="87"/>
+      <Patch Number="RAM216" Name="hit:Sweet Maj7 2" ProgramChange="88"/>
+      <Patch Number="RAM217" Name="hit:Sweet Maj7 3" ProgramChange="89"/>
+      <Patch Number="RAM218" Name="hit:Sweet Maj7 4" ProgramChange="90"/>
+      <Patch Number="RAM219" Name="hit:BE Minor 2" ProgramChange="91"/>
+      <Patch Number="RAM220" Name="hit:Soft Major 3" ProgramChange="92"/>
+      <Patch Number="RAM221" Name="sfx:Reso Dive 2" ProgramChange="93"/>
+      <Patch Number="RAM222" Name="tec:Watch Two" ProgramChange="94"/>
+      <Patch Number="RAM223" Name="syn:Pizzi Ahay" ProgramChange="95"/>
+      <Patch Number="RAM224" Name="org:Silly" ProgramChange="96"/>
+      <Patch Number="RAM225" Name="org:Silly two" ProgramChange="97"/>
+      <Patch Number="RAM226" Name="org:Hybride" ProgramChange="98"/>
+      <Patch Number="RAM227" Name="sfx:Reso DIve 3" ProgramChange="99"/>
+      <Patch Number="RAM228" Name="hit:The End.." ProgramChange="100"/>
+      <Patch Number="RAM229" Name="kit:909-2 Dance" ProgramChange="101"/>
+      <Patch Number="RAM230" Name="kit:909-3 Dance" ProgramChange="102"/>
+      <Patch Number="RAM231" Name="kit:909-4 Dance" ProgramChange="103"/>
+      <Patch Number="RAM232" Name="kit:909-5 Dance" ProgramChange="104"/>
+      <Patch Number="RAM233" Name="kit:909-6 Dance" ProgramChange="105"/>
+      <Patch Number="RAM234" Name="kit:909-7 Dance" ProgramChange="106"/>
+      <Patch Number="RAM235" Name="kit:909-8 Dance" ProgramChange="107"/>
+      <Patch Number="RAM236" Name="kit:909-9 Dance" ProgramChange="108"/>
+      <Patch Number="RAM237" Name="kit:909-10 Dance" ProgramChange="109"/>
+      <Patch Number="RAM238" Name="kit:909-11 Dance" ProgramChange="110"/>
+      <Patch Number="RAM239" Name="kit:909 BD proce" ProgramChange="111"/>
+      <Patch Number="RAM240" Name="kit:909 BD clean" ProgramChange="112"/>
+      <Patch Number="RAM241" Name="win:Bottle Veloc" ProgramChange="113"/>
+      <Patch Number="RAM242" Name="kit:GM 909-1 HH2" ProgramChange="114"/>
+      <Patch Number="RAM243" Name="kit:GM 909-2 HH1" ProgramChange="115"/>
+      <Patch Number="RAM244" Name="kit:GM 909-3 HH1" ProgramChange="116"/>
+      <Patch Number="RAM245" Name="kit:GM 909-3 HH2" ProgramChange="117"/>
+      <Patch Number="RAM246" Name="sfx:Breath" ProgramChange="118"/>
+      <Patch Number="RAM247" Name="bas:Da Moogy" ProgramChange="119"/>
+      <Patch Number="RAM248" Name="bas:Da Moogy Tec" ProgramChange="120"/>
+      <Patch Number="RAM249" Name="sub:Low Da Moogy" ProgramChange="121"/>
+      <Patch Number="RAM250" Name="bas:Da Attack" ProgramChange="122"/>
+      <Patch Number="RAM251" Name="syn:Flangy Da" ProgramChange="123"/>
+      <Patch Number="RAM252" Name="bas:Bottle" ProgramChange="124"/>
+      <Patch Number="RAM253" Name="wnd:Panflute Vel" ProgramChange="125"/>
+      <Patch Number="RAM254" Name="kit:TeCnO 1" ProgramChange="126"/>
+      <Patch Number="RAM255" Name="kit:TeCnO 1 #2" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="Presets 02">
+      <Patch Number="TeCnO-2" Name="kit:TeCnO 2" ProgramChange="0"/>
+      <Patch Number="ROM257" Name="kit:TeCnO 2 #2" ProgramChange="1"/>
+      <Patch Number="ROM258" Name="kit:TeCnO 3" ProgramChange="2"/>
+      <Patch Number="ROM259" Name="kit:TeCnO 3 #2" ProgramChange="3"/>
+      <Patch Number="ROM260" Name="kit:TeCnO 4 #2" ProgramChange="4"/>
+      <Patch Number="ROM261" Name="kit:TeCnO 5" ProgramChange="5"/>
+      <Patch Number="ROM262" Name="kit:TeCnO 5 #2" ProgramChange="6"/>
+      <Patch Number="ROM263" Name="kit:TeCnO 6" ProgramChange="7"/>
+      <Patch Number="ROM264" Name="kit:TeCnO 6 #2" ProgramChange="8"/>
+      <Patch Number="ROM265" Name="kit:TeC Percus 2" ProgramChange="9"/>
+      <Patch Number="ROM266" Name="pad:PolyMoogy I" ProgramChange="10"/>
+      <Patch Number="ROM267" Name="bpm:Filter Seq 1" ProgramChange="11"/>
+      <Patch Number="ROM268" Name="bas:Vocalize" ProgramChange="12"/>
+      <Patch Number="ROM269" Name="pad:5th Station" ProgramChange="13"/>
+      <Patch Number="ROM270" Name="bas:Sub Attack" ProgramChange="14"/>
+      <Patch Number="ROM271" Name="bas:Down Bass" ProgramChange="15"/>
+      <Patch Number="ROM272" Name="kit:TeC BD 1 Mono" ProgramChange="16"/>
+      <Patch Number="ROM273" Name="kit:TeC BD 2 Mono" ProgramChange="17"/>
+      <Patch Number="ROM274" Name="kit:TeC BD 3 Mono" ProgramChange="18"/>
+      <Patch Number="ROM275" Name="kit:TeC BD 4 Mono" ProgramChange="19"/>
+      <Patch Number="ROM276" Name="kit:TeC BD 5 Mono" ProgramChange="20"/>
+      <Patch Number="ROM277" Name="kit:TeC BD 6 Mono" ProgramChange="21"/>
+      <Patch Number="ROM278" Name="kit:Noise Hits 2" ProgramChange="22"/>
+      <Patch Number="ROM279" Name="kit:Noise Hits 3" ProgramChange="23"/>
+      <Patch Number="ROM280" Name="kit:NoiseH.velo1" ProgramChange="24"/>
+      <Patch Number="ROM281" Name="kit:NoiseH.velo2" ProgramChange="25"/>
+      <Patch Number="ROM282" Name="kit:NoiseH.velo3" ProgramChange="26"/>
+      <Patch Number="ROM283" Name="tec:Trance I Whl" ProgramChange="27"/>
+      <Patch Number="ROM284" Name="pad:Zzzz Pad" ProgramChange="28"/>
+      <Patch Number="ROM285" Name="syn:Loner" ProgramChange="29"/>
+      <Patch Number="ROM286" Name="tec:Velo Dorga" ProgramChange="30"/>
+      <Patch Number="ROM287" Name="tec:Cotcha Dance" ProgramChange="31"/>
+      <Patch Number="ROM288" Name="syn:Wave Bell" ProgramChange="32"/>
+      <Patch Number="ROM289" Name="syn:Layer Me" ProgramChange="33"/>
+      <Patch Number="ROM290" Name="bas:Tracker" ProgramChange="34"/>
+      <Patch Number="ROM291" Name="syn:Guitar Pads" ProgramChange="35"/>
+      <Patch Number="ROM292" Name="pad:Tradition" ProgramChange="36"/>
+      <Patch Number="ROM293" Name="bas:Dokter SH101" ProgramChange="37"/>
+      <Patch Number="ROM294" Name="pad:Far East Sun" ProgramChange="38"/>
+      <Patch Number="ROM295" Name="tec:Velo PWM 3" ProgramChange="39"/>
+      <Patch Number="ROM296" Name="tec:Trance Later" ProgramChange="40"/>
+      <Patch Number="ROM297" Name="bas:Nasty One" ProgramChange="41"/>
+      <Patch Number="ROM298" Name="vox:Noisy Aah" ProgramChange="42"/>
+      <Patch Number="ROM299" Name="syn:Super Mars" ProgramChange="43"/>
+      <Patch Number="ROM300" Name="bpm:HMTL Synth" ProgramChange="44"/>
+      <Patch Number="ROM301" Name="syn:MegaFiltoros" ProgramChange="45"/>
+      <Patch Number="ROM302" Name="tec:Trance Now" ProgramChange="46"/>
+      <Patch Number="ROM303" Name="pad:Logos" ProgramChange="47"/>
+      <Patch Number="ROM304" Name="tec:Venga Lady" ProgramChange="48"/>
+      <Patch Number="ROM305" Name="tec:Velocity Mo" ProgramChange="49"/>
+      <Patch Number="ROM306" Name="bas:Za Stronger" ProgramChange="50"/>
+      <Patch Number="ROM307" Name="sub:Sub Organo" ProgramChange="51"/>
+      <Patch Number="ROM308" Name="tec:Dirtylize" ProgramChange="52"/>
+      <Patch Number="ROM309" Name="amb:Valley Pad" ProgramChange="53"/>
+      <Patch Number="ROM310" Name="sub:Low Swing" ProgramChange="54"/>
+      <Patch Number="ROM311" Name="bpm:Puls Show" ProgramChange="55"/>
+      <Patch Number="ROM312" Name="syn:Classic Rise" ProgramChange="56"/>
+      <Patch Number="ROM313" Name="bpm:8 oscillator" ProgramChange="57"/>
+      <Patch Number="ROM314" Name="pad:SuperNova" ProgramChange="58"/>
+      <Patch Number="ROM315" Name="tec:Sequenca" ProgramChange="59"/>
+      <Patch Number="ROM316" Name="pad:Syntha Choir" ProgramChange="60"/>
+      <Patch Number="ROM317" Name="bpm:Fun-2-U Seq" ProgramChange="61"/>
+      <Patch Number="ROM318" Name="tec:Trance Wheel" ProgramChange="62"/>
+      <Patch Number="ROM319" Name="amb:Dream Saws" ProgramChange="63"/>
+      <Patch Number="ROM320" Name="tec:Trance On" ProgramChange="64"/>
+      <Patch Number="ROM321" Name="pad:Far To Soft?" ProgramChange="65"/>
+      <Patch Number="ROM322" Name="sfx:White BPM" ProgramChange="66"/>
+      <Patch Number="ROM323" Name="amb:Evening Pad" ProgramChange="67"/>
+      <Patch Number="ROM324" Name="tec:To Be Or Not" ProgramChange="68"/>
+      <Patch Number="ROM325" Name="bas:Early Razer" ProgramChange="69"/>
+      <Patch Number="ROM326" Name="bpm:Feature Show" ProgramChange="70"/>
+      <Patch Number="ROM327" Name="amb:Schulze 1977" ProgramChange="71"/>
+      <Patch Number="ROM328" Name="bpm:Slit Rythmn" ProgramChange="72"/>
+      <Patch Number="ROM329" Name="pad:Phasalon" ProgramChange="73"/>
+      <Patch Number="ROM330" Name="bpm:Waveron" ProgramChange="74"/>
+      <Patch Number="ROM331" Name="kit:GM TeCnO 10" ProgramChange="75"/>
+      <Patch Number="ROM332" Name="amb:Galactic End" ProgramChange="76"/>
+      <Patch Number="ROM333" Name="bpm:E-mu Lize" ProgramChange="77"/>
+      <Patch Number="ROM334" Name="syn:Super Layer" ProgramChange="78"/>
+      <Patch Number="ROM335" Name="amb:Dream Vibes" ProgramChange="79"/>
+      <Patch Number="ROM336" Name="pad:Chorusy" ProgramChange="80"/>
+      <Patch Number="ROM337" Name="tec:Club Lead II" ProgramChange="81"/>
+      <Patch Number="ROM338" Name="bas:Be Square II" ProgramChange="82"/>
+      <Patch Number="ROM339" Name="bas:Da Lowa" ProgramChange="83"/>
+      <Patch Number="ROM340" Name="tec:Voltage Lead" ProgramChange="84"/>
+      <Patch Number="ROM341" Name="sfx:Water @ Mars" ProgramChange="85"/>
+      <Patch Number="ROM342" Name="sfx:Fiction It" ProgramChange="86"/>
+      <Patch Number="ROM343" Name="tec:Industial" ProgramChange="87"/>
+      <Patch Number="ROM344" Name="bpm:Time Vox Pad" ProgramChange="88"/>
+      <Patch Number="ROM345" Name="tec:Club Lead I" ProgramChange="89"/>
+      <Patch Number="ROM346" Name="bpm:Mover Rogue" ProgramChange="90"/>
+      <Patch Number="ROM347" Name="pad:DJAlka Lady" ProgramChange="91"/>
+      <Patch Number="ROM348" Name="bpm:Wave to Pad" ProgramChange="92"/>
+      <Patch Number="ROM349" Name="bas:Balled Bass" ProgramChange="93"/>
+      <Patch Number="ROM350" Name="syn:P-5 Brass" ProgramChange="94"/>
+      <Patch Number="ROM351" Name="tec:Jazz Lead I" ProgramChange="95"/>
+      <Patch Number="ROM352" Name="tec:Whl Trance 1" ProgramChange="96"/>
+      <Patch Number="ROM353" Name="pad:PolyMoogy II" ProgramChange="97"/>
+      <Patch Number="ROM354" Name="hit:Minor C++" ProgramChange="98"/>
+      <Patch Number="ROM355" Name="wnd:Syntho Panfl" ProgramChange="99"/>
+      <Patch Number="ROM356" Name="amb:Empty@Fields" ProgramChange="100"/>
+      <Patch Number="ROM357" Name="hit:midi clocky" ProgramChange="101"/>
+      <Patch Number="ROM358" Name="bas:Simple Sawer" ProgramChange="102"/>
+      <Patch Number="ROM359" Name="syn:Velvet Lead" ProgramChange="103"/>
+      <Patch Number="ROM360" Name="bas:Mini XX / I" ProgramChange="104"/>
+      <Patch Number="ROM361" Name="pad:Panfluto" ProgramChange="105"/>
+      <Patch Number="ROM362" Name="bpm:Time MetaPad" ProgramChange="106"/>
+      <Patch Number="ROM363" Name="kit:GM Grunche 1" ProgramChange="107"/>
+      <Patch Number="ROM364" Name="pad:Steeper I" ProgramChange="108"/>
+      <Patch Number="ROM365" Name="org:Cool Stack" ProgramChange="109"/>
+      <Patch Number="ROM366" Name="bas:To Puls On" ProgramChange="110"/>
+      <Patch Number="ROM367" Name="bas:T-Be Digi 1" ProgramChange="111"/>
+      <Patch Number="ROM368" Name="org:Bass Dancer" ProgramChange="112"/>
+      <Patch Number="ROM369" Name="pad:Synth Choir+" ProgramChange="113"/>
+      <Patch Number="ROM370" Name="bpm:Accento Pad" ProgramChange="114"/>
+      <Patch Number="ROM371" Name="pad:DJAlka Phase" ProgramChange="115"/>
+      <Patch Number="ROM372" Name="tec:Tranco Lead" ProgramChange="116"/>
+      <Patch Number="ROM373" Name="tec:Whl Trance 2" ProgramChange="117"/>
+      <Patch Number="ROM374" Name="pad:Z-Plane Fall" ProgramChange="118"/>
+      <Patch Number="ROM375" Name="tec:Dirtylize II" ProgramChange="119"/>
+      <Patch Number="ROM376" Name="bas:Phat On" ProgramChange="120"/>
+      <Patch Number="ROM377" Name="pad:MegaLayer I" ProgramChange="121"/>
+      <Patch Number="ROM378" Name="bpm:System 55" ProgramChange="122"/>
+      <Patch Number="ROM379" Name="prc:Finger snap" ProgramChange="123"/>
+      <Patch Number="ROM380" Name="prc:Tambourine" ProgramChange="124"/>
+      <Patch Number="ROM381" Name="prc:Short Shake" ProgramChange="125"/>
+      <Patch Number="ROM382" Name="prc:Shaky Loop C4" ProgramChange="126"/>
+      <Patch Number="ROM383" Name="prc:Super BD" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="Presets 03">
+      <Patch Number="TeCnO-3" Name="arp:Dutch Dance" ProgramChange="0"/>
+      <Patch Number="ROM385" Name="pad:Emulator I" ProgramChange="1"/>
+      <Patch Number="ROM386" Name="arp:PanBell" ProgramChange="2"/>
+      <Patch Number="ROM387" Name="arp:Uglylizon" ProgramChange="3"/>
+      <Patch Number="ROM388" Name="prc:TeC Clap 1st" ProgramChange="4"/>
+      <Patch Number="ROM389" Name="prc:TeC Clap 1" ProgramChange="5"/>
+      <Patch Number="ROM390" Name="prc:TeC Clap 2st" ProgramChange="6"/>
+      <Patch Number="ROM391" Name="prc:TeC Clap 2" ProgramChange="7"/>
+      <Patch Number="ROM392" Name="prc:TeC Clap 3" ProgramChange="8"/>
+      <Patch Number="ROM393" Name="prc:TeC Clap 4st" ProgramChange="9"/>
+      <Patch Number="ROM394" Name="prc:Reverse CLP 1" ProgramChange="10"/>
+      <Patch Number="ROM395" Name="prc:Reverse CLP 2" ProgramChange="11"/>
+      <Patch Number="ROM396" Name="prc:80s Clap 1st" ProgramChange="12"/>
+      <Patch Number="ROM397" Name="prc:80s Clap 1" ProgramChange="13"/>
+      <Patch Number="ROM398" Name="prc:TeC Clap 5" ProgramChange="14"/>
+      <Patch Number="ROM399" Name="prc:TeC Clap 6" ProgramChange="15"/>
+      <Patch Number="ROM400" Name="prc:TeC Clap 7" ProgramChange="16"/>
+      <Patch Number="ROM401" Name="prc:808 Clap 1st" ProgramChange="17"/>
+      <Patch Number="ROM402" Name="prc:808 Clap 1" ProgramChange="18"/>
+      <Patch Number="ROM403" Name="prc:909 CLP+Revs" ProgramChange="19"/>
+      <Patch Number="ROM404" Name="prc:Reso Squeek 1" ProgramChange="20"/>
+      <Patch Number="ROM405" Name="prc:Reso Squeek 2" ProgramChange="21"/>
+      <Patch Number="ROM406" Name="prc:Reso Squeek 3" ProgramChange="22"/>
+      <Patch Number="ROM407" Name="prc:Reso Squeek 4" ProgramChange="23"/>
+      <Patch Number="ROM408" Name="prc:Reso Squeek 5" ProgramChange="24"/>
+      <Patch Number="ROM409" Name="sfx:Reso Dive Me" ProgramChange="25"/>
+      <Patch Number="ROM410" Name="sfx:Vintage Perc" ProgramChange="26"/>
+      <Patch Number="ROM411" Name="prc:MS 20 Bongos 1" ProgramChange="27"/>
+      <Patch Number="ROM412" Name="prc:MS 20 Bongos 2" ProgramChange="28"/>
+      <Patch Number="ROM413" Name="arp:ProtoWave" ProgramChange="29"/>
+      <Patch Number="ROM414" Name="arp:T-S-C-Y" ProgramChange="30"/>
+      <Patch Number="ROM415" Name="prc:TeC Snare 3" ProgramChange="31"/>
+      <Patch Number="ROM416" Name="bpm:Layer Rhythm" ProgramChange="32"/>
+      <Patch Number="ROM417" Name="arp:Shallow Tech" ProgramChange="33"/>
+      <Patch Number="ROM418" Name="arp:Move-Z" ProgramChange="34"/>
+      <Patch Number="ROM419" Name="arp:Wide Stereo" ProgramChange="35"/>
+      <Patch Number="ROM420" Name="arp:T-Be Razor" ProgramChange="36"/>
+      <Patch Number="ROM421" Name="arp:Tooth Quence" ProgramChange="37"/>
+      <Patch Number="ROM422" Name="sfx:FictionPlace" ProgramChange="38"/>
+      <Patch Number="ROM423" Name="arp:T-DigiPuls 1" ProgramChange="39"/>
+      <Patch Number="ROM424" Name="arp:TSCY chord" ProgramChange="40"/>
+      <Patch Number="ROM425" Name="arp:TSCY T-Bee 1" ProgramChange="41"/>
+      <Patch Number="ROM426" Name="arp:Real Timer" ProgramChange="42"/>
+      <Patch Number="ROM427" Name="arp:Whl.Trancy 1" ProgramChange="43"/>
+      <Patch Number="ROM428" Name="amb:Cave search" ProgramChange="44"/>
+      <Patch Number="ROM429" Name="arp:Velocity BP1" ProgramChange="45"/>
+      <Patch Number="ROM430" Name="arp:B-passer 1" ProgramChange="46"/>
+      <Patch Number="ROM431" Name="tec:Tech Radar 2" ProgramChange="47"/>
+      <Patch Number="ROM432" Name="pad:Daydreamer" ProgramChange="48"/>
+      <Patch Number="ROM433" Name="arp:RumbleGroove" ProgramChange="49"/>
+      <Patch Number="ROM434" Name="arp:Zoo Field" ProgramChange="50"/>
+      <Patch Number="ROM435" Name="arp:Seqencer Led" ProgramChange="51"/>
+      <Patch Number="ROM436" Name="arp:TeC O Quence" ProgramChange="52"/>
+      <Patch Number="ROM437" Name="arp:PanflutoMove" ProgramChange="53"/>
+      <Patch Number="ROM438" Name="arp:Bottlesync" ProgramChange="54"/>
+      <Patch Number="ROM439" Name="pad:Orbitolon" ProgramChange="55"/>
+      <Patch Number="ROM440" Name="arp:Doweron" ProgramChange="56"/>
+      <Patch Number="ROM441" Name="arp:TSCY T-Bee 2" ProgramChange="57"/>
+      <Patch Number="ROM442" Name="arp:DreamChord 2" ProgramChange="58"/>
+      <Patch Number="ROM443" Name="arp:Digi Shallow" ProgramChange="59"/>
+      <Patch Number="ROM444" Name="arp:Es-Ha 101 1" ProgramChange="60"/>
+      <Patch Number="ROM445" Name="arp:Bass Ooh one" ProgramChange="61"/>
+      <Patch Number="ROM446" Name="arp:Syncolon" ProgramChange="62"/>
+      <Patch Number="ROM447" Name="arp:OrbiterWave" ProgramChange="63"/>
+      <Patch Number="ROM448" Name="arp:SH-One O One" ProgramChange="64"/>
+      <Patch Number="ROM449" Name="arp:Chase Trance" ProgramChange="65"/>
+      <Patch Number="ROM450" Name="kb2:EP with Pad" ProgramChange="66"/>
+      <Patch Number="ROM451" Name="arp:DJalka Chord" ProgramChange="67"/>
+      <Patch Number="ROM452" Name="arp:T-Be Rogue" ProgramChange="68"/>
+      <Patch Number="ROM453" Name="pad:MegaLayer II" ProgramChange="69"/>
+      <Patch Number="ROM454" Name="arp:Voltage Tech" ProgramChange="70"/>
+      <Patch Number="ROM455" Name="arp:Dance Floor" ProgramChange="71"/>
+      <Patch Number="ROM456" Name="arp:Noise Seq 1" ProgramChange="72"/>
+      <Patch Number="ROM457" Name="amb:Wave Orbit" ProgramChange="73"/>
+      <Patch Number="ROM458" Name="arp:Noise Seq 2" ProgramChange="74"/>
+      <Patch Number="ROM459" Name="arp:Bass Clavi" ProgramChange="75"/>
+      <Patch Number="ROM460" Name="pad:Phase Orbit" ProgramChange="76"/>
+      <Patch Number="ROM461" Name="arp:Chord Tech 1" ProgramChange="77"/>
+      <Patch Number="ROM462" Name="arp:T-DigiPuls 2" ProgramChange="78"/>
+      <Patch Number="ROM463" Name="arp:SH-One O Two" ProgramChange="79"/>
+      <Patch Number="ROM464" Name="sfx:dangerzone" ProgramChange="80"/>
+      <Patch Number="ROM465" Name="arp:Chord Tech 2" ProgramChange="81"/>
+      <Patch Number="ROM466" Name="pad:Silk water" ProgramChange="82"/>
+      <Patch Number="ROM467" Name="tec:Seq Juno Bas" ProgramChange="83"/>
+      <Patch Number="ROM468" Name="arp:B-passer 2" ProgramChange="84"/>
+      <Patch Number="ROM469" Name="bpm:Accento Pad2" ProgramChange="85"/>
+      <Patch Number="ROM470" Name="bas:Sub Attack 2" ProgramChange="86"/>
+      <Patch Number="ROM471" Name="pad:Steeper II" ProgramChange="87"/>
+      <Patch Number="ROM472" Name="syn:Harpsidigi" ProgramChange="88"/>
+      <Patch Number="ROM473" Name="sfx:TechBoom C4" ProgramChange="89"/>
+      <Patch Number="ROM474" Name="sfx:Lazer Guns 1" ProgramChange="90"/>
+      <Patch Number="ROM475" Name="pad:Square !!" ProgramChange="91"/>
+      <Patch Number="ROM476" Name="prc:Brush noiser" ProgramChange="92"/>
+      <Patch Number="ROM477" Name="org:Perc Stack" ProgramChange="93"/>
+      <Patch Number="ROM478" Name="arp:Moogion" ProgramChange="94"/>
+      <Patch Number="ROM479" Name="sfx:VintageRetro" ProgramChange="95"/>
+      <Patch Number="ROM480" Name="prc:Lazer Guns 2" ProgramChange="96"/>
+      <Patch Number="ROM481" Name="sfx:RisingNoise1" ProgramChange="97"/>
+      <Patch Number="ROM482" Name="arp:Vox Field" ProgramChange="98"/>
+      <Patch Number="ROM483" Name="arp:Whl.Trancy 2" ProgramChange="99"/>
+      <Patch Number="ROM484" Name="sfx:RisingNoise2" ProgramChange="100"/>
+      <Patch Number="ROM485" Name="prc:H-SN C2/C4 1" ProgramChange="101"/>
+      <Patch Number="ROM486" Name="prc:H-SN C2/C4 2" ProgramChange="102"/>
+      <Patch Number="ROM487" Name="prc:H-SN C2/C4 3" ProgramChange="103"/>
+      <Patch Number="ROM488" Name="prc:TjaTjow C2C4" ProgramChange="104"/>
+      <Patch Number="ROM489" Name="prc:Tech Snare" ProgramChange="105"/>
+      <Patch Number="ROM490" Name="arp:Whl.Trancy 3" ProgramChange="106"/>
+      <Patch Number="ROM491" Name="sfx:Spectrumize" ProgramChange="107"/>
+      <Patch Number="ROM492" Name="syn:After Flutes" ProgramChange="108"/>
+      <Patch Number="ROM493" Name="syn:Known Fifths" ProgramChange="109"/>
+      <Patch Number="ROM494" Name="led:Soft Aahs" ProgramChange="110"/>
+      <Patch Number="ROM495" Name="led:Carnival" ProgramChange="111"/>
+      <Patch Number="ROM496" Name="hit:Tut Minor 1" ProgramChange="112"/>
+      <Patch Number="ROM497" Name="bas:The X seven" ProgramChange="113"/>
+      <Patch Number="ROM498" Name="bpm:Beam Me Up" ProgramChange="114"/>
+      <Patch Number="ROM499" Name="pad:Blue Sky" ProgramChange="115"/>
+      <Patch Number="ROM500" Name="hit:BE Minor Pizz" ProgramChange="116"/>
+      <Patch Number="ROM501" Name="bpm:Pad To Fase" ProgramChange="117"/>
+      <Patch Number="ROM502" Name="led:Terra Luna" ProgramChange="118"/>
+      <Patch Number="ROM503" Name="bpm:Time Vox" ProgramChange="119"/>
+      <Patch Number="ROM504" Name="sfx:Orwell" ProgramChange="120"/>
+      <Patch Number="ROM505" Name="bpm:Rocket Ship" ProgramChange="121"/>
+      <Patch Number="ROM506" Name="bpm:Wired Song" ProgramChange="122"/>
+      <Patch Number="ROM507" Name="led:Dance Diva" ProgramChange="123"/>
+      <Patch Number="ROM508" Name="led:Rodin's Knee" ProgramChange="124"/>
+      <Patch Number="ROM509" Name="sfx:Freak Out" ProgramChange="125"/>
+      <Patch Number="ROM510" Name="snd:By Rob Pappen" ProgramChange="126"/>
+      <Patch Number="ROM511" Name=":TemplateV2.0" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="Presets 04">
+      <Patch Number="BEAT-0" Name="bts:Beat Garden" ProgramChange="0"/>
+      <Patch Number="ROM1" Name="bas:Beat Square" ProgramChange="1"/>
+      <Patch Number="ROM2" Name="syn:Tulip Bells" ProgramChange="2"/>
+      <Patch Number="ROM3" Name="vox:FlowerBed" ProgramChange="3"/>
+      <Patch Number="ROM4" Name="bts:Disco Garden" ProgramChange="4"/>
+      <Patch Number="ROM5" Name="bts:RnB Flower 2" ProgramChange="5"/>
+      <Patch Number="ROM6" Name="bas:Oak Tree" ProgramChange="6"/>
+      <Patch Number="ROM7" Name="git:Riff me 2" ProgramChange="7"/>
+      <Patch Number="ROM8" Name="pad:DestyFlower1" ProgramChange="8"/>
+      <Patch Number="ROM9" Name="bas:Bamboe DJ" ProgramChange="9"/>
+      <Patch Number="ROM10" Name="arp:Beat Flache" ProgramChange="10"/>
+      <Patch Number="ROM11" Name="sub:LowerMeBass1" ProgramChange="11"/>
+      <Patch Number="ROM12" Name="pr1:Percussion 1" ProgramChange="12"/>
+      <Patch Number="ROM13" Name="pr2:Percussion 2" ProgramChange="13"/>
+      <Patch Number="ROM14" Name="pr3:Percussion 3" ProgramChange="14"/>
+      <Patch Number="ROM15" Name="sn1:Snares 1 St." ProgramChange="15"/>
+      <Patch Number="ROM16" Name="sn2:Snares 2mono" ProgramChange="16"/>
+      <Patch Number="ROM17" Name="sn3:Snares 3 St." ProgramChange="17"/>
+      <Patch Number="ROM18" Name="sn4:Jungle SN St" ProgramChange="18"/>
+      <Patch Number="ROM19" Name="sn5:Jngl SN St+M" ProgramChange="19"/>
+      <Patch Number="ROM20" Name="sn6:Elec SN 1mon" ProgramChange="20"/>
+      <Patch Number="ROM21" Name="sn6:Elec SN 2 St" ProgramChange="21"/>
+      <Patch Number="ROM22" Name="sn6:Elec SN 3" ProgramChange="22"/>
+      <Patch Number="ROM23" Name="sn6:Elec SN 4" ProgramChange="23"/>
+      <Patch Number="ROM24" Name="sn7:Elec SN+CLP1" ProgramChange="24"/>
+      <Patch Number="ROM25" Name="clp:Claps St.1" ProgramChange="25"/>
+      <Patch Number="ROM26" Name="clp:Claps St+M.1" ProgramChange="26"/>
+      <Patch Number="ROM27" Name="clp:Claps Stack1" ProgramChange="27"/>
+      <Patch Number="ROM28" Name="bd1:BG BD 1" ProgramChange="28"/>
+      <Patch Number="ROM29" Name="bd1:BG BD room 2" ProgramChange="29"/>
+      <Patch Number="ROM30" Name="bd2:BG BD Elec 1" ProgramChange="30"/>
+      <Patch Number="ROM31" Name="bd2:BG BD Elec 2" ProgramChange="31"/>
+      <Patch Number="ROM32" Name="hh1:HiHats monoI" ProgramChange="32"/>
+      <Patch Number="ROM33" Name="cb1:Cymb Rides 1" ProgramChange="33"/>
+      <Patch Number="ROM34" Name="cb2:Cymb Rides 2" ProgramChange="34"/>
+      <Patch Number="ROM35" Name="tom:Beat Toms" ProgramChange="35"/>
+      <Patch Number="ROM36" Name="kit:Jazz   Bass" ProgramChange="36"/>
+      <Patch Number="ROM37" Name="sfx:Beat Field 1" ProgramChange="37"/>
+      <Patch Number="ROM38" Name="sfx:Beat Field 2" ProgramChange="38"/>
+      <Patch Number="ROM39" Name="git:Riff me 1" ProgramChange="39"/>
+      <Patch Number="ROM40" Name="syn:XyloSynth D" ProgramChange="40"/>
+      <Patch Number="ROM41" Name="amb:Snowy Trees" ProgramChange="41"/>
+      <Patch Number="ROM42" Name="bas:Slap it 1cho" ProgramChange="42"/>
+      <Patch Number="ROM43" Name="sfx:Special   Dr" ProgramChange="43"/>
+      <Patch Number="ROM44" Name="syn:Angel Sword" ProgramChange="44"/>
+      <Patch Number="ROM45" Name="git:Muted Alka" ProgramChange="45"/>
+      <Patch Number="ROM46" Name="bas:Jungle GSM" ProgramChange="46"/>
+      <Patch Number="ROM47" Name="pad:GardenString" ProgramChange="47"/>
+      <Patch Number="ROM48" Name="bas:PhatSawer" ProgramChange="48"/>
+      <Patch Number="ROM49" Name="amb:Angel Pad" ProgramChange="49"/>
+      <Patch Number="ROM50" Name="led:Funky Plant" ProgramChange="50"/>
+      <Patch Number="ROM51" Name="kb2:Aurora" ProgramChange="51"/>
+      <Patch Number="ROM52" Name="bts:Z-planer" ProgramChange="52"/>
+      <Patch Number="ROM53" Name="bts:Filter Disco" ProgramChange="53"/>
+      <Patch Number="ROM54" Name="bts:Slowa" ProgramChange="54"/>
+      <Patch Number="ROM55" Name="pad:Silk Padings" ProgramChange="55"/>
+      <Patch Number="ROM56" Name="bas:Analoga Tree" ProgramChange="56"/>
+      <Patch Number="ROM57" Name="syn:Chimy Pad" ProgramChange="57"/>
+      <Patch Number="ROM58" Name="bts:Rock Garden" ProgramChange="58"/>
+      <Patch Number="ROM59" Name="bts:Tulip Garden" ProgramChange="59"/>
+      <Patch Number="ROM60" Name="bas:Saw Leaves" ProgramChange="60"/>
+      <Patch Number="ROM61" Name="bts:Post groove" ProgramChange="61"/>
+      <Patch Number="ROM62" Name="bts:Hi Temp" ProgramChange="62"/>
+      <Patch Number="ROM63" Name="pad:Artic Sweep" ProgramChange="63"/>
+      <Patch Number="ROM64" Name="bas:Spruce" ProgramChange="64"/>
+      <Patch Number="ROM65" Name="sfx:SF Chimes" ProgramChange="65"/>
+      <Patch Number="ROM66" Name="bts:Jungle Eyes" ProgramChange="66"/>
+      <Patch Number="ROM67" Name="bts:ScottsValley" ProgramChange="67"/>
+      <Patch Number="ROM68" Name="bts:Low Rider" ProgramChange="68"/>
+      <Patch Number="ROM69" Name="bts:Swing Garden" ProgramChange="69"/>
+      <Patch Number="ROM70" Name="bas:Swing Garden" ProgramChange="70"/>
+      <Patch Number="ROM71" Name="bts:Fantasy" ProgramChange="71"/>
+      <Patch Number="ROM72" Name="bas:Acous-Syn 5" ProgramChange="72"/>
+      <Patch Number="ROM73" Name="pad:Versatility" ProgramChange="73"/>
+      <Patch Number="ROM74" Name="bas:Voca T-Bee" ProgramChange="74"/>
+      <Patch Number="ROM75" Name="bts:Park groove" ProgramChange="75"/>
+      <Patch Number="ROM76" Name="arp:M-Es Twenty" ProgramChange="76"/>
+      <Patch Number="ROM77" Name="vox:Fab Syntha" ProgramChange="77"/>
+      <Patch Number="ROM78" Name="bts:DnB Garden" ProgramChange="78"/>
+      <Patch Number="ROM79" Name="git:Plectrum-B" ProgramChange="79"/>
+      <Patch Number="ROM80" Name="kb2:Butterfly" ProgramChange="80"/>
+      <Patch Number="ROM81" Name="bas:Balled" ProgramChange="81"/>
+      <Patch Number="ROM82" Name="hit:Newish II" ProgramChange="82"/>
+      <Patch Number="ROM83" Name="syn:PlantoDance" ProgramChange="83"/>
+      <Patch Number="ROM84" Name="arp:Beat Chord 1" ProgramChange="84"/>
+      <Patch Number="ROM85" Name="pad:Gardensynth" ProgramChange="85"/>
+      <Patch Number="ROM86" Name="arp:T-Beat 1" ProgramChange="86"/>
+      <Patch Number="ROM87" Name="bas:Wild Plant" ProgramChange="87"/>
+      <Patch Number="ROM88" Name="vox:Big BG Choir" ProgramChange="88"/>
+      <Patch Number="ROM89" Name="syn:Garden Party" ProgramChange="89"/>
+      <Patch Number="ROM90" Name="hit:@ BeatGarden" ProgramChange="90"/>
+      <Patch Number="ROM91" Name="bts:Moveda Floor" ProgramChange="91"/>
+      <Patch Number="ROM92" Name="bas:Cactus VI" ProgramChange="92"/>
+      <Patch Number="ROM93" Name="pad:Dramatique" ProgramChange="93"/>
+      <Patch Number="ROM94" Name="bts:SFX Garden" ProgramChange="94"/>
+      <Patch Number="ROM95" Name="brs:Beat Section" ProgramChange="95"/>
+      <Patch Number="ROM96" Name="syn:Beat Sweep 1" ProgramChange="96"/>
+      <Patch Number="ROM97" Name="arp:git C3-C6 1" ProgramChange="97"/>
+      <Patch Number="ROM98" Name="arp:git C1-C4 1" ProgramChange="98"/>
+      <Patch Number="ROM99" Name="bas:Dream Tree" ProgramChange="99"/>
+      <Patch Number="ROM100" Name="hit:SF Garden" ProgramChange="100"/>
+      <Patch Number="ROM101" Name="arp:Beat Chord 2" ProgramChange="101"/>
+      <Patch Number="ROM102" Name="bas:Flip Trance" ProgramChange="102"/>
+      <Patch Number="ROM103" Name="bts:ElectroField" ProgramChange="103"/>
+      <Patch Number="ROM104" Name="bts:Brush Garden" ProgramChange="104"/>
+      <Patch Number="ROM105" Name="bas:Acous-Syn 4" ProgramChange="105"/>
+      <Patch Number="ROM106" Name="pad:Bombasticom" ProgramChange="106"/>
+      <Patch Number="ROM107" Name="arp:Velo Garden2" ProgramChange="107"/>
+      <Patch Number="ROM108" Name="pr1:BPM LF0 1" ProgramChange="108"/>
+      <Patch Number="ROM109" Name="pr2:BPM LFO 1" ProgramChange="109"/>
+      <Patch Number="ROM110" Name="pr3:BPM LFO 1" ProgramChange="110"/>
+      <Patch Number="ROM111" Name="sfx:Big Break C4" ProgramChange="111"/>
+      <Patch Number="ROM112" Name="bas:24dB Plant" ProgramChange="112"/>
+      <Patch Number="ROM113" Name="vox:Open Flower" ProgramChange="113"/>
+      <Patch Number="ROM114" Name="bas:JD-Stack IX" ProgramChange="114"/>
+      <Patch Number="ROM115" Name="pad:FlowerFields" ProgramChange="115"/>
+      <Patch Number="ROM116" Name="arp:git C3-C6 2" ProgramChange="116"/>
+      <Patch Number="ROM117" Name="arp:git C1-C4 2" ProgramChange="117"/>
+      <Patch Number="ROM118" Name="bts:Shake Garden" ProgramChange="118"/>
+      <Patch Number="ROM119" Name="bts:Oak groove" ProgramChange="119"/>
+      <Patch Number="ROM120" Name="bts:GroovyGroove" ProgramChange="120"/>
+      <Patch Number="ROM121" Name="bas:Pick S it Is" ProgramChange="121"/>
+      <Patch Number="ROM122" Name="pad:Morning" ProgramChange="122"/>
+      <Patch Number="ROM123" Name="bts:DnB Warp" ProgramChange="123"/>
+      <Patch Number="ROM124" Name="bts:RnB Flower 1" ProgramChange="124"/>
+      <Patch Number="ROM125" Name="syn:Garden Stab" ProgramChange="125"/>
+      <Patch Number="ROM126" Name="bas:Slap a Synth" ProgramChange="126"/>
+      <Patch Number="ROM127" Name="bpm:Mars Garden?" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="Presets 05">
+      <Patch Number="BEAT-1" Name="pr1:Cajon 1" ProgramChange="0"/>
+      <Patch Number="RAM1" Name="pr1:BeatRing 1" ProgramChange="1"/>
+      <Patch Number="RAM2" Name="pr1:BeatRing 2" ProgramChange="2"/>
+      <Patch Number="RAM3" Name="pr1:BeatRing 3" ProgramChange="3"/>
+      <Patch Number="RAM4" Name="pr1:BeatRing 4" ProgramChange="4"/>
+      <Patch Number="RAM5" Name="pr1:Cabasa 1" ProgramChange="5"/>
+      <Patch Number="RAM6" Name="pr1:Cowbells 1" ProgramChange="6"/>
+      <Patch Number="RAM7" Name="pr1:Egg E4-G4 1" ProgramChange="7"/>
+      <Patch Number="RAM8" Name="pr1:Egg D4-D#4 1" ProgramChange="8"/>
+      <Patch Number="RAM9" Name="pr1:Egg A#4-C5 1" ProgramChange="9"/>
+      <Patch Number="RAM10" Name="pr2:Djembe gr1" ProgramChange="10"/>
+      <Patch Number="RAM11" Name="pr2:Djembe gr4" ProgramChange="11"/>
+      <Patch Number="RAM12" Name="pr2:BigM Shaker1" ProgramChange="12"/>
+      <Patch Number="RAM13" Name="pr2:SleighBell 1" ProgramChange="13"/>
+      <Patch Number="RAM14" Name="pr2:Agogo bells1" ProgramChange="14"/>
+      <Patch Number="RAM15" Name="pr2:FingerCymb 1" ProgramChange="15"/>
+      <Patch Number="RAM16" Name="pr2:Bongos 1" ProgramChange="16"/>
+      <Patch Number="RAM17" Name="pr2:Congas 1" ProgramChange="17"/>
+      <Patch Number="RAM18" Name="pr2:Congas 2" ProgramChange="18"/>
+      <Patch Number="RAM19" Name="pr2:Tumba fx 1" ProgramChange="19"/>
+      <Patch Number="RAM20" Name="pr3:Triangle 6 1" ProgramChange="20"/>
+      <Patch Number="RAM21" Name="pr3:Triangle 9 1" ProgramChange="21"/>
+      <Patch Number="RAM22" Name="pr3:Shaker Mid 1" ProgramChange="22"/>
+      <Patch Number="RAM23" Name="pr3:Shaker Mid 2" ProgramChange="23"/>
+      <Patch Number="RAM24" Name="pr3:Shaker Plas2" ProgramChange="24"/>
+      <Patch Number="RAM25" Name="pr3:Shaker Plas3" ProgramChange="25"/>
+      <Patch Number="RAM26" Name="pr3:Ganzeiro 2" ProgramChange="26"/>
+      <Patch Number="RAM27" Name="pr3:Ganz.Shaker1" ProgramChange="27"/>
+      <Patch Number="RAM28" Name="pr3:Ganz.Shells1" ProgramChange="28"/>
+      <Patch Number="RAM29" Name="pr3:Udo 1" ProgramChange="29"/>
+      <Patch Number="RAM30" Name="pr3:Caxici DBL 1" ProgramChange="30"/>
+      <Patch Number="RAM31" Name="pr3:Caxici DBL 2" ProgramChange="31"/>
+      <Patch Number="RAM32" Name="pr3:Caxici DBL 3" ProgramChange="32"/>
+      <Patch Number="RAM33" Name="pr3:Tarine 2" ProgramChange="33"/>
+      <Patch Number="RAM34" Name="pr3:Tarine 3" ProgramChange="34"/>
+      <Patch Number="RAM35" Name="pr3:Tambourim 1" ProgramChange="35"/>
+      <Patch Number="RAM36" Name="pr3:Tambourine 2" ProgramChange="36"/>
+      <Patch Number="RAM37" Name="pr3:Shekere 1" ProgramChange="37"/>
+      <Patch Number="RAM38" Name="pr3:Crash Box 1" ProgramChange="38"/>
+      <Patch Number="RAM39" Name="prc:Xylophone" ProgramChange="39"/>
+      <Patch Number="RAM40" Name="syn:GardenStack1" ProgramChange="40"/>
+      <Patch Number="RAM41" Name="sub:AcoustyLow" ProgramChange="41"/>
+      <Patch Number="RAM42" Name="bas:Slap it 1" ProgramChange="42"/>
+      <Patch Number="RAM43" Name="bas:Marc One Cho" ProgramChange="43"/>
+      <Patch Number="RAM44" Name="syn:Click N Bass" ProgramChange="44"/>
+      <Patch Number="RAM45" Name="pad:Artic White" ProgramChange="45"/>
+      <Patch Number="RAM46" Name="org:Organ Bass" ProgramChange="46"/>
+      <Patch Number="RAM47" Name="hh1:HiHats poly" ProgramChange="47"/>
+      <Patch Number="RAM48" Name="sub:LowerMeBass2" ProgramChange="48"/>
+      <Patch Number="RAM49" Name="arp:Beat U-know1" ProgramChange="49"/>
+      <Patch Number="RAM50" Name="git:Riff me 3" ProgramChange="50"/>
+      <Patch Number="RAM51" Name="bas:Sl+Pull1 F#1" ProgramChange="51"/>
+      <Patch Number="RAM52" Name="bas:Sl+Pull2 F#1" ProgramChange="52"/>
+      <Patch Number="RAM53" Name="pad:SolinaString" ProgramChange="53"/>
+      <Patch Number="RAM54" Name="bas:Udo Frame I" ProgramChange="54"/>
+      <Patch Number="RAM55" Name="git:Muted Meaty" ProgramChange="55"/>
+      <Patch Number="RAM56" Name="syn:XyloSynth C" ProgramChange="56"/>
+      <Patch Number="RAM57" Name="led:Funky Tree" ProgramChange="57"/>
+      <Patch Number="RAM58" Name="bas:Spruce Leaf" ProgramChange="58"/>
+      <Patch Number="RAM59" Name="vox:Botanic" ProgramChange="59"/>
+      <Patch Number="RAM60" Name="syn:RnB Stab" ProgramChange="60"/>
+      <Patch Number="RAM61" Name="sfx:FightDrum" ProgramChange="61"/>
+      <Patch Number="RAM62" Name="led:Aurora Flute" ProgramChange="62"/>
+      <Patch Number="RAM63" Name="syn:TumbaLa Bass" ProgramChange="63"/>
+      <Patch Number="RAM64" Name="arp:T-Beat 2" ProgramChange="64"/>
+      <Patch Number="RAM65" Name="pad:DestyFlower2" ProgramChange="65"/>
+      <Patch Number="RAM66" Name="bas:Dorn @ Plant" ProgramChange="66"/>
+      <Patch Number="RAM67" Name="pad:Faling2Leave" ProgramChange="67"/>
+      <Patch Number="RAM68" Name="git:Muted" ProgramChange="68"/>
+      <Patch Number="RAM69" Name="syn:Djembe Toys" ProgramChange="69"/>
+      <Patch Number="RAM70" Name="arp:Velo Garden1" ProgramChange="70"/>
+      <Patch Number="RAM71" Name="vox:BG singers" ProgramChange="71"/>
+      <Patch Number="RAM72" Name="bas:Spruce Color" ProgramChange="72"/>
+      <Patch Number="RAM73" Name="pad:Romarin" ProgramChange="73"/>
+      <Patch Number="RAM74" Name="led:Beat da bass" ProgramChange="74"/>
+      <Patch Number="RAM75" Name="kb2:Garden keys" ProgramChange="75"/>
+      <Patch Number="RAM76" Name="sub:Deep Forest" ProgramChange="76"/>
+      <Patch Number="RAM77" Name="pad:VocaleOrgan" ProgramChange="77"/>
+      <Patch Number="RAM78" Name="bas:Park II" ProgramChange="78"/>
+      <Patch Number="RAM79" Name="syn:RnB Bell I" ProgramChange="79"/>
+      <Patch Number="RAM80" Name="bas:JD-Stack I" ProgramChange="80"/>
+      <Patch Number="RAM81" Name="bpm:Evening Vox" ProgramChange="81"/>
+      <Patch Number="RAM82" Name="syn:Nippon" ProgramChange="82"/>
+      <Patch Number="RAM83" Name="hit:Newish I" ProgramChange="83"/>
+      <Patch Number="RAM84" Name="bas:OrganTube" ProgramChange="84"/>
+      <Patch Number="RAM85" Name="arp:Cords Tree" ProgramChange="85"/>
+      <Patch Number="RAM86" Name="syn:Big Section" ProgramChange="86"/>
+      <Patch Number="RAM87" Name="pad:Bowed Angel" ProgramChange="87"/>
+      <Patch Number="RAM88" Name="bas:Acacia Shade" ProgramChange="88"/>
+      <Patch Number="RAM89" Name="pad:Artic Voices" ProgramChange="89"/>
+      <Patch Number="RAM90" Name="syn:Pro-Teusion" ProgramChange="90"/>
+      <Patch Number="RAM91" Name="bas:Acoustic" ProgramChange="91"/>
+      <Patch Number="RAM92" Name="git:Muted Bliss" ProgramChange="92"/>
+      <Patch Number="RAM93" Name="prc:Xylo-Udo" ProgramChange="93"/>
+      <Patch Number="RAM94" Name="vox:Synthamike I" ProgramChange="94"/>
+      <Patch Number="RAM95" Name="bas:Distal" ProgramChange="95"/>
+      <Patch Number="RAM96" Name="arp:git C3-C6 1W" ProgramChange="96"/>
+      <Patch Number="RAM97" Name="arp:git C1-C4 1W" ProgramChange="97"/>
+      <Patch Number="RAM98" Name="arp:git C3-C6 2W" ProgramChange="98"/>
+      <Patch Number="RAM99" Name="arp:git C1-C4 2W" ProgramChange="99"/>
+      <Patch Number="RAM100" Name="arp:git C3-C6 3W" ProgramChange="100"/>
+      <Patch Number="RAM101" Name="arp:git C1-C4 3W" ProgramChange="101"/>
+      <Patch Number="RAM102" Name="arp:git C3-C6 4W" ProgramChange="102"/>
+      <Patch Number="RAM103" Name="arp:git C1-C4 4W" ProgramChange="103"/>
+      <Patch Number="RAM104" Name="arp:git C3-C6 5W" ProgramChange="104"/>
+      <Patch Number="RAM105" Name="arp:git C1-C4 5W" ProgramChange="105"/>
+      <Patch Number="RAM106" Name="arp:git C3-C6 6W" ProgramChange="106"/>
+      <Patch Number="RAM107" Name="arp:git C1-C4 6W" ProgramChange="107"/>
+      <Patch Number="RAM108" Name="arp:git C3-C6 7W" ProgramChange="108"/>
+      <Patch Number="RAM109" Name="arp:git C1-C4 7W" ProgramChange="109"/>
+      <Patch Number="RAM110" Name="arp:git C3-C6 8W" ProgramChange="110"/>
+      <Patch Number="RAM111" Name="arp:git C1-C4 8W" ProgramChange="111"/>
+      <Patch Number="RAM112" Name="arp:git C3-C6 3" ProgramChange="112"/>
+      <Patch Number="RAM113" Name="arp:git C1-C4 3" ProgramChange="113"/>
+      <Patch Number="RAM114" Name="arp:git C3-C6 4" ProgramChange="114"/>
+      <Patch Number="RAM115" Name="arp:git C1-C4 4" ProgramChange="115"/>
+      <Patch Number="RAM116" Name="arp:git C3-C6 5" ProgramChange="116"/>
+      <Patch Number="RAM117" Name="arp:git C1-C4 5" ProgramChange="117"/>
+      <Patch Number="RAM118" Name="arp:git C3-C6 6" ProgramChange="118"/>
+      <Patch Number="RAM119" Name="arp:git C1-C4 6" ProgramChange="119"/>
+      <Patch Number="RAM120" Name="arp:git C3-C6 7" ProgramChange="120"/>
+      <Patch Number="RAM121" Name="arp:git C1-C4 7" ProgramChange="121"/>
+      <Patch Number="RAM122" Name="arp:git C3-C6 8" ProgramChange="122"/>
+      <Patch Number="RAM123" Name="arp:git C1-C4 8" ProgramChange="123"/>
+      <Patch Number="RAM124" Name="arp:git C3-C6 9" ProgramChange="124"/>
+      <Patch Number="RAM125" Name="arp:git C1-C4 9" ProgramChange="125"/>
+      <Patch Number="RAM126" Name="arp:git C3-C6 T" ProgramChange="126"/>
+      <Patch Number="RAM127" Name="arp:git C1-C4 T" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="Presets 06">
+      <Patch Number="BEAT-2" Name="sfx:a cold wind" ProgramChange="0"/>
+      <Patch Number="RAM1" Name="bas:Jungle GSM 2" ProgramChange="1"/>
+      <Patch Number="RAM2" Name="arp:Film Chaser" ProgramChange="2"/>
+      <Patch Number="RAM3" Name="git:Muted Rave" ProgramChange="3"/>
+      <Patch Number="RAM4" Name="arp:T-Beat 3 Mwl" ProgramChange="4"/>
+      <Patch Number="RAM5" Name="sfx:Djembe I" ProgramChange="5"/>
+      <Patch Number="RAM6" Name="arp:Velo Garden3" ProgramChange="6"/>
+      <Patch Number="RAM7" Name="hit:Newish IV" ProgramChange="7"/>
+      <Patch Number="RAM8" Name="vox:Thin Leaves" ProgramChange="8"/>
+      <Patch Number="RAM9" Name="bas:PWM Cajon" ProgramChange="9"/>
+      <Patch Number="RAM10" Name="pad:Eastern Wind" ProgramChange="10"/>
+      <Patch Number="RAM11" Name="syn:Ting Shells" ProgramChange="11"/>
+      <Patch Number="RAM12" Name="bas:Udo Octave" ProgramChange="12"/>
+      <Patch Number="RAM13" Name="pad:Phasing Tree" ProgramChange="13"/>
+      <Patch Number="RAM14" Name="sfx:NovaZembla 2" ProgramChange="14"/>
+      <Patch Number="RAM15" Name="syn:ScottsValley" ProgramChange="15"/>
+      <Patch Number="RAM16" Name="bas:Jungle Nok" ProgramChange="16"/>
+      <Patch Number="RAM17" Name="pad:PlantoVox" ProgramChange="17"/>
+      <Patch Number="RAM18" Name="hit:Radio W Beat" ProgramChange="18"/>
+      <Patch Number="RAM19" Name="pad:Tilleul" ProgramChange="19"/>
+      <Patch Number="RAM20" Name="sfx:DSP chat" ProgramChange="20"/>
+      <Patch Number="RAM21" Name="arp:MdWhl Trance" ProgramChange="21"/>
+      <Patch Number="RAM22" Name="bas:SynthaConga" ProgramChange="22"/>
+      <Patch Number="RAM23" Name="arp:PlasticWheel" ProgramChange="23"/>
+      <Patch Number="RAM24" Name="arp:SlapYourKeys" ProgramChange="24"/>
+      <Patch Number="RAM25" Name="sub:Pepples I" ProgramChange="25"/>
+      <Patch Number="RAM26" Name="vox:Thinny-A" ProgramChange="26"/>
+      <Patch Number="RAM27" Name="pr1:BPM LF0 2" ProgramChange="27"/>
+      <Patch Number="RAM28" Name="pr1:BPM LF0 3" ProgramChange="28"/>
+      <Patch Number="RAM29" Name="pr1:BPM LF0 4" ProgramChange="29"/>
+      <Patch Number="RAM30" Name="pr1:BPM LF0 5" ProgramChange="30"/>
+      <Patch Number="RAM31" Name="pr1:BPM LF0 6" ProgramChange="31"/>
+      <Patch Number="RAM32" Name="bas:Mahony I" ProgramChange="32"/>
+      <Patch Number="RAM33" Name="syn:Club Opener" ProgramChange="33"/>
+      <Patch Number="RAM34" Name="arp:Com Plex" ProgramChange="34"/>
+      <Patch Number="RAM35" Name="bas:Analoga Puls" ProgramChange="35"/>
+      <Patch Number="RAM36" Name="arp:Beat O-Phat" ProgramChange="36"/>
+      <Patch Number="RAM37" Name="sfx:Djembe Oct" ProgramChange="37"/>
+      <Patch Number="RAM38" Name="vox:Next 2 Organ" ProgramChange="38"/>
+      <Patch Number="RAM39" Name="arp:Stereo Movie" ProgramChange="39"/>
+      <Patch Number="RAM40" Name="bas:SQR laChorus" ProgramChange="40"/>
+      <Patch Number="RAM41" Name="pr2:BPM LFO 2" ProgramChange="41"/>
+      <Patch Number="RAM42" Name="pr2:BPM LFO 3" ProgramChange="42"/>
+      <Patch Number="RAM43" Name="pr2:BPM LFO 4" ProgramChange="43"/>
+      <Patch Number="RAM44" Name="pr2:BPM LFO 5" ProgramChange="44"/>
+      <Patch Number="RAM45" Name="pr2:BPM LFO 6" ProgramChange="45"/>
+      <Patch Number="RAM46" Name="vox:Gardenlized" ProgramChange="46"/>
+      <Patch Number="RAM47" Name="arp:SlapPull F#1" ProgramChange="47"/>
+      <Patch Number="RAM48" Name="bas:Mahony II" ProgramChange="48"/>
+      <Patch Number="RAM49" Name="syn:RnB Bell IV" ProgramChange="49"/>
+      <Patch Number="RAM50" Name="arp:Beat Chord 1" ProgramChange="50"/>
+      <Patch Number="RAM51" Name="pad:Epicea" ProgramChange="51"/>
+      <Patch Number="RAM52" Name="bas:Djembe Udo I" ProgramChange="52"/>
+      <Patch Number="RAM53" Name="pad:Sweep it up" ProgramChange="53"/>
+      <Patch Number="RAM54" Name="sub:Pepples II" ProgramChange="54"/>
+      <Patch Number="RAM55" Name="pr3:BPM LFO 2" ProgramChange="55"/>
+      <Patch Number="RAM56" Name="pr3:BPM LFO 3" ProgramChange="56"/>
+      <Patch Number="RAM57" Name="pr3:BPM LFO 4" ProgramChange="57"/>
+      <Patch Number="RAM58" Name="pr3:BPM LFO 5" ProgramChange="58"/>
+      <Patch Number="RAM59" Name="pr3:BPM LFO 6" ProgramChange="59"/>
+      <Patch Number="RAM60" Name="bas:Cajon Udo" ProgramChange="60"/>
+      <Patch Number="RAM61" Name="syn:XyloSynth C" ProgramChange="61"/>
+      <Patch Number="RAM62" Name="arp:Epicea Bass" ProgramChange="62"/>
+      <Patch Number="RAM63" Name="syn:Obie CanObie" ProgramChange="63"/>
+      <Patch Number="RAM64" Name="bas:Mahony III" ProgramChange="64"/>
+      <Patch Number="RAM65" Name="vox:Deep Aahs I" ProgramChange="65"/>
+      <Patch Number="RAM66" Name="arp:Tuber B Mute" ProgramChange="66"/>
+      <Patch Number="RAM67" Name="bas:Deep Trance" ProgramChange="67"/>
+      <Patch Number="RAM68" Name="bas:TumbaConga" ProgramChange="68"/>
+      <Patch Number="RAM69" Name="arp:Pick a Synth" ProgramChange="69"/>
+      <Patch Number="RAM70" Name="pad:Faling Leave" ProgramChange="70"/>
+      <Patch Number="RAM71" Name="sfx:Dig Scratch1" ProgramChange="71"/>
+      <Patch Number="RAM72" Name="sfx:Dig Scratch2" ProgramChange="72"/>
+      <Patch Number="RAM73" Name="led:Sunflower" ProgramChange="73"/>
+      <Patch Number="RAM74" Name="bas:Click a Bass" ProgramChange="74"/>
+      <Patch Number="RAM75" Name="vox:Hi Lady" ProgramChange="75"/>
+      <Patch Number="RAM76" Name="led:Hi Trumpet" ProgramChange="76"/>
+      <Patch Number="RAM77" Name="arp:Cyber Plant" ProgramChange="77"/>
+      <Patch Number="RAM78" Name="bpm:Alien Park" ProgramChange="78"/>
+      <Patch Number="RAM79" Name="syn:XyloSynth B" ProgramChange="79"/>
+      <Patch Number="RAM80" Name="bas:Cajon MarkII" ProgramChange="80"/>
+      <Patch Number="RAM81" Name="sfx:starfighter" ProgramChange="81"/>
+      <Patch Number="RAM82" Name="vox:FlowerSmell" ProgramChange="82"/>
+      <Patch Number="RAM83" Name="bas:Saw laChorus" ProgramChange="83"/>
+      <Patch Number="RAM84" Name="bas:Djembe Frame" ProgramChange="84"/>
+      <Patch Number="RAM85" Name="pad:Vocoderlon" ProgramChange="85"/>
+      <Patch Number="RAM86" Name="git:Muted Flanga" ProgramChange="86"/>
+      <Patch Number="RAM87" Name="hit:Newish Octav" ProgramChange="87"/>
+      <Patch Number="RAM88" Name="arp:Seek Quence" ProgramChange="88"/>
+      <Patch Number="RAM89" Name="syn:Obie Plant" ProgramChange="89"/>
+      <Patch Number="RAM90" Name="syn:My BelloBell" ProgramChange="90"/>
+      <Patch Number="RAM91" Name="sfx:Tuned Frame" ProgramChange="91"/>
+      <Patch Number="RAM92" Name="arp:Beat U-know2" ProgramChange="92"/>
+      <Patch Number="RAM93" Name="pad:Lavende" ProgramChange="93"/>
+      <Patch Number="RAM94" Name="arp:Velo Garden3" ProgramChange="94"/>
+      <Patch Number="RAM95" Name="syn:Moveda Floor" ProgramChange="95"/>
+      <Patch Number="RAM96" Name="led:Mini Plant" ProgramChange="96"/>
+      <Patch Number="RAM97" Name="syn:Iceland" ProgramChange="97"/>
+      <Patch Number="RAM98" Name="sfx:Beat Field 3" ProgramChange="98"/>
+      <Patch Number="RAM99" Name="sfx:Beat Field 4" ProgramChange="99"/>
+      <Patch Number="RAM100" Name="arp:Turn a knob" ProgramChange="100"/>
+      <Patch Number="RAM101" Name="sn6:Elec SN 5 St" ProgramChange="101"/>
+      <Patch Number="RAM102" Name="sn6:Elec SN 6 St" ProgramChange="102"/>
+      <Patch Number="RAM103" Name="sn6:Elec SN 7 St" ProgramChange="103"/>
+      <Patch Number="RAM104" Name="sn1:Snares 1 FX" ProgramChange="104"/>
+      <Patch Number="RAM105" Name="sn1:Snares 2 FX" ProgramChange="105"/>
+      <Patch Number="RAM106" Name="bas:Slowa Deep" ProgramChange="106"/>
+      <Patch Number="RAM107" Name="sfx:Dig Scratch4" ProgramChange="107"/>
+      <Patch Number="RAM108" Name="sfx:Dig Scratch5" ProgramChange="108"/>
+      <Patch Number="RAM109" Name="bas:Lower Swing" ProgramChange="109"/>
+      <Patch Number="RAM110" Name="bas:Shake Garden" ProgramChange="110"/>
+      <Patch Number="RAM111" Name="amb:Dawning" ProgramChange="111"/>
+      <Patch Number="RAM112" Name="sfx:Beat Field 5" ProgramChange="112"/>
+      <Patch Number="RAM113" Name="sfx:Beat Field 6" ProgramChange="113"/>
+      <Patch Number="RAM114" Name="bas:Ace of Saw" ProgramChange="114"/>
+      <Patch Number="RAM115" Name="pad:Meta Macro" ProgramChange="115"/>
+      <Patch Number="RAM116" Name="git:Plectrum-A" ProgramChange="116"/>
+      <Patch Number="RAM117" Name="bas:RnB Flower 1" ProgramChange="117"/>
+      <Patch Number="RAM118" Name="led:Pulsy Plant" ProgramChange="118"/>
+      <Patch Number="RAM119" Name="git:Muted Switch" ProgramChange="119"/>
+      <Patch Number="RAM120" Name="git:Plectrum-F" ProgramChange="120"/>
+      <Patch Number="RAM121" Name="bas:Puls Number5" ProgramChange="121"/>
+      <Patch Number="RAM122" Name="sub:SinusMoogy" ProgramChange="122"/>
+      <Patch Number="RAM123" Name="bpm:E-mu Garden" ProgramChange="123"/>
+      <Patch Number="RAM124" Name="git:Plectrum-Q" ProgramChange="124"/>
+      <Patch Number="RAM125" Name="bas:RnB Flower 2" ProgramChange="125"/>
+      <Patch Number="RAM126" Name="kit:Riff set" ProgramChange="126"/>
+      <Patch Number="RAM127" Name="syn:RnB BellXylo" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="Presets 07">
+      <Patch Number="BEAT-3" Name="bas:Marc One" ProgramChange="0"/>
+      <Patch Number="RAM1" Name="bas:Marc Three" ProgramChange="1"/>
+      <Patch Number="RAM2" Name="bas:Marc   Synth" ProgramChange="2"/>
+      <Patch Number="RAM3" Name="bas:Marc Six" ProgramChange="3"/>
+      <Patch Number="RAM4" Name="bas:Marc Five" ProgramChange="4"/>
+      <Patch Number="RAM5" Name="bas:Marc Middy" ProgramChange="5"/>
+      <Patch Number="RAM6" Name="sfx:Alien Steps" ProgramChange="6"/>
+      <Patch Number="RAM7" Name="bas:Pick Chorus" ProgramChange="7"/>
+      <Patch Number="RAM8" Name="bas:Sweep Leaf" ProgramChange="8"/>
+      <Patch Number="RAM9" Name="arp:T-Beat 4 Mwl" ProgramChange="9"/>
+      <Patch Number="RAM10" Name="bas:JD-Stack II" ProgramChange="10"/>
+      <Patch Number="RAM11" Name="bas:JD-Stack III" ProgramChange="11"/>
+      <Patch Number="RAM12" Name="bas:JD-Stack IV" ProgramChange="12"/>
+      <Patch Number="RAM13" Name="bas:JD-Stack V" ProgramChange="13"/>
+      <Patch Number="RAM14" Name="bas:JD-Stack VI" ProgramChange="14"/>
+      <Patch Number="RAM15" Name="bas:JD-StackVII" ProgramChange="15"/>
+      <Patch Number="RAM16" Name="bpm:Botanic Rain" ProgramChange="16"/>
+      <Patch Number="RAM17" Name="bas:Distal II" ProgramChange="17"/>
+      <Patch Number="RAM18" Name="bas:SpeakFlower" ProgramChange="18"/>
+      <Patch Number="RAM19" Name="bas:Deja Vu I" ProgramChange="19"/>
+      <Patch Number="RAM20" Name="pad:E-motion" ProgramChange="20"/>
+      <Patch Number="RAM21" Name="bas:Coniferae" ProgramChange="21"/>
+      <Patch Number="RAM22" Name="bas:Vibirnum" ProgramChange="22"/>
+      <Patch Number="RAM23" Name="bas:T-Beat" ProgramChange="23"/>
+      <Patch Number="RAM24" Name="bas:Elm Tree" ProgramChange="24"/>
+      <Patch Number="RAM25" Name="bas:AttackChorus" ProgramChange="25"/>
+      <Patch Number="RAM26" Name="bas:Cactus I" ProgramChange="26"/>
+      <Patch Number="RAM27" Name="bas:Acous-Syn 1" ProgramChange="27"/>
+      <Patch Number="RAM28" Name="bas:CajonFrame" ProgramChange="28"/>
+      <Patch Number="RAM29" Name="sfx:digital H2O" ProgramChange="29"/>
+      <Patch Number="RAM30" Name="arp:Velo Garden2" ProgramChange="30"/>
+      <Patch Number="RAM31" Name="hit:Newish Phat" ProgramChange="31"/>
+      <Patch Number="RAM32" Name="bas:Marc One Two" ProgramChange="32"/>
+      <Patch Number="RAM33" Name="sub:Dark Earth" ProgramChange="33"/>
+      <Patch Number="RAM34" Name="bas:Creamy Palm" ProgramChange="34"/>
+      <Patch Number="RAM35" Name="sub:Underclick" ProgramChange="35"/>
+      <Patch Number="RAM36" Name="bas:Four Voice" ProgramChange="36"/>
+      <Patch Number="RAM37" Name="bas:Cactus II" ProgramChange="37"/>
+      <Patch Number="RAM38" Name="bas:Acous-Syn 2" ProgramChange="38"/>
+      <Patch Number="RAM39" Name="sub:PulsyMoogy" ProgramChange="39"/>
+      <Patch Number="RAM40" Name="prc:Tuned Cajon" ProgramChange="40"/>
+      <Patch Number="RAM41" Name="bas:Cajon Stack" ProgramChange="41"/>
+      <Patch Number="RAM42" Name="pad:Bowed Flower" ProgramChange="42"/>
+      <Patch Number="RAM43" Name="sfx:Huh of Jon" ProgramChange="43"/>
+      <Patch Number="RAM44" Name="sfx:Yell of Jon" ProgramChange="44"/>
+      <Patch Number="RAM45" Name="sfx:Nice drink !" ProgramChange="45"/>
+      <Patch Number="RAM46" Name="sfx:Tuned Tube" ProgramChange="46"/>
+      <Patch Number="RAM47" Name="vox:FemalaSpace" ProgramChange="47"/>
+      <Patch Number="RAM48" Name="bas:Spruce Robes" ProgramChange="48"/>
+      <Patch Number="RAM49" Name="bas:Deja Vu II" ProgramChange="49"/>
+      <Patch Number="RAM50" Name="bas:PhataTubes" ProgramChange="50"/>
+      <Patch Number="RAM51" Name="bas:Cactus III" ProgramChange="51"/>
+      <Patch Number="RAM52" Name="sub:Dark Forest" ProgramChange="52"/>
+      <Patch Number="RAM53" Name="bas:Acous-Syn 3" ProgramChange="53"/>
+      <Patch Number="RAM54" Name="bas:Jungle GSM 3" ProgramChange="54"/>
+      <Patch Number="RAM55" Name="vox:Deep Aahs II" ProgramChange="55"/>
+      <Patch Number="RAM56" Name="sfx:Tumba Tuned" ProgramChange="56"/>
+      <Patch Number="RAM57" Name="sfx:Tuned Shells" ProgramChange="57"/>
+      <Patch Number="RAM58" Name="sfx:Doppler FX 1" ProgramChange="58"/>
+      <Patch Number="RAM59" Name="sfx:Doppler FX 2" ProgramChange="59"/>
+      <Patch Number="RAM60" Name="sfx:Groove Click" ProgramChange="60"/>
+      <Patch Number="RAM61" Name="vox:ThinnyHigh" ProgramChange="61"/>
+      <Patch Number="RAM62" Name="sfx:GardenChimes" ProgramChange="62"/>
+      <Patch Number="RAM63" Name="pad:Stack 4 U" ProgramChange="63"/>
+      <Patch Number="RAM64" Name="bas:Spruce Top" ProgramChange="64"/>
+      <Patch Number="RAM65" Name="bas:AcaciaChorus" ProgramChange="65"/>
+      <Patch Number="RAM66" Name="pad:Reso Fields" ProgramChange="66"/>
+      <Patch Number="RAM67" Name="bas:AttackDeeper" ProgramChange="67"/>
+      <Patch Number="RAM68" Name="sub:Deep Pedal" ProgramChange="68"/>
+      <Patch Number="RAM69" Name="bas:Djembe UdoII" ProgramChange="69"/>
+      <Patch Number="RAM70" Name="sfx:La La synth" ProgramChange="70"/>
+      <Patch Number="RAM71" Name="sfx:X-LoFi Snare" ProgramChange="71"/>
+      <Patch Number="RAM72" Name="sfx:X-Voca Snare" ProgramChange="72"/>
+      <Patch Number="RAM73" Name="sfx:X-Meta Snare" ProgramChange="73"/>
+      <Patch Number="RAM74" Name="sfx:Door Snare" ProgramChange="74"/>
+      <Patch Number="RAM75" Name="sfx:Broken Door" ProgramChange="75"/>
+      <Patch Number="RAM76" Name="sfx:NovaZembla 1" ProgramChange="76"/>
+      <Patch Number="RAM77" Name="vox:ThinnyOrgan" ProgramChange="77"/>
+      <Patch Number="RAM78" Name="sfx:Doppler FX 3" ProgramChange="78"/>
+      <Patch Number="RAM79" Name="sfx:Doppler FX 4" ProgramChange="79"/>
+      <Patch Number="RAM80" Name="arp:Puls Plant" ProgramChange="80"/>
+      <Patch Number="RAM81" Name="bas:Cactus IV" ProgramChange="81"/>
+      <Patch Number="RAM82" Name="bas:Organ Udo" ProgramChange="82"/>
+      <Patch Number="RAM83" Name="bas:Acous-Syn 6" ProgramChange="83"/>
+      <Patch Number="RAM84" Name="bas:Udo" ProgramChange="84"/>
+      <Patch Number="RAM85" Name="vox:FemalaSynth" ProgramChange="85"/>
+      <Patch Number="RAM86" Name="sfx:SF bug" ProgramChange="86"/>
+      <Patch Number="RAM87" Name="sfx:SF bug ST" ProgramChange="87"/>
+      <Patch Number="RAM88" Name="sfx:FightDrum M" ProgramChange="88"/>
+      <Patch Number="RAM89" Name="vox:A Big Aah" ProgramChange="89"/>
+      <Patch Number="RAM90" Name="syn:OvertoneBell" ProgramChange="90"/>
+      <Patch Number="RAM91" Name="led:Garden Flute" ProgramChange="91"/>
+      <Patch Number="RAM92" Name="prc:Frame Drum" ProgramChange="92"/>
+      <Patch Number="RAM93" Name="prc:Tuned Conga" ProgramChange="93"/>
+      <Patch Number="RAM94" Name="prc:TunedQuinto1" ProgramChange="94"/>
+      <Patch Number="RAM95" Name="prc:TunedQuinto2" ProgramChange="95"/>
+      <Patch Number="RAM96" Name="bas:Cactus V" ProgramChange="96"/>
+      <Patch Number="RAM97" Name="bas:5th Organ" ProgramChange="97"/>
+      <Patch Number="RAM98" Name="bas:Acous-Syn 7" ProgramChange="98"/>
+      <Patch Number="RAM99" Name="sub:SawyMoogy" ProgramChange="99"/>
+      <Patch Number="RAM100" Name="vox:FemalaHiss" ProgramChange="100"/>
+      <Patch Number="RAM101" Name="syn:RnB Bell II" ProgramChange="101"/>
+      <Patch Number="RAM102" Name="prc:Tumba Wuha" ProgramChange="102"/>
+      <Patch Number="RAM103" Name="prc:Tumba Plop" ProgramChange="103"/>
+      <Patch Number="RAM104" Name="prc:TunedDjembe1" ProgramChange="104"/>
+      <Patch Number="RAM105" Name="prc:TunedDjembe2" ProgramChange="105"/>
+      <Patch Number="RAM106" Name="prc:Tuned Udo FX" ProgramChange="106"/>
+      <Patch Number="RAM107" Name="prc:Tuned Sizzle" ProgramChange="107"/>
+      <Patch Number="RAM108" Name="prc:Tuned China" ProgramChange="108"/>
+      <Patch Number="RAM109" Name="prc:Tuned Sleigh" ProgramChange="109"/>
+      <Patch Number="RAM110" Name="syn:Snaro Wood" ProgramChange="110"/>
+      <Patch Number="RAM111" Name="sfx:Tumba   More" ProgramChange="111"/>
+      <Patch Number="RAM112" Name="sub:Wood" ProgramChange="112"/>
+      <Patch Number="RAM113" Name="bas:CajonSawer" ProgramChange="113"/>
+      <Patch Number="RAM114" Name="bas:Udo Frame II" ProgramChange="114"/>
+      <Patch Number="RAM115" Name="vox:FemalaDream" ProgramChange="115"/>
+      <Patch Number="RAM116" Name="sfx:DeepSpring 1" ProgramChange="116"/>
+      <Patch Number="RAM117" Name="sfx:DeepSpring 2" ProgramChange="117"/>
+      <Patch Number="RAM118" Name="bas:Park I" ProgramChange="118"/>
+      <Patch Number="RAM119" Name="hit:Radio W Big" ProgramChange="119"/>
+      <Patch Number="RAM120" Name="syn:Bass a Wood" ProgramChange="120"/>
+      <Patch Number="RAM121" Name="prc:Tuned BassDr" ProgramChange="121"/>
+      <Patch Number="RAM122" Name="pad:Eucalyptus" ProgramChange="122"/>
+      <Patch Number="RAM123" Name="arp:Hi Tech Tree" ProgramChange="123"/>
+      <Patch Number="RAM124" Name="syn:RnB Bell III" ProgramChange="124"/>
+      <Patch Number="RAM125" Name="sfx:NovaZembla 3" ProgramChange="125"/>
+      <Patch Number="RAM126" Name="vox:OrganVocals" ProgramChange="126"/>
+      <Patch Number="RAM127" Name=":TemplateV1.0" ProgramChange="127"/>
+    </PatchNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>
