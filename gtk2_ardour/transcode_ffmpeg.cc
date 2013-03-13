@@ -475,13 +475,13 @@ TranscodeFfmpeg::ffexit ()
 }
 
 void
-TranscodeFfmpeg::ffprobeparse (std::string d, size_t s)
+TranscodeFfmpeg::ffprobeparse (std::string d, size_t /* s */)
 {
 	ffoutput+=d;
 }
 
 void
-TranscodeFfmpeg::ffmpegparse_a (std::string d, size_t s)
+TranscodeFfmpeg::ffmpegparse_a (std::string d, size_t /* s */)
 {
 	const char *t;
 	if (!(t=strstr(d.c_str(), "time="))) { return; }
@@ -491,7 +491,7 @@ TranscodeFfmpeg::ffmpegparse_a (std::string d, size_t s)
 }
 
 void
-TranscodeFfmpeg::ffmpegparse_v (std::string d, size_t s)
+TranscodeFfmpeg::ffmpegparse_v (std::string d, size_t /* s */)
 {
 	if (strstr(d.c_str(), "ERROR") || strstr(d.c_str(), "Error") || strstr(d.c_str(), "error")) {
 		PBD::warning << "ffmpeg-error: " << d << endmsg;

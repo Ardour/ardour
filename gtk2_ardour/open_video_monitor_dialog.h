@@ -47,7 +47,7 @@ class OpenVideoMonitorDialog : public ArdourDialog
 	~OpenVideoMonitorDialog ();
 
 	bool show_again () { return showagain_checkbox.get_active(); }
-	const int xj_settings_mask ();
+	int xj_settings_mask ();
 	void setup_settings_mask (const int);
 	void set_filename (const std::string);
 #if 1

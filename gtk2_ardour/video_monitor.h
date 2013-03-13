@@ -66,7 +66,7 @@ class VideoMonitor : public sigc::trackable , public ARDOUR::SessionHandlePtr, p
 	bool set_custom_setting (const std::string, const std::string);
 	const std::string get_custom_setting (const std::string);
 	void restore_settings_mask (int i)  { _restore_settings_mask = i;}
-	const int restore_settings_mask () { return _restore_settings_mask;}
+	int restore_settings_mask () const { return _restore_settings_mask;}
 
 	void set_offset (ARDOUR::frameoffset_t);
 	void manual_seek (ARDOUR::framepos_t, bool, ARDOUR::frameoffset_t);

@@ -167,7 +167,7 @@ OpenVideoMonitorDialog::on_show ()
 	Dialog::on_show ();
 }
 
-const int
+int
 OpenVideoMonitorDialog::xj_settings_mask ()
 {
 	int rv =0;
