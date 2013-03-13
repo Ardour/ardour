@@ -83,7 +83,7 @@ def create_stored_revision():
     rev = ""
     if os.path.exists('.git'):
         rev = fetch_git_revision();
-        print("Revision: %s", rev)
+        print("ardour.git version: " + rev + "\n")
     elif os.path.exists('libs/ardour/svn_revision.cc'):
         print("Using packaged svn revision")
         return
@@ -94,7 +94,7 @@ def create_stored_revision():
     try:
         text =  '#include "ardour/svn_revision.h"\n'
         text += 'namespace ARDOUR { const char* svn_revision = \"%s\"; }\n' % rev
-        print('Writing svn revision info to libs/ardour/svn_revision.cc using ' + rev)
+        print('Writing revision info to libs/ardour/svn_revision.cc using ' + rev)
         o = open('libs/ardour/svn_revision.cc', 'w')
         o.write(text)
         o.close()
