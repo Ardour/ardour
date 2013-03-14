@@ -157,10 +157,10 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 		t->attach (*l, 3, 4, 1, 2);
 
 		osstream.str("");
-		unsigned long sec = transcoder->get_duration() / transcoder->get_fps();
-		if (sec == 0) {
+		if (transcoder->get_duration() == 0 || transcoder->get_fps() == 0) {
 			osstream << _("??");
 		} else {
+			unsigned long sec = transcoder->get_duration() / transcoder->get_fps();
 			osstream << setfill('0') << setw(2);
 			osstream << (sec / 3600) << ":";
 			osstream << setfill('0') << setw(2);
