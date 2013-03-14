@@ -684,12 +684,18 @@ ArdourStartup::on_apply ()
 
 		Config->set_use_monitor_bus (use_monitor_section_button.get_active());
 
-		/* "touch" the been-here-before path now that we're about to save Config */
-		ofstream fout (been_here_before_path().c_str());
-		
 		Config->save_state ();
+
 	}
 
+	{
+		/* "touch" the been-here-before path now we've successfully
+		   made it through the first time setup (at least)
+		*/
+		ofstream fout (been_here_before_path().c_str());
+
+	}
+		
 	_response = RESPONSE_OK;
 	gtk_main_quit ();
 }
