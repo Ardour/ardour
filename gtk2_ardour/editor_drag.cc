@@ -1724,7 +1724,7 @@ VideoTimeLineDrag::motion (GdkEvent* event, bool first_move)
 }
 
 void
-VideoTimeLineDrag::finished (GdkEvent *event, bool movement_occurred)
+VideoTimeLineDrag::finished (GdkEvent * /*event*/, bool movement_occurred)
 {
 	if (ARDOUR_UI::instance()->video_timeline->is_offset_locked()) {
 		return;
