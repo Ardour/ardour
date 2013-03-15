@@ -302,7 +302,28 @@ AddVideoDialog::file_name (bool &local_file)
 		local_file = false;
 		Gtk::TreeModel::iterator iter = harvid_list_view.get_selection()->get_selected();
 		if(!iter) return "";
-		return (*iter)[harvid_list_columns.uri];
+
+		std::string uri = (*iter)[harvid_list_columns.uri];
+		std::string video_server_url = Config->get_video_server_url();
+
+		/* check if video server is running locally */
+		if (Config->get_video_server_docroot().size() > 0
+				&& !video_server_url.compare(0, 16, "http://localhost"))
+		{
+			/* check if the file can be accessed */
+			int plen;
+			CURL *curl;
+			curl = curl_easy_init();
+			char *ue = curl_easy_unescape(curl, uri.c_str(), uri.length(), &plen);
+			std::string path = Config->get_video_server_docroot() + ue;
+			if (!::access(path.c_str(), R_OK)) {
+				uri = path;
+				local_file = true;
+			}
+			curl_easy_cleanup(curl);
+			curl_free(ue);
+		}
+		return uri;
 	}
 }
 
