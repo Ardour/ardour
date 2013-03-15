@@ -131,7 +131,7 @@ _pingback (void *arg)
 	return_str = "";
 
 	if (curl_easy_perform (c) == 0) {
-		int http_status; 
+		long http_status; 
 
 		curl_easy_getinfo (c, CURLINFO_RESPONSE_CODE, &http_status);
 
