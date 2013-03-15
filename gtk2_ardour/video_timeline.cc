@@ -521,7 +521,11 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 			vmonitor->open(video_filename);
 		}
 	} else if (!local_file) {
+#if 1 /* temp debug/devel message */
+		// TODO - call xjremote remotely.
+		printf("the given video file can not be accessed on localhost, video monitoring is not currently supported for this case\n");
 		GuiUpdate("set-xjadeo-sensitive-off");
+#endif
 	}
 	VtlUpdate();
 	return true;
@@ -650,6 +654,10 @@ VideoTimeLine::find_xjadeo () {
 	}
 	else  {
 		_xjadeo_bin = X_("");
+		warning << _("Video-monitor 'xjadeo' was not found. Please install http://xjadeo.sf.net/ "
+				"(a custom path to xjadeo can be specified by setting the XJREMOTE environment variable. "
+				"It should point to an application compatible with xjadeo's remote-control interface 'xjremote').")
+			<< endmsg;
 	}
 }
 

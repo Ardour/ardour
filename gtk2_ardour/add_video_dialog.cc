@@ -217,6 +217,7 @@ AddVideoDialog::AddVideoDialog (Session* s)
 			&& Config->get_video_server_docroot().size() > 0) {
 		xjadeo_checkbox.set_active(true);  /* set in ardour_ui.cpp ?! */
 	} else {
+		printf("xjadeo was not found or video-server docroot is unset (remote video-server)\n");
 		xjadeo_checkbox.set_active(false);
 		xjadeo_checkbox.set_sensitive(false);
 	}
