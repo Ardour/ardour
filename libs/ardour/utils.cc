@@ -111,6 +111,17 @@ legalize_for_universal_path (const string& str)
 	return replace_chars (str, "<>:\"/\\|?*");
 }
 
+/** Legalize for a URI path component.  This is like
+ * legalize_for_universal_path, but stricter, disallowing spaces and hash.
+ * This avoids %20 escapes in URIs, but probably needs work to be more strictly
+ * correct.
+ */
+string
+legalize_for_uri (const string& str)
+{
+	return replace_chars (str, "<>:\"/\\|?* #");
+}
+
 /** take an arbitrary string as an argument, and return a version of it
  * suitable for use as a path (directory/folder name). This is the Ardour 2.X
  * version of this code, which used an approach that came to be seen as

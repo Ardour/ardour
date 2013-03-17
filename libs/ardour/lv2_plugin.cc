@@ -37,13 +37,14 @@
 
 #include "libardour-config.h"
 
-#include "ardour/types.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
+#include "ardour/types.h"
+#include "ardour/utils.h"
 #include "ardour/worker.h"
 
 #include "i18n.h"
@@ -1023,42 +1024,40 @@ ARDOUR::lv2plugin_get_port_value(const char* port_symbol,
 std::string
 LV2Plugin::do_save_preset(string name)
 {
-	string pset_uri = uri();
-	pset_uri += "#";
-	pset_uri += name;
-
-	string save_dir = Glib::build_filename(
+	const string base_name = legalize_for_uri(name);
+	const string file_name = base_name + ".ttl";
+	const string bundle    = Glib::build_filename(
 		Glib::get_home_dir(),
-		Glib::build_filename(".lv2", "presets")
-	);
+		Glib::build_filename(".lv2", base_name + ".lv2"));
 
 	LilvState* state = lilv_state_new_from_instance(
 		_impl->plugin,
 		_impl->instance,
 		_uri_map.urid_map(),
-		scratch_dir().c_str(),                  // file_dir
-		NULL,                                   // copy_dir
-		NULL,                                   // link_dir
-		save_dir.c_str(),                       // save_dir
-		lv2plugin_get_port_value,               // get_value
-		(void*) this,                           // user_data
-		LV2_STATE_IS_POD|LV2_STATE_IS_PORTABLE,	// flags
-		_features                               // features
+		scratch_dir().c_str(),                   // file_dir
+		bundle.c_str(),                          // copy_dir
+		bundle.c_str(),                          // link_dir
+		bundle.c_str(),                          // save_dir
+		lv2plugin_get_port_value,                // get_value
+		(void*)this,                             // user_data
+		LV2_STATE_IS_POD|LV2_STATE_IS_PORTABLE,  // flags
+		_features                                // features
 	);
 
 	lilv_state_set_label(state, name.c_str());
 	lilv_state_save(
 		_world.world,           // world
-		_uri_map.urid_map(),	// map
-		_uri_map.urid_unmap(),	// unmap
+		_uri_map.urid_map(),    // map
+		_uri_map.urid_unmap(),  // unmap
 		state,                  // state
-		pset_uri.c_str(),       // uri
-		save_dir.c_str(),       // dir
-		(name + ".ttl").c_str()	// filename
+		NULL,                   // uri (NULL = use file URI)
+		bundle.c_str(),         // dir
+		file_name.c_str()       // filename
 	);
 
 	lilv_state_free(state);
-	return pset_uri;
+
+	return Glib::filename_to_uri(Glib::build_filename(bundle, file_name));
 }
 
 void
