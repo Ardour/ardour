@@ -189,13 +189,17 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const
 	set_state (state);
 }
 
-ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification const & other)
+ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification const & other, bool modify_name)
 	: ExportFormatBase(other)
 	, session (other.session)
 	, _silence_beginning (other.session)
 	, _silence_end (other.session)
 {
-	set_name (other.name() + " (copy)");
+	if (modify_name) {
+		set_name (other.name() + " (copy)");
+	} else {
+		set_name (other.name());
+	}
 
 	_format_name = other._format_name;
 	has_sample_format = other.has_sample_format;
