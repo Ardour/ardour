@@ -29,6 +29,7 @@ depcomp
 # misc editor/tools
 *~
 *.swp
+*.kdev4
 .gdb_history
 core
 cscope.files
