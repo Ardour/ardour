@@ -664,6 +664,7 @@ def build(bld):
     obj.argv = menus_argv
     obj.stdin = 'ardour.menus.in'
     obj.stdout = 'ardour.menus'
+    obj.dep_vars = ['GTKOSX', 'VIDEOTIMELINE']
     bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
                       'ardour.menus')
 
