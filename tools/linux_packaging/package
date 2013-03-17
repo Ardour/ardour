@@ -63,10 +63,10 @@ if [ x$DEBUG = xT ]; then
 fi
 
 release_version=`grep -m 1 '[^A-Za-z_]LINUX_VERSION = ' ../../wscript | awk '{print $3}' | sed "s/'//g"`
-svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d'"' -f 2`
+revision=`grep -m 1 'revision =' ../../libs/ardour/revision.cc | cut -d'"' -f 2`
 
-X86_BUNDLE="${APPNAME}_x86-${release_version}_${svn_version}"
-X86_64_BUNDLE="${APPNAME}_x86_64-${release_version}_${svn_version}"
+X86_BUNDLE="${APPNAME}_x86-${release_version}_${revision}"
+X86_64_BUNDLE="${APPNAME}_x86_64-${release_version}_${revision}"
 
 if [ ! -z ${BUILDTYPE} ]; then
 	X86_BUNDLE="${X86_BUNDLE}-${BUILDTYPE}"
@@ -122,22 +122,22 @@ fi
 if [ -z ${BUILDTYPE} ]; then
 	if [ "${SINGLE_ARCH}" = "T" ]; then
 		if [ "${X86_BUNDLE_OK}" = "T" ]; then
-			PACKAGE="${APPNAME}_32bit-${release_version}_${svn_version}"
+			PACKAGE="${APPNAME}_32bit-${release_version}_${revision}"
 		else
-			PACKAGE="${APPNAME}_64bit-${release_version}_${svn_version}"
+			PACKAGE="${APPNAME}_64bit-${release_version}_${revision}"
 		fi
 	else
-		PACKAGE="${APPNAME}-${release_version}_${svn_version}"
+		PACKAGE="${APPNAME}-${release_version}_${revision}"
 	fi
 else
 	if [ "${SINGLE_ARCH}" = "T" ]; then
 		if [ "${X86_BUNDLE_OK}" = "T" ]; then
-			PACKAGE="${APPNAME}_32bit-${release_version}_${svn_version}-${BUILDTYPE}"
+			PACKAGE="${APPNAME}_32bit-${release_version}_${revision}-${BUILDTYPE}"
 		else
-			PACKAGE="${APPNAME}_64bit-${release_version}_${svn_version}-${BUILDTYPE}"
+			PACKAGE="${APPNAME}_64bit-${release_version}_${revision}-${BUILDTYPE}"
 		fi
 	else
-		PACKAGE="${APPNAME}-${release_version}_${svn_version}-${BUILDTYPE}"
+		PACKAGE="${APPNAME}-${release_version}_${revision}-${BUILDTYPE}"
 	fi
 fi 
 

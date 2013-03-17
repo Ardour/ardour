@@ -17,11 +17,11 @@
 
 */
 
-#ifndef __ardour_svn_revision_h__
-#define __ardour_svn_revision_h__
+#ifndef __ardour_revision_h__
+#define __ardour_revision_h__
 
 namespace ARDOUR {
-	extern const char* svn_revision;
+	extern const char* revision;
 }
 
 #endif

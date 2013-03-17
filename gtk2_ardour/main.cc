@@ -38,7 +38,7 @@
 
 #include <jack/jack.h>
 
-#include "ardour/svn_revision.h"
+#include "ardour/revision.h"
 #include "ardour/version.h"
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
@@ -485,7 +485,7 @@ int main (int argc, char *argv[])
 	cout << PROGRAM_NAME
 	     << VERSIONSTRING
 	     << _(" (built using ")
-	     << svn_revision
+	     << revision
 #ifdef __GNUC__
 	     << _(" and GCC version ") << __VERSION__
 #endif
