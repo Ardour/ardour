@@ -118,14 +118,7 @@ system_midi_map_search_path ()
 
 	SearchPath spath (ardour_data_search_path());
 	spath.add_subdirectory_to_paths(midi_map_dir_name);
-
-	// just return the first directory in the search path that exists
-	for (SearchPath::const_iterator i = spath.begin(); i != spath.end(); ++i) {
-		if (Glib::file_test (*i, Glib::FILE_TEST_EXISTS)) {
-			return *i;
-		}
-	}
-	return std::string();
+	return spath;
 }
 
 static std::string
