@@ -106,7 +106,7 @@ static const char * const midimap_env_variable_name = "ARDOUR_MIDIMAPS_PATH";
 static const char* const midi_map_dir_name = "midi_maps";
 static const char* const midi_map_suffix = ".map";
 
-static std::string
+SearchPath
 system_midi_map_search_path ()
 {
 	bool midimap_path_defined = false;
