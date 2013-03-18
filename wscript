@@ -84,22 +84,22 @@ def create_stored_revision():
     if os.path.exists('.git'):
         rev = fetch_git_revision();
         print("ardour.git version: " + rev + "\n")
-    elif os.path.exists('libs/ardour/svn_revision.cc'):
-        print("Using packaged svn revision")
+    elif os.path.exists('libs/ardour/revision.cc'):
+        print("Using packaged revision")
         return
     else:
-        print("Missing libs/ardour/svn_revision.cc.  Blame the packager.")
+        print("Missing libs/ardour/revision.cc.  Blame the packager.")
         sys.exit(-1)
 
     try:
-        text =  '#include "ardour/svn_revision.h"\n'
-        text += 'namespace ARDOUR { const char* svn_revision = \"%s\"; }\n' % rev
-        print('Writing revision info to libs/ardour/svn_revision.cc using ' + rev)
-        o = open('libs/ardour/svn_revision.cc', 'w')
+        text =  '#include "ardour/revision.h"\n'
+        text += 'namespace ARDOUR { const char* revision = \"%s\"; }\n' % rev
+        print('Writing revision info to libs/ardour/revision.cc using ' + rev)
+        o = open('libs/ardour/revision.cc', 'w')
         o.write(text)
         o.close()
     except IOError:
-        print('Could not open libs/ardour/svn_revision.cc for writing\n')
+        print('Could not open libs/ardour/revision.cc for writing\n')
         sys.exit(-1)
 
 def set_compiler_flags (conf,opt):
