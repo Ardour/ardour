@@ -204,7 +204,7 @@ libardour_sources = [
         'source_factory.cc',
         'speakers.cc',
         'strip_silence.cc',
-        'svn_revision.cc',
+        'revision.cc',
         'tape_file_matcher.cc',
         'template_utils.cc',
         'tempo.cc',
