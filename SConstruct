@@ -267,14 +267,11 @@ def i18n (buildenv, sources, installenv):
 
 
 def fetch_svn_revision (path):
-    cmd = "LANG= "
-    cmd += "svn info "
-    cmd += path
-    cmd += " 2>/dev/null | awk '/^Revision:/ { print $2}'"
+    cmd = "LANG= git describe --tags HEAD"
     return commands.getoutput (cmd)
 
 def create_stored_revision (target = None, source = None, env = None):
-    if os.path.exists('.svn'):    
+    if os.path.exists('.git'):    
         rev = fetch_svn_revision ('.');
         try:
             text  = "#include <ardour/svn_revision.h>\n"
