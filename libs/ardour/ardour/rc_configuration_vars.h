@@ -214,6 +214,7 @@ CONFIG_VARIABLE (std::string, linux_pingback_url, "linux-pingback-url", "http://
 CONFIG_VARIABLE (std::string, tutorial_manual_url, "tutorial-manual-url", "http://ardour.org/flossmanual")
 CONFIG_VARIABLE (std::string, reference_manual_url, "reference-manual-url", "http://manual.ardour.org/")
 CONFIG_VARIABLE (std::string, updates_url, "updates-url", "http://ardour.org/whatsnew.html")
+CONFIG_VARIABLE (std::string, donate_url, "donate-url", "http://ardour.org/donate")
 
 #ifdef WITH_VIDEOTIMELINE
 CONFIG_VARIABLE (std::string, video_server_url, "video-server-url", "http://localhost:1554")
