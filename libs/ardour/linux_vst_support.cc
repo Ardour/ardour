@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include <libgen.h>
 #include <pthread.h>
 #include <signal.h>
 #include <dlfcn.h>
@@ -35,6 +34,7 @@
 #include <glibmm/fileutils.h>
 
 #include "ardour/linux_vst_support.h"
+#include "pbd/basename.h"
 #include "pbd/error.h"
 
 #include "i18n.h"
@@ -194,14 +194,13 @@ vstfx_load (const char *path)
 {
 	char* buf = 0;
 	VSTHandle* fhandle;
-	int i;
 	
 	/*Create a new handle we can use to reference the plugin*/
 
 	fhandle = vstfx_handle_new();
 	
 	/*See if we have .so appended to the path - if not we need to make sure it is added*/
-	
+
 	if (strstr (path, ".so") == 0)
 	{
 
@@ -222,19 +221,13 @@ vstfx_load (const char *path)
 		
 		fhandle->nameptr = strdup (path);
 	}
+
+	/* get a name for the plugin based on the path: ye old VST problem where
+	   we don't know anything about its name until we load and instantiate the plugin
+	   which we don't want to do at this point
+	*/
 	
-	/*Use basename to shorten the path and then strip off the .so - the old VST problem,
-	we don't know anything about its name until we load and instantiate the plugin
-	which we don't want to do at this point*/
-	
-	for(i=0; i < (int)strlen(fhandle->nameptr); i++)
-	{
-		if(fhandle->nameptr[i] == '.')
-			fhandle->nameptr[i] = 0;
-	}
-			
-	
-	fhandle->name = basename (fhandle->nameptr);
+	fhandle->name = strdup (PBD::basename_nosuffix (fhandle->nameptr).c_str());
 
 	/*call load_vstfx_library to actually load the .so into memory*/
 
@@ -291,7 +284,7 @@ vstfx_unload (VSTHandle* fhandle)
 	if (fhandle->nameptr)
 	{
 		free (fhandle->nameptr);
-		fhandle->name = 0;
+		free (fhandle->name);
 	}
 	
 	/*Don't need the plugin handle any more*/
