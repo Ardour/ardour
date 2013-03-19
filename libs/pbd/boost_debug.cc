@@ -200,7 +200,7 @@ boost_debug_shared_ptr_operator_equals (void const *sp, void const *old_obj, int
 		if (x != sptrs().end()) {
 			sptrs().erase (x);
 			if (debug_out) {
-				cerr << "\tRemoved (by assigment) sp for " << old_obj << " @ " << sp << " UC = " << old_use_count << " (total sp's = " << sptrs().size() << ')' << endl;
+				cerr << "\tRemoved (by assignment) sp for " << old_obj << " @ " << sp << " UC = " << old_use_count << " (total sp's = " << sptrs().size() << ')' << endl;
 			}
 		}
 	}

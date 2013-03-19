@@ -2744,7 +2744,7 @@ msgstr "greier ikkje opna mappa %1 (%2)"
 #~ msgid "Chunk %1 uses an unknown playlist \"%2\""
 #~ msgstr "Beten %1 bruker ei ukjend speleliste, \"%2\""
 
-#~ msgid "Chunk %1 contains misformed playlist information"
+#~ msgid "Chunk %1 contains malformed playlist information"
 #~ msgstr "Beten %1 inneheld feilforma spelelisteinformasjon"
 
 #~ msgid "signal"
