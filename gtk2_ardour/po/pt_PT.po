@@ -14239,7 +14239,7 @@ msgstr ""
 #~ msgid "KeyboardTarget: unknown action \"%1\""
 #~ msgstr "KeyboardTarget: acção desconhecida \"%1\""
 
-#~ msgid "misformed binding node - ignored"
+#~ msgid "malformed binding node - ignored"
 #~ msgstr "combinação mal formada - ignorada"
 
 #~ msgid "ardour: soundfile selector"
