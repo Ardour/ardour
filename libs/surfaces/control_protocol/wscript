@@ -26,11 +26,11 @@ def build(bld):
             control_protocol.cc
     '''
     obj.export_includes = ['.', './control_protocol' ]
-    obj.cxxflags     = '-DPACKAGE="ardour_cp"'
+    obj.cxxflags     = '-DPACKAGE="ardour_cp" -fPIC'
     obj.includes     = ['.', './control_protocol']
     obj.name         = 'libardour_cp'
     obj.target       = 'ardourcp'
-    obj.use          = 'libardour libtimecode'
+    obj.use          = 'ardour libtimecode'
     obj.vnum         = LIBARDOUR_CP_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 

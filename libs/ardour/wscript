@@ -370,11 +370,16 @@ int main(int argc, char** argv) {
 
 def build(bld):
     # Library
-    obj              = bld(features = 'c cxx cshlib cxxshlib')
-    obj.source       = libardour_sources
+    if bld.is_defined ('INTERNAL_SHARED_LIBS'):
+        obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=libardour_sources)
+    else:
+        obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=libardour_sources)
+        obj.cxxflags     = [ '-fPIC' ]
+        obj.cflags       = [ '-fPIC' ]
+
     obj.export_includes = ['.']
     obj.includes     = ['.', '../surfaces/control_protocol', '..']
-    obj.name         = 'libardour'
+    obj.name         = 'ardour'
     obj.target       = 'ardour'
     obj.uselib       = ['GLIBMM','GTHREAD','AUBIO','SIGCPP','XML','UUID',
                         'JACK','SNDFILE','SAMPLERATE','LRDF','AUDIOUNITS',
