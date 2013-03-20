@@ -406,6 +406,10 @@ def options(opt):
                     help='Do not build with Freesound database support')
     opt.add_option('--gprofile', action='store_true', default=False, dest='gprofile',
                     help='Compile for use with gprofile')
+    opt.add_option('--internal-shared-libs', action='store_true', default=True, dest='internal_shared_libs',
+                   help='Build internal libs as shared libraries')
+    opt.add_option('--internal-static-libs', action='store_false', dest='internal_shared_libs',
+                   help='Build internal libs as static libraries')
     opt.add_option('--videotimeline', action='store_true', default=False, dest='videotimeline',
                     help='Compile with support for video-timeline')
     opt.add_option('--lv2', action='store_true', default=True, dest='lv2',
@@ -571,6 +575,10 @@ def configure(conf):
         else:
             print ('No Carbon support available for this build\n')
 
+
+    if Options.options.internal_shared_libs: 
+        conf.define('INTERNAL_SHARED_LIBS', 1)
+
     if Options.options.boost_include != '':
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.boost_include)
 
@@ -676,6 +684,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Debuggable build',      conf.env['DEBUG'])
     write_config_text('Install prefix',        conf.env['PREFIX'])
     write_config_text('Strict compiler flags', conf.env['STRICT'])
+    write_config_text('Internal Shared Libraries', conf.is_defined('INTERNAL_SHARED_LIBS'))
 
     write_config_text('Architecture flags',    opts.arch)
     write_config_text('Aubio',                 conf.is_defined('HAVE_AUBIO'))

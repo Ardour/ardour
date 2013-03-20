@@ -401,7 +401,7 @@ def build(bld):
     obj.use          = [ 'libpbd',
                          'libmidipp',
                          'libtaglib',
-                         'libardour',
+                         'ardour',
                          'libardour_cp',
                          'libgtkmm2ext',
                          'libtaglib' ]
