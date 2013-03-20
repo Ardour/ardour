@@ -86,6 +86,7 @@ def build(bld):
             malign.cc
             mountpoint.cc
             openuri.cc
+            pathexpand.cc
             pathscanner.cc
             pool.cc
             property_list.cc

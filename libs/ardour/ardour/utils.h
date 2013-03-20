@@ -60,8 +60,6 @@ int cmp_nocase (const std::string& s, const std::string& s2);
 
 int touch_file(std::string path);
 
-std::string path_expand (std::string);        /* single file path */
-std::string search_path_expand (std::string); /* colon-separated search path */
 std::string region_name_from_path (std::string path, bool strip_channels, bool add_channel_suffix = false, uint32_t total = 0, uint32_t this_one = 0);
 bool path_is_paired (std::string path, std::string& pair_base);
 
