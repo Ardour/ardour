@@ -1002,63 +1002,124 @@ Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
 }
 
 bool
-Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const & /*c*/, int x, int y, guint /*time*/)
+Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int x, int y, guint time)
 {
 	double wx;
 	double wy;
+	boost::shared_ptr<Region> region;
+	boost::shared_ptr<Region> region_copy;
+	RouteTimeAxisView* rtav;
+	GdkEvent event;
+	double px;
+	double py;
+
+	string target = track_canvas->drag_dest_find_target (context, track_canvas->drag_dest_get_target_list());
+
+	if (target.empty()) {
+		return false;
+	}
+
 	track_canvas->window_to_world (x, y, wx, wy);
 
-	GdkEvent event;
 	event.type = GDK_MOTION_NOTIFY;
 	event.button.x = wx;
 	event.button.y = wy;
 	/* assume we're dragging with button 1 */
 	event.motion.state = Gdk::BUTTON1_MASK;
 
-	if (!_drags->active ()) {
+	(void) event_frame (&event, &px, &py);
 
-		double px;
-		double py;
-		framepos_t const pos = event_frame (&event, &px, &py);
+	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
 
-		std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
-		if (tv.first == 0) {
-			return true;
+	if (tv.first != 0) {
+
+		rtav = dynamic_cast<RouteTimeAxisView*> (tv.first);
+		
+		if (rtav != 0 && rtav->is_track ()) {
+
+			region = _regions->get_dragged_region ();
+			
+			if (region) {
+	
+				if ((boost::dynamic_pointer_cast<AudioRegion> (region) != 0 &&
+				    dynamic_cast<AudioTimeAxisView*> (tv.first) != 0) ||
+				    (boost::dynamic_pointer_cast<MidiRegion> (region) != 0 &&
+				     dynamic_cast<MidiTimeAxisView*> (tv.first) != 0)) {
+
+					/* audio to audio 
+					   OR 
+					   midi to midi
+					*/
+
+					context->drag_status (context->get_suggested_action(), time);
+					return true;
+				}
+			}
 		}
-
-		RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (tv.first);
-		if (rtav == 0 || !rtav->is_track ()) {
-			return true;
-		}
-
-		boost::shared_ptr<Region> region = _regions->get_dragged_region ();
-
-		if (!region) {
-			return true;
-		}
-
-		boost::shared_ptr<Region> region_copy = RegionFactory::create (region, true);
-
-		if (boost::dynamic_pointer_cast<AudioRegion> (region_copy) != 0 &&
-		    dynamic_cast<AudioTimeAxisView*> (tv.first) == 0) {
-
-			/* audio -> non-audio */
-			return true;
-		}
-
-		if (boost::dynamic_pointer_cast<MidiRegion> (region_copy) != 0 &&
-		    dynamic_cast<MidiTimeAxisView*> (tv.first) == 0) {
-
-			/* MIDI -> non-MIDI */
-			return true;
-		}
-
-		_drags->set (new RegionInsertDrag (this, region_copy, rtav, pos), &event);
 	}
 
-	_drags->motion_handler (&event, false);
+	/* no drop here */
+	context->drag_status (Gdk::DragAction (0), time);
+	return false;
+}
 
-	return true;
+void
+Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
+		      int x, int y,
+		      const SelectionData& /*data*/,
+		      guint /*info*/, guint /*time*/)
+{
+	double wx;
+	double wy;
+	boost::shared_ptr<Region> region;
+	boost::shared_ptr<Region> region_copy;
+	RouteTimeAxisView* rtav;
+	GdkEvent event;
+	double px;
+	double py;
+
+	track_canvas->window_to_world (x, y, wx, wy);
+
+	event.type = GDK_MOTION_NOTIFY;
+	event.button.x = wx;
+	event.button.y = wy;
+	/* assume we're dragging with button 1 */
+	event.motion.state = Gdk::BUTTON1_MASK;
+
+	framepos_t const pos = event_frame (&event, &px, &py);
+
+	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
+
+	if (tv.first != 0) {
+
+		rtav = dynamic_cast<RouteTimeAxisView*> (tv.first);
+		
+		if (rtav != 0 && rtav->is_track ()) {
+
+			boost::shared_ptr<Region> region = _regions->get_dragged_region ();
+			
+			if (region) {
+
+				region_copy = RegionFactory::create (region, true);
+	
+
+				if ((boost::dynamic_pointer_cast<AudioRegion> (region_copy) != 0 &&
+				    dynamic_cast<AudioTimeAxisView*> (tv.first) != 0) ||
+				    (boost::dynamic_pointer_cast<MidiRegion> (region_copy) != 0 &&
+				     dynamic_cast<MidiTimeAxisView*> (tv.first) != 0)) {
+
+					/* audio to audio 
+					   OR 
+					   midi to midi
+					*/
+
+
+					_drags->set (new RegionInsertDrag (this, region_copy, rtav, pos), &event);
+					_drags->end_grab (0);
+				}
+			}
+		}
+	}
 }
 
 bool

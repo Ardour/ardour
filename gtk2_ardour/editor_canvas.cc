@@ -495,15 +495,6 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 	context->drag_finish (true, false, time);
 }
 
-void
-Editor::drop_regions (const RefPtr<Gdk::DragContext>& /*context*/,
-		      int /*x*/, int /*y*/,
-		      const SelectionData& /*data*/,
-		      guint /*info*/, guint /*time*/)
-{
-	_drags->end_grab (0);
-}
-
 /** If the editor window is arranged such that the edge of the trackview is right up
  *  against the edge of the screen, autoscroll will not work very well.  In this situation,
  *  we start autoscrolling some distance in from the right-hand-side of the screen edge;
