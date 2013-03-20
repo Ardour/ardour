@@ -77,15 +77,21 @@ PBD::stacktrace (std::ostream& out, int levels)
 	size_t i;
      
 	size = backtrace (array, 200);
-	strings = backtrace_symbols (array, size);
-     
-	if (strings) {
 
-		for (i = 0; i < size && (levels == 0 || i < size_t(levels)); i++) {
-			out << "  " << demangle (strings[i]) << std::endl;
+	if (size) {
+		strings = backtrace_symbols (array, size);
+     
+		if (strings) {
+			
+			for (i = 0; i < size && (levels == 0 || i < size_t(levels)); i++) {
+				out << "  " << demangle (strings[i]) << std::endl;
+				std::cerr << "  " << demangle (strings[i]) << std::endl;
+			}
+			
+			free (strings);
 		}
-		
-		free (strings);
+	} else {
+		out << "no stacktrace available!" << std::endl;
 	}
 }
 
