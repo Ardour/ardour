@@ -334,9 +334,9 @@ PluginManager::add_presets(string domain)
 				warning << string_compose(_("Could not parse rdf file: %1"), *x) << endmsg;
 			}
 		}
+		
+		vector_delete (presets);
 	}
-
-	vector_delete (presets);
 }
 
 void
