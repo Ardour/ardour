@@ -278,9 +278,10 @@ PluginManager::ladspa_discover_from_path (string /*path*/)
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
 			ladspa_discover (**x);
 		}
+
+		vector_delete (plugin_objects);
 	}
 
-	vector_delete (plugin_objects);
 	return ret;
 }
 
@@ -356,9 +357,9 @@ PluginManager::add_lrdf_data (const string &path)
 				warning << "Could not parse rdf file: " << uri << endmsg;
 			}
 		}
-	}
 
-	vector_delete (rdf_files);
+		vector_delete (rdf_files);
+	}
 }
 
 int
@@ -579,9 +580,10 @@ PluginManager::windows_vst_discover_from_path (string path)
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
 			windows_vst_discover (**x);
 		}
+
+		vector_delete (plugin_objects);
 	}
 
-	vector_delete (plugin_objects);
 	return ret;
 }
 
@@ -684,9 +686,10 @@ PluginManager::lxvst_discover_from_path (string path)
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
 			lxvst_discover (**x);
 		}
+
+		vector_delete (plugin_objects);
 	}
 
-	vector_delete (plugin_objects);
 	return ret;
 }
 
