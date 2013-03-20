@@ -18,7 +18,7 @@
 */
 
 #ifndef __libpbd_basename_h__
-#define __libdpbd_basename_h__
+#define __libpbd_basename_h__
 
 #include <glibmm/ustring.h>
 
@@ -26,4 +26,4 @@ namespace PBD {
 	Glib::ustring basename_nosuffix (Glib::ustring);
 } 
 
-#endif  /* __libdpbd_basename_h__ */
+#endif  /* __libpbd_basename_h__ */
