@@ -47,8 +47,8 @@ using namespace ARDOUR;
 using namespace PBD;
 
 Glib::Threads::Mutex AudioSource::_level_buffer_lock;
-vector<boost::shared_ptr<Sample> > AudioSource::_mixdown_buffers;
-vector<boost::shared_ptr<gain_t> > AudioSource::_gain_buffers;
+vector<boost::shared_array<Sample> > AudioSource::_mixdown_buffers;
+vector<boost::shared_array<gain_t> > AudioSource::_gain_buffers;
 size_t AudioSource::_working_buffers_size = 0;
 bool AudioSource::_build_missing_peakfiles = false;
 
@@ -984,11 +984,19 @@ AudioSource::ensure_buffers_for_level_locked (uint32_t level, framecnt_t frame_r
 {
 	framecnt_t nframes = (framecnt_t) floor (Config->get_audio_playback_buffer_seconds() * frame_rate);
 
+	/* this may be called because either "level" or "frame_rate" have
+	 * changed. and it may be called with "level" smaller than the current
+	 * number of buffers, because a new compound region has been created at
+	 * a more shallow level than the deepest one we currently have.
+	 */
+
+	uint32_t limit = max ((size_t) level, _mixdown_buffers.size());
+
 	_mixdown_buffers.clear ();
 	_gain_buffers.clear ();
 
-	while (_mixdown_buffers.size() < level) {
-		_mixdown_buffers.push_back (boost::shared_ptr<Sample> (new Sample[nframes]));
-		_gain_buffers.push_back (boost::shared_ptr<gain_t> (new gain_t[nframes]));
+	for (uint32_t n = 0; n < limit; ++n) {
+		_mixdown_buffers.push_back (boost::shared_array<Sample> (new Sample[nframes]));
+		_gain_buffers.push_back (boost::shared_array<gain_t> (new gain_t[nframes]));
 	}
 }

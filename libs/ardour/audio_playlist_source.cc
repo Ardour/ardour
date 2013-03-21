@@ -127,8 +127,8 @@ AudioPlaylistSource::set_state (const XMLNode& node, int version, bool with_desc
 framecnt_t
 AudioPlaylistSource::read_unlocked (Sample* dst, framepos_t start, framecnt_t cnt) const
 {
-	boost::shared_ptr<Sample> sbuf;
-	boost::shared_ptr<gain_t> gbuf;
+	boost::shared_array<Sample> sbuf;
+	boost::shared_array<gain_t> gbuf;
 	framecnt_t to_read;
 	framecnt_t to_zero;
 
