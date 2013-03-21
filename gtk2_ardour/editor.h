@@ -1257,8 +1257,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void bring_in_external_audio (Editing::ImportMode mode,  framepos_t& pos);
 
-	bool  idle_drop_paths  (std::vector<std::string> paths, framepos_t frame, double ypos);
-	void  drop_paths_part_two  (const std::vector<std::string>& paths, framepos_t frame, double ypos);
+	bool  idle_drop_paths  (std::vector<std::string> paths, framepos_t frame, double ypos, bool copy);
+	void  drop_paths_part_two  (const std::vector<std::string>& paths, framepos_t frame, double ypos, bool copy);
 
 	int  import_sndfiles (std::vector<std::string> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, framepos_t& pos,
 			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool);
