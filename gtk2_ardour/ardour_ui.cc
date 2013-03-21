@@ -649,7 +649,7 @@ void
 ARDOUR_UI::startup ()
 {
 	Application* app = Application::instance ();
-
+	char *nsm_url;
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
 	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_load));
 
@@ -658,6 +658,25 @@ ARDOUR_UI::startup ()
 	}
 
 	app->ready ();
+
+	nsm_url = getenv ("NSM_URL");
+
+	if (nsm_url) {
+		nsm = new NSM_Client;
+		if (!nsm->init (nsm_url)) {
+			nsm->announce (PROGRAM_NAME, ":dirty:", "ardour3");
+
+			do {
+				nsm->check ();
+				usleep (10);
+			} while (!nsm->client_id ());
+
+		}
+		else {
+			delete nsm;
+			nsm = 0;
+		}
+	}
 
 	if (get_session_parameters (true, ARDOUR_COMMAND_LINE::new_session, ARDOUR_COMMAND_LINE::load_template)) {
 		exit (1);
@@ -928,6 +947,19 @@ ARDOUR_UI::every_second ()
 	update_buffer_load ();
 	update_disk_space ();
 	update_timecode_format ();
+
+	if (nsm) {
+		nsm->check ();
+
+		if (!_was_dirty && _session->dirty ()) {
+			nsm->is_dirty ();
+			_was_dirty = true;
+		}
+		else if (_was_dirty && !_session->dirty ()){
+			nsm->is_clean ();
+			_was_dirty = false;
+		}
+	}
 	return TRUE;
 }
 
