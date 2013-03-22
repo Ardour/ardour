@@ -24,12 +24,12 @@ USER_NAME=$(logname)
 
 #### Derived Variables ####
 if [ -z "${PGM_BUILDTYPE}" ]; then
-	PGM_PATH=${INSTALL_DEST_BASE}/${PGM_NAME}-${PGM_VERSION}_${PGM_BUILD}
+	PGM_PATH=${INSTALL_DEST_BASE}/${PGM_NAME}-${PGM_VERSION}-${PGM_BUILD}
 	ICON_NAME="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}"			#no dash between name and version since dash seperates vendor from program
 	MENU_FILE="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}.desktop"	#no dash between name and version since dash seperates vendor from program
 	DESKTOP_LINK_FILE="${PGM_NAME}_${PGM_VERSION}.desktop"
 else
-	PGM_PATH=${INSTALL_DEST_BASE}/${PGM_NAME}-${PGM_VERSION}_${PGM_BUILD}-${PGM_BUILDTYPE}
+	PGM_PATH=${INSTALL_DEST_BASE}/${PGM_NAME}-${PGM_VERSION}-${PGM_BUILD}-${PGM_BUILDTYPE}
 	ICON_NAME="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}_${PGM_BUILDTYPE}"			#no dash between name and version since dash seperates vendor from program
 	MENU_FILE="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}_${PGM_BUILDTYPE}.desktop"	#no dash between name and version since dash seperates vendor from program
 	DESKTOP_LINK_FILE="${PGM_NAME}_${PGM_VERSION}_${PGM_BUILDTYPE}.desktop"
