@@ -117,7 +117,7 @@ GDither gdither_new(GDitherType type, uint32_t channels,
 	s->clamp_u = lrintf(s->scale);
 	s->clamp_l = lrintf(-s->scale);
 	break;
-    case 23:
+    case GDitherPerformanceTest:
 	/* special performance test case */
 	s->scale = SCALE_S24;
 	s->post_scale = 256;

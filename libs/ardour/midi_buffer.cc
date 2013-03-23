@@ -84,7 +84,7 @@ MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, framecnt_t dst_off
 	assert (src.type() == DataType::MIDI);
 	assert (&src != this);
 
-	const MidiBuffer& msrc = (MidiBuffer&) src;
+	const MidiBuffer& msrc = (const MidiBuffer&) src;
 
 	assert (_capacity >= msrc.size());
 
