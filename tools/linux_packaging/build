@@ -88,7 +88,7 @@ if test x$STRIP != xall -a x$STRIP != xnone -a x$STRIP != xsome ; then
 fi
 
 release_version=`grep -m 1 '[^A-Za-z_]LINUX_VERSION = ' ../../wscript | awk '{ print $3 }' | sed "s/'//g"`
-revision=`grep -m 1 'revision =' ../../libs/ardour/revision.cc | cut -d'"' -f 2 | sed -e "s/$release_version//"`
+revision=`grep -m 1 'revision =' ../../libs/ardour/revision.cc | cut -d'"' -f 2 | sed -e "s/$release_version-//"`
 echo "Version is $release_version / $revision"
 info_string="$release_version/$revision built on `hostname` by `whoami` on `date`"
 echo "Info string is $info_string"
@@ -131,11 +131,11 @@ fi
 # setup directory structure
 
 if [ -z "${BUILDTYPE}" ]; then
-	APPDIR=${APPNAME}_${ARCH}-${release_version}_${revision}
-	APP_VER_NAME=${APPNAME}-${release_version}_${revision}
+	APPDIR=${APPNAME}_${ARCH}-${release_version}-${revision}
+	APP_VER_NAME=${APPNAME}-${release_version}-${revision}
 else
-	APPDIR=${APPNAME}_${ARCH}-${release_version}_${revision}-${BUILDTYPE}
-	APP_VER_NAME=${APPNAME}-${release_version}_${revision}-${BUILDTYPE}
+	APPDIR=${APPNAME}_${ARCH}-${release_version}-${revision}-${BUILDTYPE}
+	APP_VER_NAME=${APPNAME}-${release_version}-${revision}-${BUILDTYPE}
 fi
 
 APPBIN=$APPDIR/bin
