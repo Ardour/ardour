@@ -412,14 +412,14 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 }
 
 bool
-Editor::idle_drop_paths (vector<string> paths, framepos_t frame, double ypos)
+Editor::idle_drop_paths (vector<string> paths, framepos_t frame, double ypos, bool copy)
 {
-	drop_paths_part_two (paths, frame, ypos);
+	drop_paths_part_two (paths, frame, ypos, copy);
 	return false;
 }
 
 void
-Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, double ypos)
+Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, double ypos, bool copy)
 {
 	RouteTimeAxisView* tv;
 
@@ -430,7 +430,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 
 		frame = 0;
 
-		if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
+		if (Profile->get_sae() || Config->get_only_copy_imported_files() || copy) {
 			do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, frame);
 		} else {
 			do_embed (paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
@@ -444,7 +444,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 			/* select the track, then embed/import */
 			selection->set (tv);
 
-			if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
+			if (Profile->get_sae() || Config->get_only_copy_imported_files() || copy) {
 				do_import (paths, Editing::ImportSerializeFiles, Editing::ImportToTrack, SrcBest, frame);
 			} else {
 				do_embed (paths, Editing::ImportSerializeFiles, ImportToTrack, frame);
@@ -481,14 +481,15 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 
 		snap_to (frame);
 
+		bool copy = ((context->get_actions() & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY);
 #ifdef GTKOSX
 		/* We are not allowed to call recursive main event loops from within
 		   the main event loop with GTK/Quartz. Since import/embed wants
 		   to push up a progress dialog, defer all this till we go idle.
 		*/
-		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &Editor::idle_drop_paths), paths, frame, cy));
+		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &Editor::idle_drop_paths), paths, frame, cy, copy));
 #else
-		drop_paths_part_two (paths, frame, cy);
+		drop_paths_part_two (paths, frame, cy, copy);
 #endif
 	}
 

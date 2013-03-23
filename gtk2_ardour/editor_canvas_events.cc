@@ -26,6 +26,7 @@
 
 #include "ardour/midi_region.h"
 #include "ardour/region_factory.h"
+#include "ardour/profile.h"
 
 #include "editor.h"
 #include "keyboard.h"
@@ -1054,6 +1055,21 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 					context->drag_status (context->get_suggested_action(), time);
 					return true;
 				}
+			} else {
+				/* DND originating from outside ardour
+				 *
+				 * TODO: check if file is audio/midi, allow drops on same track-type only,
+				 * currently: if audio is dropped on a midi-track, it is only added to the region-list
+				 */
+				if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
+					context->drag_status(Gdk::ACTION_COPY, time);
+				} else {
+					if ((context->get_actions() & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY)
+						context->drag_status(Gdk::ACTION_COPY, time);
+					else
+						context->drag_status(Gdk::ACTION_LINK, time);
+				}
+				return true;
 			}
 		}
 	}
