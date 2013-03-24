@@ -52,7 +52,7 @@ done
 
 
 # Figure out the Build Type
-if grep -q "DEBUG = True" ../../build/c4che/default.cache.py; then
+if grep -q "DEBUG = True" ../../build/c4che/_cache.py; then
 	DEBUG="T"
 else
 	DEBUG="F"
