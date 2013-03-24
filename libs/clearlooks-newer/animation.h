@@ -30,5 +30,5 @@ GE_INTERNAL void     clearlooks_animation_progressbar_add (GtkWidget *progressba
 GE_INTERNAL void     clearlooks_animation_connect_checkbox (GtkWidget *widget);
 GE_INTERNAL gboolean clearlooks_animation_is_animated (GtkWidget *widget);
 GE_INTERNAL gdouble  clearlooks_animation_elapsed (gpointer data);
-GE_INTERNAL void     clearlooks_animation_cleanup ();
+GE_INTERNAL void     clearlooks_animation_cleanup (void);
 #endif /* HAVE_ANIMATION */

@@ -24,12 +24,12 @@
 #include <gtkmm2ext/gtkapplication.h>
 
 int  
-gtk_application_init ()
+gtk_application_init (void)
 {
 	return 0;
 }
 
-void gtk_application_cleanup ()
+void gtk_application_cleanup (void)
 {
 }
 
@@ -44,6 +44,6 @@ gtk_application_add_app_menu_item (GtkApplicationMenuGroup* group, GtkMenuItem* 
 }
 
 void
-gtk_application_ready ()
+gtk_application_ready (void)
 {
 }

@@ -35,6 +35,6 @@ static inline float fast_log10 (const float val)
 	return fast_log2(val) / 3.312500f;
 }
 
-static inline float minus_infinity() { return -HUGE_VAL; }
+static inline float minus_infinity(void) { return -HUGE_VAL; }
 
 #endif /* __pbd_fastlog_h__ */

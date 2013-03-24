@@ -1570,7 +1570,6 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					: m;
 
 				// Now merge MIDI and any transport events into the buffer
-				LV2_Evbuf_Iterator i    = lv2_evbuf_end(_ev_buffers[port_index]);
 				const uint32_t     type = LV2Plugin::urids.midi_MidiEvent;
 				const framepos_t   tend = _session.transport_frame() + nframes;
 				++metric_i;
