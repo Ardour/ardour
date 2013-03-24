@@ -371,9 +371,10 @@ fi
 ################################
 # Setup derived variables
 ################################
-PGM_VERSION=$(echo ${BUNDLE_DIR} | awk 'BEGIN { FS = "-" } ; { print $2 }')
-PGM_BUILD=$(echo ${BUNDLE_DIR} | awk 'BEGIN { FS = "-" } ; { print $3 }')
-PGM_BUILDTYPE=$(echo ${BUNDLE_DIR} | awk 'BEGIN { FS = "-" } ; { print $3 }')
+PGM_VERSION=$(echo ${BUNDLE_DIR} | cut -d- -f2)
+PGM_BUILD=$(echo ${BUNDLE_DIR} | cut -d- -f3)
+PGM_BUILDTYPE=$(echo ${BUNDLE_DIR} | cut -d- -f4)
+
 
 if [ -z ${PGM_BUILDTYPE} ];
 then
@@ -391,6 +392,8 @@ fi
 PGM_EXEC_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/${PGM_EXEC_FILE}"
 ICON_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/share/icons"
 MENU_FILE_PATH="${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/share"
+
+echo "VERSION [$PGM_VERSION] BUILD [$BUILD] FULLNAME[$PGM_FULL_NAME] EXECPATH [$PGM_EXEC_PATH]"
 
 ################################
 # Install bundle and Menu/Link
