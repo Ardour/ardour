@@ -50,29 +50,19 @@ while [ $# -gt 0 ] ; do
 	esac
 done
 
-
-# Figure out the Build Type
-if grep -q "DEBUG = True" ../../build/c4che/_cache.py; then
-	DEBUG="T"
-else
-	DEBUG="F"
-fi
+. ./define_versions.sh
 
 if [ x$DEBUG = xT ]; then
 	BUILDTYPE="dbg"
 fi
 
-release_version=`grep -m 1 '[^A-Za-z_]LINUX_VERSION = ' ../../wscript | awk '{print $3}' | sed "s/'//g"`
-revision=`grep -m 1 'revision =' ../../libs/ardour/revision.cc | cut -d'"' -f 2 | sed -e "s/$release_version-//"`
-
-X86_BUNDLE="${APPNAME}_x86-${release_version}-${revision}"
-X86_64_BUNDLE="${APPNAME}_x86_64-${release_version}-${revision}"
+X86_BUNDLE="${APPNAME}_x86-${version}"
+X86_64_BUNDLE="${APPNAME}_x86_64-${version}"
 
 if [ ! -z ${BUILDTYPE} ]; then
 	X86_BUNDLE="${X86_BUNDLE}-${BUILDTYPE}"
 	X86_64_BUNDLE="${X86_64_BUNDLE}-${BUILDTYPE}"
 fi 
-
 
 if [ ! -e ${X86_BUNDLE}.tar.bz2 ] ; then
 	echo ""
@@ -122,22 +112,22 @@ fi
 if [ -z ${BUILDTYPE} ]; then
 	if [ "${SINGLE_ARCH}" = "T" ]; then
 		if [ "${X86_BUNDLE_OK}" = "T" ]; then
-			PACKAGE="${APPNAME}_32bit-${release_version}-${revision}"
+			PACKAGE="${APPNAME}_32bit-${version}"
 		else
-			PACKAGE="${APPNAME}_64bit-${release_version}-${revision}"
+			PACKAGE="${APPNAME}_64bit-${version}"
 		fi
 	else
-		PACKAGE="${APPNAME}-${release_version}-${revision}"
+		PACKAGE="${APPNAME}-${version}"
 	fi
 else
 	if [ "${SINGLE_ARCH}" = "T" ]; then
 		if [ "${X86_BUNDLE_OK}" = "T" ]; then
-			PACKAGE="${APPNAME}_32bit-${release_version}-${revision}-${BUILDTYPE}"
+			PACKAGE="${APPNAME}_32bit-${version}-${BUILDTYPE}"
 		else
-			PACKAGE="${APPNAME}_64bit-${release_version}-${revision}-${BUILDTYPE}"
+			PACKAGE="${APPNAME}_64bit-${version}-${BUILDTYPE}"
 		fi
 	else
-		PACKAGE="${APPNAME}-${release_version}-${revision}-${BUILDTYPE}"
+		PACKAGE="${APPNAME}-${version}-${BUILDTYPE}"
 	fi
 fi 
 
