@@ -962,38 +962,38 @@ LV2Plugin::find_presets()
 	lilv_node_free(lv2_appliesTo);
 }
 
+static void
+set_port_value(const char* port_symbol,
+               void*       user_data,
+               const void* value,
+               uint32_t    /*size*/,
+               uint32_t    type)
+{
+	LV2Plugin* self = (LV2Plugin*)user_data;
+	if (type != 0 && type != self->_uri_map.uri_to_id(LV2_ATOM__Float)) {
+		return;  // TODO: Support non-float ports
+	}
+
+	const uint32_t port_index = self->port_index(port_symbol);
+	if (port_index != (uint32_t)-1) {
+		self->set_parameter(port_index, *(const float*)value);
+	}
+}
+
 bool
 LV2Plugin::load_preset(PresetRecord r)
 {
-	std::map<std::string,uint32_t>::iterator it;
+	LilvWorld* world = _world.world;
+	LilvNode*  pset  = lilv_new_uri(world, r.uri.c_str());
+	LilvState* state = lilv_state_new_from_world(world, _uri_map.urid_map(), pset);
 
-	LilvNode* lv2_port   = lilv_new_uri(_world.world, LILV_NS_LV2 "port");
-	LilvNode* lv2_symbol = lilv_new_uri(_world.world, LILV_NS_LV2 "symbol");
-	LilvNode* preset     = lilv_new_uri(_world.world, r.uri.c_str());
-	LilvNode* pset_value = lilv_new_uri(_world.world, LV2_PRESETS__value);
-
-	LilvNodes* ports = lilv_world_find_nodes(_world.world, preset, lv2_port, NULL);
-	LILV_FOREACH(nodes, i, ports) {
-		const LilvNode* port   = lilv_nodes_get(ports, i);
-		const LilvNode* symbol = get_value(_world.world, port, lv2_symbol);
-		const LilvNode* value  = get_value(_world.world, port, pset_value);
-		if (value && lilv_node_is_float(value)) {
-			it = _port_indices.find(lilv_node_as_string(symbol));
-			if (it != _port_indices.end()) {
-				set_parameter(it->second,lilv_node_as_float(value));
-			}
-		}
+	if (state) {
+		lilv_state_restore(state, _impl->instance, set_port_value, this, 0, NULL);
+		lilv_state_free(state);
 	}
-	lilv_nodes_free(ports);
 
-	lilv_node_free(pset_value);
-	lilv_node_free(preset);
-	lilv_node_free(lv2_symbol);
-	lilv_node_free(lv2_port);
-
-	Plugin::load_preset(r);
-
-	return true;
+	lilv_node_free(pset);
+	return state;
 }
 
 const void*
