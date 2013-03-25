@@ -990,10 +990,10 @@ LV2Plugin::load_preset(PresetRecord r)
 	if (state) {
 		lilv_state_restore(state, _impl->instance, set_port_value, this, 0, NULL);
 		lilv_state_free(state);
-		return true;
-	} else {
-		return false;
 	}
+
+	lilv_node_free(pset);
+	return state;
 }
 
 const void*
