@@ -61,6 +61,7 @@ gtkmm2ext_sources = [
         'treeutils.cc',
         'utils.cc',
         'version.cc',
+        'visibility_tracker.cc',
         'window_title.cc'
 ]
 
