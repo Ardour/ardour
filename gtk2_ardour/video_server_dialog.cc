@@ -84,9 +84,6 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	if (find_file_in_search_path (PBD::SearchPath(Glib::getenv("PATH")), X_("harvid"), icsd_file_path)) {
 		path_entry.set_text(icsd_file_path);
 	}
-	else if (find_file_in_search_path (PBD::SearchPath(Glib::getenv("PATH")), X_("icsd"), icsd_file_path)) {
-		path_entry.set_text(icsd_file_path);
-	}
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\harvid.exe"), Glib::FILE_TEST_EXISTS)) {
 		path_entry.set_text(X_("C:\\Program Files\\harvid\\harvid.exe"));
 	}
