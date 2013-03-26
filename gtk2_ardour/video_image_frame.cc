@@ -203,7 +203,7 @@ http_get_thread (void *arg) {
 	} while (status == 503 && --timeout > 0);
 
 	if (status != 200 || !res) {
-		print("no-video frame: video-server returned http-status: %d\n", status);
+		printf("no-video frame: video-server returned http-status: %d\n", status);
 	}
 
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
