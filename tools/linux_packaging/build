@@ -16,6 +16,7 @@ BUILD_ROOT=../../build
 
 MIXBUS=
 WITH_LADSPA=0
+WITH_HARVID=0
 STRIP=all
 PRINT_SYSDEPS=
 WITH_NLS=
@@ -70,6 +71,7 @@ while [ $# -gt 0 ] ; do
 	--strip) STRIP=$2 ; shift ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
+	--harvid) WITH_HARVID=1 ; shift ;;
 
 	*)
 		#catch all for unknown arguments
@@ -99,11 +101,13 @@ case `uname -m` in
 		echo "Architecture is x86"
 		ARCH='x86'
 		ARCH_BITS='32-bit'
+		MULTIARCH='i386-linux-gnu'
 		;;
 	x86_64|amd64|AMD64)
 		echo "Architecture is x86_64"
 		ARCH='x86_64'
 		ARCH_BITS='64-bit'
+		MULTIARCH='x86_64-linux-gnu'
 		;;
 	*)
 		echo ""
@@ -524,6 +528,14 @@ cp -R ../../gtk2_ardour/ArdourMono.ttf $Shared
 for svndir in `find $APPDIR -name .svn -type d`; do
 	rm -rf $svndir
 done
+
+if test x$WITH_HARVID != x ; then
+	cd $APPBIN
+	HARVID_VERSION="v0.7.0" # todo make 'latest' symlink on github work somehow.
+	curl http://x42.github.com/harvid/releases/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz \
+		| tar -x -z --exclude=README --exclude=harvid.1 --strip-components=1 || exit 1
+	cd -
+fi
 
 #
 # Add the uninstaller
