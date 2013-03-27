@@ -217,9 +217,10 @@ CONFIG_VARIABLE (std::string, updates_url, "updates-url", "http://ardour.org/wha
 CONFIG_VARIABLE (std::string, donate_url, "donate-url", "http://ardour.org/donate")
 
 #ifdef WITH_VIDEOTIMELINE
+CONFIG_VARIABLE (bool, video_advanced_setup, "video-advanced-setup", false)
 CONFIG_VARIABLE (std::string, video_server_url, "video-server-url", "http://localhost:1554")
 CONFIG_VARIABLE (std::string, video_server_docroot, "video-server-docroot", "/")
 CONFIG_VARIABLE (bool, video_monitor_setup_dialog, "video-monitor-setup-dialog", false)
 CONFIG_VARIABLE (bool, show_video_export_info, "show-video-export-info", true)
-CONFIG_VARIABLE (bool, show_video_server_dialog, "show-video-server-dialog", true)
+CONFIG_VARIABLE (bool, show_video_server_dialog, "show-video-server-dialog", false)
 #endif
