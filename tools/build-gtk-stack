@@ -1,5 +1,17 @@
 #!/bin/bash
 
+#
+# THIS SCRIPT EXISTS FOR THE PURPOSE OF BUILDING THE ENTIRE GTK STACK UP UPON WHICH ARDOUR DEPENDS
+#
+# Its use is not documented, and it is not intended to be used or useful to anyone attempting to build
+# Ardour. 
+#
+# The requirements for building Ardour are made clear in the documentation on building available 
+# via http://ardour.org/development. Once your system satisfies those requirements, you can build ardour
+# using the instructions documented online. This script happens to be usable to satisfy those requirements,
+# but there are other approaches that you can and probably should use to do so.
+#
+
 clean=
 makespace=
 parallel=2
@@ -169,13 +181,20 @@ defmod 'gtkosxdocbook' 'gtk-osx-docbook' '1.0' 'http://downloads.sourceforge.net
 defmod 'gobjectintrospection' 'gobject-introspection' '1.31.10' 'http://ftp.gnome.org/pub/GNOME/sources/gobject-introspection/1.31/' 'xz'
 defmod 'gtkengines' 'gtk-engines' '2.21.0' 'http://ardour.org/files/' 'gz'
 
+# modified source : fetch tarballs from ardour.org
+
+defmod gtk gtk+ '2.24.18' http://ardour.org/files/deps/ bz2
+
 if [ x$clean != x -o x$makespace != x ] ; then
-    if [ ! -d gtk+ ] ; then 
+    #
+    # bison 2.5 is just used here because its unlikely to occur in
+    # a random non-source directory
+    #
+    if [ ! -d bison-2.5 ] ; then 
         echo "This doesn't appear to be your source directory. Don't run --clean or --space here."
         exit 1
     fi
-    rm -rf `find . -maxdepth 1 -type d | grep -v -e "gtk+" -e "^.$"`
-    # sudo required because of its use during the libxml2 install step
+    rm -rf `find . -maxdepth 1 -type d | grep -v -e "^.$"`
     if [ $clean ] ; then
         rm -rf $PREFIX
     fi
@@ -278,24 +297,16 @@ for m in $MODS ; do
     eval "fetch_as \$MOD_${m}_local_tarball \$MOD_${m}_url || die \"downloading $m failed\""
 done
 
-# GTK is special since we use git
-
-if [ ! -d gtk+ ] ; then
-    echo "GTK+ (2.24 branch)"
-    git clone git://git.gnome.org/gtk+
-    (cd gtk+ && git checkout --track -b gtk-2-24 origin/gtk-2-24)
-fi
-
 if [ x$patch != x ] ; then
 
     cd gtk+
     echo "Testing ($unpatch) patches ... "
 
-    if uname -a | grep --silent arwin ; then
+#    if uname -a | grep --silent arwin ; then
         patches=`ls $this_script_dir/current-gtk-patches/*.patch`
-    else
-        patches="$this_script_dir/current-gtk-patches/gtkrelocation.patch"
-    fi
+#    else
+#        patches="$this_script_dir/current-gtk-patches/gtkrelocation.patch"
+#    fi
         
     for patch in $patches ; do
         if patch $unpatch --dry-run -p1 < "$patch" ; then
@@ -456,8 +467,10 @@ if [ x$OSX = x ] ; then
     # lets the user set an environment variable that will force a Cairo workaround
     # to the issue.
     #
+    # --enable-gtk-doc is required so that make dist will work, which we need to be able to run for GPL compliance
+    #
     cairo_gradient_patch=$this_script_dir/misc-patches/cairo-gradients.patch
-    tar xf $MOD_cairo_local_tarball && (cd $MOD_cairo_unpacked && patch -p4 < $cairo_gradient_patch && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $CAIRO_CONF && make && make install) || die "cairo build failed"
+    tar xf $MOD_cairo_local_tarball && (cd $MOD_cairo_unpacked && patch -p4 < $cairo_gradient_patch && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $CAIRO_CONF --enable-gtk-doc && make && make install) || die "cairo build failed"
 else 
     tar xf $MOD_cairo_local_tarball && (cd $MOD_cairo_unpacked && CFLAGS=$GLOBAL_CFLAGS LDFLAGS="$GLOBAL_LDFLAGS" ./configure $GLOBAL_CONF $CAIRO_CONF && make && make install) || die "cairo build failed"
 fi
@@ -483,10 +496,12 @@ fi
 #
 # now gtk itself
 # 
+# --enable-gtk-doc is required so that make dist will work, which we need to be able to run for GPL compliance
 #
-(cd gtk+ && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" \
-    sh autogen.sh --enable-maintainer-mode --prefix=$PREFIX --libdir=$PREFIX/lib \
-    --disable-cups --disable-papi --disable-introspection --enable-relocation \
+(tar xf $MOD_gtk_local_tarball && 
+  cd $MOD_gtk_unpacked && CFLAGS="$GLOBAL_CFLAGS" LDFLAGS="$GLOBAL_LDFLAGS" \
+    ./configure --enable-maintainer-mode --prefix=$PREFIX --libdir=$PREFIX/lib \
+    --disable-cups --disable-papi --disable-introspection --enable-relocation --enable-gtk-doc \
     --with-gdktarget=$GTK_BACKEND && make && make install) || die "GTK build failed"
 
 #
