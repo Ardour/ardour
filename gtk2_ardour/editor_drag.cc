@@ -22,6 +22,7 @@
 #endif
 
 #include <stdint.h>
+#include <algorithm>
 
 #include "pbd/memento_command.h"
 #include "pbd/basename.h"
@@ -1611,11 +1612,6 @@ NoteResizeDrag::aborted (bool)
 
 #ifdef WITH_VIDEOTIMELINE
 
-#ifndef MAX
-#define MAX(a, b) (((a) > (b)) ? (a) : (b))
-#endif
-
-
 AVDraggingView::AVDraggingView (RegionView* v)
 	: view (v)
 {
@@ -1757,8 +1753,8 @@ VideoTimeLineDrag::finished (GdkEvent * /*event*/, bool movement_occurred)
 	}
 
 	_editor->session()->maybe_update_session_range(
-			MAX(ARDOUR_UI::instance()->video_timeline->get_offset(), 0),
-			MAX(ARDOUR_UI::instance()->video_timeline->get_offset() + ARDOUR_UI::instance()->video_timeline->get_duration(), 0)
+			std::max(ARDOUR_UI::instance()->video_timeline->get_offset(), (ARDOUR::frameoffset_t) 0),
+			std::max(ARDOUR_UI::instance()->video_timeline->get_offset() + ARDOUR_UI::instance()->video_timeline->get_duration(), (ARDOUR::frameoffset_t) 0)
 			);
 
 

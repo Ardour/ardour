@@ -19,6 +19,7 @@
 */
 #ifdef WITH_VIDEOTIMELINE
 
+#include <algorithm>
 #include <sigc++/bind.h>
 #include "ardour/tempo.h"
 
@@ -45,10 +46,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Timecode;
-
-#ifndef MAX
-#define MAX(a, b) (((a) > (b)) ? (a) : (b))
-#endif
 
 VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Group *vbg, int initial_height)
 	: editor (ed)
@@ -519,8 +516,8 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 	flush_local_cache ();
 
 	_session->maybe_update_session_range(
-			MAX(get_offset(), 0),
-			MAX(get_offset() + get_duration(), 0)
+			std::max(get_offset(), (ARDOUR::frameoffset_t) 0),
+			std::max(get_offset() + get_duration(), (ARDOUR::frameoffset_t) 0)
 			);
 
 	if (found_xjadeo() && local_file) {
