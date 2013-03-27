@@ -88,7 +88,9 @@ VideoServerDialog::VideoServerDialog (Session* s)
 		path_entry.set_text(X_("C:\\Program Files\\harvid\\harvid.exe"));
 	}
 	else {
-		PBD::warning << _("The external video server 'harvid' can not be found, see https://github.com/x42/harvid") << endmsg;
+		PBD::warning <<
+			_("The external video server 'harvid' can not be found. The tool is included with the Ardour releases from ardour.org, "
+			  "alternatively you can download it from http://x42.github.com/harvid/ or acquire it from your distribution.") << endmsg;
 	}
 
 

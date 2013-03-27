@@ -115,7 +115,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 
 
 	if (!transcoder->ffexec_ok()) {
-		l = manage (new Label (_("No ffprobe or ffmpeg executables could be found on this system. Transcoding is not possible until you install those tools."), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (_("No ffprobe or ffmpeg executables could be found on this system. Video Import is not possible until you install those tools. See the Log widow for more information."), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 		l->set_line_wrap();
 		options_box->pack_start (*l, false, true, 4);
 		transcode_button.set_sensitive(false);
@@ -123,7 +123,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 		bitrate_checkbox.set_sensitive(false);
 	}
 	else if (!transcoder->probe_ok()) {
-		l = manage (new Label (string_compose(_("Video file-info could not be read. Most likely '%1' is not a valid video-file. It could also be a rare unsupported video codec or format."), infn), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (string_compose(_("File-info can not be read. Most likely '%1' is not a valid video-file or an unsupported video codec or format."), infn), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 		options_box->pack_start (*l, false, true, 4);
 		transcode_button.set_sensitive(false);
 		aspect_checkbox.set_sensitive(false);

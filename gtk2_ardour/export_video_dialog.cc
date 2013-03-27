@@ -92,7 +92,6 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 {
 	set_session (s);
 
-	transcoder = 0;
 
 	set_name ("ExportVideoDialog");
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -105,15 +104,18 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	VBox* options_box = manage (new VBox);
 	HBox* path_hbox;
 
-#if 0
-	l = manage (new Label (_("<b>Export Video File</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	l->set_use_markup ();
-	vbox->pack_start (*l, false, false);
-	l = manage (new Label (_("The file-format is determined by the extension you choose for the output file."), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	l->set_size_request(700,-1);
-	l->set_line_wrap();
-	vbox->pack_start (*l, false, false, 8);
-#endif
+	/* check if ffmpeg can be found */
+	transcoder = new TranscodeFfmpeg("");
+	if (!transcoder->ffexec_ok()) {
+		l = manage (new Label (_("No ffprobe or ffmpeg executables could be found on this system. Video Export is not possible until you install those tools. See the Log widow for more information."), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l->set_line_wrap();
+		vbox->pack_start (*l, false, false, 8);
+		get_vbox()->pack_start (*vbox, false, false);
+		add_button (Stock::OK, RESPONSE_CANCEL);
+		show_all_children ();
+		return;
+	}
+	delete transcoder; transcoder = 0;
 
 	l = manage (new Label (_("<b>Files:</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
@@ -538,7 +540,7 @@ ExportVideoDialog::encode_pass (int pass)
 	 */
 	transcoder = new TranscodeFfmpeg(invid);
 	if (!transcoder->ffexec_ok()) {
-		warning << _("No ffprobe or ffmpeg executables could be found on this system. Transcoding is not possible until you install those tools.") << endmsg;
+		/* ffmpeg binary was not found.  TranscodeFfmpeg prints a warning */
 		unlink (insnd.c_str());
 		Gtk::Dialog::response(RESPONSE_CANCEL);
 		return;
