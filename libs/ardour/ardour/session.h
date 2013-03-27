@@ -732,6 +732,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void request_play_range (std::list<AudioRange>*, bool leave_rolling = false);
 	bool get_play_range () const { return _play_range; }
 
+	void maybe_update_session_range (framepos_t, framepos_t);
+
 	/* buffers for gain and pan */
 
 	gain_t* gain_automation_buffer () const;
@@ -899,8 +901,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	Location*               _session_range_location; ///< session range, or 0 if there is nothing in the session yet
 	Slave*                  _slave;
 	bool                    _silent;
-
-	void maybe_update_session_range (framepos_t, framepos_t);
 
 	// varispeed playback
 	double                  _transport_speed;

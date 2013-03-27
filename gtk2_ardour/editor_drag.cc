@@ -1611,6 +1611,11 @@ NoteResizeDrag::aborted (bool)
 
 #ifdef WITH_VIDEOTIMELINE
 
+#ifndef MAX
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#endif
+
+
 AVDraggingView::AVDraggingView (RegionView* v)
 	: view (v)
 {
@@ -1750,6 +1755,12 @@ VideoTimeLineDrag::finished (GdkEvent * /*event*/, bool movement_occurred)
 
 		_editor->session()->add_command (new StatefulDiffCommand (i->view->region()));
 	}
+
+	_editor->session()->maybe_update_session_range(
+			MAX(ARDOUR_UI::instance()->video_timeline->get_offset(), 0),
+			MAX(ARDOUR_UI::instance()->video_timeline->get_offset() + ARDOUR_UI::instance()->video_timeline->get_duration(), 0)
+			);
+
 
 	_editor->commit_reversible_command ();
 	_editor->update_canvas_now ();

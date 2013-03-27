@@ -46,6 +46,9 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Timecode;
 
+#ifndef MAX
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#endif
 
 VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Group *vbg, int initial_height)
 	: editor (ed)
@@ -456,6 +459,7 @@ VideoTimeLine::translated_filename ()
 bool
 VideoTimeLine::video_file_info (std::string filename, bool local)
 {
+
 	local_file = local;
 	if (filename.at(0) == G_DIR_SEPARATOR || !local_file) {
 		video_filename = filename;
@@ -513,6 +517,11 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 		        << video_file_fps << _(" vs ") << _session->timecode_frames_per_second() << endmsg;
 	}
 	flush_local_cache ();
+
+	_session->maybe_update_session_range(
+			MAX(get_offset(), 0),
+			MAX(get_offset() + get_duration(), 0)
+			);
 
 	if (found_xjadeo() && local_file) {
 		GuiUpdate("set-xjadeo-sensitive-on");
