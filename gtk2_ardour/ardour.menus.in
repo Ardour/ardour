@@ -487,9 +487,6 @@
       <menuitem action='ToggleSummary'/>
       <menuitem action='ToggleGroupTabs'/>
       <menuitem action='show-marker-lines'/>
-#ifdef WITH_VIDEOTIMELINE
-      <menuitem action='ToggleJadeo'/>
-#endif
     </menu>
     <menu name='JACK' action='JACK'>
       <menuitem action='JACKDisconnect'/>
@@ -521,6 +518,11 @@
       <menuitem action='toggle-speaker-config'/>
 
       <separator/>
+
+#ifdef WITH_VIDEOTIMELINE
+      <menuitem action='ToggleJadeo'/>
+      <separator/>
+#endif
 
       <menuitem action='NewMIDITracer'/>
       <menuitem action='toggle-audio-connection-manager'/>
