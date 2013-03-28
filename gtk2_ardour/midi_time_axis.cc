@@ -19,6 +19,8 @@
 #include <cstdlib>
 #include <cmath>
 
+#include <strings.h> // for ffs(3)
+
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -95,7 +97,7 @@ using namespace Gtkmm2ext;
 using namespace Editing;
 
 // Minimum height at which a control is displayed
-static const uint32_t MIDI_CONTROLS_BOX_MIN_HEIGHT = 130;
+static const uint32_t MIDI_CONTROLS_BOX_MIN_HEIGHT = 140;
 static const uint32_t KEYBOARD_MIN_HEIGHT = 130;
 
 MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, Canvas& canvas)
@@ -212,6 +214,22 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		_view->RegionViewAdded.connect (
 			sigc::mem_fun(*this, &MidiTimeAxisView::region_view_added));
 
+		midi_track()->PlaybackChannelModeChanged.connect (*this, invalidator (*this),
+								  boost::bind (&MidiTimeAxisView::playback_channel_mode_changed, this),
+								  gui_context());
+		midi_track()->PlaybackChannelMaskChanged.connect (*this, invalidator (*this),
+								  boost::bind (&MidiTimeAxisView::playback_channel_mode_changed, this),
+								  gui_context());
+		midi_track()->CaptureChannelModeChanged.connect (*this, invalidator (*this),
+								  boost::bind (&MidiTimeAxisView::capture_channel_mode_changed, this),
+								  gui_context());
+		midi_track()->CaptureChannelMaskChanged.connect (*this, invalidator (*this),
+								  boost::bind (&MidiTimeAxisView::capture_channel_mode_changed, this),
+								  gui_context());
+
+		playback_channel_mode_changed ();
+		capture_channel_mode_changed ();
+
 		if (!_editor.have_idled()) {
 			/* first idle will do what we need */
 		} else {
@@ -247,19 +265,37 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_midi_controls_box.set_homogeneous(false);
 	_midi_controls_box.set_border_width (10);
 
+	_channel_status_box.set_homogeneous (false);
+	_channel_status_box.set_spacing (6);
+	
+	_channel_selector_button.set_label (_("Chns"));
+
+	/* fixed sized labels to prevent silly nonsense */
+
+	_playback_channel_status.set_size_request (65, -1);
+	_capture_channel_status.set_size_request (60, -1);
+
+	_channel_status_box.pack_start (_playback_channel_status, false, false);
+	_channel_status_box.pack_start (_capture_channel_status, false, false);
+	_channel_status_box.pack_start (_channel_selector_button, false, false);
+	_channel_status_box.show_all ();
+
+	_channel_selector_button.signal_clicked().connect (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_channel_selector));
+	
+	_midi_controls_box.pack_start (_channel_status_box, false, false, 10);
+
 	if (!patch_manager.all_models().empty()) {
-		_midi_controls_box.resize(2, 2);
 
 		_midnam_model_selector.set_size_request(22, 30);
 		_midnam_model_selector.set_border_width(2);
 		_midnam_model_selector.show ();
-		_midi_controls_box.attach(_midnam_model_selector, 0, 1, 0, 1);
+		_midi_controls_box.pack_start (_midnam_model_selector);
 
 		_midnam_custom_device_mode_selector.set_size_request(10, 30);
 		_midnam_custom_device_mode_selector.set_border_width(2);
 		_midnam_custom_device_mode_selector.show ();
 
-		_midi_controls_box.attach(_midnam_custom_device_mode_selector, 0, 1, 1, 2);
+		_midi_controls_box.pack_start (_midnam_custom_device_mode_selector);
 	} 
 
 	model_changed();
@@ -478,6 +514,7 @@ MidiTimeAxisView::toggle_channel_selector ()
 			_channel_selector->set_default_channel_color ();
 		}
 
+		_channel_selector->set_position (WIN_POS_MOUSE);
 		_channel_selector->show_all ();
 	} else {
 		_channel_selector->cycle_visibility ();
@@ -1439,4 +1476,36 @@ void
 MidiTimeAxisView::contents_height_changed ()
 {
 	_range_scroomer->set_size_request (-1, _view->child_height ());
+}
+
+void
+MidiTimeAxisView::playback_channel_mode_changed ()
+{
+	switch (midi_track()->get_playback_channel_mode()) {
+	case AllChannels:
+		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Play"), ("all")));
+		break;
+	case FilterChannels:
+		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Play"), ("some")));
+		break;
+	case ForceChannel:
+		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Play"), ("all"), ffs (midi_track()->get_playback_channel_mask())));
+		break;
+	}
+}
+
+void
+MidiTimeAxisView::capture_channel_mode_changed ()
+{
+	switch (midi_track()->get_capture_channel_mode()) {
+	case AllChannels:
+		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Rec"), ("all")));
+		break;
+	case FilterChannels:
+		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Rec"), ("some")));
+		break;
+	case ForceChannel:
+		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Rec"), ("all"), ffs (midi_track()->get_capture_channel_mask())));
+		break;
+	}
 }
