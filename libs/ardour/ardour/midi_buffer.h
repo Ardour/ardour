@@ -55,38 +55,50 @@ public:
 	template<typename BufferType, typename EventType>
 	class iterator_base {
 	public:
-		iterator_base<BufferType, EventType>(BufferType& b, framecnt_t o) : buffer(b), offset(o) {}
+		iterator_base<BufferType, EventType>(BufferType& b, framecnt_t o) 
+		     : buffer(&b), offset(o) {}
+                iterator_base<BufferType, EventType>(const iterator_base<BufferType,EventType>& o) 
+		     : buffer (o.buffer), offset(o.offset) {}
+	    
+	        inline iterator_base<BufferType,EventType> operator= (const iterator_base<BufferType,EventType>& o) {
+			if (&o != this) {
+				buffer = o.buffer;
+				offset = o.offset;
+			}
+			return *this;
+		}
+
 		inline EventType operator*() const {
-			uint8_t* ev_start = buffer._data + offset + sizeof(TimeType);
+			uint8_t* ev_start = buffer->_data + offset + sizeof(TimeType);
 			int event_size = Evoral::midi_event_size(ev_start);
 			assert(event_size >= 0);
 			return EventType(EventTypeMap::instance().midi_event_type(*ev_start),
-					*((TimeType*)(buffer._data + offset)),
+					*((TimeType*)(buffer->_data + offset)),
 					event_size, ev_start);
 		}
 		inline EventType operator*() {
-			uint8_t* ev_start = buffer._data + offset + sizeof(TimeType);
+			uint8_t* ev_start = buffer->_data + offset + sizeof(TimeType);
 			int event_size = Evoral::midi_event_size(ev_start);
 			assert(event_size >= 0);
 			return EventType(EventTypeMap::instance().midi_event_type(*ev_start),
-					*((TimeType*)(buffer._data + offset)),
+					*((TimeType*)(buffer->_data + offset)),
 					event_size, ev_start);
 		}
 
 		inline iterator_base<BufferType, EventType>& operator++() {
-			uint8_t* ev_start = buffer._data + offset + sizeof(TimeType);
+			uint8_t* ev_start = buffer->_data + offset + sizeof(TimeType);
 			int event_size = Evoral::midi_event_size(ev_start);
 			assert(event_size >= 0);
 			offset += sizeof(TimeType) + event_size;
 			return *this;
 		}
 		inline bool operator!=(const iterator_base<BufferType, EventType>& other) const {
-			return (&buffer != &other.buffer) || (offset != other.offset);
+			return (buffer != other.buffer) || (offset != other.offset);
 		}
 		inline bool operator==(const iterator_base<BufferType, EventType>& other) const {
-			return (&buffer == &other.buffer) && (offset == other.offset);
+			return (buffer == other.buffer) && (offset == other.offset);
 		}
-		BufferType&     buffer;
+		BufferType*     buffer;
 		size_t          offset;
 	};
 
@@ -98,6 +110,41 @@ public:
 
 	const_iterator begin() const { return const_iterator(*this, 0); }
 	const_iterator end()   const { return const_iterator(*this, _size); }
+
+        iterator erase(const iterator& i) {
+		assert (i.buffer == this);
+		uint8_t* ev_start = _data + i.offset + sizeof (TimeType);
+		int event_size = Evoral::midi_event_size (ev_start);
+
+		if (event_size < 0) {
+			/* unknown size, sysex: return end() */
+			return end();
+		}
+
+		size_t total_data_deleted = sizeof(TimeType) + event_size;
+
+		if (i.offset + total_data_deleted >= _size) {
+			_size = 0;
+			return end();
+		}
+
+		/* we need to avoid the temporary malloc that memmove would do,
+		   so copy by hand. remember: this is small amounts of data ...
+		*/
+		size_t a, b;
+		for (a = i.offset, b = i.offset + total_data_deleted; b < _size; ++b, ++a) {
+			_data[a] = _data[b];
+		}
+
+		_size -= total_data_deleted;
+
+		/* all subsequent iterators are now invalid, and the one we
+		 * return should refer to the event we copied, which was after
+		 * the one we just erased.
+		 */
+
+		return iterator (*this, i.offset);
+	}
 
 	uint8_t* data() const { return _data; }
 

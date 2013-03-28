@@ -49,6 +49,7 @@ class Source;
 class Session;
 class Track;
 class Location;
+class BufferSet;
 
 /** Parent class for classes which can stream data to and from disk.
  *  These are used by Tracks to get playback and put recorded data.
@@ -191,7 +192,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
   protected:
 	friend class Track;
 
-	virtual int  process (framepos_t transport_frame, pframes_t nframes, framecnt_t &) = 0;
+    virtual int  process (BufferSet&, framepos_t transport_frame, pframes_t nframes, framecnt_t &, bool need_disk_signal) = 0;
 	virtual bool commit  (framecnt_t) = 0;
 
 	//private:

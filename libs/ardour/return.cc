@@ -50,7 +50,7 @@ Return::Return (Session& s, bool internal)
 	/* never muted */
 
 	_amp.reset (new Amp (_session));
-	_meter.reset (new PeakMeter (_session));
+	_meter.reset (new PeakMeter (_session, name()));
 }
 
 Return::~Return ()

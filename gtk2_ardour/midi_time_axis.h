@@ -39,7 +39,6 @@
 #include "route_time_axis.h"
 #include "canvas.h"
 #include "midi_streamview.h"
-#include "midi_channel_selector.h"
 
 namespace MIDI {
 namespace Name {
@@ -62,6 +61,7 @@ class MidiScroomer;
 class PianoRollHeader;
 class StepEntry;
 class StepEditor;
+class MidiChannelSelectorWindow;
 
 class MidiTimeAxisView : public RouteTimeAxisView
 {
@@ -91,12 +91,6 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	boost::shared_ptr<MIDI::Name::CustomDeviceMode> get_device_mode();
 
 	void update_range();
-
-	sigc::signal<void, ARDOUR::ChannelMode, uint16_t>& signal_channel_mode_changed() {
-		return _channel_selector.mode_changed;
-	}
-
-	const MidiMultipleChannelSelector& channel_selector() { return _channel_selector; }
 
 	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
 
@@ -141,7 +135,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	Gtk::RadioMenuItem*          _channel_color_mode_item;
 	Gtk::RadioMenuItem*          _track_color_mode_item;
 	Gtk::Table                   _midi_controls_box;
-	MidiMultipleChannelSelector  _channel_selector;
+	MidiChannelSelectorWindow*   _channel_selector;
 	Gtk::ComboBoxText            _midnam_model_selector;
 	Gtk::ComboBoxText            _midnam_custom_device_mode_selector;
 
@@ -157,6 +151,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void add_single_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
 	void add_multi_channel_controller_item (Gtk::Menu_Helpers::MenuList& ctl_items, int ctl, const std::string& name);
 	void build_controller_menu ();
+        void toggle_channel_selector ();
+        void channel_selector_hidden ();
 	void set_channel_mode (ARDOUR::ChannelMode, uint16_t);
 
 	void set_note_selection (uint8_t note);

@@ -45,37 +45,15 @@ public:
 	/** @param size Size in bytes.
 	 */
 	MidiRingBuffer(size_t size)
-		: Evoral::EventRingBuffer<T>(size)
-		, _channel_mask(0x0000FFFF)
-	{}
+		: Evoral::EventRingBuffer<T>(size) {}
 
 	inline bool read_prefix(T* time, Evoral::EventType* type, uint32_t* size);
 	inline bool read_contents(uint32_t size, uint8_t* buf);
 
 	size_t read(MidiBuffer& dst, framepos_t start, framepos_t end, framecnt_t offset=0, bool stop_on_overflow_in_destination=false);
-	inline uint32_t write(T  time, Evoral::EventType  type, uint32_t  size, const uint8_t* buf);
 
 	void dump(std::ostream& dst);
 	void flush (framepos_t start, framepos_t end);
-
-	/** Set the channel filtering mode.
-	 * @param mask If mode is FilterChannels, each bit represents a midi channel:
-	 *     bit 0 = channel 0, bit 1 = channel 1 etc. the read and write methods will only
-	 *     process events whose channel bit is 1.
-	 *     If mode is ForceChannel, mask is simply a channel number which all events will
-	 *     be forced to while reading.
-	 */
-	void set_channel_mode(ChannelMode mode, uint16_t mask) {
-		g_atomic_int_set(&_channel_mask, (uint32_t(mode) << 16) | uint32_t(mask));
-	}
-
-	ChannelMode get_channel_mode() const {
-		return static_cast<ChannelMode>((g_atomic_int_get(&_channel_mask) & 0xFFFF0000) >> 16);
-	}
-
-	uint16_t get_channel_mask() const {
-		return g_atomic_int_get(&_channel_mask) & 0x0000FFFF;
-	}
 
 	void reset_tracker ();
         void loop_resolve (MidiBuffer& dst, framepos_t);
@@ -99,7 +77,6 @@ protected:
 	}
 
 private:
-	volatile uint32_t _channel_mask; // 16 bits mode, 16 bits mask
 	MidiStateTracker _tracker;
 };
 
@@ -136,38 +113,6 @@ MidiRingBuffer<T>::read_contents(uint32_t size, uint8_t* buf)
 {
 	return PBD::RingBufferNPT<uint8_t>::read(buf, size) == size;
 }
-
-template<typename T>
-inline uint32_t
-MidiRingBuffer<T>::write(T time, Evoral::EventType type, uint32_t size, const uint8_t* buf)
-{
-	assert(size > 0);
-	uint8_t status = buf[0];
-
-	// Ignore event if it doesn't match channel filter
-	if (is_channel_event(status)) {
-		ChannelMode mode = get_channel_mode();
-		if (mode == FilterChannels) {
-			const uint8_t channel = status & 0x0F;
-			if (!(get_channel_mask() & (1L << channel))) {
-				return 0;
-			}
-		} else if (mode == ForceChannel) {
-			uint8_t* tmpbuf = (uint8_t*) malloc(size);
-			assert(tmpbuf);
-			memcpy(tmpbuf, buf, size);
-
-			tmpbuf[0] = (tmpbuf[0] & 0xF0) | (get_channel_mask() & 0x0F);
-
-			uint32_t bytes_written = Evoral::EventRingBuffer<T>::write(time, type, size, tmpbuf);
-			free(tmpbuf);
-			return bytes_written;
-		}
-	}
-
-	return Evoral::EventRingBuffer<T>::write(time, type, size, buf);
-}
-
 
 } // namespace ARDOUR
 

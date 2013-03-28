@@ -355,7 +355,8 @@ private:
 	bool canvas_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);
 
-	void midi_channel_mode_changed(ARDOUR::ChannelMode mode, uint16_t mask);
+	void midi_channel_mode_changed ();
+        PBD::ScopedConnection _channel_mode_changed_connection;
 	void instrument_settings_changed ();
 	PBD::ScopedConnection _instrument_changed_connection;
 
@@ -376,9 +377,6 @@ private:
 
 	void show_verbose_cursor (std::string const &, double, double) const;
 	void show_verbose_cursor (boost::shared_ptr<NoteType>) const;
-
-	ARDOUR::ChannelMode _last_channel_mode;
-	uint16_t _last_channel_selection;
 
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;
@@ -480,6 +478,9 @@ private:
 	Gdk::Cursor* pre_press_cursor;
 
 	NotePlayer* _note_player;
+
+        ARDOUR::ChannelMode get_channel_mode() const;
+        uint16_t get_selected_channels () const;
 };
 
 

@@ -102,11 +102,39 @@ public:
 	PBD::Signal1<void,bool> StepEditStatusChange;
 
 	boost::shared_ptr<SMFSource> write_source (uint32_t n = 0);
-	void set_channel_mode (ChannelMode, uint16_t);
-	ChannelMode get_channel_mode ();
-	uint16_t get_channel_mask ();
+
+	/** Channel filtering mode.
+	 * @param mask If mode is FilterChannels, each bit represents a midi channel:
+	 *     bit 0 = channel 0, bit 1 = channel 1 etc. the read and write methods will only
+	 *     process events whose channel bit is 1.
+	 *     If mode is ForceChannel, mask is simply a channel number which all events will
+	 *     be forced to while reading.
+	 */
+        void set_capture_channel_mode (ChannelMode mode, uint16_t mask);
+        void set_playback_channel_mode (ChannelMode mode, uint16_t mask);
+        void set_playback_channel_mask (uint16_t mask);
+        void set_capture_channel_mask (uint16_t mask);
+
+	ChannelMode get_playback_channel_mode() const {
+		return static_cast<ChannelMode>((g_atomic_int_get(&_playback_channel_mask) & 0xffff0000) >> 16);
+	}
+        uint16_t get_playback_channel_mask() const {
+		return g_atomic_int_get(&_playback_channel_mask) & 0x0000ffff;
+	}
+	ChannelMode get_capture_channel_mode() const {
+		return static_cast<ChannelMode>((g_atomic_int_get(&_capture_channel_mask) & 0xffff0000) >> 16);
+	}
+        uint16_t get_capture_channel_mask() const {
+		return g_atomic_int_get(&_capture_channel_mask) & 0x0000ffff;
+	}
+
 	boost::shared_ptr<MidiPlaylist> midi_playlist ();
 
+        PBD::Signal0<void> PlaybackChannelMaskChanged;
+        PBD::Signal0<void> PlaybackChannelModeChanged;
+        PBD::Signal0<void> CaptureChannelMaskChanged;
+        PBD::Signal0<void> CaptureChannelModeChanged;
+    
 	PBD::Signal1<void, boost::weak_ptr<MidiSource> > DataRecorded;
 	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
 
@@ -123,6 +151,13 @@ protected:
 	void act_on_mute ();
 
 private:
+	MidiRingBuffer<framepos_t> _immediate_events;
+	MidiRingBuffer<framepos_t> _step_edit_ring_buffer;
+	NoteMode                   _note_mode;
+	bool                       _step_editing;
+	bool                       _input_active;
+        uint32_t                   _playback_channel_mask; // 16 bits mode, 16 bits mask
+        uint32_t                   _capture_channel_mask; // 16 bits mode, 16 bits mask
 
 	virtual boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &);
 	
@@ -133,11 +168,6 @@ private:
 	void set_state_part_two ();
 	void set_state_part_three ();
 
-	MidiRingBuffer<framepos_t> _immediate_events;
-	MidiRingBuffer<framepos_t> _step_edit_ring_buffer;
-	NoteMode                  _note_mode;
-	bool                      _step_editing;
-	bool                      _input_active;
 
 	int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool state_changing);
 	void push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes);
@@ -147,6 +177,21 @@ private:
 
 	void track_input_active (IOChange, void*);
 	void map_input_active (bool);
+
+        void filter_channels (BufferSet& bufs, ChannelMode mode, uint32_t mask); 
+
+	void _set_playback_channel_mode(ChannelMode mode, uint16_t mask) {
+		g_atomic_int_set(&_playback_channel_mask, (uint32_t(mode) << 16) | uint32_t(mask));
+	}
+        void _set_playback_channel_mask (uint16_t mask) {
+		g_atomic_int_set(&_playback_channel_mask, (uint32_t(get_playback_channel_mode()) << 16) | uint32_t(mask));
+	}
+	void _set_capture_channel_mode(ChannelMode mode, uint16_t mask) {
+		g_atomic_int_set(&_capture_channel_mask, (uint32_t(mode) << 16) | uint32_t(mask));
+	}
+        void _set_capture_channel_mask (uint16_t mask) {
+		g_atomic_int_set(&_capture_channel_mask, (uint32_t(get_capture_channel_mode()) << 16) | uint32_t(mask));
+	}
 };
 
 } /* namespace ARDOUR*/

@@ -46,6 +46,28 @@ public:
 	}
 
 	/** Read @a len frames @a src starting at @a src_offset into self starting at @ dst_offset*/
+	void read_from (const Sample* src, framecnt_t len, framecnt_t dst_offset = 0, framecnt_t src_offset = 0) {
+		assert(src != 0);
+		assert(_capacity > 0);
+		assert(len <= _capacity);
+		memcpy(_data + dst_offset, src + src_offset, sizeof(Sample) * len);
+		_silent = false;
+		_written = true;
+	}
+
+        void read_from_with_gain (const Sample* src, framecnt_t len, gain_t gain, framecnt_t dst_offset = 0, framecnt_t src_offset = 0) {
+		assert(src != 0);
+		assert(_capacity > 0);
+		assert(len <= _capacity);
+		src += src_offset;
+		for (framecnt_t n = 0; n < len; ++n) {
+			_data[dst_offset+n] = src[n] * gain;
+		}
+		_silent = false;
+		_written = true;
+	}
+
+	/** Read @a len frames @a src starting at @a src_offset into self starting at @ dst_offset*/
 	void read_from (const Buffer& src, framecnt_t len, framecnt_t dst_offset = 0, framecnt_t src_offset = 0) {
 		assert(&src != this);
 		assert(_capacity > 0);
@@ -79,6 +101,20 @@ public:
 		mix_buffers_no_gain(dst_raw, src_raw, len);
 
 		_silent = (src.silent() && _silent);
+		_written = true;
+	}
+
+	/** Acumulate (add) @a len frames @a src starting at @a src_offset into self starting at @a dst_offset */
+	void accumulate_from (const Sample* src, framecnt_t len, framecnt_t dst_offset = 0, framecnt_t src_offset = 0) {
+		assert(_capacity > 0);
+		assert(len <= _capacity);
+
+		Sample*       const dst_raw = _data + dst_offset;
+		const Sample* const src_raw = src + src_offset;
+
+		mix_buffers_no_gain(dst_raw, src_raw, len);
+		
+		_silent = false;
 		_written = true;
 	}
 
@@ -170,6 +206,8 @@ public:
 		assert(offset <= _capacity);
 		return _data + offset;
 	}
+
+    bool check_silence (pframes_t, pframes_t&) const;
 
 	void prepare () { _written = false; _silent = false; }
 	bool written() const { return _written; }

@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include "pbd/compose.h"
+
 #include "ardour/audio_buffer.h"
 #include "ardour/buffer_set.h"
 #include "ardour/dB.h"
@@ -32,6 +34,12 @@ using namespace std;
 using namespace ARDOUR;
 
 PBD::Signal0<void> Metering::Meter;
+
+PeakMeter::PeakMeter (Session& s, const std::string& name)
+    : Processor (s, string_compose ("meter-%1", name)) 
+{
+}
+
 
 /** Get peaks from @a bufs
  * Input acceptance is lenient - the first n buffers from @a bufs will
@@ -55,7 +63,9 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 	// Meter MIDI in to the first n_midi peaks
 	for (uint32_t i = 0; i < n_midi; ++i, ++n) {
 		float val = 0.0f;
-		for (MidiBuffer::iterator e = bufs.get_midi(i).begin(); e != bufs.get_midi(i).end(); ++e) {
+		MidiBuffer& buf (bufs.get_midi(i));
+		
+		for (MidiBuffer::iterator e = buf.begin(); e != buf.end(); ++e) {
 			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
 			if (ev.is_note_on()) {
 				const float this_vel = log(ev.buffer()[2] / 127.0 * (M_E*M_E-M_E) + M_E) - 1.0;

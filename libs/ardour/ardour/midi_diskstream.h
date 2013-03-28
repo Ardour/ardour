@@ -89,29 +89,6 @@ class MidiDiskstream : public Diskstream
 
 	void set_note_mode (NoteMode m);
 
-	uint16_t get_channel_mask() {
-		uint16_t playback_mask = _playback_buf->get_channel_mask();
-#ifndef NDEBUG
-		uint16_t capture_mask  = _capture_buf->get_channel_mask();
-		assert(playback_mask == capture_mask);
-#endif
-		return playback_mask;
-	}
-
-	void set_channel_mode(ChannelMode mode, uint16_t mask) {
-		_playback_buf->set_channel_mode(mode, mask);
-		_capture_buf->set_channel_mode(mode, mask);
-	}
-
-	ChannelMode get_channel_mode() {
-		ChannelMode playback_mode = _playback_buf->get_channel_mode();
-#ifndef NDEBUG
-		ChannelMode capture_mode  = _capture_buf->get_channel_mode();
-		assert(playback_mode == capture_mode);
-#endif
-		return playback_mode;
-	}
-
 	/** Emitted when some MIDI data has been received for recording.
 	 *  Parameter is the source that it is destined for.
 	 *  A caller can get a copy of the data with get_gui_feed_buffer ()
@@ -147,7 +124,7 @@ class MidiDiskstream : public Diskstream
   protected:
 	friend class MidiTrack;
 
-	int  process (framepos_t transport_frame, pframes_t nframes, framecnt_t &);
+        int  process (BufferSet&, framepos_t transport_frame, pframes_t nframes, framecnt_t &, bool need_diskstream);
 	bool commit  (framecnt_t nframes);
 	static framecnt_t midi_readahead;
 

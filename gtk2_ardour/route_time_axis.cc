@@ -639,10 +639,6 @@ RouteTimeAxisView::build_display_menu ()
 			items.push_back (MenuElem (_("Mode"), *mode_menu));
 		}
 
-		color_mode_menu = build_color_mode_menu();
-		if (color_mode_menu) {
-			items.push_back (MenuElem (_("Color Mode"), *color_mode_menu));
-		}
 
 		items.push_back (SeparatorElem());
 

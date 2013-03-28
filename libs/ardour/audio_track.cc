@@ -316,8 +316,6 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 		return 0;
 	}
 
-	Sample* b;
-	Sample* tmpb;
 	framepos_t transport_frame;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 
@@ -342,7 +340,9 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 		   to do nothing.
 		*/
 
-		dret = diskstream->process (transport_frame, 0, playback_distance);
+		BufferSet bufs; /* empty set, no matter - nothing will happen */
+
+		dret = diskstream->process (bufs, transport_frame, 0, playback_distance, false);
 		need_butler = diskstream->commit (playback_distance);
 		return dret;
 	}
@@ -350,125 +350,21 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 	_silent = false;
 	_amp->apply_gain_automation(false);
 
-	if ((dret = diskstream->process (transport_frame, nframes, playback_distance)) != 0) {
+	BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers ());
+
+	fill_buffers_with_input (bufs, _input, nframes);
+	
+	if (_meter_point == MeterInput) {
+		_meter->run (bufs, start_frame, end_frame, nframes, true);
+	}
+
+	if ((dret = diskstream->process (bufs, transport_frame, nframes, playback_distance, (monitoring_state() == MonitoringDisk))) != 0) {
 		need_butler = diskstream->commit (playback_distance);
 		silence (nframes);
 		return dret;
 	}
 
-	/* special condition applies */
-
-	if (_meter_point == MeterInput) {
-		_input->process_input (_meter, start_frame, end_frame, nframes);
-	}
-
-	if (monitoring_state() == MonitoringInput) {
-
-		passthru (start_frame, end_frame, nframes, false);
-
-	} else if ((b = diskstream->playback_buffer(0)) != 0) {
-
-		/*
-		  XXX is it true that the earlier test on n_outputs()
-		  means that we can avoid checking it again here? i think
-		  so, because changing the i/o configuration of an IO
-		  requires holding the AudioEngine lock, which we hold
-		  while in the process() tree.
-		*/
-
-
-		/* copy the diskstream data to all output buffers */
-
-		size_t limit = input_streams ().n_audio();
-		BufferSet& bufs = _session.get_scratch_buffers ();
-		const size_t blimit = bufs.count().n_audio();
-
-		uint32_t n;
-		uint32_t i;
-
-		if (limit > blimit) {
-
-			/* example case: auditioner configured for stereo output,
-			   but loaded with an 8 channel file. there are only
-			   2 passthrough buffers, but n_process_buffers() will
-			   return 8.
-
-			   arbitrary decision: map all channels in the diskstream
-			   to the outputs available.
-			*/
-
-			float scaling = limit/blimit;
-
-			for (i = 0, n = 1; i < blimit; ++i, ++n) {
-
-				/* first time through just copy a channel into
-				   the output buffer.
-				*/
-
-				Sample* bb = bufs.get_audio (i).data();
-
-				for (pframes_t xx = 0; xx < nframes; ++xx) {
-					bb[xx] = b[xx] * scaling;
-				}
-
-				if (n < diskstream->n_channels().n_audio()) {
-					tmpb = diskstream->playback_buffer(n);
-					if (tmpb!=0) {
-						b = tmpb;
-					}
-				}
-			}
-
-			for (;i < limit; ++i, ++n) {
-
-				/* for all remaining channels, sum with existing
-				   data in the output buffers
-				*/
-
-				bufs.get_audio (i%blimit).accumulate_with_gain_from (b, nframes, 0, scaling);
-
-				if (n < diskstream->n_channels().n_audio()) {
-					tmpb = diskstream->playback_buffer(n);
-					if (tmpb!=0) {
-						b = tmpb;
-					}
-				}
-
-			}
-
-			limit = blimit;
-
-		} else {
-			for (i = 0, n = 1; i < limit; ++i, ++n) {
-				memcpy (bufs.get_audio (i).data(), b, sizeof (Sample) * nframes);
-				if (n < diskstream->n_channels().n_audio()) {
-					tmpb = diskstream->playback_buffer(n);
-					if (tmpb!=0) {
-						b = tmpb;
-					}
-				}
-			}
-
-			/* try to leave any MIDI buffers alone */
-
-			ChanCount chn;
-			chn.set_audio (limit);
-			chn.set_midi (_input->n_ports().n_midi());
-			bufs.set_count (chn);
-		}
-
-		/* final argument: don't waste time with automation if we're recording or we've just stopped (yes it can happen) */
-
-		process_output_buffers (
-			bufs, start_frame, end_frame, nframes,
-			declick,
-			(!diskstream->record_enabled() && _session.transport_rolling())
-			);
-
-	} else {
-		/* problem with the diskstream; just be quiet for a bit */
-		silence (nframes);
-	}
+	process_output_buffers (bufs, start_frame, end_frame, nframes, declick, (!diskstream->record_enabled() && _session.transport_rolling()));
 
 	need_butler = diskstream->commit (playback_distance);
 

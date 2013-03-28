@@ -66,6 +66,7 @@
 #include "mouse_cursors.h"
 #include "note_player.h"
 #include "public_editor.h"
+#include "route_time_axis.h"
 #include "rgb_macros.h"
 #include "selection.h"
 #include "simpleline.h"
@@ -89,7 +90,6 @@ PBD::Signal1<void, MidiRegionView *> MidiRegionView::SelectionCleared;
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv,
                                 boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color const & basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
-	, _last_channel_selection(0xFFFF)
 	, _current_range_min(0)
 	, _current_range_max(0)
 	, _active_notes(0)
@@ -116,13 +116,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
-
-	MidiTimeAxisView *time_axis = dynamic_cast<MidiTimeAxisView *>(&tv);
-	if (time_axis) {
-		_last_channel_mode = time_axis->channel_selector().get_channel_mode();
-		_last_channel_selection = time_axis->channel_selector().get_selected_channels();
-	}
-
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
 
@@ -133,7 +126,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
                                 boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color& basic_color,
                                 TimeAxisViewItem::Visibility visibility)
 	: RegionView (parent, tv, r, spu, basic_color, false, visibility)
-	, _last_channel_selection(0xFFFF)
 	, _current_range_min(0)
 	, _current_range_max(0)
 	, _active_notes(0)
@@ -160,12 +152,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
-	MidiTimeAxisView *time_axis = dynamic_cast<MidiTimeAxisView *>(&tv);
-	if (time_axis) {
-		_last_channel_mode = time_axis->channel_selector().get_channel_mode();
-		_last_channel_selection = time_axis->channel_selector().get_selected_channels();
-	}
-
 	connect_to_diskstream ();
 
 	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), boost::bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
@@ -184,7 +170,6 @@ MidiRegionView::parameter_changed (std::string const & p)
 MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	: sigc::trackable(other)
 	, RegionView (other)
-	, _last_channel_selection(0xFFFF)
 	, _current_range_min(0)
 	, _current_range_max(0)
 	, _active_notes(0)
@@ -219,7 +204,6 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 
 MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<MidiRegion> region)
 	: RegionView (other, boost::shared_ptr<Region> (region))
-	, _last_channel_selection(0xFFFF)
 	, _current_range_min(0)
 	, _current_range_max(0)
 	, _active_notes(0)
@@ -293,8 +277,10 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	group->raise_to_top();
 	group->signal_event().connect (sigc::mem_fun (this, &MidiRegionView::canvas_event), false);
 
-	midi_view()->signal_channel_mode_changed().connect(
-		sigc::mem_fun(this, &MidiRegionView::midi_channel_mode_changed));
+
+	midi_view()->midi_track()->PlaybackChannelModeChanged.connect (_channel_mode_changed_connection, invalidator (*this),
+								       boost::bind (&MidiRegionView::midi_channel_mode_changed, this),
+								       gui_context ());
 
 	instrument_info().Changed.connect (_instrument_changed_connection, invalidator (*this),
 					   boost::bind (&MidiRegionView::instrument_settings_changed, this), gui_context());
@@ -1214,7 +1200,7 @@ void
 MidiRegionView::display_patch_changes ()
 {
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
-	uint16_t chn_mask = mtv->channel_selector().get_selected_channels();
+	uint16_t chn_mask = mtv->midi_track()->get_playback_channel_mask();
 
 	for (uint8_t i = 0; i < 16; ++i) {
 		display_patch_changes_on_channel (i, chn_mask & (1 << i));
@@ -1673,7 +1659,7 @@ MidiRegionView::update_note (CanvasNote* ev, bool update_ghost_regions)
 		/* outline all edges */
 		ev->property_outline_what() = (guint32) 0xF;
 	}
-
+	
 	if (update_ghost_regions) {
 		for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 			MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
@@ -1751,7 +1737,7 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 			event->show_velocity();
 		}
 
-		event->on_channel_selection_change(_last_channel_selection);
+		event->on_channel_selection_change (get_selected_channels());
 		_events.push_back(event);
 
 		if (visible) {
@@ -3220,19 +3206,20 @@ MidiRegionView::set_frame_color()
 }
 
 void
-MidiRegionView::midi_channel_mode_changed(ChannelMode mode, uint16_t mask)
+MidiRegionView::midi_channel_mode_changed ()
 {
+	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	uint16_t mask = mtv->midi_track()->get_playback_channel_mask();
+	ChannelMode mode = mtv->midi_track()->get_playback_channel_mode ();
+
 	if (mode == ForceChannel) {
 		mask = 0xFFFF; // Show all notes as active (below)
 	}
 
 	// Update notes for selection
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		(*i)->on_channel_selection_change(mask);
+		(*i)->on_channel_selection_change (mask);
 	}
-
-	_last_channel_selection = mask;
-	_last_channel_mode = mode;
 
 	_patch_changes.clear ();
 	display_patch_changes ();
@@ -3399,7 +3386,7 @@ MidiRegionView::goto_next_note (bool add_to_selection)
 	time_sort_events ();
 
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
-	uint16_t const channel_mask = mtv->channel_selector().get_selected_channels ();
+	uint16_t const channel_mask = mtv->midi_track()->get_playback_channel_mask();
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		if ((*i)->selected()) {
@@ -3436,7 +3423,7 @@ MidiRegionView::goto_previous_note (bool add_to_selection)
 	time_sort_events ();
 
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
-	uint16_t const channel_mask = mtv->channel_selector().get_selected_channels ();
+	uint16_t const channel_mask = mtv->midi_track()->get_playback_channel_mask ();
 
 	for (Events::reverse_iterator i = _events.rbegin(); i != _events.rend(); ++i) {
 		if ((*i)->selected()) {
@@ -3562,7 +3549,7 @@ MidiRegionView::maybe_select_by_position (GdkEventButton* ev, double /*x*/, doub
 	Events e;
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 
-	uint16_t chn_mask = mtv->channel_selector().get_selected_channels();
+	uint16_t chn_mask = mtv->midi_track()->get_playback_channel_mask();
 
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 		get_events (e, Evoral::Sequence<Evoral::MusicalTime>::PitchGreaterThanOrEqual, (uint8_t) floor (note), chn_mask);
@@ -3687,8 +3674,8 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 		Evoral::MIDIEvent<MidiBuffer::TimeType> const ev (*i, false);
 
 		if (ev.is_channel_event()) {
-			if (_last_channel_mode == FilterChannels) {
-				if (((uint16_t(1) << ev.channel()) & _last_channel_selection) == 0) {
+			if (get_channel_mode() == FilterChannels) {
+				if (((uint16_t(1) << ev.channel()) & get_selected_channels()) == 0) {
 					continue;
 				}
 			}
@@ -3883,3 +3870,18 @@ MidiRegionView::note_button_release ()
 	delete _note_player;
 	_note_player = 0;
 }
+
+ChannelMode
+MidiRegionView::get_channel_mode () const
+{
+	RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (&trackview);
+	return rtav->midi_track()->get_playback_channel_mode();
+}
+
+uint16_t
+MidiRegionView::get_selected_channels () const
+{
+	RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (&trackview);
+	return rtav->midi_track()->get_playback_channel_mask();
+}
+

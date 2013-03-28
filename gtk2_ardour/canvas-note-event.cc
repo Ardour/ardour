@@ -22,6 +22,7 @@
 #include "gtkmm2ext/keyboard.h"
 
 #include "canvas-note-event.h"
+#include "midi_channel_selector.h"
 #include "midi_region_view.h"
 #include "public_editor.h"
 #include "editing_syms.h"

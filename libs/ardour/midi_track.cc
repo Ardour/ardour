@@ -17,6 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <strings.h> // for ffs(3)
+
 #include "pbd/enumwriter.h"
 #include "pbd/convert.h"
 #include "evoral/midi_util.h"
@@ -55,6 +57,8 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 	, _note_mode(Sustained)
 	, _step_editing (false)
 	, _input_active (true)
+	, _playback_channel_mask(0x0000ffff)
+	, _capture_channel_mask(0x0000ffff)
 {
 }
 
@@ -158,6 +162,38 @@ MidiTrack::set_state (const XMLNode& node, int version)
 		set_input_active (string_is_affirmative (prop->value()));
 	}
 
+	ChannelMode playback_channel_mode = AllChannels;
+	ChannelMode capture_channel_mode = AllChannels;
+
+	if ((prop = node.property ("playback-channel-mode")) != 0) {
+		playback_channel_mode = ChannelMode (string_2_enum(prop->value(), playback_channel_mode));
+	}
+	if ((prop = node.property ("capture-channel-mode")) != 0) {
+		playback_channel_mode = ChannelMode (string_2_enum(prop->value(), capture_channel_mode));
+	}
+	if ((prop = node.property ("channel-mode")) != 0) {
+		/* 3.0 behaviour where capture and playback modes were not separated */
+		playback_channel_mode = ChannelMode (string_2_enum(prop->value(), playback_channel_mode));
+		capture_channel_mode = playback_channel_mode;
+	}
+
+	unsigned int playback_channel_mask = 0xffff;
+	unsigned int capture_channel_mask = 0xffff;
+
+	if ((prop = node.property ("playback-channel-mask")) != 0) {
+		sscanf (prop->value().c_str(), "0x%x", &playback_channel_mask);
+	}
+	if ((prop = node.property ("capture-channel-mask")) != 0) {
+		sscanf (prop->value().c_str(), "0x%x", &capture_channel_mask);
+	}
+	if ((prop = node.property ("channel-mask")) != 0) {
+		sscanf (prop->value().c_str(), "0x%x", &playback_channel_mask);
+		capture_channel_mask = playback_channel_mask;
+	}
+
+	set_playback_channel_mode (playback_channel_mode, playback_channel_mask);
+	set_capture_channel_mode (capture_channel_mode, capture_channel_mask);
+
 	pending_state = const_cast<XMLNode*> (&node);
 
 	if (_session.state_of_the_state() & Session::Loading) {
@@ -195,6 +231,13 @@ MidiTrack::state(bool full_state)
 
 		root.add_child_nocopy (*freeze_node);
 	}
+
+	root.add_property("playback_channel-mode", enum_2_string(get_playback_channel_mode()));
+	root.add_property("capture_channel-mode", enum_2_string(get_capture_channel_mode()));
+	snprintf (buf, sizeof(buf), "0x%x", get_playback_channel_mask());
+	root.add_property("playback-channel-mask", buf);
+	snprintf (buf, sizeof(buf), "0x%x", get_capture_channel_mask());
+	root.add_property("capture-channel-mask", buf);
 
 	root.add_property ("note-mode", enum_2_string (_note_mode));
 	root.add_property ("step-editing", (_step_editing ? "yes" : "no"));
@@ -300,25 +343,36 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		   playback distance to zero, thus causing diskstream::commit
 		   to do nothing.
 		   */
-		dret = diskstream->process (transport_frame, 0, playback_distance);
+		BufferSet bufs; /* empty set - is OK, since nothing will happen */
+
+		dret = diskstream->process (bufs, transport_frame, 0, playback_distance, false);
 		need_butler = diskstream->commit (playback_distance);
 		return dret;
 	}
 
+	BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
+
+	fill_buffers_with_input (bufs, _input, nframes);
+
+	if (_meter_point == MeterInput) {
+		_meter->run (bufs, start_frame, end_frame, nframes, true);
+	}
+
+	/* filter captured data before the diskstream sees it */
+
+	filter_channels (bufs, get_capture_channel_mode(), get_capture_channel_mask());
 
 	_silent = false;
 
-	if ((dret = diskstream->process (transport_frame, nframes, playback_distance)) != 0) {
+	if ((dret = diskstream->process (bufs, transport_frame, nframes, playback_distance, (monitoring_state() == MonitoringDisk))) != 0) {
 		need_butler = diskstream->commit (playback_distance);
 		silence (nframes);
 		return dret;
 	}
 
-	/* special condition applies */
-
-	if (_meter_point == MeterInput) {
-		_input->process_input (_meter, start_frame, end_frame, nframes);
-	}
+	/* filter playback data before we do anything else */
+	
+	filter_channels (bufs, get_playback_channel_mode(), get_playback_channel_mask ());
 
 	if (monitoring_state() == MonitoringInput) {
 
@@ -334,47 +388,17 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 
 		diskstream->flush_playback (start_frame, end_frame);
 
-		passthru (start_frame, end_frame, nframes, 0);
+	} 
 
-	} else {
-
-		/*
-		   XXX is it true that the earlier test on n_outputs()
-		   means that we can avoid checking it again here? i think
-		   so, because changing the i/o configuration of an IO
-		   requires holding the AudioEngine lock, which we hold
-		   while in the process() tree.
-		   */
-
-
-		/* copy the diskstream data to all output buffers */
-
-		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
-		MidiBuffer& mbuf (bufs.get_midi (0));
-
-		/* we are a MIDI track, so we always start the chain with a
-		 * single-MIDI-channel diskstream 
-		 */
-		ChanCount c;
-		c.set_audio (0);
-		c.set_midi (1);
-		bufs.set_count (c);
-
-		assert (nframes > 0);
-
-		diskstream->get_playback (mbuf, nframes);
-
-		/* append immediate messages to the first MIDI buffer (thus sending it to the first output port) */
-
-		write_out_of_band_data (bufs, start_frame, end_frame, nframes);
-
-		/* final argument: don't waste time with automation if we're recording or we've just stopped (yes it can happen) */
-
-		process_output_buffers (
-			bufs, start_frame, end_frame, nframes,
-			declick, (!diskstream->record_enabled() && !_session.transport_stopped())
-			);
-	}
+	
+	/* append immediate messages to the first MIDI buffer (thus sending it to the first output port) */
+	
+	write_out_of_band_data (bufs, start_frame, end_frame, nframes);
+	
+	/* final argument: don't waste time with automation if we're not recording or rolling */
+	
+	process_output_buffers (bufs, start_frame, end_frame, nframes,
+				declick, (!diskstream->record_enabled() && !_session.transport_stopped()));
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
@@ -453,6 +477,43 @@ MidiTrack::push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes)
 				/* we don't care about the time for this purpose */
 				_step_edit_ring_buffer.write (0, ev.type(), ev.size(), ev.buffer());
 			}
+		}
+	}
+}
+
+void 
+MidiTrack::filter_channels (BufferSet& bufs, ChannelMode mode, uint32_t mask)
+{
+	if (mode == AllChannels) {
+		return;
+	}
+
+	MidiBuffer& buf (bufs.get_midi (0));
+	
+	for (MidiBuffer::iterator e = buf.begin(); e != buf.end(); ) {
+		
+		Evoral::MIDIEvent<framepos_t> ev(*e, false);
+
+		if (ev.is_channel_event()) {
+			switch (mode) {
+			case FilterChannels:
+				if (0 == ((1<<ev.channel()) & mask)) {
+					e = buf.erase (e);
+				} else {
+					++e;
+				}
+				break;
+			case ForceChannel:
+				ev.set_channel (ffs (mask) - 1);
+				++e;
+				break;
+			case AllChannels:
+				/* handled by the opening if() */
+				++e;
+				break;
+			}
+		} else {
+			++e;
 		}
 	}
 }
@@ -637,21 +698,53 @@ MidiTrack::write_source (uint32_t)
 }
 
 void
-MidiTrack::set_channel_mode (ChannelMode mode, uint16_t mask)
+MidiTrack::set_playback_channel_mode(ChannelMode mode, uint16_t mask) 
 {
-	midi_diskstream()->set_channel_mode (mode, mask);
+	ChannelMode old = get_playback_channel_mode ();
+	uint16_t old_mask = get_playback_channel_mask ();
+
+	if (old != mode || mask != old_mask) {
+		_set_playback_channel_mode (mode, mask);
+		PlaybackChannelModeChanged ();
+		_session.set_dirty ();
+	}
 }
 
-ChannelMode
-MidiTrack::get_channel_mode ()
+void
+MidiTrack::set_capture_channel_mode(ChannelMode mode, uint16_t mask) 
 {
-	return midi_diskstream()->get_channel_mode ();
+	ChannelMode old = get_capture_channel_mode ();
+	uint16_t old_mask = get_capture_channel_mask ();
+
+	if (old != mode || mask != old_mask) {
+		_set_capture_channel_mode (mode, mask);
+		CaptureChannelModeChanged ();
+		_session.set_dirty ();
+	}
 }
 
-uint16_t
-MidiTrack::get_channel_mask ()
+void
+MidiTrack::set_playback_channel_mask (uint16_t mask)
 {
-	return midi_diskstream()->get_channel_mask ();
+	uint16_t old = get_playback_channel_mask();
+
+	if (old != mask) {
+		_set_playback_channel_mask (mask);
+		PlaybackChannelMaskChanged ();
+		_session.set_dirty ();
+	}
+}
+
+void
+MidiTrack::set_capture_channel_mask (uint16_t mask)
+{
+	uint16_t old = get_capture_channel_mask();
+
+	if (old != mask) {
+		_set_capture_channel_mask (mask);
+		CaptureChannelMaskChanged ();
+		_session.set_dirty ();
+	}
 }
 
 boost::shared_ptr<MidiPlaylist>
@@ -739,7 +832,7 @@ MidiTrack::act_on_mute ()
 	if (muted()) {
 		/* only send messages for channels we are using */
 
-		uint16_t mask = get_channel_mask();
+		uint16_t mask = get_playback_channel_mask();
 
 		for (uint8_t channel = 0; channel <= 0xF; channel++) {
 
@@ -792,3 +885,4 @@ MidiTrack::monitoring_state () const
 	} 
 	return ms;
 }
+
