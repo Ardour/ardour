@@ -658,6 +658,7 @@ SystemExec::write_to_stdin(std::string d, size_t len)
 		}
 		c += r;
 	}
+	fsync(pin[1]);
 	::pthread_mutex_unlock(&write_lock);
 	return c;
 }
