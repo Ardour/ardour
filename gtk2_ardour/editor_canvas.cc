@@ -438,7 +438,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 
 	} else if ((tv = dynamic_cast<RouteTimeAxisView*> (tvp.first)) != 0) {
 
-		/* check that its an audio track, not a bus */
+		/* check that its a track, not a bus */
 
 		if (tv->track()) {
 			/* select the track, then embed/import */
