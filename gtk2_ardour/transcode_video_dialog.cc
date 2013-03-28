@@ -394,6 +394,7 @@ TranscodeVideoDialog::dialog_progress_mode ()
 	cancel_button->hide();
 	copy_button.hide();
 	transcode_button.hide();
+	audio_button.hide();
 	pbar.set_size_request(300,-1);
 	progress_box->show();
 }
