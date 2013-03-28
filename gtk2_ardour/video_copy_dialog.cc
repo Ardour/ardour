@@ -72,7 +72,7 @@ VideoCopyDialog::VideoCopyDialog (Session* s, std::string infile)
 	set_resizable (false);
 	p_connection = sigc::connection();
 
-	std::string dstdir = video_dest_dir(_session->session_directory().video_path(), Config->get_video_server_docroot());
+	std::string dstdir = video_dest_dir(_session->session_directory().video_path(), video_get_docroot(Config));
 	std::string dstfn  = dstdir + G_DIR_SEPARATOR + Glib::path_get_basename(infile);
 	path_entry.set_text (dstfn);
 
@@ -110,7 +110,7 @@ void
 VideoCopyDialog::setup_non_interactive_copy (std::string destfn)
 {
 	if (destfn.empty()) {
-		std::string dstdir = video_dest_dir(_session->session_directory().video_path(), Config->get_video_server_docroot());
+		std::string dstdir = video_dest_dir(_session->session_directory().video_path(), video_get_docroot(Config));
 		outfn= dstdir + G_DIR_SEPARATOR + Glib::path_get_basename(infn);
 	} else {
 		outfn=destfn;

@@ -28,8 +28,8 @@
 #include "pbd/error.h"
 #include "ardour/ardour.h"
 #include "ardour/session_directory.h"
-#include "ardour_dialog.h"
 #include "video_image_frame.h"
+#include "utils_videotl.h"
 
 #include "i18n.h"
 
@@ -92,6 +92,25 @@ video_dest_dir (const std::string sessiondir, const std::string docroot)
 	}
 	return dir;
 }
+
+std::string
+video_get_docroot (ARDOUR::RCConfiguration* config)
+{
+	if (config->get_video_advanced_setup()) {
+		return config->get_video_server_docroot();
+	}
+	return X_("/");
+}
+
+std::string
+video_get_server_url (ARDOUR::RCConfiguration* config)
+{
+	if (config->get_video_advanced_setup()) {
+		return config->get_video_server_url();
+	}
+	return X_("http://localhost:1554");
+}
+
 
 std::string
 strip_file_extension (const std::string infile)

@@ -3336,7 +3336,7 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 
 		std::string icsd_exec = video_server_dialog->get_exec_path();
 		std::string icsd_docroot = video_server_dialog->get_docroot();
-		if (icsd_docroot.empty()) {icsd_docroot = "/";}
+		if (icsd_docroot.empty()) {icsd_docroot = X_("/");}
 
 		struct stat sb;
 		if (!lstat (icsd_docroot.c_str(), &sb) == 0 || !S_ISDIR(sb.st_mode)) {
@@ -3362,10 +3362,16 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 		argp[8] = 0;
 		stop_video_server();
 
-		std::ostringstream osstream;
-		osstream << "http://localhost:" << video_server_dialog->get_listenport() << "/";
-		Config->set_video_server_url(osstream.str());
-		Config->set_video_server_docroot(icsd_docroot);
+		if (icsd_docroot == X_("/")) {
+			Config->set_video_advanced_setup(false);
+		} else {
+			std::ostringstream osstream;
+			osstream << "http://localhost:" << video_server_dialog->get_listenport() << "/";
+			Config->set_video_server_url(osstream.str());
+			Config->set_video_server_docroot(icsd_docroot);
+			Config->set_video_advanced_setup(true);
+		}
+
 		video_server_process = new SystemExec(icsd_exec, argp);
 		video_server_process->start();
 		sleep(1);

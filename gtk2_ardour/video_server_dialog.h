@@ -40,7 +40,7 @@ class VideoServerDialog : public ArdourDialog
 	~VideoServerDialog ();
 
 	std::string get_exec_path () { return path_entry.get_text(); }
-	std::string get_docroot () { return docroot_entry.get_text(); }
+	std::string get_docroot ();
 	std::string get_listenaddr () { return listenaddr_combo.get_active_text();}
 	int get_listenport () { return listenport_spinner.get_value_as_int();}
 	int get_cachesize () { return cachesize_spinner.get_value_as_int();}
