@@ -699,6 +699,8 @@ PluginManager::lxvst_discover (string path)
 	VSTInfo* finfo;
 	char buf[32];
 
+	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("checking apparent LXVST plugin at %1\n", path));
+
 	if ((finfo = vstfx_get_info (const_cast<char *> (path.c_str()))) == 0) {
 		return -1;
 	}
