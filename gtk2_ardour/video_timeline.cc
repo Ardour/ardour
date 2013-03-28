@@ -61,8 +61,8 @@ VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Group *vbg, int in
 	video_aspect_ratio = 4.0/3.0;
 	open_video_monitor_dialog = 0;
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&VideoTimeLine::parameter_changed, this, _1), gui_context());
-	video_server_url = Config->get_video_server_url();
-	server_docroot   = Config->get_video_server_docroot();
+	video_server_url = video_get_server_url(Config);
+	server_docroot   = video_get_docroot(Config);
 	video_filename = "";
 	local_file = true;
 	video_file_fps = 25.0;
@@ -616,9 +616,12 @@ void
 VideoTimeLine::parameter_changed (std::string const & p)
 {
 	if (p == "video-server-url") {
-		set_video_server_url (Config->get_video_server_url ());
+		set_video_server_url (video_get_server_url(Config));
 	} else if (p == "video-server-docroot") {
-		set_video_server_docroot (Config->get_video_server_docroot ());
+		set_video_server_docroot (video_get_docroot(Config));
+	} else if (p == "video-advanced-setup") {
+		set_video_server_url (video_get_server_url(Config));
+		set_video_server_docroot (video_get_docroot(Config));
 	}
 	if (p == "use-video-file-fps" || p == "videotimeline-pullup" ) { /* session->config parameter */
 		VtlUpdate();

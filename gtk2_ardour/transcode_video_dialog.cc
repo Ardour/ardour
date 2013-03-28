@@ -105,7 +105,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	height_spinner.set_sensitive(false);
 	bitrate_spinner.set_sensitive(false);
 
-	std::string dstdir = video_dest_dir(_session->session_directory().video_path(), Config->get_video_server_docroot());
+	std::string dstdir = video_dest_dir(_session->session_directory().video_path(), video_get_docroot(Config));
 	std::string dstfn  = video_dest_file(dstdir, infile);
 	path_entry.set_text (dstfn);
 
@@ -402,7 +402,7 @@ void
 TranscodeVideoDialog::launch_transcode ()
 {
 	std::string outfn = path_entry.get_text();
-	if (!confirm_video_outfn(outfn, Config->get_video_server_docroot())) return;
+	if (!confirm_video_outfn(outfn, video_get_docroot(Config))) return;
 	progress_label.set_text (_("Transcoding Video.."));
 	dialog_progress_mode();
 #if 1 /* tentative debug mode */
