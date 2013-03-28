@@ -409,6 +409,7 @@ SystemExec::make_argp(std::string args) {
 void
 SystemExec::terminate ()
 {
+	::pthread_mutex_lock(&write_lock);
 	close_stdin();
 	if (pid) {
 		::usleep(100000);
@@ -428,6 +429,8 @@ SystemExec::terminate ()
 
 	wait();
 	if (thread_active) pthread_join(thread_id_tt, NULL);
+	thread_active = false;
+	::pthread_mutex_unlock(&write_lock);
 }
 
 int
@@ -626,6 +629,7 @@ SystemExec::close_stdin()
 	::close(pin[1]);
 	::close(pout[0]);
 	::close(pout[1]);
+	pin[1] = - 1; // mark as closed
 }
 
 int
