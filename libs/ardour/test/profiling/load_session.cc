@@ -10,6 +10,8 @@
 using namespace std;
 using namespace ARDOUR;
 
+static const char* localedir = LOCALEDIR;
+
 int main (int argc, char* argv[])
 {
 	if (argc != 3) {
@@ -17,7 +19,7 @@ int main (int argc, char* argv[])
 		exit (EXIT_FAILURE);
 	}
 
-	ARDOUR::init (false, true);
+	ARDOUR::init (false, true, localedir);
 
 	Session* s = 0;
 	
