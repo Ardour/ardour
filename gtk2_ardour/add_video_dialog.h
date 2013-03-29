@@ -33,8 +33,7 @@
 
 enum VtlImportOption {
  VTL_IMPORT_NONE = 0,
- VTL_IMPORT_COPY = 1,
- VTL_IMPORT_TRANSCODE = 2,
+ VTL_IMPORT_TRANSCODE = 1,
 };
 
 class AddVideoDialog : public ArdourDialog
@@ -74,7 +73,6 @@ class AddVideoDialog : public ArdourDialog
 
 	Gtk::CheckButton  xjadeo_checkbox;
 	Gtk::CheckButton  set_session_fps_checkbox;
-	Gtk::ComboBoxText import_combo;
 	Gtk::Notebook notebook;
 	Gtk::Button *ok_button;
 

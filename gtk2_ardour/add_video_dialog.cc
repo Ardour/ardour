@@ -136,16 +136,8 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	chooser.add_filter (matchall_filter);
 	chooser.set_select_multiple (false);
 
-	/* file import options */
-	import_combo.set_name ("PaddedButton");
-	import_combo.append_text(_("Reference From Current Location"));
-	import_combo.append_text(_("Hardlink or Copy to Session"));
-	import_combo.append_text(_("Transcode to Session"));
-	import_combo.set_active(2);
-
 	VBox* vboxfb = manage (new VBox);
 	vboxfb->pack_start (chooser, true, true, 0);
-	vboxfb->pack_start (import_combo, false, true, 4);
 
 	if (video_get_docroot(Config).size() > 0 &&
 			Config->get_video_advanced_setup()) {
@@ -336,8 +328,7 @@ AddVideoDialog::import_option ()
 {
 	int n = notebook.get_current_page ();
 	if (n == 0 && Config->get_video_advanced_setup()) { return VTL_IMPORT_NONE; }
-	int i = import_combo.get_active_row_number();
-	return static_cast<VtlImportOption>(i);
+	return VTL_IMPORT_TRANSCODE;
 }
 
 bool

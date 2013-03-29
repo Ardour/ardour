@@ -429,7 +429,6 @@ def build(bld):
             'transcode_ffmpeg.cc',
             'transcode_video_dialog.cc',
             'video_server_dialog.cc',
-            'video_copy_dialog.cc',
             'utils_videotl.cc',
             'export_video_dialog.cc',
             'export_video_infobox.cc'
