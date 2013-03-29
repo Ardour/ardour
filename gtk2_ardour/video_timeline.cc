@@ -532,8 +532,16 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 	if (found_xjadeo() && local_file) {
 		GuiUpdate("set-xjadeo-sensitive-on");
 		if (vmonitor && vmonitor->is_started()) {
+#if 1
+			/* xjadeo <= 0.6.4 has a bug where changing the video-file may segfauls
+			 * if the geometry changes to a different line-size alignment
+			 */
+			reopen_vmonitor = true;
+			vmonitor->quit();
+#else
 			vmonitor->set_fps(video_file_fps);
 			vmonitor->open(video_filename);
+#endif
 		}
 	} else if (!local_file) {
 #if 1 /* temp debug/devel message */
