@@ -180,18 +180,29 @@ private:
 
         void filter_channels (BufferSet& bufs, ChannelMode mode, uint32_t mask); 
 
+/* if mode is ForceChannel, force mask to the lowest set channel or 1 if no
+ * channels are set.
+ */
+#define force_mask(mode,mask) (((mode) == ForceChannel) ? (((mask) ? (1<<(ffs((mask))-1)) : 1)) : mask)
+
 	void _set_playback_channel_mode(ChannelMode mode, uint16_t mask) {
+		mask = force_mask (mode, mask);
 		g_atomic_int_set(&_playback_channel_mask, (uint32_t(mode) << 16) | uint32_t(mask));
 	}
         void _set_playback_channel_mask (uint16_t mask) {
+		mask = force_mask (get_playback_channel_mode(), mask);
 		g_atomic_int_set(&_playback_channel_mask, (uint32_t(get_playback_channel_mode()) << 16) | uint32_t(mask));
 	}
 	void _set_capture_channel_mode(ChannelMode mode, uint16_t mask) {
+		mask = force_mask (mode, mask);
 		g_atomic_int_set(&_capture_channel_mask, (uint32_t(mode) << 16) | uint32_t(mask));
 	}
         void _set_capture_channel_mask (uint16_t mask) {
+		mask = force_mask (get_capture_channel_mode(), mask);
 		g_atomic_int_set(&_capture_channel_mask, (uint32_t(get_capture_channel_mode()) << 16) | uint32_t(mask));
 	}
+
+#undef force_mask
 };
 
 } /* namespace ARDOUR*/

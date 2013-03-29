@@ -720,25 +720,27 @@ void
 Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 {
 	bool erased = false;
+	bool id_matched = false;
 
-	_edited = true;
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 remove note #%2 %3 @ %4\n", this, note->id(), (int)note->note(), note->time()));
 
-	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 remove note %2 @ %3\n", this, (int)note->note(), note->time()));
+	/* first try searching for the note using the time index, which is
+	 * faster since the container is "indexed" by time. (technically, this
+	 * means that lower_bound() can do a binary search rather than linear)
+	 *
+	 * this may not work, for reasons explained below.
+	 */
 
-	typename Sequence<Time>::Notes::iterator i = note_lower_bound(note->time());
-	while (i != _notes.end() && (*i)->time() == note->time()) {
-
-		typename Sequence<Time>::Notes::iterator tmp = i;
-		++tmp;
+	typename Sequence<Time>::Notes::iterator i;
+		
+	for (i = note_lower_bound(note->time()); i != _notes.end() && musical_time_equal ((*i)->time(), note->time()); ++i) {
 
 		if (*i == note) {
 
-			NotePtr n = *i;
-
-			DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1\terasing note %2 @ %3\n", this, (int)(*i)->note(), (*i)->time()));
+			DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1\terasing note #%2 %3 @ %4\n", this, (*i)->id(), (int)(*i)->note(), (*i)->time()));
 			_notes.erase (i);
 
-			if (n->note() == _lowest_note || n->note() == _highest_note) {
+			if (note->note() == _lowest_note || note->note() == _highest_note) {
 
 				_lowest_note = 127;
 				_highest_note = 0;
@@ -752,30 +754,100 @@ Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 			}
 
 			erased = true;
+			break;
 		}
-
-		i = tmp;
 	}
 
-	Pitches& p (pitches (note->channel()));
-
-	NotePtr search_note(new Note<Time>(0, 0, 0, note->note(), 0));
-
-	typename Pitches::iterator j = p.lower_bound (search_note);
-	while (j != p.end() && (*j)->note() == note->note()) {
-		typename Pitches::iterator tmp = j;
-		++tmp;
-
-		if (*j == note) {
-			DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1\terasing pitch %2 @ %3\n", this, (int)(*j)->note(), (*j)->time()));
-			p.erase (j);
-		}
-
-		j = tmp;
-	}
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1\ttime-based lookup did not find note #%2 %3 @ %4\n", this, note->id(), (int)note->note(), note->time()));
 
 	if (!erased) {
-		cerr << "Unable to find note to erase matching " << *note.get() << endl;
+
+		/* if the note's time property was changed in tandem with some
+		 * other property as the next operation after it was added to
+		 * the sequence, then at the point where we call this to undo
+		 * the add, the note we are targetting currently has a
+		 * different time property than the one we we passed via
+		 * the argument.
+		 *
+		 * in this scenario, we have no choice other than to linear
+		 * search the list of notes and find the note by ID.
+		 */
+		
+		for (i = _notes.begin(); i != _notes.end(); ++i) {
+
+			if ((*i)->id() == note->id()) {
+				
+				DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1\tID-based pass, erasing note #%2 %3 @ %4\n", this, (*i)->id(), (int)(*i)->note(), (*i)->time()));
+				_notes.erase (i);
+				
+				if (note->note() == _lowest_note || note->note() == _highest_note) {
+					
+					_lowest_note = 127;
+					_highest_note = 0;
+					
+					for (typename Sequence<Time>::Notes::iterator ii = _notes.begin(); ii != _notes.end(); ++ii) {
+						if ((*ii)->note() < _lowest_note)
+							_lowest_note = (*ii)->note();
+						if ((*ii)->note() > _highest_note)
+							_highest_note = (*ii)->note();
+					}
+				}
+				
+				erased = true;
+				id_matched = true;
+				break;
+			}
+		}
+	}
+	
+	if (erased) {
+
+		Pitches& p (pitches (note->channel()));
+		
+		typename Pitches::iterator j;
+
+		/* if we had to ID-match above, we can't expect to find it in
+		 * pitches via note comparison either. so do another linear
+		 * search to locate it. otherwise, we can use the note index
+		 * to potentially speed things up.
+		 */
+
+		if (id_matched) {
+
+			for (j = p.begin(); j != p.end(); ++j) {
+				if ((*j)->id() == note->id()) {
+					p.erase (j);
+					break;
+				}
+			}
+
+		} else {
+
+			/* Now find the same note in the "pitches" list (which indexes
+			 * notes by channel+time. We care only about its note number
+			 * so the search_note has all other properties unset.
+			 */
+			
+			NotePtr search_note (new Note<Time>(0, 0, 0, note->note(), 0));
+
+			for (j = p.lower_bound (search_note); j != p.end() && (*j)->note() == note->note(); ++j) {
+				
+				if ((*j) == note) {
+					DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1\terasing pitch %2 @ %3\n", this, (int)(*j)->note(), (*j)->time()));
+					p.erase (j);
+					break;
+				}
+			}
+		}
+
+		if (j == p.end()) {
+			warning << string_compose ("erased note %1 not found in pitches for channel %2", *note, (int) note->channel()) << endmsg;
+		}
+
+		_edited = true;
+	
+	} else {
+		cerr << "Unable to find note to erase matching " << *note.get() << endmsg;
 	}
 }
 
@@ -784,12 +856,13 @@ void
 Sequence<Time>::remove_patch_change_unlocked (const constPatchChangePtr p)
 {
 	typename Sequence<Time>::PatchChanges::iterator i = patch_change_lower_bound (p->time ());
-	while (i != _patch_changes.end() && (*i)->time() == p->time()) {
+
+	while (i != _patch_changes.end() && (musical_time_equal ((*i)->time(), p->time()))) {
 
 		typename Sequence<Time>::PatchChanges::iterator tmp = i;
 		++tmp;
 
-		if (*i == p) {
+		if (**i == *p) {
 			_patch_changes.erase (i);
 		}
 
@@ -1148,7 +1221,7 @@ Sequence<Time>::patch_change_lower_bound (Time t) const
 {
 	PatchChangePtr search (new PatchChange<Time> (t, 0, 0, 0));
 	typename Sequence<Time>::PatchChanges::const_iterator i = _patch_changes.lower_bound (search);
-	assert (i == _patch_changes.end() || (*i)->time() >= t);
+	assert (i == _patch_changes.end() || musical_time_greater_or_equal_to ((*i)->time(), t));
 	return i;
 }
 

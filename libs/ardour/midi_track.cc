@@ -169,7 +169,7 @@ MidiTrack::set_state (const XMLNode& node, int version)
 		playback_channel_mode = ChannelMode (string_2_enum(prop->value(), playback_channel_mode));
 	}
 	if ((prop = node.property ("capture-channel-mode")) != 0) {
-		playback_channel_mode = ChannelMode (string_2_enum(prop->value(), capture_channel_mode));
+		capture_channel_mode = ChannelMode (string_2_enum(prop->value(), capture_channel_mode));
 	}
 	if ((prop = node.property ("channel-mode")) != 0) {
 		/* 3.0 behaviour where capture and playback modes were not separated */
