@@ -1031,46 +1031,59 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 	(void) event_frame (&event, &px, &py);
 
 	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
-
+	bool can_drop = false;
+	
 	if (tv.first != 0) {
+
+		/* over a time axis view of some kind */
 
 		rtav = dynamic_cast<RouteTimeAxisView*> (tv.first);
 		
 		if (rtav != 0 && rtav->is_track ()) {
-
-			region = _regions->get_dragged_region ();
+			/* over a track, not a bus */
+			can_drop = true;
+		}
 			
-			if (region) {
-	
-				if ((boost::dynamic_pointer_cast<AudioRegion> (region) != 0 &&
-				    dynamic_cast<AudioTimeAxisView*> (tv.first) != 0) ||
-				    (boost::dynamic_pointer_cast<MidiRegion> (region) != 0 &&
-				     dynamic_cast<MidiTimeAxisView*> (tv.first) != 0)) {
 
-					/* audio to audio 
-					   OR 
-					   midi to midi
-					*/
+	} else {
+		/* not over a time axis view, so drop is possible */
+		can_drop = true;
+	}
 
-					context->drag_status (context->get_suggested_action(), time);
-					return true;
-				}
-			} else {
-				/* DND originating from outside ardour
-				 *
-				 * TODO: check if file is audio/midi, allow drops on same track-type only,
-				 * currently: if audio is dropped on a midi-track, it is only added to the region-list
-				 */
-				if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
-					context->drag_status(Gdk::ACTION_COPY, time);
-				} else {
-					if ((context->get_actions() & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY)
-						context->drag_status(Gdk::ACTION_COPY, time);
-					else
-						context->drag_status(Gdk::ACTION_LINK, time);
-				}
+	if (can_drop) {
+		region = _regions->get_dragged_region ();
+		
+		if (region) {
+			
+			if ((boost::dynamic_pointer_cast<AudioRegion> (region) != 0 &&
+			     dynamic_cast<AudioTimeAxisView*> (tv.first) != 0) ||
+			    (boost::dynamic_pointer_cast<MidiRegion> (region) != 0 &&
+			     dynamic_cast<MidiTimeAxisView*> (tv.first) != 0)) {
+				
+				/* audio to audio 
+				   OR 
+				   midi to midi
+				*/
+				
+				context->drag_status (context->get_suggested_action(), time);
 				return true;
 			}
+		} else {
+			/* DND originating from outside ardour
+			 *
+			 * TODO: check if file is audio/midi, allow drops on same track-type only,
+			 * currently: if audio is dropped on a midi-track, it is only added to the region-list
+			 */
+			if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
+				context->drag_status(Gdk::ACTION_COPY, time);
+			} else {
+				if ((context->get_actions() & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY) {
+					context->drag_status(Gdk::ACTION_COPY, time);
+				} else {
+					context->drag_status(Gdk::ACTION_LINK, time);
+				}
+			}
+			return true;
 		}
 	}
 

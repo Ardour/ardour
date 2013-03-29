@@ -29,6 +29,7 @@
 
 #include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/smf_source.h"
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -422,6 +423,23 @@ void
 Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, double ypos, bool copy)
 {
 	RouteTimeAxisView* tv;
+	
+	/* MIDI files must always be imported, because we consider them
+	 * writable. So split paths into two vectors, and follow the import
+	 * path on the MIDI part.
+	 */
+
+	vector<string> midi_paths;
+	vector<string> audio_paths;
+
+	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
+		if (SMFSource::safe_midi_file_extension (*i)) {
+			midi_paths.push_back (*i);
+		} else {
+			audio_paths.push_back (*i);
+		}
+	}
+
 
 	std::pair<TimeAxisView*, int> const tvp = trackview_by_y_position (ypos);
 	if (tvp.first == 0) {
@@ -430,10 +448,12 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 
 		frame = 0;
 
+		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, frame);
+		
 		if (Profile->get_sae() || Config->get_only_copy_imported_files() || copy) {
-			do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, frame);
+			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, frame);
 		} else {
-			do_embed (paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
+			do_embed (audio_paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
 		}
 
 	} else if ((tv = dynamic_cast<RouteTimeAxisView*> (tvp.first)) != 0) {
@@ -444,10 +464,12 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 			/* select the track, then embed/import */
 			selection->set (tv);
 
+			do_import (midi_paths, Editing::ImportSerializeFiles, ImportToTrack, SrcBest, frame);
+
 			if (Profile->get_sae() || Config->get_only_copy_imported_files() || copy) {
-				do_import (paths, Editing::ImportSerializeFiles, Editing::ImportToTrack, SrcBest, frame);
+				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack, SrcBest, frame);
 			} else {
-				do_embed (paths, Editing::ImportSerializeFiles, ImportToTrack, frame);
+				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, frame);
 			}
 		}
 	}
