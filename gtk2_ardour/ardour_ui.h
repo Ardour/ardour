@@ -227,6 +227,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         void add_routes_thread ();
 #ifdef WITH_VIDEOTIMELINE
 	void add_video (Gtk::Window* float_window);
+	void remove_video ();
 	void start_video_server_menu (Gtk::Window* float_window);
 	bool start_video_server (Gtk::Window* float_window, bool popup_msg);
 	void stop_video_server (bool ask_confirm=false);

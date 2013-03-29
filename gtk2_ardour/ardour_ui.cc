@@ -3485,6 +3485,19 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 }
 
 void
+ARDOUR_UI::remove_video ()
+{
+	video_timeline->close_session();
+	editor->toggle_ruler_video(false);
+
+	/* delete session state */
+	XMLNode* node = new XMLNode(X_("Videotimeline"));
+	_session->add_extra_xml(*node);
+	node = new XMLNode(X_("Videomonitor"));
+	_session->add_extra_xml(*node);
+}
+
+void
 ARDOUR_UI::flush_videotimeline_cache (bool localcacheonly)
 {
 	if (localcacheonly) {
