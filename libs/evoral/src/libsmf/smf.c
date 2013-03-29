@@ -377,12 +377,12 @@ smf_event_delete(smf_event_t *event)
 static gint
 events_array_compare_function(gconstpointer aa, gconstpointer bb)
 {
-	smf_event_t *a, *b;
+	const smf_event_t *a, *b;
 
 	/* "The comparison function for g_ptr_array_sort() doesn't take the pointers
 	    from the array as arguments, it takes pointers to the pointers in the array." */
-	a = (smf_event_t *)*(gpointer *)aa;
-	b = (smf_event_t *)*(gpointer *)bb;
+	a = (const smf_event_t *)*(const gpointer *)aa;
+	b = (const smf_event_t *)*(const gpointer *)bb;
 
 	if (a->time_pulses < b->time_pulses)
 		return (-1);

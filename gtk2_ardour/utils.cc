@@ -676,7 +676,7 @@ set_pango_fontsize ()
 
 	/* FT2 rendering - used by GnomeCanvas, sigh */
 
-	pango_ft2_font_map_set_resolution ((PangoFT2FontMap*) pango_ft2_font_map_for_display(), val/1024, val/1024);
+	pango_ft2_font_map_set_resolution ((PangoFT2FontMap*) pango_ft2_font_map_new(), val/1024, val/1024);
 
 	/* Cairo rendering, in case there is any */
 
