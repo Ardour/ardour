@@ -306,7 +306,6 @@ SystemExec::output_interposer()
 		ReadStdout(data, bytesRead);/* EMIT SIGNAL */
 	}
 	Terminated();/* EMIT SIGNAL */
-	terminate();
 }
 
 void
@@ -618,7 +617,6 @@ SystemExec::output_interposer()
 		ReadStdout(rv, r);/* EMIT SIGNAL */
 	}
 	Terminated();/* EMIT SIGNAL */
-	terminate();
 }
 
 void
@@ -653,9 +651,6 @@ SystemExec::write_to_stdin(std::string d, size_t len)
 			}
 			if (r != (len-c)) {
 				::pthread_mutex_unlock(&write_lock);
-#if 1 // debug
-				printf("XXX: child process communication breakdown.\n");
-#endif
 				return c;
 			}
 			break;
