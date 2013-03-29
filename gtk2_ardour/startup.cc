@@ -1459,7 +1459,7 @@ ArdourStartup::info_scroller_update()
 
 	char buf[512];
 	snprintf (buf, std::min(info_scroller_count,sizeof(buf)-1), "%s", ARDOUR_UI::instance()->announce_string().c_str() );
-	buf[info_scroller_count] = NULL;
+	buf[info_scroller_count] = 0;
 	info_scroller_label.set_text (buf);
 	info_scroller_label.show();
 
