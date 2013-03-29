@@ -153,12 +153,16 @@ VideoTimeLine::save_session ()
 void
 VideoTimeLine::close_session ()
 {
+	if (video_duration == 0) {
+		return;
+	}
 	close_video_monitor();
 	save_session();
 
 	remove_frames();
 	video_filename = "";
-	video_duration = 0L;
+	video_duration = 0;
+	GuiUpdate("set-xjadeo-sensitive-off");
 }
 
 /** load settings from session */
@@ -171,6 +175,11 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 	LocaleGuard lg (X_("POSIX"));
 
 	XMLNode* node = _session->extra_xml (X_("Videotimeline"));
+
+	if (!node || !node->property (X_("Filename"))) {
+		return;
+	}
+
 	if (node) {
 		ARDOUR_UI::instance()->start_video_server((Gtk::Window*)0, false);
 
@@ -210,7 +219,7 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 	node = _session->extra_xml (X_("Videomonitor"));
 	if (node) {
 		const XMLProperty* prop = node->property (X_("active"));
-		if (prop->value() == "yes" && found_xjadeo() && !video_filename.empty() && local_file) {
+		if (prop && prop->value() == "yes" && found_xjadeo() && !video_filename.empty() && local_file) {
 			open_video_monitor(false);
 		}
 	}
@@ -523,8 +532,16 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 	if (found_xjadeo() && local_file) {
 		GuiUpdate("set-xjadeo-sensitive-on");
 		if (vmonitor && vmonitor->is_started()) {
+#if 1
+			/* xjadeo <= 0.6.4 has a bug where changing the video-file may segfauls
+			 * if the geometry changes to a different line-size alignment
+			 */
+			reopen_vmonitor = true;
+			vmonitor->quit();
+#else
 			vmonitor->set_fps(video_file_fps);
 			vmonitor->open(video_filename);
+#endif
 		}
 	} else if (!local_file) {
 #if 1 /* temp debug/devel message */

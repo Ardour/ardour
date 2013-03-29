@@ -136,6 +136,9 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("OpenVideo"), _("Open Video"),
 					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_video), (Gtk::Window*) 0));
 	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (main_actions, X_("CloseVideo"), _("Remove Video"),
+					      sigc::mem_fun (*this, &ARDOUR_UI::remove_video));
+	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (main_actions, X_("ExportVideo"), _("Export To Video File"),
 					      sigc::mem_fun (*editor, &PublicEditor::export_video));
 	ActionManager::session_sensitive_actions.push_back (act);

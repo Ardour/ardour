@@ -120,7 +120,6 @@ typedef uint64_t microseconds_t;
 #include "video_server_dialog.h"
 #include "add_video_dialog.h"
 #include "transcode_video_dialog.h"
-#include "video_copy_dialog.h"
 #include "system_exec.h" /* to launch video-server */
 #endif
 
@@ -3420,41 +3419,36 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 	}
 
 	switch (add_video_dialog->import_option()) {
-		case VTL_IMPORT_COPY:
-		{
-			VideoCopyDialog *video_copy_dialog;
-			video_copy_dialog = new VideoCopyDialog(_session, path);
-			//video_copy_dialog->setup_non_interactive_copy();
-			ResponseType r = (ResponseType) video_copy_dialog->run ();
-			video_copy_dialog->hide();
-			if (r != RESPONSE_ACCEPT) { return; }
-			path = video_copy_dialog->get_filename();
-			delete video_copy_dialog;
-		}
-			break;
 		case VTL_IMPORT_TRANSCODE:
-		{
-			TranscodeVideoDialog *transcode_video_dialog;
-			transcode_video_dialog = new TranscodeVideoDialog (_session, path);
-			ResponseType r = (ResponseType) transcode_video_dialog->run ();
-			transcode_video_dialog->hide();
-			if (r != RESPONSE_ACCEPT) { return; }
-			path = transcode_video_dialog->get_filename();
-			if (!transcode_video_dialog->get_audiofile().empty()) {
-				editor->embed_audio_from_video(transcode_video_dialog->get_audiofile());
+			{
+				TranscodeVideoDialog *transcode_video_dialog;
+				transcode_video_dialog = new TranscodeVideoDialog (_session, path);
+				ResponseType r = (ResponseType) transcode_video_dialog->run ();
+				transcode_video_dialog->hide();
+				if (r != RESPONSE_ACCEPT) {
+					delete transcode_video_dialog;
+					return;
+				}
+				if (!transcode_video_dialog->get_audiofile().empty()) {
+					editor->embed_audio_from_video(transcode_video_dialog->get_audiofile());
+				}
+				switch (transcode_video_dialog->import_option()) {
+					case VTL_IMPORT_TRANSCODED:
+						path = transcode_video_dialog->get_filename();
+						local_file = true;
+						break;
+					case VTL_IMPORT_REFERENCE:
+						break;
+					default:
+						delete transcode_video_dialog;
+						return;
+				}
+				delete transcode_video_dialog;
 			}
-			delete transcode_video_dialog;
-		}
 			break;
 		default:
 		case VTL_IMPORT_NONE:
 			break;
-	}
-
-	if (path.empty()) {
-		/* may have been overriden by 'audio only import'
-		 * in transcode_video_dialog */
-		path = add_video_dialog->file_name(local_file);;
 	}
 
 	/* strip _session->session_directory().video_path() from video file if possible */
@@ -3482,6 +3476,19 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 		}
 		editor->toggle_ruler_video(true);
 	}
+}
+
+void
+ARDOUR_UI::remove_video ()
+{
+	video_timeline->close_session();
+	editor->toggle_ruler_video(false);
+
+	/* delete session state */
+	XMLNode* node = new XMLNode(X_("Videotimeline"));
+	_session->add_extra_xml(*node);
+	node = new XMLNode(X_("Videomonitor"));
+	_session->add_extra_xml(*node);
 }
 
 void

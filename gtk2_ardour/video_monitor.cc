@@ -41,7 +41,7 @@ VideoMonitor::VideoMonitor (PublicEditor *ed, std::string xjadeo_bin_path)
 	clock_connection = sigc::connection();
 	debug_enable = false;
 
-	process = new SystemExec(xjadeo_bin_path);
+	process = new SystemExec(xjadeo_bin_path, X_("-R"));
 	process->ReadStdout.connect (*this, invalidator (*this), boost::bind (&VideoMonitor::parse_output, this, _1 ,_2), gui_context());
 	process->Terminated.connect (*this, invalidator (*this), boost::bind (&VideoMonitor::terminated, this), gui_context());
 }

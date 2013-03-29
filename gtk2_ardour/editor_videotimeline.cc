@@ -90,10 +90,9 @@ Editor::toggle_video_timeline_locked ()
 }
 
 void
-Editor::embed_audio_from_video (std::string path)
+Editor::embed_audio_from_video (std::string path, framepos_t n)
 {
 	vector<std::string> paths;
-	framepos_t n = 0; /* -1: use file's timestamp - but br0ken with ffmpeg wav extract */
 	paths.push_back(path);
 #if 0
 	do_embed (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, n);

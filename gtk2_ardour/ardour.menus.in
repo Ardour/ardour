@@ -36,6 +36,7 @@
       <!--menuitem action='importFromSession'/-->
 #ifdef WITH_VIDEOTIMELINE
       <menuitem action='OpenVideo'/>
+      <menuitem action='CloseVideo'/>
       <menu name='Video' action='Video'>
         <menuitem action='StartVideoServer'/>
         <menuitem action='StopVideoServer'/>
