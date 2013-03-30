@@ -392,6 +392,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void rename_state (std::string old_name, std::string new_name);
 	void remove_pending_capture_state ();
 	int rename (const std::string&);
+	bool get_nsm_state () const { return _under_nsm_control; }
+	void set_nsm_state (bool state) { _under_nsm_control = state; }
 
 	PBD::Signal1<void,std::string> StateSaved;
 	PBD::Signal0<void> StateReady;
@@ -925,6 +927,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	uint32_t                _solo_isolated_cnt;
 	bool                    _writable;
 	bool                    _was_seamless;
+	bool                    _under_nsm_control;
 
 	void initialize_latencies ();
 	void set_worst_io_latencies ();

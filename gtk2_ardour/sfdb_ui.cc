@@ -1339,8 +1339,9 @@ SoundFileOmega::reset_options ()
 		src_combo.set_sensitive (false);
 	}
 
-	/* We must copy MIDI files or those from Freesound */
-	bool const must_copy = have_a_midi_file || notebook.get_current_page() == 2;
+	/* We must copy MIDI files or those from Freesound
+	 * or any file if we are under nsm control */
+	bool const must_copy = _session->get_nsm_state() || have_a_midi_file || notebook.get_current_page() == 2;
 	
 	if (Config->get_only_copy_imported_files()) {
 

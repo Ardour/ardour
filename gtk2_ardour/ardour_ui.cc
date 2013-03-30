@@ -682,6 +682,9 @@ ARDOUR_UI::startup ()
 		exit (1);
 	}
 
+	if (_session && nsm) {
+		_session->set_nsm_state( true );
+	}
 	use_config ();
 
 	goto_editor_window ();

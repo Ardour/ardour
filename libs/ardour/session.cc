@@ -133,6 +133,7 @@ Session::Session (AudioEngine &eng,
 	: _engine (eng)
 	, _target_transport_speed (0.0)
 	, _requested_return_frame (-1)
+	, _under_nsm_control (false)
 	, _session_dir (new SessionDirectory(fullpath))
 	, state_tree (0)
 	, _state_of_the_state (Clean)
