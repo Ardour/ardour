@@ -111,15 +111,26 @@ FileSource::init (const string& pathstr, bool must_exist)
 {
 	_timeline_position = 0;
 
-        if (Stateful::loading_state_version < 3000) {
-                if (!find_2X (_session, _type, pathstr, must_exist, _file_is_new, _channel, _path)) {
-                        throw MissingSource (pathstr, _type);
-                }
-        } else {
-                if (!find (_session, _type, pathstr, must_exist, _file_is_new, _channel, _path)) {
-                        throw MissingSource (pathstr, _type);
-                }
-        }
+	if (!_file_is_new) {
+
+		if (Stateful::loading_state_version < 3000) {
+			if (!find_2X (_session, _type, pathstr, must_exist, _file_is_new, _channel, _path)) {
+				throw MissingSource (pathstr, _type);
+			}
+		} else {
+			string look_for;
+			
+			if (!_origin.empty()) {
+				look_for = _origin;
+			} else {
+				look_for = pathstr;
+			}
+			
+			if (!find (_session, _type, look_for, must_exist, _file_is_new, _channel, _path)) {
+				throw MissingSource (pathstr, _type);
+			}
+		}
+	}
 
 	set_within_session_from_path (_path);
 	
