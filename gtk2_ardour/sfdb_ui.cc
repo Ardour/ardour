@@ -340,9 +340,9 @@ SoundFileBox::audition ()
 	for (int n = 0; n < sf_info.channels; ++n) {
 		try {
 			afs = boost::dynamic_pointer_cast<AudioFileSource> (
-					SourceFactory::createReadable (DataType::AUDIO, *_session,
-							path, n, Source::Flag (0), false));
-
+				SourceFactory::createExternal (DataType::AUDIO, *_session,
+							       path, n, Source::Flag (0), false));
+			
 			srclist.push_back(afs);
 
 		} catch (failed_constructor& err) {

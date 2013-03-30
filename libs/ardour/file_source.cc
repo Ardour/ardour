@@ -55,8 +55,8 @@ PBD::Signal3<int,std::string,std::string,std::vector<std::string> > FileSource::
 
 FileSource::FileSource (Session& session, DataType type, const string& path, const string& origin, Source::Flag flag)
 	: Source(session, type, path, flag)
-	, _path(path)
-	, _file_is_new(true)
+	, _path (path)
+	, _file_is_new (!origin.empty()) // origin empty => new file VS. origin !empty => new file
 	, _channel (0)
         , _origin (origin)
         , _open (false)
@@ -133,11 +133,12 @@ FileSource::init (const string& pathstr, bool must_exist)
 	}
 
 	set_within_session_from_path (_path);
-	
         _name = Glib::path_get_basename (_path);
 
-	if (_file_is_new && must_exist) {
-		return -1;
+	if (must_exist) {
+		if (!Glib::file_test (_path, Glib::FILE_TEST_EXISTS)) {
+			throw MissingSource (pathstr, _type);
+		}
 	}
 
 	return 0;

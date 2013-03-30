@@ -3381,7 +3381,7 @@ Session::create_audio_source_for_session (size_t n_chans, string const & n, uint
 	const string path    = new_source_path_from_name(DataType::AUDIO, name);
 
 	return boost::dynamic_pointer_cast<AudioFileSource> (
-		SourceFactory::createWritable (DataType::AUDIO, *this, path, string(), destructive, frame_rate()));
+		SourceFactory::createWritable (DataType::AUDIO, *this, path, destructive, frame_rate()));
 }
 
 /** Return a unique name based on \a base for a new internal MIDI source */
@@ -3457,7 +3457,7 @@ Session::create_midi_source_for_session (Track* track, string const & n)
 
 	return boost::dynamic_pointer_cast<SMFSource> (
 		SourceFactory::createWritable (
-			DataType::MIDI, *this, path, string(), false, frame_rate()));
+			DataType::MIDI, *this, path, false, frame_rate()));
 }
 
 
@@ -4009,7 +4009,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 
 		try {
 			fsource = boost::dynamic_pointer_cast<AudioFileSource> (
-				SourceFactory::createWritable (DataType::AUDIO, *this, buf, string(), false, frame_rate()));
+				SourceFactory::createWritable (DataType::AUDIO, *this, buf, false, frame_rate()));
 		}
 
 		catch (failed_constructor& err) {

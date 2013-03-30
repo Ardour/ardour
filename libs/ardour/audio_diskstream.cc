@@ -2168,7 +2168,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 				fs = boost::dynamic_pointer_cast<AudioFileSource> (
 					SourceFactory::createWritable (
 						DataType::AUDIO, _session,
-						prop->value(), string(), false, _session.frame_rate()));
+						prop->value(), false, _session.frame_rate()));
 			}
 
 			catch (failed_constructor& err) {
