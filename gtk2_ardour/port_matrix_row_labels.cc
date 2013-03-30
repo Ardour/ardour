@@ -19,7 +19,7 @@
 
 #include <iostream>
 #include <boost/weak_ptr.hpp>
-#include <cairo/cairo.h>
+#include <cairo.h>
 #include "gtkmm2ext/keyboard.h"
 #include "ardour/bundle.h"
 #include "port_matrix_row_labels.h"
