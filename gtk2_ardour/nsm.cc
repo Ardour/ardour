@@ -23,8 +23,6 @@
 #include "ardour_ui.h"
 
 #include <stdio.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 
@@ -50,18 +48,10 @@ NSM_Client::command_open(const char *name,
                          char **out_msg)
 {
     int r = ERR_OK;
-    struct stat buffer;
 
-    ARDOUR_COMMAND_LINE::new_session = true;
+    ARDOUR_COMMAND_LINE::new_session = false;
     ARDOUR_COMMAND_LINE::session_name = name;
     ARDOUR_COMMAND_LINE::jack_client_name = client_id;
-
-    int f = stat(name, &buffer);
-
-    if (f == 0 && S_ISDIR(buffer.st_mode))
-    {
-        ARDOUR_COMMAND_LINE::new_session = false;
-    }
 
     return r;
 }

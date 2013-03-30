@@ -2447,7 +2447,7 @@ ARDOUR_UI::build_session_from_nsd (const std::string& session_path, const std::s
 {
 	BusProfile bus_profile;
 
-	if (Profile->get_sae()) {
+	if (nsm || Profile->get_sae()) {
 
 		bus_profile.master_out_channels = 2;
 		bus_profile.input_ac = AutoConnectPhysical;
@@ -2591,6 +2591,10 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		
 		session_name = _startup->session_name (likely_new);
 		
+		if (nsm) {
+		        likely_new = true;
+		}
+
 		string::size_type suffix = session_name.find (statefile_suffix);
 		
 		if (suffix != string::npos) {
@@ -2642,7 +2646,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 		if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
 
-			if (likely_new) {
+			if (likely_new && !nsm) {
 
 				std::string existing = Glib::build_filename (session_path, session_name);
 
