@@ -253,8 +253,8 @@ TranscodeFfmpeg::default_encoder_settings ()
 	ffs.clear();
 	ffs["-vcodec"] = "mpeg4";
 	ffs["-acodec"] = "ac3";
-	ffs["-b"] = "5000k";
-	ffs["-ab"] = "160k";
+	ffs["-b:v"] = "5000k";
+	ffs["-b:a"] = "160k";
 	return ffs;
 }
 
@@ -422,7 +422,7 @@ TranscodeFfmpeg::transcode (std::string outfile, const int outw, const int outh,
 	argp[0] = strdup(ffmpeg_exe.c_str());
 	argp[1] = strdup("-i");
 	argp[2] = strdup(infile.c_str());
-	argp[3] = strdup("-b");
+	argp[3] = strdup("-b:v");
 	argp[4] = (char*) calloc(7,sizeof(char)); snprintf(argp[4], 7, "%i0k", bitrate);
 	argp[5] = strdup("-s");
 	argp[6] = (char*) calloc(10,sizeof(char)); snprintf(argp[6], 10, "%ix%i", width, height);
@@ -484,10 +484,24 @@ void
 TranscodeFfmpeg::ffmpegparse_a (std::string d, size_t /* s */)
 {
 	const char *t;
+	int h,m,s; char f[7];
+	ARDOUR::framecnt_t p = -1;
+
 	if (!(t=strstr(d.c_str(), "time="))) { return; }
-	ARDOUR::framecnt_t f = (ARDOUR::framecnt_t) floorf (atof(t+5) * m_fps);
-	if (f > m_duration ) { f = m_duration; }
-	Progress(f, m_duration); /* EMIT SIGNAL */
+
+	if (sscanf(t+5, "%d:%d:%d.%s",&h,&m,&s,f) == 4) {
+		p = (ARDOUR::framecnt_t) floor( 100.0 * (
+		      h * 3600.0
+		    + m * 60.0
+		    + s * 1.0
+		    + atoi(f) / pow(10, strlen(f))
+		));
+		p = p * m_fps / 100.0;
+		if (p > m_duration ) { p = m_duration; }
+		Progress(p, m_duration); /* EMIT SIGNAL */
+	} else {
+		Progress(0, 0); /* EMIT SIGNAL */
+	}
 }
 
 void
