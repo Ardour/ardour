@@ -188,10 +188,10 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	Gtk::Alignment *al = manage(new Gtk::Alignment());
 	al->set_size_request(-1, 20);
 
-	previewpane->pack_start (*al, false, false);
-	previewpane->pack_start (*hbox, true, true, 6);
 	previewpane->pack_start (*preview_image, false, false);
 	previewpane->pack_start (seek_slider, false, false);
+	previewpane->pack_start (*al, false, false);
+	previewpane->pack_start (*hbox, true, true, 6);
 
 	/* Overall layout */
 	hbox = manage (new HBox);

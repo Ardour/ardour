@@ -106,10 +106,9 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	std::string dstfn  = video_dest_file(dstdir, infile);
 	path_entry.set_text (dstfn);
 
-	l = manage (new Label (_("<b>Info</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("<b>File Information</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 	options_box->pack_start (*l, false, true, 4);
-
 
 	bool ffok = false;
 	if (!transcoder->ffexec_ok()) {
@@ -176,7 +175,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 		t->attach (*l, 1, 2, 1, 2);
 	}
 
-	l = manage (new Label (_("<b>Video</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("<b>Import Settings</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 	options_box->pack_start (*l, false, true, 4);
 
