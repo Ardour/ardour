@@ -38,6 +38,7 @@ AmbiguousFileDialog::AmbiguousFileDialog (const string& file, const vector<strin
 	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
 		_radio_buttons.push_back (manage (new RadioButton (_group, *i)));
 		get_vbox()->pack_start (*_radio_buttons.back ());
+		_radio_buttons.back()->signal_button_press_event().connect (sigc::mem_fun (*this, &AmbiguousFileDialog::rb_button_press), false);
 	}
 
 	get_vbox()->pack_start (*manage (new Label (_("\n\nPlease select the path that you want to get the file from."))));
@@ -46,6 +47,15 @@ AmbiguousFileDialog::AmbiguousFileDialog (const string& file, const vector<strin
 	set_default_response (RESPONSE_OK);
 
 	show_all ();
+}
+
+bool
+AmbiguousFileDialog::rb_button_press (GdkEventButton* ev)
+{
+	if (ev->type == GDK_2BUTTON_PRESS) {
+		response (RESPONSE_OK);
+	}
+	return false;
 }
 
 int

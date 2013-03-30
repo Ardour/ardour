@@ -30,6 +30,7 @@ public:
 private:
 	Gtk::RadioButtonGroup _group;
 	std::vector<Gtk::RadioButton*> _radio_buttons;
+        bool rb_button_press (GdkEventButton*);
 };
 
 
