@@ -269,8 +269,11 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_channel_status_box.set_spacing (6);
 	
 	_channel_selector_button.set_label (_("Chns"));
-
-	/* fixed sized labels to prevent silly nonsense */
+	ARDOUR_UI::instance()->set_tip (_channel_selector_button, _("Click to edit channel settings"));
+	
+	/* fixed sized labels to prevent silly nonsense (though obviously,
+	 * they cause their own too)
+	 */
 
 	_playback_channel_status.set_size_request (65, -1);
 	_capture_channel_status.set_size_request (60, -1);
