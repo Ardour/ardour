@@ -387,14 +387,13 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 	items.push_back (MenuElem (_("Hide All Automation"),
 				   sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::hide_all_automation), for_selection)));
 
-	items.push_back (SeparatorElem ());
-
 	/* Attach the plugin submenu. It may have previously been used elsewhere,
 	   so it was detached above 
 	*/
 	
 	if (!subplugin_menu.items().empty()) {
-		items.push_back (MenuElem (_("Plugins"), subplugin_menu));
+		items.push_back (SeparatorElem ());
+		items.push_back (MenuElem (_("Processor automation"), subplugin_menu));
 		items.back().set_sensitive (!for_selection || _editor.get_selection().tracks.size() == 1);;
 	}
 }
