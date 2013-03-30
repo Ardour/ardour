@@ -404,6 +404,11 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 
 	if (be_silent) {
 
+		if (_meter_point == MeterInput) {
+			/* still need input monitoring */
+			_input->process_input (_meter, start_frame, end_frame, nframes);
+		}
+
 		passthru_silence (start_frame, end_frame, nframes, 0);
 
 	} else {
