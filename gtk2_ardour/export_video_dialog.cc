@@ -229,7 +229,7 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 
 	audio_codec_combo.set_name ("PaddedButton");
 	audio_codec_combo.append_text("ac3");
-	audio_codec_combo.append_text("libfaac");
+	audio_codec_combo.append_text("aac");
 	audio_codec_combo.append_text("libmp3lame");
 	audio_codec_combo.append_text("libvorbis");
 	audio_codec_combo.append_text("mp2");
@@ -242,8 +242,9 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	video_codec_combo.append_text("mjpeg");
 	video_codec_combo.append_text("mpeg2video");
 	video_codec_combo.append_text("mpeg4");
-	video_codec_combo.append_text("x264 (default)");
+	video_codec_combo.append_text("x264 (baseline)");
 	video_codec_combo.append_text("x264 (hq)");
+	video_codec_combo.append_text("vpx (webm)");
 	video_codec_combo.append_text("copy");
 	video_codec_combo.set_active(4);
 
@@ -566,19 +567,27 @@ ExportVideoDialog::encode_pass (int pass)
 		ffs["-b:v"]  = video_bitrate_combo.get_active_text();
 	}
 	ffs["-b:a"] = audio_bitrate_combo.get_active_text();
+
+	if (audio_codec_combo.get_active_text() == "aac" ) {
+		ffs["-strict"] = "-2";
+	}
+
 	if (video_codec_combo.get_active_text() == "x264 (hq)" ) {
 		ffs["-vcodec"] = "libx264";
-		ffs["-vpre"] = "slow";
+		ffs["-vprofile"] = "high";
 	}
-	else if (video_codec_combo.get_active_text() == "x264 (default)" ) {
+	else if (video_codec_combo.get_active_text() == "x264 (baseline)" ) {
 		ffs["-vcodec"] = "libx264";
-		ffs["-vpre"] = "medium";
+		ffs["-vpre"] = "baseline";
+	}
+	else if (video_codec_combo.get_active_text() == "vpx (webm)" ) {
+		ffs["-vcodec"] = "libvpx";
+		ffs["-g"] = "120";
+		ffs["-qmin"] = "11";
+		ffs["-qmax"] = "51";
 	}
 
 	if (optimizations_checkbox.get_active()) {
-		/* TODO: define these smartly in a header-file so that they can be
-		 * merged for printing as label and used here easyly
-		 */
 	  if (video_codec_combo.get_active_text() == "mpeg2video") {
 			ffs["-mbd"] = "rd";
 			ffs["-trellis"] = "2";
@@ -587,7 +596,7 @@ ExportVideoDialog::encode_pass (int pass)
 		}
 		else if (video_codec_combo.get_active_text() == "mpeg4") {
 			ffs["-mbd"] = "rd";
-			ffs["-flags"] = "+4mv+aic";
+			ffs["-flags"] = "+mv4+aic";
 			ffs["-trellis"] = "2";
 			ffs["-cmp"] = "2";
 			ffs["-subcmp"] = "2";
@@ -603,7 +612,10 @@ ExportVideoDialog::encode_pass (int pass)
 		}
 	}
 
-	if (bframes_checkbox.get_active()) {
+	if (bframes_checkbox.get_active() && (
+		   video_codec_combo.get_active_text() == "mpeg2video"
+		|| video_codec_combo.get_active_text() == "mpeg4"
+		)) {
 		ffs["-bf"] = "2";
 	}
 
@@ -757,7 +769,7 @@ ExportVideoDialog::video_codec_combo_changed ()
 	  if (video_codec_combo.get_active_text() == "mpeg2video") {
 			optimizations_label.set_text("-mbd rd -trellis 2 -cmp 2 -subcmp 2"); // mpeg2
 		} else if (video_codec_combo.get_active_text() == "mpeg4") {
-			optimizations_label.set_text("-mbd rd -flags +4mv+aic -trellis 2 -cmp 2 -subcmp 2 -g 300"); // mpeg4
+			optimizations_label.set_text("-mbd rd -flags +mv4+aic -trellis 2 -cmp 2 -subcmp 2 -g 300"); // mpeg4
 		} else {
 			optimizations_label.set_text("-mbd 2 -cmp 2 -subcmp 2 -trellis 2 -flags +aic+mv0+mv4 -g 160"); // flv
 		}

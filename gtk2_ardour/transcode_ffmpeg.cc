@@ -117,19 +117,20 @@ TranscodeFfmpeg::probe ()
 
 	std::vector<std::vector<std::string> > lines;
 	ParseCSV(ffoutput, lines);
+	double timebase = 0;
 	m_width = m_height = 0;
 	m_fps = m_aspect = 0;
 	m_duration = 0;
 	m_codec.clear();
 	m_audio.clear();
 
-#define PARSE_FRACTIONAL_FPS \
+#define PARSE_FRACTIONAL_FPS(VAR) \
 	{ \
 		std::string::size_type pos; \
-		m_fps = atof(value.c_str()); \
+		VAR = atof(value.c_str()); \
 		pos = value.find_first_of('/'); \
 		if (pos != std::string::npos) { \
-			m_fps = atof(value.substr(0, pos).c_str()) / atof(value.substr(pos+1).c_str()); \
+			VAR = atof(value.substr(0, pos).c_str()) / atof(value.substr(pos+1).c_str()); \
 		} \
 	}
 
@@ -160,9 +161,11 @@ TranscodeFfmpeg::probe ()
 						if (!m_codec.empty()) m_codec += " ";
 						m_codec += "(" + value + ")";
 					} else if (key == X_("r_frame_rate")) {
-						PARSE_FRACTIONAL_FPS
-					} else if (key == X_("time_base") && m_fps == 0) {
-						PARSE_FRACTIONAL_FPS
+						PARSE_FRACTIONAL_FPS(m_fps)
+					} else if (key == X_("avg_frame_rate") && m_fps == 0) {
+						PARSE_FRACTIONAL_FPS(m_fps)
+					} else if (key == X_("time_base")) {
+						PARSE_FRACTIONAL_FPS(timebase)
 					} else if (key == X_("timecode") && m_duration == 0) {
 						int h,m,s; char f[7];
 						if (sscanf(i->at(16).c_str(), "%d:%d:%d:%s",&h,&m,&s,f) == 4) {
@@ -173,9 +176,9 @@ TranscodeFfmpeg::probe ()
 								+ atoi(f) / pow(10, strlen(f))
 							));
 						}
-					} else if (key == X_("duration_ts")) {
-						m_duration = atof(value.c_str());
-					} else if (key == X_("duration") && m_duration == 0 && m_fps != 0) {
+					} else if (key == X_("duration_ts") && m_fps == 0 && timebase !=0 ) {
+						m_duration = atof(value.c_str()) * m_fps * timebase;
+					} else if (key == X_("duration") && m_fps != 0 && m_duration == 0) {
 						m_duration = atof(value.c_str()) * m_fps;
 					} else if (key == X_("display_aspect_ratio")) {
 						std::string::size_type pos;
@@ -357,23 +360,26 @@ TranscodeFfmpeg::extract_audio (std::string outfile, ARDOUR::framecnt_t samplera
   if (stream >= m_audio.size()) return false;
 
 	char **argp;
+	int i = 0;
 
 	argp=(char**) calloc(15,sizeof(char*));
-	argp[0] = strdup(ffmpeg_exe.c_str());
-	argp[1] = strdup("-i");
-	argp[2] = strdup(infile.c_str());
-	argp[3] = strdup("-ar");
-	argp[4] = (char*) calloc(7,sizeof(char)); snprintf(argp[4], 7, "%"PRId64, samplerate);
-	argp[5] = strdup("-ac");
-	argp[6] = (char*) calloc(3,sizeof(char)); snprintf(argp[6], 3, "%i", m_audio.at(stream).channels);
-	argp[7] = strdup("-map");
-	argp[8] = (char*) calloc(8,sizeof(char)); snprintf(argp[8], 8, "0:%s", m_audio.at(stream).stream_id.c_str());
-	argp[9] = strdup("-vn");
-	argp[10] = strdup("-acodec");
-	argp[11] = strdup("pcm_f32le");
-	argp[12] = strdup("-y");
-	argp[13] = strdup(outfile.c_str());
-	argp[14] = (char *)0;
+	argp[i++] = strdup(ffmpeg_exe.c_str());
+	argp[i++] = strdup("-i");
+	argp[i++] = strdup(infile.c_str());
+#if 0 // native samplerate -- use a3/SRC
+	argp[i++] = strdup("-ar");
+	argp[i] = (char*) calloc(7,sizeof(char)); snprintf(argp[i++], 7, "%"PRId64, samplerate);
+#endif
+	argp[i++] = strdup("-ac");
+	argp[i] = (char*) calloc(3,sizeof(char)); snprintf(argp[i++], 3, "%i", m_audio.at(stream).channels);
+	argp[i++] = strdup("-map");
+	argp[i] = (char*) calloc(8,sizeof(char)); snprintf(argp[i++], 8, "0:%s", m_audio.at(stream).stream_id.c_str());
+	argp[i++] = strdup("-vn");
+	argp[i++] = strdup("-acodec");
+	argp[i++] = strdup("pcm_f32le");
+	argp[i++] = strdup("-y");
+	argp[i++] = strdup(outfile.c_str());
+	argp[i++] = (char *)0;
 	/* Note: argp is free()d in ~SystemExec */
 #if 1 /* DEBUG */
 	if (debug_enable) { /* tentative debug mode */
