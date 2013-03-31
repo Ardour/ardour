@@ -60,7 +60,8 @@ class AddVideoDialog : public ArdourDialog
 	Gtk::HScale seek_slider;
 	Glib::RefPtr<Gdk::Pixbuf> imgbuf;
 	std::string preview_path;
-	Gtk::Label pi_duration;
+	Gtk::Label pi_tcin;
+	Gtk::Label pi_tcout;
 	Gtk::Label pi_aspect;
 	Gtk::Label pi_fps;
 

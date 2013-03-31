@@ -56,9 +56,10 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	: ArdourDialog (_("Set Video Track"))
 	, seek_slider (0,1000,1)
 	, preview_path ("")
-	, pi_duration ("-", Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false)
-	, pi_aspect ("-", Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false)
-	, pi_fps ("-", Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false)
+	, pi_tcin ("-", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false)
+	, pi_tcout ("-", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false)
+	, pi_aspect ("-", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false)
+	, pi_fps ("-", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false)
 	, chooser (FILE_CHOOSER_ACTION_OPEN)
 	, xjadeo_checkbox (_("Launch External Video Monitor"))
 	, set_session_fps_checkbox (_("Adjust Session Framerate to Match Video Framerate"))
@@ -157,7 +158,7 @@ AddVideoDialog::AddVideoDialog (Session* s)
 
 	/* preview pane */
 	VBox* previewpane = manage (new VBox);
-	Gtk::Table *table = manage(new Table(4,2));
+	Gtk::Table *table = manage(new Table(5,2));
 
 	table->set_row_spacings(2);
 	table->set_col_spacings(4);
@@ -165,15 +166,18 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	l = manage (new Label (_("<b>Video Information</b>"), Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 	table->attach (*l, 0, 2, 0, 1, FILL, FILL);
-	l = manage (new Label (_("Duration:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Start:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
 	table->attach (*l, 0, 1, 1, 2, FILL, FILL);
-	table->attach (pi_duration, 1, 2, 1, 2, FILL, FILL);
-	l = manage (new Label (_("Frame rate:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
+	table->attach (pi_tcin, 1, 2, 1, 2, FILL, FILL);
+	l = manage (new Label (_("End:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
 	table->attach (*l, 0, 1, 2, 3, FILL, FILL);
-	table->attach (pi_fps, 1, 2, 2, 3, FILL, FILL);
-	l = manage (new Label (_("Aspect Ratio:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
+	table->attach (pi_tcout, 1, 2, 2, 3, FILL, FILL);
+	l = manage (new Label (_("Frame rate:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
 	table->attach (*l, 0, 1, 3, 4, FILL, FILL);
-	table->attach (pi_aspect, 1, 2, 3, 4, FILL, FILL);
+	table->attach (pi_fps, 1, 2, 3, 4, FILL, FILL);
+	l = manage (new Label (_("Aspect Ratio:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
+	table->attach (*l, 0, 1, 4, 5, FILL, FILL);
+	table->attach (pi_aspect, 1, 2, 4, 5, FILL, FILL);
 
 	preview_image = manage(new Gtk::Image);
 
@@ -350,7 +354,8 @@ AddVideoDialog::set_action_ok (bool yn)
 		ok_button->set_sensitive(true);
 	} else {
 		preview_path = "";
-		pi_duration.set_text("-");
+		pi_tcin.set_text("-");
+		pi_tcout.set_text("-");
 		pi_aspect.set_text("-");
 		pi_fps.set_text("-");
 		ok_button->set_sensitive(false);
@@ -372,6 +377,7 @@ AddVideoDialog::file_selection_changed ()
 				&& !Glib::file_test(path.c_str(), Glib::FILE_TEST_IS_DIR);
 		set_action_ok(ok);
 		if (ok) {
+			seek_slider.set_value(0);
 			request_preview(video_map_path(video_get_docroot(Config), path));
 		}
 	} else {
@@ -409,6 +415,7 @@ AddVideoDialog::harvid_list_view_selected () {
 		set_action_ok(false);
 	} else {
 		set_action_ok(true);
+		seek_slider.set_value(0);
 		request_preview((*iter)[harvid_list_columns.uri]);
 	}
 }
@@ -552,7 +559,8 @@ AddVideoDialog::request_preview(std::string u)
 		printf("image preview info request failed\n");
 		// set_action_ok(false); // XXX only if docroot mismatch
 		preview_path = "";
-		pi_duration.set_text("-");
+		pi_tcin.set_text("-");
+		pi_tcout.set_text("-");
 		pi_aspect.set_text("-");
 		pi_fps.set_text("-");
 		return;
@@ -564,9 +572,66 @@ AddVideoDialog::request_preview(std::string u)
 		clip_height = MIN(PREVIEW_HEIGHT, rint(clip_width / video_aspect_ratio));
 	}
 
-	pi_duration.set_text(string_compose("%1 sec", video_duration / video_file_fps));
-	pi_aspect.set_text(string_compose("%1", video_aspect_ratio));
-	pi_fps.set_text(string_compose("%1 fps", video_file_fps));
+	pi_tcin.set_text(Timecode::timecode_format_sampletime(
+				video_start_offset, video_file_fps, video_file_fps, rint(video_file_fps*100.0)==2997));
+	pi_tcout.set_text(Timecode::timecode_format_sampletime(
+				video_start_offset + video_duration, video_file_fps, video_file_fps, rint(video_file_fps*100.0)==2997));
+
+	/* todo break out this code -> re-usability */
+	const int arc = rint(video_aspect_ratio*100);
+
+	switch (arc) {
+		case 133:
+			pi_aspect.set_text("4:3");
+			break;
+		case 134:
+			pi_aspect.set_text("47:35"); // 752x560
+			break;
+		case 141:
+			pi_aspect.set_text("1.41:1"); //  Lichtenberg ratio
+			break;
+		case 150:
+			pi_aspect.set_text("3:2");  // classic 35mm
+			break;
+		case 160:
+			pi_aspect.set_text("8:5");  // credit-card size
+			break;
+		case 162:
+			pi_aspect.set_text("16:10"); // golden ratio 1.61803..
+			break;
+		case 166:
+		case 167:
+			pi_aspect.set_text("5:3");
+			break;
+		case 177:
+		case 178:
+			pi_aspect.set_text("16:9"); // HD video
+			break;
+		case 180:
+			pi_aspect.set_text("9:5");
+			break;
+		case 185:
+			pi_aspect.set_text("1.85:1"); // US widescreen cinema
+			break;
+		case 200:
+			pi_aspect.set_text("2:1");
+			break;
+		case 239:
+		case 240:
+			pi_aspect.set_text("2.39:1"); // Anamorphic
+			break;
+		case 275:
+			pi_aspect.set_text("2.75:1"); // Ultra Panavision
+			break;
+		case 400:
+			pi_aspect.set_text("4.00:1"); // three 35mm 1.33:1 polyvision
+			break;
+		default:
+			pi_aspect.set_text(string_compose("%1:1", video_aspect_ratio));
+		break;
+	}
+
+	pi_fps.set_text(string_compose(_("%1 fps"), video_file_fps));
 
 	clip_xoff = (PREVIEW_WIDTH - clip_width)/2;
 	clip_yoff = (PREVIEW_HEIGHT - clip_height)/2;
