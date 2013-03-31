@@ -681,6 +681,23 @@ ARDOUR_UI::startup ()
 				_session->set_nsm_state( nsm->is_active() );
 			}
 
+			// nsm requires these actions disabled
+			vector<string> action_names;
+			action_names.push_back("Snapshot");
+			action_names.push_back("SaveAs");
+			action_names.push_back("Rename");
+			action_names.push_back("New");
+			action_names.push_back("Open");
+			action_names.push_back("Recent");
+			action_names.push_back("Close");
+
+			for (vector<string>::const_iterator n = action_names.begin(); n != action_names.end(); ++n) {
+				Glib::RefPtr<Action> act = ActionManager::get_action (X_("Main"), X_(n.base()->c_str()));
+				if (act) {
+					act->set_sensitive (false);
+				}
+			}
+
 			// wait for session is loaded reply from nsm server
 			do {
 				nsm->check ();
