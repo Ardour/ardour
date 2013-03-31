@@ -649,7 +649,7 @@ void
 ARDOUR_UI::startup ()
 {
 	Application* app = Application::instance ();
-
+	char *nsm_url;
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
 	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_load));
 
@@ -659,7 +659,59 @@ ARDOUR_UI::startup ()
 
 	app->ready ();
 
-	if (get_session_parameters (true, ARDOUR_COMMAND_LINE::new_session, ARDOUR_COMMAND_LINE::load_template)) {
+	nsm_url = getenv ("NSM_URL");
+
+	if (nsm_url) {
+		nsm = new NSM_Client;
+		if (!nsm->init (nsm_url)) {
+			nsm->announce (PROGRAM_NAME, ":dirty:", "ardour3");
+
+			// wait for announce reply from nsm server
+			do {
+				nsm->check ();
+				usleep (10);
+			} while (!nsm->is_active ());
+			// wait for open command from nsm server
+			do {
+				nsm->check ();
+				usleep (10);
+			} while (!nsm->client_id ());
+
+			if (_session && nsm) {
+				_session->set_nsm_state( nsm->is_active() );
+			}
+
+			// nsm requires these actions disabled
+			vector<string> action_names;
+			action_names.push_back("Snapshot");
+			action_names.push_back("SaveAs");
+			action_names.push_back("Rename");
+			action_names.push_back("New");
+			action_names.push_back("Open");
+			action_names.push_back("Recent");
+			action_names.push_back("Close");
+
+			for (vector<string>::const_iterator n = action_names.begin(); n != action_names.end(); ++n) {
+				Glib::RefPtr<Action> act = ActionManager::get_action (X_("Main"), X_(n.base()->c_str()));
+				if (act) {
+					act->set_sensitive (false);
+				}
+			}
+
+			// wait for session is loaded reply from nsm server
+			do {
+				nsm->check ();
+				usleep (10);
+			} while (!nsm->session_loaded ());
+
+		}
+		else {
+			delete nsm;
+			nsm = 0;
+		}
+	}
+
+	else if (get_session_parameters (true, ARDOUR_COMMAND_LINE::new_session, ARDOUR_COMMAND_LINE::load_template)) {
 		exit (1);
 	}
 
@@ -928,6 +980,19 @@ ARDOUR_UI::every_second ()
 	update_buffer_load ();
 	update_disk_space ();
 	update_timecode_format ();
+
+	if (nsm && nsm->is_active () && nsm->session_loaded ()) {
+		nsm->check ();
+
+		if (!_was_dirty && _session->dirty ()) {
+			nsm->is_dirty ();
+			_was_dirty = true;
+		}
+		else if (_was_dirty && !_session->dirty ()){
+			nsm->is_clean ();
+			_was_dirty = false;
+		}
+	}
 	return TRUE;
 }
 
@@ -2415,7 +2480,7 @@ ARDOUR_UI::build_session_from_nsd (const std::string& session_path, const std::s
 {
 	BusProfile bus_profile;
 
-	if (Profile->get_sae()) {
+	if (nsm || Profile->get_sae()) {
 
 		bus_profile.master_out_channels = 2;
 		bus_profile.input_ac = AutoConnectPhysical;
@@ -2559,6 +2624,10 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		
 		session_name = _startup->session_name (likely_new);
 		
+		if (nsm) {
+		        likely_new = true;
+		}
+
 		string::size_type suffix = session_name.find (statefile_suffix);
 		
 		if (suffix != string::npos) {
@@ -2610,7 +2679,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 		if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
 
-			if (likely_new) {
+			if (likely_new && !nsm) {
 
 				std::string existing = Glib::build_filename (session_path, session_name);
 
