@@ -666,10 +666,26 @@ ARDOUR_UI::startup ()
 		if (!nsm->init (nsm_url)) {
 			nsm->announce (PROGRAM_NAME, ":dirty:", "ardour3");
 
+			// wait for announce reply from nsm server
+			do {
+				nsm->check ();
+				usleep (10);
+			} while (!nsm->is_active ());
+			// wait for open command from nsm server
 			do {
 				nsm->check ();
 				usleep (10);
 			} while (!nsm->client_id ());
+
+			if (_session && nsm) {
+				_session->set_nsm_state( nsm->is_active() );
+			}
+
+			// wait for session is loaded reply from nsm server
+			do {
+				nsm->check ();
+				usleep (10);
+			} while (!nsm->session_loaded ());
 
 		}
 		else {
@@ -678,13 +694,10 @@ ARDOUR_UI::startup ()
 		}
 	}
 
-	if (get_session_parameters (true, ARDOUR_COMMAND_LINE::new_session, ARDOUR_COMMAND_LINE::load_template)) {
+	else if (get_session_parameters (true, ARDOUR_COMMAND_LINE::new_session, ARDOUR_COMMAND_LINE::load_template)) {
 		exit (1);
 	}
 
-	if (_session && nsm) {
-		_session->set_nsm_state( true );
-	}
 	use_config ();
 
 	goto_editor_window ();
@@ -951,7 +964,7 @@ ARDOUR_UI::every_second ()
 	update_disk_space ();
 	update_timecode_format ();
 
-	if (nsm) {
+	if (nsm && nsm->is_active () && nsm->session_loaded ()) {
 		nsm->check ();
 
 		if (!_was_dirty && _session->dirty ()) {

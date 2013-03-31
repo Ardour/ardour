@@ -28,12 +28,17 @@ class NSM_Client:public NSM::Client
         NSM_Client();
         ~NSM_Client() { }
 
+        bool session_loaded(void) { return _session_loaded; }
+
     protected:
+
+        bool _session_loaded;
 
         int command_open(const char *name,
                          const char *display_name,
                          const char *client_id,
                          char **out_msg);
         int command_save(char **out_msg);
+        void command_session_is_loaded (void);
 };
 
