@@ -581,57 +581,71 @@ AddVideoDialog::request_preview(std::string u)
 	const int arc = rint(video_aspect_ratio*100);
 
 	switch (arc) {
+		case 100:
+			pi_aspect.set_text(X_(" 1:1"));  // square (large format stills)
+			break;
+		case 125:
+			pi_aspect.set_text(X_(" 5:4"));
+			break;
 		case 133:
-			pi_aspect.set_text("4:3");
+			pi_aspect.set_text(X_(" 4:3"));
 			break;
 		case 134:
-			pi_aspect.set_text("47:35"); // 752x560
+			pi_aspect.set_text(X_(" 47:35")); // 752x560, Super8-scans
+			break;
+		case 137:
+		case 138:
+			pi_aspect.set_text(X_(" 1.37:1")); // 'Academy ratio' <= 1953
 			break;
 		case 141:
-			pi_aspect.set_text("1.41:1"); //  Lichtenberg ratio
+			pi_aspect.set_text(X_(" 1.41:1")); //  Lichtenberg ratio
 			break;
 		case 150:
-			pi_aspect.set_text("3:2");  // classic 35mm
+			pi_aspect.set_text(X_(" 3:2"));  // classic 35mm
 			break;
 		case 160:
-			pi_aspect.set_text("8:5");  // credit-card size
+			pi_aspect.set_text(X_(" 8:5"));  // credit-card size
 			break;
 		case 162:
-			pi_aspect.set_text("16:10"); // golden ratio 1.61803..
+			pi_aspect.set_text(X_(" 16:10")); // golden ratio 1.61803..
 			break;
 		case 166:
 		case 167:
-			pi_aspect.set_text("5:3");
+			pi_aspect.set_text(X_(" 5:3")); // Super16, EU-widescreen
 			break;
 		case 177:
 		case 178:
-			pi_aspect.set_text("16:9"); // HD video
+			pi_aspect.set_text(X_(" 16:9")); // HD video
 			break;
 		case 180:
-			pi_aspect.set_text("9:5");
+			pi_aspect.set_text(X_(" 9:5"));
 			break;
 		case 185:
-			pi_aspect.set_text("1.85:1"); // US widescreen cinema
+			pi_aspect.set_text(X_(" 1.85:1")); // US widescreen cinema
 			break;
 		case 200:
-			pi_aspect.set_text("2:1");
+			pi_aspect.set_text(X_(" 2:1"));
 			break;
 		case 239:
 		case 240:
-			pi_aspect.set_text("2.39:1"); // Anamorphic
+			pi_aspect.set_text(X_(" 2.40:1")); // Anamorphic
+			break;
+		case 266:
+		case 267:
+			pi_aspect.set_text(X_(" 2.66:1")); // CinemaScope
 			break;
 		case 275:
-			pi_aspect.set_text("2.75:1"); // Ultra Panavision
+			pi_aspect.set_text(X_(" 2.75:1")); // Ultra Panavision
 			break;
 		case 400:
-			pi_aspect.set_text("4.00:1"); // three 35mm 1.33:1 polyvision
+			pi_aspect.set_text(X_(" 4.00:1")); // three 35mm 1.33:1 polyvision
 			break;
 		default:
-			pi_aspect.set_text(string_compose("%1:1", video_aspect_ratio));
+			pi_aspect.set_text(string_compose(X_(" %1:1"), video_aspect_ratio));
 		break;
 	}
 
-	pi_fps.set_text(string_compose(_("%1 fps"), video_file_fps));
+	pi_fps.set_text(string_compose(_(" %1 fps"), video_file_fps));
 
 	clip_xoff = (PREVIEW_WIDTH - clip_width)/2;
 	clip_yoff = (PREVIEW_HEIGHT - clip_height)/2;
