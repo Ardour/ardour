@@ -111,8 +111,6 @@ FileSource::init (const string& pathstr, bool must_exist)
 {
 	_timeline_position = 0;
 
-	cerr << "FileSource looking for " << pathstr << endl;
-	
 	if (Stateful::loading_state_version < 3000) {
 		if (!find_2X (_session, _type, pathstr, must_exist, _file_is_new, _channel, _path)) {
 			throw MissingSource (pathstr, _type);
