@@ -163,6 +163,10 @@ VideoTimeLine::close_session ()
 	video_filename = "";
 	video_duration = 0;
 	GuiUpdate("set-xjadeo-sensitive-off");
+	if (open_video_monitor_dialog) {
+		delete open_video_monitor_dialog;
+	}
+	open_video_monitor_dialog = 0;
 }
 
 /** load settings from session */
@@ -215,6 +219,11 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 		const XMLProperty* propf = node->property (X_("Filename"));
 		video_file_info(propf->value(), local_file);
 	}
+
+	if (open_video_monitor_dialog) {
+		delete open_video_monitor_dialog;
+	}
+	open_video_monitor_dialog = 0;
 
 	node = _session->extra_xml (X_("Videomonitor"));
 	if (node) {
