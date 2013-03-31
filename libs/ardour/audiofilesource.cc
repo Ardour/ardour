@@ -320,7 +320,7 @@ int
 AudioFileSource::setup_peakfile ()
 {
 	if (!(_flags & NoPeakFile)) {
-		return initialize_peakfile (_origin.empty(), _path);
+		return initialize_peakfile (_path);
 	} else {
 		return 0;
 	}

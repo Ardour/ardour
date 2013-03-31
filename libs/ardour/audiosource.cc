@@ -207,7 +207,7 @@ AudioSource::rename_peakfile (string newpath)
 }
 
 int
-AudioSource::initialize_peakfile (bool newfile, string audio_path)
+AudioSource::initialize_peakfile (string audio_path)
 {
 	struct stat statbuf;
 
@@ -215,7 +215,7 @@ AudioSource::initialize_peakfile (bool newfile, string audio_path)
 
 	/* if the peak file should be there, but isn't .... */
 
-	if (!newfile && !Glib::file_test (peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
+	if (!empty() && !Glib::file_test (peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
 		peakpath = find_broken_peakfile (peakpath, audio_path);
 	}
 
@@ -269,7 +269,7 @@ AudioSource::initialize_peakfile (bool newfile, string audio_path)
 		}
 	}
 
-	if (!newfile && !_peaks_built && _build_missing_peakfiles && _build_peakfiles) {
+	if (!empty() && !_peaks_built && _build_missing_peakfiles && _build_peakfiles) {
 		build_peaks_from_scratch ();
 	}
 
