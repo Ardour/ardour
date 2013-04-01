@@ -692,7 +692,7 @@ ARDOUR_UI::startup ()
 			action_names.push_back("Close");
 
 			for (vector<string>::const_iterator n = action_names.begin(); n != action_names.end(); ++n) {
-				Glib::RefPtr<Action> act = ActionManager::get_action (X_("Main"), X_(n.base()->c_str()));
+				Glib::RefPtr<Action> act = ActionManager::get_action (X_("Main"), (*n).c_str());
 				if (act) {
 					act->set_sensitive (false);
 				}
