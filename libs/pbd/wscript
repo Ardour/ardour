@@ -129,7 +129,7 @@ def build(bld):
     obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM'
     if sys.platform == 'darwin':
         TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
-        obj.source += 'cocoa_open_uri.mm'
+        obj.source += [ 'cocoa_open_uri.mm' ]
         obj.uselib += ' OSX'
     obj.vnum         = LIBPBD_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
