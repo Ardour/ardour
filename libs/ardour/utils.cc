@@ -141,36 +141,6 @@ legalize_for_path_2X (const string& str)
 	return string (legal);
 }
 
-/** take an arbitrary string as an argument, and return a version of it
- * suitable for use as a path (directory/folder name). This is the Ardour 2.X
- * version of this code, which used an approach that came to be seen as
- * problematic: defining the characters that were allowed and replacing all
- * others with underscores. See legalize_for_path() for the 3.X and later
- * version.
- */
-
-string 
-legalize_for_path_2X (const string& str)
-{
-	string::size_type pos;
-	string legal_chars = "abcdefghijklmnopqrtsuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_+=: ";
-        Glib::ustring legal;
-	
-	/* this is the one place in Ardour where we need to iterate across
-	 * potential multibyte characters, and thus we need Glib::ustring
-	 */
-
-	legal = str;
-	pos = 0;
-
-	while ((pos = legal.find_first_not_of (legal_chars, pos)) != string::npos) {
-		legal.replace (pos, 1, "_");
-		pos += 1;
-	}
-
-	return string (legal);
-}
-
 string
 bump_name_once (const std::string& name, char delimiter)
 {

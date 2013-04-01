@@ -184,41 +184,6 @@ PixFader::create_patterns ()
 	cairo_surface_destroy (surface);
 }
 
-void
-PixFader::create_patterns ()
-{
-	Gdk::Color c = get_style()->get_fg (get_state());
-    float r, g, b;
-	r = c.get_red_p ();
-	g = c.get_green_p ();
-	b = c.get_blue_p ();
-
- 	if (_orien == VERT) {
-		pattern = cairo_pattern_create_linear (0.0, 0.0, get_width(), 0);
-		cairo_pattern_add_color_stop_rgba (pattern, 0, r*0.8,g*0.8,b*0.8, 1.0);
-		cairo_pattern_add_color_stop_rgba (pattern, 1, r*0.6,g*0.6,b*0.6, 1.0);
-
-		shine_pattern = cairo_pattern_create_linear (0.0, 0.0, 15, 0);
-		cairo_pattern_add_color_stop_rgba (shine_pattern, 0, 1,1,1,0.0);
-		cairo_pattern_add_color_stop_rgba (shine_pattern, 0.2, 1,1,1,0.3);
-		cairo_pattern_add_color_stop_rgba (shine_pattern, 0.5, 1,1,1,0.0);
-		cairo_pattern_add_color_stop_rgba (shine_pattern, 1, 1,1,1,0.0);
-	} else {
-		float rheight = get_height();
-	
-		pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, rheight);
-		cairo_pattern_add_color_stop_rgba (pattern, 0, r*0.8,g*0.8,b*0.8, 1.0);
-		cairo_pattern_add_color_stop_rgba (pattern, 1, r*0.6,g*0.6,b*0.6, 1.0);
-
-		shine_pattern = cairo_pattern_create_linear (0.0, 0.0, 0.0, rheight);
-		cairo_pattern_add_color_stop_rgba (shine_pattern, 0, 1,1,1,0.0);
-		cairo_pattern_add_color_stop_rgba (shine_pattern, 0.2, 1,1,1,0.3);
-		cairo_pattern_add_color_stop_rgba (shine_pattern, 0.5, 1,1,1,0.0);
-		cairo_pattern_add_color_stop_rgba (shine_pattern, 1, 1,1,1,0.0);
-	}
-	
-}
-
 bool
 PixFader::on_expose_event (GdkEventExpose* ev)
 {
@@ -335,14 +300,6 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 		}
 //	}
 
-//	if (Config->get_widget_prelight()) {  //pixfader does not have access to config
-		if (_hovering) {
-			Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), 3);
-			cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
-			cairo_fill (cr);
-		}
-//	}
-
 	last_drawn = ds;
 
 	return true;
@@ -379,21 +336,6 @@ PixFader::on_size_allocate (Gtk::Allocation& alloc)
 	}
 
 	update_unity_position ();
-}
-
-void
-PixFader::on_size_allocate (Gtk::Allocation& alloc)
-{
-	DrawingArea::on_size_allocate(alloc);
-	if (_orien == VERT) {
-		view.height = span = alloc.get_height();
-	} else {
-		view.width = span = alloc.get_width();
-	}
-
-	update_unity_position ();
-
-	queue_draw ();
 }
 
 bool

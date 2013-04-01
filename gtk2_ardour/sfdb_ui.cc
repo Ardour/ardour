@@ -441,10 +441,6 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
         chooser.add_shortcut_folder_uri("file:///Volumes");
 #endif
 
-#ifdef FREESOUND
-	mootcher = new Mootcher();
-#endif
-
 	//add the file chooser
 
 	chooser.set_border_width (12);
@@ -904,14 +900,6 @@ SoundFileBrowser::freesound_search()
 	gdk_window_set_cursor (get_window()->gobj(), gdk_cursor_new(GDK_WATCH));
 	freesound_progress_bar.set_fraction(0.0);
 	gdk_flush();
-	for (int page = 1; page <= 99; page++ ) {
-		
-		std::string prog;
-		prog = string_compose (_("Page %1, [Stop]->"), page);
-		freesound_progress_bar.set_text(prog);
-		while (Glib::MainContext::get_default()->iteration (false)) {
-			/* do nothing */
-		}
 
 	int freesound_n_pages = 1;
 	for (int page = 1; page <= 99 && page <= freesound_n_pages; page++ ) {

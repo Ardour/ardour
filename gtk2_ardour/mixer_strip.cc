@@ -1967,6 +1967,7 @@ MixerStrip::set_button_names ()
 	} else {
 		meter_point_button.set_text ("");
 	}
+}
 
 PluginSelector*
 MixerStrip::plugin_selector()

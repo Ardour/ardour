@@ -167,16 +167,6 @@ class AudioRegionView : public RegionView
 	ArdourCanvas::SimpleRect* end_xfade_rect;
 	bool _end_xfade_visible;
 
-	ArdourCanvas::Line *start_xfade_in;
-	ArdourCanvas::Line *start_xfade_out;
-	ArdourCanvas::SimpleRect* start_xfade_rect;
-	bool _start_xfade_visible;
-
-	ArdourCanvas::Line *end_xfade_in;
-	ArdourCanvas::Line *end_xfade_out;
-	ArdourCanvas::SimpleRect* end_xfade_rect;
-	bool _end_xfade_visible;
-
 	boost::shared_ptr<AudioRegionGainLine> gain_line;
 
 	double _amplitude_above_axis;

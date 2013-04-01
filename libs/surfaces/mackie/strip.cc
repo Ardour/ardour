@@ -297,19 +297,11 @@ Strip::notify_gain_changed (bool force_update)
 			control = _fader;
 		}
 
-<<<<<<< HEAD
-
-=======
->>>>>>> master
 		boost::shared_ptr<AutomationControl> ac = _route->gain_control();
 		
 		float gain_coefficient = ac->get_value();
 		float normalized_position = ac->internal_to_interface (gain_coefficient);
-<<<<<<< HEAD
-		
-=======
 
->>>>>>> master
 		if (force_update || normalized_position != _last_gain_position_written) {
 			
 			if (_surface->mcp().flip_mode()) {

@@ -119,12 +119,6 @@ class PixFader : public Gtk::DrawingArea
 
 	bool _hovering;
 
-	void create_patterns();
-	cairo_pattern_t* pattern;
-	cairo_pattern_t* shine_pattern;
-
-	bool _hovering;
-
 	GdkWindow* grab_window;
 	double grab_loc;
 	double grab_start;

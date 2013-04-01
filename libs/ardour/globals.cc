@@ -540,17 +540,3 @@ ARDOUR::get_available_sync_options ()
 	return ret;
 }
 
-vector<SyncSource>
-ARDOUR::get_available_sync_options ()
-{
-	vector<SyncSource> ret;
-
-	ret.push_back (JACK);
-	ret.push_back (MTC);
-	ret.push_back (MIDIClock);
-#ifdef HAVE_LTC
-	ret.push_back (LTC);
-#endif
-
-	return ret;
-}

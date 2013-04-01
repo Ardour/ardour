@@ -39,7 +39,7 @@ namespace Gtkmm2ext {
 class SliderController : public Gtkmm2ext::PixFader
 {
   public:
-	SliderController (Glib::RefPtr<Gdk::Pixbuf>, Glib::RefPtr<Gdk::Pixbuf>, Gtk::Adjustment* adj, int orientation, int);
+        SliderController (Gtk::Adjustment* adj, int orientation, int, int);
 	
         virtual ~SliderController () {}
 

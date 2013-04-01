@@ -123,15 +123,12 @@ MIDIControllable::set_controllable (Controllable* c)
 	controllable = c;
 
 	if (controllable) {
-<<<<<<< HEAD
-=======
 		last_controllable_value = controllable->get_value();
 	} else {
 		last_controllable_value = 0.0f; // is there a better value?
 	}
 
 	if (controllable) {
->>>>>>> master
 		controllable->Destroyed.connect (controllable_death_connection, MISSING_INVALIDATOR,
 						 boost::bind (&MIDIControllable::drop_controllable, this), 
 						 MidiControlUI::instance());
@@ -237,10 +234,6 @@ MIDIControllable::lookup_controllable()
 void
 MIDIControllable::drop_controllable ()
 {
-<<<<<<< HEAD
-	cerr << "removed controllable " << controllable << "\n";
-=======
->>>>>>> master
 	set_controllable (0);
 }
 

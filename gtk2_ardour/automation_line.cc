@@ -96,7 +96,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	group->property_y() = 0.0;
 
 	line = new ArdourCanvas::Line (*group);
-	line->property_width_pixels() = (guint)3;
+	line->property_width_pixels() = (guint)1;
 	line->set_data ("line", this);
 
 	line->signal_event().connect (sigc::mem_fun (*this, &AutomationLine::event_handler));
@@ -997,25 +997,6 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		if (_visible && alist->interpolation() != AutomationList::Discrete) {
 			line->show();
 		}
-		
-		if (tx >= max_framepos || tx < 0 || tx >= _maximum_time) {
-			continue;
-		}
-		
-		/* convert x-coordinate to a canvas unit coordinate (this takes
-		 * zoom and scroll into account).
-		 */
-			
-		tx = trackview.editor().frame_to_unit_unrounded (tx);
-		
-		/* convert from canonical view height (0..1.0) to actual
-		 * height coordinates (using X11's top-left rooted system)
-		 */
-
-		ty = _height - (ty * _height);
-
-		add_visible_control_point (vp, pi, tx, ty, ai, np);
-		vp++;
 	}
 
 	set_selected_points (trackview.editor().get_selection().points);

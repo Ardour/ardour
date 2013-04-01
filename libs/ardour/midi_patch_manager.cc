@@ -30,6 +30,8 @@
 #include "ardour/midi_patch_manager.h"
 #include "ardour/midi_patch_search_path.h"
 
+#include "i18n.h"
+
 using namespace std;
 using namespace ARDOUR;
 using namespace MIDI;

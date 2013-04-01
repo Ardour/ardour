@@ -190,10 +190,6 @@ class AudioRegion : public Region
 	PBD::Property<bool>     _fade_out_active;
 	/** linear gain to apply to the whole region */
 	PBD::Property<gain_t>   _scale_amplitude;
-	PBD::Property<bool>     _fade_in_is_xfade;
-	PBD::Property<bool>     _fade_out_is_xfade;
-	PBD::Property<bool>     _fade_in_is_short;
-	PBD::Property<bool>     _fade_out_is_short;
 
 	void register_properties ();
 	void post_set (const PBD::PropertyChange&);

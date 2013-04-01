@@ -125,8 +125,6 @@ public:
 
 	int number() const { return _number; }
 
-	int number() const { return _number; }
-
 	const PatchNameList& patch_name_list() const { return _patch_name_list; }
 	const std::string& patch_list_name() const { return _patch_list_name; }
 

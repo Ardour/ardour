@@ -2413,7 +2413,6 @@ Playlist::raise_region (boost::shared_ptr<Region> region)
 {
 	set_layer (region, region->layer() + 1.5);
 	relayer ();
-	check_crossfades (region->range ());
 }
 
 void
@@ -2421,7 +2420,6 @@ Playlist::lower_region (boost::shared_ptr<Region> region)
 {
 	set_layer (region, region->layer() - 1.5);
 	relayer ();
-	check_crossfades (region->range ());
 }
 
 void
@@ -2429,7 +2427,6 @@ Playlist::raise_region_to_top (boost::shared_ptr<Region> region)
 {
 	set_layer (region, DBL_MAX);
 	relayer ();
-	check_crossfades (region->range ());
 }
 
 void
@@ -2437,7 +2434,6 @@ Playlist::lower_region_to_bottom (boost::shared_ptr<Region> region)
 {
 	set_layer (region, -0.5);
 	relayer ();
-	check_crossfades (region->range ());
 }
 
 void

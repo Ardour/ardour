@@ -75,38 +75,6 @@ if ($platform eq "osx") {
     $mouse_modifier_map{$winkey} => 'Win';
 }
 
-<<<<<<< HEAD
-%keycodes = (
-    'asciicircum' => '\\verb=^=',
-    'apostrophe' => '\'',
-    'bracketleft' => '[',
-    'bracketright' => ']',
-    'braceleft' => '\\{',
-    'braceright' => '\\}',
-    'backslash' => '$\\backslash$',
-    'slash' => '/',
-    'rightanglebracket' => '>',
-    'leftanglebracket' => '<',
-    'ampersand' => '\\&',
-    'comma' => ',',
-    'period' => '.',
-    'semicolon' => ';',
-    'colon' => ':',
-    'equal' => '=',
-    'minus' => '-',
-    'plus' => '+',
-    'grave' => '`',
-    'rightarrow' => '$\rightarrow$',
-    'leftarrow' => '$\\leftarrow$',
-    'uparrow' => '$\\uparrow$',
-    'downarrow' => '$\\downarrow$',
-    'Page_Down' => 'Page Down',
-    'Page_Up' => 'Page Up',
-    'space' => 'space',
-    'KP_' => 'KP$\_$',
-    'greater' => '>',
-    'less' => '<',
-=======
 %keycodes = ();
 
 if ($html) {
@@ -177,7 +145,6 @@ if ($html) {
         'KP_' => 'KP$\_$',
         'greater' => '>',
         'less' => '<',
->>>>>>> master
     );
 }
 

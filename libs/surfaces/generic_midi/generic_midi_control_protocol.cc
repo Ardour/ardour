@@ -544,15 +544,12 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 			return 0;
 		}
 
-<<<<<<< HEAD
-=======
 		nlist = nlist.front()->children(); // "MIDIControllable" ...
 
 		if (nlist.empty()) {
 			return 0;
 		}
 
->>>>>>> master
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 			

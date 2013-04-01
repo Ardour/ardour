@@ -112,10 +112,7 @@ int
 SurfacePort::write (const MidiByteArray & mba)
 {
 	if (mba.empty()) {
-<<<<<<< HEAD
-=======
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("port %1 asked to write an empty MBA\n", output_port().name()));
->>>>>>> master
 		return 0;
 	}
 

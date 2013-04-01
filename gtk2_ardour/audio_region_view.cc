@@ -276,12 +276,6 @@ AudioRegionView::region_changed (const PropertyChange& what_changed)
 	if (what_changed.contains (ARDOUR::Properties::fade_out_active)) {
 		fade_out_active_changed ();
 	}
-	if (what_changed.contains (ARDOUR::Properties::fade_in_is_xfade)) {
-		fade_in_changed ();
-	}
-	if (what_changed.contains (ARDOUR::Properties::fade_out_is_xfade)) {
-		fade_out_changed ();
-	}
 	if (what_changed.contains (ARDOUR::Properties::envelope_active)) {
 		envelope_active_changed ();
 	}
@@ -534,26 +528,6 @@ AudioRegionView::reset_fade_in_shape ()
 void
 AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, framecnt_t width)
 {
-	if (dragging()) {
-		return;
-	}
-
-	if (audio_region()->fade_in_is_xfade()) {
-		if (fade_in_handle) {
-			fade_in_handle->hide ();
-			fade_in_shape->hide ();
-		}
-		redraw_start_xfade ();
-		return;
-	} else {
-		if (start_xfade_in) {
-			start_xfade_in->hide ();
-			start_xfade_out->hide ();
-			start_xfade_rect->hide ();
-			_start_xfade_visible = false;
-		}
-	}
-
 	if (fade_in_handle == 0) {
 		return;
 	}
@@ -641,27 +615,6 @@ AudioRegionView::reset_fade_out_shape ()
 void
 AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, framecnt_t width)
 {
-	if (dragging() && audio_region()->fade_out_is_xfade()) {
-		/* we hide xfades while dragging regions */
-		return;
-	}
-
-	if (audio_region()->fade_out_is_xfade()) {
-		if (fade_out_handle) {
-			fade_out_handle->hide ();
-			fade_out_shape->hide ();
-		}
-		redraw_end_xfade ();
-		return;
-	} else {
-		if (end_xfade_in) {
-			end_xfade_in->hide ();
-			end_xfade_out->hide ();
-			end_xfade_rect->hide ();
-			_end_xfade_visible = false;
-		}
-	}
-
 	if (fade_out_handle == 0) {
 		return;
 	}

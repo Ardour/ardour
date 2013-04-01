@@ -233,7 +233,6 @@ EngineControl::EngineControl ()
 	inputs_label = manage (left_aligned_label (_("Physical input channels:")));
 	basic_packer.attach (*inputs_label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (inputs_spinner, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-        cerr << "Packed inputs spinner on row " << row << endl;
 	++row;
 	outputs_label = manage (left_aligned_label (_("Physical output channels:")));
 	basic_packer.attach (*outputs_label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
@@ -247,6 +246,7 @@ EngineControl::EngineControl ()
 	basic_packer.attach (*busses_label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (busses_spinner, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
+#endif
 
 #if !defined(__APPLE__) && !defined(__FreeBSD__)
 	label = manage (left_aligned_label (_("Number of buffers:")));
@@ -717,12 +717,18 @@ EngineControl::engine_running ()
         }
 
 	jack_status_t status;
+        cerr << "---- PROBE FOR JACK ---\n";
+
 	jack_client_t* c = jack_client_open ("ardourprobe", JackNoStartServer, &status);
 
 	if (status == 0) {
+                cerr << "---- WORKED, close it---\n";
 		jack_client_close (c);
-		return true;
-	}
+                return true;
+        } else {
+                cerr << "---- FAILED!---\n";
+        }
+
 	return false;
 }
 
@@ -764,8 +770,11 @@ EngineControl::setup_engine ()
 		return -1;
 	}
 
+        cout << "JACK command: ";
+
 	for (vector<string>::iterator i = args.begin(); i != args.end(); ++i) {
 		jackdrc << (*i) << ' ';
+                cout << (*i) << ' ';
 	}
 
 	jackdrc << endl;
@@ -793,6 +802,7 @@ EngineControl::enumerate_devices (const string& driver)
 		devices[driver] = enumerate_coreaudio_devices ();
 	} else if (driver == "SoundGrid") {
 		devices[driver].clear ();
+#endif
 
 #if !defined(__APPLE__) && !defined(__FreeBSD__)
 

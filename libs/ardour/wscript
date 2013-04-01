@@ -386,7 +386,7 @@ def build(bld):
                         'OSX','BOOST','CURL','DL']
     obj.use          = ['libpbd','libmidipp','libevoral','libvamphost',
                         'libvampplugin','libtaglib','librubberband',
-                        'libaudiographer']
+                        'libaudiographer','libltc']
     if bld.is_defined ('HAVE_SOUNDGRID'):
         obj.uselib    += [ 'SOUNDGRID' ]
     obj.vnum         = LIBARDOUR_LIB_VERSION

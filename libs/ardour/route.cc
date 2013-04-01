@@ -53,6 +53,7 @@
 #include "ardour/port.h"
 #include "ardour/port_insert.h"
 #include "ardour/processor.h"
+#include "ardour/profile.h"
 #include "ardour/route.h"
 #include "ardour/route_group.h"
 #include "ardour/send.h"

@@ -26,7 +26,9 @@
 namespace PBD {
 
 /**
- * @class The SearchPath class is a helper class for getting a 
+ * @class SearchPath
+ *
+ * The SearchPath class is a helper class for getting a
  * vector of paths contained in a search path string where a 
  * "search path string" contains absolute directory paths 
  * separated by a colon(:) or a semi-colon(;) on windows.

@@ -401,7 +401,6 @@ public:
 	double e2; ///< second order loop error
 	double b, c; ///< DLL filter coefficients
 };
-#endif
 
 class MIDIClock_Slave : public Slave {
   public:

@@ -136,10 +136,7 @@ class MackieControlProtocol
   
 	static bool probe();
 	
-<<<<<<< HEAD
-=======
         Glib::Threads::Mutex surfaces_lock;
->>>>>>> master
 	typedef std::list<boost::shared_ptr<Mackie::Surface> > Surfaces;
 	Surfaces surfaces;
 
@@ -299,10 +296,7 @@ class MackieControlProtocol
 	void build_gui ();
 	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
 	void clear_ports ();
-<<<<<<< HEAD
-=======
 	void clear_surfaces ();
->>>>>>> master
 	void force_special_route_to_strip (boost::shared_ptr<ARDOUR::Route> r, uint32_t surface, uint32_t strip_number);
 	void build_button_map ();
 	void gui_track_selection_changed (ARDOUR::RouteNotificationListPtr, bool save_list);

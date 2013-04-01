@@ -894,12 +894,6 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 				}
 			}
 
-			/* legacy a3 */
-
-			if ((prop = child->property ("is-xfade")) != 0) {
-				_fade_in_is_xfade = string_is_affirmative (prop->value());
-			}
-
 		} else if (child->name() == "FadeOut") {
 
 			_fade_out->clear ();
@@ -1208,8 +1202,6 @@ void
 AudioRegion::set_default_fade_in ()
 {
 	_fade_in_suspended = 0;
-	_fade_in_is_xfade = false;
-	_fade_in_is_short = true;
 	set_fade_in (FadeLinear, 64);
 }
 
@@ -1217,8 +1209,6 @@ void
 AudioRegion::set_default_fade_out ()
 {
 	_fade_out_suspended = 0;
-	_fade_out_is_xfade = false;
-	_fade_out_is_short = true;
 	set_fade_out (FadeLinear, 64);
 }
 

@@ -7,22 +7,17 @@ import string
 import subprocess
 import sys
 
-<<<<<<< HEAD
-# Variables for 'waf dist'
-VERSION = '3.0rc1'
-=======
-#
+
 # build scripts need to find the right platform specific version
 # 
 
 if sys.platform == 'darwin':
-    OSX_VERSION = '3.0beta6'
-    VERSION = '3.0beta6'
+    OSX_VERSION = '3.0-SG-beta6'
+    VERSION = '3.0-SG-beta6'
 else:
-    LINUX_VERSION = '3.0'
-    VERSION = '3.0'
+    LINUX_VERSION = '3.0-SG'
+    VERSION = '3.0-SG'
 
->>>>>>> master
 APPNAME = 'Ardour3'
 
 # Mandatory variables
@@ -52,11 +47,7 @@ children = [
         'export',
         'midi_maps',
         'mcp',
-<<<<<<< HEAD
-        'manual'
-=======
         'patchfiles'
->>>>>>> master
 ]
 
 i18n_children = [
@@ -86,20 +77,7 @@ def fetch_gcc_version (CC):
 def fetch_git_revision ():
     cmd = "LANG= git describe --tags HEAD"
     output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
-<<<<<<< HEAD
-    o = output[0].decode('utf-8')
-    rev = o.replace ("commit", "git")[0:10]
-    for line in output:
-        try:
-            if "git-svn-id" in line:
-                line = line.split('@')[1].split(' ')
-                rev = line[0]
-                break
-        except:
-            pass
-=======
     rev = output[0].decode('utf-8')
->>>>>>> master
     return rev
 
 def create_stored_revision():
@@ -158,15 +136,10 @@ def set_compiler_flags (conf,opt):
                 conf.env['build_target'] = 'leopard'
             elif re.search ("^10[.]", version) != None:
                 conf.env['build_target'] = 'snowleopard'
-<<<<<<< HEAD
-            else:
-                conf.env['build_target'] = 'lion'
-=======
             elif re.search ("^11[.]", version) != None:
                 conf.env['build_target'] = 'lion'
             else:
                 conf.env['build_target'] = 'mountainlion'
->>>>>>> master
         else:
             if re.search ("x86_64", cpu) != None:
                 conf.env['build_target'] = 'x86_64'
@@ -421,11 +394,8 @@ def options(opt):
                     help='Compile with Boost shared pointer debugging')
     opt.add_option('--depstack-root', type='string', default='~', dest='depstack_root',
                     help='Directory/folder where dependency stack trees (gtk, a3) can be found (defaults to ~)')
-<<<<<<< HEAD
     opt.add_option('--soundgrid', action='store_true', default=True, dest='soundgrid',
                     help='Compile with support for Waves SoundGrid')
-=======
->>>>>>> master
     opt.add_option('--dist-target', type='string', default='auto', dest='dist_target',
                     help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,powerpc,tiger,leopard]')
     opt.add_option('--fpu-optimization', action='store_true', default=True, dest='fpu_optimization',
@@ -466,11 +436,7 @@ def options(opt):
     # help='Compile with support for Frontier Designs Tranzport (if libusb is available)')
     opt.add_option('--universal', action='store_true', default=False, dest='universal',
                     help='Compile as universal binary (OS X ONLY, requires that external libraries are universal)')
-<<<<<<< HEAD
-    opt.add_option('--generic', action='store_true', default=True, dest='generic',
-=======
     opt.add_option('--generic', action='store_true', default=False, dest='generic',
->>>>>>> master
                     help='Compile with -arch i386 (OS X ONLY)')
     opt.add_option('--versioned', action='store_true', default=False, dest='versioned',
                     help='Add revision information to executable name inside the build directory')
@@ -511,42 +477,6 @@ def configure(conf):
         print('Please use a different version or re-configure with --debug')
         exit (1)
 
-<<<<<<< HEAD
-    # libintl may or may not be trivially locatable. On OS X this is always
-    # true. On Linux it will depend on whether we're on a normal Linux distro,
-    # in which case libintl.h is going to be available in /usr/include and
-    # the library itself is part of glibc, or on a bare-bones build system
-    # where we need to pick it up from the GTK dependency stack.
-    #
-    user_gtk_root = os.path.expanduser (Options.options.depstack_root + '/gtk/inst')
-    pkg_config_path = os.getenv('PKG_CONFIG_PATH')
-    if not os.path.isfile ('/usr/include/libintl.h') or (pkg_config_path is not None and pkg_config_path.find (user_gtk_root) >= 0):
-        # XXXX hack hack hack
-        prefinclude = ''.join ([ '-I', user_gtk_root + '/include'])
-        preflib = ''.join ([ '-L', user_gtk_root + '/lib'])
-        conf.env.append_value('CFLAGS', [ prefinclude ])
-        conf.env.append_value('CXXFLAGS',  [prefinclude ])
-        conf.env.append_value('LINKFLAGS', [ preflib ])
-        conf.define ('NEED_INTL', 1)
-        autowaf.display_msg(conf, 'Will use explicit linkage against libintl in ' + user_gtk_root, 'yes')
-    else:
-        autowaf.display_msg(conf, 'Will use explicit linkage against libintl in ', 'no')
-
-    user_ardour_root = os.path.expanduser (Options.options.depstack_root  + '/a3/inst')
-    if pkg_config_path is not None and os.getenv('PKG_CONFIG_PATH').find (user_ardour_root) >= 0:
-        # XXXX hack hack hack
-        prefinclude = ''.join ([ '-I', user_ardour_root + '/include'])
-        preflib = ''.join ([ '-L', user_ardour_root + '/lib'])
-        conf.env.append_value('CFLAGS', [ prefinclude ])
-        conf.env.append_value('CXXFLAGS',  [prefinclude ])
-        conf.env.append_value('LINKFLAGS', [ preflib ])
-        autowaf.display_msg(conf, 'Will build against private Ardour dependency stack in ' + user_ardour_root, 'yes')
-    else:
-        autowaf.display_msg(conf, 'Will build against private Ardour dependency stack', 'no')
-
-    sg_tree = os.path.expanduser (Options.options.depstack_root + '/ardour/3.0-SG/soundgrid')
-
-=======
     # systems with glibc have libintl builtin. systems without require explicit
     # linkage against libintl.
     #
@@ -584,7 +514,6 @@ def configure(conf):
     else:
         autowaf.display_msg(conf, 'Will build against private Ardour dependency stack', 'no')
         
->>>>>>> master
     if sys.platform == 'darwin':
 
         # this is required, potentially, for anything we link and then relocate into a bundle
@@ -600,17 +529,6 @@ def configure(conf):
         conf.define ('TOP_MENUBAR',1)
         conf.define ('GTKOSX',1)
 
-<<<<<<< HEAD
-        #       Define OSX as a uselib to use when compiling
-        #       on Darwin to add all applicable flags at once
-        #
-        conf.env.append_value('CXXFLAGS_OSX', '-DMAC_OS_X_VERSION_MIN_REQUIRED=1040')
-        conf.env.append_value('CFLAGS_OSX', '-DMAC_OS_X_VERSION_MIN_REQUIRED=1040')
-        conf.env.append_value('CXXFLAGS_OSX', '-mmacosx-version-min=10.4')
-        conf.env.append_value('CFLAGS_OSX', '-mmacosx-version-min=10.4')
-
-=======
->>>>>>> master
         # It would be nice to be able to use this to force back-compatibility with 10.4
         # but even by the time of 11, the 10.4 SDK is no longer available in any normal
         # way.
@@ -653,9 +571,10 @@ def configure(conf):
             conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Carbon'])
         else:
             print ('No Carbon support available for this build\n')
-<<<<<<< HEAD
 
     if Options.options.soundgrid:
+        sg_tree = os.path.expanduser (Options.options.depstack_root + '/ardour/3.0-SG/soundgrid')
+
         conf.env.append_value ('CXXFLAGS_SOUNDGRID', 
                                [ '-D__MACOS__', 
                                  '-DUSE_SOUNDGRID', 
@@ -680,8 +599,6 @@ def configure(conf):
         conf.check_cxx (header_name='WavesMixerAPI/1.0/WavesMixerAPI.h', 
                         mandatory=True, use='SOUNDGRID')
         conf.define('HAVE_SOUNDGRID', 1)
-=======
->>>>>>> master
 
     if Options.options.boost_include != '':
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.boost_include)
@@ -712,11 +629,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2')
     autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0')
 
-<<<<<<< HEAD
-    conf.check_cc(function_name='dlopen', header_name='dlfcn.h', linkflags='-ldl', uselib_store='DL')
-=======
     conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
->>>>>>> master
 
     # Tell everyone that this is a waf build
 
@@ -866,8 +779,5 @@ def i18n_po(bld):
 def i18n_mo(bld):
     bld.recurse (i18n_children)
 
-<<<<<<< HEAD
-=======
 def tarball(bld):
     create_stored_revision()
->>>>>>> master

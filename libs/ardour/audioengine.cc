@@ -1412,12 +1412,15 @@ AudioEngine::connect_to_jack (string client_name, string session_uuid)
         }
 
 	jack_client_name = client_name; /* might be reset below */
+        cerr << "++++++ CONNECTING TO JACK AS " << client_name << endl;
 #ifdef HAVE_JACK_SESSION
-	if (! session_uuid.empty())
+	if (! session_uuid.empty()) {
 	    _jack = jack_client_open (jack_client_name.c_str(), JackSessionID, &status, session_uuid.c_str());
-	else
+        } else {
 #endif
-	_jack = jack_client_open (jack_client_name.c_str(), JackNullOption, &status, 0);
+                _jack = jack_client_open (jack_client_name.c_str(), JackNullOption, &status, 0);
+        }
+                
 
 	if (_jack == NULL) {
 		// error message is not useful here
