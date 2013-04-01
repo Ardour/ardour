@@ -161,6 +161,8 @@ gtk2_ardour_sources = [
         'new_plugin_preset_dialog.cc',
         'normalize_dialog.cc',
         'note_player.cc',
+        'nsm.cc',
+        'nsmclient.cc',
         'option_editor.cc',
         'opts.cc',
         'panner2d.cc',
@@ -397,7 +399,7 @@ def build(bld):
 
     obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG ALSA CURL DL'
     obj.uselib       += ' GTKMM GNOMECANVASMM GNOMECANVAS '
-    obj.uselib       += ' AUDIOUNITS OSX GTKOSX '
+    obj.uselib       += ' AUDIOUNITS OSX GTKOSX LO '
     obj.use          = [ 'libpbd',
                          'libmidipp',
                          'libtaglib',
