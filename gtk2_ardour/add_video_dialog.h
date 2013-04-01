@@ -51,6 +51,7 @@ class AddVideoDialog : public ArdourDialog
 	void on_show ();
 	bool page_switch();
 	void set_action_ok(bool yn);
+	void clear_preview_image();
 
 	/* preview pane related */
 	void request_preview(std::string vpath);

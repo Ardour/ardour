@@ -348,6 +348,15 @@ AddVideoDialog::auto_set_session_fps ()
 }
 
 void
+AddVideoDialog::clear_preview_image ()
+{
+	imgbuf->fill(RGBA_TO_UINT(0,0,0,255));
+	video_draw_cross(imgbuf);
+	preview_image->set(imgbuf);
+	preview_image->show();
+}
+
+void
 AddVideoDialog::set_action_ok (bool yn)
 {
 	if (yn) {
@@ -359,10 +368,7 @@ AddVideoDialog::set_action_ok (bool yn)
 		pi_aspect.set_text("-");
 		pi_fps.set_text("-");
 		ok_button->set_sensitive(false);
-		imgbuf->fill(RGBA_TO_UINT(0,0,0,255));
-		video_draw_cross(imgbuf);
-		preview_image->set(imgbuf);
-		preview_image->show();
+		clear_preview_image();
 	}
 }
 
@@ -563,6 +569,8 @@ AddVideoDialog::request_preview(std::string u)
 		pi_tcout.set_text("-");
 		pi_aspect.set_text("-");
 		pi_fps.set_text("-");
+
+		clear_preview_image();
 		return;
 	}
 
