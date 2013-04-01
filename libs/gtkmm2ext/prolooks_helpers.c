@@ -534,12 +534,8 @@ CairoColor* prolooks_hsl_to_cairo_color (ProlooksHSL* self) {
 	CairoColor* result = NULL;
 	gint i = 0;
 	double* _tmp0_;
-	gint _hue_shift_size_;
-	gint hue_shift_length1;
 	double* hue_shift;
 	double* _tmp1_;
-	gint _color_shift_size_;
-	gint color_shift_length1;
 	double* color_shift;
 	double m1 = 0.0;
 	double m2 = 0.0;
@@ -547,8 +543,8 @@ CairoColor* prolooks_hsl_to_cairo_color (ProlooksHSL* self) {
 	gint _tmp2_ = 0;
 	CairoColor* color;
 	g_return_val_if_fail (self != NULL, NULL);
-	hue_shift = (_tmp0_ = g_new0 (double, 3), hue_shift_length1 = 3, _hue_shift_size_ = hue_shift_length1, _tmp0_);
-	color_shift = (_tmp1_ = g_new0 (double, 3), color_shift_length1 = 3, _color_shift_size_ = color_shift_length1, _tmp1_);
+	hue_shift = (_tmp0_ = g_new0 (double, 3), _tmp0_);
+	color_shift = (_tmp1_ = g_new0 (double, 3), _tmp1_);
 	if (self->priv->_lightness <= 0.5) {
 		m2 = self->priv->_lightness * (1 + self->priv->_saturation);
 	} else {
@@ -944,7 +940,6 @@ CairoColor* prolooks_hsv_to_cairo_color (ProlooksHSV* self) {
 	double r;
 	double g;
 	double b;
-	double v;
 	gint hi = 0;
 	double f = 0.0;
 	double p = 0.0;
@@ -955,7 +950,6 @@ CairoColor* prolooks_hsv_to_cairo_color (ProlooksHSV* self) {
 	r = 0.0;
 	g = 0.0;
 	b = 0.0;
-	v = self->priv->_value;
 	hi = (gint) prolooks_modula (floor (self->priv->_hue / 60.0), (double) 6);
 	f = (self->priv->_hue / 60.0) - floor (self->priv->_hue / 60.0);
 	p = self->priv->_value * (1.0 - self->priv->_saturation);
@@ -1330,15 +1324,13 @@ void prolooks_shade_color (const GdkColor* orig, double shade_ratio, GdkColor* r
 GdkPixbuf* prolooks_cairo_image_surface_to_pixbuf (cairo_surface_t* surface) {
 	GdkPixbuf* result = NULL;
 	guchar* _tmp0_;
-	gint _knob_data_size_;
-	gint knob_data_length1;
 	guchar* knob_data;
 	g_return_val_if_fail (surface != NULL, NULL);
 	if (cairo_image_surface_get_format (surface) != CAIRO_FORMAT_ARGB32) {
 		result = NULL;
 		return result;
 	}
-	knob_data = (_tmp0_ = cairo_image_surface_get_data (surface), knob_data_length1 = -1, _knob_data_size_ = knob_data_length1, _tmp0_);
+	knob_data = (_tmp0_ = cairo_image_surface_get_data (surface), _tmp0_);
 	{
 		gint i;
 		i = 0;

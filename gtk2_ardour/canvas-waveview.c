@@ -39,7 +39,7 @@
 #define POSIX_FUNC_PTR_CAST(type, object) *((type*) &(object))
 #endif // _POSIX_VERSION
 
-extern void c_stacktrace();
+extern void c_stacktrace(void);
 
 enum {
 	 PROP_0,
@@ -338,7 +338,7 @@ gnome_canvas_waveview_set_gradient_waveforms (int yn)
 }
 
 GnomeCanvasWaveViewCache*
-gnome_canvas_waveview_cache_new ()
+gnome_canvas_waveview_cache_new (void)
 {
 	GnomeCanvasWaveViewCache *c;
 
