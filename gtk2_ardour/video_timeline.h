@@ -29,7 +29,6 @@
 #include "ardour/session.h"
 #include "ardour/session_handle.h"
 #include "video_image_frame.h"
-#include "open_video_monitor_dialog.h"
 #include "video_monitor.h"
 #include "pbd/signals.h"
 #include "canvas.h"
@@ -77,7 +76,7 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	void toggle_offset_locked () { video_offset_lock = !video_offset_lock; }
 	bool is_offset_locked () { return video_offset_lock; }
 
-	void open_video_monitor (bool interactive=true);
+	void open_video_monitor ();
 	void close_video_monitor ();
 	void terminated_video_monitor ();
 	void manual_seek_video_monitor (framepos_t pos);
@@ -132,7 +131,6 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	std::string translated_filename ();
 
 	VideoMonitor *vmonitor;
-	OpenVideoMonitorDialog *open_video_monitor_dialog;
 	bool reopen_vmonitor;
 
 	PBD::Signal0<void> VtlUpdate;

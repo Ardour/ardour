@@ -427,7 +427,6 @@ def build(bld):
             'video_timeline.cc',
             'system_exec.cc',
             'video_monitor.cc',
-            'open_video_monitor_dialog.cc',
             'transcode_ffmpeg.cc',
             'transcode_video_dialog.cc',
             'video_server_dialog.cc',
