@@ -815,12 +815,11 @@ class VideoTimelineOptions : public OptionEditorBox
 public:
 	VideoTimelineOptions (RCConfiguration* c)
 		: _rc_config (c)
-		, _show_xjadeo_setup_button (_("Show Video Monitor Option Dialog"))
 		, _show_video_export_info_button (_("Show Video Export Info before export"))
 		, _show_video_server_dialog_button (_("Show Video Server Startup Dialog"))
 		, _video_advanced_setup_button (_("Advanced Setup (remote video server)"))
 	{
-		Table* t = manage (new Table (2, 7));
+		Table* t = manage (new Table (2, 6));
 		t->set_spacings (4);
 
 		t->attach (_video_advanced_setup_button, 0, 2, 0, 1);
@@ -844,17 +843,12 @@ public:
 
 		/* small vspace  y=3..4 */
 
-		t->attach (_show_xjadeo_setup_button, 0, 2, 4, 5);
-		_show_xjadeo_setup_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_xjadeo_setup_toggled));
-		Gtkmm2ext::UI::instance()->set_tip (_show_xjadeo_setup_button,
-					    _("<b>When enabled</b> an option dialog is presented before opening the video monitor"));
-
-		t->attach (_show_video_export_info_button, 0, 2, 5, 6);
+		t->attach (_show_video_export_info_button, 0, 2, 4, 5);
 		_show_video_export_info_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_export_info_toggled));
 		Gtkmm2ext::UI::instance()->set_tip (_show_video_export_info_button,
 					    _("<b>When enabled</b> an information window with details is displayed before the video-export dialog."));
 
-		t->attach (_show_video_server_dialog_button, 0, 2, 6, 7);
+		t->attach (_show_video_server_dialog_button, 0, 2, 5, 6);
 		_show_video_server_dialog_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_server_dialog_toggled));
 		Gtkmm2ext::UI::instance()->set_tip (_show_video_server_dialog_button,
 					    _("<b>When enabled</b> the video server is never launched automatically without confirmation"));
@@ -875,12 +869,6 @@ public:
 	void server_docroot_changed ()
 	{
 		_rc_config->set_video_server_docroot (_video_server_docroot_entry.get_text());
-	}
-
-	void show_xjadeo_setup_toggled ()
-	{
-		bool const x = _show_xjadeo_setup_button.get_active ();
-		_rc_config->set_video_monitor_setup_dialog (x);
 	}
 
 	void show_video_export_info_toggled ()
@@ -907,9 +895,6 @@ public:
 			_video_server_url_entry.set_text (_rc_config->get_video_server_url());
 		} else if (p == "video-server-docroot") {
 			_video_server_docroot_entry.set_text (_rc_config->get_video_server_docroot());
-		} else if (p == "video-monitor-setup-dialog") {
-			bool const x = _rc_config->get_video_monitor_setup_dialog();
-			_show_xjadeo_setup_button.set_active (x);
 		} else if (p == "show-video-export-info") {
 			bool const x = _rc_config->get_show_video_export_info();
 			_show_video_export_info_button.set_active (x);
@@ -938,7 +923,6 @@ private:
 	RCConfiguration* _rc_config;
 	Entry _video_server_url_entry;
 	Entry _video_server_docroot_entry;
-	CheckButton _show_xjadeo_setup_button;
 	CheckButton _show_video_export_info_button;
 	CheckButton _show_video_server_dialog_button;
 	CheckButton _video_advanced_setup_button;

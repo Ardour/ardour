@@ -59,7 +59,6 @@ VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Group *vbg, int in
 	auto_set_session_fps = false;
 	video_offset_lock = false;
 	video_aspect_ratio = 4.0/3.0;
-	open_video_monitor_dialog = 0;
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&VideoTimeLine::parameter_changed, this, _1), gui_context());
 	video_server_url = video_get_server_url(Config);
 	server_docroot   = video_get_docroot(Config);
@@ -163,10 +162,6 @@ VideoTimeLine::close_session ()
 	video_filename = "";
 	video_duration = 0;
 	GuiUpdate("set-xjadeo-sensitive-off");
-	if (open_video_monitor_dialog) {
-		delete open_video_monitor_dialog;
-	}
-	open_video_monitor_dialog = 0;
 }
 
 /** load settings from session */
@@ -220,16 +215,11 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 		video_file_info(propf->value(), local_file);
 	}
 
-	if (open_video_monitor_dialog) {
-		delete open_video_monitor_dialog;
-	}
-	open_video_monitor_dialog = 0;
-
 	node = _session->extra_xml (X_("Videomonitor"));
 	if (node) {
 		const XMLProperty* prop = node->property (X_("active"));
 		if (prop && prop->value() == "yes" && found_xjadeo() && !video_filename.empty() && local_file) {
-			open_video_monitor(false);
+			open_video_monitor();
 		}
 	}
 
@@ -533,11 +523,6 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 	}
 	flush_local_cache ();
 
-	_session->maybe_update_session_range(
-			std::max(get_offset(), (ARDOUR::frameoffset_t) 0),
-			std::max(get_offset() + get_duration(), (ARDOUR::frameoffset_t) 0)
-			);
-
 	if (found_xjadeo() && local_file) {
 		GuiUpdate("set-xjadeo-sensitive-on");
 		if (vmonitor && vmonitor->is_started()) {
@@ -697,7 +682,7 @@ VideoTimeLine::find_xjadeo () {
 }
 
 void
-VideoTimeLine::open_video_monitor(bool interactive) {
+VideoTimeLine::open_video_monitor() {
 	if (!found_xjadeo()) return;
 	if (!vmonitor) {
 		vmonitor = new VideoMonitor(editor, _xjadeo_bin);
@@ -719,41 +704,7 @@ VideoTimeLine::open_video_monitor(bool interactive) {
 		}
 	}
 
-	if (interactive && Config->get_video_monitor_setup_dialog()) {
-		if (open_video_monitor_dialog == 0) {
-			open_video_monitor_dialog = new OpenVideoMonitorDialog(_session);
-		}
-		if (open_video_monitor_dialog->is_visible()) {
-			return;
-		}
-		open_video_monitor_dialog->setup_settings_mask(xj_settings_mask);
-		open_video_monitor_dialog->set_filename(video_filename);
-		Gtk::ResponseType r = (Gtk::ResponseType) open_video_monitor_dialog->run ();
-		open_video_monitor_dialog->hide();
-		if (r != Gtk::RESPONSE_ACCEPT) {
-			GuiUpdate("set-xjadeo-active-off");
-			return;
-		}
-
-		if (_session && (xj_settings_mask != open_video_monitor_dialog->xj_settings_mask()) ) {
-			/* save mask to Session */
-			XMLNode* node = new XMLNode(X_("XJRestoreSettings"));
-			node->add_property (X_("mask"), (const long) open_video_monitor_dialog->xj_settings_mask() );
-			_session->add_extra_xml (*node);
-			_session->set_dirty ();
-		}
-
-		if (open_video_monitor_dialog->show_again()) {
-			Config->set_video_monitor_setup_dialog(false);
-		}
-#if 1
-		vmonitor->set_debug(open_video_monitor_dialog->enable_debug());
-#endif
-		vmonitor->restore_settings_mask(open_video_monitor_dialog->xj_settings_mask());
-	} else {
-		vmonitor->restore_settings_mask(xj_settings_mask);
-	}
-
+	vmonitor->restore_settings_mask(xj_settings_mask);
 
 	if (!vmonitor->start()) {
 		warning << "launching xjadeo failed.." << endmsg;
@@ -781,7 +732,7 @@ VideoTimeLine::terminated_video_monitor () {
 	vmonitor=0;
   if (reopen_vmonitor) {
 		reopen_vmonitor=false;
-		open_video_monitor(false);
+		open_video_monitor();
 	}
 }
 
