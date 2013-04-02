@@ -698,12 +698,6 @@ ARDOUR_UI::startup ()
 				}
 			}
 
-			// wait for session is loaded reply from nsm server
-			do {
-				nsm->check ();
-				usleep (10);
-			} while (!nsm->session_loaded ());
-
 		}
 		else {
 			delete nsm;
@@ -981,7 +975,7 @@ ARDOUR_UI::every_second ()
 	update_disk_space ();
 	update_timecode_format ();
 
-	if (nsm && nsm->is_active () && nsm->session_loaded ()) {
+	if (nsm && nsm->is_active ()) {
 		nsm->check ();
 
 		if (!_was_dirty && _session->dirty ()) {
