@@ -658,7 +658,11 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 		RegionView* rv = i->view;
 
-		if (rv->region()->locked()) {
+		if (rv->region()->locked()
+#ifdef WITH_VIDEOTIMELINE
+				|| rv->region()->video_locked()
+#endif
+				) {
 			continue;
 		}
 
@@ -929,7 +933,11 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 	/* insert the regions into their new playlists */
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 
-		if (i->view->region()->locked()) {
+		if (i->view->region()->locked()
+#ifdef WITH_VIDEOTIMELINE
+				|| i->view->region()->video_locked()
+#endif
+				) {
 			continue;
 		}
 
@@ -1008,7 +1016,11 @@ RegionMoveDrag::finished_no_copy (
 		RouteTimeAxisView* const dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[i->time_axis_view]);
 		double const dest_layer = i->layer;
 
-		if (rv->region()->locked()) {
+		if (rv->region()->locked()
+#ifdef WITH_VIDEOTIMELINE
+				|| rv->region()->video_locked()
+#endif
+				) {
 			++i;
 			continue;
 		}
@@ -1596,6 +1608,168 @@ NoteResizeDrag::aborted (bool)
 		(*r)->abort_resizing ();
 	}
 }
+
+#ifdef WITH_VIDEOTIMELINE
+
+AVDraggingView::AVDraggingView (RegionView* v)
+	: view (v)
+{
+	initial_position = v->region()->position ();
+}
+
+VideoTimeLineDrag::VideoTimeLineDrag (Editor* e, ArdourCanvas::Item* i)
+	: Drag (e, i)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New VideoTimeLineDrag\n");
+
+	/* create a list of regions to move along */
+#if 1 /* all reagions -- with video_locked() */
+	RegionSelection rs;
+	TrackViewList empty;
+	empty.clear();
+	_editor->get_regions_after(rs, (framepos_t) 0, empty);
+	std::list<RegionView*> views = rs.by_layer();
+#else /* selected regions -- with video_locked() */
+	std::list<RegionView*> views = _editor->selection->regions.by_layer();
+#endif
+	for (list<RegionView*>::iterator i = views.begin(); i != views.end(); ++i) {
+		RegionView* rv = (*i);
+		if (!rv->region()->video_locked()) {
+			continue;
+		}
+		_views.push_back (AVDraggingView (rv));
+	}
+}
+
+void
+VideoTimeLineDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
+{
+	Drag::start_grab (event);
+	if (_editor->session() == 0) {
+		return;
+	}
+
+	_startdrag_video_offset=ARDOUR_UI::instance()->video_timeline->get_offset();
+	_max_backwards_drag = (
+			  ARDOUR_UI::instance()->video_timeline->get_duration()
+			+ ARDOUR_UI::instance()->video_timeline->get_offset()
+			- ceil(ARDOUR_UI::instance()->video_timeline->get_apv())
+			);
+
+	for (list<AVDraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
+		if (i->initial_position < _max_backwards_drag || _max_backwards_drag < 0) {
+			_max_backwards_drag = ARDOUR_UI::instance()->video_timeline->quantify_frames_to_apv (i->initial_position);
+		}
+	}
+	DEBUG_TRACE (DEBUG::Drags, string_compose("VideoTimeLineDrag: max backwards-drag: %1\n", _max_backwards_drag));
+
+	char buf[128];
+	Timecode::Time timecode;
+	_editor->session()->sample_to_timecode(abs(_startdrag_video_offset), timecode, true /* use_offset */, false /* use_subframes */ );
+	snprintf (buf, sizeof (buf), "Video Start:\n%c%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32, (_startdrag_video_offset<0?'-':' '), timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+	_editor->verbose_cursor()->set(buf, event->button.x + 10, event->button.y + 10);
+	_editor->verbose_cursor()->show ();
+}
+
+void
+VideoTimeLineDrag::motion (GdkEvent* event, bool first_move)
+{
+	if (_editor->session() == 0) {
+		return;
+	}
+	if (ARDOUR_UI::instance()->video_timeline->is_offset_locked()) {
+		return;
+	}
+
+	framecnt_t dt = adjusted_current_frame (event) - raw_grab_frame() + _pointer_frame_offset;
+	dt = ARDOUR_UI::instance()->video_timeline->quantify_frames_to_apv(dt);
+
+	if (_max_backwards_drag >= 0 && dt <= - _max_backwards_drag) {
+		dt = - _max_backwards_drag;
+	}
+
+	ARDOUR_UI::instance()->video_timeline->set_offset(_startdrag_video_offset+dt);
+	ARDOUR_UI::instance()->flush_videotimeline_cache(true);
+
+	for (list<AVDraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
+		RegionView* rv = i->view;
+		DEBUG_TRACE (DEBUG::Drags, string_compose("SHIFT REGION at %1 by %2\n", i->initial_position, dt));
+		if (first_move) {
+			rv->drag_start ();
+			_editor->update_canvas_now ();
+			rv->fake_set_opaque (true);
+			rv->region()->clear_changes ();
+			rv->region()->suspend_property_changes();
+		}
+		rv->region()->set_position(i->initial_position + dt);
+		rv->region_changed(ARDOUR::Properties::position);
+	}
+
+	const framepos_t offset = ARDOUR_UI::instance()->video_timeline->get_offset();
+	Timecode::Time timecode;
+	Timecode::Time timediff;
+	char buf[128];
+	_editor->session()->sample_to_timecode(abs(offset), timecode, true /* use_offset */, false /* use_subframes */ );
+	_editor->session()->sample_to_timecode(abs(dt), timediff, false /* use_offset */, false /* use_subframes */ );
+	snprintf (buf, sizeof (buf),
+			"%s\n%c%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32
+			"\n%s\n%c%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32
+			, _("Video Start:"),
+				(offset<0?'-':' '), timecode.hours, timecode.minutes, timecode.seconds, timecode.frames
+			, _("Diff:"),
+				(dt<0?'-':' '), timediff.hours, timediff.minutes, timediff.seconds, timediff.frames
+				);
+	_editor->verbose_cursor()->set(buf, event->button.x + 10, event->button.y + 10);
+	_editor->verbose_cursor()->show ();
+}
+
+void
+VideoTimeLineDrag::finished (GdkEvent *event, bool movement_occurred)
+{
+	if (ARDOUR_UI::instance()->video_timeline->is_offset_locked()) {
+		return;
+	}
+
+	if (!movement_occurred || ! _editor->session()) {
+		return;
+	}
+
+	ARDOUR_UI::instance()->flush_videotimeline_cache(true);
+
+	_editor->begin_reversible_command (_("Move Video"));
+
+	XMLNode &before = ARDOUR_UI::instance()->video_timeline->get_state();
+	ARDOUR_UI::instance()->video_timeline->save_undo();
+	XMLNode &after = ARDOUR_UI::instance()->video_timeline->get_state();
+	_editor->session()->add_command(new MementoCommand<VideoTimeLine>(*(ARDOUR_UI::instance()->video_timeline), &before, &after));
+
+	for (list<AVDraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
+		i->view->drag_end();
+		i->view->fake_set_opaque (false);
+		i->view->region()->resume_property_changes ();
+
+		_editor->session()->add_command (new StatefulDiffCommand (i->view->region()));
+	}
+
+	_editor->commit_reversible_command ();
+	_editor->update_canvas_now ();
+}
+
+void
+VideoTimeLineDrag::aborted (bool)
+{
+	if (ARDOUR_UI::instance()->video_timeline->is_offset_locked()) {
+		return;
+	}
+	ARDOUR_UI::instance()->video_timeline->set_offset(_startdrag_video_offset);
+	ARDOUR_UI::instance()->flush_videotimeline_cache(true);
+
+	for (list<AVDraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
+		i->view->region()->resume_property_changes ();
+		i->view->region()->set_position(i->initial_position);
+	}
+}
+#endif
 
 TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool preserve_fade_anchor)
 	: RegionDrag (e, i, p, v)

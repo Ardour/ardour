@@ -16,6 +16,7 @@ BUILD_ROOT=../../build
 
 MIXBUS=
 WITH_LADSPA=0
+WITH_HARVID=0
 STRIP=all
 PRINT_SYSDEPS=
 WITH_NLS=
@@ -70,6 +71,7 @@ while [ $# -gt 0 ] ; do
 	--strip) STRIP=$2 ; shift ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
+	--harvid) WITH_HARVID=1 ; shift ;;
 
 	*)
 		#catch all for unknown arguments
@@ -87,10 +89,10 @@ if test x$STRIP != xall -a x$STRIP != xnone -a x$STRIP != xsome ; then
     exit 1
 fi
 
-release_version=`grep -m 1 '[^A-Za-z_]LINUX_VERSION = ' ../../wscript | awk '{ print $3 }' | sed "s/'//g"`
-svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d'"' -f 2`
-echo "Version is $release_version / $svn_version"
-info_string="$release_version/$svn_version built on `hostname` by `whoami` on `date`"
+. ./define_versions.sh
+
+echo "Version is $version / $commit"
+info_string="$version ($commit) built on `hostname` by `whoami` on `date`"
 echo "Info string is $info_string"
 
 # Figure out our CPU type
@@ -99,11 +101,13 @@ case `uname -m` in
 		echo "Architecture is x86"
 		ARCH='x86'
 		ARCH_BITS='32-bit'
+		MULTIARCH='i386-linux-gnu'
 		;;
 	x86_64|amd64|AMD64)
 		echo "Architecture is x86_64"
 		ARCH='x86_64'
 		ARCH_BITS='64-bit'
+		MULTIARCH='x86_64-linux-gnu'
 		;;
 	*)
 		echo ""
@@ -112,13 +116,6 @@ case `uname -m` in
 		exit 1
 		;;
 esac
-
-# Figure out the Build Type
-if grep -q "DEBUG = True" ../../build/c4che/default.cache.py; then
-	DEBUG="T"
-else
-	DEBUG="F"
-fi
 
 if [ x$DEBUG = xT ]; then
     BUILDTYPE="dbg"
@@ -131,11 +128,11 @@ fi
 # setup directory structure
 
 if [ -z "${BUILDTYPE}" ]; then
-	APPDIR=${APPNAME}_${ARCH}-${release_version}_${svn_version}
-	APP_VER_NAME=${APPNAME}-${release_version}_${svn_version}
+	APPDIR=${APPNAME}_${ARCH}-${version}
+	APP_VER_NAME=${APPNAME}-${version}
 else
-	APPDIR=${APPNAME}_${ARCH}-${release_version}_${svn_version}-${BUILDTYPE}
-	APP_VER_NAME=${APPNAME}-${release_version}_${svn_version}-${BUILDTYPE}
+	APPDIR=${APPNAME}_${ARCH}-${version}-${BUILDTYPE}
+	APP_VER_NAME=${APPNAME}-${version}-${BUILDTYPE}
 fi
 
 APPBIN=$APPDIR/bin
@@ -298,34 +295,6 @@ fi
 #
 # Copy stuff that may be dynamically loaded
 # 
-<<<<<<< HEAD
-
-cp -R $GTKSTACK_ROOT/etc/* $Etc
-echo "Copying all Pango modules ..."
-cp -R $GTKSTACK_ROOT/lib/pango/1.6.0/modules/*.so $Modules
-echo "Copying all GDK Pixbuf loaders ..."
-cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Loaders
-
-# Generate a pango module file using the actual Pango that we're going to bundle
-
-cat > pangorc <<EOF 
-[Pango]
-ModulesPath=$GTKSTACK_ROOT/lib/pango/1.6.0/modules
-EOF
-env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.6.0/?@ROOTDIR@/?" > $Etc/pango.modules.in
-rm pangorc
-
-# Ditto for gdk-pixbuf loaders
-gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.loaders.in
-
-# We rely on clearlooks, so include a version from our own build tree
-# this one is special - we will set GTK_PATH to $Libraries/clearlooks
-
-echo "Copying clearlooks ..."
-cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so $Libraries
-mkdir -p $Libraries/clearlooks/engines
-(cd $Libraries/clearlooks/engines && ln -s ../../libclearlooks.so . )
-=======
 
 cp -R $GTKSTACK_ROOT/etc/* $Etc
 echo "Copying all Pango modules ..."
@@ -357,7 +326,6 @@ cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.so $Libraries
 
 cp $GTKSTACK_ROOT/lib/gtk-2.0/2.10.0/engines/libpixmap.so $Libraries
 (cd $GTK_ENGINE_DIR && ln -s ../../libpixmap.so . )
->>>>>>> master
 
 # LADSPA
 if test x$WITH_LADSPA != x ; then
@@ -554,20 +522,25 @@ fi
 # share stuff
 
 cp -R ../../gtk2_ardour/splash.png $Shared
-<<<<<<< HEAD
-=======
 cp -R ../../gtk2_ardour/ArdourMono.ttf $Shared
->>>>>>> master
 
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type d`; do
 	rm -rf $svndir
 done
 
+if test x$WITH_HARVID != x ; then
+	cd $APPBIN
+	HARVID_VERSION="v0.7.0" # todo make 'latest' symlink on github work somehow.
+	curl http://x42.github.com/harvid/releases/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz \
+		| tar -x -z --exclude=README --exclude=harvid.1 --strip-components=1 || exit 1
+	cd -
+fi
+
 #
 # Add the uninstaller
 #
-sed -e "s/%REPLACE_PGM%/${APPNAME}/" -e "s/%REPLACE_VENDOR%/${VENDOR}/" -e "s/%REPLACE_VERSION%/${release_version}/" -e "s/%REPLACE_BUILD%/${svn_version}/" -e "s/%REPLACE_TYPE%/${BUILDTYPE}/" < uninstall.sh.in > $APPBIN/${APP_VER_NAME}.uninstall.sh
+sed -e "s/%REPLACE_PGM%/${APPNAME}/" -e "s/%REPLACE_VENDOR%/${VENDOR}/" -e "s/%REPLACE_VERSION%/${version}/" -e "s/%REPLACE_TYPE%/${BUILDTYPE}/" < uninstall.sh.in > $APPBIN/${APP_VER_NAME}.uninstall.sh
 chmod a+x $APPBIN/${APP_VER_NAME}.uninstall.sh
 
 #Sanity Check file

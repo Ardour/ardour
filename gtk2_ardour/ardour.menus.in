@@ -34,9 +34,20 @@
       <separator/>
       <menuitem action='addExistingAudioFiles'/>
       <!--menuitem action='importFromSession'/-->
+#ifdef WITH_VIDEOTIMELINE
+      <menuitem action='OpenVideo'/>
+      <menu name='Video' action='Video'>
+        <menuitem action='StartVideoServer'/>
+        <menuitem action='StopVideoServer'/>
+        <menuitem action='VideoTimelineFlushCache'/>
+      </menu>
+#endif
       <menu name='Export' action='Export'>
         <menuitem action='ExportAudio'/>
         <menuitem action='StemExport'/>
+#ifdef WITH_VIDEOTIMELINE
+        <menuitem action='ExportVideo'/>
+#endif
       </menu>
       <menu name='Cleanup' action='Cleanup'>
         <menuitem action='CleanupUnused'/>
@@ -276,6 +287,9 @@
         <menuitem action='snap-regions-to-grid'/>
         <menuitem action='toggle-region-lock'/>
         <menuitem action='toggle-region-lock-style'/>
+#ifdef WITH_VIDEOTIMELINE
+        <menuitem action='toggle-region-video-lock'/>
+#endif
         <menuitem action='set-region-sync-position'/>
         <menuitem action='remove-region-sync'/>
         <menuitem action='nudge-forward'/>
@@ -427,6 +441,10 @@
         <menuitem action="toggle-loop-punch-ruler"/>
         <menuitem action="toggle-cd-marker-ruler"/>
         <menuitem action="toggle-marker-ruler"/>
+#ifdef WITH_VIDEOTIMELINE
+        <separator/>
+        <menuitem action="toggle-video-ruler"/>
+#endif
       </menu>
       <menu action="ScrollMenu">
         <menuitem action='scroll-tracks-down'/>
@@ -469,6 +487,9 @@
       <menuitem action='ToggleSummary'/>
       <menuitem action='ToggleGroupTabs'/>
       <menuitem action='show-marker-lines'/>
+#ifdef WITH_VIDEOTIMELINE
+      <menuitem action='ToggleJadeo'/>
+#endif
     </menu>
     <menu name='JACK' action='JACK'>
       <menuitem action='JACKDisconnect'/>
@@ -530,6 +551,10 @@
     <menuitem action="toggle-marker-ruler"/>
     <menuitem action="toggle-cd-marker-ruler"/>
     <menuitem action="toggle-loop-punch-ruler"/>
+#ifdef WITH_VIDEOTIMELINE
+	  <separator/>
+	  <menuitem action="toggle-video-ruler"/>
+#endif
   </popup>
 
   <popup name='ProcessorMenu'>
@@ -625,6 +650,9 @@
       <menuitem action='naturalize-region'/>
       <menuitem action='toggle-region-lock'/>
       <menuitem action='toggle-region-lock-style'/>
+#ifdef WITH_VIDEOTIMELINE
+      <menuitem action='toggle-region-video-lock'/>
+#endif
       <menuitem action='snap-regions-to-grid'/>
       <menuitem action='set-region-sync-position'/>
       <menuitem action='remove-region-sync'/>

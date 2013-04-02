@@ -3,16 +3,22 @@
     Authors: Sampo Savolainen, Jannis Pohlmann
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #include <glibmm/threads.h>
 
 #include "pbd/abstract_ui.h"
 
 #include <cwiid.h>
 =======
+=======
+>>>>>>> master
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
+<<<<<<< HEAD
+>>>>>>> master
+=======
 >>>>>>> master
 
     This program is distributed in the hope that it will be useful,
@@ -25,6 +31,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #define ENSURE_WIIMOTE_THREAD(slot) \
 	if (Glib::Threads::Thread::self() != main_thread) {	\
 		slot_mutex.lock();\
@@ -36,10 +43,14 @@
 =======
 */
 >>>>>>> master
+=======
+*/
+>>>>>>> master
 
 #ifndef ardour_wiimote_control_protocol_h
 #define ardour_wiimote_control_protocol_h
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 class WiimoteControlProtocol : public ARDOUR::ControlProtocol {
   public:
@@ -79,6 +90,8 @@ class WiimoteControlProtocol : public ARDOUR::ControlProtocol {
     sigc::connection transport_state_conn;
     sigc::connection record_state_conn;
 =======
+=======
+>>>>>>> master
 #include <cwiid.h>
 
 #include "pbd/abstract_ui.h"
@@ -128,6 +141,9 @@ protected:
 	GSource *idle_source;
 	uint16_t button_state;
 	bool callback_thread_registered;
+<<<<<<< HEAD
+>>>>>>> master
+=======
 >>>>>>> master
 };
 

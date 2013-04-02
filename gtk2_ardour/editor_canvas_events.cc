@@ -947,6 +947,14 @@ Editor::canvas_cd_marker_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 	return typed_event (item, event, CdMarkerBarItem);
 }
 
+#ifdef WITH_VIDEOTIMELINE
+bool
+Editor::canvas_videotl_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
+{
+	return typed_event (item, event, VideoBarItem);
+}
+#endif
+
 bool
 Editor::canvas_tempo_marker_event (GdkEvent *event, ArdourCanvas::Item* item, TempoMarker* /*marker*/)
 {

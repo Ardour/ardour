@@ -7,7 +7,7 @@ import string
 import subprocess
 import sys
 
-
+#
 # build scripts need to find the right platform specific version
 # 
 
@@ -84,7 +84,7 @@ def create_stored_revision():
     rev = ""
     if os.path.exists('.git'):
         rev = fetch_git_revision();
-        print("Revision: %s", rev)
+        print("ardour.git version: " + rev + "\n")
     elif os.path.exists('libs/ardour/svn_revision.cc'):
         print("Using packaged svn revision")
         return
@@ -95,7 +95,7 @@ def create_stored_revision():
     try:
         text =  '#include "ardour/svn_revision.h"\n'
         text += 'namespace ARDOUR { const char* svn_revision = \"%s\"; }\n' % rev
-        print('Writing svn revision info to libs/ardour/svn_revision.cc using ' + rev)
+        print('Writing revision info to libs/ardour/svn_revision.cc using ' + rev)
         o = open('libs/ardour/svn_revision.cc', 'w')
         o.write(text)
         o.close()
@@ -409,6 +409,8 @@ def options(opt):
                     help='Do not build with Freesound database support')
     opt.add_option('--gprofile', action='store_true', default=False, dest='gprofile',
                     help='Compile for use with gprofile')
+    opt.add_option('--videotimeline', action='store_true', default=False, dest='videotimeline',
+                    help='Compile with support for video-timeline')
     opt.add_option('--lv2', action='store_true', default=True, dest='lv2',
                     help='Compile with support for LV2 (if Lilv+Suil is available)')
     opt.add_option('--no-lv2', action='store_false', dest='lv2',
@@ -653,6 +655,9 @@ def configure(conf):
         conf.env['BUILD_TESTS'] = opts.build_tests
     #if opts.tranzport:
     #    conf.env['TRANZPORT'] = 1
+    if opts.videotimeline:
+        conf.define('WITH_VIDEOTIMELINE',1)
+        conf.env['VIDEOTIMELINE'] = 1
     if opts.windows_vst:
         conf.define('WINDOWS_VST_SUPPORT', 1)
         conf.env['WINDOWS_VST_SUPPORT'] = True
@@ -731,6 +736,7 @@ const char* const ardour_config_info = "\\n\\
 #    write_config_text('Tranzport',             opts.tranzport)
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
     write_config_text('Universal binary',      opts.universal)
+    write_config_text('Videotimeline',         opts.videotimeline)
     write_config_text('Generic x86 CPU',       opts.generic)
     write_config_text('Windows VST support',   opts.windows_vst)
     write_config_text('Wiimote support',       conf.is_defined('BUILD_WIIMOTE'))

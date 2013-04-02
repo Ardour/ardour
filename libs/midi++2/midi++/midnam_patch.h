@@ -30,8 +30,6 @@
 
 #include <stdint.h>
 
-#include <stdint.h>
-
 #include "midi++/event.h"
 #include "pbd/xml++.h"
 

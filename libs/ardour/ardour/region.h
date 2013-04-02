@@ -45,6 +45,9 @@ namespace Properties {
 	extern PBD::PropertyDescriptor<bool>              muted;
 	extern PBD::PropertyDescriptor<bool>              opaque;
 	extern PBD::PropertyDescriptor<bool>              locked;
+#ifdef WITH_VIDEOTIMELINE
+	extern PBD::PropertyDescriptor<bool>              video_locked;
+#endif
 	extern PBD::PropertyDescriptor<bool>              automatic;
 	extern PBD::PropertyDescriptor<bool>              whole_file;
 	extern PBD::PropertyDescriptor<bool>              import;
@@ -163,6 +166,9 @@ class Region
 	bool opaque ()           const { return _opaque; }
 	bool locked ()           const { return _locked; }
 	bool position_locked ()  const { return _position_locked; }
+#ifdef WITH_VIDEOTIMELINE
+	bool video_locked ()     const { return _video_locked; }
+#endif
 	bool valid_transients () const { return _valid_transients; }
 	bool automatic ()        const { return _automatic; }
 	bool whole_file ()       const { return _whole_file; }
@@ -240,6 +246,9 @@ class Region
 	void set_automatic (bool yn);
 	void set_opaque (bool yn);
 	void set_locked (bool yn);
+#ifdef WITH_VIDEOTIMELINE
+	void set_video_locked (bool yn);
+#endif
 	void set_position_locked (bool yn);
 
 	int apply (Filter &, Progress* progress = 0);
@@ -392,6 +401,9 @@ class Region
 	PBD::Property<bool>        _muted;
 	PBD::Property<bool>        _opaque;
 	PBD::Property<bool>        _locked;
+#ifdef WITH_VIDEOTIMELINE
+	PBD::Property<bool>        _video_locked;
+#endif
 	PBD::Property<bool>        _automatic;
 	PBD::Property<bool>        _whole_file;
 	PBD::Property<bool>        _import;

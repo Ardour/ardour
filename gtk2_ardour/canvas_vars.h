@@ -151,6 +151,9 @@ CANVAS_VARIABLE(canvasvar_TrimHandleLocked, "trim handle locked")
 CANVAS_VARIABLE(canvasvar_TrimHandle, "trim handle")
 CANVAS_VARIABLE(canvasvar_VerboseCanvasCursor, "verbose canvas cursor")
 CANVAS_VARIABLE(canvasvar_VestigialFrame, "vestigial frame")
+#ifdef WITH_VIDEOTIMELINE
+CANVAS_VARIABLE(canvasvar_VideoBar, "video timeline bar")
+#endif
 CANVAS_VARIABLE(canvasvar_FrameBase, "region base")
 CANVAS_VARIABLE(canvasvar_CoveredRegion, "region area covered by another region")
 CANVAS_VARIABLE(canvasvar_WaveForm, "waveform outline")

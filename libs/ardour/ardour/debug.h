@@ -60,11 +60,14 @@ namespace PBD {
 		extern uint64_t Layering;
 		extern uint64_t TempoMath;
 		extern uint64_t TempoMap;
-		extern uint64_t SoundGrid;
-		extern uint64_t SGDriver;
 		extern uint64_t OrderKeys;
 		extern uint64_t Automation;
 		extern uint64_t WiimoteControl;
+
+                /* Keep SoundGrid related stuff here */
+
+		extern uint64_t SoundGrid;
+		extern uint64_t SGDriver;
 	}
 }
 

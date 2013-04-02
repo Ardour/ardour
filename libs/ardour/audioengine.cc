@@ -1418,7 +1418,7 @@ AudioEngine::connect_to_jack (string client_name, string session_uuid)
 	    _jack = jack_client_open (jack_client_name.c_str(), JackSessionID, &status, session_uuid.c_str());
         } else {
 #endif
-                _jack = jack_client_open (jack_client_name.c_str(), JackNullOption, &status, 0);
+            _jack = jack_client_open (jack_client_name.c_str(), JackNullOption, &status, 0);
         }
                 
 

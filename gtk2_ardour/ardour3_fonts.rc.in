@@ -1,8 +1,3 @@
-style "smallest_text"
-{
-	font_name = "@FONT_TINY@"
-}
-
 style "very_small_text"
 {
  	font_name = "@FONT_SMALLER@"
@@ -15,7 +10,7 @@ style "small_text"
 
 style "small_mono_text"
 {
- 	font_name = "bold monospace @FONT_SMALL@"
+	font_name = "@MONOSPACE@ @FONT_SMALLER@"
 }
 
 style "small_italic_text"
@@ -40,7 +35,7 @@ style "medium_text"
 
 style "medium_monospace_text"
 {
-        font_name = "monospace @FONT_SIZE_NORMAL@"
+        font_name = "@MONOSPACE@ @FONT_SIZE_NORMAL@"
 }
 
 style "red_medium_text" = "medium_text"
@@ -55,9 +50,9 @@ style "large_bold_text"
  	font_name = "bold @FONT_LARGE@"
 }
 
-style "large_bold_mono_text"
+style "bigger_mono_text"
 {
- 	font_name = "bold monospace @FONT_BIGGER@"
+	font_name = "@MONOSPACE@ @FONT_BIGGER@"
 }
 
 style "larger_text"
@@ -65,19 +60,9 @@ style "larger_text"
  	font_name = "@FONT_LARGE@"
 }
 
-style "massive_text"
-{
- 	font_name = "@FONT_MASSIVE@"
-}
-
 style "monospace massive_text"
 {
-  	font_name = "bold monospace @FONT_MASSIVE@"
-}
-
-style "larger_bold_text"
-{
- 	font_name = "bold @FONT_LARGE@"
+	font_name = "@MONOSPACE@ bold @FONT_MASSIVE@"
 }
 
 style "big_bold_text"
@@ -90,7 +75,7 @@ style "plugin_name_text" = "big_bold_text"
 	fg[NORMAL] = @@COLPREFIX@_text
 }
 
-style "plugin_maker_text" = "larger_bold_text"
+style "plugin_maker_text" = "large_bold_text"
 {
 	fg[NORMAL] = @@COLPREFIX@_text
 }

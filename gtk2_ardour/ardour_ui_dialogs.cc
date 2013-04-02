@@ -121,6 +121,9 @@ ARDOUR_UI::set_session (Session *s)
 	secondary_clock->set_session (s);
 	big_clock->set_session (s);
 	time_info_box->set_session (s);
+#ifdef WITH_VIDEOTIMELINE
+	video_timeline->set_session (s);
+#endif
 
 	/* sensitize menu bar options that are now valid */
 
@@ -212,6 +215,11 @@ ARDOUR_UI::set_session (Session *s)
 int
 ARDOUR_UI::unload_session (bool hide_stuff)
 {
+#ifdef WITH_VIDEOTIMELINE
+	if (_session) {
+		ARDOUR_UI::instance()->video_timeline->close_session();
+	}
+#endif
 	if (_session && _session->dirty()) {
 		std::vector<std::string> actions;
 		actions.push_back (_("Don't close"));

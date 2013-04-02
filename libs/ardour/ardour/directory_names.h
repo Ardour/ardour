@@ -27,6 +27,9 @@ extern const char* const old_sound_dir_name;
 extern const char* const sound_dir_name;
 extern const char* const midi_dir_name;
 extern const char* const midi_patch_dir_name;
+#ifdef WITH_VIDEOTIMELINE
+extern const char* const video_dir_name;
+#endif
 extern const char* const dead_dir_name;
 extern const char* const interchange_dir_name;
 extern const char* const peak_dir_name;

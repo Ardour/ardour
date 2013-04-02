@@ -6,13 +6,12 @@ GTKSTACK_ROOT=$HOME/gtk/inst
 ARDOURSTACK_ROOT=$HOME/a3/inst
 BUILD_ROOT=../../build
 
+SAE=
 MIXBUS=
 WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=
-DEVONLY=
-WITH_SOUNDGRID=
 
 while [ $# -gt 0 ] ; do
     echo "arg = $1"
@@ -22,27 +21,35 @@ while [ $# -gt 0 ] ; do
 	# top level build targets
 	#
 
+	--sae) WITH_NLS= ; 
+               SAE=1 ; 
+	       WITH_LADSPA=1; 
+               STRIP= ; 
+	       PRODUCT_PKG_DIR=ArdourSAE ; 
+	       APPNAME=Ardour ;
+	       shift ;;
 	--mixbus) MIXBUS=1; 
 	          WITH_NLS=1 ; 
+                  SAE= ; 
                   WITH_LADSPA=; 
                   STRIP= ; 
 		  PRODUCT_PKG_DIR=MixBus;
 		  APPNAME=Mixbus ;
                   shift ;;
 	--public) WITH_NLS= ; 
+	          SAE= ; 
                   WITH_LADSPA=1; 
                   STRIP= ; 
 		  PRODUCT_PKG_DIR=Ardour;
 		  APPNAME=Ardour ;
 		  shift ;;
-        --sg*)  WITH_SOUNDGRID=1
-                shift;;
-        --dev*) DEVONLY=1;
-                WITH_LADSPA=0
-                STRIP=
-                PRODUCT_PKG_DIR=Ardour;
-                APPNAME=Ardour;
-                shift;;
+	--allinone) SAE= ; 
+	            WITH_NLS= ; 
+		    WITH_LADSPA=1; 
+		    STRIP= ; 
+		    PRODUCT_PKG_DIR=Ardour ;
+		    shift ;;
+	--test) SAE= ; WITH_LADSPA=; STRIP= ; shift ;;
 
 	#
 	# specific build flags
@@ -55,15 +62,11 @@ while [ $# -gt 0 ] ; do
     esac
 done
 
-<<<<<<< HEAD
-#release_version=`grep -m 1 '^VERSION' ../../wscript | cut -d' ' -f 3 | sed "s/'//g"`
-=======
 #release_version=`grep -m 1 '[^A-Za-z_]OSX_VERSION = ' ../../wscript | cut -d' ' -f 3 | sed "s/'//g"`
->>>>>>> master
 release_version=3.0
-svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d' ' -f 8 | sed 's/[^0-9]//g'`
-echo "Version is $release_version / $svn_version"
-info_string="$release_version/$svn_version built on `hostname` by `whoami` on `date`"
+revision=`grep -m 1 'revision =' ../../libs/ardour/revision.cc | cut -d' ' -f 8 | sed 's/[^0-9]//g'`
+echo "Version is $release_version / $revision"
+info_string="$release_version/$revision built on `hostname` by `whoami` on `date`"
 echo "Info string is $info_string"
 
 # setup directory structure
@@ -129,7 +132,16 @@ mkdir -p $MackieControl
 
 # maybe set variables
 env=""
-if test x$MIXBUS != x ; then
+if test x$SAE != x ; then
+    appname="Ardour3/SAE"
+    env="$env<key>ARDOUR_SAE</key><string>true</string>"
+    #
+    # current default for SAE version is German keyboard layout without a keypad
+    #
+    env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>de-nokeypad</string>"
+    env="$env<key>ARDOUR_UI_CONF</key><string>ardour3_ui_sae.conf</string>"
+    env="$env<key>ARDOUR3_UI_RC</key><string>ardour3_ui_dark_sae.rc</string>"
+elif test x$MIXBUS != x ; then
     appname="Ardour3/Mixbus"
     env="$env<key>ARDOUR_MIXBUS</key><string>true</string>"
     #
@@ -154,12 +166,12 @@ env="<key>LSEnvironment</key><dict>$env<key>ARDOUR_BUNDLED</key><string>true</st
 
 # edit plist
 sed -e "s?@ENV@?$env?g" \
-    -e "s?@VERSION@?$release_version/$svn_version?g" \
+    -e "s?@VERSION@?$release_version/$revision?g" \
     -e "s?@INFOSTRING@?$info_string?g" < Info.plist.in > Info.plist
 # and plist strings
 sed -e "s?@APPNAME@?$appname?" \
     -e "s?@ENV@?$env?g" \
-    -e "s?@VERSION@?$release_version/$svn_version?g" \
+    -e "s?@VERSION@?$release_version/$revision?g" \
     -e "s?@INFOSTRING@?$info_string?g" < InfoPlist.strings.in > Resources/InfoPlist.strings || exit 1
 
 # copy static files
@@ -180,7 +192,10 @@ MAIN_EXECUTABLE=Ardour3.bin
 
 echo "Copying ardour executable ...."
 cp $BUILD_ROOT/gtk2_ardour/ardour-$release_version $APPROOT/MacOS/$MAIN_EXECUTABLE
-if test x$MIXBUS != x ; then
+if test x$SAE != x ; then
+    # cp $BUILD_ROOT/gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
+    cp  Ardour3-SAE.icns $Resources/appIcon.icns
+elif test x$MIXBUS != x ; then
     cp  Mixbus.icns $Resources/appIcon.icns
 else
     cp  Ardour3.icns $Resources/appIcon.icns
@@ -237,59 +252,6 @@ echo "Copying all GDK Pixbuf loaders ..."
 cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Frameworks/modules
 # charset alias file
 cp -R $GTKSTACK_ROOT/lib/charset.alias $Resources
-<<<<<<< HEAD
-
-# generate new Pango module file
-cat > pangorc <<EOF 
-[Pango]
-ModulesPath=$GTKSTACK_ROOT/lib/pango/1.6.0/modules
-EOF
-env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.6.0/modules/?@executable_path/../lib/modules/?" > $Resources/pango.modules
-rm pangorc
-
-# generate a new GDK pixbufs loaders file
-gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/?@executable_path/../lib/modules/?" > $Resources/gdk-pixbuf.loaders
-
-# We rely on clearlooks, so include a version from our own build tree
-# this one is special - we will set GTK_PATH to $Libraries/clearlooks
-
-echo "Copying clearlooks ..."
-cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $Frameworks
-mkdir -p $Frameworks/clearlooks/engines
-(cd $Frameworks/clearlooks/engines && ln -s ../../libclearlooks.dylib libclearlooks.dylib && ln -s ../../libclearlooks.dylib libclearlooks.so)
-
-if test x$WITH_LADSPA != x ; then
-    if test x$MIXBUS != x ; then
-	plugdir=mixbus_ladspa
-    else
-	plugdir=ladspa
-    fi
-    if [ -d $plugdir -a "x$(ls $plugdir)" != x ] ; then 
-        echo "Copying `ls $plugdir | wc -l` plugins ..."
-        cp -r $plugdir/* $Plugins
-    fi
-fi
-
-# Control Surface shared libraries
-cp $BUILD_ROOT/libs/surfaces/*/libardour_*.dylib $Surfaces
-cp $BUILD_ROOT/libs/surfaces/control_protocol/libardourcp*.dylib $Frameworks
-
-# Panners
-cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
-
-# Export Formats/Presets
-for f in $BUILD_ROOT/../export/*.preset $BUILD_ROOT/../export/*.format ; do 
-    cp "$f" $ExportFormats ; 
-done
-
-# Session and Route templates
-for f in $BUILD_ROOT/../templates/* ; do 
-    if [ -d "$f" ] ; then
-        cp -r "$f" $Templates ; 
-    fi
-done
-
-=======
 
 # generate new Pango module file
 cat > pangorc <<EOF 
@@ -350,7 +312,6 @@ for f in $BUILD_ROOT/../templates/* ; do
     fi
 done
 
->>>>>>> master
 # MidiMaps
 # got to be careful with names here
 for x in $BUILD_ROOT/../midi_maps/*.map ; do
@@ -411,10 +372,6 @@ cp ../../gtk2_ardour/mixer.bindings $Resources
 cp ../../gtk2_ardour/step_editing.bindings $Resources
 cp $BUILD_ROOT/gtk2_ardour/ardour.menus $Resources
 
-<<<<<<< HEAD
-cp ../../ardour_system.rc $Resources/ardour_system.rc
-cp ../../instant.xml $Resources/instant.xml
-=======
 if test x$SAE != x ; then
     cp $BUILD_ROOT/gtk2_ardour/SAE-de-keypad.bindings  $Resources
     cp $BUILD_ROOT/gtk2_ardour/SAE-de-nokeypad.bindings  $Resources
@@ -429,7 +386,6 @@ else
     cp ../../instant.xml $Resources/instant.xml
     echo cp ../../instant.xml $Resources/instant.xml
 fi
->>>>>>> master
 cp ../../gtk2_ardour/ardour3_ui_default.conf $Resources
 cp ../../gtk2_ardour/ardour3_ui_default.conf $Resources/ardour3_ui.conf
 cp $BUILD_ROOT/gtk2_ardour/ardour3_ui_light.rc $Resources
@@ -442,13 +398,6 @@ cp -r ../../gtk2_ardour/pixmaps $Resources
 cp -R ../../gtk2_ardour/splash.png $Shared
 cp -R ../../gtk2_ardour/ArdourMono.ttf $Shared
 
-if [ x$WITH_SOUNDGRID != x ] ; then
-    echo "Copying SoundGrid resources into app tree ..."
-    cp $BUILD_ROOT/../soundgrid/mixerapplicationcoresg.dylib $Frameworks
-    cp -R $BUILD_ROOT/../soundgrid/PMDF $Resources
-    cp -R $BUILD_ROOT/../soundgrid/XPll $Resources
-fi
-
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type dir`; do
     rm -rf $svndir
@@ -457,6 +406,9 @@ done
 # now fix up the executables
 echo "Fixing up executable dependency names ..."
 executables=$MAIN_EXECUTABLE
+if test x$SAE != x ; then
+    executables="$executables"
+fi
 
 for exe in $executables; do
     EXE=$APPROOT/MacOS/$exe
@@ -511,37 +463,43 @@ for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners ; do
     done
 done
 
+#
+# and now ... the DMG
+# 
+
 rm -rf $PRODUCT_PKG_DIR
 mkdir $PRODUCT_PKG_DIR
 
-if [ x$WITH_SOUNDGRID != x ] ; then
-    cp -R $BUILD_ROOT/libs/soundgrid/SurfaceDriver_App.bundle $PRODUCT_PKG_DIR
-fi
+if [ x$SAE != x ] ; then
+	
+    # SAE packaging
+    
+    echo "Creating SAE packaging directory"
+    mv $APPDIR $PRODUCT_PKG_DIR/Ardour3-SAE.app
+    cp HowToInstallArdourSAE.pdf "$PRODUCT_PKG_DIR/How To Install Ardour SAE.pdf"
+    cp SAE-de-keypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts (keypad).pdf"
+    cp SAE-de-nokeypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts.pdf"
+    
+elif [ x$MIXBUS != x ] ; then
 
-if [ x$MIXBUS != x ] ; then
+     # Mixbus packaging
+
     echo "Creating Mixbus packaging directory"
     mv $APPDIR $PRODUCT_PKG_DIR/
     cp MixBus_Install_QuickStart.pdf "$PRODUCT_PKG_DIR/Mixbus Install & Quick Start Guide.pdf"
-    
+
 else 
+
     echo "Creating $APPNAME packaging directory"
     mv $APPDIR $PRODUCT_PKG_DIR/
+
 fi
 
-<<<<<<< HEAD
-if [ x$DEVONLY = x ] ; then
-    echo "Building DMG ..."
-    
-    UC_DMG=$APPNAME-${release_version}-${svn_version}.dmg
-    rm -f $UC_DMG
-    hdiutil create $UC_DMG -volname $APPNAME-$release_version -fs HFS+ -srcfolder $PRODUCT_PKG_DIR
-fi
-=======
 echo "Building DMG ..."
 
-# UC_DMG=$APPNAME-${release_version}-${svn_version}-UC.dmg
-# FINAL_DMG=$APPNAME-${release_version}-${svn_version}.dmg
-UC_DMG=$APPNAME-${release_version}-${svn_version}.dmg
+# UC_DMG=$APPNAME-${release_version}-${revision}-UC.dmg
+# FINAL_DMG=$APPNAME-${release_version}-${revision}.dmg
+UC_DMG=$APPNAME-${release_version}-${revision}.dmg
 VOLNAME=$APPNAME-$release_version
 
 # TODO use mktemp
@@ -618,7 +576,6 @@ rm ${ICNSTMP}.icns ${ICNSTMP}.rsrc
 echo
 echo "packaging suceeded."
 ls -l "$UC_DMG"
->>>>>>> master
 
 echo "Done."
 exit

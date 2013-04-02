@@ -418,6 +418,24 @@ def build(bld):
         ]
     obj.includes += ['../libs']
 
+    if bld.env['VIDEOTIMELINE']:
+        obj.source += [
+            'video_image_frame.cc',
+            'add_video_dialog.cc',
+            'editor_videotimeline.cc',
+            'video_timeline.cc',
+            'system_exec.cc',
+            'video_monitor.cc',
+            'open_video_monitor_dialog.cc',
+            'transcode_ffmpeg.cc',
+            'transcode_video_dialog.cc',
+            'video_server_dialog.cc',
+            'video_copy_dialog.cc',
+            'utils_videotl.cc',
+            'export_video_dialog.cc',
+            'export_video_infobox.cc'
+            ]
+
     if bld.is_defined('HAVE_SUIL'):
         obj.source += [ 'lv2_plugin_ui.cc' ]
         obj.use += [ 'SUIL' ]
@@ -637,6 +655,9 @@ def build(bld):
         menus_argv = [ '-E', '-P', '-DGTKOSX' ]
     else:
         menus_argv = [ '-E', '-P' ]
+
+    if bld.env['VIDEOTIMELINE']:
+        menus_argv.append ('-DWITH_VIDEOTIMELINE')
     obj = bld(features = 'command-output')
     obj.command = 'cpp'
     obj.command_is_external = True

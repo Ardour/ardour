@@ -132,6 +132,26 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
+#ifdef WITH_VIDEOTIMELINE
+	act = ActionManager::register_action (main_actions, X_("OpenVideo"), _("Open Video"),
+					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_video), (Gtk::Window*) 0));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (main_actions, X_("ExportVideo"), _("Export To Video File"),
+					      sigc::mem_fun (*editor, &PublicEditor::export_video));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (main_actions, X_("Video"), _("Video maintenance"));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (main_actions, X_("StartVideoServer"), _("Start Video Server"),
+					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::start_video_server_menu), (Gtk::Window*) 0));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (main_actions, X_("StopVideoServer"), _("Stop Video Server"),
+					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::stop_video_server), true ));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (main_actions, X_("VideoTimelineFlushCache"), _("Reload video-files"),
+					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::flush_videotimeline_cache), false));
+	ActionManager::session_sensitive_actions.push_back (act);
+#endif
+
 #ifdef WITH_CMT
 
 	std::string anicomp_file_path;

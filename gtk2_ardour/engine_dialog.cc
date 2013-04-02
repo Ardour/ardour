@@ -57,6 +57,8 @@
 
 #include "ardour/rc_configuration.h"
 
+#include "ardour/rc_configuration.h"
+
 #include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/pathscanner.h"

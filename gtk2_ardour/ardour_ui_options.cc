@@ -393,6 +393,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 
 		synchronize_sync_source_and_video_pullup ();
 		reset_main_clocks ();
+#ifdef WITH_VIDEOTIMELINE
+		editor->queue_visual_videotimeline_update();
+#endif
 
 	} else if (p == "sync-source") {
 

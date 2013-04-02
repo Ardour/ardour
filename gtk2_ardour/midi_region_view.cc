@@ -3694,14 +3694,6 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 			}
 		}
 
-		if(ev.is_channel_event()) {
-			if (_last_channel_mode == FilterChannels) {
-				if(((uint16_t(1) << ev.channel()) & _last_channel_selection) == 0) {
-					continue;
-				}
-			}
-		}
-
 		/* ev.time() is in session frames, so (ev.time() - converter.origin_b()) is
 		   frames from the start of the source, and so time_beats is in terms of the
 		   source.

@@ -997,8 +997,8 @@ AudioClock::set_slave_info ()
 
 		switch (sync_src) {
 		case JACK:
-			_left_layout->set_markup (string_compose ("<span size=\"%1\" foreground=\"white\">%2</span>",
-								  INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
+			_left_layout->set_markup (string_compose ("<span size=\"%1\">"TXTSPAN"%2</span></span>",
+						INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
 			_right_layout->set_text ("");
 			break;
 		case MIDIClock:
@@ -1035,7 +1035,7 @@ AudioClock::set_slave_info ()
 		}
 	} else {
 		_left_layout->set_markup (string_compose ("<span size=\"%1\">"TXTSPAN"INT/%2</span></span>",
-							  INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
+					INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
 		_right_layout->set_text ("");
 	}
 }
@@ -1080,7 +1080,7 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 		}
 
 		_left_layout->set_markup (string_compose ("<span size=\"%1\">"TXTSPAN"%2 </span><span foreground=\"green\">%3</span></span>",
-							  INFO_FONT_SIZE, _("SR"), buf));
+				INFO_FONT_SIZE, _("SR"), buf));
 
 		float vid_pullup = _session->config.get_video_pullup();
 

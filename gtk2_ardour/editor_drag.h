@@ -505,6 +505,47 @@ private:
 	double _cumulative_dx;
 };
 
+#ifdef WITH_VIDEOTIMELINE
+/** Container for details about audio regions being dragged along with video */
+class AVDraggingView
+{
+public:
+	AVDraggingView (RegionView *);
+
+	RegionView* view; ///< the view
+	framepos_t initial_position; ///< initial position of the region
+};
+
+/** Drag of video offset */
+class VideoTimeLineDrag : public Drag
+	//TODO , public sigc::trackable
+{
+public:
+	VideoTimeLineDrag (Editor *e, ArdourCanvas::Item *i);
+
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+
+	bool y_movement_matters () const {
+		return false;
+	}
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+	void aborted (bool);
+
+protected:
+	std::list<AVDraggingView> _views; ///< information about all audio that are being dragged along
+
+private:
+	ARDOUR::frameoffset_t _startdrag_video_offset;
+	ARDOUR::frameoffset_t _max_backwards_drag;
+};
+#endif
+
 /** Drag to trim region(s) */
 class TrimDrag : public RegionDrag
 {

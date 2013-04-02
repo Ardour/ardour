@@ -543,6 +543,11 @@ Editor::register_actions ()
 	ruler_samples_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-samples-ruler"), _("Samples"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_samples)));
 	ruler_timecode_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-timecode-ruler"), _("Timecode"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_timecode)));
 	ruler_minsec_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-minsec-ruler"), _("Min:Sec"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_minsec)));
+#ifdef WITH_VIDEOTIMELINE
+	ruler_video_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-video-ruler"), _("Video"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_video_timeline)));
+	xjadeo_proc_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("ToggleJadeo"), _("Show Video Monitor"), sigc::mem_fun (*this, &Editor::set_xjadeo_proc)));
+
+#endif
 
 	/* set defaults here */
 
@@ -553,6 +558,11 @@ Editor::register_actions ()
 	ruler_range_action->set_active (true);
 	ruler_loop_punch_action->set_active (true);
 	ruler_loop_punch_action->set_active (true);
+#ifdef WITH_VIDEOTIMELINE
+	ruler_video_action->set_active (false);
+	xjadeo_proc_action->set_active (false);
+	xjadeo_proc_action->set_sensitive (false);
+#endif
 	if (Profile->get_sae()) {
 		ruler_bbt_action->set_active (true);
 		ruler_cd_marker_action->set_active (false);
@@ -708,6 +718,11 @@ Editor::toggle_ruler_visibility (RulerType rt)
 	case ruler_time_cd_marker:
 		action = "toggle-cd-marker-ruler";
 		break;
+#ifdef WITH_VIDEOTIMELINE
+	case ruler_video_timeline:
+		action = "toggle-video-ruler";
+		break;
+#endif
 	}
 
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Rulers"), action);
@@ -738,6 +753,39 @@ Editor::set_group_tabs ()
 		_session->config.set_show_group_tabs (tact->get_active ());
 	}
 }
+
+#ifdef WITH_VIDEOTIMELINE
+void
+Editor::set_xjadeo_sensitive (bool onoff)
+{
+	xjadeo_proc_action->set_sensitive(onoff);
+}
+void
+Editor::toggle_xjadeo_proc (int state)
+{
+	switch(state) {
+		case 1:
+			xjadeo_proc_action->set_active(true);
+			break;
+		case 0:
+			xjadeo_proc_action->set_active(false);
+			break;
+		default:
+			xjadeo_proc_action->set_active(!xjadeo_proc_action->get_active());
+			break;
+	}
+}
+
+void
+Editor::set_xjadeo_proc ()
+{
+	if (xjadeo_proc_action->get_active()) {
+		ARDOUR_UI::instance()->video_timeline->open_video_monitor();
+	} else {
+		ARDOUR_UI::instance()->video_timeline->close_video_monitor();
+	}
+}
+#endif
 
 void
 Editor::toggle_measure_visibility ()
@@ -1574,6 +1622,10 @@ Editor::register_region_actions ()
 
 	/* Toggle `locked' status of selected regions */
 	toggle_reg_sens (_region_actions, "toggle-region-lock", _("Lock"), sigc::mem_fun(*this, &Editor::toggle_region_lock));
+
+#ifdef WITH_VIDEOTIMELINE
+	toggle_reg_sens (_region_actions, "toggle-region-video-lock", _("Lock to Video"), sigc::mem_fun(*this, &Editor::toggle_region_video_lock));
+#endif
 
 	toggle_reg_sens (
 		_region_actions,
