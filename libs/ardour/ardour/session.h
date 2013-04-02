@@ -195,7 +195,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	std::string new_audio_source_name (const std::string&, uint32_t nchans, uint32_t chan, bool destructive);
 	std::string new_midi_source_name (const std::string&);
 	std::string new_source_path_from_name (DataType type, const std::string&);
-	RouteList new_route_from_template (uint32_t how_many, const std::string& template_path);
+        RouteList new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name);
 
 	void process (pframes_t nframes);
 

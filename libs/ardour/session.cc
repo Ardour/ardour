@@ -1598,7 +1598,7 @@ Session::find_route_name (string const & base, uint32_t& id, char* name, size_t 
 		}
 
 		++id;
-
+		
 	} while (id < (UINT_MAX-1));
 
 	return false;
@@ -2037,12 +2037,13 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 }
 
 RouteList
-Session::new_route_from_template (uint32_t how_many, const std::string& template_path)
+Session::new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name_base)
 {
 	RouteList ret;
 	uint32_t control_id;
 	XMLTree tree;
 	uint32_t number = 0;
+	const uint32_t being_added = how_many;
 
 	if (!tree.read (template_path.c_str())) {
 		return ret;
@@ -2062,13 +2063,29 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 		node_copy.remove_property_recursively (X_("id"));
 
 		try {
-			string const route_name = node_copy.property(X_("name"))->value ();
-			
-			/* generate a new name by adding a number to the end of the template name */
 			char name[32];
-			if (!find_route_name (route_name.c_str(), ++number, name, sizeof(name), true)) {
-				fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
-				/*NOTREACHED*/
+
+			if (!name_base.empty()) {
+
+				/* if we're adding more than one routes, force
+				 * all the names of the new routes to be
+				 * numbered, via the final parameter.
+				 */
+
+				if (!find_route_name (name_base.c_str(), ++number, name, sizeof(name), (being_added > 1))) {
+					fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
+					/*NOTREACHDE*/
+				}
+
+			} else {
+
+				string const route_name  = node_copy.property(X_("name"))->value ();
+			
+				/* generate a new name by adding a number to the end of the template name */
+				if (!find_route_name (route_name.c_str(), ++number, name, sizeof(name), true)) {
+					fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
+					/*NOTREACHED*/
+				}
 			}
 
 			/* set this name in the XML description that we are about to use */

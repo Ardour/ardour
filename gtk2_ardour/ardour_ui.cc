@@ -3297,7 +3297,11 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	string template_path = add_route_dialog->track_template();
 
 	if (!template_path.empty()) {
-		_session->new_route_from_template (count, template_path);
+		if (add_route_dialog->name_template_is_default())  {
+			_session->new_route_from_template (count, template_path, string());
+		} else {
+			_session->new_route_from_template (count, template_path, add_route_dialog->name_template());
+		}
 		return;
 	}
 

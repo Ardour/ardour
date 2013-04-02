@@ -288,9 +288,24 @@ AddRouteDialog::track_type_chosen ()
 
 
 string
-AddRouteDialog::name_template ()
+AddRouteDialog::name_template () const
 {
 	return name_template_entry.get_text ();
+}
+
+bool
+AddRouteDialog::name_template_is_default() const
+{
+	string n = name_template();
+
+	if (n == _("Audio") ||
+	    n == _("MIDI") ||
+	    n == _("Audio+MIDI") ||
+	    n == _("Bus")) {
+		return true;
+	}
+
+	return false;
 }
 
 int
