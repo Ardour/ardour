@@ -42,6 +42,9 @@ TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 	ffmpeg_exe = "";
 	ffprobe_exe = "";
 	m_duration = 0;
+	m_avoffset = m_lead_in = m_lead_out = 0;
+	m_width = m_height = 0;
+	m_aspect = m_fps = 0;
 #if 1 /* tentative debug mode */
 	debug_enable = false;
 #endif
@@ -147,7 +150,9 @@ TranscodeFfmpeg::probe ()
 					std::string key = kv->substr(0, kvsep);
 					std::string value = kv->substr(kvsep + 1);
 
-					if (key == X_("width")) {
+					if (key == X_("index")) {
+						m_videoidx = atoi(value.c_str());
+					} else if (key == X_("width")) {
 						m_width = atoi(value.c_str());
 					} else if (key == X_("height")) {
 						m_height = atoi(value.c_str());
@@ -231,7 +236,7 @@ TranscodeFfmpeg::probe ()
 	while (ffcmd && --timeout) usleep (1000); // wait until 'ffprobe' terminated.
 	if (timeout == 0) return false;
 
-#if 1 /* DEBUG */
+#if 0 /* DEBUG */
 	printf("FPS: %f\n", m_fps);
 	printf("Duration: %lu frames\n",(unsigned long)m_duration);
 	printf("W/H: %ix%i\n",m_width, m_height);
@@ -314,6 +319,7 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 
 	argp[a++] = strdup("-i");
 	argp[a++] = strdup(inf_a.c_str());
+
 	for(FFSettings::const_iterator it = ffs.begin(); it != ffs.end(); ++it) {
 		argp[a++] = strdup(it->first.c_str());
 		argp[a++] = strdup(it->second.c_str());
@@ -322,12 +328,36 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 		argp[a++] = strdup("-metadata");
 		argp[a++] = format_metadata(it->first.c_str(), it->second.c_str());
 	}
+	if (m_lead_in != 0 && m_lead_out != 0) {
+		std::ostringstream osstream;
+		argp[a++] = strdup("-vf");
+		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_in << X_(" [pre]; ");
+		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_out << X_(" [post]; ");
+		osstream << X_("[pre] [in] [post] concat=n=3");
+		argp[a++] = strdup(osstream.str().c_str());
+	} else if (m_lead_in != 0) {
+		std::ostringstream osstream;
+		argp[a++] = strdup("-vf");
+		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_in << X_(" [pre]; ");
+		osstream << X_("[pre] [in] concat=n=2");
+		argp[a++] = strdup(osstream.str().c_str());
+	} else if (m_lead_out != 0) {
+		std::ostringstream osstream;
+		argp[a++] = strdup("-vf");
+		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_out << X_(" [post]; ");
+		osstream << X_("[in] [post] concat=n=2");
+		argp[a++] = strdup(osstream.str().c_str());
+	}
+
 	if (map) {
+		std::ostringstream osstream;
 		argp[a++] = strdup("-map");
-		argp[a++] = strdup("0:0");
+		osstream << X_("0:") << m_videoidx;
+		argp[a++] = strdup(osstream.str().c_str());
 		argp[a++] = strdup("-map");
 		argp[a++] = strdup("1:0");
 	}
+
 	argp[a++] = strdup("-y");
 	argp[a++] = strdup(outfile.c_str());
 	argp[a] = (char *)0;
@@ -366,7 +396,7 @@ TranscodeFfmpeg::extract_audio (std::string outfile, ARDOUR::framecnt_t samplera
 	argp[i++] = strdup(ffmpeg_exe.c_str());
 	argp[i++] = strdup("-i");
 	argp[i++] = strdup(infile.c_str());
-#if 0 // native samplerate -- use a3/SRC
+#if 0 /* ffmpeg write original samplerate, use a3/SRC to resample */
 	argp[i++] = strdup("-ar");
 	argp[i] = (char*) calloc(7,sizeof(char)); snprintf(argp[i++], 7, "%"PRId64, samplerate);
 #endif
@@ -523,10 +553,15 @@ TranscodeFfmpeg::ffmpegparse_v (std::string d, size_t /* s */)
 		  printf("ffmpeg: '%s'\n", d.c_str());
 		}
 #endif
+		Progress(0, 0); /* EMIT SIGNAL */
 		return;
 	}
 	ARDOUR::framecnt_t f = atol(d.substr(6).c_str());
-	Progress(f, m_duration); /* EMIT SIGNAL */
+	if (f == 0) {
+		Progress(0, 0); /* EMIT SIGNAL */
+	} else {
+		Progress(f, m_duration); /* EMIT SIGNAL */
+	}
 }
 
 #endif /* WITH_VIDEOTIMELINE */
