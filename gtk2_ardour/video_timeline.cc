@@ -523,11 +523,6 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 	}
 	flush_local_cache ();
 
-	_session->maybe_update_session_range(
-			std::max(get_offset(), (ARDOUR::frameoffset_t) 0),
-			std::max(get_offset() + get_duration(), (ARDOUR::frameoffset_t) 0)
-			);
-
 	if (found_xjadeo() && local_file) {
 		GuiUpdate("set-xjadeo-sensitive-on");
 		if (vmonitor && vmonitor->is_started()) {

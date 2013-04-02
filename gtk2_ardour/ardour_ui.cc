@@ -3541,6 +3541,11 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 		_session->add_extra_xml (*node);
 		_session->set_dirty ();
 
+		_session->maybe_update_session_range(
+			std::max(video_timeline->get_offset(), (ARDOUR::frameoffset_t) 0),
+			std::max(video_timeline->get_offset() + video_timeline->get_duration(), (ARDOUR::frameoffset_t) 0));
+
+
 		if (add_video_dialog->launch_xjadeo() && local_file) {
 			editor->set_xjadeo_sensitive(true);
 			editor->toggle_xjadeo_proc(1);
