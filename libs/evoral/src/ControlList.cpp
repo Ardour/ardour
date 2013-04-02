@@ -366,9 +366,68 @@ ControlList::write_pass_finished (double /*when*/)
 }
 
 void
-ControlList::set_in_write_pass (bool yn)
+ControlList::set_in_write_pass (bool yn, bool add_point, double when)
 {
 	_in_write_pass = yn;
+
+	if (yn && add_point) {
+		add_guard_point (when);
+	}
+}
+
+void
+ControlList::add_guard_point (double when)
+{
+	ControlEvent cp (when, 0.0);
+	most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+
+	DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 ADD GUARD POINT @ %2looked up insert iterator for new write pass\n", this, when));
+	
+	double eval_value = unlocked_eval (insert_position);
+	
+	if (most_recent_insert_iterator == _events.end()) {
+		
+		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert iterator at end, adding eval-value there %2\n", this, eval_value));
+		_events.push_back (new ControlEvent (when, eval_value));
+		/* leave insert iterator at the end */
+		
+	} else if ((*most_recent_insert_iterator)->when == when) {
+		
+		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert iterator at existing point, setting eval-value there %2\n", this, eval_value));
+		
+		/* most_recent_insert_iterator points to a control event
+		   already at the insert position, so there is
+		   nothing to do.
+		   
+		   ... except ... 
+		   
+		   advance most_recent_insert_iterator so that the "real"
+		   insert occurs in the right place, since it 
+		   points to the control event just inserted.
+		*/
+		
+		++most_recent_insert_iterator;
+	} else {
+		
+		/* insert a new control event at the right spot
+		 */
+		
+		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert eval-value %2 just before iterator @ %3\n", 
+								 this, eval_value, (*most_recent_insert_iterator)->when));
+		
+		most_recent_insert_iterator = _events.insert (most_recent_insert_iterator, new ControlEvent (when, eval_value));
+		
+		/* advance most_recent_insert_iterator so that the "real"
+		 * insert occurs in the right place, since it 
+		 * points to the control event just inserted.
+		 */
+		
+		++most_recent_insert_iterator;
+	}
+	
+	/* don't do this again till the next write pass */
+	
+	new_write_pass = false;
 }
 
 bool
@@ -409,68 +468,7 @@ ControlList::add (double when, double value)
 
 		if (_in_write_pass && new_write_pass) {
 
-			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 new write pass, insert pos = %2\n", this, insert_position));
-			
-			/* The first addition of a new control event during a
-			 * write pass.
-			 *
-			 * We need to add a new point at insert_position
-			 * corresponding to the (existing, implicit) value there. 
-			 */
-
-			/* the insert_iterator is not set, figure out where
-			 * it needs to be.
-			 */
-			
-			ControlEvent cp (insert_position, 0.0);
-			most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
-			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 looked up insert iterator for new write pass\n", this));
-
-			double eval_value = unlocked_eval (insert_position);
-			
-			if (most_recent_insert_iterator == _events.end()) {
-
-				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert iterator at end, adding eval-value there %2\n", this, eval_value));
-				_events.push_back (new ControlEvent (insert_position, eval_value));
-				/* leave insert iterator at the end */
-
-			} else if ((*most_recent_insert_iterator)->when == when) {
-
-				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert iterator at existing point, setting eval-value there %2\n", this, eval_value));
-
-				/* most_recent_insert_iterator points to a control event
-				   already at the insert position, so there is
-				   nothing to do.
-
-				   ... except ... 
-
-				   advance most_recent_insert_iterator so that the "real"
-				   insert occurs in the right place, since it 
-				   points to the control event just inserted.
-				 */
-
-				++most_recent_insert_iterator;
-			} else {
-
-				/* insert a new control event at the right spot
-				 */
-
-				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert eval-value %2 just before iterator @ %3\n", 
-										 this, eval_value, (*most_recent_insert_iterator)->when));
-
-				most_recent_insert_iterator = _events.insert (most_recent_insert_iterator, new ControlEvent (insert_position, eval_value));
-
-				/* advance most_recent_insert_iterator so that the "real"
-				 * insert occurs in the right place, since it 
-				 * points to the control event just inserted.
-				 */
-
-				++most_recent_insert_iterator;
-			}
-
-			/* don't do this again till the next write pass */
-			
-			new_write_pass = false;
+			add_guard_point (insert_position);
 			did_write_during_pass = true;
 
 		} else if (most_recent_insert_iterator == _events.end() || when > (*most_recent_insert_iterator)->when) {
@@ -1723,6 +1721,16 @@ ControlList::operator!= (ControlList const & other) const
 		_max_yval != other._max_yval ||
 		_default_value != other._default_value
 		);
+}
+
+void
+ControlList::dump (ostream& o)
+{
+	/* NOT LOCKED ... for debugging only */
+
+	for (EventList::iterator x = _events.begin(); x != _events.end(); ++x) {
+		o << (*x)->value << " @ " << (*x)->when << endl;
+	}
 }
 
 } // namespace Evoral

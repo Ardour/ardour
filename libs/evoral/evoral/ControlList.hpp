@@ -83,6 +83,8 @@ public:
 
 	virtual boost::shared_ptr<ControlList> create(Parameter id);
 
+        void dump (std::ostream&);
+
 	ControlList& operator= (const ControlList&);
 	bool operator== (const ControlList&);
         void copy_events (const ControlList&);
@@ -238,7 +240,7 @@ public:
 	virtual bool touch_enabled() const { return false; }
         void start_write_pass (double time);
 	void write_pass_finished (double when);
-        void set_in_write_pass (bool);
+        void set_in_write_pass (bool, bool add_point = false, double when = 0.0);
         bool in_write_pass () const;
 
 	/** Emitted when mark_dirty() is called on this object */
@@ -292,6 +294,7 @@ protected:
     bool       did_write_during_pass;
     bool       _in_write_pass;
     void unlocked_invalidate_insert_iterator ();
+    void add_guard_point (double when);
 };
 
 } // namespace Evoral
