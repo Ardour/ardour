@@ -37,11 +37,6 @@
 #ifdef WITH_VIDEOTIMELINE
       <menuitem action='OpenVideo'/>
       <menuitem action='CloseVideo'/>
-      <menu name='Video' action='Video'>
-        <menuitem action='StartVideoServer'/>
-        <menuitem action='StopVideoServer'/>
-        <menuitem action='VideoTimelineFlushCache'/>
-      </menu>
 #endif
       <menu name='Export' action='Export'>
         <menuitem action='ExportAudio'/>
