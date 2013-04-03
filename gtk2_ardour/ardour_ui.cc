@@ -666,16 +666,21 @@ ARDOUR_UI::startup ()
 		if (!nsm->init (nsm_url)) {
 			nsm->announce (PROGRAM_NAME, ":dirty:", "ardour3");
 
+			unsigned int i = 0;
 			// wait for announce reply from nsm server
-			do {
+			for ( i = 0; i < 5000; ++i) {
 				nsm->check ();
-				usleep (10);
-			} while (!nsm->is_active ());
+				usleep (i);
+				if (nsm->is_active())
+					break;
+			}
 			// wait for open command from nsm server
-			do {
+			for ( i = 0; i < 5000; ++i) {
 				nsm->check ();
-				usleep (10);
-			} while (!nsm->client_id ());
+				usleep (1000);
+				if (nsm->client_id ())
+					break;
+			}
 
 			if (_session && nsm) {
 				_session->set_nsm_state( nsm->is_active() );
