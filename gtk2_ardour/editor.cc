@@ -4655,7 +4655,7 @@ Editor::get_regions_from_selection_and_entered ()
 		regions.add (entered_regionview);
 	}
 
-	return get_equivalent_regions (regions, ARDOUR::Properties::select.property_id);
+	return regions;
 }
 
 void
