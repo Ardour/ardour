@@ -4037,7 +4037,7 @@ Editor::restore_editing_space ()
 
 /**
  *  Make new playlists for a given track and also any others that belong
- *  to the same active route group with the `edit' property.
+ *  to the same active route group with the `select' property.
  *  @param v Track.
  */
 
@@ -4053,7 +4053,7 @@ Editor::new_playlists (TimeAxisView* v)
 
 /**
  *  Use a copy of the current playlist for a given track and also any others that belong
- *  to the same active route group with the `edit' property.
+ *  to the same active route group with the `select' property.
  *  @param v Track.
  */
 
@@ -4068,7 +4068,7 @@ Editor::copy_playlists (TimeAxisView* v)
 }
 
 /** Clear the current playlist for a given track and also any others that belong
- *  to the same active route group with the `edit' property.
+ *  to the same active route group with the `select' property.
  *  @param v Track.
  */
 

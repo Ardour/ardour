@@ -24,9 +24,8 @@ If the edit point is `mouse':
      if the mouse is over a selected region, or no region, this method returns all selected regions.
      if the mouse is over an unselected region, just that region is returned.
 
-For other edit points the method returns the selected regions AND those that are both under the edit position
-AND on a selected track, or on a track which is in the same active edit-enabled route group as a selected
-region.
+For other edit points the method returns the selected regions. If no regions are selected, it returns 
+the regions under the edit position on the selected tracks.
 
 The action handlers call the appropriate method to decide which regions to operate on.
 
