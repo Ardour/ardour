@@ -78,6 +78,7 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 
 	void open_video_monitor ();
 	void close_video_monitor ();
+	void control_video_monitor (int, int);
 	void terminated_video_monitor ();
 	void manual_seek_video_monitor (framepos_t pos);
 

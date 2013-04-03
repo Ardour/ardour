@@ -544,8 +544,17 @@ Editor::register_actions ()
 	ruler_timecode_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-timecode-ruler"), _("Timecode"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_timecode)));
 	ruler_minsec_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-minsec-ruler"), _("Min:Sec"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_minsec)));
 #ifdef WITH_VIDEOTIMELINE
+
+	ActionManager::register_action (editor_menu_actions, X_("VideoMonitorMenu"), _("Video Monitor"));
+
 	ruler_video_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-video-ruler"), _("Video"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_video_timeline)));
-	xjadeo_proc_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("ToggleJadeo"), _("Show Video Monitor"), sigc::mem_fun (*this, &Editor::set_xjadeo_proc)));
+	xjadeo_proc_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("ToggleJadeo"), _("Video Monitor"), sigc::mem_fun (*this, &Editor::set_xjadeo_proc)));
+
+	xjadeo_ontop_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-ontop"), _("Always on Top"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 1)));
+	xjadeo_timecode_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-timecode"), _("Timecode"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 2)));
+	xjadeo_frame_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-frame"), _("Framenumber"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 3)));
+	xjadeo_osdbg_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-osdbg"), _("Timecode Background"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 4)));
+	xjadeo_fullscreen_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-fullscreen"), _("Fullscreen"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 5)));
 
 #endif
 
@@ -562,6 +571,16 @@ Editor::register_actions ()
 	ruler_video_action->set_active (false);
 	xjadeo_proc_action->set_active (false);
 	xjadeo_proc_action->set_sensitive (false);
+	xjadeo_ontop_action->set_active (false);
+	xjadeo_ontop_action->set_sensitive (false);
+	xjadeo_timecode_action->set_active (false);
+	xjadeo_timecode_action->set_sensitive (false);
+	xjadeo_frame_action->set_active (false);
+	xjadeo_frame_action->set_sensitive (false);
+	xjadeo_osdbg_action->set_active (false);
+	xjadeo_osdbg_action->set_sensitive (false);
+	xjadeo_fullscreen_action->set_active (false);
+	xjadeo_fullscreen_action->set_sensitive (false);
 #endif
 	if (Profile->get_sae()) {
 		ruler_bbt_action->set_active (true);
@@ -760,6 +779,7 @@ Editor::set_xjadeo_sensitive (bool onoff)
 {
 	xjadeo_proc_action->set_sensitive(onoff);
 }
+
 void
 Editor::toggle_xjadeo_proc (int state)
 {
@@ -774,6 +794,12 @@ Editor::toggle_xjadeo_proc (int state)
 			xjadeo_proc_action->set_active(!xjadeo_proc_action->get_active());
 			break;
 	}
+	bool onoff = xjadeo_proc_action->get_active();
+	xjadeo_ontop_action->set_sensitive(onoff);
+	xjadeo_timecode_action->set_sensitive(onoff);
+	xjadeo_frame_action->set_sensitive(onoff);
+	xjadeo_osdbg_action->set_sensitive(onoff);
+	xjadeo_fullscreen_action->set_sensitive(onoff);
 }
 
 void
@@ -783,6 +809,73 @@ Editor::set_xjadeo_proc ()
 		ARDOUR_UI::instance()->video_timeline->open_video_monitor();
 	} else {
 		ARDOUR_UI::instance()->video_timeline->close_video_monitor();
+	}
+}
+
+void
+Editor::toggle_xjadeo_viewoption (int what, int state)
+{
+	Glib::RefPtr<Gtk::ToggleAction> action;
+	switch (what) {
+		case 1:
+			action = xjadeo_ontop_action;
+			break;
+		case 2:
+			action = xjadeo_timecode_action;
+			break;
+		case 3:
+			action = xjadeo_frame_action;
+			break;
+		case 4:
+			action = xjadeo_osdbg_action;
+			break;
+		case 5:
+			action = xjadeo_fullscreen_action;
+			break;
+		default:
+			return;
+	}
+
+	switch(state) {
+		case 1:
+			action->set_active(true);
+			break;
+		case 0:
+			action->set_active(false);
+			break;
+		default:
+			action->set_active(!action->get_active());
+			break;
+	}
+}
+
+void
+Editor::set_xjadeo_viewoption (int what)
+{
+	Glib::RefPtr<Gtk::ToggleAction> action;
+	switch (what) {
+		case 1:
+			action = xjadeo_ontop_action;
+			break;
+		case 2:
+			action = xjadeo_timecode_action;
+			break;
+		case 3:
+			action = xjadeo_frame_action;
+			break;
+		case 4:
+			action = xjadeo_osdbg_action;
+			break;
+		case 5:
+			action = xjadeo_fullscreen_action;
+			break;
+		default:
+			return;
+	}
+	if (action->get_active()) {
+		ARDOUR_UI::instance()->video_timeline->control_video_monitor(what, 1);
+	} else {
+		ARDOUR_UI::instance()->video_timeline->control_video_monitor(what, 0);
 	}
 }
 #endif
