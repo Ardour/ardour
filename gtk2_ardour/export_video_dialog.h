@@ -70,6 +70,11 @@ class ExportVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
 	void finished ();
 	void update_progress (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
 
+	boost::shared_ptr<ARDOUR::ExportStatus> status;
+	sigc::connection audio_progress_connection;
+	gint audio_progress_display ();
+	float previous_progress;
+
 	TranscodeFfmpeg *transcoder;
 	std::string insnd;
 

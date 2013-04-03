@@ -355,6 +355,29 @@ ExportVideoDialog::update_progress (framecnt_t c, framecnt_t a)
 	pbar.set_fraction ((double)c / (double) a);
 }
 
+
+gint
+ExportVideoDialog::audio_progress_display ()
+{
+	std::string status_text;
+	float progress = 0.0;
+		if (status->normalizing) {
+			pbar.set_text (_("Normalizing audio"));
+			progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
+		} else {
+			pbar.set_text (_("Exporting audio"));
+			progress = ((float) status->processed_frames_current_timespan) / status->total_frames_current_timespan;
+		}
+		if (progress < previous_progress) {
+			// Work around gtk bug
+			pbar.hide();
+			pbar.show();
+		}
+		previous_progress = progress;
+		pbar.set_fraction (progress);
+	return TRUE;
+}
+
 void
 ExportVideoDialog::finished ()
 {
@@ -492,34 +515,19 @@ ExportVideoDialog::launch_export ()
 	/* do sound export */
 	_session->get_export_handler()->add_export_config (tsp, ccp, fmp, fnp, b);
 	_session->get_export_handler()->do_export();
-	boost::shared_ptr<ARDOUR::ExportStatus> status = _session->get_export_status ();
-	//status->running = true;
+	status = _session->get_export_status ();
 
-	float previous_progress = 0.0;
+	audio_progress_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ExportVideoDialog::audio_progress_display), 100);
+	previous_progress = 0.0;
 	while (status->running) {
 		if (aborted) { status->abort(); }
-
-		float progress = 0.0;
-		if (status->normalizing) {
-			pbar.set_text (_("Normalizing audio"));
-			progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
-		} else {
-			pbar.set_text (_("Exporting audio"));
-			progress = ((float) status->processed_frames_current_timespan) / status->total_frames_current_timespan;
-		}
-		if (progress < previous_progress) {
-			// Work around gtk bug
-			pbar.hide();
-			pbar.show();
-		}
-		previous_progress = progress;
-		pbar.set_fraction (progress);
 		if (gtk_events_pending()) {
 			gtk_main_iteration ();
 		} else {
 			usleep (10000);
 		}
 	}
+	audio_progress_connection.disconnect();
 	status->finish ();
 	if (status->aborted()) {
 		unlink (insnd.c_str());
