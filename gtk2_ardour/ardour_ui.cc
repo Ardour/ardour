@@ -660,6 +660,7 @@ ARDOUR_UI::startup ()
 	app->ready ();
 
 	nsm_url = getenv ("NSM_URL");
+	nsm = 0;
 
 	if (nsm_url) {
 		nsm = new NSM_Client;
