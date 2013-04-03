@@ -4590,19 +4590,14 @@ Editor::get_regions_after (RegionSelection& rs, framepos_t where, const TrackVie
 
 /** Get regions using the following method:
  *
- *  Make an initial region list using the selected regions, unless
+ *  Make a region list using the selected regions, unless
  *  the edit point is `mouse' and the mouse is over an unselected
- *  region.  In this case, start with just that region.
+ *  region.  In this case, use just that region.
  *
- *  Then, add equivalent regions in active edit groups to the region list.
- *
- *  Then, search the list of selected tracks to find any selected tracks which
- *  do not contain regions already in the region list. If there are no selected
- *  tracks and 'No Selection = All Tracks' is active, search all tracks rather
- *  than just the selected.
- *
- *  Add any regions that are under the edit point on these tracks to get the
- *  returned region list.
+ *  If the edit point is not 'mouse', and there are no regions selected,
+ *  search the list of selected tracks and return regions that are under
+ *  the edit point on these tracks. If there are no selected tracks and
+ *  'No Selection = All Tracks' is active, search all tracks,
  *
  *  The rationale here is that the mouse edit point is special in that
  *  its position describes both a time and a track; the other edit
@@ -4624,48 +4619,25 @@ Editor::get_regions_from_selection_and_edit_point ()
 		regions = selection->regions;
 	}
 
-	TrackViewList tracks;
 
-	if (_edit_point != EditAtMouse) {
-		tracks = selection->tracks;
-	}
+	if (regions.empty() && _edit_point != EditAtMouse) {
+		TrackViewList tracks = selection->tracks;
 
-	/* Add any other regions that are in the same
-	   edit-activated route group as one of our regions.
-	 */
-	regions = get_equivalent_regions (regions, ARDOUR::Properties::select.property_id);
-	framepos_t const where = get_preferred_edit_position ();
-
-	if (_route_groups->all_group_active_button().get_active() && tracks.empty()) {
-		/* tracks is empty (no track selected), and 'No Selection = All Tracks'
-		 * is enabled, so consider all tracks
-		 */
-		tracks = track_views; 
-	}
-
-	if (!tracks.empty()) {
-		/* now search the selected tracks for tracks which don't
-		   already contain regions to be acted upon, and get regions at
-		   the edit point on those tracks too.
-		 */
-		TrackViewList tracks_without_relevant_regions;
-
-		for (TrackViewList::iterator t = tracks.begin (); t != tracks.end (); ++t) {
-			if (!regions.involves (**t)) {
-				/* there are no equivalent regions on this track */
-				tracks_without_relevant_regions.push_back (*t);
-			}
-		}
-
-		if (!tracks_without_relevant_regions.empty()) {
-			/* there are some selected tracks with neither selected
-			 * regions or their equivalents: act upon all regions in
-			 * those tracks
+		if (_route_groups->all_group_active_button().get_active() && tracks.empty()) {
+			/* tracks is empty (no track selected), and 'No Selection = All Tracks'
+			 * is enabled, so consider all tracks
 			 */
-			get_regions_at (regions, where, tracks_without_relevant_regions);
+			tracks = track_views; 
+		}
+
+		if (!tracks.empty()) {
+			/* no region selected or entered, but some selected tracks:
+			 * act on all regions on the selected tracks at the edit point
+			 */ 
+			framepos_t const where = get_preferred_edit_position ();
+			get_regions_at(regions, where, tracks);
 		}
 	}
-
 	return regions;
 }
 
