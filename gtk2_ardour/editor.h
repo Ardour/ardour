@@ -2042,7 +2042,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void get_regions_at (RegionSelection&, framepos_t where, const TrackViewList& ts) const;
 	void get_regions_after (RegionSelection&, framepos_t where, const TrackViewList& ts) const;
 
-	RegionSelection get_regions_from_selection ();
 	RegionSelection get_regions_from_selection_and_edit_point ();
 	RegionSelection get_regions_from_selection_and_entered ();
 

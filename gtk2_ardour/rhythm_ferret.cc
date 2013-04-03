@@ -345,7 +345,7 @@ RhythmFerret::do_split_action ()
 	   performed on the selection only (without entered_regionview or the edit point
 	   being considered)
 	*/
-	RegionSelection regions = editor.get_regions_from_selection();
+	RegionSelection regions = editor.selection->regions;
 
 	if (regions.empty()) {
 		return;

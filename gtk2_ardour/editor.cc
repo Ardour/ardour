@@ -4588,17 +4588,6 @@ Editor::get_regions_after (RegionSelection& rs, framepos_t where, const TrackVie
 	}
 }
 
-/** Start with regions that are selected.  Then add equivalent regions
- *  on tracks in the same active edit-enabled route group as any of
- *  the regions that we started with.
- */
-
-RegionSelection
-Editor::get_regions_from_selection ()
-{
-	return get_equivalent_regions (selection->regions, ARDOUR::Properties::select.property_id);
-}
-
 /** Get regions using the following method:
  *
  *  Make an initial region list using the selected regions, unless
