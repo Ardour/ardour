@@ -933,6 +933,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_frame_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_osdbg_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_fullscreen_action;
+	Glib::RefPtr<Gtk::ToggleAction> xjadeo_letterbox_action;
+	Glib::RefPtr<Gtk::Action> xjadeo_zoom_100;
 	void set_xjadeo_proc ();
 	void toggle_xjadeo_proc (int state=-1);
 	void set_xjadeo_sensitive (bool onoff);

@@ -118,7 +118,7 @@ VideoMonitor::open (std::string filename)
 	manually_seeked_frame = 0;
 	osdmode = 10; // 1: frameno, 2: timecode, 8: box
 	sync_by_manual_seek = false;
-	starting = 7;
+	starting = 15;
 	process->write_to_stdin("load " + filename + "\n");
 	process->write_to_stdin("set fps -1\n");
 	process->write_to_stdin("window resize 100%\n");
@@ -132,7 +132,7 @@ VideoMonitor::open (std::string filename)
 		process->write_to_stdin(it->first + " " + it->second + "\n");
 	}
 	if (!state_connection.connected()) {
-		starting = 7;
+		starting = 15;
 		querystate();
 		state_clk_divide = 0;
 		/* TODO once every two second or so -- state_clk_divide hack below */
@@ -196,6 +196,13 @@ VideoMonitor::send_cmd (int what, int param)
 		case 5:
 			if (param) process->write_to_stdin("window zoom on\n");
 			else process->write_to_stdin("window zoom off\n");
+			break;
+		case 6:
+			if (param) process->write_to_stdin("window letterbox on\n");
+			else process->write_to_stdin("window letterbox off\n");
+			break;
+		case 7:
+			process->write_to_stdin("window resize 100%");
 			break;
 		default:
 			break;
@@ -280,6 +287,11 @@ VideoMonitor::parse_output (std::string d, size_t s)
 						}
 						xjadeo_settings["window zoom"] = value;
 					} else if(key ==  "letterbox") {
+						if (starting || xjadeo_settings["window letterbox"] != value) {
+							starting &= ~8;
+							if (atoi(value.c_str())) { UiState("xjadeo-window-letterbox-on"); }
+							else { UiState("xjadeo-window-letterbox-off"); }
+						}
 						xjadeo_settings["window letterbox"] = value;
 					} else if(key ==  "osdmode") {
 						if (starting || xjadeo_settings["osd mode"] != value) {

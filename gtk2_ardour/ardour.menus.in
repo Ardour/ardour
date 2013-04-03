@@ -447,6 +447,8 @@
         <menuitem action="toggle-vmon-frame"/>
         <menuitem action="toggle-vmon-osdbg"/>
         <menuitem action="toggle-vmon-fullscreen"/>
+        <menuitem action="toggle-vmon-letterbox"/>
+        <menuitem action="zoom-vmon-100"/>
 #endif
       </menu>
       <menu action="ScrollMenu">

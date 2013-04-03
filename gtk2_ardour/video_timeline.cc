@@ -601,6 +601,10 @@ VideoTimeLine::gui_update(std::string const & t) {
 		editor->toggle_xjadeo_viewoption(5, 1);
 	} else if (t == "xjadeo-window-fullscreen-off") {
 		editor->toggle_xjadeo_viewoption(5, 0);
+	} else if (t == "xjadeo-window-letterbox-on") {
+		editor->toggle_xjadeo_viewoption(6, 1);
+	} else if (t == "xjadeo-window-letterbox-off") {
+		editor->toggle_xjadeo_viewoption(6, 0);
 	}
 }
 

@@ -555,6 +555,8 @@ Editor::register_actions ()
 	xjadeo_frame_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-frame"), _("Framenumber"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 3)));
 	xjadeo_osdbg_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-osdbg"), _("Timecode Background"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 4)));
 	xjadeo_fullscreen_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-fullscreen"), _("Fullscreen"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 5)));
+	xjadeo_letterbox_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-letterbox"), _("Letterbox"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 6)));
+	xjadeo_zoom_100 = reg_sens (editor_actions, "zoom-vmon-100", _("Original Size"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 7));
 
 #endif
 
@@ -581,6 +583,9 @@ Editor::register_actions ()
 	xjadeo_osdbg_action->set_sensitive (false);
 	xjadeo_fullscreen_action->set_active (false);
 	xjadeo_fullscreen_action->set_sensitive (false);
+	xjadeo_letterbox_action->set_active (false);
+	xjadeo_letterbox_action->set_sensitive (false);
+	xjadeo_zoom_100->set_sensitive (false);
 #endif
 	if (Profile->get_sae()) {
 		ruler_bbt_action->set_active (true);
@@ -800,6 +805,8 @@ Editor::toggle_xjadeo_proc (int state)
 	xjadeo_frame_action->set_sensitive(onoff);
 	xjadeo_osdbg_action->set_sensitive(onoff);
 	xjadeo_fullscreen_action->set_sensitive(onoff);
+	xjadeo_letterbox_action->set_sensitive(onoff);
+	xjadeo_zoom_100->set_sensitive(onoff);
 }
 
 void
@@ -832,6 +839,11 @@ Editor::toggle_xjadeo_viewoption (int what, int state)
 		case 5:
 			action = xjadeo_fullscreen_action;
 			break;
+		case 6:
+			action = xjadeo_letterbox_action;
+			break;
+		case 7:
+			return;
 		default:
 			return;
 	}
@@ -869,6 +881,12 @@ Editor::set_xjadeo_viewoption (int what)
 		case 5:
 			action = xjadeo_fullscreen_action;
 			break;
+		case 6:
+			action = xjadeo_letterbox_action;
+			break;
+		case 7:
+			ARDOUR_UI::instance()->video_timeline->control_video_monitor(what, 0);
+			return;
 		default:
 			return;
 	}
