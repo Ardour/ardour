@@ -689,7 +689,6 @@ ARDOUR_UI::startup ()
 
 			// nsm requires these actions disabled
 			vector<string> action_names;
-			action_names.push_back("Snapshot");
 			action_names.push_back("SaveAs");
 			action_names.push_back("Rename");
 			action_names.push_back("New");
