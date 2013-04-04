@@ -27,7 +27,6 @@
 
 #include "ardour/types.h"
 
-#include "canvas.h"
 #include "editor_items.h"
 
 namespace ARDOUR {
@@ -38,18 +37,13 @@ namespace PBD {
 	class StatefulDiffCommand;
 }
 
-namespace Gnome {
-	namespace Canvas {
-		class CanvasNoteEvent;
-		class CanvasPatchChange;
-	}
-}
-
+class PatchChange;
 class Editor;
 class EditorCursor;
 class TimeAxisView;
 class MidiTimeAxisView;
 class Drag;
+class NoteBase;
 
 /** Class to manage current drags */
 class DragManager
@@ -456,7 +450,7 @@ class NoteDrag : public Drag
 	int8_t total_dy () const;
 
 	MidiRegionView* _region;
-	Gnome::Canvas::CanvasNoteEvent* _primary;
+	NoteBase* _primary;
 	double _cumulative_dx;
 	double _cumulative_dy;
 	bool _was_selected;
@@ -479,7 +473,7 @@ private:
 	framecnt_t grid_frames (framepos_t) const;
 	
 	MidiRegionView* _region_view;
-	ArdourCanvas::SimpleRect* _drag_rect;
+	ArdourCanvas::Rectangle* _drag_rect;
 	framepos_t _note[2];
 };
 
@@ -487,7 +481,7 @@ private:
 class PatchChangeDrag : public Drag
 {
 public:
-	PatchChangeDrag (Editor *, ArdourCanvas::CanvasPatchChange *, MidiRegionView *);
+	PatchChangeDrag (Editor *, PatchChange *, MidiRegionView *);
 
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
@@ -501,7 +495,7 @@ public:
 
 private:
 	MidiRegionView* _region_view;
-	ArdourCanvas::CanvasPatchChange* _patch_change;
+	PatchChange* _patch_change;
 	double _cumulative_dx;
 };
 
@@ -968,7 +962,7 @@ private:
 	void update_item (ARDOUR::Location *);
 
 	Operation _operation;
-	ArdourCanvas::SimpleRect* _drag_rect;
+	ArdourCanvas::Rectangle* _drag_rect;
 	bool _copy;
 };
 

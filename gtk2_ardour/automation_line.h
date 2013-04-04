@@ -25,10 +25,7 @@
 #include <string>
 #include <sys/types.h>
 
-#include <libgnomecanvasmm/line.h>
 #include <sigc++/signal.h>
-#include "canvas.h"
-#include "simplerect.h"
 
 #include "evoral/TimeConverter.hpp"
 
@@ -39,6 +36,10 @@
 #include "ardour/automation_list.h"
 #include "ardour/types.h"
 
+#include "canvas/types.h"
+#include "canvas/group.h"
+#include "canvas/line.h"
+
 class AutomationLine;
 class ControlPoint;
 class PointSelection;
@@ -47,10 +48,8 @@ class AutomationTimeAxisView;
 class Selectable;
 class Selection;
 
-namespace Gnome {
-	namespace Canvas {
-		class SimpleRect;
-	}
+namespace ArdourCanvas {
+	class Rectangle;
 }
 
 /** A GUI representation of an ARDOUR::AutomationList */
@@ -178,7 +177,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	ArdourCanvas::Group&        _parent_group;
 	ArdourCanvas::Group*        group;
-	ArdourCanvas::Line*         line; /* line */
+	ArdourCanvas::PolyLine*     line; /* line */
 	ArdourCanvas::Points        line_points; /* coordinates for canvas line */
 	std::vector<ControlPoint*>  control_points; /* visible control points */
 

@@ -26,8 +26,6 @@
 
 #include "ardour/location.h"
 #include "enums.h"
-#include "simplerect.h"
-#include "canvas.h"
 
 namespace Gdk {
 	class Color;
@@ -42,8 +40,13 @@ namespace ARDOUR {
 	struct PeakData;
 }
 
+namespace ArdourCanvas {
+	class Rectangle;
+	class Group;
+}
+
 struct RecBoxInfo {
-	ArdourCanvas::SimpleRect*  rectangle;
+	ArdourCanvas::Rectangle*   rectangle;
 	framepos_t                 start;
 	ARDOUR::framecnt_t         length;
 };
@@ -70,8 +73,8 @@ public:
 	int set_position (gdouble x, gdouble y);
 	virtual int set_height (double);
 
-	virtual int set_samples_per_unit (gdouble spp);
-	gdouble     get_samples_per_unit () { return _samples_per_unit; }
+	virtual int set_frames_per_pixel (double);
+	gdouble     get_frames_per_pixel () const { return _frames_per_pixel; }
 	virtual void horizontal_position_changed () {}
 
         virtual void enter_internal_edit_mode ();
@@ -153,12 +156,12 @@ protected:
 	bool                      owns_canvas_group;
 	ArdourCanvas::Group*      _background_group;
 	ArdourCanvas::Group*      _canvas_group;
-	ArdourCanvas::SimpleRect* canvas_rect; /* frame around the whole thing */
+	ArdourCanvas::Rectangle*  canvas_rect; /* frame around the whole thing */
 
 	typedef std::list<RegionView* > RegionViewList;
 	RegionViewList  region_views;
 
-	double _samples_per_unit;
+	double _frames_per_pixel;
 
 	sigc::connection       screen_update_connection;
 	std::vector<RecBoxInfo>     rec_rects;

@@ -87,11 +87,8 @@ TapeAudioRegionView::update (uint32_t n)
 		return;
 	}
 
-	ENSURE_GUI_THREAD (*this, &TapeAudioRegionView::update, n)
-
-	/* this triggers a cache invalidation and redraw in the waveview */
-
-	waves[n]->property_data_src() = _region.get();
+	ENSURE_GUI_THREAD (*this, &TapeAudioRegionView::update, n);
+	waves[n]->rebuild ();
 }
 
 void

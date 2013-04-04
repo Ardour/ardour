@@ -31,7 +31,6 @@
 #include <fstream>
 #include <list>
 #include <sys/stat.h>
-#include <libart_lgpl/art_misc.h>
 #include <gtkmm/rc.h>
 #include <gtkmm/window.h>
 #include <gtkmm/combo.h>
@@ -44,8 +43,8 @@
 
 #include <gtkmm2ext/utils.h>
 #include "ardour/rc_configuration.h"
-
 #include "ardour/filesystem_paths.h"
+#include "canvas/item.h"
 
 #include "ardour_ui.h"
 #include "debug.h"
@@ -54,7 +53,6 @@
 #include "utils.h"
 #include "i18n.h"
 #include "rgb_macros.h"
-#include "canvas_impl.h"
 #include "gui_thread.h"
 
 using namespace std;
@@ -299,12 +297,6 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a, s
 	} else {
 		return (uint32_t) RGB_TO_UINT(r,g,b);
 	}
-}
-
-bool
-canvas_item_visible (ArdourCanvas::Item* item)
-{
-	return (item->gobj()->object.flags & GNOME_CANVAS_ITEM_VISIBLE) ? true : false;
 }
 
 void

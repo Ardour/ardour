@@ -23,11 +23,9 @@
 #include <boost/pool/pool.hpp>
 #include <boost/pool/pool_alloc.hpp>
 #include "ardour/tempo.h"
-#include "canvas.h"
-#include "simpleline.h"
 
 typedef boost::fast_pool_allocator<
-		std::pair<const double, ArdourCanvas::SimpleLine*>,
+		std::pair<const double, ArdourCanvas::Line*>,
 		boost::default_user_allocator_new_delete,
 		boost::details::pool::null_mutex,
 		8192>
@@ -35,7 +33,7 @@ typedef boost::fast_pool_allocator<
 
 class TempoLines {
 public:
-	TempoLines(ArdourCanvas::Canvas& canvas, ArdourCanvas::Group* group, double screen_height);
+	TempoLines(ArdourCanvas::GtkCanvasViewport& canvas, ArdourCanvas::Group* group, double screen_height);
 
 	void tempo_map_changed();
 
@@ -47,10 +45,10 @@ public:
 	void hide();
 
 private:
-	typedef std::map<double, ArdourCanvas::SimpleLine*, std::less<double>, MapAllocator> Lines;
+	typedef std::map<double, ArdourCanvas::Line*, std::less<double>, MapAllocator> Lines;
 	Lines _lines;
 
-	ArdourCanvas::Canvas& _canvas;
+        ArdourCanvas::GtkCanvasViewport& _canvas_viewport;
 	ArdourCanvas::Group*  _group;
 	double                _clean_left;
 	double                _clean_right;

@@ -22,19 +22,31 @@
 class Editor;
 
 class EditorCursor {
-public:
-	Editor&              editor;
-	ArdourCanvas::Points points;
-	ArdourCanvas::Line   canvas_item;
-	framepos_t           current_frame;
-	double               length;
-
-	EditorCursor (Editor&, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*));
-	~EditorCursor ();
+  public:
+        EditorCursor (Editor&, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*));
+       ~EditorCursor ();
 
 	void set_position (framepos_t);
-	void set_length (double units);
-	void set_y_axis (double position);
+
+
+	void show ();
+	void hide ();
+	void set_color (ArdourCanvas::Color);
+
+	framepos_t current_frame () const {
+		return _current_frame;
+	}
+
+	ArdourCanvas::Line& track_canvas_item () {
+		return _track_canvas_item;
+	}
 
 	PBD::Signal1<void, framepos_t> PositionChanged;
+
+  private:	
+	Editor&               _editor;
+	ArdourCanvas::Arrow   _time_bars_canvas_item;
+	ArdourCanvas::Line    _track_canvas_item;
+	framepos_t            _current_frame;
+	double		      _length;
 };

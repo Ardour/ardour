@@ -48,7 +48,6 @@
 #include "utils.h"
 #include "prompter.h"
 #include "rgb_macros.h"
-#include "canvas_impl.h"
 
 #include "i18n.h"
 

@@ -24,13 +24,13 @@
 #include <string>
 #include <stdint.h>
 
-#include <cairomm/refptr.h>
+#include <cairomm/cairomm.h>
+#include <pangomm/fontdescription.h>
 
 #include <gtkmm/container.h>
 #include <gtkmm/treeview.h>
 #include <gdkmm/window.h> /* for WMDecoration */
 #include <gdkmm/pixbuf.h>
-#include <pangomm/fontdescription.h>
 
 namespace Cairo {
         class Context;
@@ -118,6 +118,8 @@ namespace Gtkmm2ext {
 	void set_no_tooltip_whatsoever (Gtk::Widget &);
 	void enable_tooltips ();
 	void disable_tooltips ();
+
+	void convert_bgra_to_rgba (guint8 const *, guint8 * dst, int, int);
 };
 
 #endif /*  __gtkmm2ext_utils_h__ */

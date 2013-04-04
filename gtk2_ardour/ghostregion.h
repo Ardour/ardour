@@ -21,19 +21,15 @@
 #define __ardour_gtk_ghost_region_h__
 
 #include <vector>
-#include <libgnomecanvasmm.h>
 #include "pbd/signals.h"
-#include "canvas.h"
 
-namespace Gnome {
-	namespace Canvas {
-		class CanvasNoteEvent;
-		class CanvasNote;
-		class CanvasHit;
-		class Diamond;
-	}
+namespace ArdourCanvas {
+	class WaveView;
 }
 
+class NoteBase;
+class Note;
+class Hit;
 class MidiStreamView;
 class TimeAxisView;
 
@@ -43,7 +39,7 @@ public:
 	GhostRegion(ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
 	virtual ~GhostRegion();
 
-	virtual void set_samples_per_unit(double spu) = 0;
+	virtual void set_frames_per_pixel (double) = 0;
 	virtual void set_height();
 	virtual void set_colors();
 
@@ -57,7 +53,7 @@ public:
 	/** TimeAxisView that we are a ghost for */
 	TimeAxisView& source_trackview;
 	ArdourCanvas::Group* group;
-	ArdourCanvas::SimpleRect* base_rect;
+	ArdourCanvas::Rectangle* base_rect;
 
 	static PBD::Signal1<void,GhostRegion*> CatchDeletion;
 };
@@ -66,7 +62,7 @@ class AudioGhostRegion : public GhostRegion {
 public:
 	AudioGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
 
-	void set_samples_per_unit(double spu);
+	void set_frames_per_pixel (double);
 	void set_height();
 	void set_colors();
 
@@ -75,13 +71,13 @@ public:
 
 class MidiGhostRegion : public GhostRegion {
 public:
-	class Event : public sigc::trackable {
+	class GhostEvent : public sigc::trackable {
 	public:
-		Event(ArdourCanvas::CanvasNoteEvent *, ArdourCanvas::Group *);
-		~Event ();
+	    GhostEvent(::NoteBase *, ArdourCanvas::Group *);
+	    virtual ~GhostEvent () {}
 
-		ArdourCanvas::CanvasNoteEvent* event;
-		ArdourCanvas::SimpleRect* rect;
+		NoteBase* event;
+		ArdourCanvas::Rectangle* rect;
 	};
 
 	MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
@@ -91,22 +87,22 @@ public:
 	MidiStreamView* midi_view();
 
 	void set_height();
-	void set_samples_per_unit(double spu);
+	void set_frames_per_pixel (double spu);
 	void set_colors();
 
 	void update_range();
 
-	void add_note(ArdourCanvas::CanvasNote*);
-	void update_note (ArdourCanvas::CanvasNote *);
-	void remove_note (ArdourCanvas::CanvasNoteEvent *);
+	void add_note(Note*);
+	void update_note (Note*);
+	void remove_note (Note*);
 
 	void clear_events();
 
 private:
 
-	MidiGhostRegion::Event* find_event (ArdourCanvas::CanvasNoteEvent *);
+	MidiGhostRegion::Event* find_event (Note*);
 
-	typedef std::list<MidiGhostRegion::Event*> EventList;
+	typedef std::list<MidiGhostRegion::GhostEvent*> EventList;
 	EventList events;
 	EventList::iterator _optimization_iterator;
 };

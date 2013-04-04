@@ -40,7 +40,6 @@
 #include "pbd/statefuldestructible.h"
 
 #include "editing.h"
-#include "canvas.h"
 #include "selection.h"
 
 namespace ARDOUR {
@@ -388,7 +387,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 #endif
 
 	virtual gdouble get_trackview_group_vertical_offset () const = 0;
-	virtual double get_canvas_timebars_vsize () const = 0;
 	virtual ArdourCanvas::Group* get_trackview_group () const = 0;
 	virtual ArdourCanvas::Group* get_background_group () const = 0;
 
@@ -422,6 +420,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual void snap_to_with_modifier (framepos_t &, GdkEvent const *, int32_t direction = 0, bool for_mark = false) = 0;
 
 	virtual void get_regions_at (RegionSelection &, framepos_t where, TrackViewList const &) const = 0;
+
+	virtual void save_canvas_state () = 0;
 
 	/// Singleton instance, set up by Editor::Editor()
 

@@ -31,7 +31,6 @@
 #include "utils.h"
 #include "imageframe_view.h"
 #include "imageframe.h"
-#include "canvas_impl.h"
 #include "gui_thread.h"
 
 using namespace ARDOUR;

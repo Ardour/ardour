@@ -22,11 +22,9 @@
 
 #include <string>
 #include <gdkmm/color.h>
-#include <libgnomecanvas/libgnomecanvas.h>
 #include <sigc++/signal.h>
 #include <list>
 
-#include "canvas.h"
 #include "enums.h"
 #include "time_axis_view_item.h"
 #include "marker_view.h"

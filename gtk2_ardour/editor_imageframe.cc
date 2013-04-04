@@ -27,7 +27,6 @@
 #include "marker_view.h"
 #include "editor.h"
 #include "i18n.h"
-#include "canvas_impl.h"
 
 #include <gtkmm2ext/gtk_ui.h>
 #include "pbd/error.h"

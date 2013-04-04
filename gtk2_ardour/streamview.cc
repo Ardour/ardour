@@ -28,12 +28,13 @@
 #include "ardour/track.h"
 #include "ardour/session.h"
 
+#include "canvas/rectangle.h"
+#include "canvas/debug.h"
+
 #include "streamview.h"
 #include "global_signals.h"
 #include "region_view.h"
 #include "route_time_axis.h"
-#include "canvas-waveview.h"
-#include "canvas-simplerect.h"
 #include "region_selection.h"
 #include "selection.h"
 #include "public_editor.h"
@@ -51,9 +52,9 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* background_g
 	: _trackview (tv)
 	, owns_background_group (background_group == 0)
 	, owns_canvas_group (canvas_group == 0)
-	, _background_group (background_group ? background_group : new ArdourCanvas::Group (*_trackview.canvas_background()))
-	, _canvas_group (canvas_group ? canvas_group : new ArdourCanvas::Group(*_trackview.canvas_display()))
-	, _samples_per_unit (_trackview.editor().get_current_zoom ())
+	, _background_group (background_group ? background_group : new ArdourCanvas::Group (_trackview.canvas_background()))
+	, _canvas_group (canvas_group ? canvas_group : new ArdourCanvas::Group (_trackview.canvas_display()))
+	, _frames_per_pixel (_trackview.editor().get_current_zoom ())
 	, rec_updating(false)
 	, rec_active(false)
 	, stream_base_color(0xFFFFFFFF)
@@ -62,19 +63,20 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* background_g
 	, height(tv.height)
 	, last_rec_data_frame(0)
 {
+	CANVAS_DEBUG_NAME (_background_group, "SV background group");
+	CANVAS_DEBUG_NAME (_canvas_group, "SV canvas group");
+	
 	/* set_position() will position the group */
 
-	canvas_rect = new ArdourCanvas::SimpleRect (*_background_group);
-	canvas_rect->property_x1() = 0.0;
-	canvas_rect->property_y1() = 0.0;
-	canvas_rect->property_x2() = Gtkmm2ext::physical_screen_width (_trackview.editor().get_window());
-	canvas_rect->property_y2() = (double) tv.current_height();
+	canvas_rect = new ArdourCanvas::Rectangle (_background_group);
+	CANVAS_DEBUG_NAME (canvas_rect, "SV canvas rectangle");
+	canvas_rect->set (ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, tv.current_height ()));
 	canvas_rect->raise(1); // raise above tempo lines
 
-	canvas_rect->property_outline_what() = (guint32) (0x2|0x8);  // outline RHS and bottom
-	canvas_rect->property_outline_color_rgba() = RGBA_TO_UINT (0, 0, 0, 255);
+	canvas_rect->set_outline_what (0x2 | 0x8);
+	canvas_rect->set_outline_color (RGBA_TO_UINT (0, 0, 0, 255));
 
-	canvas_rect->signal_event().connect (sigc::bind (
+	canvas_rect->Event.connect (sigc::bind (
 			sigc::mem_fun (_trackview.editor(), &PublicEditor::canvas_stream_view_event),
 			canvas_rect, &_trackview));
 
@@ -116,8 +118,7 @@ StreamView::attach ()
 int
 StreamView::set_position (gdouble x, gdouble y)
 {
-	_canvas_group->property_x() = x;
-	_canvas_group->property_y() = y;
+	_canvas_group->set_position (ArdourCanvas::Duple (x, y));
 	return 0;
 }
 
@@ -129,40 +130,40 @@ StreamView::set_height (double h)
 		return -1;
 	}
 
-	if (canvas_rect->property_y2() == h) {
+	if (canvas_rect->y1() == h) {
 		return 0;
 	}
 
 	height = h;
-	canvas_rect->property_y2() = height;
+	canvas_rect->set_y1 (height);
 	update_contents_height ();
 
 	return 0;
 }
 
 int
-StreamView::set_samples_per_unit (gdouble spp)
+StreamView::set_frames_per_pixel (double fpp)
 {
 	RegionViewList::iterator i;
 
-	if (spp < 1.0) {
+	if (fpp < 1.0) {
 		return -1;
 	}
 
-	_samples_per_unit = spp;
+	_frames_per_pixel = fpp;
 
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
-		(*i)->set_samples_per_unit (spp);
+		(*i)->set_frames_per_pixel (fpp);
 	}
 
 	for (vector<RecBoxInfo>::iterator xi = rec_rects.begin(); xi != rec_rects.end(); ++xi) {
 		RecBoxInfo &recbox = (*xi);
 
-		gdouble xstart = _trackview.editor().frame_to_pixel (recbox.start);
-		gdouble xend = _trackview.editor().frame_to_pixel (recbox.start + recbox.length);
+		ArdourCanvas::Coord const xstart = _trackview.editor().frame_to_pixel (recbox.start);
+		ArdourCanvas::Coord const xend = _trackview.editor().frame_to_pixel (recbox.start + recbox.length);
 
-		recbox.rectangle->property_x1() = xstart;
-		recbox.rectangle->property_x2() = xend;
+		recbox.rectangle->set_x0 (xstart);
+		recbox.rectangle->set_x1 (xend);
 	}
 
 	update_coverage_frames ();
@@ -367,9 +368,8 @@ StreamView::apply_color (Gdk::Color color, ColorTarget target)
 		break;
 
 	case StreamBaseColor:
-		stream_base_color = RGBA_TO_UINT (
-			color.get_red_p(), color.get_green_p(), color.get_blue_p(), 255);
-		canvas_rect->property_fill_color_rgba() = stream_base_color;
+		stream_base_color = RGBA_TO_UINT (color.get_red_p(), color.get_green_p(), color.get_blue_p(), 255);
+		canvas_rect->set_fill_color (stream_base_color);
 		break;
 	}
 }
@@ -435,8 +435,8 @@ StreamView::update_rec_box ()
 			break;
 		}
 
-		rect.rectangle->property_x1() = xstart;
-		rect.rectangle->property_x2() = xend;
+		rect.rectangle->set_x0 (xstart);
+		rect.rectangle->set_x1 (xend);
 	}
 }
 
@@ -603,13 +603,13 @@ StreamView::update_contents_height ()
 	for (vector<RecBoxInfo>::iterator i = rec_rects.begin(); i != rec_rects.end(); ++i) {
 		switch (_layer_display) {
 		case Overlaid:
-			i->rectangle->property_y2() = height;
+			i->rectangle->set_y1 (height);
 			break;
 		case Stacked:
 		case Expanded:
 			/* In stacked displays, the recregion is always at the top */
-			i->rectangle->property_y1() = 0;
-			i->rectangle->property_y2() = h;
+			i->rectangle->set_y0 (0);
+			i->rectangle->set_y1 (h)
 			break;
 		}
 	}

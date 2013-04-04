@@ -20,7 +20,7 @@
 #include <cstdlib>
 #include <cmath>
 
-#include <libgnomecanvas/libgnomecanvas.h>
+#include "canvas/canvas.h"
 
 #include "utils.h"
 #include "editor_cursors.h"
@@ -31,29 +31,36 @@ using namespace PBD;
 using namespace Gtk;
 
 EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,ArdourCanvas::Item*))
-	: editor (ed),
-	  canvas_item (*editor.cursor_group),
-	  length(1.0)
+	: _editor (ed)
+	, _time_bars_canvas_item (_editor._time_bars_canvas->root ())
+	, _track_canvas_item (_editor._track_canvas->root ())
+	, _length (1.0)
 {
-	points.push_back(Gnome::Art::Point(-1.0, 0.0)); // first x-coord needs to be a non-normal value
-	points.push_back(Gnome::Art::Point(1.0, 1.0));
+	_time_bars_canvas_item.set_outline_width (1);
+	_track_canvas_item.set_outline_width (1);
 
-	canvas_item.property_points() = points;
-	canvas_item.property_width_pixels() = 1;
-	canvas_item.property_first_arrowhead() = TRUE;
-	canvas_item.property_last_arrowhead() = TRUE;
-	canvas_item.property_arrow_shape_a() = 11.0;
-	canvas_item.property_arrow_shape_b() = 0.0;
-	canvas_item.property_arrow_shape_c() = 9.0;
+	for (int i = 0; i < 2; ++i) {
+		_time_bars_canvas_item.set_show_head (i, true);
+		_time_bars_canvas_item.set_head_height (i, 18);
+		_time_bars_canvas_item.set_head_width (i, 15);
+		_time_bars_canvas_item.set_head_outward (i, false);
+	}
 
-	canvas_item.set_data ("cursor", this);
-	canvas_item.signal_event().connect (sigc::bind (sigc::mem_fun (ed, callbck), &canvas_item));
-	current_frame = 1; /* force redraw at 0 */
+	_time_bars_canvas_item.set_data ("cursor", this);
+	_track_canvas_item.set_data ("cursor", this);
+
+	_time_bars_canvas_item.Event.connect (sigc::bind (sigc::mem_fun (ed, callbck), &_time_bars_canvas_item));
+	_track_canvas_item.Event.connect (sigc::bind (sigc::mem_fun (ed, callbck), &_track_canvas_item));
+
+	_time_bars_canvas_item.set_y1 (ArdourCanvas::COORD_MAX);
+	_track_canvas_item.set_y1 (ArdourCanvas::COORD_MAX);
+	
+	_current_frame = 1; /* force redraw at 0 */
 }
 
 EditorCursor::~EditorCursor ()
-
 {
+	
 }
 
 void
@@ -61,30 +68,37 @@ EditorCursor::set_position (framepos_t frame)
 {
 	PositionChanged (frame);
 
-	double new_pos =  editor.frame_to_unit (frame);
+	double const new_pos = _editor.frame_to_unit (frame);
 
-	if (new_pos != points.front().get_x()) {
-
-		points.front().set_x (new_pos);
-		points.back().set_x (new_pos);
-
-		canvas_item.property_points() = points;
+	if (new_pos != _time_bars_canvas_item.x ()) {
+		_time_bars_canvas_item.set_x (new_pos);
 	}
-	current_frame = frame;
+
+	if (new_pos != _track_canvas_item.x0 ()) {
+		_track_canvas_item.set_x0 (new_pos);
+		_track_canvas_item.set_x1 (new_pos);
+	}
+	
+	_current_frame = frame;
 }
 
 void
-EditorCursor::set_length (double units)
+EditorCursor::show ()
 {
-	length = units;
-	points.back().set_y (points.front().get_y() + length);
-	canvas_item.property_points() = points;
+	_time_bars_canvas_item.show ();
+	_track_canvas_item.show ();
 }
 
 void
-EditorCursor::set_y_axis (double position)
+EditorCursor::hide ()
 {
-	points.front().set_y (position);
-	points.back().set_y (position + length);
-	canvas_item.property_points() = points;
+	_time_bars_canvas_item.hide ();
+	_track_canvas_item.hide ();
+}
+
+void
+EditorCursor::set_color (ArdourCanvas::Color color)
+{
+	_time_bars_canvas_item.set_color (color);
+	_track_canvas_item.set_outline_color (color);
 }

@@ -57,7 +57,6 @@
 #include "global_signals.h"
 #include "route_time_axis.h"
 #include "automation_time_axis.h"
-#include "canvas_impl.h"
 #include "enums.h"
 #include "gui_thread.h"
 #include "keyboard.h"
@@ -68,7 +67,6 @@
 #include "region_view.h"
 #include "rgb_macros.h"
 #include "selection.h"
-#include "simplerect.h"
 #include "streamview.h"
 #include "utils.h"
 #include "route_group_menu.h"
@@ -85,7 +83,7 @@ using namespace Editing;
 using namespace std;
 using std::list;
 
-RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, Canvas& canvas)
+RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
 	: AxisView(sess)
 	, RouteUI(sess)
 	, TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas)
@@ -234,7 +232,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	} 
 
-	_editor.ZoomChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
+	_editor.ZoomChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::reset_frames_per_pixel));
 	_editor.HorizontalPositionChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::horizontal_position_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::color_handler));
 
@@ -775,13 +773,9 @@ RouteTimeAxisView::show_timestretch (framepos_t start, framepos_t end, int layer
 #endif
 
 	if (timestretch_rect == 0) {
-		timestretch_rect = new SimpleRect (*canvas_display ());
-		timestretch_rect->property_x1() =  0.0;
-		timestretch_rect->property_y1() =  0.0;
-		timestretch_rect->property_x2() =  0.0;
-		timestretch_rect->property_y2() =  0.0;
-		timestretch_rect->property_fill_color_rgba() =  ARDOUR_UI::config()->canvasvar_TimeStretchFill.get();
-		timestretch_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeStretchOutline.get();
+		timestretch_rect = new ArdourCanvas::Rectangle (canvas_display ());
+		timestretch_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_TimeStretchFill.get());
+		timestretch_rect->set_outline_color (ARDOUR_UI::config()->canvasvar_TimeStretchOutline.get());
 	}
 
 	timestretch_rect->show ();
@@ -790,10 +784,8 @@ RouteTimeAxisView::show_timestretch (framepos_t start, framepos_t end, int layer
 	double const x1 = start / _editor.get_current_zoom();
 	double const x2 = (end - 1) / _editor.get_current_zoom();
 
-	timestretch_rect->property_x1() = x1;
-	timestretch_rect->property_y1() = current_height() * (layers - layer - 1) / layers;
-	timestretch_rect->property_x2() = x2;
-	timestretch_rect->property_y2() = current_height() * (layers - layer) / layers;
+	timestretch_rect->set (ArdourCanvas::Rect (x1, current_height() * (layers - layer - 1) / layers,
+						   x2, current_height() * (layers - layer) / layers));
 }
 
 void
@@ -898,9 +890,9 @@ RouteTimeAxisView::route_color_changed ()
 }
 
 void
-RouteTimeAxisView::reset_samples_per_unit ()
+RouteTimeAxisView::reset_frames_per_pixel ()
 {
-	set_samples_per_unit (_editor.get_current_zoom());
+	set_frames_per_pixel (_editor.get_current_zoom());
 }
 
 void
@@ -912,7 +904,7 @@ RouteTimeAxisView::horizontal_position_changed ()
 }
 
 void
-RouteTimeAxisView::set_samples_per_unit (double spu)
+RouteTimeAxisView::set_frames_per_pixel (double fpp)
 {
 	double speed = 1.0;
 
@@ -921,10 +913,10 @@ RouteTimeAxisView::set_samples_per_unit (double spu)
 	}
 
 	if (_view) {
-		_view->set_samples_per_unit (spu * speed);
+		_view->set_frames_per_pixel (fpp * speed);
 	}
 
-	TimeAxisView::set_samples_per_unit (spu * speed);
+	TimeAxisView::set_frames_per_pixel (fpp * speed);
 }
 
 void
@@ -1142,7 +1134,7 @@ RouteTimeAxisView::clear_playlist ()
 void
 RouteTimeAxisView::speed_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&RouteTimeAxisView::reset_samples_per_unit, this));
+	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&RouteTimeAxisView::reset_frames_per_pixel, this));
 }
 
 void
@@ -1620,11 +1612,11 @@ RouteTimeAxisView::color_handler ()
 {
 	//case cTimeStretchOutline:
 	if (timestretch_rect) {
-		timestretch_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeStretchOutline.get();
+		timestretch_rect->set_outline_color (ARDOUR_UI::config()->canvasvar_TimeStretchOutline.get());
 	}
 	//case cTimeStretchFill:
 	if (timestretch_rect) {
-		timestretch_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeStretchFill.get();
+		timestretch_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_TimeStretchFill.get());
 	}
 
 	reset_meter();

@@ -21,7 +21,6 @@
 #include <cstdlib>
 #include <cmath>
 
-#include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm2ext/gtk_ui.h>
 
 #include "ardour/session.h"
@@ -29,12 +28,15 @@
 #include "ardour/profile.h"
 #include "pbd/memento_command.h"
 
+#include "canvas/canvas.h"
+#include "canvas/item.h"
+#include "canvas/rectangle.h"
+
 #include "editor.h"
 #include "marker.h"
 #include "selection.h"
 #include "editing.h"
 #include "gui_thread.h"
-#include "simplerect.h"
 #include "actions.h"
 #include "prompter.h"
 #include "editor_drag.h"
@@ -172,7 +174,7 @@ Editor::add_new_location_internal (Location* location)
 		select_new_marker = false;
 	}
 
-	lam->canvas_height_set (_canvas_height);
+	lam->canvas_height_set (_visible_canvas_height);
 	lam->set_show_lines (_show_marker_lines);
 
 	/* Add these markers to the appropriate sorted marker lists, which will render
@@ -1420,8 +1422,8 @@ Editor::update_loop_range_view (bool visibility)
 		double x1 = frame_to_pixel (tll->start());
 		double x2 = frame_to_pixel (tll->end());
 
-		transport_loop_range_rect->property_x1() = x1;
-		transport_loop_range_rect->property_x2() = x2;
+		transport_loop_range_rect->set_x0 (x1);
+		transport_loop_range_rect->set_x1 (x2);
 
 		if (visibility) {
 			transport_loop_range_rect->show();
@@ -1442,14 +1444,13 @@ Editor::update_punch_range_view (bool visibility)
 	Location* tpl;
 
 	if ((_session->config.get_punch_in() || _session->config.get_punch_out()) && ((tpl = transport_punch_location()) != 0)) {
-		guint track_canvas_width,track_canvas_height;
-		track_canvas->get_size(track_canvas_width,track_canvas_height);
+		ArdourCanvas::Rect const v = _track_canvas_viewport->visible_area ();
 		if (_session->config.get_punch_in()) {
-			transport_punch_range_rect->property_x1() = frame_to_pixel (tpl->start());
-			transport_punch_range_rect->property_x2() = (_session->config.get_punch_out() ? frame_to_pixel (tpl->end()) : frame_to_pixel (JACK_MAX_FRAMES));
+			transport_punch_range_rect->set_x0 (frame_to_pixel (tpl->start()));
+			transport_punch_range_rect->set_x1 (_session->config.get_punch_out() ? frame_to_pixel (tpl->end()) : frame_to_pixel (JACK_MAX_FRAMES));
 		} else {
-			transport_punch_range_rect->property_x1() = 0;
-			transport_punch_range_rect->property_x2() = (_session->config.get_punch_out() ? frame_to_pixel (tpl->end()) : track_canvas_width);
+			transport_punch_range_rect->set_x0 (0);
+			transport_punch_range_rect->set_x1 (_session->config.get_punch_out() ? frame_to_pixel (tpl->end()) : v.width ());
 		}
 
 		if (visibility) {

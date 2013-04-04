@@ -23,17 +23,24 @@
 #include <string>
 #include <glib.h>
 
-#include <libgnomecanvasmm/pixbuf.h>
 #include <sigc++/signal.h>
 
 #include "ardour/ardour.h"
 #include "pbd/signals.h"
-
-#include "canvas.h"
+#include "canvas/types.h"
 
 namespace ARDOUR {
 	class TempoSection;
 	class MeterSection;
+}
+
+namespace ArdourCanvas {
+	class Polygon;
+	class Line;
+	class Rectangle;
+	class Group;
+	class Pixbuf;
+	class Item;
 }
 
 class PublicEditor;
@@ -103,9 +110,9 @@ class Marker : public sigc::trackable
 	ArdourCanvas::Polygon *mark;
 	ArdourCanvas::Pixbuf *name_pixbuf;
 	ArdourCanvas::Points *points;
-	ArdourCanvas::SimpleLine* _line;
+	ArdourCanvas::Line* _line;
 	ArdourCanvas::Points *line_points;
-	ArdourCanvas::SimpleRect* _name_background;
+	ArdourCanvas::Rectangle* _name_background;
 
 	std::string  _name;
 	double        unit_position;

@@ -17,8 +17,9 @@
 
 */
 
-#include <libgnomecanvasmm/canvas.h>
-#include <libgnomecanvasmm/group.h>
+#include "canvas/line.h"
+#include "canvas/canvas.h"
+#include "canvas/debug.h"
 #include "tempo_lines.h"
 #include "ardour_ui.h"
 
@@ -26,8 +27,8 @@ using namespace std;
 
 #define MAX_CACHED_LINES 128
 
-TempoLines::TempoLines(ArdourCanvas::Canvas& canvas, ArdourCanvas::Group* group, double screen_height)
-	: _canvas(canvas)
+TempoLines::TempoLines (ArdourCanvas::GtkCanvasViewport& canvas_viewport, ArdourCanvas::Group* group, double screen_height)
+	: _canvas_viewport (canvas_viewport)
 	, _group(group)
 	, _clean_left(DBL_MAX)
 	, _clean_right(0.0)
@@ -46,9 +47,9 @@ TempoLines::tempo_map_changed()
 	for (Lines::iterator i = _lines.begin(); i != _lines.end(); d += 1.0) {
 		Lines::iterator next = i;
 		++next;
-		i->second->property_x1() = - d;
-		i->second->property_x2() = - d;
-		ArdourCanvas::SimpleLine* f = i->second;
+		i->second->set_x0 (-d);
+		i->second->set_x1 (-d);
+		ArdourCanvas::Line* f = i->second;
 		_lines.erase(i);
 		_lines.insert(make_pair(- d, f));
 		i = next;
@@ -74,10 +75,10 @@ TempoLines::hide ()
 void
 TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin, 
 		  const ARDOUR::TempoMap::BBTPointList::const_iterator& end, 
-		  double frames_per_unit)
+		  double frames_per_pixel)
 {
 	ARDOUR::TempoMap::BBTPointList::const_iterator i;
-	ArdourCanvas::SimpleLine *line = NULL;
+	ArdourCanvas::Line *line = 0;
 	gdouble xpos;
 	double who_cares;
 	double x1, x2, y1, beat_density;
@@ -88,7 +89,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 
 	const size_t needed = distance (begin, end);
 
-	_canvas.get_scroll_region (x1, y1, x2, who_cares);
+	ArdourCanvas::Rect const visible = _canvas_viewport.visible_area ();
 
 	/* get the first bar spacing */
 
@@ -97,7 +98,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 	bars = (*i).bar - (*begin).bar;
 	beats = distance (begin, end) - bars;
 
-	beat_density = (beats * 10.0f) / _canvas.get_width ();
+	beat_density = (beats * 10.0f) / visible.width ();
 
 	if (beat_density > 4.0f) {
 		/* if the lines are too close together, they become useless */
@@ -105,12 +106,12 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 		return;
 	}
 
-	xpos = rint(((framepos_t)(*i).frame) / (double)frames_per_unit);
+	xpos = rint(((framepos_t)(*i).frame) / (double)frames_per_pixel);
 	const double needed_right = xpos;
 
 	i = begin;
 
-	xpos = rint(((framepos_t)(*i).frame) / (double)frames_per_unit);
+	xpos = rint(((framepos_t)(*i).frame) / (double)frames_per_pixel);
 	const double needed_left = xpos;
 
 	Lines::iterator left = _lines.lower_bound(xpos); // first line >= xpos
@@ -143,12 +144,12 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 			color = ARDOUR_UI::config()->canvasvar_MeasureLineBeat.get();
 		}
 
-		xpos = rint(((framepos_t)(*i).frame) / (double)frames_per_unit);
+		xpos = rint(((framepos_t)(*i).frame) / (double)frames_per_pixel);
 
 		li = _lines.lower_bound(xpos); // first line >= xpos
 
-		line = (li != _lines.end()) ? li->second : NULL;
-		assert(!line || line->property_x1() == li->first);
+		line = (li != _lines.end()) ? li->second : 0;
+		assert(!line || line->x0() == li->first);
 		
 		Lines::iterator next = li;
 		if (next != _lines.end())
@@ -157,11 +158,11 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 		exhausted = (next == _lines.end());
 
 		// Hooray, line is perfect
-		if (line && line->property_x1() == xpos) {
+		if (line && line->x0() == xpos) {
 			if (li != _lines.end())
 				++li;
 			
-			line->property_color_rgba() = color;
+			line->set_outline_color (color);
 			inserted_last_time = false; // don't search next time
 			// Use existing line, moving if necessary
 		} else if (!exhausted) {
@@ -174,9 +175,9 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 				double const x = steal->first;
 				line = steal->second;
 				_lines.erase(steal);
-				line->property_x1() = xpos;
-				line->property_x2() = xpos;
-				line->property_color_rgba() = color;
+				line->set_x0 (xpos);
+				line->set_x1 (xpos);
+				line->set_outline_color (color);
 				_lines.insert(make_pair(xpos, line));
 				inserted_last_time = true; // search next time
 				invalidated = true;
@@ -191,20 +192,20 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 				if (existing != _lines.end()) {
 					//cout << "*** EXISTING LINE" << endl;
 					li = existing;
-					li->second->property_color_rgba() = color;
+					li->second->set_outline_color (color);
 					inserted_last_time = false; // don't search next time
 				} else {
 					//cout << "*** MOVING LINE" << endl;
-					const double x1 = line->property_x1();
+					const double x1 = line->x0();
 					const bool was_clean = x1 >= _clean_left && x1 <= _clean_right;
 					invalidated = invalidated || was_clean;
 					// Invalidate clean portion (XXX: too harsh?)
 					_clean_left  = needed_left;
 					_clean_right = needed_right;
 					_lines.erase(li);
-					line->property_color_rgba() = color;
-					line->property_x1() = xpos;
-					line->property_x2() = xpos;
+					line->set_outline_color (color);
+					line->set_x0 (xpos);
+					line->set_x1 (xpos);
 					_lines.insert(make_pair(xpos, line));
 					inserted_last_time = true; // search next time
 				}
@@ -215,12 +216,12 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 			//cout << "*** CREATING LINE" << endl;
 			/* if we already have a line there ... don't sweat it */
 			if (_lines.find (xpos) == _lines.end()) {
-				line = new ArdourCanvas::SimpleLine (*_group);
-				line->property_x1() = xpos;
-				line->property_x2() = xpos;
-				line->property_y1() = 0.0;
-				line->property_y2() = _height;
-				line->property_color_rgba() = color;
+				line = new ArdourCanvas::Line (*_group);
+				line->set_x0 (xpos);
+				line->set_x1 (xpos);
+				line->set_y0 (0.0);
+				line->set_y1 (_height);
+				line->set_outline_color (color);
 				_lines.insert(make_pair(xpos, line));
 				inserted_last_time = true;
 			}
@@ -233,9 +234,9 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 				double const x = steal->first;
 				line = steal->second;
 				_lines.erase(steal);
-				line->property_color_rgba() = color;
-				line->property_x1() = xpos;
-				line->property_x2() = xpos;
+				line->set_outline_color (color);
+				line->set_x0 (xpos);
+				line->set_x1 (xpos);
 				_lines.insert(make_pair(xpos, line));
 				inserted_last_time = true; // search next time
 				invalidated = true;

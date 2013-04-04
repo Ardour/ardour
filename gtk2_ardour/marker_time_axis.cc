@@ -36,7 +36,6 @@
 #include "marker_time_axis_view.h"
 #include "imageframe_view.h"
 #include "marker_time_axis.h"
-#include "canvas_impl.h"
 
 #include "i18n.h"
 
@@ -121,18 +120,18 @@ MarkerTimeAxis::set_height (uint32_t h)
 }
 
 /**
- * Sets the number of samples per unit that are used.
+ * Sets the number of frames per pixel that are used.
  * This is used to determine the sizes of items upon this time axis
  *
- * @param spu the number of samples per unit
+ * @param spu the number of frames per pixel
  */
 void
-MarkerTimeAxis::set_samples_per_unit(double spu)
+MarkerTimeAxis::set_frames_per_pixel (double fpp)
 {
-	TimeAxisView::set_samples_per_unit (editor.get_current_zoom());
+	TimeAxisView::set_frames_per_pixel (editor.get_current_zoom());
 
 	if (view) {
-		view->set_samples_per_unit(spu) ;
+		view->set_frames_per_pixel (fpp);
 	}
 }
 

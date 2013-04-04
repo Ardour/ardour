@@ -22,12 +22,10 @@
 
 #include <list>
 
-//#include <libgnomecanvas.h>
 
 #include "ardour_dialog.h"
 #include "enums.h"
 #include "time_axis_view.h"
-#include "canvas.h"
 #include "visual_time_axis.h"
 
 namespace ARDOUR
@@ -80,13 +78,7 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 */
 		virtual void set_height(uint32_t h) ;
 
-		/**
-		 * Sets the number of samples per unit that are used.
-		 * This is used to determine the siezes of items upon this time axis
-		 *
-		 * @param spu the number of samples per unit
-		 */
-		virtual void set_samples_per_unit(double spu) ;
+		virtual void set_frames_per_pixel (double);
 
 		/**
 		 * Returns the available height for images to be drawn onto

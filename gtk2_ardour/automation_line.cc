@@ -35,7 +35,6 @@
 
 #include "evoral/Curve.hpp"
 
-#include "simplerect.h"
 #include "automation_line.h"
 #include "control_point.h"
 #include "gui_thread.h"
@@ -57,7 +56,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
-using namespace Gnome; // for Canvas
 
 /** @param converter A TimeConverter whose origin_b is the start time of the AutomationList in session frames.
  *  This will not be deleted by AutomationLine.
@@ -91,15 +89,13 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	terminal_points_can_slide = true;
 	_height = 0;
 
-	group = new ArdourCanvas::Group (parent);
-	group->property_x() = 0.0;
-	group->property_y() = 0.0;
+	group = new ArdourCanvas::Group (&parent);
 
-	line = new ArdourCanvas::Line (*group);
-	line->property_width_pixels() = (guint)1;
+	line = new ArdourCanvas::PolyLine (group);
+	line->set_outline_width (1);
 	line->set_data ("line", this);
 
-	line->signal_event().connect (sigc::mem_fun (*this, &AutomationLine::event_handler));
+	line->Event.connect (sigc::mem_fun (*this, &AutomationLine::event_handler));
 
 	trackview.session()->register_with_memento_command_factory(alist->id(), this);
 
@@ -204,7 +200,7 @@ void
 AutomationLine::set_line_color (uint32_t color)
 {
 	_line_color = color;
-	line->property_fill_color_rgba() = color;
+	line->set_outline_color (color);
 }
 
 void
@@ -259,7 +255,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	reset_line_coords (cp);
 
 	if (line_points.size() > 1) {
-		line->property_points() = line_points;
+		line->set (line_points);
 	}
 
 	alist->freeze ();
@@ -280,8 +276,8 @@ void
 AutomationLine::reset_line_coords (ControlPoint& cp)
 {
 	if (cp.view_index() < line_points.size()) {
-		line_points[cp.view_index()].set_x (cp.get_x());
-		line_points[cp.view_index()].set_y (cp.get_y());
+		line_points[cp.view_index()].x = cp.get_x ();
+		line_points[cp.view_index()].y = cp.get_y ();
 	}
 }
 
@@ -683,7 +679,7 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 		 */
 
 		if (line_points.size() > 1) {
-			line->property_points() = line_points;
+			line->set (line_points);
 		}
 	}
 	
@@ -980,7 +976,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		/* reset the line coordinates given to the CanvasLine */
 
 		while (line_points.size() < vp) {
-			line_points.push_back (Art::Point (0,0));
+			line_points.push_back (ArdourCanvas::Duple (0,0));
 		}
 
 		while (line_points.size() > vp) {
@@ -988,11 +984,11 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		}
 
 		for (uint32_t n = 0; n < vp; ++n) {
-			line_points[n].set_x (control_points[n]->get_x());
-			line_points[n].set_y (control_points[n]->get_y());
+			line_points[n].x (control_points[n]->get_x());
+			line_points[n].y (control_points[n]->get_y());
 		}
 
-		line->property_points() = line_points;
+		line->set (line_points);
 
 		if (_visible && alist->interpolation() != AutomationList::Discrete) {
 			line->show();

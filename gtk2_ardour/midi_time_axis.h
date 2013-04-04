@@ -37,7 +37,6 @@
 #include "route_ui.h"
 #include "enums.h"
 #include "route_time_axis.h"
-#include "canvas.h"
 #include "midi_streamview.h"
 
 namespace MIDI {

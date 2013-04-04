@@ -364,7 +364,7 @@ void
 Editor::get_onscreen_tracks (TrackViewList& tvl)
 {
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		if ((*i)->y_position() < _canvas_height) {
+		if ((*i)->y_position() < _visible_canvas_height) {
 			tvl.push_back (*i);
 		}
 	}
@@ -1682,12 +1682,12 @@ Editor::select_all_selectables_using_cursor (EditorCursor *cursor, bool after)
 	list<Selectable *> touched;
 
 	if (after) {
-		start = cursor->current_frame;
+		start = cursor->current_frame();
 		end = _session->current_end_frame();
 	} else {
-		if (cursor->current_frame > 0) {
+		if (cursor->current_frame() > 0) {
 			start = 0;
-			end = cursor->current_frame - 1;
+			end = cursor->current_frame() - 1;
 		} else {
 			return;
 		}

@@ -44,7 +44,6 @@
 #include "axis_view.h"
 #include "enums.h"
 #include "editing.h"
-#include "canvas.h"
 
 namespace ARDOUR {
 	class Session;
@@ -56,6 +55,12 @@ namespace ARDOUR {
 
 namespace Gtk {
 	class Menu;
+}
+
+namespace ArdourCanvas {
+	class Canvas;
+	class Group;
+	class Item;
 }
 
 class PublicEditor;
@@ -149,7 +154,7 @@ class TimeAxisView : public virtual AxisView
 	virtual ARDOUR::RouteGroup* route_group() const { return 0; }
 	virtual boost::shared_ptr<ARDOUR::Playlist> playlist() const { return boost::shared_ptr<ARDOUR::Playlist> (); }
 
-	virtual void set_samples_per_unit (double);
+	virtual void set_frames_per_pixel (double);
 	virtual void show_selection (TimeSelection&);
 	virtual void hide_selection ();
 	virtual void reshow_selection (TimeSelection&);

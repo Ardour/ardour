@@ -17,9 +17,8 @@
 
 */
 
-#include <libgnomecanvasmm/item.h>
 #include "ardour/types.h"
-#include "canvas-noevent-text.h"
+#include "canvas/text.h"
 #include "canvas.h"
 
 class Editor;

@@ -22,7 +22,6 @@
 
 #include "ardour/types.h"
 #include "ardour_dialog.h"
-#include "canvas.h"
 #include "progress_reporter.h"
 
 namespace ARDOUR {

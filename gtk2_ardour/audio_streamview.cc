@@ -34,12 +34,12 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 
+#include "canvas/rectangle.h"
+
 #include "audio_streamview.h"
 #include "audio_region_view.h"
 #include "tape_region_view.h"
 #include "audio_time_axis.h"
-#include "canvas-waveview.h"
-#include "canvas-simplerect.h"
 #include "region_selection.h"
 #include "selection.h"
 #include "public_editor.h"
@@ -284,14 +284,14 @@ AudioStreamView::setup_rec_box ()
 				break;
 			}
 
-			ArdourCanvas::SimpleRect * rec_rect = new Gnome::Canvas::SimpleRect (*_canvas_group);
-			rec_rect->property_x1() = xstart;
-			rec_rect->property_y1() = 1.0;
-			rec_rect->property_x2() = xend;
-			rec_rect->property_y2() = child_height ();
-			rec_rect->property_outline_what() = 0x0;
-			rec_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
-			rec_rect->property_fill_color_rgba() = fill_color;
+			ArdourCanvas::Rectangle * rec_rect = new ArdourCanvas::Rectangle (_canvas_group);
+			rec_rect->set_x0 (xstart);
+			rec_rect->set_y0 (1);
+			rec_rect->set_x1 (xend);
+			rec_rect->set_y1 (child_height ());
+			rec_rect->set_outline_what (0);
+			rec_rect->set_outline_color (ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get());
+			rec_rect->set_fill_color (fill_color);
 			rec_rect->lower_to_bottom();
 
 			RecBoxInfo recbox;
@@ -397,7 +397,7 @@ AudioStreamView::update_rec_regions (framepos_t start, framecnt_t cnt)
 
 		assert (n < rec_rects.size());
 
-		if (!canvas_item_visible (rec_rects[n].rectangle)) {
+		if (!rec_rects[n].rectangle->visible()) {
 			/* rect already hidden, this region is done */
 			iter = tmp;
 			continue;
@@ -434,9 +434,9 @@ AudioStreamView::update_rec_regions (framepos_t start, framecnt_t cnt)
 					check_record_layers (region, (region->position() - region->start() + start + cnt));
 
 					/* also update rect */
-					ArdourCanvas::SimpleRect * rect = rec_rects[n].rectangle;
+					ArdourCanvas::Rectangle * rect = rec_rects[n].rectangle;
 					gdouble xend = _trackview.editor().frame_to_pixel (region->position() + region->length());
-					rect->property_x2() = xend;
+					rect->set_x1 (xend);
 				}
 
 			} else {
@@ -529,15 +529,15 @@ AudioStreamView::color_handler ()
 {
 	//case cAudioTrackBase:
 	if (_trackview.is_track()) {
-		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_AudioTrackBase.get();
+		canvas_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_AudioTrackBase.get());
 	}
 
 	//case cAudioBusBase:
 	if (!_trackview.is_track()) {
 		if (Profile->get_sae() && _trackview.route()->is_master()) {
-			canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_AudioMasterBusBase.get();
+			canvas_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_AudioMasterBusBase.get());
 		} else {
-			canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_AudioBusBase.get();
+			canvas_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_AudioBusBase.get());
 		}
 	}
 }

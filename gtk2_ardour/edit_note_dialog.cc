@@ -22,9 +22,9 @@
 
 #include "gtkmm2ext/utils.h"
 
-#include "canvas-note-event.h"
 #include "edit_note_dialog.h"
 #include "midi_region_view.h"
+#include "note_base.h"
 
 #include "i18n.h"
 
@@ -38,7 +38,7 @@ using namespace Gtkmm2ext;
  *    @param n Notes to edit.
  */
 
-EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<ArdourCanvas::CanvasNoteEvent*> n)
+EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n)
 	: ArdourDialog (_("Note"))
 	, _region_view (rv)
 	, _events (n)

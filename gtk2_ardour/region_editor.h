@@ -35,7 +35,6 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/listviewtext.h>
 
-#include <libgnomecanvas/libgnomecanvas.h>
 
 #include "pbd/signals.h"
 

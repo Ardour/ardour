@@ -19,6 +19,8 @@
 
 #include "ardour/session.h"
 
+#include "canvas/debug.h"
+
 #include "time_axis_view.h"
 #include "streamview.h"
 #include "editor_summary.h"
@@ -200,7 +202,7 @@ EditorSummary::render (cairo_t* cr)
 	/* XXX: colour should be set from configuration file */
 	cairo_set_source_rgba (cr, 1, 0, 0, 1);
 
-	const double ph= playhead_frame_to_position (_editor->playhead_cursor->current_frame);
+	const double ph= playhead_frame_to_position (_editor->playhead_cursor->current_frame());
 	cairo_move_to (cr, ph, 0);
 	cairo_line_to (cr, ph, get_height());
 	cairo_stroke (cr);
@@ -397,6 +399,8 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 			_moved = false;
 			_editor->_dragging_playhead = true;
 			_editor->set_follow_playhead (false);
+
+			ArdourCanvas::checkpoint ("sum", "------------------ summary move drag starts.\n");
 		}
 	}
 
@@ -436,7 +440,7 @@ EditorSummary::get_editor (pair<double, double>* x, pair<double, double>* y) con
 		x->second = x->first + _editor->current_page_frames() * _x_scale;
 		
 		y->first = editor_y_to_summary (_editor->vertical_adjustment.get_value ());
-		y->second = editor_y_to_summary (_editor->vertical_adjustment.get_value () + _editor->canvas_height() - _editor->get_canvas_timebars_vsize());
+		y->second = editor_y_to_summary (_editor->vertical_adjustment.get_value () + _editor->visible_canvas_height())
 	}
 }
 
@@ -676,7 +680,8 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 void
 EditorSummary::set_editor (double const x, double const y)
 {
-	if (_editor->pending_visual_change.idle_handler_id >= 0) {
+	ArdourCanvas::checkpoint ("editor", "-> set editor");
+	if (_editor->pending_visual_change.idle_handler_id >= 0 && _editor->pending_visual_change.executing == true) {
 
 		/* As a side-effect, the Editor's visual change idle handler processes
 		   pending GTK events.  Hence this motion notify handler can be called
@@ -791,10 +796,10 @@ void
 EditorSummary::set_editor_y (double const y)
 {
 	double y1 = summary_y_to_editor (y);
-	double const eh = _editor->canvas_height() - _editor->get_canvas_timebars_vsize ();
+	double const eh = _editor->visible_canvas_height()
 	double y2 = y1 + eh;
 
-	double const full_editor_height = _editor->full_canvas_height - _editor->get_canvas_timebars_vsize();
+	double const full_editor_height = _editor->_full_canvas_height;
 
 	if (y2 > full_editor_height) {
 		y1 -= y2 - full_editor_height;
@@ -871,7 +876,7 @@ EditorSummary::set_editor_y (pair<double, double> const y)
 	/* Height that we will use for scaling; use the whole editor height unless there are not
 	   enough tracks to fill it.
 	*/
-	double const ch = min (total_height, _editor->canvas_height() - _editor->get_canvas_timebars_vsize());
+	double const ch = min (total_height, _editor->visible_canvas_height());
 
 	/* hence required scale factor of the complete tracks to fit the required y range;
 	   the amount of space they should take up divided by the amount they currently take up.

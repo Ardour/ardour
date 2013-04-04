@@ -22,7 +22,6 @@
 
 #include "ardour/ardour.h"
 
-#include <libgnomecanvasmm.h>
 
 #include "automation_line.h"
 

@@ -21,16 +21,19 @@
 #define __gtk_ardour_time_axis_view_item_h__
 
 #include <string>
-
-#include <libgnomecanvasmm/pixbuf.h>
-
+#include <gdkmm/color.h>
+#include <pangomm/fontdescription.h>
 #include "pbd/signals.h"
-
 #include "selectable.h"
-#include "simplerect.h"
-#include "canvas.h"
 
 class TimeAxisView;
+
+namespace ArdourCanvas {
+	class Pixbuf;
+	class Rectangle;
+	class Item;
+	class Group;
+}
 
 using ARDOUR::framepos_t;
 using ARDOUR::framecnt_t;
@@ -74,9 +77,9 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	ArdourCanvas::Item* get_name_highlight();
 	ArdourCanvas::Pixbuf* get_name_pixbuf();
 
-	virtual void set_samples_per_unit(double spu);
+	virtual void set_frames_per_pixel (double);
 
-	double get_samples_per_unit();
+	double get_frames_per_pixel () const;
 
 	virtual void drag_start() { _dragging = true; }
 	virtual void drag_end() { _dragging = false; }
@@ -190,8 +193,8 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	/** indicates whether the min duration constraint is active */
 	bool min_duration_active;
 
-	/** samples per canvas unit */
-	double samples_per_unit;
+	/** frames per canvas pixel */
+	double frames_per_pixel;
 
 	/** should the item respond to events */
 	bool _sensitive;
@@ -231,14 +234,14 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
         bool rect_visible;
 
 	ArdourCanvas::Group*      group;
-	ArdourCanvas::SimpleRect* vestigial_frame;
-	ArdourCanvas::SimpleRect* frame;
+	ArdourCanvas::Rectangle* vestigial_frame;
+	ArdourCanvas::Rectangle* frame;
 	ArdourCanvas::Pixbuf*     name_pixbuf;
-	ArdourCanvas::SimpleRect* name_highlight;
+	ArdourCanvas::Rectangle* name_highlight;
 
 	/* with these two values, if frame_handle_start == 0 then frame_handle_end will also be 0 */
-	ArdourCanvas::SimpleRect* frame_handle_start; ///< `frame' (fade) handle for the start of the item, or 0
-	ArdourCanvas::SimpleRect* frame_handle_end; ///< `frame' (fade) handle for the end of the item, or 0
+	ArdourCanvas::Rectangle* frame_handle_start; ///< `frame' (fade) handle for the start of the item, or 0
+	ArdourCanvas::Rectangle* frame_handle_end; ///< `frame' (fade) handle for the end of the item, or 0
 
 	double _height;
 	Visibility visibility;

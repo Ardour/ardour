@@ -21,17 +21,16 @@
 
 #include <vector>
 
-#include <libgnomecanvasmm.h>
-#include <libgnomecanvasmm/polygon.h>
 #include <sigc++/signal.h>
 #include "ardour/audioregion.h"
+
+#include "canvas/fwd.h"
+#include "canvas/wave_view.h"
 
 #include "region_view.h"
 #include "time_axis_view_item.h"
 #include "automation_line.h"
 #include "enums.h"
-#include "waveview.h"
-#include "canvas.h"
 
 namespace ARDOUR {
 	class AudioRegion;
@@ -50,13 +49,13 @@ class AudioRegionView : public RegionView
 	AudioRegionView (ArdourCanvas::Group *,
 			 RouteTimeAxisView&,
 			 boost::shared_ptr<ARDOUR::AudioRegion>,
-			 double initial_samples_per_unit,
+			 double initial_frames_per_pixel,
 			 Gdk::Color const & basic_color);
 
 	AudioRegionView (ArdourCanvas::Group *,
 			 RouteTimeAxisView&,
 			 boost::shared_ptr<ARDOUR::AudioRegion>,
-			 double samples_per_unit,
+			 double frames_per_pixel,
 			 Gdk::Color const & basic_color,
 			 bool recording,
 			 TimeAxisViewItem::Visibility);
@@ -72,7 +71,7 @@ class AudioRegionView : public RegionView
 	void create_waves ();
 
 	void set_height (double);
-	void set_samples_per_unit (double);
+	void set_frames_per_pixel (double);
 
 	void set_amplitude_above_axis (gdouble spp);
 
@@ -154,17 +153,17 @@ class AudioRegionView : public RegionView
 	ArdourCanvas::Polygon*           sync_mark; ///< polgyon for sync position
 	ArdourCanvas::Polygon*           fade_in_shape;
 	ArdourCanvas::Polygon*           fade_out_shape;
-	ArdourCanvas::SimpleRect*        fade_in_handle; ///< fade in handle, or 0
-	ArdourCanvas::SimpleRect*        fade_out_handle; ///< fade out handle, or 0
+	ArdourCanvas::Rectangle*        fade_in_handle; ///< fade in handle, or 0
+	ArdourCanvas::Rectangle*        fade_out_handle; ///< fade out handle, or 0
 
 	ArdourCanvas::Line *start_xfade_in;
 	ArdourCanvas::Line *start_xfade_out;
-	ArdourCanvas::SimpleRect* start_xfade_rect;
+	ArdourCanvas::Rectangle* start_xfade_rect;
 	bool _start_xfade_visible;
 
 	ArdourCanvas::Line *end_xfade_in;
 	ArdourCanvas::Line *end_xfade_out;
-	ArdourCanvas::SimpleRect* end_xfade_rect;
+	ArdourCanvas::Rectangle* end_xfade_rect;
 	bool _end_xfade_visible;
 
 	boost::shared_ptr<AudioRegionGainLine> gain_line;
@@ -192,12 +191,9 @@ class AudioRegionView : public RegionView
 	void set_colors ();
 	void compute_colors (Gdk::Color const &);
 	void reset_width_dependent_items (double pixel_width);
-	void set_waveview_data_src();
 	void set_frame_color ();
 
 	void color_handler ();
-
-	std::vector<GnomeCanvasWaveViewCache*> wave_caches;
 
 	void transients_changed();
 

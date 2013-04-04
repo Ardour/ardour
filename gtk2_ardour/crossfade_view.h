@@ -21,7 +21,6 @@
 #define __gtk_ardour_crossfade_view_h__
 
 #include <vector>
-#include <libgnomecanvasmm.h>
 #include "pbd/signals.h"
 #include "ardour/crossfade.h"
 
@@ -30,13 +29,17 @@
 class RouteTimeAxisView;
 class AudioRegionView;
 
+namespace ArdourCanvas {
+	class PolyLine;
+}
+
 class CrossfadeView : public TimeAxisViewItem
 {
 public:
 	CrossfadeView (ArdourCanvas::Group*,
 		       RouteTimeAxisView&,
 		       boost::shared_ptr<ARDOUR::Crossfade>,
-		       double initial_samples_per_unit,
+		       double initial_frames_per_pixel,
 		       Gdk::Color& basic_color,
 		       AudioRegionView& leftview,
 		       AudioRegionView& rightview);
@@ -70,8 +73,8 @@ private:
 	bool _all_in_view;
 	double _child_height;
 
-	ArdourCanvas::Line *fade_in;
-	ArdourCanvas::Line *fade_out;
+	ArdourCanvas::PolyLine *fade_in;
+	ArdourCanvas::PolyLine *fade_out;
 
 	void crossfade_changed (const PBD::PropertyChange&);
 	void crossfade_fades_changed ();

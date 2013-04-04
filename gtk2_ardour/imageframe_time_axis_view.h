@@ -27,9 +27,6 @@
 
 #include <jack/jack.h>
 
-#include <libgnomecanvasmm.h>
-#include "canvas.h"
-#include "simplerect.h"
 
 
 class PublicEditor ;
@@ -96,20 +93,8 @@ class ImageFrameTimeAxisView : public sigc::trackable
 		 */
 		int set_position(gdouble x, gdouble y) ;
 
-		/**
-		 * Sets the current samples per unit.
-		 * this method tells each item upon the time axis of the change
-		 *
-		 * @param spu the new samples per canvas unit value
-		 */
-		int set_samples_per_unit(gdouble spu) ;
-
-		/**
-		 * Returns the current samples per unit of this time axis view helper
-		 *
-		 * @return the current samples per unit of this time axis view helper
-		 */
-		gdouble get_samples_per_unit() { return _samples_per_unit; }
+		int set_frames_per_pixel (double);
+		double get_frames_per_pixel () { return _frames_per_pixel; }
 
 		/**
 		 * Sets the color of the items contained uopn this view helper
@@ -237,9 +222,8 @@ class ImageFrameTimeAxisView : public sigc::trackable
 	private:
 		/**
 		 * convenience method to re-get the samples per unit and tell items upon this view
-		 *
 		 */
-		void reset_samples_per_unit() ;
+		void reset_frames_per_pixel ();
 
 		/**
 		 * The list of ImageFrameViews held by this view helper */
@@ -261,10 +245,10 @@ class ImageFrameTimeAxisView : public sigc::trackable
 		ImageFrameTimeAxis& _trackview ;
 
 		ArdourCanvas::Group       canvas_group ;
-		ArdourCanvas::SimpleRect  canvas_rect; /* frame around the whole thing */
+		ArdourCanvas::Rectangle  canvas_rect; /* frame around the whole thing */
 
-		/** the current samples per unit */
-		double _samples_per_unit ;
+		/** the current frames per pixel */
+		double _frames_per_pixel;
 
 		/* XXX why are these different? */
 		Gdk::Color region_color ;

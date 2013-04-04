@@ -41,7 +41,7 @@ VerboseCursor::VerboseCursor (Editor* editor)
 	, _xoffset (0)
 	, _yoffset (0)
 {
-	_canvas_item = new ArdourCanvas::NoEventText (*_editor->track_canvas->root());
+	_canvas_item = new ArdourCanvas::Text (*_editor->track_canvas->root());
 	_canvas_item->property_font_desc() = get_font_for_style (N_("VerboseCanvasCursor"));
 	_canvas_item->property_anchor() = Gtk::ANCHOR_NW;
 }
@@ -254,7 +254,7 @@ VerboseCursor::set_duration (framepos_t start, framepos_t end, double x, double 
 void
 VerboseCursor::set_color (uint32_t color)
 {
-	_canvas_item->property_fill_color_rgba() = color;
+	_canvas_item->set_fill_color (color);
 }
 
 /** Set the position of the verbose cursor.  Any x/y offsets
@@ -264,8 +264,8 @@ VerboseCursor::set_color (uint32_t color)
 void
 VerboseCursor::set_position (double x, double y)
 {
-	_canvas_item->property_x() = clamp_x (x + _xoffset);
-	_canvas_item->property_y() = clamp_y (y + _yoffset);
+	_canvas_item->set_x_position (clamp_x (x + _xoffset));
+	_canvas_item->set_y_position (clamp_y (y + _yoffset));
 }
 
 bool

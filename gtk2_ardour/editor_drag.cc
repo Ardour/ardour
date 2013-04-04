@@ -51,13 +51,14 @@
 #include "editor_drag.h"
 #include "audio_time_axis.h"
 #include "midi_time_axis.h"
-#include "canvas-note.h"
 #include "selection.h"
 #include "midi_selection.h"
 #include "automation_time_axis.h"
 #include "debug.h"
 #include "editor_cursors.h"
 #include "mouse_cursors.h"
+#include "note_base.h"
+#include "patch_change.h"
 #include "verbose_cursor.h"
 
 using namespace std;
@@ -203,13 +204,13 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i)
 void
 Drag::swap_grab (ArdourCanvas::Item* new_item, Gdk::Cursor* cursor, uint32_t time)
 {
-	_item->ungrab (0);
+	_item->ungrab ();
 	_item = new_item;
 
 	if (cursor == 0) {
-		_item->grab (Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK, time);
+		_item->grab ();
 	} else {
-		_item->grab (Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK, *cursor, time);
+		_item->grab ();
 	}
 }
 
@@ -239,12 +240,12 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	_last_pointer_y = _grab_y;
 
 	if (cursor == 0) {
-		_item->grab (Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK,
-			     event->button.time);
+		_item->grab ();
+			     
 	} else {
-		_item->grab (Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK,
-			     *cursor,
-			     event->button.time);
+		/* CAIROCANVAS need a variant here that passes *cursor */
+		_item->grab ();
+
 	}
 
 	if (_editor->session() && _editor->session()->transport_rolling()) {
@@ -276,7 +277,7 @@ Drag::end_grab (GdkEvent* event)
 {
 	_editor->stop_canvas_autoscroll ();
 
-	_item->ungrab (event ? event->button.time : 0);
+	_item->ungrab ();
 
 	finished (event, _move_threshold_passed);
 
@@ -355,7 +356,7 @@ void
 Drag::abort ()
 {
 	if (_item) {
-		_item->ungrab (0);
+		_item->ungrab ();
 	}
 
 	aborted (_move_threshold_passed);
@@ -551,7 +552,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, framepos_t* pending_r
 	if ((*pending_region_position != _last_frame_position) && x_move_allowed) {
 
 		/* x movement since last time (in pixels) */
-		dx = (static_cast<double> (*pending_region_position) - _last_frame_position) / _editor->frames_per_unit;
+		dx = (static_cast<double> (*pending_region_position) - _last_frame_position) / _editor->frames_per_pixel;
 
 		/* total x movement */
 		framecnt_t total_dx = *pending_region_position;
@@ -733,7 +734,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			double y = 0;
 
 			/* Get the y coordinate of the top of the track that this region is now on */
-			tv->canvas_display()->i2w (x, y);
+			tv->canvas_display()->item_to_canvas (x, y);
 			y += _editor->get_trackview_group_vertical_offset();
 			
 			/* And adjust for the layer that it should be on */
@@ -750,16 +751,12 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			}
 
 			/* Now move the region view */
-			rv->move (x_delta, y - rv->get_canvas_group()->property_y());
+			rv->move (Ardour::Duple (x_delta, y - rv->get_canvas_group()->property_y()));
 		}
 
 	} /* foreach region */
 
 	_total_x_delta += x_delta;
-
-	if (first_move) {
-		_editor->cursor_group->raise_to_top();
-	}
 
 	if (x_delta != 0 && !_brushing) {
 		show_verbose_cursor_time (_last_frame_position);
@@ -1073,8 +1070,8 @@ RegionMoveDrag::finished_no_copy (
 			   No need to do anything for copies as they are fake regions which will be deleted.
 			*/
 
-			rv->get_canvas_group()->reparent (*dest_rtv->view()->canvas_item());
-			rv->get_canvas_group()->property_y() = i->initial_y;
+			rv->get_canvas_group()->reparent (dest_rtv->view()->canvas_item());
+			rv->get_canvas_group()->set_y_position (i->initial_y);
 			rv->drag_end ();
 
 			/* just change the model */
@@ -1287,8 +1284,8 @@ RegionMotionDrag::aborted (bool)
 		TimeAxisView* tv = &(rv->get_time_axis_view ());
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 		assert (rtv);
-		rv->get_canvas_group()->reparent (*rtv->view()->canvas_item());
-		rv->get_canvas_group()->property_y() = 0;
+		rv->get_canvas_group()->reparent (rtv->view()->canvas_item());
+		rv->get_canvas_group()->set_y_position (0);
 		rv->drag_end ();
 		rv->fake_set_opaque (false);
 		rv->move (-_total_x_delta, 0);
@@ -1348,8 +1345,8 @@ RegionInsertDrag::finished (GdkEvent *, bool)
 
 	RouteTimeAxisView* dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[_views.front().time_axis_view]);
 
-	_primary->get_canvas_group()->reparent (*dest_rtv->view()->canvas_item());
-	_primary->get_canvas_group()->property_y() = 0;
+	_primary->get_canvas_group()->reparent (dest_rtv->view()->canvas_item());
+	_primary->get_canvas_group()->set_y_position (0);
 
 	boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();
 
@@ -1530,7 +1527,8 @@ void
 NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 {
 	Gdk::Cursor* cursor;
-	ArdourCanvas::CanvasNoteEvent* cnote = dynamic_cast<ArdourCanvas::CanvasNoteEvent*>(_item);
+	NoteBase* cnote = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
+	assert (cnote);
 	float x_fraction = cnote->mouse_x_fraction ();
 
 	if (x_fraction > 0.0 && x_fraction < 0.25) {
@@ -1544,7 +1542,7 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 	region = &cnote->region_view();
 
 	double const region_start = region->get_position_pixels();
-	double const middle_point = region_start + cnote->x1() + (cnote->x2() - cnote->x1()) / 2.0L;
+	double const middle_point = region_start + cnote->x0() + (cnote->x1() - cnote->x0()) / 2.0L;
 
 	if (grab_x() <= middle_point) {
 		cursor = _editor->cursors()->left_side_trim;
@@ -1554,7 +1552,7 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 		at_front = false;
 	}
 
-	_item->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK, *cursor, event->motion.time);
+	_item->grab ();
 
 	if (event->motion.state & Keyboard::PrimaryModifier) {
 		relative = false;
@@ -1588,7 +1586,9 @@ NoteResizeDrag::motion (GdkEvent* /*event*/, bool /*first_move*/)
 {
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
-		(*r)->update_resizing (dynamic_cast<ArdourCanvas::CanvasNoteEvent*>(_item), at_front, _drags->current_pointer_x() - grab_x(), relative);
+		NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
+		assert (nb);
+		(*r)->update_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative);
 	}
 }
 
@@ -1597,7 +1597,9 @@ NoteResizeDrag::finished (GdkEvent*, bool /*movement_occurred*/)
 {
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
-		(*r)->commit_resizing (dynamic_cast<ArdourCanvas::CanvasNoteEvent*>(_item), at_front, _drags->current_pointer_x() - grab_x(), relative);
+		NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
+		assert (nb);
+		(*r)->commit_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative);
 	}
 }
 
@@ -2389,7 +2391,7 @@ CursorDrag::fake_locate (framepos_t t)
 
 	Session* s = _editor->session ();
 	if (s->timecode_transmission_suspended ()) {
-		framepos_t const f = _editor->playhead_cursor->current_frame;
+		framepos_t const f = _editor->playhead_cursor->current_frame ();
 		s->send_mmc_locate (f);
 		s->send_full_time_code (f);
 	}
@@ -2466,7 +2468,7 @@ CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	Session* s = _editor->session ();
 	if (s) {
-		s->request_locate (_editor->playhead_cursor->current_frame, _was_rolling);
+		s->request_locate (_editor->playhead_cursor->current_frame (), _was_rolling);
 		_editor->_pending_locate_request = true;
 		s->request_resume_timecode_transmission ();
 	}
@@ -2723,8 +2725,8 @@ MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
 	_marker = reinterpret_cast<Marker*> (_item->get_data ("marker"));
 	assert (_marker);
 
-	_points.push_back (Gnome::Art::Point (0, 0));
-	_points.push_back (Gnome::Art::Point (0, physical_screen_height (_editor->get_window())));
+	_points.push_back (ArdourCanvas::Duple (0, 0));
+	_points.push_back (ArdourCanvas::Duple (0, physical_screen_height (_editor->get_window())));
 }
 
 MarkerDrag::~MarkerDrag ()
@@ -3233,9 +3235,9 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	double cx = event->button.x;
 	double cy = event->button.y;
 
-	_line->parent_group().w2i (cx, cy);
+	_line->parent_group().canvas_to_item (cx, cy);
 
-	framecnt_t const frame_within_region = (framecnt_t) floor (cx * _editor->frames_per_unit);
+	framecnt_t const frame_within_region = (framecnt_t) floor (cx * _editor->frames_per_pixel);
 
 	uint32_t before;
 	uint32_t after;
@@ -3322,7 +3324,7 @@ FeatureLineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	double cx = event->button.x;
 	double cy = event->button.y;
 
-	_item->property_parent().get_value()->w2i(cx, cy);
+	_item->parent()->canvas_to_item (cx, cy);
 
 	/* store grab start in parent frame */
 	_region_view_grab_x = cx;
@@ -3352,16 +3354,9 @@ FeatureLineDrag::motion (GdkEvent*, bool)
 		cx = 0;
 	}
 
-	ArdourCanvas::Points points;
-
-	double x1 = 0, x2 = 0, y1 = 0, y2 = 0;
-
-	_line->get_bounds(x1, y2, x2, y2);
-
-	points.push_back(Gnome::Art::Point(cx, 2.0)); // first x-coord needs to be a non-normal value
-	points.push_back(Gnome::Art::Point(cx, y2 - y1));
-
-	_line->property_points() = points;
+	boost::optional<Rect> bbox = _line->bounding_box ();
+	assert (bbox);
+	_line->set (ArdourCanvas::Duple (cx, 2.0), ArdourCanvas::Duple (cx, bbox.get().height ()));
 
 	float *pos = new float;
 	*pos = cx;
@@ -3437,16 +3432,16 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 		double x1 = _editor->frame_to_pixel (start);
 		double x2 = _editor->frame_to_pixel (end);
 
-		_editor->rubberband_rect->property_x1() = x1;
+		_editor->rubberband_rect->set_x0 (x1);
 		if (_vertical_only) {
 			/* fixed 10 pixel width */
-			_editor->rubberband_rect->property_x2() = x1 + 10;
+			_editor->rubberband_rect->set_x1 (x1 + 10);
 		} else {
-			_editor->rubberband_rect->property_x2() = x2;
+			_editor->rubberband_rect->set_x1 (x2);
 		} 
 
-		_editor->rubberband_rect->property_y1() = y1;
-		_editor->rubberband_rect->property_y2() = y2;
+		_editor->rubberband_rect->set_y0 (y1);
+		_editor->rubberband_rect->set_y1 (y2);
 
 		_editor->rubberband_rect->show();
 		_editor->rubberband_rect->raise_to_top();
@@ -3872,7 +3867,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		break;
 	}
 
-	if (event->button.x >= _editor->horizontal_position() + _editor->_canvas_width) {
+	if (event->button.x >= _editor->horizontal_position() + _editor->_visible_canvas_width) {
 		_editor->start_canvas_autoscroll (1, 0);
 	}
 
@@ -3968,12 +3963,12 @@ RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operat
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RangeMarkerBarDrag\n");
 
-	_drag_rect = new ArdourCanvas::SimpleRect (*_editor->time_line_group, 0.0, 0.0, 0.0,
+	_drag_rect = new ArdourCanvas::Rectangle (*_editor->time_line_group, 0.0, 0.0, 0.0,
 	                                           physical_screen_height (_editor->get_window()));
 	_drag_rect->hide ();
 
-	_drag_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeDragRect.get();
-	_drag_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_RangeDragRect.get();
+	_drag_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_RangeDragRect.get());
+	_drag_rect->set_outline_color() (ARDOUR_UI::config()->canvasvar_RangeDragRect.get());
 }
 
 void
@@ -4013,7 +4008,7 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 {
 	framepos_t start = 0;
 	framepos_t end = 0;
-	ArdourCanvas::SimpleRect *crect;
+	ArdourCanvas::Rectangle *crect;
 
 	switch (_operation) {
 	case CreateRangeMarker:
@@ -4062,7 +4057,7 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 		}
 	}
 
-	if (event->button.x >= _editor->horizontal_position() + _editor->_canvas_width) {
+	if (event->button.x >= _editor->horizontal_position() + _editor->_visible_canvas_width) {
 		_editor->start_canvas_autoscroll (1, 0);
 	}
 
@@ -4071,8 +4066,8 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 
 		double x1 = _editor->frame_to_pixel (start);
 		double x2 = _editor->frame_to_pixel (end);
-		crect->property_x1() = x1;
-		crect->property_x2() = x2;
+		crect->set_x0 (x1);
+		crect->set_x1 (x2);
 
 		update_item (_editor->temp_location);
 	}
@@ -4173,8 +4168,8 @@ RangeMarkerBarDrag::update_item (Location* location)
 	double const x1 = _editor->frame_to_pixel (location->start());
 	double const x2 = _editor->frame_to_pixel (location->end());
 
-	_drag_rect->property_x1() = x1;
-	_drag_rect->property_x2() = x2;
+	_drag_rect->set_x0 (x1);
+	_drag_rect->set_x1 (x2);
 }
 
 MouseZoomDrag::MouseZoomDrag (Editor* e, ArdourCanvas::Item* i)
@@ -4266,7 +4261,8 @@ NoteDrag::NoteDrag (Editor* e, ArdourCanvas::Item* i)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New NoteDrag\n");
 
-	_primary = dynamic_cast<CanvasNoteEvent*> (_item);
+	_primary = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
+	assert (_primary);
 	_region = &_primary->region_view ();
 	_note_height = _region->midi_stream_view()->note_height ();
 }
@@ -4638,14 +4634,14 @@ DraggingView::DraggingView (RegionView* v, RegionDrag* parent)
 {
 	time_axis_view = parent->find_time_axis_view (&v->get_time_axis_view ());
 	layer = v->region()->layer ();
-	initial_y = v->get_canvas_group()->property_y ();
+	initial_y = v->get_canvas_group()->position().y;
 	initial_playlist = v->region()->playlist ();
 	initial_position = v->region()->position ();
 	initial_end = v->region()->position () + v->region()->length ();
 }
 
-PatchChangeDrag::PatchChangeDrag (Editor* e, CanvasPatchChange* i, MidiRegionView* r)
-	: Drag (e, i)
+PatchChangeDrag::PatchChangeDrag (Editor* e, PatchChange* i, MidiRegionView* r)
+	: Drag (e, i->canvas_item ())
 	, _region_view (r)
 	, _patch_change (i)
 	, _cumulative_dx (0)
@@ -4665,7 +4661,7 @@ PatchChangeDrag::motion (GdkEvent* ev, bool)
 
 	framecnt_t const dxf = f - grab_frame(); // permitted dx in frames
 	double const dxu = _editor->frame_to_unit (dxf); // permitted fx in units
-	_patch_change->move (dxu - _cumulative_dx, 0);
+	_patch_change->move (ArdourCanvas::Duple (dxu - _cumulative_dx, 0));
 	_cumulative_dx = dxu;
 }
 
@@ -4690,7 +4686,7 @@ PatchChangeDrag::finished (GdkEvent* ev, bool movement_occurred)
 void
 PatchChangeDrag::aborted (bool)
 {
-	_patch_change->move (-_cumulative_dx, 0);
+	_patch_change->move (ArdourCanvas::Duple (-_cumulative_dx, 0));
 }
 
 void
@@ -4823,7 +4819,7 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 						 
-	_drag_rect = new ArdourCanvas::SimpleRect (*_region_view->get_canvas_group ());
+	_drag_rect = new ArdourCanvas::Rectangle (*_region_view->get_canvas_group ());
 
 	framepos_t pf = _drags->current_pointer_frame ();
 	framecnt_t const g = grid_frames (pf);

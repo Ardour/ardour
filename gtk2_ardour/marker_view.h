@@ -23,7 +23,6 @@
 #include <string>
 #include "time_axis_view_item.h"
 
-#include "canvas.h"
 
 namespace Gdk {
 	class Color;

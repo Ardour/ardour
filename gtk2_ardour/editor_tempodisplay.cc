@@ -27,8 +27,6 @@
 #include <string>
 #include <climits>
 
-#include <libgnomecanvasmm.h>
-
 #include "pbd/error.h"
 #include "pbd/memento_command.h"
 
@@ -40,9 +38,11 @@
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/utils.h>
 
+#include "canvas/canvas.h"
+#include "canvas/item.h"
+
 #include "editor.h"
 #include "marker.h"
-#include "simpleline.h"
 #include "tempo_dialog.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
@@ -191,10 +191,11 @@ Editor::draw_measures (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 	}
 
 	if (tempo_lines == 0) {
-		tempo_lines = new TempoLines(*track_canvas, time_line_group, physical_screen_height(get_window()));
+		tempo_lines = new TempoLines (*_track_canvas, time_line_group, physical_screen_height(get_window()));
 	}
 
-	tempo_lines->draw (begin, end, frames_per_unit);
+	// CAIROCANVAS
+	// tempo_lines->draw (begin, end, frames_per_unit);
 }
 
 void

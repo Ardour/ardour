@@ -22,8 +22,6 @@
 #include <string>
 #include <vector>
 
-#include <libgnomecanvasmm.h>
-#include <libgnomecanvasmm/polygon.h>
 
 #include "pbd/signals.h"
 
@@ -36,12 +34,6 @@
 #include "time_axis_view_item.h"
 #include "automation_line.h"
 #include "enums.h"
-#include "canvas.h"
-#include "canvas-hit.h"
-#include "canvas-note.h"
-#include "canvas-note-event.h"
-#include "canvas_patch_change.h"
-#include "canvas-sysex.h"
 
 namespace ARDOUR {
 	class MidiRegion;
@@ -55,6 +47,10 @@ namespace MIDI {
 	};
 };
 
+class SysEx;
+class NoteBase;
+class Note;
+class Hit;
 class MidiTimeAxisView;
 class GhostRegion;
 class AutomationTimeAxisView;
@@ -73,7 +69,7 @@ public:
 	MidiRegionView (ArdourCanvas::Group *,
 	                RouteTimeAxisView&,
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
-	                double initial_samples_per_unit,
+	                double initial_frames_per_pixel,
 	                Gdk::Color const & basic_color);
 
 	MidiRegionView (const MidiRegionView& other);
@@ -135,26 +131,26 @@ public:
 	 * @param old_patch the canvas patch change which is to be altered
 	 * @param new_patch new patch
 	 */
-	void change_patch_change (ArdourCanvas::CanvasPatchChange& old_patch, const MIDI::Name::PatchPrimaryKey& new_patch);
+	void change_patch_change (PatchChange& old_patch, const MIDI::Name::PatchPrimaryKey& new_patch);
 	void change_patch_change (ARDOUR::MidiModel::PatchChangePtr, Evoral::PatchChange<Evoral::MusicalTime> const &);
 
 	void add_patch_change (framecnt_t, Evoral::PatchChange<Evoral::MusicalTime> const &);
-	void move_patch_change (ArdourCanvas::CanvasPatchChange &, Evoral::MusicalTime);
-	void delete_patch_change (ArdourCanvas::CanvasPatchChange *);
-	void edit_patch_change (ArdourCanvas::CanvasPatchChange *);
+	void move_patch_change (PatchChange &, Evoral::MusicalTime);
+	void delete_patch_change (PatchChange *);
+	void edit_patch_change (PatchChange *);
 
 	void delete_sysex (ArdourCanvas::CanvasSysEx*);
 
 	/** Alter a given patch to be its predecessor in the MIDNAM file.
 	 */
-	void previous_patch (ArdourCanvas::CanvasPatchChange &);
+	void previous_patch (PatchChange &);
 
 	/** Alters a given patch to be its successor in the MIDNAM file.
 	 */
-	void next_patch (ArdourCanvas::CanvasPatchChange &);
+	void next_patch (PatchChange &);
 
-	void previous_bank (ArdourCanvas::CanvasPatchChange &);
-	void next_bank (ArdourCanvas::CanvasPatchChange &);
+	void previous_bank (PatchChange &);
+	void next_bank (PatchChange &);
 
 	/** Displays all patch change events in the region as flags on the canvas.
 	 */
@@ -181,8 +177,8 @@ public:
 
 	void   note_entered(ArdourCanvas::CanvasNoteEvent* ev);
 	void   note_left(ArdourCanvas::CanvasNoteEvent* ev);
-	void   patch_entered (ArdourCanvas::CanvasPatchChange *);
-	void   patch_left (ArdourCanvas::CanvasPatchChange *);
+	void   patch_entered (PatchChange *);
+	void   patch_left (PatchChange *);
 	void   sysex_entered (ArdourCanvas::CanvasSysEx* p);
 	void   sysex_left (ArdourCanvas::CanvasSysEx* p);
 	void   note_mouse_position (float xfraction, float yfraction, bool can_set_cursor=true);
@@ -242,8 +238,8 @@ public:
 	void note_button_release ();
 
 	struct NoteResizeData {
-		ArdourCanvas::CanvasNote  *canvas_note;
-		ArdourCanvas::SimpleRect  *resize_rect;
+		Note                     *note;
+		ArdourCanvas::Rectangle  *resize_rect;
 	};
 
 	/** Snap a region relative pixel coordinate to pixel units.
@@ -315,7 +311,7 @@ protected:
 	MidiRegionView (ArdourCanvas::Group *,
 	                RouteTimeAxisView&,
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
-	                double samples_per_unit,
+	                double frames_per_pixel,
 	                Gdk::Color& basic_color,
 	                TimeAxisViewItem::Visibility);
 
@@ -382,7 +378,7 @@ private:
 	uint8_t  _current_range_max;
 
 	typedef std::list<ArdourCanvas::CanvasNoteEvent*> Events;
-	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasPatchChange> > PatchChanges;
+	typedef std::vector< boost::shared_ptr<PatchChange> > PatchChanges;
 	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasSysEx> > SysExes;
 
 	boost::shared_ptr<ARDOUR::MidiModel> _model;
@@ -395,7 +391,7 @@ private:
 	ArdourCanvas::CanvasNote*            _ghost_note;
 	double                               _last_ghost_x;
 	double                               _last_ghost_y;
-	ArdourCanvas::SimpleRect*            _step_edit_cursor;
+	ArdourCanvas::Rectangle*            _step_edit_cursor;
 	Evoral::MusicalTime                  _step_edit_cursor_width;
 	Evoral::MusicalTime                  _step_edit_cursor_position;
 	ArdourCanvas::CanvasNoteEvent*	     _channel_selection_scoped_note;
@@ -430,11 +426,11 @@ private:
 	/** connection used to connect to model's ContentChanged signal */
 	PBD::ScopedConnection content_connection;
 
-	ArdourCanvas::CanvasNoteEvent* find_canvas_note (boost::shared_ptr<NoteType>);
+	NoteBase* find_canvas_note (boost::shared_ptr<NoteType>);
 	Events::iterator _optimization_iterator;
 
-	void update_note (ArdourCanvas::CanvasNote *, bool update_ghost_regions = true);
-	double update_hit (ArdourCanvas::CanvasHit *);
+	void update_note (Note *, bool update_ghost_regions = true);
+	double update_hit (Hit *);
 	void create_ghost_note (double, double);
 	void update_ghost_note (double, double);
 
@@ -442,7 +438,7 @@ private:
 	bool _no_sound_notes;
 
 	PBD::ScopedConnection note_delete_connection;
-	void maybe_remove_deleted_note_from_selection (ArdourCanvas::CanvasNoteEvent*);
+	void maybe_remove_deleted_note_from_selection (NoteBase*);
 
 	void snap_changed ();
 	PBD::ScopedConnection snap_changed_connection;

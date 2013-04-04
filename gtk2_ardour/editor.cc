@@ -70,6 +70,9 @@
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
 
+#include "canvas/debug.h"
+#include "canvas/text.h"
+
 #include "control_protocol/control_protocol.h"
 
 #include "actions.h"
@@ -81,8 +84,6 @@
 #include "audio_time_axis.h"
 #include "automation_time_axis.h"
 #include "bundle_manager.h"
-#include "canvas-noevent-text.h"
-#include "canvas_impl.h"
 #include "crossfade_edit.h"
 #include "debug.h"
 #include "editing.h"
@@ -112,7 +113,6 @@
 #include "rhythm_ferret.h"
 #include "selection.h"
 #include "sfdb_ui.h"
-#include "simpleline.h"
 #include "tempo_lines.h"
 #include "time_axis_view.h"
 #include "utils.h"
@@ -316,8 +316,8 @@ Editor::Editor ()
 
 	snap_threshold = 5.0;
 	bbt_beat_subdivision = 4;
-	_canvas_width = 0;
-	_canvas_height = 0;
+	_visible_canvas_width = 0;
+	_visible_canvas_height = 0;
 	last_autoscroll_x = 0;
 	last_autoscroll_y = 0;
 	autoscroll_active = false;
@@ -379,7 +379,7 @@ Editor::Editor ()
 	_internal_editing = false;
 	current_canvas_cursor = 0;
 
-	frames_per_unit = 2048; /* too early to use reset_zoom () */
+	frames_per_pixel = 2048; /* too early to use reset_zoom () */
 
 	_scroll_callbacks = 0;
 
@@ -479,7 +479,7 @@ Editor::Editor ()
 
 	edit_controls_vbox.set_spacing (0);
 	vertical_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &Editor::tie_vertical_scrolling), true);
-	track_canvas->signal_map_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_map_handler));
+	_track_canvas->signal_map_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_map_handler));
 
 	HBox* h = manage (new HBox);
 	_group_tabs = new EditorGroupTabs (this);
@@ -496,11 +496,11 @@ Editor::Editor ()
 
 	_cursors = new MouseCursors;
 
-	ArdourCanvas::Canvas* time_pad = manage(new ArdourCanvas::Canvas());
-	ArdourCanvas::SimpleLine* pad_line_1 = manage(new ArdourCanvas::SimpleLine(*time_pad->root(),
-			0.0, 1.0, 100.0, 1.0));
+	ArdourCanvas::Canvas* time_pad = manage(new ArdourCanvas::GtkCanvas());
+	ArdourCanvas::Line* pad_line_1 = manage(new ArdourCanvas::Line(time_pad->root()));
+	pad_line_1->set (ArdourCanvas::Duple (0.0, 1.0), ArdourCanvas::Duple (100.0, 1.0));
 
-	pad_line_1->property_color_rgba() = 0xFF0000FF;
+	pad_line_1->set_outline_color (0xFF0000FF);
 	pad_line_1->show();
 
 	time_pad->show();
@@ -512,15 +512,15 @@ Editor::Editor ()
 	ruler_label_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	ruler_label_event_box.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_label_button_release));
 
-	time_button_event_box.add (time_button_vbox);
-	time_button_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	time_button_event_box.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_label_button_release));
+	time_bars_event_box.add (time_bars_vbox);
+	time_bars_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	time_bars_event_box.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_label_button_release));
 
 	/* these enable us to have a dedicated window (for cursor setting, etc.)
 	   for the canvas areas.
 	*/
 
-	track_canvas_event_box.add (*track_canvas);
+	track_canvas_event_box.add (*_track_canvas_viewport);
 
 	time_canvas_event_box.add (time_canvas_vbox);
 	time_canvas_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
@@ -533,14 +533,16 @@ Editor::Editor ()
 
 	/* labels for the rulers */
 	edit_packer.attach (ruler_label_event_box,   1, 2, 0, 1,    FILL,        SHRINK, 0, 0);
-	/* labels for the marker "tracks" */
-	edit_packer.attach (time_button_event_box,   1, 2, 1, 2,    FILL,        SHRINK, 0, 0);
+	/* labels for the marker "tracks" (time bars) */
+	edit_packer.attach (time_bars_event_box,     1, 2, 1, 2,    FILL,        SHRINK, 0, 0);
 	/* the rulers */
 	edit_packer.attach (time_canvas_event_box,   2, 3, 0, 1,    FILL|EXPAND, FILL, 0, 0);
 	/* track controls */
 	edit_packer.attach (controls_layout,         0, 2, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
-	/* main canvas */
-	edit_packer.attach (track_canvas_event_box,  2, 3, 1, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
+	/* time bars canvas */
+	edit_packer.attach (*_time_bars_canvas_viewport, 2, 3, 1, 2,    FILL,    FILL, 0, 0);
+	/* track canvas */
+	edit_packer.attach (track_canvas_event_box,  2, 3, 2, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
 
 	bottom_hbox.set_border_width (2);
 	bottom_hbox.set_spacing (3);
@@ -785,7 +787,7 @@ Editor::~Editor()
         delete button_bindings;
 	delete _routes;
 	delete _route_groups;
-	delete track_canvas;
+	delete _track_canvas_viewport;
 	delete _drags;
 }
 
@@ -934,11 +936,11 @@ Editor::zoom_adjustment_changed ()
 		return;
 	}
 
-	double fpu = zoom_range_clock->current_duration() / _canvas_width;
-	bool clamped = clamp_frames_per_unit (fpu);
+	double fpu = zoom_range_clock->current_duration() / _visible_canvas_width;
+	bool clamped = clamp_frames_per_pixel (fpu);
 	
 	if (clamped) {
-		zoom_range_clock->set ((framepos_t) floor (fpu * _canvas_width));
+		zoom_range_clock->set ((framepos_t) floor (fpu * _visible_canvas_width));
 	}
 
 	temporal_zoom (fpu);
@@ -1145,7 +1147,7 @@ Editor::map_position_change (framepos_t frame)
 void
 Editor::center_screen (framepos_t frame)
 {
-	double page = _canvas_width * frames_per_unit;
+	double const page = _visible_canvas_width * frames_per_pixel;
 
 	/* if we're off the page, then scroll.
 	 */
@@ -1275,7 +1277,7 @@ Editor::set_session (Session *t)
 
 	/* catch up with the playhead */
 
-	_session->request_locate (playhead_cursor->current_frame);
+	_session->request_locate (playhead_cursor->current_frame ());
 	_pending_initial_locate = true;
 
 	update_title ();
@@ -1300,7 +1302,7 @@ Editor::set_session (Session *t)
 	_session->locations()->StateChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
 
-	playhead_cursor->canvas_item.show ();
+	playhead_cursor->show ();
 
 	boost::function<void (string)> pc (boost::bind (&Editor::parameter_changed, this, _1));
 	Config->map_parameters (pc);
@@ -1311,7 +1313,7 @@ Editor::set_session (Session *t)
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		(static_cast<TimeAxisView*>(*i))->set_samples_per_unit (frames_per_unit);
+		(static_cast<TimeAxisView*>(*i))->set_frames_per_pixel (frames_per_pixel);
 	}
 
 	super_rapid_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (
@@ -2287,7 +2289,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	if ((prop = node.property ("zoom"))) {
 		reset_zoom (PBD::atof (prop->value()));
 	} else {
-		reset_zoom (frames_per_unit);
+		reset_zoom (frames_per_pixel);
 	}
 
 	if ((prop = node.property ("snap-to"))) {
@@ -2507,7 +2509,7 @@ Editor::get_state ()
 	maybe_add_mixer_strip_width (*node);
 
 	node->add_property ("zoom-focus", enum_2_string (zoom_focus));
-	snprintf (buf, sizeof(buf), "%f", frames_per_unit);
+	snprintf (buf, sizeof(buf), "%f", frames_per_pixel);
 	node->add_property ("zoom", buf);
 	node->add_property ("snap-to", enum_2_string (_snap_type));
 	node->add_property ("snap-mode", enum_2_string (_snap_mode));
@@ -2517,7 +2519,7 @@ Editor::get_state ()
 	node->add_property ("pre-internal-snap-mode", enum_2_string (pre_internal_snap_mode));
 	node->add_property ("edit-point", enum_2_string (_edit_point));
 
-	snprintf (buf, sizeof (buf), "%" PRIi64, playhead_cursor->current_frame);
+	snprintf (buf, sizeof (buf), "%" PRIi64, playhead_cursor->current_frame ());
 	node->add_property ("playhead", buf);
 	snprintf (buf, sizeof (buf), "%" PRIi64, leftmost_frame);
 	node->add_property ("left-frame", buf);
@@ -4133,16 +4135,16 @@ Editor::reset_y_origin (double y)
 }
 
 void
-Editor::reset_zoom (double fpu)
+Editor::reset_zoom (double fpp)
 {
-	clamp_frames_per_unit (fpu);
+	clamp_frames_per_pixel (fpp);
 
-	if (fpu == frames_per_unit) {
+	if (fpp == frames_per_pixel) {
 		return;
 	}
 
 	pending_visual_change.add (VisualChange::ZoomLevel);
-	pending_visual_change.frames_per_unit = fpu;
+	pending_visual_change.frames_per_pixel = fpp;
 	ensure_visual_change_idle_handler ();
 }
 
@@ -4172,7 +4174,7 @@ Editor::current_visual_state (bool with_tracks)
 {
 	VisualState* vs = new VisualState (with_tracks);
 	vs->y_position = vertical_adjustment.get_value();
-	vs->frames_per_unit = frames_per_unit;
+	vs->frames_per_pixel = frames_per_pixel;
 	vs->leftmost_frame = leftmost_frame;
 	vs->zoom_focus = zoom_focus;
 
@@ -4234,7 +4236,7 @@ Editor::use_visual_state (VisualState& vs)
 	vertical_adjustment.set_value (vs.y_position);
 
 	set_zoom_focus (vs.zoom_focus);
-	reposition_and_zoom (vs.leftmost_frame, vs.frames_per_unit);
+	reposition_and_zoom (vs.leftmost_frame, vs.frames_per_pixel);
 	
 	if (vs.gui_state) {
 		*ARDOUR_UI::instance()->gui_object_state = *vs.gui_state;
@@ -4253,19 +4255,19 @@ Editor::use_visual_state (VisualState& vs)
  *  @param fpu New frames per unit; should already have been clamped so that it is sensible.
  */
 void
-Editor::set_frames_per_unit (double fpu)
+Editor::set_frames_per_pixel (double fpp)
 {
 	if (tempo_lines) {
 		tempo_lines->tempo_map_changed();
 	}
 
-	frames_per_unit = fpu;
+	frames_per_pixel = fpp;
 
 	/* convert fpu to frame count */
 
-	framepos_t frames = (framepos_t) floor (frames_per_unit * _canvas_width);
+	framepos_t frames = (framepos_t) floor (frames_per_pixel * _visible_canvas_width);
 
-	if (frames_per_unit != zoom_range_clock->current_duration()) {
+	if (frames_per_pixel != zoom_range_clock->current_duration()) {
 		zoom_range_clock->set (frames);
 	}
 
@@ -4282,7 +4284,7 @@ Editor::set_frames_per_unit (double fpu)
 	//reset_scrolling_region ();
 
 	if (playhead_cursor) {
-		playhead_cursor->set_position (playhead_cursor->current_frame);
+		playhead_cursor->set_position (playhead_cursor->current_frame ());
 	}
 
 	refresh_location_display();
@@ -4313,6 +4315,7 @@ Editor::ensure_visual_change_idle_handler ()
 {
 	if (pending_visual_change.idle_handler_id < 0) {
 		pending_visual_change.idle_handler_id = g_idle_add (_idle_visual_changer, this);
+		pending_visual_change.executing = false;
 	}
 }
 
@@ -4344,7 +4347,7 @@ Editor::idle_visual_changer ()
 	double const last_time_origin = horizontal_position ();
 
 	if (p & VisualChange::ZoomLevel) {
-		set_frames_per_unit (pending_visual_change.frames_per_unit);
+		set_frames_per_pixel (pending_visual_change.frames_per_pixel);
 
 		compute_fixed_ruler_scale ();
 
@@ -4365,7 +4368,7 @@ Editor::idle_visual_changer ()
 #endif
 
 	if (p & VisualChange::TimeOrigin) {
-		set_horizontal_position (pending_visual_change.time_origin / frames_per_unit);
+		set_horizontal_position (pending_visual_change.time_origin / frames_per_pixel);
 	}
 
 	if (p & VisualChange::YOrigin) {
@@ -4913,10 +4916,10 @@ Editor::add_routes (RouteList& routes)
 		DataType dt = route->input()->default_type();
 
 		if (dt == ARDOUR::DataType::AUDIO) {
-			rtv = new AudioTimeAxisView (*this, _session, *track_canvas);
+			rtv = new AudioTimeAxisView (*this, _session, *_track_canvas);
 			rtv->set_route (route);
 		} else if (dt == ARDOUR::DataType::MIDI) {
-			rtv = new MidiTimeAxisView (*this, _session, *track_canvas);
+			rtv = new MidiTimeAxisView (*this, _session, *_track_canvas);
 			rtv->set_route (route);
 		} else {
 			throw unknown_type();
@@ -5219,7 +5222,7 @@ Editor::scroll_release ()
 void
 Editor::reset_x_origin_to_follow_playhead ()
 {
-	framepos_t const frame = playhead_cursor->current_frame;
+	framepos_t const frame = playhead_cursor->current_frame ();
 
 	if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
 
@@ -5330,11 +5333,11 @@ Editor::super_rapid_screen_update ()
 			*/
 #if 0
 			// FIXME DO SOMETHING THAT WORKS HERE - this is 2.X code
-			double target = ((double)frame - (double)current_page_frames()/2.0) / frames_per_unit;
+			double target = ((double)frame - (double)current_page_frames()/2.0) / frames_per_pixel;
 			if (target <= 0.0) {
 				target = 0.0;
 			}
-			if (fabs(target - current) < current_page_frames() / frames_per_unit) {
+			if (fabs(target - current) < current_page_frames() / frames_per_pixel) {
 				target = (target * 0.15) + (current * 0.85);
 			} else {
 				/* relax */
@@ -5369,7 +5372,7 @@ Editor::session_going_away ()
 	last_update_frame = 0;
 	_drags->abort ();
 
-	playhead_cursor->canvas_item.hide ();
+	playhead_cursor->hide ();
 
 	/* rip everything out of the list displays */
 
@@ -5573,4 +5576,13 @@ void
 Editor::shift_key_released ()
 {
 	_stepping_axis_view = 0;
+}
+
+
+void
+Editor::save_canvas_state ()
+{
+	XMLTree* tree = static_cast<ArdourCanvas::Canvas*>(_track_canvas)->get_state ();
+	string path = string_compose ("%1/canvas-state.xml", _session->path());
+	tree->write (path);
 }

@@ -45,7 +45,6 @@
 #include "ardour_ui.h"
 #include "audio_time_axis.h"
 #include "automation_line.h"
-#include "canvas_impl.h"
 #include "enums.h"
 #include "gui_thread.h"
 #include "automation_time_axis.h"
@@ -54,7 +53,6 @@
 #include "prompter.h"
 #include "public_editor.h"
 #include "audio_region_view.h"
-#include "simplerect.h"
 #include "audio_streamview.h"
 #include "utils.h"
 
@@ -66,7 +64,7 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Editing;
 
-AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, Canvas& canvas)
+AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
 	: AxisView(sess)
 	, RouteTimeAxisView(ed, sess, canvas)
 {

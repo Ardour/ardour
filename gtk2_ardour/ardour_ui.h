@@ -35,7 +35,6 @@
 #include <list>
 #include <cmath>
 
-#include <libgnomecanvasmm/canvas.h>
 
 #include "pbd/xml++.h"
 #include "pbd/controllable.h"
