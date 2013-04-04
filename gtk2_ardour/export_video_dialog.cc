@@ -393,7 +393,6 @@ ExportVideoDialog::finished ()
 	if (aborted) {
 		unlink(outfn_path_entry.get_text().c_str());
 		unlink (insnd.c_str());
-		warning << _("Video Export Failed or Was Aborted") << endmsg;
 		Gtk::Dialog::response(RESPONSE_CANCEL);
 	} else if (twopass && firstpass) {
 		firstpass = false;
