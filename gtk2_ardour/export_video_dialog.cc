@@ -350,9 +350,16 @@ ExportVideoDialog::update_progress (framecnt_t c, framecnt_t a)
 	if (a == 0 || c > a) {
 		pbar.set_pulse_step(.1);
 		pbar.pulse();
-		return;
+	} else {
+		double progress = (double)c / (double) a;
+		progress = progress / ((twopass ? 2.0 : 1.0) + (normalize ? 2.0 : 1.0));
+		if (normalize && twopass) progress += (firstpass ? .5 : .75);
+		else if (normalize) progress += 2.0/3.0;
+		else if (twopass) progress += (firstpass ? 1.0/3.0 : 2.0/3.0);
+		else progress += .5;
+
+		pbar.set_fraction (progress);
 	}
-	pbar.set_fraction ((double)c / (double) a);
 }
 
 
@@ -360,13 +367,15 @@ gint
 ExportVideoDialog::audio_progress_display ()
 {
 	std::string status_text;
-	float progress = 0.0;
+	double progress = 0.0;
 		if (status->normalizing) {
 			pbar.set_text (_("Normalizing audio"));
 			progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
+			progress = progress / (twopass ? 4.0 : 3.0) + (twopass ? .25 : 1.0/3.0);
 		} else {
 			pbar.set_text (_("Exporting audio"));
 			progress = ((float) status->processed_frames_current_timespan) / status->total_frames_current_timespan;
+			progress = progress / ((twopass ? 2.0 : 1.0) + (normalize ? 2.0 : 1.0));
 		}
 		if (progress < previous_progress) {
 			// Work around gtk bug
@@ -386,8 +395,8 @@ ExportVideoDialog::finished ()
 		unlink (insnd.c_str());
 		warning << _("Video Export Failed or Was Aborted") << endmsg;
 		Gtk::Dialog::response(RESPONSE_CANCEL);
-	} else if (twopass) {
-		twopass = false;
+	} else if (twopass && firstpass) {
+		firstpass = false;
 		if (transcoder) { delete transcoder; transcoder = 0;}
 		encode_pass(2);
 	} else {
@@ -415,6 +424,8 @@ ExportVideoDialog::launch_export ()
 	progress_box->show();
 	aborted = false;
 	twopass = twopass_checkbox.get_active();
+	firstpass = true;
+	normalize = normalize_checkbox.get_active();
 
 	/* export audio track */
 	ExportTimespanPtr tsp = _session->get_export_handler()->add_timespan();
@@ -423,7 +434,7 @@ ExportVideoDialog::launch_export ()
 	boost::shared_ptr<AudioGrapher::BroadcastInfo> b;
 	XMLTree tree;
 	std::string vtl_samplerate = audio_samplerate_combo.get_active_text();
-	std::string vtl_normalize = normalize_checkbox.get_active()?"true":"false";
+	std::string vtl_normalize = normalize ? "true" : "false";
 	tree.read_buffer(std::string(
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 "<ExportFormatSpecification name=\"VTL-WAV-16\" id=\"3094591e-ccb9-4385-a93f-c9955ffeb1f0\">"

@@ -66,6 +66,8 @@ class ExportVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
 
 	bool aborted;
 	bool twopass;
+	bool firstpass;
+	bool normalize;
 
 	void finished ();
 	void update_progress (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
