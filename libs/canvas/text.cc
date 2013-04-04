@@ -16,6 +16,11 @@ Text::Text (Group* parent)
 
 }
 
+Text::~Text ()
+{
+	delete _font_description;
+}
+
 void
 Text::set (string const & text)
 {
@@ -97,11 +102,11 @@ Text::set_alignment (Pango::Alignment alignment)
 }
 
 void
-Text::set_font_description (Pango::FontDescription* font_description)
+Text::set_font_description (Pango::FontDescription font_description)
 {
 	begin_change ();
 	
-	_font_description = font_description;
+	_font_description = new Pango::FontDescription (font_description);
 
 	_bounding_box_dirty = true;
 	end_change ();

@@ -146,7 +146,7 @@ void
 TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & base_color, framepos_t start, framepos_t duration, Visibility vis, bool wide, bool high)
 {
 	item_name = it_name;
-	frame_per_pixel = fpp;
+	frames_per_pixel = fpp;
 	frame_position = start;
 	item_duration = duration;
 	name_connected = false;
@@ -174,9 +174,12 @@ TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & ba
 	vestigial_frame->set_fill_color (ARDOUR_UI::config()->canvasvar_VestigialFrame.get());
 
 	if (visibility & ShowFrame) {
-		frame = new ArdourCanvas::Rectangle (*group, 0.0, 1.0, trackview.editor().frame_to_pixel(duration), trackview.current_height());
+		frame = new ArdourCanvas::Rectangle (group, 
+						     ArdourCanvas::Rect (0.0, 1.0, 
+									 trackview.editor().frame_to_pixel(duration), 
+									 trackview.current_height()));
 
-		frame->set_outline_pixels (1);
+		frame->set_outline_width (1);
 		frame->set_outline_what (0xF);
 
 		if (_recregion) {
@@ -185,7 +188,7 @@ TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & ba
 			frame->set_outline_color (ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get());
 		}
 
-		frame->property_outline_what() = 0x1|0x2|0x4|0x8;
+		frame->set_outline_what (0x1|0x2|0x4|0x8);
 
 	} else {
 		frame = 0;
@@ -522,7 +525,7 @@ TimeAxisViewItem::set_name_text(const string& new_name)
 
 	last_item_width = trackview.editor().frame_to_pixel(item_duration);
 	name_pixbuf_width = pixel_width (new_name, NAME_FONT) + 2;
-	name_pixbuf->set (pixbuf_from_string(new_name, NAME_FONT, name_pixbuf_width, NAME_HEIGHT, Gdk::Color ("#000000")))
+	name_pixbuf->set (pixbuf_from_string(new_name, NAME_FONT, name_pixbuf_width, NAME_HEIGHT, Gdk::Color ("#000000")));
 }
 
 

@@ -984,8 +984,8 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		}
 
 		for (uint32_t n = 0; n < vp; ++n) {
-			line_points[n].x (control_points[n]->get_x());
-			line_points[n].y (control_points[n]->get_y());
+			line_points[n].x = control_points[n]->get_x();
+			line_points[n].y = control_points[n]->get_y();
 		}
 
 		line->set (line_points);

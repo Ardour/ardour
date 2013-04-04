@@ -1305,8 +1305,8 @@ EditorRoutes::button_press (GdkEventButton* ev)
 		int y_pos = tv->y_position();
 
 		//Clamp the y pos so that we do not extend beyond the canvas full height.
-		if (_editor->full_canvas_height - y_pos < _editor->_visible_canvas_height){
-		    y_pos = _editor->full_canvas_height - _editor->_visible_canvas_height;
+		if (_editor->_full_canvas_height - y_pos < _editor->_visible_canvas_height){
+		    y_pos = _editor->_full_canvas_height - _editor->_visible_canvas_height;
 		}
 
 		//Only scroll to if the track is visible

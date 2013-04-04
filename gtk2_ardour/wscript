@@ -151,6 +151,7 @@ gtk2_ardour_sources = [
         'new_plugin_preset_dialog.cc',
         'normalize_dialog.cc',
         'note.cc',
+        'note_base.cc',
         'note_player.cc',
         'nsm.cc',
         'nsmclient.cc',

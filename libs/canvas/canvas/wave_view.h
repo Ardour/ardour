@@ -1,12 +1,21 @@
 #include <boost/shared_ptr.hpp>
+
 #include "pbd/properties.h"
+
 #include "ardour/types.h"
+
+#include <glibmm/refptr.h>
+
 #include "canvas/item.h"
 #include "canvas/fill.h"
 #include "canvas/outline.h"
 
 namespace ARDOUR {
 	class AudioRegion;
+}
+
+namespace Gdk {
+	class Pixbuf;
 }
 
 class WaveViewTest;

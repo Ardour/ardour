@@ -40,15 +40,12 @@ public:
 		double          height,
 		double          x,
 		double          y,
-		string&         model_name,
-		string&         custom_device_mode,
+		ARDOUR::InstrumentInfo& info,
 		ARDOUR::MidiModel::PatchChangePtr patch
 		);
 
 	~PatchChange();
 
-	string model_name () const { return _model_name; }
-	string custom_device_mode () const { return _custom_device_mode; }
 	ARDOUR::MidiModel::PatchChangePtr patch () const { return _patch; }
 
 	void initialize_popup_menus();
@@ -64,12 +61,13 @@ public:
 	void hide ();
 	void show ();
 
+        ArdourCanvas::Item& item() const { return *_flag; }
+
 private:
 	bool event_handler (GdkEvent *);
 
 	MidiRegionView& _region;
-	string        _model_name;
-	string        _custom_device_mode;
+        ARDOUR::InstrumentInfo& _info;
 	ARDOUR::MidiModel::PatchChangePtr _patch;
 	Gtk::Menu     _popup;
 	bool          _popup_initialized;

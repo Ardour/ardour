@@ -72,12 +72,12 @@ public:
 class MidiGhostRegion : public GhostRegion {
 public:
 	class GhostEvent : public sigc::trackable {
-	public:
+	  public:
 	    GhostEvent(::NoteBase *, ArdourCanvas::Group *);
-	    virtual ~GhostEvent () {}
-
-		NoteBase* event;
-		ArdourCanvas::Rectangle* rect;
+	    virtual ~GhostEvent ();
+	    
+	    NoteBase* event;
+	    ArdourCanvas::Rectangle* rect;
 	};
 
 	MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
@@ -92,15 +92,15 @@ public:
 
 	void update_range();
 
-	void add_note(Note*);
-	void update_note (Note*);
-	void remove_note (Note*);
+	void add_note(NoteBase*);
+	void update_note (NoteBase*);
+	void remove_note (NoteBase*);
 
 	void clear_events();
 
 private:
 
-	MidiGhostRegion::Event* find_event (Note*);
+	MidiGhostRegion::GhostEvent* find_event (NoteBase*);
 
 	typedef std::list<MidiGhostRegion::GhostEvent*> EventList;
 	EventList events;

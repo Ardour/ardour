@@ -19,6 +19,10 @@
 
 #include "pbd/signals.h"
 
+#include "canvas/arrow.h"
+#include "canvas/line.h"
+#include "canvas/types.h"
+
 class Editor;
 
 class EditorCursor {

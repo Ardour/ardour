@@ -156,13 +156,13 @@ class AudioRegionView : public RegionView
 	ArdourCanvas::Rectangle*        fade_in_handle; ///< fade in handle, or 0
 	ArdourCanvas::Rectangle*        fade_out_handle; ///< fade out handle, or 0
 
-	ArdourCanvas::Line *start_xfade_in;
-	ArdourCanvas::Line *start_xfade_out;
+	ArdourCanvas::PolyLine *start_xfade_in;
+	ArdourCanvas::PolyLine *start_xfade_out;
 	ArdourCanvas::Rectangle* start_xfade_rect;
 	bool _start_xfade_visible;
 
-	ArdourCanvas::Line *end_xfade_in;
-	ArdourCanvas::Line *end_xfade_out;
+	ArdourCanvas::PolyLine *end_xfade_in;
+	ArdourCanvas::PolyLine *end_xfade_out;
 	ArdourCanvas::Rectangle* end_xfade_rect;
 	bool _end_xfade_visible;
 

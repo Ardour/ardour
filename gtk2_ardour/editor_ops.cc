@@ -1397,7 +1397,7 @@ Editor::temporal_zoom (double fpp)
 		nfpp = 8e+08;
 	}
 
-	new_page_size = (framepos_t) floor (_canvas_width * nfpp);
+	new_page_size = (framepos_t) floor (_visible_canvas_width * nfpp);
 	half_page_size = new_page_size / 2;
 
 	switch (zoom_focus) {

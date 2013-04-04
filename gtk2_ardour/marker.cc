@@ -324,10 +324,10 @@ Marker::setup_line ()
 
 		if (_line == 0) {
 
-			_line = new ArdourCanvas::Line (*group);
+			_line = new ArdourCanvas::Line (group);
 			_line->set_outline_color (ARDOUR_UI::config()->canvasvar_EditPoint.get());
 
-			_line->signal_event().connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
+			_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
 		}
 
                 /* work out where to start the line from so that it extends from the top of the canvas */
@@ -405,10 +405,10 @@ Marker::setup_name_display ()
 
 	if (label_on_left ()) {
 		_name_background->set_x0 (name_pixbuf->position().x - 2);
-		_name_background->property_x1() = name_pixbuf->position().x + name_width + _shift;
+		_name_background->set_x1 (name_pixbuf->position().x + name_width + _shift);
 	} else {
-		_name_background->x0 (name_pixbuf->position().x - _label_offset + 2);
-		_name_background->property_x1() = name_pixbuf->position().x + name_width;
+		_name_background->set_x0 (name_pixbuf->position().x - _label_offset + 2);
+		_name_background->set_x1 (name_pixbuf->position().x + name_width);
 	}
 
 	_name_background->set_y0 (0);

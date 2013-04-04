@@ -75,6 +75,6 @@ Editor::toggle_meter_updating()
 		stop_updating_meters ();
 	}
 
-	track_canvas_viewport_allocate (track_canvas->get_allocation());
+	track_canvas_viewport_allocate (_track_canvas->get_allocation());
 }
 

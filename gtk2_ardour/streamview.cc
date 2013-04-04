@@ -609,7 +609,7 @@ StreamView::update_contents_height ()
 		case Expanded:
 			/* In stacked displays, the recregion is always at the top */
 			i->rectangle->set_y0 (0);
-			i->rectangle->set_y1 (h)
+			i->rectangle->set_y1 (h);
 			break;
 		}
 	}

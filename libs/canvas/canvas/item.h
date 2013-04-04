@@ -79,7 +79,9 @@ public:
 	}
 
 	boost::optional<Rect> bounding_box () const;
-	
+        Coord height() const;
+        Coord width() const;
+
 	Duple item_to_parent (Duple const &) const;
 	Rect item_to_parent (Rect const &) const;
 	Duple parent_to_item (Duple const &) const;
@@ -118,7 +120,9 @@ public:
 	void set_data (std::string const &, void *);
 	void* get_data (std::string const &) const;
 	
-	/* XXX: maybe this should be a PBD::Signal */
+	/* This is a sigc++ signal because it is solely
+	   concerned with GUI stuff and is thus single-threaded
+	*/
 
 	template <class T>
 	struct EventAccumulator {
@@ -135,7 +139,7 @@ public:
 		}
 	};
 	
-	sigc::signal<bool, GdkEvent*>::accumulated<EventAccumulator<bool> > Event;
+        sigc::signal1<bool, GdkEvent*, EventAccumulator<bool> > Event;
 
 #ifdef CANVAS_DEBUG
 	std::string name;

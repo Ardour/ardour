@@ -80,8 +80,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 	ARDOUR::TempoMap::BBTPointList::const_iterator i;
 	ArdourCanvas::Line *line = 0;
 	gdouble xpos;
-	double who_cares;
-	double x1, x2, y1, beat_density;
+	double  beat_density;
 
 	uint32_t beats = 0;
 	uint32_t bars = 0;
@@ -216,7 +215,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 			//cout << "*** CREATING LINE" << endl;
 			/* if we already have a line there ... don't sweat it */
 			if (_lines.find (xpos) == _lines.end()) {
-				line = new ArdourCanvas::Line (*_group);
+				line = new ArdourCanvas::Line (_group);
 				line->set_x0 (xpos);
 				line->set_x1 (xpos);
 				line->set_y0 (0.0);

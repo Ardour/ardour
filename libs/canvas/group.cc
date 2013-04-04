@@ -192,6 +192,7 @@ void
 Group::add_items_at_point (Duple const point, vector<Item const *>& items) const
 {
 	boost::optional<Rect> const bbox = bounding_box ();
+
 	if (!bbox || !bbox.get().contains (point)) {
 		return;
 	}

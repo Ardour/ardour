@@ -119,7 +119,7 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n)
 	double test_time = (*_events.begin())->note()->time ();
 	double test_length = (*_events.begin())->note()->length ();
 	
-	for (set<ArdourCanvas::CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+	for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
 		if ((*i)->note()->channel() != test_channel) {
 			_channel_all.set_sensitive (true);
 		}
@@ -170,7 +170,7 @@ EditNoteDialog::run ()
 	bool had_change = false;
 
 	if (!_channel_all.get_sensitive() || _channel_all.get_active ()) {
-		for (set<ArdourCanvas::CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+		for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
 			if (_channel.get_value_as_int() - 1 != (*i)->note()->channel()) {
 				_region_view->change_note_channel (*i, _channel.get_value_as_int () - 1);
 				had_change = true;
@@ -179,7 +179,7 @@ EditNoteDialog::run ()
 	}
 
 	if (!_pitch_all.get_sensitive() || _pitch_all.get_active ()) {
-		for (set<ArdourCanvas::CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+		for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
 			if (_pitch.get_value_as_int() != (*i)->note()->note()) {
 				_region_view->change_note_note (*i, _pitch.get_value_as_int ());
 				had_change = true;
@@ -188,7 +188,7 @@ EditNoteDialog::run ()
 	}
 
 	if (!_velocity_all.get_sensitive() || _velocity_all.get_active ()) {
-		for (set<ArdourCanvas::CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+		for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
 			if (_velocity.get_value_as_int() != (*i)->note()->velocity()) {
 				_region_view->change_note_velocity (*i, _velocity.get_value_as_int ());
 				had_change = true;
@@ -199,7 +199,7 @@ EditNoteDialog::run ()
 	double const t = _region_view->source_relative_time_converter().from (_time_clock.current_time ());
 
 	if (!_time_all.get_sensitive() || _time_all.get_active ()) {
-		for (set<ArdourCanvas::CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+		for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
 			if (t != (*i)->note()->time()) {
 				_region_view->change_note_time (*i, t);
 				had_change = true;
@@ -210,7 +210,7 @@ EditNoteDialog::run ()
 	double const d = _region_view->region_relative_time_converter().from (_length_clock.current_duration ());
 
 	if (!_length_all.get_sensitive() || _length_all.get_active ()) {
-		for (set<ArdourCanvas::CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+		for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
 			if (d != (*i)->note()->length()) {
 				_region_view->change_note_length (*i, d);
 				had_change = true;
@@ -224,7 +224,7 @@ EditNoteDialog::run ()
 
 	_region_view->apply_diff ();
 
-	for (set<ArdourCanvas::CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+	for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
 		(*i)->set_selected ((*i)->selected()); // change color
 	}
 

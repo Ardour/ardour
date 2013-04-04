@@ -19,6 +19,8 @@
 
 #include <iostream>
 
+#include <boost/algorithm/string.hpp>
+
 #include <glibmm/regex.h>
 
 #include "gtkmm2ext/keyboard.h"
@@ -41,12 +43,10 @@ PatchChange::PatchChange(
 		double          height,
 		double          x,
 		double          y,
-		string&         model_name,
-		string&         custom_device_mode,
+		ARDOUR::InstrumentInfo& info,
 		ARDOUR::MidiModel::PatchChangePtr patch)
 	: _region (region)
-	, _model_name(model_name)
-	, _custom_device_mode(custom_device_mode)
+	, _info (info)
 	, _patch (patch)
 	, _popup_initialized(false)
 {
@@ -69,9 +69,9 @@ PatchChange::~PatchChange()
 void
 PatchChange::initialize_popup_menus()
 {
-	boost::shared_ptr<ChannelNameSet> channel_name_set =
-		MidiPatchManager::instance()
-		.find_channel_name_set(_model_name, _custom_device_mode, _patch->channel());
+	using namespace MIDI::Name;
+
+	boost::shared_ptr<ChannelNameSet> channel_name_set = _info.get_patches (_patch->channel());
 
 	if (!channel_name_set) {
 		return;
@@ -79,40 +79,62 @@ PatchChange::initialize_popup_menus()
 
 	const ChannelNameSet::PatchBanks& patch_banks = channel_name_set->patch_banks();
 
-	// fill popup menu:
-	Gtk::Menu::MenuList& patch_bank_menus = _popup.items();
+	if (patch_banks.size() > 1) {
 
-	for (ChannelNameSet::PatchBanks::const_iterator bank = patch_banks.begin();
-	     bank != patch_banks.end();
-	     ++bank) {
-		Glib::RefPtr<Glib::Regex> underscores = Glib::Regex::create("_");
-		std::string replacement(" ");
+		// fill popup menu:
+		Gtk::Menu::MenuList& patch_bank_menus = _popup.items();
 
-		Gtk::Menu& patch_bank_menu = *manage(new Gtk::Menu());
+		for (ChannelNameSet::PatchBanks::const_iterator bank = patch_banks.begin();
+		     bank != patch_banks.end();
+		     ++bank) {
+			Glib::RefPtr<Glib::Regex> underscores = Glib::Regex::create("_");
+			std::string replacement(" ");
+			
+			Gtk::Menu& patch_bank_menu = *manage(new Gtk::Menu());
+			
+			const PatchNameList& patches = (*bank)->patch_name_list();
+			Gtk::Menu::MenuList& patch_menus = patch_bank_menu.items();
+		
+			for (PatchNameList::const_iterator patch = patches.begin();
+			     patch != patches.end();
+			     ++patch) {
+				std::string name = underscores->replace((*patch)->name().c_str(), -1, 0, replacement);
 
-		const PatchBank::PatchNameList& patches = (*bank)->patch_name_list();
-		Gtk::Menu::MenuList& patch_menus = patch_bank_menu.items();
+				patch_menus.push_back(
+					Gtk::Menu_Helpers::MenuElem(
+						name,
+						sigc::bind(
+							sigc::mem_fun(*this, &PatchChange::on_patch_menu_selected),
+							(*patch)->patch_primary_key())) );
+			}
 
-		for (PatchBank::PatchNameList::const_iterator patch = patches.begin();
-		     patch != patches.end();
-		     ++patch) {
-			std::string name = underscores->replace((*patch)->name().c_str(), -1, 0, replacement);
 
-			patch_menus.push_back(
+			std::string name = underscores->replace((*bank)->name().c_str(), -1, 0, replacement);
+
+			patch_bank_menus.push_back(
 				Gtk::Menu_Helpers::MenuElem(
 					name,
-					sigc::bind(
-						sigc::mem_fun(*this, &PatchChange::on_patch_menu_selected),
-						(*patch)->patch_primary_key())) );
+					patch_bank_menu) );
 		}
 
+	} else {
+		/* only one patch bank, so make it the initial menu */
 
-		std::string name = underscores->replace((*bank)->name().c_str(), -1, 0, replacement);
-
-		patch_bank_menus.push_back(
-			Gtk::Menu_Helpers::MenuElem(
-				name,
-				patch_bank_menu) );
+		const PatchNameList& patches = patch_banks.front()->patch_name_list();
+		Gtk::Menu::MenuList& patch_menus = _popup.items();
+		
+		for (PatchNameList::const_iterator patch = patches.begin();
+		     patch != patches.end();
+		     ++patch) {
+			std::string name = (*patch)->name();
+			boost::replace_all (name, "_", " ");
+			
+			patch_menus.push_back (
+				Gtk::Menu_Helpers::MenuElem (
+					name,
+					sigc::bind (sigc::mem_fun(*this, &PatchChange::on_patch_menu_selected),
+					            (*patch)->patch_primary_key())));
+		}
 	}
 }
 

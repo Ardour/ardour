@@ -10,10 +10,10 @@ Coord const ArdourCanvas::COORD_MAX = DBL_MAX;
 /* XXX: empirically arrived at */
 Coord const ArdourCanvas::CAIRO_MAX = 65536;
 
-Coord
-ArdourCanvas::safe_add (Coord a, Coord b)
+static inline Coord
+safe_add (Coord a, Coord b)
 {
-	if (a == COORD_MAX || b == COORD_MAX) {
+	if (((COORD_MAX - a) > b) || ((COORD_MAX - b) > a)) {
 		return COORD_MAX;
 	}
 

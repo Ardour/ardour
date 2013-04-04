@@ -289,7 +289,7 @@ TimeAxisView::clip_to_viewport ()
 {
 	if (marked_for_display()) {
 		if (_y_position + _effective_height < _editor.get_trackview_group_vertical_offset () || 
-		    _y_position > _editor.get_trackview_group_vertical_offset () + _canvas_display->get_canvas()->get_height() {
+ 	            _y_position > _editor.get_trackview_group_vertical_offset () + _canvas_display->height()) {
 			_canvas_background->hide ();
 			_canvas_display->hide ();
 			return;
@@ -967,21 +967,21 @@ TimeAxisView::get_selection_rect (uint32_t id)
 
 		rect = new SelectionRect;
 
-		rect->rect = new SimpleRect (selection_group);
+		rect->rect = new ArdourCanvas::Rectangle (selection_group);
 		rect->rect->set_outline_what (0);
 		rect->rect->set_fill_color (ARDOUR_UI::config()->canvasvar_SelectionRect.get());
 
-		rect->start_trim = new SimpleRect (selection_group);
+		rect->start_trim = new ArdourCanvas::Rectangle (selection_group);
 		rect->start_trim->set_outline_what (0);
 
-		rect->end_trim = new SimpleRect (selection_group);
+		rect->end_trim = new ArdourCanvas::Rectangle (selection_group);
 		rect->end_trim->set_outline_what (0);
 
 		free_selection_rects.push_front (rect);
 
-		rect->rect->Event().connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_selection_rect_event), rect->rect, rect));
-		rect->start_trim->Event().connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_selection_start_trim_event), rect->rect, rect));
-		rect->end_trim->Event().connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_selection_end_trim_event), rect->rect, rect));
+		rect->rect->Event.connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_selection_rect_event), rect->rect, rect));
+		rect->start_trim->Event.connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_selection_start_trim_event), rect->rect, rect));
+		rect->end_trim->Event.connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_selection_end_trim_event), rect->rect, rect));
 	}
 
 	rect = free_selection_rects.front();

@@ -107,7 +107,7 @@ AudioGhostRegion::AudioGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, do
 
 }
 
-ovoid
+void
 AudioGhostRegion::set_frames_per_pixel (double fpp)
 {
 	for (vector<WaveView*>::iterator i = waves.begin(); i != waves.end(); ++i) {
@@ -187,13 +187,13 @@ MidiGhostRegion::~MidiGhostRegion()
 	clear_events ();
 }
 
-MidiGhostRegion::Event::Event (NoteBase* e, ArdourCanvas::Group* g)
+MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Group* g)
 	: event (e)
 {
-	rect = new ArdourCanvas::Rectangle (*g, e->x1(), e->y1(), e->x2(), e->y2());
+	rect = new ArdourCanvas::Rectangle (g, ArdourCanvas::Rect (e->x0(), e->y0(), e->x1(), e->y1()));
 }
 
-MidiGhostRegion::Event::~Event ()
+MidiGhostRegion::GhostEvent::~GhostEvent ()
 {
 	/* event is not ours to delete */
 	delete rect;
@@ -231,8 +231,8 @@ MidiGhostRegion::set_colors()
 	GhostRegion::set_colors();
 
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
-		(*it)->rect->property_fill_color_rgba() = fill;
-		(*it)->rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_GhostTrackMidiOutline.get();
+		(*it)->rect->set_fill_color (fill);
+		(*it)->rect->set_outline_color (ARDOUR_UI::config()->canvasvar_GhostTrackMidiOutline.get());
 	}
 }
 
@@ -255,20 +255,20 @@ MidiGhostRegion::update_range ()
 		} else {
 			(*it)->rect->show();
 			double const y = trackview.current_height() - (note_num + 1 - mv->lowest_note()) * h + 1;
-			(*it)->rect->property_y1() = y;
-			(*it)->rect->property_y2() = y + h;
+			(*it)->rect->set_y0 (y);
+			(*it)->rect->set_y1 (y + h);
 		}
 	}
 }
 
 void
-MidiGhostRegion::add_note(NoteBase* n)
+MidiGhostRegion::add_note (NoteBase* n)
 {
-	Event* event = new Event (n, group);
+	GhostEvent* event = new GhostEvent (n, group);
 	events.push_back (event);
 
-	event->rect->property_fill_color_rgba() = source_track_color(200);
-	event->rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_GhostTrackMidiOutline.get();
+	event->rect->set_fill_color (source_track_color(200));
+	event->rect->set_outline_color (ARDOUR_UI::config()->canvasvar_GhostTrackMidiOutline.get());
 
 	MidiStreamView* mv = midi_view();
 
@@ -279,8 +279,8 @@ MidiGhostRegion::add_note(NoteBase* n)
 			event->rect->hide();
 		} else {
 			const double y = mv->note_to_y(note_num);
-			event->rect->property_y1() = y;
-			event->rect->property_y2() = y + mv->note_height();
+			event->rect->set_y0 (y);
+			event->rect->set_y1 (y + mv->note_height());
 		}
 	}
 }
@@ -300,9 +300,9 @@ MidiGhostRegion::clear_events()
  *  @param parent The CanvasNote from the parent MidiRegionView.
  */
 void
-MidiGhostRegion::update_note (Note* parent)
+MidiGhostRegion::update_note (NoteBase* parent)
 {
-	Event* ev = find_event (parent);
+	GhostEvent* ev = find_event (parent);
 	if (!ev) {
 		return;
 	}
@@ -314,9 +314,9 @@ MidiGhostRegion::update_note (Note* parent)
 }
 
 void
-MidiGhostRegion::remove_note (ArdourCanvas::CanvasNoteEvent* note)
+MidiGhostRegion::remove_note (NoteBase* note)
 {
-	Event* ev = find_event (note);
+	GhostEvent* ev = find_event (note);
 	if (!ev) {
 		return;
 	}
@@ -331,8 +331,8 @@ MidiGhostRegion::remove_note (ArdourCanvas::CanvasNoteEvent* note)
  *  @return Our Event, or 0 if not found.
  */
 
-MidiGhostRegion::Event *
-MidiGhostRegion::find_event (Note* parent)
+MidiGhostRegion::GhostEvent *
+MidiGhostRegion::find_event (NoteBase* parent)
 {
 	/* we are using _optimization_iterator to speed up the common case where a caller
 	   is going through our notes in order.

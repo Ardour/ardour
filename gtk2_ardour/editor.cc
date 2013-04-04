@@ -496,14 +496,15 @@ Editor::Editor ()
 
 	_cursors = new MouseCursors;
 
-	ArdourCanvas::Canvas* time_pad = manage(new ArdourCanvas::GtkCanvas());
-	ArdourCanvas::Line* pad_line_1 = manage(new ArdourCanvas::Line(time_pad->root()));
-	pad_line_1->set (ArdourCanvas::Duple (0.0, 1.0), ArdourCanvas::Duple (100.0, 1.0));
+	ArdourCanvas::Canvas* time_pad = new ArdourCanvas::GtkCanvas ();
 
+	ArdourCanvas::Line* pad_line_1 = new ArdourCanvas::Line (time_pad->root());
+	pad_line_1->set (ArdourCanvas::Duple (0.0, 1.0), ArdourCanvas::Duple (100.0, 1.0));
 	pad_line_1->set_outline_color (0xFF0000FF);
 	pad_line_1->show();
 
-	time_pad->show();
+	// CAIROCANVAS
+	//time_pad->show();
 
 	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 2);
 	time_canvas_vbox.set_size_request (-1, -1);
@@ -4315,7 +4316,7 @@ Editor::ensure_visual_change_idle_handler ()
 {
 	if (pending_visual_change.idle_handler_id < 0) {
 		pending_visual_change.idle_handler_id = g_idle_add (_idle_visual_changer, this);
-		pending_visual_change.executing = false;
+		pending_visual_change.being_handled = false;
 	}
 }
 

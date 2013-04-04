@@ -195,7 +195,7 @@ RegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	_region->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::region_changed, this, _1), gui_context());
 
-	group->Event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_event), group, this));
+	group->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_event), group, this));
 
 	set_colors ();
 
@@ -237,7 +237,8 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 
 	for (AudioIntervalResult::const_iterator i = silences.begin(); i != silences.end(); ++i) {
 
-		ArdourCanvas::Rectangle* cr = new ArdourCanvas::NoEventSimpleRect (group);
+		ArdourCanvas::Rectangle* cr = new ArdourCanvas::Rectangle (group);
+		cr->set_ignore_events (true);
 		_silent_frames.push_back (cr);
 
 		/* coordinates for the rect are relative to the regionview origin */
@@ -272,8 +273,8 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 
         _silence_text = new ArdourCanvas::Text (group);
 	_silence_text->set_ignore_events (true);
-        _silence_text->set_font_description() = get_font_for_style (N_("SilenceText"));
-        _silence_text->set_fill_color (ARDOUR_UI::config()->canvasvar_SilenceText.get());
+        _silence_text->set_font_description (get_font_for_style (N_("SilenceText")));
+        _silence_text->set_color (ARDOUR_UI::config()->canvasvar_SilenceText.get());
 
         /* both positions are relative to the region start offset in source */
 
@@ -318,7 +319,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 		text += string_compose (_("\n  (shortest audible segment = %1 %2)"), ma, aunits);
 	}
 
-	_silence_text->set_text (text.c_str ());
+	_silence_text->set (text);
 }
 
 void
@@ -634,10 +635,10 @@ RegionView::region_sync_changed ()
 		/* points set below */
 
 		sync_mark = new ArdourCanvas::Polygon (group);
-		sync_mark->set_fill_color (RGBA_TO_UINT(0,255,0,255));     // fill_color; // FIXME make a themeable colour
+		sync_mark->set_fill_color (RGBA_TO_UINT(0,255,0,255));    // FIXME make a themeable colour
 
 		sync_line = new ArdourCanvas::Line (group);
-		sync_line->set_fill_color (RGBA_TO_UINT(0,255,0,255)); // fill_color // FIXME make a themeable colour
+		sync_line->set_outline_color (RGBA_TO_UINT(0,255,0,255)); // FIXME make a themeable colour
 		sync_line->set_outline_width  (1);
 	}
 
@@ -800,7 +801,7 @@ RegionView::update_coverage_frames (LayerDisplay d)
 
 		/* finish off any old rect, if required */
 		if (cr && me != new_me) {
-			cr->property_x2() = trackview.editor().frame_to_pixel (t - position);
+			cr->set_x1 (trackview.editor().frame_to_pixel (t - position));
 		}
 
 		/* start off any new rect, if required */

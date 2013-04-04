@@ -39,6 +39,7 @@
 
 #include "canvas/rectangle.h"
 #include "canvas/polygon.h"
+#include "canvas/poly_line.h"
 #include "canvas/pixbuf.h"
 
 #include "streamview.h"
@@ -172,7 +173,7 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 		fade_out_handle = new ArdourCanvas::Rectangle (group);
 		fade_out_handle->set_fill_color (UINT_RGBA_CHANGE_A (fill_color, 0));
-		fade_out_handle->set_outline_color_rgba (RGBA_TO_UINT (0, 0, 0, 0));
+		fade_out_handle->set_outline_color (RGBA_TO_UINT (0, 0, 0, 0));
 
 		fade_out_handle->set_data ("regionview", this);
 	}
@@ -719,7 +720,7 @@ AudioRegionView::set_frames_per_pixel (gdouble fpp)
 
 	if (Config->get_show_waveforms ()) {
 		for (uint32_t n = 0; n < waves.size(); ++n) {
-			waves[n]->set_frames_per_pixel() (fpp);
+			waves[n]->set_frames_per_pixel (fpp);
 		}
 	}
 
@@ -777,7 +778,8 @@ AudioRegionView::setup_waveform_visibility ()
 			/* make sure the zoom level is correct, since we don't update
 			   this when waveforms are hidden.
 			*/
-			waves[n]->property_samples_per_unit() = samples_per_unit;
+			// CAIROCANVAS
+			//waves[n]->set_frames_per_pixel (_frames_per_pixel);
 			waves[n]->show();
 		}
 	} else {
@@ -889,8 +891,6 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 
 	gdouble yoff = which * ht;
 
-	WaveView *wave = new WaveView(*group);
-
 	WaveView *wave = new WaveView (group, audio_region ());
 
 	wave->set_channel (which);
@@ -910,9 +910,10 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 
 	wave->property_clip_color() = ARDOUR_UI::config()->canvasvar_WaveFormClip.get();
 	wave->property_zero_color() = ARDOUR_UI::config()->canvasvar_ZeroLine.get();
-	wave->property_zero_line() = true;
+	// CAIROCANVAS
+	// wave->property_zero_line() = true;
 
-	wave->set_region_start() = _region->start();
+	wave->set_region_start (_region->start());
 	wave->property_rectified() = Config->get_waveform_shape() == Rectified;
 	wave->property_logscaled() = Config->get_waveform_scale() == Logarithmic;
 
@@ -1085,7 +1086,7 @@ AudioRegionView::entered (bool internal_editing)
 	}
 
 	if (fade_in_handle && !internal_editing) {
-		fade_in_handle->set_outline_color_ (RGBA_TO_UINT (0, 0, 0, 255));
+		fade_in_handle->set_outline_color (RGBA_TO_UINT (0, 0, 0, 255));
 		fade_in_handle->set_fill_color (UINT_RGBA_CHANGE_A (fade_color, 255));
 		fade_out_handle->set_outline_color (RGBA_TO_UINT (0, 0, 0, 255));
 		fade_out_handle->set_fill_color (UINT_RGBA_CHANGE_A (fade_color, 255));
@@ -1262,7 +1263,7 @@ AudioRegionView::transients_changed ()
 		canvas_item->show ();
 
 		canvas_item->set_data ("regionview", this);
-		canvas_item->Event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_feature_line_event), canvas_item, this));
+		canvas_item->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_feature_line_event), canvas_item, this));
 
 		feature_lines.push_back (make_pair(0, canvas_item));
 	}
@@ -1365,29 +1366,32 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 	}
 
 	if (!start_xfade_in) {
-		start_xfade_in = new ArdourCanvas::Line (*group);
-		start_xfade_in->property_width_pixels() = 1;
-		start_xfade_in->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_GainLine.get();
+		start_xfade_in = new ArdourCanvas::PolyLine (group);
+		// CAIROCANVAS
+		// start_xfade_in->set_width_pixels (1);
+		start_xfade_in->set_outline_color (ARDOUR_UI::config()->canvasvar_GainLine.get());
 	}
 
 	if (!start_xfade_out) {
-		start_xfade_out = new ArdourCanvas::Line (*group);
-		start_xfade_out->property_width_pixels() = 1;
+		start_xfade_out = new ArdourCanvas::PolyLine (group);
+		// CAIROCANVAS
+		// start_xfade_out->set_width_pixels (1);
 		uint32_t col = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_GainLine.get(), 128);
-		start_xfade_out->property_fill_color_rgba() = col;
+		start_xfade_out->set_outline_color (col);
 	}
 
 	if (!start_xfade_rect) {
-		start_xfade_rect = new ArdourCanvas::Rectangle (*group);
-		start_xfade_rect->property_draw() = true;
-		start_xfade_rect->property_fill() = true;;
-		start_xfade_rect->property_fill_color_rgba() =  ARDOUR_UI::config()->canvasvar_ActiveCrossfade.get();
-		start_xfade_rect->property_outline_pixels() = 0;
-		start_xfade_rect->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_start_xfade_event), start_xfade_rect, this));
+		start_xfade_rect = new ArdourCanvas::Rectangle (group);
+		// CAIROCANVAS
+		// start_xfade_rect->property_draw() = true;
+		start_xfade_rect->set_fill (true);
+		start_xfade_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_ActiveCrossfade.get());
+		start_xfade_rect->set_outline (false);
+		start_xfade_rect->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_start_xfade_event), start_xfade_rect, this));
 		start_xfade_rect->set_data ("regionview", this);
 	}
 
-	Points* points = get_canvas_points ("xfade edit redraw", npoints);
+	ArdourCanvas::Points* points = get_canvas_points ("xfade edit redraw", npoints);
 	boost::scoped_array<float> vec (new float[npoints]);
 
 	double effective_height;
@@ -1400,18 +1404,15 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 	ar->fade_in()->curve().get_vector (0, ar->fade_in()->back()->when, vec.get(), npoints);
 
 	for (int i = 0, pci = 0; i < npoints; ++i) {
-		Gnome::Art::Point &p ((*points)[pci++]);
-		p.set_x (i);
-		p.set_y (1.0 + effective_height - (effective_height * vec.get()[i]));
+		ArdourCanvas::Duple &p ((*points)[pci++]);
+		p.x = i;
+		p.y = 1.0 + effective_height - (effective_height * vec.get()[i]);
 	}
 
-	start_xfade_rect->property_x1() = ((*points)[0]).get_x();
-	start_xfade_rect->property_y1() = 1.0;
-	start_xfade_rect->property_x2() = ((*points)[npoints-1]).get_x();
-	start_xfade_rect->property_y2() = effective_height;
+	start_xfade_rect->set (ArdourCanvas::Rect (((*points)[0]).x, 1.0, ((*points)[npoints-1]).x, effective_height));
 	start_xfade_rect->show ();
 
-	start_xfade_in->property_points() = *points;
+	start_xfade_in->set (*points);
 	start_xfade_in->show ();
 	start_xfade_in->raise_to_top ();
 
@@ -1422,23 +1423,23 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 	if (!inverse) {
 
 		for (int i = 0, pci = 0; i < npoints; ++i) {
-			Gnome::Art::Point &p ((*points)[pci++]);
-			p.set_x (i);
-			p.set_y (1.0 + effective_height - (effective_height * (1.0 - vec.get()[i])));
+			ArdourCanvas::Duple &p ((*points)[pci++]);
+			p.x = i;
+			p.y = 1.0 + effective_height - (effective_height * (1.0 - vec.get()[i]));
 		}
 
 	} else {
 
 		inverse->curve().get_vector (0, inverse->back()->when, vec.get(), npoints);
-
+		
 		for (int i = 0, pci = 0; i < npoints; ++i) {
-			Gnome::Art::Point &p ((*points)[pci++]);
-			p.set_x (i);
-			p.set_y (1.0 + effective_height - (effective_height * vec.get()[i]));
+			ArdourCanvas::Duple &p ((*points)[pci++]);
+			p.x = i;
+			p.y = 1.0 + effective_height - (effective_height * vec.get()[i]);
 		}
 	}
 
-	start_xfade_out->property_points() = *points;
+	start_xfade_out->set (*points);
 	start_xfade_out->show ();
 	start_xfade_out->raise_to_top ();
 
@@ -1473,25 +1474,28 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 	}
 
 	if (!end_xfade_in) {
-		end_xfade_in = new ArdourCanvas::Line (*group);
-		end_xfade_in->property_width_pixels() = 1;
-		end_xfade_in->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_GainLine.get();
+		end_xfade_in = new ArdourCanvas::PolyLine (group);
+		// CAIROCANVAS
+		// end_xfade_in->property_width_pixels() = 1;
+		end_xfade_in->set_outline_color (ARDOUR_UI::config()->canvasvar_GainLine.get());
 	}
 
 	if (!end_xfade_out) {
-		end_xfade_out = new ArdourCanvas::Line (*group);
-		end_xfade_out->property_width_pixels() = 1;
+		end_xfade_out = new ArdourCanvas::PolyLine (group);
+		// CAIROCANVAS
+		// end_xfade_out->property_width_pixels() = 1;
 		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_GainLine.get(), 128);
-		end_xfade_out->property_fill_color_rgba() = col;
+		end_xfade_out->set_outline_color (col);
 	}
 
 	if (!end_xfade_rect) {
-		end_xfade_rect = new ArdourCanvas::Rectangle (*group);
-		end_xfade_rect->property_draw() = true;
-		end_xfade_rect->property_fill() = true;;
-		end_xfade_rect->property_fill_color_rgba() =  ARDOUR_UI::config()->canvasvar_ActiveCrossfade.get();
-		end_xfade_rect->property_outline_pixels() = 0;
-		end_xfade_rect->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_end_xfade_event), end_xfade_rect, this));
+		end_xfade_rect = new ArdourCanvas::Rectangle (group);
+		// CAIROCANVAS
+		// end_xfade_rect->property_draw() = true;
+		end_xfade_rect->set_fill (true);
+		end_xfade_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_ActiveCrossfade.get());
+		end_xfade_rect->set_outline (0);
+		end_xfade_rect->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_end_xfade_event), end_xfade_rect, this));
 		end_xfade_rect->set_data ("regionview", this);
 	}
 
@@ -1510,18 +1514,15 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 	}
 
 	for (int i = 0, pci = 0; i < npoints; ++i) {
-		Gnome::Art::Point &p ((*points)[pci++]);
-		p.set_x (rend + i);
-		p.set_y (1.0 + effective_height - (effective_height * vec.get()[i]));
+		ArdourCanvas::Duple &p ((*points)[pci++]);
+		p.x = rend + i;
+		p.y = 1.0 + effective_height - (effective_height * vec.get()[i]);
 	}
 
-	end_xfade_rect->property_x1() = ((*points)[0]).get_x();
-	end_xfade_rect->property_y1() = 1;
-	end_xfade_rect->property_x2() = ((*points)[npoints-1]).get_x();
-	end_xfade_rect->property_y2() = effective_height;
+	end_xfade_rect->set (ArdourCanvas::Rect (((*points)[0]).x, 1.0, ((*points)[npoints-1]).x, effective_height));
 	end_xfade_rect->show ();
 
-	end_xfade_in->property_points() = *points;
+	end_xfade_in->set (*points);
 	end_xfade_in->show ();
 	end_xfade_in->raise_to_top ();
 
@@ -1532,9 +1533,9 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 	if (!inverse) {
 
 		for (int i = 0, pci = 0; i < npoints; ++i) {
-			Gnome::Art::Point &p ((*points)[pci++]);
-			p.set_x (rend + i);
-			p.set_y (1.0 + effective_height - (effective_height * (1.0 - vec.get()[i])));
+			ArdourCanvas::Duple &p ((*points)[pci++]);
+			p.x = rend + i;
+			p.y = 1.0 + effective_height - (effective_height * (1.0 - vec.get()[i]));
 		}
 
 	} else {
@@ -1542,13 +1543,13 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 		inverse->curve().get_vector (inverse->front()->when, inverse->back()->when, vec.get(), npoints);
 
 		for (int i = 0, pci = 0; i < npoints; ++i) {
-			Gnome::Art::Point &p ((*points)[pci++]);
-			p.set_x (rend + i);
-			p.set_y (1.0 + effective_height - (effective_height * vec.get()[i]));
+			ArdourCanvas::Duple &p ((*points)[pci++]);
+			p.x = rend + i;
+			p.y = 1.0 + effective_height - (effective_height * vec.get()[i]);
 		}
 	}
 
-	end_xfade_out->property_points() = *points;
+	end_xfade_out->set (*points);
 	end_xfade_out->show ();
 	end_xfade_out->raise_to_top ();
 

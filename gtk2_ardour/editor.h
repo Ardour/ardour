@@ -25,11 +25,9 @@
 #include <set>
 #include <string>
 #include <sys/time.h>
+#include <cmath>
 
 #include <boost/optional.hpp>
-
-
-#include <cmath>
 
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/layout.h>
@@ -48,6 +46,8 @@
 #include "ardour/location.h"
 #include "ardour/types.h"
 
+#include "canvas/fwd.h"
+
 #include "gtk-custom-ruler.h"
 #include "ardour_button.h"
 #include "ardour_dialog.h"
@@ -57,8 +57,6 @@
 #include "editor_items.h"
 #include "region_selection.h"
 #include "window_proxy.h"
-
-#include "canvas/fwd.h"
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -103,6 +101,7 @@ class GUIObjectState;
 class Marker;
 class MidiRegionView;
 class MixerStrip;
+class NoteBase;
 class PlaylistSelector;
 class PluginSelector;
 class RhythmFerret;
@@ -460,6 +459,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		return _verbose_cursor;
 	}
 
+	double clamp_verbose_cursor_x (double);
+	double clamp_verbose_cursor_y (double);
+
 	void get_pointer_position (double &, double &) const;
 
 	TimeAxisView* stepping_axis_view () {
@@ -711,7 +713,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_canvas_cursor ();
 
 	ArdourCanvas::GtkCanvas* _track_canvas;
-	ArdourCanvas::GtkCanvasViewPort* _track_canvas_viewport;
+	ArdourCanvas::GtkCanvasViewport* _track_canvas_viewport;
         Gtk::Adjustment* _track_canvas_hadj;
         Gtk::Adjustment* _track_canvas_vadj;
 
@@ -1531,7 +1533,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void edit_tempo_marker (ArdourCanvas::Item*);
 	void edit_meter_marker (ArdourCanvas::Item*);
 	void edit_control_point (ArdourCanvas::Item*);
-	void edit_notes (std::set<Gnome::Canvas::CanvasNoteEvent *> const &);
+        void edit_notes (std::set<NoteBase*> const & s);
 
 	void marker_menu_edit ();
 	void marker_menu_remove ();

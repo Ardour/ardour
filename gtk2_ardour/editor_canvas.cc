@@ -95,13 +95,13 @@ Editor::initialize_canvas ()
 	}
 
 	/* a group to hold time (measure) lines */
-	time_line_group = new ArdourCanvas::Group (track_canvas->root());
+	time_line_group = new ArdourCanvas::Group (_track_canvas->root());
 
-        transport_loop_range_rect = new ArdourCanvas::Rectangle (*time_line_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, ArdourCanvas::COORD_MAX));
+        transport_loop_range_rect = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, ArdourCanvas::COORD_MAX));
 	transport_loop_range_rect->set_outline_width (1);
 	transport_loop_range_rect->hide();
 
-	transport_punch_range_rect = new ArdourCanvas::Rectangle (*time_line_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, ArdourCanvas::COORD_MAX));
+	transport_punch_range_rect = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, ArdourCanvas::COORD_MAX));
 	transport_punch_range_rect->set_outline_width (0);
 	transport_punch_range_rect->hide();
 
@@ -150,66 +150,56 @@ Editor::initialize_canvas ()
 	transport_marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height * 2.0));
 	marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height));
 	cd_marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, 0.0));
+#ifdef WITH_VIDEOTIMELINE
+	videotl_group = new ArdourCanvas::Group (_time_markers_group, 0.0, 0.0);
+#endif
 
 
 #ifdef WITH_VIDEOTIMELINE
-	videotl_bar_group = new ArdourCanvas::Group (*track_canvas->root ());
+	videotl_bar_group = new ArdourCanvas::Group (track_canvas->root ());
 	if (Profile->get_sae()) {
-		videotl_bar = new ArdourCanvas::Rectangle (*videotl_bar_group, 0.0, 0.0, phys_width, (timebar_height * videotl_bar_height - 1));
+		videotl_bar = new ArdourCanvas::Rectangle (videotl_bar_group, 0.0, 0.0, phys_width, (timebar_height * videotl_bar_height - 1));
 		videotl_bar->property_outline_pixels() = 1;
 	} else {
-		videotl_bar = new ArdourCanvas::Rectangle (*videotl_bar_group, 0.0, 0.0, phys_width, (timebar_height * videotl_bar_height));
+		videotl_bar = new ArdourCanvas::Rectangle (videotl_bar_group, 0.0, 0.0, phys_width, (timebar_height * videotl_bar_height));
 		videotl_bar->property_outline_pixels() = 0;
 	}
 	videotl_bar->property_outline_what() = (0x1 | 0x8);
 	ARDOUR_UI::instance()->video_timeline = new VideoTimeLine(this, videotl_bar_group, (timebar_height * videotl_bar_height));
 #endif
 
-	timebar_group =  new ArdourCanvas::Group (*track_canvas->root(), 0.0, 0.0);
-	cursor_group = new ArdourCanvas::Group (*track_canvas->root(), 0.0, 0.0);
-
-	meter_group = new ArdourCanvas::Group (*timebar_group, 0.0, timebar_height * 5.0);
-	tempo_group = new ArdourCanvas::Group (*timebar_group, 0.0, timebar_height * 4.0);
-	range_marker_group = new ArdourCanvas::Group (*timebar_group, 0.0, timebar_height * 3.0);
-	transport_marker_group = new ArdourCanvas::Group (*timebar_group, 0.0, timebar_height * 2.0);
-	marker_group = new ArdourCanvas::Group (*timebar_group, 0.0, timebar_height);
-	cd_marker_group = new ArdourCanvas::Group (*timebar_group, 0.0, 0.0);
-#ifdef WITH_VIDEOTIMELINE
-	videotl_group = new ArdourCanvas::Group (*timebar_group, 0.0, 0.0);
-#endif
-
 	cd_marker_bar_drag_rect = new ArdourCanvas::Rectangle (cd_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
 	cd_marker_bar_drag_rect->set_outline (false);
 	cd_marker_bar_drag_rect->hide ();
 
-	range_bar_drag_rect = new ArdourCanvas::Rectangle (range_marker_group, Ardour::Rect (0.0, 0.0, 100, timebar_height));
+	range_bar_drag_rect = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
 	range_bar_drag_rect->set_outline (false);
 	range_bar_drag_rect->hide ();
 
-	transport_bar_drag_rect = new ArdourCanvas::Rectangle (transport_marker_group, Ardour::Rect (0.0, 0.0, 100, timebar_height));
+	transport_bar_drag_rect = new ArdourCanvas::Rectangle (transport_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
 	transport_bar_drag_rect->set_outline (false);
 	transport_bar_drag_rect->hide ();
 
 	transport_punchin_line = new ArdourCanvas::Line (_master_group);
+	transport_punchin_line->set_x0 (0);
+	transport_punchin_line->set_y0 (0);
 	transport_punchin_line->set_x1 (0);
-	transport_punchin_line->set_y1 (0);
-	transport_punchin_line->set_x2 (0);
-	transport_punchin_line->set_y2 (ArdourCanvas::COORD_MAX);
+	transport_punchin_line->set_y1 (ArdourCanvas::COORD_MAX);
 	transport_punchin_line->hide ();
 
 	transport_punchout_line  = new ArdourCanvas::Line (_master_group);
+	transport_punchout_line->set_x0 (0);
+	transport_punchout_line->set_y0 (0);
 	transport_punchout_line->set_x1 (0);
-	transport_punchout_line->set_y1 (0);
-	transport_punchout_line->set_x2 (0);
-	transport_punchout_line->set_y2 (ArdourCanvas::COORD_MAX);
+	transport_punchout_line->set_y1 (ArdourCanvas::COORD_MAX);
 	transport_punchout_line->hide();
 
 	// used to show zoom mode active zooming
-	zoom_rect = new ArdourCanvas::Rectangle (_master_group, 0.0, 0.0, 0.0, 0.0);
+	zoom_rect = new ArdourCanvas::Rectangle (_master_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
 	zoom_rect->set_outline_width (1);
 	zoom_rect->hide();
 
-	zoom_rect->Event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_zoom_rect_event), (ArdourCanvas::Item*) 0));
+	zoom_rect->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_zoom_rect_event), (ArdourCanvas::Item*) 0));
 
 	// used as rubberband rect
 	rubberband_rect = new ArdourCanvas::Rectangle (_trackview_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
@@ -217,16 +207,16 @@ Editor::initialize_canvas ()
 	rubberband_rect->set_outline_width (1);
 	rubberband_rect->hide();
 
-	tempo_bar->Event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_tempo_bar_event), tempo_bar));
-	meter_bar->Event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_meter_bar_event), meter_bar));
-	marker_bar->Event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_marker_bar_event), marker_bar));
-	cd_marker_bar->Event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_cd_marker_bar_event), cd_marker_bar));
+	tempo_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_tempo_bar_event), tempo_bar));
+	meter_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_meter_bar_event), meter_bar));
+	marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_marker_bar_event), marker_bar));
+	cd_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_cd_marker_bar_event), cd_marker_bar));
 #ifdef WITH_VIDEOTIMELINE
-	videotl_bar_group->Event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_videotl_bar_event), videotl_bar));
-	//videotl_bar->Event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_videotl_bar_event), videotl_bar));
+	videotl_bar_group->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_videotl_bar_event), videotl_bar));
+	//videotl_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_videotl_bar_event), videotl_bar));
 #endif
-	range_marker_bar->Event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
-	transport_marker_bar->Event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
+	range_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
+	transport_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
 
 	playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event);
 
@@ -757,10 +747,10 @@ Editor::ensure_time_axis_view_is_visible (const TimeAxisView& tav)
 
 	double v = vertical_adjustment.get_value ();
 
-	if (begin < v || begin + tav.current_height() > v + _canvas_height - canvas_timebars_vsize) {
+	if (begin < v || begin + tav.current_height() > v + _visible_canvas_height) {
 		/* try to put the TimeAxisView roughly central */
-		if (begin >= _canvas_height/2.0) {
-			begin -= _canvas_height/2.0;
+		if (begin >= _visible_canvas_height/2.0) {
+			begin -= _visible_canvas_height/2.0;
 		}
 		vertical_adjustment.set_value (begin);
 	}
@@ -820,6 +810,8 @@ Editor::set_horizontal_position (double p)
 #endif
 }
 
+// CAIROCANVAS
+#if 0
 void
 Editor::scroll_canvas_vertically ()
 {
@@ -838,11 +830,12 @@ Editor::scroll_canvas_vertically ()
 	/* required to keep the controls_layout in lock step with the canvas group */
 	update_canvas_now ();
 }
+#endif
 
 void
 Editor::color_handler()
 {
-	playhead_cursor->canvas_item.set_fill_color (ARDOUR_UI::config()->canvasvar_PlayHead.get());
+	playhead_cursor->set_color (ARDOUR_UI::config()->canvasvar_PlayHead.get());
 	_verbose_cursor->set_color (ARDOUR_UI::config()->canvasvar_VerboseCanvasCursor.get());
 
 	meter_bar->set_fill_color (ARDOUR_UI::config()->canvasvar_MeterBar.get());
@@ -883,8 +876,8 @@ Editor::color_handler()
 	transport_punch_range_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_TransportPunchRect.get());
 	transport_punch_range_rect->set_outline_color (ARDOUR_UI::config()->canvasvar_TransportPunchRect.get());
 
-	transport_punchin_line->set_color (ARDOUR_UI::config()->canvasvar_PunchLine.get());
-	transport_punchout_line->set_color (ARDOUR_UI::config()->canvasvar_PunchLine.get());
+	transport_punchin_line->set_outline_color (ARDOUR_UI::config()->canvasvar_PunchLine.get());
+	transport_punchout_line->set_outline_color (ARDOUR_UI::config()->canvasvar_PunchLine.get());
 
 	zoom_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_ZoomRect.get());
 	zoom_rect->set_outline_color (ARDOUR_UI::config()->canvasvar_ZoomRect.get());
@@ -948,10 +941,10 @@ Editor::set_canvas_cursor (Gdk::Cursor* cursor, bool save)
 		current_canvas_cursor = cursor;
 	}
 
-	Glib::RefPtr<Gdk::Window> win = track_canvas->get_window();
+	Glib::RefPtr<Gdk::Window> win = _track_canvas->get_window();
 
 	if (win) {
-	        track_canvas->get_window()->set_cursor (*cursor);
+	        _track_canvas->get_window()->set_cursor (*cursor);
 	}
 }
 
@@ -974,4 +967,23 @@ Editor::track_canvas_key_release (GdkEventKey*)
 	}
 
 	return false;
+}
+
+double
+Editor::clamp_verbose_cursor_x (double x)
+{
+	if (x < 0) {
+		x = 0;
+	} else {
+		x = min (_visible_canvas_width - 200.0, x);
+	}
+	return x;
+}
+
+double
+Editor::clamp_verbose_cursor_y (double y)
+{
+	y = max (0.0, y);
+	y = min (_visible_canvas_height - 50, y);
+	return y;
 }

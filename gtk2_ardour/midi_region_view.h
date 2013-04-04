@@ -59,6 +59,7 @@ class MidiCutBuffer;
 class MidiListEditor;
 class EditNoteDialog;
 class NotePlayer;
+class PatchChange;
 
 class MidiRegionView : public RegionView
 {
@@ -139,7 +140,7 @@ public:
 	void delete_patch_change (PatchChange *);
 	void edit_patch_change (PatchChange *);
 
-	void delete_sysex (ArdourCanvas::CanvasSysEx*);
+	void delete_sysex (SysEx*);
 
 	/** Alter a given patch to be its predecessor in the MIDNAM file.
 	 */
@@ -167,24 +168,24 @@ public:
 	void display_model(boost::shared_ptr<ARDOUR::MidiModel> model);
 
 	void start_note_diff_command (std::string name = "midi edit");
-	void note_diff_add_change (ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, uint8_t val);
-	void note_diff_add_change (ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, Evoral::MusicalTime val);
+	void note_diff_add_change (NoteBase* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, uint8_t val);
+	void note_diff_add_change (NoteBase* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, Evoral::MusicalTime val);
 	void note_diff_add_note (const boost::shared_ptr<NoteType> note, bool selected, bool show_velocity = false);
-	void note_diff_remove_note (ArdourCanvas::CanvasNoteEvent* ev);
+	void note_diff_remove_note (NoteBase* ev);
 
 	void apply_diff (bool as_subcommand = false);
 	void abort_command();
 
-	void   note_entered(ArdourCanvas::CanvasNoteEvent* ev);
-	void   note_left(ArdourCanvas::CanvasNoteEvent* ev);
+	void   note_entered(NoteBase* ev);
+	void   note_left(NoteBase* ev);
 	void   patch_entered (PatchChange *);
 	void   patch_left (PatchChange *);
-	void   sysex_entered (ArdourCanvas::CanvasSysEx* p);
-	void   sysex_left (ArdourCanvas::CanvasSysEx* p);
+	void   sysex_entered (SysEx* p);
+	void   sysex_left (SysEx* p);
 	void   note_mouse_position (float xfraction, float yfraction, bool can_set_cursor=true);
-	void   unique_select(ArdourCanvas::CanvasNoteEvent* ev);
-	void   note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add, bool extend=false);
-	void   note_deselected(ArdourCanvas::CanvasNoteEvent* ev);
+	void   unique_select(NoteBase* ev);
+	void   note_selected(NoteBase* ev, bool add, bool extend=false);
+	void   note_deselected(NoteBase* ev);
 	void   delete_selection();
 	void   delete_note (boost::shared_ptr<NoteType>);
 	size_t selection_size() { return _selection.size(); }
@@ -193,7 +194,7 @@ public:
 	void   invert_selection ();
 
 	void move_selection(double dx, double dy, double cumulative_dy);
-	void note_dropped (ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::frameoffset_t, int8_t d_note);
+	void note_dropped (NoteBase* ev, ARDOUR::frameoffset_t, int8_t d_note);
 
 	void select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend);
 	void toggle_matching_notes (uint8_t notenum, uint16_t channel_mask);
@@ -215,8 +216,8 @@ public:
 	 */
 	void begin_resizing(bool at_front);
 
-	void update_resizing (ArdourCanvas::CanvasNoteEvent*, bool, double, bool);
-	void commit_resizing (ArdourCanvas::CanvasNoteEvent*, bool, double, bool);
+	void update_resizing (NoteBase*, bool, double, bool);
+	void commit_resizing (NoteBase*, bool, double, bool);
 	void abort_resizing ();
 
 	/** Change the channel of the selection.
@@ -283,7 +284,7 @@ public:
 
 	void show_list_editor ();
 
-	typedef std::set<ArdourCanvas::CanvasNoteEvent*> Selection;
+	typedef std::set<NoteBase*> Selection;
 	Selection selection () const {
 		return _selection;
 	}
@@ -292,8 +293,8 @@ public:
 
 	void enable_display (bool);
 
-	void set_channel_selector_scoped_note(ArdourCanvas::CanvasNoteEvent* note){ _channel_selection_scoped_note = note; }
-	ArdourCanvas::CanvasNoteEvent* channel_selector_scoped_note(){  return _channel_selection_scoped_note; }
+	void set_channel_selector_scoped_note(NoteBase* note){ _channel_selection_scoped_note = note; }
+	NoteBase* channel_selector_scoped_note(){  return _channel_selection_scoped_note; }
 
 	void trim_front_starting ();
 	void trim_front_ending ();
@@ -356,20 +357,20 @@ private:
 	void instrument_settings_changed ();
 	PBD::ScopedConnection _instrument_changed_connection;
 
-	void change_note_channel (ArdourCanvas::CanvasNoteEvent *, int8_t, bool relative=false);
-	void change_note_velocity(ArdourCanvas::CanvasNoteEvent* ev, int8_t vel, bool relative=false);
-	void change_note_note(ArdourCanvas::CanvasNoteEvent* ev, int8_t note, bool relative=false);
-	void change_note_time(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::TimeType, bool relative=false);
-	void change_note_length (ArdourCanvas::CanvasNoteEvent *, ARDOUR::MidiModel::TimeType);
-	void trim_note(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::TimeType start_delta,
+	void change_note_channel (NoteBase *, int8_t, bool relative=false);
+	void change_note_velocity(NoteBase* ev, int8_t vel, bool relative=false);
+	void change_note_note(NoteBase* ev, int8_t note, bool relative=false);
+	void change_note_time(NoteBase* ev, ARDOUR::MidiModel::TimeType, bool relative=false);
+	void change_note_length (NoteBase *, ARDOUR::MidiModel::TimeType);
+	void trim_note(NoteBase* ev, ARDOUR::MidiModel::TimeType start_delta,
 	               ARDOUR::MidiModel::TimeType end_delta);
 
-	void clear_selection_except (ArdourCanvas::CanvasNoteEvent* ev, bool signal = true);
+	void clear_selection_except (NoteBase* ev, bool signal = true);
 	void update_drag_selection (double last_x, double x, double last_y, double y, bool extend);
 	void update_vertical_drag_selection (double last_y, double y, bool extend);
 
-	void add_to_selection (ArdourCanvas::CanvasNoteEvent*);
-	void remove_from_selection (ArdourCanvas::CanvasNoteEvent*);
+	void add_to_selection (NoteBase*);
+	void remove_from_selection (NoteBase*);
 
 	void show_verbose_cursor (std::string const &, double, double) const;
 	void show_verbose_cursor (boost::shared_ptr<NoteType>) const;
@@ -377,24 +378,24 @@ private:
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;
 
-	typedef std::list<ArdourCanvas::CanvasNoteEvent*> Events;
+	typedef std::list<NoteBase*> Events;
 	typedef std::vector< boost::shared_ptr<PatchChange> > PatchChanges;
-	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasSysEx> > SysExes;
+	typedef std::vector< boost::shared_ptr<SysEx> > SysExes;
 
 	boost::shared_ptr<ARDOUR::MidiModel> _model;
 	Events                               _events;
 	PatchChanges                         _patch_changes;
 	SysExes                              _sys_exes;
-	ArdourCanvas::CanvasNote**           _active_notes;
+	Note**                               _active_notes;
 	ArdourCanvas::Group*                 _note_group;
 	ARDOUR::MidiModel::NoteDiffCommand*  _note_diff_command;
-	ArdourCanvas::CanvasNote*            _ghost_note;
+	Note*                                _ghost_note;
 	double                               _last_ghost_x;
 	double                               _last_ghost_y;
 	ArdourCanvas::Rectangle*            _step_edit_cursor;
 	Evoral::MusicalTime                  _step_edit_cursor_width;
 	Evoral::MusicalTime                  _step_edit_cursor_position;
-	ArdourCanvas::CanvasNoteEvent*	     _channel_selection_scoped_note;
+	NoteBase*	                     _channel_selection_scoped_note;
 
 
 	/** A group used to temporarily reparent _note_group to during start trims, so
@@ -405,7 +406,7 @@ private:
 	MouseState _mouse_state;
 	int _pressed_button;
 
-	/** Currently selected CanvasNoteEvents */
+	/** Currently selected NoteBase objects */
 	Selection _selection;
 
 	bool _sort_needed;

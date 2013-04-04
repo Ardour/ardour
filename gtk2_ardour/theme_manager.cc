@@ -35,7 +35,6 @@
 #include "ardour/filesystem_paths.h"
 
 #include "ardour_button.h"
-#include "canvas-waveview.h"
 #include "theme_manager.h"
 #include "rgb_macros.h"
 #include "ardour_ui.h"
@@ -248,6 +247,8 @@ ThemeManager::on_flat_buttons_toggled ()
 void
 ThemeManager::on_gradient_waveforms_toggled ()
 {
+	// CAIROCANVAS
+#if 0
 	ARDOUR_UI::config()->gradient_waveforms.set (gradient_waveforms.get_active());
 	ARDOUR_UI::config()->set_dirty ();
 	
@@ -255,6 +256,7 @@ ThemeManager::on_gradient_waveforms_toggled ()
 
 	/* force a redraw */
 	gtk_rc_reset_styles (gtk_settings_get_default());
+#endif
 }
 
 void

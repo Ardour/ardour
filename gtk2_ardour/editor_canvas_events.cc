@@ -1014,7 +1014,7 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 	double px;
 	double py;
 
-	string target = track_canvas->drag_dest_find_target (context, track_canvas->drag_dest_get_target_list());
+	string target = _track_canvas->drag_dest_find_target (context, _track_canvas->drag_dest_get_target_list());
 
 	if (target.empty()) {
 		return false;
@@ -1107,7 +1107,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	double px;
 	double py;
 
-	track_canvas->window_to_world (x, y, wx, wy);
+	_track_canvas_viewport->window_to_canvas (x, y, wx, wy);
 
 	event.type = GDK_MOTION_NOTIFY;
 	event.button.x = wx;

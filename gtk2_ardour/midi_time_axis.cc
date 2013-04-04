@@ -1034,7 +1034,7 @@ MidiTimeAxisView::set_color_mode (ColorMode mode, bool force, bool redisplay, bo
 		
 		if (_channel_selector) {
 			if (mode == ChannelColors) {
-				_channel_selector->set_channel_colors(CanvasNoteEvent::midi_channel_colors);
+				_channel_selector->set_channel_colors(NoteBase::midi_channel_colors);
 			} else {
 				_channel_selector->set_default_channel_color();
 			}

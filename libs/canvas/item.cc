@@ -192,6 +192,20 @@ Item::bounding_box () const
 	return _bounding_box;
 }
 
+Coord
+Item::height () const 
+{
+	boost::optional<Rect> bb = bounding_box().get();
+	return bb->height ();
+}
+
+Coord
+Item::width () const 
+{
+	boost::optional<Rect> bb = bounding_box().get();
+	return bb->width ();
+}
+
 /* XXX may be called even if bbox is not changing ... bit grotty */
 void
 Item::begin_change ()

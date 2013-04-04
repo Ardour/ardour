@@ -1,3 +1,6 @@
+#ifndef __ardour_canvas_text_h__
+#define __ardour_canvas_text_h__
+
 #include <pangomm/fontdescription.h>
 #include <pangomm/layout.h>
 
@@ -9,6 +12,7 @@ class Text : public Item
 {
 public:
 	Text (Group *);
+       ~Text();
 
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
@@ -17,7 +21,7 @@ public:
 
 	void set (std::string const &);
 	void set_color (uint32_t);
-	void set_font_description (Pango::FontDescription *);
+	void set_font_description (Pango::FontDescription);
 	void set_alignment (Pango::Alignment);
 
 private:
@@ -30,3 +34,5 @@ private:
 };
 
 }
+
+#endif /* __ardour_canvas_text_h__ */

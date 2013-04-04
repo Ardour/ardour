@@ -310,11 +310,18 @@ Editor::set_canvas_cursor ()
 	if (!_internal_editing && get_smart_mode() ) {
 		double x, y;
 		get_pointer_position (x, y);
-		ArdourCanvas::Item* i = track_canvas->get_item_at (x, y);
-		if (i && i->property_parent() && (*i->property_parent()).get_data (X_("timeselection"))) {
-			pair<TimeAxisView*, int> tvp = trackview_by_y_position (_last_motion_y + vertical_adjustment.get_value());
-			if (dynamic_cast<AutomationTimeAxisView*> (tvp.first)) {
-				current_canvas_cursor = _cursors->up_down;
+		vector<ArdourCanvas::Item const *> items;
+		_track_canvas->root()->add_items_at_point (ArdourCanvas::Duple (x,y), items);
+
+		// CAIROCANVAS: need upper-most item, not all items 
+
+		if (!items.empty()) {
+			const ArdourCanvas::Item* i = items.front();
+			if (i && i->parent() && i->parent()->get_data (X_("timeselection"))) {
+				pair<TimeAxisView*, int> tvp = trackview_by_y_position (_last_motion_y + vertical_adjustment.get_value());
+				if (dynamic_cast<AutomationTimeAxisView*> (tvp.first)) {
+					current_canvas_cursor = _cursors->up_down;
+				}
 			}
 		}
 	}
@@ -892,7 +899,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case NoteItem:
 			if (internal_editing()) {
 				/* trim notes if we're in internal edit mode and near the ends of the note */
-				Notebase* cn = reinterpret_cast<NoteBase*>(item->get_data ("notebase"));
+				NoteBase* cn = reinterpret_cast<NoteBase*>(item->get_data ("notebase"));
 				assert (cn);
 				if (cn && cn->big_enough_to_trim() && cn->mouse_near_ends()) {
 					_drags->set (new NoteResizeDrag (this, item), event, current_canvas_cursor);
@@ -1319,7 +1326,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		return false;
 	}
 
-	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->track_canvas->get_window();
+	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->_track_canvas_viewport->get_window();
 
 	if (canvas_window) {
 		Glib::RefPtr<const Gdk::Window> pointer_window;
@@ -1329,8 +1336,8 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 		pointer_window = canvas_window->get_pointer (x, y, mask);
 
-		if (pointer_window == track_canvas->get_bin_window()) {
-			track_canvas->window_to_world (x, y, wx, wy);
+		if (pointer_window == _track_canvas->get_window()) {
+			_track_canvas_viewport->window_to_canvas (x, y, wx, wy);
 		}
 	}
 
@@ -1861,7 +1868,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if (mouse_mode == MouseGain || mouse_mode == MouseObject) {
 			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
 			if (line) {
-				line->set_fill_color (ARDOUR_UI::config()->canvasvar_EnteredAutomationLine.get());
+				line->set_outline_color (ARDOUR_UI::config()->canvasvar_EnteredAutomationLine.get());
 			}
 			if (is_drawable()) {
 				set_canvas_cursor (_cursors->fader);
@@ -2568,7 +2575,7 @@ Editor::reposition_zoom_rect (framepos_t start, framepos_t end)
 	double x2 = frame_to_pixel (end);
 	double y2 = _full_canvas_height - 1.0;
 
-	zoom_rect->set (ArdourCanvas::Rect (x1, 1, x2, y2);
+	zoom_rect->set (ArdourCanvas::Rect (x1, 1.0, x2, y2));
 }
 
 
@@ -2898,7 +2905,7 @@ Editor::set_canvas_cursor_for_region_view (double x, RegionView* rv)
 
 	assert (rv);
 
-	ArdourCanvas::Group* g = rv->get_parent_group ();
+	ArdourCanvas::Group* g = rv->get_canvas_group ();
 	ArdourCanvas::Group* p = g->parent ();
 
 	/* Compute x in region view parent coordinates */
@@ -2928,11 +2935,11 @@ Editor::set_canvas_cursor_for_region_view (double x, RegionView* rv)
 	}
 }
 
-/** Obtain the pointer position in world coordinates */
+/** Obtain the pointer position in canvas coordinates */
 void
 Editor::get_pointer_position (double& x, double& y) const
 {
 	int px, py;
-	track_canvas->get_pointer (px, py);
-	track_canvas->window_to_world (px, py, x, y);
+	_track_canvas->get_pointer (px, py);
+	_track_canvas_viewport->window_to_canvas (px, py, x, y);
 }

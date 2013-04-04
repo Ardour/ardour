@@ -76,7 +76,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	*/
 	_note_lines = new ArdourCanvas::LineSet (_canvas_group);
 
-	_note_lines->Event().connect(
+	_note_lines->Event.connect(
 		sigc::bind(sigc::mem_fun(_trackview.editor(),
 		                         &PublicEditor::canvas_stream_view_event),
 		           _note_lines, &_trackview));

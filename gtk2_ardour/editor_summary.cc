@@ -440,7 +440,7 @@ EditorSummary::get_editor (pair<double, double>* x, pair<double, double>* y) con
 		x->second = x->first + _editor->current_page_frames() * _x_scale;
 		
 		y->first = editor_y_to_summary (_editor->vertical_adjustment.get_value ());
-		y->second = editor_y_to_summary (_editor->vertical_adjustment.get_value () + _editor->visible_canvas_height())
+		y->second = editor_y_to_summary (_editor->vertical_adjustment.get_value () + _editor->visible_canvas_height());
 	}
 }
 
@@ -681,7 +681,7 @@ void
 EditorSummary::set_editor (double const x, double const y)
 {
 	ArdourCanvas::checkpoint ("editor", "-> set editor");
-	if (_editor->pending_visual_change.idle_handler_id >= 0 && _editor->pending_visual_change.executing == true) {
+	if (_editor->pending_visual_change.idle_handler_id >= 0 && _editor->pending_visual_change.being_handled == true) {
 
 		/* As a side-effect, the Editor's visual change idle handler processes
 		   pending GTK events.  Hence this motion notify handler can be called
@@ -796,7 +796,7 @@ void
 EditorSummary::set_editor_y (double const y)
 {
 	double y1 = summary_y_to_editor (y);
-	double const eh = _editor->visible_canvas_height()
+	double const eh = _editor->visible_canvas_height();
 	double y2 = y1 + eh;
 
 	double const full_editor_height = _editor->_full_canvas_height;
