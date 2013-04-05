@@ -13,7 +13,7 @@ Coord const ArdourCanvas::CAIRO_MAX = 65536;
 static inline Coord
 safe_add (Coord a, Coord b)
 {
-	if (((COORD_MAX - a) > b) || ((COORD_MAX - b) > a)) {
+	if (((COORD_MAX - a) <= b) || ((COORD_MAX - b) <= a)) {
 		return COORD_MAX;
 	}
 
@@ -135,7 +135,7 @@ ArdourCanvas::operator<< (ostream & s, Duple const & r)
 ostream &
 ArdourCanvas::operator<< (ostream & s, Rect const & r)
 {
-	s << "[(" << r.x0 << ", " << r.y0 << "), (" << r.x1 << ", " << r.y1 << ")]";
+	s << "[(" << r.x0 << ", " << r.y0 << "), (" << r.x1 << ", " << r.y1 << ") " << r.width() << " x " << r.height() << "]";
 	return s;
 }
 

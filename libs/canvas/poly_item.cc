@@ -1,7 +1,10 @@
 #include <algorithm>
+
 #include "pbd/xml++.h"
 #include "pbd/compose.h"
+
 #include "canvas/poly_item.h"
+#include "canvas/canvas.h"
 
 using namespace std;
 using namespace ArdourCanvas;
@@ -32,6 +35,7 @@ PolyItem::compute_bounding_box () const
 			have_one = true;
 		}
 	}
+
 
 	if (!have_one) {
 		_bounding_box = boost::optional<Rect> ();
@@ -98,4 +102,15 @@ PolyItem::set_poly_item_state (XMLNode const * node)
 	}
 
 	_bounding_box_dirty = true;
+}
+
+void
+PolyItem::dump (ostream& o) const
+{
+	Item::dump (o);
+
+	o << _canvas->indent() << _points.size() << " points" << endl;
+	for (Points::const_iterator i = _points.begin(); i != _points.end(); ++i) {
+		o << i->x << ", " << i->y << endl;
+	}
 }

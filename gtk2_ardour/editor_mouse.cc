@@ -308,19 +308,26 @@ Editor::set_canvas_cursor ()
 
 	/* up-down cursor as a cue that automation can be dragged up and down when in join object/range mode */
 	if (!_internal_editing && get_smart_mode() ) {
+
 		double x, y;
 		get_pointer_position (x, y);
-		vector<ArdourCanvas::Item const *> items;
-		_track_canvas->root()->add_items_at_point (ArdourCanvas::Duple (x,y), items);
 
-		// CAIROCANVAS: need upper-most item, not all items 
-
-		if (!items.empty()) {
-			const ArdourCanvas::Item* i = items.front();
-			if (i && i->parent() && i->parent()->get_data (X_("timeselection"))) {
-				pair<TimeAxisView*, int> tvp = trackview_by_y_position (_last_motion_y + vertical_adjustment.get_value());
-				if (dynamic_cast<AutomationTimeAxisView*> (tvp.first)) {
-					current_canvas_cursor = _cursors->up_down;
+		if (x >= 0 && y >= 0) {
+			
+			vector<ArdourCanvas::Item const *> items;
+			
+			_track_canvas->root()->add_items_at_point (ArdourCanvas::Duple (x,y), items);
+			
+			// first item will be the upper most 
+			
+			if (!items.empty()) {
+				const ArdourCanvas::Item* i = items.front();
+				
+				if (i && i->parent() && i->parent()->get_data (X_("timeselection"))) {
+					pair<TimeAxisView*, int> tvp = trackview_by_y_position (_last_motion_y + vertical_adjustment.get_value());
+					if (dynamic_cast<AutomationTimeAxisView*> (tvp.first)) {
+						current_canvas_cursor = _cursors->up_down;
+					}
 				}
 			}
 		}

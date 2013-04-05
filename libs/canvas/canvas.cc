@@ -24,8 +24,11 @@
 
 #include <cassert>
 #include <gtkmm/adjustment.h>
+
 #include "pbd/xml++.h"
 #include "pbd/compose.h"
+#include "pbd/stacktrace.h"
+
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
 
@@ -74,6 +77,10 @@ Canvas::Canvas (XMLTree const * tree)
 void
 Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context) const
 {
+	// cerr << "CANVAS @ " << this << endl;
+	// dump (cerr);
+	// cerr << "-------------------------\n";
+
 	checkpoint ("render", "-> render");
 	render_count = 0;
 	
@@ -86,6 +93,7 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 	boost::optional<Rect> root_bbox = _root.bounding_box();
 	if (!root_bbox) {
 		/* the root has no bounding box, so there's nothing to render */
+		checkpoint ("render", "no root bbox");
 		context->restore ();
 		return;
 	}
@@ -95,6 +103,7 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 		/* there's a common area between the root and the requested
 		   area, so render it.
 		*/
+		checkpoint ("render", "... root");
 		_root.render (*draw, context);
 	}
 
@@ -107,6 +116,32 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 	cout << "Rendered " << render_count << "\n";
 	checkpoint ("render", "<- render");
 }
+
+ostream&
+operator<< (ostream& o, Canvas& c)
+{
+	c.dump (o);
+	return o;
+}
+
+std::string
+Canvas::indent() const
+{ 
+	string s;
+
+	for (int n = 0; n < ArdourCanvas::dump_depth; ++n) {
+		s += '\t';
+	}
+
+	return s;
+}
+
+void
+Canvas::dump (ostream& o) const
+{
+	dump_depth = 0;
+	_root.dump (o);
+}	
 
 /** Called when an item has been shown or hidden.
  *  @param item Item that has been shown or hidden.
@@ -485,7 +520,7 @@ GtkCanvas::request_size (Duple size)
 	if (req.y > INT_MAX) {
 		req.y = INT_MAX;
 	}
-	
+
 	set_size_request (req.x, req.y);
 }
 

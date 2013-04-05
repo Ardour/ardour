@@ -19,6 +19,8 @@ public:
 	void set (Points const &);
 	Points const & get () const;
 
+        void dump (std::ostream&) const;
+
 protected:
 	void render_path (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 

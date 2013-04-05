@@ -195,15 +195,24 @@ Item::bounding_box () const
 Coord
 Item::height () const 
 {
-	boost::optional<Rect> bb = bounding_box().get();
-	return bb->height ();
+	boost::optional<Rect> bb  = bounding_box();
+
+	if (bb) {
+		return bb->height ();
+	}
+	return 0;
 }
 
 Coord
 Item::width () const 
 {
 	boost::optional<Rect> bb = bounding_box().get();
-	return bb->width ();
+
+	if (bb) {
+		return bb->width ();
+	}
+
+	return 0;
 }
 
 /* XXX may be called even if bbox is not changing ... bit grotty */
@@ -324,4 +333,34 @@ void
 Item::set_ignore_events (bool ignore)
 {
 	_ignore_events = ignore;
+}
+
+void
+Item::dump (ostream& o) const
+{
+	boost::optional<Rect> bb = bounding_box();
+
+	o << _canvas->indent() << whatami() << ' ' << this;
+
+	if (bb) {
+		o << endl << _canvas->indent() << "\tbbox: " << bb.get();
+	} else {
+		o << "bbox unset";
+	}
+
+	o << endl;
+}
+
+std::string
+Item::whatami () const 
+{
+	std::string type = demangle (typeid (*this).name());
+	return type.substr (type.find_last_of (':') + 1);
+}
+
+ostream&
+ArdourCanvas::operator<< (ostream& o, const Item& i)
+{
+	i.dump (o);
+	return o;
 }

@@ -25,6 +25,7 @@ namespace ArdourCanvas {
 	extern void checkpoint (std::string, std::string);
 	extern void set_epoch ();
 	extern int render_count;
+	extern int dump_depth;
 }
 
 #endif

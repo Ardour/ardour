@@ -11,6 +11,7 @@ uint64_t PBD::DEBUG::CanvasEvents = PBD::new_debug_bit ("canvasevents");
 struct timeval ArdourCanvas::epoch;
 map<string, struct timeval> ArdourCanvas::last_time;
 int ArdourCanvas::render_count;
+int ArdourCanvas::dump_depth;
 
 void
 ArdourCanvas::set_epoch ()

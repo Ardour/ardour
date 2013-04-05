@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2011 Paul Davis
+    Copyright (C) 2011-2013 Paul Davis
     Author: Carl Hetherington <cth@carlh.net>
 
     This program is free software; you can redistribute it and/or modify
@@ -15,7 +15,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 /** @file  canvas/canvas.h
@@ -92,6 +91,9 @@ public:
 		_log_renders = log;
 	}
 
+        std::string indent() const;
+        void dump (std::ostream&) const;
+    
 protected:
 	void queue_draw_item_area (Item *, Rect);
 	
@@ -148,7 +150,7 @@ public:
 	void ungrab ();
 
 	Cairo::RefPtr<Cairo::Context> context ();
-	
+
 protected:
 	bool on_expose_event (GdkEventExpose *);
 	bool on_button_press_event (GdkEventButton *);
@@ -194,5 +196,7 @@ private:
 };
 
 }
+
+std::ostream& operator<< (std::ostream&, const ArdourCanvas::Canvas&);
 
 #endif

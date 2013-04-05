@@ -496,7 +496,7 @@ Editor::Editor ()
 
 	_cursors = new MouseCursors;
 
-	ArdourCanvas::Canvas* time_pad = new ArdourCanvas::GtkCanvas ();
+	ArdourCanvas::GtkCanvas* time_pad = manage (new ArdourCanvas::GtkCanvas ());
 
 	ArdourCanvas::Line* pad_line_1 = new ArdourCanvas::Line (time_pad->root());
 	pad_line_1->set (ArdourCanvas::Duple (0.0, 1.0), ArdourCanvas::Duple (100.0, 1.0));
@@ -504,7 +504,7 @@ Editor::Editor ()
 	pad_line_1->show();
 
 	// CAIROCANVAS
-	//time_pad->show();
+	time_pad->show();
 
 	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 2);
 	time_canvas_vbox.set_size_request (-1, -1);

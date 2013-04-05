@@ -34,6 +34,8 @@ public:
 
 	void add_items_at_point (Duple, std::vector<Item const *> &) const;
 
+        void dump (std::ostream&) const;
+
 	static int default_items_per_cell;
 
 protected:

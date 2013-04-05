@@ -275,6 +275,8 @@ Editor::track_canvas_viewport_size_allocated ()
 	_visible_canvas_width  = _canvas_viewport_allocation.get_width ();
 	_visible_canvas_height = _canvas_viewport_allocation.get_height ();
 
+	cerr << "VISIBLE CANVAS now: " << _visible_canvas_width << " x " << _visible_canvas_height << endl;
+
 	if (_session) {
 		TrackViewList::iterator i;
 

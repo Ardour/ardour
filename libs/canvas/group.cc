@@ -2,15 +2,19 @@
 #include <cairomm/context.h>
 #include "pbd/stacktrace.h"
 #include "pbd/xml++.h"
+
 #include "canvas/group.h"
 #include "canvas/types.h"
 #include "canvas/debug.h"
 #include "canvas/item_factory.h"
+#include "canvas/item.h"
+#include "canvas/canvas.h"
 
 using namespace std;
 using namespace ArdourCanvas;
 
 int Group::default_items_per_cell = 64;
+
 
 Group::Group (Canvas* canvas)
 	: Item (canvas)
@@ -52,11 +56,13 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	vector<Item*> items = _lut->get (area);
 
 	for (vector<Item*>::const_iterator i = items.begin(); i != items.end(); ++i) {
+
 		if (!(*i)->visible ()) {
 			continue;
 		}
 		
 		boost::optional<Rect> item_bbox = (*i)->bounding_box ();
+
 		if (!item_bbox) {
 			continue;
 		}
@@ -229,4 +235,30 @@ Group::set_state (XMLNode const * node)
 		/* this will create the item and add it to this group */
 		create_item (this, *i);
 	}
+}
+
+void
+Group::dump (ostream& o) const
+{
+	o << _canvas->indent();
+	o << "Group " << this;
+	o << " Items: " << _items.size();
+
+	boost::optional<Rect> bb = bounding_box();
+
+	if (bb) {
+		o << endl << _canvas->indent() << "  bbox: " << bb.get();
+	} else {
+		o << "  bbox unset";
+	}
+
+	o << endl;
+
+	ArdourCanvas::dump_depth++;
+
+	for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
+		o << **i;
+	}
+
+	ArdourCanvas::dump_depth--;
 }
