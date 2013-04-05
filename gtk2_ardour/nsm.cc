@@ -51,7 +51,6 @@ NSM_Client::command_open(const char *name,
 
     ARDOUR_COMMAND_LINE::session_name = name;
     ARDOUR_COMMAND_LINE::jack_client_name = client_id;
-    ARDOUR_COMMAND_LINE::no_connect_ports = true;
 
     if (ARDOUR_UI::instance()->get_session_parameters(true, false, "")) {
         return ERR_GENERAL;
