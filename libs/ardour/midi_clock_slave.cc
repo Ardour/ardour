@@ -154,6 +154,7 @@ MIDIClock_Slave::update_midi_clock (Parser& /*parser*/, framepos_t timestamp)
 		// so the loop will compensate for accumulating rounding errors
 		error = (double(should_be_position) - double(session->transport_frame()));
 		e = error / double(session->frame_rate());
+		current_delta = error;
 
 		// update DLL
 		t0 = t1;
@@ -344,7 +345,6 @@ MIDIClock_Slave::speed_and_position (double& speed, framepos_t& pos)
 	}
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("speed_and_position: %1 & %2 <-> %3 (transport)\n", speed, pos, session->transport_frame()));
-	current_delta = pos - session->transport_frame();
 
 	return true;
 }
