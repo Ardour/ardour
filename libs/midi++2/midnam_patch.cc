@@ -239,7 +239,6 @@ Control::get_state (void)
 	return *node;
 }
 
-
 int
 Control::set_state (const XMLTree& tree, const XMLNode& node)
 {

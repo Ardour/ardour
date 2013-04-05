@@ -2,24 +2,10 @@
     Copyright (C) 2009-2013 Paul Davis
     Authors: Sampo Savolainen, Jannis Pohlmann
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-#include <glibmm/threads.h>
-
-#include "pbd/abstract_ui.h"
-
-#include <cwiid.h>
-=======
-=======
->>>>>>> master
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
-<<<<<<< HEAD
->>>>>>> master
-=======
->>>>>>> master
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,68 +16,11 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-#define ENSURE_WIIMOTE_THREAD(slot) \
-	if (Glib::Threads::Thread::self() != main_thread) {	\
-		slot_mutex.lock();\
-		slot_list.push_back(slot);\
-		slot_cond.signal();\
-		slot_mutex.unlock();\
-		return;\
-	} 
-=======
 */
->>>>>>> master
-=======
-*/
->>>>>>> master
 
 #ifndef ardour_wiimote_control_protocol_h
 #define ardour_wiimote_control_protocol_h
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-class WiimoteControlProtocol : public ARDOUR::ControlProtocol {
-  public:
-    WiimoteControlProtocol (ARDOUR::Session &);
-    virtual ~WiimoteControlProtocol ();
-    
-    static bool probe();
-    
-    int set_active (bool yn);
-    XMLNode& get_state();
-    int set_state(const XMLNode&);
-    
-    void wiimote_callback(cwiid_wiimote_t *, int, union cwiid_mesg [], 
-			  struct timespec *);
-    
-  private:
-    
-    void wiimote_main();
-    volatile bool main_thread_quit;
-    volatile bool restart_discovery;
-    
-    Glib::Threads::Thread *main_thread;
-    
-    void update_led_state();
-    
-    bool callback_thread_registered_for_ardour;
-    
-    static uint16_t button_state;
-    
-    cwiid_wiimote_t *wiimote_handle;
-    
-    Glib::Threads::Cond slot_cond;
-    Glib::Threads::Mutex slot_mutex;
-    
-    std::list< sigc::slot<void> > slot_list;
-    
-    sigc::connection transport_state_conn;
-    sigc::connection record_state_conn;
-=======
-=======
->>>>>>> master
 #include <cwiid.h>
 
 #include "pbd/abstract_ui.h"
@@ -141,10 +70,6 @@ protected:
 	GSource *idle_source;
 	uint16_t button_state;
 	bool callback_thread_registered;
-<<<<<<< HEAD
->>>>>>> master
-=======
->>>>>>> master
 };
 
 #endif  /* ardour_wiimote_control_protocol_h */

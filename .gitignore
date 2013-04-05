@@ -30,72 +30,6 @@ depcomp
 *~
 *.swp
 .gdb_history
-<<<<<<< HEAD
-core
-cscope.files
-cscope.out
-tags
-<<<<<<< variant A
-BROWSE
-core
-gtk2_ardour/po/*.mo
-libs/ardour/po/*.mo
-gtk2_ardour/*.pot
-libs/ardour/libardour.pot
-.lock-wafbuild
-GPATH
-GRTAGS
-GSYMS
-GTAGS
->>>>>>> variant B
-
-# generated folders doc, build, packaging
-.waf-*
-.lock-waf*
-/build/
-/doc/html/
-/doc/latex/
-/tools/osx_packaging/Resources/
-
-
-# translations
-/gtk2_ardour/po/*.mo
-/gtk2_ardour/*.pot
-/libs/ardour/po/*.mo
-/libs/ardour/libardour.pot
-
-# /gtk2_ardour/
-/gtk2_ardour/ardour.sh
-/gtk2_ardour/ardev_common.sh
-/gtk2_ardour/*.bindings
-/gtk2_ardour/*.rc
-/gtk2_ardour/version.cc
-/gtk2_ardour/version.h
-
-# /libs/ardour/
-/libs/ardour/version.cc
-/libs/ardour/ardour/version.h
-/libs/ardour/svn_revision.cc
-libs/ardour/config_text.cc
-
-# /libs/gtkmm2ext/
-/libs/gtkmm2ext/*.pot
-/libs/gtkmm2ext/*.mo
-/libs/gtkmm2ext/*.po
-/libs/gtkmm2ext/version.cc
-/libs/gtkmm2ext/gtkmm2ext/version.h
-
-# /libs/midi++2/
-/libs/midi++2/version.cc
-/libs/midi++2/midi++/version.h
-
-# /libs/pbd/
-/libs/pbd/version.cc
-/libs/pbd/pbd/version.h
-####### Ancestor
-BROWSE
-=======
->>>>>>> master
 core
 cscope.files
 cscope.out
@@ -141,10 +75,6 @@ libs/ardour/config_text.cc
 /libs/midi++2/version.cc
 /libs/midi++2/midi++/version.h
 
-<<<<<<< HEAD
-======= end
-=======
 # /libs/pbd/
 /libs/pbd/version.cc
 /libs/pbd/pbd/version.h
->>>>>>> master

@@ -64,9 +64,9 @@ done
 
 #release_version=`grep -m 1 '[^A-Za-z_]OSX_VERSION = ' ../../wscript | cut -d' ' -f 3 | sed "s/'//g"`
 release_version=3.0
-revision=`grep -m 1 'revision =' ../../libs/ardour/revision.cc | cut -d' ' -f 8 | sed 's/[^0-9]//g'`
-echo "Version is $release_version / $revision"
-info_string="$release_version/$revision built on `hostname` by `whoami` on `date`"
+svn_version=`grep -m 1 'svn_revision =' ../../libs/ardour/svn_revision.cc | cut -d' ' -f 8 | sed 's/[^0-9]//g'`
+echo "Version is $release_version / $svn_version"
+info_string="$release_version/$svn_version built on `hostname` by `whoami` on `date`"
 echo "Info string is $info_string"
 
 # setup directory structure
@@ -166,12 +166,12 @@ env="<key>LSEnvironment</key><dict>$env<key>ARDOUR_BUNDLED</key><string>true</st
 
 # edit plist
 sed -e "s?@ENV@?$env?g" \
-    -e "s?@VERSION@?$release_version/$revision?g" \
+    -e "s?@VERSION@?$release_version/$svn_version?g" \
     -e "s?@INFOSTRING@?$info_string?g" < Info.plist.in > Info.plist
 # and plist strings
 sed -e "s?@APPNAME@?$appname?" \
     -e "s?@ENV@?$env?g" \
-    -e "s?@VERSION@?$release_version/$revision?g" \
+    -e "s?@VERSION@?$release_version/$svn_version?g" \
     -e "s?@INFOSTRING@?$info_string?g" < InfoPlist.strings.in > Resources/InfoPlist.strings || exit 1
 
 # copy static files
@@ -497,9 +497,9 @@ fi
 
 echo "Building DMG ..."
 
-# UC_DMG=$APPNAME-${release_version}-${revision}-UC.dmg
-# FINAL_DMG=$APPNAME-${release_version}-${revision}.dmg
-UC_DMG=$APPNAME-${release_version}-${revision}.dmg
+# UC_DMG=$APPNAME-${release_version}-${svn_version}-UC.dmg
+# FINAL_DMG=$APPNAME-${release_version}-${svn_version}.dmg
+UC_DMG=$APPNAME-${release_version}-${svn_version}.dmg
 VOLNAME=$APPNAME-$release_version
 
 # TODO use mktemp

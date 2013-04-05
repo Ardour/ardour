@@ -106,7 +106,7 @@ void		CAAUParameter::Init (AudioUnit au, AudioUnitParameterID param, AudioUnitSc
 	} else
 		mParamName = CFStringCreateWithCString(NULL, mParamInfo.name, kCFStringEncodingUTF8);
 	
-	const char* str = 0;
+	char* str = 0;
 	switch (mParamInfo.unit)
 	{
 		case kAudioUnitParameterUnit_Boolean:

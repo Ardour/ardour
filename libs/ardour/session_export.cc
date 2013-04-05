@@ -105,7 +105,6 @@ Session::start_audio_export (framepos_t position)
 {
 	if (!_exporting) {
 		pre_export ();
-		_export_started = false;
 	}
 	_export_started = false;
 

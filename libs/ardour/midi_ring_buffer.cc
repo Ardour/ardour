@@ -64,9 +64,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 			break;
 		} else if (ev_time < start) {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 before start @ %2\n", ev_time, start));
-			this->increment_read_ptr (prefix_size);
-			this->increment_read_ptr (ev_size);
-			continue;
+			break;
 		} else {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 in range %2 .. %3\n", ev_time, start, end));
 		}

@@ -699,8 +699,6 @@ LV2Plugin::set_parameter(uint32_t which, float val)
 		}
 
 		_shadow_data[which] = val;
-		
-
 	} else {
 		warning << string_compose(
 		    _("Illegal parameter number used with plugin \"%1\". "

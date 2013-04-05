@@ -626,10 +626,6 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 					set_selected_regionview_from_click (press, op);
 				}
 			}
-		} else {
-			if (mouse_mode != MouseRange) {
-				set_selected_regionview_from_click (press, op);
-			}
 		}
 		break;
 
