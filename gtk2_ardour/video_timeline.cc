@@ -155,8 +155,8 @@ VideoTimeLine::close_session ()
 	if (video_duration == 0) {
 		return;
 	}
-	close_video_monitor();
 	save_session();
+	close_video_monitor();
 
 	remove_frames();
 	video_filename = "";
@@ -581,6 +581,30 @@ VideoTimeLine::gui_update(std::string const & t) {
 		editor->toggle_xjadeo_proc(0);
 		//close_video_monitor();
 		editor->set_xjadeo_sensitive(false);
+	} else if (t == "xjadeo-window-ontop-on") {
+		editor->toggle_xjadeo_viewoption(1, 1);
+	} else if (t == "xjadeo-window-ontop-off") {
+		editor->toggle_xjadeo_viewoption(1, 0);
+	} else if (t == "xjadeo-window-osd-timecode-on") {
+		editor->toggle_xjadeo_viewoption(2, 1);
+	} else if (t == "xjadeo-window-osd-timecode-off") {
+		editor->toggle_xjadeo_viewoption(2, 0);
+	} else if (t == "xjadeo-window-osd-frame-on") {
+		editor->toggle_xjadeo_viewoption(3, 1);
+	} else if (t == "xjadeo-window-osd-frame-off") {
+		editor->toggle_xjadeo_viewoption(3, 0);
+	} else if (t == "xjadeo-window-osd-box-on") {
+		editor->toggle_xjadeo_viewoption(4, 1);
+	} else if (t == "xjadeo-window-osd-box-off") {
+		editor->toggle_xjadeo_viewoption(4, 0);
+	} else if (t == "xjadeo-window-fullscreen-on") {
+		editor->toggle_xjadeo_viewoption(5, 1);
+	} else if (t == "xjadeo-window-fullscreen-off") {
+		editor->toggle_xjadeo_viewoption(5, 0);
+	} else if (t == "xjadeo-window-letterbox-on") {
+		editor->toggle_xjadeo_viewoption(6, 1);
+	} else if (t == "xjadeo-window-letterbox-off") {
+		editor->toggle_xjadeo_viewoption(6, 0);
 	}
 }
 
@@ -688,6 +712,7 @@ VideoTimeLine::open_video_monitor() {
 		vmonitor = new VideoMonitor(editor, _xjadeo_bin);
 		vmonitor->set_session(_session);
 		vmonitor->Terminated.connect (sigc::mem_fun (*this, &VideoTimeLine::terminated_video_monitor));
+		vmonitor->UiState.connect (*this, invalidator (*this), boost::bind (&VideoTimeLine::gui_update, this, _1), gui_context());
 	} else if (vmonitor->is_started()) {
 		return;
 	}
@@ -722,6 +747,15 @@ VideoTimeLine::close_video_monitor() {
 		vmonitor->quit();
 	}
 }
+
+void
+VideoTimeLine::control_video_monitor(int what, int param) {
+	if (!vmonitor || !vmonitor->is_started()) {
+		return;
+	}
+	vmonitor->send_cmd(what, param);
+}
+
 
 void
 VideoTimeLine::terminated_video_monitor () {

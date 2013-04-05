@@ -418,7 +418,7 @@ SystemExec::terminate ()
 	if (pid) {
 		::fprintf(stderr, "Child process is running. trying SIGTERM\n");
 		::kill(pid, SIGTERM);
-		::usleep(10000);
+		::usleep(50000);
 		wait(WNOHANG);
 	}
 	if (pid) {

@@ -660,22 +660,28 @@ ARDOUR_UI::startup ()
 	app->ready ();
 
 	nsm_url = getenv ("NSM_URL");
+	nsm = 0;
 
 	if (nsm_url) {
 		nsm = new NSM_Client;
 		if (!nsm->init (nsm_url)) {
 			nsm->announce (PROGRAM_NAME, ":dirty:", "ardour3");
 
+			unsigned int i = 0;
 			// wait for announce reply from nsm server
-			do {
+			for ( i = 0; i < 5000; ++i) {
 				nsm->check ();
-				usleep (10);
-			} while (!nsm->is_active ());
+				usleep (i);
+				if (nsm->is_active())
+					break;
+			}
 			// wait for open command from nsm server
-			do {
+			for ( i = 0; i < 5000; ++i) {
 				nsm->check ();
-				usleep (10);
-			} while (!nsm->client_id ());
+				usleep (1000);
+				if (nsm->client_id ())
+					break;
+			}
 
 			if (_session && nsm) {
 				_session->set_nsm_state( nsm->is_active() );
@@ -697,12 +703,6 @@ ARDOUR_UI::startup ()
 					act->set_sensitive (false);
 				}
 			}
-
-			// wait for session is loaded reply from nsm server
-			do {
-				nsm->check ();
-				usleep (10);
-			} while (!nsm->session_loaded ());
 
 		}
 		else {
@@ -981,7 +981,7 @@ ARDOUR_UI::every_second ()
 	update_disk_space ();
 	update_timecode_format ();
 
-	if (nsm && nsm->is_active () && nsm->session_loaded ()) {
+	if (nsm && nsm->is_active ()) {
 		nsm->check ();
 
 		if (!_was_dirty && _session->dirty ()) {

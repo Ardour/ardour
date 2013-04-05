@@ -440,6 +440,17 @@
 #ifdef WITH_VIDEOTIMELINE
         <separator/>
         <menuitem action="toggle-video-ruler"/>
+      </menu>
+      <menu action="VideoMonitorMenu">
+        <menuitem action="zoom-vmon-100"/>
+        <menuitem action="toggle-vmon-letterbox"/>
+        <separator/>
+        <menuitem action="toggle-vmon-ontop"/>
+        <menuitem action="toggle-vmon-fullscreen"/>
+        <separator/>
+        <menuitem action="toggle-vmon-timecode"/>
+        <menuitem action="toggle-vmon-frame"/>
+        <menuitem action="toggle-vmon-osdbg"/>
 #endif
       </menu>
       <menu action="ScrollMenu">

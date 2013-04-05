@@ -66,21 +66,21 @@ using namespace ARDOUR;
 ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	: ArdourDialog (_("Export Video File "))
 	, editor (ed)
-	, outfn_path_label (_("Output File:"), Gtk::ALIGN_LEFT)
+	, outfn_path_label (_("File:"), Gtk::ALIGN_LEFT)
 	, outfn_browse_button (_("Browse"))
-	, invid_path_label (_("Input Video File:"), Gtk::ALIGN_LEFT)
+	, invid_path_label (_("Video:"), Gtk::ALIGN_LEFT)
 	, invid_browse_button (_("Browse"))
 	, transcode_button (_("Export"))
 	, abort_button (_("Abort"))
 	, scale_checkbox (_("Scale Video (W x H):"))
-	, width_adjustment (128, 768, 1920, 1, 16, 0)
+	, width_adjustment (768, 128, 1920, 1, 16, 0)
 	, width_spinner (width_adjustment)
-	, height_adjustment (128, 576, 1920, 1, 16, 0)
+	, height_adjustment (576, 128, 1920, 1, 16, 0)
 	, height_spinner (height_adjustment)
 	, aspect_checkbox (_("Set Aspect Ratio:"))
 	, normalize_checkbox (_("Normalize Audio"))
 	, twopass_checkbox (_("2 Pass Encoding"))
-	, optimizations_checkbox (_("Optimizations:"))
+	, optimizations_checkbox (_("Codec Optimizations:"))
 	, optimizations_label ("-")
 	, deinterlace_checkbox (_("Deinterlace"))
 	, bframes_checkbox (_("Use [2] B-frames (MPEG 2 or 4 only)"))
@@ -91,7 +91,6 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 #endif
 {
 	set_session (s);
-
 
 	set_name ("ExportVideoDialog");
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -117,29 +116,32 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	}
 	delete transcoder; transcoder = 0;
 
-	l = manage (new Label (_("<b>Files:</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("<b>Output:</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
-	vbox->pack_start (*l, false, false);
+	vbox->pack_start (*l, false, false, 4);
 
 	path_hbox = manage (new HBox);
 	path_hbox->pack_start (outfn_path_label, false, false, 3);
 	path_hbox->pack_start (outfn_path_entry, true, true, 3);
 	path_hbox->pack_start (outfn_browse_button, false, false, 3);
-	outfn_browse_button.set_name ("PaddedButton");
-	vbox->pack_start (*path_hbox, false, false);
+	vbox->pack_start (*path_hbox, false, false, 2);
+
+	l = manage (new Label (_("<b>Input:</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l->set_use_markup ();
+	vbox->pack_start (*l, false, false, 4);
 
 	path_hbox = manage (new HBox);
 	path_hbox->pack_start (invid_path_label, false, false, 3);
 	path_hbox->pack_start (invid_path_entry, true, true, 3);
 	path_hbox->pack_start (invid_browse_button, false, false, 3);
-	invid_browse_button.set_name ("PaddedButton");
-	vbox->pack_start (*path_hbox, false, false);
+	vbox->pack_start (*path_hbox, false, false, 2);
 
 	path_hbox = manage (new HBox);
-	l = manage (new Label (_("Input Audio (Ardour Session):"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	path_hbox->pack_start (*l, true, true, 3);
-	path_hbox->pack_start (insnd_combo, true, true, 3);
-	vbox->pack_start (*path_hbox, false, false);
+	l = manage (new Label (_("Audio:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	path_hbox->pack_start (*l, false, false, 3);
+	l = manage (new Label (_("Master Bus"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	path_hbox->pack_start (*l, false, false, 2);
+	vbox->pack_start (*path_hbox, false, false, 2);
 
 	insnd_combo.set_name ("PaddedButton");
 	insnd_combo.append_text("from ardour session-start to session-end");
@@ -168,43 +170,47 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	l->set_use_markup ();
 	options_box->pack_start (*l, false, true, 4);
 
-	Table* t = manage (new Table (4, 11));
+	Table* t = manage (new Table (4, 12));
 	t->set_spacings (4);
+	int ty = 0;
 	options_box->pack_start (*t, true, true, 4);
+	l = manage (new Label (_("Range:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	t->attach (*l, 0, 1, ty, ty+1);
+	t->attach (insnd_combo, 1, 4, ty, ty+1); ty++;
 	l = manage (new Label (_("Preset:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	t->attach (*l, 0, 1, 0, 1);
-	t->attach (preset_combo, 1, 4, 0, 1);
+	t->attach (*l, 0, 1, ty, ty+1);
+	t->attach (preset_combo, 1, 4, ty, ty+1); ty++;
 	l = manage (new Label (_("Video Codec:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	t->attach (*l, 0, 1, 1, 2);
-	t->attach (video_codec_combo, 1, 2, 1, 2);
+	t->attach (*l, 0, 1, ty, ty+1);
+	t->attach (video_codec_combo, 1, 2, ty, ty+1);
 	l = manage (new Label (_("Video KBit/s:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	t->attach (*l, 2, 3, 1, 2);
-	t->attach (video_bitrate_combo, 3, 4, 1, 2);
+	t->attach (*l, 2, 3, ty, ty+1);
+	t->attach (video_bitrate_combo, 3, 4, ty, ty+1); ty++;
 	l = manage (new Label (_("Audio Codec:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	t->attach (*l, 0, 1, 2, 3);
-	t->attach (audio_codec_combo, 1, 2, 2, 3);
+	t->attach (*l, 0, 1, ty, ty+1);
+	t->attach (audio_codec_combo, 1, 2, ty, ty+1);
 	l = manage (new Label (_("Audio KBit/s:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	t->attach (*l, 2, 3, 2, 3);
-	t->attach (audio_bitrate_combo, 3, 4, 2, 3);
+	t->attach (*l, 2, 3, ty, ty+1);
+	t->attach (audio_bitrate_combo, 3, 4, ty, ty+1); ty++;
 	l = manage (new Label (_("Audio Samplerate:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	t->attach (*l, 0, 1, 3, 4);
-	t->attach (audio_samplerate_combo, 1, 2, 3, 4);
-	t->attach (normalize_checkbox, 2, 4, 3, 4);
-	t->attach (scale_checkbox, 0, 2, 4, 5);
-	t->attach (width_spinner, 2, 3, 4, 5);
-	t->attach (height_spinner, 3, 4, 4, 5);
-	t->attach (fps_checkbox, 0, 3, 5, 6);
-	t->attach (fps_combo, 3, 4, 5, 6);
-	t->attach (aspect_checkbox, 2, 3, 6, 7);
-	t->attach (aspect_combo, 3, 4, 6, 7);
-	t->attach (twopass_checkbox, 0, 2, 6, 7);
-	t->attach (bframes_checkbox, 0, 2, 7, 8);
-	t->attach (deinterlace_checkbox, 2, 4, 7, 8);
-	t->attach (meta_checkbox, 2, 4, 8, 9);
-	t->attach (optimizations_checkbox, 0, 1, 9, 10);
-	t->attach (optimizations_label, 1, 4, 9, 10);
+	t->attach (*l, 0, 1, ty, ty+1);
+	t->attach (audio_samplerate_combo, 1, 2, ty, ty+1);
+	t->attach (normalize_checkbox, 2, 4, ty, ty+1); ty++;
+	t->attach (scale_checkbox, 0, 2, ty, ty+1);
+	t->attach (width_spinner, 2, 3, ty, ty+1);
+	t->attach (height_spinner, 3, 4, ty, ty+1); ty++;
+	t->attach (fps_checkbox, 0, 3, ty, ty+1);
+	t->attach (fps_combo, 3, 4, ty, ty+1); ty++;
+	t->attach (twopass_checkbox, 0, 2, ty, ty+1);
+	t->attach (aspect_checkbox, 2, 3, ty, ty+1);
+	t->attach (aspect_combo, 3, 4, ty, ty+1); ty++;
+	t->attach (bframes_checkbox, 0, 2, ty, ty+1);
+	t->attach (deinterlace_checkbox, 2, 4, ty, ty+1); ty++;
+	t->attach (meta_checkbox, 2, 4, ty, ty+1); ty++;
+	t->attach (optimizations_checkbox, 0, 1, ty, ty+1);
+	t->attach (optimizations_label, 1, 4, ty, ty+1); ty++;
 #if 1 /* tentative debug mode */
-	t->attach (debug_checkbox, 0, 4, 10, 11);
+	t->attach (debug_checkbox, 0, 4, ty, ty+1); ty++;
 #endif
 
 	preset_combo.set_name ("PaddedButton");
@@ -293,7 +299,7 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	fps_checkbox_toggled();
 	video_codec_combo_changed();
 
-	vbox->pack_start (*options_box, false, true);
+	vbox->pack_start (*options_box, false, true, 4);
 	get_vbox()->set_spacing (4);
 	get_vbox()->pack_start (*vbox, false, false);
 
@@ -344,9 +350,41 @@ ExportVideoDialog::update_progress (framecnt_t c, framecnt_t a)
 	if (a == 0 || c > a) {
 		pbar.set_pulse_step(.1);
 		pbar.pulse();
-		return;
+	} else {
+		double progress = (double)c / (double) a;
+		progress = progress / ((twopass ? 2.0 : 1.0) + (normalize ? 2.0 : 1.0));
+		if (normalize && twopass) progress += (firstpass ? .5 : .75);
+		else if (normalize) progress += 2.0/3.0;
+		else if (twopass) progress += (firstpass ? 1.0/3.0 : 2.0/3.0);
+		else progress += .5;
+
+		pbar.set_fraction (progress);
 	}
-	pbar.set_fraction ((double)c / (double) a);
+}
+
+
+gint
+ExportVideoDialog::audio_progress_display ()
+{
+	std::string status_text;
+	double progress = 0.0;
+		if (status->normalizing) {
+			pbar.set_text (_("Normalizing audio"));
+			progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
+			progress = progress / (twopass ? 4.0 : 3.0) + (twopass ? .25 : 1.0/3.0);
+		} else {
+			pbar.set_text (_("Exporting audio"));
+			progress = ((float) status->processed_frames_current_timespan) / status->total_frames_current_timespan;
+			progress = progress / ((twopass ? 2.0 : 1.0) + (normalize ? 2.0 : 1.0));
+		}
+		if (progress < previous_progress) {
+			// Work around gtk bug
+			pbar.hide();
+			pbar.show();
+		}
+		previous_progress = progress;
+		pbar.set_fraction (progress);
+	return TRUE;
 }
 
 void
@@ -355,10 +393,9 @@ ExportVideoDialog::finished ()
 	if (aborted) {
 		unlink(outfn_path_entry.get_text().c_str());
 		unlink (insnd.c_str());
-		warning << _("Video Export Failed or Was Aborted") << endmsg;
 		Gtk::Dialog::response(RESPONSE_CANCEL);
-	} else if (twopass) {
-		twopass = false;
+	} else if (twopass && firstpass) {
+		firstpass = false;
 		if (transcoder) { delete transcoder; transcoder = 0;}
 		encode_pass(2);
 	} else {
@@ -386,6 +423,8 @@ ExportVideoDialog::launch_export ()
 	progress_box->show();
 	aborted = false;
 	twopass = twopass_checkbox.get_active();
+	firstpass = true;
+	normalize = normalize_checkbox.get_active();
 
 	/* export audio track */
 	ExportTimespanPtr tsp = _session->get_export_handler()->add_timespan();
@@ -394,7 +433,7 @@ ExportVideoDialog::launch_export ()
 	boost::shared_ptr<AudioGrapher::BroadcastInfo> b;
 	XMLTree tree;
 	std::string vtl_samplerate = audio_samplerate_combo.get_active_text();
-	std::string vtl_normalize = normalize_checkbox.get_active()?"true":"false";
+	std::string vtl_normalize = normalize ? "true" : "false";
 	tree.read_buffer(std::string(
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 "<ExportFormatSpecification name=\"VTL-WAV-16\" id=\"3094591e-ccb9-4385-a93f-c9955ffeb1f0\">"
@@ -486,34 +525,19 @@ ExportVideoDialog::launch_export ()
 	/* do sound export */
 	_session->get_export_handler()->add_export_config (tsp, ccp, fmp, fnp, b);
 	_session->get_export_handler()->do_export();
-	boost::shared_ptr<ARDOUR::ExportStatus> status = _session->get_export_status ();
-	//status->running = true;
+	status = _session->get_export_status ();
 
-	float previous_progress = 0.0;
+	audio_progress_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ExportVideoDialog::audio_progress_display), 100);
+	previous_progress = 0.0;
 	while (status->running) {
 		if (aborted) { status->abort(); }
-
-		float progress = 0.0;
-		if (status->normalizing) {
-			pbar.set_text (_("Normalizing audio"));
-			progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
-		} else {
-			pbar.set_text (_("Exporting audio"));
-			progress = ((float) status->processed_frames_current_timespan) / status->total_frames_current_timespan;
-		}
-		if (progress < previous_progress) {
-			// Work around gtk bug
-			pbar.hide();
-			pbar.show();
-		}
-		previous_progress = progress;
-		pbar.set_fraction (progress);
 		if (gtk_events_pending()) {
 			gtk_main_iteration ();
 		} else {
 			usleep (10000);
 		}
 	}
+	audio_progress_connection.disconnect();
 	status->finish ();
 	if (status->aborted()) {
 		unlink (insnd.c_str());
@@ -775,7 +799,6 @@ ExportVideoDialog::video_codec_combo_changed ()
 {
 	if ((  video_codec_combo.get_active_text() == "mpeg4"
 	     ||video_codec_combo.get_active_text() == "mpeg2video"
-	     ||video_codec_combo.get_active_text() == "flv"
 			) && !(
 	       preset_combo.get_active_text() == "dvd-PAL"
 	     ||preset_combo.get_active_text() == "dvd-NTSC"
@@ -888,14 +911,14 @@ ExportVideoDialog::preset_combo_changed ()
 	if (p == "dvd-PAL" || p == "dvd-NTSC") {
 		for (it = c.begin(); it != c.end(); ++it) {
 			int row = it->get_top_attach();
-			if (row ==1 || row ==2 || row==4 || row==5 || row == 8) {
+			if (row == 2 || row == 3 || row== 5 || row== 6 || row == 9) {
 				it->get_widget()->hide();
 			}
 		}
 	} else {
 		for (it = c.begin(); it != c.end(); ++it) {
 			int row = it->get_top_attach();
-			if (row ==1 || row ==2 || row==4 || row==5 || row == 8) {
+			if (row == 2 || row == 3 || row== 5 || row== 6 || row == 9) {
 				it->get_widget()->show();
 			}
 		}

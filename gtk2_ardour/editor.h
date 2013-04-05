@@ -929,9 +929,18 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Group*      videotl_group;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_video_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_proc_action;
+	Glib::RefPtr<Gtk::ToggleAction> xjadeo_ontop_action;
+	Glib::RefPtr<Gtk::ToggleAction> xjadeo_timecode_action;
+	Glib::RefPtr<Gtk::ToggleAction> xjadeo_frame_action;
+	Glib::RefPtr<Gtk::ToggleAction> xjadeo_osdbg_action;
+	Glib::RefPtr<Gtk::ToggleAction> xjadeo_fullscreen_action;
+	Glib::RefPtr<Gtk::ToggleAction> xjadeo_letterbox_action;
+	Glib::RefPtr<Gtk::Action> xjadeo_zoom_100;
 	void set_xjadeo_proc ();
 	void toggle_xjadeo_proc (int state=-1);
 	void set_xjadeo_sensitive (bool onoff);
+	void set_xjadeo_viewoption (int);
+	void toggle_xjadeo_viewoption (int what, int state=-1);
 	void toggle_ruler_video (bool onoff) {ruler_video_action->set_active(onoff);}
 	int videotl_bar_height; /* in units of timebar_height; default: 4 */
 	int get_videotl_bar_height () const { return videotl_bar_height; }
@@ -2040,7 +2049,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void get_regions_at (RegionSelection&, framepos_t where, const TrackViewList& ts) const;
 	void get_regions_after (RegionSelection&, framepos_t where, const TrackViewList& ts) const;
 
-	RegionSelection get_regions_from_selection ();
 	RegionSelection get_regions_from_selection_and_edit_point ();
 	RegionSelection get_regions_from_selection_and_entered ();
 

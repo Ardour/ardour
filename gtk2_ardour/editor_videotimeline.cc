@@ -23,6 +23,8 @@
 
 #include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/audio_track.h"
+#include "ardour/audioregion.h"
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -33,6 +35,7 @@
 #include "video_image_frame.h"
 #include "export_video_dialog.h"
 #include "export_video_infobox.h"
+#include "interthread_progress_window.h"
 
 #include "i18n.h"
 
@@ -95,11 +98,27 @@ Editor::embed_audio_from_video (std::string path, framepos_t n)
 	vector<std::string> paths;
 	paths.push_back(path);
 #if 0
-	do_embed (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, n);
-#else
 	do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, ARDOUR::SrcBest, n);
-	unlink(path.c_str());
+#else
+	current_interthread_info = &import_status;
+	import_status.current = 1;
+	import_status.total = paths.size ();
+	import_status.all_done = false;
+
+	ImportProgressWindow ipw (&import_status, _("Import"), _("Cancel Import"));
+	ipw.show ();
+
+	boost::shared_ptr<ARDOUR::Track> track;
+	bool ok = (import_sndfiles (paths, Editing::ImportAsTrack, ARDOUR::SrcBest, n, 1, 1, track, false) == 0);
+	if (ok && track) {
+		boost::shared_ptr<ARDOUR::Playlist> pl = track->playlist();
+		pl->find_next_region(n, ARDOUR::End, 0)->set_video_locked(true);
+		_session->save_state ("");
+	}
+
+	import_status.all_done = true;
 #endif
+	unlink(path.c_str());
 }
 
 void

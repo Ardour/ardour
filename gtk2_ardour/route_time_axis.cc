@@ -243,7 +243,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	route_group_menu = new RouteGroupMenu (_session, plist);
 
-	// gm.get_gain_slider().signal_scroll_event().connect(sigc::mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
+	gm.get_gain_slider().signal_scroll_event().connect(sigc::mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
 
 	gm.get_level_meter().signal_scroll_event().connect (sigc::mem_fun (*this, &RouteTimeAxisView::controls_ebox_scroll), false);
 }
