@@ -133,6 +133,7 @@ Session::Session (AudioEngine &eng,
 	: _engine (eng)
 	, _target_transport_speed (0.0)
 	, _requested_return_frame (-1)
+	, _under_nsm_control (false)
 	, _session_dir (new SessionDirectory(fullpath))
 	, state_tree (0)
 	, _state_of_the_state (Clean)
@@ -1598,7 +1599,7 @@ Session::find_route_name (string const & base, uint32_t& id, char* name, size_t 
 		}
 
 		++id;
-
+		
 	} while (id < (UINT_MAX-1));
 
 	return false;
@@ -2037,12 +2038,13 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 }
 
 RouteList
-Session::new_route_from_template (uint32_t how_many, const std::string& template_path)
+Session::new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name_base)
 {
 	RouteList ret;
 	uint32_t control_id;
 	XMLTree tree;
 	uint32_t number = 0;
+	const uint32_t being_added = how_many;
 
 	if (!tree.read (template_path.c_str())) {
 		return ret;
@@ -2062,13 +2064,29 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 		node_copy.remove_property_recursively (X_("id"));
 
 		try {
-			string const route_name = node_copy.property(X_("name"))->value ();
-			
-			/* generate a new name by adding a number to the end of the template name */
 			char name[32];
-			if (!find_route_name (route_name.c_str(), ++number, name, sizeof(name), true)) {
-				fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
-				/*NOTREACHED*/
+
+			if (!name_base.empty()) {
+
+				/* if we're adding more than one routes, force
+				 * all the names of the new routes to be
+				 * numbered, via the final parameter.
+				 */
+
+				if (!find_route_name (name_base.c_str(), ++number, name, sizeof(name), (being_added > 1))) {
+					fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
+					/*NOTREACHDE*/
+				}
+
+			} else {
+
+				string const route_name  = node_copy.property(X_("name"))->value ();
+			
+				/* generate a new name by adding a number to the end of the template name */
+				if (!find_route_name (route_name.c_str(), ++number, name, sizeof(name), true)) {
+					fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
+					/*NOTREACHED*/
+				}
 			}
 
 			/* set this name in the XML description that we are about to use */
@@ -3382,7 +3400,7 @@ Session::create_audio_source_for_session (size_t n_chans, string const & n, uint
 	const string path    = new_source_path_from_name(DataType::AUDIO, name);
 
 	return boost::dynamic_pointer_cast<AudioFileSource> (
-		SourceFactory::createWritable (DataType::AUDIO, *this, path, string(), destructive, frame_rate()));
+		SourceFactory::createWritable (DataType::AUDIO, *this, path, destructive, frame_rate()));
 }
 
 /** Return a unique name based on \a base for a new internal MIDI source */
@@ -3458,7 +3476,7 @@ Session::create_midi_source_for_session (Track* track, string const & n)
 
 	return boost::dynamic_pointer_cast<SMFSource> (
 		SourceFactory::createWritable (
-			DataType::MIDI, *this, path, string(), false, frame_rate()));
+			DataType::MIDI, *this, path, false, frame_rate()));
 }
 
 
@@ -4010,7 +4028,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 
 		try {
 			fsource = boost::dynamic_pointer_cast<AudioFileSource> (
-				SourceFactory::createWritable (DataType::AUDIO, *this, buf, string(), false, frame_rate()));
+				SourceFactory::createWritable (DataType::AUDIO, *this, buf, false, frame_rate()));
 		}
 
 		catch (failed_constructor& err) {

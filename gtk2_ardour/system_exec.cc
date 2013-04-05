@@ -306,7 +306,6 @@ SystemExec::output_interposer()
 		ReadStdout(data, bytesRead);/* EMIT SIGNAL */
 	}
 	Terminated();/* EMIT SIGNAL */
-	terminate();
 }
 
 void
@@ -409,6 +408,7 @@ SystemExec::make_argp(std::string args) {
 void
 SystemExec::terminate ()
 {
+	::pthread_mutex_lock(&write_lock);
 	close_stdin();
 	if (pid) {
 		::usleep(100000);
@@ -418,7 +418,7 @@ SystemExec::terminate ()
 	if (pid) {
 		::fprintf(stderr, "Child process is running. trying SIGTERM\n");
 		::kill(pid, SIGTERM);
-		::usleep(10000);
+		::usleep(50000);
 		wait(WNOHANG);
 	}
 	if (pid) {
@@ -428,6 +428,8 @@ SystemExec::terminate ()
 
 	wait();
 	if (thread_active) pthread_join(thread_id_tt, NULL);
+	thread_active = false;
+	::pthread_mutex_unlock(&write_lock);
 }
 
 int
@@ -615,7 +617,6 @@ SystemExec::output_interposer()
 		ReadStdout(rv, r);/* EMIT SIGNAL */
 	}
 	Terminated();/* EMIT SIGNAL */
-	terminate();
 }
 
 void
@@ -626,6 +627,7 @@ SystemExec::close_stdin()
 	::close(pin[1]);
 	::close(pout[0]);
 	::close(pout[1]);
+	pin[1] = - 1; // mark as closed
 }
 
 int
@@ -655,6 +657,7 @@ SystemExec::write_to_stdin(std::string d, size_t len)
 		}
 		c += r;
 	}
+	fsync(pin[1]);
 	::pthread_mutex_unlock(&write_lock);
 	return c;
 }

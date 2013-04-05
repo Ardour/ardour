@@ -119,7 +119,9 @@ class TranscodeFfmpeg : public sigc::trackable
 		 */
 		void set_duration(ARDOUR::framecnt_t d) { m_duration = d; }
 
+		/* offset, lead-in/out are in seconds */
 		void set_avoffset(double av_offset) { m_avoffset = av_offset; }
+		void set_leadinout(double lead_in, double lead_out) { m_lead_in = lead_in; m_lead_out = lead_out; }
 
 
 #if 1 /* tentative debug mode */
@@ -138,7 +140,10 @@ class TranscodeFfmpeg : public sigc::trackable
 		int m_height;
 		std::string m_codec;
 
+		int m_videoidx;
 		double m_avoffset;
+		double m_lead_in;
+		double m_lead_out;
 		bool ffexecok;
 		bool probeok;
 

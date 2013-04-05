@@ -33,6 +33,7 @@ class RouteGroup;
 class Source;
 class Region;
 class Diskstream;
+class IO;
 
 class Track : public Route, public PublicDiskstream
 {

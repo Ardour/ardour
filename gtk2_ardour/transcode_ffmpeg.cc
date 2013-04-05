@@ -42,27 +42,43 @@ TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 	ffmpeg_exe = "";
 	ffprobe_exe = "";
 	m_duration = 0;
+	m_avoffset = m_lead_in = m_lead_out = 0;
+	m_width = m_height = 0;
+	m_aspect = m_fps = 0;
 #if 1 /* tentative debug mode */
 	debug_enable = false;
 #endif
 
 	std::string ff_file_path;
-	if (find_file_in_search_path (PBD::SearchPath(Glib::getenv("PATH")), X_("ffmpeg"), ff_file_path)) { ffmpeg_exe = ff_file_path; }
-	else if (find_file_in_search_path (PBD::SearchPath(Glib::getenv("PATH")), X_("avconv"), ff_file_path)) { ffmpeg_exe = ff_file_path; }
-	else if (find_file_in_search_path (PBD::SearchPath(std::string("/usr/local/bin/")), X_("ffmpeg_harvid"), ff_file_path)) { ffmpeg_exe = ff_file_path; }
+	if (find_file_in_search_path (PBD::SearchPath(Glib::getenv("PATH")), X_("ffmpeg_harvid"), ff_file_path)) { ffmpeg_exe = ff_file_path; }
+	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\ffmpeg.exe"), Glib::FILE_TEST_EXISTS)) {
+		ffmpeg_exe = X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe");
+	}
 	else if (Glib::file_test(X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe"), Glib::FILE_TEST_EXISTS)) {
 		ffmpeg_exe = X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe");
 	}
 
-	if (find_file_in_search_path (PBD::SearchPath(Glib::getenv("PATH")), X_("ffprobe"), ff_file_path)) { ffprobe_exe = ff_file_path; }
-//else if (find_file_in_search_path (PBD::SearchPath(Glib::getenv("PATH")), X_("avprobe"), ff_file_path)) { ffprobe_exe = ff_file_path; }
-	else if (find_file_in_search_path (PBD::SearchPath(std::string("/usr/local/bin/")), X_("ffprobe_harvid"), ff_file_path)) { ffprobe_exe = ff_file_path; }
+	if (find_file_in_search_path (PBD::SearchPath(Glib::getenv("PATH")), X_("ffprobe_harvid"), ff_file_path)) { ffprobe_exe = ff_file_path; }
+	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\ffprobe.exe"), Glib::FILE_TEST_EXISTS)) {
+		ffprobe_exe = X_("C:\\Program Files\\ffmpeg\\ffprobe.exe");
+	}
 	else if (Glib::file_test(X_("C:\\Program Files\\ffmpeg\\ffprobe.exe"), Glib::FILE_TEST_EXISTS)) {
 		ffprobe_exe = X_("C:\\Program Files\\ffmpeg\\ffprobe.exe");
 	}
 
 	if (ffmpeg_exe.empty() || ffprobe_exe.empty()) {
-		PBD::warning << _("No ffprobe or ffmpeg executables could be found on this system. Transcoding is not possible until you install those tools.") << endmsg;
+		PBD::warning << _(
+				"No ffprobe or ffmpeg executables could be found on this system.\n"
+				"Video import and export is not possible until you install those tools.\n"
+				"Ardour requires ffmpeg and ffprobe from ffmpeg.org - version 1.1 or newer.\n"
+				"\n"
+				"The tools are included with the Ardour releases from ardour.org "
+				"and also available with the video-server at http://x42.github.com/harvid/\n"
+				"\n"
+				"Important: the files need to be installed in $PATH and named ffmpeg_harvid and ffprobe_harvid.\n"
+				"If you already have a suitable ffmpeg installation on your system, we recommend creating "
+				"symbolic links from ffmpeg to ffmpeg_harvid and from ffprobe to ffprobe_harvid.\n"
+				) << endmsg;
 		return;
 	}
 	ffexecok = true;
@@ -85,8 +101,8 @@ TranscodeFfmpeg::probe ()
 	char **argp;
 	argp=(char**) calloc(7,sizeof(char*));
 	argp[0] = strdup(ffprobe_exe.c_str());
-	argp[1] = strdup("-print_format"); // "-of"  ; new version and avprobe compat but avprobe does not yet support csv
-	argp[2] = strdup("csv"); // TODO use "csv=nk=0" and parse key/value pairs -> ffprobe version agnostic or parse XML or JSON key/value
+	argp[1] = strdup("-print_format");
+	argp[2] = strdup("csv=nk=0");
 	argp[3] = strdup("-show_format");
 	argp[4] = strdup("-show_streams");
 	argp[5] = strdup(infile.c_str());
@@ -104,119 +120,111 @@ TranscodeFfmpeg::probe ()
 
 	std::vector<std::vector<std::string> > lines;
 	ParseCSV(ffoutput, lines);
+	double timebase = 0;
 	m_width = m_height = 0;
 	m_fps = m_aspect = 0;
 	m_duration = 0;
 	m_codec.clear();
 	m_audio.clear();
 
+#define PARSE_FRACTIONAL_FPS(VAR) \
+	{ \
+		std::string::size_type pos; \
+		VAR = atof(value.c_str()); \
+		pos = value.find_first_of('/'); \
+		if (pos != std::string::npos) { \
+			VAR = atof(value.substr(0, pos).c_str()) / atof(value.substr(pos+1).c_str()); \
+		} \
+	}
+
 	for (std::vector<std::vector<std::string> >::iterator i = lines.begin(); i != lines.end(); ++i) {
 		if (i->at(0) == X_("format")) {
 			/* format,filename,#streams,format-name,format-long-name,start-time,duration,size,bitrate */
 		} else
 		if (i->at(0) == X_("stream")) {
-			/*--------- Stream format
-			 * stream,index,codec-name,codec-name-long,PROFILE,
-			 *   codec_time_base,codec_tag_string,codec_tag[hex],
-			 * VIDEO:
-			 *   width,height,has_b_frames,sample_aspect_ratio,display_aspect_ratio
-			 *   pix_fmt,level,
-			 *   timecode
-			 * AUDIO:
-			 *   sample_fmt,sample_rate,channels,bits_per_sample
-			 *
-			 * all cont'd;
-			 *   r_frame_rate,avg_frame_rate,time_base,start_time,duration,
-			 *   bit_rate,nb_frames,nb_read_frames,nb_read_packets
-			 *
-			 *---------- Example
-			 * stream,0,mpeg2video,MPEG-2 video,video,1/50,[0][0][0][0],0x0000,720,576,1,16:15,4:3,yuv420p,8,00:02:30:00,0x1e0,25/1,25/1,1/90000,0.360000,N/A,7000000,N/A,N/A,N/A
-			 * stream,1,ac3,ATSC A/52A (AC-3),audio,1/48000,[0][0][0][0],0x0000,s16,48000,6,0,-1,-1.000000,-1.000000,-1.000000,-1.000000,0x80,0/0,0/0,1/90000,0.280000,312.992000,448000,N/A,N/A,N/A
-			 * stream,2,ac3,ATSC A/52A (AC-3),audio,1/48000,[0][0][0][0],0x0000,s16,48000,2,0,-1,-1.000000,-1.000000,-1.000000,-1.000000,0x82,0/0,0/0,1/90000,0.280000,312.992000,384000,N/A,N/A,N/A
-			 * stream,3,ac3,ATSC A/52A (AC-3),audio,1/48000,[0][0][0][0],0x0000,s16,48000,2,0,-1,-1.000000,-1.000000,-1.000000,-1.000000,0x81,0/0,0/0,1/90000,0.280000,312.992000,192000,N/A,N/A,N/A
-			 */
-			if (i->at(4) == X_("video") && m_width == 0) {
-				std::string::size_type pos;
+			if (i->at(5) == X_("codec_type=video") && m_width == 0) {
 
-				m_width = atoi(i->at(8).c_str());
-				m_height = atoi(i->at(9).c_str());
-				m_codec = i->at(3) + " -- " + i->at(2);
-				m_fps = atof(i->at(17).c_str());
+				for (std::vector<std::string>::iterator kv = i->begin(); kv != i->end(); ++kv) {
+					const size_t kvsep = kv->find('=');
+					if(kvsep == std::string::npos) continue;
+					std::string key = kv->substr(0, kvsep);
+					std::string value = kv->substr(kvsep + 1);
 
-				pos = i->at(17).find_first_of('/');
-				if (pos != std::string::npos) {
-					m_fps = atof(i->at(17).substr(0, pos).c_str()) / atof(i->at(17).substr(pos+1).c_str());
+					if (key == X_("index")) {
+						m_videoidx = atoi(value.c_str());
+					} else if (key == X_("width")) {
+						m_width = atoi(value.c_str());
+					} else if (key == X_("height")) {
+						m_height = atoi(value.c_str());
+					} else if (key == X_("codec_name")) {
+						if (!m_codec.empty()) m_codec += " ";
+						m_codec += value;
+					} else if (key == X_("codec_long_name")) {
+						if (!m_codec.empty()) m_codec += " ";
+						m_codec += "[" + value + "]";
+					} else if (key == X_("codec_tag_string")) {
+						if (!m_codec.empty()) m_codec += " ";
+						m_codec += "(" + value + ")";
+					} else if (key == X_("r_frame_rate")) {
+						PARSE_FRACTIONAL_FPS(m_fps)
+					} else if (key == X_("avg_frame_rate") && m_fps == 0) {
+						PARSE_FRACTIONAL_FPS(m_fps)
+					} else if (key == X_("time_base")) {
+						PARSE_FRACTIONAL_FPS(timebase)
+					} else if (key == X_("timecode") && m_duration == 0) {
+						int h,m,s; char f[7];
+						if (sscanf(i->at(16).c_str(), "%d:%d:%d:%s",&h,&m,&s,f) == 4) {
+							m_duration = (ARDOUR::framecnt_t) floor(m_fps * (
+									h * 3600.0
+								+ m * 60.0
+								+ s * 1.0
+								+ atoi(f) / pow(10, strlen(f))
+							));
+						}
+					} else if (key == X_("duration_ts") && m_fps == 0 && timebase !=0 ) {
+						m_duration = atof(value.c_str()) * m_fps * timebase;
+					} else if (key == X_("duration") && m_fps != 0 && m_duration == 0) {
+						m_duration = atof(value.c_str()) * m_fps;
+					} else if (key == X_("display_aspect_ratio")) {
+						std::string::size_type pos;
+						pos = value.find_first_of(':');
+						if (pos != std::string::npos && atof(value.substr(pos+1).c_str()) != 0) {
+							m_aspect = atof(value.substr(0, pos).c_str()) / atof(value.substr(pos+1).c_str());
+						}
+					}
 				}
 
-				pos = i->at(12).find_first_of(':');
-				m_aspect = 0;
-				if (pos != std::string::npos && atof(i->at(12).substr(pos+1).c_str()) != 0) {
-					m_aspect = atof(i->at(12).substr(0, pos).c_str()) / atof(i->at(12).substr(pos+1).c_str());
-				}
 				if (m_aspect == 0) {
 					m_aspect = (double)m_width / (double)m_height;
 				}
 
-				int h,m,s; char f[7];
-				if (sscanf(i->at(15).c_str(), "%d:%d:%d:%s",&h,&m,&s,f) == 4) {
-					m_duration = (ARDOUR::framecnt_t) floor(m_fps * (
-							h * 3600.0
-						+ m * 60.0
-						+ s * 1.0
-						+ atoi(f) / pow(10, strlen(f))
-					));
-				} else {
-					m_duration = atof(i->at(21).c_str()) * m_fps;
-				}
-
-			} else if (i->at(4) == X_("audio")) {
+			} else if (i->at(5) == X_("codec_type=audio")) { /* new ffprobe */
 				AudioStream as;
-				as.name = i->at(3) + " " + i->at(2) + " " + i->at(8) + " " + i->at(9);
-				as.stream_id  = i->at(1);
-				as.channels   = atoi(i->at(10).c_str());
-				m_audio.push_back(as);
+				for (std::vector<std::string>::iterator kv = i->begin(); kv != i->end(); ++kv) {
+					const size_t kvsep = kv->find('=');
+					if(kvsep == std::string::npos) continue;
+					std::string key = kv->substr(0, kvsep);
+					std::string value = kv->substr(kvsep + 1);
 
-			} else if (i->at(5) == X_("video") && m_width == 0) { /* new ffprobe */
-				std::string::size_type pos;
+					if (key == X_("channels")) {
+						as.channels   = atoi(value.c_str());
+					} else if (key == X_("index")) {
+						as.stream_id  = value;
+					} else if (key == X_("codec_long_name")) {
+						if (!as.name.empty()) as.name += " ";
+						as.name += value;
+					} else if (key == X_("codec_name")) {
+						if (!as.name.empty()) as.name += " ";
+						as.name += value;
+					} else if (key == X_("sample_fmt")) {
+						if (!as.name.empty()) as.name += " ";
+						as.name += "FMT:" + value;
+					} else if (key == X_("sample_rate")) {
+						if (!as.name.empty()) as.name += " ";
+						as.name += "SR:" + value;
+					}
 
-				m_width = atoi(i->at(9).c_str());
-				m_height = atoi(i->at(10).c_str());
-				m_codec = i->at(3) + " -- " + i->at(2);
-				m_fps = atof(i->at(18).c_str());
-
-				pos = i->at(18).find_first_of('/');
-				if (pos != std::string::npos) {
-					m_fps = atof(i->at(18).substr(0, pos).c_str()) / atof(i->at(18).substr(pos+1).c_str());
 				}
-
-				pos = i->at(13).find_first_of(':');
-				m_aspect = 0;
-				if (pos != std::string::npos && atof(i->at(13).substr(pos+1).c_str()) != 0) {
-					m_aspect = atof(i->at(13).substr(0, pos).c_str()) / atof(i->at(13).substr(pos+1).c_str());
-				}
-				if (m_aspect == 0) {
-					m_aspect = (double)m_width / (double)m_height;
-				}
-
-				int h,m,s; char f[7];
-				if (sscanf(i->at(17).c_str(), "%d:%d:%d:%s",&h,&m,&s,f) == 4) {
-					m_duration = (ARDOUR::framecnt_t) floor(m_fps * (
-							h * 3600.0
-						+ m * 60.0
-						+ s * 1.0
-						+ atoi(f) / pow(10, strlen(f))
-					));
-				} else if (atof(i->at(23).c_str()) != 0) {
-					m_duration = atof(i->at(23).c_str());
-				} else {
-					m_duration = atof(i->at(24).c_str()) * m_fps;
-				}
-
-			} else if (i->at(5) == X_("audio")) { /* new ffprobe */
-				AudioStream as;
-				as.name = i->at(3) + " " + i->at(2) + " " + i->at(9) + " " + i->at(10);
-				as.stream_id  = i->at(1);
-				as.channels   = atoi(i->at(11).c_str());
 				m_audio.push_back(as);
 			}
 		}
@@ -253,8 +261,8 @@ TranscodeFfmpeg::default_encoder_settings ()
 	ffs.clear();
 	ffs["-vcodec"] = "mpeg4";
 	ffs["-acodec"] = "ac3";
-	ffs["-b"] = "5000k";
-	ffs["-ab"] = "160k";
+	ffs["-b:v"] = "5000k";
+	ffs["-b:a"] = "160k";
 	return ffs;
 }
 
@@ -311,6 +319,7 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 
 	argp[a++] = strdup("-i");
 	argp[a++] = strdup(inf_a.c_str());
+
 	for(FFSettings::const_iterator it = ffs.begin(); it != ffs.end(); ++it) {
 		argp[a++] = strdup(it->first.c_str());
 		argp[a++] = strdup(it->second.c_str());
@@ -319,12 +328,36 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 		argp[a++] = strdup("-metadata");
 		argp[a++] = format_metadata(it->first.c_str(), it->second.c_str());
 	}
+	if (m_lead_in != 0 && m_lead_out != 0) {
+		std::ostringstream osstream;
+		argp[a++] = strdup("-vf");
+		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_in << X_(" [pre]; ");
+		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_out << X_(" [post]; ");
+		osstream << X_("[pre] [in] [post] concat=n=3");
+		argp[a++] = strdup(osstream.str().c_str());
+	} else if (m_lead_in != 0) {
+		std::ostringstream osstream;
+		argp[a++] = strdup("-vf");
+		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_in << X_(" [pre]; ");
+		osstream << X_("[pre] [in] concat=n=2");
+		argp[a++] = strdup(osstream.str().c_str());
+	} else if (m_lead_out != 0) {
+		std::ostringstream osstream;
+		argp[a++] = strdup("-vf");
+		osstream << X_("color=c=black:s=") << m_width << X_("x") << m_height << X_(":d=") << m_lead_out << X_(" [post]; ");
+		osstream << X_("[in] [post] concat=n=2");
+		argp[a++] = strdup(osstream.str().c_str());
+	}
+
 	if (map) {
+		std::ostringstream osstream;
 		argp[a++] = strdup("-map");
-		argp[a++] = strdup("0:0");
+		osstream << X_("0:") << m_videoidx;
+		argp[a++] = strdup(osstream.str().c_str());
 		argp[a++] = strdup("-map");
 		argp[a++] = strdup("1:0");
 	}
+
 	argp[a++] = strdup("-y");
 	argp[a++] = strdup(outfile.c_str());
 	argp[a] = (char *)0;
@@ -357,23 +390,26 @@ TranscodeFfmpeg::extract_audio (std::string outfile, ARDOUR::framecnt_t samplera
   if (stream >= m_audio.size()) return false;
 
 	char **argp;
+	int i = 0;
 
 	argp=(char**) calloc(15,sizeof(char*));
-	argp[0] = strdup(ffmpeg_exe.c_str());
-	argp[1] = strdup("-i");
-	argp[2] = strdup(infile.c_str());
-	argp[3] = strdup("-ar");
-	argp[4] = (char*) calloc(7,sizeof(char)); snprintf(argp[4], 7, "%"PRId64, samplerate);
-	argp[5] = strdup("-ac");
-	argp[6] = (char*) calloc(3,sizeof(char)); snprintf(argp[6], 3, "%i", m_audio.at(stream).channels);
-	argp[7] = strdup("-map");
-	argp[8] = (char*) calloc(8,sizeof(char)); snprintf(argp[8], 8, "0:%s", m_audio.at(stream).stream_id.c_str());
-	argp[9] = strdup("-vn");
-	argp[10] = strdup("-acodec");
-	argp[11] = strdup("pcm_f32le");
-	argp[12] = strdup("-y");
-	argp[13] = strdup(outfile.c_str());
-	argp[14] = (char *)0;
+	argp[i++] = strdup(ffmpeg_exe.c_str());
+	argp[i++] = strdup("-i");
+	argp[i++] = strdup(infile.c_str());
+#if 0 /* ffmpeg write original samplerate, use a3/SRC to resample */
+	argp[i++] = strdup("-ar");
+	argp[i] = (char*) calloc(7,sizeof(char)); snprintf(argp[i++], 7, "%"PRId64, samplerate);
+#endif
+	argp[i++] = strdup("-ac");
+	argp[i] = (char*) calloc(3,sizeof(char)); snprintf(argp[i++], 3, "%i", m_audio.at(stream).channels);
+	argp[i++] = strdup("-map");
+	argp[i] = (char*) calloc(8,sizeof(char)); snprintf(argp[i++], 8, "0:%s", m_audio.at(stream).stream_id.c_str());
+	argp[i++] = strdup("-vn");
+	argp[i++] = strdup("-acodec");
+	argp[i++] = strdup("pcm_f32le");
+	argp[i++] = strdup("-y");
+	argp[i++] = strdup(outfile.c_str());
+	argp[i++] = (char *)0;
 	/* Note: argp is free()d in ~SystemExec */
 #if 1 /* DEBUG */
 	if (debug_enable) { /* tentative debug mode */
@@ -422,13 +458,13 @@ TranscodeFfmpeg::transcode (std::string outfile, const int outw, const int outh,
 	argp[0] = strdup(ffmpeg_exe.c_str());
 	argp[1] = strdup("-i");
 	argp[2] = strdup(infile.c_str());
-	argp[3] = strdup("-b");
+	argp[3] = strdup("-b:v");
 	argp[4] = (char*) calloc(7,sizeof(char)); snprintf(argp[4], 7, "%i0k", bitrate);
 	argp[5] = strdup("-s");
 	argp[6] = (char*) calloc(10,sizeof(char)); snprintf(argp[6], 10, "%ix%i", width, height);
 	argp[7] = strdup("-y");
 	argp[8] = strdup("-vcodec");
-	argp[9] = strdup("mjpeg");
+	argp[9] = strdup("mpeg4");
 	argp[10] = strdup("-an");
 	argp[11] = strdup("-intra");
 	argp[12] = strdup("-g");
@@ -475,23 +511,37 @@ TranscodeFfmpeg::ffexit ()
 }
 
 void
-TranscodeFfmpeg::ffprobeparse (std::string d, size_t s)
+TranscodeFfmpeg::ffprobeparse (std::string d, size_t /* s */)
 {
 	ffoutput+=d;
 }
 
 void
-TranscodeFfmpeg::ffmpegparse_a (std::string d, size_t s)
+TranscodeFfmpeg::ffmpegparse_a (std::string d, size_t /* s */)
 {
 	const char *t;
+	int h,m,s; char f[7];
+	ARDOUR::framecnt_t p = -1;
+
 	if (!(t=strstr(d.c_str(), "time="))) { return; }
-	ARDOUR::framecnt_t f = (ARDOUR::framecnt_t) floorf (atof(t+5) * m_fps);
-	if (f > m_duration ) { f = m_duration; }
-	Progress(f, m_duration); /* EMIT SIGNAL */
+
+	if (sscanf(t+5, "%d:%d:%d.%s",&h,&m,&s,f) == 4) {
+		p = (ARDOUR::framecnt_t) floor( 100.0 * (
+		      h * 3600.0
+		    + m * 60.0
+		    + s * 1.0
+		    + atoi(f) / pow(10, strlen(f))
+		));
+		p = p * m_fps / 100.0;
+		if (p > m_duration ) { p = m_duration; }
+		Progress(p, m_duration); /* EMIT SIGNAL */
+	} else {
+		Progress(0, 0); /* EMIT SIGNAL */
+	}
 }
 
 void
-TranscodeFfmpeg::ffmpegparse_v (std::string d, size_t s)
+TranscodeFfmpeg::ffmpegparse_v (std::string d, size_t /* s */)
 {
 	if (strstr(d.c_str(), "ERROR") || strstr(d.c_str(), "Error") || strstr(d.c_str(), "error")) {
 		PBD::warning << "ffmpeg-error: " << d << endmsg;
@@ -503,10 +553,15 @@ TranscodeFfmpeg::ffmpegparse_v (std::string d, size_t s)
 		  printf("ffmpeg: '%s'\n", d.c_str());
 		}
 #endif
+		Progress(0, 0); /* EMIT SIGNAL */
 		return;
 	}
 	ARDOUR::framecnt_t f = atol(d.substr(6).c_str());
-	Progress(f, m_duration); /* EMIT SIGNAL */
+	if (f == 0) {
+		Progress(0, 0); /* EMIT SIGNAL */
+	} else {
+		Progress(f, m_duration); /* EMIT SIGNAL */
+	}
 }
 
 #endif /* WITH_VIDEOTIMELINE */

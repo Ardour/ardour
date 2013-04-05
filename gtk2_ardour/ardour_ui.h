@@ -72,6 +72,7 @@
 #include "ardour_dialog.h"
 #include "ardour_button.h"
 #include "editing.h"
+#include "nsm.h"
 #include "ui_config.h"
 #include "window_proxy.h"
 #include "enums.h"
@@ -227,6 +228,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         void add_routes_thread ();
 #ifdef WITH_VIDEOTIMELINE
 	void add_video (Gtk::Window* float_window);
+	void remove_video ();
 	void start_video_server_menu (Gtk::Window* float_window);
 	bool start_video_server (Gtk::Window* float_window, bool popup_msg);
 	void stop_video_server (bool ask_confirm=false);
@@ -309,6 +311,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ArdourStartup*      _startup;
 	ARDOUR::AudioEngine *engine;
 	Gtk::Tooltips        _tooltips;
+	NSM_Client          *nsm;
+	bool                 _was_dirty;
 
 	void goto_editor_window ();
 	void goto_mixer_window ();

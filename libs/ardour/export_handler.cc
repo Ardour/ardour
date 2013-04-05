@@ -171,6 +171,7 @@ ExportHandler::start_timespan ()
 	timespan_bounds = config_map.equal_range (current_timespan);
 	graph_builder->reset ();
 	graph_builder->set_current_timespan (current_timespan);
+	handle_duplicate_format_extensions();
 	for (ConfigMap::iterator it = timespan_bounds.first; it != timespan_bounds.second; ++it) {
 		// Filenames can be shared across timespans
 		FileSpec & spec = it->second;
@@ -184,6 +185,27 @@ ExportHandler::start_timespan ()
 	session.ProcessExport.connect_same_thread (process_connection, boost::bind (&ExportHandler::process, this, _1));
 	process_position = current_timespan->get_start();
 	session.start_audio_export (process_position);
+}
+
+void
+ExportHandler::handle_duplicate_format_extensions()
+{
+	typedef std::map<std::string, int> ExtCountMap;
+
+	ExtCountMap counts;
+	for (ConfigMap::iterator it = timespan_bounds.first; it != timespan_bounds.second; ++it) {
+		counts[it->second.format->extension()]++;
+	}
+
+	bool duplicates_found = false;
+	for (ExtCountMap::iterator it = counts.begin(); it != counts.end(); ++it) {
+		if (it->second > 1) { duplicates_found = true; }
+	}
+
+	// Set this always, as the filenames are shared...
+	for (ConfigMap::iterator it = timespan_bounds.first; it != timespan_bounds.second; ++it) {
+		it->second.filename->include_format_name = duplicates_found;
+	}
 }
 
 int

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
+from waflib import Options
 import os
 
 # Version of this package (even if built as a child)
@@ -60,6 +61,7 @@ gtkmm2ext_sources = [
         'treeutils.cc',
         'utils.cc',
         'version.cc',
+        'visibility_tracker.cc',
         'window_title.cc'
 ]
 
@@ -82,14 +84,18 @@ def configure(conf):
 
 
 def build(bld):
-    obj = bld(features = 'c cxx cxxshlib cshlib')
-    obj.source = gtkmm2ext_sources
+    if bld.is_defined ('INTERNAL_SHARED_LIBS'):
+        obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=gtkmm2ext_sources)
+    else:
+        obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=gtkmm2ext_sources)
+        obj.cxxflags     = [ '-fPIC' ]
+
     obj.export_includes = ['.']
     obj.includes     = ['.']
     obj.name         = 'libgtkmm2ext'
     obj.target       = 'gtkmm2ext'
     obj.uselib       = 'GTKMM GTK GTKOSX OSX GDK'
-    obj.use          = 'libpbd'
+    obj.use          = [ 'libpbd' ]
     obj.vnum         = GTKMM2EXT_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
     obj.defines     = [

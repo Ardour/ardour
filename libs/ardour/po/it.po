@@ -2724,7 +2724,7 @@ msgstr "impossibile accedere al file di sessione recente %1 (%2)"
 #~ msgid "Chunk %1 uses an unknown playlist \"%2\""
 #~ msgstr "Lo spezzone %1 usa una playlist sconosciuta \"%2\""
 
-#~ msgid "Chunk %1 contains misformed playlist information"
+#~ msgid "Chunk %1 contains malformed playlist information"
 #~ msgstr "Lo spezzone %1 contiene informazioni sulla playlist mal formate"
 
 #~ msgid "signal"

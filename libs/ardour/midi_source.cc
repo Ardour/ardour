@@ -355,7 +355,7 @@ MidiSource::clone (const string& path, Evoral::MusicalTime begin, Evoral::Musica
 
 	boost::shared_ptr<MidiSource> newsrc = boost::dynamic_pointer_cast<MidiSource>(
 		SourceFactory::createWritable(DataType::MIDI, _session,
-		                              newpath, string(), false, _session.frame_rate()));
+		                              newpath, false, _session.frame_rate()));
 
 	newsrc->set_timeline_position(_timeline_position);
 	newsrc->copy_interpolation_from (this);

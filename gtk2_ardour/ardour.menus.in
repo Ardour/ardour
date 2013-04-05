@@ -36,11 +36,7 @@
       <!--menuitem action='importFromSession'/-->
 #ifdef WITH_VIDEOTIMELINE
       <menuitem action='OpenVideo'/>
-      <menu name='Video' action='Video'>
-        <menuitem action='StartVideoServer'/>
-        <menuitem action='StopVideoServer'/>
-        <menuitem action='VideoTimelineFlushCache'/>
-      </menu>
+      <menuitem action='CloseVideo'/>
 #endif
       <menu name='Export' action='Export'>
         <menuitem action='ExportAudio'/>
@@ -444,6 +440,17 @@
 #ifdef WITH_VIDEOTIMELINE
         <separator/>
         <menuitem action="toggle-video-ruler"/>
+      </menu>
+      <menu action="VideoMonitorMenu">
+        <menuitem action="zoom-vmon-100"/>
+        <menuitem action="toggle-vmon-letterbox"/>
+        <separator/>
+        <menuitem action="toggle-vmon-ontop"/>
+        <menuitem action="toggle-vmon-fullscreen"/>
+        <separator/>
+        <menuitem action="toggle-vmon-timecode"/>
+        <menuitem action="toggle-vmon-frame"/>
+        <menuitem action="toggle-vmon-osdbg"/>
 #endif
       </menu>
       <menu action="ScrollMenu">
@@ -487,9 +494,6 @@
       <menuitem action='ToggleSummary'/>
       <menuitem action='ToggleGroupTabs'/>
       <menuitem action='show-marker-lines'/>
-#ifdef WITH_VIDEOTIMELINE
-      <menuitem action='ToggleJadeo'/>
-#endif
     </menu>
     <menu name='JACK' action='JACK'>
       <menuitem action='JACKDisconnect'/>
@@ -521,6 +525,11 @@
       <menuitem action='toggle-speaker-config'/>
 
       <separator/>
+
+#ifdef WITH_VIDEOTIMELINE
+      <menuitem action='ToggleJadeo'/>
+      <separator/>
+#endif
 
       <menuitem action='NewMIDITracer'/>
       <menuitem action='toggle-audio-connection-manager'/>

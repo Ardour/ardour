@@ -25,7 +25,7 @@
 
 #include <glibmm.h>
 
-#include "ardour/svn_revision.h"
+#include "ardour/revision.h"
 #include "ardour/session.h"
 #include "ardour/session_metadata.h"
 
@@ -89,7 +89,7 @@ BroadcastInfo::set_originator_ref_from_session (Session const & /*session*/)
 	/* Serial number is 12 chars */
 
 	std::ostringstream serial_number;
-	serial_number << "ARDOUR" << "r" <<  std::setfill('0') << std::right << std::setw(5) << svn_revision;
+	serial_number << "ARDOUR" << "r" <<  std::setfill('0') << std::right << std::setw(5) << revision;
 
 	snprintf_bounded_null_filled (info->originator_reference, sizeof (info->originator_reference), "%2s%3s%12s%02d%02d%02d%9d",
 		  SessionMetadata::Metadata()->country().c_str(),

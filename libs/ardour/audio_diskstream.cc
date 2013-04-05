@@ -408,7 +408,7 @@ AudioDiskstream::prepare_record_status(framepos_t capture_start_frame)
  *      that someone can read playback_distance worth of data from.
  */
 int
-AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt_t& playback_distance)
+AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t nframes, framecnt_t& playback_distance, bool need_disk_signal)
 {
 	uint32_t n;
 	boost::shared_ptr<ChannelList> c = channels.reader();
@@ -494,9 +494,9 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecn
 				assert(ap);
 				assert(rec_nframes <= (framecnt_t) ap->get_audio_buffer(nframes).capacity());
 
-				Sample *buf = ap->get_audio_buffer (nframes).data (rec_offset);
+				Sample *buf = bufs.get_audio (n).data(rec_offset);
 				memcpy (chaninfo->current_capture_buffer, buf, sizeof (Sample) * rec_nframes);
-
+				
 			} else {
 
 				framecnt_t total = chaninfo->capture_vector.len[0] + chaninfo->capture_vector.len[1];
@@ -509,7 +509,7 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecn
 				boost::shared_ptr<AudioPort> const ap = _io->audio (n);
 				assert(ap);
 
-				Sample* buf = ap->get_audio_buffer(nframes).data (rec_offset);
+				Sample *buf = bufs.get_audio (n).data(rec_offset);
 				framecnt_t first = chaninfo->capture_vector.len[0];
 
 				memcpy (chaninfo->capture_wrap_buffer, buf, sizeof (Sample) * first);
@@ -655,6 +655,46 @@ AudioDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecn
 		}
 
 		_speed = _target_speed;
+	}
+
+	if (need_disk_signal) {
+
+		/* copy data over to buffer set */
+		
+		size_t n_buffers = bufs.count().n_audio();
+		size_t n_chans = c->size();
+		gain_t scaling = 1.0f;
+		
+		if (n_chans > n_buffers) {
+			scaling = ((float) n_buffers)/n_chans;
+		}
+
+		for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
+			
+			AudioBuffer& buf (bufs.get_audio (n%n_buffers));
+			ChannelInfo* chaninfo (*chan);
+			
+			if (n < n_chans) {
+				if (scaling != 1.0f) {
+					buf.read_from_with_gain (chaninfo->current_playback_buffer, nframes, scaling);
+				} else {
+					buf.read_from (chaninfo->current_playback_buffer, nframes);
+				}
+			} else {
+				if (scaling != 1.0f) {
+					buf.accumulate_with_gain_from (chaninfo->current_playback_buffer, nframes, scaling);
+				} else {
+					buf.accumulate_from (chaninfo->current_playback_buffer, nframes);
+				}
+			}
+		}
+
+		/* leave the MIDI count alone */
+		ChanCount cnt (DataType::AUDIO, n_chans);
+		cnt.set (DataType::MIDI, bufs.count().n_midi());
+		bufs.set_count (cnt);
+	
+		/* extra buffers will already be silent, so leave them alone */
 	}
 
 	return 0;
@@ -2128,7 +2168,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 				fs = boost::dynamic_pointer_cast<AudioFileSource> (
 					SourceFactory::createWritable (
 						DataType::AUDIO, _session,
-						prop->value(), string(), false, _session.frame_rate()));
+						prop->value(), false, _session.frame_rate()));
 			}
 
 			catch (failed_constructor& err) {

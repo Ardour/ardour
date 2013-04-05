@@ -111,6 +111,17 @@ legalize_for_universal_path (const string& str)
 	return replace_chars (str, "<>:\"/\\|?*");
 }
 
+/** Legalize for a URI path component.  This is like
+ * legalize_for_universal_path, but stricter, disallowing spaces and hash.
+ * This avoids %20 escapes in URIs, but probably needs work to be more strictly
+ * correct.
+ */
+string
+legalize_for_uri (const string& str)
+{
+	return replace_chars (str, "<>:\"/\\|?* #");
+}
+
 /** take an arbitrary string as an argument, and return a version of it
  * suitable for use as a path (directory/folder name). This is the Ardour 2.X
  * version of this code, which used an approach that came to be seen as
@@ -294,112 +305,6 @@ path_is_paired (string path, string& pair_base)
 	}
 
 	return false;
-}
-
-string
-path_expand (string path)
-{
-        if (path.empty()) {
-                return path;
-        }
-
-        /* tilde expansion */
-
-        if (path[0] == '~') {
-                if (path.length() == 1) {
-                        return Glib::get_home_dir();
-                }
-
-                if (path[1] == '/') {
-                        path.replace (0, 1, Glib::get_home_dir());
-                } else {
-                        /* can't handle ~roger, so just leave it */
-                }
-        }
-
-	/* now do $VAR substitution, since wordexp isn't reliable */
-
-	regex_t compiled_pattern;
-	const int nmatches = 100;
-	regmatch_t matches[nmatches];
-	
-	if (regcomp (&compiled_pattern, "\\$([a-zA-Z_][a-zA-Z0-9_]*|\\{[a-zA-Z_][a-zA-Z0-9_]*\\})", REG_EXTENDED)) {
-                cerr << "bad regcomp\n";
-                return path;
-        }
-
-	while (true) { 
-
-		if (regexec (&compiled_pattern, path.c_str(), nmatches, matches, 0)) {
-			break;
-		}
-		
-		/* matches[0] gives the entire match */
-		
-		string match = path.substr (matches[0].rm_so, matches[0].rm_eo - matches[0].rm_so);
-		
-		/* try to get match from the environment */
-
-                if (match[1] == '{') {
-                        /* ${FOO} form */
-                        match = match.substr (2, match.length() - 3);
-                }
-
-		char* matched_value = getenv (match.c_str());
-
-		if (matched_value) {
-			path.replace (matches[0].rm_so, matches[0].rm_eo - matches[0].rm_so, matched_value);
-		} else {
-			path.replace (matches[0].rm_so, matches[0].rm_eo - matches[0].rm_so, string());
-                }
-
-		/* go back and do it again with whatever remains after the
-		 * substitution 
-		 */
-	}
-
-	regfree (&compiled_pattern);
-
-	/* canonicalize */
-
-	char buf[PATH_MAX+1];
-
-	if (realpath (path.c_str(), buf)) {
-		return buf;
-	} else {
-		return string();
-	}
-}
-
-string
-search_path_expand (string path)
-{
-        if (path.empty()) {
-                return path;
-        }
-
-	vector<string> s;
-	vector<string> n;
-
-	split (path, s, ':');
-
-	for (vector<string>::iterator i = s.begin(); i != s.end(); ++i) {
-		string exp = path_expand (*i);
-		if (!exp.empty()) {
-			n.push_back (exp);
-		}
-	}
-
-	string r;
-
-	for (vector<string>::iterator i = n.begin(); i != n.end(); ++i) {
-		if (!r.empty()) {
-			r += ':';
-		}
-		r += *i;
-	}
-
-	return r;
 }
 
 #if __APPLE__

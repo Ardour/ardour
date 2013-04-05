@@ -59,7 +59,8 @@ class AddRouteDialog : public ArdourDialog
         ARDOUR::ChanCount channels ();
 	int count ();
 
-	std::string name_template ();
+        std::string name_template () const;
+        bool name_template_is_default () const;
 	std::string track_template ();
 	ARDOUR::PluginInfoPtr requested_instrument ();
 	

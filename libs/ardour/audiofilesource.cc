@@ -95,8 +95,6 @@ AudioFileSource::AudioFileSource (Session& s, const string& path, Source::Flag f
           /* note that external files have their own path as "origin" */
 	, FileSource (s, DataType::AUDIO, path, path, flags)
 {
-        /* note that origin remains empty */
-
 	if (init (_path, true)) {
 		throw failed_constructor ();
 	}
@@ -322,7 +320,7 @@ int
 AudioFileSource::setup_peakfile ()
 {
 	if (!(_flags & NoPeakFile)) {
-		return initialize_peakfile (_file_is_new, _path);
+		return initialize_peakfile (_path);
 	} else {
 		return 0;
 	}

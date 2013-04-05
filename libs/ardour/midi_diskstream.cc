@@ -26,6 +26,7 @@
 #include <fcntl.h>
 #include <cstdlib>
 #include <ctime>
+#include <strings.h> // for ffs(3)
 #include <sys/stat.h>
 #include <sys/mman.h>
 
@@ -320,7 +321,7 @@ get_location_times(const Location* location,
 }
 
 int
-MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt_t& playback_distance)
+MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t nframes, framecnt_t& playback_distance, bool need_disk_signal)
 {
 	framecnt_t rec_offset = 0;
 	framecnt_t rec_nframes = 0;
@@ -389,8 +390,11 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt
 
 		// Pump entire port buffer into the ring buffer (FIXME: split cycles?)
 		MidiBuffer& buf = sp->get_midi_buffer(nframes);
+		ChannelMode mode = AllChannels; // _track->get_capture_channel_mode ();
+		uint32_t mask = 0xffff; // _track->get_capture_channel_mask ();
+
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
-			const Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
+			Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
 #ifndef NDEBUG
 			if (DEBUG::MidiIO & PBD::debug_bits) {
 				const uint8_t* __data = ev.buffer();
@@ -416,8 +420,31 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt
 			   probabl be implemented in the source instead of here.
 			*/
 			const framecnt_t loop_offset = _num_captured_loops * loop_length;
-			_capture_buf->write(transport_frame + loop_offset + ev.time(),
-			                    ev.type(), ev.size(), ev.buffer());
+			
+			switch (mode) {
+			case AllChannels:
+				_capture_buf->write(transport_frame + loop_offset + ev.time(),
+						    ev.type(), ev.size(), ev.buffer());
+				break;
+			case FilterChannels:
+				if (ev.is_channel_event()) {
+					if ((1<<ev.channel()) & mask) {
+						_capture_buf->write(transport_frame + loop_offset + ev.time(),
+								    ev.type(), ev.size(), ev.buffer());
+					}
+				} else {
+					_capture_buf->write(transport_frame + loop_offset + ev.time(),
+							    ev.type(), ev.size(), ev.buffer());
+				}
+				break;
+			case ForceChannel:
+				if (ev.is_channel_event()) {
+					ev.set_channel (ffs(mask) - 1);
+				}
+				_capture_buf->write(transport_frame + loop_offset + ev.time(),
+						    ev.type(), ev.size(), ev.buffer());
+				break;
+			}
 		}
 		g_atomic_int_add(&_frames_pending_write, nframes);
 
@@ -473,6 +500,18 @@ MidiDiskstream::process (framepos_t transport_frame, pframes_t nframes, framecnt
 
 		playback_distance = nframes;
 
+	}
+
+	if (need_disk_signal) {
+		/* copy the diskstream data to all output buffers */
+		
+		MidiBuffer& mbuf (bufs.get_midi (0));
+		get_playback (mbuf, nframes);
+		
+		/* leave the audio count alone */
+		ChanCount cnt (DataType::MIDI, 1);
+		cnt.set (DataType::AUDIO, bufs.count().n_audio());
+		bufs.set_count (cnt);
 	}
 
 	return 0;
@@ -1078,10 +1117,6 @@ MidiDiskstream::get_state ()
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	node.add_property("channel-mode", enum_2_string(get_channel_mode()));
-	snprintf (buf, sizeof(buf), "0x%x", get_channel_mask());
-	node.add_property("channel-mask", buf);
-
 	if (_write_source && _session.get_record_enabled()) {
 
 		XMLNode* cs_child = new XMLNode (X_("CapturingSources"));
@@ -1111,7 +1146,6 @@ MidiDiskstream::get_state ()
 int
 MidiDiskstream::set_state (const XMLNode& node, int version)
 {
-	const XMLProperty* prop;
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
 	XMLNode* capture_pending_node = 0;
@@ -1131,25 +1165,9 @@ MidiDiskstream::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	ChannelMode channel_mode = AllChannels;
-	if ((prop = node.property ("channel-mode")) != 0) {
-		channel_mode = ChannelMode (string_2_enum(prop->value(), channel_mode));
-	}
-
-	unsigned int channel_mask = 0xFFFF;
-	if ((prop = node.property ("channel-mask")) != 0) {
-		sscanf (prop->value().c_str(), "0x%x", &channel_mask);
-		if (channel_mask & (~0xFFFF)) {
-			warning << _("MidiDiskstream: XML property channel-mask out of range") << endmsg;
-		}
-	}
-
-
 	if (capture_pending_node) {
 		use_pending_capture_data (*capture_pending_node);
 	}
-
-	set_channel_mode (channel_mode, channel_mask);
 
 	in_set_state = false;
 

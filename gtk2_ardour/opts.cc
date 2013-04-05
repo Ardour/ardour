@@ -67,6 +67,7 @@ print_help (const char *execname)
 	     << _("  -m, --menus file            Use \"file\" to define menus\n")
 	     << _("  -N, --new session-name      Create a new session from the command line\n")
 	     << _("  -O, --no-hw-optimizations   Disable h/w specific optimizations\n")
+	     << _("  -P, --no-connect-ports      Do not connect any ports at startup\n")
 	     << _("  -S, --sync                  Draw the gui synchronously \n")
 #ifdef WINDOWS_VST_SUPPORT
 	     << _("  -V, --novst                 Do not use VST support\n")

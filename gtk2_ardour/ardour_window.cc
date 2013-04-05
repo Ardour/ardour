@@ -31,6 +31,7 @@ using namespace Gtkmm2ext;
 
 ArdourWindow::ArdourWindow (string title)
 	: Window ()
+	, VisibilityTracker (*((Gtk::Window*)this))
 {
 	set_title (title);
 	init ();
@@ -38,6 +39,7 @@ ArdourWindow::ArdourWindow (string title)
 
 ArdourWindow::ArdourWindow (Gtk::Window& parent, string /*title*/)
 	: Window ()
+	, VisibilityTracker (*((Gtk::Window*)this))
 {
 	init ();
 	set_transient_for (parent);
@@ -74,3 +76,4 @@ ArdourWindow::init ()
 {
 	set_border_width (10);
 }
+

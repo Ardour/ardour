@@ -194,7 +194,18 @@ http_get_thread (void *arg) {
 	  (long int) vif->get_req_frame(), vif->get_width(), vif->get_height(),
 	  vif->get_video_filename().c_str()
 	);
-	char *res=curl_http_get(url, NULL);
+	int status = 0;
+	int timeout = 1000; // * 5ms -> 5sec
+	char *res = NULL;
+	do {
+		res=curl_http_get(url, &status);
+		if (status == 503) usleep(5000); // try-again
+	} while (status == 503 && --timeout > 0);
+
+	if (status != 200 || !res) {
+		printf("no-video frame: video-server returned http-status: %d\n", status);
+	}
+
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 	vif->http_download_done(res);
 	pthread_exit(0);

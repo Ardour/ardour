@@ -122,7 +122,6 @@ typedef uint64_t microseconds_t;
 #include "video_server_dialog.h"
 #include "add_video_dialog.h"
 #include "transcode_video_dialog.h"
-#include "video_copy_dialog.h"
 #include "system_exec.h" /* to launch video-server */
 #endif
 
@@ -651,7 +650,7 @@ void
 ARDOUR_UI::startup ()
 {
 	Application* app = Application::instance ();
-
+	char *nsm_url;
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
 	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_load));
 
@@ -661,7 +660,57 @@ ARDOUR_UI::startup ()
 
 	app->ready ();
 
-	if (get_session_parameters (true, ARDOUR_COMMAND_LINE::new_session, ARDOUR_COMMAND_LINE::load_template)) {
+	nsm_url = getenv ("NSM_URL");
+	nsm = 0;
+
+	if (nsm_url) {
+		nsm = new NSM_Client;
+		if (!nsm->init (nsm_url)) {
+			nsm->announce (PROGRAM_NAME, ":dirty:", "ardour3");
+
+			unsigned int i = 0;
+			// wait for announce reply from nsm server
+			for ( i = 0; i < 5000; ++i) {
+				nsm->check ();
+				usleep (i);
+				if (nsm->is_active())
+					break;
+			}
+			// wait for open command from nsm server
+			for ( i = 0; i < 5000; ++i) {
+				nsm->check ();
+				usleep (1000);
+				if (nsm->client_id ())
+					break;
+			}
+
+			if (_session && nsm) {
+				_session->set_nsm_state( nsm->is_active() );
+			}
+
+			// nsm requires these actions disabled
+			vector<string> action_names;
+			action_names.push_back("SaveAs");
+			action_names.push_back("Rename");
+			action_names.push_back("New");
+			action_names.push_back("Open");
+			action_names.push_back("Recent");
+			action_names.push_back("Close");
+
+			for (vector<string>::const_iterator n = action_names.begin(); n != action_names.end(); ++n) {
+				Glib::RefPtr<Action> act = ActionManager::get_action (X_("Main"), (*n).c_str());
+				if (act) {
+					act->set_sensitive (false);
+				}
+			}
+
+		}
+		else {
+			delete nsm;
+			nsm = 0;
+		}
+
+	} else if (get_session_parameters (true, ARDOUR_COMMAND_LINE::new_session, ARDOUR_COMMAND_LINE::load_template)) {
                 if (Profile->get_soundgrid()) {
                         SoundGrid::instance().teardown();
                 }
@@ -938,6 +987,19 @@ ARDOUR_UI::every_second ()
 	update_buffer_load ();
 	update_disk_space ();
 	update_timecode_format ();
+
+	if (nsm && nsm->is_active ()) {
+		nsm->check ();
+
+		if (!_was_dirty && _session->dirty ()) {
+			nsm->is_dirty ();
+			_was_dirty = true;
+		}
+		else if (_was_dirty && !_session->dirty ()){
+			nsm->is_clean ();
+			_was_dirty = false;
+		}
+	}
 	return TRUE;
 }
 
@@ -2425,7 +2487,7 @@ ARDOUR_UI::build_session_from_nsd (const std::string& session_path, const std::s
 {
 	BusProfile bus_profile;
 
-	if (Profile->get_sae()) {
+	if (nsm || Profile->get_sae()) {
 
 		bus_profile.master_out_channels = 2;
 		bus_profile.input_ac = AutoConnectPhysical;
@@ -2569,6 +2631,10 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		
 		session_name = _startup->session_name (likely_new);
 		
+		if (nsm) {
+		        likely_new = true;
+		}
+
 		string::size_type suffix = session_name.find (statefile_suffix);
 		
 		if (suffix != string::npos) {
@@ -2620,7 +2686,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 		if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
 
-			if (likely_new) {
+			if (likely_new && !nsm) {
 
 				std::string existing = Glib::build_filename (session_path, session_name);
 
@@ -3238,7 +3304,11 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	string template_path = add_route_dialog->track_template();
 
 	if (!template_path.empty()) {
-		_session->new_route_from_template (count, template_path);
+		if (add_route_dialog->name_template_is_default())  {
+			_session->new_route_from_template (count, template_path, string());
+		} else {
+			_session->new_route_from_template (count, template_path, add_route_dialog->name_template());
+		}
 		return;
 	}
 
@@ -3345,7 +3415,7 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 
 		std::string icsd_exec = video_server_dialog->get_exec_path();
 		std::string icsd_docroot = video_server_dialog->get_docroot();
-		if (icsd_docroot.empty()) {icsd_docroot = "/";}
+		if (icsd_docroot.empty()) {icsd_docroot = X_("/");}
 
 		struct stat sb;
 		if (!lstat (icsd_docroot.c_str(), &sb) == 0 || !S_ISDIR(sb.st_mode)) {
@@ -3371,10 +3441,16 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 		argp[8] = 0;
 		stop_video_server();
 
-		std::ostringstream osstream;
-		osstream << "http://localhost:" << video_server_dialog->get_listenport() << "/";
-		Config->set_video_server_url(osstream.str());
-		Config->set_video_server_docroot(icsd_docroot);
+		if (icsd_docroot == X_("/")) {
+			Config->set_video_advanced_setup(false);
+		} else {
+			std::ostringstream osstream;
+			osstream << "http://localhost:" << video_server_dialog->get_listenport() << "/";
+			Config->set_video_server_url(osstream.str());
+			Config->set_video_server_docroot(icsd_docroot);
+			Config->set_video_advanced_setup(true);
+		}
+
 		video_server_process = new SystemExec(icsd_exec, argp);
 		video_server_process->start();
 		sleep(1);
@@ -3423,41 +3499,36 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 	}
 
 	switch (add_video_dialog->import_option()) {
-		case VTL_IMPORT_COPY:
-		{
-			VideoCopyDialog *video_copy_dialog;
-			video_copy_dialog = new VideoCopyDialog(_session, path);
-			//video_copy_dialog->setup_non_interactive_copy();
-			ResponseType r = (ResponseType) video_copy_dialog->run ();
-			video_copy_dialog->hide();
-			if (r != RESPONSE_ACCEPT) { return; }
-			path = video_copy_dialog->get_filename();
-			delete video_copy_dialog;
-		}
-			break;
 		case VTL_IMPORT_TRANSCODE:
-		{
-			TranscodeVideoDialog *transcode_video_dialog;
-			transcode_video_dialog = new TranscodeVideoDialog (_session, path);
-			ResponseType r = (ResponseType) transcode_video_dialog->run ();
-			transcode_video_dialog->hide();
-			if (r != RESPONSE_ACCEPT) { return; }
-			path = transcode_video_dialog->get_filename();
-			if (!transcode_video_dialog->get_audiofile().empty()) {
-				editor->embed_audio_from_video(transcode_video_dialog->get_audiofile());
+			{
+				TranscodeVideoDialog *transcode_video_dialog;
+				transcode_video_dialog = new TranscodeVideoDialog (_session, path);
+				ResponseType r = (ResponseType) transcode_video_dialog->run ();
+				transcode_video_dialog->hide();
+				if (r != RESPONSE_ACCEPT) {
+					delete transcode_video_dialog;
+					return;
+				}
+				if (!transcode_video_dialog->get_audiofile().empty()) {
+					editor->embed_audio_from_video(transcode_video_dialog->get_audiofile());
+				}
+				switch (transcode_video_dialog->import_option()) {
+					case VTL_IMPORT_TRANSCODED:
+						path = transcode_video_dialog->get_filename();
+						local_file = true;
+						break;
+					case VTL_IMPORT_REFERENCE:
+						break;
+					default:
+						delete transcode_video_dialog;
+						return;
+				}
+				delete transcode_video_dialog;
 			}
-			delete transcode_video_dialog;
-		}
 			break;
 		default:
 		case VTL_IMPORT_NONE:
 			break;
-	}
-
-	if (path.empty()) {
-		/* may have been overriden by 'audio only import'
-		 * in transcode_video_dialog */
-		path = add_video_dialog->file_name(local_file);;
 	}
 
 	/* strip _session->session_directory().video_path() from video file if possible */
@@ -3477,6 +3548,11 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 		_session->add_extra_xml (*node);
 		_session->set_dirty ();
 
+		_session->maybe_update_session_range(
+			std::max(video_timeline->get_offset(), (ARDOUR::frameoffset_t) 0),
+			std::max(video_timeline->get_offset() + video_timeline->get_duration(), (ARDOUR::frameoffset_t) 0));
+
+
 		if (add_video_dialog->launch_xjadeo() && local_file) {
 			editor->set_xjadeo_sensitive(true);
 			editor->toggle_xjadeo_proc(1);
@@ -3485,6 +3561,20 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 		}
 		editor->toggle_ruler_video(true);
 	}
+}
+
+void
+ARDOUR_UI::remove_video ()
+{
+	video_timeline->close_session();
+	editor->toggle_ruler_video(false);
+
+	/* delete session state */
+	XMLNode* node = new XMLNode(X_("Videotimeline"));
+	_session->add_extra_xml(*node);
+	node = new XMLNode(X_("Videomonitor"));
+	_session->add_extra_xml(*node);
+	stop_video_server();
 }
 
 void

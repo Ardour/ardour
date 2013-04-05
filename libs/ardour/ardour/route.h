@@ -439,6 +439,12 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	bool has_external_redirects() const;
 
+        /* can only be executed by a route for which is_monitor() is true
+   	   (i.e. the monitor out)
+        */
+        void monitor_run (framepos_t start_frame, framepos_t end_frame,
+			  pframes_t nframes, int declick);
+
   protected:
 	friend class Session;
 
@@ -451,11 +457,13 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
   protected:
 	virtual framecnt_t check_initial_delay (framecnt_t nframes, framepos_t&) { return nframes; }
 
-	void passthru (framepos_t start_frame, framepos_t end_frame,
+        void fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes);
+
+        void passthru (BufferSet&, framepos_t start_frame, framepos_t end_frame,
 			pframes_t nframes, int declick);
 
 	virtual void write_out_of_band_data (BufferSet& /* bufs */, framepos_t /* start_frame */, framepos_t /* end_frame */,
-			framecnt_t /* nframes */) {}
+					     framecnt_t /* nframes */) {}
 
 	virtual void process_output_buffers (BufferSet& bufs,
 	                                     framepos_t start_frame, framepos_t end_frame,

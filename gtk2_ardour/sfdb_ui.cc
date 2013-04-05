@@ -340,9 +340,9 @@ SoundFileBox::audition ()
 	for (int n = 0; n < sf_info.channels; ++n) {
 		try {
 			afs = boost::dynamic_pointer_cast<AudioFileSource> (
-					SourceFactory::createReadable (DataType::AUDIO, *_session,
-							path, n, Source::Flag (0), false));
-
+				SourceFactory::createExternal (DataType::AUDIO, *_session,
+							       path, n, Source::Flag (0), false));
+			
 			srclist.push_back(afs);
 
 		} catch (failed_constructor& err) {
@@ -520,8 +520,6 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 
 	//add freesound search
 
-	mootcher = new Mootcher();
-	
 	HBox* passbox;
 	Label* label;
 	
@@ -553,8 +551,13 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	freesound_sort.set_active(0);
 	
 	passbox->pack_start (freesound_search_btn, false, false);
+	passbox->pack_start (freesound_more_btn, false, false);
+	freesound_more_btn.set_label(_("More"));
+	freesound_more_btn.set_sensitive(false);
+
 	passbox->pack_end   (freesound_stop_btn, false, false);
 	freesound_stop_btn.set_label(_("Stop"));
+	freesound_stop_btn.set_sensitive(false);
 	
 	scroll = manage(new ScrolledWindow);
 	scroll->add(freesound_list_view);
@@ -586,6 +589,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	freesound_list_view.signal_row_activated().connect (sigc::mem_fun (*this, &SoundFileBrowser::freesound_list_view_activated));
 	freesound_search_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_search_clicked));
 	freesound_entry.signal_activate().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_search_clicked));
+	freesound_more_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_more_clicked));
 	freesound_stop_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_stop_clicked));
 	notebook.append_page (*vbox, _("Search Freesound"));
 #endif
@@ -802,12 +806,13 @@ void
 SoundFileBrowser::freesound_list_view_selected ()
 {
 	freesound_download_cancel = false;
+	freesound_stop_btn.set_sensitive(true);
 
 #ifdef FREESOUND
 	if (!reset_options ()) {
 		set_action_sensitive (false);
 	} else {
-
+		Mootcher mootcher; 
 		string file;
 
 		TreeView::Selection::ListHandle_Path rows = freesound_list_view.get_selection()->get_selected_rows ();
@@ -825,7 +830,7 @@ SoundFileBrowser::freesound_list_view_selected ()
 			gdk_window_set_cursor (get_window()->gobj(), gdk_cursor_new(GDK_WATCH));
 			gdk_flush();
 
-			file = mootcher->getAudioFile(ofn, id, uri, this);
+			file = mootcher.getAudioFile(ofn, id, uri, this);
 
 			gdk_window_set_cursor (get_window()->gobj(), prev_cursor);
 
@@ -843,6 +848,7 @@ SoundFileBrowser::freesound_list_view_selected ()
 		preview.setup_labels (file);
 	}
 #endif
+	freesound_stop_btn.set_sensitive(false);
 }
 
 void
@@ -872,15 +878,26 @@ SoundFileBrowser::found_search_clicked ()
 void
 SoundFileBrowser::freesound_search_clicked ()
 {
-	freesound_search_cancel = false;
+	freesound_page = 1;
+	freesound_list->clear();
+	matches = 0;
 	freesound_search();
+}
+
+void
+SoundFileBrowser::freesound_more_clicked ()
+{
+	char row_path[21];
+	freesound_page++;
+	freesound_search();
+	snprintf(row_path, 21, "%d", (freesound_page - 1) * 100);
+	freesound_list_view.scroll_to_row(Gtk::TreePath(row_path), 0);
 }
 
 void
 SoundFileBrowser::freesound_stop_clicked ()
 {
 	freesound_download_cancel = true;
-	freesound_search_cancel = true;
 }
 
 
@@ -888,9 +905,8 @@ void
 SoundFileBrowser::freesound_search()
 {
 #ifdef FREESOUND
-	freesound_list->clear();
+	Mootcher mootcher;
 	freesound_list_view.get_column(1)->set_sizing(TREE_VIEW_COLUMN_GROW_ONLY);
-	matches = 0;
 
 	string search_string = freesound_entry.get_text ();
 	enum sortMethod sort_method = (enum sortMethod) freesound_sort.get_active_row_number();
@@ -901,164 +917,155 @@ SoundFileBrowser::freesound_search()
 	freesound_progress_bar.set_fraction(0.0);
 	gdk_flush();
 
-	int freesound_n_pages = 1;
-	for (int page = 1; page <= 99 && page <= freesound_n_pages; page++ ) {
-		
-		std::string prog;
-		if (freesound_n_pages > 1) {
-			freesound_progress_bar.set_fraction(page/(float)freesound_n_pages);
-			prog = string_compose (_("Searching Page %1 of %2, click Stop to cancel"), page, freesound_n_pages);
-		} else {
-			prog = _("Searching, click Stop to cancel");
-		}
-		freesound_progress_bar.set_text(prog);
-		while (Glib::MainContext::get_default()->iteration (false)) {
-			/* do nothing */
-		}
-
-		std::string theString = mootcher->searchText(
+	std::string theString = mootcher.searchText(
 			search_string, 
-			page,
+			freesound_page,
 #ifdef GTKOSX
 			"", // OSX eats anything incl mp3
 #else
 			"type:wav OR type:aiff OR type:flac OR type:aif OR type:ogg OR type:oga",
 #endif
 			sort_method
-		);
-
-		XMLTree doc;
-		doc.read_buffer( theString );
-		XMLNode *root = doc.root();
-
-		if (!root) {
-			error << "no root XML node!" << endmsg;
-			break;
-		}
-
-		if ( strcmp(root->name().c_str(), "response") != 0) {
-			error << string_compose ("root node name == %1 != \"response\"", root->name()) << endmsg;
-			break;
-		}
-
-		//find out how many pages are available to search
-		XMLNode *res = root->child("num_pages");
-		if (res) {
-			string result = res->child("text")->content();
-			freesound_n_pages = atoi(result.c_str());
-		}
-
-		XMLNode *sounds_root = root->child("sounds");
-		
-		if (!sounds_root) {
-			error << "no child node \"sounds\" found!" << endmsg;
-			break;
-		}
-		
-		XMLNodeList sounds = sounds_root->children();
-		if (sounds.size() == 0) {
-			/* nothing found */
-			break;
-		}
-
-		XMLNodeConstIterator niter;
-		XMLNode *node;
-		for (niter = sounds.begin(); niter != sounds.end(); ++niter) {
-			node = *niter;
-			if( strcmp( node->name().c_str(), "resource") != 0 ){
-				error << string_compose ("node->name()=%1 != \"resource\"", node->name()) << endmsg;
-				freesound_search_cancel = true;
-				break;
-			}
-
-			// node->dump(cerr, "node:");
-			
-			XMLNode *id_node  = node->child ("id");
-			XMLNode *uri_node = node->child ("serve");
-			XMLNode *ofn_node = node->child ("original_filename");
-			XMLNode *dur_node = node->child ("duration");
-			XMLNode *siz_node = node->child ("filesize");
-			XMLNode *srt_node = node->child ("samplerate");
-			XMLNode *lic_node = node->child ("license");
-
-			if (id_node && uri_node && ofn_node && dur_node && siz_node && srt_node) {
-				
-				std::string  id =  id_node->child("text")->content();
-				std::string uri = uri_node->child("text")->content();
-				std::string ofn = ofn_node->child("text")->content();
-				std::string dur = dur_node->child("text")->content();
-				std::string siz = siz_node->child("text")->content();
-				std::string srt = srt_node->child("text")->content();
-				std::string lic = lic_node->child("text")->content();
-
-				std::string r;
-				// cerr << "id=" << id << ",uri=" << uri << ",ofn=" << ofn << ",dur=" << dur << endl;
-				
-				double duration_seconds = atof(dur.c_str());
-				double h, m, s;
-				char duration_hhmmss[16];
-				if (duration_seconds >= 99 * 60 * 60) {
-					strcpy(duration_hhmmss, ">99h");
-				} else {
-					s = modf(duration_seconds/60, &m) * 60;
-					m = modf(m/60, &h) * 60;
-					sprintf(duration_hhmmss, "%02.fh:%02.fm:%04.1fs",
-						h, m, s
-					);
-				}
-
-				double size_bytes = atof(siz.c_str());
-				char bsize[32];
-				if (size_bytes < 1000) {
-					sprintf(bsize, "%.0f %s", size_bytes, _("B"));
-				} else if (size_bytes < 1000000 ) {
-					sprintf(bsize, "%.1f %s", size_bytes / 1000.0, _("kB"));
-				} else if (size_bytes < 10000000) {
-					sprintf(bsize, "%.1f %s", size_bytes / 1000000.0, _("MB"));
-				} else if (size_bytes < 1000000000) {
-					sprintf(bsize, "%.2f %s", size_bytes / 1000000.0, _("MB"));
-				} else {
-					sprintf(bsize, "%.2f %s", size_bytes / 1000000000.0, _("GB"));
-				}
-
-				/* see http://www.freesound.org/help/faq/#licenses */
-				char shortlicense[64];
-				if(!lic.compare(0, 42, "http://creativecommons.org/licenses/by-nc/")){
-					sprintf(shortlicense, "CC-BY-NC");
-				} else if(!lic.compare(0, 39, "http://creativecommons.org/licenses/by/")) {
-					sprintf(shortlicense, "CC-BY");
-				} else if(!lic.compare("http://creativecommons.org/licenses/sampling+/1.0/")) {
-					sprintf(shortlicense, "sampling+");
-				} else if(!lic.compare(0, 40, "http://creativecommons.org/publicdomain/")) {
-					sprintf(shortlicense, "PD");
-				} else {
-					snprintf(shortlicense, 64, "%s", lic.c_str());
-					shortlicense[63]= '\0';
-				}
-
- 				TreeModel::iterator new_row = freesound_list->append();
-				TreeModel::Row row = *new_row;
-				
-				row[freesound_list_columns.id      ] = id;
-				row[freesound_list_columns.uri     ] = uri;
-				row[freesound_list_columns.filename] = ofn;
-				row[freesound_list_columns.duration] = duration_hhmmss;
-				row[freesound_list_columns.filesize] = bsize;
-				row[freesound_list_columns.smplrate] = srt;
-				row[freesound_list_columns.license ] = shortlicense;
-				matches++;
-
-			}
-		}
-	
-		if (freesound_search_cancel)
-			break;
-
-	}  //page "for" loop
+			);
 
 	gdk_window_set_cursor (get_window()->gobj(), prev_cursor);
 
-	freesound_progress_bar.set_fraction(0.0);
+	XMLTree doc;
+	doc.read_buffer( theString );
+	XMLNode *root = doc.root();
+
+	if (!root) {
+		error << "no root XML node!" << endmsg;
+		return;
+	}
+
+	if ( strcmp(root->name().c_str(), "response") != 0) {
+		error << string_compose ("root node name == %1 != \"response\"", root->name()) << endmsg;
+		return;
+	}
+
+	// find out how many pages are available to search
+	int freesound_n_pages = 1;
+	XMLNode *res = root->child("num_pages");
+	if (res) {
+		string result = res->child("text")->content();
+		freesound_n_pages = atoi(result.c_str());
+	}
+
+	int more_pages = freesound_n_pages - freesound_page;
+
+	if (more_pages > 0) {
+		freesound_more_btn.set_sensitive(true);
+		freesound_more_btn.set_tooltip_text(string_compose(P_(
+						"%1 more page of 100 results available",
+						"%1 more pages of 100 results available",
+						more_pages), more_pages));
+	} else {
+		freesound_more_btn.set_sensitive(false);
+		freesound_more_btn.set_tooltip_text(_("No more results available"));
+	}
+
+	XMLNode *sounds_root = root->child("sounds");
+	if (!sounds_root) {
+		error << "no child node \"sounds\" found!" << endmsg;
+		return;
+	}
+
+	XMLNodeList sounds = sounds_root->children();
+	if (sounds.size() == 0) {
+		/* nothing found */
+		return;
+	}
+
+	XMLNodeConstIterator niter;
+	XMLNode *node;
+	for (niter = sounds.begin(); niter != sounds.end(); ++niter) {
+		node = *niter;
+		if( strcmp( node->name().c_str(), "resource") != 0 ) {
+			error << string_compose ("node->name()=%1 != \"resource\"", node->name()) << endmsg;
+			break;
+		}
+
+		// node->dump(cerr, "node:");
+
+
+		XMLNode *id_node  = node->child ("id");
+		XMLNode *uri_node = node->child ("serve");
+		XMLNode *ofn_node = node->child ("original_filename");
+		XMLNode *dur_node = node->child ("duration");
+		XMLNode *siz_node = node->child ("filesize");
+		XMLNode *srt_node = node->child ("samplerate");
+		XMLNode *lic_node = node->child ("license");
+
+		if (id_node && uri_node && ofn_node && dur_node && siz_node && srt_node) {
+
+			std::string  id =  id_node->child("text")->content();
+			std::string uri = uri_node->child("text")->content();
+			std::string ofn = ofn_node->child("text")->content();
+			std::string dur = dur_node->child("text")->content();
+			std::string siz = siz_node->child("text")->content();
+			std::string srt = srt_node->child("text")->content();
+			std::string lic = lic_node->child("text")->content();
+
+			std::string r;
+			// cerr << "id=" << id << ",uri=" << uri << ",ofn=" << ofn << ",dur=" << dur << endl;
+
+			double duration_seconds = atof(dur.c_str());
+			double h, m, s;
+			char duration_hhmmss[16];
+			if (duration_seconds >= 99 * 60 * 60) {
+				strcpy(duration_hhmmss, ">99h");
+			} else {
+				s = modf(duration_seconds/60, &m) * 60;
+				m = modf(m/60, &h) * 60;
+				sprintf(duration_hhmmss, "%02.fh:%02.fm:%04.1fs",
+						h, m, s
+				       );
+			}
+
+			double size_bytes = atof(siz.c_str());
+			char bsize[32];
+			if (size_bytes < 1000) {
+				sprintf(bsize, "%.0f %s", size_bytes, _("B"));
+			} else if (size_bytes < 1000000 ) {
+				sprintf(bsize, "%.1f %s", size_bytes / 1000.0, _("kB"));
+			} else if (size_bytes < 10000000) {
+				sprintf(bsize, "%.1f %s", size_bytes / 1000000.0, _("MB"));
+			} else if (size_bytes < 1000000000) {
+				sprintf(bsize, "%.2f %s", size_bytes / 1000000.0, _("MB"));
+			} else {
+				sprintf(bsize, "%.2f %s", size_bytes / 1000000000.0, _("GB"));
+			}
+
+			/* see http://www.freesound.org/help/faq/#licenses */
+			char shortlicense[64];
+			if(!lic.compare(0, 42, "http://creativecommons.org/licenses/by-nc/")){
+				sprintf(shortlicense, "CC-BY-NC");
+			} else if(!lic.compare(0, 39, "http://creativecommons.org/licenses/by/")) {
+				sprintf(shortlicense, "CC-BY");
+			} else if(!lic.compare("http://creativecommons.org/licenses/sampling+/1.0/")) {
+				sprintf(shortlicense, "sampling+");
+			} else if(!lic.compare(0, 40, "http://creativecommons.org/publicdomain/")) {
+				sprintf(shortlicense, "PD");
+			} else {
+				snprintf(shortlicense, 64, "%s", lic.c_str());
+				shortlicense[63]= '\0';
+			}
+
+			TreeModel::iterator new_row = freesound_list->append();
+			TreeModel::Row row = *new_row;
+
+			row[freesound_list_columns.id      ] = id;
+			row[freesound_list_columns.uri     ] = uri;
+			row[freesound_list_columns.filename] = ofn;
+			row[freesound_list_columns.duration] = duration_hhmmss;
+			row[freesound_list_columns.filesize] = bsize;
+			row[freesound_list_columns.smplrate] = srt;
+			row[freesound_list_columns.license ] = shortlicense;
+			matches++;
+		}
+	}
+
 	if (matches == 0) {
 		freesound_progress_bar.set_text(_("Search returned no results."));
 	} else {
@@ -1100,6 +1107,7 @@ SoundFileBrowser::get_paths ()
 	} else {
 #ifdef FREESOUND
 		typedef TreeView::Selection::ListHandle_Path ListPath;
+		Mootcher mootcher;
 
 		ListPath rows = freesound_list_view.get_selection()->get_selected_rows ();
 		for (ListPath::iterator i = rows.begin() ; i != rows.end(); ++i) {
@@ -1113,7 +1121,7 @@ SoundFileBrowser::get_paths ()
 			gdk_window_set_cursor (get_window()->gobj(), gdk_cursor_new(GDK_WATCH));
 			gdk_flush();
 
-			string str = mootcher->getAudioFile(ofn, id, uri, this);
+			string str = mootcher.getAudioFile(ofn, id, uri, this);
 			if (str != "") {
 				results.push_back (str);
 			}
@@ -1331,8 +1339,9 @@ SoundFileOmega::reset_options ()
 		src_combo.set_sensitive (false);
 	}
 
-	/* We must copy MIDI files or those from Freesound */
-	bool const must_copy = have_a_midi_file || notebook.get_current_page() == 2;
+	/* We must copy MIDI files or those from Freesound
+	 * or any file if we are under nsm control */
+	bool const must_copy = _session->get_nsm_state() || have_a_midi_file || notebook.get_current_page() == 2;
 	
 	if (Config->get_only_copy_imported_files()) {
 

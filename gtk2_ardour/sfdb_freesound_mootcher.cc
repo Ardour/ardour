@@ -226,6 +226,7 @@ std::string Mootcher::searchText(std::string query, int page, std::string filter
 		params += "&s=" + sortMethodString(sort);
 
 	params += "&fields=id,original_filename,duration,filesize,samplerate,license,serve";
+	params += "&sounds_per_page=100";
 
 	return doRequest("/sounds/search", params);
 }
@@ -318,12 +319,12 @@ std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID,
 		return "";
 	}
 
-	//if already canceling a previous download, bail out here  ( this can happen b/c getAudioFile gets called by various UI update funcs )
+	// if already cancelling a previous download, bail out here  ( this can happen b/c getAudioFile gets called by various UI update funcs )
 	if ( caller->freesound_download_cancel ) {
 		return "";
 	}
 	
-	//now download the actual file
+	// now download the actual file
 	FILE* theFile;
 	theFile = g_fopen( audioFileName.c_str(), "wb" );
 
@@ -359,7 +360,10 @@ std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID,
 	caller->freesound_progress_bar.set_text("");
 	
 	if( res != 0 ) {
-		error <<  string_compose (_("curl error %1 (%2)"), res, curl_easy_strerror(res)) << endmsg;
+		/* it's not an error if the user pressed the stop button */
+		if (res != CURLE_ABORTED_BY_CALLBACK) {
+			error <<  string_compose (_("curl error %1 (%2)"), res, curl_easy_strerror(res)) << endmsg;
+		}
 		remove( audioFileName.c_str() );  
 		return "";
 	} else {

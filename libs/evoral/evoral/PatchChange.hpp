@@ -119,7 +119,7 @@ public:
 	uint8_t channel () const { return _program_change.buffer()[0] & 0xf; }
 
 	inline bool operator< (const PatchChange<Time>& o) const {
-		if (time() != o.time()) {
+		if (!musical_time_equal (time(), o.time())) {
 			return time() < o.time();
 		}
 
@@ -131,7 +131,7 @@ public:
 	}
 
 	inline bool operator== (const PatchChange<Time>& o) const {
-		return (time() == o.time() && program() == o.program() && bank() == o.bank());
+		return (musical_time_equal (time(), o.time()) && program() == o.program() && bank() == o.bank());
 	}
 
 	/** The PatchChange is made up of messages() MIDI messages; this method returns them by index.
@@ -163,6 +163,12 @@ private:
 	MIDIEvent<Time> _program_change;
 };
 
+}
+
+template<typename Time>
+std::ostream& operator<< (std::ostream& o, const Evoral::PatchChange<Time>& p) {
+	o << "Patch Change " << p.id() << " @ " << p.time() << " bank " << (int) p.bank() << " program " << (int) p.program();
+	return o;
 }
 
 #endif

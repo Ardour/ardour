@@ -330,15 +330,20 @@ int
 Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool session_state_changing)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+
 	if (!lm.locked()) {
 		return 0;
 	}
 
 	bool can_record = _session.actively_recording ();
 
+	/* no outputs? nothing to do ... what happens if we have sends etc. ? */
+
 	if (n_outputs().n_total() == 0) {
 		return 0;
 	}
+
+	/* not active ... do the minimum possible by just outputting silence */
 
 	if (!_active) {
 		silence (nframes);
@@ -392,26 +397,31 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 			break;
 		}
 	}
-	
-	if (!_have_internal_generator && metering_state() == MeteringInput) {
-		_input->process_input (_meter, start_frame, end_frame, nframes);
-	}
 
 	_amp->apply_gain_automation (false);
 
 	/* if have_internal_generator, or .. */
-	//_input->process_input (_meter, start_frame, end_frame, nframes);
 
 	if (be_silent) {
+
+		if (_meter_point == MeterInput) {
+			/* still need input monitoring */
+			_input->process_input (_meter, start_frame, end_frame, nframes);
+		}
 
 		passthru_silence (start_frame, end_frame, nframes, 0);
 
 	} else {
 
-		/* we're sending signal, but we may still want to meter the input.
-		 */
+		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
+		
+		fill_buffers_with_input (bufs, _input, nframes);
 
-		passthru (start_frame, end_frame, nframes, false);
+		if (_meter_point == MeterInput) {
+			_meter->run (bufs, start_frame, end_frame, nframes, true);
+		}
+
+		passthru (bufs, start_frame, end_frame, nframes, false);
 	}
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
@@ -447,7 +457,10 @@ Track::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*
 	silence (nframes);
 
 	framecnt_t playback_distance;
-	int const dret = _diskstream->process (_session.transport_frame(), nframes, playback_distance);
+
+	BufferSet& bufs (_session.get_silent_buffers (n_process_buffers()));
+
+	int const dret = _diskstream->process (bufs, _session.transport_frame(), nframes, playback_distance, false);
 	need_butler = _diskstream->commit (playback_distance);
 	return dret;
 }
@@ -934,3 +947,4 @@ Track::metering_state () const
 {
 	return _diskstream->record_enabled() ? MeteringInput : MeteringRoute;
 }
+

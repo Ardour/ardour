@@ -195,7 +195,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	std::string new_audio_source_name (const std::string&, uint32_t nchans, uint32_t chan, bool destructive);
 	std::string new_midi_source_name (const std::string&);
 	std::string new_source_path_from_name (DataType type, const std::string&);
-	RouteList new_route_from_template (uint32_t how_many, const std::string& template_path);
+        RouteList new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name);
 
 	void process (pframes_t nframes);
 
@@ -392,6 +392,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void rename_state (std::string old_name, std::string new_name);
 	void remove_pending_capture_state ();
 	int rename (const std::string&);
+	bool get_nsm_state () const { return _under_nsm_control; }
+	void set_nsm_state (bool state) { _under_nsm_control = state; }
 
 	PBD::Signal1<void,std::string> StateSaved;
 	PBD::Signal0<void> StateReady;
@@ -732,6 +734,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void request_play_range (std::list<AudioRange>*, bool leave_rolling = false);
 	bool get_play_range () const { return _play_range; }
 
+	void maybe_update_session_range (framepos_t, framepos_t);
+
 	/* buffers for gain and pan */
 
 	gain_t* gain_automation_buffer () const;
@@ -900,8 +904,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	Slave*                  _slave;
 	bool                    _silent;
 
-	void maybe_update_session_range (framepos_t, framepos_t);
-
 	// varispeed playback
 	double                  _transport_speed;
 	double                  _default_transport_speed;
@@ -925,6 +927,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	uint32_t                _solo_isolated_cnt;
 	bool                    _writable;
 	bool                    _was_seamless;
+	bool                    _under_nsm_control;
 
 	void initialize_latencies ();
 	void set_worst_io_latencies ();

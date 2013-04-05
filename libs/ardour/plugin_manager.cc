@@ -278,9 +278,10 @@ PluginManager::ladspa_discover_from_path (string /*path*/)
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
 			ladspa_discover (**x);
 		}
+
+		vector_delete (plugin_objects);
 	}
 
-	vector_delete (plugin_objects);
 	return ret;
 }
 
@@ -334,9 +335,9 @@ PluginManager::add_presets(string domain)
 				warning << string_compose(_("Could not parse rdf file: %1"), *x) << endmsg;
 			}
 		}
+		
+		vector_delete (presets);
 	}
-
-	vector_delete (presets);
 }
 
 void
@@ -356,9 +357,9 @@ PluginManager::add_lrdf_data (const string &path)
 				warning << "Could not parse rdf file: " << uri << endmsg;
 			}
 		}
-	}
 
-	vector_delete (rdf_files);
+		vector_delete (rdf_files);
+	}
 }
 
 int
@@ -579,9 +580,10 @@ PluginManager::windows_vst_discover_from_path (string path)
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
 			windows_vst_discover (**x);
 		}
+
+		vector_delete (plugin_objects);
 	}
 
-	vector_delete (plugin_objects);
 	return ret;
 }
 
@@ -684,9 +686,10 @@ PluginManager::lxvst_discover_from_path (string path)
 		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
 			lxvst_discover (**x);
 		}
+
+		vector_delete (plugin_objects);
 	}
 
-	vector_delete (plugin_objects);
 	return ret;
 }
 
@@ -695,6 +698,8 @@ PluginManager::lxvst_discover (string path)
 {
 	VSTInfo* finfo;
 	char buf[32];
+
+	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("checking apparent LXVST plugin at %1\n", path));
 
 	if ((finfo = vstfx_get_info (const_cast<char *> (path.c_str()))) == 0) {
 		return -1;

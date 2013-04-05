@@ -83,7 +83,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	   related to "hidden"
 	*/
 	plugin_display.append_column (_("Fav"), plugin_columns.favorite);
-	plugin_display.append_column (_("Hid"), plugin_columns.hidden);
+	plugin_display.append_column (_("Hide"), plugin_columns.hidden);
 	plugin_display.append_column (_("Available Plugins"), plugin_columns.name);
 	plugin_display.append_column (_("Type"), plugin_columns.type_name);
 	plugin_display.append_column (_("Category"), plugin_columns.category);
@@ -820,6 +820,8 @@ PluginSelector::hidden_changed (const std::string& path)
 		manager.set_status (pi->type, pi->unique_id, status);
 
 		manager.save_statuses ();
+
+		build_plugin_menu ();
 	}
 	in_row_change = false;
 }

@@ -43,6 +43,33 @@ static inline bool musical_time_equal (MusicalTime a, MusicalTime b) {
 	return fabs (a - b) <= (1.0/1920.0);
 }
 
+static inline bool musical_time_less_than (MusicalTime a, MusicalTime b) {
+	/* acceptable tolerance is 1 tick. Nice if there was no magic number here */
+	if (fabs (a - b) <= (1.0/1920.0)) {
+		return false; /* effectively identical */
+	} else {
+		return a < b;
+	}
+}
+
+static inline bool musical_time_greater_than (MusicalTime a, MusicalTime b) {
+	/* acceptable tolerance is 1 tick. Nice if there was no magic number here */
+	if (fabs (a - b) <= (1.0/1920.0)) {
+		return false; /* effectively identical */
+	} else {
+		return a > b;
+	}
+}
+
+static inline bool musical_time_greater_or_equal_to (MusicalTime a, MusicalTime b) {
+	/* acceptable tolerance is 1 tick. Nice if there was no magic number here */
+	if (fabs (a - b) <= (1.0/1920.0)) {
+		return true; /* effectively identical, note the "or_equal_to" */
+	} else {
+		return a >= b;
+	}
+}
+
 /** Type of an event (opaque, mapped by application) */
 typedef uint32_t EventType;
 

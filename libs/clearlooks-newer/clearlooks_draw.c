@@ -1088,7 +1088,7 @@ clearlooks_draw_frame            (cairo_t *cr,
                                   int x, int y, int width, int height)
 {
 	const CairoColor *border = frame->border;
-	const CairoColor *dark   = (CairoColor*)&colors->shade[4];
+	const CairoColor *dark   = (const CairoColor*)&colors->shade[4];
 	ClearlooksRectangle bevel_clip = {0, 0, 0, 0};
 	ClearlooksRectangle frame_clip = {0, 0, 0, 0};
 	double radius = MIN (params->radius, MIN ((width - 2.0) / 2.0, (height - 2.0) / 2.0));
@@ -1623,7 +1623,6 @@ clearlooks_draw_scrollbar_stepper (cairo_t *cr,
 	CairoColor   border;
 	CairoColor   s1, s2, s3, s4;
 	cairo_pattern_t *pattern;
-	ShadowParameters shadow;
 	double radius = MIN (widget->radius, MIN ((width - 2.0) / 2.0, (height - 2.0) / 2.0));
 
 	ge_shade_color(&colors->shade[6], 1.05, &border);
@@ -1675,12 +1674,6 @@ clearlooks_draw_scrollbar_stepper (cairo_t *cr,
 	cairo_stroke (cr);
 	
 	cairo_translate (cr, 0.5, 0.5);
-	shadow.shadow  = CL_SHADOW_OUT;
-	shadow.corners = corners;
-	/*
-	clearlooks_draw_highlight_and_shade (cr, &shadow,
-	                                     width,
-	                                     height, params->radius);*/
 }
 
 static void
@@ -1892,17 +1885,14 @@ clearlooks_draw_handle (cairo_t *cr,
 {
 	const CairoColor *fill  = &colors->bg[params->state_type];
 	int num_bars = 6; /* shut up gcc warnings */
-	int bar_spacing;
 	
 	switch (handle->type)
 	{
 		case CL_HANDLE_TOOLBAR:
 			num_bars    = 6;
-			bar_spacing = 3;
 		break;
 		case CL_HANDLE_SPLITTER:
 			num_bars    = 16;
-			bar_spacing = 3;
 		break;
 	}
 

@@ -1051,6 +1051,7 @@ EditorRoutes::set_all_tracks_visibility (bool yn)
 			continue;
 		}
 
+		tv->set_marked_for_display (yn);
 		(*i)[_columns.visible] = yn;
 	}
 

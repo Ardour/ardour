@@ -235,7 +235,7 @@ AnalysisWindow::analyze()
 }
 
 void
-AnalysisWindow::analyze_data (Gtk::Button */*button*/)
+AnalysisWindow::analyze_data (Gtk::Button * /*button*/)
 {
 	track_list_ready = false;
 	{
@@ -251,29 +251,29 @@ AnalysisWindow::analyze_data (Gtk::Button */*button*/)
 		float  *gain   = (float *)  malloc(sizeof(float) * fft_graph.windowSize());
 
 		Selection& s (PublicEditor::instance().get_selection());
-		TimeSelection ts = s.time;
-		RegionSelection ars = s.regions;
 
-		for (TrackSelection::iterator i = s.tracks.begin(); i != s.tracks.end(); ++i) {
-			boost::shared_ptr<AudioPlaylist> pl
-				= boost::dynamic_pointer_cast<AudioPlaylist>((*i)->playlist());
 
-			if (!pl)
-				continue;
+		// if timeSelection
+		if (source_selection_ranges_rb.get_active()) {
+			TimeSelection ts = s.time;
 
-			RouteUI *rui = dynamic_cast<RouteUI *>(*i);
-			int n_inputs = rui->route()->n_inputs().n_audio(); // FFT is audio only
+			for (TrackSelection::iterator i = s.tracks.begin(); i != s.tracks.end(); ++i) {
+				boost::shared_ptr<AudioPlaylist> pl
+					= boost::dynamic_pointer_cast<AudioPlaylist>((*i)->playlist());
 
-			// Busses don't have playlists, so we need to check that we actually are working with a playlist
-			if (!pl || !rui)
-				continue;
+				if (!pl)
+					continue;
 
-			FFTResult *res = fft_graph.prepareResult(rui->color(), rui->route()->name());
+				RouteUI *rui = dynamic_cast<RouteUI *>(*i);
+				int n_inputs = rui->route()->n_inputs().n_audio(); // FFT is audio only
 
-			// if timeSelection
-			if (source_selection_ranges_rb.get_active()) {
-//				cerr << "Analyzing ranges on track " << *&rui->route().name() << endl;
+				// Busses don't have playlists, so we need to check that we actually are working with a playlist
+				if (!pl || !rui)
+					continue;
 
+				// std::cerr << "Analyzing ranges on track " << rui->route()->name() << std::endl;
+
+				FFTResult *res = fft_graph.prepareResult(rui->color(), rui->route()->name());
 				for (std::list<AudioRange>::iterator j = ts.begin(); j != ts.end(); ++j) {
 
 					int n;
@@ -303,67 +303,72 @@ AnalysisWindow::analyze_data (Gtk::Button */*button*/)
 						}
 					}
 				}
-			} else if (source_selection_regions_rb.get_active()) {
-//				cerr << "Analyzing selected regions on track " << *&rui->route().name() << endl;
+				res->finalize();
 
-				TimeAxisView *current_axis = (*i);
+				Gtk::TreeModel::Row newrow = *(tlmodel)->append();
+				newrow[tlcols.trackname]   = rui->route()->name();
+				newrow[tlcols.visible]     = true;
+				newrow[tlcols.color]       = rui->color();
+				newrow[tlcols.graph]       = res;
+			} 
+		} else if (source_selection_regions_rb.get_active()) {
+			RegionSelection ars = s.regions;
+			// std::cerr << "Analyzing selected regions" << std::endl;
 
-				for (RegionSelection::iterator j = ars.begin(); j != ars.end(); ++j) {
-					// Check that the region is actually audio (so we can analyze it)
-					AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*j);
-					if (!arv)
-						continue;
+			for (RegionSelection::iterator j = ars.begin(); j != ars.end(); ++j) {
+				// Check that the region is actually audio (so we can analyze it)
+				AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*j);
+				if (!arv)
+					continue;
 
-					// Check that the region really is selected on _this_ track/solo
-					if ( &arv->get_time_axis_view() != current_axis)
-						continue;
-
-//					cerr << " - " << (*j)->region().name() << ": " << (*j)->region().length() << " samples starting at " << (*j)->region().position() << endl;
-					int n;
-					for (int channel = 0; channel < n_inputs; channel++) {
-
-						framecnt_t x = 0;
-
-						framecnt_t length = arv->region()->length();
-
-						while (x < length) {
-							// TODO: What about stereo+ channels? composite all to one, I guess
-
-							n = fft_graph.windowSize();
-							if (x + n >= length ) {
-								n = length - x;
-							}
-
-							memset (buf, 0, n * sizeof (Sample));
-							n = arv->audio_region()->read_at(buf, mixbuf, gain, arv->region()->position() + x, n, channel);
-
-							if (n == 0)
-								break;
-
-							if ( n < fft_graph.windowSize()) {
-								for (int j = n; j < fft_graph.windowSize(); j++) {
-									buf[j] = 0.0;
-								}
-							}
-
-							res->analyzeWindow(buf);
-
-							x += n;
-						}
-					}
-//					cerr << "Found: " << (*j)->get_item_name() << endl;
-
+				// std::cerr << " - " << (*j)->region().name() << ": " << (*j)->region().length() << " samples starting at " << (*j)->region().position() << std::endl;
+				RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(&arv->get_time_axis_view());
+				if (!rtav) {
+					/* shouldn't happen... */
+					continue;
 				}
+				FFTResult *res = fft_graph.prepareResult(rtav->color(), arv->get_item_name());
+				int n;
+				for (unsigned int channel = 0; channel < arv->region()->n_channels(); channel++) {
+
+					framecnt_t x = 0;
+					framecnt_t length = arv->region()->length();
+
+					while (x < length) {
+						// TODO: What about stereo+ channels? composite all to one, I guess
+
+						n = fft_graph.windowSize();
+						if (x + n >= length ) {
+							n = length - x;
+						}
+
+						memset (buf, 0, n * sizeof (Sample));
+						n = arv->audio_region()->read_at(buf, mixbuf, gain, arv->region()->position() + x, n, channel);
+
+						if (n == 0)
+							break;
+
+						if ( n < fft_graph.windowSize()) {
+							for (int j = n; j < fft_graph.windowSize(); j++) {
+								buf[j] = 0.0;
+							}
+						}
+
+						res->analyzeWindow(buf);
+						x += n;
+					}
+				}
+				// std::cerr << "Found: " << (*j)->get_item_name() << std::endl;
+				res->finalize();
+
+				Gtk::TreeModel::Row newrow = *(tlmodel)->append();
+				newrow[tlcols.trackname]   = arv->get_item_name();
+				newrow[tlcols.visible]     = true;
+				newrow[tlcols.color]       = rtav->color();
+				newrow[tlcols.graph]       = res;
 
 			}
-			res->finalize();
 
-
-			Gtk::TreeModel::Row newrow = *(tlmodel)->append();
-			newrow[tlcols.trackname]   = rui->route()->name();
-			newrow[tlcols.visible]     = true;
-			newrow[tlcols.color]       = rui->color();
-			newrow[tlcols.graph]       = res;
 		}
 
 

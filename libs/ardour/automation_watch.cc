@@ -72,8 +72,10 @@ AutomationWatch::add_automation_watch (boost::shared_ptr<AutomationControl> ac)
 	 */
 
 	if (_session && _session->transport_rolling() && ac->alist()->automation_write()) {
-		DEBUG_TRACE (DEBUG::Automation, string_compose ("\ttransport is rolling @ %1, so enter write pass\n", _session->transport_speed()));
-		ac->list()->set_in_write_pass (true);
+		DEBUG_TRACE (DEBUG::Automation, string_compose ("\ttransport is rolling @ %1, audible = %2so enter write pass\n", 
+								_session->transport_speed(), _session->audible_frame()));
+		/* add a guard point since we are already moving */
+		ac->list()->set_in_write_pass (true, true, _session->audible_frame());
 	}
 
 	/* we can't store shared_ptr<Destructible> in connections because it

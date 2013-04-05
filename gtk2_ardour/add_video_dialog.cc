@@ -56,9 +56,10 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	: ArdourDialog (_("Set Video Track"))
 	, seek_slider (0,1000,1)
 	, preview_path ("")
-	, pi_duration ("-", Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false)
-	, pi_aspect ("-", Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false)
-	, pi_fps ("-", Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false)
+	, pi_tcin ("-", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false)
+	, pi_tcout ("-", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false)
+	, pi_aspect ("-", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false)
+	, pi_fps ("-", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false)
 	, chooser (FILE_CHOOSER_ACTION_OPEN)
 	, xjadeo_checkbox (_("Launch External Video Monitor"))
 	, set_session_fps_checkbox (_("Adjust Session Framerate to Match Video Framerate"))
@@ -76,46 +77,45 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	set_size_request (800, -1);
 
 	harvid_initialized = false;
-	std::string dstdir = video_dest_dir(_session->session_directory().video_path(), Config->get_video_server_docroot());
+	std::string dstdir = video_dest_dir(_session->session_directory().video_path(), video_get_docroot(Config));
 
+	if (Config->get_video_advanced_setup()) {
 
-	/* Harvid Browser */
-	harvid_list_view.append_column("", pixBufRenderer);
-	harvid_list_view.append_column(_("Filename"), harvid_list_columns.filename);
+		/* Harvid Browser */
+		harvid_list_view.append_column("", pixBufRenderer);
+		harvid_list_view.append_column(_("Filename"), harvid_list_columns.filename);
 
-	harvid_list_view.get_column(0)->set_alignment(0.5);
-	harvid_list_view.get_column(0)->add_attribute(pixBufRenderer, "stock-id", harvid_list_columns.id);
-	harvid_list_view.get_column(1)->set_expand(true);
-	harvid_list_view.get_column(1)->set_sort_column(harvid_list_columns.filename);
-	harvid_list_view.set_enable_search(true);
-	harvid_list_view.set_search_column(1);
+		harvid_list_view.get_column(0)->set_alignment(0.5);
+		harvid_list_view.get_column(0)->add_attribute(pixBufRenderer, "stock-id", harvid_list_columns.id);
+		harvid_list_view.get_column(1)->set_expand(true);
+		harvid_list_view.get_column(1)->set_sort_column(harvid_list_columns.filename);
+		harvid_list_view.set_enable_search(true);
+		harvid_list_view.set_search_column(1);
 
+		harvid_list_view.get_selection()->set_mode (SELECTION_SINGLE);
 
-	//Glib::RefPtr<Gtk::TreeModelSort> refTreeModelSort = Gtk::TreeModelSort::create(harvid_list_view.get_model());
-	//refTreeModelSort->set_sort_column(harvid_list_columns.filename, Gtk::SORT_ASCENDING);
-	//harvid_list_view.set_model(refTreeModelSort);
+		harvid_list_view.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &AddVideoDialog::harvid_list_view_selected));
+		harvid_list_view.signal_row_activated().connect (sigc::mem_fun (*this, &AddVideoDialog::harvid_list_view_activated));
 
-	harvid_list_view.get_selection()->set_mode (SELECTION_SINGLE);
+		VBox* vbox = manage (new VBox);
+		Gtk::ScrolledWindow *scroll = manage(new ScrolledWindow);
+		scroll->add(harvid_list_view);
+		scroll->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
-	harvid_list_view.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &AddVideoDialog::harvid_list_view_selected));
-	harvid_list_view.signal_row_activated().connect (sigc::mem_fun (*this, &AddVideoDialog::harvid_list_view_activated));
+		HBox* hbox = manage (new HBox);
+		harvid_path.set_alignment (0, 0.5);
+		hbox->pack_start (harvid_path, true, true);
+		hbox->pack_start (harvid_reset, false, false);
 
-	VBox* vbox = manage (new VBox);
-	Gtk::ScrolledWindow *scroll = manage(new ScrolledWindow);
-	scroll->add(harvid_list_view);
-	scroll->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+		vbox->pack_start (*hbox, false, false);
+		vbox->pack_start (*scroll, true, true);
 
-	HBox* hbox = manage (new HBox);
-	harvid_path.set_alignment (0, 0.5);
-	hbox->pack_start (harvid_path, true, true);
-	hbox->pack_start (harvid_reset, false, false);
-
-	vbox->pack_start (*hbox, false, false);
-	vbox->pack_start (*scroll, true, true);
-
-	notebook.append_page (*vbox, _("VideoServerIndex"));
-
-
+		notebook.append_page (*vbox, _("VideoServerIndex"));
+	} else {
+		/* dummy entry */
+		VBox* vbox = manage (new VBox);
+		notebook.append_page (*vbox, _("VideoServerIndex"));
+	}
 
 	/* file chooser */
 	chooser.set_border_width (4);
@@ -137,19 +137,12 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	chooser.add_filter (matchall_filter);
 	chooser.set_select_multiple (false);
 
-	/* file import options */
-	import_combo.set_name ("PaddedButton");
-	import_combo.append_text(_("Reference From Current Location"));
-	import_combo.append_text(_("Hardlink or Copy to Session"));
-	import_combo.append_text(_("Transcode to Session"));
-	import_combo.set_active(2);
+	VBox* vboxfb = manage (new VBox);
+	vboxfb->pack_start (chooser, true, true, 0);
 
-	vbox = manage (new VBox);
-	vbox->pack_start (chooser, true, true, 0);
-	vbox->pack_start (import_combo, false, true, 4);
-
-	if (Config->get_video_server_docroot().size() > 0) {
-		notebook.append_page (*vbox, _("Browse Files"));
+	if (video_get_docroot(Config).size() > 0 &&
+			Config->get_video_advanced_setup()) {
+		notebook.append_page (*vboxfb, _("Browse Files"));
 	}
 
 	/* Global Options*/
@@ -165,7 +158,7 @@ AddVideoDialog::AddVideoDialog (Session* s)
 
 	/* preview pane */
 	VBox* previewpane = manage (new VBox);
-	Gtk::Table *table = manage(new Table(4,2));
+	Gtk::Table *table = manage(new Table(5,2));
 
 	table->set_row_spacings(2);
 	table->set_col_spacings(4);
@@ -173,15 +166,18 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	l = manage (new Label (_("<b>Video Information</b>"), Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 	table->attach (*l, 0, 2, 0, 1, FILL, FILL);
-	l = manage (new Label (_("Duration:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Start:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
 	table->attach (*l, 0, 1, 1, 2, FILL, FILL);
-	table->attach (pi_duration, 1, 2, 1, 2, FILL, FILL);
-	l = manage (new Label (_("Frame rate:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
+	table->attach (pi_tcin, 1, 2, 1, 2, FILL, FILL);
+	l = manage (new Label (_("End:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
 	table->attach (*l, 0, 1, 2, 3, FILL, FILL);
-	table->attach (pi_fps, 1, 2, 2, 3, FILL, FILL);
-	l = manage (new Label (_("Aspect Ratio:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
+	table->attach (pi_tcout, 1, 2, 2, 3, FILL, FILL);
+	l = manage (new Label (_("Frame rate:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
 	table->attach (*l, 0, 1, 3, 4, FILL, FILL);
-	table->attach (pi_aspect, 1, 2, 3, 4, FILL, FILL);
+	table->attach (pi_fps, 1, 2, 3, 4, FILL, FILL);
+	l = manage (new Label (_("Aspect Ratio:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
+	table->attach (*l, 0, 1, 4, 5, FILL, FILL);
+	table->attach (pi_aspect, 1, 2, 4, 5, FILL, FILL);
 
 	preview_image = manage(new Gtk::Image);
 
@@ -190,20 +186,24 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	preview_image->set(imgbuf);
 	seek_slider.set_draw_value(false);
 
-	hbox = manage (new HBox);
+	HBox* hbox = manage (new HBox);
 	hbox->pack_start (*table, true, false);
 
 	Gtk::Alignment *al = manage(new Gtk::Alignment());
 	al->set_size_request(-1, 20);
 
-	previewpane->pack_start (*al, false, false);
-	previewpane->pack_start (*hbox, true, true, 6);
 	previewpane->pack_start (*preview_image, false, false);
 	previewpane->pack_start (seek_slider, false, false);
+	previewpane->pack_start (*al, false, false);
+	previewpane->pack_start (*hbox, true, true, 6);
 
 	/* Overall layout */
 	hbox = manage (new HBox);
-	hbox->pack_start (notebook, true, true);
+	if (Config->get_video_advanced_setup()) {
+		hbox->pack_start (notebook, true, true);
+	} else {
+		hbox->pack_start (*vboxfb, true, true);
+	}
 	hbox->pack_start (*previewpane, false, false);
 
 	get_vbox()->set_spacing (4);
@@ -214,9 +214,10 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	/* xjadeo checkbox */
 	if (ARDOUR_UI::instance()->video_timeline->found_xjadeo()
 			/* TODO xjadeo setup w/ xjremote */
-			&& Config->get_video_server_docroot().size() > 0) {
+			&& video_get_docroot(Config).size() > 0) {
 		xjadeo_checkbox.set_active(true);  /* set in ardour_ui.cpp ?! */
 	} else {
+		printf("xjadeo was not found or video-server docroot is unset (remote video-server)\n");
 		xjadeo_checkbox.set_active(false);
 		xjadeo_checkbox.set_sensitive(false);
 	}
@@ -294,14 +295,35 @@ std::string
 AddVideoDialog::file_name (bool &local_file)
 {
 	int n = notebook.get_current_page ();
-	if (n == 1) {
+	if (n == 1 || ! Config->get_video_advanced_setup()) {
 		local_file = true;
 		return chooser.get_filename();
 	} else {
 		local_file = false;
 		Gtk::TreeModel::iterator iter = harvid_list_view.get_selection()->get_selected();
 		if(!iter) return "";
-		return (*iter)[harvid_list_columns.uri];
+
+		std::string uri = (*iter)[harvid_list_columns.uri];
+		std::string video_server_url = video_get_server_url(Config);
+
+		/* check if video server is running locally */
+		if (video_get_docroot(Config).size() > 0
+				&& !video_server_url.compare(0, 16, "http://localhost"))
+		{
+			/* check if the file can be accessed */
+			int plen;
+			CURL *curl;
+			curl = curl_easy_init();
+			char *ue = curl_easy_unescape(curl, uri.c_str(), uri.length(), &plen);
+			std::string path = video_get_docroot(Config) + ue;
+			if (!::access(path.c_str(), R_OK)) {
+				uri = path;
+				local_file = true;
+			}
+			curl_easy_cleanup(curl);
+			curl_free(ue);
+		}
+		return uri;
 	}
 }
 
@@ -309,9 +331,8 @@ enum VtlImportOption
 AddVideoDialog::import_option ()
 {
 	int n = notebook.get_current_page ();
-	if (n == 0) { return VTL_IMPORT_NONE; }
-	int i = import_combo.get_active_row_number();
-	return static_cast<VtlImportOption>(i);
+	if (n == 0 && Config->get_video_advanced_setup()) { return VTL_IMPORT_NONE; }
+	return VTL_IMPORT_TRANSCODE;
 }
 
 bool
@@ -327,20 +348,27 @@ AddVideoDialog::auto_set_session_fps ()
 }
 
 void
+AddVideoDialog::clear_preview_image ()
+{
+	imgbuf->fill(RGBA_TO_UINT(0,0,0,255));
+	video_draw_cross(imgbuf);
+	preview_image->set(imgbuf);
+	preview_image->show();
+}
+
+void
 AddVideoDialog::set_action_ok (bool yn)
 {
 	if (yn) {
 		ok_button->set_sensitive(true);
 	} else {
 		preview_path = "";
-		pi_duration.set_text("-");
+		pi_tcin.set_text("-");
+		pi_tcout.set_text("-");
 		pi_aspect.set_text("-");
 		pi_fps.set_text("-");
 		ok_button->set_sensitive(false);
-		imgbuf->fill(RGBA_TO_UINT(0,0,0,255));
-		video_draw_cross(imgbuf);
-		preview_image->set(imgbuf);
-		preview_image->show();
+		clear_preview_image();
 	}
 }
 
@@ -355,7 +383,8 @@ AddVideoDialog::file_selection_changed ()
 				&& !Glib::file_test(path.c_str(), Glib::FILE_TEST_IS_DIR);
 		set_action_ok(ok);
 		if (ok) {
-			request_preview(video_map_path(Config->get_video_server_docroot(), path));
+			seek_slider.set_value(0);
+			request_preview(video_map_path(video_get_docroot(Config), path));
 		}
 	} else {
 		set_action_ok(false);
@@ -392,6 +421,7 @@ AddVideoDialog::harvid_list_view_selected () {
 		set_action_ok(false);
 	} else {
 		set_action_ok(true);
+		seek_slider.set_value(0);
 		request_preview((*iter)[harvid_list_columns.uri]);
 	}
 }
@@ -421,7 +451,7 @@ void
 AddVideoDialog::harvid_load_docroot() {
 	set_action_ok(false);
 
-	std::string video_server_url = Config->get_video_server_url();
+	std::string video_server_url = video_get_server_url(Config);
 	char url[2048];
 	snprintf(url, sizeof(url), "%s%sindex/"
 		, video_server_url.c_str()
@@ -432,7 +462,7 @@ AddVideoDialog::harvid_load_docroot() {
 
 bool
 AddVideoDialog::page_switch() {
-	if (notebook.get_current_page () == 1) {
+	if (notebook.get_current_page () == 1 || Config->get_video_advanced_setup()) {
 		file_selection_changed();
 		return true;
 	}
@@ -518,7 +548,7 @@ AddVideoDialog::seek_preview()
 void
 AddVideoDialog::request_preview(std::string u)
 {
-	std::string video_server_url = Config->get_video_server_url();
+	std::string video_server_url = video_get_server_url(Config);
 
 	double video_file_fps;
 	long long int video_duration;
@@ -535,9 +565,12 @@ AddVideoDialog::request_preview(std::string u)
 		printf("image preview info request failed\n");
 		// set_action_ok(false); // XXX only if docroot mismatch
 		preview_path = "";
-		pi_duration.set_text("-");
+		pi_tcin.set_text("-");
+		pi_tcout.set_text("-");
 		pi_aspect.set_text("-");
 		pi_fps.set_text("-");
+
+		clear_preview_image();
 		return;
 	}
 
@@ -547,9 +580,80 @@ AddVideoDialog::request_preview(std::string u)
 		clip_height = MIN(PREVIEW_HEIGHT, rint(clip_width / video_aspect_ratio));
 	}
 
-	pi_duration.set_text(string_compose("%1 sec", video_duration / video_file_fps));
-	pi_aspect.set_text(string_compose("%1", video_aspect_ratio));
-	pi_fps.set_text(string_compose("%1 fps", video_file_fps));
+	pi_tcin.set_text(Timecode::timecode_format_sampletime(
+				video_start_offset, video_file_fps, video_file_fps, rint(video_file_fps*100.0)==2997));
+	pi_tcout.set_text(Timecode::timecode_format_sampletime(
+				video_start_offset + video_duration, video_file_fps, video_file_fps, rint(video_file_fps*100.0)==2997));
+
+	/* todo break out this code -> re-usability */
+	const int arc = rint(video_aspect_ratio*100);
+
+	switch (arc) {
+		case 100:
+			pi_aspect.set_text(X_(" 1:1"));  // square (large format stills)
+			break;
+		case 125:
+			pi_aspect.set_text(X_(" 5:4"));
+			break;
+		case 133:
+			pi_aspect.set_text(X_(" 4:3"));
+			break;
+		case 134:
+			pi_aspect.set_text(X_(" 47:35")); // 752x560, Super8-scans
+			break;
+		case 137:
+		case 138:
+			pi_aspect.set_text(X_(" 1.37:1")); // 'Academy ratio' <= 1953
+			break;
+		case 141:
+			pi_aspect.set_text(X_(" 1.41:1")); //  Lichtenberg ratio
+			break;
+		case 150:
+			pi_aspect.set_text(X_(" 3:2"));  // classic 35mm
+			break;
+		case 160:
+			pi_aspect.set_text(X_(" 8:5"));  // credit-card size
+			break;
+		case 162:
+			pi_aspect.set_text(X_(" 16:10")); // golden ratio 1.61803..
+			break;
+		case 166:
+		case 167:
+			pi_aspect.set_text(X_(" 5:3")); // Super16, EU-widescreen
+			break;
+		case 177:
+		case 178:
+			pi_aspect.set_text(X_(" 16:9")); // HD video
+			break;
+		case 180:
+			pi_aspect.set_text(X_(" 9:5"));
+			break;
+		case 185:
+			pi_aspect.set_text(X_(" 1.85:1")); // US widescreen cinema
+			break;
+		case 200:
+			pi_aspect.set_text(X_(" 2:1"));
+			break;
+		case 239:
+		case 240:
+			pi_aspect.set_text(X_(" 2.40:1")); // Anamorphic
+			break;
+		case 266:
+		case 267:
+			pi_aspect.set_text(X_(" 2.66:1")); // CinemaScope
+			break;
+		case 275:
+			pi_aspect.set_text(X_(" 2.75:1")); // Ultra Panavision
+			break;
+		case 400:
+			pi_aspect.set_text(X_(" 4.00:1")); // three 35mm 1.33:1 polyvision
+			break;
+		default:
+			pi_aspect.set_text(string_compose(X_(" %1:1"), video_aspect_ratio));
+		break;
+	}
+
+	pi_fps.set_text(string_compose(_(" %1 fps"), video_file_fps));
 
 	clip_xoff = (PREVIEW_WIDTH - clip_width)/2;
 	clip_yoff = (PREVIEW_HEIGHT - clip_height)/2;

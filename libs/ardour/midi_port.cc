@@ -108,7 +108,6 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 	return *_buffer;
 }
 
-
 void
 MidiPort::cycle_end (pframes_t /*nframes*/)
 {

@@ -27,6 +27,7 @@
 #include "pbd/openuri.h"
 
 #include "ardour/filesystem_paths.h"
+#include "ardour/rc_configuration.h"
 
 #include "nag.h"
 #include "i18n.h"
@@ -192,11 +193,9 @@ NagScreen::is_subscribed (bool& really)
 void
 NagScreen::offer_to_donate ()
 {
-	const char* uri = "http://ardour.org/donate";
-
 	/* we don't care if it fails */
 
-        PBD::open_uri (uri);
+        PBD::open_uri (Config->get_donate_url());
 }
 
 void

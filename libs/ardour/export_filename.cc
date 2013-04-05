@@ -49,6 +49,7 @@ ExportFilename::ExportFilename (Session & session) :
   include_session (false),
   include_revision (false),
   include_channel_config (false),
+  include_format_name (false),
   include_channel (false),
   include_timespan (true), // Include timespan name always
   include_time (false),
@@ -203,6 +204,12 @@ ExportFilename::get_path (ExportFormatSpecPtr format) const
 	if (include_time) {
 		path += filename_empty ? "" : "_";
 		path += get_time_format_str (time_format);
+		filename_empty = false;
+	}
+
+	if (include_format_name) {
+		path += filename_empty ? "" : "_";
+		path += format->name();
 		filename_empty = false;
 	}
 

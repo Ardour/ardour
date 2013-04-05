@@ -22,6 +22,7 @@
 #endif
 
 #include <stdint.h>
+#include <algorithm>
 
 #include "pbd/memento_command.h"
 #include "pbd/basename.h"
@@ -1724,7 +1725,7 @@ VideoTimeLineDrag::motion (GdkEvent* event, bool first_move)
 }
 
 void
-VideoTimeLineDrag::finished (GdkEvent *event, bool movement_occurred)
+VideoTimeLineDrag::finished (GdkEvent * /*event*/, bool movement_occurred)
 {
 	if (ARDOUR_UI::instance()->video_timeline->is_offset_locked()) {
 		return;
@@ -1750,6 +1751,12 @@ VideoTimeLineDrag::finished (GdkEvent *event, bool movement_occurred)
 
 		_editor->session()->add_command (new StatefulDiffCommand (i->view->region()));
 	}
+
+	_editor->session()->maybe_update_session_range(
+			std::max(ARDOUR_UI::instance()->video_timeline->get_offset(), (ARDOUR::frameoffset_t) 0),
+			std::max(ARDOUR_UI::instance()->video_timeline->get_offset() + ARDOUR_UI::instance()->video_timeline->get_duration(), (ARDOUR::frameoffset_t) 0)
+			);
+
 
 	_editor->commit_reversible_command ();
 	_editor->update_canvas_now ();

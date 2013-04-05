@@ -37,6 +37,7 @@
 
 #include "ardour/amp.h"
 #include "ardour/audio_buffer.h"
+#include "ardour/audio_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/buffer.h"
 #include "ardour/buffer_set.h"
@@ -46,6 +47,8 @@
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
 #include "ardour/meter.h"
+#include "ardour/midi_buffer.h"
+#include "ardour/midi_port.h"
 #include "ardour/monitor_processor.h"
 #include "ardour/pannable.h"
 #include "ardour/panner_shell.h"
@@ -150,7 +153,7 @@ Route::init ()
 	   they will be added to _processors by setup_invisible_processors ()
 	*/
 
-	_meter.reset (new PeakMeter (_session));
+	_meter.reset (new PeakMeter (_session, _name));
 	_meter->set_display_to_user (false);
 	_meter->activate ();
 
@@ -465,8 +468,8 @@ Route::process_output_buffers (BufferSet& bufs,
 	   on a transition between monitoring states we get a de-clicking gain
 	   change in the _main_outs delivery.
 	*/
-	_main_outs->no_outs_cuz_we_no_monitor (monitoring_state () == MonitoringSilence);
 
+	_main_outs->no_outs_cuz_we_no_monitor (monitoring_state () == MonitoringSilence);
 
 	/* -------------------------------------------------------------------------------------------
 	   GLOBAL DECLICK (for transport changes etc.)
@@ -572,19 +575,17 @@ Route::n_process_buffers ()
 }
 
 void
-Route::passthru (framepos_t start_frame, framepos_t end_frame, pframes_t nframes, int declick)
+Route::monitor_run (framepos_t start_frame, framepos_t end_frame, pframes_t nframes, int declick)
 {
-	BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
+	assert (is_monitor());
+	BufferSet& bufs (_session.get_scratch_buffers (n_process_buffers()));
+	passthru (bufs, start_frame, end_frame, nframes, declick);
+}
 
+void
+Route::passthru (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, int declick)
+{
 	_silent = false;
-
-	assert (bufs.available() >= input_streams());
-
-	if (_input->n_ports() == ChanCount::ZERO) {
-		silence_unlocked (nframes);
-	}
-
-	bufs.set_count (input_streams());
 
 	if (is_monitor() && _session.listening() && !_session.is_auditioning()) {
 
@@ -592,19 +593,8 @@ Route::passthru (framepos_t start_frame, framepos_t end_frame, pframes_t nframes
 		   feeding the listen "stream". data will "arrive" into the
 		   route from the intreturn processor element.
 		*/
+
 		bufs.silence (nframes, 0);
-
-	} else {
-
-		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-
-			BufferSet::iterator o = bufs.begin(*t);
-			PortSet& ports (_input->ports());
-
-			for (PortSet::iterator i = ports.begin(*t); i != ports.end(*t); ++i, ++o) {
-				o->read_from (i->get_buffer(nframes), nframes);
-			}
-		}
 	}
 
 	write_out_of_band_data (bufs, start_frame, end_frame, nframes);
@@ -3003,6 +2993,7 @@ int
 Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool session_state_changing)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+
 	if (!lm.locked()) {
 		return 0;
 	}
@@ -3015,6 +3006,7 @@ Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		silence_unlocked (nframes);
 		return 0;
 	}
+
 	if (session_state_changing) {
 		if (_session.transport_speed() != 0.0f) {
 			/* we're rolling but some state is changing (e.g. our diskstream contents)
@@ -3030,8 +3022,16 @@ Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		*/
 	}
 
+	BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
+
+	fill_buffers_with_input (bufs, _input, nframes);
+
+	if (_meter_point == MeterInput) {
+		_meter->run (bufs, start_frame, end_frame, nframes, true);
+	}
+
 	_amp->apply_gain_automation (false);
-	passthru (start_frame, end_frame, nframes, 0);
+	passthru (bufs, start_frame, end_frame, nframes, 0);
 
 	return 0;
 }
@@ -3061,7 +3061,15 @@ Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, in
 
 	_silent = false;
 
-	passthru (start_frame, end_frame, nframes, declick);
+	BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
+
+	fill_buffers_with_input (bufs, _input, nframes);
+
+	if (_meter_point == MeterInput) {
+		_meter->run (bufs, start_frame, end_frame, nframes, true);
+	}
+
+	passthru (bufs, start_frame, end_frame, nframes, declick);
 
 	return 0;
 }
@@ -4175,4 +4183,91 @@ Route::rack_id() const
         }
 
         return UINT32_MAX;
+}
+
+void
+Route::fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes)
+{
+	size_t n_buffers;
+	size_t i;
+	
+	/* MIDI 
+	 *  
+	 * We don't currently mix MIDI input together, so we don't need the
+	 * complex logic of the audio case.
+	 */
+
+	n_buffers = bufs.count().n_midi ();
+
+	for (i = 0; i < n_buffers; ++i) {
+
+		boost::shared_ptr<MidiPort> source_port = io->midi (i);
+		MidiBuffer& buf (bufs.get_midi (i));
+		
+		if (source_port) {
+			buf.copy (source_port->get_midi_buffer(nframes));
+		} else {
+			buf.silence (nframes);
+		}
+	}
+
+	/* AUDIO */
+
+	n_buffers = bufs.count().n_audio();
+
+	size_t n_ports = io->n_ports().n_audio();
+	float scaling = 1.0f;
+
+	if (n_ports > n_buffers) {
+		scaling = ((float) n_buffers) / n_ports;
+	}
+	
+	for (i = 0; i < n_ports; ++i) {
+		
+		/* if there are more ports than buffers, map them onto buffers
+		 * in a round-robin fashion
+		 */
+
+		boost::shared_ptr<AudioPort> source_port = io->audio (i);
+		AudioBuffer& buf (bufs.get_audio (i%n_buffers));
+			
+
+		if (i < n_buffers) {
+			
+			/* first time through just copy a channel into
+			   the output buffer.
+			*/
+
+			buf.read_from (source_port->get_audio_buffer (nframes), nframes);
+
+			if (scaling != 1.0f) {
+				buf.apply_gain (scaling, nframes);
+			}
+			
+		} else {
+			
+			/* on subsequent times around, merge data from
+			 * the port with what is already there 
+			 */
+
+			if (scaling != 1.0f) {
+				buf.accumulate_with_gain_from (source_port->get_audio_buffer (nframes), nframes, 0, scaling);
+			} else {
+				buf.accumulate_from (source_port->get_audio_buffer (nframes), nframes);
+			}
+		}
+	}
+
+	/* silence any remaining buffers */
+
+	for (; i < n_buffers; ++i) {
+		AudioBuffer& buf (bufs.get_audio (i));
+		buf.silence (nframes);
+	}
+
+	/* establish the initial setup of the buffer set, reflecting what was
+	   copied into it.
+	*/
+
+	bufs.set_count (io->n_ports());
 }

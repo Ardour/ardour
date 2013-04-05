@@ -527,13 +527,25 @@ RegionExportChannelSelector::handle_selection ()
 	CriticalSelectionChanged ();
 }
 
+/* Track export channel selector */
+
 TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager)
   : ExportChannelSelector(session, manager)
+  , region_contents_button(source_group, _("Export region contents"))
+  , track_output_button(source_group, _("Export track output"))
 {
+	pack_start(main_layout);
+
+	// Options
+	options_box.pack_start(region_contents_button);
+	options_box.pack_start(track_output_button);
+	main_layout.pack_start(options_box);
+
+	// Track scroller
 	track_scroller.add (track_view);
 	track_scroller.set_size_request (-1, 130);
 	track_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-	pack_start(track_scroller);
+	main_layout.pack_start(track_scroller);
 
 	// Track list
 	track_list = Gtk::ListStore::create (track_cols);
@@ -613,22 +625,23 @@ TrackExportChannelSelector::update_config()
 
 		boost::shared_ptr<Route> route = row[track_cols.route];
 
-		/* Output of track code. TODO make this an option also
-		uint32_t outs = route->n_ports().n_audio();
-		for (uint32_t i = 0; i < outs; ++i) {
-			AudioPort * port = route->audio (i);
-			if (port) {
-				ExportChannelPtr channel (new PortExportChannel ());
-				PortExportChannel * pec = static_cast<PortExportChannel *> (channel.get());
-				pec->add_port(port);
-				state->config->register_channel(channel);
+		if (track_output_button.get_active()) {
+			uint32_t outs = route->n_outputs().n_audio();
+			for (uint32_t i = 0; i < outs; ++i) {
+				boost::shared_ptr<AudioPort> port = route->output()->audio (i);
+				if (port) {
+					ExportChannelPtr channel (new PortExportChannel ());
+					PortExportChannel * pec = static_cast<PortExportChannel *> (channel.get());
+					pec->add_port(port);
+					state->config->register_channel(channel);
+				}
 			}
+		} else {
+			std::list<ExportChannelPtr> list;
+			RouteExportChannel::create_from_route (list, route);
+			state->config->register_channels (list);
 		}
-		*/
 
-		std::list<ExportChannelPtr> list;
-		RouteExportChannel::create_from_route (list, route);
-		state->config->register_channels (list);
 		state->config->set_name (route->name());
 	}
 

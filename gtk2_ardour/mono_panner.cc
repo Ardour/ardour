@@ -412,10 +412,6 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
                 step = one_degree * 5.0;
         }
 
-        /* up/down control width because we consider pan position more "important"
-           (and thus having higher "sense" priority) than width.
-        */
-
         switch (ev->keyval) {
         case GDK_Left:
                 pv -= step;
@@ -425,6 +421,10 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
                 pv += step;
                 position_control->set_value (pv);
                 break;
+	case GDK_0:
+	case GDK_KP_0:
+		position_control->set_value (0.0);
+		break;
         default:
                 return false;
         }

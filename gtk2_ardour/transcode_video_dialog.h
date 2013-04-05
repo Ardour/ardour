@@ -32,6 +32,12 @@
 
 #include "transcode_ffmpeg.h"
 
+enum VtlTranscodeOption {
+ VTL_IMPORT_NO_VIDEO = 0,
+ VTL_IMPORT_REFERENCE = 1,
+ VTL_IMPORT_TRANSCODED = 2
+};
+
 /** @class TranscodeVideoDialog
  *  @brief dialog-box and controller for importing video-files
  */
@@ -43,6 +49,7 @@ class TranscodeVideoDialog : public ArdourDialog , public PBD::ScopedConnectionL
 
 	std::string get_filename () { return path_entry.get_text(); }
 	std::string get_audiofile () { return audiofile; }
+	VtlTranscodeOption import_option ();
 
   private:
 	void on_show ();
@@ -50,18 +57,16 @@ class TranscodeVideoDialog : public ArdourDialog , public PBD::ScopedConnectionL
 	void abort_clicked ();
 	void scale_combo_changed ();
 	void audio_combo_changed ();
+	void video_combo_changed ();
 	void aspect_checkbox_toggled ();
 	void bitrate_checkbox_toggled ();
 	void update_bitrate ();
 	void launch_audioonly ();
 	void launch_transcode ();
   void launch_extract ();
-	void prepare_copy ();
-	void launch_copy ();
 	void dialog_progress_mode ();
 	bool aborted;
 	bool pending_audio_extract;
-	bool pending_copy_file;
 	std::string audiofile;
 	std::string infn;
 	double m_aspect;
@@ -76,8 +81,6 @@ class TranscodeVideoDialog : public ArdourDialog , public PBD::ScopedConnectionL
 	Gtk::Entry        path_entry;
 	Gtk::Button       browse_button;
 	Gtk::Button       transcode_button;
-	Gtk::Button       copy_button;
-	Gtk::Button       audio_button;
 
 	Gtk::VBox* vbox;
 	Gtk::Button *cancel_button;
@@ -87,6 +90,7 @@ class TranscodeVideoDialog : public ArdourDialog , public PBD::ScopedConnectionL
 	Gtk::Label  progress_label;
 	Gtk::ProgressBar pbar;
 
+	Gtk::ComboBoxText video_combo;
 	Gtk::ComboBoxText scale_combo;
 	Gtk::CheckButton  aspect_checkbox;
 	Gtk::Adjustment   height_adjustment;

@@ -30,7 +30,7 @@ using namespace ARDOUR;
 
 ExportVideoInfobox::ExportVideoInfobox (Session* s)
 	: ArdourDialog (_("Video Export Info"))
-	, showagain_checkbox (_("Don't show this dialog again. (Reset in Edit->Preferences)."))
+	, showagain_checkbox (_("Do Not Show This Dialog Again (Reset in Edit > Preferences > Video)."))
 {
 	set_session (s);
 
@@ -46,7 +46,7 @@ ExportVideoInfobox::ExportVideoInfobox (Session* s)
 	l = manage (new Label (_("<b>Video Export Info</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 	vbox->pack_start (*l, false, true);
-	l = manage (new Label (_("The video export is not recommended for mastering!\nThe video input file defaults to that listed from the video timeline, which may not the the best quality to start with. While 'ffmpeg' can produce high-quality files, this export lacks the possibility to tweak many settings. We recommend to use 'winff', 'devede' or 'dvdauthor' to mux & master. Nevertheless this video-export may come in handy to do quick snapshots, intermediates or online videos.\n\nThe file-format is determined by the extension you choose for the output file (.avi, .mov, .flv, .ogv; run 'ffmpeg -formats' for a full list of supported formats)\nNote: not all combinations do work, i.e., flv files require samplerates of 22.1kHz or 44.1kHz, mpeg containers can not be used with ac3 audio-codec, etc. If in doubt, use one of the presets."), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Ardour video export is not recommended for mastering!\nWhile 'ffmpeg' (which is used by ardour) can produce high-quality files, this export lacks the possibility to tweak many settings. We recommend to use 'winff', 'devede' or 'dvdauthor' to mux & master. Nevertheless this video-export comes in handy to do quick snapshots, intermediates, dailies or online videos.\n\nThe soundtrack is created from the master-bus of the current Ardour session.\n\nThe video soure defaults to the file used in the video timeline, which may not the best quality to start with, you should the original video file.\n\nIf the export-range is longer than the original video, black video frames are prefixed and/or appended. This process may fail with non-standard pixel-aspect-ratios.\n\nThe file-format is determined by the extension that you choose for the output file (.avi, .mov, .flv, .ogv,...)\nNote: not all combinations of format+codec+settings produce files which are according so spec. e.g. flv files require sample-rates of 22.1kHz or 44.1kHz, mpeg containers can not be used with ac3 audio-codec, etc. If in doubt, use one of the built-in presets."), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	l->set_size_request(700,-1);
 	l->set_line_wrap();
 	vbox->pack_start (*l, false, true,4);

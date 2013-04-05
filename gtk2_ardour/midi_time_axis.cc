@@ -19,6 +19,8 @@
 #include <cstdlib>
 #include <cmath>
 
+#include <strings.h> // for ffs(3)
+
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -66,6 +68,7 @@
 #include "ghostregion.h"
 #include "gui_thread.h"
 #include "keyboard.h"
+#include "midi_channel_selector.h"
 #include "midi_scroomer.h"
 #include "midi_streamview.h"
 #include "midi_region_view.h"
@@ -94,8 +97,8 @@ using namespace Gtkmm2ext;
 using namespace Editing;
 
 // Minimum height at which a control is displayed
-static const uint32_t MIDI_CONTROLS_BOX_MIN_HEIGHT = 162;
-static const uint32_t KEYBOARD_MIN_HEIGHT = 140;
+static const uint32_t MIDI_CONTROLS_BOX_MIN_HEIGHT = 140;
+static const uint32_t KEYBOARD_MIN_HEIGHT = 130;
 
 MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, Canvas& canvas)
 	: AxisView(sess) // virtually inherited
@@ -110,6 +113,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, Canvas& can
 	, _meter_color_mode_item(0)
 	, _channel_color_mode_item(0)
 	, _track_color_mode_item(0)
+	, _channel_selector (0)
 	, _step_edit_item (0)
 	, controller_menu (0)
 	, _step_editor (0)
@@ -210,6 +214,22 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		_view->RegionViewAdded.connect (
 			sigc::mem_fun(*this, &MidiTimeAxisView::region_view_added));
 
+		midi_track()->PlaybackChannelModeChanged.connect (*this, invalidator (*this),
+								  boost::bind (&MidiTimeAxisView::playback_channel_mode_changed, this),
+								  gui_context());
+		midi_track()->PlaybackChannelMaskChanged.connect (*this, invalidator (*this),
+								  boost::bind (&MidiTimeAxisView::playback_channel_mode_changed, this),
+								  gui_context());
+		midi_track()->CaptureChannelModeChanged.connect (*this, invalidator (*this),
+								  boost::bind (&MidiTimeAxisView::capture_channel_mode_changed, this),
+								  gui_context());
+		midi_track()->CaptureChannelMaskChanged.connect (*this, invalidator (*this),
+								  boost::bind (&MidiTimeAxisView::capture_channel_mode_changed, this),
+								  gui_context());
+
+		playback_channel_mode_changed ();
+		capture_channel_mode_changed ();
+
 		if (!_editor.have_idled()) {
 			/* first idle will do what we need */
 		} else {
@@ -245,29 +265,41 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_midi_controls_box.set_homogeneous(false);
 	_midi_controls_box.set_border_width (10);
 
-	if (!patch_manager.all_models().empty()) {
-		_channel_selector.set_border_width(2);
-		_channel_selector.show_all ();
+	_channel_status_box.set_homogeneous (false);
+	_channel_status_box.set_spacing (6);
+	
+	_channel_selector_button.set_label (_("Chns"));
+	ARDOUR_UI::instance()->set_tip (_channel_selector_button, _("Click to edit channel settings"));
+	
+	/* fixed sized labels to prevent silly nonsense (though obviously,
+	 * they cause their own too)
+	 */
 
-		_midi_controls_box.resize(3, 2);
-		_midi_controls_box.attach(_channel_selector, 0, 2, 0, 1);
-		
-		_midi_controls_box.attach(*manage(new HSeparator()), 0, 2, 1, 2);
+	_playback_channel_status.set_size_request (65, -1);
+	_capture_channel_status.set_size_request (60, -1);
+
+	_channel_status_box.pack_start (_playback_channel_status, false, false);
+	_channel_status_box.pack_start (_capture_channel_status, false, false);
+	_channel_status_box.pack_start (_channel_selector_button, false, false);
+	_channel_status_box.show_all ();
+
+	_channel_selector_button.signal_clicked().connect (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_channel_selector));
+	
+	_midi_controls_box.pack_start (_channel_status_box, false, false, 10);
+
+	if (!patch_manager.all_models().empty()) {
 
 		_midnam_model_selector.set_size_request(22, 30);
 		_midnam_model_selector.set_border_width(2);
 		_midnam_model_selector.show ();
-		_midi_controls_box.attach(_midnam_model_selector, 0, 1, 2, 3);
+		_midi_controls_box.pack_start (_midnam_model_selector);
 
 		_midnam_custom_device_mode_selector.set_size_request(10, 30);
 		_midnam_custom_device_mode_selector.set_border_width(2);
 		_midnam_custom_device_mode_selector.show ();
 
-		_midi_controls_box.attach(_midnam_custom_device_mode_selector, 0, 1, 3, 4);
-	} else {
-		_midi_controls_box.attach(_channel_selector, 0, 1, 0, 1);
-		_channel_selector.show_all ();
-	}
+		_midi_controls_box.pack_start (_midnam_custom_device_mode_selector);
+	} 
 
 	model_changed();
 	custom_device_mode_changed();
@@ -279,19 +311,11 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	controls_vbox.pack_start(_midi_controls_box, false, false);
 
-	// restore channel selector settings
-	_channel_selector.set_channel_mode(midi_track()->get_channel_mode(),
-	                                   midi_track()->get_channel_mask());
-	_channel_selector.mode_changed.connect(
-		sigc::mem_fun(*midi_track(), &MidiTrack::set_channel_mode));
-	_channel_selector.mode_changed.connect(
-		sigc::mem_fun(*this, &MidiTimeAxisView::set_channel_mode));
-
 	const string color_mode = gui_property ("color-mode");
 	if (!color_mode.empty()) {
 		_color_mode = ColorMode (string_2_enum(color_mode, _color_mode));
-		if (_color_mode == ChannelColors) {
-			_channel_selector.set_channel_colors(CanvasNoteEvent::midi_channel_colors);
+		if (_channel_selector && _color_mode == ChannelColors) {
+			_channel_selector->set_channel_colors(CanvasNoteEvent::midi_channel_colors);
 		}
 	}
 
@@ -334,6 +358,8 @@ MidiTimeAxisView::first_idle ()
 
 MidiTimeAxisView::~MidiTimeAxisView ()
 {
+	delete _channel_selector;
+
 	delete _piano_roll_header;
 	_piano_roll_header = 0;
 
@@ -468,8 +494,34 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 
 	items.push_back (MenuElem (_("Note Range"), *range_menu));
 	items.push_back (MenuElem (_("Note Mode"), *build_note_mode_menu()));
+	items.push_back (MenuElem (_("Channel Selector"),
+				   sigc::mem_fun(*this, &MidiTimeAxisView::toggle_channel_selector)));
 
+	color_mode_menu = build_color_mode_menu();
+	if (color_mode_menu) {
+		items.push_back (MenuElem (_("Color Mode"), *color_mode_menu));
+	}
+	
 	items.push_back (SeparatorElem ());
+}
+
+void
+MidiTimeAxisView::toggle_channel_selector ()
+{
+	if (!_channel_selector) {
+		_channel_selector = new MidiChannelSelectorWindow (midi_track());
+
+		if (_color_mode == ChannelColors) {
+			_channel_selector->set_channel_colors(CanvasNoteEvent::midi_channel_colors);
+		} else {
+			_channel_selector->set_default_channel_color ();
+		}
+
+		_channel_selector->set_position (WIN_POS_MOUSE);
+		_channel_selector->show_all ();
+	} else {
+		_channel_selector->cycle_visibility ();
+	}
 }
 
 void
@@ -493,7 +545,7 @@ MidiTimeAxisView::build_automation_action_menu (bool for_selection)
 
 	MenuList& automation_items = automation_action_menu->items();
 
-	uint16_t selected_channels = _channel_selector.get_selected_channels();
+	uint16_t selected_channels = midi_track()->get_playback_channel_mask();
 
 	if (selected_channels !=  0) {
 
@@ -537,7 +589,7 @@ MidiTimeAxisView::build_automation_action_menu (bool for_selection)
 void
 MidiTimeAxisView::change_all_channel_tracks_visibility (bool yn, Evoral::Parameter param)
 {
-	const uint16_t selected_channels = _channel_selector.get_selected_channels();
+	const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
 
 	for (uint8_t chn = 0; chn < 16; chn++) {
 		if (selected_channels & (0x0001 << chn)) {
@@ -564,7 +616,7 @@ MidiTimeAxisView::add_channel_command_menu_item (Menu_Helpers::MenuList& items,
 	   structure if there is more than 1 selected.
 	 */
 
-	const uint16_t selected_channels = _channel_selector.get_selected_channels();
+	const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
 	int chn_cnt = 0;
 
 	for (uint8_t chn = 0; chn < 16; chn++) {
@@ -665,7 +717,7 @@ MidiTimeAxisView::add_single_channel_controller_item(Menu_Helpers::MenuList& ctl
 {
 	using namespace Menu_Helpers;
 
-	const uint16_t selected_channels = _channel_selector.get_selected_channels();
+	const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
 	for (uint8_t chn = 0; chn < 16; chn++) {
 		if (selected_channels & (0x0001 << chn)) {
 
@@ -706,7 +758,7 @@ MidiTimeAxisView::add_multi_channel_controller_item(Menu_Helpers::MenuList& ctl_
 {
 	using namespace Menu_Helpers;
 
-	const uint16_t selected_channels = _channel_selector.get_selected_channels();
+	const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
 
 	Menu* chn_menu = manage (new Menu);
 	MenuList& chn_items (chn_menu->items());
@@ -804,7 +856,7 @@ MidiTimeAxisView::build_controller_menu ()
 	   combination covering the currently selected channels for this track
 	*/
 
-	const uint16_t selected_channels = _channel_selector.get_selected_channels();
+	const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
 
 	/* count the number of selected channels because we will build a different menu
 	   structure if there is more than 1 selected.
@@ -982,10 +1034,12 @@ MidiTimeAxisView::set_color_mode (ColorMode mode, bool force, bool redisplay, bo
 			return;
 		}
 		
-		if (mode == ChannelColors) {
-			_channel_selector.set_channel_colors(CanvasNoteEvent::midi_channel_colors);
-		} else {
-			_channel_selector.set_default_channel_color();
+		if (_channel_selector) {
+			if (mode == ChannelColors) {
+				_channel_selector->set_channel_colors(CanvasNoteEvent::midi_channel_colors);
+			} else {
+				_channel_selector->set_default_channel_color();
+			}
 		}
 		
 		_color_mode = mode;
@@ -1168,7 +1222,7 @@ MidiTimeAxisView::set_note_selection (uint8_t note)
 		return;
 	}
 
-	uint16_t chn_mask = _channel_selector.get_selected_channels();
+	uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
@@ -1188,7 +1242,7 @@ MidiTimeAxisView::add_note_selection (uint8_t note)
 		return;
 	}
 
-	const uint16_t chn_mask = _channel_selector.get_selected_channels();
+	const uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
@@ -1208,7 +1262,7 @@ MidiTimeAxisView::extend_note_selection (uint8_t note)
 		return;
 	}
 
-	const uint16_t chn_mask = _channel_selector.get_selected_channels();
+	const uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
@@ -1228,7 +1282,7 @@ MidiTimeAxisView::toggle_note_selection (uint8_t note)
 		return;
 	}
 
-	const uint16_t chn_mask = _channel_selector.get_selected_channels();
+	const uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
@@ -1272,7 +1326,7 @@ MidiTimeAxisView::set_channel_mode (ChannelMode, uint16_t)
 	   the right ones.
 	*/
 
-	const uint16_t selected_channels = _channel_selector.get_selected_channels();
+	const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
 	bool changed = false;
 
 	no_redraw = true;
@@ -1392,7 +1446,7 @@ MidiTimeAxisView::stop_step_editing ()
 uint8_t
 MidiTimeAxisView::get_channel_for_add () const
 {
-	uint16_t const chn_mask = _channel_selector.get_selected_channels ();
+	uint16_t const chn_mask = midi_track()->get_playback_channel_mask();
 	int chn_cnt = 0;
 	uint8_t channel = 0;
 
@@ -1425,4 +1479,36 @@ void
 MidiTimeAxisView::contents_height_changed ()
 {
 	_range_scroomer->set_size_request (-1, _view->child_height ());
+}
+
+void
+MidiTimeAxisView::playback_channel_mode_changed ()
+{
+	switch (midi_track()->get_playback_channel_mode()) {
+	case AllChannels:
+		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Play"), ("all")));
+		break;
+	case FilterChannels:
+		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Play"), ("some")));
+		break;
+	case ForceChannel:
+		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Play"), ("all"), ffs (midi_track()->get_playback_channel_mask())));
+		break;
+	}
+}
+
+void
+MidiTimeAxisView::capture_channel_mode_changed ()
+{
+	switch (midi_track()->get_capture_channel_mode()) {
+	case AllChannels:
+		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Rec"), ("all")));
+		break;
+	case FilterChannels:
+		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Rec"), ("some")));
+		break;
+	case ForceChannel:
+		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Rec"), ("all"), ffs (midi_track()->get_capture_channel_mask())));
+		break;
+	}
 }

@@ -296,10 +296,11 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual void queue_visual_videotimeline_update () = 0;
 	virtual void toggle_ruler_video (bool) = 0;
 	virtual void toggle_xjadeo_proc (int) = 0;
+	virtual void toggle_xjadeo_viewoption (int, int) = 0;
 	virtual void set_xjadeo_sensitive (bool onoff) = 0;
 	virtual int  get_videotl_bar_height () const = 0;
 	virtual void set_video_timeline_height (const int h) = 0;
-	virtual void embed_audio_from_video (std::string) = 0;
+	virtual void embed_audio_from_video (std::string, framepos_t n = 0) = 0;
 	virtual void export_video () = 0;
 #endif
 

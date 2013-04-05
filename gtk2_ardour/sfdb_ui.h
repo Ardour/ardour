@@ -149,6 +149,7 @@ class SoundFileBrowser : public ArdourWindow
 	FreesoundColumns freesound_list_columns;
 	Glib::RefPtr<Gtk::ListStore> freesound_list;
 
+	Gtk::Button freesound_more_btn;
 	Gtk::Button freesound_stop_btn;
 
   public:
@@ -173,21 +174,15 @@ class SoundFileBrowser : public ArdourWindow
 
 	Gtk::Entry freesound_entry;
 	Gtk::ComboBoxText freesound_sort;
-	Gtk::SpinButton freesound_page;
-	
+
 	Gtk::Button freesound_search_btn;
 	Gtk::TreeView freesound_list_view;
 	Gtk::ProgressBar freesound_progress_bar;
 
-	bool freesound_search_cancel;
 	bool freesound_download_cancel;
 
 	void freesound_search();
 	
-#ifdef FREESOUND
-	Mootcher *mootcher;
-#endif
-
   protected:
 	bool resetting_ourselves;
 	int matches;
@@ -228,7 +223,9 @@ class SoundFileBrowser : public ArdourWindow
 	void freesound_list_view_selected ();
 	void freesound_list_view_activated (const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*);
 	void freesound_search_clicked ();
+	void freesound_more_clicked ();
 	void freesound_stop_clicked ();
+	int freesound_page;
 	
 	void chooser_file_activated ();
 

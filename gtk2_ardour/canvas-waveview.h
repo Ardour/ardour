@@ -61,7 +61,7 @@ struct _GnomeCanvasWaveViewCache
     gulong                        end;
 };
 
-GnomeCanvasWaveViewCache* gnome_canvas_waveview_cache_new ();
+GnomeCanvasWaveViewCache* gnome_canvas_waveview_cache_new (void);
 void                    gnome_canvas_waveview_cache_destroy (GnomeCanvasWaveViewCache*);
 
 void gnome_canvas_waveview_set_gradient_waveforms (int);

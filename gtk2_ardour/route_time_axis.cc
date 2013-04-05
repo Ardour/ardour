@@ -245,7 +245,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	route_group_menu = new RouteGroupMenu (_session, plist);
 
-	// gm.get_gain_slider().signal_scroll_event().connect(sigc::mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
+	gm.get_gain_slider().signal_scroll_event().connect(sigc::mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
 
 	gm.get_level_meter().signal_scroll_event().connect (sigc::mem_fun (*this, &RouteTimeAxisView::controls_ebox_scroll), false);
 }
@@ -387,14 +387,13 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 	items.push_back (MenuElem (_("Hide All Automation"),
 				   sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::hide_all_automation), for_selection)));
 
-	items.push_back (SeparatorElem ());
-
 	/* Attach the plugin submenu. It may have previously been used elsewhere,
 	   so it was detached above 
 	*/
 	
 	if (!subplugin_menu.items().empty()) {
-		items.push_back (MenuElem (_("Plugins"), subplugin_menu));
+		items.push_back (SeparatorElem ());
+		items.push_back (MenuElem (_("Processor automation"), subplugin_menu));
 		items.back().set_sensitive (!for_selection || _editor.get_selection().tracks.size() == 1);;
 	}
 }
@@ -639,10 +638,6 @@ RouteTimeAxisView::build_display_menu ()
 			items.push_back (MenuElem (_("Mode"), *mode_menu));
 		}
 
-		color_mode_menu = build_color_mode_menu();
-		if (color_mode_menu) {
-			items.push_back (MenuElem (_("Color Mode"), *color_mode_menu));
-		}
 
 		items.push_back (SeparatorElem());
 

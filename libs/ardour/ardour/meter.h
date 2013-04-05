@@ -44,7 +44,7 @@ class Metering {
  */
 class PeakMeter : public Processor {
 public:
-	PeakMeter(Session& s) : Processor(s, "Meter") {}
+        PeakMeter(Session& s, const std::string& name);
 
 	void meter();
 	void reset ();

@@ -928,9 +928,18 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Group*      videotl_group;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_video_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_proc_action;
+	Glib::RefPtr<Gtk::ToggleAction> xjadeo_ontop_action;
+	Glib::RefPtr<Gtk::ToggleAction> xjadeo_timecode_action;
+	Glib::RefPtr<Gtk::ToggleAction> xjadeo_frame_action;
+	Glib::RefPtr<Gtk::ToggleAction> xjadeo_osdbg_action;
+	Glib::RefPtr<Gtk::ToggleAction> xjadeo_fullscreen_action;
+	Glib::RefPtr<Gtk::ToggleAction> xjadeo_letterbox_action;
+	Glib::RefPtr<Gtk::Action> xjadeo_zoom_100;
 	void set_xjadeo_proc ();
 	void toggle_xjadeo_proc (int state=-1);
 	void set_xjadeo_sensitive (bool onoff);
+	void set_xjadeo_viewoption (int);
+	void toggle_xjadeo_viewoption (int what, int state=-1);
 	void toggle_ruler_video (bool onoff) {ruler_video_action->set_active(onoff);}
 	int videotl_bar_height; /* in units of timebar_height; default: 4 */
 	int get_videotl_bar_height () const { return videotl_bar_height; }
@@ -1257,8 +1266,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void bring_in_external_audio (Editing::ImportMode mode,  framepos_t& pos);
 
-	bool  idle_drop_paths  (std::vector<std::string> paths, framepos_t frame, double ypos);
-	void  drop_paths_part_two  (const std::vector<std::string>& paths, framepos_t frame, double ypos);
+	bool  idle_drop_paths  (std::vector<std::string> paths, framepos_t frame, double ypos, bool copy);
+	void  drop_paths_part_two  (const std::vector<std::string>& paths, framepos_t frame, double ypos, bool copy);
 
 	int  import_sndfiles (std::vector<std::string> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, framepos_t& pos,
 			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool);
@@ -1455,7 +1464,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_video_timeline_locked ();
 	void set_video_timeline_locked (const bool);
 	void queue_visual_videotimeline_update ();
-	void embed_audio_from_video (std::string);
+	void embed_audio_from_video (std::string, framepos_t n = 0);
 #endif
 
 	bool canvas_imageframe_item_view_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameView*);
@@ -2042,7 +2051,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void get_regions_at (RegionSelection&, framepos_t where, const TrackViewList& ts) const;
 	void get_regions_after (RegionSelection&, framepos_t where, const TrackViewList& ts) const;
 
-	RegionSelection get_regions_from_selection ();
 	RegionSelection get_regions_from_selection_and_edit_point ();
 	RegionSelection get_regions_from_selection_and_entered ();
 

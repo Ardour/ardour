@@ -18,7 +18,7 @@
 
 #include <algorithm>
 
-#include <cairo/cairo.h>
+#include <cairo.h>
 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"

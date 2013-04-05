@@ -30,7 +30,16 @@
 
 using namespace std;
 static uint64_t _debug_bit = 1;
-static std::map<const char*,uint64_t> _debug_bit_map;
+
+typedef std::map<const char*,uint64_t> DebugMap;
+
+namespace PBD {
+	DebugMap & _debug_bit_map()
+	{
+		static DebugMap map;
+		return map;
+	}
+}
 
 uint64_t PBD::DEBUG::Stateful = PBD::new_debug_bit ("stateful");
 uint64_t PBD::DEBUG::Properties = PBD::new_debug_bit ("properties");
@@ -45,7 +54,7 @@ uint64_t
 PBD::new_debug_bit (const char* name)
 {
         uint64_t ret;
-        _debug_bit_map.insert (make_pair (name, _debug_bit));
+        _debug_bit_map().insert (make_pair (name, _debug_bit));
         ret = _debug_bit;
         _debug_bit <<= 1;
         return ret;
@@ -86,7 +95,7 @@ PBD::parse_debug_options (const char* str)
 			return 0;
 		}
 
-                for (map<const char*,uint64_t>::iterator i = _debug_bit_map.begin(); i != _debug_bit_map.end(); ++i) {
+		for (map<const char*,uint64_t>::iterator i = _debug_bit_map().begin(); i != _debug_bit_map().end(); ++i) {
                         if (strncasecmp (p, i->first, strlen (p)) == 0) {
                                 bits |= i->second;
                         }
@@ -108,7 +117,7 @@ PBD::list_debug_options ()
 
 	vector<string> options;
 
-        for (map<const char*,uint64_t>::iterator i = _debug_bit_map.begin(); i != _debug_bit_map.end(); ++i) {
+	for (map<const char*,uint64_t>::iterator i = _debug_bit_map().begin(); i != _debug_bit_map().end(); ++i) {
 		options.push_back (i->first);
         }
 

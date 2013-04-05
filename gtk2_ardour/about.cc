@@ -27,7 +27,7 @@
 
 #include "pbd/file_utils.h"
 
-#include "ardour/svn_revision.h"
+#include "ardour/revision.h"
 #include "ardour/version.h"
 #include "ardour/filesystem_paths.h"
 
@@ -582,7 +582,7 @@ About::About ()
 	set_website_label (_("http://ardour.org/"));
 	set_version ((string_compose(_("%1\n(built from revision %2)"),
 				     VERSIONSTRING,
-				     svn_revision)));
+				     revision)));
 
 	Gtk::Button* config_button = manage (new Button (_("Config")));
 

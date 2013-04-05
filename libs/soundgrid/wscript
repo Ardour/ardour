@@ -33,7 +33,7 @@ def build(bld):
             target       = 'SurfaceDriver_App',
             includes     = ['.'],
             linkflags    = '-bundle',
-            use          = [ 'libardour' ],
+            use          = [ 'ardour' ],
             install_path = os.path.join(bld.env['LIBDIR'], 'ardour3'),
             defines      = ['PACKAGE="' + I18N_PACKAGE + '"',
                             'PROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"' 

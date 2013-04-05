@@ -815,31 +815,33 @@ class VideoTimelineOptions : public OptionEditorBox
 public:
 	VideoTimelineOptions (RCConfiguration* c)
 		: _rc_config (c)
-		, _show_xjadeo_setup_button (_("Show Video Monitor Option Dialog"))
 		, _show_video_export_info_button (_("Show Video Export Info before export"))
 		, _show_video_server_dialog_button (_("Show Video Server Startup Dialog"))
+		, _video_advanced_setup_button (_("Advanced Setup (remote video server)"))
 	{
 		Table* t = manage (new Table (2, 6));
 		t->set_spacings (4);
 
+		t->attach (_video_advanced_setup_button, 0, 2, 0, 1);
+		_video_advanced_setup_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::video_advanced_setup_toggled));
+		Gtkmm2ext::UI::instance()->set_tip (_video_advanced_setup_button,
+					    _("<b>When enabled</b> you can speficify a custom video-server URL and docroot. - Do not enable this option unless you know what you are doing."));
+
 		Label* l = manage (new Label (_("Video Server URL:")));
 		l->set_alignment (0, 0.5);
-		t->attach (*l, 0, 1, 0, 1, FILL);
-		t->attach (_video_server_url_entry, 1, 2, 0, 1, FILL);
+		t->attach (*l, 0, 1, 1, 2, FILL);
+		t->attach (_video_server_url_entry, 1, 2, 1, 2, FILL);
 		Gtkmm2ext::UI::instance()->set_tip (_video_server_url_entry,
 					    _("Base URL of the video-server including http prefix. This is usually 'http://hostname.example.org:1554/' and defaults to 'http://localhost:1554/' when the video-server is runing locally"));
 
-		l = manage (new Label (_("Video Server Docroot:")));
+		l = manage (new Label (_("Video Folder:")));
 		l->set_alignment (0, 0.5);
-		t->attach (*l, 0, 1, 1, 2, FILL);
-		t->attach (_video_server_docroot_entry, 1, 2, 1, 2);
+		t->attach (*l, 0, 1, 2, 3, FILL);
+		t->attach (_video_server_docroot_entry, 1, 2, 2, 3);
 		Gtkmm2ext::UI::instance()->set_tip (_video_server_docroot_entry,
-					    _("Local path to the video-server docroot. If the server runs remotely, it should point to a network mounted folder of the server's docroot or be left empty if it is unvailable. It is used for the local video-monitor and file-browsing when opening/adding a video file."));
+					    _("Local path to the video-server document-root. Only files below this directory will be accessible by the video-server. If the server run on a remote host, it should point to a network mounted folder of the server's docroot or be left empty if it is unvailable. It is used for the local video-monitor and file-browsing when opening/adding a video file."));
 
-		t->attach (_show_xjadeo_setup_button, 0, 2, 3, 4);
-		_show_xjadeo_setup_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_xjadeo_setup_toggled));
-		Gtkmm2ext::UI::instance()->set_tip (_show_xjadeo_setup_button,
-					    _("<b>When enabled</b> an option dialog is presented before opening the video monitor"));
+		/* small vspace  y=3..4 */
 
 		t->attach (_show_video_export_info_button, 0, 2, 4, 5);
 		_show_video_export_info_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::show_video_export_info_toggled));
@@ -869,12 +871,6 @@ public:
 		_rc_config->set_video_server_docroot (_video_server_docroot_entry.get_text());
 	}
 
-	void show_xjadeo_setup_toggled ()
-	{
-		bool const x = _show_xjadeo_setup_button.get_active ();
-		_rc_config->set_video_monitor_setup_dialog (x);
-	}
-
 	void show_video_export_info_toggled ()
 	{
 		bool const x = _show_video_export_info_button.get_active ();
@@ -887,18 +883,29 @@ public:
 		_rc_config->set_show_video_server_dialog (x);
 	}
 
+	void video_advanced_setup_toggled ()
+	{
+		bool const x = _video_advanced_setup_button.get_active ();
+		_rc_config->set_video_advanced_setup(x);
+	}
+
 	void parameter_changed (string const & p)
 	{
 		if (p == "video-server-url") {
 			_video_server_url_entry.set_text (_rc_config->get_video_server_url());
 		} else if (p == "video-server-docroot") {
 			_video_server_docroot_entry.set_text (_rc_config->get_video_server_docroot());
-		} else if (p == "video-monitor-setup-dialog") {
-			bool const x = _rc_config->get_video_monitor_setup_dialog();
-			_show_xjadeo_setup_button.set_active (x);
 		} else if (p == "show-video-export-info") {
 			bool const x = _rc_config->get_show_video_export_info();
 			_show_video_export_info_button.set_active (x);
+		} else if (p == "show-video-server-dialog") {
+			bool const x = _rc_config->get_show_video_server_dialog();
+			_show_video_server_dialog_button.set_active (x);
+		} else if (p == "video-advanced-setup") {
+			bool const x = _rc_config->get_video_advanced_setup();
+			_video_advanced_setup_button.set_active(x);
+			_video_server_docroot_entry.set_sensitive(x);
+			_video_server_url_entry.set_sensitive(x);
 		}
 	}
 
@@ -908,16 +915,17 @@ public:
 		parameter_changed ("video-server-docroot");
 		parameter_changed ("video-monitor-setup-dialog");
 		parameter_changed ("show-video-export-info");
-		parameter_changed ("how-video-server-dialog");
+		parameter_changed ("show-video-server-dialog");
+		parameter_changed ("video-advanced-setup");
 	}
 
 private:
 	RCConfiguration* _rc_config;
 	Entry _video_server_url_entry;
 	Entry _video_server_docroot_entry;
-	CheckButton _show_xjadeo_setup_button;
 	CheckButton _show_video_export_info_button;
 	CheckButton _show_video_server_dialog_button;
+	CheckButton _video_advanced_setup_button;
 };
 #endif
 

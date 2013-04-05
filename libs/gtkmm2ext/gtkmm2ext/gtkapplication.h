@@ -30,9 +30,9 @@ G_BEGIN_DECLS
 
 typedef struct _GtkApplicationMenuGroup GtkApplicationMenuGroup;
 
-int  gtk_application_init ();
-void gtk_application_ready ();
-void gtk_application_cleanup ();
+int  gtk_application_init (void);
+void gtk_application_ready (void);
+void gtk_application_cleanup (void);
 
 void                      gtk_application_set_menu_bar       (GtkMenuShell    *menu_shell);
 GtkApplicationMenuGroup * gtk_application_add_app_menu_group (void);

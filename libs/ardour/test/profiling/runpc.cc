@@ -11,6 +11,8 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
+static const char* localedir = LOCALEDIR;
+
 int
 main (int argc, char* argv[])
 {
@@ -19,7 +21,7 @@ main (int argc, char* argv[])
 		exit (EXIT_FAILURE);
 	}
 
-	ARDOUR::init (false, true);
+	ARDOUR::init (false, true, localedir);
 
 	Session* session = load_session (
 		string_compose ("../libs/ardour/test/profiling/sessions/%1", argv[1]),

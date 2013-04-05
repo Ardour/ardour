@@ -29,6 +29,7 @@
 #include <glibmm/miscutils.h>
 
 #include "pbd/error.h"
+#include "pbd/pathexpand.h"
 #include "pbd/pathscanner.h"
 #include "pbd/stl_delete.h"
 
@@ -90,7 +91,7 @@ PathScanner::run_scan_internal (vector<string *> *result,
 {
 	DIR *dir;
 	struct dirent *finfo;
-	char *pathcopy = strdup (dirpath.c_str());
+	char *pathcopy = strdup (search_path_expand (dirpath).c_str());
 	char *thisdir;
 	string fullpath;
 	string search_str;

@@ -265,7 +265,7 @@ void MathUtilities::circShift( double* pData, int length, int shift)
 
 int MathUtilities::compareInt (const void * a, const void * b)
 {
-  return ( *(int*)a - *(int*)b );
+  return ( *(const int*)a - *(const int*)b );
 }
 
 void MathUtilities::normalise(double *data, int length, NormaliseType type)

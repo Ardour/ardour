@@ -64,7 +64,7 @@ class ExportFormatSpecification : public ExportFormatBase {
 	ExportFormatSpecification (Session & s, XMLNode const & state);
 
   public:
-	ExportFormatSpecification (ExportFormatSpecification const & other);
+	ExportFormatSpecification (ExportFormatSpecification const & other, bool modify_name = true);
 	~ExportFormatSpecification ();
 
 	/* compatibility */

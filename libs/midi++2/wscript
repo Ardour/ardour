@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
+from waflib import Options
 import os
 import sys
 
@@ -25,6 +26,20 @@ out = 'build'
 
 path_prefix = 'libs/midi++2/'
 
+libmidi_sources = [
+        'midi.cc',
+        'channel.cc',
+        'ipmidi_port.cc',
+        'jack_midi_port.cc',
+        'manager.cc',
+        'parser.cc',
+        'port.cc',
+        'midnam_patch.cc',
+        'mmc.cc',
+        'mtc.cc',
+        'version.cc',
+]
+
 def options(opt):
     autowaf.set_options(opt)
     opt.add_option('--test', action='store_true', default=False, dest='build_tests',
@@ -46,22 +61,12 @@ def configure(conf):
 
 def build(bld):
     # Library
-    obj = bld(features = 'cxx cxxshlib')
-    obj.source = '''
-            midi.cc
-            channel.cc
-            ipmidi_port.cc
-            jack_midi_port.cc
-            manager.cc
-            parser.cc
-            port.cc
-            midnam_patch.cc
-            mmc.cc
-            mtc.cc
-            version.cc
-    '''
+    if bld.is_defined ('INTERNAL_SHARED_LIBS'):
+        obj              = bld.shlib(features = 'cxx cxxshlib', source=libmidi_sources)
+    else:
+        obj              = bld.stlib(features = 'cxx cxxstlib', source=libmidi_sources)
+        obj.cxxflags = [ '-fPIC', '-DWITH_JACK_MIDI' ]
     # everybody loves JACK
-    obj.cxxflags = [ '-DWITH_JACK_MIDI' ]
     obj.export_includes = ['.']
     obj.includes     = ['.', '../surfaces/control_protocol']
     obj.name         = 'libmidipp'

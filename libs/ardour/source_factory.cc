@@ -218,11 +218,11 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 }
 
 boost::shared_ptr<Source>
-SourceFactory::createReadable (DataType type, Session& s, const string& path,
+SourceFactory::createExternal (DataType type, Session& s, const string& path,
 			       int chn, Source::Flag flags, bool announce, bool defer_peaks)
 {
 	if (type == DataType::AUDIO) {
-
+		
 		if (!(flags & Destructive)) {
 
 			try {
@@ -291,19 +291,19 @@ SourceFactory::createReadable (DataType type, Session& s, const string& path,
 }
 
 boost::shared_ptr<Source>
-SourceFactory::createWritable (DataType type, Session& s, const std::string& path, const std::string& origin,
+SourceFactory::createWritable (DataType type, Session& s, const std::string& path, 
 			       bool destructive, framecnt_t rate, bool announce, bool defer_peaks)
 {
 	/* this might throw failed_constructor(), which is OK */
 
 	if (type == DataType::AUDIO) {
-		Source* src = new SndFileSource (s, path, origin,
-				s.config.get_native_file_data_format(),
-				s.config.get_native_file_header_format(),
-				rate,
-				(destructive
-					? Source::Flag (SndFileSource::default_writable_flags | Source::Destructive)
-				 : SndFileSource::default_writable_flags));
+		Source* src = new SndFileSource (s, path, string(),
+						 s.config.get_native_file_data_format(),
+						 s.config.get_native_file_header_format(),
+						 rate,
+						 (destructive
+						  ? Source::Flag (SndFileSource::default_writable_flags | Source::Destructive)
+						  : SndFileSource::default_writable_flags));
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 		// boost_debug_shared_ptr_mark_interesting (src, "Source");
 #endif

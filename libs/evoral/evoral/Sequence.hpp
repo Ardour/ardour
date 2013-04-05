@@ -69,8 +69,7 @@ protected:
 	struct WriteLockImpl {
 		WriteLockImpl(Glib::Threads::RWLock& s, Glib::Threads::Mutex& c)
 			: sequence_lock(new Glib::Threads::RWLock::WriterLock(s))
-			, control_lock(new Glib::Threads::Mutex::Lock(c))
-		{ }
+			, control_lock(new Glib::Threads::Mutex::Lock(c)) { }
 		~WriteLockImpl() {
 			delete sequence_lock;
 			delete control_lock;
@@ -88,7 +87,7 @@ public:
 	typedef boost::shared_ptr<WriteLockImpl>            WriteLock;
 
 	virtual ReadLock  read_lock() const { return ReadLock(new Glib::Threads::RWLock::ReaderLock(_lock)); }
-	virtual WriteLock write_lock()      { return WriteLock(new WriteLockImpl(_lock, _control_lock)); }
+        virtual WriteLock write_lock()      { return WriteLock(new WriteLockImpl(_lock, _control_lock)); }
 
 	void clear();
 
@@ -126,7 +125,7 @@ public:
 	struct EarlierNoteComparator {
 		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,
 		                       const boost::shared_ptr< const Note<Time> > b) const {
-			return a->time() < b->time();
+			return musical_time_less_than (a->time(), b->time());
 		}
 	};
 
@@ -134,6 +133,7 @@ public:
 		typedef const Note<Time>* value_type;
 		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,
 		                       const boost::shared_ptr< const Note<Time> > b) const {
+			return musical_time_greater_than (a->time(), b->time());
 			return a->time() > b->time();
 		}
 	};
@@ -142,7 +142,7 @@ public:
 		typedef const Note<Time>* value_type;
 		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,
 		                       const boost::shared_ptr< const Note<Time> > b) const {
-			return a->end_time() > b->end_time();
+			return musical_time_greater_than (a->end_time(), b->end_time());
 		}
 	};
 
@@ -186,7 +186,7 @@ public:
 
 	struct EarlierSysExComparator {
 		inline bool operator() (constSysExPtr a, constSysExPtr b) const {
-			return a->time() < b->time();
+			return musical_time_less_than (a->time(), b->time());
 		}
 	};
 
@@ -199,7 +199,7 @@ public:
 
 	struct EarlierPatchChangeComparator {
 		inline bool operator() (constPatchChangePtr a, constPatchChangePtr b) const {
-			return a->time() < b->time();
+			return musical_time_less_than (a->time(), b->time());
 		}
 	};
 

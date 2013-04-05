@@ -35,9 +35,8 @@ namespace ARDOUR {
 class Session;
 class AutomationControl;
 
-
-/** Note this class is abstract, actual objects must either be
- * an AutomatableControls or an AutomatableSequence
+/* The inherited ControlSet is virtual because AutomatableSequence inherits
+ * from this AND EvoralSequence, which is also a ControlSet
  */
 class Automatable : virtual public Evoral::ControlSet
 {

@@ -14347,7 +14347,7 @@ msgstr ""
 #~ msgid "KeyboardTarget: unknown action \"%1\""
 #~ msgstr "KeyboardTarget: άγνωστη ενέργεια \"%1\""
 
-#~ msgid "misformed binding node - ignored"
+#~ msgid "malformed binding node - ignored"
 #~ msgstr "παραμορφωμένος πομπός δεσμού - αγνοήθηκε"
 
 #~ msgid "ardour: soundfile selector"

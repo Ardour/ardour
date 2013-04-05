@@ -207,7 +207,7 @@ libardour_sources = [
         'source_factory.cc',
         'speakers.cc',
         'strip_silence.cc',
-        'svn_revision.cc',
+        'revision.cc',
         'tape_file_matcher.cc',
         'template_utils.cc',
         'tempo.cc',
@@ -375,11 +375,16 @@ int main(int argc, char** argv) {
 
 def build(bld):
     # Library
-    obj              = bld(features = 'c cxx cshlib cxxshlib')
-    obj.source       = libardour_sources
+    if bld.is_defined ('INTERNAL_SHARED_LIBS'):
+        obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=libardour_sources)
+    else:
+        obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=libardour_sources)
+        obj.cxxflags     = [ '-fPIC' ]
+        obj.cflags       = [ '-fPIC' ]
+
     obj.export_includes = ['.']
     obj.includes     = ['.', '../surfaces/control_protocol', '..']
-    obj.name         = 'libardour'
+    obj.name         = 'ardour'
     obj.target       = 'ardour'
     obj.uselib       = ['GLIBMM','GTHREAD','AUBIO','SIGCPP','XML','UUID',
                         'JACK','SNDFILE','SAMPLERATE','LRDF','AUDIOUNITS',
@@ -482,10 +487,10 @@ def build(bld):
 # Tests that don't work
 #                test/mantis_3356_test.cc
 
-        testobj.includes     = obj.includes + ['test', '../pbd']
+        testobj.includes     = obj.includes + ['test', '../pbd', '../libltc', '../audiographer']
         testobj.uselib       = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
                                 'SAMPLERATE','XML','LRDF','COREAUDIO']
-        testobj.use          = ['libpbd','libmidipp','libardour']
+        testobj.use          = ['libpbd','libmidipp','ardour','libltc','libaudiographer']
         testobj.name         = 'libardour-tests'
         testobj.target       = 'run-tests'
         testobj.install_path = ''
@@ -518,7 +523,7 @@ def build(bld):
         session_load_tester.includes.append ('test')
         session_load_tester.uselib    = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
                              'SAMPLERATE','XML','LRDF','COREAUDIO']
-        session_load_tester.use       = ['libpbd','libmidipp','libardour']
+        session_load_tester.use       = ['libpbd','libmidipp','ardour']
         session_load_tester.name      = 'libardour-session-load-tester'
         session_load_tester.target    = 'load-session'
         session_load_tester.install_path = ''
@@ -553,7 +558,7 @@ def build(bld):
             profilingobj.includes.append ('test')
             profilingobj.uselib    = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
                              'SAMPLERATE','XML','LRDF','COREAUDIO']
-            profilingobj.use       = ['libpbd','libmidipp','libardour']
+            profilingobj.use       = ['libpbd','libmidipp','ardour']
             profilingobj.name      = 'libardour-profiling'
             profilingobj.target    = p
             profilingobj.install_path = ''

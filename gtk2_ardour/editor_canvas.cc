@@ -29,6 +29,7 @@
 
 #include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/smf_source.h"
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -412,16 +413,33 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 }
 
 bool
-Editor::idle_drop_paths (vector<string> paths, framepos_t frame, double ypos)
+Editor::idle_drop_paths (vector<string> paths, framepos_t frame, double ypos, bool copy)
 {
-	drop_paths_part_two (paths, frame, ypos);
+	drop_paths_part_two (paths, frame, ypos, copy);
 	return false;
 }
 
 void
-Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, double ypos)
+Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, double ypos, bool copy)
 {
 	RouteTimeAxisView* tv;
+	
+	/* MIDI files must always be imported, because we consider them
+	 * writable. So split paths into two vectors, and follow the import
+	 * path on the MIDI part.
+	 */
+
+	vector<string> midi_paths;
+	vector<string> audio_paths;
+
+	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
+		if (SMFSource::safe_midi_file_extension (*i)) {
+			midi_paths.push_back (*i);
+		} else {
+			audio_paths.push_back (*i);
+		}
+	}
+
 
 	std::pair<TimeAxisView*, int> const tvp = trackview_by_y_position (ypos);
 	if (tvp.first == 0) {
@@ -430,24 +448,28 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 
 		frame = 0;
 
-		if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
-			do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, frame);
+		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, frame);
+		
+		if (Profile->get_sae() || Config->get_only_copy_imported_files() || copy) {
+			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, frame);
 		} else {
-			do_embed (paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
+			do_embed (audio_paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
 		}
 
 	} else if ((tv = dynamic_cast<RouteTimeAxisView*> (tvp.first)) != 0) {
 
-		/* check that its an audio track, not a bus */
+		/* check that its a track, not a bus */
 
 		if (tv->track()) {
 			/* select the track, then embed/import */
 			selection->set (tv);
 
-			if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
-				do_import (paths, Editing::ImportSerializeFiles, Editing::ImportToTrack, SrcBest, frame);
+			do_import (midi_paths, Editing::ImportSerializeFiles, ImportToTrack, SrcBest, frame);
+
+			if (Profile->get_sae() || Config->get_only_copy_imported_files() || copy) {
+				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack, SrcBest, frame);
 			} else {
-				do_embed (paths, Editing::ImportSerializeFiles, ImportToTrack, frame);
+				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, frame);
 			}
 		}
 	}
@@ -481,27 +503,19 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 
 		snap_to (frame);
 
+		bool copy = ((context->get_actions() & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY);
 #ifdef GTKOSX
 		/* We are not allowed to call recursive main event loops from within
 		   the main event loop with GTK/Quartz. Since import/embed wants
 		   to push up a progress dialog, defer all this till we go idle.
 		*/
-		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &Editor::idle_drop_paths), paths, frame, cy));
+		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &Editor::idle_drop_paths), paths, frame, cy, copy));
 #else
-		drop_paths_part_two (paths, frame, cy);
+		drop_paths_part_two (paths, frame, cy, copy);
 #endif
 	}
 
 	context->drag_finish (true, false, time);
-}
-
-void
-Editor::drop_regions (const RefPtr<Gdk::DragContext>& /*context*/,
-		      int /*x*/, int /*y*/,
-		      const SelectionData& /*data*/,
-		      guint /*info*/, guint /*time*/)
-{
-	_drags->end_grab (0);
 }
 
 /** If the editor window is arranged such that the edge of the trackview is right up

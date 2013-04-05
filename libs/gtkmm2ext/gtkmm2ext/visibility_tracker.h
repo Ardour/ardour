@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2013 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,11 +17,30 @@
 
 */
 
-#ifndef __ardour_svn_revision_h__
-#define __ardour_svn_revision_h__
+#ifndef __libgtkmm2ext_visibility_tracker__
+#define __libgtkmm2ext_visibility_tracker__
 
-namespace ARDOUR {
-	extern const char* svn_revision;
+#include <gdk/gdkevents.h>
+
+namespace GTK {
+	class Window;
 }
 
-#endif
+namespace Gtkmm2ext {
+
+class VisibilityTracker {
+  public:
+    VisibilityTracker (Gtk::Window&);
+    virtual ~VisibilityTracker() {}
+    
+    void cycle_visibility ();
+
+  private:
+    Gtk::Window& window;
+    GdkVisibilityState _visibility;
+    bool handle_visibility_notify_event (GdkEventVisibility*);
+};
+
+}
+
+#endif /* __libgtkmm2ext_visibility_tracker__ */ 

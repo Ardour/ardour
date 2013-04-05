@@ -18,7 +18,7 @@
 */
 
 #include <iostream>
-#include <cairo/cairo.h>
+#include <cairo.h>
 #include "ardour/bundle.h"
 #include "port_matrix_grid.h"
 #include "port_matrix.h"

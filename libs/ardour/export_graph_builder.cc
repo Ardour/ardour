@@ -129,7 +129,7 @@ ExportGraphBuilder::add_config (FileSpec const & config)
 	// If the sample rate is "session rate", change it to the real value.
 	// However, we need to copy it to not change the config which is saved...
 	FileSpec new_config (config);
-	new_config.format.reset(new ExportFormatSpecification(*new_config.format));
+	new_config.format.reset(new ExportFormatSpecification(*new_config.format, false));
 	if(new_config.format->sample_rate() == ExportFormatBase::SR_Session) {
 		framecnt_t session_rate = session.nominal_frame_rate();
 		new_config.format->set_sample_rate(ExportFormatBase::nearest_sample_rate(session_rate));

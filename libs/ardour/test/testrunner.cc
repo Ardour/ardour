@@ -11,6 +11,8 @@
 #include "pbd/debug.h"
 #include "ardour/ardour.h"
 
+static const char* localedir = LOCALEDIR;
+
 int
 main(int argc, char* argv[])
 {
@@ -45,7 +47,7 @@ main(int argc, char* argv[])
 		}
 	}
 
-	ARDOUR::init (false, true);
+	ARDOUR::init (false, true, localedir);
 	
 	CppUnit::TestResult testresult;
 	

@@ -28,6 +28,7 @@
 #include <string>
 #include <gtkmm.h>
 
+#include "ardour/rc_configuration.h"
 #include "ardour/types.h"
 #include "ardour/template_utils.h"
 #include "ardour_dialog.h"
@@ -41,6 +42,8 @@ std::string get_file_extension (const std::string infile);
 void ParseCSV(const std::string &csv, std::vector<std::vector<std::string> > &lines);
 std::string video_map_path (std::string server_docroot, std::string filepath);
 void video_draw_cross (Glib::RefPtr<Gdk::Pixbuf> img);
+std::string video_get_server_url (ARDOUR::RCConfiguration* config);
+std::string video_get_docroot (ARDOUR::RCConfiguration* config);
 
 bool video_query_info (
 		std::string video_server_url,

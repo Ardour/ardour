@@ -235,15 +235,17 @@ class TrackExportChannelSelector : public ExportChannelSelector
   private:
 
 	void fill_list();
-        void add_track (boost::shared_ptr<ARDOUR::Route> route);
+	void add_track (boost::shared_ptr<ARDOUR::Route> route);
 	void update_config();
 
 	ChannelConfigList configs;
 
+	Gtk::VBox main_layout;
+
 	struct TrackCols : public Gtk::TreeModelColumnRecord
 	{
 	  public:
-  	        Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> > route;
+		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> > route;
 		Gtk::TreeModelColumn<std::string>     label;
 		Gtk::TreeModelColumn<bool>            selected;
 
@@ -256,6 +258,10 @@ class TrackExportChannelSelector : public ExportChannelSelector
 
 	Gtk::ScrolledWindow          track_scroller;
 
+	Gtk::HBox                    options_box;
+	Gtk::RadioButton::Group      source_group;
+	Gtk::RadioButton             region_contents_button;
+	Gtk::RadioButton             track_output_button;
 };
 
 #endif /* __export_channel_selector_h__ */

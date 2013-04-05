@@ -66,14 +66,17 @@ class VideoMonitor : public sigc::trackable , public ARDOUR::SessionHandlePtr, p
 	bool set_custom_setting (const std::string, const std::string);
 	const std::string get_custom_setting (const std::string);
 	void restore_settings_mask (int i)  { _restore_settings_mask = i;}
-	const int restore_settings_mask () { return _restore_settings_mask;}
+	int restore_settings_mask () const { return _restore_settings_mask;}
 
 	void set_offset (ARDOUR::frameoffset_t);
 	void manual_seek (ARDOUR::framepos_t, bool, ARDOUR::frameoffset_t);
 	void srsupdate ();
+	void querystate ();
 	bool synced_by_manual_seeks() { return sync_by_manual_seek; }
 
 	sigc::signal<void> Terminated;
+	PBD::Signal1<void,std::string> UiState;
+	void send_cmd (int what, int param);
 
 #if 1
 	void set_debug (bool onoff) { debug_enable = onoff; }
@@ -99,6 +102,10 @@ class VideoMonitor : public sigc::trackable , public ARDOUR::SessionHandlePtr, p
 	ARDOUR::framepos_t manually_seeked_frame;
 	bool sync_by_manual_seek;
 	sigc::connection clock_connection;
+	sigc::connection state_connection;
+	int state_clk_divide;
+	int starting;
+	int osdmode;
 #if 1
 	bool debug_enable;
 #endif

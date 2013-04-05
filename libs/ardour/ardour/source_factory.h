@@ -46,14 +46,14 @@ class SourceFactory {
 	static boost::shared_ptr<Source> createSilent (Session&, const XMLNode& node,
 	                                               framecnt_t nframes, float sample_rate);
 
-	static boost::shared_ptr<Source> createReadable
+	static boost::shared_ptr<Source> createExternal
 		(DataType type, Session&,
-		 const std::string& path,
+		 const std::string& path, 
 		 int chn, Source::Flag flags, bool announce = true, bool async = false);
 
 	static boost::shared_ptr<Source> createWritable
 		(DataType type, Session&,
-		 const std::string& path, const std::string& origin,
+		 const std::string& path, 
 		 bool destructive, framecnt_t rate, bool announce = true, bool async = false);
 
 

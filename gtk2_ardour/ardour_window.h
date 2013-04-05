@@ -23,6 +23,8 @@
 #include <gtkmm/window.h>
 #include <gtkmm/window.h>
 
+#include "gtkmm2ext/visibility_tracker.h"
+
 #include "ardour/session_handle.h"
 
 /**
@@ -31,7 +33,7 @@
  * method of connecting and disconnecting from a Session with
  * all other objects that have a handle on a Session.
  */
-class ArdourWindow : public Gtk::Window, public ARDOUR::SessionHandlePtr
+class ArdourWindow : public Gtk::Window, public ARDOUR::SessionHandlePtr, public Gtkmm2ext::VisibilityTracker
 {
   public:
 	ArdourWindow (std::string title);

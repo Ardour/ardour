@@ -32,6 +32,7 @@
 #include "ardour/session.h"
 
 #include "video_server_dialog.h"
+#include "utils_videotl.h"
 #include "i18n.h"
 
 using namespace Gtk;
@@ -84,14 +85,13 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	if (find_file_in_search_path (PBD::SearchPath(Glib::getenv("PATH")), X_("harvid"), icsd_file_path)) {
 		path_entry.set_text(icsd_file_path);
 	}
-	else if (find_file_in_search_path (PBD::SearchPath(Glib::getenv("PATH")), X_("icsd"), icsd_file_path)) {
-		path_entry.set_text(icsd_file_path);
-	}
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\harvid.exe"), Glib::FILE_TEST_EXISTS)) {
 		path_entry.set_text(X_("C:\\Program Files\\harvid\\harvid.exe"));
 	}
 	else {
-		PBD::warning << _("The external video server 'harvid' can not be found, see https://github.com/x42/harvid") << endmsg;
+		PBD::warning <<
+			_("The external video server 'harvid' can not be found. The tool is included with the Ardour releases from ardour.org, "
+			  "alternatively you can download it from http://x42.github.com/harvid/ or acquire it from your distribution.") << endmsg;
 	}
 
 
@@ -132,17 +132,23 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	t->attach (*l, 0, 1, 2, 3, FILL);
 	t->attach (cachesize_spinner, 1, 2, 2, 3);
 
-	l = manage (new Label (_("Ardour relies on an external Video Server for the videotimeline. The server configured in Edit -> Prefereces -> Video is not reachable. Do you want ardour to launch 'harvid' on this machine?"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Ardour relies on an external Video Server for the videotimeline.\nThe server configured in Edit -> Prefereces -> Video is not reachable.\nDo you want ardour to launch 'harvid' on this machine?"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l->set_max_width_chars(80);
 	l->set_line_wrap();
-	vbox->pack_start (*l, false, true, 4);
+	vbox->pack_start (*l, true, true, 4);
 	vbox->pack_start (*path_hbox, false, false);
-	vbox->pack_start (*docroot_hbox, false, false);
+	if (Config->get_video_advanced_setup()){
+		vbox->pack_start (*docroot_hbox, false, false);
+	} else {
+		docroot_entry.set_text(X_("/"));
+		listenport_spinner.set_sensitive(false);
+	}
 	vbox->pack_start (*options_box, false, true);
 
 	get_vbox()->set_spacing (4);
 	get_vbox()->pack_start (*vbox, false, false);
 	get_vbox()->pack_start (showagain_checkbox, false, false);
-	showagain_checkbox.set_active(false);
+	showagain_checkbox.set_active(!Config->get_show_video_server_dialog());
 
 	path_browse_button.signal_clicked().connect (sigc::mem_fun (*this, &VideoServerDialog::open_path_dialog));
 	docroot_browse_button.signal_clicked().connect (sigc::mem_fun (*this, &VideoServerDialog::open_docroot_dialog));
@@ -196,10 +202,19 @@ VideoServerDialog::open_docroot_dialog ()
 	if (result == Gtk::RESPONSE_OK) {
 		std::string dirname = dialog.get_filename();
 
+		if (dirname.empty() || dirname.at(dirname.length()-1) != G_DIR_SEPARATOR) {
+			dirname += "/";
+		}
+
 		if (dirname.length()) {
 			docroot_entry.set_text (dirname);
 		}
 	}
+}
+
+std::string
+VideoServerDialog::get_docroot () {
+	return docroot_entry.get_text();
 }
 
 #endif /* WITH_VIDEOTIMELINE */

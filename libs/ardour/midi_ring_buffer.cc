@@ -17,6 +17,7 @@
 */
 
 #include "pbd/compose.h"
+#include "pbd/enumwriter.h"
 #include "pbd/error.h"
 
 #include "ardour/debug.h"
@@ -81,17 +82,6 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		bool r = this->peek (&status, sizeof(uint8_t)); 
 		assert (r); // If this failed, buffer is corrupt, all hope is lost
 
-		// Ignore event if it doesn't match channel filter
-		if (is_channel_event(status) && get_channel_mode() == FilterChannels) {
-			const uint8_t channel = status & 0x0F;
-			if (!(get_channel_mask() & (1L << channel))) {
-				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB skipping event (%3 bytes) due to channel mask (mask = %1 chn = %2)\n",
-										      get_channel_mask(), (int) channel, ev_size));
-				this->increment_read_ptr (ev_size); // Advance read pointer to next event
-				continue;
-			}
-		}
-
 		/* lets see if we are going to be able to write this event into dst.
 		 */
 		uint8_t* write_loc = dst.reserve (ev_time, ev_size);
@@ -130,10 +120,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 			} else if (is_note_off(write_loc[0])) {
 				_tracker.remove (write_loc[1], write_loc[0] & 0xf);
 			}
-			
-			if (is_channel_event(status) && get_channel_mode() == ForceChannel) {
-				write_loc[0] = (write_loc[0] & 0xF0) | (get_channel_mask() & 0x0F);
-			}
+
 			++count;
 		} else {
 			cerr << "WARNING: error reading event contents from MIDI ring" << endl;

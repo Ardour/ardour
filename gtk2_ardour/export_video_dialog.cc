@@ -66,21 +66,21 @@ using namespace ARDOUR;
 ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	: ArdourDialog (_("Export Video File "))
 	, editor (ed)
-  , outfn_path_label (_("Output File:"), Gtk::ALIGN_LEFT)
+	, outfn_path_label (_("File:"), Gtk::ALIGN_LEFT)
 	, outfn_browse_button (_("Browse"))
-	, invid_path_label (_("Input Video File:"), Gtk::ALIGN_LEFT)
+	, invid_path_label (_("Video:"), Gtk::ALIGN_LEFT)
 	, invid_browse_button (_("Browse"))
 	, transcode_button (_("Export"))
 	, abort_button (_("Abort"))
 	, scale_checkbox (_("Scale Video (W x H):"))
-	, width_adjustment (128, 768, 1920, 1, 16, 0)
+	, width_adjustment (768, 128, 1920, 1, 16, 0)
 	, width_spinner (width_adjustment)
-	, height_adjustment (128, 576, 1920, 1, 16, 0)
+	, height_adjustment (576, 128, 1920, 1, 16, 0)
 	, height_spinner (height_adjustment)
 	, aspect_checkbox (_("Set Aspect Ratio:"))
 	, normalize_checkbox (_("Normalize Audio"))
 	, twopass_checkbox (_("2 Pass Encoding"))
-	, optimizations_checkbox (_("Optimizations:"))
+	, optimizations_checkbox (_("Codec Optimizations:"))
 	, optimizations_label ("-")
 	, deinterlace_checkbox (_("Deinterlace"))
 	, bframes_checkbox (_("Use [2] B-frames (MPEG 2 or 4 only)"))
@@ -91,8 +91,6 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 #endif
 {
 	set_session (s);
-
-	transcoder = 0;
 
 	set_name ("ExportVideoDialog");
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -105,39 +103,45 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	VBox* options_box = manage (new VBox);
 	HBox* path_hbox;
 
-#if 0
-	l = manage (new Label (_("<b>Export Video File</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	l->set_use_markup ();
-	vbox->pack_start (*l, false, false);
-	l = manage (new Label (_("The file-format is determined by the extension you choose for the output file."), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	l->set_size_request(700,-1);
-	l->set_line_wrap();
-	vbox->pack_start (*l, false, false, 8);
-#endif
+	/* check if ffmpeg can be found */
+	transcoder = new TranscodeFfmpeg("");
+	if (!transcoder->ffexec_ok()) {
+		l = manage (new Label (_("No ffprobe or ffmpeg executables could be found on this system. Video Export is not possible until you install those tools. See the Log widow for more information."), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l->set_line_wrap();
+		vbox->pack_start (*l, false, false, 8);
+		get_vbox()->pack_start (*vbox, false, false);
+		add_button (Stock::OK, RESPONSE_CANCEL);
+		show_all_children ();
+		return;
+	}
+	delete transcoder; transcoder = 0;
 
-	l = manage (new Label (_("<b>Files:</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("<b>Output:</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
-	vbox->pack_start (*l, false, false);
+	vbox->pack_start (*l, false, false, 4);
 
 	path_hbox = manage (new HBox);
 	path_hbox->pack_start (outfn_path_label, false, false, 3);
 	path_hbox->pack_start (outfn_path_entry, true, true, 3);
 	path_hbox->pack_start (outfn_browse_button, false, false, 3);
-	outfn_browse_button.set_name ("PaddedButton");
-	vbox->pack_start (*path_hbox, false, false);
+	vbox->pack_start (*path_hbox, false, false, 2);
+
+	l = manage (new Label (_("<b>Input:</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l->set_use_markup ();
+	vbox->pack_start (*l, false, false, 4);
 
 	path_hbox = manage (new HBox);
 	path_hbox->pack_start (invid_path_label, false, false, 3);
 	path_hbox->pack_start (invid_path_entry, true, true, 3);
 	path_hbox->pack_start (invid_browse_button, false, false, 3);
-	invid_browse_button.set_name ("PaddedButton");
-	vbox->pack_start (*path_hbox, false, false);
+	vbox->pack_start (*path_hbox, false, false, 2);
 
 	path_hbox = manage (new HBox);
-	l = manage (new Label (_("Input Audio (Ardour Session):"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	path_hbox->pack_start (*l, true, true, 3);
-	path_hbox->pack_start (insnd_combo, true, true, 3);
-	vbox->pack_start (*path_hbox, false, false);
+	l = manage (new Label (_("Audio:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	path_hbox->pack_start (*l, false, false, 3);
+	l = manage (new Label (_("Master Bus"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	path_hbox->pack_start (*l, false, false, 2);
+	vbox->pack_start (*path_hbox, false, false, 2);
 
 	insnd_combo.set_name ("PaddedButton");
 	insnd_combo.append_text("from ardour session-start to session-end");
@@ -149,15 +153,6 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 		insnd_combo.append_text("from video-start to video-end");
 	}
 	insnd_combo.set_active(0);
-
-#if 1
-	// TODO probe input file - don't use VTL duration.
-	framecnt_t duration_v = ARDOUR_UI::instance()->video_timeline->get_duration();
-	framecnt_t duration_a = _session->current_end_frame() - _session->current_start_frame();
-	if ( duration_a > duration_v ) {
-		warning << _("Audio is longer than video. This file may not play correctly.") << endmsg;
-	}
-#endif
 
 	outfn_path_entry.set_width_chars(38);
 	outfn_path_entry.set_text (_session->session_directory().export_path() + G_DIR_SEPARATOR +"export.avi");
@@ -175,43 +170,47 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	l->set_use_markup ();
 	options_box->pack_start (*l, false, true, 4);
 
-	Table* t = manage (new Table (4, 11));
+	Table* t = manage (new Table (4, 12));
 	t->set_spacings (4);
+	int ty = 0;
 	options_box->pack_start (*t, true, true, 4);
+	l = manage (new Label (_("Range:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	t->attach (*l, 0, 1, ty, ty+1);
+	t->attach (insnd_combo, 1, 4, ty, ty+1); ty++;
 	l = manage (new Label (_("Preset:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	t->attach (*l, 0, 1, 0, 1);
-	t->attach (preset_combo, 1, 4, 0, 1);
+	t->attach (*l, 0, 1, ty, ty+1);
+	t->attach (preset_combo, 1, 4, ty, ty+1); ty++;
 	l = manage (new Label (_("Video Codec:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	t->attach (*l, 0, 1, 1, 2);
-	t->attach (video_codec_combo, 1, 2, 1, 2);
+	t->attach (*l, 0, 1, ty, ty+1);
+	t->attach (video_codec_combo, 1, 2, ty, ty+1);
 	l = manage (new Label (_("Video KBit/s:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	t->attach (*l, 2, 3, 1, 2);
-	t->attach (video_bitrate_combo, 3, 4, 1, 2);
+	t->attach (*l, 2, 3, ty, ty+1);
+	t->attach (video_bitrate_combo, 3, 4, ty, ty+1); ty++;
 	l = manage (new Label (_("Audio Codec:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	t->attach (*l, 0, 1, 2, 3);
-	t->attach (audio_codec_combo, 1, 2, 2, 3);
+	t->attach (*l, 0, 1, ty, ty+1);
+	t->attach (audio_codec_combo, 1, 2, ty, ty+1);
 	l = manage (new Label (_("Audio KBit/s:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	t->attach (*l, 2, 3, 2, 3);
-	t->attach (audio_bitrate_combo, 3, 4, 2, 3);
+	t->attach (*l, 2, 3, ty, ty+1);
+	t->attach (audio_bitrate_combo, 3, 4, ty, ty+1); ty++;
 	l = manage (new Label (_("Audio Samplerate:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	t->attach (*l, 0, 1, 3, 4);
-	t->attach (audio_samplerate_combo, 1, 2, 3, 4);
-	t->attach (normalize_checkbox, 2, 4, 3, 4);
-	t->attach (scale_checkbox, 0, 2, 4, 5);
-	t->attach (width_spinner, 2, 3, 4, 5);
-	t->attach (height_spinner, 3, 4, 4, 5);
-	t->attach (fps_checkbox, 0, 3, 5, 6);
-	t->attach (fps_combo, 3, 4, 5, 6);
-	t->attach (aspect_checkbox, 2, 3, 6, 7);
-	t->attach (aspect_combo, 3, 4, 6, 7);
-	t->attach (twopass_checkbox, 0, 2, 6, 7);
-	t->attach (bframes_checkbox, 0, 2, 7, 8);
-	t->attach (deinterlace_checkbox, 2, 4, 7, 8);
-	t->attach (meta_checkbox, 2, 4, 8, 9);
-	t->attach (optimizations_checkbox, 0, 1, 9, 10);
-	t->attach (optimizations_label, 1, 4, 9, 10);
+	t->attach (*l, 0, 1, ty, ty+1);
+	t->attach (audio_samplerate_combo, 1, 2, ty, ty+1);
+	t->attach (normalize_checkbox, 2, 4, ty, ty+1); ty++;
+	t->attach (scale_checkbox, 0, 2, ty, ty+1);
+	t->attach (width_spinner, 2, 3, ty, ty+1);
+	t->attach (height_spinner, 3, 4, ty, ty+1); ty++;
+	t->attach (fps_checkbox, 0, 3, ty, ty+1);
+	t->attach (fps_combo, 3, 4, ty, ty+1); ty++;
+	t->attach (twopass_checkbox, 0, 2, ty, ty+1);
+	t->attach (aspect_checkbox, 2, 3, ty, ty+1);
+	t->attach (aspect_combo, 3, 4, ty, ty+1); ty++;
+	t->attach (bframes_checkbox, 0, 2, ty, ty+1);
+	t->attach (deinterlace_checkbox, 2, 4, ty, ty+1); ty++;
+	t->attach (meta_checkbox, 2, 4, ty, ty+1); ty++;
+	t->attach (optimizations_checkbox, 0, 1, ty, ty+1);
+	t->attach (optimizations_label, 1, 4, ty, ty+1); ty++;
 #if 1 /* tentative debug mode */
-	t->attach (debug_checkbox, 0, 4, 10, 11);
+	t->attach (debug_checkbox, 0, 4, ty, ty+1); ty++;
 #endif
 
 	preset_combo.set_name ("PaddedButton");
@@ -227,7 +226,7 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 
 	audio_codec_combo.set_name ("PaddedButton");
 	audio_codec_combo.append_text("ac3");
-	audio_codec_combo.append_text("libfaac");
+	audio_codec_combo.append_text("aac");
 	audio_codec_combo.append_text("libmp3lame");
 	audio_codec_combo.append_text("libvorbis");
 	audio_codec_combo.append_text("mp2");
@@ -240,8 +239,9 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	video_codec_combo.append_text("mjpeg");
 	video_codec_combo.append_text("mpeg2video");
 	video_codec_combo.append_text("mpeg4");
-	video_codec_combo.append_text("x264 (default)");
+	video_codec_combo.append_text("x264 (baseline)");
 	video_codec_combo.append_text("x264 (hq)");
+	video_codec_combo.append_text("vpx (webm)");
 	video_codec_combo.append_text("copy");
 	video_codec_combo.set_active(4);
 
@@ -278,14 +278,14 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	fps_combo.append_text("59.94");
 	fps_combo.append_text("60");
 	float tcfps = _session->timecode_frames_per_second();
-	if      (fabs(tcfps - 23.976)  < 0.01) { fps_combo.set_active(0); }
-	else if (fabs(tcfps - 24.0  )  < 0.01) { fps_combo.set_active(1); }
-	else if (fabs(tcfps - 24.976)  < 0.01) { fps_combo.set_active(2); }
-	else if (fabs(tcfps - 25.0  )  < 0.01) { fps_combo.set_active(3); }
-	else if (fabs(tcfps - 29.97 )  < 0.01) { fps_combo.set_active(4); }
-	else if (fabs(tcfps - 30.0  )  < 0.01) { fps_combo.set_active(5); }
-	else if (fabs(tcfps - 59.94 )  < 0.01) { fps_combo.set_active(6); }
-	else if (fabs(tcfps - 60.0  )  < 0.01) { fps_combo.set_active(7); }
+	if      (fabs(tcfps - 23.976) < 0.01) { fps_combo.set_active(0); }
+	else if (fabs(tcfps - 24.0  ) < 0.01) { fps_combo.set_active(1); }
+	else if (fabs(tcfps - 24.976) < 0.01) { fps_combo.set_active(2); }
+	else if (fabs(tcfps - 25.0  ) < 0.01) { fps_combo.set_active(3); }
+	else if (fabs(tcfps - 29.97 ) < 0.01) { fps_combo.set_active(4); }
+	else if (fabs(tcfps - 30.0  ) < 0.01) { fps_combo.set_active(5); }
+	else if (fabs(tcfps - 59.94 ) < 0.01) { fps_combo.set_active(6); }
+	else if (fabs(tcfps - 60.0  ) < 0.01) { fps_combo.set_active(7); }
 	else { fps_combo.set_active(5); }
 
 	aspect_combo.set_name ("PaddedButton");
@@ -299,7 +299,7 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	fps_checkbox_toggled();
 	video_codec_combo_changed();
 
-  vbox->pack_start (*options_box, false, true);
+	vbox->pack_start (*options_box, false, true, 4);
 	get_vbox()->set_spacing (4);
 	get_vbox()->pack_start (*vbox, false, false);
 
@@ -350,9 +350,41 @@ ExportVideoDialog::update_progress (framecnt_t c, framecnt_t a)
 	if (a == 0 || c > a) {
 		pbar.set_pulse_step(.1);
 		pbar.pulse();
-		return;
+	} else {
+		double progress = (double)c / (double) a;
+		progress = progress / ((twopass ? 2.0 : 1.0) + (normalize ? 2.0 : 1.0));
+		if (normalize && twopass) progress += (firstpass ? .5 : .75);
+		else if (normalize) progress += 2.0/3.0;
+		else if (twopass) progress += (firstpass ? 1.0/3.0 : 2.0/3.0);
+		else progress += .5;
+
+		pbar.set_fraction (progress);
 	}
-	pbar.set_fraction ((double)c / (double) a);
+}
+
+
+gint
+ExportVideoDialog::audio_progress_display ()
+{
+	std::string status_text;
+	double progress = 0.0;
+		if (status->normalizing) {
+			pbar.set_text (_("Normalizing audio"));
+			progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
+			progress = progress / (twopass ? 4.0 : 3.0) + (twopass ? .25 : 1.0/3.0);
+		} else {
+			pbar.set_text (_("Exporting audio"));
+			progress = ((float) status->processed_frames_current_timespan) / status->total_frames_current_timespan;
+			progress = progress / ((twopass ? 2.0 : 1.0) + (normalize ? 2.0 : 1.0));
+		}
+		if (progress < previous_progress) {
+			// Work around gtk bug
+			pbar.hide();
+			pbar.show();
+		}
+		previous_progress = progress;
+		pbar.set_fraction (progress);
+	return TRUE;
 }
 
 void
@@ -361,14 +393,13 @@ ExportVideoDialog::finished ()
 	if (aborted) {
 		unlink(outfn_path_entry.get_text().c_str());
 		unlink (insnd.c_str());
-		warning << _("Video Export Failed or Was Aborted") << endmsg;
 		Gtk::Dialog::response(RESPONSE_CANCEL);
-	} else if (twopass) {
-		twopass = false;
+	} else if (twopass && firstpass) {
+		firstpass = false;
 		if (transcoder) { delete transcoder; transcoder = 0;}
 		encode_pass(2);
 	} else {
-	  if (twopass_checkbox.get_active()) {
+		if (twopass_checkbox.get_active()) {
 			std::string outfn = outfn_path_entry.get_text();
 			std::string p2log = Glib::path_get_dirname (outfn) + G_DIR_SEPARATOR + "ffmpeg2pass";
 			unlink (p2log.c_str());
@@ -392,17 +423,18 @@ ExportVideoDialog::launch_export ()
 	progress_box->show();
 	aborted = false;
 	twopass = twopass_checkbox.get_active();
+	firstpass = true;
+	normalize = normalize_checkbox.get_active();
 
 	/* export audio track */
 	ExportTimespanPtr tsp = _session->get_export_handler()->add_timespan();
 	boost::shared_ptr<ExportChannelConfiguration> ccp = _session->get_export_handler()->add_channel_config();
 	boost::shared_ptr<ARDOUR::ExportFilename> fnp = _session->get_export_handler()->add_filename();
 	boost::shared_ptr<AudioGrapher::BroadcastInfo> b;
-  XMLTree tree;
+	XMLTree tree;
 	std::string vtl_samplerate = audio_samplerate_combo.get_active_text();
-	std::string vtl_normalize = normalize_checkbox.get_active()?"true":"false";
+	std::string vtl_normalize = normalize ? "true" : "false";
 	tree.read_buffer(std::string(
-	/* TODO: move this into a header file */
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 "<ExportFormatSpecification name=\"VTL-WAV-16\" id=\"3094591e-ccb9-4385-a93f-c9955ffeb1f0\">"
 "  <Encoding id=\"F_WAV\" type=\"T_Sndfile\" extension=\"wav\" name=\"WAV\" has-sample-format=\"true\" channel-limit=\"256\"/>"
@@ -441,23 +473,29 @@ ExportVideoDialog::launch_export ()
 	start = end = 0;
 	if (insnd_combo.get_active_row_number() == 1) {
 		transcoder = new TranscodeFfmpeg(invid_path_entry.get_text());
-		if (transcoder->probe_ok()) {
-		  end = transcoder->get_duration() * _session->nominal_frame_rate() / transcoder->get_fps();
+		if (transcoder->probe_ok() && transcoder->get_fps() > 0) {
+			end = transcoder->get_duration() * _session->nominal_frame_rate() / transcoder->get_fps();
+		} else {
+			warning << _("Export Video: Cannot query duration of video-file, using duration from timeline instead.") << endmsg;
+			end = ARDOUR_UI::instance()->video_timeline->get_duration();
 		}
-		if (transcoder) { delete transcoder; transcoder = 0;}
+		if (transcoder) {delete transcoder; transcoder = 0;}
 
 		frameoffset_t av_offset = ARDOUR_UI::instance()->video_timeline->get_offset();
+#if 0 /* DEBUG */
+		printf("audio-range -- AV offset: %lld\n", av_offset);
+#endif
 		if (av_offset > 0) {
-			start += (av_offset / (double)_session->nominal_frame_rate());
+			start = av_offset;
 		}
-		end += (av_offset / (double)_session->nominal_frame_rate());
+		end += av_offset;
 	}
 	if (end <= 0) {
 		start = _session->current_start_frame();
 		end   = _session->current_end_frame();
 	}
 #if 0 /* DEBUG */
-	printf("export-range %ld -> %ld\n", start,  end);
+	printf("audio export-range %lld -> %lld\n", start, end);
 #endif
 
 	tsp->set_range (start, end);
@@ -487,40 +525,25 @@ ExportVideoDialog::launch_export ()
 	/* do sound export */
 	_session->get_export_handler()->add_export_config (tsp, ccp, fmp, fnp, b);
 	_session->get_export_handler()->do_export();
-  boost::shared_ptr<ARDOUR::ExportStatus> status = _session->get_export_status ();
-	//status->running = true;
+	status = _session->get_export_status ();
 
-	float previous_progress = 0.0;
-  while (status->running) {
+	audio_progress_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ExportVideoDialog::audio_progress_display), 100);
+	previous_progress = 0.0;
+	while (status->running) {
 		if (aborted) { status->abort(); }
-
-		float progress = 0.0;
-		if (status->normalizing) {
-			pbar.set_text (_("Normalizing audio"));
-			progress = ((float) status->current_normalize_cycle) / status->total_normalize_cycles;
+		if (gtk_events_pending()) {
+			gtk_main_iteration ();
 		} else {
-			pbar.set_text (_("Exporting audio"));
-			progress = ((float) status->processed_frames_current_timespan) / status->total_frames_current_timespan;
+			usleep (10000);
 		}
-		if (progress < previous_progress) {
-			// Work around gtk bug
-			pbar.hide();
-			pbar.show();
-		}
-		previous_progress = progress;
-		pbar.set_fraction (progress);
-    if (gtk_events_pending()) {
-      gtk_main_iteration ();
-    } else {
-      usleep (10000);
-    }
-  }
-  if (status->aborted()) {
+	}
+	audio_progress_connection.disconnect();
+	status->finish ();
+	if (status->aborted()) {
 		unlink (insnd.c_str());
 		Gtk::Dialog::response(RESPONSE_CANCEL);
 		return;
 	}
-	status->finish ();
 	pbar.set_text (_("Encoding Video.."));
 	encode_pass(1);
 }
@@ -531,17 +554,19 @@ ExportVideoDialog::encode_pass (int pass)
 	std::string outfn = outfn_path_entry.get_text();
 	std::string invid = invid_path_entry.get_text();
 
-	/* TODO: optimize
-	 * if (insnd_combo.get_active_row_number() == 0)
-	 * we can skip parsing the input video-file and use
-	 * new TranscodeFfmpeg("");
-	 */
 	transcoder = new TranscodeFfmpeg(invid);
 	if (!transcoder->ffexec_ok()) {
-		warning << _("No ffprobe or ffmpeg executables could be found on this system. Transcoding is not possible until you install those tools.") << endmsg;
+		/* ffmpeg binary was not found. TranscodeFfmpeg prints a warning */
 		unlink (insnd.c_str());
 		Gtk::Dialog::response(RESPONSE_CANCEL);
 		return;
+	}
+	if (!transcoder->probe_ok()) {
+		/* video input file can not be read */
+		warning << _("Export Video: Video input file cannot be read.") << endmsg;
+	  unlink (insnd.c_str());
+	  Gtk::Dialog::response(RESPONSE_CANCEL);
+	  return;
 	}
 
 	std::string preset = preset_combo.get_active_text();
@@ -564,19 +589,27 @@ ExportVideoDialog::encode_pass (int pass)
 		ffs["-b:v"]  = video_bitrate_combo.get_active_text();
 	}
 	ffs["-b:a"] = audio_bitrate_combo.get_active_text();
+
+	if (audio_codec_combo.get_active_text() == "aac" ) {
+		ffs["-strict"] = "-2";
+	}
+
 	if (video_codec_combo.get_active_text() == "x264 (hq)" ) {
 		ffs["-vcodec"] = "libx264";
-		ffs["-vpre"] = "slow";
+		ffs["-vprofile"] = "high";
 	}
-	else if (video_codec_combo.get_active_text() == "x264 (default)" ) {
+	else if (video_codec_combo.get_active_text() == "x264 (baseline)" ) {
 		ffs["-vcodec"] = "libx264";
-		ffs["-vpre"] = "medium";
+		ffs["-vpre"] = "baseline";
+	}
+	else if (video_codec_combo.get_active_text() == "vpx (webm)" ) {
+		ffs["-vcodec"] = "libvpx";
+		ffs["-g"] = "120";
+		ffs["-qmin"] = "11";
+		ffs["-qmax"] = "51";
 	}
 
 	if (optimizations_checkbox.get_active()) {
-		/* TODO: define these smartly in a header-file so that they can be
-		 * merged for printing as label and used here easyly
-		 */
 	  if (video_codec_combo.get_active_text() == "mpeg2video") {
 			ffs["-mbd"] = "rd";
 			ffs["-trellis"] = "2";
@@ -585,7 +618,7 @@ ExportVideoDialog::encode_pass (int pass)
 		}
 		else if (video_codec_combo.get_active_text() == "mpeg4") {
 			ffs["-mbd"] = "rd";
-			ffs["-flags"] = "+4mv+aic";
+			ffs["-flags"] = "+mv4+aic";
 			ffs["-trellis"] = "2";
 			ffs["-cmp"] = "2";
 			ffs["-subcmp"] = "2";
@@ -601,7 +634,10 @@ ExportVideoDialog::encode_pass (int pass)
 		}
 	}
 
-	if (bframes_checkbox.get_active()) {
+	if (bframes_checkbox.get_active() && (
+		   video_codec_combo.get_active_text() == "mpeg2video"
+		|| video_codec_combo.get_active_text() == "mpeg4"
+		)) {
 		ffs["-bf"] = "2";
 	}
 
@@ -620,7 +656,7 @@ ExportVideoDialog::encode_pass (int pass)
 		ffs["-aspect"] = aspect_combo.get_active_text();
 	}
 	if (deinterlace_checkbox.get_active()) {
-			ffs["-deinterlace"] = "-y"; // we use '-y' as dummy parameter for non key/value options
+		ffs["-deinterlace"] = "-y"; // we use '-y' as dummy parameter for non key/value options
 	}
 
 	bool map = true;
@@ -643,34 +679,52 @@ ExportVideoDialog::encode_pass (int pass)
 	}
 
 	frameoffset_t av_offset = ARDOUR_UI::instance()->video_timeline->get_offset();
+	double duration_s  = 0;
 
 	if (insnd_combo.get_active_row_number() == 0) {
 		framecnt_t duration_f = _session->current_end_frame() - _session->current_start_frame();
-		double duration_s  = (double)duration_f / (double)_session->nominal_frame_rate();
-		std::ostringstream osstream; osstream << duration_s;
-		ffs["-t"] = osstream.str();
-		if (fps_checkbox.get_active()) {
-			transcoder->set_duration(duration_s * atof(fps_combo.get_active_text()));
-		} else {
-			transcoder->set_duration(duration_s * transcoder->get_fps());
-		}
+		duration_s = (double)duration_f / (double)_session->nominal_frame_rate();
 	} else {
-		;
-		// TODO use (end-start) from above
-		// in case offset is negative, video will be shorter..
-		// CHECK; maybe this is not needed -itsoffset may take care of it
+		framecnt_t duration_f = ARDOUR_UI::instance()->video_timeline->get_duration();
+		if (av_offset < 0 ) {
+			duration_f += av_offset;
+		}
+		duration_s = (double)duration_f / (double)_session->nominal_frame_rate();
+	}
+
+	std::ostringstream osstream; osstream << duration_s;
+	ffs["-t"] = osstream.str();
+	if (fps_checkbox.get_active()) {
+		transcoder->set_duration(duration_s * atof(fps_combo.get_active_text()));
+	} else {
+		transcoder->set_duration(duration_s * transcoder->get_fps());
 	}
 
 	if (insnd_combo.get_active_row_number() == 0) {
-		framepos_t start = _session->current_start_frame();
-#if 0
-		double start_s  = ((double)start / (double)_session->nominal_frame_rate());
-		std::ostringstream osstream; osstream << start_s;
-		ffs["-ss"] = osstream.str();
+		const framepos_t start = _session->current_start_frame();
+		const framepos_t snend = _session->current_end_frame();
+		const frameoffset_t vid_duration = ARDOUR_UI::instance()->video_timeline->get_duration();
+
+#if 0 /* DEBUG */
+		printf("AV offset: %lld Vid-len: %lld Vid-end: %lld || start:%lld || end:%lld\n",
+				av_offset, vid_duration, av_offset+vid_duration, start, snend); // XXX
 #endif
-		av_offset -= start;
+
+		if (av_offset > start && av_offset + vid_duration < snend) {
+			transcoder->set_leadinout((av_offset - start) / (double)_session->nominal_frame_rate(),
+				(snend - (av_offset + vid_duration)) / (double)_session->nominal_frame_rate());
+		} else if (av_offset > start) {
+			transcoder->set_leadinout((av_offset - start) / (double)_session->nominal_frame_rate(), 0);
+		} else if (av_offset + vid_duration < snend) {
+			transcoder->set_leadinout(0, (snend - (av_offset + vid_duration)) / (double)_session->nominal_frame_rate());
+			transcoder->set_avoffset((av_offset - start) / (double)_session->nominal_frame_rate());
+		} else {
+			transcoder->set_avoffset((av_offset - start) / (double)_session->nominal_frame_rate());
+		}
+	} else if (av_offset < 0) {
+		/* from 00:00:00:00 to video-end */
+		transcoder->set_avoffset(av_offset / (double)_session->nominal_frame_rate());
 	}
-	transcoder->set_avoffset(av_offset / (double)_session->nominal_frame_rate());
 
 	FFSettings meta = transcoder->default_meta_data();
 	if (meta_checkbox.get_active()) {
@@ -687,11 +741,11 @@ ExportVideoDialog::encode_pass (int pass)
 			std::ostringstream osstream; osstream << session_data->disc_number();
 			meta["disc"] = osstream.str();
 		}
-		if (!session_data->title().empty())  {meta["title"] = session_data->title();}
-		if (!session_data->artist().empty()) {meta["author"] = session_data->artist();}
+		if (!session_data->title().empty())     {meta["title"] = session_data->title();}
+		if (!session_data->artist().empty())    {meta["author"] = session_data->artist();}
 		if (!session_data->album_artist().empty()) {meta["album_artist"] = session_data->album_artist();}
-		if (!session_data->album().empty())  {meta["album"] = session_data->album();}
-		if (!session_data->genre().empty())  {meta["genre"] = session_data->genre();}
+		if (!session_data->album().empty())     {meta["album"] = session_data->album();}
+		if (!session_data->genre().empty())     {meta["genre"] = session_data->genre();}
 		if (!session_data->composer().empty())  {meta["composer"] = session_data->composer();}
 		if (!session_data->comment().empty())   {meta["comment"] = session_data->comment();}
 		if (!session_data->copyright().empty()) {meta["copyright"] = session_data->copyright();}
@@ -717,7 +771,7 @@ void
 ExportVideoDialog::change_file_extension (std::string ext)
 {
 	outfn_path_entry.set_text (
-	  strip_file_extension(outfn_path_entry.get_text()) + ext
+		strip_file_extension(outfn_path_entry.get_text()) + ext
 	);
 }
 
@@ -745,17 +799,16 @@ ExportVideoDialog::video_codec_combo_changed ()
 {
 	if ((  video_codec_combo.get_active_text() == "mpeg4"
 	     ||video_codec_combo.get_active_text() == "mpeg2video"
-	     ||video_codec_combo.get_active_text() == "flv"
 			) && !(
 	       preset_combo.get_active_text() == "dvd-PAL"
 	     ||preset_combo.get_active_text() == "dvd-NTSC"
 	   )) {
 		bframes_checkbox.set_sensitive(true);
 		optimizations_checkbox.set_sensitive(true);
-	  if (video_codec_combo.get_active_text() == "mpeg2video") {
+		if (video_codec_combo.get_active_text() == "mpeg2video") {
 			optimizations_label.set_text("-mbd rd -trellis 2 -cmp 2 -subcmp 2"); // mpeg2
 		} else if (video_codec_combo.get_active_text() == "mpeg4") {
-			optimizations_label.set_text("-mbd rd -flags +4mv+aic -trellis 2 -cmp 2 -subcmp 2 -g 300"); // mpeg4
+			optimizations_label.set_text("-mbd rd -flags +mv4+aic -trellis 2 -cmp 2 -subcmp 2 -g 300"); // mpeg4
 		} else {
 			optimizations_label.set_text("-mbd 2 -cmp 2 -subcmp 2 -trellis 2 -flags +aic+mv0+mv4 -g 160"); // flv
 		}
@@ -822,8 +875,8 @@ ExportVideoDialog::preset_combo_changed ()
 		video_bitrate_combo.set_active(3);
 		audio_samplerate_combo.set_active(2);
 
-	  scale_checkbox.set_active(false);
-	  scale_checkbox.set_sensitive(false);
+		scale_checkbox.set_active(false);
+		scale_checkbox.set_sensitive(false);
 	}
 	else if (p == "mpeg4") {
 		change_file_extension(".mp4");
@@ -858,15 +911,15 @@ ExportVideoDialog::preset_combo_changed ()
 	if (p == "dvd-PAL" || p == "dvd-NTSC") {
 		for (it = c.begin(); it != c.end(); ++it) {
 			int row = it->get_top_attach();
-			if (row ==1 || row ==2 || row==4 || row==5 || row == 8) {
-			  it->get_widget()->hide();
+			if (row == 2 || row == 3 || row== 5 || row== 6 || row == 9) {
+				it->get_widget()->hide();
 			}
 		}
 	} else {
 		for (it = c.begin(); it != c.end(); ++it) {
 			int row = it->get_top_attach();
-			if (row ==1 || row ==2 || row==4 || row==5 || row == 8) {
-			  it->get_widget()->show();
+			if (row == 2 || row == 3 || row== 5 || row== 6 || row == 9) {
+				it->get_widget()->show();
 			}
 		}
 	}

@@ -36,7 +36,8 @@ typedef enum {
     GDither16bit = 16,
     GDither32bit = 32,
     GDitherFloat = 25,
-    GDitherDouble = 54
+    GDitherDouble = 54,
+    GDitherPerformanceTest = 23
 } GDitherSize;
 
 typedef void *GDither;

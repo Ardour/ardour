@@ -214,8 +214,7 @@ map_existing_mono_sources (const vector<string>& new_paths, Session& /*sess*/,
 }
 
 static bool
-create_mono_sources_for_writing (const string& origin,
-                                 const vector<string>& new_paths,
+create_mono_sources_for_writing (const vector<string>& new_paths,
                                  Session& sess, uint samplerate,
                                  vector<boost::shared_ptr<Source> >& newfiles,
                                  framepos_t timeline_position)
@@ -229,7 +228,6 @@ create_mono_sources_for_writing (const string& origin,
 
 			source = SourceFactory::createWritable (type, sess,
 			                                        i->c_str(),
-			                                        origin,
 			                                        false, // destructive
 			                                        samplerate);
 		}
@@ -527,7 +525,7 @@ Session::import_files (ImportStatus& status)
 			fatal << "THIS IS NOT IMPLEMENTED YET, IT SHOULD NEVER GET CALLED!!! DYING!" << endmsg;
 			status.cancel = !map_existing_mono_sources (new_paths, *this, frame_rate(), newfiles, this);
 		} else {
-			status.cancel = !create_mono_sources_for_writing (*p, new_paths, *this, frame_rate(), newfiles, natural_position);
+			status.cancel = !create_mono_sources_for_writing (new_paths, *this, frame_rate(), newfiles, natural_position);
 		}
 
 		// copy on cancel/failure so that any files that were created will be removed below

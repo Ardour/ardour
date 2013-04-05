@@ -29,6 +29,7 @@ depcomp
 # misc editor/tools
 *~
 *.swp
+*.kdev4
 .gdb_history
 core
 cscope.files
@@ -37,6 +38,7 @@ tags
 
 # generated folders doc, build, packaging
 .waf-*
+.waf3-*
 .lock-waf*
 /build/
 /doc/html/
@@ -61,8 +63,8 @@ tags
 # /libs/ardour/
 /libs/ardour/version.cc
 /libs/ardour/ardour/version.h
-/libs/ardour/svn_revision.cc
-libs/ardour/config_text.cc
+/libs/ardour/revision.cc
+/libs/ardour/config_text.cc
 
 # /libs/gtkmm2ext/
 /libs/gtkmm2ext/*.pot

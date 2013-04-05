@@ -17,16 +17,13 @@
 
 */
 
-#ifndef __stupid_basename_h__
-#define __stupid_basename_h__
+#ifndef __libpbd_basename_h__
+#define __libpbd_basename_h__
 
 #include <glibmm/ustring.h>
 
-namespace PBD
-{
-	
-Glib::ustring basename_nosuffix (Glib::ustring);
-
+namespace PBD {
+	Glib::ustring basename_nosuffix (Glib::ustring);
 } 
 
-#endif  // __stupid_basename_h__
+#endif  /* __libpbd_basename_h__ */

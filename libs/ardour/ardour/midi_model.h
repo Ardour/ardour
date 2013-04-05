@@ -114,6 +114,8 @@ public:
 		struct NoteChange {
 			NoteDiffCommand::Property property;
 			NotePtr note;
+		        uint32_t note_id; 
+		    
 			union {
 				uint8_t  old_value;
 				TimeType old_time;
@@ -161,6 +163,7 @@ public:
 	private:
 		struct Change {
 			boost::shared_ptr<Evoral::Event<TimeType> > sysex;
+   		        gint sysex_id;
 			SysExDiffCommand::Property property;
 			TimeType old_time;
 			TimeType new_time;
@@ -204,6 +207,7 @@ public:
 		struct Change {
 			PatchChangePtr patch;
 			Property       property;
+		        gint           patch_id;
 			union {
 				TimeType   old_time;
 				uint8_t    old_channel;

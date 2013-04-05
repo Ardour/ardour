@@ -33,8 +33,7 @@
 
 enum VtlImportOption {
  VTL_IMPORT_NONE = 0,
- VTL_IMPORT_COPY = 1,
- VTL_IMPORT_TRANSCODE = 2,
+ VTL_IMPORT_TRANSCODE = 1,
 };
 
 class AddVideoDialog : public ArdourDialog
@@ -52,6 +51,7 @@ class AddVideoDialog : public ArdourDialog
 	void on_show ();
 	bool page_switch();
 	void set_action_ok(bool yn);
+	void clear_preview_image();
 
 	/* preview pane related */
 	void request_preview(std::string vpath);
@@ -61,7 +61,8 @@ class AddVideoDialog : public ArdourDialog
 	Gtk::HScale seek_slider;
 	Glib::RefPtr<Gdk::Pixbuf> imgbuf;
 	std::string preview_path;
-	Gtk::Label pi_duration;
+	Gtk::Label pi_tcin;
+	Gtk::Label pi_tcout;
 	Gtk::Label pi_aspect;
 	Gtk::Label pi_fps;
 
@@ -74,7 +75,6 @@ class AddVideoDialog : public ArdourDialog
 
 	Gtk::CheckButton  xjadeo_checkbox;
 	Gtk::CheckButton  set_session_fps_checkbox;
-	Gtk::ComboBoxText import_combo;
 	Gtk::Notebook notebook;
 	Gtk::Button *ok_button;
 

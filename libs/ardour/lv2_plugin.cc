@@ -37,13 +37,14 @@
 
 #include "libardour-config.h"
 
-#include "ardour/types.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
+#include "ardour/types.h"
+#include "ardour/utils.h"
 #include "ardour/worker.h"
 
 #include "i18n.h"
@@ -961,38 +962,38 @@ LV2Plugin::find_presets()
 	lilv_node_free(lv2_appliesTo);
 }
 
+static void
+set_port_value(const char* port_symbol,
+               void*       user_data,
+               const void* value,
+               uint32_t    /*size*/,
+               uint32_t    type)
+{
+	LV2Plugin* self = (LV2Plugin*)user_data;
+	if (type != 0 && type != self->_uri_map.uri_to_id(LV2_ATOM__Float)) {
+		return;  // TODO: Support non-float ports
+	}
+
+	const uint32_t port_index = self->port_index(port_symbol);
+	if (port_index != (uint32_t)-1) {
+		self->set_parameter(port_index, *(const float*)value);
+	}
+}
+
 bool
 LV2Plugin::load_preset(PresetRecord r)
 {
-	std::map<std::string,uint32_t>::iterator it;
+	LilvWorld* world = _world.world;
+	LilvNode*  pset  = lilv_new_uri(world, r.uri.c_str());
+	LilvState* state = lilv_state_new_from_world(world, _uri_map.urid_map(), pset);
 
-	LilvNode* lv2_port   = lilv_new_uri(_world.world, LILV_NS_LV2 "port");
-	LilvNode* lv2_symbol = lilv_new_uri(_world.world, LILV_NS_LV2 "symbol");
-	LilvNode* preset     = lilv_new_uri(_world.world, r.uri.c_str());
-	LilvNode* pset_value = lilv_new_uri(_world.world, LV2_PRESETS__value);
-
-	LilvNodes* ports = lilv_world_find_nodes(_world.world, preset, lv2_port, NULL);
-	LILV_FOREACH(nodes, i, ports) {
-		const LilvNode* port   = lilv_nodes_get(ports, i);
-		const LilvNode* symbol = get_value(_world.world, port, lv2_symbol);
-		const LilvNode* value  = get_value(_world.world, port, pset_value);
-		if (value && lilv_node_is_float(value)) {
-			it = _port_indices.find(lilv_node_as_string(symbol));
-			if (it != _port_indices.end()) {
-				set_parameter(it->second,lilv_node_as_float(value));
-			}
-		}
+	if (state) {
+		lilv_state_restore(state, _impl->instance, set_port_value, this, 0, NULL);
+		lilv_state_free(state);
 	}
-	lilv_nodes_free(ports);
 
-	lilv_node_free(pset_value);
-	lilv_node_free(preset);
-	lilv_node_free(lv2_symbol);
-	lilv_node_free(lv2_port);
-
-	Plugin::load_preset(r);
-
-	return true;
+	lilv_node_free(pset);
+	return state;
 }
 
 const void*
@@ -1023,42 +1024,40 @@ ARDOUR::lv2plugin_get_port_value(const char* port_symbol,
 std::string
 LV2Plugin::do_save_preset(string name)
 {
-	string pset_uri = uri();
-	pset_uri += "#";
-	pset_uri += name;
-
-	string save_dir = Glib::build_filename(
+	const string base_name = legalize_for_uri(name);
+	const string file_name = base_name + ".ttl";
+	const string bundle    = Glib::build_filename(
 		Glib::get_home_dir(),
-		Glib::build_filename(".lv2", "presets")
-	);
+		Glib::build_filename(".lv2", base_name + ".lv2"));
 
 	LilvState* state = lilv_state_new_from_instance(
 		_impl->plugin,
 		_impl->instance,
 		_uri_map.urid_map(),
-		scratch_dir().c_str(),                  // file_dir
-		NULL,                                   // copy_dir
-		NULL,                                   // link_dir
-		save_dir.c_str(),                       // save_dir
-		lv2plugin_get_port_value,               // get_value
-		(void*) this,                           // user_data
-		LV2_STATE_IS_POD|LV2_STATE_IS_PORTABLE,	// flags
-		_features                               // features
+		scratch_dir().c_str(),                   // file_dir
+		bundle.c_str(),                          // copy_dir
+		bundle.c_str(),                          // link_dir
+		bundle.c_str(),                          // save_dir
+		lv2plugin_get_port_value,                // get_value
+		(void*)this,                             // user_data
+		LV2_STATE_IS_POD|LV2_STATE_IS_PORTABLE,  // flags
+		_features                                // features
 	);
 
 	lilv_state_set_label(state, name.c_str());
 	lilv_state_save(
 		_world.world,           // world
-		_uri_map.urid_map(),	// map
-		_uri_map.urid_unmap(),	// unmap
+		_uri_map.urid_map(),    // map
+		_uri_map.urid_unmap(),  // unmap
 		state,                  // state
-		pset_uri.c_str(),       // uri
-		save_dir.c_str(),       // dir
-		(name + ".ttl").c_str()	// filename
+		NULL,                   // uri (NULL = use file URI)
+		bundle.c_str(),         // dir
+		file_name.c_str()       // filename
 	);
 
 	lilv_state_free(state);
-	return pset_uri;
+
+	return Glib::filename_to_uri(Glib::build_filename(bundle, file_name));
 }
 
 void
@@ -1571,7 +1570,6 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					: m;
 
 				// Now merge MIDI and any transport events into the buffer
-				LV2_Evbuf_Iterator i    = lv2_evbuf_end(_ev_buffers[port_index]);
 				const uint32_t     type = LV2Plugin::urids.midi_MidiEvent;
 				const framepos_t   tend = _session.transport_frame() + nframes;
 				++metric_i;

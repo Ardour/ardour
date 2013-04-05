@@ -454,7 +454,7 @@ SMFSource::safe_midi_file_extension (const string& file)
 	const int nmatches = 2;
 	regmatch_t matches[nmatches];
 	
-	if (compile && regcomp (&compiled_pattern, "[mM][iI][dD]$", REG_EXTENDED)) {
+	if (compile && regcomp (&compiled_pattern, "[mM][iI][dD][iI]?$", REG_EXTENDED)) {
 		return false;
 	} else {
 		compile = false;

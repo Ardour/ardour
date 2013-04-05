@@ -21,6 +21,7 @@
 #define __ardour_audio_source_h__
 
 #include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
 #include <time.h>
@@ -116,8 +117,8 @@ class AudioSource : virtual public Source,
 	   thread, or a lock around calls that use them.
 	*/
 
-	static std::vector<boost::shared_ptr<Sample> > _mixdown_buffers;
-	static std::vector<boost::shared_ptr<gain_t> > _gain_buffers;
+        static std::vector<boost::shared_array<Sample> > _mixdown_buffers;
+	static std::vector<boost::shared_array<gain_t> > _gain_buffers;
         static Glib::Threads::Mutex    _level_buffer_lock;
 
 	static void ensure_buffers_for_level (uint32_t, framecnt_t);
@@ -127,7 +128,7 @@ class AudioSource : virtual public Source,
 	std::string         peakpath;
 	std::string        _captured_for;
 
-	int initialize_peakfile (bool newfile, std::string path);
+	int initialize_peakfile (std::string path);
 	int build_peaks_from_scratch ();
 	int compute_and_write_peaks (Sample* buf, framecnt_t first_frame, framecnt_t cnt,
 	bool force, bool intermediate_peaks_ready_signal);

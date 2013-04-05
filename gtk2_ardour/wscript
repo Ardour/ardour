@@ -161,6 +161,8 @@ gtk2_ardour_sources = [
         'new_plugin_preset_dialog.cc',
         'normalize_dialog.cc',
         'note_player.cc',
+        'nsm.cc',
+        'nsmclient.cc',
         'option_editor.cc',
         'opts.cc',
         'panner2d.cc',
@@ -398,11 +400,11 @@ def build(bld):
 
     obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG ALSA CURL DL'
     obj.uselib       += ' GTKMM GNOMECANVASMM GNOMECANVAS '
-    obj.uselib       += ' AUDIOUNITS OSX GTKOSX '
+    obj.uselib       += ' AUDIOUNITS OSX GTKOSX LO '
     obj.use          = [ 'libpbd',
                          'libmidipp',
                          'libtaglib',
-                         'libardour',
+                         'ardour',
                          'libardour_cp',
                          'libgtkmm2ext',
                          'libtaglib' ]
@@ -426,11 +428,9 @@ def build(bld):
             'video_timeline.cc',
             'system_exec.cc',
             'video_monitor.cc',
-            'open_video_monitor_dialog.cc',
             'transcode_ffmpeg.cc',
             'transcode_video_dialog.cc',
             'video_server_dialog.cc',
-            'video_copy_dialog.cc',
             'utils_videotl.cc',
             'export_video_dialog.cc',
             'export_video_infobox.cc'
@@ -665,6 +665,7 @@ def build(bld):
     obj.argv = menus_argv
     obj.stdin = 'ardour.menus.in'
     obj.stdout = 'ardour.menus'
+    obj.dep_vars = ['GTKOSX', 'VIDEOTIMELINE']
     bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
                       'ardour.menus')
 

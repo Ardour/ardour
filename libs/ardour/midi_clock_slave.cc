@@ -43,7 +43,7 @@ using namespace PBD;
 
 MIDIClock_Slave::MIDIClock_Slave (Session& s, MIDI::Port& p, int ppqn)
 	: ppqn (ppqn)
-	, bandwidth (1.0 / 60.0) // 1 BpM = 1 / 60 Hz
+	, bandwidth (10.0 / 60.0) // 1 BpM = 1 / 60 Hz
 {
 	session = (ISlaveSessionProxy *) new SlaveSessionProxy(s);
 	rebind (p);
@@ -53,7 +53,7 @@ MIDIClock_Slave::MIDIClock_Slave (Session& s, MIDI::Port& p, int ppqn)
 MIDIClock_Slave::MIDIClock_Slave (ISlaveSessionProxy* session_proxy, int ppqn)
 	: session(session_proxy)
 	, ppqn (ppqn)
-	, bandwidth (1.0 / 60.0) // 1 BpM = 1 / 60 Hz
+	, bandwidth (10.0 / 60.0) // 1 BpM = 1 / 60 Hz
 {
 	reset ();
 }
@@ -149,11 +149,12 @@ MIDIClock_Slave::update_midi_clock (Parser& /*parser*/, framepos_t timestamp)
 		calculate_filter_coefficients();
 
 		// calculate loop error
-		// we use session->audible_frame() instead of t1 here
+		// we use session->transport_frame() instead of t1 here
 		// because t1 is used to calculate the transport speed,
 		// so the loop will compensate for accumulating rounding errors
-		error = (double(should_be_position) - double(session->audible_frame()));
+		error = (double(should_be_position) - double(session->transport_frame()));
 		e = error / double(session->frame_rate());
+		current_delta = error;
 
 		// update DLL
 		t0 = t1;
@@ -328,8 +329,8 @@ MIDIClock_Slave::speed_and_position (double& speed, framepos_t& pos)
 	// calculate speed
 	speed = ((t1 - t0) * session->frame_rate()) / one_ppqn_in_frames;
 
-	// provide a 3% deadzone to lock the speed
-	if (fabs(speed - 1.0) <= 0.03)
+	// provide a 0.1% deadzone to lock the speed
+	if (fabs(speed - 1.0) <= 0.001)
 	        speed = 1.0;
 
 	// calculate position
@@ -344,7 +345,6 @@ MIDIClock_Slave::speed_and_position (double& speed, framepos_t& pos)
 	}
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("speed_and_position: %1 & %2 <-> %3 (transport)\n", speed, pos, session->transport_frame()));
-	current_delta = pos - session->transport_frame();
 
 	return true;
 }

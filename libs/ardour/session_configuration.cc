@@ -17,8 +17,9 @@
 
 */
 
+#include "pbd/pathexpand.h"
+
 #include "ardour/types.h"
-#include "ardour/utils.h"
 #include "ardour/session_configuration.h"
 #include "i18n.h"
 

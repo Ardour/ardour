@@ -19,6 +19,7 @@
 */
 #ifdef WITH_VIDEOTIMELINE
 
+#include <algorithm>
 #include <sigc++/bind.h>
 #include "ardour/tempo.h"
 
@@ -46,7 +47,6 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Timecode;
 
-
 VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Group *vbg, int initial_height)
 	: editor (ed)
 		, videotl_bar_group(vbg)
@@ -59,10 +59,9 @@ VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Group *vbg, int in
 	auto_set_session_fps = false;
 	video_offset_lock = false;
 	video_aspect_ratio = 4.0/3.0;
-	open_video_monitor_dialog = 0;
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&VideoTimeLine::parameter_changed, this, _1), gui_context());
-	video_server_url = Config->get_video_server_url();
-	server_docroot   = Config->get_video_server_docroot();
+	video_server_url = video_get_server_url(Config);
+	server_docroot   = video_get_docroot(Config);
 	video_filename = "";
 	local_file = true;
 	video_file_fps = 25.0;
@@ -153,12 +152,16 @@ VideoTimeLine::save_session ()
 void
 VideoTimeLine::close_session ()
 {
-	close_video_monitor();
+	if (video_duration == 0) {
+		return;
+	}
 	save_session();
+	close_video_monitor();
 
 	remove_frames();
 	video_filename = "";
-	video_duration = 0L;
+	video_duration = 0;
+	GuiUpdate("set-xjadeo-sensitive-off");
 }
 
 /** load settings from session */
@@ -171,6 +174,11 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 	LocaleGuard lg (X_("POSIX"));
 
 	XMLNode* node = _session->extra_xml (X_("Videotimeline"));
+
+	if (!node || !node->property (X_("Filename"))) {
+		return;
+	}
+
 	if (node) {
 		ARDOUR_UI::instance()->start_video_server((Gtk::Window*)0, false);
 
@@ -210,8 +218,8 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 	node = _session->extra_xml (X_("Videomonitor"));
 	if (node) {
 		const XMLProperty* prop = node->property (X_("active"));
-		if (prop->value() == "yes" && found_xjadeo() && !video_filename.empty() && local_file) {
-			open_video_monitor(false);
+		if (prop && prop->value() == "yes" && found_xjadeo() && !video_filename.empty() && local_file) {
+			open_video_monitor();
 		}
 	}
 
@@ -456,6 +464,7 @@ VideoTimeLine::translated_filename ()
 bool
 VideoTimeLine::video_file_info (std::string filename, bool local)
 {
+
 	local_file = local;
 	if (filename.at(0) == G_DIR_SEPARATOR || !local_file) {
 		video_filename = filename;
@@ -517,11 +526,23 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 	if (found_xjadeo() && local_file) {
 		GuiUpdate("set-xjadeo-sensitive-on");
 		if (vmonitor && vmonitor->is_started()) {
+#if 1
+			/* xjadeo <= 0.6.4 has a bug where changing the video-file may segfauls
+			 * if the geometry changes to a different line-size alignment
+			 */
+			reopen_vmonitor = true;
+			vmonitor->quit();
+#else
 			vmonitor->set_fps(video_file_fps);
 			vmonitor->open(video_filename);
+#endif
 		}
 	} else if (!local_file) {
+#if 1 /* temp debug/devel message */
+		// TODO - call xjremote remotely.
+		printf("the given video file can not be accessed on localhost, video monitoring is not currently supported for this case\n");
 		GuiUpdate("set-xjadeo-sensitive-off");
+#endif
 	}
 	VtlUpdate();
 	return true;
@@ -560,6 +581,30 @@ VideoTimeLine::gui_update(std::string const & t) {
 		editor->toggle_xjadeo_proc(0);
 		//close_video_monitor();
 		editor->set_xjadeo_sensitive(false);
+	} else if (t == "xjadeo-window-ontop-on") {
+		editor->toggle_xjadeo_viewoption(1, 1);
+	} else if (t == "xjadeo-window-ontop-off") {
+		editor->toggle_xjadeo_viewoption(1, 0);
+	} else if (t == "xjadeo-window-osd-timecode-on") {
+		editor->toggle_xjadeo_viewoption(2, 1);
+	} else if (t == "xjadeo-window-osd-timecode-off") {
+		editor->toggle_xjadeo_viewoption(2, 0);
+	} else if (t == "xjadeo-window-osd-frame-on") {
+		editor->toggle_xjadeo_viewoption(3, 1);
+	} else if (t == "xjadeo-window-osd-frame-off") {
+		editor->toggle_xjadeo_viewoption(3, 0);
+	} else if (t == "xjadeo-window-osd-box-on") {
+		editor->toggle_xjadeo_viewoption(4, 1);
+	} else if (t == "xjadeo-window-osd-box-off") {
+		editor->toggle_xjadeo_viewoption(4, 0);
+	} else if (t == "xjadeo-window-fullscreen-on") {
+		editor->toggle_xjadeo_viewoption(5, 1);
+	} else if (t == "xjadeo-window-fullscreen-off") {
+		editor->toggle_xjadeo_viewoption(5, 0);
+	} else if (t == "xjadeo-window-letterbox-on") {
+		editor->toggle_xjadeo_viewoption(6, 1);
+	} else if (t == "xjadeo-window-letterbox-off") {
+		editor->toggle_xjadeo_viewoption(6, 0);
 	}
 }
 
@@ -606,9 +651,12 @@ void
 VideoTimeLine::parameter_changed (std::string const & p)
 {
 	if (p == "video-server-url") {
-		set_video_server_url (Config->get_video_server_url ());
+		set_video_server_url (video_get_server_url(Config));
 	} else if (p == "video-server-docroot") {
-		set_video_server_docroot (Config->get_video_server_docroot ());
+		set_video_server_docroot (video_get_docroot(Config));
+	} else if (p == "video-advanced-setup") {
+		set_video_server_url (video_get_server_url(Config));
+		set_video_server_docroot (video_get_docroot(Config));
 	}
 	if (p == "use-video-file-fps" || p == "videotimeline-pullup" ) { /* session->config parameter */
 		VtlUpdate();
@@ -650,16 +698,21 @@ VideoTimeLine::find_xjadeo () {
 	}
 	else  {
 		_xjadeo_bin = X_("");
+		warning << _("Video-monitor 'xjadeo' was not found. Please install http://xjadeo.sf.net/ "
+				"(a custom path to xjadeo can be specified by setting the XJREMOTE environment variable. "
+				"It should point to an application compatible with xjadeo's remote-control interface 'xjremote').")
+			<< endmsg;
 	}
 }
 
 void
-VideoTimeLine::open_video_monitor(bool interactive) {
+VideoTimeLine::open_video_monitor() {
 	if (!found_xjadeo()) return;
 	if (!vmonitor) {
 		vmonitor = new VideoMonitor(editor, _xjadeo_bin);
 		vmonitor->set_session(_session);
 		vmonitor->Terminated.connect (sigc::mem_fun (*this, &VideoTimeLine::terminated_video_monitor));
+		vmonitor->UiState.connect (*this, invalidator (*this), boost::bind (&VideoTimeLine::gui_update, this, _1), gui_context());
 	} else if (vmonitor->is_started()) {
 		return;
 	}
@@ -676,41 +729,7 @@ VideoTimeLine::open_video_monitor(bool interactive) {
 		}
 	}
 
-	if (interactive && Config->get_video_monitor_setup_dialog()) {
-		if (open_video_monitor_dialog == 0) {
-			open_video_monitor_dialog = new OpenVideoMonitorDialog(_session);
-		}
-		if (open_video_monitor_dialog->is_visible()) {
-			return;
-		}
-		open_video_monitor_dialog->setup_settings_mask(xj_settings_mask);
-		open_video_monitor_dialog->set_filename(video_filename);
-		Gtk::ResponseType r = (Gtk::ResponseType) open_video_monitor_dialog->run ();
-		open_video_monitor_dialog->hide();
-		if (r != Gtk::RESPONSE_ACCEPT) {
-			GuiUpdate("set-xjadeo-active-off");
-			return;
-		}
-
-		if (_session && (xj_settings_mask != open_video_monitor_dialog->xj_settings_mask()) ) {
-			/* save mask to Session */
-			XMLNode* node = new XMLNode(X_("XJRestoreSettings"));
-			node->add_property (X_("mask"), (const long) open_video_monitor_dialog->xj_settings_mask() );
-			_session->add_extra_xml (*node);
-			_session->set_dirty ();
-		}
-
-		if (open_video_monitor_dialog->show_again()) {
-			Config->set_video_monitor_setup_dialog(false);
-		}
-#if 1
-		vmonitor->set_debug(open_video_monitor_dialog->enable_debug());
-#endif
-		vmonitor->restore_settings_mask(open_video_monitor_dialog->xj_settings_mask());
-	} else {
-		vmonitor->restore_settings_mask(xj_settings_mask);
-	}
-
+	vmonitor->restore_settings_mask(xj_settings_mask);
 
 	if (!vmonitor->start()) {
 		warning << "launching xjadeo failed.." << endmsg;
@@ -730,6 +749,15 @@ VideoTimeLine::close_video_monitor() {
 }
 
 void
+VideoTimeLine::control_video_monitor(int what, int param) {
+	if (!vmonitor || !vmonitor->is_started()) {
+		return;
+	}
+	vmonitor->send_cmd(what, param);
+}
+
+
+void
 VideoTimeLine::terminated_video_monitor () {
 	if (vmonitor) {
 		delete vmonitor;
@@ -738,7 +766,7 @@ VideoTimeLine::terminated_video_monitor () {
 	vmonitor=0;
   if (reopen_vmonitor) {
 		reopen_vmonitor=false;
-		open_video_monitor(false);
+		open_video_monitor();
 	}
 }
 

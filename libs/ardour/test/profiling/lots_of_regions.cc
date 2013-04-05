@@ -10,10 +10,12 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+static const char* localedir = LOCALEDIR;
+
 int
 main (int argc, char* argv[])
 {
-	ARDOUR::init (false, true);
+	ARDOUR::init (false, true, localedir);
 	Session* session = load_session ("../libs/ardour/test/profiling/sessions/1region", "1region");
 
 	assert (session->get_routes()->size() == 2);

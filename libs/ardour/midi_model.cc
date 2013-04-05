@@ -289,6 +289,15 @@ MidiModel::NoteDiffCommand::operator() ()
 
 		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
 			Property prop = i->property;
+
+			if (!i->note) {
+				/* note found during deserialization, so try
+				   again now that the model state is different.
+				*/
+				i->note = _model->find_note (i->note_id);
+				assert (i->note);
+			}
+
 			switch (prop) {
 			case NoteNumber:
 				if (temporary_removals.find (i->note) == temporary_removals.end()) {
@@ -341,7 +350,7 @@ MidiModel::NoteDiffCommand::operator() ()
 				_removed_notes.push_back (*i);
 			}
 		}
-
+		
 		if (!side_effect_removals.empty()) {
 			cerr << "SER: \n";
 			for (set<NotePtr>::iterator i = side_effect_removals.begin(); i != side_effect_removals.end(); ++i) {
@@ -373,15 +382,25 @@ MidiModel::NoteDiffCommand::undo ()
 		/* notes we modify in a way that requires remove-then-add to maintain ordering */
 		set<NotePtr> temporary_removals;
 
+
+		/* lazily discover any affected notes that were not discovered when
+		 * loading the history because of deletions, etc.
+		 */
+
+		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
+			if (!i->note) {
+				i->note = _model->find_note (i->note_id);
+				assert (i->note);
+			}
+		}
+				
 		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
 			Property prop = i->property;
-			switch (prop) {
 
+			switch (prop) {
 			case NoteNumber:
-				if (
-					temporary_removals.find (i->note) == temporary_removals.end() &&
-					find (_removed_notes.begin(), _removed_notes.end(), i->note) == _removed_notes.end()
-					) {
+				if (temporary_removals.find (i->note) == temporary_removals.end() &&
+				    find (_removed_notes.begin(), _removed_notes.end(), i->note) == _removed_notes.end()) {
 
 					/* We only need to mark this note for re-add if (a) we haven't
 					   already marked it and (b) it isn't on the _removed_notes
@@ -396,10 +415,8 @@ MidiModel::NoteDiffCommand::undo ()
 				break;
 
 			case StartTime:
-				if (
-					temporary_removals.find (i->note) == temporary_removals.end() &&
-					find (_removed_notes.begin(), _removed_notes.end(), i->note) == _removed_notes.end()
-					) {
+				if (temporary_removals.find (i->note) == temporary_removals.end() &&
+				    find (_removed_notes.begin(), _removed_notes.end(), i->note) == _removed_notes.end()) {
 
 					/* See above ... */
 
@@ -410,10 +427,8 @@ MidiModel::NoteDiffCommand::undo ()
 				break;
 
 			case Channel:
-				if (
-					temporary_removals.find (i->note) == temporary_removals.end() &&
-					find (_removed_notes.begin(), _removed_notes.end(), i->note) == _removed_notes.end()
-					) {
+				if (temporary_removals.find (i->note) == temporary_removals.end() &&
+				    find (_removed_notes.begin(), _removed_notes.end(), i->note) == _removed_notes.end()) {
 
 					/* See above ... */
 
@@ -453,7 +468,7 @@ MidiModel::NoteDiffCommand::undo ()
 			_model->add_note_unlocked (*i);
 		}
 	}
-
+	
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
 
@@ -651,15 +666,13 @@ MidiModel::NoteDiffCommand::unmarshal_change (XMLNode *xml_change)
 	}
 
 	/* we must point at the instance of the note that is actually in the model.
-	   so go look for it ...
+	   so go look for it ... it may not be there (it could have been
+	   deleted in a later operation, so store the note id so that we can
+	   look it up again later).
 	*/
 
 	change.note = _model->find_note (note_id);
-
-	if (!change.note) {
-		warning << "MIDI note #" << note_id << " not found in model - programmers should investigate this" << endmsg;
-		return change;
-	}
+	change.note_id = note_id;
 
 	return change;
 }
@@ -790,6 +803,15 @@ MidiModel::SysExDiffCommand::operator() ()
 			_model->remove_sysex_unlocked (*i);
 		}
 
+		/* find any sysex events that were missing when unmarshalling */
+
+		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
+			if (!i->sysex) {
+				i->sysex = _model->find_sysex (i->sysex_id);
+				assert (i->sysex);
+			}
+		}
+
 		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
 			switch (i->property) {
 			case Time:
@@ -809,6 +831,15 @@ MidiModel::SysExDiffCommand::undo ()
 
 		for (list<SysExPtr>::iterator i = _removed.begin(); i != _removed.end(); ++i) {
 			_model->add_sysex_unlocked (*i);
+		}
+
+		/* find any sysex events that were missing when unmarshalling */
+
+		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
+			if (!i->sysex) {
+				i->sysex = _model->find_sysex (i->sysex_id);
+				assert (i->sysex);
+			}
 		}
 
 		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
@@ -899,11 +930,7 @@ MidiModel::SysExDiffCommand::unmarshal_change (XMLNode *xml_change)
 	*/
 
 	change.sysex = _model->find_sysex (sysex_id);
-
-	if (!change.sysex) {
-		warning << "Sys-ex #" << sysex_id << " not found in model - programmers should investigate this" << endmsg;
-		return change;
-	}
+	change.sysex_id = sysex_id;
 
 	return change;
 }
@@ -1033,6 +1060,15 @@ MidiModel::PatchChangeDiffCommand::operator() ()
 			_model->remove_patch_change_unlocked (*i);
 		}
 
+		/* find any patch change events that were missing when unmarshalling */
+
+		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
+			if (!i->patch) {
+				i->patch = _model->find_patch_change (i->patch_id);
+				assert (i->patch);
+			}
+		}
+
 		set<PatchChangePtr> temporary_removals;
 
 		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
@@ -1079,6 +1115,15 @@ MidiModel::PatchChangeDiffCommand::undo ()
 
 		for (list<PatchChangePtr>::iterator i = _removed.begin(); i != _removed.end(); ++i) {
 			_model->add_patch_change_unlocked (*i);
+		}
+
+		/* find any patch change events that were missing when unmarshalling */
+
+		for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
+			if (!i->patch) {
+				i->patch = _model->find_patch_change (i->patch_id);
+				assert (i->patch);
+			}
 		}
 
 		set<PatchChangePtr> temporary_removals;
@@ -1207,10 +1252,10 @@ MidiModel::PatchChangeDiffCommand::unmarshal_patch_change (XMLNode* n)
 	XMLProperty* prop;
 	Evoral::event_id_t id;
 	Evoral::MusicalTime time = 0;
-	uint8_t channel = 0;
-	uint8_t program = 0;
+	int channel = 0;
+	int program = 0;
 	int bank = 0;
-
+	
 	if ((prop = n->property ("id")) != 0) {
 		istringstream s (prop->value());
 		s >> id;
@@ -1246,6 +1291,7 @@ MidiModel::PatchChangeDiffCommand::unmarshal_change (XMLNode* n)
 {
 	XMLProperty* prop;
 	Change c;
+	int an_int;
 
 	prop = n->property ("property");
 	assert (prop);
@@ -1255,6 +1301,10 @@ MidiModel::PatchChangeDiffCommand::unmarshal_change (XMLNode* n)
 	assert (prop);
 	Evoral::event_id_t const id = atoi (prop->value().c_str());
 
+	/* we need to load via an int intermediate for all properties that are 
+	   actually uint8_t (char/byte).
+	*/
+
 	prop = n->property ("old");
 	assert (prop);
 	{
@@ -1262,11 +1312,14 @@ MidiModel::PatchChangeDiffCommand::unmarshal_change (XMLNode* n)
 		if (c.property == Time) {
 			s >> c.old_time;
 		} else if (c.property == Channel) {
-			s >> c.old_channel;
+			s >> an_int;
+			c.old_channel = an_int;
 		} else if (c.property == Program) {
-			s >> c.old_program;
+			s >> an_int;
+			c.old_program = an_int;
 		} else if (c.property == Bank) {
-			s >> c.old_bank;
+			s >> an_int;
+			c.old_bank = an_int;
 		}
 	}
 
@@ -1274,19 +1327,23 @@ MidiModel::PatchChangeDiffCommand::unmarshal_change (XMLNode* n)
 	assert (prop);
 	{
 		istringstream s (prop->value ());
+
 		if (c.property == Time) {
 			s >> c.new_time;
 		} else if (c.property == Channel) {
-			s >> c.new_channel;
+			s >> an_int;
+			c.new_channel = an_int;
 		} else if (c.property == Program) {
-			s >> c.new_program;
+			s >> an_int;
+			c.new_program = an_int;
 		} else if (c.property == Bank) {
-			s >> c.new_bank;
+			s >> an_int;
+			c.new_bank = an_int;
 		}
 	}
 
 	c.patch = _model->find_patch_change (id);
-	assert (c.patch);
+	c.patch_id = id;
 
 	return c;
 }
@@ -1584,7 +1641,7 @@ MidiModel::write_lock()
 	assert (ms);
 
 	assert (!ms->mutex().trylock ());
-	return WriteLock(new WriteLockImpl(NULL, _lock, _control_lock));
+	return WriteLock(new WriteLockImpl(0, _lock, _control_lock));
 }
 
 int

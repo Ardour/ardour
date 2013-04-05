@@ -164,8 +164,8 @@ ARDOUR::framecnt_t
 AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, framepos_t start,
 		     framecnt_t cnt, unsigned chan_n)
 {
-	DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Playlist %1 read @ %2 for %3, channel %4, regions %5\n",
-							   name(), start, cnt, chan_n, regions.size()));
+	DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Playlist %1 read @ %2 for %3, channel %4, regions %5 mixdown @ %6 gain @ %7\n",
+							   name(), start, cnt, chan_n, regions.size(), mixdown_buffer, gain_buffer));
 
 	/* optimizing this memset() away involves a lot of conditionals
 	   that may well cause more of a hit due to cache misses

@@ -106,6 +106,7 @@ class ExportHandler : public ExportElementFactory
 
   private:
 
+	void handle_duplicate_format_extensions();
 	int process (framecnt_t frames);
 
 	Session &          session;

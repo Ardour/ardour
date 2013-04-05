@@ -684,12 +684,18 @@ ArdourStartup::on_apply ()
 
 		Config->set_use_monitor_bus (use_monitor_section_button.get_active());
 
-		/* "touch" the been-here-before path now that we're about to save Config */
-		ofstream fout (been_here_before_path().c_str());
-		
 		Config->save_state ();
+
 	}
 
+	{
+		/* "touch" the been-here-before path now we've successfully
+		   made it through the first time setup (at least)
+		*/
+		ofstream fout (been_here_before_path().c_str());
+
+	}
+		
 	_response = RESPONSE_OK;
 	gtk_main_quit ();
 }
@@ -1453,7 +1459,7 @@ ArdourStartup::info_scroller_update()
 
 	char buf[512];
 	snprintf (buf, std::min(info_scroller_count,sizeof(buf)-1), "%s", ARDOUR_UI::instance()->announce_string().c_str() );
-	buf[info_scroller_count] = NULL;
+	buf[info_scroller_count] = 0;
 	info_scroller_label.set_text (buf);
 	info_scroller_label.show();
 

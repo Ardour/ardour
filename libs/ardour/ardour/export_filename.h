@@ -92,6 +92,7 @@ class ExportFilename {
 	bool include_session;
 	bool include_revision;
 	bool include_channel_config;
+	bool include_format_name;
 	bool include_channel;
 	bool include_timespan;
 	bool include_time;

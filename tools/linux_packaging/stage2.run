@@ -371,18 +371,17 @@ fi
 ################################
 # Setup derived variables
 ################################
-PGM_VERSION=$(echo ${BUNDLE_DIR} | awk 'BEGIN { FS = "-" } ; { print $2 }' | awk 'BEGIN { FS = "_"} ; { print $1}')
-PGM_BUILD=$(echo ${BUNDLE_DIR} | awk 'BEGIN { FS = "-" } ; { print $2 }' | awk 'BEGIN { FS = "_"} ; { print $2}')
-PGM_BUILDTYPE=$(echo ${BUNDLE_DIR} | awk 'BEGIN { FS = "-" } ; { print $3 }')
+PGM_VERSION=$(echo ${BUNDLE_DIR} | cut -d- -f2)
+PGM_BUILDTYPE=$(echo ${BUNDLE_DIR} | cut -d- -f3)
 
 if [ -z ${PGM_BUILDTYPE} ];
 then
-	PGM_FULL_NAME="${PGM_NAME}-${PGM_VERSION}_${PGM_BUILD}"
+	PGM_FULL_NAME="${PGM_NAME}-${PGM_VERSION}"
 	ICON_NAME="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}"			#no dash between name and version since dash seperates vendor from program
 	MENU_FILE="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}.desktop"	#no dash between name and version since dash seperates vendor from program
 	DESKTOP_LINK_FILE="${PGM_NAME}_${PGM_VERSION}.desktop"
 else
-	PGM_FULL_NAME="${PGM_NAME}-${PGM_VERSION}_${PGM_BUILD}-${PGM_BUILDTYPE}"
+	PGM_FULL_NAME="${PGM_NAME}-${PGM_VERSION}-${PGM_BUILDTYPE}"
 	ICON_NAME="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}_${PGM_BUILDTYPE}"			#no dash between name and version since dash seperates vendor from program
 	MENU_FILE="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}_${PGM_BUILDTYPE}.desktop"	#no dash between name and version since dash seperates vendor from program
 	DESKTOP_LINK_FILE="${PGM_NAME}_${PGM_VERSION}_${PGM_BUILDTYPE}.desktop"
@@ -421,7 +420,7 @@ fi
 # install 
 
 echo ""
-echo "Installing ${PGM_NAME} ${PGM_VERSION} built from ${PGM_BUILD} in ${INSTALL_DEST_BASE}"
+echo "Installing ${PGM_NAME} ${PGM_VERSION} in ${INSTALL_DEST_BASE}"
 echo ""
 
 # Copy the new version in the install directory

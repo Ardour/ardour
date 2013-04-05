@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
+from waflib import Options
 from waflib import TaskGen
 import os
 import sys
@@ -26,6 +27,58 @@ top = '.'
 out = 'build'
 
 path_prefix = 'libs/pbd/'
+
+libpbd_sources = [
+    'basename.cc',
+    'base_ui.cc',
+    'boost_debug.cc',
+    'cartesian.cc',
+    'command.cc',
+    'convert.cc',
+    'controllable.cc',
+    'controllable_descriptor.cc',
+    'clear_dir.cc',
+    'crossthread.cc',
+    'cpus.cc',
+    'debug.cc',
+    'enumwriter.cc',
+    'event_loop.cc',
+    'dmalloc.cc',
+    'enums.cc',
+    'epa.cc',
+    'error.cc',
+    'file_manager.cc',
+    'file_utils.cc',
+    'fpu.cc',
+    'id.cc',
+    'locale_guard.cc',
+    'malign.cc',
+    'mountpoint.cc',
+    'openuri.cc',
+    'pathexpand.cc',
+    'pathscanner.cc',
+    'pool.cc',
+    'property_list.cc',
+    'pthread_utils.cc',
+    'receiver.cc',
+    'search_path.cc',
+    'semutils.cc',
+    'shortpath.cc',
+    'signals.cc',
+    'sndfile_manager.cc',
+    'stacktrace.cc',
+    'stateful_diff_command.cc',
+    'stateful.cc',
+    'strreplace.cc',
+    'strsplit.cc',
+    'textreceiver.cc',
+    'transmitter.cc',
+    'undo.cc',
+    'uuid.cc',
+    'version.cc',
+    'whitespace.cc',
+    'xml++.cc',
+]
 
 def options(opt):
     autowaf.set_options(opt)
@@ -58,57 +111,13 @@ def build(bld):
     bld(rule = 'python ${SRC} ${TGT}', source = 'pbd/signals.py', target = 'pbd/signals_generated.h')
 
     # Library
-    obj = bld(features = 'cxx cxxshlib')
-    obj.source = '''
-            basename.cc
-            base_ui.cc
-            boost_debug.cc
-            cartesian.cc
-            command.cc
-            convert.cc
-            controllable.cc
-            controllable_descriptor.cc
-            clear_dir.cc
-            crossthread.cc
-            cpus.cc
-            debug.cc
-            enumwriter.cc
-            event_loop.cc
-            dmalloc.cc
-            enums.cc
-            epa.cc
-            error.cc
-            file_manager.cc
-            file_utils.cc
-            fpu.cc
-            id.cc
-            locale_guard.cc
-            malign.cc
-            mountpoint.cc
-            openuri.cc
-            pathscanner.cc
-            pool.cc
-            property_list.cc
-            pthread_utils.cc
-            receiver.cc
-            search_path.cc
-            semutils.cc
-            shortpath.cc
-            signals.cc
-            sndfile_manager.cc
-            stacktrace.cc
-            stateful_diff_command.cc
-            stateful.cc
-            strreplace.cc
-            strsplit.cc
-            textreceiver.cc
-            transmitter.cc
-            undo.cc
-            uuid.cc
-            version.cc
-            whitespace.cc
-            xml++.cc
-    '''
+    if bld.is_defined ('INTERNAL_SHARED_LIBS'):
+        print('BUILD SHARED LIB')
+        obj              = bld.shlib(features = 'cxx cxxshlib', source=libpbd_sources)
+    else:
+        print('BUILD STATIC LIB')
+        obj              = bld.stlib(features = 'cxx cxxstlib', source=libpbd_sources)
+        obj.cxxflags     = [ '-fPIC' ]
 
     if bld.is_defined('DEBUG_RT_ALLOC'):
         obj.source += 'debug_rt_alloc.c'
@@ -120,7 +129,7 @@ def build(bld):
     obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM'
     if sys.platform == 'darwin':
         TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
-        obj.source += 'cocoa_open_uri.mm'
+        obj.source += [ 'cocoa_open_uri.mm' ]
         obj.uselib += ' OSX'
     obj.vnum         = LIBPBD_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
