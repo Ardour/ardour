@@ -11,7 +11,7 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
-#define XML_VERSION "1.0"
+xmlChar* xml_version = xmlCharStrdup("1.0");
 
 using namespace std;
 
@@ -151,7 +151,7 @@ XMLTree::write() const
 	int result;
 
 	xmlKeepBlanksDefault(0);
-	doc = xmlNewDoc((xmlChar*) XML_VERSION);
+	doc = xmlNewDoc(xml_version);
 	xmlSetDocCompressMode(doc, _compression);
 	writenode(doc, _root, doc->children, 1);
 	result = xmlSaveFormatFileEnc(_filename.c_str(), doc, "UTF-8", 1);
@@ -171,7 +171,7 @@ XMLTree::debug(FILE* out) const
 	XMLNodeList children;
 
 	xmlKeepBlanksDefault(0);
-	doc = xmlNewDoc((xmlChar*) XML_VERSION);
+	doc = xmlNewDoc(xml_version);
 	xmlSetDocCompressMode(doc, _compression);
 	writenode(doc, _root, doc->children, 1);
 	xmlDebugDumpDocument (out, doc);
@@ -188,7 +188,7 @@ XMLTree::write_buffer() const
 	XMLNodeList children;
 
 	xmlKeepBlanksDefault(0);
-	doc = xmlNewDoc((xmlChar*) XML_VERSION);
+	doc = xmlNewDoc(xml_version);
 	xmlSetDocCompressMode(doc, _compression);
 	writenode(doc, _root, doc->children, 1);
 	xmlDocDumpMemory(doc, (xmlChar **) & ptr, &len);
@@ -358,7 +358,7 @@ XMLTree::find(const string xpath, XMLNode* node) const
 	xmlDocPtr doc = 0;
 
 	if (node) {
-		doc = xmlNewDoc((xmlChar*) XML_VERSION);
+		doc = xmlNewDoc(xml_version);
 		writenode(doc, node, doc->children, 1);
 		ctxt = xmlXPathNewContext(doc);
 	} else {
@@ -556,7 +556,7 @@ readnode(xmlNodePtr node)
 	xmlAttrPtr attr;
 
 	if (node->name) {
-		name = (char*)node->name;
+		name = (const char*)node->name;
 	}
 
 	tmp = new XMLNode(name);
@@ -566,7 +566,7 @@ readnode(xmlNodePtr node)
 		if (attr->children) {
 			content = (char*)attr->children->content;
 		}
-		tmp->add_property((char*)attr->name, content);
+		tmp->add_property((const char*)attr->name, content);
 	}
 
 	if (node->content) {
@@ -592,9 +592,9 @@ writenode(xmlDocPtr doc, XMLNode* n, xmlNodePtr p, int root = 0)
 	xmlNodePtr node;
 
 	if (root) {
-		node = doc->children = xmlNewDocNode(doc, 0, (xmlChar*) n->name().c_str(), 0);
+		node = doc->children = xmlNewDocNode(doc, 0, (const xmlChar*) n->name().c_str(), 0);
 	} else {
-		node = xmlNewChild(p, 0, (xmlChar*) n->name().c_str(), 0);
+		node = xmlNewChild(p, 0, (const xmlChar*) n->name().c_str(), 0);
 	}
 
 	if (n->is_content()) {
@@ -604,7 +604,7 @@ writenode(xmlDocPtr doc, XMLNode* n, xmlNodePtr p, int root = 0)
 
 	props = n->properties();
 	for (curprop = props.begin(); curprop != props.end(); ++curprop) {
-		xmlSetProp(node, (xmlChar*) (*curprop)->name().c_str(), (xmlChar*) (*curprop)->value().c_str());
+		xmlSetProp(node, (const xmlChar*) (*curprop)->name().c_str(), (const xmlChar*) (*curprop)->value().c_str());
 	}
 
 	children = n->children();

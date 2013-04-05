@@ -33,15 +33,9 @@ class Fader;
 class Meter;
 class SurfacePort;
 
-struct StripControlDefinition {
-    const char* name;
-    uint32_t base_id;
-    Control* (*factory)(Surface&, int index, const char* name, Group&);
-};
-
 struct GlobalControlDefinition {
     const char* name;
-    uint32_t id;
+    int id;
     Control* (*factory)(Surface&, int index, const char* name, Group&);
     const char* group_name;
 };

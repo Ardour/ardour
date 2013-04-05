@@ -313,7 +313,7 @@ BarController::expose (GdkEventExpose* /*event*/)
 
 	Gdk::Color c;
 	Widget* parent;
-	gint x1=0, x2=0, y1=0, y2=0;
+	gint x1=0, x2=0, y2=0;
 	gint w, h;
 	double fract, radius;
     float r, g, b;
@@ -327,7 +327,6 @@ BarController::expose (GdkEventExpose* /*event*/)
 		h = darea.get_height();
 		x1 = (gint) floor (w * fract);
 		x2 = x1;
-		y1 = 0;
 		y2 = h - 1;
 
 		if (use_parent) {

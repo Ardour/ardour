@@ -665,7 +665,6 @@ clearlooks_gummy_draw_tab (cairo_t                *cr,
 	cairo_pattern_t     *pattern;
 
 	double               radius;
-	double               strip_size;
 
 	radius = MIN (params->radius, MIN ((width - 2.0) / 2.0, (height - 2.0) / 2.0));
 
@@ -683,7 +682,6 @@ clearlooks_gummy_draw_tab (cairo_t                *cr,
 	if (tab->gap_side == CL_GAP_TOP || tab->gap_side == CL_GAP_BOTTOM)
 	{
 		height += 3.0;
-		strip_size = 2.0/height; /* 2 pixel high strip */
 
 		if (tab->gap_side == CL_GAP_TOP)
 			cairo_translate (cr, 0.0, -3.0); /* gap at the other side */
@@ -691,7 +689,6 @@ clearlooks_gummy_draw_tab (cairo_t                *cr,
 	else
 	{
 		width += 3.0;
-		strip_size = 2.0/width;
 
 		if (tab->gap_side == CL_GAP_LEFT) 
 			cairo_translate (cr, -3.0, 0.0); /* gap at the other side */
@@ -927,7 +924,6 @@ clearlooks_gummy_draw_scrollbar_stepper (cairo_t                          *cr,
 	CairoColor fill;
 	CairoColor shade1, shade2, shade3;
 	cairo_pattern_t *pattern;
-	ShadowParameters shadow;
 	double radius = MIN (widget->radius, MIN ((width - 2.0) / 2.0, (height - 2.0) / 2.0));
 
 	if (scrollbar->horizontal)
@@ -977,8 +973,6 @@ clearlooks_gummy_draw_scrollbar_stepper (cairo_t                          *cr,
 	cairo_stroke (cr);
 
 	cairo_translate (cr, 0.5, 0.5);
-	shadow.shadow  = CL_SHADOW_OUT;
-	shadow.corners = corners;
 }
 
 static void

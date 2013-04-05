@@ -536,7 +536,6 @@ clearlooks_style_draw_box (DRAW_ARGS)
 	else if (DETAIL ("button") || DETAIL ("buttondefault"))
 	{
 		WidgetParameters params;
-		ShadowParameters shadow = { CR_CORNER_ALL, CL_SHADOW_NONE } ;
 		clearlooks_set_widget_parameters (widget, style, state_type, &params);
 
 		if (ge_is_in_combo_box(widget))
@@ -545,23 +544,21 @@ clearlooks_style_draw_box (DRAW_ARGS)
 				params.corners = CR_CORNER_TOPRIGHT | CR_CORNER_BOTTOMRIGHT;
 			else
 				params.corners = CR_CORNER_TOPLEFT | CR_CORNER_BOTTOMLEFT;
-			
-			shadow.shadow = CL_SHADOW_IN;
 
 			if (params.xthickness > 2)
 			{
 				if (params.ltr)
 					x--;
 				width++;
-			}			
+			}
 		}
 		else
 		{
 			params.corners    = CR_CORNER_ALL;
 			/* if (!(ge_is_combo_box (widget, FALSE))) */
 			params.enable_glow = TRUE;
-		}		
-	
+		}
+
 		if (GE_IS_TOGGLE_BUTTON (widget) &&
 		    gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget)))
 			params.active = TRUE;
