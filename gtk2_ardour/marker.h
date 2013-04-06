@@ -27,20 +27,13 @@
 
 #include "ardour/ardour.h"
 #include "pbd/signals.h"
+
+#include "canvas/fwd.h"
 #include "canvas/types.h"
 
 namespace ARDOUR {
 	class TempoSection;
 	class MeterSection;
-}
-
-namespace ArdourCanvas {
-	class Polygon;
-	class Line;
-	class Rectangle;
-	class Group;
-	class Pixbuf;
-	class Item;
 }
 
 class PublicEditor;
@@ -108,7 +101,7 @@ class Marker : public sigc::trackable
 	ArdourCanvas::Group* _parent;
 	ArdourCanvas::Group *group;
 	ArdourCanvas::Polygon *mark;
-	ArdourCanvas::Pixbuf *name_pixbuf;
+        ArdourCanvas::Text *_name_item;
 	ArdourCanvas::Points *points;
 	ArdourCanvas::Line* _line;
 	ArdourCanvas::Points *line_points;

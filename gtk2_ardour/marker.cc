@@ -23,7 +23,7 @@
 #include "canvas/group.h"
 #include "canvas/line.h"
 #include "canvas/polygon.h"
-#include "canvas/pixbuf.h"
+#include "canvas/text.h"
 
 #include "ardour_ui.h"
 /*
@@ -268,12 +268,15 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 	layout->set_font_description (name_font);
 	Gtkmm2ext::get_ink_pixel_size (layout, width, name_height);
+	
+	_name_item = new ArdourCanvas::Text (group);
+	_name_item->set_font_description (name_font);
+	_name_item->set_color (0);
 
-	name_pixbuf = new ArdourCanvas::Pixbuf (group);
 #ifdef CANVAS_DEBUG
-	name_pixbuf->name = string_compose ("Marker::name_pixbuf for %1", annotation);
+	_name_item->name = string_compose ("Marker::_name_item for %1", annotation);
 #endif	
-	name_pixbuf->set_position (ArdourCanvas::Duple (_label_offset, 13 / 2 - name_height / 2));
+	_name_item->set_position (ArdourCanvas::Duple (_label_offset, 13 / 2 - name_height / 2));
 
 	set_name (annotation.c_str());
 
@@ -393,22 +396,26 @@ Marker::setup_name_display ()
 
 	/* Work out how wide the name can be */
 	int name_width = min ((double) pixel_width (_name, name_font) + 2, limit);
+
 	if (name_width == 0) {
 		name_width = 1;
 	}
 
 	if (label_on_left ()) {
-		name_pixbuf->set_x_position (-name_width);
+		_name_item->set_x_position (-name_width);
 	}
 
-	name_pixbuf->set (pixbuf_from_string (_name, name_font, name_width, name_height, Gdk::Color ("#000000")));
+	_name_item->set (_name);
+
+	// CAIROCANVAS
+	// need to "clip" name to name_width and name_height
 
 	if (label_on_left ()) {
-		_name_background->set_x0 (name_pixbuf->position().x - 2);
-		_name_background->set_x1 (name_pixbuf->position().x + name_width + _shift);
+		_name_background->set_x0 (_name_item->position().x - 2);
+		_name_background->set_x1 (_name_item->position().x + name_width + _shift);
 	} else {
-		_name_background->set_x0 (name_pixbuf->position().x - _label_offset + 2);
-		_name_background->set_x1 (name_pixbuf->position().x + name_width);
+		_name_background->set_x0 (_name_item->position().x - _label_offset + 2);
+		_name_background->set_x1 (_name_item->position().x + name_width);
 	}
 
 	_name_background->set_y0 (0);
