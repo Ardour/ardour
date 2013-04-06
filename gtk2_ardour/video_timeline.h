@@ -31,7 +31,7 @@
 #include "video_image_frame.h"
 #include "video_monitor.h"
 #include "pbd/signals.h"
-#include "canvas.h"
+#include "canvas/group.h"
 
 namespace ARDOUR {
 	class Session;

@@ -26,8 +26,7 @@
 #include "video_image_frame.h"
 #include "public_editor.h"
 #include "utils.h"
-#include "canvas_impl.h"
-#include "simpleline.h"
+#include "canvas/group.h"
 #include "rgb_macros.h"
 #include "utils_videotl.h"
 
@@ -60,20 +59,20 @@ VideoImageFrame::VideoImageFrame (PublicEditor& ed, ArdourCanvas::Group& parent,
 #endif
 
 	unit_position = editor.frame_to_unit (frame_position);
-	group = new Group (parent, unit_position, 1.0);
-	img_pixbuf = new ArdourCanvas::Pixbuf(*group);
+	group = new ArdourCanvas::Group (_parent, ArdourCanvas::Duple(unit_position, 1.0));
+	img_pixbuf = new ArdourCanvas::Pixbuf(group);
 
 	Glib::RefPtr<Gdk::Pixbuf> img;
 
 	img = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, clip_width, clip_height);
 	img->fill(RGBA_TO_UINT(0,0,0,255));
-	img_pixbuf->property_pixbuf() = img;
+	img_pixbuf->set(img);
 
 	draw_line();
-	video_draw_cross(img_pixbuf->property_pixbuf());
+	video_draw_cross(img_pixbuf->pixbuf());
+	img_pixbuf->set(img_pixbuf->pixbuf());
 
-	group->signal_event().connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_videotl_bar_event), _parent));
-	//img_pixbuf->signal_event().connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_videotl_bar_event), _parent));
+	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_videotl_bar_event), _parent));
 }
 
 VideoImageFrame::~VideoImageFrame ()
@@ -89,7 +88,7 @@ void
 VideoImageFrame::set_position (framepos_t frame)
 {
 	double new_unit_position = editor.frame_to_unit (frame);
-	group->move (new_unit_position - unit_position, 0.0);
+	group->move (ArdourCanvas::Duple (new_unit_position - unit_position, 0.0));
 	frame_position = frame;
 	unit_position = new_unit_position;
 }
@@ -119,16 +118,17 @@ VideoImageFrame::set_videoframe (framepos_t videoframenumber, int re)
 #if 0 /* dummy mode: print framenumber */
 	gchar buf[16];
 	snprintf (buf, sizeof(buf), "%li", (long int) videoframenumber);
-	img_pixbuf->property_pixbuf() = pixbuf_from_ustring(g_strdup (buf), get_font_for_style (N_("MarkerText")), 80, 60, Gdk::Color ("#C0C0C0"));
+	img_pixbuf->pixbuf() = pixbuf_from_ustring(g_strdup (buf), get_font_for_style (N_("MarkerText")), 80, 60, Gdk::Color ("#C0C0C0"));
 	return;
 #endif
 #if 1 /* draw "empty frame" while we request the data */
 	Glib::RefPtr<Gdk::Pixbuf> img;
-	img = img_pixbuf->property_pixbuf();
+	img = img_pixbuf->pixbuf();
 	img->fill(RGBA_TO_UINT(0,0,0,255));
-	video_draw_cross(img_pixbuf->property_pixbuf());
+	video_draw_cross(img_pixbuf->pixbuf());
 	draw_line();
 	cut_rightend();
+	img_pixbuf->set(img);
 	exposeimg();
 #endif
 	/* request video-frame from decoder in background thread */
@@ -139,7 +139,7 @@ void
 VideoImageFrame::draw_line ()
 {
 	Glib::RefPtr<Gdk::Pixbuf> img;
-	img = img_pixbuf->property_pixbuf();
+	img = img_pixbuf->pixbuf();
 
 	int rowstride = img->get_rowstride();
 	int clip_height = img->get_height();
@@ -160,7 +160,7 @@ VideoImageFrame::cut_rightend ()
 {
 	if (rightend < 0 ) { return; }
 	Glib::RefPtr<Gdk::Pixbuf> img;
-	img = img_pixbuf->property_pixbuf();
+	img = img_pixbuf->pixbuf();
 
 	int rowstride = img->get_rowstride();
 	int clip_height = img->get_height();
@@ -222,12 +222,13 @@ VideoImageFrame::http_download_done (char *data){
 	if (!data) {
 		/* Image request failed (HTTP error or timeout) */
 		Glib::RefPtr<Gdk::Pixbuf> img;
-		img = img_pixbuf->property_pixbuf();
+		img = img_pixbuf->pixbuf();
 		img->fill(RGBA_TO_UINT(128,0,0,255));
-		video_draw_cross(img_pixbuf->property_pixbuf());
+		video_draw_cross(img_pixbuf->pixbuf());
 		cut_rightend();
 		draw_line();
 		cut_rightend();
+		img_pixbuf->set(img);
 		/* TODO: mark as invalid:
 		 * video_frame_number = -1;
 		 * TODO: but prevent live-loops when calling update again
@@ -239,11 +240,12 @@ VideoImageFrame::http_download_done (char *data){
 #else // RGB
 		tmp = Gdk::Pixbuf::create_from_data ((guint8*) data, Gdk::COLORSPACE_RGB, false, 8, clip_width, clip_height, clip_width*3);
 #endif
-		img = img_pixbuf->property_pixbuf();
+		img = img_pixbuf->pixbuf();
 		tmp->copy_area (0, 0, clip_width, clip_height, img, 0, 0);
 		free(data);
 		draw_line();
 		cut_rightend();
+		img_pixbuf->set(img);
 	}
 
 	exposeimg();
