@@ -40,7 +40,7 @@ using namespace PBD;
 #include "i18n.h"
 
 Auditioner::Auditioner (Session& s)
-	: AudioTrack (s, "auditioner", Route::Hidden)
+	: AudioTrack (s, "auditioner", Route::Auditioner)
         , current_frame (0)
         , _auditioning (0)
         , length (0)

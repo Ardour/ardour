@@ -42,7 +42,7 @@ void
 Session::rt_set_monitoring (boost::shared_ptr<RouteList> rl, MonitorChoice mc, bool /* group_override */)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if (!(*i)->is_hidden()) {
+		if (!(*i)->is_auditioner()) {
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*i);
 			if (t) {
 				t->set_monitoring (mc);
@@ -63,7 +63,7 @@ void
 Session::rt_set_solo (boost::shared_ptr<RouteList> rl, bool yn, bool /* group_override */)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if (!(*i)->is_hidden()) {
+		if (!(*i)->is_auditioner()) {
 			(*i)->set_solo (yn, this);
 		}
 	}
@@ -84,7 +84,7 @@ void
 Session::rt_cancel_solo_after_disconnect (boost::shared_ptr<RouteList> rl, bool upstream, bool /* group_override */)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if (!(*i)->is_hidden()) {
+		if (!(*i)->is_auditioner()) {
 			(*i)->cancel_solo_after_disconnect (upstream);
 		}
 	}
@@ -112,7 +112,7 @@ Session::rt_set_just_one_solo (boost::shared_ptr<RouteList> just_one, bool yn, b
 	boost::shared_ptr<Route> r = just_one->front();
 
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if (!(*i)->is_hidden() && r != *i) {
+		if (!(*i)->is_auditioner() && r != *i) {
 			(*i)->set_solo (!yn, (*i)->route_group());
 		}
 	}
@@ -132,7 +132,7 @@ void
 Session::rt_set_listen (boost::shared_ptr<RouteList> rl, bool yn, bool /*group_override*/ )
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if (!(*i)->is_hidden()) {
+		if (!(*i)->is_auditioner()) {
 			(*i)->set_listen (yn, this);
 		}
 	}
@@ -150,7 +150,7 @@ void
 Session::rt_set_mute (boost::shared_ptr<RouteList> rl, bool yn, bool /*group_override*/)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if (!(*i)->is_monitor() && !(*i)->is_hidden()) {
+		if (!(*i)->is_monitor() && !(*i)->is_auditioner()) {
 			(*i)->set_mute (yn, this);
 		}
 	}
@@ -168,7 +168,7 @@ void
 Session::rt_set_solo_isolated (boost::shared_ptr<RouteList> rl, bool yn, bool /*group_override*/)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if (!(*i)->is_master() && !(*i)->is_monitor() && !(*i)->is_hidden()) {
+		if (!(*i)->is_master() && !(*i)->is_monitor() && !(*i)->is_auditioner()) {
 			(*i)->set_solo_isolated (yn, this);
 		}
 	}
@@ -191,7 +191,7 @@ Session::set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, SessionEv
 	 */
 
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if ((*i)->is_hidden()) {
+		if ((*i)->is_auditioner()) {
 			continue;
 		}
 
@@ -209,7 +209,7 @@ void
 Session::rt_set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, bool group_override)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if ((*i)->is_hidden()) {
+		if ((*i)->is_auditioner()) {
 			continue;
 		}
 

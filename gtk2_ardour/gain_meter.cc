@@ -186,7 +186,7 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 
 	setup_gain_adjustment ();
 
-	if (!_route || !_route->is_hidden()) {
+	if (!_route || !_route->is_auditioner()) {
 
 		using namespace Menu_Helpers;
 
@@ -926,7 +926,7 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 
 	hbox.pack_start (meter_alignment, true, true);
 
-//	if (r && !r->is_hidden()) {
+//	if (r && !r->is_auditioner()) {
 //		fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
 //	}
 
