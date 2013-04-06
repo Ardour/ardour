@@ -4238,8 +4238,11 @@ Route::fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pfram
 	}
 
 	/* establish the initial setup of the buffer set, reflecting what was
-	   copied into it.
+	   copied into it. unless, of course, we are the auditioner, in which
+	   case nothing was fed into it from the inputs at all.
 	*/
 
-	bufs.set_count (io->n_ports());
+	if (!is_hidden()) {
+		bufs.set_count (io->n_ports());
+	}
 }
