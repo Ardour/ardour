@@ -42,7 +42,6 @@ children = [
         'libs/clearlooks-newer',
         'libs/audiographer',
         'gtk2_ardour',
-        'templates',
         'export',
         'midi_maps',
         'mcp',
