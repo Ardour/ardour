@@ -151,20 +151,13 @@ Editor::initialize_canvas ()
 	marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height));
 	cd_marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, 0.0));
 #ifdef WITH_VIDEOTIMELINE
-	videotl_group = new ArdourCanvas::Group (_time_markers_group, 0.0, 0.0);
+	videotl_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple(0.0, 0.0));
 #endif
 
 
 #ifdef WITH_VIDEOTIMELINE
-	videotl_bar_group = new ArdourCanvas::Group (track_canvas->root ());
-	if (Profile->get_sae()) {
-		videotl_bar = new ArdourCanvas::Rectangle (videotl_bar_group, 0.0, 0.0, phys_width, (timebar_height * videotl_bar_height - 1));
-		videotl_bar->property_outline_pixels() = 1;
-	} else {
-		videotl_bar = new ArdourCanvas::Rectangle (videotl_bar_group, 0.0, 0.0, phys_width, (timebar_height * videotl_bar_height));
-		videotl_bar->property_outline_pixels() = 0;
-	}
-	videotl_bar->property_outline_what() = (0x1 | 0x8);
+	videotl_bar_group = new ArdourCanvas::Group (_time_bars_canvas->root ());
+	videotl_bar = new ArdourCanvas::Rectangle (videotl_bar_group, ArdourCanvas::Rect (0.0, 0.0, 100,(timebar_height * videotl_bar_height)));
 	ARDOUR_UI::instance()->video_timeline = new VideoTimeLine(this, videotl_bar_group, (timebar_height * videotl_bar_height));
 #endif
 

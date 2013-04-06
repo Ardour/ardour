@@ -44,6 +44,11 @@ Pixbuf::set (Glib::RefPtr<Gdk::Pixbuf> pixbuf)
 	end_change ();
 }
 
+Glib::RefPtr<Gdk::Pixbuf>
+Pixbuf::pixbuf() {
+	return _pixbuf;
+}
+
 XMLNode *
 Pixbuf::get_state () const
 {
