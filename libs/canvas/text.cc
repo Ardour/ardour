@@ -12,12 +12,12 @@ using namespace ArdourCanvas;
 
 Text::Text (Group* parent)
 	: Item (parent)
-	, _image (0)
 	, _color (0x000000ff)
 	, _font_description (0)
 	, _alignment (Pango::ALIGN_LEFT)
 	, _width (0)
 	, _height (0)
+	, _need_redraw (false)
 {
 
 }
@@ -34,18 +34,15 @@ Text::set (string const & text)
 	
 	_text = text;
 
-	redraw ();
-
+	_need_redraw = true;
 	_bounding_box_dirty = true;
+
 	end_change ();
 }
 
 void
-Text::redraw ()
+Text::redraw (Cairo::RefPtr<Cairo::Context> context) const
 {
-	_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _width, _height);
-
-	Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (_image);
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
 
 	layout->set_text (_text);
@@ -63,11 +60,20 @@ Text::redraw ()
 	_width = (ink_rect.get_width() + Pango::SCALE / 2) / Pango::SCALE;
 	_height = (ink_rect.get_height() + Pango::SCALE / 2) / Pango::SCALE;
 	
-	set_source_rgba (context, _color);
+	_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _width, _height);
 
-	layout->show_in_cairo_context (context);
+	Cairo::RefPtr<Cairo::Context> img_context = Cairo::Context::create (_image);
 
-	/* text has now been rendered */
+	/* and draw, in the appropriate color of course */
+
+	set_source_rgba (img_context, _color);
+	layout->show_in_cairo_context (img_context);
+
+	/* text has now been rendered in _image and is ready for blit in
+	 * ::render 
+	 */
+
+	_need_redraw = false;
 }
 
 void
@@ -80,6 +86,14 @@ Text::compute_bounding_box () const
 void
 Text::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) const
 {
+	if (_text.empty()) {
+		return;
+	}
+
+	if (_need_redraw) {
+		redraw (context);
+	}
+
 	context->set_source (_image, 0, 0);
 	context->rectangle (0, 0, _width, _height);
 	context->fill ();
@@ -109,7 +123,7 @@ Text::set_alignment (Pango::Alignment alignment)
 	begin_change ();
 	
 	_alignment = alignment;
-	redraw ();
+	_need_redraw = true;
 	_bounding_box_dirty = true;
 	end_change ();
 }
@@ -120,7 +134,7 @@ Text::set_font_description (Pango::FontDescription font_description)
 	begin_change ();
 	
 	_font_description = new Pango::FontDescription (font_description);
-	redraw ();
+	_need_redraw = true;
 
 	_bounding_box_dirty = true;
 	end_change ();
@@ -132,7 +146,7 @@ Text::set_color (Color color)
 	begin_change ();
 
 	_color = color;
-	redraw ();
+	_need_redraw = true;
 
 	end_change ();
 }

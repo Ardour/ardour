@@ -28,15 +28,16 @@ public:
 
 private:
 	std::string      _text;
-        Cairo::RefPtr<Cairo::ImageSurface> _image;
 	uint32_t         _color;
 	Pango::FontDescription* _font_description;
 	Pango::Alignment _alignment;
-        Duple _origin;
-        int _width;
-        int _height;
+        mutable Cairo::RefPtr<Cairo::ImageSurface> _image;
+        mutable Duple _origin;
+        mutable int _width;
+        mutable int _height;
+        mutable bool _need_redraw;
 
-        void redraw ();
+        void redraw (Cairo::RefPtr<Cairo::Context>) const;
 };
 
 }
