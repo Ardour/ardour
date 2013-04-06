@@ -24,13 +24,19 @@ public:
 	void set_font_description (Pango::FontDescription);
 	void set_alignment (Pango::Alignment);
 
+        void set_size_chars (int nchars);
+
 private:
-	Glib::RefPtr<Pango::Layout> layout (Cairo::RefPtr<Cairo::Context>) const;
-	
-	std::string _text;
+	std::string      _text;
+        Cairo::RefPtr<Cairo::ImageSurface> _image;
+	uint32_t         _color;
 	Pango::FontDescription* _font_description;
-	uint32_t _color;
 	Pango::Alignment _alignment;
+        Duple _origin;
+        int _width;
+        int _height;
+
+        void redraw ();
 };
 
 }
