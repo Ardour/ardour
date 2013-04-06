@@ -321,7 +321,7 @@ Mixer_UI::add_strips (RouteList& routes)
 		for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 			boost::shared_ptr<Route> route = (*x);
 			
-			if (route->is_hidden()) {
+			if (route->is_auditioner()) {
 				continue;
 			}
 			

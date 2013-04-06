@@ -1615,7 +1615,7 @@ Session::count_existing_track_channels (ChanCount& in, ChanCount& out)
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
                 boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (tr && !tr->is_hidden()) {
+		if (tr && !tr->is_auditioner()) {
 			in  += tr->n_inputs();
 			out += tr->n_outputs();
 		}
@@ -2246,7 +2246,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		*/
 
 		if (!r->has_order_key (EditorSort)) {
-			if (r->is_hidden()) {
+			if (r->is_auditioner()) {
 				/* use an arbitrarily high value */
 				r->set_order_key (EditorSort, UINT_MAX);
 				r->set_order_key (MixerSort, UINT_MAX);
@@ -2471,7 +2471,7 @@ Session::route_listen_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 			/* new listen: disable all other listen */
 			boost::shared_ptr<RouteList> r = routes.reader ();
 			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-				if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden()) {
+				if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
 					continue;
 				}
 				(*i)->set_listen (false, this);
@@ -2553,7 +2553,7 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 		/* new solo: disable all other solos, but not the group if its solo-enabled */
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden() ||
+			if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner() ||
 			    (leave_group_alone && ((*i)->route_group() == rg))) {
 				continue;
 			}
@@ -2573,7 +2573,7 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 		bool via_sends_only;
 		bool in_signal_flow;
 
-		if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden() ||
+		if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner() ||
 		    (leave_group_alone && ((*i)->route_group() == rg))) {
 			continue;
 		}
@@ -2662,11 +2662,11 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 	}
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->is_master() && !(*i)->is_monitor() && !(*i)->is_hidden() && (*i)->self_soloed()) {
+		if (!(*i)->is_master() && !(*i)->is_monitor() && !(*i)->is_auditioner() && (*i)->self_soloed()) {
 			something_soloed = true;
 		}
 
-		if (!(*i)->is_hidden() && (*i)->listening_via_monitor()) {
+		if (!(*i)->is_auditioner() && (*i)->listening_via_monitor()) {
 			if (Config->get_solo_control_is_listen_control()) {
 				listeners++;
 			} else {
@@ -4621,7 +4621,7 @@ Session::post_playback_latency ()
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->is_hidden() && ((*i)->active())) {
+		if (!(*i)->is_auditioner() && ((*i)->active())) {
 			_worst_track_latency = max (_worst_track_latency, (*i)->update_signal_latency ());
 		}
 	}
@@ -4727,7 +4727,7 @@ Session::update_latency_compensation (bool force_whole_graph)
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->is_hidden() && ((*i)->active())) {
+		if (!(*i)->is_auditioner() && ((*i)->active())) {
 			framecnt_t tl;
 			if ((*i)->signal_latency () != (tl = (*i)->update_signal_latency ())) {
 				some_track_latency_changed = true;

@@ -122,7 +122,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		set_height (preset_height (HeightNormal));
 	}
 
-	if (!_route->is_hidden()) {
+	if (!_route->is_auditioner()) {
 		if (gui_property ("visible").empty()) {
 			set_gui_property ("visible", true);
 		}

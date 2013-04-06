@@ -129,7 +129,6 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 
 	//cout << endl << "*** LINE CACHE MISS" << endl;
 
-	bool inserted_last_time = true;
 	bool invalidated = false;
 
 	for (i = begin; i != end; ++i) {
@@ -162,7 +161,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 				++li;
 			
 			line->set_outline_color (color);
-			inserted_last_time = false; // don't search next time
+
 			// Use existing line, moving if necessary
 		} else if (!exhausted) {
 			Lines::iterator steal = _lines.end();
@@ -178,7 +177,6 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 				line->set_x1 (xpos);
 				line->set_outline_color (color);
 				_lines.insert(make_pair(xpos, line));
-				inserted_last_time = true; // search next time
 				invalidated = true;
 				
 				// Shift clean range left
@@ -192,7 +190,6 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 					//cout << "*** EXISTING LINE" << endl;
 					li = existing;
 					li->second->set_outline_color (color);
-					inserted_last_time = false; // don't search next time
 				} else {
 					//cout << "*** MOVING LINE" << endl;
 					const double x1 = line->x0();
@@ -206,7 +203,6 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 					line->set_x0 (xpos);
 					line->set_x1 (xpos);
 					_lines.insert(make_pair(xpos, line));
-					inserted_last_time = true; // search next time
 				}
 			}
 			
@@ -222,7 +218,6 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 				line->set_y1 (_height);
 				line->set_outline_color (color);
 				_lines.insert(make_pair(xpos, line));
-				inserted_last_time = true;
 			}
 			
 			// Steal from the left
@@ -237,7 +232,6 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 				line->set_x0 (xpos);
 				line->set_x1 (xpos);
 				_lines.insert(make_pair(xpos, line));
-				inserted_last_time = true; // search next time
 				invalidated = true;
 			
 				// Shift clean range right

@@ -528,41 +528,39 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 		pending_controllables.clear ();
 	}
 
+	/* Load up specific bindings from the
+	 * <Controls><MidiControllable>...</MidiControllable><Controls> section
+	 */
+
 	{
 		Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 		controllables.clear ();
 		nlist = node.children(); // "Controls"
 
-		if (nlist.empty()) {
-			return 0;
-		}
+		if (!nlist.empty()) {
+			nlist = nlist.front()->children(); // "MIDIControllable" ...
 
-		nlist = nlist.front()->children(); // "MIDIControllable" ...
-
-		if (nlist.empty()) {
-			return 0;
-		}
-
-		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
-			
-			
-			if ((prop = (*niter)->property ("id")) != 0) {
-
-				ID id = prop->value ();
-				Controllable* c = Controllable::by_id (id);
-
-				if (c) {
-					MIDIControllable* mc = new MIDIControllable (this, *_input_port, *c, false);
-                                        
-					if (mc->set_state (**niter, version) == 0) {
-						controllables.push_back (mc);
-					}
+			if (!nlist.empty()) {
+				for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 					
-				} else {
-					warning << string_compose (
-						_("Generic MIDI control: controllable %1 not found in session (ignored)"),
-						id) << endmsg;
+					if ((prop = (*niter)->property ("id")) != 0) {
+						
+						ID id = prop->value ();
+						Controllable* c = Controllable::by_id (id);
+						
+						if (c) {
+							MIDIControllable* mc = new MIDIControllable (this, *_input_port, *c, false);
+							
+							if (mc->set_state (**niter, version) == 0) {
+								controllables.push_back (mc);
+							}
+							
+						} else {
+							warning << string_compose (
+								_("Generic MIDI control: controllable %1 not found in session (ignored)"),
+								id) << endmsg;
+						}
+					}
 				}
 			}
 		}

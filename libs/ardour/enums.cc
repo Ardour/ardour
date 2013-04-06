@@ -398,7 +398,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Session, pullup_Minus4Minus1);
 	REGISTER (_Session_PullupFormat);
 
-	REGISTER_CLASS_ENUM (Route, Hidden);
+	REGISTER_CLASS_ENUM (Route, Auditioner);
 	REGISTER_CLASS_ENUM (Route, MasterOut);
 	REGISTER_CLASS_ENUM (Route, MonitorOut);
 	REGISTER_BITS (_Route_Flag);

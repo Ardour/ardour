@@ -63,7 +63,7 @@ force_widget_redraw (GtkWidget *widget)
 
 /* ensures that the timer is running */
 static void
-start_timer ()
+start_timer (void)
 {
 	if (animation_timer_id == 0)
 		animation_timer_id = g_timeout_add (ANIMATION_DELAY, animation_timeout_handler, NULL);
@@ -71,7 +71,7 @@ start_timer ()
 
 /* ensures that the timer is stopped */
 static void
-stop_timer ()
+stop_timer (void)
 {
 	if (animation_timer_id != 0)
 	{
@@ -243,7 +243,7 @@ on_connected_widget_destruction (gpointer data, GObject *widget)
 }
 
 static void
-disconnect_all_signals ()
+disconnect_all_signals (void)
 {
 	GSList * item = connected_widgets;
 	while (item != NULL)
@@ -265,7 +265,7 @@ disconnect_all_signals ()
 static gint
 find_signal_info (gconstpointer signal_info, gconstpointer widget)
 {
-	if (((SignalInfo*)signal_info)->widget == widget)
+	if (((const SignalInfo*)signal_info)->widget == widget)
 		return 0;
 	else
 		return 1;
@@ -325,7 +325,7 @@ clearlooks_animation_elapsed (gpointer data)
 
 /* cleans up all resources of the animation system */
 void
-clearlooks_animation_cleanup ()
+clearlooks_animation_cleanup (void)
 {
 	disconnect_all_signals ();
 	

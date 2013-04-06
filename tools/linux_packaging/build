@@ -16,7 +16,7 @@ BUILD_ROOT=../../build
 
 MIXBUS=
 WITH_LADSPA=0
-WITH_HARVID=0
+WITH_HARVID=
 STRIP=all
 PRINT_SYSDEPS=
 WITH_NLS=
@@ -192,7 +192,6 @@ mkdir -p $MackieControl
 mkdir -p $ExportFormats
 mkdir -p $Panners
 mkdir -p $Templates
-mkdir -p $Shared/templates
 mkdir -p $Shared/doc
 
 # maybe set variables
@@ -363,11 +362,11 @@ for x in $BUILD_ROOT/../mcp/*.device $BUILD_ROOT/../mcp/*.profile ; do
 done
 
 # Templates
-for f in $BUILD_ROOT/../templates/* ; do 
-    if [ -d "$f" ] ; then
-	echo Template: $f ; cp -r "$f" $Templates ; 
-    fi
-done
+#for f in $BUILD_ROOT/../templates/* ; do 
+#    if [ -d "$f" ] ; then
+#	echo Template: $f ; cp -r "$f" $Templates ; 
+#    fi
+#done
 
 # ExportFormats
 # got to be careful with names here
@@ -532,7 +531,7 @@ done
 if test x$WITH_HARVID != x ; then
 	cd $APPBIN
 	HARVID_VERSION="v0.7.0" # todo make 'latest' symlink on github work somehow.
-	curl http://x42.github.com/harvid/releases/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz \
+	curl -L http://x42.github.com/harvid/releases/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz \
 		| tar -x -z --exclude=README --exclude=harvid.1 --strip-components=1 || exit 1
 	cd -
 fi

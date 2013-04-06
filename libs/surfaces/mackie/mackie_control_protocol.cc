@@ -261,7 +261,7 @@ MackieControlProtocol::get_sorted_routes()
 			continue;
 		}
 
-		if (route->is_hidden() || route->is_master() || route->is_monitor()) {
+		if (route->is_auditioner() || route->is_master() || route->is_monitor()) {
 			continue;
 		}
 

@@ -125,7 +125,7 @@ Session::no_roll (pframes_t nframes)
 		PT_TIMING_CHECK (10);
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
-			if ((*i)->is_hidden()) {
+			if ((*i)->is_auditioner()) {
 				continue;
 			}
 
@@ -170,7 +170,7 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 
 			int ret;
 
-			if ((*i)->is_hidden()) {
+			if ((*i)->is_auditioner()) {
 				continue;
 			}
 
@@ -210,7 +210,7 @@ Session::silent_process_routes (pframes_t nframes, bool& need_butler)
 
 			int ret;
 
-			if ((*i)->is_hidden()) {
+			if ((*i)->is_auditioner()) {
 				continue;
 			}
 
@@ -863,7 +863,7 @@ Session::process_audition (pframes_t nframes)
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->is_hidden()) {
+		if (!(*i)->is_auditioner()) {
 			(*i)->silence (nframes);
 		}
 	}

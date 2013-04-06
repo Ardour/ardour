@@ -43,7 +43,6 @@ children = [
         'libs/audiographer',
         'libs/canvas',
         'gtk2_ardour',
-        'templates',
         'export',
         'midi_maps',
         'mcp',
@@ -610,6 +609,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
     autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2')
     autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0')
+    autowaf.check_pkg(conf, 'liblo', uselib_store='LO', atleast_version='0.26')
 
     conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
 

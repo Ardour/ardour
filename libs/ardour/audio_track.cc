@@ -62,7 +62,7 @@ AudioTrack::create_diskstream ()
 {
 	AudioDiskstream::Flag dflags = AudioDiskstream::Flag (0);
 
-	if (_flags & Hidden) {
+	if (_flags & Auditioner) {
 		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Hidden);
 	} else {
 		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Recordable);
