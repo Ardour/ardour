@@ -35,9 +35,16 @@ namespace ARDOUR {
 SearchPath
 export_formats_search_path ()
 {
-	SearchPath spath;
-	spath += Glib::build_filename (user_config_directory (), export_formats_dir_name);
-	spath += SearchPath(Glib::getenv (export_env_variable_name));
+	SearchPath spath (ardour_data_search_path());
+	spath.add_subdirectory_to_paths (export_formats_dir_name);
+
+	bool export_formats_path_defined = false;
+	SearchPath spath_env (Glib::getenv(export_env_variable_name, export_formats_path_defined));
+
+	if (export_formats_path_defined) {
+		spath += spath_env;
+	}
+
 	return spath;
 }
 
