@@ -229,6 +229,22 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 }
 
 void
+VideoTimeLine::set_offset_locked (bool v) {
+	if (_session && v != video_offset_lock) {
+		_session->set_dirty ();
+	}
+	video_offset_lock = v;
+}
+
+void
+VideoTimeLine::toggle_offset_locked () {
+	video_offset_lock = !video_offset_lock;
+	if (_session) {
+		_session->set_dirty ();
+	}
+}
+
+void
 VideoTimeLine::save_undo ()
 {
 	if (_session && video_offset_p != video_offset) {
@@ -614,6 +630,9 @@ VideoTimeLine::gui_update(std::string const & t) {
 
 void
 VideoTimeLine::set_height (int height) {
+	if (_session && bar_height != height) {
+		_session->set_dirty ();
+	}
 	bar_height = height;
 	flush_local_cache();
 }

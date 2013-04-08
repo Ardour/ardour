@@ -72,8 +72,8 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	double get_video_file_fps () { return video_file_fps; }
 	void set_update_session_fps (bool v=true) { auto_set_session_fps = v; }
 
-	void set_offset_locked (bool v) { video_offset_lock = v; }
-	void toggle_offset_locked () { video_offset_lock = !video_offset_lock; }
+	void set_offset_locked (bool v);
+	void toggle_offset_locked ();
 	bool is_offset_locked () { return video_offset_lock; }
 
 	void open_video_monitor ();
