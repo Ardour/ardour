@@ -35,83 +35,97 @@ class Region;
 class Diskstream;
 class IO;
 
+
 class Track : public Route, public PublicDiskstream
 {
   public:
-	Track (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal, DataType default_type = DataType::AUDIO);
+	Track (Session&, 
+	       std::string name, 
+	       Route::Flag f = Route::Flag (0), 
+	       TrackMode m = Normal, 
+	       DataType default_type = DataType::AUDIO); //A virer
 	virtual ~Track ();
 
 	int init ();
-
 	bool set_name (const std::string& str);
+	virtual DataType data_type () const = 0;//a virer
 
+	//TrackMode
 	TrackMode mode () const { return _mode; }
 	virtual int set_mode (TrackMode /*m*/) { return false; }
 	virtual bool can_use_mode (TrackMode /*m*/, bool& /*bounce_required*/) { return false; }
 	PBD::Signal0<void> TrackModeChanged;
 
+	//Monitoring
 	virtual void set_monitoring (MonitorChoice);
 	MonitorChoice monitoring_choice() const { return _monitoring; }
         MonitorState monitoring_state () const;
 	PBD::Signal0<void> MonitoringChanged;
 
-	MeterState metering_state () const;
-	
-	virtual int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                     bool state_changing);
-
-	int silent_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                 bool& need_butler);
-
-	virtual int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                  int declick, bool& need_butler) = 0;
-
-	bool needs_butler() const { return _needs_butler; }
-
-	virtual DataType data_type () const = 0;
-
+	//Recording
+	bool record_enabled() const;
+	void set_record_enabled (bool yn, void *src);
+	void prep_record_enabled (bool yn, void *src);
 	bool can_record();
-
-	void use_new_diskstream ();
-	virtual boost::shared_ptr<Diskstream> create_diskstream() = 0;
-	virtual void set_diskstream (boost::shared_ptr<Diskstream>);
-
-	void set_latency_compensation (framecnt_t);
-
-	enum FreezeState {
-		NoFreeze,
-		Frozen,
-		UnFrozen
-	};
-
+	
+	//FreezeState
+	enum FreezeState {NoFreeze,
+			  Frozen,
+			  UnFrozen};
 	FreezeState freeze_state() const;
-
 	virtual void freeze_me (InterThreadInfo&) = 0;
 	virtual void unfreeze () = 0;
 
-	/** @return true if the track can be bounced, or false otherwise.
-	 */
+	//Diskstream
+	void use_new_diskstream ();
+	virtual boost::shared_ptr<Diskstream> create_diskstream() = 0;
+	virtual void set_diskstream (boost::shared_ptr<Diskstream>);
+	bool using_diskstream_id (PBD::ID) const;
+	void set_block_size (pframes_t);
+
+	//Bounce
 	virtual bool bounceable (boost::shared_ptr<Processor> endpoint, bool include_endpoint) const = 0;
 	virtual boost::shared_ptr<Region> bounce (InterThreadInfo&) = 0;
-	virtual boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&, 
-							boost::shared_ptr<Processor> endpoint, bool include_endpoint) = 0;
-	virtual int export_stuff (BufferSet& bufs, framepos_t start_frame, framecnt_t nframes,
-				  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export) = 0;
+	virtual boost::shared_ptr<Region> bounce_range (framepos_t start, 
+							framepos_t end, InterThreadInfo&, 
+							boost::shared_ptr<Processor> endpoint, 
+							bool include_endpoint) = 0;
+	virtual int export_stuff ( BufferSet& bufs, 
+				  framepos_t start_frame, 
+				  framecnt_t nframes,
+				  boost::shared_ptr<Processor> endpoint, 
+				  bool include_endpoint, bool for_export) = 0;
 
+
+
+	MeterState metering_state () const;
+	
+	virtual int no_roll (pframes_t nframes, 
+			     framepos_t start_frame, 
+			     framepos_t end_frame,
+	                     bool state_changing);
+
+	int silent_roll (pframes_t nframes, 
+			 framepos_t start_frame, 
+			 framepos_t end_frame,
+	                 bool& need_butler);
+
+	virtual int roll (pframes_t nframes, 
+			  framepos_t start_frame, 
+			  framepos_t end_frame,
+	                  int declick, bool& need_butler) = 0;
+
+	bool needs_butler() const { return _needs_butler; 
+
+	void set_latency_compensation (framecnt_t);
+
+	//Persistance
 	XMLNode&    get_state();
 	XMLNode&    get_template();
 	virtual int set_state (const XMLNode&, int version);
 	static void zero_diskstream_id_in_xml (XMLNode&);
 
 	boost::shared_ptr<AutomationControl> rec_enable_control() { return _rec_enable_control; }
-
-	bool record_enabled() const;
-	void set_record_enabled (bool yn, void *src);
-	void prep_record_enabled (bool yn, void *src);
-
-	bool using_diskstream_id (PBD::ID) const;
-
-	void set_block_size (pframes_t);
 
 	/* PublicDiskstream interface */
 	boost::shared_ptr<Playlist> playlist ();
@@ -159,6 +173,7 @@ class Track : public Route, public PublicDiskstream
 	void adjust_playback_buffering ();
 	void adjust_capture_buffering ();
 
+	//Signals
 	PBD::Signal0<void> DiskstreamChanged;
 	PBD::Signal0<void> FreezeChange;
 	/* Emitted when our diskstream is set to use a different playlist */
