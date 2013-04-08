@@ -57,8 +57,9 @@ Text::redraw (Cairo::RefPtr<Cairo::Context> context) const
 	
 	_origin.x = ink_rect.get_x() / Pango::SCALE;
 	_origin.y = ink_rect.get_y() / Pango::SCALE;
-	_width = (ink_rect.get_width() + Pango::SCALE / 2) / Pango::SCALE;
-	_height = (ink_rect.get_height() + Pango::SCALE / 2) / Pango::SCALE;
+
+	_width = _origin.x + ((ink_rect.get_width() + Pango::SCALE / 2) / Pango::SCALE);
+	_height = _origin.y + ((ink_rect.get_height() + Pango::SCALE / 2) / Pango::SCALE);
 	
 	_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _width, _height);
 
@@ -67,6 +68,14 @@ Text::redraw (Cairo::RefPtr<Cairo::Context> context) const
 	/* and draw, in the appropriate color of course */
 
 	set_source_rgba (img_context, _color);
+	
+	std::cerr << "render " << _text << " as " 
+		  << ((_color >> 24) & 0xff) / 255.0
+		  << ((_color >> 16) & 0xff) / 255.0
+		  << ((_color >>  8) & 0xff) / 255.0
+		  << ((_color >>  0) & 0xff) / 255.
+		  << std::endl;
+
 	layout->show_in_cairo_context (img_context);
 
 	/* text has now been rendered in _image and is ready for blit in
@@ -79,8 +88,18 @@ Text::redraw (Cairo::RefPtr<Cairo::Context> context) const
 void
 Text::compute_bounding_box () const
 {
-	_bounding_box = Rect (_origin.x, _origin.y, _origin.x + _width, _origin.y + _height);
+	if (!_canvas || !_canvas->context () || _text.empty()) {
+		_bounding_box = boost::optional<Rect> ();
+		_bounding_box_dirty = false;
+		return;
+	}
+
+	redraw (_canvas->context());
+
+	_bounding_box = Rect (_origin.x, _origin.y, _width - _origin.x, _height - _origin.y);
 	_bounding_box_dirty = false;
+
+	cerr << "bbox for " << _text << " = " << _bounding_box << endl;
 }
 
 void
@@ -93,6 +112,8 @@ Text::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) cons
 	if (_need_redraw) {
 		redraw (context);
 	}
+	
+	cerr << " with " << _origin  << " and " << _width << " x " << _height << " render " << _text << endl;
 
 	context->set_source (_image, 0, 0);
 	context->rectangle (0, 0, _width, _height);
@@ -152,3 +173,13 @@ Text::set_color (Color color)
 }
 
 		
+void
+Text::dump (ostream& o) const
+{
+	Item::dump (o);
+
+	o << _canvas->indent() << '\t' << " text = " << _text << endl
+	  << _canvas->indent() << " color = " << _color;
+
+	o << endl;
+}

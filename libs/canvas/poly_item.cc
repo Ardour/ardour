@@ -109,8 +109,8 @@ PolyItem::dump (ostream& o) const
 {
 	Item::dump (o);
 
-	o << _canvas->indent() << _points.size() << " points" << endl;
+	o << _canvas->indent() << '\t' << _points.size() << " points" << endl;
 	for (Points::const_iterator i = _points.begin(); i != _points.end(); ++i) {
-		o << i->x << ", " << i->y << endl;
+		o << _canvas->indent() << "\t\t" << i->x << ", " << i->y << endl;
 	}
 }

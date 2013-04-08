@@ -77,9 +77,9 @@ Canvas::Canvas (XMLTree const * tree)
 void
 Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context) const
 {
-	// cerr << "CANVAS @ " << this << endl;
-	// dump (cerr);
-	// cerr << "-------------------------\n";
+	cerr << "CANVAS @ " << this << endl;
+	dump (cerr);
+	cerr << "-------------------------\n";
 
 	checkpoint ("render", "-> render");
 	render_count = 0;

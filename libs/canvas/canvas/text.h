@@ -25,6 +25,7 @@ public:
 	void set_alignment (Pango::Alignment);
 
         void set_size_chars (int nchars);
+        void dump (std::ostream&) const;
 
 private:
 	std::string      _text;

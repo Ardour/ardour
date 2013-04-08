@@ -341,11 +341,17 @@ Item::dump (ostream& o) const
 	boost::optional<Rect> bb = bounding_box();
 
 	o << _canvas->indent() << whatami() << ' ' << this;
+	
+#ifdef CANVAS_DEBUG
+	if (!name.empty()) {
+		o << ' ' << name;
+	}
+#endif
 
 	if (bb) {
 		o << endl << _canvas->indent() << "\tbbox: " << bb.get();
 	} else {
-		o << "bbox unset";
+		o << " bbox unset";
 	}
 
 	o << endl;
