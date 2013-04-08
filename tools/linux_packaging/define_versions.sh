@@ -8,7 +8,7 @@ if echo $r | grep -q -e - ; then
     revcount=`echo $r | cut -d- -f1`
 fi
 commit=`echo $r | cut -d- -f2`
-version=${release_version}${revcount:+:.revcount}
+version=${release_version}${revcount:+:.$revcount}
 
 #
 # Figure out the Build Type
