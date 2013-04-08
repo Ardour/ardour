@@ -271,7 +271,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	
 	_name_item = new ArdourCanvas::Text (group);
 	_name_item->set_font_description (name_font);
-	_name_item->set_color (0);
+	_name_item->set_color (RGBA_TO_UINT (0,0,0,255));
 
 #ifdef CANVAS_DEBUG
 	_name_item->name = string_compose ("Marker::_name_item for %1", annotation);
