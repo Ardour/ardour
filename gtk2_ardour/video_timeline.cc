@@ -231,6 +231,9 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 void
 VideoTimeLine::save_undo ()
 {
+	if (_session && video_offset_p != video_offset) {
+		_session->set_dirty ();
+	}
 	video_offset_p = video_offset;
 }
 
