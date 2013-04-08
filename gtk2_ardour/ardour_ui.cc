@@ -849,6 +849,7 @@ ARDOUR_UI::finish()
 			actions.push_back (_("Save and quit"));
 			switch (ask_about_saving_session(actions)) {
 			case -1:
+				ARDOUR_UI::instance()->video_timeline->set_session(_session);
 				return;
 				break;
 			case 1:
