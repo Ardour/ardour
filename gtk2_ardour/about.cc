@@ -132,6 +132,7 @@ static const char* authors[] = {
 	N_("Sam Chessman"),
 	N_("André Colomb"),
 	N_("Paul Davis"),
+	N_("Julien Dekozak"),
 	N_("Gerard van Dongen"),
 	N_("Colin Fletcher"),
 	N_("Dave Flick"),
