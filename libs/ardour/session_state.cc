@@ -827,6 +827,8 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	if (!pending) {
 
+		SaveSession (); /* EMIT SIGNAL */
+
 		save_history (snapshot_name);
 
 		bool was_dirty = dirty();

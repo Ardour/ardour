@@ -397,6 +397,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	PBD::Signal1<void,std::string> StateSaved;
 	PBD::Signal0<void> StateReady;
+	PBD::Signal0<void> SaveSession;
 
 	std::vector<std::string*>* possible_states() const;
 	static std::vector<std::string*>* possible_states (std::string path);

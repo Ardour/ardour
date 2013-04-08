@@ -171,6 +171,7 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 	SessionHandlePtr::set_session (s);
 	if (!_session) { return ; }
 
+	_session->SaveSession.connect_same_thread (*this, boost::bind (&VideoTimeLine::save_session, this));
 	LocaleGuard lg (X_("POSIX"));
 
 	XMLNode* node = _session->extra_xml (X_("Videotimeline"));
