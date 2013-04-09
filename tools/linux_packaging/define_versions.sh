@@ -4,9 +4,11 @@
 
 release_version=`grep -m 1 '[^A-Za-z_]LINUX_VERSION = ' ../../wscript | awk '{print $3}' | sed "s/'//g"`
 r=`cut -d'"' -f2 < ../../libs/ardour/revision.cc | sed -e 1d -e "s/$release_version-//"`
-revcount=`echo $r | cut -d- -f1`
+if echo $r | grep -q -e - ; then
+    revcount=`echo $r | cut -d- -f1`
+fi
 commit=`echo $r | cut -d- -f2`
-version=${release_version}.${revcount}
+version=${release_version}${revcount:+.$revcount}
 
 #
 # Figure out the Build Type

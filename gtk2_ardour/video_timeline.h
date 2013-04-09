@@ -72,8 +72,8 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	double get_video_file_fps () { return video_file_fps; }
 	void set_update_session_fps (bool v=true) { auto_set_session_fps = v; }
 
-	void set_offset_locked (bool v) { video_offset_lock = v; }
-	void toggle_offset_locked () { video_offset_lock = !video_offset_lock; }
+	void set_offset_locked (bool v);
+	void toggle_offset_locked ();
 	bool is_offset_locked () { return video_offset_lock; }
 
 	void open_video_monitor ();
@@ -93,6 +93,7 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	void flush_cache ();
 	void save_session ();
 	void close_session ();
+	void sync_session_state (); /* video-monitor does not actively report window/pos changes, query it */
 	float get_apv(); /* audio frames per video frame; */
 	ARDOUR::framecnt_t get_duration () { return video_duration;}
 	ARDOUR::frameoffset_t get_offset () { return video_offset;}
@@ -137,6 +138,8 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	PBD::Signal0<void> VtlUpdate;
 	PBD::Signal1<void,std::string> GuiUpdate;
 	void gui_update (const std::string &);
+
+	PBD::ScopedConnection sessionsave;
 };
 
 #endif /* __ardour_video_timeline_h__ */

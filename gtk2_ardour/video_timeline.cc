@@ -87,63 +87,26 @@ VideoTimeLine::save_session ()
 
 	LocaleGuard lg (X_("POSIX"));
 
-	bool is_dirty = false;
-
-	XMLNode* prev = _session->extra_xml (X_("Videomonitor"));
-
-	/* remember if vmonitor was open.. */
 	XMLNode* node = new XMLNode(X_("Videomonitor"));
-
+	if (!node) return;
 	node->add_property (X_("active"), (vmonitor && vmonitor->is_started())?"yes":"no");
-	if (!prev || !(prev->property (X_("active")) && prev->property (X_("active"))->value() == node->property(X_("active"))->value()) ){
-		_session->add_extra_xml (*node);
-		is_dirty=true; // TODO not if !prev && value==default
+	_session->add_extra_xml (*node);
+
+	if (vmonitor) {
+		if (vmonitor->is_started()) {
+			vmonitor->query_full_state(true);
+		}
+		vmonitor->save_session();
 	}
 
 	/* VTL settings */
 	node = _session->extra_xml (X_("Videotimeline"));
-
-	if (node) {
-		if (!(node->property(X_("id")) && node->property(X_("id"))->value() == id().to_s())) {
-			node->add_property (X_("id"), id().to_s());
-			is_dirty=true;
-		}
-	}
-
-	/* remember timeline height.. */
-	if (node) {
-		int h = editor->get_videotl_bar_height();
-		if (!(node->property(X_("Height")) && atoi(node->property(X_("Height"))->value().c_str())==h)) {
-			node->add_property (X_("Height"), h);
-			is_dirty=true;
-		}
-	}
-
-	/* save video-offset-lock */
-	if (node) {
-		if (!(node->property(X_("VideoOffsetLock")) && atoi(node->property(X_("VideoOffsetLock"))->value().c_str())==video_offset_lock)) {
-			node->add_property (X_("VideoOffsetLock"), video_offset_lock?X_("1"):X_("0"));
-			is_dirty=true;
-		}
-	}
-	/* save video-offset */
-	if (node) {
-		if (!(node->property(X_("VideoOffset")) && atoll(node->property(X_("VideoOffset"))->value().c_str())==video_offset)) {
-			node->add_property (X_("VideoOffset"), video_offset);
-			is_dirty=true;
-		}
-	}
-
-	/* save 'auto_set_session_fps' */
-	if (node) {
-		if (!(node->property(X_("AutoFPS")) && atoi(node->property(X_("AutoFPS"))->value().c_str())==auto_set_session_fps)) {
-			node->add_property (X_("AutoFPS"), auto_set_session_fps?X_("1"):X_("0"));
-			is_dirty=true;
-		}
-	}
-	if (is_dirty) {
-		_session->set_dirty ();
-	}
+	if (!node) return;
+	node->add_property (X_("id"), id().to_s());
+	node->add_property (X_("Height"), editor->get_videotl_bar_height());
+	node->add_property (X_("VideoOffsetLock"), video_offset_lock?X_("1"):X_("0"));
+	node->add_property (X_("VideoOffset"), video_offset);
+	node->add_property (X_("AutoFPS"), auto_set_session_fps?X_("1"):X_("0"));
 }
 
 /* close and save settings */
@@ -153,13 +116,22 @@ VideoTimeLine::close_session ()
 	if (video_duration == 0) {
 		return;
 	}
-	save_session();
+	sessionsave.disconnect();
 	close_video_monitor();
 
 	remove_frames();
 	video_filename = "";
 	video_duration = 0;
 	GuiUpdate("set-xjadeo-sensitive-off");
+}
+
+void
+VideoTimeLine::sync_session_state ()
+{
+	if (!_session || !vmonitor || !vmonitor->is_started()) {
+		return;
+	}
+	save_session();
 }
 
 /** load settings from session */
@@ -169,6 +141,7 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 	SessionHandlePtr::set_session (s);
 	if (!_session) { return ; }
 
+	_session->SaveSession.connect_same_thread (sessionsave, boost::bind (&VideoTimeLine::save_session, this));
 	LocaleGuard lg (X_("POSIX"));
 
 	XMLNode* node = _session->extra_xml (X_("Videotimeline"));
@@ -226,8 +199,27 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 }
 
 void
+VideoTimeLine::set_offset_locked (bool v) {
+	if (_session && v != video_offset_lock) {
+		_session->set_dirty ();
+	}
+	video_offset_lock = v;
+}
+
+void
+VideoTimeLine::toggle_offset_locked () {
+	video_offset_lock = !video_offset_lock;
+	if (_session) {
+		_session->set_dirty ();
+	}
+}
+
+void
 VideoTimeLine::save_undo ()
 {
+	if (_session && video_offset_p != video_offset) {
+		_session->set_dirty ();
+	}
 	video_offset_p = video_offset;
 }
 
@@ -608,6 +600,9 @@ VideoTimeLine::gui_update(std::string const & t) {
 
 void
 VideoTimeLine::set_height (int height) {
+	if (_session && bar_height != height) {
+		_session->set_dirty ();
+	}
 	bar_height = height;
 	flush_local_cache();
 }
@@ -736,6 +731,17 @@ VideoTimeLine::open_video_monitor() {
 		GuiUpdate("set-xjadeo-active-on");
 		vmonitor->set_fps(video_file_fps);
 		vmonitor->open(video_filename);
+
+		if (_session) {
+			XMLNode* node = _session->extra_xml (X_("Videomonitor"));
+			if (node) {
+				const XMLProperty* prop = node->property (X_("active"));
+				if (prop && prop->value() != "yes") _session->set_dirty ();
+			} else {
+				_session->set_dirty ();
+			}
+		}
+
 	}
 }
 
@@ -762,9 +768,13 @@ VideoTimeLine::terminated_video_monitor () {
 	}
 	GuiUpdate("set-xjadeo-active-off");
 	vmonitor=0;
-  if (reopen_vmonitor) {
+	if (reopen_vmonitor) {
 		reopen_vmonitor=false;
 		open_video_monitor();
+	} else {
+		if (_session) {
+			_session->set_dirty ();
+		}
 	}
 }
 

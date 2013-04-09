@@ -79,11 +79,9 @@ VideoMonitor::start ()
 }
 
 void
-VideoMonitor::quit ()
+VideoMonitor::query_full_state (bool wait)
 {
-	if (!is_started()) return;
-	if (state_connection.connected()) { state_connection.disconnect(); }
-	if (clock_connection.connected()) { clock_connection.disconnect(); }
+	knownstate = 0;
 	process->write_to_stdin("get windowsize\n");
 	process->write_to_stdin("get windowpos\n");
 	process->write_to_stdin("get letterbox\n");
@@ -91,10 +89,21 @@ VideoMonitor::quit ()
 	process->write_to_stdin("get ontop\n");
 	process->write_to_stdin("get offset\n");
 	process->write_to_stdin("get osdcfg\n");
+	int timeout = 40;
+	if (wait && knownstate !=127 && --timeout) {
+		usleep(50000);
+		sched_yield();
+	}
+}
+
+void
+VideoMonitor::quit ()
+{
+	if (!is_started()) return;
+	if (state_connection.connected()) { state_connection.disconnect(); }
+	if (clock_connection.connected()) { clock_connection.disconnect(); }
 	process->write_to_stdin("quit\n");
-#if 1
-	/* wait for replies to the config requests above.
-	 * the 'quit' command should result in process termination
+	/* the 'quit' command should result in process termination
 	 * but in case it fails (communication failure, SIGSTOP, ??)
 	 * here's a timeout..
 	 */
@@ -104,11 +113,8 @@ VideoMonitor::quit ()
 		sched_yield();
 	}
 	if (timeout <= 0) {
-		printf("xjadeo connection: time-out. session may not be saved.\n");
 		process->terminate();
 	}
-#endif
-	save_session();
 }
 
 void
@@ -145,9 +151,16 @@ void
 VideoMonitor::querystate ()
 {
 	/* clock-divider hack -- RapidScreenUpdate == every_point_one_seconds */
-	state_clk_divide = (state_clk_divide + 1) % 15; // every 1.5 seconds
-	if (state_clk_divide != 0) return;
-
+	state_clk_divide = (state_clk_divide + 1) % 300; // 30 secs
+	if (state_clk_divide == 0) {
+		// every 30 seconds
+		query_full_state(false);
+		return;
+	}
+	if (state_clk_divide%25 != 0) {
+		return;
+	}
+	// every 2.5 seconds:
 	process->write_to_stdin("get fullscreen\n");
 	process->write_to_stdin("get ontop\n");
 	process->write_to_stdin("get osdcfg\n");
@@ -268,35 +281,50 @@ VideoMonitor::parse_output (std::string d, size_t s)
 #if 0 /* DEBUG */
 					std::cout << "parsed: " << key << " => " << value << std::endl;
 #endif
-					       if(key ==  "windowpos") {
+					if       (key ==  "windowpos") {
+						knownstate |= 16;
+						if (xjadeo_settings["window xy"] != value) {
+							if (!starting && _session) _session->set_dirty ();
+						}
 						xjadeo_settings["window xy"] = value;
 					} else if(key ==  "windowsize") {
+						knownstate |= 32;
+						if (xjadeo_settings["window size"] != value) {
+							if (!starting && _session) _session->set_dirty ();
+						}
 						xjadeo_settings["window size"] = value;
 					} else if(key ==  "windowontop") {
+						knownstate |= 2;
 						if (starting || xjadeo_settings["window ontop"] != value) {
-							starting &= ~2;
+							if (!starting && _session) _session->set_dirty ();
 							if (atoi(value.c_str())) { UiState("xjadeo-window-ontop-on"); }
 							else { UiState("xjadeo-window-ontop-off"); }
+							starting &= ~2;
 						}
 						xjadeo_settings["window ontop"] = value;
 					} else if(key ==  "fullscreen") {
+						knownstate |= 4;
 						if (starting || xjadeo_settings["window zoom"] != value) {
-							starting &= ~4;
+							if (!starting && _session) _session->set_dirty ();
 							if (atoi(value.c_str())) { UiState("xjadeo-window-fullscreen-on"); }
 							else { UiState("xjadeo-window-fullscreen-off"); }
+							starting &= ~4;
 						}
 						xjadeo_settings["window zoom"] = value;
 					} else if(key ==  "letterbox") {
+						knownstate |= 8;
 						if (starting || xjadeo_settings["window letterbox"] != value) {
-							starting &= ~8;
+							if (!starting && _session) _session->set_dirty ();
 							if (atoi(value.c_str())) { UiState("xjadeo-window-letterbox-on"); }
 							else { UiState("xjadeo-window-letterbox-off"); }
+							starting &= ~8;
 						}
 						xjadeo_settings["window letterbox"] = value;
 					} else if(key ==  "osdmode") {
-						if (starting || xjadeo_settings["osd mode"] != value) {
-							starting &= ~1;
-							osdmode = atoi(value.c_str());
+						knownstate |= 1;
+						osdmode = atoi(value.c_str());
+						if (starting || atoi(xjadeo_settings["osd mode"].c_str()) != osdmode) {
+							if (!starting && _session) _session->set_dirty ();
 							if ((osdmode & 1) == 1) { UiState("xjadeo-window-osd-frame-on"); }
 							if ((osdmode & 1) == 0) { UiState("xjadeo-window-osd-frame-off"); }
 							if ((osdmode & 2) == 2) { UiState("xjadeo-window-osd-timecode-on"); }
@@ -304,8 +332,13 @@ VideoMonitor::parse_output (std::string d, size_t s)
 							if ((osdmode & 8) == 8) { UiState("xjadeo-window-osd-box-on"); }
 							if ((osdmode & 8) == 0) { UiState("xjadeo-window-osd-box-off"); }
 						}
+						starting &= ~1;
 						xjadeo_settings["osd mode"] = value;
 					} else if(key ==  "offset") {
+						knownstate |= 64;
+						if (xjadeo_settings["set offset"] != value) {
+							if (!starting && _session) _session->set_dirty ();
+						}
 						xjadeo_settings["set offset"] = value;
 					}
 				}
@@ -321,7 +354,6 @@ void
 VideoMonitor::terminated ()
 {
 	process->terminate(); // from gui-context clean up
-	save_session();
 	Terminated();
 }
 
@@ -329,35 +361,13 @@ void
 VideoMonitor::save_session ()
 {
 	if (!_session) { return; }
-	bool is_dirty = false;
-
-	XMLNode* prev = _session->extra_xml (X_("XJSettings"));
-	XMLNode* node = new XMLNode(X_("XJSettings"));
-	XMLNodeList nlist;
-	if (!prev) { is_dirty = true; }
-	else { nlist = prev->children(); }
+	XMLNode* node = _session->extra_xml (X_("XJSettings"));
+	if (!node) return;
 
 	for(XJSettings::const_iterator it = xjadeo_settings.begin(); it != xjadeo_settings.end(); ++it) {
 	  XMLNode* child = node->add_child (X_("XJSetting"));
 		child->add_property (X_("k"), it->first);
 		child->add_property (X_("v"), it->second);
-		if (!is_dirty) {
-			bool found = false;
-			XMLNodeConstIterator i;
-			for (i = nlist.begin(); i != nlist.end(); ++i) {
-				if ((*i)->property(X_("k"))->value() == it->first &&
-				    (*i)->property(X_("v"))->value() == it->second ) {
-					found=true;
-					break;
-				}
-			}
-			if (!found) {is_dirty = true;}
-		}
-	}
-
-	if (is_dirty) {
-	  _session->add_extra_xml (*node);
-	  _session->set_dirty ();
 	}
 }
 
