@@ -95,6 +95,9 @@ VideoTimeLine::save_session ()
 	_session->add_extra_xml (*node);
 
 	if (vmonitor) {
+		if (vmonitor->is_started()) {
+			vmonitor->query_full_state(true);
+		}
 		vmonitor->save_session();
 	}
 
@@ -130,7 +133,6 @@ VideoTimeLine::sync_session_state ()
 	if (!_session || !vmonitor || !vmonitor->is_started()) {
 		return;
 	}
-	vmonitor->query_full_state(true);
 	save_session();
 }
 
