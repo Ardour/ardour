@@ -137,6 +137,8 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	PBD::Signal0<void> VtlUpdate;
 	PBD::Signal1<void,std::string> GuiUpdate;
 	void gui_update (const std::string &);
+
+	PBD::ScopedConnection sessionsave;
 };
 
 #endif /* __ardour_video_timeline_h__ */

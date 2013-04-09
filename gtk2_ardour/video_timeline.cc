@@ -155,6 +155,7 @@ VideoTimeLine::close_session ()
 	if (video_duration == 0) {
 		return;
 	}
+	sessionsave.disconnect();
 	save_session();
 	close_video_monitor();
 
@@ -171,7 +172,7 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 	SessionHandlePtr::set_session (s);
 	if (!_session) { return ; }
 
-	_session->SaveSession.connect_same_thread (*this, boost::bind (&VideoTimeLine::save_session, this));
+	_session->SaveSession.connect_same_thread (sessionsave, boost::bind (&VideoTimeLine::save_session, this));
 	LocaleGuard lg (X_("POSIX"));
 
 	XMLNode* node = _session->extra_xml (X_("Videotimeline"));
