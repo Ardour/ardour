@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cairomm/context.h>
+
 #include "pbd/stacktrace.h"
+#include "pbd/compose.h"
 #include "pbd/xml++.h"
 
 #include "canvas/group.h"
@@ -55,15 +57,34 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	ensure_lut ();
 	vector<Item*> items = _lut->get (area);
 
+	++render_depth;
+		
+#ifdef CANVAS_DEBUG
+	if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+		cerr << string_compose ("%1GROUP %2 render %3 items out of %4\n", 
+					_canvas->render_indent(), (name.empty() ? string ("[unnamed]") : name), items.size(), _items.size());
+	}
+#endif
+
 	for (vector<Item*>::const_iterator i = items.begin(); i != items.end(); ++i) {
 
 		if (!(*i)->visible ()) {
+#ifdef CANVAS_DEBUG
+			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+				cerr << _canvas->render_indent() << "Item " << (*i)->whatami() << ' ' << (*i)->name << " invisible - skipped\n";
+			}
+#endif
 			continue;
 		}
 		
 		boost::optional<Rect> item_bbox = (*i)->bounding_box ();
 
 		if (!item_bbox) {
+#ifdef CANVAS_DEBUG
+			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+				cerr << _canvas->render_indent() << "Item " << (*i)->whatami() << ' ' << (*i)->name << " empty - skipped\n";
+			}
+#endif
 			continue;
 		}
 
@@ -77,11 +98,26 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 			/* render the intersection */
 			context->save ();
 			context->translate ((*i)->position().x, (*i)->position().y);
+#ifdef CANVAS_DEBUG
+			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+				cerr << string_compose ("%1render %2 %3\n", _canvas->render_indent(), (*i)->whatami(),
+							(*i)->name);
+			}
+#endif
 			(*i)->render (r.get(), context);
-			context->restore ();
 			++render_count;
+			context->restore ();
+		} else {
+#ifdef CANVAS_DEBUG
+			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+				cerr << string_compose ("%1skip render of %2 %3, no intersection\n", _canvas->render_indent(), (*i)->whatami(),
+							(*i)->name);
+			}
+#endif
 		}
 	}
+
+	--render_depth;
 }
 
 void

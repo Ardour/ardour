@@ -92,6 +92,7 @@ public:
 	}
 
         std::string indent() const;
+        std::string render_indent() const;
         void dump (std::ostream&) const;
     
 protected:

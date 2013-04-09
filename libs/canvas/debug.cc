@@ -7,10 +7,12 @@ using namespace std;
 uint64_t PBD::DEBUG::CanvasItems = PBD::new_debug_bit ("canvasitems");
 uint64_t PBD::DEBUG::CanvasItemsDirtied = PBD::new_debug_bit ("canvasitemsdirtied");
 uint64_t PBD::DEBUG::CanvasEvents = PBD::new_debug_bit ("canvasevents");
+uint64_t PBD::DEBUG::CanvasRender = PBD::new_debug_bit ("canvasrender");
 
 struct timeval ArdourCanvas::epoch;
 map<string, struct timeval> ArdourCanvas::last_time;
 int ArdourCanvas::render_count;
+int ArdourCanvas::render_depth;
 int ArdourCanvas::dump_depth;
 
 void

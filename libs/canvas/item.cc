@@ -22,21 +22,17 @@ Item::Item (Canvas* canvas)
 }
 
 Item::Item (Group* parent)
-	: _parent (parent)
+	: _canvas (parent->canvas ())
+	, _parent (parent)
 {
-	assert (parent);
-	_canvas = _parent->canvas ();
-	
 	init ();
 }
 
 Item::Item (Group* parent, Duple position)
-	: _parent (parent)
+	: _canvas (parent->canvas())
+	, _parent (parent)
 	, _position (position)
 {
-	assert (parent);
-	_canvas = _parent->canvas ();
-	
 	init ();
 }
 
@@ -56,7 +52,9 @@ Item::init ()
 
 Item::~Item ()
 {
-	_canvas->item_going_away (this, _bounding_box);
+	if (_canvas) {
+		_canvas->item_going_away (this, _bounding_box);
+	}
 	
 	if (_parent) {
 		_parent->remove (this);

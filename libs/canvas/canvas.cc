@@ -77,9 +77,13 @@ Canvas::Canvas (XMLTree const * tree)
 void
 Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context) const
 {
-	cerr << "CANVAS @ " << this << endl;
-	dump (cerr);
-	cerr << "-------------------------\n";
+#ifdef CANVAS_DEBUG
+	if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+		cerr << "CANVAS @ " << this << endl;
+		dump (cerr);
+		cerr << "-------------------------\n";
+	}
+#endif
 
 	checkpoint ("render", "-> render");
 	render_count = 0;
@@ -131,6 +135,18 @@ Canvas::indent() const
 
 	for (int n = 0; n < ArdourCanvas::dump_depth; ++n) {
 		s += '\t';
+	}
+
+	return s;
+}
+
+std::string
+Canvas::render_indent() const
+{ 
+	string s;
+
+	for (int n = 0; n < ArdourCanvas::render_depth; ++n) {
+		s += ' ';
 	}
 
 	return s;
@@ -334,6 +350,10 @@ GtkCanvas::deliver_event (Duple point, GdkEvent* event)
 	while (i != items.rend()) {
 
 		if ((*i)->ignore_events ()) {
+			DEBUG_TRACE (
+				PBD::DEBUG::CanvasEvents,
+				string_compose ("canvas event ignored by %1 %2\n", (*i)->whatami(), (*i)->name.empty() ? "[unknown]" : (*i)->name)
+				);
 			++i;
 			continue;
 		}
@@ -342,7 +362,7 @@ GtkCanvas::deliver_event (Duple point, GdkEvent* event)
 			/* this item has just handled the event */
 			DEBUG_TRACE (
 				PBD::DEBUG::CanvasEvents,
-				string_compose ("canvas event handled by %1\n", (*i)->name.empty() ? "[unknown]" : (*i)->name)
+				string_compose ("canvas event handled by %1 %2\n", (*i)->whatami(), (*i)->name.empty() ? "[unknown]" : (*i)->name)
 				);
 			
 			return true;
@@ -350,7 +370,7 @@ GtkCanvas::deliver_event (Duple point, GdkEvent* event)
 		
 		DEBUG_TRACE (
 			PBD::DEBUG::CanvasEvents,
-			string_compose ("canvas event ignored by %1\n", (*i)->name.empty() ? "[unknown]" : (*i)->name)
+			string_compose ("canvas event left unhandled by %1 %2\n", (*i)->whatami(), (*i)->name.empty() ? "[unknown]" : (*i)->name)
 			);
 		
 		++i;

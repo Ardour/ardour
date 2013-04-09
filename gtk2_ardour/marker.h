@@ -104,7 +104,6 @@ class Marker : public sigc::trackable
         ArdourCanvas::Text *_name_item;
 	ArdourCanvas::Points *points;
 	ArdourCanvas::Line* _line;
-	ArdourCanvas::Points *line_points;
 	ArdourCanvas::Rectangle* _name_background;
 
 	std::string  _name;
