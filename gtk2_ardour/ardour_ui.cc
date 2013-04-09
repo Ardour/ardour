@@ -834,13 +834,10 @@ ARDOUR_UI::idle_finish ()
 void
 ARDOUR_UI::finish()
 {
-#ifdef WITH_VIDEOTIMELINE
-	/* close video-monitor & pending requests
-	 * would better be done in ~Editor() but that is not called..
-	 */
-	ARDOUR_UI::instance()->video_timeline->close_session();
-#endif
 	if (_session) {
+#ifdef WITH_VIDEOTIMELINE
+		ARDOUR_UI::instance()->video_timeline->sync_session_state();
+#endif
 
 		if (_session->dirty()) {
 			vector<string> actions;
@@ -2557,7 +2554,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	 */
 #ifdef WITH_VIDEOTIMELINE
 	if (_session && ARDOUR_UI::instance()->video_timeline) {
-		ARDOUR_UI::instance()->video_timeline->close_session();
+		ARDOUR_UI::instance()->video_timeline->sync_session_state();
 	}
 #endif
 	if (_session && _session->dirty()) {
@@ -2744,9 +2741,6 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 void
 ARDOUR_UI::close_session()
 {
-#ifdef WITH_VIDEOTIMELINE
-	ARDOUR_UI::instance()->video_timeline->close_session();
-#endif
 	if (!check_audioengine()) {
 		return;
 	}

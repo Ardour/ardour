@@ -217,7 +217,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 {
 #ifdef WITH_VIDEOTIMELINE
 	if (_session) {
-		ARDOUR_UI::instance()->video_timeline->close_session();
+		ARDOUR_UI::instance()->video_timeline->sync_session_state();
 	}
 #endif
 	if (_session && _session->dirty()) {
@@ -250,6 +250,9 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, false);
 
 	rec_button.set_sensitive (false);
+#ifdef WITH_VIDEOTIMELINE
+	ARDOUR_UI::instance()->video_timeline->close_session();
+#endif
 
 	stop_blinking ();
 	stop_clocking ();
