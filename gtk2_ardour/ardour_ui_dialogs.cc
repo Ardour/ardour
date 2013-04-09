@@ -217,11 +217,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 {
 #ifdef WITH_VIDEOTIMELINE
 	if (_session) {
-		/* close video-monitor
-		 * this needed to enfore querying its settings (window size,..)
-		 * which are reported asynchroneously.
-		 */
-		ARDOUR_UI::instance()->video_timeline->close_session();
+		ARDOUR_UI::instance()->video_timeline->sync_session_state();
 	}
 #endif
 	if (_session && _session->dirty()) {
@@ -231,7 +227,6 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 		actions.push_back (_("Save and close"));
 		switch (ask_about_saving_session (actions)) {
 		case -1:
-			ARDOUR_UI::instance()->video_timeline->set_session(_session);
 			// cancel
 			return 1;
 
@@ -255,6 +250,9 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, false);
 
 	rec_button.set_sensitive (false);
+#ifdef WITH_VIDEOTIMELINE
+	ARDOUR_UI::instance()->video_timeline->close_session();
+#endif
 
 	stop_blinking ();
 	stop_clocking ();
