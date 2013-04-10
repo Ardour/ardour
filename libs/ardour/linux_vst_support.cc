@@ -34,6 +34,8 @@
 #include <glibmm/fileutils.h>
 
 #include "ardour/linux_vst_support.h"
+#include "ardour/vst_plugin.h"
+
 #include "pbd/basename.h"
 #include "pbd/error.h"
 
@@ -293,36 +295,43 @@ vstfx_unload (VSTHandle* fhandle)
 	return 0;
 }
 
-/*This instantiates a plugin*/
+/**
+   Instantiates a VST plugin and also set _state of its plugin argument 
+ */
 
-VSTState *
-vstfx_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
+VSTState*
+vstfx_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void *ptr)
 {
 	VSTState* vstfx = vstfx_new ();
+	ARDOUR::VSTPlugin* plugin = reinterpret_cast<ARDOUR::VSTPlugin*> (ptr);
 
-	if(fhandle == 0)
-	{
+	if (fhandle == 0) {
 	    vstfx_error( "** ERROR ** VSTFX : The handle was 0\n" );
 	    return 0;
 	}
 
-	if ((vstfx->plugin = fhandle->main_entry (amc)) == 0) 
-	{
+	if ((vstfx->plugin = fhandle->main_entry (amc)) == 0) {
 		vstfx_error ("** ERROR ** VSTFX : %s could not be instantiated :(\n", fhandle->name);
 		free (vstfx);
 		return 0;
 	}
 	
 	vstfx->handle = fhandle;
-	vstfx->plugin->user = userptr;
+	vstfx->plugin->user = plugin;
 		
-	if (vstfx->plugin->magic != kEffectMagic)
-	{
+	if (vstfx->plugin->magic != kEffectMagic) {
 		vstfx_error ("** ERROR ** VSTFX : %s is not a VST plugin\n", fhandle->name);
 		free (vstfx);
 		return 0;
 	}
+
+	/* need to set this here because some plugins make audioMaster
+	 * callbacks from within effOpen, and _state must be set for
+	 * that to work.
+	 */
 	
+	plugin->set_state (vstfx);
+
 	vstfx->plugin->dispatcher (vstfx->plugin, effOpen, 0, 0, 0, 0);
 	
 	/*May or May not need to 'switch the plugin on' here - unlikely

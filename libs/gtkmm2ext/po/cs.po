@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-12-20 10:09+0100\n"
+"POT-Creation-Date: 2013-04-09 09:28-0400\n"
 "PO-Revision-Date: 2013-02-22 21:09+0100\n"
 "Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
 "Language-Team: Czech <kde-i18n-doc@kde.org>\n"
@@ -80,7 +80,8 @@ msgid "Unknown"
 msgstr "Neznámý"
 
 #: keyboard.cc:534
-msgid "Ardour key bindings file not found at \"%1\" or contains errors."
+#, fuzzy
+msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "Soubor s přiřazením kláves pro Ardour \"%1\"se nepodařilo najít, nebo "
 "obsahuje chyby."
@@ -96,5 +97,3 @@ msgstr "Klepněte pro ukotvení do hlavního okna"
 #: textviewer.cc:34
 msgid "Close"
 msgstr "Zavřít"
-
-
