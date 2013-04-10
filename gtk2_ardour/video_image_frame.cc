@@ -347,7 +347,6 @@ extern "C" {
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, ARDOUR_USER_AGENT);
 		curl_easy_setopt(curl, CURLOPT_TIMEOUT, ARDOUR_CURL_TIMEOUT);
 		curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
-#define CURLERRORDEBUG /* XXX */
 #ifdef CURLERRORDEBUG
 		char curlerror[CURL_ERROR_SIZE] = "";
 		curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curlerror);
