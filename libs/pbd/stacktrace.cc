@@ -93,7 +93,6 @@ PBD::stacktrace (std::ostream& out, int levels)
 			
 			for (i = 0; i < size && (levels == 0 || i < size_t(levels)); i++) {
 				out << "  " << demangle (strings[i]) << std::endl;
-				std::cerr << "  " << demangle (strings[i]) << std::endl;
 			}
 			
 			free (strings);
