@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
 #endif
 
 #include "system_exec.h"
@@ -293,6 +294,10 @@ SystemExec::output_interposer()
 {
 	DWORD bytesRead = 0;
 	char data[BUFSIZ];
+#if 0 // untested code to set up nonblocking
+	unsigned long l = 1;
+	ioctlsocket(stdoutP[0], FIONBIO, &l);
+#endif
 	while(1) {
 #if 0 // for non-blocking pipes..
 		DWORD bytesAvail = 0;
@@ -411,14 +416,15 @@ SystemExec::terminate ()
 	::pthread_mutex_lock(&write_lock);
 	close_stdin();
 	if (pid) {
-		::usleep(100000);
+		::usleep(50000);
+		sched_yield();
 		wait(WNOHANG);
 	}
 
 	if (pid) {
-		::fprintf(stderr, "Child process is running. trying SIGTERM\n");
 		::kill(pid, SIGTERM);
 		::usleep(50000);
+		sched_yield();
 		wait(WNOHANG);
 	}
 	if (pid) {
@@ -482,7 +488,7 @@ SystemExec::start (int stderr_mode)
 		::close(pok[1]);
 		char buf;
 		for ( ;; ) {
-			int n = ::read(pok[0], &buf, 1 );
+			ssize_t n = ::read(pok[0], &buf, 1 );
 			if ( n==1 ) {
 				/* child process returned from execve */
 				pid=0;
@@ -602,7 +608,11 @@ SystemExec::output_interposer()
 {
 	int rfd=pout[0];
 	char buf[BUFSIZ];
-	size_t r;
+	ssize_t r;
+	unsigned long l = 1;
+
+  ioctl(rfd, FIONBIO, &l); // set non-blocking I/O
+
 	for (;fcntl(rfd, F_GETFL)!=-1;) {
 		r = read(rfd, buf, sizeof(buf));
 		if (r < 0 && (errno == EINTR || errno == EAGAIN)) {
