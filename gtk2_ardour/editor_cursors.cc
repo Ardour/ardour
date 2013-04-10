@@ -39,12 +39,11 @@ EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,Ardour
 	_time_bars_canvas_item.set_outline_width (1);
 	_track_canvas_item.set_outline_width (1);
 
-	for (int i = 0; i < 2; ++i) {
-		_time_bars_canvas_item.set_show_head (i, true);
-		_time_bars_canvas_item.set_head_height (i, 18);
-		_time_bars_canvas_item.set_head_width (i, 15);
-		_time_bars_canvas_item.set_head_outward (i, false);
-	}
+	_time_bars_canvas_item.set_show_head (0, true);
+	_time_bars_canvas_item.set_head_height (0, 9);
+	_time_bars_canvas_item.set_head_width (0, 16);
+	_time_bars_canvas_item.set_head_outward (0, false);
+	_time_bars_canvas_item.set_show_head (1, false); // head only
 
 	_time_bars_canvas_item.set_data ("cursor", this);
 	_track_canvas_item.set_data ("cursor", this);
