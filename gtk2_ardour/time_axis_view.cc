@@ -288,12 +288,6 @@ void
 TimeAxisView::clip_to_viewport ()
 {
 	if (marked_for_display()) {
-		if (_y_position + _effective_height < _editor.get_trackview_group_vertical_offset () || 
- 	            _y_position > _editor.get_trackview_group_vertical_offset () + _canvas_display->height()) {
-			_canvas_background->hide ();
-			_canvas_display->hide ();
-			return;
-		}
 		_canvas_background->show ();
 		_canvas_display->show ();
 	}

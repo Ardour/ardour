@@ -28,6 +28,8 @@
 #include "ardour/track.h"
 #include "ardour/session.h"
 
+#include "pbd/compose.h"
+
 #include "canvas/rectangle.h"
 #include "canvas/debug.h"
 
@@ -63,13 +65,13 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* background_g
 	, height(tv.height)
 	, last_rec_data_frame(0)
 {
-	CANVAS_DEBUG_NAME (_background_group, "SV background group");
-	CANVAS_DEBUG_NAME (_canvas_group, "SV canvas group");
+	CANVAS_DEBUG_NAME (_background_group, string_compose ("SV background group %1", _trackview.name()));
+	CANVAS_DEBUG_NAME (_canvas_group, string_compose ("SV canvas group %1", _trackview.name()));
 	
 	/* set_position() will position the group */
 
 	canvas_rect = new ArdourCanvas::Rectangle (_background_group);
-	CANVAS_DEBUG_NAME (canvas_rect, "SV canvas rectangle");
+	CANVAS_DEBUG_NAME (canvas_rect, string_compose ("SV canvas rectangle %1", _trackview.name()));
 	canvas_rect->set (ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, tv.current_height ()));
 	canvas_rect->raise(1); // raise above tempo lines
 

@@ -109,7 +109,7 @@ TimeAxisViewItem::TimeAxisViewItem(
 	, _dragging (false)
 {
 	group = new ArdourCanvas::Group (&parent);
-	CANVAS_DEBUG_NAME (group, "TAVI group");
+	CANVAS_DEBUG_NAME (group, string_compose ("TAVI group for %1", it_name));
 
 	init (it_name, spu, base_color, start, duration, vis, true, true);
 }

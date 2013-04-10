@@ -755,6 +755,7 @@ Editor::ensure_time_axis_view_is_visible (const TimeAxisView& tav)
 void
 Editor::tie_vertical_scrolling ()
 {
+
 	_track_canvas_vadj->set_value (vertical_adjustment.get_value ());
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {

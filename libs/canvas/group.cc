@@ -71,7 +71,7 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		if (!(*i)->visible ()) {
 #ifdef CANVAS_DEBUG
 			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-				cerr << _canvas->render_indent() << "Item " << (*i)->whatami() << ' ' << (*i)->name << " invisible - skipped\n";
+				cerr << _canvas->render_indent() << "Item " << (*i)->whatami() << " [" << (*i)->name << "] invisible - skipped\n";
 			}
 #endif
 			continue;
@@ -82,7 +82,7 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		if (!item_bbox) {
 #ifdef CANVAS_DEBUG
 			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-				cerr << _canvas->render_indent() << "Item " << (*i)->whatami() << ' ' << (*i)->name << " empty - skipped\n";
+				cerr << _canvas->render_indent() << "Item " << (*i)->whatami() << " [" << (*i)->name << "] empty - skipped\n";
 			}
 #endif
 			continue;
@@ -279,6 +279,7 @@ Group::dump (ostream& o) const
 	o << _canvas->indent();
 	o << "Group " << this;
 	o << " Items: " << _items.size();
+	o << " Visible ? " << _visible;
 
 	boost::optional<Rect> bb = bounding_box();
 

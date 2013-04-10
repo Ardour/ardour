@@ -116,7 +116,7 @@ public:
 	void raise (int);
 	void lower_to_bottom ();
 
-	void hide ();
+        void hide ();
 	void show ();
 
 	/** @return true if this item is visible (ie it will be rendered),

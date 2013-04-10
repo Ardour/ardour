@@ -26,7 +26,7 @@ public:
 	std::list<Item*> const & items () const {
 		return _items;
 	}
-
+    
 	void raise_child_to_top (Item *);
 	void raise_child (Item *, int);
 	void lower_child_to_bottom (Item *);
