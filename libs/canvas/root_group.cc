@@ -18,7 +18,6 @@ RootGroup::compute_bounding_box () const
 	Group::compute_bounding_box ();
 
 	if (_bounding_box) {
-		cerr << "!!!!! requesting canvas size " << _bounding_box.get() << endl;
 		_canvas->request_size (Duple (_bounding_box.get().width (), _bounding_box.get().height ()));
 	}
 }
