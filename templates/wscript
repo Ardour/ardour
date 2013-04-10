@@ -1,5 +1,22 @@
 #!/usr/bin/python
 
+#
+# Paul notes (April 2013)
+#
+# There seems to be little point in including templates with Ardour
+# until or as long as the input connections of tracks depends on
+# the user's hardware configuration. This makes any pre-existing
+# templates potentially wrong/useless/annoying for anyone who
+# uses a different hardware input configuration than was used
+# to create the templates. 
+#
+# Templates should be created by the user, not by us. 
+#
+# I modified the code below, but have not tested it. For now
+# this directory will be removed from the top level wscript's
+# list of children.
+#
+
 import os
 
 top = '.'
@@ -10,21 +27,15 @@ def configure(conf):
 
 def build(bld):
 
-    if bld.is_defined('COREAUDIO_SUPPORT'):
-        subst_dict = {'JACK_INPUT': 'coreaudio:Built-in Audio:in', 'JACK_OUTPUT': 'coreaudio:Built-in Audio:out'}
-    else:
-        subst_dict = {'JACK_INPUT': 'system:playback_','JACK_OUTPUT': 'system:capture_'}
-
-    templates = bld.path.ant_glob('*/*.template.in')
+    templates = bld.path.ant_glob('*/*.template')
     for t in templates:
-        dir_name = os.path.basename(t.srcpath()).replace('.template.in', '')
-        file_name = os.path.basename(t.srcpath()).replace('.in', '')
+        file_name = os.path.basename(t.srcpath())
+        dir_name = os.path.dirname(t.srcpath())
         obj = bld(features = 'subst',
                   name = 'template',
                   source = [ t ],
                   target = [ os.path.join(dir_name, file_name) ],
                   install_path = os.path.join(bld.env['DATADIR'], 'ardour3', os.path.join('templates', dir_name)))
-        obj.__dict__.update(subst_dict)
 
 def options(opt):
     pass

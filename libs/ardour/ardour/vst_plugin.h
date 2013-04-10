@@ -73,6 +73,7 @@ public:
 	
 	AEffect * plugin () const { return _plugin; }
 	VSTState * state () const { return _state; }
+        void set_state (VSTState* s) { _state = s; }
 
 	int set_state (XMLNode const &, int);
 

@@ -172,7 +172,7 @@ Route::init ()
 		_monitor_control->activate ();
 	}
 
-	if (is_master() || is_monitor() || is_hidden()) {
+	if (is_master() || is_monitor() || is_auditioner()) {
 		_mute_master->set_solo_ignore (true);
 	}
 
@@ -319,7 +319,7 @@ Route::sync_order_keys (RouteSortOrderKey base)
 void
 Route::set_remote_control_id_from_order_key (RouteSortOrderKey /*key*/, uint32_t rid)
 {
-	if (is_master() || is_monitor() || is_hidden()) {
+	if (is_master() || is_monitor() || is_auditioner()) {
 		/* hard-coded remote IDs, or no remote ID */
 		return;
 	}
@@ -790,7 +790,7 @@ Route::set_mute_master_solo ()
 void
 Route::set_solo_isolated (bool yn, void *src)
 {
-	if (is_master() || is_monitor() || is_hidden()) {
+	if (is_master() || is_monitor() || is_auditioner()) {
 		return;
 	}
 
@@ -804,7 +804,7 @@ Route::set_solo_isolated (bool yn, void *src)
 	boost::shared_ptr<RouteList> routes = _session.get_routes ();
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 
-		if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden()) {
+		if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
 			continue;
 		}
 
@@ -2007,7 +2007,7 @@ Route::set_state (const XMLNode& node, int version)
 		_flags = Flag (0);
 	}
 
-	if (is_master() || is_monitor() || is_hidden()) {
+	if (is_master() || is_monitor() || is_auditioner()) {
 		_mute_master->set_solo_ignore (true);
 	}
 
@@ -2223,7 +2223,7 @@ Route::set_state_2X (const XMLNode& node, int version)
 		_flags = Flag (0);
 	}
 
-	if (is_master() || is_monitor() || is_hidden()) {
+	if (is_master() || is_monitor() || is_auditioner()) {
 		_mute_master->set_solo_ignore (true);
 	}
 
@@ -4266,8 +4266,11 @@ Route::fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pfram
 	}
 
 	/* establish the initial setup of the buffer set, reflecting what was
-	   copied into it.
+	   copied into it. unless, of course, we are the auditioner, in which
+	   case nothing was fed into it from the inputs at all.
 	*/
 
-	bufs.set_count (io->n_ports());
+	if (!is_auditioner()) {
+		bufs.set_count (io->n_ports());
+	}
 }

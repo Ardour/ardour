@@ -75,7 +75,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	typedef std::list<boost::shared_ptr<Processor> > ProcessorList;
 
 	enum Flag {
-		Hidden = 0x1,
+		Auditioner = 0x1,
 		MasterOut = 0x2,
 		MonitorOut = 0x4
 	};
@@ -109,7 +109,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void set_order_key (RouteSortOrderKey, uint32_t);
         void sync_order_keys (RouteSortOrderKey);
 
-	bool is_hidden() const { return _flags & Hidden; }
+	bool is_auditioner() const { return _flags & Auditioner; }
 	bool is_master() const { return _flags & MasterOut; }
 	bool is_monitor() const { return _flags & MonitorOut; }
 

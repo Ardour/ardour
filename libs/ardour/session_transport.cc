@@ -491,7 +491,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->is_hidden()) {
+		if (!(*i)->is_auditioner()) {
 			(*i)->set_pending_declick (0);
 		}
 	}

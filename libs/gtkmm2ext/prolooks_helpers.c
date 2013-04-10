@@ -184,6 +184,8 @@ static gpointer cairo_value_color_peek_pointer (const GValue* value) {
 
 
 static gchar* cairo_value_color_collect_value (GValue* value, guint n_collect_values, GTypeCValue* collect_values, guint collect_flags) {
+	(void) n_collect_values;
+	(void) collect_flags;
 	if (collect_values[0].v_pointer) {
 		CairoColor* object;
 		object = collect_values[0].v_pointer;
@@ -202,9 +204,10 @@ static gchar* cairo_value_color_collect_value (GValue* value, guint n_collect_va
 
 static gchar* cairo_value_color_lcopy_value (const GValue* value, guint n_collect_values, GTypeCValue* collect_values, guint collect_flags) {
 	CairoColor** object_p;
+	(void) n_collect_values;
 	object_p = collect_values[0].v_pointer;
 	if (!object_p) {
-		return g_strdup_printf ("value location for `%s' passed as NULL", G_VALUE_TYPE_NAME (value));
+		return g_strdup_printf ("value location for `%s' passed as NULL", G_VALUE_TYPE_NAME ((GValue*)value));
 	}
 	if (!value->data[0].v_pointer) {
 		*object_p = NULL;
@@ -227,7 +230,7 @@ GParamSpec* cairo_param_spec_color (const gchar* name, const gchar* nick, const 
 
 
 gpointer cairo_value_get_color (const GValue* value) {
-	g_return_val_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, CAIRO_TYPE_COLOR), NULL);
+	g_return_val_if_fail (G_TYPE_CHECK_VALUE_TYPE ((GValue*)value, CAIRO_TYPE_COLOR), NULL);
 	return value->data[0].v_pointer;
 }
 
@@ -767,6 +770,8 @@ static gpointer prolooks_value_hsl_peek_pointer (const GValue* value) {
 
 
 static gchar* prolooks_value_hsl_collect_value (GValue* value, guint n_collect_values, GTypeCValue* collect_values, guint collect_flags) {
+	(void) n_collect_values;
+	(void) collect_flags;
 	if (collect_values[0].v_pointer) {
 		ProlooksHSL* object;
 		object = collect_values[0].v_pointer;
@@ -785,9 +790,10 @@ static gchar* prolooks_value_hsl_collect_value (GValue* value, guint n_collect_v
 
 static gchar* prolooks_value_hsl_lcopy_value (const GValue* value, guint n_collect_values, GTypeCValue* collect_values, guint collect_flags) {
 	ProlooksHSL** object_p;
+	(void) n_collect_values;
 	object_p = collect_values[0].v_pointer;
 	if (!object_p) {
-		return g_strdup_printf ("value location for `%s' passed as NULL", G_VALUE_TYPE_NAME (value));
+		return g_strdup_printf ("value location for `%s' passed as NULL", G_VALUE_TYPE_NAME ((GValue*)value));
 	}
 	if (!value->data[0].v_pointer) {
 		*object_p = NULL;
@@ -810,7 +816,7 @@ GParamSpec* prolooks_param_spec_hsl (const gchar* name, const gchar* nick, const
 
 
 gpointer prolooks_value_get_hsl (const GValue* value) {
-	g_return_val_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, PROLOOKS_TYPE_HSL), NULL);
+	g_return_val_if_fail (G_TYPE_CHECK_VALUE_TYPE ((GValue*)value, PROLOOKS_TYPE_HSL), NULL);
 	return value->data[0].v_pointer;
 }
 
@@ -1173,6 +1179,8 @@ static gpointer prolooks_value_hsv_peek_pointer (const GValue* value) {
 
 
 static gchar* prolooks_value_hsv_collect_value (GValue* value, guint n_collect_values, GTypeCValue* collect_values, guint collect_flags) {
+	(void) collect_flags;
+	(void) n_collect_values;
 	if (collect_values[0].v_pointer) {
 		ProlooksHSV* object;
 		object = collect_values[0].v_pointer;
@@ -1191,9 +1199,10 @@ static gchar* prolooks_value_hsv_collect_value (GValue* value, guint n_collect_v
 
 static gchar* prolooks_value_hsv_lcopy_value (const GValue* value, guint n_collect_values, GTypeCValue* collect_values, guint collect_flags) {
 	ProlooksHSV** object_p;
+	(void) n_collect_values;
 	object_p = collect_values[0].v_pointer;
 	if (!object_p) {
-		return g_strdup_printf ("value location for `%s' passed as NULL", G_VALUE_TYPE_NAME (value));
+		return g_strdup_printf ("value location for `%s' passed as NULL", G_VALUE_TYPE_NAME ((GValue*)value));
 	}
 	if (!value->data[0].v_pointer) {
 		*object_p = NULL;
@@ -1216,7 +1225,7 @@ GParamSpec* prolooks_param_spec_hsv (const gchar* name, const gchar* nick, const
 
 
 gpointer prolooks_value_get_hsv (const GValue* value) {
-	g_return_val_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, PROLOOKS_TYPE_HSV), NULL);
+	g_return_val_if_fail (G_TYPE_CHECK_VALUE_TYPE ((GValue*) value, PROLOOKS_TYPE_HSV), NULL);
 	return value->data[0].v_pointer;
 }
 

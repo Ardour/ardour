@@ -62,7 +62,9 @@ class VideoMonitor : public sigc::trackable , public ARDOUR::SessionHandlePtr, p
 	void open (std::string);
 
 	void set_session (ARDOUR::Session *s);
+	void save_session ();
 	void clear_session_state ();
+	void query_full_state (bool);
 	bool set_custom_setting (const std::string, const std::string);
 	const std::string get_custom_setting (const std::string);
 	void restore_settings_mask (int i)  { _restore_settings_mask = i;}
@@ -89,7 +91,6 @@ class VideoMonitor : public sigc::trackable , public ARDOUR::SessionHandlePtr, p
 	void parse_output (std::string d, size_t s);
 	void terminated ();
 
-	void save_session ();
 	void parameter_changed (std::string const & p);
 
 	typedef std::map<std::string,std::string> XJSettings;
@@ -105,6 +106,7 @@ class VideoMonitor : public sigc::trackable , public ARDOUR::SessionHandlePtr, p
 	sigc::connection state_connection;
 	int state_clk_divide;
 	int starting;
+	int knownstate;
 	int osdmode;
 #if 1
 	bool debug_enable;

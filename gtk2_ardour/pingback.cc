@@ -89,9 +89,6 @@ _pingback (void *arg)
 	char errbuf[CURL_ERROR_SIZE];
 	curl_easy_setopt (c, CURLOPT_ERRORBUFFER, errbuf); 
 
-	//get announcements from our server
-	std::cerr << "Checking for Announcements from ardour.org  ...\n";
-
 	string url;
 
 #ifdef __APPLE__

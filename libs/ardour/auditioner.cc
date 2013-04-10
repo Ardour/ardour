@@ -40,7 +40,7 @@ using namespace PBD;
 #include "i18n.h"
 
 Auditioner::Auditioner (Session& s)
-	: AudioTrack (s, "auditioner", Route::Hidden)
+	: AudioTrack (s, "auditioner", Route::Auditioner)
         , current_frame (0)
         , _auditioning (0)
         , length (0)
@@ -61,7 +61,7 @@ Auditioner::init ()
 	vector<string> outputs;
 	_session.engine().get_physical_outputs (DataType::AUDIO, outputs);
 
-	if (left == "default") {
+	if (left.empty() || left == "default") {
                 if (_session.monitor_out()) {
                         left = _session.monitor_out()->input()->audio (0)->name();
                         via_monitor = true;
@@ -72,7 +72,7 @@ Auditioner::init ()
                 }
 	}
 
-	if (right == "default") {
+	if (right.empty() || right == "default") {
                 if (_session.monitor_out()) {
                         right = _session.monitor_out()->input()->audio (1)->name();
                         via_monitor = true;

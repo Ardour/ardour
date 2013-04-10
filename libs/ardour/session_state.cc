@@ -772,6 +772,8 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		}
 	}
 
+	SaveSession (); /* EMIT SIGNAL */
+
 	tree.set_root (&get_state());
 
 	if (snapshot_name.empty()) {
@@ -1139,7 +1141,7 @@ Session::state (bool full_state)
                 }
 
 		for (RouteList::iterator i = public_order.begin(); i != public_order.end(); ++i) {
-			if (!(*i)->is_hidden()) {
+			if (!(*i)->is_auditioner()) {
 				if (full_state) {
 					child->add_child_nocopy ((*i)->get_state());
 				} else {

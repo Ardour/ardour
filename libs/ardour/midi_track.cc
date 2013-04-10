@@ -83,7 +83,7 @@ MidiTrack::create_diskstream ()
 {
 	MidiDiskstream::Flag dflags = MidiDiskstream::Flag (0);
 
-	if (_flags & Hidden) {
+	if (_flags & Auditioner) {
 		dflags = MidiDiskstream::Flag (dflags | MidiDiskstream::Hidden);
 	} else {
 		dflags = MidiDiskstream::Flag (dflags | MidiDiskstream::Recordable);
