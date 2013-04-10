@@ -1,3 +1,23 @@
+/*
+    Copyright (C) 2011-2013 Paul Davis
+    Author: Carl Hetherington <cth@carlh.net>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #include <cairomm/cairomm.h>
 
 #include "gtkmm2ext/utils.h"
@@ -124,7 +144,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		
 		context->translate (left, 0);
 
-		Gdk::Cairo::set_source_pixbuf (context, render->pixbuf (), render->start() - p, 0);
+		context->set_source (render->image(), render->start() - p, 0);
 		context->paint ();
 		
 		context->restore ();
@@ -168,7 +188,7 @@ WaveView::set_height (Distance height)
 	_bounding_box_dirty = true;
 	end_change ();
 
-	invalidate_pixbuf_cache ();
+	invalidate_image_cache ();
 }
 
 void
@@ -195,10 +215,10 @@ WaveView::invalidate_whole_cache ()
 }
 
 void
-WaveView::invalidate_pixbuf_cache ()
+WaveView::invalidate_image_cache ()
 {
 	for (list<CacheEntry*>::iterator i = _cache.begin(); i != _cache.end(); ++i) {
-		(*i)->clear_pixbuf ();
+		(*i)->clear_image ();
 	}
 }
 
@@ -228,10 +248,10 @@ WaveView::CacheEntry::CacheEntry (
 	, _end (end)
 {
 	_n_peaks = _end - _start;
-	_peaks = new PeakData[_n_peaks];
+	_peaks.reset (new PeakData[_n_peaks]);
 
 	_wave_view->_region->read_peaks (
-		_peaks,
+		_peaks.get(),
 		_n_peaks,
 		_start * _wave_view->_frames_per_pixel,
 		(_end - _start) * _wave_view->_frames_per_pixel,
@@ -242,16 +262,15 @@ WaveView::CacheEntry::CacheEntry (
 
 WaveView::CacheEntry::~CacheEntry ()
 {
-	delete[] _peaks;
 }
 
-Glib::RefPtr<Gdk::Pixbuf>
-WaveView::CacheEntry::pixbuf ()
+Cairo::RefPtr<Cairo::ImageSurface>
+WaveView::CacheEntry::image ()
 {
-	if (!_pixbuf) {
-		_pixbuf = Gdk::Pixbuf::create (Gdk::COLORSPACE_RGB, true, 8, _n_peaks, _wave_view->_height);
-		Cairo::RefPtr<Cairo::ImageSurface> surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _n_peaks, _wave_view->_height);
-		Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (surface);
+	if (!_image) {
+
+		_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _n_peaks, _wave_view->_height);
+		Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (_image);
 
 		_wave_view->setup_outline_context (context);
 		context->move_to (0.5, position (_peaks[0].min));
@@ -272,11 +291,9 @@ WaveView::CacheEntry::pixbuf ()
 		 	context->line_to (i + 0.5, position (_peaks[i].min) + 1);
 			context->stroke ();
 		}
-
-		Gtkmm2ext::convert_bgra_to_rgba (surface->get_data(), _pixbuf->get_pixels(), _n_peaks, _wave_view->_height);
 	}
 
-	return _pixbuf;
+	return _image;
 }
 
 
@@ -287,9 +304,9 @@ WaveView::CacheEntry::position (float s) const
 }
 
 void
-WaveView::CacheEntry::clear_pixbuf ()
+WaveView::CacheEntry::clear_image ()
 {
-	_pixbuf.reset ();
+	_image.clear ();
 }
 
 

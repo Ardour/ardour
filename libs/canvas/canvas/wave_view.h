@@ -1,4 +1,25 @@
+/*
+    Copyright (C) 2011-2013 Paul Davis
+    Author: Carl Hetherington <cth@carlh.net>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
 
 #include "pbd/properties.h"
 
@@ -88,12 +109,12 @@ private:
 			return _end;
 		}
 
-		ARDOUR::PeakData* peaks () const {
+     	        boost::shared_array<ARDOUR::PeakData> peaks () const {
 			return _peaks;
 		}
 
-		Glib::RefPtr<Gdk::Pixbuf> pixbuf ();
-		void clear_pixbuf ();
+                Cairo::RefPtr<Cairo::ImageSurface> image();
+	        void clear_image ();
 
 	private:
 		Coord position (float) const;
@@ -102,15 +123,15 @@ private:
 		int _start;
 		int _end;
 		int _n_peaks;
-		ARDOUR::PeakData* _peaks;
-		Glib::RefPtr<Gdk::Pixbuf> _pixbuf;
+	        boost::shared_array<ARDOUR::PeakData> _peaks;
+	        Cairo::RefPtr<Cairo::ImageSurface> _image;
 	};
 
 	friend class CacheEntry;
 	friend class ::WaveViewTest;
 
 	void invalidate_whole_cache ();
-	void invalidate_pixbuf_cache ();
+	void invalidate_image_cache ();
 
 	boost::shared_ptr<ARDOUR::AudioRegion> _region;
 	int _channel;
