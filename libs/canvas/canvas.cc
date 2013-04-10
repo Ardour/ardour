@@ -117,7 +117,6 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 
 	context->restore ();
 
-	cout << "Rendered " << render_count << "\n";
 	checkpoint ("render", "<- render");
 }
 
@@ -272,7 +271,7 @@ GtkCanvas::GtkCanvas (XMLTree const * tree)
 bool
 GtkCanvas::button_handler (GdkEventButton* ev)
 {
-	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas button press %1 %1\n", ev->x, ev->y));
+	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas button %3 %1 %1\n", ev->x, ev->y, (ev->type == GDK_BUTTON_PRESS ? "press" : "release")));
 	/* The Duple that we are passing in here is in canvas coordinates */
 	return deliver_event (Duple (ev->x, ev->y), reinterpret_cast<GdkEvent*> (ev));
 }
@@ -288,6 +287,8 @@ GtkCanvas::motion_notify_handler (GdkEventMotion* ev)
 		/* if we have a grabbed item, it gets just the motion event,
 		   since no enter/leave events can have happened.
 		*/
+		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("%1 %2 (%3) was grabbed, send MOTION event there\n",
+								       _grabbed_item, _grabbed_item->whatami(), _grabbed_item->name));
 		return _grabbed_item->Event (reinterpret_cast<GdkEvent*> (ev));
 	}
 
@@ -338,12 +339,16 @@ GtkCanvas::deliver_event (Duple point, GdkEvent* event)
 {
 	if (_grabbed_item) {
 		/* we have a grabbed item, so everything gets sent there */
+		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("%1 %2 (%3) was grabbed, send event there\n",
+								       _grabbed_item, _grabbed_item->whatami(), _grabbed_item->name));
 		return _grabbed_item->Event (event);
 	}
 
 	/* find the items that exist at the event's position */
 	vector<Item const *> items;
 	_root.add_items_at_point (point, items);
+
+	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("%1 possible items to deliver event to\n", items.size()));
 
 	/* run through the items under the event, from top to bottom, until one claims the event */
 	vector<Item const *>::const_reverse_iterator i = items.rbegin ();
