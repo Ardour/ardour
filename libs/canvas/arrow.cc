@@ -203,6 +203,7 @@ Arrow::setup_polygon (int which)
 		points.push_back (Duple (0, 0));
 		points.push_back (Duple (_heads[which].width, 0));
 		points.push_back (Duple (_heads[which].width / 2, _heads[which].height));
+		points.push_back (Duple (0, 0));
 	}
 
 	_heads[which].polygon->set (points);
