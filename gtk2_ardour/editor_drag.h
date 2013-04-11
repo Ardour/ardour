@@ -505,7 +505,6 @@ private:
 	double _cumulative_dx;
 };
 
-#ifdef WITH_VIDEOTIMELINE
 /** Container for details about audio regions being dragged along with video */
 class AVDraggingView
 {
@@ -518,7 +517,6 @@ public:
 
 /** Drag of video offset */
 class VideoTimeLineDrag : public Drag
-	//TODO , public sigc::trackable
 {
 public:
 	VideoTimeLineDrag (Editor *e, ArdourCanvas::Item *i);
@@ -544,7 +542,6 @@ private:
 	ARDOUR::frameoffset_t _startdrag_video_offset;
 	ARDOUR::frameoffset_t _max_backwards_drag;
 };
-#endif
 
 /** Drag to trim region(s) */
 class TrimDrag : public RegionDrag

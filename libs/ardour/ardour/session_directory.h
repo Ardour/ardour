@@ -85,13 +85,11 @@ public:
 	 */
 	const std::string peak_path () const;
 
-#ifdef WITH_VIDEOTIMELINE
 	/**
 	 * @return The absolute path to the directory in which all
 	 * video files are stored for a session.
 	 */
 	const std::string video_path () const;
-#endif
 
 	/**
 	 * @return The absolute path to the directory that source

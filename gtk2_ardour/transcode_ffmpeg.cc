@@ -17,8 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifdef WITH_VIDEOTIMELINE
-
 #include <stdio.h>
 #include <string.h>
 #include <sstream>
@@ -563,5 +561,3 @@ TranscodeFfmpeg::ffmpegparse_v (std::string d, size_t /* s */)
 		Progress(f, m_duration); /* EMIT SIGNAL */
 	}
 }
-
-#endif /* WITH_VIDEOTIMELINE */

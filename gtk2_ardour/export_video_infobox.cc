@@ -17,8 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifdef WITH_VIDEOTIMELINE
-
 #include "ardour/session.h"
 #include "export_video_infobox.h"
 #include "i18n.h"
@@ -65,12 +63,3 @@ ExportVideoInfobox::ExportVideoInfobox (Session* s)
 ExportVideoInfobox::~ExportVideoInfobox ()
 {
 }
-/*
-void
-ExportVideoInfobox::on_show ()
-{
-	Dialog::on_show ();
-}
-*/
-
-#endif /* WITH_VIDEOTIMELINE */

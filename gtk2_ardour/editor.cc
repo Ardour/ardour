@@ -246,9 +246,7 @@ Editor::Editor ()
 	, range_mark_label (_("Range Markers"))
 	, transport_mark_label (_("Loop/Punch Ranges"))
 	, cd_mark_label (_("CD Markers"))
-#ifdef WITH_VIDEOTIMELINE
 	, videotl_label (_("Video Timeline"))
-#endif
 	, edit_packer (4, 4, true)
 
 	  /* the values here don't matter: layout widgets
@@ -440,7 +438,6 @@ Editor::Editor ()
 	cd_mark_label.hide();
 	cd_mark_label.set_no_show_all();
 
-#ifdef WITH_VIDEOTIMELINE
 	videotl_bar_height = 4;
 	videotl_label.set_name ("EditorRulerLabel");
 	videotl_label.set_size_request (-1, (int)timebar_height * videotl_bar_height);
@@ -448,7 +445,6 @@ Editor::Editor ()
 	videotl_label.set_padding (5,0);
 	videotl_label.hide();
 	videotl_label.set_no_show_all();
-#endif
 
 	range_mark_label.set_name ("EditorRulerLabel");
 	range_mark_label.set_size_request (-1, (int)timebar_height);
@@ -4293,7 +4289,6 @@ Editor::set_frames_per_unit (double fpu)
 	instant_save ();
 }
 
-#ifdef WITH_VIDEOTIMELINE
 void
 Editor::queue_visual_videotimeline_update ()
 {
@@ -4306,7 +4301,6 @@ Editor::queue_visual_videotimeline_update ()
 	 */
 	ensure_visual_change_idle_handler ();
 }
-#endif
 
 void
 Editor::ensure_visual_change_idle_handler ()
@@ -4358,11 +4352,9 @@ Editor::idle_visual_changer ()
 		update_tempo_based_rulers (current_bbt_points_begin, current_bbt_points_end);
 	}
 
-#ifdef WITH_VIDEOTIMELINE
 	if (p & VisualChange::ZoomLevel) {
 		update_video_timeline();
 	}
-#endif
 
 	if (p & VisualChange::TimeOrigin) {
 		set_horizontal_position (pending_visual_change.time_origin / frames_per_unit);
@@ -4377,11 +4369,10 @@ Editor::idle_visual_changer ()
 		update_fixed_rulers ();
 		redisplay_tempo (true);
 	}
-#ifdef WITH_VIDEOTIMELINE
+
 	if (!(p & VisualChange::ZoomLevel)) {
 		update_video_timeline();
 	}
-#endif
 
 	_summary->set_overlays_dirty ();
 

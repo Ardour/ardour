@@ -242,7 +242,20 @@ gtk2_ardour_sources = [
         'visibility_group.cc',
         'volume_controller.cc',
         'waveview.cc',
-        'window_proxy.cc'
+        'window_proxy.cc',
+# video-timeline related sources:
+        'video_image_frame.cc',
+        'add_video_dialog.cc',
+        'editor_videotimeline.cc',
+        'video_timeline.cc',
+        'system_exec.cc',
+        'video_monitor.cc',
+        'transcode_ffmpeg.cc',
+        'transcode_video_dialog.cc',
+        'video_server_dialog.cc',
+        'utils_videotl.cc',
+        'export_video_dialog.cc',
+        'export_video_infobox.cc'
 ]
 
 def options(opt):
@@ -418,22 +431,6 @@ def build(bld):
         'PROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"'
         ]
     obj.includes += ['../libs']
-
-    if bld.env['VIDEOTIMELINE']:
-        obj.source += [
-            'video_image_frame.cc',
-            'add_video_dialog.cc',
-            'editor_videotimeline.cc',
-            'video_timeline.cc',
-            'system_exec.cc',
-            'video_monitor.cc',
-            'transcode_ffmpeg.cc',
-            'transcode_video_dialog.cc',
-            'video_server_dialog.cc',
-            'utils_videotl.cc',
-            'export_video_dialog.cc',
-            'export_video_infobox.cc'
-            ]
 
     if bld.is_defined('HAVE_SUIL'):
         obj.source += [ 'lv2_plugin_ui.cc' ]
@@ -655,8 +652,6 @@ def build(bld):
     else:
         menus_argv = [ '-E', '-P' ]
 
-    if bld.env['VIDEOTIMELINE']:
-        menus_argv.append ('-DWITH_VIDEOTIMELINE')
     obj = bld(features = 'command-output')
     obj.command = 'cpp'
     obj.command_is_external = True
@@ -664,7 +659,7 @@ def build(bld):
     obj.argv = menus_argv
     obj.stdin = 'ardour.menus.in'
     obj.stdout = 'ardour.menus'
-    obj.dep_vars = ['GTKOSX', 'VIDEOTIMELINE']
+    obj.dep_vars = ['GTKOSX']
     bld.install_files(os.path.join(bld.env['SYSCONFDIR'], 'ardour3'),
                       'ardour.menus')
 

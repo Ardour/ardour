@@ -659,11 +659,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 		RegionView* rv = i->view;
 
-		if (rv->region()->locked()
-#ifdef WITH_VIDEOTIMELINE
-				|| rv->region()->video_locked()
-#endif
-				) {
+		if (rv->region()->locked() || rv->region()->video_locked()) {
 			continue;
 		}
 
@@ -934,11 +930,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 	/* insert the regions into their new playlists */
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 
-		if (i->view->region()->locked()
-#ifdef WITH_VIDEOTIMELINE
-				|| i->view->region()->video_locked()
-#endif
-				) {
+		if (i->view->region()->locked() || i->view->region()->video_locked()) {
 			continue;
 		}
 
@@ -1017,11 +1009,7 @@ RegionMoveDrag::finished_no_copy (
 		RouteTimeAxisView* const dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[i->time_axis_view]);
 		double const dest_layer = i->layer;
 
-		if (rv->region()->locked()
-#ifdef WITH_VIDEOTIMELINE
-				|| rv->region()->video_locked()
-#endif
-				) {
+		if (rv->region()->locked() || rv->region()->video_locked()) {
 			++i;
 			continue;
 		}
@@ -1610,8 +1598,6 @@ NoteResizeDrag::aborted (bool)
 	}
 }
 
-#ifdef WITH_VIDEOTIMELINE
-
 AVDraggingView::AVDraggingView (RegionView* v)
 	: view (v)
 {
@@ -1623,16 +1609,12 @@ VideoTimeLineDrag::VideoTimeLineDrag (Editor* e, ArdourCanvas::Item* i)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New VideoTimeLineDrag\n");
 
-	/* create a list of regions to move along */
-#if 1 /* all reagions -- with video_locked() */
 	RegionSelection rs;
 	TrackViewList empty;
 	empty.clear();
 	_editor->get_regions_after(rs, (framepos_t) 0, empty);
 	std::list<RegionView*> views = rs.by_layer();
-#else /* selected regions -- with video_locked() */
-	std::list<RegionView*> views = _editor->selection->regions.by_layer();
-#endif
+
 	for (list<RegionView*>::iterator i = views.begin(); i != views.end(); ++i) {
 		RegionView* rv = (*i);
 		if (!rv->region()->video_locked()) {
@@ -1776,7 +1758,6 @@ VideoTimeLineDrag::aborted (bool)
 		i->view->region()->set_position(i->initial_position);
 	}
 }
-#endif
 
 TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool preserve_fade_anchor)
 	: RegionDrag (e, i, p, v)
