@@ -132,7 +132,6 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-#ifdef WITH_VIDEOTIMELINE
 	act = ActionManager::register_action (main_actions, X_("OpenVideo"), _("Open Video"),
 					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_video), (Gtk::Window*) 0));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -142,7 +141,6 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("ExportVideo"), _("Export To Video File"),
 					      sigc::mem_fun (*editor, &PublicEditor::export_video));
 	ActionManager::session_sensitive_actions.push_back (act);
-#endif
 
 #ifdef WITH_CMT
 

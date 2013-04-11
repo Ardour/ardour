@@ -49,9 +49,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> muted;
 		PBD::PropertyDescriptor<bool> opaque;
 		PBD::PropertyDescriptor<bool> locked;
-#ifdef WITH_VIDEOTIMELINE
 		PBD::PropertyDescriptor<bool> video_locked;
-#endif
 		PBD::PropertyDescriptor<bool> automatic;
 		PBD::PropertyDescriptor<bool> whole_file;
 		PBD::PropertyDescriptor<bool> import;
@@ -87,10 +85,8 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for opaque = %1\n", 	Properties::opaque.property_id));
 	Properties::locked.property_id = g_quark_from_static_string (X_("locked"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for locked = %1\n", 	Properties::locked.property_id));
-#ifdef WITH_VIDEOTIMELINE
 	Properties::video_locked.property_id = g_quark_from_static_string (X_("video-locked"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for video-locked = %1\n", 	Properties::video_locked.property_id));
-#endif
 	Properties::automatic.property_id = g_quark_from_static_string (X_("automatic"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for automatic = %1\n", 	Properties::automatic.property_id));
 	Properties::whole_file.property_id = g_quark_from_static_string (X_("whole-file"));
@@ -143,9 +139,7 @@ Region::register_properties ()
 	add_property (_muted);
 	add_property (_opaque);
 	add_property (_locked);
-#ifdef WITH_VIDEOTIMELINE
 	add_property (_video_locked);
-#endif
 	add_property (_automatic);
 	add_property (_whole_file);
 	add_property (_import);
@@ -167,13 +161,6 @@ Region::register_properties ()
 	add_property (_position_lock_style);
 	add_property (_layering_index);
 }
-#ifdef WITH_VIDEOTIMELINE
-#define VTLSTATE	, _video_locked (Properties::video_locked, false)
-#define VTLCSTATE	, _video_locked (Properties::video_locked, other->_video_locked)
-#else
-#define VTLSTATE
-#define VTLCSTATE
-#endif
 
 #define REGION_DEFAULT_STATE(s,l) \
 	_sync_marked (Properties::sync_marked, false) \
@@ -187,7 +174,7 @@ Region::register_properties ()
 	, _muted (Properties::muted, false) \
 	, _opaque (Properties::opaque, true) \
 	, _locked (Properties::locked, false) \
-  VTLSTATE \
+  , _video_locked (Properties::video_locked, false) \
 	, _automatic (Properties::automatic, false) \
 	, _whole_file (Properties::whole_file, false) \
 	, _import (Properties::import, false) \
@@ -213,7 +200,7 @@ Region::register_properties ()
         , _muted (Properties::muted, other->_muted)	        \
 	, _opaque (Properties::opaque, other->_opaque)		\
 	, _locked (Properties::locked, other->_locked)		\
-  VTLCSTATE \
+  , _video_locked (Properties::video_locked, other->_video_locked) \
 	, _automatic (Properties::automatic, other->_automatic)	\
 	, _whole_file (Properties::whole_file, other->_whole_file) \
 	, _import (Properties::import, other->_import)		\
@@ -646,11 +633,7 @@ Region::recompute_position_from_lock_style ()
 void
 Region::nudge_position (frameoffset_t n)
 {
-	if (locked()
-#ifdef WITH_VIDEOTIMELINE
-			|| video_locked()
-#endif
-			) {
+	if (locked() || video_locked()) {
 		return;
 	}
 
@@ -691,11 +674,7 @@ Region::set_ancestral_data (framepos_t s, framecnt_t l, float st, float sh)
 void
 Region::set_start (framepos_t pos)
 {
-	if (locked() || position_locked()
-#ifdef WITH_VIDEOTIMELINE
-			|| video_locked()
-#endif
-			) {
+	if (locked() || position_locked() || video_locked()) {
 		return;
 	}
 	/* This just sets the start, nothing else. It effectively shifts
@@ -721,11 +700,7 @@ Region::set_start (framepos_t pos)
 void
 Region::trim_start (framepos_t new_position)
 {
-	if (locked() || position_locked()
-#ifdef WITH_VIDEOTIMELINE
-			|| video_locked()
-#endif
-			) {
+	if (locked() || position_locked() || video_locked()) {
 		return;
 	}
 
@@ -1010,7 +985,6 @@ Region::set_locked (bool yn)
 	}
 }
 
-#ifdef WITH_VIDEOTIMELINE
 void
 Region::set_video_locked (bool yn)
 {
@@ -1019,7 +993,6 @@ Region::set_video_locked (bool yn)
 		send_change (Properties::video_locked);
 	}
 }
-#endif
 
 void
 Region::set_position_locked (bool yn)

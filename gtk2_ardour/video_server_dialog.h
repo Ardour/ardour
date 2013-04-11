@@ -17,8 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifdef WITH_VIDEOTIMELINE
-
 #ifndef __gtk_ardour_video_server_dialog_h__
 #define __gtk_ardour_video_server_dialog_h__
 
@@ -68,5 +66,3 @@ class VideoServerDialog : public ArdourDialog
 };
 
 #endif /* __gtk_ardour_video_server_dialog_h__ */
-
-#endif /* WITH_VIDEOTIMELINE */

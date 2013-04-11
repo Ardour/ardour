@@ -27,9 +27,7 @@ const char* const old_sound_dir_name = X_("sounds");
 const char* const sound_dir_name = X_("audiofiles");
 const char* const midi_dir_name = X_("midifiles");
 const char* const midi_patch_dir_name = X_("patchfiles");
-#ifdef WITH_VIDEOTIMELINE
 const char* const video_dir_name = X_("videofiles");
-#endif
 const char* const peak_dir_name = X_("peaks");
 const char* const dead_dir_name = X_("dead");
 const char* const interchange_dir_name = X_("interchange");

@@ -783,9 +783,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		ruler_time_range_marker = 7,
 		ruler_time_transport_marker = 8,
 		ruler_time_cd_marker = 9,
-#ifdef WITH_VIDEOTIMELINE
 		ruler_video_timeline = 10,
-#endif
 	};
 
 	static GtkCustomMetric ruler_metrics[4];
@@ -921,7 +919,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Label  transport_mark_label;
 	Gtk::Label  cd_mark_label;
 
-#ifdef WITH_VIDEOTIMELINE
+	/* videtimline related actions */
 	ArdourCanvas::SimpleRect* videotl_bar;
 	Gtk::Label                videotl_label;
 	ArdourCanvas::Group*      videotl_bar_group;
@@ -945,7 +943,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	int get_videotl_bar_height () const { return videotl_bar_height; }
 	void export_video ();
 	void toggle_region_video_lock ();
-#endif
 
 	Gtk::VBox          time_button_vbox;
 	Gtk::HBox          time_button_hbox;
@@ -1456,7 +1453,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool canvas_range_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_transport_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_cd_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
-#ifdef WITH_VIDEOTIMELINE
+
 	bool canvas_videotl_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	void update_video_timeline (bool flush = false);
 	void set_video_timeline_height (const int);
@@ -1465,7 +1462,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_video_timeline_locked (const bool);
 	void queue_visual_videotimeline_update ();
 	void embed_audio_from_video (std::string, framepos_t n = 0);
-#endif
 
 	bool canvas_imageframe_item_view_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameView*);
 	bool canvas_imageframe_view_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameTimeAxis*);
@@ -2183,9 +2179,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	friend class RegionCreateDrag;
 	friend class RegionMotionDrag;
 	friend class RegionInsertDrag;
-#ifdef WITH_VIDEOTIMELINE
 	friend class VideoTimeLineDrag;
-#endif
 
 	friend class EditorSummary;
 	friend class EditorGroupTabs;

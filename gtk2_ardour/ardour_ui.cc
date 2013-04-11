@@ -118,12 +118,10 @@ typedef uint64_t microseconds_t;
 #include "time_axis_view_item.h"
 #include "utils.h"
 #include "window_proxy.h"
-#ifdef WITH_VIDEOTIMELINE
 #include "video_server_dialog.h"
 #include "add_video_dialog.h"
 #include "transcode_video_dialog.h"
-#include "system_exec.h" /* to launch video-server */
-#endif
+#include "system_exec.h"
 
 #include "i18n.h"
 
@@ -203,10 +201,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	session_selector_window = 0;
 	last_key_press_time = 0;
 	add_route_dialog = 0;
-#ifdef WITH_VIDEOTIMELINE
 	add_video_dialog = 0;
 	video_server_process = 0;
-#endif
 	route_params = 0;
 	bundle_manager = 0;
 	rc_option_editor = 0;
@@ -472,10 +468,10 @@ ARDOUR_UI::~ARDOUR_UI ()
 	delete editor;
 	delete mixer;
 	delete add_route_dialog;
-#ifdef WITH_VIDEOTIMELINE
-	if (add_video_dialog) delete add_video_dialog;
+	if (add_video_dialog) {
+		delete add_video_dialog;
+	}
 	stop_video_server();
-#endif
 }
 
 void
@@ -838,9 +834,7 @@ void
 ARDOUR_UI::finish()
 {
 	if (_session) {
-#ifdef WITH_VIDEOTIMELINE
 		ARDOUR_UI::instance()->video_timeline->sync_session_state();
-#endif
 
 		if (_session->dirty()) {
 			vector<string> actions;
@@ -876,10 +870,8 @@ If you still wish to quit, please use the\n\n\
 		point_zero_one_second_connection.disconnect();
 	}
 
-#ifdef WITH_VIDEOTIMELINE
 	delete ARDOUR_UI::instance()->video_timeline;
 	stop_video_server();
-#endif
 
 	/* Save state before deleting the session, as that causes some
 	   windows to be destroyed before their visible state can be
@@ -2560,11 +2552,11 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	 * treat a non-dirty session this way, so that it stays visible 
 	 * as we bring up the new session dialog.
 	 */
-#ifdef WITH_VIDEOTIMELINE
+
 	if (_session && ARDOUR_UI::instance()->video_timeline) {
 		ARDOUR_UI::instance()->video_timeline->sync_session_state();
 	}
-#endif
+
 	if (_session && _session->dirty()) {
 		if (unload_session (false)) {
 			/* unload cancelled by user */
@@ -3340,7 +3332,6 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	/* idle connection will end at scope end */
 }
 
-#ifdef WITH_VIDEOTIMELINE
 void
 ARDOUR_UI::stop_video_server (bool ask_confirm)
 {
@@ -3581,7 +3572,6 @@ ARDOUR_UI::flush_videotimeline_cache (bool localcacheonly)
 	}
 	editor->queue_visual_videotimeline_update();
 }
-#endif
 
 XMLNode*
 ARDOUR_UI::mixer_settings () const
@@ -3851,9 +3841,7 @@ ARDOUR_UI::update_transport_clocks (framepos_t pos)
 	if (big_clock_window->get()) {
 		big_clock->set (pos);
 	}
-#ifdef WITH_VIDEOTIMELINE
 	ARDOUR_UI::instance()->video_timeline->manual_seek_video_monitor(pos);
-#endif
 }
 
 

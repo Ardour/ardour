@@ -17,8 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifdef WITH_VIDEOTIMELINE
-
 #include <cstdio>
 #include <string>
 #include <sstream>
@@ -512,5 +510,3 @@ TranscodeVideoDialog::import_option() {
 	int i = video_combo.get_active_row_number();
 	return static_cast<VtlTranscodeOption>(i);
 }
-
-#endif /* WITH_VIDEOTIMELINE */

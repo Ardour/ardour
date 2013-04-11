@@ -17,8 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifdef WITH_VIDEOTIMELINE
-
 #include <cstdio>
 #include <string>
 #include <cerrno>
@@ -316,5 +314,3 @@ video_draw_cross (Glib::RefPtr<Gdk::Pixbuf> img)
 		if (n_channels>3) p[3] = 255;
 	}
 }
-
-#endif /* WITH_VIDEOTIMELINE */

@@ -55,7 +55,5 @@ CONFIG_VARIABLE (std::string, timecode_generator_offset, "timecode-generator-off
 CONFIG_VARIABLE (bool, glue_new_markers_to_bars_and_beats, "glue-new-markers-to-bars-and-beats", false)
 CONFIG_VARIABLE (bool, midi_copy_is_fork, "midi-copy-is-fork", false)
 CONFIG_VARIABLE (bool, glue_new_regions_to_bars_and_beats, "glue-new-regions-to-bars-and-beats", false)
-#ifdef WITH_VIDEOTIMELINE
 CONFIG_VARIABLE (bool, use_video_file_fps, "use-video-file-fps", false)
 CONFIG_VARIABLE (bool, videotimeline_pullup, "videotimeline-pullup", true)
-#endif

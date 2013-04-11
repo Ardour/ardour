@@ -17,8 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifdef WITH_VIDEOTIMELINE
-
 #include <sigc++/bind.h>
 #include "ardour/tempo.h"
 
@@ -370,5 +368,3 @@ extern "C" {
 	}
 
 } /* end extern "C" */
-
-#endif /* WITH_VIDEOTIMELINE */

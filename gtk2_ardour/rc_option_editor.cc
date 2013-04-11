@@ -809,7 +809,6 @@ private:
         PBD::ScopedConnection protocol_status_connection;
 };
 
-#ifdef WITH_VIDEOTIMELINE
 class VideoTimelineOptions : public OptionEditorBox
 {
 public:
@@ -927,7 +926,6 @@ private:
 	CheckButton _show_video_server_dialog_button;
 	CheckButton _video_advanced_setup_button;
 };
-#endif
 
 /** A class which allows control of visibility of some editor components usign
  *  a VisibilityGroup.  The caller should pass in a `dummy' VisibilityGroup
@@ -1832,10 +1830,8 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("User interaction"), rm);
 
-#ifdef WITH_VIDEOTIMELINE
 	/* VIDEO Timeline */
 	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
-#endif
 
 	/* INTERFACE */
 

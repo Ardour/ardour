@@ -17,8 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifdef WITH_VIDEOTIMELINE
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -673,5 +671,3 @@ SystemExec::write_to_stdin(std::string d, size_t len)
 }
 
 #endif // end UNIX process
-
-#endif /* WITH_VIDEOTIMELINE */

@@ -737,12 +737,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		}
 	}
 
-#ifdef WITH_VIDEOTIMELINE
 	case VideoBarItem:
 		_drags->set (new VideoTimeLineDrag (this, item), event);
 		return true;
 		break;
-#endif
 
 	case MarkerBarItem:
 	case TempoBarItem:
@@ -1554,9 +1552,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case CdMarkerBarItem:
 			case TempoBarItem:
 			case MeterBarItem:
-#ifdef WITH_VIDEOTIMELINE
 			case VideoBarItem:
-#endif
 				popup_ruler_menu (where, item_type);
 				break;
 
