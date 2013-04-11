@@ -17,8 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifdef WITH_VIDEOTIMELINE
-
 #include <sigc++/bind.h>
 #include "ardour/tempo.h"
 
@@ -349,7 +347,6 @@ extern "C" {
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, ARDOUR_USER_AGENT);
 		curl_easy_setopt(curl, CURLOPT_TIMEOUT, ARDOUR_CURL_TIMEOUT);
 		curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
-#define CURLERRORDEBUG /* XXX */
 #ifdef CURLERRORDEBUG
 		char curlerror[CURL_ERROR_SIZE] = "";
 		curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curlerror);
@@ -373,5 +370,3 @@ extern "C" {
 	}
 
 } /* end extern "C" */
-
-#endif /* WITH_VIDEOTIMELINE */

@@ -17,8 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifdef WITH_VIDEOTIMELINE
-
 #ifndef __ardour_system_exec_h__
 #define __ardour_system_exec_h__
 
@@ -201,4 +199,3 @@ class SystemExec
 };
 
 #endif /* __ardour_system_exec_h__ */
-#endif /* WITH_VIDEOTIMELINE */

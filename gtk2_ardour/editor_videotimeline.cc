@@ -17,7 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifdef WITH_VIDEOTIMELINE
 
 #include <jack/types.h>
 
@@ -139,5 +138,3 @@ Editor::export_video ()
 	}
 #endif
 }
-
-#endif /* WITH_VIDEOTIMELINE */

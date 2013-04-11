@@ -291,7 +291,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual framecnt_t get_nudge_distance (framepos_t pos, framecnt_t& next) = 0;
 	virtual Evoral::MusicalTime get_grid_type_as_beats (bool& success, framepos_t position) = 0;
 
-#ifdef WITH_VIDEOTIMELINE
 	virtual void queue_visual_videotimeline_update () = 0;
 	virtual void toggle_ruler_video (bool) = 0;
 	virtual void toggle_xjadeo_proc (int) = 0;
@@ -301,7 +300,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual void set_video_timeline_height (const int h) = 0;
 	virtual void embed_audio_from_video (std::string, framepos_t n = 0) = 0;
 	virtual void export_video () = 0;
-#endif
 
 #ifdef WITH_CMT
 	virtual void connect_to_image_compositor()  = 0;
@@ -347,9 +345,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual bool canvas_feature_line_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
 	virtual bool canvas_stream_view_event (GdkEvent* event, ArdourCanvas::Item*, RouteTimeAxisView*) = 0;
 	virtual bool canvas_marker_event (GdkEvent* event, ArdourCanvas::Item*, Marker*) = 0;
-#ifdef WITH_VIDEOTIMELINE
 	virtual bool canvas_videotl_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
-#endif
 	virtual bool canvas_zoom_rect_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 	virtual bool canvas_tempo_marker_event (GdkEvent* event, ArdourCanvas::Item*, TempoMarker*) = 0;
 	virtual bool canvas_meter_marker_event (GdkEvent* event, ArdourCanvas::Item*, MeterMarker*) = 0;

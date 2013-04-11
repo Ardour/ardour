@@ -145,13 +145,11 @@ SessionDirectory::midi_patch_path () const
 	return Glib::build_filename (sources_root(), midi_patch_dir_name);
 }
 
-#ifdef WITH_VIDEOTIMELINE
 const std::string
 SessionDirectory::video_path () const
 {
 	return Glib::build_filename (sources_root(), video_dir_name);
 }
-#endif
 
 const std::string
 SessionDirectory::peak_path () const

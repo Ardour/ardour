@@ -17,8 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifdef WITH_VIDEOTIMELINE
-
 #include "pbd/file_utils.h"
 #include "gui_thread.h"
 #include "ardour_ui.h"
@@ -517,4 +515,3 @@ VideoMonitor::xjadeo_sync_setup ()
 		sync_by_manual_seek = my_manual_seek;
 	}
 }
-#endif /* WITH_VIDEOTIMELINE */

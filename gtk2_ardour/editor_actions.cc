@@ -546,7 +546,6 @@ Editor::register_actions ()
 	ruler_samples_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-samples-ruler"), _("Samples"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_samples)));
 	ruler_timecode_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-timecode-ruler"), _("Timecode"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_timecode)));
 	ruler_minsec_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-minsec-ruler"), _("Min:Sec"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_minsec)));
-#ifdef WITH_VIDEOTIMELINE
 
 	ActionManager::register_action (editor_menu_actions, X_("VideoMonitorMenu"), _("Video Monitor"));
 
@@ -561,8 +560,6 @@ Editor::register_actions ()
 	xjadeo_letterbox_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-letterbox"), _("Letterbox"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 6)));
 	xjadeo_zoom_100 = reg_sens (editor_actions, "zoom-vmon-100", _("Original Size"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 7));
 
-#endif
-
 	/* set defaults here */
 
 	no_ruler_shown_update = true;
@@ -572,7 +569,7 @@ Editor::register_actions ()
 	ruler_range_action->set_active (true);
 	ruler_loop_punch_action->set_active (true);
 	ruler_loop_punch_action->set_active (true);
-#ifdef WITH_VIDEOTIMELINE
+
 	ruler_video_action->set_active (false);
 	xjadeo_proc_action->set_active (false);
 	xjadeo_proc_action->set_sensitive (false);
@@ -589,7 +586,7 @@ Editor::register_actions ()
 	xjadeo_letterbox_action->set_active (false);
 	xjadeo_letterbox_action->set_sensitive (false);
 	xjadeo_zoom_100->set_sensitive (false);
-#endif
+
 	if (Profile->get_sae()) {
 		ruler_bbt_action->set_active (true);
 		ruler_cd_marker_action->set_active (false);
@@ -745,11 +742,9 @@ Editor::toggle_ruler_visibility (RulerType rt)
 	case ruler_time_cd_marker:
 		action = "toggle-cd-marker-ruler";
 		break;
-#ifdef WITH_VIDEOTIMELINE
 	case ruler_video_timeline:
 		action = "toggle-video-ruler";
 		break;
-#endif
 	}
 
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Rulers"), action);
@@ -781,7 +776,6 @@ Editor::set_group_tabs ()
 	}
 }
 
-#ifdef WITH_VIDEOTIMELINE
 void
 Editor::set_xjadeo_sensitive (bool onoff)
 {
@@ -899,7 +893,6 @@ Editor::set_xjadeo_viewoption (int what)
 		ARDOUR_UI::instance()->video_timeline->control_video_monitor(what, 0);
 	}
 }
-#endif
 
 void
 Editor::toggle_measure_visibility ()
@@ -1737,9 +1730,7 @@ Editor::register_region_actions ()
 	/* Toggle `locked' status of selected regions */
 	toggle_reg_sens (_region_actions, "toggle-region-lock", _("Lock"), sigc::mem_fun(*this, &Editor::toggle_region_lock));
 
-#ifdef WITH_VIDEOTIMELINE
 	toggle_reg_sens (_region_actions, "toggle-region-video-lock", _("Lock to Video"), sigc::mem_fun(*this, &Editor::toggle_region_video_lock));
-#endif
 
 	toggle_reg_sens (
 		_region_actions,

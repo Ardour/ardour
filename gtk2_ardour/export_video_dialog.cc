@@ -17,8 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifdef WITH_VIDEOTIMELINE
-
 #include <cstdio>
 #include <string>
 #include <sstream>
@@ -966,5 +964,3 @@ ExportVideoDialog::open_invid_dialog ()
 		}
 	}
 }
-
-#endif /* WITH_VIDEOTIMELINE */

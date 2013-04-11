@@ -150,16 +150,12 @@ Editor::initialize_canvas ()
 	transport_marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height * 2.0));
 	marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height));
 	cd_marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, 0.0));
-#ifdef WITH_VIDEOTIMELINE
 	videotl_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple(0.0, 0.0));
-#endif
 
 
-#ifdef WITH_VIDEOTIMELINE
 	videotl_bar_group = new ArdourCanvas::Group (_time_bars_canvas->root ());
 	videotl_bar = new ArdourCanvas::Rectangle (videotl_bar_group, ArdourCanvas::Rect (0.0, 0.0, 100,(timebar_height * videotl_bar_height)));
 	ARDOUR_UI::instance()->video_timeline = new VideoTimeLine(this, videotl_bar_group, (timebar_height * videotl_bar_height));
-#endif
 
 	cd_marker_bar_drag_rect = new ArdourCanvas::Rectangle (cd_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
 	cd_marker_bar_drag_rect->set_outline (false);
@@ -204,10 +200,7 @@ Editor::initialize_canvas ()
 	meter_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_meter_bar_event), meter_bar));
 	marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_marker_bar_event), marker_bar));
 	cd_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_cd_marker_bar_event), cd_marker_bar));
-#ifdef WITH_VIDEOTIMELINE
 	videotl_bar_group->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_videotl_bar_event), videotl_bar));
-	//videotl_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_videotl_bar_event), videotl_bar));
-#endif
 	range_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
 	transport_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
 
@@ -790,9 +783,7 @@ Editor::set_horizontal_position (double p)
 		_summary->set_overlays_dirty ();
 	}
 
-#ifdef WITH_VIDEOTIMELINE
 	update_video_timeline();
-#endif
 
 	HorizontalPositionChanged (); /* EMIT SIGNAL */
 
@@ -846,10 +837,8 @@ Editor::color_handler()
 	cd_marker_bar->set_fill_color (ARDOUR_UI::config()->canvasvar_CDMarkerBar.get());
 	cd_marker_bar->set_outline_color (ARDOUR_UI::config()->canvasvar_MarkerBarSeparator.get());
 
-#ifdef WITH_VIDEOTIMELINE
 	videotl_bar->set_fill_color (ARDOUR_UI::config()->canvasvar_VideoBar.get());
 	videotl_bar->set_outline_color (ARDOUR_UI::config()->canvasvar_MarkerBarSeparator.get());
-#endif
 
 	range_marker_bar->set_fill_color (ARDOUR_UI::config()->canvasvar_RangeMarkerBar.get());
 	range_marker_bar->set_outline_color (ARDOUR_UI::config()->canvasvar_MarkerBarSeparator.get());

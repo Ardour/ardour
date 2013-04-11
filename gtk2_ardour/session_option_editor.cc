@@ -79,7 +79,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Timecode"), _vpu);
 
-#ifdef WITH_VIDEOTIMELINE
 	add_option (_("Sync"), new BoolOption (
 			    "use-video-file-fps",
 			    _("Use Video File's FPS Instead of Timecode Value for Timeline and Video Monitor."),
@@ -93,7 +92,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_videotimeline_pullup),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_videotimeline_pullup)
 			    ));
-#endif
 
 	add_option (_("Timecode"), new OptionEditorHeading (_("Ext Timecode Offsets")));
 

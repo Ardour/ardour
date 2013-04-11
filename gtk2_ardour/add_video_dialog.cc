@@ -17,8 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifdef WITH_VIDEOTIMELINE
-
 #include <cstdio>
 #include <cmath>
 
@@ -684,5 +682,3 @@ AddVideoDialog::request_preview(std::string u)
 	preview_image->set(imgbuf);
 	preview_image->show();
 }
-
-#endif /* WITH_VIDEOTIMELINE */

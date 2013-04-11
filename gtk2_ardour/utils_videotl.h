@@ -17,7 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifdef WITH_VIDEOTIMELINE
 /** @file utils_videotl.h
  *  @brief common functions used for video-file im/export
  */
@@ -55,5 +54,3 @@ bool video_query_info (
 		);
 
 #endif /* __gtk_ardour_video_utils_h__ */
-
-#endif /* WITH_VIDEOTIMELINE */
