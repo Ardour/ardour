@@ -44,7 +44,7 @@ Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, Data
         , _mode (mode)
 	, _monitoring (MonitorAuto)
 {
-	_freeze_record.state = NoFreeze;
+  //	_freeze_record.state = NoFreeze;
         _declickable = true;
 }
 
@@ -161,7 +161,7 @@ Track::get_template ()
 {
 	return state (false);
 }
-
+/*
 Track::FreezeRecord::~FreezeRecord ()
 {
 	for (vector<FreezeRecordProcessorInfo*>::iterator i = processor_info.begin(); i != processor_info.end(); ++i) {
@@ -174,7 +174,7 @@ Track::freeze_state() const
 {
 	return _freeze_record.state;
 }
-
+*/
 Track::RecEnableControl::RecEnableControl (boost::shared_ptr<Track> t)
 	: AutomationControl (t->session(), RecEnableAutomation, boost::shared_ptr<AutomationList>(), X_("recenable"))
 	, track (t)
@@ -230,9 +230,9 @@ Track::prep_record_enabled (bool yn, void *src)
 		return;
 	}
 
-	if (_freeze_record.state == Frozen) {
+	/*	if (_freeze_record.state == Frozen) {
 		return;
-	}
+		}*/
 
 	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_recenable()) {
 		_route_group->apply (&Track::prep_record_enabled, yn, _route_group);
@@ -270,9 +270,9 @@ Track::set_record_enabled (bool yn, void *src)
 		return;
 	}
 
-	if (_freeze_record.state == Frozen) {
+	/*	if (_freeze_record.state == Frozen) {
 		return;
-	}
+		}*/
 
 	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_recenable()) {
 		_route_group->apply (&Track::set_record_enabled, yn, _route_group);

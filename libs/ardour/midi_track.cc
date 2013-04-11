@@ -60,10 +60,26 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 	, _playback_channel_mask(0x0000ffff)
 	, _capture_channel_mask(0x0000ffff)
 {
+  _freeze_record.state = NoFreeze;
 }
 
 MidiTrack::~MidiTrack ()
 {
+}
+
+MidiTrack::FreezeState
+MidiTrack::freeze_state() const
+{
+	return _freeze_record.state;
+}
+
+void
+MidiTrack::prep_record_enabled (bool yn, void *src)
+{
+  if (_freeze_record.state == Frozen) {
+    return;
+  }
+  return Track::prep_record_enabled(yn, src);
 }
 
 int
@@ -565,6 +581,14 @@ MidiTrack::bounce_range (framepos_t /*start*/, framepos_t /*end*/, InterThreadIn
 	std::cerr << "MIDI bounce range currently unsupported" << std::endl;
 	return boost::shared_ptr<Region> ();
 }
+
+/*
+MidiTrack::FreezeRecord::~FreezeRecord ()
+{
+	for (vector<FreezeRecordProcessorInfo*>::iterator i = processor_info.begin(); i != processor_info.end(); ++i) {
+		delete *i;
+	}
+}*/
 
 void
 MidiTrack::freeze_me (InterThreadInfo& /*itt*/)

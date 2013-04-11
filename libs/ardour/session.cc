@@ -65,6 +65,7 @@
 #include "ardour/data_type.h"
 #include "ardour/debug.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/freezable.h"
 #include "ardour/graph.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_ui.h"
@@ -3954,9 +3955,9 @@ Session::freeze_all (InterThreadInfo& itt)
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
-		boost::shared_ptr<Track> t;
+		boost::shared_ptr<Freezable> t;
 
-		if ((t = boost::dynamic_pointer_cast<Track>(*i)) != 0) {
+		if ((t = boost::dynamic_pointer_cast<Freezable>(*i)) != 0) {
 			/* XXX this is wrong because itt.progress will keep returning to zero at the start
 			   of every track.
 			*/

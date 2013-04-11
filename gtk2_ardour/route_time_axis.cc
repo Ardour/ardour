@@ -44,6 +44,7 @@
 
 #include "ardour/amp.h"
 #include "ardour/event_type_map.h"
+#include "ardour/freezable.h"
 #include "ardour/processor.h"
 #include "ardour/profile.h"
 #include "ardour/route_group.h"
@@ -1536,13 +1537,17 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 			std::string playlist_name = (*i)->name()+group_string+take_name;
 			
 			boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track>(*i);
+			boost::shared_ptr<Freezable> freezable = boost::dynamic_pointer_cast<Freezable>(*i);
+
 			if (!track) {
 				continue;
 			}
 
-			if (track->freeze_state() == Track::Frozen) {
-				/* Don't change playlists of frozen tracks */
-				continue;
+			if(freezable != 0){
+			  if (freezable->freeze_state() == Freezable::Frozen) {
+			    /* Don't change playlists of frozen tracks */
+			    continue;
+			  }
 			}
 			
 			boost::shared_ptr<Playlist> ipl = session()->playlists->by_name(playlist_name);
@@ -1602,17 +1607,22 @@ RouteTimeAxisView::map_frozen ()
 	}
 
 	ENSURE_GUI_THREAD (*this, &RouteTimeAxisView::map_frozen)
+	  boost::shared_ptr<Freezable> t = boost::dynamic_pointer_cast<Freezable>(track());
 
-	switch (track()->freeze_state()) {
-	case Track::Frozen:
+	  if( t != 0 )
+	    {
+
+	      switch (t->freeze_state()) {
+	      case Freezable::Frozen:
 		playlist_button.set_sensitive (false);
 		rec_enable_button->set_sensitive (false);
 		break;
-	default:
+	      default:
 		playlist_button.set_sensitive (true);
 		rec_enable_button->set_sensitive (true);
 		break;
-	}
+	      }
+	    }
 }
 
 void

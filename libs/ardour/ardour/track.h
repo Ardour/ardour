@@ -24,6 +24,8 @@
 #include "ardour/interthread_info.h"
 #include "ardour/route.h"
 #include "ardour/public_diskstream.h"
+#include "ardour/freezable.h"
+
 
 namespace ARDOUR {
 
@@ -35,21 +37,25 @@ class Region;
 class Diskstream;
 class IO;
 
-class Track : public Route, public PublicDiskstream
+ class Track : public Route, public PublicDiskstream
 {
   public:
-	Track (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal, DataType default_type = DataType::AUDIO);
+	Track (Session&, 
+	       std::string name, 
+	       Route::Flag f = Route::Flag (0), 
+	       TrackMode m = Normal, 
+	       DataType default_type = DataType::AUDIO);
 	virtual ~Track ();
-
 	int init ();
-
 	bool set_name (const std::string& str);
 
+	//TrackMode
 	TrackMode mode () const { return _mode; }
 	virtual int set_mode (TrackMode /*m*/) { return false; }
 	virtual bool can_use_mode (TrackMode /*m*/, bool& /*bounce_required*/) { return false; }
 	PBD::Signal0<void> TrackModeChanged;
 
+	//Monitoring
 	virtual void set_monitoring (MonitorChoice);
 	MonitorChoice monitoring_choice() const { return _monitoring; }
         MonitorState monitoring_state () const;
@@ -70,27 +76,30 @@ class Track : public Route, public PublicDiskstream
 
 	virtual DataType data_type () const = 0;
 
+	//Recording
 	bool can_record();
+	bool record_enabled() const;
+	virtual void set_record_enabled (bool yn, void *src);
+	virtual void prep_record_enabled (bool yn, void *src);
 
+	//Diskstream
 	void use_new_diskstream ();
 	virtual boost::shared_ptr<Diskstream> create_diskstream() = 0;
 	virtual void set_diskstream (boost::shared_ptr<Diskstream>);
+	bool using_diskstream_id (PBD::ID) const;
+	void set_block_size (pframes_t);
 
 	void set_latency_compensation (framecnt_t);
 
-	enum FreezeState {
-		NoFreeze,
-		Frozen,
-		UnFrozen
-	};
+	//FreezeState
+	//enum FreezeState {NoFreeze,
+	//		  Frozen,
+	//		  UnFrozen};
+	//FreezeState freeze_state() const;
+	//virtual void freeze_me (InterThreadInfo&) = 0;
+	//virtual void unfreeze () = 0;
 
-	FreezeState freeze_state() const;
-
-	virtual void freeze_me (InterThreadInfo&) = 0;
-	virtual void unfreeze () = 0;
-
-	/** @return true if the track can be bounced, or false otherwise.
-	 */
+	//Bounce
 	virtual bool bounceable (boost::shared_ptr<Processor> endpoint, bool include_endpoint) const = 0;
 	virtual boost::shared_ptr<Region> bounce (InterThreadInfo&) = 0;
 	virtual boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&, 
@@ -105,13 +114,7 @@ class Track : public Route, public PublicDiskstream
 
 	boost::shared_ptr<AutomationControl> rec_enable_control() { return _rec_enable_control; }
 
-	bool record_enabled() const;
-	void set_record_enabled (bool yn, void *src);
-	void prep_record_enabled (bool yn, void *src);
-
-	bool using_diskstream_id (PBD::ID) const;
-
-	void set_block_size (pframes_t);
+	
 
 	/* PublicDiskstream interface */
 	boost::shared_ptr<Playlist> playlist ();
@@ -177,6 +180,7 @@ class Track : public Route, public PublicDiskstream
 	MonitorChoice _monitoring;
 
 	//private: (FIXME)
+	/*
 	struct FreezeRecordProcessorInfo {
 		FreezeRecordProcessorInfo(XMLNode& st, boost::shared_ptr<Processor> proc)
 			: state (st), processor (proc) {}
@@ -198,6 +202,7 @@ class Track : public Route, public PublicDiskstream
 		bool                               have_mementos;
 		FreezeState                        state;
 	};
+	*/
 
 	struct RecEnableControl : public AutomationControl {
 		RecEnableControl (boost::shared_ptr<Track> t);
@@ -210,7 +215,7 @@ class Track : public Route, public PublicDiskstream
 
 	virtual void set_state_part_two () = 0;
 
-	FreezeRecord          _freeze_record;
+	//FreezeRecord          _freeze_record;
 	XMLNode*              pending_state;
 	bool                  _destructive;
 

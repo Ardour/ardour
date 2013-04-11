@@ -22,6 +22,7 @@
 
 #include "ardour/track.h"
 #include "ardour/midi_ring_buffer.h"
+#include "ardour/freezable.h"
 
 namespace ARDOUR
 {
@@ -33,10 +34,13 @@ class RouteGroup;
 class SMFSource;
 class Session;
 
-class MidiTrack : public Track
+ class MidiTrack : public Track, public Freezable
 {
 public:
-	MidiTrack (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
+	MidiTrack (Session&, 
+		   string name, 
+		   Route::Flag f = Route::Flag (0), 
+		   TrackMode m = Normal);
 	~MidiTrack ();
 
 	int init ();
@@ -48,12 +52,17 @@ public:
 
 	boost::shared_ptr<Diskstream> create_diskstream ();
 	void set_diskstream (boost::shared_ptr<Diskstream>);
-	void set_record_enabled (bool yn, void *src);
 
 	DataType data_type () const {
 		return DataType::MIDI;
 	}
 
+	//Recording
+	void set_record_enabled (bool yn, void *src);
+	void prep_record_enabled (bool yn, void *src);
+
+	//FreezeState
+	FreezeState freeze_state() const;
 	void freeze_me (InterThreadInfo&);
 	void unfreeze ();
 
@@ -149,6 +158,7 @@ protected:
 	XMLNode& state (bool full);
 
 	void act_on_mute ();
+	FreezeRecord          _freeze_record;
 
 private:
 	MidiRingBuffer<framepos_t> _immediate_events;

@@ -51,10 +51,35 @@ using namespace PBD;
 AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
 	: Track (sess, name, flag, mode)
 {
+  _freeze_record.state = NoFreeze;
 }
 
 AudioTrack::~AudioTrack ()
 {
+}
+
+AudioTrack::FreezeState
+AudioTrack::freeze_state() const
+{
+	return _freeze_record.state;
+}
+
+void
+AudioTrack::prep_record_enabled (bool yn, void *src)
+{
+  if (_freeze_record.state == Frozen) {
+    return;
+  }
+  return Track::prep_record_enabled(yn, src);
+}
+
+void
+AudioTrack::set_record_enabled (bool yn, void *src)
+{
+  if (_freeze_record.state == Frozen) {
+    return;
+  }
+  return Track::prep_record_enabled(yn, src);
 }
 
 boost::shared_ptr<Diskstream>
@@ -513,6 +538,14 @@ AudioTrack::bounce_range (framepos_t start, framepos_t end, InterThreadInfo& itt
 	vector<boost::shared_ptr<Source> > srcs;
 	return _session.write_one_track (*this, start, end, false, srcs, itt, endpoint, include_endpoint, false);
 }
+
+/*
+AudioTrack::FreezeRecord::~FreezeRecord ()
+{
+	for (vector<FreezeRecordProcessorInfo*>::iterator i = processor_info.begin(); i != processor_info.end(); ++i) {
+		delete *i;
+	}
+	}*/
 
 void
 AudioTrack::freeze_me (InterThreadInfo& itt)

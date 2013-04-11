@@ -99,7 +99,7 @@ setup_enum_writer ()
 	Diskstream::Flag _Diskstream_Flag;
 	Location::Flags _Location_Flags;
 	PositionLockStyle _PositionLockStyle;
-	Track::FreezeState _Track_FreezeState;
+	Freezable::FreezeState _Freezable_FreezeState;
 	AutomationList::InterpolationStyle _AutomationList_InterpolationStyle;
 	AnyTime::Type _AnyTime_Type;
 	ExportFilename::TimeFormat _ExportFilename_TimeFormat;
@@ -438,10 +438,10 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Location, IsRangeMarker);
 	REGISTER_BITS (_Location_Flags);
 
-	REGISTER_CLASS_ENUM (Track, NoFreeze);
-	REGISTER_CLASS_ENUM (Track, Frozen);
-	REGISTER_CLASS_ENUM (Track, UnFrozen);
-	REGISTER (_Track_FreezeState);
+	REGISTER_CLASS_ENUM (Freezable, NoFreeze);
+	REGISTER_CLASS_ENUM (Freezable, Frozen);
+	REGISTER_CLASS_ENUM (Freezable, UnFrozen);
+	REGISTER (_Freezable_FreezeState);
 
 	REGISTER_CLASS_ENUM (AutomationList, Discrete);
 	REGISTER_CLASS_ENUM (AutomationList, Linear);
