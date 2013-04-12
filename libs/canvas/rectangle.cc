@@ -40,32 +40,58 @@ Rectangle::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context)
 	if (_fill) {
 		setup_fill_context (context);
 		context->rectangle (plot.x0, plot.y0, plot.width(), plot.height());
-		context->fill ();
-	}
+		
+		if (!_outline) {
+			context->fill ();
+		} else {
+			
+			/* special/common case: outline the entire rectangle is
+			 * requested, so just use the same path for the fill
+			 * and stroke.
+			 */
 
+			if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
+				context->fill_preserve();
+				setup_outline_context (context);
+				context->stroke ();
+			} else {
+				context->fill ();
+			}
+		}
+	} 
+	
 	if (_outline) {
-		if (_outline_what & LEFT) {
-			context->move_to (plot.x0, plot.y0);
-			context->line_to (plot.x0, plot.y1);
-		}
 		
-		if (_outline_what & BOTTOM) {
-			context->move_to (plot.x0, plot.y1);
-			context->line_to (plot.x1, plot.y1);
+		if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
+			context->rectangle (plot.x0, plot.y0, plot.width(), plot.height());
+			setup_outline_context (context);
+			context->stroke ();
+			
+		} else {
+			
+			if (_outline_what & LEFT) {
+				context->move_to (plot.x0, plot.y0);
+				context->line_to (plot.x0, plot.y1);
+			}
+			
+			if (_outline_what & BOTTOM) {
+				context->move_to (plot.x0, plot.y1);
+				context->line_to (plot.x1, plot.y1);
+			}
+			
+			if (_outline_what & RIGHT) {
+				context->move_to (plot.x1, plot.y0);
+				context->line_to (plot.x1, plot.y1);
+			}
+			
+			if (_outline_what & TOP) {
+				context->move_to (plot.x0, plot.y0);
+				context->line_to (plot.x1, plot.y0);
+			}
+			
+			setup_outline_context (context);
+			context->stroke ();
 		}
-		
-		if (_outline_what & RIGHT) {
-			context->move_to (plot.x1, plot.y0);
-			context->line_to (plot.x1, plot.y1);
-		}
-		
-		if (_outline_what & TOP) {
-			context->move_to (plot.x0, plot.y0);
-			context->line_to (plot.x1, plot.y0);
-		}
-		
-		setup_outline_context (context);
-		context->stroke ();
 	}
 }
 
