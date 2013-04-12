@@ -1211,7 +1211,7 @@ Editor::cursor_align (bool playhead_to_edit)
 void
 Editor::scroll_backward (float pages)
 {
-	framepos_t const one_page = (framepos_t) rint (_visible_canvas_width * frames_per_pixel);
+	framepos_t const one_page = (framepos_t) rint (_visible_canvas_width * samples_per_pixel);
 	framepos_t const cnt = (framepos_t) floor (pages * one_page);
 
 	framepos_t frame;
@@ -1227,7 +1227,7 @@ Editor::scroll_backward (float pages)
 void
 Editor::scroll_forward (float pages)
 {
-	framepos_t const one_page = (framepos_t) rint (_visible_canvas_width * frames_per_pixel);
+	framepos_t const one_page = (framepos_t) rint (_visible_canvas_width * samples_per_pixel);
 	framepos_t const cnt = (framepos_t) floor (pages * one_page);
 
 	framepos_t frame;
@@ -1331,7 +1331,7 @@ Editor::tav_zoom_smooth (bool coarser, bool force_all)
 }
 
 bool
-Editor::clamp_frames_per_pixel (double& fpp) const
+Editor::clamp_samples_per_pixel (double& fpp) const
 {
 	bool clamped = false;
 	
@@ -1353,7 +1353,7 @@ Editor::temporal_zoom_step (bool coarser)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_step, coarser)
 
-	double nfpp = frames_per_pixel;
+	double nfpp = samples_per_pixel;
 
 	if (coarser) {
 		nfpp = min (9e6, nfpp * 1.61803399);
@@ -1383,8 +1383,8 @@ Editor::temporal_zoom (double fpp)
 	double nfpp;
 	double l;
 
-	clamp_frames_per_pixel (fpp);
-	if (fpp == frames_per_pixel) {
+	clamp_samples_per_pixel (fpp);
+	if (fpp == samples_per_pixel) {
 		return;
 	}
 
@@ -1660,7 +1660,7 @@ Editor::temporal_zoom_to_frame (bool coarser, framepos_t frame)
 	double range_before = frame - leftmost_frame;
 	double new_fpp;
 
-	new_fpp = frames_per_pixel;
+	new_fpp = samples_per_pixel;
 
 	if (coarser) {
 		new_fpp *= 1.61803399;
@@ -1670,7 +1670,7 @@ Editor::temporal_zoom_to_frame (bool coarser, framepos_t frame)
 		range_before /= 1.61803399;
 	}
 
-	if (new_fpp == frames_per_pixel)  {
+	if (new_fpp == samples_per_pixel)  {
 		return;
 	}
 
@@ -4419,14 +4419,14 @@ Editor::reset_point_selection ()
 void
 Editor::center_playhead ()
 {
-	float const page = _visible_canvas_width * frames_per_pixel;
+	float const page = _visible_canvas_width * samples_per_pixel;
 	center_screen_internal (playhead_cursor->current_frame (), page);
 }
 
 void
 Editor::center_edit_point ()
 {
-	float const page = _visible_canvas_width * frames_per_pixel;
+	float const page = _visible_canvas_width * samples_per_pixel;
 	center_screen_internal (get_preferred_edit_position(), page);
 }
 

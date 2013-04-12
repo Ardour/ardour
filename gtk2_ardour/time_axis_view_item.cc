@@ -138,7 +138,7 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 
 	_selected = other._selected;
 
-	init (other.item_name, other.frames_per_pixel, c, other.frame_position,
+	init (other.item_name, other.samples_per_pixel, c, other.frame_position,
 	      other.item_duration, other.visibility, other.wide_enough_for_name, other.high_enough_for_name);
 }
 
@@ -146,7 +146,7 @@ void
 TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & base_color, framepos_t start, framepos_t duration, Visibility vis, bool wide, bool high)
 {
 	item_name = it_name;
-	frames_per_pixel = fpp;
+	samples_per_pixel = fpp;
 	frame_position = start;
 	item_duration = duration;
 	name_connected = false;
@@ -301,7 +301,7 @@ TimeAxisViewItem::set_position(framepos_t pos, void* src, double* delta)
 	*/
 
 	double old_unit_pos;
-	double new_unit_pos = pos / frames_per_pixel;
+	double new_unit_pos = pos / samples_per_pixel;
 
 	old_unit_pos = group->position().x;
 
@@ -799,9 +799,9 @@ TimeAxisViewItem::set_trim_handle_colors()
 
 /** @return the frames per pixel */
 double
-TimeAxisViewItem::get_frames_per_pixel () const
+TimeAxisViewItem::get_samples_per_pixel () const
 {
-	return frames_per_pixel;
+	return samples_per_pixel;
 }
 
 /** Set the frames per pixel of this item.
@@ -811,11 +811,11 @@ TimeAxisViewItem::get_frames_per_pixel () const
  *  @param fpp the new frames per pixel
  */
 void
-TimeAxisViewItem::set_frames_per_pixel (double fpp)
+TimeAxisViewItem::set_samples_per_pixel (double fpp)
 {
-	frames_per_pixel = fpp;
+	samples_per_pixel = fpp;
 	set_position (this->get_position(), this);
-	reset_width_dependent_items ((double) get_duration() / frames_per_pixel);
+	reset_width_dependent_items ((double) get_duration() / samples_per_pixel);
 }
 
 void

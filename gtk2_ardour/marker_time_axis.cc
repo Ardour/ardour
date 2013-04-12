@@ -126,12 +126,12 @@ MarkerTimeAxis::set_height (uint32_t h)
  * @param spu the number of frames per pixel
  */
 void
-MarkerTimeAxis::set_frames_per_pixel (double fpp)
+MarkerTimeAxis::set_samples_per_pixel (double fpp)
 {
-	TimeAxisView::set_frames_per_pixel (editor.get_current_zoom());
+	TimeAxisView::set_samples_per_pixel (editor.get_current_zoom());
 
 	if (view) {
-		view->set_frames_per_pixel (fpp);
+		view->set_samples_per_pixel (fpp);
 	}
 }
 

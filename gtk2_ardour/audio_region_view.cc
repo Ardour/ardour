@@ -202,7 +202,7 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	region_resized (ARDOUR::bounds_change);
 
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		(*i)->set_duration (_region->length() / frames_per_pixel);
+		(*i)->set_duration (_region->length() / samples_per_pixel);
 	}
 
 	region_locked ();
@@ -545,7 +545,7 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 	Points* points;
 
 	/* round here to prevent little visual glitches with sub-pixel placement */
-	double const pwidth = rint (width / frames_per_pixel);
+	double const pwidth = rint (width / samples_per_pixel);
 	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
 	double h;
 
@@ -632,11 +632,11 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 	Points* points;
 
 	/* round here to prevent little visual glitches with sub-pixel placement */
-	double const pwidth = rint (width / frames_per_pixel);
+	double const pwidth = rint (width / samples_per_pixel);
 	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
 	double h;
 
-	double const handle_center = (_region->length() - width) / frames_per_pixel;
+	double const handle_center = (_region->length() - width) / samples_per_pixel;
 
 	/* Put the fade out handle so that its right side is at the end-of-fade line;
 	 * it's `one out' for precise pixel accuracy.
@@ -715,13 +715,13 @@ AudioRegionView::get_fade_out_shape_width ()
 
 
 void
-AudioRegionView::set_frames_per_pixel (gdouble fpp)
+AudioRegionView::set_samples_per_pixel (gdouble fpp)
 {
-	RegionView::set_frames_per_pixel (fpp);
+	RegionView::set_samples_per_pixel (fpp);
 
 	if (Config->get_show_waveforms ()) {
 		for (uint32_t n = 0; n < waves.size(); ++n) {
-			waves[n]->set_frames_per_pixel (fpp);
+			waves[n]->set_samples_per_pixel (fpp);
 		}
 	}
 
@@ -780,7 +780,7 @@ AudioRegionView::setup_waveform_visibility ()
 			   this when waveforms are hidden.
 			*/
 			// CAIROCANVAS
-			//waves[n]->set_frames_per_pixel (_frames_per_pixel);
+			//waves[n]->set_samples_per_pixel (_samples_per_pixel);
 			waves[n]->show();
 		}
 	} else {
@@ -898,7 +898,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	wave->set_x_position (0);
 	wave->set_y_position (yoff);
 	wave->set_height (ht);
-	wave->set_frames_per_pixel (frames_per_pixel);
+	wave->set_samples_per_pixel (samples_per_pixel);
 	wave->property_amplitude_above_axis() =  _amplitude_above_axis;
 
 	if (_recregion) {
@@ -1045,7 +1045,7 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&trackview);
 	assert(rtv);
 
-	double unit_position = _region->position () / frames_per_pixel;
+	double unit_position = _region->position () / samples_per_pixel;
 	AudioGhostRegion* ghost = new AudioGhostRegion (tv, trackview, unit_position);
 	uint32_t nchans;
 
@@ -1061,7 +1061,7 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 
 		wave->set_channel (n);
 		wave->set_x_position (0);
-		wave->set_frames_per_pixel (frames_per_pixel);
+		wave->set_samples_per_pixel (samples_per_pixel);
 		wave->property_amplitude_above_axis() =  _amplitude_above_axis;
 		wave->set_region_start (_region->start());
 
@@ -1069,7 +1069,7 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 	}
 
 	ghost->set_height ();
-	ghost->set_duration (_region->length() / frames_per_pixel);
+	ghost->set_duration (_region->length() / samples_per_pixel);
 	ghost->set_colors();
 	ghosts.push_back (ghost);
 

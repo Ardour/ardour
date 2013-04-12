@@ -624,7 +624,7 @@ CrossfadeEditor::canvas_allocation (Gtk::Allocation& /*alloc*/)
 
 		(*i)->set_y_position (yoff);
 		(*i)->set_height (ht);
-		(*i)->set_frames_per_pixel (spu);
+		(*i)->set_samples_per_pixel (spu);
 	}
 
 	ht = canvas->get_allocation().get_height() / xfade->out()->n_channels();
@@ -636,7 +636,7 @@ CrossfadeEditor::canvas_allocation (Gtk::Allocation& /*alloc*/)
 
 		(*i)->set_y_position (yoff);
 		(*i)->set_height (ht);
-		(*i)->set_frames_per_pixel (spu);
+		(*i)->set_samples_per_pixel (spu);
 	}
 
 }
@@ -1170,7 +1170,7 @@ CrossfadeEditor::make_waves (boost::shared_ptr<AudioRegion> region, WhichFade wh
 			waveview->set_x_position (canvas_border);
 			waveview->set_y_position (yoff);
 			waveview->set_height (ht);
-			waveview->set_frames_per_pixel (spu);
+			waveview->set_samples_per_pixel (spu);
 			waveview->property_amplitude_above_axis() = 2.0;
 			waveview->set_outline_color (color);
 			waveview->set_fill_color (color);

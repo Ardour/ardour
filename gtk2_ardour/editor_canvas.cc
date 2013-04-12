@@ -770,7 +770,7 @@ Editor::set_horizontal_position (double p)
 	_track_canvas_hadj->set_value (p);
 	_time_bars_canvas_hadj->set_value (p);
 
-	leftmost_frame = (framepos_t) floor (p * frames_per_pixel);
+	leftmost_frame = (framepos_t) floor (p * samples_per_pixel);
 
 	update_fixed_rulers ();
 	redisplay_tempo (true);

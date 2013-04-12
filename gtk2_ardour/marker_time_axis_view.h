@@ -91,14 +91,14 @@ class MarkerTimeAxisView : public sigc::trackable
 		 */
 		int set_position(gdouble x, gdouble y) ;
 
-		int set_frames_per_pixel (double);
+		int set_samples_per_pixel (double);
 
 		/**
 		 * Returns the current samples per unit of this time axis view helper
 		 *
 		 * @return the current samples per unit of this time axis view helper
 		 */
-		gdouble get_frames_per_pixel() { return _frames_per_pixel; }
+		gdouble get_samples_per_pixel() { return _samples_per_pixel; }
 
 		/**
 		 * Sets the color of the items contained upon this view helper
@@ -203,7 +203,7 @@ class MarkerTimeAxisView : public sigc::trackable
 		 * convenience method to re-get the samples per unit and tell items upon this view
 		 *
 		 */
-		void reset_frames_per_pixel() ;
+		void reset_samples_per_pixel() ;
 
 		/** The list of items held by this time axis view helper */
 		typedef std::list<MarkerView *> MarkerViewList ;
@@ -219,7 +219,7 @@ class MarkerTimeAxisView : public sigc::trackable
 		ArdourCanvas::Rectangle *canvas_rect; /* frame around the whole thing */
 
 		/** the current frames per pixel */
-		double _frames_per_pixel;
+		double _samples_per_pixel;
 
 		/* XXX why are these different? */
 		Gdk::Color region_color;

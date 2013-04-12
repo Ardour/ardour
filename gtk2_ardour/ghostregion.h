@@ -39,7 +39,7 @@ public:
 	GhostRegion(ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
 	virtual ~GhostRegion();
 
-	virtual void set_frames_per_pixel (double) = 0;
+	virtual void set_samples_per_pixel (double) = 0;
 	virtual void set_height();
 	virtual void set_colors();
 
@@ -62,7 +62,7 @@ class AudioGhostRegion : public GhostRegion {
 public:
 	AudioGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
 
-	void set_frames_per_pixel (double);
+	void set_samples_per_pixel (double);
 	void set_height();
 	void set_colors();
 
@@ -87,7 +87,7 @@ public:
 	MidiStreamView* midi_view();
 
 	void set_height();
-	void set_frames_per_pixel (double spu);
+	void set_samples_per_pixel (double spu);
 	void set_colors();
 
 	void update_range();

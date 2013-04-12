@@ -150,7 +150,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	framepos_t leftmost_sample() const { return leftmost_frame; }
 
 	framecnt_t current_page_samples() const {
-		return (framecnt_t) floor (_visible_canvas_width * frames_per_pixel);
+		return (framecnt_t) floor (_visible_canvas_width * samples_per_pixel);
 	}
 
 	double visible_canvas_height () const {
@@ -221,10 +221,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void transition_to_rolling (bool forward);
 
 	/* NOTE: these functions assume that the "pixel" coordinate is
-	   the result of using the world->canvas affine transform on a
-	   world coordinate. These coordinates already take into
-	   account any scrolling carried out by adjusting the
-	   xscroll_adjustment.
+	   in canvas coordinates. These coordinates already take into
+	   account any scrolling offsets.
 	*/
 
 	framepos_t pixel_to_sample (double pixel) const {
@@ -236,18 +234,18 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		*/
 
 		if (pixel >= 0) {
-			return (framepos_t) rint (pixel * frames_per_pixel);
+			return (framepos_t) rint (pixel * samples_per_pixel);
 		} else {
 			return 0;
 		}
 	}
 
-	double sample_to_pixel (framepos_t frame) const {
-		return rint (frame / frames_per_pixel);
+	double sample_to_pixel (framepos_t sample) const {
+		return rint (sample / samples_per_pixel);
 	}
 
-	double sample_to_pixel_unrounded (framepos_t frame) const {
-		return frame / frames_per_pixel;
+	double sample_to_pixel_unrounded (framepos_t sample) const {
+		return sample / samples_per_pixel;
 	}
 
 	void flush_canvas ();
@@ -296,7 +294,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void               set_zoom_focus (Editing::ZoomFocus);
 	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
-	double             get_current_zoom () const { return frames_per_pixel; }
+	double             get_current_zoom () const { return samples_per_pixel; }
         void               cycle_zoom_focus ();
 	void temporal_zoom_step (bool coarser);
 	void tav_zoom_step (bool coarser);
@@ -483,7 +481,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	    VisualState (bool with_tracks);
 	    ~VisualState ();
 	    double              y_position;
-	    double              frames_per_pixel;
+	    double              samples_per_pixel;
 	    framepos_t          leftmost_frame;
 	    Editing::ZoomFocus  zoom_focus;
 	    GUIObjectState*     gui_state;
@@ -503,11 +501,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void cancel_visual_state_op (uint32_t n);
 
 	framepos_t leftmost_frame;
-	double      frames_per_pixel;
+	double      samples_per_pixel;
 	Editing::ZoomFocus zoom_focus;
 
-	void set_frames_per_pixel (double);
-	bool clamp_frames_per_pixel (double &) const;
+	void set_samples_per_pixel (double);
+	bool clamp_samples_per_pixel (double &) const;
 
 	Editing::MouseMode mouse_mode;
 	Editing::MouseMode pre_internal_mouse_mode;
@@ -1039,14 +1037,14 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 		Type pending;
 		framepos_t time_origin;
-		double frames_per_pixel;
+		double samples_per_pixel;
 		double y_origin;
 
 		int idle_handler_id;
 		/** true if we are currently in the idle handler */
 		bool being_handled;
 
-		VisualChange() : pending ((VisualChange::Type) 0), time_origin (0), frames_per_pixel (0), idle_handler_id (-1), being_handled (false) {}
+		VisualChange() : pending ((VisualChange::Type) 0), time_origin (0), samples_per_pixel (0), idle_handler_id (-1), being_handled (false) {}
 		void add (Type t) {
 			pending = Type (pending | t);
 		}

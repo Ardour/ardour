@@ -377,7 +377,7 @@ Editor::Editor ()
 	_internal_editing = false;
 	current_canvas_cursor = 0;
 
-	frames_per_pixel = 2048; /* too early to use reset_zoom () */
+	samples_per_pixel = 2048; /* too early to use reset_zoom () */
 
 	_scroll_callbacks = 0;
 
@@ -929,7 +929,7 @@ Editor::zoom_adjustment_changed ()
 	}
 
 	double fpu = zoom_range_clock->current_duration() / _visible_canvas_width;
-	bool clamped = clamp_frames_per_pixel (fpu);
+	bool clamped = clamp_samples_per_pixel (fpu);
 	
 	if (clamped) {
 		zoom_range_clock->set ((framepos_t) floor (fpu * _visible_canvas_width));
@@ -1139,7 +1139,7 @@ Editor::map_position_change (framepos_t frame)
 void
 Editor::center_screen (framepos_t frame)
 {
-	double const page = _visible_canvas_width * frames_per_pixel;
+	double const page = _visible_canvas_width * samples_per_pixel;
 
 	/* if we're off the page, then scroll.
 	 */
@@ -1305,7 +1305,7 @@ Editor::set_session (Session *t)
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		(static_cast<TimeAxisView*>(*i))->set_frames_per_pixel (frames_per_pixel);
+		(static_cast<TimeAxisView*>(*i))->set_samples_per_pixel (samples_per_pixel);
 	}
 
 	super_rapid_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (
@@ -2281,7 +2281,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	if ((prop = node.property ("zoom"))) {
 		reset_zoom (PBD::atof (prop->value()));
 	} else {
-		reset_zoom (frames_per_pixel);
+		reset_zoom (samples_per_pixel);
 	}
 
 	if ((prop = node.property ("snap-to"))) {
@@ -2501,7 +2501,7 @@ Editor::get_state ()
 	maybe_add_mixer_strip_width (*node);
 
 	node->add_property ("zoom-focus", enum_2_string (zoom_focus));
-	snprintf (buf, sizeof(buf), "%f", frames_per_pixel);
+	snprintf (buf, sizeof(buf), "%f", samples_per_pixel);
 	node->add_property ("zoom", buf);
 	node->add_property ("snap-to", enum_2_string (_snap_type));
 	node->add_property ("snap-mode", enum_2_string (_snap_mode));
@@ -4129,14 +4129,14 @@ Editor::reset_y_origin (double y)
 void
 Editor::reset_zoom (double fpp)
 {
-	clamp_frames_per_pixel (fpp);
+	clamp_samples_per_pixel (fpp);
 
-	if (fpp == frames_per_pixel) {
+	if (fpp == samples_per_pixel) {
 		return;
 	}
 
 	pending_visual_change.add (VisualChange::ZoomLevel);
-	pending_visual_change.frames_per_pixel = fpp;
+	pending_visual_change.samples_per_pixel = fpp;
 	ensure_visual_change_idle_handler ();
 }
 
@@ -4166,7 +4166,7 @@ Editor::current_visual_state (bool with_tracks)
 {
 	VisualState* vs = new VisualState (with_tracks);
 	vs->y_position = vertical_adjustment.get_value();
-	vs->frames_per_pixel = frames_per_pixel;
+	vs->samples_per_pixel = samples_per_pixel;
 	vs->leftmost_frame = leftmost_frame;
 	vs->zoom_focus = zoom_focus;
 
@@ -4228,7 +4228,7 @@ Editor::use_visual_state (VisualState& vs)
 	vertical_adjustment.set_value (vs.y_position);
 
 	set_zoom_focus (vs.zoom_focus);
-	reposition_and_zoom (vs.leftmost_frame, vs.frames_per_pixel);
+	reposition_and_zoom (vs.leftmost_frame, vs.samples_per_pixel);
 	
 	if (vs.gui_state) {
 		*ARDOUR_UI::instance()->gui_object_state = *vs.gui_state;
@@ -4247,19 +4247,19 @@ Editor::use_visual_state (VisualState& vs)
  *  @param fpu New frames per unit; should already have been clamped so that it is sensible.
  */
 void
-Editor::set_frames_per_pixel (double fpp)
+Editor::set_samples_per_pixel (double fpp)
 {
 	if (tempo_lines) {
 		tempo_lines->tempo_map_changed();
 	}
 
-	frames_per_pixel = fpp;
+	samples_per_pixel = fpp;
 
 	/* convert fpu to frame count */
 
-	framepos_t frames = (framepos_t) floor (frames_per_pixel * _visible_canvas_width);
+	framepos_t frames = (framepos_t) floor (samples_per_pixel * _visible_canvas_width);
 
-	if (frames_per_pixel != zoom_range_clock->current_duration()) {
+	if (samples_per_pixel != zoom_range_clock->current_duration()) {
 		zoom_range_clock->set (frames);
 	}
 
@@ -4337,7 +4337,7 @@ Editor::idle_visual_changer ()
 	double const last_time_origin = horizontal_position ();
 
 	if (p & VisualChange::ZoomLevel) {
-		set_frames_per_pixel (pending_visual_change.frames_per_pixel);
+		set_samples_per_pixel (pending_visual_change.samples_per_pixel);
 
 		compute_fixed_ruler_scale ();
 
@@ -4356,7 +4356,7 @@ Editor::idle_visual_changer ()
 	}
 
 	if (p & VisualChange::TimeOrigin) {
-		set_horizontal_position (pending_visual_change.time_origin / frames_per_pixel);
+		set_horizontal_position (pending_visual_change.time_origin / samples_per_pixel);
 	}
 
 	if (p & VisualChange::YOrigin) {
@@ -5281,11 +5281,11 @@ Editor::super_rapid_screen_update ()
 			*/
 #if 0
 			// FIXME DO SOMETHING THAT WORKS HERE - this is 2.X code
-			double target = ((double)frame - (double)current_page_samples()/2.0) / frames_per_pixel;
+			double target = ((double)frame - (double)current_page_samples()/2.0) / samples_per_pixel;
 			if (target <= 0.0) {
 				target = 0.0;
 			}
-			if (fabs(target - current) < current_page_samples() / frames_per_pixel) {
+			if (fabs(target - current) < current_page_samples() / samples_per_pixel) {
 				target = (target * 0.15) + (current * 0.85);
 			} else {
 				/* relax */

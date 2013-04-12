@@ -78,7 +78,7 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 */
 		virtual void set_height(uint32_t h) ;
 
-		virtual void set_frames_per_pixel (double);
+		virtual void set_samples_per_pixel (double);
 
 		/**
 		 * Returns the available height for images to be drawn onto

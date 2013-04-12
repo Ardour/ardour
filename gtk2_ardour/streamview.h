@@ -73,8 +73,8 @@ public:
 	int set_position (gdouble x, gdouble y);
 	virtual int set_height (double);
 
-	virtual int set_frames_per_pixel (double);
-	gdouble     get_frames_per_pixel () const { return _frames_per_pixel; }
+	virtual int set_samples_per_pixel (double);
+	gdouble     get_samples_per_pixel () const { return _samples_per_pixel; }
 	virtual void horizontal_position_changed () {}
 
         virtual void enter_internal_edit_mode ();
@@ -161,7 +161,7 @@ protected:
 	typedef std::list<RegionView* > RegionViewList;
 	RegionViewList  region_views;
 
-	double _frames_per_pixel;
+	double _samples_per_pixel;
 
 	sigc::connection       screen_update_connection;
 	std::vector<RecBoxInfo>     rec_rects;

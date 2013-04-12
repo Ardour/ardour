@@ -59,9 +59,9 @@ ImageFrameTimeAxisView::ImageFrameTimeAxisView (ImageFrameTimeAxis& tv)
 
 	canvas_rect.signal_event().connect (sigc::bind (sigc::mem_fun (_trackview.editor, &PublicEditor::canvas_imageframe_view_event), (ArdourCanvas::Item*) &canvas_rect, &tv));
 
-	_frames_per_pixel = _trackview.editor.get_current_zoom() ;
+	_samples_per_pixel = _trackview.editor.get_current_zoom() ;
 
-	_trackview.editor.ZoomChanged.connect (sigc::mem_fun(*this, &ImageFrameTimeAxisView::reset_frames_per_pixel)) ;
+	_trackview.editor.ZoomChanged.connect (sigc::mem_fun(*this, &ImageFrameTimeAxisView::reset_samples_per_pixel)) ;
 
 	selected_imageframe_group = 0 ;
 	selected_imageframe_view = 0 ;
@@ -146,16 +146,16 @@ ImageFrameTimeAxisView::set_position (gdouble x, gdouble y)
  * @param spu the new samples per canvas unit value
  */
 int
-ImageFrameTimeAxisView::set_frames_per_pixel (double fpp)
+ImageFrameTimeAxisView::set_samples_per_pixel (double fpp)
 {
 	if (fpp < 1.0) {
 		return -1;
 	}
 
-	_frames_per_pixel = fpp;
+	_samples_per_pixel = fpp;
 
 	for (ImageFrameGroupList::const_iterator citer = imageframe_groups.begin(); citer != imageframe_groups.end(); ++citer) {
-		(*citer)->set_item_frames_per_pixels (fpp);
+		(*citer)->set_item_samples_per_pixels (fpp);
 	}
 
 	return 0;
@@ -182,9 +182,9 @@ ImageFrameTimeAxisView::apply_color(Gdk::Color& color)
  *
  */
 void
-ImageFrameTimeAxisView::reset_frames_per_pixel ()
+ImageFrameTimeAxisView::reset_samples_per_pixel ()
 {
-	set_frames_per_pixel (_trackview.editor.get_current_zoom());
+	set_samples_per_pixel (_trackview.editor.get_current_zoom());
 }
 
 

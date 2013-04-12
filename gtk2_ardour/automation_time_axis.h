@@ -69,7 +69,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	~AutomationTimeAxisView();
 
 	virtual void set_height (uint32_t);
-	void set_frames_per_pixel (double);
+	void set_samples_per_pixel (double);
 	std::string name() const { return _name; }
 
 	void add_automation_event (GdkEvent *, framepos_t, double);

@@ -82,7 +82,7 @@ public:
 	void show_selection (TimeSelection&);
 	void set_button_names ();
 
-	void set_frames_per_pixel (double);
+	void set_samples_per_pixel (double);
  	void set_height (uint32_t h);
 	void show_timestretch (framepos_t start, framepos_t end, int layers, int layer);
 	void hide_timestretch ();
@@ -211,7 +211,7 @@ protected:
 
 	virtual void label_view ();
 
-	void reset_frames_per_pixel ();
+	void reset_samples_per_pixel ();
 	void horizontal_position_changed ();
 
 	virtual void build_automation_action_menu (bool);

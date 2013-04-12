@@ -423,7 +423,7 @@ RegionView::region_resized (const PropertyChange& what_changed)
 
 		set_duration (_region->length(), 0);
 
-		unit_length = _region->length() / frames_per_pixel;
+		unit_length = _region->length() / samples_per_pixel;
 
  		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 
@@ -489,12 +489,12 @@ RegionView::set_position (framepos_t pos, void* /*src*/, double* ignored)
 }
 
 void
-RegionView::set_frames_per_pixel (double fpp)
+RegionView::set_samples_per_pixel (double fpp)
 {
-	TimeAxisViewItem::set_frames_per_pixel (fpp);
+	TimeAxisViewItem::set_samples_per_pixel (fpp);
 
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		(*i)->set_frames_per_pixel (fpp);
+		(*i)->set_samples_per_pixel (fpp);
 		(*i)->set_duration (_region->length() / fpp);
 	}
 
@@ -509,7 +509,7 @@ RegionView::set_duration (framecnt_t frames, void *src)
 	}
 
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
-		(*i)->set_duration (_region->length() / frames_per_pixel);
+		(*i)->set_duration (_region->length() / samples_per_pixel);
 	}
 
 	return true;
@@ -639,7 +639,7 @@ RegionView::region_sync_changed ()
 		sync_line->set_outline_width  (1);
 	}
 
-	/* this has to handle both a genuine change of position, a change of frames_per_pixel
+	/* this has to handle both a genuine change of position, a change of samples_per_pixel
 	   and a change in the bounds of the _region->
 	 */
 
@@ -667,7 +667,7 @@ RegionView::region_sync_changed ()
 
 			//points = sync_mark->property_points().get_value();
 
-			double offset = sync_offset / frames_per_pixel;
+			double offset = sync_offset / samples_per_pixel;
 			points.push_back (ArdourCanvas::Duple (offset - ((sync_mark_width-1)/2), 1));
 			points.push_back (ArdourCanvas::Duple (offset + ((sync_mark_width-1)/2), 1));
 			points.push_back (ArdourCanvas::Duple (offset, sync_mark_width - 1));
@@ -739,7 +739,7 @@ RegionView::set_height (double h)
 		int sync_dir;
 		framecnt_t sync_offset;
 		sync_offset = _region->sync_offset (sync_dir);
-		double offset = sync_offset / frames_per_pixel;
+		double offset = sync_offset / samples_per_pixel;
 
 		sync_line->set (
 			ArdourCanvas::Duple (offset, 0),

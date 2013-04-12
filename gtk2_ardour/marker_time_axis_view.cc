@@ -63,9 +63,9 @@ MarkerTimeAxisView::MarkerTimeAxisView(MarkerTimeAxis& tv)
 
 	canvas_rect->signal_event().connect (sigc::bind (sigc::mem_fun (_trackview.editor, &PublicEditor::canvas_marker_time_axis_view_event), canvas_rect, &_trackview));
 
-	_frames_per_pixel = _trackview.editor.get_current_zoom() ;
+	_samples_per_pixel = _trackview.editor.get_current_zoom() ;
 
-	_trackview.editor.ZoomChanged.connect (sigc::mem_fun(*this, &MarkerTimeAxisView::reset_frames_per_pixel));
+	_trackview.editor.ZoomChanged.connect (sigc::mem_fun(*this, &MarkerTimeAxisView::reset_samples_per_pixel));
 	MarkerView::CatchDeletion.connect (*this, boost::bind (&MarkerTimeAxisView::remove_marker_view, this, _1), gui_context());
 }
 
@@ -144,16 +144,16 @@ MarkerTimeAxisView::set_position(gdouble x, gdouble y)
  * @param fpp the new frames per pixel value
  */
 int
-MarkerTimeAxisView::set_frames_per_pixel (double fpp)
+MarkerTimeAxisView::set_samples_per_pixel (double fpp)
 {
 	if (spp < 1.0) {
 		return -1;
 	}
 
-	_frames_per_pixel = fpp;
+	_samples_per_pixel = fpp;
 
 	for (MarkerViewList::iterator i = marker_view_list.begin(); i != marker_view_list.end(); ++i) {
-		(*i)->set_frames_per_pixel (spp);
+		(*i)->set_samples_per_pixel (spp);
 	}
 	
 	return 0;
@@ -382,7 +382,7 @@ MarkerTimeAxisView::get_selected_time_axis_item()
  *
  */
 void
-MarkerTimeAxisView::reset_frames_per_pixel ()
+MarkerTimeAxisView::reset_samples_per_pixel ()
 {
-	set_frames_per_pixel (_trackview.editor.get_current_zoom());
+	set_samples_per_pixel (_trackview.editor.get_current_zoom());
 }

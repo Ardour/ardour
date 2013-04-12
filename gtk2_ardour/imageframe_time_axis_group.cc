@@ -147,14 +147,14 @@ ImageFrameTimeAxisGroup::set_item_heights(gdouble h)
  * @param spu the new samples per canvas unit value
  */
 int
-ImageFrameTimeAxisGroup::set_item_frames_per_pixel (double fpp)
+ImageFrameTimeAxisGroup::set_item_samples_per_pixel (double fpp)
 {
 	if (fpp < 1.0) {
 		return -1;
 	}
 
 	for (ImageFrameViewList::const_iterator citer = imageframe_views.begin(); citer != imageframe_views.end(); ++citer) {
-		(*citer)->set_frames_per_pixel (fpp);
+		(*citer)->set_samples_per_pixel (fpp);
 	}
 
 	return 0;

@@ -75,7 +75,7 @@ TempoLines::hide ()
 void
 TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin, 
 		  const ARDOUR::TempoMap::BBTPointList::const_iterator& end, 
-		  double frames_per_pixel)
+		  double samples_per_pixel)
 {
 	ARDOUR::TempoMap::BBTPointList::const_iterator i;
 	ArdourCanvas::Line *line = 0;
@@ -105,12 +105,12 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 		return;
 	}
 
-	xpos = rint(((framepos_t)(*i).frame) / (double)frames_per_pixel);
+	xpos = rint(((framepos_t)(*i).frame) / (double)samples_per_pixel);
 	const double needed_right = xpos;
 
 	i = begin;
 
-	xpos = rint(((framepos_t)(*i).frame) / (double)frames_per_pixel);
+	xpos = rint(((framepos_t)(*i).frame) / (double)samples_per_pixel);
 	const double needed_left = xpos;
 
 	Lines::iterator left = _lines.lower_bound(xpos); // first line >= xpos
@@ -142,7 +142,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 			color = ARDOUR_UI::config()->canvasvar_MeasureLineBeat.get();
 		}
 
-		xpos = rint(((framepos_t)(*i).frame) / (double)frames_per_pixel);
+		xpos = rint(((framepos_t)(*i).frame) / (double)samples_per_pixel);
 
 		li = _lines.lower_bound(xpos); // first line >= xpos
 

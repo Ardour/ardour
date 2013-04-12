@@ -146,12 +146,12 @@ ImageFrameTimeAxis::set_height (uint32_t h)
  * @param fpp the number of frames per pixel
  */
 void
-ImageFrameTimeAxis::set_frames_per_pixel (double fpp)
+ImageFrameTimeAxis::set_samples_per_pixel (double fpp)
 {
-	TimeAxisView::set_frames_per_pixel (editor.get_current_zoom ());
+	TimeAxisView::set_samples_per_pixel (editor.get_current_zoom ());
 
 	if (view) {
-		view->set_frames_per_pixel (fpp);
+		view->set_samples_per_pixel (fpp);
 	}
 }
 

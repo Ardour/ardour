@@ -77,9 +77,9 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	ArdourCanvas::Item* get_name_highlight();
 	ArdourCanvas::Pixbuf* get_name_pixbuf();
 
-	virtual void set_frames_per_pixel (double);
+	virtual void set_samples_per_pixel (double);
 
-	double get_frames_per_pixel () const;
+	double get_samples_per_pixel () const;
 
 	virtual void drag_start() { _dragging = true; }
 	virtual void drag_end() { _dragging = false; }
@@ -194,7 +194,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	bool min_duration_active;
 
 	/** frames per canvas pixel */
-	double frames_per_pixel;
+	double samples_per_pixel;
 
 	/** should the item respond to events */
 	bool _sensitive;

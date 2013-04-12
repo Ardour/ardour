@@ -108,10 +108,10 @@ AudioGhostRegion::AudioGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, do
 }
 
 void
-AudioGhostRegion::set_frames_per_pixel (double fpp)
+AudioGhostRegion::set_samples_per_pixel (double fpp)
 {
 	for (vector<WaveView*>::iterator i = waves.begin(); i != waves.end(); ++i) {
-		(*i)->set_frames_per_pixel (fpp);
+		(*i)->set_samples_per_pixel (fpp);
 	}
 }
 
@@ -200,7 +200,7 @@ MidiGhostRegion::GhostEvent::~GhostEvent ()
 }
 
 void
-MidiGhostRegion::set_frames_per_pixel (double /*spu*/)
+MidiGhostRegion::set_samples_per_pixel (double /*spu*/)
 {
 }
 

@@ -49,13 +49,13 @@ class AudioRegionView : public RegionView
 	AudioRegionView (ArdourCanvas::Group *,
 			 RouteTimeAxisView&,
 			 boost::shared_ptr<ARDOUR::AudioRegion>,
-			 double initial_frames_per_pixel,
+			 double initial_samples_per_pixel,
 			 Gdk::Color const & basic_color);
 
 	AudioRegionView (ArdourCanvas::Group *,
 			 RouteTimeAxisView&,
 			 boost::shared_ptr<ARDOUR::AudioRegion>,
-			 double frames_per_pixel,
+			 double samples_per_pixel,
 			 Gdk::Color const & basic_color,
 			 bool recording,
 			 TimeAxisViewItem::Visibility);
@@ -71,7 +71,7 @@ class AudioRegionView : public RegionView
 	void create_waves ();
 
 	void set_height (double);
-	void set_frames_per_pixel (double);
+	void set_samples_per_pixel (double);
 
 	void set_amplitude_above_axis (gdouble spp);
 

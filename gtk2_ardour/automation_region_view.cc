@@ -69,7 +69,7 @@ AutomationRegionView::init (Gdk::Color const & basic_color, bool /*wfd*/)
 
 	compute_colors (basic_color);
 
-	reset_width_dependent_items ((double) _region->length() / frames_per_pixel);
+	reset_width_dependent_items ((double) _region->length() / samples_per_pixel);
 
 	set_height (trackview.current_height());
 

@@ -70,7 +70,7 @@ public:
 	MidiRegionView (ArdourCanvas::Group *,
 	                RouteTimeAxisView&,
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
-	                double initial_frames_per_pixel,
+	                double initial_samples_per_pixel,
 	                Gdk::Color const & basic_color);
 
 	MidiRegionView (const MidiRegionView& other);
@@ -312,7 +312,7 @@ protected:
 	MidiRegionView (ArdourCanvas::Group *,
 	                RouteTimeAxisView&,
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
-	                double frames_per_pixel,
+	                double samples_per_pixel,
 	                Gdk::Color& basic_color,
 	                TimeAxisViewItem::Visibility);
 

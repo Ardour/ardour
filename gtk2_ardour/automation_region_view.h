@@ -42,7 +42,7 @@ public:
 	                     boost::shared_ptr<ARDOUR::Region>,
 	                     const Evoral::Parameter& parameter,
 	                     boost::shared_ptr<ARDOUR::AutomationList>,
-	                     double initial_frames_per_pixel,
+	                     double initial_samples_per_pixel,
 	                     Gdk::Color const & basic_color);
 
 	~AutomationRegionView();
