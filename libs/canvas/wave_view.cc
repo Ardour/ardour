@@ -43,7 +43,7 @@ WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region
 	, Fill (parent)
 	, _region (region)
 	, _channel (0)
-	, _frames_per_pixel (0)
+	, _samples_per_pixel (0)
 	, _height (64)
 	, _wave_color (0xffffffff)
 	, _region_start (0)
@@ -52,11 +52,11 @@ WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region
 }
 
 void
-WaveView::set_frames_per_pixel (double frames_per_pixel)
+WaveView::set_samples_per_pixel (double samples_per_pixel)
 {
 	begin_change ();
 	
-	_frames_per_pixel = frames_per_pixel;
+	_samples_per_pixel = samples_per_pixel;
 
 	_bounding_box_dirty = true;
 	end_change ();
@@ -67,7 +67,7 @@ WaveView::set_frames_per_pixel (double frames_per_pixel)
 void
 WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	assert (_frames_per_pixel != 0);
+	assert (_samples_per_pixel != 0);
 
 	if (!_region) {
 		return;
@@ -77,8 +77,8 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	   area is relative to the position of the region.
 	 */
 	
-	int const start = rint (area.x0 + _region_start / _frames_per_pixel);
-	int const end   = rint (area.x1 + _region_start / _frames_per_pixel);
+	int const start = rint (area.x0 + _region_start / _samples_per_pixel);
+	int const end   = rint (area.x1 + _region_start / _samples_per_pixel);
 
 	int p = start;
 	list<CacheEntry*>::iterator cache = _cache.begin ();
@@ -134,8 +134,8 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 		int const this_end = min (end, render->end ());
 		
-		Coord const left  =        p - _region_start / _frames_per_pixel;
-		Coord const right = this_end - _region_start / _frames_per_pixel;
+		Coord const left  =        p - _region_start / _samples_per_pixel;
+		Coord const right = this_end - _region_start / _samples_per_pixel;
 		
 		context->save ();
 		
@@ -157,7 +157,7 @@ void
 WaveView::compute_bounding_box () const
 {
 	if (_region) {
-		_bounding_box = Rect (0, 0, _region->length() / _frames_per_pixel, _height);
+		_bounding_box = Rect (0, 0, _region->length() / _samples_per_pixel, _height);
 	} else {
 		_bounding_box = boost::optional<Rect> ();
 	}
@@ -253,10 +253,10 @@ WaveView::CacheEntry::CacheEntry (
 	_wave_view->_region->read_peaks (
 		_peaks.get(),
 		_n_peaks,
-		_start * _wave_view->_frames_per_pixel,
-		(_end - _start) * _wave_view->_frames_per_pixel,
+		_start * _wave_view->_samples_per_pixel,
+		(_end - _start) * _wave_view->_samples_per_pixel,
 		_wave_view->_channel,
-		_wave_view->_frames_per_pixel
+		_wave_view->_samples_per_pixel
 		);
 }
 

@@ -54,7 +54,7 @@ public:
 	XMLNode* get_state () const;
 	void set_state (XMLNode const *);
 
-	void set_frames_per_pixel (double);
+	void set_samples_per_pixel (double);
 	void set_height (Distance);
 	void set_channel (int);
 	void set_region_start (ARDOUR::frameoffset_t);
@@ -135,7 +135,7 @@ private:
 
 	boost::shared_ptr<ARDOUR::AudioRegion> _region;
 	int _channel;
-	double _frames_per_pixel;
+	double _samples_per_pixel;
 	Coord _height;
 	Color _wave_color;
 	/** The `start' value to use for the region; we can't use the region's
