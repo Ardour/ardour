@@ -40,6 +40,7 @@
 #include "canvas/rectangle.h"
 #include "canvas/polygon.h"
 #include "canvas/poly_line.h"
+#include "canvas/line.h"
 #include "canvas/pixbuf.h"
 
 #include "streamview.h"

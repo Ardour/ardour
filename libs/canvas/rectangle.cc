@@ -61,7 +61,7 @@ Rectangle::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context)
 		
 		if (_outline_what & TOP) {
 			context->move_to (plot.x0, plot.y0);
-			context->line_to (plot.x0, plot.y1);
+			context->line_to (plot.x1, plot.y0);
 		}
 		
 		setup_outline_context (context);

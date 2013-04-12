@@ -38,7 +38,7 @@
 
 #include "canvas/types.h"
 #include "canvas/group.h"
-#include "canvas/line.h"
+#include "canvas/curve.h"
 
 class AutomationLine;
 class ControlPoint;
@@ -48,9 +48,6 @@ class AutomationTimeAxisView;
 class Selectable;
 class Selection;
 
-namespace ArdourCanvas {
-	class Rectangle;
-}
 
 /** A GUI representation of an ARDOUR::AutomationList */
 class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
@@ -177,7 +174,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	ArdourCanvas::Group&        _parent_group;
 	ArdourCanvas::Group*        group;
-	ArdourCanvas::PolyLine*     line; /* line */
+	ArdourCanvas::Curve*        line; /* line */
 	ArdourCanvas::Points        line_points; /* coordinates for canvas line */
 	std::vector<ControlPoint*>  control_points; /* visible control points */
 

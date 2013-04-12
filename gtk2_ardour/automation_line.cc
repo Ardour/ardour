@@ -91,7 +91,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 
 	group = new ArdourCanvas::Group (&parent);
 
-	line = new ArdourCanvas::PolyLine (group);
+	line = new ArdourCanvas::Curve (group);
 	line->set_outline_width (1);
 	line->set_data ("line", this);
 

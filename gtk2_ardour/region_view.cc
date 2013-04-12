@@ -32,6 +32,7 @@
 #include "canvas/debug.h"
 #include "canvas/pixbuf.h"
 #include "canvas/text.h"
+#include "canvas/line.h"
 
 #include "ardour_ui.h"
 #include "global_signals.h"

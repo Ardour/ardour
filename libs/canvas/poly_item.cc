@@ -61,6 +61,38 @@ PolyItem::render_path (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> cont
 }
 
 void
+PolyItem::render_curve (Rect const & area, Cairo::RefPtr<Cairo::Context> context, Points const & first_control_points, Points const & second_control_points) const
+{
+	bool done_first = false;
+
+	if (_points.size() <= 2) {
+		render_path (area, context);
+		return;
+	}
+
+	Points::const_iterator cp1 = first_control_points.begin();
+	Points::const_iterator cp2 = second_control_points.begin();
+
+	for (Points::const_iterator i = _points.begin(); i != _points.end(); ++i) {
+
+		if (done_first) {
+
+			context->curve_to (cp1->x, cp1->y,
+					   cp2->x, cp2->y,
+					   i->x, i->y);
+
+			cp1++;
+			cp2++;
+			
+		} else {
+
+			context->move_to (i->x, i->y);
+			done_first = true;
+		}
+	}
+}
+
+void
 PolyItem::set (Points const & points)
 {
 	begin_change ();

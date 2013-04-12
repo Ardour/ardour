@@ -25,6 +25,8 @@
 #include "ardour/region.h"
 #include "ardour/beats_frames_converter.h"
 
+#include "canvas/fwd.h"
+
 #include "time_axis_view_item.h"
 #include "automation_line.h"
 #include "enums.h"
