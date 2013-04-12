@@ -2680,9 +2680,6 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region
 		RegionSelection s = get_equivalent_regions (selection->regions, ARDOUR::Properties::select.property_id);
 		_drags->add (new RegionMoveDrag (this, item, region_view, s.by_layer(), false, false));
 	}
-
-	/* sync the canvas to what we think is its current state */
-	update_canvas_now();
 }
 
 void

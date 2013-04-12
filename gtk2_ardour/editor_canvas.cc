@@ -261,15 +261,7 @@ Editor::track_canvas_viewport_size_allocated ()
 	_visible_canvas_width  = _canvas_viewport_allocation.get_width ();
 	_visible_canvas_height = _canvas_viewport_allocation.get_height ();
 
-	cerr << "VISIBLE CANVAS now: " << _visible_canvas_width << " x " << _visible_canvas_height << endl;
-
-	if (_session) {
-		TrackViewList::iterator i;
-
-		for (i = track_views.begin(); i != track_views.end(); ++i) {
-			(*i)->clip_to_viewport ();
-		}
-	}
+	// SHOWTRACKS
 
 	if (height_changed) {
 
@@ -744,18 +736,7 @@ Editor::ensure_time_axis_view_is_visible (const TimeAxisView& tav)
 void
 Editor::tie_vertical_scrolling ()
 {
-
 	_track_canvas_vadj->set_value (vertical_adjustment.get_value ());
-
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		(*i)->clip_to_viewport ();
-	}
-
-	/* required to keep the controls_layout in lock step with the canvas group */
-	
-	update_canvas_now ();
-
-	/* this will do an immediate redraw */
 
 	controls_layout.get_vadjustment()->set_value (vertical_adjustment.get_value());
 
@@ -806,12 +787,7 @@ Editor::scroll_canvas_vertically ()
 	_trackview_group->move (0, y_delta);
 	_background_group->move (0, y_delta);
 
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		(*i)->clip_to_viewport ();
-	}
 	last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
-	/* required to keep the controls_layout in lock step with the canvas group */
-	update_canvas_now ();
 }
 #endif
 
@@ -879,34 +855,6 @@ Editor::color_handler()
 	if (_session)
 	      _session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 */
-}
-
-void
-Editor::flush_canvas ()
-{
-	if (is_mapped()) {
-		update_canvas_now ();
-		// gdk_window_process_updates (GTK_LAYOUT(track_canvas->gobj())->bin_window, true);
-	}
-}
-
-void
-Editor::update_canvas_now ()
-{
-	/* GnomeCanvas has a bug whereby if its idle handler is not scheduled between
-	   two calls to update_now, an assert will trip.  This wrapper works around
-	   that problem by only calling update_now if the assert will not trip.
-
-	   I think the GC bug is due to the fact that its code will reset need_update
-	   and need_redraw to FALSE without checking to see if an idle handler is scheduled.
-	   If one is scheduled, GC should probably remove it.
-	*/
-
-	/* XXX: CANVAS */
-//	GnomeCanvas* c = track_canvas->gobj ();
-//	if (c->need_update || c->need_redraw) {
-//		track_canvas->update_now ();
-//	}
 }
 
 double

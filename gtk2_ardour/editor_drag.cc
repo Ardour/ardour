@@ -667,11 +667,6 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 			rv->drag_start (); 
 
-			/* Absolutely no idea why this is necessary, but it is; without
-			   it, the region view disappears after the reparent.
-			*/
-			_editor->update_canvas_now ();
-			
 			/* Reparent to a non scrolling group so that we can keep the
 			   region selection above all time axis views.
 			   Reparenting means that we will have to move the region view
@@ -815,15 +810,6 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 			_views = new_regionviews;
 
 			swap_grab (new_regionviews.front().view->get_canvas_group (), 0, event ? event->motion.time : 0);
-
-			/*
-			  sync the canvas to what we think is its current state
-			  without it, the canvas seems to
-			  "forget" to update properly after the upcoming reparent()
-			  ..only if the mouse is in rapid motion at the time of the grab.
-			  something to do with regionview creation taking so long?
-			*/
-			_editor->update_canvas_now();
 		}
 	}
 
@@ -876,8 +862,6 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 	bool const changed_tracks = (_time_axis_views[_views.front().time_axis_view] != &_views.front().view->get_time_axis_view());
 	framecnt_t const drag_delta = _primary->region()->position() - _last_frame_position;
 	
-	_editor->update_canvas_now ();
-
 	if (_copy) {
 
 		finished_copy (
@@ -1278,8 +1262,6 @@ RegionMotionDrag::aborted (bool)
 		rv->move (-_total_x_delta, 0);
 		rv->set_height (rtv->view()->child_height ());
 	}
-
-	_editor->update_canvas_now ();
 }
 
 /** @param b true to brush, otherwise false.
@@ -1328,8 +1310,6 @@ RegionInsertDrag::RegionInsertDrag (Editor* e, boost::shared_ptr<Region> r, Rout
 void
 RegionInsertDrag::finished (GdkEvent *, bool)
 {
-	_editor->update_canvas_now ();
-
 	RouteTimeAxisView* dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[_views.front().time_axis_view]);
 
 	_primary->get_canvas_group()->reparent (dest_rtv->view()->canvas_item());
@@ -1680,7 +1660,6 @@ VideoTimeLineDrag::motion (GdkEvent* event, bool first_move)
 		DEBUG_TRACE (DEBUG::Drags, string_compose("SHIFT REGION at %1 by %2\n", i->initial_position, dt));
 		if (first_move) {
 			rv->drag_start ();
-			_editor->update_canvas_now ();
 			rv->fake_set_opaque (true);
 			rv->region()->clear_changes ();
 			rv->region()->suspend_property_changes();
@@ -1742,7 +1721,6 @@ VideoTimeLineDrag::finished (GdkEvent * /*event*/, bool movement_occurred)
 
 
 	_editor->commit_reversible_command ();
-	_editor->update_canvas_now ();
 }
 
 void
@@ -2429,9 +2407,6 @@ CursorDrag::motion (GdkEvent* event, bool)
 	framepos_t const adjusted_frame = adjusted_current_frame (event);
 	if (adjusted_frame != last_pointer_frame()) {
 		fake_locate (adjusted_frame);
-#ifdef GTKOSX
-		_editor->update_canvas_now ();
-#endif
 	}
 }
 
@@ -2976,10 +2951,6 @@ MarkerDrag::motion (GdkEvent* event, bool)
 	assert (!_copied_locations.empty());
 
 	show_verbose_cursor_time (newframe);
-
-#ifdef GTKOSX
-	_editor->update_canvas_now ();
-#endif
 }
 
 void
