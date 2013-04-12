@@ -120,7 +120,7 @@ AutomationRegionView::canvas_event (GdkEvent* ev)
 		y = std::max (y, 0.0);
 		y = std::min (y, _height - NAME_HIGHLIGHT_SIZE);
 
-		add_automation_event (ev, trackview.editor().pixel_to_frame (x) - _region->position() + _region->start(), y);
+		add_automation_event (ev, trackview.editor().pixel_to_sample (x) - _region->position() + _region->start(), y);
 	}
 
 	return false;

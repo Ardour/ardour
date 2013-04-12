@@ -263,7 +263,7 @@ AudioStreamView::setup_rec_box ()
 
 			at = _trackview.audio_track(); /* we know what it is already */
 			framepos_t const frame_pos = at->current_capture_start ();
-			gdouble xstart = _trackview.editor().frame_to_pixel (frame_pos);
+			gdouble xstart = _trackview.editor().sample_to_pixel (frame_pos);
 			gdouble xend;
 			uint32_t fill_color;
 
@@ -435,7 +435,7 @@ AudioStreamView::update_rec_regions (framepos_t start, framecnt_t cnt)
 
 					/* also update rect */
 					ArdourCanvas::Rectangle * rect = rec_rects[n].rectangle;
-					gdouble xend = _trackview.editor().frame_to_pixel (region->position() + region->length());
+					gdouble xend = _trackview.editor().sample_to_pixel (region->position() + region->length());
 					rect->set_x1 (xend);
 				}
 

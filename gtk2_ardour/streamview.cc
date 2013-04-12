@@ -161,8 +161,8 @@ StreamView::set_frames_per_pixel (double fpp)
 	for (vector<RecBoxInfo>::iterator xi = rec_rects.begin(); xi != rec_rects.end(); ++xi) {
 		RecBoxInfo &recbox = (*xi);
 
-		ArdourCanvas::Coord const xstart = _trackview.editor().frame_to_pixel (recbox.start);
-		ArdourCanvas::Coord const xend = _trackview.editor().frame_to_pixel (recbox.start + recbox.length);
+		ArdourCanvas::Coord const xstart = _trackview.editor().sample_to_pixel (recbox.start);
+		ArdourCanvas::Coord const xend = _trackview.editor().sample_to_pixel (recbox.start + recbox.length);
 
 		recbox.rectangle->set_x0 (xstart);
 		recbox.rectangle->set_x1 (xend);
@@ -426,14 +426,14 @@ StreamView::update_rec_box ()
 		case NonLayered:
 		case Normal:
 			rect.length = at - rect.start;
-			xstart = _trackview.editor().frame_to_pixel (rect.start);
-			xend = _trackview.editor().frame_to_pixel (at);
+			xstart = _trackview.editor().sample_to_pixel (rect.start);
+			xend = _trackview.editor().sample_to_pixel (at);
 			break;
 
 		case Destructive:
 			rect.length = 2;
-			xstart = _trackview.editor().frame_to_pixel (_trackview.track()->current_capture_start());
-			xend = _trackview.editor().frame_to_pixel (at);
+			xstart = _trackview.editor().sample_to_pixel (_trackview.track()->current_capture_start());
+			xend = _trackview.editor().sample_to_pixel (at);
 			break;
 		}
 

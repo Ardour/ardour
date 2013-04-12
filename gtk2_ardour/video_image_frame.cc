@@ -56,7 +56,7 @@ VideoImageFrame::VideoImageFrame (PublicEditor& ed, ArdourCanvas::Group& parent,
 	printf("New VideoImageFrame (%ix%i) %s - %s\n", w, h, vsurl.c_str(), vfn.c_str());
 #endif
 
-	unit_position = editor.frame_to_pixel (frame_position);
+	unit_position = editor.sample_to_pixel (frame_position);
 	group = new ArdourCanvas::Group (_parent, ArdourCanvas::Duple(unit_position, 1.0));
 	img_pixbuf = new ArdourCanvas::Pixbuf(group);
 
@@ -85,7 +85,7 @@ VideoImageFrame::~VideoImageFrame ()
 void
 VideoImageFrame::set_position (framepos_t frame)
 {
-	double new_unit_position = editor.frame_to_pixel (frame);
+	double new_unit_position = editor.sample_to_pixel (frame);
 	group->move (ArdourCanvas::Duple (new_unit_position - unit_position, 0.0));
 	frame_position = frame;
 	unit_position = new_unit_position;

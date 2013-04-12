@@ -479,7 +479,7 @@ MidiStreamView::setup_rec_box ()
 
 			boost::shared_ptr<MidiTrack> mt = _trackview.midi_track(); /* we know what it is already */
 			framepos_t const frame_pos = mt->current_capture_start ();
-			gdouble const xstart = _trackview.editor().frame_to_pixel (frame_pos);
+			gdouble const xstart = _trackview.editor().sample_to_pixel (frame_pos);
 			gdouble const xend = xstart;
 			uint32_t fill_color;
 

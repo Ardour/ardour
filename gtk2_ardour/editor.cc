@@ -2833,12 +2833,12 @@ Editor::snap_to_internal (framepos_t& start, int32_t direction, bool for_mark)
 	case SnapMagnetic:
 
 		if (presnap > start) {
-			if (presnap > (start + pixel_to_frame(snap_threshold))) {
+			if (presnap > (start + pixel_to_sample(snap_threshold))) {
 				start = presnap;
 			}
 
 		} else if (presnap < start) {
-			if (presnap < (start - pixel_to_frame(snap_threshold))) {
+			if (presnap < (start - pixel_to_sample(snap_threshold))) {
 				start = presnap;
 			}
 		}

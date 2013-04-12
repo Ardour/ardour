@@ -208,7 +208,7 @@ ImageFrameView::set_duration(framepos_t dur, void* src)
 	if(ret)
 	{
 		/* handle setting the sizes of our canvas itesm based on the new duration */
-		imageframe->property_drawwidth() = trackview.editor.frame_to_pixel(get_duration());
+		imageframe->property_drawwidth() = trackview.editor.sample_to_pixel(get_duration());
 	}
 
 	return(ret);

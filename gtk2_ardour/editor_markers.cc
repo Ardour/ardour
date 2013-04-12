@@ -259,7 +259,7 @@ Editor::check_marker_label (Marker* m)
 
 		/* Update just the available space between the previous marker and this one */
 
-		double const p = frame_to_pixel (m->position() - (*prev)->position());
+		double const p = sample_to_pixel (m->position() - (*prev)->position());
 
 		if (m->label_on_left()) {
 			(*prev)->set_right_label_limit (p / 2);
@@ -278,7 +278,7 @@ Editor::check_marker_label (Marker* m)
 
 		/* Update just the available space between this marker and the next */
 
-		double const p = frame_to_pixel ((*next)->position() - m->position());
+		double const p = sample_to_pixel ((*next)->position() - m->position());
 
 		if ((*next)->label_on_left()) {
 			m->set_right_label_limit (p / 2);
@@ -332,7 +332,7 @@ Editor::update_marker_labels (ArdourCanvas::Group* group)
 	while (i != sorted.end()) {
 
 		if (prev != sorted.end()) {
-			double const p = frame_to_pixel ((*i)->position() - (*prev)->position());
+			double const p = sample_to_pixel ((*i)->position() - (*prev)->position());
 
 			if ((*prev)->label_on_left()) {
 				(*i)->set_left_label_limit (p);
@@ -343,7 +343,7 @@ Editor::update_marker_labels (ArdourCanvas::Group* group)
 		}
 
 		if (next != sorted.end()) {
-			double const p = frame_to_pixel ((*next)->position() - (*i)->position());
+			double const p = sample_to_pixel ((*next)->position() - (*i)->position());
 
 			if ((*next)->label_on_left()) {
 				(*i)->set_right_label_limit (p / 2);
@@ -1419,8 +1419,8 @@ Editor::update_loop_range_view (bool visibility)
 
 	if (_session->get_play_loop() && ((tll = transport_loop_location()) != 0)) {
 
-		double x1 = frame_to_pixel (tll->start());
-		double x2 = frame_to_pixel (tll->end());
+		double x1 = sample_to_pixel (tll->start());
+		double x2 = sample_to_pixel (tll->end());
 
 		transport_loop_range_rect->set_x0 (x1);
 		transport_loop_range_rect->set_x1 (x2);
@@ -1446,11 +1446,11 @@ Editor::update_punch_range_view (bool visibility)
 	if ((_session->config.get_punch_in() || _session->config.get_punch_out()) && ((tpl = transport_punch_location()) != 0)) {
 		ArdourCanvas::Rect const v = _track_canvas_viewport->visible_area ();
 		if (_session->config.get_punch_in()) {
-			transport_punch_range_rect->set_x0 (frame_to_pixel (tpl->start()));
-			transport_punch_range_rect->set_x1 (_session->config.get_punch_out() ? frame_to_pixel (tpl->end()) : frame_to_pixel (JACK_MAX_FRAMES));
+			transport_punch_range_rect->set_x0 (sample_to_pixel (tpl->start()));
+			transport_punch_range_rect->set_x1 (_session->config.get_punch_out() ? sample_to_pixel (tpl->end()) : sample_to_pixel (JACK_MAX_FRAMES));
 		} else {
 			transport_punch_range_rect->set_x0 (0);
-			transport_punch_range_rect->set_x1 (_session->config.get_punch_out() ? frame_to_pixel (tpl->end()) : v.width ());
+			transport_punch_range_rect->set_x1 (_session->config.get_punch_out() ? sample_to_pixel (tpl->end()) : v.width ());
 		}
 
 		if (visibility) {

@@ -1896,7 +1896,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 					boost::shared_ptr<AudioRegion> ar (arv->audio_region());
 					distance = _drags->current_pointer_x() - grab_x();
 					len = ar->fade_in()->back()->when;
-					new_length = len - _editor->pixel_to_frame (distance);
+					new_length = len - _editor->pixel_to_sample (distance);
 					new_length = ar->verify_xfade_bounds (new_length, true  /*START*/ );
 					arv->reset_fade_in_shape_width (ar, new_length);  //the grey shape
 				}
@@ -1916,7 +1916,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 					boost::shared_ptr<AudioRegion> ar (arv->audio_region());
 					distance = grab_x() - _drags->current_pointer_x();
 					len = ar->fade_out()->back()->when;
-					new_length = len - _editor->pixel_to_frame (distance);
+					new_length = len - _editor->pixel_to_sample (distance);
 					new_length = ar->verify_xfade_bounds (new_length, false  /*END*/ );
 					arv->reset_fade_out_shape_width (ar, new_length);  //the grey shape
 				}
@@ -1990,7 +1990,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 						boost::shared_ptr<AudioRegion> ar (arv->audio_region());
 						distance = _drags->current_pointer_x() - grab_x();
 						len = ar->fade_in()->back()->when;
-						new_length = len - _editor->pixel_to_frame (distance);
+						new_length = len - _editor->pixel_to_sample (distance);
 						new_length = ar->verify_xfade_bounds (new_length, true  /*START*/ );
 						ar->set_fade_in_length(new_length);
 					}
@@ -2007,7 +2007,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 						boost::shared_ptr<AudioRegion> ar (arv->audio_region());
 						distance = _drags->current_pointer_x() - grab_x();
 						len = ar->fade_out()->back()->when;
-						new_length = len - _editor->pixel_to_frame (distance);
+						new_length = len - _editor->pixel_to_sample (distance);
 						new_length = ar->verify_xfade_bounds (new_length, false  /*END*/ );
 						ar->set_fade_out_length(new_length);
 					}
@@ -3140,7 +3140,7 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 	cy = max (0.0, cy);
 	cy = min ((double) _point->line().height(), cy);
 
-	framepos_t cx_frames = _editor->pixel_to_frame (cx);
+	framepos_t cx_frames = _editor->pixel_to_sample (cx);
 
 	if (!_x_constrained) {
 		_editor->snap_to_with_modifier (cx_frames, event);
@@ -3150,7 +3150,7 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 
 	float const fraction = 1.0 - (cy / _point->line().height());
 
-	_point->line().drag_motion (_editor->frame_to_pixel_unrounded (cx_frames), fraction, false, _pushing, _final_index);
+	_point->line().drag_motion (_editor->sample_to_pixel_unrounded (cx_frames), fraction, false, _pushing, _final_index);
 
 	_editor->verbose_cursor()->set_text (_point->line().get_verbose_cursor_string (fraction));
 }
@@ -3313,7 +3313,7 @@ FeatureLineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	_arv = reinterpret_cast<AudioRegionView*> (_item->get_data ("regionview"));
 
-	_max_x = _editor->frame_to_pixel(_arv->get_duration());
+	_max_x = _editor->sample_to_pixel(_arv->get_duration());
 }
 
 void
@@ -3409,8 +3409,8 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 
 	if (start != end || y1 != y2) {
 
-		double x1 = _editor->frame_to_pixel (start);
-		double x2 = _editor->frame_to_pixel (end);
+		double x1 = _editor->sample_to_pixel (start);
+		double x2 = _editor->sample_to_pixel (end);
 
 		_editor->rubberband_rect->set_x0 (x1);
 		if (_vertical_only) {
@@ -4045,8 +4045,8 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 	if (start != end) {
 		_editor->temp_location->set (start, end);
 
-		double x1 = _editor->frame_to_pixel (start);
-		double x2 = _editor->frame_to_pixel (end);
+		double x1 = _editor->sample_to_pixel (start);
+		double x2 = _editor->sample_to_pixel (end);
 		crect->set_x0 (x1);
 		crect->set_x1 (x2);
 
@@ -4146,8 +4146,8 @@ RangeMarkerBarDrag::aborted (bool)
 void
 RangeMarkerBarDrag::update_item (Location* location)
 {
-	double const x1 = _editor->frame_to_pixel (location->start());
-	double const x2 = _editor->frame_to_pixel (location->end());
+	double const x1 = _editor->sample_to_pixel (location->start());
+	double const x2 = _editor->sample_to_pixel (location->end());
 
 	_drag_rect->set_x0 (x1);
 	_drag_rect->set_x1 (x2);
@@ -4279,7 +4279,7 @@ frameoffset_t
 NoteDrag::total_dx () const
 {
 	/* dx in frames */
-	frameoffset_t const dx = _editor->pixel_to_frame (_drags->current_pointer_x() - grab_x());
+	frameoffset_t const dx = _editor->pixel_to_sample (_drags->current_pointer_x() - grab_x());
 
 	/* primary note time */
 	frameoffset_t const n = _region->source_beats_to_absolute_frames (_primary->note()->time ());
@@ -4319,7 +4319,7 @@ NoteDrag::motion (GdkEvent *, bool)
 	int8_t const dy = total_dy ();
 
 	/* Now work out what we have to do to the note canvas items to set this new drag delta */
-	double const tdx = _editor->frame_to_pixel (dx) - _cumulative_dx;
+	double const tdx = _editor->sample_to_pixel (dx) - _cumulative_dx;
 	double const tdy = -dy * _note_height - _cumulative_dy;
 
 	if (tdx || tdy) {
@@ -4641,7 +4641,7 @@ PatchChangeDrag::motion (GdkEvent* ev, bool)
 	f = min (f, r->last_frame ());
 
 	framecnt_t const dxf = f - grab_frame(); // permitted dx in frames
-	double const dxu = _editor->frame_to_pixel (dxf); // permitted fx in units
+	double const dxu = _editor->sample_to_pixel (dxf); // permitted fx in units
 	_patch_change->move (ArdourCanvas::Duple (dxu - _cumulative_dx, 0));
 	_cumulative_dx = dxu;
 }
@@ -4696,8 +4696,8 @@ MidiRubberbandSelectDrag::select_things (int button_state, framepos_t x1, framep
 	y2 = max (0.0, y2 - y);
 	
 	_region_view->update_drag_selection (
-		_editor->frame_to_pixel (x1),
-		_editor->frame_to_pixel (x2),
+		_editor->sample_to_pixel (x1),
+		_editor->sample_to_pixel (x2),
 		y1,
 		y2,
 		Keyboard::modifier_state_contains (button_state, Keyboard::TertiaryModifier)
@@ -4815,7 +4815,7 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	_note[0] = adjusted_frame (pf, event) - _region_view->region()->position ();
 
 	MidiStreamView* sv = _region_view->midi_stream_view ();
-	double const x = _editor->frame_to_pixel (_note[0]);
+	double const x = _editor->sample_to_pixel (_note[0]);
 	double const y = sv->note_to_y (sv->y_to_note (y_to_region (event->button.y)));
 
 	_drag_rect->set (ArdourCanvas::Rect (x, y, x, y + floor (_region_view->midi_stream_view()->note_height ())));
@@ -4828,7 +4828,7 @@ void
 NoteCreateDrag::motion (GdkEvent* event, bool)
 {
 	_note[1] = max ((framepos_t)0, adjusted_current_frame (event) - _region_view->region()->position ());
-	double const x = _editor->frame_to_pixel (_note[1]);
+	double const x = _editor->sample_to_pixel (_note[1]);
 	if (_note[1] > _note[0]) {
 		_drag_rect->set_x1 (x);
 	} else {
@@ -4905,7 +4905,7 @@ CrossfadeEdgeDrag::motion (GdkEvent*, bool)
 
 	/* how long should it be ? */
 
-	new_length = len + _editor->pixel_to_frame (distance);
+	new_length = len + _editor->pixel_to_sample (distance);
 
 	/* now check with the region that this is legal */
 
@@ -4935,7 +4935,7 @@ CrossfadeEdgeDrag::finished (GdkEvent*, bool)
 		len = ar->fade_out()->back()->when;
 	}
 
-	new_length = ar->verify_xfade_bounds (len + _editor->pixel_to_frame (distance), start);
+	new_length = ar->verify_xfade_bounds (len + _editor->pixel_to_sample (distance), start);
 	
 	_editor->begin_reversible_command ("xfade trim");
 	ar->playlist()->clear_owned_changes ();	

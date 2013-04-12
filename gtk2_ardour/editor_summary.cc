@@ -778,7 +778,7 @@ EditorSummary::set_editor_x (pair<double, double> x)
 		
 		double const nx = (
 			((x.second - x.first) / _x_scale) /
-			_editor->frame_to_pixel (_editor->current_page_frames())
+			_editor->sample_to_pixel (_editor->current_page_frames())
 			);
 		
 		if (nx != _editor->get_current_zoom ()) {

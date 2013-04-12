@@ -244,8 +244,8 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 
 		/* coordinates for the rect are relative to the regionview origin */
 
-		cr->set_x0 (trackview.editor().frame_to_pixel (i->first - _region->start()));
-		cr->set_x1 (trackview.editor().frame_to_pixel (i->second - _region->start()));
+		cr->set_x0 (trackview.editor().sample_to_pixel (i->first - _region->start()));
+		cr->set_x1 (trackview.editor().sample_to_pixel (i->second - _region->start()));
 		cr->set_y0 (1);
 		cr->set_y1 (_height - 2);
 		cr->set_outline (false);
@@ -279,7 +279,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 
         /* both positions are relative to the region start offset in source */
 
-        _silence_text->set_x_position (trackview.editor().frame_to_pixel (silences.front().first - _region->start()) + 10.0);
+        _silence_text->set_x_position (trackview.editor().sample_to_pixel (silences.front().first - _region->start()) + 10.0);
         _silence_text->set_y_position (20.0);
 
         double ms = (float) shortest/_region->session().frame_rate();
@@ -798,14 +798,14 @@ RegionView::update_coverage_frames (LayerDisplay d)
 
 		/* finish off any old rect, if required */
 		if (cr && me != new_me) {
-			cr->set_x1 (trackview.editor().frame_to_pixel (t - position));
+			cr->set_x1 (trackview.editor().sample_to_pixel (t - position));
 		}
 
 		/* start off any new rect, if required */
 		if (cr == 0 || me != new_me) {
 			cr = new ArdourCanvas::Rectangle (group);
 			_coverage_frames.push_back (cr);
-			cr->set_x0 (trackview.editor().frame_to_pixel (t - position));
+			cr->set_x0 (trackview.editor().sample_to_pixel (t - position));
 			cr->set_y0 (1);
 			cr->set_y1 (_height + 1);
 			cr->set_outline (false);
@@ -823,7 +823,7 @@ RegionView::update_coverage_frames (LayerDisplay d)
 
 	if (cr) {
 		/* finish off the last rectangle */
-		cr->set_x1 (trackview.editor().frame_to_pixel (end - position));
+		cr->set_x1 (trackview.editor().sample_to_pixel (end - position));
 	}
 
 	if (frame_handle_start) {

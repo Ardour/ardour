@@ -530,7 +530,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 					group->canvas_to_item (event_x, event_y);
 
 					bool success;
-					Evoral::MusicalTime beats = editor.get_grid_type_as_beats (success, editor.pixel_to_frame (event_x));
+					Evoral::MusicalTime beats = editor.get_grid_type_as_beats (success, editor.pixel_to_sample (event_x));
 
 					if (!success) {
 						beats = 1;
@@ -541,7 +541,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 					*/
 					beats -= 1.0 / Timecode::BBT_Time::ticks_per_beat;
 
-					create_note_at (editor.pixel_to_frame (event_x), event_y, beats, true);
+					create_note_at (editor.pixel_to_sample (event_x), event_y, beats, true);
 				}
 
 				break;
@@ -549,7 +549,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 		case MouseDraw:
 			{
 				bool success;
-				Evoral::MusicalTime beats = editor.get_grid_type_as_beats (success, editor.pixel_to_frame (event_x));
+				Evoral::MusicalTime beats = editor.get_grid_type_as_beats (success, editor.pixel_to_sample (event_x));
 
 				if (!success) {
 					beats = 1;
@@ -560,7 +560,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 				*/
 				beats -= 1.0 / Timecode::BBT_Time::ticks_per_beat;
 				
-				create_note_at (editor.pixel_to_frame (event_x), event_y, beats, true);
+				create_note_at (editor.pixel_to_sample (event_x), event_y, beats, true);
 
 				break;
 			}
@@ -1290,7 +1290,7 @@ MidiRegionView::display_sysexes()
 		}
 		string text = str.str();
 
-		const double x = trackview.editor().frame_to_pixel(source_beats_to_region_frames(time));
+		const double x = trackview.editor().sample_to_pixel(source_beats_to_region_frames(time));
 
 		double height = midi_stream_view()->contents_height();
 
@@ -1524,7 +1524,7 @@ MidiRegionView::resolve_note(uint8_t note, double end_time)
 		*/
 		const framepos_t end_time_frames = region_beats_to_region_frames(end_time);
 
-		_active_notes[note]->set_x1 (trackview.editor().frame_to_pixel(end_time_frames));
+		_active_notes[note]->set_x1 (trackview.editor().sample_to_pixel(end_time_frames));
 		_active_notes[note]->set_outline_what (0xf);
 		_active_notes[note] = 0;
 	}
@@ -1542,7 +1542,7 @@ MidiRegionView::extend_active_notes()
 
 	for (unsigned i=0; i < 128; ++i) {
 		if (_active_notes[i]) {
-			_active_notes[i]->set_x1 (trackview.editor().frame_to_pixel(_region->length()));
+			_active_notes[i]->set_x1 (trackview.editor().sample_to_pixel(_region->length()));
 		}
 	}
 }
@@ -1631,7 +1631,7 @@ void
 MidiRegionView::update_note (Note* ev, bool update_ghost_regions)
 {
 	boost::shared_ptr<NoteType> note = ev->note();
-	const double x = trackview.editor().frame_to_pixel (source_beats_to_region_frames (note->time()));
+	const double x = trackview.editor().sample_to_pixel (source_beats_to_region_frames (note->time()));
 	const double y0 = midi_stream_view()->note_to_y(note->note());
 
 	ev->set_x0 (x);
@@ -1641,9 +1641,9 @@ MidiRegionView::update_note (Note* ev, bool update_ghost_regions)
 
 	if (note->length() > 0) {
 		const framepos_t note_end_frames = min (source_beats_to_region_frames (note->end_time()), _region->length());
-		ev->set_x1 (trackview.editor().frame_to_pixel (note_end_frames));
+		ev->set_x1 (trackview.editor().sample_to_pixel (note_end_frames));
 	} else {
-		ev->set_x1 (trackview.editor().frame_to_pixel (_region->length()));
+		ev->set_x1 (trackview.editor().sample_to_pixel (_region->length()));
 	}
 
 	ev->set_y1 (y0 + floor(midi_stream_view()->note_height()));
@@ -1683,7 +1683,7 @@ MidiRegionView::update_hit (Hit* ev)
 	boost::shared_ptr<NoteType> note = ev->note();
 
 	const framepos_t note_start_frames = source_beats_to_region_frames(note->time());
-	const double x = trackview.editor().frame_to_pixel(note_start_frames);
+	const double x = trackview.editor().sample_to_pixel(note_start_frames);
 	const double diamond_size = midi_stream_view()->note_height() / 2.0;
 	const double y = midi_stream_view()->note_to_y(note->note()) + ((diamond_size-2) / 4.0);
 
@@ -1805,7 +1805,7 @@ void
 MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch, const string& displaytext, bool /*active_channel*/)
 {
 	framecnt_t region_frames = source_beats_to_region_frames (patch->time());
-	const double x = trackview.editor().frame_to_pixel (region_frames);
+	const double x = trackview.editor().sample_to_pixel (region_frames);
 
 	double const height = midi_stream_view()->contents_height();
 
@@ -2471,10 +2471,10 @@ MidiRegionView::note_dropped(NoteBase *, frameoffset_t dt, int8_t dnote)
  *  @return Snapped frame relative to the region position.
  */
 framepos_t
-MidiRegionView::snap_pixel_to_frame(double x)
+MidiRegionView::snap_pixel_to_sample(double x)
 {
 	PublicEditor& editor (trackview.editor());
-	return snap_frame_to_frame (editor.pixel_to_frame (x));
+	return snap_frame_to_frame (editor.pixel_to_sample (x));
 }
 
 /** @param x Pixel relative to the region position.
@@ -2483,21 +2483,21 @@ MidiRegionView::snap_pixel_to_frame(double x)
 double
 MidiRegionView::snap_to_pixel(double x)
 {
-	return (double) trackview.editor().frame_to_pixel(snap_pixel_to_frame(x));
+	return (double) trackview.editor().sample_to_pixel(snap_pixel_to_sample(x));
 }
 
 double
 MidiRegionView::get_position_pixels()
 {
 	framepos_t region_frame = get_position();
-	return trackview.editor().frame_to_pixel(region_frame);
+	return trackview.editor().sample_to_pixel(region_frame);
 }
 
 double
 MidiRegionView::get_end_position_pixels()
 {
 	framepos_t frame = get_position() + get_duration ();
-	return trackview.editor().frame_to_pixel(frame);
+	return trackview.editor().sample_to_pixel(frame);
 }
 
 framepos_t
@@ -2618,7 +2618,7 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 		if (!cursor_set) {
 			double beats;
 
-			beats = snap_pixel_to_frame (current_x);
+			beats = snap_pixel_to_sample (current_x);
 			beats = region_frames_to_region_beats (beats);
 
 			double len;
@@ -2682,7 +2682,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		/* Convert that to a frame within the source */
-		current_x = snap_pixel_to_frame (current_x) + _region->start ();
+		current_x = snap_pixel_to_sample (current_x) + _region->start ();
 
 		/* and then to beats */
 		current_x = region_frames_to_region_beats (current_x);
@@ -3494,7 +3494,7 @@ MidiRegionView::update_ghost_note (double x, double y)
 
 	PublicEditor& editor = trackview.editor ();
 	
-	framepos_t const unsnapped_frame = editor.pixel_to_frame (x);
+	framepos_t const unsnapped_frame = editor.pixel_to_sample (x);
 	framecnt_t grid_frames;
 	framepos_t const f = snap_frame_to_grid_underneath (unsnapped_frame, grid_frames);
 
@@ -3635,7 +3635,7 @@ MidiRegionView::move_step_edit_cursor (Evoral::MusicalTime pos)
 	_step_edit_cursor_position = pos;
 
 	if (_step_edit_cursor) {
-		double pixel = trackview.editor().frame_to_pixel (region_beats_to_region_frames (pos));
+		double pixel = trackview.editor().sample_to_pixel (region_beats_to_region_frames (pos));
 		_step_edit_cursor->set_x0 (pixel);
 		set_step_edit_cursor_width (_step_edit_cursor_width);
 	}
@@ -3655,7 +3655,7 @@ MidiRegionView::set_step_edit_cursor_width (Evoral::MusicalTime beats)
 	_step_edit_cursor_width = beats;
 
 	if (_step_edit_cursor) {
-		_step_edit_cursor->set_x1 (_step_edit_cursor->x0() + trackview.editor().frame_to_pixel (region_beats_to_region_frames (beats)));
+		_step_edit_cursor->set_x1 (_step_edit_cursor->x0() + trackview.editor().sample_to_pixel (region_beats_to_region_frames (beats)));
 	}
 }
 

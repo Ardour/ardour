@@ -155,7 +155,7 @@ Editor::window_event_frame (GdkEvent const * event, double* pcx, double* pcy) co
 		*pcy = d.y;
 	}
 
-	return pixel_to_frame (d.x);
+	return pixel_to_sample (d.x);
 }
 
 framepos_t
@@ -179,12 +179,12 @@ Editor::canvas_event_frame (GdkEvent const * event, double* pcx, double* pcy) co
 		*pcy = y;
 	}
 
-	/* note that pixel_to_frame() never returns less than zero, so even if the pixel
+	/* note that pixel_to_sample() never returns less than zero, so even if the pixel
 	   position is negative (as can be the case with motion events in particular),
 	   the frame location is always positive.
 	*/
 
-	return pixel_to_frame (x);
+	return pixel_to_sample (x);
 }
 
 Gdk::Cursor*
@@ -1700,7 +1700,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		case MeterBarItem:
 			if (!_dragging_playhead) {
-				mouse_add_new_meter_event (pixel_to_frame (event->button.x));
+				mouse_add_new_meter_event (pixel_to_sample (event->button.x));
 			}
 			return true;
 			break;
@@ -2575,8 +2575,8 @@ Editor::hide_marker (ArdourCanvas::Item* item, GdkEvent* /*event*/)
 void
 Editor::reposition_zoom_rect (framepos_t start, framepos_t end)
 {
-	double x1 = frame_to_pixel (start);
-	double x2 = frame_to_pixel (end);
+	double x1 = sample_to_pixel (start);
+	double x2 = sample_to_pixel (end);
 	double y2 = _full_canvas_height - 1.0;
 
 	zoom_rect->set (ArdourCanvas::Rect (x1, 1.0, x2, y2));

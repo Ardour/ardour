@@ -420,7 +420,7 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 
 	for (i = analysis_features.begin(), l = feature_lines.begin(); i != analysis_features.end() && l != feature_lines.end(); ++i, ++l) {
 
-		float x_pos = trackview.editor().frame_to_pixel (*i);
+		float x_pos = trackview.editor().sample_to_pixel (*i);
 
 		(*l).second->set (ArdourCanvas::Duple (x_pos, 2.0),
 				  ArdourCanvas::Duple (x_pos, _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1));
@@ -505,7 +505,7 @@ AudioRegionView::set_height (gdouble height)
 
 	for (l = feature_lines.begin(); l != feature_lines.end(); ++l) {
 
-		float pos_x = trackview.editor().frame_to_pixel((*l).first);
+		float pos_x = trackview.editor().sample_to_pixel((*l).first);
 
 		(*l).second->set (ArdourCanvas::Duple (pos_x, 2.0),
 				  ArdourCanvas::Duple (pos_x, _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1));
@@ -980,7 +980,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	item->canvas_to_item (x, y);
 
-	framepos_t fx = trackview.editor().pixel_to_frame (x);
+	framepos_t fx = trackview.editor().pixel_to_sample (x);
 
 	if (fx > _region->length()) {
 		return;
@@ -1281,7 +1281,7 @@ AudioRegionView::transients_changed ()
 	for (i = analysis_features.begin(), l = feature_lines.begin(); i != analysis_features.end() && l != feature_lines.end(); ++i, ++l) {
 
 		float *pos = new float;
-		*pos = trackview.editor().frame_to_pixel (*i);
+		*pos = trackview.editor().sample_to_pixel (*i);
 
 		(*l).second->set (
 			ArdourCanvas::Duple (*pos, 2.0),
@@ -1308,7 +1308,7 @@ AudioRegionView::update_transient(float /*old_pos*/, float new_pos)
 		if (rint(new_pos) == rint(*pos)) {
 
 		    framepos_t old_frame = (*l).first;
-		    framepos_t new_frame = trackview.editor().pixel_to_frame (new_pos);
+		    framepos_t new_frame = trackview.editor().pixel_to_sample (new_pos);
 
 		    _region->update_transient (old_frame, new_frame);
 
@@ -1360,7 +1360,7 @@ AudioRegionView::redraw_start_xfade ()
 void
 AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, framecnt_t len)
 {
-	int32_t const npoints = trackview.editor().frame_to_pixel (len);
+	int32_t const npoints = trackview.editor().sample_to_pixel (len);
 
 	if (npoints < 3) {
 		return;
@@ -1468,7 +1468,7 @@ AudioRegionView::redraw_end_xfade ()
 void
 AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecnt_t len)
 {
-	int32_t const npoints = trackview.editor().frame_to_pixel (len);
+	int32_t const npoints = trackview.editor().sample_to_pixel (len);
 
 	if (npoints < 3) {
 		return;
@@ -1505,7 +1505,7 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 
 	ar->fade_out()->curve().get_vector (0, ar->fade_out()->back()->when, vec.get(), npoints);
 
-	double rend = trackview.editor().frame_to_pixel (_region->length() - len);
+	double rend = trackview.editor().sample_to_pixel (_region->length() - len);
 
 	double effective_height;
 	if (_height >= NAME_HIGHLIGHT_THRESH) {

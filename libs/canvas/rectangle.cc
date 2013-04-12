@@ -63,9 +63,14 @@ Rectangle::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context)
 	if (_outline) {
 		
 		if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
-			context->rectangle (plot.x0, plot.y0, plot.width(), plot.height());
-			setup_outline_context (context);
-			context->stroke ();
+
+			/* if we filled and use full outline, we are already done */
+
+			if (!_fill) { 
+				context->rectangle (plot.x0, plot.y0, plot.width(), plot.height());
+				setup_outline_context (context);
+				context->stroke ();
+			}
 			
 		} else {
 			

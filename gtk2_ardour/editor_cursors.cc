@@ -67,7 +67,7 @@ EditorCursor::set_position (framepos_t frame)
 {
 	PositionChanged (frame);
 
-	double const new_pos = _editor.frame_to_pixel (frame);
+	double const new_pos = _editor.sample_to_pixel (frame);
 
 	if (new_pos != _time_bars_canvas_item.x ()) {
 		_time_bars_canvas_item.set_x (new_pos);

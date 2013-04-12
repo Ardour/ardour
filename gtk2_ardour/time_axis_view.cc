@@ -856,8 +856,8 @@ TimeAxisView::show_selection (TimeSelection& ts)
 
 		rect = get_selection_rect ((*i).id);
 
-		x1 = _editor.frame_to_pixel (start);
-		x2 = _editor.frame_to_pixel (start + cnt - 1);
+		x1 = _editor.sample_to_pixel (start);
+		x2 = _editor.sample_to_pixel (start + cnt - 1);
 		y2 = current_height();
 
 		rect->rect->set (ArdourCanvas::Rect (x1, 1, x2, y2));

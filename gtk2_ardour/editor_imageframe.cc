@@ -444,7 +444,7 @@ Editor::start_imageframe_grab(ArdourCanvas::Item* item, GdkEvent* event)
 
 	start_grab(event) ;
 
-	drag_info.pointer_frame_offset = pixel_to_frame(drag_info.grab_x) - drag_info.last_frame_position;
+	drag_info.pointer_frame_offset = pixel_to_sample(drag_info.grab_x) - drag_info.last_frame_position;
 }
 
 
@@ -478,7 +478,7 @@ Editor::start_markerview_grab(ArdourCanvas::Item* item, GdkEvent* event)
 
 	start_grab(event) ;
 
-	drag_info.pointer_frame_offset = pixel_to_frame(drag_info.grab_x) - drag_info.last_frame_position ;
+	drag_info.pointer_frame_offset = pixel_to_sample(drag_info.grab_x) - drag_info.last_frame_position ;
 }
 
 

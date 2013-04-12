@@ -176,7 +176,7 @@ TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & ba
 	if (visibility & ShowFrame) {
 		frame = new ArdourCanvas::Rectangle (group, 
 						     ArdourCanvas::Rect (0.0, 1.0, 
-									 trackview.editor().frame_to_pixel(duration), 
+									 trackview.editor().sample_to_pixel(duration), 
 									 trackview.current_height()));
 
 		frame->set_outline_width (1);
@@ -198,11 +198,11 @@ TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & ba
 
 		if (visibility & FullWidthNameHighlight) {
 			name_highlight = new ArdourCanvas::Rectangle (group, 
-								      ArdourCanvas::Rect (0.0, trackview.editor().frame_to_pixel(item_duration),
+								      ArdourCanvas::Rect (0.0, trackview.editor().sample_to_pixel(item_duration),
 											  trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, trackview.current_height()));
 		} else {
 			name_highlight = new ArdourCanvas::Rectangle (group, 
-								      ArdourCanvas::Rect (1.0, trackview.editor().frame_to_pixel(item_duration) - 1, 
+								      ArdourCanvas::Rect (1.0, trackview.editor().sample_to_pixel(item_duration) - 1, 
 											  trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, trackview.current_height()));
 		}
 
@@ -350,7 +350,7 @@ TimeAxisViewItem::set_duration (framecnt_t dur, void* src)
 
 	item_duration = dur;
 
-	reset_width_dependent_items (trackview.editor().frame_to_pixel (dur));
+	reset_width_dependent_items (trackview.editor().sample_to_pixel (dur));
 
 	DurationChanged (dur, src); /* EMIT_SIGNAL */
 	return true;
@@ -523,7 +523,7 @@ TimeAxisViewItem::set_name_text(const string& new_name)
 		return;
 	}
 
-	last_item_width = trackview.editor().frame_to_pixel(item_duration);
+	last_item_width = trackview.editor().sample_to_pixel(item_duration);
 	name_pixbuf_width = pixel_width (new_name, NAME_FONT) + 2;
 	name_pixbuf->set (pixbuf_from_string(new_name, NAME_FONT, name_pixbuf_width, NAME_HEIGHT, Gdk::Color ("#000000")));
 }
@@ -901,7 +901,7 @@ TimeAxisViewItem::reset_name_width (double /*pixel_width*/)
 		return;
 	}
 
-	it_width = trackview.editor().frame_to_pixel(item_duration);
+	it_width = trackview.editor().sample_to_pixel(item_duration);
 	pb_width = name_pixbuf_width;
 
 	pixbuf_holds_full_name = last_item_width > pb_width + NAME_X_OFFSET;

@@ -493,9 +493,9 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool moving_left, b
 
 	Gtk::Allocation editor_list = _the_notebook.get_allocation ();
 
-	framecnt_t distance = pixel_to_frame (root_rect.get_x() + root_rect.get_width() - window_rect.get_x() - window_rect.get_width());
+	framecnt_t distance = pixel_to_sample (root_rect.get_x() + root_rect.get_width() - window_rect.get_x() - window_rect.get_width());
 	if (_the_notebook.is_visible ()) {
-		distance += pixel_to_frame (editor_list.get_width());
+		distance += pixel_to_sample (editor_list.get_width());
 	}
 
 	/* Note whether we're fudging the autoscroll (see autoscroll_fudge_threshold) */
@@ -912,7 +912,7 @@ Editor::update_canvas_now ()
 double
 Editor::horizontal_position () const
 {
-	return frame_to_pixel (leftmost_frame);
+	return sample_to_pixel (leftmost_frame);
 }
 
 void

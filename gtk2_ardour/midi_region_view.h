@@ -253,7 +253,7 @@ public:
 	 * @param x a pixel coordinate relative to region start
 	 * @return the snapped framepos_t coordinate relative to region start
 	 */
-	framepos_t snap_pixel_to_frame(double x);
+	framepos_t snap_pixel_to_sample(double x);
 
 	/** Convert a timestamp in beats into frames (both relative to region position) */
 	framepos_t region_beats_to_region_frames(double beats) const;

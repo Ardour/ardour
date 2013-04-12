@@ -227,7 +227,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	   xscroll_adjustment.
 	*/
 
-	framepos_t pixel_to_frame (double pixel) const {
+	framepos_t pixel_to_sample (double pixel) const {
 
 		/* pixel can be less than zero when motion events
 		   are processed. since we've already run the world->canvas
@@ -242,11 +242,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		}
 	}
 
-	double frame_to_pixel (framepos_t frame) const {
+	double sample_to_pixel (framepos_t frame) const {
 		return rint (frame / frames_per_pixel);
 	}
 
-	double frame_to_pixel_unrounded (framepos_t frame) const {
+	double sample_to_pixel_unrounded (framepos_t frame) const {
 		return frame / frames_per_pixel;
 	}
 

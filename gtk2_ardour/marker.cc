@@ -234,7 +234,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	}
 
 	frame_position = frame;
-	unit_position = editor.frame_to_pixel (frame);
+	unit_position = editor.sample_to_pixel (frame);
 	unit_position -= _shift;
 
 	group = new ArdourCanvas::Group (&parent, ArdourCanvas::Duple (unit_position, 0));
@@ -429,7 +429,7 @@ Marker::setup_name_display ()
 void
 Marker::set_position (framepos_t frame)
 {
-	unit_position = editor.frame_to_pixel (frame) - _shift;
+	unit_position = editor.sample_to_pixel (frame) - _shift;
 	group->set_x_position (unit_position);
 	frame_position = frame;
 }
