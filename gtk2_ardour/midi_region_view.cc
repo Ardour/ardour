@@ -3820,6 +3820,7 @@ MidiRegionView::show_verbose_cursor (string const & text, double xoffset, double
 {
 	double wx, wy;
 
+	trackview.editor().verbose_cursor()->set_text (text);
 	trackview.editor().get_pointer_position (wx, wy);
 
 	wx += xoffset;
@@ -3827,13 +3828,17 @@ MidiRegionView::show_verbose_cursor (string const & text, double xoffset, double
 
 	/* Flip the cursor above the mouse pointer if it would overlap the bottom of the canvas */
 
-	ArdourCanvas::Rect bb = trackview.editor().verbose_cursor()->item().bounding_box().get();
+	boost::optional<ArdourCanvas::Rect> bbo = trackview.editor().verbose_cursor()->item().bounding_box();
+
+	assert (bbo);
+	
+	ArdourCanvas::Rect bb = bbo.get();
 
 	if ((wy + bb.y1 - bb.y0) > trackview.editor().visible_canvas_height()) {
 		wy -= (bb.y1 - bb.y0) + 2 * yoffset;
 	}
 
-	trackview.editor().verbose_cursor()->set (text, wx, wy);
+	trackview.editor().verbose_cursor()->set_position (wx, wy);
 	trackview.editor().verbose_cursor()->show ();
 }
 
