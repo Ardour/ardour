@@ -5052,7 +5052,6 @@ Editor::toggle_region_lock ()
 	_session->commit_reversible_command ();
 }
 
-#ifdef WITH_VIDEOTIMELINE
 void
 Editor::toggle_region_video_lock ()
 {
@@ -5076,8 +5075,6 @@ Editor::toggle_region_video_lock ()
 
 	_session->commit_reversible_command ();
 }
-#endif
-
 
 void
 Editor::toggle_region_lock_style ()

@@ -17,8 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifdef WITH_VIDEOTIMELINE
-
 #include <cstdio>
 #include <cmath>
 
@@ -216,5 +214,3 @@ std::string
 VideoServerDialog::get_docroot () {
 	return docroot_entry.get_text();
 }
-
-#endif /* WITH_VIDEOTIMELINE */

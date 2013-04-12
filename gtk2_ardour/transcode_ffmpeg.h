@@ -17,8 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifdef WITH_VIDEOTIMELINE
-
 #ifndef __ardour_transcode_ffmpeg_h__
 #define __ardour_transcode_ffmpeg_h__
 
@@ -164,4 +162,3 @@ class TranscodeFfmpeg : public sigc::trackable
 };
 
 #endif /* __ardour_transcode_ffmpeg_h__ */
-#endif /* WITH_VIDEOTIMELINE */

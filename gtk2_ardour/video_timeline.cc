@@ -17,8 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifdef WITH_VIDEOTIMELINE
-
 #include <algorithm>
 #include <sigc++/bind.h>
 #include "ardour/tempo.h"
@@ -801,5 +799,3 @@ VideoTimeLine::manual_seek_video_monitor (framepos_t pos)
 	if (!vmonitor->synced_by_manual_seeks()) { return; }
 	vmonitor->manual_seek(pos, false, GOFFSET); // XXX -> set offset in xjadeo
 }
-
-#endif /* WITH_VIDEOTIMELINE */

@@ -133,9 +133,7 @@ Editor::initialize_rulers ()
 	lab_children.push_back (Element(transport_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(cd_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
-#ifdef WITH_VIDEOTIMELINE
 	lab_children.push_back (Element(videotl_label, PACK_SHRINK, PACK_START));
-#endif
 
 	ruler_lab_children.push_back (Element(minsec_label, PACK_SHRINK, PACK_START));
 	ruler_children.insert (canvaspos, Element(*minsec_ruler, PACK_SHRINK, PACK_START));
@@ -372,7 +370,6 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 		ruler_items.push_back (SeparatorElem ());
 		break;
 
-#ifdef WITH_VIDEOTIMELINE
 	case VideoBarItem:
 		ruler_items.push_back (MenuElem (_("Timeline height")));
 		static_cast<MenuItem*>(&ruler_items.back())->set_sensitive(false);
@@ -396,7 +393,6 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 
 		ruler_items.push_back (SeparatorElem ());
 		break;
-#endif
 
 	default:
 		break;
@@ -448,12 +444,10 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 	if (action) {
 		ruler_items.push_back (MenuElem (*action->create_menu_item()));
 	}
-#ifdef WITH_VIDEOTIMELINE
 	action = ActionManager::get_action ("Rulers", "toggle-video-ruler");
 	if (action) {
 		ruler_items.push_back (MenuElem (*action->create_menu_item()));
 	}
-#endif
 
 	editor_ruler_menu->popup (1, gtk_get_current_event_time());
 
@@ -475,9 +469,7 @@ Editor::store_ruler_visibility ()
 	node->add_property (X_("rangemarker"), ruler_range_action->get_active() ? "yes": "no");
 	node->add_property (X_("transportmarker"), ruler_loop_punch_action->get_active() ? "yes": "no");
 	node->add_property (X_("cdmarker"), ruler_cd_marker_action->get_active() ? "yes": "no");
-#ifdef WITH_VIDEOTIMELINE
 	node->add_property (X_("videotl"), ruler_video_action->get_active() ? "yes": "no");
-#endif
 
 	_session->add_extra_xml (*node);
 	_session->set_dirty ();
@@ -578,7 +570,6 @@ Editor::restore_ruler_visibility ()
 			}
 		}
 
-#ifdef WITH_VIDEOTIMELINE
 		if ((prop = node->property ("videotl")) != 0) {
 			if (string_is_affirmative (prop->value())) {
 				ruler_video_action->set_active (true);
@@ -586,7 +577,6 @@ Editor::restore_ruler_visibility ()
 				ruler_video_action->set_active (false);
 			}
 		}
-#endif
 
 	}
 
@@ -653,9 +643,7 @@ Editor::update_ruler_visibility ()
 	transport_mark_label.hide();
 	cd_mark_label.hide();
 	mark_label.hide();
- #ifdef WITH_VIDEOTIMELINE
 	videotl_label.hide();
- #endif
 #endif
 	if (ruler_meter_action->get_active()) {
 		old_unit_pos = meter_group->position().y;
@@ -788,8 +776,6 @@ Editor::update_ruler_visibility ()
 		mark_label.hide();
 	}
 
-#ifdef WITH_VIDEOTIMELINE
-
 	if (ruler_video_action->get_active()) {
 		old_unit_pos = videotl_group->position().y;
 		if (tbpos != old_unit_pos) {
@@ -812,7 +798,6 @@ Editor::update_ruler_visibility ()
 		videotl_label.hide();
 	  update_video_timeline(true);
 	}
-#endif
 
 	ruler_label_vbox.set_size_request (-1, (int)(timebar_height * visible_rulers));
 	time_canvas_vbox.set_size_request (-1,-1);
