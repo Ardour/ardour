@@ -265,8 +265,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual bool dragging_playhead () const = 0;
 	virtual void ensure_float (Gtk::Window&) = 0;
 	virtual void show_window () = 0;
-	virtual framepos_t leftmost_position() const = 0;
-	virtual framecnt_t current_page_frames() const = 0;
+	virtual framepos_t leftmost_sample() const = 0;
+	virtual framecnt_t current_page_samples() const = 0;
 	virtual double visible_canvas_height () const = 0;
 	virtual void temporal_zoom_step (bool coarser) = 0;
 	virtual void ensure_time_axis_view_is_visible (const TimeAxisView& tav) = 0;

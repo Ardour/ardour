@@ -191,7 +191,7 @@ Editor::ruler_scroll (GdkEventScroll* event)
 		break;
 
 	case GDK_SCROLL_LEFT:
-		xdelta = (current_page_frames() / 2);
+		xdelta = (current_page_samples() / 2);
 		if (leftmost_frame > xdelta) {
 			reset_x_origin (leftmost_frame - xdelta);
 		} else {
@@ -201,11 +201,11 @@ Editor::ruler_scroll (GdkEventScroll* event)
 		break;
 
 	case GDK_SCROLL_RIGHT:
-		xdelta = (current_page_frames() / 2);
+		xdelta = (current_page_samples() / 2);
 		if (max_framepos - xdelta > leftmost_frame) {
 			reset_x_origin (leftmost_frame + xdelta);
 		} else {
-			reset_x_origin (max_framepos - current_page_frames());
+			reset_x_origin (max_framepos - current_page_samples());
 		}
 		handled = true;
 		break;
@@ -821,7 +821,7 @@ Editor::update_just_timecode ()
 		return;
 	}
 
-	framepos_t rightmost_frame = leftmost_frame + current_page_frames();
+	framepos_t rightmost_frame = leftmost_frame + current_page_samples();
 
 	if (ruler_timecode_action->get_active()) {
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_timecode_ruler), leftmost_frame, rightmost_frame,
@@ -837,15 +837,15 @@ Editor::compute_fixed_ruler_scale ()
 	}
 
 	if (ruler_timecode_action->get_active()) {
-		set_timecode_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames());
+		set_timecode_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
 	}
 
 	if (ruler_minsec_action->get_active()) {
-		set_minsec_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames());
+		set_minsec_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
 	}
 
 	if (ruler_samples_action->get_active()) {
-		set_samples_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames());
+		set_samples_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples());
 	}
 }
 
@@ -864,7 +864,7 @@ Editor::update_fixed_rulers ()
 	ruler_metrics[ruler_metric_samples].units_per_pixel = frames_per_pixel;
 	ruler_metrics[ruler_metric_minsec].units_per_pixel = frames_per_pixel;
 
-	rightmost_frame = leftmost_frame + current_page_frames();
+	rightmost_frame = leftmost_frame + current_page_samples();
 
 	/* these force a redraw, which in turn will force execution of the metric callbacks
 	   to compute the relevant ticks to display.
@@ -894,13 +894,13 @@ Editor::update_tempo_based_rulers (ARDOUR::TempoMap::BBTPointList::const_iterato
 		return;
 	}
 
-	compute_bbt_ruler_scale (leftmost_frame, leftmost_frame+current_page_frames(),
+	compute_bbt_ruler_scale (leftmost_frame, leftmost_frame+current_page_samples(),
 				 begin, end);
 
 	ruler_metrics[ruler_metric_bbt].units_per_pixel = frames_per_pixel;
 
 	if (ruler_bbt_action->get_active()) {
-		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_bbt_ruler), leftmost_frame, leftmost_frame+current_page_frames(),
+		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_bbt_ruler), leftmost_frame, leftmost_frame+current_page_samples(),
 					    leftmost_frame, _session->current_end_frame());
 	}
 }

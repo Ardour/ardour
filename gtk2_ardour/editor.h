@@ -147,9 +147,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void             first_idle ();
 	virtual bool     have_idled () const { return _have_idled; }
 
-	framepos_t leftmost_position() const { return leftmost_frame; }
+	framepos_t leftmost_sample() const { return leftmost_frame; }
 
-	framecnt_t current_page_frames() const {
+	framecnt_t current_page_samples() const {
 		return (framecnt_t) floor (_visible_canvas_width * frames_per_pixel);
 	}
 

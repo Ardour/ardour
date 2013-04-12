@@ -460,7 +460,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 int
 Editor::autoscroll_fudge_threshold () const
 {
-	return current_page_frames() / 6;
+	return current_page_samples() / 6;
 }
 
 /** @param allow_horiz true to allow horizontal autoscroll, otherwise false.
@@ -513,7 +513,7 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool moving_left, b
 		startit = true;
 	}
 
-	framepos_t rightmost_frame = leftmost_frame + current_page_frames();
+	framepos_t rightmost_frame = leftmost_frame + current_page_samples();
 	if (_autoscroll_fudging) {
 		rightmost_frame -= autoscroll_fudge_threshold ();
 	}
@@ -552,7 +552,7 @@ bool
 Editor::autoscroll_canvas ()
 {
 	framepos_t new_frame;
-	framepos_t limit = max_framepos - current_page_frames();
+	framepos_t limit = max_framepos - current_page_samples();
 	GdkEventMotion ev;
 	double new_pixel;
 	double target_pixel;
@@ -560,7 +560,7 @@ Editor::autoscroll_canvas ()
 	if (autoscroll_x_distance != 0) {
 
 		if (autoscroll_x > 0) {
-			autoscroll_x_distance = (_drags->current_pointer_frame() - (leftmost_frame + current_page_frames())) / 3;
+			autoscroll_x_distance = (_drags->current_pointer_frame() - (leftmost_frame + current_page_samples())) / 3;
 			if (_autoscroll_fudging) {
 				autoscroll_x_distance += autoscroll_fudge_threshold () / 3;
 			}
@@ -683,7 +683,7 @@ Editor::start_canvas_autoscroll (int dx, int dy)
 	autoscroll_active = true;
 	autoscroll_x = dx;
 	autoscroll_y = dy;
-	autoscroll_x_distance = (framepos_t) floor (current_page_frames()/50.0);
+	autoscroll_x_distance = (framepos_t) floor (current_page_samples()/50.0);
 	autoscroll_y_distance = fabs (dy * 5); /* pixels */
 	autoscroll_cnt = 0;
 

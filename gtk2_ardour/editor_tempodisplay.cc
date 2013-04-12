@@ -117,7 +117,7 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 	ARDOUR::TempoMap::BBTPointList::const_iterator begin;
 	ARDOUR::TempoMap::BBTPointList::const_iterator end;
 
-	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_frames(), begin, end);
+	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(), begin, end);
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 	redraw_measures ();
 	update_tempo_based_rulers (begin, end);
@@ -133,7 +133,7 @@ Editor::redisplay_tempo (bool immediate_redraw)
 	ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
 	ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
 
-	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_frames(),
+	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(),
 				    current_bbt_points_begin, current_bbt_points_end);
 
 	if (immediate_redraw) {
@@ -176,7 +176,7 @@ Editor::redraw_measures ()
 	ARDOUR::TempoMap::BBTPointList::const_iterator begin;
 	ARDOUR::TempoMap::BBTPointList::const_iterator end;
 
-	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_frames(), begin, end);
+	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(), begin, end);
         draw_measures (begin, end);
 
 	return false;

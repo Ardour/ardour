@@ -674,7 +674,7 @@ Editor::mouse_add_new_range (framepos_t where)
 	   it's reasonably easy to manipulate after creation.
 	*/
 
-	framepos_t const end = where + current_page_frames() / 8;
+	framepos_t const end = where + current_page_samples() / 8;
 
 	string name;
 	_session->locations()->next_available_name (name, _("range"));

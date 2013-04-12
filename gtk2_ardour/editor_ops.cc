@@ -1146,7 +1146,7 @@ void
 Editor::scroll_playhead (bool forward)
 {
 	framepos_t pos = playhead_cursor->current_frame ();
-	framecnt_t delta = (framecnt_t) floor (current_page_frames() / 0.8);
+	framecnt_t delta = (framecnt_t) floor (current_page_samples() / 0.8);
 
 	if (forward) {
 		if (pos == max_framepos) {
@@ -1371,7 +1371,7 @@ Editor::temporal_zoom (double fpp)
 		return;
 	}
 
-	framepos_t current_page = current_page_frames();
+	framepos_t current_page = current_page_samples();
 	framepos_t current_leftmost = leftmost_frame;
 	framepos_t current_rightmost;
 	framepos_t current_center;
@@ -1976,7 +1976,7 @@ Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 
 	where = window_event_frame (&event, &cx, &cy);
 
-	if (where < leftmost_frame || where > leftmost_frame + current_page_frames()) {
+	if (where < leftmost_frame || where > leftmost_frame + current_page_samples()) {
 		/* clearly outside canvas area */
 		return;
 	}

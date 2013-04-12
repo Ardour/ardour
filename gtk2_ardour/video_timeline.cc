@@ -303,7 +303,7 @@ VideoTimeLine::update_video_timeline()
 	}
 
 	double frames_per_unit = editor->pixel_to_sample(1.0);
-	framepos_t leftmost_frame =  editor->leftmost_position();
+	framepos_t leftmost_frame =  editor->leftmost_sample();
 
 	/* Outline:
 	 * 1) calculate how many frames there should be in current zoom (plus 1 page on each side)
@@ -352,7 +352,7 @@ VideoTimeLine::update_video_timeline()
 	leftmost_video_frame = floor (floor((leftmost_frame - video_start_offset - GOFFSET ) / vtl_dist) * vtl_dist / apv);
 
 	vtl_start = rint (GOFFSET + video_start_offset + leftmost_video_frame * apv);
-	visible_video_frames = 2 + ceil(editor->current_page_frames() / vtl_dist); /* +2 left+right partial frames */
+	visible_video_frames = 2 + ceil(editor->current_page_samples() / vtl_dist); /* +2 left+right partial frames */
 
 	/* expand timeline (cache next/prev page images) */
 	vtl_start -= visible_video_frames * vtl_dist;

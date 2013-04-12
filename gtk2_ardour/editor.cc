@@ -1033,7 +1033,7 @@ Editor::control_scroll (float fraction)
 		return;
 	}
 
-	double step = fraction * current_page_frames();
+	double step = fraction * current_page_samples();
 
 	/*
 		_control_scroll_target is an optional<T>
@@ -1054,7 +1054,7 @@ Editor::control_scroll (float fraction)
 	if ((fraction < 0.0f) && (*_control_scroll_target < (framepos_t) fabs(step))) {
 		*_control_scroll_target = 0;
 	} else if ((fraction > 0.0f) && (max_framepos - *_control_scroll_target < step)) {
-		*_control_scroll_target = max_framepos - (current_page_frames()*2); // allow room for slop in where the PH is on the screen
+		*_control_scroll_target = max_framepos - (current_page_samples()*2); // allow room for slop in where the PH is on the screen
 	} else {
 		*_control_scroll_target += (framepos_t) floor (step);
 	}
@@ -1064,9 +1064,9 @@ Editor::control_scroll (float fraction)
 	playhead_cursor->set_position (*_control_scroll_target);
 	UpdateAllTransportClocks (*_control_scroll_target);
 
-	if (*_control_scroll_target > (current_page_frames() / 2)) {
+	if (*_control_scroll_target > (current_page_samples() / 2)) {
 		/* try to center PH in window */
-		reset_x_origin (*_control_scroll_target - (current_page_frames()/2));
+		reset_x_origin (*_control_scroll_target - (current_page_samples()/2));
 	} else {
 		reset_x_origin (0);
 	}
@@ -2121,9 +2121,9 @@ Editor::set_snap_to (SnapType st)
 		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
 		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
 		
-		compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_frames(),
+		compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(),
 					    current_bbt_points_begin, current_bbt_points_end);
-		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames(),
+		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples(),
 					 current_bbt_points_begin, current_bbt_points_end);
 		update_tempo_based_rulers (current_bbt_points_begin, current_bbt_points_end);
 		break;
@@ -4344,9 +4344,9 @@ Editor::idle_visual_changer ()
 		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
 		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
 		
-		compute_current_bbt_points (pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_frames(),
+		compute_current_bbt_points (pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_samples(),
 					    current_bbt_points_begin, current_bbt_points_end);
-		compute_bbt_ruler_scale (pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_frames(),
+		compute_bbt_ruler_scale (pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_samples(),
 					 current_bbt_points_begin, current_bbt_points_end);
 		update_tempo_based_rulers (current_bbt_points_begin, current_bbt_points_end);
 	}
@@ -5172,14 +5172,14 @@ Editor::reset_x_origin_to_follow_playhead ()
 {
 	framepos_t const frame = playhead_cursor->current_frame ();
 
-	if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
+	if (frame < leftmost_frame || frame > leftmost_frame + current_page_samples()) {
 
 		if (_session->transport_speed() < 0) {
 
-			if (frame > (current_page_frames() / 2)) {
-				center_screen (frame-(current_page_frames()/2));
+			if (frame > (current_page_samples() / 2)) {
+				center_screen (frame-(current_page_samples()/2));
 			} else {
-				center_screen (current_page_frames()/2);
+				center_screen (current_page_samples()/2);
 			}
 
 		} else {
@@ -5190,10 +5190,10 @@ Editor::reset_x_origin_to_follow_playhead ()
 				/* moving left */
 				if (_session->transport_rolling()) {
 					/* rolling; end up with the playhead at the right of the page */
-					l = frame - current_page_frames ();
+					l = frame - current_page_samples ();
 				} else {
 					/* not rolling: end up with the playhead 1/4 of the way along the page */
-					l = frame - current_page_frames() / 4;
+					l = frame - current_page_samples() / 4;
 				}
 			} else {
 				/* moving right */
@@ -5202,7 +5202,7 @@ Editor::reset_x_origin_to_follow_playhead ()
 					l = frame;
 				} else {
 					/* not rolling: end up with the playhead 3/4 of the way along the page */
-					l = frame - 3 * current_page_frames() / 4;
+					l = frame - 3 * current_page_samples() / 4;
 				}
 			}
 
@@ -5210,7 +5210,7 @@ Editor::reset_x_origin_to_follow_playhead ()
 				l = 0;
 			}
 			
-			center_screen_internal (l + (current_page_frames() / 2), current_page_frames ());
+			center_screen_internal (l + (current_page_samples() / 2), current_page_samples ());
 		}
 	}
 }
@@ -5281,11 +5281,11 @@ Editor::super_rapid_screen_update ()
 			*/
 #if 0
 			// FIXME DO SOMETHING THAT WORKS HERE - this is 2.X code
-			double target = ((double)frame - (double)current_page_frames()/2.0) / frames_per_pixel;
+			double target = ((double)frame - (double)current_page_samples()/2.0) / frames_per_pixel;
 			if (target <= 0.0) {
 				target = 0.0;
 			}
-			if (fabs(target - current) < current_page_frames() / frames_per_pixel) {
+			if (fabs(target - current) < current_page_samples() / frames_per_pixel) {
 				target = (target * 0.15) + (current * 0.85);
 			} else {
 				/* relax */

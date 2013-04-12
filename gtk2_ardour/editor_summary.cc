@@ -436,8 +436,8 @@ EditorSummary::get_editor (pair<double, double>* x, pair<double, double>* y) con
 
 		/* Otherwise query the editor for its actual position */
 
-		x->first = (_editor->leftmost_position () - _start) * _x_scale;
-		x->second = x->first + _editor->current_page_frames() * _x_scale;
+		x->first = (_editor->leftmost_sample () - _start) * _x_scale;
+		x->second = x->first + _editor->current_page_samples() * _x_scale;
 		
 		y->first = editor_y_to_summary (_editor->vertical_adjustment.get_value ());
 		y->second = editor_y_to_summary (_editor->vertical_adjustment.get_value () + _editor->visible_canvas_height());
@@ -778,7 +778,7 @@ EditorSummary::set_editor_x (pair<double, double> x)
 		
 		double const nx = (
 			((x.second - x.first) / _x_scale) /
-			_editor->sample_to_pixel (_editor->current_page_frames())
+			_editor->sample_to_pixel (_editor->current_page_samples())
 			);
 		
 		if (nx != _editor->get_current_zoom ()) {
