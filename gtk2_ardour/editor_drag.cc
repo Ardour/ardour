@@ -127,7 +127,7 @@ DragManager::start_grab (GdkEvent* e, Gdk::Cursor* c)
 	_old_follow_playhead = _editor->follow_playhead ();
 	_editor->set_follow_playhead (false);
 
-	_current_pointer_frame = _editor->event_frame (e, &_current_pointer_x, &_current_pointer_y);
+	_current_pointer_frame = _editor->canvas_event_frame (e, &_current_pointer_x, &_current_pointer_y);
 
 	for (list<Drag*>::const_iterator i = _drags.begin(); i != _drags.end(); ++i) {
 		(*i)->start_grab (e, c);
@@ -165,7 +165,7 @@ DragManager::motion_handler (GdkEvent* e, bool from_autoscroll)
 {
 	bool r = false;
 
-	_current_pointer_frame = _editor->event_frame (e, &_current_pointer_x, &_current_pointer_y);
+	_current_pointer_frame = _editor->canvas_event_frame (e, &_current_pointer_x, &_current_pointer_y);
 
 	for (list<Drag*>::iterator i = _drags.begin(); i != _drags.end(); ++i) {
 		bool const t = (*i)->motion_handler (e, from_autoscroll);
@@ -232,7 +232,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 		_y_constrained = false;
 	}
 
-	_raw_grab_frame = _editor->event_frame (event, &_grab_x, &_grab_y);
+	_raw_grab_frame = _editor->canvas_event_frame (event, &_grab_x, &_grab_y);
 	setup_pointer_frame_offset ();
 	_grab_frame = adjusted_frame (_raw_grab_frame, event);
 	_last_pointer_frame = _grab_frame;
@@ -1896,7 +1896,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 					boost::shared_ptr<AudioRegion> ar (arv->audio_region());
 					distance = _drags->current_pointer_x() - grab_x();
 					len = ar->fade_in()->back()->when;
-					new_length = len - _editor->unit_to_frame (distance);
+					new_length = len - _editor->pixel_to_frame (distance);
 					new_length = ar->verify_xfade_bounds (new_length, true  /*START*/ );
 					arv->reset_fade_in_shape_width (ar, new_length);  //the grey shape
 				}
@@ -1916,7 +1916,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 					boost::shared_ptr<AudioRegion> ar (arv->audio_region());
 					distance = grab_x() - _drags->current_pointer_x();
 					len = ar->fade_out()->back()->when;
-					new_length = len - _editor->unit_to_frame (distance);
+					new_length = len - _editor->pixel_to_frame (distance);
 					new_length = ar->verify_xfade_bounds (new_length, false  /*END*/ );
 					arv->reset_fade_out_shape_width (ar, new_length);  //the grey shape
 				}
@@ -1990,7 +1990,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 						boost::shared_ptr<AudioRegion> ar (arv->audio_region());
 						distance = _drags->current_pointer_x() - grab_x();
 						len = ar->fade_in()->back()->when;
-						new_length = len - _editor->unit_to_frame (distance);
+						new_length = len - _editor->pixel_to_frame (distance);
 						new_length = ar->verify_xfade_bounds (new_length, true  /*START*/ );
 						ar->set_fade_in_length(new_length);
 					}
@@ -2007,7 +2007,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 						boost::shared_ptr<AudioRegion> ar (arv->audio_region());
 						distance = _drags->current_pointer_x() - grab_x();
 						len = ar->fade_out()->back()->when;
-						new_length = len - _editor->unit_to_frame (distance);
+						new_length = len - _editor->pixel_to_frame (distance);
 						new_length = ar->verify_xfade_bounds (new_length, false  /*END*/ );
 						ar->set_fade_out_length(new_length);
 					}
@@ -2387,7 +2387,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 
 	_grab_zoom = _editor->frames_per_pixel;
 
-	framepos_t where = _editor->event_frame (event, 0, 0);
+	framepos_t where = _editor->canvas_event_frame (event, 0, 0);
 	_editor->snap_to_with_modifier (where, event);
 
 	_editor->_dragging_playhead = true;
@@ -3140,7 +3140,7 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 	cy = max (0.0, cy);
 	cy = min ((double) _point->line().height(), cy);
 
-	framepos_t cx_frames = _editor->unit_to_frame (cx);
+	framepos_t cx_frames = _editor->pixel_to_frame (cx);
 
 	if (!_x_constrained) {
 		_editor->snap_to_with_modifier (cx_frames, event);
@@ -3150,7 +3150,7 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 
 	float const fraction = 1.0 - (cy / _point->line().height());
 
-	_point->line().drag_motion (_editor->frame_to_unit_unrounded (cx_frames), fraction, false, _pushing, _final_index);
+	_point->line().drag_motion (_editor->frame_to_pixel_unrounded (cx_frames), fraction, false, _pushing, _final_index);
 
 	_editor->verbose_cursor()->set_text (_point->line().get_verbose_cursor_string (fraction));
 }
@@ -4279,7 +4279,7 @@ frameoffset_t
 NoteDrag::total_dx () const
 {
 	/* dx in frames */
-	frameoffset_t const dx = _editor->unit_to_frame (_drags->current_pointer_x() - grab_x());
+	frameoffset_t const dx = _editor->pixel_to_frame (_drags->current_pointer_x() - grab_x());
 
 	/* primary note time */
 	frameoffset_t const n = _region->source_beats_to_absolute_frames (_primary->note()->time ());
@@ -4319,7 +4319,7 @@ NoteDrag::motion (GdkEvent *, bool)
 	int8_t const dy = total_dy ();
 
 	/* Now work out what we have to do to the note canvas items to set this new drag delta */
-	double const tdx = _editor->frame_to_unit (dx) - _cumulative_dx;
+	double const tdx = _editor->frame_to_pixel (dx) - _cumulative_dx;
 	double const tdy = -dy * _note_height - _cumulative_dy;
 
 	if (tdx || tdy) {
@@ -4641,7 +4641,7 @@ PatchChangeDrag::motion (GdkEvent* ev, bool)
 	f = min (f, r->last_frame ());
 
 	framecnt_t const dxf = f - grab_frame(); // permitted dx in frames
-	double const dxu = _editor->frame_to_unit (dxf); // permitted fx in units
+	double const dxu = _editor->frame_to_pixel (dxf); // permitted fx in units
 	_patch_change->move (ArdourCanvas::Duple (dxu - _cumulative_dx, 0));
 	_cumulative_dx = dxu;
 }
@@ -4905,7 +4905,7 @@ CrossfadeEdgeDrag::motion (GdkEvent*, bool)
 
 	/* how long should it be ? */
 
-	new_length = len + _editor->unit_to_frame (distance);
+	new_length = len + _editor->pixel_to_frame (distance);
 
 	/* now check with the region that this is legal */
 
@@ -4935,7 +4935,7 @@ CrossfadeEdgeDrag::finished (GdkEvent*, bool)
 		len = ar->fade_out()->back()->when;
 	}
 
-	new_length = ar->verify_xfade_bounds (len + _editor->unit_to_frame (distance), start);
+	new_length = ar->verify_xfade_bounds (len + _editor->pixel_to_frame (distance), start);
 	
 	_editor->begin_reversible_command ("xfade trim");
 	ar->playlist()->clear_owned_changes ();	

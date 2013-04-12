@@ -220,24 +220,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void separate_regions_using_location (ARDOUR::Location&);
 	void transition_to_rolling (bool forward);
 
-	/* undo related */
-
-	framepos_t unit_to_frame (double unit) const {
-		return (framepos_t) rint (unit * frames_per_pixel);
-	}
-
-	double frame_to_unit (framepos_t frame) const {
-		return rint ((double) frame / (double) frames_per_pixel);
-	}
-
-	double frame_to_unit_unrounded (framepos_t frame) const {
-		return frame / frames_per_pixel;
-	}
-	
-	double frame_to_unit (double frame) const {
-		return rint (frame / frames_per_pixel);
-	}
-
 	/* NOTE: these functions assume that the "pixel" coordinate is
 	   the result of using the world->canvas affine transform on a
 	   world coordinate. These coordinates already take into
@@ -260,8 +242,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		}
 	}
 
-	gulong frame_to_pixel (framepos_t frame) const {
-		return (gulong) rint (frame / frames_per_pixel);
+	double frame_to_pixel (framepos_t frame) const {
+		return rint (frame / frames_per_pixel);
+	}
+
+	double frame_to_pixel_unrounded (framepos_t frame) const {
+		return frame / frames_per_pixel;
 	}
 
 	void flush_canvas ();
@@ -1885,7 +1871,15 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void duplicate_range (bool with_dialog);
 
-	framepos_t event_frame (GdkEvent const *, double* px = 0, double* py = 0) const;
+        /** computes the timeline frame (sample) of an event whose coordinates
+	 * are in canvas units (pixels, scroll offset included).
+	 */
+	framepos_t canvas_event_frame (GdkEvent const *, double* px = 0, double* py = 0) const;
+
+        /** computes the timeline frame (sample) of an event whose coordinates
+	 * are in window units (pixels, no scroll offset).
+	 */
+	framepos_t window_event_frame (GdkEvent const *, double* px = 0, double* py = 0) const;
 
 	/* returns false if mouse pointer is not in track or marker canvas
 	 */

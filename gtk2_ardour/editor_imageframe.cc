@@ -491,7 +491,7 @@ Editor::markerview_drag_motion_callback(ArdourCanvas::Item*, GdkEvent* event)
 	framepos_t pending_region_position ;
 	framepos_t pointer_frame ;
 
-	pointer_frame = event_frame(event, &cx, &cy) ;
+	pointer_frame = canvas_event_frame(event, &cx, &cy) ;
 
   	snap_to(pointer_frame) ;
 
@@ -539,7 +539,7 @@ Editor::imageframe_drag_motion_callback(ArdourCanvas::Item*, GdkEvent* event)
 	framepos_t pending_region_position;
 	framepos_t pointer_frame;
 
-	pointer_frame = event_frame(event, &cx, &cy) ;
+	pointer_frame = canvas_event_frame(event, &cx, &cy) ;
 
 	snap_to(pointer_frame) ;
 
@@ -676,7 +676,7 @@ Editor::imageframe_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* 
 
 	framepos_t start = 0 ;
 	framepos_t end = 0 ;
-	framepos_t pointer_frame = event_frame(event) ;
+	framepos_t pointer_frame = canvas_event_frame(event) ;
 
 	// chekc th eposition of the item is not locked
 	if(!ifv->get_position_locked()) {
@@ -765,7 +765,7 @@ Editor::imageframe_end_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* ev
 
 	framepos_t start = 0 ;
 	framepos_t end = 0 ;
-	framepos_t pointer_frame = event_frame(event) ;
+	framepos_t pointer_frame = canvas_event_frame(event) ;
 	framepos_t new_dur_val = 0 ;
 
 	snap_to(pointer_frame) ;
@@ -890,7 +890,7 @@ Editor::markerview_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* 
 
 	framepos_t start = 0 ;
 	framepos_t end = 0 ;
-	framepos_t pointer_frame = event_frame(event) ;
+	framepos_t pointer_frame = canvas_event_frame(event) ;
 
 	// chekc th eposition of the item is not locked
 	if(!mv->get_position_locked())
@@ -982,7 +982,7 @@ Editor::markerview_end_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* ev
 
 	framepos_t start = 0 ;
 	framepos_t end = 0 ;
-	framepos_t pointer_frame = event_frame(event) ;
+	framepos_t pointer_frame = canvas_event_frame(event) ;
 	framepos_t new_dur_val = 0 ;
 
 	snap_to(pointer_frame) ;

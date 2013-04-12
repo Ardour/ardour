@@ -243,7 +243,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	y = min (1.0, y);
 	y = _height - (y * _height);
 
-	double const x = trackview.editor().frame_to_unit_unrounded (_time_converter->to((*cp.model())->when) - _offset);
+	double const x = trackview.editor().frame_to_pixel_unrounded (_time_converter->to((*cp.model())->when) - _offset);
 
 	trackview.editor().session()->begin_reversible_command (_("automation event move"));
 	trackview.editor().session()->add_command (
@@ -739,10 +739,10 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 
 	/* if xval has not changed, set it directly from the model to avoid rounding errors */
 
-	if (view_x == trackview.editor().frame_to_unit_unrounded (_time_converter->to ((*cp.model())->when)) - _offset) {
+	if (view_x == trackview.editor().frame_to_pixel_unrounded (_time_converter->to ((*cp.model())->when)) - _offset) {
 		view_x = (*cp.model())->when - _offset;
 	} else {
-		view_x = trackview.editor().unit_to_frame (view_x);
+		view_x = trackview.editor().pixel_to_frame (view_x);
 		view_x = _time_converter->from (view_x + _offset);
 	}
 
@@ -760,7 +760,7 @@ AutomationLine::control_points_adjacent (double xval, uint32_t & before, uint32_
 	ControlPoint *acp = 0;
 	double unit_xval;
 
-	unit_xval = trackview.editor().frame_to_unit_unrounded (xval);
+	unit_xval = trackview.editor().frame_to_pixel_unrounded (xval);
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 
@@ -947,7 +947,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		 * zoom and scroll into account).
 		 */
 			
-		tx = trackview.editor().frame_to_unit_unrounded (tx);
+		tx = trackview.editor().frame_to_pixel_unrounded (tx);
 		
 		/* convert from canonical view height (0..1.0) to actual
 		 * height coordinates (using X11's top-left rooted system)

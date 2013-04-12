@@ -1003,8 +1003,6 @@ Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
 bool
 Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int x, int y, guint time)
 {
-	ArdourCanvas::Coord wx;
-	ArdourCanvas::Coord wy;
 	boost::shared_ptr<Region> region;
 	boost::shared_ptr<Region> region_copy;
 	RouteTimeAxisView* rtav;
@@ -1018,15 +1016,13 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 		return false;
 	}
 
-	_track_canvas_viewport->window_to_canvas (x, y, wx, wy);
-
 	event.type = GDK_MOTION_NOTIFY;
-	event.button.x = wx;
-	event.button.y = wy;
+	event.button.x = x;
+	event.button.y = y;
 	/* assume we're dragging with button 1 */
 	event.motion.state = Gdk::BUTTON1_MASK;
 
-	(void) event_frame (&event, &px, &py);
+	(void) window_event_frame (&event, &px, &py);
 
 	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
 	bool can_drop = false;
@@ -1096,8 +1092,6 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 		      const SelectionData& /*data*/,
 		      guint /*info*/, guint /*time*/)
 {
-	double wx;
-	double wy;
 	boost::shared_ptr<Region> region;
 	boost::shared_ptr<Region> region_copy;
 	RouteTimeAxisView* rtav;
@@ -1105,15 +1099,13 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	double px;
 	double py;
 
-	_track_canvas_viewport->window_to_canvas (x, y, wx, wy);
-
 	event.type = GDK_MOTION_NOTIFY;
-	event.button.x = wx;
-	event.button.y = wy;
+	event.button.x = x;
+	event.button.y = y;
 	/* assume we're dragging with button 1 */
 	event.motion.state = Gdk::BUTTON1_MASK;
 
-	framepos_t const pos = event_frame (&event, &px, &py);
+	framepos_t const pos = window_event_frame (&event, &px, &py);
 
 	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
 

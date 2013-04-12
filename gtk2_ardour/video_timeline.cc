@@ -302,7 +302,7 @@ VideoTimeLine::update_video_timeline()
 		if (_session->timecode_frames_per_second() == 0 ) return;
 	}
 
-	double frames_per_unit = editor->unit_to_frame(1.0);
+	double frames_per_unit = editor->pixel_to_frame(1.0);
 	framepos_t leftmost_frame =  editor->leftmost_position();
 
 	/* Outline:

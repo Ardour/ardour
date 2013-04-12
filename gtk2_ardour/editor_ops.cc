@@ -1964,20 +1964,17 @@ Editor::unhide_ranges ()
 void
 Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 {
-	double wx, wy;
 	double cx, cy;
 	framepos_t where;
 	RouteTimeAxisView *rtv = 0;
 	boost::shared_ptr<Playlist> playlist;
 
-	_track_canvas_viewport->window_to_canvas (x, y, wx, wy);
-
 	GdkEvent event;
 	event.type = GDK_BUTTON_RELEASE;
-	event.button.x = wx;
-	event.button.y = wy;
+	event.button.x = x;
+	event.button.y = y;
 
-	where = event_frame (&event, &cx, &cy);
+	where = window_event_frame (&event, &cx, &cy);
 
 	if (where < leftmost_frame || where > leftmost_frame + current_page_frames()) {
 		/* clearly outside canvas area */
@@ -2009,19 +2006,16 @@ Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 void
 Editor::insert_route_list_drag (boost::shared_ptr<Route> route, int x, int y)
 {
-	double wx, wy;
 	double cx, cy;
 	RouteTimeAxisView *dest_rtv = 0;
 	RouteTimeAxisView *source_rtv = 0;
 
-	_track_canvas_viewport->window_to_canvas (x, y, wx, wy);
-
 	GdkEvent event;
 	event.type = GDK_BUTTON_RELEASE;
-	event.button.x = wx;
-	event.button.y = wy;
+	event.button.x = x;
+	event.button.y = y;
 
-	event_frame (&event, &cx, &cy);
+	window_event_frame (&event, &cx, &cy);
 
 	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (cy);
 	if (tv.first == 0) {

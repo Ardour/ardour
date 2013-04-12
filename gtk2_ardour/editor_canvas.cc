@@ -422,8 +422,6 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 	vector<string> paths;
 	GdkEvent ev;
 	framepos_t frame;
-	double wx;
-	double wy;
 	double cy;
 
 	if (convert_drop_to_paths (paths, context, x, y, data, info, time) == 0) {
@@ -431,13 +429,11 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 		/* D-n-D coordinates are window-relative, so convert to "world" coordinates
 		 */
 
-		_track_canvas_viewport->window_to_canvas (x, y, wx, wy);
-
 		ev.type = GDK_BUTTON_RELEASE;
-		ev.button.x = wx;
-		ev.button.y = wy;
+		ev.button.x = x;
+		ev.button.y = y;
 
-		frame = event_frame (&ev, 0, &cy);
+		frame = window_event_frame (&ev, 0, &cy);
 
 		snap_to (frame);
 
@@ -916,7 +912,7 @@ Editor::update_canvas_now ()
 double
 Editor::horizontal_position () const
 {
-	return frame_to_unit (leftmost_frame);
+	return frame_to_pixel (leftmost_frame);
 }
 
 void

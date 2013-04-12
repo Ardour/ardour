@@ -58,8 +58,8 @@ Editor::update_video_timeline (bool flush)
 #if DEBUG
 	framepos_t rightmost_frame = leftmost_frame + current_page_frames();
 	std::cout << "VIDEO SCROLL: " << leftmost_frame << " -- " << rightmost_frame << std::endl;
-	std::cout << "SCROLL UNITS: " << frame_to_unit(leftmost_frame) << " -- " << frame_to_unit(rightmost_frame)
-	          << " = " << frame_to_unit(rightmost_frame) - frame_to_unit(leftmost_frame)
+	std::cout << "SCROLL UNITS: " << frame_to_pixel(leftmost_frame) << " -- " << frame_to_pixel(rightmost_frame)
+	          << " = " << frame_to_pixel(rightmost_frame) - frame_to_pixel(leftmost_frame)
 		        << std::endl;
 #endif
 

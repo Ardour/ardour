@@ -102,86 +102,81 @@ Editor::mouse_frame (framepos_t& where, bool& in_track_canvas) const
         }
 
 	int x, y;
-	double wx, wy;
-	Gdk::ModifierType mask;
-	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->_track_canvas_viewport->get_window();
-	Glib::RefPtr<const Gdk::Window> pointer_window;
+	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->_track_canvas->get_window();
 
 	if (!canvas_window) {
 		return false;
 	}
 
-	pointer_window = canvas_window->get_pointer (x, y, mask);
+	Glib::RefPtr<const Gdk::Window> pointer_window = Gdk::Display::get_default()->get_window_at_pointer (x, y);
 
-	if (pointer_window == _track_canvas->get_window()) {
-		wx = x;
-		wy = y;
-		in_track_canvas = true;
-	} else {
+	if (!pointer_window) {
+		return false;
+	}
+
+	if (pointer_window != canvas_window && pointer_window != _time_bars_canvas->get_window()) {
 		in_track_canvas = false;
 		return false;
 	}
 
+	in_track_canvas = true;
+
 	GdkEvent event;
 	event.type = GDK_BUTTON_RELEASE;
-	event.button.x = wx;
-	event.button.y = wy;
+	event.button.x = x;
+	event.button.y = y;
 
-	where = event_frame (&event, 0, 0);
+	where = window_event_frame (&event, 0, 0);
+
 	return true;
 }
 
 framepos_t
-Editor::event_frame (GdkEvent const * event, double* pcx, double* pcy) const
+Editor::window_event_frame (GdkEvent const * event, double* pcx, double* pcy) const
 {
-	using ArdourCanvas::Duple;
-	Duple d;
-	double cx, cy;
+	double x;
+	double y;
 
-	if (pcx == 0) {
-		pcx = &cx;
-	}
-	if (pcy == 0) {
-		pcy = &cy;
+	if (!gdk_event_get_coords (event, &x, &y)) {
+		return 0;
 	}
 
-	*pcx = 0;
-	*pcy = 0;
-
-	/* The event coordinates will be window coordinates and we need canvas
-	 * coordinates (units are pixels as with the window, but scrolling is taken into account)
+	/* event coordinates are in window units, so convert to canvas
+	 * (i.e. account for scrolling)
 	 */
 
-	switch (event->type) {
-	case GDK_BUTTON_RELEASE:
-	case GDK_BUTTON_PRESS:
-	case GDK_2BUTTON_PRESS:
-	case GDK_3BUTTON_PRESS:
-		d = _track_canvas->window_to_canvas (Duple (event->button.x, event->button.y));
+	ArdourCanvas::Duple d = _track_canvas->window_to_canvas (ArdourCanvas::Duple (x, y));
+
+	if (pcx) {
 		*pcx = d.x;
+	}
+
+	if (pcy) {
 		*pcy = d.y;
-		break;
-	case GDK_MOTION_NOTIFY:
-		d = _track_canvas->window_to_canvas (Duple (event->motion.x, event->motion.y));
-		*pcx = d.x;
-		*pcy = d.y;
-		break;
-	case GDK_ENTER_NOTIFY:
-	case GDK_LEAVE_NOTIFY:
-		d = _track_canvas->window_to_canvas (Duple (event->crossing.x, event->crossing.y));
-		*pcx = d.x;
-		*pcy = d.y;
-		break;
-	case GDK_KEY_PRESS:
-	case GDK_KEY_RELEASE:
-		// need to get pointer for this to work
-		// d = _track_canvas->window_to_canvas (Duple (event->key.x, event->key.y));
-		*pcx = 0;
-		*pcy = 0;
-		break;
-	default:
-		warning << string_compose (_("Editor::event_frame() used on unhandled event type %1"), event->type) << endmsg;
-		break;
+	}
+
+	return pixel_to_frame (d.x);
+}
+
+framepos_t
+Editor::canvas_event_frame (GdkEvent const * event, double* pcx, double* pcy) const
+{
+	double x;
+	double y;
+
+	/* event coordinates are already in canvas units */
+
+	if (!gdk_event_get_coords (event, &x, &y)) {
+		cerr << "!NO c COORDS for event type " << event->type << endl;
+		return 0;
+	}
+
+	if (pcx) {
+		*pcx = x;
+	}
+
+	if (pcy) {
+		*pcy = y;
 	}
 
 	/* note that pixel_to_frame() never returns less than zero, so even if the pixel
@@ -189,7 +184,7 @@ Editor::event_frame (GdkEvent const * event, double* pcx, double* pcy) const
 	   the frame location is always positive.
 	*/
 
-	return pixel_to_frame (*pcx);
+	return pixel_to_frame (x);
 }
 
 Gdk::Cursor*
@@ -1086,7 +1081,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 						_drags->set (new RegionCreateDrag (this, item, parent), event);
 					} else {
 						/* See if there's a region before the click that we can extend, and extend it if so */
-						framepos_t const t = event_frame (event);
+						framepos_t const t = canvas_event_frame (event);
 						boost::shared_ptr<Region> prev = pl->find_next_region (t, End, -1);
 						if (!prev) {
 							_drags->set (new RegionCreateDrag (this, item, parent), event);
@@ -1124,7 +1119,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 								boost::shared_ptr<Playlist> pl = t->playlist ();
 								if (pl) {
 
-									boost::shared_ptr<Region> r = pl->top_region_at (event_frame (event));
+									boost::shared_ptr<Region> r = pl->top_region_at (canvas_event_frame (event));
 									if (r) {
 										RegionView* rv = rtv->view()->find_view (r);
 										clicked_selection = select_range (rv->region()->position(), 
@@ -1316,9 +1311,9 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	case MouseZoom:
 		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			temporal_zoom_to_frame (false, event_frame (event));
+			temporal_zoom_to_frame (false, canvas_event_frame (event));
 		} else {
-			temporal_zoom_to_frame (true, event_frame(event));
+			temporal_zoom_to_frame (true, canvas_event_frame(event));
 		}
 		return true;
 		break;
@@ -1411,7 +1406,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 	//not rolling, range mode click + join_play_range :  locate the PH here
 	if ( !_drags->active () && !_session->transport_rolling() && ( effective_mouse_mode() == MouseRange ) && Config->get_always_play_range() ) {
-		framepos_t where = event_frame (event, 0, 0);
+		framepos_t where = canvas_event_frame (event, 0, 0);
 		snap_to(where);
 		_session->request_locate (where, false);
 	}
@@ -1460,7 +1455,7 @@ Editor::button_release_dispatch (GdkEventButton* ev)
 bool
 Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	framepos_t where = event_frame (event, 0, 0);
+	framepos_t where = canvas_event_frame (event, 0, 0);
 	AutomationTimeAxisView* atv = 0;
 
         if (pre_press_cursor) {

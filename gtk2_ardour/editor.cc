@@ -2833,12 +2833,12 @@ Editor::snap_to_internal (framepos_t& start, int32_t direction, bool for_mark)
 	case SnapMagnetic:
 
 		if (presnap > start) {
-			if (presnap > (start + unit_to_frame(snap_threshold))) {
+			if (presnap > (start + pixel_to_frame(snap_threshold))) {
 				start = presnap;
 			}
 
 		} else if (presnap < start) {
-			if (presnap < (start - unit_to_frame(snap_threshold))) {
+			if (presnap < (start - pixel_to_frame(snap_threshold))) {
 				start = presnap;
 			}
 		}
@@ -4400,7 +4400,7 @@ Editor::get_preferred_edit_position (bool ignore_playhead, bool from_context_men
 	EditPoint ep = _edit_point;
 
 	if (from_context_menu && (ep == EditAtMouse)) {
-		return  event_frame (&context_click_event, 0, 0);
+		return  window_event_frame (&context_click_event, 0, 0);
 	}
 
 	if (entered_marker) {
