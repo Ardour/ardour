@@ -496,9 +496,8 @@ RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 	  _brushing (b),
 	  _total_x_delta (0)
 {
-
+	DEBUG_TRACE (DEBUG::Drags, "New RegionMotionDrag\n");
 }
-
 
 void
 RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)

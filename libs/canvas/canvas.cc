@@ -24,6 +24,7 @@
 
 #include <cassert>
 #include <gtkmm/adjustment.h>
+#include <gtkmm/label.h>
 
 #include "pbd/xml++.h"
 #include "pbd/compose.h"
@@ -39,6 +40,8 @@ using namespace ArdourCanvas;
 Canvas::Canvas ()
 	: _root (this)
 	, _log_renders (true)
+	, _scroll_offset_x (0)
+	, _scroll_offset_y (0)
 {
 	set_epoch ();
 }
@@ -49,6 +52,8 @@ Canvas::Canvas ()
 Canvas::Canvas (XMLTree const * tree)
 	: _root (this)
 	, _log_renders (true)
+	, _scroll_offset_x (0)
+	, _scroll_offset_y (0)
 {
 	set_epoch ();
 	
@@ -70,6 +75,13 @@ Canvas::Canvas (XMLTree const * tree)
 	}
 }
 
+void
+Canvas::scroll_to (Coord x, Coord y)
+{
+	_scroll_offset_x = x;
+	_scroll_offset_y = y;
+}
+
 /** Render an area of the canvas.
  *  @param area Area in canvas coordinates.
  *  @param context Cairo context to render to.
@@ -85,9 +97,21 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 	}
 #endif
 
-	checkpoint ("render", "-> render");
+	// checkpoint ("render", "-> render");
 	render_count = 0;
 	
+#ifdef CANVAS_DEBUG
+	if (getenv ("ARDOUR_HARLEQUIN_CANVAS")) {
+		/* light up the canvas to show redraws */
+		context->set_source_rgba (random()%255 / 255.0,
+					  random()%255 / 255.0,
+					  random()%255 / 255.0,
+					  255);
+		context->rectangle (area.x0, area.y0, area.width(), area.height());
+		context->fill ();
+	}
+#endif
+
 	context->save ();
 
 	/* clip to the requested area */
@@ -97,7 +121,7 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 	boost::optional<Rect> root_bbox = _root.bounding_box();
 	if (!root_bbox) {
 		/* the root has no bounding box, so there's nothing to render */
-		checkpoint ("render", "no root bbox");
+		// checkpoint ("render", "no root bbox");
 		context->restore ();
 		return;
 	}
@@ -107,7 +131,9 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 		/* there's a common area between the root and the requested
 		   area, so render it.
 		*/
-		checkpoint ("render", "... root");
+		// checkpoint ("render", "... root");
+		context->stroke ();
+
 		_root.render (*draw, context);
 	}
 
@@ -117,7 +143,7 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 
 	context->restore ();
 
-	checkpoint ("render", "<- render");
+	// checkpoint ("render", "<- render");
 }
 
 ostream&
@@ -412,52 +438,6 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 	}
 }
 
-/** Construct an ImageCanvas.
- *  @param size Size in pixels.
- */
-ImageCanvas::ImageCanvas (Duple size)
-	: _surface (Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, size.x, size.y))
-{
-	_context = Cairo::Context::create (_surface);
-}
-
-/** Construct an ImageCanvas from an XML tree.
- *  @param tree XML Tree.
- *  @param size Size in pixels.
- */
-ImageCanvas::ImageCanvas (XMLTree const * tree, Duple size)
-	: Canvas (tree)
-	, _surface (Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, size.x, size.y))
-{
-	_context = Cairo::Context::create (_surface);
-}
-
-/** Render the canvas to our pixbuf.
- *  @param area Area to render, in canvas coordinates.
- */
-void
-ImageCanvas::render_to_image (Rect const & area) const
-{
-	render (area, _context);
-}
-
-/** Write our pixbuf to a PNG file.
- *  @param f PNG file name.
- */
-void
-ImageCanvas::write_to_png (string const & f)
-{
-	assert (_surface);
-	_surface->write_to_png (f);
-}
-
-/** @return Our Cairo context */
-Cairo::RefPtr<Cairo::Context>
-ImageCanvas::context ()
-{
-	return _context;
-}
-
 /** Handler for GDK expose events.
  *  @param ev Event.
  *  @return true if the event was handled.
@@ -465,8 +445,30 @@ ImageCanvas::context ()
 bool
 GtkCanvas::on_expose_event (GdkEventExpose* ev)
 {
+
 	Cairo::RefPtr<Cairo::Context> c = get_window()->create_cairo_context ();
-	render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), c);
+	
+	/* WINDOW  CANVAS
+	 * 0,0     _scroll_offset_x, _scroll_offset_y
+	 */
+
+	/* render using canvas coordinates */
+
+	Rect canvas_area (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height);
+	canvas_area  = canvas_area.translate (Duple (_scroll_offset_x, _scroll_offset_y));
+
+	/* things are going to render to the cairo surface with canvas
+	 * coordinates:
+	 *
+	 *  an item at window/cairo 0,0 will have canvas_coords _scroll_offset_x,_scroll_offset_y
+	 *
+	 * let them render at their natural coordinates by using cairo_translate()
+	 */
+
+	c->translate (-_scroll_offset_x, -_scroll_offset_y);
+
+	render (canvas_area, c);
+
 	return true;
 }
 
@@ -489,10 +491,18 @@ GtkCanvas::context ()
 bool
 GtkCanvas::on_button_press_event (GdkEventButton* ev)
 {
+	/* translate event coordinates from window to canvas */
+
+	GdkEvent copy = *((GdkEvent*)ev);
+	Duple where = window_to_canvas (Duple (ev->x, ev->y));
+
+	copy.button.x = where.x;
+	copy.button.y = where.y;
+				 
 	/* Coordinates in the event will be canvas coordinates, correctly adjusted
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
 	*/
-	return button_handler (ev);
+	return button_handler ((GdkEventButton*) &copy);
 }
 
 /** Handler for GDK button release events.
@@ -501,11 +511,19 @@ GtkCanvas::on_button_press_event (GdkEventButton* ev)
  */
 bool
 GtkCanvas::on_button_release_event (GdkEventButton* ev)
-{
+{	
+	/* translate event coordinates from window to canvas */
+
+	GdkEvent copy = *((GdkEvent*)ev);
+	Duple where = window_to_canvas (Duple (ev->x, ev->y));
+
+	copy.button.x = where.x;
+	copy.button.y = where.y;
+
 	/* Coordinates in the event will be canvas coordinates, correctly adjusted
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
 	*/
-	return button_handler (ev);
+	return button_handler ((GdkEventButton*) &copy);
 }
 
 /** Handler for GDK motion events.
@@ -515,18 +533,27 @@ GtkCanvas::on_button_release_event (GdkEventButton* ev)
 bool
 GtkCanvas::on_motion_notify_event (GdkEventMotion* ev)
 {
+	/* translate event coordinates from window to canvas */
+
+	GdkEvent copy = *((GdkEvent*)ev);
+	Duple where = window_to_canvas (Duple (ev->x, ev->y));
+
+	copy.motion.x = where.x;
+	copy.motion.y = where.y;
+
 	/* Coordinates in the event will be canvas coordinates, correctly adjusted
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
 	*/
-	return motion_notify_handler (ev);
+	return motion_notify_handler ((GdkEventMotion*) &copy);
 }
 
 /** Called to request a redraw of our canvas.
  *  @param area Area to redraw, in canvas coordinates.
  */
 void
-GtkCanvas::request_redraw (Rect const & area)
+GtkCanvas::request_redraw (Rect const & request)
 {
+	Rect area = canvas_to_window (request);
 	queue_draw_area (floor (area.x0), floor (area.y0), ceil (area.x1) - floor (area.x0), ceil (area.y1) - floor (area.y0));
 }
 
@@ -574,10 +601,46 @@ GtkCanvas::ungrab ()
  *  @param vadj Adjustment to use for vertica scrolling.
  */
 GtkCanvasViewport::GtkCanvasViewport (Gtk::Adjustment& hadj, Gtk::Adjustment& vadj)
-	: Viewport (hadj, vadj)
+	: Alignment (0, 0, 1.0, 1.0)
+	, hadjustment (hadj)
+	, vadjustment (vadj)
 {
 	add (_canvas);
+
+	hadj.signal_value_changed().connect (sigc::mem_fun (*this, &GtkCanvasViewport::scrolled));
+	vadj.signal_value_changed().connect (sigc::mem_fun (*this, &GtkCanvasViewport::scrolled));
 }
+
+void
+GtkCanvasViewport::scrolled ()
+{
+	_canvas.scroll_to (hadjustment.get_value(), vadjustment.get_value());
+	queue_draw ();
+}
+
+Duple
+GtkCanvas::window_to_canvas (Duple const & d) const
+{
+	return d.translate (Duple (_scroll_offset_x, _scroll_offset_y));
+}
+
+Duple
+GtkCanvas::canvas_to_window (Duple const & d) const
+{
+	return d.translate (Duple (-_scroll_offset_x, -_scroll_offset_y));
+}	
+
+Rect
+GtkCanvas::window_to_canvas (Rect const & r) const
+{
+	return r.translate (Duple (_scroll_offset_x, _scroll_offset_y));
+}
+
+Rect
+GtkCanvas::canvas_to_window (Rect const & r) const
+{
+	return r.translate (Duple (-_scroll_offset_x, -_scroll_offset_y));
+}	
 
 /** Handler for when GTK asks us what minimum size we want.
  *  @param req Requsition to fill in.
@@ -585,6 +648,9 @@ GtkCanvasViewport::GtkCanvasViewport (Gtk::Adjustment& hadj, Gtk::Adjustment& va
 void
 GtkCanvasViewport::on_size_request (Gtk::Requisition* req)
 {
+	/* force the canvas to size itself */
+	// _canvas.root()->bounding_box(); 
+
 	req->width = 16;
 	req->height = 16;
 }
@@ -599,15 +665,16 @@ GtkCanvasViewport::on_size_request (Gtk::Requisition* req)
 void
 GtkCanvasViewport::window_to_canvas (int wx, int wy, Coord& cx, Coord& cy) const
 {
-	cx = wx + get_hadjustment()->get_value ();
-	cy = wy + get_vadjustment()->get_value ();
+	Duple d = _canvas.window_to_canvas (Duple (wx, wy));
+	cx = d.x;
+	cy = d.y;
 }
 
 /** @return The visible area of the canvas, in canvas coordinates */
 Rect
 GtkCanvasViewport::visible_area () const
 {
-	Distance const xo = get_hadjustment()->get_value ();
-	Distance const yo = get_vadjustment()->get_value ();
+	Distance const xo = hadjustment.get_value ();
+	Distance const yo = vadjustment.get_value ();
 	return Rect (xo, yo, xo + get_allocation().get_width (), yo + get_allocation().get_height ());
 }

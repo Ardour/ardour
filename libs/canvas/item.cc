@@ -73,6 +73,7 @@ Item::set_position (Duple p)
 {
 	boost::optional<Rect> bbox = bounding_box ();
 	boost::optional<Rect> pre_change_parent_bounding_box;
+
 	if (bbox) {
 		pre_change_parent_bounding_box = item_to_parent (bbox.get());
 	}

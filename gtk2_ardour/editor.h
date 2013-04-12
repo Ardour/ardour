@@ -732,7 +732,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool track_canvas_motion (GdkEvent*);
 
 	Gtk::EventBox             time_canvas_event_box;
-	Gtk::EventBox             track_canvas_event_box;
 	Gtk::EventBox             time_bars_event_box;
 	Gtk::EventBox             ruler_label_event_box;
 

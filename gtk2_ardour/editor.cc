@@ -517,12 +517,6 @@ Editor::Editor ()
 	time_bars_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	time_bars_event_box.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_label_button_release));
 
-	/* these enable us to have a dedicated window (for cursor setting, etc.)
-	   for the canvas areas.
-	*/
-
-	track_canvas_event_box.add (*_track_canvas_viewport);
-
 	time_canvas_event_box.add (time_canvas_vbox);
 	time_canvas_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 
@@ -543,7 +537,7 @@ Editor::Editor ()
 	/* time bars canvas */
 	edit_packer.attach (*_time_bars_canvas_viewport, 2, 3, 1, 2,    FILL,    FILL, 0, 0);
 	/* track canvas */
-	edit_packer.attach (track_canvas_event_box,  2, 3, 2, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
+	edit_packer.attach (*_track_canvas_viewport,  2, 3, 2, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
 
 	bottom_hbox.set_border_width (2);
 	bottom_hbox.set_spacing (3);
@@ -788,6 +782,7 @@ Editor::~Editor()
         delete button_bindings;
 	delete _routes;
 	delete _route_groups;
+	delete _time_bars_canvas_viewport;
 	delete _track_canvas_viewport;
 	delete _drags;
 }

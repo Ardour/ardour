@@ -104,7 +104,7 @@ Editor::mouse_frame (framepos_t& where, bool& in_track_canvas) const
 	int x, y;
 	double wx, wy;
 	Gdk::ModifierType mask;
-	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->_track_canvas_viewport->get_bin_window();
+	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->_track_canvas_viewport->get_window();
 	Glib::RefPtr<const Gdk::Window> pointer_window;
 
 	if (!canvas_window) {
@@ -134,6 +134,8 @@ Editor::mouse_frame (framepos_t& where, bool& in_track_canvas) const
 framepos_t
 Editor::event_frame (GdkEvent const * event, double* pcx, double* pcy) const
 {
+	using ArdourCanvas::Duple;
+	Duple d;
 	double cx, cy;
 
 	if (pcx == 0) {
@@ -146,32 +148,36 @@ Editor::event_frame (GdkEvent const * event, double* pcx, double* pcy) const
 	*pcx = 0;
 	*pcy = 0;
 
-	/* The event coordinates will be canvas coordinates */
+	/* The event coordinates will be window coordinates and we need canvas
+	 * coordinates (units are pixels as with the window, but scrolling is taken into account)
+	 */
 
 	switch (event->type) {
 	case GDK_BUTTON_RELEASE:
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
 	case GDK_3BUTTON_PRESS:
-		*pcx = event->button.x;
-		*pcy = event->button.y;
-		_trackview_group->canvas_to_item (*pcx, *pcy);
+		d = _track_canvas->window_to_canvas (Duple (event->button.x, event->button.y));
+		*pcx = d.x;
+		*pcy = d.y;
 		break;
 	case GDK_MOTION_NOTIFY:
-		*pcx = event->motion.x;
-		*pcy = event->motion.y;
-		_trackview_group->canvas_to_item (*pcx, *pcy);
+		d = _track_canvas->window_to_canvas (Duple (event->motion.x, event->motion.y));
+		*pcx = d.x;
+		*pcy = d.y;
 		break;
 	case GDK_ENTER_NOTIFY:
 	case GDK_LEAVE_NOTIFY:
-		*pcx = event->crossing.x;
-		*pcy = event->crossing.y;
-		/* XXX: CANVAS */
-//		track_canvas->w2c(event->crossing.x, event->crossing.y, *pcx, *pcy);
+		d = _track_canvas->window_to_canvas (Duple (event->crossing.x, event->crossing.y));
+		*pcx = d.x;
+		*pcy = d.y;
 		break;
 	case GDK_KEY_PRESS:
 	case GDK_KEY_RELEASE:
-		// track_canvas->w2c(event->key.x, event->key.y, *pcx, *pcy);
+		// need to get pointer for this to work
+		// d = _track_canvas->window_to_canvas (Duple (event->key.x, event->key.y));
+		*pcx = 0;
+		*pcy = 0;
 		break;
 	default:
 		warning << string_compose (_("Editor::event_frame() used on unhandled event type %1"), event->type) << endmsg;

@@ -277,7 +277,7 @@ void
 Group::dump (ostream& o) const
 {
 	o << _canvas->indent();
-	o << "Group " << this;
+	o << "Group " << this << " [" << name << ']';
 	o << " Items: " << _items.size();
 	o << " Visible ? " << _visible;
 

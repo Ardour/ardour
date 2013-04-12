@@ -26,7 +26,7 @@
 
 #include <gdkmm/window.h>
 #include <gtkmm/eventbox.h>
-#include <gtkmm/viewport.h>
+#include <gtkmm/alignment.h>
 #include <cairomm/surface.h>
 #include <cairomm/context.h>
 #include "pbd/signals.h"
@@ -91,6 +91,8 @@ public:
 		_log_renders = log;
 	}
 
+        void scroll_to (Coord x, Coord y);
+
         std::string indent() const;
         std::string render_indent() const;
         void dump (std::ostream&) const;
@@ -103,39 +105,9 @@ protected:
 
 	mutable std::list<Rect> _renders;
 	bool _log_renders;
-};
 
-/** A Canvas which renders onto an in-memory pixbuf.  In Ardour's context,
- *  this is most useful for testing.
- */
-class ImageCanvas : public Canvas
-{
-public:
-	ImageCanvas (Duple size = Duple (1024, 1024));
-	ImageCanvas (XMLTree const *, Duple size = Duple (1024, 1024));
-
-	void request_redraw (Rect const &) {
-		/* XXX */
-	}
-
-	void request_size (Duple) {
-		/* XXX */
-	}
-	
-	void grab (Item *) {}
-	void ungrab () {}
-
-	void render_to_image (Rect const &) const;
-	void clear ();
-	void write_to_png (std::string const &);
-
-	Cairo::RefPtr<Cairo::Context> context ();
-
-private:
-	/** our Cairo surface */
-	Cairo::RefPtr<Cairo::Surface> _surface;
-	/** our Cairo context */
-	Cairo::RefPtr<Cairo::Context> _context;
+        Coord _scroll_offset_x;
+        Coord _scroll_offset_y;
 };
 
 /** A canvas which renders onto a GTK EventBox */
@@ -152,6 +124,12 @@ public:
 
 	Cairo::RefPtr<Cairo::Context> context ();
 
+        Rect canvas_to_window (Rect const&) const;
+        Rect window_to_canvas (Rect const&) const;
+
+        Duple canvas_to_window (Duple const&) const;
+        Duple window_to_canvas (Duple const&) const;
+
 protected:
 	bool on_expose_event (GdkEventExpose *);
 	bool on_button_press_event (GdkEventButton *);
@@ -166,16 +144,20 @@ private:
 	void item_going_away (Item *, boost::optional<Rect>);
 	bool send_leave_event (Item const *, double, double) const;
 
+
 	/** the item that the mouse is currently over, or 0 */
 	Item const * _current_item;
 	/** the item that is currently grabbed, or 0 */
 	Item const * _grabbed_item;
 };
 
-/** A GTK::Viewport with a GtkCanvas inside it.  This provides a GtkCanvas
- *  that can be scrolled.
+/** A GTK::Alignment with a GtkCanvas inside it plus some Gtk::Adjustments for
+ *   scrolling. 
+ *
+ * This provides a GtkCanvas that can be scrolled. It does NOT implement the
+ * Gtk::Scrollable interface.
  */
-class GtkCanvasViewport : public Gtk::Viewport
+class GtkCanvasViewport : public Gtk::Alignment
 {
 public:
 	GtkCanvasViewport (Gtk::Adjustment &, Gtk::Adjustment &);
@@ -194,6 +176,10 @@ protected:
 private:
 	/** our GtkCanvas */
 	GtkCanvas _canvas;
+        Gtk::Adjustment& hadjustment;
+        Gtk::Adjustment& vadjustment;
+
+        void scrolled ();
 };
 
 }

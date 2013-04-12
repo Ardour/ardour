@@ -52,7 +52,7 @@ Rect
 Rect::translate (Duple t) const
 {
 	Rect r;
-	
+
 	r.x0 = safe_add (x0, t.x);
 	r.y0 = safe_add (y0, t.y);
 	r.x1 = safe_add (x1, t.x);
