@@ -254,6 +254,10 @@ Editor::Editor ()
 	  */
 
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
+	, horizontal_adjustment (0.0, 0.0, 1e16)
+	, unused_adjustment (0.0, 0.0, 10.0, 400.0)
+
+	, controls_layout (unused_adjustment, vertical_adjustment)
 
 	  /* tool bar related */
 

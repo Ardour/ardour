@@ -68,16 +68,11 @@ const double max_canvas_coordinate = (double) JACK_MAX_FRAMES;
 void
 Editor::initialize_canvas ()
 {
-	/* XXX */
-
-	_track_canvas_hadj = new Adjustment (0, 0, 1e16);
-	_track_canvas_vadj = new Adjustment (0, 0, 1e16);
-	_track_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (*_track_canvas_hadj, *_track_canvas_vadj);
+	_track_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
 	_track_canvas = _track_canvas_viewport->canvas ();
 
-	_time_bars_canvas_hadj = new Adjustment (0, 0, 1e16);
 	_time_bars_canvas_vadj = new Adjustment (0, 0, 1e16);
-	_time_bars_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (*_time_bars_canvas_hadj, *_time_bars_canvas_vadj);
+	_time_bars_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, *_time_bars_canvas_vadj);
 	_time_bars_canvas = _time_bars_canvas_viewport->canvas ();
 	
 	_verbose_cursor = new VerboseCursor (this);
@@ -736,10 +731,6 @@ Editor::ensure_time_axis_view_is_visible (const TimeAxisView& tav)
 void
 Editor::tie_vertical_scrolling ()
 {
-	_track_canvas_vadj->set_value (vertical_adjustment.get_value ());
-
-	controls_layout.get_vadjustment()->set_value (vertical_adjustment.get_value());
-
 	if (pending_visual_change.idle_handler_id < 0) {
 		_summary->set_overlays_dirty ();
 	}
@@ -748,8 +739,7 @@ Editor::tie_vertical_scrolling ()
 void
 Editor::set_horizontal_position (double p)
 {
-	_track_canvas_hadj->set_value (p);
-	_time_bars_canvas_hadj->set_value (p);
+	horizontal_adjustment.set_value (p);
 
 	leftmost_frame = (framepos_t) floor (p * samples_per_pixel);
 
@@ -763,15 +753,6 @@ Editor::set_horizontal_position (double p)
 	update_video_timeline();
 
 	HorizontalPositionChanged (); /* EMIT SIGNAL */
-
-#ifndef GTKOSX
-	if (!autoscroll_active && !_stationary_playhead) {
-		/* force rulers and canvas to move in lock step */
-		while (gtk_events_pending ()) {
-			gtk_main_iteration ();
-		}
-	}
-#endif
 }
 
 // CAIROCANVAS

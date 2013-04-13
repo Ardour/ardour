@@ -696,12 +696,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	ArdourCanvas::GtkCanvas* _track_canvas;
 	ArdourCanvas::GtkCanvasViewport* _track_canvas_viewport;
-        Gtk::Adjustment* _track_canvas_hadj;
-        Gtk::Adjustment* _track_canvas_vadj;
 
         ArdourCanvas::GtkCanvas* _time_bars_canvas;
         ArdourCanvas::GtkCanvasViewport* _time_bars_canvas_viewport;
-	Gtk::Adjustment* _time_bars_canvas_hadj;
 	Gtk::Adjustment* _time_bars_canvas_vadj;
 
 	bool within_track_canvas;
@@ -970,7 +967,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/** the adjustment that controls the overall editor vertical scroll position */
 	Gtk::Adjustment     vertical_adjustment;
+        Gtk::Adjustment     horizontal_adjustment;
 
+        Gtk::Adjustment     unused_adjustment; // yes, really; Gtk::Layout constructor requires refs
 	Gtk::Layout         controls_layout;
 	bool control_layout_scroll (GdkEventScroll* ev);
 	void reset_controls_layout_width ();
