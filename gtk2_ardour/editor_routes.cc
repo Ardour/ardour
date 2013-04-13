@@ -518,7 +518,7 @@ EditorRoutes::redisplay ()
 		/* show or hide the TimeAxisView */
 		if (visible) {
 			position += tv->show_at (position, n, &_editor->edit_controls_vbox);
-			tv->clip_to_viewport ();
+			// SHOWTRACKS
 		} else {
 			tv->hide ();
 		}
@@ -687,7 +687,6 @@ EditorRoutes::handle_gui_changes (string const & what, void*)
 		/* Optional :make tracks change height while it happens, instead
 		   of on first-idle
 		*/
-		//update_canvas_now ();
 		redisplay ();
 	}
 

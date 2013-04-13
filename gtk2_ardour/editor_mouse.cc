@@ -325,7 +325,7 @@ Editor::set_canvas_cursor ()
 				const ArdourCanvas::Item* i = items.front();
 				
 				if (i && i->parent() && i->parent()->get_data (X_("timeselection"))) {
-					pair<TimeAxisView*, int> tvp = trackview_by_y_position (_last_motion_y + vertical_adjustment.get_value());
+					pair<TimeAxisView*, int> tvp = trackview_by_y_position (_last_motion_y);
 					if (dynamic_cast<AutomationTimeAxisView*> (tvp.first)) {
 						current_canvas_cursor = _cursors->up_down;
 					}
@@ -848,7 +848,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				/* grab selection for moving */
 				_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionMove), event);
 			} else {
-				double const y = event->button.y + vertical_adjustment.get_value();
+				double const y = event->button.y;
 				pair<TimeAxisView*, int> tvp = trackview_by_y_position (y);
 				if (tvp.first) {
 					AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
@@ -1100,7 +1100,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			{
 				if ( get_smart_mode() ) {
 					/* we're in "smart" joined mode, and we've clicked on a Selection */
-					double const y = event->button.y + vertical_adjustment.get_value();
+					double const y = event->button.y;
 					pair<TimeAxisView*, int> tvp = trackview_by_y_position (y);
 					if (tvp.first) {
 						/* if we're over an automation track, start a drag of its data */
@@ -2680,9 +2680,6 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region
 		RegionSelection s = get_equivalent_regions (selection->regions, ARDOUR::Properties::select.property_id);
 		_drags->add (new RegionMoveDrag (this, item, region_view, s.by_layer(), false, false));
 	}
-
-	/* sync the canvas to what we think is its current state */
-	update_canvas_now();
 }
 
 void
@@ -2860,7 +2857,7 @@ Editor::update_join_object_range_location (double /*x*/, double y)
 	}
 
 	/* XXX: maybe we should make entered_track work in all cases, rather than resorting to this */
-	pair<TimeAxisView*, int> tvp = trackview_by_y_position (y + vertical_adjustment.get_value());
+	pair<TimeAxisView*, int> tvp = trackview_by_y_position (y);
 
 	if (tvp.first) {
 

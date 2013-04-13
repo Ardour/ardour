@@ -63,6 +63,12 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	framepos_t xdelta;
 	int direction = ev->direction;
 
+	/* this event arrives without transformation by the canvas, so we have
+	 * to transform the coordinates to be able to look things up.
+	 */
+
+	Duple event_coords = _track_canvas->window_to_canvas (Duple (ev->x, ev->y));
+	
   retry:
 	switch (direction) {
 	case GDK_SCROLL_UP:
@@ -79,7 +85,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Editor::track_height_step_timeout), 500);
-				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (ev->y + vertical_adjustment.get_value());
+				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (event_coords.y);
 				current_stepping_trackview = p.first;
 				if (!current_stepping_trackview) {
 					return false;
@@ -108,7 +114,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Editor::track_height_step_timeout), 500);
-				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (ev->y + vertical_adjustment.get_value());
+				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (event_coords.y);
 				current_stepping_trackview = p.first;
 				if (!current_stepping_trackview) {
 					return false;

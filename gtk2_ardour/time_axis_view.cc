@@ -284,16 +284,6 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	return _effective_height;
 }
 
-void
-TimeAxisView::clip_to_viewport ()
-{
-	if (marked_for_display()) {
-		_canvas_background->show ();
-		_canvas_display->show ();
-	}
-	return;
-}
-
 bool
 TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 {

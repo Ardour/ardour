@@ -248,8 +248,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		return sample / samples_per_pixel;
 	}
 
-	void flush_canvas ();
-
 	/* selection */
 
 	Selection& get_selection() const { return *selection; }
@@ -2083,8 +2081,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void region_view_added (RegionView *);
 	void region_view_removed ();
-
-	void update_canvas_now ();
 
 	EditorGroupTabs* _group_tabs;
 	void fit_route_group (ARDOUR::RouteGroup *);

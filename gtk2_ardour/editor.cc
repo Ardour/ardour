@@ -4780,7 +4780,6 @@ Editor::idle_resize ()
 	}
 
 	_pending_resize_amount = 0;
-	flush_canvas ();
 	_group_tabs->set_dirty ();
 	resize_idle_id = -1;
 
