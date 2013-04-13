@@ -61,8 +61,8 @@ Item::~Item ()
 	}
 }
 
-Rect
-Item::item_to_parent (Rect const & r) const
+ArdourCanvas::Rect
+Item::item_to_parent (ArdourCanvas::Rect const & r) const
 {
 	return r.translate (_position);
 }
@@ -71,8 +71,8 @@ Item::item_to_parent (Rect const & r) const
 void
 Item::set_position (Duple p)
 {
-	boost::optional<Rect> bbox = bounding_box ();
-	boost::optional<Rect> pre_change_parent_bounding_box;
+	boost::optional<ArdourCanvas::Rect> bbox = bounding_box ();
+	boost::optional<ArdourCanvas::Rect> pre_change_parent_bounding_box;
 
 	if (bbox) {
 		pre_change_parent_bounding_box = item_to_parent (bbox.get());
@@ -146,8 +146,8 @@ Item::parent_to_item (Duple const & d) const
 	return d.translate (- _position);
 }
 
-Rect
-Item::parent_to_item (Rect const & d) const
+ArdourCanvas::Rect
+Item::parent_to_item (ArdourCanvas::Rect const & d) const
 {
 	return d.translate (- _position);
 }
@@ -180,7 +180,7 @@ Item::grab_focus ()
 }
 
 /** @return Bounding box in this item's coordinates */
-boost::optional<Rect>
+boost::optional<ArdourCanvas::Rect>
 Item::bounding_box () const
 {
 	if (_bounding_box_dirty) {
@@ -194,7 +194,7 @@ Item::bounding_box () const
 Coord
 Item::height () const 
 {
-	boost::optional<Rect> bb  = bounding_box();
+	boost::optional<ArdourCanvas::Rect> bb  = bounding_box();
 
 	if (bb) {
 		return bb->height ();
@@ -205,7 +205,7 @@ Item::height () const
 Coord
 Item::width () const 
 {
-	boost::optional<Rect> bb = bounding_box().get();
+	boost::optional<ArdourCanvas::Rect> bb = bounding_box().get();
 
 	if (bb) {
 		return bb->width ();
@@ -314,10 +314,10 @@ Item::canvas_to_item (Coord& x, Coord& y) const
 	y = d.y;
 }
 
-Rect
-Item::item_to_canvas (Rect const & area) const
+ArdourCanvas::Rect
+Item::item_to_canvas (ArdourCanvas::Rect const & area) const
 {
-	Rect r = area;
+	ArdourCanvas::Rect r = area;
 	Item const * i = this;
 
 	while (i) {
@@ -337,7 +337,7 @@ Item::set_ignore_events (bool ignore)
 void
 Item::dump (ostream& o) const
 {
-	boost::optional<Rect> bb = bounding_box();
+	boost::optional<ArdourCanvas::Rect> bb = bounding_box();
 
 	o << _canvas->indent() << whatami() << ' ' << this;
 	

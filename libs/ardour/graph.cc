@@ -232,7 +232,7 @@ Graph::trigger (GraphNode* n)
 void
 Graph::dec_ref()
 {
-        if (g_atomic_int_dec_and_test (&_finished_refcount)) {
+        if (g_atomic_int_dec_and_test (const_cast<gint*> (&_finished_refcount))) {
 
 		/* We have run all the nodes that are at the `output' end of
 		   the graph, so there is nothing more to do this time around.

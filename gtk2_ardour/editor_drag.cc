@@ -3334,7 +3334,7 @@ FeatureLineDrag::motion (GdkEvent*, bool)
 		cx = 0;
 	}
 
-	boost::optional<Rect> bbox = _line->bounding_box ();
+	boost::optional<ArdourCanvas::Rect> bbox = _line->bounding_box ();
 	assert (bbox);
 	_line->set (ArdourCanvas::Duple (cx, 2.0), ArdourCanvas::Duple (cx, bbox.get().height ()));
 

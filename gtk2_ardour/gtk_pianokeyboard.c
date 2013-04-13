@@ -244,7 +244,7 @@ bind_key(PianoKeyboard *pk, const char *key, int note)
 {
 	assert(pk->key_bindings != NULL);
 
-	g_hash_table_insert(pk->key_bindings, (gpointer)key, (gpointer)((intptr_t)note));
+	g_hash_table_insert(pk->key_bindings, key, (gpointer)((intptr_t)note));
 }
 
 static void
@@ -360,6 +360,8 @@ keyboard_event_handler(GtkWidget *mk, GdkEventKey *event, gpointer ignored)
 	GdkKeymapKey	kk;
 	PianoKeyboard	*pk = PIANO_KEYBOARD(mk);
 
+        (void) ignored;
+
 	/* We're not using event->keyval, because we need keyval with level set to 0.
 	   E.g. if user holds Shift and presses '7', we want to get a '7', not '&'. */
 	kk.keycode = event->hardware_keycode;
@@ -440,6 +442,8 @@ mouse_button_event_handler(PianoKeyboard *pk, GdkEventButton *event, gpointer ig
 
 	int		note = get_note_for_xy(pk, x, y);
 
+        (void) ignored;
+
 	if (event->button != 1)
 		return TRUE;
 
@@ -476,6 +480,8 @@ static gboolean
 mouse_motion_event_handler(PianoKeyboard *pk, GdkEventMotion *event, gpointer ignored)
 {
 	int		note;
+
+        (void) ignored;
 
 	if ((event->state & GDK_BUTTON1_MASK) == 0)
 		return TRUE;
@@ -529,6 +535,8 @@ piano_keyboard_expose(GtkWidget *widget, GdkEventExpose *event)
 static void
 piano_keyboard_size_request(GtkWidget* w, GtkRequisition *requisition)
 {
+        (void) w;
+
 	requisition->width = PIANO_KEYBOARD_DEFAULT_WIDTH;
 	requisition->height = PIANO_KEYBOARD_DEFAULT_HEIGHT;
 }

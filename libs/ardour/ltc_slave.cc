@@ -588,7 +588,7 @@ LTC_Slave::approximate_current_delta() const
 	if (last_timestamp == 0 || engine_dll_initstate == 0) {
 		snprintf(delta, sizeof(delta), "\u2012\u2012\u2012\u2012");
 	} else if ((monotonic_cnt - last_timestamp) > 2 * frames_per_ltc_frame) {
-		snprintf(delta, sizeof(delta), _("flywheel"));
+		snprintf(delta, sizeof(delta), "%s", _("flywheel"));
 	} else {
 		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%" PRIi64 "</span>sm",
 				LEADINGZERO(abs(current_delta)), PLUSMINUS(-current_delta), abs(current_delta));

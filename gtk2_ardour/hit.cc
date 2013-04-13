@@ -48,7 +48,7 @@ Hit::move_event (double dx, double dy)
 Coord
 Hit::x0 () const
 {
-	boost::optional<Rect> bbox = _polygon->bounding_box ();
+	boost::optional<ArdourCanvas::Rect> bbox = _polygon->bounding_box ();
 	assert (bbox);
 	return bbox.get().x0;
 }
@@ -56,7 +56,7 @@ Hit::x0 () const
 Coord
 Hit::x1 () const
 {
-	boost::optional<Rect> bbox = _polygon->bounding_box ();
+	boost::optional<ArdourCanvas::Rect> bbox = _polygon->bounding_box ();
 	assert (bbox);
 	return bbox.get().x1;
 }
@@ -64,7 +64,7 @@ Hit::x1 () const
 Coord
 Hit::y0 () const
 {
-	boost::optional<Rect> bbox = _polygon->bounding_box ();
+	boost::optional<ArdourCanvas::Rect> bbox = _polygon->bounding_box ();
 	assert (bbox);
 	return bbox.get().y0;
 }
@@ -72,7 +72,7 @@ Hit::y0 () const
 Coord
 Hit::y1 () const
 {
-	boost::optional<Rect> bbox = _polygon->bounding_box ();
+	boost::optional<ArdourCanvas::Rect> bbox = _polygon->bounding_box ();
 	assert (bbox);
 	return bbox.get().y1;
 }
