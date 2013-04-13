@@ -71,8 +71,7 @@ Editor::initialize_canvas ()
 	_track_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
 	_track_canvas = _track_canvas_viewport->canvas ();
 
-	_time_bars_canvas_vadj = new Adjustment (0, 0, 1e16);
-	_time_bars_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, *_time_bars_canvas_vadj);
+	_time_bars_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, unused_adjustment);
 	_time_bars_canvas = _time_bars_canvas_viewport->canvas ();
 	
 	_verbose_cursor = new VerboseCursor (this);

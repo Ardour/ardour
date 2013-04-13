@@ -699,7 +699,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
         ArdourCanvas::GtkCanvas* _time_bars_canvas;
         ArdourCanvas::GtkCanvasViewport* _time_bars_canvas_viewport;
-	Gtk::Adjustment* _time_bars_canvas_vadj;
 
 	bool within_track_canvas;
 
