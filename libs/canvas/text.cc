@@ -61,8 +61,8 @@ Text::redraw (Cairo::RefPtr<Cairo::Context> context) const
 	_origin.x = ink_rect.get_x() / Pango::SCALE;
 	_origin.y = ink_rect.get_y() / Pango::SCALE;
 
-	_width = _origin.x + ((ink_rect.get_width() + Pango::SCALE / 2) / Pango::SCALE);
-	_height = _origin.y + ((ink_rect.get_height() + Pango::SCALE / 2) / Pango::SCALE);
+	_width = _origin.x + (ink_rect.get_width() / Pango::SCALE);
+	_height = _origin.y + (ink_rect.get_height() / Pango::SCALE);
 	
 	_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _width, _height);
 
@@ -71,7 +71,6 @@ Text::redraw (Cairo::RefPtr<Cairo::Context> context) const
 	/* and draw, in the appropriate color of course */
 
 	set_source_rgba (img_context, _color);
-
 	layout->show_in_cairo_context (img_context);
 
 	/* text has now been rendered in _image and is ready for blit in

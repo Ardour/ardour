@@ -637,6 +637,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	double const x_delta = compute_x_delta (event, &pending_region_position);
 
 	/* Work out the change in y */
+
 	int delta_time_axis_view = current_pointer_time_axis_view - _last_pointer_time_axis_view;
 	double delta_layer = current_pointer_layer - _last_pointer_layer;
 

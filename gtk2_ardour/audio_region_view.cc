@@ -41,7 +41,7 @@
 #include "canvas/polygon.h"
 #include "canvas/poly_line.h"
 #include "canvas/line.h"
-#include "canvas/pixbuf.h"
+#include "canvas/text.h"
 
 #include "streamview.h"
 #include "audio_region_view.h"
@@ -511,8 +511,8 @@ AudioRegionView::set_height (gdouble height)
 				  ArdourCanvas::Duple (pos_x, _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1));
 	}
 
-	if (name_pixbuf) {
-		name_pixbuf->raise_to_top();
+	if (name_text) {
+		name_text->raise_to_top();
 	}
 }
 

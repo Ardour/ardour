@@ -94,7 +94,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 		compute_heights ();
 	}
 
-	_canvas_background = new Group (ed.get_background_group (), ArdourCanvas::Duple (0.0, 0.0));
 	_canvas_display = new Group (ed.get_trackview_group (), ArdourCanvas::Duple (0.0, 0.0));
 	_canvas_display->hide(); // reveal as needed
 
@@ -189,9 +188,6 @@ TimeAxisView::~TimeAxisView()
 	delete selection_group;
 	selection_group = 0;
 
-	delete _canvas_background;
-	_canvas_background = 0;
-
 	delete _canvas_display;
 	_canvas_display = 0;
 
@@ -209,7 +205,6 @@ TimeAxisView::hide ()
 	}
 
 	_canvas_display->hide ();
-	_canvas_background->hide ();
 
 	if (control_parent) {
 		control_parent->remove (time_axis_vbox);
@@ -255,15 +250,11 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 
 	if (_y_position != y) {
 		_canvas_display->set_y_position (y);
-		_canvas_background->set_y_position (y);
 		_y_position = y;
 
 	}
 
-	_canvas_background->raise_to_top ();
 	_canvas_display->raise_to_top ();
-
-	_canvas_background->show ();
 	_canvas_display->show ();
 
 	_hidden = false;

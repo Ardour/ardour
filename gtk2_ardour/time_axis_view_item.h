@@ -33,6 +33,7 @@ namespace ArdourCanvas {
 	class Rectangle;
 	class Item;
 	class Group;
+	class Text;
 }
 
 using ARDOUR::framepos_t;
@@ -75,7 +76,6 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	ArdourCanvas::Item* get_canvas_frame();
 	ArdourCanvas::Group* get_canvas_group();
 	ArdourCanvas::Item* get_name_highlight();
-	ArdourCanvas::Pixbuf* get_name_pixbuf();
 
 	virtual void set_samples_per_pixel (double);
 
@@ -165,7 +165,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 
 	virtual void reset_width_dependent_items (double);
 	void reset_name_width (double);
-	void update_name_pixbuf_visibility ();
+	void update_name_text_visibility ();
 
 	static gint idle_remove_this_item(TimeAxisViewItem*, void*);
 
@@ -228,7 +228,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	uint32_t lock_handle_color_g;
 	uint32_t lock_handle_color_b;
 	uint32_t last_item_width;
-	int name_pixbuf_width;
+	int name_text_width;
 	bool wide_enough_for_name;
 	bool high_enough_for_name;
         bool rect_visible;
@@ -236,7 +236,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	ArdourCanvas::Group*      group;
 	ArdourCanvas::Rectangle* vestigial_frame;
 	ArdourCanvas::Rectangle* frame;
-	ArdourCanvas::Pixbuf*     name_pixbuf;
+	ArdourCanvas::Text*      name_text;
 	ArdourCanvas::Rectangle* name_highlight;
 
 	/* with these two values, if frame_handle_start == 0 then frame_handle_end will also be 0 */

@@ -276,7 +276,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 #ifdef CANVAS_DEBUG
 	_name_item->name = string_compose ("Marker::_name_item for %1", annotation);
 #endif	
-	_name_item->set_position (ArdourCanvas::Duple (_label_offset, 13 / 2 - name_height / 2));
+	_name_item->set_position (ArdourCanvas::Duple (_label_offset, (13.0 / 2.0) - (name_height / 2.0)));
 
 	set_name (annotation.c_str());
 

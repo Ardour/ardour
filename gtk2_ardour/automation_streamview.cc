@@ -45,9 +45,7 @@ using namespace PBD;
 using namespace Editing;
 
 AutomationStreamView::AutomationStreamView (AutomationTimeAxisView& tv)
-	: StreamView (*dynamic_cast<RouteTimeAxisView*>(tv.get_parent()),
-		      new ArdourCanvas::Group (tv.canvas_background()),
-		      new ArdourCanvas::Group (tv.canvas_display()))
+	: StreamView (*dynamic_cast<RouteTimeAxisView*>(tv.get_parent()))
 	, _automation_view(tv)
 	, _pending_automation_state (Off)
 {

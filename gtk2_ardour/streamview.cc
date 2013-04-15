@@ -50,12 +50,9 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
 
-StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* background_group, ArdourCanvas::Group* canvas_group)
+StreamView::StreamView (RouteTimeAxisView& tv)
 	: _trackview (tv)
-	, owns_background_group (background_group == 0)
-	, owns_canvas_group (canvas_group == 0)
-	, _background_group (background_group ? background_group : new ArdourCanvas::Group (_trackview.canvas_background()))
-	, _canvas_group (canvas_group ? canvas_group : new ArdourCanvas::Group (_trackview.canvas_display()))
+	, _canvas_group (new ArdourCanvas::Group (_trackview.canvas_display()))
 	, _samples_per_pixel (_trackview.editor().get_current_zoom ())
 	, rec_updating(false)
 	, rec_active(false)
@@ -65,12 +62,11 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* background_g
 	, height(tv.height)
 	, last_rec_data_frame(0)
 {
-	CANVAS_DEBUG_NAME (_background_group, string_compose ("SV background group %1", _trackview.name()));
 	CANVAS_DEBUG_NAME (_canvas_group, string_compose ("SV canvas group %1", _trackview.name()));
 	
 	/* set_position() will position the group */
 
-	canvas_rect = new ArdourCanvas::Rectangle (_background_group);
+	canvas_rect = new ArdourCanvas::Rectangle (_canvas_group);
 	CANVAS_DEBUG_NAME (canvas_rect, string_compose ("SV canvas rectangle %1", _trackview.name()));
 	canvas_rect->set (ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, tv.current_height ()));
 	canvas_rect->raise(1); // raise above tempo lines
@@ -99,14 +95,6 @@ StreamView::~StreamView ()
 	undisplay_track ();
 
 	delete canvas_rect;
-
-	if (owns_background_group) {
-		delete _background_group;
-	}
-
-	if (owns_canvas_group) {
-		delete _canvas_group;
-	}
 }
 
 void

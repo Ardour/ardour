@@ -100,13 +100,7 @@ Editor::initialize_canvas ()
 	transport_punch_range_rect->set_outline_width (0);
 	transport_punch_range_rect->hide();
 
-
-	_background_group = new ArdourCanvas::Group (_track_canvas->root());
-	CANVAS_DEBUG_NAME (_background_group, "Canvas Background");
-	_master_group = new ArdourCanvas::Group (_track_canvas->root());
-	CANVAS_DEBUG_NAME (_master_group, "Canvas Master");
-
-	_trackview_group = new ArdourCanvas::Group (_master_group);
+	_trackview_group = new ArdourCanvas::Group (_track_canvas->root());
 	CANVAS_DEBUG_NAME (_trackview_group, "Canvas TrackViews");
 	_region_motion_group = new ArdourCanvas::Group (_trackview_group);
 	CANVAS_DEBUG_NAME (_region_motion_group, "Canvas Region Motion");
@@ -168,14 +162,14 @@ Editor::initialize_canvas ()
 	transport_bar_drag_rect->set_outline (false);
 	transport_bar_drag_rect->hide ();
 
-	transport_punchin_line = new ArdourCanvas::Line (_master_group);
+	transport_punchin_line = new ArdourCanvas::Line (_track_canvas->root());
 	transport_punchin_line->set_x0 (0);
 	transport_punchin_line->set_y0 (0);
 	transport_punchin_line->set_x1 (0);
 	transport_punchin_line->set_y1 (ArdourCanvas::COORD_MAX);
 	transport_punchin_line->hide ();
 
-	transport_punchout_line  = new ArdourCanvas::Line (_master_group);
+	transport_punchout_line  = new ArdourCanvas::Line (_track_canvas->root());
 	transport_punchout_line->set_x0 (0);
 	transport_punchout_line->set_y0 (0);
 	transport_punchout_line->set_x1 (0);
@@ -183,7 +177,7 @@ Editor::initialize_canvas ()
 	transport_punchout_line->hide();
 
 	// used to show zoom mode active zooming
-	zoom_rect = new ArdourCanvas::Rectangle (_master_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
+	zoom_rect = new ArdourCanvas::Rectangle (_track_canvas->root(), ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
 	zoom_rect->set_outline_width (1);
 	zoom_rect->hide();
 
@@ -544,7 +538,6 @@ Editor::autoscroll_canvas ()
 {
 	framepos_t new_frame;
 	framepos_t limit = max_framepos - current_page_samples();
-	GdkEventMotion ev;
 	double new_pixel;
 	double target_pixel;
 	
@@ -640,11 +633,15 @@ Editor::autoscroll_canvas ()
 	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->_track_canvas->get_window();
 	gint x, y;
 	Gdk::ModifierType mask;
+	GdkEventMotion ev;
 	canvas_window->get_pointer (x, y, mask);
 	ev.type = GDK_MOTION_NOTIFY;
 	ev.state = Gdk::BUTTON1_MASK;
-	ev.x = x;
-	ev.y = y;
+
+	/* the motion handler expects events in canvas coordinate space */
+	ArdourCanvas::Duple d = _track_canvas->window_to_canvas (ArdourCanvas::Duple (x, y));
+	ev.x = d.x;
+	ev.y = d.y;
 
 	motion_handler (0, (GdkEvent*) &ev, true);
 

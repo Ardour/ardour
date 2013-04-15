@@ -735,16 +735,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Group*      transport_marker_bar_group;
 	ArdourCanvas::Group*      cd_marker_bar_group;
 
-	/** The group containing all items that require horizontal scrolling. */
-	ArdourCanvas::Group* _background_group;
-	/*
-	   The _master_group is the group containing all items
-	   that require horizontal scrolling..
-	   It is primarily used to separate canvas items
-	   that require horizontal scrolling from those that do not.
-	*/
-	ArdourCanvas::Group* _master_group;
-
 	/* The group containing all trackviews.  Only scrolled vertically. */
 	ArdourCanvas::Group* _trackview_group;
 
@@ -1016,8 +1006,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool deferred_control_scroll (framepos_t);
 	sigc::connection control_scroll_connection;
 
-	ArdourCanvas::Group* get_background_group () const { return _background_group; }
 	ArdourCanvas::Group* get_trackview_group () const { return _trackview_group; }
+
 	void tie_vertical_scrolling ();
 	void set_horizontal_position (double);
 	double horizontal_position () const;

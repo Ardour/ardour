@@ -105,7 +105,6 @@ class TimeAxisView : public virtual AxisView
         virtual void leave_internal_edit_mode () {}
 
 	ArdourCanvas::Group* canvas_display () { return _canvas_display; }
-	ArdourCanvas::Group* canvas_background () { return _canvas_background; }
 	ArdourCanvas::Group* ghost_group () { return _ghost_group; }
 
 	/** @return effective height (taking children into account) in canvas units, or
@@ -279,7 +278,6 @@ class TimeAxisView : public virtual AxisView
 	void build_size_menu ();
 
 private:
-	ArdourCanvas::Group* _canvas_background;
  	Gtk::VBox*            control_parent;
 	int                  _order;
 	uint32_t             _effective_height;

@@ -183,9 +183,9 @@ RegionView::init (Gdk::Color const & basic_color, bool wfd)
 		}
 	}
 
-	if (name_pixbuf) {
-		name_pixbuf->set_data ("regionview", this);
-		name_pixbuf->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_event), name_pixbuf, this));
+	if (name_text) {
+		name_text->set_data ("regionview", this);
+		name_text->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_event), name_text, this));
 	}
 
 	if (wfd) {
@@ -838,8 +838,8 @@ RegionView::update_coverage_frames (LayerDisplay d)
 		name_highlight->raise_to_top ();
 	}
 
-	if (name_pixbuf) {
-		name_pixbuf->raise_to_top ();
+	if (name_text) {
+		name_text->raise_to_top ();
 	}
 }
 

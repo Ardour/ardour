@@ -262,11 +262,11 @@ ImageFrameView::set_height (gdouble h)
 	frame->raise_to_top();
 	imageframe->raise_to_top();
 	name_highlight->raise_to_top();
-	name_pixbuf->raise_to_top();
+	name_text->raise_to_top();
 	frame_handle_start->raise_to_top();
 	frame_handle_end->raise_to_top();
 
-	name_pixbuf->property_y() = h - TimeAxisViewItem::NAME_Y_OFFSET;
+	name_text->property_y() = h - TimeAxisViewItem::NAME_Y_OFFSET;
 	frame->property_y2() = h;
 
 	name_highlight->property_y1() = (gdouble) h - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE;
