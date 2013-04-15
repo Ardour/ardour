@@ -1512,14 +1512,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Audio"), oac);
 
-	add_option (_("Audio"),
-		    new BoolOption (
-			    "ignore-feedback-loops",
-			    _("Ignore Feedback Loops"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_ignore_feedback_loops),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_ignore_feedback_loops)
-			    ));
-
 	add_option (_("Audio"), new OptionEditorHeading (_("Denormals")));
 
 	add_option (_("Audio"),
