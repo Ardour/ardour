@@ -456,6 +456,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void save_canvas_state ();
 	
+	ArdourCanvas::Group* get_trackview_group () const { return _trackview_group; }
+        ArdourCanvas::Group* get_time_bars_group () const;
+        ArdourCanvas::Group* get_track_canvas_group () const;
+        ArdourCanvas::GtkCanvasViewport* get_time_bars_canvas () const;
+        ArdourCanvas::GtkCanvasViewport* get_track_canvas () const;
+
+
   protected:
 	void map_transport_state ();
 	void map_position_change (framepos_t);
@@ -1005,8 +1012,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void access_action (std::string,std::string);
 	bool deferred_control_scroll (framepos_t);
 	sigc::connection control_scroll_connection;
-
-	ArdourCanvas::Group* get_trackview_group () const { return _trackview_group; }
 
 	void tie_vertical_scrolling ();
 	void set_horizontal_position (double);

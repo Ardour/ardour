@@ -19,11 +19,13 @@
 
 #include <sigc++/bind.h>
 #include "ardour/tempo.h"
+
 #include "canvas/rectangle.h"
 #include "canvas/group.h"
 #include "canvas/line.h"
 #include "canvas/polygon.h"
 #include "canvas/text.h"
+#include "canvas/canvas.h"
 
 #include "ardour_ui.h"
 /*
@@ -52,12 +54,12 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 	: editor (ed)
 	, _parent (&parent)
-	, _line (0)
+	, _time_bars_line (0)
+	, _track_canvas_line (0)
 	, _type (type)
 	, _selected (false)
 	, _shown (false)
 	, _line_shown (false)
-	, _canvas_height (0)
 	, _color (rgba)
 	, _left_label_limit (DBL_MAX)
 	, _right_label_limit (DBL_MAX)
@@ -301,7 +303,8 @@ Marker::~Marker ()
 
 	/* destroying the parent group destroys its contents, namely any polygons etc. that we added */
 	delete group;
-	delete _line;
+	delete _time_bars_line;
+	delete _track_canvas_line;
 }
 
 void Marker::reparent(ArdourCanvas::Group & parent)
@@ -329,32 +332,41 @@ Marker::setup_line ()
 {
 	if (_shown && (_selected || _line_shown)) {
 
-		if (_line == 0) {
+		if (_time_bars_line == 0) {
 
-			_line = new ArdourCanvas::Line (group);
-			_line->set_outline_color (ARDOUR_UI::config()->canvasvar_EditPoint.get());
-
-			_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
+			_time_bars_line = new ArdourCanvas::Line (editor.get_time_bars_group());
+			_time_bars_line->set_outline_color (ARDOUR_UI::config()->canvasvar_EditPoint.get());
+			_time_bars_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
+			
+			_track_canvas_line = new ArdourCanvas::Line (editor.get_track_canvas_group());
+			_track_canvas_line->set_outline_color (ARDOUR_UI::config()->canvasvar_EditPoint.get());
+			_track_canvas_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
 		}
 
-                /* work out where to start the line from so that it extends from the top of the canvas */
-		double yo = 0;
-                double xo = 0;
+		ArdourCanvas::Duple g = group->item_to_canvas (ArdourCanvas::Duple (0, 0));
+		ArdourCanvas::Duple d = _time_bars_line->canvas_to_item (ArdourCanvas::Duple (g.x + _shift, 0));
 
-                _line->item_to_canvas (xo, yo);
+                _time_bars_line->set_x0 (d.x);
+                _time_bars_line->set_x1 (d.x);
+		_time_bars_line->set_y0 (d.y);
+		_time_bars_line->set_y1 (ArdourCanvas::COORD_MAX);
+		_time_bars_line->set_outline_color (_selected ? ARDOUR_UI::config()->canvasvar_EditPoint.get() : _color);
+		_time_bars_line->raise_to_top ();
+		_time_bars_line->show ();
 
-                _line->set_x0 (_shift);
-                _line->set_x1 (_shift);
-		_line->set_y0 (-yo); // zero in world coordinates, negative in item/parent coordinate space
-		_line->set_y1 (-yo + _canvas_height);
-
-		_line->set_outline_color (_selected ? ARDOUR_UI::config()->canvasvar_EditPoint.get() : _color);
-		_line->raise_to_top ();
-		_line->show ();
+                d = _track_canvas_line->canvas_to_item (ArdourCanvas::Duple (g.x + _shift, 0));
+		_track_canvas_line->set_x0 (d.x);
+		_track_canvas_line->set_x1 (d.x);
+		_track_canvas_line->set_y0 (d.y);
+		_track_canvas_line->set_y1 (ArdourCanvas::COORD_MAX);
+		_track_canvas_line->set_outline_color (_selected ? ARDOUR_UI::config()->canvasvar_EditPoint.get() : _color);
+		_track_canvas_line->raise_to_top ();
+		_track_canvas_line->show ();
 
 	} else {
-		if (_line) {
-			_line->hide ();
+		if (_time_bars_line) {
+			_time_bars_line->hide ();
+			_track_canvas_line->hide ();
 		}
 	}
 }
@@ -431,6 +443,7 @@ Marker::set_position (framepos_t frame)
 {
 	unit_position = editor.sample_to_pixel (frame) - _shift;
 	group->set_x_position (unit_position);
+	setup_line ();
 	frame_position = frame;
 }
 
@@ -465,8 +478,9 @@ Marker::set_color_rgba (uint32_t c)
 	mark->set_fill_color (_color);
 	mark->set_outline_color (_color);
 
-	if (_line && !_selected) {
-		_line->set_outline_color (_color);
+	if (_time_bars_line && !_selected) {
+		_time_bars_line->set_outline_color (_color);
+		_track_canvas_line->set_outline_color (_color);
 	}
 
 	_name_background->set_fill (true);

@@ -881,3 +881,27 @@ Editor::clamp_verbose_cursor_y (double y)
 	y = min (_visible_canvas_height - 50, y);
 	return y;
 }
+
+ArdourCanvas::Group*
+Editor::get_time_bars_group () const
+{
+	return _time_bars_canvas->root();
+}
+
+ArdourCanvas::Group*
+Editor::get_track_canvas_group() const
+{
+	return _track_canvas->root();
+}
+
+ArdourCanvas::GtkCanvasViewport*
+Editor::get_time_bars_canvas() const
+{
+	return _time_bars_canvas_viewport;
+}
+
+ArdourCanvas::GtkCanvasViewport*
+Editor::get_track_canvas() const
+{
+	return _track_canvas_viewport;
+}

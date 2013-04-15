@@ -39,6 +39,8 @@
 
 #include "pbd/statefuldestructible.h"
 
+#include "canvas/fwd.h"
+
 #include "editing.h"
 #include "selection.h"
 
@@ -381,6 +383,11 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 #endif
 
 	virtual ArdourCanvas::Group* get_trackview_group () const = 0;
+	virtual ArdourCanvas::Group* get_time_bars_group () const = 0;
+	virtual ArdourCanvas::Group* get_track_canvas_group () const = 0;
+
+        virtual ArdourCanvas::GtkCanvasViewport* get_time_bars_canvas() const = 0;
+        virtual ArdourCanvas::GtkCanvasViewport* get_track_canvas() const = 0;
 
 	virtual TimeAxisView* axis_view_from_route (boost::shared_ptr<ARDOUR::Route>) const = 0;
 
