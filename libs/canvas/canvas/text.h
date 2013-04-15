@@ -24,6 +24,8 @@ public:
 	void set_font_description (Pango::FontDescription);
 	void set_alignment (Pango::Alignment);
 
+        void clamp_width (double);
+
         void set_size_chars (int nchars);
         void dump (std::ostream&) const;
 
@@ -34,9 +36,10 @@ private:
 	Pango::Alignment _alignment;
         mutable Cairo::RefPtr<Cairo::ImageSurface> _image;
         mutable Duple _origin;
-        mutable int _width;
-        mutable int _height;
+        mutable double _width;
+        mutable double _height;
         mutable bool _need_redraw;
+        double _clamped_width;
 
         void redraw (Cairo::RefPtr<Cairo::Context>) const;
 };

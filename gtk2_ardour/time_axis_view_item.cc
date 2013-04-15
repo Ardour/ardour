@@ -80,7 +80,7 @@ TimeAxisViewItem::set_constant_heights ()
         Gtkmm2ext::get_ink_pixel_size (layout, width, height);
 
         NAME_HEIGHT = height;
-        NAME_Y_OFFSET = height + 4;
+        NAME_Y_OFFSET = height + 5; // XXX this offset is magic
         NAME_HIGHLIGHT_SIZE = height + 2;
         NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 3;
 }
@@ -523,7 +523,7 @@ TimeAxisViewItem::set_name_text(const string& new_name)
 	last_item_width = trackview.editor().sample_to_pixel(item_duration);
 	name_text_width = pixel_width (new_name, NAME_FONT) + 2;
 	name_text->set (new_name);
-	// CAIROCANVAS   need to limit text to name_text_width or something
+
 }
 
 /**
@@ -886,7 +886,7 @@ TimeAxisViewItem::reset_name_width (double /*pixel_width*/)
 {
 	uint32_t it_width;
 	int pb_width;
-	bool pixbuf_holds_full_name;
+	bool showing_full_name;
 
 	if (!name_text) {
 		return;
@@ -895,10 +895,10 @@ TimeAxisViewItem::reset_name_width (double /*pixel_width*/)
 	it_width = trackview.editor().sample_to_pixel(item_duration);
 	pb_width = name_text_width;
 
-	pixbuf_holds_full_name = last_item_width > pb_width + NAME_X_OFFSET;
+	showing_full_name = last_item_width > pb_width + NAME_X_OFFSET;
 	last_item_width = it_width;
 
-	if (pixbuf_holds_full_name && (it_width >= pb_width + NAME_X_OFFSET)) {
+	if (showing_full_name && (it_width >= pb_width + NAME_X_OFFSET)) {
 		/*
 		  we've previously had the full name length showing
 		  and its still showing.
@@ -923,8 +923,7 @@ TimeAxisViewItem::reset_name_width (double /*pixel_width*/)
 	}
 
 	name_text->set (item_name);
-	// CAIROCANVAS need to limit text length to pb_width
-	
+	name_text->clamp_width (pb_width);
 }
 
 /**

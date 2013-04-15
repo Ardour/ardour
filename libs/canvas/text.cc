@@ -21,6 +21,7 @@ Text::Text (Group* parent)
 	, _width (0)
 	, _height (0)
 	, _need_redraw (false)
+	, _clamped_width (COORD_MAX)
 {
 
 }
@@ -81,6 +82,12 @@ Text::redraw (Cairo::RefPtr<Cairo::Context> context) const
 }
 
 void
+Text::clamp_width (double w)
+{
+	_clamped_width = w;
+}
+
+void
 Text::compute_bounding_box () const
 {
 	if (!_canvas || _text.empty()) {
@@ -120,7 +127,7 @@ Text::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) cons
 	}
 	
 	context->set_source (_image, 0, 0);
-	context->rectangle (0, 0, _width, _height);
+	context->rectangle (0, 0, min (_clamped_width, _width), _height);
 	context->fill ();
 }
 
