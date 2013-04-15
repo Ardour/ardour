@@ -1522,7 +1522,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 	/* Attempt a topological sort of the route graph */
 	boost::shared_ptr<RouteList> sorted_routes = topological_sort (r, edges);
 	
-	if (sorted_routes) {
+	if (Config->get_ignore_feedback_loops() || sorted_routes) {
 		/* We got a satisfactory topological sort, so there is no feedback;
 		   use this new graph.
 
@@ -1553,8 +1553,9 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 #endif
 
 		SuccessfulGraphSort (); /* EMIT SIGNAL */
+	}
 
-	} else {
+	if (!sorted_routes)  {
 		/* The topological sort failed, so we have a problem.  Tell everyone
 		   and stick to the old graph; this will continue to be processed, so
 		   until the feedback is fixed, what is played back will not quite
