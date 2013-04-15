@@ -1016,8 +1016,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool deferred_control_scroll (framepos_t);
 	sigc::connection control_scroll_connection;
 
-	gdouble get_trackview_group_vertical_offset () const { return vertical_adjustment.get_value (); }
-
 	ArdourCanvas::Group* get_background_group () const { return _background_group; }
 	ArdourCanvas::Group* get_trackview_group () const { return _trackview_group; }
 	void tie_vertical_scrolling ();

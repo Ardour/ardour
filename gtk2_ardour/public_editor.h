@@ -380,7 +380,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual Gtk::HBox& get_status_bar_packer() = 0;
 #endif
 
-	virtual gdouble get_trackview_group_vertical_offset () const = 0;
 	virtual ArdourCanvas::Group* get_trackview_group () const = 0;
 	virtual ArdourCanvas::Group* get_background_group () const = 0;
 

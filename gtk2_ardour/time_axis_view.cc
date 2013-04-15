@@ -373,7 +373,7 @@ TimeAxisView::controls_ebox_motion (GdkEventMotion* ev)
 		*/
 		int tx, ty;
 		controls_ebox.translate_coordinates (*control_parent, ev->x, ev->y, tx, ty);
-		ev->y = ty - _editor.get_trackview_group_vertical_offset();
+		ev->y = ty;
 		_editor.drags()->motion_handler ((GdkEvent *) ev, false);
 		_editor.maybe_autoscroll (false, true, false, ev->y_root < _resize_drag_start);
 

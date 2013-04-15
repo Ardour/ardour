@@ -67,6 +67,66 @@ Item::item_to_parent (ArdourCanvas::Rect const & r) const
 	return r.translate (_position);
 }
 
+ArdourCanvas::Rect
+Item::item_to_canvas (ArdourCanvas::Rect const & r) const
+{
+	Item const * i = this;
+	Duple offset;
+
+	while (i) {
+		offset = offset.translate (i->position());
+		i = i->parent();
+	}
+
+	return r.translate (offset);
+}
+
+ArdourCanvas::Duple
+Item::item_to_canvas (ArdourCanvas::Duple const & d) const
+{
+	Item const * i = this;
+	Duple offset;
+
+	while (i) {
+		offset = offset.translate (i->position());
+		i = i->parent();
+	}
+
+	return d.translate (offset);
+}
+
+ArdourCanvas::Duple
+Item::canvas_to_item (ArdourCanvas::Duple const & d) const
+{
+	Item const * i = this;
+	Duple offset;
+
+	while (i) {
+		offset = offset.translate (-(i->position()));
+		i = i->parent();
+	}
+
+	return d.translate (offset);
+}
+
+void
+Item::item_to_canvas (Coord& x, Coord& y) const
+{
+	Duple d = item_to_canvas (Duple (x, y));
+		
+	x = d.x;
+	y = d.y;
+}
+
+void
+Item::canvas_to_item (Coord& x, Coord& y) const
+{
+	Duple d = canvas_to_item (Duple (x, y));
+
+	x = d.x;
+	y = d.y;
+}
+
 /** Set the position of this item in the parent's coordinates */
 void
 Item::set_position (Duple p)
@@ -75,6 +135,9 @@ Item::set_position (Duple p)
 	boost::optional<ArdourCanvas::Rect> pre_change_parent_bounding_box;
 
 	if (bbox) {
+		/* see the comment in Canvas::item_moved() to understand
+		 * why we use the parent's bounding box here.
+		 */
 		pre_change_parent_bounding_box = item_to_parent (bbox.get());
 	}
 	
@@ -285,50 +348,6 @@ Item::get_data (string const & key) const
 }
 
 void
-Item::item_to_canvas (Coord& x, Coord& y) const
-{
-	Duple d (x, y);
-	Item const * i = this;
-	
-	while (i) {
-		d = i->item_to_parent (d);
-		i = i->_parent;
-	}
-		
-	x = d.x;
-	y = d.y;
-}
-
-void
-Item::canvas_to_item (Coord& x, Coord& y) const
-{
-	Duple d (x, y);
-	Item const * i = this;
-
-	while (i) {
-		d = i->parent_to_item (d);
-		i = i->_parent;
-	}
-
-	x = d.x;
-	y = d.y;
-}
-
-ArdourCanvas::Rect
-Item::item_to_canvas (ArdourCanvas::Rect const & area) const
-{
-	ArdourCanvas::Rect r = area;
-	Item const * i = this;
-
-	while (i) {
-		r = i->item_to_parent (r);
-		i = i->parent ();
-	}
-
-	return r;
-}
-
-void
 Item::set_ignore_events (bool ignore)
 {
 	_ignore_events = ignore;
@@ -340,6 +359,7 @@ Item::dump (ostream& o) const
 	boost::optional<ArdourCanvas::Rect> bb = bounding_box();
 
 	o << _canvas->indent() << whatami() << ' ' << this;
+	o << " @ " << position();
 	
 #ifdef CANVAS_DEBUG
 	if (!name.empty()) {
@@ -349,6 +369,7 @@ Item::dump (ostream& o) const
 
 	if (bb) {
 		o << endl << _canvas->indent() << "\tbbox: " << bb.get();
+		o << endl << _canvas->indent() << "\tCANVAS bbox: " << item_to_canvas (bb.get());
 	} else {
 		o << " bbox unset";
 	}

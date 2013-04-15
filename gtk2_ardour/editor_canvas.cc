@@ -33,6 +33,7 @@
 #include "canvas/rectangle.h"
 #include "canvas/pixbuf.h"
 #include "canvas/text.h"
+#include "canvas/debug.h"
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -101,10 +102,14 @@ Editor::initialize_canvas ()
 
 
 	_background_group = new ArdourCanvas::Group (_track_canvas->root());
+	CANVAS_DEBUG_NAME (_background_group, "Canvas Background");
 	_master_group = new ArdourCanvas::Group (_track_canvas->root());
+	CANVAS_DEBUG_NAME (_master_group, "Canvas Master");
 
 	_trackview_group = new ArdourCanvas::Group (_master_group);
+	CANVAS_DEBUG_NAME (_trackview_group, "Canvas TrackViews");
 	_region_motion_group = new ArdourCanvas::Group (_trackview_group);
+	CANVAS_DEBUG_NAME (_region_motion_group, "Canvas Region Motion");
 
 	meter_bar_group = new ArdourCanvas::Group (_time_bars_canvas->root ());
 	meter_bar = new ArdourCanvas::Rectangle (meter_bar_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height - 1));
@@ -487,7 +492,7 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool moving_left, b
 	/* Note whether we're fudging the autoscroll (see autoscroll_fudge_threshold) */
 	_autoscroll_fudging = (distance < autoscroll_fudge_threshold ());
 
-	double const ty = _drags->current_pointer_y() - get_trackview_group_vertical_offset ();
+	double const ty = _drags->current_pointer_y();
 
 	autoscroll_y = 0;
 	autoscroll_x = 0;
@@ -558,7 +563,7 @@ Editor::autoscroll_canvas ()
 
 	if (autoscroll_y_distance != 0) {
 		if (autoscroll_y > 0) {
-			autoscroll_y_distance = (_drags->current_pointer_y() - (get_trackview_group_vertical_offset() + _visible_canvas_height)) / 3;
+			autoscroll_y_distance = (_drags->current_pointer_y() - _visible_canvas_height) / 3;
 		} else if (autoscroll_y < 0) {
 
 			autoscroll_y_distance = (vertical_adjustment.get_value () - _drags->current_pointer_y()) / 3;
@@ -753,23 +758,6 @@ Editor::set_horizontal_position (double p)
 
 	HorizontalPositionChanged (); /* EMIT SIGNAL */
 }
-
-// CAIROCANVAS
-#if 0
-void
-Editor::scroll_canvas_vertically ()
-{
-	/* vertical scrolling only */
-
-	double y_delta;
-
-	y_delta = last_trackview_group_vertical_offset - get_trackview_group_vertical_offset ();
-	_trackview_group->move (0, y_delta);
-	_background_group->move (0, y_delta);
-
-	last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
-}
-#endif
 
 void
 Editor::color_handler()

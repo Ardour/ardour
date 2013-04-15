@@ -278,6 +278,7 @@ Group::dump (ostream& o) const
 {
 	o << _canvas->indent();
 	o << "Group " << this << " [" << name << ']';
+	o << " @ " << position();
 	o << " Items: " << _items.size();
 	o << " Visible ? " << _visible;
 
@@ -285,6 +286,7 @@ Group::dump (ostream& o) const
 
 	if (bb) {
 		o << endl << _canvas->indent() << "  bbox: " << bb.get();
+		o << endl << _canvas->indent() << "  CANVAS bbox: " << item_to_canvas (bb.get());
 	} else {
 		o << "  bbox unset";
 	}

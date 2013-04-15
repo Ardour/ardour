@@ -193,9 +193,8 @@ Editor::draw_measures (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 	if (tempo_lines == 0) {
 		tempo_lines = new TempoLines (*_track_canvas_viewport, time_line_group, physical_screen_height(get_window()));
 	}
-
-	// CAIROCANVAS
-	// tempo_lines->draw (begin, end, frames_per_unit);
+	
+	tempo_lines->draw (begin, end, samples_per_pixel);
 }
 
 void

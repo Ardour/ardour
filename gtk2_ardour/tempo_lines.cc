@@ -123,11 +123,11 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 	// Tempo map hasn't changed and we're entirely within a clean
 	// range, don't need to do anything.  Yay.
 	if (needed_left >= _clean_left && needed_right <= _clean_right) {
-		// cout << endl << "*** LINE CACHE PERFECT HIT" << endl;
+		// cerr << endl << "*** LINE CACHE PERFECT HIT" << endl;
 		return;
 	}
 
-	//cout << endl << "*** LINE CACHE MISS" << endl;
+	// cerr << endl << "*** LINE CACHE MISS" << endl;
 
 	bool invalidated = false;
 
@@ -169,7 +169,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 			
 			// Steal from the right
 			if (left->first > needed_left && li != steal && steal->first > needed_right) {
-				//cout << "*** STEALING FROM RIGHT" << endl;
+				// cerr << "*** STEALING FROM RIGHT" << endl;
 				double const x = steal->first;
 				line = steal->second;
 				_lines.erase(steal);
@@ -208,7 +208,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 			
 			// Create a new line
 		} else if (_lines.size() < needed || _lines.size() < MAX_CACHED_LINES) {
-			//cout << "*** CREATING LINE" << endl;
+			// cerr << "*** CREATING LINE" << endl;
 			/* if we already have a line there ... don't sweat it */
 			if (_lines.find (xpos) == _lines.end()) {
 				line = new ArdourCanvas::Line (_group);
@@ -222,7 +222,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 			
 			// Steal from the left
 		} else {
-			//cout << "*** STEALING FROM LEFT" << endl;
+			// cerr << "*** STEALING FROM LEFT" << endl;
 			if (_lines.find (xpos) == _lines.end()) {
 				Lines::iterator steal = _lines.begin();
 				double const x = steal->first;

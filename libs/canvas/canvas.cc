@@ -100,18 +100,6 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 	// checkpoint ("render", "-> render");
 	render_count = 0;
 	
-#ifdef CANVAS_DEBUG
-	if (getenv ("ARDOUR_HARLEQUIN_CANVAS")) {
-		/* light up the canvas to show redraws */
-		context->set_source_rgba (random()%255 / 255.0,
-					  random()%255 / 255.0,
-					  random()%255 / 255.0,
-					  255);
-		context->rectangle (area.x0, area.y0, area.width(), area.height());
-		context->fill ();
-	}
-#endif
-
 	context->save ();
 
 	/* clip to the requested area */
@@ -143,6 +131,17 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 
 	context->restore ();
 
+#ifdef CANVAS_DEBUG
+	if (getenv ("ARDOUR_HARLEQUIN_CANVAS")) {
+		/* light up the canvas to show redraws */
+		context->set_source_rgba (random()%255 / 255.0,
+					  random()%255 / 255.0,
+					  random()%255 / 255.0,
+					  255);
+		context->rectangle (area.x0, area.y0, area.width(), area.height());
+		context->fill ();
+	}
+#endif
 	// checkpoint ("render", "<- render");
 }
 
@@ -225,10 +224,15 @@ void
 Canvas::item_moved (Item* item, boost::optional<Rect> pre_change_parent_bounding_box)
 {
 	if (pre_change_parent_bounding_box) {
-		/* request a redraw of where the item used to be; we have to use the
-		   parent's coordinates here as item bounding boxes do not change
-		   when the item moves.
-		*/
+		/* request a redraw of where the item used to be. The box has
+		 * to be in parent coordinate space since the bounding box of
+		 * an item does not change when moved. If we use
+		 * item->item_to_canvas() on the old bounding box, we will be
+		 * using the item's new position, and so will compute the wrong
+		 * invalidation area. If we use the parent (which has not
+		 * moved, then this will work.
+		 */
+
 		queue_draw_item_area (item->parent(), pre_change_parent_bounding_box.get ());
 	}
 
@@ -246,7 +250,9 @@ Canvas::item_moved (Item* item, boost::optional<Rect> pre_change_parent_bounding
 void
 Canvas::queue_draw_item_area (Item* item, Rect area)
 {
-	request_redraw (item->item_to_canvas (area));
+	ArdourCanvas::Rect canvas_area = item->item_to_canvas (area);
+	// cerr << "CANVAS Invalidate " << area << " TRANSLATE AS " << canvas_area << endl;
+	request_redraw (canvas_area);
 }
 
 /** @return An XML description of the canvas and its objects */
@@ -554,6 +560,7 @@ void
 GtkCanvas::request_redraw (Rect const & request)
 {
 	Rect area = canvas_to_window (request);
+	// cerr << "Invalidate " << request << " TRANSLATE AS " << area << endl;
 	queue_draw_area (floor (area.x0), floor (area.y0), ceil (area.x1) - floor (area.x0), ceil (area.y1) - floor (area.y0));
 }
 

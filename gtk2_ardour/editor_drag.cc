@@ -670,12 +670,16 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			/* Reparent to a non scrolling group so that we can keep the
 			   region selection above all time axis views.
 			   Reparenting means that we will have to move the region view
-			   later, as the two parent groups have different coordinates.
+			   within its new parent, as the two parent groups have different coordinates.
 			*/
 
+			ArdourCanvas::Group* rvg = rv->get_canvas_group();
+			Duple rv_canvas_offset = rvg->item_to_canvas (Duple (0,0));
+
 			rv->get_canvas_group()->reparent (_editor->_region_motion_group);
-			
+
 			rv->fake_set_opaque (true);
+			rvg->set_position (rv_canvas_offset);
 		}
 
 		/* If we have moved tracks, we'll fudge the layer delta so that the
@@ -725,8 +729,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 			/* Get the y coordinate of the top of the track that this region is now on */
 			tv->canvas_display()->item_to_canvas (x, y);
-			y += _editor->get_trackview_group_vertical_offset();
-			
+
 			/* And adjust for the layer that it should be on */
 			StreamView* cv = tv->view ();
 			switch (cv->layer_display ()) {

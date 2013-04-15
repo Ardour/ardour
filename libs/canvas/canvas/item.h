@@ -108,9 +108,12 @@ public:
 	/* XXX: it's a pity these aren't the same form as item_to_parent etc.,
 	   but it makes a bit of a mess in the rest of the code if they are not.
 	*/
-	void canvas_to_item (Coord &, Coord &) const;
+
+        void canvas_to_item (Coord &, Coord &) const;
+        Duple canvas_to_item (Duple const &) const;
 	void item_to_canvas (Coord &, Coord &) const;
 	Rect item_to_canvas (Rect const &) const;
+        Duple item_to_canvas (Duple const &) const;
 
 	void raise_to_top ();
 	void raise (int);
