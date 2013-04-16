@@ -34,6 +34,7 @@
 
 #include "canvas/group.h"
 #include "canvas/pixbuf.h"
+#include "canvas/image.h"
 
 namespace ARDOUR {
 	class TempoSection;
@@ -70,7 +71,8 @@ class VideoImageFrame : public sigc::trackable
 	PublicEditor& editor;
 	ArdourCanvas::Group *_parent;
 	ArdourCanvas::Group *group;
-	ArdourCanvas::Pixbuf *img_pixbuf;
+	ArdourCanvas::Image *image;
+	boost::shared_ptr<ArdourCanvas::Image::Data> img;
 
 	int clip_width;
 	int clip_height;
@@ -86,12 +88,14 @@ class VideoImageFrame : public sigc::trackable
 	void reposition ();
 	void exposeimg ();
 
+	void fill_frame (const uint8_t r, const uint8_t g, const uint8_t b);
 	void draw_line ();
+	void draw_x ();
 	void cut_rightend ();
 
 
 	void http_get(framepos_t fn);
-	void http_get_again(framepos_t fn);
+	void http_maybe_get_again();
 
 	framepos_t req_video_frame_number;
 	framepos_t want_video_frame_number;

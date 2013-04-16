@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2010 Paul Davis
+    Copyright (C) 2010, 2013 Paul Davis
     Author: Robin Gareus <robin@gareus.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -25,7 +25,6 @@
 #include "public_editor.h"
 #include "utils.h"
 #include "canvas/group.h"
-#include "rgb_macros.h"
 #include "utils_videotl.h"
 
 #include <gtkmm2ext/utils.h>
@@ -52,23 +51,15 @@ VideoImageFrame::VideoImageFrame (PublicEditor& ed, ArdourCanvas::Group& parent,
 	frame_position = 0;
 	thread_active=false;
 
-#if 0 /* DEBUG */
-	printf("New VideoImageFrame (%ix%i) %s - %s\n", w, h, vsurl.c_str(), vfn.c_str());
-#endif
-
 	unit_position = editor.sample_to_pixel (frame_position);
 	group = new ArdourCanvas::Group (_parent, ArdourCanvas::Duple(unit_position, 1.0));
-	img_pixbuf = new ArdourCanvas::Pixbuf(group);
+	image = new ArdourCanvas::Image (group, Cairo::FORMAT_ARGB32, clip_width, clip_height);
 
-	Glib::RefPtr<Gdk::Pixbuf> img;
-
-	img = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, clip_width, clip_height);
-	img->fill(RGBA_TO_UINT(0,0,0,255));
-	img_pixbuf->set(img);
-
+	img = image->get_image();
+	fill_frame(0, 0, 0);
 	draw_line();
-	video_draw_cross(img_pixbuf->pixbuf());
-	img_pixbuf->set(img_pixbuf->pixbuf());
+	draw_x();
+	image->put_image(img);
 
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_videotl_bar_event), _parent));
 }
@@ -76,7 +67,7 @@ VideoImageFrame::VideoImageFrame (PublicEditor& ed, ArdourCanvas::Group& parent,
 VideoImageFrame::~VideoImageFrame ()
 {
 	if (thread_active) pthread_join(thread_id_tt, NULL);
-	delete img_pixbuf;
+	delete image;
 	delete group;
 	pthread_mutex_destroy(&request_lock);
 	pthread_mutex_destroy(&queue_lock);
@@ -98,11 +89,7 @@ VideoImageFrame::reposition ()
 }
 
 void
-VideoImageFrame::exposeimg ()
-{
-	img_pixbuf->show();
-	/* Note: we can not use this thread to update the window
-	 * it needs to be done from the Editor's thread idle_update */
+VideoImageFrame::exposeimg () {
 	ImgChanged(); /* EMIT SIGNAL */
 }
 
@@ -113,22 +100,15 @@ VideoImageFrame::set_videoframe (framepos_t videoframenumber, int re)
 
 	video_frame_number = videoframenumber;
 	rightend = re;
-#if 0 /* dummy mode: print framenumber */
-	gchar buf[16];
-	snprintf (buf, sizeof(buf), "%li", (long int) videoframenumber);
-	img_pixbuf->pixbuf() = pixbuf_from_ustring(g_strdup (buf), get_font_for_style (N_("MarkerText")), 80, 60, Gdk::Color ("#C0C0C0"));
-	return;
-#endif
-#if 1 /* draw "empty frame" while we request the data */
-	Glib::RefPtr<Gdk::Pixbuf> img;
-	img = img_pixbuf->pixbuf();
-	img->fill(RGBA_TO_UINT(0,0,0,255));
-	video_draw_cross(img_pixbuf->pixbuf());
+
+	img = image->get_image();
+	fill_frame(0, 0, 0);
+	draw_x();
 	draw_line();
 	cut_rightend();
-	img_pixbuf->set(img);
+	image->put_image(img);
 	exposeimg();
-#endif
+
 	/* request video-frame from decoder in background thread */
 	http_get(video_frame_number);
 }
@@ -136,47 +116,77 @@ VideoImageFrame::set_videoframe (framepos_t videoframenumber, int re)
 void
 VideoImageFrame::draw_line ()
 {
-	Glib::RefPtr<Gdk::Pixbuf> img;
-	img = img_pixbuf->pixbuf();
-
-	int rowstride = img->get_rowstride();
-	int clip_height = img->get_height();
-	int n_channels = img->get_n_channels();
-	guchar *pixels, *p;
-	pixels = img->get_pixels();
+	const int rowstride = img->stride;
+	const int clip_height = img->height;
+	uint8_t *pixels, *p;
+	pixels = img->data.get();
 
 	int y;
-	for (y=0;y<clip_height;y++) {
+	for (y = 0;y < clip_height; y++) {
 		p = pixels + y * rowstride;
-		p[0] = 255; p[1] = 255; p[2] = 255;
-		if (n_channels>3) p[3] = 255;
+		p[0] = 255; p[1] = 255; p[2] = 255; p[3] = 255;
+	}
+}
+
+void
+VideoImageFrame::fill_frame (const uint8_t r, const uint8_t g, const uint8_t b)
+{
+	memset((void*) img->data.get(), 0, img->stride * img->height); /// fill
+
+	const int rowstride = img->stride;
+	const int clip_height = img->height;
+	const int clip_width = img->width;
+	uint8_t *pixels, *p;
+	pixels = img->data.get();
+
+	int x,y;
+	for (y = 0; y < clip_height; ++y) {
+		for (x = 0; x < clip_width; ++x) {
+			p = pixels + y * rowstride + x * 4;
+			p[0] = b; p[1] = g; p[2] = r; p[3] = 255;
+		}
+	}
+}
+
+void
+VideoImageFrame::draw_x ()
+{
+	int x,y;
+	const int rowstride = img->stride;
+	const int clip_width = img->width;
+	const int clip_height = img->height;
+	uint8_t *pixels, *p;
+	pixels = img->data.get();
+
+	for (x = 0;x < clip_width; x++) {
+		y = clip_height * x / clip_width;
+		p = pixels + y * rowstride + x * 4;
+		p[0] = 192; p[1] = 192; p[2] = 192; p[3] = 255;
+		p = pixels + y * rowstride + (clip_width-x-1) * 4;
+		p[0] = 192; p[1] = 192; p[2] = 192; p[3] = 255;
 	}
 }
 
 void
 VideoImageFrame::cut_rightend ()
 {
-	if (rightend < 0 ) { return; }
-	Glib::RefPtr<Gdk::Pixbuf> img;
-	img = img_pixbuf->pixbuf();
 
-	int rowstride = img->get_rowstride();
-	int clip_height = img->get_height();
-	int clip_width = img->get_width();
-	int n_channels = img->get_n_channels();
-	guchar *pixels, *p;
-	pixels = img->get_pixels();
+	if (rightend < 0 ) { return; }
+
+	const int rowstride = img->stride;
+	const int clip_height = img->height;
+	const int clip_width = img->width;
+	uint8_t *pixels, *p;
+	pixels = img->data.get();
 	if (rightend > clip_width) { return; }
 
 	int x,y;
-	for (y=0;y<clip_height;++y) {
-		p = pixels + y * rowstride + rightend * n_channels;
-		p[0] = 192; p[1] = 127; p[2] = 127;
-		if (n_channels>3) p[3] = 255;
-		for (x=rightend+1; x<clip_width; ++x) {
-			p = pixels + y * rowstride + x * n_channels;
-			p[0] = 0; p[1] = 0; p[2] = 0;
-			if (n_channels>3) p[3] = 0;
+	for (y = 0;y < clip_height; ++y) {
+		p = pixels + y * rowstride + rightend * 4;
+		p[0] = 192; p[1] = 192; p[2] = 192; p[3] = 255;
+		for (x=rightend+1; x < clip_width; ++x) {
+			p = pixels + y * rowstride + x * 4;
+			p[0] = 0; p[1] = 0; p[2] = 0; p[3] = 0;
 		}
 	}
 }
@@ -187,7 +197,7 @@ http_get_thread (void *arg) {
 	char url[2048];
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-	snprintf(url, sizeof(url), "%s?frame=%li&w=%d&h=%di&file=%s&format=rgb",
+	snprintf(url, sizeof(url), "%s?frame=%li&w=%d&h=%di&file=%s&format=bgra",
 	  vif->get_video_server_url().c_str(),
 	  (long int) vif->get_req_frame(), vif->get_width(), vif->get_height(),
 	  vif->get_video_filename().c_str()
@@ -213,45 +223,35 @@ http_get_thread (void *arg) {
 void
 VideoImageFrame::http_download_done (char *data){
 	if (queued_request) {
-		http_get_again(want_video_frame_number);
+		http_maybe_get_again();
 		return;
 	}
 
 	if (!data) {
 		/* Image request failed (HTTP error or timeout) */
-		Glib::RefPtr<Gdk::Pixbuf> img;
-		img = img_pixbuf->pixbuf();
-		img->fill(RGBA_TO_UINT(128,0,0,255));
-		video_draw_cross(img_pixbuf->pixbuf());
+		img = image->get_image();
+		fill_frame(128, 0, 0);
+		draw_x();
 		cut_rightend();
 		draw_line();
 		cut_rightend();
-		img_pixbuf->set(img);
-		/* TODO: mark as invalid:
-		 * video_frame_number = -1;
-		 * TODO: but prevent live-loops when calling update again
-		 */
+		image->put_image(img);
 	} else {
-		Glib::RefPtr<Gdk::Pixbuf> tmp, img;
-#if 0 // RGBA
-		tmp = Gdk::Pixbuf::create_from_data ((guint8*) data, Gdk::COLORSPACE_RGB, true, 8, clip_width, clip_height, clip_width*4);
-#else // RGB
-		tmp = Gdk::Pixbuf::create_from_data ((guint8*) data, Gdk::COLORSPACE_RGB, false, 8, clip_width, clip_height, clip_width*3);
-#endif
-		img = img_pixbuf->pixbuf();
-		tmp->copy_area (0, 0, clip_width, clip_height, img, 0, 0);
+		img = image->get_image();
+		/* TODO - have curl write directly to the shared memory region */
+		memcpy((void*) img->data.get(), data, img->stride * img->height);
 		free(data);
 		draw_line();
 		cut_rightend();
-		img_pixbuf->set(img);
+		image->put_image(img);
 	}
 
 	exposeimg();
-	/* don't request frames too quickly, wait after user has zoomed */
-	usleep(40000);
+	/* don't request frames rapidly, wait after user has zoomed */
+	usleep(20000);
 
 	if (queued_request) {
-		http_get_again(want_video_frame_number);
+		http_maybe_get_again();
 	}
 	pthread_mutex_unlock(&request_lock);
 }
@@ -260,24 +260,11 @@ VideoImageFrame::http_download_done (char *data){
 void
 VideoImageFrame::http_get(framepos_t fn) {
 	if (pthread_mutex_trylock(&request_lock)) {
-		/* remember last request and schedule after the lock has been released. */
 		pthread_mutex_lock(&queue_lock);
 		queued_request=true;
 		want_video_frame_number=fn;
 		pthread_mutex_unlock(&queue_lock);
-#if 0
-		/* TODO: cancel request and start a new one
-		 *  but only if we're waiting for curl request.
-		 *  don't interrupt http_download_done()
-		 *
-		 *  This should work, but requires testing:
-		 */
-		if (!pthread_cancel(thread_id_tt)) {
-			pthread_mutex_unlock(&request_lock);
-		} else return;
-#else
 		return;
-#endif
 	}
 	if (thread_active) pthread_join(thread_id_tt, NULL);
 	pthread_mutex_lock(&queue_lock);
@@ -294,7 +281,7 @@ VideoImageFrame::http_get(framepos_t fn) {
 }
 
 void
-VideoImageFrame::http_get_again(framepos_t /*fn*/) {
+VideoImageFrame::http_maybe_get_again() {
 	pthread_mutex_lock(&queue_lock);
 	queued_request=false;
 	req_video_frame_number=want_video_frame_number;
@@ -332,7 +319,6 @@ extern "C" {
 		struct MemoryStruct chunk;
 		long int httpstatus;
 		if (status) *status = 0;
-		//usleep(500000); return NULL; // TEST & DEBUG
 		if (strncmp("http://", u, 7)) return NULL;
 
 		chunk.data=NULL;
