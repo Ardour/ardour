@@ -294,7 +294,7 @@ VideoImageFrame::http_get(framepos_t fn) {
 }
 
 void
-VideoImageFrame::http_get_again(framepos_t fn) {
+VideoImageFrame::http_get_again(framepos_t /*fn*/) {
 	pthread_mutex_lock(&queue_lock);
 	queued_request=false;
 	req_video_frame_number=want_video_frame_number;
