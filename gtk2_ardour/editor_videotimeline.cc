@@ -130,11 +130,6 @@ Editor::export_video ()
 		}
 	}
 	ExportVideoDialog dialog (*this, _session);
-	Gtk::ResponseType r = (Gtk::ResponseType) dialog.run();
+	dialog.run();
 	dialog.hide();
-#if 0
-	if (r == Gtk::RESPONSE_ACCEPT) {
-		ARDOUR_UI::instance()->popup_error(string_compose(_("Export Successful: %1"),dialog.get_exported_filename()));
-	}
-#endif
 }
