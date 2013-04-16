@@ -231,7 +231,7 @@ VideoMonitor::is_started ()
 }
 
 void
-VideoMonitor::parse_output (std::string d, size_t s)
+VideoMonitor::parse_output (std::string d, size_t /*s*/)
 {
 	std::string line = d;
 	std::string::size_type start = 0;
@@ -447,7 +447,7 @@ VideoMonitor::set_offset (ARDOUR::frameoffset_t offset)
 }
 
 void
-VideoMonitor::manual_seek (framepos_t when, bool force, ARDOUR::frameoffset_t offset)
+VideoMonitor::manual_seek (framepos_t when, bool /*force*/, ARDOUR::frameoffset_t offset)
 {
 	if (!is_started()) { return; }
 	if (!_session) { return; }
