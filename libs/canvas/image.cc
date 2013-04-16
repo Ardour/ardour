@@ -60,6 +60,8 @@ Image::compute_bounding_box () const
 boost::shared_ptr<Image::Data>
 Image::get_image ()
 {
+	/* can be called by any thread */
+
 	int stride = Cairo::ImageSurface::format_stride_for_width (_format, _width);
 	boost::shared_ptr<Data> d (new Data (boost::shared_array<uint8_t> (new uint8_t[stride*_height]), _width, _height, stride, _format));
 
@@ -69,6 +71,8 @@ Image::get_image ()
 void
 Image::put_image (boost::shared_ptr<Data> d)
 {
+	/* can be called by any thread */
+
 	_pending = d;
 	DataReady (); /* EMIT SIGNAL */
 }
@@ -77,8 +81,13 @@ void
 Image::accept_data () 
 {
 	/* must be executed in gui thread */
+
+	begin_change ();
+
 	_current = _pending;
 	_pending.reset ();
 	_need_render = true;
+
+	end_change (); // notify canvas that we need redrawing
 }	     
 

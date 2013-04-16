@@ -48,7 +48,28 @@ public:
 	Cairo::Format format;
     };
 
+    /** 
+     * Returns a shared_ptr to a Data object that can be used to 
+     * write image data to. The Data object will contain a pointer
+     * to the buffer, along with image properties that may be
+     * useful during the data writing.
+     * 
+     * Can be called from any thread BUT ..
+     *
+     * ... to avoid collisions with Image deletion, some synchronization method
+     * may be required or the use of shared_ptr<Image> or similar.
+     */
     boost::shared_ptr<Data> get_image ();
+
+    /**
+     * Queues a Data object to be used to redraw this Image item
+     * at the earliest possible opportunity.
+     *
+     * May be called from any thread BUT ...
+     *
+     * ... to avoid collisions with Image deletion, some synchronization method
+     * may be required or the use of shared_ptr<Image> or similar.
+     */
     void put_image (boost::shared_ptr<Data>);
 
     void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
