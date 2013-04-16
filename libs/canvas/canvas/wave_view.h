@@ -55,6 +55,8 @@ public:
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
+    
+        void rebuild ();
 
 	void set_samples_per_pixel (double);
 	void set_height (Distance);
@@ -74,6 +76,9 @@ public:
 
         void set_shape (Shape);
         Shape shape() const;
+
+        static void set_gradient_waveforms (bool);
+        static bool gradient_waveforms()  { return _gradient_waveforms; }
 
 #ifdef CANVAS_COMPATIBILITY	
 	void*& property_gain_src () {
@@ -149,6 +154,11 @@ private:
 	ARDOUR::frameoffset_t _region_start;
 	
 	mutable std::list<CacheEntry*> _cache;
+       
+        PBD::ScopedConnection invalidation_connection;
+
+        static bool _gradient_waveforms;
+        static PBD::Signal0<void> InvalidateAllImages;
 };
 
 }

@@ -21,7 +21,12 @@
 
 namespace ArdourCanvas {
 
-extern void set_source_rgba (Cairo::RefPtr<Cairo::Context>, Color);
-	
+	extern void color_to_hsv (Color color, double& h, double& s, double& v);
+	extern Color hsv_to_color (double h, double s, double v, double a);
+
+	extern void color_to_rgba (Color, double& r, double& g, double& b, double& a);
+	extern Color rgba_to_color (double r, double g, double b, double a);
+
+	extern void set_source_rgba (Cairo::RefPtr<Cairo::Context>, Color);
 }
 

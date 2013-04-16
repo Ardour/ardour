@@ -38,6 +38,9 @@ using namespace std;
 using namespace ARDOUR;
 using namespace ArdourCanvas;
 
+bool WaveView::_gradient_waveforms = true;
+PBD::Signal0<void> WaveView::InvalidateAllImages;
+
 WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	: Item (parent)
 	, Outline (parent)
@@ -55,7 +58,14 @@ WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region
 	, _amplitude (1.0)
 	, _region_start (0)
 {
-	
+	InvalidateAllImages.connect_same_thread (invalidation_connection, boost::bind (&WaveView::rebuild, this));
+}
+
+void
+WaveView::rebuild ()
+{
+	invalidate_image_cache ();
+	_canvas->item_visual_property_changed (this);
 }
 
 void
@@ -324,26 +334,63 @@ WaveView::CacheEntry::image ()
 
 		_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _n_peaks, _wave_view->_height);
 		Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (_image);
+		PeakData::PeakDatum pmax = 0.0;
+		PeakData::PeakDatum pmin = DBL_MAX;
 
-		_wave_view->setup_outline_context (context);
-		context->move_to (0.5, position (_peaks[0].min));
+		/* Draw the edge of the waveform, top half first, the loop back
+		 * for the bottom half to create a clockwise path
+		 */
+
+		context->move_to (0.5, position (_peaks[0].max));
 		for (int i = 1; i < _n_peaks; ++i) {
 			context->line_to (i + 0.5, position (_wave_view->amplitude() * _peaks[i].max));
+			pmax = max (pmax, _peaks[i].max);
+			pmin = min (pmin, _peaks[i].min);
 		}
-		context->stroke ();
+
+		/* from final top point, move out of the clip zone */
+
+		context->line_to (_n_peaks + 10, position (0.0));
 		
-		context->move_to (0.5, position (_peaks[0].min));
-		for (int i = 1; i < _n_peaks; ++i) {
+		/* bottom half, in reverse */
+
+		for (int i = _n_peaks-1; i >= 0; --i) {
 			context->line_to (i + 0.5, position (_wave_view->amplitude() * _peaks[i].min));
 		}
-		context->stroke ();
+		
+		/* from final bottom point, move out of the clip zone */
 
-		set_source_rgba (context, _wave_view->_fill_color);
-		for (int i = 0; i < _n_peaks; ++i) {
-			context->move_to (i + 0.5, position (_wave_view->amplitude() * (_peaks[i].max)) - 1);
-			context->line_to (i + 0.5, position (_wave_view->amplitude() * (_peaks[i].min)) + 1);
-			context->stroke ();
+		context->line_to (-10.0, position (0.0));
+
+		context->close_path ();
+
+		if (WaveView::gradient_waveforms()) {
+
+			Cairo::RefPtr<Cairo::LinearGradient> gradient (Cairo::LinearGradient::create (0, 0, 0, _wave_view->_height));
+			
+			double r, g, b, a;
+			
+			color_to_rgba (_wave_view->_fill_color, r, g, b, a);
+			gradient->add_color_stop_rgba (0.1, r, g, b, a);
+			gradient->add_color_stop_rgba (0.9, r, g, b, a);
+			
+			/* generate a new color for the middle of the gradient */
+			double h, s, v;
+			color_to_hsv (_wave_view->_fill_color, h, s, v);
+			/* tone down the saturation */
+			s *= 0.75;
+			Color center = hsv_to_color (h, s, v, a);
+			color_to_rgba (center, r, g, b, a);
+			gradient->add_color_stop_rgba (0.5, r, g, b, a);
+			
+			context->set_source (gradient);
+		} else {
+			set_source_rgba (context, _wave_view->_fill_color);
 		}
+
+		context->fill_preserve ();
+		_wave_view->setup_outline_context (context);
+		context->stroke ();
 
 		if (_wave_view->show_zero_line()) {
 			set_source_rgba (context, _wave_view->_zero_color);
@@ -368,6 +415,12 @@ WaveView::CacheEntry::clear_image ()
 {
 	_image.clear ();
 }
-
-
 	    
+void
+WaveView::set_gradient_waveforms (bool yn)
+{
+	if (_gradient_waveforms != yn) {
+		_gradient_waveforms = yn;
+		InvalidateAllImages (); /* EMIT SIGNAL */
+	}
+}
