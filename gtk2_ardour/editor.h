@@ -895,7 +895,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* videtimline related actions */
 	ArdourCanvas::Rectangle*  videotl_bar;
 	Gtk::Label                videotl_label;
-	ArdourCanvas::Group*      videotl_bar_group;
 	ArdourCanvas::Group*      videotl_group;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_video_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_proc_action;

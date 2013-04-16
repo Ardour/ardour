@@ -101,7 +101,7 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	protected:
 
 	PublicEditor *editor;
-	ArdourCanvas::Group *videotl_bar_group;
+	ArdourCanvas::Group *videotl_group;
 	int bar_height;
 
 	std::string _xjadeo_bin;

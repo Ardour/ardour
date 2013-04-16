@@ -45,7 +45,7 @@ using namespace Timecode;
 
 VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Group *vbg, int initial_height)
 	: editor (ed)
-		, videotl_bar_group(vbg)
+		, videotl_group(vbg)
 		, bar_height(initial_height)
 {
 	video_start_offset = 0L;
@@ -379,7 +379,7 @@ VideoTimeLine::update_video_timeline()
 
 	while (video_frames.size() < visible_video_frames) {
 		VideoImageFrame *frame;
-		frame = new VideoImageFrame(*editor, *videotl_bar_group, display_vframe_width, bar_height, video_server_url, translated_filename());
+		frame = new VideoImageFrame(*editor, *videotl_group, display_vframe_width, bar_height, video_server_url, translated_filename());
 		frame->ImgChanged.connect (*this, invalidator (*this), boost::bind (&PublicEditor::queue_visual_videotimeline_update, editor), gui_context());
 		video_frames.push_back(frame);
 	}
