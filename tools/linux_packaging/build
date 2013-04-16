@@ -530,9 +530,13 @@ done
 
 if test x$WITH_HARVID != x ; then
 	cd $APPBIN
-	HARVID_VERSION=$(curl http://ardour.org/files/video-tools/latest_version_numer.txt)
+	HARVID_VERSION=$(curl http://ardour.org/files/video-tools/harvid_version.txt)
 	curl -L http://ardour.org/files/video-tools/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz \
 		| tar -x -z --exclude=README --exclude=harvid.1 --strip-components=1 || exit 1
+	XJADEO_VERSION=$(curl http://ardour.org/files/video-tools/xjadeo_version.txt)
+	curl -L http://ardour.org/files/video-tools/xjadeo-${MULTIARCH}-${XJADEO_VERSION}.tgz \
+		| tar -x -z --exclude=README --exclude=xjadeo.1 --strip-components=1 || exit 1
+	mv xjadeo xjremote
 	cd -
 fi
 
