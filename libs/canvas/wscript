@@ -36,6 +36,7 @@ canvas_sources = [
 	'fill.cc',
         'flag.cc',
 	'group.cc',
+        'image.cc',
 	'item_factory.cc',
 	'line.cc',
         'line_set.cc',
@@ -72,7 +73,7 @@ def build(bld):
 
     obj.export_includes = ['.']
     obj.includes     = ['.']
-    obj.uselib       = 'SIGCPP CAIROMM GTKMM'
+    obj.uselib       = 'SIGCPP CAIROMM GTKMM BOOST'
     obj.use          = [ 'libpbd', 'libevoral', 'libardour', 'libgtkmm2ext' ]
     obj.name         = 'libcanvas'
     obj.target       = 'canvas'
