@@ -239,7 +239,7 @@ WaveView::set_logscaled (bool yn)
 {
 	if (_logscaled != yn) {
 		_logscaled = yn;
-		invalidate_whole_cache ();
+		invalidate_image_cache ();
 		_canvas->item_visual_property_changed (this);
 	}
 }
@@ -249,7 +249,7 @@ WaveView::set_amplitude (double a)
 {
 	if (_amplitude != a) {
 		_amplitude = a;
-		invalidate_whole_cache ();
+		invalidate_image_cache ();
 		_canvas->item_visual_property_changed (this);
 	}
 }
@@ -259,7 +259,7 @@ WaveView::set_zero_color (Color c)
 {
 	if (_zero_color != c) {
 		_zero_color = c;
-		invalidate_whole_cache ();
+		invalidate_image_cache ();
 		_canvas->item_visual_property_changed (this);
 	}
 }
@@ -269,7 +269,7 @@ WaveView::set_clip_color (Color c)
 {
 	if (_clip_color != c) {
 		_clip_color = c;
-		invalidate_whole_cache ();
+		invalidate_image_cache ();
 		_canvas->item_visual_property_changed (this);
 	}
 }
@@ -279,7 +279,7 @@ WaveView::set_show_zero_line (bool yn)
 {
 	if (_show_zero != yn) {
 		_show_zero = yn;
-		invalidate_whole_cache ();
+		invalidate_image_cache ();
 		_canvas->item_visual_property_changed (this);
 	}
 }
@@ -289,6 +289,7 @@ WaveView::set_shape (Shape s)
 {
 	if (_shape != s) {
 		_shape = s;
+		invalidate_image_cache ();
 		_canvas->item_visual_property_changed (this);
 	}
 }
@@ -355,49 +356,82 @@ WaveView::CacheEntry::image ()
 
 		context->begin_new_path();
 
-		if (_wave_view->_logscaled) {
-			for (int i = 0; i < _n_peaks; ++i) {
-				Coord y = _peaks[i].max;
-				if (y > 0.0) {
-					context->line_to (i + 0.5, position (_wave_view->amplitude() * alt_log_meter (fast_coefficient_to_dB (y))));
-				} else if (y < 0.0) {
-					context->line_to (i + 0.5, position (_wave_view->amplitude() * -alt_log_meter (fast_coefficient_to_dB (-y))));
-				} else {
-					context->line_to (i + 0.5, position (0.0));
+
+		if (_wave_view->_shape == WaveView::Rectified) {
+
+			/* top edge of waveform is based on max (fabs (peak_min, peak_max))
+			 */
+
+			if (_wave_view->_logscaled) {
+				for (int i = 0; i < _n_peaks; ++i) {
+					context->line_to (i + 0.5, position (_wave_view->amplitude() * 
+									     alt_log_meter (fast_coefficient_to_dB (
+												    max (fabs (_peaks[i].max), fabs (_peaks[i].min))))));
 				}
-			} 
+			} else {
+				for (int i = 0; i < _n_peaks; ++i) {
+					context->line_to (i + 0.5, position (_wave_view->amplitude() * max (fabs (_peaks[i].max), fabs (_peaks[i].min))));
+				}
+			}
+
 		} else {
-			for (int i = 0; i < _n_peaks; ++i) {
-				context->line_to (i + 0.5, position (_wave_view->amplitude() * _peaks[i].max));
+			if (_wave_view->_logscaled) {
+				for (int i = 0; i < _n_peaks; ++i) {
+					Coord y = _peaks[i].max;
+					if (y > 0.0) {
+						context->line_to (i + 0.5, position (_wave_view->amplitude() * alt_log_meter (fast_coefficient_to_dB (y))));
+					} else if (y < 0.0) {
+						context->line_to (i + 0.5, position (_wave_view->amplitude() * -alt_log_meter (fast_coefficient_to_dB (-y))));
+					} else {
+						context->line_to (i + 0.5, position (0.0));
+					}
+				} 
+			} else {
+				for (int i = 0; i < _n_peaks; ++i) {
+					context->line_to (i + 0.5, position (_wave_view->amplitude() * _peaks[i].max));
+				}
 			}
 		}
 
 		/* from final top point, move out of the clip zone */
 
 		context->line_to (_n_peaks + 10, position (0.0));
-		
+
+	
 		/* bottom half, in reverse */
+	
+		if (_wave_view->_shape == WaveView::Rectified) {
+			
+			/* lower half: drop to the bottom, then a line back to
+			 * beyond the left edge of the clip region 
+			 */
 
-		if (_wave_view->_logscaled) {
-			for (int i = _n_peaks-1; i >= 0; --i) {
-				Coord y = _peaks[i].min;
-				if (y > 0.0) {
-					context->line_to (i + 0.5, position (_wave_view->amplitude() * alt_log_meter (fast_coefficient_to_dB (y))));
-				} else if (y < 0.0) {
-					context->line_to (i + 0.5, position (_wave_view->amplitude() * -alt_log_meter (fast_coefficient_to_dB (-y))));
-				} else {
-					context->line_to (i + 0.5, position (0.0));
-				}
-			} 
+			context->line_to (_n_peaks + 10, _wave_view->_height);
+			context->line_to (-10.0, _wave_view->_height);
+
 		} else {
-			for (int i = _n_peaks-1; i >= 0; --i) {
-				context->line_to (i + 0.5, position (_wave_view->amplitude() * _peaks[i].min));
-			}
-		}
-		
-		/* from final bottom point, move out of the clip zone */
 
-		context->line_to (-10.0, position (0.0));
+			if (_wave_view->_logscaled) {
+				for (int i = _n_peaks-1; i >= 0; --i) {
+					Coord y = _peaks[i].min;
+					if (y > 0.0) {
+						context->line_to (i + 0.5, position (_wave_view->amplitude() * alt_log_meter (fast_coefficient_to_dB (y))));
+					} else if (y < 0.0) {
+						context->line_to (i + 0.5, position (_wave_view->amplitude() * -alt_log_meter (fast_coefficient_to_dB (-y))));
+					} else {
+						context->line_to (i + 0.5, position (0.0));
+					}
+				} 
+			} else {
+				for (int i = _n_peaks-1; i >= 0; --i) {
+					context->line_to (i + 0.5, position (_wave_view->amplitude() * _peaks[i].min));
+				}
+			}
+		
+			/* from final bottom point, move out of the clip zone */
+			
+			context->line_to (-10.0, position (0.0));
+		}
 
 		context->close_path ();
 
@@ -405,20 +439,32 @@ WaveView::CacheEntry::image ()
 
 			Cairo::RefPtr<Cairo::LinearGradient> gradient (Cairo::LinearGradient::create (0, 0, 0, _wave_view->_height));
 			
+			double stops[3];
+			
 			double r, g, b, a;
 			
+			if (_wave_view->_shape == Rectified) {
+				stops[0] = 0.1;
+				stops[0] = 0.3;
+				stops[0] = 0.9;
+			} else {
+				stops[0] = 0.1;
+				stops[1] = 0.5;
+				stops[2] = 0.9;
+			}
+
 			color_to_rgba (_wave_view->_fill_color, r, g, b, a);
-			gradient->add_color_stop_rgba (0.1, r, g, b, a);
-			gradient->add_color_stop_rgba (0.9, r, g, b, a);
+			gradient->add_color_stop_rgba (stops[0], r, g, b, a);
+			gradient->add_color_stop_rgba (stops[2], r, g, b, a);
 			
 			/* generate a new color for the middle of the gradient */
 			double h, s, v;
 			color_to_hsv (_wave_view->_fill_color, h, s, v);
 			/* tone down the saturation */
-			s *= 0.75;
+			s *= 0.60;
 			Color center = hsv_to_color (h, s, v, a);
 			color_to_rgba (center, r, g, b, a);
-			gradient->add_color_stop_rgba (0.5, r, g, b, a);
+			gradient->add_color_stop_rgba (stops[1], r, g, b, a);
 			
 			context->set_source (gradient);
 		} else {
