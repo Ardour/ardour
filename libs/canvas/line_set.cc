@@ -1,4 +1,3 @@
-#include "pbd/xml++.h"
 #include "canvas/line_set.h"
 #include "canvas/utils.h"
 

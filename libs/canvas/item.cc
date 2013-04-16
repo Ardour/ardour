@@ -1,6 +1,5 @@
 #include "pbd/compose.h"
 #include "pbd/stacktrace.h"
-#include "pbd/xml++.h"
 #include "pbd/convert.h"
 
 #include "ardour/utils.h"

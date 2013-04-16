@@ -20,8 +20,6 @@
 #include <exception>
 #include <algorithm>
 
-#include "pbd/xml++.h"
-
 #include "canvas/curve.h"
 
 using namespace ArdourCanvas;

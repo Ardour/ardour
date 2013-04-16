@@ -1,7 +1,6 @@
 #include <iostream>
 #include <cairomm/context.h>
 #include "pbd/stacktrace.h"
-#include "pbd/xml++.h"
 #include "pbd/compose.h"
 #include "canvas/rectangle.h"
 #include "canvas/debug.h"

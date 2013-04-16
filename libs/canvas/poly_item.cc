@@ -1,6 +1,5 @@
 #include <algorithm>
 
-#include "pbd/xml++.h"
 #include "pbd/compose.h"
 
 #include "canvas/poly_item.h"

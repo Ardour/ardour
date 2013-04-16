@@ -2,8 +2,6 @@
 
 #include "gtkmm2ext/gui_thread.h"
 
-#include "pbd/xml++.h"
-
 using namespace ArdourCanvas;
 
 Image::Image (Group* group, Cairo::Format fmt, int width, int height)

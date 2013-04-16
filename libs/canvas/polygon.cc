@@ -1,4 +1,3 @@
-#include "pbd/xml++.h"
 #include "canvas/polygon.h"
 
 using namespace ArdourCanvas;

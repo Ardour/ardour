@@ -1,4 +1,3 @@
-#include "pbd/xml++.h"
 #include "canvas/poly_line.h"
 
 using namespace ArdourCanvas;

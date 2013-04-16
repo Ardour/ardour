@@ -3,7 +3,6 @@
 
 #include "pbd/stacktrace.h"
 #include "pbd/compose.h"
-#include "pbd/xml++.h"
 
 #include "canvas/group.h"
 #include "canvas/types.h"

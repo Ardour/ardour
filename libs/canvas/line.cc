@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <cairomm/context.h>
-#include "pbd/xml++.h"
 #include "pbd/compose.h"
 #include "canvas/line.h"
 #include "canvas/types.h"

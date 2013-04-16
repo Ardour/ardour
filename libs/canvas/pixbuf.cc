@@ -1,8 +1,6 @@
 #include <cairomm/cairomm.h>
 #include <gdkmm/general.h>
 
-#include "pbd/xml++.h"
-
 #include "canvas/pixbuf.h"
 
 using namespace std;

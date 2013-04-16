@@ -26,7 +26,6 @@
 #include <gtkmm/adjustment.h>
 #include <gtkmm/label.h>
 
-#include "pbd/xml++.h"
 #include "pbd/compose.h"
 #include "pbd/stacktrace.h"
 

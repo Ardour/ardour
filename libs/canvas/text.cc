@@ -3,7 +3,6 @@
 #include <cairomm/cairomm.h>
 #include <gtkmm/label.h>
 
-#include "pbd/xml++.h"
 #include "pbd/stacktrace.h"
 
 #include "canvas/text.h"
