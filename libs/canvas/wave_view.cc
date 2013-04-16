@@ -18,6 +18,7 @@
 
 */
 
+#include <cmath>
 #include <cairomm/cairomm.h>
 
 #include "gtkmm2ext/utils.h"
@@ -26,6 +27,7 @@
 #include "pbd/signals.h"
 
 #include "ardour/types.h"
+#include "ardour/dB.h"
 #include "ardour/audioregion.h"
 
 #include "canvas/wave_view.h"
@@ -327,6 +329,18 @@ WaveView::CacheEntry::~CacheEntry ()
 {
 }
 
+static inline float
+_log_meter (float power, double lower_db, double upper_db, double non_linearity)
+{
+	return (power < lower_db ? 0.0 : pow((power-lower_db)/(upper_db-lower_db), non_linearity));
+}
+
+static inline float
+alt_log_meter (float power)
+{
+	return _log_meter (power, -192.0, 0.0, 8.0);
+}
+
 Cairo::RefPtr<Cairo::ImageSurface>
 WaveView::CacheEntry::image ()
 {
@@ -334,18 +348,28 @@ WaveView::CacheEntry::image ()
 
 		_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _n_peaks, _wave_view->_height);
 		Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (_image);
-		PeakData::PeakDatum pmax = 0.0;
-		PeakData::PeakDatum pmin = DBL_MAX;
 
 		/* Draw the edge of the waveform, top half first, the loop back
 		 * for the bottom half to create a clockwise path
 		 */
 
-		context->move_to (0.5, position (_peaks[0].max));
-		for (int i = 1; i < _n_peaks; ++i) {
-			context->line_to (i + 0.5, position (_wave_view->amplitude() * _peaks[i].max));
-			pmax = max (pmax, _peaks[i].max);
-			pmin = min (pmin, _peaks[i].min);
+		context->begin_new_path();
+
+		if (_wave_view->_logscaled) {
+			for (int i = 0; i < _n_peaks; ++i) {
+				Coord y = _peaks[i].max;
+				if (y > 0.0) {
+					context->line_to (i + 0.5, position (_wave_view->amplitude() * alt_log_meter (fast_coefficient_to_dB (y))));
+				} else if (y < 0.0) {
+					context->line_to (i + 0.5, position (_wave_view->amplitude() * -alt_log_meter (fast_coefficient_to_dB (-y))));
+				} else {
+					context->line_to (i + 0.5, position (0.0));
+				}
+			} 
+		} else {
+			for (int i = 0; i < _n_peaks; ++i) {
+				context->line_to (i + 0.5, position (_wave_view->amplitude() * _peaks[i].max));
+			}
 		}
 
 		/* from final top point, move out of the clip zone */
@@ -354,8 +378,21 @@ WaveView::CacheEntry::image ()
 		
 		/* bottom half, in reverse */
 
-		for (int i = _n_peaks-1; i >= 0; --i) {
-			context->line_to (i + 0.5, position (_wave_view->amplitude() * _peaks[i].min));
+		if (_wave_view->_logscaled) {
+			for (int i = _n_peaks-1; i >= 0; --i) {
+				Coord y = _peaks[i].min;
+				if (y > 0.0) {
+					context->line_to (i + 0.5, position (_wave_view->amplitude() * alt_log_meter (fast_coefficient_to_dB (y))));
+				} else if (y < 0.0) {
+					context->line_to (i + 0.5, position (_wave_view->amplitude() * -alt_log_meter (fast_coefficient_to_dB (-y))));
+				} else {
+					context->line_to (i + 0.5, position (0.0));
+				}
+			} 
+		} else {
+			for (int i = _n_peaks-1; i >= 0; --i) {
+				context->line_to (i + 0.5, position (_wave_view->amplitude() * _peaks[i].min));
+			}
 		}
 		
 		/* from final bottom point, move out of the clip zone */
@@ -405,8 +442,14 @@ WaveView::CacheEntry::image ()
 
 
 Coord
-WaveView::CacheEntry::position (Coord s) const
+WaveView::CacheEntry::position (double s) const
 {
+	switch (_wave_view->_shape) {
+	case Rectified:
+		return _wave_view->_height - (s * _wave_view->_height);
+	default:
+		break;
+	}
 	return (s+1.0) * (_wave_view->_height / 2.0);
 }
 
