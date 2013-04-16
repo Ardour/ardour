@@ -79,7 +79,7 @@ TapeAudioRegionView::~TapeAudioRegionView()
 }
 
 void
-TapeAudioRegionView::update (uint32_t n)
+TapeAudioRegionView::update (uint32_t /*n*/)
 {
 	/* check that all waves are build and ready */
 
@@ -88,7 +88,8 @@ TapeAudioRegionView::update (uint32_t n)
 	}
 
 	ENSURE_GUI_THREAD (*this, &TapeAudioRegionView::update, n);
-	waves[n]->rebuild ();
+	// CAIROCANVAS
+	// waves[n]->rebuild ();
 }
 
 void

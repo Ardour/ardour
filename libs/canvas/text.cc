@@ -119,7 +119,9 @@ Text::compute_bounding_box () const
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
 	
 	layout->set_text (_text);
-	layout->set_font_description (*_font_description);
+	if (_font_description) {
+		layout->set_font_description (*_font_description);
+	}
 	layout->set_alignment (_alignment);
 	Pango::Rectangle const r = layout->get_ink_extents ();
 	

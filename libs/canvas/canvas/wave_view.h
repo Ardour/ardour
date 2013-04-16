@@ -46,6 +46,11 @@ namespace ArdourCanvas {
 class WaveView : virtual public Item, public Outline, public Fill
 {
 public:
+        enum Shape { 
+		Normal,
+		Rectified,
+        };
+
 	WaveView (Group *, boost::shared_ptr<ARDOUR::AudioRegion>);
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
@@ -58,8 +63,17 @@ public:
 	
 	void region_resized ();
 
-	/* XXX */
-	void rebuild () {}
+        void set_show_zero_line (bool);
+        bool show_zero_line() const { return _show_zero; }
+        void set_zero_color (Color);
+        void set_clip_color (Color);
+        void set_amplitude (double);
+        double amplitude() const { return _amplitude; }
+        void set_logscaled (bool);
+        bool logscaled() const { return _logscaled; }
+
+        void set_shape (Shape);
+        Shape shape() const;
 
 #ifdef CANVAS_COMPATIBILITY	
 	void*& property_gain_src () {
@@ -68,22 +82,9 @@ public:
 	void*& property_gain_function () {
 		return _foo_void;
 	}
-	bool& property_rectified () {
-		return _foo_bool;
-	}
-	bool& property_logscaled () {
-		return _foo_bool;
-	}
 	double& property_amplitude_above_axis () {
 		return _foo_double;
 	}
-	Color& property_clip_color () {
-		return _foo_uint;
-	}
-	Color& property_zero_color () {
-		return _foo_uint;
-	}
-
 private:
 	void* _foo_void;
 	bool _foo_bool;
@@ -114,7 +115,7 @@ private:
 	        void clear_image ();
 
 	private:
-		Coord position (float) const;
+		Coord position (Coord) const;
 		
 		WaveView const * _wave_view;
 		int _start;
@@ -135,6 +136,13 @@ private:
 	double _samples_per_pixel;
 	Coord _height;
 	Color _wave_color;
+        bool  _show_zero;
+        Color _zero_color;
+        Shape _shape;
+        Color _clip_color;
+        bool  _logscaled;
+        double _amplitude;
+
 	/** The `start' value to use for the region; we can't use the region's
 	 *  value as the crossfade editor needs to alter it.
 	 */

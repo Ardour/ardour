@@ -30,6 +30,7 @@
 
 #include "canvas/wave_view.h"
 #include "canvas/utils.h"
+#include "canvas/canvas.h"
 
 #include <gdkmm/general.h>
 
@@ -46,6 +47,12 @@ WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region
 	, _samples_per_pixel (0)
 	, _height (64)
 	, _wave_color (0xffffffff)
+	, _show_zero (true)
+	, _zero_color (0xff0000ff)
+	, _shape (Normal)
+	, _clip_color (0xff0000ff)
+	, _logscaled (false)
+	, _amplitude (1.0)
 	, _region_start (0)
 {
 	
@@ -216,6 +223,65 @@ WaveView::region_resized ()
 }
 
 void
+WaveView::set_logscaled (bool yn)
+{
+	if (_logscaled != yn) {
+		_logscaled = yn;
+		invalidate_whole_cache ();
+		_canvas->item_visual_property_changed (this);
+	}
+}
+
+void
+WaveView::set_amplitude (double a)
+{
+	if (_amplitude != a) {
+		_amplitude = a;
+		invalidate_whole_cache ();
+		_canvas->item_visual_property_changed (this);
+	}
+}
+
+void
+WaveView::set_zero_color (Color c)
+{
+	if (_zero_color != c) {
+		_zero_color = c;
+		invalidate_whole_cache ();
+		_canvas->item_visual_property_changed (this);
+	}
+}
+
+void
+WaveView::set_clip_color (Color c)
+{
+	if (_clip_color != c) {
+		_clip_color = c;
+		invalidate_whole_cache ();
+		_canvas->item_visual_property_changed (this);
+	}
+}
+
+void
+WaveView::set_show_zero_line (bool yn)
+{
+	if (_show_zero != yn) {
+		_show_zero = yn;
+		invalidate_whole_cache ();
+		_canvas->item_visual_property_changed (this);
+	}
+}
+
+void
+WaveView::set_shape (Shape s)
+{
+	if (_shape != s) {
+		_shape = s;
+		_canvas->item_visual_property_changed (this);
+	}
+}
+
+void
 WaveView::set_region_start (frameoffset_t start)
 {
 	_region_start = start;
@@ -262,20 +328,27 @@ WaveView::CacheEntry::image ()
 		_wave_view->setup_outline_context (context);
 		context->move_to (0.5, position (_peaks[0].min));
 		for (int i = 1; i < _n_peaks; ++i) {
-			context->line_to (i + 0.5, position (_peaks[i].max));
+			context->line_to (i + 0.5, position (_wave_view->amplitude() * _peaks[i].max));
 		}
 		context->stroke ();
 		
 		context->move_to (0.5, position (_peaks[0].min));
 		for (int i = 1; i < _n_peaks; ++i) {
-			context->line_to (i + 0.5, position (_peaks[i].min));
+			context->line_to (i + 0.5, position (_wave_view->amplitude() * _peaks[i].min));
 		}
 		context->stroke ();
 
 		set_source_rgba (context, _wave_view->_fill_color);
 		for (int i = 0; i < _n_peaks; ++i) {
-			context->move_to (i + 0.5, position (_peaks[i].max) - 1);
-		 	context->line_to (i + 0.5, position (_peaks[i].min) + 1);
+			context->move_to (i + 0.5, position (_wave_view->amplitude() * (_peaks[i].max)) - 1);
+			context->line_to (i + 0.5, position (_wave_view->amplitude() * (_peaks[i].min)) + 1);
+			context->stroke ();
+		}
+
+		if (_wave_view->show_zero_line()) {
+			set_source_rgba (context, _wave_view->_zero_color);
+			context->move_to (0, position (0.0));
+			context->line_to (_n_peaks, position (0.0));
 			context->stroke ();
 		}
 	}
@@ -285,9 +358,9 @@ WaveView::CacheEntry::image ()
 
 
 Coord
-WaveView::CacheEntry::position (float s) const
+WaveView::CacheEntry::position (Coord s) const
 {
-	return (s + 1) * _wave_view->_height / 2;
+	return (s+1.0) * (_wave_view->_height / 2.0);
 }
 
 void
@@ -297,4 +370,4 @@ WaveView::CacheEntry::clear_image ()
 }
 
 
-		
+	    

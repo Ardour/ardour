@@ -165,6 +165,19 @@ Canvas::item_shown_or_hidden (Item* item)
 	}
 }
 
+/** Called when an item has a change to its visual properties
+ *  that do NOT affect its bounding box.
+ *  @param item Item that has been modified.
+ */
+void
+Canvas::item_visual_property_changed (Item* item)
+{
+	boost::optional<Rect> bbox = item->bounding_box ();
+	if (bbox) {
+		queue_draw_item_area (item, bbox.get ());
+	}
+}
+
 /** Called when an item has changed, but not moved.
  *  @param item Item that has changed.
  *  @param pre_change_bounding_box The bounding box of item before the change,

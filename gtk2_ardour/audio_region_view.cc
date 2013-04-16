@@ -330,10 +330,10 @@ AudioRegionView::fade_out_active_changed ()
 void
 AudioRegionView::region_scale_amplitude_changed ()
 {
-	ENSURE_GUI_THREAD (*this, &AudioRegionView::region_scale_amplitude_changed)
+	double g = audio_region()->scale_amplitude ();
 
 	for (uint32_t n = 0; n < waves.size(); ++n) {
-		waves[n]->rebuild ();
+		waves[n]->set_amplitude (g);
 	}
 }
 
@@ -766,8 +766,8 @@ AudioRegionView::set_colors ()
 			waves[n]->set_outline_color (ARDOUR_UI::config()->canvasvar_WaveForm.get());
 		}
 
-		waves[n]->property_clip_color() = ARDOUR_UI::config()->canvasvar_WaveFormClip.get();
-		waves[n]->property_zero_color() = ARDOUR_UI::config()->canvasvar_ZeroLine.get();
+		waves[n]->set_clip_color (ARDOUR_UI::config()->canvasvar_WaveFormClip.get());
+		waves[n]->set_zero_color (ARDOUR_UI::config()->canvasvar_ZeroLine.get());
 	}
 }
 
@@ -780,7 +780,7 @@ AudioRegionView::setup_waveform_visibility ()
 			   this when waveforms are hidden.
 			*/
 			// CAIROCANVAS
-			//waves[n]->set_samples_per_pixel (_samples_per_pixel);
+			// waves[n]->set_samples_per_pixel (_samples_per_pixel);
 			waves[n]->show();
 		}
 	} else {
@@ -909,14 +909,22 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		wave->set_fill_color (ARDOUR_UI::config()->canvasvar_WaveFormFill.get());
 	}
 
-	wave->property_clip_color() = ARDOUR_UI::config()->canvasvar_WaveFormClip.get();
-	wave->property_zero_color() = ARDOUR_UI::config()->canvasvar_ZeroLine.get();
+	wave->set_clip_color (ARDOUR_UI::config()->canvasvar_WaveFormClip.get());
+	wave->set_zero_color (ARDOUR_UI::config()->canvasvar_ZeroLine.get());
 	// CAIROCANVAS
 	// wave->property_zero_line() = true;
 
 	wave->set_region_start (_region->start());
-	wave->property_rectified() = Config->get_waveform_shape() == Rectified;
-	wave->property_logscaled() = Config->get_waveform_scale() == Logarithmic;
+
+	switch (Config->get_waveform_shape()) {
+	case Rectified:
+		wave->set_shape (WaveView::Rectified);
+		break;
+	default:
+		wave->set_shape (WaveView::Normal);
+	}
+		
+	wave->set_logscaled (Config->get_waveform_scale() == Logarithmic);
 
 	if (!Config->get_show_waveforms ()) {
 		wave->hide();
@@ -1025,8 +1033,17 @@ AudioRegionView::remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent */*
 void
 AudioRegionView::setup_waveform_shape ()
 {
+	WaveView::Shape shape;
+
+	switch (Config->get_waveform_shape()) {
+	case Rectified:
+		shape = WaveView::Rectified;
+		break;
+	default:
+		shape = WaveView::Normal;
+	}
 	for (vector<WaveView *>::iterator wave = waves.begin(); wave != waves.end() ; ++wave) {
-		(*wave)->property_rectified() = Config->get_waveform_shape() == Rectified;
+		(*wave)->set_shape (shape);
 	}
 }
 
@@ -1034,7 +1051,7 @@ void
 AudioRegionView::setup_waveform_scale ()
 {
 	for (vector<WaveView *>::iterator wave = waves.begin(); wave != waves.end() ; ++wave) {
-		(*wave)->property_logscaled() = Config->get_waveform_scale() == Logarithmic;
+		(*wave)->set_logscaled (Config->get_waveform_scale() == Logarithmic);
 	}
 }
 

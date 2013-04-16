@@ -147,8 +147,8 @@ AudioGhostRegion::set_colors ()
 	for (uint32_t n=0; n < waves.size(); ++n) {
 		waves[n]->set_outline_color (ARDOUR_UI::config()->canvasvar_GhostTrackWave.get());
 		waves[n]->set_fill_color (fill_color);
-		waves[n]->property_clip_color() = ARDOUR_UI::config()->canvasvar_GhostTrackWaveClip.get();
-		waves[n]->property_zero_color() = ARDOUR_UI::config()->canvasvar_GhostTrackZeroLine.get();
+		waves[n]->set_clip_color (ARDOUR_UI::config()->canvasvar_GhostTrackWaveClip.get());
+		waves[n]->set_zero_color (ARDOUR_UI::config()->canvasvar_GhostTrackZeroLine.get());
 	}
 }
 
