@@ -35,19 +35,20 @@ Image::Image (Group* group, Cairo::Format fmt, int width, int height)
 void 
 Image::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	if (_current) {
-		_surface = Cairo::ImageSurface::create (_current->data.get(),
-							_current->format,
-							_current->width,
-							_current->height,
-							_current->stride);
+	if (_need_render && _pending) {
+		_surface = Cairo::ImageSurface::create (_pending->data.get(),
+							_pending->format,
+							_pending->width,
+							_pending->height,
+							_pending->stride);
+		_current = _pending;
 	}
 
-	_current.reset ();
-
-	context->set_source (_surface, 0, 0);
-	context->rectangle (area.x0, area.y0, area.width(), area.height());
-	context->fill ();
+	if (_surface) {
+		context->set_source (_surface, 0, 0);
+		context->rectangle (area.x0, area.y0, area.width(), area.height());
+		context->fill ();
+	}
 }
 
 void
@@ -83,11 +84,7 @@ Image::accept_data ()
 	/* must be executed in gui thread */
 
 	begin_change ();
-
-	_current = _pending;
-	_pending.reset ();
 	_need_render = true;
-
 	end_change (); // notify canvas that we need redrawing
 }	     
 
