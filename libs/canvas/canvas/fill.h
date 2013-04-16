@@ -11,9 +11,6 @@ class Fill : virtual public Item
 public:
 	Fill (Group *);
 
-	void add_fill_state (XMLNode *) const;
-	void set_fill_state (XMLNode const *);
-
 	Color fill_color () const {
 		return _fill_color;
 	}

@@ -420,8 +420,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 
 	virtual void get_regions_at (RegionSelection &, framepos_t where, TrackViewList const &) const = 0;
 
-	virtual void save_canvas_state () = 0;
-
 	/// Singleton instance, set up by Editor::Editor()
 
 	static PublicEditor* _instance;

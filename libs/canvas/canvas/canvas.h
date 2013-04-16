@@ -32,8 +32,6 @@
 #include "pbd/signals.h"
 #include "canvas/root_group.h"
 
-class XMLTree;
-
 namespace ArdourCanvas
 {
 
@@ -54,7 +52,6 @@ class Canvas
 {
 public:
 	Canvas ();
-	Canvas (XMLTree const *);
 	virtual ~Canvas () {}
 
 	/** called to request a redraw of an area of the canvas */
@@ -79,9 +76,7 @@ public:
 	void item_changed (Item *, boost::optional<Rect>);
 	void item_moved (Item *, boost::optional<Rect>);
 
-	XMLTree* get_state () const;
-
-	virtual Cairo::RefPtr<Cairo::Context> context () = 0;
+		virtual Cairo::RefPtr<Cairo::Context> context () = 0;
 
 	std::list<Rect> const & renders () const {
 		return _renders;
@@ -115,7 +110,6 @@ class GtkCanvas : public Canvas, public Gtk::EventBox
 {
 public:
 	GtkCanvas ();
-	GtkCanvas (XMLTree const *);
 
 	void request_redraw (Rect const &);
 	void request_size (Duple);

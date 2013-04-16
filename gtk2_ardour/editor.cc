@@ -5528,12 +5528,3 @@ Editor::shift_key_released ()
 {
 	_stepping_axis_view = 0;
 }
-
-
-void
-Editor::save_canvas_state ()
-{
-	XMLTree* tree = static_cast<ArdourCanvas::Canvas*>(_track_canvas)->get_state ();
-	string path = string_compose ("%1/canvas-state.xml", _session->path());
-	tree->write (path);
-}

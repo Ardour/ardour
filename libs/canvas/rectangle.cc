@@ -194,39 +194,3 @@ Rectangle::set_outline_what (int what)
 	set_outline_what ((What) what);
 }
 
-XMLNode *
-Rectangle::get_state () const
-{
-	XMLNode* node = new XMLNode ("Rectangle");
-#ifdef CANVAS_DEBUG
-	if (!name.empty ()) {
-		node->add_property ("name", name);
-	}
-#endif	
-	node->add_property ("x0", string_compose ("%1", _rect.x0));
-	node->add_property ("y0", string_compose ("%1", _rect.y0));
-	node->add_property ("x1", string_compose ("%1", _rect.x1));
-	node->add_property ("y1", string_compose ("%1", _rect.y1));
-	node->add_property ("outline-what", string_compose ("%1", _outline_what));
-
-	add_item_state (node);
-	add_outline_state (node);
-	add_fill_state (node);
-	return node;
-}
-
-void
-Rectangle::set_state (XMLNode const * node)
-{
-	_rect.x0 = atof (node->property("x0")->value().c_str());
-	_rect.y0 = atof (node->property("y0")->value().c_str());
-	_rect.x1 = atof (node->property("x1")->value().c_str());
-	_rect.y1 = atof (node->property("y1")->value().c_str());
-	_outline_what = (What) atoi (node->property("outline-what")->value().c_str());
-
-	set_item_state (node);
-	set_outline_state (node);
-	set_fill_state (node);
-
-	_bounding_box_dirty = true;
-}

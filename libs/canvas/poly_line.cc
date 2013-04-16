@@ -19,20 +19,3 @@ PolyLine::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		context->stroke ();
 	}
 }
-
-
-XMLNode *
-PolyLine::get_state () const
-{
-	XMLNode* node = new XMLNode ("PolyLine");
-	add_poly_item_state (node);
-	add_outline_state (node);
-	return node;
-}
-
-void
-PolyLine::set_state (XMLNode const * node)
-{
-	set_poly_item_state (node);
-	set_outline_state (node);
-}

@@ -165,19 +165,6 @@ WaveView::compute_bounding_box () const
 	_bounding_box_dirty = false;
 }
 	
-XMLNode *
-WaveView::get_state () const
-{
-	/* XXX */
-	return new XMLNode ("WaveView");
-}
-
-void
-WaveView::set_state (XMLNode const * /*node*/)
-{
-	/* XXX */
-}
-
 void
 WaveView::set_height (Distance height)
 {

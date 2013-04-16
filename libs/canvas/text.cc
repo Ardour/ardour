@@ -131,24 +131,6 @@ Text::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) cons
 	context->fill ();
 }
 
-XMLNode *
-Text::get_state () const
-{
-	XMLNode* node = new XMLNode ("Text");
-#ifdef CANVAS_DEBUG
-	if (!name.empty ()) {
-		node->add_property ("name", name);
-	}
-#endif
-	return node;
-}
-
-void
-Text::set_state (XMLNode const * /*node*/)
-{
-	/* XXX */
-}
-
 void
 Text::set_alignment (Pango::Alignment alignment)
 {

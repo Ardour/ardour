@@ -454,8 +454,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		_stepping_axis_view = v;
 	}
 
-	void save_canvas_state ();
-	
 	ArdourCanvas::Group* get_trackview_group () const { return _trackview_group; }
         ArdourCanvas::Group* get_time_bars_group () const;
         ArdourCanvas::Group* get_track_canvas_group () const;

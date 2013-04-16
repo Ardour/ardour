@@ -49,15 +49,3 @@ Pixbuf::pixbuf() {
 	return _pixbuf;
 }
 
-XMLNode *
-Pixbuf::get_state () const
-{
-	/* XXX */
-	return new XMLNode ("Pixbuf");
-}
-
-void
-Pixbuf::set_state (XMLNode const * /*node*/)
-{
-	/* XXX */
-}

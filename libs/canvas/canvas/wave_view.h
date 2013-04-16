@@ -51,9 +51,6 @@ public:
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
 
-	XMLNode* get_state () const;
-	void set_state (XMLNode const *);
-
 	void set_samples_per_pixel (double);
 	void set_height (Distance);
 	void set_channel (int);

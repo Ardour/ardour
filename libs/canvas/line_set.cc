@@ -21,12 +21,6 @@ LineSet::LineSet (Group* parent)
 
 }
 
-XMLNode *
-LineSet::get_state () const
-{
-	/* XXX */
-	return new XMLNode ("LineSet");
-}
 
 void
 LineSet::compute_bounding_box () const

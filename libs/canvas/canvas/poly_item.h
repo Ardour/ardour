@@ -13,9 +13,6 @@ public:
 
 	void compute_bounding_box () const;
 
-	void add_poly_item_state (XMLNode *) const;
-	void set_poly_item_state (XMLNode const *);
-	
 	virtual void set (Points const &);
 	Points const & get () const;
 

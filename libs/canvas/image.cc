@@ -66,15 +66,3 @@ Image::accept_data ()
 	_need_render = true;
 }	     
 
-XMLNode *
-Image::get_state () const
-{
-	/* XXX */
-	return new XMLNode ("Image");
-}
-
-void
-Image::set_state (XMLNode const * /*node*/)
-{
-	/* XXX */
-}

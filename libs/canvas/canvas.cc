@@ -46,35 +46,6 @@ Canvas::Canvas ()
 	set_epoch ();
 }
 
-/** Construct a new Canvas from an XML tree
- *  @param tree XML Tree.
- */
-Canvas::Canvas (XMLTree const * tree)
-	: _root (this)
-	, _log_renders (true)
-	, _scroll_offset_x (0)
-	, _scroll_offset_y (0)
-{
-	set_epoch ();
-	
-	/* XXX: little bit hacky */
-	_root.set_state (tree->root()->child ("Group"));
-
-	XMLNodeList const & children = tree->root()->children ();
-	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-		if ((*i)->name() == ("Render")) {
-			_renders.push_back (
-				Rect (
-					atof ((*i)->property ("x0")->value().c_str()),
-					atof ((*i)->property ("y0")->value().c_str()),
-					atof ((*i)->property ("x1")->value().c_str()),
-					atof ((*i)->property ("x1")->value().c_str())
-					)
-				);
-		}
-	}
-}
-
 void
 Canvas::scroll_to (Coord x, Coord y)
 {
@@ -255,42 +226,9 @@ Canvas::queue_draw_item_area (Item* item, Rect area)
 	request_redraw (canvas_area);
 }
 
-/** @return An XML description of the canvas and its objects */
-XMLTree *
-Canvas::get_state () const
-{
-	XMLTree* tree = new XMLTree ();
-	XMLNode* node = new XMLNode ("Canvas");
-	node->add_child_nocopy (*_root.get_state ());
-
-	for (list<Rect>::const_iterator i = _renders.begin(); i != _renders.end(); ++i) {
-		XMLNode* render = new XMLNode ("Render");
-		render->add_property ("x0", string_compose ("%1", i->x0));
-		render->add_property ("y0", string_compose ("%1", i->y0));
-		render->add_property ("x1", string_compose ("%1", i->x1));
-		render->add_property ("y1", string_compose ("%1", i->y1));
-		node->add_child_nocopy (*render);
-	}
-
-	tree->set_root (node);
-	return tree;
-}
-
 /** Construct a GtkCanvas */
 GtkCanvas::GtkCanvas ()
 	: _current_item (0)
-	, _grabbed_item (0)
-{
-	/* these are the events we want to know about */
-	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK);
-}
-
-/** Construct a GtkCanvas from an XML tree.
- *  @param tree XML Tree.
- */
-GtkCanvas::GtkCanvas (XMLTree const * tree)
-	: Canvas (tree)
-	, _current_item (0)
 	, _grabbed_item (0)
 {
 	/* these are the events we want to know about */

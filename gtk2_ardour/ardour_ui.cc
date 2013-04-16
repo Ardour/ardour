@@ -2335,7 +2335,6 @@ ARDOUR_UI::save_state_canfail (string name, bool switch_to_it)
 	}
 
 	save_ardour_state (); /* XXX cannot fail? yeah, right ... */
-	editor->save_canvas_state ();
 	return 0;
 }
 

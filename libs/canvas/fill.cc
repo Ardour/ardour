@@ -43,19 +43,3 @@ Fill::setup_fill_context (Cairo::RefPtr<Cairo::Context> context) const
 {
 	set_source_rgba (context, _fill_color);
 }
-
-void
-Fill::add_fill_state (XMLNode* node) const
-{
-	node->add_property ("fill-color", string_compose ("%1", _fill_color));
-	node->add_property ("fill", _fill ? "yes" : "no");
-}
-
-void
-Fill::set_fill_state (XMLNode const * node)
-{
-	_fill_color = atoll (node->property("fill-color")->value().c_str());
-	_fill = PBD::string_is_affirmative (node->property("fill")->value ().c_str());
-
-	_bounding_box_dirty = true;
-}

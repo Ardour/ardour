@@ -8,7 +8,6 @@
 #include "canvas/group.h"
 #include "canvas/types.h"
 #include "canvas/debug.h"
-#include "canvas/item_factory.h"
 #include "canvas/item.h"
 #include "canvas/canvas.h"
 
@@ -246,30 +245,6 @@ Group::add_items_at_point (Duple const point, vector<Item const *>& items) const
 	vector<Item*> our_items = _lut->items_at_point (point);
 	for (vector<Item*>::iterator i = our_items.begin(); i != our_items.end(); ++i) {
 		(*i)->add_items_at_point (point - (*i)->position(), items);
-	}
-}
-
-XMLNode *
-Group::get_state () const
-{
-	XMLNode* node = new XMLNode ("Group");
-	for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
-		node->add_child_nocopy (*(*i)->get_state ());
-	}
-
-	add_item_state (node);
-	return node;
-}
-
-void
-Group::set_state (XMLNode const * node)
-{
-	set_item_state (node);
-
-	XMLNodeList const & children = node->children ();
-	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-		/* this will create the item and add it to this group */
-		create_item (this, *i);
 	}
 }
 

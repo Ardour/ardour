@@ -110,33 +110,6 @@ PolyItem::get () const
 }
 
 void
-PolyItem::add_poly_item_state (XMLNode* node) const
-{
-	add_item_state (node);
-	
-	for (Points::const_iterator i = _points.begin(); i != _points.end(); ++i) {
-		XMLNode* p = new XMLNode ("Point");
-		p->add_property ("x", string_compose ("%1", i->x));
-		p->add_property ("y", string_compose ("%1", i->y));
-		node->add_child_nocopy (*p);
-	}
-}
-
-void
-PolyItem::set_poly_item_state (XMLNode const * node)
-{
-	XMLNodeList const & children = node->children ();
-	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-		Duple p;
-		p.x = atof ((*i)->property("x")->value().c_str());
-		p.y = atof ((*i)->property("y")->value().c_str());
-		_points.push_back (p);
-	}
-
-	_bounding_box_dirty = true;
-}
-
-void
 PolyItem::dump (ostream& o) const
 {
 	Item::dump (o);

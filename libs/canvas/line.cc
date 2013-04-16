@@ -113,36 +113,3 @@ Line::set_y1 (Coord y1)
 
 	DEBUG_TRACE (PBD::DEBUG::CanvasItemsDirtied, "canvas item dirty: line change\n");
 }
-
-XMLNode *
-Line::get_state () const
-{
-	XMLNode* node = new XMLNode ("Line");
-#ifdef CANVAS_DEBUG
-	if (!name.empty ()) {
-		node->add_property ("name", name);
-	}
-#endif	
-	node->add_property ("x0", string_compose ("%1", _points[0].x));
-	node->add_property ("y0", string_compose ("%1", _points[0].y));
-	node->add_property ("x1", string_compose ("%1", _points[1].x));
-	node->add_property ("y1", string_compose ("%1", _points[1].y));
-
-	add_item_state (node);
-	add_outline_state (node);
-	return node;
-}
-
-void
-Line::set_state (XMLNode const * node)
-{
-	_points[0].x = atof (node->property("x0")->value().c_str());
-	_points[0].y = atof (node->property("y0")->value().c_str());
-	_points[1].x = atof (node->property("x1")->value().c_str());
-	_points[1].y = atof (node->property("y1")->value().c_str());
-
-	set_item_state (node);
-	set_outline_state (node);
-
-	_bounding_box_dirty = true;
-}

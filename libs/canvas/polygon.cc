@@ -31,26 +31,3 @@ Polygon::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	}
 }
 
-XMLNode *
-Polygon::get_state () const
-{
-	XMLNode* node = new XMLNode ("Polygon");
-#ifdef CANVAS_DEBUG
-	if (!name.empty ()) {
-		node->add_property ("name", name);
-	}
-#endif	
-	add_poly_item_state (node);
-	add_outline_state (node);
-	add_fill_state (node);
-	return node;
-}
-
-
-void
-Polygon::set_state (XMLNode const * node)
-{
-	set_poly_item_state (node);
-	set_outline_state (node);
-	set_fill_state (node);
-}

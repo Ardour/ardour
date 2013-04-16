@@ -102,22 +102,6 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	}
 }
 
-XMLNode *
-Curve::get_state () const
-{
-	XMLNode* node = new XMLNode ("PolyLine");
-	add_poly_item_state (node);
-	add_outline_state (node);
-	return node;
-}
-
-void
-Curve::set_state (XMLNode const * node)
-{
-	set_poly_item_state (node);
-	set_outline_state (node);
-}
-
 void 
 Curve::render_path (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {

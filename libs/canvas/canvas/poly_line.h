@@ -12,8 +12,6 @@ public:
 	PolyLine (Group *);
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
-	XMLNode* get_state () const;
-	void set_state (XMLNode const *);
 };
 	
 }

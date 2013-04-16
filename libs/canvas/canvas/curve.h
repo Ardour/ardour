@@ -13,8 +13,6 @@ public:
     void compute_bounding_box () const;
 
     void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
-    XMLNode* get_state () const;
-    void set_state (XMLNode const *);
 
     void set (Points const &);
 
