@@ -1118,6 +1118,8 @@ MidiRegionView::redisplay_model()
 	MidiModel::Notes& notes (_model->notes());
 	_optimization_iterator = _events.begin();
 
+	bool empty_when_starting = !_events.empty();
+
 	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
 
 		boost::shared_ptr<NoteType> note (*n);
@@ -1126,7 +1128,7 @@ MidiRegionView::redisplay_model()
 
 		if (note_in_region_range (note, visible)) {
 
-			if ((cne = find_canvas_note (note)) != 0) {
+			if (empty_when_starting && (cne = find_canvas_note (note)) != 0) {
 
 				cne->validate ();
 
@@ -1152,7 +1154,7 @@ MidiRegionView::redisplay_model()
 
 		} else {
 
-			if ((cne = find_canvas_note (note)) != 0) {
+			if (empty_when_starting && (cne = find_canvas_note (note)) != 0) {
 				cne->validate ();
 				cne->hide ();
 			}
@@ -1162,21 +1164,23 @@ MidiRegionView::redisplay_model()
 
 	/* remove note items that are no longer valid */
 
-	for (Events::iterator i = _events.begin(); i != _events.end(); ) {
-		if (!(*i)->valid ()) {
-
-			for (vector<GhostRegion*>::iterator j = ghosts.begin(); j != ghosts.end(); ++j) {
-				MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*j);
-				if (gr) {
-					gr->remove_note (*i);
+	if (empty_when_starting) {
+		for (Events::iterator i = _events.begin(); i != _events.end(); ) {
+			if (!(*i)->valid ()) {
+				
+				for (vector<GhostRegion*>::iterator j = ghosts.begin(); j != ghosts.end(); ++j) {
+					MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*j);
+					if (gr) {
+						gr->remove_note (*i);
+					}
 				}
+				
+				delete *i;
+				i = _events.erase (i);
+				
+			} else {
+				++i;
 			}
-			
-			delete *i;
-			i = _events.erase (i);
-			
-		} else {
-			++i;
 		}
 	}
 
@@ -1360,16 +1364,13 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 		redisplay_model();
 	}
 
-// CAIROCANVAS
-#if 0
 	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
-		if ((*x)->width() >= _pixel_width) {
+		if ((*x)->canvas_item()->width() >= _pixel_width) {
 			(*x)->hide();
 		} else {
 			(*x)->show();
 		}
 	}
-#endif
 
 	move_step_edit_cursor (_step_edit_cursor_position);
 	set_step_edit_cursor_width (_step_edit_cursor_width);
