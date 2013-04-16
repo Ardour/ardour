@@ -41,7 +41,10 @@ using namespace ARDOUR;
 using namespace ArdourCanvas;
 
 bool WaveView::_gradient_waveforms = true;
-PBD::Signal0<void> WaveView::InvalidateAllImages;
+bool WaveView::_global_logscaled = false;
+WaveView::Shape WaveView::_global_shape = WaveView::Normal;
+
+PBD::Signal0<void> WaveView::VisualPropertiesChanged;
 
 WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	: Item (parent)
@@ -54,20 +57,35 @@ WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region
 	, _wave_color (0xffffffff)
 	, _show_zero (true)
 	, _zero_color (0xff0000ff)
-	, _shape (Normal)
 	, _clip_color (0xff0000ff)
-	, _logscaled (false)
+	, _logscaled (_global_logscaled)
+	, _shape (_global_shape)
 	, _amplitude (1.0)
+	, _shape_independent (false)
+	, _logscaled_independent (false)
 	, _region_start (0)
 {
-	InvalidateAllImages.connect_same_thread (invalidation_connection, boost::bind (&WaveView::rebuild, this));
+	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
 }
 
 void
-WaveView::rebuild ()
+WaveView::handle_visual_property_change ()
 {
-	invalidate_image_cache ();
-	_canvas->item_visual_property_changed (this);
+	bool changed = false;
+
+	if (!_shape_independent && (_shape != global_shape())) {
+		_shape = global_shape();
+		changed = true;
+	}
+
+	if (!_logscaled_independent && (_logscaled != global_logscaled())) {
+		_logscaled = global_logscaled();
+		changed = true;
+	}
+
+	if (changed) {
+		invalidate_image_cache ();
+	}
 }
 
 void
@@ -218,6 +236,7 @@ WaveView::invalidate_whole_cache ()
 	}
 
 	_cache.clear ();
+	_canvas->item_visual_property_changed (this);
 }
 
 void
@@ -226,6 +245,7 @@ WaveView::invalidate_image_cache ()
 	for (list<CacheEntry*>::iterator i = _cache.begin(); i != _cache.end(); ++i) {
 		(*i)->clear_image ();
 	}
+	_canvas->item_visual_property_changed (this);
 }
 
 void
@@ -240,7 +260,6 @@ WaveView::set_logscaled (bool yn)
 	if (_logscaled != yn) {
 		_logscaled = yn;
 		invalidate_image_cache ();
-		_canvas->item_visual_property_changed (this);
 	}
 }
 
@@ -250,7 +269,6 @@ WaveView::set_amplitude (double a)
 	if (_amplitude != a) {
 		_amplitude = a;
 		invalidate_image_cache ();
-		_canvas->item_visual_property_changed (this);
 	}
 }
 
@@ -260,7 +278,6 @@ WaveView::set_zero_color (Color c)
 	if (_zero_color != c) {
 		_zero_color = c;
 		invalidate_image_cache ();
-		_canvas->item_visual_property_changed (this);
 	}
 }
 
@@ -270,7 +287,6 @@ WaveView::set_clip_color (Color c)
 	if (_clip_color != c) {
 		_clip_color = c;
 		invalidate_image_cache ();
-		_canvas->item_visual_property_changed (this);
 	}
 }
 
@@ -280,7 +296,6 @@ WaveView::set_show_zero_line (bool yn)
 	if (_show_zero != yn) {
 		_show_zero = yn;
 		invalidate_image_cache ();
-		_canvas->item_visual_property_changed (this);
 	}
 }
 
@@ -290,7 +305,25 @@ WaveView::set_shape (Shape s)
 	if (_shape != s) {
 		_shape = s;
 		invalidate_image_cache ();
-		_canvas->item_visual_property_changed (this);
+	}
+}
+
+void
+WaveView::set_global_shape (Shape s)
+{
+	if (_global_shape != s) {
+		_global_shape = s;
+		VisualPropertiesChanged (); /* EMIT SIGNAL */
+	}
+}
+
+void
+WaveView::set_global_logscaled (bool yn)
+{
+	if (_global_logscaled != yn) {
+		_global_logscaled = yn;
+		VisualPropertiesChanged (); /* EMIT SIGNAL */
+		
 	}
 }
 
@@ -510,6 +543,6 @@ WaveView::set_gradient_waveforms (bool yn)
 {
 	if (_gradient_waveforms != yn) {
 		_gradient_waveforms = yn;
-		InvalidateAllImages (); /* EMIT SIGNAL */
+		VisualPropertiesChanged (); /* EMIT SIGNAL */
 	}
 }

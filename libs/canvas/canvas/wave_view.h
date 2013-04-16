@@ -56,8 +56,6 @@ public:
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
     
-        void rebuild ();
-
 	void set_samples_per_pixel (double);
 	void set_height (Distance);
 	void set_channel (int);
@@ -70,15 +68,22 @@ public:
         void set_zero_color (Color);
         void set_clip_color (Color);
         void set_amplitude (double);
-        double amplitude() const { return _amplitude; }
         void set_logscaled (bool);
-        bool logscaled() const { return _logscaled; }
-
         void set_shape (Shape);
-        Shape shape() const;
+        double amplitude() const { return _amplitude; }
+        
+        /* currently missing because we don't need them (yet):
+	   set_shape_independent();
+	   set_logscaled_independent()
+        */
 
         static void set_gradient_waveforms (bool);
-        static bool gradient_waveforms()  { return _gradient_waveforms; }
+        static void set_global_logscaled (bool);
+        static void set_global_shape (Shape);
+    
+        static bool  gradient_waveforms()  { return _gradient_waveforms; }
+        static bool  global_logscaled()  { return _global_logscaled; }
+        static Shape global_shape()  { return _global_shape; }
 
 #ifdef CANVAS_COMPATIBILITY	
 	void*& property_gain_src () {
@@ -137,16 +142,18 @@ private:
 	void invalidate_image_cache ();
 
 	boost::shared_ptr<ARDOUR::AudioRegion> _region;
-	int _channel;
+	int    _channel;
 	double _samples_per_pixel;
-	Coord _height;
-	Color _wave_color;
-        bool  _show_zero;
-        Color _zero_color;
-        Shape _shape;
-        Color _clip_color;
-        bool  _logscaled;
+	Coord  _height;
+	Color  _wave_color;
+        bool   _show_zero;
+        Color  _zero_color;
+        Color  _clip_color;
+        bool   _logscaled;
+        Shape  _shape;
         double _amplitude;
+        bool   _shape_independent;
+        bool   _logscaled_independent;
 
 	/** The `start' value to use for the region; we can't use the region's
 	 *  value as the crossfade editor needs to alter it.
@@ -158,7 +165,12 @@ private:
         PBD::ScopedConnection invalidation_connection;
 
         static bool _gradient_waveforms;
-        static PBD::Signal0<void> InvalidateAllImages;
+        static bool _global_logscaled;
+        static Shape _global_shape;
+
+        static PBD::Signal0<void> VisualPropertiesChanged;
+
+        void handle_visual_property_change ();
 };
 
 }
