@@ -52,8 +52,7 @@ VideoImageFrame::VideoImageFrame (PublicEditor& ed, ArdourCanvas::Group& parent,
 	thread_active=false;
 
 	unit_position = editor.sample_to_pixel (frame_position);
-	group = new ArdourCanvas::Group (_parent, ArdourCanvas::Duple(unit_position, 1.0));
-	image = new ArdourCanvas::Image (group, Cairo::FORMAT_ARGB32, clip_width, clip_height);
+	image = new ArdourCanvas::Image (_parent, Cairo::FORMAT_ARGB32, clip_width, clip_height);
 
 	img = image->get_image();
 	fill_frame(0, 0, 0);
@@ -61,14 +60,13 @@ VideoImageFrame::VideoImageFrame (PublicEditor& ed, ArdourCanvas::Group& parent,
 	draw_x();
 	image->put_image(img);
 
-	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_videotl_bar_event), _parent));
+	image->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_videotl_bar_event), _parent));
 }
 
 VideoImageFrame::~VideoImageFrame ()
 {
 	if (thread_active) pthread_join(thread_id_tt, NULL);
 	delete image;
-	delete group;
 	pthread_mutex_destroy(&request_lock);
 	pthread_mutex_destroy(&queue_lock);
 }
@@ -77,7 +75,7 @@ void
 VideoImageFrame::set_position (framepos_t frame)
 {
 	double new_unit_position = editor.sample_to_pixel (frame);
-	group->move (ArdourCanvas::Duple (new_unit_position - unit_position, 0.0));
+	image->move (ArdourCanvas::Duple (new_unit_position - unit_position, 0.0));
 	frame_position = frame;
 	unit_position = new_unit_position;
 }

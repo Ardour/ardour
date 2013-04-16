@@ -70,7 +70,6 @@ class VideoImageFrame : public sigc::trackable
 
 	PublicEditor& editor;
 	ArdourCanvas::Group *_parent;
-	ArdourCanvas::Group *group;
 	ArdourCanvas::Image *image;
 	boost::shared_ptr<ArdourCanvas::Image::Data> img;
 
