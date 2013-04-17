@@ -129,8 +129,6 @@ VideoImageFrame::draw_line ()
 void
 VideoImageFrame::fill_frame (const uint8_t r, const uint8_t g, const uint8_t b)
 {
-	memset((void*) img->data.get(), 0, img->stride * img->height); /// fill
-
 	const int rowstride = img->stride;
 	const int clip_height = img->height;
 	const int clip_width = img->width;
