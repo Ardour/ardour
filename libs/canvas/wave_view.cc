@@ -61,10 +61,10 @@ WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region
 	, _logscaled (_global_logscaled)
 	, _shape (_global_shape)
 	, _gradient_depth (_global_gradient_depth)
-	, _amplitude (1.0)
 	, _shape_independent (false)
 	, _logscaled_independent (false)
 	, _gradient_depth_independent (false)
+	, _amplitude_above_axis (1.0)
 	, _region_start (0)
 {
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
@@ -252,21 +252,26 @@ WaveView::set_channel (int channel)
 void
 WaveView::invalidate_whole_cache ()
 {
+	begin_visual_change ();
 	for (list<CacheEntry*>::iterator i = _cache.begin(); i != _cache.end(); ++i) {
 		delete *i;
 	}
 
 	_cache.clear ();
-	_canvas->item_visual_property_changed (this);
+
+	end_visual_change ();
 }
 
 void
 WaveView::invalidate_image_cache ()
 {
+	begin_visual_change ();
+
 	for (list<CacheEntry*>::iterator i = _cache.begin(); i != _cache.end(); ++i) {
 		(*i)->clear_image ();
 	}
-	_canvas->item_visual_property_changed (this);
+	
+	end_visual_change ();
 }
 
 void
@@ -285,12 +290,9 @@ WaveView::set_logscaled (bool yn)
 }
 
 void
-WaveView::set_amplitude (double a)
+WaveView::gain_changed ()
 {
-	if (_amplitude != a) {
-		_amplitude = a;
-		invalidate_image_cache ();
-	}
+	invalidate_whole_cache ();
 }
 
 void
@@ -325,6 +327,15 @@ WaveView::set_shape (Shape s)
 {
 	if (_shape != s) {
 		_shape = s;
+		invalidate_image_cache ();
+	}
+}
+
+void
+WaveView::set_amplitude_above_axis (double a)
+{
+	if (_amplitude_above_axis != a) {
+		_amplitude_above_axis = a;
 		invalidate_image_cache ();
 	}
 }
@@ -410,7 +421,6 @@ WaveView::CacheEntry::image ()
 
 		context->begin_new_path();
 
-
 		if (_wave_view->_shape == WaveView::Rectified) {
 
 			/* top edge of waveform is based on max (fabs (peak_min, peak_max))
@@ -418,13 +428,12 @@ WaveView::CacheEntry::image ()
 
 			if (_wave_view->_logscaled) {
 				for (int i = 0; i < _n_peaks; ++i) {
-					context->line_to (i + 0.5, position (_wave_view->amplitude() * 
-									     alt_log_meter (fast_coefficient_to_dB (
+					context->line_to (i + 0.5, position (alt_log_meter (fast_coefficient_to_dB (
 												    max (fabs (_peaks[i].max), fabs (_peaks[i].min))))));
 				}
 			} else {
 				for (int i = 0; i < _n_peaks; ++i) {
-					context->line_to (i + 0.5, position (_wave_view->amplitude() * max (fabs (_peaks[i].max), fabs (_peaks[i].min))));
+					context->line_to (i + 0.5, position (max (fabs (_peaks[i].max), fabs (_peaks[i].min))));
 				}
 			}
 
@@ -433,16 +442,16 @@ WaveView::CacheEntry::image ()
 				for (int i = 0; i < _n_peaks; ++i) {
 					Coord y = _peaks[i].max;
 					if (y > 0.0) {
-						context->line_to (i + 0.5, position (_wave_view->amplitude() * alt_log_meter (fast_coefficient_to_dB (y))));
+						context->line_to (i + 0.5, position (alt_log_meter (fast_coefficient_to_dB (y))));
 					} else if (y < 0.0) {
-						context->line_to (i + 0.5, position (_wave_view->amplitude() * -alt_log_meter (fast_coefficient_to_dB (-y))));
+						context->line_to (i + 0.5, position (alt_log_meter (fast_coefficient_to_dB (-y))));
 					} else {
 						context->line_to (i + 0.5, position (0.0));
 					}
 				} 
 			} else {
 				for (int i = 0; i < _n_peaks; ++i) {
-					context->line_to (i + 0.5, position (_wave_view->amplitude() * _peaks[i].max));
+					context->line_to (i + 0.5, position (_peaks[i].max));
 				}
 			}
 		}
@@ -469,16 +478,16 @@ WaveView::CacheEntry::image ()
 				for (int i = _n_peaks-1; i >= 0; --i) {
 					Coord y = _peaks[i].min;
 					if (y > 0.0) {
-						context->line_to (i + 0.5, position (_wave_view->amplitude() * alt_log_meter (fast_coefficient_to_dB (y))));
+						context->line_to (i + 0.5, position (alt_log_meter (fast_coefficient_to_dB (y))));
 					} else if (y < 0.0) {
-						context->line_to (i + 0.5, position (_wave_view->amplitude() * -alt_log_meter (fast_coefficient_to_dB (-y))));
+						context->line_to (i + 0.5, position (-alt_log_meter (fast_coefficient_to_dB (-y))));
 					} else {
 						context->line_to (i + 0.5, position (0.0));
 					}
 				} 
 			} else {
 				for (int i = _n_peaks-1; i >= 0; --i) {
-					context->line_to (i + 0.5, position (_wave_view->amplitude() * _peaks[i].min));
+					context->line_to (i + 0.5, position (_peaks[i].min));
 				}
 			}
 		

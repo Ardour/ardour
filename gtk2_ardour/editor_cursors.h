@@ -45,6 +45,10 @@ class EditorCursor {
 		return _track_canvas_item;
 	}
 
+	ArdourCanvas::Arrow& time_bar_canvas_item () {
+		return _time_bars_canvas_item;
+	}
+
 	PBD::Signal1<void, framepos_t> PositionChanged;
 
   private:	

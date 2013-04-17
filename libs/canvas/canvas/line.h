@@ -39,6 +39,8 @@ public:
 	void set_y0 (Coord);
 	void set_x1 (Coord);
 	void set_y1 (Coord);
+        void set_x (Coord, Coord);
+
 	Coord x0 () const {
 		return _points[0].x;
 	}

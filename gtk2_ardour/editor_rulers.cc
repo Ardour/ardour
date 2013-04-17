@@ -251,7 +251,7 @@ Editor::ruler_button_press (GdkEventButton* ev)
 		}
 
 		/* playhead cursor */
-		_drags->set (new CursorDrag (this, &playhead_cursor->track_canvas_item (), false), reinterpret_cast<GdkEvent *> (ev));
+		_drags->set (new CursorDrag (this, *playhead_cursor, false), reinterpret_cast<GdkEvent *> (ev));
 		_dragging_playhead = true;
 	}
 

@@ -76,6 +76,20 @@ Line::set (Duple a, Duple b)
 }
 
 void
+Line::set_x (Coord x0, Coord x1)
+{
+	begin_change ();
+	
+	_points[0].x = x0;
+	_points[1].x = x1;
+
+	_bounding_box_dirty = true;
+	end_change ();
+
+	DEBUG_TRACE (PBD::DEBUG::CanvasItemsDirtied, "canvas item dirty: line change\n");
+}	
+
+void
 Line::set_x0 (Coord x0)
 {
 	begin_change ();

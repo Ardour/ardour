@@ -26,6 +26,7 @@
 #include "canvas/polygon.h"
 #include "canvas/text.h"
 #include "canvas/canvas.h"
+#include "canvas/debug.h"
 
 #include "ardour_ui.h"
 /*
@@ -252,9 +253,8 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	/* adjust to properly locate the tip */
 
 	mark = new ArdourCanvas::Polygon (group);
-#ifdef CANVAS_DEBUG
-	mark->name = string_compose ("Marker::mark for %1", annotation);
-#endif	
+	CANVAS_DEBUG_NAME (mark, string_compose ("Marker::mark for %1", annotation));
+
 	mark->set (*points);
 	set_color_rgba (rgba);
 
@@ -270,12 +270,9 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	Gtkmm2ext::get_ink_pixel_size (layout, width, name_height);
 	
 	_name_item = new ArdourCanvas::Text (group);
+	CANVAS_DEBUG_NAME (_name_item, string_compose ("Marker::_name_item for %1", annotation));
 	_name_item->set_font_description (name_font);
 	_name_item->set_color (RGBA_TO_UINT (0,0,0,255));
-
-#ifdef CANVAS_DEBUG
-	_name_item->name = string_compose ("Marker::_name_item for %1", annotation);
-#endif	
 	_name_item->set_position (ArdourCanvas::Duple (_label_offset, (13.0 / 2.0) - (name_height / 2.0)));
 
 	set_name (annotation.c_str());
@@ -292,7 +289,6 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	if (handle_events) {
 		group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
 	}
-
 }
 
 Marker::~Marker ()

@@ -626,7 +626,7 @@ private:
 class CursorDrag : public Drag
 {
 public:
-	CursorDrag (Editor *, ArdourCanvas::Item *, bool);
+	CursorDrag (Editor *, EditorCursor&, bool);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -648,6 +648,7 @@ public:
 private:
 	void fake_locate (framepos_t);
 
+        EditorCursor& _cursor;
 	bool _stop; ///< true to stop the transport on starting the drag, otherwise false
 	double _grab_zoom; ///< editor frames per unit when our grab started
 };

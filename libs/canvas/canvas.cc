@@ -72,6 +72,18 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 	
 	context->save ();
 
+#ifdef CANVAS_DEBUG
+	if (getenv ("ARDOUR_REDRAW_CANVAS")) {
+		/* light up the canvas to show redraws */
+		context->set_source_rgba (random()%255 / 255.0,
+					  random()%255 / 255.0,
+					  random()%255 / 255.0,
+					  255);
+		context->rectangle (area.x0, area.y0, area.width(), area.height());
+		context->stroke ();
+	}
+#endif
+
 	/* clip to the requested area */
 	context->rectangle (area.x0, area.y0, area.width(), area.height());
 	context->clip ();

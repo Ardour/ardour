@@ -65,17 +65,17 @@ public:
         void set_outline_color (Color);
 	
 	void region_resized ();
+        void gain_changed ();
 
         void set_show_zero_line (bool);
         bool show_zero_line() const { return _show_zero; }
         void set_zero_color (Color);
         void set_clip_color (Color);
-        void set_amplitude (double);
         void set_logscaled (bool);
         void set_gradient_depth (double);
         double gradient_depth() const { return _gradient_depth; }
         void set_shape (Shape);
-        double amplitude() const { return _amplitude; }
+
         
         /* currently missing because we don't need them (yet):
 	   set_shape_independent();
@@ -90,6 +90,9 @@ public:
         static bool    global_logscaled()  { return _global_logscaled; }
         static Shape   global_shape()  { return _global_shape; }
 
+        void set_amplitude_above_axis (double v);
+        double amplitude_above_axis () const { return _amplitude_above_axis; }
+
 #ifdef CANVAS_COMPATIBILITY	
 	void*& property_gain_src () {
 		return _foo_void;
@@ -97,15 +100,9 @@ public:
 	void*& property_gain_function () {
 		return _foo_void;
 	}
-	double& property_amplitude_above_axis () {
-		return _foo_double;
-	}
 private:
 	void* _foo_void;
-	bool _foo_bool;
-	int _foo_int;
-	Color _foo_uint;
-	double _foo_double;
+
 #endif
 
 	class CacheEntry
@@ -157,10 +154,10 @@ private:
         bool   _logscaled;
         Shape  _shape;
         double _gradient_depth;
-        double _amplitude;
         bool   _shape_independent;
         bool   _logscaled_independent;
         bool   _gradient_depth_independent;
+        double _amplitude_above_axis;
 
 	/** The `start' value to use for the region; we can't use the region's
 	 *  value as the crossfade editor needs to alter it.

@@ -2335,9 +2335,10 @@ TempoMarkerDrag::aborted (bool moved)
 	}
 }
 
-CursorDrag::CursorDrag (Editor* e, ArdourCanvas::Item* i, bool s)
-	: Drag (e, i),
-	  _stop (s)
+CursorDrag::CursorDrag (Editor* e, EditorCursor& c, bool s)
+	: Drag (e, &c.time_bar_canvas_item())
+	, _cursor (c)
+	, _stop (s)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New CursorDrag\n");
 }
@@ -2375,6 +2376,10 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 	_editor->_dragging_playhead = true;
 
 	Session* s = _editor->session ();
+
+	/* grab the track canvas item as well */
+
+	_cursor.track_canvas_item().grab();
 
 	if (s) {
 		if (_was_rolling && _stop) {
@@ -2419,6 +2424,8 @@ CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	_editor->_dragging_playhead = false;
 
+	_cursor.track_canvas_item().ungrab();
+
 	if (!movement_occurred && _stop) {
 		return;
 	}
@@ -2436,6 +2443,8 @@ CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 CursorDrag::aborted (bool)
 {
+	_cursor.track_canvas_item().ungrab();
+
 	if (_editor->_dragging_playhead) {
 		_editor->session()->request_resume_timecode_transmission ();
 		_editor->_dragging_playhead = false;

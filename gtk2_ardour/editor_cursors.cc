@@ -75,8 +75,7 @@ EditorCursor::set_position (framepos_t frame)
 	}
 
 	if (new_pos != _track_canvas_item.x0 ()) {
-		_track_canvas_item.set_x0 (new_pos);
-		_track_canvas_item.set_x1 (new_pos);
+		_track_canvas_item.set_x (new_pos, new_pos);
 	}
 	
 	_current_frame = frame;

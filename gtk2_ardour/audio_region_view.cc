@@ -326,10 +326,8 @@ AudioRegionView::fade_out_active_changed ()
 void
 AudioRegionView::region_scale_amplitude_changed ()
 {
-	double g = audio_region()->scale_amplitude ();
-
 	for (uint32_t n = 0; n < waves.size(); ++n) {
-		waves[n]->set_amplitude (g);
+		waves[n]->gain_changed ();
 	}
 }
 
@@ -729,10 +727,10 @@ AudioRegionView::set_samples_per_pixel (gdouble fpp)
 }
 
 void
-AudioRegionView::set_amplitude_above_axis (gdouble spp)
+AudioRegionView::set_amplitude_above_axis (gdouble a)
 {
 	for (uint32_t n=0; n < waves.size(); ++n) {
-		waves[n]->property_amplitude_above_axis() = spp;
+		waves[n]->set_amplitude_above_axis (a);
 	}
 }
 
@@ -895,7 +893,6 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	wave->set_y_position (yoff);
 	wave->set_height (ht);
 	wave->set_samples_per_pixel (samples_per_pixel);
-	wave->property_amplitude_above_axis() =  _amplitude_above_axis;
 
 	if (_recregion) {
 		wave->set_outline_color (_region->muted() ? UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_RecWaveForm(), MUTED_ALPHA) : ARDOUR_UI::config()->get_canvasvar_RecWaveForm());
@@ -1075,7 +1072,7 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 		wave->set_channel (n);
 		wave->set_x_position (0);
 		wave->set_samples_per_pixel (samples_per_pixel);
-		wave->property_amplitude_above_axis() =  _amplitude_above_axis;
+		wave->set_amplitude_above_axis (_amplitude_above_axis);
 		wave->set_region_start (_region->start());
 
 		ghost->waves.push_back(wave);
