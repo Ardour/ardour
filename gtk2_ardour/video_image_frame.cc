@@ -48,10 +48,10 @@ VideoImageFrame::VideoImageFrame (PublicEditor& ed, ArdourCanvas::Group& parent,
 	queued_request=false;
 	video_frame_number = -1;
 	rightend = -1;
-	frame_position = 0;
+	sample_position = 0;
 	thread_active=false;
 
-	unit_position = editor.sample_to_pixel (frame_position);
+	unit_position = editor.sample_to_pixel (sample_position);
 	image = new ArdourCanvas::Image (_parent, Cairo::FORMAT_ARGB32, clip_width, clip_height);
 
 	img = image->get_image();
@@ -72,18 +72,18 @@ VideoImageFrame::~VideoImageFrame ()
 }
 
 void
-VideoImageFrame::set_position (framepos_t frame)
+VideoImageFrame::set_position (framepos_t sample)
 {
 	double new_unit_position = editor.sample_to_pixel (frame);
 	image->move (ArdourCanvas::Duple (new_unit_position - unit_position, 0.0));
-	frame_position = frame;
+	sample_position = sample;
 	unit_position = new_unit_position;
 }
 
 void
 VideoImageFrame::reposition ()
 {
-	set_position (frame_position);
+	set_position (sample_position);
 }
 
 void
