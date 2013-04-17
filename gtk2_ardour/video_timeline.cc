@@ -269,7 +269,7 @@ float
 VideoTimeLine::get_apv()
 {
 	// XXX: dup code - TODO use this fn in update_video_timeline()
-	float apv = -1; /* audio frames per video frame; */
+	float apv = -1; /* audio samples per video frame; */
 	if (!_session) return apv;
 
 	if (_session->config.get_use_video_file_fps()) {
@@ -302,8 +302,8 @@ VideoTimeLine::update_video_timeline()
 		if (_session->timecode_frames_per_second() == 0 ) return;
 	}
 
-	double frames_per_unit = editor->get_current_zoom();
-	framepos_t leftmost_frame =  editor->leftmost_sample();
+	const double samples_per_pixel = editor->get_current_zoom();
+	const framepos_t leftmost_sample =  editor->leftmost_sample();
 
 	/* Outline:
 	 * 1) calculate how many frames there should be in current zoom (plus 1 page on each side)
@@ -315,12 +315,12 @@ VideoTimeLine::update_video_timeline()
 
 	/* video-file and session properties */
 	double display_vframe_width; /* unit: pixels ; width of one thumbnail in the timeline */
-	float apv; /* audio frames per video frame; */
+	float apv; /* audio samples per video frame; */
 	framepos_t leftmost_video_frame; /* unit: video-frame number ; temporary var -> vtl_start */
 
 	/* variables needed to render videotimeline -- what needs to computed first */
-	framepos_t vtl_start; /* unit: audio-frames ; first displayed video-frame */
-	framepos_t vtl_dist;  /* unit: audio-frames ; distance between displayed video-frames */
+	framepos_t vtl_start; /* unit: audio-samples ; first displayed video-frame */
+	framepos_t vtl_dist;  /* unit: audio-samples ; distance between displayed video-frames */
 	unsigned int visible_video_frames; /* number of frames that fit on current canvas */
 
 	if (_session->config.get_videotimeline_pullup()) {
@@ -336,12 +336,12 @@ VideoTimeLine::update_video_timeline()
 
 	display_vframe_width = bar_height * video_aspect_ratio;
 
-	if (apv > frames_per_unit * display_vframe_width) {
+	if (apv > samples_per_pixel * display_vframe_width) {
 		/* high-zoom: need space between successive video-frames */
 		vtl_dist = rint(apv);
 	} else {
 		/* continous timeline: skip video-frames */
-		vtl_dist = ceil(display_vframe_width * frames_per_unit / apv) * apv;
+		vtl_dist = ceil(display_vframe_width * samples_per_pixel / apv) * apv;
 	}
 
 	assert (vtl_dist > 0);
@@ -349,7 +349,7 @@ VideoTimeLine::update_video_timeline()
 
 #define GOFFSET (video_offset)
 
-	leftmost_video_frame = floor (floor((leftmost_frame - video_start_offset - GOFFSET ) / vtl_dist) * vtl_dist / apv);
+	leftmost_video_frame = floor (floor((leftmost_sample - video_start_offset - GOFFSET ) / vtl_dist) * vtl_dist / apv);
 
 	vtl_start = rint (GOFFSET + video_start_offset + leftmost_video_frame * apv);
 	visible_video_frames = 2 + ceil(editor->current_page_samples() / vtl_dist); /* +2 left+right partial frames */
@@ -401,7 +401,7 @@ VideoTimeLine::update_video_timeline()
 #endif
 
 	for (unsigned int vfcount=0; vfcount < visible_video_frames; ++vfcount){
-		framepos_t vfpos = vtl_start + vfcount * vtl_dist; /* unit: audio-frames */
+		framepos_t vfpos = vtl_start + vfcount * vtl_dist; /* unit: audio-samples */
 		framepos_t vframeno = rint ( (vfpos - GOFFSET) / apv); /* unit: video-frames */
 		vfpos = (vframeno * apv ) + GOFFSET; /* audio-frame  corresponding to /rounded/ video-frame */
 
@@ -422,16 +422,15 @@ VideoTimeLine::update_video_timeline()
 	for (VideoFrames::iterator i = outdated_video_frames.begin(); i != outdated_video_frames.end(); ++i ) {
 		VideoImageFrame *frame = (*i);
 		if (remaining.empty()) {
-		  frame->set_position(-2 * vtl_dist + leftmost_frame); /* move off screen */
+		  frame->set_position(-2 * vtl_dist + leftmost_sample); /* move off screen */
 		} else {
 			int vfcount=remaining.front();
 			remaining.pop_front();
-			framepos_t vfpos = vtl_start + vfcount * vtl_dist; /* unit: audio-frames */
+			framepos_t vfpos = vtl_start + vfcount * vtl_dist; /* unit: audio-samples */
 			framepos_t vframeno = rint ((vfpos - GOFFSET) / apv);  /* unit: video-frames */
 			int rightend = -1; /* unit: pixels */
 			if (vfpos + vtl_dist > video_start_offset + video_duration + GOFFSET) {
 				rightend = display_vframe_width * (video_start_offset + video_duration + GOFFSET - vfpos) / vtl_dist;
-				//printf("lf(n): %lu\n", vframeno); // XXX
 			}
 			frame->set_position(vfpos);
 			frame->set_videoframe(vframeno, rightend);
@@ -500,7 +499,7 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 				_session->config.set_timecode_format(timecode_60);
 				break;
 			default:
-				warning << _("Failed to set session-framerate: ") << video_file_fps << _(" does not have a corresponding option setting in Ardour.") << endmsg; /* TODO: gettext arg */
+				warning << _("Failed to set session-fps: ") << video_file_fps << _(" does not have a corresponding option setting in Ardour.") << endmsg; /* TODO: gettext arg */
 				break;
 		}
 		_session->config.set_video_pullup(0); /* TODO only set if set_timecode_format() was successful ?!*/
