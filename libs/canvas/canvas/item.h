@@ -168,8 +168,22 @@ public:
 
 protected:
 
+        /** To be called at the beginning of any property change that
+	 *  may alter the bounding box of this item
+	 */
 	void begin_change ();
+        /** To be called at the endof any property change that
+	 *  may alter the bounding box of this item
+	 */
 	void end_change ();
+        /** To be called at the beginning of any property change that
+	 *  does NOT alter the bounding box of this item
+	 */
+	void begin_visual_change ();
+        /** To be called at the endof any property change that
+	 *  does NOT alter the bounding box of this item
+	 */
+	void end_visual_change ();
 
 	Canvas* _canvas;
 	/** parent group; may be 0 if we are the root group or if we have been unparent()ed */

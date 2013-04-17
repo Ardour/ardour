@@ -30,14 +30,16 @@ class Fill : virtual public Item
 public:
 	Fill (Group *);
 
+	virtual void set_fill_color (Color);
+	virtual void set_fill (bool);
+
 	Color fill_color () const {
 		return _fill_color;
 	}
-	void set_fill_color (Color);
+
 	bool fill () const {
 		return _fill;
 	}
-	void set_fill (bool);
 	
 protected:
 	void setup_fill_context (Cairo::RefPtr<Cairo::Context>) const;

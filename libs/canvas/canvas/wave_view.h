@@ -60,6 +60,9 @@ public:
 	void set_height (Distance);
 	void set_channel (int);
 	void set_region_start (ARDOUR::frameoffset_t);
+
+        void set_fill_color (Color);
+        void set_outline_color (Color);
 	
 	void region_resized ();
 

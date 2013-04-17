@@ -41,11 +41,11 @@ Outline::Outline (Group* parent)
 void
 Outline::set_outline_color (Color color)
 {
-	begin_change ();
+	begin_visual_change ();
 	
 	_outline_color = color;
 
-	end_change ();
+	end_visual_change ();
 }
 
 void

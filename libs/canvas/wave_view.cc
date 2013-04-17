@@ -89,6 +89,20 @@ WaveView::handle_visual_property_change ()
 }
 
 void
+WaveView::set_fill_color (Color c)
+{
+	invalidate_image_cache ();
+	Fill::set_fill_color (c);
+}
+
+void
+WaveView::set_outline_color (Color c)
+{
+	invalidate_image_cache ();
+	Outline::set_outline_color (c);
+}
+
+void
 WaveView::set_samples_per_pixel (double samples_per_pixel)
 {
 	begin_change ();
@@ -475,7 +489,7 @@ WaveView::CacheEntry::image ()
 			double stops[3];
 			
 			double r, g, b, a;
-			
+
 			if (_wave_view->_shape == Rectified) {
 				stops[0] = 0.1;
 				stops[0] = 0.3;

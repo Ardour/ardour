@@ -295,7 +295,6 @@ Item::width () const
 	return 0;
 }
 
-/* XXX may be called even if bbox is not changing ... bit grotty */
 void
 Item::begin_change ()
 {
@@ -310,6 +309,17 @@ Item::end_change ()
 	if (_parent) {
 		_parent->child_changed ();
 	}
+}
+
+void
+Item::begin_visual_change ()
+{
+}
+
+void
+Item::end_visual_change ()
+{
+	_canvas->item_visual_property_changed (this);
 }
 
 void

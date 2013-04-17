@@ -48,7 +48,7 @@ public:
 		return _outline;
 	}
 
-	void set_outline (bool);
+	virtual void set_outline (bool);
 
 #ifdef CANVAS_COMPATIBILITY
 	int& property_first_arrowhead () {
