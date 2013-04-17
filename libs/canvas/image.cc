@@ -36,7 +36,7 @@ void
 Image::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	if (_need_render && _pending) {
-		_surface = Cairo::ImageSurface::create (_pending->data.get(),
+		_surface = Cairo::ImageSurface::create (_pending->data,
 							_pending->format,
 							_pending->width,
 							_pending->height,
@@ -59,14 +59,18 @@ Image::compute_bounding_box () const
 }
 
 boost::shared_ptr<Image::Data>
-Image::get_image ()
+Image::get_image (bool allocate_data)
 {
 	/* can be called by any thread */
 
 	int stride = Cairo::ImageSurface::format_stride_for_width (_format, _width);
-	boost::shared_ptr<Data> d (new Data (boost::shared_array<uint8_t> (new uint8_t[stride*_height]), _width, _height, stride, _format));
-
-	return d;
+	if (allocate_data)  {
+		boost::shared_ptr<Data> d (new Data (new uint8_t[stride*_height], _width, _height, stride, _format));
+		return d;
+	} else {
+		boost::shared_ptr<Data> d (new Data (NULL, _width, _height, stride, _format));
+		return d;
+	}
 }
 
 void

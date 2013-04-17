@@ -25,7 +25,10 @@
 
 #include "canvas/item.h"
 
+typedef void (*ImageReleaseCallback)(uint8_t *d, void *arg);
+
 namespace ArdourCanvas {
+
 
 class Image : public Item
 {
@@ -33,19 +36,31 @@ public:
     Image (Group *, Cairo::Format, int width, int height);
     
     struct Data {
-	Data (boost::shared_array<uint8_t> d, int w, int h, int s, Cairo::Format fmt)
+	Data (uint8_t *d, int w, int h, int s, Cairo::Format fmt)
 		: data (d)
 		, width (w)
 		, height (h)
 		, stride (s)
 		, format (fmt)
+		, destroy_callback(NULL)
+		, destroy_arg(NULL)
 	{}
 
-	boost::shared_array<uint8_t> data;
+	virtual ~Data () {
+		if (destroy_callback) {
+			destroy_callback(data, destroy_arg);
+		} else {
+			free(data);
+		}
+	}
+
+	uint8_t* data;
 	int width;
 	int height;
 	int stride;
 	Cairo::Format format;
+	ImageReleaseCallback  destroy_callback;
+	void* destroy_arg;
     };
 
     /** 
@@ -59,7 +74,8 @@ public:
      * ... to avoid collisions with Image deletion, some synchronization method
      * may be required or the use of shared_ptr<Image> or similar.
      */
-    boost::shared_ptr<Data> get_image ();
+    boost::shared_ptr<Data> get_image (bool allocate_data = true);
+
 
     /**
      * Queues a Data object to be used to redraw this Image item

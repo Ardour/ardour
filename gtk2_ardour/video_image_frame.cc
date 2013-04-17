@@ -35,6 +35,13 @@
 using namespace std;
 using namespace ARDOUR;
 
+static void freedata_cb (uint8_t *d, void *arg) {
+	/* later this can be used with libharvid
+	 * the buffer/videocacheline instead of freeing it
+	 */
+	free (d);
+}
+
 VideoImageFrame::VideoImageFrame (PublicEditor& ed, ArdourCanvas::Group& parent, int w, int h, std::string vsurl, std::string vfn)
 	: editor (ed)
 	, _parent(&parent)
@@ -117,7 +124,7 @@ VideoImageFrame::draw_line ()
 	const int rowstride = img->stride;
 	const int clip_height = img->height;
 	uint8_t *pixels, *p;
-	pixels = img->data.get();
+	pixels = img->data;
 
 	int y;
 	for (y = 0;y < clip_height; y++) {
@@ -133,7 +140,7 @@ VideoImageFrame::fill_frame (const uint8_t r, const uint8_t g, const uint8_t b)
 	const int clip_height = img->height;
 	const int clip_width = img->width;
 	uint8_t *pixels, *p;
-	pixels = img->data.get();
+	pixels = img->data;
 
 	int x,y;
 	for (y = 0; y < clip_height; ++y) {
@@ -152,7 +159,7 @@ VideoImageFrame::draw_x ()
 	const int clip_width = img->width;
 	const int clip_height = img->height;
 	uint8_t *pixels, *p;
-	pixels = img->data.get();
+	pixels = img->data;
 
 	for (x = 0;x < clip_width; x++) {
 		y = clip_height * x / clip_width;
@@ -173,7 +180,7 @@ VideoImageFrame::cut_rightend ()
 	const int clip_height = img->height;
 	const int clip_width = img->width;
 	uint8_t *pixels, *p;
-	pixels = img->data.get();
+	pixels = img->data;
 	if (rightend > clip_width) { return; }
 
 	int x,y;
@@ -233,10 +240,9 @@ VideoImageFrame::http_download_done (char *data){
 		cut_rightend();
 		image->put_image(img);
 	} else {
-		img = image->get_image();
-		/* TODO - have curl write directly to the shared memory region */
-		memcpy((void*) img->data.get(), data, img->stride * img->height);
-		free(data);
+		img = image->get_image(false);
+		img->data = (uint8_t*) data;
+		img->destroy_callback = &freedata_cb;
 		draw_line();
 		cut_rightend();
 		image->put_image(img);
