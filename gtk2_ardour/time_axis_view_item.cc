@@ -849,7 +849,6 @@ TimeAxisViewItem::set_samples_per_pixel (double fpp)
 void
 TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 {
-
 	if (pixel_width < 2.0) {
 
 		if (show_vestigial) {

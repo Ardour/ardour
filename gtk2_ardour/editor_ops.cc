@@ -1335,8 +1335,8 @@ Editor::clamp_samples_per_pixel (double& fpp) const
 {
 	bool clamped = false;
 	
-	if (fpp < 2.0) {
-		fpp = 2.0;
+	if (fpp < 1.0) {
+		fpp = 1.0;
 		clamped = true;
 	}
 

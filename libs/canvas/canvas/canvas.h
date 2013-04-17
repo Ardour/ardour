@@ -87,7 +87,25 @@ public:
 		_log_renders = log;
 	}
 
+        Rect canvas_to_window (Rect const&) const;
+        Rect window_to_canvas (Rect const&) const;
+        Duple canvas_to_window (Duple const&) const;
+        Duple window_to_canvas (Duple const&) const;
+
+        void canvas_to_window (Coord cx, Coord cy, Coord& wx, Coord& wy) {
+		Duple d = canvas_to_window (Duple (cx, cy));
+		wx = d.x;
+		wy = d.y;
+        }
+
+        void window_to_canvas (Coord wx, Coord wy, Coord& cx, Coord& cy) {
+		Duple d = window_to_canvas (Duple (wx, wy));
+		cx = d.x;
+		cy = d.y;
+        }
+
         void scroll_to (Coord x, Coord y);
+        virtual Rect visible_area () const = 0;
 
         std::string indent() const;
         std::string render_indent() const;
@@ -119,11 +137,7 @@ public:
 
 	Cairo::RefPtr<Cairo::Context> context ();
 
-        Rect canvas_to_window (Rect const&) const;
-        Rect window_to_canvas (Rect const&) const;
-
-        Duple canvas_to_window (Duple const&) const;
-        Duple window_to_canvas (Duple const&) const;
+	Rect visible_area () const;
 
 protected:
 	bool on_expose_event (GdkEventExpose *);
@@ -161,9 +175,6 @@ public:
 	GtkCanvas* canvas () {
 		return &_canvas;
 	}
-
-	void window_to_canvas (int, int, Coord &, Coord &) const;
-	Rect visible_area () const;
 
 protected:
 	void on_size_request (Gtk::Requisition *);

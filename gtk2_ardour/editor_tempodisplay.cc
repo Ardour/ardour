@@ -191,7 +191,7 @@ Editor::draw_measures (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 	}
 
 	if (tempo_lines == 0) {
-		tempo_lines = new TempoLines (*_track_canvas_viewport, time_line_group, physical_screen_height(get_window()));
+		tempo_lines = new TempoLines (*_track_canvas, time_line_group, physical_screen_height(get_window()));
 	}
 	
 	tempo_lines->draw (begin, end, samples_per_pixel);

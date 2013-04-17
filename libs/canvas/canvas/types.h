@@ -56,6 +56,7 @@ struct Duple
 
 extern Duple operator- (Duple const &);
 extern Duple operator+ (Duple const &, Duple const &);
+extern bool operator== (Duple const &, Duple const &);
 extern Duple operator- (Duple const &, Duple const &);
 extern Duple operator/ (Duple const &, double);
 extern std::ostream & operator<< (std::ostream &, Duple const &);

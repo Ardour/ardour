@@ -198,6 +198,30 @@ Canvas::item_changed (Item* item, boost::optional<Rect> pre_change_bounding_box)
 	}
 }
 
+Duple
+Canvas::window_to_canvas (Duple const & d) const
+{
+	return d.translate (Duple (_scroll_offset_x, _scroll_offset_y));
+}
+
+Duple
+Canvas::canvas_to_window (Duple const & d) const
+{
+	return d.translate (Duple (-_scroll_offset_x, -_scroll_offset_y));
+}	
+
+Rect
+Canvas::window_to_canvas (Rect const & r) const
+{
+	return r.translate (Duple (_scroll_offset_x, _scroll_offset_y));
+}
+
+Rect
+Canvas::canvas_to_window (Rect const & r) const
+{
+	return r.translate (Duple (-_scroll_offset_x, -_scroll_offset_y));
+}	
+
 /** Called when an item has moved.
  *  @param item Item that has moved.
  *  @param pre_change_parent_bounding_box The bounding box of the item before
@@ -553,6 +577,15 @@ GtkCanvas::ungrab ()
 	_grabbed_item = 0;
 }
 
+/** @return The visible area of the canvas, in canvas coordinates */
+Rect
+GtkCanvas::visible_area () const
+{
+	Distance const xo = _scroll_offset_x;
+	Distance const yo = _scroll_offset_y;
+	return Rect (xo, yo, xo + get_allocation().get_width (), yo + get_allocation().get_height ());
+}
+
 /** Create a GtkCanvaSViewport.
  *  @param hadj Adjustment to use for horizontal scrolling.
  *  @param vadj Adjustment to use for vertica scrolling.
@@ -575,30 +608,6 @@ GtkCanvasViewport::scrolled ()
 	queue_draw ();
 }
 
-Duple
-GtkCanvas::window_to_canvas (Duple const & d) const
-{
-	return d.translate (Duple (_scroll_offset_x, _scroll_offset_y));
-}
-
-Duple
-GtkCanvas::canvas_to_window (Duple const & d) const
-{
-	return d.translate (Duple (-_scroll_offset_x, -_scroll_offset_y));
-}	
-
-Rect
-GtkCanvas::window_to_canvas (Rect const & r) const
-{
-	return r.translate (Duple (_scroll_offset_x, _scroll_offset_y));
-}
-
-Rect
-GtkCanvas::canvas_to_window (Rect const & r) const
-{
-	return r.translate (Duple (-_scroll_offset_x, -_scroll_offset_y));
-}	
-
 /** Handler for when GTK asks us what minimum size we want.
  *  @param req Requsition to fill in.
  */
@@ -612,26 +621,3 @@ GtkCanvasViewport::on_size_request (Gtk::Requisition* req)
 	req->height = 16;
 }
 
-/** Convert window coordinates to canvas coordinates by taking into account
- *  where we are scrolled to.
- *  @param wx Window x.
- *  @param wy Window y.
- *  @param cx Filled in with canvas x.
- *  @param cy Filled in with canvas y.
- */
-void
-GtkCanvasViewport::window_to_canvas (int wx, int wy, Coord& cx, Coord& cy) const
-{
-	Duple d = _canvas.window_to_canvas (Duple (wx, wy));
-	cx = d.x;
-	cy = d.y;
-}
-
-/** @return The visible area of the canvas, in canvas coordinates */
-Rect
-GtkCanvasViewport::visible_area () const
-{
-	Distance const xo = hadjustment.get_value ();
-	Distance const yo = vadjustment.get_value ();
-	return Rect (xo, yo, xo + get_allocation().get_width (), yo + get_allocation().get_height ());
-}

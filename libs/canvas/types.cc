@@ -25,9 +25,7 @@
 using namespace std;
 using namespace ArdourCanvas;
 
-Coord const ArdourCanvas::COORD_MAX = DBL_MAX;
-/* XXX: empirically arrived at */
-Coord const ArdourCanvas::CAIRO_MAX = 65536;
+Coord const ArdourCanvas::COORD_MAX = 1.7e307;
 
 static inline Coord
 safe_add (Coord a, Coord b)
@@ -130,6 +128,12 @@ Duple
 ArdourCanvas::operator+ (Duple const & a, Duple const & b)
 {
 	return Duple (safe_add (a.x, b.x), safe_add (a.y, b.y));
+}
+
+bool
+ArdourCanvas::operator== (Duple const & a, Duple const & b)
+{
+	return a.x == b.x && a.y == b.y;
 }
 
 Duple

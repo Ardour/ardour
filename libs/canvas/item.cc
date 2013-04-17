@@ -370,7 +370,7 @@ Item::dump (ostream& o) const
 {
 	boost::optional<ArdourCanvas::Rect> bb = bounding_box();
 
-	o << _canvas->indent() << whatami() << ' ' << this;
+	o << _canvas->indent() << whatami() << ' ' << this << " Visible ? " << _visible;
 	o << " @ " << position();
 	
 #ifdef CANVAS_DEBUG

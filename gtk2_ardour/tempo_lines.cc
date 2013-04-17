@@ -27,8 +27,8 @@ using namespace std;
 
 #define MAX_CACHED_LINES 128
 
-TempoLines::TempoLines (ArdourCanvas::GtkCanvasViewport& canvas_viewport, ArdourCanvas::Group* group, double screen_height)
-	: _canvas_viewport (canvas_viewport)
+TempoLines::TempoLines (ArdourCanvas::Canvas& canvas, ArdourCanvas::Group* group, double screen_height)
+	: _canvas (canvas)
 	, _group(group)
 	, _clean_left(DBL_MAX)
 	, _clean_right(0.0)
@@ -88,7 +88,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 
 	const size_t needed = distance (begin, end);
 
-	ArdourCanvas::Rect const visible = _canvas_viewport.visible_area ();
+	ArdourCanvas::Rect const visible = _canvas.visible_area ();
 
 	/* get the first bar spacing */
 

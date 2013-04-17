@@ -1343,7 +1343,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		pointer_window = canvas_window->get_pointer (x, y, mask);
 
 		if (pointer_window == _track_canvas->get_window()) {
-			_track_canvas_viewport->window_to_canvas (x, y, wx, wy);
+			_track_canvas->window_to_canvas (x, y, wx, wy);
 		}
 	}
 
@@ -2942,5 +2942,5 @@ Editor::get_pointer_position (double& x, double& y) const
 {
 	int px, py;
 	_track_canvas->get_pointer (px, py);
-	_track_canvas_viewport->window_to_canvas (px, py, x, y);
+	_track_canvas->window_to_canvas (px, py, x, y);
 }

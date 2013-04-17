@@ -21,6 +21,7 @@
 #include <cmath>
 
 #include "canvas/canvas.h"
+#include "canvas/debug.h"
 
 #include "utils.h"
 #include "editor_cursors.h"
@@ -36,6 +37,9 @@ EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,Ardour
 	, _track_canvas_item (_editor._track_canvas->root ())
 	, _length (1.0)
 {
+	CANVAS_DEBUG_NAME ((&_time_bars_canvas_item), "timebars editor cursor");
+	CANVAS_DEBUG_NAME ((&_track_canvas_item), "track canvas editor cursor");
+
 	_time_bars_canvas_item.set_outline_width (1);
 	_track_canvas_item.set_outline_width (1);
 

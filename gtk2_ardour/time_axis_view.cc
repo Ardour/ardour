@@ -780,9 +780,6 @@ TimeAxisView::set_samples_per_pixel (double fpp)
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->set_samples_per_pixel (fpp);
 	}
-
-	AnalysisFeatureList::const_iterator i;
-	list<ArdourCanvas::Line*>::iterator l;
 }
 
 void

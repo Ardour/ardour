@@ -1444,7 +1444,7 @@ Editor::update_punch_range_view (bool visibility)
 	Location* tpl;
 
 	if ((_session->config.get_punch_in() || _session->config.get_punch_out()) && ((tpl = transport_punch_location()) != 0)) {
-		ArdourCanvas::Rect const v = _track_canvas_viewport->visible_area ();
+		ArdourCanvas::Rect const v = _track_canvas->visible_area ();
 		if (_session->config.get_punch_in()) {
 			transport_punch_range_rect->set_x0 (sample_to_pixel (tpl->start()));
 			transport_punch_range_rect->set_x1 (_session->config.get_punch_out() ? sample_to_pixel (tpl->end()) : sample_to_pixel (JACK_MAX_FRAMES));

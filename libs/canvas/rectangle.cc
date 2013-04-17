@@ -21,6 +21,8 @@
 #include <cairomm/context.h>
 #include "pbd/stacktrace.h"
 #include "pbd/compose.h"
+
+#include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 #include "canvas/debug.h"
 #include "canvas/utils.h"
@@ -50,10 +52,18 @@ Rectangle::Rectangle (Group* parent, Rect const & rect)
 void
 Rectangle::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) const
 {
-	Rect plot = _rect;
+	/* Cairo goes a little (!) wrong when asked to fill/stroke rectangles that
+	 * extend way beyond the surface boundaries. To avoid this issue,
+	 * clamp what we are drawing using the absolute end of the visible
+	 * canvas, converting to item-space coordinates, of course.
+	 */
 
-	plot.x1 = min (plot.x1, CAIRO_MAX);
-	plot.y1 = min (plot.y1, CAIRO_MAX);
+	Rect plot = _rect;
+	Rect visible = _canvas->visible_area();
+	Duple visible_end = canvas_to_item (Duple (visible.x1, visible.y1));
+
+	plot.x1 = min (plot.x1, visible_end.x);
+	plot.y1 = min (plot.y1, visible_end.y);	
 
 	if (_fill) {
 		setup_fill_context (context);
