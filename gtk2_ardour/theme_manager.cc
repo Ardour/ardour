@@ -58,7 +58,9 @@ ThemeManager::ThemeManager()
 	, light_button (_("Light Theme"))
 	, reset_button (_("Restore Defaults"))
 	, flat_buttons (_("Draw \"flat\" buttons"))
-	, gradient_waveforms (_("Draw waveforms with color gradient"))
+	, waveform_gradient_depth (0, 1.0, 0.1)
+	, waveform_gradient_depth_label (_("Waveforms color gradient depth"))
+	  
 {
 	set_title (_("Theme Manager"));
 
@@ -94,9 +96,17 @@ ThemeManager::ThemeManager()
 	vbox->pack_start (theme_selection_hbox, PACK_SHRINK);
 	vbox->pack_start (reset_button, PACK_SHRINK);
 	vbox->pack_start (flat_buttons, PACK_SHRINK);
-	vbox->pack_start (gradient_waveforms, PACK_SHRINK);
+
+	Gtk::HBox* hbox = Gtk::manage (new Gtk::HBox());
+	hbox->set_spacing (6);
+	hbox->pack_start (waveform_gradient_depth, true, true);
+	hbox->pack_start (waveform_gradient_depth_label, false, false);
+
+	vbox->pack_start (*hbox, PACK_SHRINK);
 	vbox->pack_start (scroller);
 	add (*vbox);
+
+	waveform_gradient_depth.set_update_policy (Gtk::UPDATE_DELAYED);
 
 	color_display.signal_button_press_event().connect (sigc::mem_fun (*this, &ThemeManager::button_press_event), false);
 
@@ -109,7 +119,7 @@ ThemeManager::ThemeManager()
 	light_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_light_theme_button_toggled));
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &ThemeManager::reset_canvas_colors));
 	flat_buttons.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_flat_buttons_toggled));
-	gradient_waveforms.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_gradient_waveforms_toggled));
+	waveform_gradient_depth.signal_value_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_waveform_gradient_depth_change));
 
 	set_size_request (-1, 400);
 	setup_theme ();
@@ -247,11 +257,13 @@ ThemeManager::on_flat_buttons_toggled ()
 }
 
 void
-ThemeManager::on_gradient_waveforms_toggled ()
+ThemeManager::on_waveform_gradient_depth_change ()
 {
-	ARDOUR_UI::config()->gradient_waveforms.set (gradient_waveforms.get_active());
+	double v = waveform_gradient_depth.get_value();
+
+	ARDOUR_UI::config()->waveform_gradient_depth.set (v);
 	ARDOUR_UI::config()->set_dirty ();
-	ArdourCanvas::WaveView::set_gradient_waveforms (gradient_waveforms.get_active());
+	ArdourCanvas::WaveView::set_global_gradient_depth (v);
 }
 
 void
@@ -363,7 +375,7 @@ ThemeManager::setup_theme ()
 	}
 	
 	flat_buttons.set_active (ARDOUR_UI::config()->flat_buttons.get());
-	gradient_waveforms.set_active (ARDOUR_UI::config()->gradient_waveforms.get());
+	waveform_gradient_depth.set_value (ARDOUR_UI::config()->waveform_gradient_depth.get());
 	
 	load_rc_file(rcfile, false);
 }

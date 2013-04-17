@@ -72,6 +72,8 @@ public:
         void set_clip_color (Color);
         void set_amplitude (double);
         void set_logscaled (bool);
+        void set_gradient_depth (double);
+        double gradient_depth() const { return _gradient_depth; }
         void set_shape (Shape);
         double amplitude() const { return _amplitude; }
         
@@ -80,13 +82,13 @@ public:
 	   set_logscaled_independent()
         */
 
-        static void set_gradient_waveforms (bool);
+        static void set_global_gradient_depth (double);
         static void set_global_logscaled (bool);
         static void set_global_shape (Shape);
     
-        static bool  gradient_waveforms()  { return _gradient_waveforms; }
-        static bool  global_logscaled()  { return _global_logscaled; }
-        static Shape global_shape()  { return _global_shape; }
+        static double  global_gradient_depth()  { return _global_gradient_depth; }
+        static bool    global_logscaled()  { return _global_logscaled; }
+        static Shape   global_shape()  { return _global_shape; }
 
 #ifdef CANVAS_COMPATIBILITY	
 	void*& property_gain_src () {
@@ -154,9 +156,11 @@ private:
         Color  _clip_color;
         bool   _logscaled;
         Shape  _shape;
+        double _gradient_depth;
         double _amplitude;
         bool   _shape_independent;
         bool   _logscaled_independent;
+        bool   _gradient_depth_independent;
 
 	/** The `start' value to use for the region; we can't use the region's
 	 *  value as the crossfade editor needs to alter it.
@@ -167,9 +171,9 @@ private:
        
         PBD::ScopedConnection invalidation_connection;
 
-        static bool _gradient_waveforms;
-        static bool _global_logscaled;
-        static Shape _global_shape;
+        static double _global_gradient_depth;
+        static bool   _global_logscaled;
+        static Shape  _global_shape;
 
         static PBD::Signal0<void> VisualPropertiesChanged;
 

@@ -40,7 +40,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace ArdourCanvas;
 
-bool WaveView::_gradient_waveforms = true;
+double WaveView::_global_gradient_depth = 0.6;
 bool WaveView::_global_logscaled = false;
 WaveView::Shape WaveView::_global_shape = WaveView::Normal;
 
@@ -60,9 +60,11 @@ WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region
 	, _clip_color (0xff0000ff)
 	, _logscaled (_global_logscaled)
 	, _shape (_global_shape)
+	, _gradient_depth (_global_gradient_depth)
 	, _amplitude (1.0)
 	, _shape_independent (false)
 	, _logscaled_independent (false)
+	, _gradient_depth_independent (false)
 	, _region_start (0)
 {
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
@@ -83,6 +85,11 @@ WaveView::handle_visual_property_change ()
 		changed = true;
 	}
 
+	if (!_gradient_depth_independent && (_gradient_depth != global_gradient_depth())) {
+		_gradient_depth = global_gradient_depth();
+		changed = true;
+	}
+	
 	if (changed) {
 		invalidate_image_cache ();
 	}
@@ -482,8 +489,8 @@ WaveView::CacheEntry::image ()
 
 		context->close_path ();
 
-		if (WaveView::gradient_waveforms()) {
-
+		if (_wave_view->gradient_depth() != 0.0) {
+			
 			Cairo::RefPtr<Cairo::LinearGradient> gradient (Cairo::LinearGradient::create (0, 0, 0, _wave_view->_height));
 			
 			double stops[3];
@@ -508,7 +515,7 @@ WaveView::CacheEntry::image ()
 			double h, s, v;
 			color_to_hsv (_wave_view->_fill_color, h, s, v);
 			/* tone down the saturation */
-			s *= 0.60;
+			s *= 1.0 - _wave_view->gradient_depth();
 			Color center = hsv_to_color (h, s, v, a);
 			color_to_rgba (center, r, g, b, a);
 			gradient->add_color_stop_rgba (stops[1], r, g, b, a);
@@ -553,10 +560,10 @@ WaveView::CacheEntry::clear_image ()
 }
 	    
 void
-WaveView::set_gradient_waveforms (bool yn)
+WaveView::set_global_gradient_depth (double depth)
 {
-	if (_gradient_waveforms != yn) {
-		_gradient_waveforms = yn;
+	if (_global_gradient_depth != depth) {
+		_global_gradient_depth = depth;
 		VisualPropertiesChanged (); /* EMIT SIGNAL */
 	}
 }
