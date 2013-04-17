@@ -215,7 +215,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 				line->set_x0 (xpos);
 				line->set_x1 (xpos);
 				line->set_y0 (0.0);
-				line->set_y1 (_height);
+				line->set_y1 (ArdourCanvas::COORD_MAX);
 				line->set_outline_color (color);
 				_lines.insert(make_pair(xpos, line));
 			}
