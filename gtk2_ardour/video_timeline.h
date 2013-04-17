@@ -92,7 +92,7 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	void save_session ();
 	void close_session ();
 	void sync_session_state (); /* video-monitor does not actively report window/pos changes, query it */
-	float get_apv(); /* audio frames per video frame; */
+	float get_apv(); /* audio samples per video frame; */
 	ARDOUR::framecnt_t get_duration () { return video_duration;}
 	ARDOUR::frameoffset_t get_offset () { return video_offset;}
 	ARDOUR::frameoffset_t quantify_frames_to_apv (ARDOUR::frameoffset_t offset) { return floor(offset/get_apv())*get_apv(); }
@@ -108,10 +108,10 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	void find_xjadeo ();
 
 
-	ARDOUR::frameoffset_t video_start_offset; /**< unit: audio-frames - video-file */
-	ARDOUR::frameoffset_t video_offset; /**< unit: audio-frames - session */
+	ARDOUR::frameoffset_t video_start_offset; /**< unit: audio-samples - video-file */
+	ARDOUR::frameoffset_t video_offset; /**< unit: audio-samples - session */
 	ARDOUR::frameoffset_t video_offset_p; /**< used for undo from editor_drag.cc */
-	framepos_t video_duration;     /**< unit: audio-frames */
+	framepos_t video_duration;     /**< unit: audio-samples */
 	std::string video_filename;
 	bool        local_file;
 	double      video_aspect_ratio;

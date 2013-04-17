@@ -53,16 +53,6 @@ Editor::set_video_timeline_height (const int h)
 void
 Editor::update_video_timeline (bool flush)
 {
-#if DEBUG
-	framepos_t rightmost_frame = leftmost_frame + current_page_samples();
-	std::cout << "VIDEO SCROLL: " << leftmost_frame << " -- " << rightmost_frame << std::endl;
-	std::cout << "SCROLL UNITS: " << sample_to_pixel(leftmost_frame) << " -- " << sample_to_pixel(rightmost_frame)
-	          << " = " << sample_to_pixel(rightmost_frame) - sample_to_pixel(leftmost_frame)
-		        << std::endl;
-#endif
-
-	// TODO later: make this a list for mult. video tracks
-	// also modify  ardour_ui_dialogs.cc : set_session()
 	if (flush) {
 		ARDOUR_UI::instance()->video_timeline->flush_local_cache();
 	}
