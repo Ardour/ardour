@@ -45,9 +45,7 @@ Editor::set_video_timeline_height (const int h)
 	if (videotl_bar_height == h) { return; }
 	if (h < 2 || h > 8) { return; }
   videotl_bar_height = h;
-	const double nh = (videotl_bar_height * timebar_height - ((ARDOUR::Profile->get_sae())?1.0:0.0));
 	videotl_label.set_size_request (-1, (int)timebar_height * videotl_bar_height);
-	videotl_bar->set_y1(nh);
 	ARDOUR_UI::instance()->video_timeline->set_height(videotl_bar_height * timebar_height);
 	update_ruler_visibility();
 }

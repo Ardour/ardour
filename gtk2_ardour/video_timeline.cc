@@ -45,7 +45,7 @@ using namespace Timecode;
 
 VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Group *vbg, int initial_height)
 	: editor (ed)
-		, videotl_bar_group(vbg)
+		, videotl_group(vbg)
 		, bar_height(initial_height)
 {
 	video_start_offset = 0L;
@@ -302,7 +302,7 @@ VideoTimeLine::update_video_timeline()
 		if (_session->timecode_frames_per_second() == 0 ) return;
 	}
 
-	double frames_per_unit = editor->pixel_to_sample(1.0);
+	double frames_per_unit = editor->get_current_zoom();
 	framepos_t leftmost_frame =  editor->leftmost_sample();
 
 	/* Outline:
@@ -379,7 +379,7 @@ VideoTimeLine::update_video_timeline()
 
 	while (video_frames.size() < visible_video_frames) {
 		VideoImageFrame *frame;
-		frame = new VideoImageFrame(*editor, *videotl_bar_group, display_vframe_width, bar_height, video_server_url, translated_filename());
+		frame = new VideoImageFrame(*editor, *videotl_group, display_vframe_width, bar_height, video_server_url, translated_filename());
 		frame->ImgChanged.connect (*this, invalidator (*this), boost::bind (&PublicEditor::queue_visual_videotimeline_update, editor), gui_context());
 		video_frames.push_back(frame);
 	}
@@ -412,7 +412,7 @@ VideoTimeLine::update_video_timeline()
 		}
 		VideoImageFrame * frame = get_video_frame(vframeno, cut, rightend);
 		if (frame) {
-		  frame->set_position(vfpos-leftmost_frame);
+		  frame->set_position(vfpos);
 			outdated_video_frames.remove(frame);
 		} else {
 			remaining.push_back(vfcount);
@@ -422,7 +422,7 @@ VideoTimeLine::update_video_timeline()
 	for (VideoFrames::iterator i = outdated_video_frames.begin(); i != outdated_video_frames.end(); ++i ) {
 		VideoImageFrame *frame = (*i);
 		if (remaining.empty()) {
-		  frame->set_position(-2 * vtl_dist); /* move off screen */
+		  frame->set_position(-2 * vtl_dist + leftmost_frame); /* move off screen */
 		} else {
 			int vfcount=remaining.front();
 			remaining.pop_front();
@@ -433,7 +433,7 @@ VideoTimeLine::update_video_timeline()
 				rightend = display_vframe_width * (video_start_offset + video_duration + GOFFSET - vfpos) / vtl_dist;
 				//printf("lf(n): %lu\n", vframeno); // XXX
 			}
-			frame->set_position(vfpos-leftmost_frame);
+			frame->set_position(vfpos);
 			frame->set_videoframe(vframeno, rightend);
 		}
 	}

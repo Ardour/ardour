@@ -781,11 +781,11 @@ Editor::update_ruler_visibility ()
 		if (tbpos != old_unit_pos) {
 			videotl_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
-		old_unit_pos = videotl_bar_group->position().y;
+		old_unit_pos = videotl_group->position().y;
 		if (tbgpos != old_unit_pos) {
-			videotl_bar_group->move (ArdourCanvas::Duple (0.0, tbgpos - old_unit_pos));
+			videotl_group->move (ArdourCanvas::Duple (0.0, tbgpos - old_unit_pos));
 		}
-		videotl_bar_group->show();
+		videotl_group->show();
 		videotl_group->show();
 		videotl_label.show();
 		tbpos += timebar_height * videotl_bar_height;
@@ -793,7 +793,7 @@ Editor::update_ruler_visibility ()
 		visible_timebars+=videotl_bar_height;
 	  queue_visual_videotimeline_update();
 	} else {
-		videotl_bar_group->hide();
+		videotl_group->hide();
 		videotl_group->hide();
 		videotl_label.hide();
 	  update_video_timeline(true);
