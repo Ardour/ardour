@@ -615,23 +615,23 @@ StereoPanner::on_key_press_event (GdkEventKey* ev)
 void
 StereoPanner::set_colors ()
 {
-	colors[Normal].fill = ARDOUR_UI::config()->canvasvar_StereoPannerFill.get();
-	colors[Normal].outline = ARDOUR_UI::config()->canvasvar_StereoPannerOutline.get();
-	colors[Normal].text = ARDOUR_UI::config()->canvasvar_StereoPannerText.get();
-	colors[Normal].background = ARDOUR_UI::config()->canvasvar_StereoPannerBackground.get();
-	colors[Normal].rule = ARDOUR_UI::config()->canvasvar_StereoPannerRule.get();
+	colors[Normal].fill = ARDOUR_UI::config()->get_canvasvar_StereoPannerFill();
+	colors[Normal].outline = ARDOUR_UI::config()->get_canvasvar_StereoPannerOutline();
+	colors[Normal].text = ARDOUR_UI::config()->get_canvasvar_StereoPannerText();
+	colors[Normal].background = ARDOUR_UI::config()->get_canvasvar_StereoPannerBackground();
+	colors[Normal].rule = ARDOUR_UI::config()->get_canvasvar_StereoPannerRule();
 
-	colors[Mono].fill = ARDOUR_UI::config()->canvasvar_StereoPannerMonoFill.get();
-	colors[Mono].outline = ARDOUR_UI::config()->canvasvar_StereoPannerMonoOutline.get();
-	colors[Mono].text = ARDOUR_UI::config()->canvasvar_StereoPannerMonoText.get();
-	colors[Mono].background = ARDOUR_UI::config()->canvasvar_StereoPannerMonoBackground.get();
-	colors[Mono].rule = ARDOUR_UI::config()->canvasvar_StereoPannerRule.get();
+	colors[Mono].fill = ARDOUR_UI::config()->get_canvasvar_StereoPannerMonoFill();
+	colors[Mono].outline = ARDOUR_UI::config()->get_canvasvar_StereoPannerMonoOutline();
+	colors[Mono].text = ARDOUR_UI::config()->get_canvasvar_StereoPannerMonoText();
+	colors[Mono].background = ARDOUR_UI::config()->get_canvasvar_StereoPannerMonoBackground();
+	colors[Mono].rule = ARDOUR_UI::config()->get_canvasvar_StereoPannerRule();
 
-	colors[Inverted].fill = ARDOUR_UI::config()->canvasvar_StereoPannerInvertedFill.get();
-	colors[Inverted].outline = ARDOUR_UI::config()->canvasvar_StereoPannerInvertedOutline.get();
-	colors[Inverted].text = ARDOUR_UI::config()->canvasvar_StereoPannerInvertedText.get();
-	colors[Inverted].background = ARDOUR_UI::config()->canvasvar_StereoPannerInvertedBackground.get();
-	colors[Inverted].rule = ARDOUR_UI::config()->canvasvar_StereoPannerRule.get();
+	colors[Inverted].fill = ARDOUR_UI::config()->get_canvasvar_StereoPannerInvertedFill();
+	colors[Inverted].outline = ARDOUR_UI::config()->get_canvasvar_StereoPannerInvertedOutline();
+	colors[Inverted].text = ARDOUR_UI::config()->get_canvasvar_StereoPannerInvertedText();
+	colors[Inverted].background = ARDOUR_UI::config()->get_canvasvar_StereoPannerInvertedBackground();
+	colors[Inverted].rule = ARDOUR_UI::config()->get_canvasvar_StereoPannerRule();
 }
 
 void

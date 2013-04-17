@@ -110,11 +110,11 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	_base_rect = new ArdourCanvas::Rectangle (_canvas_display);
 	_base_rect->set_x1 (ArdourCanvas::COORD_MAX);
-	_base_rect->set_outline_color (ARDOUR_UI::config()->canvasvar_AutomationTrackOutline.get());
+	_base_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_AutomationTrackOutline());
 
 	/* outline ends and bottom */
 	_base_rect->set_outline_what (0x1 | 0x2 | 0x8);
-	_base_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_AutomationTrackFill.get());
+	_base_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_AutomationTrackFill());
 
 	_base_rect->set_data ("trackview", this);
 
@@ -209,7 +209,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 				)
 			);
 
-		line->set_line_color (ARDOUR_UI::config()->canvasvar_ProcessorAutomationLine.get());
+		line->set_line_color (ARDOUR_UI::config()->get_canvasvar_ProcessorAutomationLine());
 		line->queue_reset ();
 		add_line (line);
 	}

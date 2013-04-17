@@ -1860,7 +1860,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if (mouse_mode == MouseGain) {
 			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
 			if (line) {
-				line->set_outline_color (ARDOUR_UI::config()->canvasvar_EnteredGainLine.get());
+				line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_EnteredGainLine());
 			}
 			if (is_drawable()) {
 				set_canvas_cursor (_cursors->fader);
@@ -1872,7 +1872,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if (mouse_mode == MouseGain || mouse_mode == MouseObject) {
 			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
 			if (line) {
-				line->set_outline_color (ARDOUR_UI::config()->canvasvar_EnteredAutomationLine.get());
+				line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_EnteredAutomationLine());
 			}
 			if (is_drawable()) {
 				set_canvas_cursor (_cursors->fader);
@@ -1980,7 +1980,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			break;
 		}
 		entered_marker = marker;
-		marker->set_color_rgba (ARDOUR_UI::config()->canvasvar_EnteredMarker.get());
+		marker->set_color_rgba (ARDOUR_UI::config()->get_canvasvar_EnteredMarker());
 		// fall through
 	case MeterMarkerItem:
 	case TempoMarkerItem:
@@ -2172,7 +2172,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	case FeatureLineItem:
 		{
 			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
-			line->set_outline_color (ARDOUR_UI::config()->canvasvar_ZeroLine.get());
+			line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_ZeroLine());
 		}
 		break;
 

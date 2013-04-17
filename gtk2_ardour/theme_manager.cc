@@ -60,6 +60,8 @@ ThemeManager::ThemeManager()
 	, flat_buttons (_("Draw \"flat\" buttons"))
 	, waveform_gradient_depth (0, 1.0, 0.1)
 	, waveform_gradient_depth_label (_("Waveforms color gradient depth"))
+	, timeline_item_gradient_depth (0, 2.0, 0.1)
+	, timeline_item_gradient_depth_label (_("Timeline item gradient depth"))
 	  
 {
 	set_title (_("Theme Manager"));
@@ -101,13 +103,20 @@ ThemeManager::ThemeManager()
 	hbox->set_spacing (6);
 	hbox->pack_start (waveform_gradient_depth, true, true);
 	hbox->pack_start (waveform_gradient_depth_label, false, false);
+	vbox->pack_start (*hbox, PACK_SHRINK);
+
+	hbox = Gtk::manage (new Gtk::HBox());
+	hbox->set_spacing (6);
+	hbox->pack_start (timeline_item_gradient_depth, true, true);
+	hbox->pack_start (timeline_item_gradient_depth_label, false, false);
 
 	vbox->pack_start (*hbox, PACK_SHRINK);
 	vbox->pack_start (scroller);
 	add (*vbox);
 
 	waveform_gradient_depth.set_update_policy (Gtk::UPDATE_DELAYED);
-
+	timeline_item_gradient_depth.set_update_policy (Gtk::UPDATE_DELAYED);
+	
 	color_display.signal_button_press_event().connect (sigc::mem_fun (*this, &ThemeManager::button_press_event), false);
 
 	color_dialog.get_colorsel()->set_has_opacity_control (true);
@@ -120,6 +129,7 @@ ThemeManager::ThemeManager()
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &ThemeManager::reset_canvas_colors));
 	flat_buttons.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_flat_buttons_toggled));
 	waveform_gradient_depth.signal_value_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_waveform_gradient_depth_change));
+	timeline_item_gradient_depth.signal_value_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_timeline_item_gradient_depth_change));
 
 	set_size_request (-1, 400);
 	setup_theme ();
@@ -249,7 +259,7 @@ load_rc_file (const string& filename, bool themechange)
 void
 ThemeManager::on_flat_buttons_toggled ()
 {
-	ARDOUR_UI::config()->flat_buttons.set (flat_buttons.get_active());
+	ARDOUR_UI::config()->set_flat_buttons (flat_buttons.get_active());
 	ARDOUR_UI::config()->set_dirty ();
 	ArdourButton::set_flat_buttons (flat_buttons.get_active());
 	/* force a redraw */
@@ -261,9 +271,19 @@ ThemeManager::on_waveform_gradient_depth_change ()
 {
 	double v = waveform_gradient_depth.get_value();
 
-	ARDOUR_UI::config()->waveform_gradient_depth.set (v);
+	ARDOUR_UI::config()->set_waveform_gradient_depth (v);
 	ARDOUR_UI::config()->set_dirty ();
 	ArdourCanvas::WaveView::set_global_gradient_depth (v);
+}
+
+
+void
+ThemeManager::on_timeline_item_gradient_depth_change ()
+{
+	double v = timeline_item_gradient_depth.get_value();
+
+	ARDOUR_UI::config()->set_timeline_item_gradient_depth (v);
+	ARDOUR_UI::config()->set_dirty ();
 }
 
 void
@@ -272,13 +292,13 @@ ThemeManager::on_dark_theme_button_toggled()
 	if (!dark_button.get_active()) return;
 
 	if (HACK_PROFILE_IS_SAE()){
-		ARDOUR_UI::config()->ui_rc_file.set("ardour3_ui_dark_sae.rc");
+		ARDOUR_UI::config()->set_ui_rc_file("ardour3_ui_dark_sae.rc");
 	} else {
-		ARDOUR_UI::config()->ui_rc_file.set("ardour3_ui_dark.rc");
+		ARDOUR_UI::config()->set_ui_rc_file("ardour3_ui_dark.rc");
 	}
 	ARDOUR_UI::config()->set_dirty ();
 
-	load_rc_file (ARDOUR_UI::config()->ui_rc_file.get(), true);
+	load_rc_file (ARDOUR_UI::config()->get_ui_rc_file(), true);
 }
 
 void
@@ -287,12 +307,12 @@ ThemeManager::on_light_theme_button_toggled()
 	if (!light_button.get_active()) return;
 
 	if (HACK_PROFILE_IS_SAE()){
-		ARDOUR_UI::config()->ui_rc_file.set("ardour3_ui_light_sae.rc");
+		ARDOUR_UI::config()->set_ui_rc_file("ardour3_ui_light_sae.rc");
 	} else {
-		ARDOUR_UI::config()->ui_rc_file.set("ardour3_ui_light.rc");
+		ARDOUR_UI::config()->set_ui_rc_file("ardour3_ui_light.rc");
 	}
 
-	load_rc_file (ARDOUR_UI::config()->ui_rc_file.get(), true);
+	load_rc_file (ARDOUR_UI::config()->get_ui_rc_file(), true);
 }
 
 void
@@ -365,7 +385,7 @@ ThemeManager::setup_theme ()
 	string rcfile = Glib::getenv("ARDOUR3_UI_RC", env_defined);
 
 	if(!env_defined) {
-		rcfile = ARDOUR_UI::config()->ui_rc_file.get();
+		rcfile = ARDOUR_UI::config()->get_ui_rc_file();
 	}
 
 	if (rcfile == "ardour3_ui_dark.rc" || rcfile == "ardour3_ui_dark_sae.rc") {
@@ -374,8 +394,9 @@ ThemeManager::setup_theme ()
 		light_button.set_active();
 	}
 	
-	flat_buttons.set_active (ARDOUR_UI::config()->flat_buttons.get());
-	waveform_gradient_depth.set_value (ARDOUR_UI::config()->waveform_gradient_depth.get());
+	flat_buttons.set_active (ARDOUR_UI::config()->get_flat_buttons());
+	waveform_gradient_depth.set_value (ARDOUR_UI::config()->get_waveform_gradient_depth());
+	timeline_item_gradient_depth.set_value (ARDOUR_UI::config()->get_timeline_item_gradient_depth());
 	
 	load_rc_file(rcfile, false);
 }

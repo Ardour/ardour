@@ -441,9 +441,9 @@ AudioRegionView::region_muted ()
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
 		if (_region->muted()) {
-			waves[n]->set_outline_color (UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA));
+			waves[n]->set_outline_color (UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), MUTED_ALPHA));
 		} else {
-			waves[n]->set_outline_color (ARDOUR_UI::config()->canvasvar_WaveForm.get());
+			waves[n]->set_outline_color (ARDOUR_UI::config()->get_canvasvar_WaveForm());
 		}
 	}
 }
@@ -756,18 +756,18 @@ AudioRegionView::set_colors ()
 	RegionView::set_colors();
 
 	if (gain_line) {
-		gain_line->set_line_color (audio_region()->envelope_active() ? ARDOUR_UI::config()->canvasvar_GainLine.get() : ARDOUR_UI::config()->canvasvar_GainLineInactive.get());
+		gain_line->set_line_color (audio_region()->envelope_active() ? ARDOUR_UI::config()->get_canvasvar_GainLine() : ARDOUR_UI::config()->get_canvasvar_GainLineInactive());
 	}
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
 		if (_region->muted()) {
-			waves[n]->set_outline_color (UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA));
+			waves[n]->set_outline_color (UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), MUTED_ALPHA));
 		} else {
-			waves[n]->set_outline_color (ARDOUR_UI::config()->canvasvar_WaveForm.get());
+			waves[n]->set_outline_color (ARDOUR_UI::config()->get_canvasvar_WaveForm());
 		}
 
-		waves[n]->set_clip_color (ARDOUR_UI::config()->canvasvar_WaveFormClip.get());
-		waves[n]->set_zero_color (ARDOUR_UI::config()->canvasvar_ZeroLine.get());
+		waves[n]->set_clip_color (ARDOUR_UI::config()->get_canvasvar_WaveFormClip());
+		waves[n]->set_zero_color (ARDOUR_UI::config()->get_canvasvar_ZeroLine());
 	}
 }
 
@@ -902,15 +902,15 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	wave->property_amplitude_above_axis() =  _amplitude_above_axis;
 
 	if (_recregion) {
-		wave->set_outline_color (_region->muted() ? UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_RecWaveForm.get(), MUTED_ALPHA) : ARDOUR_UI::config()->canvasvar_RecWaveForm.get());
-		wave->set_fill_color (ARDOUR_UI::config()->canvasvar_RecWaveFormFill.get());
+		wave->set_outline_color (_region->muted() ? UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_RecWaveForm(), MUTED_ALPHA) : ARDOUR_UI::config()->get_canvasvar_RecWaveForm());
+		wave->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RecWaveFormFill());
 	} else {
-		wave->set_outline_color (_region->muted() ? UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA) : ARDOUR_UI::config()->canvasvar_WaveForm.get());
-		wave->set_fill_color (ARDOUR_UI::config()->canvasvar_WaveFormFill.get());
+		wave->set_outline_color (_region->muted() ? UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), MUTED_ALPHA) : ARDOUR_UI::config()->get_canvasvar_WaveForm());
+		wave->set_fill_color (ARDOUR_UI::config()->get_canvasvar_WaveFormFill());
 	}
 
-	wave->set_clip_color (ARDOUR_UI::config()->canvasvar_WaveFormClip.get());
-	wave->set_zero_color (ARDOUR_UI::config()->canvasvar_ZeroLine.get());
+	wave->set_clip_color (ARDOUR_UI::config()->get_canvasvar_WaveFormClip());
+	wave->set_zero_color (ARDOUR_UI::config()->get_canvasvar_ZeroLine());
 	// CAIROCANVAS
 	// wave->property_zero_line() = true;
 
@@ -1133,7 +1133,7 @@ void
 AudioRegionView::envelope_active_changed ()
 {
 	if (gain_line) {
-		gain_line->set_line_color (audio_region()->envelope_active() ? ARDOUR_UI::config()->canvasvar_GainLine.get() : ARDOUR_UI::config()->canvasvar_GainLineInactive.get());
+		gain_line->set_line_color (audio_region()->envelope_active() ? ARDOUR_UI::config()->get_canvasvar_GainLine() : ARDOUR_UI::config()->get_canvasvar_GainLineInactive());
 	}
 }
 
@@ -1172,26 +1172,26 @@ AudioRegionView::set_frame_color ()
 
 	if (_selected) {
                 if (_region->muted()) {
-                        wc = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_SelectedWaveForm.get(), MUTED_ALPHA);
+                        wc = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm(), MUTED_ALPHA);
                 } else {
-                        wc = ARDOUR_UI::config()->canvasvar_SelectedWaveForm.get();
+                        wc = ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm();
                 }
-                fc = ARDOUR_UI::config()->canvasvar_SelectedWaveFormFill.get();
+                fc = ARDOUR_UI::config()->get_canvasvar_SelectedWaveFormFill();
 	} else {
 		if (_recregion) {
                         if (_region->muted()) {
-                                wc = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_RecWaveForm.get(), MUTED_ALPHA);
+                                wc = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_RecWaveForm(), MUTED_ALPHA);
                         } else {
-                                wc = ARDOUR_UI::config()->canvasvar_RecWaveForm.get();
+                                wc = ARDOUR_UI::config()->get_canvasvar_RecWaveForm();
                         }
-                        fc = ARDOUR_UI::config()->canvasvar_RecWaveFormFill.get();
+                        fc = ARDOUR_UI::config()->get_canvasvar_RecWaveFormFill();
 		} else {
                         if (_region->muted()) {
-                                wc = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->canvasvar_WaveForm.get(), MUTED_ALPHA);
+                                wc = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), MUTED_ALPHA);
                         } else {
-                                wc = ARDOUR_UI::config()->canvasvar_WaveForm.get();
+                                wc = ARDOUR_UI::config()->get_canvasvar_WaveForm();
                         }
-                        fc = ARDOUR_UI::config()->canvasvar_WaveFormFill.get();
+                        fc = ARDOUR_UI::config()->get_canvasvar_WaveFormFill();
 		}
 	}
 
@@ -1387,14 +1387,14 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 		start_xfade_in = new ArdourCanvas::PolyLine (group);
 		// CAIROCANVAS
 		// start_xfade_in->set_width_pixels (1);
-		start_xfade_in->set_outline_color (ARDOUR_UI::config()->canvasvar_GainLine.get());
+		start_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GainLine());
 	}
 
 	if (!start_xfade_out) {
 		start_xfade_out = new ArdourCanvas::PolyLine (group);
 		// CAIROCANVAS
 		// start_xfade_out->set_width_pixels (1);
-		uint32_t col = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_GainLine.get(), 128);
+		uint32_t col = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_GainLine(), 128);
 		start_xfade_out->set_outline_color (col);
 	}
 
@@ -1403,7 +1403,7 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 		// CAIROCANVAS
 		// start_xfade_rect->property_draw() = true;
 		start_xfade_rect->set_fill (true);
-		start_xfade_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_ActiveCrossfade.get());
+		start_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade());
 		start_xfade_rect->set_outline (false);
 		start_xfade_rect->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_start_xfade_event), start_xfade_rect, this));
 		start_xfade_rect->set_data ("regionview", this);
@@ -1495,14 +1495,14 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 		end_xfade_in = new ArdourCanvas::PolyLine (group);
 		// CAIROCANVAS
 		// end_xfade_in->property_width_pixels() = 1;
-		end_xfade_in->set_outline_color (ARDOUR_UI::config()->canvasvar_GainLine.get());
+		end_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GainLine());
 	}
 
 	if (!end_xfade_out) {
 		end_xfade_out = new ArdourCanvas::PolyLine (group);
 		// CAIROCANVAS
 		// end_xfade_out->property_width_pixels() = 1;
-		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->canvasvar_GainLine.get(), 128);
+		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_GainLine(), 128);
 		end_xfade_out->set_outline_color (col);
 	}
 
@@ -1511,7 +1511,7 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 		// CAIROCANVAS
 		// end_xfade_rect->property_draw() = true;
 		end_xfade_rect->set_fill (true);
-		end_xfade_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_ActiveCrossfade.get());
+		end_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade());
 		end_xfade_rect->set_outline (0);
 		end_xfade_rect->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_end_xfade_event), end_xfade_rect, this));
 		end_xfade_rect->set_data ("regionview", this);

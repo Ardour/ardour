@@ -134,12 +134,12 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 	for (i = begin; i != end; ++i) {
 
 		if ((*i).is_bar()) {
-			color = ARDOUR_UI::config()->canvasvar_MeasureLineBar.get();
+			color = ARDOUR_UI::config()->get_canvasvar_MeasureLineBar();
 		} else {
 			if (beat_density > 2.0) {
 				continue; /* only draw beat lines if the gaps between beats are large. */
 			}
-			color = ARDOUR_UI::config()->canvasvar_MeasureLineBeat.get();
+			color = ARDOUR_UI::config()->get_canvasvar_MeasureLineBeat();
 		}
 
 		xpos = rint(((framepos_t)(*i).frame) / (double)samples_per_pixel);

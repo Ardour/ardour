@@ -298,7 +298,7 @@ MidiStreamView::draw_note_lines()
 	for (int i = lowest_note(); i <= highest_note(); ++i) {
 		y = floor(note_to_y(i));
 
-		_note_lines->add (prev_y, 1.0, ARDOUR_UI::config()->canvasvar_PianoRollBlackOutline.get());
+		_note_lines->add (prev_y, 1.0, ARDOUR_UI::config()->get_canvasvar_PianoRollBlackOutline());
 
 		switch (i % 12) {
 		case 1:
@@ -306,10 +306,10 @@ MidiStreamView::draw_note_lines()
 		case 6:
 		case 8:
 		case 10:
-			color = ARDOUR_UI::config()->canvasvar_PianoRollBlack.get();
+			color = ARDOUR_UI::config()->get_canvasvar_PianoRollBlack();
 			break;
 		default:
-			color = ARDOUR_UI::config()->canvasvar_PianoRollWhite.get();
+			color = ARDOUR_UI::config()->get_canvasvar_PianoRollWhite();
 			break;
 		}
 
@@ -483,11 +483,11 @@ MidiStreamView::setup_rec_box ()
 			gdouble const xend = xstart;
 			uint32_t fill_color;
 
-			fill_color = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
+			fill_color = ARDOUR_UI::config()->get_canvasvar_RecordingRect();
 
 			ArdourCanvas::Rectangle * rec_rect = new ArdourCanvas::Rectangle (_canvas_group);
 			rec_rect->set (ArdourCanvas::Rect (xstart, 1, xend, _trackview.current_height() - 1));
-			rec_rect->set_outline_color (ARDOUR_UI::config()->canvasvar_RecordingRect.get());
+			rec_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RecordingRect());
 			rec_rect->set_fill_color (fill_color);
 			rec_rect->lower_to_bottom();
 
@@ -560,9 +560,9 @@ MidiStreamView::color_handler ()
 	draw_note_lines ();
 
 	if (_trackview.is_midi_track()) {
-		canvas_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_MidiTrackBase.get());
+		canvas_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_MidiTrackBase());
 	} else {
-		canvas_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_MidiBusBase.get());
+		canvas_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_MidiBusBase());
 	}
 }
 

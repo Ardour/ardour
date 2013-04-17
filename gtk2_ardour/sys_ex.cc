@@ -36,8 +36,8 @@ SysEx::SysEx (
 	_flag = new ArdourCanvas::Flag (
 		parent,
 		height, 
-		ARDOUR_UI::config()->canvasvar_MidiSysExOutline.get(),
-		ARDOUR_UI::config()->canvasvar_MidiSysExFill.get(),
+		ARDOUR_UI::config()->get_canvasvar_MidiSysExOutline(),
+		ARDOUR_UI::config()->get_canvasvar_MidiSysExFill(),
 		ArdourCanvas::Duple (x, y)
 		);
 	

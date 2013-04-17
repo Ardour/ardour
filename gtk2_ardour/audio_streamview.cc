@@ -271,12 +271,12 @@ AudioStreamView::setup_rec_box ()
 			case Normal:
 			case NonLayered:
 				xend = xstart;
-				fill_color = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
+				fill_color = ARDOUR_UI::config()->get_canvasvar_RecordingRect();
 				break;
 
 			case Destructive:
 				xend = xstart + 2;
-				fill_color = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
+				fill_color = ARDOUR_UI::config()->get_canvasvar_RecordingRect();
 				/* make the recording rect translucent to allow
 				   the user to see the peak data coming in, etc.
 				*/
@@ -290,7 +290,7 @@ AudioStreamView::setup_rec_box ()
 			rec_rect->set_x1 (xend);
 			rec_rect->set_y1 (child_height ());
 			rec_rect->set_outline_what (0);
-			rec_rect->set_outline_color (ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get());
+			rec_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_TimeAxisFrame());
 			rec_rect->set_fill_color (fill_color);
 			rec_rect->lower_to_bottom();
 
@@ -529,15 +529,15 @@ AudioStreamView::color_handler ()
 {
 	//case cAudioTrackBase:
 	if (_trackview.is_track()) {
-		canvas_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_AudioTrackBase.get());
+		canvas_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_AudioTrackBase());
 	}
 
 	//case cAudioBusBase:
 	if (!_trackview.is_track()) {
 		if (Profile->get_sae() && _trackview.route()->is_master()) {
-			canvas_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_AudioMasterBusBase.get());
+			canvas_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_AudioMasterBusBase());
 		} else {
-			canvas_rect->set_fill_color (ARDOUR_UI::config()->canvasvar_AudioBusBase.get());
+			canvas_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_AudioBusBase());
 		}
 	}
 }

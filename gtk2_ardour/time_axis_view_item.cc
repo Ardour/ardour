@@ -17,6 +17,8 @@
 
 */
 
+#include <utility>
+
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
 
@@ -30,6 +32,7 @@
 #include "canvas/rectangle.h"
 #include "canvas/debug.h"
 #include "canvas/text.h"
+#include "canvas/utils.h"
 
 #include "ardour_ui.h"
 /*
@@ -169,8 +172,8 @@ TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & ba
 
 	vestigial_frame = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, 1.0, 2.0, trackview.current_height()));
 	vestigial_frame->hide ();
-	vestigial_frame->set_outline_color (ARDOUR_UI::config()->canvasvar_VestigialFrame.get());
-	vestigial_frame->set_fill_color (ARDOUR_UI::config()->canvasvar_VestigialFrame.get());
+	vestigial_frame->set_outline_color (ARDOUR_UI::config()->get_canvasvar_VestigialFrame());
+	vestigial_frame->set_fill_color (ARDOUR_UI::config()->get_canvasvar_VestigialFrame());
 
 	if (visibility & ShowFrame) {
 		frame = new ArdourCanvas::Rectangle (group, 
@@ -179,9 +182,9 @@ TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & ba
 									 trackview.current_height()));
 
 		if (_recregion) {
-			frame->set_outline_color (ARDOUR_UI::config()->canvasvar_RecordingRect.get());
+			frame->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RecordingRect());
 		} else {
-			frame->set_outline_color (ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get());
+			frame->set_outline_color (ARDOUR_UI::config()->get_canvasvar_TimeAxisFrame());
 		}
 
 	} else {
@@ -240,6 +243,7 @@ TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & ba
 	set_position (start, this);
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&TimeAxisViewItem::parameter_changed, this, _1), gui_context ());
+	ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun (*this, &TimeAxisViewItem::parameter_changed));
 }
 
 TimeAxisViewItem::~TimeAxisViewItem()
@@ -722,7 +726,7 @@ TimeAxisViewItem::set_frame_color()
 
 	if (_selected) {
 
-                f = ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get();
+                f = ARDOUR_UI::config()->get_canvasvar_SelectedFrameBase();
 
 		if (fill_opacity) {
                         f = UINT_RGBA_CHANGE_A (f, fill_opacity);
@@ -735,11 +739,11 @@ TimeAxisViewItem::set_frame_color()
 	} else {
 
 		if (_recregion) {
-			f = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
+			f = ARDOUR_UI::config()->get_canvasvar_RecordingRect();
 		} else {
 
 			if (high_enough_for_name && !Config->get_color_regions_using_track_color()) {
-				f = ARDOUR_UI::config()->canvasvar_FrameBase.get();
+				f = ARDOUR_UI::config()->get_canvasvar_FrameBase();
 			} else {
 				f = fill_color;
 			}
@@ -755,12 +759,13 @@ TimeAxisViewItem::set_frame_color()
 	}
 
         frame->set_fill_color (f);
+	set_frame_gradient ();
 
         if (!_recregion) {
                 if (_selected) {
-                        f = ARDOUR_UI::config()->canvasvar_SelectedTimeAxisFrame.get();
+                        f = ARDOUR_UI::config()->get_canvasvar_SelectedTimeAxisFrame();
                 } else {
-                        f = ARDOUR_UI::config()->canvasvar_TimeAxisFrame.get();
+                        f = ARDOUR_UI::config()->get_canvasvar_TimeAxisFrame();
                 }
 
                 if (!rect_visible) {
@@ -771,6 +776,38 @@ TimeAxisViewItem::set_frame_color()
         }
 }
 
+void
+TimeAxisViewItem::set_frame_gradient ()
+{
+	if (ARDOUR_UI::config()->get_timeline_item_gradient_depth() == 0.0) {
+		frame->set_gradient (ArdourCanvas::Fill::StopList (), 0);
+		return;
+	}
+		
+	ArdourCanvas::Fill::StopList stops;
+	double r, g, b, a;
+	double h, s, v;
+	ArdourCanvas::Color f (frame->fill_color());
+
+	/* need to get alpha value */
+	ArdourCanvas::color_to_rgba (f, r, g, b, a);
+	
+	stops.push_back (std::make_pair (0.0, f));
+	
+	/* now a darker version */
+	
+	ArdourCanvas::color_to_hsv (f, h, s, v);
+	s *= ARDOUR_UI::config()->get_timeline_item_gradient_depth();
+	if (s > 1.0) {
+		s = 1.0;
+	}
+	
+	ArdourCanvas::Color darker = ArdourCanvas::hsv_to_color (h, s, v, a);
+	stops.push_back (std::make_pair (1.0, darker));
+	
+	frame->set_gradient (stops, _height);
+}
+
 /**
  * Set the colors of the start and end trim handle depending on object state
  */
@@ -779,11 +816,11 @@ TimeAxisViewItem::set_trim_handle_colors()
 {
 	if (frame_handle_start) {
 		if (position_locked) {
-			frame_handle_start->set_fill_color (ARDOUR_UI::config()->canvasvar_TrimHandleLocked.get());
-			frame_handle_end->set_fill_color (ARDOUR_UI::config()->canvasvar_TrimHandleLocked.get());
+			frame_handle_start->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TrimHandleLocked());
+			frame_handle_end->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TrimHandleLocked());
 		} else {
-			frame_handle_start->set_fill_color (RGBA_TO_UINT (1, 1, 1, 0)); //ARDOUR_UI::config()->canvasvar_TrimHandle.get();
-			frame_handle_end->set_fill_color (RGBA_TO_UINT (1, 1, 1, 0)); //ARDOUR_UI::config()->canvasvar_TrimHandle.get();
+			frame_handle_start->set_fill_color (RGBA_TO_UINT (1, 1, 1, 0)); //ARDOUR_UI::config()->get_canvasvar_TrimHandle();
+			frame_handle_end->set_fill_color (RGBA_TO_UINT (1, 1, 1, 0)); //ARDOUR_UI::config()->get_canvasvar_TrimHandle();
 		}
 	}
 }
@@ -968,5 +1005,7 @@ TimeAxisViewItem::parameter_changed (string p)
 {
 	if (p == "color-regions-using-track-color") {
 		set_frame_color ();
+	} else if (p == "timeline-item-gradient-depth") {
+		set_frame_gradient ();
 	}
 }

@@ -181,15 +181,15 @@ LevelMeter::setup_meters (int len, int initial_width)
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
 		uint32_t b, m, t, c;
 		if (n < nmidi) {
-			b = ARDOUR_UI::config()->canvasvar_MidiMeterColorBase.get();
-			m = ARDOUR_UI::config()->canvasvar_MidiMeterColorMid.get();
-			t = ARDOUR_UI::config()->canvasvar_MidiMeterColorTop.get();
-			c = ARDOUR_UI::config()->canvasvar_MeterColorClip.get();
+			b = ARDOUR_UI::config()->get_canvasvar_MidiMeterColorBase();
+			m = ARDOUR_UI::config()->get_canvasvar_MidiMeterColorMid();
+			t = ARDOUR_UI::config()->get_canvasvar_MidiMeterColorTop();
+			c = ARDOUR_UI::config()->get_canvasvar_MeterColorClip();
 		} else {
-			b = ARDOUR_UI::config()->canvasvar_MeterColorBase.get();
-			m = ARDOUR_UI::config()->canvasvar_MeterColorMid.get();
-			t = ARDOUR_UI::config()->canvasvar_MeterColorTop.get();
-			c = ARDOUR_UI::config()->canvasvar_MeterColorClip.get();
+			b = ARDOUR_UI::config()->get_canvasvar_MeterColorBase();
+			m = ARDOUR_UI::config()->get_canvasvar_MeterColorMid();
+			t = ARDOUR_UI::config()->get_canvasvar_MeterColorTop();
+			c = ARDOUR_UI::config()->get_canvasvar_MeterColorClip();
 		}
 		if (meters[n].width != width || meters[n].length != len || color_changed) {
 			delete meters[n].meter;

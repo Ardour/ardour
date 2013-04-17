@@ -53,8 +53,8 @@ PatchChange::PatchChange(
 	_flag = new ArdourCanvas::Flag (
 		parent,
 		height,
-		ARDOUR_UI::config()->canvasvar_MidiPatchChangeOutline.get(),
-		ARDOUR_UI::config()->canvasvar_MidiPatchChangeFill.get(),
+		ARDOUR_UI::config()->get_canvasvar_MidiPatchChangeOutline(),
+		ARDOUR_UI::config()->get_canvasvar_MidiPatchChangeFill(),
 		ArdourCanvas::Duple (x, y)
 		);
 	

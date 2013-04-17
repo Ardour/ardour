@@ -20,6 +20,7 @@
 #ifndef __CANVAS_FILL_H__
 #define __CANVAS_FILL_H__
 
+#include <vector>
 #include <stdint.h>
 #include "canvas/item.h"
 
@@ -40,12 +41,17 @@ public:
 	bool fill () const {
 		return _fill;
 	}
+
+        typedef std::vector<std::pair<double,Color> > StopList;
 	
+        void set_gradient (StopList const & stops, double height);
+
 protected:
 	void setup_fill_context (Cairo::RefPtr<Cairo::Context>) const;
 	
 	Color _fill_color;
 	bool _fill;
+        Cairo::RefPtr<Cairo::LinearGradient> _gradient;
 };
 
 }

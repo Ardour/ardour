@@ -335,11 +335,11 @@ Marker::setup_line ()
 		if (_time_bars_line == 0) {
 
 			_time_bars_line = new ArdourCanvas::Line (editor.get_time_bars_group());
-			_time_bars_line->set_outline_color (ARDOUR_UI::config()->canvasvar_EditPoint.get());
+			_time_bars_line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_EditPoint());
 			_time_bars_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
 			
 			_track_canvas_line = new ArdourCanvas::Line (editor.get_track_canvas_group());
-			_track_canvas_line->set_outline_color (ARDOUR_UI::config()->canvasvar_EditPoint.get());
+			_track_canvas_line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_EditPoint());
 			_track_canvas_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
 		}
 
@@ -350,7 +350,7 @@ Marker::setup_line ()
                 _time_bars_line->set_x1 (d.x);
 		_time_bars_line->set_y0 (d.y);
 		_time_bars_line->set_y1 (ArdourCanvas::COORD_MAX);
-		_time_bars_line->set_outline_color (_selected ? ARDOUR_UI::config()->canvasvar_EditPoint.get() : _color);
+		_time_bars_line->set_outline_color (_selected ? ARDOUR_UI::config()->get_canvasvar_EditPoint() : _color);
 		_time_bars_line->raise_to_top ();
 		_time_bars_line->show ();
 
@@ -359,7 +359,7 @@ Marker::setup_line ()
 		_track_canvas_line->set_x1 (d.x);
 		_track_canvas_line->set_y0 (d.y);
 		_track_canvas_line->set_y1 (ArdourCanvas::COORD_MAX);
-		_track_canvas_line->set_outline_color (_selected ? ARDOUR_UI::config()->canvasvar_EditPoint.get() : _color);
+		_track_canvas_line->set_outline_color (_selected ? ARDOUR_UI::config()->get_canvasvar_EditPoint() : _color);
 		_track_canvas_line->raise_to_top ();
 		_track_canvas_line->show ();
 

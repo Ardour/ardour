@@ -944,7 +944,7 @@ TimeAxisView::get_selection_rect (uint32_t id)
 
 		rect->rect = new ArdourCanvas::Rectangle (selection_group);
 		rect->rect->set_outline_what (0);
-		rect->rect->set_fill_color (ARDOUR_UI::config()->canvasvar_SelectionRect.get());
+		rect->rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_SelectionRect());
 
 		rect->start_trim = new ArdourCanvas::Rectangle (selection_group);
 		rect->start_trim->set_outline_what (0);
@@ -1116,26 +1116,26 @@ TimeAxisView::color_handler ()
 
 	for (list<SelectionRect*>::iterator i = used_selection_rects.begin(); i != used_selection_rects.end(); ++i) {
 
-		(*i)->rect->set_fill_color (ARDOUR_UI::config()->canvasvar_SelectionRect.get());
-		(*i)->rect->set_outline_color (ARDOUR_UI::config()->canvasvar_Selection.get());
+		(*i)->rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_SelectionRect());
+		(*i)->rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_Selection());
 
-		(*i)->start_trim->set_fill_color (ARDOUR_UI::config()->canvasvar_Selection.get());
-		(*i)->start_trim->set_outline_color (ARDOUR_UI::config()->canvasvar_Selection.get());
+		(*i)->start_trim->set_fill_color (ARDOUR_UI::config()->get_canvasvar_Selection());
+		(*i)->start_trim->set_outline_color (ARDOUR_UI::config()->get_canvasvar_Selection());
 		
-		(*i)->end_trim->set_fill_color (ARDOUR_UI::config()->canvasvar_Selection.get());
-		(*i)->end_trim->set_outline_color (ARDOUR_UI::config()->canvasvar_Selection.get());
+		(*i)->end_trim->set_fill_color (ARDOUR_UI::config()->get_canvasvar_Selection());
+		(*i)->end_trim->set_outline_color (ARDOUR_UI::config()->get_canvasvar_Selection());
 	}
 	
 	for (list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i) {
 		
-		(*i)->rect->set_fill_color (ARDOUR_UI::config()->canvasvar_SelectionRect.get());
-		(*i)->rect->set_outline_color (ARDOUR_UI::config()->canvasvar_Selection.get());
+		(*i)->rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_SelectionRect());
+		(*i)->rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_Selection());
 		
-		(*i)->start_trim->set_fill_color (ARDOUR_UI::config()->canvasvar_Selection.get());
-		(*i)->start_trim->set_outline_color (ARDOUR_UI::config()->canvasvar_Selection.get());
+		(*i)->start_trim->set_fill_color (ARDOUR_UI::config()->get_canvasvar_Selection());
+		(*i)->start_trim->set_outline_color (ARDOUR_UI::config()->get_canvasvar_Selection());
 		
-		(*i)->end_trim->set_fill_color (ARDOUR_UI::config()->canvasvar_Selection.get());
-		(*i)->end_trim->set_outline_color (ARDOUR_UI::config()->canvasvar_Selection.get());
+		(*i)->end_trim->set_fill_color (ARDOUR_UI::config()->get_canvasvar_Selection());
+		(*i)->end_trim->set_outline_color (ARDOUR_UI::config()->get_canvasvar_Selection());
 	}
 }
 

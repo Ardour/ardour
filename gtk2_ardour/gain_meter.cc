@@ -145,7 +145,7 @@ void
 GainMeterBase::set_flat_buttons ()
 {
 printf("set_flat_butt\n");
-//	gain_slider->set_flat_buttons( ARDOUR_UI::config()->flat_buttons.get() );
+//	gain_slider->set_flat_buttons( ARDOUR_UI::config()->get_flat_buttons() );
 }
 
 GainMeterBase::~GainMeterBase ()

@@ -59,5 +59,31 @@ Fill::set_fill (bool fill)
 void
 Fill::setup_fill_context (Cairo::RefPtr<Cairo::Context> context) const
 {
-	set_source_rgba (context, _fill_color);
+	if (_gradient) {
+		context->set_source (_gradient);
+	} else {
+		set_source_rgba (context, _fill_color);
+	}
+}
+
+void
+Fill::set_gradient (StopList const & stops, double height)
+{
+	begin_visual_change ();
+
+	if (stops.empty()) {
+		_gradient.clear();
+	} else {
+
+		double r, g, b, a;
+		
+		_gradient = Cairo::LinearGradient::create (0, 0, 0, height);
+		
+		for (StopList::const_iterator s = stops.begin(); s != stops.end(); ++s) {
+			color_to_rgba (s->second, r, g, b, a);
+			_gradient->add_color_stop_rgba (s->first, r, g, b, a);
+		}
+	}
+
+	end_visual_change ();
 }

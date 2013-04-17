@@ -435,12 +435,12 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
 void
 MonoPanner::set_colors ()
 {
-        colors.fill = ARDOUR_UI::config()->canvasvar_MonoPannerFill.get();
-        colors.outline = ARDOUR_UI::config()->canvasvar_MonoPannerOutline.get();
-        colors.text = ARDOUR_UI::config()->canvasvar_MonoPannerText.get();
-        colors.background = ARDOUR_UI::config()->canvasvar_MonoPannerBackground.get();
-        colors.pos_outline = ARDOUR_UI::config()->canvasvar_MonoPannerPositionOutline.get();
-        colors.pos_fill = ARDOUR_UI::config()->canvasvar_MonoPannerPositionFill.get();
+        colors.fill = ARDOUR_UI::config()->get_canvasvar_MonoPannerFill();
+        colors.outline = ARDOUR_UI::config()->get_canvasvar_MonoPannerOutline();
+        colors.text = ARDOUR_UI::config()->get_canvasvar_MonoPannerText();
+        colors.background = ARDOUR_UI::config()->get_canvasvar_MonoPannerBackground();
+        colors.pos_outline = ARDOUR_UI::config()->get_canvasvar_MonoPannerPositionOutline();
+        colors.pos_fill = ARDOUR_UI::config()->get_canvasvar_MonoPannerPositionFill();
 }
 
 void

@@ -186,11 +186,11 @@ void
 AutomationStreamView::color_handler ()
 {
 	/*if (_trackview.is_midi_track()) {
-		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
+		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->get_canvasvar_MidiTrackBase();
 	}
 
 	if (!_trackview.is_midi_track()) {
-		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();;
+		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->get_canvasvar_MidiBusBase();;
 	}*/
 }
 

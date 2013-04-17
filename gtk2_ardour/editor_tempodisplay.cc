@@ -85,7 +85,7 @@ Editor::draw_metric_marks (const Metrics& metrics)
 
 		if ((ms = dynamic_cast<const MeterSection*>(*i)) != 0) {
 			snprintf (buf, sizeof(buf), "%g/%g", ms->divisions_per_bar(), ms->note_divisor ());
-			metric_marks.push_back (new MeterMarker (*this, *meter_group, ARDOUR_UI::config()->canvasvar_MeterMarker.get(), buf,
+			metric_marks.push_back (new MeterMarker (*this, *meter_group, ARDOUR_UI::config()->get_canvasvar_MeterMarker(), buf,
 								 *(const_cast<MeterSection*>(ms))));
 		} else if ((ts = dynamic_cast<const TempoSection*>(*i)) != 0) {
 			if (Config->get_allow_non_quarter_pulse()) {
@@ -93,7 +93,7 @@ Editor::draw_metric_marks (const Metrics& metrics)
 			} else {
 				snprintf (buf, sizeof (buf), "%.2f", ts->beats_per_minute());
 			}
-			metric_marks.push_back (new TempoMarker (*this, *tempo_group, ARDOUR_UI::config()->canvasvar_TempoMarker.get(), buf,
+			metric_marks.push_back (new TempoMarker (*this, *tempo_group, ARDOUR_UI::config()->get_canvasvar_TempoMarker(), buf,
 								 *(const_cast<TempoSection*>(ts))));
 		}
 
