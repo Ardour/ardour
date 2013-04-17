@@ -81,7 +81,7 @@ class VideoImageFrame : public sigc::trackable
 	std::string video_filename;
 
 	double        unit_position;
-	framepos_t   frame_position;
+	framepos_t   sample_position;
 	framepos_t   video_frame_number;
 
 	void reposition ();

@@ -88,7 +88,7 @@ VideoImageFrame::reposition ()
 
 void
 VideoImageFrame::exposeimg () {
-	ImgChanged(); /* EMIT SIGNAL */
+	//ImgChanged(); /* EMIT SIGNAL */
 }
 
 void
