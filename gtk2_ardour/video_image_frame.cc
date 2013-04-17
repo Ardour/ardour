@@ -74,7 +74,7 @@ VideoImageFrame::~VideoImageFrame ()
 void
 VideoImageFrame::set_position (framepos_t sample)
 {
-	double new_unit_position = editor.sample_to_pixel (frame);
+	double new_unit_position = editor.sample_to_pixel (sample);
 	image->move (ArdourCanvas::Duple (new_unit_position - unit_position, 0.0));
 	sample_position = sample;
 	unit_position = new_unit_position;
