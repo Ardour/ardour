@@ -141,14 +141,12 @@ CrossfadeEditor::CrossfadeEditor (Session* s, boost::shared_ptr<Crossfade> xf, d
 	toplevel->Event.connect (sigc::mem_fun (*this, &CrossfadeEditor::canvas_event));
 
 	fade[Out].line = new ArdourCanvas::PolyLine (canvas->root());
-	fade[Out].line->set_outline_width (1);
 	fade[Out].line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeEditorLine());
 
 	fade[Out].shading = new ArdourCanvas::Polygon (canvas->root());
 	fade[Out].shading->set_fill_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeEditorLineShading());
 
 	fade[In].line = new ArdourCanvas::PolyLine (canvas->root());
-	fade[In].line->set_outline_width (1);
 	fade[In].line->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeEditorLine());
 
 	fade[In].shading = new ArdourCanvas::Polygon (canvas->root());
@@ -468,7 +466,6 @@ CrossfadeEditor::make_point ()
 	p->box->set_fill (true);
 	p->box->set_fill_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeEditorPointFill());
 	p->box->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeEditorPointOutline());
-	p->box->set_outline_width (1);
 
 	p->curve = fade[current].line;
 

@@ -248,7 +248,6 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 #ifdef CANVAS_DEBUG
 	_name_background->name = string_compose ("Marker::_name_background for %1", annotation);
 #endif	
-	_name_background->set_outline_width (1);
 
 	/* adjust to properly locate the tip */
 
@@ -258,7 +257,6 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 #endif	
 	mark->set (*points);
 	set_color_rgba (rgba);
-	mark->set_outline_width (1);
 
 	/* setup name pixbuf sizes */
 	name_font = get_font_for_style (N_("MarkerText"));

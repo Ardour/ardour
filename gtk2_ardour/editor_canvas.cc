@@ -93,11 +93,9 @@ Editor::initialize_canvas ()
 	time_line_group = new ArdourCanvas::Group (_track_canvas->root());
 
         transport_loop_range_rect = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, ArdourCanvas::COORD_MAX));
-	transport_loop_range_rect->set_outline_width (1);
 	transport_loop_range_rect->hide();
 
 	transport_punch_range_rect = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, ArdourCanvas::COORD_MAX));
-	transport_punch_range_rect->set_outline_width (0);
 	transport_punch_range_rect->hide();
 
 	_trackview_group = new ArdourCanvas::Group (_track_canvas->root());
@@ -108,37 +106,31 @@ Editor::initialize_canvas ()
 	meter_bar_group = new ArdourCanvas::Group (_time_bars_canvas->root ());
 	meter_bar = new ArdourCanvas::Rectangle (meter_bar_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height - 1));
 	CANVAS_DEBUG_NAME (meter_bar, "meter Bar");
-	meter_bar->set_outline_width (1);
 	meter_bar->set_outline_what (0x8);
 
 	tempo_bar_group = new ArdourCanvas::Group (_time_bars_canvas->root ());
 	tempo_bar = new ArdourCanvas::Rectangle (tempo_bar_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height - 1));
 	CANVAS_DEBUG_NAME (tempo_bar, "Tempo  Bar");
-	tempo_bar->set_outline_width (1);
 	tempo_bar->set_outline_what (0x8);
 
 	range_marker_bar_group = new ArdourCanvas::Group (_time_bars_canvas->root ());
 	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_bar_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height - 1));
 	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
-	range_marker_bar->set_outline_width (1);
 	range_marker_bar->set_outline_what (0x8);
 
 	transport_marker_bar_group = new ArdourCanvas::Group (_time_bars_canvas->root ());
 	transport_marker_bar = new ArdourCanvas::Rectangle (transport_marker_bar_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height - 1));
 	CANVAS_DEBUG_NAME (transport_marker_bar, "transport Marker Bar");
-	transport_marker_bar->set_outline_width (1);
 	transport_marker_bar->set_outline_what (0x8);
 
 	marker_bar_group = new ArdourCanvas::Group (_time_bars_canvas->root ());
 	marker_bar = new ArdourCanvas::Rectangle (marker_bar_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height - 1));
 	CANVAS_DEBUG_NAME (marker_bar, "Marker Bar");
-	marker_bar->set_outline_width (1);
 	marker_bar->set_outline_what (0x8);
 
 	cd_marker_bar_group = new ArdourCanvas::Group (_time_bars_canvas->root ());
 	cd_marker_bar = new ArdourCanvas::Rectangle (cd_marker_bar_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height - 1));
 	CANVAS_DEBUG_NAME (cd_marker_bar, "CD Marker Bar");
-	cd_marker_bar->set_outline_width (1);
  	cd_marker_bar->set_outline_what (0x8);
 
 	_time_markers_group = new ArdourCanvas::Group (_time_bars_canvas->root());
@@ -181,7 +173,6 @@ Editor::initialize_canvas ()
 
 	// used to show zoom mode active zooming
 	zoom_rect = new ArdourCanvas::Rectangle (_track_canvas->root(), ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
-	zoom_rect->set_outline_width (1);
 	zoom_rect->hide();
 
 	zoom_rect->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_zoom_rect_event), (ArdourCanvas::Item*) 0));
@@ -189,7 +180,6 @@ Editor::initialize_canvas ()
 	// used as rubberband rect
 	rubberband_rect = new ArdourCanvas::Rectangle (_trackview_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
 
-	rubberband_rect->set_outline_width (1);
 	rubberband_rect->hide();
 
 	tempo_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_tempo_bar_event), tempo_bar));

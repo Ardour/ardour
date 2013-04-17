@@ -40,9 +40,6 @@ EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,Ardour
 	CANVAS_DEBUG_NAME ((&_time_bars_canvas_item), "timebars editor cursor");
 	CANVAS_DEBUG_NAME ((&_track_canvas_item), "track canvas editor cursor");
 
-	_time_bars_canvas_item.set_outline_width (1);
-	_track_canvas_item.set_outline_width (1);
-
 	_time_bars_canvas_item.set_show_head (0, true);
 	_time_bars_canvas_item.set_head_height (0, 9);
 	_time_bars_canvas_item.set_head_width (0, 16);

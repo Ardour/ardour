@@ -304,11 +304,9 @@ AudioRegionView::fade_in_active_changed ()
 	if (audio_region()->fade_in_active()) {
 		/* XXX: make a themable colour */
 		fade_in_shape->set_fill_color (RGBA_TO_UINT (45, 45, 45, 90));
-		fade_in_shape->set_outline_width (1);
 	} else {
 		/* XXX: make a themable colour */
 		fade_in_shape->set_fill_color (RGBA_TO_UINT (45, 45, 45, 20));
-		fade_in_shape->set_outline_width (1);
 	}
 }
 
@@ -318,11 +316,9 @@ AudioRegionView::fade_out_active_changed ()
 	if (audio_region()->fade_out_active()) {
 		/* XXX: make a themable colour */
 		fade_out_shape->set_fill_color (RGBA_TO_UINT (45, 45, 45, 90));
-		fade_out_shape->set_outline_width (1);
 	} else {
 		/* XXX: make a themable colour */
 		fade_out_shape->set_fill_color (RGBA_TO_UINT (45, 45, 45, 20));
-		fade_out_shape->set_outline_width (1);
 	}
 }
 
@@ -1270,7 +1266,6 @@ AudioRegionView::transients_changed ()
 		canvas_item->set (ArdourCanvas::Duple (-1.0, 2.0),
 				  ArdourCanvas::Duple (1.0, _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1));
 
-		canvas_item->set_outline_width (1);
 		canvas_item->property_first_arrowhead() = TRUE;
 		canvas_item->property_last_arrowhead() = TRUE;
 		canvas_item->property_arrow_shape_a() = 11.0;

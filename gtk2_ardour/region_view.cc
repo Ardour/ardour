@@ -636,7 +636,6 @@ RegionView::region_sync_changed ()
 
 		sync_line = new ArdourCanvas::Line (group);
 		sync_line->set_outline_color (RGBA_TO_UINT(0,255,0,255)); // FIXME make a themeable colour
-		sync_line->set_outline_width  (1);
 	}
 
 	/* this has to handle both a genuine change of position, a change of samples_per_pixel
