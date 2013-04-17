@@ -893,7 +893,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Label  cd_mark_label;
 
 	/* videtimline related actions */
-	ArdourCanvas::Rectangle*  videotl_bar;
 	Gtk::Label                videotl_label;
 	ArdourCanvas::Group*      videotl_group;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_video_action;
