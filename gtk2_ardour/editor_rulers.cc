@@ -314,7 +314,7 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 	}
 
 	if (_drags->active ()) {
-		_drags->motion_handler (reinterpret_cast<GdkEvent*> (ev), false);
+		_drags->window_motion_handler (reinterpret_cast<GdkEvent*> (ev), false);
 	}
 
 	return true;

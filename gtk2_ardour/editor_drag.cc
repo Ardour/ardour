@@ -179,6 +179,24 @@ DragManager::motion_handler (GdkEvent* e, bool from_autoscroll)
 }
 
 bool
+DragManager::window_motion_handler (GdkEvent* e, bool from_autoscroll)
+{
+	bool r = false;
+
+	_current_pointer_frame = _editor->window_event_frame (e, &_current_pointer_x, &_current_pointer_y);
+
+	for (list<Drag*>::iterator i = _drags.begin(); i != _drags.end(); ++i) {
+		bool const t = (*i)->motion_handler (e, from_autoscroll);
+		if (t) {
+			r = true;
+		}
+
+	}
+
+	return r;
+}
+
+bool
 DragManager::have_item (ArdourCanvas::Item* i) const
 {
 	list<Drag*>::const_iterator j = _drags.begin ();
