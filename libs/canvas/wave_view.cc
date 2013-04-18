@@ -444,7 +444,7 @@ WaveView::CacheEntry::image ()
 					if (y > 0.0) {
 						context->line_to (i + 0.5, position (alt_log_meter (fast_coefficient_to_dB (y))));
 					} else if (y < 0.0) {
-						context->line_to (i + 0.5, position (alt_log_meter (fast_coefficient_to_dB (-y))));
+						context->line_to (i + 0.5, position (-alt_log_meter (fast_coefficient_to_dB (-y))));
 					} else {
 						context->line_to (i + 0.5, position (0.0));
 					}
@@ -559,7 +559,7 @@ WaveView::CacheEntry::position (double s) const
 	default:
 		break;
 	}
-	return (s+1.0) * (_wave_view->_height / 2.0);
+	return (1.0-s) * (_wave_view->_height / 2.0);
 }
 
 void
