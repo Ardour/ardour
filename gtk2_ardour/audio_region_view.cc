@@ -69,7 +69,7 @@ using namespace Editing;
 using namespace ArdourCanvas;
 
 static const int32_t sync_mark_width = 9;
-static double const handle_size = 6; /* height of fade handles */
+static double const handle_size = 15; /* height of fade handles */
 
 AudioRegionView::AudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
 				  Gdk::Color const & basic_color)
@@ -538,14 +538,11 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 
 	/* round here to prevent little visual glitches with sub-pixel placement */
 	double const pwidth = rint (width / samples_per_pixel);
-	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
-	double effective_height;
-
-	double const handle_center = pwidth;
+	double const handle_left = pwidth;
 
 	/* Put the fade in handle so that its left side is at the end-of-fade line */
-	fade_in_handle->set_x0 (handle_center);
-	fade_in_handle->set_x1 (handle_center + handle_size);
+	fade_in_handle->set_x0 (handle_left);
+	fade_in_handle->set_x1 (handle_left + handle_size);
 
 	if (pwidth < 5) {
 		hide_start_xfade();
@@ -557,7 +554,10 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 		fade_in_shape->show();
 	}
 
+	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
+	double effective_height;
 	float curve[npoints];
+
 	audio_region()->fade_in()->curve().get_vector (0, audio_region()->fade_in()->back()->when, curve, npoints);
 
 	if (_height >= NAME_HIGHLIGHT_THRESH) {
@@ -582,7 +582,7 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 
 	/* draw the line */
 
-	redraw_start_xfade_to (ar, points, effective_height);
+	redraw_start_xfade_to (ar, width, points, effective_height);
 
 	/* add 3 more points */
 
@@ -634,16 +634,13 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 
 	/* round here to prevent little visual glitches with sub-pixel placement */
 	double const pwidth = rint (width / samples_per_pixel);
-	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
-	double effective_height;
 
-	double const handle_center = (_region->length() - width) / samples_per_pixel;
+	double const handle_right = (_region->length() / samples_per_pixel) - pwidth;
 
 	/* Put the fade out handle so that its right side is at the end-of-fade line;
-	 * it's `one out' for precise pixel accuracy.
 	 */
-	fade_out_handle->set_x0 (handle_center - 5);
-	fade_out_handle->set_x1 (handle_center + 1);
+	fade_out_handle->set_x0 (handle_right - handle_size);
+	fade_out_handle->set_x1 (handle_right);
 
 	/* don't show shape if its too small */
 
@@ -657,7 +654,10 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 		fade_out_shape->show();
 	}
 
+	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
+	double effective_height;
 	float curve[npoints];
+
 	audio_region()->fade_out()->curve().get_vector (0, audio_region()->fade_out()->back()->when, curve, npoints);
 
 	if (_height >= NAME_HIGHLIGHT_THRESH) {
@@ -682,7 +682,7 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 
 	/* draw the line */
 
-	redraw_end_xfade_to (ar, points, effective_height);
+	redraw_end_xfade_to (ar, width, points, effective_height);
 
 	/* fill the polygon*/
 
@@ -742,7 +742,7 @@ AudioRegionView::redraw_start_xfade ()
 }
 
 void
-AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, Points& points, double effective_height)
+AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, framecnt_t /*width*/, Points& points, double effective_height)
 {
 	if (points.size() < 3) {
 		return;
@@ -751,12 +751,14 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, Point
 	if (!start_xfade_in) {
 		start_xfade_in = new ArdourCanvas::PolyLine (group);
 		start_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GainLine());
+		start_xfade_in->set_outline_width (2.5);
 	}
 
 	if (!start_xfade_out) {
 		start_xfade_out = new ArdourCanvas::PolyLine (group);
 		uint32_t col = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_GainLine(), 128);
 		start_xfade_out->set_outline_color (col);
+		start_xfade_out->set_outline_width (2.5);
 	}
 
 	if (!start_xfade_rect) {
@@ -827,7 +829,7 @@ AudioRegionView::redraw_end_xfade ()
 }
 
 void
-AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, Points& points, double effective_height)
+AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecnt_t width, Points& points, double effective_height)
 {
 	if (points.size() < 3) {
 		return;
@@ -836,12 +838,14 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, Points&
 	if (!end_xfade_in) {
 		end_xfade_in = new ArdourCanvas::PolyLine (group);
 		end_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GainLine());
+		end_xfade_in->set_outline_width (2.5);
 	}
 
 	if (!end_xfade_out) {
 		end_xfade_out = new ArdourCanvas::PolyLine (group);
 		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_GainLine(), 128);
 		end_xfade_out->set_outline_color (col);
+		end_xfade_out->set_outline_width (2.5);
 	}
 
 	if (!end_xfade_rect) {
@@ -868,7 +872,6 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, Points&
 
 	ipoints.assign (npoints, Duple());
 
-
 	if (!inverse) {
 
 		const double rend = trackview.editor().sample_to_pixel (_region->length() - points.back().y);
@@ -881,15 +884,17 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, Points&
 
 	} else {
 
-		float vec[npoints];
-		inverse->curve().get_vector (inverse->front()->when, inverse->back()->when, vec, npoints);
+		boost::scoped_array<float> vec (new float[npoints]);
+		inverse->curve().get_vector (inverse->front()->when, inverse->back()->when, vec.get(), npoints);
 
-		const double rend = trackview.editor().sample_to_pixel (_region->length() - inverse->back()->when);
+		const double rend = trackview.editor().sample_to_pixel (_region->length() - width);
+
+		float* vp = vec.get();
 
 		for (Points::size_type i = 0, pci = 0; i < npoints; ++i) {
-			ArdourCanvas::Duple& p (points[pci++]);
+			ArdourCanvas::Duple& p (ipoints[pci++]);
 			p.x = rend + i;
-			p.y = 1.0 + effective_height - (effective_height * vec[i]);
+			p.y = 1.0 + effective_height - (effective_height * vp[i]);
 		}
 	}
 
