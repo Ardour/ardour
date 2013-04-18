@@ -93,6 +93,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 
 	line = new ArdourCanvas::Curve (group);
 	line->set_data ("line", this);
+	line->set_outline_width (2.0);
 
 	line->Event.connect (sigc::mem_fun (*this, &AutomationLine::event_handler));
 

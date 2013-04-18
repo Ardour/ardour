@@ -1020,7 +1020,9 @@ AudioRegionView::set_colors ()
 	RegionView::set_colors();
 
 	if (gain_line) {
-		gain_line->set_line_color (audio_region()->envelope_active() ? ARDOUR_UI::config()->get_canvasvar_GainLine() : ARDOUR_UI::config()->get_canvasvar_GainLineInactive());
+		gain_line->set_line_color (audio_region()->envelope_active() ? 
+					   ARDOUR_UI::config()->get_canvasvar_GainLine() : 
+					   ARDOUR_UI::config()->get_canvasvar_GainLineInactive());
 	}
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
@@ -1032,6 +1034,25 @@ AudioRegionView::set_colors ()
 
 		waves[n]->set_clip_color (ARDOUR_UI::config()->get_canvasvar_WaveFormClip());
 		waves[n]->set_zero_color (ARDOUR_UI::config()->get_canvasvar_ZeroLine());
+	}
+
+	if (start_xfade_in) {
+		start_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GainLine());
+	}
+	if (start_xfade_out) {
+		start_xfade_out->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GainLine());
+	}
+	if (end_xfade_in) {
+		end_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GainLine());
+	}
+	if (end_xfade_out) {
+		end_xfade_out->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GainLine());
+	}
+	if (start_xfade_rect) {
+		start_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade());
+	}
+	if (end_xfade_rect) {
+		end_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade());
 	}
 }
 
