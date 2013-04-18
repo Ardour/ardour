@@ -30,6 +30,7 @@
 #include <gtk/gtkaction.h>
 
 #include "canvas/group.h"
+#include "canvas/canvas.h"
 
 #include "ardour/session.h"
 #include "ardour/tempo.h"
@@ -250,8 +251,17 @@ Editor::ruler_button_press (GdkEventButton* ev)
 			_session->cancel_audition ();
 		}
 
-		/* playhead cursor */
-		_drags->set (new CursorDrag (this, *playhead_cursor, false), reinterpret_cast<GdkEvent *> (ev));
+		/* playhead cursor drag: CursorDrag expects an event with
+		 * canvas coordinates, so convert from window coordinates,
+		 * since for now, rulers are still Gtk::Widgets.
+		 */
+
+		GdkEventButton canvas_ev = *ev;
+		ArdourCanvas::Duple d = _track_canvas->window_to_canvas (ArdourCanvas::Duple (ev->x, ev->y));
+		canvas_ev.x = rint (d.x);
+		canvas_ev.y = rint (d.y);
+
+		_drags->set (new CursorDrag (this, *playhead_cursor, false), reinterpret_cast<GdkEvent *> (&canvas_ev));
 		_dragging_playhead = true;
 	}
 
@@ -265,21 +275,21 @@ Editor::ruler_button_release (GdkEventButton* ev)
 		return false;
 	}
 
-	gint x,y;
-	Gdk::ModifierType state;
-
 	if (_drags->active ()) {
-		_drags->end_grab (reinterpret_cast<GdkEvent*> (ev));
+		GdkEventButton canvas_ev = *ev;
+		ArdourCanvas::Duple d = _track_canvas->window_to_canvas (ArdourCanvas::Duple (ev->x, ev->y));
+		canvas_ev.x = rint (d.x);
+		canvas_ev.x = rint (d.y);
+		_drags->end_grab (reinterpret_cast<GdkEvent*> (&canvas_ev));
 		_dragging_playhead = false;
 	}
 
 	if (ev->button == 3) {
-		/* need to use the correct x,y, the event lies */
-		time_canvas_event_box.get_window()->get_pointer (x, y, state);
-
+		
 		stop_canvas_autoscroll();
 
-		framepos_t where = leftmost_frame + pixel_to_sample (x);
+		framepos_t where = window_event_frame ((GdkEvent*) ev);
+
 		snap_to (where);
 		popup_ruler_menu (where);
 	}
