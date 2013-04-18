@@ -4914,9 +4914,9 @@ CrossfadeEdgeDrag::motion (GdkEvent*, bool)
 	new_length = ar->verify_xfade_bounds (new_length, start);
 
 	if (start) {
-		arv->redraw_start_xfade_to (ar, new_length);
+		arv->reset_fade_in_shape_width (ar, new_length);
 	} else {
-		arv->redraw_end_xfade_to (ar, new_length);
+		arv->reset_fade_out_shape_width (ar, new_length);
 	}
 }
 

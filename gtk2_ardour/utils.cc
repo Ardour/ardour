@@ -199,18 +199,6 @@ xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h)
 	return (savergb);
 }
 
-ArdourCanvas::Points*
-get_canvas_points (string /*who*/, uint32_t npoints)
-{
-	// cerr << who << ": wants " << npoints << " canvas points" << endl;
-#ifdef TRAP_EXCESSIVE_POINT_REQUESTS
-	if (npoints > (uint32_t) gdk_screen_width() + 4) {
-		abort ();
-	}
-#endif
-	return new ArdourCanvas::Points (npoints);
-}
-
 Pango::FontDescription
 get_font_for_style (string widgetname)
 {
