@@ -30,6 +30,7 @@ path_prefix = 'libs/canvas/'
 canvas_sources = [
 	'arrow.cc',
 	'canvas.cc',
+        'circle.cc',
         'curve.cc',
 	'debug.cc',
 	'item.cc',
