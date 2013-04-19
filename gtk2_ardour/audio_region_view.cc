@@ -750,13 +750,13 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 
 	if (!start_xfade_in) {
 		start_xfade_in = new ArdourCanvas::PolyLine (group);
-		start_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GainLine());
+		start_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
 		start_xfade_in->set_outline_width (2.5);
 	}
 
 	if (!start_xfade_out) {
 		start_xfade_out = new ArdourCanvas::PolyLine (group);
-		uint32_t col = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_GainLine(), 128);
+		uint32_t col = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128);
 		start_xfade_out->set_outline_color (col);
 		start_xfade_out->set_outline_width (2.5);
 	}
@@ -837,14 +837,14 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 
 	if (!end_xfade_in) {
 		end_xfade_in = new ArdourCanvas::PolyLine (group);
-		end_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GainLine());
+		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128);
+		end_xfade_in->set_outline_color (col);
 		end_xfade_in->set_outline_width (2.5);
 	}
 
 	if (!end_xfade_out) {
 		end_xfade_out = new ArdourCanvas::PolyLine (group);
-		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_GainLine(), 128);
-		end_xfade_out->set_outline_color (col);
+		end_xfade_out->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
 		end_xfade_out->set_outline_width (2.5);
 	}
 
@@ -1037,17 +1037,20 @@ AudioRegionView::set_colors ()
 	}
 
 	if (start_xfade_in) {
-		start_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GainLine());
+		start_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
 	}
 	if (start_xfade_out) {
-		start_xfade_out->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GainLine());
+		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128);
+		start_xfade_out->set_outline_color (col);
 	}
 	if (end_xfade_in) {
-		end_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GainLine());
+		end_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
 	}
 	if (end_xfade_out) {
-		end_xfade_out->set_outline_color (ARDOUR_UI::config()->get_canvasvar_GainLine());
+		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128);
+		end_xfade_out->set_outline_color (col);
 	}
+
 	if (start_xfade_rect) {
 		start_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade());
 	}
@@ -1417,7 +1420,9 @@ void
 AudioRegionView::envelope_active_changed ()
 {
 	if (gain_line) {
-		gain_line->set_line_color (audio_region()->envelope_active() ? ARDOUR_UI::config()->get_canvasvar_GainLine() : ARDOUR_UI::config()->get_canvasvar_GainLineInactive());
+		gain_line->set_line_color (audio_region()->envelope_active() ? 
+					   ARDOUR_UI::config()->get_canvasvar_GainLine() : 
+					   ARDOUR_UI::config()->get_canvasvar_GainLineInactive());
 	}
 }
 
