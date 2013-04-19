@@ -174,7 +174,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 			   need another one for the missing bit.
 			*/
 
-			CacheEntry* c = new CacheEntry (this, p, (*cache)->start());
+			CacheEntry* c = new CacheEntry (this, p, min (end, (*cache)->start()));
 			cache = _cache.insert (cache, c);
 			++cache;
 			render = c;
@@ -369,11 +369,7 @@ WaveView::set_region_start (frameoffset_t start)
 /** Construct a new CacheEntry with peak data between two offsets
  *  in the source.
  */
-WaveView::CacheEntry::CacheEntry (
-	WaveView const * wave_view,
-	int start,
-	int end
-	)
+WaveView::CacheEntry::CacheEntry (WaveView const * wave_view, int start, int end)
 	: _wave_view (wave_view)
 	, _start (start)
 	, _end (end)
