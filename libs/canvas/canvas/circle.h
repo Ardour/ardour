@@ -19,33 +19,14 @@
 #ifndef __CANVAS_CIRCLE_H__
 #define __CANVAS_CIRCLE_H__
 
-#include "canvas/item.h"
-#include "canvas/outline.h"
-#include "canvas/fill.h"
+#include "canvas/arc.h"
 
 namespace ArdourCanvas {
 
-class Circle : virtual public Item, public Outline, public Fill
+class Circle : public Arc
 {
 public:
 	Circle (Group *);
-
-	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
-	void compute_bounding_box () const;
-
-        void set_center (Duple const &);
-	void set_radius (Coord);
-
-        Duple center() const { 
-		return _center;
-	}
-	Coord radius () const {
-		return _radius;
-	}
-
-private:
-        Duple _center;
-        Coord _radius;
 };
 	
 }

@@ -28,6 +28,7 @@ out = 'build'
 path_prefix = 'libs/canvas/'
 
 canvas_sources = [
+        'arc.cc',
 	'arrow.cc',
 	'canvas.cc',
         'circle.cc',
