@@ -6,6 +6,42 @@ if test -z "$(which curl)"; then
 	exit 1
 fi
 
+###############################################################################
+### look-up architecture
+
+case $(uname -m) in
+	i[3456789]86|x86|i86pc)
+		echo "Architecture is x86"
+		MULTIARCH="i386"
+		;;
+	x86_64|amd64|AMD64)
+		echo "Architecture is x86_64"
+		MULTIARCH="x86_64"
+		;;
+	*)
+		echo
+		echo "ERROR: Unknown architecture `uname -m`" >&2
+		exit 1
+		;;
+esac
+
+case $(uname) in
+	Linux|linux)
+		MULTIARCH="${MULTIARCH}-linux-gnu"
+		;;
+	*)
+		echo
+		echo "ERROR: Platform `uname` is not supported by this script" >&2
+		exit 1
+		;;
+esac
+
+echo "Multiarch triplet is '$MULTIARCH'"
+
+
+###############################################################################
+### install target directory
+
 checkdir () {
   DUT="$1"
 	CHECKPATH="${2:-yes}"
@@ -90,16 +126,21 @@ done
 
 ###############################################################################
 ### actual install procedure
-echo "installing video-tools to '${TARGETDIR}'.."
-exit
+
+echo "installing video-tools to '${TARGETDIR}'."
 cd "$TARGETDIR" || exit 1
 
-HARVID_VERSION=$(curl http://ardour.org/files/video-tools/harvid_version.txt)
-curl -L http://ardour.org/files/video-tools/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz \
+HARVID_VERSION=$(curl -s http://ardour.org/files/video-tools/harvid_version.txt)
+echo "Downloading harvid-${MULTIARCH}-${HARVID_VERSION}."
+curl -L --progress-bar \
+	http://ardour.org/files/video-tools/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz \
 	| tar -x -z --exclude=README --exclude=harvid.1 --strip-components=1 || exit 1
-XJADEO_VERSION=$(curl http://ardour.org/files/video-tools/xjadeo_version.txt)
-curl -L http://ardour.org/files/video-tools/xjadeo-${MULTIARCH}-${XJADEO_VERSION}.tgz \
+
+XJADEO_VERSION=$(curl -s http://ardour.org/files/video-tools/xjadeo_version.txt)
+echo "Downloading xjadeo-${MULTIARCH}-${XJADEO_VERSION}."
+curl -L --progress-bar \
+	http://ardour.org/files/video-tools/xjadeo-${MULTIARCH}-${XJADEO_VERSION}.tgz \
 	| tar -x -z --exclude=README --exclude=xjadeo.1 --strip-components=1 || exit 1
 mv xjadeo xjremote
 
-echo "ardour video tools installed successfully"
+echo "ardour video tools installed successfully."
