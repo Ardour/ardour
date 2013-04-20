@@ -45,9 +45,11 @@ EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,Ardour
 	_time_bars_canvas_item.set_head_width (0, 16);
 	_time_bars_canvas_item.set_head_outward (0, false);
 	_time_bars_canvas_item.set_show_head (1, false); // head only
+	_time_bars_canvas_item.set_outline_width (2.0);
 
 	_time_bars_canvas_item.set_data ("cursor", this);
 	_track_canvas_item.set_data ("cursor", this);
+	_track_canvas_item.set_outline_width (2.0);
 
 	_time_bars_canvas_item.Event.connect (sigc::bind (sigc::mem_fun (ed, callbck), &_time_bars_canvas_item));
 	_track_canvas_item.Event.connect (sigc::bind (sigc::mem_fun (ed, callbck), &_track_canvas_item));
