@@ -29,8 +29,6 @@ Image::Image (Group* group, Cairo::Format fmt, int width, int height)
 	, _height (height)
 	, _need_render (false)
 {
-	boost::shared_ptr<Data> d0 (new Data (NULL, 0, 0, 0, _format)); _current = d0;
-	boost::shared_ptr<Data> d1 (new Data (NULL, 0, 0, 0, _format)); _pending = d1;
 	DataReady.connect (data_connections, MISSING_INVALIDATOR, boost::bind (&Image::accept_data, this), gui_context());
 }
 
