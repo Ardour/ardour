@@ -119,7 +119,7 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 
 	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(), begin, end);
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
-	redraw_measures ();
+	draw_measures (begin, end);
 	update_tempo_based_rulers (begin, end);
 }
 
@@ -130,22 +130,18 @@ Editor::redisplay_tempo (bool immediate_redraw)
 		return;
 	}
 
-	ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
-	ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
-
-	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(),
-				    current_bbt_points_begin, current_bbt_points_end);
-
 	if (immediate_redraw) {
-		redraw_measures ();
+		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
+		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
+		
+		compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(),
+					    current_bbt_points_begin, current_bbt_points_end);
+		draw_measures (current_bbt_points_begin, current_bbt_points_end);
+		update_tempo_based_rulers (current_bbt_points_begin, current_bbt_points_end); // redraw rulers and measures
+	
 	} else {
-#ifdef GTKOSX
-		redraw_measures ();
-#else
-		Glib::signal_idle().connect (sigc::mem_fun (*this, &Editor::redraw_measures));
-#endif
+		Glib::signal_idle().connect (sigc::bind_return (sigc::bind (sigc::mem_fun (*this, &Editor::redisplay_tempo), true), false));
 	}
-	update_tempo_based_rulers (current_bbt_points_begin, current_bbt_points_end); // redraw rulers and measures
 }
 
 void
@@ -168,18 +164,6 @@ Editor::hide_measures ()
 {
 	if (tempo_lines)
 		tempo_lines->hide();
-}
-
-bool
-Editor::redraw_measures ()
-{
-	ARDOUR::TempoMap::BBTPointList::const_iterator begin;
-	ARDOUR::TempoMap::BBTPointList::const_iterator end;
-
-	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(), begin, end);
-        draw_measures (begin, end);
-
-	return false;
 }
 
 void

@@ -1489,7 +1489,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void hide_measures ();
         void draw_measures (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 			    ARDOUR::TempoMap::BBTPointList::const_iterator& end);
-	bool redraw_measures ();
 
 	void new_tempo_section ();
 

@@ -212,7 +212,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual void maybe_locate_with_edit_preroll (framepos_t location) = 0;
 	virtual void set_show_measures (bool yn) = 0;
 	virtual bool show_measures () const = 0;
-	virtual bool redraw_measures () = 0;
 
 	virtual Editing::MouseMode effective_mouse_mode () const = 0;
 
