@@ -47,6 +47,7 @@ public:
 	{}
 
 	virtual ~Data () {
+		std::cerr << "Data @ " << this << " being deleted, data ptr = " << data << " cb = " << destroy_callback << std::endl;
 		if (destroy_callback) {
 			destroy_callback(data, destroy_arg);
 		} else {
