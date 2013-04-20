@@ -310,9 +310,36 @@ GtkCanvas::motion_notify_handler (GdkEventMotion* ev)
 		return _grabbed_item->Event (reinterpret_cast<GdkEvent*> (ev));
 	}
 
-	/* This is in canvas coordinates */
 	Duple point (ev->x, ev->y);
+	
+	enter_leave_items (point);
 
+	/* Now deliver the motion event.  It may seem a little inefficient
+	   to recompute the items under the event, but the enter notify/leave
+	   events may have deleted canvas items so it is important to
+	   recompute the list in deliver_event.
+	*/
+	return deliver_event (point, reinterpret_cast<GdkEvent*> (ev));
+}
+
+void
+GtkCanvas::enter_leave_items ()
+{
+	int x;
+	int y;
+	     
+	Glib::RefPtr<const Gdk::Window> pointer_window = Gdk::Display::get_default()->get_window_at_pointer (x, y);
+
+	if (pointer_window != get_window()) {
+		return;
+	}
+
+	enter_leave_items (window_to_canvas (Duple (x, y)));
+}
+		
+void
+GtkCanvas::enter_leave_items (Duple const & point)
+{
 	/* find the items at the new mouse position */
 	vector<Item const *> items;
 	_root.add_items_at_point (point, items);
@@ -323,8 +350,8 @@ GtkCanvas::motion_notify_handler (GdkEventMotion* ev)
 		/* leave event */
 		GdkEventCrossing leave_event;
 		leave_event.type = GDK_LEAVE_NOTIFY;
-		leave_event.x = ev->x;
-		leave_event.y = ev->y;
+		leave_event.x = point.x;
+		leave_event.y = point.y;
 		_current_item->Event (reinterpret_cast<GdkEvent*> (&leave_event));
 	}
 
@@ -332,19 +359,12 @@ GtkCanvas::motion_notify_handler (GdkEventMotion* ev)
 		/* enter event */
 		GdkEventCrossing enter_event;
 		enter_event.type = GDK_ENTER_NOTIFY;
-		enter_event.x = ev->x;
-		enter_event.y = ev->y;
+		enter_event.x = point.x;
+		enter_event.y = point.y;
 		new_item->Event (reinterpret_cast<GdkEvent*> (&enter_event));
 	}
 
 	_current_item = new_item;
-
-	/* Now deliver the motion event.  It may seem a little inefficient
-	   to recompute the items under the event, but the enter notify/leave
-	   events may have deleted canvas items so it is important to
-	   recompute the list in deliver_event.
-	*/
-	return deliver_event (point, reinterpret_cast<GdkEvent*> (ev));
 }
 
 /** Deliver an event to the appropriate item; either the grabbed item, or
@@ -428,6 +448,9 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 	if (_grabbed_item == item) {
 		_grabbed_item = 0;
 	}
+
+	enter_leave_items ();
+	
 }
 
 /** Handler for GDK expose events.
