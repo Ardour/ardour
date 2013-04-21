@@ -19,8 +19,17 @@
 #ifndef __ardour_tempo_lines_h__
 #define __ardour_tempo_lines_h__
 
-#include <list>
+#include <map>
+#include <boost/pool/pool.hpp>
+#include <boost/pool/pool_alloc.hpp>
 #include "ardour/tempo.h"
+
+typedef boost::fast_pool_allocator<
+		std::pair<const double, ArdourCanvas::Line*>,
+		boost::default_user_allocator_new_delete,
+		boost::details::pool::null_mutex,
+		8192>
+	MapAllocator;
 
 class TempoLines {
 public:
@@ -28,20 +37,21 @@ public:
 
 	void tempo_map_changed();
 
-	void draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin, 
-		   const ARDOUR::TempoMap::BBTPointList::const_iterator& end, 
-		   double frames_per_unit);
+	void draw(const ARDOUR::TempoMap::BBTPointList::const_iterator& begin, 
+		  const ARDOUR::TempoMap::BBTPointList::const_iterator& end, 
+		  double frames_per_unit);
 
 	void show();
 	void hide();
 
 private:
-        typedef std::list<ArdourCanvas::Line*> Lines;
+	typedef std::map<double, ArdourCanvas::Line*, std::less<double>, MapAllocator> Lines;
 	Lines _lines;
-        Lines _cache;
 
         ArdourCanvas::Canvas& _canvas;
 	ArdourCanvas::Group*  _group;
+	double                _clean_left;
+	double                _clean_right;
 	double                _height;
 };
 

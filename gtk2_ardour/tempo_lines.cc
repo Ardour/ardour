@@ -25,30 +25,42 @@
 
 using namespace std;
 
+#define MAX_CACHED_LINES 128
+
 TempoLines::TempoLines (ArdourCanvas::Canvas& canvas, ArdourCanvas::Group* group, double screen_height)
 	: _canvas (canvas)
-	, _group (group)
-	, _height (screen_height)
+	, _group(group)
+	, _clean_left(DBL_MAX)
+	, _clean_right(0.0)
+	, _height(screen_height)
 {
 }
 
 void
 TempoLines::tempo_map_changed()
 {
-	/* remove all lines from the group, put them in the cache (to avoid
-	 * unnecessary object destruction+construction later), and clear _lines
-	 */
-	 
-	_group->clear ();
-	_cache.insert (_cache.end(), _lines.begin(), _lines.end());
-	_lines.clear ();
+	_clean_left = DBL_MAX;
+	_clean_right = 0.0;
+
+	double_t d = 1.0;
+	// TODO: Dirty/slow, but 'needed' for zoom :(
+	for (Lines::iterator i = _lines.begin(); i != _lines.end(); d += 1.0) {
+		Lines::iterator next = i;
+		++next;
+		i->second->set_x0 (-d);
+		i->second->set_x1 (-d);
+		ArdourCanvas::Line* f = i->second;
+		_lines.erase(i);
+		_lines.insert(make_pair(- d, f));
+		i = next;
+	}
 }
 
 void
 TempoLines::show ()
 {
 	for (Lines::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-		(*i)->show();
+		i->second->show();
 	}
 }
 
@@ -56,7 +68,7 @@ void
 TempoLines::hide ()
 {
 	for (Lines::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-		(*i)->hide();
+		i->second->hide();
 	}
 }
 
@@ -66,12 +78,17 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 		  double samples_per_pixel)
 {
 	ARDOUR::TempoMap::BBTPointList::const_iterator i;
-	ArdourCanvas::Rect const visible = _canvas.visible_area ();
+	ArdourCanvas::Line *line = 0;
+	gdouble xpos;
 	double  beat_density;
 
 	uint32_t beats = 0;
 	uint32_t bars = 0;
 	uint32_t color;
+
+	const size_t needed = distance (begin, end);
+
+	ArdourCanvas::Rect const visible = _canvas.visible_area ();
 
 	/* get the first bar spacing */
 
@@ -88,7 +105,31 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 		return;
 	}
 
-	tempo_map_changed ();
+	xpos = rint(((framepos_t)(*i).frame) / (double)samples_per_pixel);
+	const double needed_right = xpos;
+
+	i = begin;
+
+	xpos = rint(((framepos_t)(*i).frame) / (double)samples_per_pixel);
+	const double needed_left = xpos;
+
+	Lines::iterator left = _lines.lower_bound(xpos); // first line >= xpos
+
+	bool exhausted = (left == _lines.end());
+	Lines::iterator li = left;
+	if (li != _lines.end())
+		line = li->second;
+
+	// Tempo map hasn't changed and we're entirely within a clean
+	// range, don't need to do anything.  Yay.
+	if (needed_left >= _clean_left && needed_right <= _clean_right) {
+		// cerr << endl << "*** LINE CACHE PERFECT HIT" << endl;
+		return;
+	}
+
+	// cerr << endl << "*** LINE CACHE MISS" << endl;
+
+	bool invalidated = false;
 
 	for (i = begin; i != end; ++i) {
 
@@ -101,24 +142,109 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 			color = ARDOUR_UI::config()->get_canvasvar_MeasureLineBeat();
 		}
 
-		ArdourCanvas::Coord xpos = rint(((framepos_t)(*i).frame) / (double)samples_per_pixel);
+		xpos = rint(((framepos_t)(*i).frame) / (double)samples_per_pixel);
 
-		ArdourCanvas::Line* line;
+		li = _lines.lower_bound(xpos); // first line >= xpos
 
-		if (!_cache.empty()) {
-			line = _cache.back ();
-			_cache.pop_back ();
-			line->reparent (_group);
+		line = (li != _lines.end()) ? li->second : 0;
+		assert(!line || line->x0() == li->first);
+		
+		Lines::iterator next = li;
+		if (next != _lines.end())
+			++next;
+		
+		exhausted = (next == _lines.end());
+
+		// Hooray, line is perfect
+		if (line && line->x0() == xpos) {
+			if (li != _lines.end())
+				++li;
+			
+			line->set_outline_color (color);
+
+			// Use existing line, moving if necessary
+		} else if (!exhausted) {
+			Lines::iterator steal = _lines.end();
+			--steal;
+			
+			// Steal from the right
+			if (left->first > needed_left && li != steal && steal->first > needed_right) {
+				// cerr << "*** STEALING FROM RIGHT" << endl;
+				double const x = steal->first;
+				line = steal->second;
+				_lines.erase(steal);
+				line->set_x0 (xpos);
+				line->set_x1 (xpos);
+				line->set_outline_color (color);
+				_lines.insert(make_pair(xpos, line));
+				invalidated = true;
+				
+				// Shift clean range left
+				_clean_left = min(_clean_left, xpos);
+				_clean_right = min(_clean_right, x);
+				
+				// Move this line to where we need it
+			} else {
+				Lines::iterator existing = _lines.find(xpos);
+				if (existing != _lines.end()) {
+					//cout << "*** EXISTING LINE" << endl;
+					li = existing;
+					li->second->set_outline_color (color);
+				} else {
+					//cout << "*** MOVING LINE" << endl;
+					const double x1 = line->x0();
+					const bool was_clean = x1 >= _clean_left && x1 <= _clean_right;
+					invalidated = invalidated || was_clean;
+					// Invalidate clean portion (XXX: too harsh?)
+					_clean_left  = needed_left;
+					_clean_right = needed_right;
+					_lines.erase(li);
+					line->set_outline_color (color);
+					line->set_x0 (xpos);
+					line->set_x1 (xpos);
+					_lines.insert(make_pair(xpos, line));
+				}
+			}
+			
+			// Create a new line
+		} else if (_lines.size() < needed || _lines.size() < MAX_CACHED_LINES) {
+			// cerr << "*** CREATING LINE" << endl;
+			/* if we already have a line there ... don't sweat it */
+			if (_lines.find (xpos) == _lines.end()) {
+				line = new ArdourCanvas::Line (_group);
+				line->set_x0 (xpos);
+				line->set_x1 (xpos);
+				line->set_y0 (0.0);
+				line->set_y1 (ArdourCanvas::COORD_MAX);
+				line->set_outline_color (color);
+				_lines.insert(make_pair(xpos, line));
+			}
+			
+			// Steal from the left
 		} else {
-			line = new ArdourCanvas::Line (_group);
+			// cerr << "*** STEALING FROM LEFT" << endl;
+			if (_lines.find (xpos) == _lines.end()) {
+				Lines::iterator steal = _lines.begin();
+				double const x = steal->first;
+				line = steal->second;
+				_lines.erase(steal);
+				line->set_outline_color (color);
+				line->set_x0 (xpos);
+				line->set_x1 (xpos);
+				_lines.insert(make_pair(xpos, line));
+				invalidated = true;
+			
+				// Shift clean range right
+				_clean_left = max(_clean_left, x);
+				_clean_right = max(_clean_right, xpos);
+			}
 		}
+	}
 
-		line->set_x0 (xpos);
-		line->set_x1 (xpos);
-		line->set_y0 (0.0);
-		line->set_y1 (_height);
-		line->set_outline_color (color);
-		line->show ();
+	// Extend range to what we've 'fixed'
+	if (!invalidated) {
+		_clean_left  = min(_clean_left, needed_left);
+		_clean_right = max(_clean_right, needed_right);
 	}
 }
 
