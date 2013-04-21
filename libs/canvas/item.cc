@@ -236,13 +236,14 @@ Item::parent_to_item (ArdourCanvas::Rect const & d) const
 void
 Item::unparent ()
 {
-	_canvas = 0;
 	_parent = 0;
 }
 
 void
 Item::reparent (Group* new_parent)
 {
+	assert (_canvas == _parent->canvas ());
+
 	if (_parent) {
 		_parent->remove (this);
 	}
@@ -250,7 +251,6 @@ Item::reparent (Group* new_parent)
 	assert (new_parent);
 
 	_parent = new_parent;
-	_canvas = _parent->canvas ();
 	_parent->add (this);
 }
 

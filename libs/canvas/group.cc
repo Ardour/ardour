@@ -170,6 +170,8 @@ Group::compute_bounding_box () const
 void
 Group::add (Item* i)
 {
+	/* XXX should really notify canvas about this */
+
 	_items.push_back (i);
 	invalidate_lut ();
 	_bounding_box_dirty = true;
@@ -180,11 +182,40 @@ Group::add (Item* i)
 void
 Group::remove (Item* i)
 {
+
+	if (i->parent() != this) {
+		return;
+	}
+
+	begin_change ();
+
+	i->unparent ();
 	_items.remove (i);
 	invalidate_lut ();
 	_bounding_box_dirty = true;
 	
-	DEBUG_TRACE (PBD::DEBUG::CanvasItemsDirtied, "canvas item dirty: group remove\n");
+	end_change ();
+}
+
+void
+Group::clear (bool with_delete)
+{
+	begin_change ();
+
+	for (list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
+		if (with_delete) {
+			delete *i;
+		} else {
+			(*i)->unparent ();
+		}
+	}
+
+	_items.clear ();
+
+	invalidate_lut ();
+	_bounding_box_dirty = true;
+
+	end_change ();
 }
 
 void
