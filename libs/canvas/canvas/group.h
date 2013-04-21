@@ -40,6 +40,7 @@ public:
 
 	void add (Item *);
 	void remove (Item *);
+         void clear (bool with_delete = false);
 	std::list<Item*> const & items () const {
 		return _items;
 	}
