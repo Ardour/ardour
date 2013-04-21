@@ -36,6 +36,7 @@
 #include "ardour/source.h"
 #include "ardour/track.h"
 #include "ardour/types.h"
+#include "ardour/freezable.h"
 
 using namespace std;
 using namespace PBD;

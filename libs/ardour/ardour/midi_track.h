@@ -23,6 +23,7 @@
 #include "ardour/track.h"
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/freezable.h"
+#include "ardour/operation.h"
 
 namespace ARDOUR
 {
@@ -56,6 +57,10 @@ public:
 	DataType data_type () const {
 		return DataType::MIDI;
 	}
+
+	//Operation
+	void apply(Operation *op);
+	void disapply(Operation *op);
 
 	//Recording
 	void set_record_enabled (bool yn, void *src);

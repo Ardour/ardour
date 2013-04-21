@@ -24,8 +24,7 @@
 #include "ardour/interthread_info.h"
 #include "ardour/route.h"
 #include "ardour/public_diskstream.h"
-#include "ardour/freezable.h"
-
+#include "ardour/operation.h"
 
 namespace ARDOUR {
 
@@ -48,6 +47,10 @@ class IO;
 	virtual ~Track ();
 	int init ();
 	bool set_name (const std::string& str);
+
+	//Operation
+	virtual void apply(Operation *operation) = 0;
+	virtual void disapply(Operation *operation) = 0;
 
 	//TrackMode
 	TrackMode mode () const { return _mode; }

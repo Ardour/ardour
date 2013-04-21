@@ -22,6 +22,7 @@
 #include <boost/shared_ptr.hpp>
 #include "ardour/interthread_info.h"
 #include "ardour/playlist.h"
+#include "ardour/processor.h"
 
 namespace ARDOUR {
 

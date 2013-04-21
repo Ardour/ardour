@@ -44,6 +44,7 @@
 #include "ardour/dB.h"
 #include "ardour/location.h"
 #include "ardour/freezable.h"
+#include "ardour/freeze_operation.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_track.h"
 #include "ardour/operations.h"
@@ -3448,12 +3449,10 @@ Editor::unfreeze_route ()
 		return;
 	}
 
-	boost::shared_ptr<Freezable> t;
+	FreezeOperation* freeze = FreezeOperation::get_instance();
+	boost::shared_ptr<Track> track = clicked_routeview->track();
 
-	if( (t=boost::dynamic_pointer_cast<Freezable>(clicked_routeview->track())) != 0)
-	  {
-	    t->unfreeze ();
-	  }
+	track->disapply(freeze);
 }
 
 void*

@@ -64,6 +64,18 @@ AudioTrack::freeze_state() const
 	return _freeze_record.state;
 }
 
+void 
+AudioTrack::apply(Operation* operation)
+{
+  operation->apply(this);
+}
+
+void 
+AudioTrack::disapply(Operation* operation)
+{
+  operation->disapply(this);
+}
+
 void
 AudioTrack::prep_record_enabled (bool yn, void *src)
 {

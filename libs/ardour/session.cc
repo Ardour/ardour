@@ -66,6 +66,7 @@
 #include "ardour/debug.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/freezable.h"
+#include "ardour/freeze_operation.h"
 #include "ardour/graph.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_ui.h"
@@ -3955,14 +3956,26 @@ Session::freeze_all (InterThreadInfo& itt)
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
-		boost::shared_ptr<Freezable> t;
+	  	boost::shared_ptr<Freezable> t;
 
 		if ((t = boost::dynamic_pointer_cast<Freezable>(*i)) != 0) {
 			/* XXX this is wrong because itt.progress will keep returning to zero at the start
 			   of every track.
 			*/
-			t->freeze_me (itt);
+		  t->freeze_me (itt);
 		}
+
+		/* TODO
+		 * Use the FreezeOperation class to do it. 
+		 * Add a graphical action (gtk2_ardour).
+		 * @see Editor::unfreeze_routes
+		 */
+
+		/* Something like....
+		FreezeOperation* freeze = FreezeOperation::get_instance();
+		boost::shared_ptr<Track> track = ...;
+
+		track->disapply(freeze);*/
 	}
 
 	return 0;

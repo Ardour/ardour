@@ -22,7 +22,7 @@
 
 #include "ardour/interthread_info.h"
 #include "ardour/track.h"
-
+#include "ardour/operation.h"
 #include "ardour/freezable.h"
 
 namespace ARDOUR {
@@ -54,6 +54,10 @@ class AudioFileSource;
 	DataType data_type () const {
 		return DataType::AUDIO;
 	}
+
+	//Operation
+	void apply(Operation *op);
+	void disapply(Operation *op);
 
 	//Recording
 	void set_record_enabled (bool yn, void *src);

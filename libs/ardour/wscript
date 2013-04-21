@@ -101,6 +101,7 @@ libardour_sources = [
         'filesystem_paths.cc',
         'filter.cc',
         'find_session.cc',
+        'freeze_operation.cc',
         'globals.cc',
         'graph.cc',
         'graphnode.cc',

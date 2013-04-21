@@ -161,6 +161,7 @@ Track::get_template ()
 {
 	return state (false);
 }
+
 /*
 Track::FreezeRecord::~FreezeRecord ()
 {

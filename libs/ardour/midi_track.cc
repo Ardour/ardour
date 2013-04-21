@@ -73,6 +73,18 @@ MidiTrack::freeze_state() const
 	return _freeze_record.state;
 }
 
+void 
+MidiTrack::apply(Operation* operation)
+{
+  operation->apply(this);
+}
+
+void 
+MidiTrack::disapply(Operation* operation)
+{
+  operation->disapply(this);
+}
+
 void
 MidiTrack::prep_record_enabled (bool yn, void *src)
 {
