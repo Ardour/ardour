@@ -175,8 +175,8 @@ Group::add (Item* i)
 	_items.push_back (i);
 	invalidate_lut ();
 	_bounding_box_dirty = true;
+
 	
-	DEBUG_TRACE (PBD::DEBUG::CanvasItemsDirtied, "canvas item dirty: group add\n");
 }
 
 void

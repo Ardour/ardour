@@ -70,12 +70,12 @@ Item::init ()
 
 Item::~Item ()
 {
-	if (_canvas) {
-		_canvas->item_going_away (this, _bounding_box);
-	}
-	
 	if (_parent) {
 		_parent->remove (this);
+	}
+
+	if (_canvas) {
+		_canvas->item_going_away (this, _bounding_box);
 	}
 }
 

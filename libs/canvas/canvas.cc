@@ -377,6 +377,7 @@ GtkCanvas::enter_leave_items (Duple const & point)
 		if (new_item->ignore_events()) {
 			continue;
 		}
+
 		if (_current_item && _current_item != new_item) {
 			/* leave event */
 			GdkEventCrossing leave_event;
@@ -395,10 +396,11 @@ GtkCanvas::enter_leave_items (Duple const & point)
 			enter_event.y = point.y;
 			cerr << "Entering (" << new_item->name << ") " << new_item->whatami() << endl;
 			new_item->Event (reinterpret_cast<GdkEvent*> (&enter_event));
+
+			_current_item = new_item;
+			break;
 		}
 	
-		_current_item = new_item;
-		break;
 	}
 }
 

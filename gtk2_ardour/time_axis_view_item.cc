@@ -147,7 +147,9 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 }
 
 void
-TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & base_color, framepos_t start, framepos_t duration, Visibility vis, bool wide, bool high)
+TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & base_color, 
+			framepos_t start, framepos_t duration, Visibility vis, 
+			bool wide, bool high)
 {
 	item_name = it_name;
 	samples_per_pixel = fpp;
