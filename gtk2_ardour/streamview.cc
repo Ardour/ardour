@@ -71,8 +71,10 @@ StreamView::StreamView (RouteTimeAxisView& tv)
 	canvas_rect->set (ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, tv.current_height ()));
 	canvas_rect->raise(1); // raise above tempo lines
 
-	canvas_rect->set_outline_what (0x2 | 0x8);
+	canvas_rect->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::TOP | ArdourCanvas::Rectangle::BOTTOM));
 	canvas_rect->set_outline_color (RGBA_TO_UINT (0, 0, 0, 255));
+	canvas_rect->set_fill_color (RGBA_TO_UINT (1.0, 0, 0, 255));
+	canvas_rect->set_fill (true);
 
 	canvas_rect->Event.connect (sigc::bind (
 			sigc::mem_fun (_trackview.editor(), &PublicEditor::canvas_stream_view_event),

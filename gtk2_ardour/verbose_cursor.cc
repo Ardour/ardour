@@ -22,6 +22,8 @@
 #include "pbd/stacktrace.h"
 #include "ardour/profile.h"
 
+#include "canvas/debug.h"
+
 #include "ardour_ui.h"
 #include "audio_clock.h"
 #include "editor.h"
@@ -42,10 +44,9 @@ VerboseCursor::VerboseCursor (Editor* editor)
 	, _yoffset (0)
 {
 	_canvas_item = new ArdourCanvas::Text (_editor->_track_canvas->root());
+	CANVAS_DEBUG_NAME (_canvas_item, "verbose canvas cursor");
 	_canvas_item->set_ignore_events (true);
 	_canvas_item->set_font_description (get_font_for_style (N_("VerboseCanvasCursor")));
-	// CAIROCANVAS
-	// _canvas_item->property_anchor() = Gtk::ANCHOR_NW;
 }
 
 ArdourCanvas::Item *

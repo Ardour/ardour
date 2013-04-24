@@ -42,6 +42,7 @@
 #include "canvas/poly_line.h"
 #include "canvas/line.h"
 #include "canvas/text.h"
+#include "canvas/debug.h"
 
 #include "streamview.h"
 #include "audio_region_view.h"
@@ -158,21 +159,25 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	create_waves ();
 
 	fade_in_shape = new ArdourCanvas::Polygon (group);
+	CANVAS_DEBUG_NAME (fade_in_shape, string_compose ("fade in shape for %1", region()->name()));
 	fade_in_shape->set_fill_color (fade_color);
 	fade_in_shape->set_data ("regionview", this);
 
 	fade_out_shape = new ArdourCanvas::Polygon (group);
+	CANVAS_DEBUG_NAME (fade_out_shape, string_compose ("fade out shape for %1", region()->name()));
 	fade_out_shape->set_fill_color (fade_color);
 	fade_out_shape->set_data ("regionview", this);
 
 	if (!_recregion) {
 		fade_in_handle = new ArdourCanvas::Rectangle (group);
+		CANVAS_DEBUG_NAME (fade_in_handle, string_compose ("fade in handle for %1", region()->name()));
 		fade_in_handle->set_fill_color (UINT_RGBA_CHANGE_A (fill_color, 0));
 		fade_in_handle->set_outline_color (RGBA_TO_UINT (0, 0, 0, 0));
 
 		fade_in_handle->set_data ("regionview", this);
 
 		fade_out_handle = new ArdourCanvas::Rectangle (group);
+		CANVAS_DEBUG_NAME (fade_out_handle, string_compose ("fade out handle for %1", region()->name()));
 		fade_out_handle->set_fill_color (UINT_RGBA_CHANGE_A (fill_color, 0));
 		fade_out_handle->set_outline_color (RGBA_TO_UINT (0, 0, 0, 0));
 
@@ -228,6 +233,9 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	setup_waveform_visibility ();
 	setup_waveform_shape ();
 	setup_waveform_scale ();
+
+	frame_handle_start->raise_to_top ();
+	frame_handle_end->raise_to_top ();
 
 	/* XXX sync mark drag? */
 }
@@ -360,10 +368,9 @@ AudioRegionView::region_resized (const PropertyChange& what_changed)
 	interesting_stuff.add (ARDOUR::Properties::length);
 
 	if (what_changed.contains (interesting_stuff)) {
-
+		
 		for (uint32_t n = 0; n < waves.size(); ++n) {
 			waves[n]->region_resized ();
-			waves[n]->set_region_start (region()->start ());
 		}
 
 		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
@@ -371,7 +378,6 @@ AudioRegionView::region_resized (const PropertyChange& what_changed)
 
 				for (vector<WaveView*>::iterator w = agr->waves.begin(); w != agr->waves.end(); ++w) {
 					(*w)->region_resized ();
-					(*w)->set_region_start (region()->start ());
 				}
 			}
 		}
@@ -432,14 +438,7 @@ void
 AudioRegionView::region_muted ()
 {
 	RegionView::region_muted();
-
-	for (uint32_t n=0; n < waves.size(); ++n) {
-		if (_region->muted()) {
-			waves[n]->set_outline_color (UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), MUTED_ALPHA));
-		} else {
-			waves[n]->set_outline_color (ARDOUR_UI::config()->get_canvasvar_WaveForm());
-		}
-	}
+	set_waveform_colors ();
 }
 
 void
@@ -750,12 +749,14 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 
 	if (!start_xfade_in) {
 		start_xfade_in = new ArdourCanvas::PolyLine (group);
+		CANVAS_DEBUG_NAME (start_xfade_in, string_compose ("xfade start in line for %1", region()->name()));
 		start_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
 		start_xfade_in->set_outline_width (1.5);
 	}
 
 	if (!start_xfade_out) {
 		start_xfade_out = new ArdourCanvas::PolyLine (group);
+		CANVAS_DEBUG_NAME (start_xfade_out, string_compose ("xfade start out line for %1", region()->name()));
 		uint32_t col = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128);
 		start_xfade_out->set_outline_color (col);
 		start_xfade_out->set_outline_width (2.0);
@@ -763,6 +764,7 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 
 	if (!start_xfade_rect) {
 		start_xfade_rect = new ArdourCanvas::Rectangle (group);
+		CANVAS_DEBUG_NAME (start_xfade_rect, string_compose ("xfade start rect for %1", region()->name()));
 		start_xfade_rect->set_fill (true);
 		start_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade());
 		start_xfade_rect->set_outline (false);
@@ -775,7 +777,6 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 
 	start_xfade_in->set (points);
 	start_xfade_in->show ();
-	start_xfade_in->raise_to_top ();
 
 	/* fade out line */
 
@@ -807,9 +808,6 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 
 	start_xfade_out->set (ipoints);
 	start_xfade_out->show ();
-	start_xfade_out->raise_to_top ();
-
-	start_xfade_rect->raise_to_top ();  //this needs to be topmost so the lines don't steal mouse focus
 
 	show_start_xfade();
 }
@@ -837,6 +835,7 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 
 	if (!end_xfade_in) {
 		end_xfade_in = new ArdourCanvas::PolyLine (group);
+		CANVAS_DEBUG_NAME (end_xfade_in, string_compose ("xfade end in line for %1", region()->name()));
 		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128);
 		end_xfade_in->set_outline_color (col);
 		end_xfade_in->set_outline_width (1.5);
@@ -844,12 +843,14 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 
 	if (!end_xfade_out) {
 		end_xfade_out = new ArdourCanvas::PolyLine (group);
+		CANVAS_DEBUG_NAME (end_xfade_out, string_compose ("xfade end out line for %1", region()->name()));
 		end_xfade_out->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
 		end_xfade_out->set_outline_width (2.0);
 	}
 
 	if (!end_xfade_rect) {
 		end_xfade_rect = new ArdourCanvas::Rectangle (group);
+		CANVAS_DEBUG_NAME (end_xfade_rect, string_compose ("xfade end rect for %1", region()->name()));
 		end_xfade_rect->set_fill (true);
 		end_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ActiveCrossfade());
 		end_xfade_rect->set_outline (0);
@@ -1025,16 +1026,7 @@ AudioRegionView::set_colors ()
 					   ARDOUR_UI::config()->get_canvasvar_GainLineInactive());
 	}
 
-	for (uint32_t n=0; n < waves.size(); ++n) {
-		if (_region->muted()) {
-			waves[n]->set_outline_color (UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), MUTED_ALPHA));
-		} else {
-			waves[n]->set_outline_color (ARDOUR_UI::config()->get_canvasvar_WaveForm());
-		}
-
-		waves[n]->set_clip_color (ARDOUR_UI::config()->get_canvasvar_WaveFormClip());
-		waves[n]->set_zero_color (ARDOUR_UI::config()->get_canvasvar_ZeroLine());
-	}
+	set_waveform_colors ();
 
 	if (start_xfade_in) {
 		start_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
@@ -1181,9 +1173,10 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	gdouble yoff = which * ht;
 
 	WaveView *wave = new WaveView (group, audio_region ());
-
+	CANVAS_DEBUG_NAME (wave, string_compose ("wave view for chn %1 of %2", which, get_item_name()));
+	
+	wave->lower_to_bottom ();
 	wave->set_channel (which);
-	wave->set_x_position (0);
 	wave->set_y_position (yoff);
 	wave->set_height (ht);
 	wave->set_samples_per_pixel (samples_per_pixel);
@@ -1200,8 +1193,6 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	wave->set_zero_color (ARDOUR_UI::config()->get_canvasvar_ZeroLine());
 	// CAIROCANVAS
 	// wave->property_zero_line() = true;
-
-	wave->set_region_start (_region->start());
 
 	switch (Config->get_waveform_shape()) {
 	case Rectified:
@@ -1362,12 +1353,11 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 		}
 
 		WaveView *wave = new WaveView (ghost->group, audio_region());
+		CANVAS_DEBUG_NAME (wave, string_compose ("ghost wave for %1", get_item_name()));
 
 		wave->set_channel (n);
-		wave->set_x_position (0);
 		wave->set_samples_per_pixel (samples_per_pixel);
 		wave->set_amplitude_above_axis (_amplitude_above_axis);
-		wave->set_region_start (_region->start());
 
 		ghost->waves.push_back(wave);
 	}
@@ -1442,6 +1432,47 @@ AudioRegionView::color_handler ()
 }
 
 void
+AudioRegionView::set_waveform_colors ()
+{
+	ArdourCanvas::Color fill, outline, clip, zero;
+	
+	if (_selected) {
+                if (_region->muted()) {
+                        outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm(), MUTED_ALPHA);
+                } else {
+                        outline = ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm();
+                }
+                fill = ARDOUR_UI::config()->get_canvasvar_SelectedWaveFormFill();
+	} else {
+		if (_recregion) {
+                        if (_region->muted()) {
+                                outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_RecWaveForm(), MUTED_ALPHA);
+                        } else {
+                                outline = ARDOUR_UI::config()->get_canvasvar_RecWaveForm();
+                        }
+                        fill = ARDOUR_UI::config()->get_canvasvar_RecWaveFormFill();
+		} else {
+                        if (_region->muted()) {
+                                outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), MUTED_ALPHA);
+                        } else {
+                                outline = ARDOUR_UI::config()->get_canvasvar_WaveForm();
+                        }
+                        fill = ARDOUR_UI::config()->get_canvasvar_WaveFormFill();
+		}
+	}
+
+	clip = ARDOUR_UI::config()->get_canvasvar_WaveFormClip();
+	zero = ARDOUR_UI::config()->get_canvasvar_ZeroLine();
+
+        for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
+		(*w)->set_outline_color (outline);
+		(*w)->set_fill_color (fill);
+		(*w)->set_clip_color (clip);
+		(*w)->set_zero_color (zero);
+	}
+}
+
+void
 AudioRegionView::set_frame_color ()
 {
 	if (!frame) {
@@ -1456,40 +1487,7 @@ AudioRegionView::set_frame_color ()
 
 	TimeAxisViewItem::set_frame_color ();
 
-        uint32_t wc;
-        uint32_t fc;
-
-	if (_selected) {
-                if (_region->muted()) {
-                        wc = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm(), MUTED_ALPHA);
-                } else {
-                        wc = ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm();
-                }
-                fc = ARDOUR_UI::config()->get_canvasvar_SelectedWaveFormFill();
-	} else {
-		if (_recregion) {
-                        if (_region->muted()) {
-                                wc = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_RecWaveForm(), MUTED_ALPHA);
-                        } else {
-                                wc = ARDOUR_UI::config()->get_canvasvar_RecWaveForm();
-                        }
-                        fc = ARDOUR_UI::config()->get_canvasvar_RecWaveFormFill();
-		} else {
-                        if (_region->muted()) {
-                                wc = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), MUTED_ALPHA);
-                        } else {
-                                wc = ARDOUR_UI::config()->get_canvasvar_WaveForm();
-                        }
-                        fc = ARDOUR_UI::config()->get_canvasvar_WaveFormFill();
-		}
-	}
-
-        for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
-		(*w)->set_outline_color (wc);
-                if (!_region->muted()) {
-                        (*w)->set_fill_color (fc);
-                }
-        }
+	set_waveform_colors ();
 }
 
 void
@@ -1555,6 +1553,7 @@ AudioRegionView::transients_changed ()
 	while (feature_lines.size() < analysis_features.size()) {
 
 		ArdourCanvas::Line* canvas_item = new ArdourCanvas::Line(group);
+		CANVAS_DEBUG_NAME (canvas_item, string_compose ("transient group for %1", region()->name()));
 
 		canvas_item->set (ArdourCanvas::Duple (-1.0, 2.0),
 				  ArdourCanvas::Duple (1.0, _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1));

@@ -41,35 +41,33 @@ Outline::Outline (Group* parent)
 void
 Outline::set_outline_color (Color color)
 {
-	begin_visual_change ();
-	
-	_outline_color = color;
-
-	end_visual_change ();
+	if (color != _outline_color) {
+		begin_visual_change ();
+		_outline_color = color;
+		end_visual_change ();
+	}
 }
 
 void
 Outline::set_outline_width (Distance width)
 {
-	begin_change ();
-	
-	_outline_width = width;
-
-	_bounding_box_dirty = true;
-	end_change ();
-
-	DEBUG_TRACE (PBD::DEBUG::CanvasItemsDirtied, "canvas item dirty: outline width change\n");	
+	if (width != _outline_width) {
+		begin_change ();
+		_outline_width = width;
+		_bounding_box_dirty = true;
+		end_change ();
+	}
 }
 
 void
 Outline::set_outline (bool outline)
 {
-	begin_change ();
-
-	_outline = outline;
-
-	_bounding_box_dirty = true;
-	end_change ();
+	if (outline != _outline) {
+		begin_change ();
+		_outline = outline;
+		_bounding_box_dirty = true;
+		end_change ();
+	}
 }
 
 void

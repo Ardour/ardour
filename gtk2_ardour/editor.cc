@@ -3731,7 +3731,7 @@ Editor::set_show_measures (bool yn)
 			
 			compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(), begin, end);
 			draw_measures (begin, end);
-		}
+		} 
 
 		instant_save ();
 	}

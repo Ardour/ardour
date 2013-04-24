@@ -113,7 +113,7 @@ class RegionView : public TimeAxisViewItem
 	virtual void trim_front_ending () {}
 
 	bool trim_end (framepos_t, bool);
-	void trim_contents (framepos_t, bool, bool);
+        void move_contents (ARDOUR::frameoffset_t);
 	virtual void thaw_after_trim ();
 
         void set_silent_frames (const ARDOUR::AudioIntervalResult&, double threshold);

@@ -61,9 +61,10 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 {
 #ifdef CANVAS_DEBUG
 	if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-		cerr << "CANVAS @ " << this << endl;
-		dump (cerr);
-		cerr << "-------------------------\n";
+		cerr << "RENDER: " << area << endl;
+		//cerr << "CANVAS @ " << this << endl;
+		//dump (cerr);
+		//cerr << "-------------------------\n";
 	}
 #endif
 
@@ -78,9 +79,9 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 		context->set_source_rgba (random()%255 / 255.0,
 					  random()%255 / 255.0,
 					  random()%255 / 255.0,
-					  255);
+					  0.3);
 		context->rectangle (area.x0, area.y0, area.width(), area.height());
-		context->stroke ();
+		context->fill ();
 	}
 #endif
 
@@ -119,7 +120,7 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 		context->set_source_rgba (random()%255 / 255.0,
 					  random()%255 / 255.0,
 					  random()%255 / 255.0,
-					  255);
+					  0.4);
 		context->rectangle (area.x0, area.y0, area.width(), area.height());
 		context->fill ();
 	}
@@ -327,6 +328,11 @@ GtkCanvas::enter_leave_items ()
 {
 	int x;
 	int y;
+
+	/* this version of ::enter_leave_items() is called after an item is
+	 * added or removed, so we have no coordinates to work from as is the
+	 * case with a motion event. Find out where the mouse is and use that.
+	 */
 	     
 	Glib::RefPtr<const Gdk::Window> pointer_window = Gdk::Display::get_default()->get_window_at_pointer (x, y);
 
@@ -340,31 +346,60 @@ GtkCanvas::enter_leave_items ()
 void
 GtkCanvas::enter_leave_items (Duple const & point)
 {
-	/* find the items at the new mouse position */
+	/* find the items at the given position */
+
 	vector<Item const *> items;
 	_root.add_items_at_point (point, items);
 
-	Item const * new_item = items.empty() ? 0 : items.back ();
-
-	if (_current_item && _current_item != new_item) {
-		/* leave event */
-		GdkEventCrossing leave_event;
-		leave_event.type = GDK_LEAVE_NOTIFY;
-		leave_event.x = point.x;
-		leave_event.y = point.y;
-		_current_item->Event (reinterpret_cast<GdkEvent*> (&leave_event));
+	if (items.empty()) {
+		if (_current_item) {
+			/* leave event */
+			GdkEventCrossing leave_event;
+			leave_event.type = GDK_LEAVE_NOTIFY;
+			leave_event.x = point.x;
+			leave_event.y = point.y;
+			cerr << "Leaving (without entering)" << _current_item->name << endl;
+			_current_item->Event (reinterpret_cast<GdkEvent*> (&leave_event));
+			_current_item = 0;
+		}
+		return;
 	}
 
-	if (new_item && _current_item != new_item) {
-		/* enter event */
-		GdkEventCrossing enter_event;
-		enter_event.type = GDK_ENTER_NOTIFY;
-		enter_event.x = point.x;
-		enter_event.y = point.y;
-		new_item->Event (reinterpret_cast<GdkEvent*> (&enter_event));
-	}
+	/* items is sorted from bottom to top, so reverse through it from top
+	 * to bottom to find the first event-sensitive item and notify that
+	 * we have entered it
+	 */
 
-	_current_item = new_item;
+	for (vector<Item const*>::const_reverse_iterator i = items.rbegin(); i != items.rend(); ++i) {
+
+		Item const *  new_item = *i;
+
+		if (new_item->ignore_events()) {
+			continue;
+		}
+		if (_current_item && _current_item != new_item) {
+			/* leave event */
+			GdkEventCrossing leave_event;
+			leave_event.type = GDK_LEAVE_NOTIFY;
+			leave_event.x = point.x;
+			leave_event.y = point.y;
+			cerr << "Leaving " << _current_item->name << endl;
+			_current_item->Event (reinterpret_cast<GdkEvent*> (&leave_event));
+		}
+
+		if (new_item && _current_item != new_item) {
+			/* enter event */
+			GdkEventCrossing enter_event;
+			enter_event.type = GDK_ENTER_NOTIFY;
+			enter_event.x = point.x;
+			enter_event.y = point.y;
+			cerr << "Entering (" << new_item->name << ") " << new_item->whatami() << endl;
+			new_item->Event (reinterpret_cast<GdkEvent*> (&enter_event));
+		}
+	
+		_current_item = new_item;
+		break;
+	}
 }
 
 /** Deliver an event to the appropriate item; either the grabbed item, or

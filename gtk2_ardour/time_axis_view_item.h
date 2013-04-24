@@ -21,6 +21,7 @@
 #define __gtk_ardour_time_axis_view_item_h__
 
 #include <string>
+#include <gdk/gdk.h>
 #include <gdkmm/color.h>
 #include <pangomm/fontdescription.h>
 #include "pbd/signals.h"
@@ -243,6 +244,8 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	/* with these two values, if frame_handle_start == 0 then frame_handle_end will also be 0 */
 	ArdourCanvas::Rectangle* frame_handle_start; ///< `frame' (fade) handle for the start of the item, or 0
 	ArdourCanvas::Rectangle* frame_handle_end; ///< `frame' (fade) handle for the end of the item, or 0
+
+        bool frame_handle_crossing (GdkEvent*, ArdourCanvas::Rectangle*);
 
 	double _height;
 	Visibility visibility;

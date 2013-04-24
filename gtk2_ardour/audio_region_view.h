@@ -189,6 +189,7 @@ class AudioRegionView : public RegionView
 	void peaks_ready_handler (uint32_t);
 
 	void set_colors ();
+        void set_waveform_colors ();
 	void compute_colors (Gdk::Color const &);
 	void reset_width_dependent_items (double pixel_width);
 	void set_frame_color ();

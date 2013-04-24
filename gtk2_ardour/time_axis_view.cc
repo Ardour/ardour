@@ -32,6 +32,7 @@
 #include <gtkmm2ext/selector.h>
 
 #include "canvas/rectangle.h"
+#include "canvas/debug.h"
 
 #include "ardour_ui.h"
 #include "ardour_dialog.h"
@@ -940,13 +941,16 @@ TimeAxisView::get_selection_rect (uint32_t id)
 		rect = new SelectionRect;
 
 		rect->rect = new ArdourCanvas::Rectangle (selection_group);
+		CANVAS_DEBUG_NAME (rect->rect, "selection rect");
 		rect->rect->set_outline_what (0);
 		rect->rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_SelectionRect());
 
 		rect->start_trim = new ArdourCanvas::Rectangle (selection_group);
+		CANVAS_DEBUG_NAME (rect->rect, "selection rect start trim");
 		rect->start_trim->set_outline_what (0);
 
 		rect->end_trim = new ArdourCanvas::Rectangle (selection_group);
+		CANVAS_DEBUG_NAME (rect->rect, "selection rect end trim");
 		rect->end_trim->set_outline_what (0);
 
 		free_selection_rects.push_front (rect);

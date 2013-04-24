@@ -105,17 +105,31 @@ private:
 
 #endif
 
+    /** A cached, pre-rendered image of some section of a waveform.
+	
+	It spans a range given relative to the start of the source
+	of the waveform data, so a range from N..M corresponds
+	to the sample range N..M within the source.
+	
+	Invalidated by a changes to:
+
+               samples_per_pixel
+               colors
+	       height
+
+    */
+
 	class CacheEntry
 	{
-	public:
-		CacheEntry (WaveView const *, int, int);
+	  public:
+  	        CacheEntry (WaveView const *, double, double, int);
 		~CacheEntry ();
 
-		int start () const {
+	        double start () const {
 			return _start;
 		}
 
-		int end () const {
+  	        double end () const {
 			return _end;
 		}
 
@@ -130,9 +144,11 @@ private:
 		Coord position (Coord) const;
 		
 		WaveView const * _wave_view;
-		int _start;
-		int _end;
-		int _n_peaks;
+	        
+	        double _start;
+	        double _end;
+	        int _n_peaks; 
+
 	        boost::shared_array<ARDOUR::PeakData> _peaks;
 	        Cairo::RefPtr<Cairo::ImageSurface> _image;
 	};
@@ -163,7 +179,7 @@ private:
 	 *  value as the crossfade editor needs to alter it.
 	 */
 	ARDOUR::frameoffset_t _region_start;
-	
+
 	mutable std::list<CacheEntry*> _cache;
        
         PBD::ScopedConnection invalidation_connection;

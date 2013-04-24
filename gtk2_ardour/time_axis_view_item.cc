@@ -138,6 +138,7 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 	ArdourCanvas::Group* parent = other.group->parent();
 
 	group = new ArdourCanvas::Group (parent);
+	CANVAS_DEBUG_NAME (group, string_compose ("TAVI group for %1", get_item_name()));
 
 	_selected = other._selected;
 
@@ -171,6 +172,7 @@ TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & ba
 	}
 
 	vestigial_frame = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, 1.0, 2.0, trackview.current_height()));
+	CANVAS_DEBUG_NAME (vestigial_frame, string_compose ("vestigial frame for %1", get_item_name()));
 	vestigial_frame->hide ();
 	vestigial_frame->set_outline_color (ARDOUR_UI::config()->get_canvasvar_VestigialFrame());
 	vestigial_frame->set_fill_color (ARDOUR_UI::config()->get_canvasvar_VestigialFrame());
@@ -180,6 +182,7 @@ TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & ba
 						     ArdourCanvas::Rect (0.0, 1.0, 
 									 trackview.editor().sample_to_pixel(duration), 
 									 trackview.current_height()));
+		CANVAS_DEBUG_NAME (frame, string_compose ("frame for %1", get_item_name()));
 
 		if (_recregion) {
 			frame->set_outline_color (ARDOUR_UI::config()->get_canvasvar_RecordingRect());
@@ -199,11 +202,13 @@ TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & ba
 								      ArdourCanvas::Rect (0.0, trackview.editor().sample_to_pixel(item_duration),
 											  trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, 
 											  trackview.current_height()));
+			CANVAS_DEBUG_NAME (name_highlight, string_compose ("name highlight for %1", get_item_name()));
 		} else {
 			name_highlight = new ArdourCanvas::Rectangle (group, 
 								      ArdourCanvas::Rect (1.0, trackview.editor().sample_to_pixel(item_duration) - 1, 
 											  trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, 
 											  trackview.current_height()));
+			CANVAS_DEBUG_NAME (name_highlight, string_compose ("name highlight for %1", get_item_name()));
 		}
 
 		name_highlight->set_data ("timeaxisviewitem", this);
@@ -217,6 +222,7 @@ TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & ba
 
 	if (visibility & ShowNameText) {
 		name_text = new ArdourCanvas::Text (group);
+		CANVAS_DEBUG_NAME (name_text, string_compose ("name text for %1", get_item_name()));
 		name_text->set_position (ArdourCanvas::Duple (NAME_X_OFFSET, trackview.current_height() - NAME_Y_OFFSET));
 		name_text->set_font_description (NAME_FONT);
 		
@@ -230,9 +236,16 @@ TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & ba
 		double width = TimeAxisViewItem::GRAB_HANDLE_WIDTH;
 
 		frame_handle_start = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, top, width, trackview.current_height()));
-		frame_handle_start->set_outline_what (ArdourCanvas::Rectangle::What (0));
+		CANVAS_DEBUG_NAME (frame_handle_start, "TAVI frame handle start");
+		frame_handle_start->set_outline (false);
+		frame_handle_start->set_fill (false);
+		frame_handle_start->Event.connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisViewItem::frame_handle_crossing), frame_handle_start));
+
 		frame_handle_end = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, top, width, trackview.current_height()));
-		frame_handle_end->set_outline_what (ArdourCanvas::Rectangle::What (0));
+		CANVAS_DEBUG_NAME (frame_handle_end, "TAVI frame handle end");
+		frame_handle_end->set_outline (false);
+		frame_handle_end->set_fill (false);
+		frame_handle_end->Event.connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisViewItem::frame_handle_crossing), frame_handle_end));
 	} else {
 		frame_handle_start = frame_handle_end = 0;
 	}
@@ -819,10 +832,26 @@ TimeAxisViewItem::set_trim_handle_colors()
 			frame_handle_start->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TrimHandleLocked());
 			frame_handle_end->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TrimHandleLocked());
 		} else {
-			frame_handle_start->set_fill_color (RGBA_TO_UINT (1, 1, 1, 0)); //ARDOUR_UI::config()->get_canvasvar_TrimHandle();
-			frame_handle_end->set_fill_color (RGBA_TO_UINT (1, 1, 1, 0)); //ARDOUR_UI::config()->get_canvasvar_TrimHandle();
+			frame_handle_start->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TrimHandle());
+			frame_handle_end->set_fill_color (ARDOUR_UI::config()->get_canvasvar_TrimHandle());
 		}
 	}
+}
+
+bool
+TimeAxisViewItem::frame_handle_crossing (GdkEvent* ev, ArdourCanvas::Rectangle* item)
+{
+	switch (ev->type) {
+	case GDK_LEAVE_NOTIFY:
+		item->set_fill (false);
+		break;
+	case GDK_ENTER_NOTIFY:
+		item->set_fill (true);
+		break;
+	default:
+		break;
+	}
+	return false;
 }
 
 /** @return the frames per pixel */
@@ -901,6 +930,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 				 * the right-hand end of frame_handle_start and the left-hand
 				 * end of frame_handle_end, so disable the handles
 				 */
+
 				frame_handle_start->hide();
 				frame_handle_end->hide();
 			} else {

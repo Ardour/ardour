@@ -1830,6 +1830,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	TimeAxisView* tvp = &_primary->get_time_axis_view ();
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
+	frameoffset_t frame_delta = 0;
 
 	if (tv && tv->is_track()) {
 		speed = tv->track()->speed();
@@ -1926,27 +1927,11 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 	case ContentsTrim:
 		{
-			bool swap_direction = false;
-
-			if (event && Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-				swap_direction = true;
-			}
-
-			framecnt_t frame_delta = 0;
-
-			bool left_direction = false;
-			if (last_pointer_frame() > adjusted_current_frame(event)) {
-				left_direction = true;
-			}
-
-			if (left_direction) {
-				frame_delta = (last_pointer_frame() - adjusted_current_frame(event));
-			} else {
-				frame_delta = (adjusted_current_frame(event) - last_pointer_frame());
-			}
+			frame_delta = (adjusted_current_frame(event) - last_pointer_frame());
+			// frame_delta = (last_pointer_frame() - adjusted_current_frame(event));
 
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				i->view->trim_contents (frame_delta, left_direction, swap_direction);
+				i->view->move_contents (frame_delta);
 			}
 		}
 		break;
@@ -1960,7 +1945,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		show_verbose_cursor_time ((framepos_t) (rv->region()->last_frame() / speed));
 		break;
 	case ContentsTrim:
-		show_verbose_cursor_time (adjusted_current_frame (event));
+		// show_verbose_cursor_time (frame_delta);
 		break;
 	}
 }

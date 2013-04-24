@@ -162,8 +162,9 @@ Editor::compute_current_bbt_points (framepos_t leftmost, framepos_t rightmost,
 void
 Editor::hide_measures ()
 {
-	if (tempo_lines)
+	if (tempo_lines) {
 		tempo_lines->hide();
+	}
 }
 
 void

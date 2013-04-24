@@ -220,7 +220,7 @@ class Region
 	bool at_natural_position () const;
 	void move_to_natural_position ();
 
-	void trim_start (framepos_t new_position);
+	void move_start (frameoffset_t distance);
 	void trim_front (framepos_t new_position);
 	void trim_end (framepos_t new_position);
 	void trim_to (framepos_t position, framecnt_t length);

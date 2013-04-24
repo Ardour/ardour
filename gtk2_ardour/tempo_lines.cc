@@ -47,17 +47,13 @@ TempoLines::tempo_map_changed()
 void
 TempoLines::show ()
 {
-	for (Lines::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-		(*i)->show();
-	}
+	_group->show ();
 }
 
 void
 TempoLines::hide ()
 {
-	for (Lines::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-		(*i)->hide();
-	}
+	_group->hide ();
 }
 
 void
@@ -111,6 +107,8 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 			line->reparent (_group);
 		} else {
 			line = new ArdourCanvas::Line (_group);
+			CANVAS_DEBUG_NAME (line, "tempo measure line");
+			line->set_ignore_events (true);
 		}
 
 		line->set_x0 (xpos);

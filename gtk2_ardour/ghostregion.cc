@@ -21,6 +21,8 @@
 #include "canvas/group.h"
 #include "canvas/rectangle.h"
 #include "canvas/wave_view.h"
+#include "canvas/debug.h"
+
 #include "ardour_ui.h"
 #include "automation_time_axis.h"
 #include "ghostregion.h"
@@ -41,9 +43,11 @@ GhostRegion::GhostRegion (ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxi
 	, source_trackview (source_tv)
 {
 	group = new ArdourCanvas::Group (parent);
+	CANVAS_DEBUG_NAME (group, "ghost region group");
 	group->set_position (ArdourCanvas::Duple (initial_pos, 0));
 
 	base_rect = new ArdourCanvas::Rectangle (group);
+	CANVAS_DEBUG_NAME (base_rect, "ghost region rect");
 	base_rect->set_x0 (0);
 	base_rect->set_y0 (0);
 	base_rect->set_y1 (trackview.current_height());
@@ -191,6 +195,7 @@ MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Group* g)
 	: event (e)
 {
 	rect = new ArdourCanvas::Rectangle (g, ArdourCanvas::Rect (e->x0(), e->y0(), e->x1(), e->y1()));
+	CANVAS_DEBUG_NAME (rect, "ghost note rect");
 }
 
 MidiGhostRegion::GhostEvent::~GhostEvent ()

@@ -25,6 +25,7 @@
 
 #include "pbd/compose.h"
 #include "pbd/signals.h"
+#include "pbd/stacktrace.h"
 
 #include "ardour/types.h"
 #include "ardour/dB.h"
@@ -65,7 +66,7 @@ WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region
 	, _logscaled_independent (false)
 	, _gradient_depth_independent (false)
 	, _amplitude_above_axis (1.0)
-	, _region_start (0)
+	, _region_start (region->start())
 {
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
 }
@@ -98,28 +99,47 @@ WaveView::handle_visual_property_change ()
 void
 WaveView::set_fill_color (Color c)
 {
-	invalidate_image_cache ();
-	Fill::set_fill_color (c);
+	if (c != _fill_color) {
+		invalidate_image_cache ();
+		Fill::set_fill_color (c);
+	}
 }
 
 void
 WaveView::set_outline_color (Color c)
 {
-	invalidate_image_cache ();
-	Outline::set_outline_color (c);
+	if (c != _outline_color) {
+		invalidate_image_cache ();
+		Outline::set_outline_color (c);
+	}
 }
 
 void
 WaveView::set_samples_per_pixel (double samples_per_pixel)
 {
-	begin_change ();
+	if (samples_per_pixel != _samples_per_pixel) {
+		begin_change ();
 	
-	_samples_per_pixel = samples_per_pixel;
+		_samples_per_pixel = samples_per_pixel;
+		
+		_bounding_box_dirty = true;
+		
+		end_change ();
+		
+		invalidate_whole_cache ();
+	}
+}
 
-	_bounding_box_dirty = true;
-	end_change ();
+static inline double
+to_src_sample_offset (frameoffset_t src_sample_start, double pixel_offset, double spp)
+{
+	return src_sample_start + (pixel_offset * spp);
+}
 
-	invalidate_whole_cache ();
+static inline double
+to_pixel_offset (frameoffset_t src_sample_start, double sample_offset, double spp)
+{
+	return (sample_offset - src_sample_start) / spp;
 }
 
 void
@@ -131,53 +151,91 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		return;
 	}
 
-	/* p, start and end are offsets from the start of the source.
-	   area is relative to the position of the region.
+	/* These are all pixel (integer) coordinates from the left hand edge of
+	 * the waveview.
 	 */
 	
-	int const start = rint (area.x0 + _region_start / _samples_per_pixel);
-	int const end   = rint (area.x1 + _region_start / _samples_per_pixel);
+	double       start = area.x0;
+	double const end   = area.x1;
+	double const rend  = _region->length() / _samples_per_pixel;
 
-	int p = start;
 	list<CacheEntry*>::iterator cache = _cache.begin ();
 
-	while (p < end) {
+	while ((end - start) > 1.0) {
 
-		/* Step through cache entries that end at or before our current position, p */
-		while (cache != _cache.end() && (*cache)->end() <= p) {
+		frameoffset_t start_sample_offset = to_src_sample_offset (_region_start, start, _samples_per_pixel);
+
+		/* Step through cache entries that end at or before our current position */
+
+		while (cache != _cache.end() && (*cache)->end() <= start_sample_offset) {
 			++cache;
 		}
 
 		/* Now either:
 		   1. we have run out of cache entries
-		   2. the one we are looking at finishes after p but also starts after p.
-		   3. the one we are looking at finishes after p and starts before p.
+		   2. the one we are looking at finishes after start(_sample_offset) but also starts after start(_sample_offset).
+		   3. the one we are looking at finishes after start(_sample_offset) and starts before start(_sample_offset).
 
 		   Set up a pointer to the cache entry that we will use on this iteration.
 		*/
 
-		CacheEntry* render = 0;
+		CacheEntry* image = 0;
 
 		if (cache == _cache.end ()) {
 
 			/* Case 1: we have run out of cache entries, so make a new one for
 			   the whole required area and put it in the list.
+			   
+			   We would like to avoid lots of little images in the
+			   cache, so when we create a new one, make it as wide
+			   as possible, within a sensible limit (here, the
+			   visible width of the canvas we're on). 
+
+			   However, we don't want to try to make it larger than 
+			   the region actually is, so clamp with that too.
 			*/
-			
-			CacheEntry* c = new CacheEntry (this, p, end);
+
+			double const endpoint = min (rend, max (end, start + _canvas->visible_area().width()));
+			CacheEntry* c = new CacheEntry (this, 
+							start_sample_offset,
+							to_src_sample_offset (_region_start, endpoint, _samples_per_pixel),
+							endpoint - start);
 			_cache.push_back (c);
-			render = c;
+			image = c;
 
-		} else if ((*cache)->start() > p) {
+		} else if ((*cache)->start() > start_sample_offset) {
 
-			/* Case 2: we have a cache entry, but it starts after p, so we
-			   need another one for the missing bit.
-			*/
+			/* Case 2: we have a cache entry, but it starts after
+			 * start(_sample_offset), so we need another one for
+			 * the missing bit.
+			 *  
+			 * Create a new cached image that extends as far as the
+			 * next cached image's start, or the end of the region,
+			 * or the end of the render area, whichever comes first.
+			 */
 
-			CacheEntry* c = new CacheEntry (this, p, min (end, (*cache)->start()));
+			double    end_pixel = min (rend, end);
+			double end_sample_offset = to_src_sample_offset (_region_start, end_pixel, _samples_per_pixel);
+			int npeaks;
+
+			if (end_sample_offset < (*cache)->start()) {
+				npeaks = end_pixel - start;
+				assert (npeaks > 0);
+			} else {
+				end_sample_offset = (*cache)->start();
+				end_pixel = to_pixel_offset (_region_start, end_sample_offset, _samples_per_pixel);
+				npeaks = end_pixel - npeaks;
+				assert (npeaks > 0);
+			}
+		
+			CacheEntry* c = new CacheEntry (this,
+							start_sample_offset,
+							end_sample_offset,
+							npeaks);
+
 			cache = _cache.insert (cache, c);
 			++cache;
-			render = c;
+			image = c;
 
 		} else {
 
@@ -185,29 +243,19 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 			   we have left, so render it.
 			*/
 
-			render = *cache;
+			image = *cache;
 			++cache;
 
 		}
 
-		int const this_end = min (end, render->end ());
-		
-		Coord const left  =        p - _region_start / _samples_per_pixel;
-		Coord const right = this_end - _region_start / _samples_per_pixel;
-		
-		context->save ();
-		
-		context->rectangle (left, area.y0, right, area.height());
-		context->clip ();
-		
-		context->translate (left, 0);
+		double this_end = min (end, to_pixel_offset (_region_start, image->end (), _samples_per_pixel));
+		double const image_origin = to_pixel_offset (_region_start, image->start(), _samples_per_pixel);
 
-		context->set_source (render->image(), render->start() - p, 0);
-		context->paint ();
+		context->rectangle (start, area.y0, this_end - start, area.height());
+		context->set_source (image->image(), image_origin, 0);
+		context->fill ();
 		
-		context->restore ();
-
-		p = min (end, render->end ());
+		start = this_end;
 	}
 }
 
@@ -215,7 +263,7 @@ void
 WaveView::compute_bounding_box () const
 {
 	if (_region) {
-		_bounding_box = Rect (0, 0, _region->length() / _samples_per_pixel, _height);
+		_bounding_box = Rect (0.0, 0.0, _region->length() / _samples_per_pixel, _height);
 	} else {
 		_bounding_box = boost::optional<Rect> ();
 	}
@@ -226,33 +274,38 @@ WaveView::compute_bounding_box () const
 void
 WaveView::set_height (Distance height)
 {
-	begin_change ();
-
-	_height = height;
-
-	_bounding_box_dirty = true;
-	end_change ();
-
-	invalidate_image_cache ();
+	if (height != _height) {
+		begin_change ();
+		
+		_height = height;
+		
+		_bounding_box_dirty = true;
+		end_change ();
+		
+		invalidate_image_cache ();
+	}
 }
 
 void
 WaveView::set_channel (int channel)
 {
-	begin_change ();
-	
-	_channel = channel;
-
-	_bounding_box_dirty = true;
-	end_change ();
-
-	invalidate_whole_cache ();
+	if (channel != _channel) {
+		begin_change ();
+		
+		_channel = channel;
+		
+		_bounding_box_dirty = true;
+		end_change ();
+		
+		invalidate_whole_cache ();
+	}
 }
 
 void
 WaveView::invalidate_whole_cache ()
 {
 	begin_visual_change ();
+
 	for (list<CacheEntry*>::iterator i = _cache.begin(); i != _cache.end(); ++i) {
 		delete *i;
 	}
@@ -266,18 +319,12 @@ void
 WaveView::invalidate_image_cache ()
 {
 	begin_visual_change ();
-
+	
 	for (list<CacheEntry*>::iterator i = _cache.begin(); i != _cache.end(); ++i) {
 		(*i)->clear_image ();
 	}
 	
 	end_visual_change ();
-}
-
-void
-WaveView::region_resized ()
-{
-	_bounding_box_dirty = true;
 }
 
 void
@@ -360,31 +407,41 @@ WaveView::set_global_logscaled (bool yn)
 }
 
 void
-WaveView::set_region_start (frameoffset_t start)
+WaveView::region_resized ()
 {
-	_region_start = start;
+	if (!_region) {
+		return;
+	}
+
+	/* special: do not use _region->length() here to compute
+	   bounding box because it will already have changed.
+	   
+	   if we have a bounding box, use it.
+	*/
+
+	_pre_change_bounding_box = _bounding_box;
+
+	_region_start = _region->start();
+	invalidate_whole_cache ();
+
 	_bounding_box_dirty = true;
+	compute_bounding_box ();
+
+	end_change ();
 }
 
-/** Construct a new CacheEntry with peak data between two offsets
- *  in the source.
- */
-WaveView::CacheEntry::CacheEntry (WaveView const * wave_view, int start, int end)
+WaveView::CacheEntry::CacheEntry (WaveView const * wave_view, double start, double end, int npeaks)
 	: _wave_view (wave_view)
 	, _start (start)
 	, _end (end)
+	, _n_peaks (npeaks)
 {
-	_n_peaks = _end - _start;
 	_peaks.reset (new PeakData[_n_peaks]);
 
-	_wave_view->_region->read_peaks (
-		_peaks.get(),
-		_n_peaks,
-		_start * _wave_view->_samples_per_pixel,
-		(_end - _start) * _wave_view->_samples_per_pixel,
-		_wave_view->_channel,
-		_wave_view->_samples_per_pixel
-		);
+	_wave_view->_region->read_peaks (_peaks.get(), _n_peaks, 
+					 (framecnt_t) floor (_start), 
+					 (framecnt_t) ceil (_end), 
+					 _wave_view->_channel, _wave_view->_samples_per_pixel);
 }
 
 WaveView::CacheEntry::~CacheEntry ()

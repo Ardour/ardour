@@ -632,9 +632,11 @@ RegionView::region_sync_changed ()
 		/* points set below */
 
 		sync_mark = new ArdourCanvas::Polygon (group);
+		CANVAS_DEBUG_NAME (sync_mark, string_compose ("sync mark for %1", get_item_name()));
 		sync_mark->set_fill_color (RGBA_TO_UINT(0,255,0,255));    // FIXME make a themeable colour
 
 		sync_line = new ArdourCanvas::Line (group);
+		CANVAS_DEBUG_NAME (sync_line, string_compose ("sync mark for %1", get_item_name()));
 		sync_line->set_outline_color (RGBA_TO_UINT(0,255,0,255)); // FIXME make a themeable colour
 	}
 
@@ -930,32 +932,12 @@ RegionView::thaw_after_trim ()
 
 
 void
-RegionView::trim_contents (framepos_t frame_delta, bool left_direction, bool swap_direction)
+RegionView::move_contents (frameoffset_t distance)
 {
 	if (_region->locked()) {
 		return;
 	}
-
-	framepos_t new_bound;
-
-	RouteTimeAxisView& rtv = dynamic_cast<RouteTimeAxisView&> (trackview);
-	double const speed = rtv.track()->speed ();
-
-	if (left_direction) {
-		if (swap_direction) {
-			new_bound = (framepos_t) (_region->position() / speed) + frame_delta;
-		} else {
-			new_bound = (framepos_t) (_region->position() / speed) - frame_delta;
-		}
-	} else {
-		if (swap_direction) {
-			new_bound = (framepos_t) (_region->position() / speed) - frame_delta;
-		} else {
-			new_bound = (framepos_t) (_region->position() / speed) + frame_delta;
-		}
-	}
-
-	_region->trim_start ((framepos_t) (new_bound * speed));
+	_region->move_start (distance);
 	region_changed (PropertyChange (ARDOUR::Properties::start));
 }
 
