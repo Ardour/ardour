@@ -313,7 +313,7 @@ GtkCanvas::motion_notify_handler (GdkEventMotion* ev)
 
 	Duple point (ev->x, ev->y);
 	
-	enter_leave_items (point);
+	enter_leave_items (point, ev->state);
 
 	/* Now deliver the motion event.  It may seem a little inefficient
 	   to recompute the items under the event, but the enter notify/leave
@@ -324,7 +324,7 @@ GtkCanvas::motion_notify_handler (GdkEventMotion* ev)
 }
 
 void
-GtkCanvas::enter_leave_items ()
+GtkCanvas::enter_leave_items (int state)
 {
 	int x;
 	int y;
@@ -340,11 +340,11 @@ GtkCanvas::enter_leave_items ()
 		return;
 	}
 
-	enter_leave_items (window_to_canvas (Duple (x, y)));
+	enter_leave_items (window_to_canvas (Duple (x, y)), state);
 }
 		
 void
-GtkCanvas::enter_leave_items (Duple const & point)
+GtkCanvas::enter_leave_items (Duple const & point, int state)
 {
 	/* find the items at the given position */
 
@@ -365,10 +365,22 @@ GtkCanvas::enter_leave_items (Duple const & point)
 		return;
 	}
 
-	/* items is sorted from bottom to top, so reverse through it from top
-	 * to bottom to find the first event-sensitive item and notify that
+	/* items is sorted from top to bottom, so reverse through it from bottom
+	 * to top to find the lowest, first event-sensitive item and notify that
 	 * we have entered it
 	 */
+	
+	GdkEventCrossing enter_event;
+	enter_event.type = GDK_ENTER_NOTIFY;
+	enter_event.window = get_window()->gobj();
+	enter_event.send_event = 0;
+	enter_event.subwindow = 0;
+	enter_event.mode = GDK_CROSSING_NORMAL;
+	enter_event.detail = GDK_NOTIFY_NONLINEAR;
+	enter_event.focus = FALSE;
+	enter_event.state = state;
+	enter_event.x = point.x;
+	enter_event.y = point.y;
 
 	for (vector<Item const*>::const_reverse_iterator i = items.rbegin(); i != items.rend(); ++i) {
 
@@ -378,22 +390,22 @@ GtkCanvas::enter_leave_items (Duple const & point)
 			continue;
 		}
 
-		if (_current_item && _current_item != new_item) {
+		if (_current_item == new_item) {
+			break;
+		}
+
+		if (_current_item) {
 			/* leave event */
-			GdkEventCrossing leave_event;
+			GdkEventCrossing leave_event = enter_event;
 			leave_event.type = GDK_LEAVE_NOTIFY;
-			leave_event.x = point.x;
-			leave_event.y = point.y;
+			leave_event.detail = GDK_NOTIFY_ANCESTOR;
+			leave_event.subwindow = 0;
 			cerr << "Leaving " << _current_item->name << endl;
 			_current_item->Event (reinterpret_cast<GdkEvent*> (&leave_event));
 		}
 
 		if (new_item && _current_item != new_item) {
 			/* enter event */
-			GdkEventCrossing enter_event;
-			enter_event.type = GDK_ENTER_NOTIFY;
-			enter_event.x = point.x;
-			enter_event.y = point.y;
 			cerr << "Entering (" << new_item->name << ") " << new_item->whatami() << endl;
 			new_item->Event (reinterpret_cast<GdkEvent*> (&enter_event));
 
@@ -486,7 +498,7 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 		_grabbed_item = 0;
 	}
 
-	enter_leave_items ();
+	enter_leave_items (0); // no mouse state
 	
 }
 

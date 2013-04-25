@@ -123,8 +123,8 @@ protected:
         Coord _scroll_offset_x;
         Coord _scroll_offset_y;
 
-        virtual void enter_leave_items () = 0;
-        virtual void enter_leave_items (Duple const &) = 0;
+        virtual void enter_leave_items (int state) = 0;
+        virtual void enter_leave_items (Duple const &, int state) = 0;
 };
 
 /** A canvas which renders onto a GTK EventBox */
@@ -152,8 +152,8 @@ protected:
 	bool motion_notify_handler (GdkEventMotion *);
 	bool deliver_event (Duple, GdkEvent *);
 
-        void enter_leave_items ();
-        void enter_leave_items (Duple const &);
+        void enter_leave_items (int state);
+        void enter_leave_items (Duple const &, int state);
 
 private:
 	void item_going_away (Item *, boost::optional<Rect>);
