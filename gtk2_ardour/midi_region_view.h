@@ -349,7 +349,7 @@ private:
 
 	void clear_events (bool with_selection_signal = true);
 
-	bool canvas_event(GdkEvent* ev);
+	bool canvas_group_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);
 
 	void midi_channel_mode_changed ();

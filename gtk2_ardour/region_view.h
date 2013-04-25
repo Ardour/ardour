@@ -135,6 +135,8 @@ class RegionView : public TimeAxisViewItem
 		    bool recording,
 		    TimeAxisViewItem::Visibility);
 
+        bool canvas_group_event (GdkEvent*);
+
 	virtual void region_resized (const PBD::PropertyChange&);
 	virtual void region_muted ();
 	void         region_locked ();

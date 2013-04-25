@@ -196,8 +196,6 @@ RegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	_region->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::region_changed, this, _1), gui_context());
 
-	group->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_event), group, this));
-
 	set_colors ();
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &RegionView::color_handler));
@@ -220,6 +218,12 @@ RegionView::~RegionView ()
         drop_silent_frames ();
 
 	delete editor;
+}
+
+bool
+RegionView::canvas_group_event (GdkEvent* event)
+{
+	return trackview.editor().canvas_region_view_event (event, group, this);
 }
 
 void

@@ -199,7 +199,7 @@ NoteBase::set_selected(bool selected)
 	}
 
 	_selected = selected;
-	set_fill_color (base_color ());
+	set_fill_color (base_color());
         
 	if (_selected) {
 		set_outline_color(calculate_outline(ARDOUR_UI::config()->get_canvasvar_MidiNoteSelected()));

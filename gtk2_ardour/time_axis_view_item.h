@@ -157,7 +157,9 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 
 	TimeAxisViewItem (const TimeAxisViewItem&);
 
-	void init (const std::string&, double, Gdk::Color const &, framepos_t, framepos_t, Visibility, bool, bool);
+        void init (const std::string&, ArdourCanvas::Group*, double, Gdk::Color const &, framepos_t, framepos_t, Visibility, bool, bool);
+
+        virtual bool canvas_group_event (GdkEvent*);
 
 	virtual void compute_colors (Gdk::Color const &);
 	virtual void set_colors();

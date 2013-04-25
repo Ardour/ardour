@@ -111,10 +111,7 @@ TimeAxisViewItem::TimeAxisViewItem(
 	, _automation (automation)
 	, _dragging (false)
 {
-	group = new ArdourCanvas::Group (&parent);
-	CANVAS_DEBUG_NAME (group, string_compose ("TAVI group for %1", it_name));
-
-	init (it_name, spu, base_color, start, duration, vis, true, true);
+	init (it_name, &parent, spu, base_color, start, duration, vis, true, true);
 }
 
 TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
@@ -136,21 +133,22 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 	/* share the other's parent, but still create a new group */
 
 	ArdourCanvas::Group* parent = other.group->parent();
-
-	group = new ArdourCanvas::Group (parent);
-	CANVAS_DEBUG_NAME (group, string_compose ("TAVI group for %1", get_item_name()));
-
+	
 	_selected = other._selected;
-
-	init (other.item_name, other.samples_per_pixel, c, other.frame_position,
+	
+	init (other.item_name, parent, other.samples_per_pixel, c, other.frame_position,
 	      other.item_duration, other.visibility, other.wide_enough_for_name, other.high_enough_for_name);
 }
 
 void
-TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & base_color, 
+TimeAxisViewItem::init (const string& it_name, ArdourCanvas::Group* parent, double fpp, Gdk::Color const & base_color, 
 			framepos_t start, framepos_t duration, Visibility vis, 
 			bool wide, bool high)
 {
+	group = new ArdourCanvas::Group (parent);
+	CANVAS_DEBUG_NAME (group, string_compose ("TAVI group for %1", get_item_name()));
+	group->Event.connect (sigc::mem_fun (*this, &TimeAxisViewItem::canvas_group_event));
+
 	item_name = it_name;
 	samples_per_pixel = fpp;
 	frame_position = start;
@@ -264,6 +262,12 @@ TimeAxisViewItem::init (const string& it_name, double fpp, Gdk::Color const & ba
 TimeAxisViewItem::~TimeAxisViewItem()
 {
 	delete group;
+}
+
+bool
+TimeAxisViewItem::canvas_group_event (GdkEvent* ev)
+{
+	return false;
 }
 
 void

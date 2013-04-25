@@ -43,7 +43,7 @@
 #include "evoral/Control.hpp"
 #include "evoral/midi_util.h"
 
-#include "canvas/pixbuf.h"
+#include "canvas/debug.h"
 
 #include "automation_region_view.h"
 #include "automation_time_axis.h"
@@ -114,6 +114,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, pre_press_cursor (0)
 	, _note_player (0)
 {
+	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
 	_note_group->raise_to_top();
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
@@ -150,7 +151,9 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, pre_press_cursor (0)
 	, _note_player (0)
 {
+	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
 	_note_group->raise_to_top();
+
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
 	connect_to_diskstream ();
@@ -276,8 +279,6 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	reset_width_dependent_items (_pixel_width);
 
 	group->raise_to_top();
-	group->Event.connect (sigc::mem_fun (this, &MidiRegionView::canvas_event));
-
 
 	midi_view()->midi_track()->PlaybackChannelModeChanged.connect (_channel_mode_changed_connection, invalidator (*this),
 								       boost::bind (&MidiRegionView::midi_channel_mode_changed, this),
@@ -319,7 +320,7 @@ MidiRegionView::connect_to_diskstream ()
 }
 
 bool
-MidiRegionView::canvas_event(GdkEvent* ev)
+MidiRegionView::canvas_group_event(GdkEvent* ev)
 {
 	bool r;
 
@@ -385,7 +386,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		break;
 	}
 
-	return false;
+	return trackview.editor().canvas_region_view_event (ev, group, this);
 }
 
 void
@@ -626,7 +627,6 @@ MidiRegionView::motion (GdkEventMotion* ev)
 			MouseMode m = editor.current_mouse_mode();
 			
 			if (m == MouseDraw || (m == MouseObject && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
-			
 				editor.drags()->set (new NoteCreateDrag (dynamic_cast<Editor *> (&editor), group, this), (GdkEvent *) ev);
 				_mouse_state = AddDragging;
 				remove_ghost_note ();
