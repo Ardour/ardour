@@ -3410,7 +3410,7 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 
 		_editor->rubberband_rect->set_y0 (y1);
 		_editor->rubberband_rect->set_y1 (y2);
-
+		
 		_editor->rubberband_rect->show();
 		_editor->rubberband_rect->raise_to_top();
 
@@ -4666,7 +4666,7 @@ PatchChangeDrag::setup_pointer_frame_offset ()
 }
 
 MidiRubberbandSelectDrag::MidiRubberbandSelectDrag (Editor* e, MidiRegionView* rv)
-	: RubberbandSelectDrag (e, rv->get_canvas_frame ())
+	: RubberbandSelectDrag (e, rv->get_canvas_group ())
 	, _region_view (rv)
 {
 
@@ -4699,7 +4699,7 @@ MidiRubberbandSelectDrag::deselect_things ()
 }
 
 MidiVerticalSelectDrag::MidiVerticalSelectDrag (Editor* e, MidiRegionView* rv)
-	: RubberbandSelectDrag (e, rv->get_canvas_frame ())
+	: RubberbandSelectDrag (e, rv->get_canvas_group ())
 	, _region_view (rv)
 {
 	_vertical_only = true;
