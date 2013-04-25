@@ -351,25 +351,6 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 	vector<Item const *> items;
 	_root.add_items_at_point (point, items);
 
-	if (items.empty()) {
-		if (_current_item) {
-			/* leave event */
-			GdkEventCrossing leave_event;
-			leave_event.type = GDK_LEAVE_NOTIFY;
-			leave_event.x = point.x;
-			leave_event.y = point.y;
-			cerr << "Leaving (without entering)" << _current_item->name << endl;
-			_current_item->Event (reinterpret_cast<GdkEvent*> (&leave_event));
-			_current_item = 0;
-		}
-		return;
-	}
-
-	/* items is sorted from top to bottom, so reverse through it from bottom
-	 * to top to find the lowest, first event-sensitive item and notify that
-	 * we have entered it
-	 */
-	
 	GdkEventCrossing enter_event;
 	enter_event.type = GDK_ENTER_NOTIFY;
 	enter_event.window = get_window()->gobj();
@@ -382,6 +363,25 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 	enter_event.x = point.x;
 	enter_event.y = point.y;
 
+	GdkEventCrossing leave_event = enter_event;
+	leave_event.type = GDK_LEAVE_NOTIFY;
+	leave_event.detail = GDK_NOTIFY_ANCESTOR;
+	leave_event.subwindow = 0;
+
+	if (items.empty()) {
+		if (_current_item) {
+			/* leave event */
+			_current_item->Event (reinterpret_cast<GdkEvent*> (&leave_event));
+			_current_item = 0;
+		}
+		return;
+	}
+
+	/* items is sorted from top to bottom, so reverse through it from bottom
+	 * to top to find the lowest, first event-sensitive item and notify that
+	 * we have entered it
+	 */
+	
 	for (vector<Item const*>::const_reverse_iterator i = items.rbegin(); i != items.rend(); ++i) {
 
 		Item const *  new_item = *i;
@@ -396,20 +396,13 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 
 		if (_current_item) {
 			/* leave event */
-			GdkEventCrossing leave_event = enter_event;
-			leave_event.type = GDK_LEAVE_NOTIFY;
-			leave_event.detail = GDK_NOTIFY_ANCESTOR;
-			leave_event.subwindow = 0;
-			cerr << "Leaving " << _current_item->name << endl;
 			_current_item->Event (reinterpret_cast<GdkEvent*> (&leave_event));
 		}
 
 		if (new_item && _current_item != new_item) {
 			/* enter event */
-			cerr << "Entering (" << new_item->name << ") " << new_item->whatami() << endl;
-			new_item->Event (reinterpret_cast<GdkEvent*> (&enter_event));
-
 			_current_item = new_item;
+			_current_item->Event (reinterpret_cast<GdkEvent*> (&enter_event));
 			break;
 		}
 	
