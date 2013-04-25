@@ -421,8 +421,17 @@ WaveView::region_resized ()
 
 	_pre_change_bounding_box = _bounding_box;
 
-	_region_start = _region->start();
-	invalidate_whole_cache ();
+	frameoffset_t s = _region->start();
+
+	if (s != _region_start) {
+		/* if the region start changes, the information we have 
+		   in the image cache is out of date and not useful
+		   since it will fragmented into little pieces. invalidate
+		   the cache.
+		*/
+		_region_start = _region->start();
+		invalidate_whole_cache ();
+	}
 
 	_bounding_box_dirty = true;
 	compute_bounding_box ();
