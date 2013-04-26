@@ -119,7 +119,7 @@ WaveView::set_samples_per_pixel (double samples_per_pixel)
 {
 	if (samples_per_pixel != _samples_per_pixel) {
 		begin_change ();
-	
+
 		_samples_per_pixel = samples_per_pixel;
 		
 		_bounding_box_dirty = true;
@@ -160,6 +160,20 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	double const rend  = _region->length() / _samples_per_pixel;
 
 	list<CacheEntry*>::iterator cache = _cache.begin ();
+#if 0
+	cerr << name << " cache contains " << _cache.size() << endl;
+	while (cache != _cache.end()) {
+		cerr << "\tsamples " << (*cache)->start() << " .. " << (*cache)->end()
+		     << " pixels " 
+		     << to_pixel_offset (_region_start, (*cache)->start(), _samples_per_pixel)
+		     << " .. "
+		     << to_pixel_offset (_region_start, (*cache)->end(), _samples_per_pixel)
+		     << endl;
+		++cache;
+	}
+
+	cache = _cache.begin();
+#endif
 
 	while ((end - start) > 1.0) {
 
@@ -250,6 +264,21 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 		double this_end = min (end, to_pixel_offset (_region_start, image->end (), _samples_per_pixel));
 		double const image_origin = to_pixel_offset (_region_start, image->start(), _samples_per_pixel);
+#if 0
+		cerr << "\t\tDraw image between "
+		     << start
+		     << " .. "
+		     << this_end
+		     << " using image spanning "
+		     << image->start()
+		     << " .. "
+		     << image->end ()
+		     << " pixels "
+		     << to_pixel_offset (_region_start, image->start(), _samples_per_pixel)
+		     << " .. "
+		     << to_pixel_offset (_region_start, image->end(), _samples_per_pixel)
+		     << endl;
+#endif
 
 		context->rectangle (start, area.y0, this_end - start, area.height());
 		context->set_source (image->image(), image_origin, 0);
@@ -449,7 +478,7 @@ WaveView::CacheEntry::CacheEntry (WaveView const * wave_view, double start, doub
 
 	_wave_view->_region->read_peaks (_peaks.get(), _n_peaks, 
 					 (framecnt_t) floor (_start), 
-					 (framecnt_t) ceil (_end), 
+					 (framecnt_t) ceil (_end - _start), 
 					 _wave_view->_channel, _wave_view->_samples_per_pixel);
 }
 
@@ -503,13 +532,15 @@ WaveView::CacheEntry::image ()
 			if (_wave_view->_logscaled) {
 				for (int i = 0; i < _n_peaks; ++i) {
 					Coord y = _peaks[i].max;
+					
 					if (y > 0.0) {
-						context->line_to (i + 0.5, position (alt_log_meter (fast_coefficient_to_dB (y))));
+						y = position (alt_log_meter (fast_coefficient_to_dB (y)));
 					} else if (y < 0.0) {
-						context->line_to (i + 0.5, position (-alt_log_meter (fast_coefficient_to_dB (-y))));
+						y = position (-alt_log_meter (fast_coefficient_to_dB (-y)));
 					} else {
-						context->line_to (i + 0.5, position (0.0));
+						y = position (0.0);
 					}
+					context->line_to (i + 0.5, y);
 				} 
 			} else {
 				for (int i = 0; i < _n_peaks; ++i) {
@@ -521,7 +552,6 @@ WaveView::CacheEntry::image ()
 		/* from final top point, move out of the clip zone */
 
 		context->line_to (_n_peaks + 10, position (0.0));
-
 	
 		/* bottom half, in reverse */
 	
