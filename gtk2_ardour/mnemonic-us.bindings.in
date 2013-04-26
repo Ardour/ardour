@@ -219,7 +219,7 @@ This mode provides many different operations on both regions and control points,
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
 @sess|Main/New|<@PRIMARY@>n|open a new session
 @rop|Region/toggle-region-mute|<@PRIMARY@>m|mute/unmute
-@wvis|Common/toggle-mixer-on-top|<@WINDOW@>m|rotate editor \& mixer window
+@wvis|Common/toggle-editor-mixer|<@WINDOW@>m|rotate editor \& mixer window
 
 ;; arrow keys, navigation etc.
 

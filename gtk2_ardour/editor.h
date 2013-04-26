@@ -37,6 +37,7 @@
 #include "gtkmm2ext/dndtreeview.h"
 #include "gtkmm2ext/stateful_button.h"
 #include "gtkmm2ext/bindings.h"
+#include "gtkmm2ext/visibility_tracker.h"
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
@@ -135,7 +136,7 @@ class ImageFrameSocketHandler ;
 class TimeAxisViewItem ;
 /* </CMT Additions> */
 
-class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
+class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public Gtkmm2ext::VisibilityTracker
 {
   public:
 	Editor ();

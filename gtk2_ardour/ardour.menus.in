@@ -506,7 +506,7 @@
     </menu>
     <menu action = 'WindowMenu'>
       <menuitem action='toggle-mixer'/>
-      <menuitem action='toggle-mixer-on-top'/>
+      <menuitem action='toggle-editor-mixer'/>
 
       <separator/>
 
