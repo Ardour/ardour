@@ -83,6 +83,7 @@ Mixer_UI::instance ()
 
 Mixer_UI::Mixer_UI ()
 	: Window (Gtk::WINDOW_TOPLEVEL)
+	, VisibilityTracker (*((Gtk::Window*) this))
 	, _visible (false)
 	, no_track_list_redisplay (false)
 	, in_group_row_change (false)

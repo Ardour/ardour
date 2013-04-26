@@ -41,10 +41,27 @@ VisibilityTracker::handle_visibility_notify_event (GdkEventVisibility* ev)
 void
 VisibilityTracker::cycle_visibility ()
 {
-	if (window.is_mapped() && (_visibility == GDK_VISIBILITY_UNOBSCURED)) {
+	if (fully_visible ()) {
 		window.hide ();
 	} else {
 		window.present ();
 	}
 }
 
+bool
+VisibilityTracker::fully_visible () const
+{
+	return window.is_mapped() && (_visibility == GDK_VISIBILITY_UNOBSCURED);
+}
+
+bool
+VisibilityTracker::not_visible () const
+{
+	return !window.is_mapped() || (_visibility == GDK_VISIBILITY_FULLY_OBSCURED);
+}
+
+bool
+VisibilityTracker::partially_visible () const
+{
+	return window.is_mapped() && (_visibility == GDK_VISIBILITY_PARTIAL);
+}

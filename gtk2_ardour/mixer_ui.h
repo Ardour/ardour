@@ -40,6 +40,8 @@
 #include "ardour/types.h"
 #include "ardour/session_handle.h"
 
+#include "gtkmm2ext/visibility_tracker.h"
+
 #include "enums.h"
 #include "mixer_actor.h"
 
@@ -53,7 +55,7 @@ class PluginSelector;
 class MixerGroupTabs;
 class MonitorSection;
 
-class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public MixerActor
+class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public MixerActor, public Gtkmm2ext::VisibilityTracker
 {
   public:
 	static Mixer_UI* instance();
