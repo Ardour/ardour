@@ -39,21 +39,21 @@ Fill::Fill (Group* parent)
 void
 Fill::set_fill_color (Color color)
 {
-	begin_visual_change ();
-	
-	_fill_color = color;
-
-	end_visual_change ();
+	if (_fill_color != color) {
+		begin_visual_change ();
+		_fill_color = color;
+		end_visual_change ();
+	}
 }
 
 void
 Fill::set_fill (bool fill)
 {
-	begin_visual_change ();
-	
-	_fill = fill;
-
-	end_visual_change ();
+	if (_fill != fill) {
+		begin_visual_change ();
+		_fill = fill;
+		end_visual_change ();
+	}
 }
 
 void
