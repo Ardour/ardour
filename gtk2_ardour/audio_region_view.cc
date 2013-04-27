@@ -1175,7 +1175,6 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	WaveView *wave = new WaveView (group, audio_region ());
 	CANVAS_DEBUG_NAME (wave, string_compose ("wave view for chn %1 of %2", which, get_item_name()));
 	
-	wave->lower_to_bottom ();
 	wave->set_channel (which);
 	wave->set_y_position (yoff);
 	wave->set_height (ht);
