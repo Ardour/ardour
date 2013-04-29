@@ -32,7 +32,7 @@ LXVSTPlugin::LXVSTPlugin (AudioEngine& e, Session& session, VSTHandle* h)
 {
 	/* Instantiate the plugin and return a VSTState* */
 
-	if (vstfx_instantiate (_handle, Session::vst_callback, this) == 0) {
+	if ((_state = vstfx_instantiate (_handle, Session::vst_callback, this)) == 0) {
 		throw failed_constructor();
 	}
 
@@ -44,7 +44,7 @@ LXVSTPlugin::LXVSTPlugin (const LXVSTPlugin &other)
 {
 	_handle = other._handle;
 
-	if (vstfx_instantiate (_handle, Session::vst_callback, this) == 0) {
+	if ((_state = vstfx_instantiate (_handle, Session::vst_callback, this)) == 0) {
 		throw failed_constructor();
 	}
 	_plugin = _state->plugin;
