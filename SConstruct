@@ -39,7 +39,9 @@ opts.AddVariables(
     PathVariable('DESTDIR', 'Set the intermediate install "prefix"', '/'),
     PathVariable('PREFIX', 'Set the install "prefix"', '/usr/local'),
     EnumVariable('DIST_TARGET', 'Build target for cross compiling packagers', 'auto', 
-          allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 'tiger', 'panther', 'leopard', 'none' ), ignorecase=2),
+          allowed_values=('auto', 'i386', 'i686', 'x86_64', 'powerpc', 
+                          'tiger', 'lion', 'none' ), ignorecase=2),
+    BoolVariable('GENERIC', 'Force 32 bit compilation on OS X targets', 0),
     BoolVariable('AUDIOUNITS', 'Compile with Apple\'s AudioUnit library. (experimental)', 0),
     BoolVariable('COREAUDIO', 'Compile with Apple\'s CoreAudio library', 0),
     BoolVariable('GTKOSX', 'Compile for use with GTK-OSX, not GTK-X11', 0),
@@ -673,8 +675,14 @@ if env['DIST_TARGET'] == 'auto':
             env['DIST_TARGET'] = 'panther'
         if re.search ("darwin8[.]", config[config_kernel]) != None:
             env['DIST_TARGET'] = 'tiger'
-        else:
+        elif re.search ("darwin9[.]", config[config_kernel]) != None:
             env['DIST_TARGET'] = 'leopard'
+        elif re.search ("darwin10[.]", config[config_kernel]) != None:
+            env['DIST_TARGET'] = 'snowleopard'
+        elif re.search ("darwin11[.]", config[config_kernel]) != None:
+            env['DIST_TARGET'] = 'lion'
+        else:
+            env['DIST_TARGET'] = 'mountainlion'
     else:
         if re.search ("x86_64", config[config_cpu]) != None:
             env['DIST_TARGET'] = 'x86_64'
@@ -688,13 +696,22 @@ if env['DIST_TARGET'] == 'auto':
     print "detected DIST_TARGET = " + env['DIST_TARGET']
     print "*******************************\n"
 
-if env['DIST_TARGET'] != 'tiger' and env['DIST_TARGET'] != 'leopard':
-	# make sure this is all disabled for non-OS X builds
+if config[config_arch] == 'apple':
+    env['IS_OSX'] = 1
+else:
+    env['IS_OSX'] = 0
+    
+
+if env['IS_OSX'] == 1:
+	env['GTKOSX'] = 1
+	env['COREAUDIO'] = 1
+	env['AUDIOUNITS'] = 1
+        if env['DIST_TARGET'] in ('lion', 'mountainlion'):
+            env['WITH_CARBON'] = 0
+else:
 	env['GTKOSX'] = 0
 	env['COREAUDIO'] = 0
 	env['AUDIOUNITS'] = 0
-	env['AUSTATE'] = 0
-	env['WITH_CARBON'] = 0
 
 if config[config_cpu] == 'powerpc' and env['DIST_TARGET'] != 'none':
     # Apple/PowerPC optimization options
@@ -744,6 +761,12 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
                 opt_flags.append ("-march=i586")
             elif config[config_cpu] == "i686":
                 opt_flags.append ("-march=i686")
+
+    elif config[config_kernel].find ('darwin') != -1:
+            flag_line = os.popen ('sysctl machdep.cpu.features').read()[:-1]
+            x86_flags = flag_line.split (" ")
+            if "SSE" in x86_flags:
+                build_host_supports_sse = 1
     
     if ((env['DIST_TARGET'] == 'i686') or (env['DIST_TARGET'] == 'x86_64')) and build_host_supports_sse:
         opt_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
@@ -765,16 +788,20 @@ elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_6
 
 # optimization section
 if env['FPU_OPTIMIZATION']:
-    if env['DIST_TARGET'] == 'tiger' or env['DIST_TARGET'] == 'leopard':
+    if config[config_arch] == 'apple':
         opt_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
         debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
         libraries['core'].Append(LINKFLAGS= '-framework Accelerate')
+        if env['GENERIC'] != 1 and env['DIST_TARGET'] in ('lion', 'mountainlion'):
+            opt_flags.append ("-DUSE_X86_64_ASM")
+            debug_flags.append ("-DUSE_X86_64_ASM")
     elif env['DIST_TARGET'] == 'i686' or env['DIST_TARGET'] == 'x86_64':
         opt_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if env['DIST_TARGET'] == 'x86_64' and not env['VST']:
             opt_flags.append ("-DUSE_X86_64_ASM")
             debug_flags.append ("-DUSE_X86_64_ASM")
+
         if build_host_supports_sse != 1:
             print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be anerror, especially if you are a package maintainer)"
 # end optimization section

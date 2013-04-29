@@ -21,11 +21,16 @@ Import ('env install_prefix')
 
 clearlooks = env.Clone()
 
-clearlooks.Replace(CCFLAGS = ' `pkg-config --cflags gtk+-2.0 cairo` ',
+clearlooks.Append (CCFLAGS = ' `pkg-config --cflags gtk+-2.0 cairo` ',
                    LINKFLAGS = ' `pkg-config --libs gtk+-2.0 cairo` ')
 
-if env['GTKOSX']:
-    clearlooks.Append (CCFLAGS = '-DGTKOSX')
+if env['IS_OSX']:
+    if env['GENERIC']:
+        clearlooks.Append (CCFLAGS = ['-DGTKOSX', '-arch', 'i386'])
+        clearlooks.Append (LINKFLAGS = ['-arch', 'i386'])
+    else:
+        clearlooks.Append (CCFLAGS='-DGTKOSX')
+
 
 libclearlooks = clearlooks.SharedLibrary('clearlooks', libclearlooks_files) 
 usable_libclearlooks = clearlooks.Install ('engines', libclearlooks)
