@@ -226,6 +226,12 @@ PluginUIWindow::on_show ()
 	}
 
 	if (_pluginui) {
+#if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
+                if (pre_deactivate_x >= 0) {                                                                             
+                        move (pre_deactivate_x, pre_deactivate_y);
+                }                                                      
+#endif
+
 		if (_pluginui->on_window_show (_title)) {
 			Window::on_show ();
 		}
@@ -239,6 +245,10 @@ PluginUIWindow::on_show ()
 void
 PluginUIWindow::on_hide ()
 {
+#if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
+        get_position (pre_deactivate_x, pre_deactivate_y);                                                               
+#endif
+
 	Window::on_hide ();
 
 	if (_pluginui) {
