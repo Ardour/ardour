@@ -3771,12 +3771,14 @@ audio may be played at the wrong sample rate.\n"), desired, PROGRAM_NAME, actual
 	image->show();
 	hbox->show();
 
-	switch (dialog.run ()) {
+	switch (dialog.run()) {
 	case RESPONSE_ACCEPT:
 		return 0;
 	default:
-		return 1;
+                break;
 	}
+
+        return 1;
 }
 
 
