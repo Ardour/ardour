@@ -27,10 +27,23 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <stdint.h>
 #include <libgnomecanvasmm/item.h>
 #include <libgnomecanvasmm/group.h>
 #include <libgnomecanvasmm/shape.h>
-#include "canvas-imageframe.h"
+
+#include <libgnomecanvas/libgnomecanvas.h>
+#include <gtk/gtkenums.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <libart_lgpl/art_misc.h>
+#ifdef __cplusplus
+}
+#endif
+
+#include <libart_lgpl/art_pixbuf.h>
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
