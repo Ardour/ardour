@@ -43,7 +43,6 @@ libpbd_sources = [
     'debug.cc',
     'enumwriter.cc',
     'event_loop.cc',
-    'dmalloc.cc',
     'enums.cc',
     'epa.cc',
     'error.cc',
