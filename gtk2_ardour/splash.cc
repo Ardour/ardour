@@ -25,6 +25,10 @@
 #include "ardour/ardour.h"
 #include "ardour/filesystem_paths.h"
 
+#ifdef check
+#undef check
+#endif
+
 #include "gui_thread.h"
 #include "splash.h"
 
@@ -96,15 +100,33 @@ Splash::~Splash ()
 void
 Splash::pop_back_for (Gtk::Window& win)
 {
+#ifdef __APPLE__
+        /* April 2013: window layering on OS X is a bit different to X Window. at present,
+           the "restack()" functionality in GDK will only operate on windows in the same
+           "level" (e.g. two normal top level windows, or two utility windows) and will not
+           work across them. The splashscreen is on its own "StatusWindowLevel" so restacking 
+           is not going to work.
+
+           So for OS X, we just hide ourselves.
+        */
+        hide();
+#else
 	set_keep_above (false);
 	get_window()->restack (win.get_window(), false);
-	win.signal_hide().connect (sigc::mem_fun (*this, &Splash::pop_front));
+#endif
 }
 
 void
 Splash::pop_front ()
 {
+
+#ifdef __APPLE__
+        if (get_window()) {
+                show ();
+        }
+#else
 	set_keep_above (true);
+#endif
 }
 
 void

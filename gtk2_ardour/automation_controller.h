@@ -21,6 +21,13 @@
 #ifndef __ardour_gtk_automation_controller_h__
 #define __ardour_gtk_automation_controller_h__
 
+#ifdef YES
+#undef YES
+#endif
+#ifdef NO
+#undef NO
+#endif
+
 #include <boost/shared_ptr.hpp>
 #include <gtkmm.h>
 

@@ -73,10 +73,10 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			temporal_zoom_step (false);
 			zoom_focus = temp_focus;
 			return true;
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			direction = GDK_SCROLL_LEFT;
 			goto retry;
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Editor::track_height_step_timeout), 500);
 				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (ev->y + vertical_adjustment.get_value() - canvas_timebars_vsize);
@@ -102,10 +102,10 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			temporal_zoom_step (true);
 			zoom_focus = temp_focus;
 			return true;
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 			direction = GDK_SCROLL_RIGHT;
 			goto retry;
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Editor::track_height_step_timeout), 500);
 				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (ev->y + vertical_adjustment.get_value() - canvas_timebars_vsize);

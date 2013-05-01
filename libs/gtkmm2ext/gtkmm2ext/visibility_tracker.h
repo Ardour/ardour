@@ -35,6 +35,10 @@ class VisibilityTracker {
     
     void cycle_visibility ();
 
+    bool fully_visible() const;
+    bool not_visible() const;
+    bool partially_visible() const;
+
   private:
     Gtk::Window& window;
     GdkVisibilityState _visibility;

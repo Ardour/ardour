@@ -150,21 +150,49 @@ ARDOUR_UI::toggle_mixer_window ()
 }
 
 void
-ARDOUR_UI::toggle_mixer_on_top ()
+ARDOUR_UI::toggle_editor_mixer ()
 {
+	if (editor && mixer) {
 
-	if (gtk_window_is_active(Mixer_UI::instance()->gobj())) {
+		if (editor->get_screen() != mixer->get_screen()) {
+			// different screens, so don't do anything
+			return;
+		}
+
+		/* See if they are obscuring each other */
+		
+		gint ex, ey, ew, eh;
+		gint mx, my, mw, mh;
+
+		editor->get_position (ex, ey);
+		editor->get_size (ew, eh);
+
+		mixer->get_position (mx, my);
+		mixer->get_size (mw, mh);
+
+		GdkRectangle e;
+		GdkRectangle m;
+		GdkRectangle r;
+
+		e.x = ex;
+		e.y = ey;
+		e.width = ew;
+		e.height = eh;
+
+		m.x = mx;
+		m.y = my;
+		m.width = mw;
+		m.height = mh;
+		
+		if (!gdk_rectangle_intersect (&e, &m, &r)) {
+			/* they do not intersect so do not toggle */
+			return;
+		}
+	}
+		
+	if (mixer && mixer->fully_visible()) {
 		goto_editor_window ();
 	} else {
-		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("toggle-mixer"));
-		if (act) {
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-
-			/* Toggle the mixer to `visible' if required */
-			if (!tact->get_active ()) {
-				tact->set_active (true);
-			}
-		}
 		goto_mixer_window ();
 	}
 }

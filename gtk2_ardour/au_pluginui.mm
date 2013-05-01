@@ -1,5 +1,3 @@
-#include <gtkmm/stock.h>
-
 #undef  Marker
 #define Marker FuckYouAppleAndYourLackOfNameSpaces
 
@@ -170,13 +168,16 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	top_box.show ();
 	low_box.show ();
 
-	_activating_from_app = false;
 	cocoa_parent = 0;
-	_notify = 0;
 	cocoa_window = 0;
-	carbon_window = 0;
+
+#ifdef WITH_CARBBON
+	_activating_from_app = false;
+	_notify = 0;
 	au_view = 0;
 	editView = 0;
+	carbon_window = 0;
+#endif
 
 	/* prefer cocoa, fall back to cocoa, but use carbon if its there */
 
@@ -227,6 +228,7 @@ AUPluginUI::~AUPluginUI ()
 bool
 AUPluginUI::test_carbon_view_support ()
 {
+#ifdef WITH_CARBON
 	bool ret = false;
 	
 	carbon_descriptor.componentType = kAudioUnitCarbonViewComponentType;
@@ -253,6 +255,9 @@ AUPluginUI::test_carbon_view_support ()
 	}
 
 	return ret;
+#else
+        return false;
+#endif
 }
 	
 bool
@@ -282,7 +287,7 @@ AUPluginUI::plugin_class_valid (Class pluginClass)
 int
 AUPluginUI::create_cocoa_view ()
 {
-	BOOL wasAbleToLoadCustomView = NO;
+	bool wasAbleToLoadCustomView = false;
 	AudioUnitCocoaViewInfo* cocoaViewInfo = NULL;
 	UInt32               numberOfClasses = 0;
 	UInt32     dataSize;
@@ -380,7 +385,7 @@ AUPluginUI::create_cocoa_view ()
 				
 				free (cocoaViewInfo);
 			}
-			wasAbleToLoadCustomView = YES;
+			wasAbleToLoadCustomView = true;
 		}
 	}
 
@@ -390,14 +395,16 @@ AUPluginUI::create_cocoa_view ()
 								au->get_au()));
 		au_view = [[AUGenericView alloc] initWithAudioUnit:*au->get_au()];
 		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("view created @ %1\n", au_view));
-		[(AUGenericView *)au_view setShowsExpertParameters:YES];
+		[(AUGenericView *)au_view setShowsExpertParameters:1];
 	}
 
 	// Get the initial size of the new AU View's frame 
 	
 	NSRect rect = [au_view frame];
+        prefheight = rect.size.height;
+        prefwidth = rect.size.width;
 	low_box.set_size_request (rect.size.width, rect.size.height);
-	
+
 	return 0;
 }
 
@@ -409,7 +416,7 @@ AUPluginUI::cocoa_view_resized ()
         NSSize oldContentSize= [window contentRectForFrameRect:[window frame]].size;
         NSSize newContentSize= [au_view frame].size;
         NSRect windowFrame= [window frame];
-        
+
         oldContentSize.height -= topsize.height;
 
         float dy = oldContentSize.height - newContentSize.height;
@@ -427,7 +434,7 @@ AUPluginUI::cocoa_view_resized ()
         NSUInteger old_auto_resize = [au_view autoresizingMask];
 
         [au_view setAutoresizingMask:NSViewNotSizable];
-        [window setFrame:windowFrame display:YES];
+        [window setFrame:windowFrame display:1];
         [au_view setAutoresizingMask:old_auto_resize];
 
         [[NSNotificationCenter defaultCenter] addObserver:_notify
@@ -603,7 +610,7 @@ AUPluginUI::parent_cocoa_window ()
 		return -1;
 	}
 
-	[win setAutodisplay:YES]; // turn of GTK stuff for this window
+	[win setAutodisplay:1]; // turn of GTK stuff for this window
 
 	Gtk::Container* toplevel = get_toplevel();
 
@@ -620,7 +627,7 @@ AUPluginUI::parent_cocoa_window ()
 	NSPoint origin = { 0, a.height };
 
 	[au_view setFrameOrigin:origin];
-	[view addSubview:au_view positioned:NSWindowBelow relativeTo:nil]; 
+        [view addSubview:au_view positioned:NSWindowBelow relativeTo:nil]; 
 
 	// watch for size changes of the view
 
@@ -681,7 +688,7 @@ AUPluginUI::on_realize ()
 
 	NSWindow* win = get_nswindow ();
 	if (win) {
-		[win setShowsResizeIndicator:NO];
+		[win setShowsResizeIndicator:0];
 	}
 }
 

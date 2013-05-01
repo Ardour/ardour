@@ -93,7 +93,7 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	int prefwidth;
 
 	Gtk::HBox     top_box;
-	Gtk::EventBox low_box;
+	Gtk::HBox low_box;
 	Gtk::VBox vpacker;
 	Gtk::Label automation_mode_label;
 	Gtk::ComboBoxText automation_mode_selector;
