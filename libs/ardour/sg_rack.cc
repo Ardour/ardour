@@ -43,7 +43,7 @@ SoundGridRack::SoundGridRack (Session& s, Route& r, const std::string& name)
 {
         DEBUG_TRACE (DEBUG::SoundGrid, string_compose ("Creating SG Chainer for %1\n", r.name()));
 
-        if (dynamic_cast<Track*> (&r) != 0 && !_route.is_hidden()) {
+        if (dynamic_cast<Track*> (&r) != 0 && !_route.is_auditioner()) {
                 /* only real tracks use an InputTrack. the auditioner is a track, but
                    it doesn't need any input
                 */
@@ -125,7 +125,7 @@ SoundGridRack::make_connections ()
         PortSet& ports (_route.output()->ports());
         uint32_t channel = 0;
         boost::shared_ptr<Route> master_out = _route.session().master_out();
-        bool is_track = (dynamic_cast<Track*>(&_route) != 0) && !_route.is_hidden();
+        bool is_track = (dynamic_cast<Track*>(&_route) != 0) && !_route.is_auditioner();
 
         assert (master_out);
 
@@ -190,7 +190,7 @@ SoundGridRack::make_connections ()
                                                        SoundGrid::PseudoPhysicalOutputPort (channel+4));
                         
 
-                } else if (_route.is_hidden()) {
+                } else if (_route.is_auditioner()) {
 
                         /* auditioner - wire it directly to the "outputs" */
                         
