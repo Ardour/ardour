@@ -67,6 +67,7 @@ Rectangle::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context)
 
 	if (_fill) {
 		setup_fill_context (context);
+		cerr << "Fill rect: " << plot << endl;
 		context->rectangle (plot.x0, plot.y0, plot.width(), plot.height());
 		
 		if (!_outline) {
@@ -90,13 +91,16 @@ Rectangle::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context)
 	
 	if (_outline) {
 		
+		setup_outline_context (context);
+
 		if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
 
-			/* if we filled and use full outline, we are already done */
+			/* if we filled and use full outline, we are already
+			 * done. otherwise, draw the frame here.
+			 */
 
 			if (!_fill) { 
 				context->rectangle (plot.x0, plot.y0, plot.width(), plot.height());
-				setup_outline_context (context);
 				context->stroke ();
 			}
 			
@@ -122,7 +126,6 @@ Rectangle::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context)
 				context->line_to (plot.x1, plot.y0);
 			}
 			
-			setup_outline_context (context);
 			context->stroke ();
 		}
 	}
