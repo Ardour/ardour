@@ -1299,8 +1299,8 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 {
 	/* not much to do with audio - the data is already in the buffers given to us in connect_and_run() */
 
-	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1: render callback, frames %2 bufs %3\n",
-							name(), inNumberFrames, ioData->mNumberBuffers));
+	// DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1: render callback, frames %2 bufs %3\n",
+        // name(), inNumberFrames, ioData->mNumberBuffers));
 
 	if (input_maxbuf == 0) {
 		error << _("AUPlugin: render callback called illegally!") << endmsg;
