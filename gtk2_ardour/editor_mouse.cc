@@ -978,10 +978,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				}
 
 				if (internal_editing ()) {
-					if (event->type == GDK_2BUTTON_PRESS && event->button.button == 1) {
-						Glib::RefPtr<Action> act = ActionManager::get_action (X_("MouseMode"), X_("toggle-internal-edit"));
-						act->activate ();
-					}
 					break;
 				}
 
@@ -1459,14 +1455,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case ControlPointItem:
 			edit_control_point (item);
 			break;
-
-		case NoteItem:
-		{
-			ArdourCanvas::CanvasNoteEvent* e = dynamic_cast<ArdourCanvas::CanvasNoteEvent*> (item);
-			assert (e);
-			edit_notes (e->region_view().selection ());
-			break;
-		}
 
 		default:
 			break;
@@ -2304,8 +2292,16 @@ Editor::edit_control_point (ArdourCanvas::Item* item)
 }
 
 void
-Editor::edit_notes (MidiRegionView::Selection const & s)
+Editor::edit_notes (TimeAxisViewItem& tavi)
 {
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(&tavi);
+
+	if (!mrv) {
+		return;
+	}
+
+	MidiRegionView::Selection const & s = mrv->selection();
+
 	if (s.empty ()) {
 		return;
 	}
@@ -2316,7 +2312,6 @@ Editor::edit_notes (MidiRegionView::Selection const & s)
 
 	d.run ();
 }
-
 
 void
 Editor::visible_order_range (int* low, int* high) const

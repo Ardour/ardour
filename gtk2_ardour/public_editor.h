@@ -291,6 +291,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
 	virtual framecnt_t get_nudge_distance (framepos_t pos, framecnt_t& next) = 0;
 	virtual Evoral::MusicalTime get_grid_type_as_beats (bool& success, framepos_t position) = 0;
+        virtual void edit_notes (TimeAxisViewItem&) = 0;
 
 	virtual void queue_visual_videotimeline_update () = 0;
 	virtual void toggle_ruler_video (bool) = 0;

@@ -338,7 +338,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 	case GDK_BUTTON_PRESS:
 		set_mouse_fractions (ev);
 		if (ev->button.button == 3 && Keyboard::no_modifiers_active (ev->button.state) && _selected) {
-			show_channel_selector();
+			_region.get_time_axis_view().editor().edit_notes (_region);
 			return true;
 		}
 		break;

@@ -1531,7 +1531,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void edit_tempo_marker (ArdourCanvas::Item*);
 	void edit_meter_marker (ArdourCanvas::Item*);
 	void edit_control_point (ArdourCanvas::Item*);
-	void edit_notes (std::set<Gnome::Canvas::CanvasNoteEvent *> const &);
+        void edit_notes (TimeAxisViewItem&);
 
 	void marker_menu_edit ();
 	void marker_menu_remove ();
