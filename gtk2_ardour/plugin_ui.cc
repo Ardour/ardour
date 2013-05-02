@@ -82,11 +82,10 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 
 PluginUIWindow::PluginUIWindow (
-	Gtk::Window*                    win,
 	boost::shared_ptr<PluginInsert> insert,
 	bool                            scrollable,
 	bool                            editor)
-	: parent (win)
+	: ArdourWindow (string())
 	, was_visible (false)
 	, _keyboard_focused (false)
 #ifdef AUDIOUNIT_SUPPORT
@@ -96,7 +95,6 @@ PluginUIWindow::PluginUIWindow (
 
 {
 	bool have_gui = false;
-
 	Label* label = manage (new Label());
 	label->set_markup ("<b>THIS IS THE PLUGIN UI</b>");
 
@@ -147,7 +145,6 @@ PluginUIWindow::PluginUIWindow (
 		signal_unmap_event().connect (sigc::mem_fun (*pu, &GenericPluginUI::stop_updating));
 	}
 
-	// set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginEditor");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
@@ -163,6 +160,7 @@ PluginUIWindow::PluginUIWindow (
 
 	set_default_size (w, h);
 	set_resizable (_pluginui->resizable());
+	set_position (Gtk::WIN_POS_MOUSE);
 }
 
 PluginUIWindow::~PluginUIWindow ()
@@ -171,18 +169,9 @@ PluginUIWindow::~PluginUIWindow ()
 }
 
 void
-PluginUIWindow::set_parent (Gtk::Window* win)
-{
-	parent = win;
-}
-
-void
 PluginUIWindow::on_map ()
 {
 	Window::on_map ();
-#ifdef __APPLE__
-	set_keep_above (true);
-#endif // __APPLE__
 }
 
 bool
@@ -235,10 +224,6 @@ PluginUIWindow::on_show ()
 		if (_pluginui->on_window_show (_title)) {
 			Window::on_show ();
 		}
-	}
-
-	if (parent) {
-		// set_transient_for (*parent);
 	}
 }
 
