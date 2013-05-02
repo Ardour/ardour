@@ -82,7 +82,6 @@ StepEditor::start_step_editing ()
         step_edit_region_view->show_step_edit_cursor (step_edit_beat_pos);
         step_edit_region_view->set_step_edit_cursor_width (step_editor->note_length());
 
-        step_editor->set_position (WIN_POS_MOUSE);
         step_editor->present ();
 }
 

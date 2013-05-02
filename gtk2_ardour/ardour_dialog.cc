@@ -37,6 +37,7 @@ ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
         , _splash_pushed (false)
 {
 	init ();
+	set_position (Gtk::WIN_POS_MOUSE);
 }
 
 ArdourDialog::ArdourDialog (Gtk::Window& parent, string title, bool modal, bool use_seperator)

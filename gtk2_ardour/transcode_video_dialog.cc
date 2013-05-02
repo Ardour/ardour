@@ -77,7 +77,6 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	aborted = false;
 
 	set_name ("TranscodeVideoDialog");
-	set_position (Gtk::WIN_POS_MOUSE);
 	set_modal (true);
 	set_skip_taskbar_hint (true);
 	set_resizable (false);

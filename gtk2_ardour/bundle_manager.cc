@@ -115,7 +115,6 @@ BundleEditorMatrix::add_channel (boost::shared_ptr<Bundle> b, DataType t)
 	if (b == _bundle) {
 
 		NameChannelDialog d;
-		d.set_position (Gtk::WIN_POS_MOUSE);
 
 		if (d.run () != Gtk::RESPONSE_ACCEPT) {
 			return;
@@ -162,7 +161,6 @@ void
 BundleEditorMatrix::rename_channel (BundleChannel bc)
 {
 	NameChannelDialog d (bc.bundle, bc.channel);
-	d.set_position (Gtk::WIN_POS_MOUSE);
 
 	if (d.run () != Gtk::RESPONSE_ACCEPT) {
 		return;

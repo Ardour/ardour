@@ -68,7 +68,6 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 	set_modal (true);
 	set_skip_taskbar_hint (true);
 	set_resizable (false);
-	set_position (Gtk::WIN_POS_MOUSE);
 	set_name (N_("TimeFXDialog"));
 
 	if (pitching) {

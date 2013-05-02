@@ -933,7 +933,6 @@ ARDOUR_UI::ask_about_saving_session (const vector<string>& actions)
 	window.get_vbox()->pack_start (dhbox);
 
 	window.set_name (_("Prompter"));
-	window.set_position (Gtk::WIN_POS_MOUSE);
 	window.set_modal (true);
 	window.set_resizable (false);
 
@@ -1366,8 +1365,6 @@ ARDOUR_UI::open_recent_session ()
 	redisplay_recent_sessions ();
 
 	while (true) {
-
-		session_selector_window->set_position (WIN_POS_MOUSE);
 
 		ResponseType r = (ResponseType) session_selector_window->run ();
 
@@ -3246,7 +3243,6 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 
 	if (add_route_dialog == 0) {
 		add_route_dialog = new AddRouteDialog (_session);
-		add_route_dialog->set_position (WIN_POS_MOUSE);
 		if (float_window) {
 			add_route_dialog->set_transient_for (*float_window);
 		}

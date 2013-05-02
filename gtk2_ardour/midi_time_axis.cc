@@ -517,7 +517,6 @@ MidiTimeAxisView::toggle_channel_selector ()
 			_channel_selector->set_default_channel_color ();
 		}
 
-		_channel_selector->set_position (WIN_POS_MOUSE);
 		_channel_selector->show_all ();
 	} else {
 		_channel_selector->cycle_visibility ();

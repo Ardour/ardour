@@ -2281,7 +2281,6 @@ Editor::edit_control_point (ArdourCanvas::Item* item)
 	}
 
 	ControlPointDialog d (p);
-	d.set_position (Gtk::WIN_POS_MOUSE);
 	ensure_float (d);
 
 	if (d.run () != RESPONSE_ACCEPT) {
@@ -2306,11 +2305,18 @@ Editor::edit_notes (TimeAxisViewItem& tavi)
 		return;
 	}
 	
-	EditNoteDialog d (&(*s.begin())->region_view(), s);
-	d.set_position (Gtk::WIN_POS_MOUSE);
-	ensure_float (d);
+	EditNoteDialog* d = new EditNoteDialog (&(*s.begin())->region_view(), s);
+        d->show_all ();
+	ensure_float (*d);
 
-	d.run ();
+        d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &Editor::note_edit_done), d));
+}
+
+void
+Editor::note_edit_done (int r, EditNoteDialog* d)
+{
+        d->done (r);
+        delete d;
 }
 
 void

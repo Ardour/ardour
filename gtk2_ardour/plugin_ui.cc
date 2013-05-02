@@ -160,7 +160,6 @@ PluginUIWindow::PluginUIWindow (
 
 	set_default_size (w, h);
 	set_resizable (_pluginui->resizable());
-	set_position (Gtk::WIN_POS_MOUSE);
 }
 
 PluginUIWindow::~PluginUIWindow ()
@@ -555,7 +554,6 @@ PlugUIBase::latency_button_clicked ()
 	if (!latency_gui) {
 		latency_gui = new LatencyGUI (*(insert.get()), insert->session().frame_rate(), insert->session().get_block_size());
 		latency_dialog = new ArdourWindow (_("Edit Latency"));
-		latency_dialog->set_position (WIN_POS_MOUSE);
 		/* use both keep-above and transient for to try cover as many
 		   different WM's as possible.
 		*/

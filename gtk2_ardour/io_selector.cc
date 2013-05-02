@@ -224,8 +224,6 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session* session, boost::shared_ptr<
 
 	add (_selector);
 
-	set_position (Gtk::WIN_POS_MOUSE);
-
 	io_name_changed (this);
 
 	show_all ();

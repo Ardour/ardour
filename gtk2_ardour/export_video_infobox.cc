@@ -33,7 +33,6 @@ ExportVideoInfobox::ExportVideoInfobox (Session* s)
 	set_session (s);
 
 	set_name ("ExportVideoInfobox");
-	set_position (Gtk::WIN_POS_MOUSE);
 	set_modal (true);
 	set_skip_taskbar_hint (true);
 	set_resizable (false);

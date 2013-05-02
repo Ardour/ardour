@@ -2383,7 +2383,6 @@ Editor::rename_region ()
 	d.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
 
 	d.set_size_request (300, -1);
-	d.set_position (Gtk::WIN_POS_MOUSE);
 
 	entry.set_text (rs.front()->region()->name());
 	entry.select_region (0, -1);

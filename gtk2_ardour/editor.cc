@@ -3311,8 +3311,6 @@ Editor::duplicate_range (bool with_dialog)
 		win.add_button (_("Duplicate"), RESPONSE_ACCEPT);
 		win.set_default_response (RESPONSE_ACCEPT);
 
-		win.set_position (WIN_POS_MOUSE);
-
 		spinner.grab_focus ();
 
 		switch (win.run ()) {
@@ -5389,7 +5387,6 @@ Editor::change_region_layering_order (bool from_context_menu)
 
 	if (layering_order_editor == 0) {
 		layering_order_editor = new RegionLayeringOrderEditor (*this);
-		layering_order_editor->set_position (WIN_POS_MOUSE);
 	}
 
 	layering_order_editor->set_context (clicked_routeview->name(), _session, clicked_routeview, pl, position);

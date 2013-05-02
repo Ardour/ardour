@@ -1183,7 +1183,6 @@ ProcessorBox::weird_plugin_dialog (Plugin& p, Route::ProcessorStreams streams)
 	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
 
 	dialog.set_name (X_("PluginIODialog"));
-	dialog.set_position (Gtk::WIN_POS_MOUSE);
 	dialog.set_modal (true);
 	dialog.show_all ();
 
@@ -1550,7 +1549,6 @@ outputs will not work correctly."));
 	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
 
 	dialog.set_name (X_("PluginIODialog"));
-	dialog.set_position (Gtk::WIN_POS_MOUSE);
 	dialog.set_modal (true);
 	dialog.show_all ();
 
