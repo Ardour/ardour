@@ -137,16 +137,6 @@ class EditorCursor;
 class MouseCursors;
 class VerboseCursor;
 
-/* <CMT Additions> */
-class ImageFrameView;
-class ImageFrameTimeAxisView;
-class ImageFrameTimeAxis;
-class MarkerTimeAxis ;
-class MarkerView ;
-class ImageFrameSocketHandler ;
-class TimeAxisViewItem ;
-/* </CMT Additions> */
-
 class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public Gtkmm2ext::VisibilityTracker
 {
   public:

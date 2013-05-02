@@ -119,10 +119,6 @@
 
 #include "i18n.h"
 
-#ifdef WITH_CMT
-#include "imageframe_socket_handler.h"
-#endif
-
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
@@ -265,10 +261,6 @@ Editor::Editor ()
 	, automation_mode_button (_("mode"))
 
 	, _toolbar_viewport (*manage (new Gtk::Adjustment (0, 0, 1e10)), *manage (new Gtk::Adjustment (0, 0, 1e10)))
-
-#ifdef WITH_CMT
-	, image_socket_listener(0)
-#endif
 
 	  /* nudge */
 
@@ -767,18 +759,6 @@ Editor::Editor ()
 
 Editor::~Editor()
 {
-#ifdef WITH_CMT
-	if(image_socket_listener) {
-		if(image_socket_listener->is_connected())
-		{
-			image_socket_listener->close_connection() ;
-		}
-
-		delete image_socket_listener ;
-		image_socket_listener = 0 ;
-	}
-#endif
-
         delete button_bindings;
 	delete _routes;
 	delete _route_groups;

@@ -1115,31 +1115,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 			}
 
-#ifdef WITH_CMT
-			case ImageFrameHandleStartItem:
-				imageframe_start_handle_op(item, event) ;
-				return(true) ;
-				break ;
-			case ImageFrameHandleEndItem:
-				imageframe_end_handle_op(item, event) ;
-				return(true) ;
-				break ;
-			case MarkerViewHandleStartItem:
-				markerview_item_start_handle_op(item, event) ;
-				return(true) ;
-				break ;
-			case MarkerViewHandleEndItem:
-				markerview_item_end_handle_op(item, event) ;
-				return(true) ;
-				break ;
-			case MarkerViewItem:
-				start_markerview_grab(item, event) ;
-				break ;
-			case ImageFrameItem:
-				start_imageframe_grab(item, event) ;
-				break ;
-#endif
-
 			case MarkerBarItem:
 
 				break;
@@ -1576,21 +1551,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				popup_control_point_context_menu (item, event);
 				break;
 
-#ifdef WITH_CMT
-			case ImageFrameItem:
-				popup_imageframe_edit_menu(1, event->button.time, item, true) ;
-				break ;
-			case ImageFrameTimeAxisItem:
-				popup_imageframe_edit_menu(1, event->button.time, item, false) ;
-				break ;
-			case MarkerViewItem:
-				popup_marker_time_axis_edit_menu(1, event->button.time, item, true) ;
-				break ;
-			case MarkerTimeAxisItem:
-				popup_marker_time_axis_edit_menu(1, event->button.time, item, false) ;
-				break ;
-#endif
-
 			default:
 				break;
 			}
@@ -1869,19 +1829,11 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
                 break;
 
 	case StartSelectionTrimItem:
-#ifdef WITH_CMT
-	case ImageFrameHandleStartItem:
-	case MarkerViewHandleStartItem:
-#endif
 		if (is_drawable()) {
 			set_canvas_cursor (_cursors->left_side_trim);
 		}
 		break;
 	case EndSelectionTrimItem:
-#ifdef WITH_CMT
-	case ImageFrameHandleEndItem:
-	case MarkerViewHandleEndItem:
-#endif
 		if (is_drawable()) {
 			set_canvas_cursor (_cursors->right_side_trim);
 		}
@@ -2054,13 +2006,6 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	case StartSelectionTrimItem:
 	case EndSelectionTrimItem:
 	case PlayheadCursorItem:
-
-#ifdef WITH_CMT
-	case ImageFrameHandleStartItem:
-	case ImageFrameHandleEndItem:
-	case MarkerViewHandleStartItem:
-	case MarkerViewHandleEndItem:
-#endif
 
 		_over_region_trim_target = false;
 
