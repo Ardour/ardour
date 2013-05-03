@@ -288,6 +288,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
 	virtual framecnt_t get_nudge_distance (framepos_t pos, framecnt_t& next) = 0;
 	virtual Evoral::MusicalTime get_grid_type_as_beats (bool& success, framepos_t position) = 0;
+        virtual void edit_notes (TimeAxisViewItem&) = 0;
 
 	virtual void queue_visual_videotimeline_update () = 0;
 	virtual void toggle_ruler_video (bool) = 0;
@@ -298,14 +299,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual void set_video_timeline_height (const int h) = 0;
 	virtual void embed_audio_from_video (std::string, framepos_t n = 0) = 0;
 	virtual void export_video () = 0;
-
-#ifdef WITH_CMT
-	virtual void connect_to_image_compositor()  = 0;
-	virtual void add_imageframe_time_axis(const std::string & track_name, void*)  = 0;
-	virtual void add_imageframe_marker_time_axis(const std::string & track_name, TimeAxisView* marked_track, void*)  = 0;
-	virtual void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item)  = 0;
-	virtual TimeAxisView* get_named_time_axis(const std::string & name)  = 0;
-#endif
 
 	virtual RouteTimeAxisView* get_route_view_by_route_id (const PBD::ID& id) const = 0;
 

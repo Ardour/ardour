@@ -82,11 +82,10 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 
 PluginUIWindow::PluginUIWindow (
-	Gtk::Window*                    win,
 	boost::shared_ptr<PluginInsert> insert,
 	bool                            scrollable,
 	bool                            editor)
-	: parent (win)
+	: ArdourWindow (string())
 	, was_visible (false)
 	, _keyboard_focused (false)
 #ifdef AUDIOUNIT_SUPPORT
@@ -96,7 +95,6 @@ PluginUIWindow::PluginUIWindow (
 
 {
 	bool have_gui = false;
-
 	Label* label = manage (new Label());
 	label->set_markup ("<b>THIS IS THE PLUGIN UI</b>");
 
@@ -147,7 +145,6 @@ PluginUIWindow::PluginUIWindow (
 		signal_unmap_event().connect (sigc::mem_fun (*pu, &GenericPluginUI::stop_updating));
 	}
 
-	// set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginEditor");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
@@ -171,18 +168,9 @@ PluginUIWindow::~PluginUIWindow ()
 }
 
 void
-PluginUIWindow::set_parent (Gtk::Window* win)
-{
-	parent = win;
-}
-
-void
 PluginUIWindow::on_map ()
 {
 	Window::on_map ();
-#ifdef __APPLE__
-	set_keep_above (true);
-#endif // __APPLE__
 }
 
 bool
@@ -226,19 +214,25 @@ PluginUIWindow::on_show ()
 	}
 
 	if (_pluginui) {
+#if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
+                if (pre_deactivate_x >= 0) {                                                                             
+                        move (pre_deactivate_x, pre_deactivate_y);
+                }                                                      
+#endif
+
 		if (_pluginui->on_window_show (_title)) {
 			Window::on_show ();
 		}
-	}
-
-	if (parent) {
-		// set_transient_for (*parent);
 	}
 }
 
 void
 PluginUIWindow::on_hide ()
 {
+#if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
+        get_position (pre_deactivate_x, pre_deactivate_y);                                                               
+#endif
+
 	Window::on_hide ();
 
 	if (_pluginui) {
@@ -560,7 +554,6 @@ PlugUIBase::latency_button_clicked ()
 	if (!latency_gui) {
 		latency_gui = new LatencyGUI (*(insert.get()), insert->session().frame_rate(), insert->session().get_block_size());
 		latency_dialog = new ArdourWindow (_("Edit Latency"));
-		latency_dialog->set_position (WIN_POS_MOUSE);
 		/* use both keep-above and transient for to try cover as many
 		   different WM's as possible.
 		*/

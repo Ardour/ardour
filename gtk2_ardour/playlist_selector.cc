@@ -44,7 +44,6 @@ PlaylistSelector::PlaylistSelector ()
 {
 	rui = 0;
 
-	set_position (WIN_POS_MOUSE);
 	set_name ("PlaylistSelectorWindow");
 	set_modal(true);
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);

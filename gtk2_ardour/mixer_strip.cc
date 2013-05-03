@@ -1358,7 +1358,6 @@ void
 MixerStrip::setup_comment_editor ()
 {
 	comment_window = new ArdourWindow (""); // title will be reset to show route
-	comment_window->set_position (Gtk::WIN_POS_MOUSE);
 	comment_window->set_skip_taskbar_hint (true);
 	comment_window->signal_hide().connect (sigc::mem_fun(*this, &MixerStrip::comment_editor_done_editing));
 	comment_window->set_default_size (400, 200);

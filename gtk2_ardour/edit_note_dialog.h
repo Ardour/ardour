@@ -28,11 +28,11 @@ class NoteBase;
 class EditNoteDialog : public ArdourDialog
 {
 public:
-	EditNoteDialog (MidiRegionView *, std::set<NoteBase*>);
+        EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n);
 
-	int run ();
-
-private:
+        void done (int);
+    
+  private:
 	MidiRegionView* _region_view;
 	std::set<NoteBase*> _events;
 	Gtk::SpinButton _channel;

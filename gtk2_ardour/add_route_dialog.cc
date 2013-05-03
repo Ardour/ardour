@@ -60,7 +60,6 @@ AddRouteDialog::AddRouteDialog (Session* s)
 	set_session (s);
 
 	set_name ("AddRouteDialog");
-	set_position (Gtk::WIN_POS_MOUSE);
 	set_modal (true);
 	set_skip_taskbar_hint (true);
 	set_resizable (false);

@@ -46,6 +46,7 @@ class ArdourDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr
 	static void close_all_dialogs () { CloseAllDialogs(); }
 
   private:
+        bool _splash_pushed;
 	void init ();
 
 	static sigc::signal<void> CloseAllDialogs;

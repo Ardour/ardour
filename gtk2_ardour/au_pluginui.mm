@@ -1,5 +1,3 @@
-#include <gtkmm/stock.h>
-
 #undef  Marker
 #define Marker FuckYouAppleAndYourLackOfNameSpaces
 
@@ -49,6 +47,26 @@ static const gchar* _automation_mode_strings[] = {
 	X_("Touch"),
 	0
 };
+
+static void
+dump_view_tree (NSView* view, int depth)
+{
+	NSArray* subviews = [view subviews];
+	unsigned long cnt = [subviews count];
+
+	for (int d = 0; d < depth; d++) {
+		cerr << '\t';
+	}
+        NSRect frame = [view frame];
+	cerr << " view @ " <<  frame.origin.x << ", " << frame.origin.y
+             << ' ' << frame.size.width << " x " << frame.size.height
+             << endl;
+	
+	for (unsigned long i = 0; i < cnt; ++i) {
+		NSView* subview = [subviews objectAtIndex:i];
+		dump_view_tree (subview, depth+1);
+	}
+}
 
 @implementation NotificationObject
 
@@ -170,13 +188,16 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	top_box.show ();
 	low_box.show ();
 
-	_activating_from_app = false;
 	cocoa_parent = 0;
-	_notify = 0;
 	cocoa_window = 0;
-	carbon_window = 0;
+
+#ifdef WITH_CARBBON
+	_activating_from_app = false;
+	_notify = 0;
 	au_view = 0;
 	editView = 0;
+	carbon_window = 0;
+#endif
 
 	/* prefer cocoa, fall back to cocoa, but use carbon if its there */
 
@@ -227,6 +248,7 @@ AUPluginUI::~AUPluginUI ()
 bool
 AUPluginUI::test_carbon_view_support ()
 {
+#ifdef WITH_CARBON
 	bool ret = false;
 	
 	carbon_descriptor.componentType = kAudioUnitCarbonViewComponentType;
@@ -253,6 +275,9 @@ AUPluginUI::test_carbon_view_support ()
 	}
 
 	return ret;
+#else
+        return false;
+#endif
 }
 	
 bool
@@ -282,7 +307,7 @@ AUPluginUI::plugin_class_valid (Class pluginClass)
 int
 AUPluginUI::create_cocoa_view ()
 {
-	BOOL wasAbleToLoadCustomView = NO;
+	bool wasAbleToLoadCustomView = false;
 	AudioUnitCocoaViewInfo* cocoaViewInfo = NULL;
 	UInt32               numberOfClasses = 0;
 	UInt32     dataSize;
@@ -380,7 +405,7 @@ AUPluginUI::create_cocoa_view ()
 				
 				free (cocoaViewInfo);
 			}
-			wasAbleToLoadCustomView = YES;
+			wasAbleToLoadCustomView = true;
 		}
 	}
 
@@ -390,14 +415,16 @@ AUPluginUI::create_cocoa_view ()
 								au->get_au()));
 		au_view = [[AUGenericView alloc] initWithAudioUnit:*au->get_au()];
 		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("view created @ %1\n", au_view));
-		[(AUGenericView *)au_view setShowsExpertParameters:YES];
+		[(AUGenericView *)au_view setShowsExpertParameters:1];
 	}
 
 	// Get the initial size of the new AU View's frame 
 	
 	NSRect rect = [au_view frame];
+        prefheight = rect.size.height;
+        prefwidth = rect.size.width;
 	low_box.set_size_request (rect.size.width, rect.size.height);
-	
+
 	return 0;
 }
 
@@ -406,14 +433,11 @@ AUPluginUI::cocoa_view_resized ()
 {
         GtkRequisition topsize = top_box.size_request ();
         NSWindow* window = get_nswindow ();
-        NSSize oldContentSize= [window contentRectForFrameRect:[window frame]].size;
-        NSSize newContentSize= [au_view frame].size;
         NSRect windowFrame= [window frame];
-        
-        oldContentSize.height -= topsize.height;
+        NSRect new_frame = [au_view frame];
 
-        float dy = oldContentSize.height - newContentSize.height;
-        float dx = oldContentSize.width - newContentSize.width;
+        float dy = last_au_frame.size.height - new_frame.size.height;
+        float dx = last_au_frame.size.width - new_frame.size.width;
 
         windowFrame.origin.y    += dy;
         windowFrame.origin.x    += dx;
@@ -427,12 +451,30 @@ AUPluginUI::cocoa_view_resized ()
         NSUInteger old_auto_resize = [au_view autoresizingMask];
 
         [au_view setAutoresizingMask:NSViewNotSizable];
-        [window setFrame:windowFrame display:YES];
+        [window setFrame:windowFrame display:1];
+
+        /* Some stupid AU Views change the origin of the original AU View
+           when they are resized (I'm looking at you AUSampler). If the origin
+           has been moved, move it back.
+        */
+
+        if (last_au_frame.origin.x != new_frame.origin.x ||
+            last_au_frame.origin.y != new_frame.origin.y) {
+                new_frame.origin = last_au_frame.origin;
+                [au_view setFrame:new_frame];
+                /* also be sure to redraw the topbox because this can
+                   also go wrong.
+                 */
+                top_box.queue_draw ();
+        }
+
         [au_view setAutoresizingMask:old_auto_resize];
 
         [[NSNotificationCenter defaultCenter] addObserver:_notify
          selector:@selector(auViewResized:) name:NSViewFrameDidChangeNotification
          object:au_view];
+
+        last_au_frame = new_frame;
 }
 
 int
@@ -526,7 +568,6 @@ AUPluginUI::activate ()
 #ifdef WITH_CARBON
 	ActivateWindow (carbon_window, TRUE);
 #endif
-	// [cocoa_parent makeKeyAndOrderFront:nil];
 }
 
 void
@@ -603,7 +644,7 @@ AUPluginUI::parent_cocoa_window ()
 		return -1;
 	}
 
-	[win setAutodisplay:YES]; // turn of GTK stuff for this window
+	[win setAutodisplay:1]; // turn of GTK stuff for this window
 
 	Gtk::Container* toplevel = get_toplevel();
 
@@ -620,7 +661,9 @@ AUPluginUI::parent_cocoa_window ()
 	NSPoint origin = { 0, a.height };
 
 	[au_view setFrameOrigin:origin];
-	[view addSubview:au_view positioned:NSWindowBelow relativeTo:nil]; 
+        [view addSubview:au_view positioned:NSWindowBelow relativeTo:nil]; 
+
+        last_au_frame = [au_view frame];
 
 	// watch for size changes of the view
 
@@ -631,23 +674,6 @@ AUPluginUI::parent_cocoa_window ()
          object:au_view];
 
 	return 0;
-}
-
-static void
-dump_view_tree (NSView* view, int depth)
-{
-	NSArray* subviews = [view subviews];
-	unsigned long cnt = [subviews count];
-
-	for (int d = 0; d < depth; d++) {
-		cerr << '\t';
-	}
-	cerr << " view @ " << view << endl;
-	
-	for (unsigned long i = 0; i < cnt; ++i) {
-		NSView* subview = [subviews objectAtIndex:i];
-		dump_view_tree (subview, depth+1);
-	}
 }
 
 void
@@ -681,7 +707,7 @@ AUPluginUI::on_realize ()
 
 	NSWindow* win = get_nswindow ();
 	if (win) {
-		[win setShowsResizeIndicator:NO];
+		[win setShowsResizeIndicator:0];
 	}
 }
 
@@ -695,12 +721,6 @@ AUPluginUI::lower_box_realized ()
 	}
 }
 
-bool
-AUPluginUI::on_map_event (GdkEventAny*)
-{
-	return false;
-}
-
 void
 AUPluginUI::on_window_hide ()
 {
@@ -710,8 +730,14 @@ AUPluginUI::on_window_hide ()
 		ActivateWindow (carbon_window, FALSE);
 	}
 #endif
-
 	hide_all ();
+        
+#if 0
+        NSArray* wins = [NSApp windows];
+        for (uint32_t i = 0; i < [wins count]; i++) {
+                id win = [wins objectAtIndex:i];
+        }
+#endif
 }
 
 bool
@@ -753,19 +779,4 @@ create_au_gui (boost::shared_ptr<PluginInsert> plugin_insert, VBox** box)
 	return aup;
 }
 
-bool
-AUPluginUI::on_focus_in_event (GdkEventFocus*)
-{
-	//cerr << "au plugin focus in\n";
-	//Keyboard::magic_widget_grab_focus ();
-	return false;
-}
-
-bool
-AUPluginUI::on_focus_out_event (GdkEventFocus*)
-{
-	//cerr << "au plugin focus out\n";
-	//Keyboard::magic_widget_drop_focus ();
-	return false;
-}
 

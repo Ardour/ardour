@@ -1183,7 +1183,6 @@ ProcessorBox::weird_plugin_dialog (Plugin& p, Route::ProcessorStreams streams)
 	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
 
 	dialog.set_name (X_("PluginIODialog"));
-	dialog.set_position (Gtk::WIN_POS_MOUSE);
 	dialog.set_modal (true);
 	dialog.show_all ();
 
@@ -1550,7 +1549,6 @@ outputs will not work correctly."));
 	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
 
 	dialog.set_name (X_("PluginIODialog"));
-	dialog.set_position (Gtk::WIN_POS_MOUSE);
 	dialog.set_modal (true);
 	dialog.show_all ();
 
@@ -2094,20 +2092,16 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 
 		/* these are both allowed to be null */
 
-		Container* toplevel = get_toplevel();
-		Window* win = dynamic_cast<Gtk::Window*>(toplevel);
-
 		Window* w = get_processor_ui (plugin_insert);
 
 		if (w == 0) {
 
-			plugin_ui = new PluginUIWindow (win, plugin_insert);
+			plugin_ui = new PluginUIWindow (plugin_insert);
 			plugin_ui->set_title (generate_processor_title (plugin_insert));
 			set_processor_ui (plugin_insert, plugin_ui);
 
 		} else {
 			plugin_ui = dynamic_cast<PluginUIWindow *> (w);
-			plugin_ui->set_parent (win);
 		}
 
 		gidget = plugin_ui;
@@ -2155,9 +2149,7 @@ ProcessorBox::toggle_edit_generic_processor (boost::shared_ptr<Processor> proces
 		return;
 	}
 
-	Container*      toplevel  = get_toplevel();
-	Window*         win       = dynamic_cast<Gtk::Window*>(toplevel);
-	PluginUIWindow* plugin_ui = new PluginUIWindow(win, plugin_insert, true, false);
+	PluginUIWindow* plugin_ui = new PluginUIWindow (plugin_insert, true, false);
 	plugin_ui->set_title(generate_processor_title (plugin_insert));
 
 	if (plugin_ui->is_visible()) {

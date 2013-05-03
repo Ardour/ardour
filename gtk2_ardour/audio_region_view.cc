@@ -1540,7 +1540,6 @@ AudioRegionView::show_region_editor ()
 	}
 
 	editor->present ();
-	editor->set_position (Gtk::WIN_POS_MOUSE);
 	editor->show_all();
 }
 

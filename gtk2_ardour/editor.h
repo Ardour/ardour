@@ -97,14 +97,25 @@ class BundleManager;
 class ButtonJoiner;
 class ControlPoint;
 class DragManager;
+class EditNoteDialog;
+class EditorCursor;
+class EditorGroupTabs;
+class EditorLocations;
+class EditorRegions;
+class EditorRoutes;
+class EditorRouteGroups;
+class EditorSnapshots;
+class EditorSummary;
 class GroupedButtons;
 class GUIObjectState;
 class Marker;
 class MidiRegionView;
 class MixerStrip;
+class MouseCursors;
 class NoteBase;
 class PlaylistSelector;
 class PluginSelector;
+class ProgressReporter;
 class RhythmFerret;
 class Selection;
 class SoundFileOmega;
@@ -113,28 +124,8 @@ class TempoLines;
 class TimeAxisView;
 class TimeFXDialog;
 class TimeSelection;
-class EditorGroupTabs;
-class EditorRoutes;
-class EditorRouteGroups;
-class EditorRegions;
-class EditorLocations;
-class EditorSnapshots;
-class EditorSummary;
 class RegionLayeringOrderEditor;
-class ProgressReporter;
-class EditorCursor;
-class MouseCursors;
 class VerboseCursor;
-
-/* <CMT Additions> */
-class ImageFrameView;
-class ImageFrameTimeAxisView;
-class ImageFrameTimeAxis;
-class MarkerTimeAxis ;
-class MarkerView ;
-class ImageFrameSocketHandler ;
-class TimeAxisViewItem ;
-/* </CMT Additions> */
 
 class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public Gtkmm2ext::VisibilityTracker
 {
@@ -1506,7 +1497,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void edit_tempo_marker (ArdourCanvas::Item*);
 	void edit_meter_marker (ArdourCanvas::Item*);
 	void edit_control_point (ArdourCanvas::Item*);
-        void edit_notes (std::set<NoteBase*> const & s);
+        void edit_notes (TimeAxisViewItem&);
 
 	void marker_menu_edit ();
 	void marker_menu_remove ();
@@ -2110,7 +2101,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool _following_mixer_selection;
 
 	int time_fx (ARDOUR::RegionList&, float val, bool pitching);
-
+        void note_edit_done (int, EditNoteDialog*);
 	void toggle_sound_midi_notes ();
 
 	/** Flag for a bit of a hack wrt control point selection; see set_selected_control_point_from_click */

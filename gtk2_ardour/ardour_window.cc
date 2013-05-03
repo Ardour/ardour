@@ -35,6 +35,7 @@ ArdourWindow::ArdourWindow (string title)
 {
 	set_title (title);
 	init ();
+	set_position (Gtk::WIN_POS_MOUSE);
 }
 
 ArdourWindow::ArdourWindow (Gtk::Window& parent, string /*title*/)
@@ -75,5 +76,15 @@ void
 ArdourWindow::init ()
 {
 	set_border_width (10);
+
+        /* ArdourWindows are not dialogs (they have no "OK" or "Close" button) but
+           they should be considered part of the same "window level" as a dialog. This
+           works on X11 and Quartz, in that:
+           
+           (a) utility & dialog windows are considered to be part of the same level
+           (b) they will float above normal windows without any particular effort
+        */
+
+        set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
 }
 

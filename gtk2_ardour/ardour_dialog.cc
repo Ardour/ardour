@@ -34,12 +34,15 @@ sigc::signal<void> ArdourDialog::CloseAllDialogs;
 
 ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
 	: Dialog (title, modal, use_seperator)
+        , _splash_pushed (false)
 {
 	init ();
+	set_position (Gtk::WIN_POS_MOUSE);
 }
 
 ArdourDialog::ArdourDialog (Gtk::Window& parent, string title, bool modal, bool use_seperator)
 	: Dialog (title, parent, modal, use_seperator)
+        , _splash_pushed (false)
 {
 	init ();
 	set_position (Gtk::WIN_POS_CENTER_ON_PARENT);
@@ -47,6 +50,13 @@ ArdourDialog::ArdourDialog (Gtk::Window& parent, string title, bool modal, bool 
 
 ArdourDialog::~ArdourDialog ()
 {
+        if (_splash_pushed) {
+                Splash* spl = Splash::instance();
+                
+                if (spl) {
+                        spl->pop_front();
+                }
+        }
 }
 
 bool
@@ -73,15 +83,16 @@ ArdourDialog::on_unmap ()
 void
 ArdourDialog::on_show ()
 {
+	Dialog::on_show ();
+
 	// never allow the splash screen to obscure any dialog
 
 	Splash* spl = Splash::instance();
 
-	if (spl) {
+	if (spl && spl->is_visible()) {
 		spl->pop_back_for (*this);
+                _splash_pushed = true;
 	}
-
-	Dialog::on_show ();
 }
 
 void

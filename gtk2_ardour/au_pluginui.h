@@ -76,9 +76,6 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	void lower_box_realized ();
 	void cocoa_view_resized ();
 	void on_realize ();
-	bool on_map_event (GdkEventAny*);
-	bool on_focus_in_event (GdkEventFocus*);
-	bool on_focus_out_event (GdkEventFocus*);
 	void forward_key_event (GdkEventKey*);
 
 	bool on_window_show (const std::string& /*title*/);
@@ -93,7 +90,7 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	int prefwidth;
 
 	Gtk::HBox     top_box;
-	Gtk::EventBox low_box;
+	Gtk::HBox low_box;
 	Gtk::VBox vpacker;
 	Gtk::Label automation_mode_label;
 	Gtk::ComboBoxText automation_mode_selector;
@@ -105,6 +102,7 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 
 	NSWindow*           cocoa_window;
 	NSView*             au_view;
+        NSRect              last_au_frame;
 
 	/* Carbon */
 

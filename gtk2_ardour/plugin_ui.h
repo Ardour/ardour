@@ -50,6 +50,7 @@
 
 #include "automation_controller.h"
 #include "ardour_button.h"
+#include "ardour_window.h"
 
 namespace ARDOUR {
 	class PluginInsert;
@@ -278,11 +279,10 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	bool integer_printer (char* buf, Gtk::Adjustment &, ControlUI *);
 };
 
-class PluginUIWindow : public Gtk::Window
+class PluginUIWindow : public ArdourWindow
 {
   public:
-	PluginUIWindow (Gtk::Window*,
-	                boost::shared_ptr<ARDOUR::PluginInsert> insert,
+	PluginUIWindow (boost::shared_ptr<ARDOUR::PluginInsert> insert,
 	                bool scrollable=false,
 	                bool editor=true);
 	~PluginUIWindow ();
