@@ -48,7 +48,6 @@ NoteBase::NoteBase(MidiRegionView& region, bool with_events, const boost::shared
 	: _region(region)
 	, _item (0)
 	, _text(0)
-//	, _channel_selector_widget()
 	, _state(None)
 	, _note(note)
 	, _with_events (with_events)
@@ -64,9 +63,6 @@ NoteBase::~NoteBase()
 	NoteBaseDeleted (this);
 
 	delete _text;
-
-	/* XXX */
-//	delete _channel_selector_widget;
 }
 
 void
@@ -138,57 +134,7 @@ void
 NoteBase::on_channel_change(uint8_t channel)
 {
 	_region.note_selected(this, true);
-	hide_channel_selector();
 	_region.change_channel(channel);
-}
-
-void
-NoteBase::show_channel_selector ()
-{
-#if 0	
-	if (_channel_selector_widget == 0) {
-	  
-	  	if(_region.channel_selector_scoped_note() != 0){
-		    _region.channel_selector_scoped_note()->hide_channel_selector();
-		    _region.set_channel_selector_scoped_note(0);
-		}
-
-		SingleMidiChannelSelector* _channel_selector = new SingleMidiChannelSelector(_note->channel());
-		_channel_selector->show_all();
-		_channel_selector->channel_selected.connect(
-			sigc::mem_fun(this, &NoteBase::on_channel_change));
-
-		_channel_selector->clicked.connect (
-			sigc::mem_fun (this, &NoteBase::hide_channel_selector));
-
-		_channel_selector_widget = new Widget(*(_item->property_parent()),
-		                                      x1(),
-		                                      y2() + 2,
-		                                      (Gtk::Widget &) *_channel_selector);
-
-		_channel_selector_widget->hide();
-		_channel_selector_widget->property_height() = 100;
-		_channel_selector_widget->property_width() = 100;
-		_channel_selector_widget->raise_to_top();
-		_channel_selector_widget->show();
-		
-		_region.set_channel_selector_scoped_note(this);
-	} else {
-		hide_channel_selector();
-	}
-#endif	
-}
-
-void
-NoteBase::hide_channel_selector ()
-{
-#if 0
-	if (_channel_selector_widget) {
-		_channel_selector_widget->hide();
-		delete _channel_selector_widget;
-		_channel_selector_widget = 0;
-	}
-#endif	
 }
 
 void
@@ -203,14 +149,8 @@ NoteBase::set_selected(bool selected)
         
 	if (_selected) {
 		set_outline_color(calculate_outline(ARDOUR_UI::config()->get_canvasvar_MidiNoteSelected()));
-		
-		if(_region.channel_selector_scoped_note() != 0){
-		    _region.channel_selector_scoped_note()->hide_channel_selector();
-		    _region.set_channel_selector_scoped_note(0);
-		}
 	} else {
 		set_outline_color(calculate_outline(base_color()));
-		hide_channel_selector();
 	}
 
 }

@@ -91,9 +91,6 @@ public:
 	/** Channel selection changed */
 	void on_channel_selection_change(uint16_t selection);
 
-	void show_channel_selector();
-	void hide_channel_selector();
-
 	virtual void set_outline_color(uint32_t c) = 0;
 	virtual void set_fill_color(uint32_t c) = 0;
 
@@ -153,7 +150,6 @@ protected:
 	MidiRegionView&                   _region;
 	ArdourCanvas::Item*               _item;
 	ArdourCanvas::Text*               _text;
-//	Widget*                           _channel_selector_widget;
 	State                             _state;
 	const boost::shared_ptr<NoteType> _note;
 	bool                              _with_events;
