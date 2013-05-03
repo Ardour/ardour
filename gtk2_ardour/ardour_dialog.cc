@@ -23,14 +23,13 @@
 #include <gtkmm2ext/doi.h>
 
 #include "ardour_dialog.h"
+#include "ardour_ui.h"
 #include "keyboard.h"
 #include "splash.h"
 
 using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
-
-sigc::signal<void> ArdourDialog::CloseAllDialogs;
 
 ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
 	: Dialog (title, modal, use_seperator)
@@ -98,9 +97,7 @@ ArdourDialog::on_show ()
 void
 ArdourDialog::init ()
 {
-	set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 	set_border_width (10);
-	CloseAllDialogs.connect (
-		sigc::bind (sigc::mem_fun (*this, &ArdourDialog::response),
-		            RESPONSE_CANCEL));
+	// set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+	ARDOUR_UI::CloseAllDialogs.connect (sigc::bind (sigc::mem_fun (*this, &ArdourDialog::response), RESPONSE_CANCEL));
 }

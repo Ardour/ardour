@@ -136,6 +136,7 @@ sigc::signal<void,bool> ARDOUR_UI::Blink;
 sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
 sigc::signal<void, framepos_t, bool, framepos_t> ARDOUR_UI::Clock;
+sigc::signal<void>      ARDOUR_UI::CloseAllDialogs;
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
@@ -886,7 +887,7 @@ If you still wish to quit, please use the\n\n\
 		_session = 0;
 	}
 
-	ArdourDialog::close_all_dialogs ();
+	close_all_dialogs ();
 	engine->stop (true);
 	quit ();
 }

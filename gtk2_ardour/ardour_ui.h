@@ -189,6 +189,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	 */
 	static sigc::signal<void, framepos_t, bool, framepos_t> Clock;
 
+	static void close_all_dialogs () { CloseAllDialogs(); }
+        static sigc::signal<void> CloseAllDialogs;
+
 	XMLNode* editor_settings() const;
 	XMLNode* mixer_settings () const;
 	XMLNode* keyboard_settings () const;
