@@ -380,7 +380,6 @@ ARDOUR_UI::new_midi_tracer_window ()
 	if (i == _midi_tracer_windows.end()) {
 		/* all our MIDITracer windows are visible; make a new one */
 		MidiTracer* t = new MidiTracer ();
-		manage_window (*t);
 		t->show_all ();
 		_midi_tracer_windows.push_back (t);
 	} else {

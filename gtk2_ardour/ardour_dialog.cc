@@ -94,6 +94,13 @@ ArdourDialog::on_show ()
 	}
 }
 
+bool
+ArdourDialog::on_delete_event (GdkEventAny*)
+{
+	hide ();
+	return false;
+}
+
 void
 ArdourDialog::init ()
 {

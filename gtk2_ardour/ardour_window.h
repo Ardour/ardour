@@ -42,6 +42,7 @@ class ArdourWindow : public Gtk::Window, public ARDOUR::SessionHandlePtr, public
 
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
+        bool on_delete_event (GdkEventAny *);
 	void on_unmap ();
 
   private:

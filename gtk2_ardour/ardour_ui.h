@@ -348,8 +348,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void         start_clocking ();
 	void         stop_clocking ();
 
-	void manage_window (Gtk::Window&);
-
 	bool main_window_state_event_handler (GdkEventWindowState*, bool window_was_editor);
 
 	void update_transport_clocks (framepos_t pos);
