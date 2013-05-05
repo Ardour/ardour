@@ -25,6 +25,7 @@
 #include "ardour_window.h"
 #include "ardour_ui.h"
 #include "keyboard.h"
+#include "utils.h"
 
 using namespace std;
 using namespace Gtk;
@@ -89,6 +90,8 @@ ArdourWindow::init ()
         */
 
         set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
+
+	signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), this));
 
 	ARDOUR_UI::CloseAllDialogs.connect (sigc::mem_fun (*this, &ArdourWindow::hide));
 }

@@ -16,7 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-
+#include <iostream>
 #include <gtkmm/window.h>
 
 #include "gtkmm2ext/visibility_tracker.h"
@@ -35,6 +35,7 @@ bool
 VisibilityTracker::handle_visibility_notify_event (GdkEventVisibility* ev)
 {
 	_visibility = ev->state;
+	std::cerr << "VT: " << _window.get_title() << " vis event, fv = " << fully_visible() << " pv = " << partially_visible() << " nv = " << not_visible() << std::endl;
 	return false;
 }
 

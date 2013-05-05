@@ -53,6 +53,8 @@ BigClockWindow::BigClockWindow (AudioClock& c)
 void
 BigClockWindow::on_unmap ()
 {
+	ArdourWindow::on_unmap ();
+
 	PublicEditor::instance().reset_focus ();
 }
 
