@@ -158,13 +158,13 @@ This mode provides many different operations on both regions and control points,
 @mmode|MouseMode/set-mouse-mode-object|o|object mode
 @sess|Main/Open|<@PRIMARY@>o|open an existing session
 @sess|Main/Recent|<@PRIMARY@><@TERTIARY@>o|open a recent session
-@wvis|Common/ToggleOptionsEditor|<@WINDOW@>o|toggle preferences dialog
+@wvis|Window/toggle-session-options-editor|<@WINDOW@>o|toggle preferences dialog
 @rop|Region/naturalize-region|<@SECONDARY@>o|move to original position
 @trans|Editor/set-playhead|p|set playhead position
 @select|Editor/select-all-before-playhead|<@PRIMARY@>p|all before playhead
-@wvis|Common/ToggleRCOptionsEditor|<@PRIMARY@><@TERTIARY@>p|toggle preferences dialog
-@wvis|Common/toggle-audio-connection-manager|<@WINDOW@>p|toggle global audio patchbay
-@wvis|Common/toggle-midi-connection-manager|<@WINDOW@><@TERTIARY@>p|toggle global midi patchbay
+@wvis|Window/toggle-rc-options-editor|<@PRIMARY@><@TERTIARY@>p|toggle preferences dialog
+@wvis|Window/toggle-audio-connection-manager|<@WINDOW@>p|toggle global audio patchbay
+@wvis|Window/toggle-midi-connection-manager|<@WINDOW@><@TERTIARY@>p|toggle global midi patchbay
 @midi|MIDI/panic|<@PRIMARY@><@SECONDARY@>p|MIDI panic (stop all notes etc)
 @select|Editor/select-all-after-playhead|<@TERTIARY@><@PRIMARY@>p|all after playhead
 
@@ -194,10 +194,10 @@ This mode provides many different operations on both regions and control points,
 @epp|Region/play-selected-regions|h|play selected region(s)
 @eep|Region/trim-front|j|trim front
 @eep|Region/trim-back|k|trim back
-@wvis|Common/ToggleKeyEditor|<@WINDOW@>k|toggle key bindings editor
+@wvis|Window/toggle-key-editor|<@WINDOW@>k|toggle key bindings editor
 @trans|Transport/Loop|l|loop play (the loop range)
 @select|Editor/select-all-in-loop-range|<@PRIMARY@>l|select all in loop range
-@wvis|Common/ToggleLocations|<@WINDOW@>l| toggle locations dialog
+@wvis|Window/toggle-locations|<@WINDOW@>l| toggle locations dialog
 
 ;; BOTTOM ROW
 
@@ -209,12 +209,12 @@ This mode provides many different operations on both regions and control points,
 @edit|Editor/editor-cut|<@PRIMARY@>x|cut
 @-group|Editor/crop|c|some text
 @edit|Editor/editor-copy|<@PRIMARY@>c|copy
-@wvis|Common/ToggleColorManager|<@WINDOW@>c|toggle color manager
+@wvis|Window/toggle-theme-manager|<@WINDOW@>c|toggle color manager
 @rop|Region/set-region-sync-position|v|set region sync point
 @edit|Editor/editor-paste|<@PRIMARY@>v|paste
 @-group|Editor/brush-at-mouse|<@PRIMARY@>b|some text
 @trans|Editor/track-record-enable-toggle|<@TERTIARY@>b|toggle track rec-enable 
-@wvis|Common/ToggleBigClock|<@WINDOW@>b|toggle big clock
+@wvis|Window/toggle-big-clock|<@WINDOW@>b|toggle big clock
 @rop|Region/normalize-region|n|normalize
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
 @sess|Main/New|<@PRIMARY@>n|open a new session

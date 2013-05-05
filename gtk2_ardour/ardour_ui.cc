@@ -21,18 +21,19 @@
 #include "gtk2ardour-config.h"
 #endif
 
-#include <stdint.h>
-
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <cerrno>
+#include <fstream>
+
+#include <boost/locale.hpp>
+
+#include <stdint.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <unistd.h>
 #include <time.h>
-#include <cerrno>
-#include <fstream>
-
-#include <iostream>
 
 #include <sys/resource.h>
 #include <sys/types.h>
@@ -88,6 +89,7 @@ typedef uint64_t microseconds_t;
 #include "ambiguous_file_dialog.h"
 #include "ardour_ui.h"
 #include "audio_clock.h"
+#include "big_clock_window.h"
 #include "bundle_manager.h"
 #include "engine_dialog.h"
 #include "gain_meter.h"
@@ -95,6 +97,7 @@ typedef uint64_t microseconds_t;
 #include "gui_object.h"
 #include "gui_thread.h"
 #include "keyboard.h"
+#include "keyeditor.h"
 #include "location_ui.h"
 #include "main_clock.h"
 #include "missing_file_dialog.h"
@@ -106,8 +109,11 @@ typedef uint64_t microseconds_t;
 #include "processor_box.h"
 #include "prompter.h"
 #include "public_editor.h"
+#include "rc_option_editor.h"
 #include "route_time_axis.h"
+#include "route_params_ui.h"
 #include "session_metadata_dialog.h"
+#include "session_option_editor.h"
 #include "shuttle_control.h"
 #include "speaker_dialog.h"
 #include "splash.h"
@@ -115,7 +121,6 @@ typedef uint64_t microseconds_t;
 #include "theme_manager.h"
 #include "time_axis_view_item.h"
 #include "utils.h"
-#include "window_proxy.h"
 #include "video_server_dialog.h"
 #include "add_video_dialog.h"
 #include "transcode_video_dialog.h"
@@ -136,6 +141,7 @@ sigc::signal<void,bool> ARDOUR_UI::Blink;
 sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
 sigc::signal<void, framepos_t, bool, framepos_t> ARDOUR_UI::Clock;
+sigc::signal<void>      ARDOUR_UI::CloseAllDialogs;
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
@@ -167,6 +173,21 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, solo_alert_button (_("solo"))
 	, feedback_alert_button (_("feedback"))
 
+	, speaker_config_window (X_("speaker-config"), _("Speaker Configuration"))
+	, theme_manager (X_("theme-manager"), _("Theme Manager"))
+	, key_editor (X_("key-editor"), _("Key Bindings"))
+	, rc_option_editor (X_("rc-options-editor"), _("Preferences"))
+	, add_route_dialog (X_("add-routes"), _("Add Tracks/Busses"))
+	, about (X_("about"), _("About"))
+	, location_ui (X_("locations"), _("Locations"))
+	, route_params (X_("inspector"), _("Tracks and Busses"))
+	, session_option_editor (X_("session-options-editor"), _("Properties"), boost::bind (&ARDOUR_UI::create_session_option_editor, this))
+	, add_video_dialog (X_("add-video"), _("Add Tracks/Busses"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
+	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
+	, big_clock_window (X_("big-clock"), _("Big Clock"), boost::bind (&ARDOUR_UI::create_big_clock_window, this))
+	, audio_port_matrix (X_("audio-connection-manager"), _("Audio Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::AUDIO))
+	, midi_port_matrix (X_("midi-connection-manager"), _("MIDI Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::MIDI))
+
 	, error_log_button (_("Errors"))
 
 	, _status_bar_visibility (X_("status-bar"))
@@ -175,7 +196,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 {
 	Gtkmm2ext::init(localedir);
 
-	about = 0;
 	splash = 0;
 	_startup = 0;
 
@@ -184,36 +204,20 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	}
 
 	ui_config = new UIConfiguration();
-	theme_manager = new ThemeManager();
-
-	key_editor = 0;
 
 	editor = 0;
 	mixer = 0;
 	editor = 0;
 	engine = 0;
 	_session_is_new = false;
-	big_clock_window = 0;
-	big_clock_height = 0;
-	big_clock_resize_in_progress = false;
 	session_selector_window = 0;
 	last_key_press_time = 0;
-	add_route_dialog = 0;
-	add_video_dialog = 0;
 	video_server_process = 0;
-	route_params = 0;
-	bundle_manager = 0;
-	rc_option_editor = 0;
-	session_option_editor = 0;
-	location_ui = 0;
 	open_session_selector = 0;
 	have_configure_timeout = false;
 	have_disk_speed_dialog_displayed = false;
 	session_loaded = false;
 	ignore_dual_punch = false;
-	original_big_clock_width = -1;
-	original_big_clock_height = -1;
-	original_big_clock_font_size = 0;
 
 	roll_button.set_controllable (roll_controllable);
 	stop_button.set_controllable (stop_controllable);
@@ -307,26 +311,53 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	TimeAxisViewItem::set_constant_heights ();
 
+	/* load up the UI manager */
+
+	ActionManager::init ();
+
 	/* The following must happen after ARDOUR::init() so that Config is set up */
 
-	location_ui = new ActionWindowProxy<LocationUIWindow> (X_("locations"), Config->extra_xml (X_("UI")), X_("ToggleLocations"));
-	big_clock_window = new ActionWindowProxy<Gtk::Window> (X_("bigclock"), Config->extra_xml (X_("UI")), X_("ToggleBigClock"));
-	speaker_config_window = new ActionWindowProxy<SpeakerDialog> (X_("speakerconf"), Config->extra_xml (X_("UI")), X_("toggle-speaker-config"));
+	const XMLNode* ui_xml = Config->extra_xml (X_("UI"));
 
-	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
-		_global_port_matrix[*i] = new ActionWindowProxy<GlobalPortMatrixWindow> (
-			string_compose ("GlobalPortMatrix-%1", (*i).to_string()),
-			Config->extra_xml (X_("UI")),
-			string_compose ("toggle-%1-connection-manager", (*i).to_string())
-			);
+	if (ui_xml) {
+		theme_manager.set_state (*ui_xml);
+		key_editor.set_state (*ui_xml);
+		rc_option_editor.set_state (*ui_xml);
+		session_option_editor.set_state (*ui_xml);
+		speaker_config_window.set_state (*ui_xml);
+		about.set_state (*ui_xml);
+		add_route_dialog.set_state (*ui_xml);
+		add_video_dialog.set_state (*ui_xml);
+		route_params.set_state (*ui_xml);
+		bundle_manager.set_state (*ui_xml);
+		location_ui.set_state (*ui_xml);
+		big_clock_window.set_state (*ui_xml);
+		audio_port_matrix.set_state (*ui_xml);
+		midi_port_matrix.set_state (*ui_xml);
 	}
 
-	setup_clock ();
+	WindowManager::instance().register_window (&theme_manager);
+	WindowManager::instance().register_window (&key_editor);
+	WindowManager::instance().register_window (&rc_option_editor);
+	WindowManager::instance().register_window (&session_option_editor);
+	WindowManager::instance().register_window (&speaker_config_window);
+	WindowManager::instance().register_window (&about);
+	WindowManager::instance().register_window (&add_route_dialog);
+	WindowManager::instance().register_window (&add_video_dialog);
+	WindowManager::instance().register_window (&route_params);
+	WindowManager::instance().register_window (&bundle_manager);
+	WindowManager::instance().register_window (&location_ui);
+	WindowManager::instance().register_window (&big_clock_window);
+	WindowManager::instance().register_window (&audio_port_matrix);
+	WindowManager::instance().register_window (&midi_port_matrix);
 
-	SpeakerDialog* s = new SpeakerDialog ();
-	s->signal_unmap().connect (sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/toggle-speaker-config")));
-	speaker_config_window->set (s);
-
+	/* We need to instantiate the theme manager because it loads our
+	   theme files. This should really change so that its window
+	   and its functionality are separate 
+	*/
+	
+	(void) theme_manager.get (true);
+	
 	starting.connect (sigc::mem_fun(*this, &ARDOUR_UI::startup));
 	stopping.connect (sigc::mem_fun(*this, &ARDOUR_UI::shutdown));
 
@@ -336,6 +367,14 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
 }
 
+GlobalPortMatrixWindow*
+ARDOUR_UI::create_global_port_matrix (ARDOUR::DataType type)
+{
+	if (!_session) {
+		return 0;
+	}
+	return new GlobalPortMatrixWindow (_session, type);
+}
 
 int
 ARDOUR_UI::create_engine ()
@@ -376,10 +415,6 @@ ARDOUR_UI::post_engine ()
 	 */
 
 	ARDOUR::init_post_engine ();
-
-	/* load up the UI manager */
-
-	ActionManager::init ();
 
 	_tooltips.enable();
 
@@ -466,10 +501,7 @@ ARDOUR_UI::~ARDOUR_UI ()
 	delete keyboard;
 	delete editor;
 	delete mixer;
-	delete add_route_dialog;
-	if (add_video_dialog) {
-		delete add_video_dialog;
-	}
+
 	stop_video_server();
 }
 
@@ -714,14 +746,7 @@ ARDOUR_UI::startup ()
 
 	goto_editor_window ();
 
-	/* Add the window proxies here; their addition may cause windows to be opened, and we want them
-	   to be opened on top of the editor window that goto_editor_window() just opened.
-	*/
-	add_window_proxy (location_ui);
-	add_window_proxy (big_clock_window);
-	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
-		add_window_proxy (_global_port_matrix[*i]);
-	}
+	WindowManager::instance().show_visible ();
 
 	/* We have to do this here since goto_editor_window() ends up calling show_all() on the
 	 * editor window, and we may want stuff to be hidden.
@@ -876,6 +901,8 @@ If you still wish to quit, please use the\n\n\
 	*/
 	save_ardour_state ();
 
+	close_all_dialogs ();
+
 	loading_message (string_compose (_("Please wait while %1 cleans up..."), PROGRAM_NAME));
 
 	if (_session) {
@@ -886,7 +913,6 @@ If you still wish to quit, please use the\n\n\
 		_session = 0;
 	}
 
-	ArdourDialog::close_all_dialogs ();
 	engine->stop (true);
 	quit ();
 }
@@ -2303,11 +2329,7 @@ ARDOUR_UI::save_state (const string & name, bool switch_to_it)
 {
 	XMLNode* node = new XMLNode (X_("UI"));
 
-	for (list<WindowProxyBase*>::iterator i = _window_proxies.begin(); i != _window_proxies.end(); ++i) {
-		if (!(*i)->rc_configured()) {
-			node->add_child_nocopy (*((*i)->get_state ()));
-		}
-	}
+	WindowManager::instance().add_state (*node);
 
 	node->add_child_nocopy (gui_object_state->get_state());
 
@@ -2943,18 +2965,6 @@ ARDOUR_UI::launch_chat ()
 }
 
 void
-ARDOUR_UI::show_about ()
-{
-	if (about == 0) {
-		about = new About;
-		about->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::about_signal_response));
-	}
-
-	about->set_transient_for(*editor);
-	about->show_all ();
-}
-
-void
 ARDOUR_UI::launch_manual ()
 {
 	PBD::open_uri (Config->get_tutorial_manual_url());
@@ -2964,21 +2974,6 @@ void
 ARDOUR_UI::launch_reference ()
 {
 	PBD::open_uri (Config->get_reference_manual_url());
-}
-
-void
-ARDOUR_UI::hide_about ()
-{
-	if (about) {
-		about->get_window()->set_cursor ();
-		about->hide ();
-	}
-}
-
-void
-ARDOUR_UI::about_signal_response (int /*response*/)
-{
-	hide_about();
 }
 
 void
@@ -3241,16 +3236,13 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 		return;
 	}
 
-	if (add_route_dialog == 0) {
-		add_route_dialog = new AddRouteDialog (_session);
-		if (float_window) {
-			add_route_dialog->set_transient_for (*float_window);
-		}
-	}
-
 	if (add_route_dialog->is_visible()) {
 		/* we're already doing this */
 		return;
+	}
+
+	if (float_window) {
+		add_route_dialog->set_transient_for (*float_window);
 	}
 
 	ResponseType r = (ResponseType) add_route_dialog->run ();
@@ -3443,17 +3435,15 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 		return;
 	}
 
-	if (add_video_dialog == 0) {
-		add_video_dialog = new AddVideoDialog (_session);
-		if (float_window) {
-			add_video_dialog->set_transient_for (*float_window);
-		}
+	if (float_window) {
+		add_video_dialog->set_transient_for (*float_window);
 	}
 
 	if (add_video_dialog->is_visible()) {
 		/* we're already doing this */
 		return;
 	}
+
 	ResponseType r = (ResponseType) add_video_dialog->run ();
 	add_video_dialog->hide();
 	if (r != RESPONSE_ACCEPT) { return; }
@@ -3828,12 +3818,11 @@ ARDOUR_UI::update_transport_clocks (framepos_t pos)
 		secondary_clock->set (pos);
 	}
 
-	if (big_clock_window->get()) {
+	if (big_clock_window) {
 		big_clock->set (pos);
 	}
 	ARDOUR_UI::instance()->video_timeline->manual_seek_video_monitor(pos);
 }
-
 
 void
 ARDOUR_UI::step_edit_status_change (bool yn)
@@ -3855,7 +3844,7 @@ ARDOUR_UI::record_state_changed ()
 {
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::record_state_changed);
 
-	if (!_session || !big_clock_window->get()) {
+	if (!_session || !big_clock_window) {
 		/* why bother - the clock isn't visible */
 		return;
 	}
@@ -3992,26 +3981,6 @@ ARDOUR_UI::setup_profile ()
 		Profile->set_sae ();
 		Profile->set_single_package ();
 	}
-}
-
-/** Add a window proxy to our list, so that its state will be saved.
- *  This call also causes the window to be created and opened if its
- *  state was saved as `visible'.
- */
-void
-ARDOUR_UI::add_window_proxy (WindowProxyBase* p)
-{
-	_window_proxies.push_back (p);
-	p->maybe_show ();
-}
-
-/** Remove a window proxy from our list.  Must be called if a WindowProxy
- *  is deleted, to prevent hanging pointers.
- */
-void
-ARDOUR_UI::remove_window_proxy (WindowProxyBase* p)
-{
-	_window_proxies.remove (p);
 }
 
 int

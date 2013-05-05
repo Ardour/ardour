@@ -49,7 +49,7 @@ using namespace ARDOUR;
 
 std::vector<std::string> AddRouteDialog::channel_combo_strings;
 
-AddRouteDialog::AddRouteDialog (Session* s)
+AddRouteDialog::AddRouteDialog ()
 	: ArdourDialog (_("Add Track or Bus"))
 	, routes_adjustment (1, 1, 128, 1, 4)
 	, routes_spinner (routes_adjustment)
@@ -57,8 +57,6 @@ AddRouteDialog::AddRouteDialog (Session* s)
 	, mode_label (_("Track mode:"))
 	, instrument_label (_("Instrument:"))
 {
-	set_session (s);
-
 	set_name ("AddRouteDialog");
 	set_modal (true);
 	set_skip_taskbar_hint (true);
@@ -496,7 +494,7 @@ AddRouteDialog::add_route_group (RouteGroup* g)
 RouteGroup*
 AddRouteDialog::route_group ()
 {
-	if (route_group_combo.get_active_row_number () == 2) {
+	if (!_session || route_group_combo.get_active_row_number () == 2) {
 		return 0;
 	}
 
@@ -513,7 +511,9 @@ AddRouteDialog::refill_route_groups ()
 
 	route_group_combo.append_text (_("No Group"));
 
-	_session->foreach_route_group (sigc::mem_fun (*this, &AddRouteDialog::add_route_group));
+	if (_session) {
+		_session->foreach_route_group (sigc::mem_fun (*this, &AddRouteDialog::add_route_group));
+	}
 
 	route_group_combo.set_active (2);
 }
@@ -534,7 +534,9 @@ AddRouteDialog::group_changed ()
 			delete g;
 			route_group_combo.set_active (2);
 		} else {
-			_session->add_route_group (g);
+			if (_session) {
+				_session->add_route_group (g);
+			}
 			add_route_group (g);
 			route_group_combo.set_active (3);
 		}

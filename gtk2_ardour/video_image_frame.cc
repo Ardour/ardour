@@ -226,7 +226,7 @@ http_get_thread (void *arg) {
 void
 VideoImageFrame::http_download_done (char *data){
 	if (queued_request) {
-		http_maybe_get_again();
+		http_get_again(want_video_frame_number);
 		return;
 	}
 
@@ -253,7 +253,7 @@ VideoImageFrame::http_download_done (char *data){
 	usleep(20000);
 
 	if (queued_request) {
-		http_maybe_get_again();
+		http_get_again(want_video_frame_number);
 	}
 	pthread_mutex_unlock(&request_lock);
 }
@@ -283,7 +283,7 @@ VideoImageFrame::http_get(framepos_t fn) {
 }
 
 void
-VideoImageFrame::http_maybe_get_again() {
+VideoImageFrame::http_get_again(framepos_t /*fn*/) {
 	pthread_mutex_lock(&queue_lock);
 	queued_request=false;
 	req_video_frame_number=want_video_frame_number;

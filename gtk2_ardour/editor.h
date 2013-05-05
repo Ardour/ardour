@@ -57,7 +57,6 @@
 #include "enums.h"
 #include "editor_items.h"
 #include "region_selection.h"
-#include "window_proxy.h"
 
 namespace Gtkmm2ext {
 	class TearOff;

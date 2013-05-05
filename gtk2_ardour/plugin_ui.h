@@ -294,15 +294,10 @@ class PluginUIWindow : public ArdourWindow
 	void set_title(const std::string& title);
 
 
-	bool on_enter_notify_event (GdkEventCrossing*);
-	bool on_leave_notify_event (GdkEventCrossing*);
-	bool on_focus_in_event (GdkEventFocus*);
-	bool on_focus_out_event (GdkEventFocus*);
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
 	void on_show ();
 	void on_hide ();
-	void on_map ();
 
   private:
 	std::string _title;

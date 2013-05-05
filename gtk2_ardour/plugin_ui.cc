@@ -168,42 +168,6 @@ PluginUIWindow::~PluginUIWindow ()
 }
 
 void
-PluginUIWindow::on_map ()
-{
-	Window::on_map ();
-}
-
-bool
-PluginUIWindow::on_enter_notify_event (GdkEventCrossing *ev)
-{
-	Keyboard::the_keyboard().enter_window (ev, this);
-	return false;
-}
-
-bool
-PluginUIWindow::on_leave_notify_event (GdkEventCrossing *ev)
-{
-	Keyboard::the_keyboard().leave_window (ev, this);
-	return false;
-}
-
-bool
-PluginUIWindow::on_focus_in_event (GdkEventFocus *ev)
-{
-	Window::on_focus_in_event (ev);
-	//Keyboard::the_keyboard().magic_widget_grab_focus ();
-	return false;
-}
-
-bool
-PluginUIWindow::on_focus_out_event (GdkEventFocus *ev)
-{
-	Window::on_focus_out_event (ev);
-	//Keyboard::the_keyboard().magic_widget_drop_focus ();
-	return false;
-}
-
-void
 PluginUIWindow::on_show ()
 {
 	set_role("plugin_ui");

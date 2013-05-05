@@ -43,8 +43,6 @@ class ArdourDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr
 	void on_unmap ();
 	void on_show ();
 
-	static void close_all_dialogs () { CloseAllDialogs(); }
-
   private:
         bool _splash_pushed;
 	void init ();

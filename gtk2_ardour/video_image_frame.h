@@ -94,7 +94,7 @@ class VideoImageFrame : public sigc::trackable
 
 
 	void http_get(framepos_t fn);
-	void http_maybe_get_again();
+	void http_get_again(framepos_t fn);
 
 	framepos_t req_video_frame_number;
 	framepos_t want_video_frame_number;

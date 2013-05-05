@@ -42,10 +42,10 @@ NSM_Client::command_save(char **out_msg)
 }
 
 int
-NSM_Client::command_open(const char *name,
-                         const char */*display_name*/,
-                         const char *client_id,
-                         char **/*out_msg*/)
+NSM_Client::command_open(const char* name,
+                         const char* /*display_name*/,
+                         const char* client_id,
+                         char** /*out_msg*/)
 {
     int r = ERR_OK;
 

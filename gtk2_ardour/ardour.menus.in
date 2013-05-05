@@ -50,10 +50,10 @@
 #ifndef GTKOSX
       <separator/>
 #endif
-      <menuitem action='ToggleSessionOptionsEditor'/>
+      <menuitem action='toggle-session-options-editor'/>
 #ifdef GTKOSX
-      <menuitem action='ToggleRCOptionsEditor'/>
-      <menuitem action='About'/>
+      <menuitem action='toggle-rc-options-editor'/>
+      <menuitem action='toggle-about'/>
 #endif
       <separator/>
       <menuitem action='Quit'/>
@@ -231,7 +231,7 @@
       <menuitem action='set-mouse-mode-object-range'/>
 #ifndef GTKOSX
       <separator/>
-      <menuitem action='ToggleRCOptionsEditor'/>
+      <menuitem action='toggle-rc-options-editor'/>
 #endif
     </menu>         
 
@@ -510,12 +510,12 @@
 
       <separator/>
 
-      <menuitem action='ToggleInspector'/>
-      <menuitem action='ToggleLocations'/>
-      <menuitem action='ToggleKeyEditor'/>
-      <menuitem action='ToggleBundleManager'/>
-      <menuitem action='ToggleThemeManager'/>
-      <menuitem action='ToggleBigClock'/>
+      <menuitem action='toggle-inspector'/>
+      <menuitem action='toggle-locations'/>
+      <menuitem action='toggle-key-editor'/>
+      <menuitem action='toggle-bundle-manager'/>
+      <menuitem action='toggle-theme-manager'/>
+      <menuitem action='toggle-big-clock'/>
       <menuitem action='toggle-speaker-config'/>
 
       <separator/>
@@ -531,7 +531,7 @@
     </menu>
     <menu name='Help' action='Help'>
 #ifndef GTKOSX
-      <menuitem action='About'/>
+      <menuitem action='toggle-about'/>
 #endif
       <menuitem action='Chat'/>
       <menuitem action='Manual'/>

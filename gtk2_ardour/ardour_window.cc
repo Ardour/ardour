@@ -23,6 +23,7 @@
 #include <gtkmm2ext/doi.h>
 
 #include "ardour_window.h"
+#include "ardour_ui.h"
 #include "keyboard.h"
 
 using namespace std;
@@ -83,8 +84,12 @@ ArdourWindow::init ()
            
            (a) utility & dialog windows are considered to be part of the same level
            (b) they will float above normal windows without any particular effort
+	   (c) present()-ing them will make a utility float over a dialog or
+               vice versa.
         */
 
         set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
+
+	ARDOUR_UI::CloseAllDialogs.connect (sigc::mem_fun (*this, &ArdourWindow::hide));
 }
 

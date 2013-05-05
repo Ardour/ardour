@@ -82,8 +82,6 @@ ARDOUR_UI::setup_windows ()
 
 	we_have_dependents ();
 
-	theme_manager->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleThemeManager")));
-
 #ifdef TOP_MENUBAR
 	HBox* status_bar_packer = manage (new HBox);
 	EventBox* status_bar_event_box = manage (new EventBox);

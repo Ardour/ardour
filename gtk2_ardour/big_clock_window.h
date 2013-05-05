@@ -17,36 +17,33 @@
 
 */
 
-#ifndef __libgtkmm2ext_visibility_tracker__
-#define __libgtkmm2ext_visibility_tracker__
+#ifndef __bigclock_window_h__
+#define __bigclock_window_h__
 
-#include <gdk/gdkevents.h>
+#include "ardour_window.h"
 
-namespace GTK {
-	class Window;
-}
+class AudioClock;
 
-namespace Gtkmm2ext {
-
-class VisibilityTracker : public virtual sigc::trackable {
+class BigClockWindow : public ArdourWindow
+{
   public:
-    VisibilityTracker (Gtk::Window&);
-    virtual ~VisibilityTracker() {}
-    
-    void cycle_visibility ();
-
-    bool fully_visible() const;
-    bool not_visible() const;
-    bool partially_visible() const;
-
-    Gtk::Window& window () const { return _window; }
+    BigClockWindow (AudioClock&);
 
   private:
-    Gtk::Window& _window;
-    GdkVisibilityState _visibility;
-    bool handle_visibility_notify_event (GdkEventVisibility*);
+    AudioClock& clock;
+    bool resize_in_progress;
+    int original_height;
+    int original_width;
+    int original_font_size;
+
+    void on_size_allocate (Gtk::Allocation&);
+    void on_realize ();
+    void on_unmap ();
+    bool on_key_press_event (GdkEventKey*);
+
+    bool text_resizer (int, int);
+    void reset_aspect_ratio ();
 };
 
-}
+#endif // __ardour_window_h__
 
-#endif /* __libgtkmm2ext_visibility_tracker__ */ 
