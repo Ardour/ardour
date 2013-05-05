@@ -53,8 +53,8 @@
 #include "io_selector.h"
 #include "send_ui.h"
 #include "enums.h"
-#include "window_proxy.h"
 #include "ardour_button.h"
+#include "window_manager.h"
 
 class MotionController;
 class PluginSelector;
@@ -75,28 +75,26 @@ namespace ARDOUR {
 
 class ProcessorBox;
 
-/** A WindowProxy for Processor UI windows; it knows how to ask a ProcessorBox
- *  to create a UI window for a particular processor.
- */
-class ProcessorWindowProxy : public WindowProxy<Gtk::Window>
+class ProcessorWindowProxy : public WindowManager::ProxyBase 
 {
-public:
-	ProcessorWindowProxy (std::string const &, XMLNode const *, ProcessorBox *, boost::weak_ptr<ARDOUR::Processor>);
+  public:
+    ProcessorWindowProxy (std::string const &, ProcessorBox *, boost::weak_ptr<ARDOUR::Processor>);
 
-	void show ();
-	bool rc_configured () const {
-		return false;
-	}
+    Gtk::Window* get (bool create = false);
+    
+    boost::weak_ptr<ARDOUR::Processor> processor () const {
+	    return _processor;
+    }
 
-	boost::weak_ptr<ARDOUR::Processor> processor () const {
-		return _processor;
-	}
+    ARDOUR::SessionHandlePtr* session_handle();
+    void toggle();
 
-	bool marked;
+    bool marked;
 
-private:
-	ProcessorBox* _processor_box;
-	boost::weak_ptr<ARDOUR::Processor> _processor;
+  private:
+    ProcessorBox* _processor_box;
+    boost::weak_ptr<ARDOUR::Processor> _processor;
+    bool is_custom;
 };
 
 class ProcessorEntry : public Gtkmm2ext::DnDVBoxChild, public sigc::trackable
@@ -255,9 +253,15 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	void hide_things ();
 
+        /* Everything except a WindowProxy object should use this to get the window */
 	Gtk::Window* get_processor_ui (boost::shared_ptr<ARDOUR::Processor>) const;
-	void toggle_edit_processor (boost::shared_ptr<ARDOUR::Processor>);
-	void toggle_edit_generic_processor (boost::shared_ptr<ARDOUR::Processor>);
+
+        /* a WindowProxy object can use this */
+        Gtk::Window* get_editor_window (boost::shared_ptr<ARDOUR::Processor>);
+        Gtk::Window* get_generic_editor_window (boost::shared_ptr<ARDOUR::Processor>);
+
+        void edit_processor (boost::shared_ptr<ARDOUR::Processor>);
+        void generic_edit_processor (boost::shared_ptr<ARDOUR::Processor>);
 
 	void update_gui_object_state (ProcessorEntry *);
 	
@@ -393,7 +397,9 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void route_property_changed (const PBD::PropertyChange&);
 	std::string generate_processor_title (boost::shared_ptr<ARDOUR::PluginInsert> pi);
 
-	std::list<ProcessorWindowProxy*> _processor_window_proxies;
+	std::list<ProcessorWindowProxy*> _processor_window_info;
+        ProcessorWindowProxy* find_window_proxy (boost::shared_ptr<ARDOUR::Processor>) const;
+
 	void set_processor_ui (boost::shared_ptr<ARDOUR::Processor>, Gtk::Window *);
 	void maybe_add_processor_to_ui_list (boost::weak_ptr<ARDOUR::Processor>);
 

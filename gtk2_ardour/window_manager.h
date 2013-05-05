@@ -68,12 +68,11 @@ class WindowManager
 	void set_action (Glib::RefPtr<Gtk::Action>);
 	Glib::RefPtr<Gtk::Action> action() const { return _action; };
 	
-	void clear ();
+	void drop_window ();
 	void use_window (Gtk::Window&);
 
 	virtual Gtk::Window* get (bool create = false) = 0;
 
-	virtual bool rc_configured() const { return true; }
 	virtual void toggle ();
 
         void set_state (const XMLNode&);
@@ -88,16 +87,14 @@ class WindowManager
 	std::string  _menu_name;
 	Glib::RefPtr<Gtk::Action> _action;
 	Gtk::Window* _window;
-	bool         _visible; ///< true if the window should be visible on startup
-	int          _x_off; ///< x position
-	int          _y_off; ///< y position
-	int          _width; ///< width
-	int          _height; ///< height
+	mutable bool _visible; ///< true if the window should be visible on startup
+	mutable int  _x_off; ///< x position
+	mutable int  _y_off; ///< y position
+	mutable int  _width; ///< width
+	mutable int  _height; ///< height
 	Gtkmm2ext::VisibilityTracker* vistracker;
-	sigc::connection configure_connection;
 
 	void setup ();
-	bool configured (GdkEventConfigure*);
     };
 
     template<typename T>

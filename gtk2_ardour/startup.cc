@@ -129,8 +129,6 @@ ArdourStartup::ArdourStartup (bool require_new, const std::string& session_name,
 			set_default_icon_list (window_icons);
 		}
 
-		set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
-		
 #ifdef __APPLE__
 		setup_prerelease_page ();
 #endif

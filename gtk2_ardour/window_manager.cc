@@ -51,7 +51,7 @@ WindowManager::register_window (ProxyBase* info)
 {
 	_windows.push_back (info);
 
-	if (info->rc_configured() && !info->menu_name().empty()) {
+	if (!info->menu_name().empty()) {
 
 		if (!window_actions) {
 			window_actions = Gtk::ActionGroup::create (X_("Window"));
@@ -220,26 +220,25 @@ WindowManager::ProxyBase::toggle()
 	}
 }
 
-bool
-WindowManager::ProxyBase::configured (GdkEventConfigure* ev)
-{
-	_visible = true;
-	_x_off = ev->x;
-	_y_off = ev->y;
-	_height = ev->height;
-	_width = ev->width;
-
-	return false;
-}
-
 XMLNode&
 WindowManager::ProxyBase::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Window"));
-	node->add_property (X_("name"), _name);
-	node->add_property (X_("visible"), _visible ? X_("yes") : X_("no"));
+	char buf[32];	
 
-	char buf[32];
+	node->add_property (X_("name"), _name);
+
+	if (_window && vistracker) {
+		
+		/* we have a window, so use current state */
+
+		_visible = vistracker->partially_visible ();
+		_window->get_position (_x_off, _y_off);
+		_window->get_size (_width, _height);
+	}
+
+	node->add_property (X_("visible"), _visible? X_("yes") : X_("no"));
+	
 	snprintf (buf, sizeof (buf), "%d", _x_off);
 	node->add_property (X_("x-off"), buf);
 	snprintf (buf, sizeof (buf), "%d", _y_off);
@@ -253,13 +252,12 @@ WindowManager::ProxyBase::get_state () const
 }
 
 void
-WindowManager::ProxyBase::clear ()
+WindowManager::ProxyBase::drop_window ()
 {
 	if (_window) {
 		_window->hide ();
 		delete _window;
 		_window = 0;
-		configure_connection.disconnect ();
 		delete vistracker;
 		vistracker = 0;
 	}
@@ -268,7 +266,7 @@ WindowManager::ProxyBase::clear ()
 void
 WindowManager::ProxyBase::use_window (Gtk::Window& win)
 {
-	clear ();
+	drop_window ();
 	_window = &win;
 	setup ();
 }
@@ -277,8 +275,6 @@ void
 WindowManager::ProxyBase::setup ()
 {
 	assert (_window);
-
-	configure_connection = _window->signal_configure_event().connect (sigc::mem_fun (*this, &ProxyBase::configured), false);
 
 	vistracker = new Gtkmm2ext::VisibilityTracker (*_window);
 

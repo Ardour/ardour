@@ -52,6 +52,7 @@ gtk2_ardour_sources = [
         'automation_streamview.cc',
         'automation_time_axis.cc',
         'axis_view.cc',
+        'big_clock_window.cc',
         'bundle_manager.cc',
         'button_joiner.cc',
         'canvas-flag.cc',
@@ -242,7 +243,7 @@ gtk2_ardour_sources = [
         'visibility_group.cc',
         'volume_controller.cc',
         'waveview.cc',
-        'window_proxy.cc',
+        'window_manager.cc',
 # video-timeline related sources:
         'video_image_frame.cc',
         'add_video_dialog.cc',

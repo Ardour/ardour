@@ -29,7 +29,9 @@
 
 #include "actions.h"
 #include "add_route_dialog.h"
+#include "add_video_dialog.h"
 #include "ardour_ui.h"
+#include "big_clock_window.h"
 #include "bundle_manager.h"
 #include "global_port_matrix.h"
 #include "gui_object.h"
@@ -45,6 +47,7 @@
 #include "shuttle_control.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
+#include "splash.h"
 #include "sfdb_ui.h"
 #include "theme_manager.h"
 #include "time_info_box.h"
@@ -62,14 +65,20 @@ ARDOUR_UI::set_session (Session *s)
 {
 	SessionHandlePtr::set_session (s);
 
-	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
-		GlobalPortMatrixWindow* w;
-		if ((w = _global_port_matrix[*i]->get()) != 0) {
-			w->set_session (s);
-		}
+	if (audio_port_matrix) {
+		audio_port_matrix->set_session (s);
 	}
 
+	if (midi_port_matrix) {
+		midi_port_matrix->set_session (s);
+	}
+
+
 	if (!_session) {
+		/* Session option editor cannot exist across change-of-session */
+		session_option_editor.drop_window ();
+		/* Ditto for AddVideoDialog */
+		add_video_dialog.drop_window ();
 		return;
 	}
 
@@ -86,35 +95,10 @@ ARDOUR_UI::set_session (Session *s)
 	}
 
 	AutomationWatch::instance().set_session (s);
-
-	if (location_ui->get()) {
-		location_ui->get()->set_session(s);
-	}
-
-        if (speaker_config_window->get()) {
-                speaker_config_window->get()->set_speakers (s->get_speakers());
-        }
-
-	if (route_params) {
-		route_params->set_session (s);
-	}
-
-	if (add_route_dialog) {
-		add_route_dialog->set_session (s);
-	}
-
-	if (session_option_editor) {
-		session_option_editor->set_session (s);
-	}
+	WindowManager::instance().set_session (s);
 
 	if (shuttle_box) {
 		shuttle_box->set_session (s);
-	}
-
-	for (ARDOUR::DataType::iterator i = ARDOUR::DataType::begin(); i != ARDOUR::DataType::end(); ++i) {
-		if (_global_port_matrix[*i]->get()) {
-			_global_port_matrix[*i]->get()->set_session (_session);
-		}
 	}
 
 	primary_clock->set_session (s);
@@ -267,35 +251,116 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	return 0;
 }
 
-void
-ARDOUR_UI::toggle_big_clock_window ()
+static bool
+_hide_splash (gpointer arg)
 {
-	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleBigClock"));
-	if (act) {
-		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+	((ARDOUR_UI*)arg)->hide_splash();
+	return false;
+}
 
-		if (tact->get_active()) {
-			big_clock_window->get()->show_all ();
-			big_clock_window->get()->present ();
-		} else {
-			big_clock_window->get()->hide ();
-		}
+void
+ARDOUR_UI::goto_editor_window ()
+{
+	if (splash && splash->is_visible()) {
+		// in 2 seconds, hide the splash screen
+		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 2000);
+	}
+
+	editor->show_window ();
+	editor->present ();
+	flush_pending ();
+}
+
+void
+ARDOUR_UI::goto_mixer_window ()
+{
+	if (!editor) {
+		return;
+	}
+
+	Glib::RefPtr<Gdk::Window> win = editor->get_window ();
+	Glib::RefPtr<Gdk::Screen> screen;
+	
+	if (win) {
+		screen = win->get_screen();
+	} else {
+		screen = Gdk::Screen::get_default();
+	}
+	
+	if (screen && screen->get_height() < 700) {
+		Gtk::MessageDialog msg (_("This screen is not tall enough to display the mixer window"));
+		msg.run ();
+		return;
+	}
+
+	mixer->show_window ();
+	mixer->present ();
+	flush_pending ();
+}
+
+
+void
+ARDOUR_UI::toggle_mixer_window ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("toggle-mixer"));
+	if (!act) {
+		return;
+	}
+
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+
+	if (tact->get_active()) {
+		goto_mixer_window ();
+	} else {
+		mixer->hide ();
 	}
 }
 
 void
-ARDOUR_UI::toggle_speaker_config_window ()
+ARDOUR_UI::toggle_editor_mixer ()
 {
-	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("toggle-speaker-config"));
-	if (act) {
-		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+	if (editor && mixer) {
 
-		if (tact->get_active()) {
-			speaker_config_window->get()->show_all ();
-			speaker_config_window->get()->present ();
-		} else {
-			speaker_config_window->get()->hide ();
+		if (editor->get_screen() != mixer->get_screen()) {
+			// different screens, so don't do anything
+			return;
 		}
+
+		/* See if they are obscuring each other */
+		
+		gint ex, ey, ew, eh;
+		gint mx, my, mw, mh;
+
+		editor->get_position (ex, ey);
+		editor->get_size (ew, eh);
+
+		mixer->get_position (mx, my);
+		mixer->get_size (mw, mh);
+
+		GdkRectangle e;
+		GdkRectangle m;
+		GdkRectangle r;
+
+		e.x = ex;
+		e.y = ey;
+		e.width = ew;
+		e.height = eh;
+
+		m.x = mx;
+		m.y = my;
+		m.width = mw;
+		m.height = mh;
+		
+		if (!gdk_rectangle_intersect (&e, &m, &r)) {
+			/* they do not intersect so do not toggle */
+			return;
+		}
+	}
+		
+	if (mixer && mixer->fully_visible()) {
+		goto_editor_window ();
+	} else {
+		goto_mixer_window ();
 	}
 }
 
@@ -324,173 +389,28 @@ ARDOUR_UI::new_midi_tracer_window ()
 	}
 }
 
-void
-ARDOUR_UI::toggle_rc_options_window ()
-{
-	if (rc_option_editor == 0) {
-		rc_option_editor = new RCOptionEditor;
-		rc_option_editor->signal_unmap().connect(sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleRCOptionsEditor")));
-		rc_option_editor->set_session (_session);
-	}
-
-	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleRCOptionsEditor"));
-	if (act) {
-		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-
-		if (tact->get_active()) {
-			rc_option_editor->show_all ();
-			rc_option_editor->present ();
-		} else {
-			rc_option_editor->hide ();
-		}
-	}
-}
-
-void
-ARDOUR_UI::toggle_session_options_window ()
-{
-	if (session_option_editor == 0) {
-		session_option_editor = new SessionOptionEditor (_session);
-		session_option_editor->signal_unmap().connect(sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleSessionOptionsEditor")));
-	}
-
-	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleSessionOptionsEditor"));
-	if (act) {
-		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
-
-		if (tact->get_active()) {
-			session_option_editor->show_all ();
-			session_option_editor->present ();
-		} else {
-			session_option_editor->hide ();
-		}
-	}
-}
-
-int
-ARDOUR_UI::create_location_ui ()
-{
-	if (location_ui->get() == 0) {
-		location_ui->set (new LocationUIWindow ());
-		location_ui->get()->set_session (_session);
-		location_ui->get()->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleLocations")));
-	}
-	return 0;
-}
-
-void
-ARDOUR_UI::toggle_location_window ()
-{
-	if (create_location_ui()) {
-		return;
-	}
-
-	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleLocations"));
-	if (act) {
-		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-
-		if (tact->get_active()) {
-			location_ui->get()->show_all ();
-			location_ui->get()->present ();
-		} else {
-			location_ui->get()->hide ();
-		}
-	}
-}
-
-void
-ARDOUR_UI::toggle_key_editor ()
-{
-	if (key_editor == 0) {
-		key_editor = new KeyEditor;
-		key_editor->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleKeyEditor")));
-	}
-
-	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleKeyEditor"));
-	if (act) {
-		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-
-		if (tact->get_active()) {
-			key_editor->show_all ();
-			key_editor->present ();
-		} else {
-			key_editor->hide ();
-		}
-	}
-}
-
-void
-ARDOUR_UI::toggle_theme_manager ()
-{
-	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleThemeManager"));
-	if (act) {
-		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-
-		if (tact->get_active()) {
-			theme_manager->show_all ();
-			theme_manager->present ();
-		} else {
-			theme_manager->hide ();
-		}
-	}
-}
-
-void
+BundleManager*
 ARDOUR_UI::create_bundle_manager ()
 {
-	if (bundle_manager == 0) {
-		bundle_manager = new BundleManager (_session);
-		bundle_manager->signal_unmap().connect (sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBundleManager")));
-	}
+	return new BundleManager (_session);
 }
 
-void
-ARDOUR_UI::toggle_bundle_manager ()
+AddVideoDialog*
+ARDOUR_UI::create_add_video_dialog ()
 {
-	create_bundle_manager ();
-
-	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleBundleManager"));
-	if (act) {
-		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
-
-		if (tact->get_active()) {
-			bundle_manager->show_all ();
-			bundle_manager->present ();
-		} else {
-			bundle_manager->hide ();
-		}
-	}
+	return new AddVideoDialog (_session);
 }
 
-int
-ARDOUR_UI::create_route_params ()
+SessionOptionEditor*
+ARDOUR_UI::create_session_option_editor ()
 {
-	if (route_params == 0) {
-		route_params = new RouteParams_UI ();
-		route_params->set_session (_session);
-		route_params->signal_unmap().connect (sigc::bind(sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleInspector")));
-	}
-	return 0;
+	return new SessionOptionEditor (_session);
 }
 
-void
-ARDOUR_UI::toggle_route_params_window ()
+BigClockWindow*
+ARDOUR_UI::create_big_clock_window ()
 {
-	if (create_route_params ()) {
-		return;
-	}
-
-	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleInspector"));
-	if (act) {
-		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-
-		if (tact->get_active()) {
-			route_params->show_all ();
-			route_params->present ();
-		} else {
-			route_params->hide ();
-		}
-	}
+	return new BigClockWindow (*big_clock);
 }
 
 void
@@ -512,14 +432,18 @@ ARDOUR_UI::main_window_state_event_handler (GdkEventWindowState* ev, bool window
 
 		if ((ev->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) &&
 		    (ev->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)) {
-			float_big_clock (editor);
+			if (big_clock_window) {
+				big_clock_window->set_transient_for (*editor);
+			}
 		}
 
 	} else {
 
 		if ((ev->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) &&
 		    (ev->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)) {
-			float_big_clock (mixer);
+			if (big_clock_window) {
+				big_clock_window->set_transient_for (*mixer);
+			}
 		}
 	}
 

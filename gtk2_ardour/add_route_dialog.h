@@ -45,7 +45,7 @@ class Editor;
 class AddRouteDialog : public ArdourDialog
 {
   public:
-	AddRouteDialog (ARDOUR::Session*);
+	AddRouteDialog ();
 	~AddRouteDialog ();
 
         enum TypeWanted { 

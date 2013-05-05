@@ -24,15 +24,10 @@
 
 class AudioClock;
 
-class BigClockWindow : public Gtk::Window, public ARDOUR::SessionHandlePtr, public Gtkmm2ext::VisibilityTracker
+class BigClockWindow : public ArdourWindow
 {
   public:
     BigClockWindow (AudioClock&);
-
-    AudioClock* clock() const { return _clock; }
-    void set_clock (AudioClock* c) { _clock = c; }
-
-    void float (Gtk::Window*);
 
   private:
     AudioClock& clock;
@@ -44,7 +39,7 @@ class BigClockWindow : public Gtk::Window, public ARDOUR::SessionHandlePtr, publ
     void on_size_allocate (Gtk::Allocation&);
     void on_realize ();
     void on_unmap ();
-    bool on_key_press_event ();
+    bool on_key_press_event (GdkEventKey*);
 
     bool text_resizer (int, int);
     void reset_aspect_ratio ();

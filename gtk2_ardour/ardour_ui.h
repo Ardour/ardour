@@ -67,14 +67,15 @@
 
 #include "video_timeline.h"
 
-#include "ardour_dialog.h"
 #include "ardour_button.h"
+#include "ardour_dialog.h"
+#include "ardour_window.h"
 #include "editing.h"
 #include "nsm.h"
 #include "ui_config.h"
-#include "window_proxy.h"
 #include "enums.h"
 #include "visibility_group.h"
+#include "window_manager.h"
 
 class About;
 class AddRouteDialog;
@@ -84,6 +85,7 @@ class SystemExec;
 class ArdourStartup;
 class ArdourKeyboard;
 class AudioClock;
+class BigClockWindow;
 class BundleManager;
 class ButtonJoiner;
 class ConnectionEditor;
@@ -101,7 +103,6 @@ class SpeakerDialog;
 class ThemeManager;
 class TimeInfoBox;
 class MidiTracer;
-class WindowProxyBase;
 class GlobalPortMatrixWindow;
 class GUIObjectState;
 
@@ -165,14 +166,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	PublicEditor&	  the_editor(){return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }
 
-	void toggle_key_editor ();
-	void toggle_location_window ();
-	void toggle_theme_manager ();
-	void toggle_bundle_manager ();
-	void toggle_big_clock_window ();
-	void toggle_speaker_config_window ();
 	void new_midi_tracer_window ();
-	void toggle_route_params_window ();
 	void toggle_editing_space();
 	void toggle_keep_tearoffs();
 
@@ -209,6 +203,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	MainClock* primary_clock;
 	MainClock* secondary_clock;
 	void focus_on_clock ();
+	AudioClock*   big_clock;
 
 	TimeInfoBox* time_info_box;
 
@@ -274,9 +269,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void setup_tooltips ();
 
 	void set_shuttle_fract (double);
-
-	void add_window_proxy (WindowProxyBase *);
-	void remove_window_proxy (WindowProxyBase *);
 
 	void get_process_buffers ();
 	void drop_process_buffers ();
@@ -358,24 +350,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void manage_window (Gtk::Window&);
 
-	AudioClock*   big_clock;
-	ActionWindowProxy<Gtk::Window>* big_clock_window;
-	int original_big_clock_width;
-	int original_big_clock_height;
-	double original_big_clock_font_size;
-
-	void big_clock_size_allocate (Gtk::Allocation&);
-	bool idle_big_clock_text_resizer (int width, int height);
-	void big_clock_realized ();
-	bool big_clock_resize_in_progress;
-	int  big_clock_height;
-	void big_clock_catch_focus ();
-	void big_clock_reset_aspect_ratio ();
-
-	void float_big_clock (Gtk::Window* parent);
 	bool main_window_state_event_handler (GdkEventWindowState*, bool window_was_editor);
-
-	ActionWindowProxy<SpeakerDialog>* speaker_config_window;
 
 	void update_transport_clocks (framepos_t pos);
 	void record_state_changed ();
@@ -596,40 +571,39 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	PublicEditor     *editor;
 	int         create_editor ();
 
-	RouteParams_UI *route_params;
-	int             create_route_params ();
+        /* Dialogs that can be created via new<T> */
 
-	BundleManager *bundle_manager;
-	void create_bundle_manager ();
+        WindowManager::Proxy<SpeakerDialog> speaker_config_window;
+        WindowManager::Proxy<ThemeManager> theme_manager;
+        WindowManager::Proxy<KeyEditor> key_editor;
+        WindowManager::Proxy<RCOptionEditor> rc_option_editor;
+        WindowManager::Proxy<AddRouteDialog> add_route_dialog;
+        WindowManager::Proxy<About> about;
+        WindowManager::Proxy<LocationUIWindow> location_ui;
+        WindowManager::Proxy<RouteParams_UI> route_params;
 
-	ActionWindowProxy<LocationUIWindow>* location_ui;
-	int               create_location_ui ();
-	void              handle_locations_change (ARDOUR::Location*);
+        /* Windows/Dialogs that require a creator method */
 
-	ActionWindowProxy<GlobalPortMatrixWindow>* _global_port_matrix[ARDOUR::DataType::num_types];
-	void toggle_global_port_matrix (ARDOUR::DataType);
+        WindowManager::ProxyWithConstructor<SessionOptionEditor> session_option_editor;
+        WindowManager::ProxyWithConstructor<AddVideoDialog> add_video_dialog;
+        WindowManager::ProxyWithConstructor<BundleManager> bundle_manager;
+        WindowManager::ProxyWithConstructor<BigClockWindow> big_clock_window;
+        WindowManager::ProxyWithConstructor<GlobalPortMatrixWindow> audio_port_matrix;
+        WindowManager::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
+
+        /* creator methods */
+
+        SessionOptionEditor*    create_session_option_editor ();
+        BundleManager*          create_bundle_manager ();
+        AddVideoDialog*         create_add_video_dialog ();
+        BigClockWindow*         create_big_clock_window(); 
+        GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
 
 	static UIConfiguration *ui_config;
-	ThemeManager *theme_manager;
 
-	/* Key bindings editor */
-
-	KeyEditor *key_editor;
-
-	/* RC Options window */
-
-	RCOptionEditor *rc_option_editor;
-
-	SessionOptionEditor *session_option_editor;
-
-	/* route dialog */
-
-	AddRouteDialog *add_route_dialog;
-
-	/* video dialog */
-
-	AddVideoDialog *add_video_dialog;
 	SystemExec *video_server_process;
+
+	void handle_locations_change (ARDOUR::Location*);
 
 	/* Keyboard Handling */
 
@@ -644,7 +618,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	uint32_t rec_enabled_streams;
 	void count_recenabled_streams (ARDOUR::Route&);
 
-	About* about;
 	Splash* splash;
 
 	void pop_back_splash (Gtk::Window&);
@@ -729,8 +702,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool idle_finish ();
 	void queue_finish ();
 	void fontconfig_dialog ();
-
-	std::list<WindowProxyBase*> _window_proxies;
 
         int missing_file (ARDOUR::Session*s, std::string str, ARDOUR::DataType type);
         int ambiguous_file (std::string file, std::string path, std::vector<std::string> hits);

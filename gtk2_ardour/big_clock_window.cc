@@ -17,29 +17,37 @@
 
 */
 
-#ifdef WAF_BUILD
-#include "gtk2ardour-config.h"
-#endif
+#include <algorithm>
+#include <string>
 
-#include "big_clock_window.h"
+#include "ardour_ui.h"
 #include "audio_clock.h"
+#include "big_clock_window.h"
+#include "public_editor.h"
+#include "utils.h"
 
 #include "i18n.h"
 
+using std::min;
+using std::string;
 
 BigClockWindow::BigClockWindow (AudioClock& c) 
 	: ArdourWindow (_("Big Clock"))
 	, clock (c)
 	, resize_in_progress (false)
+	, original_height (0)
+	, original_width (0)
+	, original_font_size (0)
 {
 	ARDOUR_UI::Clock.connect (sigc::mem_fun (clock, &AudioClock::set));
 
 	clock.set_corner_radius (0.0);
 	clock.mode_changed.connect (sigc::mem_fun (*this, &BigClockWindow::reset_aspect_ratio));
 
-	win->set_keep_above (true);
-	win->set_border_width (0);
-	win->add (*clock);
+	set_keep_above (true);
+	set_border_width (0);
+	add (clock);
+	clock.show_all ();
 }
 
 void
@@ -51,7 +59,7 @@ BigClockWindow::on_unmap ()
 bool
 BigClockWindow::on_key_press_event (GdkEventKey* ev)
 {
-	return relay_key_press (ev);
+	return relay_key_press (ev, this);
 }
 
 void
@@ -82,20 +90,9 @@ BigClockWindow::on_size_allocate (Gtk::Allocation& alloc)
 {
 	ArdourWindow::on_size_allocate (alloc);
 
-	if (!big_clock_resize_in_progress) {
+	if (!resize_in_progress) {
 		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &BigClockWindow::text_resizer), 0, 0));
 		resize_in_progress = true;
-	}
-}
-
-void
-BigClockWindow::float (Gtk::Window* parent)
-{
-	if (parent) {
-		set_transient_for (*parent);
-	} else {
-		/* Gtkmm doesn't allow a call to this for a null parent */
-		gtk_window_set_transient_for (big_clock_window->gobj(), (GtkWindow*) 0);
 	}
 }
 

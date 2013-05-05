@@ -22,9 +22,11 @@
 
 #include <gtkmm/aboutdialog.h>
 
+#include "ardour/session_handle.h"
+
 class ConfigInfoDialog;
 
-class About : public Gtk::AboutDialog
+class About : public Gtk::AboutDialog, public ARDOUR::SessionHandlePtr
 {
   public:
 	About ();

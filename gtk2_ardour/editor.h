@@ -62,7 +62,6 @@
 #include "editor_items.h"
 #include "region_selection.h"
 #include "canvas.h"
-#include "window_proxy.h"
 
 namespace Gnome {
 	namespace Canvas {
