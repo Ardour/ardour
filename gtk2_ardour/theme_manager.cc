@@ -95,6 +95,9 @@ ThemeManager::ThemeManager()
 	vbox->pack_start (flat_buttons, PACK_SHRINK);
 	vbox->pack_start (gradient_waveforms, PACK_SHRINK);
 	vbox->pack_start (scroller);
+
+	vbox->show_all ();
+
 	add (*vbox);
 
 	color_display.signal_button_press_event().connect (sigc::mem_fun (*this, &ThemeManager::button_press_event), false);
