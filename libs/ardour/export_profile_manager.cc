@@ -501,6 +501,8 @@ ExportProfileManager::init_channel_configs (XMLNodeList nodes)
 		channel_configs.push_back (config);
 
 		// Add master outs as default
+		if (!session.master_out()) { return false; }
+
 		IO* master_out = session.master_out()->output().get();
 		if (!master_out) { return false; }
 
