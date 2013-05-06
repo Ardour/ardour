@@ -161,12 +161,12 @@ class WindowManager
 	}
 
 	T* operator->() { 
-		/* make return null */
-		return dynamic_cast<T*> (_window);
+		return dynamic_cast<T*> (get(true));
 	}
 
 	ARDOUR::SessionHandlePtr* session_handle () {
-		return dynamic_cast<T*> (get());
+		/* may return null */
+		return dynamic_cast<T*> (_window);
 	}
 
       private:
