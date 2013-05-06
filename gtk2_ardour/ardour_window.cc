@@ -54,6 +54,12 @@ ArdourWindow::~ArdourWindow ()
 }
 
 bool
+ArdourWindow::on_key_press_event (GdkEventKey* ev)
+{
+	return relay_key_press (ev, this);
+}
+
+bool
 ArdourWindow::on_enter_notify_event (GdkEventCrossing *ev)
 {
 	Keyboard::the_keyboard().enter_window (ev, this);

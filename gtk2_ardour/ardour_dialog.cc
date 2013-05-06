@@ -26,6 +26,7 @@
 #include "ardour_ui.h"
 #include "keyboard.h"
 #include "splash.h"
+#include "utils.h"
 
 using namespace std;
 using namespace Gtk;
@@ -56,6 +57,12 @@ ArdourDialog::~ArdourDialog ()
                         spl->pop_front();
                 }
         }
+}
+
+bool
+ArdourDialog::on_key_press_event (GdkEventKey* ev)
+{
+	return relay_key_press (ev, this);
 }
 
 bool
