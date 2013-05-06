@@ -278,6 +278,11 @@ WindowManager::ProxyBase::setup ()
 
 	vistracker = new Gtkmm2ext::VisibilityTracker (*_window);
 
+	if (_width != -1 || _height != -1 || _x_off != -1 || _y_off != -1) {
+		/* cancel any mouse-based positioning */
+		_window->set_position (Gtk::WIN_POS_NONE);
+	}
+
 	if (_width != -1 && _height != -1) {
 		_window->set_default_size (_width, _height);
 	}
@@ -316,6 +321,9 @@ WindowManager::ProxyBase::present ()
 	Gtk::Window* win = get (true);
 	win->show_all ();
 	win->present ();
+
+	/* turn off any mouse-based positioning */
+	_window->set_position (Gtk::WIN_POS_NONE);
 }
 
 void
