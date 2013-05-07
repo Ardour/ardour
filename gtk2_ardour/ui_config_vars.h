@@ -20,4 +20,5 @@
 UI_CONFIG_VARIABLE(std::string, ui_rc_file, "ui-rc-file", "ardour3_ui_dark.rc")
 UI_CONFIG_VARIABLE(bool, flat_buttons, "flat-buttons", false)
 UI_CONFIG_VARIABLE(bool, gradient_waveforms, "gradient-waveforms", false)
+UI_CONFIG_VARIABLE(bool, all_floating_windows_are_dialogs, "all-floating-windows-are-dialogs", false)
 

@@ -43,6 +43,7 @@ WindowManager::instance ()
 }
 
 WindowManager::WindowManager ()
+	: current_transient_parent (0)
 {
 }
 
@@ -130,6 +131,8 @@ WindowManager::set_transient_for (Gtk::Window* parent)
 			}
 		}
 	}
+
+	current_transient_parent = parent;
 }
 
 /*-----------------------*/

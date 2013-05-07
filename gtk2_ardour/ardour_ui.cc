@@ -149,18 +149,20 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	
 	, gui_object_state (new GUIObjectState)
 
-	, _startup (0)
-	, engine (0)
-	, nsm (0)
-	, _was_dirty (false)
-	, _mixer_on_top (false)
-
 	, primary_clock (new MainClock (X_("primary"), false, X_("transport"), true, true, true, false, true))
 	, secondary_clock (new MainClock (X_("secondary"), false, X_("secondary"), true, true, false, false, true))
 
 	  /* big clock */
 
 	, big_clock (new AudioClock (X_("bigclock"), false, "big", true, true, false, false))
+
+	  /* start of private members */
+
+	, _startup (0)
+	, engine (0)
+	, nsm (0)
+	, _was_dirty (false)
+	, _mixer_on_top (false)
 
 	  /* transport */
 

@@ -112,6 +112,14 @@ void
 ArdourDialog::init ()
 {
 	set_border_width (10);
-	// set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+
+	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+
+	Gtk::Window* parent = WindowManager::instance().transient_parent();
+
+	if (parent) {
+		set_transient_for (*parent);
+	}
+
 	ARDOUR_UI::CloseAllDialogs.connect (sigc::bind (sigc::mem_fun (*this, &ArdourDialog::response), RESPONSE_CANCEL));
 }

@@ -102,8 +102,21 @@ ArdourWindow::init ()
                vice versa.
         */
 
-        set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
+	if (ARDOUR_UI::instance()->config()->all_floating_windows_are_dialogs.get()) {
+		cerr << "AW " << get_title() <<  " => dialog\n";
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+	} else {
+		cerr << "AW " << get_title() << " => utility\n";
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
+	}
 
+	Gtk::Window* parent = WindowManager::instance().transient_parent();
+
+	if (parent) {
+		cerr << "\tmarked as transient for " << parent->get_title() << endl;
+		set_transient_for (*parent);
+	}
+	
 	ARDOUR_UI::CloseAllDialogs.connect (sigc::mem_fun (*this, &ArdourWindow::hide));
 }
 
