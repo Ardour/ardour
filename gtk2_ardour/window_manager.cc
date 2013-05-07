@@ -112,6 +112,26 @@ WindowManager::set_session (ARDOUR::Session* s)
 	}
 }
 
+void
+WindowManager::set_transient_for (Gtk::Window* parent)
+{
+	if (parent) {
+		for (Windows::const_iterator i = _windows.begin(); i != _windows.end(); ++i) {
+			Gtk::Window* win = (*i)->get();
+			if (win) {
+				win->set_transient_for (*parent);
+			}
+		}
+	} else {
+		for (Windows::const_iterator i = _windows.begin(); i != _windows.end(); ++i) {
+			Gtk::Window* win = (*i)->get();
+			if (win) {
+				gtk_window_set_transient_for (win->gobj(), 0);
+			}
+		}
+	}
+}
+
 /*-----------------------*/
 
 WindowManager::ProxyBase::ProxyBase (const string& name, const std::string& menu_name)

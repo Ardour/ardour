@@ -146,8 +146,15 @@ sigc::signal<void>      ARDOUR_UI::CloseAllDialogs;
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
-
+	
 	, gui_object_state (new GUIObjectState)
+
+	, _startup (0)
+	, engine (0)
+	, nsm (0)
+	, _was_dirty (false)
+	, _mixer_on_top (false)
+
 	, primary_clock (new MainClock (X_("primary"), false, X_("transport"), true, true, true, false, true))
 	, secondary_clock (new MainClock (X_("secondary"), false, X_("secondary"), true, true, false, false, true))
 
@@ -197,7 +204,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	Gtkmm2ext::init(localedir);
 
 	splash = 0;
-	_startup = 0;
 
 	if (theArdourUI == 0) {
 		theArdourUI = this;
@@ -688,7 +694,6 @@ ARDOUR_UI::startup ()
 	app->ready ();
 
 	nsm_url = getenv ("NSM_URL");
-	nsm = 0;
 
 	if (nsm_url) {
 		nsm = new NSM_Client;

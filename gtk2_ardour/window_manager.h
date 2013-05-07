@@ -180,6 +180,9 @@ class WindowManager
     void set_session (ARDOUR::Session*);
     void add_state (XMLNode&) const;
 
+    /* HACK HACK HACK */
+    void set_transient_for (Gtk::Window*);
+
   private:
     typedef std::list<ProxyBase*> Windows;
     Windows _windows;

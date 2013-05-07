@@ -301,6 +301,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtk::Tooltips        _tooltips;
 	NSM_Client          *nsm;
 	bool                 _was_dirty;
+        bool                 _mixer_on_top;
 
 	void goto_editor_window ();
 	void goto_mixer_window ();

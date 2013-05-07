@@ -35,7 +35,7 @@ bool
 VisibilityTracker::handle_visibility_notify_event (GdkEventVisibility* ev)
 {
 	_visibility = ev->state;
-	std::cerr << "VT: " << _window.get_title() << " vis event, fv = " << fully_visible() << " pv = " << partially_visible() << " nv = " << not_visible() << std::endl;
+	// std::cerr << "VT: " << _window.get_title() << " vis event, fv = " << fully_visible() << " pv = " << partially_visible() << " nv = " << not_visible() << std::endl;
 	return false;
 }
 
