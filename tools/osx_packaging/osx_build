@@ -506,10 +506,14 @@ UC_DMG=$APPNAME-${release_version}-${revision}.dmg
 VOLNAME=$APPNAME-$release_version
 
 # TODO use mktemp
-MNTPATH=`mktemp -d -t ardourimg`
+export TMPDIR=`pwd`
+MNTPATH=`mktemp -d -t /ardourimg`
 TMPDMG=`mktemp -t ardour`
 ICNSTMP=`mktemp -t ardouricon`
-DMGSIZE=$[ `du -sm "$PRODUCT_PKG_DIR" | cut -f 1` * 1049 / 1000 + 3 ]
+EXTRA_SPACE_MB=30
+DMGMEGABYTES=$[ `du -sk "$PRODUCT_PKG_DIR" | cut -f 1` * 1024 / 1048576 + $EXTRA_SPACE_MB ]
+
+echo "DMG MB = " $DMGMEGABYTES
 
 rm -f $UC_DMG "$TMPDMG" "${TMPDMG}.dmg" "$ICNSTMP"
 rm -rf "$MNTPATH"
@@ -517,7 +521,7 @@ mkdir -p "$MNTPATH"
 
 TMPDMG="${TMPDMG}.dmg"
 
-hdiutil create -megabytes $DMGSIZE "$TMPDMG"
+hdiutil create -megabytes $DMGMEGABYTES "$TMPDMG"
 DiskDevice=$(hdid -nomount "$TMPDMG" | grep Apple_HFS | cut -f 1 -d ' ')
 newfs_hfs -v "${VOLNAME}" "${DiskDevice}"
 mount -t hfs "${DiskDevice}" "${MNTPATH}"

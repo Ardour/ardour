@@ -12,7 +12,7 @@ import sys
 # 
 
 if sys.platform == 'darwin':
-    OSX_VERSION = '3.0beta6'
+    OSX_VERSION = '3.0'
     VERSION = '3.0beta6'
 else:
     LINUX_VERSION = '3.1'
