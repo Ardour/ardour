@@ -124,6 +124,7 @@ Manager::set_session (ARDOUR::Session* s)
 void
 Manager::set_transient_for (Gtk::Window* parent)
 {
+#ifndef __APPLE__
 	if (parent) {
 		for (Windows::const_iterator i = _windows.begin(); i != _windows.end(); ++i) {
 			Gtk::Window* win = (*i)->get();
@@ -142,6 +143,7 @@ Manager::set_transient_for (Gtk::Window* parent)
 	}
 	
 	current_transient_parent = parent;
+#endif
 }
 
 /*-------------------------*/
