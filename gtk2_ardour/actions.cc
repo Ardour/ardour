@@ -63,13 +63,18 @@ vector<RefPtr<Gtk::Action> > ActionManager::jack_opposite_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::transport_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::edit_point_in_region_sensitive_actions;
 
+static Glib::RefPtr<UIManager> ui_manager;
 
 void
 ActionManager::init ()
 {
-	std::string ui_file;
-
 	ui_manager = UIManager::create ();
+}
+
+void
+ActionManager::load_menus ()
+{
+	std::string ui_file;
 
 	find_file_in_search_path (ardour_config_search_path(), "ardour.menus", ui_file);
 

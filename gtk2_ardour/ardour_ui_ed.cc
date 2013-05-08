@@ -573,7 +573,10 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 	Gtk::Widget* widget;
 	Application* app = Application::instance ();
 
-	/* Quit will be taken of separately */
+        /* the addresses ("/ui/Main...") used below are based on the menu definitions in the menus file
+         */
+
+	/* Quit will be taken care of separately */
 
 	if ((widget = ActionManager::get_widget ("/ui/Main/Session/Quit"))) {
 		widget->hide ();
@@ -585,13 +588,13 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 
 	GtkApplicationMenuGroup* group = app->add_app_menu_group ();
 
-	if ((widget = ActionManager::get_widget ("/ui/Windows/toggle-about"))) {
+	if ((widget = ActionManager::get_widget ("/ui/Main/Session/toggle-about"))) {
 		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
-	}
+        }
 
-	if ((widget = ActionManager::get_widget ("/ui/Windows/toggle-rc-options-editor"))) {
+	if ((widget = ActionManager::get_widget ("/ui/Main/Session/toggle-rc-options-editor"))) {
 		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
-	}
+        }
 
 	app->set_menu_bar (*menu_bar);
 }

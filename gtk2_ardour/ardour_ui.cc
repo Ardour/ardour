@@ -319,7 +319,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	TimeAxisViewItem::set_constant_heights ();
 
-	/* load up the UI manager */
+        /* Set this up so that our window proxies can register actions */
 
 	ActionManager::init ();
 
@@ -425,6 +425,8 @@ ARDOUR_UI::post_engine ()
 	ARDOUR::init_post_engine ();
 
 	_tooltips.enable();
+
+	ActionManager::load_menus ();
 
 	if (setup_windows ()) {
 		throw failed_constructor ();
