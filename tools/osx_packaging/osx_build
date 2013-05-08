@@ -67,10 +67,9 @@ if test -z "$PRODUCT_PKG_DIR" -o -z "$APPNAME"; then
 	exit 1
 fi
 
-release_version=`grep -m 1 '[^A-Za-z_]OSX_VERSION = ' ../../wscript | cut -d"'" -f2`
-revision=`grep -m 1 'revision =' ../../libs/ardour/revision.cc | cut -d'"' -f 2 | sed 's/^.*-//g'`
+. ../define_versions.sh
 echo "Version is $release_version / $revision"
-info_string="$release_version/$revision built on `hostname` by `whoami` on `date`"
+info_string="$version built on `hostname` by `whoami` on `date`"
 echo "Info string is $info_string"
 
 # setup directory structure
@@ -502,8 +501,8 @@ echo "Building DMG ..."
 
 # UC_DMG=$APPNAME-${release_version}-${revision}-UC.dmg
 # FINAL_DMG=$APPNAME-${release_version}-${revision}.dmg
-UC_DMG=$APPNAME-${release_version}-${revision}.dmg
-VOLNAME=$APPNAME-$release_version
+UC_DMG=$APPNAME-$version.dmg
+VOLNAME=$APPNAME-$version
 
 # TODO use mktemp
 export TMPDIR=`pwd`

@@ -386,7 +386,7 @@ def build(bld):
                              'libgtk2_ardour',
                              'libgtkmm2ext',
                              'libtaglib']
-        obj.target = 'ardour-3.0-vst.exe.so'
+        obj.target = 'ardour-' + bld.env['VERSION'] + '-vst.exe.so'
         obj.includes  = [ '../libs/fst', '.' ]
         obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
         obj.defines = ['_POSIX_SOURCE', 'USE_WS_PREFIX']
@@ -403,7 +403,7 @@ def build(bld):
         # just the normal executable version of the GTK GUI
         obj = bld(features = 'cxx c cxxprogram')
         obj.source    = gtk2_ardour_sources
-        obj.target = 'ardour-3.0'
+        obj.target = 'ardour-' + bld.env['VERSION']
         obj.includes = ['.']
 
     # continue with setup of obj, which could be a shared library
@@ -476,8 +476,8 @@ def build(bld):
             'DATADIR'        : os.path.normpath(bld.env['DATADIR']),
             'SYSCONFDIR'     : os.path.normpath(bld.env['SYSCONFDIR']),
             'LIBS'           : 'build/libs',
-            'VERSION'        : '3.0',
-            'EXECUTABLE'     : 'build/gtk2_ardour/ardour-3.0'
+            'VERSION'        : bld.env['VERSION'],
+            'EXECUTABLE'     : 'build/gtk2_ardour/ardour-' + bld.env['VERSION']
     }
 
     def set_subst_dict(obj, dict):

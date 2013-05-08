@@ -1,8 +1,8 @@
 # 
-# this is sourced by build and package, and executed from within build/linux_packaging
+# this is sourced by build and package, and executed from within build/{osx,linux}_packaging
 #
 
-release_version=`grep -m 1 '[^A-Za-z_]LINUX_VERSION = ' ../../wscript | awk '{print $3}' | sed "s/'//g"`
+release_version=`grep -m 1 '^VERSION = ' ../../wscript | awk '{print $3}' | sed "s/'//g"`
 r=`cut -d'"' -f2 < ../../libs/ardour/revision.cc | sed -e 1d -e "s/$release_version-//"`
 if echo $r | grep -q -e - ; then
     revcount=`echo $r | cut -d- -f1`
