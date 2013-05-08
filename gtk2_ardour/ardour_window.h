@@ -27,6 +27,10 @@
 
 #include "ardour/session_handle.h"
 
+namespace WM {
+	class ProxyTemporary;
+}
+
 /**
  * This virtual parent class is so that each window uses the
  * same mechanism to declare its closing. It shares a common
@@ -47,7 +51,8 @@ class ArdourWindow : public Gtk::Window, public ARDOUR::SessionHandlePtr, public
 	void on_unmap ();
 
   private:
-	void init ();
+    WM::ProxyTemporary* proxy;
+    void init ();
 };
 
 #endif // __ardour_window_h__

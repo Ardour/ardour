@@ -43,136 +43,15 @@ namespace ARDOUR {
 	class SessionHandlePtr;
 }
 
-class WindowManager 
+namespace WM {
+
+class ProxyBase;
+
+class Manager 
 {
   public:
-    static WindowManager& instance();
+    static Manager& instance();
 
-    class ProxyBase : public sigc::trackable {
-      public:
-	ProxyBase (const std::string& name, const std::string& menu_name);
-	ProxyBase (const std::string& name, const std::string& menu_name, const XMLNode&);
-	virtual ~ProxyBase();
-
-	void show ();
-	void show_all ();
-	void hide ();
-	void present ();
-	void maybe_show ();
-
-	bool visible() const { return _visible; }
-	const std::string& name() const { return _name; }
-	const std::string& menu_name() const { return _menu_name; }
-
-	std::string action_name() const;
-	void set_action (Glib::RefPtr<Gtk::Action>);
-	Glib::RefPtr<Gtk::Action> action() const { return _action; };
-	
-	void drop_window ();
-	void use_window (Gtk::Window&);
-
-	virtual Gtk::Window* get (bool create = false) = 0;
-
-	virtual void toggle ();
-
-        void set_state (const XMLNode&);
-	XMLNode& get_state () const;
-
-	virtual ARDOUR::SessionHandlePtr* session_handle () = 0;
-
-	operator bool() const { return _window != 0; }
-
-      protected:
-	std::string  _name;
-	std::string  _menu_name;
-	Glib::RefPtr<Gtk::Action> _action;
-	Gtk::Window* _window;
-	mutable bool _visible; ///< true if the window should be visible on startup
-	mutable int  _x_off; ///< x position
-	mutable int  _y_off; ///< y position
-	mutable int  _width; ///< width
-	mutable int  _height; ///< height
-	Gtkmm2ext::VisibilityTracker* vistracker;
-
-	void setup ();
-    };
-
-    template<typename T>
-    class ProxyWithConstructor: public ProxyBase {
-      public:
-	ProxyWithConstructor (const std::string& name, const std::string& menu_name, const boost::function<T*()>& c)
-		: ProxyBase (name, menu_name) , creator (c) {}
-	
-	ProxyWithConstructor (const std::string& name, const std::string& menu_name, const boost::function<T*()>& c, const XMLNode* node)
-		: ProxyBase (name, menu_name, node) , creator (c) {}
-	
-	Gtk::Window* get (bool create = false) { 
-		if (!_window) {
-			if (!create) {
-				return 0;
-			}
-
-			_window = creator ();
-
-			if (_window) {
-				setup ();
-			}	
-		}
-
-		return _window;
-	}
-
-	T* operator->() { 
-		return dynamic_cast<T*> (get (true));
-	}
-
-	ARDOUR::SessionHandlePtr* session_handle () {
-		/* may return null */
-		return dynamic_cast<T*> (_window);
-	}
-
-      private:
-	boost::function<T*()>	creator;
-    };
-
-    template<typename T>
-    class Proxy : public ProxyBase {
-      public:
-	Proxy (const std::string& name, const std::string& menu_name)
-		: ProxyBase (name, menu_name) {}
-
-	Proxy (const std::string& name, const std::string& menu_name, const XMLNode* node)
-		: ProxyBase (name, menu_name, node)  {}
-	
-	Gtk::Window* get (bool create = false) { 
-		if (!_window) {
-			if (!create) {
-				return 0;
-			}
-
-			_window = new T ();
-
-			if (_window) {
-				setup ();
-			}	
-		}
-
-		return _window;
-	}
-
-	T* operator->() { 
-		return dynamic_cast<T*> (get(true));
-	}
-
-	ARDOUR::SessionHandlePtr* session_handle () {
-		/* may return null */
-		return dynamic_cast<T*> (_window);
-	}
-
-      private:
-	boost::function<T*()>	creator;
-    };
-    
     void register_window (ProxyBase*);
     void remove (const ProxyBase*);
     void toggle_window (ProxyBase*);
@@ -190,10 +69,154 @@ class WindowManager
     Glib::RefPtr<Gtk::ActionGroup> window_actions;
     Gtk::Window* current_transient_parent;
 
-    WindowManager();
-    ~WindowManager();
+    Manager();
+    ~Manager();
 
-    static WindowManager* _instance;
+    static Manager* _instance;
 };
+	
+class ProxyBase : public sigc::trackable {
+  public:
+    ProxyBase (const std::string& name, const std::string& menu_name);
+    ProxyBase (const std::string& name, const std::string& menu_name, const XMLNode&);
+    virtual ~ProxyBase();
+    
+    void show ();
+    void show_all ();
+    void hide ();
+    void present ();
+    void maybe_show ();
+    
+    bool visible() const { return _visible; }
+    const std::string& name() const { return _name; }
+    const std::string& menu_name() const { return _menu_name; }
+    
+    std::string action_name() const;
+    void set_action (Glib::RefPtr<Gtk::Action>);
+    Glib::RefPtr<Gtk::Action> action() const { return _action; };
+    
+    void drop_window ();
+    void use_window (Gtk::Window&);
+    
+    virtual Gtk::Window* get (bool create = false) = 0;
+    
+    virtual void toggle ();
+    
+    void set_state (const XMLNode&);
+    XMLNode& get_state () const;
+    
+    virtual ARDOUR::SessionHandlePtr* session_handle () = 0;
+    
+    operator bool() const { return _window != 0; }
+    
+  protected:
+    std::string  _name;
+    std::string  _menu_name;
+    Glib::RefPtr<Gtk::Action> _action;
+    Gtk::Window* _window;
+    mutable bool _visible; ///< true if the window should be visible on startup
+    mutable int  _x_off; ///< x position
+    mutable int  _y_off; ///< y position
+    mutable int  _width; ///< width
+    mutable int  _height; ///< height
+    Gtkmm2ext::VisibilityTracker* vistracker;
+    
+    void setup ();
+};
+	
+class ProxyTemporary: public ProxyBase {
+  public:
+    ProxyTemporary (const std::string& name, Gtk::Window* win);
+    ~ProxyTemporary();
+    
+    Gtk::Window* get (bool create = false) { 
+	    (void) create;
+	    return _window;
+    }
+    
+    Gtk::Window* operator->() { 
+	    return _window;
+    }
+    
+    ARDOUR::SessionHandlePtr* session_handle ();
+};
+	
+template<typename T>
+class ProxyWithConstructor: public ProxyBase {
+  public:
+    ProxyWithConstructor (const std::string& name, const std::string& menu_name, const boost::function<T*()>& c)
+	    : ProxyBase (name, menu_name) , creator (c) {}
+	
+    ProxyWithConstructor (const std::string& name, const std::string& menu_name, const boost::function<T*()>& c, const XMLNode* node)
+	    : ProxyBase (name, menu_name, node) , creator (c) {}
+	
+    Gtk::Window* get (bool create = false) { 
+	    if (!_window) {
+		    if (!create) {
+			    return 0;
+		    }
+
+		    _window = creator ();
+
+		    if (_window) {
+			    setup ();
+		    }	
+	    }
+
+	    return _window;
+    }
+
+    T* operator->() { 
+	    return dynamic_cast<T*> (get (true));
+    }
+
+    ARDOUR::SessionHandlePtr* session_handle () {
+	    /* may return null */
+	    return dynamic_cast<T*> (_window);
+    }
+
+  private:
+    boost::function<T*()>	creator;
+};
+
+template<typename T>
+class Proxy : public ProxyBase {
+  public:
+    Proxy (const std::string& name, const std::string& menu_name)
+	    : ProxyBase (name, menu_name) {}
+
+    Proxy (const std::string& name, const std::string& menu_name, const XMLNode* node)
+	    : ProxyBase (name, menu_name, node)  {}
+	
+    Gtk::Window* get (bool create = false) { 
+	    if (!_window) {
+		    if (!create) {
+			    return 0;
+		    }
+
+		    _window = new T ();
+
+		    if (_window) {
+			    setup ();
+		    }	
+	    }
+
+	    return _window;
+    }
+
+    T* operator->() { 
+	    return dynamic_cast<T*> (get(true));
+    }
+
+    ARDOUR::SessionHandlePtr* session_handle () {
+	    /* may return null */
+	    return dynamic_cast<T*> (_window);
+    }
+
+  private:
+    boost::function<T*()>	creator;
+};
+    
+} /* namespace */
 
 #endif /* __gtk2_ardour_window_manager_h__ */

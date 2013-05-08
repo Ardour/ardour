@@ -51,6 +51,7 @@ ArdourWindow::ArdourWindow (Gtk::Window& parent, string /*title*/)
 
 ArdourWindow::~ArdourWindow ()
 {
+	WM::Manager::instance().remove (proxy);
 }
 
 bool
@@ -103,20 +104,20 @@ ArdourWindow::init ()
         */
 
 	if (ARDOUR_UI::instance()->config()->all_floating_windows_are_dialogs.get()) {
-		cerr << "AW " << get_title() <<  " => dialog\n";
 		set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
 	} else {
-		cerr << "AW " << get_title() << " => utility\n";
 		set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
 	}
 
-	Gtk::Window* parent = WindowManager::instance().transient_parent();
+	Gtk::Window* parent = WM::Manager::instance().transient_parent();
 
 	if (parent) {
-		cerr << "\tmarked as transient for " << parent->get_title() << endl;
 		set_transient_for (*parent);
 	}
 	
 	ARDOUR_UI::CloseAllDialogs.connect (sigc::mem_fun (*this, &ArdourWindow::hide));
+
+	proxy = new WM::ProxyTemporary (get_title(), this);
+	WM::Manager::instance().register_window (proxy);
 }
 

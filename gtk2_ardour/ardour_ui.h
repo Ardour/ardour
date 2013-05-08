@@ -572,23 +572,23 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
         /* Dialogs that can be created via new<T> */
 
-        WindowManager::Proxy<SpeakerDialog> speaker_config_window;
-        WindowManager::Proxy<ThemeManager> theme_manager;
-        WindowManager::Proxy<KeyEditor> key_editor;
-        WindowManager::Proxy<RCOptionEditor> rc_option_editor;
-        WindowManager::Proxy<AddRouteDialog> add_route_dialog;
-        WindowManager::Proxy<About> about;
-        WindowManager::Proxy<LocationUIWindow> location_ui;
-        WindowManager::Proxy<RouteParams_UI> route_params;
+        WM::Proxy<SpeakerDialog> speaker_config_window;
+        WM::Proxy<ThemeManager> theme_manager;
+        WM::Proxy<KeyEditor> key_editor;
+        WM::Proxy<RCOptionEditor> rc_option_editor;
+        WM::Proxy<AddRouteDialog> add_route_dialog;
+        WM::Proxy<About> about;
+        WM::Proxy<LocationUIWindow> location_ui;
+        WM::Proxy<RouteParams_UI> route_params;
 
         /* Windows/Dialogs that require a creator method */
 
-        WindowManager::ProxyWithConstructor<SessionOptionEditor> session_option_editor;
-        WindowManager::ProxyWithConstructor<AddVideoDialog> add_video_dialog;
-        WindowManager::ProxyWithConstructor<BundleManager> bundle_manager;
-        WindowManager::ProxyWithConstructor<BigClockWindow> big_clock_window;
-        WindowManager::ProxyWithConstructor<GlobalPortMatrixWindow> audio_port_matrix;
-        WindowManager::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
+        WM::ProxyWithConstructor<SessionOptionEditor> session_option_editor;
+        WM::ProxyWithConstructor<AddVideoDialog> add_video_dialog;
+        WM::ProxyWithConstructor<BundleManager> bundle_manager;
+        WM::ProxyWithConstructor<BigClockWindow> big_clock_window;
+        WM::ProxyWithConstructor<GlobalPortMatrixWindow> audio_port_matrix;
+        WM::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
 
         /* creator methods */
 

@@ -612,7 +612,7 @@ ARDOUR_UI::save_ardour_state ()
 
 	/* Windows */
 
-	WindowManager::instance().add_state (*window_node);
+	WM::Manager::instance().add_state (*window_node);
 
 	/* tearoffs */
 

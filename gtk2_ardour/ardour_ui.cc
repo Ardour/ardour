@@ -344,20 +344,20 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		midi_port_matrix.set_state (*ui_xml);
 	}
 
-	WindowManager::instance().register_window (&theme_manager);
-	WindowManager::instance().register_window (&key_editor);
-	WindowManager::instance().register_window (&rc_option_editor);
-	WindowManager::instance().register_window (&session_option_editor);
-	WindowManager::instance().register_window (&speaker_config_window);
-	WindowManager::instance().register_window (&about);
-	WindowManager::instance().register_window (&add_route_dialog);
-	WindowManager::instance().register_window (&add_video_dialog);
-	WindowManager::instance().register_window (&route_params);
-	WindowManager::instance().register_window (&bundle_manager);
-	WindowManager::instance().register_window (&location_ui);
-	WindowManager::instance().register_window (&big_clock_window);
-	WindowManager::instance().register_window (&audio_port_matrix);
-	WindowManager::instance().register_window (&midi_port_matrix);
+	WM::Manager::instance().register_window (&theme_manager);
+	WM::Manager::instance().register_window (&key_editor);
+	WM::Manager::instance().register_window (&rc_option_editor);
+	WM::Manager::instance().register_window (&session_option_editor);
+	WM::Manager::instance().register_window (&speaker_config_window);
+	WM::Manager::instance().register_window (&about);
+	WM::Manager::instance().register_window (&add_route_dialog);
+	WM::Manager::instance().register_window (&add_video_dialog);
+	WM::Manager::instance().register_window (&route_params);
+	WM::Manager::instance().register_window (&bundle_manager);
+	WM::Manager::instance().register_window (&location_ui);
+	WM::Manager::instance().register_window (&big_clock_window);
+	WM::Manager::instance().register_window (&audio_port_matrix);
+	WM::Manager::instance().register_window (&midi_port_matrix);
 
 	/* We need to instantiate the theme manager because it loads our
 	   theme files. This should really change so that its window
@@ -753,7 +753,7 @@ ARDOUR_UI::startup ()
 
 	goto_editor_window ();
 
-	WindowManager::instance().show_visible ();
+	WM::Manager::instance().show_visible ();
 
 	/* We have to do this here since goto_editor_window() ends up calling show_all() on the
 	 * editor window, and we may want stuff to be hidden.
@@ -2336,7 +2336,7 @@ ARDOUR_UI::save_state (const string & name, bool switch_to_it)
 {
 	XMLNode* node = new XMLNode (X_("UI"));
 
-	WindowManager::instance().add_state (*node);
+	WM::Manager::instance().add_state (*node);
 
 	node->add_child_nocopy (gui_object_state->get_state());
 

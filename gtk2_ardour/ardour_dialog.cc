@@ -27,6 +27,7 @@
 #include "keyboard.h"
 #include "splash.h"
 #include "utils.h"
+#include "window_manager.h"
 
 using namespace std;
 using namespace Gtk;
@@ -34,6 +35,7 @@ using namespace Gtkmm2ext;
 
 ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
 	: Dialog (title, modal, use_seperator)
+	, proxy (0)
         , _splash_pushed (false)
 {
 	init ();
@@ -57,6 +59,7 @@ ArdourDialog::~ArdourDialog ()
                         spl->pop_front();
                 }
         }
+	WM::Manager::instance().remove (proxy);
 }
 
 bool
@@ -115,11 +118,14 @@ ArdourDialog::init ()
 
 	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
 
-	Gtk::Window* parent = WindowManager::instance().transient_parent();
+	Gtk::Window* parent = WM::Manager::instance().transient_parent();
 
 	if (parent) {
 		set_transient_for (*parent);
 	}
 
 	ARDOUR_UI::CloseAllDialogs.connect (sigc::bind (sigc::mem_fun (*this, &ArdourDialog::response), RESPONSE_CANCEL));
+
+	proxy = new WM::ProxyTemporary (get_title(), this);
+	WM::Manager::instance().register_window (proxy);
 }

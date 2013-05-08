@@ -95,7 +95,7 @@ ARDOUR_UI::set_session (Session *s)
 	}
 
 	AutomationWatch::instance().set_session (s);
-	WindowManager::instance().set_session (s);
+	WM::Manager::instance().set_session (s);
 
 	if (shuttle_box) {
 		shuttle_box->set_session (s);
@@ -269,7 +269,7 @@ ARDOUR_UI::goto_editor_window ()
 	editor->show_window ();
 	editor->present ();
 	/* mixer should now be on top */
-	WindowManager::instance().set_transient_for (editor);
+	WM::Manager::instance().set_transient_for (editor);
 	_mixer_on_top = false;
 }
 
@@ -298,7 +298,7 @@ ARDOUR_UI::goto_mixer_window ()
 	mixer->show_window ();
 	mixer->present ();
 	/* mixer should now be on top */
-	WindowManager::instance().set_transient_for (mixer);
+	WM::Manager::instance().set_transient_for (mixer);
 	_mixer_on_top = true;
 }
 
