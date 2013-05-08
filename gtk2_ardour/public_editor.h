@@ -40,6 +40,7 @@
 #include "pbd/statefuldestructible.h"
 
 #include "canvas/fwd.h"
+#include "gtkmm2ext/visibility_tracker.h"
 
 #include "editing.h"
 #include "selection.h"
@@ -98,7 +99,7 @@ using ARDOUR::framecnt_t;
  * of PublicEditor need not be recompiled if private methods or member variables
  * change.
  */
-class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
+class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, public Gtkmm2ext::VisibilityTracker {
   public:
 	PublicEditor ();
 	virtual ~PublicEditor ();

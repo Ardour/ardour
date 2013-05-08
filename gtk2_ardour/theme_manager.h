@@ -46,6 +46,7 @@ class ThemeManager : public ArdourWindow
 	void on_flat_buttons_toggled ();
         void on_waveform_gradient_depth_change ();
         void on_timeline_item_gradient_depth_change ();
+	void on_all_dialogs_toggled ();
 
   private:
 	struct ColorDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
@@ -76,6 +77,8 @@ class ThemeManager : public ArdourWindow
         Gtk::Label waveform_gradient_depth_label;
         Gtk::HScale timeline_item_gradient_depth;
         Gtk::Label timeline_item_gradient_depth_label;
+	Gtk::CheckButton all_dialogs;
+	Gtk::CheckButton gradient_waveforms;
 
 	bool button_press_event (GdkEventButton*);
 };

@@ -1378,7 +1378,7 @@ ProcessorBox::redisplay_processors ()
 		++j;
 
 		if (!(*i)->marked) {
-			WindowManager::instance().remove (*i);
+			WM::Manager::instance().remove (*i);
 			delete *i;
 			_processor_window_info.erase (i);
 		}
@@ -1451,7 +1451,7 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
         }
 
 	_processor_window_info.push_back (wp);
-	WindowManager::instance().register_window (wp);
+	WM::Manager::instance().register_window (wp);
 }
 
 void
@@ -2624,7 +2624,7 @@ ProcessorBox::update_gui_object_state (ProcessorEntry* entry)
 }
 
 ProcessorWindowProxy::ProcessorWindowProxy (string const & name, ProcessorBox* box, boost::weak_ptr<Processor> processor)
-	: WindowManager::ProxyBase (name, string())
+	: WM::ProxyBase (name, string())
 	, marked (false)
 	, _processor_box (box)
 	, _processor (processor)
@@ -2678,5 +2678,5 @@ ProcessorWindowProxy::toggle ()
 		drop_window ();
 	}
 
-	WindowManager::ProxyBase::toggle ();
+	WM::ProxyBase::toggle ();
 }

@@ -110,8 +110,10 @@ PortExportChannelSelector::fill_route_list ()
 
 	/* Add master bus and then everything else */
 
-	ARDOUR::IO* master = _session->master_out()->output().get();
-	channel_view.add_route (master);
+	if (_session->master_out()) {
+		ARDOUR::IO* master = _session->master_out()->output().get();
+		channel_view.add_route (master);
+	}
 
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
 		if ((*it)->is_master () || (*it)->is_monitor ()) {

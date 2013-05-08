@@ -23,7 +23,6 @@
 #include <gtk/gtkpaned.h>
 #include <gtk/gtk.h>
 
-#include <gtkmm2ext/utils.h>
 #include <gtkmm/widget.h>
 #include <gtkmm/button.h>
 #include <gtkmm/window.h>
@@ -31,6 +30,8 @@
 #include <gtkmm/label.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/tooltip.h>
+
+#include "gtkmm2ext/utils.h"
 
 #include "i18n.h"
 
@@ -659,3 +660,4 @@ Gtkmm2ext::disable_tooltips ()
 {
 	gtk_rc_parse_string ("gtk-enable-tooltips = 0");
 }
+

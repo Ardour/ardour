@@ -573,21 +573,28 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 	Gtk::Widget* widget;
 	Application* app = Application::instance ();
 
-	/* Quit will be taken of separately */
+        /* the addresses ("/ui/Main...") used below are based on the menu definitions in the menus file
+         */
+
+	/* Quit will be taken care of separately */
 
 	if ((widget = ActionManager::get_widget ("/ui/Main/Session/Quit"))) {
 		widget->hide ();
 	}
 
+	/* Put items for About and Preferences into App menu (the
+	 * ardour.menus.in file does not list them for OS X)
+	 */
+
 	GtkApplicationMenuGroup* group = app->add_app_menu_group ();
 
-	if ((widget = ActionManager::get_widget ("/ui/Main/Session/About"))) {
+	if ((widget = ActionManager::get_widget ("/ui/Main/Session/toggle-about"))) {
 		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
-	}
+        }
 
-	if ((widget = ActionManager::get_widget ("/ui/Main/Session/ToggleRCOptionsEditor"))) {
+	if ((widget = ActionManager::get_widget ("/ui/Main/Session/toggle-rc-options-editor"))) {
 		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
-	}
+        }
 
 	app->set_menu_bar (*menu_bar);
 }
@@ -612,7 +619,7 @@ ARDOUR_UI::save_ardour_state ()
 
 	/* Windows */
 
-	WindowManager::instance().add_state (*window_node);
+	WM::Manager::instance().add_state (*window_node);
 
 	/* tearoffs */
 

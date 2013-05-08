@@ -89,7 +89,7 @@ if test x$STRIP != xall -a x$STRIP != xnone -a x$STRIP != xsome ; then
     exit 1
 fi
 
-. ./define_versions.sh
+. ../define_versions.sh
 
 echo "Version is $version / $commit"
 info_string="$version ($commit) built on `hostname` by `whoami` on `date`"

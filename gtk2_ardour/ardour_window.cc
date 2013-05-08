@@ -25,6 +25,7 @@
 #include "ardour_window.h"
 #include "ardour_ui.h"
 #include "keyboard.h"
+#include "utils.h"
 
 using namespace std;
 using namespace Gtk;
@@ -50,6 +51,13 @@ ArdourWindow::ArdourWindow (Gtk::Window& parent, string /*title*/)
 
 ArdourWindow::~ArdourWindow ()
 {
+	WM::Manager::instance().remove (proxy);
+}
+
+bool
+ArdourWindow::on_key_press_event (GdkEventKey* ev)
+{
+	return relay_key_press (ev, this);
 }
 
 bool
@@ -73,6 +81,13 @@ ArdourWindow::on_unmap ()
 	Window::on_unmap ();
 }
 
+bool
+ArdourWindow::on_delete_event (GdkEventAny*)
+{
+	hide ();
+	return false;
+}
+
 void
 ArdourWindow::init ()
 {
@@ -88,8 +103,21 @@ ArdourWindow::init ()
                vice versa.
         */
 
-        set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
+	if (ARDOUR_UI::instance()->config()->get_all_floating_windows_are_dialogs()) {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+	} else {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
+	}
 
+	Gtk::Window* parent = WM::Manager::instance().transient_parent();
+
+	if (parent) {
+		set_transient_for (*parent);
+	}
+	
 	ARDOUR_UI::CloseAllDialogs.connect (sigc::mem_fun (*this, &ArdourWindow::hide));
+
+	proxy = new WM::ProxyTemporary (get_title(), this);
+	WM::Manager::instance().register_window (proxy);
 }
 

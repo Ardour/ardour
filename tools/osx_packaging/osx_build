@@ -67,10 +67,9 @@ if test -z "$PRODUCT_PKG_DIR" -o -z "$APPNAME"; then
 	exit 1
 fi
 
-release_version=`grep -m 1 '[^A-Za-z_]OSX_VERSION = ' ../../wscript | cut -d"'" -f2`
-revision=`grep -m 1 'revision =' ../../libs/ardour/revision.cc | cut -d'"' -f 2 | sed 's/^.*-//g'`
+. ../define_versions.sh
 echo "Version is $release_version / $revision"
-info_string="$release_version/$revision built on `hostname` by `whoami` on `date`"
+info_string="$version built on `hostname` by `whoami` on `date`"
 echo "Info string is $info_string"
 
 # setup directory structure
@@ -502,14 +501,18 @@ echo "Building DMG ..."
 
 # UC_DMG=$APPNAME-${release_version}-${revision}-UC.dmg
 # FINAL_DMG=$APPNAME-${release_version}-${revision}.dmg
-UC_DMG=$APPNAME-${release_version}-${revision}.dmg
-VOLNAME=$APPNAME-$release_version
+UC_DMG=$APPNAME-$version.dmg
+VOLNAME=$APPNAME-$version
 
 # TODO use mktemp
-MNTPATH=`mktemp -d -t ardourimg`
+export TMPDIR=`pwd`
+MNTPATH=`mktemp -d -t /ardourimg`
 TMPDMG=`mktemp -t ardour`
 ICNSTMP=`mktemp -t ardouricon`
-DMGSIZE=$[ `du -sm "$PRODUCT_PKG_DIR" | cut -f 1` * 1049 / 1000 + 3 ]
+EXTRA_SPACE_MB=30
+DMGMEGABYTES=$[ `du -sk "$PRODUCT_PKG_DIR" | cut -f 1` * 1024 / 1048576 + $EXTRA_SPACE_MB ]
+
+echo "DMG MB = " $DMGMEGABYTES
 
 rm -f $UC_DMG "$TMPDMG" "${TMPDMG}.dmg" "$ICNSTMP"
 rm -rf "$MNTPATH"
@@ -517,7 +520,7 @@ mkdir -p "$MNTPATH"
 
 TMPDMG="${TMPDMG}.dmg"
 
-hdiutil create -megabytes $DMGSIZE "$TMPDMG"
+hdiutil create -megabytes $DMGMEGABYTES "$TMPDMG"
 DiskDevice=$(hdid -nomount "$TMPDMG" | grep Apple_HFS | cut -f 1 -d ' ')
 newfs_hfs -v "${VOLNAME}" "${DiskDevice}"
 mount -t hfs "${DiskDevice}" "${MNTPATH}"

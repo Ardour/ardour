@@ -229,8 +229,7 @@ pane_size_watcher (Paned* pane)
 }
 
 Editor::Editor ()
-	: VisibilityTracker (*((Gtk::Window*) this))
-	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
+	: _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
 
 	  /* time display buttons */
 	, minsec_label (_("Mins:Secs"))

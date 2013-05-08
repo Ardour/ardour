@@ -75,7 +75,7 @@ namespace ARDOUR {
 
 class ProcessorBox;
 
-class ProcessorWindowProxy : public WindowManager::ProxyBase 
+class ProcessorWindowProxy : public WM::ProxyBase 
 {
   public:
     ProcessorWindowProxy (std::string const &, ProcessorBox *, boost::weak_ptr<ARDOUR::Processor>);

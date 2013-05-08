@@ -25,29 +25,33 @@
 #include "gtkmm2ext/visibility_tracker.h"
 
 #include "actions.h"
+#include "ardour_dialog.h"
+#include "ardour_window.h"
 #include "window_manager.h"
 
 #include "i18n.h"
 
 using std::string;
+using namespace WM;
 
-WindowManager* WindowManager::_instance = 0;
+Manager* Manager::_instance = 0;
 
-WindowManager&
-WindowManager::instance ()
+Manager&
+Manager::instance ()
 {
 	if (!_instance) {
-		_instance = new WindowManager;
+		_instance = new Manager;
 	}
 	return *_instance;
 }
 
-WindowManager::WindowManager ()
+Manager::Manager ()
+	: current_transient_parent (0)
 {
 }
 
 void
-WindowManager::register_window (ProxyBase* info)
+Manager::register_window (ProxyBase* info)
 {
 	_windows.push_back (info);
 
@@ -59,12 +63,12 @@ WindowManager::register_window (ProxyBase* info)
 		}
 
 		info->set_action (ActionManager::register_action (window_actions, info->action_name().c_str(), info->menu_name().c_str(), 
-								  sigc::bind (sigc::mem_fun (*this, &WindowManager::toggle_window), info)));
+								  sigc::bind (sigc::mem_fun (*this, &Manager::toggle_window), info)));
 	}
 }
 
 void
-WindowManager::remove (const ProxyBase* info)
+Manager::remove (const ProxyBase* info)
 {
 	for (Windows::iterator i = _windows.begin(); i != _windows.end(); ++i) {
 		if ((*i) == info) {
@@ -75,7 +79,7 @@ WindowManager::remove (const ProxyBase* info)
 }
 
 void
-WindowManager::toggle_window (ProxyBase* proxy)
+Manager::toggle_window (ProxyBase* proxy)
 {
 	if (proxy) {
 		proxy->toggle ();
@@ -83,7 +87,7 @@ WindowManager::toggle_window (ProxyBase* proxy)
 }
 
 void
-WindowManager::show_visible() const
+Manager::show_visible() const
 {
 	for (Windows::const_iterator i = _windows.begin(); i != _windows.end(); ++i) {
 		if ((*i)->visible()) {
@@ -94,15 +98,20 @@ WindowManager::show_visible() const
 }
 
 void
-WindowManager::add_state (XMLNode& root) const
+Manager::add_state (XMLNode& root) const
 {
 	for (Windows::const_iterator i = _windows.begin(); i != _windows.end(); ++i) {
+		/* don't save state for temporary proxy windows
+		 */
+		if (dynamic_cast<ProxyTemporary*> (*i)) {
+			continue;
+		}
 		root.add_child_nocopy ((*i)->get_state());
 	}
 }
 
 void
-WindowManager::set_session (ARDOUR::Session* s)
+Manager::set_session (ARDOUR::Session* s)
 {
 	for (Windows::const_iterator i = _windows.begin(); i != _windows.end(); ++i) {
 		ARDOUR::SessionHandlePtr* sp = (*i)->session_handle ();
@@ -112,9 +121,34 @@ WindowManager::set_session (ARDOUR::Session* s)
 	}
 }
 
-/*-----------------------*/
+void
+Manager::set_transient_for (Gtk::Window* parent)
+{
+#ifndef __APPLE__
+	if (parent) {
+		for (Windows::const_iterator i = _windows.begin(); i != _windows.end(); ++i) {
+			Gtk::Window* win = (*i)->get();
+			if (win) {
+				std::cerr << "marked " << win->get_title() << " as transient of " << parent->get_title() << std::endl;
+				win->set_transient_for (*parent);
+			}
+		}
+	} else {
+		for (Windows::const_iterator i = _windows.begin(); i != _windows.end(); ++i) {
+			Gtk::Window* win = (*i)->get();
+			if (win) {
+				gtk_window_set_transient_for (win->gobj(), 0);
+			}
+		}
+	}
+	
+	current_transient_parent = parent;
+#endif
+}
 
-WindowManager::ProxyBase::ProxyBase (const string& name, const std::string& menu_name)
+/*-------------------------*/
+
+ProxyBase::ProxyBase (const string& name, const std::string& menu_name)
 	: _name (name)
 	, _menu_name (menu_name)
 	, _window (0)
@@ -127,7 +161,7 @@ WindowManager::ProxyBase::ProxyBase (const string& name, const std::string& menu
 {
 }
 
-WindowManager::ProxyBase::ProxyBase (const string& name, const std::string& menu_name, const XMLNode& node)
+ProxyBase::ProxyBase (const string& name, const std::string& menu_name, const XMLNode& node)
 	: _name (name)
 	, _menu_name (menu_name)
 	, _window (0)
@@ -141,13 +175,13 @@ WindowManager::ProxyBase::ProxyBase (const string& name, const std::string& menu
 	set_state (node);
 }
 
-WindowManager::ProxyBase::~ProxyBase ()
+ProxyBase::~ProxyBase ()
 {
 	delete vistracker;
 }
 
 void
-WindowManager::ProxyBase::set_state (const XMLNode& node)
+ProxyBase::set_state (const XMLNode& node)
 {
 	XMLNodeList children = node.children ();
 
@@ -192,19 +226,19 @@ WindowManager::ProxyBase::set_state (const XMLNode& node)
 }
 
 void
-WindowManager::ProxyBase::set_action (Glib::RefPtr<Gtk::Action> act)
+ProxyBase::set_action (Glib::RefPtr<Gtk::Action> act)
 {
 	_action = act;
 }
 
 std::string
-WindowManager::ProxyBase::action_name() const 
+ProxyBase::action_name() const 
 {
 	return string_compose (X_("toggle-%1"), _name);
 }
 
 void
-WindowManager::ProxyBase::toggle() 
+ProxyBase::toggle() 
 {
 	if (!_window) {
 		(void) get (true);
@@ -221,7 +255,7 @@ WindowManager::ProxyBase::toggle()
 }
 
 XMLNode&
-WindowManager::ProxyBase::get_state () const
+ProxyBase::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Window"));
 	char buf[32];	
@@ -252,7 +286,7 @@ WindowManager::ProxyBase::get_state () const
 }
 
 void
-WindowManager::ProxyBase::drop_window ()
+ProxyBase::drop_window ()
 {
 	if (_window) {
 		_window->hide ();
@@ -264,7 +298,7 @@ WindowManager::ProxyBase::drop_window ()
 }
 
 void
-WindowManager::ProxyBase::use_window (Gtk::Window& win)
+ProxyBase::use_window (Gtk::Window& win)
 {
 	drop_window ();
 	_window = &win;
@@ -272,11 +306,16 @@ WindowManager::ProxyBase::use_window (Gtk::Window& win)
 }
 
 void
-WindowManager::ProxyBase::setup ()
+ProxyBase::setup ()
 {
 	assert (_window);
 
 	vistracker = new Gtkmm2ext::VisibilityTracker (*_window);
+
+	if (_width != -1 || _height != -1 || _x_off != -1 || _y_off != -1) {
+		/* cancel any mouse-based positioning */
+		_window->set_position (Gtk::WIN_POS_NONE);
+	}
 
 	if (_width != -1 && _height != -1) {
 		_window->set_default_size (_width, _height);
@@ -288,14 +327,14 @@ WindowManager::ProxyBase::setup ()
 }
 	
 void
-WindowManager::ProxyBase::show ()
+ProxyBase::show ()
 {
 	Gtk::Window* win = get (true);
 	win->show ();
 }
 
 void
-WindowManager::ProxyBase::maybe_show ()
+ProxyBase::maybe_show ()
 {
 	if (_visible) {
 		show ();
@@ -303,7 +342,7 @@ WindowManager::ProxyBase::maybe_show ()
 }
 
 void
-WindowManager::ProxyBase::show_all ()
+ProxyBase::show_all ()
 {
 	Gtk::Window* win = get (true);
 	win->show_all ();
@@ -311,15 +350,18 @@ WindowManager::ProxyBase::show_all ()
 
 
 void
-WindowManager::ProxyBase::present ()
+ProxyBase::present ()
 {
 	Gtk::Window* win = get (true);
 	win->show_all ();
 	win->present ();
+
+	/* turn off any mouse-based positioning */
+	_window->set_position (Gtk::WIN_POS_NONE);
 }
 
 void
-WindowManager::ProxyBase::hide ()
+ProxyBase::hide ()
 {
 	Gtk::Window* win = get (false);
 	if (win) {
@@ -327,3 +369,25 @@ WindowManager::ProxyBase::hide ()
 	}
 }
 
+/*-----------------------*/
+
+ProxyTemporary::ProxyTemporary (const string& name, Gtk::Window* win)
+	: ProxyBase (name, string())
+{
+	_window = win;
+}
+
+ProxyTemporary::~ProxyTemporary ()
+{
+}
+
+ARDOUR::SessionHandlePtr*
+ProxyTemporary::session_handle()
+{
+	/* may return null */
+	ArdourWindow* aw = dynamic_cast<ArdourWindow*> (_window);
+	if (aw) { return aw; }
+	ArdourDialog* ad = dynamic_cast<ArdourDialog*> (_window);
+	if (ad) { return ad; }
+	return 0;
+}

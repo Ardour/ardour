@@ -429,14 +429,6 @@ ARDOUR_UI::setup_transport ()
 }
 
 void
-ARDOUR_UI::manage_window (Window& win)
-{
-	win.signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), &win));
-	win.signal_enter_notify_event().connect (sigc::bind (sigc::mem_fun (Keyboard::the_keyboard(), &Keyboard::enter_window), &win));
-	win.signal_leave_notify_event().connect (sigc::bind (sigc::mem_fun (Keyboard::the_keyboard(), &Keyboard::leave_window), &win));
-}
-
-void
 ARDOUR_UI::detach_tearoff (Box* b, Widget* w)
 {
 //	editor->ensure_float (transport_tearoff->tearoff_window());

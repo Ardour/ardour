@@ -265,7 +265,7 @@ TimeAxisViewItem::~TimeAxisViewItem()
 }
 
 bool
-TimeAxisViewItem::canvas_group_event (GdkEvent* ev)
+TimeAxisViewItem::canvas_group_event (GdkEvent* /*ev*/)
 {
 	return false;
 }

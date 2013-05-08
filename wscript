@@ -7,16 +7,7 @@ import string
 import subprocess
 import sys
 
-#
-# build scripts need to find the right platform specific version
-# 
-
-if sys.platform == 'darwin':
-    OSX_VERSION = '3.0beta6'
-    VERSION = '3.0beta6'
-else:
-    LINUX_VERSION = '3.1'
-    VERSION = '3.1'
+VERSION = '3.1'
 
 APPNAME = 'Ardour3'
 
