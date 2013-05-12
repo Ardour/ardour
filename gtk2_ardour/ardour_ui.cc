@@ -815,13 +815,13 @@ ARDOUR_UI::check_memory_locking ()
 						  "runs out of memory. \n\n"
 						  "You can view the memory limit with 'ulimit -l', "
 						  "and it is normally controlled by %2"),
-						PROGRAM_NAME).c_str(), 
+						PROGRAM_NAME, 
 #ifdef __FreeBSD__
-					X_("/etc/login.conf")
+						X_("/etc/login.conf")
 #else
-					X_(" /etc/security/limits.conf")
+						X_(" /etc/security/limits.conf")
 #endif
-					);
+					).c_str());
 
 				msg.set_default_response (RESPONSE_OK);
 
