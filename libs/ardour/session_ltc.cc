@@ -93,7 +93,10 @@ void
 Session::ltc_tx_cleanup()
 {
 	DEBUG_TRACE (DEBUG::LTC, "LTC TX cleanup\n");
-	if (ltc_enc_buf) free(ltc_enc_buf);
+	if (ltc_enc_buf) {
+		free(ltc_enc_buf);
+		ltc_enc_buf = 0;
+	}
 	ltc_encoder_free(ltc_encoder);
 	ltc_encoder = NULL;
 }
