@@ -148,7 +148,7 @@ msgstr "Armand Klenk"
 
 #: about.cc:153
 msgid "Julien de Kozak"
-msgstr ""
+msgstr "Julien de Kozak"
 
 #: about.cc:154
 msgid "Matt Krai"
@@ -269,6 +269,7 @@ msgid ""
 "\tBenjamin Scherrer <realhangman@web.de>\n"
 "\tEdgar Aichinger <edogawa@aon.at>\n"
 "\tRichard Oax <richard@pagliacciempire.de>\n"
+"\Robin Gloster <robin@loc-com.de>\n"
 msgstr ""
 "Deutsch:\n"
 "\tKarsten Petersen <kapet@kapet.de>\n"
@@ -277,6 +278,7 @@ msgstr ""
 "\tBenjamin Scherrer <realhangman@web.de>\n"
 "\tEdgar Aichinger <edogawa@aon.at>\n"
 "\tRichard Oax <richard@pagliacciempire.de>\n"
+"\Robin Gloster <robin@loc-com.de>\n"
 
 #: about.cc:189
 msgid ""
@@ -380,7 +382,7 @@ msgstr "Copyright (C) 1999-2013 Paul Davis\n"
 
 #: about.cc:583
 msgid "http://ardour.org/"
-msgstr "http://ardour.org"
+msgstr "http://ardour.org/"
 
 #: about.cc:584
 msgid ""
@@ -420,7 +422,7 @@ msgstr "Kanaleinstellungen:"
 
 #: add_route_dialog.cc:57
 msgid "Track mode:"
-msgstr "SpurModus"
+msgstr "Spurmodus"
 
 #: add_route_dialog.cc:58
 msgid "Instrument:"
@@ -440,7 +442,7 @@ msgstr "Audio+MIDI-Spuren"
 
 #: add_route_dialog.cc:82
 msgid "Busses"
-msgstr "Audio-Busse"
+msgstr "Audiobusse"
 
 #: add_route_dialog.cc:104
 msgid "Add:"
@@ -495,7 +497,7 @@ msgid ""
 "track instead."
 msgstr ""
 "Audio+MIDI Spuren sind <b>NUR</b> für den Gebrauch mit Plugins gedacht, die "
-"sowohl Audio als auch MIDI Eingangsdaten nützen\n"
+"sowohl Audio als auch MIDI Eingangsdaten benutzen\n"
 "\n"
 "Falls Sie nicht vorhaben, so ein Plugin zu benutzen, verwenden Sie "
 "stattdessen eine normale Audio- oder MIDI-Spur"
@@ -563,7 +565,7 @@ msgstr "-keine-"
 
 #: ambiguous_file_dialog.cc:30
 msgid "Ambiguous File"
-msgstr "Mehrdeutige Datei"
+msgstr "Mehrmals gefundene Datei"
 
 #: ambiguous_file_dialog.cc:35
 msgid ""
@@ -621,7 +623,7 @@ msgstr "Normalisieren"
 
 #: analysis_window.cc:59
 msgid "FFT analysis window"
-msgstr "FFT - Analysefenster"
+msgstr "FFT-Analysefenster"
 
 #: analysis_window.cc:60 editor.cc:1880
 msgid "Spectral Analysis"
@@ -653,11 +655,11 @@ msgstr "Vorhören"
 
 #: ardour_ui.cc:169
 msgid "solo"
-msgstr "solo"
+msgstr "Solo"
 
 #: ardour_ui.cc:170
 msgid "feedback"
-msgstr "feedback"
+msgstr "Feedback"
 
 #: ardour_ui.cc:172
 msgid "Errors"
@@ -684,15 +686,15 @@ msgid ""
 "controlled by %2"
 msgstr ""
 "WARNUNG: Ihr System hat eine Begrenzung für die Reservierung von "
-"Arbeitsspeicher eingestellt. Dies könnte dazu führen, dass %1 zu schnell der "
-"Speicher ausgeht.\n"
+"Arbeitsspeicher eingestellt. Dies könnte dazu führen, dass %1 der "
+"Speicher ausgeht bevor die Systembegrenzung erreicht ist.\n"
 "\n"
 "Sie können die Speicherbegrenzung mit 'ulimit -l' einsehen und normalerweise "
 "in %2 verändern."
 
 #: ardour_ui.cc:800
 msgid "Do not show this window again"
-msgstr "Diese Meldung nicht wieder anzeigen"
+msgstr "Diese Meldung nicht erneut anzeigen"
 
 #: ardour_ui.cc:847
 msgid "Don't quit"
@@ -700,7 +702,7 @@ msgstr "Abbrechen"
 
 #: ardour_ui.cc:848
 msgid "Just quit"
-msgstr "Nur beenden"
+msgstr "Beenden ohne zu speichern"
 
 #: ardour_ui.cc:849
 msgid "Save and quit"
@@ -874,7 +876,7 @@ msgid ""
 "You cannot open or close sessions in this condition"
 msgstr ""
 "%1 ist derzeit nicht mit JACK verbunden.\n"
-"Es ist nicht möglich, Projekte zu öffnen oder zu schließen."
+"Dadurch können keine Projekte geöffnet oder geschlossen werden."
 
 #: ardour_ui.cc:1455
 msgid "Open Session"
@@ -883,7 +885,7 @@ msgstr "Projekt öffnen"
 #: ardour_ui.cc:1473 session_import_dialog.cc:169
 #: session_metadata_dialog.cc:729 startup.cc:1049
 msgid "%1 sessions"
-msgstr "%1projekte"
+msgstr "%1 Projekte"
 
 #: ardour_ui.cc:1510
 msgid "You cannot add a track without a session already loaded."
@@ -931,8 +933,8 @@ msgid ""
 "Please create one or more tracks before trying to record.\n"
 "You can do this with the \"Add Track or Bus\" option in the Session menu."
 msgstr ""
-"Bitte fügen Sie mindestens eine oder mehrere Spur hinzu,\n"
-"bevor Sie aufnehmen. Die geht über \"Spur/Bus hinzufügen\"\n"
+"Bitte fügen Sie, bevor Sie aufnehmen, mindestens \n"
+"eine oder mehrere Spur hinzu. Die geht über \"Spur/Bus hinzufügen\"\n"
 "im Menüpunkt Projekt."
 
 #: ardour_ui.cc:2084
@@ -984,11 +986,11 @@ msgstr "Bestätige das Überschreiben des Schnappschusses"
 #: ardour_ui.cc:2230
 msgid "A snapshot already exists with that name.  Do you want to overwrite it?"
 msgstr ""
-"Ein Schnappschuss mit diesem existiert bereits. Wollen Sie ihn überschreiben?"
+"Ein Schnappschuss mit diesem Namen existiert bereits. Wollen Sie ihn überschreiben?"
 
 #: ardour_ui.cc:2233
 msgid "Overwrite"
-msgstr "Überschreibe"
+msgstr "Überschreiben"
 
 #: ardour_ui.cc:2267
 msgid "Rename Session"
@@ -1011,7 +1013,7 @@ msgid ""
 "That name is already in use by another directory/folder. Please try again."
 msgstr ""
 "Dieser Name wird schon von einem anderen Verzeichnis/Ordner benutzt. Bitte "
-"nochmal versuchen."
+"versuchen Sie einen anderen Namen."
 
 #: ardour_ui.cc:2299
 msgid ""
@@ -1031,7 +1033,7 @@ msgstr "Name für Vorlage"
 
 #: ardour_ui.cc:2416
 msgid "-template"
-msgstr "Vorlage"
+msgstr "-Vorlage"
 
 #: ardour_ui.cc:2454
 msgid ""
@@ -1039,7 +1041,7 @@ msgid ""
 "%1\n"
 "already exists. Do you want to open it?"
 msgstr ""
-"Das Projekt\n"
+"Dieses Projekt\n"
 "%1\n"
 "existiert bereits. Wollen Sie sie öffnen?"
 
@@ -1049,7 +1051,7 @@ msgstr "Vorhandenes Projekt öffnen"
 
 #: ardour_ui.cc:2702
 msgid "There is no existing session at \"%1\""
-msgstr "Es gibt kein Projekt an folgender Stelle: \"%1\""
+msgstr "Es gibt kein Projekt in: \"%1\""
 
 #: ardour_ui.cc:2792
 msgid "Please wait while %1 loads your session"
@@ -1146,7 +1148,7 @@ msgid_plural ""
 "\n"
 "will release an additional %3 %4bytes of disk space.\n"
 msgstr[0] ""
-"Die folgende Datei war unbenutzt\n"
+"Die folgende Datei wurde nicht benutzt\n"
 "und wurde verschoben nach: %2\n"
 "\n"
 "Nach einem Neustart von %5 kann über\n"
@@ -1195,44 +1197,48 @@ msgstr "gelöschte Datei"
 #: ardour_ui.cc:3346
 msgid ""
 "Video-Server was not launched by Ardour. The request to stop it is ignored."
-msgstr ""
+msgstr "Der Video-Server wurde nicht von Ardour gestartet, der Befehl ihn anzuhalten wird ignoriert."
 
 #: ardour_ui.cc:3350
 msgid "Stop Video-Server"
-msgstr ""
+msgstr "Video-Server anhalten"
 
 #: ardour_ui.cc:3351
 msgid "Do you really want to stop the Video Server?"
-msgstr ""
+msgstr "Wollen Sie den Video-Server wirklich anhalten?"
 
 #: ardour_ui.cc:3354
-#, fuzzy
 msgid "Yes, Stop It"
-msgstr "Ja, entfernen."
+msgstr "Ja, anhalten."
 
 #: ardour_ui.cc:3380
 msgid "The Video Server is already started."
-msgstr ""
+msgstr "Der Video-Server läuft bereits"
 
 #: ardour_ui.cc:3382
 msgid ""
 "An external Video Server is configured and can be reached. Not starting a "
 "new instance."
 msgstr ""
+"Ein externer Video-Server wurde konfiguriert, ist aber nicht erreichbar. Es wird "
+"keine neue Instanz gestartet."
 
 #: ardour_ui.cc:3390 ardour_ui.cc:3461
 msgid ""
 "Could not connect to the Video Server. Start it or configure its access URL "
 "in Edit -> Preferences."
 msgstr ""
+"Es konnte keine Verbindung zum Video-Server hergestellt werden."
+"Sie müssen ihn vorher starten oder die Adresse in "
+"Bearbeiten -> Globale Einstellungen anpassen"
 
 #: ardour_ui.cc:3414
 msgid "Specified docroot is not an existing directory."
-msgstr ""
+msgstr "Das eingestellte Dokumentenverzeichnis existiert nicht."
 
 #: ardour_ui.cc:3419
 msgid "Given Video Server is not an executable file."
-msgstr ""
+msgstr "Der eingestellte Video-Server ist keine ausführbare Datei."
 
 #: ardour_ui.cc:3485 editor_audio_import.cc:629
 msgid "could not open %1"
@@ -1240,7 +1246,7 @@ msgstr "Konnte \"%s\" nicht öffnen."
 
 #: ardour_ui.cc:3489
 msgid "no video-file selected"
-msgstr ""
+msgstr "Es wurde keine Video-Datei ausgewählt."
 
 #: ardour_ui.cc:3650
 msgid "Recording was stopped because your system could not keep up."
@@ -1277,7 +1283,7 @@ msgstr ""
 
 #: ardour_ui.cc:3738
 msgid "Crash Recovery"
-msgstr "Wiederherstellung"
+msgstr "Absturz-Wiederherstellung"
 
 #: ardour_ui.cc:3739
 msgid ""
@@ -1338,11 +1344,11 @@ msgstr "Konnte nicht erneut zu JACK verbinden"
 
 #: ardour_ui.cc:3902
 msgid "Check the website for more..."
-msgstr ""
+msgstr "Informieren Sie sich auf der Webseite weiter..."
 
 #: ardour_ui.cc:3915
 msgid "Click to open the program website in your web browser"
-msgstr ""
+msgstr "Klicken Sie, um die Webseite in Ihrem Web-Browse zu öffnen"
 
 #: ardour_ui.cc:4152
 msgid ""
@@ -1453,7 +1459,6 @@ msgid "When active, there is a feedback loop."
 msgstr "Wenn aktiv, gibt es eine Rückkopplungsschleife."
 
 #: ardour_ui2.cc:142
-#, fuzzy
 msgid ""
 "<b>Primary Clock</b> right-click to set display mode. Click to edit, click"
 "+drag a digit or mouse-over+scroll wheel to modify.\n"
@@ -1470,7 +1475,6 @@ msgstr ""
 "Einzelheiten."
 
 #: ardour_ui2.cc:143
-#, fuzzy
 msgid ""
 "<b>Secondary Clock</b> right-click to set display mode. Click to edit, click"
 "+drag a digit or mouse-over+scroll wheel to modify.\n"
@@ -1841,7 +1845,7 @@ msgstr "Start/Stopp"
 
 #: ardour_ui_ed.cc:308
 msgid "Stop and Forget Capture"
-msgstr "Stop + Aufnahme verwerfen"
+msgstr "Stopp + Aufnahme verwerfen"
 
 #: ardour_ui_ed.cc:318
 msgid "Transition To Roll"
@@ -1857,7 +1861,7 @@ msgstr "Schleife wiedergeben"
 
 #: ardour_ui_ed.cc:329
 msgid "Play Selected Range"
-msgstr "Gewählten Bereich abspielen"
+msgstr "Gewählten Bereich wiedergeben"
 
 #: ardour_ui_ed.cc:332
 msgid "Play Selection w/Preroll"
@@ -2610,7 +2614,7 @@ msgstr "Arbeitspunkt"
 
 #: editor.cc:200
 msgid "Mushy"
-msgstr "Breiig/Matschig"
+msgstr "Matschig"
 
 #: editor.cc:201
 msgid "Smooth"
@@ -2658,7 +2662,7 @@ msgstr "CD-Marker"
 
 #: editor.cc:250
 msgid "Video Timeline"
-msgstr ""
+msgstr "Video Zeitleiste"
 
 #: editor.cc:266
 msgid "mode"
