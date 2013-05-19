@@ -266,6 +266,25 @@ BufferSet::get_lv2_midi(bool input, size_t i, bool old_api)
 }
 
 void
+BufferSet::forward_lv2_midi(LV2_Evbuf* buf, size_t i, bool purge_ardour_buffer)
+{
+	MidiBuffer& mbuf  = get_midi(i);
+	if (purge_ardour_buffer) {
+		mbuf.silence(0, 0);
+	}
+	for (LV2_Evbuf_Iterator i = lv2_evbuf_begin(buf);
+			 lv2_evbuf_is_valid(i);
+			 i = lv2_evbuf_next(i)) {
+		uint32_t frames, subframes, type, size;
+		uint8_t* data;
+		lv2_evbuf_get(i, &frames, &subframes, &type, &size, &data);
+		if (type == LV2Plugin::urids.midi_MidiEvent) {
+			mbuf.push_back(frames, size, data);
+		}
+	}
+}
+
+void
 BufferSet::flush_lv2_midi(bool input, size_t i)
 {
 	MidiBuffer&            mbuf  = get_midi(i);

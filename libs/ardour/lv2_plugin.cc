@@ -1640,8 +1640,28 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		PortFlags flags = _port_flags[port_index];
 		bool      valid = false;
 
-		// Flush MIDI (write back to Ardour MIDI buffers)
-		if ((flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE))) {
+		/* TODO ask drobilla about comment
+		 * "Make Ardour event buffers generic so plugins can communicate"
+		 * in libs/ardour/buffer_set.cc:310
+		 *
+		 * ideally the user could choose which of the following two modes
+		 * to use (e.g. instrument/effect chains  MIDI OUT vs MIDI TRHU).
+		 *
+		 * This implementation follows the discussion on IRC Mar 16 2013 16:47 UTC
+		 * 16:51 < drobilla> rgareus: [..] i.e always replace with MIDI output [of LV2 plugin] if it's there
+		 * 16:52 < drobilla> rgareus: That would probably be good enough [..] to make users not complain
+		 *                            for quite a while at least ;)
+		 */
+		// copy output of LV2 plugin's MIDI port to Ardour MIDI buffers -- MIDI OUT
+		if ((flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE|PORT_MIDI))) {
+			const uint32_t buf_index = out_map.get(
+				DataType::MIDI, midi_out_index++, &valid);
+			if (valid) {
+				bufs.forward_lv2_midi(_ev_buffers[port_index], buf_index);
+			}
+		}
+		// Flush MIDI (write back to Ardour MIDI buffers) -- MIDI THRU
+		else if ((flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE))) {
 			const uint32_t buf_index = out_map.get(
 				DataType::MIDI, midi_out_index++, &valid);
 			if (valid) {
