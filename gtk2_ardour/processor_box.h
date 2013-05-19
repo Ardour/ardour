@@ -88,6 +88,7 @@ class ProcessorWindowProxy : public WM::ProxyBase
 
     ARDOUR::SessionHandlePtr* session_handle();
     void toggle();
+    void set_custom_ui_mode(bool use_custom) { want_custom = use_custom; }
 
     bool marked;
 
@@ -95,6 +96,7 @@ class ProcessorWindowProxy : public WM::ProxyBase
     ProcessorBox* _processor_box;
     boost::weak_ptr<ARDOUR::Processor> _processor;
     bool is_custom;
+    bool want_custom;
 };
 
 class ProcessorEntry : public Gtkmm2ext::DnDVBoxChild, public sigc::trackable
@@ -257,7 +259,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	Gtk::Window* get_processor_ui (boost::shared_ptr<ARDOUR::Processor>) const;
 
         /* a WindowProxy object can use this */
-        Gtk::Window* get_editor_window (boost::shared_ptr<ARDOUR::Processor>);
+        Gtk::Window* get_editor_window (boost::shared_ptr<ARDOUR::Processor>, bool);
         Gtk::Window* get_generic_editor_window (boost::shared_ptr<ARDOUR::Processor>);
 
         void edit_processor (boost::shared_ptr<ARDOUR::Processor>);
