@@ -28,6 +28,7 @@
 #include "ardour_dialog.h"
 #include "ardour_window.h"
 #include "window_manager.h"
+#include "processor_box.h"
 
 #include "i18n.h"
 
@@ -106,7 +107,12 @@ Manager::add_state (XMLNode& root) const
 		if (dynamic_cast<ProxyTemporary*> (*i)) {
 			continue;
 		}
-		root.add_child_nocopy ((*i)->get_state());
+		if (dynamic_cast<ProcessorWindowProxy*> (*i)) {
+			ProcessorWindowProxy *pi = dynamic_cast<ProcessorWindowProxy*> (*i);
+			root.add_child_nocopy (pi->get_state());
+		} else {
+			root.add_child_nocopy ((*i)->get_state());
+		}
 	}
 }
 

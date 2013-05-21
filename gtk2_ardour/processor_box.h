@@ -92,6 +92,9 @@ class ProcessorWindowProxy : public WM::ProxyBase
 
     bool marked;
 
+    void set_state (const XMLNode&);
+    XMLNode& get_state () const;
+
   private:
     ProcessorBox* _processor_box;
     boost::weak_ptr<ARDOUR::Processor> _processor;

@@ -2642,6 +2642,38 @@ ProcessorWindowProxy::session_handle()
 	return 0;
 }
 
+XMLNode&
+ProcessorWindowProxy::get_state () const
+{
+	XMLNode *node;
+	node = &ProxyBase::get_state();
+	node->add_property (X_("custom-ui"), is_custom? X_("yes") : X_("no"));
+	return *node;
+}
+
+void
+ProcessorWindowProxy::set_state (const XMLNode& node)
+{
+	XMLNodeList children = node.children ();
+	XMLNodeList::const_iterator i = children.begin ();
+	while (i != children.end()) {
+		XMLProperty* prop = (*i)->property (X_("name"));
+		if ((*i)->name() == X_("Window") && prop && prop->value() == _name) {
+			break;
+		}
+		++i;
+	}
+
+	if (i != children.end()) {
+		XMLProperty* prop;
+		if ((prop = (*i)->property (X_("custom-ui"))) != 0) {
+			want_custom = PBD::string_is_affirmative (prop->value ());
+		}
+	}
+
+	ProxyBase::set_state(node);
+}
+
 Gtk::Window*
 ProcessorWindowProxy::get (bool create)
 {
