@@ -27,8 +27,6 @@
 #include <cerrno>
 #include <fstream>
 
-#include <boost/locale.hpp>
-
 #include <stdint.h>
 #include <fcntl.h>
 #include <signal.h>
