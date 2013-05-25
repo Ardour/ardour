@@ -183,7 +183,11 @@ defmod 'gtkengines' 'gtk-engines' '2.21.0' 'http://ardour.org/files/' 'gz'
 
 # modified source : fetch tarballs from ardour.org
 
-defmod gtk gtk+ '2.24.18' http://ardour.org/files/deps/ bz2
+if uname -a | grep --silent arwin ; then
+    defmod gtk gtk+ '2.24.18-quartz' http://ardour.org/files/deps/ bz2 "gtk+-2.24.18"
+else
+    defmod gtk gtk+ '2.24.18-x11' http://ardour.org/files/deps/ bz2 "gtk+-2.24.18"
+fi
 
 if [ x$clean != x -o x$makespace != x ] ; then
     #
