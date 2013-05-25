@@ -426,9 +426,9 @@ tar xf $MOD_glib_local_tarball \
 # step two: build pkg-config with glib flags specified so that pkg-config is not used or required
 #
 if [ x$explicit_intl != x ] ; then
-    tar xf $MOD_pkgconfig_local_tarball && (cd $MOD_pkgconfig_unpacked && GLIB_CFLAGS="-I$PREFIX/include/glib-2.0 -I$PREFIX/lib/glib-2.0/include" GLIB_LIBS="-L$PREFIX/lib -lglib-2.0 -lintl" ./configure --prefix=$HOME/gtk/inst && make && make install) && rm -rf $MOD_pkgconfig_unpacked || die "pkg-config build1 failed"
+    tar xf $MOD_pkgconfig_local_tarball && (cd $MOD_pkgconfig_unpacked && GLIB_CFLAGS="-I$PREFIX/include/glib-2.0 -I$PREFIX/lib/glib-2.0/include" GLIB_LIBS="-L$PREFIX/lib -lglib-2.0 -lintl" ./configure --prefix=$PREFIX && make && make install) && rm -rf $MOD_pkgconfig_unpacked || die "pkg-config build1 failed"
 else
-    tar xf $MOD_pkgconfig_local_tarball && (cd $MOD_pkgconfig_unpacked && GLIB_CFLAGS="-I$PREFIX/include/glib-2.0 -I$PREFIX/lib/glib-2.0/include" GLIB_LIBS="-L$PREFIX/lib -lglib-2.0" ./configure --prefix=$HOME/gtk/inst && make && make install) && rm -rf $MOD_pkgconfig_unpacked || die "pkg-config build1 failed"
+    tar xf $MOD_pkgconfig_local_tarball && (cd $MOD_pkgconfig_unpacked && GLIB_CFLAGS="-I$PREFIX/include/glib-2.0 -I$PREFIX/lib/glib-2.0/include" GLIB_LIBS="-L$PREFIX/lib -lglib-2.0" ./configure --prefix=$PREFIX && make && make install) && rm -rf $MOD_pkgconfig_unpacked || die "pkg-config build1 failed"
 fi
 # 
 # step three: rebuild glib 
