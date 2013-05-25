@@ -256,6 +256,10 @@ GenericPluginUI::build ()
 				continue;
 			}
 
+			if (plugin->describe_parameter (Evoral::Parameter(PluginAutomation, 0, i)) == X_("hidden")) {
+				continue;
+			}
+
 			ControlUI* cui;
 
 			boost::shared_ptr<ARDOUR::AutomationControl> c

@@ -119,6 +119,7 @@ public:
 	LilvNode* atom_supports;
 	LilvNode* ev_EventPort;
 	LilvNode* ext_logarithmic;
+	LilvNode* ext_notOnGUI;
 	LilvNode* lv2_AudioPort;
 	LilvNode* lv2_ControlPort;
 	LilvNode* lv2_InputPort;
@@ -126,6 +127,7 @@ public:
 	LilvNode* lv2_enumeration;
 	LilvNode* lv2_inPlaceBroken;
 	LilvNode* lv2_integer;
+	LilvNode* lv2_reportsLatency;
 	LilvNode* lv2_sampleRate;
 	LilvNode* lv2_toggled;
 	LilvNode* midi_MidiEvent;
@@ -1319,6 +1321,16 @@ string
 LV2Plugin::describe_parameter(Evoral::Parameter which)
 {
 	if (( which.type() == PluginAutomation) && ( which.id() < parameter_count()) ) {
+
+		if (lilv_port_has_property(_impl->plugin,
+					lilv_plugin_get_port_by_index(_impl->plugin, which.id()), _world.ext_notOnGUI)) {
+			return X_("hidden");
+		}
+		if (lilv_port_has_property(_impl->plugin,
+					lilv_plugin_get_port_by_index(_impl->plugin, which.id()), _world.lv2_reportsLatency)) {
+			return X_("latency");
+		}
+
 		LilvNode* name = lilv_port_get_name(_impl->plugin,
 		                                    lilv_plugin_get_port_by_index(_impl->plugin, which.id()));
 		string ret(lilv_node_as_string(name));
@@ -1856,12 +1868,14 @@ LV2World::LV2World()
 	atom_eventTransfer = lilv_new_uri(world, LV2_ATOM__eventTransfer);
 	ev_EventPort       = lilv_new_uri(world, LILV_URI_EVENT_PORT);
 	ext_logarithmic    = lilv_new_uri(world, LV2_PORT_PROPS__logarithmic);
+	ext_notOnGUI       = lilv_new_uri(world, LV2_PORT_PROPS__notOnGUI);
 	lv2_AudioPort      = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
 	lv2_ControlPort    = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
 	lv2_InputPort      = lilv_new_uri(world, LILV_URI_INPUT_PORT);
 	lv2_OutputPort     = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
 	lv2_inPlaceBroken  = lilv_new_uri(world, LV2_CORE__inPlaceBroken);
 	lv2_integer        = lilv_new_uri(world, LV2_CORE__integer);
+	lv2_reportsLatency = lilv_new_uri(world, LV2_CORE__reportsLatency);
 	lv2_sampleRate     = lilv_new_uri(world, LV2_CORE__sampleRate);
 	lv2_toggled        = lilv_new_uri(world, LV2_CORE__toggled);
 	lv2_enumeration    = lilv_new_uri(world, LV2_CORE__enumeration);
@@ -1880,12 +1894,14 @@ LV2World::~LV2World()
 	lilv_node_free(lv2_toggled);
 	lilv_node_free(lv2_sampleRate);
 	lilv_node_free(lv2_integer);
+	lilv_node_free(lv2_reportsLatency);
 	lilv_node_free(lv2_inPlaceBroken);
 	lilv_node_free(lv2_OutputPort);
 	lilv_node_free(lv2_InputPort);
 	lilv_node_free(lv2_ControlPort);
 	lilv_node_free(lv2_AudioPort);
 	lilv_node_free(ext_logarithmic);
+	lilv_node_free(ext_notOnGUI);
 	lilv_node_free(ev_EventPort);
 	lilv_node_free(atom_eventTransfer);
 	lilv_node_free(atom_bufferType);
