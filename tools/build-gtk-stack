@@ -153,14 +153,14 @@ defmod 'bison' '2.5' 'ftp://ftp.gnu.org/gnu/bison/' 'bz2'
 defmod 'glib' '2.32.2' 'http://ftp.gnome.org/pub/gnome/sources/glib/2.32/' 'xz'
 defmod 'pkgconfig' 'pkg-config' '0.26' 'http://pkgconfig.freedesktop.org/releases/' 'gz'
 defmod 'readline' '6.2' 'ftp://ftp.cwru.edu/pub/bash/' 'gz'
-defmod 'zlib' '1.2.7' 'http://zlib.net/' 'bz2'
+defmod 'zlib' '1.2.7' 'ftp://ftp.simplesystems.org/pub/libpng/png/src/history/zlib/' 'bz2'
 defmod 'libiconv' '1.14' 'ftp://ftp.gnu.org/gnu/libiconv/' 'gz'
 defmod 'gettext' '0.18.1.1' 'http://ftp.gnu.org/pub/gnu/gettext/' 'gz'
 defmod 'expat' '2.1.0' 'http://prdownloads.sourceforge.net/expat/' 'gz'
 defmod 'libxml2' '2.7.8' 'ftp://xmlsoft.org/libxslt/' 'gz'
 defmod 'libxslt' '1.1.28' 'ftp://xmlsoft.org/libxslt/' 'gz'
 defmod 'tiff' '4.0.1' 'ftp://ftp.remotesensing.org/pub/libtiff/' 'gz'
-defmod 'libpng' '1.6.0' 'ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng16/' 'xz'
+defmod 'libpng' '1.6.0' 'ftp://ftp.simplesystems.org/pub/libpng/png/src/history/libpng16/' 'xz'
 defmod 'jpeg' 'jpegsrc.v8d' '' 'http://www.ijg.org/files/' 'gz' 'jpeg-8d'
 defmod 'makemaker' 'ExtUtils-MakeMaker' '6.64' 'http://search.cpan.org/CPAN/authors/id/M/MS/MSCHWERN/' 'gz'
 defmod 'xmlparser' 'XML-Parser' '2.41' 'http://search.cpan.org/CPAN/authors/id/T/TO/TODDR/' 'gz'
@@ -183,7 +183,11 @@ defmod 'gtkengines' 'gtk-engines' '2.21.0' 'http://ardour.org/files/' 'gz'
 
 # modified source : fetch tarballs from ardour.org
 
-defmod gtk gtk+ '2.24.18' http://ardour.org/files/deps/ bz2
+if uname -a | grep --silent arwin ; then
+    defmod gtk gtk+ '2.24.18-quartz' http://ardour.org/files/deps/ bz2 "gtk+-2.24.18"
+else
+    defmod gtk gtk+ '2.24.18-x11' http://ardour.org/files/deps/ bz2 "gtk+-2.24.18"
+fi
 
 if [ x$clean != x -o x$makespace != x ] ; then
     #
@@ -422,9 +426,9 @@ tar xf $MOD_glib_local_tarball \
 # step two: build pkg-config with glib flags specified so that pkg-config is not used or required
 #
 if [ x$explicit_intl != x ] ; then
-    tar xf $MOD_pkgconfig_local_tarball && (cd $MOD_pkgconfig_unpacked && GLIB_CFLAGS="-I$PREFIX/include/glib-2.0 -I$PREFIX/lib/glib-2.0/include" GLIB_LIBS="-L$PREFIX/lib -lglib-2.0 -lintl" ./configure --prefix=$HOME/gtk/inst && make && make install) && rm -rf $MOD_pkgconfig_unpacked || die "pkg-config build1 failed"
+    tar xf $MOD_pkgconfig_local_tarball && (cd $MOD_pkgconfig_unpacked && GLIB_CFLAGS="-I$PREFIX/include/glib-2.0 -I$PREFIX/lib/glib-2.0/include" GLIB_LIBS="-L$PREFIX/lib -lglib-2.0 -lintl" ./configure --prefix=$PREFIX && make && make install) && rm -rf $MOD_pkgconfig_unpacked || die "pkg-config build1 failed"
 else
-    tar xf $MOD_pkgconfig_local_tarball && (cd $MOD_pkgconfig_unpacked && GLIB_CFLAGS="-I$PREFIX/include/glib-2.0 -I$PREFIX/lib/glib-2.0/include" GLIB_LIBS="-L$PREFIX/lib -lglib-2.0" ./configure --prefix=$HOME/gtk/inst && make && make install) && rm -rf $MOD_pkgconfig_unpacked || die "pkg-config build1 failed"
+    tar xf $MOD_pkgconfig_local_tarball && (cd $MOD_pkgconfig_unpacked && GLIB_CFLAGS="-I$PREFIX/include/glib-2.0 -I$PREFIX/lib/glib-2.0/include" GLIB_LIBS="-L$PREFIX/lib -lglib-2.0" ./configure --prefix=$PREFIX && make && make install) && rm -rf $MOD_pkgconfig_unpacked || die "pkg-config build1 failed"
 fi
 # 
 # step three: rebuild glib 
