@@ -437,6 +437,10 @@ ExportProfileManager::deserialize_timespan (XMLNode & root)
 		state->time_format = (TimeFormat) string_2_enum (prop->value(), TimeFormat);
 	}
 
+	if (state->timespans->empty()) {
+		return TimespanStatePtr();
+	}
+
 	return state;
 }
 
