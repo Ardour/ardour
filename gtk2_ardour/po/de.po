@@ -3109,7 +3109,7 @@ msgstr "Wiedergabeliste löschen"
 
 #: editor.cc:3902
 msgid "Keep Playlist"
-msgstr "Wiedergabeliste beibehalten"
+msgstr "Wiedergabeliste behalten"
 
 #: editor.cc:3903 editor_audio_import.cc:579 editor_ops.cc:5860
 #: processor_box.cc:1953 processor_box.cc:1978
