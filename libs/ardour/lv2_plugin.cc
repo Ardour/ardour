@@ -445,10 +445,12 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 					flags |= PORT_POSITION;
 				}
 			}
+#ifdef HAVE_NEW_LV2
 			LilvNode* min_size = lilv_port_get(_impl->plugin, port, _world.rsz_minimumSize);
 			if (min_size && lilv_node_is_int(min_size)) {
 				minimumSize = lilv_node_as_int(min_size);
 			}
+#endif
 			lilv_node_free(min_size);
 			lilv_nodes_free(buffer_types);
 			lilv_nodes_free(atom_supports);
@@ -1435,10 +1437,12 @@ LV2Plugin::allocate_atom_event_buffers()
 				if (lilv_port_is_a(p, port, _world.lv2_OutputPort)) {
 					count_atom_out++;
 				}
+#ifdef HAVE_NEW_LV2
 				LilvNode* min_size = lilv_port_get(_impl->plugin, port, _world.rsz_minimumSize);
 				if (min_size && lilv_node_is_int(min_size)) {
 					minimumSize = std::max(minimumSize, lilv_node_as_int(min_size));
 				}
+#endif
 			}
 			lilv_nodes_free(buffer_types);
 			lilv_nodes_free(atom_supports);
