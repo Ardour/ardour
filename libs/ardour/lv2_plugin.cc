@@ -1442,6 +1442,7 @@ LV2Plugin::allocate_atom_event_buffers()
 				if (min_size && lilv_node_is_int(min_size)) {
 					minimumSize = std::max(minimumSize, lilv_node_as_int(min_size));
 				}
+				lilv_node_free(min_size);
 #endif
 			}
 			lilv_nodes_free(buffer_types);
