@@ -450,8 +450,8 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 			if (min_size && lilv_node_is_int(min_size)) {
 				minimumSize = lilv_node_as_int(min_size);
 			}
-#endif
 			lilv_node_free(min_size);
+#endif
 			lilv_nodes_free(buffer_types);
 			lilv_nodes_free(atom_supports);
 		} else {
