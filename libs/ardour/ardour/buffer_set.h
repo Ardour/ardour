@@ -120,6 +120,9 @@ public:
 	 */
 	LV2_Evbuf* get_lv2_midi(bool input, size_t i, bool old_api);
 
+	/** ensure minimum size of LV2 Atom port buffer */
+	void ensure_lv2_bufsize(bool input, size_t i, size_t buffer_capacity);
+
 	/** Flush modified LV2 event output buffers back to Ardour buffers */
 	void flush_lv2_midi(bool input, size_t i);
 

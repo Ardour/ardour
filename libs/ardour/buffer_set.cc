@@ -252,6 +252,25 @@ BufferSet::get(DataType type, size_t i) const
 
 #ifdef LV2_SUPPORT
 
+void
+BufferSet::ensure_lv2_bufsize(bool input, size_t i, size_t buffer_capacity)
+{
+	assert(count().get(DataType::MIDI) > i);
+
+	LV2Buffers::value_type b     = _lv2_buffers.at(i * 2 + (input ? 0 : 1));
+	LV2_Evbuf*             evbuf = b.second;
+
+	if (lv2_evbuf_get_capacity(evbuf) >= buffer_capacity) return;
+
+	lv2_evbuf_free(b.second);
+	_lv2_buffers.at(i * 2 + (input ? 0 : 1)) =
+		std::make_pair(false, lv2_evbuf_new(
+					buffer_capacity,
+					LV2_EVBUF_EVENT,
+					LV2Plugin::urids.atom_Chunk,
+					LV2Plugin::urids.atom_Sequence));
+}
+
 LV2_Evbuf*
 BufferSet::get_lv2_midi(bool input, size_t i, bool old_api)
 {
