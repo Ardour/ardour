@@ -1911,20 +1911,24 @@ LV2World::~LV2World()
 {
 	lilv_node_free(ui_external);
 	lilv_node_free(ui_GtkUI);
+	lilv_node_free(time_Position);
+	lilv_node_free(rsz_minimumSize);
+	lilv_node_free(rdfs_comment);
 	lilv_node_free(midi_MidiEvent);
+	lilv_node_free(lv2_enumeration);
 	lilv_node_free(lv2_toggled);
 	lilv_node_free(lv2_sampleRate);
-	lilv_node_free(lv2_integer);
 	lilv_node_free(lv2_reportsLatency);
+	lilv_node_free(lv2_integer);
 	lilv_node_free(lv2_inPlaceBroken);
 	lilv_node_free(lv2_OutputPort);
 	lilv_node_free(lv2_InputPort);
 	lilv_node_free(lv2_ControlPort);
 	lilv_node_free(lv2_AudioPort);
-	lilv_node_free(ext_logarithmic);
 	lilv_node_free(ext_notOnGUI);
+	lilv_node_free(ext_logarithmic);
 	lilv_node_free(ev_EventPort);
-	lilv_node_free(rsz_minimumSize);
+	lilv_node_free(atom_supports);
 	lilv_node_free(atom_eventTransfer);
 	lilv_node_free(atom_bufferType);
 	lilv_node_free(atom_Sequence);
