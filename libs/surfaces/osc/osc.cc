@@ -34,6 +34,7 @@
 #include <pbd/file_utils.h>
 #include <pbd/failed_constructor.h>
 
+#include "ardour/amp.h"
 #include "ardour/session.h"
 #include "ardour/route.h"
 #include "ardour/audio_track.h"
@@ -42,6 +43,7 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/panner.h"
 #include "ardour/plugin.h"
+#include "ardour/send.h"
 
 #include "osc.h"
 #include "osc_controllable.h"
@@ -910,7 +912,7 @@ OSC::route_set_send_gain_abs (int rid, int sid, float val)
 		--sid;
 	}
 
-	boost::shared_ptr<Processor> p = r->nth_send (send);
+	boost::shared_ptr<Processor> p = r->nth_send (sid);
 	
 	if (p) {
 		boost::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(p);
@@ -941,7 +943,7 @@ OSC::route_set_send_gain_dB (int rid, int sid, float val)
 		--sid;
 	}
 
-	boost::shared_ptr<Processor> p = r->nth_send (send);
+	boost::shared_ptr<Processor> p = r->nth_send (sid);
 	
 	if (p) {
 		boost::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(p);
