@@ -169,7 +169,7 @@ vstfx_infofile_path (char* dllpath, int personal)
 		}
 		
 	} else {
-		dir = Glib::path_get_dirname (dllpath);
+		dir = Glib::path_get_dirname (std::string(dllpath));
 	}
 
 	stringstream s;
@@ -214,6 +214,7 @@ vstfx_infofile_for_read (char* dllpath)
 {
 	struct stat own_statbuf;
 	struct stat sys_statbuf;
+	FILE *rv = NULL;
 	
 	char* own_info = vstfx_infofile_stat (dllpath, &own_statbuf, 1);
 	char* sys_info = vstfx_infofile_stat (dllpath, &sys_statbuf, 0);
@@ -222,14 +223,16 @@ vstfx_infofile_for_read (char* dllpath)
 		if (sys_info) {
 			if (own_statbuf.st_mtime <= sys_statbuf.st_mtime) {
 				/* system info file is newer, use it */
-				return g_fopen (sys_info, "rb");
+				rv = g_fopen (sys_info, "rb");
 			}
 		} else {
-			return g_fopen (own_info, "rb");
+			rv = g_fopen (own_info, "rb");
 		}
 	}
+	free(own_info);
+	free(sys_info);
 
-	return 0;
+	return rv;
 }
 
 static FILE *
@@ -416,6 +419,8 @@ vstfx_free_info (VSTInfo *info)
 	free (info->name);
 	free (info->creator);
 	free (info->Category);
+	free (info->ParamNames);
+	free (info->ParamLabels);
 	free (info);
 }
 
