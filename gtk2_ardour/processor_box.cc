@@ -1066,6 +1066,8 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 		if (_session->engine().connected()) {
 			/* XXX giving an error message here is hard, because we may be in the midst of a button press */
 
+			if (!one_processor_can_be_edited ()) return true;
+
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 				generic_edit_processor (processor);
 			} else {
