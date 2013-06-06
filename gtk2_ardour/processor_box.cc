@@ -113,7 +113,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 
 		_button.set_active (_processor->active());
 		_button.show ();
-		
+
 		_processor->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
 		_processor->PropertyChanged.connect (name_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_property_changed, this, _1), gui_context());
 
@@ -247,7 +247,20 @@ ProcessorEntry::processor_property_changed (const PropertyChange& what_changed)
 void
 ProcessorEntry::setup_tooltip ()
 {
-	ARDOUR_UI::instance()->set_tip (_button, name (Wide));
+	if (_processor) {
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
+		if (pi) {
+			if (pi->plugin()->has_editor()) {
+				ARDOUR_UI::instance()->set_tip (_button,
+						string_compose (_("<b>%1</b>\nDouble-click to show GUI.\nAlt+double-click to show generic GUI."), name (Wide)));
+			} else {
+				ARDOUR_UI::instance()->set_tip (_button,
+						string_compose (_("<b>%1</b>\nDouble-click to show generic GUI."), name (Wide)));
+			}
+			return;
+		}
+	}
+	ARDOUR_UI::instance()->set_tip (_button, string_compose ("<b>%1</b>", name (Wide)));
 }
 
 string
@@ -918,6 +931,7 @@ ProcessorBox::show_processor_menu (int arg)
 	const bool sensitive = !processor_display.selection().empty();
 	ActionManager::set_sensitive (ActionManager::plugin_selection_sensitive_actions, sensitive);
 	edit_action->set_sensitive (one_processor_can_be_edited ());
+	edit_generic_action->set_sensitive (one_processor_can_be_edited ());
 
 	boost::shared_ptr<PluginInsert> pi;
 	if (single_selection) {
@@ -1050,13 +1064,12 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 	if (processor && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS))) {
 
 		if (_session->engine().connected()) {
-
 			/* XXX giving an error message here is hard, because we may be in the midst of a button press */
 
-			if (Config->get_use_plugin_own_gui ()) {
-				edit_processor (processor);
-			} else {
+			if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 				generic_edit_processor (processor);
+			} else {
+				edit_processor (processor);
 			}
 		}
 
@@ -2235,7 +2248,7 @@ ProcessorBox::register_actions ()
 		sigc::ptr_fun (ProcessorBox::rb_edit));
 
 	edit_generic_action = ActionManager::register_action (
-		popup_act_grp, X_("edit-generic"), _("Edit with basic controls..."),
+		popup_act_grp, X_("edit-generic"), _("Edit with generic controls..."),
 		sigc::ptr_fun (ProcessorBox::rb_edit_generic));
 
 	ActionManager::add_action_group (popup_act_grp);
@@ -2437,7 +2450,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 	ProcessorWindowProxy* proxy = find_window_proxy (processor);
 
 	if (proxy) {
-		proxy->set_custom_ui_mode (Config->get_use_plugin_own_gui ());
+		proxy->set_custom_ui_mode (true);
 		proxy->toggle ();
 	}
 }
