@@ -925,7 +925,7 @@ ProcessorBox::show_processor_menu (int arg)
 	}
 
 	/* allow editing with an Ardour-generated UI for plugin inserts with editors */
-	edit_generic_action->set_sensitive (pi && pi->plugin()->has_editor ());
+	edit_action->set_sensitive (pi && pi->plugin()->has_editor ());
 
 	/* disallow rename for multiple selections, for plugin inserts and for the fader */
 	rename_action->set_sensitive (single_selection && !pi && !boost::dynamic_pointer_cast<Amp> (single_selection->processor ()));
