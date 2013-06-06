@@ -2040,7 +2040,7 @@ ProcessorBox::one_processor_can_be_edited ()
 }
 
 Gtk::Window*
-ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor)
+ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool use_custom)
 {
 	boost::shared_ptr<Send> send;
 	boost::shared_ptr<InternalSend> internal_send;
@@ -2119,8 +2119,7 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor)
 		Window* w = get_processor_ui (plugin_insert);
 
 		if (w == 0) {
-
-			plugin_ui = new PluginUIWindow (plugin_insert, false, Config->get_use_plugin_own_gui());
+			plugin_ui = new PluginUIWindow (plugin_insert, false, use_custom);
 			plugin_ui->set_title (generate_processor_title (plugin_insert));
 			set_processor_ui (plugin_insert, plugin_ui);
 
@@ -2438,6 +2437,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 	ProcessorWindowProxy* proxy = find_window_proxy (processor);
 
 	if (proxy) {
+		proxy->set_custom_ui_mode (Config->get_use_plugin_own_gui ());
 		proxy->toggle ();
 	}
 }
@@ -2452,6 +2452,7 @@ ProcessorBox::generic_edit_processor (boost::shared_ptr<Processor> processor)
 	ProcessorWindowProxy* proxy = find_window_proxy (processor);
 
 	if (proxy) {
+		proxy->set_custom_ui_mode (false);
 		proxy->toggle ();
 	}
 }
@@ -2629,6 +2630,7 @@ ProcessorWindowProxy::ProcessorWindowProxy (string const & name, ProcessorBox* b
 	, _processor_box (box)
 	, _processor (processor)
 	, is_custom (false)
+	, want_custom (false)
 {
 
 }
@@ -2640,6 +2642,38 @@ ProcessorWindowProxy::session_handle()
 	return 0;
 }
 
+XMLNode&
+ProcessorWindowProxy::get_state () const
+{
+	XMLNode *node;
+	node = &ProxyBase::get_state();
+	node->add_property (X_("custom-ui"), is_custom? X_("yes") : X_("no"));
+	return *node;
+}
+
+void
+ProcessorWindowProxy::set_state (const XMLNode& node)
+{
+	XMLNodeList children = node.children ();
+	XMLNodeList::const_iterator i = children.begin ();
+	while (i != children.end()) {
+		XMLProperty* prop = (*i)->property (X_("name"));
+		if ((*i)->name() == X_("Window") && prop && prop->value() == _name) {
+			break;
+		}
+		++i;
+	}
+
+	if (i != children.end()) {
+		XMLProperty* prop;
+		if ((prop = (*i)->property (X_("custom-ui"))) != 0) {
+			want_custom = PBD::string_is_affirmative (prop->value ());
+		}
+	}
+
+	ProxyBase::set_state(node);
+}
+
 Gtk::Window*
 ProcessorWindowProxy::get (bool create)
 {
@@ -2648,8 +2682,7 @@ ProcessorWindowProxy::get (bool create)
 	if (!p) {
 		return 0;
 	}
-	
-	if (_window && (is_custom != Config->get_use_plugin_own_gui ())) {
+	if (_window && (is_custom != want_custom)) {
 		/* drop existing window - wrong type */
 		drop_window ();
 	}
@@ -2659,8 +2692,8 @@ ProcessorWindowProxy::get (bool create)
 			return 0;
 		}
 		
-		_window = _processor_box->get_editor_window (p);
-		is_custom = Config->get_use_plugin_own_gui();
+		is_custom = want_custom;
+		_window = _processor_box->get_editor_window (p, is_custom);
 
 		if (_window) {
 			setup ();
@@ -2673,10 +2706,11 @@ ProcessorWindowProxy::get (bool create)
 void
 ProcessorWindowProxy::toggle ()
 {
-	if (_window && (is_custom != Config->get_use_plugin_own_gui ())) {
+	if (_window && (is_custom != want_custom)) {
 		/* drop existing window - wrong type */
 		drop_window ();
 	}
+	is_custom = want_custom;
 
 	WM::ProxyBase::toggle ();
 }

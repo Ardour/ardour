@@ -61,6 +61,7 @@
 #include "lv2/lv2plug.in/ns/ext/state/state.h"
 #include "lv2/lv2plug.in/ns/ext/time/time.h"
 #include "lv2/lv2plug.in/ns/ext/worker/worker.h"
+#include "lv2/lv2plug.in/ns/ext/resize-port/resize-port.h"
 #include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
 #ifdef HAVE_NEW_LV2
 #include "lv2/lv2plug.in/ns/ext/buf-size/buf-size.h"
@@ -119,6 +120,7 @@ public:
 	LilvNode* atom_supports;
 	LilvNode* ev_EventPort;
 	LilvNode* ext_logarithmic;
+	LilvNode* ext_notOnGUI;
 	LilvNode* lv2_AudioPort;
 	LilvNode* lv2_ControlPort;
 	LilvNode* lv2_InputPort;
@@ -126,10 +128,12 @@ public:
 	LilvNode* lv2_enumeration;
 	LilvNode* lv2_inPlaceBroken;
 	LilvNode* lv2_integer;
+	LilvNode* lv2_reportsLatency;
 	LilvNode* lv2_sampleRate;
 	LilvNode* lv2_toggled;
 	LilvNode* midi_MidiEvent;
 	LilvNode* rdfs_comment;
+	LilvNode* rsz_minimumSize;
 	LilvNode* time_Position;
 	LilvNode* ui_GtkUI;
 	LilvNode* ui_external;
@@ -406,6 +410,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		const LilvPort* port  = lilv_plugin_get_port_by_index(_impl->plugin, i);
 		PortFlags       flags = 0;
+		size_t          minimumSize = 0;
 
 		if (lilv_port_is_a(_impl->plugin, port, _world.lv2_OutputPort)) {
 			flags |= PORT_OUTPUT;
@@ -440,6 +445,12 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 					flags |= PORT_POSITION;
 				}
 			}
+			LilvNodes* min_size_v = lilv_port_get_value(_impl->plugin, port, _world.rsz_minimumSize);
+			LilvNode* min_size = min_size_v ? lilv_nodes_get_first(min_size_v) : NULL;
+			if (min_size && lilv_node_is_int(min_size)) {
+				minimumSize = lilv_node_as_int(min_size);
+			}
+			lilv_nodes_free(min_size_v);
 			lilv_nodes_free(buffer_types);
 			lilv_nodes_free(atom_supports);
 		} else {
@@ -450,6 +461,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 		}
 
 		_port_flags.push_back(flags);
+		_port_minimumSize.push_back(minimumSize);
 	}
 
 	_control_data = new float[num_ports];
@@ -1319,6 +1331,16 @@ string
 LV2Plugin::describe_parameter(Evoral::Parameter which)
 {
 	if (( which.type() == PluginAutomation) && ( which.id() < parameter_count()) ) {
+
+		if (lilv_port_has_property(_impl->plugin,
+					lilv_plugin_get_port_by_index(_impl->plugin, which.id()), _world.ext_notOnGUI)) {
+			return X_("hidden");
+		}
+		if (lilv_port_has_property(_impl->plugin,
+					lilv_plugin_get_port_by_index(_impl->plugin, which.id()), _world.lv2_reportsLatency)) {
+			return X_("latency");
+		}
+
 		LilvNode* name = lilv_port_get_name(_impl->plugin,
 		                                    lilv_plugin_get_port_by_index(_impl->plugin, which.id()));
 		string ret(lilv_node_as_string(name));
@@ -1397,6 +1419,7 @@ LV2Plugin::allocate_atom_event_buffers()
 	 */
 	int count_atom_out = 0;
 	int count_atom_in = 0;
+	int minimumSize = 32768; // TODO use a per-port minimum-size
 	for (uint32_t i = 0; i < lilv_plugin_get_num_ports(p); ++i) {
 		const LilvPort* port  = lilv_plugin_get_port_by_index(p, i);
 		if (lilv_port_is_a(p, port, _world.atom_AtomPort)) {
@@ -1413,6 +1436,12 @@ LV2Plugin::allocate_atom_event_buffers()
 				if (lilv_port_is_a(p, port, _world.lv2_OutputPort)) {
 					count_atom_out++;
 				}
+				LilvNodes* min_size_v = lilv_port_get_value(_impl->plugin, port, _world.rsz_minimumSize);
+				LilvNode* min_size = min_size_v ? lilv_nodes_get_first(min_size_v) : NULL;
+				if (min_size && lilv_node_is_int(min_size)) {
+					minimumSize = std::max(minimumSize, lilv_node_as_int(min_size));
+				}
+				lilv_nodes_free(min_size_v);
 			}
 			lilv_nodes_free(buffer_types);
 			lilv_nodes_free(atom_supports);
@@ -1430,7 +1459,7 @@ LV2Plugin::allocate_atom_event_buffers()
 	DEBUG_TRACE(DEBUG::LV2, string_compose("allocate %1 atom_ev_buffers\n", total_atom_buffers));
 	_atom_ev_buffers = (LV2_Evbuf**) malloc((total_atom_buffers + 1) * sizeof(LV2_Evbuf*));
 	for (int i = 0; i < total_atom_buffers; ++i ) {
-		_atom_ev_buffers[i] = lv2_evbuf_new(32768, LV2_EVBUF_ATOM,
+		_atom_ev_buffers[i] = lv2_evbuf_new(minimumSize, LV2_EVBUF_ATOM,
 				LV2Plugin::urids.atom_Chunk, LV2Plugin::urids.atom_Sequence);
 	}
 	_atom_ev_buffers[total_atom_buffers] = 0;
@@ -1539,6 +1568,12 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					index = out_map.get(DataType::MIDI, midi_out_index++, &valid);
 				}
 				if (valid && bufs.count().n_midi() > index) {
+					/* Note, ensure_lv2_bufsize() is not RT safe!
+					 * However free()/alloc() is only called if a
+					 * plugin requires a rsz:minimumSize buffersize
+					 * and the existing buffer if smaller.
+					 */
+					bufs.ensure_lv2_bufsize((flags & PORT_INPUT), index, _port_minimumSize[port_index]);
 					_ev_buffers[port_index] = bufs.get_lv2_midi(
 						(flags & PORT_INPUT), index, (flags & PORT_EVENT));
 				}
@@ -1640,8 +1675,28 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		PortFlags flags = _port_flags[port_index];
 		bool      valid = false;
 
-		// Flush MIDI (write back to Ardour MIDI buffers)
-		if ((flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE))) {
+		/* TODO ask drobilla about comment
+		 * "Make Ardour event buffers generic so plugins can communicate"
+		 * in libs/ardour/buffer_set.cc:310
+		 *
+		 * ideally the user could choose which of the following two modes
+		 * to use (e.g. instrument/effect chains  MIDI OUT vs MIDI TRHU).
+		 *
+		 * This implementation follows the discussion on IRC Mar 16 2013 16:47 UTC
+		 * 16:51 < drobilla> rgareus: [..] i.e always replace with MIDI output [of LV2 plugin] if it's there
+		 * 16:52 < drobilla> rgareus: That would probably be good enough [..] to make users not complain
+		 *                            for quite a while at least ;)
+		 */
+		// copy output of LV2 plugin's MIDI port to Ardour MIDI buffers -- MIDI OUT
+		if ((flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE|PORT_MIDI))) {
+			const uint32_t buf_index = out_map.get(
+				DataType::MIDI, midi_out_index++, &valid);
+			if (valid) {
+				bufs.forward_lv2_midi(_ev_buffers[port_index], buf_index);
+			}
+		}
+		// Flush MIDI (write back to Ardour MIDI buffers) -- MIDI THRU
+		else if ((flags & PORT_OUTPUT) && (flags & (PORT_EVENT|PORT_SEQUENCE))) {
 			const uint32_t buf_index = out_map.get(
 				DataType::MIDI, midi_out_index++, &valid);
 			if (valid) {
@@ -1836,17 +1891,20 @@ LV2World::LV2World()
 	atom_eventTransfer = lilv_new_uri(world, LV2_ATOM__eventTransfer);
 	ev_EventPort       = lilv_new_uri(world, LILV_URI_EVENT_PORT);
 	ext_logarithmic    = lilv_new_uri(world, LV2_PORT_PROPS__logarithmic);
+	ext_notOnGUI       = lilv_new_uri(world, LV2_PORT_PROPS__notOnGUI);
 	lv2_AudioPort      = lilv_new_uri(world, LILV_URI_AUDIO_PORT);
 	lv2_ControlPort    = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
 	lv2_InputPort      = lilv_new_uri(world, LILV_URI_INPUT_PORT);
 	lv2_OutputPort     = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
 	lv2_inPlaceBroken  = lilv_new_uri(world, LV2_CORE__inPlaceBroken);
 	lv2_integer        = lilv_new_uri(world, LV2_CORE__integer);
+	lv2_reportsLatency = lilv_new_uri(world, LV2_CORE__reportsLatency);
 	lv2_sampleRate     = lilv_new_uri(world, LV2_CORE__sampleRate);
 	lv2_toggled        = lilv_new_uri(world, LV2_CORE__toggled);
 	lv2_enumeration    = lilv_new_uri(world, LV2_CORE__enumeration);
 	midi_MidiEvent     = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
 	rdfs_comment       = lilv_new_uri(world, LILV_NS_RDFS "comment");
+	rsz_minimumSize    = lilv_new_uri(world, LV2_RESIZE_PORT__minimumSize);
 	time_Position      = lilv_new_uri(world, LV2_TIME__Position);
 	ui_GtkUI           = lilv_new_uri(world, LV2_UI__GtkUI);
 	ui_external        = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
@@ -1856,17 +1914,24 @@ LV2World::~LV2World()
 {
 	lilv_node_free(ui_external);
 	lilv_node_free(ui_GtkUI);
+	lilv_node_free(time_Position);
+	lilv_node_free(rsz_minimumSize);
+	lilv_node_free(rdfs_comment);
 	lilv_node_free(midi_MidiEvent);
+	lilv_node_free(lv2_enumeration);
 	lilv_node_free(lv2_toggled);
 	lilv_node_free(lv2_sampleRate);
+	lilv_node_free(lv2_reportsLatency);
 	lilv_node_free(lv2_integer);
 	lilv_node_free(lv2_inPlaceBroken);
 	lilv_node_free(lv2_OutputPort);
 	lilv_node_free(lv2_InputPort);
 	lilv_node_free(lv2_ControlPort);
 	lilv_node_free(lv2_AudioPort);
+	lilv_node_free(ext_notOnGUI);
 	lilv_node_free(ext_logarithmic);
 	lilv_node_free(ev_EventPort);
+	lilv_node_free(atom_supports);
 	lilv_node_free(atom_eventTransfer);
 	lilv_node_free(atom_bufferType);
 	lilv_node_free(atom_Sequence);

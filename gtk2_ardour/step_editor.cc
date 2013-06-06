@@ -255,7 +255,9 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evo
         assert (step_edit_region);
         assert (step_edit_region_view);
 
-        if (beat_duration == 0.0) {
+        if (beat_duration == 0.0 && step_editor) {
+                beat_duration = step_editor->note_length();
+        } else if (beat_duration == 0.0) {
                 bool success;
                 beat_duration = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
 

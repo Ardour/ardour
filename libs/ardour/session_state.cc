@@ -694,13 +694,15 @@ Session::remove_state (string snapshot_name)
 void
 Session::jack_session_event (jack_session_event_t * event)
 {
-        char timebuf[128];
+        char timebuf[128], *tmp;
         time_t n;
         struct tm local_time;
 
         time (&n);
         localtime_r (&n, &local_time);
         strftime (timebuf, sizeof(timebuf), "JS_%FT%T", &local_time);
+
+        while ((tmp = strchr(timebuf, ':'))) { *tmp = '.'; }
 
         if (event->type == JackSessionSaveTemplate)
         {

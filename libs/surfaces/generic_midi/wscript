@@ -38,6 +38,9 @@ def build(bld):
     obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd'
     obj.vnum         = LIBARDOUR_GENERIC_MIDI_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'surfaces')
+    obj.defines      = [
+        'PROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"'
+        ]
 
 def shutdown():
     autowaf.shutdown()
