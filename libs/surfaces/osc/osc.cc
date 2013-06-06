@@ -922,6 +922,7 @@ OSC::route_set_send_gain_abs (int rid, int sid, float val)
 			a->set_gain (val, this);
 		}
 	}
+	return 0;
 }
 
 int
@@ -953,6 +954,7 @@ OSC::route_set_send_gain_dB (int rid, int sid, float val)
 			a->set_gain (dB_to_coefficient (val), this);
 		}
 	}
+	return 0;
 }
 
 int
