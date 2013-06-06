@@ -653,7 +653,7 @@ public:
 	{
 		_store = ListStore::create (_model);
 		_view.set_model (_store);
-		_view.append_column (_("Name"), _model.name);
+		_view.append_column (_("Control Surface Protocol"), _model.name);
 		_view.get_column(0)->set_resizable (true);
 		_view.get_column(0)->set_expand (true);
 		_view.append_column_editable (_("Enabled"), _model.enabled);
@@ -1813,9 +1813,9 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("User interaction"), new KeyboardOptions);
 
-	add_option (_("User interaction"), new OptionEditorHeading (_("Control surfaces")));
+	/* Control Surfaces */
 
-	add_option (_("User interaction"), new ControlSurfacesOptions (*this));
+	add_option (_("Control Surfaces"), new ControlSurfacesOptions (*this));
 
 	ComboOption<RemoteModel>* rm = new ComboOption<RemoteModel> (
 		"remote-model",
@@ -1828,14 +1828,14 @@ RCOptionEditor::RCOptionEditor ()
 	rm->add (MixerOrdered, _("follows order of mixer"));
 	rm->add (EditorOrdered, _("follows order of editor"));
 
-	add_option (_("User interaction"), rm);
+	add_option (_("Control Surfaces"), rm);
 
 	/* VIDEO Timeline */
 	add_option (_("Video"), new VideoTimelineOptions (_rc_config));
 
 	/* INTERFACE */
 
-	add_option (S_("GUI"),
+	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "widget-prelight",
 		     _("Graphically indicate mouse pointer hovering over various widgets"),
@@ -1843,7 +1843,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_widget_prelight)
 		     ));
 
-	add_option (S_("GUI"),
+	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "use-tooltips",
 		     _("Show tooltips if mouse hovers over a control"),
@@ -1853,9 +1853,9 @@ RCOptionEditor::RCOptionEditor ()
 
 #ifndef GTKOSX
 	/* font scaling does nothing with GDK/Quartz */
-	add_option (S_("GUI"), new FontScalingOptions (_rc_config));
+	add_option (S_("Preferences|GUI"), new FontScalingOptions (_rc_config));
 #endif
-	add_option (S_("GUI"),
+	add_option (S_("Preferences|GUI"),
 		    new BoolOption (
 			    "use-own-plugin-gui",
 			    string_compose (_("Use plugins' own interfaces instead of %1's"), PROGRAM_NAME),
@@ -1881,7 +1881,7 @@ RCOptionEditor::RCOptionEditor ()
 	_mixer_strip_visibility.add (0, X_("MeterPoint"), _("Meter Point"));
 	
 	add_option (
-		S_("GUI"),
+		S_("Preferences|GUI"),
 		new VisibilityOption (
 			_("Mixer Strip"),
 			&_mixer_strip_visibility,
@@ -1890,7 +1890,7 @@ RCOptionEditor::RCOptionEditor ()
 			)
 		);
 
-	add_option (S_("GUI"),
+	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "default-narrow_ms",
 		     _("Use narrow strips in the mixer by default"),
@@ -1898,7 +1898,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_narrow_ms)
 		     ));
 
-	add_option (S_("GUI"), new OptionEditorHeading (_("Metering")));
+	add_option (S_("Preferences|GUI"), new OptionEditorHeading (_("Metering")));
 
 	ComboOption<float>* mht = new ComboOption<float> (
 		"meter-hold",
@@ -1912,7 +1912,7 @@ RCOptionEditor::RCOptionEditor ()
 	mht->add (MeterHoldMedium, _("medium"));
 	mht->add (MeterHoldLong, _("long"));
 
-	add_option (S_("GUI"), mht);
+	add_option (S_("Preferences|GUI"), mht);
 
 	ComboOption<float>* mfo = new ComboOption<float> (
 		"meter-falloff",
@@ -1929,7 +1929,7 @@ RCOptionEditor::RCOptionEditor ()
 	mfo->add (METER_FALLOFF_FASTER, _("faster"));
 	mfo->add (METER_FALLOFF_FASTEST, _("fastest"));
 
-	add_option (S_("GUI"), mfo);
+	add_option (S_("Preferences|GUI"), mfo);
 }
 
 void
