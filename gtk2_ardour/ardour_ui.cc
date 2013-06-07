@@ -3423,9 +3423,17 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 			Config->set_video_advanced_setup(true);
 		}
 
+		if (video_server_process) {
+			delete video_server_process;
+		}
+
 		video_server_process = new SystemExec(icsd_exec, argp);
 		video_server_process->start();
-		sleep(1);
+		int timeout = 10;
+		while (!ARDOUR_UI::instance()->video_timeline->check_server()) {
+			sleep(1);
+			if (--timeout <= 0) break;
+		}
 	}
 	return true;
 }
