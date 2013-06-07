@@ -191,9 +191,9 @@ OSC::start ()
 		
 		if (_osc_unix_server) {
 			_osc_unix_socket_path = tmpstr;
+			fd = lo_server_get_socket_fd (_osc_unix_server)
+			fcntl(fdx, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
 		}
-		fd = lo_server_get_socket_fd (_osc_unix_server)
-		fcntl(fdx, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
 	}
 #endif
 	
@@ -232,19 +232,23 @@ OSC::thread_init ()
 	pthread_set_name (X_("OSC"));
 
 	if (_osc_unix_server) {
+		const int fd = lo_server_get_socket_fd (_osc_unix_server);
 		Glib::RefPtr<IOSource> src = IOSource::create (lo_server_get_socket_fd (_osc_unix_server), IO_IN|IO_HUP|IO_ERR);
 		src->connect (sigc::bind (sigc::mem_fun (*this, &OSC::osc_input_handler), _osc_unix_server));
 		src->attach (_main_loop->get_context());
 		local_server = src->gobj();
 		g_source_ref (local_server);
+		fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
 	}
 
 	if (_osc_server) {
-		Glib::RefPtr<IOSource> src  = IOSource::create (lo_server_get_socket_fd (_osc_server), IO_IN|IO_HUP|IO_ERR);
+		const int fd = lo_server_get_socket_fd (_osc_server);
+		Glib::RefPtr<IOSource> src  = IOSource::create (fd, IO_IN|IO_HUP|IO_ERR);
 		src->connect (sigc::bind (sigc::mem_fun (*this, &OSC::osc_input_handler), _osc_server));
 		src->attach (_main_loop->get_context());
 		remote_server = src->gobj();
 		g_source_ref (remote_server);
+		fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
 	}
 
 	PBD::notify_gui_about_thread_creation (X_("gui"), pthread_self(), X_("OSC"), 2048);
