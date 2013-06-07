@@ -444,10 +444,13 @@ SystemExec::wait (int options)
 	int status=0;
 	if (pid==0) return -1;
 	if (pid==::waitpid(pid, &status, options)) {
-		pid=0;
-	}
-	if (errno == ECHILD) {
-		pid=0;
+		if (WEXITSTATUS(status) || WIFSIGNALED(status)) {
+			pid=0;
+		}
+	} else {
+		if (errno == ECHILD) {
+			pid=0;
+		}
 	}
 	return status;
 }
