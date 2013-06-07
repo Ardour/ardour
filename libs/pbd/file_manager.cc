@@ -289,6 +289,9 @@ StdioFileDescriptor::open ()
 	/* we must have a lock on the FileManager's mutex */
 	
 	_file = fopen (_path.c_str(), _mode.c_str());
+	if (_file) {
+		fcntl(fileno(_file), F_SETFD, fcntl(fileno(_file), F_GETFD) | FD_CLOEXEC);
+	}
 	return (_file == 0);
 }
 
