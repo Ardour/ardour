@@ -160,6 +160,8 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 		return false;
 	}
 
+	fcntl(sockin, F_SETFD, fcntl(sockin, F_GETFD) | FD_CLOEXEC);
+
 	struct sockaddr_in addrin;
 	::memset(&addrin, 0, sizeof(addrin));
 	addrin.sin_family = AF_INET;
@@ -206,6 +208,8 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 		::perror("socket(out)");
 		return false;
 	}
+
+	fcntl(sockout, F_SETFD, fcntl(sockout, F_GETFD) | FD_CLOEXEC);
 	
 	// Will Hall, Oct 2007
 	if (!ifname.empty()) {

@@ -166,6 +166,9 @@ OSC::start ()
 		_port++;
 		continue;
 	}
+
+	int fd = lo_server_get_socket_fd (_osc_server);
+	fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
 	
 #ifdef ARDOUR_OSC_UNIX_SERVER
 	
@@ -174,7 +177,7 @@ OSC::start ()
 	// attempt to create unix socket server too
 	
 	snprintf(tmpstr, sizeof(tmpstr), "/tmp/sooperlooper_XXXXXX");
-	int fd = mkstemp(tmpstr);
+	fd = mkstemp(tmpstr);
 	
 	if (fd >= 0 ) {
 		unlink (tmpstr);
@@ -185,6 +188,8 @@ OSC::start ()
 		if (_osc_unix_server) {
 			_osc_unix_socket_path = tmpstr;
 		}
+		fd = lo_server_get_socket_fd (_osc_unix_server)
+		fcntl(fdx, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
 	}
 #endif
 	
