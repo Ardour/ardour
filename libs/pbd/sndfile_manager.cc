@@ -96,6 +96,10 @@ SndFileDescriptor::open ()
 
 	_sndfile = sf_open_fd (fd, _writeable ? SFM_RDWR : SFM_READ, _info, 1);
 
+	if (sf_open_fd == 0) {
+		::close(fd);
+	}
+
 	return (_sndfile == 0);
 }
 
