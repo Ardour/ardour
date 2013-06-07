@@ -130,12 +130,19 @@ Manager::set_session (ARDOUR::Session* s)
 void
 Manager::set_transient_for (Gtk::Window* parent)
 {
+	/* OS X has a richer concept of window layering than X does (or
+	 * certainly, than any accepted conventions on X), and so the use of
+	 * Manager::set_transient_for() is not necessary on that platform.
+	 * 
+	 * On OS X this is mostly taken care of by using the window type rather
+	 * than explicit 1:1 transient-for relationships.
+	 */
+
 #ifndef __APPLE__
 	if (parent) {
 		for (Windows::const_iterator i = _windows.begin(); i != _windows.end(); ++i) {
 			Gtk::Window* win = (*i)->get();
 			if (win) {
-				std::cerr << "marked " << win->get_title() << " as transient of " << parent->get_title() << std::endl;
 				win->set_transient_for (*parent);
 			}
 		}
