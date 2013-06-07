@@ -414,6 +414,10 @@ void
 SystemExec::terminate ()
 {
 	::pthread_mutex_lock(&write_lock);
+
+	/* close stdin in an attempt to get the child to exit cleanly.
+	 */
+
 	close_stdin();
 
 	if (pid) {
@@ -422,12 +426,21 @@ SystemExec::terminate ()
 		wait(WNOHANG);
 	}
 
+	/* if pid is non-zero, the child task is still executing (i.e. it did
+	 * not exit in response to stdin being closed). try to kill it.
+	 */
+	
 	if (pid) {
 		::kill(pid, SIGTERM);
 		::usleep(50000);
 		sched_yield();
 		wait(WNOHANG);
 	}
+
+	/* if pid is non-zero, the child task is STILL executing after being
+	 * sent SIGTERM. Act tough ... send SIGKILL
+	 */
+
 	if (pid) {
 		::fprintf(stderr, "Process is still running! trying SIGKILL\n");
 		::kill(pid, SIGKILL);
@@ -443,15 +456,23 @@ int
 SystemExec::wait (int options)
 {
 	int status=0;
+	int ret;
+
 	if (pid==0) return -1;
-	if (pid==::waitpid(pid, &status, options)) {
+
+	ret = waitpid (pid, &status, options);
+
+	if (ret == pid) {
 		if (WEXITSTATUS(status) || WIFSIGNALED(status)) {
 			pid=0;
 		}
 	} else {
-		if (errno == ECHILD) {
-			pid=0;
-		}
+		if (ret != 0) {
+			if (errno == ECHILD) {
+				/* no currently running children, reset pid */
+				pid=0;
+			}
+		} /* else the process is still running */
 	}
 	return status;
 }
@@ -615,7 +636,7 @@ SystemExec::output_interposer()
 	ssize_t r;
 	unsigned long l = 1;
 
-  ioctl(rfd, FIONBIO, &l); // set non-blocking I/O
+	ioctl(rfd, FIONBIO, &l); // set non-blocking I/O
 
 	for (;fcntl(rfd, F_GETFL)!=-1;) {
 		r = read(rfd, buf, sizeof(buf));
