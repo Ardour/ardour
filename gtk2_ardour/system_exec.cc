@@ -38,7 +38,7 @@
 using namespace std;
 void * interposer_thread (void *arg);
 
-static void close_fd (int* fd) { if (!fd) return; if (*fd >= 0) ::close (*fd); *fd = -1; }
+static void close_fd (int& fd) { if (fd >= 0) ::close (fd); fd = -1; }
 
 SystemExec::SystemExec (std::string c, std::string a)
 	: cmd(c)
@@ -510,18 +510,18 @@ SystemExec::start (int stderr_mode)
 		pid=r;
 
 		/* check if execve was successful. */
-		close_fd(&pok[1]);
+		close_fd(pok[1]);
 		char buf;
 		for ( ;; ) {
 			ssize_t n = ::read(pok[0], &buf, 1 );
 			if ( n==1 ) {
 				/* child process returned from execve */
 				pid=0;
-				close_fd(&pok[0]);
-				close_fd(&pin[1]);
-				close_fd(&pin[0]);
-				close_fd(&pout[1]);
-				close_fd(&pout[0]);
+				close_fd(pok[0]);
+				close_fd(pin[1]);
+				close_fd(pin[0]);
+				close_fd(pout[1]);
+				close_fd(pout[0]);
 				pin[1] = -1;
 				return -3;
 			} else if ( n==-1 ) {
@@ -530,7 +530,7 @@ SystemExec::start (int stderr_mode)
 			}
 			break;
 		}
-		close_fd(&pok[0]);
+		close_fd(pok[0]);
 		/* child started successfully */
 
 #if 0
@@ -546,17 +546,17 @@ SystemExec::start (int stderr_mode)
 		}
 		if (r == 0) {
 			/* 2nd child process - catch stdout */
-			close_fd(&pin[1]);
-			close_fd(&pout[1]);
+			close_fd(pin[1]);
+			close_fd(pout[1]);
 			output_interposer();
 			exit(0);
 		}
-		close_fd(&pout[1]);
-		close_fd(&pin[0]);
-		close_fd(&pout[0]);
+		close_fd(pout[1]);
+		close_fd(pin[0]);
+		close_fd(pout[0]);
 #else /* use pthread */
-		close_fd(&pout[1]);
-		close_fd(&pin[0]);
+		close_fd(pout[1]);
+		close_fd(pin[0]);
 		int rv = pthread_create(&thread_id_tt, NULL, interposer_thread, this);
 
 		thread_active=true;
@@ -570,15 +570,15 @@ SystemExec::start (int stderr_mode)
 	}
 
 	/* child process - exec external process */
-	close_fd(&pok[0]);
+	close_fd(pok[0]);
 	::fcntl(pok[1], F_SETFD, FD_CLOEXEC);
 
-	close_fd(&pin[1]);
+	close_fd(pin[1]);
 	if (pin[0] != STDIN_FILENO) {
 	  ::dup2(pin[0], STDIN_FILENO);
 	}
-	close_fd(&pin[0]);
-	close_fd(&pout[0]);
+	close_fd(pin[0]);
+	close_fd(pout[0]);
 	if (pout[1] != STDOUT_FILENO) {
 		::dup2(pout[1], STDOUT_FILENO);
 	}
@@ -596,7 +596,7 @@ SystemExec::start (int stderr_mode)
 	}
 
 	if (pout[1] != STDOUT_FILENO && pout[1] != STDERR_FILENO) {
-		close_fd(&pout[1]);
+		close_fd(pout[1]);
 	}
 
 	if (nicelevel !=0) {
@@ -623,7 +623,7 @@ SystemExec::start (int stderr_mode)
 	/* if we reach here something went wrong.. */
 	char buf = 0;
 	(void) ::write(pok[1], &buf, 1 );
-	close_fd(&pok[1]);
+	close_fd(pok[1]);
 	exit(-1);
 	return -1;
 }
@@ -658,10 +658,10 @@ void
 SystemExec::close_stdin()
 {
 	if (pin[1]<0) return;
-	close_fd(&pin[0]);
-	close_fd(&pin[1]);
-	close_fd(&pout[0]);
-	close_fd(&pout[1]);
+	close_fd(pin[0]);
+	close_fd(pin[1]);
+	close_fd(pout[0]);
+	close_fd(pout[1]);
 }
 
 int
