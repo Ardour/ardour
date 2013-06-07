@@ -507,7 +507,7 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 		}
 		_session->config.set_video_pullup(0); /* TODO only set if set_timecode_format() was successful ?!*/
 	}
-	if (video_file_fps != _session->timecode_frames_per_second()) {
+	if (floor(video_file_fps*100) != floor(_session->timecode_frames_per_second()*100)) {
 		warning << _("Video file's framerate is not equal to Ardour session timecode's framerate: ")
 		        << video_file_fps << _(" vs ") << _session->timecode_frames_per_second() << endmsg;
 	}
