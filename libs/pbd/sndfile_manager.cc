@@ -90,7 +90,7 @@ SndFileDescriptor::open ()
 {
 	/* we must have a lock on the FileManager's mutex */
 	
-	int fd = ::open(_path.c_str(), O_LARGEFILE | (_writeable ? (O_RDWR) : O_RDONLY));
+	int fd = ::open(_path.c_str(), O_LARGEFILE | (_writeable ? (O_RDWR|O_CREAT) : O_RDONLY));
 	if (fd == -1) return false;
 	fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
 
