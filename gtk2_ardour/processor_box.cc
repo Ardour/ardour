@@ -2084,10 +2084,12 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 		}
 
 		if (boost::dynamic_pointer_cast<InternalSend> (processor) == 0) {
-			SendUIWindow* w = new SendUIWindow (send, _session);
-			w->show ();
+
+			gidget = new SendUIWindow (send, _session);
+
 		} else {
 			/* assign internal send to main fader */
+
 			if (_parent_strip) {
 				if (_parent_strip->current_delivery() == send) {
 					_parent_strip->revert_to_default_display ();
