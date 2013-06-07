@@ -415,6 +415,7 @@ SystemExec::terminate ()
 {
 	::pthread_mutex_lock(&write_lock);
 	close_stdin();
+
 	if (pid) {
 		::usleep(50000);
 		sched_yield();
@@ -643,7 +644,8 @@ int
 SystemExec::write_to_stdin(std::string d, size_t len)
 {
 	const char *data;
-	size_t r,c;
+	ssize_t r;
+	size_t c;
 	::pthread_mutex_lock(&write_lock);
 
 	data=d.c_str();
@@ -658,7 +660,7 @@ SystemExec::write_to_stdin(std::string d, size_t len)
 				sleep(1);
 				continue;
 			}
-			if (r != (len-c)) {
+			if ((size_t) r != (len-c)) {
 				::pthread_mutex_unlock(&write_lock);
 				return c;
 			}
