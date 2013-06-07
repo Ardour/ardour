@@ -1855,13 +1855,6 @@ RCOptionEditor::RCOptionEditor ()
 	/* font scaling does nothing with GDK/Quartz */
 	add_option (S_("Preferences|GUI"), new FontScalingOptions (_rc_config));
 #endif
-	add_option (S_("Preferences|GUI"),
-		    new BoolOption (
-			    "use-own-plugin-gui",
-			    string_compose (_("Use plugins' own interfaces instead of %1's"), PROGRAM_NAME),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_plugin_own_gui),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_plugin_own_gui)
-			    ));
 
 	add_option (S_("GUI"),
 		    new BoolOption (

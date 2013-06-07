@@ -74,6 +74,8 @@ rdff_open(const char* path, bool write)
 		}
 	}
 
+	fcntl(fileno(fd), F_SETFD, fcntl(fileno(fd), F_GETFD) | FD_CLOEXEC);
+
 	RDFF ret = (RDFF)malloc(sizeof(struct _RDFF));
 	ret->fd    = fd;
 	ret->size  = size;

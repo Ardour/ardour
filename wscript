@@ -107,12 +107,14 @@ def set_compiler_flags (conf,opt):
     platform = u[0].lower()
     version = u[2]
 
+    # waf adds -O0 -g itself. thanks waf!
     is_clang = conf.env['CXX'][0].endswith('clang++')
     if opt.gprofile:
         debug_flags = [ '-pg' ]
-    else:
+
+    if opt.backtrace:
         if platform != 'darwin' and not is_clang:
-            debug_flags = [ '-rdynamic' ] # waf adds -O0 -g itself. thanks waf!
+            debug_flags = [ '-rdynamic' ]
 
     # Autodetect
     if opt.dist_target == 'auto':
@@ -380,6 +382,8 @@ def options(opt):
                     help='The user-visible name of the program being built')
     opt.add_option('--arch', type='string', action='store', dest='arch',
                     help='Architecture-specific compiler flags')
+    opt.add_option('--backtrace', action='store_true', default=False, dest='backtrace',
+                    help='Compile with -rdynamic -- allow obtaining backtraces from within Ardour')
     opt.add_option('--no-carbon', action='store_true', default=False, dest='nocarbon',
                     help='Compile without support for AU Plugins with only CARBON UI (needed for 64bit)')
     opt.add_option('--boost-sp-debug', action='store_true', default=False, dest='boost_sp_debug',
@@ -671,6 +675,7 @@ const char* const ardour_config_info = "\\n\\
 
     write_config_text('Build documentation',   conf.env['DOCS'])
     write_config_text('Debuggable build',      conf.env['DEBUG'])
+    write_config_text('Export all symbols (backtrace)', opts.backtrace)
     write_config_text('Install prefix',        conf.env['PREFIX'])
     write_config_text('Strict compiler flags', conf.env['STRICT'])
     write_config_text('Internal Shared Libraries', conf.is_defined('INTERNAL_SHARED_LIBS'))

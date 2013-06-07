@@ -110,6 +110,9 @@ Butler::start_thread()
 		return -1;
 	}
 
+	fcntl(request_pipe[0], F_SETFD, fcntl(request_pipe[0], F_GETFD) | FD_CLOEXEC);
+	fcntl(request_pipe[1], F_SETFD, fcntl(request_pipe[1], F_GETFD) | FD_CLOEXEC);
+
 	//pthread_detach (thread);
 
 	return 0;

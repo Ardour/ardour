@@ -591,6 +591,11 @@ About::About ()
 	get_action_area()->add (*config_button);
 	get_action_area()->reorder_child (*config_button, 0);
 	config_button->signal_clicked().connect (mem_fun (*this, &About::show_config_info));
+
+	Gtk::Button *btn = static_cast<Gtk::Button*>(get_widget_for_response(Gtk::RESPONSE_CANCEL));
+	if (btn) {
+		btn->signal_clicked().connect(sigc::mem_fun(static_cast<Gtk::Window*>(this), &Gtk::Window::hide));
+	}
 }
 
 About::~About ()
