@@ -52,8 +52,6 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 			return;
 		}
 	}
-	fcntl(fds[0], F_SETFD, fcntl(fds[0], F_GETFD) | FD_CLOEXEC);
-	fcntl(fds[1], F_SETFD, fcntl(fds[1], F_GETFD) | FD_CLOEXEC);
 }
 
 CrossThreadChannel::~CrossThreadChannel ()

@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2010 Paul Davis
+    Copyright 2005-2008 Lennart Poettering
     Author: Robin Gareus <robin@gareus.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -23,6 +24,9 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include <assert.h>
+#include <dirent.h>
+
 #ifdef __WIN32__
 #include <windows.h>
 #else
@@ -31,7 +35,10 @@
 #include <sys/wait.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 #endif
+
 
 #include "system_exec.h"
 
@@ -39,6 +46,104 @@ using namespace std;
 void * interposer_thread (void *arg);
 
 static void close_fd (int& fd) { if (fd >= 0) ::close (fd); fd = -1; }
+
+#ifndef __WIN32__
+/*
+ * This function was part of libasyncns.
+ * LGPL v2.1
+ * Copyright 2005-2008 Lennart Poettering
+ */
+static int close_allv(const int except_fds[]) {
+	struct rlimit rl;
+	int fd;
+
+#ifdef __linux__
+
+	DIR *d;
+
+	assert(except_fds);
+
+	if ((d = opendir("/proc/self/fd"))) {
+		struct dirent *de;
+
+		while ((de = readdir(d))) {
+			int found;
+			long l;
+			char *e = NULL;
+			int i;
+
+			if (de->d_name[0] == '.')
+					continue;
+
+			errno = 0;
+			l = strtol(de->d_name, &e, 10);
+			if (errno != 0 || !e || *e) {
+				closedir(d);
+				errno = EINVAL;
+				return -1;
+			}
+
+			fd = (int) l;
+
+			if ((long) fd != l) {
+				closedir(d);
+				errno = EINVAL;
+				return -1;
+			}
+
+			if (fd < 3)
+				continue;
+
+			if (fd == dirfd(d))
+				continue;
+
+			found = 0;
+			for (i = 0; except_fds[i] >= 0; i++)
+				if (except_fds[i] == fd) {
+						found = 1;
+						break;
+				}
+
+			if (found) continue;
+
+			if (close(fd) < 0) {
+				int saved_errno;
+
+				saved_errno = errno;
+				closedir(d);
+				errno = saved_errno;
+
+				return -1;
+			}
+		}
+
+		closedir(d);
+		return 0;
+	}
+
+#endif
+
+	if (getrlimit(RLIMIT_NOFILE, &rl) < 0)
+		return -1;
+
+	for (fd = 0; fd < (int) rl.rlim_max; fd++) {
+		int i;
+
+		if (fd <= 3)
+				continue;
+
+		for (i = 0; except_fds[i] >= 0; i++)
+			if (except_fds[i] == fd)
+				continue;
+
+		if (close(fd) < 0 && errno != EBADF)
+			return -1;
+	}
+
+	return 0;
+}
+#endif /* not on windows */
+
 
 SystemExec::SystemExec (std::string c, std::string a)
 	: cmd(c)
@@ -617,6 +722,11 @@ SystemExec::start (int stderr_mode)
 	sigset(SIGPIPE, SIG_DFL);
 #else
 	signal(SIGPIPE, SIG_DFL);
+#endif
+
+#ifndef __WIN32__
+	int good_fds[1] = { 0 };
+	close_allv(good_fds);
 #endif
 
 	::execve(argp[0], argp, envp);
