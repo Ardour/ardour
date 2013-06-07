@@ -167,6 +167,10 @@ OSC::start ()
 		continue;
 	}
 
+	if (!_osc_server) {
+		return 1;
+	}
+
 	int fd = lo_server_get_socket_fd (_osc_server);
 	fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
 	
