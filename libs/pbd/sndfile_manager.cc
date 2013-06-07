@@ -31,6 +31,16 @@
 #include "pbd/sndfile_manager.h"
 #include "pbd/debug.h"
 
+/*
+ * Neat solution to the Win32/OS2 binary file flage requirement.
+ * If O_BINARY isn't already defined by the inclusion of the system
+ * headers, set it to zero.
+ */
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
+
 using namespace std;
 using namespace PBD;
 
@@ -89,8 +99,23 @@ bool
 SndFileDescriptor::open ()
 {
 	/* we must have a lock on the FileManager's mutex */
-	
-	int fd = ::open(_path.c_str(), O_LARGEFILE | (_writeable ? (O_RDWR|O_CREAT) : O_RDONLY));
+
+	int fd, oflag, mode ;
+
+	if (_writeable) {
+		oflag = O_RDWR | O_CREAT | O_BINARY ;
+		mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH ;
+	} else {
+		oflag = O_RDONLY | O_BINARY ;
+		mode = 0 ;
+	}
+
+	if (mode == 0) {
+		fd = ::open (_path.c_str(), oflag) ;
+	} else {
+		fd = ::open (_path.c_str(), oflag, mode) ;
+	}
+
 	if (fd == -1) return false;
 	fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
 
