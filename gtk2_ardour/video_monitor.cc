@@ -18,6 +18,7 @@
 
 */
 #include "pbd/file_utils.h"
+#include "pbd/convert.h"
 #include "gui_thread.h"
 #include "ardour_ui.h"
 
@@ -28,6 +29,7 @@
 #include "i18n.h"
 
 using namespace std;
+using namespace PBD;
 
 VideoMonitor::VideoMonitor (PublicEditor *ed, std::string xjadeo_bin_path)
 	: editor (ed)
@@ -248,7 +250,7 @@ VideoMonitor::parse_output (std::string d, size_t /*s*/)
 			printf("xjadeo: '%s'\n", line.c_str());
 		}
 #endif
-		int status = atoi(line.substr(1,3).c_str());
+		int status = atoi(line.substr(1,3));
 		switch(status / 100) {
 			case 4: /* errors */
 				if (status == 403) {
@@ -295,7 +297,7 @@ VideoMonitor::parse_output (std::string d, size_t /*s*/)
 						knownstate |= 2;
 						if (starting || xjadeo_settings["window ontop"] != value) {
 							if (!starting && _session) _session->set_dirty ();
-							if (atoi(value.c_str())) { UiState("xjadeo-window-ontop-on"); }
+							if (atoi(value)) { UiState("xjadeo-window-ontop-on"); }
 							else { UiState("xjadeo-window-ontop-off"); }
 							starting &= ~2;
 						}
@@ -304,7 +306,7 @@ VideoMonitor::parse_output (std::string d, size_t /*s*/)
 						knownstate |= 4;
 						if (starting || xjadeo_settings["window zoom"] != value) {
 							if (!starting && _session) _session->set_dirty ();
-							if (atoi(value.c_str())) { UiState("xjadeo-window-fullscreen-on"); }
+							if (atoi(value)) { UiState("xjadeo-window-fullscreen-on"); }
 							else { UiState("xjadeo-window-fullscreen-off"); }
 							starting &= ~4;
 						}
@@ -313,15 +315,15 @@ VideoMonitor::parse_output (std::string d, size_t /*s*/)
 						knownstate |= 8;
 						if (starting || xjadeo_settings["window letterbox"] != value) {
 							if (!starting && _session) _session->set_dirty ();
-							if (atoi(value.c_str())) { UiState("xjadeo-window-letterbox-on"); }
+							if (atoi(value)) { UiState("xjadeo-window-letterbox-on"); }
 							else { UiState("xjadeo-window-letterbox-off"); }
 							starting &= ~8;
 						}
 						xjadeo_settings["window letterbox"] = value;
 					} else if(key ==  "osdmode") {
 						knownstate |= 1;
-						osdmode = atoi(value.c_str());
-						if (starting || atoi(xjadeo_settings["osd mode"].c_str()) != osdmode) {
+						osdmode = atoi(value);
+						if (starting || atoi(xjadeo_settings["osd mode"]) != osdmode) {
 							if (!starting && _session) _session->set_dirty ();
 							if ((osdmode & 1) == 1) { UiState("xjadeo-window-osd-frame-on"); }
 							if ((osdmode & 1) == 0) { UiState("xjadeo-window-osd-frame-off"); }

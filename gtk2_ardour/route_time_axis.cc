@@ -999,7 +999,7 @@ RouteTimeAxisView::resolve_new_group_playlist_name(std::string &basename, vector
 			tmp = tmp.substr(idx + group_string.length());
 
 			// and find the largest current number
-			int x = atoi(tmp.c_str());
+			int x = atoi(tmp);
 			if (x > maxnumber) {
 				maxnumber = x;
 			}

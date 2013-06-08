@@ -22,6 +22,7 @@
 #include "ardour/tempo.h"
 
 #include "pbd/file_utils.h"
+#include "pbd/convert.h"
 #include "ardour/session_directory.h"
 
 #include "ardour_ui.h"
@@ -156,29 +157,29 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 
 	const XMLProperty* proph = node->property (X_("Height"));
 	if (proph) {
-		editor->set_video_timeline_height(atoi(proph->value().c_str()));
+		editor->set_video_timeline_height(atoi(proph->value()));
 	}
 #if 0 /* TODO THINK: set FPS first time only ?! */
 	const XMLProperty* propasfps = node->property (X_("AutoFPS"));
 	if (propasfps) {
-		auto_set_session_fps = atoi(propasfps->value().c_str())?true:false;
+		auto_set_session_fps = atoi(propasfps->value())?true:false;
 	}
 #endif
 
 	const XMLProperty* propoffset = node->property (X_("VideoOffset"));
 	if (propoffset) {
-		video_offset = atoll(propoffset->value().c_str());
+		video_offset = atoll(propoffset->value());
 		video_offset_p = video_offset;
 	}
 
 	const XMLProperty* proplock = node->property (X_("VideoOffsetLock"));
 	if (proplock) {
-		video_offset_lock = atoi(proplock->value().c_str())?true:false;
+		video_offset_lock = atoi(proplock->value())?true:false;
 	}
 
 	const XMLProperty* localfile = node->property (X_("LocalFile"));
 	if (localfile) {
-		local_file = atoi(localfile->value().c_str())?true:false;
+		local_file = atoi(localfile->value())?true:false;
 	}
 
 	const XMLProperty* propf = node->property (X_("Filename"));
@@ -226,7 +227,7 @@ VideoTimeLine::set_state (const XMLNode& node, int /*version*/)
 	LocaleGuard lg (X_("POSIX"));
 	const XMLProperty* propoffset = node.property (X_("VideoOffset"));
 	if (propoffset) {
-		video_offset = atoll(propoffset->value().c_str());
+		video_offset = atoll(propoffset->value());
 	}
 	ARDOUR_UI::instance()->flush_videotimeline_cache(true);
 	return 0;
@@ -714,7 +715,7 @@ VideoTimeLine::open_video_monitor() {
 		if (node) {
 			const XMLProperty* prop = node->property (X_("mask"));
 			if (prop) {
-				xj_settings_mask = atoi(prop->value().c_str());
+				xj_settings_mask = atoi(prop->value());
 			}
 		}
 	}

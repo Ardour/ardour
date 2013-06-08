@@ -34,6 +34,7 @@
 
 using std::string;
 using namespace WM;
+using namespace PBD;
 
 Manager* Manager::_instance = 0;
 
@@ -218,16 +219,16 @@ ProxyBase::set_state (const XMLNode& node)
 		}
 
 		if ((prop = (*i)->property (X_("x-off"))) != 0) {
-			_x_off = atoi (prop->value().c_str());
+			_x_off = atoi (prop->value());
 		}
 		if ((prop = (*i)->property (X_("y-off"))) != 0) {
-			_y_off = atoi (prop->value().c_str());
+			_y_off = atoi (prop->value());
 		}
 		if ((prop = (*i)->property (X_("x-size"))) != 0) {
-			_width = atoi (prop->value().c_str());
+			_width = atoi (prop->value());
 		}
 		if ((prop = (*i)->property (X_("y-size"))) != 0) {
-			_height = atoi (prop->value().c_str());
+			_height = atoi (prop->value());
 		}
 	}
 
