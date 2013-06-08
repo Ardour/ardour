@@ -8,6 +8,7 @@ BUILD_ROOT=../../build
 
 SAE=
 MIXBUS=
+WITH_HARVID=
 WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
@@ -55,6 +56,7 @@ while [ $# -gt 0 ] ; do
 	# specific build flags
 	#
 
+	--harvid) WITH_HARVID=1 ; shift ;;
 	--noladspa) WITH_LADSPA= ; shift ;;
 	--nostrip) STRIP= ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
@@ -472,6 +474,8 @@ done
 rm -rf $PRODUCT_PKG_DIR
 mkdir $PRODUCT_PKG_DIR
 
+DMGWINBOTTOM=440
+
 if [ x$SAE != x ] ; then
 	
     # SAE packaging
@@ -489,12 +493,27 @@ elif [ x$MIXBUS != x ] ; then
     echo "Creating Mixbus packaging directory"
     mv $APPDIR $PRODUCT_PKG_DIR/
     cp MixBus_Install_QuickStart.pdf "$PRODUCT_PKG_DIR/Mixbus Install & Quick Start Guide.pdf"
-
+		DMGWINBOTTOM=$[ $DMGWINBOTTOM + 100 ]
+		MIXBUSPOS="set position of item \"MixBus_Install_QuickStart.pdf\" of container window to {90, 180}"
 else 
 
     echo "Creating $APPNAME packaging directory"
     mv $APPDIR $PRODUCT_PKG_DIR/
 
+fi
+
+if test x$WITH_HARVID != x ; then
+	echo "installing video tools.."
+	# TODO move files to http://ardour.org/files/ - symlink 'latest'
+	HARVID_VERSION=$(curl http://ardour.org/files/video-tools/harvid_version.txt)
+	XJADEO_VERSION=$(curl http://ardour.org/files/video-tools/xjadeo_version.txt)
+	echo "copying harvid and xjadeo ..."
+  curl -L -o "$PRODUCT_PKG_DIR/harvid-${HARVID_VERSION}.pkg" "http://x42.github.io/harvid/releases/harvid-${HARVID_VERSION}.pkg"
+  curl -L -o "$PRODUCT_PKG_DIR/xjadeo-${XJADEO_VERSION:1}.dmg" "http://sourceforge.net/projects/xjadeo/files/xjadeo/${XJADEO_VERSION}/jadeo-${XJADEO_VERSION:1}.dmg/download"
+	DMGWINBOTTOM=$[ $DMGWINBOTTOM + 140 ]
+	YPOS=$[ $DMGWINBOTTOM - 300 ]
+	HARVIDPOS="set position of item \"harvid-${HARVID_VERSION}.pkg\" of container window to {90, ${YPOS}}"
+	XJADEOPOS="set position of item \"xjadeo-${XJADEO_VERSION:1}.dmg\" of container window to {310, ${YPOS}}"
 fi
 
 echo "Building DMG ..."
@@ -525,7 +544,7 @@ DiskDevice=$(hdid -nomount "$TMPDMG" | grep Apple_HFS | cut -f 1 -d ' ')
 newfs_hfs -v "${VOLNAME}" "${DiskDevice}"
 mount -t hfs "${DiskDevice}" "${MNTPATH}"
 
-cp -r ${PRODUCT_PKG_DIR}/${APPDIR} "${MNTPATH}" || exit
+cp -r ${PRODUCT_PKG_DIR}/* "${MNTPATH}" || exit
 mkdir "${MNTPATH}/.background"
 cp -vi dmgbg.png "${MNTPATH}/.background/dmgbg.png"
 
@@ -538,7 +557,7 @@ echo '
            set current view of container window to icon view
            set toolbar visible of container window to false
            set statusbar visible of container window to false
-           set the bounds of container window to {400, 200, 800, 440}
+           set the bounds of container window to {400, 200, 800, '${DMGWINBOTTOM}'}
            set theViewOptions to the icon view options of container window
            set arrangement of theViewOptions to not arranged
            set icon size of theViewOptions to 64
@@ -546,6 +565,9 @@ echo '
            make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
            set position of item "'${APPDIR}'" of container window to {90, 100}
            set position of item "Applications" of container window to {310, 100}
+           '${MIXBUSPOS}'
+           '${HARVIDPOS}'
+           '${XJADEOPOS}'
            close
            open
            update without registering applications
