@@ -25,6 +25,7 @@
 #include "ardour/dB.h"
 #include "ardour/utils.h"
 
+#include <pangomm.h>
 #include <gtkmm/style.h>
 #include <gdkmm/color.h>
 #include <gtkmm2ext/utils.h>
@@ -860,7 +861,7 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	gain_display_box.pack_start (gain_display, true, true);
 
 	meter_metric_area.set_name ("AudioTrackMetrics");
-	set_size_request_to_display_given_text (meter_metric_area, "-127", 0, 0);
+	set_size_request_to_display_given_text (meter_metric_area, "-127", 1, 0);
 
 	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
@@ -952,7 +953,32 @@ GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 
 	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width, height);
 	cairo_t* cr = cairo_create (surface);
-	PangoLayout* layout = gtk_widget_create_pango_layout (w.gobj(), "");
+	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create(w.get_pango_context());
+
+
+	Pango::AttrList audio_font_attributes;
+	Pango::AttrList midi_font_attributes;
+
+	Pango::AttrFontDesc* font_attr;
+	Pango::FontDescription font;
+
+	font = Pango::FontDescription (""); // use defaults
+	//font = get_font_for_style("gain-fader");
+	//font = w.get_style()->get_font();
+
+	font.set_weight (Pango::WEIGHT_NORMAL);
+	font.set_size (10.0 * PANGO_SCALE);
+	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
+	audio_font_attributes.change (*font_attr);
+	delete font_attr;
+
+	font.set_weight (Pango::WEIGHT_ULTRALIGHT);
+	font.set_stretch (Pango::STRETCH_ULTRA_CONDENSED);
+	font.set_size (7.5 * PANGO_SCALE);
+	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
+	midi_font_attributes.change (*font_attr);
+	delete font_attr;
+
 
 	cairo_move_to (cr, 0, 0);
 	cairo_rectangle (cr, 0, 0, width, height);
@@ -988,6 +1014,7 @@ GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 
 		switch (*i) {
 		case DataType::AUDIO:
+			layout->set_attributes (audio_font_attributes);
 			points.push_back (-50);
 			points.push_back (-40);
 			points.push_back (-30);
@@ -999,6 +1026,7 @@ GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 			break;
 
 		case DataType::MIDI:
+			layout->set_attributes (midi_font_attributes);
 			points.push_back (0);
 			if (types.size() == 1) {
 				points.push_back (32);
@@ -1030,23 +1058,23 @@ GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 
 			cairo_set_line_width (cr, 1.0);
 			cairo_move_to (cr, 0, pos);
-			cairo_line_to (cr, 4, pos);
+			cairo_line_to (cr, 3.5, pos);
 			cairo_stroke (cr);
 			
-			snprintf (buf, sizeof (buf), "%d", abs (*j));
-			pango_layout_set_text (layout, buf, strlen (buf));
+			snprintf (buf, sizeof (buf), "%2d", abs (*j));
+			layout->set_text(buf);
 
 			/* we want logical extents, not ink extents here */
 
 			int tw, th;
-			pango_layout_get_pixel_size (layout, &tw, &th);
+			layout->get_pixel_size(tw, th);
 
 			int p = pos - (th / 2);
 			p = min (p, height - th);
 			p = max (p, 0);
 
-			cairo_move_to (cr, 6, p);
-			pango_cairo_show_layout (cr, layout);
+			cairo_move_to (cr, 5, p);
+			pango_cairo_show_layout (cr, layout->gobj());
 		}
 	}
 
@@ -1061,7 +1089,6 @@ GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 	
 	cairo_destroy (cr);
 	cairo_surface_destroy (surface);
-	g_object_unref (layout);
 
 	return pattern;
 }
