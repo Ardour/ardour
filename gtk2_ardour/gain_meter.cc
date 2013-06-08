@@ -236,7 +236,7 @@ GainMeterBase::setup_gain_adjustment ()
 
 	ignore_toggle = true;
 
-	if (_amp->output_streams().n_midi() == 0) {
+	if (_amp->output_streams().n_midi() <=  _amp->output_streams().n_audio()) {
 		_data_type = DataType::AUDIO;
 		gain_adjustment.set_lower (0.0);
 		gain_adjustment.set_upper (1.0);
