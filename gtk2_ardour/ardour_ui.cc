@@ -27,8 +27,6 @@
 #include <cerrno>
 #include <fstream>
 
-#include <boost/locale.hpp>
-
 #include <stdint.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -815,13 +813,13 @@ ARDOUR_UI::check_memory_locking ()
 						  "runs out of memory. \n\n"
 						  "You can view the memory limit with 'ulimit -l', "
 						  "and it is normally controlled by %2"),
-						PROGRAM_NAME).c_str(), 
+						PROGRAM_NAME, 
 #ifdef __FreeBSD__
-					X_("/etc/login.conf")
+						X_("/etc/login.conf")
 #else
-					X_(" /etc/security/limits.conf")
+						X_(" /etc/security/limits.conf")
 #endif
-					);
+					).c_str());
 
 				msg.set_default_response (RESPONSE_OK);
 
@@ -3425,9 +3423,23 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 			Config->set_video_advanced_setup(true);
 		}
 
+		if (video_server_process) {
+			delete video_server_process;
+		}
+
 		video_server_process = new SystemExec(icsd_exec, argp);
-		video_server_process->start();
-		sleep(1);
+		if (video_server_process->start()) {
+			warning << _("Cannot launch the video-server") << endmsg;
+			continue;
+		}
+		int timeout = 120; // 6 sec
+		while (!ARDOUR_UI::instance()->video_timeline->check_server()) {
+			usleep (50000);
+			if (--timeout <= 0 || !video_server_process->is_running()) break;
+		}
+		if (timeout <= 0) {
+			warning << _("Video-server was started but does not respond to requests...") << endmsg;
+		}
 	}
 	return true;
 }

@@ -113,7 +113,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 
 		_button.set_active (_processor->active());
 		_button.show ();
-		
+
 		_processor->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
 		_processor->PropertyChanged.connect (name_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_property_changed, this, _1), gui_context());
 
@@ -247,7 +247,20 @@ ProcessorEntry::processor_property_changed (const PropertyChange& what_changed)
 void
 ProcessorEntry::setup_tooltip ()
 {
-	ARDOUR_UI::instance()->set_tip (_button, name (Wide));
+	if (_processor) {
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
+		if (pi) {
+			if (pi->plugin()->has_editor()) {
+				ARDOUR_UI::instance()->set_tip (_button,
+						string_compose (_("<b>%1</b>\nDouble-click to show GUI.\nAlt+double-click to show generic GUI."), name (Wide)));
+			} else {
+				ARDOUR_UI::instance()->set_tip (_button,
+						string_compose (_("<b>%1</b>\nDouble-click to show generic GUI."), name (Wide)));
+			}
+			return;
+		}
+	}
+	ARDOUR_UI::instance()->set_tip (_button, string_compose ("<b>%1</b>", name (Wide)));
 }
 
 string
@@ -918,6 +931,7 @@ ProcessorBox::show_processor_menu (int arg)
 	const bool sensitive = !processor_display.selection().empty();
 	ActionManager::set_sensitive (ActionManager::plugin_selection_sensitive_actions, sensitive);
 	edit_action->set_sensitive (one_processor_can_be_edited ());
+	edit_generic_action->set_sensitive (one_processor_can_be_edited ());
 
 	boost::shared_ptr<PluginInsert> pi;
 	if (single_selection) {
@@ -925,7 +939,7 @@ ProcessorBox::show_processor_menu (int arg)
 	}
 
 	/* allow editing with an Ardour-generated UI for plugin inserts with editors */
-	edit_generic_action->set_sensitive (pi && pi->plugin()->has_editor ());
+	edit_action->set_sensitive (pi && pi->plugin()->has_editor ());
 
 	/* disallow rename for multiple selections, for plugin inserts and for the fader */
 	rename_action->set_sensitive (single_selection && !pi && !boost::dynamic_pointer_cast<Amp> (single_selection->processor ()));
@@ -1050,13 +1064,14 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 	if (processor && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS))) {
 
 		if (_session->engine().connected()) {
-
 			/* XXX giving an error message here is hard, because we may be in the midst of a button press */
 
-			if (Config->get_use_plugin_own_gui ()) {
-				edit_processor (processor);
-			} else {
+			if (!one_processor_can_be_edited ()) return true;
+
+			if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 				generic_edit_processor (processor);
+			} else {
+				edit_processor (processor);
 			}
 		}
 
@@ -2040,7 +2055,7 @@ ProcessorBox::one_processor_can_be_edited ()
 }
 
 Gtk::Window*
-ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor)
+ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool use_custom)
 {
 	boost::shared_ptr<Send> send;
 	boost::shared_ptr<InternalSend> internal_send;
@@ -2069,10 +2084,12 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor)
 		}
 
 		if (boost::dynamic_pointer_cast<InternalSend> (processor) == 0) {
-			SendUIWindow* w = new SendUIWindow (send, _session);
-			w->show ();
+
+			gidget = new SendUIWindow (send, _session);
+
 		} else {
 			/* assign internal send to main fader */
+
 			if (_parent_strip) {
 				if (_parent_strip->current_delivery() == send) {
 					_parent_strip->revert_to_default_display ();
@@ -2119,8 +2136,7 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor)
 		Window* w = get_processor_ui (plugin_insert);
 
 		if (w == 0) {
-
-			plugin_ui = new PluginUIWindow (plugin_insert, false, Config->get_use_plugin_own_gui());
+			plugin_ui = new PluginUIWindow (plugin_insert, false, use_custom);
 			plugin_ui->set_title (generate_processor_title (plugin_insert));
 			set_processor_ui (plugin_insert, plugin_ui);
 
@@ -2236,7 +2252,7 @@ ProcessorBox::register_actions ()
 		sigc::ptr_fun (ProcessorBox::rb_edit));
 
 	edit_generic_action = ActionManager::register_action (
-		popup_act_grp, X_("edit-generic"), _("Edit with basic controls..."),
+		popup_act_grp, X_("edit-generic"), _("Edit with generic controls..."),
 		sigc::ptr_fun (ProcessorBox::rb_edit_generic));
 
 	ActionManager::add_action_group (popup_act_grp);
@@ -2438,6 +2454,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 	ProcessorWindowProxy* proxy = find_window_proxy (processor);
 
 	if (proxy) {
+		proxy->set_custom_ui_mode (true);
 		proxy->toggle ();
 	}
 }
@@ -2452,6 +2469,7 @@ ProcessorBox::generic_edit_processor (boost::shared_ptr<Processor> processor)
 	ProcessorWindowProxy* proxy = find_window_proxy (processor);
 
 	if (proxy) {
+		proxy->set_custom_ui_mode (false);
 		proxy->toggle ();
 	}
 }
@@ -2629,6 +2647,7 @@ ProcessorWindowProxy::ProcessorWindowProxy (string const & name, ProcessorBox* b
 	, _processor_box (box)
 	, _processor (processor)
 	, is_custom (false)
+	, want_custom (false)
 {
 
 }
@@ -2640,6 +2659,38 @@ ProcessorWindowProxy::session_handle()
 	return 0;
 }
 
+XMLNode&
+ProcessorWindowProxy::get_state () const
+{
+	XMLNode *node;
+	node = &ProxyBase::get_state();
+	node->add_property (X_("custom-ui"), is_custom? X_("yes") : X_("no"));
+	return *node;
+}
+
+void
+ProcessorWindowProxy::set_state (const XMLNode& node)
+{
+	XMLNodeList children = node.children ();
+	XMLNodeList::const_iterator i = children.begin ();
+	while (i != children.end()) {
+		XMLProperty* prop = (*i)->property (X_("name"));
+		if ((*i)->name() == X_("Window") && prop && prop->value() == _name) {
+			break;
+		}
+		++i;
+	}
+
+	if (i != children.end()) {
+		XMLProperty* prop;
+		if ((prop = (*i)->property (X_("custom-ui"))) != 0) {
+			want_custom = PBD::string_is_affirmative (prop->value ());
+		}
+	}
+
+	ProxyBase::set_state(node);
+}
+
 Gtk::Window*
 ProcessorWindowProxy::get (bool create)
 {
@@ -2648,8 +2699,7 @@ ProcessorWindowProxy::get (bool create)
 	if (!p) {
 		return 0;
 	}
-	
-	if (_window && (is_custom != Config->get_use_plugin_own_gui ())) {
+	if (_window && (is_custom != want_custom)) {
 		/* drop existing window - wrong type */
 		drop_window ();
 	}
@@ -2659,8 +2709,8 @@ ProcessorWindowProxy::get (bool create)
 			return 0;
 		}
 		
-		_window = _processor_box->get_editor_window (p);
-		is_custom = Config->get_use_plugin_own_gui();
+		is_custom = want_custom;
+		_window = _processor_box->get_editor_window (p, is_custom);
 
 		if (_window) {
 			setup ();
@@ -2673,10 +2723,11 @@ ProcessorWindowProxy::get (bool create)
 void
 ProcessorWindowProxy::toggle ()
 {
-	if (_window && (is_custom != Config->get_use_plugin_own_gui ())) {
+	if (_window && (is_custom != want_custom)) {
 		/* drop existing window - wrong type */
 		drop_window ();
 	}
+	is_custom = want_custom;
 
 	WM::ProxyBase::toggle ();
 }

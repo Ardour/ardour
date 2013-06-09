@@ -120,9 +120,7 @@ ExportTimespanSelector::add_range_to_selection (ARDOUR::Location const * loc)
 	ExportTimespanPtr span = _session->get_export_handler()->add_timespan();
 
 	std::string id;
-	if (loc == state->session_range.get()) {
-		id = "session";
-	} else if (loc == state->selection_range.get()) {
+	if (loc == state->selection_range.get()) {
 		id = "selection";
 	} else {
 		id = loc->id().to_s();
@@ -367,9 +365,7 @@ ExportTimespanSelectorSingle::fill_range_list ()
 	if (!state) { return; }
 
 	std::string id;
-	if (!range_id.compare (X_("session"))) {
-		id = state->session_range->id().to_s();
-	} else if (!range_id.compare (X_("selection"))) {
+	if (!range_id.compare (X_("selection"))) {
 		id = state->selection_range->id().to_s();
 	} else {
 		id = range_id;
@@ -459,9 +455,8 @@ ExportTimespanSelectorMultiple::set_selection_from_state ()
 		for (tree_it = range_list->children().begin(); tree_it != range_list->children().end(); ++tree_it) {
 			Location * loc = tree_it->get_value (range_cols.location);
 
-			if ((!id.compare ("session") && loc == state->session_range.get()) ||
-			    (!id.compare ("selection") && loc == state->selection_range.get()) ||
-			    (!id.compare (loc->id().to_s()))) {
+			if ((id == "selection" && loc == state->selection_range.get()) ||
+			    (id == loc->id().to_s())) {
 				tree_it->set_value (range_cols.selected, true);
 			}
 		}

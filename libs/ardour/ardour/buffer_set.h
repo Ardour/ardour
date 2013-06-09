@@ -120,8 +120,14 @@ public:
 	 */
 	LV2_Evbuf* get_lv2_midi(bool input, size_t i, bool old_api);
 
+	/** ensure minimum size of LV2 Atom port buffer */
+	void ensure_lv2_bufsize(bool input, size_t i, size_t buffer_capacity);
+
 	/** Flush modified LV2 event output buffers back to Ardour buffers */
 	void flush_lv2_midi(bool input, size_t i);
+
+	/** Forward plugin MIDI output to to Ardour buffers */
+	void forward_lv2_midi(LV2_Evbuf*, size_t, bool purge_ardour_buffer = true);
 #endif
 
 #if defined VST_SUPPORT || defined LXVST_SUPPORT

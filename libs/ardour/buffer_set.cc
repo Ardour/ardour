@@ -252,6 +252,25 @@ BufferSet::get(DataType type, size_t i) const
 
 #ifdef LV2_SUPPORT
 
+void
+BufferSet::ensure_lv2_bufsize(bool input, size_t i, size_t buffer_capacity)
+{
+	assert(count().get(DataType::MIDI) > i);
+
+	LV2Buffers::value_type b     = _lv2_buffers.at(i * 2 + (input ? 0 : 1));
+	LV2_Evbuf*             evbuf = b.second;
+
+	if (lv2_evbuf_get_capacity(evbuf) >= buffer_capacity) return;
+
+	lv2_evbuf_free(b.second);
+	_lv2_buffers.at(i * 2 + (input ? 0 : 1)) =
+		std::make_pair(false, lv2_evbuf_new(
+					buffer_capacity,
+					LV2_EVBUF_EVENT,
+					LV2Plugin::urids.atom_Chunk,
+					LV2Plugin::urids.atom_Sequence));
+}
+
 LV2_Evbuf*
 BufferSet::get_lv2_midi(bool input, size_t i, bool old_api)
 {
@@ -263,6 +282,25 @@ BufferSet::get_lv2_midi(bool input, size_t i, bool old_api)
 	lv2_evbuf_set_type(evbuf, old_api ? LV2_EVBUF_EVENT : LV2_EVBUF_ATOM);
 	lv2_evbuf_reset(evbuf, input);
 	return evbuf;
+}
+
+void
+BufferSet::forward_lv2_midi(LV2_Evbuf* buf, size_t i, bool purge_ardour_buffer)
+{
+	MidiBuffer& mbuf  = get_midi(i);
+	if (purge_ardour_buffer) {
+		mbuf.silence(0, 0);
+	}
+	for (LV2_Evbuf_Iterator i = lv2_evbuf_begin(buf);
+			 lv2_evbuf_is_valid(i);
+			 i = lv2_evbuf_next(i)) {
+		uint32_t frames, subframes, type, size;
+		uint8_t* data;
+		lv2_evbuf_get(i, &frames, &subframes, &type, &size, &data);
+		if (type == LV2Plugin::urids.midi_MidiEvent) {
+			mbuf.push_back(frames, size, data);
+		}
+	}
 }
 
 void

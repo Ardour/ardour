@@ -185,7 +185,8 @@ static const char* translators[] = {
 \n\tRobert Schwede <schwede@ironshark.com>\
 \n\tBenjamin Scherrer <realhangman@web.de>\
 \n\tEdgar Aichinger <edogawa@aon.at>\
-\n\tRichard Oax <richard@pagliacciempire.de>\n"),
+\n\tRichard Oax <richard@pagliacciempire.de>\
+\n\tRobin Gloster <robin@loc-com.de>\n"),
 	N_("Italian:\n\tFilippo Pappalardo <filippo@email.it>\n\tRaffaele Morelli <raffaele.morelli@gmail.com>\n"),
 	N_("Portuguese:\n\tRui Nuno Capela <rncbc@rncbc.org>\n"),
 	N_("Brazilian Portuguese:\n\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\
@@ -590,6 +591,11 @@ About::About ()
 	get_action_area()->add (*config_button);
 	get_action_area()->reorder_child (*config_button, 0);
 	config_button->signal_clicked().connect (mem_fun (*this, &About::show_config_info));
+
+	Gtk::Button *btn = static_cast<Gtk::Button*>(get_widget_for_response(Gtk::RESPONSE_CANCEL));
+	if (btn) {
+		btn->signal_clicked().connect(sigc::mem_fun(static_cast<Gtk::Window*>(this), &Gtk::Window::hide));
+	}
 }
 
 About::~About ()

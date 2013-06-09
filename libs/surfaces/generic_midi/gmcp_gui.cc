@@ -28,6 +28,7 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/table.h>
 
+#include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
 
 #include "generic_midi_control_protocol.h"
@@ -147,7 +148,10 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 
 	threshold_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &GMCPGUI::threshold_changed));
 
-	label = manage (new Label (_("Threshold:")));
+	Gtkmm2ext::UI::instance()->set_tip (threshold_spinner, 
+					    string_compose (_("Controls how %1 behaves if the MIDI controller sends discontinuous values"), PROGRAM_NAME));
+
+	label = manage (new Label (_("Smoothing:")));
 	label->set_alignment (0, 0.5);
 	table->attach (*label, 0, 1, n, n + 1);
 	table->attach (threshold_spinner, 1, 2, n, n + 1);

@@ -949,7 +949,7 @@ SoundFileBrowser::freesound_search()
 	XMLNode *res = root->child("num_pages");
 	if (res) {
 		string result = res->child("text")->content();
-		freesound_n_pages = atoi(result.c_str());
+		freesound_n_pages = atoi(result);
 	}
 
 	int more_pages = freesound_n_pages - freesound_page;
@@ -1010,7 +1010,7 @@ SoundFileBrowser::freesound_search()
 			std::string r;
 			// cerr << "id=" << id << ",uri=" << uri << ",ofn=" << ofn << ",dur=" << dur << endl;
 
-			double duration_seconds = atof(dur.c_str());
+			double duration_seconds = atof(dur);
 			double h, m, s;
 			char duration_hhmmss[16];
 			if (duration_seconds >= 99 * 60 * 60) {
@@ -1023,7 +1023,7 @@ SoundFileBrowser::freesound_search()
 				       );
 			}
 
-			double size_bytes = atof(siz.c_str());
+			double size_bytes = atof(siz);
 			char bsize[32];
 			if (size_bytes < 1000) {
 				sprintf(bsize, "%.0f %s", size_bytes, _("B"));

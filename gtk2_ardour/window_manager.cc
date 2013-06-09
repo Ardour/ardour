@@ -28,11 +28,13 @@
 #include "ardour_dialog.h"
 #include "ardour_window.h"
 #include "window_manager.h"
+#include "processor_box.h"
 
 #include "i18n.h"
 
 using std::string;
 using namespace WM;
+using namespace PBD;
 
 Manager* Manager::_instance = 0;
 
@@ -106,7 +108,12 @@ Manager::add_state (XMLNode& root) const
 		if (dynamic_cast<ProxyTemporary*> (*i)) {
 			continue;
 		}
-		root.add_child_nocopy ((*i)->get_state());
+		if (dynamic_cast<ProcessorWindowProxy*> (*i)) {
+			ProcessorWindowProxy *pi = dynamic_cast<ProcessorWindowProxy*> (*i);
+			root.add_child_nocopy (pi->get_state());
+		} else {
+			root.add_child_nocopy ((*i)->get_state());
+		}
 	}
 }
 
@@ -124,12 +131,19 @@ Manager::set_session (ARDOUR::Session* s)
 void
 Manager::set_transient_for (Gtk::Window* parent)
 {
+	/* OS X has a richer concept of window layering than X does (or
+	 * certainly, than any accepted conventions on X), and so the use of
+	 * Manager::set_transient_for() is not necessary on that platform.
+	 * 
+	 * On OS X this is mostly taken care of by using the window type rather
+	 * than explicit 1:1 transient-for relationships.
+	 */
+
 #ifndef __APPLE__
 	if (parent) {
 		for (Windows::const_iterator i = _windows.begin(); i != _windows.end(); ++i) {
 			Gtk::Window* win = (*i)->get();
 			if (win) {
-				std::cerr << "marked " << win->get_title() << " as transient of " << parent->get_title() << std::endl;
 				win->set_transient_for (*parent);
 			}
 		}
@@ -205,16 +219,16 @@ ProxyBase::set_state (const XMLNode& node)
 		}
 
 		if ((prop = (*i)->property (X_("x-off"))) != 0) {
-			_x_off = atoi (prop->value().c_str());
+			_x_off = atoi (prop->value());
 		}
 		if ((prop = (*i)->property (X_("y-off"))) != 0) {
-			_y_off = atoi (prop->value().c_str());
+			_y_off = atoi (prop->value());
 		}
 		if ((prop = (*i)->property (X_("x-size"))) != 0) {
-			_width = atoi (prop->value().c_str());
+			_width = atoi (prop->value());
 		}
 		if ((prop = (*i)->property (X_("y-size"))) != 0) {
-			_height = atoi (prop->value().c_str());
+			_height = atoi (prop->value());
 		}
 	}
 

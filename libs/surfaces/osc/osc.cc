@@ -34,6 +34,7 @@
 #include <pbd/file_utils.h>
 #include <pbd/failed_constructor.h>
 
+#include "ardour/amp.h"
 #include "ardour/session.h"
 #include "ardour/route.h"
 #include "ardour/audio_track.h"
@@ -42,6 +43,7 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/panner.h"
 #include "ardour/plugin.h"
+#include "ardour/send.h"
 
 #include "osc.h"
 #include "osc_controllable.h"
@@ -163,6 +165,10 @@ OSC::start ()
 #endif
 		_port++;
 		continue;
+	}
+
+	if (!_osc_server) {
+		return 1;
 	}
 	
 #ifdef ARDOUR_OSC_UNIX_SERVER
@@ -356,8 +362,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/routes/pan_stereo_width", "if", route_set_pan_stereo_width);
 		REGISTER_CALLBACK (serv, "/ardour/routes/plugin/parameter", "iiif", route_plugin_parameter);
 		REGISTER_CALLBACK (serv, "/ardour/routes/plugin/parameter/print", "iii", route_plugin_parameter_print);
-
-		
+		REGISTER_CALLBACK (serv, "/ardour/routes/send/gainabs", "iif", route_set_send_gain_abs);
+		REGISTER_CALLBACK (serv, "/ardour/routes/send/gaindB", "iif", route_set_send_gain_dB);
 
 		/* still not-really-standardized query interface */
 		//REGISTER_CALLBACK (serv, "/ardour/*/#current_value", "", current_value);
@@ -889,6 +895,70 @@ OSC::route_set_pan_stereo_width (int rid, float pos)
 	
 	return 0;
 
+}
+
+int
+OSC::route_set_send_gain_abs (int rid, int sid, float val)
+{
+        if (!session) { 
+                return -1;
+        }
+
+        boost::shared_ptr<Route> r = session->route_by_remote_id (rid);  
+
+        if (!r) {
+                return -1;
+        }
+
+	/* revert to zero-based counting */
+
+	if (sid > 0) {
+		--sid;
+	}
+
+	boost::shared_ptr<Processor> p = r->nth_send (sid);
+	
+	if (p) {
+		boost::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(p);
+		boost::shared_ptr<Amp> a = s->amp();
+		
+		if (a) {
+			a->set_gain (val, this);
+		}
+	}
+	return 0;
+}
+
+int
+OSC::route_set_send_gain_dB (int rid, int sid, float val)
+{
+        if (!session) { 
+                return -1;
+        }
+
+        boost::shared_ptr<Route> r = session->route_by_remote_id (rid);  
+
+        if (!r) {
+                return -1;
+        }
+
+	/* revert to zero-based counting */
+
+	if (sid > 0) {
+		--sid;
+	}
+
+	boost::shared_ptr<Processor> p = r->nth_send (sid);
+	
+	if (p) {
+		boost::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(p);
+		boost::shared_ptr<Amp> a = s->amp();
+		
+		if (a) {
+			a->set_gain (dB_to_coefficient (val), this);
+		}
+	}
+	return 0;
 }
 
 int

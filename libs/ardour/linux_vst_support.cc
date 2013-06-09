@@ -379,6 +379,7 @@ void vstfx_close (VSTState* vstfx)
 		dlclose(vstfx->handle->dll); //dlclose keeps its own reference count
 		vstfx->handle->dll = 0;
 	}
+	free(vstfx);
 }
 
 

@@ -140,6 +140,7 @@ Session::Session (AudioEngine &eng,
 	, _butler (new Butler (*this))
 	, _post_transport_work (0)
 	, _send_timecode_update (false)
+	, ltc_enc_buf(0)
 	, _all_route_group (new RouteGroup (*this, "all"))
 	, routes (new RouteList)
 	, _total_free_4k_blocks (0)
