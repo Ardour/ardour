@@ -48,6 +48,7 @@ VideoMonitor::VideoMonitor (PublicEditor *ed, std::string xjadeo_bin_path)
 	process = new SystemExec(xjadeo_bin_path, X_("-R"));
 	process->ReadStdout.connect_same_thread (*this, boost::bind (&VideoMonitor::parse_output, this, _1 ,_2));
 	process->Terminated.connect (*this, invalidator (*this), boost::bind (&VideoMonitor::terminated, this), gui_context());
+	XJKeyEvent.connect (*this, invalidator (*this), boost::bind (&VideoMonitor::forward_keyevent, this, _1), gui_context());
 }
 
 VideoMonitor::~VideoMonitor ()
@@ -131,7 +132,18 @@ VideoMonitor::open (std::string filename)
 	process->write_to_stdin("window resize 100%\n");
 	process->write_to_stdin("window ontop on\n");
 	process->write_to_stdin("set seekmode 1\n");
-	process->write_to_stdin("set override 47\n");
+	/* override bitwise flags -- see xjadeo.h
+	 * 0x01 : ignore 'q', ESC  / quite
+	 * 0x02 : ignore "window closed by WM" / quit
+	 * 0x04 : (osx only) menu-exit / quit
+	 * 0x08 : ignore mouse-button 1 -- resize
+	 * 0x10 : no A/V offset
+	 * 0x20 : don't use jack-session
+	 * 0x40 : no jack-transport control play/pause/rewind
+	 */
+	process->write_to_stdin("set override 104\n");
+	process->write_to_stdin("notify keyboard\n");
+	process->write_to_stdin("notify settings\n");
 	process->write_to_stdin("window letterbox on\n");
 	process->write_to_stdin("osd mode 10\n");
 	for(XJSettings::const_iterator it = xjadeo_settings.begin(); it != xjadeo_settings.end(); ++it) {
@@ -234,6 +246,38 @@ VideoMonitor::is_started ()
 }
 
 void
+VideoMonitor::forward_keyevent (unsigned int keyval)
+{
+#if 0 // TODO just 'fake' keyboard input
+					GdkEventKey ev;
+					ev.type = GDK_KEY_PRESS;
+					ev.window = NULL; // XXX
+					ev.send_event = TRUE;
+					ev.time = 0;
+					ev.state = 0;
+					ev.keyval = keyval;
+					ev.length = 1;
+					ev.string = NULL;
+					ev.hardware_keycode = 0;
+					ev.group = 0;
+
+					PublicEditor::instance().on_key_press_event(&ev);
+					ev.type = GDK_KEY_RELEASE;
+					PublicEditor::instance().on_key_press_event(&ev);
+#else
+	if (keyval == GDK_KEY_space) {
+		if(_session->transport_rolling ()) {
+			_session->request_transport_speed (0.0);
+		} else {
+			_session->request_transport_speed (1.0f);
+		}
+	} else if (keyval == GDK_KEY_BackSpace) {
+		_session->goto_start ();
+	}
+#endif
+}
+
+void
 VideoMonitor::parse_output (std::string d, size_t /*s*/)
 {
 	std::string line = d;
@@ -261,8 +305,41 @@ VideoMonitor::parse_output (std::string d, size_t /*s*/)
 					 */
 					process->write_to_stdin("quit\n");
 				}
-			case 1: /* requested async notifications */
-			case 3: /* warnings ; command succeeded, but status is negative. */
+#ifdef DEBUG_XJCOM
+			else
+				printf("xjadeo: error '%s'\n", line.c_str());
+#endif
+			break;
+			case 3: /* async notifications */
+			{
+				std::string::size_type equalsign = line.find('=');
+				std::string::size_type comment = line.find('#');
+				if (comment != std::string::npos) { line = line.substr(0,comment); }
+				if (equalsign != std::string::npos) {
+					std::string key = line.substr(5, equalsign - 5);
+					std::string value = line.substr(equalsign + 1);
+
+					if (status == 310 && key=="keypress") {
+						/* keyboard event */
+						XJKeyEvent((unsigned int)atoi(value));
+					}
+#ifdef DEBUG_XJCOM
+					else {
+						std::string msg = line.substr(5);
+						printf("xjadeo: async '%s' -> '%s'\n", key, value);
+					}
+#endif
+				}
+#ifdef DEBUG_XJCOM
+				else {
+					std::string msg = line.substr(5);
+					printf("xjadeo: async '%s'\n", msg.c_str());
+				}
+#endif
+			} break;
+			case 1: /* text messages - command reply */
+				break;
+			case 8: /* comments / info for humans */
 				break;
 			case 2:
 /* replies:
@@ -341,6 +418,10 @@ VideoMonitor::parse_output (std::string d, size_t /*s*/)
 							if (!starting && _session) _session->set_dirty ();
 						}
 						xjadeo_settings["set offset"] = value;
+#ifdef DEBUG_XJCOM
+					} else {
+						printf("xjadeo: '%s' -> '%s'\n", key.c_str(), value.c_str());
+#endif
 					}
 				}
 			}
