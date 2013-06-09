@@ -21,9 +21,11 @@
 #include "pbd/convert.h"
 #include "gui_thread.h"
 #include "ardour_ui.h"
+#include "utils.h"
 
 #include <stdio.h>
 #include "public_editor.h"
+#include "editor.h"
 #include "video_monitor.h"
 
 #include "i18n.h"
@@ -248,33 +250,33 @@ VideoMonitor::is_started ()
 void
 VideoMonitor::forward_keyevent (unsigned int keyval)
 {
-#if 0 // TODO just 'fake' keyboard input
-					GdkEventKey ev;
-					ev.type = GDK_KEY_PRESS;
-					ev.window = NULL; // XXX
-					ev.send_event = TRUE;
-					ev.time = 0;
-					ev.state = 0;
-					ev.keyval = keyval;
-					ev.length = 1;
-					ev.string = NULL;
-					ev.hardware_keycode = 0;
-					ev.group = 0;
+	Editor* ed = dynamic_cast<Editor*>(&PublicEditor::instance());
+	if (!ed) return;
 
-					PublicEditor::instance().on_key_press_event(&ev);
-					ev.type = GDK_KEY_RELEASE;
-					PublicEditor::instance().on_key_press_event(&ev);
-#else
-	if (keyval == GDK_KEY_space) {
-		if(_session->transport_rolling ()) {
-			_session->request_transport_speed (0.0);
-		} else {
-			_session->request_transport_speed (1.0f);
-		}
-	} else if (keyval == GDK_KEY_BackSpace) {
-		_session->goto_start ();
-	}
-#endif
+	GdkDisplay  *display = gtk_widget_get_display (GTK_WIDGET(ed->gobj()));
+	GdkKeymap   *keymap  = gdk_keymap_get_for_display (display);
+	GdkKeymapKey *keymapkey = NULL;
+	gint n_keys;
+
+	if (!gdk_keymap_get_entries_for_keyval(keymap, keyval, &keymapkey, &n_keys)) return;
+	if (n_keys !=1) { g_free(keymapkey); return;}
+
+	GdkEventKey ev;
+	ev.type = GDK_KEY_PRESS;
+	ev.window = ed->get_window()->gobj();
+	ev.send_event = FALSE;
+	ev.time = 0;
+	ev.state = 0;
+	ev.keyval = keyval;
+	ev.length = 0;
+	ev.string = (gchar*) "";
+	ev.hardware_keycode = keymapkey[0].keycode;
+	ev.group = keymapkey[0].group;
+	g_free(keymapkey);
+
+	forward_key_press(&ev);
+	ev.type = GDK_KEY_RELEASE;
+	forward_key_press(&ev);
 }
 
 void
