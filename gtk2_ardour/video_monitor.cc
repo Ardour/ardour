@@ -143,7 +143,7 @@ VideoMonitor::open (std::string filename)
 	 * 0x20 : don't use jack-session
 	 * 0x40 : no jack-transport control play/pause/rewind
 	 */
-	process->write_to_stdin("set override 104\n");
+	process->write_to_stdin("set override 120\n");
 	process->write_to_stdin("notify keyboard\n");
 	process->write_to_stdin("notify settings\n");
 	process->write_to_stdin("window letterbox on\n");
