@@ -3428,11 +3428,17 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 		}
 
 		video_server_process = new SystemExec(icsd_exec, argp);
-		video_server_process->start();
-		int timeout = 10;
+		if (video_server_process->start()) {
+			warning << _("Cannot launch the video-server") << endmsg;
+			continue;
+		}
+		int timeout = 120; // 6 sec
 		while (!ARDOUR_UI::instance()->video_timeline->check_server()) {
-			sleep(1);
-			if (--timeout <= 0) break;
+			usleep (50000);
+			if (--timeout <= 0 || !video_server_process->is_running()) break;
+		}
+		if (timeout <= 0) {
+			warning << _("Video-server was started but does not respond to requests...") << endmsg;
 		}
 	}
 	return true;
