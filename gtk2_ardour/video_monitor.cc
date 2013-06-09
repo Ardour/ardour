@@ -252,31 +252,7 @@ VideoMonitor::forward_keyevent (unsigned int keyval)
 {
 	Editor* ed = dynamic_cast<Editor*>(&PublicEditor::instance());
 	if (!ed) return;
-
-	GdkDisplay  *display = gtk_widget_get_display (GTK_WIDGET(ed->gobj()));
-	GdkKeymap   *keymap  = gdk_keymap_get_for_display (display);
-	GdkKeymapKey *keymapkey = NULL;
-	gint n_keys;
-
-	if (!gdk_keymap_get_entries_for_keyval(keymap, keyval, &keymapkey, &n_keys)) return;
-	if (n_keys !=1) { g_free(keymapkey); return;}
-
-	GdkEventKey ev;
-	ev.type = GDK_KEY_PRESS;
-	ev.window = ed->get_window()->gobj();
-	ev.send_event = FALSE;
-	ev.time = 0;
-	ev.state = 0;
-	ev.keyval = keyval;
-	ev.length = 0;
-	ev.string = (gchar*) "";
-	ev.hardware_keycode = keymapkey[0].keycode;
-	ev.group = keymapkey[0].group;
-	g_free(keymapkey);
-
-	forward_key_press(&ev);
-	ev.type = GDK_KEY_RELEASE;
-	forward_key_press(&ev);
+	emulate_key_event(ed, keyval);
 }
 
 void
