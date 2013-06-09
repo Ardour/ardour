@@ -762,6 +762,7 @@ VideoTimeLine::control_video_monitor(int what, int param) {
 void
 VideoTimeLine::terminated_video_monitor () {
 	if (vmonitor) {
+		vmonitor->save_session();
 		delete vmonitor;
 	}
 	GuiUpdate("set-xjadeo-active-off");

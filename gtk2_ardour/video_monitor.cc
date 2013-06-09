@@ -102,6 +102,7 @@ VideoMonitor::quit ()
 	if (!is_started()) return;
 	if (state_connection.connected()) { state_connection.disconnect(); }
 	if (clock_connection.connected()) { clock_connection.disconnect(); }
+	query_full_state(true);
 	process->write_to_stdin("quit\n");
 	/* the 'quit' command should result in process termination
 	 * but in case it fails (communication failure, SIGSTOP, ??)
