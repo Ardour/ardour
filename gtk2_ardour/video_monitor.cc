@@ -423,7 +423,7 @@ void
 VideoMonitor::save_session ()
 {
 	if (!_session) { return; }
-	XMLNode* node = _session->extra_xml (X_("XJSettings"));
+	XMLNode* node = _session->extra_xml (X_("XJSettings"), true);
 	if (!node) return;
 	node->remove_nodes_and_delete("XJSetting");
 
