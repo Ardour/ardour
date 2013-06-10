@@ -508,12 +508,12 @@ if test x$WITH_HARVID != x ; then
 	HARVID_VERSION=$(curl http://ardour.org/files/video-tools/harvid_version.txt)
 	XJADEO_VERSION=$(curl http://ardour.org/files/video-tools/xjadeo_version.txt)
 	echo "copying harvid and xjadeo ..."
-  curl -L -o "$PRODUCT_PKG_DIR/harvid-${HARVID_VERSION}.pkg" "http://x42.github.io/harvid/releases/harvid-${HARVID_VERSION}.pkg"
   curl -L -o "$PRODUCT_PKG_DIR/xjadeo-${XJADEO_VERSION:1}.dmg" "http://sourceforge.net/projects/xjadeo/files/xjadeo/${XJADEO_VERSION}/jadeo-${XJADEO_VERSION:1}.dmg/download"
+  curl -L "http://ardour.org/files/video-tools/harvid-osx-${HARVID_VERSION}.tgz"\
+		| tar -x -z -C $PRODUCT_PKG_DIR/$APPROOT
 	DMGWINBOTTOM=$[ $DMGWINBOTTOM + 140 ]
 	YPOS=$[ $DMGWINBOTTOM - 300 ]
-	HARVIDPOS="set position of item \"harvid-${HARVID_VERSION}.pkg\" of container window to {90, ${YPOS}}"
-	XJADEOPOS="set position of item \"xjadeo-${XJADEO_VERSION:1}.dmg\" of container window to {310, ${YPOS}}"
+	XJADEOPOS="set position of item \"xjadeo-${XJADEO_VERSION:1}.dmg\" of container window to {90, ${YPOS}}"
 fi
 
 echo "Building DMG ..."
