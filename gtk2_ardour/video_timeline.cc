@@ -708,6 +708,13 @@ VideoTimeLine::open_video_monitor() {
 		return;
 	}
 
+#if 0
+	/* unused for now.
+	 * the idea is to selective ignore certain monitor window
+	 * states if xjadeo is not running on the same host as ardour.
+	 * However with the removal of the video-monitor-startup-dialogue
+	 * (git rev 5a4d0fff0) these settings are currently not accessible.
+	 */
 	int xj_settings_mask = vmonitor->restore_settings_mask();
 	if (_session) {
 		/* load mask from Session */
@@ -721,6 +728,7 @@ VideoTimeLine::open_video_monitor() {
 	}
 
 	vmonitor->restore_settings_mask(xj_settings_mask);
+#endif
 
 	if (!vmonitor->start()) {
 		warning << "launching xjadeo failed.." << endmsg;
