@@ -700,6 +700,7 @@ VideoTimeLine::open_video_monitor() {
 	if (!vmonitor) {
 		vmonitor = new VideoMonitor(editor, _xjadeo_bin);
 		vmonitor->set_session(_session);
+		vmonitor->set_offset(video_offset);
 		vmonitor->Terminated.connect (sigc::mem_fun (*this, &VideoTimeLine::terminated_video_monitor));
 		vmonitor->UiState.connect (*this, invalidator (*this), boost::bind (&VideoTimeLine::gui_update, this, _1), gui_context());
 	} else if (vmonitor->is_started()) {

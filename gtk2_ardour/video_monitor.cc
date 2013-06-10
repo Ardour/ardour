@@ -496,7 +496,9 @@ VideoMonitor::set_offset (ARDOUR::frameoffset_t offset)
 		video_frame_offset = floor(offset * _session->timecode_frames_per_second() / audio_frame_rate);
 	}
 
-	// TODO remember if changed..
+	if (video_offset == video_frame_offset) { return; }
+	video_offset = video_frame_offset;
+
 	std::ostringstream osstream1; osstream1 << -1 * video_frame_offset;
 	process->write_to_stdin("set offset " + osstream1.str() + "\n");
 }

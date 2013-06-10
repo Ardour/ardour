@@ -99,6 +99,7 @@ class VideoMonitor : public sigc::trackable , public ARDOUR::SessionHandlePtr, p
 
 	void xjadeo_sync_setup ();
 	ARDOUR::framepos_t manually_seeked_frame;
+	ARDOUR::frameoffset_t video_offset;
 	bool sync_by_manual_seek;
 	sigc::connection clock_connection;
 	sigc::connection state_connection;
