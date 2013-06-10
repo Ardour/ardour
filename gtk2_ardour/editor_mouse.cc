@@ -607,7 +607,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 
 	switch (item_type) {
 	case RegionItem:
-		if (!get_smart_mode() || (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT)) {
+		if (!get_smart_mode() || (_join_object_range_state != JOIN_OBJECT_RANGE_RANGE)) {
 			if (press) {
 				if (mouse_mode != MouseRange) {
 					set_selected_regionview_from_click (press, op);
