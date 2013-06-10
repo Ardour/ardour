@@ -347,28 +347,26 @@ VideoTimeLine::update_video_timeline()
 	assert (vtl_dist > 0);
 	assert (apv > 0);
 
-#define GOFFSET (video_offset)
+	leftmost_video_frame = floor (floor((leftmost_frame - video_start_offset - video_offset ) / vtl_dist) * vtl_dist / apv);
 
-	leftmost_video_frame = floor (floor((leftmost_frame - video_start_offset - GOFFSET ) / vtl_dist) * vtl_dist / apv);
-
-	vtl_start = rint (GOFFSET + video_start_offset + leftmost_video_frame * apv);
+	vtl_start = rint (video_offset + video_start_offset + leftmost_video_frame * apv);
 	visible_video_frames = 2 + ceil(editor->current_page_frames() / vtl_dist); /* +2 left+right partial frames */
 
 	/* expand timeline (cache next/prev page images) */
 	vtl_start -= visible_video_frames * vtl_dist;
 	visible_video_frames *=3;
 
-	if (vtl_start < GOFFSET ) {
+	if (vtl_start < video_offset ) {
 		visible_video_frames += ceil(vtl_start/vtl_dist);
-		vtl_start = GOFFSET;
+		vtl_start = video_offset;
 	}
 
 	/* apply video-file constraints */
-	if (vtl_start > video_start_offset + video_duration + GOFFSET ) {
+	if (vtl_start > video_start_offset + video_duration + video_offset ) {
 		visible_video_frames = 0;
 	}
 	/* TODO optimize: compute rather than iterate */
-	while (visible_video_frames > 0 && vtl_start + (visible_video_frames-1) * vtl_dist >= video_start_offset + video_duration + GOFFSET) {
+	while (visible_video_frames > 0 && vtl_start + (visible_video_frames-1) * vtl_dist >= video_start_offset + video_duration + video_offset) {
 		--visible_video_frames;
 	}
 
@@ -402,12 +400,12 @@ VideoTimeLine::update_video_timeline()
 
 	for (unsigned int vfcount=0; vfcount < visible_video_frames; ++vfcount){
 		framepos_t vfpos = vtl_start + vfcount * vtl_dist; /* unit: audio-frames */
-		framepos_t vframeno = rint ( (vfpos - GOFFSET) / apv); /* unit: video-frames */
-		vfpos = (vframeno * apv ) + GOFFSET; /* audio-frame  corresponding to /rounded/ video-frame */
+		framepos_t vframeno = rint ( (vfpos - video_offset) / apv); /* unit: video-frames */
+		vfpos = (vframeno * apv ) + video_offset; /* audio-frame  corresponding to /rounded/ video-frame */
 
 		int rightend = -1; /* unit: pixels */
-		if (vfpos + vtl_dist > video_start_offset + video_duration + GOFFSET) {
-			rightend = display_vframe_width * (video_start_offset + video_duration + GOFFSET - vfpos) / vtl_dist;
+		if (vfpos + vtl_dist > video_start_offset + video_duration + video_offset) {
+			rightend = display_vframe_width * (video_start_offset + video_duration + video_offset - vfpos) / vtl_dist;
 			//printf("lf(e): %lu\n", vframeno); // XXX
 		}
 		VideoImageFrame * frame = get_video_frame(vframeno, cut, rightend);
@@ -427,10 +425,10 @@ VideoTimeLine::update_video_timeline()
 			int vfcount=remaining.front();
 			remaining.pop_front();
 			framepos_t vfpos = vtl_start + vfcount * vtl_dist; /* unit: audio-frames */
-			framepos_t vframeno = rint ((vfpos - GOFFSET) / apv);  /* unit: video-frames */
+			framepos_t vframeno = rint ((vfpos - video_offset) / apv);  /* unit: video-frames */
 			int rightend = -1; /* unit: pixels */
-			if (vfpos + vtl_dist > video_start_offset + video_duration + GOFFSET) {
-				rightend = display_vframe_width * (video_start_offset + video_duration + GOFFSET - vfpos) / vtl_dist;
+			if (vfpos + vtl_dist > video_start_offset + video_duration + video_offset) {
+				rightend = display_vframe_width * (video_start_offset + video_duration + video_offset - vfpos) / vtl_dist;
 				//printf("lf(n): %lu\n", vframeno); // XXX
 			}
 			frame->set_position(vfpos-leftmost_frame);
@@ -608,7 +606,7 @@ VideoTimeLine::set_height (int height) {
 void
 VideoTimeLine::vmon_update () {
 	if (vmonitor && vmonitor->is_started()) {
-		vmonitor->set_offset( GOFFSET); // TODO proper re-init xjadeo w/o restart not just offset.
+		vmonitor->set_offset(video_offset); // TODO proper re-init xjadeo w/o restart not just offset.
 	}
 }
 
@@ -791,5 +789,5 @@ VideoTimeLine::manual_seek_video_monitor (framepos_t pos)
 	if (!vmonitor) { return; }
 	if (!vmonitor->is_started()) { return; }
 	if (!vmonitor->synced_by_manual_seeks()) { return; }
-	vmonitor->manual_seek(pos, false, GOFFSET); // XXX -> set offset in xjadeo
+	vmonitor->manual_seek(pos, false, video_offset); // XXX -> set offset in xjadeo
 }
