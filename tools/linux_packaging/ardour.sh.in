@@ -31,9 +31,6 @@ if [ ! -d $USER_ARDOUR_DIR ] ; then
     mkdir -p $USER_ARDOUR_DIR || exit 1
 fi
 
-PATH="${BIN_DIR}:${PATH}"
-export PATH
-
 # this triggers code in main() that will reset runtime environment variables
 # to point to directories inside the ardour package
 
