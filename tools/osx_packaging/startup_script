@@ -15,6 +15,18 @@ end tell'
    exit 1
 fi
 
+#
+# Some versions of Audacity leave /usr/local/lib unreadable/unsearchable. Ardour will not be able to start up if this is 
+# the case, because we need access to /usr/local/lib/libjack.dylib
+#
+
+if test ! -x /usr/local/lib -o ! -r /usr/local/lib ; then
+   /usr/bin/osascript -e 'tell application "Finder"
+display dialog "You appear to have previously installed Audacity which altered your filesystem incorrectly. Ardour cannot run until this is corrected. To correct the error, type the following command into a Terminal window: chmod 755 /usr/local/lib" buttons["OK"]
+end tell'
+   exit 1
+fi
+
 # this needs to be set so that we can restore the environment when we want to find JACK (or similar)
 export PREBUNDLE_ENV="$(env)"
 
