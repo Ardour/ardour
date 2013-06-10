@@ -452,16 +452,6 @@ VideoMonitor::set_session (ARDOUR::Session *s)
   }
 }
 
-void
-VideoMonitor::clear_session_state ()
-{
-	xjadeo_settings.clear();
-	if (!_session) { return; }
-	XMLNode* node = new XMLNode(X_("XJSettings"));
-	_session->add_extra_xml (*node);
-	_session->set_dirty ();
-}
-
 bool
 VideoMonitor::set_custom_setting (const std::string k, const std::string v)
 {

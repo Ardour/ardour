@@ -61,7 +61,6 @@ class VideoMonitor : public sigc::trackable , public ARDOUR::SessionHandlePtr, p
 
 	void set_session (ARDOUR::Session *s);
 	void save_session ();
-	void clear_session_state ();
 	void query_full_state (bool);
 	bool set_custom_setting (const std::string, const std::string);
 	const std::string get_custom_setting (const std::string);

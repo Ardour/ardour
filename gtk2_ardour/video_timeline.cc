@@ -785,21 +785,6 @@ VideoTimeLine::terminated_video_monitor () {
 	}
 }
 
-/*
-void
-VideoTimeLine::clear_video_monitor_session_state ()
-{
-	if (vmonitor) {
-		vmonitor->clear_session_state();
-	} else {
-	  if (!_session) { return; }
-		XMLNode* node = new XMLNode(X_("XJSettings"));
-		_session->add_extra_xml (*node);
-		_session->set_dirty ();
-	}
-}
-*/
-
 void
 VideoTimeLine::manual_seek_video_monitor (framepos_t pos)
 {
