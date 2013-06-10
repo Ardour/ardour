@@ -200,7 +200,9 @@ void
 VideoMonitor::send_cmd (int what, int param)
 {
 	bool osd_update = false;
+	int prev_osdmode = osdmode;
 	if (!is_started()) return;
+	printf("VideoMonitor::send_cmd %d %d\n", what, param); fflush(stdout);
 	switch (what) {
 		case 1:
 			if (param) process->write_to_stdin("window ontop on\n");
@@ -209,17 +211,17 @@ VideoMonitor::send_cmd (int what, int param)
 		case 2:
 			if (param) osdmode |= 2;
 			else osdmode &= ~2;
-			osd_update = true;
+			osd_update = (prev_osdmode != osdmode);
 			break;
 		case 3:
 			if (param) osdmode |= 1;
 			else osdmode &= ~1;
-			osd_update = true;
+			osd_update = (prev_osdmode != osdmode);
 			break;
 		case 4:
 			if (param) osdmode |= 8;
 			else osdmode &= ~8;
-			osd_update = true;
+			osd_update = (prev_osdmode != osdmode);
 			break;
 		case 5:
 			if (param) process->write_to_stdin("window zoom on\n");
@@ -235,7 +237,7 @@ VideoMonitor::send_cmd (int what, int param)
 		default:
 			break;
 	}
-	if (osd_update >= 0) {
+	if (osd_update) {
 		std::ostringstream osstream; osstream << "osd mode " << osdmode << "\n";
 		process->write_to_stdin(osstream.str());
 	}
