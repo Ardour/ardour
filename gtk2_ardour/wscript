@@ -649,7 +649,7 @@ def build(bld):
     # Menus
     menus_argv = []
     if bld.is_defined('GTKOSX'):
-        menus_argv = [ '-E', '-P', '-DGTKOSX' ]
+        menus_argv = [ '-E', '-P', '-DGTKOSX', '-DNOVIDEOTIMELINE' ]
     else:
         menus_argv = [ '-E', '-P' ]
 

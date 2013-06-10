@@ -35,7 +35,7 @@
       <menuitem action='addExistingAudioFiles'/>
       <!--menuitem action='importFromSession'/-->
 
-#ifndef GTKOSX
+#ifndef NOVIDEOTIMELINE
       <menuitem action='OpenVideo'/>
       <menuitem action='CloseVideo'/>
 #endif
@@ -282,7 +282,7 @@
         <menuitem action='snap-regions-to-grid'/>
         <menuitem action='toggle-region-lock'/>
         <menuitem action='toggle-region-lock-style'/>
-#ifndef GTKOSX
+#ifndef NOVIDEOTIMELINE
         <menuitem action='toggle-region-video-lock'/>
 #endif
         <menuitem action='set-region-sync-position'/>
@@ -437,7 +437,7 @@
         <menuitem action="toggle-cd-marker-ruler"/>
         <menuitem action="toggle-marker-ruler"/>
         <separator/>
-#ifndef GTKOSX
+#ifndef NOVIDEOTIMELINE
         <menuitem action="toggle-video-ruler"/>
 #endif
       </menu>
@@ -557,7 +557,7 @@
     <menuitem action="toggle-marker-ruler"/>
     <menuitem action="toggle-cd-marker-ruler"/>
     <menuitem action="toggle-loop-punch-ruler"/>
-#ifndef GTKOSX
+#ifndef NOVIDEOTIMELINE
     <separator/>
     <menuitem action="toggle-video-ruler"/>
 #endif
@@ -656,7 +656,7 @@
       <menuitem action='naturalize-region'/>
       <menuitem action='toggle-region-lock'/>
       <menuitem action='toggle-region-lock-style'/>
-#ifndef GTKOSX
+#ifndef NOVIDEOTIMELINE
       <menuitem action='toggle-region-video-lock'/>
 #endif
       <menuitem action='snap-regions-to-grid'/>
