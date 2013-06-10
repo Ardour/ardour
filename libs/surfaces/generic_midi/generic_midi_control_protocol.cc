@@ -472,6 +472,8 @@ GenericMidiControlProtocol::get_state ()
 	node->add_property (X_("feedback"), do_feedback ? "1" : "0");
 	snprintf (buf, sizeof (buf), "%" PRIu64, _feedback_interval);
 	node->add_property (X_("feedback_interval"), buf);
+	snprintf (buf, sizeof (buf), "%d", _threshold);
+	node->add_property (X_("threshold"), buf);
 
 	if (!_current_binding.empty()) {
 		node->add_property ("binding", _current_binding);
@@ -516,6 +518,14 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 		}
 	} else {
 		_feedback_interval = 10000;
+	}
+
+	if ((prop = node.property ("threshold")) != 0) {
+		if (sscanf (prop->value().c_str(), "%d", &_threshold) != 1) {
+			_threshold = 10;
+		}
+	} else {
+		_threshold = 10;
 	}
 
 	boost::shared_ptr<Controllable> c;

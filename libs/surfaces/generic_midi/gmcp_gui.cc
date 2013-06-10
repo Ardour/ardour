@@ -90,7 +90,7 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 	, bank_adjustment (1, 1, 100, 1, 10)
 	, bank_spinner (bank_adjustment)
 	, motorised_button ("Motorised")
-	, threshold_adjustment (1, 1, 127, 1, 10)
+	, threshold_adjustment (p.threshold(), 1, 127, 1, 10)
 	, threshold_spinner (threshold_adjustment)
 {
 	vector<string> popdowns;
