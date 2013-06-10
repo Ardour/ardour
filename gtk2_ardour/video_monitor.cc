@@ -202,7 +202,6 @@ VideoMonitor::send_cmd (int what, int param)
 	bool osd_update = false;
 	int prev_osdmode = osdmode;
 	if (!is_started()) return;
-	printf("VideoMonitor::send_cmd %d %d\n", what, param); fflush(stdout);
 	switch (what) {
 		case 1:
 			if (param) process->write_to_stdin("window ontop on\n");
