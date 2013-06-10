@@ -423,6 +423,7 @@ VideoMonitor::save_session ()
 	if (!_session) { return; }
 	XMLNode* node = _session->extra_xml (X_("XJSettings"));
 	if (!node) return;
+	node->remove_nodes_and_delete("XJSetting");
 
 	for(XJSettings::const_iterator it = xjadeo_settings.begin(); it != xjadeo_settings.end(); ++it) {
 	  XMLNode* child = node->add_child (X_("XJSetting"));
