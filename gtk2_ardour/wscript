@@ -10,13 +10,10 @@ from waflib.Task import Task
 
 # Version of this package (even if built as a child)
 MAJOR = '3'
-MINOR = '0'
-MICRO = '0'
-GTK2_ARDOUR_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
+MINOR = '2'
 
 # Variables for 'waf dist'
-APPNAME = 'gtk2_ardour3'
-VERSION = GTK2_ARDOUR_VERSION
+VERSION = "%s.%s" % (MAJOR, MINOR)
 I18N_PACKAGE = 'gtk2_ardour3'
 
 # Mandatory variables
@@ -265,10 +262,11 @@ def options(opt):
 def configure(conf):
     conf.load('misc')
     conf.load('compiler_cxx')
+    # we don't use hard-coded micro versions with ardour, so hard code it to zero
     autowaf.build_version_files(
         path_prefix + 'version.h',
         path_prefix + 'version.cc',
-        'gtk2_ardour', MAJOR, MINOR, MICRO)
+        'gtk2_ardour', MAJOR, MINOR, 0)
     autowaf.configure(conf)
 
     if re.search ("linux", sys.platform) != None:

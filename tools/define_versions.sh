@@ -2,8 +2,10 @@
 # this is sourced by build and package, and executed from within build/{osx,linux}_packaging
 #
 
-release_version=`grep -m 1 '^VERSION = ' ../../wscript | awk '{print $3}' | sed "s/'//g"`
-r=`cut -d'"' -f2 < ../../libs/ardour/revision.cc | sed -e 1d -e "s/$release_version-//"`
+major_version=`grep -m 1 '^MAJOR = ' ../../wscript | awk '{print $3}' | sed "s/'//g"`
+minor_version=`grep -m 1 '^MINOR = ' ../../wscript | awk '{print $3}' | sed "s/'//g"`
+release_version=${major_version}.${minor_version}
+r=`cut -d'"' -f2 < ../../libs/ardour/revision.cc | sed -e 1d -e "s/[0-9][0-9]*\.[0-9][0-9]*-//"`
 if echo $r | grep -q -e - ; then
     revcount=`echo $r | cut -d- -f1`
 fi
