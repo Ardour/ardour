@@ -220,8 +220,7 @@ echo export 'PATH=/usr/local/bin:/opt/bin:$PATH' >> $ENVIRONMENT
 
 sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' -e 's/%VER%/'"${release_version}"'/' < ardour.sh.in > $APPBIN/ardour3
 rm $ENVIRONMENT && chmod 775 $APPBIN/ardour3
-# the 3.0 here is not the same as "release-version" because the latter may include "-betaN" etc.
-MAIN_EXECUTABLE=ardour-3.0
+MAIN_EXECUTABLE=ardour-${release_version}
 
 echo "Copying ardour executable ...."
 cp $BUILD_ROOT/gtk2_ardour/$MAIN_EXECUTABLE $APPBIN
