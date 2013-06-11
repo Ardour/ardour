@@ -53,9 +53,9 @@ sed "s?@ROOTDIR@/loaders?$LIB_DIR/loaders?" < $ETC_DIR/gdk-pixbuf.loaders.in > $
 
 if [ "T" = "$DEBUG" ]; then
 	export ARDOUR_INSIDE_GDB=1
-	exec gdb $INSTALL_DIR/bin/ardour-3.0
+	exec gdb $INSTALL_DIR/bin/ardour-%VER%
 else
-	exec $INSTALL_DIR/bin/ardour-3.0 $ARGS
+	exec $INSTALL_DIR/bin/ardour-%VER% $ARGS
 fi
 
 
