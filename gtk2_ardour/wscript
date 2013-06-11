@@ -8,12 +8,6 @@ import re
 import time
 from waflib.Task import Task
 
-# Version of this package (even if built as a child)
-MAJOR = '3'
-MINOR = '2'
-
-# Variables for 'waf dist'
-VERSION = "%s.%s" % (MAJOR, MINOR)
 I18N_PACKAGE = 'gtk2_ardour3'
 
 # Mandatory variables
@@ -266,7 +260,7 @@ def configure(conf):
     autowaf.build_version_files(
         path_prefix + 'version.h',
         path_prefix + 'version.cc',
-        'gtk2_ardour', MAJOR, MINOR, 0)
+        'gtk2_ardour', conf.env['MAJOR'], conf.env['MINOR'], 0)
     autowaf.configure(conf)
 
     if re.search ("linux", sys.platform) != None:
@@ -363,6 +357,8 @@ def build_color_scheme(path, prefix):
     return color_scheme
 
 def build(bld):
+
+    VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
 
     if bld.is_defined('WINDOWS_VST_SUPPORT'):
         # If we require VST support we build a stub main() and the FST library

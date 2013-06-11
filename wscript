@@ -7,9 +7,11 @@ import string
 import subprocess
 import sys
 
-VERSION = '3.1'
+MAJOR = '3'
+MINOR = '1'
+VERSION = MAJOR + '.' + MINOR
 
-APPNAME = 'Ardour3'
+APPNAME = 'Ardour' + MAJOR
 
 # Mandatory variables
 top = '.'
@@ -461,6 +463,8 @@ def configure(conf):
     conf.load('compiler_c')
     conf.load('compiler_cxx')
     conf.env['VERSION'] = VERSION
+    conf.env['MAJOR'] = MAJOR
+    conf.env['MINOR'] = MINOR
     conf.line_just = 52
     autowaf.set_recursive()
     autowaf.configure(conf)
