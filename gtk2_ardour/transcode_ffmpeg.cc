@@ -114,7 +114,19 @@ TranscodeFfmpeg::probe ()
 		ffexit();
 		return false;
 	}
+
+	/* wait for ffprobe process to exit */
 	ffcmd->wait();
+
+	/* wait for interposer thread to copy all data.
+	 * SystemExec::Terminated is emitted and ffcmd set to NULL */
+	int timeout = 300; // 1.5 sec
+	while (ffcmd && --timeout > 0) {
+		usleep(5000);
+	}
+	if (timeout == 0 || ffoutput.empty()) {
+		return false;
+	}
 
 	/* parse */
 
@@ -230,11 +242,6 @@ TranscodeFfmpeg::probe ()
 		}
 	}
 	/* end parse */
-
-
-	int timeout = 500;
-	while (ffcmd && --timeout) usleep (1000); // wait until 'ffprobe' terminated.
-	if (timeout == 0) return false;
 
 #if 0 /* DEBUG */
 	printf("FPS: %f\n", m_fps);
