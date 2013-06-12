@@ -925,6 +925,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Glib::RefPtr<Gtk::Action> xjadeo_zoom_100;
 	void set_xjadeo_proc ();
 	void toggle_xjadeo_proc (int state=-1);
+	void set_close_video_sensitive (bool onoff);
 	void set_xjadeo_sensitive (bool onoff);
 	void set_xjadeo_viewoption (int);
 	void toggle_xjadeo_viewoption (int what, int state=-1);

@@ -3559,6 +3559,8 @@ ARDOUR_UI::remove_video ()
 	node = new XMLNode(X_("Videomonitor"));
 	_session->add_extra_xml(*node);
 	stop_video_server();
+
+	editor->set_close_video_sensitive(false);
 }
 
 void

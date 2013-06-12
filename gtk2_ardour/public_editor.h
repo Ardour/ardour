@@ -296,6 +296,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
         virtual void edit_notes (TimeAxisViewItem&) = 0;
 
 	virtual void queue_visual_videotimeline_update () = 0;
+	virtual void set_close_video_sensitive (bool) = 0;
 	virtual void toggle_ruler_video (bool) = 0;
 	virtual void toggle_xjadeo_proc (int) = 0;
 	virtual void toggle_xjadeo_viewoption (int, int) = 0;

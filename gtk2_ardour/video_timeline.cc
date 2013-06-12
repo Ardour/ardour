@@ -465,6 +465,7 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 			video_server_url, translated_filename(),
 			video_file_fps, _duration, _start_offset, video_aspect_ratio)) {
 		warning << _("Parsing video file info failed. Is the Video Server running? Is the file readable by the Video Server? Does the docroot match? Is it a video file?") << endmsg;
+		GuiUpdate("video-unavailable");
 		return false;
 	}
 	video_duration = _duration * _session->nominal_frame_rate() / video_file_fps;
@@ -531,6 +532,7 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 #endif
 	}
 	VtlUpdate();
+	GuiUpdate("video-available");
 	return true;
 }
 
@@ -591,6 +593,10 @@ VideoTimeLine::gui_update(std::string const & t) {
 		editor->toggle_xjadeo_viewoption(6, 1);
 	} else if (t == "xjadeo-window-letterbox-off") {
 		editor->toggle_xjadeo_viewoption(6, 0);
+	} else if (t == "video-available") {
+		editor->set_close_video_sensitive(true);
+	} else if (t == "video-unavailable") {
+		editor->set_close_video_sensitive(false);
 	}
 }
 

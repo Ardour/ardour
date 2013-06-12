@@ -774,6 +774,15 @@ Editor::set_group_tabs ()
 }
 
 void
+Editor::set_close_video_sensitive (bool onoff)
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Main"), X_("CloseVideo"));
+	if (act) {
+		act->set_sensitive (onoff);
+	}
+}
+
+void
 Editor::set_xjadeo_sensitive (bool onoff)
 {
 	xjadeo_proc_action->set_sensitive(onoff);

@@ -137,7 +137,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (main_actions, X_("CloseVideo"), _("Remove Video"),
 					      sigc::mem_fun (*this, &ARDOUR_UI::remove_video));
-	ActionManager::session_sensitive_actions.push_back (act);
+	act->set_sensitive (false);
 	act = ActionManager::register_action (main_actions, X_("ExportVideo"), _("Export To Video File"),
 					      sigc::mem_fun (*editor, &PublicEditor::export_video));
 	ActionManager::session_sensitive_actions.push_back (act);
