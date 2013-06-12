@@ -86,6 +86,7 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 
 	bool found_xjadeo () { return ((_xjadeo_bin.empty())?false:true); }
 	bool check_server ();
+	bool check_server_docroot ();
 	void flush_local_cache ();
 	void vmon_update ();
 	void flush_cache ();

@@ -553,6 +553,39 @@ VideoTimeLine::check_server ()
 	return ok;
 }
 
+bool
+VideoTimeLine::check_server_docroot ()
+{
+	bool ok = true;
+	char url[1024];
+	std::vector<std::vector<std::string> > lines;
+
+	if (video_server_url.find("/localhost:") == string::npos) {
+		return true;
+	}
+	snprintf(url, sizeof(url), "%s%src?format=csv"
+			, video_server_url.c_str()
+			, (video_server_url.length()>0 && video_server_url.at(video_server_url.length()-1) == '/')?"":"/"
+			);
+	char *res=curl_http_get(url, NULL);
+	if (!res) {
+		return false;
+	}
+
+	ParseCSV(std::string(res), lines);
+	if (   lines.empty()
+			|| lines.at(0).empty()
+			|| lines.at(0).at(0) != video_get_docroot(Config)) {
+		warning << string_compose(
+				_("Video-server docroot mismatch. Ardour: '%1', video-server: '%2'. This usually means that the video server was not started by ardour and uses a different document-root."),
+				video_get_docroot(Config), lines.at(0).at(0))
+		<< endmsg;
+		ok = false; // TODO allow to override
+	}
+	free(res);
+	return ok;
+}
+
 void
 VideoTimeLine::gui_update(std::string const & t) {
 	/* this is to be called via GuiUpdate() only. */

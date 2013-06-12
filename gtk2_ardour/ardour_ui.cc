@@ -3439,6 +3439,11 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 		}
 		if (timeout <= 0) {
 			warning << _("Video-server was started but does not respond to requests...") << endmsg;
+		} else {
+			if (!ARDOUR_UI::instance()->video_timeline->check_server_docroot()) {
+				delete video_server_process;
+				video_server_process = 0;
+			}
 		}
 	}
 	return true;
