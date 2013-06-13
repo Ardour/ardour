@@ -124,6 +124,7 @@ VideoTimeLine::close_session ()
 	video_filename = "";
 	video_duration = 0;
 	GuiUpdate("set-xjadeo-sensitive-off");
+	GuiUpdate("video-unavailable");
 }
 
 void
@@ -465,6 +466,8 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 			video_server_url, translated_filename(),
 			video_file_fps, _duration, _start_offset, video_aspect_ratio)) {
 		warning << _("Parsing video file info failed. Is the Video Server running? Is the file readable by the Video Server? Does the docroot match? Is it a video file?") << endmsg;
+		video_duration = 0;
+		GuiUpdate("set-xjadeo-sensitive-off");
 		GuiUpdate("video-unavailable");
 		return false;
 	}
