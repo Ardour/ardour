@@ -475,6 +475,7 @@ rm -rf $PRODUCT_PKG_DIR
 mkdir $PRODUCT_PKG_DIR
 
 DMGWINBOTTOM=440
+DMGBACKGROUND=dmgbg.png
 
 if [ x$SAE != x ] ; then
 	
@@ -493,8 +494,9 @@ elif [ x$MIXBUS != x ] ; then
     echo "Creating Mixbus packaging directory"
     mv $APPDIR $PRODUCT_PKG_DIR/
     cp MixBus_Install_QuickStart.pdf "$PRODUCT_PKG_DIR/Mixbus Install & Quick Start Guide.pdf"
-		DMGWINBOTTOM=$[ $DMGWINBOTTOM + 100 ]
-		MIXBUSPOS="set position of item \"MixBus_Install_QuickStart.pdf\" of container window to {90, 180}"
+		DMGWINBOTTOM=580
+		YPOS=$[ $DMGWINBOTTOM - 300 ]
+		MIXBUSPOS="set position of item \"MixBus_Install_QuickStart.pdf\" of container window to {90, ${YPOS}}"
 else 
 
     echo "Creating $APPNAME packaging directory"
@@ -511,9 +513,18 @@ if test x$WITH_HARVID != x ; then
   curl -L -o "$PRODUCT_PKG_DIR/xjadeo-${XJADEO_VERSION:1}.dmg" "http://sourceforge.net/projects/xjadeo/files/xjadeo/${XJADEO_VERSION}/jadeo-${XJADEO_VERSION:1}.dmg/download"
   curl -L "http://ardour.org/files/video-tools/harvid-osx-${HARVID_VERSION}.tgz"\
 		| tar -x -z -C $PRODUCT_PKG_DIR/$APPROOT
-	DMGWINBOTTOM=$[ $DMGWINBOTTOM + 140 ]
+
+	ls -l "$PRODUCT_PKG_DIR/xjadeo-${XJADEO_VERSION:1}.dmg"
+	JADEO=$(hdiutil attach "$PRODUCT_PKG_DIR/xjadeo-${XJADEO_VERSION:1}.dmg" | grep Apple_HFS | grep dev/ | cut -f 3)
+	cp -r "${JADEO}/Jadeo.app" "$PRODUCT_PKG_DIR/"
+	hdiutil detach "${JADEO}"
+	rm "$PRODUCT_PKG_DIR/xjadeo-${XJADEO_VERSION:1}.dmg"
+
+	DMGWINBOTTOM=580
 	YPOS=$[ $DMGWINBOTTOM - 300 ]
-	XJADEOPOS="set position of item \"xjadeo-${XJADEO_VERSION:1}.dmg\" of container window to {90, ${YPOS}}"
+	XJADEOPOS="set position of item \"Jadeo.app\" of container window to {310, ${YPOS}}"
+
+	DMGBACKGROUND=dmgbgxj.png
 fi
 
 echo "Building DMG ..."
@@ -546,7 +557,7 @@ mount -t hfs "${DiskDevice}" "${MNTPATH}"
 
 cp -r ${PRODUCT_PKG_DIR}/* "${MNTPATH}" || exit
 mkdir "${MNTPATH}/.background"
-cp -vi dmgbg.png "${MNTPATH}/.background/dmgbg.png"
+cp -vi ${DMGBACKGROUND} "${MNTPATH}/.background/dmgbg.png"
 
 echo "setting DMG background ..."
 
