@@ -346,10 +346,10 @@ VideoTimeLine::update_video_timeline()
 	assert (vtl_dist > 0);
 	assert (apv > 0);
 
-	leftmost_video_frame = floor (floor((leftmost_frame - video_start_offset - video_offset ) / vtl_dist) * vtl_dist / apv);
+	leftmost_video_frame = floor (floor((leftmost_sample - video_start_offset - video_offset ) / vtl_dist) * vtl_dist / apv);
 
 	vtl_start = rint (video_offset + video_start_offset + leftmost_video_frame * apv);
-	visible_video_frames = 2 + ceil(editor->current_page_frames() / vtl_dist); /* +2 left+right partial frames */
+	visible_video_frames = 2 + ceil(editor->current_page_samples() / vtl_dist); /* +2 left+right partial frames */
 
 	/* expand timeline (cache next/prev page images) */
 	vtl_start -= visible_video_frames * vtl_dist;
