@@ -25,12 +25,12 @@
 #include "system_exec.h"
 
 /* TODO: use a namespace here ? */
-struct AudioStream {
+struct FFAudioStream {
 	std::string name;
 	std::string stream_id;
 	uint32_t channels;
 };
-typedef std::vector<AudioStream> AudioStreams;
+typedef std::vector<FFAudioStream> AudioStreams;
 typedef std::map<std::string,std::string> FFSettings;
 
 /** @class TranscodeFfmpeg

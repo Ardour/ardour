@@ -211,7 +211,7 @@ TranscodeFfmpeg::probe ()
 				}
 
 			} else if (i->at(5) == X_("codec_type=audio")) { /* new ffprobe */
-				AudioStream as;
+				FFAudioStream as;
 				for (std::vector<std::string>::iterator kv = i->begin(); kv != i->end(); ++kv) {
 					const size_t kvsep = kv->find('=');
 					if(kvsep == std::string::npos) continue;
