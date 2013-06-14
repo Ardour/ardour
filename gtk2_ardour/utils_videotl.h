@@ -53,4 +53,8 @@ bool video_query_info (
 		double &video_aspect_ratio
 		);
 
+extern "C" {
+	char *curl_http_get (const char *u, int *status);
+}
+
 #endif /* __gtk_ardour_video_utils_h__ */
