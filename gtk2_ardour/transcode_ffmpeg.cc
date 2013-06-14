@@ -23,7 +23,7 @@
 #include <sys/types.h>
 
 #include "pbd/error.h"
-#include "pbd/file_utils.h"
+#include "pbd/convert.h"
 #include "pbd/file_utils.h"
 #include "gui_thread.h"
 
@@ -31,6 +31,8 @@
 #include "utils_videotl.h"
 
 #include "i18n.h"
+
+using namespace PBD;
 
 TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 	: infile(f)
@@ -48,7 +50,7 @@ TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 #endif
 
 	std::string ff_file_path;
-	if (find_file_in_search_path (PBD::SearchPath(Glib::getenv("PATH")), X_("ffmpeg_harvid"), ff_file_path)) { ffmpeg_exe = ff_file_path; }
+	if (find_file_in_search_path (SearchPath(Glib::getenv("PATH")), X_("ffmpeg_harvid"), ff_file_path)) { ffmpeg_exe = ff_file_path; }
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\ffmpeg.exe"), Glib::FILE_TEST_EXISTS)) {
 		ffmpeg_exe = X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe");
 	}
@@ -56,7 +58,7 @@ TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 		ffmpeg_exe = X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe");
 	}
 
-	if (find_file_in_search_path (PBD::SearchPath(Glib::getenv("PATH")), X_("ffprobe_harvid"), ff_file_path)) { ffprobe_exe = ff_file_path; }
+	if (find_file_in_search_path (SearchPath(Glib::getenv("PATH")), X_("ffprobe_harvid"), ff_file_path)) { ffprobe_exe = ff_file_path; }
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\ffprobe.exe"), Glib::FILE_TEST_EXISTS)) {
 		ffprobe_exe = X_("C:\\Program Files\\ffmpeg\\ffprobe.exe");
 	}
@@ -65,7 +67,7 @@ TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 	}
 
 	if (ffmpeg_exe.empty() || ffprobe_exe.empty()) {
-		PBD::warning << _(
+		warning << _(
 				"No ffprobe or ffmpeg executables could be found on this system.\n"
 				"Video import and export is not possible until you install those tools.\n"
 				"Ardour requires ffmpeg and ffprobe from ffmpeg.org - version 1.1 or newer.\n"
@@ -112,7 +114,19 @@ TranscodeFfmpeg::probe ()
 		ffexit();
 		return false;
 	}
+
+	/* wait for ffprobe process to exit */
 	ffcmd->wait();
+
+	/* wait for interposer thread to copy all data.
+	 * SystemExec::Terminated is emitted and ffcmd set to NULL */
+	int timeout = 300; // 1.5 sec
+	while (ffcmd && --timeout > 0) {
+		usleep(5000);
+	}
+	if (timeout == 0 || ffoutput.empty()) {
+		return false;
+	}
 
 	/* parse */
 
@@ -128,10 +142,10 @@ TranscodeFfmpeg::probe ()
 #define PARSE_FRACTIONAL_FPS(VAR) \
 	{ \
 		std::string::size_type pos; \
-		VAR = atof(value.c_str()); \
+		VAR = atof(value); \
 		pos = value.find_first_of('/'); \
 		if (pos != std::string::npos) { \
-			VAR = atof(value.substr(0, pos).c_str()) / atof(value.substr(pos+1).c_str()); \
+			VAR = atof(value.substr(0, pos)) / atof(value.substr(pos+1)); \
 		} \
 	}
 
@@ -149,11 +163,11 @@ TranscodeFfmpeg::probe ()
 					std::string value = kv->substr(kvsep + 1);
 
 					if (key == X_("index")) {
-						m_videoidx = atoi(value.c_str());
+						m_videoidx = atoi(value);
 					} else if (key == X_("width")) {
-						m_width = atoi(value.c_str());
+						m_width = atoi(value);
 					} else if (key == X_("height")) {
-						m_height = atoi(value.c_str());
+						m_height = atoi(value);
 					} else if (key == X_("codec_name")) {
 						if (!m_codec.empty()) m_codec += " ";
 						m_codec += value;
@@ -180,14 +194,14 @@ TranscodeFfmpeg::probe ()
 							));
 						}
 					} else if (key == X_("duration_ts") && m_fps == 0 && timebase !=0 ) {
-						m_duration = atof(value.c_str()) * m_fps * timebase;
+						m_duration = atof(value) * m_fps * timebase;
 					} else if (key == X_("duration") && m_fps != 0 && m_duration == 0) {
-						m_duration = atof(value.c_str()) * m_fps;
+						m_duration = atof(value) * m_fps;
 					} else if (key == X_("display_aspect_ratio")) {
 						std::string::size_type pos;
 						pos = value.find_first_of(':');
-						if (pos != std::string::npos && atof(value.substr(pos+1).c_str()) != 0) {
-							m_aspect = atof(value.substr(0, pos).c_str()) / atof(value.substr(pos+1).c_str());
+						if (pos != std::string::npos && atof(value.substr(pos+1)) != 0) {
+							m_aspect = atof(value.substr(0, pos)) / atof(value.substr(pos+1));
 						}
 					}
 				}
@@ -205,7 +219,7 @@ TranscodeFfmpeg::probe ()
 					std::string value = kv->substr(kvsep + 1);
 
 					if (key == X_("channels")) {
-						as.channels   = atoi(value.c_str());
+						as.channels   = atoi(value);
 					} else if (key == X_("index")) {
 						as.stream_id  = value;
 					} else if (key == X_("codec_long_name")) {
@@ -228,11 +242,6 @@ TranscodeFfmpeg::probe ()
 		}
 	}
 	/* end parse */
-
-
-	int timeout = 500;
-	while (ffcmd && --timeout) usleep (1000); // wait until 'ffprobe' terminated.
-	if (timeout == 0) return false;
 
 #if 0 /* DEBUG */
 	printf("FPS: %f\n", m_fps);
@@ -542,7 +551,7 @@ void
 TranscodeFfmpeg::ffmpegparse_v (std::string d, size_t /* s */)
 {
 	if (strstr(d.c_str(), "ERROR") || strstr(d.c_str(), "Error") || strstr(d.c_str(), "error")) {
-		PBD::warning << "ffmpeg-error: " << d << endmsg;
+		warning << "ffmpeg-error: " << d << endmsg;
 	}
 	if (strncmp(d.c_str(), "frame=",6)) {
 #if 1 /* DEBUG */
@@ -554,7 +563,7 @@ TranscodeFfmpeg::ffmpegparse_v (std::string d, size_t /* s */)
 		Progress(0, 0); /* EMIT SIGNAL */
 		return;
 	}
-	ARDOUR::framecnt_t f = atol(d.substr(6).c_str());
+	ARDOUR::framecnt_t f = atol(d.substr(6));
 	if (f == 0) {
 		Progress(0, 0); /* EMIT SIGNAL */
 	} else {

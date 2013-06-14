@@ -141,20 +141,20 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	vbox->pack_start (*path_hbox, false, false, 2);
 
 	insnd_combo.set_name ("PaddedButton");
-	insnd_combo.append_text("from ardour session-start to session-end");
+	insnd_combo.append_text (string_compose (_("from the %1 session's start to the session's end"), PROGRAM_NAME));
 
 	frameoffset_t av_offset = ARDOUR_UI::instance()->video_timeline->get_offset();
 	if (av_offset < 0 ) {
-		insnd_combo.append_text("from 00:00:00:00 to video-end");
+		insnd_combo.append_text (_("from 00:00:00:00 to the video's end"));
 	} else {
-		insnd_combo.append_text("from video-start to video-end");
+		insnd_combo.append_text (_("from the video's start to the video's end"));
 	}
 	insnd_combo.set_active(0);
 
 	outfn_path_entry.set_width_chars(38);
 	outfn_path_entry.set_text (_session->session_directory().export_path() + G_DIR_SEPARATOR +"export.avi");
 
-	XMLNode* node = _session->extra_xml (X_("Videotimeline"));
+	XMLNode* node = _session->extra_xml (X_("Video Timeline"));
 	if (node && node->property(X_("Filename"))) {
 		std::string filename = node->property(X_("Filename"))->value();
 		if (filename.at(0) != G_DIR_SEPARATOR) {
@@ -416,7 +416,7 @@ ExportVideoDialog::launch_export ()
 	cancel_button->hide();
 	transcode_button.hide();
 	pbar.set_size_request(300,-1);
-	pbar.set_text(_("Exporting Audio.."));
+	pbar.set_text(_("Exporting Audio..."));
 	progress_box->show();
 	aborted = false;
 	twopass = twopass_checkbox.get_active();
@@ -541,7 +541,7 @@ ExportVideoDialog::launch_export ()
 		Gtk::Dialog::response(RESPONSE_CANCEL);
 		return;
 	}
-	pbar.set_text (_("Encoding Video.."));
+	pbar.set_text (_("Encoding Video..."));
 	encode_pass(1);
 }
 

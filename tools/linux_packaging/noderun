@@ -11,10 +11,10 @@ fi
 
 cd $BASE || exit 1
 git pull || exit 1
-./waf configure $* --strict --backtrace --noconfirm --also-libdir=$HOME/a3/inst/lib --also-include=$HOME/gtk/inst/include || exit 1
+./waf configure $* --strict --noconfirm --also-libdir=$HOME/a3/inst/lib --also-include=$HOME/gtk/inst/include || exit 1
 ./waf || exit 1
 cd tools/linux_packaging || exit 1
-./build --public --strip some || exit 1
+./build --public --harvid --strip some || exit 1
 ./package --public --singlearch || exit 1
 file=`ls -t *.tar`
 echo "Copying $file to shared folder ..."

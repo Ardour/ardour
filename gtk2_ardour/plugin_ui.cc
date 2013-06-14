@@ -565,9 +565,14 @@ PlugUIBase::preset_selected ()
 	}
 }
 
+#ifdef NO_PLUGIN_STATE
+static bool seen_saving_message = false;
+#endif
+
 void
 PlugUIBase::add_plugin_setting ()
 {
+#ifndef NO_PLUGIN_STATE
 	NewPluginPresetDialog d (plugin);
 
 	switch (d.run ()) {
@@ -586,23 +591,49 @@ PlugUIBase::add_plugin_setting ()
 		}
 		break;
 	}
+#else 
+	if (!seen_saving_message) {
+		info << string_compose (_("Plugin presets are not supported in this build of %1. Consider paying for a full version"),
+					PROGRAM_NAME)
+		     << endmsg;
+		seen_saving_message = true;
+	}
+#endif
 }
 
 void
 PlugUIBase::save_plugin_setting ()
 {
+#ifndef NO_PLUGIN_STATE
 	string const name = _preset_combo.get_active_text ();
 	plugin->remove_preset (name);
 	Plugin::PresetRecord const r = plugin->save_preset (name);
 	if (!r.uri.empty ()) {
 		plugin->load_preset (r);
 	}
+#else 
+	if (!seen_saving_message) {
+		info << string_compose (_("Plugin presets are not supported in this build of %1. Consider paying for a newer version"),
+					PROGRAM_NAME)
+		     << endmsg;
+		seen_saving_message = true;
+	}
+#endif
 }
 
 void
 PlugUIBase::delete_plugin_setting ()
 {
+#ifndef NO_PLUGIN_STATE
 	plugin->remove_preset (_preset_combo.get_active_text ());
+#else
+	if (!seen_saving_message) {
+		info << string_compose (_("Plugin presets are not supported in this build of %1. Consider paying for a newer version"),
+					PROGRAM_NAME)
+		     << endmsg;
+		seen_saving_message = true;
+	}
+#endif
 }
 
 bool

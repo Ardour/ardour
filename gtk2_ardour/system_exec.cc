@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2010 Paul Davis
+    Copyright 2005-2008 Lennart Poettering
     Author: Robin Gareus <robin@gareus.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -23,6 +24,9 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include <assert.h>
+#include <dirent.h>
+
 #ifdef __WIN32__
 #include <windows.h>
 #else
@@ -31,14 +35,115 @@
 #include <sys/wait.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 #endif
+
 
 #include "system_exec.h"
 
 using namespace std;
 void * interposer_thread (void *arg);
 
-static void close_fd (int* fd) { if (!fd) return; if (*fd >= 0) ::close (*fd); *fd = -1; }
+static void close_fd (int& fd) { if (fd >= 0) ::close (fd); fd = -1; }
+
+#ifndef __WIN32__
+/*
+ * This function was part of libasyncns.
+ * LGPL v2.1
+ * Copyright 2005-2008 Lennart Poettering
+ */
+static int close_allv(const int except_fds[]) {
+	struct rlimit rl;
+	int fd;
+
+#ifdef __linux__
+
+	DIR *d;
+
+	assert(except_fds);
+
+	if ((d = opendir("/proc/self/fd"))) {
+		struct dirent *de;
+
+		while ((de = readdir(d))) {
+			int found;
+			long l;
+			char *e = NULL;
+			int i;
+
+			if (de->d_name[0] == '.')
+					continue;
+
+			errno = 0;
+			l = strtol(de->d_name, &e, 10);
+			if (errno != 0 || !e || *e) {
+				closedir(d);
+				errno = EINVAL;
+				return -1;
+			}
+
+			fd = (int) l;
+
+			if ((long) fd != l) {
+				closedir(d);
+				errno = EINVAL;
+				return -1;
+			}
+
+			if (fd < 3)
+				continue;
+
+			if (fd == dirfd(d))
+				continue;
+
+			found = 0;
+			for (i = 0; except_fds[i] >= 0; i++)
+				if (except_fds[i] == fd) {
+						found = 1;
+						break;
+				}
+
+			if (found) continue;
+
+			if (close(fd) < 0) {
+				int saved_errno;
+
+				saved_errno = errno;
+				closedir(d);
+				errno = saved_errno;
+
+				return -1;
+			}
+		}
+
+		closedir(d);
+		return 0;
+	}
+
+#endif
+
+	if (getrlimit(RLIMIT_NOFILE, &rl) < 0)
+		return -1;
+
+	for (fd = 0; fd < (int) rl.rlim_max; fd++) {
+		int i;
+
+		if (fd <= 3)
+				continue;
+
+		for (i = 0; except_fds[i] >= 0; i++)
+			if (except_fds[i] == fd)
+				continue;
+
+		if (close(fd) < 0 && errno != EBADF)
+			return -1;
+	}
+
+	return 0;
+}
+#endif /* not on windows */
+
 
 SystemExec::SystemExec (std::string c, std::string a)
 	: cmd(c)
@@ -510,18 +615,18 @@ SystemExec::start (int stderr_mode)
 		pid=r;
 
 		/* check if execve was successful. */
-		close_fd(&pok[1]);
+		close_fd(pok[1]);
 		char buf;
 		for ( ;; ) {
 			ssize_t n = ::read(pok[0], &buf, 1 );
 			if ( n==1 ) {
 				/* child process returned from execve */
 				pid=0;
-				close_fd(&pok[0]);
-				close_fd(&pin[1]);
-				close_fd(&pin[0]);
-				close_fd(&pout[1]);
-				close_fd(&pout[0]);
+				close_fd(pok[0]);
+				close_fd(pin[1]);
+				close_fd(pin[0]);
+				close_fd(pout[1]);
+				close_fd(pout[0]);
 				pin[1] = -1;
 				return -3;
 			} else if ( n==-1 ) {
@@ -530,7 +635,7 @@ SystemExec::start (int stderr_mode)
 			}
 			break;
 		}
-		close_fd(&pok[0]);
+		close_fd(pok[0]);
 		/* child started successfully */
 
 #if 0
@@ -546,17 +651,17 @@ SystemExec::start (int stderr_mode)
 		}
 		if (r == 0) {
 			/* 2nd child process - catch stdout */
-			close_fd(&pin[1]);
-			close_fd(&pout[1]);
+			close_fd(pin[1]);
+			close_fd(pout[1]);
 			output_interposer();
 			exit(0);
 		}
-		close_fd(&pout[1]);
-		close_fd(&pin[0]);
-		close_fd(&pout[0]);
+		close_fd(pout[1]);
+		close_fd(pin[0]);
+		close_fd(pout[0]);
 #else /* use pthread */
-		close_fd(&pout[1]);
-		close_fd(&pin[0]);
+		close_fd(pout[1]);
+		close_fd(pin[0]);
 		int rv = pthread_create(&thread_id_tt, NULL, interposer_thread, this);
 
 		thread_active=true;
@@ -570,15 +675,15 @@ SystemExec::start (int stderr_mode)
 	}
 
 	/* child process - exec external process */
-	close_fd(&pok[0]);
+	close_fd(pok[0]);
 	::fcntl(pok[1], F_SETFD, FD_CLOEXEC);
 
-	close_fd(&pin[1]);
+	close_fd(pin[1]);
 	if (pin[0] != STDIN_FILENO) {
 	  ::dup2(pin[0], STDIN_FILENO);
 	}
-	close_fd(&pin[0]);
-	close_fd(&pout[0]);
+	close_fd(pin[0]);
+	close_fd(pout[0]);
 	if (pout[1] != STDOUT_FILENO) {
 		::dup2(pout[1], STDOUT_FILENO);
 	}
@@ -596,7 +701,7 @@ SystemExec::start (int stderr_mode)
 	}
 
 	if (pout[1] != STDOUT_FILENO && pout[1] != STDERR_FILENO) {
-		close_fd(&pout[1]);
+		close_fd(pout[1]);
 	}
 
 	if (nicelevel !=0) {
@@ -619,11 +724,16 @@ SystemExec::start (int stderr_mode)
 	signal(SIGPIPE, SIG_DFL);
 #endif
 
+#ifndef __WIN32__
+	int good_fds[1] = { 0 };
+	close_allv(good_fds);
+#endif
+
 	::execve(argp[0], argp, envp);
 	/* if we reach here something went wrong.. */
 	char buf = 0;
 	(void) ::write(pok[1], &buf, 1 );
-	close_fd(&pok[1]);
+	close_fd(pok[1]);
 	exit(-1);
 	return -1;
 }
@@ -658,10 +768,10 @@ void
 SystemExec::close_stdin()
 {
 	if (pin[1]<0) return;
-	close_fd(&pin[0]);
-	close_fd(&pin[1]);
-	close_fd(&pout[0]);
-	close_fd(&pout[1]);
+	close_fd(pin[0]);
+	close_fd(pin[1]);
+	close_fd(pout[0]);
+	close_fd(pout[1]);
 }
 
 int

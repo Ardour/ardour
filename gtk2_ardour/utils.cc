@@ -310,6 +310,35 @@ forward_key_press (GdkEventKey* ev)
 }
 
 bool
+emulate_key_event (Gtk::Widget* w, unsigned int keyval)
+{
+	GdkDisplay  *display = gtk_widget_get_display (GTK_WIDGET(w->gobj()));
+	GdkKeymap   *keymap  = gdk_keymap_get_for_display (display);
+	GdkKeymapKey *keymapkey = NULL;
+	gint n_keys;
+
+	if (!gdk_keymap_get_entries_for_keyval(keymap, keyval, &keymapkey, &n_keys)) return false;
+	if (n_keys !=1) { g_free(keymapkey); return false;}
+
+	GdkEventKey ev;
+	ev.type = GDK_KEY_PRESS;
+	ev.window = gtk_widget_get_window(GTK_WIDGET(w->gobj()));
+	ev.send_event = FALSE;
+	ev.time = 0;
+	ev.state = 0;
+	ev.keyval = keyval;
+	ev.length = 0;
+	ev.string = (gchar*) "";
+	ev.hardware_keycode = keymapkey[0].keycode;
+	ev.group = keymapkey[0].group;
+	g_free(keymapkey);
+
+	forward_key_press(&ev);
+	ev.type = GDK_KEY_RELEASE;
+	return forward_key_press(&ev);
+}
+
+bool
 key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 {
 	GtkWindow* win = window.gobj();
@@ -441,6 +470,8 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 		/* no special handling or there are modifiers in effect: accelerate first */
 
                 DEBUG_TRACE (DEBUG::Accelerators, "\tactivate, then propagate\n");
+		DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tevent send-event:%1 time:%2 length:%3 string:%4 hardware_keycode:%5 group:%6\n",
+					ev->send_event, ev->time, ev->length, ev->string, ev->hardware_keycode, ev->group));
 
 		if (allow_activating) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\tsending to window\n");
