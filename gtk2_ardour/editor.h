@@ -188,14 +188,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_internal_edit (bool yn);
 	bool toggle_internal_editing_from_double_click (GdkEvent*);
 
-#ifdef WITH_CMT
-	void add_imageframe_time_axis(const std::string & track_name, void*) ;
-	void add_imageframe_marker_time_axis(const std::string & track_name, TimeAxisView* marked_track, void*) ;
-	void connect_to_image_compositor() ;
-	void scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item) ;
-	TimeAxisView* get_named_time_axis(const std::string & name) ;
-#endif /* WITH_CMT */
-
 	void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>);
 	void add_to_idle_resize (TimeAxisView*, int32_t);
 
@@ -1454,15 +1446,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void queue_visual_videotimeline_update ();
 	void embed_audio_from_video (std::string, framepos_t n = 0);
 
-	bool canvas_imageframe_item_view_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameView*);
-	bool canvas_imageframe_view_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameTimeAxis*);
-	bool canvas_imageframe_start_handle_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameView*);
-	bool canvas_imageframe_end_handle_event(GdkEvent* event, ArdourCanvas::Item*,ImageFrameView*);
-	bool canvas_marker_time_axis_view_event(GdkEvent* event, ArdourCanvas::Item*,MarkerTimeAxis*);
-	bool canvas_markerview_item_view_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*);
-	bool canvas_markerview_start_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*);
-	bool canvas_markerview_end_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*);
-
 	PBD::Signal0<void> EditorFreeze;
 	PBD::Signal0<void> EditorThaw;
 
@@ -1911,47 +1894,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* nudging tracks */
 
 	void nudge_track (bool use_edit_point, bool forwards);
-
-#ifdef WITH_CMT
-	void handle_new_imageframe_time_axis_view(const std::string & track_name, void* src) ;
-	void handle_new_imageframe_marker_time_axis_view(const std::string & track_name, TimeAxisView* marked_track) ;
-
-	void start_imageframe_grab(ArdourCanvas::Item*, GdkEvent*) ;
-	void start_markerview_grab(ArdourCanvas::Item*, GdkEvent*) ;
-
-	void imageframe_drag_motion_callback(ArdourCanvas::Item*, GdkEvent*) ;
-	void markerview_drag_motion_callback(ArdourCanvas::Item*, GdkEvent*) ;
-	void timeaxis_item_drag_finished_callback(ArdourCanvas::Item*, GdkEvent*) ;
-
-	gint canvas_imageframe_item_view_event(ArdourCanvas::Item* item, GdkEvent* event, ImageFrameView* ifv);
-	gint canvas_imageframe_view_event(ArdourCanvas::Item* item, GdkEvent* event, ImageFrameTimeAxis* ifta);
-	gint canvas_imageframe_start_handle_event(ArdourCanvas::Item* item, GdkEvent* event, ImageFrameView* ifv);
-	gint canvas_imageframe_end_handle_event(ArdourCanvas::Item* item, GdkEvent* event, ImageFrameView* ifv);
-
-	gint canvas_marker_time_axis_view_event(ArdourCanvas::Item* item, GdkEvent* event, MarkerTimeAxis* mta);
-	gint canvas_markerview_item_view_event(ArdourCanvas::Item* item, GdkEvent* event, MarkerView* mv);
-	gint canvas_markerview_start_handle_event(ArdourCanvas::Item* item, GdkEvent* event, MarkerView* mv);
-	gint canvas_markerview_end_handle_event(ArdourCanvas::Item* item, GdkEvent* event, MarkerView* mv);
-
-	void imageframe_start_handle_op(ArdourCanvas::Item* item, GdkEvent* event) ;
-	void imageframe_end_handle_op(ArdourCanvas::Item* item, GdkEvent* event) ;
-	void imageframe_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* event) ;
-	void imageframe_start_handle_end_trim(ArdourCanvas::Item* item, GdkEvent* event) ;
-	void imageframe_end_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* event) ;
-	void imageframe_end_handle_end_trim(ArdourCanvas::Item* item, GdkEvent* event) ;
-
-	void markerview_item_start_handle_op(ArdourCanvas::Item* item, GdkEvent* event) ;
-	void markerview_item_end_handle_op(ArdourCanvas::Item* item, GdkEvent* event) ;
-	void markerview_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* event) ;
-	void markerview_start_handle_end_trim(ArdourCanvas::Item* item, GdkEvent* event) ;
-	void markerview_end_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* event) ;
-	void markerview_end_handle_end_trim(ArdourCanvas::Item* item, GdkEvent* event) ;
-
-	void popup_imageframe_edit_menu(int button, int32_t time, ArdourCanvas::Item* ifv, bool with_frame) ;
-	void popup_marker_time_axis_edit_menu(int button, int32_t time, ArdourCanvas::Item* ifv, bool with_frame) ;
-
-	ImageFrameSocketHandler* image_socket_listener ;
-#endif
 
 	static const int32_t default_width = 995;
 	static const int32_t default_height = 765;
