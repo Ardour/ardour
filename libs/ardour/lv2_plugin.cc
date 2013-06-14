@@ -126,6 +126,7 @@ public:
 	LilvNode* lv2_InputPort;
 	LilvNode* lv2_OutputPort;
 	LilvNode* lv2_enumeration;
+	LilvNode* lv2_freewheeling;
 	LilvNode* lv2_inPlaceBroken;
 	LilvNode* lv2_integer;
 	LilvNode* lv2_reportsLatency;
@@ -1336,6 +1337,17 @@ LV2Plugin::describe_parameter(Evoral::Parameter which)
 					lilv_plugin_get_port_by_index(_impl->plugin, which.id()), _world.ext_notOnGUI)) {
 			return X_("hidden");
 		}
+
+		if (lilv_port_has_property(_impl->plugin,
+					lilv_plugin_get_port_by_index(_impl->plugin, which.id()), _world.lv2_freewheeling)) {
+			return X_("hidden");
+		}
+
+		if (lilv_port_has_property(_impl->plugin,
+					lilv_plugin_get_port_by_index(_impl->plugin, which.id()), _world.lv2_sampleRate)) {
+			return X_("hidden");
+		}
+
 		if (lilv_port_has_property(_impl->plugin,
 					lilv_plugin_get_port_by_index(_impl->plugin, which.id()), _world.lv2_reportsLatency)) {
 			return X_("latency");
@@ -1902,6 +1914,7 @@ LV2World::LV2World()
 	lv2_sampleRate     = lilv_new_uri(world, LV2_CORE__sampleRate);
 	lv2_toggled        = lilv_new_uri(world, LV2_CORE__toggled);
 	lv2_enumeration    = lilv_new_uri(world, LV2_CORE__enumeration);
+	lv2_freewheeling   = lilv_new_uri(world, LV2_CORE__freeWheeling);
 	midi_MidiEvent     = lilv_new_uri(world, LILV_URI_MIDI_EVENT);
 	rdfs_comment       = lilv_new_uri(world, LILV_NS_RDFS "comment");
 	rsz_minimumSize    = lilv_new_uri(world, LV2_RESIZE_PORT__minimumSize);
@@ -1919,6 +1932,7 @@ LV2World::~LV2World()
 	lilv_node_free(rdfs_comment);
 	lilv_node_free(midi_MidiEvent);
 	lilv_node_free(lv2_enumeration);
+	lilv_node_free(lv2_freewheeling);
 	lilv_node_free(lv2_toggled);
 	lilv_node_free(lv2_sampleRate);
 	lilv_node_free(lv2_reportsLatency);

@@ -53,18 +53,6 @@ enum ItemType {
         RightFrameHandle,
 	StartCrossFadeItem,
 	EndCrossFadeItem,
-
-#ifdef WITH_CMT
-	MarkerViewItem,
-	MarkerTimeAxisItem,
-	MarkerViewHandleStartItem,
-	MarkerViewHandleEndItem,
-	ImageFrameItem,
-	ImageFrameTimeAxisItem,
-	ImageFrameHandleStartItem,
-	ImageFrameHandleEndItem,
-#endif
-
 	CrossfadeViewItem,
 
 	/* don't remove this */

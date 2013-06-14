@@ -108,8 +108,4 @@ class VideoImageFrame : public sigc::trackable
 
 };
 
-extern "C" {
-	char *curl_http_get (const char *u, int *status);
-}
-
 #endif /* __ardour_video_image_frame_h__ */

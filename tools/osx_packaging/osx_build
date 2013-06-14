@@ -6,6 +6,11 @@ GTKSTACK_ROOT=$HOME/gtk/inst
 ARDOURSTACK_ROOT=$HOME/a3/inst
 BUILD_ROOT=../../build
 
+# where harvid and xjadeo binaries are cached
+if test -z "$CACHEDIR" -o ! -d "$CACHEDIR"; then
+	CACHEDIR=`pwd`
+fi
+
 SAE=
 MIXBUS=
 WITH_HARVID=
@@ -506,19 +511,25 @@ fi
 
 if test x$WITH_HARVID != x ; then
 	echo "installing video tools.."
-	# TODO move files to http://ardour.org/files/ - symlink 'latest'
-	HARVID_VERSION=$(curl http://ardour.org/files/video-tools/harvid_version.txt)
-	XJADEO_VERSION=$(curl http://ardour.org/files/video-tools/xjadeo_version.txt)
+	HARVID_VERSION=$(curl -s -S http://ardour.org/files/video-tools/harvid_version.txt)
+	XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
 	echo "copying harvid and xjadeo ..."
-  curl -L -o "$PRODUCT_PKG_DIR/xjadeo-${XJADEO_VERSION:1}.dmg" "http://sourceforge.net/projects/xjadeo/files/xjadeo/${XJADEO_VERSION}/jadeo-${XJADEO_VERSION:1}.dmg/download"
-  curl -L "http://ardour.org/files/video-tools/harvid-osx-${HARVID_VERSION}.tgz"\
-		| tar -x -z -C $PRODUCT_PKG_DIR/$APPROOT
 
-	ls -l "$PRODUCT_PKG_DIR/xjadeo-${XJADEO_VERSION:1}.dmg"
-	JADEO=$(hdiutil attach "$PRODUCT_PKG_DIR/xjadeo-${XJADEO_VERSION:1}.dmg" | grep Apple_HFS | grep dev/ | cut -f 3)
+	rsync -Pa \
+		rsync://ardour.org/video-tools/harvid-osx-${HARVID_VERSION}.tgz \
+		"$CACHEDIR/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz"
+
+	rsync -Pa \
+		rsync://ardour.org/video-tools/jadeo-${XJADEO_VERSION:1}.dmg \
+		"$CACHEDIR/jadeo-${XJADEO_VERSION:1}.dmg"
+
+	tar -x -z \
+		-C $PRODUCT_PKG_DIR/$APPROOT \
+		-f "$CACHEDIR/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz" || exit 1
+
+	JADEO=$(hdiutil attach "$CACHEDIR/jadeo-${XJADEO_VERSION:1}.dmg" | grep Apple_HFS | grep dev/ | cut -f 3)
 	cp -r "${JADEO}/Jadeo.app" "$PRODUCT_PKG_DIR/"
 	hdiutil detach "${JADEO}"
-	rm "$PRODUCT_PKG_DIR/xjadeo-${XJADEO_VERSION:1}.dmg"
 
 	DMGWINBOTTOM=580
 	YPOS=$[ $DMGWINBOTTOM - 300 ]
@@ -600,7 +611,7 @@ hdiutil eject "${DiskDevice}"
 hdiutil convert -format UDZO "${TMPDMG}" -imagekey zlib-level=9 -o "${UC_DMG}"
 # Delete the temporary files
 rm "$TMPDMG"
-rmdir "$MNTPATH"
+rm -rf "$MNTPATH"
 
 echo "setting file icon ..."
 
