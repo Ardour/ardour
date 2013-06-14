@@ -513,6 +513,10 @@ def configure(conf):
     else:
         autowaf.display_msg(conf, 'Will build against private Ardour dependency stack', 'no')
         
+    if Options.options.freebie:
+        conf.env.append_value ('CFLAGS', '-DNO_PLUGIN_STATE')
+        conf.env.append_value ('CXXFLAGS', '-DNO_PLUGIN_STATE')
+
     if sys.platform == 'darwin':
 
         # this is required, potentially, for anything we link and then relocate into a bundle
@@ -520,9 +524,6 @@ def configure(conf):
 
         conf.define ('HAVE_COREAUDIO', 1)
         conf.define ('AUDIOUNIT_SUPPORT', 1)
-
-        if not Options.options.freebie:
-            conf.define ('AU_STATE_SUPPORT', 1)
 
         conf.define ('GTKOSX', 1)
         conf.define ('TOP_MENUBAR',1)
@@ -563,7 +564,7 @@ def configure(conf):
         conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Cocoa'])
 
         if not Options.options.freebie:
-            conf.env.append_value('CXXFLAGS_AUDIOUNITS', "-DAU_STATE_SUPPORT")
+            conf.env.append_value('CXXFLAGS_AUDIOUNITS')
 
         if re.search ("^[1-9][0-9]\.", os.uname()[2]) == None and not Options.options.nocarbon:
             conf.env.append_value('CXXFLAGS_AUDIOUNITS', "-DWITH_CARBON")
