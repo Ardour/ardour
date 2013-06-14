@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-06-11 08:49-0400\n"
-"PO-Revision-Date: 2013-01-05 12:34+0300\n"
+"POT-Creation-Date: 2013-06-14 03:23+0400\n"
+"PO-Revision-Date: 2013-06-14 02:14+0300\n"
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
 "Language: \n"
@@ -18,6 +18,7 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2); 10<=4 && (n%100<10 || n"
 "%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 1.5.4\n"
 
 #: amp.cc:60 automatable.cc:158
 msgid "Fader"
@@ -786,7 +787,6 @@ msgid "Track %1 of %2 contained no usable MIDI data"
 msgstr ""
 
 #: import.cc:453
-#, fuzzy
 msgid "MIDI file %1 was not readable (no reason available)"
 msgstr "MIDI-файл %1 нечитаем по неизвестной причине"
 
@@ -1755,9 +1755,8 @@ msgid "Programming error: illegal event type in process_event (%1)"
 msgstr ""
 
 #: session_state.cc:139
-#, fuzzy
 msgid "Could not use path %1 (%2)"
-msgstr "Cannot expand path %1 (%2)"
+msgstr "Не удалось использовать расположение  %1 (%2)"
 
 #: session_state.cc:267
 msgid "solo cut control (dB)"
@@ -1769,7 +1768,7 @@ msgstr "Сброс удалённого управления"
 
 #: session_state.cc:385
 msgid "Session loading complete"
-msgstr ""
+msgstr "Загрузка сеанса завершена"
 
 #: session_state.cc:452
 msgid "Session: cannot create session peakfile folder \"%1\" (%2)"
@@ -1809,7 +1808,7 @@ msgstr "Session: cannot create session folder \"%1\" (%2)"
 
 #: session_state.cc:548
 msgid "Could not open %1 for writing session template"
-msgstr ""
+msgstr "Не удалось открыть %1 для записи шаблона сеанса"
 
 #: session_state.cc:554
 msgid "Could not open session template %1 for reading"
@@ -1853,7 +1852,7 @@ msgstr ""
 
 #: session_state.cc:890
 msgid "%1: session file \"%2\" doesn't exist!"
-msgstr ""
+msgstr "%1: файл сеанса «%2» не существует!"
 
 #: session_state.cc:902
 msgid "Could not understand session file %1"
@@ -2135,7 +2134,7 @@ msgstr ""
 
 #: smf_source.cc:410
 msgid "cannot open MIDI file %1 for write"
-msgstr ""
+msgstr "не удалось открыть MIDI-файл %2 для записи"
 
 #: sndfile_helpers.cc:32
 msgid "WAV"
@@ -2413,15 +2412,15 @@ msgstr ""
 
 #: tempo_map_importer.cc:52
 msgid "Tempo map"
-msgstr ""
+msgstr "Карта темпа"
 
 #: tempo_map_importer.cc:60
 msgid "Tempo Map"
-msgstr ""
+msgstr "Карта темпа"
 
 #: tempo_map_importer.cc:80
 msgid "Tempo marks: "
-msgstr ""
+msgstr "Метки темпа:"
 
 #: tempo_map_importer.cc:80
 msgid ""

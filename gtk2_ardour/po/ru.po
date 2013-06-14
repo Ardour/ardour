@@ -10,15 +10,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-06-11 08:49-0400\n"
-"PO-Revision-Date: 2013-03-05 03:23+0300\n"
+"POT-Creation-Date: 2013-06-14 03:57+0400\n"
+"PO-Revision-Date: 2013-06-14 04:15+0300\n"
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.11.4\n"
+"X-Generator: Poedit 1.5.4\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2); 10<=4 && (n%100<10 || n"
 "%100>=20) ? 1 : 2);\n"
@@ -149,7 +149,7 @@ msgstr "Armand Klenk"
 
 #: about.cc:153
 msgid "Julien de Kozak"
-msgstr ""
+msgstr "Julien de Kozak"
 
 #: about.cc:154
 msgid "Matt Krai"
@@ -262,7 +262,6 @@ msgstr ""
 "\tRomain Arnaud <roming22@gmail.com>\n"
 
 #: about.cc:183
-#, fuzzy
 msgid ""
 "German:\n"
 "\tKarsten Petersen <kapet@kapet.de>\n"
@@ -276,10 +275,11 @@ msgstr ""
 "Немецкий:\n"
 "\tKarsten Petersen <kapet@kapet.de>\n"
 "\tSebastian Arnold <mail@sebastian-arnold.net>\n"
-"\tRobert Schwede<schwede@ironshark.com>\n"
+"\tRobert Schwede <schwede@ironshark.com>\n"
 "\tBenjamin Scherrer <realhangman@web.de>\n"
 "\tEdgar Aichinger <edogawa@aon.at>\n"
 "\tRichard Oax <richard@pagliacciempire.de>\n"
+"\tRobin Gloster <robin@loc-com.de>\n"
 
 #: about.cc:190
 msgid ""
@@ -679,9 +679,8 @@ msgid "Preferences"
 msgstr "Параметры"
 
 #: ardour_ui.cc:187 ardour_ui.cc:192
-#, fuzzy
 msgid "Add Tracks/Busses"
-msgstr "Дорожки/Шины"
+msgstr "Добавить дорожки/шины"
 
 #: ardour_ui.cc:188
 msgid "About"
@@ -708,14 +707,12 @@ msgid "Big Clock"
 msgstr "Большой счётчик"
 
 #: ardour_ui.cc:195
-#, fuzzy
 msgid "Audio Connections"
-msgstr "Входные соединения"
+msgstr "Звуковые соединения"
 
 #: ardour_ui.cc:196
-#, fuzzy
 msgid "MIDI Connections"
-msgstr "Входные соединения"
+msgstr "Соединения MIDI"
 
 #: ardour_ui.cc:198
 msgid "Errors"
@@ -1268,14 +1265,12 @@ msgid "Stop Video-Server"
 msgstr ""
 
 #: ardour_ui.cc:3331
-#, fuzzy
 msgid "Do you really want to stop the Video Server?"
-msgstr "Вы действительно хотите удалить %1 %2?"
+msgstr "Вы действительно хотите остановить видеосервер?"
 
 #: ardour_ui.cc:3334
-#, fuzzy
 msgid "Yes, Stop It"
-msgstr "Да"
+msgstr "Да, остановить"
 
 #: ardour_ui.cc:3360
 msgid "The Video Server is already started."
@@ -1287,7 +1282,7 @@ msgid ""
 "new instance."
 msgstr ""
 
-#: ardour_ui.cc:3370 ardour_ui.cc:3455
+#: ardour_ui.cc:3370 ardour_ui.cc:3460
 msgid ""
 "Could not connect to the Video Server. Start it or configure its access URL "
 "in Edit -> Preferences."
@@ -1303,25 +1298,25 @@ msgstr ""
 
 #: ardour_ui.cc:3432
 msgid "Cannot launch the video-server"
-msgstr ""
+msgstr "Не удалось запустить видеосервер"
 
 #: ardour_ui.cc:3441
 msgid "Video-server was started but does not respond to requests..."
 msgstr ""
 
-#: ardour_ui.cc:3477 editor_audio_import.cc:629
+#: ardour_ui.cc:3482 editor_audio_import.cc:629
 msgid "could not open %1"
 msgstr "не удалось открыть %1"
 
-#: ardour_ui.cc:3481
+#: ardour_ui.cc:3486
 msgid "no video-file selected"
 msgstr ""
 
-#: ardour_ui.cc:3641
+#: ardour_ui.cc:3646
 msgid "Recording was stopped because your system could not keep up."
 msgstr "Запись остановлена из-за недостаточного быстродействия системы"
 
-#: ardour_ui.cc:3670
+#: ardour_ui.cc:3675
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1335,7 +1330,7 @@ msgstr ""
 "В частности ей не удалось записать данные на диск\n"
 "достаточно быстро для фиксации захваченных данных.\n"
 
-#: ardour_ui.cc:3689
+#: ardour_ui.cc:3694
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1349,11 +1344,11 @@ msgstr ""
 "В частности ей не удалось прочитать данные\n"
 "с диска достаточно быстро для воспроизведения.\n"
 
-#: ardour_ui.cc:3729
+#: ardour_ui.cc:3734
 msgid "Crash Recovery"
 msgstr "Восстановление данных"
 
-#: ardour_ui.cc:3730
+#: ardour_ui.cc:3735
 msgid ""
 "This session appears to have been in the\n"
 "middle of recording when %1 or\n"
@@ -1369,19 +1364,19 @@ msgstr ""
 "%1 может восстановить записанные данные,\n"
 "либо проигнорировать их. Примите решение.\n"
 
-#: ardour_ui.cc:3742
+#: ardour_ui.cc:3747
 msgid "Ignore crash data"
 msgstr "Проигнорировать"
 
-#: ardour_ui.cc:3743
+#: ardour_ui.cc:3748
 msgid "Recover from crash"
 msgstr "Восстановить данные"
 
-#: ardour_ui.cc:3763
+#: ardour_ui.cc:3768
 msgid "Sample Rate Mismatch"
 msgstr "Несовпадение частот сэмплирования"
 
-#: ardour_ui.cc:3764
+#: ardour_ui.cc:3769
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
 "%2 is currently running at %3 Hz.  If you load this session,\n"
@@ -1393,23 +1388,23 @@ msgstr ""
 "Если вы загрузите этот сеанс, звуковые данные могут быть\n"
 "воспроизведены с некорректной частотой сэмплирования.\n"
 
-#: ardour_ui.cc:3773
+#: ardour_ui.cc:3778
 msgid "Do not load session"
 msgstr "Не загружать сеанс"
 
-#: ardour_ui.cc:3774
+#: ardour_ui.cc:3779
 msgid "Load session anyway"
 msgstr "Все равно загрузить"
 
-#: ardour_ui.cc:3797
+#: ardour_ui.cc:3802
 msgid "Could not disconnect from JACK"
 msgstr "Не удалось отсоединиться от сервера JACK"
 
-#: ardour_ui.cc:3810
+#: ardour_ui.cc:3815
 msgid "Could not reconnect to JACK"
 msgstr "Не удалось соединиться с сервером JACK"
 
-#: ardour_ui.cc:4084
+#: ardour_ui.cc:4089
 msgid ""
 "%4This is a session from an older version of %3%5\n"
 "\n"
@@ -1503,7 +1498,6 @@ msgid "When active, there is a feedback loop."
 msgstr "Включена, когда есть петля отклика (feedback loop)"
 
 #: ardour_ui2.cc:140
-#, fuzzy
 msgid ""
 "<b>Primary Clock</b> right-click to set display mode. Click to edit, click"
 "+drag a digit or mouse-over+scroll wheel to modify.\n"
@@ -1515,11 +1509,8 @@ msgstr ""
 "или прокрутка колеса меняется значение.\n"
 "Прямой ввод: <tt>Esc</tt>: отмена; <tt>Enter</tt>: подтверждение; постфикс "
 "'+' или '-' вводит разницу во времени.\n"
-"Подробнее см. <span color=\"blue\">http://ardour.org/a3_features_clocks</"
-"span>."
 
 #: ardour_ui2.cc:141
-#, fuzzy
 msgid ""
 "<b>Secondary Clock</b> right-click to set display mode. Click to edit, click"
 "+drag a digit or mouse-over+scroll wheel to modify.\n"
@@ -1531,8 +1522,6 @@ msgstr ""
 "вверх-вниз или прокрутка колеса меняется значение.\n"
 "Прямой ввод: <tt>Esc</tt>: отмена; <tt>Enter</tt>: подтверждение; постфикс "
 "'+' или '-' вводит разницу во времени.\n"
-"Подробнее см. <span color=\"blue\">http://ardour.org/a3_features_clocks</"
-"span>."
 
 #: ardour_ui2.cc:173
 msgid "[ERROR]: "
@@ -1676,19 +1665,16 @@ msgid "Add Track or Bus..."
 msgstr "Добавить дорожку или шину..."
 
 #: ardour_ui_ed.cc:135
-#, fuzzy
 msgid "Open Video"
-msgstr "Открыть сеанс"
+msgstr "Добавить видео"
 
 #: ardour_ui_ed.cc:138
-#, fuzzy
 msgid "Remove Video"
-msgstr "Удалить выделение"
+msgstr "Удалить видео"
 
 #: ardour_ui_ed.cc:141
-#, fuzzy
 msgid "Export To Video File"
-msgstr "Экспортировать в файл"
+msgstr "Экспортировать видеофайл"
 
 #: ardour_ui_ed.cc:145
 msgid "Snapshot..."
@@ -1698,7 +1684,7 @@ msgstr "Создать снимок..."
 msgid "Save As..."
 msgstr "Сохранить как..."
 
-#: ardour_ui_ed.cc:153 editor_actions.cc:1710 editor_markers.cc:858
+#: ardour_ui_ed.cc:153 editor_actions.cc:1719 editor_markers.cc:858
 #: editor_snapshots.cc:123 mixer_strip.cc:1464 route_time_axis.cc:1471
 msgid "Rename..."
 msgstr "Переименовать..."
@@ -1774,7 +1760,6 @@ msgid "Window|Mixer"
 msgstr "Микшер"
 
 #: ardour_ui_ed.cc:231
-#, fuzzy
 msgid "Toggle Editor+Mixer"
 msgstr "Редактор или микшер на переднем плане"
 
@@ -2075,7 +2060,7 @@ msgstr "Темп"
 msgid "Meter"
 msgstr "Размер"
 
-#: audio_clock.cc:1819 audio_streamview.cc:116 editor_actions.cc:1030
+#: audio_clock.cc:1819 audio_streamview.cc:116 editor_actions.cc:1039
 #: midi_region_view.cc:2991 session_metadata_dialog.cc:331
 #: session_metadata_dialog.cc:379 session_metadata_dialog.cc:435
 #: session_metadata_dialog.cc:716
@@ -2171,11 +2156,11 @@ msgstr "Вручную"
 
 #: automation_time_axis.cc:257 automation_time_axis.cc:318
 #: automation_time_axis.cc:501 editor.cc:1933 editor.cc:2010
-#: editor_actions.cc:118 editor_actions.cc:1856 gain_meter.cc:199
+#: editor_actions.cc:118 editor_actions.cc:1865 gain_meter.cc:199
 #: generic_pluginui.cc:459 generic_pluginui.cc:735 midi_time_axis.cc:1488
 #: midi_time_axis.cc:1491 midi_time_axis.cc:1494 panner_ui.cc:153
 msgid "Play"
-msgstr "Воспроизведение"
+msgstr "Воспр."
 
 #: automation_time_axis.cc:259 automation_time_axis.cc:329
 #: automation_time_axis.cc:506 gain_meter.cc:202 generic_pluginui.cc:462
@@ -2640,7 +2625,7 @@ msgstr "Маркеры CD"
 
 #: editor.cc:245
 msgid "Video Timeline"
-msgstr ""
+msgstr "Видеолинейка"
 
 #: editor.cc:260
 msgid "mode"
@@ -2677,7 +2662,7 @@ msgid "Editor"
 msgstr "Редактор"
 
 #: editor.cc:1215 editor.cc:1225 editor.cc:4440 editor_actions.cc:130
-#: editor_actions.cc:1804
+#: editor_actions.cc:1813
 msgid "Loop"
 msgstr "Петля"
 
@@ -3054,7 +3039,7 @@ msgstr "Вернуть"
 msgid "Redo (%1)"
 msgstr "Вернуть (%1)"
 
-#: editor.cc:3286 editor.cc:3310 editor_actions.cc:106 editor_actions.cc:1785
+#: editor.cc:3286 editor.cc:3310 editor_actions.cc:106 editor_actions.cc:1794
 msgid "Duplicate"
 msgstr "Продублировать"
 
@@ -3167,7 +3152,7 @@ msgstr "Усиление"
 msgid "Ranges"
 msgstr "Выделения"
 
-#: editor_actions.cc:104 editor_actions.cc:1781 session_option_editor.cc:145
+#: editor_actions.cc:104 editor_actions.cc:1790 session_option_editor.cc:145
 #: session_option_editor.cc:147 session_option_editor.cc:156
 #: session_option_editor.cc:163
 msgid "Fades"
@@ -3651,7 +3636,7 @@ msgstr "Вставить промежуток времени"
 msgid "Toggle Active"
 msgstr "Переключить активность"
 
-#: editor_actions.cc:370 editor_actions.cc:1707 editor_markers.cc:876
+#: editor_actions.cc:370 editor_actions.cc:1716 editor_markers.cc:876
 #: editor_markers.cc:941 editor_snapshots.cc:121 mixer_strip.cc:1488
 #: route_time_axis.cc:701
 msgid "Remove"
@@ -3769,7 +3754,7 @@ msgstr "Стыковка"
 msgid "Slide"
 msgstr "Скольжение"
 
-#: editor_actions.cc:478 editor_actions.cc:1728 editor_markers.cc:860
+#: editor_actions.cc:478 editor_actions.cc:1737 editor_markers.cc:860
 #: editor_rulers.cc:386 location_ui.cc:56
 msgid "Lock"
 msgstr "Блок"
@@ -3939,43 +3924,36 @@ msgid "Min:Sec"
 msgstr "Мин:С"
 
 #: editor_actions.cc:547 editor_actions.cc:550
-#, fuzzy
 msgid "Video Monitor"
-msgstr "Монитор"
+msgstr "Видеомонитор"
 
 #: editor_actions.cc:549 rc_option_editor.cc:1834
 msgid "Video"
-msgstr ""
+msgstr "Видео"
 
 #: editor_actions.cc:552
-#, fuzzy
 msgid "Always on Top"
-msgstr "На самый верх"
+msgstr "Всегда сверху"
 
 #: editor_actions.cc:554
-#, fuzzy
-msgid "Framenumber"
-msgstr "Номер дорожки"
+msgid "Frame number"
+msgstr "Номер кадра"
 
 #: editor_actions.cc:555
-#, fuzzy
 msgid "Timecode Background"
-msgstr "FPS синхросигнала"
+msgstr "Фон тайм-кода"
 
 #: editor_actions.cc:556
-#, fuzzy
 msgid "Fullscreen"
-msgstr "Полная тишина"
+msgstr "Во весь экран"
 
 #: editor_actions.cc:557
-#, fuzzy
 msgid "Letterbox"
-msgstr "Нормальное"
+msgstr "Уместить в окно"
 
 #: editor_actions.cc:558
-#, fuzzy
 msgid "Original Size"
-msgstr "Исходное положение"
+msgstr "Исходный размер"
 
 #: editor_actions.cc:608
 msgid "Sort"
@@ -4087,289 +4065,289 @@ msgstr ""
 msgid "Could not find editor.bindings in search path %1"
 msgstr ""
 
-#: editor_actions.cc:1019 editor_actions.cc:1415 editor_actions.cc:1426
-#: editor_actions.cc:1479 editor_actions.cc:1490 editor_actions.cc:1537
-#: editor_actions.cc:1547 editor_regions.cc:1561
+#: editor_actions.cc:1028 editor_actions.cc:1424 editor_actions.cc:1435
+#: editor_actions.cc:1488 editor_actions.cc:1499 editor_actions.cc:1546
+#: editor_actions.cc:1556 editor_regions.cc:1561
 msgid "programming error: %1: %2"
 msgstr "Ошибка в программе: %1: %2"
 
-#: editor_actions.cc:1713
+#: editor_actions.cc:1722
 msgid "Raise"
 msgstr "Поднять"
 
-#: editor_actions.cc:1716
+#: editor_actions.cc:1725
 msgid "Raise to Top"
 msgstr "На самый верх"
 
-#: editor_actions.cc:1719 gtk-custom-ruler.c:132
+#: editor_actions.cc:1728 gtk-custom-ruler.c:132
 msgid "Lower"
 msgstr "Опустить"
 
-#: editor_actions.cc:1722
+#: editor_actions.cc:1731
 msgid "Lower to Bottom"
 msgstr "В самый низ"
 
-#: editor_actions.cc:1725
+#: editor_actions.cc:1734
 msgid "Move to Original Position"
 msgstr "К исходной позиции"
 
-#: editor_actions.cc:1730
+#: editor_actions.cc:1739
 msgid "Lock to Video"
 msgstr ""
 
-#: editor_actions.cc:1735 editor_markers.cc:867
+#: editor_actions.cc:1744 editor_markers.cc:867
 msgid "Glue to Bars and Beats"
 msgstr "Приклеить к тактам и долям"
 
-#: editor_actions.cc:1740
+#: editor_actions.cc:1749
 msgid "Remove Sync"
 msgstr "Удалить синхронизатор"
 
-#: editor_actions.cc:1743 mixer_strip.cc:1903 route_time_axis.cc:200
+#: editor_actions.cc:1752 mixer_strip.cc:1903 route_time_axis.cc:200
 msgid "Mute"
 msgstr "Молча"
 
-#: editor_actions.cc:1746
+#: editor_actions.cc:1755
 msgid "Normalize..."
 msgstr "Нормировать сигнал..."
 
-#: editor_actions.cc:1749
+#: editor_actions.cc:1758
 msgid "Reverse"
 msgstr "Развернуть"
 
-#: editor_actions.cc:1752
+#: editor_actions.cc:1761
 msgid "Make Mono Regions"
 msgstr "Создать моно-области"
 
-#: editor_actions.cc:1755
+#: editor_actions.cc:1764
 msgid "Boost Gain"
 msgstr "Повысить громкость области"
 
-#: editor_actions.cc:1758
+#: editor_actions.cc:1767
 msgid "Cut Gain"
 msgstr "Понизить громкость области"
 
-#: editor_actions.cc:1761
+#: editor_actions.cc:1770
 msgid "Pitch Shift..."
 msgstr "Смена высоты тона…"
 
-#: editor_actions.cc:1764
+#: editor_actions.cc:1773
 msgid "Transpose..."
 msgstr "Транспозиция…"
 
-#: editor_actions.cc:1767
+#: editor_actions.cc:1776
 msgid "Opaque"
 msgstr "Непрозрачно"
 
-#: editor_actions.cc:1771 editor_regions.cc:116
+#: editor_actions.cc:1780 editor_regions.cc:116
 msgid "Fade In"
 msgstr "Нарастание"
 
-#: editor_actions.cc:1776 editor_regions.cc:117
+#: editor_actions.cc:1785 editor_regions.cc:117
 msgid "Fade Out"
 msgstr "Затухание"
 
-#: editor_actions.cc:1791
+#: editor_actions.cc:1800
 msgid "Multi-Duplicate..."
 msgstr "Продублировать многократно..."
 
-#: editor_actions.cc:1796
+#: editor_actions.cc:1805
 msgid "Fill Track"
 msgstr "Заполнить дорожку"
 
-#: editor_actions.cc:1800 editor_markers.cc:955
+#: editor_actions.cc:1809 editor_markers.cc:955
 msgid "Set Loop Range"
 msgstr "Установить область петли"
 
-#: editor_actions.cc:1807
+#: editor_actions.cc:1816
 msgid "Set Punch"
 msgstr "Установить врезку"
 
-#: editor_actions.cc:1811
+#: editor_actions.cc:1820
 msgid "Add Single Range Marker"
 msgstr "Добавить маркер текущей области"
 
-#: editor_actions.cc:1816
+#: editor_actions.cc:1825
 msgid "Add Range Marker Per Region"
 msgstr "Добавить по маркеру на каждую область"
 
-#: editor_actions.cc:1820
+#: editor_actions.cc:1829
 msgid "Snap Position To Grid"
 msgstr ""
 
-#: editor_actions.cc:1823
+#: editor_actions.cc:1832
 msgid "Close Gaps"
 msgstr "Закрыть интервалы"
 
-#: editor_actions.cc:1826
+#: editor_actions.cc:1835
 msgid "Rhythm Ferret..."
 msgstr "Ритмический хорёк..."
 
-#: editor_actions.cc:1829
+#: editor_actions.cc:1838
 msgid "Export..."
 msgstr "Экспортировать..."
 
-#: editor_actions.cc:1835
+#: editor_actions.cc:1844
 msgid "Separate Under"
 msgstr "Разделить под"
 
-#: editor_actions.cc:1839
+#: editor_actions.cc:1848
 msgid "Set Fade In Length"
 msgstr "Установить длину фейда нарастания"
 
-#: editor_actions.cc:1840
+#: editor_actions.cc:1849
 msgid "Set Fade Out Length"
 msgstr "Установить длину фейда затухания"
 
-#: editor_actions.cc:1841
+#: editor_actions.cc:1850
 msgid "Set Tempo from Region = Bar"
 msgstr "Установить темп, считая что область = такт"
 
-#: editor_actions.cc:1846
+#: editor_actions.cc:1855
 msgid "Split at Percussion Onsets"
 msgstr "Разделить по атакам перкуссии"
 
-#: editor_actions.cc:1851
+#: editor_actions.cc:1860
 msgid "List Editor..."
 msgstr "Редактор списка событий"
 
-#: editor_actions.cc:1854
+#: editor_actions.cc:1863
 msgid "Properties..."
 msgstr "Свойства..."
 
-#: editor_actions.cc:1858
+#: editor_actions.cc:1867
 msgid "Bounce (with processing)"
 msgstr "Свести (с обработкой)"
 
-#: editor_actions.cc:1859
+#: editor_actions.cc:1868
 msgid "Bounce (without processing)"
 msgstr "Свести (без обработки)"
 
-#: editor_actions.cc:1860
+#: editor_actions.cc:1869
 msgid "Combine"
 msgstr "Объединить"
 
-#: editor_actions.cc:1861
+#: editor_actions.cc:1870
 msgid "Uncombine"
 msgstr "Снять объединение"
 
-#: editor_actions.cc:1863
+#: editor_actions.cc:1872
 msgid "Spectral Analysis..."
 msgstr "Спектральный анализ..."
 
-#: editor_actions.cc:1865
+#: editor_actions.cc:1874
 msgid "Reset Envelope"
 msgstr "Сбросить огибающую"
 
-#: editor_actions.cc:1867
+#: editor_actions.cc:1876
 msgid "Reset Gain"
 msgstr "Сбросить усиление"
 
-#: editor_actions.cc:1872
+#: editor_actions.cc:1881
 msgid "Envelope Active"
 msgstr "Огибающая активна"
 
-#: editor_actions.cc:1876
+#: editor_actions.cc:1885
 msgid "Quantize..."
 msgstr "Квантование..."
 
-#: editor_actions.cc:1877 editor_actions.cc:1878
+#: editor_actions.cc:1886 editor_actions.cc:1887
 msgid "Insert Patch Change..."
 msgstr "Вставить смену программы..."
 
-#: editor_actions.cc:1879
+#: editor_actions.cc:1888
 msgid "Unlink from other copies"
 msgstr ""
 
-#: editor_actions.cc:1880
+#: editor_actions.cc:1889
 msgid "Strip Silence..."
 msgstr "Вырезать тишину..."
 
-#: editor_actions.cc:1881
+#: editor_actions.cc:1890
 msgid "Set Range Selection"
 msgstr "Создать выделение из области"
 
-#: editor_actions.cc:1883
+#: editor_actions.cc:1892
 msgid "Nudge Later"
 msgstr "Толкнуть вперёд"
 
-#: editor_actions.cc:1884
+#: editor_actions.cc:1893
 msgid "Nudge Earlier"
 msgstr "Толкнуть назад"
 
-#: editor_actions.cc:1889
+#: editor_actions.cc:1898
 msgid "Nudge Later by Capture Offset"
 msgstr "Толкнуть вперёд на смещение захвата"
 
-#: editor_actions.cc:1896
+#: editor_actions.cc:1905
 msgid "Nudge Earlier by Capture Offset"
 msgstr "Толкнуть назад на смещение захвата"
 
-#: editor_actions.cc:1900
+#: editor_actions.cc:1909
 msgid "Trim to Loop"
 msgstr "В петлю"
 
-#: editor_actions.cc:1901
+#: editor_actions.cc:1910
 msgid "Trim to Punch"
 msgstr "Во врезку"
 
-#: editor_actions.cc:1903
+#: editor_actions.cc:1912
 msgid "Trim to Previous"
 msgstr "До предыдущей области"
 
-#: editor_actions.cc:1904
+#: editor_actions.cc:1913
 msgid "Trim to Next"
 msgstr "До следующей области"
 
-#: editor_actions.cc:1911
+#: editor_actions.cc:1920
 msgid "Insert Region From Region List"
 msgstr "Вставить область из списка областей"
 
-#: editor_actions.cc:1917
+#: editor_actions.cc:1926
 msgid "Set Sync Position"
 msgstr "Установить синхронизатор области"
 
-#: editor_actions.cc:1918
+#: editor_actions.cc:1927
 msgid "Place Transient"
 msgstr ""
 
-#: editor_actions.cc:1919
+#: editor_actions.cc:1928
 msgid "Split"
 msgstr "Разделить"
 
-#: editor_actions.cc:1920
+#: editor_actions.cc:1929
 msgid "Trim Start at Edit Point"
 msgstr "Начало по курсору редактора"
 
-#: editor_actions.cc:1921
+#: editor_actions.cc:1930
 msgid "Trim End at Edit Point"
 msgstr "Конец по курсору редактора"
 
-#: editor_actions.cc:1926
+#: editor_actions.cc:1935
 msgid "Align Start"
 msgstr "Выровнять начала областей"
 
-#: editor_actions.cc:1933
+#: editor_actions.cc:1942
 msgid "Align Start Relative"
 msgstr "Выровнять относительно начал областей"
 
-#: editor_actions.cc:1937
+#: editor_actions.cc:1946
 msgid "Align End"
 msgstr "Выровнять концы областей"
 
-#: editor_actions.cc:1942
+#: editor_actions.cc:1951
 msgid "Align End Relative"
 msgstr "Выровнять относительно концов областей"
 
-#: editor_actions.cc:1949
+#: editor_actions.cc:1958
 msgid "Align Sync"
 msgstr "Выровнять по синхронизаторам областей"
 
-#: editor_actions.cc:1956
+#: editor_actions.cc:1965
 msgid "Align Sync Relative"
 msgstr "Выровнять относительно синхронизаторов областей"
 
-#: editor_actions.cc:1960 editor_actions.cc:1963
+#: editor_actions.cc:1969 editor_actions.cc:1972
 msgid "Choose Top..."
 msgstr "Выбрать верхнюю область..."
 
@@ -4441,9 +4419,8 @@ msgid "fixed time region drag"
 msgstr ""
 
 #: editor_drag.cc:1700
-#, fuzzy
 msgid "Video Start:"
-msgstr "Mike Start"
+msgstr "Начало видеофайла"
 
 #: editor_drag.cc:1702
 msgid "Diff:"
@@ -5058,9 +5035,8 @@ msgid "toggle region lock"
 msgstr "переключение блокировки области"
 
 #: editor_ops.cc:5067
-#, fuzzy
 msgid "Toggle Video Lock"
-msgstr "переключение блокировки области"
+msgstr ""
 
 #: editor_ops.cc:5091
 msgid "region lock style"
@@ -5555,14 +5531,12 @@ msgid "New Meter"
 msgstr "Вставить новый размер"
 
 #: editor_rulers.cc:373
-#, fuzzy
 msgid "Timeline height"
-msgstr "Высота"
+msgstr "Высота видеолинейки"
 
 #: editor_rulers.cc:383
-#, fuzzy
 msgid "Align Video Track"
-msgstr "Добавить звуковую дорожку"
+msgstr "Выровнять видеодорожку"
 
 #: editor_selection.cc:889 editor_selection.cc:932
 msgid "set selected regions"
@@ -5958,14 +5932,12 @@ msgid "Track output (channels: %1)"
 msgstr "Выход дорожки (каналов: %1)"
 
 #: export_channel_selector.cc:536
-#, fuzzy
 msgid "Export region contents"
-msgstr "Экспортировать область"
+msgstr "Экспортировать содержимое области"
 
 #: export_channel_selector.cc:537
-#, fuzzy
 msgid "Export track output"
-msgstr "Соединять выходы дорожек и шин"
+msgstr "Экспортировать выходы дорожки"
 
 #: export_dialog.cc:46
 msgid ""
@@ -6759,47 +6731,40 @@ msgid "Force"
 msgstr "Принуд."
 
 #: midi_channel_selector.cc:330 midi_channel_selector.cc:372
-#, fuzzy
 msgid "MIDI Channel Control"
-msgstr "Управление по MIDI"
+msgstr "Управление каналами MIDI"
 
 #: midi_channel_selector.cc:332
-#, fuzzy
 msgid "Playback all channels"
-msgstr "Скрыть все каналы"
+msgstr "Воспроизводить все каналы"
 
 #: midi_channel_selector.cc:333
-#, fuzzy
 msgid "Play only selected channels"
-msgstr "Воспроизвести выбранные области"
+msgstr "Воспроизводить только выбранные каналы"
 
 #: midi_channel_selector.cc:334
 msgid "Use a single fixed channel for all playback"
-msgstr ""
+msgstr "Использовать один канал для воспроизведения"
 
 #: midi_channel_selector.cc:335
-#, fuzzy
 msgid "Record all channels"
-msgstr "Скрыть все каналы"
+msgstr "Записывать все каналы"
 
 #: midi_channel_selector.cc:336
 msgid "Record only selected channels"
-msgstr ""
+msgstr "Записывать только выбранные каналы"
 
 #: midi_channel_selector.cc:337
-#, fuzzy
 msgid "Force all channels to 1 channel"
-msgstr "смена канала ноты"
+msgstr ""
 
 #: midi_channel_selector.cc:378
-#, fuzzy
 msgid "Inbound"
-msgstr "Границы областей"
+msgstr "Входящие события"
 
 #: midi_channel_selector.cc:398
-#, fuzzy
 msgid "Click to enable recording all channels"
-msgstr "Щелкните, чтобы включить или отключить этот модуль"
+msgstr "Щёлкните, чтобы включить запись во все каналы"
 
 #: midi_channel_selector.cc:403
 msgid "Click to disable recording all channels"
@@ -6810,9 +6775,8 @@ msgid "Click to invert currently selected recording channels"
 msgstr ""
 
 #: midi_channel_selector.cc:415
-#, fuzzy
 msgid "Playback"
-msgstr "Только воспроизведение"
+msgstr "Воспроизведение"
 
 #: midi_channel_selector.cc:434
 msgid "Click to enable playback of all channels"
@@ -7048,12 +7012,11 @@ msgstr "Режим внешнего устройства"
 
 #: midi_time_axis.cc:271
 msgid "Chns"
-msgstr ""
+msgstr "Кнл"
 
 #: midi_time_axis.cc:272
-#, fuzzy
 msgid "Click to edit channel settings"
-msgstr "Щёлкните для добавления нового расположения"
+msgstr "Щёлкните для изменения параметров каналов"
 
 #: midi_time_axis.cc:486
 msgid "Show Full Range"
@@ -7072,9 +7035,8 @@ msgid "Note Mode"
 msgstr "Режим представления нот"
 
 #: midi_time_axis.cc:497
-#, fuzzy
 msgid "Channel Selector"
-msgstr "Цвета канала"
+msgstr "Выбор каналов"
 
 #: midi_time_axis.cc:502
 msgid "Color Mode"
@@ -7138,13 +7100,12 @@ msgstr "Цвет дорожки"
 
 #: midi_time_axis.cc:1488 midi_time_axis.cc:1494 midi_time_axis.cc:1504
 #: midi_time_axis.cc:1510
-#, fuzzy
 msgid "all"
-msgstr "Маленькая"
+msgstr "все"
 
 #: midi_time_axis.cc:1491 midi_time_axis.cc:1507
 msgid "some"
-msgstr ""
+msgstr "не все"
 
 #: midi_tracer.cc:43
 msgid "Line history: "
@@ -8559,7 +8520,6 @@ msgid "A/B Plugins"
 msgstr "Отключить все"
 
 #: processor_box.cc:2255
-#, fuzzy
 msgid "Edit with generic controls..."
 msgstr "Изменить с интерфейсом хоста..."
 
@@ -8708,7 +8668,7 @@ msgstr ""
 
 #: rc_option_editor.cc:819
 msgid "Advanced Setup (remote video server)"
-msgstr ""
+msgstr "Дополнительные параметры (удалённого видеосервера)"
 
 #: rc_option_editor.cc:827
 msgid ""
@@ -8718,7 +8678,7 @@ msgstr ""
 
 #: rc_option_editor.cc:829
 msgid "Video Server URL:"
-msgstr ""
+msgstr "URL видеосервера:"
 
 #: rc_option_editor.cc:834
 msgid ""
@@ -8728,9 +8688,8 @@ msgid ""
 msgstr ""
 
 #: rc_option_editor.cc:836
-#, fuzzy
 msgid "Video Folder:"
-msgstr "Папка:"
+msgstr "Папка с видео:"
 
 #: rc_option_editor.cc:841
 msgid ""
@@ -9365,9 +9324,8 @@ msgstr "Следуют порядку редактора"
 #: rc_option_editor.cc:1838 rc_option_editor.cc:1846 rc_option_editor.cc:1856
 #: rc_option_editor.cc:1877 rc_option_editor.cc:1886 rc_option_editor.cc:1894
 #: rc_option_editor.cc:1908 rc_option_editor.cc:1925
-#, fuzzy
 msgid "Preferences|GUI"
-msgstr "Параметры"
+msgstr "Интерфейс"
 
 #: rc_option_editor.cc:1841
 msgid "Graphically indicate mouse pointer hovering over various widgets"
@@ -10801,13 +10759,13 @@ msgstr ""
 #: sfdb_ui.cc:960
 msgid "%1 more page of 100 results available"
 msgid_plural "%1 more pages of 100 results available"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "Ещё %1 страница из 100 доступных"
+msgstr[1] "Ещё %1 страницы из 100 доступных"
+msgstr[2] "Ещё %1 страниц из 100 доступных"
 
 #: sfdb_ui.cc:965
 msgid "No more results available"
-msgstr ""
+msgstr "Больше результатов нет"
 
 #: sfdb_ui.cc:1029
 msgid "B"
@@ -11976,18 +11934,16 @@ msgid "VerboseCanvasCursor"
 msgstr "VerboseCanvasCursor"
 
 #: add_video_dialog.cc:54
-#, fuzzy
 msgid "Set Video Track"
-msgstr "Добавить звуковую дорожку"
+msgstr "Установка видеодорожки"
 
 #: add_video_dialog.cc:62
-#, fuzzy
 msgid "Launch External Video Monitor"
-msgstr "Внешний контроль"
+msgstr "Запустить внешний видеомонитор"
 
 #: add_video_dialog.cc:63
 msgid "Adjust Session Framerate to Match Video Framerate"
-msgstr ""
+msgstr "Подогнать частоту кадров сеанса к частоте кадров видео"
 
 #: add_video_dialog.cc:65
 msgid "Reload docroot"
@@ -11998,62 +11954,64 @@ msgid "VideoServerIndex"
 msgstr ""
 
 #: add_video_dialog.cc:128
-#, fuzzy
 msgid "Video files"
-msgstr "Звуковые файлы"
+msgstr "Видеофайлы"
 
 #: add_video_dialog.cc:163
-#, fuzzy
 msgid "<b>Video Information</b>"
-msgstr "<b>Информация о файле</b>"
+msgstr "<b>Информация о видеофайле</b>"
 
 #: add_video_dialog.cc:166
-#, fuzzy
 msgid "Start:"
-msgstr "Начало"
+msgstr "Начало:"
 
 #: add_video_dialog.cc:172
-#, fuzzy
 msgid "Frame rate:"
-msgstr "Частота сэмплирования:"
+msgstr "Частота кадров::"
 
 #: add_video_dialog.cc:175
 msgid "Aspect Ratio:"
-msgstr ""
+msgstr "Соотношение сторон:"
 
 #: add_video_dialog.cc:653
 msgid " %1 fps"
-msgstr ""
+msgstr " %1 к/с"
 
 #: editor_videotimeline.cc:138
-#, fuzzy
 msgid "Export Successful: %1"
-msgstr "Экспорт MIDI: %1"
+msgstr "Экспорт успешно завершён: %1"
 
-#: video_timeline.cc:467
+#: video_timeline.cc:468
 msgid ""
 "Parsing video file info failed. Is the Video Server running? Is the file "
 "readable by the Video Server? Does the docroot match? Is it a video file?"
 msgstr ""
 
-#: video_timeline.cc:501
+#: video_timeline.cc:505
 msgid "Failed to set session-framerate: "
 msgstr ""
 
-#: video_timeline.cc:501
+#: video_timeline.cc:505
 msgid " does not have a corresponding option setting in Ardour."
 msgstr ""
 
-#: video_timeline.cc:507
+#: video_timeline.cc:511
 msgid ""
 "Video file's framerate is not equal to Ardour session timecode's framerate: "
 msgstr ""
 
-#: video_timeline.cc:508
+#: video_timeline.cc:512
 msgid " vs "
 msgstr ""
 
-#: video_timeline.cc:690
+#: video_timeline.cc:583
+msgid ""
+"Video-server docroot mismatch. Ardour: '%1', video-server: '%2'. This "
+"usually means that the video server was not started by ardour and uses a "
+"different document-root."
+msgstr ""
+
+#: video_timeline.cc:732
 msgid ""
 "Video-monitor 'xjadeo' was not found. Please install http://xjadeo.sf.net/ "
 "(a custom path to xjadeo can be specified by setting the XJREMOTE "
@@ -12061,10 +12019,9 @@ msgid ""
 "xjadeo's remote-control interface 'xjremote')."
 msgstr ""
 
-#: video_monitor.cc:282
-#, fuzzy
+#: video_monitor.cc:281
 msgid "Video Monitor: File Not Found."
-msgstr "Монитор"
+msgstr "Видеомонитор: файл не найден"
 
 #: transcode_ffmpeg.cc:71
 msgid ""
@@ -12083,23 +12040,20 @@ msgid ""
 msgstr ""
 
 #: transcode_video_dialog.cc:55
-#, fuzzy
 msgid "Transcode/Import Video File "
-msgstr "Экспортировать в файл"
+msgstr "Импортировать/перекодировать видеофайл"
 
 #: transcode_video_dialog.cc:57
-#, fuzzy
 msgid "Output File:"
-msgstr "Устройство выхода:"
+msgstr "Файл вывода:"
 
 #: transcode_video_dialog.cc:60 export_video_dialog.cc:72
 msgid "Abort"
 msgstr ""
 
 #: transcode_video_dialog.cc:62
-#, fuzzy
 msgid "Height = "
-msgstr "Высота"
+msgstr "Высота = "
 
 #: transcode_video_dialog.cc:65
 msgid "Manual Override"
@@ -12110,7 +12064,6 @@ msgid "Debug Mode: Print ffmpeg Command and Output to stdout."
 msgstr ""
 
 #: transcode_video_dialog.cc:106
-#, fuzzy
 msgid "<b>File Information</b>"
 msgstr "<b>Информация о файле</b>"
 
@@ -12129,20 +12082,19 @@ msgstr ""
 
 #: transcode_video_dialog.cc:133
 msgid "FPS:"
-msgstr ""
+msgstr "К/с:"
 
 #: transcode_video_dialog.cc:135
-#, fuzzy
 msgid "Duration:"
-msgstr "Длительность"
+msgstr "Длительность:"
 
 #: transcode_video_dialog.cc:137
 msgid "Codec:"
-msgstr ""
+msgstr "Кодек:"
 
 #: transcode_video_dialog.cc:139
 msgid "Geometry:"
-msgstr ""
+msgstr "Геометрия:"
 
 #: transcode_video_dialog.cc:154
 #, fuzzy
@@ -12150,71 +12102,64 @@ msgid "??"
 msgstr "???"
 
 #: transcode_video_dialog.cc:175
-#, fuzzy
 msgid "<b>Import Settings</b>"
-msgstr "<b>Параметры</b>"
+msgstr "<b>Параметры импорта</b>"
 
 #: transcode_video_dialog.cc:180
 msgid "Do Not Import Video"
-msgstr ""
+msgstr "Не импортировать видео"
 
 #: transcode_video_dialog.cc:181
 msgid "Reference From Current Location"
 msgstr ""
 
 #: transcode_video_dialog.cc:183
-#, fuzzy
 msgid "Import/Transcode Video to Session"
-msgstr "Импортировать из сеанса"
+msgstr "Импортировать/перекодировать видео в сеанс"
 
 #: transcode_video_dialog.cc:197
 msgid "Scale Video: Width = "
-msgstr ""
+msgstr "Масштаб видео: Ширина = "
 
 #: transcode_video_dialog.cc:204
-#, fuzzy
 msgid "Original Width"
-msgstr "Исходное положение"
+msgstr "Исходная ширина"
 
 #: transcode_video_dialog.cc:219
 msgid "Bitrate (KBit/s):"
-msgstr ""
+msgstr "Скорость потока (Кбит/с):"
 
 #: transcode_video_dialog.cc:224
-#, fuzzy
 msgid "Extract Audio:"
-msgstr "Экспортировать звук"
+msgstr "Извлечь звук:"
 
 #: transcode_video_dialog.cc:344
-#, fuzzy
 msgid "Extracting Audio.."
-msgstr "Экспортировать звук"
+msgstr "Извлекается звук..."
 
 #: transcode_video_dialog.cc:347
 msgid "Audio Extraction Failed."
-msgstr ""
+msgstr "Не удалось извлечь звуковую дорожку."
 
 #: transcode_video_dialog.cc:373
 msgid "Transcoding Video.."
 msgstr ""
 
 #: transcode_video_dialog.cc:407
-#, fuzzy
 msgid "Transcoding Failed."
-msgstr "Локализация включена"
+msgstr "Не удалось выполнить перекодирование."
 
 #: transcode_video_dialog.cc:490
-#, fuzzy
 msgid "Save Transcoded Video File"
-msgstr "Экспортировать в файл"
+msgstr "Сохранить перекодированный видеофайл"
 
 #: video_server_dialog.cc:42
 msgid "Launch Video Server"
-msgstr ""
+msgstr "Запустить видеосервер"
 
 #: video_server_dialog.cc:43
 msgid "Server Executable:"
-msgstr ""
+msgstr "Исполняемый файл сервера:"
 
 #: video_server_dialog.cc:45
 #, fuzzy
@@ -12223,7 +12168,7 @@ msgstr "Сервер:"
 
 #: video_server_dialog.cc:51
 msgid "Don't show this dialog again. (Reset in Edit->Preferences)."
-msgstr ""
+msgstr "Больше не показывать этот диалог"
 
 #: video_server_dialog.cc:90
 msgid ""
@@ -12234,17 +12179,15 @@ msgstr ""
 
 #: video_server_dialog.cc:117
 msgid "Listen Address:"
-msgstr ""
+msgstr "Слушать адрес:"
 
 #: video_server_dialog.cc:122
-#, fuzzy
 msgid "Listen Port:"
-msgstr "Положение прослушивания"
+msgstr "Слушать порт:"
 
 #: video_server_dialog.cc:127
-#, fuzzy
 msgid "Cache Size:"
-msgstr "Макс. размер"
+msgstr "Размер кэша:"
 
 #: video_server_dialog.cc:132
 msgid ""
@@ -12273,12 +12216,11 @@ msgstr ""
 
 #: utils_videotl.cc:56
 msgid "Continue"
-msgstr ""
+msgstr "Дальше"
 
 #: utils_videotl.cc:62
-#, fuzzy
 msgid "Confirm Overwrite"
-msgstr "Подтвердите перезапись снимка"
+msgstr "Подтвердите перезапись"
 
 #: utils_videotl.cc:63
 #, fuzzy
@@ -12291,35 +12233,32 @@ msgid "Cannot create video folder \"%1\" (%2)"
 msgstr "Не удалось создать пользовательскую папку %3:  %1 (%2)"
 
 #: export_video_dialog.cc:65
-#, fuzzy
 msgid "Export Video File "
-msgstr "Экспортировать в файл"
+msgstr "Экспортировать видеофайл"
 
 #: export_video_dialog.cc:69
-#, fuzzy
 msgid "Video:"
-msgstr "Mike Start"
+msgstr "Видео:"
 
 #: export_video_dialog.cc:73
 msgid "Scale Video (W x H):"
-msgstr ""
+msgstr "Масштабирование видео (В×Ш):"
 
 #: export_video_dialog.cc:78
 msgid "Set Aspect Ratio:"
-msgstr ""
+msgstr "Указать соотношение сторон:"
 
 #: export_video_dialog.cc:79
-#, fuzzy
 msgid "Normalize Audio"
-msgstr "Нормировать до:"
+msgstr "Нормировать звук"
 
 #: export_video_dialog.cc:80
 msgid "2 Pass Encoding"
-msgstr ""
+msgstr "Кодирование в два прохода"
 
 #: export_video_dialog.cc:81
 msgid "Codec Optimizations:"
-msgstr ""
+msgstr "Оптимизация кодека:"
 
 #: export_video_dialog.cc:83
 #, fuzzy
@@ -12328,20 +12267,19 @@ msgstr "Указатель по центру"
 
 #: export_video_dialog.cc:84
 msgid "Use [2] B-frames (MPEG 2 or 4 only)"
-msgstr ""
+msgstr "Использовать [2] B-кадры (только MPEG 2 или 4)"
 
 #: export_video_dialog.cc:85
 msgid "Override FPS (Default is to retain FPS from the input video file):"
-msgstr ""
+msgstr "Принудительно указать свою частоту кадров:"
 
 #: export_video_dialog.cc:86
-#, fuzzy
 msgid "Include Session Metadata"
-msgstr "Метаданные сеанса"
+msgstr "Включить метаданные сеанса"
 
 #: export_video_dialog.cc:88
 msgid "Enable Debug Mode: Print ffmpeg Command & Output to stdout."
-msgstr ""
+msgstr "Включить режим отладки: направлять вывод ffmpeg в stdout"
 
 #: export_video_dialog.cc:106
 msgid ""
@@ -12351,79 +12289,76 @@ msgid ""
 msgstr ""
 
 #: export_video_dialog.cc:116
-#, fuzzy
 msgid "<b>Output:</b>"
-msgstr "<b>Выходы</b>"
+msgstr "<b>Выход:</b>"
 
 #: export_video_dialog.cc:126
-#, fuzzy
 msgid "<b>Input:</b>"
-msgstr "<b>Входы</b>"
+msgstr "<b>Вход:</b>"
 
 #: export_video_dialog.cc:137
-#, fuzzy
 msgid "Audio:"
-msgstr "Audio"
+msgstr "Звук:"
 
 #: export_video_dialog.cc:139
-#, fuzzy
 msgid "Master Bus"
 msgstr "Мастер-шина"
 
+#: export_video_dialog.cc:144
+msgid "from the %1 session's start to the session's end"
+msgstr "от начала до конца сеанса %1"
+
+#: export_video_dialog.cc:148
+msgid "from 00:00:00:00 to the video's end"
+msgstr "от 00:00:00:00 до конца видео"
+
+#: export_video_dialog.cc:150
+msgid "from the video's start to the video's end"
+msgstr "от начала до конца видео"
+
 #: export_video_dialog.cc:166
-#, fuzzy
 msgid "<b>Settings:</b>"
-msgstr "<b>Назначения</b>"
+msgstr "<b>Параметры:</b>"
 
 #: export_video_dialog.cc:174
-#, fuzzy
 msgid "Range:"
-msgstr "Диапазон"
+msgstr "Диапазон:"
 
 #: export_video_dialog.cc:177
-#, fuzzy
 msgid "Preset:"
-msgstr "Профиль"
+msgstr "Профиль:"
 
 #: export_video_dialog.cc:180
-#, fuzzy
 msgid "Video Codec:"
-msgstr "Папка:"
+msgstr "Видеокодек:"
 
 #: export_video_dialog.cc:183
-#, fuzzy
 msgid "Video KBit/s:"
-msgstr "Mike Start"
+msgstr "Скорость видеопотока (Кбит/с):"
 
 #: export_video_dialog.cc:186
-#, fuzzy
 msgid "Audio Codec:"
-msgstr "Звуковой режим:"
+msgstr "Звуковой кодек:"
 
 #: export_video_dialog.cc:189
-#, fuzzy
 msgid "Audio KBit/s:"
-msgstr "Звуковые файлы"
+msgstr "Скорость звукового потока (Кбит/с):"
 
 #: export_video_dialog.cc:192
-#, fuzzy
 msgid "Audio Samplerate:"
-msgstr "Частота сэмплирования:"
+msgstr "Частота сэмплирования звука:"
 
 #: export_video_dialog.cc:369
-#, fuzzy
 msgid "Normalizing audio"
-msgstr "Нормировать значения"
+msgstr "Выполняется нормировка звука"
 
 #: export_video_dialog.cc:373
-#, fuzzy
 msgid "Exporting audio"
-msgstr "Экспортировать звук"
+msgstr ""
 
 #: export_video_dialog.cc:419
-#, fuzzy
-msgid "Exporting Audio.."
-msgstr "Экспортировать звук"
+msgid "Exporting Audio..."
+msgstr "Экспортируется звук..."
 
 #: export_video_dialog.cc:476
 msgid ""
@@ -12436,8 +12371,8 @@ msgid "Export Video: No Master Out Ports to Connect for Audio Export"
 msgstr ""
 
 #: export_video_dialog.cc:544
-msgid "Encoding Video.."
-msgstr ""
+msgid "Encoding Video..."
+msgstr "Кодируется видео..."
 
 #: export_video_dialog.cc:563
 msgid "Export Video: Video input file cannot be read."
@@ -12445,26 +12380,23 @@ msgstr ""
 
 #: export_video_dialog.cc:661
 msgid "Encoding Video.. Pass 1/2"
-msgstr ""
+msgstr "Выполняется кодирование видео. Проход 1/2."
 
 #: export_video_dialog.cc:673
 msgid "Encoding Video.. Pass 2/2"
-msgstr ""
+msgstr "Выполняется кодирование видео. Проход 2/2."
 
 #: export_video_dialog.cc:761
-#, fuzzy
 msgid "Transcoding failed."
-msgstr "Локализация включена"
+msgstr "Не удалось выполнить перекодировку."
 
 #: export_video_dialog.cc:930 export_video_dialog.cc:950
-#, fuzzy
 msgid "Save Exported Video File"
-msgstr "Экспортировать в файл"
+msgstr "Сохранить экспортированный видеофайл"
 
 #: export_video_infobox.cc:30
-#, fuzzy
 msgid "Video Export Info"
-msgstr "Монитор"
+msgstr ""
 
 #: export_video_infobox.cc:31
 msgid "Do Not Show This Dialog Again (Reset in Edit > Preferences > Video)."
@@ -12501,6 +12433,14 @@ msgid ""
 "doubt, use one of the built-in presets."
 msgstr ""
 
+#~ msgid "Control surfaces"
+#~ msgstr "Устройства управления"
+
+#~ msgid "Use plugins' own interfaces instead of %1's"
+#~ msgstr ""
+#~ "По возможности использовать собственный интерфейс модулей вместо "
+#~ "интерфейса %1"
+
 #~ msgid "Connect"
 #~ msgstr "Соединить"
 
@@ -12515,14 +12455,6 @@ msgstr ""
 
 #~ msgid "Add MIDI Track"
 #~ msgstr "Добавить MIDI-дорожку"
-
-#~ msgid "Control surfaces"
-#~ msgstr "Устройства управления"
-
-#~ msgid "Use plugins' own interfaces instead of %1's"
-#~ msgstr ""
-#~ "По возможности использовать собственный интерфейс модулей вместо "
-#~ "интерфейса %1"
 
 #~ msgid "Hid"
 #~ msgstr "Скрытый"
