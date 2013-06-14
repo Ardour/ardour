@@ -54,6 +54,7 @@
 
 #include "ardour/audio_library.h"
 #include "ardour/rc_configuration.h"
+#include "pbd/pthread_utils.h"
 
 using namespace PBD;
 
@@ -119,7 +120,8 @@ size_t Mootcher::WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void 
 
 //------------------------------------------------------------------------
 
-std::string Mootcher::sortMethodString(enum sortMethod sort) {
+std::string Mootcher::sortMethodString(enum sortMethod sort)
+{
 // given a sort type, returns the string value to be passed to the API to
 // sort the results in the requested way.
 
@@ -199,6 +201,18 @@ std::string Mootcher::doRequest(std::string uri, std::string params)
 	return result;
 }
 
+
+std::string Mootcher::searchSimilar(std::string id)
+{
+	std::string params = "";
+
+	params += "&fields=id,original_filename,duration,filesize,samplerate,license,serve";
+	params += "&num_results=100";
+
+	return doRequest("/sounds/" + id + "/similar", params);
+}
+
+//------------------------------------------------------------------------
 
 std::string Mootcher::searchText(std::string query, int page, std::string filter, enum sortMethod sort)
 {
@@ -294,9 +308,62 @@ int audioFileWrite(void *buffer, size_t size, size_t nmemb, void *file)
 };
 
 //------------------------------------------------------------------------
-std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID, std::string audioURL, SoundFileBrowser *caller)
+
+void *
+Mootcher::threadFunc() {
+CURLcode res;
+
+	res = curl_easy_perform (curl);
+	fclose (theFile);
+	curl_easy_setopt (curl, CURLOPT_NOPROGRESS, 1); // turn off the progress bar
+	
+	if (res != CURLE_OK) {
+		/* it's not an error if the user pressed the stop button */
+		if (res != CURLE_ABORTED_BY_CALLBACK) {
+			error <<  string_compose (_("curl error %1 (%2)"), res, curl_easy_strerror(res)) << endmsg;
+		}
+		remove ( (audioFileName+".part").c_str() );  
+	} else {
+		rename ( (audioFileName+".part").c_str(), audioFileName.c_str() );
+		// now download the tags &c.
+		getSoundResourceFile(ID);
+	}
+
+	return (void *) res;
+}
+
+static int 
+donewithMootcher(void *arg) 
+{
+	Mootcher *thisMootcher = (Mootcher *) arg;
+
+	// update the sound info pane if the selection in the list box is still us 
+	thisMootcher->sfb->refresh_display(thisMootcher->ID, thisMootcher->audioFileName);
+
+	delete(thisMootcher);
+	return 0;
+}
+
+static void *
+freesound_download_thread_func(void *arg) 
+{ 
+	Mootcher *thisMootcher = (Mootcher *) arg;
+	void *res;
+
+	// std::cerr << "freesound_download_thread_func(" << arg << ")" << std::endl;
+	res = thisMootcher->threadFunc();
+	g_idle_add(donewithMootcher, thisMootcher);
+
+	return res;
+}
+
+
+//------------------------------------------------------------------------
+
+bool Mootcher::checkAudioFile(std::string originalFileName, std::string theID)
 {
 	ensureWorkingDir();
+	ID = theID;
 	audioFileName = Glib::build_filename (basePath, ID + "-" + originalFileName);
 
 	// check to see if audio file already exists
@@ -305,29 +372,31 @@ std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID,
 		fseek (testFile , 0 , SEEK_END);
 		if (ftell (testFile) > 256) {
 			fclose (testFile);
-			return audioFileName;
+			return true;
 		}
 		
-		// else file was small, probably an error, delete it and try again
+		// else file was small, probably an error, delete it 
 		fclose(testFile);
 		remove( audioFileName.c_str() );  
 	}
+	return false;
+}
+
+
+bool Mootcher::fetchAudioFile(std::string originalFileName, std::string theID, std::string audioURL, SoundFileBrowser *caller)
+{
+	ensureWorkingDir();
+	ID = theID;
+	audioFileName = Glib::build_filename (basePath, ID + "-" + originalFileName);
 
 	if (!curl) {
-		return "";
+		return false;
 	}
-
-	// if already cancelling a previous download, bail out here  ( this can happen b/c getAudioFile gets called by various UI update funcs )
-	if ( caller->freesound_download_cancel ) {
-		return "";
-	}
-	
 	// now download the actual file
-	FILE* theFile;
-	theFile = g_fopen( audioFileName.c_str(), "wb" );
+	theFile = g_fopen( (audioFileName + ".part").c_str(), "wb" );
 
 	if (!theFile) {
-		return "";
+		return false;
 	}
 	
 	// create the download url
@@ -338,57 +407,71 @@ std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID,
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, audioFileWrite);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, theFile);
 
-	/* hack to get rid of the barber-pole stripes */
-	caller->freesound_progress_bar.hide();
-	caller->freesound_progress_bar.show();
-
 	std::string prog;
 	prog = string_compose (_("%1"), originalFileName);
-	caller->freesound_progress_bar.set_text(prog);
+	progress_bar.set_text(prog);
+
+	Gtk::VBox *freesound_vbox = dynamic_cast<Gtk::VBox *> (caller->notebook.get_nth_page(2));
+	freesound_vbox->pack_start(progress_hbox, Gtk::PACK_SHRINK);
+	progress_hbox.show();
+	cancel_download = false;
+	sfb = caller;
 
 	curl_easy_setopt (curl, CURLOPT_NOPROGRESS, 0); // turn on the progress bar
 	curl_easy_setopt (curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
-	curl_easy_setopt (curl, CURLOPT_PROGRESSDATA, caller);
+	curl_easy_setopt (curl, CURLOPT_PROGRESSDATA, this);
 
-	CURLcode res = curl_easy_perform(curl);
-	fclose(theFile);
+	pthread_t freesound_download_thread;
+	pthread_create_and_store("freesound_import", &freesound_download_thread, freesound_download_thread_func, this);
 
-	curl_easy_setopt (curl, CURLOPT_NOPROGRESS, 1); // turn off the progress bar
-	caller->freesound_progress_bar.set_fraction(0.0);
-	caller->freesound_progress_bar.set_text("");
-	
-	if( res != 0 ) {
-		/* it's not an error if the user pressed the stop button */
-		if (res != CURLE_ABORTED_BY_CALLBACK) {
-			error <<  string_compose (_("curl error %1 (%2)"), res, curl_easy_strerror(res)) << endmsg;
-		}
-		remove( audioFileName.c_str() );  
-		return "";
-	} else {
-		// now download the tags &c.
-		getSoundResourceFile(ID);
-	}
-
-	return audioFileName;
+	return true;
 }
 
 //---------
-int Mootcher::progress_callback(void *caller, double dltotal, double dlnow, double /*ultotal*/, double /*ulnow*/)
-{
+struct progressInfo {
+	Gtk::ProgressBar *bar;
+	double dltotal;
+	double dlnow;
+};
 
-SoundFileBrowser *sfb = (SoundFileBrowser *) caller;
-	//XXX I hope it's OK to do GTK things in this callback. Otherwise
-	// I'll have to do stuff like in interthread_progress_window.
-	if (sfb->freesound_download_cancel) {
+static int 
+updateProgress(void *arg) 
+{
+	struct progressInfo *progress = (struct progressInfo *) arg;
+	if (progress->dltotal > 0) {
+		double fraction = progress->dlnow / progress->dltotal;
+		// std::cerr << "progress idle: " << progress->bar->get_text() << ". " << progress->dlnow << " / " << progress->dltotal << " = " << fraction << std::endl;
+		if (fraction > 1.0) {
+			fraction = 1.0;
+		} else if (fraction < 0.0) {
+			fraction = 0.0;
+		}
+		progress->bar->set_fraction(fraction);
+	}
+
+	delete progress;
+	return 0;
+}
+
+int 
+Mootcher::progress_callback(void *caller, double dltotal, double dlnow, double /*ultotal*/, double /*ulnow*/)
+{
+	// It may seem curious to pass a pointer to an instance of an object to a static
+	// member function, but we can't use a normal member function as a curl progress callback,
+	// and we want access to some private members of Mootcher.
+
+	Mootcher *thisMootcher = (Mootcher *) caller;
+	
+	if (thisMootcher->cancel_download) {
 		return -1;
 	}
-	
-	
-	sfb->freesound_progress_bar.set_fraction(dlnow/dltotal);
-	/* Make sure the progress widget gets updated */
-	while (Glib::MainContext::get_default()->iteration (false)) {
-		/* do nothing */
-	}
+
+	struct progressInfo *progress = new struct progressInfo;
+	progress->bar = &thisMootcher->progress_bar;
+	progress->dltotal = dltotal;
+	progress->dlnow = dlnow;
+
+	g_idle_add(updateProgress, progress);
 	return 0;
 }
 

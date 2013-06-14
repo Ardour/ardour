@@ -71,8 +71,14 @@ public:
 	Mootcher();
 	~Mootcher();
 
-	std::string	getAudioFile(std::string originalFileName, std::string ID, std::string audioURL, SoundFileBrowser *caller);
+	bool		checkAudioFile(std::string originalFileName, std::string ID);
+	bool		fetchAudioFile(std::string originalFileName, std::string ID, std::string audioURL, SoundFileBrowser *caller);
 	std::string	searchText(std::string query, int page, std::string filter, enum sortMethod sort);
+	std::string	searchSimilar(std::string id);
+	void *		threadFunc();
+	SoundFileBrowser *sfb; 
+	std::string	audioFileName;
+	std::string	ID;
 
 private:
 
@@ -88,6 +94,18 @@ private:
 
 	CURL *curl;
 	char errorBuffer[CURL_ERROR_SIZE];	// storage for cUrl error message
+
+	FILE* theFile;
+
+	Gtk::HBox progress_hbox;
+	Gtk::ProgressBar progress_bar;
+	Gtk::Button cancel_download_btn;
+
+	bool cancel_download;
+	void cancelDownload() { 
+		cancel_download = true;
+		progress_hbox.hide();
+	}
 
 	std::string basePath;
 	std::string xmlLocation;
