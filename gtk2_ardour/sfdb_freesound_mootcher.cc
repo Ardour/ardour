@@ -53,6 +53,7 @@
 #include "i18n.h"
 
 #include "ardour/audio_library.h"
+#include "ardour/rc_configuration.h"
 
 using namespace PBD;
 
@@ -63,9 +64,12 @@ static const std::string api_key = "9d77cb8d841b4bcfa960e1aae62224eb"; // ardour
 Mootcher::Mootcher()
 	: curl(curl_easy_init())
 {
-	std::string path;
-	path = Glib::get_home_dir() + "/Freesound/";
-	changeWorkingDir ( path.c_str() );
+	cancel_download_btn.set_label (_("Cancel"));
+	progress_hbox.pack_start (progress_bar, true, true);
+	progress_hbox.pack_end (cancel_download_btn, false, false);
+	progress_bar.show();
+	cancel_download_btn.show();
+	cancel_download_btn.signal_clicked().connect(sigc::mem_fun (*this, &Mootcher::cancelDownload));
 };
 //------------------------------------------------------------------------
 Mootcher:: ~Mootcher()
@@ -74,9 +78,17 @@ Mootcher:: ~Mootcher()
 }
 
 //------------------------------------------------------------------------
-void Mootcher::changeWorkingDir(const char *saveLocation)
+
+void Mootcher::ensureWorkingDir ()
 {
-	basePath = saveLocation;
+	std::string p = ARDOUR::Config->get_freesound_download_dir();
+
+	if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
+		if (g_mkdir_with_parents (p.c_str(), 0775) != 0) {
+			PBD::error << "Unable to create Mootcher working dir" << endmsg;
+		}
+	}
+	basePath = p;
 #ifdef __WIN32__
 	std::string replace = "/";
 	size_t pos = basePath.find("\\");
@@ -85,20 +97,6 @@ void Mootcher::changeWorkingDir(const char *saveLocation)
 		pos = basePath.find("\\");
 	}
 #endif
-	//
-	size_t pos2 = basePath.find_last_of("/");
-	if(basePath.length() != (pos2+1)) basePath += "/";
-}
-
-void Mootcher::ensureWorkingDir ()
-{
-	std::string p = Glib::build_filename (basePath, "snd");
-
-	if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
-		if (g_mkdir_with_parents (p.c_str(), 0775) != 0) {
-			PBD::error << "Unable to create Mootcher working dir" << endmsg;
-		}
-	}
 }
 	
 
@@ -264,7 +262,7 @@ std::string Mootcher::getSoundResourceFile(std::string ID)
 	// get the file name and size from xml file
 	if (name) {
 
-		audioFileName = basePath + "snd/" + ID + "-" + name->child("text")->content();
+		audioFileName = Glib::build_filename (basePath, ID + "-" + name->child("text")->content());
 
 		//store all the tags in the database
 		XMLNode *tags = freesound->child("tags");
@@ -299,7 +297,7 @@ int audioFileWrite(void *buffer, size_t size, size_t nmemb, void *file)
 std::string Mootcher::getAudioFile(std::string originalFileName, std::string ID, std::string audioURL, SoundFileBrowser *caller)
 {
 	ensureWorkingDir();
-	std::string audioFileName = basePath + "snd/" + ID + "-" + originalFileName;
+	audioFileName = Glib::build_filename (basePath, ID + "-" + originalFileName);
 
 	// check to see if audio file already exists
 	FILE *testFile = g_fopen(audioFileName.c_str(), "r");
