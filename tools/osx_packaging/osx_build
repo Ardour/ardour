@@ -611,7 +611,7 @@ hdiutil eject "${DiskDevice}"
 hdiutil convert -format UDZO "${TMPDMG}" -imagekey zlib-level=9 -o "${UC_DMG}"
 # Delete the temporary files
 rm "$TMPDMG"
-rmdir "$MNTPATH"
+rm -rf "$MNTPATH"
 
 echo "setting file icon ..."
 
