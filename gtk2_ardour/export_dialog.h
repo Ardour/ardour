@@ -75,9 +75,6 @@ class ExportDialog : public ArdourDialog {
 	// Must initialize all the shared_ptrs below
 	virtual void init_components ();
 
-	// Override if the channel selector should not be grown
-	virtual bool channel_selector_is_expandable() { return true; }
-
 	boost::scoped_ptr<ExportPresetSelector>   preset_selector;
 	boost::scoped_ptr<ExportTimespanSelector> timespan_selector;
 	boost::scoped_ptr<ExportChannelSelector>  channel_selector;
@@ -86,14 +83,12 @@ class ExportDialog : public ArdourDialog {
 	Gtk::VBox                                 warning_widget;
 	Gtk::VBox                                 progress_widget;
 
-	Gtk::Label *                              timespan_label;
-	Gtk::Label *                              channels_label;
+	/*** GUI components ***/
+	Gtk::Notebook export_notebook;
 
   private:
 
 	void init ();
-
-	void expanded_changed();
 
 	void notify_errors ();
 	void close_dialog ();
@@ -112,10 +107,7 @@ class ExportDialog : public ArdourDialog {
 	PublicEditor &  editor;
 	StatusPtr       status;
 
-	/*** GUI components ***/
 
-	Glib::RefPtr<Gtk::SizeGroup> advanced_sizegroup;
-	Gtk::Expander * advanced;
 
 	/* Warning area */
 
@@ -169,9 +161,6 @@ class ExportRegionDialog : public ExportDialog
 {
   public:
 	ExportRegionDialog (PublicEditor & editor, ARDOUR::AudioRegion const & region, ARDOUR::AudioTrack & track);
-
-  protected:
-	virtual bool channel_selector_is_expandable() { return false; }
 
   private:
 	void init_gui ();

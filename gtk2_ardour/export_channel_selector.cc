@@ -458,15 +458,15 @@ RegionExportChannelSelector::RegionExportChannelSelector (ARDOUR::Session * _ses
 
 	raw_button.set_label (string_compose (_("Region contents without fades nor region gain (channels: %1)"), region_chans));
 	raw_button.signal_toggled ().connect (sigc::mem_fun (*this, &RegionExportChannelSelector::handle_selection));
-	vbox.pack_start (raw_button);
+	vbox.pack_start (raw_button, false, false);
 
 	fades_button.set_label (string_compose (_("Region contents with fades and region gain (channels: %1)"), region_chans));
 	fades_button.signal_toggled ().connect (sigc::mem_fun (*this, &RegionExportChannelSelector::handle_selection));
-	vbox.pack_start (fades_button);
+	vbox.pack_start (fades_button, false, false);
 
 	processed_button.set_label (string_compose (_("Track output (channels: %1)"), track_chans));
 	processed_button.signal_toggled ().connect (sigc::mem_fun (*this, &RegionExportChannelSelector::handle_selection));
-	vbox.pack_start (processed_button);
+	vbox.pack_start (processed_button, false, false);
 
 	sync_with_manager();
 	vbox.show_all_children ();
@@ -541,7 +541,7 @@ TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * sessio
 	// Options
 	options_box.pack_start(region_contents_button);
 	options_box.pack_start(track_output_button);
-	main_layout.pack_start(options_box);
+	main_layout.pack_start(options_box, false, false);
 
 	// Track scroller
 	track_scroller.add (track_view);
