@@ -122,7 +122,7 @@ class PortExportChannelSelector : public ExportChannelSelector
 		typedef Gtk::TreeModelColumn<Glib::RefPtr<Gtk::ListStore> > ComboCol;
 		ComboCol                             port_list_col;
 
-		/* Channel struct, that represents the selected port and it's name */
+		/* Channel struct, that represents the selected port and its name */
 
 		struct Channel {
 		  public:

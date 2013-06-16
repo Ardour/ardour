@@ -128,7 +128,7 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	Gtk::ScrolledWindow          range_scroller;
 };
 
-/// Allows seleting multiple timespans
+/// Allows selecting multiple timespans
 class ExportTimespanSelectorMultiple : public ExportTimespanSelector
 {
   public:
