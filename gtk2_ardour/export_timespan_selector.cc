@@ -105,6 +105,9 @@ ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, Profi
 	/* Range view */
 
 	range_list = Gtk::ListStore::create (range_cols);
+	// order by location start times
+	range_list->set_sort_column(range_cols.location, Gtk::SORT_ASCENDING);
+	range_list->set_sort_func(range_cols.location, sigc::mem_fun(*this, &ExportTimespanSelector::location_sorter));
 	range_view.set_model (range_list);
 	range_view.set_headers_visible (true);
 }
@@ -112,6 +115,22 @@ ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, Profi
 ExportTimespanSelector::~ExportTimespanSelector ()
 {
 
+}
+
+int
+ExportTimespanSelector::location_sorter(Gtk::TreeModel::iterator a, Gtk::TreeModel::iterator b)
+{
+	Location *l1 = (*a)[range_cols.location];
+	Location *l2 = (*b)[range_cols.location];
+	const Location *ls = _session->locations()->session_range_location();
+
+	// always sort session range first
+	if (l1 == ls)
+		return -1;
+	if (l2 == ls)
+		return +1;
+
+	return l1->start() - l2->start();
 }
 
 void
