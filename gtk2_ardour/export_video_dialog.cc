@@ -581,7 +581,7 @@ ExportVideoDialog::encode_pass (int pass)
 	ffs["-acodec"] = audio_codec_combo.get_active_text();
 
 	if (video_bitrate_combo.get_active_text() == "retain" ) {
-		ffs["-sameq"]  = "-y"; // we use '-y' as dummy parameter for non key/value options
+		ffs["-qscale"]  = "0";
 	} else {
 		ffs["-b:v"]  = video_bitrate_combo.get_active_text();
 	}
