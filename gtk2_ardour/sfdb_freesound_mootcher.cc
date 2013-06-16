@@ -55,6 +55,7 @@
 #include "ardour/audio_library.h"
 #include "ardour/rc_configuration.h"
 #include "pbd/pthread_utils.h"
+#include "gui_thread.h"
 
 using namespace PBD;
 
@@ -331,17 +332,15 @@ CURLcode res;
 
 	return (void *) res;
 }
-
-static int 
-donewithMootcher(void *arg) 
+ 
+void
+Mootcher::doneWithMootcher()
 {
-	Mootcher *thisMootcher = (Mootcher *) arg;
 
 	// update the sound info pane if the selection in the list box is still us 
-	thisMootcher->sfb->refresh_display(thisMootcher->ID, thisMootcher->audioFileName);
+	sfb->refresh_display(ID, audioFileName);
 
-	delete(thisMootcher);
-	return 0;
+	delete this; // XXX is this a good idea?
 }
 
 static void *
@@ -352,8 +351,8 @@ freesound_download_thread_func(void *arg)
 
 	// std::cerr << "freesound_download_thread_func(" << arg << ")" << std::endl;
 	res = thisMootcher->threadFunc();
-	g_idle_add(donewithMootcher, thisMootcher);
 
+	thisMootcher->Finished(); /* EMIT SIGNAL */
 	return res;
 }
 
@@ -421,6 +420,8 @@ bool Mootcher::fetchAudioFile(std::string originalFileName, std::string theID, s
 	curl_easy_setopt (curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
 	curl_easy_setopt (curl, CURLOPT_PROGRESSDATA, this);
 
+	Progress.connect(*this, invalidator (*this), boost::bind(&Mootcher::updateProgress, this, _1, _2), gui_context());
+	Finished.connect(*this, invalidator (*this), boost::bind(&Mootcher::doneWithMootcher, this), gui_context());
 	pthread_t freesound_download_thread;
 	pthread_create_and_store("freesound_import", &freesound_download_thread, freesound_download_thread_func, this);
 
@@ -428,29 +429,20 @@ bool Mootcher::fetchAudioFile(std::string originalFileName, std::string theID, s
 }
 
 //---------
-struct progressInfo {
-	Gtk::ProgressBar *bar;
-	double dltotal;
-	double dlnow;
-};
 
-static int 
-updateProgress(void *arg) 
+void 
+Mootcher::updateProgress(double dlnow, double dltotal) 
 {
-	struct progressInfo *progress = (struct progressInfo *) arg;
-	if (progress->dltotal > 0) {
-		double fraction = progress->dlnow / progress->dltotal;
+	if (dltotal > 0) {
+		double fraction = dlnow / dltotal;
 		// std::cerr << "progress idle: " << progress->bar->get_text() << ". " << progress->dlnow << " / " << progress->dltotal << " = " << fraction << std::endl;
 		if (fraction > 1.0) {
 			fraction = 1.0;
 		} else if (fraction < 0.0) {
 			fraction = 0.0;
 		}
-		progress->bar->set_fraction(fraction);
+		progress_bar.set_fraction(fraction);
 	}
-
-	delete progress;
-	return 0;
 }
 
 int 
@@ -466,12 +458,7 @@ Mootcher::progress_callback(void *caller, double dltotal, double dlnow, double /
 		return -1;
 	}
 
-	struct progressInfo *progress = new struct progressInfo;
-	progress->bar = &thisMootcher->progress_bar;
-	progress->dltotal = dltotal;
-	progress->dlnow = dlnow;
-
-	g_idle_add(updateProgress, progress);
+	thisMootcher->Progress(dlnow, dltotal); /* EMIT SIGNAL */
 	return 0;
 }
 

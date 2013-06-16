@@ -65,7 +65,7 @@ enum sortMethod {
 };
 
 
-class Mootcher
+class Mootcher: public sigc::trackable, public PBD::ScopedConnectionList
 {
 public:
 	Mootcher();
@@ -79,6 +79,14 @@ public:
 	SoundFileBrowser *sfb; 
 	std::string	audioFileName;
 	std::string	ID;
+
+	/** signal emitted when mootcher reports progress updates during download.
+	 * The parameters are current and total numbers of bytes downloaded.
+	 */
+	PBD::Signal2<void, double, double> Progress;
+	/** signal emitted when the mootcher has finished downloading. */
+	PBD::Signal0<void> Finished;
+
 
 private:
 
@@ -96,6 +104,9 @@ private:
 	char errorBuffer[CURL_ERROR_SIZE];	// storage for cUrl error message
 
 	FILE* theFile;
+
+	void updateProgress(double dlnow, double dltotal);
+	void doneWithMootcher();
 
 	Gtk::HBox progress_hbox;
 	Gtk::ProgressBar progress_bar;
