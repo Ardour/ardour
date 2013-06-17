@@ -340,7 +340,7 @@ Mootcher::doneWithMootcher()
 	// update the sound info pane if the selection in the list box is still us 
 	sfb->refresh_display(ID, audioFileName);
 
-	delete this; // XXX is this a good idea?
+	delete this; // this should be OK to do as long as Progress and Finished signals are always received in the order in which they are emitted
 }
 
 static void *
