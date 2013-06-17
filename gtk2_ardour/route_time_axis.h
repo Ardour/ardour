@@ -212,7 +212,6 @@ protected:
 	virtual void label_view ();
 
 	void reset_samples_per_pixel ();
-	void horizontal_position_changed ();
 
 	virtual void build_automation_action_menu (bool);
 	virtual void append_extra_display_menu_items () {}

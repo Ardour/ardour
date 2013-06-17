@@ -233,7 +233,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	} 
 
 	_editor.ZoomChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::reset_samples_per_pixel));
-	_editor.HorizontalPositionChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::horizontal_position_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::color_handler));
 
 	PropertyList* plist = new PropertyList();
@@ -893,14 +892,6 @@ void
 RouteTimeAxisView::reset_samples_per_pixel ()
 {
 	set_samples_per_pixel (_editor.get_current_zoom());
-}
-
-void
-RouteTimeAxisView::horizontal_position_changed ()
-{
-	if (_view) {
-		_view->horizontal_position_changed ();
-	}
 }
 
 void

@@ -75,7 +75,6 @@ public:
 
 	virtual int set_samples_per_pixel (double);
 	gdouble     get_samples_per_pixel () const { return _samples_per_pixel; }
-	virtual void horizontal_position_changed () {}
 
         virtual void enter_internal_edit_mode ();
         virtual void leave_internal_edit_mode ();
