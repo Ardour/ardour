@@ -3474,8 +3474,12 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 	add_video_dialog->hide();
 	if (r != RESPONSE_ACCEPT) { return; }
 
-	bool local_file;
+	bool local_file, orig_local_file;
 	std::string path = add_video_dialog->file_name(local_file);
+
+	std::string orig_path = path;
+	orig_local_file = local_file;
+
 	bool auto_set_session_fps = add_video_dialog->auto_set_session_fps();
 
 	if (local_file && !Glib::file_test(path, Glib::FILE_TEST_EXISTS)) {
@@ -3534,6 +3538,11 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 		node->add_property (X_("Filename"), path);
 		node->add_property (X_("AutoFPS"), auto_set_session_fps?X_("1"):X_("0"));
 		node->add_property (X_("LocalFile"), local_file?X_("1"):X_("0"));
+		if (orig_local_file) {
+			node->add_property (X_("OriginalVideoFile"), orig_path);
+		} else {
+			node->remove_property (X_("OriginalVideoFile"));
+		}
 		_session->add_extra_xml (*node);
 		_session->set_dirty ();
 
