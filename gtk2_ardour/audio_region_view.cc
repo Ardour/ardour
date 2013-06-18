@@ -234,8 +234,12 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	setup_waveform_shape ();
 	setup_waveform_scale ();
 
-	frame_handle_start->raise_to_top ();
-	frame_handle_end->raise_to_top ();
+	if (frame_handle_start) {
+		frame_handle_start->raise_to_top ();
+	}
+	if (frame_handle_end) {
+		frame_handle_end->raise_to_top ();
+	}
 
 	/* XXX sync mark drag? */
 }
