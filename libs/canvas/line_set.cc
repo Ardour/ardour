@@ -73,8 +73,10 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		} else if (i->y > area.y0) {
 			set_source_rgba (context, i->color);
 			context->set_line_width (i->width);
-			context->move_to (area.x0, i->y);
-			context->line_to (area.x1, i->y);
+			Duple p0 = item_to_window (Duple (area.x0, i->y));
+			Duple p1 = item_to_window (Duple (area.x1, i->y));
+			context->move_to (p0.x, p0.y);
+			context->line_to (p1.x, p1.y);
 			context->stroke ();
 		}
 	}

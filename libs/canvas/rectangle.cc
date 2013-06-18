@@ -50,7 +50,7 @@ Rectangle::Rectangle (Group* parent, Rect const & rect)
 }
 
 void
-Rectangle::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) const
+Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	/* Cairo goes a little (!) wrong when asked to fill/stroke rectangles that
 	 * extend way beyond the surface boundaries. To avoid this issue,
@@ -58,17 +58,13 @@ Rectangle::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context)
 	 * canvas, converting to item-space coordinates, of course.
 	 */
 
-	Rect plot = _rect;
-	Rect visible = _canvas->visible_area();
-	Duple visible_end = canvas_to_item (Duple (visible.x1, visible.y1));
+	Rect self = item_to_window (_rect);
+	boost::optional<Rect> draw = self.intersection (area);
 
-	plot.x1 = min (plot.x1, visible_end.x);
-	plot.y1 = min (plot.y1, visible_end.y);	
-
-	if (_fill) {
+	if (_fill && draw) {
 		setup_fill_context (context);
-		cerr << "Fill rect: " << plot << endl;
-		context->rectangle (plot.x0, plot.y0, plot.width(), plot.height());
+
+		context->rectangle (draw->x0, draw->y0, draw->width(), draw->height());
 		
 		if (!_outline) {
 			context->fill ();
@@ -100,30 +96,30 @@ Rectangle::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context)
 			 */
 
 			if (!_fill) { 
-				context->rectangle (plot.x0, plot.y0, plot.width(), plot.height());
+				context->rectangle (draw->x0, draw->y0, draw->width(), draw->height());
 				context->stroke ();
 			}
 			
 		} else {
 			
 			if (_outline_what & LEFT) {
-				context->move_to (plot.x0, plot.y0);
-				context->line_to (plot.x0, plot.y1);
+				context->move_to (draw->x0, draw->y0);
+				context->line_to (draw->x0, draw->y1);
 			}
 			
 			if (_outline_what & BOTTOM) {
-				context->move_to (plot.x0, plot.y1);
-				context->line_to (plot.x1, plot.y1);
+				context->move_to (draw->x0, draw->y1);
+				context->line_to (draw->x1, draw->y1);
 			}
 			
 			if (_outline_what & RIGHT) {
-				context->move_to (plot.x1, plot.y0);
-				context->line_to (plot.x1, plot.y1);
+				context->move_to (draw->x1, draw->y0);
+				context->line_to (draw->x1, draw->y1);
 			}
 			
 			if (_outline_what & TOP) {
-				context->move_to (plot.x0, plot.y0);
-				context->line_to (plot.x1, plot.y0);
+				context->move_to (draw->x0, draw->y0);
+				context->line_to (draw->x1, draw->y0);
 			}
 			
 			context->stroke ();

@@ -78,8 +78,8 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		
 #ifdef CANVAS_DEBUG
 	if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-		cerr << string_compose ("%1GROUP %2 render %3 items out of %4\n", 
-					_canvas->render_indent(), (name.empty() ? string ("[unnamed]") : name), items.size(), _items.size());
+		cerr << string_compose ("%1GROUP %2 render %5 %3 items out of %4\n", 
+					_canvas->render_indent(), (name.empty() ? string ("[unnamed]") : name), items.size(), _items.size(), area);
 	}
 #endif
 
@@ -105,25 +105,18 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 			continue;
 		}
 
-		/* convert the render area to our child's coordinates */
-		Rect const item_area = (*i)->parent_to_item (area);
-
-		/* intersect the child's render area with the child's bounding box */
-		boost::optional<Rect> r = item_bbox.get().intersection (item_area);
-
-		if (r) {
-			/* render the intersection */
-			context->save ();
-			context->translate ((*i)->position().x, (*i)->position().y);
+		Rect item = (*i)->item_to_window (item_bbox.get());
+		boost::optional<Rect> draw = item.intersection (area);
+		
+		if (draw) {
 #ifdef CANVAS_DEBUG
 			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
 				cerr << string_compose ("%1render %2 %3\n", _canvas->render_indent(), (*i)->whatami(),
 							(*i)->name);
 			}
 #endif
-			(*i)->render (r.get(), context);
+			(*i)->render (draw.get(), context);
 			++render_count;
-			context->restore ();
 		} else {
 #ifdef CANVAS_DEBUG
 			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {

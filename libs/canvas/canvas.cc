@@ -38,7 +38,6 @@ using namespace ArdourCanvas;
 /** Construct a new Canvas */
 Canvas::Canvas ()
 	: _root (this)
-	, _log_renders (true)
 	, _scroll_offset_x (0)
 	, _scroll_offset_y (0)
 {
@@ -68,64 +67,21 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 	}
 #endif
 
-	// checkpoint ("render", "-> render");
 	render_count = 0;
 	
-	context->save ();
-
-#ifdef CANVAS_DEBUG
-	if (getenv ("ARDOUR_REDRAW_CANVAS")) {
-		/* light up the canvas to show redraws */
-		context->set_source_rgba (random()%255 / 255.0,
-					  random()%255 / 255.0,
-					  random()%255 / 255.0,
-					  0.3);
-		context->rectangle (area.x0, area.y0, area.width(), area.height());
-		context->fill ();
-	}
-#endif
-
-	/* clip to the requested area */
-	context->rectangle (area.x0, area.y0, area.width(), area.height());
-	context->clip ();
-
 	boost::optional<Rect> root_bbox = _root.bounding_box();
 	if (!root_bbox) {
 		/* the root has no bounding box, so there's nothing to render */
-		// checkpoint ("render", "no root bbox");
-		context->restore ();
 		return;
 	}
 
-	boost::optional<Rect> draw = root_bbox.get().intersection (area);
+	boost::optional<Rect> draw = root_bbox->intersection (area);
 	if (draw) {
 		/* there's a common area between the root and the requested
 		   area, so render it.
 		*/
-		// checkpoint ("render", "... root");
-		context->stroke ();
-
 		_root.render (*draw, context);
 	}
-
-	if (_log_renders) {
-		_renders.push_back (area);
-	}
-
-	context->restore ();
-
-#ifdef CANVAS_DEBUG
-	if (getenv ("ARDOUR_HARLEQUIN_CANVAS")) {
-		/* light up the canvas to show redraws */
-		context->set_source_rgba (random()%255 / 255.0,
-					  random()%255 / 255.0,
-					  random()%255 / 255.0,
-					  0.4);
-		context->rectangle (area.x0, area.y0, area.width(), area.height());
-		context->fill ();
-	}
-#endif
-	// checkpoint ("render", "<- render");
 }
 
 ostream&
@@ -502,29 +458,9 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 bool
 GtkCanvas::on_expose_event (GdkEventExpose* ev)
 {
-
 	Cairo::RefPtr<Cairo::Context> c = get_window()->create_cairo_context ();
-	
-	/* WINDOW  CANVAS
-	 * 0,0     _scroll_offset_x, _scroll_offset_y
-	 */
 
-	/* render using canvas coordinates */
-
-	Rect canvas_area (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height);
-	canvas_area  = canvas_area.translate (Duple (_scroll_offset_x, _scroll_offset_y));
-
-	/* things are going to render to the cairo surface with canvas
-	 * coordinates:
-	 *
-	 *  an item at window/cairo 0,0 will have canvas_coords _scroll_offset_x,_scroll_offset_y
-	 *
-	 * let them render at their natural coordinates by using cairo_translate()
-	 */
-
-	c->translate (-_scroll_offset_x, -_scroll_offset_y);
-
-	render (canvas_area, c);
+	render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), c);
 
 	return true;
 }

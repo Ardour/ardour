@@ -56,8 +56,10 @@ void
 Line::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) const
 {
 	setup_outline_context (context);
-	context->move_to (_points[0].x, _points[0].y);
-	context->line_to (_points[1].x, _points[1].y);
+	Duple p0 = item_to_window (Duple (_points[0].x, _points[0].y));
+	Duple p1 = item_to_window (Duple (_points[1].x, _points[1].y));
+	context->move_to (p0.x, p0.y);
+	context->line_to (p1.x, p1.y);
 	context->stroke ();
 }
 

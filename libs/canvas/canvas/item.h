@@ -57,7 +57,15 @@ public:
 	virtual ~Item ();
 
 	/** Render this item to a Cairo context.
-	 *  @param area Area to draw in this item's coordinates.
+	 *  @param area Area to draw, in **window** coordinates
+	 *
+	 *  Items must convert their own coordinates into window coordinates
+	 *  because Cairo is limited to a fixed point coordinate space that
+	 *  does not extend as far as the Ardour timeline. All rendering must
+	 *  be done using coordinates that do not exceed the (rough) limits
+	 *  of the canvas' window, to avoid odd errors within Cairo as it
+	 *  converts doubles into its fixed point format and then tesselates
+	 *  the results.
 	 */
 	virtual void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const = 0;
 
@@ -105,7 +113,12 @@ public:
         Duple canvas_to_item (Duple const &) const;
 	void item_to_canvas (Coord &, Coord &) const;
 	Rect item_to_canvas (Rect const &) const;
+	Rect canvas_to_item (Rect const &) const;
         Duple item_to_canvas (Duple const &) const;
+
+        Duple item_to_window (Duple const&) const;
+        Duple window_to_item (Duple const&) const;
+        Rect item_to_window (Rect const&) const;
 
 	void raise_to_top ();
 	void raise (int);

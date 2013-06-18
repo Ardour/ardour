@@ -127,6 +127,20 @@ Item::canvas_to_item (ArdourCanvas::Duple const & d) const
 	return d.translate (offset);
 }
 
+ArdourCanvas::Rect
+Item::canvas_to_item (ArdourCanvas::Rect const & d) const
+{
+	Item const * i = this;
+	Duple offset;
+
+	while (i) {
+		offset = offset.translate (-(i->position()));
+		i = i->parent();
+	}
+
+	return d.translate (offset);
+}
+
 void
 Item::item_to_canvas (Coord& x, Coord& y) const
 {
@@ -143,6 +157,24 @@ Item::canvas_to_item (Coord& x, Coord& y) const
 
 	x = d.x;
 	y = d.y;
+}
+
+Duple
+Item::item_to_window (ArdourCanvas::Duple const & d) const
+{
+	return _canvas->canvas_to_window (item_to_canvas (d));
+}
+
+Duple
+Item::window_to_item (ArdourCanvas::Duple const & d) const
+{
+	return _canvas->window_to_canvas (canvas_to_item (d));
+}
+
+Rect
+Item::item_to_window (ArdourCanvas::Rect const & r) const
+{
+	return _canvas->canvas_to_window (item_to_canvas (r));
 }
 
 /** Set the position of this item in the parent's coordinates */

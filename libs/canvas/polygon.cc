@@ -37,7 +37,9 @@ Polygon::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		render_path (area, context);
 		
 		if (!_points.empty ()) {
-			context->move_to (_points.front().x, _points.front().y);
+			/* close path */
+			Duple p = item_to_window (Duple (_points.front().x, _points.front().y));
+			context->move_to (p.x, p.y);
 		}
 
 		context->stroke_preserve ();

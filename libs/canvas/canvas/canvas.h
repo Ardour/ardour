@@ -79,14 +79,6 @@ public:
 
         virtual Cairo::RefPtr<Cairo::Context> context () = 0;
 
-	std::list<Rect> const & renders () const {
-		return _renders;
-	}
-
-	void set_log_renders (bool log) {
-		_log_renders = log;
-	}
-
         Rect canvas_to_window (Rect const&) const;
         Rect window_to_canvas (Rect const&) const;
         Duple canvas_to_window (Duple const&) const;
@@ -116,9 +108,6 @@ protected:
 	
 	/** our root group */
 	RootGroup _root;
-
-	mutable std::list<Rect> _renders;
-	bool _log_renders;
 
         Coord _scroll_offset_x;
         Coord _scroll_offset_y;

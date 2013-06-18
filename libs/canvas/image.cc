@@ -43,10 +43,13 @@ Image::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 							_pending->stride);
 		_current = _pending;
 	}
+	
+	Rect self = item_to_window (Rect (0, 0, _width, _height));
+	boost::optional<Rect> draw = self.intersection (area);
 
-	if (_surface) {
+	if (_surface && draw) {
 		context->set_source (_surface, 0, 0);
-		context->rectangle (area.x0, area.y0, area.width(), area.height());
+		context->rectangle (draw->x0, draw->y0, draw->width(), draw->height());
 		context->fill ();
 	}
 }
