@@ -227,7 +227,7 @@ void
 Canvas::queue_draw_item_area (Item* item, Rect area)
 {
 	ArdourCanvas::Rect canvas_area = item->item_to_canvas (area);
-	// cerr << "CANVAS Invalidate " << area << " TRANSLATE AS " << canvas_area << endl;
+	// cerr << "CANVAS " << this << " for " << item->whatami() << ' ' << item->name << " invalidate " << area << " TRANSLATE AS " << canvas_area << endl;
 	request_redraw (canvas_area);
 }
 
@@ -547,7 +547,7 @@ void
 GtkCanvas::request_redraw (Rect const & request)
 {
 	Rect area = canvas_to_window (request);
-	// cerr << "Invalidate " << request << " TRANSLATE AS " << area << endl;
+	// cerr << this << " Invalidate " << request << " TRANSLATE AS " << area << endl;
 	queue_draw_area (floor (area.x0), floor (area.y0), ceil (area.x1) - floor (area.x0), ceil (area.y1) - floor (area.y0));
 }
 

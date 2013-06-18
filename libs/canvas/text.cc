@@ -96,9 +96,24 @@ Text::redraw (Cairo::RefPtr<Cairo::Context> context) const
 	 * ::render 
 	 */
 
-	cerr << "rendered \"" << layout->get_text() << "\" into image\n";
-
 	_need_redraw = false;
+}
+
+void
+Text::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) const
+{
+	if (_text.empty()) {
+		return;
+	}
+
+	if (_need_redraw) {
+		redraw (context);
+	}
+	
+	Rect self = item_to_window (Rect (0, 0, min (_clamped_width, _width), _height));
+	context->rectangle (self.x0, self.y0, self.width(), self.height());
+	context->set_source (_image, self.x0, self.y0);
+	context->fill ();
 }
 
 void
@@ -135,26 +150,6 @@ Text::compute_bounding_box () const
 		);
 		
 	_bounding_box_dirty = false;
-}
-
-void
-Text::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
-{
-	if (_text.empty()) {
-		return;
-	}
-
-	if (_need_redraw) {
-		redraw (context);
-	}
-	
-	
-	Rect self = item_to_window (Rect (0, 0, min (_clamped_width, _width), _height));
-	cerr << "Draw \"" << _text << "\" @ " << self.x0 << ", " << self.y0 << ' ' << self.width() << " x " << self.height() << endl;
-	context->rectangle (self.x0, self.y0, self.width(), self.height());
-	context->set_source (_image, 0, 0);
-	//context->set_source_rgb (0.3, 0.4, 0.02);
-	context->fill ();
 }
 
 void

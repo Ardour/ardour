@@ -115,8 +115,10 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 							(*i)->name);
 			}
 #endif
-			(*i)->render (draw.get(), context);
+
+			(*i)->render (area, context);
 			++render_count;
+
 		} else {
 #ifdef CANVAS_DEBUG
 			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {

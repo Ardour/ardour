@@ -154,10 +154,6 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	Rect self = item_to_window (Rect (0.0, 0.0, _region->length() / _samples_per_pixel, _height));
 	boost::optional<Rect> draw = self.intersection (area);
 
-	context->rectangle (self.x0, self.y0, self.width(), self.height());
-	context->set_source_rgb (1.0, 0.0, 0.0);
-	context->stroke ();
-
 	if (!draw) {
 		return;
 	}
@@ -169,8 +165,8 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 	list<CacheEntry*>::iterator cache = _cache.begin ();
 
-	cerr << name << " draw " << area << "self = " << self << "\n\twill use " << draw.get() << endl;
-#if 1
+	// cerr << name << " draw " << area << "self = " << self << "\n\twill use " << draw.get() << endl;
+#if 0
 	cerr << "  Cache contains " << _cache.size() << endl;
 	while (cache != _cache.end()) {
 		cerr << "\tsample span " << (*cache)->start() << " .. " << (*cache)->end()
@@ -186,7 +182,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 	while ((end - start) > 1.0) {
 
-		cerr << "***** RANGE = " << start << " .. " << end << " = " << end - start << endl;
+		// cerr << "***** RANGE = " << start << " .. " << end << " = " << end - start << endl;
 
 		frameoffset_t start_sample_offset = to_src_sample_offset (_region_start, start, _samples_per_pixel);
 
@@ -208,8 +204,6 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 		if (cache == _cache.end ()) {
 
-			cerr << "Nothing in cache spans\n";
-
 			/* Case 1: we have run out of cache entries, so make a new one for
 			   the whole required area and put it in the list.
 			   
@@ -224,9 +218,6 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 			double const rend  = _region->length() / _samples_per_pixel;
 			double const endpoint = min (rend, max (end, start + _canvas->visible_area().width()));
-
-			cerr << "New cache entry for " << start_sample_offset << " .. " << to_src_sample_offset (_region_start, endpoint, _samples_per_pixel)
-			     << endl;
 
 			CacheEntry* c = new CacheEntry (this, 
 							start_sample_offset,
@@ -261,9 +252,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		
 			npeaks = end_pixel - start;
 			assert (npeaks > 0);
-
-			cerr << "New fill-in cache entry for " << start_sample_offset << " .. " << end_sample_offset << endl;
-
+			
 			CacheEntry* c = new CacheEntry (this,
 							start_sample_offset,
 							end_sample_offset,
@@ -279,8 +268,6 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 			   we have left, so render it.
 			*/
 
-			cerr << "found suitable cache entry\n";
-
 			image = *cache;
 			++cache;
 
@@ -290,7 +277,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 		double this_end = min (end, to_pixel_offset (_region_start, image->end (), _samples_per_pixel));
 		double const image_origin = to_pixel_offset (_region_start, image->start(), _samples_per_pixel);
-#if 1
+#if 0
 		cerr << "\t\tDraw image between "
 		     << start
 		     << " .. "
@@ -306,11 +293,10 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		     << endl;
 #endif
 
-		cerr << "Fill rect " << draw->x0 << ", " << self.y0 << ' ' << draw->width() << " x " << draw->height() << endl;
+		// cerr << "Fill rect " << draw->x0 << ", " << self.y0 << ' ' << draw->width() << " x " << draw->height() << endl;
 
 		context->rectangle (start, draw->y0, this_end - start, _height);
-		// context->set_source (image->image(), image_origin, self.y0 - draw->y0);
-		context->set_source_rgb (0.0, 0.0, 1.0);
+		context->set_source (image->image(), self.x0 - image_origin, self.y0);
 		context->fill ();
 		
 		start = this_end;
