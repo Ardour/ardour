@@ -142,6 +142,18 @@ to_pixel_offset (frameoffset_t src_sample_start, double sample_offset, double sp
 	return llrintf ((sample_offset - src_sample_start) / spp);
 }
 
+static inline double
+image_to_window (double wave_origin, double image_start)
+{
+	return wave_origin + image_start;
+}
+
+static inline double
+window_to_image (double wave_origin, double image_start)
+{
+	return image_start - wave_origin;
+}
+
 void
 WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
@@ -158,23 +170,33 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		return;
 	}
 	
+	/* we have a set of cached images that have precise pixel positions
+	 * whose origin is 0,0 within our own rect. To convert these pixel
+	 * positions so that they are useful when rendering, they need to 
+	 * be offset by the window position of our own origin. This is given
+	 * by self.x0
+	 */
+
 	Rect draw = d.get();
+
 
 	/* pixel coordinates */
 
 	double       start = floor (draw.x0);
-	double const end   = ceil (draw.x1);
+	double const end   = ceil  (draw.x1);
 
-	list<CacheEntry*>::iterator cache = _cache.begin ();
+	cerr << this << ' ' << name << " draw " << start << " .. " << end << endl;
+
+	list<CacheEntry*>::iterator cache;
 
 	cache = _cache.begin ();
 
-	while ((end - start) > 1.0) {
+	while (end > start) {
 
 		/* Step through cache entries that end at or before our current position */
 
 		for (; cache != _cache.end(); ++cache) {
-			if ((*cache)->pixel_start() <= start) {
+			if (image_to_window (self.x0, (*cache)->pixel_start()) <= start) {
 				break;
 			}
 		}
@@ -194,7 +216,9 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		*/
 
 		CacheEntry* image = 0;
-		const double BIG_IMAGE_SIZE = 32767.0;
+
+		/* Cairo limit, caused by its use of 16.16 fixed point */
+		const double BIG_IMAGE_SIZE = 32767.0; 
 
 		if (cache == _cache.end ()) {
 
@@ -206,27 +230,26 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 			   as possible, within the limits inherent in Cairo.
 
 			   However, we don't want to try to make it larger than 
-			   the region actually is, so clamp with that too.
+			   the source could allow, so clamp with that too.
 			*/
 
-			double const rend  = floor (_region->length() / _samples_per_pixel);
-			double const end_pixel = min (rend, max (end, BIG_IMAGE_SIZE));
+			double const region_end_pixel = image_to_window (self.x0, floor (_region->latest_possible_frame() / _samples_per_pixel));
+			double const end_pixel = min (region_end_pixel, start + BIG_IMAGE_SIZE);
 
-			if ((end_pixel - start) < 1.0) {
+			cerr << "Need new image " << start << " .. " << end_pixel << " (region end = " << region_end_pixel << ")" << endl;
+
+			if (end_pixel <= start) {
 				/* nothing more to draw */
-				break;
+				image = 0;
+			} else {
+
+				CacheEntry* c = new CacheEntry (this, window_to_image (self.x0, start), window_to_image (self.x0, end_pixel));
+				
+				_cache.push_back (c);
+				image = c;
 			}
-			
-			cerr << "Create new cache entry to grow cache,"
-			     << " range is " << start << " .. " << end_pixel
-			     << endl;
 
-			CacheEntry* c = new CacheEntry (this, start, end_pixel);
-
-			_cache.push_back (c);
-			image = c;
-
-		} else if ((*cache)->pixel_start() > start) {
+		} else if (image_to_window (self.x0, (*cache)->pixel_start()) > start) {
 
 			/* Case 2: we have a cache entry, but it begins after
 			 * start, so we need another one for the missing section.
@@ -238,18 +261,16 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 			double end_pixel;
 
-			if (end < (*cache)->pixel_start()) {
-				double const rend  = floor (_region->length() / _samples_per_pixel);
-				end_pixel = min (rend, max (end, BIG_IMAGE_SIZE));
+			if (end > image_to_window (self.x0, (*cache)->pixel_start())) {
+				double const region_end_pixel = image_to_window (self.x0, floor (_region->length() / _samples_per_pixel));
+				end_pixel = min (region_end_pixel, max (image_to_window (self.x0, (*cache)->pixel_start()), start + BIG_IMAGE_SIZE));
 			} else {
-				end_pixel = (*cache)->pixel_start();
+				end_pixel = image_to_window (self.x0, (*cache)->pixel_start());
 			}
 
-			cerr << "Create new cache entry to reach " << (*cache)->pixel_start()
-			     << " range is " << start << " .. " << end_pixel
-			     << endl;
-		
-			CacheEntry* c = new CacheEntry (this, start, end_pixel);
+			cerr << "Need fill image " << start << " .. " << end_pixel << endl;
+
+			CacheEntry* c = new CacheEntry (this, window_to_image (self.x0, start), window_to_image (self.x0, end_pixel));
 
 			cache = _cache.insert (cache, c);
 			++cache;
@@ -257,16 +278,23 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 		} else {
 
-			/* Case 3: we have a cache entry that will do at least some of what
-			   we have left, so render it.
+			/* Case 3: we have a cache entry that covers some of what
+			   we have left to render
 			*/
+
 
 			image = *cache;
 			++cache;
+
+			cerr << "have image to " << image->pixel_end() << " win = " << image_to_window (self.x0, image->pixel_end()) << endl;
 		}
 
-		double this_end = min (end, image->pixel_end ());
-		double const image_origin = image->pixel_start ();
+		if (!image) {
+			break;
+		}
+
+		double this_end = min (end, image_to_window (self.x0, image->pixel_end ()));
+		double const image_origin = image_to_window (self.x0, image->pixel_start ());
 #if 0
 		cerr << "\t\tDraw image between "
 		     << start
@@ -276,11 +304,15 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		     << image->pixel_start()
 		     << " .. "
 		     << image->pixel_end ()
+		     << " WINDOW = " 
+		     << image_to_window (self.x0, image->pixel_start()) 
+		     << " .. " 
+		     << image_to_window (self.x0, image->pixel_end()) 
 		     << endl;
 #endif
 
-		context->rectangle (start, draw.y0, this_end - start, _height);
-		context->set_source (image->image(), self.x0 - image_origin, self.y0);
+		context->rectangle (start, draw.y0, this_end - start, draw.height());
+		context->set_source (image->image(), self.x0 + (start - image_origin), self.y0);
 		context->fill ();
 		
 		start = this_end;
