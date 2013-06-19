@@ -912,7 +912,7 @@ Editor::zoom_adjustment_changed ()
 		return;
 	}
 
-	double fpu = zoom_range_clock->current_duration() / _visible_canvas_width;
+	framecnt_t fpu = llrintf (zoom_range_clock->current_duration() / _visible_canvas_width);
 	bool clamped = clamp_samples_per_pixel (fpu);
 	
 	if (clamped) {
@@ -1123,7 +1123,7 @@ Editor::map_position_change (framepos_t frame)
 void
 Editor::center_screen (framepos_t frame)
 {
-	double const page = _visible_canvas_width * samples_per_pixel;
+	framecnt_t const page = _visible_canvas_width * samples_per_pixel;
 
 	/* if we're off the page, then scroll.
 	 */
@@ -2263,7 +2263,10 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	if ((prop = node.property ("zoom"))) {
-		reset_zoom (PBD::atof (prop->value()));
+		/* older versions of ardour used floating point samples_per_pixel */
+		double f = PBD::atof (prop->value());
+		cerr << "LOADED ZOOM from " << prop->value() << " as " << f << endl;
+		reset_zoom (llrintf (f));
 	} else {
 		reset_zoom (samples_per_pixel);
 	}
@@ -2485,7 +2488,8 @@ Editor::get_state ()
 	maybe_add_mixer_strip_width (*node);
 
 	node->add_property ("zoom-focus", enum_2_string (zoom_focus));
-	snprintf (buf, sizeof(buf), "%f", samples_per_pixel);
+
+	snprintf (buf, sizeof(buf), "%" PRId64, samples_per_pixel);
 	node->add_property ("zoom", buf);
 	node->add_property ("snap-to", enum_2_string (_snap_type));
 	node->add_property ("snap-mode", enum_2_string (_snap_mode));
@@ -4115,16 +4119,16 @@ Editor::reset_y_origin (double y)
 }
 
 void
-Editor::reset_zoom (double fpp)
+Editor::reset_zoom (framecnt_t spp)
 {
-	clamp_samples_per_pixel (fpp);
+	clamp_samples_per_pixel (spp);
 
-	if (fpp == samples_per_pixel) {
+	if (spp == samples_per_pixel) {
 		return;
 	}
 
 	pending_visual_change.add (VisualChange::ZoomLevel);
-	pending_visual_change.samples_per_pixel = fpp;
+	pending_visual_change.samples_per_pixel = spp;
 	ensure_visual_change_idle_handler ();
 }
 
@@ -4235,17 +4239,18 @@ Editor::use_visual_state (VisualState& vs)
  *  @param fpu New frames per unit; should already have been clamped so that it is sensible.
  */
 void
-Editor::set_samples_per_pixel (double fpp)
+Editor::set_samples_per_pixel (framecnt_t spp)
 {
+	clamp_samples_per_pixel (spp);
+	samples_per_pixel = spp;
+
 	if (tempo_lines) {
 		tempo_lines->tempo_map_changed();
 	}
 
-	samples_per_pixel = fpp;
-
 	/* convert fpu to frame count */
 
-	framepos_t frames = (framepos_t) floor (samples_per_pixel * _visible_canvas_width);
+	framepos_t frames = samples_per_pixel * _visible_canvas_width;
 
 	if (samples_per_pixel != zoom_range_clock->current_duration()) {
 		zoom_range_clock->set (frames);

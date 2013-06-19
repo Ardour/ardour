@@ -1331,17 +1331,17 @@ Editor::tav_zoom_smooth (bool coarser, bool force_all)
 }
 
 bool
-Editor::clamp_samples_per_pixel (double& fpp) const
+Editor::clamp_samples_per_pixel (framecnt_t& fpp) const
 {
 	bool clamped = false;
 	
-	if (fpp < 1.0) {
-		fpp = 1.0;
+	if (fpp < 1) {
+		fpp = 1;
 		clamped = true;
 	}
 
 	if (max_framepos / fpp < 800) {
-		fpp = max_framepos / 800.0;
+		fpp = max_framepos / 800;
 		clamped = true;
 	}
 
@@ -1353,19 +1353,19 @@ Editor::temporal_zoom_step (bool coarser)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_step, coarser)
 
-	double nfpp = samples_per_pixel;
+	framecnt_t nspp = samples_per_pixel;
 
 	if (coarser) {
-		nfpp = min (9e6, nfpp * 1.61803399);
+		nspp *= 2;
 	} else {
-		nfpp = max (1.0, nfpp / 1.61803399);
+		nspp /= 2;
 	}
 
-	temporal_zoom (nfpp);
+	temporal_zoom (nspp);
 }
 
 void
-Editor::temporal_zoom (double fpp)
+Editor::temporal_zoom (framecnt_t fpp)
 {
 	if (!_session) {
 		return;
@@ -1380,7 +1380,7 @@ Editor::temporal_zoom (double fpp)
 	framepos_t leftmost_after_zoom = 0;
 	framepos_t where;
 	bool in_track_canvas;
-	double nfpp;
+	framecnt_t nfpp;
 	double l;
 
 	clamp_samples_per_pixel (fpp);
@@ -1388,16 +1388,14 @@ Editor::temporal_zoom (double fpp)
 		return;
 	}
 
-	nfpp = fpp;
-	
 	// Imposing an arbitrary limit to zoom out as too much zoom out produces 
 	// segfaults for lack of memory. If somebody decides this is not high enough I
 	// believe it can be raisen to higher values but some limit must be in place.
-	if (nfpp > 8e+08) {
-		nfpp = 8e+08;
-	}
 
-	new_page_size = (framepos_t) floor (_visible_canvas_width * nfpp);
+	nfpp = min (fpp, 8589934592);
+	nfpp = max ((framecnt_t) 1, fpp);
+
+	new_page_size = _visible_canvas_width;
 	half_page_size = new_page_size / 2;
 
 	switch (zoom_focus) {

@@ -140,7 +140,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	framepos_t leftmost_sample() const { return leftmost_frame; }
 
 	framecnt_t current_page_samples() const {
-		return (framecnt_t) floor (_visible_canvas_width * samples_per_pixel);
+		return (framecnt_t) _visible_canvas_width * samples_per_pixel;
 	}
 
 	double visible_canvas_height () const {
@@ -216,18 +216,18 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		*/
 
 		if (pixel >= 0) {
-			return (framepos_t) rint (pixel * samples_per_pixel);
+			return pixel * samples_per_pixel;
 		} else {
 			return 0;
 		}
 	}
 
-	double sample_to_pixel (framepos_t sample) const {
-		return rint (sample / samples_per_pixel);
+        double sample_to_pixel (framepos_t sample) const {
+		return sample / samples_per_pixel;
 	}
 
 	double sample_to_pixel_unrounded (framepos_t sample) const {
-		return sample / samples_per_pixel;
+		return sample / (double) samples_per_pixel;
 	}
 
 	/* selection */
@@ -274,7 +274,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void               set_zoom_focus (Editing::ZoomFocus);
 	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
-	double             get_current_zoom () const { return samples_per_pixel; }
+	framecnt_t         get_current_zoom () const { return samples_per_pixel; }
         void               cycle_zoom_focus ();
 	void temporal_zoom_step (bool coarser);
 	void tav_zoom_step (bool coarser);
@@ -360,7 +360,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void reset_x_origin (framepos_t);
 	void reset_x_origin_to_follow_playhead ();
 	void reset_y_origin (double);
-	void reset_zoom (double);
+	void reset_zoom (framecnt_t);
 	void reposition_and_zoom (framepos_t, double);
 
 	framepos_t get_preferred_edit_position (bool ignore_playhead = false, bool use_context_click = false);
@@ -466,7 +466,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	    VisualState (bool with_tracks);
 	    ~VisualState ();
 	    double              y_position;
-	    double              samples_per_pixel;
+	    framecnt_t          samples_per_pixel;
 	    framepos_t          leftmost_frame;
 	    Editing::ZoomFocus  zoom_focus;
 	    GUIObjectState*     gui_state;
@@ -485,12 +485,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void start_visual_state_op (uint32_t n);
 	void cancel_visual_state_op (uint32_t n);
 
-	framepos_t leftmost_frame;
-	double      samples_per_pixel;
+	framepos_t         leftmost_frame;
+        framecnt_t         samples_per_pixel;
 	Editing::ZoomFocus zoom_focus;
 
-	void set_samples_per_pixel (double);
-	bool clamp_samples_per_pixel (double &) const;
+	void set_samples_per_pixel (framecnt_t);
+        bool clamp_samples_per_pixel (framecnt_t &) const;
 
 	Editing::MouseMode mouse_mode;
 	Editing::MouseMode pre_internal_mouse_mode;
@@ -1003,10 +1003,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 			YOrigin = 0x4
 		};
 
-		Type pending;
+		Type       pending;
 		framepos_t time_origin;
-		double samples_per_pixel;
-		double y_origin;
+	        framecnt_t samples_per_pixel;
+		double     y_origin;
 
 		int idle_handler_id;
 		/** true if we are currently in the idle handler */
@@ -1190,7 +1190,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void temporal_zoom_region (bool both_axes);
 	void zoom_to_region (bool both_axes);
 	void temporal_zoom_session ();
-	void temporal_zoom (double scale);
+	void temporal_zoom (framecnt_t samples_per_pixel);
 	void temporal_zoom_by_frame (framepos_t start, framepos_t end);
 	void temporal_zoom_to_frame (bool coarser, framepos_t frame);
 
