@@ -51,6 +51,25 @@ public:
 		Rectified,
         };
 
+    /* Displays a single channel of waveform data for the given Region.
+
+       x = 0 in the waveview corresponds to the first waveform datum taken
+       from region->start() samples into the source data.
+
+       x = N in the waveview corresponds to the (N * spp)'th sample 
+       measured from region->start() into the source data.
+
+       when drawing, we will map the zeroth-pixel of the waveview
+       into a window. 
+
+       The waveview itself contains a set of pre-rendered Cairo::ImageSurfaces
+       that cache sections of the display. This is filled on-demand and
+       never cleared until something explicitly marks the cache invalid
+       (such as a change in samples_per_pixel, the log scaling, rectified or
+       other view parameters).
+    */
+
+
 	WaveView (Group *, boost::shared_ptr<ARDOUR::AudioRegion>);
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
@@ -122,15 +141,23 @@ private:
 	class CacheEntry
 	{
 	  public:
-  	        CacheEntry (WaveView const *, double, double, int);
+   	        CacheEntry (WaveView const *, double, double);
 		~CacheEntry ();
 
-	        double start () const {
-			return _start;
+	        double pixel_start () const {
+			return _pixel_start;
 		}
 
-  	        double end () const {
-			return _end;
+  	        double pixel_end () const {
+			return _pixel_end;
+		}
+
+	        double sample_start () const {
+			return _sample_start;
+		}
+
+  	        double sample_end () const {
+			return _sample_end;
 		}
 
      	        boost::shared_array<ARDOUR::PeakData> peaks () const {
@@ -145,9 +172,11 @@ private:
 		
 		WaveView const * _wave_view;
 	        
-	        double _start;
-	        double _end;
-	        int _n_peaks; 
+	        double     _pixel_start;
+	        double     _pixel_end;
+	        ARDOUR::framecnt_t _sample_start; 
+	        ARDOUR::framecnt_t _sample_end; 
+	        int        _n_peaks; 
 
 	        boost::shared_array<ARDOUR::PeakData> _peaks;
 	        Cairo::RefPtr<Cairo::ImageSurface> _image;

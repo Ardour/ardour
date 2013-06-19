@@ -151,56 +151,50 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		return;
 	}
 
-	Rect self = item_to_window (Rect (0.0, 0.0, _region->length() / _samples_per_pixel, _height));
-	boost::optional<Rect> draw = self.intersection (area);
+	Rect self = item_to_window (Rect (0.0, 0.0, floor (_region->length() / _samples_per_pixel), _height));
+	boost::optional<Rect> d = self.intersection (area);
 
-	if (!draw) {
+	if (!d) {
 		return;
 	}
+	
+	Rect draw = d.get();
 
 	/* pixel coordinates */
 
-	double       start = draw->x0;
-	double const end   = draw->x1;
+	double       start = floor (draw.x0);
+	double const end   = ceil (draw.x1);
 
 	list<CacheEntry*>::iterator cache = _cache.begin ();
 
-	// cerr << name << " draw " << area << "self = " << self << "\n\twill use " << draw.get() << endl;
-#if 0
-	cerr << "  Cache contains " << _cache.size() << endl;
-	while (cache != _cache.end()) {
-		cerr << "\tsample span " << (*cache)->start() << " .. " << (*cache)->end()
-		     << " pixel span " 
-		     << to_pixel_offset (_region_start, (*cache)->start(), _samples_per_pixel)
-		     << " .. "
-		     << to_pixel_offset (_region_start, (*cache)->end(), _samples_per_pixel)
-		     << endl;
-		++cache;
-	}
-	cache = _cache.begin();
-#endif
+	cache = _cache.begin ();
 
 	while ((end - start) > 1.0) {
 
-		// cerr << "***** RANGE = " << start << " .. " << end << " = " << end - start << endl;
-
-		frameoffset_t start_sample_offset = to_src_sample_offset (_region_start, start, _samples_per_pixel);
-
 		/* Step through cache entries that end at or before our current position */
 
-		while (cache != _cache.end() && (*cache)->end() <= start_sample_offset) {
-			++cache;
+		for (; cache != _cache.end(); ++cache) {
+			if ((*cache)->pixel_start() <= start) {
+				break;
+			}
 		}
 
 		/* Now either:
+
 		   1. we have run out of cache entries
-		   2. the one we are looking at finishes after start(_sample_offset) but also starts after start(_sample_offset).
-		   3. the one we are looking at finishes after start(_sample_offset) and starts before start(_sample_offset).
+
+		   2. we have found a cache entry that starts after start
+		      create a new cache entry to "fill in" before the one we have found.
+
+		   3. we have found a cache entry that starts at or before
+   		      start, but finishes before end: create a new cache entry
+		      to extend the cache further along the timeline.
 
 		   Set up a pointer to the cache entry that we will use on this iteration.
 		*/
 
 		CacheEntry* image = 0;
+		const double BIG_IMAGE_SIZE = 32767.0;
 
 		if (cache == _cache.end ()) {
 
@@ -209,54 +203,53 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 			   
 			   We would like to avoid lots of little images in the
 			   cache, so when we create a new one, make it as wide
-			   as possible, within a sensible limit (here, the
-			   visible width of the canvas we're on). 
+			   as possible, within the limits inherent in Cairo.
 
 			   However, we don't want to try to make it larger than 
 			   the region actually is, so clamp with that too.
 			*/
 
-			double const rend  = _region->length() / _samples_per_pixel;
-			double const endpoint = min (rend, max (end, start + _canvas->visible_area().width()));
+			double const rend  = floor (_region->length() / _samples_per_pixel);
+			double const end_pixel = min (rend, max (end, BIG_IMAGE_SIZE));
 
-			CacheEntry* c = new CacheEntry (this, 
-							start_sample_offset,
-							to_src_sample_offset (_region_start, endpoint, _samples_per_pixel),
-							endpoint - start);
+			if ((end_pixel - start) < 1.0) {
+				/* nothing more to draw */
+				break;
+			}
+			
+			cerr << "Create new cache entry to grow cache,"
+			     << " range is " << start << " .. " << end_pixel
+			     << endl;
+
+			CacheEntry* c = new CacheEntry (this, start, end_pixel);
+
 			_cache.push_back (c);
 			image = c;
 
-		} else if ((*cache)->start() > start_sample_offset) {
+		} else if ((*cache)->pixel_start() > start) {
 
-			/* Case 2: we have a cache entry, but it starts after
-			 * start(_sample_offset), so we need another one for
-			 * the missing bit.
+			/* Case 2: we have a cache entry, but it begins after
+			 * start, so we need another one for the missing section.
 			 *  
 			 * Create a new cached image that extends as far as the
 			 * next cached image's start, or the end of the region,
-			 * or the end of the render area, whichever comes first.
+			 * or the end of a BIG_IMAGE, whichever comes first.
 			 */
 
-			double    end_pixel;
-			double end_sample_offset;
-			int npeaks;
+			double end_pixel;
 
-			if (end_sample_offset < (*cache)->start()) {
-				double const rend  = _region->length() / _samples_per_pixel;
-				end_sample_offset = to_src_sample_offset (_region_start, end_pixel, _samples_per_pixel);
-				end_pixel = min (rend, end);
+			if (end < (*cache)->pixel_start()) {
+				double const rend  = floor (_region->length() / _samples_per_pixel);
+				end_pixel = min (rend, max (end, BIG_IMAGE_SIZE));
 			} else {
-				end_sample_offset = (*cache)->start();
-				end_pixel = to_pixel_offset (_region_start, end_sample_offset, _samples_per_pixel);
+				end_pixel = (*cache)->pixel_start();
 			}
+
+			cerr << "Create new cache entry to reach " << (*cache)->pixel_start()
+			     << " range is " << start << " .. " << end_pixel
+			     << endl;
 		
-			npeaks = end_pixel - start;
-			assert (npeaks > 0);
-			
-			CacheEntry* c = new CacheEntry (this,
-							start_sample_offset,
-							end_sample_offset,
-							npeaks);
+			CacheEntry* c = new CacheEntry (this, start, end_pixel);
 
 			cache = _cache.insert (cache, c);
 			++cache;
@@ -270,36 +263,28 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 			image = *cache;
 			++cache;
-
 		}
 
-		
-
-		double this_end = min (end, to_pixel_offset (_region_start, image->end (), _samples_per_pixel));
-		double const image_origin = to_pixel_offset (_region_start, image->start(), _samples_per_pixel);
+		double this_end = min (end, image->pixel_end ());
+		double const image_origin = image->pixel_start ();
 #if 0
 		cerr << "\t\tDraw image between "
 		     << start
 		     << " .. "
 		     << this_end
 		     << " using image spanning "
-		     << image->start()
+		     << image->pixel_start()
 		     << " .. "
-		     << image->end ()
-		     << " pixels "
-		     << to_pixel_offset (_region_start, image->start(), _samples_per_pixel)
-		     << " .. "
-		     << to_pixel_offset (_region_start, image->end(), _samples_per_pixel)
+		     << image->pixel_end ()
 		     << endl;
 #endif
 
-		// cerr << "Fill rect " << draw->x0 << ", " << self.y0 << ' ' << draw->width() << " x " << draw->height() << endl;
-
-		context->rectangle (start, draw->y0, this_end - start, _height);
+		context->rectangle (start, draw.y0, this_end - start, _height);
 		context->set_source (image->image(), self.x0 - image_origin, self.y0);
 		context->fill ();
 		
 		start = this_end;
+		
 	}
 }
 
@@ -483,18 +468,21 @@ WaveView::region_resized ()
 	end_change ();
 }
 
-WaveView::CacheEntry::CacheEntry (WaveView const * wave_view, double start, double end, int npeaks)
+WaveView::CacheEntry::CacheEntry (WaveView const * wave_view, double pixel_start, double pixel_end)
 	: _wave_view (wave_view)
-	, _start (start)
-	, _end (end)
-	, _n_peaks (npeaks)
+	, _pixel_start (pixel_start)
+	, _pixel_end (pixel_end)
+	, _n_peaks (_pixel_end - _pixel_start)
 {
 	_peaks.reset (new PeakData[_n_peaks]);
 
+	_sample_start = pixel_start * _wave_view->_samples_per_pixel;
+	_sample_end = pixel_end * _wave_view->_samples_per_pixel;
+
 	_wave_view->_region->read_peaks (_peaks.get(), _n_peaks, 
-					 (framecnt_t) floor (_start), 
-					 (framecnt_t) ceil (_end - _start), 
-					 _wave_view->_channel, _wave_view->_samples_per_pixel);
+					 _sample_start, _sample_end,
+					 _wave_view->_channel, 
+					 _wave_view->_samples_per_pixel);
 }
 
 WaveView::CacheEntry::~CacheEntry ()
