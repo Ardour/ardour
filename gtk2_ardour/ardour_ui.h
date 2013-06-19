@@ -71,6 +71,7 @@
 #include "ardour_dialog.h"
 #include "ardour_window.h"
 #include "editing.h"
+#include "meterbridge.h"
 #include "nsm.h"
 #include "ui_config.h"
 #include "enums.h"
@@ -306,6 +307,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void goto_editor_window ();
 	void goto_mixer_window ();
 	void toggle_mixer_window ();
+	void toggle_meterbridge ();
         void toggle_editor_mixer ();
 
 	int  setup_windows ();
@@ -570,6 +572,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	PublicEditor     *editor;
 	int         create_editor ();
 
+	Meterbridge  *meterbridge;
+	int         create_meterbridge ();
         /* Dialogs that can be created via new<T> */
 
         WM::Proxy<SpeakerDialog> speaker_config_window;

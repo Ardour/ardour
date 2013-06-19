@@ -315,6 +315,23 @@ ARDOUR_UI::toggle_mixer_window ()
 }
 
 void
+ARDOUR_UI::toggle_meterbridge ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("toggle-meterbridge"));
+	if (!act) {
+		return;
+	}
+
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+
+	if (tact->get_active()) {
+		meterbridge->show_window ();
+	} else {
+		meterbridge->hide ();
+	}
+}
+
+void
 ARDOUR_UI::toggle_editor_mixer ()
 {
 	bool obscuring = false;

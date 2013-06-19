@@ -78,6 +78,11 @@ ARDOUR_UI::setup_windows ()
 		return -1;
 	}
 
+	if (create_meterbridge ()) {
+		error << _("UI: cannot setup meterbridge") << endmsg;
+		return -1;
+	}
+
 	/* all other dialogs are created conditionally */
 
 	we_have_dependents ();
