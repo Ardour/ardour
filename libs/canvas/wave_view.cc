@@ -181,11 +181,8 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 
 	/* pixel coordinates */
-
 	double       start = floor (draw.x0);
 	double const end   = ceil  (draw.x1);
-
-	cerr << this << ' ' << name << " draw " << start << " .. " << end << endl;
 
 	list<CacheEntry*>::iterator cache;
 
@@ -236,8 +233,6 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 			double const region_end_pixel = image_to_window (self.x0, floor (_region->latest_possible_frame() / _samples_per_pixel));
 			double const end_pixel = min (region_end_pixel, start + BIG_IMAGE_SIZE);
 
-			cerr << "Need new image " << start << " .. " << end_pixel << " (region end = " << region_end_pixel << ")" << endl;
-
 			if (end_pixel <= start) {
 				/* nothing more to draw */
 				image = 0;
@@ -268,8 +263,6 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 				end_pixel = image_to_window (self.x0, (*cache)->pixel_start());
 			}
 
-			cerr << "Need fill image " << start << " .. " << end_pixel << endl;
-
 			CacheEntry* c = new CacheEntry (this, window_to_image (self.x0, start), window_to_image (self.x0, end_pixel));
 
 			cache = _cache.insert (cache, c);
@@ -285,8 +278,6 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 			image = *cache;
 			++cache;
-
-			cerr << "have image to " << image->pixel_end() << " win = " << image_to_window (self.x0, image->pixel_end()) << endl;
 		}
 
 		if (!image) {
@@ -294,25 +285,19 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		}
 
 		double this_end = min (end, image_to_window (self.x0, image->pixel_end ()));
-		double const image_origin = image_to_window (self.x0, image->pixel_start ());
 #if 0
 		cerr << "\t\tDraw image between "
-		     << start
-		     << " .. "
-		     << this_end
+		     << start << " .. " << this_end
 		     << " using image spanning "
-		     << image->pixel_start()
+		     << image->pixel_start() << " (" << image_to_window (self.x0, image->pixel_start()) << ")"
 		     << " .. "
-		     << image->pixel_end ()
-		     << " WINDOW = " 
-		     << image_to_window (self.x0, image->pixel_start()) 
-		     << " .. " 
-		     << image_to_window (self.x0, image->pixel_end()) 
+		     << image->pixel_end () << " (" << image_to_window (self.x0, image->pixel_end()) << ")"
+		     << " offset into image = " << image_to_window (self.x0, image->pixel_start()) - start 
 		     << endl;
 #endif
 
 		context->rectangle (start, draw.y0, this_end - start, draw.height());
-		context->set_source (image->image(), self.x0 + (start - image_origin), self.y0);
+		context->set_source (image->image(), self.x0 + (image_to_window (self.x0, image->pixel_start()) - start), self.y0);
 		context->fill ();
 		
 		start = this_end;
@@ -508,9 +493,9 @@ WaveView::CacheEntry::CacheEntry (WaveView const * wave_view, double pixel_start
 {
 	_peaks.reset (new PeakData[_n_peaks]);
 
-	_sample_start = pixel_start * _wave_view->_samples_per_pixel;
-	_sample_end = pixel_end * _wave_view->_samples_per_pixel;
-
+	_sample_start = _wave_view->_region_start + pixel_start * _wave_view->_samples_per_pixel;
+	_sample_end = _wave_view->_region_start + pixel_end * _wave_view->_samples_per_pixel;
+	
 	_wave_view->_region->read_peaks (_peaks.get(), _n_peaks, 
 					 _sample_start, _sample_end,
 					 _wave_view->_channel, 
