@@ -71,6 +71,7 @@ public:
 
 
 	WaveView (Group *, boost::shared_ptr<ARDOUR::AudioRegion>);
+       ~WaveView ();
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
@@ -141,7 +142,7 @@ private:
 	class CacheEntry
 	{
 	  public:
-   	        CacheEntry (WaveView const *, double, double);
+	        CacheEntry (WaveView const *, double, double, ARDOUR::framepos_t, ARDOUR::framepos_t);
 		~CacheEntry ();
 
 	        double pixel_start () const {
@@ -171,7 +172,7 @@ private:
 		Coord position (Coord) const;
 		
 		WaveView const * _wave_view;
-	        
+	    
 	        double     _pixel_start;
 	        double     _pixel_end;
 	        ARDOUR::framecnt_t _sample_start; 
@@ -208,8 +209,8 @@ private:
 	 *  value as the crossfade editor needs to alter it.
 	 */
 	ARDOUR::frameoffset_t _region_start;
-
-	mutable std::list<CacheEntry*> _cache;
+    
+        mutable CacheEntry* _cache;
        
         PBD::ScopedConnection invalidation_connection;
 
@@ -220,6 +221,8 @@ private:
         static PBD::Signal0<void> VisualPropertiesChanged;
 
         void handle_visual_property_change ();
+    void ensure_cache (ARDOUR::framecnt_t pixel_start, ARDOUR::framecnt_t pixel_end,
+		       ARDOUR::framepos_t sample_start, ARDOUR::framepos_t sample_end) const;
 };
 
 }

@@ -67,8 +67,15 @@ WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region
 	, _gradient_depth_independent (false)
 	, _amplitude_above_axis (1.0)
 	, _region_start (region->start())
+	, _cache (0)
 {
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
+}
+
+WaveView::~WaveView ()
+{
+	delete _cache;
+	_cache = 0;
 }
 
 void
@@ -131,18 +138,6 @@ WaveView::set_samples_per_pixel (double samples_per_pixel)
 }
 
 static inline double
-to_src_sample_offset (frameoffset_t src_sample_start, double pixel_offset, double spp)
-{
-	return llrintf (src_sample_start + (pixel_offset * spp));
-}
-
-static inline double
-to_pixel_offset (frameoffset_t src_sample_start, double sample_offset, double spp)
-{
-	return llrintf ((sample_offset - src_sample_start) / spp);
-}
-
-static inline double
 image_to_window (double wave_origin, double image_start)
 {
 	return wave_origin + image_start;
@@ -152,6 +147,53 @@ static inline double
 window_to_image (double wave_origin, double image_start)
 {
 	return image_start - wave_origin;
+}
+
+void
+WaveView::ensure_cache (framecnt_t start, framecnt_t end,
+			framepos_t sample_start, framepos_t sample_end) const
+{
+	if (_cache && _cache->sample_start() <= sample_start && _cache->sample_end() >= sample_end) {
+		/* cache already covers required range, do nothing */
+		return;
+	}
+
+	if (_cache) {
+		delete _cache;
+		_cache = 0;
+	}
+
+	/* sample position is canonical here, and we want to generate
+	 * an image that spans about twice the canvas width 
+	 */
+	
+	const framepos_t center = sample_start + ((sample_end - sample_start) / 2);
+	const framecnt_t canvas_samples = 2 * (_canvas->visible_area().width() * _samples_per_pixel);
+
+	/* we can request data from anywhere in the Source, between 0 and its length
+	 */
+
+	sample_start = max ((framepos_t) 0, (center - canvas_samples));
+	sample_end = min (center + canvas_samples, _region->source_length (0));
+
+	if (sample_end <= sample_start) {
+		cerr << "sample start = " << sample_start << endl;
+		cerr << "center+ = " << center<< endl;
+		cerr << "CS = " << canvas_samples << endl;
+		cerr << "pui = " << center + canvas_samples << endl;
+		cerr << "sl = " << _region->source_length (0) << endl;
+		cerr << "st = " << _region->start () << endl;
+		cerr << "END: " << sample_end << endl;
+		assert (false);
+	}
+	
+	start = floor (sample_start / (double) _samples_per_pixel);
+	end = ceil (sample_end / (double) _samples_per_pixel);
+	
+	assert (end > start);
+
+	cerr << name << " cache miss - new CE, span " << start << " .. " << end << " (" << sample_start << " .. " << sample_end << ")\n";
+	_cache = new CacheEntry (this, start, end, sample_start, sample_end);
 }
 
 void
@@ -170,139 +212,23 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		return;
 	}
 	
-	/* we have a set of cached images that have precise pixel positions
-	 * whose origin is 0,0 within our own rect. To convert these pixel
-	 * positions so that they are useful when rendering, they need to 
-	 * be offset by the window position of our own origin. This is given
-	 * by self.x0
-	 */
-
 	Rect draw = d.get();
 
+	/* pixel coordinates - we round up and down in case we were asked to
+	 * draw "between" pixels at the start and/or end 
+	 */
+	double draw_start = floor (draw.x0);
+	double draw_end = ceil (draw.x1);
 
-	/* pixel coordinates */
-	double       start = floor (draw.x0);
-	double const end   = ceil  (draw.x1);
+	/* sample coordinates - note, these are not subject to rounding error */
+	framepos_t sample_start = _region_start + (draw_start * _samples_per_pixel);
+	framepos_t sample_end   = _region_start + (draw_end * _samples_per_pixel);
 
-	list<CacheEntry*>::iterator cache;
+	ensure_cache (draw_start, draw_end, sample_start, sample_end);
 
-	cache = _cache.begin ();
-
-	while (end > start) {
-
-		/* Step through cache entries that end at or before our current position */
-
-		for (; cache != _cache.end(); ++cache) {
-			if (image_to_window (self.x0, (*cache)->pixel_start()) <= start) {
-				break;
-			}
-		}
-
-		/* Now either:
-
-		   1. we have run out of cache entries
-
-		   2. we have found a cache entry that starts after start
-		      create a new cache entry to "fill in" before the one we have found.
-
-		   3. we have found a cache entry that starts at or before
-   		      start, but finishes before end: create a new cache entry
-		      to extend the cache further along the timeline.
-
-		   Set up a pointer to the cache entry that we will use on this iteration.
-		*/
-
-		CacheEntry* image = 0;
-
-		/* Cairo limit, caused by its use of 16.16 fixed point */
-		const double BIG_IMAGE_SIZE = 32767.0; 
-
-		if (cache == _cache.end ()) {
-
-			/* Case 1: we have run out of cache entries, so make a new one for
-			   the whole required area and put it in the list.
-			   
-			   We would like to avoid lots of little images in the
-			   cache, so when we create a new one, make it as wide
-			   as possible, within the limits inherent in Cairo.
-
-			   However, we don't want to try to make it larger than 
-			   the source could allow, so clamp with that too.
-			*/
-
-			double const region_end_pixel = image_to_window (self.x0, floor (_region->latest_possible_frame() / _samples_per_pixel));
-			double const end_pixel = min (region_end_pixel, start + BIG_IMAGE_SIZE);
-
-			if (end_pixel <= start) {
-				/* nothing more to draw */
-				image = 0;
-			} else {
-
-				CacheEntry* c = new CacheEntry (this, window_to_image (self.x0, start), window_to_image (self.x0, end_pixel));
-				
-				_cache.push_back (c);
-				image = c;
-			}
-
-		} else if (image_to_window (self.x0, (*cache)->pixel_start()) > start) {
-
-			/* Case 2: we have a cache entry, but it begins after
-			 * start, so we need another one for the missing section.
-			 *  
-			 * Create a new cached image that extends as far as the
-			 * next cached image's start, or the end of the region,
-			 * or the end of a BIG_IMAGE, whichever comes first.
-			 */
-
-			double end_pixel;
-
-			if (end > image_to_window (self.x0, (*cache)->pixel_start())) {
-				double const region_end_pixel = image_to_window (self.x0, floor (_region->length() / _samples_per_pixel));
-				end_pixel = min (region_end_pixel, max (image_to_window (self.x0, (*cache)->pixel_start()), start + BIG_IMAGE_SIZE));
-			} else {
-				end_pixel = image_to_window (self.x0, (*cache)->pixel_start());
-			}
-
-			CacheEntry* c = new CacheEntry (this, window_to_image (self.x0, start), window_to_image (self.x0, end_pixel));
-
-			cache = _cache.insert (cache, c);
-			++cache;
-			image = c;
-
-		} else {
-
-			/* Case 3: we have a cache entry that covers some of what
-			   we have left to render
-			*/
-
-
-			image = *cache;
-			++cache;
-		}
-
-		if (!image) {
-			break;
-		}
-
-		double this_end = min (end, image_to_window (self.x0, image->pixel_end ()));
-#if 0
-		cerr << "\t\tDraw image between "
-		     << start << " .. " << this_end
-		     << " using image spanning "
-		     << image->pixel_start() << " (" << image_to_window (self.x0, image->pixel_start()) << ")"
-		     << " .. "
-		     << image->pixel_end () << " (" << image_to_window (self.x0, image->pixel_end()) << ")"
-		     << " offset into image = " << image_to_window (self.x0, image->pixel_start()) - start 
-		     << endl;
-#endif
-
-		context->rectangle (start, draw.y0, this_end - start, draw.height());
-		context->set_source (image->image(), self.x0 + (image_to_window (self.x0, image->pixel_start()) - start), self.y0);
-		context->fill ();
-		
-		start = this_end;
-		
-	}
+	context->rectangle (draw_start, draw.y0, draw_end - draw_start, draw.height());
+	context->set_source (_cache->image(), self.x0 + _cache->pixel_start(), self.y0);
+	context->fill ();
 }
 
 void
@@ -351,26 +277,15 @@ void
 WaveView::invalidate_whole_cache ()
 {
 	begin_visual_change ();
-
-	for (list<CacheEntry*>::iterator i = _cache.begin(); i != _cache.end(); ++i) {
-		delete *i;
-	}
-
-	_cache.clear ();
-
+	delete _cache;
+	_cache = 0;
 	end_visual_change ();
 }
 
 void
 WaveView::invalidate_image_cache ()
 {
-	begin_visual_change ();
-	
-	for (list<CacheEntry*>::iterator i = _cache.begin(); i != _cache.end(); ++i) {
-		(*i)->clear_image ();
-	}
-	
-	end_visual_change ();
+	invalidate_whole_cache ();
 }
 
 void
@@ -485,19 +400,19 @@ WaveView::region_resized ()
 	end_change ();
 }
 
-WaveView::CacheEntry::CacheEntry (WaveView const * wave_view, double pixel_start, double pixel_end)
+WaveView::CacheEntry::CacheEntry (WaveView const * wave_view, double pixel_start, double pixel_end,
+				  framepos_t sample_start,framepos_t sample_end)
 	: _wave_view (wave_view)
 	, _pixel_start (pixel_start)
 	, _pixel_end (pixel_end)
+	, _sample_start (sample_start)
+	, _sample_end (sample_end)
 	, _n_peaks (_pixel_end - _pixel_start)
 {
 	_peaks.reset (new PeakData[_n_peaks]);
 
-	_sample_start = _wave_view->_region_start + pixel_start * _wave_view->_samples_per_pixel;
-	_sample_end = _wave_view->_region_start + pixel_end * _wave_view->_samples_per_pixel;
-	
 	_wave_view->_region->read_peaks (_peaks.get(), _n_peaks, 
-					 _sample_start, _sample_end,
+					 _sample_start, _sample_end - _sample_start,
 					 _wave_view->_channel, 
 					 _wave_view->_samples_per_pixel);
 }
