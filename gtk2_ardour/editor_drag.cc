@@ -160,6 +160,14 @@ DragManager::end_grab (GdkEvent* e)
 	return r;
 }
 
+void
+DragManager::mark_double_click ()
+{
+	for (list<Drag*>::const_iterator i = _drags.begin(); i != _drags.end(); ++i) {
+		(*i)->set_double_click (true);
+	}
+}
+
 bool
 DragManager::motion_handler (GdkEvent* e, bool from_autoscroll)
 {
@@ -212,6 +220,7 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i)
 	, _item (i)
 	, _pointer_frame_offset (0)
 	, _move_threshold_passed (false)
+	, _was_double_click (false)
 	, _raw_grab_frame (0)
 	, _grab_frame (0)
 	, _last_pointer_frame (0)
@@ -2974,6 +2983,10 @@ void
 MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
+		
+		if (was_double_click()) {
+			cerr << "End of marker double click\n";
+		}
 
 		/* just a click, do nothing but finish
 		   off the selection process

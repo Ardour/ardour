@@ -1293,6 +1293,11 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 bool
 Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
+	if (event->type == GDK_2BUTTON_PRESS) {
+		_drags->mark_double_click ();
+		return false;
+	}
+
 	if (event->type != GDK_BUTTON_PRESS) {
 		return false;
 	}

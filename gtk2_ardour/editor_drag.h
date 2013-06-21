@@ -63,6 +63,8 @@ public:
 	bool end_grab (GdkEvent *);
 	bool have_item (ArdourCanvas::Item *) const;
 
+        void mark_double_click ();
+
 	/** @return true if an end drag or abort is in progress */
 	bool ending () const {
 		return _ending;
@@ -101,7 +103,7 @@ private:
 class Drag
 {
 public:
-	Drag (Editor *, ArdourCanvas::Item *);
+        Drag (Editor *, ArdourCanvas::Item *);
 	virtual ~Drag () {}
 
 	void set_manager (DragManager* m) {
@@ -119,6 +121,9 @@ public:
 
 	ARDOUR::framepos_t adjusted_frame (ARDOUR::framepos_t, GdkEvent const *, bool snap = true) const;
 	ARDOUR::framepos_t adjusted_current_frame (GdkEvent const *, bool snap = true) const;
+
+        bool was_double_click() const { return _was_double_click; }
+        void set_double_click (bool yn) { _was_double_click = yn; }
 
 	/** Called to start a grab of an item.
 	 *  @param e Event that caused the grab to start.
@@ -225,6 +230,7 @@ protected:
 private:
 
 	bool _move_threshold_passed; ///< true if the move threshold has been passed, otherwise false
+        bool _was_double_click; ///< true if drag initiated by a double click event
 	double _grab_x; ///< trackview x of the grab start position
 	double _grab_y; ///< trackview y of the grab start position
 	double _last_pointer_x; ///< trackview x of the pointer last time a motion occurred
@@ -694,7 +700,7 @@ public:
 class MarkerDrag : public Drag
 {
 public:
-	MarkerDrag (Editor *, ArdourCanvas::Item *);
+        MarkerDrag (Editor *, ArdourCanvas::Item *);
 	~MarkerDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
