@@ -91,7 +91,8 @@ class UIConfiguration : public PBD::Stateful
 
 	uint32_t color_by_name (const std::string&);
 
-	sigc::signal<void,const char*> ParameterChanged;
+        sigc::signal<void,std::string> ParameterChanged;
+	void map_parameters (boost::function<void (std::string)>&);
 
 #undef UI_CONFIG_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,name,value) \

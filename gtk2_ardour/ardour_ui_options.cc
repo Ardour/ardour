@@ -33,6 +33,8 @@
 #include "ardour/osc.h"
 #endif
 
+#include "canvas/wave_view.h"
+
 #include "audio_clock.h"
 #include "ardour_ui.h"
 #include "actions.h"
@@ -311,8 +313,6 @@ ARDOUR_UI::setup_session_options ()
 void
 ARDOUR_UI::parameter_changed (std::string p)
 {
-	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::parameter_changed, p)
-
 	if (p == "external-sync") {
 
 		ActionManager::map_some_state ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
@@ -413,6 +413,8 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "super-rapid-clock-update") {
 		stop_clocking ();
 		start_clocking ();
+	} else if (p == "waveform-gradient-depth") {
+		ArdourCanvas::WaveView::set_global_gradient_depth (config()->get_waveform_gradient_depth());
 	}
 }
 

@@ -603,6 +603,7 @@ WaveView::CacheEntry::image ()
 
 #else
 		cerr << "draw, logscaled = " << _wave_view->_logscaled << " global " << WaveView::_global_logscaled << endl;
+		cerr << "gradient depth: " << _wave_view->gradient_depth() << endl;
 
 		boost::scoped_array<LineTips> tips (new LineTips[_n_peaks]);
 

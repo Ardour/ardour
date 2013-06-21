@@ -296,7 +296,6 @@ ThemeManager::on_waveform_gradient_depth_change ()
 	ArdourCanvas::WaveView::set_global_gradient_depth (v);
 }
 
-
 void
 ThemeManager::on_timeline_item_gradient_depth_change ()
 {
