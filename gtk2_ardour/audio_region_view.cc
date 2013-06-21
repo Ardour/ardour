@@ -43,6 +43,7 @@
 #include "canvas/line.h"
 #include "canvas/text.h"
 #include "canvas/debug.h"
+#include "canvas/utils.h"
 
 #include "streamview.h"
 #include "audio_region_view.h"
@@ -1186,10 +1187,21 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 
 	if (_recregion) {
 		wave->set_outline_color (_region->muted() ? UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_RecWaveForm(), MUTED_ALPHA) : ARDOUR_UI::config()->get_canvasvar_RecWaveForm());
+
+
+
 		wave->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RecWaveFormFill());
 	} else {
 		wave->set_outline_color (_region->muted() ? UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), MUTED_ALPHA) : ARDOUR_UI::config()->get_canvasvar_WaveForm());
-		wave->set_fill_color (ARDOUR_UI::config()->get_canvasvar_WaveFormFill());
+
+		ArdourCanvas::Color c = frame->fill_color ();
+		double h, s, v;
+		ArdourCanvas::color_to_hsv (c, h, s, v);
+		v *= 0.5;
+		c = ArdourCanvas::hsv_to_color (h, s, v, 1.0);
+
+		//wave->set_fill_color (ARDOUR_UI::config()->get_canvasvar_WaveFormFill());
+		wave->set_fill_color (c);
 	}
 
 	wave->set_clip_color (ARDOUR_UI::config()->get_canvasvar_WaveFormClip());
