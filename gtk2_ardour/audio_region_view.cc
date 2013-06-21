@@ -1194,13 +1194,21 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	} else {
 		wave->set_outline_color (_region->muted() ? UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), MUTED_ALPHA) : ARDOUR_UI::config()->get_canvasvar_WaveForm());
 
+		/* wave color is a saturated, whiter version of the frame's
+		 * fill color 
+		 */
+
 		ArdourCanvas::Color c = frame->fill_color ();
 		double h, s, v;
 		ArdourCanvas::color_to_hsv (c, h, s, v);
-		v *= 0.5;
-		c = ArdourCanvas::hsv_to_color (h, s, v, 1.0);
 
-		//wave->set_fill_color (ARDOUR_UI::config()->get_canvasvar_WaveFormFill());
+		/* full saturate */
+		s = 1.0;
+		/* head towards white */
+		v = min (1.0, v * 3.0);
+		
+		c = ArdourCanvas::hsv_to_color (h, s, v, _region->muted() ? MUTED_ALPHA : 1.0);
+
 		wave->set_fill_color (c);
 	}
 
@@ -1343,11 +1351,8 @@ AudioRegionView::setup_waveform_shape ()
 void
 AudioRegionView::setup_waveform_scale ()
 {
-	for (vector<WaveView *>::iterator wave = waves.begin(); wave != waves.end() ; ++wave) {
-		(*wave)->set_logscaled (Config->get_waveform_scale() == Logarithmic);
-	}
+	WaveView::set_global_logscaled (Config->get_waveform_scale() == Logarithmic);
 }
-
 
 GhostRegion*
 AudioRegionView::add_ghost (TimeAxisView& tv)

@@ -21,6 +21,8 @@
 #include <cmath>
 #include <cairomm/cairomm.h>
 
+#include <boost/scoped_array.hpp>
+
 #include "gtkmm2ext/utils.h"
 
 #include "pbd/compose.h"
@@ -388,7 +390,6 @@ WaveView::set_global_logscaled (bool yn)
 	if (_global_logscaled != yn) {
 		_global_logscaled = yn;
 		VisualPropertiesChanged (); /* EMIT SIGNAL */
-		
 	}
 }
 
@@ -457,6 +458,14 @@ alt_log_meter (float power)
 {
 	return _log_meter (power, -192.0, 0.0, 8.0);
 }
+
+struct LineTips {
+    double top;
+    double bot;
+    bool clipped;
+    
+    LineTips() : top (0.0), bot (0.0), clipped (false) {}
+};
 
 Cairo::RefPtr<Cairo::ImageSurface>
 WaveView::CacheEntry::image ()
@@ -592,32 +601,144 @@ WaveView::CacheEntry::image ()
 		_wave_view->setup_outline_context (context);
 		context->stroke ();
 
+#else
+		cerr << "draw, logscaled = " << _wave_view->_logscaled << " global " << WaveView::_global_logscaled << endl;
+
+		boost::scoped_array<LineTips> tips (new LineTips[_n_peaks]);
+
+		if (_wave_view->_shape == WaveView::Rectified) {
+
+			/* each peak is a line from the bottom of the waveview
+			 * to a point determined by max (_peaks[i].max,
+			 * _peaks[i].min)
+			 */
+
+			if (_wave_view->_logscaled) {
+				for (int i = 0; i < _n_peaks; ++i) {
+					tips[i].bot = _wave_view->height();
+					tips[i].top = position (alt_log_meter (fast_coefficient_to_dB (max (fabs (_peaks[i].max), fabs (_peaks[i].min)))));
+				}
+			} else {
+				for (int i = 0; i < _n_peaks; ++i) {
+					tips[i].bot = _wave_view->height();
+					tips[i].top = position (max (fabs (_peaks[i].max), fabs (_peaks[i].min)));
+				}
+			}
+
+		} else {
+
+			if (_wave_view->_logscaled) {
+				for (int i = 0; i < _n_peaks; ++i) {
+					Coord top = _peaks[i].min;
+					Coord bot = _peaks[i].max;
+
+					if (top > 0.0) {
+						top = position (alt_log_meter (fast_coefficient_to_dB (top)));
+					} else if (top < 0.0) {
+						top = position (-alt_log_meter (fast_coefficient_to_dB (-top)));
+					} else {
+						top = position (0.0);
+					}
+
+					if (bot > 0.0) {
+						bot = position (alt_log_meter (fast_coefficient_to_dB (bot)));
+					} else if (bot < 0.0) {
+						bot = position (-alt_log_meter (fast_coefficient_to_dB (-bot)));
+					} else {
+						bot = position (0.0);
+					}
+
+					tips[i].top = top;
+					tips[i].bot = bot;
+
+				} 
+
+			} else {
+				for (int i = 0; i < _n_peaks; ++i) {
+					tips[i].top = floor (position (_peaks[i].min));
+					tips[i].bot = ceil (position (_peaks[i].max));
+				}
+			}
+		}
+
+		if (_wave_view->gradient_depth() != 0.0) {
+			
+			Cairo::RefPtr<Cairo::LinearGradient> gradient (Cairo::LinearGradient::create (0, 0, 0, _wave_view->_height));
+			
+			double stops[3];
+			
+			double r, g, b, a;
+
+			if (_wave_view->_shape == Rectified) {
+				stops[0] = 0.1;
+				stops[0] = 0.3;
+				stops[0] = 0.9;
+			} else {
+				stops[0] = 0.1;
+				stops[1] = 0.5;
+				stops[2] = 0.9;
+			}
+
+			color_to_rgba (_wave_view->_fill_color, r, g, b, a);
+			gradient->add_color_stop_rgba (stops[0], r, g, b, a);
+			gradient->add_color_stop_rgba (stops[2], r, g, b, a);
+
+			/* generate a new color for the middle of the gradient */
+			double h, s, v;
+			color_to_hsv (_wave_view->_fill_color, h, s, v);
+			/* tone down the saturation */
+			v *= 1.0 - _wave_view->gradient_depth();
+			Color center = hsv_to_color (h, s, v, a);
+			color_to_rgba (center, r, g, b, a);
+			gradient->add_color_stop_rgba (stops[1], r, g, b, a);
+			
+			context->set_source (gradient);
+		} else {
+			cerr << "\tno gradient\n";
+			set_source_rgba (context, _wave_view->_fill_color);
+		}
+
+		context->set_line_width (0.5);
+
+		/* draw the lines */
+		
+		if (_wave_view->_shape == WaveView::Rectified) {
+			for (int i = 0; i < _n_peaks; ++i) {
+				context->move_to (i + 0.5, tips[i].top + 0.5); /* down 1 pixel */
+				context->line_to (i + 0.5, tips[i].bot);
+				context->stroke ();
+			}
+		} else {
+			for (int i = 0; i < _n_peaks; ++i) {
+				context->move_to (i + 0.5, tips[i].top + 0.5); /* down 1 pixel */
+				context->line_to (i + 0.5, tips[i].bot - 0.5); /* up 1 pixel */
+				context->stroke ();
+			}
+		}
+
+		/* now add dots to the top and bottom of each line (this is
+		 * modelled on pyramix, except that we add clipping indicators.
+		 */
+
+		context->set_source_rgb (0, 0, 0);
+
+		for (int i = 0; i < _n_peaks; ++i) {
+			context->rectangle (i + 0.5, tips[i].top, 0.5, 0.5);
+			context->fill ();
+			if (_wave_view->_shape != WaveView::Rectified) {
+				context->rectangle (i + 0.5, tips[i].bot, 0.5, 0.5);
+				context->fill ();
+			}
+		}
+#endif
+
 		if (_wave_view->show_zero_line()) {
 			set_source_rgba (context, _wave_view->_zero_color);
 			context->move_to (0, position (0.0));
 			context->line_to (_n_peaks, position (0.0));
 			context->stroke ();
 		}
-#else
-		
-		set_source_rgba (context, _wave_view->_fill_color);
-		context->save ();
-		context->set_line_width (0.5);
-		for (int i = 0; i < _n_peaks; ++i) {
-			context->move_to (i + 0.5, floor (position (_peaks[i].min)) - 1.0);
-			context->line_to (i + 0.5, ceil (position (_peaks[i].max)) + 1.0);
-			context->stroke ();
-		}
-		context->restore ();
 
-		context->set_source_rgba (0, 0, 0, 1.0);
-		for (int i = 0; i < _n_peaks; ++i) {
-			context->rectangle (i + 0.5, floor (position (_peaks[i].min)), 0.5, 0.5);
-			context->fill ();
-			context->rectangle (i + 0.5, ceil (position (_peaks[i].max)), 0.5, 0.5);
-			context->fill ();
-		}
-#endif
 	}
 
 	return _image;
