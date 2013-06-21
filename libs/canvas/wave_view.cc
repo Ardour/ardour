@@ -214,20 +214,45 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	
 	Rect draw = d.get();
 
-	/* pixel coordinates - we round up and down in case we were asked to
-	 * draw "between" pixels at the start and/or end 
+	/* window coordinates - pixels where x=0 is the left edge of the canvas
+	 * window. We round up and down in case we were asked to
+	 * draw "between" pixels at the start and/or end.
 	 */
-	double draw_start = floor (draw.x0);
-	double draw_end = ceil (draw.x1);
+
+	const double draw_start = floor (draw.x0);
+	const double draw_end = ceil (draw.x1);
+
+	// cerr << "Need to draw " << draw_start << " .. " << draw_end << endl;
+	
+	/* image coordnates: pixels where x=0 is the start of this waveview,
+	 * wherever it may be positioned. thus image_start=N means "an image
+	 * that beings N pixels after the start of region that this waveview is
+	 * representing. 
+	 */
+
+	const framepos_t image_start = window_to_image (self.x0, draw_start);
+	const framepos_t image_end = window_to_image (self.x0, draw_end);
+
+	// cerr << "Image/WV space: " << image_start << " .. " << image_end << endl;
 
 	/* sample coordinates - note, these are not subject to rounding error */
-	framepos_t sample_start = _region_start + (draw_start * _samples_per_pixel);
-	framepos_t sample_end   = _region_start + (draw_end * _samples_per_pixel);
+	framepos_t sample_start = _region_start + (image_start * _samples_per_pixel);
+	framepos_t sample_end   = _region_start + (image_end * _samples_per_pixel);
 
-	ensure_cache (draw_start, draw_end, sample_start, sample_end);
+	// cerr << "Sample space: " << sample_start << " .. " << sample_end << endl;
+
+	ensure_cache (image_start, image_end, sample_start, sample_end);
+
+	// cerr << "Cache contains " << _cache->pixel_start() << " .. " << _cache->pixel_end() << " / " 
+	// << _cache->sample_start() << " .. " << _cache->sample_end()
+	// << endl;
+
+	double image_offset = (_cache->sample_start() - _region->start()) / _samples_per_pixel;
+
+	// cerr << "Offset into image to place at zero: " << image_offset << endl;
 
 	context->rectangle (draw_start, draw.y0, draw_end - draw_start, draw.height());
-	context->set_source (_cache->image(), self.x0 + _cache->pixel_start(), self.y0);
+	context->set_source (_cache->image(), self.x0 + image_offset, self.y0);
 	context->fill ();
 }
 
@@ -441,6 +466,8 @@ WaveView::CacheEntry::image ()
 		_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _n_peaks, _wave_view->_height);
 		Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (_image);
 
+#ifdef AREA_DRAW_AND_FILL
+
 		/* Draw the edge of the waveform, top half first, the loop back
 		 * for the bottom half to create a clockwise path
 		 */
@@ -571,6 +598,26 @@ WaveView::CacheEntry::image ()
 			context->line_to (_n_peaks, position (0.0));
 			context->stroke ();
 		}
+#else
+		
+		set_source_rgba (context, _wave_view->_fill_color);
+		context->save ();
+		context->set_line_width (0.5);
+		for (int i = 0; i < _n_peaks; ++i) {
+			context->move_to (i + 0.5, floor (position (_peaks[i].min)) - 1.0);
+			context->line_to (i + 0.5, ceil (position (_peaks[i].max)) + 1.0);
+			context->stroke ();
+		}
+		context->restore ();
+
+		context->set_source_rgba (0, 0, 0, 1.0);
+		for (int i = 0; i < _n_peaks; ++i) {
+			context->rectangle (i + 0.5, floor (position (_peaks[i].min)), 0.5, 0.5);
+			context->fill ();
+			context->rectangle (i + 0.5, ceil (position (_peaks[i].max)), 0.5, 0.5);
+			context->fill ();
+		}
+#endif
 	}
 
 	return _image;

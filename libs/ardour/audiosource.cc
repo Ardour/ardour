@@ -342,14 +342,14 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	/* fix for near-end-of-file conditions */
 
 	if (cnt > _length - start) {
-		cerr << "too close to end @ " << _length << " given " << start << " + " << cnt << " (" << _length - start << ")" << endl;
+		// cerr << "too close to end @ " << _length << " given " << start << " + " << cnt << " (" << _length - start << ")" << endl;
 		cnt = _length - start;
 		framecnt_t old = npeaks;
 		npeaks = min ((framecnt_t) floor (cnt / samples_per_visual_peak), npeaks);
 		zero_fill = old - npeaks;
 	}
 
-	cerr << "actual npeaks = " << npeaks << " zf = " << zero_fill << endl;
+	// cerr << "actual npeaks = " << npeaks << " zf = " << zero_fill << endl;
 
 	if (npeaks == cnt) {
 
