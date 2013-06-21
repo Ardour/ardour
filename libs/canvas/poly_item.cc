@@ -109,7 +109,7 @@ PolyItem::render_curve (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 		} else {
 
 			Duple c = item_to_window (Duple (i->x, i->y));
-			context->move_to (i->x, i->y);
+			context->move_to (c.x, c.y);
 			done_first = true;
 		}
 	}
