@@ -629,6 +629,11 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 				x -= 64;
 			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
 				_editor->temporal_zoom_step (false);
+			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
+				yr.first  += 4;
+				yr.second -= 4;
+				set_editor (xr, yr);
+				return true;
 			} else {
 				y -= 8;
 			}
@@ -638,6 +643,11 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 				x += 64;
 			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
 				_editor->temporal_zoom_step (true);
+			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
+				yr.first  -= 4;
+				yr.second += 4;
+				set_editor (xr, yr);
+				return true;
 			} else {
 				y += 8;
 			}
