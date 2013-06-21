@@ -35,7 +35,7 @@
 using namespace std;
 using namespace ARDOUR;
 
-static void freedata_cb (uint8_t *d, void *arg) {
+static void freedata_cb (uint8_t *d, void* /*arg*/) {
 	/* later this can be used with libharvid
 	 * the buffer/videocacheline instead of freeing it
 	 */
