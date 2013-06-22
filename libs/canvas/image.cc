@@ -48,7 +48,7 @@ Image::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) const
 	boost::optional<Rect> draw = self.intersection (area);
 
 	if (_surface && draw) {
-		context->set_source (_surface, 0, 0);
+		context->set_source (_surface, self.x0, self.y0);
 		context->rectangle (draw->x0, draw->y0, draw->width(), draw->height());
 		context->fill ();
 	}
