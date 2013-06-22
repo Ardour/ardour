@@ -192,6 +192,7 @@ CONFIG_VARIABLE (bool, sound_midi_notes, "sound-midi-notes", false)
 CONFIG_VARIABLE (bool, use_plugin_own_gui, "use-plugin-own-gui", true)
 CONFIG_VARIABLE (uint32_t, max_recent_sessions, "max-recent-sessions", 10)
 CONFIG_VARIABLE (double, automation_thinning_factor, "automation-thinning-factor", 20.0)
+CONFIG_VARIABLE (std::string, freesound_download_dir, "freesound-download-dir", Glib::get_home_dir() + "/Freesound/snd")
 
 /* denormal management */
 

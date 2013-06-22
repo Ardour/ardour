@@ -131,6 +131,7 @@ class SoundFileBrowser : public ArdourWindow
 		Gtk::TreeModelColumn<std::string> filesize;
 		Gtk::TreeModelColumn<std::string> smplrate;
 		Gtk::TreeModelColumn<std::string> license;
+		Gtk::TreeModelColumn<bool>        started;
 
 		FreesoundColumns() {
 			add(id); 
@@ -140,6 +141,7 @@ class SoundFileBrowser : public ArdourWindow
 			add(filesize);
 			add(smplrate);
 			add(license);
+			add(started);
 		}
 	};
 
@@ -150,8 +152,9 @@ class SoundFileBrowser : public ArdourWindow
 	Glib::RefPtr<Gtk::ListStore> freesound_list;
 
 	Gtk::Button freesound_more_btn;
-	Gtk::Button freesound_stop_btn;
+	Gtk::Button freesound_similar_btn;
 
+	void handle_freesound_results(std::string theString);
   public:
 	SoundFileBrowser (std::string title, ARDOUR::Session* _s, bool persistent);
 	virtual ~SoundFileBrowser ();
@@ -177,11 +180,10 @@ class SoundFileBrowser : public ArdourWindow
 
 	Gtk::Button freesound_search_btn;
 	Gtk::TreeView freesound_list_view;
-	Gtk::ProgressBar freesound_progress_bar;
-
-	bool freesound_download_cancel;
+	Gtk::Notebook notebook;
 
 	void freesound_search();
+	void refresh_display(std::string ID, std::string file);
 	
   protected:
 	bool resetting_ourselves;
@@ -203,7 +205,6 @@ class SoundFileBrowser : public ArdourWindow
 
 	static std::string persistent_folder;
 
-	Gtk::Notebook notebook;
 
 	GainMeter* gm;
 	Gtk::VBox meter_packer;
@@ -224,10 +225,11 @@ class SoundFileBrowser : public ArdourWindow
 	void freesound_list_view_activated (const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*);
 	void freesound_search_clicked ();
 	void freesound_more_clicked ();
-	void freesound_stop_clicked ();
+	void freesound_similar_clicked ();
 	int freesound_page;
 	
 	void chooser_file_activated ();
+	std::string freesound_get_audio_file(Gtk::TreeIter iter);
 
 	bool on_audio_filter (const Gtk::FileFilter::Info& filter_info);
 	bool on_midi_filter (const Gtk::FileFilter::Info& filter_info);
