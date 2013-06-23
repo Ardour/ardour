@@ -43,7 +43,7 @@ ExportFormatSelector::ExportFormatSelector () :
 	new_button.set_name ("PaddedButton");
 
 	edit_button.signal_clicked().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*this, &ExportFormatSelector::open_edit_dialog), false)));
-	remove_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportFormatSelector::remove_format));
+	remove_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &ExportFormatSelector::remove_format), true));
 	new_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportFormatSelector::add_new_format));
 
 	/* Format combo */
@@ -122,7 +122,7 @@ ExportFormatSelector::add_new_format ()
 	FormatPtr new_format = state->format = NewFormat (state->format);
 
 	if (open_edit_dialog (true) != Gtk::RESPONSE_APPLY) {
-		remove_format();
+		remove_format(false);
 		if (state->list->empty()) {
 			state->format.reset ();
 		}
@@ -130,11 +130,26 @@ ExportFormatSelector::add_new_format ()
 }
 
 void
-ExportFormatSelector::remove_format ()
+ExportFormatSelector::remove_format (bool called_from_button)
 {
+	if (called_from_button) {
+		Gtk::MessageDialog dialog (_("Do you really want to remove the format?"),
+				false,
+				Gtk::MESSAGE_QUESTION,
+				Gtk::BUTTONS_YES_NO);
+
+		if (Gtk::RESPONSE_YES != dialog.run ()) {
+			/* User has selected "no" or closed the dialog, better
+			 * abort
+			 */
+			return;
+		}
+	}
+
 	FormatPtr remove;
 	Gtk::TreeModel::iterator it = format_combo.get_active();
 	remove = it->get_value (format_cols.format);
+
 	FormatRemoved (remove);
 }
 
