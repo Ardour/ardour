@@ -3125,12 +3125,12 @@ Editor::convert_drop_to_paths (
 		*/
 
 		string txt = data.get_text();
-		const char* p;
+		char* p;
 		const char* q;
 
-		p = (const char *) malloc (txt.length() + 1);
-		txt.copy (const_cast<char *> (p), txt.length(), 0);
-		const_cast<char*>(p)[txt.length()] = '\0';
+		p = (char *) malloc (txt.length() + 1);
+		txt.copy (p, txt.length(), 0);
+		p[txt.length()] = '\0';
 
 		while (p)
 		{
