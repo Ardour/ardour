@@ -373,3 +373,5 @@ widget "*transport option button" style:highest "small_text"
 widget "*transport active option button" style:highest "small_text"
 widget "*plugin bypass button" style:highest "small_text"
 widget "*punch button" style:highest "small_text"
+
+widget "*MeterbridgeLabel*" style:highest "meterbridge_label"

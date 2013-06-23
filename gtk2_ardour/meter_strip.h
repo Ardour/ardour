@@ -49,6 +49,7 @@ class MeterStrip : public Gtk::VBox
 	~MeterStrip ();
 
 	void fast_update ();
+	boost::shared_ptr<ARDOUR::Route> route() { return _route; }
 
 	static PBD::Signal1<void,MeterStrip*> CatchDeletion;
 
@@ -57,15 +58,29 @@ class MeterStrip : public Gtk::VBox
 	PBD::ScopedConnectionList route_connections;
 	void self_delete ();
 
+	gint meter_metrics_expose (GdkEventExpose *);
+
+	typedef std::map<std::string,cairo_pattern_t*> MetricPatterns;
+	static  MetricPatterns metric_patterns;
+	static  cairo_pattern_t* render_metrics (Gtk::Widget &, std::vector<ARDOUR::DataType>);
+
+	void on_theme_changed ();
+	bool style_changed;
+
+	void on_size_allocate (Gtk::Allocation&);
+	void on_size_request (Gtk::Requisition*);
+
   private:
-	Meterbridge& _meterbridge;
-	Gtk::Label *label;
+	Gtk::Label label;
+	Gtk::DrawingArea meter_metric_area;
+	std::vector<ARDOUR::DataType> _types;
 
 	LevelMeter   *level_meter;
 	void meter_changed ();
 
 	PBD::ScopedConnection _config_connection;
 	void strip_property_changed (const PBD::PropertyChange&);
+	void meter_configuration_changed (ARDOUR::ChanCount);
 
 };
 

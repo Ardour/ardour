@@ -71,6 +71,45 @@ Meterbridge::instance ()
 	return _instance;
 }
 
+/* copy from gtk2_ardour/mixer_ui.cc -- TODO consolidate
+ * used by Meterbridge::set_session() below
+ */
+struct SignalOrderRouteSorter {
+	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
+		if (a->is_master() || a->is_monitor()) {
+			/* "a" is a special route (master, monitor, etc), and comes
+			 * last in the mixer ordering
+			 */
+			return false;
+		} else if (b->is_master() || b->is_monitor()) {
+			/* everything comes before b */
+			return true;
+		}
+		return a->order_key (MixerSort) < b->order_key (MixerSort);
+	}
+};
+
+/* modified version of above
+ * used in Meterbridge::sync_order_keys()
+ */
+struct MeterOrderRouteSorter {
+	bool operator() (MeterStrip *ma, MeterStrip *mb) {
+		boost::shared_ptr<Route> a = ma->route();
+		boost::shared_ptr<Route> b = mb->route();
+		if (a->is_master() || a->is_monitor()) {
+			/* "a" is a special route (master, monitor, etc), and comes
+			 * last in the mixer ordering
+			 */
+			return false;
+		} else if (b->is_master() || b->is_monitor()) {
+			/* everything comes before b */
+			return true;
+		}
+		return a->order_key (MixerSort) < b->order_key (MixerSort);
+	}
+};
+
+
 Meterbridge::Meterbridge ()
 	: Window (Gtk::WINDOW_TOPLEVEL)
 	, VisibilityTracker (*((Gtk::Window*) this))
@@ -82,6 +121,7 @@ Meterbridge::Meterbridge ()
 
 	signal_delete_event().connect (sigc::mem_fun (*this, &Meterbridge::hide_window));
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
+	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Meterbridge::sync_order_keys, this, _1), gui_context());
 
 	MeterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Meterbridge::remove_strip, this, _1), gui_context());
 
@@ -151,23 +191,6 @@ Meterbridge::on_key_release_event (GdkEventKey* ev)
 	return true;
 }
 
-
-// copy from gtk2_ardour/mixer_ui.cc 
-struct SignalOrderRouteSorter {
-    bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-	    if (a->is_master() || a->is_monitor()) {
-		    /* "a" is a special route (master, monitor, etc), and comes
-		     * last in the mixer ordering
-		     */
-		    return false;
-	    } else if (b->is_master() || b->is_monitor()) {
-		    /* everything comes before b */
-		    return true;
-	    }
-	    return a->order_key (MixerSort) < b->order_key (MixerSort);
-    }
-};
-
 void
 Meterbridge::set_session (Session* s)
 {
@@ -190,8 +213,6 @@ Meterbridge::set_session (Session* s)
 	add_strips(copy);
 
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Meterbridge::add_strips, this, _1), gui_context());
-
-	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&Meterbridge::parameter_changed, this, _1), gui_context());
 
 	if (_visible) {
 		show_window();
@@ -340,12 +361,11 @@ Meterbridge::add_strips (RouteList& routes)
 		strip = new MeterStrip (*this, _session, route);
 		strips.push_back (strip);
 
-		// TODO sort-routes, insert at proper position
-		// order_key
-
 		global_hpacker.pack_start (*strip, false, false);
 		strip->show();
 	}
+
+	sync_order_keys(MixerSort);
 }
 
 void
@@ -362,6 +382,14 @@ Meterbridge::remove_strip (MeterStrip* strip)
 }
 
 void
-Meterbridge::parameter_changed (string const & p)
+Meterbridge::sync_order_keys (RouteSortOrderKey src)
 {
+	MeterOrderRouteSorter sorter;
+	std::list<MeterStrip *> copy (strips);
+	copy.sort(sorter);
+
+	int pos = 0;
+	for (list<MeterStrip *>::iterator i = copy.begin(); i != copy.end(); ++i) {
+		global_hpacker.reorder_child(*(*i), pos++);
+	}
 }

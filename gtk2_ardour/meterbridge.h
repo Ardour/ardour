@@ -73,14 +73,14 @@ class Meterbridge :
 	void add_strips (ARDOUR::RouteList&);
 	void remove_strip (MeterStrip *);
 
-	void parameter_changed (std::string const &);
-
 	void session_going_away ();
+	void sync_order_keys (ARDOUR::RouteSortOrderKey src);
 
 	std::list<MeterStrip *> strips;
 
 	static const int32_t default_width = 300;
 	static const int32_t default_height = 400;
+
 	// for restoring window geometry.
 	int m_root_x, m_root_y, m_width, m_height;
 
