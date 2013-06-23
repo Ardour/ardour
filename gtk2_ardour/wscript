@@ -146,6 +146,7 @@ gtk2_ardour_sources = [
         'mixer_strip.cc',
         'mixer_ui.cc',
         'meterbridge.cc',
+        'meter_strip.cc',
         'monitor_section.cc',
         'mono_panner.cc',
         'mono_panner_editor.cc',

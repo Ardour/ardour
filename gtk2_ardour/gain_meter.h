@@ -99,6 +99,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
   protected:
 
 	friend class MixerStrip;
+	friend class MeterStrip;
 	boost::shared_ptr<ARDOUR::Route> _route;
 	boost::shared_ptr<ARDOUR::PeakMeter> _meter;
 	boost::shared_ptr<ARDOUR::Amp> _amp;
