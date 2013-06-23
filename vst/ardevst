@@ -2,4 +2,4 @@
 
 . `dirname "$0"`/../build/gtk2_ardour/ardev_common_waf.sh
 export LD_LIBRARY_PATH=$libs/../gtk2_ardour:$LD_LIBRARY_PATH
-exec wine $libs/../gtk2_ardour/ardour-3.0-vst.exe.so "$@"
+exec wine $libs/../gtk2_ardour/ardour-$ARDOURVERSION-vst.exe.so "$@"
