@@ -25,6 +25,12 @@
 #include <stdint.h>
 #include <boost/optional.hpp>
 
+#include <cairomm/refptr.h>
+
+namespace Cairo {
+	struct Context;
+}
+
 namespace ArdourCanvas
 {
 
@@ -88,6 +94,9 @@ struct Rect
 	Rect expand (Distance) const;
 	bool contains (Duple) const;
 	Rect fix () const;
+
+        Rect convert_to_device (Cairo::RefPtr<Cairo::Context>) const;
+        Rect convert_to_user (Cairo::RefPtr<Cairo::Context>) const;
 
 	Distance width () const {
 		return x1 - x0;

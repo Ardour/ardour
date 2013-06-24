@@ -80,6 +80,7 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 		/* there's a common area between the root and the requested
 		   area, so render it.
 		*/
+
 		_root.render (*draw, context);
 	}
 }

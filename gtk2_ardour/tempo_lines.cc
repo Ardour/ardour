@@ -111,8 +111,12 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 			line->set_ignore_events (true);
 		}
 
-		line->set_x0 (xpos);
-		line->set_x1 (xpos);
+		/* move to 0.5 offset to ensure single pixel lines (see Cairo
+		 * FAQ for info on why we do this).
+		 */
+
+		line->set_x0 (xpos + 0.5);
+		line->set_x1 (xpos + 0.5);
 		line->set_y0 (0.0);
 		line->set_y1 (_height);
 		line->set_outline_color (color);

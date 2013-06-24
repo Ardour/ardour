@@ -731,29 +731,14 @@ TimeAxisViewItem::set_colors()
 	set_trim_handle_colors();
 }
 
-/**
- * Sets the frame color depending on whether this item is selected
- */
-void
-TimeAxisViewItem::set_frame_color()
+uint32_t
+TimeAxisViewItem::get_fill_color () const
 {
         uint32_t f = 0;
-
-	if (!frame) {
-		return;
-	}
 
 	if (_selected) {
 
                 f = ARDOUR_UI::config()->get_canvasvar_SelectedFrameBase();
-
-		if (fill_opacity) {
-                        f = UINT_RGBA_CHANGE_A (f, fill_opacity);
-		}
-
-                if (!rect_visible) {
-                        f = UINT_RGBA_CHANGE_A (f, 0);
-                }
 
 	} else {
 
@@ -766,15 +751,32 @@ TimeAxisViewItem::set_frame_color()
 			} else {
 				f = fill_color;
 			}
+		}
+	}
 
-			if (fill_opacity) {
-				f = UINT_RGBA_CHANGE_A (f, fill_opacity);
-			}
+	return f;
+}
 
-                        if (!rect_visible) {
-                                f = UINT_RGBA_CHANGE_A (f, 0);
-                        }
-                }
+/**
+ * Sets the frame color depending on whether this item is selected
+ */
+void
+TimeAxisViewItem::set_frame_color()
+{
+        uint32_t f = 0;
+
+	if (!frame) {
+		return;
+	}
+
+	f = get_fill_color ();
+
+	if (fill_opacity) {
+		f = UINT_RGBA_CHANGE_A (f, fill_opacity);
+	}
+	
+	if (!rect_visible) {
+		f = UINT_RGBA_CHANGE_A (f, 0);
 	}
 
         frame->set_fill_color (f);
@@ -806,7 +808,7 @@ TimeAxisViewItem::set_frame_gradient ()
 	ArdourCanvas::Fill::StopList stops;
 	double r, g, b, a;
 	double h, s, v;
-	ArdourCanvas::Color f (frame->fill_color());
+	ArdourCanvas::Color f (get_fill_color());
 
 	/* need to get alpha value */
 	ArdourCanvas::color_to_rgba (f, r, g, b, a);
@@ -816,10 +818,8 @@ TimeAxisViewItem::set_frame_gradient ()
 	/* now a darker version */
 	
 	ArdourCanvas::color_to_hsv (f, h, s, v);
-	s *= ARDOUR_UI::config()->get_timeline_item_gradient_depth();
-	if (s > 1.0) {
-		s = 1.0;
-	}
+
+	v = min (1.0, v * (1.0 - ARDOUR_UI::config()->get_timeline_item_gradient_depth()));
 	
 	ArdourCanvas::Color darker = ArdourCanvas::hsv_to_color (h, s, v, a);
 	stops.push_back (std::make_pair (1.0, darker));

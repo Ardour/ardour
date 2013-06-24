@@ -68,69 +68,40 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 	draw.y0 = max (self.y0, max (0.0, draw.y0 - boundary));
 	draw.y1 = min (self.y1, min (2000.0, draw.y1 + boundary));
 
+	Rect fill_rect = draw;
+	Rect stroke_rect = fill_rect.expand (0.5);
+
 	if (_fill) {
 		setup_fill_context (context);
-
-		context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
-		
-		if (!_outline) {
-			context->fill ();
-		} else {
-			
-			/* special/common case: outline the entire rectangle is
-			 * requested, so just use the same path for the fill
-			 * and stroke.
-			 */
-
-			if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
-				context->fill_preserve();
-				setup_outline_context (context);
-				context->stroke ();
-			} else {
-				context->fill ();
-			}
-		}
-	} 
+		context->rectangle (fill_rect.x0, fill_rect.y0, fill_rect.width(), fill_rect.height());
+		context->fill ();
+	}
 	
 	if (_outline) {
-		
+
 		setup_outline_context (context);
 
-		if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
-
-			/* if we filled and use full outline, we are already
-			 * done. otherwise, draw the frame here.
-			 */
-
-			if (!_fill) { 
-				context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
-				context->stroke ();
-			}
-			
-		} else {
-			
-			if (_outline_what & LEFT) {
-				context->move_to (draw.x0, draw.y0);
-				context->line_to (draw.x0, draw.y1);
-			}
-			
-			if (_outline_what & BOTTOM) {
-				context->move_to (draw.x0, draw.y1);
-				context->line_to (draw.x1, draw.y1);
-			}
-			
-			if (_outline_what & RIGHT) {
-				context->move_to (draw.x1, draw.y0);
-				context->line_to (draw.x1, draw.y1);
-			}
-			
-			if (_outline_what & TOP) {
-				context->move_to (draw.x0, draw.y0);
-				context->line_to (draw.x1, draw.y0);
-			}
-			
-			context->stroke ();
+		if (_outline_what & LEFT) {
+			context->move_to (stroke_rect.x0, stroke_rect.y0);
+			context->line_to (stroke_rect.x0, stroke_rect.y1);
 		}
+		
+		if (_outline_what & BOTTOM) {
+			context->move_to (stroke_rect.x0, stroke_rect.y1);
+			context->line_to (stroke_rect.x1, stroke_rect.y1);
+		}
+		
+		if (_outline_what & RIGHT) {
+			context->move_to (stroke_rect.x1, stroke_rect.y0);
+			context->line_to (stroke_rect.x1, stroke_rect.y1);
+		}
+		
+		if (_outline_what & TOP) {
+			context->move_to (stroke_rect.x0, stroke_rect.y0);
+			context->line_to (stroke_rect.x1, stroke_rect.y0);
+		}
+		
+		context->stroke ();
 	}
 }
 

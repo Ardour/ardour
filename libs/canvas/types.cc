@@ -20,6 +20,9 @@
 #include <algorithm>
 #include <cfloat>
 #include <cassert>
+
+#include <cairomm/context.h>
+
 #include "canvas/types.h"
 
 using namespace std;
@@ -116,6 +119,39 @@ Rect::fix () const
 	r.y1 = max (y0, y1);
 
 	return r;
+}
+
+Rect
+Rect::convert_to_device (Cairo::RefPtr<Cairo::Context> c) const
+{
+	Coord xa, ya, xb, yb;
+
+	xa = x0;
+	xb = x1;
+	ya = y0;
+	yb = y1;
+
+	c->user_to_device (xa, ya);
+	c->user_to_device (xb, yb);
+
+	return Rect (xa, ya, xb, yb);
+}
+
+
+Rect
+Rect::convert_to_user (Cairo::RefPtr<Cairo::Context> c) const
+{
+	Coord xa, ya, xb, yb;
+
+	xa = x0;
+	xb = x1;
+	ya = y0;
+	yb = y1;
+
+	c->device_to_user (xa, ya);
+	c->device_to_user (xb, yb);
+
+	return Rect (xa, ya, xb, yb);
 }
 
 Duple

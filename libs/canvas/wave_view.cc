@@ -178,6 +178,7 @@ WaveView::ensure_cache (framecnt_t start, framecnt_t end,
 	sample_start = max ((framepos_t) 0, (center - canvas_samples));
 	sample_end = min (center + canvas_samples, _region->source_length (0));
 
+#if 0
 	if (sample_end <= sample_start) {
 		cerr << "sample start = " << sample_start << endl;
 		cerr << "center+ = " << center<< endl;
@@ -188,13 +189,15 @@ WaveView::ensure_cache (framecnt_t start, framecnt_t end,
 		cerr << "END: " << sample_end << endl;
 		assert (false);
 	}
+#endif
 	
 	start = floor (sample_start / (double) _samples_per_pixel);
 	end = ceil (sample_end / (double) _samples_per_pixel);
 	
 	assert (end > start);
 
-	cerr << name << " cache miss - new CE, span " << start << " .. " << end << " (" << sample_start << " .. " << sample_end << ")\n";
+	// cerr << name << " cache miss - new CE, span " << start << " .. " << end << " (" << sample_start << " .. " << sample_end << ")\n";
+
 	_cache = new CacheEntry (this, start, end, sample_start, sample_end);
 }
 
@@ -254,7 +257,19 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	// cerr << "Offset into image to place at zero: " << image_offset << endl;
 
 	context->rectangle (draw_start, draw.y0, draw_end - draw_start, draw.height());
-	context->set_source (_cache->image(), self.x0 + image_offset, self.y0);
+
+	/* round image origin position to an exact pixel in device space to
+	 * avoid blurring
+	 */
+
+	double x  = self.x0 + image_offset;
+	double y  = self.y0;
+	context->user_to_device (x, y);
+	x = round (x);
+	y = round (y);
+	context->device_to_user (x, y);
+
+	context->set_source (_cache->image(), x, y);
 	context->fill ();
 }
 
@@ -407,18 +422,6 @@ WaveView::region_resized ()
 	*/
 
 	_pre_change_bounding_box = _bounding_box;
-
-	frameoffset_t s = _region->start();
-
-	if (s != _region_start) {
-		/* if the region start changes, the information we have 
-		   in the image cache is out of date and not useful
-		   since it will fragmented into little pieces. invalidate
-		   the cache.
-		*/
-		_region_start = _region->start();
-		invalidate_whole_cache ();
-	}
 
 	_bounding_box_dirty = true;
 	compute_bounding_box ();
@@ -602,9 +605,6 @@ WaveView::CacheEntry::image ()
 		context->stroke ();
 
 #else
-		cerr << "draw, logscaled = " << _wave_view->_logscaled << " global " << WaveView::_global_logscaled << endl;
-		cerr << "gradient depth: " << _wave_view->gradient_depth() << endl;
-
 		boost::scoped_array<LineTips> tips (new LineTips[_n_peaks]);
 
 		if (_wave_view->_shape == WaveView::Rectified) {
@@ -656,8 +656,8 @@ WaveView::CacheEntry::image ()
 
 			} else {
 				for (int i = 0; i < _n_peaks; ++i) {
-					tips[i].top = floor (position (_peaks[i].min));
-					tips[i].bot = ceil (position (_peaks[i].max));
+					tips[i].top = position (_peaks[i].min);
+					tips[i].bot = position (_peaks[i].max);
 				}
 			}
 		}
@@ -687,7 +687,7 @@ WaveView::CacheEntry::image ()
 			/* generate a new color for the middle of the gradient */
 			double h, s, v;
 			color_to_hsv (_wave_view->_fill_color, h, s, v);
-			/* tone down the saturation */
+			/* change v towards white */
 			v *= 1.0 - _wave_view->gradient_depth();
 			Color center = hsv_to_color (h, s, v, a);
 			color_to_rgba (center, r, g, b, a);
@@ -695,24 +695,26 @@ WaveView::CacheEntry::image ()
 			
 			context->set_source (gradient);
 		} else {
-			cerr << "\tno gradient\n";
 			set_source_rgba (context, _wave_view->_fill_color);
 		}
 
+		/* ensure single-pixel lines */
+		
 		context->set_line_width (0.5);
+		context->translate (0.5, 0.0);
 
 		/* draw the lines */
-		
+
 		if (_wave_view->_shape == WaveView::Rectified) {
 			for (int i = 0; i < _n_peaks; ++i) {
-				context->move_to (i + 0.5, tips[i].top + 0.5); /* down 1 pixel */
-				context->line_to (i + 0.5, tips[i].bot);
+				context->move_to (i, tips[i].top); /* down 1 pixel */
+				context->line_to (i, tips[i].bot);
 				context->stroke ();
 			}
 		} else {
 			for (int i = 0; i < _n_peaks; ++i) {
-				context->move_to (i + 0.5, tips[i].top + 0.5); /* down 1 pixel */
-				context->line_to (i + 0.5, tips[i].bot - 0.5); /* up 1 pixel */
+				context->move_to (i, tips[i].top);
+				context->line_to (i, tips[i].bot);
 				context->stroke ();
 			}
 		}
@@ -721,14 +723,16 @@ WaveView::CacheEntry::image ()
 		 * modelled on pyramix, except that we add clipping indicators.
 		 */
 
-		context->set_source_rgb (0, 0, 0);
+		context->set_source_rgba (0, 0, 0, 1.0);
 
 		for (int i = 0; i < _n_peaks; ++i) {
-			context->rectangle (i + 0.5, tips[i].top, 0.5, 0.5);
-			context->fill ();
+			context->move_to (i, tips[i].top);
+			context->rel_line_to (0, 1.0);
+			context->stroke ();
 			if (_wave_view->_shape != WaveView::Rectified) {
-				context->rectangle (i + 0.5, tips[i].bot, 0.5, 0.5);
-				context->fill ();
+				context->move_to (i, tips[i].bot);
+				context->rel_line_to (0, -1.0);
+				context->stroke ();
 			}
 		}
 #endif
@@ -749,13 +753,17 @@ WaveView::CacheEntry::image ()
 Coord
 WaveView::CacheEntry::position (double s) const
 {
+	/* it is important that this returns an integral value, so that we 
+	   can ensure correct single pixel behaviour.
+	 */
+
 	switch (_wave_view->_shape) {
 	case Rectified:
-		return _wave_view->_height - (s * _wave_view->_height);
+		return floor (_wave_view->_height - (s * _wave_view->_height));
 	default:
 		break;
 	}
-	return (1.0-s) * (_wave_view->_height / 2.0);
+	return floor ((1.0-s) * (_wave_view->_height / 2.0));
 }
 
 void

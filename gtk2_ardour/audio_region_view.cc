@@ -1208,14 +1208,13 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		v = min (1.0, v * 3.0);
 		
 		c = ArdourCanvas::hsv_to_color (h, s, v, _region->muted() ? MUTED_ALPHA : 1.0);
-
+		
 		wave->set_fill_color (c);
 	}
 
 	wave->set_clip_color (ARDOUR_UI::config()->get_canvasvar_WaveFormClip());
 	wave->set_zero_color (ARDOUR_UI::config()->get_canvasvar_ZeroLine());
-	// CAIROCANVAS
-	// wave->property_zero_line() = true;
+	wave->set_show_zero_line (true);
 
 	switch (Config->get_waveform_shape()) {
 	case Rectified:
