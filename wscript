@@ -516,6 +516,7 @@ def configure(conf):
     if Options.options.freebie:
         conf.env.append_value ('CFLAGS', '-DNO_PLUGIN_STATE')
         conf.env.append_value ('CXXFLAGS', '-DNO_PLUGIN_STATE')
+        conf.define ('NO_PLUGIN_STATE', 1)
 
     if sys.platform == 'darwin':
 
@@ -562,9 +563,6 @@ def configure(conf):
         conf.env.append_value('CXXFLAGS_AUDIOUNITS', "-DAUDIOUNIT_SUPPORT")
         conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'AudioToolbox', '-framework', 'AudioUnit'])
         conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Cocoa'])
-
-        if not Options.options.freebie:
-            conf.env.append_value('CXXFLAGS_AUDIOUNITS')
 
         if re.search ("^[1-9][0-9]\.", os.uname()[2]) == None and not Options.options.nocarbon:
             conf.env.append_value('CXXFLAGS_AUDIOUNITS', "-DWITH_CARBON")
@@ -685,7 +683,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Architecture flags',    opts.arch)
     write_config_text('Aubio',                 conf.is_defined('HAVE_AUBIO'))
     write_config_text('AudioUnits',            conf.is_defined('AUDIOUNIT_SUPPORT'))
-    write_config_text('AU state support',      conf.is_defined('AU_STATE_SUPPORT'))
+    write_config_text('No plugin state',       conf.is_defined('NO_PLUGIN_STATE'))
     write_config_text('Build target',          conf.env['build_target'])
     write_config_text('CoreAudio',             conf.is_defined('HAVE_COREAUDIO'))
     write_config_text('Debug RT allocations',  conf.is_defined('DEBUG_RT_ALLOC'))
