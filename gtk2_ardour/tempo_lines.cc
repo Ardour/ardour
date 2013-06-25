@@ -25,10 +25,10 @@
 
 using namespace std;
 
-TempoLines::TempoLines (ArdourCanvas::Canvas& canvas, ArdourCanvas::Group* group, double screen_height)
+TempoLines::TempoLines (ArdourCanvas::Canvas& canvas, ArdourCanvas::Group* group, double h)
 	: _canvas (canvas)
 	, _group (group)
-	, _height (screen_height)
+	, _height (h)
 {
 }
 
