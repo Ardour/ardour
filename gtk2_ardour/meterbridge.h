@@ -81,6 +81,8 @@ class Meterbridge :
 	static const int32_t default_width = 600;
 	static const int32_t default_height = 400;
 
+	void update_title ();
+
 	// for restoring window geometry.
 	int m_root_x, m_root_y, m_width, m_height;
 

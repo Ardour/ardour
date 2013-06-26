@@ -117,6 +117,8 @@ Meterbridge::Meterbridge ()
 {
 	set_name ("Meter Bridge");
 
+	update_title ();
+
 	set_wmclass (X_("ardour_mixer"), PROGRAM_NAME);
 
 	Gdk::Geometry geom;
@@ -158,6 +160,36 @@ Meterbridge::show_window ()
 		set_window_pos_and_size ();
 	}
 	_visible = true;
+}
+
+/* code duplicated from gtk2_ardour/mixer_ui.cc  Mixer_UI::update_title() */
+void
+Meterbridge::update_title ()
+{
+	if (_session) {
+		string n;
+
+		if (_session->snap_name() != _session->name()) {
+			n = _session->snap_name ();
+		} else {
+			n = _session->name ();
+		}
+
+		if (_session->dirty ()) {
+			n = "*" + n;
+		}
+
+		WindowTitle title (n);
+		title += S_("Window|Meterbridge");
+		title += Glib::get_application_name ();
+		set_title (title.get_string());
+
+	} else {
+
+		WindowTitle title (S_("Window|Meterbridge"));
+		title += Glib::get_application_name ();
+		set_title (title.get_string());
+	}
 }
 
 void
@@ -215,6 +247,8 @@ Meterbridge::set_session (Session* s)
 		set_state (*node);
 	}
 
+	update_title ();
+
 	SignalOrderRouteSorter sorter;
 	boost::shared_ptr<RouteList> routes = _session->get_routes();
 
@@ -223,6 +257,8 @@ Meterbridge::set_session (Session* s)
 	add_strips(copy);
 
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Meterbridge::add_strips, this, _1), gui_context());
+	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Meterbridge::update_title, this), gui_context());
+	_session->StateSaved.connect (_session_connections, invalidator (*this), boost::bind (&Meterbridge::update_title, this), gui_context());
 
 	if (_visible) {
 		show_window();
@@ -246,6 +282,7 @@ Meterbridge::session_going_away ()
 	SessionHandlePtr::session_going_away ();
 
 	_session = 0;
+	update_title ();
 }
 
 int
