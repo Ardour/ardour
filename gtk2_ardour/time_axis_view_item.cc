@@ -728,6 +728,61 @@ TimeAxisViewItem::set_colors()
 	if (name_highlight) {
 		name_highlight->set_fill_color (fill_color);
 	}
+
+	if (name_text) {
+		double r, g, b, a;
+
+		const double black_r = 0.0;
+		const double black_g = 0.0;
+		const double black_b = 0.0;
+
+		const double white_r = 1.0;
+		const double white_g = 1.0;
+		const double white_b = 1.0;
+
+		ArdourCanvas::color_to_rgba (fill_color, r, g, b, a);
+		
+		/* Use W3C contrast guideline calculation */
+
+		double white_contrast = (max (r, white_r) - min (r, white_r)) +
+			(max (g, white_g) - min (g, white_g)) + 
+			(max (b, white_b) - min (b, white_b));
+
+		double black_contrast = (max (r, black_r) - min (r, black_r)) +
+			(max (g, black_g) - min (g, black_g)) + 
+			(max (b, black_b) - min (b, black_b));
+
+		if (white_contrast > black_contrast) {		
+			/* use white */
+			name_text->set_color (ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 1.0));
+		} else {
+			/* use black */
+			name_text->set_color (ArdourCanvas::rgba_to_color (0.0, 0.0, 0.0, 1.0));
+		}
+
+#if 0
+		double h, s, v;
+
+		ArdourCanvas::color_to_hsv (fill_color, h, s, v);
+
+		if (v == 0.0) {
+			/* fill is black, set text to white */
+			name_text->set_color (ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 1.0));
+		} else if (v == 1.0) {
+			/* fill is white, set text to black */
+			name_text->set_color (ArdourCanvas::rgba_to_color (0.0, 0.0, 0.0, 1.0));
+		} else {
+
+			h = fabs (fmod ((h - 180), 360.0)); /* complementary color */
+			s = 1.0; /* fully saturate */
+			v = 0.9; /* increase lightness/brightness/value */
+
+			name_text->set_color (ArdourCanvas::hsv_to_color (h, s, v, 1.0));
+		}
+#endif
+
+	}
+	
 	set_trim_handle_colors();
 }
 
