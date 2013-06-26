@@ -1395,7 +1395,7 @@ Editor::temporal_zoom (framecnt_t fpp)
 	nfpp = min (fpp, 8589934592);
 	nfpp = max ((framecnt_t) 1, fpp);
 
-	new_page_size = _visible_canvas_width;
+	new_page_size = (framepos_t) floor (_visible_canvas_width * nfpp);
 	half_page_size = new_page_size / 2;
 
 	switch (zoom_focus) {

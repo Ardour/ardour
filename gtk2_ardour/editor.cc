@@ -2265,7 +2265,6 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	if ((prop = node.property ("zoom"))) {
 		/* older versions of ardour used floating point samples_per_pixel */
 		double f = PBD::atof (prop->value());
-		cerr << "LOADED ZOOM from " << prop->value() << " as " << f << endl;
 		reset_zoom (llrintf (f));
 	} else {
 		reset_zoom (samples_per_pixel);
@@ -4329,6 +4328,7 @@ Editor::idle_visual_changer ()
 
 	double const last_time_origin = horizontal_position ();
 
+
 	if (p & VisualChange::ZoomLevel) {
 		set_samples_per_pixel (pending_visual_change.samples_per_pixel);
 
@@ -4342,9 +4342,7 @@ Editor::idle_visual_changer ()
 		compute_bbt_ruler_scale (pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_samples(),
 					 current_bbt_points_begin, current_bbt_points_end);
 		update_tempo_based_rulers (current_bbt_points_begin, current_bbt_points_end);
-	}
 
-	if (p & VisualChange::ZoomLevel) {
 		update_video_timeline();
 	}
 
