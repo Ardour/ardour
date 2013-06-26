@@ -397,8 +397,8 @@ Drag::show_verbose_cursor_time (framepos_t frame)
 {
 	_editor->verbose_cursor()->set_time (
 		frame,
-		_drags->current_pointer_x() + 10 - _editor->horizontal_position(),
-		_drags->current_pointer_y() + 10 - _editor->vertical_adjustment.get_value()
+		_drags->current_pointer_x() + 10,
+		_drags->current_pointer_y() + 10
 		);
 
 	_editor->verbose_cursor()->show ();
@@ -411,8 +411,8 @@ Drag::show_verbose_cursor_duration (framepos_t start, framepos_t end, double xof
 
 	_editor->verbose_cursor()->set_duration (
 		start, end,
-		_drags->current_pointer_x() + 10 - _editor->horizontal_position(),
-		_drags->current_pointer_y() + 10 - _editor->vertical_adjustment.get_value()
+		_drags->current_pointer_x() + 10,
+		_drags->current_pointer_y() + 10
 		);
 }
 
@@ -423,8 +423,8 @@ Drag::show_verbose_cursor_text (string const & text)
 
 	_editor->verbose_cursor()->set (
 		text,
-		_drags->current_pointer_x() + 10 - _editor->horizontal_position(),
-		_drags->current_pointer_y() + 10 - _editor->vertical_adjustment.get_value()
+		_drags->current_pointer_x() + 10,
+		_drags->current_pointer_y() + 10
 		);
 }
 
