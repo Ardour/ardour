@@ -60,7 +60,14 @@ void
 Fill::setup_fill_context (Cairo::RefPtr<Cairo::Context> context) const
 {
 	if (_gradient) {
+		Cairo::Matrix m;
+
+		Duple origin = item_to_window (Duple (0, 0));
+
+		context->translate (origin.x, origin.y);
 		context->set_source (_gradient);
+		context->translate (-origin.x, -origin.y);
+
 	} else {
 		set_source_rgba (context, _fill_color);
 	}
