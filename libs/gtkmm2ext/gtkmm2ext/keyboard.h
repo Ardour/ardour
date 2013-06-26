@@ -59,6 +59,11 @@ class Keyboard : public sigc::trackable, PBD::Stateful
 	static uint32_t GainFineScaleModifier;
 	static uint32_t GainExtraFineScaleModifier;
 
+	// Modifiers for scroll wheel
+	static uint32_t ScrollZoomVerticalModifier;
+	static uint32_t ScrollZoomHorizontalModifier;
+	static uint32_t ScrollHorizontalModifier;
+
 	static const char* primary_modifier_name ();
 	static const char* secondary_modifier_name ();
 	static const char* tertiary_modifier_name ();

@@ -48,6 +48,8 @@
 #include "ardour/session.h"
 #include "ardour/route.h"
 #include "ardour/meter.h"
+#include "ardour/audio_track.h"
+#include "ardour/midi_track.h"
 
 #include "i18n.h"
 
@@ -1151,11 +1153,43 @@ GainMeterBase::level_meter_button_press (GdkEventButton* ev)
 void
 GainMeter::meter_configuration_changed (ChanCount c)
 {
+	int type = 0;
 	_types.clear ();
 
 	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
 		if (c.get (*i) > 0) {
 			_types.push_back (*i);
+			type |= 1 << (*i);
+		}
+	}
+
+	if (boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
+			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0
+			) {
+		if (_route->active()) {
+			set_meter_strip_name ("AudioBusMetrics");
+		} else {
+			set_meter_strip_name ("AudioBusMetricsInactive");
+		}
+	}
+	else if (type == (1 << DataType::AUDIO)) {
+		if (_route->active()) {
+			set_meter_strip_name ("AudioTrackMetrics");
+		} else {
+			set_meter_strip_name ("AudioTrackMetricsInactive");
+		}
+	}
+	else if (type == (1 << DataType::MIDI)) {
+		if (_route->active()) {
+			set_meter_strip_name ("MidiTrackMetrics");
+		} else {
+			set_meter_strip_name ("MidiTrackMetricsInactive");
+		}
+	} else {
+		if (_route->active()) {
+			set_meter_strip_name ("AudioMidiTrackMetrics");
+		} else {
+			set_meter_strip_name ("AudioMidiTrackMetricsInactive");
 		}
 	}
 

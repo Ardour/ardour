@@ -72,17 +72,17 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
   retry:
 	switch (direction) {
 	case GDK_SCROLL_UP:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
 			//for mouse-wheel zoom, force zoom-focus to mouse
 			Editing::ZoomFocus temp_focus = zoom_focus;
 			zoom_focus = Editing::ZoomFocusMouse;
 			temporal_zoom_step (false);
 			zoom_focus = temp_focus;
 			return true;
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
 			direction = GDK_SCROLL_LEFT;
 			goto retry;
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Editor::track_height_step_timeout), 500);
 				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (event_coords.y);
@@ -101,17 +101,17 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		break;
 
 	case GDK_SCROLL_DOWN:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
 			//for mouse-wheel zoom, force zoom-focus to mouse
 			Editing::ZoomFocus temp_focus = zoom_focus;
 			zoom_focus = Editing::ZoomFocusMouse;
 			temporal_zoom_step (true);
 			zoom_focus = temp_focus;
 			return true;
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
 			direction = GDK_SCROLL_RIGHT;
 			goto retry;
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Editor::track_height_step_timeout), 500);
 				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (event_coords.y);

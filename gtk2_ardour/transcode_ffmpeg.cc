@@ -471,7 +471,7 @@ TranscodeFfmpeg::transcode (std::string outfile, const int outw, const int outh,
 	argp[6] = (char*) calloc(10,sizeof(char)); snprintf(argp[6], 10, "%ix%i", width, height);
 	argp[7] = strdup("-y");
 	argp[8] = strdup("-vcodec");
-	argp[9] = strdup("mpeg4");
+	argp[9] = strdup("mjpeg");
 	argp[10] = strdup("-an");
 	argp[11] = strdup("-intra");
 	argp[12] = strdup("-g");

@@ -154,13 +154,30 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	outfn_path_entry.set_width_chars(38);
 	outfn_path_entry.set_text (_session->session_directory().export_path() + G_DIR_SEPARATOR +"export.avi");
 
-	XMLNode* node = _session->extra_xml (X_("Video Timeline"));
-	if (node && node->property(X_("Filename"))) {
-		std::string filename = node->property(X_("Filename"))->value();
-		if (filename.at(0) != G_DIR_SEPARATOR) {
-			filename = Glib::build_filename (_session->session_directory().video_path(), filename);
+	XMLNode* node = _session->extra_xml (X_("Videotimeline"));
+	if (node) {
+		bool filenameset = false;
+		if (node->property(X_("OriginalVideoFile"))) {
+			std::string filename = node->property(X_("OriginalVideoFile"))->value();
+			if (Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
+				invid_path_entry.set_text (filename);
+				filenameset = true;
+			}
 		}
-		invid_path_entry.set_text (filename);
+		else if (!filenameset
+				&& node->property(X_("Filename"))
+				&& node->property(X_("LocalFile"))
+				&& node->property(X_("LocalFile"))->value() == X_("1")
+				) {
+			std::string filename = node->property(X_("Filename"))->value();
+			if (filename.at(0) != G_DIR_SEPARATOR) {
+				filename = Glib::build_filename (_session->session_directory().video_path(), filename);
+			}
+			if (Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
+				invid_path_entry.set_text (filename);
+				filenameset = true;
+			}
+		}
 	}
 
 	l = manage (new Label (_("<b>Settings:</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
@@ -581,7 +598,7 @@ ExportVideoDialog::encode_pass (int pass)
 	ffs["-acodec"] = audio_codec_combo.get_active_text();
 
 	if (video_bitrate_combo.get_active_text() == "retain" ) {
-		ffs["-sameq"]  = "-y"; // we use '-y' as dummy parameter for non key/value options
+		ffs["-qscale"]  = "0";
 	} else {
 		ffs["-b:v"]  = video_bitrate_combo.get_active_text();
 	}

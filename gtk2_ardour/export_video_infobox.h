@@ -38,7 +38,6 @@ class ExportVideoInfobox : public ArdourDialog
 	bool show_again () { return showagain_checkbox.get_active(); }
 
   private:
-	//void on_show ();
 	Gtk::CheckButton showagain_checkbox;
 };
 
