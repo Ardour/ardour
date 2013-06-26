@@ -65,6 +65,10 @@ Text::set (string const & text)
 void
 Text::redraw (Cairo::RefPtr<Cairo::Context> context) const
 {
+	if (_text.empty()) {
+		return;
+	}
+
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
 
 	layout->set_text (_text);
@@ -113,7 +117,7 @@ Text::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) cons
 	
 	Rect self = item_to_window (Rect (0, 0, min (_clamped_width, _width), _height));
 	context->rectangle (self.x0, self.y0, self.width(), self.height());
-	context->set_source (_image, self.x0, self.y0 - 2);
+	context->set_source (_image, self.x0, self.y0);
 	context->fill ();
 }
 
@@ -132,25 +136,33 @@ Text::compute_bounding_box () const
 		return;
 	}
 
-	PangoContext* _pc = gdk_pango_context_get ();
-	Glib::RefPtr<Pango::Context> context = Glib::wrap (_pc); // context now owns _pc and will free it
-	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
-	
-	layout->set_text (_text);
-	if (_font_description) {
-		layout->set_font_description (*_font_description);
+	if (_bounding_box_dirty) {
+		if (!_image) {
+
+			PangoContext* _pc = gdk_pango_context_get ();
+			Glib::RefPtr<Pango::Context> context = Glib::wrap (_pc); // context now owns _pc and will free it
+			Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
+			
+			layout->set_text (_text);
+			if (_font_description) {
+				layout->set_font_description (*_font_description);
+			}
+			layout->set_alignment (_alignment);
+			Pango::Rectangle const r = layout->get_ink_extents ();
+			
+			_bounding_box = Rect (
+				r.get_x() / Pango::SCALE,
+				r.get_y() / Pango::SCALE,
+				(r.get_x() + r.get_width()) / Pango::SCALE,
+				(r.get_y() + r.get_height()) / Pango::SCALE
+				);
+		} else {
+
+			_bounding_box = Rect (0, 0, _image->get_width(), _image->get_height());
+		}
+
+		_bounding_box_dirty = false;
 	}
-	layout->set_alignment (_alignment);
-	Pango::Rectangle const r = layout->get_ink_extents ();
-	
-	_bounding_box = Rect (
-		r.get_x() / Pango::SCALE,
-		r.get_y() / Pango::SCALE,
-		(r.get_x() + r.get_width()) / Pango::SCALE,
-		(r.get_y() + r.get_height()) / Pango::SCALE
-		);
-		
-	_bounding_box_dirty = false;
 }
 
 void
