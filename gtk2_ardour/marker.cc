@@ -273,7 +273,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	CANVAS_DEBUG_NAME (_name_item, string_compose ("Marker::_name_item for %1", annotation));
 	_name_item->set_font_description (name_font);
 	_name_item->set_color (RGBA_TO_UINT (0,0,0,255));
-	_name_item->set_position (ArdourCanvas::Duple (_label_offset, (13.0 / 2.0) - (name_height / 2.0)));
+	_name_item->set_position (ArdourCanvas::Duple (_label_offset, (13.0 / 2.0) - (name_height / 2.0) - 2.0));
 
 	set_name (annotation.c_str());
 
