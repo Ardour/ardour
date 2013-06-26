@@ -519,9 +519,11 @@ RegionDrag::find_time_axis_view (TimeAxisView* t) const
 }
 
 RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b)
-	: RegionDrag (e, i, p, v),
-	  _brushing (b),
-	  _total_x_delta (0)
+	: RegionDrag (e, i, p, v)
+	, _brushing (b)
+	, _total_x_delta (0)
+	, _last_pointer_time_axis_view (0)
+	, _last_pointer_layer (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionMotionDrag\n");
 }
@@ -534,8 +536,10 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	show_verbose_cursor_time (_last_frame_position);
 
 	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (_drags->current_pointer_y ());
-	_last_pointer_time_axis_view = find_time_axis_view (tv.first);
-	_last_pointer_layer = tv.first->layer_display() == Overlaid ? 0 : tv.second;
+	if (tv.first) {
+		_last_pointer_time_axis_view = find_time_axis_view (tv.first);
+		_last_pointer_layer = tv.first->layer_display() == Overlaid ? 0 : tv.second;
+	}
 }
 
 double
@@ -642,15 +646,16 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	/* Find the TimeAxisView that the pointer is now over */
 	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (_drags->current_pointer_y ());
 
-	if (first_move && tv.first->view()->layer_display() == Stacked) {
-		tv.first->view()->set_layer_display (Expanded);
-	}
-
 	/* Bail early if we're not over a track */
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv.first);
+
 	if (!rtv || !rtv->is_track()) {
 		_editor->verbose_cursor()->hide ();
 		return;
+	}
+
+	if (first_move && tv.first->view()->layer_display() == Stacked) {
+		tv.first->view()->set_layer_display (Expanded);
 	}
 
 	/* Note: time axis views in this method are often expressed as an index into the _time_axis_views vector */
