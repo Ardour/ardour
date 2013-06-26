@@ -119,6 +119,16 @@ Meterbridge::Meterbridge ()
 
 	set_wmclass (X_("ardour_mixer"), PROGRAM_NAME);
 
+	Gdk::Geometry geom;
+	geom.max_width = 1<<16;
+	geom.max_height = 1024; // XXX see FastMeter::max_pattern_metric_size
+	set_geometry_hints(*((Gtk::Window*) this), geom, Gdk::HINT_MAX_SIZE);
+
+	/* disable "maximize" button because it overrides size hint from above,
+	 * this also keeps window on top..
+	 */
+	set_type_hint(Gdk::WINDOW_TYPE_HINT_UTILITY);
+
 	signal_delete_event().connect (sigc::mem_fun (*this, &Meterbridge::hide_window));
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Meterbridge::sync_order_keys, this, _1), gui_context());

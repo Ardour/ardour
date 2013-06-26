@@ -78,7 +78,7 @@ class Meterbridge :
 
 	std::list<MeterStrip *> strips;
 
-	static const int32_t default_width = 300;
+	static const int32_t default_width = 600;
 	static const int32_t default_height = 400;
 
 	// for restoring window geometry.
