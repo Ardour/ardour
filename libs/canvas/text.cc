@@ -90,6 +90,7 @@ Text::redraw (Cairo::RefPtr<Cairo::Context> context) const
 	/* and draw, in the appropriate color of course */
 
 	set_source_rgba (img_context, _color);
+
 	layout->show_in_cairo_context (img_context);
 
 	/* text has now been rendered in _image and is ready for blit in
@@ -112,7 +113,7 @@ Text::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) cons
 	
 	Rect self = item_to_window (Rect (0, 0, min (_clamped_width, _width), _height));
 	context->rectangle (self.x0, self.y0, self.width(), self.height());
-	context->set_source (_image, self.x0, self.y0);
+	context->set_source (_image, self.x0, self.y0 - 2);
 	context->fill ();
 }
 
