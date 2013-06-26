@@ -23,8 +23,10 @@
    is to cut down on the nasty compile times for these classes.
 */
 
+#include "actions.h"
 #include "ardour_ui.h"
 #include "mixer_ui.h"
+
 #include "i18n.h"
 
 using namespace ARDOUR;

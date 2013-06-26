@@ -93,6 +93,12 @@ uint32_t
 lv2_evbuf_get_size(LV2_Evbuf* evbuf);
 
 /**
+   Return the available capacity of the buffer
+*/
+uint32_t
+lv2_evbuf_get_capacity(LV2_Evbuf* evbuf);
+
+/**
    Return the actual buffer implementation.
    The format of the buffer returned depends on the buffer type.
 */

@@ -6,8 +6,14 @@ GTKSTACK_ROOT=$HOME/gtk/inst
 ARDOURSTACK_ROOT=$HOME/a3/inst
 BUILD_ROOT=../../build
 
+# where harvid and xjadeo binaries are cached
+if test -z "$CACHEDIR" -o ! -d "$CACHEDIR"; then
+	CACHEDIR=`pwd`
+fi
+
 SAE=
 MIXBUS=
+WITH_HARVID=
 WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
@@ -55,6 +61,7 @@ while [ $# -gt 0 ] ; do
 	# specific build flags
 	#
 
+	--harvid) WITH_HARVID=1 ; shift ;;
 	--noladspa) WITH_LADSPA= ; shift ;;
 	--nostrip) STRIP= ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
@@ -67,10 +74,9 @@ if test -z "$PRODUCT_PKG_DIR" -o -z "$APPNAME"; then
 	exit 1
 fi
 
-release_version=`grep -m 1 '[^A-Za-z_]OSX_VERSION = ' ../../wscript | cut -d"'" -f2`
-revision=`grep -m 1 'revision =' ../../libs/ardour/revision.cc | cut -d'"' -f 2 | sed 's/^.*-//g'`
+. ../define_versions.sh
 echo "Version is $release_version / $revision"
-info_string="$release_version/$revision built on `hostname` by `whoami` on `date`"
+info_string="$version built on `hostname` by `whoami` on `date`"
 echo "Info string is $info_string"
 
 # setup directory structure
@@ -473,6 +479,9 @@ done
 rm -rf $PRODUCT_PKG_DIR
 mkdir $PRODUCT_PKG_DIR
 
+DMGWINBOTTOM=440
+DMGBACKGROUND=dmgbg.png
+
 if [ x$SAE != x ] ; then
 	
     # SAE packaging
@@ -490,7 +499,9 @@ elif [ x$MIXBUS != x ] ; then
     echo "Creating Mixbus packaging directory"
     mv $APPDIR $PRODUCT_PKG_DIR/
     cp MixBus_Install_QuickStart.pdf "$PRODUCT_PKG_DIR/Mixbus Install & Quick Start Guide.pdf"
-
+		DMGWINBOTTOM=580
+		YPOS=$[ $DMGWINBOTTOM - 300 ]
+		MIXBUSPOS="set position of item \"MixBus_Install_QuickStart.pdf\" of container window to {90, ${YPOS}}"
 else 
 
     echo "Creating $APPNAME packaging directory"
@@ -498,18 +509,51 @@ else
 
 fi
 
+if test x$WITH_HARVID != x ; then
+	echo "installing video tools.."
+	HARVID_VERSION=$(curl -s -S http://ardour.org/files/video-tools/harvid_version.txt)
+	XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
+	echo "copying harvid and xjadeo ..."
+
+	rsync -Pa \
+		rsync://ardour.org/video-tools/harvid-osx-${HARVID_VERSION}.tgz \
+		"$CACHEDIR/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz"
+
+	rsync -Pa \
+		rsync://ardour.org/video-tools/jadeo-${XJADEO_VERSION:1}.dmg \
+		"$CACHEDIR/jadeo-${XJADEO_VERSION:1}.dmg"
+
+	tar -x -z \
+		-C $PRODUCT_PKG_DIR/$APPROOT \
+		-f "$CACHEDIR/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz" || exit 1
+
+	JADEO=$(hdiutil attach "$CACHEDIR/jadeo-${XJADEO_VERSION:1}.dmg" | grep Apple_HFS | grep dev/ | cut -f 3)
+	cp -r "${JADEO}/Jadeo.app" "$PRODUCT_PKG_DIR/"
+	hdiutil detach "${JADEO}"
+
+	DMGWINBOTTOM=580
+	YPOS=$[ $DMGWINBOTTOM - 300 ]
+	XJADEOPOS="set position of item \"Jadeo.app\" of container window to {310, ${YPOS}}"
+
+	DMGBACKGROUND=dmgbgxj.png
+fi
+
 echo "Building DMG ..."
 
 # UC_DMG=$APPNAME-${release_version}-${revision}-UC.dmg
 # FINAL_DMG=$APPNAME-${release_version}-${revision}.dmg
-UC_DMG=$APPNAME-${release_version}-${revision}.dmg
-VOLNAME=$APPNAME-$release_version
+UC_DMG=$APPNAME-$version.dmg
+VOLNAME=$APPNAME-$version
 
 # TODO use mktemp
-MNTPATH=`mktemp -d -t ardourimg`
+export TMPDIR=`pwd`
+MNTPATH=`mktemp -d -t /ardourimg`
 TMPDMG=`mktemp -t ardour`
 ICNSTMP=`mktemp -t ardouricon`
-DMGSIZE=$[ `du -sm "$PRODUCT_PKG_DIR" | cut -f 1` * 1049 / 1000 + 3 ]
+EXTRA_SPACE_MB=30
+DMGMEGABYTES=$[ `du -sk "$PRODUCT_PKG_DIR" | cut -f 1` * 1024 / 1048576 + $EXTRA_SPACE_MB ]
+
+echo "DMG MB = " $DMGMEGABYTES
 
 rm -f $UC_DMG "$TMPDMG" "${TMPDMG}.dmg" "$ICNSTMP"
 rm -rf "$MNTPATH"
@@ -517,14 +561,14 @@ mkdir -p "$MNTPATH"
 
 TMPDMG="${TMPDMG}.dmg"
 
-hdiutil create -megabytes $DMGSIZE "$TMPDMG"
+hdiutil create -megabytes $DMGMEGABYTES "$TMPDMG"
 DiskDevice=$(hdid -nomount "$TMPDMG" | grep Apple_HFS | cut -f 1 -d ' ')
 newfs_hfs -v "${VOLNAME}" "${DiskDevice}"
 mount -t hfs "${DiskDevice}" "${MNTPATH}"
 
-cp -r ${PRODUCT_PKG_DIR}/${APPDIR} "${MNTPATH}" || exit
+cp -r ${PRODUCT_PKG_DIR}/* "${MNTPATH}" || exit
 mkdir "${MNTPATH}/.background"
-cp -vi dmgbg.png "${MNTPATH}/.background/dmgbg.png"
+cp -vi ${DMGBACKGROUND} "${MNTPATH}/.background/dmgbg.png"
 
 echo "setting DMG background ..."
 
@@ -535,7 +579,7 @@ echo '
            set current view of container window to icon view
            set toolbar visible of container window to false
            set statusbar visible of container window to false
-           set the bounds of container window to {400, 200, 800, 440}
+           set the bounds of container window to {400, 200, 800, '${DMGWINBOTTOM}'}
            set theViewOptions to the icon view options of container window
            set arrangement of theViewOptions to not arranged
            set icon size of theViewOptions to 64
@@ -543,6 +587,9 @@ echo '
            make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
            set position of item "'${APPDIR}'" of container window to {90, 100}
            set position of item "Applications" of container window to {310, 100}
+           '${MIXBUSPOS}'
+           '${HARVIDPOS}'
+           '${XJADEOPOS}'
            close
            open
            update without registering applications
@@ -564,7 +611,7 @@ hdiutil eject "${DiskDevice}"
 hdiutil convert -format UDZO "${TMPDMG}" -imagekey zlib-level=9 -o "${UC_DMG}"
 # Delete the temporary files
 rm "$TMPDMG"
-rmdir "$MNTPATH"
+rm -rf "$MNTPATH"
 
 echo "setting file icon ..."
 

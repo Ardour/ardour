@@ -202,6 +202,7 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	typedef unsigned PortFlags;
 
 	std::vector<PortFlags>         _port_flags;
+	std::vector<size_t>            _port_minimumSize;
 	std::map<std::string,uint32_t> _port_indices;
 
 	/// Message send to/from UI via ports

@@ -66,7 +66,6 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	, manager (mgr)
 	  
 {
-	set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginSelectorWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 

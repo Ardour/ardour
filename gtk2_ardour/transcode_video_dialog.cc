@@ -77,7 +77,6 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	aborted = false;
 
 	set_name ("TranscodeVideoDialog");
-	set_position (Gtk::WIN_POS_MOUSE);
 	set_modal (true);
 	set_skip_taskbar_hint (true);
 	set_resizable (false);
@@ -389,7 +388,7 @@ TranscodeVideoDialog::launch_transcode ()
 	if (scale_combo.get_active_row_number() == 0 ) {
 		scale_width =0;
 	} else {
-	  scale_width = atoi(scale_combo.get_active_text().c_str());
+	  scale_width = atoi(scale_combo.get_active_text());
 	}
 	if (!aspect_checkbox.get_active()) {
 		scale_height = 0;
@@ -444,7 +443,7 @@ TranscodeVideoDialog::scale_combo_changed ()
 		if (scale_combo.get_active_row_number() == 0 ) {
 			h = transcoder->get_height();
 		} else {
-			h = floor(atof(scale_combo.get_active_text().c_str()) / m_aspect);
+			h = floor(atof(scale_combo.get_active_text()) / m_aspect);
 		}
 		height_spinner.set_value(h);
 	}
@@ -478,7 +477,7 @@ TranscodeVideoDialog::update_bitrate ()
 	if (scale_combo.get_active_row_number() == 0 ) {
 		br *= transcoder->get_width();
 	} else {
-		br *= atof(scale_combo.get_active_text().c_str());
+		br *= atof(scale_combo.get_active_text());
 	}
 	if (br != 0) {
 		bitrate_spinner.set_value(floor(br/10000.0)*10);

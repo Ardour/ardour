@@ -94,6 +94,11 @@ const char* Keyboard::rangeselect_modifier_name() { return S_("Key|Shift"); }
 guint Keyboard::GainFineScaleModifier = Keyboard::PrimaryModifier;
 guint Keyboard::GainExtraFineScaleModifier = Keyboard::SecondaryModifier;
 
+guint Keyboard::ScrollZoomVerticalModifier = Keyboard::SecondaryModifier;
+guint Keyboard::ScrollZoomHorizontalModifier = Keyboard::PrimaryModifier;
+guint Keyboard::ScrollHorizontalModifier = Keyboard::TertiaryModifier;
+
+
 Keyboard*    Keyboard::_the_keyboard = 0;
 Gtk::Window* Keyboard::current_window = 0;
 bool         Keyboard::_some_magic_widget_has_focus = false;

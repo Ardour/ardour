@@ -43,6 +43,7 @@ class ThemeManager : public ArdourWindow
 	void on_dark_theme_button_toggled ();
 	void on_light_theme_button_toggled ();
 	void on_flat_buttons_toggled ();
+	void on_all_dialogs_toggled ();
 	void on_gradient_waveforms_toggled ();
 
   private:
@@ -70,6 +71,7 @@ class ThemeManager : public ArdourWindow
 	Gtk::RadioButton light_button;
 	Gtk::Button reset_button;
 	Gtk::CheckButton flat_buttons;
+	Gtk::CheckButton all_dialogs;
 	Gtk::CheckButton gradient_waveforms;
 
 	bool button_press_event (GdkEventButton*);

@@ -146,16 +146,13 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<ArdourCanvas::CanvasNote
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_ACCEPT);
 	set_default_response (Gtk::RESPONSE_ACCEPT);
-
-	show_all ();
 }
 
-int
-EditNoteDialog::run ()
+void
+EditNoteDialog::done (int r)
 {
-	int const r = Dialog::run ();
 	if (r != RESPONSE_ACCEPT) {
-		return r;
+                return;
 	}
 
 	/* These calls mean that if a value is entered using the keyboard
@@ -227,6 +224,4 @@ EditNoteDialog::run ()
 	for (set<ArdourCanvas::CanvasNoteEvent*>::iterator i = _events.begin(); i != _events.end(); ++i) {
 		(*i)->set_selected ((*i)->selected()); // change color
 	}
-
-	return r;
 }

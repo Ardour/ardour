@@ -18,16 +18,20 @@
 
 */
 #include "pbd/file_utils.h"
+#include "pbd/convert.h"
 #include "gui_thread.h"
 #include "ardour_ui.h"
+#include "utils.h"
 
 #include <stdio.h>
 #include "public_editor.h"
+#include "editor.h"
 #include "video_monitor.h"
 
 #include "i18n.h"
 
 using namespace std;
+using namespace PBD;
 
 VideoMonitor::VideoMonitor (PublicEditor *ed, std::string xjadeo_bin_path)
 	: editor (ed)
@@ -46,6 +50,7 @@ VideoMonitor::VideoMonitor (PublicEditor *ed, std::string xjadeo_bin_path)
 	process = new SystemExec(xjadeo_bin_path, X_("-R"));
 	process->ReadStdout.connect_same_thread (*this, boost::bind (&VideoMonitor::parse_output, this, _1 ,_2));
 	process->Terminated.connect (*this, invalidator (*this), boost::bind (&VideoMonitor::terminated, this), gui_context());
+	XJKeyEvent.connect (*this, invalidator (*this), boost::bind (&VideoMonitor::forward_keyevent, this, _1), gui_context());
 }
 
 VideoMonitor::~VideoMonitor ()
@@ -100,6 +105,7 @@ VideoMonitor::quit ()
 	if (!is_started()) return;
 	if (state_connection.connected()) { state_connection.disconnect(); }
 	if (clock_connection.connected()) { clock_connection.disconnect(); }
+	query_full_state(true);
 	process->write_to_stdin("quit\n");
 	/* the 'quit' command should result in process termination
 	 * but in case it fails (communication failure, SIGSTOP, ??)
@@ -128,7 +134,18 @@ VideoMonitor::open (std::string filename)
 	process->write_to_stdin("window resize 100%\n");
 	process->write_to_stdin("window ontop on\n");
 	process->write_to_stdin("set seekmode 1\n");
-	process->write_to_stdin("set override 47\n");
+	/* override bitwise flags -- see xjadeo.h
+	 * 0x01 : ignore 'q', ESC  / quite
+	 * 0x02 : ignore "window closed by WM" / quit
+	 * 0x04 : (osx only) menu-exit / quit
+	 * 0x08 : ignore mouse-button 1 -- resize
+	 * 0x10 : no A/V offset
+	 * 0x20 : don't use jack-session
+	 * 0x40 : no jack-transport control play/pause/rewind
+	 */
+	process->write_to_stdin("set override 120\n");
+	process->write_to_stdin("notify keyboard\n");
+	process->write_to_stdin("notify settings\n");
 	process->write_to_stdin("window letterbox on\n");
 	process->write_to_stdin("osd mode 10\n");
 	for(XJSettings::const_iterator it = xjadeo_settings.begin(); it != xjadeo_settings.end(); ++it) {
@@ -183,6 +200,7 @@ void
 VideoMonitor::send_cmd (int what, int param)
 {
 	bool osd_update = false;
+	int prev_osdmode = osdmode;
 	if (!is_started()) return;
 	switch (what) {
 		case 1:
@@ -192,17 +210,17 @@ VideoMonitor::send_cmd (int what, int param)
 		case 2:
 			if (param) osdmode |= 2;
 			else osdmode &= ~2;
-			osd_update = true;
+			osd_update = (prev_osdmode != osdmode);
 			break;
 		case 3:
 			if (param) osdmode |= 1;
 			else osdmode &= ~1;
-			osd_update = true;
+			osd_update = (prev_osdmode != osdmode);
 			break;
 		case 4:
 			if (param) osdmode |= 8;
 			else osdmode &= ~8;
-			osd_update = true;
+			osd_update = (prev_osdmode != osdmode);
 			break;
 		case 5:
 			if (param) process->write_to_stdin("window zoom on\n");
@@ -218,7 +236,7 @@ VideoMonitor::send_cmd (int what, int param)
 		default:
 			break;
 	}
-	if (osd_update >= 0) {
+	if (osd_update) {
 		std::ostringstream osstream; osstream << "osd mode " << osdmode << "\n";
 		process->write_to_stdin(osstream.str());
 	}
@@ -231,7 +249,15 @@ VideoMonitor::is_started ()
 }
 
 void
-VideoMonitor::parse_output (std::string d, size_t s)
+VideoMonitor::forward_keyevent (unsigned int keyval)
+{
+	Editor* ed = dynamic_cast<Editor*>(&PublicEditor::instance());
+	if (!ed) return;
+	emulate_key_event(ed, keyval);
+}
+
+void
+VideoMonitor::parse_output (std::string d, size_t /*s*/)
 {
 	std::string line = d;
 	std::string::size_type start = 0;
@@ -248,7 +274,7 @@ VideoMonitor::parse_output (std::string d, size_t s)
 			printf("xjadeo: '%s'\n", line.c_str());
 		}
 #endif
-		int status = atoi(line.substr(1,3).c_str());
+		int status = atoi(line.substr(1,3));
 		switch(status / 100) {
 			case 4: /* errors */
 				if (status == 403) {
@@ -258,8 +284,41 @@ VideoMonitor::parse_output (std::string d, size_t s)
 					 */
 					process->write_to_stdin("quit\n");
 				}
-			case 1: /* requested async notifications */
-			case 3: /* warnings ; command succeeded, but status is negative. */
+#ifdef DEBUG_XJCOM
+			else
+				printf("xjadeo: error '%s'\n", line.c_str());
+#endif
+			break;
+			case 3: /* async notifications */
+			{
+				std::string::size_type equalsign = line.find('=');
+				std::string::size_type comment = line.find('#');
+				if (comment != std::string::npos) { line = line.substr(0,comment); }
+				if (equalsign != std::string::npos) {
+					std::string key = line.substr(5, equalsign - 5);
+					std::string value = line.substr(equalsign + 1);
+
+					if (status == 310 && key=="keypress") {
+						/* keyboard event */
+						XJKeyEvent((unsigned int)atoi(value));
+					}
+#ifdef DEBUG_XJCOM
+					else {
+						std::string msg = line.substr(5);
+						printf("xjadeo: async '%s' -> '%s'\n", key, value);
+					}
+#endif
+				}
+#ifdef DEBUG_XJCOM
+				else {
+					std::string msg = line.substr(5);
+					printf("xjadeo: async '%s'\n", msg.c_str());
+				}
+#endif
+			} break;
+			case 1: /* text messages - command reply */
+				break;
+			case 8: /* comments / info for humans */
 				break;
 			case 2:
 /* replies:
@@ -295,7 +354,7 @@ VideoMonitor::parse_output (std::string d, size_t s)
 						knownstate |= 2;
 						if (starting || xjadeo_settings["window ontop"] != value) {
 							if (!starting && _session) _session->set_dirty ();
-							if (atoi(value.c_str())) { UiState("xjadeo-window-ontop-on"); }
+							if (atoi(value)) { UiState("xjadeo-window-ontop-on"); }
 							else { UiState("xjadeo-window-ontop-off"); }
 							starting &= ~2;
 						}
@@ -304,7 +363,7 @@ VideoMonitor::parse_output (std::string d, size_t s)
 						knownstate |= 4;
 						if (starting || xjadeo_settings["window zoom"] != value) {
 							if (!starting && _session) _session->set_dirty ();
-							if (atoi(value.c_str())) { UiState("xjadeo-window-fullscreen-on"); }
+							if (atoi(value)) { UiState("xjadeo-window-fullscreen-on"); }
 							else { UiState("xjadeo-window-fullscreen-off"); }
 							starting &= ~4;
 						}
@@ -313,15 +372,15 @@ VideoMonitor::parse_output (std::string d, size_t s)
 						knownstate |= 8;
 						if (starting || xjadeo_settings["window letterbox"] != value) {
 							if (!starting && _session) _session->set_dirty ();
-							if (atoi(value.c_str())) { UiState("xjadeo-window-letterbox-on"); }
+							if (atoi(value)) { UiState("xjadeo-window-letterbox-on"); }
 							else { UiState("xjadeo-window-letterbox-off"); }
 							starting &= ~8;
 						}
 						xjadeo_settings["window letterbox"] = value;
 					} else if(key ==  "osdmode") {
 						knownstate |= 1;
-						osdmode = atoi(value.c_str());
-						if (starting || atoi(xjadeo_settings["osd mode"].c_str()) != osdmode) {
+						osdmode = atoi(value);
+						if (starting || atoi(xjadeo_settings["osd mode"]) != osdmode) {
 							if (!starting && _session) _session->set_dirty ();
 							if ((osdmode & 1) == 1) { UiState("xjadeo-window-osd-frame-on"); }
 							if ((osdmode & 1) == 0) { UiState("xjadeo-window-osd-frame-off"); }
@@ -338,6 +397,10 @@ VideoMonitor::parse_output (std::string d, size_t s)
 							if (!starting && _session) _session->set_dirty ();
 						}
 						xjadeo_settings["set offset"] = value;
+#ifdef DEBUG_XJCOM
+					} else {
+						printf("xjadeo: '%s' -> '%s'\n", key.c_str(), value.c_str());
+#endif
 					}
 				}
 			}
@@ -359,8 +422,9 @@ void
 VideoMonitor::save_session ()
 {
 	if (!_session) { return; }
-	XMLNode* node = _session->extra_xml (X_("XJSettings"));
+	XMLNode* node = _session->extra_xml (X_("XJSettings"), true);
 	if (!node) return;
+	node->remove_nodes_and_delete("XJSetting");
 
 	for(XJSettings::const_iterator it = xjadeo_settings.begin(); it != xjadeo_settings.end(); ++it) {
 	  XMLNode* child = node->add_child (X_("XJSetting"));
@@ -385,16 +449,6 @@ VideoMonitor::set_session (ARDOUR::Session *s)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		xjadeo_settings[(*niter)->property(X_("k"))->value()] = (*niter)->property(X_("v"))->value();
   }
-}
-
-void
-VideoMonitor::clear_session_state ()
-{
-	xjadeo_settings.clear();
-	if (!_session) { return; }
-	XMLNode* node = new XMLNode(X_("XJSettings"));
-	_session->add_extra_xml (*node);
-	_session->set_dirty ();
 }
 
 bool
@@ -441,13 +495,15 @@ VideoMonitor::set_offset (ARDOUR::frameoffset_t offset)
 		video_frame_offset = floor(offset * _session->timecode_frames_per_second() / audio_frame_rate);
 	}
 
-	// TODO remember if changed..
+	if (video_offset == video_frame_offset) { return; }
+	video_offset = video_frame_offset;
+
 	std::ostringstream osstream1; osstream1 << -1 * video_frame_offset;
 	process->write_to_stdin("set offset " + osstream1.str() + "\n");
 }
 
 void
-VideoMonitor::manual_seek (framepos_t when, bool force, ARDOUR::frameoffset_t offset)
+VideoMonitor::manual_seek (framepos_t when, bool /*force*/, ARDOUR::frameoffset_t offset)
 {
 	if (!is_started()) { return; }
 	if (!_session) { return; }

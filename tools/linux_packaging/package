@@ -50,7 +50,7 @@ while [ $# -gt 0 ] ; do
 	esac
 done
 
-. ./define_versions.sh
+. ../define_versions.sh
 
 if [ x$DEBUG = xT ]; then
 	BUILDTYPE="dbg"

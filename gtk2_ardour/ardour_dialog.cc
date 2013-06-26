@@ -23,20 +23,23 @@
 #include <gtkmm2ext/doi.h>
 
 #include "ardour_dialog.h"
+#include "ardour_ui.h"
 #include "keyboard.h"
 #include "splash.h"
+#include "utils.h"
+#include "window_manager.h"
 
 using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-sigc::signal<void> ArdourDialog::CloseAllDialogs;
-
 ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
 	: Dialog (title, modal, use_seperator)
+	, proxy (0)
         , _splash_pushed (false)
 {
 	init ();
+	set_position (Gtk::WIN_POS_MOUSE);
 }
 
 ArdourDialog::ArdourDialog (Gtk::Window& parent, string title, bool modal, bool use_seperator)
@@ -56,6 +59,13 @@ ArdourDialog::~ArdourDialog ()
                         spl->pop_front();
                 }
         }
+	WM::Manager::instance().remove (proxy);
+}
+
+bool
+ArdourDialog::on_key_press_event (GdkEventKey* ev)
+{
+	return relay_key_press (ev, this);
 }
 
 bool
@@ -94,12 +104,28 @@ ArdourDialog::on_show ()
 	}
 }
 
+bool
+ArdourDialog::on_delete_event (GdkEventAny*)
+{
+	hide ();
+	return false;
+}
+
 void
 ArdourDialog::init ()
 {
-	set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 	set_border_width (10);
-	CloseAllDialogs.connect (
-		sigc::bind (sigc::mem_fun (*this, &ArdourDialog::response),
-		            RESPONSE_CANCEL));
+
+	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+
+	Gtk::Window* parent = WM::Manager::instance().transient_parent();
+
+	if (parent) {
+		set_transient_for (*parent);
+	}
+
+	ARDOUR_UI::CloseAllDialogs.connect (sigc::bind (sigc::mem_fun (*this, &ArdourDialog::response), RESPONSE_CANCEL));
+
+	proxy = new WM::ProxyTemporary (get_title(), this);
+	WM::Manager::instance().register_window (proxy);
 }

@@ -257,7 +257,6 @@ Sequence<Time>::const_iterator::operator++()
 		throw std::logic_error("Attempt to iterate past end of Sequence");
 	}
 
-	DEBUG_TRACE(DEBUG::Sequence, "Sequence::const_iterator++\n");
 	assert(_event && _event->buffer() && _event->size() > 0);
 
 	const MIDIEvent<Time>& ev = *((MIDIEvent<Time>*)_event.get());
@@ -378,30 +377,30 @@ Sequence<Time>::const_iterator::operator++()
 	// Set event to reflect new position
 	switch (_type) {
 	case NOTE_ON:
-		DEBUG_TRACE(DEBUG::Sequence, "iterator = note on\n");
+		// DEBUG_TRACE(DEBUG::Sequence, "iterator = note on\n");
 		*_event = (*_note_iter)->on_event();
 		_active_notes.push(*_note_iter);
 		break;
 	case NOTE_OFF:
-		DEBUG_TRACE(DEBUG::Sequence, "iterator = note off\n");
+		// DEBUG_TRACE(DEBUG::Sequence, "iterator = note off\n");
 		assert(!_active_notes.empty());
 		*_event = _active_notes.top()->off_event();
 		_active_notes.pop();
 		break;
 	case CONTROL:
-		DEBUG_TRACE(DEBUG::Sequence, "iterator = control\n");
+		//DEBUG_TRACE(DEBUG::Sequence, "iterator = control\n");
 		_seq->control_to_midi_event(_event, *_control_iter);
 		break;
 	case SYSEX:
-		DEBUG_TRACE(DEBUG::Sequence, "iterator = sysex\n");
+		//DEBUG_TRACE(DEBUG::Sequence, "iterator = sysex\n");
 		*_event = *(*_sysex_iter);
 		break;
 	case PATCH_CHANGE:
-		DEBUG_TRACE(DEBUG::Sequence, "iterator = patch change\n");
+		//DEBUG_TRACE(DEBUG::Sequence, "iterator = patch change\n");
 		*_event = (*_patch_change_iter)->message (_active_patch_change_message);
 		break;
 	default:
-		DEBUG_TRACE(DEBUG::Sequence, "iterator = end\n");
+		//DEBUG_TRACE(DEBUG::Sequence, "iterator = end\n");
 		_is_end = true;
 	}
 
@@ -1025,12 +1024,12 @@ Sequence<Time>::append_note_off_unlocked (NotePtr note)
 
 	_edited = true;
 
-	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
+#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
 	if (_percussive) {
 		DEBUG_TRACE(DEBUG::Sequence, "Sequence Ignoring note off (percussive mode)\n");
 		return;
 	}
-	#endif
+#endif
 
 	bool resolved = false;
 
@@ -1073,7 +1072,7 @@ template<typename Time>
 void
 Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, double value, event_id_t /* evid */)
 {
-	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 %2 @ %3\t=\t%4 # controls: %5\n",
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 %2 @ %3 = %4 # controls: %5\n",
 	                                              this, _type_map.to_symbol(param), time, value, _controls.size()));
 	boost::shared_ptr<Control> c = control(param, true);
 	c->list()->add (time, value);

@@ -35,9 +35,10 @@
       <menuitem action='addExistingAudioFiles'/>
       <!--menuitem action='importFromSession'/-->
 
+#ifndef NOVIDEOTIMELINE
       <menuitem action='OpenVideo'/>
       <menuitem action='CloseVideo'/>
-
+#endif
       <menu name='Export' action='Export'>
         <menuitem action='ExportAudio'/>
         <menuitem action='StemExport'/>
@@ -47,16 +48,16 @@
         <menuitem action='CleanupUnused'/>
         <menuitem action='FlushWastebasket'/>
       </menu>
+      <separator/>
+      <menuitem action='toggle-session-options-editor'/>
+#ifdef GTKOSX      
+      <menuitem action='toggle-about'/>
+      <menuitem action='toggle-rc-options-editor'/>
+#endif
 #ifndef GTKOSX
       <separator/>
-#endif
-      <menuitem action='ToggleSessionOptionsEditor'/>
-#ifdef GTKOSX
-      <menuitem action='ToggleRCOptionsEditor'/>
-      <menuitem action='About'/>
-#endif
-      <separator/>
       <menuitem action='Quit'/>
+#endif
     </menu>
 
     <menu name='Transport' action='Transport'>
@@ -231,7 +232,7 @@
       <menuitem action='set-mouse-mode-object-range'/>
 #ifndef GTKOSX
       <separator/>
-      <menuitem action='ToggleRCOptionsEditor'/>
+      <menuitem action='toggle-rc-options-editor'/>
 #endif
     </menu>         
 
@@ -281,7 +282,9 @@
         <menuitem action='snap-regions-to-grid'/>
         <menuitem action='toggle-region-lock'/>
         <menuitem action='toggle-region-lock-style'/>
+#ifndef NOVIDEOTIMELINE
         <menuitem action='toggle-region-video-lock'/>
+#endif
         <menuitem action='set-region-sync-position'/>
         <menuitem action='remove-region-sync'/>
         <menuitem action='nudge-forward'/>
@@ -434,7 +437,9 @@
         <menuitem action="toggle-cd-marker-ruler"/>
         <menuitem action="toggle-marker-ruler"/>
         <separator/>
+#ifndef NOVIDEOTIMELINE
         <menuitem action="toggle-video-ruler"/>
+#endif
       </menu>
       <menu action="VideoMonitorMenu">
         <menuitem action="zoom-vmon-100"/>
@@ -510,12 +515,12 @@
 
       <separator/>
 
-      <menuitem action='ToggleInspector'/>
-      <menuitem action='ToggleLocations'/>
-      <menuitem action='ToggleKeyEditor'/>
-      <menuitem action='ToggleBundleManager'/>
-      <menuitem action='ToggleThemeManager'/>
-      <menuitem action='ToggleBigClock'/>
+      <menuitem action='toggle-inspector'/>
+      <menuitem action='toggle-locations'/>
+      <menuitem action='toggle-key-editor'/>
+      <menuitem action='toggle-bundle-manager'/>
+      <menuitem action='toggle-theme-manager'/>
+      <menuitem action='toggle-big-clock'/>
       <menuitem action='toggle-speaker-config'/>
 
       <separator/>
@@ -531,7 +536,7 @@
     </menu>
     <menu name='Help' action='Help'>
 #ifndef GTKOSX
-      <menuitem action='About'/>
+      <menuitem action='toggle-about'/>
 #endif
       <menuitem action='Chat'/>
       <menuitem action='Manual'/>
@@ -552,8 +557,10 @@
     <menuitem action="toggle-marker-ruler"/>
     <menuitem action="toggle-cd-marker-ruler"/>
     <menuitem action="toggle-loop-punch-ruler"/>
-	  <separator/>
-	  <menuitem action="toggle-video-ruler"/>
+#ifndef NOVIDEOTIMELINE
+    <separator/>
+    <menuitem action="toggle-video-ruler"/>
+#endif
   </popup>
 
   <popup name='ProcessorMenu'>
@@ -649,7 +656,9 @@
       <menuitem action='naturalize-region'/>
       <menuitem action='toggle-region-lock'/>
       <menuitem action='toggle-region-lock-style'/>
+#ifndef NOVIDEOTIMELINE
       <menuitem action='toggle-region-video-lock'/>
+#endif
       <menuitem action='snap-regions-to-grid'/>
       <menuitem action='set-region-sync-position'/>
       <menuitem action='remove-region-sync'/>

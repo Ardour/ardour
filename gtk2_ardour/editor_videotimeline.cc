@@ -36,6 +36,7 @@
 #include "export_video_infobox.h"
 #include "interthread_progress_window.h"
 
+#include "pbd/openuri.h"
 #include "i18n.h"
 
 using namespace std;
@@ -125,9 +126,16 @@ Editor::export_video ()
 {
 	if (ARDOUR::Config->get_show_video_export_info()) {
 		ExportVideoInfobox infobox (_session);
-		infobox.run();
+		Gtk::ResponseType rv = (Gtk::ResponseType) infobox.run();
 		if (infobox.show_again()) {
 			ARDOUR::Config->set_show_video_export_info(false);
+		}
+		switch (rv) {
+			case GTK_RESPONSE_YES:
+				PBD::open_uri (ARDOUR::Config->get_reference_manual_url() + "/video-timeline/operations/#export");
+				break;
+			default:
+				break;
 		}
 	}
 	ExportVideoDialog dialog (*this, _session);

@@ -82,8 +82,6 @@ ARDOUR_UI::setup_windows ()
 
 	we_have_dependents ();
 
-	theme_manager->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleThemeManager")));
-
 #ifdef TOP_MENUBAR
 	HBox* status_bar_packer = manage (new HBox);
 	EventBox* status_bar_event_box = manage (new EventBox);
@@ -428,14 +426,6 @@ ARDOUR_UI::setup_transport ()
 	if (tnode) {
 		transport_tearoff->set_state (*tnode);
 	}
-}
-
-void
-ARDOUR_UI::manage_window (Window& win)
-{
-	win.signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), &win));
-	win.signal_enter_notify_event().connect (sigc::bind (sigc::mem_fun (Keyboard::the_keyboard(), &Keyboard::enter_window), &win));
-	win.signal_leave_notify_event().connect (sigc::bind (sigc::mem_fun (Keyboard::the_keyboard(), &Keyboard::leave_window), &win));
 }
 
 void

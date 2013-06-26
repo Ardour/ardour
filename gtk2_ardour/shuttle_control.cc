@@ -31,6 +31,7 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
 
+#include "actions.h"
 #include "ardour_ui.h"
 #include "rgb_macros.h"
 #include "shuttle_control.h"

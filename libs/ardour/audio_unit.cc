@@ -65,13 +65,6 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
-#ifndef AU_STATE_SUPPORT
-static bool seen_get_state_message = false;
-static bool seen_set_state_message = false;
-static bool seen_loading_message = false;
-static bool seen_saving_message = false;
-#endif
-
 AUPluginInfo::CachedInfoMap AUPluginInfo::cached_info;
 
 static string preset_search_path = "/Library/Audio/Presets:/Network/Library/Audio/Presets";
@@ -1299,8 +1292,8 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 {
 	/* not much to do with audio - the data is already in the buffers given to us in connect_and_run() */
 
-	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1: render callback, frames %2 bufs %3\n",
-							name(), inNumberFrames, ioData->mNumberBuffers));
+	// DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("%1: render callback, frames %2 bufs %3\n",
+        // name(), inNumberFrames, ioData->mNumberBuffers));
 
 	if (input_maxbuf == 0) {
 		error << _("AUPlugin: render callback called illegally!") << endmsg;
@@ -1679,8 +1672,6 @@ void
 AUPlugin::add_state (XMLNode* root) const
 {
 	LocaleGuard lg (X_("POSIX"));
-
-#ifdef AU_STATE_SUPPORT
 	CFDataRef xmlData;
 	CFPropertyListRef propertyList;
 
@@ -1712,20 +1703,11 @@ AUPlugin::add_state (XMLNode* root) const
 
 	CFRelease (xmlData);
 	CFRelease (propertyList);
-#else
-	if (!seen_get_state_message) {
-		info << string_compose (_("Saving AudioUnit settings is not supported in this build of %1. Consider paying for a newer version"),
-					PROGRAM_NAME)
-		     << endmsg;
-		seen_get_state_message = true;
-	}
-#endif
 }
 
 int
 AUPlugin::set_state(const XMLNode& node, int version)
 {
-#ifdef AU_STATE_SUPPORT
 	int ret = -1;
 	CFPropertyListRef propertyList;
 	LocaleGuard lg (X_("POSIX"));
@@ -1773,14 +1755,6 @@ AUPlugin::set_state(const XMLNode& node, int version)
 
 	Plugin::set_state (node, version);
 	return ret;
-#else
-	if (!seen_set_state_message) {
-		info << string_compose (_("Restoring AudioUnit settings is not supported in this build of %1. Consider paying for a newer version"),
-					PROGRAM_NAME)
-		     << endmsg;
-	}
-	return Plugin::set_state (node, version);
-#endif
 }
 
 bool
@@ -1788,7 +1762,6 @@ AUPlugin::load_preset (PresetRecord r)
 {
 	Plugin::load_preset (r);
 
-#ifdef AU_STATE_SUPPORT
 	bool ret = false;
 	CFPropertyListRef propertyList;
 	Glib::ustring path;
@@ -1836,15 +1809,6 @@ AUPlugin::load_preset (PresetRecord r)
 	}
 
 	return ret;
-#else
-	if (!seen_loading_message) {
-		info << string_compose (_("Loading AudioUnit presets is not supported in this build of %1. Consider paying for a newer version"),
-					PROGRAM_NAME)
-		     << endmsg;
-		seen_loading_message = true;
-	}
-	return true;
-#endif
 }
 
 void
@@ -1855,7 +1819,6 @@ AUPlugin::do_remove_preset (std::string)
 string
 AUPlugin::do_save_preset (string preset_name)
 {
-#ifdef AU_STATE_SUPPORT
 	CFPropertyListRef propertyList;
 	vector<Glib::ustring> v;
 	Glib::ustring user_preset_path;
@@ -1904,15 +1867,6 @@ AUPlugin::do_save_preset (string preset_name)
 	CFRelease(propertyList);
 
 	return string ("file:///") + user_preset_path;
-#else
-	if (!seen_saving_message) {
-		info << string_compose (_("Saving AudioUnit presets is not supported in this build of %1. Consider paying for a newer version"),
-					PROGRAM_NAME)
-		     << endmsg;
-		seen_saving_message = true;
-	}
-	return string();
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -2079,7 +2033,6 @@ AUPlugin::current_preset() const
 {
 	string preset_name;
 
-#ifdef AU_STATE_SUPPORT
 	CFPropertyListRef propertyList;
 
 	DEBUG_TRACE (DEBUG::AudioUnits, "get current preset for current_preset()\n");
@@ -2087,14 +2040,13 @@ AUPlugin::current_preset() const
 		preset_name = get_preset_name_in_plist (propertyList);
 		CFRelease(propertyList);
 	}
-#endif
+
 	return preset_name;
 }
 
 void
 AUPlugin::find_presets ()
 {
-#ifdef AU_STATE_SUPPORT
 	vector<string*>* preset_files;
 	PathScanner scanner;
 
@@ -2143,8 +2095,6 @@ AUPlugin::find_presets ()
 		string const uri = string_compose ("%1", _presets.size ());
 		_presets.insert (make_pair (uri, Plugin::PresetRecord (uri, i->first, i->second)));
 	}
-
-#endif
 }
 
 bool

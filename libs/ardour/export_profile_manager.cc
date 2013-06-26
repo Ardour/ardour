@@ -61,7 +61,6 @@ ExportProfileManager::ExportProfileManager (Session & s, ExportType type)
   , handler (s.get_export_handler())
   , session (s)
 
-  , session_range (new Location (s))
   , ranges (new LocationList ())
   , single_range_mode (false)
 
@@ -385,13 +384,16 @@ ExportProfileManager::init_timespans (XMLNodeList nodes)
 	}
 
 	if (timespans.empty()) {
-		TimespanStatePtr state (new TimespanState (session_range, selection_range, ranges));
+		TimespanStatePtr state (new TimespanState (selection_range, ranges));
 		timespans.push_back (state);
 
 		// Add session as default selection
+		Location * session_range = session.locations()->session_range_location();
+		if (!session_range) { return false; }
+
 		ExportTimespanPtr timespan = handler->add_timespan();
 		timespan->set_name (session_range->name());
-		timespan->set_range_id ("session");
+		timespan->set_range_id (session_range->id().to_s());
 		timespan->set_range (session_range->start(), session_range->end());
 		state->timespans->push_back (timespan);
 		return false;
@@ -403,7 +405,7 @@ ExportProfileManager::init_timespans (XMLNodeList nodes)
 ExportProfileManager::TimespanStatePtr
 ExportProfileManager::deserialize_timespan (XMLNode & root)
 {
-	TimespanStatePtr state (new TimespanState (session_range, selection_range, ranges));
+	TimespanStatePtr state (new TimespanState (selection_range, ranges));
 	XMLProperty const * prop;
 
 	XMLNodeList spans = root.children ("Range");
@@ -413,21 +415,30 @@ ExportProfileManager::deserialize_timespan (XMLNode & root)
 		if (!prop) { continue; }
 		string id = prop->value();
 
+		Location * location = 0;
 		for (LocationList::iterator it = ranges->begin(); it != ranges->end(); ++it) {
-			if ((!id.compare ("session") && *it == session_range.get()) ||
-			    (!id.compare ("selection") && *it == selection_range.get()) ||
-			    (!id.compare ((*it)->id().to_s()))) {
-				ExportTimespanPtr timespan = handler->add_timespan();
-				timespan->set_name ((*it)->name());
-				timespan->set_range_id (id);
-				timespan->set_range ((*it)->start(), (*it)->end());
-				state->timespans->push_back (timespan);
+			if ((id == "selection" && *it == selection_range.get()) ||
+			    (id == (*it)->id().to_s())) {
+				location = *it;
+				break;
 			}
 		}
+
+		if (!location) { continue; }
+
+		ExportTimespanPtr timespan = handler->add_timespan();
+		timespan->set_name (location->name());
+		timespan->set_range_id (location->id().to_s());
+		timespan->set_range (location->start(), location->end());
+		state->timespans->push_back (timespan);
 	}
 
 	if ((prop = root.property ("format"))) {
 		state->time_format = (TimeFormat) string_2_enum (prop->value(), TimeFormat);
+	}
+
+	if (state->timespans->empty()) {
+		return TimespanStatePtr();
 	}
 
 	return state;
@@ -440,7 +451,6 @@ ExportProfileManager::serialize_timespan (TimespanStatePtr state)
 	XMLNode * span;
 
 	update_ranges ();
-
 	for (TimespanList::iterator it = state->timespans->begin(); it != state->timespans->end(); ++it) {
 		if ((span = root.add_child ("Range"))) {
 			span->add_property ("id", (*it)->range_id());
@@ -463,9 +473,10 @@ ExportProfileManager::update_ranges () {
 
 	/* Session */
 
-	session_range->set_name (_("Session"));
-	session_range->set (session.current_start_frame(), session.current_end_frame());
-	ranges->push_back (session_range.get());
+	Location * session_range = session.locations()->session_range_location();
+	if (session_range) {
+		ranges->push_back (session_range);
+	}
 
 	/* Selection */
 
@@ -501,6 +512,8 @@ ExportProfileManager::init_channel_configs (XMLNodeList nodes)
 		channel_configs.push_back (config);
 
 		// Add master outs as default
+		if (!session.master_out()) { return false; }
+
 		IO* master_out = session.master_out()->output().get();
 		if (!master_out) { return false; }
 

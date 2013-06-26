@@ -113,7 +113,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 
 		_button.set_active (_processor->active());
 		_button.show ();
-		
+
 		_processor->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
 		_processor->PropertyChanged.connect (name_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_property_changed, this, _1), gui_context());
 
@@ -247,7 +247,20 @@ ProcessorEntry::processor_property_changed (const PropertyChange& what_changed)
 void
 ProcessorEntry::setup_tooltip ()
 {
-	ARDOUR_UI::instance()->set_tip (_button, name (Wide));
+	if (_processor) {
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
+		if (pi) {
+			if (pi->plugin()->has_editor()) {
+				ARDOUR_UI::instance()->set_tip (_button,
+						string_compose (_("<b>%1</b>\nDouble-click to show GUI.\nAlt+double-click to show generic GUI."), name (Wide)));
+			} else {
+				ARDOUR_UI::instance()->set_tip (_button,
+						string_compose (_("<b>%1</b>\nDouble-click to show generic GUI."), name (Wide)));
+			}
+			return;
+		}
+	}
+	ARDOUR_UI::instance()->set_tip (_button, string_compose ("<b>%1</b>", name (Wide)));
 }
 
 string
@@ -918,6 +931,7 @@ ProcessorBox::show_processor_menu (int arg)
 	const bool sensitive = !processor_display.selection().empty();
 	ActionManager::set_sensitive (ActionManager::plugin_selection_sensitive_actions, sensitive);
 	edit_action->set_sensitive (one_processor_can_be_edited ());
+	edit_generic_action->set_sensitive (one_processor_can_be_edited ());
 
 	boost::shared_ptr<PluginInsert> pi;
 	if (single_selection) {
@@ -925,7 +939,7 @@ ProcessorBox::show_processor_menu (int arg)
 	}
 
 	/* allow editing with an Ardour-generated UI for plugin inserts with editors */
-	edit_generic_action->set_sensitive (pi && pi->plugin()->has_editor ());
+	edit_action->set_sensitive (pi && pi->plugin()->has_editor ());
 
 	/* disallow rename for multiple selections, for plugin inserts and for the fader */
 	rename_action->set_sensitive (single_selection && !pi && !boost::dynamic_pointer_cast<Amp> (single_selection->processor ()));
@@ -1020,6 +1034,22 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 	}
 }
 
+ProcessorWindowProxy* 
+ProcessorBox::find_window_proxy (boost::shared_ptr<Processor> processor) const
+{
+	for (list<ProcessorWindowProxy*>::const_iterator i = _processor_window_info.begin(); i != _processor_window_info.end(); ++i) {
+		boost::shared_ptr<Processor> p = (*i)->processor().lock();
+
+		if (p && p == processor) {
+			return (*i);
+		}
+	}
+
+	return 0;
+}
+
+
+
 bool
 ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* child)
 {
@@ -1035,12 +1065,16 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 
 		if (_session->engine().connected()) {
 			/* XXX giving an error message here is hard, because we may be in the midst of a button press */
-			if (Config->get_use_plugin_own_gui ()) {
-				toggle_edit_processor (processor);
+
+			if (!one_processor_can_be_edited ()) return true;
+
+			if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+				generic_edit_processor (processor);
 			} else {
-				toggle_edit_generic_processor (processor);
+				edit_processor (processor);
 			}
 		}
+
 		ret = true;
 
 	} else if (processor && ev->button == 1 && selected) {
@@ -1183,7 +1217,6 @@ ProcessorBox::weird_plugin_dialog (Plugin& p, Route::ProcessorStreams streams)
 	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
 
 	dialog.set_name (X_("PluginIODialog"));
-	dialog.set_position (Gtk::WIN_POS_MOUSE);
 	dialog.set_modal (true);
 	dialog.show_all ();
 
@@ -1346,7 +1379,7 @@ ProcessorBox::redisplay_processors ()
 
 	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::add_processor_to_display));
 
-	for (list<ProcessorWindowProxy*>::iterator i = _processor_window_proxies.begin(); i != _processor_window_proxies.end(); ++i) {
+	for (list<ProcessorWindowProxy*>::iterator i = _processor_window_info.begin(); i != _processor_window_info.end(); ++i) {
 		(*i)->marked = false;
 	}
 
@@ -1354,15 +1387,15 @@ ProcessorBox::redisplay_processors ()
 
 	/* trim dead wood from the processor window proxy list */
 
-	list<ProcessorWindowProxy*>::iterator i = _processor_window_proxies.begin();
-	while (i != _processor_window_proxies.end()) {
+	list<ProcessorWindowProxy*>::iterator i = _processor_window_info.begin();
+	while (i != _processor_window_info.end()) {
 		list<ProcessorWindowProxy*>::iterator j = i;
 		++j;
 
 		if (!(*i)->marked) {
-			ARDOUR_UI::instance()->remove_window_proxy (*i);
+			WM::Manager::instance().remove (*i);
 			delete *i;
-			_processor_window_proxies.erase (i);
+			_processor_window_info.erase (i);
 		}
 
 		i = j;
@@ -1382,8 +1415,8 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 		return;
 	}
 
-	list<ProcessorWindowProxy*>::iterator i = _processor_window_proxies.begin ();
-	while (i != _processor_window_proxies.end()) {
+	list<ProcessorWindowProxy*>::iterator i = _processor_window_info.begin ();
+	while (i != _processor_window_info.end()) {
 
 		boost::shared_ptr<Processor> t = (*i)->processor().lock ();
 
@@ -1411,10 +1444,15 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 
 	ProcessorWindowProxy* wp = new ProcessorWindowProxy (
 		string_compose ("%1-%2-%3", loc, _route->id(), p->id()),
-		_session->extra_xml (X_("UI")),
 		this,
 		w);
 
+	const XMLNode* ui_xml = _session->extra_xml (X_("UI"));
+
+	if (ui_xml) {
+		wp->set_state (*ui_xml);
+	}
+	
 	wp->marked = true;
 
         /* if the processor already has an existing UI,
@@ -1424,11 +1462,11 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
         void* existing_ui = p->get_ui ();
 
         if (existing_ui) {
-                wp->set (static_cast<Gtk::Window*>(existing_ui));
+                wp->use_window (*(reinterpret_cast<Gtk::Window*>(existing_ui)));
         }
 
-	_processor_window_proxies.push_back (wp);
-	ARDOUR_UI::instance()->add_window_proxy (wp);
+	_processor_window_info.push_back (wp);
+	WM::Manager::instance().register_window (wp);
 }
 
 void
@@ -1550,7 +1588,6 @@ outputs will not work correctly."));
 	dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
 
 	dialog.set_name (X_("PluginIODialog"));
-	dialog.set_position (Gtk::WIN_POS_MOUSE);
 	dialog.set_modal (true);
 	dialog.show_all ();
 
@@ -2017,8 +2054,8 @@ ProcessorBox::one_processor_can_be_edited ()
 	return (i != selection.end());
 }
 
-void
-ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
+Gtk::Window*
+ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool use_custom)
 {
 	boost::shared_ptr<Send> send;
 	boost::shared_ptr<InternalSend> internal_send;
@@ -2030,7 +2067,7 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 	if (boost::dynamic_pointer_cast<AudioTrack>(_route) != 0) {
 
 		if (boost::dynamic_pointer_cast<AudioTrack> (_route)->freeze_state() == AudioTrack::Frozen) {
-			return;
+			return 0;
 		}
 	}
 
@@ -2043,14 +2080,16 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 	} else if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0) {
 
 		if (!_session->engine().connected()) {
-			return;
+			return 0;
 		}
 
 		if (boost::dynamic_pointer_cast<InternalSend> (processor) == 0) {
-			SendUIWindow* w = new SendUIWindow (send, _session);
-			w->show ();
+
+			gidget = new SendUIWindow (send, _session);
+
 		} else {
 			/* assign internal send to main fader */
+
 			if (_parent_strip) {
 				if (_parent_strip->current_delivery() == send) {
 					_parent_strip->revert_to_default_display ();
@@ -2064,11 +2103,11 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 
 		if (boost::dynamic_pointer_cast<InternalReturn> (retrn)) {
 			/* no GUI for these */
-			return;
+			return 0;
 		}
 
 		if (!_session->engine().connected()) {
-			return;
+			return 0;
 		}
 
 		boost::shared_ptr<Return> retrn = boost::dynamic_pointer_cast<Return> (processor);
@@ -2094,20 +2133,15 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 
 		/* these are both allowed to be null */
 
-		Container* toplevel = get_toplevel();
-		Window* win = dynamic_cast<Gtk::Window*>(toplevel);
-
 		Window* w = get_processor_ui (plugin_insert);
 
 		if (w == 0) {
-
-			plugin_ui = new PluginUIWindow (win, plugin_insert);
+			plugin_ui = new PluginUIWindow (plugin_insert, false, use_custom);
 			plugin_ui->set_title (generate_processor_title (plugin_insert));
 			set_processor_ui (plugin_insert, plugin_ui);
 
 		} else {
 			plugin_ui = dynamic_cast<PluginUIWindow *> (w);
-			plugin_ui->set_parent (win);
 		}
 
 		gidget = plugin_ui;
@@ -2117,7 +2151,7 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 		if (!_session->engine().connected()) {
 			MessageDialog msg ( _("Not connected to JACK - no I/O changes are possible"));
 			msg.run ();
-			return;
+			return 0;
 		}
 
 		PortInsertWindow *io_selector;
@@ -2135,37 +2169,23 @@ ProcessorBox::toggle_edit_processor (boost::shared_ptr<Processor> processor)
 		gidget = io_selector;
 	}
 
-	if (gidget) {
-		if (gidget->is_visible()) {
-			gidget->hide ();
-		} else {
-			gidget->show_all ();
-			gidget->present ();
-		}
-	}
+	return gidget;
 }
 
-/** Toggle a generic (Ardour-generated) plugin UI */
-void
-ProcessorBox::toggle_edit_generic_processor (boost::shared_ptr<Processor> processor)
+Gtk::Window*
+ProcessorBox::get_generic_editor_window (boost::shared_ptr<Processor> processor)
 {
 	boost::shared_ptr<PluginInsert> plugin_insert
 		= boost::dynamic_pointer_cast<PluginInsert>(processor);
+
 	if (!plugin_insert) {
-		return;
+		return 0;
 	}
 
-	Container*      toplevel  = get_toplevel();
-	Window*         win       = dynamic_cast<Gtk::Window*>(toplevel);
-	PluginUIWindow* plugin_ui = new PluginUIWindow(win, plugin_insert, true, false);
-	plugin_ui->set_title(generate_processor_title (plugin_insert));
+	PluginUIWindow* win = new PluginUIWindow (plugin_insert, true, false);
+	win->set_title (generate_processor_title (plugin_insert));
 
-	if (plugin_ui->is_visible()) {
-		plugin_ui->hide();
-	} else {
-		plugin_ui->show_all();
-		plugin_ui->present();
-	}
+	return win;
 }
 
 void
@@ -2232,7 +2252,7 @@ ProcessorBox::register_actions ()
 		sigc::ptr_fun (ProcessorBox::rb_edit));
 
 	edit_generic_action = ActionManager::register_action (
-		popup_act_grp, X_("edit-generic"), _("Edit with basic controls..."),
+		popup_act_grp, X_("edit-generic"), _("Edit with generic controls..."),
 		sigc::ptr_fun (ProcessorBox::rb_edit_generic));
 
 	ActionManager::add_action_group (popup_act_grp);
@@ -2245,7 +2265,7 @@ ProcessorBox::rb_edit_generic ()
 		return;
 	}
 
-	_current_processor_box->for_selected_processors (&ProcessorBox::toggle_edit_generic_processor);
+	_current_processor_box->for_selected_processors (&ProcessorBox::generic_edit_processor);
 }
 
 void
@@ -2421,7 +2441,37 @@ ProcessorBox::rb_edit ()
 		return;
 	}
 
-	_current_processor_box->for_selected_processors (&ProcessorBox::toggle_edit_processor);
+	_current_processor_box->for_selected_processors (&ProcessorBox::edit_processor);
+}
+
+void
+ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
+{
+	if (!processor) {
+		return;
+	}
+	
+	ProcessorWindowProxy* proxy = find_window_proxy (processor);
+
+	if (proxy) {
+		proxy->set_custom_ui_mode (true);
+		proxy->toggle ();
+	}
+}
+
+void
+ProcessorBox::generic_edit_processor (boost::shared_ptr<Processor> processor)
+{
+	if (!processor) {
+		return;
+	}
+	
+	ProcessorWindowProxy* proxy = find_window_proxy (processor);
+
+	if (proxy) {
+		proxy->set_custom_ui_mode (false);
+		proxy->toggle ();
+	}
 }
 
 void
@@ -2487,8 +2537,8 @@ ProcessorBox::generate_processor_title (boost::shared_ptr<PluginInsert> pi)
 Window *
 ProcessorBox::get_processor_ui (boost::shared_ptr<Processor> p) const
 {
-	list<ProcessorWindowProxy*>::const_iterator i = _processor_window_proxies.begin ();
-	while (i != _processor_window_proxies.end()) {
+	list<ProcessorWindowProxy*>::const_iterator i = _processor_window_info.begin ();
+	while (i != _processor_window_info.end()) {
 		boost::shared_ptr<Processor> t = (*i)->processor().lock ();
 		if (t && t == p) {
 			return (*i)->get ();
@@ -2507,14 +2557,14 @@ ProcessorBox::get_processor_ui (boost::shared_ptr<Processor> p) const
 void
 ProcessorBox::set_processor_ui (boost::shared_ptr<Processor> p, Gtk::Window* w)
 {
- 	list<ProcessorWindowProxy*>::iterator i = _processor_window_proxies.begin ();
+ 	list<ProcessorWindowProxy*>::iterator i = _processor_window_info.begin ();
 
 	p->set_ui (w);
 
-	while (i != _processor_window_proxies.end()) {
+	while (i != _processor_window_info.end()) {
 		boost::shared_ptr<Processor> t = (*i)->processor().lock ();
 		if (t && t == p) {
-			(*i)->set (w);
+			(*i)->use_window (*w);
 			return;
 		}
 
@@ -2591,29 +2641,93 @@ ProcessorBox::update_gui_object_state (ProcessorEntry* entry)
 	entry->add_control_state (proc);
 }
 
-ProcessorWindowProxy::ProcessorWindowProxy (
-	string const & name,
-	XMLNode const * node,
-	ProcessorBox* box,
-	boost::weak_ptr<Processor> processor
-	)
-	: WindowProxy<Gtk::Window> (name, node)
+ProcessorWindowProxy::ProcessorWindowProxy (string const & name, ProcessorBox* box, boost::weak_ptr<Processor> processor)
+	: WM::ProxyBase (name, string())
 	, marked (false)
 	, _processor_box (box)
 	, _processor (processor)
+	, is_custom (false)
+	, want_custom (false)
 {
 
 }
 
+ARDOUR::SessionHandlePtr*
+ProcessorWindowProxy::session_handle() 
+{
+	/* we don't care */
+	return 0;
+}
+
+XMLNode&
+ProcessorWindowProxy::get_state () const
+{
+	XMLNode *node;
+	node = &ProxyBase::get_state();
+	node->add_property (X_("custom-ui"), is_custom? X_("yes") : X_("no"));
+	return *node;
+}
 
 void
-ProcessorWindowProxy::show ()
+ProcessorWindowProxy::set_state (const XMLNode& node)
 {
-	boost::shared_ptr<Processor> p = _processor.lock ();
-	if (!p) {
-		return;
+	XMLNodeList children = node.children ();
+	XMLNodeList::const_iterator i = children.begin ();
+	while (i != children.end()) {
+		XMLProperty* prop = (*i)->property (X_("name"));
+		if ((*i)->name() == X_("Window") && prop && prop->value() == _name) {
+			break;
+		}
+		++i;
 	}
 
-	_processor_box->toggle_edit_processor (p);
+	if (i != children.end()) {
+		XMLProperty* prop;
+		if ((prop = (*i)->property (X_("custom-ui"))) != 0) {
+			want_custom = PBD::string_is_affirmative (prop->value ());
+		}
+	}
+
+	ProxyBase::set_state(node);
 }
 
+Gtk::Window*
+ProcessorWindowProxy::get (bool create)
+{
+	boost::shared_ptr<Processor> p = _processor.lock ();
+
+	if (!p) {
+		return 0;
+	}
+	if (_window && (is_custom != want_custom)) {
+		/* drop existing window - wrong type */
+		drop_window ();
+	}
+
+	if (!_window) {
+		if (!create) {
+			return 0;
+		}
+		
+		is_custom = want_custom;
+		_window = _processor_box->get_editor_window (p, is_custom);
+
+		if (_window) {
+			setup ();
+		}
+	}
+
+	return _window;
+}
+
+void
+ProcessorWindowProxy::toggle ()
+{
+	if (_window && (is_custom != want_custom)) {
+		/* drop existing window - wrong type */
+		drop_window ();
+	}
+	is_custom = want_custom;
+
+	WM::ProxyBase::toggle ();
+}

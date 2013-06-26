@@ -65,18 +65,31 @@ enum sortMethod {
 };
 
 
-class Mootcher
+class Mootcher: public sigc::trackable, public PBD::ScopedConnectionList
 {
 public:
 	Mootcher();
 	~Mootcher();
 
-	std::string	getAudioFile(std::string originalFileName, std::string ID, std::string audioURL, SoundFileBrowser *caller);
+	bool		checkAudioFile(std::string originalFileName, std::string ID);
+	bool		fetchAudioFile(std::string originalFileName, std::string ID, std::string audioURL, SoundFileBrowser *caller);
 	std::string	searchText(std::string query, int page, std::string filter, enum sortMethod sort);
+	std::string	searchSimilar(std::string id);
+	void *		threadFunc();
+	SoundFileBrowser *sfb; 
+	std::string	audioFileName;
+	std::string	ID;
+
+	/** signal emitted when mootcher reports progress updates during download.
+	 * The parameters are current and total numbers of bytes downloaded.
+	 */
+	PBD::Signal2<void, double, double> Progress;
+	/** signal emitted when the mootcher has finished downloading. */
+	PBD::Signal0<void> Finished;
+
 
 private:
 
-	void		changeWorkingDir(const char *saveLocation);
 	void		ensureWorkingDir();
 
 	std::string	doRequest(std::string uri, std::string params);
@@ -89,6 +102,21 @@ private:
 
 	CURL *curl;
 	char errorBuffer[CURL_ERROR_SIZE];	// storage for cUrl error message
+
+	FILE* theFile;
+
+	void updateProgress(double dlnow, double dltotal);
+	void doneWithMootcher();
+
+	Gtk::HBox progress_hbox;
+	Gtk::ProgressBar progress_bar;
+	Gtk::Button cancel_download_btn;
+
+	bool cancel_download;
+	void cancelDownload() { 
+		cancel_download = true;
+		progress_hbox.hide();
+	}
 
 	std::string basePath;
 	std::string xmlLocation;

@@ -736,6 +736,11 @@ style "midi_track_metrics" = "midi_track_base"
 	font_name = "@FONT_TINY@"
 }
 
+style "audiomidi_track_metrics" = "midi_track_base"
+{
+	font_name = "@FONT_TINY@"
+}
+
 style "audio_bus_metrics" = "audio_bus_base"
 {
 	font_name = "@FONT_TINY@"
@@ -747,6 +752,11 @@ style "audio_track_metrics_inactive" = "track_controls_inactive"
 }
 
 style "midi_track_metrics_inactive" = "track_controls_inactive"
+{
+	font_name = "@FONT_TINY@"
+}
+
+style "audiomidi_track_metrics_inactive" = "track_controls_inactive"
 {
 	font_name = "@FONT_TINY@"
 }

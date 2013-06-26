@@ -623,45 +623,55 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 	double x = xr.first;
 	double y = yr.first;
 
-	double amount = 8;
-
-	if (Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier)) {
-		amount = 64;
-	} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
-		amount = 1;
-	}
-
-	if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
-
-		/* secondary-wheel == left-right scrolling */
-
-		if (ev->direction == GDK_SCROLL_UP) {
-			x -= amount;
-		} else if (ev->direction == GDK_SCROLL_DOWN) {
-			x += amount;
-		}
-
-	} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-
-		/* primary-wheel == zoom */
-		
-		if (ev->direction == GDK_SCROLL_UP) {
-			_editor->temporal_zoom_step (false);
-		} else {
-			_editor->temporal_zoom_step (true);
-		}
-
-	} else {
-
-		if (ev->direction == GDK_SCROLL_DOWN) {
-			y += amount;
-		} else if (ev->direction == GDK_SCROLL_UP) {
-			y -= amount;
-		} else if (ev->direction == GDK_SCROLL_LEFT) {
-			x -= amount;
-		} else if (ev->direction == GDK_SCROLL_RIGHT) {
-			x += amount;
-		}
+	switch (ev->direction) {
+		case GDK_SCROLL_UP:
+			if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
+				x -= 64;
+			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
+				_editor->temporal_zoom_step (false);
+			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
+				yr.first  += 4;
+				yr.second -= 4;
+				set_editor (xr, yr);
+				return true;
+			} else {
+				y -= 8;
+			}
+			break;
+		case GDK_SCROLL_DOWN:
+			if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollHorizontalModifier)) {
+				x += 64;
+			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
+				_editor->temporal_zoom_step (true);
+			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
+				yr.first  -= 4;
+				yr.second += 4;
+				set_editor (xr, yr);
+				return true;
+			} else {
+				y += 8;
+			}
+			break;
+		case GDK_SCROLL_LEFT:
+			if (Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier)) {
+				x -= 64;
+			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
+				x -= 1;
+			} else {
+				x -= 8;
+			}
+			break;
+		case GDK_SCROLL_RIGHT:
+			if (Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier)) {
+				x += 64;
+			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
+				x += 1;
+			} else {
+				x += 8;
+			}
+			break;
+		default:
+			break;
 	}
 
 	set_editor (x, y);

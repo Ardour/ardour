@@ -31,6 +31,7 @@
 #include "gtkmm2ext/cell_renderer_color_selector.h"
 
 #include "pbd/file_utils.h"
+#include "pbd/compose.h"
 
 #include "ardour/filesystem_paths.h"
 
@@ -57,6 +58,7 @@ ThemeManager::ThemeManager()
 	, light_button (_("Light Theme"))
 	, reset_button (_("Restore Defaults"))
 	, flat_buttons (_("Draw \"flat\" buttons"))
+	, all_dialogs (_("All floating windows are dialogs"))
 	, gradient_waveforms (_("Draw waveforms with color gradient"))
 {
 	set_title (_("Theme Manager"));
@@ -92,9 +94,15 @@ ThemeManager::ThemeManager()
 	vbox->set_homogeneous (false);
 	vbox->pack_start (theme_selection_hbox, PACK_SHRINK);
 	vbox->pack_start (reset_button, PACK_SHRINK);
+#ifndef __APPLE__
+	vbox->pack_start (all_dialogs, PACK_SHRINK);
+#endif
 	vbox->pack_start (flat_buttons, PACK_SHRINK);
 	vbox->pack_start (gradient_waveforms, PACK_SHRINK);
 	vbox->pack_start (scroller);
+
+	vbox->show_all ();
+
 	add (*vbox);
 
 	color_display.signal_button_press_event().connect (sigc::mem_fun (*this, &ThemeManager::button_press_event), false);
@@ -108,7 +116,13 @@ ThemeManager::ThemeManager()
 	light_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_light_theme_button_toggled));
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &ThemeManager::reset_canvas_colors));
 	flat_buttons.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_flat_buttons_toggled));
+	all_dialogs.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_all_dialogs_toggled));
 	gradient_waveforms.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_gradient_waveforms_toggled));
+
+	Gtkmm2ext::UI::instance()->set_tip (all_dialogs, 
+					    string_compose (_("Mark all floating windows to be type \"Dialog\" rather than using \"Utility\" for some.\n"
+							      "This may help with some window managers. This requires a restart of %1 to take effect"),
+							    PROGRAM_NAME));
 
 	set_size_request (-1, 400);
 	setup_theme ();
@@ -246,6 +260,13 @@ ThemeManager::on_flat_buttons_toggled ()
 }
 
 void
+ThemeManager::on_all_dialogs_toggled ()
+{
+	ARDOUR_UI::config()->all_floating_windows_are_dialogs.set (all_dialogs.get_active());
+	ARDOUR_UI::config()->set_dirty ();
+}
+
+void
 ThemeManager::on_gradient_waveforms_toggled ()
 {
 	ARDOUR_UI::config()->gradient_waveforms.set (gradient_waveforms.get_active());
@@ -366,6 +387,7 @@ ThemeManager::setup_theme ()
 	}
 	
 	flat_buttons.set_active (ARDOUR_UI::config()->flat_buttons.get());
+	all_dialogs.set_active (ARDOUR_UI::config()->all_floating_windows_are_dialogs.get());
 	gradient_waveforms.set_active (ARDOUR_UI::config()->gradient_waveforms.get());
 	
 	load_rc_file(rcfile, false);

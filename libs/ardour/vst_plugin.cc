@@ -295,10 +295,11 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 		/* old style */
 
 		char label[64];
-		label[0] = '\0';
+		/* some VST plugins expect this buffer to be zero-filled */
+		memset (label, sizeof (label), 0);
 
 		_plugin->dispatcher (_plugin, effGetParamName, which, 0, label, 0);
-
+		
 		desc.label = label;
 		desc.integer_step = false;
 		desc.lower = 0.0f;
@@ -482,8 +483,17 @@ VSTPlugin::do_remove_preset (string name)
 string 
 VSTPlugin::describe_parameter (Evoral::Parameter param)
 {
-	char name[64] = "Unkown";
+	char name[64];
+	memset (name, sizeof (name), 0);
+
+	/* some VST plugins expect this buffer to be zero-filled */
+
 	_plugin->dispatcher (_plugin, effGetParamName, param.id(), 0, name, 0);
+
+	if (name[0] == '\0') {
+		strcpy (name, _("Unknown"));
+	}
+
 	return name;
 }
 

@@ -82,11 +82,10 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 
 PluginUIWindow::PluginUIWindow (
-	Gtk::Window*                    win,
 	boost::shared_ptr<PluginInsert> insert,
 	bool                            scrollable,
 	bool                            editor)
-	: parent (win)
+	: ArdourWindow (string())
 	, was_visible (false)
 	, _keyboard_focused (false)
 #ifdef AUDIOUNIT_SUPPORT
@@ -96,7 +95,6 @@ PluginUIWindow::PluginUIWindow (
 
 {
 	bool have_gui = false;
-
 	Label* label = manage (new Label());
 	label->set_markup ("<b>THIS IS THE PLUGIN UI</b>");
 
@@ -147,7 +145,6 @@ PluginUIWindow::PluginUIWindow (
 		signal_unmap_event().connect (sigc::mem_fun (*pu, &GenericPluginUI::stop_updating));
 	}
 
-	// set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginEditor");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
@@ -171,51 +168,6 @@ PluginUIWindow::~PluginUIWindow ()
 }
 
 void
-PluginUIWindow::set_parent (Gtk::Window* win)
-{
-	parent = win;
-}
-
-void
-PluginUIWindow::on_map ()
-{
-	Window::on_map ();
-#ifdef __APPLE__
-	set_keep_above (true);
-#endif // __APPLE__
-}
-
-bool
-PluginUIWindow::on_enter_notify_event (GdkEventCrossing *ev)
-{
-	Keyboard::the_keyboard().enter_window (ev, this);
-	return false;
-}
-
-bool
-PluginUIWindow::on_leave_notify_event (GdkEventCrossing *ev)
-{
-	Keyboard::the_keyboard().leave_window (ev, this);
-	return false;
-}
-
-bool
-PluginUIWindow::on_focus_in_event (GdkEventFocus *ev)
-{
-	Window::on_focus_in_event (ev);
-	//Keyboard::the_keyboard().magic_widget_grab_focus ();
-	return false;
-}
-
-bool
-PluginUIWindow::on_focus_out_event (GdkEventFocus *ev)
-{
-	Window::on_focus_out_event (ev);
-	//Keyboard::the_keyboard().magic_widget_drop_focus ();
-	return false;
-}
-
-void
 PluginUIWindow::on_show ()
 {
 	set_role("plugin_ui");
@@ -235,10 +187,6 @@ PluginUIWindow::on_show ()
 		if (_pluginui->on_window_show (_title)) {
 			Window::on_show ();
 		}
-	}
-
-	if (parent) {
-		// set_transient_for (*parent);
 	}
 }
 
@@ -570,7 +518,6 @@ PlugUIBase::latency_button_clicked ()
 	if (!latency_gui) {
 		latency_gui = new LatencyGUI (*(insert.get()), insert->session().frame_rate(), insert->session().get_block_size());
 		latency_dialog = new ArdourWindow (_("Edit Latency"));
-		latency_dialog->set_position (WIN_POS_MOUSE);
 		/* use both keep-above and transient for to try cover as many
 		   different WM's as possible.
 		*/
@@ -618,9 +565,14 @@ PlugUIBase::preset_selected ()
 	}
 }
 
+#ifdef NO_PLUGIN_STATE
+static bool seen_saving_message = false;
+#endif
+
 void
 PlugUIBase::add_plugin_setting ()
 {
+#ifndef NO_PLUGIN_STATE
 	NewPluginPresetDialog d (plugin);
 
 	switch (d.run ()) {
@@ -639,23 +591,49 @@ PlugUIBase::add_plugin_setting ()
 		}
 		break;
 	}
+#else 
+	if (!seen_saving_message) {
+		info << string_compose (_("Plugin presets are not supported in this build of %1. Consider paying for a full version"),
+					PROGRAM_NAME)
+		     << endmsg;
+		seen_saving_message = true;
+	}
+#endif
 }
 
 void
 PlugUIBase::save_plugin_setting ()
 {
+#ifndef NO_PLUGIN_STATE
 	string const name = _preset_combo.get_active_text ();
 	plugin->remove_preset (name);
 	Plugin::PresetRecord const r = plugin->save_preset (name);
 	if (!r.uri.empty ()) {
 		plugin->load_preset (r);
 	}
+#else 
+	if (!seen_saving_message) {
+		info << string_compose (_("Plugin presets are not supported in this build of %1. Consider paying for a newer version"),
+					PROGRAM_NAME)
+		     << endmsg;
+		seen_saving_message = true;
+	}
+#endif
 }
 
 void
 PlugUIBase::delete_plugin_setting ()
 {
+#ifndef NO_PLUGIN_STATE
 	plugin->remove_preset (_preset_combo.get_active_text ());
+#else
+	if (!seen_saving_message) {
+		info << string_compose (_("Plugin presets are not supported in this build of %1. Consider paying for a newer version"),
+					PROGRAM_NAME)
+		     << endmsg;
+		seen_saving_message = true;
+	}
+#endif
 }
 
 bool

@@ -37,11 +37,9 @@
 #include "waveview.h"
 #include "simplerect.h"
 #include "simpleline.h"
-#include "imageframe.h"
 #include "waveview_p.h"
 #include "simplerect_p.h"
 #include "simpleline_p.h"
-#include "imageframe_p.h"
 #include "canvas_impl.h"
 #include "canvas-noevent-text.h"
 #include "editing.h"
@@ -89,14 +87,12 @@ static void ardour_canvas_type_init()
 	Glib::wrap_register(gnome_canvas_simpleline_get_type(), &Gnome::Canvas::SimpleLine_Class::wrap_new);
 	Glib::wrap_register(gnome_canvas_simplerect_get_type(), &Gnome::Canvas::SimpleRect_Class::wrap_new);
 	Glib::wrap_register(gnome_canvas_waveview_get_type(), &Gnome::Canvas::WaveView_Class::wrap_new);
-	// Glib::wrap_register(gnome_canvas_imageframe_get_type(), &Gnome::Canvas::ImageFrame_Class::wrap_new);
 
 	// Register the gtkmm gtypes:
 
 	(void) Gnome::Canvas::WaveView::get_type();
 	(void) Gnome::Canvas::SimpleLine::get_type();
 	(void) Gnome::Canvas::SimpleRect::get_type();
-	(void) Gnome::Canvas::ImageFrame::get_type();
 }
 
 void

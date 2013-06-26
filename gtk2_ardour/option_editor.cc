@@ -342,7 +342,7 @@ OptionEditor::OptionEditor (Configuration* c, std::string const & t)
 	using namespace Notebook_Helpers;
 
 	set_default_size (300, 300);
-	set_wmclass (X_("ardour_preferences"), PROGRAM_NAME);
+	// set_wmclass (X_("ardour_preferences"), PROGRAM_NAME);
 
 	set_name ("Preferences");
 	add_events (Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);

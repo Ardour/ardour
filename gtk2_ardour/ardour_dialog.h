@@ -25,6 +25,10 @@
 
 #include "ardour/session_handle.h"
 
+namespace WM {
+	class ProxyTemporary;
+}
+
 /*
  * This virtual parent class is so that each dialog box uses the
  * same mechanism to declare its closing. It shares a common
@@ -40,12 +44,13 @@ class ArdourDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr
 
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
+        bool on_delete_event (GdkEventAny*);
+        bool on_key_press_event (GdkEventKey*);
 	void on_unmap ();
 	void on_show ();
 
-	static void close_all_dialogs () { CloseAllDialogs(); }
-
   private:
+        WM::ProxyTemporary* proxy;
         bool _splash_pushed;
 	void init ();
 

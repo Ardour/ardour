@@ -607,7 +607,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 
 	switch (item_type) {
 	case RegionItem:
-		if (!get_smart_mode() || (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT)) {
+		if (!get_smart_mode() || (_join_object_range_state != JOIN_OBJECT_RANGE_RANGE)) {
 			if (press) {
 				if (mouse_mode != MouseRange) {
 					set_selected_regionview_from_click (press, op);
@@ -861,8 +861,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		case RegionViewNameHighlight:
 			if (!clicked_regionview->region()->locked()) {
-				RegionSelection s = get_equivalent_regions (selection->regions, Properties::select.property_id);
-				_drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer()), event);
+				_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
 				return true;
 			}
 			break;
@@ -935,15 +934,13 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			switch (item_type) {
 			case FadeInHandleItem:
 			{
-				RegionSelection s = get_equivalent_regions (selection->regions, Properties::select.property_id);
-				_drags->set (new FadeInDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), s), event, _cursors->fade_in);
+				_drags->set (new FadeInDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), selection->regions), event, _cursors->fade_in);
 				return true;
 			}
 
 			case FadeOutHandleItem:
 			{
-				RegionSelection s = get_equivalent_regions (selection->regions, Properties::select.property_id);
-				_drags->set (new FadeOutDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), s), event, _cursors->fade_out);
+				_drags->set (new FadeOutDrag (this, item, reinterpret_cast<RegionView*> (item->get_data("regionview")), selection->regions), event, _cursors->fade_out);
 				return true;
 			}
 
@@ -951,8 +948,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case EndCrossFadeItem:
 				/* we might allow user to grab inside the fade to trim a region with preserve_fade_anchor.  for not this is not fully implemented */ 
 //				if (!clicked_regionview->region()->locked()) {
-//					RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
-//					_drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer(), true), event);
+//					_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer(), true), event);
 //					return true;
 //				}
 				break;
@@ -978,10 +974,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				}
 
 				if (internal_editing ()) {
-					if (event->type == GDK_2BUTTON_PRESS && event->button.button == 1) {
-						Glib::RefPtr<Action> act = ActionManager::get_action (X_("MouseMode"), X_("toggle-internal-edit"));
-						act->activate ();
-					}
 					break;
 				}
 
@@ -1006,8 +998,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case LeftFrameHandle:
                         case RightFrameHandle:
 				if (!clicked_regionview->region()->locked()) {
-					RegionSelection s = get_equivalent_regions (selection->regions, Properties::select.property_id);
-					_drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer()), event);
+					_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
 					return true;
 				}
 				break;
@@ -1015,8 +1006,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case RegionViewName:
 			{
 				/* rename happens on edit clicks */
-				RegionSelection s = get_equivalent_regions (selection->regions, Properties::select.property_id);
-				_drags->set (new TrimDrag (this, clicked_regionview->get_name_highlight(), clicked_regionview, s.by_layer()), event);
+				_drags->set (new TrimDrag (this, clicked_regionview->get_name_highlight(), clicked_regionview, selection->regions.by_layer()), event);
 				return true;
 				break;
 			}
@@ -1114,31 +1104,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				}
 				break;
 			}
-
-#ifdef WITH_CMT
-			case ImageFrameHandleStartItem:
-				imageframe_start_handle_op(item, event) ;
-				return(true) ;
-				break ;
-			case ImageFrameHandleEndItem:
-				imageframe_end_handle_op(item, event) ;
-				return(true) ;
-				break ;
-			case MarkerViewHandleStartItem:
-				markerview_item_start_handle_op(item, event) ;
-				return(true) ;
-				break ;
-			case MarkerViewHandleEndItem:
-				markerview_item_end_handle_op(item, event) ;
-				return(true) ;
-				break ;
-			case MarkerViewItem:
-				start_markerview_grab(item, event) ;
-				break ;
-			case ImageFrameItem:
-				start_imageframe_grab(item, event) ;
-				break ;
-#endif
 
 			case MarkerBarItem:
 
@@ -1485,14 +1450,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			edit_control_point (item);
 			break;
 
-		case NoteItem:
-		{
-			ArdourCanvas::CanvasNoteEvent* e = dynamic_cast<ArdourCanvas::CanvasNoteEvent*> (item);
-			assert (e);
-			edit_notes (e->region_view().selection ());
-			break;
-		}
-
 		default:
 			break;
 		}
@@ -1575,21 +1532,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case ControlPointItem:
 				popup_control_point_context_menu (item, event);
 				break;
-
-#ifdef WITH_CMT
-			case ImageFrameItem:
-				popup_imageframe_edit_menu(1, event->button.time, item, true) ;
-				break ;
-			case ImageFrameTimeAxisItem:
-				popup_imageframe_edit_menu(1, event->button.time, item, false) ;
-				break ;
-			case MarkerViewItem:
-				popup_marker_time_axis_edit_menu(1, event->button.time, item, true) ;
-				break ;
-			case MarkerTimeAxisItem:
-				popup_marker_time_axis_edit_menu(1, event->button.time, item, false) ;
-				break ;
-#endif
 
 			default:
 				break;
@@ -1869,19 +1811,11 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
                 break;
 
 	case StartSelectionTrimItem:
-#ifdef WITH_CMT
-	case ImageFrameHandleStartItem:
-	case MarkerViewHandleStartItem:
-#endif
 		if (is_drawable()) {
 			set_canvas_cursor (_cursors->left_side_trim);
 		}
 		break;
 	case EndSelectionTrimItem:
-#ifdef WITH_CMT
-	case ImageFrameHandleEndItem:
-	case MarkerViewHandleEndItem:
-#endif
 		if (is_drawable()) {
 			set_canvas_cursor (_cursors->right_side_trim);
 		}
@@ -2054,13 +1988,6 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	case StartSelectionTrimItem:
 	case EndSelectionTrimItem:
 	case PlayheadCursorItem:
-
-#ifdef WITH_CMT
-	case ImageFrameHandleStartItem:
-	case ImageFrameHandleEndItem:
-	case MarkerViewHandleStartItem:
-	case MarkerViewHandleEndItem:
-#endif
 
 		_over_region_trim_target = false;
 
@@ -2348,7 +2275,6 @@ Editor::edit_control_point (ArdourCanvas::Item* item)
 	}
 
 	ControlPointDialog d (p);
-	d.set_position (Gtk::WIN_POS_MOUSE);
 	ensure_float (d);
 
 	if (d.run () != RESPONSE_ACCEPT) {
@@ -2359,19 +2285,33 @@ Editor::edit_control_point (ArdourCanvas::Item* item)
 }
 
 void
-Editor::edit_notes (MidiRegionView::Selection const & s)
+Editor::edit_notes (TimeAxisViewItem& tavi)
 {
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(&tavi);
+
+	if (!mrv) {
+		return;
+	}
+
+	MidiRegionView::Selection const & s = mrv->selection();
+
 	if (s.empty ()) {
 		return;
 	}
 	
-	EditNoteDialog d (&(*s.begin())->region_view(), s);
-	d.set_position (Gtk::WIN_POS_MOUSE);
-	ensure_float (d);
+	EditNoteDialog* d = new EditNoteDialog (&(*s.begin())->region_view(), s);
+        d->show_all ();
+	ensure_float (*d);
 
-	d.run ();
+        d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &Editor::note_edit_done), d));
 }
 
+void
+Editor::note_edit_done (int r, EditNoteDialog* d)
+{
+        d->done (r);
+        delete d;
+}
 
 void
 Editor::visible_order_range (int* low, int* high) const
@@ -2652,8 +2592,7 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region
 	if (Config->get_edit_mode() == Splice) {
 		_drags->add (new RegionSpliceDrag (this, item, region_view, selection->regions.by_layer()));
 	} else {
-		RegionSelection s = get_equivalent_regions (selection->regions, ARDOUR::Properties::select.property_id);
-		_drags->add (new RegionMoveDrag (this, item, region_view, s.by_layer(), false, false));
+		_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), false, false));
 	}
 
 	/* sync the canvas to what we think is its current state */
@@ -2671,8 +2610,7 @@ Editor::add_region_copy_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* r
 
 	_region_motion_group->raise_to_top ();
 
-	RegionSelection s = get_equivalent_regions (selection->regions, ARDOUR::Properties::select.property_id);
-	_drags->add (new RegionMoveDrag (this, item, region_view, s.by_layer(), false, true));
+	_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), false, true));
 }
 
 void
@@ -2688,8 +2626,7 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* 
 		return;
 	}
 
-	RegionSelection s = get_equivalent_regions (selection->regions, ARDOUR::Properties::select.property_id);
-	_drags->add (new RegionMoveDrag (this, item, region_view, s.by_layer(), true, false));
+	_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), true, false));
 
 	begin_reversible_command (Operations::drag_region_brush);
 }

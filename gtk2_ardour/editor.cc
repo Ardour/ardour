@@ -119,10 +119,6 @@
 
 #include "i18n.h"
 
-#ifdef WITH_CMT
-#include "imageframe_socket_handler.h"
-#endif
-
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
@@ -233,8 +229,7 @@ pane_size_watcher (Paned* pane)
 }
 
 Editor::Editor ()
-	: VisibilityTracker (*((Gtk::Window*) this))
-	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
+	: _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
 
 	  /* time display buttons */
 	, minsec_label (_("Mins:Secs"))
@@ -265,10 +260,6 @@ Editor::Editor ()
 	, automation_mode_button (_("mode"))
 
 	, _toolbar_viewport (*manage (new Gtk::Adjustment (0, 0, 1e10)), *manage (new Gtk::Adjustment (0, 0, 1e10)))
-
-#ifdef WITH_CMT
-	, image_socket_listener(0)
-#endif
 
 	  /* nudge */
 
@@ -767,18 +758,6 @@ Editor::Editor ()
 
 Editor::~Editor()
 {
-#ifdef WITH_CMT
-	if(image_socket_listener) {
-		if(image_socket_listener->is_connected())
-		{
-			image_socket_listener->close_connection() ;
-		}
-
-		delete image_socket_listener ;
-		image_socket_listener = 0 ;
-	}
-#endif
-
         delete button_bindings;
 	delete _routes;
 	delete _route_groups;
@@ -3146,12 +3125,12 @@ Editor::convert_drop_to_paths (
 		*/
 
 		string txt = data.get_text();
-		const char* p;
+		char* p;
 		const char* q;
 
-		p = (const char *) malloc (txt.length() + 1);
-		txt.copy (const_cast<char *> (p), txt.length(), 0);
-		const_cast<char*>(p)[txt.length()] = '\0';
+		p = (char *) malloc (txt.length() + 1);
+		txt.copy (p, txt.length(), 0);
+		p[txt.length()] = '\0';
 
 		while (p)
 		{
@@ -3330,8 +3309,6 @@ Editor::duplicate_range (bool with_dialog)
 		win.add_button (Stock::CANCEL, RESPONSE_CANCEL);
 		win.add_button (_("Duplicate"), RESPONSE_ACCEPT);
 		win.set_default_response (RESPONSE_ACCEPT);
-
-		win.set_position (WIN_POS_MOUSE);
 
 		spinner.grab_focus ();
 
@@ -5409,7 +5386,6 @@ Editor::change_region_layering_order (bool from_context_menu)
 
 	if (layering_order_editor == 0) {
 		layering_order_editor = new RegionLayeringOrderEditor (*this);
-		layering_order_editor->set_position (WIN_POS_MOUSE);
 	}
 
 	layering_order_editor->set_context (clicked_routeview->name(), _session, clicked_routeview, pl, position);

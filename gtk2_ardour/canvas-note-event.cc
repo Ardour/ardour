@@ -22,7 +22,6 @@
 #include "gtkmm2ext/keyboard.h"
 
 #include "canvas-note-event.h"
-#include "midi_channel_selector.h"
 #include "midi_region_view.h"
 #include "public_editor.h"
 #include "editing_syms.h"
@@ -49,7 +48,6 @@ CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item, const boost
 	: _region(region)
 	, _item(item)
 	, _text(0)
-	, _channel_selector_widget()
 	, _state(None)
 	, _note(note)
 	, _selected(false)
@@ -68,8 +66,6 @@ CanvasNoteEvent::~CanvasNoteEvent()
 		_text->hide();
 		delete _text;
 	}
-
-	delete _channel_selector_widget;
 }
 
 void
@@ -129,53 +125,7 @@ void
 CanvasNoteEvent::on_channel_change(uint8_t channel)
 {
 	_region.note_selected(this, true);
-	hide_channel_selector();
 	_region.change_channel(channel);
-}
-
-void
-CanvasNoteEvent::show_channel_selector(void)
-{
-	if (_channel_selector_widget == 0) {
-
-	  	if(_region.channel_selector_scoped_note() != 0){
-		    _region.channel_selector_scoped_note()->hide_channel_selector();
-		    _region.set_channel_selector_scoped_note(0);
-		}
-
-		SingleMidiChannelSelector* _channel_selector = new SingleMidiChannelSelector(_note->channel());
-		_channel_selector->show_all();
-		_channel_selector->channel_selected.connect(
-			sigc::mem_fun(this, &CanvasNoteEvent::on_channel_change));
-
-		_channel_selector->clicked.connect (
-			sigc::mem_fun (this, &CanvasNoteEvent::hide_channel_selector));
-
-		_channel_selector_widget = new Widget(*(_item->property_parent()),
-		                                      x1(),
-		                                      y2() + 2,
-		                                      (Gtk::Widget &) *_channel_selector);
-
-		_channel_selector_widget->hide();
-		_channel_selector_widget->property_height() = 100;
-		_channel_selector_widget->property_width() = 100;
-		_channel_selector_widget->raise_to_top();
-		_channel_selector_widget->show();
-
-		_region.set_channel_selector_scoped_note(this);
-	} else {
-		hide_channel_selector();
-	}
-}
-
-void
-CanvasNoteEvent::hide_channel_selector(void)
-{
-	if (_channel_selector_widget) {
-		_channel_selector_widget->hide();
-		delete _channel_selector_widget;
-		_channel_selector_widget = 0;
-	}
 }
 
 void
@@ -191,12 +141,6 @@ CanvasNoteEvent::set_selected(bool selected)
 
 	if (_selected && active) {
 		set_outline_color(calculate_outline(ARDOUR_UI::config()->canvasvar_MidiNoteSelected.get()));
-
-		if(_region.channel_selector_scoped_note() != 0){
-		    _region.channel_selector_scoped_note()->hide_channel_selector();
-		    _region.set_channel_selector_scoped_note(0);
-		}
-
 		set_fill_color (base_color ());
 
 	} else {
@@ -208,8 +152,6 @@ CanvasNoteEvent::set_selected(bool selected)
 			set_fill_color(ARDOUR_UI::config()->canvasvar_MidiNoteInactiveChannel.get());
 			set_outline_color(calculate_outline(ARDOUR_UI::config()->canvasvar_MidiNoteInactiveChannel.get()));
 		}
-		
-		hide_channel_selector();
 	}
 }
 
@@ -338,7 +280,7 @@ CanvasNoteEvent::on_event(GdkEvent* ev)
 	case GDK_BUTTON_PRESS:
 		set_mouse_fractions (ev);
 		if (ev->button.button == 3 && Keyboard::no_modifiers_active (ev->button.state) && _selected) {
-			show_channel_selector();
+			_region.get_time_axis_view().editor().edit_notes (_region);
 			return true;
 		}
 		break;

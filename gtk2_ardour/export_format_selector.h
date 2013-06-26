@@ -63,7 +63,7 @@ class ExportFormatSelector : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	void select_format (FormatPtr f);
 	void add_new_format ();
-	void remove_format ();
+	void remove_format (bool called_from_button = false);
 	int open_edit_dialog (bool new_dialog = false);
 	void update_format_combo ();
 	void update_format_description ();

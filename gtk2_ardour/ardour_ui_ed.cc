@@ -52,7 +52,7 @@
 #include "mixer_ui.h"
 #include "startup.h"
 #include "utils.h"
-#include "window_proxy.h"
+#include "window_manager.h"
 #include "global_port_matrix.h"
 #include "location_ui.h"
 #include "main_clock.h"
@@ -137,21 +137,10 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (main_actions, X_("CloseVideo"), _("Remove Video"),
 					      sigc::mem_fun (*this, &ARDOUR_UI::remove_video));
-	ActionManager::session_sensitive_actions.push_back (act);
+	act->set_sensitive (false);
 	act = ActionManager::register_action (main_actions, X_("ExportVideo"), _("Export To Video File"),
 					      sigc::mem_fun (*editor, &PublicEditor::export_video));
 	ActionManager::session_sensitive_actions.push_back (act);
-
-#ifdef WITH_CMT
-
-	std::string anicomp_file_path;
-
-	if (PBD::find_file_in_search_path (Glib::getenv("PATH"), "AniComp", anicomp_file_path)) {
-		act = ActionManager::register_action (main_actions, X_("aniConnect"), _("Connect"),  (sigc::mem_fun (*editor, &PublicEditor::connect_to_image_compositor)));
-		ActionManager::session_sensitive_actions.push_back (act);
-	}
-
-#endif
 
 	act = ActionManager::register_action (main_actions, X_("Snapshot"), _("Snapshot..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), false));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -240,42 +229,14 @@ ARDOUR_UI::install_actions ()
 
 	ActionManager::register_toggle_action (common_actions, X_("toggle-mixer"), S_("Window|Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_mixer_window));
 	ActionManager::register_action (common_actions, X_("toggle-editor-mixer"), _("Toggle Editor+Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_editor_mixer));
-	ActionManager::register_toggle_action (common_actions, X_("ToggleRCOptionsEditor"), _("Preferences"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_rc_options_window));
-	ActionManager::register_toggle_action (common_actions, X_("ToggleSessionOptionsEditor"), _("Properties"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_session_options_window));
-	act = ActionManager::register_toggle_action (common_actions, X_("ToggleInspector"), _("Tracks and Busses"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_route_params_window));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (common_actions, X_("ToggleLocations"), _("Locations"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_location_window));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (common_actions, X_("ToggleBigClock"), _("Big Clock"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_big_clock_window));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (common_actions, X_("toggle-speaker-config"), _("Speaker Configuration"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_speaker_config_window));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (common_actions, X_("toggle-audio-connection-manager"), _("Audio Connection Manager"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_global_port_matrix), ARDOUR::DataType::AUDIO));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (common_actions, X_("toggle-midi-connection-manager"), _("MIDI Connection Manager"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_global_port_matrix), ARDOUR::DataType::MIDI));
-	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (common_actions, X_("NewMIDITracer"), _("MIDI Tracer"), sigc::mem_fun(*this, &ARDOUR_UI::new_midi_tracer_window));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::register_action (common_actions, X_("About"), _("About"),  sigc::mem_fun(*this, &ARDOUR_UI::show_about));
 	ActionManager::register_action (common_actions, X_("Chat"), _("Chat"),  sigc::mem_fun(*this, &ARDOUR_UI::launch_chat));
 	/** TRANSLATORS: This is `Manual' in the sense of an instruction book that tells a user how to use Ardour */
 	ActionManager::register_action (common_actions, X_("Manual"), S_("Help|Manual"),  mem_fun(*this, &ARDOUR_UI::launch_manual));
 	ActionManager::register_action (common_actions, X_("Reference"), _("Reference"),  mem_fun(*this, &ARDOUR_UI::launch_reference));
-	ActionManager::register_toggle_action (common_actions, X_("ToggleThemeManager"), _("Theme Manager"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_theme_manager));
-	ActionManager::register_toggle_action (common_actions, X_("ToggleKeyEditor"), _("Key Bindings"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_key_editor));
-	ActionManager::register_toggle_action (common_actions, X_("ToggleBundleManager"), _("Bundle Manager"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_bundle_manager));
 
-#if 0
-	act = ActionManager::register_action (common_actions, X_("AddAudioTrack"), _("Add Audio Track"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::session_add_audio_track), 1, 1, ARDOUR::Normal, (ARDOUR::RouteGroup *) 0, 1));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("AddAudioBus"), _("Add Audio Bus"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::session_add_audio_bus), 1, 1, (ARDOUR::RouteGroup *) 0, 1));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("AddMIDITrack"), _("Add MIDI Track"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::session_add_midi_track), (ARDOUR::RouteGroup *) 0, 1));
-	ActionManager::session_sensitive_actions.push_back (act);
-	//act = ActionManager::register_action (common_actions, X_("AddMidiBus"), _("Add Midi Bus"), sigc::mem_fun(*this, &ARDOUR_UI::session_add_midi_bus));
-	//ActionManager::session_sensitive_actions.push_back (act);
-#endif
 	act = ActionManager::register_action (common_actions, X_("Save"), _("Save"),  sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::save_state), string(""), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
@@ -612,154 +573,30 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 	Gtk::Widget* widget;
 	Application* app = Application::instance ();
 
-	/* Quit will be taken of separately */
+        /* the addresses ("/ui/Main...") used below are based on the menu definitions in the menus file
+         */
+
+	/* Quit will be taken care of separately */
 
 	if ((widget = ActionManager::get_widget ("/ui/Main/Session/Quit"))) {
 		widget->hide ();
 	}
 
+	/* Put items for About and Preferences into App menu (the
+	 * ardour.menus.in file does not list them for OS X)
+	 */
+
 	GtkApplicationMenuGroup* group = app->add_app_menu_group ();
 
-	if ((widget = ActionManager::get_widget ("/ui/Main/Session/About"))) {
+	if ((widget = ActionManager::get_widget ("/ui/Main/Session/toggle-about"))) {
 		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
-	}
+        }
 
-	if ((widget = ActionManager::get_widget ("/ui/Main/Session/ToggleRCOptionsEditor"))) {
+	if ((widget = ActionManager::get_widget ("/ui/Main/Session/toggle-rc-options-editor"))) {
 		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
-	}
+        }
 
 	app->set_menu_bar (*menu_bar);
-}
-
-void
-ARDOUR_UI::big_clock_catch_focus ()
-{
-	PublicEditor::instance().reset_focus ();
-}
-
-void
-ARDOUR_UI::setup_clock ()
-{
-	ARDOUR_UI::Clock.connect (sigc::mem_fun (big_clock, &AudioClock::set));
-
-	big_clock->set_corner_radius (0.0);
-	big_clock->mode_changed.connect (sigc::mem_fun (*this, &ARDOUR_UI::big_clock_reset_aspect_ratio));
-
-	big_clock_window->set (new Window (WINDOW_TOPLEVEL), false);
-
-	big_clock_window->get()->set_keep_above (true);
-	big_clock_window->get()->set_border_width (0);
-	big_clock_window->get()->add (*big_clock);
-
-	big_clock_window->get()->set_title (_("Big Clock"));
-	big_clock_window->get()->signal_realize().connect (sigc::mem_fun (*this, &ARDOUR_UI::big_clock_realized));
-	big_clock_window->get()->signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), big_clock_window->get()), false);
-	big_clock_window->get()->signal_size_allocate().connect (sigc::mem_fun (*this, &ARDOUR_UI::big_clock_size_allocate));
-
-	big_clock_window->get()->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBigClock")));
-	big_clock_window->get()->signal_unmap().connect (sigc::mem_fun (*this, &ARDOUR_UI::big_clock_catch_focus));
-
-	manage_window (*big_clock_window->get());
-}
-
-void
-ARDOUR_UI::big_clock_reset_aspect_ratio ()
-{
-	Gtk::Requisition req;
-	big_clock->size_request (req);
-	float aspect = req.width/(float)req.height;
-	Gdk::Geometry geom;
-
-	geom.min_aspect = aspect;
-	geom.max_aspect = aspect;
-
-	big_clock_window->get()->set_geometry_hints (*big_clock, geom, Gdk::HINT_ASPECT);
-}
-
-void
-ARDOUR_UI::big_clock_realized ()
-{
-	int x, y, w, d;
-
-	set_decoration (big_clock_window->get(), (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
-	big_clock_window->get()->get_window()->get_geometry (x, y, w, big_clock_height, d);
-
-	big_clock_reset_aspect_ratio ();
-
-	original_big_clock_height = big_clock_height;
-	original_big_clock_width = w;
-
-	Pango::FontDescription fd (big_clock->get_style()->get_font());
-	original_big_clock_font_size = fd.get_size ();
-
-	if (!fd.get_size_is_absolute ()) {
-		original_big_clock_font_size /= PANGO_SCALE;
-	}
-
-	big_clock_window->setup ();
-}
-
-void
-ARDOUR_UI::float_big_clock (Gtk::Window* parent)
-{
-	if (big_clock_window->get()) {
-		if (parent) {
-			big_clock_window->get()->set_transient_for (*parent);
-		} else {
-			gtk_window_set_transient_for (big_clock_window->get()->gobj(), (GtkWindow*) 0);
-		}
-	}
-}
-
-void
-ARDOUR_UI::big_clock_size_allocate (Gtk::Allocation&)
-{
-	if (!big_clock_resize_in_progress) {
-		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::idle_big_clock_text_resizer), 0, 0));
-		big_clock_resize_in_progress = true;
-	}
-}
-
-bool
-ARDOUR_UI::idle_big_clock_text_resizer (int, int)
-{
-	big_clock_resize_in_progress = false;
-
-	Glib::RefPtr<Gdk::Window> win = big_clock_window->get()->get_window();
-	Pango::FontDescription fd (big_clock->get_style()->get_font());
-	int current_size = fd.get_size ();
-	int x, y, w, h, d;
-
-	if (!fd.get_size_is_absolute ()) {
-		current_size /= PANGO_SCALE;
-	}
-
-	win->get_geometry (x, y, w, h, d);
-
-	double scale  = min (((double) w / (double) original_big_clock_width),
-	                     ((double) h / (double) original_big_clock_height));
-
-	int size = (int) lrintf (original_big_clock_font_size * scale);
-
-	if (size != current_size) {
-
-		string family = fd.get_family();
-		char buf[family.length()+16];
-		snprintf (buf, family.length()+16, "%s %d", family.c_str(), size);
-
-		try {
-			Pango::FontDescription fd (buf);
-			Glib::RefPtr<Gtk::RcStyle> rcstyle = big_clock->get_modifier_style ();
-			rcstyle->set_font (fd);
-			big_clock->modify_style (rcstyle);
-		}
-
-		catch (...) {
-			/* oh well, do nothing */
-		}
-	}
-
-	return false;
 }
 
 void
@@ -780,11 +617,9 @@ ARDOUR_UI::save_ardour_state ()
 	XMLNode* window_node = new XMLNode (X_("UI"));
 	window_node->add_property (_status_bar_visibility.get_state_name().c_str(), _status_bar_visibility.get_state_value ());
 
-	for (list<WindowProxyBase*>::iterator i = _window_proxies.begin(); i != _window_proxies.end(); ++i) {
-		if ((*i)->rc_configured()) {
-			window_node->add_child_nocopy (*((*i)->get_state ()));
-		}
-	}
+	/* Windows */
+
+	WM::Manager::instance().add_state (*window_node);
 
 	/* tearoffs */
 
@@ -826,40 +661,18 @@ ARDOUR_UI::save_ardour_state ()
 	if (_session) {
 		_session->add_instant_xml (enode);
 		_session->add_instant_xml (mnode);
-		if (location_ui->get ()) {
-			_session->add_instant_xml (location_ui->get()->ui().get_state ());
+		if (location_ui) {
+			_session->add_instant_xml (location_ui->ui().get_state ());
 		}
 	} else {
 		Config->add_instant_xml (enode);
 		Config->add_instant_xml (mnode);
-		if (location_ui->get ()) {
-			Config->add_instant_xml (location_ui->get()->ui().get_state ());
+		if (location_ui) {
+			Config->add_instant_xml (location_ui->ui().get_state ());
 		}
 	}
 
 	Keyboard::save_keybindings ();
-}
-
-void
-ARDOUR_UI::toggle_global_port_matrix (ARDOUR::DataType t)
-{
-	std::string const action = string_compose ("toggle-%1-connection-manager", t.to_string ());
-
-	if (_global_port_matrix[t]->get() == 0) {
-		_global_port_matrix[t]->set (new GlobalPortMatrixWindow (_session, t));
-		_global_port_matrix[t]->get()->signal_unmap().connect(sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), string_compose (X_("<Actions>/Common/%1"), action)));
-	}
-
-	RefPtr<Action> act = ActionManager::get_action (X_("Common"), action.c_str());
-	if (act) {
-		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
-
-		if (tact->get_active()) {
-			_global_port_matrix[t]->get()->present ();
-		} else {
-			_global_port_matrix[t]->get()->hide ();
-		}
-	}
 }
 
 void

@@ -48,6 +48,26 @@ static const gchar* _automation_mode_strings[] = {
 	0
 };
 
+static void
+dump_view_tree (NSView* view, int depth)
+{
+	NSArray* subviews = [view subviews];
+	unsigned long cnt = [subviews count];
+
+	for (int d = 0; d < depth; d++) {
+		cerr << '\t';
+	}
+        NSRect frame = [view frame];
+	cerr << " view @ " <<  frame.origin.x << ", " << frame.origin.y
+             << ' ' << frame.size.width << " x " << frame.size.height
+             << endl;
+	
+	for (unsigned long i = 0; i < cnt; ++i) {
+		NSView* subview = [subviews objectAtIndex:i];
+		dump_view_tree (subview, depth+1);
+	}
+}
+
 @implementation NotificationObject
 
 - (NotificationObject*) initWithPluginUI: (AUPluginUI*) apluginui andCocoaParent: (NSWindow*) cp andTopLevelParent: (NSWindow*) tlp
@@ -413,14 +433,11 @@ AUPluginUI::cocoa_view_resized ()
 {
         GtkRequisition topsize = top_box.size_request ();
         NSWindow* window = get_nswindow ();
-        NSSize oldContentSize= [window contentRectForFrameRect:[window frame]].size;
-        NSSize newContentSize= [au_view frame].size;
         NSRect windowFrame= [window frame];
+        NSRect new_frame = [au_view frame];
 
-        oldContentSize.height -= topsize.height;
-
-        float dy = oldContentSize.height - newContentSize.height;
-        float dx = oldContentSize.width - newContentSize.width;
+        float dy = last_au_frame.size.height - new_frame.size.height;
+        float dx = last_au_frame.size.width - new_frame.size.width;
 
         windowFrame.origin.y    += dy;
         windowFrame.origin.x    += dx;
@@ -435,11 +452,29 @@ AUPluginUI::cocoa_view_resized ()
 
         [au_view setAutoresizingMask:NSViewNotSizable];
         [window setFrame:windowFrame display:1];
+
+        /* Some stupid AU Views change the origin of the original AU View
+           when they are resized (I'm looking at you AUSampler). If the origin
+           has been moved, move it back.
+        */
+
+        if (last_au_frame.origin.x != new_frame.origin.x ||
+            last_au_frame.origin.y != new_frame.origin.y) {
+                new_frame.origin = last_au_frame.origin;
+                [au_view setFrame:new_frame];
+                /* also be sure to redraw the topbox because this can
+                   also go wrong.
+                 */
+                top_box.queue_draw ();
+        }
+
         [au_view setAutoresizingMask:old_auto_resize];
 
         [[NSNotificationCenter defaultCenter] addObserver:_notify
          selector:@selector(auViewResized:) name:NSViewFrameDidChangeNotification
          object:au_view];
+
+        last_au_frame = new_frame;
 }
 
 int
@@ -533,7 +568,6 @@ AUPluginUI::activate ()
 #ifdef WITH_CARBON
 	ActivateWindow (carbon_window, TRUE);
 #endif
-	// [cocoa_parent makeKeyAndOrderFront:nil];
 }
 
 void
@@ -629,6 +663,8 @@ AUPluginUI::parent_cocoa_window ()
 	[au_view setFrameOrigin:origin];
         [view addSubview:au_view positioned:NSWindowBelow relativeTo:nil]; 
 
+        last_au_frame = [au_view frame];
+
 	// watch for size changes of the view
 
 	_notify = [ [NotificationObject alloc] initWithPluginUI:this andCocoaParent:nil andTopLevelParent:win ]; 
@@ -638,23 +674,6 @@ AUPluginUI::parent_cocoa_window ()
          object:au_view];
 
 	return 0;
-}
-
-static void
-dump_view_tree (NSView* view, int depth)
-{
-	NSArray* subviews = [view subviews];
-	unsigned long cnt = [subviews count];
-
-	for (int d = 0; d < depth; d++) {
-		cerr << '\t';
-	}
-	cerr << " view @ " << view << endl;
-	
-	for (unsigned long i = 0; i < cnt; ++i) {
-		NSView* subview = [subviews objectAtIndex:i];
-		dump_view_tree (subview, depth+1);
-	}
 }
 
 void
@@ -702,12 +721,6 @@ AUPluginUI::lower_box_realized ()
 	}
 }
 
-bool
-AUPluginUI::on_map_event (GdkEventAny*)
-{
-	return false;
-}
-
 void
 AUPluginUI::on_window_hide ()
 {
@@ -717,8 +730,14 @@ AUPluginUI::on_window_hide ()
 		ActivateWindow (carbon_window, FALSE);
 	}
 #endif
-
 	hide_all ();
+        
+#if 0
+        NSArray* wins = [NSApp windows];
+        for (uint32_t i = 0; i < [wins count]; i++) {
+                id win = [wins objectAtIndex:i];
+        }
+#endif
 }
 
 bool
@@ -760,19 +779,4 @@ create_au_gui (boost::shared_ptr<PluginInsert> plugin_insert, VBox** box)
 	return aup;
 }
 
-bool
-AUPluginUI::on_focus_in_event (GdkEventFocus*)
-{
-	//cerr << "au plugin focus in\n";
-	//Keyboard::magic_widget_grab_focus ();
-	return false;
-}
-
-bool
-AUPluginUI::on_focus_out_event (GdkEventFocus*)
-{
-	//cerr << "au plugin focus out\n";
-	//Keyboard::magic_widget_drop_focus ();
-	return false;
-}
 

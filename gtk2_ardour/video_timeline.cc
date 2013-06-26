@@ -22,6 +22,7 @@
 #include "ardour/tempo.h"
 
 #include "pbd/file_utils.h"
+#include "pbd/convert.h"
 #include "ardour/session_directory.h"
 
 #include "ardour_ui.h"
@@ -123,6 +124,7 @@ VideoTimeLine::close_session ()
 	video_filename = "";
 	video_duration = 0;
 	GuiUpdate("set-xjadeo-sensitive-off");
+	GuiUpdate("video-unavailable");
 }
 
 void
@@ -150,44 +152,41 @@ VideoTimeLine::set_session (ARDOUR::Session *s)
 		return;
 	}
 
-	if (node) {
-		ARDOUR_UI::instance()->start_video_server((Gtk::Window*)0, false);
+	ARDOUR_UI::instance()->start_video_server((Gtk::Window*)0, false);
 
-		set_id(*node);
+	set_id(*node);
 
-		const XMLProperty* proph = node->property (X_("Height"));
-		if (proph) {
-			editor->set_video_timeline_height(atoi(proph->value().c_str()));
-		}
+	const XMLProperty* proph = node->property (X_("Height"));
+	if (proph) {
+		editor->set_video_timeline_height(atoi(proph->value()));
+	}
 #if 0 /* TODO THINK: set FPS first time only ?! */
-		const XMLProperty* propasfps = node->property (X_("AutoFPS"));
-		if (propasfps) {
-			auto_set_session_fps = atoi(propasfps->value().c_str())?true:false;
-		}
+	const XMLProperty* propasfps = node->property (X_("AutoFPS"));
+	if (propasfps) {
+		auto_set_session_fps = atoi(propasfps->value())?true:false;
+	}
 #endif
 
-		const XMLProperty* propoffset = node->property (X_("VideoOffset"));
-		if (propoffset) {
-			video_offset = atoll(propoffset->value().c_str());
-			video_offset_p = video_offset;
-		}
-
-		const XMLProperty* proplock = node->property (X_("VideoOffsetLock"));
-		if (proplock) {
-			video_offset_lock = atoi(proplock->value().c_str())?true:false;
-		}
-
-		const XMLProperty* localfile = node->property (X_("LocalFile"));
-		if (localfile) {
-			local_file = atoi(localfile->value().c_str())?true:false;
-		}
-
-		const XMLProperty* propf = node->property (X_("Filename"));
-		video_file_info(propf->value(), local_file);
+	const XMLProperty* propoffset = node->property (X_("VideoOffset"));
+	if (propoffset) {
+		video_offset = atoll(propoffset->value());
+		video_offset_p = video_offset;
 	}
 
-	node = _session->extra_xml (X_("Videomonitor"));
-	if (node) {
+	const XMLProperty* proplock = node->property (X_("VideoOffsetLock"));
+	if (proplock) {
+		video_offset_lock = atoi(proplock->value())?true:false;
+	}
+
+	const XMLProperty* localfile = node->property (X_("LocalFile"));
+	if (localfile) {
+		local_file = atoi(localfile->value())?true:false;
+	}
+
+	const XMLProperty* propf = node->property (X_("Filename"));
+	video_file_info(propf->value(), local_file);
+
+	if ((node = _session->extra_xml (X_("Videomonitor")))) {
 		const XMLProperty* prop = node->property (X_("active"));
 		if (prop && prop->value() == "yes" && found_xjadeo() && !video_filename.empty() && local_file) {
 			open_video_monitor();
@@ -229,7 +228,7 @@ VideoTimeLine::set_state (const XMLNode& node, int /*version*/)
 	LocaleGuard lg (X_("POSIX"));
 	const XMLProperty* propoffset = node.property (X_("VideoOffset"));
 	if (propoffset) {
-		video_offset = atoll(propoffset->value().c_str());
+		video_offset = atoll(propoffset->value());
 	}
 	ARDOUR_UI::instance()->flush_videotimeline_cache(true);
 	return 0;
@@ -349,28 +348,26 @@ VideoTimeLine::update_video_timeline()
 	assert (vtl_dist > 0);
 	assert (apv > 0);
 
-#define GOFFSET (video_offset)
+	leftmost_video_frame = floor (floor((leftmost_frame - video_start_offset - video_offset ) / vtl_dist) * vtl_dist / apv);
 
-	leftmost_video_frame = floor (floor((leftmost_frame - video_start_offset - GOFFSET ) / vtl_dist) * vtl_dist / apv);
-
-	vtl_start = rint (GOFFSET + video_start_offset + leftmost_video_frame * apv);
+	vtl_start = rint (video_offset + video_start_offset + leftmost_video_frame * apv);
 	visible_video_frames = 2 + ceil(editor->current_page_frames() / vtl_dist); /* +2 left+right partial frames */
 
 	/* expand timeline (cache next/prev page images) */
 	vtl_start -= visible_video_frames * vtl_dist;
 	visible_video_frames *=3;
 
-	if (vtl_start < GOFFSET ) {
+	if (vtl_start < video_offset ) {
 		visible_video_frames += ceil(vtl_start/vtl_dist);
-		vtl_start = GOFFSET;
+		vtl_start = video_offset;
 	}
 
 	/* apply video-file constraints */
-	if (vtl_start > video_start_offset + video_duration + GOFFSET ) {
+	if (vtl_start > video_start_offset + video_duration + video_offset ) {
 		visible_video_frames = 0;
 	}
 	/* TODO optimize: compute rather than iterate */
-	while (visible_video_frames > 0 && vtl_start + (visible_video_frames-1) * vtl_dist >= video_start_offset + video_duration + GOFFSET) {
+	while (visible_video_frames > 0 && vtl_start + (visible_video_frames-1) * vtl_dist >= video_start_offset + video_duration + video_offset) {
 		--visible_video_frames;
 	}
 
@@ -404,12 +401,12 @@ VideoTimeLine::update_video_timeline()
 
 	for (unsigned int vfcount=0; vfcount < visible_video_frames; ++vfcount){
 		framepos_t vfpos = vtl_start + vfcount * vtl_dist; /* unit: audio-frames */
-		framepos_t vframeno = rint ( (vfpos - GOFFSET) / apv); /* unit: video-frames */
-		vfpos = (vframeno * apv ) + GOFFSET; /* audio-frame  corresponding to /rounded/ video-frame */
+		framepos_t vframeno = rint ( (vfpos - video_offset) / apv); /* unit: video-frames */
+		vfpos = (vframeno * apv ) + video_offset; /* audio-frame  corresponding to /rounded/ video-frame */
 
 		int rightend = -1; /* unit: pixels */
-		if (vfpos + vtl_dist > video_start_offset + video_duration + GOFFSET) {
-			rightend = display_vframe_width * (video_start_offset + video_duration + GOFFSET - vfpos) / vtl_dist;
+		if (vfpos + vtl_dist > video_start_offset + video_duration + video_offset) {
+			rightend = display_vframe_width * (video_start_offset + video_duration + video_offset - vfpos) / vtl_dist;
 			//printf("lf(e): %lu\n", vframeno); // XXX
 		}
 		VideoImageFrame * frame = get_video_frame(vframeno, cut, rightend);
@@ -429,10 +426,10 @@ VideoTimeLine::update_video_timeline()
 			int vfcount=remaining.front();
 			remaining.pop_front();
 			framepos_t vfpos = vtl_start + vfcount * vtl_dist; /* unit: audio-frames */
-			framepos_t vframeno = rint ((vfpos - GOFFSET) / apv);  /* unit: video-frames */
+			framepos_t vframeno = rint ((vfpos - video_offset) / apv);  /* unit: video-frames */
 			int rightend = -1; /* unit: pixels */
-			if (vfpos + vtl_dist > video_start_offset + video_duration + GOFFSET) {
-				rightend = display_vframe_width * (video_start_offset + video_duration + GOFFSET - vfpos) / vtl_dist;
+			if (vfpos + vtl_dist > video_start_offset + video_duration + video_offset) {
+				rightend = display_vframe_width * (video_start_offset + video_duration + video_offset - vfpos) / vtl_dist;
 				//printf("lf(n): %lu\n", vframeno); // XXX
 			}
 			frame->set_position(vfpos-leftmost_frame);
@@ -469,6 +466,9 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 			video_server_url, translated_filename(),
 			video_file_fps, _duration, _start_offset, video_aspect_ratio)) {
 		warning << _("Parsing video file info failed. Is the Video Server running? Is the file readable by the Video Server? Does the docroot match? Is it a video file?") << endmsg;
+		video_duration = 0;
+		GuiUpdate("set-xjadeo-sensitive-off");
+		GuiUpdate("video-unavailable");
 		return false;
 	}
 	video_duration = _duration * _session->nominal_frame_rate() / video_file_fps;
@@ -507,7 +507,7 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 		}
 		_session->config.set_video_pullup(0); /* TODO only set if set_timecode_format() was successful ?!*/
 	}
-	if (video_file_fps != _session->timecode_frames_per_second()) {
+	if (floor(video_file_fps*100) != floor(_session->timecode_frames_per_second()*100)) {
 		warning << _("Video file's framerate is not equal to Ardour session timecode's framerate: ")
 		        << video_file_fps << _(" vs ") << _session->timecode_frames_per_second() << endmsg;
 	}
@@ -535,6 +535,7 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 #endif
 	}
 	VtlUpdate();
+	GuiUpdate("video-available");
 	return true;
 }
 
@@ -552,6 +553,39 @@ VideoTimeLine::check_server ()
 		if (strstr(res, "status: ok, online.")) { ok = true; }
 		free(res);
 	}
+	return ok;
+}
+
+bool
+VideoTimeLine::check_server_docroot ()
+{
+	bool ok = true;
+	char url[1024];
+	std::vector<std::vector<std::string> > lines;
+
+	if (video_server_url.find("/localhost:") == string::npos) {
+		return true;
+	}
+	snprintf(url, sizeof(url), "%s%src?format=csv"
+			, video_server_url.c_str()
+			, (video_server_url.length()>0 && video_server_url.at(video_server_url.length()-1) == '/')?"":"/"
+			);
+	char *res=curl_http_get(url, NULL);
+	if (!res) {
+		return false;
+	}
+
+	ParseCSV(std::string(res), lines);
+	if (   lines.empty()
+			|| lines.at(0).empty()
+			|| lines.at(0).at(0) != video_get_docroot(Config)) {
+		warning << string_compose(
+				_("Video-server docroot mismatch. Ardour: '%1', video-server: '%2'. This usually means that the video server was not started by ardour and uses a different document-root."),
+				video_get_docroot(Config), lines.at(0).at(0))
+		<< endmsg;
+		ok = false; // TODO allow to override
+	}
+	free(res);
 	return ok;
 }
 
@@ -595,6 +629,10 @@ VideoTimeLine::gui_update(std::string const & t) {
 		editor->toggle_xjadeo_viewoption(6, 1);
 	} else if (t == "xjadeo-window-letterbox-off") {
 		editor->toggle_xjadeo_viewoption(6, 0);
+	} else if (t == "video-available") {
+		editor->set_close_video_sensitive(true);
+	} else if (t == "video-unavailable") {
+		editor->set_close_video_sensitive(false);
 	}
 }
 
@@ -610,7 +648,7 @@ VideoTimeLine::set_height (int height) {
 void
 VideoTimeLine::vmon_update () {
 	if (vmonitor && vmonitor->is_started()) {
-		vmonitor->set_offset( GOFFSET); // TODO proper re-init xjadeo w/o restart not just offset.
+		vmonitor->set_offset(video_offset); // TODO proper re-init xjadeo w/o restart not just offset.
 	}
 }
 
@@ -704,12 +742,20 @@ VideoTimeLine::open_video_monitor() {
 	if (!vmonitor) {
 		vmonitor = new VideoMonitor(editor, _xjadeo_bin);
 		vmonitor->set_session(_session);
+		vmonitor->set_offset(video_offset);
 		vmonitor->Terminated.connect (sigc::mem_fun (*this, &VideoTimeLine::terminated_video_monitor));
 		vmonitor->UiState.connect (*this, invalidator (*this), boost::bind (&VideoTimeLine::gui_update, this, _1), gui_context());
 	} else if (vmonitor->is_started()) {
 		return;
 	}
 
+#if 0
+	/* unused for now.
+	 * the idea is to selective ignore certain monitor window
+	 * states if xjadeo is not running on the same host as ardour.
+	 * However with the removal of the video-monitor-startup-dialogue
+	 * (git rev 5a4d0fff0) these settings are currently not accessible.
+	 */
 	int xj_settings_mask = vmonitor->restore_settings_mask();
 	if (_session) {
 		/* load mask from Session */
@@ -717,12 +763,13 @@ VideoTimeLine::open_video_monitor() {
 		if (node) {
 			const XMLProperty* prop = node->property (X_("mask"));
 			if (prop) {
-				xj_settings_mask = atoi(prop->value().c_str());
+				xj_settings_mask = atoi(prop->value());
 			}
 		}
 	}
 
 	vmonitor->restore_settings_mask(xj_settings_mask);
+#endif
 
 	if (!vmonitor->start()) {
 		warning << "launching xjadeo failed.." << endmsg;
@@ -764,6 +811,7 @@ VideoTimeLine::control_video_monitor(int what, int param) {
 void
 VideoTimeLine::terminated_video_monitor () {
 	if (vmonitor) {
+		vmonitor->save_session();
 		delete vmonitor;
 	}
 	GuiUpdate("set-xjadeo-active-off");
@@ -778,26 +826,11 @@ VideoTimeLine::terminated_video_monitor () {
 	}
 }
 
-/*
-void
-VideoTimeLine::clear_video_monitor_session_state ()
-{
-	if (vmonitor) {
-		vmonitor->clear_session_state();
-	} else {
-	  if (!_session) { return; }
-		XMLNode* node = new XMLNode(X_("XJSettings"));
-		_session->add_extra_xml (*node);
-		_session->set_dirty ();
-	}
-}
-*/
-
 void
 VideoTimeLine::manual_seek_video_monitor (framepos_t pos)
 {
 	if (!vmonitor) { return; }
 	if (!vmonitor->is_started()) { return; }
 	if (!vmonitor->synced_by_manual_seeks()) { return; }
-	vmonitor->manual_seek(pos, false, GOFFSET); // XXX -> set offset in xjadeo
+	vmonitor->manual_seek(pos, false, video_offset); // XXX -> set offset in xjadeo
 }

@@ -1358,7 +1358,6 @@ void
 MixerStrip::setup_comment_editor ()
 {
 	comment_window = new ArdourWindow (""); // title will be reset to show route
-	comment_window->set_position (Gtk::WIN_POS_MOUSE);
 	comment_window->set_skip_taskbar_hint (true);
 	comment_window->signal_hide().connect (sigc::mem_fun(*this, &MixerStrip::comment_editor_done_editing));
 	comment_window->set_default_size (400, 200);
@@ -1666,28 +1665,22 @@ MixerStrip::reset_strip_style ()
 		if (is_midi_track()) {
 			if (_route->active()) {
 				set_name ("MidiTrackStripBase");
-				gpm.set_meter_strip_name ("MidiTrackMetrics");
 			} else {
 				set_name ("MidiTrackStripBaseInactive");
-				gpm.set_meter_strip_name ("MidiTrackMetricsInactive");
 			}
 			gpm.set_fader_name ("MidiTrackFader");
 		} else if (is_audio_track()) {
 			if (_route->active()) {
 				set_name ("AudioTrackStripBase");
-				gpm.set_meter_strip_name ("AudioTrackMetrics");
 			} else {
 				set_name ("AudioTrackStripBaseInactive");
-				gpm.set_meter_strip_name ("AudioTrackMetricsInactive");
 			}
 			gpm.set_fader_name ("AudioTrackFader");
 		} else {
 			if (_route->active()) {
 				set_name ("AudioBusStripBase");
-				gpm.set_meter_strip_name ("AudioBusMetrics");
 			} else {
 				set_name ("AudioBusStripBaseInactive");
-				gpm.set_meter_strip_name ("AudioBusMetricsInactive");
 			}
 			gpm.set_fader_name ("AudioBusFader");
 

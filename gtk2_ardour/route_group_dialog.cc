@@ -50,7 +50,6 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	set_modal (true);
 	set_skip_taskbar_hint (true);
 	set_resizable (true);
-	set_position (Gtk::WIN_POS_MOUSE);
 	set_name (N_("RouteGroupDialog"));
 
 	VBox* main_vbox = manage (new VBox);

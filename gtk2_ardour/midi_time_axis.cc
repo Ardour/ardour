@@ -517,7 +517,6 @@ MidiTimeAxisView::toggle_channel_selector ()
 			_channel_selector->set_default_channel_color ();
 		}
 
-		_channel_selector->set_position (WIN_POS_MOUSE);
 		_channel_selector->show_all ();
 	} else {
 		_channel_selector->cycle_visibility ();
@@ -1486,13 +1485,13 @@ MidiTimeAxisView::playback_channel_mode_changed ()
 {
 	switch (midi_track()->get_playback_channel_mode()) {
 	case AllChannels:
-		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Play"), ("all")));
+		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Play"), _("all")));
 		break;
 	case FilterChannels:
-		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Play"), ("some")));
+		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Play"), _("some")));
 		break;
 	case ForceChannel:
-		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Play"), ("all"), ffs (midi_track()->get_playback_channel_mask())));
+		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Play"), _("all"), ffs (midi_track()->get_playback_channel_mask())));
 		break;
 	}
 }
@@ -1502,13 +1501,13 @@ MidiTimeAxisView::capture_channel_mode_changed ()
 {
 	switch (midi_track()->get_capture_channel_mode()) {
 	case AllChannels:
-		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Rec"), ("all")));
+		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Rec"), _("all")));
 		break;
 	case FilterChannels:
-		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Rec"), ("some")));
+		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Rec"), _("some")));
 		break;
 	case ForceChannel:
-		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Rec"), ("all"), ffs (midi_track()->get_capture_channel_mask())));
+		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Rec"), _("all"), ffs (midi_track()->get_capture_channel_mask())));
 		break;
 	}
 }
