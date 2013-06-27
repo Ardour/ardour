@@ -761,21 +761,10 @@ unique_random_color (list<Gdk::Color>& used_colors)
 		s = (random() % 65535) / 65535.0;
 		v = (random() % 65535) / 65535.0;
 
-#if 0
-		/* avoid neon/glowing tones by limiting them to the
-		   "inner section" (paler) of a color wheel/circle.
-		*/
-
-		const int32_t max_saturation = 48000; // 65535 would open up the whole color wheel
-
-		newcolor.set_red (random() % max_saturation);
-		newcolor.set_blue (random() % max_saturation);
-		newcolor.set_green (random() % max_saturation);
-#else
 		s = min (0.5, s); /* not too saturated */
 		v = max (0.9, v);  /* not too bright */
 		newcolor.set_hsv (h, s, v);
-#endif
+
 		if (used_colors.size() == 0) {
 			used_colors.push_back (newcolor);
 			return newcolor;
@@ -790,6 +779,7 @@ unique_random_color (list<Gdk::Color>& used_colors)
 			gdelta = newcolor.get_green() - c.get_green();
 
 			if (sqrt (rdelta*rdelta + bdelta*bdelta + gdelta*gdelta) > 25.0) {
+				/* different enough */
 				used_colors.push_back (newcolor);
 				return newcolor;
 			}
