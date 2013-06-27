@@ -20,6 +20,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
+#include <boost/scoped_array.hpp>
 
 #include "pbd/properties.h"
 
@@ -125,69 +126,9 @@ private:
 
 #endif
 
-    /** A cached, pre-rendered image of some section of a waveform.
-	
-	It spans a range given relative to the start of the source
-	of the waveform data, so a range from N..M corresponds
-	to the sample range N..M within the source.
-	
-	Invalidated by a changes to:
+        friend class ::WaveViewTest;
 
-               samples_per_pixel
-               colors
-	       height
-
-    */
-
-	class CacheEntry
-	{
-	  public:
-	        CacheEntry (WaveView const *, double, double, ARDOUR::framepos_t, ARDOUR::framepos_t);
-		~CacheEntry ();
-
-	        double pixel_start () const {
-			return _pixel_start;
-		}
-
-  	        double pixel_end () const {
-			return _pixel_end;
-		}
-
-	        double sample_start () const {
-			return _sample_start;
-		}
-
-  	        double sample_end () const {
-			return _sample_end;
-		}
-
-     	        boost::shared_array<ARDOUR::PeakData> peaks () const {
-			return _peaks;
-		}
-
-                Cairo::RefPtr<Cairo::ImageSurface> image();
-	        void clear_image ();
-
-	private:
-		Coord position (Coord) const;
-		
-		WaveView const * _wave_view;
-	    
-	        double     _pixel_start;
-	        double     _pixel_end;
-	        ARDOUR::framecnt_t _sample_start; 
-	        ARDOUR::framecnt_t _sample_end; 
-	        int        _n_peaks; 
-
-	        boost::shared_array<ARDOUR::PeakData> _peaks;
-	        Cairo::RefPtr<Cairo::ImageSurface> _image;
-	};
-
-	friend class CacheEntry;
-	friend class ::WaveViewTest;
-
-	void invalidate_whole_cache ();
-	void invalidate_image_cache ();
+	void invalidate_image ();
 
 	boost::shared_ptr<ARDOUR::AudioRegion> _region;
 	int    _channel;
@@ -210,8 +151,11 @@ private:
 	 */
 	ARDOUR::frameoffset_t _region_start;
     
-        mutable CacheEntry* _cache;
-       
+    
+        mutable ARDOUR::framepos_t _sample_start; 
+        mutable ARDOUR::framepos_t _sample_end; 
+        mutable Cairo::RefPtr<Cairo::ImageSurface> _image;
+
         PBD::ScopedConnection invalidation_connection;
 
         static double _global_gradient_depth;
@@ -221,8 +165,10 @@ private:
         static PBD::Signal0<void> VisualPropertiesChanged;
 
         void handle_visual_property_change ();
-    void ensure_cache (ARDOUR::framecnt_t pixel_start, ARDOUR::framecnt_t pixel_end,
-		       ARDOUR::framepos_t sample_start, ARDOUR::framepos_t sample_end) const;
+
+        void ensure_cache (ARDOUR::framepos_t sample_start, ARDOUR::framepos_t sample_end) const;
+        ArdourCanvas::Coord position (double) const;
+        void draw_image (ARDOUR::PeakData*, int npeaks) const;
 };
 
 }

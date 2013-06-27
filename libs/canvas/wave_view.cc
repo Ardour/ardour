@@ -21,8 +21,6 @@
 #include <cmath>
 #include <cairomm/cairomm.h>
 
-#include <boost/scoped_array.hpp>
-
 #include "gtkmm2ext/utils.h"
 
 #include "pbd/compose.h"
@@ -69,15 +67,14 @@ WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region
 	, _gradient_depth_independent (false)
 	, _amplitude_above_axis (1.0)
 	, _region_start (region->start())
-	, _cache (0)
+	, _sample_start (-1)
+	, _sample_end (-1)
 {
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
 }
 
 WaveView::~WaveView ()
 {
-	delete _cache;
-	_cache = 0;
 }
 
 void
@@ -101,7 +98,7 @@ WaveView::handle_visual_property_change ()
 	}
 	
 	if (changed) {
-		invalidate_image_cache ();
+		invalidate_image ();
 	}
 }
 
@@ -109,7 +106,7 @@ void
 WaveView::set_fill_color (Color c)
 {
 	if (c != _fill_color) {
-		invalidate_image_cache ();
+		invalidate_image ();
 		Fill::set_fill_color (c);
 	}
 }
@@ -118,7 +115,7 @@ void
 WaveView::set_outline_color (Color c)
 {
 	if (c != _outline_color) {
-		invalidate_image_cache ();
+		invalidate_image ();
 		Outline::set_outline_color (c);
 	}
 }
@@ -135,7 +132,7 @@ WaveView::set_samples_per_pixel (double samples_per_pixel)
 		
 		end_change ();
 		
-		invalidate_whole_cache ();
+		invalidate_image ();
 	}
 }
 
@@ -151,54 +148,204 @@ window_to_image (double wave_origin, double image_start)
 	return image_start - wave_origin;
 }
 
-void
-WaveView::ensure_cache (framecnt_t start, framecnt_t end,
-			framepos_t sample_start, framepos_t sample_end) const
+static inline float
+_log_meter (float power, double lower_db, double upper_db, double non_linearity)
 {
-	if (_cache && _cache->sample_start() <= sample_start && _cache->sample_end() >= sample_end) {
-		/* cache already covers required range, do nothing */
-		return;
+	return (power < lower_db ? 0.0 : pow((power-lower_db)/(upper_db-lower_db), non_linearity));
+}
+
+static inline float
+alt_log_meter (float power)
+{
+	return _log_meter (power, -192.0, 0.0, 8.0);
+}
+
+struct LineTips {
+    double top;
+    double bot;
+    bool clipped;
+    
+    LineTips() : top (0.0), bot (0.0), clipped (false) {}
+};
+
+void
+WaveView::draw_image (PeakData* _peaks, int n_peaks) const
+{
+	_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, n_peaks, _height);
+
+	Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (_image);
+
+	boost::scoped_array<LineTips> tips (new LineTips[n_peaks]);
+
+	if (_shape == WaveView::Rectified) {
+
+		/* each peak is a line from the bottom of the waveview
+		 * to a point determined by max (_peaks[i].max,
+		 * _peaks[i].min)
+		 */
+
+		if (_logscaled) {
+			for (int i = 0; i < n_peaks; ++i) {
+				tips[i].bot = height();
+				tips[i].top = position (alt_log_meter (fast_coefficient_to_dB (max (fabs (_peaks[i].max), fabs (_peaks[i].min)))));
+			}
+		} else {for (int i = 0; i < n_peaks; ++i) {
+				tips[i].bot = height();
+				tips[i].top = position (max (fabs (_peaks[i].max), fabs (_peaks[i].min)));
+			}
+		}
+
+	} else {
+
+		if (_logscaled) {
+			for (int i = 0; i < n_peaks; ++i) {
+				Coord top = _peaks[i].min;
+				Coord bot = _peaks[i].max;
+
+				if (top > 0.0) {
+					top = position (alt_log_meter (fast_coefficient_to_dB (top)));
+				} else if (top < 0.0) {
+					top = position (-alt_log_meter (fast_coefficient_to_dB (-top)));
+				} else {
+					top = position (0.0);
+				}
+
+				if (bot > 0.0) {
+					bot = position (alt_log_meter (fast_coefficient_to_dB (bot)));
+				} else if (bot < 0.0) {
+					bot = position (-alt_log_meter (fast_coefficient_to_dB (-bot)));
+				} else {
+					bot = position (0.0);
+				}
+
+				tips[i].top = top;
+				tips[i].bot = bot;
+
+			} 
+
+		} else {
+			for (int i = 0; i < n_peaks; ++i) {
+				tips[i].top = position (_peaks[i].min);
+				tips[i].bot = position (_peaks[i].max);
+			}
+		}
 	}
 
-	if (_cache) {
-		delete _cache;
-		_cache = 0;
+	if (gradient_depth() != 0.0) {
+			
+		Cairo::RefPtr<Cairo::LinearGradient> gradient (Cairo::LinearGradient::create (0, 0, 0, _height));
+			
+		double stops[3];
+			
+		double r, g, b, a;
+
+		if (_shape == Rectified) {
+			stops[0] = 0.1;
+			stops[0] = 0.3;
+			stops[0] = 0.9;
+		} else {
+			stops[0] = 0.1;
+			stops[1] = 0.5;
+			stops[2] = 0.9;
+		}
+
+		color_to_rgba (_fill_color, r, g, b, a);
+		gradient->add_color_stop_rgba (stops[0], r, g, b, a);
+		gradient->add_color_stop_rgba (stops[2], r, g, b, a);
+
+		/* generate a new color for the middle of the gradient */
+		double h, s, v;
+		color_to_hsv (_fill_color, h, s, v);
+		/* change v towards white */
+		v *= 1.0 - gradient_depth();
+		Color center = hsv_to_color (h, s, v, a);
+		color_to_rgba (center, r, g, b, a);
+		gradient->add_color_stop_rgba (stops[1], r, g, b, a);
+			
+		context->set_source (gradient);
+	} else {
+		set_source_rgba (context, _fill_color);
+	}
+
+	/* ensure single-pixel lines */
+		
+	context->set_line_width (0.5);
+	context->translate (0.5, 0.0);
+
+	/* draw the lines */
+
+	if (_shape == WaveView::Rectified) {
+		for (int i = 0; i < n_peaks; ++i) {
+			context->move_to (i, tips[i].top); /* down 1 pixel */
+			context->line_to (i, tips[i].bot);
+			context->stroke ();
+		}
+	} else {
+		for (int i = 0; i < n_peaks; ++i) {
+			context->move_to (i, tips[i].top);
+			context->line_to (i, tips[i].bot);
+			context->stroke ();
+		}
+	}
+
+	/* now add dots to the top and bottom of each line (this is
+	 * modelled on pyramix, except that we add clipping indicators.
+	 */
+
+	context->set_source_rgba (0, 0, 0, 1.0);
+
+	for (int i = 0; i < n_peaks; ++i) {
+		context->move_to (i, tips[i].top);
+		context->rel_line_to (0, 1.0);
+		context->stroke ();
+		if (_shape != WaveView::Rectified) {
+			context->move_to (i, tips[i].bot);
+			context->rel_line_to (0, -1.0);
+			context->stroke ();
+		}
+	}
+
+	if (show_zero_line()) {
+		set_source_rgba (context, _zero_color);
+		context->move_to (0, position (0.0));
+		context->line_to (n_peaks, position (0.0));
+		context->stroke ();
+	}
+}
+
+void
+WaveView::ensure_cache (framepos_t start, framepos_t end) const
+{
+	if (_image && _sample_start <= start && _sample_end >= end) {
+		/* cache already covers required range, do nothing */
+		return;
 	}
 
 	/* sample position is canonical here, and we want to generate
 	 * an image that spans about twice the canvas width 
 	 */
 	
-	const framepos_t center = sample_start + ((sample_end - sample_start) / 2);
+	const framepos_t center = start + ((end - start) / 2);
 	const framecnt_t canvas_samples = 2 * (_canvas->visible_area().width() * _samples_per_pixel);
 
 	/* we can request data from anywhere in the Source, between 0 and its length
 	 */
 
-	sample_start = max ((framepos_t) 0, (center - canvas_samples));
-	sample_end = min (center + canvas_samples, _region->source_length (0));
+	_sample_start = max ((framepos_t) 0, (center - canvas_samples));
+	_sample_end = min (center + canvas_samples, _region->source_length (0));
 
-#if 0
-	if (sample_end <= sample_start) {
-		cerr << "sample start = " << sample_start << endl;
-		cerr << "center+ = " << center<< endl;
-		cerr << "CS = " << canvas_samples << endl;
-		cerr << "pui = " << center + canvas_samples << endl;
-		cerr << "sl = " << _region->source_length (0) << endl;
-		cerr << "st = " << _region->start () << endl;
-		cerr << "END: " << sample_end << endl;
-		assert (false);
-	}
-#endif
-	
-	start = floor (sample_start / (double) _samples_per_pixel);
-	end = ceil (sample_end / (double) _samples_per_pixel);
-	
-	assert (end > start);
+	double pixel_start = floor (_sample_start / (double) _samples_per_pixel);
+	double pixel_end = ceil (_sample_end / (double) _samples_per_pixel);
+	int n_peaks = llrintf (pixel_end - pixel_start);
 
-	// cerr << name << " cache miss - new CE, span " << start << " .. " << end << " (" << sample_start << " .. " << sample_end << ")\n";
+	boost::scoped_array<ARDOUR::PeakData> peaks (new PeakData[n_peaks]);
 
-	_cache = new CacheEntry (this, start, end, sample_start, sample_end);
+	_region->read_peaks (peaks.get(), n_peaks, 
+			     _sample_start, _sample_end - _sample_start,
+			     _channel, 
+			     _samples_per_pixel);
+
+	draw_image (peaks.get(), n_peaks);
 }
 
 void
@@ -246,13 +393,13 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 	// cerr << "Sample space: " << sample_start << " .. " << sample_end << endl;
 
-	ensure_cache (image_start, image_end, sample_start, sample_end);
+	ensure_cache (sample_start, sample_end);
 
 	// cerr << "Cache contains " << _cache->pixel_start() << " .. " << _cache->pixel_end() << " / " 
 	// << _cache->sample_start() << " .. " << _cache->sample_end()
 	// << endl;
 
-	double image_offset = (_cache->sample_start() - _region->start()) / _samples_per_pixel;
+	double image_offset = (_sample_start - _region->start()) / _samples_per_pixel;
 
 	// cerr << "Offset into image to place at zero: " << image_offset << endl;
 
@@ -269,7 +416,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	y = round (y);
 	context->device_to_user (x, y);
 
-	context->set_source (_cache->image(), x, y);
+	context->set_source (_image, x, y);
 	context->fill ();
 }
 
@@ -296,7 +443,7 @@ WaveView::set_height (Distance height)
 		_bounding_box_dirty = true;
 		end_change ();
 		
-		invalidate_image_cache ();
+		invalidate_image ();
 	}
 }
 
@@ -311,38 +458,36 @@ WaveView::set_channel (int channel)
 		_bounding_box_dirty = true;
 		end_change ();
 		
-		invalidate_whole_cache ();
+		invalidate_image ();
 	}
 }
 
 void
-WaveView::invalidate_whole_cache ()
+WaveView::invalidate_image ()
 {
 	begin_visual_change ();
-	delete _cache;
-	_cache = 0;
+
+	_image.clear ();
+	_sample_start  = -1;
+	_sample_end = -1;
+	
 	end_visual_change ();
 }
 
-void
-WaveView::invalidate_image_cache ()
-{
-	invalidate_whole_cache ();
-}
 
 void
 WaveView::set_logscaled (bool yn)
 {
 	if (_logscaled != yn) {
 		_logscaled = yn;
-		invalidate_image_cache ();
+		invalidate_image ();
 	}
 }
 
 void
 WaveView::gain_changed ()
 {
-	invalidate_whole_cache ();
+	invalidate_image ();
 }
 
 void
@@ -350,7 +495,7 @@ WaveView::set_zero_color (Color c)
 {
 	if (_zero_color != c) {
 		_zero_color = c;
-		invalidate_image_cache ();
+		invalidate_image ();
 	}
 }
 
@@ -359,7 +504,7 @@ WaveView::set_clip_color (Color c)
 {
 	if (_clip_color != c) {
 		_clip_color = c;
-		invalidate_image_cache ();
+		invalidate_image ();
 	}
 }
 
@@ -368,7 +513,7 @@ WaveView::set_show_zero_line (bool yn)
 {
 	if (_show_zero != yn) {
 		_show_zero = yn;
-		invalidate_image_cache ();
+		invalidate_image ();
 	}
 }
 
@@ -377,7 +522,7 @@ WaveView::set_shape (Shape s)
 {
 	if (_shape != s) {
 		_shape = s;
-		invalidate_image_cache ();
+		invalidate_image ();
 	}
 }
 
@@ -386,7 +531,7 @@ WaveView::set_amplitude_above_axis (double a)
 {
 	if (_amplitude_above_axis != a) {
 		_amplitude_above_axis = a;
-		invalidate_image_cache ();
+		invalidate_image ();
 	}
 }
 
@@ -429,349 +574,22 @@ WaveView::region_resized ()
 	end_change ();
 }
 
-WaveView::CacheEntry::CacheEntry (WaveView const * wave_view, double pixel_start, double pixel_end,
-				  framepos_t sample_start,framepos_t sample_end)
-	: _wave_view (wave_view)
-	, _pixel_start (pixel_start)
-	, _pixel_end (pixel_end)
-	, _sample_start (sample_start)
-	, _sample_end (sample_end)
-	, _n_peaks (_pixel_end - _pixel_start)
-{
-	_peaks.reset (new PeakData[_n_peaks]);
-
-	_wave_view->_region->read_peaks (_peaks.get(), _n_peaks, 
-					 _sample_start, _sample_end - _sample_start,
-					 _wave_view->_channel, 
-					 _wave_view->_samples_per_pixel);
-}
-
-WaveView::CacheEntry::~CacheEntry ()
-{
-}
-
-static inline float
-_log_meter (float power, double lower_db, double upper_db, double non_linearity)
-{
-	return (power < lower_db ? 0.0 : pow((power-lower_db)/(upper_db-lower_db), non_linearity));
-}
-
-static inline float
-alt_log_meter (float power)
-{
-	return _log_meter (power, -192.0, 0.0, 8.0);
-}
-
-struct LineTips {
-    double top;
-    double bot;
-    bool clipped;
-    
-    LineTips() : top (0.0), bot (0.0), clipped (false) {}
-};
-
-Cairo::RefPtr<Cairo::ImageSurface>
-WaveView::CacheEntry::image ()
-{
-	if (!_image) {
-
-		_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _n_peaks, _wave_view->_height);
-		Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (_image);
-
-#ifdef AREA_DRAW_AND_FILL
-
-		/* Draw the edge of the waveform, top half first, the loop back
-		 * for the bottom half to create a clockwise path
-		 */
-
-		context->begin_new_path();
-
-		if (_wave_view->_shape == WaveView::Rectified) {
-
-			/* top edge of waveform is based on max (fabs (peak_min, peak_max))
-			 */
-
-			if (_wave_view->_logscaled) {
-				for (int i = 0; i < _n_peaks; ++i) {
-					context->line_to (i + 0.5, position (alt_log_meter (fast_coefficient_to_dB (
-												    max (fabs (_peaks[i].max), fabs (_peaks[i].min))))));
-				}
-			} else {
-				for (int i = 0; i < _n_peaks; ++i) {
-					context->line_to (i + 0.5, position (max (fabs (_peaks[i].max), fabs (_peaks[i].min))));
-				}
-			}
-
-		} else {
-			if (_wave_view->_logscaled) {
-				for (int i = 0; i < _n_peaks; ++i) {
-					Coord y = _peaks[i].max;
-					
-					if (y > 0.0) {
-						y = position (alt_log_meter (fast_coefficient_to_dB (y)));
-					} else if (y < 0.0) {
-						y = position (-alt_log_meter (fast_coefficient_to_dB (-y)));
-					} else {
-						y = position (0.0);
-					}
-					context->line_to (i + 0.5, y);
-				} 
-			} else {
-				for (int i = 0; i < _n_peaks; ++i) {
-					context->line_to (i + 0.5, position (_peaks[i].max));
-				}
-			}
-		}
-
-		/* from final top point, move out of the clip zone */
-
-		context->line_to (_n_peaks + 10, position (0.0));
-	
-		/* bottom half, in reverse */
-	
-		if (_wave_view->_shape == WaveView::Rectified) {
-			
-			/* lower half: drop to the bottom, then a line back to
-			 * beyond the left edge of the clip region 
-			 */
-
-			context->line_to (_n_peaks + 10, _wave_view->_height);
-			context->line_to (-10.0, _wave_view->_height);
-
-		} else {
-
-			if (_wave_view->_logscaled) {
-				for (int i = _n_peaks-1; i >= 0; --i) {
-					Coord y = _peaks[i].min;
-					if (y > 0.0) {
-						context->line_to (i + 0.5, position (alt_log_meter (fast_coefficient_to_dB (y))));
-					} else if (y < 0.0) {
-						context->line_to (i + 0.5, position (-alt_log_meter (fast_coefficient_to_dB (-y))));
-					} else {
-						context->line_to (i + 0.5, position (0.0));
-					}
-				} 
-			} else {
-				for (int i = _n_peaks-1; i >= 0; --i) {
-					context->line_to (i + 0.5, position (_peaks[i].min));
-				}
-			}
-		
-			/* from final bottom point, move out of the clip zone */
-			
-			context->line_to (-10.0, position (0.0));
-		}
-
-		context->close_path ();
-
-		if (_wave_view->gradient_depth() != 0.0) {
-			
-			Cairo::RefPtr<Cairo::LinearGradient> gradient (Cairo::LinearGradient::create (0, 0, 0, _wave_view->_height));
-			
-			double stops[3];
-			
-			double r, g, b, a;
-
-			if (_wave_view->_shape == Rectified) {
-				stops[0] = 0.1;
-				stops[0] = 0.3;
-				stops[0] = 0.9;
-			} else {
-				stops[0] = 0.1;
-				stops[1] = 0.5;
-				stops[2] = 0.9;
-			}
-
-			color_to_rgba (_wave_view->_fill_color, r, g, b, a);
-			gradient->add_color_stop_rgba (stops[0], r, g, b, a);
-			gradient->add_color_stop_rgba (stops[2], r, g, b, a);
-			
-			/* generate a new color for the middle of the gradient */
-			double h, s, v;
-			color_to_hsv (_wave_view->_fill_color, h, s, v);
-			/* tone down the saturation */
-			s *= 1.0 - _wave_view->gradient_depth();
-			Color center = hsv_to_color (h, s, v, a);
-			color_to_rgba (center, r, g, b, a);
-			gradient->add_color_stop_rgba (stops[1], r, g, b, a);
-			
-			context->set_source (gradient);
-		} else {
-			set_source_rgba (context, _wave_view->_fill_color);
-		}
-
-		context->fill_preserve ();
-		_wave_view->setup_outline_context (context);
-		context->stroke ();
-
-#else
-		boost::scoped_array<LineTips> tips (new LineTips[_n_peaks]);
-
-		if (_wave_view->_shape == WaveView::Rectified) {
-
-			/* each peak is a line from the bottom of the waveview
-			 * to a point determined by max (_peaks[i].max,
-			 * _peaks[i].min)
-			 */
-
-			if (_wave_view->_logscaled) {
-				for (int i = 0; i < _n_peaks; ++i) {
-					tips[i].bot = _wave_view->height();
-					tips[i].top = position (alt_log_meter (fast_coefficient_to_dB (max (fabs (_peaks[i].max), fabs (_peaks[i].min)))));
-				}
-			} else {
-				for (int i = 0; i < _n_peaks; ++i) {
-					tips[i].bot = _wave_view->height();
-					tips[i].top = position (max (fabs (_peaks[i].max), fabs (_peaks[i].min)));
-				}
-			}
-
-		} else {
-
-			if (_wave_view->_logscaled) {
-				for (int i = 0; i < _n_peaks; ++i) {
-					Coord top = _peaks[i].min;
-					Coord bot = _peaks[i].max;
-
-					if (top > 0.0) {
-						top = position (alt_log_meter (fast_coefficient_to_dB (top)));
-					} else if (top < 0.0) {
-						top = position (-alt_log_meter (fast_coefficient_to_dB (-top)));
-					} else {
-						top = position (0.0);
-					}
-
-					if (bot > 0.0) {
-						bot = position (alt_log_meter (fast_coefficient_to_dB (bot)));
-					} else if (bot < 0.0) {
-						bot = position (-alt_log_meter (fast_coefficient_to_dB (-bot)));
-					} else {
-						bot = position (0.0);
-					}
-
-					tips[i].top = top;
-					tips[i].bot = bot;
-
-				} 
-
-			} else {
-				for (int i = 0; i < _n_peaks; ++i) {
-					tips[i].top = position (_peaks[i].min);
-					tips[i].bot = position (_peaks[i].max);
-				}
-			}
-		}
-
-		if (_wave_view->gradient_depth() != 0.0) {
-			
-			Cairo::RefPtr<Cairo::LinearGradient> gradient (Cairo::LinearGradient::create (0, 0, 0, _wave_view->_height));
-			
-			double stops[3];
-			
-			double r, g, b, a;
-
-			if (_wave_view->_shape == Rectified) {
-				stops[0] = 0.1;
-				stops[0] = 0.3;
-				stops[0] = 0.9;
-			} else {
-				stops[0] = 0.1;
-				stops[1] = 0.5;
-				stops[2] = 0.9;
-			}
-
-			color_to_rgba (_wave_view->_fill_color, r, g, b, a);
-			gradient->add_color_stop_rgba (stops[0], r, g, b, a);
-			gradient->add_color_stop_rgba (stops[2], r, g, b, a);
-
-			/* generate a new color for the middle of the gradient */
-			double h, s, v;
-			color_to_hsv (_wave_view->_fill_color, h, s, v);
-			/* change v towards white */
-			v *= 1.0 - _wave_view->gradient_depth();
-			Color center = hsv_to_color (h, s, v, a);
-			color_to_rgba (center, r, g, b, a);
-			gradient->add_color_stop_rgba (stops[1], r, g, b, a);
-			
-			context->set_source (gradient);
-		} else {
-			set_source_rgba (context, _wave_view->_fill_color);
-		}
-
-		/* ensure single-pixel lines */
-		
-		context->set_line_width (0.5);
-		context->translate (0.5, 0.0);
-
-		/* draw the lines */
-
-		if (_wave_view->_shape == WaveView::Rectified) {
-			for (int i = 0; i < _n_peaks; ++i) {
-				context->move_to (i, tips[i].top); /* down 1 pixel */
-				context->line_to (i, tips[i].bot);
-				context->stroke ();
-			}
-		} else {
-			for (int i = 0; i < _n_peaks; ++i) {
-				context->move_to (i, tips[i].top);
-				context->line_to (i, tips[i].bot);
-				context->stroke ();
-			}
-		}
-
-		/* now add dots to the top and bottom of each line (this is
-		 * modelled on pyramix, except that we add clipping indicators.
-		 */
-
-		context->set_source_rgba (0, 0, 0, 1.0);
-
-		for (int i = 0; i < _n_peaks; ++i) {
-			context->move_to (i, tips[i].top);
-			context->rel_line_to (0, 1.0);
-			context->stroke ();
-			if (_wave_view->_shape != WaveView::Rectified) {
-				context->move_to (i, tips[i].bot);
-				context->rel_line_to (0, -1.0);
-				context->stroke ();
-			}
-		}
-#endif
-
-		if (_wave_view->show_zero_line()) {
-			set_source_rgba (context, _wave_view->_zero_color);
-			context->move_to (0, position (0.0));
-			context->line_to (_n_peaks, position (0.0));
-			context->stroke ();
-		}
-
-	}
-
-	return _image;
-}
-
-
 Coord
-WaveView::CacheEntry::position (double s) const
+WaveView::position (double s) const
 {
 	/* it is important that this returns an integral value, so that we 
 	   can ensure correct single pixel behaviour.
 	 */
 
-	switch (_wave_view->_shape) {
+	switch (_shape) {
 	case Rectified:
-		return floor (_wave_view->_height - (s * _wave_view->_height));
+		return floor (_height - (s * _height));
 	default:
 		break;
 	}
-	return floor ((1.0-s) * (_wave_view->_height / 2.0));
+	return floor ((1.0-s) * (_height / 2.0));
 }
 
-void
-WaveView::CacheEntry::clear_image ()
-{
-	_image.clear ();
-}
-	    
 void
 WaveView::set_global_gradient_depth (double depth)
 {
