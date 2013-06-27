@@ -44,14 +44,16 @@ public:
 
         typedef std::vector<std::pair<double,Color> > StopList;
 	
-        void set_gradient (StopList const & stops, double height);
+        void set_gradient (StopList const & stops, bool is_vertical);
 
 protected:
 	void setup_fill_context (Cairo::RefPtr<Cairo::Context>) const;
-	
+        void setup_gradient_context (Cairo::RefPtr<Cairo::Context>, Rect const &, Duple const &) const;
+       	
 	Color _fill_color;
 	bool _fill;
-        Cairo::RefPtr<Cairo::LinearGradient> _gradient;
+        StopList _stops;
+        bool _vertical_gradient;
 };
 
 }

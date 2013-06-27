@@ -879,7 +879,7 @@ TimeAxisViewItem::set_frame_gradient ()
 	ArdourCanvas::Color darker = ArdourCanvas::hsv_to_color (h, s, v, a);
 	stops.push_back (std::make_pair (1.0, darker));
 	
-	frame->set_gradient (stops, _height);
+	frame->set_gradient (stops, true);
 }
 
 /**

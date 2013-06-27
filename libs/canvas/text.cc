@@ -151,8 +151,7 @@ Text::compute_bounding_box () const
 			Pango::Rectangle const r = layout->get_ink_extents ();
 			
 			_bounding_box = Rect (
-				r.get_x() / Pango::SCALE,
-				r.get_y() / Pango::SCALE,
+				0, 0, 
 				(r.get_x() + r.get_width()) / Pango::SCALE,
 				(r.get_y() + r.get_height()) / Pango::SCALE
 				);

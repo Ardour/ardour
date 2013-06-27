@@ -72,7 +72,11 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 	Rect stroke_rect = fill_rect.expand (0.5);
 
 	if (_fill) {
-		setup_fill_context (context);
+		if (_stops.empty()) {
+			setup_fill_context (context);
+		} else {
+			setup_gradient_context (context, self, Duple (draw.x0, draw.y0));
+		}
 		context->rectangle (fill_rect.x0, fill_rect.y0, fill_rect.width(), fill_rect.height());
 		context->fill ();
 	}
