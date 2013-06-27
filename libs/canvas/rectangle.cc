@@ -61,12 +61,13 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 	
 	Rect draw = d.get();
 	static const double boundary = 0.5;
+	const double x_limit = _canvas->visible_area().width();
 
 	draw.x0 = max (self.x0, max (0.0, draw.x0 - boundary));
-	draw.x1 = min (self.x1, min (2000.0, draw.x1 + boundary));
+	draw.x1 = min (self.x1, min (x_limit, draw.x1 + boundary));
 
 	draw.y0 = max (self.y0, max (0.0, draw.y0 - boundary));
-	draw.y1 = min (self.y1, min (2000.0, draw.y1 + boundary));
+	draw.y1 = min (self.y1, min (x_limit, draw.y1 + boundary));
 
 	Rect fill_rect = draw;
 	Rect stroke_rect = fill_rect.expand (0.5);
