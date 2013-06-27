@@ -755,6 +755,13 @@ unique_random_color (list<Gdk::Color>& used_colors)
 
 	while (1) {
 
+		double h, s, v;
+
+		h = fmod (random(), 360.0);
+		s = (random() % 65535) / 65535.0;
+		v = (random() % 65535) / 65535.0;
+
+#if 0
 		/* avoid neon/glowing tones by limiting them to the
 		   "inner section" (paler) of a color wheel/circle.
 		*/
@@ -764,7 +771,11 @@ unique_random_color (list<Gdk::Color>& used_colors)
 		newcolor.set_red (random() % max_saturation);
 		newcolor.set_blue (random() % max_saturation);
 		newcolor.set_green (random() % max_saturation);
-
+#else
+		s = min (0.5, s); /* not too saturated */
+		v = max (0.9, v);  /* not too bright */
+		newcolor.set_hsv (h, s, v);
+#endif
 		if (used_colors.size() == 0) {
 			used_colors.push_back (newcolor);
 			return newcolor;
