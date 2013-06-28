@@ -59,6 +59,7 @@ class Meterbridge :
 	static Meterbridge* _instance;
 
 	bool _visible;
+	bool _show_busses;
 
 	Gtk::ScrolledWindow scroller;
 	Gtk::HBox global_hpacker;
@@ -91,6 +92,8 @@ class Meterbridge :
 
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
+
+	void parameter_changed (std::string const & p);
 };
 
 #endif

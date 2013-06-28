@@ -117,6 +117,7 @@ Meterbridge::Meterbridge ()
 	: Window (Gtk::WINDOW_TOPLEVEL)
 	, VisibilityTracker (*((Gtk::Window*) this))
 	, _visible (false)
+	, _show_busses (false)
 {
 	set_name ("Meter Bridge");
 
@@ -251,6 +252,7 @@ Meterbridge::set_session (Session* s)
 	}
 
 	update_title ();
+	_show_busses = _session->config.get_show_busses_in_meterbridge();
 
 	SignalOrderRouteSorter sorter;
 	boost::shared_ptr<RouteList> routes = _session->get_routes();
@@ -262,6 +264,7 @@ Meterbridge::set_session (Session* s)
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Meterbridge::add_strips, this, _1), gui_context());
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Meterbridge::update_title, this), gui_context());
 	_session->StateSaved.connect (_session_connections, invalidator (*this), boost::bind (&Meterbridge::update_title, this), gui_context());
+	_session->config.ParameterChanged.connect (*this, invalidator (*this), ui_bind (&Meterbridge::parameter_changed, this, _1), gui_context());
 
 	if (_visible) {
 		show_window();
@@ -408,17 +411,6 @@ Meterbridge::add_strips (RouteList& routes)
 			continue;
 		}
 
-		if (route->is_master()) {
-			/* always show master */
-		}
-		else
-		if (boost::dynamic_pointer_cast<AudioTrack>(route) == 0
-				&& boost::dynamic_pointer_cast<MidiTrack>(route) == 0
-				) {
-			// non-master bus
-			if (0) continue; // TODO allow to skip busses
-		}
-
 		strip = new MeterStrip (*this, _session, route);
 		strips.push_back (strip);
 
@@ -451,7 +443,8 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 
 	int pos = 0;
 	for (list<MeterStrip *>::iterator i = copy.begin(); i != copy.end(); ++i) {
-#if 0 // TODO subscribe to route active,inactive changes
+
+#if 0 // TODO subscribe to route active,inactive changes, merge w/ bus
 		if (! (*i)->route()->active()) {
 			(*i)->hide();
 		} else {
@@ -459,11 +452,41 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 		}
 #endif
 
+		// TODO simplyfy, abstract ->is_bus()
+		if ((*i)->route()->is_master()) {
+			/* always show master */
+			(*i)->show();
+		}
+		else if (boost::dynamic_pointer_cast<AudioTrack>((*i)->route()) == 0
+				&& boost::dynamic_pointer_cast<MidiTrack>((*i)->route()) == 0
+				) {
+			/* non-master bus */
+			if (_show_busses) {
+				(*i)->show();
+			} else {
+				(*i)->hide();
+			}
+		}
+		else {
+			(*i)->show();
+		}
+
+
+
 		if (pos%8 == 0) {
 			(*i)->display_metrics(true);
 		} else {
 			(*i)->display_metrics(false);
 		}
 		global_hpacker.reorder_child(*(*i), pos++);
+	}
+}
+
+void
+Meterbridge::parameter_changed (std::string const & p)
+{
+	if (p == "show-busses-in-meterbridge") {
+		_show_busses = _session->config.get_show_busses_in_meterbridge();
+		sync_order_keys(MixerSort);
 	}
 }

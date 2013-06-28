@@ -271,6 +271,15 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_glue_new_regions_to_bars_and_beats),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_glue_new_regions_to_bars_and_beats)
 			    ));
+
+	add_option (_("Misc"), new OptionEditorHeading (_("Meterbridge Options")));
+	add_option (_("Misc"), new BoolOption (
+			    "show-busses-in-meterbridge",
+			    _("Include Busses on Meterbridge"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_busses_in_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_busses_in_meterbridge)
+			    ));
+
 }
 
 void
