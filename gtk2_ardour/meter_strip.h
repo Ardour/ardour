@@ -61,14 +61,18 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void self_delete ();
 
 	gint meter_metrics_expose (GdkEventExpose *);
+	gint meter_ticks_expose (GdkEventExpose *, Gtk::DrawingArea *);
+	gint meter_ticks1_expose (GdkEventExpose *);
+	gint meter_ticks2_expose (GdkEventExpose *);
 
 	typedef std::map<std::string,cairo_pattern_t*> MetricPatterns;
 	static  MetricPatterns metric_patterns;
 
 	typedef std::map<std::string,cairo_pattern_t*> TickPatterns;
-	static  TickPatterns tick_patterns;
+	static  TickPatterns ticks_patterns;
 
 	static  cairo_pattern_t* render_metrics (Gtk::Widget &, std::vector<ARDOUR::DataType>);
+	static  cairo_pattern_t* render_ticks (Gtk::Widget &, std::vector<ARDOUR::DataType>);
 
 	void on_theme_changed ();
 	bool style_changed;
@@ -85,7 +89,8 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	Gtk::HBox meterbox;
 	Gtk::Label label;
 	Gtk::DrawingArea meter_metric_area;
-	Gtk::DrawingArea meter_tick_area;
+	Gtk::DrawingArea meter_ticks1_area;
+	Gtk::DrawingArea meter_ticks2_area;
 	std::vector<ARDOUR::DataType> _types;
 
 	LevelMeter   *level_meter;

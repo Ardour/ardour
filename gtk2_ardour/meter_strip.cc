@@ -51,7 +51,7 @@ using namespace std;
 PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
 
 MeterStrip::MetricPatterns MeterStrip::metric_patterns;
-MeterStrip::TickPatterns MeterStrip::tick_patterns;
+MeterStrip::TickPatterns MeterStrip::ticks_patterns;
 
 MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	: AxisView(sess)
@@ -78,6 +78,10 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	meter_align->set(0.5, 0.5, 0.0, 1.0);
 	meter_align->add(*level_meter);
 
+	meterbox.pack_start(meter_ticks1_area, true, false);
+	meterbox.pack_start(*meter_align, true, true);
+	meterbox.pack_start(meter_ticks2_area, true, false);
+
 	// add track-name label
 	// TODO
 	// * fixed-height labels (or table layout)
@@ -99,11 +103,14 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	btnbox->pack_start(*rec_enable_button, true, false);
 	btnbox->set_size_request(-1, 16);
 
-	pack_start(*meter_align, true, true);
+	pack_start (meterbox, true, true);
 	pack_start (*btnbox, false, false);
 	pack_start (label, false, false);
 
+	meter_ticks1_area.hide();
+	meter_ticks2_area.show();
 	meter_metric_area.show();
+	meterbox.show();
 	level_meter->show();
 	meter_align->show();
 	btnbox->show();
@@ -117,6 +124,11 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	set_size_request_to_display_given_text (meter_metric_area, "-8888", 1, 0);
 	meter_metric_area.signal_expose_event().connect (
 			sigc::mem_fun(*this, &MeterStrip::meter_metrics_expose));
+
+	meter_ticks1_area.set_size_request(4,-1);
+	meter_ticks2_area.set_size_request(4,-1);
+	meter_ticks1_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks1_expose));
+	meter_ticks2_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks2_expose));
 
 	_route->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&MeterStrip::self_delete, this), gui_context());
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&MeterStrip::strip_property_changed, this, _1), gui_context());
@@ -176,8 +188,10 @@ MeterStrip::display_metrics (bool show)
 {
 	if (show) {
 		meter_metric_area.show();
+		meter_ticks1_area.hide();
 	} else {
 		meter_metric_area.hide();
+		meter_ticks1_area.show();
 	}
 }
 
@@ -205,14 +219,22 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0
 			) {
 		meter_metric_area.set_name ("AudioBusMetrics");
+		meter_ticks1_area.set_name ("AudioBusMetrics");
+		meter_ticks2_area.set_name ("AudioBusMetrics");
 	}
 	else if (type == (1 << DataType::AUDIO)) {
 		meter_metric_area.set_name ("AudioTrackMetrics");
+		meter_ticks1_area.set_name ("AudioTrackMetrics");
+		meter_ticks2_area.set_name ("AudioTrackMetrics");
 	}
 	else if (type == (1 << DataType::MIDI)) {
 		meter_metric_area.set_name ("MidiTrackMetrics");
+		meter_ticks1_area.set_name ("MidiTrackMetrics");
+		meter_ticks2_area.set_name ("MidiTrackMetrics");
 	} else {
 		meter_metric_area.set_name ("AudioMidiTrackMetrics");
+		meter_ticks1_area.set_name ("AudioMidiTrackMetrics");
+		meter_ticks2_area.set_name ("AudioMidiTrackMetrics");
 	}
 	style_changed = true;
 	meter_metric_area.queue_draw ();
@@ -443,6 +465,159 @@ MeterStrip::meter_metrics_expose (GdkEventExpose *ev)
 
 	if (i == metric_patterns.end() || style_changed) {
 		pattern = render_metrics (meter_metric_area, _types);
+	} else {
+		pattern = i->second;
+	}
+
+	cairo_move_to (cr, 0, 0);
+	cairo_set_source (cr, pattern);
+
+	gint width, height;
+	win->get_size (width, height);
+
+	cairo_rectangle (cr, 0, 0, width, height);
+	cairo_fill (cr);
+
+	style_changed = false;
+
+	cairo_destroy (cr);
+
+	return true;
+}
+
+cairo_pattern_t*
+MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
+{
+	Glib::RefPtr<Gdk::Window> win (w.get_window());
+
+	gint width, height;
+	win->get_size (width, height);
+
+	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width, height);
+	cairo_t* cr = cairo_create (surface);
+
+	cairo_move_to (cr, 0, 0);
+	cairo_rectangle (cr, 0, 0, width, height);
+	{
+		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_NORMAL);
+		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
+	}
+	cairo_fill (cr);
+
+	height = min(1024, height); // XXX see FastMeter::max_pattern_metric_size
+
+	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
+
+		Gdk::Color c;
+
+		if (types.size() > 1) {
+			/* we're overlaying more than 1 set of marks, so use different colours */
+			Gdk::Color c;
+			switch (*i) {
+			case DataType::AUDIO:
+				c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
+				cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
+				break;
+			case DataType::MIDI:
+				c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
+				cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
+				break;
+			}
+		} else {
+			c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
+			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
+		}
+
+		vector<int> points;
+
+		switch (*i) {
+		case DataType::AUDIO:
+			points.push_back (-50);
+			points.push_back (-40);
+			points.push_back (-30);
+			points.push_back (-20);
+			points.push_back (-18);
+			points.push_back (-10);
+			points.push_back (-6);
+			points.push_back (-3);
+			points.push_back (0);
+			points.push_back (4);
+			break;
+
+		case DataType::MIDI:
+			points.push_back (0);
+			points.push_back (32);
+			points.push_back (64);
+			points.push_back (96);
+			points.push_back (127);
+			break;
+		}
+
+		for (vector<int>::const_iterator j = points.begin(); j != points.end(); ++j) {
+
+			float fraction = 0;
+			switch (*i) {
+			case DataType::AUDIO:
+				fraction = log_meter (*j);
+				break;
+			case DataType::MIDI:
+				fraction = *j / 127.0;
+				break;
+			}
+
+			gint const pos = height - (gint) floor (height * fraction);
+			cairo_set_line_width (cr, 1.0);
+			cairo_arc(cr, 1.5, pos, 1.0, 0, 2 * M_PI);
+			cairo_fill_preserve(cr);
+			cairo_stroke (cr);
+		}
+	}
+
+	cairo_pattern_t* pattern = cairo_pattern_create_for_surface (surface);
+	TickPatterns::iterator p;
+
+	if ((p = ticks_patterns.find (w.get_name())) != metric_patterns.end()) {
+		cairo_pattern_destroy (p->second);
+	}
+
+	ticks_patterns[w.get_name()] = pattern;
+
+	cairo_destroy (cr);
+	cairo_surface_destroy (surface);
+
+	return pattern;
+}
+
+gint
+MeterStrip::meter_ticks1_expose (GdkEventExpose *ev)
+{
+	return meter_ticks_expose(ev, &meter_ticks1_area);
+}
+
+gint
+MeterStrip::meter_ticks2_expose (GdkEventExpose *ev)
+{
+	return meter_ticks_expose(ev, &meter_ticks2_area);
+}
+
+gint
+MeterStrip::meter_ticks_expose (GdkEventExpose *ev, Gtk::DrawingArea *mta)
+{
+	Glib::RefPtr<Gdk::Window> win (mta->get_window());
+	cairo_t* cr;
+
+	cr = gdk_cairo_create (win->gobj());
+
+	/* clip to expose area */
+
+	gdk_cairo_rectangle (cr, &ev->area);
+	cairo_clip (cr);
+
+	cairo_pattern_t* pattern;
+	TickPatterns::iterator i = ticks_patterns.find (mta->get_name());
+
+	if (i == ticks_patterns.end() || style_changed) {
+		pattern = render_ticks (*mta, _types);
 	} else {
 		pattern = i->second;
 	}
