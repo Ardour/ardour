@@ -163,9 +163,10 @@ alt_log_meter (float power)
 struct LineTips {
     double top;
     double bot;
-    bool clipped;
+    bool clip_max;
+    bool clip_min;
     
-    LineTips() : top (0.0), bot (0.0), clipped (false) {}
+    LineTips() : top (0.0), bot (0.0), clip_max (false), clip_min (false) {}
 };
 
 void
@@ -176,6 +177,7 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 	Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (_image);
 
 	boost::scoped_array<LineTips> tips (new LineTips[n_peaks]);
+	const double clip_level = 1.0;
 
 	if (_shape == WaveView::Rectified) {
 
@@ -188,10 +190,26 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 			for (int i = 0; i < n_peaks; ++i) {
 				tips[i].bot = height();
 				tips[i].top = position (alt_log_meter (fast_coefficient_to_dB (max (fabs (_peaks[i].max), fabs (_peaks[i].min)))));
+
+				if (fabs (_peaks[i].max) >= clip_level) {
+					tips[i].clip_max = true;
+				}
+
+				if (fabs (_peaks[i].min) >= clip_level) {
+					tips[i].clip_min = true;
+				}
 			}
 		} else {for (int i = 0; i < n_peaks; ++i) {
 				tips[i].bot = height();
 				tips[i].top = position (max (fabs (_peaks[i].max), fabs (_peaks[i].min)));
+
+				if (fabs (_peaks[i].max) >= clip_level) {
+					tips[i].clip_max = true;
+				}
+
+				if (fabs (_peaks[i].min) >= clip_level) {
+					tips[i].clip_min = true;
+				}
 			}
 		}
 
@@ -201,6 +219,14 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 			for (int i = 0; i < n_peaks; ++i) {
 				Coord top = _peaks[i].min;
 				Coord bot = _peaks[i].max;
+
+				if (fabs (top) >= clip_level) {
+					tips[i].clip_max = true;
+				}
+
+				if (fabs (bot) >= clip_level) {
+					tips[i].clip_min = true;
+				}
 
 				if (top > 0.0) {
 					top = position (alt_log_meter (fast_coefficient_to_dB (top)));
@@ -220,13 +246,23 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 
 				tips[i].top = top;
 				tips[i].bot = bot;
-
 			} 
 
 		} else {
 			for (int i = 0; i < n_peaks; ++i) {
+
+				if (fabs (_peaks[i].max) >= clip_level) {
+					tips[i].clip_max = true;
+				}
+
+				if (fabs (_peaks[i].min) >= clip_level) {
+					tips[i].clip_min = true;
+				}
+
 				tips[i].top = position (_peaks[i].min);
 				tips[i].bot = position (_peaks[i].max);
+
+
 			}
 		}
 	}
@@ -296,12 +332,31 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 
 	for (int i = 0; i < n_peaks; ++i) {
 		context->move_to (i, tips[i].top);
-		context->rel_line_to (0, 1.0);
-		context->stroke ();
+
+		bool show_top_clip = (_shape == WaveView::Rectified && (tips[i].clip_max || tips[i].clip_min)) ||
+			tips[i].clip_max;
+
+		if (show_top_clip) {
+			context->set_source_rgba (1.0, 0, 0, 1.0);
+			context->rel_line_to (0, 2.0);
+			context->stroke ();
+			context->set_source_rgba (0.0, 0, 0, 1.0);
+		} else {
+			context->rel_line_to (0, 1.0);
+			context->stroke ();
+		}
+
 		if (_shape != WaveView::Rectified) {
 			context->move_to (i, tips[i].bot);
-			context->rel_line_to (0, -1.0);
-			context->stroke ();
+			if (tips[i].clip_min) {
+				context->set_source_rgba (1.0, 0, 0, 1.0);
+				context->rel_line_to (0, -2.0);
+				context->stroke ();
+				context->set_source_rgba (0.0, 0, 0, 1.0);
+			} else {
+				context->rel_line_to (0, -1.0);
+				context->stroke ();
+			}
 		}
 	}
 
@@ -581,13 +636,17 @@ WaveView::position (double s) const
 	   can ensure correct single pixel behaviour.
 	 */
 
+	Coord pos;
+
 	switch (_shape) {
 	case Rectified:
-		return floor (_height - (s * _height));
+		pos = floor (_height - (s * _height));
 	default:
+		pos = floor ((1.0-s) * (_height / 2.0));
 		break;
 	}
-	return floor ((1.0-s) * (_height / 2.0));
+
+	return min (_height, (max (0.0, pos)));
 }
 
 void
