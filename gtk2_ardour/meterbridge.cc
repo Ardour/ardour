@@ -38,6 +38,9 @@
 #include "ardour/route_group.h"
 #include "ardour/session.h"
 
+#include "ardour/audio_track.h"
+#include "ardour/midi_track.h"
+
 #include "meterbridge.h"
 
 #include "monitor_section.h"
@@ -137,7 +140,7 @@ Meterbridge::Meterbridge ()
 
 	MeterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Meterbridge::remove_strip, this, _1), gui_context());
 
-	global_hpacker.set_spacing(1);
+	global_hpacker.set_spacing(3);
 	scroller.add (global_hpacker);
 	scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
 	global_vpacker.pack_start (scroller, true, true);
@@ -405,6 +408,17 @@ Meterbridge::add_strips (RouteList& routes)
 			continue;
 		}
 
+		if (route->is_master()) {
+			/* always show master */
+		}
+		else
+		if (boost::dynamic_pointer_cast<AudioTrack>(route) == 0
+				&& boost::dynamic_pointer_cast<MidiTrack>(route) == 0
+				) {
+			// non-master bus
+			if (0) continue; // TODO allow to skip busses
+		}
+
 		strip = new MeterStrip (*this, _session, route);
 		strips.push_back (strip);
 
@@ -437,6 +451,19 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 
 	int pos = 0;
 	for (list<MeterStrip *>::iterator i = copy.begin(); i != copy.end(); ++i) {
+#if 0 // TODO subscribe to route active,inactive changes
+		if (! (*i)->route()->active()) {
+			(*i)->hide();
+		} else {
+			(*i)->show();
+		}
+#endif
+
+		if (pos%8 == 0) {
+			(*i)->display_metrics(true);
+		} else {
+			(*i)->display_metrics(false);
+		}
 		global_hpacker.reorder_child(*(*i), pos++);
 	}
 }

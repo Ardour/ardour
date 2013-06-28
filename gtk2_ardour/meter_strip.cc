@@ -26,6 +26,9 @@
 #include "ardour/route_group.h"
 #include "ardour/meter.h"
 
+#include "ardour/audio_track.h"
+#include "ardour/midi_track.h"
+
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
 
@@ -55,11 +58,16 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 {
 	set_spacing(2);
 
+	int meter_width = 6;
+	if (_route->shared_peak_meter()->input_streams().n_total() == 1) {
+		meter_width = 12;
+	}
+
 	// add level meter
 	level_meter = new LevelMeter(sess);
 	level_meter->set_meter (_route->shared_peak_meter().get());
 	level_meter->clear_meters();
-	level_meter->setup_meters (350, 6);
+	level_meter->setup_meters (350, meter_width, 6);
 	level_meter->pack_start (meter_metric_area, false, false);
 
 	Gtk::Alignment *meter_align = Gtk::manage (new Gtk::Alignment());
@@ -71,13 +79,17 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	// * fixed-height labels (or table layout)
 	// * print lables at angle (allow longer text)
 	label.set_text(_route->name().c_str());
+	label.set_name("MeterbridgeLabel");
+#if 0
 	label.set_ellipsize(Pango::ELLIPSIZE_MIDDLE);
 	label.set_max_width_chars(7);
 	label.set_width_chars(7);
 	label.set_alignment(0.5, 0.5);
-	label.set_name("MeterbridgeLabel");
-	//ellipsize & angle are incompatible :(
-	//label.property_angle().set_value(90.0);
+#else //ellipsize & angle are incompatible :(
+	label.set_angle(90.0);
+	label.set_alignment(0.5, 0.0);
+#endif
+	label.set_size_request(12, 36);
 
 	pack_start(*meter_align, true, true);
 	pack_start (label, false, false);
@@ -132,6 +144,16 @@ MeterStrip::fast_update ()
 }
 
 void
+MeterStrip::display_metrics (bool show)
+{
+	if (show) {
+		meter_metric_area.show();
+	} else {
+		meter_metric_area.hide();
+	}
+}
+
+void
 MeterStrip::on_theme_changed()
 {
 	style_changed = true;
@@ -150,8 +172,13 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 		}
 	}
 
-	// TODO draw Inactive routes and busses with different styles
-	if (type == (1 << DataType::AUDIO)) {
+	// TODO draw Inactive routes or busses with different styles
+	if (boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
+			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0
+			) {
+		meter_metric_area.set_name ("AudioBusMetrics");
+	}
+	else if (type == (1 << DataType::AUDIO)) {
 		meter_metric_area.set_name ("AudioTrackMetrics");
 	}
 	else if (type == (1 << DataType::MIDI)) {
