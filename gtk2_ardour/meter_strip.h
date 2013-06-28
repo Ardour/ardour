@@ -28,6 +28,7 @@
 
 #include "ardour/types.h"
 #include "ardour/ardour.h"
+#include "route_ui.h"
 
 #include "level_meter.h"
 
@@ -42,7 +43,7 @@ namespace Gtk {
 
 class Meterbridge;
 
-class MeterStrip : public Gtk::VBox
+class MeterStrip : public Gtk::VBox, public RouteUI
 {
   public:
 	MeterStrip (Meterbridge&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
@@ -63,6 +64,10 @@ class MeterStrip : public Gtk::VBox
 
 	typedef std::map<std::string,cairo_pattern_t*> MetricPatterns;
 	static  MetricPatterns metric_patterns;
+
+	typedef std::map<std::string,cairo_pattern_t*> TickPatterns;
+	static  TickPatterns tick_patterns;
+
 	static  cairo_pattern_t* render_metrics (Gtk::Widget &, std::vector<ARDOUR::DataType>);
 
 	void on_theme_changed ();
@@ -71,9 +76,16 @@ class MeterStrip : public Gtk::VBox
 	void on_size_allocate (Gtk::Allocation&);
 	void on_size_request (Gtk::Requisition*);
 
+	/* route UI */
+	void update_rec_display ();
+	std::string state_id() const;
+	void set_button_names ();
+
   private:
+	Gtk::HBox meterbox;
 	Gtk::Label label;
 	Gtk::DrawingArea meter_metric_area;
+	Gtk::DrawingArea meter_tick_area;
 	std::vector<ARDOUR::DataType> _types;
 
 	LevelMeter   *level_meter;

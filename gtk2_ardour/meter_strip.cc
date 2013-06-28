@@ -51,12 +51,16 @@ using namespace std;
 PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
 
 MeterStrip::MetricPatterns MeterStrip::metric_patterns;
+MeterStrip::TickPatterns MeterStrip::tick_patterns;
 
 MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
-	: _route(rt)
+	: AxisView(sess)
+	, RouteUI(sess)
+	, _route(rt)
 	, style_changed (false)
 {
 	set_spacing(2);
+	RouteUI::set_route (rt);
 
 	int meter_width = 6;
 	if (_route->shared_peak_meter()->input_streams().n_total() == 1) {
@@ -91,12 +95,18 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 #endif
 	label.set_size_request(12, 36);
 
+	Gtk::HBox* btnbox = Gtk::manage (new Gtk::HBox());
+	btnbox->pack_start(*rec_enable_button, true, false);
+	btnbox->set_size_request(-1, 16);
+
 	pack_start(*meter_align, true, true);
+	pack_start (*btnbox, false, false);
 	pack_start (label, false, false);
 
 	meter_metric_area.show();
 	level_meter->show();
 	meter_align->show();
+	btnbox->show();
 	label.show();
 
 	_route->shared_peak_meter()->ConfigurationChanged.connect (
@@ -124,6 +134,24 @@ void
 MeterStrip::self_delete ()
 {
 	delete this;
+}
+
+void
+MeterStrip::update_rec_display ()
+{
+	RouteUI::update_rec_display ();
+}
+
+std::string
+MeterStrip::state_id() const
+{
+	return string_compose ("mtrs %1", _route->id().to_s());
+}
+
+void
+MeterStrip::set_button_names()
+{
+	rec_enable_button->set_text (_("R"));
 }
 
 void
