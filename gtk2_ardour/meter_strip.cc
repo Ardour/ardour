@@ -67,7 +67,7 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 		meter_width = 12;
 	}
 
-	// add level meter
+	// level meter + ticks
 	level_meter = new LevelMeter(sess);
 	level_meter->set_meter (_route->shared_peak_meter().get());
 	level_meter->clear_meters();
@@ -82,38 +82,41 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	meterbox.pack_start(*meter_align, true, true);
 	meterbox.pack_start(meter_ticks2_area, true, false);
 
-	// add track-name label
-	// TODO
-	// * fixed-height labels (or table layout)
-	// * print lables at angle (allow longer text)
+	// peak display
+	peak_display.set_name ("MixerStripPeakDisplay");
+	set_size_request_to_display_given_text (peak_display, "-80.g", 2, 6);
+	max_peak = minus_infinity();
+	peak_display.set_label (_("-inf"));
+	peak_display.unset_flags (Gtk::CAN_FOCUS);
+
+	peakbx.pack_start(peak_display, true, true);
+	peakbx.set_size_request(-1, 16);
+
+	// add track-name label -- TODO ellipsize
 	label.set_text(_route->name().c_str());
 	label.set_name("MeterbridgeLabel");
-#if 0
-	label.set_ellipsize(Pango::ELLIPSIZE_MIDDLE);
-	label.set_max_width_chars(7);
-	label.set_width_chars(7);
-	label.set_alignment(0.5, 0.5);
-#else //ellipsize & angle are incompatible :(
 	label.set_angle(90.0);
 	label.set_alignment(0.5, 0.0);
-#endif
 	label.set_size_request(12, 36);
 
-	Gtk::HBox* btnbox = Gtk::manage (new Gtk::HBox());
-	btnbox->pack_start(*rec_enable_button, true, false);
-	btnbox->set_size_request(-1, 16);
+	// rec-enable button
+	btnbox.pack_start(*rec_enable_button, true, false);
+	btnbox.set_size_request(-1, 16);
 
+	pack_start (peakbx, false, false);
 	pack_start (meterbox, true, true);
-	pack_start (*btnbox, false, false);
+	pack_start (btnbox, false, false);
 	pack_start (label, false, false);
 
+	peak_display.show();
+	peakbx.show();
 	meter_ticks1_area.hide();
 	meter_ticks2_area.show();
 	meter_metric_area.show();
 	meterbox.show();
 	level_meter->show();
 	meter_align->show();
-	btnbox->show();
+	btnbox.show();
 	label.show();
 
 	_route->shared_peak_meter()->ConfigurationChanged.connect (
@@ -132,6 +135,8 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 
 	_route->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&MeterStrip::self_delete, this), gui_context());
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&MeterStrip::strip_property_changed, this, _1), gui_context());
+
+	peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &MeterStrip::peak_button_release), false);
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
 }
@@ -179,8 +184,21 @@ MeterStrip::strip_property_changed (const PropertyChange& what_changed)
 void
 MeterStrip::fast_update ()
 {
-	const float mpeak = level_meter->update_meters();
-	// TODO peak indicator if mpeak > 0
+	char buf[32];
+	float mpeak = level_meter->update_meters();
+	if (mpeak > max_peak) {
+		max_peak = mpeak;
+		if (mpeak <= -200.0f) {
+			peak_display.set_label (_("-inf"));
+		} else {
+			snprintf (buf, sizeof(buf), "%.1f", mpeak);
+			peak_display.set_label (buf);
+		}
+
+		if (mpeak >= 0.0f) {
+			peak_display.set_name ("MixerStripPeakDisplayPeak");
+		}
+	}
 }
 
 void
@@ -635,5 +653,30 @@ MeterStrip::meter_ticks_expose (GdkEventExpose *ev, Gtk::DrawingArea *mta)
 
 	cairo_destroy (cr);
 
+	return true;
+}
+
+void
+MeterStrip::reset_group_peak_display (RouteGroup* group)
+{
+	if (_route && group == _route->route_group()) {
+		reset_peak_display ();
+	}
+}
+
+void
+MeterStrip::reset_peak_display ()
+{
+	_route->shared_peak_meter()->reset_max();
+	level_meter->clear_meters();
+	max_peak = -INFINITY;
+	peak_display.set_label (_("-inf"));
+	peak_display.set_name ("MixerStripPeakDisplay");
+}
+
+bool
+MeterStrip::peak_button_release (GdkEventButton* ev)
+{
+	reset_peak_display ();
 	return true;
 }
