@@ -330,6 +330,11 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 
 	context->set_source_rgba (0, 0, 0, 1.0);
 
+	/* the height of the clip-indicator should be at most 7 pixels,
+	   or 5% of the height of the waveview item.
+	*/
+	const double clip_height = min (7.0, ceil (_height * 0.05));
+
 	for (int i = 0; i < n_peaks; ++i) {
 		context->move_to (i, tips[i].top);
 
@@ -338,7 +343,7 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 
 		if (show_top_clip) {
 			context->set_source_rgba (1.0, 0, 0, 1.0);
-			context->rel_line_to (0, 2.0);
+			context->rel_line_to (0, clip_height);
 			context->stroke ();
 			context->set_source_rgba (0.0, 0, 0, 1.0);
 		} else {
@@ -350,7 +355,7 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 			context->move_to (i, tips[i].bot);
 			if (tips[i].clip_min) {
 				context->set_source_rgba (1.0, 0, 0, 1.0);
-				context->rel_line_to (0, -2.0);
+				context->rel_line_to (0, -clip_height);
 				context->stroke ();
 				context->set_source_rgba (0.0, 0, 0, 1.0);
 			} else {
