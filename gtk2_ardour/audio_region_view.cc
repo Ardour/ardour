@@ -1184,36 +1184,6 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	wave->set_y_position (yoff);
 	wave->set_height (ht);
 	wave->set_samples_per_pixel (samples_per_pixel);
-
-	if (_recregion) {
-		wave->set_outline_color (_region->muted() ? UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_RecWaveForm(), MUTED_ALPHA) : ARDOUR_UI::config()->get_canvasvar_RecWaveForm());
-
-
-
-		wave->set_fill_color (ARDOUR_UI::config()->get_canvasvar_RecWaveFormFill());
-	} else {
-		wave->set_outline_color (_region->muted() ? UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), MUTED_ALPHA) : ARDOUR_UI::config()->get_canvasvar_WaveForm());
-
-		/* wave color is a saturated, whiter version of the frame's
-		 * fill color 
-		 */
-
-		ArdourCanvas::Color c = frame->fill_color ();
-		double h, s, v;
-		ArdourCanvas::color_to_hsv (c, h, s, v);
-
-		/* full saturate */
-		s = 1.0;
-		/* head towards white */
-		v = min (1.0, v * 3.0);
-		
-		c = ArdourCanvas::hsv_to_color (h, s, v, _region->muted() ? MUTED_ALPHA : 1.0);
-		
-		wave->set_fill_color (c);
-	}
-
-	wave->set_clip_color (ARDOUR_UI::config()->get_canvasvar_WaveFormClip());
-	wave->set_zero_color (ARDOUR_UI::config()->get_canvasvar_ZeroLine());
 	wave->set_show_zero_line (true);
 
 	switch (Config->get_waveform_shape()) {
@@ -1453,42 +1423,62 @@ AudioRegionView::color_handler ()
 void
 AudioRegionView::set_waveform_colors ()
 {
-	ArdourCanvas::Color fill, outline, clip, zero;
-	
-	if (_selected) {
-                if (_region->muted()) {
-                        outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm(), MUTED_ALPHA);
-                } else {
-                        outline = ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm();
-                }
-                fill = ARDOUR_UI::config()->get_canvasvar_SelectedWaveFormFill();
+        for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
+		set_one_waveform_color (*w);
+	}
+}
+
+void
+AudioRegionView::set_one_waveform_color (ArdourCanvas::WaveView* wave)
+{
+	ArdourCanvas::Color fill;
+	ArdourCanvas::Color outline;
+
+	if (ARDOUR_UI::config()->get_color_regions_using_track_color()) {
+
+		/* wave color is a saturated, whiter version of the frame's
+		 * fill color 
+		 */
+
+		ArdourCanvas::Color c = frame->fill_color ();
+		double h, s, v;
+		ArdourCanvas::color_to_hsv (c, h, s, v);
+		
+		/* full saturate */
+		s = 0.45;
+		/* head towards white */
+		v = 0.97;
+		
+		fill = ArdourCanvas::hsv_to_color (h, s, v, _region->muted() ? MUTED_ALPHA : 1.0);
+		
 	} else {
-		if (_recregion) {
-                        if (_region->muted()) {
-                                outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_RecWaveForm(), MUTED_ALPHA);
-                        } else {
-                                outline = ARDOUR_UI::config()->get_canvasvar_RecWaveForm();
-                        }
-                        fill = ARDOUR_UI::config()->get_canvasvar_RecWaveFormFill();
+
+		if (_selected) {
+			if (_region->muted()) {
+				outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm(), MUTED_ALPHA);
+			} else {
+				outline = ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm();
+			}
+			fill = ARDOUR_UI::config()->get_canvasvar_SelectedWaveFormFill();
 		} else {
-                        if (_region->muted()) {
-                                outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), MUTED_ALPHA);
-                        } else {
-                                outline = ARDOUR_UI::config()->get_canvasvar_WaveForm();
-                        }
-                        fill = ARDOUR_UI::config()->get_canvasvar_WaveFormFill();
+			if (_recregion) {
+				outline = ARDOUR_UI::config()->get_canvasvar_RecWaveForm();
+				fill = ARDOUR_UI::config()->get_canvasvar_RecWaveFormFill();
+			} else {
+				if (_region->muted()) {
+					outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), MUTED_ALPHA);
+				} else {
+					outline = ARDOUR_UI::config()->get_canvasvar_WaveForm();
+				}
+				fill = ARDOUR_UI::config()->get_canvasvar_WaveFormFill();
+			}
 		}
 	}
-
-	clip = ARDOUR_UI::config()->get_canvasvar_WaveFormClip();
-	zero = ARDOUR_UI::config()->get_canvasvar_ZeroLine();
-
-        for (vector<ArdourCanvas::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
-		(*w)->set_outline_color (outline);
-		(*w)->set_fill_color (fill);
-		(*w)->set_clip_color (clip);
-		(*w)->set_zero_color (zero);
-	}
+		
+	wave->set_fill_color (fill);
+	wave->set_outline_color (outline);
+	wave->set_clip_color (ARDOUR_UI::config()->get_canvasvar_WaveFormClip());
+	wave->set_zero_color (ARDOUR_UI::config()->get_canvasvar_ZeroLine());
 }
 
 void

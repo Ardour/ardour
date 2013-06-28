@@ -801,7 +801,7 @@ TimeAxisViewItem::get_fill_color () const
 			f = ARDOUR_UI::config()->get_canvasvar_RecordingRect();
 		} else {
 
-			if (high_enough_for_name && !Config->get_color_regions_using_track_color()) {
+			if (high_enough_for_name && !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
 				f = ARDOUR_UI::config()->get_canvasvar_FrameBase();
 			} else {
 				f = fill_color;
@@ -1094,7 +1094,7 @@ void
 TimeAxisViewItem::parameter_changed (string p)
 {
 	if (p == "color-regions-using-track-color") {
-		set_frame_color ();
+		set_colors ();
 	} else if (p == "timeline-item-gradient-depth") {
 		set_frame_gradient ();
 	}
