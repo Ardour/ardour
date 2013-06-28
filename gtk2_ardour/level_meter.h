@@ -65,7 +65,7 @@ class LevelMeter : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void update_meters_falloff ();
 	void clear_meters ();
 	void hide_meters ();
-	void setup_meters (int len=0, int width=3);
+	void setup_meters (int len=0, int width=3, int thin=2);
 
 	/** Emitted in the GUI thread when a button is pressed over the meter */
 	PBD::Signal1<bool, GdkEventButton *> ButtonPress;
@@ -91,7 +91,7 @@ class LevelMeter : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	guint16                regular_meter_width;
 	int                    meter_length;
-	static const guint16   thin_meter_width = 2;
+	guint16                thin_meter_width;
 	std::vector<MeterInfo> meters;
 	float                  max_peak;
 

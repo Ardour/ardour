@@ -51,6 +51,7 @@ using namespace std;
 LevelMeter::LevelMeter (Session* s)
 	: _meter (0)
 	, meter_length (0)
+	, thin_meter_width(2)
 {
 	set_session (s);
 	set_spacing (1);
@@ -132,7 +133,7 @@ void
 LevelMeter::configuration_changed (ChanCount /*in*/, ChanCount /*out*/)
 {
 	color_changed = true;
-	setup_meters (meter_length, regular_meter_width);
+	setup_meters (meter_length, regular_meter_width, thin_meter_width);
 }
 
 void
@@ -147,7 +148,7 @@ LevelMeter::hide_all_meters ()
 }
 
 void
-LevelMeter::setup_meters (int len, int initial_width)
+LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 {
 	hide_all_meters ();
 
@@ -158,6 +159,7 @@ LevelMeter::setup_meters (int len, int initial_width)
 	int32_t nmidi = _meter->input_streams().n_midi();
 	uint32_t nmeters = _meter->input_streams().n_total();
 	regular_meter_width = initial_width;
+	thin_meter_width = thin_width;
 	meter_length = len;
 
 	guint16 width;
