@@ -44,6 +44,7 @@ using namespace ArdourCanvas;
 double WaveView::_global_gradient_depth = 0.6;
 bool WaveView::_global_logscaled = false;
 WaveView::Shape WaveView::_global_shape = WaveView::Normal;
+bool WaveView::_global_show_waveform_clipping = true;
 
 PBD::Signal0<void> WaveView::VisualPropertiesChanged;
 
@@ -177,7 +178,18 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 	Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (_image);
 
 	boost::scoped_array<LineTips> tips (new LineTips[n_peaks]);
-	const double clip_level = 1.0;
+
+	/* Clip level nominally set to -0.9dBFS to account for inter-sample
+	   interpolation possibly clipping (value may be too low).
+
+	   We adjust by the region's own gain (but note: not by any gain
+	   automation or its gain envelope) so that clip indicators are closer
+	   to providing data about on-disk data. This multiplication is
+	   needed because the data we get from AudioRegion::read_peaks()
+	   has been scaled by scale_amplitude() already.
+	*/
+
+	const double clip_level = 0.98853 * _region->scale_amplitude();
 
 	if (_shape == WaveView::Rectified) {
 
@@ -328,39 +340,42 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 	 * modelled on pyramix, except that we add clipping indicators.
 	 */
 
-	context->set_source_rgba (0, 0, 0, 1.0);
-
-	/* the height of the clip-indicator should be at most 7 pixels,
-	   or 5% of the height of the waveview item.
-	*/
-	const double clip_height = min (7.0, ceil (_height * 0.05));
-
-	for (int i = 0; i < n_peaks; ++i) {
-		context->move_to (i, tips[i].top);
-
-		bool show_top_clip = (_shape == WaveView::Rectified && (tips[i].clip_max || tips[i].clip_min)) ||
-			tips[i].clip_max;
-
-		if (show_top_clip) {
-			context->set_source_rgba (1.0, 0, 0, 1.0);
-			context->rel_line_to (0, clip_height);
-			context->stroke ();
-			context->set_source_rgba (0.0, 0, 0, 1.0);
-		} else {
-			context->rel_line_to (0, 1.0);
-			context->stroke ();
-		}
-
-		if (_shape != WaveView::Rectified) {
-			context->move_to (i, tips[i].bot);
-			if (tips[i].clip_min) {
+	if (_global_show_waveform_clipping) {
+		
+		context->set_source_rgba (0, 0, 0, 1.0);
+		
+		/* the height of the clip-indicator should be at most 7 pixels,
+		   or 5% of the height of the waveview item.
+		*/
+		const double clip_height = min (7.0, ceil (_height * 0.05));
+		
+		for (int i = 0; i < n_peaks; ++i) {
+			context->move_to (i, tips[i].top);
+			
+			bool show_top_clip = (_shape == WaveView::Rectified && (tips[i].clip_max || tips[i].clip_min)) ||
+				tips[i].clip_max;
+			
+			if (show_top_clip) {
 				context->set_source_rgba (1.0, 0, 0, 1.0);
-				context->rel_line_to (0, -clip_height);
+				context->rel_line_to (0, clip_height);
 				context->stroke ();
 				context->set_source_rgba (0.0, 0, 0, 1.0);
 			} else {
-				context->rel_line_to (0, -1.0);
+				context->rel_line_to (0, 1.0);
 				context->stroke ();
+			}
+
+			if (_shape != WaveView::Rectified) {
+				context->move_to (i, tips[i].bot);
+				if (tips[i].clip_min) {
+					context->set_source_rgba (1.0, 0, 0, 1.0);
+					context->rel_line_to (0, -clip_height);
+					context->stroke ();
+					context->set_source_rgba (0.0, 0, 0, 1.0);
+				} else {
+					context->rel_line_to (0, -1.0);
+					context->stroke ();
+				}
 			}
 		}
 	}
@@ -659,6 +674,15 @@ WaveView::set_global_gradient_depth (double depth)
 {
 	if (_global_gradient_depth != depth) {
 		_global_gradient_depth = depth;
+		VisualPropertiesChanged (); /* EMIT SIGNAL */
+	}
+}
+
+void
+WaveView::set_global_show_waveform_clipping (bool yn)
+{
+	if (_global_show_waveform_clipping != yn) {
+		_global_show_waveform_clipping = yn;
 		VisualPropertiesChanged (); /* EMIT SIGNAL */
 	}
 }

@@ -233,7 +233,6 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	setup_waveform_visibility ();
 	setup_waveform_shape ();
-	setup_waveform_scale ();
 
 	if (frame_handle_start) {
 		frame_handle_start->raise_to_top ();
@@ -1323,6 +1322,12 @@ AudioRegionView::setup_waveform_scale ()
 	WaveView::set_global_logscaled (Config->get_waveform_scale() == Logarithmic);
 }
 
+void
+AudioRegionView::setup_waveform_clipping ()
+{
+	WaveView::set_global_show_waveform_clipping (ARDOUR_UI::config()->get_show_waveform_clipping());
+}
+
 GhostRegion*
 AudioRegionView::add_ghost (TimeAxisView& tv)
 {
@@ -1433,46 +1438,38 @@ AudioRegionView::set_one_waveform_color (ArdourCanvas::WaveView* wave)
 {
 	ArdourCanvas::Color fill;
 	ArdourCanvas::Color outline;
+	
+	if (_selected) {
+		if (_region->muted()) {
+			outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm(), MUTED_ALPHA);
+		} else {
+			outline = ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm();
+		}
+		fill = ARDOUR_UI::config()->get_canvasvar_SelectedWaveFormFill();
+	} else {
+		if (_recregion) {
+			outline = ARDOUR_UI::config()->get_canvasvar_RecWaveForm();
+			fill = ARDOUR_UI::config()->get_canvasvar_RecWaveFormFill();
+		} else {
+			if (_region->muted()) {
+				outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), MUTED_ALPHA);
+			} else {
+				outline = ARDOUR_UI::config()->get_canvasvar_WaveForm();
+			}
+			fill = ARDOUR_UI::config()->get_canvasvar_WaveFormFill();
+		}
+	}
 
 	if (ARDOUR_UI::config()->get_color_regions_using_track_color()) {
 
-		/* wave color is a saturated, whiter version of the frame's
-		 * fill color 
+		/* just use a slightly transparent version of the selected
+		 * color so that some of the track color bleeds through
 		 */
 
-		ArdourCanvas::Color c = frame->fill_color ();
-		double h, s, v;
-		ArdourCanvas::color_to_hsv (c, h, s, v);
+		double r, g, b, a;
+		ArdourCanvas::color_to_rgba (fill, r, g, b, a);
+		fill = ArdourCanvas::rgba_to_color (r, g, b, 0.85); /* magic number, not user controllable */
 		
-		/* full saturate */
-		s = 0.45;
-		/* head towards white */
-		v = 0.97;
-		
-		fill = ArdourCanvas::hsv_to_color (h, s, v, _region->muted() ? MUTED_ALPHA : 1.0);
-		
-	} else {
-
-		if (_selected) {
-			if (_region->muted()) {
-				outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm(), MUTED_ALPHA);
-			} else {
-				outline = ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm();
-			}
-			fill = ARDOUR_UI::config()->get_canvasvar_SelectedWaveFormFill();
-		} else {
-			if (_recregion) {
-				outline = ARDOUR_UI::config()->get_canvasvar_RecWaveForm();
-				fill = ARDOUR_UI::config()->get_canvasvar_RecWaveFormFill();
-			} else {
-				if (_region->muted()) {
-					outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), MUTED_ALPHA);
-				} else {
-					outline = ARDOUR_UI::config()->get_canvasvar_WaveForm();
-				}
-				fill = ARDOUR_UI::config()->get_canvasvar_WaveFormFill();
-			}
-		}
 	}
 		
 	wave->set_fill_color (fill);
@@ -1688,5 +1685,7 @@ AudioRegionView::parameter_changed (string const & p)
 		setup_waveform_scale ();
 	} else if (p == "waveform-shape") {
 		setup_waveform_shape ();
+	} else if (p == "show-waveform-clipping") {
+		setup_waveform_clipping ();
 	}
 }

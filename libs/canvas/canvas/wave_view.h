@@ -106,6 +106,7 @@ public:
         static void set_global_gradient_depth (double);
         static void set_global_logscaled (bool);
         static void set_global_shape (Shape);
+        static void set_global_show_waveform_clipping (bool);
     
         static double  global_gradient_depth()  { return _global_gradient_depth; }
         static bool    global_logscaled()  { return _global_logscaled; }
@@ -161,6 +162,7 @@ private:
         static double _global_gradient_depth;
         static bool   _global_logscaled;
         static Shape  _global_shape;
+        static bool   _global_show_waveform_clipping;
 
         static PBD::Signal0<void> VisualPropertiesChanged;
 

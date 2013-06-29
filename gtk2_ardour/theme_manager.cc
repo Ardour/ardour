@@ -60,6 +60,7 @@ ThemeManager::ThemeManager()
 	, reset_button (_("Restore Defaults"))
 	, flat_buttons (_("Draw \"flat\" buttons"))
 	, region_color_button (_("Color regions using their track's color"))
+	, show_clipping_button (_("Show waveform clipping"))
 	, waveform_gradient_depth (0, 1.0, 0.05)
 	, waveform_gradient_depth_label (_("Waveforms color gradient depth"))
 	, timeline_item_gradient_depth (0, 1.0, 0.05)
@@ -104,6 +105,7 @@ ThemeManager::ThemeManager()
 #endif
 	vbox->pack_start (flat_buttons, PACK_SHRINK);
 	vbox->pack_start (region_color_button, PACK_SHRINK);
+	vbox->pack_start (show_clipping_button, PACK_SHRINK);
 
 	Gtk::HBox* hbox = Gtk::manage (new Gtk::HBox());
 	hbox->set_spacing (6);
@@ -133,6 +135,7 @@ ThemeManager::ThemeManager()
 
 	flat_buttons.set_active (ARDOUR_UI::config()->get_flat_buttons());
 	region_color_button.set_active (ARDOUR_UI::config()->get_color_regions_using_track_color());
+	show_clipping_button.set_active (ARDOUR_UI::config()->get_show_waveform_clipping());
 
 	color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_ACCEPT));
 	color_dialog.get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_CANCEL));
@@ -141,6 +144,7 @@ ThemeManager::ThemeManager()
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &ThemeManager::reset_canvas_colors));
 	flat_buttons.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_flat_buttons_toggled));
 	region_color_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_region_color_toggled));
+	show_clipping_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_show_clip_toggled));
 	waveform_gradient_depth.signal_value_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_waveform_gradient_depth_change));
 	timeline_item_gradient_depth.signal_value_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_timeline_item_gradient_depth_change));
 	all_dialogs.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_all_dialogs_toggled));
@@ -289,6 +293,13 @@ void
 ThemeManager::on_region_color_toggled ()
 {
 	ARDOUR_UI::config()->set_color_regions_using_track_color (region_color_button.get_active());
+	ARDOUR_UI::config()->set_dirty ();
+}
+
+void
+ThemeManager::on_show_clip_toggled ()
+{
+	ARDOUR_UI::config()->set_show_waveform_clipping (show_clipping_button.get_active());
 	ARDOUR_UI::config()->set_dirty ();
 }
 

@@ -23,4 +23,5 @@ UI_CONFIG_VARIABLE(float, waveform_gradient_depth, "waveform-gradient-depth", 0.
 UI_CONFIG_VARIABLE(float, timeline_item_gradient_depth, "timeline-item-gradient-depth", 1.3)
 UI_CONFIG_VARIABLE(bool, all_floating_windows_are_dialogs, "all-floating-windows-are-dialogs", false)
 UI_CONFIG_VARIABLE (bool, color_regions_using_track_color, "color-regions-using-track-color", false)
+UI_CONFIG_VARIABLE (bool, show_waveform_clipping, "show-waveform-clipping", true)
 
