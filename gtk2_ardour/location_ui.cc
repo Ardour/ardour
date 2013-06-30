@@ -1162,6 +1162,7 @@ LocationUIWindow::set_session (Session *s)
 {
 	ArdourWindow::set_session (s);
 	_ui.set_session (s);
+	_ui.show_all ();
 }
 
 void
