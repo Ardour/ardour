@@ -333,7 +333,7 @@ GainMeterBase::reset_peak_display ()
 	_meter->reset_max();
 	level_meter->clear_meters();
 	max_peak = -INFINITY;
-	peak_display.set_label (_("-Inf"));
+	peak_display.set_label (_("-inf"));
 	peak_display.set_name ("MixerStripPeakDisplay");
 }
 
