@@ -333,7 +333,7 @@ GainMeterBase::reset_peak_display ()
 	_meter->reset_max();
 	level_meter->clear_meters();
 	max_peak = -INFINITY;
-	peak_display.set_label (_("-Inf"));
+	peak_display.set_label (_("-inf"));
 	peak_display.set_name ("MixerStripPeakDisplay");
 }
 
@@ -1163,7 +1163,8 @@ GainMeter::meter_configuration_changed (ChanCount c)
 		}
 	}
 
-	if (boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
+	if (_route
+			&& boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
 			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0
 			) {
 		if (_route->active()) {
@@ -1173,20 +1174,20 @@ GainMeter::meter_configuration_changed (ChanCount c)
 		}
 	}
 	else if (type == (1 << DataType::AUDIO)) {
-		if (_route->active()) {
+		if (!_route || _route->active()) {
 			set_meter_strip_name ("AudioTrackMetrics");
 		} else {
 			set_meter_strip_name ("AudioTrackMetricsInactive");
 		}
 	}
 	else if (type == (1 << DataType::MIDI)) {
-		if (_route->active()) {
+		if (!_route || _route->active()) {
 			set_meter_strip_name ("MidiTrackMetrics");
 		} else {
 			set_meter_strip_name ("MidiTrackMetricsInactive");
 		}
 	} else {
-		if (_route->active()) {
+		if (!_route || _route->active()) {
 			set_meter_strip_name ("AudioMidiTrackMetrics");
 		} else {
 			set_meter_strip_name ("AudioMidiTrackMetricsInactive");

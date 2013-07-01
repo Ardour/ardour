@@ -106,6 +106,7 @@ ARDOUR_UI::set_session (Session *s)
 	big_clock->set_session (s);
 	time_info_box->set_session (s);
 	video_timeline->set_session (s);
+	location_ui->set_session (s);
 
 	/* sensitize menu bar options that are now valid */
 
