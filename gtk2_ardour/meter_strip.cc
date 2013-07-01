@@ -33,6 +33,7 @@
 #include <gtkmm2ext/utils.h>
 
 #include "ardour_ui.h"
+#include "global_signals.h"
 #include "logmeter.h"
 #include "gui_thread.h"
 #include "ardour_window.h"
@@ -151,6 +152,8 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &MeterStrip::peak_button_release), false);
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
+	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
+	DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
 }
 
 MeterStrip::~MeterStrip ()
@@ -231,6 +234,13 @@ void
 MeterStrip::on_theme_changed()
 {
 	style_changed = true;
+
+	// TODO save meter_width as private var?!
+	int meter_width = 6;
+	if (_route->shared_peak_meter()->input_streams().n_total() == 1) {
+		meter_width = 12;
+	}
+	level_meter->setup_meters (350, meter_width, 6);
 }
 
 void
