@@ -338,9 +338,9 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	pixrect.height = top_of_meter;
 	pixrect.y = pixheight - top_of_meter;
 
-	background.x = 1;
+	background.x = 0;
 	background.y = 0;
-	background.width = pixrect.width;
+	background.width = pixrect.width + 2;
 	background.height = pixheight - top_of_meter;
 
 	if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
