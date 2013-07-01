@@ -206,8 +206,8 @@ private:
 	int write (uint8_t* cmd, uint32_t timeout_override = 0);
 	int write_noretry (uint8_t* cmd, uint32_t timeout_override = 0);
 	int close ();
-	int save_config(char *name = "default");
-	int load_config(char *name = "default");
+	int save_config(const char *name = "default");
+	int load_config(const char *name = "default");
 	int save(char *name);
 	int load(char *name);
         void print (int row, int col, const char* text);
