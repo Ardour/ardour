@@ -171,7 +171,7 @@ Item::window_to_item (ArdourCanvas::Duple const & d) const
 	return _canvas->window_to_canvas (canvas_to_item (d));
 }
 
-Rect
+ArdourCanvas::Rect
 Item::item_to_window (ArdourCanvas::Rect const & r) const
 {
 	return _canvas->canvas_to_window (item_to_canvas (r));

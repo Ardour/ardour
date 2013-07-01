@@ -1392,7 +1392,7 @@ Editor::temporal_zoom (framecnt_t fpp)
 	// segfaults for lack of memory. If somebody decides this is not high enough I
 	// believe it can be raisen to higher values but some limit must be in place.
 
-	nfpp = min (fpp, 8589934592);
+	nfpp = min (fpp, (framecnt_t) 8589934592);
 	nfpp = max ((framecnt_t) 1, fpp);
 
 	new_page_size = (framepos_t) floor (_visible_canvas_width * nfpp);
