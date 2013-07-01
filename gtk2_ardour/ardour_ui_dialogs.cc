@@ -212,6 +212,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	if (hide_stuff) {
 		editor->hide ();
 		mixer->hide ();
+		meterbridge->hide ();
 		theme_manager->hide ();
 		audio_port_matrix->hide();
 		midi_port_matrix->hide();

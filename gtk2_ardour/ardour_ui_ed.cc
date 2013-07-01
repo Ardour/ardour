@@ -603,7 +603,7 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 void
 ARDOUR_UI::save_ardour_state ()
 {
-	if (!keyboard || !mixer || !editor) {
+	if (!keyboard || !mixer || !editor || !meterbridge) {
 		return;
 	}
 

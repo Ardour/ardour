@@ -214,6 +214,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	editor = 0;
 	mixer = 0;
+	meterbridge = 0;
 	editor = 0;
 	engine = 0;
 	_session_is_new = false;
@@ -510,6 +511,7 @@ ARDOUR_UI::~ARDOUR_UI ()
 	delete keyboard;
 	delete editor;
 	delete mixer;
+	delete meterbridge;
 
 	stop_video_server();
 }
