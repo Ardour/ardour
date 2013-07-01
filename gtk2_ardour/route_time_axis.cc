@@ -182,7 +182,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		gm.set_fader_name ("AudioBusFader");
 	}
 	
-	controls_hbox.pack_start(gm.get_level_meter(), false, false);
+	controls_hbox.pack_start(gm.get_level_meter(), false, false, 3);
 	_route->meter_change.connect (*this, invalidator (*this), bind (&RouteTimeAxisView::meter_changed, this), gui_context());
 	_route->input()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
 	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
