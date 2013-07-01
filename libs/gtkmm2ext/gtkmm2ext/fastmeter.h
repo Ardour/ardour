@@ -71,6 +71,7 @@ private:
 	float current_level;
 	float current_peak;
 	float current_user_level;
+	bool resized;
 
 	bool vertical_expose (GdkEventExpose*);
 	bool horizontal_expose (GdkEventExpose*);
