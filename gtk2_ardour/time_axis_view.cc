@@ -159,7 +159,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_hbox.pack_start (controls_ebox, true, true);
 	controls_hbox.show ();
 
-	time_axis_vbox.pack_start (controls_hbox, true, true);
+	time_axis_vbox.pack_start (controls_hbox, true, true, 2);
 	time_axis_vbox.pack_end (*separator, false, false);
 	time_axis_vbox.show();
 
