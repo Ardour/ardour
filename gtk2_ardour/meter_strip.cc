@@ -72,15 +72,19 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	level_meter->set_meter (_route->shared_peak_meter().get());
 	level_meter->clear_meters();
 	level_meter->setup_meters (350, meter_width, 6);
+#ifdef WITH_METRICS
 	level_meter->pack_start (meter_metric_area, false, false);
+#endif
 
 	Gtk::Alignment *meter_align = Gtk::manage (new Gtk::Alignment());
 	meter_align->set(0.5, 0.5, 0.0, 1.0);
 	meter_align->add(*level_meter);
 
+#ifdef WITH_METRICS
 	meterbox.pack_start(meter_ticks1_area, true, false);
 	meterbox.pack_start(*meter_align, true, true);
 	meterbox.pack_start(meter_ticks2_area, true, false);
+#endif
 
 	// peak display
 	peak_display.set_name ("MixerStripPeakDisplay");
@@ -104,16 +108,22 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	btnbox.set_size_request(-1, 16);
 
 	pack_start (peakbx, false, false);
+#ifdef WITH_METRICS
 	pack_start (meterbox, true, true);
+#else
+	pack_start (*meter_align, true, true);
+#endif
 	pack_start (btnbox, false, false);
 	pack_start (label, false, false);
 
 	peak_display.show();
 	peakbx.show();
+#ifdef WITH_METRICS
 	meter_ticks1_area.hide();
 	meter_ticks2_area.show();
 	meter_metric_area.show();
 	meterbox.show();
+#endif
 	level_meter->show();
 	meter_align->show();
 	btnbox.show();
@@ -124,6 +134,7 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 			);
 	meter_configuration_changed (_route->shared_peak_meter()->input_streams ());
 
+#ifdef WITH_METRICS
 	set_size_request_to_display_given_text (meter_metric_area, "-8888", 1, 0);
 	meter_metric_area.signal_expose_event().connect (
 			sigc::mem_fun(*this, &MeterStrip::meter_metrics_expose));
@@ -132,6 +143,7 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	meter_ticks2_area.set_size_request(4,-1);
 	meter_ticks1_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks1_expose));
 	meter_ticks2_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks2_expose));
+#endif
 
 	_route->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&MeterStrip::self_delete, this), gui_context());
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&MeterStrip::strip_property_changed, this, _1), gui_context());
@@ -204,6 +216,7 @@ MeterStrip::fast_update ()
 void
 MeterStrip::display_metrics (bool show)
 {
+#ifdef WITH_METRICS
 	if (show) {
 		meter_metric_area.show();
 		meter_ticks1_area.hide();
@@ -211,6 +224,7 @@ MeterStrip::display_metrics (bool show)
 		meter_metric_area.hide();
 		meter_ticks1_area.show();
 	}
+#endif
 }
 
 void
@@ -232,6 +246,7 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 		}
 	}
 
+#ifdef WITH_METRICS
 	// TODO draw Inactive routes or busses with different styles
 	if (boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
 			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0
@@ -254,8 +269,9 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 		meter_ticks1_area.set_name ("AudioMidiTrackMetrics");
 		meter_ticks2_area.set_name ("AudioMidiTrackMetrics");
 	}
-	style_changed = true;
 	meter_metric_area.queue_draw ();
+#endif
+	style_changed = true;
 }
 
 void
