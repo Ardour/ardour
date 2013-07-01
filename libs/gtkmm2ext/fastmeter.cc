@@ -56,7 +56,7 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len, in
 	_clr2 = clr2;
 	_clr3 = clr3;
 
-	_bgc0 = 0x000000ff;
+	_bgc0 = 0x111111ff;
 	_bgc1 = 0x333333ff;
 	_bgc2 = 0x333333ff;
 	_bgc3 = 0x444444ff;
@@ -93,7 +93,7 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len, in
 	}
 
 	request_width = pixrect.width + 2;
-	request_height= pixrect.height;
+	request_height= pixrect.height + 2;
 }
 
 Cairo::RefPtr<Cairo::Pattern>
@@ -233,6 +233,7 @@ FastMeter::on_size_request (GtkRequisition* req)
 		req->height = request_height;
 		req->height = max(req->height, min_pattern_metric_size);
 		req->height = min(req->height, max_pattern_metric_size);
+		req->height += 2;
 
 		req->width  = request_width;
 
@@ -257,8 +258,8 @@ FastMeter::on_size_allocate (Gtk::Allocation &alloc)
 		}
 
 		int h = alloc.get_height();
-		h = max (h, min_pattern_metric_size);
-		h = min (h, max_pattern_metric_size);
+		h = max (h, min_pattern_metric_size + 2);
+		h = min (h, max_pattern_metric_size + 2);
 
 		if (h != alloc.get_height()) {
 			alloc.set_height (h);
@@ -269,7 +270,7 @@ FastMeter::on_size_allocate (Gtk::Allocation &alloc)
 				request_width, h, _clr0, _clr1, _clr2, _clr3);
 			bgpattern = request_vertical_meter (
 				request_width, h, _bgc0, _bgc1, _bgc2, _bgc3);
-			pixheight = h;
+			pixheight = h - 2;
 			pixwidth  = request_width - 2;
 		}
 
@@ -323,8 +324,21 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 
 	if (resized) {
 		cairo_set_source_rgb (cr, 0, 0, 0); // black
-		cairo_rectangle (cr, 0, 0, pixrect.width + 2, pixheight);
+#if 1 // fake rounded corners..
+		cairo_set_line_width(cr, 1.0);
+		cairo_move_to  (cr, 1, 0);
+		cairo_line_to  (cr, 1 + pixrect.width, 0);
+		cairo_move_to  (cr, 2 + pixrect.width, 1);
+		cairo_line_to  (cr, 2 + pixrect.width, 1 + pixheight);
+		cairo_move_to  (cr, 1 + pixrect.width, 2 + pixheight);
+		cairo_line_to  (cr, 1,                 2 + pixheight);
+		cairo_move_to  (cr, 0,                 1 + pixheight);
+		cairo_line_to  (cr, 0,                 1);
+		cairo_stroke (cr);
+#else
+		cairo_rectangle (cr, 0, 0, pixrect.width + 2, pixheight + 2);
 		cairo_fill (cr);
+#endif
 	}
 
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
@@ -336,11 +350,11 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	 */
 
 	pixrect.height = top_of_meter;
-	pixrect.y = pixheight - top_of_meter;
+	pixrect.y = 1 + pixheight - top_of_meter;
 
-	background.x = 0;
-	background.y = 0;
-	background.width = pixrect.width + 2;
+	background.x = 1;
+	background.y = 1;
+	background.width = pixrect.width;
 	background.height = pixheight - top_of_meter;
 
 	if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
@@ -361,7 +375,7 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	if (hold_state) {
 		last_peak_rect.x = 1;
 		last_peak_rect.width = pixwidth;
-		last_peak_rect.y = pixheight - (gint) floor (pixheight * current_peak);
+		last_peak_rect.y = 1 + pixheight - (gint) floor (pixheight * current_peak);
 		last_peak_rect.height = min(3, pixheight - last_peak_rect.y);
 
 		cairo_set_source (cr, fgpattern->cobj());
@@ -481,7 +495,7 @@ FastMeter::queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>& win, float ol
 	rect.x = 1;
 	rect.width = pixwidth;
 	rect.height = new_top;
-	rect.y = pixheight - new_top;
+	rect.y = 1 + pixheight - new_top;
 
 	if (current_level > old_level) {
 		/* colored/pixbuf got larger, just draw the new section */
