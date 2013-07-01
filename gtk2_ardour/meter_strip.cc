@@ -72,7 +72,7 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	level_meter = new LevelMeter(sess);
 	level_meter->set_meter (_route->shared_peak_meter().get());
 	level_meter->clear_meters();
-	level_meter->setup_meters (350, meter_width, 6);
+	level_meter->setup_meters (400, meter_width, 6);
 #ifdef WITH_METRICS
 	level_meter->pack_start (meter_metric_area, false, false);
 #endif
@@ -101,8 +101,8 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	label.set_text(_route->name().c_str());
 	label.set_name("MeterbridgeLabel");
 	label.set_angle(90.0);
-	label.set_alignment(0.5, 0.0);
-	label.set_size_request(12, 36);
+	label.set_alignment(0.5, 1.0);
+	label.set_size_request(12, 52);
 
 	// rec-enable button
 	btnbox.pack_start(*rec_enable_button, true, false);
@@ -115,7 +115,7 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	pack_start (*meter_align, true, true);
 #endif
 	pack_start (btnbox, false, false);
-	pack_start (label, false, false);
+	pack_start (label, false, false, 2);
 
 	peak_display.show();
 	peakbx.show();
@@ -240,7 +240,7 @@ MeterStrip::on_theme_changed()
 	if (_route->shared_peak_meter()->input_streams().n_total() == 1) {
 		meter_width = 12;
 	}
-	level_meter->setup_meters (350, meter_width, 6);
+	level_meter->setup_meters (400, meter_width, 6);
 }
 
 void
