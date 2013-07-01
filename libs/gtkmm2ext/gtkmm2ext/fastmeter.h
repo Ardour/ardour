@@ -56,10 +56,12 @@ protected:
 
 private:
 
-	Cairo::RefPtr<Cairo::Pattern> pattern;
+	Cairo::RefPtr<Cairo::Pattern> fgpattern;
+	Cairo::RefPtr<Cairo::Pattern> bgpattern;
 	gint pixheight;
 	gint pixwidth;
 	int _clr0, _clr1, _clr2, _clr3;
+	int _bgc0, _bgc1, _bgc2, _bgc3;
 
 	Orientation orientation;
 	GdkRectangle pixrect;

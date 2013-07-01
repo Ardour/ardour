@@ -56,6 +56,11 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len, in
 	_clr2 = clr2;
 	_clr3 = clr3;
 
+	_bgc0 = 0x000000ff;
+	_bgc1 = 0x333333ff;
+	_bgc2 = 0x333333ff;
+	_bgc3 = 0x444444ff;
+
 	set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 
 	pixrect.x = 1;
@@ -65,14 +70,16 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len, in
 		if (!len) {
 			len = 250;
 		}
-		pattern = request_vertical_meter(dimen, len, clr0, clr1, clr2, clr3);
+		fgpattern = request_vertical_meter(dimen, len, clr0, clr1, clr2, clr3);
+		bgpattern = request_vertical_meter(dimen, len, _bgc0, _bgc1, _bgc2, _bgc3);
 		pixheight = len;
 		pixwidth = dimen;
 	} else {
 		if (!len) {
 			len = 186; // interesting size, eh?
 		}
-		pattern = request_horizontal_meter(len, dimen, clr0, clr1, clr2, clr3);
+		fgpattern = request_horizontal_meter(len, dimen, clr0, clr1, clr2, clr3);
+		bgpattern = request_horizontal_meter(len, dimen, _bgc0, _bgc1, _bgc2, _bgc3);
 		pixheight = dimen;
 		pixwidth = len;
 	}
@@ -258,8 +265,10 @@ FastMeter::on_size_allocate (Gtk::Allocation &alloc)
 		}
 
 		if (pixheight != h) {
-			pattern = request_vertical_meter (
+			fgpattern = request_vertical_meter (
 				request_width, h, _clr0, _clr1, _clr2, _clr3);
+			bgpattern = request_vertical_meter (
+				request_width, h, _bgc0, _bgc1, _bgc2, _bgc3);
 			pixheight = h;
 			pixwidth  = request_width - 2;
 		}
@@ -279,8 +288,10 @@ FastMeter::on_size_allocate (Gtk::Allocation &alloc)
 		}
 
 		if (pixwidth != w) {
-			pattern = request_horizontal_meter (
+			fgpattern = request_horizontal_meter (
 				w, request_height, _clr0, _clr1, _clr2, _clr3);
+			bgpattern = request_horizontal_meter (
+				w, request_height, _bgc0, _bgc1, _bgc2, _bgc3);
 			pixheight = request_height;
 			pixwidth  = w;
 		}
@@ -327,20 +338,20 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	pixrect.height = top_of_meter;
 	pixrect.y = pixheight - top_of_meter;
 
-	background.x = 0;
+	background.x = 1;
 	background.y = 0;
-	background.width = pixrect.width + 2;
+	background.width = pixrect.width;
 	background.height = pixheight - top_of_meter;
 
 	if (gdk_rectangle_intersect (&background, &ev->area, &intersection)) {
-		cairo_set_source_rgb (cr, 0, 0, 0); // black
+		cairo_set_source (cr, bgpattern->cobj());
 		cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
 		cairo_fill (cr);
 	}
 
 	if (gdk_rectangle_intersect (&pixrect, &ev->area, &intersection)) {
 		// draw the part of the meter image that we need. the area we draw is bounded "in reverse" (top->bottom)
-		cairo_set_source (cr, pattern->cobj());
+		cairo_set_source (cr, fgpattern->cobj());
 		cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
 		cairo_fill (cr);
 	}
@@ -353,7 +364,7 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 		last_peak_rect.y = pixheight - (gint) floor (pixheight * current_peak);
 		last_peak_rect.height = min(3, pixheight - last_peak_rect.y);
 
-		cairo_set_source (cr, pattern->cobj());
+		cairo_set_source (cr, fgpattern->cobj());
 		cairo_rectangle (cr, 1, last_peak_rect.y, pixwidth, last_peak_rect.height);
 		cairo_fill (cr);
 
@@ -397,8 +408,8 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 		// draw the part of the meter image that we need. the area we draw is bounded "in reverse" (top->bottom)
 		cairo_matrix_t m;
 		cairo_matrix_init_translate (&m, -intersection.x, -intersection.y);
-		cairo_pattern_set_matrix (pattern->cobj(), &m);
-		cairo_set_source (cr, pattern->cobj());
+		cairo_pattern_set_matrix (fgpattern->cobj(), &m);
+		cairo_set_source (cr, fgpattern->cobj());
 		cairo_rectangle (cr, intersection.x, intersection.y, pixrect.width, intersection.height);
 		cairo_fill (cr);
 	}
