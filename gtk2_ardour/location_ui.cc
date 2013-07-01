@@ -307,6 +307,10 @@ LocationEditRow::set_location (Location *loc)
 		end_clock.show();
 		length_clock.show();
 
+		if (location->is_cd_marker()) {
+			show_cd_track_details ();
+		}
+
 		ARDOUR_UI::instance()->set_tip (remove_button, _("Remove this range"));
 		ARDOUR_UI::instance()->set_tip (start_clock, _("Start time - middle click to locate here"));
 		ARDOUR_UI::instance()->set_tip (end_clock, _("End time - middle click to locate here"));
@@ -447,6 +451,34 @@ LocationEditRow::clock_changed (LocationPart part)
 }
 
 void
+LocationEditRow::show_cd_track_details ()
+{
+
+	if (location->cd_info.find("isrc") != location->cd_info.end()) {
+		isrc_entry.set_text(location->cd_info["isrc"]);
+	}
+	if (location->cd_info.find("performer") != location->cd_info.end()) {
+		performer_entry.set_text(location->cd_info["performer"]);
+	}
+	if (location->cd_info.find("composer") != location->cd_info.end()) {
+		composer_entry.set_text(location->cd_info["composer"]);
+	}
+	if (location->cd_info.find("scms") != location->cd_info.end()) {
+		scms_check_button.set_active(true);
+	}
+	if (location->cd_info.find("preemph") != location->cd_info.end()) {
+		preemph_check_button.set_active(true);
+	}
+
+
+	if (!cd_track_details_hbox.get_parent()) {
+		item_table.attach (cd_track_details_hbox, 0, 7, 1, 2, FILL | EXPAND, FILL, 4, 0);
+	}
+	// item_table.resize(2, 7);
+	cd_track_details_hbox.show_all();
+}
+
+void
 LocationEditRow::cd_toggled ()
 {
 	if (i_am_the_modifier || !location) {
@@ -469,27 +501,7 @@ LocationEditRow::cd_toggled ()
 
 	if (location->is_cd_marker() && !(location->is_mark())) {
 
-		if (location->cd_info.find("isrc") != location->cd_info.end()) {
-			isrc_entry.set_text(location->cd_info["isrc"]);
-		}
-		if (location->cd_info.find("performer") != location->cd_info.end()) {
-			performer_entry.set_text(location->cd_info["performer"]);
-		}
-		if (location->cd_info.find("composer") != location->cd_info.end()) {
-			composer_entry.set_text(location->cd_info["composer"]);
-		}
-		if (location->cd_info.find("scms") != location->cd_info.end()) {
-			scms_check_button.set_active(true);
-		}
-		if (location->cd_info.find("preemph") != location->cd_info.end()) {
-			preemph_check_button.set_active(true);
-		}
-
-		if (!cd_track_details_hbox.get_parent()) {
-			item_table.attach (cd_track_details_hbox, 0, 7, 1, 2, FILL | EXPAND, FILL, 4, 0);
-		}
-		// item_table.resize(2, 7);
-		cd_track_details_hbox.show_all();
+		show_cd_track_details ();
 
 	} else if (cd_track_details_hbox.get_parent()){
 
