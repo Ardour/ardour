@@ -148,7 +148,7 @@ Meterbridge::Meterbridge ()
 	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Meterbridge::sync_order_keys, this, _1), gui_context());
 	MeterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Meterbridge::remove_strip, this, _1), gui_context());
 
-	global_hpacker.set_spacing(4);
+	global_hpacker.set_spacing(0);
 	scroller.add (global_hpacker);
 	scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
 	global_vpacker.pack_start (scroller, true, true);

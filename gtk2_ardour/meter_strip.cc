@@ -181,8 +181,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 			);
 	meter_configuration_changed (_route->shared_peak_meter()->input_streams ());
 
-	meter_ticks1_area.set_size_request(3,-1);
-	meter_ticks2_area.set_size_request(3,-1);
+	meter_ticks1_area.set_size_request(4,-1);
+	meter_ticks2_area.set_size_request(4,-1);
 	meter_ticks1_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks1_expose));
 	meter_ticks2_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks2_expose));
 
@@ -674,13 +674,13 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 				fraction = log_meter (j->first);
 				pos = height - (gint) floor (height * fraction);
 				cairo_move_to(cr, 0, pos + .5);
-				cairo_line_to(cr, 3, pos + .5);
+				cairo_line_to(cr, 4, pos + .5);
 				cairo_stroke (cr);
 				break;
 			case DataType::MIDI:
 				fraction = (j->first) / 127.0;
 				pos = height - (gint) floor (height * fraction);
-				cairo_arc(cr, 1.5, pos, (j->second), 0, 2 * M_PI);
+				cairo_arc(cr, 2, pos, (j->second), 0, 2 * M_PI);
 				cairo_fill_preserve(cr);
 				cairo_stroke (cr);
 				break;
