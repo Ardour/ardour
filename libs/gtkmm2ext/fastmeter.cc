@@ -365,7 +365,7 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 		last_peak_rect.x = 1;
 		last_peak_rect.width = pixwidth;
 		last_peak_rect.y = 1 + pixheight - (gint) floor (pixheight * current_peak);
-		last_peak_rect.height = min(3, pixheight - last_peak_rect.y);
+		last_peak_rect.height = min(2, pixheight - last_peak_rect.y);
 
 		cairo_set_source (cr, fgpattern->cobj());
 		cairo_rectangle (cr, 1, last_peak_rect.y, pixwidth, last_peak_rect.height);
