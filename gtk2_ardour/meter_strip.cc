@@ -426,10 +426,12 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 			points.push_back (-50);
 			points.push_back (-40);
 			points.push_back (-30);
+			points.push_back (-25);
 			points.push_back (-20);
 			points.push_back (-18);
+			points.push_back (-15);
 			points.push_back (-10);
-			points.push_back (-6);
+			points.push_back (-5);
 			points.push_back (-3);
 			points.push_back (0);
 			points.push_back (3);
