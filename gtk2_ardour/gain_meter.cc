@@ -286,7 +286,7 @@ void
 GainMeterBase::setup_meters (int len)
 {
 	int meter_width = 5;
-	if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
+	if (_width == Wide && _route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
 		meter_width = 10;
 	}
 	level_meter->setup_meters(len, meter_width);
@@ -847,7 +847,7 @@ GainMeterBase::set_width (Width w, int len)
 {
 	_width = w;
 	int meter_width = 5;
-	if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
+	if (_width == Wide && _route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
 		meter_width = 10;
 	}
 	level_meter->setup_meters(len, meter_width);
