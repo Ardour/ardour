@@ -43,6 +43,7 @@
 #include <gtkmm2ext/utils.h>
 
 #include "ardour/amp.h"
+#include "ardour/meter.h"
 #include "ardour/event_type_map.h"
 #include "ardour/processor.h"
 #include "ardour/profile.h"
@@ -112,9 +113,13 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
 
+	int meter_width = 3;
+	if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
+		meter_width = 6;
+	}
 	gm.set_controls (_route, _route->shared_peak_meter(), _route->amp());
 	gm.get_level_meter().set_no_show_all();
-	gm.get_level_meter().setup_meters(50);
+	gm.get_level_meter().setup_meters(50, meter_width);
 	gm.update_gain_sensitive ();
 
 	string str = gui_property ("height");
@@ -829,9 +834,14 @@ RouteTimeAxisView::show_selection (TimeSelection& ts)
 void
 RouteTimeAxisView::set_height (uint32_t h)
 {
-	int gmlen = h - 5;
+	int gmlen = h - 7;
 	bool height_changed = (height == 0) || (h != height);
-	gm.get_level_meter().setup_meters (gmlen);
+
+	int meter_width = 3;
+	if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
+		meter_width = 6;
+	}
+	gm.get_level_meter().setup_meters (gmlen, meter_width);
 
 	TimeAxisView::set_height (h);
 
@@ -2228,7 +2238,11 @@ void
 RouteTimeAxisView::reset_meter ()
 {
 	if (Config->get_show_track_meters()) {
-		gm.get_level_meter().setup_meters (height-5);
+		int meter_width = 3;
+		if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
+			meter_width = 6;
+		}
+		gm.get_level_meter().setup_meters (height-7, meter_width);
 	} else {
 		hide_meter ();
 	}
