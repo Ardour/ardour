@@ -285,7 +285,11 @@ GainMeter::hide_all_meters ()
 void
 GainMeterBase::setup_meters (int len)
 {
-	level_meter->setup_meters(len, 5);
+	int meter_width = 5;
+	if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
+		meter_width = 10;
+	}
+	level_meter->setup_meters(len, meter_width);
 }
 
 void
@@ -842,7 +846,11 @@ void
 GainMeterBase::set_width (Width w, int len)
 {
 	_width = w;
-	level_meter->setup_meters (len);
+	int meter_width = 5;
+	if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
+		meter_width = 10;
+	}
+	level_meter->setup_meters(len, meter_width);
 }
 
 
