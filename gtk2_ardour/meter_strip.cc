@@ -142,13 +142,15 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 
 	// peak display
 	peak_display.set_name ("MixerStripPeakDisplay");
-	set_size_request_to_display_given_text (peak_display, "-80.g", 2, 6);
 	max_peak = minus_infinity();
-	peak_display.set_label (_("-inf"));
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
+	peak_display.set_size_request(-1, 8);
 
-	peakbx.pack_start(peak_display, true, true);
-	peakbx.set_size_request(-1, 16);
+	Gtk::Alignment *peak_align = Gtk::manage (new Gtk::Alignment());
+	peak_align->set(0.5, 1.0, 0.75, 0.8); // TODO rather add padding 4px left+right (ticks)
+	peak_align->add(peak_display);
+	peakbx.pack_start(*peak_align, true, true);
+	peakbx.set_size_request(-1, 14);
 
 	// add track-name label -- TODO ellipsize
 	label.set_text(_route->name().c_str());
@@ -173,6 +175,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	meterbox.show();
 	level_meter->show();
 	meter_align->show();
+	peak_align->show();
 	btnbox.show();
 	label.show();
 
@@ -239,17 +242,9 @@ MeterStrip::strip_property_changed (const PropertyChange& what_changed)
 void
 MeterStrip::fast_update ()
 {
-	char buf[32];
 	float mpeak = level_meter->update_meters();
 	if (mpeak > max_peak) {
 		max_peak = mpeak;
-		if (mpeak <= -200.0f) {
-			peak_display.set_label (_("-inf"));
-		} else {
-			snprintf (buf, sizeof(buf), "%.1f", mpeak);
-			peak_display.set_label (buf);
-		}
-
 		if (mpeak >= 0.0f) {
 			peak_display.set_name ("MixerStripPeakDisplayPeak");
 		}
@@ -766,7 +761,6 @@ MeterStrip::reset_peak_display ()
 	_route->shared_peak_meter()->reset_max();
 	level_meter->clear_meters();
 	max_peak = -INFINITY;
-	peak_display.set_label (_("-inf"));
 	peak_display.set_name ("MixerStripPeakDisplay");
 }
 
