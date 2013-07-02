@@ -36,7 +36,10 @@ class FastMeter : public Gtk::DrawingArea {
 		Vertical
 	};
 
-	FastMeter (long hold_cnt, unsigned long width, Orientation, int len=0, int clrb0=0x00ff00, int clr1=0xffff00, int clr2=0xffaa00, int clr3=0xff0000);
+	FastMeter (long hold_cnt, unsigned long width, Orientation, int len=0,
+			int clr0=0x00ff00, int clr1=0xffff00, int clr2=0xffaa00, int clr3=0xff0000,
+			int bgc0=0x111111ff, int bgc1=0x333333ff, int bgc2=0x333333ff, int bgc3=0x444444ff
+			);
 	virtual ~FastMeter ();
 
 	void set (float level);

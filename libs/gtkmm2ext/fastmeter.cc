@@ -41,7 +41,9 @@ int FastMeter::max_pattern_metric_size = 1024;
 FastMeter::PatternMap FastMeter::v_pattern_cache;
 FastMeter::PatternMap FastMeter::h_pattern_cache;
 
-FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len, int clr0, int clr1, int clr2, int clr3)
+FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
+		int clr0, int clr1, int clr2, int clr3,
+		int bgc0, int bgc1, int bgc2, int bgc3)
 {
 	orientation = o;
 	hold_cnt = hold;
@@ -56,10 +58,10 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len, in
 	_clr2 = clr2;
 	_clr3 = clr3;
 
-	_bgc0 = 0x111111ff;
-	_bgc1 = 0x333333ff;
-	_bgc2 = 0x333333ff;
-	_bgc3 = 0x444444ff;
+	_bgc0 = bgc0;
+	_bgc1 = bgc1;
+	_bgc2 = bgc2;
+	_bgc3 = bgc3;
 
 	set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 

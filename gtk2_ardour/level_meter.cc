@@ -195,7 +195,13 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 		}
 		if (meters[n].width != width || meters[n].length != len || color_changed) {
 			delete meters[n].meter;
-			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len, b, m, t, c);
+			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len,
+					b, m, t, c,
+					ARDOUR_UI::config()->canvasvar_MeterBackgroundBot.get(),
+					ARDOUR_UI::config()->canvasvar_MeterBackgroundMid.get(),
+					ARDOUR_UI::config()->canvasvar_MeterBackgroundMid.get(),
+					ARDOUR_UI::config()->canvasvar_MeterBackgroundTop.get()
+					);
 			meters[n].width = width;
 			meters[n].length = len;
 			meters[n].meter->add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
