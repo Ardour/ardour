@@ -66,7 +66,7 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 
 	pixrect.x = 1;
-	pixrect.y = 0;
+	pixrect.y = 1;
 
 	if (orientation == Vertical) {
 		if (!len) {
@@ -326,21 +326,8 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 
 	if (resized) {
 		cairo_set_source_rgb (cr, 0, 0, 0); // black
-#if 1 // fake rounded corners..
-		cairo_set_line_width(cr, 1.0);
-		cairo_move_to  (cr, 1, 0);
-		cairo_line_to  (cr, 1 + pixrect.width, 0);
-		cairo_move_to  (cr, 2 + pixrect.width, 1);
-		cairo_line_to  (cr, 2 + pixrect.width, 1 + pixheight);
-		cairo_move_to  (cr, 1 + pixrect.width, 2 + pixheight);
-		cairo_line_to  (cr, 1,                 2 + pixheight);
-		cairo_move_to  (cr, 0,                 1 + pixheight);
-		cairo_line_to  (cr, 0,                 1);
-		cairo_stroke (cr);
-#else
-		cairo_rectangle (cr, 0, 0, pixrect.width + 2, pixheight + 2);
+		rounded_rectangle (cr, 0, 0, pixrect.width + 2, pixheight + 2, 2);
 		cairo_fill (cr);
-#endif
 	}
 
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
