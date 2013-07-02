@@ -41,12 +41,11 @@ namespace Gtk {
 	class Style;
 }
 
-class Meterbridge;
-
 class MeterStrip : public Gtk::VBox, public RouteUI
 {
   public:
-	MeterStrip (Meterbridge&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
+	MeterStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
+	MeterStrip (int);
 	~MeterStrip ();
 
 	void fast_update ();
@@ -75,7 +74,6 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	static  cairo_pattern_t* render_ticks (Gtk::Widget &, std::vector<ARDOUR::DataType>);
 
 	void on_theme_changed ();
-	bool style_changed;
 
 	void on_size_allocate (Gtk::Allocation&);
 	void on_size_request (Gtk::Requisition*);

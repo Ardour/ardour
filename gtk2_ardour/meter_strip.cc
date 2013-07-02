@@ -43,8 +43,6 @@
 
 #include "i18n.h"
 
-#define WITH_METRICS 1
-
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
@@ -56,11 +54,69 @@ PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
 MeterStrip::MetricPatterns MeterStrip::metric_patterns;
 MeterStrip::TickPatterns MeterStrip::ticks_patterns;
 
-MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
+MeterStrip::MeterStrip (int metricmode)
+	: AxisView(0)
+	, RouteUI(0)
+{
+	level_meter = 0;
+	set_spacing(2);
+	peakbx.set_size_request(-1, 16);
+	btnbox.set_size_request(-1, 16);
+
+	_types.clear ();
+	switch(metricmode) {
+		case 1:
+			meter_metric_area.set_name ("AudioBusMetrics");
+			_types.push_back (DataType::AUDIO);
+			break;
+		case 2:
+			meter_metric_area.set_name ("AudioTrackMetrics");
+			_types.push_back (DataType::AUDIO);
+			break;
+		case 3:
+			meter_metric_area.set_name ("MidiTrackMetrics");
+			_types.push_back (DataType::MIDI);
+			break;
+		default:
+			meter_metric_area.set_name ("AudioMidiTrackMetrics");
+			_types.push_back (DataType::AUDIO);
+			_types.push_back (DataType::MIDI);
+			break;
+	}
+	//meter_metric_area.queue_draw ();
+
+	set_size_request_to_display_given_text (meter_metric_area, "8888", 1, 0);
+	meter_metric_area.signal_expose_event().connect (
+			sigc::mem_fun(*this, &MeterStrip::meter_metrics_expose));
+
+	meterbox.pack_start(meter_metric_area, true, false);
+
+	label.set_text("");
+	label.set_name("MeterbridgeLabel");
+	label.set_angle(90.0);
+	label.set_alignment(0.5, 1.0);
+	label.set_size_request(12, 52);
+
+	pack_start (peakbx, false, false);
+	pack_start (meterbox, true, true);
+	pack_start (btnbox, false, false);
+	pack_start (label, false, false, 2);
+
+	peakbx.show();
+	btnbox.show();
+	label.show();
+	meter_metric_area.show();
+	meterbox.show();
+
+	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
+	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
+	DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
+}
+
+MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	: AxisView(sess)
 	, RouteUI(sess)
 	, _route(rt)
-	, style_changed (false)
 {
 	set_spacing(2);
 	RouteUI::set_route (rt);
@@ -75,20 +131,14 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	level_meter->set_meter (_route->shared_peak_meter().get());
 	level_meter->clear_meters();
 	level_meter->setup_meters (400, meter_width, 6);
-#ifdef WITH_METRICSINMETER
-	level_meter->pack_start (meter_metric_area, false, false);
-#endif
 
 	Gtk::Alignment *meter_align = Gtk::manage (new Gtk::Alignment());
 	meter_align->set(0.5, 0.5, 0.0, 1.0);
 	meter_align->add(*level_meter);
 
-#ifdef WITH_METRICS
-	meterbox.pack_start(meter_metric_area, true, false);
 	meterbox.pack_start(meter_ticks1_area, true, false);
 	meterbox.pack_start(*meter_align, true, true);
 	meterbox.pack_start(meter_ticks2_area, true, false);
-#endif
 
 	// peak display
 	peak_display.set_name ("MixerStripPeakDisplay");
@@ -112,22 +162,15 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	btnbox.set_size_request(-1, 16);
 
 	pack_start (peakbx, false, false);
-#ifdef WITH_METRICS
 	pack_start (meterbox, true, true);
-#else
-	pack_start (*meter_align, true, true);
-#endif
 	pack_start (btnbox, false, false);
 	pack_start (label, false, false, 2);
 
 	peak_display.show();
 	peakbx.show();
-#ifdef WITH_METRICS
 	meter_ticks1_area.show();
 	meter_ticks2_area.show();
-	meter_metric_area.hide();
 	meterbox.show();
-#endif
 	level_meter->show();
 	meter_align->show();
 	btnbox.show();
@@ -138,16 +181,10 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 			);
 	meter_configuration_changed (_route->shared_peak_meter()->input_streams ());
 
-#ifdef WITH_METRICS
-	set_size_request_to_display_given_text (meter_metric_area, "-8888", 1, 0);
-	meter_metric_area.signal_expose_event().connect (
-			sigc::mem_fun(*this, &MeterStrip::meter_metrics_expose));
-
 	meter_ticks1_area.set_size_request(3,-1);
 	meter_ticks2_area.set_size_request(3,-1);
 	meter_ticks1_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks1_expose));
 	meter_ticks2_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks2_expose));
-#endif
 
 	_route->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&MeterStrip::self_delete, this), gui_context());
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&MeterStrip::strip_property_changed, this, _1), gui_context());
@@ -222,24 +259,28 @@ MeterStrip::fast_update ()
 void
 MeterStrip::display_metrics (bool show)
 {
+#if 0
 	if (show) {
 		meter_metric_area.show();
 	} else {
 		meter_metric_area.hide();
 	}
+#endif
 }
 
 void
 MeterStrip::on_theme_changed()
 {
-	style_changed = true;
+	metric_patterns.clear();
+	ticks_patterns.clear();
 
-	// TODO save meter_width as private var?!
-	int meter_width = 6;
-	if (_route->shared_peak_meter()->input_streams().n_total() == 1) {
-		meter_width = 12;
+	if (level_meter && _route) {
+		int meter_width = 6;
+		if (_route->shared_peak_meter()->input_streams().n_total() == 1) {
+			meter_width = 12;
+		}
+		level_meter->setup_meters (400, meter_width, 6);
 	}
-	level_meter->setup_meters (400, meter_width, 6);
 }
 
 void
@@ -255,45 +296,43 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 		}
 	}
 
-#ifdef WITH_METRICS
 	// TODO draw Inactive routes or busses with different styles
 	if (boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
 			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0
 			) {
-		meter_metric_area.set_name ("AudioBusMetrics");
 		meter_ticks1_area.set_name ("AudioBusMetrics");
 		meter_ticks2_area.set_name ("AudioBusMetrics");
 	}
 	else if (type == (1 << DataType::AUDIO)) {
-		meter_metric_area.set_name ("AudioTrackMetrics");
 		meter_ticks1_area.set_name ("AudioTrackMetrics");
 		meter_ticks2_area.set_name ("AudioTrackMetrics");
 	}
 	else if (type == (1 << DataType::MIDI)) {
-		meter_metric_area.set_name ("MidiTrackMetrics");
 		meter_ticks1_area.set_name ("MidiTrackMetrics");
 		meter_ticks2_area.set_name ("MidiTrackMetrics");
 	} else {
-		meter_metric_area.set_name ("AudioMidiTrackMetrics");
 		meter_ticks1_area.set_name ("AudioMidiTrackMetrics");
 		meter_ticks2_area.set_name ("AudioMidiTrackMetrics");
 	}
-	meter_metric_area.queue_draw ();
-#endif
-	style_changed = true;
+	meter_ticks1_area.queue_draw();
+	meter_ticks2_area.queue_draw();
+	metric_patterns.clear();
+	ticks_patterns.clear();
 }
 
 void
 MeterStrip::on_size_request (Gtk::Requisition* r)
 {
-	style_changed = true;
+	metric_patterns.clear();
+	ticks_patterns.clear();
 	VBox::on_size_request(r);
 }
 
 void
 MeterStrip::on_size_allocate (Gtk::Allocation& a)
 {
-	style_changed = true;
+	metric_patterns.clear();
+	ticks_patterns.clear();
 	VBox::on_size_allocate(a);
 }
 
@@ -330,7 +369,7 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 	//font = w.get_style()->get_font();
 
 	font.set_weight (Pango::WEIGHT_NORMAL);
-	font.set_size (10.0 * PANGO_SCALE);
+	font.set_size (9.0 * PANGO_SCALE);
 	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 	audio_font_attributes.change (*font_attr);
 	delete font_attr;
@@ -444,7 +483,7 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 			p = min (p, height - th);
 			p = max (p, 0);
 
-			cairo_move_to (cr, width-2-tw, p + .5);
+			cairo_move_to (cr, width-1-tw, p + .5);
 			pango_cairo_show_layout (cr, layout->gobj());
 		}
 	}
@@ -500,7 +539,7 @@ MeterStrip::meter_metrics_expose (GdkEventExpose *ev)
 	cairo_pattern_t* pattern;
 	MetricPatterns::iterator i = metric_patterns.find (meter_metric_area.get_name());
 
-	if (i == metric_patterns.end() || style_changed) {
+	if (i == metric_patterns.end()) {
 		pattern = render_metrics (meter_metric_area, _types);
 	} else {
 		pattern = i->second;
@@ -514,8 +553,6 @@ MeterStrip::meter_metrics_expose (GdkEventExpose *ev)
 
 	cairo_rectangle (cr, 0, 0, width, height);
 	cairo_fill (cr);
-
-	style_changed = false;
 
 	cairo_destroy (cr);
 
@@ -569,22 +606,35 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 
 		switch (*i) {
 		case DataType::AUDIO:
+			points.insert (std::pair<int,float>(-60, 0.5));
 			points.insert (std::pair<int,float>(-50, 0.5));
 			points.insert (std::pair<int,float>(-40, 0.5));
 			points.insert (std::pair<int,float>(-30, 0.5));
-			points.insert (std::pair<int,float>(-20, 0.5));
+			points.insert (std::pair<int,float>(-25, 0.5));
+			points.insert (std::pair<int,float>(-20, 1.0));
+
+			points.insert (std::pair<int,float>(-19, 0.5));
 			points.insert (std::pair<int,float>(-18, 1.0));
-			points.insert (std::pair<int,float>(-15, 0.5));
+			points.insert (std::pair<int,float>(-17, 0.5));
+			points.insert (std::pair<int,float>(-16, 0.5));
+			points.insert (std::pair<int,float>(-15, 1.0));
+
+			points.insert (std::pair<int,float>(-14, 0.5));
+			points.insert (std::pair<int,float>(-13, 0.5));
+			points.insert (std::pair<int,float>(-12, 0.5));
+			points.insert (std::pair<int,float>(-11, 0.5));
 			points.insert (std::pair<int,float>(-10, 1.0));
+
 			points.insert (std::pair<int,float>( -9, 0.5));
 			points.insert (std::pair<int,float>( -8, 0.5));
 			points.insert (std::pair<int,float>( -7, 0.5));
 			points.insert (std::pair<int,float>( -6, 0.5));
 			points.insert (std::pair<int,float>( -5, 1.0));
 			points.insert (std::pair<int,float>( -4, 0.5));
-			points.insert (std::pair<int,float>( -3, 1.0));
+			points.insert (std::pair<int,float>( -3, 0.5));
 			points.insert (std::pair<int,float>( -2, 0.5));
 			points.insert (std::pair<int,float>( -1, 0.5));
+
 			points.insert (std::pair<int,float>(  0, 1.0));
 			points.insert (std::pair<int,float>(  1, 0.5));
 			points.insert (std::pair<int,float>(  2, 0.5));
@@ -679,7 +729,7 @@ MeterStrip::meter_ticks_expose (GdkEventExpose *ev, Gtk::DrawingArea *mta)
 	cairo_pattern_t* pattern;
 	TickPatterns::iterator i = ticks_patterns.find (mta->get_name());
 
-	if (i == ticks_patterns.end() || style_changed) {
+	if (i == ticks_patterns.end()) {
 		pattern = render_ticks (*mta, _types);
 	} else {
 		pattern = i->second;
@@ -694,8 +744,6 @@ MeterStrip::meter_ticks_expose (GdkEventExpose *ev, Gtk::DrawingArea *mta)
 	cairo_rectangle (cr, 0, 0, width, height);
 	cairo_fill (cr);
 
-	style_changed = false;
-
 	cairo_destroy (cr);
 
 	return true;
@@ -704,6 +752,7 @@ MeterStrip::meter_ticks_expose (GdkEventExpose *ev, Gtk::DrawingArea *mta)
 void
 MeterStrip::reset_group_peak_display (RouteGroup* group)
 {
+	/* UNUSED -- need connection w/mixer || other meters */
 	if (_route && group == _route->route_group()) {
 		reset_peak_display ();
 	}

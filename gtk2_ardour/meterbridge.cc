@@ -135,13 +135,20 @@ Meterbridge::Meterbridge ()
 	 */
 	set_type_hint(Gdk::WINDOW_TYPE_HINT_UTILITY);
 
+	metrics_left = manage(new MeterStrip (2));
+	global_hpacker.pack_start (*metrics_left, false, false);
+	metrics_left->show();
+
+	metrics_right = manage(new MeterStrip (3));
+	global_hpacker.pack_start (*metrics_right, false, false);
+	metrics_right->show();
+
 	signal_delete_event().connect (sigc::mem_fun (*this, &Meterbridge::hide_window));
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Meterbridge::sync_order_keys, this, _1), gui_context());
-
 	MeterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Meterbridge::remove_strip, this, _1), gui_context());
 
-	global_hpacker.set_spacing(3);
+	global_hpacker.set_spacing(4);
 	scroller.add (global_hpacker);
 	scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
 	global_vpacker.pack_start (scroller, true, true);
@@ -411,7 +418,7 @@ Meterbridge::add_strips (RouteList& routes)
 			continue;
 		}
 
-		strip = new MeterStrip (*this, _session, route);
+		strip = new MeterStrip (_session, route);
 		strips.push_back (strip);
 
 		global_hpacker.pack_start (*strip, false, false);
@@ -442,6 +449,8 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 	copy.sort(sorter);
 
 	int pos = 0;
+	global_hpacker.reorder_child(*metrics_left, pos++);
+
 	for (list<MeterStrip *>::iterator i = copy.begin(); i != copy.end(); ++i) {
 
 #if 0 // TODO subscribe to route active,inactive changes, merge w/ bus
@@ -471,13 +480,9 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 			(*i)->show();
 		}
 
-		if (pos == 0) {
-			(*i)->display_metrics(true);
-		} else {
-			(*i)->display_metrics(false);
-		}
 		global_hpacker.reorder_child(*(*i), pos++);
 	}
+	global_hpacker.reorder_child(*metrics_right, pos);
 }
 
 void

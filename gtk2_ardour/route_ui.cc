@@ -67,7 +67,7 @@ boost::weak_ptr<Route> RouteUI::_showing_sends_to;
 RouteUI::RouteUI (ARDOUR::Session* sess)
 	: AxisView(sess)
 {
-	init ();
+	if (sess) init ();
 }
 
 RouteUI::~RouteUI()

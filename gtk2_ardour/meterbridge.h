@@ -79,6 +79,9 @@ class Meterbridge :
 
 	std::list<MeterStrip *> strips;
 
+	MeterStrip *metrics_left;
+	MeterStrip *metrics_right;
+
 	static const int32_t default_width = 600;
 	static const int32_t default_height = 400;
 
