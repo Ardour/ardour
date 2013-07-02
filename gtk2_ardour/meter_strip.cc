@@ -43,6 +43,8 @@
 
 #include "i18n.h"
 
+#define WITH_METRICS 1
+
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
@@ -120,9 +122,9 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	peak_display.show();
 	peakbx.show();
 #ifdef WITH_METRICS
-	meter_ticks1_area.hide();
+	meter_ticks1_area.show();
 	meter_ticks2_area.show();
-	meter_metric_area.show();
+	meter_metric_area.hide();
 	meterbox.show();
 #endif
 	level_meter->show();
@@ -140,8 +142,8 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	meter_metric_area.signal_expose_event().connect (
 			sigc::mem_fun(*this, &MeterStrip::meter_metrics_expose));
 
-	meter_ticks1_area.set_size_request(4,-1);
-	meter_ticks2_area.set_size_request(4,-1);
+	meter_ticks1_area.set_size_request(3,-1);
+	meter_ticks2_area.set_size_request(3,-1);
 	meter_ticks1_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks1_expose));
 	meter_ticks2_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks2_expose));
 #endif
@@ -219,7 +221,7 @@ MeterStrip::fast_update ()
 void
 MeterStrip::display_metrics (bool show)
 {
-#ifdef WITH_METRICS
+#ifdef WITH_METRICSTOGGLE
 	if (show) {
 		meter_metric_area.show();
 		meter_ticks1_area.hide();
@@ -572,48 +574,74 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 		}
 
-		vector<int> points;
+		std::map<int,float> points;
 
 		switch (*i) {
 		case DataType::AUDIO:
-			points.push_back (-50);
-			points.push_back (-40);
-			points.push_back (-30);
-			points.push_back (-20);
-			points.push_back (-18);
-			points.push_back (-10);
-			points.push_back (-6);
-			points.push_back (-3);
-			points.push_back (0);
-			points.push_back (4);
+			points.insert (std::pair<int,float>(-50, 0.5));
+			points.insert (std::pair<int,float>(-40, 0.5));
+			points.insert (std::pair<int,float>(-30, 0.5));
+			points.insert (std::pair<int,float>(-20, 0.5));
+			points.insert (std::pair<int,float>(-18, 1.0));
+			points.insert (std::pair<int,float>(-15, 0.5));
+			points.insert (std::pair<int,float>(-10, 1.0));
+			points.insert (std::pair<int,float>( -9, 0.5));
+			points.insert (std::pair<int,float>( -8, 0.5));
+			points.insert (std::pair<int,float>( -7, 0.5));
+			points.insert (std::pair<int,float>( -6, 0.5));
+			points.insert (std::pair<int,float>( -5, 1.0));
+			points.insert (std::pair<int,float>( -4, 0.5));
+			points.insert (std::pair<int,float>( -3, 1.0));
+			points.insert (std::pair<int,float>( -2, 0.5));
+			points.insert (std::pair<int,float>( -1, 0.5));
+			points.insert (std::pair<int,float>(  0, 1.0));
+			points.insert (std::pair<int,float>(  1, 0.5));
+			points.insert (std::pair<int,float>(  2, 0.5));
+			points.insert (std::pair<int,float>(  3, 0.5));
+			points.insert (std::pair<int,float>(  4, 0.5));
+			points.insert (std::pair<int,float>(  5, 0.5));
+			points.insert (std::pair<int,float>(  6, 0.5));
 			break;
 
 		case DataType::MIDI:
-			points.push_back (0);
-			points.push_back (32);
-			points.push_back (64);
-			points.push_back (96);
-			points.push_back (127);
+			points.insert (std::pair<int,float>(  0, 1.0));
+			points.insert (std::pair<int,float>( 16, 0.5));
+			points.insert (std::pair<int,float>( 32, 1.0));
+			points.insert (std::pair<int,float>( 48, 0.5));
+			points.insert (std::pair<int,float>( 64, 1.0));
+			points.insert (std::pair<int,float>( 72, 0.5));
+			points.insert (std::pair<int,float>( 96, 1.0));
+			points.insert (std::pair<int,float>(100, 1.0));
+			points.insert (std::pair<int,float>(112, 0.5));
+			points.insert (std::pair<int,float>(127, 1.0));
 			break;
 		}
 
-		for (vector<int>::const_iterator j = points.begin(); j != points.end(); ++j) {
+		for (std::map<int,float>::const_iterator j = points.begin(); j != points.end(); ++j) {
+			cairo_set_line_width (cr, (j->second));
 
 			float fraction = 0;
+			gint pos;
+
 			switch (*i) {
 			case DataType::AUDIO:
-				fraction = log_meter (*j);
+				if (j->first >= 0) {
+					cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
+				}
+				fraction = log_meter (j->first);
+				pos = height - (gint) floor (height * fraction);
+				cairo_move_to(cr, 0, pos + .5);
+				cairo_line_to(cr, 3, pos + .5);
+				cairo_stroke (cr);
 				break;
 			case DataType::MIDI:
-				fraction = *j / 127.0;
+				fraction = (j->first) / 127.0;
+				pos = height - (gint) floor (height * fraction);
+				cairo_arc(cr, 1.5, pos, (j->second), 0, 2 * M_PI);
+				cairo_fill_preserve(cr);
+				cairo_stroke (cr);
 				break;
 			}
-
-			gint const pos = height - (gint) floor (height * fraction);
-			cairo_set_line_width (cr, 1.0);
-			cairo_arc(cr, 1.5, pos, 1.0, 0, 2 * M_PI);
-			cairo_fill_preserve(cr);
-			cairo_stroke (cr);
 		}
 	}
 
