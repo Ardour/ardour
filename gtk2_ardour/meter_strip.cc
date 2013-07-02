@@ -60,7 +60,7 @@ MeterStrip::MeterStrip (int metricmode)
 {
 	level_meter = 0;
 	set_spacing(2);
-	peakbx.set_size_request(-1, 16);
+	peakbx.set_size_request(-1, 14);
 	btnbox.set_size_request(-1, 16);
 
 	_types.clear ();
@@ -147,7 +147,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	peak_display.set_size_request(-1, 8);
 
 	Gtk::Alignment *peak_align = Gtk::manage (new Gtk::Alignment());
-	peak_align->set(0.5, 1.0, 0.75, 0.8); // TODO rather add padding 4px left+right (ticks)
+	peak_align->set(0.5, 1.0, 0.9, 0.8);
 	peak_align->add(peak_display);
 	peakbx.pack_start(*peak_align, true, true);
 	peakbx.set_size_request(-1, 14);
@@ -468,7 +468,7 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 				break;
 			}
 
-			gint const pos = height - (gint) floor (height * fraction);
+			gint const pos = height - (gint) rintf (height * fraction);
 			layout->set_text(buf);
 
 			/* we want logical extents, not ink extents here */
@@ -480,7 +480,7 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 			p = min (p, height - th);
 			p = max (p, 0);
 
-			cairo_move_to (cr, width-1-tw, p + .5);
+			cairo_move_to (cr, width-1-tw, p);
 			pango_cairo_show_layout (cr, layout->gobj());
 		}
 	}
