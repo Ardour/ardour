@@ -75,7 +75,7 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	level_meter->set_meter (_route->shared_peak_meter().get());
 	level_meter->clear_meters();
 	level_meter->setup_meters (400, meter_width, 6);
-#ifdef WITH_METRICS
+#ifdef WITH_METRICSINMETER
 	level_meter->pack_start (meter_metric_area, false, false);
 #endif
 
@@ -84,6 +84,7 @@ MeterStrip::MeterStrip (Meterbridge& mtr, Session* sess, boost::shared_ptr<ARDOU
 	meter_align->add(*level_meter);
 
 #ifdef WITH_METRICS
+	meterbox.pack_start(meter_metric_area, true, false);
 	meterbox.pack_start(meter_ticks1_area, true, false);
 	meterbox.pack_start(*meter_align, true, true);
 	meterbox.pack_start(meter_ticks2_area, true, false);
@@ -221,15 +222,11 @@ MeterStrip::fast_update ()
 void
 MeterStrip::display_metrics (bool show)
 {
-#ifdef WITH_METRICSTOGGLE
 	if (show) {
 		meter_metric_area.show();
-		meter_ticks1_area.hide();
 	} else {
 		meter_metric_area.hide();
-		meter_ticks1_area.show();
 	}
-#endif
 }
 
 void
@@ -396,7 +393,7 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 			points.push_back (-6);
 			points.push_back (-3);
 			points.push_back (0);
-			points.push_back (4);
+			points.push_back (3);
 			break;
 
 		case DataType::MIDI:
@@ -436,12 +433,6 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 			}
 
 			gint const pos = height - (gint) floor (height * fraction);
-
-			cairo_set_line_width (cr, 1.0);
-			cairo_move_to (cr, width-3.5, pos);
-			cairo_line_to (cr, width, pos);
-			cairo_stroke (cr);
-
 			layout->set_text(buf);
 
 			/* we want logical extents, not ink extents here */
@@ -453,7 +444,7 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 			p = min (p, height - th);
 			p = max (p, 0);
 
-			cairo_move_to (cr, width-5-tw, p);
+			cairo_move_to (cr, width-2-tw, p + .5);
 			pango_cairo_show_layout (cr, layout->gobj());
 		}
 	}
@@ -606,11 +597,11 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 		case DataType::MIDI:
 			points.insert (std::pair<int,float>(  0, 1.0));
 			points.insert (std::pair<int,float>( 16, 0.5));
-			points.insert (std::pair<int,float>( 32, 1.0));
+			points.insert (std::pair<int,float>( 32, 0.5));
 			points.insert (std::pair<int,float>( 48, 0.5));
 			points.insert (std::pair<int,float>( 64, 1.0));
 			points.insert (std::pair<int,float>( 72, 0.5));
-			points.insert (std::pair<int,float>( 96, 1.0));
+			points.insert (std::pair<int,float>( 96, 0.5));
 			points.insert (std::pair<int,float>(100, 1.0));
 			points.insert (std::pair<int,float>(112, 0.5));
 			points.insert (std::pair<int,float>(127, 1.0));

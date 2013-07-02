@@ -471,9 +471,7 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 			(*i)->show();
 		}
 
-
-
-		if (pos%8 == 0) {
+		if (pos == 0) {
 			(*i)->display_metrics(true);
 		} else {
 			(*i)->display_metrics(false);
