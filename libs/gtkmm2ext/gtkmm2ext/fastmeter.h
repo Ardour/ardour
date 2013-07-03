@@ -37,8 +37,12 @@ class FastMeter : public Gtk::DrawingArea {
 	};
 
 	FastMeter (long hold_cnt, unsigned long width, Orientation, int len=0,
-			int clr0=0x00ff00, int clr1=0xffff00, int clr2=0xffaa00, int clr3=0xff0000,
-			int bgc0=0x111111ff, int bgc1=0x333333ff, int bgc2=0x333333ff, int bgc3=0x444444ff
+			int clr0=0x008800ff, int clr1=0x008800ff,
+			int clr2=0x00ff00ff, int clr3=0x00ff00ff,
+			int clr4=0x80ff00ff, int clr5=0x80ff00ff,
+			int clr6=0xffaa00ff, int clr7=0xffaa00ff,
+			int clr8=0xff0000ff, int clr9=0xff0000ff,
+			int bgc0=0x333333ff, int bgc1=0x444444ff
 			);
 	virtual ~FastMeter ();
 
@@ -63,8 +67,10 @@ private:
 	Cairo::RefPtr<Cairo::Pattern> bgpattern;
 	gint pixheight;
 	gint pixwidth;
-	int _clr0, _clr1, _clr2, _clr3;
-	int _bgc0, _bgc1, _bgc2, _bgc3;
+
+	float _stp[3];
+	int _clr[10];
+	int _bgc[2];
 
 	Orientation orientation;
 	GdkRectangle pixrect;
@@ -82,24 +88,53 @@ private:
 	void queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>&, float);
 
 	static Cairo::RefPtr<Cairo::Pattern> generate_meter_pattern (
-		int w, int h, int clr0, int clr1, int clr2, int clr3);
+		int w, int h, int *clr, float *stp);
 	static Cairo::RefPtr<Cairo::Pattern> request_vertical_meter (
-		int w, int h, int clr0, int clr1, int clr2, int clr3);
+		int w, int h, int *clr, float *stp);
 
-	struct PatternMapKey {
-		PatternMapKey (int w, int h, int c0, int c1, int c2, int c3)
+	static Cairo::RefPtr<Cairo::Pattern> generate_meter_background (
+		int w, int h, int *bgc);
+	static Cairo::RefPtr<Cairo::Pattern> request_vertical_background (
+		int w, int h, int *bgc);
+
+	struct Pattern10MapKey {
+		Pattern10MapKey (
+				int w, int h,
+				float stp0, float stp1, float stp2,
+				int c0, int c1, int c2, int c3,
+				int c4, int c5, int c6, int c7,
+				int c8, int c9
+				)
 			: dim(w, h)
-			, cols(c0, c1, c2, c3)
+			, stp(stp0, stp1, stp2)
+			, cols(c0, c1, c2, c3, c4, c5, c6, c7, c8, c9)
 		{}
-		inline bool operator<(const PatternMapKey& rhs) const {
+		inline bool operator<(const Pattern10MapKey& rhs) const {
+			return (dim < rhs.dim)
+				|| (dim == rhs.dim && stp < rhs.stp)
+				|| (dim == rhs.dim && stp == rhs.stp && cols < rhs.cols);
+		}
+		boost::tuple<int, int> dim;
+		boost::tuple<float, float, float> stp;
+		boost::tuple<int, int, int, int, int, int, int, int, int, int> cols;
+	};
+	typedef std::map<Pattern10MapKey, Cairo::RefPtr<Cairo::Pattern> > Pattern10Map;
+
+	struct PatternBgMapKey {
+		PatternBgMapKey (int w, int h, int c0, int c1)
+			: dim(w, h)
+			, cols(c0, c1)
+		{}
+		inline bool operator<(const PatternBgMapKey& rhs) const {
 			return (dim < rhs.dim) || (dim == rhs.dim && cols < rhs.cols);
 		}
-		boost::tuple<int, int>           dim;  // width, height
-		boost::tuple<int, int, int, int> cols; // c0, c1, c2, c3
+		boost::tuple<int, int> dim;
+		boost::tuple<int, int> cols;
 	};
-	typedef std::map<PatternMapKey, Cairo::RefPtr<Cairo::Pattern> > PatternMap;
+	typedef std::map<PatternBgMapKey, Cairo::RefPtr<Cairo::Pattern> > PatternBgMap;
 
-	static PatternMap v_pattern_cache;
+	static Pattern10Map vm_pattern_cache;
+	static PatternBgMap vb_pattern_cache;
 	static int min_pattern_metric_size; // min dimension for axis that displays the meter level
 	static int max_pattern_metric_size; // max dimension for axis that displays the meter level
 };

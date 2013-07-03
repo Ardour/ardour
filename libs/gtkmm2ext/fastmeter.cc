@@ -38,11 +38,13 @@ using namespace std;
 int FastMeter::min_pattern_metric_size = 10;
 int FastMeter::max_pattern_metric_size = 1024;
 
-FastMeter::PatternMap FastMeter::v_pattern_cache;
+FastMeter::Pattern10Map FastMeter::vm_pattern_cache;
+FastMeter::PatternBgMap FastMeter::vb_pattern_cache;
 
 FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 		int clr0, int clr1, int clr2, int clr3,
-		int bgc0, int bgc1, int bgc2, int bgc3)
+		int clr4, int clr5, int clr6, int clr7,
+		int clr8, int clr9, int bgc0, int bgc1)
 {
 	orientation = o;
 	hold_cnt = hold;
@@ -52,15 +54,25 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	current_level = 0;
 	last_peak_rect.width = 0;
 	last_peak_rect.height = 0;
-	_clr0 = clr0;
-	_clr1 = clr1;
-	_clr2 = clr2;
-	_clr3 = clr3;
 
-	_bgc0 = bgc0;
-	_bgc1 = bgc1;
-	_bgc2 = bgc2;
-	_bgc3 = bgc3;
+	_clr[0] = clr0;
+	_clr[1] = clr1;
+	_clr[2] = clr2;
+	_clr[3] = clr3;
+	_clr[4] = clr4;
+	_clr[5] = clr5;
+	_clr[6] = clr6;
+	_clr[7] = clr7;
+	_clr[8] = clr8;
+	_clr[9] = clr9;
+
+	_bgc[0] = bgc0;
+	_bgc[1] = bgc1;
+
+	_stp[0] = 55.0; // log_meter(-18);
+	_stp[1] = 77.5; // log_meter(-9);
+	_stp[2] = 92.5; // log_meter(-3);
+	_stp[2] = 95.0; // log_meter(-2);
 
 	set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 
@@ -70,8 +82,8 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	if (!len) {
 		len = 250;
 	}
-	fgpattern = request_vertical_meter(dimen, len, clr0, clr1, clr2, clr3);
-	bgpattern = request_vertical_meter(dimen, len, _bgc0, _bgc1, _bgc2, _bgc3);
+	fgpattern = request_vertical_meter(dimen, len, _clr, _stp);
+	bgpattern = request_vertical_background (dimen, len, _bgc);
 	pixheight = len;
 	pixwidth = dimen;
 
@@ -82,36 +94,17 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	request_height= pixrect.height + 2;
 }
 
+FastMeter::~FastMeter ()
+{
+}
+
 Cairo::RefPtr<Cairo::Pattern>
 FastMeter::generate_meter_pattern (
-		int width, int height, int clr0, int clr1, int clr2, int clr3)
+		int width, int height, int *clr, float *stp)
 {
-	guint8 r0,g0,b0,r1,g1,b1,r2,g2,b2,r3,g3,b3,a;
+	guint8 r,g,b,a;
+	int knee;
 
-	/*
-	  The knee is the hard transition point (e.g. at 0dB where the colors
-	  change dramatically to make clipping apparent). Thus there are two
-	  gradients in the pattern, the "normal range" and the "clip range", which
-	  are separated at the knee point.
-
-	  clr0: color at bottom of normal range gradient
-	  clr1: color at top of normal range gradient
-	  clr2: color at bottom of clip range gradient
-	  clr3: color at top of clip range gradient
-	*/
-
-	UINT_TO_RGBA (clr0, &r0, &g0, &b0, &a);
-	UINT_TO_RGBA (clr1, &r1, &g1, &b1, &a);
-	UINT_TO_RGBA (clr2, &r2, &g2, &b2, &a);
-	UINT_TO_RGBA (clr3, &r3, &g3, &b3, &a);
-
-	// fake log calculation copied from log_meter.h
-	// actual calculation:
-	// log_meter(0.0f) =
-	//  def = (0.0f + 20.0f) * 2.5f + 50f
-	//  return def / 115.0f
-
-	const int knee = (int)floor((float)height * 100.0f / 115.0f);
 	cairo_pattern_t* pat = cairo_pattern_create_linear (0.0, 0.0, width, height);
 
 	/*
@@ -119,21 +112,76 @@ FastMeter::generate_meter_pattern (
 	  knee-based positions by using (1.0 - y)
 	*/
 
-	// Clip range top
+	UINT_TO_RGBA (clr[9], &r, &g, &b, &a); // top/clip
 	cairo_pattern_add_color_stop_rgb (pat, 0.0,
-	                                  r3/255.0, g3/255.0, b3/255.0);
+	                                  r/255.0, g/255.0, b/255.0);
 
-	// Clip range bottom
-	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
-	                                  r2/255.0, g2/255.0, b2/255.0);
+	knee = (int)floor((float)height * 100.0f / 115.0f); // -0dB
 
-	// Normal range top (double-stop at knee)
+	UINT_TO_RGBA (clr[8], &r, &g, &b, &a);
 	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	                                  r/255.0, g/255.0, b/255.0);
+
+	UINT_TO_RGBA (clr[7], &r, &g, &b, &a);
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	                                  r/255.0, g/255.0, b/255.0);
+
+	knee = (int)floor((float)height * stp[2]/ 115.0f); // -3dB || -2dB
+
+	UINT_TO_RGBA (clr[6], &r, &g, &b, &a);
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	                                  r/255.0, g/255.0, b/255.0);
+
+	UINT_TO_RGBA (clr[5], &r, &g, &b, &a);
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	                                  r/255.0, g/255.0, b/255.0);
+
+	knee = (int)floor((float)height * stp[1] / 115.0f); // -9dB
+
+	UINT_TO_RGBA (clr[4], &r, &g, &b, &a);
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	                                  r/255.0, g/255.0, b/255.0);
+
+	UINT_TO_RGBA (clr[3], &r, &g, &b, &a);
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	                                  r/255.0, g/255.0, b/255.0);
+
+	knee = (int)floor((float)height * stp[0] / 115.0f); // -18dB
+
+	UINT_TO_RGBA (clr[2], &r, &g, &b, &a);
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	                                  r/255.0, g/255.0, b/255.0);
+
+	UINT_TO_RGBA (clr[1], &r, &g, &b, &a);
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	                                  r/255.0, g/255.0, b/255.0);
+
+	UINT_TO_RGBA (clr[0], &r, &g, &b, &a); // bottom
+	cairo_pattern_add_color_stop_rgb (pat, 1.0,
+	                                  r/255.0, g/255.0, b/255.0);
+
+	Cairo::RefPtr<Cairo::Pattern> p (new Cairo::Pattern (pat, false));
+
+	return p;
+}
+
+
+Cairo::RefPtr<Cairo::Pattern>
+FastMeter::generate_meter_background (
+		int width, int height, int *clr)
+{
+	guint8 r0,g0,b0,r1,g1,b1,a;
+
+	cairo_pattern_t* pat = cairo_pattern_create_linear (0.0, 0.0, width, height);
+
+	UINT_TO_RGBA (clr[0], &r0, &g0, &b0, &a);
+	UINT_TO_RGBA (clr[1], &r1, &g1, &b1, &a);
+
+	cairo_pattern_add_color_stop_rgb (pat, 0.0,
 	                                  r1/255.0, g1/255.0, b1/255.0);
 
-	// Normal range bottom
 	cairo_pattern_add_color_stop_rgb (pat, 1.0,
-	                                  r0/255.0, g0/255.0, b0/255.0); // top
+	                                  r0/255.0, g0/255.0, b0/255.0);
 
 	Cairo::RefPtr<Cairo::Pattern> p (new Cairo::Pattern (pat, false));
 
@@ -142,29 +190,52 @@ FastMeter::generate_meter_pattern (
 
 Cairo::RefPtr<Cairo::Pattern>
 FastMeter::request_vertical_meter(
-		int width, int height, int clr0, int clr1, int clr2, int clr3)
+		int width, int height, int *clr, float *stp)
 {
 	if (height < min_pattern_metric_size)
 		height = min_pattern_metric_size;
 	if (height > max_pattern_metric_size)
 		height = max_pattern_metric_size;
 
-	const PatternMapKey key (width, height, clr0, clr1, clr2, clr3);
-	PatternMap::iterator i;
-	if ((i = v_pattern_cache.find (key)) != v_pattern_cache.end()) {
+	const Pattern10MapKey key (width, height,
+			stp[0], stp[1], stp[2],
+			clr[0], clr[1], clr[2], clr[3],
+			clr[4], clr[5], clr[6], clr[7],
+			clr[8], clr[9]);
+	Pattern10Map::iterator i;
+	if ((i = vm_pattern_cache.find (key)) != vm_pattern_cache.end()) {
 		return i->second;
 	}
 
 	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_pattern (
-		width, height, clr0, clr1, clr2, clr3);
-	v_pattern_cache[key] = p;
+		width, height, clr, stp);
+	vm_pattern_cache[key] = p;
 
 	return p;
 }
 
-FastMeter::~FastMeter ()
+Cairo::RefPtr<Cairo::Pattern>
+FastMeter::request_vertical_background(
+		int width, int height, int *bgc)
 {
+	if (height < min_pattern_metric_size)
+		height = min_pattern_metric_size;
+	if (height > max_pattern_metric_size)
+		height = max_pattern_metric_size;
+
+	const PatternBgMapKey key (width, height, bgc[0], bgc[1]);
+	PatternBgMap::iterator i;
+	if ((i = vb_pattern_cache.find (key)) != vb_pattern_cache.end()) {
+		return i->second;
+	}
+
+	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_background (
+		width, height, bgc);
+	vb_pattern_cache[key] = p;
+
+	return p;
 }
+
 
 void
 FastMeter::set_hold_count (long val)
@@ -207,10 +278,8 @@ FastMeter::on_size_allocate (Gtk::Allocation &alloc)
 	}
 
 	if (pixheight != h) {
-		fgpattern = request_vertical_meter (
-			request_width, h, _clr0, _clr1, _clr2, _clr3);
-		bgpattern = request_vertical_meter (
-			request_width, h, _bgc0, _bgc1, _bgc2, _bgc3);
+		fgpattern = request_vertical_meter (request_width, h, _clr, _stp);
+		bgpattern = request_vertical_background (request_width, h, _bgc);
 		pixheight = h - 2;
 		pixwidth  = request_width - 2;
 	}
