@@ -186,8 +186,11 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	} else {
 		gm.set_fader_name ("AudioBusFader");
 	}
-	
-	controls_hbox.pack_start(gm.get_level_meter(), false, false, 2);
+
+	Gtk::VBox *mtrbox = manage(new Gtk::VBox());
+	mtrbox->pack_start(gm.get_level_meter(), false, false, 2);
+	controls_hbox.pack_start(*mtrbox, false, false, 4);
+
 	_route->meter_change.connect (*this, invalidator (*this), bind (&RouteTimeAxisView::meter_changed, this), gui_context());
 	_route->input()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
 	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
@@ -834,7 +837,7 @@ RouteTimeAxisView::show_selection (TimeSelection& ts)
 void
 RouteTimeAxisView::set_height (uint32_t h)
 {
-	int gmlen = h - 7;
+	int gmlen = h - 9;
 	bool height_changed = (height == 0) || (h != height);
 
 	int meter_width = 3;
@@ -2242,7 +2245,7 @@ RouteTimeAxisView::reset_meter ()
 		if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
 			meter_width = 6;
 		}
-		gm.get_level_meter().setup_meters (height-7, meter_width);
+		gm.get_level_meter().setup_meters (height - 9, meter_width);
 	} else {
 		hide_meter ();
 	}
