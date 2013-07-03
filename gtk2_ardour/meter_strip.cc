@@ -159,9 +159,9 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	name_label.set_angle(-90.0);
 	name_label.layout()->set_ellipsize (Pango::ELLIPSIZE_END);
 	name_label.layout()->set_width(48 * PANGO_SCALE);
-	name_label.set_size_request(14, 50);
+	name_label.set_size_request(18, 50);
 
-	namebx.set_size_request(14, 52);
+	namebx.set_size_request(18, 52);
 	namebx.pack_start(name_label, true, false, 3);
 
 	// rec-enable button
