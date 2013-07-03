@@ -190,6 +190,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	Gtk::VBox *mtrbox = manage(new Gtk::VBox());
 	mtrbox->pack_start(gm.get_level_meter(), false, false, 2);
 	controls_hbox.pack_start(*mtrbox, false, false, 4);
+	mtrbox->show();
 
 	_route->meter_change.connect (*this, invalidator (*this), bind (&RouteTimeAxisView::meter_changed, this), gui_context());
 	_route->input()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
