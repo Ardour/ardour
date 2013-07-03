@@ -38,6 +38,7 @@
 #include "logmeter.h"
 #include "gui_thread.h"
 #include "ardour_window.h"
+#include "utils.h"
 
 #include "meterbridge.h"
 #include "meter_strip.h"
@@ -232,7 +233,8 @@ MeterStrip::state_id() const
 void
 MeterStrip::set_button_names()
 {
-	rec_enable_button->set_text (_("R"));
+	rec_enable_button->set_text ("");
+	rec_enable_button->set_image (::get_icon (X_("record_normal_red")));
 }
 
 void
