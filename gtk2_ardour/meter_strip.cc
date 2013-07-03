@@ -595,10 +595,10 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
 
 		Gdk::Color c;
+		c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
 
 		if (types.size() > 1) {
 			/* we're overlaying more than 1 set of marks, so use different colours */
-			Gdk::Color c;
 			switch (*i) {
 			case DataType::AUDIO:
 				c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
@@ -677,11 +677,13 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 
 			switch (*i) {
 			case DataType::AUDIO:
-				if (j->first >= 0) {
+				if (j->first >= 0 || j->first == -9) {
 					cairo_set_source_rgb (cr,
 							UINT_RGBA_R_FLT(peakcolor),
 							UINT_RGBA_G_FLT(peakcolor),
 							UINT_RGBA_B_FLT(peakcolor));
+				} else {
+					cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 				}
 				fraction = log_meter (j->first);
 				pos = height - (gint) floor (height * fraction);
