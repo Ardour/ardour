@@ -679,6 +679,7 @@ style "audio_bus_base" = "very_small_text"
 {
   fg[NORMAL] = @@COLPREFIX@_fg
   bg[NORMAL] = @@COLPREFIX@_audio_bus
+  bg[ACTIVE] = @@COLPREFIX@_bg
 }
 
 style "send_strip_base" = "default"

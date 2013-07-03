@@ -55,6 +55,7 @@ PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
 
 MeterStrip::MetricPatterns MeterStrip::metric_patterns;
 MeterStrip::TickPatterns MeterStrip::ticks_patterns;
+int MeterStrip::max_pattern_metric_size = 1024;
 
 MeterStrip::MeterStrip (int metricmode)
 	: AxisView(0)
@@ -130,12 +131,11 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	level_meter->clear_meters();
 	level_meter->setup_meters (220, meter_width, 6);
 
-	Gtk::Alignment *meter_align = Gtk::manage (new Gtk::Alignment());
-	meter_align->set(0.5, 0.5, 0.0, 1.0);
-	meter_align->add(*level_meter);
+	meter_align.set(0.5, 0.5, 0.0, 1.0);
+	meter_align.add(*level_meter);
 
 	meterbox.pack_start(meter_ticks1_area, true, false);
-	meterbox.pack_start(*meter_align, true, true);
+	meterbox.pack_start(meter_align, true, true);
 	meterbox.pack_start(meter_ticks2_area, true, false);
 
 	// peak display
@@ -146,10 +146,9 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	peak_display.set_size_request(12, 8);
 	peak_display.set_corner_radius(2);
 
-	Gtk::Alignment *peak_align = Gtk::manage (new Gtk::Alignment());
-	peak_align->set(0.5, 1.0, 1.0, 0.8);
-	peak_align->add(peak_display);
-	peakbx.pack_start(*peak_align, true, true, 3);
+	peak_align.set(0.5, 1.0, 1.0, 0.8);
+	peak_align.add(peak_display);
+	peakbx.pack_start(peak_align, true, true, 3);
 	peakbx.set_size_request(-1, 14);
 
 	// add track-name label
@@ -180,8 +179,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	meter_ticks2_area.show();
 	meterbox.show();
 	level_meter->show();
-	meter_align->show();
-	peak_align->show();
+	meter_align.show();
+	peak_align.show();
 	btnbox.show();
 	name_label.show();
 	namebx.show();
@@ -349,7 +348,6 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 	cairo_t* cr = cairo_create (surface);
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create(w.get_pango_context());
 
-
 	Pango::AttrList audio_font_attributes;
 	Pango::AttrList midi_font_attributes;
 	Pango::AttrList unit_font_attributes;
@@ -387,7 +385,15 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 	}
 	cairo_fill (cr);
 
-	height = min(1024, height); // XXX see FastMeter::max_pattern_metric_size
+	if (height > max_pattern_metric_size) {
+		cairo_move_to (cr, 0, max_pattern_metric_size);
+		cairo_rectangle (cr, 0, max_pattern_metric_size, width, height);
+		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_ACTIVE);
+		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
+		cairo_fill (cr);
+	}
+
+	height = min(max_pattern_metric_size, height);
 	uint32_t peakcolor = ARDOUR_UI::config()->color_by_name ("meterbridge peaklabel");
 
 	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
@@ -591,7 +597,15 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 	}
 	cairo_fill (cr);
 
-	height = min(1024, height); // XXX see FastMeter::max_pattern_metric_size
+	if (height > max_pattern_metric_size) {
+		cairo_move_to (cr, 0, max_pattern_metric_size);
+		cairo_rectangle (cr, 0, max_pattern_metric_size, width, height);
+		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_ACTIVE);
+		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
+		cairo_fill (cr);
+	}
+
+	height = min(max_pattern_metric_size, height);
 	uint32_t peakcolor = ARDOUR_UI::config()->color_by_name ("meterbridge peaklabel");
 
 	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {

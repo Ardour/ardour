@@ -130,11 +130,6 @@ Meterbridge::Meterbridge ()
 	geom.max_height = 1024 + 52 + 16 + 12 ; // XXX see FastMeter::max_pattern_metric_size + meter-strip widgets
 	set_geometry_hints(*((Gtk::Window*) this), geom, Gdk::HINT_MAX_SIZE);
 
-	/* disable "maximize" button because it overrides size hint from above,
-	 * this also keeps window on top..
-	 */
-	set_type_hint(Gdk::WINDOW_TYPE_HINT_UTILITY);
-
 	metrics_left = manage(new MeterStrip (2));
 	global_hpacker.pack_start (*metrics_left, false, false);
 	metrics_left->show();

@@ -94,6 +94,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	Gtk::DrawingArea meter_ticks2_area;
 
 	Gtk::Alignment meter_align;
+	Gtk::Alignment peak_align;
 	Gtk::HBox peakbx;
 	Gtk::HBox btnbox;
 	ArdourButton peak_display;
@@ -111,6 +112,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void strip_property_changed (const PBD::PropertyChange&);
 	void meter_configuration_changed (ARDOUR::ChanCount);
 
+	static int max_pattern_metric_size; // == FastMeter::max_pattern_metric_size
 };
 
 #endif /* __ardour_mixer_strip__ */
