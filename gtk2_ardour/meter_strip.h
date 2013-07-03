@@ -50,7 +50,6 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	~MeterStrip ();
 
 	void fast_update ();
-	void display_metrics (bool);
 	boost::shared_ptr<ARDOUR::Route> route() { return _route; }
 
 	static PBD::Signal1<void,MeterStrip*> CatchDeletion;

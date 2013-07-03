@@ -256,18 +256,6 @@ MeterStrip::fast_update ()
 }
 
 void
-MeterStrip::display_metrics (bool show)
-{
-#if 0
-	if (show) {
-		meter_metric_area.show();
-	} else {
-		meter_metric_area.hide();
-	}
-#endif
-}
-
-void
 MeterStrip::on_theme_changed()
 {
 	metric_patterns.clear();
