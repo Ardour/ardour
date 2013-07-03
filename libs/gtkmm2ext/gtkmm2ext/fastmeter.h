@@ -79,15 +79,11 @@ private:
 	bool resized;
 
 	bool vertical_expose (GdkEventExpose*);
-	bool horizontal_expose (GdkEventExpose*);
 	void queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>&, float);
-	void queue_horizontal_redraw (const Glib::RefPtr<Gdk::Window>&, float);
 
 	static Cairo::RefPtr<Cairo::Pattern> generate_meter_pattern (
 		int w, int h, int clr0, int clr1, int clr2, int clr3);
 	static Cairo::RefPtr<Cairo::Pattern> request_vertical_meter (
-		int w, int h, int clr0, int clr1, int clr2, int clr3);
-	static Cairo::RefPtr<Cairo::Pattern> request_horizontal_meter (
 		int w, int h, int clr0, int clr1, int clr2, int clr3);
 
 	struct PatternMapKey {
@@ -104,7 +100,6 @@ private:
 	typedef std::map<PatternMapKey, Cairo::RefPtr<Cairo::Pattern> > PatternMap;
 
 	static PatternMap v_pattern_cache;
-	static PatternMap h_pattern_cache;
 	static int min_pattern_metric_size; // min dimension for axis that displays the meter level
 	static int max_pattern_metric_size; // max dimension for axis that displays the meter level
 };
