@@ -650,7 +650,6 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 			points.insert (std::pair<int,float>(  3, 0.5));
 			points.insert (std::pair<int,float>(  4, 0.5));
 			points.insert (std::pair<int,float>(  5, 0.5));
-			points.insert (std::pair<int,float>(  6, 0.5));
 			break;
 
 		case DataType::MIDI:
