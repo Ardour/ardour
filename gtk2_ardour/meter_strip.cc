@@ -383,7 +383,7 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 	cairo_fill (cr);
 
 	height = min(1024, height); // XXX see FastMeter::max_pattern_metric_size
-	uint32_t peakcolor = ARDOUR_UI::config()->color_by_name ("meterbridge peakindicator on: fill start");
+	uint32_t peakcolor = ARDOUR_UI::config()->color_by_name ("meterbridge peaklabel");
 
 	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
 
@@ -587,7 +587,7 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 	cairo_fill (cr);
 
 	height = min(1024, height); // XXX see FastMeter::max_pattern_metric_size
-	uint32_t peakcolor = ARDOUR_UI::config()->color_by_name ("meterbridge peakindicator on: fill start");
+	uint32_t peakcolor = ARDOUR_UI::config()->color_by_name ("meterbridge peaklabel");
 
 	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
 
