@@ -31,6 +31,7 @@
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
+#include <gtkmm2ext/rgb_macros.h>
 
 #include "ardour_ui.h"
 #include "global_signals.h"
@@ -85,7 +86,7 @@ MeterStrip::MeterStrip (int metricmode)
 	}
 	//meter_metric_area.queue_draw ();
 
-	set_size_request_to_display_given_text (meter_metric_area, "8888", 1, 0);
+	set_size_request_to_display_given_text (meter_metric_area, "-8888", 1, 0);
 	meter_metric_area.signal_expose_event().connect (
 			sigc::mem_fun(*this, &MeterStrip::meter_metrics_expose));
 
@@ -117,6 +118,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	: AxisView(sess)
 	, RouteUI(sess)
 	, _route(rt)
+	, peak_display()
 {
 	set_spacing(2);
 	RouteUI::set_route (rt);
@@ -141,15 +143,16 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	meterbox.pack_start(meter_ticks2_area, true, false);
 
 	// peak display
-	peak_display.set_name ("MixerStripPeakDisplay");
+	peak_display.set_name ("meterbridge peakindicator");
+	peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
 	max_peak = minus_infinity();
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
 	peak_display.set_size_request(12, 8);
 
 	Gtk::Alignment *peak_align = Gtk::manage (new Gtk::Alignment());
-	peak_align->set(0.5, 1.0, 0.0, 0.8);
+	peak_align->set(0.5, 1.0, 1.0, 0.8);
 	peak_align->add(peak_display);
-	peakbx.pack_start(*peak_align, true, true);
+	peakbx.pack_start(*peak_align, true, true, 3);
 	peakbx.set_size_request(-1, 14);
 
 	// add track-name label -- TODO ellipsize
@@ -246,7 +249,8 @@ MeterStrip::fast_update ()
 	if (mpeak > max_peak) {
 		max_peak = mpeak;
 		if (mpeak >= 0.0f) {
-			peak_display.set_name ("MixerStripPeakDisplayPeak");
+			peak_display.set_name ("meterbridge peakindicator on");
+			peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
 		}
 	}
 }
@@ -276,6 +280,9 @@ MeterStrip::on_theme_changed()
 		}
 		level_meter->setup_meters (400, meter_width, 6);
 	}
+	meter_metric_area.queue_draw();
+	meter_ticks1_area.queue_draw();
+	meter_ticks2_area.queue_draw();
 }
 
 void
@@ -309,10 +316,8 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 		meter_ticks1_area.set_name ("AudioMidiTrackMetrics");
 		meter_ticks2_area.set_name ("AudioMidiTrackMetrics");
 	}
-	meter_ticks1_area.queue_draw();
-	meter_ticks2_area.queue_draw();
-	metric_patterns.clear();
-	ticks_patterns.clear();
+
+	on_theme_changed();
 }
 
 void
@@ -390,6 +395,7 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 	cairo_fill (cr);
 
 	height = min(1024, height); // XXX see FastMeter::max_pattern_metric_size
+	uint32_t peakcolor = ARDOUR_UI::config()->color_by_name ("meterbridge peakindicator on: fill start");
 
 	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
 
@@ -413,68 +419,79 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 		}
 
-		vector<int> points;
+		std::map<int,float> points;
 
 		switch (*i) {
 		case DataType::AUDIO:
 			layout->set_attributes (audio_font_attributes);
-			points.push_back (-50);
-			points.push_back (-40);
-			points.push_back (-30);
-			points.push_back (-25);
-			points.push_back (-20);
-			points.push_back (-18);
-			points.push_back (-15);
-			points.push_back (-10);
-			points.push_back (-5);
-			points.push_back (-3);
-			points.push_back (0);
-			points.push_back (3);
+			points.insert (std::pair<int,float>(-50, 0.5));
+			points.insert (std::pair<int,float>(-40, 0.5));
+			points.insert (std::pair<int,float>(-30, 0.5));
+			points.insert (std::pair<int,float>(-25, 0.5));
+			points.insert (std::pair<int,float>(-20, 1.0));
+			points.insert (std::pair<int,float>(-18, 1.0));
+			points.insert (std::pair<int,float>(-15, 1.0));
+			points.insert (std::pair<int,float>(-10, 1.0));
+			points.insert (std::pair<int,float>( -5, 1.0));
+			points.insert (std::pair<int,float>( -3, 0.5));
+			points.insert (std::pair<int,float>(  0, 1.0));
+			points.insert (std::pair<int,float>(  3, 0.5));
 			break;
 
 		case DataType::MIDI:
 			layout->set_attributes (midi_font_attributes);
-			points.push_back (0);
+			points.insert (std::pair<int,float>(  0, 1.0));
 			if (types.size() == 1) {
-				points.push_back (32);
+				points.insert (std::pair<int,float>( 16, 0.5));
+				points.insert (std::pair<int,float>( 32, 0.5));
+				points.insert (std::pair<int,float>( 48, 0.5));
+				points.insert (std::pair<int,float>( 64, 1.0));
+				points.insert (std::pair<int,float>( 80, 0.5));
+				points.insert (std::pair<int,float>( 96, 0.5));
+				points.insert (std::pair<int,float>(100, 0.5));
+				points.insert (std::pair<int,float>(112, 0.5));
 			} else {
-				/* tweak so as not to overlay the -30dB mark */
-				points.push_back (48);
+				/* labels that don't overlay with dB */
+				points.insert (std::pair<int,float>( 48, 0.5));
+				points.insert (std::pair<int,float>( 72, 0.5));
+				points.insert (std::pair<int,float>( 88, 0.5));
 			}
-			if (types.size() == 1) {
-				points.push_back (64); // very close to -18dB
-				points.push_back (96); // overlays with -6dB mark
-			} else {
-				points.push_back (72);
-				points.push_back (88);
-			}
-			points.push_back (127);
+			points.insert (std::pair<int,float>(127, 1.0));
 			break;
 		}
 
 		char buf[32];
 		gint pos;
 
-		for (vector<int>::const_iterator j = points.begin(); j != points.end(); ++j) {
+		for (std::map<int,float>::const_iterator j = points.begin(); j != points.end(); ++j) {
 
 			float fraction = 0;
 			switch (*i) {
 			case DataType::AUDIO:
-				fraction = log_meter (*j);
-				snprintf (buf, sizeof (buf), "%+2d", *j);
+				cairo_set_line_width (cr, (j->second));
+				if (j->first >= 0) {
+					cairo_set_source_rgb (cr,
+							UINT_RGBA_R_FLT(peakcolor),
+							UINT_RGBA_G_FLT(peakcolor),
+							UINT_RGBA_B_FLT(peakcolor));
+				}
+				fraction = log_meter (j->first);
+				snprintf (buf, sizeof (buf), "%+2d", j->first);
+				pos = height - (gint) floor (height * fraction);
+				cairo_move_to(cr, width-2.5, pos + .5);
+				cairo_line_to(cr, width, pos + .5);
+				cairo_stroke (cr);
 				break;
 			case DataType::MIDI:
-				fraction = *j / 127.0;
-				snprintf (buf, sizeof (buf), "%3d", *j);
-				pos = height - (gint) rintf (height * fraction);
 				cairo_set_line_width (cr, 1.0);
-				cairo_arc(cr, 2.5, pos, 1.0, 0, 2 * M_PI);
+				fraction = (j->first) / 127.0;
+				snprintf (buf, sizeof (buf), "%3d", j->first);
+				pos = height - (gint) rintf (height * fraction);
+				cairo_arc(cr, 3, pos, 1.0, 0, 2 * M_PI);
 				cairo_fill(cr);
-				cairo_stroke (cr);
 				break;
 			}
 
-			pos = height - (gint) rintf (height * fraction);
 			layout->set_text(buf);
 
 			/* we want logical extents, not ink extents here */
@@ -486,7 +503,7 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 			p = min (p, height - th);
 			p = max (p, 0);
 
-			cairo_move_to (cr, width-1-tw, p);
+			cairo_move_to (cr, width-4-tw, p);
 			pango_cairo_show_layout (cr, layout->gobj());
 		}
 	}
@@ -582,6 +599,7 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 	cairo_fill (cr);
 
 	height = min(1024, height); // XXX see FastMeter::max_pattern_metric_size
+	uint32_t peakcolor = ARDOUR_UI::config()->color_by_name ("meterbridge peakindicator on: fill start");
 
 	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
 
@@ -653,7 +671,7 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 			points.insert (std::pair<int,float>( 32, 0.5));
 			points.insert (std::pair<int,float>( 48, 0.5));
 			points.insert (std::pair<int,float>( 64, 1.0));
-			points.insert (std::pair<int,float>( 72, 0.5));
+			points.insert (std::pair<int,float>( 80, 0.5));
 			points.insert (std::pair<int,float>( 96, 0.5));
 			points.insert (std::pair<int,float>(100, 1.0));
 			points.insert (std::pair<int,float>(112, 0.5));
@@ -670,7 +688,10 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 			switch (*i) {
 			case DataType::AUDIO:
 				if (j->first >= 0) {
-					cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
+					cairo_set_source_rgb (cr,
+							UINT_RGBA_R_FLT(peakcolor),
+							UINT_RGBA_G_FLT(peakcolor),
+							UINT_RGBA_B_FLT(peakcolor));
 				}
 				fraction = log_meter (j->first);
 				pos = height - (gint) floor (height * fraction);
@@ -681,9 +702,8 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 			case DataType::MIDI:
 				fraction = (j->first) / 127.0;
 				pos = height - (gint) floor (height * fraction);
-				cairo_arc(cr, 1.5, pos, (j->second), 0, 2 * M_PI);
-				cairo_fill_preserve(cr);
-				cairo_stroke (cr);
+				cairo_arc(cr, 1.5, pos, 1.0, 0, 2 * M_PI);
+				cairo_fill(cr);
 				break;
 			}
 		}
@@ -767,7 +787,8 @@ MeterStrip::reset_peak_display ()
 	_route->shared_peak_meter()->reset_max();
 	level_meter->clear_meters();
 	max_peak = -INFINITY;
-	peak_display.set_name ("MixerStripPeakDisplay");
+	peak_display.set_name ("meterbridge peakindicator");
+	peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
 }
 
 bool

@@ -29,6 +29,7 @@
 #include "ardour/types.h"
 #include "ardour/ardour.h"
 #include "route_ui.h"
+#include "ardour_button.h"
 
 #include "level_meter.h"
 
@@ -95,7 +96,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	Gtk::Alignment meter_align;
 	Gtk::HBox peakbx;
 	Gtk::HBox btnbox;
-	Gtk::Button peak_display;
+	ArdourButton peak_display;
 
 	std::vector<ARDOUR::DataType> _types;
 
