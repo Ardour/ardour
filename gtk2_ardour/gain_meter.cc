@@ -969,7 +969,7 @@ GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 	//font = w.get_style()->get_font();
 
 	font.set_weight (Pango::WEIGHT_NORMAL);
-	font.set_size (10.0 * PANGO_SCALE);
+	font.set_size (9.0 * PANGO_SCALE);
 	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 	audio_font_attributes.change (*font_attr);
 	delete font_attr;
@@ -1057,10 +1057,11 @@ GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 			}
 
 			gint const pos = height - (gint) floor (height * fraction);
+			float const linepos = min((float) height, (float)(pos + .5f));
 
 			cairo_set_line_width (cr, 1.0);
-			cairo_move_to (cr, 0, pos);
-			cairo_line_to (cr, 3.5, pos);
+			cairo_move_to (cr, 0, linepos);
+			cairo_line_to (cr, 3.5, linepos);
 			cairo_stroke (cr);
 			
 			snprintf (buf, sizeof (buf), "%2d", abs (*j));
