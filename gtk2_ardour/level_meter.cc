@@ -181,24 +181,43 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 	//cerr << "LevelMeter::setup_meters() called color_changed = " << color_changed << " colors: " << endl;//DEBUG
 
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
-		uint32_t b, m, t, c;
+		uint32_t c[10];
+		float stp[4] =  {55.0, 77.5, 92.5, 100.0};
 		if (n < nmidi) {
-			b = ARDOUR_UI::config()->canvasvar_MidiMeterColorBase.get();
-			m = ARDOUR_UI::config()->canvasvar_MidiMeterColorMid.get();
-			t = ARDOUR_UI::config()->canvasvar_MidiMeterColorTop.get();
-			c = ARDOUR_UI::config()->canvasvar_MeterColorClip.get();
+			c[0] = ARDOUR_UI::config()->canvasvar_MidiMeterColor0.get();
+			c[1] = ARDOUR_UI::config()->canvasvar_MidiMeterColor1.get();
+			c[2] = ARDOUR_UI::config()->canvasvar_MidiMeterColor2.get();
+			c[3] = ARDOUR_UI::config()->canvasvar_MidiMeterColor3.get();
+			c[4] = ARDOUR_UI::config()->canvasvar_MidiMeterColor4.get();
+			c[5] = ARDOUR_UI::config()->canvasvar_MidiMeterColor5.get();
+			c[6] = ARDOUR_UI::config()->canvasvar_MidiMeterColor6.get();
+			c[7] = ARDOUR_UI::config()->canvasvar_MidiMeterColor7.get();
+			c[8] = ARDOUR_UI::config()->canvasvar_MidiMeterColor8.get();
+			c[9] = ARDOUR_UI::config()->canvasvar_MidiMeterColor9.get();
+			stp[0] = 115.0 *  32.0 / 128.0;
+			stp[1] = 115.0 *  64.0 / 128.0;
+			stp[2] = 115.0 * 100.0 / 128.0;
+			stp[3] = 115.0 * 112.0 / 128.0;
 		} else {
-			b = ARDOUR_UI::config()->canvasvar_MeterColorBase.get();
-			m = ARDOUR_UI::config()->canvasvar_MeterColorMid.get();
-			t = ARDOUR_UI::config()->canvasvar_MeterColorTop.get();
-			c = ARDOUR_UI::config()->canvasvar_MeterColorClip.get();
+			c[0] = ARDOUR_UI::config()->canvasvar_MeterColor0.get();
+			c[1] = ARDOUR_UI::config()->canvasvar_MeterColor1.get();
+			c[2] = ARDOUR_UI::config()->canvasvar_MeterColor2.get();
+			c[3] = ARDOUR_UI::config()->canvasvar_MeterColor3.get();
+			c[4] = ARDOUR_UI::config()->canvasvar_MeterColor4.get();
+			c[5] = ARDOUR_UI::config()->canvasvar_MeterColor5.get();
+			c[6] = ARDOUR_UI::config()->canvasvar_MeterColor6.get();
+			c[7] = ARDOUR_UI::config()->canvasvar_MeterColor7.get();
+			c[8] = ARDOUR_UI::config()->canvasvar_MeterColor8.get();
+			c[9] = ARDOUR_UI::config()->canvasvar_MeterColor9.get();
 		}
 		if (meters[n].width != width || meters[n].length != len || color_changed) {
 			delete meters[n].meter;
 			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len,
-					b, b, m, m, t, t, c, c, c, c,
+					c[0], c[1], c[2], c[3], c[4],
+					c[5], c[6], c[7], c[8], c[9],
 					ARDOUR_UI::config()->canvasvar_MeterBackgroundBot.get(),
-					ARDOUR_UI::config()->canvasvar_MeterBackgroundTop.get()
+					ARDOUR_UI::config()->canvasvar_MeterBackgroundTop.get(),
+					stp[0], stp[1], stp[2], stp[3]
 					);
 			meters[n].width = width;
 			meters[n].length = len;

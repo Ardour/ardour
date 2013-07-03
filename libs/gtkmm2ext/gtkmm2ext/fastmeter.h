@@ -39,10 +39,14 @@ class FastMeter : public Gtk::DrawingArea {
 	FastMeter (long hold_cnt, unsigned long width, Orientation, int len=0,
 			int clr0=0x008800ff, int clr1=0x008800ff,
 			int clr2=0x00ff00ff, int clr3=0x00ff00ff,
-			int clr4=0x80ff00ff, int clr5=0x80ff00ff,
-			int clr6=0xffaa00ff, int clr7=0xffaa00ff,
+			int clr4=0xffaa00ff, int clr5=0xffaa00ff,
+			int clr6=0xffff00ff, int clr7=0xffff00ff,
 			int clr8=0xff0000ff, int clr9=0xff0000ff,
-			int bgc0=0x333333ff, int bgc1=0x444444ff
+			int bgc0=0x333333ff, int bgc1=0x444444ff,
+			float stp0 = 55.0, // log_meter(-18);
+			float stp1 = 77.5, // log_meter(-9);
+			float stp2 = 92.5, // log_meter(-3); // 95.0, // log_meter(-2);
+			float stp3 = 100.0
 			);
 	virtual ~FastMeter ();
 
@@ -68,7 +72,7 @@ private:
 	gint pixheight;
 	gint pixwidth;
 
-	float _stp[3];
+	float _stp[4];
 	int _clr[10];
 	int _bgc[2];
 
@@ -100,13 +104,13 @@ private:
 	struct Pattern10MapKey {
 		Pattern10MapKey (
 				int w, int h,
-				float stp0, float stp1, float stp2,
+				float stp0, float stp1, float stp2, float stp3,
 				int c0, int c1, int c2, int c3,
 				int c4, int c5, int c6, int c7,
 				int c8, int c9
 				)
 			: dim(w, h)
-			, stp(stp0, stp1, stp2)
+			, stp(stp0, stp1, stp2, stp3)
 			, cols(c0, c1, c2, c3, c4, c5, c6, c7, c8, c9)
 		{}
 		inline bool operator<(const Pattern10MapKey& rhs) const {
@@ -115,7 +119,7 @@ private:
 				|| (dim == rhs.dim && stp == rhs.stp && cols < rhs.cols);
 		}
 		boost::tuple<int, int> dim;
-		boost::tuple<float, float, float> stp;
+		boost::tuple<float, float, float, float> stp;
 		boost::tuple<int, int, int, int, int, int, int, int, int, int> cols;
 	};
 	typedef std::map<Pattern10MapKey, Cairo::RefPtr<Cairo::Pattern> > Pattern10Map;

@@ -44,7 +44,10 @@ FastMeter::PatternBgMap FastMeter::vb_pattern_cache;
 FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 		int clr0, int clr1, int clr2, int clr3,
 		int clr4, int clr5, int clr6, int clr7,
-		int clr8, int clr9, int bgc0, int bgc1)
+		int clr8, int clr9, int bgc0, int bgc1,
+		float stp0, float stp1,
+		float stp2, float stp3
+		)
 {
 	orientation = o;
 	hold_cnt = hold;
@@ -69,10 +72,10 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	_bgc[0] = bgc0;
 	_bgc[1] = bgc1;
 
-	_stp[0] = 55.0; // log_meter(-18);
-	_stp[1] = 77.5; // log_meter(-9);
-	_stp[2] = 92.5; // log_meter(-3);
-	_stp[2] = 95.0; // log_meter(-2);
+	_stp[0] = stp0;
+	_stp[1] = stp1;
+	_stp[2] = stp2;
+	_stp[3] = stp3;
 
 	set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 
@@ -116,7 +119,7 @@ FastMeter::generate_meter_pattern (
 	cairo_pattern_add_color_stop_rgb (pat, 0.0,
 	                                  r/255.0, g/255.0, b/255.0);
 
-	knee = (int)floor((float)height * 100.0f / 115.0f); // -0dB
+	knee = (int)floor((float)height * stp[3] / 115.0f); // -0dB
 
 	UINT_TO_RGBA (clr[8], &r, &g, &b, &a);
 	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
@@ -198,7 +201,7 @@ FastMeter::request_vertical_meter(
 		height = max_pattern_metric_size;
 
 	const Pattern10MapKey key (width, height,
-			stp[0], stp[1], stp[2],
+			stp[0], stp[1], stp[2], stp[3],
 			clr[0], clr[1], clr[2], clr[3],
 			clr[4], clr[5], clr[6], clr[7],
 			clr[8], clr[9]);
