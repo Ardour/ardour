@@ -73,6 +73,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 
 	void set_text (const std::string&);
 	void set_markup (const std::string&);
+	void set_angle (const double);
 
 	void set_led_left (bool yn);
 	void set_distinct_led_click (bool yn);
@@ -117,6 +118,8 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	float _diameter;
 	float _corner_radius;
 	int   _corner_mask;
+
+	double _angle;
 
 	uint32_t bg_color;
 	uint32_t border_color;

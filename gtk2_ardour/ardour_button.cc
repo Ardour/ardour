@@ -61,6 +61,7 @@ ArdourButton::ArdourButton (Element e)
 	, _diameter (11.0)
 	, _corner_radius (4.0)
 	, _corner_mask (0xf)
+	, _angle(0)
 	, border_color (0)
 	, fill_color_active (0)
 	, fill_color_inactive (0)
@@ -87,6 +88,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, _diameter (11.0)
 	, _corner_radius (4.0)
 	, _corner_mask (0xf)
+	, _angle(0)
 	, border_color (0)
 	, fill_color_active (0)
 	, fill_color_inactive (0)
@@ -158,6 +160,12 @@ ArdourButton::set_markup (const std::string& str)
 
 	_layout->set_text (str);
 	queue_resize ();
+}
+
+void
+ArdourButton::set_angle (const double angle)
+{
+	_angle = angle;
 }
 
 void
@@ -285,6 +293,7 @@ ArdourButton::render (cairo_t* cr)
 	if ( ((_elements & Text)==Text) && !_text.empty()) {
 
 		cairo_new_path (cr);	
+		cairo_set_source_rgba (cr, text_r, text_g, text_b, text_a);
 
 		if (_elements & Indicator) {
 			if (_led_left) {
@@ -292,13 +301,25 @@ ArdourButton::render (cairo_t* cr)
 			} else {
 				cairo_move_to (cr, text_margin, get_height()/2.0 - _text_height/2.0);
 			}
+			pango_cairo_show_layout (cr, _layout->gobj());
 		} else {
 			/* center text */
+			double ww, wh;
+			ww= get_width();
+			wh= get_height();
+			cairo_save (cr); // TODO retain rotataion.. adj. LED,...
+			cairo_rotate(cr, _angle * M_PI / 180.0);
+			cairo_device_to_user(cr, &ww, &wh);
+			cairo_move_to (cr,
+					(ww - _text_width) / 2.0,
+					(wh - _text_height) / 2.0);
+			pango_cairo_update_layout(cr, _layout->gobj());
+			pango_cairo_show_layout (cr, _layout->gobj());
+			cairo_restore (cr);
+
 			cairo_move_to (cr, (get_width() - _text_width)/2.0, get_height()/2.0 - _text_height/2.0);
 		}
 
-		cairo_set_source_rgba (cr, text_r, text_g, text_b, text_a);
-		pango_cairo_show_layout (cr, _layout->gobj());
 	} 
 
 	if (((_elements & Indicator)==Indicator)) {
@@ -357,7 +378,8 @@ ArdourButton::render (cairo_t* cr)
 
 	/* if requested, show hovering */
 	
-	if (ARDOUR::Config->get_widget_prelight()) {
+	if (ARDOUR::Config->get_widget_prelight()
+			&& !((visual_state() & Gtkmm2ext::Insensitive))) {
 		if (_hovering) {
 			rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
 			cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
