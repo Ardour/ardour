@@ -144,10 +144,10 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	peak_display.set_name ("MixerStripPeakDisplay");
 	max_peak = minus_infinity();
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
-	peak_display.set_size_request(-1, 8);
+	peak_display.set_size_request(12, 8);
 
 	Gtk::Alignment *peak_align = Gtk::manage (new Gtk::Alignment());
-	peak_align->set(0.5, 1.0, 0.9, 0.8);
+	peak_align->set(0.5, 1.0, 0.0, 0.8);
 	peak_align->add(peak_display);
 	peakbx.pack_start(*peak_align, true, true);
 	peakbx.set_size_request(-1, 14);
@@ -467,8 +467,8 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 				fraction = *j / 127.0;
 				snprintf (buf, sizeof (buf), "%3d", *j);
 				pos = height - (gint) rintf (height * fraction);
-
-				cairo_arc(cr, 2, pos, 1.0, 0, 2 * M_PI);
+				cairo_set_line_width (cr, 1.0);
+				cairo_arc(cr, 2.5, pos, 1.0, 0, 2 * M_PI);
 				cairo_fill(cr);
 				cairo_stroke (cr);
 				break;
@@ -506,7 +506,7 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 		}
 		Gdk::Color c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
 		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-		cairo_move_to (cr, 1, height - th);
+		cairo_move_to (cr, 1, height - th - 1.5);
 		pango_cairo_show_layout (cr, layout->gobj());
 	}
 

@@ -127,7 +127,7 @@ Meterbridge::Meterbridge ()
 
 	Gdk::Geometry geom;
 	geom.max_width = 1<<16;
-	geom.max_height = 1024; // XXX see FastMeter::max_pattern_metric_size
+	geom.max_height = 1024 + 52 + 16 + 12 ; // XXX see FastMeter::max_pattern_metric_size + meter-strip widgets
 	set_geometry_hints(*((Gtk::Window*) this), geom, Gdk::HINT_MAX_SIZE);
 
 	/* disable "maximize" button because it overrides size hint from above,
