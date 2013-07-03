@@ -453,6 +453,7 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 		}
 
 		char buf[32];
+		gint pos;
 
 		for (vector<int>::const_iterator j = points.begin(); j != points.end(); ++j) {
 
@@ -465,10 +466,15 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 			case DataType::MIDI:
 				fraction = *j / 127.0;
 				snprintf (buf, sizeof (buf), "%3d", *j);
+				pos = height - (gint) rintf (height * fraction);
+
+				cairo_arc(cr, 2, pos, 1.0, 0, 2 * M_PI);
+				cairo_fill(cr);
+				cairo_stroke (cr);
 				break;
 			}
 
-			gint const pos = height - (gint) rintf (height * fraction);
+			pos = height - (gint) rintf (height * fraction);
 			layout->set_text(buf);
 
 			/* we want logical extents, not ink extents here */
