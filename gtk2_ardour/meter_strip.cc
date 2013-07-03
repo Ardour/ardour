@@ -63,6 +63,7 @@ MeterStrip::MeterStrip (int metricmode)
 	set_spacing(2);
 	peakbx.set_size_request(-1, 14);
 	btnbox.set_size_request(-1, 16);
+	namebx.set_size_request(14, 52);
 
 	_types.clear ();
 	switch(metricmode) {
@@ -92,22 +93,16 @@ MeterStrip::MeterStrip (int metricmode)
 
 	meterbox.pack_start(meter_metric_area, true, false);
 
-	label.set_text("");
-	label.set_name("MeterbridgeLabel");
-	label.set_angle(90.0);
-	label.set_alignment(0.5, 1.0);
-	label.set_size_request(12, 52);
-
 	pack_start (peakbx, false, false);
 	pack_start (meterbox, true, true);
 	pack_start (btnbox, false, false);
-	pack_start (label, false, false, 2);
+	pack_start (namebx, false, false);
 
 	peakbx.show();
 	btnbox.show();
-	label.show();
 	meter_metric_area.show();
 	meterbox.show();
+	namebx.show();
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
@@ -148,6 +143,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	max_peak = minus_infinity();
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
 	peak_display.set_size_request(12, 8);
+	peak_display.set_corner_radius(2);
 
 	Gtk::Alignment *peak_align = Gtk::manage (new Gtk::Alignment());
 	peak_align->set(0.5, 1.0, 1.0, 0.8);
@@ -155,21 +151,27 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	peakbx.pack_start(*peak_align, true, true, 3);
 	peakbx.set_size_request(-1, 14);
 
-	// add track-name label -- TODO ellipsize
-	label.set_text(_route->name().c_str());
-	label.set_name("MeterbridgeLabel");
-	label.set_angle(90.0);
-	label.set_alignment(0.5, 1.0);
-	label.set_size_request(12, 52);
+	// add track-name label
+	name_label.set_text(_route->name().c_str());
+	name_label.set_corner_radius(2);
+	name_label.set_name("solo isolate"); // XXX re-use 'very_small_text'
+	name_label.set_angle(-90.0);
+	name_label.layout()->set_ellipsize (Pango::ELLIPSIZE_END);
+	name_label.layout()->set_width(48 * PANGO_SCALE);
+	name_label.set_size_request(14, 50);
+
+	namebx.set_size_request(14, 52);
+	namebx.pack_start(name_label, true, false, 3);
 
 	// rec-enable button
 	btnbox.pack_start(*rec_enable_button, true, false);
+	rec_enable_button->set_corner_radius(2);
 	btnbox.set_size_request(-1, 16);
 
 	pack_start (peakbx, false, false);
 	pack_start (meterbox, true, true);
 	pack_start (btnbox, false, false);
-	pack_start (label, false, false, 2);
+	pack_start (namebx, false, false);
 
 	peak_display.show();
 	peakbx.show();
@@ -180,7 +182,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	meter_align->show();
 	peak_align->show();
 	btnbox.show();
-	label.show();
+	name_label.show();
+	namebx.show();
 
 	_route->shared_peak_meter()->ConfigurationChanged.connect (
 			route_connections, invalidator (*this), boost::bind (&MeterStrip::meter_configuration_changed, this, _1), gui_context()
@@ -239,7 +242,7 @@ MeterStrip::strip_property_changed (const PropertyChange& what_changed)
 		return;
 	}
 	ENSURE_GUI_THREAD (*this, &MeterStrip::strip_name_changed, what_changed)
-	label.set_text(_route->name());
+	name_label.set_text(_route->name());
 }
 
 void

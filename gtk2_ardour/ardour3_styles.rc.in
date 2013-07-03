@@ -766,11 +766,6 @@ style "audio_bus_metrics_inactive" = "track_controls_inactive"
 	font_name = "@FONT_TINY@"
 }
 
-style "meterbridge_label" = "very_small_text"
-{
-
-}
-
 style "track_name_display" = "medium_text"
 {
 	fg[NORMAL] = @@COLPREFIX@_fg

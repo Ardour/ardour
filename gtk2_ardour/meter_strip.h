@@ -87,7 +87,8 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 
   private:
 	Gtk::HBox meterbox;
-	Gtk::Label label;
+	Gtk::HBox namebx;
+	ArdourButton name_label;
 	Gtk::DrawingArea meter_metric_area;
 	Gtk::DrawingArea meter_ticks1_area;
 	Gtk::DrawingArea meter_ticks2_area;
