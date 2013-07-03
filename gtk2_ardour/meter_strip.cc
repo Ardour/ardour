@@ -128,7 +128,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	level_meter = new LevelMeter(sess);
 	level_meter->set_meter (_route->shared_peak_meter().get());
 	level_meter->clear_meters();
-	level_meter->setup_meters (400, meter_width, 6);
+	level_meter->setup_meters (220, meter_width, 6);
 
 	Gtk::Alignment *meter_align = Gtk::manage (new Gtk::Alignment());
 	meter_align->set(0.5, 0.5, 0.0, 1.0);
@@ -271,7 +271,7 @@ MeterStrip::on_theme_changed()
 		if (_route->shared_peak_meter()->input_streams().n_total() == 1) {
 			meter_width = 12;
 		}
-		level_meter->setup_meters (400, meter_width, 6);
+		level_meter->setup_meters (220, meter_width, 6);
 	}
 	meter_metric_area.queue_draw();
 	meter_ticks1_area.queue_draw();
