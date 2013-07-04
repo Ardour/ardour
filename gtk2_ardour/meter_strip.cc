@@ -65,7 +65,7 @@ MeterStrip::MeterStrip (int metricmode)
 	set_spacing(2);
 	peakbx.set_size_request(-1, 14);
 	btnbox.set_size_request(-1, 16);
-	namebx.set_size_request(14, 52);
+	namebx.set_size_request(18, 52);
 
 	_types.clear ();
 	switch(metricmode) {
@@ -325,6 +325,15 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 {
 	metric_patterns.clear();
 	ticks_patterns.clear();
+	const int wh = a.get_height();
+	int nh = ceilf(wh * .11f);
+	if (nh < 52) nh = 52;
+	if (nh > 148) nh = 148;
+	namebx.set_size_request(18, nh);
+	if (_route) {
+		name_label.set_size_request(18, nh-2);
+		name_label.layout()->set_width((nh-4) * PANGO_SCALE);
+	}
 	VBox::on_size_allocate(a);
 }
 
