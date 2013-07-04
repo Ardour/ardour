@@ -1064,7 +1064,7 @@ GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 				break;
 			}
 
-			gint const pos = height - (gint) floor (height * fraction);
+			gint const pos = 1 + height - (gint) floor (height * fraction);
 			float const linepos = min((float) height, (float)(pos + .5f));
 
 			cairo_set_line_width (cr, 1.0);

@@ -55,7 +55,7 @@ PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
 
 MeterStrip::MetricPatterns MeterStrip::metric_patterns;
 MeterStrip::TickPatterns MeterStrip::ticks_patterns;
-int MeterStrip::max_pattern_metric_size = 1024;
+int MeterStrip::max_pattern_metric_size = 1026; // +2 border
 
 MeterStrip::MeterStrip (int metricmode)
 	: AxisView(0)
@@ -395,8 +395,8 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 	cairo_fill (cr);
 
 	if (height > max_pattern_metric_size) {
-		cairo_move_to (cr, 0, max_pattern_metric_size);
-		cairo_rectangle (cr, 0, max_pattern_metric_size, width, height);
+		cairo_move_to (cr, 0, max_pattern_metric_size + 1);
+		cairo_rectangle (cr, 0, max_pattern_metric_size, width, height - max_pattern_metric_size);
 		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_ACTIVE);
 		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 		cairo_fill (cr);
@@ -485,7 +485,7 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 				}
 				fraction = log_meter (j->first);
 				snprintf (buf, sizeof (buf), "%+2d", j->first);
-				pos = height - (gint) floor (height * fraction);
+				pos = 1 + height - (gint) floor (height * fraction);
 				cairo_move_to(cr, width-2.5, pos + .5);
 				cairo_line_to(cr, width, pos + .5);
 				cairo_stroke (cr);
@@ -494,8 +494,9 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 				cairo_set_line_width (cr, 1.0);
 				fraction = (j->first) / 127.0;
 				snprintf (buf, sizeof (buf), "%3d", j->first);
-				pos = height - (gint) rintf (height * fraction);
-				cairo_arc(cr, 3, pos, 1.0, 0, 2 * M_PI);
+				pos = 1 + height - (gint) rintf (height * fraction);
+				pos = min (pos, height);
+				cairo_arc(cr, 3, pos + .5, 1.0, 0, 2 * M_PI);
 				cairo_fill(cr);
 				break;
 			}
@@ -607,8 +608,8 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 	cairo_fill (cr);
 
 	if (height > max_pattern_metric_size) {
-		cairo_move_to (cr, 0, max_pattern_metric_size);
-		cairo_rectangle (cr, 0, max_pattern_metric_size, width, height);
+		cairo_move_to (cr, 0, max_pattern_metric_size + 1);
+		cairo_rectangle (cr, 0, max_pattern_metric_size, width, height - max_pattern_metric_size);
 		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_ACTIVE);
 		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 		cairo_fill (cr);
@@ -711,15 +712,16 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 					cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 				}
 				fraction = log_meter (j->first);
-				pos = height - (gint) floor (height * fraction);
+				pos = 1 + height - (gint) floor (height * fraction);
 				cairo_move_to(cr, 0, pos + .5);
 				cairo_line_to(cr, 3, pos + .5);
 				cairo_stroke (cr);
 				break;
 			case DataType::MIDI:
 				fraction = (j->first) / 127.0;
-				pos = height - (gint) floor (height * fraction);
-				cairo_arc(cr, 1.5, pos, 1.0, 0, 2 * M_PI);
+				pos = 1 + height - (gint) floor (height * fraction);
+				pos = min (pos, height);
+				cairo_arc(cr, 1.5, pos + .5, 1.0, 0, 2 * M_PI);
 				cairo_fill(cr);
 				break;
 			}
