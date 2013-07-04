@@ -96,10 +96,16 @@ LevelMeter::update_meters ()
 		return 0.0f;
 	}
 
+	int32_t nmidi = _meter->input_streams().n_midi();
+
 	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
 		if ((*i).packed) {
 			peak = _meter->peak_power (n);
-			(*i).meter->set (log_meter (peak));
+			if (n < nmidi) {
+				(*i).meter->set (peak);
+			} else {
+				(*i).meter->set (log_meter (peak));
+			}
 			mpeak = _meter->max_peak_power(n);
 			if (mpeak > max_peak) {
 				max_peak = mpeak;

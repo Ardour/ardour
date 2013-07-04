@@ -68,7 +68,7 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 		for (MidiBuffer::iterator e = buf.begin(); e != buf.end(); ++e) {
 			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
 			if (ev.is_note_on()) {
-				const float this_vel = log(ev.buffer()[2] / 127.0 * (M_E*M_E-M_E) + M_E) - 1.0;
+				const float this_vel = ev.buffer()[2] / 127.0;
 				if (this_vel > val) {
 					val = this_vel;
 				}
@@ -189,6 +189,7 @@ PeakMeter::meter ()
 	assert(_visible_peak_power.size() == _peak_power.size());
 
 	const size_t limit = min (_peak_power.size(), (size_t) current_meters.n_total ());
+	const size_t n_midi  = min (_peak_power.size(), (size_t) current_meters.n_midi());
 
 	for (size_t n = 0; n < limit; ++n) {
 
@@ -196,6 +197,24 @@ PeakMeter::meter ()
 
 		float new_peak = _peak_power[n]; /* XXX we should use atomic exchange from here ... */
 		_peak_power[n] = 0;              /* ... to here */
+
+		if (n < n_midi) {
+			_max_peak_power[n] = -INFINITY; // std::max (fast_coefficient_to_dB(new_peak), _max_peak_power[n]); // XXX
+			if (Config->get_meter_falloff() == 0.0f || new_peak > _visible_peak_power[n]) {
+			} else {
+				/* empirical WRT to falloff times , 0.01f ^= 100 Hz update rate */
+#if 1
+				new_peak = _visible_peak_power[n] - _visible_peak_power[n] * Config->get_meter_falloff() * 0.01f * 0.05f;
+#else
+				new_peak = _visible_peak_power[n] - sqrt(_visible_peak_power[n] * Config->get_meter_falloff() * 0.01f * 0.0002f);
+#endif
+				if (new_peak < (1.0 / 512.0)) new_peak = 0;
+			}
+			_visible_peak_power[n] = new_peak;
+			continue;
+		}
+
+		/* AUDIO */
 
 		/* compute new visible value using falloff */
 
