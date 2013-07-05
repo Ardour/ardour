@@ -61,9 +61,6 @@ using namespace Gtk;
 using namespace std;
 using Gtkmm2ext::Keyboard;
 
-sigc::signal<void> GainMeterBase::ResetAllPeakDisplays;
-sigc::signal<void,RouteGroup*> GainMeterBase::ResetGroupPeakDisplays;
-
 GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int fader_girth)
 	: gain_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0.0, 1.0, 0.01, 0.1)
 	, gain_automation_style_button ("")

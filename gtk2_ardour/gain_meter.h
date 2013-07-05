@@ -183,9 +183,6 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	void reset_peak_display ();
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
 
-	static sigc::signal<void> ResetAllPeakDisplays;
-	static sigc::signal<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
-
 	void on_theme_changed ();
 	void color_handler(bool);
 	ARDOUR::DataType _data_type;

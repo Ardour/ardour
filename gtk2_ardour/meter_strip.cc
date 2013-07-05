@@ -54,10 +54,7 @@ using namespace Gtkmm2ext;
 using namespace std;
 
 PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
-PBD::Signal0<void> MeterStrip::ResetAllPeakDisplays;
-PBD::Signal1<void,RouteGroup*> MeterStrip::ResetGroupPeakDisplays;
 PBD::Signal0<void> MeterStrip::MetricChanged;
-
 
 MeterStrip::MeterStrip (int metricmode)
 	: AxisView(0)
@@ -173,6 +170,10 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	_route->shared_peak_meter()->ConfigurationChanged.connect (
 			route_connections, invalidator (*this), boost::bind (&MeterStrip::meter_configuration_changed, this, _1), gui_context()
 			);
+
+	ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &MeterStrip::reset_peak_display));
+	ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &MeterStrip::reset_group_peak_display));
+
 	meter_configuration_changed (_route->shared_peak_meter()->input_streams ());
 
 	meter_ticks1_area.set_size_request(3,-1);

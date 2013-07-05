@@ -54,8 +54,6 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	boost::shared_ptr<ARDOUR::Route> route() { return _route; }
 
 	static PBD::Signal1<void,MeterStrip*> CatchDeletion;
-	static PBD::Signal0<void> ResetAllPeakDisplays;
-	static PBD::Signal1<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
 	static PBD::Signal0<void> MetricChanged;
 
 	void reset_peak_display ();
