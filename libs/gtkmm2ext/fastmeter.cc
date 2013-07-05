@@ -35,7 +35,7 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace std;
 
-int FastMeter::min_pattern_metric_size = 10;
+int FastMeter::min_pattern_metric_size = 16;
 int FastMeter::max_pattern_metric_size = 1024;
 
 FastMeter::Pattern10Map FastMeter::vm_pattern_cache;
@@ -106,7 +106,8 @@ FastMeter::generate_meter_pattern (
 		int width, int height, int *clr, float *stp)
 {
 	guint8 r,g,b,a;
-	int knee;
+	double knee;
+	double soft = 1.5 / (double) height;
 
 	cairo_pattern_t* pat = cairo_pattern_create_linear (0.0, 0.0, 0.0, height);
 
@@ -119,49 +120,74 @@ FastMeter::generate_meter_pattern (
 	cairo_pattern_add_color_stop_rgb (pat, 0.0,
 	                                  r/255.0, g/255.0, b/255.0);
 
-	knee = (int)floor((float)height * stp[3] / 115.0f); // -0dB
+	knee = ((float)height * stp[3] / 115.0f); // -0dB
 
 	UINT_TO_RGBA (clr[8], &r, &g, &b, &a);
-	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height) - soft,
 	                                  r/255.0, g/255.0, b/255.0);
 
 	UINT_TO_RGBA (clr[7], &r, &g, &b, &a);
-	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height) + soft,
 	                                  r/255.0, g/255.0, b/255.0);
 
-	knee = (int)floor((float)height * stp[2]/ 115.0f); // -3dB || -2dB
+	knee = ((float)height * stp[2]/ 115.0f); // -3dB || -2dB
 
 	UINT_TO_RGBA (clr[6], &r, &g, &b, &a);
-	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height) - soft,
 	                                  r/255.0, g/255.0, b/255.0);
 
 	UINT_TO_RGBA (clr[5], &r, &g, &b, &a);
-	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height) + soft,
 	                                  r/255.0, g/255.0, b/255.0);
 
-	knee = (int)floor((float)height * stp[1] / 115.0f); // -9dB
+	knee = ((float)height * stp[1] / 115.0f); // -9dB
 
 	UINT_TO_RGBA (clr[4], &r, &g, &b, &a);
-	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height) - soft,
 	                                  r/255.0, g/255.0, b/255.0);
 
 	UINT_TO_RGBA (clr[3], &r, &g, &b, &a);
-	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height) + soft,
 	                                  r/255.0, g/255.0, b/255.0);
 
-	knee = (int)floor((float)height * stp[0] / 115.0f); // -18dB
+	knee = ((float)height * stp[0] / 115.0f); // -18dB
 
 	UINT_TO_RGBA (clr[2], &r, &g, &b, &a);
-	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height) - soft,
 	                                  r/255.0, g/255.0, b/255.0);
 
 	UINT_TO_RGBA (clr[1], &r, &g, &b, &a);
-	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height),
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height) + soft,
 	                                  r/255.0, g/255.0, b/255.0);
 
 	UINT_TO_RGBA (clr[0], &r, &g, &b, &a); // bottom
 	cairo_pattern_add_color_stop_rgb (pat, 1.0,
 	                                  r/255.0, g/255.0, b/255.0);
+
+	if (1) { // TODO Config->get_meter_shade()
+		cairo_pattern_t* shade_pattern = cairo_pattern_create_linear (0.0, 0.0, width, 0.0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, 1.0, 1.0, 1.0, 0.3);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, 0.0, 0.0, 0.0, 0.5);
+
+		cairo_surface_t* surface;
+		cairo_t* tc = 0;
+		surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width, height);
+		tc = cairo_create (surface);
+		cairo_set_source (tc, pat);
+		cairo_rectangle (tc, 0, 0, width, height);
+		cairo_fill (tc);
+		cairo_set_source (tc, shade_pattern);
+		cairo_rectangle (tc, 0, 0, width, height);
+		cairo_fill (tc);
+
+		cairo_pattern_destroy (pat);
+		cairo_pattern_destroy (shade_pattern);
+
+		pat = cairo_pattern_create_for_surface (surface);
+
+		cairo_destroy (tc);
+		cairo_surface_destroy (surface);
+	}
 
 	Cairo::RefPtr<Cairo::Pattern> p (new Cairo::Pattern (pat, false));
 
@@ -205,10 +231,12 @@ FastMeter::request_vertical_meter(
 			clr[0], clr[1], clr[2], clr[3],
 			clr[4], clr[5], clr[6], clr[7],
 			clr[8], clr[9]);
+
 	Pattern10Map::iterator i;
 	if ((i = vm_pattern_cache.find (key)) != vm_pattern_cache.end()) {
 		return i->second;
 	}
+	// TODO flush pattern cache if it gets too large
 
 	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_pattern (
 		width, height, clr, stp);
@@ -231,6 +259,7 @@ FastMeter::request_vertical_background(
 	if ((i = vb_pattern_cache.find (key)) != vb_pattern_cache.end()) {
 		return i->second;
 	}
+	// TODO flush pattern cache if it gets too large
 
 	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_background (
 		width, height, bgc);
