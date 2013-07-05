@@ -108,7 +108,7 @@ FastMeter::generate_meter_pattern (
 	guint8 r,g,b,a;
 	int knee;
 
-	cairo_pattern_t* pat = cairo_pattern_create_linear (0.0, 0.0, width, height);
+	cairo_pattern_t* pat = cairo_pattern_create_linear (0.0, 0.0, 0.0, height);
 
 	/*
 	  Cairo coordinate space goes downwards as y value goes up, so invert
