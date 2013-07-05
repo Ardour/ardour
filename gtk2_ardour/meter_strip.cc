@@ -383,14 +383,6 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 	}
 	cairo_fill (cr);
 
-	if (height > max_pattern_metric_size) {
-		cairo_move_to (cr, 0, max_pattern_metric_size + 1);
-		cairo_rectangle (cr, 0, max_pattern_metric_size, width, height - max_pattern_metric_size);
-		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_ACTIVE);
-		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-		cairo_fill (cr);
-	}
-
 	height = min(max_pattern_metric_size, height);
 	uint32_t peakcolor = ARDOUR_UI::config()->color_by_name ("meterbridge peaklabel");
 
@@ -634,14 +626,6 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 	}
 	cairo_fill (cr);
-
-	if (height > max_pattern_metric_size) {
-		cairo_move_to (cr, 0, max_pattern_metric_size + 1);
-		cairo_rectangle (cr, 0, max_pattern_metric_size, width, height - max_pattern_metric_size);
-		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_ACTIVE);
-		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-		cairo_fill (cr);
-	}
 
 	height = min(max_pattern_metric_size, height);
 	uint32_t peakcolor = ARDOUR_UI::config()->color_by_name ("meterbridge peaklabel");
