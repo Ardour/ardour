@@ -60,6 +60,8 @@ class Meterbridge :
 
 	bool _visible;
 	bool _show_busses;
+	bool _show_master;
+	bool _show_midi;
 
 	Gtk::ScrolledWindow scroller;
 	Gtk::HBox meterarea;
@@ -78,6 +80,7 @@ class Meterbridge :
 
 	void session_going_away ();
 	void sync_order_keys (ARDOUR::RouteSortOrderKey src);
+	void resync_order ();
 
 	std::list<MeterStrip *> strips;
 

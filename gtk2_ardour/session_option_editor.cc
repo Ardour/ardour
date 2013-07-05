@@ -273,11 +273,26 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    ));
 
 	add_option (_("Misc"), new OptionEditorHeading (_("Meterbridge Options")));
+
 	add_option (_("Misc"), new BoolOption (
-			    "show-busses-in-meterbridge",
+			    "show-midi-on-meterbridge",
+			    _("Include Midi Tracks on Meterbridge"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_midi_on_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_midi_on_meterbridge)
+			    ));
+
+	add_option (_("Misc"), new BoolOption (
+			    "show-busses-on-meterbridge",
 			    _("Include Busses on Meterbridge"),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_busses_in_meterbridge),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_busses_in_meterbridge)
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_busses_on_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_busses_on_meterbridge)
+			    ));
+
+	add_option (_("Misc"), new BoolOption (
+			    "show-master-on-meterbridge",
+			    _("Include Master Bus on Meterbridge"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_master_on_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_master_on_meterbridge)
 			    ));
 
 }

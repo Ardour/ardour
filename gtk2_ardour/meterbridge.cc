@@ -337,7 +337,9 @@ Meterbridge::set_session (Session* s)
 	}
 
 	update_title ();
-	_show_busses = _session->config.get_show_busses_in_meterbridge();
+	_show_busses = _session->config.get_show_busses_on_meterbridge();
+	_show_master = _session->config.get_show_master_on_meterbridge();
+	_show_midi = _session->config.get_show_midi_on_meterbridge();
 
 	SignalOrderRouteSorter sorter;
 	boost::shared_ptr<RouteList> routes = _session->get_routes();
@@ -479,6 +481,7 @@ Meterbridge::fast_update_strips ()
 		return;
 	}
 	for (list<MeterStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		// TODO skip inactive/hidden routes
 		(*i)->fast_update ();
 	}
 }
@@ -498,6 +501,7 @@ Meterbridge::add_strips (RouteList& routes)
 
 		strip = new MeterStrip (_session, route);
 		strips.push_back (strip);
+		route->active_changed.connect (*this, invalidator (*this), boost::bind (&Meterbridge::resync_order, this), gui_context ());
 
 		meterarea.pack_start (*strip, false, false);
 		strip->show();
@@ -549,18 +553,15 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 
 	for (list<MeterStrip *>::iterator i = copy.begin(); i != copy.end(); ++i) {
 
-#if 0 // TODO subscribe to route active,inactive changes, merge w/ bus
 		if (! (*i)->route()->active()) {
 			(*i)->hide();
-		} else {
-			(*i)->show();
 		}
-#endif
-
-		// TODO simplyfy, abstract ->is_bus()
-		if ((*i)->route()->is_master()) {
-			/* always show master */
-			(*i)->show();
+		else if ((*i)->route()->is_master()) {
+			if (_show_master) {
+				(*i)->show();
+			} else {
+				(*i)->hide();
+			}
 		}
 		else if (boost::dynamic_pointer_cast<AudioTrack>((*i)->route()) == 0
 				&& boost::dynamic_pointer_cast<MidiTrack>((*i)->route()) == 0
@@ -572,19 +573,39 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 				(*i)->hide();
 			}
 		}
+		else if (boost::dynamic_pointer_cast<MidiTrack>((*i)->route())) {
+			if (_show_midi) {
+				(*i)->show();
+			} else {
+				(*i)->hide();
+			}
+		}
 		else {
 			(*i)->show();
 		}
-
 		meterarea.reorder_child(*(*i), pos++);
 	}
 }
 
 void
+Meterbridge::resync_order ()
+{
+	sync_order_keys(MixerSort);
+}
+
+void
 Meterbridge::parameter_changed (std::string const & p)
 {
-	if (p == "show-busses-in-meterbridge") {
-		_show_busses = _session->config.get_show_busses_in_meterbridge();
+	if (p == "show-busses-on-meterbridge") {
+		_show_busses = _session->config.get_show_busses_on_meterbridge();
+		sync_order_keys(MixerSort);
+	}
+	else if (p == "show-master-on-meterbridge") {
+		_show_master = _session->config.get_show_master_on_meterbridge();
+		sync_order_keys(MixerSort);
+	}
+	else if (p == "show-midi-on-meterbridge") {
+		_show_midi = _session->config.get_show_midi_on_meterbridge();
 		sync_order_keys(MixerSort);
 	}
 }
