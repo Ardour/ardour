@@ -1938,13 +1938,18 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (S_("Preferences|GUI"), mlu);
 
-	add_option (S_("Preferences|GUI"),
-	     new FaderOption (
-		     "meter-peak",
-		     _("Meter Peak Threshold"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_peak),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_peak)
-		     ));
+	Gtk::Adjustment *mpk = manage (new Gtk::Adjustment(-.1, -10, 0, .01, .1));
+	HSliderOption *mpks = new HSliderOption("meter-peak", _("Meter peak threshold [dBFS]"),
+			mpk,
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_peak),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_peak)
+			);
+
+	Gtkmm2ext::UI::instance()->set_tip
+		(mpks->tip_widget(),
+		 _("Specify the audio signal level in dbFS at and above which the meter-peak indicator will flash red."));
+
+	add_option (S_("Preferences|GUI"), mpks);
 }
 
 void
