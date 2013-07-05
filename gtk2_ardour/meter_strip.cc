@@ -241,7 +241,7 @@ MeterStrip::fast_update ()
 	float mpeak = level_meter->update_meters();
 	if (mpeak > max_peak) {
 		max_peak = mpeak;
-		if (mpeak >= -0.5f) {
+		if (mpeak >= Config->get_meter_peak()) {
 			peak_display.set_name ("meterbridge peakindicator on");
 			peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
 		}

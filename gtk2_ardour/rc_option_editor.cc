@@ -1937,6 +1937,14 @@ RCOptionEditor::RCOptionEditor ()
 	mlu->add (MeteringLineUp15, _("-15dB"));
 
 	add_option (S_("Preferences|GUI"), mlu);
+
+	add_option (S_("Preferences|GUI"),
+	     new FaderOption (
+		     "meter-peak",
+		     _("Meter Peak Threshold"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_peak),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_peak)
+		     ));
 }
 
 void

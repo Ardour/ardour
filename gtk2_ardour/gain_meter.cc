@@ -844,7 +844,7 @@ GainMeterBase::update_meters()
 			peak_display.set_label (buf);
 		}
 
-		if (mpeak >= 0.0f) {
+		if (mpeak >= Config->get_meter_peak()) {
 			peak_display.set_name ("MixerStripPeakDisplayPeak");
 		}
 	}
