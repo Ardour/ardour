@@ -199,7 +199,7 @@ Meterbridge::Meterbridge ()
 	 */
 	Gtk::Viewport* viewport = (Gtk::Viewport*) scroller.get_child();
 	viewport->set_shadow_type(Gtk::SHADOW_NONE);
-	//viewport->set_border_width(0);
+	viewport->set_border_width(0);
 }
 
 Meterbridge::~Meterbridge ()
@@ -301,7 +301,17 @@ Meterbridge::on_size_allocate (Gtk::Allocation& a)
 	const Gtk::Scrollbar * hsc = scroller.get_hscrollbar();
 
 	if (scroller.get_hscrollbar_visible() && hsc) {
-		int h = hsc->get_height() + 4;
+		gint scrollbar_spacing;
+		gtk_widget_style_get (GTK_WIDGET (scroller.gobj()),
+				"scrollbar-spacing", &scrollbar_spacing, NULL);
+		const int h = hsc->get_height() + scrollbar_spacing + 1;
+#if 1 // debug
+		Gtk::Viewport* viewport = (Gtk::Viewport*) scroller.get_child();
+		if (get_height() - viewport->get_height() != h) {
+			printf("scrollbar height vs win-view height: %d vs %d\n",
+					h, get_height() - viewport->get_height());
+		}
+#endif
 		metrics_spacer_left.set_size_request(-1, h);
 		metrics_spacer_right.set_size_request(-1, h);
 	} else {
