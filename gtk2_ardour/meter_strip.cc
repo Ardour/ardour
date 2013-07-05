@@ -55,6 +55,7 @@ using namespace std;
 PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
 PBD::Signal0<void> MeterStrip::ResetAllPeakDisplays;
 PBD::Signal1<void,RouteGroup*> MeterStrip::ResetGroupPeakDisplays;
+PBD::Signal0<void> MeterStrip::MetricChanged;
 
 
 MeterStrip::MetricPatterns MeterStrip::metric_patterns;
@@ -71,27 +72,7 @@ MeterStrip::MeterStrip (int metricmode)
 	btnbox.set_size_request(-1, 16);
 	namebx.set_size_request(18, 52);
 
-	_types.clear ();
-	switch(metricmode) {
-		case 1:
-			meter_metric_area.set_name ("AudioBusMetrics");
-			_types.push_back (DataType::AUDIO);
-			break;
-		case 2:
-			meter_metric_area.set_name ("AudioTrackMetrics");
-			_types.push_back (DataType::AUDIO);
-			break;
-		case 3:
-			meter_metric_area.set_name ("MidiTrackMetrics");
-			_types.push_back (DataType::MIDI);
-			break;
-		default:
-			meter_metric_area.set_name ("AudioMidiTrackMetrics");
-			_types.push_back (DataType::AUDIO);
-			_types.push_back (DataType::MIDI);
-			break;
-	}
-	//meter_metric_area.queue_draw ();
+	set_metric_mode(metricmode);
 
 	set_size_request_to_display_given_text (meter_metric_area, "-8888", 1, 0);
 	meter_metric_area.signal_expose_event().connect (
@@ -123,6 +104,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 {
 	set_spacing(2);
 	RouteUI::set_route (rt);
+
+	_has_midi = false;
 
 	int meter_width = 6;
 	if (_route->shared_peak_meter()->input_streams().n_total() == 1) {
@@ -287,6 +270,7 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 {
 	int type = 0;
 	_types.clear ();
+	bool old_has_midi = _has_midi;
 
 	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
 		if (c.get (*i) > 0) {
@@ -301,19 +285,24 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 			) {
 		meter_ticks1_area.set_name ("AudioBusMetrics");
 		meter_ticks2_area.set_name ("AudioBusMetrics");
+		_has_midi = false;
 	}
 	else if (type == (1 << DataType::AUDIO)) {
 		meter_ticks1_area.set_name ("AudioTrackMetrics");
 		meter_ticks2_area.set_name ("AudioTrackMetrics");
+		_has_midi = false;
 	}
 	else if (type == (1 << DataType::MIDI)) {
 		meter_ticks1_area.set_name ("MidiTrackMetrics");
 		meter_ticks2_area.set_name ("MidiTrackMetrics");
+		_has_midi = true;
 	} else {
 		meter_ticks1_area.set_name ("AudioMidiTrackMetrics");
 		meter_ticks2_area.set_name ("AudioMidiTrackMetrics");
+		_has_midi = true;
 	}
 
+	if (old_has_midi != _has_midi) MetricChanged();
 	on_theme_changed();
 }
 
@@ -342,21 +331,16 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 	VBox::on_size_allocate(a);
 }
 
-/* XXX code-copy from gain_meter.cc -- TODO consolidate
- *
- * slightly different:
- *  - ticks & label positions are swapped
- *  - more ticks for audio (longer meter by default)
- *  - right-aligned lables, unit-legend
- *  - height limitation of FastMeter::max_pattern_metric_size is included here
- */
 cairo_pattern_t*
 MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 {
 	Glib::RefPtr<Gdk::Window> win (w.get_window());
 
+	bool tickleft = true;
 	gint width, height;
 	win->get_size (width, height);
+
+	tickleft = w.get_name().substr(w.get_name().length() - 4) == "Left";
 
 	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width, height);
 	cairo_t* cr = cairo_create (surface);
@@ -491,8 +475,13 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 				fraction = log_meter (j->first);
 				snprintf (buf, sizeof (buf), "%+2d", j->first);
 				pos = height - (gint) floor (height * fraction);
-				cairo_move_to(cr, width-2.5, pos + .5);
-				cairo_line_to(cr, width, pos + .5);
+				if (tickleft) {
+					cairo_move_to(cr, width-2.5, pos + .5);
+					cairo_line_to(cr, width, pos + .5);
+				} else {
+					cairo_move_to(cr, 0, pos + .5);
+					cairo_line_to(cr, 2.5, pos + .5);
+				}
 				cairo_stroke (cr);
 				break;
 			case DataType::MIDI:
@@ -501,7 +490,11 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 				snprintf (buf, sizeof (buf), "%3d", j->first);
 				pos = 1 + height - (gint) rintf (height * fraction);
 				pos = min (pos, height);
-				cairo_arc(cr, 3, pos + .5, 1.0, 0, 2 * M_PI);
+				if (tickleft) {
+					cairo_arc(cr, width - 2.0, pos + .5, 1.0, 0, 2 * M_PI);
+				} else {
+					cairo_arc(cr, 3, pos + .5, 1.0, 0, 2 * M_PI);
+				}
 				cairo_fill(cr);
 				break;
 			}
@@ -556,7 +549,6 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 	return pattern;
 }
 
-/* XXX code-copy from gain_meter.cc -- TODO consolidate */
 gint
 MeterStrip::meter_metrics_expose (GdkEventExpose *ev)
 {
@@ -591,6 +583,37 @@ MeterStrip::meter_metrics_expose (GdkEventExpose *ev)
 	cairo_destroy (cr);
 
 	return true;
+}
+
+void
+MeterStrip::set_metric_mode (int metricmode)
+{
+	_types.clear ();
+	switch(metricmode) {
+		case 1:
+			meter_metric_area.set_name ("AudioBusMetrics");
+			_types.push_back (DataType::AUDIO);
+			break;
+		case 2:
+			meter_metric_area.set_name ("AudioTrackMetricsLeft");
+			_types.push_back (DataType::AUDIO);
+			break;
+		case 3:
+			meter_metric_area.set_name ("MidiTrackMetrics");
+			_types.push_back (DataType::MIDI);
+			break;
+		case 4:
+			meter_metric_area.set_name ("AudioTrackMetrics");
+			_types.push_back (DataType::AUDIO);
+			break;
+		default:
+			meter_metric_area.set_name ("AudioMidiTrackMetrics");
+			_types.push_back (DataType::AUDIO);
+			_types.push_back (DataType::MIDI);
+			break;
+	}
+
+	meter_metric_area.queue_draw ();
 }
 
 cairo_pattern_t*

@@ -73,6 +73,7 @@ class Meterbridge :
 
 	void add_strips (ARDOUR::RouteList&);
 	void remove_strip (MeterStrip *);
+	void update_metrics ();
 
 	void reset_all_peaks ();
 	void reset_group_peaks (ARDOUR::RouteGroup*);

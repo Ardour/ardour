@@ -147,6 +147,7 @@ Meterbridge::Meterbridge ()
 	MeterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Meterbridge::remove_strip, this, _1), gui_context());
 	MeterStrip::ResetAllPeakDisplays.connect_same_thread (*this, boost::bind(&Meterbridge::reset_all_peaks, this));
 	MeterStrip::ResetGroupPeakDisplays.connect_same_thread (*this, boost::bind (&Meterbridge::reset_group_peaks, this, _1));
+	MeterStrip::MetricChanged.connect_same_thread (*this, boost::bind(&Meterbridge::update_metrics, this));
 
 	global_hpacker.set_spacing(0);
 	scroller.add (global_hpacker);
@@ -426,6 +427,7 @@ Meterbridge::add_strips (RouteList& routes)
 	}
 
 	sync_order_keys(MixerSort);
+	update_metrics();
 }
 
 void
@@ -438,6 +440,24 @@ Meterbridge::remove_strip (MeterStrip* strip)
 	list<MeterStrip *>::iterator i;
 	if ((i = find (strips.begin(), strips.end(), strip)) != strips.end()) {
 		strips.erase (i);
+	}
+	update_metrics();
+}
+
+void
+Meterbridge::update_metrics ()
+{
+	bool have_midi = false;
+	for (list<MeterStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		if ( (*i)->has_midi ()) {
+			have_midi = true;
+			break;
+		}
+	}
+	if (have_midi) {
+		metrics_right->set_metric_mode(3);
+	} else {
+		metrics_right->set_metric_mode(4);
 	}
 }
 

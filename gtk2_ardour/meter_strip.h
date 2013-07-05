@@ -56,9 +56,13 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	static PBD::Signal1<void,MeterStrip*> CatchDeletion;
 	static PBD::Signal0<void> ResetAllPeakDisplays;
 	static PBD::Signal1<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
+	static PBD::Signal0<void> MetricChanged;
 
 	void reset_peak_display ();
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
+
+	void set_metric_mode (int);
+	bool has_midi() { return _has_midi; }
 
   protected:
 	boost::shared_ptr<ARDOUR::Route> _route;
@@ -106,6 +110,8 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	std::vector<ARDOUR::DataType> _types;
 
 	float max_peak;
+	bool _has_midi;
+
 	LevelMeter   *level_meter;
 	void meter_changed ();
 
