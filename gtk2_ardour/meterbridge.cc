@@ -120,6 +120,7 @@ Meterbridge::Meterbridge ()
 	, _show_busses (false)
 	, metrics_left (2)
 	, metrics_right (3)
+	, cur_max_width (-1)
 {
 	set_name ("Meter Bridge");
 
@@ -134,7 +135,7 @@ Meterbridge::Meterbridge ()
 
 	Gdk::Geometry geom;
 	geom.max_width = 1<<16;
-	geom.max_height = 1024 + 148 + 16 + 12 ; // see FastMeter::max_pattern_metric_size + meter-strip widgets
+	geom.max_height = max_height;
 	set_geometry_hints(*((Gtk::Window*) this), geom, Gdk::HINT_MAX_SIZE);
 
 	set_keep_above (true);
@@ -293,6 +294,15 @@ void
 Meterbridge::on_size_request (Gtk::Requisition* r)
 {
 	Gtk::Window::on_size_request(r);
+
+	Gdk::Geometry geom;
+	geom.max_width = meterarea.get_width() + metrics_left.get_width() + metrics_right.get_width();
+	geom.max_height = max_height;
+
+	if (cur_max_width != geom.max_width) {
+		cur_max_width = geom.max_width;
+		set_geometry_hints(*((Gtk::Window*) this), geom, Gdk::HINT_MAX_SIZE);
+	}
 }
 
 void

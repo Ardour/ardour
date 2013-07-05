@@ -94,6 +94,8 @@ class Meterbridge :
 
 	static const int32_t default_width = 600;
 	static const int32_t default_height = 400;
+	static const int max_height = 1200; // == 1024 + 148 + 16 + 12 see meter_strip.cc
+	int cur_max_width;
 
 	void update_title ();
 
