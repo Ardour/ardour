@@ -305,13 +305,6 @@ Meterbridge::on_size_allocate (Gtk::Allocation& a)
 		gtk_widget_style_get (GTK_WIDGET (scroller.gobj()),
 				"scrollbar-spacing", &scrollbar_spacing, NULL);
 		const int h = hsc->get_height() + scrollbar_spacing + 1;
-#if 1 // debug
-		Gtk::Viewport* viewport = (Gtk::Viewport*) scroller.get_child();
-		if (get_height() - viewport->get_height() != h) {
-			printf("scrollbar height vs win-view height: %d vs %d\n",
-					h, get_height() - viewport->get_height());
-		}
-#endif
 		metrics_spacer_left.set_size_request(-1, h);
 		metrics_spacer_right.set_size_request(-1, h);
 	} else {
