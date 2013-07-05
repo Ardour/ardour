@@ -166,8 +166,8 @@ FastMeter::generate_meter_pattern (
 
 	if (1) { // TODO Config->get_meter_shade()
 		cairo_pattern_t* shade_pattern = cairo_pattern_create_linear (0.0, 0.0, width, 0.0);
-		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, 1.0, 1.0, 1.0, 0.3);
-		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, 0.0, 0.0, 0.0, 0.5);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, 1.0, 1.0, 1.0, 0.2);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, 0.0, 0.0, 0.0, 0.3);
 
 		cairo_surface_t* surface;
 		cairo_t* tc = 0;
