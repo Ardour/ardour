@@ -147,7 +147,7 @@ style "monitor" = "small_button"
 {
 }
 
-style "meterbridge_label" = "very_small_text"
+style "meterbridge_label" = "small_text"
 {
 }
 
