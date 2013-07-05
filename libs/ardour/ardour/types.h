@@ -367,6 +367,13 @@ namespace ARDOUR {
 		MeteringRoute  ///< meter what is going through the route
 	};
 
+	enum MeterLineUp {
+		MeteringLineUp24,
+		MeteringLineUp20,
+		MeteringLineUp18,
+		MeteringLineUp15
+	};
+
 	enum PFLPosition {
 		/** PFL signals come from before pre-fader processors */
 		PFLFromBeforeProcessors,
@@ -567,6 +574,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::AutoConnectOption& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::EditMode& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::MonitorModel& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::MeterLineUp& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::PFLPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::AFLPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::RemoteModel& sf);
@@ -588,6 +596,7 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::HeaderFormat& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::AutoConnectOption& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::EditMode& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::MonitorModel& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::MeterLineUp& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PFLPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::AFLPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::RemoteModel& sf);

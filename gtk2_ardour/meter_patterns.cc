@@ -22,6 +22,7 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/rgb_macros.h>
 
+#include <ardour/rc_configuration.h>
 #include "ardour_ui.h"
 #include "utils.h"
 #include "logmeter.h"
@@ -41,6 +42,7 @@ static const int max_pattern_metric_size = 1026;
 sigc::signal<void> ResetAllPeakDisplays;
 sigc::signal<void,ARDOUR::Route*> ResetRoutePeakDisplays;
 sigc::signal<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
+sigc::signal<void> RedrawMetrics;
 
 cairo_pattern_t*
 meter_render_ticks (Gtk::Widget& w, vector<ARDOUR::DataType> types)
@@ -98,6 +100,9 @@ meter_render_ticks (Gtk::Widget& w, vector<ARDOUR::DataType> types)
 			points.insert (std::pair<int,float>(-50, 0.5));
 			points.insert (std::pair<int,float>(-40, 0.5));
 			points.insert (std::pair<int,float>(-30, 0.5));
+			if (Config->get_meter_line_up_level() == MeteringLineUp24) {
+				points.insert (std::pair<int,float>(-24, 0.5));
+			}
 			points.insert (std::pair<int,float>(-25, 0.5));
 			points.insert (std::pair<int,float>(-20, 1.0));
 
@@ -276,7 +281,11 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 			points.insert (std::pair<int,float>(-30, 0.5));
 			points.insert (std::pair<int,float>(-20, 1.0));
 			if (types.size() == 1) {
-				points.insert (std::pair<int,float>(-25, 0.5));
+				if (Config->get_meter_line_up_level() == MeteringLineUp24) {
+					points.insert (std::pair<int,float>(-24, 0.5));
+				} else {
+					points.insert (std::pair<int,float>(-25, 0.5));
+				}
 				points.insert (std::pair<int,float>(-15, 1.0));
 			}
 			points.insert (std::pair<int,float>(-18, 1.0));
@@ -476,4 +485,5 @@ gint meter_expose_metrics (GdkEventExpose *ev, std::vector<ARDOUR::DataType> typ
 void meter_clear_pattern_cache() {
 	metric_patterns.clear();
 	ticks_patterns.clear();
+	RedrawMetrics();
 }

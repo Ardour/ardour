@@ -130,6 +130,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &GainMeterBase::reset_peak_display));
 	ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &GainMeterBase::reset_route_peak_display));
 	ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &GainMeterBase::reset_group_peak_display));
+	RedrawMetrics.connect (sigc::mem_fun(*this, &GainMeterBase::redraw_metrics));
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &GainMeterBase::on_theme_changed));
 	ColorsChanged.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), false));
@@ -851,11 +852,7 @@ GainMeterBase::update_meters()
 
 void GainMeterBase::color_handler(bool dpi)
 {
-	meter_clear_pattern_cache();
 	setup_meters();
-	meter_metric_area.queue_draw ();
-	meter_ticks1_area.queue_draw ();
-	meter_ticks2_area.queue_draw ();
 }
 
 void
@@ -873,7 +870,11 @@ GainMeterBase::set_width (Width w, int len)
 void
 GainMeterBase::on_theme_changed()
 {
-	meter_clear_pattern_cache();
+}
+
+void
+GainMeterBase::redraw_metrics()
+{
 	meter_metric_area.queue_draw ();
 	meter_ticks1_area.queue_draw ();
 	meter_ticks2_area.queue_draw ();
@@ -1062,10 +1063,6 @@ GainMeter::meter_configuration_changed (ChanCount c)
 			set_meter_strip_name ("AudioMidiTrackMetricsInactive");
 		}
 	}
-
-	meter_clear_pattern_cache();
-	meter_metric_area.queue_draw ();
-	meter_ticks1_area.queue_draw ();
-	meter_ticks2_area.queue_draw ();
+	meter_clear_pattern_cache(); // XXX only once
 }
 

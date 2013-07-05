@@ -1923,6 +1923,20 @@ RCOptionEditor::RCOptionEditor ()
 	mfo->add (METER_FALLOFF_FASTEST, _("fastest"));
 
 	add_option (S_("Preferences|GUI"), mfo);
+
+	ComboOption<MeterLineUp>* mlu = new ComboOption<MeterLineUp> (
+		"meter-line-up-level",
+		_("Meter Line Up Level"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_line_up_level),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_line_up_level)
+		);
+
+	mlu->add (MeteringLineUp24, _("-24dB"));
+	mlu->add (MeteringLineUp20, _("-20dB"));
+	mlu->add (MeteringLineUp18, _("-18dB"));
+	mlu->add (MeteringLineUp15, _("-15dB"));
+
+	add_option (S_("Preferences|GUI"), mlu);
 }
 
 void

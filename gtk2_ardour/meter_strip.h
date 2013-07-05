@@ -111,6 +111,8 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	static int max_pattern_metric_size; // == FastMeter::max_pattern_metric_size
 
 	bool peak_button_release (GdkEventButton*);
+
+	void redraw_metrics ();
 };
 
 #endif /* __ardour_mixer_strip__ */

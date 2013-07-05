@@ -51,6 +51,8 @@
 #include "route_sorter.h"
 #include "actions.h"
 #include "gui_thread.h"
+#include "global_signals.h"
+#include "meter_patterns.h"
 
 #include "i18n.h"
 
@@ -200,6 +202,10 @@ Meterbridge::Meterbridge ()
 	Gtk::Viewport* viewport = (Gtk::Viewport*) scroller.get_child();
 	viewport->set_shadow_type(Gtk::SHADOW_NONE);
 	viewport->set_border_width(0);
+
+	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &Meterbridge::on_theme_changed));
+	ColorsChanged.connect (sigc::mem_fun (*this, &Meterbridge::on_theme_changed));
+	DPIReset.connect (sigc::mem_fun (*this, &Meterbridge::on_theme_changed));
 }
 
 Meterbridge::~Meterbridge ()
@@ -398,6 +404,7 @@ Meterbridge::set_session (Session* s)
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Meterbridge::update_title, this), gui_context());
 	_session->StateSaved.connect (_session_connections, invalidator (*this), boost::bind (&Meterbridge::update_title, this), gui_context());
 	_session->config.ParameterChanged.connect (*this, invalidator (*this), ui_bind (&Meterbridge::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&Meterbridge::parameter_changed, this, _1), gui_context());
 
 	if (_visible) {
 		show_window();
@@ -654,4 +661,13 @@ Meterbridge::parameter_changed (std::string const & p)
 		_show_midi = _session->config.get_show_midi_on_meterbridge();
 		sync_order_keys(MixerSort);
 	}
+	else if (p == "meter-line-up-level") {
+		meter_clear_pattern_cache();
+	}
+}
+
+void
+Meterbridge::on_theme_changed ()
+{
+	meter_clear_pattern_cache();
 }

@@ -71,6 +71,7 @@ MeterStrip::MeterStrip (int metricmode)
 	set_size_request_to_display_given_text (meter_metric_area, "-8888", 1, 0);
 	meter_metric_area.signal_expose_event().connect (
 			sigc::mem_fun(*this, &MeterStrip::meter_metrics_expose));
+	RedrawMetrics.connect (sigc::mem_fun(*this, &MeterStrip::redraw_metrics));
 
 	meterbox.pack_start(meter_metric_area, true, false);
 
@@ -174,6 +175,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &MeterStrip::reset_peak_display));
 	ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &MeterStrip::reset_route_peak_display));
 	ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &MeterStrip::reset_group_peak_display));
+	RedrawMetrics.connect (sigc::mem_fun(*this, &MeterStrip::redraw_metrics));
 
 	meter_configuration_changed (_route->shared_peak_meter()->input_streams ());
 
@@ -249,8 +251,6 @@ MeterStrip::fast_update ()
 void
 MeterStrip::on_theme_changed()
 {
-	meter_clear_pattern_cache();
-
 	if (level_meter && _route) {
 		int meter_width = 6;
 		if (_route->shared_peak_meter()->input_streams().n_total() == 1) {
@@ -258,9 +258,6 @@ MeterStrip::on_theme_changed()
 		}
 		level_meter->setup_meters (220, meter_width, 6);
 	}
-	meter_metric_area.queue_draw();
-	meter_ticks1_area.queue_draw();
-	meter_ticks2_area.queue_draw();
 }
 
 void
@@ -411,4 +408,12 @@ MeterStrip::peak_button_release (GdkEventButton* ev)
 		ResetRoutePeakDisplays (_route.get());
 	}
 	return true;
+}
+
+void
+MeterStrip::redraw_metrics ()
+{
+	meter_metric_area.queue_draw();
+	meter_ticks1_area.queue_draw();
+	meter_ticks2_area.queue_draw();
 }

@@ -30,6 +30,7 @@
 extern sigc::signal<void> ResetAllPeakDisplays;
 extern sigc::signal<void,ARDOUR::Route*> ResetRoutePeakDisplays;
 extern sigc::signal<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
+extern sigc::signal<void> RedrawMetrics;
 
 cairo_pattern_t* meter_render_ticks (Gtk::Widget& w, std::vector<ARDOUR::DataType> types);
 cairo_pattern_t* meter_render_metrics (Gtk::Widget& w, std::vector<ARDOUR::DataType> types);

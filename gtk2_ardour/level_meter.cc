@@ -133,6 +133,10 @@ LevelMeter::parameter_changed (string p)
 			(*i).meter->set_hold_count ((uint32_t) floor(Config->get_meter_hold()));
 		}
 	}
+	else if (p == "meter-line-up-level") {
+		color_changed = true;
+		setup_meters (meter_length, regular_meter_width, thin_meter_width);
+	}
 }
 
 void
@@ -188,7 +192,7 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
 		uint32_t c[10];
-		float stp[4] =  {55.0, 77.5, 92.5, 100.0};
+		float stp[4];
 		if (n < nmidi) {
 			c[0] = ARDOUR_UI::config()->canvasvar_MidiMeterColor0.get();
 			c[1] = ARDOUR_UI::config()->canvasvar_MidiMeterColor1.get();
@@ -205,6 +209,33 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 			stp[2] = 115.0 * 100.0 / 128.0;
 			stp[3] = 115.0 * 112.0 / 128.0;
 		} else {
+			switch (Config->get_meter_line_up_level()) {
+				case MeteringLineUp24:
+					stp[0] = 42.0;
+					stp[1] = 77.5;
+					stp[2] = 92.5;
+					stp[3] = 100.0;
+					break;
+				case MeteringLineUp20:
+					stp[0] = 50.0;
+					stp[1] = 77.5;
+					stp[2] = 92.5;
+					stp[3] = 100.0;
+					break;
+				default:
+				case MeteringLineUp18:
+					stp[0] = 55.0;
+					stp[1] = 77.5;
+					stp[2] = 92.5;
+					stp[3] = 100.0;
+					break;
+				case MeteringLineUp15:
+					stp[0] = 62.5;
+					stp[1] = 77.5;
+					stp[2] = 92.5;
+					stp[3] = 100.0;
+					break;
+			}
 			c[0] = ARDOUR_UI::config()->canvasvar_MeterColor0.get();
 			c[1] = ARDOUR_UI::config()->canvasvar_MeterColor1.get();
 			c[2] = ARDOUR_UI::config()->canvasvar_MeterColor2.get();

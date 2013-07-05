@@ -61,6 +61,7 @@ setup_enum_writer ()
 	ColorMode _ColorMode;
 	MeterFalloff _MeterFalloff;
 	MeterHold _MeterHold;
+	MeterLineUp _MeterLineUp;
 	EditMode _EditMode;
 	RegionPoint _RegionPoint;
 	Placement _Placement;
@@ -204,6 +205,12 @@ setup_enum_writer ()
 	REGISTER_ENUM (MeterHoldMedium);
 	REGISTER_ENUM (MeterHoldLong);
 	REGISTER (_MeterHold);
+
+	REGISTER_ENUM (MeteringLineUp24);
+	REGISTER_ENUM (MeteringLineUp20);
+	REGISTER_ENUM (MeteringLineUp18);
+	REGISTER_ENUM (MeteringLineUp15);
+	REGISTER (_MeterLineUp);
 
 	REGISTER_ENUM (Slide);
 	REGISTER_ENUM (Splice);
@@ -647,6 +654,20 @@ std::istream& operator>>(std::istream& o, MonitorModel& var)
 }
 
 std::ostream& operator<<(std::ostream& o, const MonitorModel& var)
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
+std::istream& operator>>(std::istream& o, MeterLineUp& var)
+{
+	std::string s;
+	o >> s;
+	var = (MeterLineUp) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const MeterLineUp& var)
 {
 	std::string s = enum_2_string (var);
 	return o << s;

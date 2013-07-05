@@ -116,6 +116,7 @@ class Meterbridge :
 	void on_size_request (Gtk::Requisition*);
 
 	void parameter_changed (std::string const & p);
+	void on_theme_changed ();
 };
 
 #endif
