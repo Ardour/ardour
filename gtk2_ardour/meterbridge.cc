@@ -121,6 +121,11 @@ Meterbridge::Meterbridge ()
 {
 	set_name ("Meter Bridge");
 
+	m_width = default_width;
+	m_height = default_height;
+	m_root_x = 1;
+	m_root_y = 1;
+
 	update_title ();
 
 	set_wmclass (X_("ardour_mixer"), PROGRAM_NAME);
@@ -208,7 +213,9 @@ void
 Meterbridge::set_window_pos_and_size ()
 {
 	resize (m_width, m_height);
-	move (m_root_x, m_root_y);
+	if (m_root_x >= 0 && m_root_y >= 0) {
+		move (m_root_x, m_root_y);
+	}
 }
 
 void
