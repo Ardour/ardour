@@ -159,6 +159,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	name_label.layout()->set_ellipsize (Pango::ELLIPSIZE_END);
 	name_label.layout()->set_width(48 * PANGO_SCALE);
 	name_label.set_size_request(18, 50);
+	name_label.set_alignment(-1.0, .5);
 
 	namebx.set_size_request(18, 52);
 	namebx.pack_start(name_label, true, false, 3);

@@ -62,6 +62,8 @@ ArdourButton::ArdourButton (Element e)
 	, _corner_radius (4.0)
 	, _corner_mask (0xf)
 	, _angle(0)
+	, _xalign(.5)
+	, _yalign(.5)
 	, border_color (0)
 	, fill_color_active (0)
 	, fill_color_inactive (0)
@@ -89,6 +91,8 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, _corner_radius (4.0)
 	, _corner_mask (0xf)
 	, _angle(0)
+	, _xalign(.5)
+	, _yalign(.5)
 	, border_color (0)
 	, fill_color_active (0)
 	, fill_color_inactive (0)
@@ -166,6 +170,13 @@ void
 ArdourButton::set_angle (const double angle)
 {
 	_angle = angle;
+}
+
+void
+ArdourButton::set_alignment (const float xa, const float ya)
+{
+	_xalign = xa;
+	_yalign = ya;
 }
 
 void
@@ -303,20 +314,32 @@ ArdourButton::render (cairo_t* cr)
 			}
 			pango_cairo_show_layout (cr, _layout->gobj());
 		} else {
-			/* center text */
+			/* align text */
+
 			double ww, wh;
-			ww= get_width();
-			wh= get_height();
+			double xa, ya;
+			ww = get_width();
+			wh = get_height();
 			cairo_save (cr); // TODO retain rotataion.. adj. LED,...
 			cairo_rotate(cr, _angle * M_PI / 180.0);
 			cairo_device_to_user(cr, &ww, &wh);
-			cairo_move_to (cr,
-					(ww - _text_width) / 2.0,
-					(wh - _text_height) / 2.0);
+			xa = (ww - _text_width) * _xalign;
+			ya = (wh - _text_height) * _yalign;
+
+			/* quick hack for left/bottom alignment at -90deg
+			 * TODO this should be generalized incl rotation.
+			 * currently only 'user' of this API is meter_strip.cc
+			 */
+			if (_xalign < 0) xa = (ww * fabs(_xalign) + text_margin);
+
+			// TODO honor left/right text_margin with min/max()
+
+			cairo_move_to (cr, xa, ya);
 			pango_cairo_update_layout(cr, _layout->gobj());
 			pango_cairo_show_layout (cr, _layout->gobj());
 			cairo_restore (cr);
 
+			/* use old center'ed layout for follow up items - until rotation/aligment code is completed */
 			cairo_move_to (cr, (get_width() - _text_width)/2.0, get_height()/2.0 - _text_height/2.0);
 		}
 
