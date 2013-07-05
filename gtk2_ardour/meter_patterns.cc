@@ -102,8 +102,9 @@ meter_render_ticks (Gtk::Widget& w, vector<ARDOUR::DataType> types)
 			points.insert (std::pair<int,float>(-30, 0.5));
 			if (Config->get_meter_line_up_level() == MeteringLineUp24) {
 				points.insert (std::pair<int,float>(-24, 0.5));
+			} else {
+				points.insert (std::pair<int,float>(-25, 0.5));
 			}
-			points.insert (std::pair<int,float>(-25, 0.5));
 			points.insert (std::pair<int,float>(-20, 1.0));
 
 			points.insert (std::pair<int,float>(-19, 0.5));
