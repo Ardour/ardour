@@ -181,6 +181,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	void parameter_changed (const char*);
 
 	void reset_peak_display ();
+	void reset_route_peak_display (ARDOUR::Route*);
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
 
 	void on_theme_changed ();

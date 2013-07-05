@@ -128,6 +128,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	gain_display.signal_key_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_key_press), false);
 
 	ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &GainMeterBase::reset_peak_display));
+	ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &GainMeterBase::reset_route_peak_display));
 	ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &GainMeterBase::reset_group_peak_display));
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &GainMeterBase::on_theme_changed));
@@ -328,7 +329,7 @@ GainMeterBase::peak_button_release (GdkEventButton* ev)
 			ResetGroupPeakDisplays (_route->route_group());
 		}
 	} else {
-		reset_peak_display ();
+		ResetRoutePeakDisplays (_route.get());
 	}
 
 	return true;
@@ -342,6 +343,14 @@ GainMeterBase::reset_peak_display ()
 	max_peak = -INFINITY;
 	peak_display.set_label (_("-inf"));
 	peak_display.set_name ("MixerStripPeakDisplay");
+}
+
+void
+GainMeterBase::reset_route_peak_display (Route* route)
+{
+	if (_route && _route.get() == route) {
+		reset_peak_display ();
+	}
 }
 
 void

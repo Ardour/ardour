@@ -28,6 +28,7 @@
 
 #include <sigc++/signal.h>
 extern sigc::signal<void> ResetAllPeakDisplays;
+extern sigc::signal<void,ARDOUR::Route*> ResetRoutePeakDisplays;
 extern sigc::signal<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
 
 cairo_pattern_t* meter_render_ticks (Gtk::Widget& w, std::vector<ARDOUR::DataType> types);

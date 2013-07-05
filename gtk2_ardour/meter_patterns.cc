@@ -39,6 +39,7 @@ using namespace std;
 static const int max_pattern_metric_size = 1026;
 
 sigc::signal<void> ResetAllPeakDisplays;
+sigc::signal<void,ARDOUR::Route*> ResetRoutePeakDisplays;
 sigc::signal<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
 
 cairo_pattern_t*

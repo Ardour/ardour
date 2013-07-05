@@ -172,6 +172,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 			);
 
 	ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &MeterStrip::reset_peak_display));
+	ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &MeterStrip::reset_route_peak_display));
 	ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &MeterStrip::reset_group_peak_display));
 
 	meter_configuration_changed (_route->shared_peak_meter()->input_streams ());
@@ -372,9 +373,16 @@ MeterStrip::meter_ticks2_expose (GdkEventExpose *ev)
 }
 
 void
+MeterStrip::reset_route_peak_display (Route* route)
+{
+	if (_route && _route.get() == route) {
+		reset_peak_display ();
+	}
+}
+
+void
 MeterStrip::reset_group_peak_display (RouteGroup* group)
 {
-	/* UNUSED -- need connection w/mixer || other meters */
 	if (_route && group == _route->route_group()) {
 		reset_peak_display ();
 	}
@@ -400,7 +408,7 @@ MeterStrip::peak_button_release (GdkEventButton* ev)
 			ResetGroupPeakDisplays (_route->route_group());
 		}
 	} else {
-		reset_peak_display ();
+		ResetRoutePeakDisplays (_route.get());
 	}
 	return true;
 }
