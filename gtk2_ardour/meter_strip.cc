@@ -158,7 +158,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	// add track-name label
 	name_label.set_text(_route->name().c_str());
 	name_label.set_corner_radius(2);
-	name_label.set_name("solo isolate"); // XXX re-use 'very_small_text'
+	name_label.set_name("meterbridge label");
 	name_label.set_angle(-90.0);
 	name_label.layout()->set_ellipsize (Pango::ELLIPSIZE_END);
 	name_label.layout()->set_width(48 * PANGO_SCALE);
