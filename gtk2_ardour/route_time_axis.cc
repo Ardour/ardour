@@ -2263,6 +2263,9 @@ RouteTimeAxisView::meter_changed ()
 {
 	ENSURE_GUI_THREAD (*this, &RouteTimeAxisView::meter_changed)
 	reset_meter();
+	if (_route && !no_redraw) {
+		request_redraw ();
+	}
 }
 
 void
