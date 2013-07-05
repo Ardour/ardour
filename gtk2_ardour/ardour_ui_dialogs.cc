@@ -328,7 +328,7 @@ ARDOUR_UI::toggle_meterbridge ()
 	if (tact->get_active()) {
 		meterbridge->show_window ();
 	} else {
-		meterbridge->hide ();
+		meterbridge->hide_window (NULL);
 	}
 }
 
