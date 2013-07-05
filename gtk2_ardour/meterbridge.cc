@@ -118,8 +118,8 @@ Meterbridge::Meterbridge ()
 	, VisibilityTracker (*((Gtk::Window*) this))
 	, _visible (false)
 	, _show_busses (false)
-	, metrics_left (2)
-	, metrics_right (3)
+	, metrics_left (1)
+	, metrics_right (2)
 	, cur_max_width (-1)
 {
 	set_name ("Meter Bridge");
@@ -534,9 +534,9 @@ Meterbridge::update_metrics ()
 		}
 	}
 	if (have_midi) {
-		metrics_right.set_metric_mode(3);
+		metrics_right.set_metric_mode(2);
 	} else {
-		metrics_right.set_metric_mode(4);
+		metrics_right.set_metric_mode(3);
 	}
 }
 

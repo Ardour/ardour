@@ -185,9 +185,6 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	static sigc::signal<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
 
 	void on_theme_changed ();
-	bool style_changed;
-	bool dpi_changed;
-	bool color_changed;
 	void color_handler(bool);
 	ARDOUR::DataType _data_type;
 	ARDOUR::ChanCount _previous_amp_output_streams;
@@ -215,10 +212,6 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 	void hide_all_meters ();
 
 	gint meter_metrics_expose (GdkEventExpose *);
-
-	typedef std::map<std::string,cairo_pattern_t*> MetricPatterns;
-	static  MetricPatterns metric_patterns;
-	static  cairo_pattern_t* render_metrics (Gtk::Widget &, std::vector<ARDOUR::DataType>);
 
   private:
 

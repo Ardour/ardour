@@ -44,6 +44,7 @@
 #include "keyboard.h"
 #include "public_editor.h"
 #include "utils.h"
+#include "meter_patterns.h"
 
 #include "ardour/session.h"
 #include "ardour/route.h"
@@ -63,14 +64,10 @@ using Gtkmm2ext::Keyboard;
 sigc::signal<void> GainMeterBase::ResetAllPeakDisplays;
 sigc::signal<void,RouteGroup*> GainMeterBase::ResetGroupPeakDisplays;
 
-GainMeter::MetricPatterns GainMeter::metric_patterns;
-
 GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int fader_girth)
 	: gain_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0.0, 1.0, 0.01, 0.1)
 	, gain_automation_style_button ("")
 	, gain_automation_state_button ("")
-	, style_changed (false)
-	, dpi_changed (false)
 	, _data_type (DataType::AUDIO)
 
 {
@@ -837,9 +834,9 @@ GainMeterBase::update_meters()
 
 void GainMeterBase::color_handler(bool dpi)
 {
-	color_changed = true;
-	dpi_changed = (dpi) ? true : false;
+	meter_clear_pattern_cache();
 	setup_meters();
+	meter_metric_area.queue_draw ();
 }
 
 void
@@ -857,7 +854,8 @@ GainMeterBase::set_width (Width w, int len)
 void
 GainMeterBase::on_theme_changed()
 {
-	style_changed = true;
+	meter_clear_pattern_cache();
+	meter_metric_area.queue_draw ();
 }
 
 GainMeter::GainMeter (Session* s, int fader_length)
@@ -871,7 +869,7 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	gain_display_box.pack_start (gain_display, true, true);
 
 	meter_metric_area.set_name ("AudioTrackMetrics");
-	set_size_request_to_display_given_text (meter_metric_area, "-127", 1, 0);
+	set_size_request_to_display_given_text (meter_metric_area, "-8888", 1, 0);
 
 	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
@@ -953,197 +951,10 @@ GainMeter::get_gm_width ()
 	return sz.width;
 }
 
-cairo_pattern_t*
-GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
-{
-	Glib::RefPtr<Gdk::Window> win (w.get_window());
-
-	gint width, height;
-	win->get_size (width, height);
-
-	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width, height);
-	cairo_t* cr = cairo_create (surface);
-	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create(w.get_pango_context());
-
-
-	Pango::AttrList audio_font_attributes;
-	Pango::AttrList midi_font_attributes;
-
-	Pango::AttrFontDesc* font_attr;
-	Pango::FontDescription font;
-
-	font = Pango::FontDescription (""); // use defaults
-	//font = get_font_for_style("gain-fader");
-	//font = w.get_style()->get_font();
-
-	font.set_weight (Pango::WEIGHT_NORMAL);
-	font.set_size (9.0 * PANGO_SCALE);
-	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
-	audio_font_attributes.change (*font_attr);
-	delete font_attr;
-
-	font.set_weight (Pango::WEIGHT_ULTRALIGHT);
-	font.set_stretch (Pango::STRETCH_ULTRA_CONDENSED);
-	font.set_size (7.5 * PANGO_SCALE);
-	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
-	midi_font_attributes.change (*font_attr);
-	delete font_attr;
-
-
-	cairo_move_to (cr, 0, 0);
-	cairo_rectangle (cr, 0, 0, width, height);
-	{
-		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_NORMAL);
-		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-	}
-	cairo_fill (cr);
-
-	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
-
-		Gdk::Color c;
-
-		if (types.size() > 1) {
-			/* we're overlaying more than 1 set of marks, so use different colours */
-			Gdk::Color c;
-			switch (*i) {
-			case DataType::AUDIO:
-				c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
-				cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-				break;
-			case DataType::MIDI:
-				c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
-				cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-				break;
-			}
-		} else {
-			c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
-			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-		}
-
-		vector<int> points;
-
-		switch (*i) {
-		case DataType::AUDIO:
-			layout->set_attributes (audio_font_attributes);
-			points.push_back (-50);
-			points.push_back (-40);
-			points.push_back (-30);
-			points.push_back (-20);
-			points.push_back (-10);
-			points.push_back (-3);
-			points.push_back (0);
-			points.push_back (4);
-			break;
-
-		case DataType::MIDI:
-			layout->set_attributes (midi_font_attributes);
-			points.push_back (0);
-			if (types.size() == 1) {
-				points.push_back (32);
-			} else {
-				/* tweak so as not to overlay the -30dB mark */
-				points.push_back (48);
-			}
-			points.push_back (64);
-			points.push_back (96);
-			points.push_back (127);
-			break;
-		}
-
-		char buf[32];
-
-		for (vector<int>::const_iterator j = points.begin(); j != points.end(); ++j) {
-
-			gint pos;
-
-			float fraction = 0;
-			switch (*i) {
-			case DataType::AUDIO:
-				fraction = log_meter (*j);
-				pos = height - (gint) floor (height * fraction);
-				break;
-			case DataType::MIDI:
-				fraction = *j / 127.0;
-				pos = 1 + height - (gint) floor (height * fraction);
-				break;
-			}
-
-			float const linepos = min((float) height, (float)(pos + .5f));
-
-			cairo_set_line_width (cr, 1.0);
-			cairo_move_to (cr, 0, linepos);
-			cairo_line_to (cr, 3.5, linepos);
-			cairo_stroke (cr);
-			
-			snprintf (buf, sizeof (buf), "%2d", abs (*j));
-			layout->set_text(buf);
-
-			/* we want logical extents, not ink extents here */
-
-			int tw, th;
-			layout->get_pixel_size(tw, th);
-
-			int p = pos - (th / 2);
-			p = min (p, height - th);
-			p = max (p, 0);
-
-			cairo_move_to (cr, 5, p);
-			pango_cairo_show_layout (cr, layout->gobj());
-		}
-	}
-
-	cairo_pattern_t* pattern = cairo_pattern_create_for_surface (surface);
-	MetricPatterns::iterator p;
-
-	if ((p = metric_patterns.find (w.get_name())) != metric_patterns.end()) {
-		cairo_pattern_destroy (p->second);
-	}
-
-	metric_patterns[w.get_name()] = pattern;
-	
-	cairo_destroy (cr);
-	cairo_surface_destroy (surface);
-
-	return pattern;
-}
-
 gint
 GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 {
-	Glib::RefPtr<Gdk::Window> win (meter_metric_area.get_window());
-	cairo_t* cr;
-
-	cr = gdk_cairo_create (win->gobj());
-	
-	/* clip to expose area */
-
-	gdk_cairo_rectangle (cr, &ev->area);
-	cairo_clip (cr);
-
-	cairo_pattern_t* pattern;
-	MetricPatterns::iterator i = metric_patterns.find (meter_metric_area.get_name());
-
-	if (i == metric_patterns.end() || style_changed || dpi_changed) {
-		pattern = render_metrics (meter_metric_area, _types);
-	} else {
-		pattern = i->second;
-	}
-
-	cairo_move_to (cr, 0, 0);
-	cairo_set_source (cr, pattern);
-
-	gint width, height;
-	win->get_size (width, height);
-
-	cairo_rectangle (cr, 0, 0, width, height);
-	cairo_fill (cr);
-
-	style_changed = false;
-	dpi_changed = false;
-
-	cairo_destroy (cr);
-
-	return true;
+	return meter_expose_metrics(ev, _types, &meter_metric_area);
 }
 
 boost::shared_ptr<PBD::Controllable>
@@ -1206,7 +1017,7 @@ GainMeter::meter_configuration_changed (ChanCount c)
 		}
 	}
 
-	style_changed = true;
+	meter_clear_pattern_cache();
 	meter_metric_area.queue_draw ();
 }
 
