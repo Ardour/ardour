@@ -30,6 +30,7 @@
 #include "ardour/midi_track.h"
 
 #include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/keyboard.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/rgb_macros.h>
 
@@ -52,6 +53,9 @@ using namespace Gtkmm2ext;
 using namespace std;
 
 PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
+PBD::Signal0<void> MeterStrip::ResetAllPeakDisplays;
+PBD::Signal1<void,RouteGroup*> MeterStrip::ResetGroupPeakDisplays;
+
 
 MeterStrip::MetricPatterns MeterStrip::metric_patterns;
 MeterStrip::TickPatterns MeterStrip::ticks_patterns;
@@ -814,6 +818,14 @@ MeterStrip::reset_peak_display ()
 bool
 MeterStrip::peak_button_release (GdkEventButton* ev)
 {
-	reset_peak_display ();
+	if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) {
+		ResetAllPeakDisplays ();
+	} else if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+		if (_route) {
+			ResetGroupPeakDisplays (_route->route_group());
+		}
+	} else {
+		reset_peak_display ();
+	}
 	return true;
 }

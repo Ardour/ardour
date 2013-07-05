@@ -145,6 +145,8 @@ Meterbridge::Meterbridge ()
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Meterbridge::sync_order_keys, this, _1), gui_context());
 	MeterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Meterbridge::remove_strip, this, _1), gui_context());
+	MeterStrip::ResetAllPeakDisplays.connect_same_thread (*this, boost::bind(&Meterbridge::reset_all_peaks, this));
+	MeterStrip::ResetGroupPeakDisplays.connect_same_thread (*this, boost::bind (&Meterbridge::reset_group_peaks, this, _1));
 
 	global_hpacker.set_spacing(0);
 	scroller.add (global_hpacker);
@@ -436,6 +438,22 @@ Meterbridge::remove_strip (MeterStrip* strip)
 	list<MeterStrip *>::iterator i;
 	if ((i = find (strips.begin(), strips.end(), strip)) != strips.end()) {
 		strips.erase (i);
+	}
+}
+
+void
+Meterbridge::reset_all_peaks ()
+{
+	for (list<MeterStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		(*i)->reset_peak_display ();
+	}
+}
+
+void
+Meterbridge::reset_group_peaks (RouteGroup* rg)
+{
+	for (list<MeterStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		(*i)->reset_group_peak_display (rg);
 	}
 }
 

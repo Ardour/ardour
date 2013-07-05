@@ -35,6 +35,7 @@
 
 namespace ARDOUR {
 	class Route;
+	class RouteGroup;
 	class Session;
 }
 namespace Gtk {
@@ -53,6 +54,11 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	boost::shared_ptr<ARDOUR::Route> route() { return _route; }
 
 	static PBD::Signal1<void,MeterStrip*> CatchDeletion;
+	static PBD::Signal0<void> ResetAllPeakDisplays;
+	static PBD::Signal1<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
+
+	void reset_peak_display ();
+	void reset_group_peak_display (ARDOUR::RouteGroup*);
 
   protected:
 	boost::shared_ptr<ARDOUR::Route> _route;
@@ -77,8 +83,6 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 
 	void on_size_allocate (Gtk::Allocation&);
 	void on_size_request (Gtk::Requisition*);
-
-	bool peak_button_release (GdkEventButton*);
 
 	/* route UI */
 	void update_rec_display ();
@@ -105,14 +109,13 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	LevelMeter   *level_meter;
 	void meter_changed ();
 
-	void reset_peak_display ();
-	void reset_group_peak_display (ARDOUR::RouteGroup*);
-
 	PBD::ScopedConnection _config_connection;
 	void strip_property_changed (const PBD::PropertyChange&);
 	void meter_configuration_changed (ARDOUR::ChanCount);
 
 	static int max_pattern_metric_size; // == FastMeter::max_pattern_metric_size
+
+	bool peak_button_release (GdkEventButton*);
 };
 
 #endif /* __ardour_mixer_strip__ */
