@@ -43,8 +43,12 @@ meter_render_ticks (Gtk::Widget& w, vector<ARDOUR::DataType> types)
 {
 	Glib::RefPtr<Gdk::Window> win (w.get_window());
 
+	bool background;
 	gint width, height;
 	win->get_size (width, height);
+	background =
+		   w.get_name().substr(w.get_name().length() - 4) == "Left"
+		|| w.get_name().substr(w.get_name().length() - 5) == "Right";
 
 	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width, height);
 	cairo_t* cr = cairo_create (surface);
@@ -52,7 +56,7 @@ meter_render_ticks (Gtk::Widget& w, vector<ARDOUR::DataType> types)
 	cairo_move_to (cr, 0, 0);
 	cairo_rectangle (cr, 0, 0, width, height);
 	{
-		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_ACTIVE);
+		Gdk::Color c = w.get_style()->get_bg (background ? Gtk::STATE_ACTIVE : Gtk::STATE_NORMAL);
 		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 	}
 	cairo_fill (cr);
@@ -184,11 +188,13 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 {
 	Glib::RefPtr<Gdk::Window> win (w.get_window());
 
-	bool tickleft = true;
+	bool tickleft;
+	bool background;
 	gint width, height;
 	win->get_size (width, height);
 
 	tickleft = w.get_name().substr(w.get_name().length() - 4) == "Left";
+	background = tickleft || w.get_name().substr(w.get_name().length() - 5) == "Right";
 
 	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width, height);
 	cairo_t* cr = cairo_create (surface);
@@ -226,7 +232,7 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 	cairo_move_to (cr, 0, 0);
 	cairo_rectangle (cr, 0, 0, width, height);
 	{
-		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_ACTIVE);
+		Gdk::Color c = w.get_style()->get_bg (background ? Gtk::STATE_ACTIVE : Gtk::STATE_NORMAL);
 		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 	}
 	cairo_fill (cr);

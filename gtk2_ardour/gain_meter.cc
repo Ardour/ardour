@@ -287,15 +287,24 @@ GainMeterBase::setup_meters (int len)
 		meter_width = 10;
 	}
 	level_meter->setup_meters(len, meter_width);
+
+	switch (_width) {
+	case Wide:
+		//meter_metric_area.show();
+		meter_ticks1_area.show();
+		meter_ticks2_area.show();
+		break;
+	case Narrow:
+		//meter_metric_area.hide();
+		meter_ticks1_area.hide();
+		meter_ticks2_area.hide();
+		break;
+	}
 }
 
 void
 GainMeter::setup_meters (int len)
 {
-	if (!meter_metric_area.get_parent()) {
-		level_meter->pack_end (meter_metric_area, false, false);
-		meter_metric_area.show_all ();
-	}
 	GainMeterBase::setup_meters (len);
 }
 
@@ -499,6 +508,8 @@ void
 GainMeterBase::set_meter_strip_name (const char * name)
 {
 	meter_metric_area.set_name (name);
+	meter_ticks1_area.set_name (name);
+	meter_ticks2_area.set_name (name);
 }
 
 void
@@ -837,6 +848,8 @@ void GainMeterBase::color_handler(bool dpi)
 	meter_clear_pattern_cache();
 	setup_meters();
 	meter_metric_area.queue_draw ();
+	meter_ticks1_area.queue_draw ();
+	meter_ticks2_area.queue_draw ();
 }
 
 void
@@ -856,6 +869,8 @@ GainMeterBase::on_theme_changed()
 {
 	meter_clear_pattern_cache();
 	meter_metric_area.queue_draw ();
+	meter_ticks1_area.queue_draw ();
+	meter_ticks2_area.queue_draw ();
 }
 
 GainMeter::GainMeter (Session* s, int fader_length)
@@ -902,6 +917,19 @@ GainMeter::GainMeter (Session* s, int fader_length)
 
 	meter_metric_area.signal_expose_event().connect (
 		sigc::mem_fun(*this, &GainMeter::meter_metrics_expose));
+
+	meter_ticks1_area.set_size_request(3,-1);
+	meter_ticks2_area.set_size_request(3,-1);
+
+	meter_ticks1_area.signal_expose_event().connect (
+			sigc::mem_fun(*this, &GainMeter::meter_ticks1_expose));
+	meter_ticks2_area.signal_expose_event().connect (
+			sigc::mem_fun(*this, &GainMeter::meter_ticks2_expose));
+
+	meter_hbox.pack_start (meter_ticks1_area, false, false);
+	meter_hbox.pack_start (meter_alignment, true, true);
+	meter_hbox.pack_start (meter_ticks2_area, false, false);
+	meter_hbox.pack_start (meter_metric_area, false, false);
 }
 
 void
@@ -910,7 +938,7 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 			 boost::shared_ptr<Amp> amp)
 {
 	if (meter_alignment.get_parent()) {
-		hbox.remove (meter_alignment);
+		hbox.remove (meter_hbox);
 	}
 
 //	if (gain_automation_state_button.get_parent()) {
@@ -933,14 +961,14 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 	   pack some route-dependent stuff.
 	*/
 
-	hbox.pack_start (meter_alignment, true, true);
+	hbox.pack_start (meter_hbox, true, true);
 
 //	if (r && !r->is_auditioner()) {
 //		fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
 //	}
 
-	setup_meters ();
 	hbox.show_all ();
+	setup_meters ();
 }
 
 int
@@ -955,6 +983,18 @@ gint
 GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 {
 	return meter_expose_metrics(ev, _types, &meter_metric_area);
+}
+
+gint
+GainMeter::meter_ticks1_expose (GdkEventExpose *ev)
+{
+	return meter_expose_ticks(ev, _types, &meter_ticks1_area);
+}
+
+gint
+GainMeter::meter_ticks2_expose (GdkEventExpose *ev)
+{
+	return meter_expose_ticks(ev, _types, &meter_ticks2_area);
 }
 
 boost::shared_ptr<PBD::Controllable>
@@ -1019,5 +1059,7 @@ GainMeter::meter_configuration_changed (ChanCount c)
 
 	meter_clear_pattern_cache();
 	meter_metric_area.queue_draw ();
+	meter_ticks1_area.queue_draw ();
+	meter_ticks2_area.queue_draw ();
 }
 

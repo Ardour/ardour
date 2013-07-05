@@ -96,7 +96,7 @@ LevelMeter::update_meters ()
 		return 0.0f;
 	}
 
-	int32_t nmidi = _meter->input_streams().n_midi();
+	uint32_t nmidi = _meter->input_streams().n_midi();
 
 	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
 		if ((*i).packed) {

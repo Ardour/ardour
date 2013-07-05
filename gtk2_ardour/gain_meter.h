@@ -114,6 +114,8 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	Gtkmm2ext::FocusEntry        gain_display;
 	Gtk::Button                  peak_display;
 	Gtk::DrawingArea             meter_metric_area;
+	Gtk::DrawingArea             meter_ticks1_area;
+	Gtk::DrawingArea             meter_ticks2_area;
 	LevelMeter                  *level_meter;
 
 	sigc::connection gain_watching;
@@ -212,6 +214,8 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 	void hide_all_meters ();
 
 	gint meter_metrics_expose (GdkEventExpose *);
+	gint meter_ticks1_expose (GdkEventExpose *);
+	gint meter_ticks2_expose (GdkEventExpose *);
 
   private:
 
@@ -221,6 +225,7 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 	Gtk::HBox  fader_box;
 	Gtk::VBox* fader_vbox;
 	Gtk::HBox  hbox;
+	Gtk::HBox  meter_hbox;
 	Gtk::Alignment fader_alignment;
 	Gtk::Alignment meter_alignment;
 	std::vector<ARDOUR::DataType> _types;
