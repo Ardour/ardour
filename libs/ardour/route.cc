@@ -2949,6 +2949,8 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 		   contains ConfigurationChanged 
 		*/
 		need_to_queue_solo_change = false;
+		configure_processors (0);
+		io_changed (); /* EMIT SIGNAL */
 	}
 
 	if (!_output->connected() && _soloed_by_others_downstream) {
