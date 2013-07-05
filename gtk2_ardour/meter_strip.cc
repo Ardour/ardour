@@ -490,7 +490,7 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 				}
 				fraction = log_meter (j->first);
 				snprintf (buf, sizeof (buf), "%+2d", j->first);
-				pos = 1 + height - (gint) floor (height * fraction);
+				pos = height - (gint) floor (height * fraction);
 				cairo_move_to(cr, width-2.5, pos + .5);
 				cairo_line_to(cr, width, pos + .5);
 				cairo_stroke (cr);
@@ -717,7 +717,7 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 					cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 				}
 				fraction = log_meter (j->first);
-				pos = 1 + height - (gint) floor (height * fraction);
+				pos = height - (gint) floor (height * fraction);
 				cairo_move_to(cr, 0, pos + .5);
 				cairo_line_to(cr, 3, pos + .5);
 				cairo_stroke (cr);

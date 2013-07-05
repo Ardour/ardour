@@ -1054,17 +1054,20 @@ GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
 
 		for (vector<int>::const_iterator j = points.begin(); j != points.end(); ++j) {
 
+			gint pos;
+
 			float fraction = 0;
 			switch (*i) {
 			case DataType::AUDIO:
 				fraction = log_meter (*j);
+				pos = height - (gint) floor (height * fraction);
 				break;
 			case DataType::MIDI:
 				fraction = *j / 127.0;
+				pos = 1 + height - (gint) floor (height * fraction);
 				break;
 			}
 
-			gint const pos = 1 + height - (gint) floor (height * fraction);
 			float const linepos = min((float) height, (float)(pos + .5f));
 
 			cairo_set_line_width (cr, 1.0);
