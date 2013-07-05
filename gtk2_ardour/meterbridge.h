@@ -107,6 +107,10 @@ class Meterbridge :
 
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
+	bool on_scroll_event (GdkEventScroll*);
+
+	void scroll_left ();
+	void scroll_right ();
 
 	void on_size_allocate (Gtk::Allocation&);
 	void on_size_request (Gtk::Requisition*);

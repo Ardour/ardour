@@ -43,6 +43,7 @@
 
 #include "meterbridge.h"
 
+#include "keyboard.h"
 #include "monitor_section.h"
 #include "public_editor.h"
 #include "ardour_ui.h"
@@ -286,6 +287,51 @@ Meterbridge::on_key_release_event (GdkEventKey* ev)
 	}
 	/* don't forward releases */
 	return true;
+}
+
+bool
+Meterbridge::on_scroll_event (GdkEventScroll* ev)
+{
+	switch (ev->direction) {
+	case GDK_SCROLL_LEFT:
+		scroll_left ();
+		return true;
+	case GDK_SCROLL_UP:
+		if (ev->state & Keyboard::TertiaryModifier) {
+			scroll_left ();
+			return true;
+		}
+		return false;
+
+	case GDK_SCROLL_RIGHT:
+		scroll_right ();
+		return true;
+
+	case GDK_SCROLL_DOWN:
+		if (ev->state & Keyboard::TertiaryModifier) {
+			scroll_right ();
+			return true;
+		}
+		return false;
+	}
+
+	return false;
+}
+
+void
+Meterbridge::scroll_left ()
+{
+	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
+	/* stupid GTK: can't rely on clamping across versions */
+	scroller.get_hscrollbar()->set_value (max (adj->get_lower(), adj->get_value() - adj->get_step_increment()));
+}
+
+void
+Meterbridge::scroll_right ()
+{
+	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
+	/* stupid GTK: can't rely on clamping across versions */
+	scroller.get_hscrollbar()->set_value (min (adj->get_upper(), adj->get_value() + adj->get_step_increment()));
 }
 
 void
