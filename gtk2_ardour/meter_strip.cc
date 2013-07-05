@@ -394,7 +394,7 @@ MeterStrip::render_metrics (Gtk::Widget& w, vector<DataType> types)
 	cairo_move_to (cr, 0, 0);
 	cairo_rectangle (cr, 0, 0, width, height);
 	{
-		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_NORMAL);
+		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_ACTIVE);
 		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 	}
 	cairo_fill (cr);
@@ -607,7 +607,7 @@ MeterStrip::render_ticks (Gtk::Widget& w, vector<DataType> types)
 	cairo_move_to (cr, 0, 0);
 	cairo_rectangle (cr, 0, 0, width, height);
 	{
-		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_NORMAL);
+		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_ACTIVE);
 		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 	}
 	cairo_fill (cr);
