@@ -271,6 +271,7 @@ Meterbridge::get_window_pos_and_size ()
 bool
 Meterbridge::hide_window (GdkEventAny *ev)
 {
+	if (!_visible) return 0;
 	get_window_pos_and_size();
 	_visible = false;
 	return just_hide_it(ev, static_cast<Gtk::Window *>(this));
