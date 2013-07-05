@@ -308,10 +308,12 @@ namespace ARDOUR {
 		MeterFalloffOff = 0,
 		MeterFalloffSlowest = 1,
 		MeterFalloffSlow = 2,
-		MeterFalloffMedium = 3,
-		MeterFalloffFast = 4,
-		MeterFalloffFaster = 5,
-		MeterFalloffFastest = 6
+		MeterFalloffSlowish = 3,
+		MeterFalloffModerate = 4,
+		MeterFalloffMedium = 5,
+		MeterFalloffFast = 6,
+		MeterFalloffFaster = 7,
+		MeterFalloffFastest = 8,
 	};
 
 	enum MeterHold {

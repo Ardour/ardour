@@ -442,8 +442,12 @@ meter_falloff_to_float (MeterFalloff falloff)
 		return METER_FALLOFF_SLOWEST;
 	case MeterFalloffSlow:
 		return METER_FALLOFF_SLOW;
+	case MeterFalloffSlowish:
+		return METER_FALLOFF_SLOWISH;
 	case MeterFalloffMedium:
 		return METER_FALLOFF_MEDIUM;
+	case MeterFalloffModerate:
+		return METER_FALLOFF_MODERATE;
 	case MeterFalloffFast:
 		return METER_FALLOFF_FAST;
 	case MeterFalloffFaster:
@@ -466,6 +470,12 @@ meter_falloff_from_float (float val)
 	}
 	else if (val <= METER_FALLOFF_SLOW) {
 		return MeterFalloffSlow;
+	}
+	else if (val <= METER_FALLOFF_SLOWISH) {
+		return MeterFalloffSlowish;
+	}
+	else if (val <= METER_FALLOFF_MODERATE) {
+		return MeterFalloffModerate;
 	}
 	else if (val <= METER_FALLOFF_MEDIUM) {
 		return MeterFalloffMedium;

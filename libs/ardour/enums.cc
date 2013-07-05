@@ -194,6 +194,8 @@ setup_enum_writer ()
 	REGISTER_ENUM (MeterFalloffOff);
 	REGISTER_ENUM (MeterFalloffSlowest);
 	REGISTER_ENUM (MeterFalloffSlow);
+	REGISTER_ENUM (MeterFalloffSlowish);
+	REGISTER_ENUM (MeterFalloffModerate);
 	REGISTER_ENUM (MeterFalloffMedium);
 	REGISTER_ENUM (MeterFalloffFast);
 	REGISTER_ENUM (MeterFalloffFaster);

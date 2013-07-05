@@ -149,13 +149,15 @@ double slider_position_to_gain_with_max (double g, double max_gain = 2.0);
  * These rates are db/sec.
 */
 
-#define METER_FALLOFF_OFF     0.0f
-#define METER_FALLOFF_SLOWEST 6.6f // BBC standard
-#define METER_FALLOFF_SLOW    8.6f // BBC standard
-#define METER_FALLOFF_MEDIUM  20.0f
-#define METER_FALLOFF_FAST    32.0f
-#define METER_FALLOFF_FASTER  46.0f
-#define METER_FALLOFF_FASTEST 70.0f
+#define METER_FALLOFF_OFF       0.0f
+#define METER_FALLOFF_SLOWEST   6.6f  // BBC standard
+#define METER_FALLOFF_SLOW      8.6f  // BBC standard, EBU  24dB / 2.8sec
+#define METER_FALLOFF_SLOWISH   12.0f // DIN  20dB / 1.7 sec
+#define METER_FALLOFF_MODERATE  13.3f // EBU-PPM, IRT PPM-   20dB / 1.5 sec
+#define METER_FALLOFF_MEDIUM    20.0f
+#define METER_FALLOFF_FAST      32.0f
+#define METER_FALLOFF_FASTER    46.0f
+#define METER_FALLOFF_FASTEST   70.0f
 
 float meter_falloff_to_float (ARDOUR::MeterFalloff);
 ARDOUR::MeterFalloff meter_falloff_from_float (float);

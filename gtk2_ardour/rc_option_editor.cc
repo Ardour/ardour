@@ -1914,13 +1914,15 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_falloff)
 		);
 
-	mfo->add (METER_FALLOFF_OFF, _("off"));
-	mfo->add (METER_FALLOFF_SLOWEST, _("slowest"));
-	mfo->add (METER_FALLOFF_SLOW, _("slow"));
-	mfo->add (METER_FALLOFF_MEDIUM, _("medium"));
-	mfo->add (METER_FALLOFF_FAST, _("fast"));
-	mfo->add (METER_FALLOFF_FASTER, _("faster"));
-	mfo->add (METER_FALLOFF_FASTEST, _("fastest"));
+	mfo->add (METER_FALLOFF_OFF,      _("off"));
+	mfo->add (METER_FALLOFF_SLOWEST,  _("slowest [6.6dB/sec]"));
+	mfo->add (METER_FALLOFF_SLOW,     _("slow [8.6dB/sec] (BBC PPM, EBU PPM)"));
+	mfo->add (METER_FALLOFF_SLOWISH,  _("slowish [12.0dB/sec] (DIN)"));
+	mfo->add (METER_FALLOFF_MODERATE, _("moderate [13.3dB/sec] (EBU Digi PPM, IRT Digi PPM)"));
+	mfo->add (METER_FALLOFF_MEDIUM,   _("medium [20dB/sec]"));
+	mfo->add (METER_FALLOFF_FAST,     _("fast [32dB/sec]"));
+	mfo->add (METER_FALLOFF_FASTER,   _("faster [46dB/sec]"));
+	mfo->add (METER_FALLOFF_FASTEST,  _("fastest [70dB/sec]"));
 
 	add_option (S_("Preferences|GUI"), mfo);
 
@@ -1932,9 +1934,11 @@ RCOptionEditor::RCOptionEditor ()
 		);
 
 	mlu->add (MeteringLineUp24, _("-24dB"));
-	mlu->add (MeteringLineUp20, _("-20dB"));
-	mlu->add (MeteringLineUp18, _("-18dB"));
+	mlu->add (MeteringLineUp20, _("-20dB (SMPTE)"));
+	mlu->add (MeteringLineUp18, _("-18dB (EBU)"));
 	mlu->add (MeteringLineUp15, _("-15dB"));
+
+	Gtkmm2ext::UI::instance()->set_tip (mlu->tip_widget(), _("Configure meter-ticks and color-knee point."));
 
 	add_option (S_("Preferences|GUI"), mlu);
 
