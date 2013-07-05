@@ -118,6 +118,8 @@ Meterbridge::Meterbridge ()
 	, VisibilityTracker (*((Gtk::Window*) this))
 	, _visible (false)
 	, _show_busses (false)
+	, metrics_left (2)
+	, metrics_right (3)
 {
 	set_name ("Meter Bridge");
 
@@ -138,13 +140,15 @@ Meterbridge::Meterbridge ()
 	set_keep_above (true);
 	set_border_width (0);
 
-	metrics_left = manage(new MeterStrip (2));
-	global_hpacker.pack_start (*metrics_left, false, false);
-	metrics_left->show();
+	metrics_vpacker_left.pack_start (metrics_left, true, true);
+	metrics_vpacker_left.pack_start (metrics_spacer_left, false, false);
+	metrics_spacer_left.set_size_request(-1, 0);
+	metrics_spacer_left.set_spacing(0);
 
-	metrics_right = manage(new MeterStrip (3));
-	global_hpacker.pack_start (*metrics_right, false, false);
-	metrics_right->show();
+	metrics_vpacker_right.pack_start (metrics_right, true, true);
+	metrics_vpacker_right.pack_start (metrics_spacer_right, false, false);
+	metrics_spacer_right.set_size_request(-1, 0);
+	metrics_spacer_right.set_spacing(0);
 
 	signal_delete_event().connect (sigc::mem_fun (*this, &Meterbridge::hide_window));
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
@@ -154,15 +158,48 @@ Meterbridge::Meterbridge ()
 	MeterStrip::ResetGroupPeakDisplays.connect_same_thread (*this, boost::bind (&Meterbridge::reset_group_peaks, this, _1));
 	MeterStrip::MetricChanged.connect_same_thread (*this, boost::bind(&Meterbridge::update_metrics, this));
 
-	global_hpacker.set_spacing(0);
-	scroller.add (global_hpacker);
+	/* work around ScrolledWindowViewport alignment mess Part one */
+	Gtk::HBox * yspc = manage (new Gtk::HBox());
+	yspc->set_size_request(-1, 1);
+	Gtk::VBox * xspc = manage (new Gtk::VBox());
+	xspc->pack_start(meterarea, true, true);
+	xspc->pack_start(*yspc, false, false);
+	yspc->show();
+	xspc->show();
+
+	meterarea.set_spacing(0);
+	scroller.set_shadow_type(Gtk::SHADOW_NONE);
+	scroller.set_border_width(0);
+	scroller.add (*xspc);
 	scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
-	global_vpacker.pack_start (scroller, true, true);
+
+	global_hpacker.pack_start (metrics_vpacker_left, false, false);
+	global_hpacker.pack_start (scroller, true, true);
+	global_hpacker.pack_start (metrics_vpacker_right, false, false);
+
+	global_vpacker.pack_start (global_hpacker, true, true);
 	add (global_vpacker);
 
-	global_hpacker.show();
+	metrics_left.show();
+	metrics_right.show();
+
+	metrics_vpacker_left.show();
+	metrics_spacer_left.show();
+	metrics_vpacker_right.show();
+	metrics_spacer_right.show();
+
+	meterarea.show();
 	global_vpacker.show();
+	global_hpacker.show();
 	scroller.show();
+
+	/* the return of the ScrolledWindowViewport mess:
+	 * remove shadow from scrollWindow's viewport
+	 * see http://www.mail-archive.com/gtkmm-list@gnome.org/msg03509.html
+	 */
+	Gtk::Viewport* viewport = (Gtk::Viewport*) scroller.get_child();
+	viewport->set_shadow_type(Gtk::SHADOW_NONE);
+	//viewport->set_border_width(0);
 }
 
 Meterbridge::~Meterbridge ()
@@ -250,6 +287,28 @@ Meterbridge::on_key_release_event (GdkEventKey* ev)
 	}
 	/* don't forward releases */
 	return true;
+}
+
+void
+Meterbridge::on_size_request (Gtk::Requisition* r)
+{
+	Gtk::Window::on_size_request(r);
+}
+
+void
+Meterbridge::on_size_allocate (Gtk::Allocation& a)
+{
+	const Gtk::Scrollbar * hsc = scroller.get_hscrollbar();
+
+	if (scroller.get_hscrollbar_visible() && hsc) {
+		int h = hsc->get_height() + 4;
+		metrics_spacer_left.set_size_request(-1, h);
+		metrics_spacer_right.set_size_request(-1, h);
+	} else {
+		metrics_spacer_left.set_size_request(-1, 0);
+		metrics_spacer_right.set_size_request(-1, 0);
+	}
+	Gtk::Window::on_size_allocate(a);
 }
 
 void
@@ -429,7 +488,7 @@ Meterbridge::add_strips (RouteList& routes)
 		strip = new MeterStrip (_session, route);
 		strips.push_back (strip);
 
-		global_hpacker.pack_start (*strip, false, false);
+		meterarea.pack_start (*strip, false, false);
 		strip->show();
 	}
 
@@ -462,9 +521,9 @@ Meterbridge::update_metrics ()
 		}
 	}
 	if (have_midi) {
-		metrics_right->set_metric_mode(3);
+		metrics_right.set_metric_mode(3);
 	} else {
-		metrics_right->set_metric_mode(4);
+		metrics_right.set_metric_mode(4);
 	}
 }
 
@@ -492,7 +551,6 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 	copy.sort(sorter);
 
 	int pos = 0;
-	global_hpacker.reorder_child(*metrics_left, pos++);
 
 	for (list<MeterStrip *>::iterator i = copy.begin(); i != copy.end(); ++i) {
 
@@ -523,9 +581,8 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 			(*i)->show();
 		}
 
-		global_hpacker.reorder_child(*(*i), pos++);
+		meterarea.reorder_child(*(*i), pos++);
 	}
-	global_hpacker.reorder_child(*metrics_right, pos);
 }
 
 void

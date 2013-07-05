@@ -62,6 +62,7 @@ class Meterbridge :
 	bool _show_busses;
 
 	Gtk::ScrolledWindow scroller;
+	Gtk::HBox meterarea;
 	Gtk::HBox global_hpacker;
 	Gtk::VBox global_vpacker;
 
@@ -83,8 +84,13 @@ class Meterbridge :
 
 	std::list<MeterStrip *> strips;
 
-	MeterStrip *metrics_left;
-	MeterStrip *metrics_right;
+	MeterStrip metrics_left;
+	MeterStrip metrics_right;
+
+	Gtk::VBox metrics_vpacker_left;
+	Gtk::VBox metrics_vpacker_right;
+	Gtk::HBox metrics_spacer_left;
+	Gtk::HBox metrics_spacer_right;
 
 	static const int32_t default_width = 600;
 	static const int32_t default_height = 400;
@@ -99,6 +105,9 @@ class Meterbridge :
 
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
+
+	void on_size_allocate (Gtk::Allocation&);
+	void on_size_request (Gtk::Requisition*);
 
 	void parameter_changed (std::string const & p);
 };
