@@ -192,6 +192,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
 	DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
+	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MeterStrip::parameter_changed, this, _1), gui_context());
 }
 
 MeterStrip::~MeterStrip ()
@@ -416,4 +417,12 @@ MeterStrip::redraw_metrics ()
 	meter_metric_area.queue_draw();
 	meter_ticks1_area.queue_draw();
 	meter_ticks2_area.queue_draw();
+}
+
+void
+MeterStrip::parameter_changed (std::string const & p)
+{
+	if (p == "meter-peak") {
+		max_peak = -INFINITY;
+	}
 }

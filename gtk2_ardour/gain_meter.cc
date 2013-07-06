@@ -843,10 +843,9 @@ GainMeterBase::update_meters()
 			snprintf (buf, sizeof(buf), "%.1f", mpeak);
 			peak_display.set_label (buf);
 		}
-
-		if (mpeak >= Config->get_meter_peak()) {
-			peak_display.set_name ("MixerStripPeakDisplayPeak");
-		}
+	}
+	if (mpeak >= Config->get_meter_peak()) {
+		peak_display.set_name ("MixerStripPeakDisplayPeak");
 	}
 }
 

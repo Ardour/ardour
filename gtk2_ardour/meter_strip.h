@@ -112,6 +112,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 
 	bool peak_button_release (GdkEventButton*);
 
+	void parameter_changed (std::string const & p);
 	void redraw_metrics ();
 };
 
