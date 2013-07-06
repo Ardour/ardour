@@ -100,18 +100,20 @@ LevelMeter::update_meters ()
 
 	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
 		if ((*i).packed) {
+			mpeak = _meter->max_peak_power(n);
+			if (mpeak > (*i).max_peak) {
+				(*i).max_peak = mpeak;
+				(*i).meter->set_highlight(mpeak > Config->get_meter_peak());
+			}
+			if (mpeak > max_peak) {
+				max_peak = mpeak;
+			}
+
 			peak = _meter->peak_power (n);
 			if (n < nmidi) {
 				(*i).meter->set (peak);
 			} else {
 				(*i).meter->set (log_meter (peak));
-			}
-			mpeak = _meter->max_peak_power(n);
-			if (mpeak > max_peak) {
-				max_peak = mpeak;
-			}
-			if (mpeak > max_peak) {
-				max_peak = mpeak;
 			}
 		}
 	}
@@ -293,6 +295,8 @@ void LevelMeter::clear_meters ()
 {
 	for (vector<MeterInfo>::iterator i = meters.begin(); i < meters.end(); i++) {
 		(*i).meter->clear();
+		(*i).max_peak = minus_infinity();
+		(*i).meter->set_highlight(false);
 	}
 	max_peak = minus_infinity();
 }

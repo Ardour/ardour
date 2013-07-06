@@ -80,12 +80,14 @@ class LevelMeter : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	    gint16                width;
             int			  length;
 	    bool                  packed;
+	    float                 max_peak;
 
 	    MeterInfo() {
 		    meter = 0;
 		    width = 0;
                     length = 0;
 		    packed = false;
+		    max_peak = -INFINITY;
 	    }
 	};
 
