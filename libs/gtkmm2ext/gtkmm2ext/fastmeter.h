@@ -43,6 +43,7 @@ class FastMeter : public Gtk::DrawingArea {
 			int clr6=0xffff00ff, int clr7=0xffff00ff,
 			int clr8=0xff0000ff, int clr9=0xff0000ff,
 			int bgc0=0x333333ff, int bgc1=0x444444ff,
+			int bgh0=0x991122ff, int bgh1=0x551111ff,
 			float stp0 = 55.0, // log_meter(-18);
 			float stp1 = 77.5, // log_meter(-9);
 			float stp2 = 92.5, // log_meter(-3); // 95.0, // log_meter(-2);
@@ -59,6 +60,8 @@ class FastMeter : public Gtk::DrawingArea {
 
 	long hold_count() { return hold_cnt; }
 	void set_hold_count (long);
+	void set_highlight (bool);
+	bool get_highlight () { return highlight; }
 
 protected:
 	bool on_expose_event (GdkEventExpose*);
@@ -75,6 +78,7 @@ private:
 	float _stp[4];
 	int _clr[10];
 	int _bgc[2];
+	int _bgh[2];
 
 	Orientation orientation;
 	GdkRectangle pixrect;
@@ -87,19 +91,20 @@ private:
 	float current_peak;
 	float current_user_level;
 	bool resized;
+	bool highlight;
 
 	bool vertical_expose (GdkEventExpose*);
 	void queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>&, float);
 
 	static Cairo::RefPtr<Cairo::Pattern> generate_meter_pattern (
-		int w, int h, int *clr, float *stp);
+		int w, int h, int *clr, float *stp, bool shade);
 	static Cairo::RefPtr<Cairo::Pattern> request_vertical_meter (
-		int w, int h, int *clr, float *stp);
+		int w, int h, int *clr, float *stp, bool shade);
 
 	static Cairo::RefPtr<Cairo::Pattern> generate_meter_background (
-		int w, int h, int *bgc);
+		int w, int h, int *bgc, bool shade);
 	static Cairo::RefPtr<Cairo::Pattern> request_vertical_background (
-		int w, int h, int *bgc);
+		int w, int h, int *bgc, bool shade);
 
 	struct Pattern10MapKey {
 		Pattern10MapKey (

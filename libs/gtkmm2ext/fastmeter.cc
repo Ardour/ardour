@@ -44,7 +44,9 @@ FastMeter::PatternBgMap FastMeter::vb_pattern_cache;
 FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 		int clr0, int clr1, int clr2, int clr3,
 		int clr4, int clr5, int clr6, int clr7,
-		int clr8, int clr9, int bgc0, int bgc1,
+		int clr8, int clr9,
+		int bgc0, int bgc1,
+		int bgh0, int bgh1,
 		float stp0, float stp1,
 		float stp2, float stp3
 		)
@@ -57,6 +59,8 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	current_level = 0;
 	last_peak_rect.width = 0;
 	last_peak_rect.height = 0;
+
+	highlight = false;
 
 	_clr[0] = clr0;
 	_clr[1] = clr1;
@@ -72,6 +76,9 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	_bgc[0] = bgc0;
 	_bgc[1] = bgc1;
 
+	_bgh[0] = bgh0;
+	_bgh[1] = bgh1;
+
 	_stp[0] = stp0;
 	_stp[1] = stp1;
 	_stp[2] = stp2;
@@ -85,8 +92,8 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	if (!len) {
 		len = 250;
 	}
-	fgpattern = request_vertical_meter(dimen, len, _clr, _stp);
-	bgpattern = request_vertical_background (dimen, len, _bgc);
+	fgpattern = request_vertical_meter(dimen, len, _clr, _stp, true);
+	bgpattern = request_vertical_background (dimen, len, _bgc, false);
 	pixheight = len;
 	pixwidth = dimen;
 
@@ -95,6 +102,8 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 
 	request_width = pixrect.width + 2;
 	request_height= pixrect.height + 2;
+
+	queue_draw ();
 }
 
 FastMeter::~FastMeter ()
@@ -103,7 +112,7 @@ FastMeter::~FastMeter ()
 
 Cairo::RefPtr<Cairo::Pattern>
 FastMeter::generate_meter_pattern (
-		int width, int height, int *clr, float *stp)
+		int width, int height, int *clr, float *stp, bool shade)
 {
 	guint8 r,g,b,a;
 	double knee;
@@ -164,7 +173,7 @@ FastMeter::generate_meter_pattern (
 	cairo_pattern_add_color_stop_rgb (pat, 1.0,
 	                                  r/255.0, g/255.0, b/255.0);
 
-	if (1) { // TODO Config->get_meter_shade()
+	if (shade) {
 		cairo_pattern_t* shade_pattern = cairo_pattern_create_linear (0.0, 0.0, width, 0.0);
 		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, 1.0, 1.0, 1.0, 0.2);
 		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, 0.0, 0.0, 0.0, 0.3);
@@ -197,11 +206,11 @@ FastMeter::generate_meter_pattern (
 
 Cairo::RefPtr<Cairo::Pattern>
 FastMeter::generate_meter_background (
-		int width, int height, int *clr)
+		int width, int height, int *clr, bool shade)
 {
 	guint8 r0,g0,b0,r1,g1,b1,a;
 
-	cairo_pattern_t* pat = cairo_pattern_create_linear (0.0, 0.0, width, height);
+	cairo_pattern_t* pat = cairo_pattern_create_linear (0.0, 0.0, 0.0, height);
 
 	UINT_TO_RGBA (clr[0], &r0, &g0, &b0, &a);
 	UINT_TO_RGBA (clr[1], &r1, &g1, &b1, &a);
@@ -212,6 +221,32 @@ FastMeter::generate_meter_background (
 	cairo_pattern_add_color_stop_rgb (pat, 1.0,
 	                                  r0/255.0, g0/255.0, b0/255.0);
 
+	if (shade) {
+		cairo_pattern_t* shade_pattern = cairo_pattern_create_linear (0.0, 0.0, width, 0.0);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0.0, 1.0, 1.0, 1.0, 0.15);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0.6, 0.0, 0.0, 0.0, 0.10);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 1.0, 1.0, 1.0, 1.0, 0.20);
+
+		cairo_surface_t* surface;
+		cairo_t* tc = 0;
+		surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width, height);
+		tc = cairo_create (surface);
+		cairo_set_source (tc, pat);
+		cairo_rectangle (tc, 0, 0, width, height);
+		cairo_fill (tc);
+		cairo_set_source (tc, shade_pattern);
+		cairo_rectangle (tc, 0, 0, width, height);
+		cairo_fill (tc);
+
+		cairo_pattern_destroy (pat);
+		cairo_pattern_destroy (shade_pattern);
+
+		pat = cairo_pattern_create_for_surface (surface);
+
+		cairo_destroy (tc);
+		cairo_surface_destroy (surface);
+	}
+
 	Cairo::RefPtr<Cairo::Pattern> p (new Cairo::Pattern (pat, false));
 
 	return p;
@@ -219,7 +254,7 @@ FastMeter::generate_meter_background (
 
 Cairo::RefPtr<Cairo::Pattern>
 FastMeter::request_vertical_meter(
-		int width, int height, int *clr, float *stp)
+		int width, int height, int *clr, float *stp, bool shade)
 {
 	if (height < min_pattern_metric_size)
 		height = min_pattern_metric_size;
@@ -239,7 +274,7 @@ FastMeter::request_vertical_meter(
 	// TODO flush pattern cache if it gets too large
 
 	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_pattern (
-		width, height, clr, stp);
+		width, height, clr, stp, shade);
 	vm_pattern_cache[key] = p;
 
 	return p;
@@ -247,7 +282,7 @@ FastMeter::request_vertical_meter(
 
 Cairo::RefPtr<Cairo::Pattern>
 FastMeter::request_vertical_background(
-		int width, int height, int *bgc)
+		int width, int height, int *bgc, bool shade)
 {
 	if (height < min_pattern_metric_size)
 		height = min_pattern_metric_size;
@@ -262,7 +297,7 @@ FastMeter::request_vertical_background(
 	// TODO flush pattern cache if it gets too large
 
 	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_background (
-		width, height, bgc);
+		width, height, bgc, shade);
 	vb_pattern_cache[key] = p;
 
 	return p;
@@ -310,8 +345,8 @@ FastMeter::on_size_allocate (Gtk::Allocation &alloc)
 	}
 
 	if (pixheight != h) {
-		fgpattern = request_vertical_meter (request_width, h, _clr, _stp);
-		bgpattern = request_vertical_background (request_width, h, _bgc);
+		fgpattern = request_vertical_meter (request_width, h, _clr, _stp, true);
+		bgpattern = request_vertical_background (request_width, h, highlight ? _bgh : _bgc, highlight);
 		pixheight = h - 2;
 		pixwidth  = request_width - 2;
 	}
@@ -339,7 +374,9 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	if (resized) {
 		cairo_set_source_rgb (cr, 0, 0, 0); // black
 		rounded_rectangle (cr, 0, 0, pixrect.width + 2, pixheight + 2, 2);
-		cairo_fill (cr);
+		cairo_stroke (cr);
+		//cairo_fill (cr);
+		//resized = false;
 	}
 
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
@@ -490,10 +527,24 @@ FastMeter::queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>& win, float ol
 }
 
 void
+FastMeter::set_highlight (bool onoff)
+{
+	if (highlight == onoff) {
+		return;
+	}
+	highlight = onoff;
+	bgpattern = request_vertical_background (request_width, pixheight, highlight ? _bgh : _bgc, highlight);
+	resized = true;
+	queue_draw ();
+}
+
+void
 FastMeter::clear ()
 {
 	current_level = 0;
 	current_peak = 0;
 	hold_state = 0;
+	set_highlight(false);
+	resized = true;
 	queue_draw ();
 }

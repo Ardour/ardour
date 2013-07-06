@@ -254,6 +254,7 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 					c[5], c[6], c[7], c[8], c[9],
 					ARDOUR_UI::config()->canvasvar_MeterBackgroundBot.get(),
 					ARDOUR_UI::config()->canvasvar_MeterBackgroundTop.get(),
+					0x991122ff, 0x551111ff,
 					stp[0], stp[1], stp[2], stp[3]
 					);
 			meters[n].width = width;
