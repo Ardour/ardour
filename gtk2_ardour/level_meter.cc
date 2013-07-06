@@ -126,18 +126,24 @@ LevelMeter::parameter_changed (string p)
 	ENSURE_GUI_THREAD (*this, &LevelMeter::parameter_changed, p)
 
 	if (p == "meter-hold") {
-
 		vector<MeterInfo>::iterator i;
 		uint32_t n;
 
 		for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
-
 			(*i).meter->set_hold_count ((uint32_t) floor(Config->get_meter_hold()));
 		}
 	}
 	else if (p == "meter-line-up-level") {
 		color_changed = true;
 		setup_meters (meter_length, regular_meter_width, thin_meter_width);
+	}
+	else if (p == "meter-peak") {
+		vector<MeterInfo>::iterator i;
+		uint32_t n;
+
+		for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
+			(*i).max_peak = minus_infinity();
+		}
 	}
 }
 
