@@ -52,8 +52,8 @@ meter_render_ticks (Gtk::Widget& w, vector<ARDOUR::DataType> types)
 	bool background;
 	gint width, height;
 	win->get_size (width, height);
-	background =
-		   w.get_name().substr(w.get_name().length() - 4) == "Left"
+	background = types.size() == 0
+		|| w.get_name().substr(w.get_name().length() - 4) == "Left"
 		|| w.get_name().substr(w.get_name().length() - 5) == "Right";
 
 	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width, height);
@@ -204,7 +204,7 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 	win->get_size (width, height);
 
 	tickleft = w.get_name().substr(w.get_name().length() - 4) == "Left";
-	background = tickleft || w.get_name().substr(w.get_name().length() - 5) == "Right";
+	background = types.size() == 0 || tickleft || w.get_name().substr(w.get_name().length() - 5) == "Right";
 
 	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width, height);
 	cairo_t* cr = cairo_create (surface);
