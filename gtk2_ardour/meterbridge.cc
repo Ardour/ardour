@@ -95,27 +95,6 @@ struct SignalOrderRouteSorter {
 	}
 };
 
-/* modified version of above
- * used in Meterbridge::sync_order_keys()
- */
-struct MeterOrderRouteSorter {
-	bool operator() (MeterStrip *ma, MeterStrip *mb) {
-		boost::shared_ptr<Route> a = ma->route();
-		boost::shared_ptr<Route> b = mb->route();
-		if (a->is_master() || a->is_monitor()) {
-			/* "a" is a special route (master, monitor, etc), and comes
-			 * last in the mixer ordering
-			 */
-			return false;
-		} else if (b->is_master() || b->is_monitor()) {
-			/* everything comes before b */
-			return true;
-		}
-		return a->order_key (MixerSort) < b->order_key (MixerSort);
-	}
-};
-
-
 Meterbridge::Meterbridge ()
 	: Window (Gtk::WINDOW_TOPLEVEL)
 	, VisibilityTracker (*((Gtk::Window*) this))
@@ -419,8 +398,8 @@ Meterbridge::session_going_away ()
 {
 	ENSURE_GUI_THREAD (*this, &Meterbridge::session_going_away);
 
-	for (list<MeterStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
-		delete (*i);
+	for (list<MeterBridgeStrip>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		delete ((*i).s);
 	}
 
 	strips.clear ();
@@ -534,9 +513,9 @@ Meterbridge::fast_update_strips ()
 	if (!is_mapped () || !_session) {
 		return;
 	}
-	for (list<MeterStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
-		// TODO skip inactive/hidden routes
-		(*i)->fast_update ();
+	for (list<MeterBridgeStrip>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		if (!(*i).visible) continue;
+		(*i).s->fast_update ();
 	}
 }
 
@@ -554,14 +533,14 @@ Meterbridge::add_strips (RouteList& routes)
 		}
 
 		strip = new MeterStrip (_session, route);
-		strips.push_back (strip);
+		strips.push_back (MeterBridgeStrip(strip));
 		route->active_changed.connect (*this, invalidator (*this), boost::bind (&Meterbridge::resync_order, this), gui_context ());
 
 		meterarea.pack_start (*strip, false, false);
 		strip->show();
 	}
 
-	sync_order_keys(MixerSort);
+	resync_order();
 	update_metrics();
 }
 
@@ -572,9 +551,12 @@ Meterbridge::remove_strip (MeterStrip* strip)
 		return;
 	}
 
-	list<MeterStrip *>::iterator i;
-	if ((i = find (strips.begin(), strips.end(), strip)) != strips.end()) {
-		strips.erase (i);
+	list<MeterBridgeStrip>::iterator i;
+	for (list<MeterBridgeStrip>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		if ( (*i).s == strip) {
+			strips.erase (i);
+			break;
+		}
 	}
 	update_metrics();
 }
@@ -583,8 +565,8 @@ void
 Meterbridge::update_metrics ()
 {
 	bool have_midi = false;
-	for (list<MeterStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
-		if ( (*i)->has_midi ()) {
+	for (list<MeterBridgeStrip>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		if ( (*i).s->has_midi () && (*i).visible) {
 			have_midi = true;
 			break;
 		}
@@ -600,49 +582,57 @@ void
 Meterbridge::sync_order_keys (RouteSortOrderKey src)
 {
 	MeterOrderRouteSorter sorter;
-	std::list<MeterStrip *> copy (strips);
+	std::list<MeterBridgeStrip> copy (strips);
 	copy.sort(sorter);
 
 	int pos = 0;
 
-	for (list<MeterStrip *>::iterator i = copy.begin(); i != copy.end(); ++i) {
+	for (list<MeterBridgeStrip>::iterator i = copy.begin(); i != copy.end(); ++i) {
 
-		if (! (*i)->route()->active()) {
-			(*i)->hide();
+		if (! (*i).s->route()->active()) {
+			(*i).s->hide();
+			(*i).visible = false;
 		}
-		else if ((*i)->route()->is_master()) {
+		else if ((*i).s->route()->is_master()) {
 			if (_show_master) {
-				(*i)->show();
+				(*i).s->show();
+				(*i).visible = true;
 			} else {
-				(*i)->hide();
+				(*i).s->hide();
+				(*i).visible = false;
 			}
 		}
-		else if (boost::dynamic_pointer_cast<AudioTrack>((*i)->route()) == 0
-				&& boost::dynamic_pointer_cast<MidiTrack>((*i)->route()) == 0
+		else if (boost::dynamic_pointer_cast<AudioTrack>((*i).s->route()) == 0
+				&& boost::dynamic_pointer_cast<MidiTrack>((*i).s->route()) == 0
 				) {
 			/* non-master bus */
 			if (_show_busses) {
-				(*i)->show();
+				(*i).s->show();
+				(*i).visible = true;
 			} else {
-				(*i)->hide();
+				(*i).s->hide();
+				(*i).visible = false;
 			}
 		}
-		else if (boost::dynamic_pointer_cast<MidiTrack>((*i)->route())) {
+		else if (boost::dynamic_pointer_cast<MidiTrack>((*i).s->route())) {
 			if (_show_midi) {
-				(*i)->show();
+				(*i).s->show();
+				(*i).visible = true;
 			} else {
-				(*i)->hide();
+				(*i).s->hide();
+				(*i).visible = false;
 			}
 		}
 		else {
-			(*i)->show();
+			(*i).s->show();
+			(*i).visible = true;
 		}
-		meterarea.reorder_child(*(*i), pos++);
+		meterarea.reorder_child(*((*i).s), pos++);
 	}
 }
 
 void
-Meterbridge::resync_order ()
+Meterbridge::resync_order()
 {
 	sync_order_keys(MixerSort);
 }
@@ -652,18 +642,22 @@ Meterbridge::parameter_changed (std::string const & p)
 {
 	if (p == "show-busses-on-meterbridge") {
 		_show_busses = _session->config.get_show_busses_on_meterbridge();
-		sync_order_keys(MixerSort);
+		resync_order();
+		update_metrics();
 	}
 	else if (p == "show-master-on-meterbridge") {
 		_show_master = _session->config.get_show_master_on_meterbridge();
-		sync_order_keys(MixerSort);
+		resync_order();
+		update_metrics();
 	}
 	else if (p == "show-midi-on-meterbridge") {
 		_show_midi = _session->config.get_show_midi_on_meterbridge();
-		sync_order_keys(MixerSort);
+		resync_order();
+		update_metrics();
 	}
 	else if (p == "meter-line-up-level") {
 		meter_clear_pattern_cache();
+		update_metrics();
 	}
 }
 

@@ -82,7 +82,34 @@ class Meterbridge :
 	void sync_order_keys (ARDOUR::RouteSortOrderKey src);
 	void resync_order ();
 
-	std::list<MeterStrip *> strips;
+	struct MeterBridgeStrip {
+		MeterStrip *s;
+		bool visible;
+
+		MeterBridgeStrip(MeterStrip *ss) {
+			s = ss;
+			visible = true;
+		}
+	};
+
+	struct MeterOrderRouteSorter {
+		bool operator() (struct MeterBridgeStrip ma, struct MeterBridgeStrip mb) {
+			boost::shared_ptr<ARDOUR::Route> a = ma.s->route();
+			boost::shared_ptr<ARDOUR::Route> b = mb.s->route();
+			if (a->is_master() || a->is_monitor()) {
+				/* "a" is a special route (master, monitor, etc), and comes
+				 * last in the mixer ordering
+				 */
+				return false;
+			} else if (b->is_master() || b->is_monitor()) {
+				/* everything comes before b */
+				return true;
+			}
+			return a->order_key (ARDOUR::MixerSort) < b->order_key (ARDOUR::MixerSort);
+		}
+	};
+
+	std::list<MeterBridgeStrip> strips;
 
 	MeterStrip metrics_left;
 	MeterStrip metrics_right;
