@@ -308,6 +308,7 @@ public:
 		_label = manage (new Gtk::Label (n + ":"));
 		_label->set_alignment (0, 0.5);
 		_hscale = manage (new Gtk::HScale(adj));
+		_adj = NULL;
 	}
 
 	HSliderOption (
