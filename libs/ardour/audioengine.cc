@@ -759,6 +759,15 @@ void
 AudioEngine::meter_thread ()
 {
 	pthread_set_name (X_("meter"));
+#if 1
+	while (true) {
+		Glib::usleep (10000);
+		if (g_atomic_int_get(&m_meter_exit)) {
+			break;
+		}
+		Metering::Meter ();
+	}
+#else
 	struct timeval clock1, clock2;
 	int64_t delay = 10000; /* 1/100th sec interval */
 
@@ -779,6 +788,7 @@ AudioEngine::meter_thread ()
 		  + (clock2.tv_usec-clock1.tv_usec);
 		delay = max((int64_t)0, 10000 - elapsed_time);
 	}
+#endif
 }
 
 void
