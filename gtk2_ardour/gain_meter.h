@@ -85,6 +85,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	void set_flat_buttons ();
 
 	virtual void setup_meters (int len=0);
+	virtual void set_type (ARDOUR::MeterType);
 
 	boost::shared_ptr<PBD::Controllable> get_controllable();
 
@@ -208,6 +209,7 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 
 	int get_gm_width ();
 	void setup_meters (int len=0);
+	void set_type (ARDOUR::MeterType);
 
   protected:
 	void hide_all_meters ();

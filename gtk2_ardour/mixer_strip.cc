@@ -410,6 +410,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	if (gpm.gain_display.get_parent()) {
 		gpm.gain_display.get_parent()->remove (gpm.gain_display);
 	}
+
+	gpm.set_type (rt->meter_type_mixer());
 	
 	middle_button_table.attach (gpm.gain_display,0,1,1,2);
 	middle_button_table.attach (gpm.peak_display,1,2,1,2);
@@ -2123,17 +2125,24 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 
 	RadioMenuItem::Group group;
 
-	add_level_meter_item (items, group, _("Input"), MeterInput);
-	add_level_meter_item (items, group, _("Pre-fader"), MeterPreFader);
-	add_level_meter_item (items, group, _("Post-fader"), MeterPostFader);
-	add_level_meter_item (items, group, _("Output"), MeterOutput);
-	add_level_meter_item (items, group, _("Custom"), MeterCustom);
+	add_level_meter_item_point (items, group, _("Input"), MeterInput);
+	add_level_meter_item_point (items, group, _("Pre-fader"), MeterPreFader);
+	add_level_meter_item_point (items, group, _("Post-fader"), MeterPostFader);
+	add_level_meter_item_point (items, group, _("Output"), MeterOutput);
+	add_level_meter_item_point (items, group, _("Custom"), MeterCustom);
+
+	RadioMenuItem::Group tgroup;
+	items.push_back (SeparatorElem());
+
+	add_level_meter_item_type (items, tgroup, _("Peak"), MeterPeak);
+	add_level_meter_item_type (items, tgroup, _("RMS"), MeterKrms);
 
 	m->popup (ev->button, ev->time);
 }
 
 void
-MixerStrip::add_level_meter_item (Menu_Helpers::MenuList& items, RadioMenuItem::Group& group, string const & name, MeterPoint point)
+MixerStrip::add_level_meter_item_point (Menu_Helpers::MenuList& items,
+		RadioMenuItem::Group& group, string const & name, MeterPoint point)
 {
 	using namespace Menu_Helpers;
 	
@@ -2146,4 +2155,22 @@ void
 MixerStrip::set_meter_point (MeterPoint p)
 {
 	_route->set_meter_point (p);
+}
+
+void
+MixerStrip::add_level_meter_item_type (Menu_Helpers::MenuList& items,
+		RadioMenuItem::Group& group, string const & name, MeterType type)
+{
+	using namespace Menu_Helpers;
+	
+	items.push_back (RadioMenuElem (group, name, sigc::bind (sigc::mem_fun (*this, &MixerStrip::set_meter_type), type)));
+	RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&items.back ());
+	i->set_active (_route->meter_type_mixer() == type);
+}
+
+void
+MixerStrip::set_meter_type (MeterType t)
+{
+	_route->set_meter_type_mixer (t);
+	gpm.set_type (t);
 }

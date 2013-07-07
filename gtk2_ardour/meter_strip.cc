@@ -113,6 +113,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	level_meter->clear_meters();
 	level_meter->setup_meters (220, meter_width, 6);
 	level_meter->ButtonPress.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::level_meter_button_press, this, _1));
+	level_meter->set_type (_route->meter_type_meterbridge());
 
 	meter_align.set(0.5, 0.5, 0.0, 1.0);
 	meter_align.add(*level_meter);
@@ -463,11 +464,12 @@ MeterStrip::add_level_meter_item (Menu_Helpers::MenuList& items, RadioMenuItem::
 
 	items.push_back (RadioMenuElem (group, name, sigc::bind (sigc::mem_fun (*this, &MeterStrip::set_meter_point), type)));
 	RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&items.back ());
-	i->set_active (level_meter->get_type() == type);
+	i->set_active (_route->meter_type_meterbridge() == type);
 }
 
 void
 MeterStrip::set_meter_point (MeterType m)
 {
 	level_meter->set_type (m);
+	_route->set_meter_type_meterbridge(m);
 }

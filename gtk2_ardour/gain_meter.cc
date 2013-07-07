@@ -302,9 +302,21 @@ GainMeterBase::setup_meters (int len)
 }
 
 void
+GainMeterBase::set_type (MeterType t)
+{
+	level_meter->set_type(t);
+}
+
+void
 GainMeter::setup_meters (int len)
 {
 	GainMeterBase::setup_meters (len);
+}
+
+void
+GainMeter::set_type (MeterType t)
+{
+	GainMeterBase::set_type (t);
 }
 
 bool

@@ -95,7 +95,7 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 	// Meter audio in to the rest of the peaks
 	for (uint32_t i = 0; i < n_audio; ++i, ++n) {
 		_peak_signal[n] = compute_peak (bufs.get_audio(i).data(), nframes, _peak_signal[n]);
-		if (_meter_type & MeterKrms) {
+		if (1 /* TODO use separate bit-flags for mixer|meterbridge */ || _meter_type & MeterKrms) {
 			_kmeter[i]->process(bufs.get_audio(i).data(), nframes);
 		}
 	}
