@@ -454,7 +454,7 @@ MeterStrip::popup_level_meter_menu (GdkEventButton* ev)
 
 	_suspend_menu_callbacks = true;
 	add_level_meter_item (items, group, _("Peak"), MeterPeak);
-	add_level_meter_item (items, group, _("RMS"), MeterKrms);
+	add_level_meter_item (items, group, _("RMS + Peak"), MeterKrms);
 
 	m->popup (ev->button, ev->time);
 	_suspend_menu_callbacks = false;

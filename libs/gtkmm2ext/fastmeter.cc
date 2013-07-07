@@ -55,6 +55,7 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	hold_cnt = hold;
 	resized = true;
 	hold_state = 0;
+	bright_hold = false;
 	current_peak = 0;
 	current_level = 0;
 	last_peak_rect.width = 0;
@@ -378,7 +379,6 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 		//cairo_fill (cr);
 		//resized = false;
 	}
-
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_clip (cr);
 
@@ -413,11 +413,19 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 	if (hold_state) {
 		last_peak_rect.x = 1;
 		last_peak_rect.width = pixwidth;
-		last_peak_rect.y = 1 + pixheight - (gint) floor (pixheight * current_peak);
-		last_peak_rect.height = min(2, pixheight - last_peak_rect.y);
+		last_peak_rect.y = max(1, 1 + pixheight - (gint) floor (pixheight * current_peak));
+		if (bright_hold) {
+			last_peak_rect.height = max(0, min(4, pixheight - last_peak_rect.y -1 ));
+		} else {
+			last_peak_rect.height = max(0, min(2, pixheight - last_peak_rect.y -1 ));
+		}
 
 		cairo_set_source (cr, fgpattern->cobj());
 		cairo_rectangle (cr, 1, last_peak_rect.y, pixwidth, last_peak_rect.height);
+		if (bright_hold) {
+			cairo_fill_preserve (cr);
+			cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 0.3);
+		}
 		cairo_fill (cr);
 
 	} else {
@@ -435,24 +443,26 @@ FastMeter::set (float lvl, float peak)
 {
 	float old_level = current_level;
 	float old_peak = current_peak;
-	float peak_lvl = peak;
 
-	if (peak_lvl == -1) {
-		peak_lvl = lvl;
+	if (peak == -1) {
+		if (lvl >= current_peak) {
+			current_peak = lvl;
+			hold_state = hold_cnt;
+		}
+
+		if (hold_state > 0) {
+			if (--hold_state == 0) {
+				current_peak = lvl;
+			}
+		}
+		bright_hold = false;
+	} else {
+		current_peak = peak;
+		hold_state = 1;
+		bright_hold = true;
 	}
 
 	current_level = lvl;
-
-	if (peak_lvl >= current_peak) {
-		current_peak = peak_lvl;
-		hold_state = hold_cnt;
-	}
-
-	if (hold_state > 0) {
-		if (--hold_state == 0) {
-			current_peak = peak_lvl;
-		}
-	}
 
 	if (current_level == old_level && current_peak == old_peak && hold_state == 0) {
 		return;
@@ -520,6 +530,22 @@ FastMeter::queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>& win, float ol
 			queue = true;
 		}
 		gdk_region_union_with_rect (region, &last_peak_rect);
+	}
+
+	if (hold_state && current_peak > 0) {
+		if (!queue) {
+			region = gdk_region_new ();
+			queue = true;
+		}
+		rect.x = 1;
+		rect.y = max(1, 1 + pixheight - (gint) floor (pixheight * current_peak));
+		if (bright_hold) {
+			rect.height = max(0, min(4, pixheight - last_peak_rect.y -1 ));
+		} else {
+			rect.height = max(0, min(2, pixheight - last_peak_rect.y -1 ));
+		}
+		rect.width = pixwidth;
+		gdk_region_union_with_rect (region, &rect);
 	}
 
 	if (queue) {

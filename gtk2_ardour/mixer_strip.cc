@@ -2136,7 +2136,7 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 	items.push_back (SeparatorElem());
 
 	add_level_meter_item_type (items, tgroup, _("Peak"), MeterPeak);
-	add_level_meter_item_type (items, tgroup, _("RMS"), MeterKrms);
+	add_level_meter_item_type (items, tgroup, _("RMS + Peak"), MeterKrms);
 
 	m->popup (ev->button, ev->time);
 	_suspend_menu_callbacks = false;

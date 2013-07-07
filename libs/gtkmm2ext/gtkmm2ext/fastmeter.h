@@ -87,6 +87,7 @@ private:
 	gint request_height;
 	unsigned long hold_cnt;
 	unsigned long hold_state;
+	bool bright_hold;
 	float current_level;
 	float current_peak;
 	float current_user_level;
