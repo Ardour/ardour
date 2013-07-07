@@ -452,10 +452,12 @@ MeterStrip::popup_level_meter_menu (GdkEventButton* ev)
 
 	RadioMenuItem::Group group;
 
+	_suspend_menu_callbacks = true;
 	add_level_meter_item (items, group, _("Peak"), MeterPeak);
 	add_level_meter_item (items, group, _("RMS"), MeterKrms);
 
 	m->popup (ev->button, ev->time);
+	_suspend_menu_callbacks = false;
 }
 
 void
@@ -471,8 +473,8 @@ MeterStrip::add_level_meter_item (Menu_Helpers::MenuList& items, RadioMenuItem::
 void
 MeterStrip::set_meter_type (MeterType m)
 {
+	if (_suspend_menu_callbacks) return;
 	level_meter->set_type (m);
-	//_route->set_meter_type(m);
 }
 
 void

@@ -116,6 +116,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void parameter_changed (std::string const & p);
 	void redraw_metrics ();
 
+	bool _suspend_menu_callbacks;
 	bool level_meter_button_press (GdkEventButton* ev);
 	void popup_level_meter_menu (GdkEventButton* ev);
 	void add_level_meter_item (Gtk::Menu_Helpers::MenuList& items, Gtk::RadioMenuItem::Group& group, std::string const & name, ARDOUR::MeterType mode);

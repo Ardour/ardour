@@ -307,6 +307,10 @@ PeakMeter::meter_level(uint32_t n, MeterType type) {
 void
 PeakMeter::set_type(MeterType t)
 {
+	if (t == _meter_type) {
+		return;
+	}
+
 	_meter_type = t;
 
 	if (t & MeterKrms) {

@@ -2125,6 +2125,7 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 
 	RadioMenuItem::Group group;
 
+	_suspend_menu_callbacks = true;
 	add_level_meter_item_point (items, group, _("Input"), MeterInput);
 	add_level_meter_item_point (items, group, _("Pre-fader"), MeterPreFader);
 	add_level_meter_item_point (items, group, _("Post-fader"), MeterPostFader);
@@ -2138,6 +2139,7 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 	add_level_meter_item_type (items, tgroup, _("RMS"), MeterKrms);
 
 	m->popup (ev->button, ev->time);
+	_suspend_menu_callbacks = false;
 }
 
 void
@@ -2154,6 +2156,7 @@ MixerStrip::add_level_meter_item_point (Menu_Helpers::MenuList& items,
 void
 MixerStrip::set_meter_point (MeterPoint p)
 {
+	if (_suspend_menu_callbacks) return;
 	_route->set_meter_point (p);
 }
 
@@ -2171,6 +2174,6 @@ MixerStrip::add_level_meter_item_type (Menu_Helpers::MenuList& items,
 void
 MixerStrip::set_meter_type (MeterType t)
 {
-	//_route->set_meter_type (t);
+	if (_suspend_menu_callbacks) return;
 	gpm.set_type (t);
 }
