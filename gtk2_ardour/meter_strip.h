@@ -103,11 +103,11 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	bool _has_midi;
 
 	LevelMeter   *level_meter;
-	void meter_changed ();
 
 	PBD::ScopedConnection _config_connection;
 	void strip_property_changed (const PBD::PropertyChange&);
 	void meter_configuration_changed (ARDOUR::ChanCount);
+	void meter_type_changed (ARDOUR::MeterType);
 
 	static int max_pattern_metric_size; // == FastMeter::max_pattern_metric_size
 
@@ -119,7 +119,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	bool level_meter_button_press (GdkEventButton* ev);
 	void popup_level_meter_menu (GdkEventButton* ev);
 	void add_level_meter_item (Gtk::Menu_Helpers::MenuList& items, Gtk::RadioMenuItem::Group& group, std::string const & name, ARDOUR::MeterType mode);
-	void set_meter_point (ARDOUR::MeterType mode);
+	void set_meter_type (ARDOUR::MeterType mode);
 };
 
 #endif /* __ardour_mixer_strip__ */

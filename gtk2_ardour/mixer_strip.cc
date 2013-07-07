@@ -411,7 +411,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		gpm.gain_display.get_parent()->remove (gpm.gain_display);
 	}
 
-	gpm.set_type (rt->meter_type_mixer());
+	gpm.set_type (rt->meter_type());
 	
 	middle_button_table.attach (gpm.gain_display,0,1,1,2);
 	middle_button_table.attach (gpm.peak_display,1,2,1,2);
@@ -2165,12 +2165,12 @@ MixerStrip::add_level_meter_item_type (Menu_Helpers::MenuList& items,
 	
 	items.push_back (RadioMenuElem (group, name, sigc::bind (sigc::mem_fun (*this, &MixerStrip::set_meter_type), type)));
 	RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&items.back ());
-	i->set_active (_route->meter_type_mixer() == type);
+	i->set_active (_route->meter_type() == type);
 }
 
 void
 MixerStrip::set_meter_type (MeterType t)
 {
-	_route->set_meter_type_mixer (t);
+	//_route->set_meter_type (t);
 	gpm.set_type (t);
 }

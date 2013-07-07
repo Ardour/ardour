@@ -969,6 +969,9 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 		_meter->ConfigurationChanged.connect (
 			model_connections, invalidator (*this), boost::bind (&GainMeter::meter_configuration_changed, this, _1), gui_context()
 			);
+		_meter->TypeChanged.connect (
+			model_connections, invalidator (*this), boost::bind (&GainMeter::meter_type_changed, this, _1), gui_context()
+			);
 
 		meter_configuration_changed (_meter->input_streams ());
 	}
@@ -1077,3 +1080,8 @@ GainMeter::meter_configuration_changed (ChanCount c)
 	meter_clear_pattern_cache(); // XXX only once
 }
 
+void
+GainMeter::meter_type_changed (MeterType t)
+{
+	_route->set_meter_type(t);
+}

@@ -112,8 +112,9 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	level_meter->set_meter (_route->shared_peak_meter().get());
 	level_meter->clear_meters();
 	level_meter->setup_meters (220, meter_width, 6);
+	level_meter->set_type (_route->meter_type());
 	level_meter->ButtonPress.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::level_meter_button_press, this, _1));
-	level_meter->set_type (_route->meter_type_meterbridge());
+	level_meter->MeterTypeChanged.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::meter_type_changed, this, _1));
 
 	meter_align.set(0.5, 0.5, 0.0, 1.0);
 	meter_align.add(*level_meter);
@@ -462,14 +463,21 @@ MeterStrip::add_level_meter_item (Menu_Helpers::MenuList& items, RadioMenuItem::
 {
 	using namespace Menu_Helpers;
 
-	items.push_back (RadioMenuElem (group, name, sigc::bind (sigc::mem_fun (*this, &MeterStrip::set_meter_point), type)));
+	items.push_back (RadioMenuElem (group, name, sigc::bind (sigc::mem_fun (*this, &MeterStrip::set_meter_type), type)));
 	RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&items.back ());
-	i->set_active (_route->meter_type_meterbridge() == type);
+	i->set_active (_route->meter_type() == type);
 }
 
 void
-MeterStrip::set_meter_point (MeterType m)
+MeterStrip::set_meter_type (MeterType m)
 {
 	level_meter->set_type (m);
-	_route->set_meter_type_meterbridge(m);
+	//_route->set_meter_type(m);
 }
+
+void
+MeterStrip::meter_type_changed (MeterType t)
+{
+	_route->set_meter_type(t);
+}
+

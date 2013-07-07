@@ -181,10 +181,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	MeterPoint   meter_point() const { return _meter_point; }
 	void         meter ();
 
-	void         set_meter_type_mixer (MeterType t) { _meter_type_mixer = t; }
-	void         set_meter_type_meterbridge (MeterType t) { _meter_type_meterbridge = t; }
-	MeterType    meter_type_mixer() const { return _meter_type_mixer; }
-	MeterType    meter_type_meterbridge() const { return _meter_type_meterbridge; }
+	void         set_meter_type (MeterType t) { _meter_type = t; }
+	MeterType    meter_type() const { return _meter_type; }
 
 	/* Processors */
 
@@ -491,8 +489,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	Flag           _flags;
 	int            _pending_declick;
 	MeterPoint     _meter_point;
-	MeterType      _meter_type_mixer;
-	MeterType      _meter_type_meterbridge;
+	MeterType      _meter_type;
 	boost::dynamic_bitset<> _phase_invert;
 	bool           _self_solo;
 	uint32_t       _soloed_by_others_upstream;

@@ -221,6 +221,7 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
   private:
 
 	void meter_configuration_changed (ARDOUR::ChanCount);
+	void meter_type_changed (ARDOUR::MeterType);
 
 	Gtk::HBox  gain_display_box;
 	Gtk::HBox  fader_box;
