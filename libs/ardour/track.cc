@@ -945,6 +945,6 @@ Track::set_monitoring (MonitorChoice mc)
 MeterState
 Track::metering_state () const
 {
-	return _diskstream->record_enabled() ? MeteringInput : MeteringRoute;
+	return (_diskstream->record_enabled() || _meter_point == MeterInput) ? MeteringInput : MeteringRoute;
 }
 
