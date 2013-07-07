@@ -82,20 +82,14 @@ public:
 		}
 	}
 
-	float max_peak_power (uint32_t n) {
-		if (n < _max_peak_power.size()) {
-			return _max_peak_power[n];
-		} else {
-			return minus_infinity();
-		}
-	}
-
 	float meter_level (uint32_t n, MeterType type);
 
 	void set_type(MeterType t);
 	MeterType get_type() { return _meter_type; }
 
 	XMLNode& state (bool full);
+
+	PBD::Signal1<void, MeterType> TypeChanged;
 
 private:
 	friend class IO;

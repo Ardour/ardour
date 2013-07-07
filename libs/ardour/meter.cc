@@ -297,7 +297,11 @@ PeakMeter::meter_level(uint32_t n, MeterType type) {
 			}
 		default:
 		case MeterMaxPeak:
-			return max_peak_power(n);
+			if (n < _max_peak_power.size()) {
+				return _max_peak_power[n];
+			} else {
+				return minus_infinity();
+			}
 	}
 }
 void
@@ -311,6 +315,7 @@ PeakMeter::set_type(MeterType t)
 			_kmeter[n]->reset();
 		}
 	}
+	TypeChanged(t);
 }
 
 XMLNode&

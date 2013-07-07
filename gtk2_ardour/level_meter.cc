@@ -44,10 +44,6 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace std;
 
-//sigc::signal<void> LevelMeter::ResetAllPeakDisplays;
-//sigc::signal<void,RouteGroup*> LevelMeter::ResetGroupPeakDisplays;
-
-
 LevelMeter::LevelMeter (Session* s)
 	: _meter (0)
 	, meter_length (0)
@@ -79,10 +75,13 @@ void
 LevelMeter::set_meter (PeakMeter* meter)
 {
 	_configuration_connection.disconnect();
+	_meter_type_connection.disconnect();
+
 	_meter = meter;
 
 	if (_meter) {
 		_meter->ConfigurationChanged.connect (_configuration_connection, invalidator (*this), boost::bind (&LevelMeter::configuration_changed, this, _1, _2), gui_context());
+		_meter->TypeChanged.connect (_meter_type_connection, invalidator (*this), boost::bind (&LevelMeter::meter_type_changed, this, _1), gui_context());
 	}
 }
 
@@ -153,6 +152,13 @@ LevelMeter::configuration_changed (ChanCount /*in*/, ChanCount /*out*/)
 {
 	color_changed = true;
 	setup_meters (meter_length, regular_meter_width, thin_meter_width);
+}
+
+void
+LevelMeter::meter_type_changed (MeterType t)
+{
+	meter_type = t;
+	MeterTypeChanged(t);
 }
 
 void
