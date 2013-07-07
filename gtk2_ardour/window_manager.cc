@@ -263,8 +263,27 @@ ProxyBase::toggle()
 		_window->show_all();
 		/* we'd like to just call this and nothing else */
 		_window->present ();
+
+		if (_width != -1 && _height != -1) {
+			_window->set_default_size (_width, _height);
+		}
+		if (_x_off != -1 && _y_off != -1) {
+			_window->move (_x_off, _y_off);
+		}
+
 	} else {
+		if (_window->is_mapped()) {
+			save_pos_and_size();
+		}
 		vistracker->cycle_visibility ();
+		if (_window->is_mapped()) {
+			if (_width != -1 && _height != -1) {
+				_window->set_default_size (_width, _height);
+			}
+			if (_x_off != -1 && _y_off != -1) {
+				_window->move (_x_off, _y_off);
+			}
+		}
 	}
 }
 
@@ -325,6 +344,7 @@ ProxyBase::setup ()
 	assert (_window);
 
 	vistracker = new Gtkmm2ext::VisibilityTracker (*_window);
+	_window->signal_delete_event().connect (sigc::mem_fun (*this, &ProxyBase::handle_win_event));
 
 	if (_width != -1 || _height != -1 || _x_off != -1 || _y_off != -1) {
 		/* cancel any mouse-based positioning */
@@ -379,10 +399,17 @@ ProxyBase::hide ()
 {
 	Gtk::Window* win = get (false);
 	if (win) {
+		save_pos_and_size();
 		win->hide ();
 	}
 }
 
+void
+ProxyBase::save_pos_and_size ()
+{
+	_window->get_position (_x_off, _y_off);
+	_window->get_size (_width, _height);
+}
 /*-----------------------*/
 
 ProxyTemporary::ProxyTemporary (const string& name, Gtk::Window* win)

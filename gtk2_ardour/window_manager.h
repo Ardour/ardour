@@ -120,6 +120,8 @@ class ProxyBase : public sigc::trackable {
     mutable int  _width; ///< width
     mutable int  _height; ///< height
     Gtkmm2ext::VisibilityTracker* vistracker;
+
+    void save_pos_and_size ();
     
     void setup ();
 };
