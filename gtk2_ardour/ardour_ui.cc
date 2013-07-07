@@ -188,13 +188,13 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, add_route_dialog (X_("add-routes"), _("Add Tracks/Busses"))
 	, about (X_("about"), _("About"))
 	, location_ui (X_("locations"), _("Locations"))
+	, route_params (X_("inspector"), _("Tracks and Busses"))
 	, session_option_editor (X_("session-options-editor"), _("Properties"), boost::bind (&ARDOUR_UI::create_session_option_editor, this))
 	, add_video_dialog (X_("add-video"), _("Add Tracks/Busses"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
 	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
 	, big_clock_window (X_("big-clock"), _("Big Clock"), boost::bind (&ARDOUR_UI::create_big_clock_window, this))
 	, audio_port_matrix (X_("audio-connection-manager"), _("Audio Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::AUDIO))
 	, midi_port_matrix (X_("midi-connection-manager"), _("MIDI Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::MIDI))
-	, route_params (X_("inspector"), _("Tracks and Busses"), boost::bind (&ARDOUR_UI::create_route_params_window, this))
 
 	, error_log_button (_("Errors"))
 
@@ -363,18 +363,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	   and its functionality are separate 
 	*/
 	
-	if (audio_port_matrix) {
-		audio_port_matrix->set_session (_session);
-	}
-
-	if (midi_port_matrix) {
-		midi_port_matrix->set_session (_session);
-	}
-
-	if (route_params) {
-		route_params->set_session (_session);
-	}
-
 	(void) theme_manager.get (true);
 	
 	starting.connect (sigc::mem_fun(*this, &ARDOUR_UI::startup));

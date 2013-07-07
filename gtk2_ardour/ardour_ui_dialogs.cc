@@ -65,17 +65,7 @@ ARDOUR_UI::set_session (Session *s)
 {
 	SessionHandlePtr::set_session (s);
 
-	if (audio_port_matrix) {
-		audio_port_matrix->set_session (s);
-	}
-
-	if (midi_port_matrix) {
-		midi_port_matrix->set_session (s);
-	}
-
-	if (route_params) {
-		route_params->set_session (s);
-	}
+	WM::Manager::instance().set_session (s);
 
 	if (!_session) {
 		/* Session option editor cannot exist across change-of-session */
@@ -98,7 +88,6 @@ ARDOUR_UI::set_session (Session *s)
 	}
 
 	AutomationWatch::instance().set_session (s);
-	WM::Manager::instance().set_session (s);
 
 	if (shuttle_box) {
 		shuttle_box->set_session (s);
@@ -109,7 +98,6 @@ ARDOUR_UI::set_session (Session *s)
 	big_clock->set_session (s);
 	time_info_box->set_session (s);
 	video_timeline->set_session (s);
-	location_ui->set_session (s);
 
 	/* sensitize menu bar options that are now valid */
 
@@ -451,14 +439,6 @@ BigClockWindow*
 ARDOUR_UI::create_big_clock_window ()
 {
 	return new BigClockWindow (*big_clock);
-}
-
-RouteParams_UI*
-ARDOUR_UI::create_route_params_window ()
-{
-	RouteParams_UI *rv = new RouteParams_UI ();
-	rv->set_session(_session);
-	return rv;
 }
 
 void

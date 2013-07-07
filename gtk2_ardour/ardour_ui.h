@@ -579,6 +579,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         WM::Proxy<AddRouteDialog> add_route_dialog;
         WM::Proxy<About> about;
         WM::Proxy<LocationUIWindow> location_ui;
+        WM::Proxy<RouteParams_UI> route_params;
 
         /* Windows/Dialogs that require a creator method */
 
@@ -588,7 +589,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         WM::ProxyWithConstructor<BigClockWindow> big_clock_window;
         WM::ProxyWithConstructor<GlobalPortMatrixWindow> audio_port_matrix;
         WM::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
-        WM::ProxyWithConstructor<RouteParams_UI> route_params;
 
         /* creator methods */
 
@@ -597,7 +597,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         AddVideoDialog*         create_add_video_dialog ();
         BigClockWindow*         create_big_clock_window(); 
         GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
-        RouteParams_UI*         create_route_params_window ();
 
 	static UIConfiguration *ui_config;
 
