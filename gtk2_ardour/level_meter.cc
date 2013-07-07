@@ -298,19 +298,20 @@ bool
 LevelMeter::meter_button_release (GdkEventButton* ev)
 {
 	if (ev->button == 1) {
-		clear_meters ();
+		clear_meters (false);
 	}
 
 	return true;
 }
 
 
-void LevelMeter::clear_meters ()
+void LevelMeter::clear_meters (bool reset_highlight)
 {
 	for (vector<MeterInfo>::iterator i = meters.begin(); i < meters.end(); i++) {
 		(*i).meter->clear();
 		(*i).max_peak = minus_infinity();
-		(*i).meter->set_highlight(false);
+		if (reset_highlight)
+			(*i).meter->set_highlight(false);
 	}
 	max_peak = minus_infinity();
 }

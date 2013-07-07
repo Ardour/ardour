@@ -63,7 +63,7 @@ class LevelMeter : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	float update_meters ();
 	void update_meters_falloff ();
-	void clear_meters ();
+	void clear_meters (bool reset_highlight = true);
 	void hide_meters ();
 	void setup_meters (int len=0, int width=3, int thin=2);
 

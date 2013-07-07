@@ -544,7 +544,5 @@ FastMeter::clear ()
 	current_level = 0;
 	current_peak = 0;
 	hold_state = 0;
-	set_highlight(false);
-	resized = true;
 	queue_draw ();
 }
