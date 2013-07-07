@@ -112,6 +112,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	level_meter->set_meter (_route->shared_peak_meter().get());
 	level_meter->clear_meters();
 	level_meter->setup_meters (220, meter_width, 6);
+	level_meter->ButtonPress.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::level_meter_button_press, this, _1));
 
 	meter_align.set(0.5, 0.5, 0.0, 1.0);
 	meter_align.add(*level_meter);
@@ -425,4 +426,48 @@ MeterStrip::parameter_changed (std::string const & p)
 	if (p == "meter-peak") {
 		max_peak = -INFINITY;
 	}
+}
+
+
+bool
+MeterStrip::level_meter_button_press (GdkEventButton* ev)
+{
+	if (ev->button == 3) {
+		popup_level_meter_menu (ev);
+		return true;
+	}
+
+	return false;
+}
+
+void
+MeterStrip::popup_level_meter_menu (GdkEventButton* ev)
+{
+	using namespace Gtk::Menu_Helpers;
+
+	Gtk::Menu* m = manage (new Menu);
+	MenuList& items = m->items ();
+
+	RadioMenuItem::Group group;
+
+	add_level_meter_item (items, group, _("Peak"), MeterPeak);
+	add_level_meter_item (items, group, _("RMS"), MeterKrms);
+
+	m->popup (ev->button, ev->time);
+}
+
+void
+MeterStrip::add_level_meter_item (Menu_Helpers::MenuList& items, RadioMenuItem::Group& group, string const & name, MeterType type)
+{
+	using namespace Menu_Helpers;
+
+	items.push_back (RadioMenuElem (group, name, sigc::bind (sigc::mem_fun (*this, &MeterStrip::set_meter_point), type)));
+	RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&items.back ());
+	i->set_active (level_meter->get_type() == type);
+}
+
+void
+MeterStrip::set_meter_point (MeterType m)
+{
+	level_meter->set_type (m);
 }

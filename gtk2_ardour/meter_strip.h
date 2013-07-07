@@ -66,6 +66,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
   protected:
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList route_connections;
+	PBD::ScopedConnectionList level_meter_connection;
 	void self_delete ();
 
 	gint meter_metrics_expose (GdkEventExpose *);
@@ -114,6 +115,11 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 
 	void parameter_changed (std::string const & p);
 	void redraw_metrics ();
+
+	bool level_meter_button_press (GdkEventButton* ev);
+	void popup_level_meter_menu (GdkEventButton* ev);
+	void add_level_meter_item (Gtk::Menu_Helpers::MenuList& items, Gtk::RadioMenuItem::Group& group, std::string const & name, ARDOUR::MeterType mode);
+	void set_meter_point (ARDOUR::MeterType mode);
 };
 
 #endif /* __ardour_mixer_strip__ */

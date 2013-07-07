@@ -55,6 +55,7 @@ setup_enum_writer ()
 	AlignStyle _AlignStyle;
 	AlignChoice _AlignChoice;
 	MeterPoint _MeterPoint;
+	MeterType _MeterType;
 	TrackMode _TrackMode;
 	NoteMode _NoteMode;
 	ChannelMode _ChannelMode;
@@ -171,6 +172,12 @@ setup_enum_writer ()
 	REGISTER_ENUM (MeterOutput);
 	REGISTER_ENUM (MeterCustom);
 	REGISTER (_MeterPoint);
+
+	REGISTER_ENUM (MeterMaxSignal);
+	REGISTER_ENUM (MeterMaxPeak);
+	REGISTER_ENUM (MeterPeak);
+	REGISTER_ENUM (MeterKrms);
+	REGISTER (_MeterType);
 
 	REGISTER_ENUM (Normal);
 	REGISTER_ENUM (NonLayered);

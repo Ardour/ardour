@@ -26,6 +26,7 @@
 #include "ardour/dB.h"
 #include "ardour/meter.h"
 #include "ardour/midi_buffer.h"
+#include "ardour/session.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/runtime_functions.h"
 
@@ -36,8 +37,17 @@ using namespace ARDOUR;
 PBD::Signal0<void> Metering::Meter;
 
 PeakMeter::PeakMeter (Session& s, const std::string& name)
-    : Processor (s, string_compose ("meter-%1", name)) 
+    : Processor (s, string_compose ("meter-%1", name))
 {
+	Kmeterdsp::init(s.nominal_frame_rate());
+}
+
+PeakMeter::~PeakMeter ()
+{
+	while (_kmeter.size() > 0) {
+		delete (_kmeter.back());
+		_kmeter.pop_back();
+	}
 }
 
 
@@ -79,17 +89,20 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 				}
 			}
 		}
-		_peak_power[n] = max (val, _peak_power[n]);
+		_peak_signal[n] = max (val, _peak_signal[n]);
 	}
 
 	// Meter audio in to the rest of the peaks
 	for (uint32_t i = 0; i < n_audio; ++i, ++n) {
-		_peak_power[n] = compute_peak (bufs.get_audio(i).data(), nframes, _peak_power[n]);
+		_peak_signal[n] = compute_peak (bufs.get_audio(i).data(), nframes, _peak_signal[n]);
+		if (_meter_type & MeterKrms) {
+			_kmeter[i]->process(bufs.get_audio(i).data(), nframes);
+		}
 	}
 
 	// Zero any excess peaks
-	for (uint32_t i = n; i < _peak_power.size(); ++i) {
-		_peak_power[i] = 0.0f;
+	for (uint32_t i = n; i < _peak_signal.size(); ++i) {
+		_peak_signal[i] = 0.0f;
 	}
 
 	_active = _pending_active;
@@ -98,8 +111,8 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 void
 PeakMeter::reset ()
 {
-	for (size_t i = 0; i < _peak_power.size(); ++i) {
-		_peak_power[i] = 0.0f;
+	for (size_t i = 0; i < _peak_signal.size(); ++i) {
+		_peak_signal[i] = 0.0f;
 	}
 }
 
@@ -108,6 +121,7 @@ PeakMeter::reset_max ()
 {
 	for (size_t i = 0; i < _max_peak_power.size(); ++i) {
 		_max_peak_power[i] = -INFINITY;
+		_max_peak_signal[i] = 0;
 	}
 }
 
@@ -137,8 +151,9 @@ PeakMeter::reflect_inputs (const ChanCount& in)
 {
 	current_meters = in;
 
-	const size_t limit = min (_peak_power.size(), (size_t) current_meters.n_total ());
-	const size_t n_midi  = min (_peak_power.size(), (size_t) current_meters.n_midi());
+	const size_t limit = min (_peak_signal.size(), (size_t) current_meters.n_total ());
+	const size_t n_midi  = min (_peak_signal.size(), (size_t) current_meters.n_midi());
+	const size_t n_audio = current_meters.n_audio();
 
 	for (size_t n = 0; n < limit; ++n) {
 		if (n < n_midi) {
@@ -147,6 +162,11 @@ PeakMeter::reflect_inputs (const ChanCount& in)
 			_visible_peak_power[n] = -INFINITY;
 		}
 	}
+
+	for (size_t n = 0; n < n_audio; ++n) {
+		_kmeter[n]->reset();
+	}
+
 	reset_max();
 
 	ConfigurationChanged (in, in); /* EMIT SIGNAL */
@@ -156,22 +176,36 @@ void
 PeakMeter::reset_max_channels (const ChanCount& chn)
 {
 	uint32_t const limit = chn.n_total();
+	const size_t n_audio = chn.n_audio();
 
-	while (_peak_power.size() > limit) {
-		_peak_power.pop_back();
+	while (_peak_signal.size() > limit) {
+		_peak_signal.pop_back();
 		_visible_peak_power.pop_back();
+		_max_peak_signal.pop_back();
 		_max_peak_power.pop_back();
 	}
 
-	while (_peak_power.size() < limit) {
-		_peak_power.push_back(0);
+	while (_peak_signal.size() < limit) {
+		_peak_signal.push_back(0);
 		_visible_peak_power.push_back(minus_infinity());
+		_max_peak_signal.push_back(0);
 		_max_peak_power.push_back(minus_infinity());
 	}
 
-	assert(_peak_power.size() == limit);
+	assert(_peak_signal.size() == limit);
 	assert(_visible_peak_power.size() == limit);
+	assert(_max_peak_signal.size() == limit);
 	assert(_max_peak_power.size() == limit);
+
+	/* alloc/free other audio-only meter types. */
+	while (_kmeter.size() > n_audio) {
+		delete (_kmeter.back());
+		_kmeter.pop_back();
+	}
+	while (_kmeter.size() < n_audio) {
+		_kmeter.push_back(new Kmeterdsp());
+	}
+	assert(_kmeter.size() == n_audio);
 }
 
 /** To be driven by the Meter signal from IO.
@@ -186,21 +220,23 @@ PeakMeter::meter ()
 		return;
 	}
 
-	assert(_visible_peak_power.size() == _peak_power.size());
+	assert(_visible_peak_power.size() == _peak_signal.size());
 
-	const size_t limit = min (_peak_power.size(), (size_t) current_meters.n_total ());
-	const size_t n_midi  = min (_peak_power.size(), (size_t) current_meters.n_midi());
+	const size_t limit = min (_peak_signal.size(), (size_t) current_meters.n_total ());
+	const size_t n_midi  = min (_peak_signal.size(), (size_t) current_meters.n_midi());
 
 	for (size_t n = 0; n < limit; ++n) {
 
 		/* grab peak since last read */
 
-		float new_peak = _peak_power[n]; /* XXX we should use atomic exchange from here ... */
-		_peak_power[n] = 0;              /* ... to here */
+		float new_peak = _peak_signal[n]; /* XXX we should use atomic exchange from here ... */
+		_peak_signal[n] = 0;              /* ... to here */
 
 		if (n < n_midi) {
-			_max_peak_power[n] = -INFINITY; // std::max (fast_coefficient_to_dB(new_peak), _max_peak_power[n]); // XXX
+			_max_peak_power[n] = -INFINITY; // std::max (new_peak, _max_peak_power[n]); // XXX
+			_max_peak_signal[n] = 0;
 			if (Config->get_meter_falloff() == 0.0f || new_peak > _visible_peak_power[n]) {
+				;
 			} else {
 				/* empirical WRT to falloff times , 0.01f ^= 100 Hz update rate */
 #if 1
@@ -218,6 +254,8 @@ PeakMeter::meter ()
 
 		/* compute new visible value using falloff */
 
+		_max_peak_signal[n] = std::max(new_peak, _max_peak_signal[n]);
+
 		if (new_peak > 0.0) {
 			new_peak = fast_coefficient_to_dB (new_peak);
 		} else {
@@ -234,6 +272,43 @@ PeakMeter::meter ()
 			// do falloff
 			new_peak = _visible_peak_power[n] - (Config->get_meter_falloff() * 0.01f);
 			_visible_peak_power[n] = std::max (new_peak, -INFINITY);
+		}
+	}
+}
+
+float
+PeakMeter::meter_level(uint32_t n, MeterType type) {
+	switch (type) {
+		case MeterKrms:
+			{
+				const uint32_t n_midi  = current_meters.n_midi();
+				if ((n - n_midi) < _kmeter.size()) {
+					return fast_coefficient_to_dB(_kmeter[n]->read());
+				}
+				return minus_infinity();
+			}
+		case MeterPeak:
+			return peak_power(n);
+		case MeterMaxSignal:
+			if (n < _max_peak_signal.size()) {
+				return _max_peak_signal[n];
+			} else {
+				return minus_infinity();
+			}
+		default:
+		case MeterMaxPeak:
+			return max_peak_power(n);
+	}
+}
+void
+PeakMeter::set_type(MeterType t)
+{
+	_meter_type = t;
+
+	if (t & MeterKrms) {
+		const size_t n_audio = current_meters.n_audio();
+		for (size_t n = 0; n < n_audio; ++n) {
+			_kmeter[n]->reset();
 		}
 	}
 }

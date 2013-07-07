@@ -177,6 +177,13 @@ namespace ARDOUR {
 		MeterCustom
 	};
 
+	enum MeterType {
+		MeterMaxSignal = 0x01,
+		MeterMaxPeak   = 0x02,
+		MeterPeak      = 0x04,
+		MeterKrms      = 0x08
+	};
+
 	enum TrackMode {
 		Normal,
 		NonLayered,

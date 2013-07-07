@@ -59,6 +59,7 @@ LevelMeter::LevelMeter (Session* s)
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &LevelMeter::on_theme_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &LevelMeter::color_handler));
 	max_peak = minus_infinity();
+	meter_type = MeterPeak;
 }
 
 void
@@ -100,7 +101,7 @@ LevelMeter::update_meters ()
 
 	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
 		if ((*i).packed) {
-			mpeak = _meter->max_peak_power(n);
+			mpeak = _meter->meter_level(n, MeterMaxPeak);
 			if (mpeak > (*i).max_peak) {
 				(*i).max_peak = mpeak;
 				(*i).meter->set_highlight(mpeak > Config->get_meter_peak());
@@ -109,7 +110,7 @@ LevelMeter::update_meters ()
 				max_peak = mpeak;
 			}
 
-			peak = _meter->peak_power (n);
+			peak = _meter->meter_level (n, meter_type);
 			if (n < nmidi) {
 				(*i).meter->set (peak);
 			} else {
@@ -278,6 +279,13 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 	}
 	show();
 	color_changed = false;
+}
+
+void
+LevelMeter::set_type(MeterType t)
+{
+	meter_type = t;
+	_meter->set_type(t);
 }
 
 bool
