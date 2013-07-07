@@ -431,21 +431,26 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 }
 
 void
-FastMeter::set (float lvl)
+FastMeter::set (float lvl, float peak)
 {
 	float old_level = current_level;
 	float old_peak = current_peak;
+	float peak_lvl = peak;
+
+	if (peak_lvl == -1) {
+		peak_lvl = lvl;
+	}
 
 	current_level = lvl;
 
-	if (lvl > current_peak) {
-		current_peak = lvl;
+	if (peak_lvl >= current_peak) {
+		current_peak = peak_lvl;
 		hold_state = hold_cnt;
 	}
 
 	if (hold_state > 0) {
 		if (--hold_state == 0) {
-			current_peak = lvl;
+			current_peak = peak_lvl;
 		}
 	}
 

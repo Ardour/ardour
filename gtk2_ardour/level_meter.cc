@@ -113,7 +113,7 @@ LevelMeter::update_meters ()
 			if (n < nmidi) {
 				(*i).meter->set (peak);
 			} else {
-				(*i).meter->set (log_meter (peak));
+				(*i).meter->set (log_meter (peak), log_meter(_meter->meter_level(n, MeterPeak)));
 			}
 		}
 	}

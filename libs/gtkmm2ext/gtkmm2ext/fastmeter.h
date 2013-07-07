@@ -51,7 +51,7 @@ class FastMeter : public Gtk::DrawingArea {
 			);
 	virtual ~FastMeter ();
 
-	void set (float level);
+	void set (float level, float peak = -1);
 	void clear ();
 
 	float get_level() { return current_level; }
