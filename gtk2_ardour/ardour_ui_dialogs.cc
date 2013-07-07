@@ -73,6 +73,9 @@ ARDOUR_UI::set_session (Session *s)
 		midi_port_matrix->set_session (s);
 	}
 
+	if (route_params) {
+		route_params->set_session (s);
+	}
 
 	if (!_session) {
 		/* Session option editor cannot exist across change-of-session */
@@ -222,6 +225,9 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 		editor->hide ();
 		mixer->hide ();
 		theme_manager->hide ();
+		audio_port_matrix->hide();
+		midi_port_matrix->hide();
+		route_params->hide();
 	}
 
 	second_connection.disconnect ();
@@ -445,6 +451,14 @@ BigClockWindow*
 ARDOUR_UI::create_big_clock_window ()
 {
 	return new BigClockWindow (*big_clock);
+}
+
+RouteParams_UI*
+ARDOUR_UI::create_route_params_window ()
+{
+	RouteParams_UI *rv = new RouteParams_UI ();
+	rv->set_session(_session);
+	return rv;
 }
 
 void
