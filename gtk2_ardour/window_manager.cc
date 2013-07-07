@@ -52,6 +52,10 @@ Manager::Manager ()
 {
 }
 
+Manager::~Manager ()
+{
+}
+
 void
 Manager::register_window (ProxyBase* info)
 {
@@ -120,11 +124,9 @@ Manager::add_state (XMLNode& root) const
 void
 Manager::set_session (ARDOUR::Session* s)
 {
+	SessionHandlePtr::set_session (s);
 	for (Windows::const_iterator i = _windows.begin(); i != _windows.end(); ++i) {
-		ARDOUR::SessionHandlePtr* sp = (*i)->session_handle ();
-		if (sp) {
-			sp->set_session (s);
-		}
+		(*i)->set_session(s);
 	}
 }
 
@@ -358,6 +360,7 @@ ProxyBase::setup ()
 	if (_x_off != -1 && _y_off != -1) {
 		_window->move (_x_off, _y_off);
 	}
+	set_session(_session);
 }
 	
 void
@@ -404,6 +407,13 @@ ProxyBase::hide ()
 	}
 }
 
+bool
+ProxyBase::handle_win_event (GdkEventAny *ev)
+{
+	save_pos_and_size();
+	return 0;
+}
+
 void
 ProxyBase::save_pos_and_size ()
 {
@@ -421,6 +431,7 @@ ProxyTemporary::ProxyTemporary (const string& name, Gtk::Window* win)
 ProxyTemporary::~ProxyTemporary ()
 {
 }
+
 
 ARDOUR::SessionHandlePtr*
 ProxyTemporary::session_handle()
