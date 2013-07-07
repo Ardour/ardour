@@ -20,6 +20,8 @@
 #ifndef __ardour_meterbridge_h__
 #define __ardour_meterbridge_h__
 
+#include <glibmm/thread.h>
+
 #include <gtkmm/box.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/label.h>
@@ -81,6 +83,7 @@ class Meterbridge :
 	void session_going_away ();
 	void sync_order_keys (ARDOUR::RouteSortOrderKey src);
 	void resync_order ();
+	mutable Glib::Threads::Mutex _resync_mutex;
 
 	struct MeterBridgeStrip {
 		MeterStrip *s;

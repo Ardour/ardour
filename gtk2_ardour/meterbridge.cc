@@ -566,7 +566,7 @@ Meterbridge::update_metrics ()
 {
 	bool have_midi = false;
 	for (list<MeterBridgeStrip>::iterator i = strips.begin(); i != strips.end(); ++i) {
-		if ( (*i).s->has_midi () && (*i).visible) {
+		if ( (*i).s->has_midi() && (*i).visible) {
 			have_midi = true;
 			break;
 		}
@@ -581,13 +581,14 @@ Meterbridge::update_metrics ()
 void
 Meterbridge::sync_order_keys (RouteSortOrderKey src)
 {
+	Glib::Threads::Mutex::Lock lm (_resync_mutex);
+
 	MeterOrderRouteSorter sorter;
-	std::list<MeterBridgeStrip> copy (strips);
-	copy.sort(sorter);
+	strips.sort(sorter);
 
 	int pos = 0;
 
-	for (list<MeterBridgeStrip>::iterator i = copy.begin(); i != copy.end(); ++i) {
+	for (list<MeterBridgeStrip>::iterator i = strips.begin(); i != strips.end(); ++i) {
 
 		if (! (*i).s->route()->active()) {
 			(*i).s->hide();
