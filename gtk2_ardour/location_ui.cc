@@ -1165,8 +1165,7 @@ LocationUIWindow::on_map ()
 bool
 LocationUIWindow::on_delete_event (GdkEventAny*)
 {
-	hide ();
-	return true;
+	return false;
 }
 
 void

@@ -149,7 +149,7 @@ bool
 StepEditor::step_editor_hidden (GdkEventAny*)
 {
         step_editor_hide ();
-        return true;
+        return true; // XXX remember position ?!
 }
 
 void

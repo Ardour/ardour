@@ -161,7 +161,6 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	set_name ("RegionEditorWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
-	signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (this)));
 	signal_response().connect (sigc::mem_fun (*this, &RegionEditor::handle_response));
 
 	set_title (string_compose (_("Region '%1'"), _region->name()));

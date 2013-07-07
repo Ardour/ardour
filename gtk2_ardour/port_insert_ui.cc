@@ -184,7 +184,7 @@ bool
 PortInsertWindow::wm_delete (GdkEventAny* /*event*/)
 {
 	accept ();
-	return true;
+	return false;
 }
 
 void

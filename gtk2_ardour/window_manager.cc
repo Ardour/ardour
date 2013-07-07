@@ -302,8 +302,10 @@ ProxyBase::get_state () const
 		/* we have a window, so use current state */
 
 		_visible = vistracker->partially_visible ();
-		_window->get_position (_x_off, _y_off);
-		_window->get_size (_width, _height);
+		if (_visible) {
+			_window->get_position (_x_off, _y_off);
+			_window->get_size (_width, _height);
+		}
 	}
 
 	node->add_property (X_("visible"), _visible? X_("yes") : X_("no"));
@@ -410,15 +412,16 @@ ProxyBase::hide ()
 bool
 ProxyBase::handle_win_event (GdkEventAny *ev)
 {
-	save_pos_and_size();
-	return 0;
+	hide();
+	return true;
 }
 
 void
 ProxyBase::save_pos_and_size ()
 {
-	_window->get_position (_x_off, _y_off);
-	_window->get_size (_width, _height);
+	Gtk::Window* win = get (false);
+	win->get_position (_x_off, _y_off);
+	win->get_size (_width, _height);
 }
 /*-----------------------*/
 

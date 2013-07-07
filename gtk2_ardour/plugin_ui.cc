@@ -148,7 +148,6 @@ PluginUIWindow::PluginUIWindow (
 	set_name ("PluginEditor");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
-	signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)), false);
 	insert->DropReferences.connect (death_connection, invalidator (*this), boost::bind (&PluginUIWindow::plugin_going_away, this), gui_context());
 
 	gint h = _pluginui->get_preferred_height ();
