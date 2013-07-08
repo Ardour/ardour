@@ -90,7 +90,6 @@ LevelMeter::update_meters ()
 {
 	vector<MeterInfo>::iterator i;
 	uint32_t n;
-	float peak, mpeak;
 
 	if (!_meter) {
 		return 0.0f;
@@ -100,7 +99,7 @@ LevelMeter::update_meters ()
 
 	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
 		if ((*i).packed) {
-			mpeak = _meter->meter_level(n, MeterMaxPeak);
+			const float mpeak = _meter->meter_level(n, MeterMaxPeak);
 			if (mpeak > (*i).max_peak) {
 				(*i).max_peak = mpeak;
 				(*i).meter->set_highlight(mpeak > Config->get_meter_peak());
@@ -109,10 +108,10 @@ LevelMeter::update_meters ()
 				max_peak = mpeak;
 			}
 
-			peak = _meter->meter_level (n, meter_type);
 			if (n < nmidi) {
-				(*i).meter->set (peak);
+				(*i).meter->set (_meter->meter_level (n, MeterPeak));
 			} else {
+				const float peak = _meter->meter_level (n, meter_type);
 				if (meter_type == MeterPeak) {
 					(*i).meter->set (log_meter (peak));
 				} else {

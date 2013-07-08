@@ -282,8 +282,8 @@ PeakMeter::meter_level(uint32_t n, MeterType type) {
 		case MeterKrms:
 			{
 				const uint32_t n_midi  = current_meters.n_midi();
-				if ((n - n_midi) < _kmeter.size()) {
-					return fast_coefficient_to_dB(_kmeter[n]->read());
+				if ((n - n_midi) < _kmeter.size() && (n - n_midi) >= 0) {
+					return fast_coefficient_to_dB (_kmeter[n-n_midi]->read());
 				}
 				return minus_infinity();
 			}
