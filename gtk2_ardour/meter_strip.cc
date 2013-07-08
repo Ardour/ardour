@@ -406,7 +406,7 @@ MeterStrip::set_metric_mode (int metricmode)
 void
 MeterStrip::set_pos (int pos)
 {
-	number_label.set_alignment(1.0, pos%2 ? .2 : .8 );
+	number_label.set_alignment(1.0, pos%2 ? .25 : .75 );
 }
 
 gint
