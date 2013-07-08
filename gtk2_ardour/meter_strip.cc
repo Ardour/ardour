@@ -151,9 +151,9 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	number_label.set_alignment(1.0, .5);
 	number_label.set_name("meterbridge numlabel");
 
-	if (atoi(_route->name().c_str()) > 0) {
+	if (_route->unique_id() > 0) {
 		char buf[16];
-		snprintf(buf, 15, "%d", atoi(_route->name().c_str()));
+		snprintf(buf, 15, "%d", _route->unique_id());
 		number_label.set_text(buf);
 		number_label.show();
 		name_label.hide();
@@ -304,9 +304,9 @@ MeterStrip::strip_property_changed (const PropertyChange& what_changed)
 	ENSURE_GUI_THREAD (*this, &MeterStrip::strip_name_changed, what_changed)
 	name_label.set_text(_route->name());
 
-	if (atoi(_route->name().c_str()) > 0) {
+	if (_route->unique_id() > 0) {
 		char buf[16];
-		snprintf(buf, 15, "%d", atoi(_route->name().c_str()));
+		snprintf(buf, 15, "%d", _route->unique_id());
 		number_label.set_text(buf);
 		number_label.show();
 		name_label.hide();
