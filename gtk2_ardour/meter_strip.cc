@@ -69,7 +69,7 @@ MeterStrip::MeterStrip (int metricmode)
 
 	set_metric_mode(metricmode);
 
-	set_size_request_to_display_given_text (meter_metric_area, "-8888", 1, 0);
+	meter_metric_area.set_size_request(25, 10);
 	meter_metric_area.signal_expose_event().connect (
 			sigc::mem_fun(*this, &MeterStrip::meter_metrics_expose));
 	RedrawMetrics.connect (sigc::mem_fun(*this, &MeterStrip::redraw_metrics));

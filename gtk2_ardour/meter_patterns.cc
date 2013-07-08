@@ -394,7 +394,7 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 		}
 		Gdk::Color c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
 		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-		cairo_move_to (cr, 1, height - th - 1.5);
+		cairo_move_to (cr, 2, height - th - 1.5);
 		pango_cairo_show_layout (cr, layout->gobj());
 	}
 

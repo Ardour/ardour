@@ -902,7 +902,7 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	gain_display_box.pack_start (gain_display, true, true);
 
 	meter_metric_area.set_name ("AudioTrackMetrics");
-	set_size_request_to_display_given_text (meter_metric_area, "-8888", 1, 0);
+	meter_metric_area.set_size_request(25, 10);
 
 	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
