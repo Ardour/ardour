@@ -72,9 +72,9 @@ style "gain_fader"
 	bg[ACTIVE] = shade (0.705, @@COLPREFIX@_bg)
 	bg[INSENSITIVE] = shade (0.705, @@COLPREFIX@_bg)
 
-        fg[INSENSITIVE] = { 0.525, 0.521, 0.568 }
-        fg[NORMAL] = { 0.525, 0.521, 0.568 }
-	fg[ACTIVE] = { 0.525, 0.521, 0.568 }
+        fg[INSENSITIVE] = shade(1.4, @@COLPREFIX@_bg)
+        fg[NORMAL] = shade(1.4, @@COLPREFIX@_bg)
+	fg[ACTIVE] = shade(1.4, @@COLPREFIX@_bg)
 }
 
 #MSR and related buttons
