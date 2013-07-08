@@ -61,6 +61,7 @@ MeterStrip::MeterStrip (int metricmode)
 	, RouteUI(0)
 {
 	level_meter = 0;
+	_strip_type = 0;
 	set_spacing(2);
 	peakbx.set_size_request(-1, 14);
 	btnbox.set_size_request(-1, 16);
@@ -179,6 +180,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &MeterStrip::reset_route_peak_display));
 	ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &MeterStrip::reset_group_peak_display));
 	RedrawMetrics.connect (sigc::mem_fun(*this, &MeterStrip::redraw_metrics));
+	SetMeterTypeMulti.connect (sigc::mem_fun(*this, &MeterStrip::set_meter_type_multi));
 
 	meter_configuration_changed (_route->shared_peak_meter()->input_streams ());
 
@@ -196,6 +198,21 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
 	DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MeterStrip::parameter_changed, this, _1), gui_context());
+
+	if (_route->is_master()) {
+		_strip_type = 4;
+	}
+	else if (boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
+			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0) {
+		/* non-master bus */
+		_strip_type = 3;
+	}
+	else if (boost::dynamic_pointer_cast<MidiTrack>(_route)) {
+		_strip_type = 2;
+	}
+	else {
+		_strip_type = 1;
+	}
 }
 
 MeterStrip::~MeterStrip ()
@@ -456,6 +473,14 @@ MeterStrip::popup_level_meter_menu (GdkEventButton* ev)
 	add_level_meter_item (items, group, _("Peak"), MeterPeak);
 	add_level_meter_item (items, group, _("RMS + Peak"), MeterKrms);
 
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Change all in Group to Peak"), sigc::bind (SetMeterTypeMulti, -1, _route->route_group(), MeterPeak)));
+	items.push_back (MenuElem (_("Change all in Group to RMS + Peak"), sigc::bind (SetMeterTypeMulti, -1, _route->route_group(), MeterKrms)));
+	items.push_back (MenuElem (_("Change all to Peak"), sigc::bind (SetMeterTypeMulti, 0, _route->route_group(), MeterPeak)));
+	items.push_back (MenuElem (_("Change all to RMS + Peak"), sigc::bind (SetMeterTypeMulti, 0, _route->route_group(), MeterKrms)));
+	items.push_back (MenuElem (_("Change same track-type to Peak"), sigc::bind (SetMeterTypeMulti, _strip_type, _route->route_group(), MeterPeak)));
+	items.push_back (MenuElem (_("Change same track-type to RMS + Peak"), sigc::bind (SetMeterTypeMulti, _strip_type, _route->route_group(), MeterKrms)));
+
 	m->popup (ev->button, ev->time);
 	_suspend_menu_callbacks = false;
 }
@@ -471,15 +496,33 @@ MeterStrip::add_level_meter_item (Menu_Helpers::MenuList& items, RadioMenuItem::
 }
 
 void
-MeterStrip::set_meter_type (MeterType m)
+MeterStrip::set_meter_type (MeterType type)
 {
 	if (_suspend_menu_callbacks) return;
-	level_meter->set_type (m);
+	level_meter->set_type (type);
 }
 
 void
-MeterStrip::meter_type_changed (MeterType t)
+MeterStrip::meter_type_changed (MeterType type)
 {
-	_route->set_meter_type(t);
+	_route->set_meter_type(type);
 }
 
+void
+MeterStrip::set_meter_type_multi (int what, RouteGroup* group, MeterType type)
+{
+	switch (what) {
+		case -1:
+			if (_route && group == _route->route_group()) {
+				level_meter->set_type (type);
+			}
+			break;
+		case 0:
+			level_meter->set_type (type);
+		default:
+			if (what == _strip_type) {
+				level_meter->set_type (type);
+			}
+			break;
+	}
+}

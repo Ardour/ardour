@@ -60,6 +60,8 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void reset_route_peak_display (ARDOUR::Route*);
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
 
+	void set_meter_type_multi (int, ARDOUR::RouteGroup*, ARDOUR::MeterType);
+
 	void set_metric_mode (int);
 	bool has_midi() { return _has_midi; }
 
@@ -101,6 +103,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 
 	float max_peak;
 	bool _has_midi;
+	int _strip_type;
 
 	LevelMeter   *level_meter;
 

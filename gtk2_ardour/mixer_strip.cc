@@ -62,6 +62,7 @@
 #include "utils.h"
 #include "gui_thread.h"
 #include "route_group_menu.h"
+#include "meter_patterns.h"
 
 #include "i18n.h"
 
@@ -2137,6 +2138,30 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 
 	add_level_meter_item_type (items, tgroup, _("Peak"), MeterPeak);
 	add_level_meter_item_type (items, tgroup, _("RMS + Peak"), MeterKrms);
+
+	int _strip_type;
+	if (_route->is_master()) {
+		_strip_type = 4;
+	}
+	else if (boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
+			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0) {
+		/* non-master bus */
+		_strip_type = 3;
+	}
+	else if (boost::dynamic_pointer_cast<MidiTrack>(_route)) {
+		_strip_type = 2;
+	}
+	else {
+		_strip_type = 1;
+	}
+
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Change all in Group to Peak"), sigc::bind (SetMeterTypeMulti, -1, _route->route_group(), MeterPeak)));
+	items.push_back (MenuElem (_("Change all in Group to RMS + Peak"), sigc::bind (SetMeterTypeMulti, -1, _route->route_group(), MeterKrms)));
+	items.push_back (MenuElem (_("Change all to Peak"), sigc::bind (SetMeterTypeMulti, 0, _route->route_group(), MeterPeak)));
+	items.push_back (MenuElem (_("Change all to RMS + Peak"), sigc::bind (SetMeterTypeMulti, 0, _route->route_group(), MeterKrms)));
+	items.push_back (MenuElem (_("Change same track-type to Peak"), sigc::bind (SetMeterTypeMulti, _strip_type, _route->route_group(), MeterPeak)));
+	items.push_back (MenuElem (_("Change same track-type to RMS + Peak"), sigc::bind (SetMeterTypeMulti, _strip_type, _route->route_group(), MeterKrms)));
 
 	m->popup (ev->button, ev->time);
 	_suspend_menu_callbacks = false;
