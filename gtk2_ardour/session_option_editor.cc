@@ -295,6 +295,27 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_master_on_meterbridge)
 			    ));
 
+	add_option (_("Misc"), new BoolOption (
+			    "show-rec-on-meterbridge",
+			    _("Show Rec-enable Button on Meterbridge"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_rec_on_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_rec_on_meterbridge)
+			    ));
+
+	add_option (_("Misc"), new BoolOption (
+			    "show-mute-on-meterbridge",
+			    _("Include Mute Button on Meterbridge"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_mute_on_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_mute_on_meterbridge)
+			    ));
+
+	add_option (_("Misc"), new BoolOption (
+			    "show-solo-on-meterbridge",
+			    _("Show Solo Button on Meterbridge"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_solo_on_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_solo_on_meterbridge)
+			    ));
+
 }
 
 void

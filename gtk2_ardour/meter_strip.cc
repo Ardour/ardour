@@ -64,8 +64,8 @@ MeterStrip::MeterStrip (int metricmode)
 	_strip_type = 0;
 	set_spacing(2);
 	peakbx.set_size_request(-1, 14);
-	btnbox.set_size_request(-1, 16);
 	namebx.set_size_request(18, 52);
+	update_button_box();
 
 	set_metric_mode(metricmode);
 
@@ -100,6 +100,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 {
 	set_spacing(2);
 	RouteUI::set_route (rt);
+	SessionHandlePtr::set_session (sess);
 
 	_has_midi = false;
 
@@ -165,10 +166,33 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	namebx.pack_start(name_label, true, false, 3);
 	namebx.pack_start(number_label, true, false, 0);
 
-	// rec-enable button
-	btnbox.pack_start(*rec_enable_button, true, false);
+	Gtk::HBox *btnwrap; // horiz center, no expand gtk workaround
+
+	btnwrap = manage(new Gtk::HBox());
+	btnwrap->pack_start(*rec_enable_button, true, false);
+	btnbox.pack_start(*btnwrap, false, false, 1);
+	btnwrap->show();
+
+	btnwrap = manage(new Gtk::HBox());
+	btnwrap->pack_start(*mute_button, true, false);
+	btnbox.pack_start(*btnwrap, false, false, 1);
+	btnwrap->show();
+
+	btnwrap = manage(new Gtk::HBox());
+	btnwrap->pack_start(*solo_button, true, false);
+	btnbox.pack_start(*btnwrap, false, false, 1);
+	btnwrap->show();
+
 	rec_enable_button->set_corner_radius(2);
-	btnbox.set_size_request(-1, 16);
+	rec_enable_button->set_size_request(16, 16);
+
+	mute_button->set_corner_radius(2);
+	mute_button->set_size_request(16, 16);
+
+	solo_button->set_corner_radius(2);
+	solo_button->set_size_request(16, 16);
+
+	update_button_box();
 
 	pack_start (peakbx, false, false);
 	pack_start (meterbox, true, true);
@@ -212,6 +236,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
 	DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MeterStrip::parameter_changed, this, _1), gui_context());
+	sess->config.ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MeterStrip::parameter_changed, this, _1), gui_context());
 
 	if (_route->is_master()) {
 		_strip_type = 4;
@@ -242,6 +267,14 @@ MeterStrip::self_delete ()
 }
 
 void
+MeterStrip::set_session (Session* s)
+{
+	SessionHandlePtr::set_session (s);
+	s->config.ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MeterStrip::parameter_changed, this, _1), gui_context());
+	update_button_box();
+}
+
+void
 MeterStrip::update_rec_display ()
 {
 	RouteUI::update_rec_display ();
@@ -256,6 +289,8 @@ MeterStrip::state_id() const
 void
 MeterStrip::set_button_names()
 {
+	mute_button->set_text (_("M"));
+	solo_button->set_text (_("S"));
 	rec_enable_button->set_text ("");
 	rec_enable_button->set_image (::get_icon (X_("record_normal_red")));
 }
@@ -471,10 +506,46 @@ MeterStrip::redraw_metrics ()
 }
 
 void
+MeterStrip::update_button_box ()
+{
+	if (!_session) return;
+	int height = 0;
+	if (_session->config.get_show_mute_on_meterbridge()) {
+		height += 18;
+		if (mute_button) mute_button->show();
+	} else {
+		if (mute_button) mute_button->hide();
+	}
+	if (_session->config.get_show_solo_on_meterbridge()) {
+		height += 18;
+		if (solo_button) solo_button->show();
+	} else {
+		if (solo_button) solo_button->hide();
+	}
+	if (_session->config.get_show_rec_on_meterbridge()) {
+		height += 18;
+		if (rec_enable_button) rec_enable_button->show();
+	} else {
+		if (rec_enable_button) rec_enable_button->hide();
+	}
+	btnbox.set_size_request(16, height);
+	check_resize();
+}
+
+void
 MeterStrip::parameter_changed (std::string const & p)
 {
 	if (p == "meter-peak") {
 		max_peak = -INFINITY;
+	}
+	else if (p == "show-rec-on-meterbridge") {
+		update_button_box();
+	}
+	else if (p == "show-mute-on-meterbridge") {
+		update_button_box();
+	}
+	else if (p == "show-solo-on-meterbridge") {
+		update_button_box();
 	}
 }
 

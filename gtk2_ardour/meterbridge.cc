@@ -363,6 +363,9 @@ Meterbridge::set_session (Session* s)
 		return;
 	}
 
+	metrics_left.set_session(s);
+	metrics_right.set_session(s);
+
 	XMLNode* node = _session->instant_xml(X_("Meterbridge"));
 	if (node) {
 		set_state (*node);
@@ -665,6 +668,15 @@ Meterbridge::parameter_changed (std::string const & p)
 	else if (p == "meter-line-up-level") {
 		meter_clear_pattern_cache();
 		update_metrics();
+	}
+	else if (p == "show-rec-on-meterbridge") {
+		scroller.queue_resize();
+	}
+	else if (p == "show-mute-on-meterbridge") {
+		scroller.queue_resize();
+	}
+	else if (p == "show-solo-on-meterbridge") {
+		scroller.queue_resize();
 	}
 }
 

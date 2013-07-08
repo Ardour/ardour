@@ -50,6 +50,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	MeterStrip (int);
 	~MeterStrip ();
 
+	void set_session (ARDOUR::Session* s);
 	void fast_update ();
 	boost::shared_ptr<ARDOUR::Route> route() { return _route; }
 
@@ -98,7 +99,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	Gtk::Alignment meter_align;
 	Gtk::Alignment peak_align;
 	Gtk::HBox peakbx;
-	Gtk::HBox btnbox;
+	Gtk::VBox btnbox;
 	ArdourButton peak_display;
 
 	std::vector<ARDOUR::DataType> _types;
@@ -120,6 +121,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 
 	void parameter_changed (std::string const & p);
 	void redraw_metrics ();
+	void update_button_box ();
 
 	bool _suspend_menu_callbacks;
 	bool level_meter_button_press (GdkEventButton* ev);
