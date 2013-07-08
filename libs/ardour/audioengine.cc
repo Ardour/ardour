@@ -759,7 +759,6 @@ void
 AudioEngine::meter_thread ()
 {
 	pthread_set_name (X_("meter"));
-#if 1
 	while (true) {
 		Glib::usleep (10000);
 		if (g_atomic_int_get(&m_meter_exit)) {
@@ -767,28 +766,6 @@ AudioEngine::meter_thread ()
 		}
 		Metering::Meter ();
 	}
-#else
-	struct timeval clock1, clock2;
-	int64_t delay = 10000; /* 1/100th sec interval */
-
-	while (true) {
-		/* TODO use select() for sleep:
-		 * select() has a maxium delay time,
-		 * [u]sleep has a minimum delay time
-		 */
-		Glib::usleep (delay);
-		if (g_atomic_int_get(&m_meter_exit)) {
-			break;
-		}
-		gettimeofday(&clock1, NULL);
-		Metering::Meter ();
-		gettimeofday(&clock2, NULL);
-		const int64_t elapsed_time =
-		  (clock2.tv_sec-clock1.tv_sec) * 10000
-		  + (clock2.tv_usec-clock1.tv_usec);
-		delay = max((int64_t)0, 10000 - elapsed_time);
-	}
-#endif
 }
 
 void
