@@ -929,6 +929,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	bool                    _writable;
 	bool                    _was_seamless;
 	bool                    _under_nsm_control;
+	uint32_t                _unique_track_number;
 
 	void initialize_latencies ();
 	void set_worst_io_latencies ();

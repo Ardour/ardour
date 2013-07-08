@@ -184,6 +184,9 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void         set_meter_type (MeterType t) { _meter_type = t; }
 	MeterType    meter_type() const { return _meter_type; }
 
+	void         set_unique_id (uint32_t id) { _unique_id = id; }
+	uint32_t     unique_id() const { return _unique_id; }
+
 	/* Processors */
 
 	boost::shared_ptr<Amp> amp() const  { return _amp; }
@@ -495,6 +498,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	uint32_t       _soloed_by_others_upstream;
 	uint32_t       _soloed_by_others_downstream;
 	uint32_t       _solo_isolated;
+	uint32_t       _unique_id;
 
 	bool           _denormal_protection;
 
