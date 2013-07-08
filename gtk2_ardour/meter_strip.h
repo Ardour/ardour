@@ -63,6 +63,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void set_meter_type_multi (int, ARDOUR::RouteGroup*, ARDOUR::MeterType);
 
 	void set_metric_mode (int);
+	void set_pos(int);
 	bool has_midi() { return _has_midi; }
 
   protected:
@@ -89,6 +90,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	Gtk::HBox meterbox;
 	Gtk::HBox namebx;
 	ArdourButton name_label;
+	Gtk::Label number_label;
 	Gtk::DrawingArea meter_metric_area;
 	Gtk::DrawingArea meter_ticks1_area;
 	Gtk::DrawingArea meter_ticks2_area;

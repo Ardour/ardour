@@ -587,6 +587,7 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 	strips.sort(sorter);
 
 	int pos = 0;
+	int vis = 0;
 
 	for (list<MeterBridgeStrip>::iterator i = strips.begin(); i != strips.end(); ++i) {
 
@@ -598,6 +599,7 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 			if (_show_master) {
 				(*i).s->show();
 				(*i).visible = true;
+				vis++;
 			} else {
 				(*i).s->hide();
 				(*i).visible = false;
@@ -610,6 +612,7 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 			if (_show_busses) {
 				(*i).s->show();
 				(*i).visible = true;
+				vis++;
 			} else {
 				(*i).s->hide();
 				(*i).visible = false;
@@ -619,6 +622,7 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 			if (_show_midi) {
 				(*i).s->show();
 				(*i).visible = true;
+				vis++;
 			} else {
 				(*i).s->hide();
 				(*i).visible = false;
@@ -627,7 +631,9 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 		else {
 			(*i).s->show();
 			(*i).visible = true;
+				vis++;
 		}
+		(*i).s->set_pos(vis);
 		meterarea.reorder_child(*((*i).s), pos++);
 	}
 }

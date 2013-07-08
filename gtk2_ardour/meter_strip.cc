@@ -147,8 +147,23 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	name_label.set_size_request(18, 50);
 	name_label.set_alignment(-1.0, .5);
 
+	number_label.set_alignment(1.0, .5);
+	number_label.set_name("meterbridge numlabel");
+
+	if (atoi(_route->name().c_str()) > 0) {
+		char buf[16];
+		snprintf(buf, 15, "%d", atoi(_route->name().c_str()));
+		number_label.set_text(buf);
+		number_label.show();
+		name_label.hide();
+	} else {
+		name_label.show();
+		number_label.hide();
+	}
+
 	namebx.set_size_request(18, 52);
 	namebx.pack_start(name_label, true, false, 3);
+	namebx.pack_start(number_label, true, false, 0);
 
 	// rec-enable button
 	btnbox.pack_start(*rec_enable_button, true, false);
@@ -169,7 +184,6 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	meter_align.show();
 	peak_align.show();
 	btnbox.show();
-	name_label.show();
 	namebx.show();
 
 	_route->shared_peak_meter()->ConfigurationChanged.connect (
@@ -254,6 +268,17 @@ MeterStrip::strip_property_changed (const PropertyChange& what_changed)
 	}
 	ENSURE_GUI_THREAD (*this, &MeterStrip::strip_name_changed, what_changed)
 	name_label.set_text(_route->name());
+
+	if (atoi(_route->name().c_str()) > 0) {
+		char buf[16];
+		snprintf(buf, 15, "%d", atoi(_route->name().c_str()));
+		number_label.set_text(buf);
+		number_label.show();
+		name_label.hide();
+	} else {
+		name_label.show();
+		number_label.hide();
+	}
 }
 
 void
@@ -376,6 +401,12 @@ MeterStrip::set_metric_mode (int metricmode)
 	}
 
 	meter_metric_area.queue_draw ();
+}
+
+void
+MeterStrip::set_pos (int pos)
+{
+	number_label.set_alignment(1.0, pos%2 ? .2 : .8 );
 }
 
 gint
