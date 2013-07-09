@@ -267,6 +267,7 @@ void
 MeterStrip::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
+	if (!s) return;
 	s->config.ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MeterStrip::parameter_changed, this, _1), gui_context());
 	update_button_box();
 	update_name_box();
