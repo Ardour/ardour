@@ -471,25 +471,23 @@ Meterbridge::set_state (const XMLNode& node)
 XMLNode&
 Meterbridge::get_state (void)
 {
+	char buf[32];
 	XMLNode* node = new XMLNode ("Meterbridge");
 
-	if (is_realized()) {
-		Glib::RefPtr<Gdk::Window> win = get_window();
-
+	if (is_realized() && _visible) {
 		get_window_pos_and_size ();
-
-		XMLNode* geometry = new XMLNode ("geometry");
-		char buf[32];
-		snprintf(buf, sizeof(buf), "%d", m_width);
-		geometry->add_property(X_("x_size"), string(buf));
-		snprintf(buf, sizeof(buf), "%d", m_height);
-		geometry->add_property(X_("y_size"), string(buf));
-		snprintf(buf, sizeof(buf), "%d", m_root_x);
-		geometry->add_property(X_("x_pos"), string(buf));
-		snprintf(buf, sizeof(buf), "%d", m_root_y);
-		geometry->add_property(X_("y_pos"), string(buf));
-		node->add_child_nocopy (*geometry);
 	}
+
+	XMLNode* geometry = new XMLNode ("geometry");
+	snprintf(buf, sizeof(buf), "%d", m_width);
+	geometry->add_property(X_("x_size"), string(buf));
+	snprintf(buf, sizeof(buf), "%d", m_height);
+	geometry->add_property(X_("y_size"), string(buf));
+	snprintf(buf, sizeof(buf), "%d", m_root_x);
+	geometry->add_property(X_("x_pos"), string(buf));
+	snprintf(buf, sizeof(buf), "%d", m_root_y);
+	geometry->add_property(X_("y_pos"), string(buf));
+	node->add_child_nocopy (*geometry);
 
 	node->add_property ("show-meterbridge", _visible ? "yes" : "no");
 	return *node;
