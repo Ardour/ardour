@@ -1033,9 +1033,6 @@ Session::state (bool full_state)
 	snprintf (buf, sizeof (buf), "%" PRIu64, ID::counter());
 	node->add_property ("id-counter", buf);
 
-	snprintf (buf, sizeof (buf), "%d", _unique_track_number);
-	node->add_property ("trackid-counter", buf);
-
 	/* save the event ID counter */
 
 	snprintf (buf, sizeof (buf), "%d", Evoral::event_id_counter());
@@ -1243,10 +1240,6 @@ Session::set_state (const XMLNode& node, int version)
 		time (&now);
 		ID::init_counter (now);
 	}
-
-        if ((prop = node.property (X_("trackid-counter"))) != 0) {
-                _unique_track_number = atoi (prop->value());
-        }
 
         if ((prop = node.property (X_("event-counter"))) != 0) {
                 Evoral::init_event_id_counter (atoi (prop->value()));

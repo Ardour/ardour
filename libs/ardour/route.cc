@@ -88,7 +88,6 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _soloed_by_others_upstream (0)
 	, _soloed_by_others_downstream (0)
 	, _solo_isolated (0)
-	, _unique_id (0)
 	, _denormal_protection (false)
 	, _recordable (true)
 	, _silent (false)
@@ -1882,9 +1881,6 @@ Route::state(bool full_state)
 
 	node->add_property("meter-type", enum_2_string (_meter_type));
 
-	snprintf (buf, sizeof (buf), "%d", _unique_id);
-	node->add_property("unique-id", buf);
-
 	if (_route_group) {
 		node->add_property("route-group", _route_group->name());
 	}
@@ -2061,10 +2057,6 @@ Route::set_state (const XMLNode& node, int version)
 
 	if ((prop = node.property (X_("meter-type"))) != 0) {
 		_meter_type = MeterType (string_2_enum (prop->value (), _meter_type));
-	}
-
-	if ((prop = node.property (X_("unique-id"))) != 0) {
-		_unique_id = atoi(prop->value());
 	}
 
 	set_processor_state (processor_state);
@@ -3486,18 +3478,6 @@ Route::set_name (const string& str)
 	}
 
 	return ret;
-}
-
-std::string
-Route::id_and_name (std::string id_prefix, std::string id_postfix)
-{
-	if (_unique_id == 0) {
-		return name();
-	} else {
-		stringstream ss;
-		ss << id_prefix << _unique_id << id_postfix << name();
-		return ss.str();
-	}
 }
 
 /** Set the name of a route in an XML description.

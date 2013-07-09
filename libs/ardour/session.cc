@@ -134,7 +134,6 @@ Session::Session (AudioEngine &eng,
 	, _target_transport_speed (0.0)
 	, _requested_return_frame (-1)
 	, _under_nsm_control (false)
-	, _unique_track_number (0)
 	, _session_dir (new SessionDirectory(fullpath))
 	, state_tree (0)
 	, _state_of_the_state (Clean)
@@ -1650,7 +1649,6 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 
 		try {
 			track.reset (new MidiTrack (*this, track_name, Route::Flag (0), mode));
-			track->set_unique_id(++_unique_track_number);
 
 			if (track->init ()) {
 				goto failed;
@@ -1886,7 +1884,6 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 		try {
 			track.reset (new AudioTrack (*this, track_name, Route::Flag (0), mode));
-			track->set_unique_id(++_unique_track_number);
 
 			if (track->init ()) {
 				goto failed;
