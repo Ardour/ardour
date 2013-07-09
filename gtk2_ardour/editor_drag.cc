@@ -1281,8 +1281,13 @@ void
 RegionMotionDrag::aborted (bool)
 {
 	for (vector<TimeAxisView*>::iterator i = _time_axis_views.begin(); i != _time_axis_views.end(); ++i) {
-		if ((*i)->view()->layer_display() == Expanded) {
-			(*i)->view()->set_layer_display (Stacked);
+
+		StreamView* sview = (*i)->view();
+
+		if (sview) {
+			if (sview->layer_display() == Expanded) {
+				sview->set_layer_display (Stacked);
+			}
 		}
 	}
 	
