@@ -343,7 +343,6 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 		}
 	}
 
-	// TODO draw Inactive routes or busses with different styles
 	if (boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
 			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0
 			) {
