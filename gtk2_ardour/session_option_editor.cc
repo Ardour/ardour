@@ -327,13 +327,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_name_on_meterbridge)
 			    ));
 
-	add_option (_("Meterbridge"), new BoolOption (
-			    "show-id-on-meterbridge",
-			    _("Track ID"),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_id_on_meterbridge),
-			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_id_on_meterbridge)
-			    ));
-
 }
 
 void

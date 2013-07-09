@@ -65,7 +65,6 @@ MeterStrip::MeterStrip (int metricmode)
 	set_spacing(2);
 	peakbx.set_size_request(-1, 14);
 	namebx.set_size_request(18, 52);
-	numbx.set_size_request(18, 18);
 
 	set_metric_mode(metricmode);
 
@@ -80,7 +79,6 @@ MeterStrip::MeterStrip (int metricmode)
 	pack_start (meterbox, true, true);
 	pack_start (btnbox, false, false);
 	pack_start (namebx, false, false);
-	pack_start (numbx, false, false);
 
 	peakbx.show();
 	btnbox.show();
@@ -149,26 +147,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	name_label.set_alignment(-1.0, .5);
 	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
 
-	number_label.set_alignment(.5, .5);
-	number_label.set_name("meterbridge label");
-	number_label.set_corner_radius(2);
-	number_label.set_size_request(18, 18);
-
-	if (_route->unique_id() > 0) {
-		char buf[12];
-		snprintf(buf, 12, "%d", _route->unique_id());
-		number_label.set_text(buf);
-		number_label.show();
-	} else {
-		number_label.set_text("");
-		number_label.hide();
-	}
-
 	namebx.set_size_request(18, 52);
 	namebx.pack_start(name_label, true, false, 3);
-
-	numbx.set_size_request(18, 18);
-	numbx.pack_start(number_label, true, false, 3);
 
 	recbox.pack_start(*rec_enable_button, true, false);
 	btnbox.pack_start(recbox, false, false, 1);
@@ -195,7 +175,6 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 
 	pack_start (peakbx, false, false);
 	pack_start (meterbox, true, true);
-	pack_start (numbx, false, false);
 	pack_start (btnbox, false, false);
 	pack_start (namebx, false, false);
 	name_label.show();
@@ -525,11 +504,6 @@ void
 MeterStrip::update_name_box ()
 {
 	if (!_session) return;
-	if (_session->config.get_show_id_on_meterbridge()) {
-		numbx.show();
-	} else {
-		numbx.hide();
-	}
 	if (_session->config.get_show_name_on_meterbridge()) {
 		namebx.show();
 	} else {
@@ -553,9 +527,6 @@ MeterStrip::parameter_changed (std::string const & p)
 		update_button_box();
 	}
 	else if (p == "show-name-on-meterbridge") {
-		update_name_box();
-	}
-	else if (p == "show-id-on-meterbridge") {
 		update_name_box();
 	}
 }
