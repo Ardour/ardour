@@ -265,58 +265,20 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 	/* draw the unity-position line if it's not at either end*/
 	if (unity_loc > 0) {
 		context->set_line_width (1);
-		if (1 /* XXX */ || girth < 14) { // Line
-			context->set_line_cap (Cairo::LINE_CAP_ROUND);
-			Gdk::Color c = get_style()->get_fg (Gtk::STATE_ACTIVE);
-			context->set_source_rgba (c.get_red_p()*1.5, c.get_green_p()*1.5, c.get_blue_p()*1.5, 0.85);
-			if ( _orien == VERT) {
-				if (unity_loc < h ) {
-					context->move_to (1.5, unity_loc + .5);
-					context->line_to (girth - 1.5, unity_loc + .5);
-					context->stroke ();
-				}
-			} else {
-				if ( unity_loc < w ){
-					context->move_to (unity_loc + .5, 1.5);
-					context->line_to (unity_loc + .5, girth - 1.5);
-					context->stroke ();
-				}
+		context->set_line_cap (Cairo::LINE_CAP_ROUND);
+		Gdk::Color c = get_style()->get_fg (Gtk::STATE_ACTIVE);
+		context->set_source_rgba (c.get_red_p()*1.5, c.get_green_p()*1.5, c.get_blue_p()*1.5, 0.85);
+		if ( _orien == VERT) {
+			if (unity_loc < h ) {
+				context->move_to (1.5, unity_loc + .5);
+				context->line_to (girth - 1.5, unity_loc + .5);
+				context->stroke ();
 			}
-		} else { // triangle
-			Gdk::Color c = get_style()->get_fg (Gtk::STATE_ACTIVE);
-			context->set_source_rgba (c.get_red_p()*1.25, c.get_green_p()*1.25, c.get_blue_p()*1.25, 0.85);
-			if ( _orien == VERT) {
-				if (unity_loc < h ) {
-					context->move_to (1.5, unity_loc - 1.0);
-					context->line_to (1.5, unity_loc + 2.0);
-					context->line_to (5.5, unity_loc + 0.5);
-					cairo_close_path(cr);
-					context->fill_preserve ();
-					context->stroke ();
-
-					context->move_to (girth - 1.5, unity_loc - 1.0);
-					context->line_to (girth - 1.5, unity_loc + 2.0);
-					context->line_to (girth - 5.5, unity_loc + 0.5);
-					cairo_close_path(cr);
-					context->fill_preserve ();
-					context->stroke ();
-				}
-			} else {
-				if ( unity_loc < w ){
-					context->move_to (unity_loc + 1.0, 1);
-					context->line_to (unity_loc - 2.0, 1);
-					context->line_to (unity_loc - 0.5, 5);
-					cairo_close_path(cr);
-					context->fill_preserve ();
-					context->stroke ();
-
-					context->move_to (unity_loc + 1.0, girth - 1);
-					context->line_to (unity_loc - 2.0, girth - 1);
-					context->line_to (unity_loc - 0.5, girth - 5);
-					cairo_close_path(cr);
-					context->fill_preserve ();
-					context->stroke ();
-				}
+		} else {
+			if ( unity_loc < w ){
+				context->move_to (unity_loc + .5, 1.5);
+				context->line_to (unity_loc + .5, girth - 1.5);
+				context->stroke ();
 			}
 		}
 	}
