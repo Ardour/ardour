@@ -342,7 +342,7 @@ AutomationLine::fraction_to_string (double fraction) const
 
 	if (_uses_gain_mapping) {
 		if (fraction == 0.0) {
-			snprintf (buf, sizeof (buf), "-\u221e");
+			snprintf (buf, sizeof (buf), "-inf");
 		} else {
 			snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain_with_max (fraction, Config->get_max_gain())));
 		}
@@ -379,7 +379,7 @@ AutomationLine::fraction_to_relative_string (double original, double fraction) c
 			*/
 			return "";
 		} else if (fraction == 0.0) {
-			snprintf (buf, sizeof (buf), "-\u221e");
+			snprintf (buf, sizeof (buf), "-inf");
 		} else {
 			double old_db = accurate_coefficient_to_dB (slider_position_to_gain_with_max (original, Config->get_max_gain()));
 			double new_db = accurate_coefficient_to_dB (slider_position_to_gain_with_max (fraction, Config->get_max_gain()));
@@ -405,7 +405,7 @@ AutomationLine::fraction_to_relative_string (double original, double fraction) c
 double
 AutomationLine::string_to_fraction (string const & s) const
 {
-	if (s == "-\u221e") {
+	if (s == "-inf") {
 		return 0;
 	}
 

@@ -254,7 +254,7 @@ FaderOption::set_state_from_config ()
 	char buf[16];
 
 	if (val == 0.0) {
-		snprintf (buf, sizeof (buf), "-\u221e");
+		snprintf (buf, sizeof (buf), "-inf");
 	} else {
 		snprintf (buf, sizeof (buf), "%.2f", accurate_coefficient_to_dB (val));
 	}
