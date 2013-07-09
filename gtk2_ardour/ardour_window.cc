@@ -84,7 +84,6 @@ ArdourWindow::on_unmap ()
 bool
 ArdourWindow::on_delete_event (GdkEventAny*)
 {
-	hide ();
 	return false;
 }
 

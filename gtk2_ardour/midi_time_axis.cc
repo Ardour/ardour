@@ -199,7 +199,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		v->pack_start (*manage (new Label ("")), true, true);
 		v->show ();
 		h->show ();
-		controls_hbox.pack_start(*v);
+		controls_hbox.pack_start(*v, false, false);
 
 		controls_ebox.set_name ("MidiTrackControlsBaseUnselected");
 		controls_base_selected_name = "MidiTrackControlsBaseSelected";

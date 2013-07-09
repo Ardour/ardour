@@ -146,11 +146,6 @@ RouteParams_UI::RouteParams_UI ()
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_RELEASE_MASK);
 
 	_plugin_selector = new PluginSelector (PluginManager::instance());
-	_plugin_selector->signal_delete_event().connect (sigc::bind (ptr_fun (just_hide_it),
-						     static_cast<Window *> (_plugin_selector)));
-
-
-	signal_delete_event().connect(sigc::bind(ptr_fun(just_hide_it), static_cast<Gtk::Window *>(this)));
 }
 
 RouteParams_UI::~RouteParams_UI ()

@@ -65,14 +65,7 @@ ARDOUR_UI::set_session (Session *s)
 {
 	SessionHandlePtr::set_session (s);
 
-	if (audio_port_matrix) {
-		audio_port_matrix->set_session (s);
-	}
-
-	if (midi_port_matrix) {
-		midi_port_matrix->set_session (s);
-	}
-
+	WM::Manager::instance().set_session (s);
 
 	if (!_session) {
 		/* Session option editor cannot exist across change-of-session */
@@ -95,7 +88,6 @@ ARDOUR_UI::set_session (Session *s)
 	}
 
 	AutomationWatch::instance().set_session (s);
-	WM::Manager::instance().set_session (s);
 
 	if (shuttle_box) {
 		shuttle_box->set_session (s);
@@ -106,7 +98,6 @@ ARDOUR_UI::set_session (Session *s)
 	big_clock->set_session (s);
 	time_info_box->set_session (s);
 	video_timeline->set_session (s);
-	location_ui->set_session (s);
 
 	/* sensitize menu bar options that are now valid */
 
@@ -222,6 +213,9 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 		editor->hide ();
 		mixer->hide ();
 		theme_manager->hide ();
+		audio_port_matrix->hide();
+		midi_port_matrix->hide();
+		route_params->hide();
 	}
 
 	second_connection.disconnect ();

@@ -236,7 +236,7 @@ Splash::message (const string& msg)
 		}
 
                 while (!expose_done) {
-                        gtk_main_iteration ();
+                        if(gtk_main_iteration ()) return; // quit was called
                 }
 		gdk_display_flush (gdk_display_get_default());
 	}

@@ -235,8 +235,7 @@ bool
 IOSelectorWindow::wm_delete (GdkEventAny* /*event*/)
 {
 	_selector.Finished (IOSelector::Accepted);
-	hide ();
-	return true;
+	return false;
 }
 
 

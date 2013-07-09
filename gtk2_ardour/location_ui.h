@@ -140,6 +140,7 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void position_lock_style_changed (ARDOUR::Location *);
 
 	void set_clock_editable_status ();
+	void show_cd_track_details ();
 
 	PBD::ScopedConnectionList connections;
 };

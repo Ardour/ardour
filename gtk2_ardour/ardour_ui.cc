@@ -153,6 +153,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	  /* big clock */
 
 	, big_clock (new AudioClock (X_("bigclock"), false, "big", true, true, false, false))
+	, video_timeline(0)
 
 	  /* start of private members */
 
@@ -903,6 +904,7 @@ If you still wish to quit, please use the\n\n\
 	}
 
 	delete ARDOUR_UI::instance()->video_timeline;
+	ARDOUR_UI::instance()->video_timeline = NULL;
 	stop_video_server();
 
 	/* Save state before deleting the session, as that causes some

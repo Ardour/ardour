@@ -52,6 +52,10 @@ Manager::Manager ()
 {
 }
 
+Manager::~Manager ()
+{
+}
+
 void
 Manager::register_window (ProxyBase* info)
 {
@@ -120,11 +124,9 @@ Manager::add_state (XMLNode& root) const
 void
 Manager::set_session (ARDOUR::Session* s)
 {
+	SessionHandlePtr::set_session (s);
 	for (Windows::const_iterator i = _windows.begin(); i != _windows.end(); ++i) {
-		ARDOUR::SessionHandlePtr* sp = (*i)->session_handle ();
-		if (sp) {
-			sp->set_session (s);
-		}
+		(*i)->set_session(s);
 	}
 }
 
@@ -263,8 +265,27 @@ ProxyBase::toggle()
 		_window->show_all();
 		/* we'd like to just call this and nothing else */
 		_window->present ();
+
+		if (_width != -1 && _height != -1) {
+			_window->set_default_size (_width, _height);
+		}
+		if (_x_off != -1 && _y_off != -1) {
+			_window->move (_x_off, _y_off);
+		}
+
 	} else {
+		if (_window->is_mapped()) {
+			save_pos_and_size();
+		}
 		vistracker->cycle_visibility ();
+		if (_window->is_mapped()) {
+			if (_width != -1 && _height != -1) {
+				_window->set_default_size (_width, _height);
+			}
+			if (_x_off != -1 && _y_off != -1) {
+				_window->move (_x_off, _y_off);
+			}
+		}
 	}
 }
 
@@ -281,8 +302,10 @@ ProxyBase::get_state () const
 		/* we have a window, so use current state */
 
 		_visible = vistracker->partially_visible ();
-		_window->get_position (_x_off, _y_off);
-		_window->get_size (_width, _height);
+		if (_visible) {
+			_window->get_position (_x_off, _y_off);
+			_window->get_size (_width, _height);
+		}
 	}
 
 	node->add_property (X_("visible"), _visible? X_("yes") : X_("no"));
@@ -325,6 +348,7 @@ ProxyBase::setup ()
 	assert (_window);
 
 	vistracker = new Gtkmm2ext::VisibilityTracker (*_window);
+	_window->signal_delete_event().connect (sigc::mem_fun (*this, &ProxyBase::handle_win_event));
 
 	if (_width != -1 || _height != -1 || _x_off != -1 || _y_off != -1) {
 		/* cancel any mouse-based positioning */
@@ -338,6 +362,7 @@ ProxyBase::setup ()
 	if (_x_off != -1 && _y_off != -1) {
 		_window->move (_x_off, _y_off);
 	}
+	set_session(_session);
 }
 	
 void
@@ -379,10 +404,25 @@ ProxyBase::hide ()
 {
 	Gtk::Window* win = get (false);
 	if (win) {
+		save_pos_and_size();
 		win->hide ();
 	}
 }
 
+bool
+ProxyBase::handle_win_event (GdkEventAny *ev)
+{
+	hide();
+	return true;
+}
+
+void
+ProxyBase::save_pos_and_size ()
+{
+	Gtk::Window* win = get (false);
+	win->get_position (_x_off, _y_off);
+	win->get_size (_width, _height);
+}
 /*-----------------------*/
 
 ProxyTemporary::ProxyTemporary (const string& name, Gtk::Window* win)
@@ -394,6 +434,7 @@ ProxyTemporary::ProxyTemporary (const string& name, Gtk::Window* win)
 ProxyTemporary::~ProxyTemporary ()
 {
 }
+
 
 ARDOUR::SessionHandlePtr*
 ProxyTemporary::session_handle()
