@@ -166,22 +166,12 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	namebx.pack_start(name_label, true, false, 3);
 	namebx.pack_start(number_label, true, false, 0);
 
-	Gtk::HBox *btnwrap; // horiz center, no expand gtk workaround
-
-	btnwrap = manage(new Gtk::HBox());
-	btnwrap->pack_start(*rec_enable_button, true, false);
-	btnbox.pack_start(*btnwrap, false, false, 1);
-	btnwrap->show();
-
-	btnwrap = manage(new Gtk::HBox());
-	btnwrap->pack_start(*mute_button, true, false);
-	btnbox.pack_start(*btnwrap, false, false, 1);
-	btnwrap->show();
-
-	btnwrap = manage(new Gtk::HBox());
-	btnwrap->pack_start(*solo_button, true, false);
-	btnbox.pack_start(*btnwrap, false, false, 1);
-	btnwrap->show();
+	recbox.pack_start(*rec_enable_button, true, false);
+	btnbox.pack_start(recbox, false, false, 1);
+	mutebox.pack_start(*mute_button, true, false);
+	btnbox.pack_start(mutebox, false, false, 1);
+	solobox.pack_start(*solo_button, true, false);
+	btnbox.pack_start(solobox, false, false, 1);
 
 	rec_enable_button->set_corner_radius(2);
 	rec_enable_button->set_size_request(16, 16);
@@ -191,6 +181,10 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 
 	solo_button->set_corner_radius(2);
 	solo_button->set_size_request(16, 16);
+
+	mutebox.set_size_request(16, 16);
+	solobox.set_size_request(16, 16);
+	recbox.set_size_request(16, 16);
 
 	update_button_box();
 
@@ -512,21 +506,21 @@ MeterStrip::update_button_box ()
 	int height = 0;
 	if (_session->config.get_show_mute_on_meterbridge()) {
 		height += 18;
-		if (mute_button) mute_button->show();
+		mutebox.w();
 	} else {
-		if (mute_button) mute_button->hide();
+		mutebox.e();
 	}
 	if (_session->config.get_show_solo_on_meterbridge()) {
 		height += 18;
-		if (solo_button) solo_button->show();
+		solobox.>show();
 	} else {
-		if (solo_button) solo_button->hide();
+		solobox.>hide();
 	}
 	if (_session->config.get_show_rec_on_meterbridge()) {
 		height += 18;
-		if (rec_enable_button) rec_enable_button->show();
+		recbox.show();
 	} else {
-		if (rec_enable_button) rec_enable_button->hide();
+		recbox.hide();
 	}
 	btnbox.set_size_request(16, height);
 	check_resize();

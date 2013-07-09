@@ -96,6 +96,10 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	Gtk::DrawingArea meter_ticks1_area;
 	Gtk::DrawingArea meter_ticks2_area;
 
+	Gtk::HBox mutebox;
+	Gtk::HBox solobox;
+	Gtk::HBox recbox;
+
 	Gtk::Alignment meter_align;
 	Gtk::Alignment peak_align;
 	Gtk::HBox peakbx;
