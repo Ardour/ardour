@@ -139,7 +139,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	peakbx.set_size_request(-1, 14);
 
 	// add track-name label
-	name_label.set_text(_route->name().c_str());
+	name_label.set_text(_route->name());
 	name_label.set_corner_radius(2);
 	name_label.set_name("meterbridge label");
 	name_label.set_angle(-90.0);
@@ -147,6 +147,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	name_label.layout()->set_width(48 * PANGO_SCALE);
 	name_label.set_size_request(18, 50);
 	name_label.set_alignment(-1.0, .5);
+	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
 
 	number_label.set_alignment(1.0, .5);
 	number_label.set_name("meterbridge numlabel");
@@ -300,6 +301,7 @@ MeterStrip::strip_property_changed (const PropertyChange& what_changed)
 	}
 	ENSURE_GUI_THREAD (*this, &MeterStrip::strip_name_changed, what_changed)
 	name_label.set_text(_route->name());
+	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
 }
 
 void
