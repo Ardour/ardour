@@ -1545,7 +1545,7 @@ MixerStrip::name_changed ()
 {
 	switch (_width) {
 	case Wide:
-		name_button.set_text (_route->name());
+		name_button.set_text (_route->id_and_name());
 		break;
 	case Narrow:
 		name_button.set_text (PBD::short_version (_route->name(), 5));

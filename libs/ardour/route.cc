@@ -3488,6 +3488,18 @@ Route::set_name (const string& str)
 	return ret;
 }
 
+std::string
+Route::id_and_name (std::string id_prefix, std::string id_postfix)
+{
+	if (_unique_id == 0) {
+		return name();
+	} else {
+		stringstream ss;
+		ss << id_prefix << _unique_id << id_postfix << name();
+		return ss.str();
+	}
+}
+
 /** Set the name of a route in an XML description.
  *  @param node XML <Route> node to set the name in.
  *  @param name New name.

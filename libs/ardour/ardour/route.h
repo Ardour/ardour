@@ -98,6 +98,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	std::string comment() { return _comment; }
 	void set_comment (std::string str, void *src);
 
+	std::string id_and_name(std::string id_prefix="", std::string id_suffix=" ");
+
 	bool set_name (const std::string& str);
 	static void set_name_in_state (XMLNode &, const std::string &);
 
