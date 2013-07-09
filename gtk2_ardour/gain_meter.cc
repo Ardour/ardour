@@ -267,15 +267,7 @@ GainMeterBase::hide_all_meters ()
 void
 GainMeter::hide_all_meters ()
 {
-	bool remove_metric_area = false;
-
 	GainMeterBase::hide_all_meters ();
-
-	if (remove_metric_area) {
-		if (meter_metric_area.get_parent()) {
-			level_meter->remove (meter_metric_area);
-		}
-	}
 }
 
 void
