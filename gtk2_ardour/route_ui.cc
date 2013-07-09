@@ -254,7 +254,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	mute_button->show();
 
-	if (_route->is_monitor()) {
+	if (_route->is_monitor() || _route->is_master()) {
 		solo_button->hide ();
 	} else {
 		solo_button->show();
