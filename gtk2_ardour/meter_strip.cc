@@ -66,8 +66,6 @@ MeterStrip::MeterStrip (int metricmode)
 	peakbx.set_size_request(-1, 14);
 	namebx.set_size_request(18, 52);
 	numbx.set_size_request(18, 42);
-	update_button_box();
-	update_name_box();
 
 	set_metric_mode(metricmode);
 
@@ -88,8 +86,6 @@ MeterStrip::MeterStrip (int metricmode)
 	btnbox.show();
 	meter_metric_area.show();
 	meterbox.show();
-	namebx.show();
-	numbx.show();
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
@@ -209,8 +205,6 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	meter_align.show();
 	peak_align.show();
 	btnbox.show();
-	namebx.show();
-	numbx.show();
 
 	_route->shared_peak_meter()->ConfigurationChanged.connect (
 			route_connections, invalidator (*this), boost::bind (&MeterStrip::meter_configuration_changed, this, _1), gui_context()
