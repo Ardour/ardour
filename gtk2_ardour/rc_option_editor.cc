@@ -1895,7 +1895,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	ComboOption<float>* mht = new ComboOption<float> (
 		"meter-hold",
-		_("Meter hold time"),
+		_("Peak hold time"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_hold),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_hold)
 		);
@@ -1909,7 +1909,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	ComboOption<float>* mfo = new ComboOption<float> (
 		"meter-falloff",
-		_("Meter fall-off"),
+		_("DPM fall-off"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_falloff),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_falloff)
 		);
@@ -1928,7 +1928,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	ComboOption<MeterLineUp>* mlu = new ComboOption<MeterLineUp> (
 		"meter-line-up-level",
-		_("Meter Line Up Level"),
+		_("Meter line-up level"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_line_up_level),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_line_up_level)
 		);
@@ -1942,8 +1942,9 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (S_("Preferences|GUI"), mlu);
 
-	Gtk::Adjustment *mpk = manage (new Gtk::Adjustment(-.1, -10, 0, .01, .1));
-	HSliderOption *mpks = new HSliderOption("meter-peak", _("Meter peak threshold [dBFS]"),
+	Gtk::Adjustment *mpk = manage (new Gtk::Adjustment(0, -10, 0, .1, .1));
+	HSliderOption *mpks = new HSliderOption("meter-peak",
+			_("Peak threshold [dBFS]"),
 			mpk,
 			sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_peak),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_peak)
