@@ -90,6 +90,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
   private:
 	Gtk::HBox meterbox;
 	Gtk::HBox namebx;
+	Gtk::HBox numbx;
 	ArdourButton name_label;
 	Gtk::Label number_label;
 	Gtk::DrawingArea meter_metric_area;
@@ -126,6 +127,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void parameter_changed (std::string const & p);
 	void redraw_metrics ();
 	void update_button_box ();
+	void update_name_box ();
 
 	bool _suspend_menu_callbacks;
 	bool level_meter_button_press (GdkEventButton* ev);

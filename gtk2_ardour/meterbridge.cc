@@ -678,6 +678,12 @@ Meterbridge::parameter_changed (std::string const & p)
 	else if (p == "show-solo-on-meterbridge") {
 		scroller.queue_resize();
 	}
+	else if (p == "show-name-on-meterbridge") {
+		scroller.queue_resize();
+	}
+	else if (p == "show-id-on-meterbridge") {
+		scroller.queue_resize();
+	}
 }
 
 void

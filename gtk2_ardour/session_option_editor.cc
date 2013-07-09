@@ -272,44 +272,56 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_glue_new_regions_to_bars_and_beats)
 			    ));
 
-	add_option (_("Misc"), new OptionEditorHeading (_("Meterbridge Options")));
+	add_option (_("Meterbridge"), new BoolOption (
+			    "show-name-on-meterbridge",
+			    _("Show Track Name on Meterbridge"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_name_on_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_name_on_meterbridge)
+			    ));
 
-	add_option (_("Misc"), new BoolOption (
+	add_option (_("Meterbridge"), new BoolOption (
+			    "show-id-on-meterbridge",
+			    _("Show Track Id on Meterbridge"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_id_on_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_id_on_meterbridge)
+			    ));
+
+	add_option (_("Meterbridge"), new BoolOption (
 			    "show-midi-on-meterbridge",
 			    _("Include Midi Tracks on Meterbridge"),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_midi_on_meterbridge),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_midi_on_meterbridge)
 			    ));
 
-	add_option (_("Misc"), new BoolOption (
+	add_option (_("Meterbridge"), new BoolOption (
 			    "show-busses-on-meterbridge",
 			    _("Include Busses on Meterbridge"),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_busses_on_meterbridge),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_busses_on_meterbridge)
 			    ));
 
-	add_option (_("Misc"), new BoolOption (
+	add_option (_("Meterbridge"), new BoolOption (
 			    "show-master-on-meterbridge",
 			    _("Include Master Bus on Meterbridge"),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_master_on_meterbridge),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_master_on_meterbridge)
 			    ));
 
-	add_option (_("Misc"), new BoolOption (
+	add_option (_("Meterbridge"), new BoolOption (
 			    "show-rec-on-meterbridge",
 			    _("Show Rec-enable Button on Meterbridge"),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_rec_on_meterbridge),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_rec_on_meterbridge)
 			    ));
 
-	add_option (_("Misc"), new BoolOption (
+	add_option (_("Meterbridge"), new BoolOption (
 			    "show-mute-on-meterbridge",
 			    _("Include Mute Button on Meterbridge"),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_mute_on_meterbridge),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_mute_on_meterbridge)
 			    ));
 
-	add_option (_("Misc"), new BoolOption (
+	add_option (_("Meterbridge"), new BoolOption (
 			    "show-solo-on-meterbridge",
 			    _("Show Solo Button on Meterbridge"),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_solo_on_meterbridge),

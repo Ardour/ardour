@@ -63,3 +63,5 @@ CONFIG_VARIABLE (bool, show_midi_on_meterbridge, "show-midi-on-meterbridge", tru
 CONFIG_VARIABLE (bool, show_rec_on_meterbridge, "show-rec-on-meterbridge", true)
 CONFIG_VARIABLE (bool, show_mute_on_meterbridge, "show-mute-on-meterbridge", false)
 CONFIG_VARIABLE (bool, show_solo_on_meterbridge, "show-solo-on-meterbridge", false)
+CONFIG_VARIABLE (bool, show_name_on_meterbridge, "show-name-on-meterbridge", true)
+CONFIG_VARIABLE (bool, show_id_on_meterbridge, "show-id-on-meterbridge", true)

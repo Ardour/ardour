@@ -65,7 +65,9 @@ MeterStrip::MeterStrip (int metricmode)
 	set_spacing(2);
 	peakbx.set_size_request(-1, 14);
 	namebx.set_size_request(18, 52);
+	numbx.set_size_request(18, 42);
 	update_button_box();
+	update_name_box();
 
 	set_metric_mode(metricmode);
 
@@ -80,12 +82,14 @@ MeterStrip::MeterStrip (int metricmode)
 	pack_start (meterbox, true, true);
 	pack_start (btnbox, false, false);
 	pack_start (namebx, false, false);
+	pack_start (numbx, false, false);
 
 	peakbx.show();
 	btnbox.show();
 	meter_metric_area.show();
 	meterbox.show();
 	namebx.show();
+	numbx.show();
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
@@ -152,19 +156,18 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	number_label.set_name("meterbridge numlabel");
 
 	if (_route->unique_id() > 0) {
-		char buf[16];
-		snprintf(buf, 15, "%d", _route->unique_id());
+		char buf[12];
+		snprintf(buf, 12, "%d", _route->unique_id());
 		number_label.set_text(buf);
-		number_label.show();
-		name_label.hide();
 	} else {
-		name_label.show();
-		number_label.hide();
+		number_label.set_text("");
 	}
 
 	namebx.set_size_request(18, 52);
 	namebx.pack_start(name_label, true, false, 3);
-	namebx.pack_start(number_label, true, false, 0);
+
+	numbx.set_size_request(18, 42);
+	numbx.pack_start(number_label, true, false, 0);
 
 	recbox.pack_start(*rec_enable_button, true, false);
 	btnbox.pack_start(recbox, false, false, 1);
@@ -187,12 +190,16 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	recbox.set_size_request(16, 16);
 
 	update_button_box();
+	update_name_box();
 
 	pack_start (peakbx, false, false);
 	pack_start (meterbox, true, true);
 	pack_start (btnbox, false, false);
 	pack_start (namebx, false, false);
+	pack_start (numbx, false, false);
 
+	number_label.show();
+	name_label.show();
 	peak_display.show();
 	peakbx.show();
 	meter_ticks1_area.show();
@@ -203,6 +210,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	peak_align.show();
 	btnbox.show();
 	namebx.show();
+	numbx.show();
 
 	_route->shared_peak_meter()->ConfigurationChanged.connect (
 			route_connections, invalidator (*this), boost::bind (&MeterStrip::meter_configuration_changed, this, _1), gui_context()
@@ -266,6 +274,7 @@ MeterStrip::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 	s->config.ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MeterStrip::parameter_changed, this, _1), gui_context());
 	update_button_box();
+	update_name_box();
 }
 
 void
@@ -297,17 +306,6 @@ MeterStrip::strip_property_changed (const PropertyChange& what_changed)
 	}
 	ENSURE_GUI_THREAD (*this, &MeterStrip::strip_name_changed, what_changed)
 	name_label.set_text(_route->name());
-
-	if (_route->unique_id() > 0) {
-		char buf[16];
-		snprintf(buf, 15, "%d", _route->unique_id());
-		number_label.set_text(buf);
-		number_label.show();
-		name_label.hide();
-	} else {
-		name_label.show();
-		number_label.hide();
-	}
 }
 
 void
@@ -435,7 +433,7 @@ MeterStrip::set_metric_mode (int metricmode)
 void
 MeterStrip::set_pos (int pos)
 {
-	number_label.set_alignment(1.0, pos%2 ? .25 : .75 );
+	number_label.set_alignment(1.0, pos%2 ? 0.0 : 1.0 );
 }
 
 gint
@@ -506,15 +504,15 @@ MeterStrip::update_button_box ()
 	int height = 0;
 	if (_session->config.get_show_mute_on_meterbridge()) {
 		height += 18;
-		mutebox.w();
+		mutebox.show();
 	} else {
-		mutebox.e();
+		mutebox.hide();
 	}
 	if (_session->config.get_show_solo_on_meterbridge()) {
 		height += 18;
-		solobox.>show();
+		solobox.show();
 	} else {
-		solobox.>hide();
+		solobox.hide();
 	}
 	if (_session->config.get_show_rec_on_meterbridge()) {
 		height += 18;
@@ -524,6 +522,22 @@ MeterStrip::update_button_box ()
 	}
 	btnbox.set_size_request(16, height);
 	check_resize();
+}
+
+void
+MeterStrip::update_name_box ()
+{
+	if (!_session) return;
+	if (_session->config.get_show_id_on_meterbridge()) {
+		numbx.show();
+	} else {
+		numbx.hide();
+	}
+	if (_session->config.get_show_name_on_meterbridge()) {
+		namebx.show();
+	} else {
+		namebx.hide();
+	}
 }
 
 void
@@ -540,6 +554,12 @@ MeterStrip::parameter_changed (std::string const & p)
 	}
 	else if (p == "show-solo-on-meterbridge") {
 		update_button_box();
+	}
+	else if (p == "show-name-on-meterbridge") {
+		update_name_box();
+	}
+	else if (p == "show-id-on-meterbridge") {
+		update_name_box();
 	}
 }
 
