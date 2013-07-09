@@ -102,7 +102,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	peak_display.set_name ("MixerStripPeakDisplay");
 	set_size_request_to_display_given_text (peak_display, "-80.g", 2, 6); /* note the descender */
 	max_peak = minus_infinity();
-	peak_display.set_label (_("-inf"));
+	peak_display.set_label ("-\u221e");
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
 
 	gain_automation_style_button.set_name ("mixer strip button");
@@ -354,7 +354,7 @@ GainMeterBase::reset_peak_display ()
 	_meter->reset_max();
 	level_meter->clear_meters();
 	max_peak = -INFINITY;
-	peak_display.set_label (_("-inf"));
+	peak_display.set_label ("-\u221e");
 	peak_display.set_name ("MixerStripPeakDisplay");
 }
 
@@ -459,7 +459,7 @@ GainMeterBase::show_gain ()
 	switch (_data_type) {
 	case DataType::AUDIO:
 		if (v == 0.0) {
-			strcpy (buf, _("-inf"));
+			strcpy (buf, "-\u221e");
 		} else {
 			snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain_with_max (v, Config->get_max_gain())));
 		}
@@ -850,7 +850,7 @@ GainMeterBase::update_meters()
 	if (mpeak > max_peak) {
 		max_peak = mpeak;
 		if (mpeak <= -200.0f) {
-			peak_display.set_label (_("-inf"));
+			peak_display.set_label ("-\u221e");
 		} else {
 			snprintf (buf, sizeof(buf), "%.1f", mpeak);
 			peak_display.set_label (buf);

@@ -882,7 +882,7 @@ RouteUI::build_sends_menu ()
 		);
 
 	items.push_back (MenuElem(_("Copy track/bus gains to sends"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
-	items.push_back (MenuElem(_("Set sends gain to -inf"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_zero)));
+	items.push_back (MenuElem(_("Set sends gain to -\u221edB"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_zero)));
 	items.push_back (MenuElem(_("Set sends gain to 0dB"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_unity)));
 
 }
