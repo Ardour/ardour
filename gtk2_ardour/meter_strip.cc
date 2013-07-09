@@ -65,7 +65,7 @@ MeterStrip::MeterStrip (int metricmode)
 	set_spacing(2);
 	peakbx.set_size_request(-1, 14);
 	namebx.set_size_request(18, 52);
-	numbx.set_size_request(18, 42);
+	numbx.set_size_request(18, 18);
 
 	set_metric_mode(metricmode);
 
@@ -149,22 +149,26 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	name_label.set_alignment(-1.0, .5);
 	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
 
-	number_label.set_alignment(1.0, .5);
-	number_label.set_name("meterbridge numlabel");
+	number_label.set_alignment(.5, .5);
+	number_label.set_name("meterbridge label");
+	number_label.set_corner_radius(2);
+	number_label.set_size_request(18, 18);
 
 	if (_route->unique_id() > 0) {
 		char buf[12];
 		snprintf(buf, 12, "%d", _route->unique_id());
 		number_label.set_text(buf);
+		number_label.show();
 	} else {
 		number_label.set_text("");
+		number_label.hide();
 	}
 
 	namebx.set_size_request(18, 52);
 	namebx.pack_start(name_label, true, false, 3);
 
-	numbx.set_size_request(18, 42);
-	numbx.pack_start(number_label, true, false, 0);
+	numbx.set_size_request(18, 18);
+	numbx.pack_start(number_label, true, false, 3);
 
 	recbox.pack_start(*rec_enable_button, true, false);
 	btnbox.pack_start(recbox, false, false, 1);
@@ -191,11 +195,9 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 
 	pack_start (peakbx, false, false);
 	pack_start (meterbox, true, true);
+	pack_start (numbx, false, false);
 	pack_start (btnbox, false, false);
 	pack_start (namebx, false, false);
-	pack_start (numbx, false, false);
-
-	number_label.show();
 	name_label.show();
 	peak_display.show();
 	peakbx.show();
@@ -429,7 +431,6 @@ MeterStrip::set_metric_mode (int metricmode)
 void
 MeterStrip::set_pos (int pos)
 {
-	number_label.set_alignment(1.0, pos%2 ? 0.0 : 1.0 );
 }
 
 gint
