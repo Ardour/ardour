@@ -55,6 +55,8 @@ PeakMeter::~PeakMeter ()
  * Input acceptance is lenient - the first n buffers from @a bufs will
  * be metered, where n was set by the last call to setup(), excess meters will
  * be set to 0.
+ *
+ * (runs in jack realtime context)
  */
 void
 PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, pframes_t nframes, bool)
@@ -95,7 +97,7 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 	// Meter audio in to the rest of the peaks
 	for (uint32_t i = 0; i < n_audio; ++i, ++n) {
 		_peak_signal[n] = compute_peak (bufs.get_audio(i).data(), nframes, _peak_signal[n]);
-		if (/* TODO use separate bit-flags for mixer,meterbridge,.. */ /* 1 || */  _meter_type & MeterKrms) {
+		if (_meter_type & MeterKrms) {
 			_kmeter[i]->process(bufs.get_audio(i).data(), nframes);
 		}
 	}
@@ -239,11 +241,7 @@ PeakMeter::meter ()
 				;
 			} else {
 				/* empirical WRT to falloff times , 0.01f ^= 100 Hz update rate */
-#if 1
-				new_peak = _visible_peak_power[n] - _visible_peak_power[n] * Config->get_meter_falloff() * 0.01f * 0.05f;
-#else
 				new_peak = _visible_peak_power[n] - sqrt(_visible_peak_power[n] * Config->get_meter_falloff() * 0.01f * 0.0002f);
-#endif
 				if (new_peak < (1.0 / 512.0)) new_peak = 0;
 			}
 			_visible_peak_power[n] = new_peak;
@@ -257,7 +255,7 @@ PeakMeter::meter ()
 		_max_peak_signal[n] = std::max(new_peak, _max_peak_signal[n]);
 
 		if (new_peak > 0.0) {
-			new_peak = fast_coefficient_to_dB (new_peak);
+			new_peak = accurate_coefficient_to_dB (new_peak);
 		} else {
 			new_peak = minus_infinity();
 		}
@@ -283,7 +281,11 @@ PeakMeter::meter_level(uint32_t n, MeterType type) {
 			{
 				const uint32_t n_midi  = current_meters.n_midi();
 				if ((n - n_midi) < _kmeter.size() && (n - n_midi) >= 0) {
+#if 0
 					return fast_coefficient_to_dB (_kmeter[n-n_midi]->read());
+#else
+					return accurate_coefficient_to_dB (_kmeter[n-n_midi]->read());
+#endif
 				}
 				return minus_infinity();
 			}
@@ -304,6 +306,7 @@ PeakMeter::meter_level(uint32_t n, MeterType type) {
 			}
 	}
 }
+
 void
 PeakMeter::set_type(MeterType t)
 {
@@ -329,5 +332,3 @@ PeakMeter::state (bool full_state)
 	node.add_property("type", "meter");
 	return node;
 }
-
-

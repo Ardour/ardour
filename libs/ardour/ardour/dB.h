@@ -31,7 +31,7 @@ static inline float fast_coefficient_to_dB (float coeff) {
 }
 
 static inline float accurate_coefficient_to_dB (float coeff) {
-	return 20.0f * log10 (coeff);
+	return 20.0f * log10f (coeff);
 }
 
 extern double zero_db_as_fraction;
