@@ -1572,11 +1572,11 @@ MixerStrip::width_button_pressed (GdkEventButton* ev)
 	if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier | Keyboard::TertiaryModifier)) && _mixer_owned) {
 		switch (_width) {
 		case Wide:
-			_mixer.set_strip_width (Narrow);
+			_mixer.set_strip_width (Narrow, true);
 			break;
 
 		case Narrow:
-			_mixer.set_strip_width (Wide);
+			_mixer.set_strip_width (Wide, true);
 			break;
 		}
 	} else {

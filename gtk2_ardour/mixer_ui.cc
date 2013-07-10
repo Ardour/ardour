@@ -1477,12 +1477,12 @@ Mixer_UI::strip_scroller_button_release (GdkEventButton* ev)
 }
 
 void
-Mixer_UI::set_strip_width (Width w)
+Mixer_UI::set_strip_width (Width w, bool save)
 {
 	_strip_width = w;
 
 	for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
-		(*i)->set_width_enum (w, this);
+		(*i)->set_width_enum (w, save ? (*i)->width_owner() : this);
 	}
 }
 
