@@ -274,25 +274,20 @@ MeterStrip::set_button_names()
 	rec_enable_button->set_image (::get_icon (X_("record_normal_red")));
 
 	if (_route && _route->solo_safe()) {
-		solo_button->remove ();
-		if (solo_safe_pixbuf == 0) {
-			solo_safe_pixbuf =::get_icon("solo-safe-icon");
-		}
-		solo_button->set_image (solo_safe_pixbuf);
-		solo_button->set_text (string());
+		solo_button->set_sensitive(false);
 	} else {
-		solo_button->set_image (Glib::RefPtr<Gdk::Pixbuf>());
-		if (!Config->get_solo_control_is_listen_control()) {
-			solo_button->set_text (_("S"));
-		} else {
-			switch (Config->get_listen_position()) {
-			case AfterFaderListen:
-				solo_button->set_text (_("A"));
-				break;
-			case PreFaderListen:
-				solo_button->set_text (_("P"));
-				break;
-			}
+		solo_button->set_sensitive(true);
+	}
+	if (!Config->get_solo_control_is_listen_control()) {
+		solo_button->set_text (_("S"));
+	} else {
+		switch (Config->get_listen_position()) {
+		case AfterFaderListen:
+			solo_button->set_text (_("A"));
+			break;
+		case PreFaderListen:
+			solo_button->set_text (_("P"));
+			break;
 		}
 	}
 

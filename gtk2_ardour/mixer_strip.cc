@@ -1905,24 +1905,20 @@ MixerStrip::set_button_names ()
 		monitor_disk_button->set_text (_("Disk"));
 
 		if (_route && _route->solo_safe()) {
-			if (solo_safe_pixbuf == 0) {
-				solo_safe_pixbuf = ::get_icon("solo-safe-icon");
-			}
-			solo_button->set_image (solo_safe_pixbuf);
-			solo_button->set_text (string());
+			solo_button->set_sensitive(false);
 		} else {
-			solo_button->set_image (Glib::RefPtr<Gdk::Pixbuf>());
-			if (!Config->get_solo_control_is_listen_control()) {
-				solo_button->set_text (_("Solo"));
-			} else {
-				switch (Config->get_listen_position()) {
-				case AfterFaderListen:
-					solo_button->set_text (_("AFL"));
-					break;
-				case PreFaderListen:
-					solo_button->set_text (_("PFL"));
-					break;
-				}
+			solo_button->set_sensitive(true);
+		}
+		if (!Config->get_solo_control_is_listen_control()) {
+			solo_button->set_text (_("Solo"));
+		} else {
+			switch (Config->get_listen_position()) {
+			case AfterFaderListen:
+				solo_button->set_text (_("AFL"));
+				break;
+			case PreFaderListen:
+				solo_button->set_text (_("PFL"));
+				break;
 			}
 		}
 		solo_isolated_led->set_text (_("iso"));
@@ -1934,28 +1930,25 @@ MixerStrip::set_button_names ()
 		mute_button->set_text (_("M"));
 		monitor_input_button->set_text (_("I"));
 		monitor_disk_button->set_text (_("D"));
+
 		if (_route && _route->solo_safe()) {
-			solo_button->remove ();
-			if (solo_safe_pixbuf == 0) {
-				solo_safe_pixbuf =::get_icon("solo-safe-icon");
-			}
-			solo_button->set_image (solo_safe_pixbuf);
-			solo_button->set_text (string());
+			solo_button->set_sensitive(false);
 		} else {
-			solo_button->set_image (Glib::RefPtr<Gdk::Pixbuf>());
-			if (!Config->get_solo_control_is_listen_control()) {
-				solo_button->set_text (_("S"));
-			} else {
-				switch (Config->get_listen_position()) {
-				case AfterFaderListen:
-					solo_button->set_text (_("A"));
-					break;
-				case PreFaderListen:
-					solo_button->set_text (_("P"));
-					break;
-				}
+			solo_button->set_sensitive(true);
+		}
+		if (!Config->get_solo_control_is_listen_control()) {
+			solo_button->set_text (_("S"));
+		} else {
+			switch (Config->get_listen_position()) {
+			case AfterFaderListen:
+				solo_button->set_text (_("A"));
+				break;
+			case PreFaderListen:
+				solo_button->set_text (_("P"));
+				break;
 			}
 		}
+
 		solo_isolated_led->set_text (_("i"));
 		solo_safe_led->set_text (_("L"));
 		break;
