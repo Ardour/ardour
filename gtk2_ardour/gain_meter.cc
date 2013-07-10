@@ -277,7 +277,6 @@ GainMeterBase::setup_meters (int len)
 
 	switch (_width) {
 		case Wide:
-			meter_metric_area.set_size_request(24, -1);
 			meter_ticks1_area.show();
 			meter_ticks2_area.show();
 			if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
@@ -286,7 +285,6 @@ GainMeterBase::setup_meters (int len)
 			break;
 		case Narrow:
 			meter_width = 2;
-			meter_metric_area.set_size_request(20, -1);
 			meter_ticks1_area.hide();
 			meter_ticks2_area.hide();
 			break;

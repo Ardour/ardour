@@ -486,6 +486,7 @@ gint meter_expose_metrics (GdkEventExpose *ev, std::vector<ARDOUR::DataType> typ
 }
 
 void meter_clear_pattern_cache() {
+	// TODO allow to clear meterbridge "*Left|Right" patterns independenly
 	metric_patterns.clear();
 	ticks_patterns.clear();
 	RedrawMetrics();
