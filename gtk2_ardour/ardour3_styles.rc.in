@@ -792,7 +792,7 @@ style "track_name_display" = "medium_text"
 
 style "track_separator"
 {
-	bg[NORMAL] = @@COLPREFIX@_fg
+	bg[NORMAL] = lighter(@@COLPREFIX@_bg)
 }
 
 # Plugin Editors

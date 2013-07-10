@@ -134,6 +134,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_table.set_no_show_all ();
 
 	HSeparator* separator = manage (new HSeparator());
+	separator->set_name("TrackSeparator");
 	separator->set_size_request(-1, 1);
 	separator->show();
 
