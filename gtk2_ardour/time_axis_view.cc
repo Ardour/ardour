@@ -134,6 +134,8 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_table.set_no_show_all ();
 
 	HSeparator* separator = manage (new HSeparator());
+	separator->set_size_request(-1, 1);
+	separator->show();
 
 	controls_vbox.pack_start (controls_table, false, false);
 	controls_vbox.show ();
@@ -159,8 +161,8 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_ebox.signal_leave_notify_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_leave));
 	controls_ebox.show ();
 
-	time_axis_vbox.pack_end (*separator, false, false);
 	time_axis_vbox.pack_start (controls_ebox, true, true, 0);
+	time_axis_vbox.pack_end (*separator, false, false);
 	time_axis_vbox.show();
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
