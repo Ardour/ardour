@@ -274,23 +274,22 @@ void
 GainMeterBase::setup_meters (int len)
 {
 	int meter_width = 5;
-	if (_width == Wide && _route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
-		meter_width = 10;
-	}
-	level_meter->setup_meters(len, meter_width);
 
 	switch (_width) {
-	case Wide:
-		//meter_metric_area.show();
-		meter_ticks1_area.show();
-		meter_ticks2_area.show();
-		break;
-	case Narrow:
-		//meter_metric_area.hide();
-		meter_ticks1_area.hide();
-		meter_ticks2_area.hide();
-		break;
+		case Wide:
+			meter_ticks1_area.show();
+			meter_ticks2_area.show();
+			if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
+				meter_width = 10;
+			}
+			break;
+		case Narrow:
+			meter_width = 2;
+			meter_ticks1_area.hide();
+			meter_ticks2_area.hide();
+			break;
 	}
+	level_meter->setup_meters(len, meter_width);
 }
 
 void
@@ -894,7 +893,7 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	gain_display_box.pack_start (gain_display, true, true);
 
 	meter_metric_area.set_name ("AudioTrackMetrics");
-	meter_metric_area.set_size_request(25, 10);
+	meter_metric_area.set_size_request(24, -1);
 
 	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
@@ -937,7 +936,7 @@ GainMeter::GainMeter (Session* s, int fader_length)
 			sigc::mem_fun(*this, &GainMeter::meter_ticks2_expose));
 
 	meter_hbox.pack_start (meter_ticks1_area, false, false);
-	meter_hbox.pack_start (meter_alignment, true, true);
+	meter_hbox.pack_start (meter_alignment, false, false);
 	meter_hbox.pack_start (meter_ticks2_area, false, false);
 	meter_hbox.pack_start (meter_metric_area, false, false);
 }
