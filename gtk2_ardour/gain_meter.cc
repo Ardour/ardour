@@ -934,7 +934,7 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 			 boost::shared_ptr<PeakMeter> meter,
 			 boost::shared_ptr<Amp> amp)
 {
-	if (meter_alignment.get_parent()) {
+	if (meter_hbox.get_parent()) {
 		hbox.remove (meter_hbox);
 	}
 
