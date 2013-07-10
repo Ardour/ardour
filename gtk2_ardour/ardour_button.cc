@@ -421,6 +421,7 @@ ArdourButton::set_diameter (float d)
 	}
 
 	set_colors ();
+	queue_resize ();
 }
 
 void
@@ -443,7 +444,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		if (_text_width + _diameter < 75) {
 			xpad = 7;
 		} else {
-			xpad = 20;
+			xpad = 12;
 		}
 	} else {
 		_text_width = 0;
@@ -459,7 +460,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 			req->width = _pixbuf->get_width() + lrint (_diameter) + xpad;
 			req->height = max (_pixbuf->get_height(), (int) lrint (_diameter)) + ypad;
 		} else {
-			req->width = _text_width + lrint (_diameter) + xpad;
+			req->width = _text_width + lrint (_diameter) + xpad * 2; // margin left+right * 2
 			req->height = max (_text_height, (int) lrint (_diameter)) + ypad;
 		}
         } else {
