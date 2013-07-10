@@ -2272,6 +2272,9 @@ void
 RouteTimeAxisView::io_changed (IOChange /*change*/, void */*src*/)
 {
 	reset_meter ();
+	if (_route && !no_redraw) {
+		request_redraw ();
+	}
 }
 
 void
