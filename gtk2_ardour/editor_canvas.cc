@@ -577,8 +577,6 @@ Editor::autoscroll_canvas ()
 		new_frame = leftmost_frame;
 	}
 
-	cerr << "new frame = " << new_frame << " current = " << leftmost_frame << endl;
-
 	double vertical_pos = vertical_adjustment.get_value();
 
 	if (autoscroll_y < 0) {
