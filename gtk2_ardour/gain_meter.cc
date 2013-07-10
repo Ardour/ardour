@@ -277,6 +277,7 @@ GainMeterBase::setup_meters (int len)
 
 	switch (_width) {
 		case Wide:
+			meter_metric_area.set_size_request(24, -1);
 			meter_ticks1_area.show();
 			meter_ticks2_area.show();
 			if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
@@ -285,6 +286,7 @@ GainMeterBase::setup_meters (int len)
 			break;
 		case Narrow:
 			meter_width = 2;
+			meter_metric_area.set_size_request(20, -1);
 			meter_ticks1_area.hide();
 			meter_ticks2_area.hide();
 			break;
@@ -987,8 +989,14 @@ int
 GainMeter::get_gm_width ()
 {
 	Gtk::Requisition sz;
-	hbox.size_request (sz);
-	return sz.width;
+	int min_w = 0;
+	meter_metric_area.size_request (sz);
+	min_w += sz.width;
+	level_meter->size_request (sz);
+	min_w += sz.width;
+
+	fader_alignment.size_request (sz);
+	return max(sz.width * 2, min_w * 2) + 6;
 }
 
 gint

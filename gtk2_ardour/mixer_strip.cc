@@ -647,6 +647,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 				gpm.short_astyle_string(gain_automation->automation_style()));
 		gpm.gain_automation_state_button.set_text (
 				gpm.short_astate_string(gain_automation->automation_state()));
+		gain_meter().setup_meters (); // recalc meter width
 
 		if (_route->panner()) {
 			((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (
