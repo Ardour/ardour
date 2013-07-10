@@ -118,7 +118,9 @@ Meterbridge::Meterbridge ()
 	Gdk::Geometry geom;
 	geom.max_width = 1<<16;
 	geom.max_height = max_height;
-	set_geometry_hints(*((Gtk::Window*) this), geom, Gdk::HINT_MAX_SIZE);
+	geom.height_inc = 16;
+	geom.width_inc = 1;
+	set_geometry_hints(*((Gtk::Window*) this), geom, Gdk::HINT_MAX_SIZE | Gdk::HINT_RESIZE_INC);
 
 	set_keep_above (true);
 	set_border_width (0);
@@ -331,7 +333,9 @@ Meterbridge::on_size_request (Gtk::Requisition* r)
 
 	if (cur_max_width != geom.max_width) {
 		cur_max_width = geom.max_width;
-		set_geometry_hints(*((Gtk::Window*) this), geom, Gdk::HINT_MAX_SIZE);
+		geom.height_inc = 16;
+		geom.width_inc = 1;
+		set_geometry_hints(*((Gtk::Window*) this), geom, Gdk::HINT_MAX_SIZE | Gdk::HINT_RESIZE_INC);
 	}
 }
 
