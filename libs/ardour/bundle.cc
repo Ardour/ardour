@@ -206,6 +206,7 @@ Bundle::remove_channel (uint32_t ch)
 	Glib::Threads::Mutex::Lock lm (_channel_mutex);
 	_channel.erase (_channel.begin () + ch);
 
+	lm.release();
 	emit_changed (ConfigurationChanged);
 }
 
@@ -217,6 +218,7 @@ Bundle::remove_channels ()
 
 	_channel.clear ();
 
+	lm.release();
 	emit_changed (ConfigurationChanged);
 }
 
