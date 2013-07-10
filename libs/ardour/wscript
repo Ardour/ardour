@@ -103,6 +103,7 @@ libardour_sources = [
         'location.cc',
         'location_importer.cc',
         'ltc_slave.cc',
+        'lv2_bundled_search_path.cc',
         'meter.cc',
         'midi_automation_list_binder.cc',
         'midi_buffer.cc',

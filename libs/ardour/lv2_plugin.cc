@@ -31,6 +31,7 @@
 
 #include <boost/utility.hpp>
 
+#include "pbd/pathscanner.h"
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/xml++.h"
@@ -46,6 +47,7 @@
 #include "ardour/types.h"
 #include "ardour/utils.h"
 #include "ardour/worker.h"
+#include "ardour/lv2_bundled_search_path.h"
 
 #include "i18n.h"
 #include <locale.h>
@@ -1891,10 +1893,37 @@ LV2Plugin::Impl::designated_input (const char* uri, void** bufptrs[], void** buf
 	return port;
 }
 
+static bool lv2_filter (const string& str, void *arg)
+{
+	/* Not a dotfile, has a prefix before a period, suffix is "lv2" */
+	
+	return str[0] != '.' && (str.length() > 3 && str.find (".lv2") == (str.length() - 4));
+}
+
+
 LV2World::LV2World()
 	: world(lilv_world_new())
 {
 	lilv_world_load_all(world);
+
+	cout << "Scanning folders for bundled LV2s: " << ARDOUR::lv2_bundled_search_path().to_string() << endl;
+	PathScanner scanner;
+	vector<string *> *plugin_objects = scanner (ARDOUR::lv2_bundled_search_path().to_string(), lv2_filter, 0, true, true);
+	if (plugin_objects) {
+		for ( vector<string *>::iterator x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
+#ifdef WINDOWS
+			string uri = "file:///" + **x + "/";
+#else
+			string uri = "file://" + **x + "/";
+#endif
+			LilvNode *node = lilv_new_uri(world, uri.c_str());
+			lilv_world_load_bundle(world, node);
+			lilv_node_free(node);
+		}
+	}
+	delete (plugin_objects);
+
+
 	atom_AtomPort      = lilv_new_uri(world, LV2_ATOM__AtomPort);
 	atom_Chunk         = lilv_new_uri(world, LV2_ATOM__Chunk);
 	atom_Sequence      = lilv_new_uri(world, LV2_ATOM__Sequence);
