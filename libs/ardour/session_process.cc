@@ -45,8 +45,6 @@
 
 #include "i18n.h"
 
-#include <xmmintrin.h>
-
 using namespace ARDOUR;
 using namespace PBD;
 using namespace std;

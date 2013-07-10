@@ -19,7 +19,6 @@
 */
 #include <stdio.h>
 #include <cmath>
-#include <xmmintrin.h>
 
 #include "pbd/compose.h"
 #include "pbd/debug_rt_alloc.h"
