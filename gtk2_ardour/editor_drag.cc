@@ -2392,7 +2392,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 
 	_grab_zoom = _editor->samples_per_pixel;
 
-	framepos_t where = _editor->canvas_event_frame (event, 0, 0);
+	framepos_t where = _editor->canvas_event_frame (event);
 
 	_editor->snap_to_with_modifier (where, event);
 

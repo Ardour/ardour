@@ -74,12 +74,12 @@ public:
 		return !_drags.empty ();
 	}
 
-	/** @return current pointer x position in trackview coordinates */
+	/** @return current pointer x position in canvas coordinates */
 	double current_pointer_x () const {
 		return _current_pointer_x;
 	}
 
-	/** @return current pointer y position in trackview coordinates */
+	/** @return current pointer y position in canvas coordinates */
 	double current_pointer_y () const {
 		return _current_pointer_y;
 	}
@@ -93,8 +93,8 @@ private:
 	Editor* _editor;
 	std::list<Drag*> _drags;
 	bool _ending; ///< true if end_grab or abort is in progress, otherwise false
-	double _current_pointer_x; ///< trackview x of the current pointer
-	double _current_pointer_y; ///< trackview y of the current pointer
+	double _current_pointer_x; ///< canvas-coordinate space x of the current pointer
+	double _current_pointer_y; ///< canvas-coordinate space y of the current pointer
 	ARDOUR::framepos_t _current_pointer_frame; ///< frame that the pointer is now at
 	bool _old_follow_playhead; ///< state of Editor::follow_playhead() before the drags started
 };

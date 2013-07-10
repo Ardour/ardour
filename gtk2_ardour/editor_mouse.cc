@@ -1376,7 +1376,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 	//not rolling, range mode click + join_play_range :  locate the PH here
 	if ( !_drags->active () && !_session->transport_rolling() && ( effective_mouse_mode() == MouseRange ) && Config->get_always_play_range() ) {
-		framepos_t where = canvas_event_frame (event, 0, 0);
+		framepos_t where = canvas_event_frame (event);
 		snap_to(where);
 		_session->request_locate (where, false);
 	}
@@ -1425,7 +1425,7 @@ Editor::button_release_dispatch (GdkEventButton* ev)
 bool
 Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	framepos_t where = canvas_event_frame (event, 0, 0);
+	framepos_t where = canvas_event_frame (event);
 	AutomationTimeAxisView* atv = 0;
 
         if (pre_press_cursor) {
@@ -1452,7 +1452,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		were_dragging = true;
 	}
 
-    update_region_layering_order_editor ();
+	update_region_layering_order_editor ();
 
 	/* edit events get handled here */
 

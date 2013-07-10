@@ -535,7 +535,6 @@ EditorRoutes::redisplay ()
         _editor->reset_controls_layout_height (position);
         _editor->reset_controls_layout_width ();
 	_editor->_full_canvas_height = position;
-	_editor->vertical_adjustment.set_upper (_editor->_full_canvas_height);
 
 	if ((_editor->vertical_adjustment.get_value() + _editor->_visible_canvas_height) > _editor->vertical_adjustment.get_upper()) {
 		/*

@@ -442,9 +442,12 @@ Editor::autoscroll_fudge_threshold () const
 }
 
 /** @param allow_horiz true to allow horizontal autoscroll, otherwise false.
+ *
  *  @param allow_vert true to allow vertical autoscroll, otherwise false.
+ *
  *  @param moving_left true if we are moving left, so we only want to autoscroll on the left of the canvas,
  *  otherwise false, so we only want to autoscroll on the right of the canvas.
+ *
  *  @param moving_up true if we are moving up, so we only want to autoscroll at the top of the canvas,
  *  otherwise false, so we only want to autoscroll at the bottom of the canvas.
  */
@@ -479,14 +482,17 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool moving_left, b
 	/* Note whether we're fudging the autoscroll (see autoscroll_fudge_threshold) */
 	_autoscroll_fudging = (distance < autoscroll_fudge_threshold ());
 
+	/* ty is in canvas-coordinate space */
+
 	double const ty = _drags->current_pointer_y();
+	ArdourCanvas::Rect visible = _track_canvas->visible_area();
 
 	autoscroll_y = 0;
 	autoscroll_x = 0;
-	if (ty < 0 && moving_up && allow_vert) {
+	if (ty < visible.y0 && moving_up && allow_vert) {
 		autoscroll_y = -1;
 		startit = true;
-	} else if (ty > _visible_canvas_height && !moving_up && allow_vert) {
+	} else if (ty > visible.y1 && !moving_up && allow_vert) {
 		autoscroll_y = 1;
 		startit = true;
 	}
@@ -532,8 +538,7 @@ Editor::autoscroll_canvas ()
 	framepos_t new_frame;
 	framepos_t limit = max_framepos - current_page_samples();
 	double new_pixel;
-	double target_pixel;
-	
+
 	if (autoscroll_x_distance != 0) {
 
 		if (autoscroll_x > 0) {
@@ -572,6 +577,8 @@ Editor::autoscroll_canvas ()
 		new_frame = leftmost_frame;
 	}
 
+	cerr << "new frame = " << new_frame << " current = " << leftmost_frame << endl;
+
 	double vertical_pos = vertical_adjustment.get_value();
 
 	if (autoscroll_y < 0) {
@@ -582,31 +589,11 @@ Editor::autoscroll_canvas ()
 			new_pixel = vertical_pos - autoscroll_y_distance;
 		}
 
-		target_pixel = _drags->current_pointer_y() - autoscroll_y_distance;
-		target_pixel = max (target_pixel, 0.0);
-
  	} else if (autoscroll_y > 0) {
 
-		double const top_of_bottom_of_canvas = _full_canvas_height - _visible_canvas_height;
-
-		if (vertical_pos > _full_canvas_height - autoscroll_y_distance) {
-			new_pixel = _full_canvas_height;
-		} else {
-			new_pixel = vertical_pos + autoscroll_y_distance;
-		}
-
-		new_pixel = min (top_of_bottom_of_canvas, new_pixel);
-
-		target_pixel = _drags->current_pointer_y() + autoscroll_y_distance;
-
-		/* don't move to the full canvas height because the item will be invisible
-		   (its top edge will line up with the bottom of the visible canvas.
-		*/
-
-		target_pixel = min (target_pixel, _full_canvas_height - 10);
+		new_pixel = min (_full_canvas_height - _visible_canvas_height, min (_full_canvas_height, (vertical_adjustment.get_value() + autoscroll_y_distance)));
 
 	} else {
-	  	target_pixel = _drags->current_pointer_y();
 		new_pixel = vertical_pos;
 	}
 
@@ -619,7 +606,9 @@ Editor::autoscroll_canvas ()
 		reset_x_origin (new_frame);
 	}
 
-	vertical_adjustment.set_value (new_pixel);
+	if (new_pixel != vertical_pos) {
+		vertical_adjustment.set_value (new_pixel);
+	}
 
 	/* fake an event. */
 
@@ -689,7 +678,6 @@ Editor::left_track_canvas (GdkEventCrossing */*ev*/)
 {
 	DropDownKeys ();
 	within_track_canvas = false;
-	//cerr << "left track canvas\n";
 	set_entered_track (0);
 	set_entered_regionview (0);
 	reset_canvas_action_sensitivity (false);
@@ -699,7 +687,6 @@ Editor::left_track_canvas (GdkEventCrossing */*ev*/)
 bool
 Editor::entered_track_canvas (GdkEventCrossing */*ev*/)
 {
-	//cerr << "entered track canvas\n";
 	within_track_canvas = true;
 	reset_canvas_action_sensitivity (true);
 	return FALSE;
