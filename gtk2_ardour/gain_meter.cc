@@ -303,6 +303,14 @@ GainMeterBase::set_type (MeterType t)
 void
 GainMeter::setup_meters (int len)
 {
+	switch (_width) {
+		case Wide:
+			hbox.set_homogeneous(true);
+			break;
+		case Narrow:
+			hbox.set_homogeneous(false);
+			break;
+	}
 	GainMeterBase::setup_meters (len);
 }
 
@@ -996,7 +1004,11 @@ GainMeter::get_gm_width ()
 	min_w += sz.width;
 
 	fader_alignment.size_request (sz);
-	return max(sz.width * 2, min_w * 2) + 6;
+	if (_width == Wide)
+		return max(sz.width * 2, min_w * 2) + 6;
+	else
+		return sz.width + min_w + 6;
+
 }
 
 gint
