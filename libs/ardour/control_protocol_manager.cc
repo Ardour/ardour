@@ -17,7 +17,7 @@
 
 */
 
-#include <dlfcn.h>
+#include <glibmm/module.h>
 
 #include <glibmm/fileutils.h>
 
@@ -29,7 +29,13 @@
 
 #include "ardour/debug.h"
 #include "ardour/control_protocol_manager.h"
+
+#ifdef SearchPath
+#undef SearchPath
+#endif
+
 #include "ardour/control_protocol_search_path.h"
+
 
 using namespace ARDOUR;
 using namespace std;
@@ -179,7 +185,7 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 	cpi.protocol = 0;
 	delete cpi.state;
 	cpi.state = 0;
-	dlclose (cpi.descriptor->module);
+	delete (Glib::Module*)cpi.descriptor->module;
 
 	ProtocolStatusChange (&cpi);
 
@@ -264,7 +270,7 @@ ControlProtocolManager::control_protocol_discover (string path)
 				     string_compose(_("Control surface protocol discovered: \"%1\"\n"), cpi->name));
 		}
 
-		dlclose (descriptor->module);
+		delete (Glib::Module*)descriptor->module;
 	}
 
 	return 0;
@@ -273,31 +279,31 @@ ControlProtocolManager::control_protocol_discover (string path)
 ControlProtocolDescriptor*
 ControlProtocolManager::get_descriptor (string path)
 {
-	void *module;
+	Glib::Module* module = new Glib::Module(path);
 	ControlProtocolDescriptor *descriptor = 0;
 	ControlProtocolDescriptor* (*dfunc)(void);
-	const char *errstr;
+	void* func = 0;
 
-	if ((module = dlopen (path.c_str(), RTLD_NOW)) == 0) {
-		error << string_compose(_("ControlProtocolManager: cannot load module \"%1\" (%2)"), path, dlerror()) << endmsg;
+	if (!(*module)) {
+		error << string_compose(_("ControlProtocolManager: cannot load module \"%1\" (%2)"), path, Glib::Module::get_last_error()) << endmsg;
+		delete module;
 		return 0;
 	}
 
-
-	dfunc = (ControlProtocolDescriptor* (*)(void)) dlsym (module, "protocol_descriptor");
-
-	if ((errstr = dlerror()) != 0) {
+	if (!module->get_symbol("protocol_descriptor", func)) {
 		error << string_compose(_("ControlProtocolManager: module \"%1\" has no descriptor function."), path) << endmsg;
-		error << errstr << endmsg;
-		dlclose (module);
+		error << Glib::Module::get_last_error() << endmsg;
+		delete module;
 		return 0;
 	}
 
+	dfunc = (ControlProtocolDescriptor* (*)(void))func;
 	descriptor = dfunc();
+
 	if (descriptor) {
-		descriptor->module = module;
+		descriptor->module = (void*)module;
 	} else {
-		dlclose (module);
+		delete module;
 	}
 
 	return descriptor;

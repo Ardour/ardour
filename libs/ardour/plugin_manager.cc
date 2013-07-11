@@ -26,7 +26,6 @@
 #include <sys/types.h>
 #include <cstdio>
 #include <lrdf.h>
-#include <dlfcn.h>
 #include <cstdlib>
 #include <fstream>
 
@@ -365,24 +364,25 @@ PluginManager::add_lrdf_data (const string &path)
 int
 PluginManager::ladspa_discover (string path)
 {
-	void *module;
+	Glib::Module module(path);
 	const LADSPA_Descriptor *descriptor;
 	LADSPA_Descriptor_Function dfunc;
-	const char *errstr;
+	void* func = 0;
 
-	if ((module = dlopen (path.c_str(), RTLD_NOW)) == 0) {
-		error << string_compose(_("LADSPA: cannot load module \"%1\" (%2)"), path, dlerror()) << endmsg;
+	if (!module) {
+		error << string_compose(_("LADSPA: cannot load module \"%1\" (%2)"),
+			path, Glib::Module::get_last_error()) << endmsg;
 		return -1;
 	}
 
-	dfunc = (LADSPA_Descriptor_Function) dlsym (module, "ladspa_descriptor");
 
-	if ((errstr = dlerror()) != 0) {
+	if (!module.get_symbol("ladspa_descriptor", func)) {
 		error << string_compose(_("LADSPA: module \"%1\" has no descriptor function."), path) << endmsg;
-		error << errstr << endmsg;
-		dlclose (module);
+		error << Glib::Module::get_last_error() << endmsg;
 		return -1;
 	}
+
+	dfunc = (LADSPA_Descriptor_Function)func;
 
 	for (uint32_t i = 0; ; ++i) {
 		if ((descriptor = dfunc (i)) == 0) {

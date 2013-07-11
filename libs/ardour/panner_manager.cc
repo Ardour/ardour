@@ -106,31 +106,33 @@ PannerManager::panner_discover (string path)
 PannerInfo*
 PannerManager::get_descriptor (string path)
 {
-	void *module;
+	Glib::Module* module = new Glib::Module(path);
 	PannerInfo* info = 0;
 	PanPluginDescriptor *descriptor = 0;
 	PanPluginDescriptor* (*dfunc)(void);
-	const char *errstr;
+	void* func = 0;
 
-	if ((module = dlopen (path.c_str(), RTLD_NOW)) == 0) {
-		error << string_compose(_("PannerManager: cannot load module \"%1\" (%2)"), path, dlerror()) << endmsg;
+	if (!module) {
+		error << string_compose(_("PannerManager: cannot load module \"%1\" (%2)"), path,
+				Glib::Module::get_last_error()) << endmsg;
+		delete module;
 		return 0;
 	}
 
-	dfunc = (PanPluginDescriptor* (*)(void)) dlsym (module, "panner_descriptor");
-
-	if ((errstr = dlerror()) != 0) {
+	if (!module->get_symbol("panner_descriptor", func)) {
 		error << string_compose(_("PannerManager: module \"%1\" has no descriptor function."), path) << endmsg;
-		error << errstr << endmsg;
-		dlclose (module);
+		error << Glib::Module::get_last_error() << endmsg;
+		delete module;
 		return 0;
 	}
 
+	dfunc = (PanPluginDescriptor* (*)(void))func;
 	descriptor = dfunc();
+
 	if (descriptor) {
 		info = new PannerInfo (*descriptor, module);
 	} else {
-		dlclose (module);
+		delete module;
 	}
 
 	return info;
