@@ -858,14 +858,14 @@ Editor::build_marker_menu (Location* loc)
 	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
 
 	items.push_back (CheckMenuElem (_("Lock")));
-	CheckMenuItem* lock_item = static_cast<CheckMenuItem*> (&items.back());
+	Gtk::CheckMenuItem* lock_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
 	if (loc->locked ()) {
 		lock_item->set_active ();
 	}
 	lock_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_menu_lock));
 
 	items.push_back (CheckMenuElem (_("Glue to Bars and Beats")));
-	CheckMenuItem* glue_item = static_cast<CheckMenuItem*> (&items.back());
+	Gtk::CheckMenuItem* glue_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
 	if (loc->position_lock_style() == MusicTime) {
 		glue_item->set_active ();
 	}

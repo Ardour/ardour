@@ -49,7 +49,7 @@ MainClock::build_ops_menu ()
 	MenuList& ops_items = ops_menu->items();
 	ops_items.push_back (SeparatorElem ());
 	ops_items.push_back (CheckMenuElem (_("Display delta to edit cursor"), sigc::mem_fun (*this, &MainClock::display_delta_to_edit_cursor)));
-	CheckMenuItem* c = dynamic_cast<CheckMenuItem *> (&ops_items.back());
+	Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem *> (&ops_items.back());
 	if (_primary) {
 		if (ARDOUR::Config->get_primary_clock_delta_edit_cursor ()) {
 			ARDOUR::Config->set_primary_clock_delta_edit_cursor (false);

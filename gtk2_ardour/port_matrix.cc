@@ -508,7 +508,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 	items.push_back (MenuElem (_("Rescan"), sigc::mem_fun (*this, &PortMatrix::setup_all_ports)));
 
 	items.push_back (CheckMenuElem (_("Show individual ports"), sigc::mem_fun (*this, &PortMatrix::toggle_show_only_bundles)));
-	CheckMenuItem* i = dynamic_cast<CheckMenuItem*> (&items.back());
+	Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
 	_inhibit_toggle_show_only_bundles = true;
 	i->set_active (!_show_only_bundles);
 	_inhibit_toggle_show_only_bundles = false;

@@ -496,22 +496,22 @@ AutomationTimeAxisView::build_display_menu ()
 	as_items.push_back (CheckMenuElem (S_("Automation|Manual"), sigc::bind (
 			sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
 			(AutoState) ARDOUR::Off)));
-	auto_off_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
+	auto_off_item = dynamic_cast<Gtk::CheckMenuItem*>(&as_items.back());
 
 	as_items.push_back (CheckMenuElem (_("Play"), sigc::bind (
 			sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
 			(AutoState) Play)));
-	auto_play_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
+	auto_play_item = dynamic_cast<Gtk::CheckMenuItem*>(&as_items.back());
 
 	as_items.push_back (CheckMenuElem (_("Write"), sigc::bind (
 			sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
 			(AutoState) Write)));
-	auto_write_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
+	auto_write_item = dynamic_cast<Gtk::CheckMenuItem*>(&as_items.back());
 
 	as_items.push_back (CheckMenuElem (_("Touch"), sigc::bind (
 			sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
 			(AutoState) Touch)));
-	auto_touch_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
+	auto_touch_item = dynamic_cast<Gtk::CheckMenuItem*>(&as_items.back());
 
 	items.push_back (MenuElem (_("State"), *auto_state_menu));
 
@@ -531,13 +531,13 @@ AutomationTimeAxisView::build_display_menu ()
 		am_items.push_back (RadioMenuElem (group, _("Discrete"), sigc::bind (
 				sigc::mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
 				AutomationList::Discrete)));
-		mode_discrete_item = dynamic_cast<CheckMenuItem*>(&am_items.back());
+		mode_discrete_item = dynamic_cast<Gtk::CheckMenuItem*>(&am_items.back());
 		mode_discrete_item->set_active (s == AutomationList::Discrete);
 
 		am_items.push_back (RadioMenuElem (group, _("Linear"), sigc::bind (
 				sigc::mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
 				AutomationList::Linear)));
-		mode_line_item = dynamic_cast<CheckMenuItem*>(&am_items.back());
+		mode_line_item = dynamic_cast<Gtk::CheckMenuItem*>(&am_items.back());
 		mode_line_item->set_active (s == AutomationList::Linear);
 
 		items.push_back (MenuElem (_("Mode"), *auto_mode_menu));

@@ -381,7 +381,7 @@ ProcessorEntry::build_controls_menu ()
 	
 	for (list<Control*>::iterator i = _controls.begin(); i != _controls.end(); ++i) {
 		items.push_back (CheckMenuElem ((*i)->name ()));
-		CheckMenuItem* c = dynamic_cast<CheckMenuItem*> (&items.back ());
+		Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		c->set_active ((*i)->visible ());
 		c->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &ProcessorEntry::toggle_control_visibility), *i));
 	}

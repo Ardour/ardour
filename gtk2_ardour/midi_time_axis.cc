@@ -665,7 +665,7 @@ MidiTimeAxisView::add_channel_command_menu_item (Menu_Helpers::MenuList& items,
 					}
 				}
 
-				CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&chn_items.back());
+				Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&chn_items.back());
 				_channel_command_menu_map[fully_qualified_param] = cmi;
 				cmi->set_active (visible);
 			}
@@ -697,7 +697,7 @@ MidiTimeAxisView::add_channel_command_menu_item (Menu_Helpers::MenuList& items,
 					}
 				}
 
-				CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&items.back());
+				Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&items.back());
 				_channel_command_menu_map[fully_qualified_param] = cmi;
 				cmi->set_active (visible);
 
@@ -739,7 +739,7 @@ MidiTimeAxisView::add_single_channel_controller_item(Menu_Helpers::MenuList& ctl
 				}
 			}
 
-			CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&ctl_items.back());
+			Gtk::CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&ctl_items.back());
 			_controller_menu_map[fully_qualified_param] = cmi;
 			cmi->set_active (visible);
 
@@ -795,7 +795,7 @@ MidiTimeAxisView::add_multi_channel_controller_item(Menu_Helpers::MenuList& ctl_
 				}
 			}
 
-			CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&chn_items.back());
+			Gtk::CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&chn_items.back());
 			_controller_menu_map[fully_qualified_param] = cmi;
 			cmi->set_active (visible);
 		}

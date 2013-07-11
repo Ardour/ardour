@@ -387,14 +387,14 @@ AudioTimeAxisView::build_automation_action_menu (bool for_selection)
 	MenuList& automation_items = automation_action_menu->items ();
 
 	automation_items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &AudioTimeAxisView::update_gain_track_visibility)));
-	gain_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
+	gain_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&automation_items.back ());
 	gain_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) && 
 					  (gain_track && string_is_affirmative (gain_track->gui_property ("visible"))));
 
 	_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
 
 	automation_items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &AudioTimeAxisView::update_pan_track_visibility)));
-	pan_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
+	pan_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&automation_items.back ());
 	pan_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
 					 (!pan_tracks.empty() && string_is_affirmative (pan_tracks.front()->gui_property ("visible"))));
 
