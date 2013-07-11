@@ -22,6 +22,8 @@
 #include <gtkmm/main.h>
 #include <iostream>
 
+#include "pbd/timersub.h"
+
 using namespace Gtk;
 using namespace sigc;
 using namespace Gtkmm2ext;
