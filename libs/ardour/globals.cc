@@ -25,7 +25,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#ifndef WIN32
 #include <sys/resource.h>
+#endif
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -193,6 +195,7 @@ setup_hardware_optimization (bool try_optimization)
 static void
 lotsa_files_please ()
 {
+#ifndef WIN32
 	struct rlimit rl;
 
 	if (getrlimit (RLIMIT_NOFILE, &rl) == 0) {
@@ -213,6 +216,7 @@ lotsa_files_please ()
 	} else {
 		error << string_compose (_("Could not get system open files limit (%1)"), strerror (errno)) << endmsg;
 	}
+#endif
 }
 
 int
