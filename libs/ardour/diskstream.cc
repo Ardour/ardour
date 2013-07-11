@@ -29,6 +29,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <sys/stat.h>
+#include <sys/mman.h>
 
 #include <glibmm/threads.h>
 
