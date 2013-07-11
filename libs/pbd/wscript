@@ -52,6 +52,7 @@ libpbd_sources = [
     'glib_semaphore.cc',
     'id.cc',
     'locale_guard.cc',
+    'localtime_r.cc',
     'malign.cc',
     'mountpoint.cc',
     'openuri.cc',
@@ -96,6 +97,7 @@ def configure(conf):
     conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO',mandatory=False)
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD',mandatory=False)
     conf.check_cc(function_name='posix_memalign', header_name='stdlib.h', cflags='-D_XOPEN_SOURCE=600', define_name='HAVE_POSIX_MEMALIGN', mandatory=False)
+    conf.check(function_name='localtime_r', header_name='time.h', define_name='HAVE_LOCALTIME_R',mandatory=False)
 
     conf.write_config_header('libpbd-config.h', remove=False)
 
