@@ -20,6 +20,8 @@
 #ifndef __ardour_butler_h__
 #define __ardour_butler_h__
 
+#include <pthread.h>
+
 #include <glibmm/threads.h>
 
 #ifdef WIN32
