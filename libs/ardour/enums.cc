@@ -55,12 +55,14 @@ setup_enum_writer ()
 	AlignStyle _AlignStyle;
 	AlignChoice _AlignChoice;
 	MeterPoint _MeterPoint;
+	MeterType _MeterType;
 	TrackMode _TrackMode;
 	NoteMode _NoteMode;
 	ChannelMode _ChannelMode;
 	ColorMode _ColorMode;
 	MeterFalloff _MeterFalloff;
 	MeterHold _MeterHold;
+	MeterLineUp _MeterLineUp;
 	EditMode _EditMode;
 	RegionPoint _RegionPoint;
 	Placement _Placement;
@@ -171,6 +173,12 @@ setup_enum_writer ()
 	REGISTER_ENUM (MeterCustom);
 	REGISTER (_MeterPoint);
 
+	REGISTER_ENUM (MeterMaxSignal);
+	REGISTER_ENUM (MeterMaxPeak);
+	REGISTER_ENUM (MeterPeak);
+	REGISTER_ENUM (MeterKrms);
+	REGISTER (_MeterType);
+
 	REGISTER_ENUM (Normal);
 	REGISTER_ENUM (NonLayered);
 	REGISTER_ENUM (Destructive);
@@ -193,6 +201,8 @@ setup_enum_writer ()
 	REGISTER_ENUM (MeterFalloffOff);
 	REGISTER_ENUM (MeterFalloffSlowest);
 	REGISTER_ENUM (MeterFalloffSlow);
+	REGISTER_ENUM (MeterFalloffSlowish);
+	REGISTER_ENUM (MeterFalloffModerate);
 	REGISTER_ENUM (MeterFalloffMedium);
 	REGISTER_ENUM (MeterFalloffFast);
 	REGISTER_ENUM (MeterFalloffFaster);
@@ -204,6 +214,12 @@ setup_enum_writer ()
 	REGISTER_ENUM (MeterHoldMedium);
 	REGISTER_ENUM (MeterHoldLong);
 	REGISTER (_MeterHold);
+
+	REGISTER_ENUM (MeteringLineUp24);
+	REGISTER_ENUM (MeteringLineUp20);
+	REGISTER_ENUM (MeteringLineUp18);
+	REGISTER_ENUM (MeteringLineUp15);
+	REGISTER (_MeterLineUp);
 
 	REGISTER_ENUM (Slide);
 	REGISTER_ENUM (Splice);
@@ -647,6 +663,20 @@ std::istream& operator>>(std::istream& o, MonitorModel& var)
 }
 
 std::ostream& operator<<(std::ostream& o, const MonitorModel& var)
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
+std::istream& operator>>(std::istream& o, MeterLineUp& var)
+{
+	std::string s;
+	o >> s;
+	var = (MeterLineUp) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const MeterLineUp& var)
 {
 	std::string s = enum_2_string (var);
 	return o << s;

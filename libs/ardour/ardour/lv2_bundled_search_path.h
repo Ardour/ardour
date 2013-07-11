@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001 Paul Davis
+    Copyright (C) 2013 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,23 +17,19 @@
 
 */
 
-#ifndef __ardour_dB_h__
-#define __ardour_dB_h__
+#ifndef ARDOUR_LV2_BUNDLED_SEARCH_PATH_INCLUDED
+#define ARDOUR_LV2_BUNDLED_SEARCH_PATH_INCLUDED
 
-#include "pbd/fastlog.h"
+#include "pbd/search_path.h"
 
-static inline float dB_to_coefficient (float dB) {
-	return dB > -318.8f ? pow (10.0f, dB * 0.05f) : 0.0f;
-}
+namespace ARDOUR {
 
-static inline float fast_coefficient_to_dB (float coeff) {
-	return 20.0f * fast_log10 (coeff);
-}
+	/**
+	 * return a SearchPath containing directories in which to look for
+	 * lv2 plugins.
+	 */
+	PBD::SearchPath lv2_bundled_search_path ();
 
-static inline float accurate_coefficient_to_dB (float coeff) {
-	return 20.0f * log10f (coeff);
-}
+} // namespace ARDOUR
 
-extern double zero_db_as_fraction;
-
-#endif /* __ardour_dB_h__ */
+#endif

@@ -205,6 +205,9 @@ Bundle::remove_channel (uint32_t ch)
 
 	Glib::Threads::Mutex::Lock lm (_channel_mutex);
 	_channel.erase (_channel.begin () + ch);
+
+	lm.release();
+	emit_changed (ConfigurationChanged);
 }
 
 /** Remove all channels */
@@ -214,6 +217,9 @@ Bundle::remove_channels ()
 	Glib::Threads::Mutex::Lock lm (_channel_mutex);
 
 	_channel.clear ();
+
+	lm.release();
+	emit_changed (ConfigurationChanged);
 }
 
 /** @param p Port name.

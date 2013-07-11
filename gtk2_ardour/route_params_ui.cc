@@ -146,6 +146,7 @@ RouteParams_UI::RouteParams_UI ()
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_RELEASE_MASK);
 
 	_plugin_selector = new PluginSelector (PluginManager::instance());
+	show_all();
 }
 
 RouteParams_UI::~RouteParams_UI ()

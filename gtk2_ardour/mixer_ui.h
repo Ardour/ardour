@@ -66,7 +66,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
 	PluginSelector* plugin_selector();
 
-	void  set_strip_width (Width);
+	void  set_strip_width (Width, bool save = false);
 	Width get_strip_width () const { return _strip_width; }
 
 	void unselect_strip_in_display (MixerStrip*);

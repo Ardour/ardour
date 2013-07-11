@@ -1,5 +1,6 @@
 /*
-    Copyright (C) 2001 Paul Davis
+    Copyright (C) 2008-2011 Fons Adriaensen <fons@linuxaudio.org>
+		Adopted for Ardour 2013 by Robin Gareus <robin@gareus.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,26 +15,31 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
-#ifndef __ardour_dB_h__
-#define __ardour_dB_h__
+#ifndef __KMETERDSP_H
+#define	__KMETERDSP_H
 
-#include "pbd/fastlog.h"
+class Kmeterdsp
+{
+public:
 
-static inline float dB_to_coefficient (float dB) {
-	return dB > -318.8f ? pow (10.0f, dB * 0.05f) : 0.0f;
-}
+    Kmeterdsp (void);
+    ~Kmeterdsp (void);
 
-static inline float fast_coefficient_to_dB (float coeff) {
-	return 20.0f * fast_log10 (coeff);
-}
+    void process (float *p, int n);
+    float read ();
+    static void init (int fsamp);
+    void reset ();
 
-static inline float accurate_coefficient_to_dB (float coeff) {
-	return 20.0f * log10f (coeff);
-}
+private:
 
-extern double zero_db_as_fraction;
+    float          _z1;          // filter state
+    float          _z2;          // filter state
+    float          _rms;         // max rms value since last read()
+    bool           _flag;        // flag set by read(), resets _rms
 
-#endif /* __ardour_dB_h__ */
+    static float   _omega;       // ballistics filter constant.
+};
+
+#endif

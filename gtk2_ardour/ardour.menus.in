@@ -511,6 +511,7 @@
     </menu>
     <menu action = 'WindowMenu'>
       <menuitem action='toggle-mixer'/>
+      <menuitem action='toggle-meterbridge'/>
       <menuitem action='toggle-editor-mixer'/>
 
       <separator/>

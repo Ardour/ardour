@@ -83,6 +83,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _flags (flg)
 	, _pending_declick (true)
 	, _meter_point (MeterPostFader)
+	, _meter_type (MeterPeak)
 	, _self_solo (false)
 	, _soloed_by_others_upstream (0)
 	, _soloed_by_others_downstream (0)
@@ -1878,6 +1879,8 @@ Route::state(bool full_state)
 	node->add_property("denormal-protection", _denormal_protection?"yes":"no");
 	node->add_property("meter-point", enum_2_string (_meter_point));
 
+	node->add_property("meter-type", enum_2_string (_meter_type));
+
 	if (_route_group) {
 		node->add_property("route-group", _route_group->name());
 	}
@@ -2050,6 +2053,10 @@ Route::set_state (const XMLNode& node, int version)
 		if (_meter) {
 			_meter->set_display_to_user (_meter_point == MeterCustom);
 		}
+	}
+
+	if ((prop = node.property (X_("meter-type"))) != 0) {
+		_meter_type = MeterType (string_2_enum (prop->value (), _meter_type));
 	}
 
 	set_processor_state (processor_state);
@@ -2949,6 +2956,8 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 		   contains ConfigurationChanged 
 		*/
 		need_to_queue_solo_change = false;
+		configure_processors (0);
+		io_changed (); /* EMIT SIGNAL */
 	}
 
 	if (!_output->connected() && _soloed_by_others_downstream) {

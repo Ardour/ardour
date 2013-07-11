@@ -44,13 +44,10 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace std;
 
-//sigc::signal<void> LevelMeter::ResetAllPeakDisplays;
-//sigc::signal<void,RouteGroup*> LevelMeter::ResetGroupPeakDisplays;
-
-
 LevelMeter::LevelMeter (Session* s)
 	: _meter (0)
 	, meter_length (0)
+	, thin_meter_width(2)
 {
 	set_session (s);
 	set_spacing (1);
@@ -58,6 +55,7 @@ LevelMeter::LevelMeter (Session* s)
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &LevelMeter::on_theme_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &LevelMeter::color_handler));
 	max_peak = minus_infinity();
+	meter_type = MeterPeak;
 }
 
 void
@@ -77,10 +75,13 @@ void
 LevelMeter::set_meter (PeakMeter* meter)
 {
 	_configuration_connection.disconnect();
+	_meter_type_connection.disconnect();
+
 	_meter = meter;
 
 	if (_meter) {
 		_meter->ConfigurationChanged.connect (_configuration_connection, invalidator (*this), boost::bind (&LevelMeter::configuration_changed, this, _1, _2), gui_context());
+		_meter->TypeChanged.connect (_meter_type_connection, invalidator (*this), boost::bind (&LevelMeter::meter_type_changed, this, _1), gui_context());
 	}
 }
 
@@ -89,22 +90,33 @@ LevelMeter::update_meters ()
 {
 	vector<MeterInfo>::iterator i;
 	uint32_t n;
-	float peak, mpeak;
 
 	if (!_meter) {
 		return 0.0f;
 	}
 
+	uint32_t nmidi = _meter->input_streams().n_midi();
+
 	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
 		if ((*i).packed) {
-			peak = _meter->peak_power (n);
-			(*i).meter->set (log_meter (peak));
-			mpeak = _meter->max_peak_power(n);
-			if (mpeak > max_peak) {
-				max_peak = mpeak;
+			const float mpeak = _meter->meter_level(n, MeterMaxPeak);
+			if (mpeak > (*i).max_peak) {
+				(*i).max_peak = mpeak;
+				(*i).meter->set_highlight(mpeak > Config->get_meter_peak());
 			}
 			if (mpeak > max_peak) {
 				max_peak = mpeak;
+			}
+
+			if (n < nmidi) {
+				(*i).meter->set (_meter->meter_level (n, MeterPeak));
+			} else {
+				const float peak = _meter->meter_level (n, meter_type);
+				if (meter_type == MeterPeak) {
+					(*i).meter->set (log_meter (peak));
+				} else {
+					(*i).meter->set (log_meter (peak), log_meter(_meter->meter_level(n, MeterPeak)));
+				}
 			}
 		}
 	}
@@ -117,13 +129,23 @@ LevelMeter::parameter_changed (string p)
 	ENSURE_GUI_THREAD (*this, &LevelMeter::parameter_changed, p)
 
 	if (p == "meter-hold") {
-
 		vector<MeterInfo>::iterator i;
 		uint32_t n;
 
 		for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
-
 			(*i).meter->set_hold_count ((uint32_t) floor(Config->get_meter_hold()));
+		}
+	}
+	else if (p == "meter-line-up-level") {
+		color_changed = true;
+		setup_meters (meter_length, regular_meter_width, thin_meter_width);
+	}
+	else if (p == "meter-peak") {
+		vector<MeterInfo>::iterator i;
+		uint32_t n;
+
+		for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
+			(*i).max_peak = minus_infinity();
 		}
 	}
 }
@@ -132,7 +154,14 @@ void
 LevelMeter::configuration_changed (ChanCount /*in*/, ChanCount /*out*/)
 {
 	color_changed = true;
-	setup_meters (meter_length, regular_meter_width);
+	setup_meters (meter_length, regular_meter_width, thin_meter_width);
+}
+
+void
+LevelMeter::meter_type_changed (MeterType t)
+{
+	meter_type = t;
+	MeterTypeChanged(t);
 }
 
 void
@@ -147,7 +176,7 @@ LevelMeter::hide_all_meters ()
 }
 
 void
-LevelMeter::setup_meters (int len, int initial_width)
+LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 {
 	hide_all_meters ();
 
@@ -158,6 +187,7 @@ LevelMeter::setup_meters (int len, int initial_width)
 	int32_t nmidi = _meter->input_streams().n_midi();
 	uint32_t nmeters = _meter->input_streams().n_total();
 	regular_meter_width = initial_width;
+	thin_meter_width = thin_width;
 	meter_length = len;
 
 	guint16 width;
@@ -179,21 +209,72 @@ LevelMeter::setup_meters (int len, int initial_width)
 	//cerr << "LevelMeter::setup_meters() called color_changed = " << color_changed << " colors: " << endl;//DEBUG
 
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
-		uint32_t b, m, t, c;
+		uint32_t c[10];
+		float stp[4];
 		if (n < nmidi) {
-			b = ARDOUR_UI::config()->get_canvasvar_MidiMeterColorBase();
-			m = ARDOUR_UI::config()->get_canvasvar_MidiMeterColorMid();
-			t = ARDOUR_UI::config()->get_canvasvar_MidiMeterColorTop();
-			c = ARDOUR_UI::config()->get_canvasvar_MeterColorClip();
+			c[0] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor0();
+			c[1] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor1();
+			c[2] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor2();
+			c[3] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor3();
+			c[4] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor4();
+			c[5] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor5();
+			c[6] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor6();
+			c[7] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor7();
+			c[8] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor8();
+			c[9] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor9();
+			stp[0] = 115.0 *  32.0 / 128.0;
+			stp[1] = 115.0 *  64.0 / 128.0;
+			stp[2] = 115.0 * 100.0 / 128.0;
+			stp[3] = 115.0 * 112.0 / 128.0;
 		} else {
-			b = ARDOUR_UI::config()->get_canvasvar_MeterColorBase();
-			m = ARDOUR_UI::config()->get_canvasvar_MeterColorMid();
-			t = ARDOUR_UI::config()->get_canvasvar_MeterColorTop();
-			c = ARDOUR_UI::config()->get_canvasvar_MeterColorClip();
+			switch (Config->get_meter_line_up_level()) {
+				case MeteringLineUp24:
+					stp[0] = 42.0;
+					stp[1] = 77.5;
+					stp[2] = 92.5;
+					stp[3] = 100.0;
+					break;
+				case MeteringLineUp20:
+					stp[0] = 50.0;
+					stp[1] = 77.5;
+					stp[2] = 92.5;
+					stp[3] = 100.0;
+					break;
+				default:
+				case MeteringLineUp18:
+					stp[0] = 55.0;
+					stp[1] = 77.5;
+					stp[2] = 92.5;
+					stp[3] = 100.0;
+					break;
+				case MeteringLineUp15:
+					stp[0] = 62.5;
+					stp[1] = 77.5;
+					stp[2] = 92.5;
+					stp[3] = 100.0;
+					break;
+			}
+			c[0] = ARDOUR_UI::config()->get_canvasvar_MeterColor0();
+			c[1] = ARDOUR_UI::config()->get_canvasvar_MeterColor1();
+			c[2] = ARDOUR_UI::config()->get_canvasvar_MeterColor2();
+			c[3] = ARDOUR_UI::config()->get_canvasvar_MeterColor3();
+			c[4] = ARDOUR_UI::config()->get_canvasvar_MeterColor4();
+			c[5] = ARDOUR_UI::config()->get_canvasvar_MeterColor5();
+			c[6] = ARDOUR_UI::config()->get_canvasvar_MeterColor6();
+			c[7] = ARDOUR_UI::config()->get_canvasvar_MeterColor7();
+			c[8] = ARDOUR_UI::config()->get_canvasvar_MeterColor8();
+			c[9] = ARDOUR_UI::config()->get_canvasvar_MeterColor9();
 		}
 		if (meters[n].width != width || meters[n].length != len || color_changed) {
 			delete meters[n].meter;
-			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len, b, m, t, c);
+			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len,
+							 c[0], c[1], c[2], c[3], c[4],
+							 c[5], c[6], c[7], c[8], c[9],
+							 ARDOUR_UI::config()->get_canvasvar_MeterBackgroundBot(),
+							 ARDOUR_UI::config()->get_canvasvar_MeterBackgroundTop(),
+							 0x991122ff, 0x551111ff,
+							 stp[0], stp[1], stp[2], stp[3]
+				);
 			meters[n].width = width;
 			meters[n].length = len;
 			meters[n].meter->add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
@@ -209,6 +290,13 @@ LevelMeter::setup_meters (int len, int initial_width)
 	color_changed = false;
 }
 
+void
+LevelMeter::set_type(MeterType t)
+{
+	meter_type = t;
+	_meter->set_type(t);
+}
+
 bool
 LevelMeter::meter_button_press (GdkEventButton* ev)
 {
@@ -219,17 +307,20 @@ bool
 LevelMeter::meter_button_release (GdkEventButton* ev)
 {
 	if (ev->button == 1) {
-		clear_meters ();
+		clear_meters (false);
 	}
 
 	return true;
 }
 
 
-void LevelMeter::clear_meters ()
+void LevelMeter::clear_meters (bool reset_highlight)
 {
 	for (vector<MeterInfo>::iterator i = meters.begin(); i < meters.end(); i++) {
 		(*i).meter->clear();
+		(*i).max_peak = minus_infinity();
+		if (reset_highlight)
+			(*i).meter->set_highlight(false);
 	}
 	max_peak = minus_infinity();
 }

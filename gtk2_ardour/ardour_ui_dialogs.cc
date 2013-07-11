@@ -65,9 +65,9 @@ ARDOUR_UI::set_session (Session *s)
 {
 	SessionHandlePtr::set_session (s);
 
-	WM::Manager::instance().set_session (s);
 
 	if (!_session) {
+		WM::Manager::instance().set_session (s);
 		/* Session option editor cannot exist across change-of-session */
 		session_option_editor.drop_window ();
 		/* Ditto for AddVideoDialog */
@@ -86,6 +86,8 @@ ARDOUR_UI::set_session (Session *s)
 			}
 		}
 	}
+
+	WM::Manager::instance().set_session (s);
 
 	AutomationWatch::instance().set_session (s);
 
@@ -212,6 +214,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	if (hide_stuff) {
 		editor->hide ();
 		mixer->hide ();
+		meterbridge->hide ();
 		theme_manager->hide ();
 		audio_port_matrix->hide();
 		midi_port_matrix->hide();
@@ -227,6 +230,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 
 	rec_button.set_sensitive (false);
 
+	WM::Manager::instance().set_session ((ARDOUR::Session*) 0);
 	ARDOUR_UI::instance()->video_timeline->close_session();
 
 	stop_blinking ();
@@ -311,6 +315,23 @@ ARDOUR_UI::toggle_mixer_window ()
 		goto_mixer_window ();
 	} else {
 		mixer->hide ();
+	}
+}
+
+void
+ARDOUR_UI::toggle_meterbridge ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("toggle-meterbridge"));
+	if (!act) {
+		return;
+	}
+
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+
+	if (tact->get_active()) {
+		meterbridge->show_window ();
+	} else {
+		meterbridge->hide_window (NULL);
 	}
 }
 

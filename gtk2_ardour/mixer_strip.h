@@ -308,10 +308,13 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void add_input_port (ARDOUR::DataType);
 	void add_output_port (ARDOUR::DataType);
 
+	bool _suspend_menu_callbacks;
 	bool level_meter_button_press (GdkEventButton *);
 	void popup_level_meter_menu (GdkEventButton *);
-	void add_level_meter_item (Gtk::Menu_Helpers::MenuList &, Gtk::RadioMenuItem::Group &, std::string const &, ARDOUR::MeterPoint);
+	void add_level_meter_item_point (Gtk::Menu_Helpers::MenuList &, Gtk::RadioMenuItem::Group &, std::string const &, ARDOUR::MeterPoint);
+	void add_level_meter_item_type (Gtk::Menu_Helpers::MenuList &, Gtk::RadioMenuItem::Group &, std::string const &, ARDOUR::MeterType);
 	void set_meter_point (ARDOUR::MeterPoint);
+	void set_meter_type (ARDOUR::MeterType);
 	PBD::ScopedConnection _level_meter_connection;
 
 	std::string meter_point_string (ARDOUR::MeterPoint);

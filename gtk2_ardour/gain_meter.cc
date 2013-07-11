@@ -44,6 +44,7 @@
 #include "keyboard.h"
 #include "public_editor.h"
 #include "utils.h"
+#include "meter_patterns.h"
 
 #include "ardour/session.h"
 #include "ardour/route.h"
@@ -60,17 +61,10 @@ using namespace Gtk;
 using namespace std;
 using Gtkmm2ext::Keyboard;
 
-sigc::signal<void> GainMeterBase::ResetAllPeakDisplays;
-sigc::signal<void,RouteGroup*> GainMeterBase::ResetGroupPeakDisplays;
-
-GainMeter::MetricPatterns GainMeter::metric_patterns;
-
 GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int fader_girth)
 	: gain_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0.0, 1.0, 0.01, 0.1)
 	, gain_automation_style_button ("")
 	, gain_automation_state_button ("")
-	, style_changed (false)
-	, dpi_changed (false)
 	, _data_type (DataType::AUDIO)
 
 {
@@ -134,7 +128,9 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	gain_display.signal_key_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_key_press), false);
 
 	ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &GainMeterBase::reset_peak_display));
+	ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &GainMeterBase::reset_route_peak_display));
 	ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &GainMeterBase::reset_group_peak_display));
+	RedrawMetrics.connect (sigc::mem_fun(*this, &GainMeterBase::redraw_metrics));
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &GainMeterBase::on_theme_changed));
 	ColorsChanged.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), false));
@@ -271,31 +267,55 @@ GainMeterBase::hide_all_meters ()
 void
 GainMeter::hide_all_meters ()
 {
-	bool remove_metric_area = false;
-
 	GainMeterBase::hide_all_meters ();
-
-	if (remove_metric_area) {
-		if (meter_metric_area.get_parent()) {
-			level_meter->remove (meter_metric_area);
-		}
-	}
 }
 
 void
 GainMeterBase::setup_meters (int len)
 {
-	level_meter->setup_meters(len, 5);
+	int meter_width = 5;
+
+	switch (_width) {
+		case Wide:
+			meter_ticks1_area.show();
+			meter_ticks2_area.show();
+			if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
+				meter_width = 10;
+			}
+			break;
+		case Narrow:
+			meter_width = 2;
+			meter_ticks1_area.hide();
+			meter_ticks2_area.hide();
+			break;
+	}
+	level_meter->setup_meters(len, meter_width);
+}
+
+void
+GainMeterBase::set_type (MeterType t)
+{
+	level_meter->set_type(t);
 }
 
 void
 GainMeter::setup_meters (int len)
 {
-	if (!meter_metric_area.get_parent()) {
-		level_meter->pack_end (meter_metric_area, false, false);
-		meter_metric_area.show_all ();
+	switch (_width) {
+		case Wide:
+			hbox.set_homogeneous(true);
+			break;
+		case Narrow:
+			hbox.set_homogeneous(false);
+			break;
 	}
 	GainMeterBase::setup_meters (len);
+}
+
+void
+GainMeter::set_type (MeterType t)
+{
+	GainMeterBase::set_type (t);
 }
 
 bool
@@ -321,7 +341,7 @@ GainMeterBase::peak_button_release (GdkEventButton* ev)
 			ResetGroupPeakDisplays (_route->route_group());
 		}
 	} else {
-		reset_peak_display ();
+		ResetRoutePeakDisplays (_route.get());
 	}
 
 	return true;
@@ -335,6 +355,14 @@ GainMeterBase::reset_peak_display ()
 	max_peak = -INFINITY;
 	peak_display.set_label (_("-inf"));
 	peak_display.set_name ("MixerStripPeakDisplay");
+}
+
+void
+GainMeterBase::reset_route_peak_display (Route* route)
+{
+	if (_route && _route.get() == route) {
+		reset_peak_display ();
+	}
 }
 
 void
@@ -498,6 +526,8 @@ void
 GainMeterBase::set_meter_strip_name (const char * name)
 {
 	meter_metric_area.set_name (name);
+	meter_ticks1_area.set_name (name);
+	meter_ticks2_area.set_name (name);
 }
 
 void
@@ -824,17 +854,14 @@ GainMeterBase::update_meters()
 			snprintf (buf, sizeof(buf), "%.1f", mpeak);
 			peak_display.set_label (buf);
 		}
-
-		if (mpeak >= 0.0f) {
-			peak_display.set_name ("MixerStripPeakDisplayPeak");
-		}
+	}
+	if (mpeak >= Config->get_meter_peak()) {
+		peak_display.set_name ("MixerStripPeakDisplayPeak");
 	}
 }
 
 void GainMeterBase::color_handler(bool dpi)
 {
-	color_changed = true;
-	dpi_changed = (dpi) ? true : false;
 	setup_meters();
 }
 
@@ -842,14 +869,25 @@ void
 GainMeterBase::set_width (Width w, int len)
 {
 	_width = w;
-	level_meter->setup_meters (len);
+	int meter_width = 5;
+	if (_width == Wide && _route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
+		meter_width = 10;
+	}
+	level_meter->setup_meters(len, meter_width);
 }
 
 
 void
 GainMeterBase::on_theme_changed()
 {
-	style_changed = true;
+}
+
+void
+GainMeterBase::redraw_metrics()
+{
+	meter_metric_area.queue_draw ();
+	meter_ticks1_area.queue_draw ();
+	meter_ticks2_area.queue_draw ();
 }
 
 GainMeter::GainMeter (Session* s, int fader_length)
@@ -863,7 +901,7 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	gain_display_box.pack_start (gain_display, true, true);
 
 	meter_metric_area.set_name ("AudioTrackMetrics");
-	set_size_request_to_display_given_text (meter_metric_area, "-127", 1, 0);
+	meter_metric_area.set_size_request(24, -1);
 
 	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
@@ -896,6 +934,19 @@ GainMeter::GainMeter (Session* s, int fader_length)
 
 	meter_metric_area.signal_expose_event().connect (
 		sigc::mem_fun(*this, &GainMeter::meter_metrics_expose));
+
+	meter_ticks1_area.set_size_request(3,-1);
+	meter_ticks2_area.set_size_request(3,-1);
+
+	meter_ticks1_area.signal_expose_event().connect (
+			sigc::mem_fun(*this, &GainMeter::meter_ticks1_expose));
+	meter_ticks2_area.signal_expose_event().connect (
+			sigc::mem_fun(*this, &GainMeter::meter_ticks2_expose));
+
+	meter_hbox.pack_start (meter_ticks1_area, false, false);
+	meter_hbox.pack_start (meter_alignment, false, false);
+	meter_hbox.pack_start (meter_ticks2_area, false, false);
+	meter_hbox.pack_start (meter_metric_area, false, false);
 }
 
 void
@@ -903,8 +954,8 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 			 boost::shared_ptr<PeakMeter> meter,
 			 boost::shared_ptr<Amp> amp)
 {
-	if (meter_alignment.get_parent()) {
-		hbox.remove (meter_alignment);
+	if (meter_hbox.get_parent()) {
+		hbox.remove (meter_hbox);
 	}
 
 //	if (gain_automation_state_button.get_parent()) {
@@ -917,6 +968,9 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 		_meter->ConfigurationChanged.connect (
 			model_connections, invalidator (*this), boost::bind (&GainMeter::meter_configuration_changed, this, _1), gui_context()
 			);
+		_meter->TypeChanged.connect (
+			model_connections, invalidator (*this), boost::bind (&GainMeter::meter_type_changed, this, _1), gui_context()
+			);
 
 		meter_configuration_changed (_meter->input_streams ());
 	}
@@ -927,212 +981,50 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 	   pack some route-dependent stuff.
 	*/
 
-	hbox.pack_start (meter_alignment, true, true);
+	hbox.pack_start (meter_hbox, true, true);
 
 //	if (r && !r->is_auditioner()) {
 //		fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
 //	}
 
-	setup_meters ();
 	hbox.show_all ();
+	setup_meters ();
 }
 
 int
 GainMeter::get_gm_width ()
 {
 	Gtk::Requisition sz;
-	hbox.size_request (sz);
-	return sz.width;
-}
+	int min_w = 0;
+	meter_metric_area.size_request (sz);
+	min_w += sz.width;
+	level_meter->size_request (sz);
+	min_w += sz.width;
 
-cairo_pattern_t*
-GainMeter::render_metrics (Gtk::Widget& w, vector<DataType> types)
-{
-	Glib::RefPtr<Gdk::Window> win (w.get_window());
+	fader_alignment.size_request (sz);
+	if (_width == Wide)
+		return max(sz.width * 2, min_w * 2) + 6;
+	else
+		return sz.width + min_w + 6;
 
-	gint width, height;
-	win->get_size (width, height);
-
-	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width, height);
-	cairo_t* cr = cairo_create (surface);
-	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create(w.get_pango_context());
-
-
-	Pango::AttrList audio_font_attributes;
-	Pango::AttrList midi_font_attributes;
-
-	Pango::AttrFontDesc* font_attr;
-	Pango::FontDescription font;
-
-	font = Pango::FontDescription (""); // use defaults
-	//font = get_font_for_style("gain-fader");
-	//font = w.get_style()->get_font();
-
-	font.set_weight (Pango::WEIGHT_NORMAL);
-	font.set_size (9.0 * PANGO_SCALE);
-	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
-	audio_font_attributes.change (*font_attr);
-	delete font_attr;
-
-	font.set_weight (Pango::WEIGHT_ULTRALIGHT);
-	font.set_stretch (Pango::STRETCH_ULTRA_CONDENSED);
-	font.set_size (7.5 * PANGO_SCALE);
-	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
-	midi_font_attributes.change (*font_attr);
-	delete font_attr;
-
-
-	cairo_move_to (cr, 0, 0);
-	cairo_rectangle (cr, 0, 0, width, height);
-	{
-		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_NORMAL);
-		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-	}
-	cairo_fill (cr);
-
-	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
-
-		Gdk::Color c;
-
-		if (types.size() > 1) {
-			/* we're overlaying more than 1 set of marks, so use different colours */
-			Gdk::Color c;
-			switch (*i) {
-			case DataType::AUDIO:
-				c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
-				cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-				break;
-			case DataType::MIDI:
-				c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
-				cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-				break;
-			}
-		} else {
-			c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
-			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-		}
-
-		vector<int> points;
-
-		switch (*i) {
-		case DataType::AUDIO:
-			layout->set_attributes (audio_font_attributes);
-			points.push_back (-50);
-			points.push_back (-40);
-			points.push_back (-30);
-			points.push_back (-20);
-			points.push_back (-10);
-			points.push_back (-3);
-			points.push_back (0);
-			points.push_back (4);
-			break;
-
-		case DataType::MIDI:
-			layout->set_attributes (midi_font_attributes);
-			points.push_back (0);
-			if (types.size() == 1) {
-				points.push_back (32);
-			} else {
-				/* tweak so as not to overlay the -30dB mark */
-				points.push_back (48);
-			}
-			points.push_back (64);
-			points.push_back (96);
-			points.push_back (127);
-			break;
-		}
-
-		char buf[32];
-
-		for (vector<int>::const_iterator j = points.begin(); j != points.end(); ++j) {
-
-			float fraction = 0;
-			switch (*i) {
-			case DataType::AUDIO:
-				fraction = log_meter (*j);
-				break;
-			case DataType::MIDI:
-				fraction = *j / 127.0;
-				break;
-			}
-
-			gint const pos = height - (gint) floor (height * fraction);
-			float const linepos = min((float) height, (float)(pos + .5f));
-
-			cairo_set_line_width (cr, 1.0);
-			cairo_move_to (cr, 0, linepos);
-			cairo_line_to (cr, 3.5, linepos);
-			cairo_stroke (cr);
-			
-			snprintf (buf, sizeof (buf), "%2d", abs (*j));
-			layout->set_text(buf);
-
-			/* we want logical extents, not ink extents here */
-
-			int tw, th;
-			layout->get_pixel_size(tw, th);
-
-			int p = pos - (th / 2);
-			p = min (p, height - th);
-			p = max (p, 0);
-
-			cairo_move_to (cr, 5, p);
-			pango_cairo_show_layout (cr, layout->gobj());
-		}
-	}
-
-	cairo_pattern_t* pattern = cairo_pattern_create_for_surface (surface);
-	MetricPatterns::iterator p;
-
-	if ((p = metric_patterns.find (w.get_name())) != metric_patterns.end()) {
-		cairo_pattern_destroy (p->second);
-	}
-
-	metric_patterns[w.get_name()] = pattern;
-	
-	cairo_destroy (cr);
-	cairo_surface_destroy (surface);
-
-	return pattern;
 }
 
 gint
 GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 {
-	Glib::RefPtr<Gdk::Window> win (meter_metric_area.get_window());
-	cairo_t* cr;
+	return meter_expose_metrics(ev, _types, &meter_metric_area);
+}
 
-	cr = gdk_cairo_create (win->gobj());
-	
-	/* clip to expose area */
+gint
+GainMeter::meter_ticks1_expose (GdkEventExpose *ev)
+{
+	return meter_expose_ticks(ev, _types, &meter_ticks1_area);
+}
 
-	gdk_cairo_rectangle (cr, &ev->area);
-	cairo_clip (cr);
-
-	cairo_pattern_t* pattern;
-	MetricPatterns::iterator i = metric_patterns.find (meter_metric_area.get_name());
-
-	if (i == metric_patterns.end() || style_changed || dpi_changed) {
-		pattern = render_metrics (meter_metric_area, _types);
-	} else {
-		pattern = i->second;
-	}
-
-	cairo_move_to (cr, 0, 0);
-	cairo_set_source (cr, pattern);
-
-	gint width, height;
-	win->get_size (width, height);
-
-	cairo_rectangle (cr, 0, 0, width, height);
-	cairo_fill (cr);
-
-	style_changed = false;
-	dpi_changed = false;
-
-	cairo_destroy (cr);
-
-	return true;
+gint
+GainMeter::meter_ticks2_expose (GdkEventExpose *ev)
+{
+	return meter_expose_ticks(ev, _types, &meter_ticks2_area);
 }
 
 boost::shared_ptr<PBD::Controllable>
@@ -1194,8 +1086,11 @@ GainMeter::meter_configuration_changed (ChanCount c)
 			set_meter_strip_name ("AudioMidiTrackMetricsInactive");
 		}
 	}
-
-	style_changed = true;
-	meter_metric_area.queue_draw ();
+	meter_clear_pattern_cache(); // XXX only once
 }
 
+void
+GainMeter::meter_type_changed (MeterType t)
+{
+	_route->set_meter_type(t);
+}

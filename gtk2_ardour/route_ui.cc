@@ -67,7 +67,7 @@ boost::weak_ptr<Route> RouteUI::_showing_sends_to;
 RouteUI::RouteUI (ARDOUR::Session* sess)
 	: AxisView(sess)
 {
-	init ();
+	if (sess) init ();
 }
 
 RouteUI::~RouteUI()
@@ -254,7 +254,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	mute_button->show();
 
-	if (_route->is_monitor()) {
+	if (_route->is_monitor() || _route->is_master()) {
 		solo_button->hide ();
 	} else {
 		solo_button->show();

@@ -26,6 +26,7 @@
 #include "actions.h"
 #include "ardour_ui.h"
 #include "mixer_ui.h"
+#include "meterbridge.h"
 
 #include "i18n.h"
 
@@ -46,6 +47,25 @@ ARDOUR_UI::create_mixer ()
 
 	mixer->signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::main_window_state_event_handler), false));
 	mixer->signal_unmap().connect (sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/toggle-mixer")));
+
+	return 0;
+}
+
+
+int
+ARDOUR_UI::create_meterbridge ()
+
+{
+	try {
+		meterbridge = Meterbridge::instance ();
+	}
+
+	catch (failed_constructor& err) {
+		return -1;
+	}
+
+	meterbridge->signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::main_window_state_event_handler), false));
+	meterbridge->signal_unmap().connect (sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/toggle-meterbridge")));
 
 	return 0;
 }

@@ -31,6 +31,7 @@ public:
 	GlobalPortMatrix (Gtk::Window*, ARDOUR::Session*, ARDOUR::DataType);
 
 	void setup_ports (int);
+	void set_session (ARDOUR::Session* s);
 
 	void set_state (ARDOUR::BundleChannel c[2], bool);
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;

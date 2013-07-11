@@ -63,12 +63,16 @@ class LevelMeter : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	float update_meters ();
 	void update_meters_falloff ();
-	void clear_meters ();
+	void clear_meters (bool reset_highlight = true);
 	void hide_meters ();
-	void setup_meters (int len=0, int width=3);
+	void setup_meters (int len=0, int width=3, int thin=2);
+
+	void set_type (ARDOUR::MeterType);
+	ARDOUR::MeterType get_type () { return meter_type; }
 
 	/** Emitted in the GUI thread when a button is pressed over the meter */
 	PBD::Signal1<bool, GdkEventButton *> ButtonPress;
+	PBD::Signal1<void, ARDOUR::MeterType> MeterTypeChanged;
 
   private:
 	ARDOUR::PeakMeter* _meter;
@@ -80,22 +84,26 @@ class LevelMeter : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	    gint16                width;
             int			  length;
 	    bool                  packed;
+	    float                 max_peak;
 
 	    MeterInfo() {
 		    meter = 0;
 		    width = 0;
                     length = 0;
 		    packed = false;
+		    max_peak = -INFINITY;
 	    }
 	};
 
 	guint16                regular_meter_width;
 	int                    meter_length;
-	static const guint16   thin_meter_width = 2;
+	guint16                thin_meter_width;
 	std::vector<MeterInfo> meters;
 	float                  max_peak;
+	ARDOUR::MeterType      meter_type;
 
 	PBD::ScopedConnection _configuration_connection;
+	PBD::ScopedConnection _meter_type_connection;
 	PBD::ScopedConnection _parameter_connection;
 
 	void hide_all_meters ();
@@ -104,6 +112,7 @@ class LevelMeter : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	void parameter_changed (std::string);
 	void configuration_changed (ARDOUR::ChanCount in, ARDOUR::ChanCount out);
+	void meter_type_changed (ARDOUR::MeterType);
 
 	void on_theme_changed ();
 	bool style_changed;

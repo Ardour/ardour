@@ -72,9 +72,9 @@ style "gain_fader"
 	bg[ACTIVE] = shade (0.705, @@COLPREFIX@_bg)
 	bg[INSENSITIVE] = shade (0.705, @@COLPREFIX@_bg)
 
-        fg[INSENSITIVE] = { 0.525, 0.521, 0.568 }
-        fg[NORMAL] = { 0.525, 0.521, 0.568 }
-	fg[ACTIVE] = { 0.525, 0.521, 0.568 }
+        fg[INSENSITIVE] = shade(1.4, @@COLPREFIX@_bg)
+        fg[NORMAL] = shade(1.4, @@COLPREFIX@_bg)
+	fg[ACTIVE] = shade(1.4, @@COLPREFIX@_bg)
 }
 
 #MSR and related buttons
@@ -144,6 +144,10 @@ style "mixer_track_rec_enable_button_active" = "track_rec_enable_button_active"
 }
 
 style "monitor" = "small_button"
+{
+}
+
+style "meterbridge_label" = "small_text"
 {
 }
 
@@ -679,6 +683,7 @@ style "audio_bus_base" = "very_small_text"
 {
   fg[NORMAL] = @@COLPREFIX@_fg
   bg[NORMAL] = @@COLPREFIX@_audio_bus
+  bg[ACTIVE] = @@COLPREFIX@_bg
 }
 
 style "send_strip_base" = "default"
@@ -787,7 +792,7 @@ style "track_name_display" = "medium_text"
 
 style "track_separator"
 {
-	bg[NORMAL] = @@COLPREFIX@_fg
+	bg[NORMAL] = lighter(@@COLPREFIX@_bg)
 }
 
 # Plugin Editors

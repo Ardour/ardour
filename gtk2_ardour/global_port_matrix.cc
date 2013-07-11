@@ -192,6 +192,15 @@ GlobalPortMatrixWindow::set_session (Session* s)
 	}
 }
 
+void
+GlobalPortMatrix::set_session (Session *s)
+{
+	SessionHandlePtr::set_session (s);
+	if (!s) return;
+	setup_all_ports ();
+	init();
+}
+
 string
 GlobalPortMatrix::disassociation_verb () const
 {

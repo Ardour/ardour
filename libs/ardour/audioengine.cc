@@ -759,9 +759,8 @@ void
 AudioEngine::meter_thread ()
 {
 	pthread_set_name (X_("meter"));
-
 	while (true) {
-		Glib::usleep (10000); /* 1/100th sec interval */
+		Glib::usleep (10000);
 		if (g_atomic_int_get(&m_meter_exit)) {
 			break;
 		}

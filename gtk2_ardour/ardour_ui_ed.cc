@@ -229,6 +229,7 @@ ARDOUR_UI::install_actions ()
 
 	ActionManager::register_toggle_action (common_actions, X_("toggle-mixer"), S_("Window|Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_mixer_window));
 	ActionManager::register_action (common_actions, X_("toggle-editor-mixer"), _("Toggle Editor+Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_editor_mixer));
+	ActionManager::register_toggle_action (common_actions, X_("toggle-meterbridge"), S_("Window|Meterbridge"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_meterbridge));
 
 	act = ActionManager::register_action (common_actions, X_("NewMIDITracer"), _("MIDI Tracer"), sigc::mem_fun(*this, &ARDOUR_UI::new_midi_tracer_window));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -602,7 +603,7 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 void
 ARDOUR_UI::save_ardour_state ()
 {
-	if (!keyboard || !mixer || !editor) {
+	if (!keyboard || !mixer || !editor || !meterbridge) {
 		return;
 	}
 
@@ -657,10 +658,12 @@ ARDOUR_UI::save_ardour_state ()
 
 	XMLNode& enode (static_cast<Stateful*>(editor)->get_state());
 	XMLNode& mnode (mixer->get_state());
+	XMLNode& bnode (meterbridge->get_state());
 
 	if (_session) {
 		_session->add_instant_xml (enode);
 		_session->add_instant_xml (mnode);
+		_session->add_instant_xml (bnode);
 		if (location_ui) {
 			_session->add_instant_xml (location_ui->ui().get_state ());
 		}

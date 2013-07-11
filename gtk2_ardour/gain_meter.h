@@ -85,6 +85,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	void set_flat_buttons ();
 
 	virtual void setup_meters (int len=0);
+	virtual void set_type (ARDOUR::MeterType);
 
 	boost::shared_ptr<PBD::Controllable> get_controllable();
 
@@ -99,6 +100,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
   protected:
 
 	friend class MixerStrip;
+	friend class MeterStrip;
 	boost::shared_ptr<ARDOUR::Route> _route;
 	boost::shared_ptr<ARDOUR::PeakMeter> _meter;
 	boost::shared_ptr<ARDOUR::Amp> _amp;
@@ -113,6 +115,8 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	Gtkmm2ext::FocusEntry        gain_display;
 	Gtk::Button                  peak_display;
 	Gtk::DrawingArea             meter_metric_area;
+	Gtk::DrawingArea             meter_ticks1_area;
+	Gtk::DrawingArea             meter_ticks2_area;
 	LevelMeter                  *level_meter;
 
 	sigc::connection gain_watching;
@@ -178,15 +182,11 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	void parameter_changed (const char*);
 
 	void reset_peak_display ();
+	void reset_route_peak_display (ARDOUR::Route*);
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
 
-	static sigc::signal<void> ResetAllPeakDisplays;
-	static sigc::signal<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
-
+	void redraw_metrics ();
 	void on_theme_changed ();
-	bool style_changed;
-	bool dpi_changed;
-	bool color_changed;
 	void color_handler(bool);
 	ARDOUR::DataType _data_type;
 	ARDOUR::ChanCount _previous_amp_output_streams;
@@ -209,24 +209,25 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 
 	int get_gm_width ();
 	void setup_meters (int len=0);
+	void set_type (ARDOUR::MeterType);
 
   protected:
 	void hide_all_meters ();
 
 	gint meter_metrics_expose (GdkEventExpose *);
-
-	typedef std::map<std::string,cairo_pattern_t*> MetricPatterns;
-	static  MetricPatterns metric_patterns;
-	static  cairo_pattern_t* render_metrics (Gtk::Widget &, std::vector<ARDOUR::DataType>);
+	gint meter_ticks1_expose (GdkEventExpose *);
+	gint meter_ticks2_expose (GdkEventExpose *);
 
   private:
 
 	void meter_configuration_changed (ARDOUR::ChanCount);
+	void meter_type_changed (ARDOUR::MeterType);
 
 	Gtk::HBox  gain_display_box;
 	Gtk::HBox  fader_box;
 	Gtk::VBox* fader_vbox;
 	Gtk::HBox  hbox;
+	Gtk::HBox  meter_hbox;
 	Gtk::Alignment fader_alignment;
 	Gtk::Alignment meter_alignment;
 	std::vector<ARDOUR::DataType> _types;

@@ -132,12 +132,18 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_table.set_no_show_all ();
 
 	HSeparator* separator = manage (new HSeparator());
+	separator->set_name("TrackSeparator");
+	separator->set_size_request(-1, 1);
+	separator->show();
 
 	controls_vbox.pack_start (controls_table, false, false);
 	controls_vbox.show ();
 
+	controls_hbox.pack_start (controls_vbox, true, true);
+	controls_hbox.show ();
+
 	//controls_ebox.set_name ("TimeAxisViewControlsBaseUnselected");
-	controls_ebox.add (controls_vbox);
+	controls_ebox.add (controls_hbox);
 	controls_ebox.add_events (Gdk::BUTTON_PRESS_MASK|
 				  Gdk::BUTTON_RELEASE_MASK|
 				  Gdk::POINTER_MOTION_MASK|
@@ -154,10 +160,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_ebox.signal_leave_notify_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_leave));
 	controls_ebox.show ();
 
-	controls_hbox.pack_start (controls_ebox, true, true);
-	controls_hbox.show ();
-
-	time_axis_vbox.pack_start (controls_hbox, true, true);
+	time_axis_vbox.pack_start (controls_ebox, true, true, 0);
 	time_axis_vbox.pack_end (*separator, false, false);
 	time_axis_vbox.show();
 

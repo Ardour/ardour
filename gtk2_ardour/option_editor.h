@@ -308,9 +308,34 @@ public:
 		_label = manage (new Gtk::Label (n + ":"));
 		_label->set_alignment (0, 0.5);
 		_hscale = manage (new Gtk::HScale(adj));
+		_adj = NULL;
 	}
 
-	void set_state_from_config () { }
+	HSliderOption (
+		std::string const & i,
+		std::string const & n,
+		Gtk::Adjustment *adj,
+		sigc::slot<float> g,
+		sigc::slot<bool, float> s
+		)
+		: Option (i, n)
+		, _get (g)
+		, _set (s)
+		, _adj (adj)
+	{
+		_label = manage (new Gtk::Label (n + ":"));
+		_label->set_alignment (0, 0.5);
+		_hscale = manage (new Gtk::HScale(*_adj));
+		_adj->signal_value_changed().connect (sigc::mem_fun (*this, &HSliderOption::changed));
+	}
+
+	void set_state_from_config () {
+		if (_adj) _adj->set_value (_get());
+	}
+
+	void changed () {
+		if (_adj) _set (_adj->get_value ());
+	}
 
 	void add_to_page (OptionEditorPage* p)
 	{
@@ -324,8 +349,11 @@ public:
 	Gtk::Widget& tip_widget() { return *_hscale; }
 
 private:
+	sigc::slot<float> _get;
+	sigc::slot<bool, float> _set;
 	Gtk::Label* _label;
 	Gtk::HScale* _hscale;
+	Gtk::Adjustment* _adj;
 };
 
 /** Component which provides the UI to handle an enumerated option using a GTK ComboBox.

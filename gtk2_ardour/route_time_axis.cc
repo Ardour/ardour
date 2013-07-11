@@ -43,6 +43,7 @@
 #include <gtkmm2ext/utils.h>
 
 #include "ardour/amp.h"
+#include "ardour/meter.h"
 #include "ardour/event_type_map.h"
 #include "ardour/processor.h"
 #include "ardour/profile.h"
@@ -110,9 +111,13 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
 
+	int meter_width = 3;
+	if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
+		meter_width = 6;
+	}
 	gm.set_controls (_route, _route->shared_peak_meter(), _route->amp());
 	gm.get_level_meter().set_no_show_all();
-	gm.get_level_meter().setup_meters(50);
+	gm.get_level_meter().setup_meters(50, meter_width);
 	gm.update_gain_sensitive ();
 
 	string str = gui_property ("height");
@@ -179,8 +184,12 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	} else {
 		gm.set_fader_name ("AudioBusFader");
 	}
-	
-	controls_hbox.pack_start(gm.get_level_meter(), false, false);
+
+	Gtk::VBox *mtrbox = manage(new Gtk::VBox());
+	mtrbox->pack_start(gm.get_level_meter(), false, false, 2);
+	controls_hbox.pack_start(*mtrbox, false, false, 4);
+	mtrbox->show();
+
 	_route->meter_change.connect (*this, invalidator (*this), bind (&RouteTimeAxisView::meter_changed, this), gui_context());
 	_route->input()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
 	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
@@ -820,9 +829,14 @@ RouteTimeAxisView::show_selection (TimeSelection& ts)
 void
 RouteTimeAxisView::set_height (uint32_t h)
 {
-	int gmlen = h - 5;
+	int gmlen = h - 9;
 	bool height_changed = (height == 0) || (h != height);
-	gm.get_level_meter().setup_meters (gmlen);
+
+	int meter_width = 3;
+	if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
+		meter_width = 6;
+	}
+	gm.get_level_meter().setup_meters (gmlen, meter_width);
 
 	TimeAxisView::set_height (h);
 
@@ -2211,7 +2225,11 @@ void
 RouteTimeAxisView::reset_meter ()
 {
 	if (Config->get_show_track_meters()) {
-		gm.get_level_meter().setup_meters (height-5);
+		int meter_width = 3;
+		if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
+			meter_width = 6;
+		}
+		gm.get_level_meter().setup_meters (height - 9, meter_width);
 	} else {
 		hide_meter ();
 	}
@@ -2228,12 +2246,18 @@ RouteTimeAxisView::meter_changed ()
 {
 	ENSURE_GUI_THREAD (*this, &RouteTimeAxisView::meter_changed)
 	reset_meter();
+	if (_route && !no_redraw) {
+		request_redraw ();
+	}
 }
 
 void
 RouteTimeAxisView::io_changed (IOChange /*change*/, void */*src*/)
 {
 	reset_meter ();
+	if (_route && !no_redraw) {
+		request_redraw ();
+	}
 }
 
 void
@@ -2355,31 +2379,26 @@ RouteTimeAxisView::remove_underlay (StreamView* v)
 void
 RouteTimeAxisView::set_button_names ()
 {
-        if (_route && _route->solo_safe()) {
-		solo_button->remove ();
-		if (solo_safe_pixbuf == 0) {
-			solo_safe_pixbuf = ::get_icon("solo-safe-icon");
-		}
-		solo_button->set_image (solo_safe_pixbuf);
-		solo_button->set_text (string());
-        } else {
-		solo_button->set_image (Glib::RefPtr<Gdk::Pixbuf>());
-                if (Config->get_solo_control_is_listen_control()) {
-                        switch (Config->get_listen_position()) {
-                        case AfterFaderListen:
-                                solo_button->set_text (_("A"));
+	if (_route && _route->solo_safe()) {
+		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
+	} else {
+		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
+	}
+	if (Config->get_solo_control_is_listen_control()) {
+		switch (Config->get_listen_position()) {
+			case AfterFaderListen:
+				solo_button->set_text (_("A"));
 				ARDOUR_UI::instance()->set_tip (*solo_button, _("After-fade listen (AFL)"));
-                                break;
-                        case PreFaderListen:
-                                solo_button->set_text (_("P"));
+				break;
+			case PreFaderListen:
+				solo_button->set_text (_("P"));
 				ARDOUR_UI::instance()->set_tip (*solo_button, _("Pre-fade listen (PFL)"));
-                                break;
-                        }
-                } else {
-                        solo_button->set_text (_("s"));
-			ARDOUR_UI::instance()->set_tip (*solo_button, _("Solo"));
-                }
-        }
+			break;
+		}
+	} else {
+		solo_button->set_text (_("s"));
+		ARDOUR_UI::instance()->set_tip (*solo_button, _("Solo"));
+	}
 	mute_button->set_text (_("m"));
 }
 

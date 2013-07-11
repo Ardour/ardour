@@ -23,6 +23,7 @@
 #include "ardour/types.h"
 #include "ardour/processor.h"
 #include "pbd/fastlog.h"
+#include "kmeterdsp.h"
 
 namespace ARDOUR {
 
@@ -45,6 +46,7 @@ class Metering {
 class PeakMeter : public Processor {
 public:
         PeakMeter(Session& s, const std::string& name);
+        ~PeakMeter();
 
 	void meter();
 	void reset ();
@@ -80,15 +82,14 @@ public:
 		}
 	}
 
-	float max_peak_power (uint32_t n) {
-		if (n < _max_peak_power.size()) {
-			return _max_peak_power[n];
-		} else {
-			return minus_infinity();
-		}
-	}
+	float meter_level (uint32_t n, MeterType type);
+
+	void set_type(MeterType t);
+	MeterType get_type() { return _meter_type; }
 
 	XMLNode& state (bool full);
+
+	PBD::Signal1<void, MeterType> TypeChanged;
 
 private:
 	friend class IO;
@@ -99,11 +100,14 @@ private:
 	 */
 	ChanCount current_meters;
 
-	std::vector<float> _peak_power;
+	std::vector<float> _peak_signal;
 	std::vector<float> _visible_peak_power;
+	std::vector<float> _max_peak_signal;
 	std::vector<float> _max_peak_power;
-};
+	std::vector<Kmeterdsp *> _kmeter;
 
+	MeterType _meter_type;
+};
 
 } // namespace ARDOUR
 

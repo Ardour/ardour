@@ -1887,7 +1887,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	ComboOption<float>* mht = new ComboOption<float> (
 		"meter-hold",
-		_("Meter hold time"),
+		_("Peak hold time"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_hold),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_hold)
 		);
@@ -1901,20 +1901,52 @@ RCOptionEditor::RCOptionEditor ()
 
 	ComboOption<float>* mfo = new ComboOption<float> (
 		"meter-falloff",
-		_("Meter fall-off"),
+		_("DPM fall-off"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_falloff),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_falloff)
 		);
 
-	mfo->add (METER_FALLOFF_OFF, _("off"));
-	mfo->add (METER_FALLOFF_SLOWEST, _("slowest"));
-	mfo->add (METER_FALLOFF_SLOW, _("slow"));
-	mfo->add (METER_FALLOFF_MEDIUM, _("medium"));
-	mfo->add (METER_FALLOFF_FAST, _("fast"));
-	mfo->add (METER_FALLOFF_FASTER, _("faster"));
-	mfo->add (METER_FALLOFF_FASTEST, _("fastest"));
+	mfo->add (METER_FALLOFF_OFF,      _("off"));
+	mfo->add (METER_FALLOFF_SLOWEST,  _("slowest [6.6dB/sec]"));
+	mfo->add (METER_FALLOFF_SLOW,     _("slow [8.6dB/sec] (BBC PPM, EBU PPM)"));
+	mfo->add (METER_FALLOFF_SLOWISH,  _("slowish [12.0dB/sec] (DIN)"));
+	mfo->add (METER_FALLOFF_MODERATE, _("moderate [13.3dB/sec] (EBU Digi PPM, IRT Digi PPM)"));
+	mfo->add (METER_FALLOFF_MEDIUM,   _("medium [20dB/sec]"));
+	mfo->add (METER_FALLOFF_FAST,     _("fast [32dB/sec]"));
+	mfo->add (METER_FALLOFF_FASTER,   _("faster [46dB/sec]"));
+	mfo->add (METER_FALLOFF_FASTEST,  _("fastest [70dB/sec]"));
 
 	add_option (S_("Preferences|GUI"), mfo);
+
+	ComboOption<MeterLineUp>* mlu = new ComboOption<MeterLineUp> (
+		"meter-line-up-level",
+		_("Meter line-up level"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_line_up_level),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_line_up_level)
+		);
+
+	mlu->add (MeteringLineUp24, _("-24dB"));
+	mlu->add (MeteringLineUp20, _("-20dB (SMPTE)"));
+	mlu->add (MeteringLineUp18, _("-18dB (EBU)"));
+	mlu->add (MeteringLineUp15, _("-15dB"));
+
+	Gtkmm2ext::UI::instance()->set_tip (mlu->tip_widget(), _("Configure meter-ticks and color-knee point."));
+
+	add_option (S_("Preferences|GUI"), mlu);
+
+	Gtk::Adjustment *mpk = manage (new Gtk::Adjustment(0, -10, 0, .1, .1));
+	HSliderOption *mpks = new HSliderOption("meter-peak",
+			_("Peak threshold [dBFS]"),
+			mpk,
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_peak),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_peak)
+			);
+
+	Gtkmm2ext::UI::instance()->set_tip
+		(mpks->tip_widget(),
+		 _("Specify the audio signal level in dbFS at and above which the meter-peak indicator will flash red."));
+
+	add_option (S_("Preferences|GUI"), mpks);
 }
 
 void

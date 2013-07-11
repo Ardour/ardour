@@ -62,6 +62,7 @@
 #include "utils.h"
 #include "gui_thread.h"
 #include "route_group_menu.h"
+#include "meter_patterns.h"
 
 #include "i18n.h"
 
@@ -410,8 +411,10 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	if (gpm.gain_display.get_parent()) {
 		gpm.gain_display.get_parent()->remove (gpm.gain_display);
 	}
+
+	gpm.set_type (rt->meter_type());
 	
-	middle_button_table.attach (gpm.gain_display,0,1,1,2);
+	middle_button_table.attach (gpm.gain_display,0,1,1,2, EXPAND|FILL, EXPAND);
 	middle_button_table.attach (gpm.peak_display,1,2,1,2);
 
 	if (solo_button->get_parent()) {
@@ -507,6 +510,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	route_ops_menu = 0;
 
 	_route->meter_change.connect (route_connections, invalidator (*this), bind (&MixerStrip::meter_changed, this), gui_context());
+	_route->input()->changed.connect (*this, invalidator (*this), boost::bind (&MixerStrip::update_output_display, this), gui_context());
+	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&MixerStrip::update_output_display, this), gui_context());
 	_route->route_group_changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::route_group_changed, this), gui_context());
 
 	if (_route->panner_shell()) {
@@ -644,6 +649,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 				gpm.short_astyle_string(gain_automation->automation_style()));
 		gpm.gain_automation_state_button.set_text (
 				gpm.short_astate_string(gain_automation->automation_state()));
+		gain_meter().setup_meters (); // recalc meter width
 
 		if (_route->panner()) {
 			((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (
@@ -1568,11 +1574,11 @@ MixerStrip::width_button_pressed (GdkEventButton* ev)
 	if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier | Keyboard::TertiaryModifier)) && _mixer_owned) {
 		switch (_width) {
 		case Wide:
-			_mixer.set_strip_width (Narrow);
+			_mixer.set_strip_width (Narrow, true);
 			break;
 
 		case Narrow:
-			_mixer.set_strip_width (Wide);
+			_mixer.set_strip_width (Wide, true);
 			break;
 		}
 	} else {
@@ -1899,24 +1905,20 @@ MixerStrip::set_button_names ()
 		monitor_disk_button->set_text (_("Disk"));
 
 		if (_route && _route->solo_safe()) {
-			if (solo_safe_pixbuf == 0) {
-				solo_safe_pixbuf = ::get_icon("solo-safe-icon");
-			}
-			solo_button->set_image (solo_safe_pixbuf);
-			solo_button->set_text (string());
+			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
 		} else {
-			solo_button->set_image (Glib::RefPtr<Gdk::Pixbuf>());
-			if (!Config->get_solo_control_is_listen_control()) {
-				solo_button->set_text (_("Solo"));
-			} else {
-				switch (Config->get_listen_position()) {
-				case AfterFaderListen:
-					solo_button->set_text (_("AFL"));
-					break;
-				case PreFaderListen:
-					solo_button->set_text (_("PFL"));
-					break;
-				}
+			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
+		}
+		if (!Config->get_solo_control_is_listen_control()) {
+			solo_button->set_text (_("Solo"));
+		} else {
+			switch (Config->get_listen_position()) {
+			case AfterFaderListen:
+				solo_button->set_text (_("AFL"));
+				break;
+			case PreFaderListen:
+				solo_button->set_text (_("PFL"));
+				break;
 			}
 		}
 		solo_isolated_led->set_text (_("iso"));
@@ -1928,28 +1930,25 @@ MixerStrip::set_button_names ()
 		mute_button->set_text (_("M"));
 		monitor_input_button->set_text (_("I"));
 		monitor_disk_button->set_text (_("D"));
+
 		if (_route && _route->solo_safe()) {
-			solo_button->remove ();
-			if (solo_safe_pixbuf == 0) {
-				solo_safe_pixbuf =::get_icon("solo-safe-icon");
-			}
-			solo_button->set_image (solo_safe_pixbuf);
-			solo_button->set_text (string());
+			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
 		} else {
-			solo_button->set_image (Glib::RefPtr<Gdk::Pixbuf>());
-			if (!Config->get_solo_control_is_listen_control()) {
-				solo_button->set_text (_("S"));
-			} else {
-				switch (Config->get_listen_position()) {
-				case AfterFaderListen:
-					solo_button->set_text (_("A"));
-					break;
-				case PreFaderListen:
-					solo_button->set_text (_("P"));
-					break;
-				}
+			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
+		}
+		if (!Config->get_solo_control_is_listen_control()) {
+			solo_button->set_text (_("S"));
+		} else {
+			switch (Config->get_listen_position()) {
+			case AfterFaderListen:
+				solo_button->set_text (_("A"));
+				break;
+			case PreFaderListen:
+				solo_button->set_text (_("P"));
+				break;
 			}
 		}
+
 		solo_isolated_led->set_text (_("i"));
 		solo_safe_led->set_text (_("L"));
 		break;
@@ -2123,17 +2122,50 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 
 	RadioMenuItem::Group group;
 
-	add_level_meter_item (items, group, _("Input"), MeterInput);
-	add_level_meter_item (items, group, _("Pre-fader"), MeterPreFader);
-	add_level_meter_item (items, group, _("Post-fader"), MeterPostFader);
-	add_level_meter_item (items, group, _("Output"), MeterOutput);
-	add_level_meter_item (items, group, _("Custom"), MeterCustom);
+	_suspend_menu_callbacks = true;
+	add_level_meter_item_point (items, group, _("Input"), MeterInput);
+	add_level_meter_item_point (items, group, _("Pre-fader"), MeterPreFader);
+	add_level_meter_item_point (items, group, _("Post-fader"), MeterPostFader);
+	add_level_meter_item_point (items, group, _("Output"), MeterOutput);
+	add_level_meter_item_point (items, group, _("Custom"), MeterCustom);
+
+	RadioMenuItem::Group tgroup;
+	items.push_back (SeparatorElem());
+
+	add_level_meter_item_type (items, tgroup, _("Peak"), MeterPeak);
+	add_level_meter_item_type (items, tgroup, _("RMS + Peak"), MeterKrms);
+
+	int _strip_type;
+	if (_route->is_master()) {
+		_strip_type = 4;
+	}
+	else if (boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
+			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0) {
+		/* non-master bus */
+		_strip_type = 3;
+	}
+	else if (boost::dynamic_pointer_cast<MidiTrack>(_route)) {
+		_strip_type = 2;
+	}
+	else {
+		_strip_type = 1;
+	}
+
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Change all in Group to Peak"), sigc::bind (SetMeterTypeMulti, -1, _route->route_group(), MeterPeak)));
+	items.push_back (MenuElem (_("Change all in Group to RMS + Peak"), sigc::bind (SetMeterTypeMulti, -1, _route->route_group(), MeterKrms)));
+	items.push_back (MenuElem (_("Change all to Peak"), sigc::bind (SetMeterTypeMulti, 0, _route->route_group(), MeterPeak)));
+	items.push_back (MenuElem (_("Change all to RMS + Peak"), sigc::bind (SetMeterTypeMulti, 0, _route->route_group(), MeterKrms)));
+	items.push_back (MenuElem (_("Change same track-type to Peak"), sigc::bind (SetMeterTypeMulti, _strip_type, _route->route_group(), MeterPeak)));
+	items.push_back (MenuElem (_("Change same track-type to RMS + Peak"), sigc::bind (SetMeterTypeMulti, _strip_type, _route->route_group(), MeterKrms)));
 
 	m->popup (ev->button, ev->time);
+	_suspend_menu_callbacks = false;
 }
 
 void
-MixerStrip::add_level_meter_item (Menu_Helpers::MenuList& items, RadioMenuItem::Group& group, string const & name, MeterPoint point)
+MixerStrip::add_level_meter_item_point (Menu_Helpers::MenuList& items,
+		RadioMenuItem::Group& group, string const & name, MeterPoint point)
 {
 	using namespace Menu_Helpers;
 	
@@ -2145,5 +2177,24 @@ MixerStrip::add_level_meter_item (Menu_Helpers::MenuList& items, RadioMenuItem::
 void
 MixerStrip::set_meter_point (MeterPoint p)
 {
+	if (_suspend_menu_callbacks) return;
 	_route->set_meter_point (p);
+}
+
+void
+MixerStrip::add_level_meter_item_type (Menu_Helpers::MenuList& items,
+		RadioMenuItem::Group& group, string const & name, MeterType type)
+{
+	using namespace Menu_Helpers;
+	
+	items.push_back (RadioMenuElem (group, name, sigc::bind (sigc::mem_fun (*this, &MixerStrip::set_meter_type), type)));
+	RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&items.back ());
+	i->set_active (_route->meter_type() == type);
+}
+
+void
+MixerStrip::set_meter_type (MeterType t)
+{
+	if (_suspend_menu_callbacks) return;
+	gpm.set_type (t);
 }

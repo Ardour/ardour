@@ -271,6 +271,62 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_glue_new_regions_to_bars_and_beats),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_glue_new_regions_to_bars_and_beats)
 			    ));
+
+	add_option (_("Meterbridge"), new OptionEditorHeading (_("Route Display")));
+
+	add_option (_("Meterbridge"), new BoolOption (
+			    "show-midi-on-meterbridge",
+			    _("Show Midi Tracks"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_midi_on_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_midi_on_meterbridge)
+			    ));
+
+	add_option (_("Meterbridge"), new BoolOption (
+			    "show-busses-on-meterbridge",
+			    _("Show Busses"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_busses_on_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_busses_on_meterbridge)
+			    ));
+
+	add_option (_("Meterbridge"), new BoolOption (
+			    "show-master-on-meterbridge",
+			    _("Include Master Bus"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_master_on_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_master_on_meterbridge)
+			    ));
+
+	add_option (_("Meterbridge"), new OptionEditorHeading (_("Button Area")));
+
+	add_option (_("Meterbridge"), new BoolOption (
+			    "show-rec-on-meterbridge",
+			    _("Rec-enable Button"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_rec_on_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_rec_on_meterbridge)
+			    ));
+
+	add_option (_("Meterbridge"), new BoolOption (
+			    "show-mute-on-meterbridge",
+			    _("Mute Button"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_mute_on_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_mute_on_meterbridge)
+			    ));
+
+	add_option (_("Meterbridge"), new BoolOption (
+			    "show-solo-on-meterbridge",
+			    _("Solo Button"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_solo_on_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_solo_on_meterbridge)
+			    ));
+
+	add_option (_("Meterbridge"), new OptionEditorHeading (_("Name Labels")));
+
+	add_option (_("Meterbridge"), new BoolOption (
+			    "show-name-on-meterbridge",
+			    _("Track Name"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_name_on_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_name_on_meterbridge)
+			    ));
+
 }
 
 void

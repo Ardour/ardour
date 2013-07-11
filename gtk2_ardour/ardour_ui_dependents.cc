@@ -78,6 +78,7 @@ ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 	editor->set_session (s);
 	BootMessage (_("Setup Mixer"));
 	mixer->set_session (s);
+	meterbridge->set_session (s);
 
 	/* its safe to do this now */
 

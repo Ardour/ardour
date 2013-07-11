@@ -177,6 +177,13 @@ namespace ARDOUR {
 		MeterCustom
 	};
 
+	enum MeterType {
+		MeterMaxSignal = 0x01,
+		MeterMaxPeak   = 0x02,
+		MeterPeak      = 0x04,
+		MeterKrms      = 0x08
+	};
+
 	enum TrackMode {
 		Normal,
 		NonLayered,
@@ -308,10 +315,12 @@ namespace ARDOUR {
 		MeterFalloffOff = 0,
 		MeterFalloffSlowest = 1,
 		MeterFalloffSlow = 2,
-		MeterFalloffMedium = 3,
-		MeterFalloffFast = 4,
-		MeterFalloffFaster = 5,
-		MeterFalloffFastest = 6
+		MeterFalloffSlowish = 3,
+		MeterFalloffModerate = 4,
+		MeterFalloffMedium = 5,
+		MeterFalloffFast = 6,
+		MeterFalloffFaster = 7,
+		MeterFalloffFastest = 8,
 	};
 
 	enum MeterHold {
@@ -365,6 +374,13 @@ namespace ARDOUR {
 	enum MeterState {
 		MeteringInput, ///< meter the input IO, regardless of what is going through the route
 		MeteringRoute  ///< meter what is going through the route
+	};
+
+	enum MeterLineUp {
+		MeteringLineUp24,
+		MeteringLineUp20,
+		MeteringLineUp18,
+		MeteringLineUp15
 	};
 
 	enum PFLPosition {
@@ -567,6 +583,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::AutoConnectOption& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::EditMode& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::MonitorModel& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::MeterLineUp& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::PFLPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::AFLPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::RemoteModel& sf);
@@ -588,6 +605,7 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::HeaderFormat& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::AutoConnectOption& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::EditMode& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::MonitorModel& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::MeterLineUp& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PFLPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::AFLPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::RemoteModel& sf);

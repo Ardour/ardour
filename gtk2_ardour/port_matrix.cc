@@ -206,6 +206,8 @@ PortMatrix::routes_changed ()
 void
 PortMatrix::setup ()
 {
+	if (!_session) return; // session went away
+
 	/* this needs to be done first, as the visible_ports() method uses the
 	   notebook state to decide which ports are being shown */
 

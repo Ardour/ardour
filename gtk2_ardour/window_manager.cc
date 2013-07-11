@@ -420,8 +420,10 @@ void
 ProxyBase::save_pos_and_size ()
 {
 	Gtk::Window* win = get (false);
-	win->get_position (_x_off, _y_off);
-	win->get_size (_width, _height);
+	if (win) {
+		win->get_position (_x_off, _y_off);
+		win->get_size (_width, _height);
+	}
 }
 /*-----------------------*/
 
