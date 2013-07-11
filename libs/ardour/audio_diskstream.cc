@@ -27,8 +27,6 @@
 #include <fcntl.h>
 #include <cstdlib>
 #include <ctime>
-#include <sys/stat.h>
-#include <sys/mman.h>
 
 #include "pbd/error.h"
 #include "pbd/xml++.h"
