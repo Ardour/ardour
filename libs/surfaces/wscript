@@ -23,10 +23,6 @@ children = [
         'control_protocol',
         'frontier',
         'generic_midi',
-        'mackie',
-        'osc',
-        'tranzport',
-        'wiimote'
 ]
 
 def options(opt):
@@ -47,14 +43,19 @@ def configure(conf):
     #if Options.options.tranzport and conf.is_defined('HAVE_USB'):
     #    conf.define('BUILD_TRANZPORT', 1)
 
-    autowaf.check_pkg (conf, 'liblo', mandatory=False, uselib_store="LO", atleast_version="0.24")
-
+    if conf.check_cc (header_name='poll.h', define_name='BUILD_MACKIE'):
+        sub_config_and_use(conf, 'mackie')
+            
+    if autowaf.check_pkg (conf, 'liblo', mandatory=False, uselib_store="LO", atleast_version="0.24"):
+        sub_config_and_use(conf, 'osc')
+ 
     conf.check_cc (header_name='cwiid.h', define_name='HAVE_CWIID_H',mandatory=False)
     if conf.is_defined('HAVE_CWIID_H'):
         conf.check_cc (header_name='bluetooth/bluetooth.h', define_name='HAVE_BLUETOOTH_H',mandatory=False)
         if conf.is_defined('HAVE_BLUETOOTH_H'):
             autowaf.check_pkg(conf, 'cwiid', uselib_store='CWIID', atleast_version='0.6.00')
             conf.define ('BUILD_WIIMOTE', 1)
+            sub_config_and_use(conf, 'wiimote')
         else:
             print('You are missing the libbluetooth headers needed to compile wiimote support')
     else:
@@ -62,8 +63,8 @@ def configure(conf):
 
 def build(bld):
     bld.recurse('control_protocol')
-    bld.recurse('generic_midi')
-    bld.recurse('mackie')
+    if bld.is_defined ('BUILD_MACKIE'):
+        bld.recurse('mackie')
     if bld.is_defined ('HAVE_LO'):
         bld.recurse('osc')
     if bld.is_defined('BUILD_WIIMOTE'):
