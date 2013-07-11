@@ -74,9 +74,10 @@ class BaseUI : public sigc::trackable, public PBD::EventLoop
 	bool _ok; 
 
 	Glib::RefPtr<Glib::MainLoop> _main_loop;
-        Glib::Threads::Thread*       run_loop_thread;
+	Glib::RefPtr<Glib::MainContext> m_context;
+	Glib::Threads::Thread*       run_loop_thread;
 	Glib::Threads::Mutex        _run_lock;
-        Glib::Threads::Cond         _running;
+	Glib::Threads::Cond         _running;
 
 	/* this signals _running from within the event loop,
 	   from an idle callback 
@@ -91,12 +92,17 @@ class BaseUI : public sigc::trackable, public PBD::EventLoop
 
 	virtual void thread_init () {};
 
+#ifdef WIN32
+	static gboolean _request_handler (gpointer);
+	bool request_handler ();
+#else
 	/** Called when there input ready on the request_channel
 	 */
 	bool request_handler (Glib::IOCondition);
+#endif
 
 	void signal_new_request ();
-	void attach_request_source (Glib::RefPtr<Glib::MainContext> context);
+	void attach_request_source ();
 
 	/** Derived UI objects must implement this method,
 	 * which will be called whenever there are requests
@@ -108,7 +114,9 @@ class BaseUI : public sigc::trackable, public PBD::EventLoop
 	std::string _name; 
 	BaseUI* base_ui_instance;
 
+#ifndef WIN32
 	CrossThreadChannel request_channel;
+#endif
 	
 	static uint64_t rt_bit;
 
