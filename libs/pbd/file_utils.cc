@@ -23,6 +23,10 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
+#ifdef WIN32
+#include <io.h> // for W_OK
+#endif
+
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/pattern.h>
