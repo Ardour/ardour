@@ -73,7 +73,7 @@ BaseUI::new_request_type ()
 void
 BaseUI::main_thread ()
 {
-	DEBUG_TRACE (DEBUG::EventLoop, string_compose ("%1: event loop running in thread %2\n", name(), pthread_self()));
+	DEBUG_TRACE (DEBUG::EventLoop, string_compose ("%1: event loop running in thread %2\n", name(), pthread_name()));
 	set_event_loop_for_thread (this);
 	thread_init ();
 	_main_loop->get_context()->signal_idle().connect (sigc::mem_fun (*this, &BaseUI::signal_running));

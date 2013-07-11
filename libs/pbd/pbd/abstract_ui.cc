@@ -146,7 +146,7 @@ AbstractUI<RequestObject>::get_request (RequestType rt)
 			return 0;
 		}
 
-		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: allocated per-thread request of type %2, caller %3\n", name(), rt, pthread_self()));
+		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: allocated per-thread request of type %2, caller %3\n", name(), rt, pthread_name()));
 
 		vec.buf[0]->type = rt;
                 vec.buf[0]->valid = true;
@@ -158,7 +158,7 @@ AbstractUI<RequestObject>::get_request (RequestType rt)
 	 * are not at work.
 	 */
 
-	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: allocated normal heap request of type %2, caller %3\n", name(), rt, pthread_self()));
+	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: allocated normal heap request of type %2, caller %3\n", name(), rt, pthread_name()));
 
 	RequestObject* req = new RequestObject;
 	req->type = rt;
@@ -213,7 +213,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 	for (i = request_buffers.begin(); i != request_buffers.end(); ) {
              if ((*i).second->dead) {
 		     DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 deleting dead per-thread request buffer for %3 @ %4\n",
-									  name(), pthread_self(), i->first, i->second));
+									  name(), pthread_name(), i->second));
                      delete (*i).second;
                      RequestBufferMapIterator tmp = i;
                      ++tmp;
@@ -241,7 +241,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
                 request_buffer_map_lock.lock ();
                 if (!req->valid) {
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 handling invalid heap request, type %3, deleting\n", name(), pthread_self(), req->type));
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 handling invalid heap request, type %3, deleting\n", name(), pthread_name(), req->type));
                         delete req;
                         request_buffer_map_lock.unlock ();
                         continue;
@@ -253,7 +253,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
                 */
 
                 if (req->invalidation) {
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 remove request from its invalidation list\n", name(), pthread_self()));
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 remove request from its invalidation list\n", name(), pthread_name()));
 			
 			/* after this call, if the object referenced by the
 			 * invalidation record is deleted, it will no longer
@@ -281,7 +281,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 		lm.release ();
 
-		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 execute request type %3\n", name(), pthread_self(), req->type));
+		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 execute request type %3\n", name(), pthread_name(), req->type));
 
 		/* and lets do it ... this is a virtual call so that each
 		 * specific type of UI can have its own set of requests without
@@ -290,7 +290,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 		do_request (req);
 
-		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 delete heap request type %3\n", name(), pthread_self(), req->type));
+		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 delete heap request type %3\n", name(), pthread_name(), req->type));
 		delete req;
 
 		/* re-acquire the list lock so that we check again */
@@ -315,7 +315,7 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 		/* the thread that runs this UI's event loop is sending itself
 		   a request: we dispatch it immediately and inline.
 		*/
-		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 direct dispatch of request type %3\n", name(), pthread_self(), req->type));
+		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 direct dispatch of request type %3\n", name(), pthread_name(), req->type));
 		do_request (req);
 	} else {	
 
@@ -334,13 +334,13 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 		RequestBuffer* rbuf = per_thread_request_buffer.get ();
 
 		if (rbuf != 0) {
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 send per-thread request type %3\n", name(), pthread_self(), req->type));
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 send per-thread request type %3\n", name(), pthread_name(), req->type));
 			rbuf->increment_write_ptr (1);
 		} else {
 			/* no per-thread buffer, so just use a list with a lock so that it remains
 			   single-reader/single-writer semantics
 			*/
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 send heap request type %3\n", name(), pthread_self(), req->type));
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 send heap request type %3\n", name(), pthread_name(), req->type));
 			Glib::Threads::Mutex::Lock lm (request_list_lock);
 			request_list.push_back (req);
 		}
@@ -357,7 +357,7 @@ template<typename RequestObject> void
 AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const boost::function<void()>& f)
 {
 	if (caller_is_self()) {
-		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 direct dispatch of call slot via functor @ %3, invalidation %4\n", name(), pthread_self(), &f, invalidation));
+		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 direct dispatch of call slot via functor @ %3, invalidation %4\n", name(), pthread_name(), &f, invalidation));
 		f ();
 		return;
 	}
@@ -368,7 +368,7 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
 		return;
 	}
 
-	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 queue call-slot using functor @ %3, invalidation %4\n", name(), pthread_self(), &f, invalidation));
+	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 queue call-slot using functor @ %3, invalidation %4\n", name(), pthread_name(), &f, invalidation));
 
 	/* copy semantics: copy the functor into the request object */
 
