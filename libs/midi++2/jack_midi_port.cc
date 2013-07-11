@@ -458,7 +458,7 @@ JackMIDIPort::set_process_thread (pthread_t thr)
 bool
 JackMIDIPort::is_process_thread()
 {
-	return (pthread_self() == _process_thread);
+	return (pthread_equal(pthread_self(), _process_thread));
 }
 
 void
