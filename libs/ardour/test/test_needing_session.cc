@@ -1,3 +1,5 @@
+#include <glibmm/miscutils.h>
+
 #include "midi++/manager.h"
 #include "pbd/compose.h"
 #include "pbd/enumwriter.h"
@@ -5,6 +7,7 @@
 #include "ardour/audioengine.h"
 #include "test_needing_session.h"
 #include "test_util.h"
+#include "test_common.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -13,9 +16,9 @@ using namespace PBD;
 void
 TestNeedingSession::setUp ()
 {
-	string const test_session_path = "libs/ardour/test/test_session";
-	system (string_compose ("rm -rf %1", test_session_path).c_str());
-	_session = load_session (test_session_path, "test_session");
+	const string session_name("test_session");
+	std::string new_session_dir = Glib::build_filename (new_test_output_dir(), session_name);
+	_session = load_session (new_session_dir, "test_session");
 }
 
 void

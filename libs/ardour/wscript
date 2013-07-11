@@ -483,6 +483,7 @@ def build(bld):
             create_ardour_test_program(bld, obj.includes, 'region_naming', 'test_region_naming', ['test/region_naming_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'control_surface', 'test_control_surfaces', ['test/control_surfaces_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'mtdm_test', 'test_mtdm', ['test/mtdm_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'session_test', 'test_session', ['test/session_test.cc'])
 
         test_sources  = '''
             test/automation_list_property_test.cc
@@ -499,6 +500,7 @@ def build(bld):
             test/region_naming_test.cc
             test/control_surfaces_test.cc
             test/mtdm_test.cc
+            test/session_test.cc
         '''.split()
 
 # Tests that don't work
