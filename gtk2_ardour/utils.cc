@@ -781,9 +781,9 @@ unique_random_color (list<Gdk::Color>& used_colors)
 
 		const int32_t max_saturation = 48000; // 65535 would open up the whole color wheel
 
-		newcolor.set_red (random() % max_saturation);
-		newcolor.set_blue (random() % max_saturation);
-		newcolor.set_green (random() % max_saturation);
+		newcolor.set_red (g_random_int() % max_saturation);
+		newcolor.set_blue (g_random_int() % max_saturation);
+		newcolor.set_green (g_random_int() % max_saturation);
 
 		if (used_colors.size() == 0) {
 			used_colors.push_back (newcolor);

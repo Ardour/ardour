@@ -84,7 +84,7 @@ BroadcastInfo::set_originator_ref_from_session (Session const & /*session*/)
 
 	/* random code is 9 digits */
 
-	int random_code = random() % 999999999;
+	int random_code = g_random_int() % 999999999;
 
 	/* Serial number is 12 chars */
 

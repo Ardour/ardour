@@ -278,7 +278,7 @@ UIConfiguration::color_by_name (const std::string& name)
 	}
 
 	// cerr << string_compose (_("Color %1 not found"), name) << endl;
-	return RGBA_TO_UINT (random()%256,random()%256,random()%256,0xff);
+	return RGBA_TO_UINT (g_random_int()%256,g_random_int()%256,g_random_int()%256,0xff);
 }
 
 void
