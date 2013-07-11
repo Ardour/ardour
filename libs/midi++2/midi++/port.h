@@ -24,6 +24,8 @@
 
 #include <jack/types.h>
 
+#include <pthread.h>
+
 #include "pbd/xml++.h"
 #include "pbd/crossthread.h"
 #include "pbd/signals.h"
