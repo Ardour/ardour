@@ -26,6 +26,8 @@
 #include <climits>
 #include <cstdarg>
 
+#include <pwd.h>
+#include <sys/utsname.h>
 #include <sys/stat.h>
 
 #include <glibmm/miscutils.h>

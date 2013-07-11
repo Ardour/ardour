@@ -19,6 +19,7 @@
 */
 #include <iostream>
 #include <errno.h>
+#include <poll.h>
 #include <sys/types.h>
 #include <unistd.h>
 
