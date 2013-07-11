@@ -19,6 +19,10 @@
 #ifndef __gtkselector_h__
 #define __gtkselector_h__
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <string>
 #include <vector>
 

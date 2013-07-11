@@ -20,6 +20,10 @@
 #ifndef __ardour_gtk_doi_h__
 #define __ardour_gtk_doi_h__
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <gtkmm.h>
 
 /* XXX g++ 2.95 can't compile this as pair of member function templates */
