@@ -3,18 +3,24 @@
 
 #include "xpath.h"
 #include "pbd/xml++.h"
+#include "pbd/file_utils.h"
+
+#include "test_common.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION (XPathTest);
 
 using namespace std;
-
-static string const prefix = "../libs/pbd/test/";
+using namespace PBD;
 
 void
 XPathTest::testMisc ()
 {
 //	cout << "Test 1: RosegardenPatchFile.xml: Find all banks in the file" << endl;
-	XMLTree  doc(prefix + "RosegardenPatchFile.xml");
+
+	std::string testdata_path;
+	CPPUNIT_ASSERT (find_file_in_search_path (test_search_path (), "RosegardenPatchFile.xml", testdata_path));
+
+	XMLTree  doc(testdata_path);
 	// "//bank" gives as last element an empty element libxml bug????
 	boost::shared_ptr<XMLSharedNodeList> result = doc.find("//bank[@name]");
 	
@@ -44,7 +50,10 @@ XPathTest::testMisc ()
 //	cout << endl << endl << "Test 3: TestSession.ardour: find all Sources where captured-for contains the string 'Guitar'" << endl;
 	
 	// We have to allocate a new document here, or we get segfaults
-	XMLTree doc2(prefix + "TestSession.ardour");
+	std::string testsession_path;
+	CPPUNIT_ASSERT (find_file_in_search_path (test_search_path (), "TestSession.ardour", testsession_path));
+
+	XMLTree doc2(testsession_path);
 	result = doc2.find("/Session/Sources/Source[contains(@captured-for, 'Guitar')]");
 	assert(result->size() == 16);
 	
@@ -67,8 +76,11 @@ XPathTest::testMisc ()
 	
 //	cout << endl << endl << "Test 5: ProtoolsPatchFile.midnam: Get Banks and Patches for 'Name Set 1'" << endl;
 	
+	std::string testmidnam_path;
+	CPPUNIT_ASSERT (find_file_in_search_path (test_search_path (), "ProtoolsPatchFile.midnam", testmidnam_path));
+
 	// We have to allocate a new document here, or we get segfaults
-	XMLTree doc3(prefix + "ProtoolsPatchFile.midnam");
+	XMLTree doc3(testmidnam_path);
 	result = doc3.find("/MIDINameDocument/MasterDeviceNames/ChannelNameSet[@Name='Name Set 1']/PatchBank");
 	assert(result->size() == 16);
 	
