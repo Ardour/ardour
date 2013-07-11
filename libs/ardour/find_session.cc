@@ -27,6 +27,7 @@
 #include <glibmm/miscutils.h>
 
 #include "pbd/compose.h"
+#include "pbd/pathexpand.h"
 #include "pbd/error.h"
 
 #include "ardour/filename_extensions.h"
@@ -43,16 +44,10 @@ int
 find_session (string str, string& path, string& snapshot, bool& isnew)
 {
 	struct stat statbuf;
-	char buf[PATH_MAX+1];
 
 	isnew = false;
 
-	if (!realpath (str.c_str(), buf) && (errno != ENOENT && errno != ENOTDIR)) {
-		error << string_compose (_("Could not resolve path: %1 (%2)"), buf, strerror(errno)) << endmsg;
-		return -1;
-	}
-
-	str = buf;
+	str = canonical_path (str);
 
 	/* check to see if it exists, and what it is */
 

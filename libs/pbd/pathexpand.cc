@@ -18,8 +18,10 @@
 */
 
 #include <vector>
-#include <climits>
 #include <iostream>
+#include <climits>
+#include <cerrno>
+#include <cstdlib>
 
 #include <regex.h>
 
@@ -30,6 +32,21 @@
 
 using std::string;
 using std::vector;
+
+string
+PBD::canonical_path (const std::string& path)
+{
+#ifdef WIN32
+	return path;
+#endif
+	char buf[PATH_MAX+1];
+
+	if (!realpath (path.c_str(), buf) && (errno != ENOENT)) {
+		return path;
+	}
+
+	return string (buf);
+}
 
 string
 PBD::path_expand (string path)
@@ -97,13 +114,7 @@ PBD::path_expand (string path)
 
 	/* canonicalize */
 
-	char buf[PATH_MAX+1];
-
-	if (realpath (path.c_str(), buf)) {
-		return buf;
-	} else {
-		return string();
-	}
+	return canonical_path (path);
 }
 
 string

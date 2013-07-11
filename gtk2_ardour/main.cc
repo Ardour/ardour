@@ -31,6 +31,7 @@
 #include "pbd/file_utils.h"
 #include "pbd/textreceiver.h"
 #include "pbd/failed_constructor.h"
+#include "pbd/pathexpand.h"
 #include "pbd/pthread_utils.h"
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 #include "pbd/boost_debug.h"
@@ -277,7 +278,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 		lpath.push_back (dir_path);
 		lpath.push_back ("share");
 		lpath.push_back ("locale");
-		localedir = realpath (Glib::build_filename (lpath).c_str(), NULL);
+		localedir = canonical_path (Glib::build_filename (lpath)).c_str();
 	}
 #endif
 

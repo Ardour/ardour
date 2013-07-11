@@ -64,6 +64,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
+#include "pbd/pathexpand.h"
 #include "pbd/pathscanner.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/stacktrace.h"
@@ -128,14 +129,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 		throw failed_constructor();
 	}
 
-	char buf[PATH_MAX+1];
-	if (!realpath (fullpath.c_str(), buf) && (errno != ENOENT)) {
-		error << string_compose(_("Could not use path %1 (%2)"), buf, strerror(errno)) << endmsg;
-		destroy ();
-		throw failed_constructor();
-	}
-
-	_path = string(buf);
+	_path = canonical_path (fullpath);
 
 	if (_path[_path.length()-1] != G_DIR_SEPARATOR) {
 		_path += G_DIR_SEPARATOR;
@@ -2664,6 +2658,8 @@ Session::cleanup_sources (CleanupReport& rep)
 	bool used;
 	string spath;
 	int ret = -1;
+	string tmppath1;
+	string tmppath2;
 
 	_state_of_the_state = (StateOfTheState) (_state_of_the_state | InCleanup);
 
@@ -2788,9 +2784,6 @@ Session::cleanup_sources (CleanupReport& rep)
                 i = tmp;
 	}
 
-	char tmppath1[PATH_MAX+1];
-	char tmppath2[PATH_MAX+1];
-
         if (candidates) {
                 for (vector<string*>::iterator x = candidates->begin(); x != candidates->end(); ++x) {
 
@@ -2799,19 +2792,10 @@ Session::cleanup_sources (CleanupReport& rep)
 
                         for (set<string>::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
 
-                                if (realpath(spath.c_str(), tmppath1) == 0) {
-                                        error << string_compose (_("Cannot expand path %1 (%2)"),
-                                                                 spath, strerror (errno)) << endmsg;
-                                        continue;
-                                }
+				tmppath1 = canonical_path (spath);
+				tmppath2 = canonical_path ((*i));
 
-                                if (realpath((*i).c_str(),  tmppath2) == 0) {
-                                        error << string_compose (_("Cannot expand path %1 (%2)"),
-                                                                 (*i), strerror (errno)) << endmsg;
-                                        continue;
-                                }
-
-                                if (strcmp(tmppath1, tmppath2) == 0) {
+				if (tmppath1 == tmppath2) {
                                         used = true;
                                         break;
                                 }

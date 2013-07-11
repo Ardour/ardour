@@ -22,6 +22,7 @@
 #include <string>
 
 namespace PBD {
+	std::string canonical_path (const std::string& path);
 	std::string path_expand (std::string path);
 	std::string search_path_expand (std::string path);
 }
