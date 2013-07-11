@@ -392,7 +392,9 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		cerr << "DIRECT PEAKS\n";
 #endif
 
+#ifndef WIN32
 		nread = ::pread (peakfile_fd, peaks, sizeof (PeakData)* npeaks, first_peak_byte);
+#endif
 
 		if (nread != sizeof (PeakData) * npeaks) {
 			cerr << "AudioSource["
@@ -477,6 +479,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 				cerr << "read " << sizeof (PeakData) * to_read << " from peakfile @ " << start_byte << endl;
 #endif
 
+#ifndef WIN32
 				if ((nread = ::pread (peakfile_fd, staging, sizeof (PeakData) * to_read, start_byte))
 				    != sizeof (PeakData) * to_read) {
 
@@ -498,7 +501,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 					     << endl;
 					goto out;
 				}
-
+#endif
 				i = 0;
 				stored_peaks_read = nread / sizeof(PeakData);
 			}
@@ -768,11 +771,12 @@ AudioSource::compute_and_write_peaks (Sample* buf, framecnt_t first_frame, frame
 
 			off_t byte = (peak_leftover_frame / fpp) * sizeof (PeakData);
 
+#ifndef WIN32
 			if (::pwrite (_peakfile_fd, &x, sizeof (PeakData), byte) != sizeof (PeakData)) {
 				error << string_compose(_("%1: could not write peak file data (%2)"), _name, strerror (errno)) << endmsg;
 				goto out;
 			}
-
+#endif
 			_peak_byte_max = max (_peak_byte_max, (off_t) (byte + sizeof(PeakData)));
 
 			{
@@ -881,10 +885,12 @@ AudioSource::compute_and_write_peaks (Sample* buf, framecnt_t first_frame, frame
 		}
 	}
 
+#ifndef WIN32
 	if (::pwrite (_peakfile_fd, peakbuf, sizeof (PeakData) * peaks_computed, first_peak_byte) != (ssize_t) (sizeof (PeakData) * peaks_computed)) {
 		error << string_compose(_("%1: could not write peak file data (%2)"), _name, strerror (errno)) << endmsg;
 		goto out;
 	}
+#endif
 
 	_peak_byte_max = max (_peak_byte_max, (off_t) (first_peak_byte + sizeof(PeakData)*peaks_computed));
 
