@@ -42,9 +42,9 @@ BaseUI::RequestType BaseUI::CallSlot = BaseUI::new_request_type();
 BaseUI::RequestType BaseUI::Quit = BaseUI::new_request_type();
 
 BaseUI::BaseUI (const string& str)
-	: request_channel (true)
-	, run_loop_thread (0)
+	: run_loop_thread (0)
 	, _name (str)
+	, request_channel (true)
 {
 	base_ui_instance = this;
 
@@ -138,4 +138,15 @@ BaseUI::request_handler (Glib::IOCondition ioc)
 
 	return true;
 }
-	
+
+void
+BaseUI::signal_new_request ()
+{
+	request_channel.wakeup ();
+}
+
+void
+BaseUI::attach_request_source (Glib::RefPtr<Glib::MainContext> context)
+{
+	request_channel.ios()->attach (context);
+}

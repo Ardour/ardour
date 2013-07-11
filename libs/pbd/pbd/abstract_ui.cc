@@ -349,7 +349,7 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 		   at the per-thread and generic request lists.
 		*/
 
-		request_channel.wakeup ();
+		signal_new_request ();
 	}
 }
 

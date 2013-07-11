@@ -71,7 +71,6 @@ class BaseUI : public sigc::trackable, public PBD::EventLoop
 	void quit ();
 
   protected:
-	CrossThreadChannel request_channel;
 	bool _ok; 
 
 	Glib::RefPtr<Glib::MainLoop> _main_loop;
@@ -96,6 +95,9 @@ class BaseUI : public sigc::trackable, public PBD::EventLoop
 	 */
 	bool request_handler (Glib::IOCondition);
 
+	void signal_new_request ();
+	void attach_request_source (Glib::RefPtr<Glib::MainContext> context);
+
 	/** Derived UI objects must implement this method,
 	 * which will be called whenever there are requests
 	 * to be dealt with.
@@ -105,6 +107,8 @@ class BaseUI : public sigc::trackable, public PBD::EventLoop
   private:
 	std::string _name; 
 	BaseUI* base_ui_instance;
+
+	CrossThreadChannel request_channel;
 	
 	static uint64_t rt_bit;
 
