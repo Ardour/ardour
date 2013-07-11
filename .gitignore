@@ -1,7 +1,6 @@
 *.[oa]
 *.o
 *.os
-*.template
 *.binding
 *.so
 *.dylib
