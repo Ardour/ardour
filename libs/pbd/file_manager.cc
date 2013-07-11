@@ -116,10 +116,14 @@ FileManager::allocate (FileDescriptor* d)
 
 #ifdef __APPLE__
 	d->_last_used = mach_absolute_time();
-#else
+#elif defined(_POSIX_TIMERS) && defined(_POSIX_MONOTONIC_CLOCK)
 	struct timespec t;
 	clock_gettime (CLOCK_MONOTONIC, &t);
 	d->_last_used = t.tv_sec + (double) t.tv_nsec / 10e9;
+#else
+	struct timeval now;
+	gettimeofday (&now, NULL);
+	d->_last_used = now.tv_sec + (double) now.tv_usec / 10e6;
 #endif
 
 	d->_refcount++;
