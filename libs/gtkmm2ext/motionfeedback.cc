@@ -468,14 +468,18 @@ Glib::RefPtr<Gdk::Pixbuf>
 MotionFeedback::render_pixbuf (int size)
 {
         Glib::RefPtr<Gdk::Pixbuf> pixbuf;
-        char path[32];
+	char *path;
         int fd;
+	GError *error = NULL;
 
-        snprintf (path, sizeof (path), "/tmp/mfimg%dXXXXXX", size);
-        
-        if ((fd = mkstemp (path)) < 0) {
+	fd = g_file_open_tmp ("mfimgXXXXXX", &path, &error);
+	close (fd);
+
+	if(error) {
+		g_critical("failed to open a temporary file for writing: %s.", error->message);
+		g_error_free (error);
                 return pixbuf;
-        }
+	}
         
 	GdkColor col2 = {0,0,0,0};
 	GdkColor col3 = {0,0,0,0};
@@ -521,6 +525,8 @@ MotionFeedback::render_pixbuf (int size)
 	}
 
         unlink (path);
+
+	g_free(path);
 
         return pixbuf;
 } 
