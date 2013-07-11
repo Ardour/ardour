@@ -22,10 +22,16 @@
 
 #include <glibmm/threads.h>
 
+#ifdef WIN32
+#include "pbd/glib_semaphore.h"
+#endif
+
 #include "pbd/ringbuffer.h"
 #include "pbd/pool.h"
 #include "ardour/types.h"
 #include "ardour/session_handle.h"
+
+
 
 namespace ARDOUR {
 
@@ -71,17 +77,25 @@ class Butler : public SessionHandleRef
         Glib::Threads::Cond   paused;
 	bool         should_run;
 	mutable gint should_do_transport_work;
-	int          request_pipe[2];
 	framecnt_t   audio_dstream_capture_buffer_size;
 	framecnt_t   audio_dstream_playback_buffer_size;
 	uint32_t     midi_dstream_buffer_size;
 	RingBuffer<CrossThreadPool*> pool_trash;
 
+#ifdef WIN32
+	PBD::atomic_counter m_request_state;
+	PBD::GlibSemaphore   m_request_sem;
+#else
+	int          request_pipe[2];
+#endif
+
 private:
 	void empty_pool_trash ();
 	void config_changed (std::string);
 
+#ifndef WIN32
 	int setup_request_pipe ();
+#endif
 
 	/**
 	 * return true if there are requests to be processed

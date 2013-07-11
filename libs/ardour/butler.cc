@@ -20,7 +20,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+#ifndef WIN32
 #include <poll.h>
+#endif
+
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
 #include "ardour/butler.h"
@@ -38,7 +42,7 @@ namespace ARDOUR {
 
 Butler::Butler(Session& s)
 	: SessionHandleRef (s)
-	, thread(0)
+	, thread()
 	, audio_dstream_capture_buffer_size(0)
 	, audio_dstream_playback_buffer_size(0)
 	, midi_dstream_buffer_size(0)
@@ -68,6 +72,7 @@ Butler::config_changed (std::string p)
         }
 }
 
+#ifndef WIN32
 int
 Butler::setup_request_pipe ()
 {
@@ -90,6 +95,7 @@ Butler::setup_request_pipe ()
 	}
 	return 0;
 }
+#endif
 
 int
 Butler::start_thread()
@@ -110,7 +116,9 @@ Butler::start_thread()
 
 	should_run = false;
 
+#ifndef WIN32
 	if (setup_request_pipe() != 0) return -1;
+#endif
 
 	if (pthread_create_and_store ("disk butler", &thread, _thread_work, this)) {
 		error << _("Session: could not create butler thread") << endmsg;
@@ -125,11 +133,9 @@ Butler::start_thread()
 void
 Butler::terminate_thread ()
 {
-	if (thread) {
-		void* status;
-		queue_request (Request::Quit);
-		pthread_join (thread, &status);
-	}
+	void* status;
+	queue_request (Request::Quit);
+	pthread_join (thread, &status);
 }
 
 void *
@@ -143,6 +149,7 @@ Butler::_thread_work (void* arg)
 bool
 Butler::wait_for_requests ()
 {
+#ifndef WIN32
 	struct pollfd pfd[1];
 
 	pfd[0].fd = request_pipe[0];
@@ -171,11 +178,16 @@ Butler::wait_for_requests ()
 		}
 	}
 	return false;
+#else
+	m_request_sem.wait ();
+	return true;
+#endif
 }
 
 bool
 Butler::dequeue_request (Request::Type& r)
 {
+#ifndef WIN32
 	char req;
 	size_t nread = ::read (request_pipe[0], &req, sizeof (req));
 	if (nread == 1) {
@@ -189,6 +201,9 @@ Butler::dequeue_request (Request::Type& r)
 		fatal << _("Error reading from butler request pipe") << endmsg;
 		/*NOTREACHED*/
 	}
+#else
+	r = (Request::Type) m_request_state.get();
+#endif
 	return false;
 }
 
@@ -206,7 +221,12 @@ Butler::thread_work ()
 				Request::Type req;
 
 				/* empty the pipe of all current requests */
+#ifdef WIN32
+				dequeue_request (req);
+				{
+#else
 				while(dequeue_request(req)) {
+#endif
 					switch (req) {
 
 					case Request::Run:
@@ -367,8 +387,13 @@ Butler::schedule_transport_work ()
 void
 Butler::queue_request (Request::Type r)
 {
+#ifndef WIN32
 	char c = r;
 	(void) ::write (request_pipe[1], &c, 1);
+#else
+	m_request_state.set (r);
+	m_request_sem.post ();
+#endif
 }
 
 void
