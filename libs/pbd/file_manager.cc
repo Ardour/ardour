@@ -18,7 +18,6 @@
 */
 
 #include <sys/time.h>
-#include <sys/resource.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -31,6 +30,7 @@
 
 #include "pbd/compose.h"
 #include "pbd/file_manager.h"
+#include "pbd/resource.h"
 #include "pbd/debug.h"
 
 using namespace std;
@@ -41,12 +41,11 @@ FileManager* FileDescriptor::_manager;
 FileManager::FileManager ()
 	: _open (0)
 {
-	struct rlimit rl;
-	int const r = getrlimit (RLIMIT_NOFILE, &rl);
+	struct ResourceLimit rl;
 	
 	/* XXX: this is a bit arbitrary */
-	if (r == 0) {
-		_max_open = rl.rlim_cur - 64;
+	if (get_resource_limit (OpenFiles, rl)) {
+		_max_open = rl.current_limit - 64;
 	} else {
 		_max_open = 256;
 	}
