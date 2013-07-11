@@ -1548,7 +1548,7 @@ AudioEngine::is_realtime () const
 }
 
 int
-AudioEngine::create_process_thread (boost::function<void()> f, pthread_t* thread, size_t stacksize)
+AudioEngine::create_process_thread (boost::function<void()> f, jack_native_thread_t* thread, size_t stacksize)
 {
         GET_PRIVATE_JACK_POINTER_RET (_jack, 0);
         ThreadData* td = new ThreadData (this, f, stacksize);
@@ -1559,6 +1559,28 @@ AudioEngine::create_process_thread (boost::function<void()> f, pthread_t* thread
         }
 
         return 0;
+}
+
+bool
+AudioEngine::stop_process_thread (jack_native_thread_t thread)
+{
+	/**
+	 * can't use GET_PRIVATE_JACK_POINTER_RET (_jack, 0) here
+	 * because _jack is 0 when this is called. At least for
+	 * Jack 2 _jack arg is not used so it should be OK
+	 */
+
+#ifdef USING_JACK2_EXPANSION_OF_JACK_API
+	if (jack_client_stop_thread (_jack, thread) != 0) {
+		error << "AudioEngine: cannot stop process thread" << endmsg;
+		return false;
+	}
+#else
+	void* status;
+	pthread_join (thread, &status);
+#endif
+
+	return true;
 }
 
 void*

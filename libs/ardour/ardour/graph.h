@@ -92,7 +92,7 @@ protected:
 	virtual void session_going_away ();
 
 private:
-	std::list<pthread_t> _thread_list;
+	std::list<jack_native_thread_t> _thread_list;
 	volatile bool        _quit_threads;
 
 	void reset_thread_list ();

@@ -101,7 +101,7 @@ Graph::reset_thread_list ()
         }
 
         Glib::Threads::Mutex::Lock lm (_session.engine().process_lock());
-	pthread_t a_thread;
+	jack_native_thread_t a_thread;
 
         if (!_thread_list.empty()) {
                 drop_threads ();
@@ -146,9 +146,8 @@ Graph::drop_threads ()
 
         _callback_start_sem.signal ();
 
-        for (list<pthread_t>::iterator i = _thread_list.begin(); i != _thread_list.end(); ++i) {
-                void* status;
-                pthread_join (*i, &status);
+        for (list<jack_native_thread_t>::iterator i = _thread_list.begin(); i != _thread_list.end(); ++i) {
+                AudioEngine::instance()->stop_process_thread(*i);
         }
 
         _thread_list.clear ();

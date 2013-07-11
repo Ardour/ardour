@@ -258,7 +258,8 @@ _	   the regular process() call to session->process() is not made.
 	static void destroy();
 	void died ();
 
-	int create_process_thread (boost::function<void()>, pthread_t*, size_t stacksize);
+	int create_process_thread (boost::function<void()>, jack_native_thread_t*, size_t stacksize);
+	bool stop_process_thread (jack_native_thread_t);
 
 private:
 	static AudioEngine*       _instance;
