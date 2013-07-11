@@ -84,10 +84,12 @@ Transmitter::deliver ()
 	/* do the right thing if this should not return */
 	
 	if (does_not_return()) {
+#ifndef WIN32
 		sigset_t mask;
 		
 		sigemptyset (&mask);
 		sigsuspend (&mask);
+#endif
 		/*NOTREACHED*/
 		exit (1);
 	} 
