@@ -836,7 +836,7 @@ GenericPluginUI::start_updating (GdkEventAny*)
 {
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
-		screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect
+		screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect
 			(sigc::mem_fun(*this, &GenericPluginUI::output_update));
 	}
 	return false;

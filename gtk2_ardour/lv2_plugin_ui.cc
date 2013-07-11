@@ -144,7 +144,7 @@ LV2PluginUI::start_updating(GdkEventAny*)
 {
 	if (!_output_ports.empty()) {
 		_screen_update_connection.disconnect();
-		_screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect
+		_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect
 		        (sigc::mem_fun(*this, &LV2PluginUI::output_update));
 	}
 	return false;
@@ -322,7 +322,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 
 	if (_lv2->has_message_output()) {
 		_lv2->enable_ui_emmission();
-		ARDOUR_UI::instance()->RapidScreenUpdate.connect(
+		ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect(
 			sigc::mem_fun(*this, &LV2PluginUI::update_timeout));
 	}
 }
@@ -432,7 +432,7 @@ LV2PluginUI::on_window_show(const std::string& title)
 
 		LV2_EXTERNAL_UI_SHOW(_external_ui_ptr);
 		_screen_update_connection.disconnect();
-		_screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect
+		_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect
 		        (sigc::mem_fun(*this, &LV2PluginUI::output_update));
 		return false;
 	} else {
