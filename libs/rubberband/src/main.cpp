@@ -495,7 +495,11 @@ int main(int argc, char **argv)
             }
             delete[] obf;
         } else {
+#ifdef WIN32
+            RubberBand::usleep(10000);
+#else
             usleep(10000);
+#endif
         }
     }
 
