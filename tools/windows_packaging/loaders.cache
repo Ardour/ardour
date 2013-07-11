@@ -1,0 +1,144 @@
+# GdkPixbuf Image Loader Modules file
+# Automatically generated file, do not edit
+# Created by gdk-pixbuf-query-loaders.exe from gdk-pixbuf-2.21.7
+#
+# LoaderDir = Z:\usr\i686-pc-mingw32\sys-root\mingw/lib/gdk-pixbuf-2.0/2.10.0/loaders
+#
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-png.dll"
+"png" 5 "gdk-pixbuf" "The PNG image format" "LGPL"
+"image/png" ""
+"png" ""
+"\211PNG\r\n\032\n" "" 100
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-xpm.dll"
+"xpm" 4 "gdk-pixbuf" "The XPM image format" "LGPL"
+"image/x-xpixmap" ""
+"xpm" ""
+"/* XPM */" "" 100
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-gdip-bmp.dll"
+"bmp" 5 "gdk-pixbuf" "Het BMP-bestandsformaat" "LGPL"
+"image/bmp" "image/x-bmp" "image/x-MS-bmp" ""
+"bmp" ""
+"BM" "" 100
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-gdip-tiff.dll"
+"tiff" 5 "gdk-pixbuf" "The TIFF image format" "LGPL"
+"image/tiff" ""
+"tiff" "tif" ""
+"MM *" "  z " 100
+"II* " "   z" 100
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-pcx.dll"
+"pcx" 4 "gdk-pixbuf" "The PCX image format" "LGPL"
+"image/x-pcx" ""
+"pcx" ""
+"\n \001" "" 100
+"\n\002\001" "" 100
+"\n\003\001" "" 100
+"\n\004\001" "" 100
+"\n\005\001" "" 100
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-gdip-wmf.dll"
+"wmf" 4 "gdk-pixbuf" "Het WMF-bestandsformaat" "LGPL"
+"image/x-wmf" ""
+"wmf" "apm" ""
+"\327\315\306\232" "" 100
+"\001" "" 100
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-ras.dll"
+"ras" 4 "gdk-pixbuf" "The Sun raster image format" "LGPL"
+"image/x-cmu-raster" "image/x-sun-raster" ""
+"ras" ""
+"Y\246j\225" "" 100
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-gdip-ico.dll"
+"ico" 4 "gdk-pixbuf" "Het ICO-bestandsformaat" "LGPL"
+"image/x-icon" "image/x-ico" ""
+"ico" "cur" ""
+"  \001   " "zz znz" 100
+"  \002   " "zz znz" 100
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-wbmp.dll"
+"wbmp" 4 "gdk-pixbuf" "The WBMP image format" "LGPL"
+"image/vnd.wap.wbmp" ""
+"wbmp" ""
+"  " "zz" 1
+" `" "z " 1
+" @" "z " 1
+"  " "z " 1
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-pnm.dll"
+"pnm" 4 "gdk-pixbuf" "The PNM/PBM/PGM/PPM image format family" "LGPL"
+"image/x-portable-anymap" "image/x-portable-bitmap" "image/x-portable-graymap" "image/x-portable-pixmap" ""
+"pnm" "pbm" "pgm" "ppm" ""
+"P1" "" 100
+"P2" "" 100
+"P3" "" 100
+"P4" "" 100
+"P5" "" 100
+"P6" "" 100
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-ani.dll"
+"ani" 4 "gdk-pixbuf" "The ANI image format" "LGPL"
+"application/x-navi-animation" ""
+"ani" ""
+"RIFF    ACON" "    xxxx    " 100
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-qtif.dll"
+"qtif" 4 "gdk-pixbuf" "The QTIF image format" "LGPL"
+"image/x-quicktime" "image/qtif" ""
+"qtif" "qif" ""
+"abcdidsc" "xxxx    " 100
+"abcdidat" "xxxx    " 100
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-xbm.dll"
+"xbm" 4 "gdk-pixbuf" "The XBM image format" "LGPL"
+"image/x-xbitmap" ""
+"xbm" ""
+"#define " "" 100
+"/*" "" 50
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-icns.dll"
+"icns" 4 "gdk-pixbuf" "The ICNS image format" "GPL"
+"image/x-icns" ""
+"icns" ""
+"icns" "" 100
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-jasper.dll"
+"jpeg2000" 4 "gdk-pixbuf" "The JPEG 2000 image format" "LGPL"
+"image/jp2" "image/jpeg2000" "image/jpx" ""
+"jp2" "jpc" "jpx" "j2k" "jpf" ""
+"    jP" "!!!!  " 100
+"\377O\377Q" "" 100
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-gdip-jpeg.dll"
+"jpeg" 5 "gdk-pixbuf" "Het JPEG-bestandsformaat" "LGPL"
+"image/jpeg" ""
+"jpeg" "jpe" "jpg" ""
+"\377\330" "" 100
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-gdip-gif.dll"
+"gif" 5 "gdk-pixbuf" "Het GIF-bestandsformaat" "LGPL"
+"image/gif" ""
+"gif" ""
+"GIF8" "" 100
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-gdip-emf.dll"
+"emf" 4 "gdk-pixbuf" "Het EMF-bestandsformaat" "LGPL"
+"application/emf" "application/x-emf" "image/x-emf" "image/x-mgx-emf" ""
+"emf" ""
+"\001" "" 100
+
+"lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-tga.dll"
+"tga" 4 "gdk-pixbuf" "The Targa image format" "LGPL"
+"image/x-tga" ""
+"tga" "targa" ""
+" \001\001" "x  " 100
+" \001\t" "x  " 100
+"  \002" "xz " 99
+"  \003" "xz " 100
+"  \n" "xz " 100
+"  \013" "xz " 100
+
+
