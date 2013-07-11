@@ -18,6 +18,7 @@
 */
 
 #include <gtkmm/textview.h>
+#include <gtkmm/scrolledwindow.h>
 
 #include "ardour_dialog.h"
 
@@ -28,4 +29,5 @@ class ConfigInfoDialog : public ArdourDialog
 
   private:
 	Gtk::TextView text;
+	Gtk::ScrolledWindow scroller;
 };
