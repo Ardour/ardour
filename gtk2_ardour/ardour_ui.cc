@@ -27,6 +27,10 @@
 #include <cerrno>
 #include <fstream>
 
+#ifndef WIN32
+#include <sys/resource.h>#
+#endif
+
 #include <stdint.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -776,7 +780,7 @@ ARDOUR_UI::no_memory_warning ()
 void
 ARDOUR_UI::check_memory_locking ()
 {
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(WIN32)
 	/* OS X doesn't support mlockall(2), and so testing for memory locking capability there is pointless */
 	return;
 #else // !__APPLE__
