@@ -351,7 +351,7 @@ private:
 
 			/* dropped from ourselves onto ourselves */
 
-			T* child = *((T **) selection_data.get_data());
+			T* child = *((T * const *) selection_data.get_data());
 
 			if (drop.first == 0) {
 				_internal_vbox.reorder_child (child->widget(), -1);
