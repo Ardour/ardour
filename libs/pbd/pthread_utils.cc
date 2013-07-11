@@ -30,7 +30,7 @@
 
 using namespace std;
 
-typedef std::set<pthread_t> ThreadMap;
+typedef std::list<pthread_t> ThreadMap;
 static ThreadMap all_threads;
 static pthread_mutex_t thread_map_lock = PTHREAD_MUTEX_INITIALIZER;
 static Glib::Threads::Private<char> thread_name (free);
@@ -94,7 +94,7 @@ pthread_create_and_store (string name, pthread_t  *thread, void * (*start_routin
 
 	if ((ret = thread_creator (thread, &default_attr, fake_thread_start, ts)) == 0) {
 		pthread_mutex_lock (&thread_map_lock);
-		all_threads.insert (*thread);
+		all_threads.push_back (*thread);
 		pthread_mutex_unlock (&thread_map_lock);
 	}
 
