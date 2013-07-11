@@ -440,29 +440,65 @@ def build(bld):
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         # Unit tests
-        testobj              = bld(features = 'cxx cxxprogram')
-        testobj.source       = '''
-                test/dummy_lxvst.cc
-                test/test_util.cc
-                test/test_needing_session.cc
-                test/audio_region_test.cc
-                test/test_globals.cc
-                test/automation_list_property_test.cc
-                test/bbt_test.cc
-                test/tempo_test.cc
-                test/interpolation_test.cc
-                test/midi_clock_slave_test.cc
-                test/resampled_source_test.cc
-                test/framewalk_to_beats_test.cc
-                test/framepos_plus_beats_test.cc
-                test/framepos_minus_beats_test.cc
-                test/playlist_layering_test.cc
-                test/playlist_equivalent_regions_test.cc
-                test/control_surfaces_test.cc
-                test/region_naming_test.cc
-                test/load_sessions_test.cc
-                test/mtdm_test.cc
-                test/testrunner.cc
+        # only build these common sources once
+        testcommon              = bld(features = 'cxx')
+        testcommon.includes     = obj.includes + ['test', '../pbd', '..']
+        testcommon.source       = ['test/test_globals.cc', 'test/testrunner.cc', 'test/test_needing_session.cc',
+                                   'test/dummy_lxvst.cc', 'test/audio_region_test.cc', 'test/test_util.cc' ]
+        testcommon.uselib       = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
+                                   'SAMPLERATE','XML','LRDF','COREAUDIO']
+        testcommon.use          = ['libpbd','libmidipp','libevoral','libvamphost',
+                                   'libvampplugin','libtaglib','librubberband',
+                                   'libaudiographer','libltc','ardour']
+        testcommon.defines      = [
+            'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
+            'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
+            'LOCALEDIR="' + os.path.join(
+                os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
+            'VAMP_DIR="' + os.path.join(
+                os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"'
+            ]
+        testcommon.name         = 'testcommon'
+
+        if bld.env['FPU_OPTIMIZATION']:
+            testcommon.source += [ 'sse_functions_xmm.cc' ]
+            if (bld.env['build_target'] == 'i386'
+                or bld.env['build_target'] == 'i686'):
+                testcommon.source += [ 'sse_functions.s' ]
+            elif bld.env['build_target'] == 'x86_64':
+                testcommon.source += [ 'sse_functions_64bit.s' ]
+
+        if bld.env['SINGLE_TESTS']:
+            create_ardour_test_program(bld, obj.includes, 'automation_list_property_test', 'test_automation_list_property', ['test/automation_list_property_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'bbt', 'test_bbt', ['test/bbt_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'tempo', 'test_tempo', ['test/tempo_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'interpolation', 'test_interpolation', ['test/interpolation_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'midi_clock_slave', 'test_midi_clock_slave', ['test/midi_clock_slave_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'resampled_source', 'test_resampled_source', ['test/resampled_source_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'framewalk_to_beats', 'test_framewalk_to_beats', ['test/framewalk_to_beats_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'framepos_plus_beats', 'test_framepos_plus_beats', ['test/framepos_plus_beats_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'framepos_minus_beats', 'test_framepos_minus_beats', ['test/framepos_minus_beats_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'playlist_equivalent_regions', 'test_playlist_equivalent_regions', ['test/playlist_equivalent_regions_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'playlist_layering', 'test_playlist_layering', ['test/playlist_layering_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'region_naming', 'test_region_naming', ['test/region_naming_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'control_surface', 'test_control_surfaces', ['test/control_surfaces_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'mtdm_test', 'test_mtdm', ['test/mtdm_test.cc'])
+
+        test_sources  = '''
+            test/automation_list_property_test.cc
+            test/bbt_test.cc
+            test/tempo_test.cc
+            test/interpolation_test.cc
+            test/midi_clock_slave_test.cc
+            test/resampled_source_test.cc
+            test/framewalk_to_beats_test.cc
+            test/framepos_plus_beats_test.cc
+            test/framepos_minus_beats_test.cc
+            test/playlist_equivalent_regions_test.cc
+            test/playlist_layering_test.cc
+            test/region_naming_test.cc
+            test/control_surfaces_test.cc
+            test/mtdm_test.cc
         '''.split()
 
 # Tests that don't work
@@ -471,29 +507,7 @@ def build(bld):
 #                test/combine_regions_test.cc
 #                test/mantis_3356_test.cc
 
-        testobj.includes     = obj.includes + ['test', '../pbd', '../libltc', '../audiographer']
-        testobj.uselib       = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
-                                'SAMPLERATE','XML','LRDF','COREAUDIO']
-        testobj.use          = ['libpbd','libmidipp','ardour','libltc','libaudiographer']
-        testobj.name         = 'libardour-tests'
-        testobj.target       = 'run-tests'
-        testobj.install_path = ''
-        testobj.defines      = [
-            'PACKAGE="libardour3test"',
-            'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
-            'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
-            'LOCALEDIR="' + os.path.join(
-                os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
-            'VAMP_DIR="' + os.path.join(
-                os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"'
-            ]
-        if bld.env['FPU_OPTIMIZATION']:
-            testobj.source += [ 'sse_functions_xmm.cc' ]
-            if (bld.env['build_target'] == 'i386'
-                or bld.env['build_target'] == 'i686'):
-                testobj.source += [ 'sse_functions.s' ]
-            elif bld.env['build_target'] == 'x86_64':
-                testobj.source += [ 'sse_functions_64bit.s' ]
+        create_ardour_test_program(bld, obj.includes, 'libardour-tests', 'run-tests', test_sources)
 
         # Tester to just load a session
         session_load_tester = bld(features = 'cxx cxxprogram')
@@ -562,6 +576,29 @@ def build(bld):
                     profilingobj.source += [ 'sse_functions.s' ]
                 elif bld.env['build_target'] == 'x86_64':
                     profilingobj.source += [ 'sse_functions_64bit.s' ]
+
+def create_ardour_test_program(bld, includes, name, target, sources):
+    testobj              = bld(features = 'cxx cxxprogram')
+    testobj.includes     = includes + ['test', '../pbd', '..']
+    testobj.source       = sources
+    testobj.uselib       = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
+                            'SAMPLERATE','XML','LRDF','COREAUDIO']
+    testobj.use          = ['libpbd','libmidipp','libevoral','libvamphost',
+                            'libvampplugin','libtaglib','librubberband',
+                            'libaudiographer','libltc','ardour','testcommon']
+    testobj.name         = name
+    testobj.target       = target
+    # not sure about install path
+    testobj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    testobj.defines      = [
+        'PACKAGE="libardour3test"',
+        'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
+        'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
+        'LOCALEDIR="' + os.path.join(
+            os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
+        'VAMP_DIR="' + os.path.join(
+            os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"'
+        ]
 
 def shutdown():
     autowaf.shutdown()
