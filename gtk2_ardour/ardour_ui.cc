@@ -898,8 +898,7 @@ If you still wish to quit, please use the\n\n\
 
 		second_connection.disconnect ();
 		point_one_second_connection.disconnect ();
-		point_oh_five_second_connection.disconnect ();
-		point_zero_one_second_connection.disconnect();
+		point_zero_something_second_connection.disconnect();
 	}
 
 	delete ARDOUR_UI::instance()->video_timeline;
@@ -1029,9 +1028,9 @@ ARDOUR_UI::every_point_one_seconds ()
 }
 
 gint
-ARDOUR_UI::every_point_zero_one_seconds ()
+ARDOUR_UI::every_point_zero_something_seconds ()
 {
-	// august 2007: actual update frequency: 40Hz, not 100Hz
+	// august 2007: actual update frequency: 25Hz (40ms), not 100Hz
 
 	SuperRapidScreenUpdate(); /* EMIT_SIGNAL */
 	return TRUE;
