@@ -89,8 +89,6 @@ def configure(conf):
     autowaf.configure(conf)
     autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
-    if sys.platform != 'darwin':
-        autowaf.check_pkg(conf, 'uuid', uselib_store='UUID')
 
     conf.check(function_name='getmntent', header_name='mntent.h', define_name='HAVE_GETMNTENT',mandatory=False)
     conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO',mandatory=False)
@@ -102,7 +100,6 @@ def configure(conf):
     # Boost headers
     autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
     autowaf.check_header(conf, 'cxx', 'boost/weak_ptr.hpp')
-    # autowaf.check_header(conf, 'cxx', 'boost/uuid/uuid.hpp')
 
 def build(bld):
     
