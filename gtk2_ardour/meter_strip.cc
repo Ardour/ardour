@@ -274,9 +274,9 @@ MeterStrip::set_button_names()
 	rec_enable_button->set_image (::get_icon (X_("record_normal_red")));
 
 	if (_route && _route->solo_safe()) {
-		solo_button->set_sensitive(false);
+		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
 	} else {
-		solo_button->set_sensitive(true);
+		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
 	}
 	if (!Config->get_solo_control_is_listen_control()) {
 		solo_button->set_text (_("S"));

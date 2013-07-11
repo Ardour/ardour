@@ -414,7 +414,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	gpm.set_type (rt->meter_type());
 	
-	middle_button_table.attach (gpm.gain_display,0,1,1,2);
+	middle_button_table.attach (gpm.gain_display,0,1,1,2, EXPAND|FILL, EXPAND);
 	middle_button_table.attach (gpm.peak_display,1,2,1,2);
 
 	if (solo_button->get_parent()) {
@@ -1905,9 +1905,9 @@ MixerStrip::set_button_names ()
 		monitor_disk_button->set_text (_("Disk"));
 
 		if (_route && _route->solo_safe()) {
-			solo_button->set_sensitive(false);
+			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
 		} else {
-			solo_button->set_sensitive(true);
+			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
 		}
 		if (!Config->get_solo_control_is_listen_control()) {
 			solo_button->set_text (_("Solo"));
@@ -1932,9 +1932,9 @@ MixerStrip::set_button_names ()
 		monitor_disk_button->set_text (_("D"));
 
 		if (_route && _route->solo_safe()) {
-			solo_button->set_sensitive(false);
+			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
 		} else {
-			solo_button->set_sensitive(true);
+			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
 		}
 		if (!Config->get_solo_control_is_listen_control()) {
 			solo_button->set_text (_("S"));

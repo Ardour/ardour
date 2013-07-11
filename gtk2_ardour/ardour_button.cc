@@ -384,7 +384,7 @@ ArdourButton::render (cairo_t* cr)
 
 	if ((visual_state() & Gtkmm2ext::Insensitive)) {
 		rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
-		cairo_set_source_rgba (cr, 0.505, 0.517, 0.525, 0.5);
+		cairo_set_source_rgba (cr, 0.505, 0.517, 0.525, 0.6);
 		cairo_fill (cr);
 	}
 

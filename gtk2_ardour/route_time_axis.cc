@@ -2396,31 +2396,26 @@ RouteTimeAxisView::remove_underlay (StreamView* v)
 void
 RouteTimeAxisView::set_button_names ()
 {
-        if (_route && _route->solo_safe()) {
-		solo_button->remove ();
-		if (solo_safe_pixbuf == 0) {
-			solo_safe_pixbuf = ::get_icon("solo-safe-icon");
-		}
-		solo_button->set_image (solo_safe_pixbuf);
-		solo_button->set_text (string());
-        } else {
-		solo_button->set_image (Glib::RefPtr<Gdk::Pixbuf>());
-                if (Config->get_solo_control_is_listen_control()) {
-                        switch (Config->get_listen_position()) {
-                        case AfterFaderListen:
-                                solo_button->set_text (_("A"));
+	if (_route && _route->solo_safe()) {
+		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
+	} else {
+		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
+	}
+	if (Config->get_solo_control_is_listen_control()) {
+		switch (Config->get_listen_position()) {
+			case AfterFaderListen:
+				solo_button->set_text (_("A"));
 				ARDOUR_UI::instance()->set_tip (*solo_button, _("After-fade listen (AFL)"));
-                                break;
-                        case PreFaderListen:
-                                solo_button->set_text (_("P"));
+				break;
+			case PreFaderListen:
+				solo_button->set_text (_("P"));
 				ARDOUR_UI::instance()->set_tip (*solo_button, _("Pre-fade listen (PFL)"));
-                                break;
-                        }
-                } else {
-                        solo_button->set_text (_("s"));
-			ARDOUR_UI::instance()->set_tip (*solo_button, _("Solo"));
-                }
-        }
+			break;
+		}
+	} else {
+		solo_button->set_text (_("s"));
+		ARDOUR_UI::instance()->set_tip (*solo_button, _("Solo"));
+	}
 	mute_button->set_text (_("m"));
 }
 
