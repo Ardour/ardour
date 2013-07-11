@@ -33,17 +33,11 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <climits>
-#include <fcntl.h>
-#include <poll.h>
 #include <signal.h>
-#include <sys/mman.h>
 #include <sys/time.h>
 
 #ifdef HAVE_SYS_VFS_H
 #include <sys/vfs.h>
-#else
-#include <sys/param.h>
-#include <sys/mount.h>
 #endif
 
 #ifdef HAVE_SYS_STATVFS_H

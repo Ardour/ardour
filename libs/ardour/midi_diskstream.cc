@@ -28,7 +28,6 @@
 #include <ctime>
 #include <strings.h> // for ffs(3)
 #include <sys/stat.h>
-#include <sys/mman.h>
 
 #include "pbd/error.h"
 #include "pbd/basename.h"

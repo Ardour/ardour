@@ -17,16 +17,6 @@
 
 */
 
-#include <algorithm>
-#include <string>
-#include <cmath>
-#include <cerrno>
-#include <unistd.h>
-#include <fcntl.h>
-#include <poll.h>
-
-#include <glibmm/threads.h>
-
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/stacktrace.h"
