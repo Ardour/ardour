@@ -7,6 +7,7 @@
 
 #ifdef __GNUC__
 #include <cxxabi.h>
+#include <cstdlib>
 #endif
 
 namespace AudioGrapher
