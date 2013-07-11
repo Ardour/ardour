@@ -671,7 +671,17 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		MeterInfo * info = new MeterInfo(port_index);
  		control_ui->meterinfo = info;
 
-		info->meter = new FastMeter (5, 5, FastMeter::Vertical);
+		info->meter = new FastMeter (
+				5, 5, FastMeter::Vertical, 0,
+				0x0000aaff,
+				0x008800ff, 0x008800ff,
+				0x00ff00ff, 0x00ff00ff,
+				0xcccc00ff, 0xcccc00ff,
+				0xffaa00ff, 0xffaa00ff,
+				0xff0000ff,
+				ARDOUR_UI::config()->canvasvar_MeterBackgroundBot.get(),
+				ARDOUR_UI::config()->canvasvar_MeterBackgroundTop.get()
+				);
 
 		info->min_unbound = desc.min_unbound;
 		info->max_unbound = desc.max_unbound;
