@@ -49,6 +49,7 @@ libpbd_sources = [
     'file_manager.cc',
     'file_utils.cc',
     'fpu.cc',
+    'glib_semaphore.cc',
     'id.cc',
     'locale_guard.cc',
     'malign.cc',
