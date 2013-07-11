@@ -37,7 +37,11 @@
 #include <assert.h>
 #include <math.h>
 #include <errno.h>
+#ifdef WIN32
+#include <winsock2.h>
+#else
 #include <arpa/inet.h>
+#endif
 #include <stdint.h>
 #include "smf.h"
 #include "smf_private.h"
