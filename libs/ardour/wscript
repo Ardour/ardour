@@ -444,7 +444,7 @@ def build(bld):
         testcommon              = bld(features = 'cxx')
         testcommon.includes     = obj.includes + ['test', '../pbd', '..']
         testcommon.source       = ['test/test_globals.cc', 'test/testrunner.cc', 'test/test_needing_session.cc',
-                                   'test/dummy_lxvst.cc', 'test/audio_region_test.cc', 'test/test_util.cc' ]
+                                   'test/test_common.cc', 'test/dummy_lxvst.cc', 'test/audio_region_test.cc', 'test/test_util.cc']
         testcommon.uselib       = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
                                    'SAMPLERATE','XML','LRDF','COREAUDIO']
         testcommon.use          = ['libpbd','libmidipp','libevoral','libvamphost',
