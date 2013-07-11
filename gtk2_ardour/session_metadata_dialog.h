@@ -82,7 +82,7 @@ class TextMetadataField : public MetadataField {
 	Gtk::Label* value_label;
 	Gtk::Entry* entry;
 
-	uint width;
+	guint width;
 };
 
 /// MetadataField that accepts only numbers

@@ -226,7 +226,7 @@ inline static void gdither_innner_loop(const GDitherType dt,
 
 	switch (bit_depth) {
 	case GDither8bit:
-	    o8[i] = (u_int8_t) (clamped * post_scale);
+	    o8[i] = (uint8_t) (clamped * post_scale);
 	    break;
 	case GDither16bit:
 	    o16[i] = (int16_t) (clamped * post_scale);

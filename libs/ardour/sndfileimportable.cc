@@ -51,7 +51,7 @@ SndFileImportableSource::read (Sample* buffer, framecnt_t nframes)
 	return per_channel * sf_info.channels;
 }
 
-uint
+uint32_t
 SndFileImportableSource::channels () const
 {
 	return sf_info.channels;
