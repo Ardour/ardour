@@ -23,6 +23,7 @@
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
 #include "pbd/stacktrace.h"
+#include "pbd/pthread_utils.h"
 
 #include "ardour/debug.h"
 #include "ardour/session_event.h"
@@ -56,7 +57,7 @@ SessionEvent::operator new (size_t)
 {
 	CrossThreadPool* p = pool->per_thread_pool ();
 	SessionEvent* ev = static_cast<SessionEvent*> (p->alloc ());
-	DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("%1 Allocating SessionEvent from %2 ev @ %3\n", pthread_self(), p->name(), ev));
+	DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("%1 Allocating SessionEvent from %2 ev @ %3\n", pthread_name(), p->name(), ev));
 #ifndef NDEBUG
 	if (DEBUG::SessionEvents & PBD::debug_bits) {
 		stacktrace (cerr, 40);
@@ -74,7 +75,7 @@ SessionEvent::operator delete (void *ptr, size_t /*size*/)
 
 	DEBUG_TRACE (DEBUG::SessionEvents, string_compose (
 		             "%1 Deleting SessionEvent @ %2 ev thread pool = %3 ev pool = %4\n",
-		             pthread_self(), ev, p->name(), ev->own_pool->name()
+		             pthread_name(), ev, p->name(), ev->own_pool->name()
 		             ));
 
 #ifndef NDEBUG
