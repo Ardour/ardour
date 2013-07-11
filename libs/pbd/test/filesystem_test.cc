@@ -10,6 +10,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION (FilesystemTest);
 void
 FilesystemTest::testPathIsWithin ()
 {
+#ifndef WIN32
 	system ("rm -r foo");
 	CPPUNIT_ASSERT (g_mkdir_with_parents ("foo/bar/baz", 0755) == 0);
 
@@ -31,5 +32,6 @@ FilesystemTest::testPathIsWithin ()
 	CPPUNIT_ASSERT (PBD::path_is_within ("foo/bar", "foo/bar"));
 
 	CPPUNIT_ASSERT (PBD::path_is_within ("foo/jim/baz", "frobozz") == false);
+#endif
 }
 
