@@ -127,7 +127,7 @@ pthread_kill_all (int signum)
 {	
 	pthread_mutex_lock (&thread_map_lock);
 	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
-		if ((*i) != pthread_self()) {
+		if (!pthread_equal ((*i), pthread_self())) {
 			pthread_kill ((*i), signum);
 		}
 	}
@@ -140,7 +140,7 @@ pthread_cancel_all ()
 {	
 	pthread_mutex_lock (&thread_map_lock);
 	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
-		if ((*i) != pthread_self()) {
+		if (!pthread_equal ((*i), pthread_self())) {
 			pthread_cancel ((*i));
 		}
 	}
@@ -153,7 +153,7 @@ pthread_cancel_one (pthread_t thread)
 {	
 	pthread_mutex_lock (&thread_map_lock);
 	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
-		if ((*i) == thread) {
+		if (pthread_equal ((*i), thread)) {
 			all_threads.erase (i);
 			break;
 		}
@@ -170,7 +170,7 @@ pthread_exit_pbd (void* status)
 
 	pthread_mutex_lock (&thread_map_lock);
 	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
-		if ((*i) == thread) {
+		if (pthread_equal ((*i), thread)) {
 			all_threads.erase (i);
 			break;
 		}
