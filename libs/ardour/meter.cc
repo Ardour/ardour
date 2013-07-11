@@ -269,7 +269,7 @@ PeakMeter::meter ()
 		} else {
 			// do falloff
 			new_peak = _visible_peak_power[n] - (Config->get_meter_falloff() * 0.01f);
-			_visible_peak_power[n] = std::max (new_peak, -INFINITY);
+			_visible_peak_power[n] = std::max (new_peak, (float)-INFINITY);
 		}
 	}
 }
