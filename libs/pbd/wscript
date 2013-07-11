@@ -60,6 +60,7 @@ libpbd_sources = [
     'property_list.cc',
     'pthread_utils.cc',
     'receiver.cc',
+    'resource.cc',
     'search_path.cc',
     'semutils.cc',
     'shortpath.cc',
