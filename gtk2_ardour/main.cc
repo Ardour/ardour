@@ -110,7 +110,7 @@ Please consider the possibilities, and perhaps (re)start JACK."), PROGRAM_NAME))
 static void export_search_path (const string& base_dir, const char* varname, const char* dir)
 {
 	string path;
-	const char * cstr = getenv (varname);
+	const char * cstr = g_getenv (varname);
 
 	if (cstr) {
 		path = cstr;
@@ -121,7 +121,7 @@ static void export_search_path (const string& base_dir, const char* varname, con
 	path += base_dir;
 	path += dir;
 
-	setenv (varname, path.c_str(), 1);
+	g_setenv (varname, path.c_str(), 1);
 }
 
 #ifdef __APPLE__
@@ -134,7 +134,7 @@ extern void set_language_preference (); // cocoacarbon.mm
 void
 fixup_bundle_environment (int, char* [])
 {
-	if (!getenv ("ARDOUR_BUNDLED")) {
+	if (!g_getenv ("ARDOUR_BUNDLED")) {
 		return;
 	}
 
@@ -184,12 +184,12 @@ fixup_bundle_environment (int, char* [])
 	export_search_path (bundle_dir, "SUIL_MODULE_DIR", "/lib");
 	export_search_path (bundle_dir, "GTK_PATH", "/lib/gtkengines");
 
-	setenv ("PATH", (bundle_dir + "/MacOS:" + std::string(getenv ("PATH"))).c_str(), 1);
+	g_setenv ("PATH", (bundle_dir + "/MacOS:" + std::string(getenv ("PATH"))).c_str(), 1);
 
 	/* unset GTK_RC_FILES so that we only load the RC files that we define
 	 */
 
-	unsetenv ("GTK_RC_FILES");
+	g_unsetenv ("GTK_RC_FILES");
 
 	/* write a pango.rc file and tell pango to use it. we'd love
 	   to put this into the PROGRAM_NAME.app bundle and leave it there,
@@ -214,13 +214,13 @@ fixup_bundle_environment (int, char* [])
 				<< endl;
 			pangorc.close ();
 			
-			setenv ("PANGO_RC_FILE", path.c_str(), 1);
+			g_setenv ("PANGO_RC_FILE", path.c_str(), 1);
 		}
 	}
 	
-	setenv ("CHARSETALIASDIR", bundle_dir.c_str(), 1);
-	setenv ("FONTCONFIG_FILE", Glib::build_filename (bundle_dir, "Resources/fonts.conf").c_str(), 1);
-	setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (bundle_dir, "Resources/gdk-pixbuf.loaders").c_str(), 1);
+	g_setenv ("CHARSETALIASDIR", bundle_dir.c_str(), 1);
+	g_setenv ("FONTCONFIG_FILE", Glib::build_filename (bundle_dir, "Resources/fonts.conf").c_str(), 1);
+	g_setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (bundle_dir, "Resources/gdk-pixbuf.loaders").c_str(), 1);
 }
 
 static void load_custom_fonts() {
@@ -258,7 +258,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	 * acceptable to build paths directly using '/'.
 	 */
 
-	if (!getenv ("ARDOUR_BUNDLED")) {
+	if (!g_getenv ("ARDOUR_BUNDLED")) {
 		return;
 	}
 
@@ -294,20 +294,20 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	export_search_path (dir_path, "SUIL_MODULE_DIR", "/lib");
 	export_search_path (dir_path, "GTK_PATH", "/lib/gtkengines");
 
-	setenv ("PATH", (dir_path + "/bin:" + std::string(getenv ("PATH"))).c_str(), 1);
+	g_setenv ("PATH", (dir_path + "/bin:" + std::string(getenv ("PATH"))).c_str(), 1);
 
 	/* unset GTK_RC_FILES so that we only load the RC files that we define
 	 */
 
-	unsetenv ("GTK_RC_FILES");
+	g_unsetenv ("GTK_RC_FILES");
 
 	/* Tell fontconfig where to find fonts.conf. Use the system version
 	   if it exists, otherwise use the stuff we included in the bundle
 	*/
 
 	if (Glib::file_test ("/etc/fonts/fonts.conf", Glib::FILE_TEST_EXISTS)) {
-		setenv ("FONTCONFIG_FILE", "/etc/fonts/fonts.conf", 1);
-		setenv ("FONTCONFIG_PATH", "/etc/fonts", 1);
+		g_setenv ("FONTCONFIG_FILE", "/etc/fonts/fonts.conf", 1);
+		g_setenv ("FONTCONFIG_PATH", "/etc/fonts", 1);
 	} else {
 		error << _("No fontconfig file found on your system. Things may looked very odd or ugly") << endmsg;
 	}
@@ -336,19 +336,19 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 			pangorc.close ();
 		}
 		
-		setenv ("PANGO_RC_FILE", path.c_str(), 1);
+		g_setenv ("PANGO_RC_FILE", path.c_str(), 1);
 		
 		/* similar for GDK pixbuf loaders, but there's no RC file required
 		   to specify where it lives.
 		*/
 		
-		setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (userconfigdir, "gdk-pixbuf.loaders").c_str(), 1);
+		g_setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (userconfigdir, "gdk-pixbuf.loaders").c_str(), 1);
 	}
 
         /* this doesn't do much but setting it should prevent various parts of the GTK/GNU stack
            from looking outside the bundle to find the charset.alias file.
         */
-        setenv ("CHARSETALIASDIR", dir_path.c_str(), 1);
+        g_setenv ("CHARSETALIASDIR", dir_path.c_str(), 1);
 
 }
 
@@ -473,7 +473,7 @@ int main (int argc, char *argv[])
 	text_receiver.listen_to (warning);
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-	if (getenv ("BOOST_DEBUG")) {
+	if (g_getenv ("BOOST_DEBUG")) {
 		boost_debug_shared_ptr_show_live_debugging (true);
 	}
 #endif
