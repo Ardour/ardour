@@ -94,6 +94,14 @@ mountpoint (string path)
 	return best;
 }
 
+#elif defined(WIN32)
+
+string
+mountpoint (string path)
+{
+	// TODO ... if needed
+}
+
 #else // !HAVE_GETMNTENT
 
 #include <sys/param.h>
