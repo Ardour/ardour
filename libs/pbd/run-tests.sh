@@ -7,6 +7,7 @@ fi
 
 srcdir=`pwd`
 cd ../../build
+export PBD_TEST_PATH=$srcdir/test
 
 libs='libs'
 
