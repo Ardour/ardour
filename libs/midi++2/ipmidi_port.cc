@@ -25,7 +25,11 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#if defined(WIN32)
+#include <winsock2.h>
+#else
 #include <netdb.h>
+#endif
 
 #if defined(WIN32)
 static WSADATA g_wsaData;
@@ -147,6 +151,7 @@ get_address (int sock, struct in_addr *inaddr, const string& ifname )
 bool
 IPMIDIPort::open_sockets (int base_port, const string& ifname)
 {
+#if !defined(WIN32)
 	int protonum = 0;
 	struct protoent *proto = ::getprotobyname("IP");
 
@@ -243,6 +248,9 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 	}
 	
 	return true;
+#else
+	return false;
+#endif	// !WIN32
 }
 
 int
