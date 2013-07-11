@@ -2031,7 +2031,7 @@ ProcessorBox::processor_can_be_edited (boost::shared_ptr<Processor> processor)
 	}
 
 	if (
-		(boost::dynamic_pointer_cast<Send> (processor) && !boost::dynamic_pointer_cast<InternalSend> (processor))||
+		boost::dynamic_pointer_cast<Send> (processor) ||
 		boost::dynamic_pointer_cast<Return> (processor) ||
 		boost::dynamic_pointer_cast<PluginInsert> (processor) ||
 		boost::dynamic_pointer_cast<PortInsert> (processor)
@@ -2086,17 +2086,6 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 		if (boost::dynamic_pointer_cast<InternalSend> (processor) == 0) {
 
 			gidget = new SendUIWindow (send, _session);
-
-		} else {
-			/* assign internal send to main fader */
-
-			if (_parent_strip) {
-				if (_parent_strip->current_delivery() == send) {
-					_parent_strip->revert_to_default_display ();
-				} else {
-					_parent_strip->show_send(send);
-				}
-			} 
 		}
 
 	} else if ((retrn = boost::dynamic_pointer_cast<Return> (processor)) != 0) {
@@ -2444,13 +2433,34 @@ ProcessorBox::rb_edit ()
 	_current_processor_box->for_selected_processors (&ProcessorBox::edit_processor);
 }
 
+bool
+ProcessorBox::edit_aux_send (boost::shared_ptr<Processor> processor)
+{
+	if (boost::dynamic_pointer_cast<InternalSend> (processor) == 0) {
+		return false;
+	}
+
+	if (_parent_strip) {
+		boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
+		if (_parent_strip->current_delivery() == send) {
+			_parent_strip->revert_to_default_display ();
+		} else {
+			_parent_strip->show_send(send);
+		}
+	}
+	return true;
+}
+
 void
 ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 {
 	if (!processor) {
 		return;
 	}
-	
+	if (edit_aux_send (processor)) {
+		return;
+	}
+
 	ProcessorWindowProxy* proxy = find_window_proxy (processor);
 
 	if (proxy) {
@@ -2465,7 +2475,10 @@ ProcessorBox::generic_edit_processor (boost::shared_ptr<Processor> processor)
 	if (!processor) {
 		return;
 	}
-	
+	if (edit_aux_send (processor)) {
+		return;
+	}
+
 	ProcessorWindowProxy* proxy = find_window_proxy (processor);
 
 	if (proxy) {

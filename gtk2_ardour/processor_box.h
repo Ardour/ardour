@@ -258,6 +258,8 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	void hide_things ();
 
+	bool edit_aux_send(boost::shared_ptr<ARDOUR::Processor>);
+
         /* Everything except a WindowProxy object should use this to get the window */
 	Gtk::Window* get_processor_ui (boost::shared_ptr<ARDOUR::Processor>) const;
 
