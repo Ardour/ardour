@@ -38,6 +38,10 @@
 #include "ardour/types.h"
 #include "ardour/export_handler.h"
 
+#ifdef SearchPath
+#undef SearchPath
+#endif
+
 namespace ARDOUR
 {
 

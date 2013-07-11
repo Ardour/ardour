@@ -22,6 +22,10 @@
 
 #include "pbd/search_path.h"
 
+#ifdef SearchPath
+#undef SearchPath
+#endif
+
 namespace ARDOUR {
 
 	/**

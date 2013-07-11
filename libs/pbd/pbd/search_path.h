@@ -20,6 +20,10 @@
 #ifndef PBD_SEARCH_PATH_INCLUDED
 #define PBD_SEARCH_PATH_INCLUDED
 
+#ifdef SearchPath
+#undef SearchPath
+#endif
+
 #include <string>
 #include <vector>
 

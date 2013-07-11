@@ -32,6 +32,10 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/io.h"
 
+#ifdef SearchPath
+#undef SearchPath
+#endif
+
 using namespace std;
 using namespace PBD;
 
