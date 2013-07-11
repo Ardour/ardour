@@ -19,6 +19,10 @@
 #ifndef __gtk_ardour_audio_region_view_h__
 #define __gtk_ardour_audio_region_view_h__
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <vector>
 
 #include <libgnomecanvasmm.h>

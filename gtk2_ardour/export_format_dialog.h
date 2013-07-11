@@ -32,6 +32,10 @@
 #include "ardour_dialog.h"
 #include "audio_clock.h"
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <gtkmm.h>
 
 class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList {

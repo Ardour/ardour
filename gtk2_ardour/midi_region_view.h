@@ -22,6 +22,10 @@
 #include <string>
 #include <vector>
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <libgnomecanvasmm.h>
 #include <libgnomecanvasmm/polygon.h>
 

@@ -25,6 +25,10 @@
 
 #include "ardour/export_profile_manager.h"
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <gtkmm.h>
 #include <sigc++/signal.h>
 #include <boost/shared_ptr.hpp>

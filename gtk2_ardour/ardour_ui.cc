@@ -28,7 +28,7 @@
 #include <fstream>
 
 #ifndef WIN32
-#include <sys/resource.h>#
+#include <sys/resource.h>
 #endif
 
 #include <stdint.h>

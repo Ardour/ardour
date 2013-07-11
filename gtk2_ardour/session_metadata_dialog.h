@@ -22,6 +22,10 @@
 
 #include "ardour_dialog.h"
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <gtkmm.h>
 #include <boost/shared_ptr.hpp>
 

@@ -22,6 +22,10 @@
 
 #include "ardour/ardour.h"
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <libgnomecanvasmm.h>
 
 #include "automation_line.h"
