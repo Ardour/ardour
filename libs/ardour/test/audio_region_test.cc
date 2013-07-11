@@ -16,6 +16,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <glibmm/miscutils.h>
+
 #include "pbd/compose.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/source_factory.h"
@@ -26,6 +28,7 @@
 #include "ardour/audioplaylist.h"
 #include "audio_region_test.h"
 #include "test_globals.h"
+#include "test_common.h"
 
 using namespace std;
 using namespace PBD;
@@ -36,9 +39,7 @@ AudioRegionTest::setUp ()
 {
 	TestNeedingSession::setUp ();
 
-	/* This is important, otherwise createWritable will mark the source immutable (hence unwritable) */
-	unlink ("libs/ardour/test/test.wav");
-	string const test_wav_path = "libs/ardour/test/test.wav";
+	std::string const test_wav_path = Glib::build_filename (new_test_output_dir(), "test.wav");
 	_playlist = PlaylistFactory::create (DataType::AUDIO, *_session, "test");
 	_audio_playlist = boost::dynamic_pointer_cast<AudioPlaylist> (_playlist);
 	_source = SourceFactory::createWritable (DataType::AUDIO, *_session, test_wav_path, "", false, Fs);
