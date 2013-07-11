@@ -69,6 +69,29 @@ Butler::config_changed (std::string p)
 }
 
 int
+Butler::setup_request_pipe ()
+{
+	if (pipe (request_pipe)) {
+		error << string_compose(_("Cannot create transport request signal pipe (%1)"),
+				strerror (errno)) << endmsg;
+		return -1;
+	}
+
+	if (fcntl (request_pipe[0], F_SETFL, O_NONBLOCK)) {
+		error << string_compose(_("UI: cannot set O_NONBLOCK on butler request pipe (%1)"),
+				strerror (errno)) << endmsg;
+		return -1;
+	}
+
+	if (fcntl (request_pipe[1], F_SETFL, O_NONBLOCK)) {
+		error << string_compose(_("UI: cannot set O_NONBLOCK on butler request pipe (%1)"),
+				strerror (errno)) << endmsg;
+		return -1;
+	}
+	return 0;
+}
+
+int
 Butler::start_thread()
 {
 	const float rate = (float)_session.frame_rate();
@@ -87,23 +110,7 @@ Butler::start_thread()
 
 	should_run = false;
 
-	if (pipe (request_pipe)) {
-		error << string_compose(_("Cannot create transport request signal pipe (%1)"),
-				strerror (errno)) << endmsg;
-		return -1;
-	}
-
-	if (fcntl (request_pipe[0], F_SETFL, O_NONBLOCK)) {
-		error << string_compose(_("UI: cannot set O_NONBLOCK on butler request pipe (%1)"),
-				strerror (errno)) << endmsg;
-		return -1;
-	}
-
-	if (fcntl (request_pipe[1], F_SETFL, O_NONBLOCK)) {
-		error << string_compose(_("UI: cannot set O_NONBLOCK on butler request pipe (%1)"),
-				strerror (errno)) << endmsg;
-		return -1;
-	}
+	if (setup_request_pipe() != 0) return -1;
 
 	if (pthread_create_and_store ("disk butler", &thread, _thread_work, this)) {
 		error << _("Session: could not create butler thread") << endmsg;
