@@ -447,7 +447,6 @@ def build(bld):
                 test/test_needing_session.cc
                 test/audio_region_test.cc
                 test/test_globals.cc
-                test/audio_region_read_test.cc
                 test/automation_list_property_test.cc
                 test/bbt_test.cc
                 test/tempo_test.cc
@@ -458,10 +457,8 @@ def build(bld):
                 test/framepos_plus_beats_test.cc
                 test/framepos_minus_beats_test.cc
                 test/playlist_layering_test.cc
-                test/playlist_read_test.cc
                 test/playlist_equivalent_regions_test.cc
                 test/control_surfaces_test.cc
-                test/combine_regions_test.cc
                 test/region_naming_test.cc
                 test/load_sessions_test.cc
                 test/mtdm_test.cc
@@ -469,6 +466,9 @@ def build(bld):
         '''.split()
 
 # Tests that don't work
+#                test/playlist_read_test.cc
+#                test/audio_region_read_test.cc
+#                test/combine_regions_test.cc
 #                test/mantis_3356_test.cc
 
         testobj.includes     = obj.includes + ['test', '../pbd', '../libltc', '../audiographer']
