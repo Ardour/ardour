@@ -28,6 +28,11 @@
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/midi_patch_manager.h"
+
+#ifdef SearchPath
+#undef SearchPath
+#endif
+
 #include "ardour/midi_patch_search_path.h"
 
 #include "i18n.h"
