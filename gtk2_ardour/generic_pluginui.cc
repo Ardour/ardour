@@ -661,7 +661,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		control_ui->display_label->set_name ("ParameterValueDisplay");
 
 		control_ui->display->add (*control_ui->display_label);
-		Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->display, "-99,99", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->display, "-888.8g", 2, 6);
 
 		control_ui->display->show_all ();
 
@@ -691,6 +691,9 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 		control_ui->vbox = manage (new VBox);
 		control_ui->hbox = manage (new HBox);
+
+		control_ui->hbox->set_spacing(1);
+		control_ui->vbox->set_spacing(3);
 
 		control_ui->label.set_angle(90);
 		control_ui->hbox->pack_start (control_ui->label, false, false);
