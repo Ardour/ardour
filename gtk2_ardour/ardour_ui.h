@@ -176,10 +176,17 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	static PublicEditor* _instance;
 	static sigc::signal<void,bool> Blink;
+
+	/** point_zero_one_seconds -- 10Hz ^= 100ms */
 	static sigc::signal<void>      RapidScreenUpdate;
+
+	/** point_zero_something_seconds -- currently 25Hz ^= 40ms */
 	static sigc::signal<void>      SuperRapidScreenUpdate;
+
 	/** Emitted frequently with the audible frame, false, and the edit point as
 	 *  parameters respectively.
+	 *
+	 *  (either RapidScreenUpdate || SuperRapidScreenUpdate - user-config)
 	 */
 	static sigc::signal<void, framepos_t, bool, framepos_t> Clock;
 
@@ -520,12 +527,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	
 	gint every_second ();
 	gint every_point_one_seconds ();
-	gint every_point_zero_one_seconds ();
+	gint every_point_zero_something_seconds ();
 
 	sigc::connection second_connection;
 	sigc::connection point_one_second_connection;
-	sigc::connection point_oh_five_second_connection;
-	sigc::connection point_zero_one_second_connection;
+	sigc::connection point_zero_something_second_connection;
 
 	void open_session ();
 	void open_recent_session ();
