@@ -70,6 +70,7 @@
 #include "pbd/stacktrace.h"
 #include "pbd/convert.h"
 #include "pbd/clear_dir.h"
+#include "pbd/localtime_r.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_diskstream.h"
