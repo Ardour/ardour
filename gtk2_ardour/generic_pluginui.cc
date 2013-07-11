@@ -43,8 +43,6 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/session.h"
 
-#include <lrdf.h>
-
 #include "ardour_ui.h"
 #include "prompter.h"
 #include "plugin_ui.h"

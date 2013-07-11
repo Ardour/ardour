@@ -32,7 +32,9 @@
 #include <cerrno>
 #include <utility>
 
+#ifdef HAVE_LRDF
 #include <lrdf.h>
+#endif
 
 #include "pbd/compose.h"
 #include "pbd/error.h"

@@ -25,9 +25,12 @@
 
 #include <sys/types.h>
 #include <cstdio>
-#include <lrdf.h>
 #include <cstdlib>
 #include <fstream>
+
+#ifdef HAVE_LRDF
+#include <lrdf.h>
+#endif
 
 #ifdef WINDOWS_VST_SUPPORT
 #include "fst.h"
@@ -314,7 +317,7 @@ PluginManager::add_lxvst_presets()
 void
 PluginManager::add_presets(string domain)
 {
-
+#ifdef HAVE_LRDF
 	PathScanner scanner;
 	vector<string *> *presets;
 	vector<string *>::iterator x;
@@ -337,11 +340,13 @@ PluginManager::add_presets(string domain)
 		
 		vector_delete (presets);
 	}
+#endif
 }
 
 void
 PluginManager::add_lrdf_data (const string &path)
 {
+#ifdef HAVE_LRDF
 	PathScanner scanner;
 	vector<string *>* rdf_files;
 	vector<string *>::iterator x;
@@ -359,6 +364,7 @@ PluginManager::add_lrdf_data (const string &path)
 
 		vector_delete (rdf_files);
 	}
+#endif
 }
 
 int
@@ -448,6 +454,7 @@ PluginManager::ladspa_discover (string path)
 string
 PluginManager::get_ladspa_category (uint32_t plugin_id)
 {
+#ifdef HAVE_LRDF
 	char buf[256];
 	lrdf_statement pattern;
 
@@ -505,6 +512,9 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 	} else {
 		return label;
 	}
+#else
+		return ("Unknown");
+#endif
 }
 
 #ifdef LV2_SUPPORT

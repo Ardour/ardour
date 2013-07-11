@@ -59,8 +59,6 @@
 #include "lv2_plugin_ui.h"
 #endif
 
-#include <lrdf.h>
-
 #include "ardour_window.h"
 #include "ardour_ui.h"
 #include "prompter.h"

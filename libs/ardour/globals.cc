@@ -57,7 +57,9 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
+#ifdef HAVE_LRDF
 #include <lrdf.h>
+#endif
 
 #include "pbd/cpus.h"
 #include "pbd/error.h"
@@ -265,7 +267,9 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	// allow ardour the absolute maximum number of open files
 	lotsa_files_please ();
 
+#ifdef HAVE_LRDF
 	lrdf_init();
+#endif
 	Library = new AudioLibrary;
 
 	BootMessage (_("Loading configuration"));
@@ -360,7 +364,9 @@ int
 ARDOUR::cleanup ()
 {
 	delete Library;
+#ifdef HAVE_LRDF
 	lrdf_cleanup ();
+#endif
 	delete &ControlProtocolManager::instance();
 #ifdef WINDOWS_VST_SUPPORT
 	fst_exit ();

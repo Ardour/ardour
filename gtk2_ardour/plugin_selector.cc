@@ -21,7 +21,6 @@
 #endif
 
 #include <cstdio>
-#include <lrdf.h>
 #include <map>
 
 #include <algorithm>

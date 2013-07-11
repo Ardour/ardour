@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 #include <inttypes.h>
 
 #include <vector>
@@ -29,7 +33,9 @@
 #include <sys/stat.h>
 #include <cerrno>
 
+#ifdef HAVE_LRDF
 #include <lrdf.h>
+#endif
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
@@ -625,10 +631,11 @@ LadspaPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 boost::shared_ptr<Plugin::ScalePoints>
 LadspaPlugin::get_scale_points(uint32_t port_index) const
 {
+	boost::shared_ptr<Plugin::ScalePoints> ret;
+#ifdef HAVE_LRDF
 	const uint32_t id     = atol(unique_id().c_str());
 	lrdf_defaults* points = lrdf_get_scale_values(id, port_index);
 
-	boost::shared_ptr<Plugin::ScalePoints> ret;
 	if (!points) {
 		return ret;
 	}
@@ -641,6 +648,7 @@ LadspaPlugin::get_scale_points(uint32_t port_index) const
 	}
 
 	lrdf_free_setting_values(points);
+#endif
 	return ret;
 }
 
@@ -725,6 +733,7 @@ LadspaPluginInfo::LadspaPluginInfo()
 void
 LadspaPlugin::find_presets ()
 {
+#ifdef HAVE_LRDF
 	uint32_t id;
 	std::string unique (unique_id());
 
@@ -745,12 +754,14 @@ LadspaPlugin::find_presets ()
 		}
 		lrdf_free_uris(set_uris);
 	}
+#endif
 }
 
 
 bool
 LadspaPlugin::load_preset (PresetRecord r)
 {
+#ifdef HAVE_LRDF
 	lrdf_defaults* defs = lrdf_get_setting_values (r.uri.c_str());
 
 	if (defs) {
@@ -763,6 +774,7 @@ LadspaPlugin::load_preset (PresetRecord r)
 	}
 
 	Plugin::load_preset (r);
+#endif
 	return true;
 }
 
@@ -770,6 +782,7 @@ LadspaPlugin::load_preset (PresetRecord r)
 static void
 lrdf_remove_preset (const char* /*source*/, const char *setting_uri)
 {
+#ifdef HAVE_LRDF
 	lrdf_statement p;
 	lrdf_statement *q;
 	lrdf_statement *i;
@@ -803,11 +816,13 @@ lrdf_remove_preset (const char* /*source*/, const char *setting_uri)
 	p.predicate = NULL;
 	p.object = NULL;
 	lrdf_remove_matches (&p);
+#endif
 }
 
 void
 LadspaPlugin::do_remove_preset (string name)
 {
+#ifdef HAVE_LRDF
 	string const envvar = preset_envvar ();
 	if (envvar.empty()) {
 		warning << _("Could not locate HOME.  Preset not removed.") << endmsg;
@@ -823,6 +838,7 @@ LadspaPlugin::do_remove_preset (string name)
 	lrdf_remove_preset (source.c_str(), p->uri.c_str ());
 
 	write_preset_file (envvar);
+#endif
 }
 
 string
@@ -845,6 +861,7 @@ LadspaPlugin::preset_source (string envvar) const
 bool
 LadspaPlugin::write_preset_file (string envvar)
 {
+#ifdef HAVE_LRDF
 	string path = string_compose("%1/.ladspa", envvar);
 	if (g_mkdir_with_parents (path.c_str(), 0775)) {
 		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
@@ -865,11 +882,15 @@ LadspaPlugin::write_preset_file (string envvar)
 	}
 
 	return true;
+#else
+	return false;
+#endif
 }
 
 string
 LadspaPlugin::do_save_preset (string name)
 {
+#ifdef HAVE_LRDF
 	/* make a vector of pids that are input parameters */
 	vector<int> input_parameter_pids;
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
@@ -913,6 +934,9 @@ LadspaPlugin::do_save_preset (string name)
 	}
 
 	return uri;
+#else
+	return string();
+#endif
 }
 
 LADSPA_PortDescriptor
