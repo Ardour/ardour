@@ -82,6 +82,24 @@ private:
 	void config_changed (std::string);
 
 	int setup_request_pipe ();
+
+	/**
+	 * return true if there are requests to be processed
+	 */
+	bool wait_for_requests ();
+
+	/**
+	 * Remove request from butler request queue
+	 *
+	 * return true if there was another request and req is valid
+	 */
+	bool dequeue_request (Request::Type& req);
+
+	/**
+	 * Add request to butler thread request queue
+	 */
+	void queue_request (Request::Type r);
+
 };
 
 } // namespace ARDOUR
