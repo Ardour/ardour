@@ -36,6 +36,10 @@
 
 #include "i18n.h"
 
+#ifdef SearchPath
+#undef SearchPath
+#endif
+
 using namespace std;
 using namespace Gtk;
 using namespace Glib;
