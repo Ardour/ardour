@@ -402,9 +402,12 @@ Editor::timefx_thread (void *arg)
            by the GUI ...
         */
 
+#ifdef WIN32
+	Sleep(2000);
+#else
         struct timespec t = { 2, 0 };
         nanosleep (&t, 0);
-
+#endif
 	return 0;
 }
 
