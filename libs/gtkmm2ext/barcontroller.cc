@@ -468,6 +468,12 @@ BarController::expose (GdkEventExpose* /*event*/)
 		break;
 	}
 
+	if (!darea.get_sensitive()) {
+		rounded_rectangle (context, 0, 0, darea.get_width(), darea.get_height(), 3);
+		context->set_source_rgba (0.505, 0.517, 0.525, 0.6);
+		context->fill ();
+	}
+
 	/* draw label */
 
 	double xpos = -1;
