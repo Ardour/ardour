@@ -516,9 +516,11 @@ int main (int argc, char *argv[])
 
 	PBD::ID::init ();
 
+#ifndef WIN32
 	if (::signal (SIGPIPE, sigpipe_handler)) {
 		cerr << _("Cannot xinstall SIGPIPE error handler") << endl;
 	}
+#endif
 
 	try {
 		ui = new ARDOUR_UI (&argc, &argv, localedir);
