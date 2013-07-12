@@ -591,7 +591,7 @@ ArdourStartup::setup_initial_choice_page ()
 	ic_vbox.show_all ();
 
 	initial_choice_index = append_page (ic_vbox);
-	set_page_title (ic_vbox, _("What would you like to do ?"));
+	set_page_title (ic_vbox, string_compose("%1 %2", PROGRAM_NAME, VERSIONSTRING));
 	set_page_header_image (ic_vbox, icon_pixbuf);
 
 	/* user could just click on "Forward" if default
