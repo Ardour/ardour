@@ -53,7 +53,6 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 {
 	orientation = o;
 	hold_cnt = hold;
-	resized = true;
 	hold_state = 0;
 	bright_hold = false;
 	current_peak = 0;
@@ -353,7 +352,6 @@ FastMeter::on_size_allocate (Gtk::Allocation &alloc)
 	}
 
 	DrawingArea::on_size_allocate (alloc);
-	resized = true;
 }
 
 bool
@@ -372,15 +370,12 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 
 	cairo_t* cr = gdk_cairo_create (get_window ()->gobj());
 
-	if (resized) {
-		cairo_set_source_rgb (cr, 0, 0, 0); // black
-		rounded_rectangle (cr, 0, 0, pixrect.width + 2, pixheight + 2, 2);
-		cairo_stroke (cr);
-		//cairo_fill (cr);
-		//resized = false;
-	}
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_clip (cr);
+
+	cairo_set_source_rgb (cr, 0, 0, 0); // black
+	rounded_rectangle (cr, 0, 0, pixrect.width + 2, pixheight + 2, 2);
+	cairo_stroke (cr);
 
 	top_of_meter = (gint) floor (pixheight * current_level);
 
@@ -464,10 +459,9 @@ FastMeter::set (float lvl, float peak)
 
 	current_level = lvl;
 
-	if (current_level == old_level && current_peak == old_peak && hold_state == 0) {
+	if (current_level == old_level && current_peak == old_peak && (hold_state == 0 || peak != -1)) {
 		return;
 	}
-
 
 	Glib::RefPtr<Gdk::Window> win;
 
@@ -565,7 +559,6 @@ FastMeter::set_highlight (bool onoff)
 	}
 	highlight = onoff;
 	bgpattern = request_vertical_background (request_width, pixheight, highlight ? _bgh : _bgc, highlight);
-	resized = true;
 	queue_draw ();
 }
 
