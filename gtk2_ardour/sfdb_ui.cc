@@ -1463,6 +1463,9 @@ SoundFileOmega::check_info (const vector<string>& paths, bool& same_size, bool& 
 bool
 SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths)
 {
+#ifdef WIN32
+	return false;
+#else
 	std::string tmpdir(Glib::build_filename (s->session_directory().sound_path(), "linktest"));
 	bool ret = false;
 
@@ -1492,6 +1495,7 @@ SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths
   out:
 	rmdir (tmpdir.c_str());
 	return ret;
+#endif
 }
 
 SoundFileChooser::SoundFileChooser (string title, ARDOUR::Session* s)
