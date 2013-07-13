@@ -23,6 +23,7 @@
 #include <unistd.h>
 
 #include "pbd/error.h"
+#include "pbd/pthread_utils.h"
 
 #include "midi++/port.h"
 #include "ardour/debug.h"
@@ -305,7 +306,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 	   a locate command via MMC.
 	*/
 
-	//DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::update_mtc_time - TID:%1\n", ::pthread_self()));
+	//DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::update_mtc_time - TID:%1\n", pthread_name()));
 	TimecodeFormat tc_format;
 	bool reset_tc = true;
 
@@ -421,7 +422,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 						 now, timecode, mtc_frame, was_full, speedup_due_to_tc_mismatch));
 
 	if (was_full || outside_window (mtc_frame)) {
-		DEBUG_TRACE (DEBUG::MTC, string_compose ("update_mtc_time: full TC or outside window. - TID:%1\n", ::pthread_self()));
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("update_mtc_time: full TC or outside window. - TID:%1\n", pthread_name()));
 		session.request_locate (mtc_frame, false);
 		session.request_transport_speed (0);
 		update_mtc_status (MIDI::MTC_Stopped);
@@ -485,7 +486,7 @@ MTC_Slave::update_mtc_status (MIDI::MTC_Status status)
 	/* XXX !!! thread safety ... called from MIDI I/O context
 	 * on locate (via ::update_mtc_time())
 	 */
-	DEBUG_TRACE (DEBUG::MTC, string_compose("MTC_Slave::update_mtc_status - TID:%1\n", ::pthread_self()));
+	DEBUG_TRACE (DEBUG::MTC, string_compose("MTC_Slave::update_mtc_status - TID:%1\n", pthread_name()));
 	return; // why was this fn needed anyway ? it just messes up things -> use reset.
 	busy_guard1++;
 
