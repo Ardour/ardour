@@ -324,7 +324,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	uint32_t nread;
 	framecnt_t zero_fill = 0;
 	int ret = -1;
-	PeakData* staging = 0;
 
 	boost::scoped_ptr<FdFileDescriptor> peakfile_descriptor(new FdFileDescriptor (peakpath, false, 0664));
 	int peakfile_fd = -1;
@@ -419,7 +418,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 		const framecnt_t chunksize = (framecnt_t) min (expected_peaks, 65536.0);
 
-		staging = new PeakData[chunksize];
+		boost::scoped_array<PeakData> staging(new PeakData[chunksize]);
 
 		/* compute the rounded up frame position  */
 
@@ -440,7 +439,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 		if ((peakfile_fd = peakfile_descriptor->allocate ()) < 0) {
 			error << string_compose(_("AudioSource: cannot open peakpath (b) \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
-			delete [] staging;
 			return 0;
 		}
 
@@ -456,7 +454,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 						, sizeof (PeakData) * to_read, start_byte));
 
 #ifndef WIN32
-				if ((nread = ::pread (peakfile_fd, staging, sizeof (PeakData) * to_read, start_byte))
+				if ((nread = ::pread (peakfile_fd, staging.get(), sizeof (PeakData) * to_read, start_byte))
 				    != sizeof (PeakData) * to_read) {
 
 					off_t fend = lseek (peakfile_fd, 0, SEEK_END);
@@ -585,7 +583,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	}
 
   out:
-	delete [] staging;
 
 	DEBUG_TRACE (DEBUG::Peaks, "READPEAKS DONE\n");
 
