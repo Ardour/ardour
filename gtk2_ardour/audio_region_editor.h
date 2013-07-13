@@ -37,7 +37,11 @@
 #include <libgnomecanvas/libgnomecanvas.h>
 
 #include "pbd/signals.h"
+#ifdef WIN32
+#include "pbd/glib_semaphore.h"
+#else
 #include "pbd/crossthread.h"
+#endif
 
 #include "audio_clock.h"
 #include "ardour_dialog.h"
@@ -74,11 +78,17 @@ class AudioRegionEditor : public RegionEditor
 	Gtk::Label _peak_amplitude_label;
 	Gtk::Entry _peak_amplitude;
 
+	void signal_peak_thread ();
+	void wait_for_signal ();
 	pthread_t _peak_amplitude_thread_handle;
 	void peak_amplitude_found (double);
 	PBD::Signal1<void, double> PeakAmplitudeFound;
 	PBD::ScopedConnection _peak_amplitude_connection;
+#ifdef WIN32
+	PBD::GlibSemaphore m_peak_sem;
+#else
 	CrossThreadChannel _peak_channel;
+#endif
 };
 
 #endif /* __gtk_ardour_audio_region_edit_h__ */
