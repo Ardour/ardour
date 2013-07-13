@@ -807,9 +807,9 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	} else {
 
-		if (::rename (tmp_path.c_str(), xml_path.c_str()) != 0) {
-			error << string_compose (_("could not rename temporary session file %1 to %2"),
-					tmp_path, xml_path) << endmsg;
+		if (::g_rename (tmp_path.c_str(), xml_path.c_str()) != 0) {
+			error << string_compose (_("could not rename temporary session file %1 to %2 (%3)"),
+					tmp_path, xml_path, g_strerror(errno)) << endmsg;
 			if (g_remove (tmp_path.c_str()) != 0) {
 				error << string_compose(_("Could not remove temporary session file at path \"%1\" (%2)"),
 						tmp_path, g_strerror (errno)) << endmsg;
