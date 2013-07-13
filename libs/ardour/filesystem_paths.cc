@@ -86,13 +86,29 @@ user_config_directory ()
 std::string
 ardour_dll_directory ()
 {
+#ifdef WIN32
+	std::string dll_dir_path(g_win32_get_package_installation_directory_of_module(NULL));
+	dll_dir_path = Glib::build_filename (dll_dir_path, "lib");
+	return Glib::build_filename (dll_dir_path, "ardour3");
+#else
 	std::string s = Glib::getenv("ARDOUR_DLL_PATH");
 	if (s.empty()) {
 		std::cerr << _("ARDOUR_DLL_PATH not set in environment - exiting\n");
 		::exit (1);
 	}	
 	return s;
+#endif
 }
+
+#ifdef WIN32
+SearchPath
+windows_search_path ()
+{
+	std::string dll_dir_path(g_win32_get_package_installation_directory_of_module(NULL));
+	dll_dir_path = Glib::build_filename (dll_dir_path, "share");
+	return Glib::build_filename (dll_dir_path, "ardour3");
+}
+#endif
 
 SearchPath
 ardour_config_search_path ()
@@ -101,7 +117,9 @@ ardour_config_search_path ()
 
 	if (search_path.empty()) {
 		search_path += user_config_directory();
-		
+#ifdef WIN32
+		search_path += windows_search_path ();
+#else
 		std::string s = Glib::getenv("ARDOUR_CONFIG_PATH");
 		if (s.empty()) {
 			std::cerr << _("ARDOUR_CONFIG_PATH not set in environment - exiting\n");
@@ -109,6 +127,7 @@ ardour_config_search_path ()
 		}
 		
 		search_path += SearchPath (s);
+#endif
 	}
 
 	return search_path;
@@ -121,7 +140,9 @@ ardour_data_search_path ()
 
 	if (search_path.empty()) {
 		search_path += user_config_directory();
-		
+#ifdef WIN32
+		search_path += windows_search_path ();
+#else
 		std::string s = Glib::getenv("ARDOUR_DATA_PATH");
 		if (s.empty()) {
 			std::cerr << _("ARDOUR_DATA_PATH not set in environment - exiting\n");
@@ -129,6 +150,7 @@ ardour_data_search_path ()
 		}
 		
 		search_path += SearchPath (s);
+#endif
 	}
 
 	return search_path;
