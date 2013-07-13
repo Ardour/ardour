@@ -1666,6 +1666,7 @@ Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
 void
 Mixer_UI::scroll_left ()
 {
+	if (!scroller.get_hscrollbar()) return;
 	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
 	/* stupid GTK: can't rely on clamping across versions */
 	scroller.get_hscrollbar()->set_value (max (adj->get_lower(), adj->get_value() - adj->get_step_increment()));
@@ -1674,6 +1675,7 @@ Mixer_UI::scroll_left ()
 void
 Mixer_UI::scroll_right ()
 {
+	if (!scroller.get_hscrollbar()) return;
 	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
 	/* stupid GTK: can't rely on clamping across versions */
 	scroller.get_hscrollbar()->set_value (min (adj->get_upper(), adj->get_value() + adj->get_step_increment()));

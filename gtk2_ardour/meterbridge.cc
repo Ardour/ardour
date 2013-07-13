@@ -309,6 +309,7 @@ Meterbridge::on_scroll_event (GdkEventScroll* ev)
 void
 Meterbridge::scroll_left ()
 {
+	if (!scroller.get_hscrollbar()) return;
 	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
 	/* stupid GTK: can't rely on clamping across versions */
 	scroller.get_hscrollbar()->set_value (max (adj->get_lower(), adj->get_value() - adj->get_step_increment()));
@@ -317,6 +318,7 @@ Meterbridge::scroll_left ()
 void
 Meterbridge::scroll_right ()
 {
+	if (!scroller.get_hscrollbar()) return;
 	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
 	/* stupid GTK: can't rely on clamping across versions */
 	scroller.get_hscrollbar()->set_value (min (adj->get_upper(), adj->get_value() + adj->get_step_increment()));
