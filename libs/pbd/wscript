@@ -144,6 +144,7 @@ def build(bld):
         testobj.source       = '''
                 test/testrunner.cc
                 test/xpath.cc
+                test/mutex_test.cc
                 test/scalar_properties.cc
                 test/signals_test.cc
                 test/convert_test.cc
