@@ -584,8 +584,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 int
 AudioSource::build_peaks_from_scratch ()
 {
-	Sample* buf = 0;
-
 	const framecnt_t bufsize = 65536; // 256kB per disk read for mono data is about ideal
 
 	DEBUG_TRACE (DEBUG::Peaks, "Building peaks from scratch\n");
@@ -605,20 +603,20 @@ AudioSource::build_peaks_from_scratch ()
 		framecnt_t cnt = _length;
 
 		_peaks_built = false;
-		buf = new Sample[bufsize];
+		boost::scoped_array<Sample> buf(new Sample[bufsize]);
 
 		while (cnt) {
 
 			framecnt_t frames_to_read = min (bufsize, cnt);
 			framecnt_t frames_read;
 			
-			if ((frames_read = read_unlocked (buf, current_frame, frames_to_read)) != frames_to_read) {
+			if ((frames_read = read_unlocked (buf.get(), current_frame, frames_to_read)) != frames_to_read) {
 				error << string_compose(_("%1: could not write read raw data for peak computation (%2)"), _name, strerror (errno)) << endmsg;
 				done_with_peakfile_writes (false);
 				goto out;
 			}
 
-			if (compute_and_write_peaks (buf, current_frame, frames_read, true, false, _FPP)) {
+			if (compute_and_write_peaks (buf.get(), current_frame, frames_read, true, false, _FPP)) {
 				break;
 			}
 
@@ -642,8 +640,6 @@ AudioSource::build_peaks_from_scratch ()
 		DEBUG_TRACE (DEBUG::Peaks, string_compose("Could not write peak data, attempting to remove peakfile %1\n", peakpath));
 		unlink (peakpath.c_str());
 	}
-
-	delete [] buf;
 
 	return ret;
 }
