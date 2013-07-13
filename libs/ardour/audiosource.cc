@@ -323,7 +323,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	int32_t to_read;
 	uint32_t nread;
 	framecnt_t zero_fill = 0;
-	int ret = -1;
 
 	boost::scoped_ptr<FdFileDescriptor> peakfile_descriptor(new FdFileDescriptor (peakpath, false, 0664));
 	int peakfile_fd = -1;
@@ -461,7 +460,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 					DEBUG_TRACE (DEBUG::Peaks, string_compose ("[%1]: cannot read peak data from peakfile (%2 peaks instead of %3) (%4) at start_byte = %5 _length = %6 versus len = %7 expected maxpeaks = %8 npeaks was %9"
 					     , _name, (nread / sizeof(PeakData)), to_read, g_strerror (errno), start_byte, _length, fend, ((_length - current_frame)/samples_per_file_peak), npeaks));
-					goto out;
+					return -1;
 				}
 #endif
 				i = 0;
@@ -493,8 +492,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		if (zero_fill) {
 			memset (&peaks[npeaks], 0, sizeof (PeakData) * zero_fill);
 		}
-
-		ret = 0;
 
 	} else {
 
@@ -550,7 +547,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
                                                 error << string_compose(_("AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"),
                                                                         _name, to_read, current_frame, _length, strerror (errno))
                                                       << endmsg;
-                                                goto out;
+                                                return -1;
                                         }
                                 }
 
@@ -578,15 +575,10 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		if (zero_fill) {
 			memset (&peaks[npeaks], 0, sizeof (PeakData) * zero_fill);
 		}
-
-		ret = 0;
 	}
 
-  out:
-
 	DEBUG_TRACE (DEBUG::Peaks, "READPEAKS DONE\n");
-
-	return ret;
+	return 0;
 }
 
 int
