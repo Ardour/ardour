@@ -684,15 +684,13 @@ int
 AudioSource::compute_and_write_peaks (Sample* buf, framecnt_t first_frame, framecnt_t cnt,
 				      bool force, bool intermediate_peaks_ready, framecnt_t fpp)
 {
-	Sample* buf2 = 0;
 	framecnt_t to_do;
 	uint32_t  peaks_computed;
-	PeakData* peakbuf = 0;
-	int ret = -1;
 	framepos_t current_frame;
 	framecnt_t frames_done;
 	const size_t blocksize = (128 * 1024);
 	off_t first_peak_byte;
+	boost::scoped_array<Sample> buf2;
 
 	if (_peakfile_descriptor == 0) {
 		prepare_for_peakfile_writes ();
@@ -718,7 +716,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, framecnt_t first_frame, frame
 #ifndef WIN32
 			if (::pwrite (_peakfile_fd, &x, sizeof (PeakData), byte) != sizeof (PeakData)) {
 				error << string_compose(_("%1: could not write peak file data (%2)"), _name, strerror (errno)) << endmsg;
-				goto out;
+				return -1;
 			}
 #endif
 			_peak_byte_max = max (_peak_byte_max, (off_t) (byte + sizeof(PeakData)));
@@ -744,19 +742,19 @@ AudioSource::compute_and_write_peaks (Sample* buf, framecnt_t first_frame, frame
 		/* make a new contiguous buffer containing leftovers and the new stuff */
 
 		to_do = cnt + peak_leftover_cnt;
-		buf2 = new Sample[to_do];
+		buf2.reset(new Sample[to_do]);
 
 		/* the remnants */
-		memcpy (buf2, peak_leftovers, peak_leftover_cnt * sizeof (Sample));
+		memcpy (buf2.get(), peak_leftovers, peak_leftover_cnt * sizeof (Sample));
 
 		/* the new stuff */
-		memcpy (buf2+peak_leftover_cnt, buf, cnt * sizeof (Sample));
+		memcpy (buf2.get()+peak_leftover_cnt, buf, cnt * sizeof (Sample));
 
 		/* no more leftovers */
 		peak_leftover_cnt = 0;
 
 		/* use the temporary buffer */
-		buf = buf2;
+		buf = buf2.get();
 
 		/* make sure that when we write into the peakfile, we startup where we left off */
 
@@ -766,7 +764,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, framecnt_t first_frame, frame
 		to_do = cnt;
 	}
 
-	peakbuf = new PeakData[(to_do/fpp)+1];
+	boost::scoped_array<PeakData> peakbuf(new PeakData[(to_do/fpp)+1]);
 	peaks_computed = 0;
 	current_frame = first_frame;
 	frames_done = 0;
@@ -831,9 +829,9 @@ AudioSource::compute_and_write_peaks (Sample* buf, framecnt_t first_frame, frame
 	}
 
 #ifndef WIN32
-	if (::pwrite (_peakfile_fd, peakbuf, sizeof (PeakData) * peaks_computed, first_peak_byte) != (ssize_t) (sizeof (PeakData) * peaks_computed)) {
+	if (::pwrite (_peakfile_fd, peakbuf.get(), sizeof (PeakData) * peaks_computed, first_peak_byte) != (ssize_t) (sizeof (PeakData) * peaks_computed)) {
 		error << string_compose(_("%1: could not write peak file data (%2)"), _name, strerror (errno)) << endmsg;
-		goto out;
+		return -1;
 	}
 #endif
 
@@ -847,13 +845,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, framecnt_t first_frame, frame
 		}
 	}
 
-	ret = 0;
-
-  out:
-	delete [] peakbuf;
-	delete [] buf2;
-
-	return ret;
+	return 0;
 }
 
 void
