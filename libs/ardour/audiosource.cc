@@ -31,6 +31,7 @@
 #include <vector>
 
 #include <boost/scoped_ptr.hpp>
+#include <boost/scoped_array.hpp>
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
@@ -324,7 +325,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	framecnt_t zero_fill = 0;
 	int ret = -1;
 	PeakData* staging = 0;
-	Sample* raw_staging = 0;
 
 	boost::scoped_ptr<FdFileDescriptor> peakfile_descriptor(new FdFileDescriptor (peakpath, false, 0664));
 	int peakfile_fd = -1;
@@ -355,9 +355,9 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		   both max and min peak values.
 		*/
 
-		Sample* raw_staging = new Sample[cnt];
+		boost::scoped_array<Sample> raw_staging(new Sample[cnt]);
 
-		if (read_unlocked (raw_staging, start, cnt) != cnt) {
+		if (read_unlocked (raw_staging.get(), start, cnt) != cnt) {
 			error << _("cannot read sample data for unscaled peak computation") << endmsg;
 			return -1;
 		}
@@ -367,7 +367,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 			peaks[i].min = raw_staging[i];
 		}
 
-		delete [] raw_staging;
 		return 0;
 	}
 
@@ -517,7 +516,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		framecnt_t i = 0;
 		framecnt_t nvisual_peaks = 0;
 		framecnt_t chunksize = (framecnt_t) min (cnt, (framecnt_t) 4096);
-		raw_staging = new Sample[chunksize];
+		boost::scoped_array<Sample> raw_staging(new Sample[chunksize]);
 
 		framepos_t frame_pos = start;
 		double pixel_pos = floor (frame_pos / samples_per_visual_peak);
@@ -542,14 +541,14 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
                                            this loop early
 					*/
 
-                                        memset (raw_staging, 0, sizeof (Sample) * chunksize);
+                                        memset (raw_staging.get(), 0, sizeof (Sample) * chunksize);
 
                                 } else {
 
                                         to_read = min (chunksize, (_length - current_frame));
 
 
-                                        if ((frames_read = read_unlocked (raw_staging, current_frame, to_read)) == 0) {
+                                        if ((frames_read = read_unlocked (raw_staging.get(), current_frame, to_read)) == 0) {
                                                 error << string_compose(_("AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"),
                                                                         _name, to_read, current_frame, _length, strerror (errno))
                                                       << endmsg;
@@ -587,7 +586,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
   out:
 	delete [] staging;
-	delete [] raw_staging;
 
 	DEBUG_TRACE (DEBUG::Peaks, "READPEAKS DONE\n");
 
