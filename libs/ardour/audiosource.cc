@@ -30,6 +30,8 @@
 #include <algorithm>
 #include <vector>
 
+#include <boost/scoped_ptr.hpp>
+
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
@@ -324,7 +326,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	PeakData* staging = 0;
 	Sample* raw_staging = 0;
 
-	FdFileDescriptor* peakfile_descriptor = new FdFileDescriptor (peakpath, false, 0664);
+	boost::scoped_ptr<FdFileDescriptor> peakfile_descriptor(new FdFileDescriptor (peakpath, false, 0664));
 	int peakfile_fd = -1;
 
 	expected_peaks = (cnt / (double) samples_per_file_peak);
@@ -365,7 +367,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 			peaks[i].min = raw_staging[i];
 		}
 
-		delete peakfile_descriptor;
 		delete [] raw_staging;
 		return 0;
 	}
@@ -378,7 +379,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 		if ((peakfile_fd = peakfile_descriptor->allocate ()) < 0) {
 			error << string_compose(_("AudioSource: cannot open peakpath (a) \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
-			delete peakfile_descriptor;
 			return -1;
 		}
 
@@ -391,7 +391,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		if (nread != sizeof (PeakData) * npeaks) {
 			DEBUG_TRACE (DEBUG::Peaks,  string_compose ("[%1]: Cannot read peaks from peakfile! (read only %2 not %3 at sample %4 = byte %5 )\n"
 			     , _name, nread, npeaks, start, first_peak_byte));
-			delete peakfile_descriptor;
 			return -1;
 		}
 
@@ -399,7 +398,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 			memset (&peaks[npeaks], 0, sizeof (PeakData) * zero_fill);
 		}
 
-		delete peakfile_descriptor;
 		return 0;
 	}
 
@@ -443,7 +441,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 		if ((peakfile_fd = peakfile_descriptor->allocate ()) < 0) {
 			error << string_compose(_("AudioSource: cannot open peakpath (b) \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
-			delete peakfile_descriptor;
 			delete [] staging;
 			return 0;
 		}
@@ -589,8 +586,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	}
 
   out:
-	delete peakfile_descriptor;
-
 	delete [] staging;
 	delete [] raw_staging;
 
