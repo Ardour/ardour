@@ -327,6 +327,7 @@ Meterbridge::scroll_right ()
 void
 Meterbridge::on_size_request (Gtk::Requisition* r)
 {
+	meter_clear_pattern_cache(3);
 	Gtk::Window::on_size_request(r);
 
 	Gdk::Geometry geom;
