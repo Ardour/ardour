@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-06-14 03:57+0400\n"
-"PO-Revision-Date: 2013-06-14 04:15+0300\n"
+"POT-Creation-Date: 2013-07-14 15:01+0400\n"
+"PO-Revision-Date: 2013-07-14 18:04+0300\n"
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
 "Language: ru\n"
@@ -20,8 +20,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.5.4\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2); 10<=4 && (n%100<10 || n"
-"%100>=20) ? 1 : 2);\n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"%100>=20) ? 1: 2);\n"
 
 #: about.cc:122
 msgid "Brian Ahr"
@@ -413,7 +413,7 @@ msgstr "%1 menu definition file not found"
 msgid "%1 will not work without a valid ardour.menus file"
 msgstr "%1 will not work without a valid ardour.menus file"
 
-#: add_route_dialog.cc:53 route_params_ui.cc:503
+#: add_route_dialog.cc:53 route_params_ui.cc:499
 msgid "Add Track or Bus"
 msgstr "Добавить дорожку или шину"
 
@@ -506,7 +506,7 @@ msgstr ""
 "звуковые и MIDI-дорожки."
 
 #: add_route_dialog.cc:319 add_route_dialog.cc:338 editor_actions.cc:385
-#: editor_rulers.cc:377 time_axis_view.cc:1301
+#: editor_rulers.cc:377 time_axis_view.cc:1304
 msgid "Normal"
 msgstr "Нормальная"
 
@@ -550,7 +550,7 @@ msgstr "8 каналов"
 msgid "12 Channel"
 msgstr "3 канала"
 
-#: add_route_dialog.cc:475 mixer_strip.cc:2136
+#: add_route_dialog.cc:475 mixer_strip.cc:2130
 msgid "Custom"
 msgstr "На заказ"
 
@@ -638,7 +638,7 @@ msgid "Track"
 msgstr "Дорожка"
 
 #: analysis_window.cc:68 editor_actions.cc:616 mixer_ui.cc:125
-#: mixer_ui.cc:1793
+#: mixer_ui.cc:1795
 msgid "Show"
 msgstr "Показать"
 
@@ -646,91 +646,91 @@ msgstr "Показать"
 msgid "Re-analyze data"
 msgstr "Повторно проанализировать данные"
 
-#: ardour_button.cc:658
+#: ardour_button.cc:704
 msgid "button cannot watch state of non-existing Controllable\n"
 msgstr ""
 
-#: ardour_ui.cc:179
+#: ardour_ui.cc:180
 msgid "audition"
 msgstr "прослушивание"
 
-#: ardour_ui.cc:180
+#: ardour_ui.cc:181
 msgid "solo"
 msgstr "солирование"
 
-#: ardour_ui.cc:181
+#: ardour_ui.cc:182
 msgid "feedback"
 msgstr "отклик"
 
-#: ardour_ui.cc:183 speaker_dialog.cc:36
+#: ardour_ui.cc:184 speaker_dialog.cc:36
 msgid "Speaker Configuration"
 msgstr "Конфигурация громкоговорителей"
 
-#: ardour_ui.cc:184 theme_manager.cc:56 theme_manager.cc:64
+#: ardour_ui.cc:185 theme_manager.cc:56 theme_manager.cc:64
 msgid "Theme Manager"
 msgstr "Стиль оформления"
 
-#: ardour_ui.cc:185 keyeditor.cc:53
+#: ardour_ui.cc:186 keyeditor.cc:53
 msgid "Key Bindings"
 msgstr "Клавиатурные комбинации"
 
-#: ardour_ui.cc:186
+#: ardour_ui.cc:187
 msgid "Preferences"
 msgstr "Параметры"
 
-#: ardour_ui.cc:187 ardour_ui.cc:192
+#: ardour_ui.cc:188 ardour_ui.cc:193
 msgid "Add Tracks/Busses"
 msgstr "Добавить дорожки/шины"
 
-#: ardour_ui.cc:188
+#: ardour_ui.cc:189
 msgid "About"
 msgstr "О программе"
 
-#: ardour_ui.cc:189 location_ui.cc:1134
+#: ardour_ui.cc:190 location_ui.cc:1146
 msgid "Locations"
 msgstr "Позиции"
 
-#: ardour_ui.cc:190 route_params_ui.cc:57 route_params_ui.cc:604
+#: ardour_ui.cc:191 route_params_ui.cc:57 route_params_ui.cc:600
 msgid "Tracks and Busses"
 msgstr "Дорожки и шины"
 
-#: ardour_ui.cc:191
+#: ardour_ui.cc:192
 msgid "Properties"
 msgstr "Свойства"
 
-#: ardour_ui.cc:193 bundle_manager.cc:263
+#: ardour_ui.cc:194 bundle_manager.cc:263
 msgid "Bundle Manager"
 msgstr "Управление пакетами"
 
-#: ardour_ui.cc:194 big_clock_window.cc:35
+#: ardour_ui.cc:195 big_clock_window.cc:35
 msgid "Big Clock"
 msgstr "Большой счётчик"
 
-#: ardour_ui.cc:195
+#: ardour_ui.cc:196
 msgid "Audio Connections"
 msgstr "Звуковые соединения"
 
-#: ardour_ui.cc:196
+#: ardour_ui.cc:197
 msgid "MIDI Connections"
 msgstr "Соединения MIDI"
 
-#: ardour_ui.cc:198
+#: ardour_ui.cc:199
 msgid "Errors"
 msgstr "Ошибки"
 
-#: ardour_ui.cc:299
+#: ardour_ui.cc:301
 msgid "could not initialize %1."
 msgstr "Не удалось инициализировать %1."
 
-#: ardour_ui.cc:394
+#: ardour_ui.cc:396
 msgid "Starting audio engine"
 msgstr "Запускается звуковой движок"
 
-#: ardour_ui.cc:763 startup.cc:638
+#: ardour_ui.cc:766 startup.cc:638
 msgid "%1 is ready for use"
 msgstr "%1 готов к работе"
 
-#: ardour_ui.cc:811
+#: ardour_ui.cc:814
 msgid ""
 "WARNING: Your system has a limit for maximum amount of locked memory. This "
 "might cause %1 to run out of memory before your system runs out of memory. \n"
@@ -745,23 +745,23 @@ msgstr ""
 "Вы можете узнать установленный предел при помощи команды 'ulimit -l'. Обычно "
 "это контролируется в %2."
 
-#: ardour_ui.cc:828
+#: ardour_ui.cc:831
 msgid "Do not show this window again"
 msgstr "Больше не показывать это окно"
 
-#: ardour_ui.cc:870
+#: ardour_ui.cc:873
 msgid "Don't quit"
 msgstr "Не выходить"
 
-#: ardour_ui.cc:871
+#: ardour_ui.cc:874
 msgid "Just quit"
 msgstr "Просто выйти"
 
-#: ardour_ui.cc:872
+#: ardour_ui.cc:875
 msgid "Save and quit"
 msgstr "Сохранить и выйти"
 
-#: ardour_ui.cc:882
+#: ardour_ui.cc:885
 msgid ""
 "%1 was unable to save your session.\n"
 "\n"
@@ -776,15 +776,15 @@ msgstr ""
 "\n"
 "«Просто выйти»."
 
-#: ardour_ui.cc:913
+#: ardour_ui.cc:916
 msgid "Please wait while %1 cleans up..."
 msgstr "Дождитесь завершения подчистки сеанса в %1..."
 
-#: ardour_ui.cc:930
+#: ardour_ui.cc:933
 msgid "Unsaved Session"
 msgstr "Сеанс не сохранён"
 
-#: ardour_ui.cc:951
+#: ardour_ui.cc:954
 msgid ""
 "The session \"%1\"\n"
 "has not been saved.\n"
@@ -802,7 +802,7 @@ msgstr ""
 "\n"
 "Что вы хотите сделать?"
 
-#: ardour_ui.cc:954
+#: ardour_ui.cc:957
 msgid ""
 "The snapshot \"%1\"\n"
 "has not been saved.\n"
@@ -820,74 +820,74 @@ msgstr ""
 "\n"
 "Что вы хотите сделать?"
 
-#: ardour_ui.cc:968
+#: ardour_ui.cc:971
 msgid "Prompter"
 msgstr ""
 
-#: ardour_ui.cc:1045
+#: ardour_ui.cc:1048
 msgid "disconnected"
 msgstr "отсоединено"
 
-#: ardour_ui.cc:1052
+#: ardour_ui.cc:1055
 #, c-format
 msgid "JACK: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"
 msgstr "JACK: <span foreground=\"green\">%.1f КГц / %4.1f мс</span>"
 
-#: ardour_ui.cc:1056
+#: ardour_ui.cc:1059
 #, c-format
 msgid "JACK: <span foreground=\"green\">%<PRId64> kHz / %4.1f ms</span>"
 msgstr "JACK: <span foreground=\"green\">%<PRId64> КГц / %4.1f мс</span>"
 
-#: ardour_ui.cc:1074 export_video_dialog.cc:67
+#: ardour_ui.cc:1077 export_video_dialog.cc:67
 msgid "File:"
 msgstr "Файл:"
 
-#: ardour_ui.cc:1078
+#: ardour_ui.cc:1081
 msgid "BWF"
 msgstr "BWF"
 
-#: ardour_ui.cc:1081
+#: ardour_ui.cc:1084
 msgid "WAV"
 msgstr "WAV"
 
-#: ardour_ui.cc:1084
+#: ardour_ui.cc:1087
 msgid "WAV64"
 msgstr "WAV64"
 
-#: ardour_ui.cc:1087 session_option_editor.cc:197
+#: ardour_ui.cc:1090 session_option_editor.cc:197
 msgid "CAF"
 msgstr "CAF"
 
-#: ardour_ui.cc:1090
+#: ardour_ui.cc:1093
 msgid "AIFF"
 msgstr "AIFF"
 
-#: ardour_ui.cc:1093
+#: ardour_ui.cc:1096
 msgid "iXML"
 msgstr "iXML"
 
-#: ardour_ui.cc:1096
+#: ardour_ui.cc:1099
 msgid "RF64"
 msgstr "RF64"
 
-#: ardour_ui.cc:1104
+#: ardour_ui.cc:1107
 msgid "32-float"
 msgstr "32-float"
 
-#: ardour_ui.cc:1107
+#: ardour_ui.cc:1110
 msgid "24-int"
 msgstr "24-int"
 
-#: ardour_ui.cc:1110
+#: ardour_ui.cc:1113
 msgid "16-int"
 msgstr "16-int"
 
-#: ardour_ui.cc:1129
+#: ardour_ui.cc:1132
 #, c-format
 msgid "DSP: <span foreground=\"%s\">%5.1f%%</span>"
 msgstr "ЦП: <span foreground=\"%s\">%5.1f%%</span>"
 
-#: ardour_ui.cc:1148
+#: ardour_ui.cc:1151
 #, c-format
 msgid ""
 "Buffers: <span foreground=\"green\">p:</span><span foreground=\"%s\">"
@@ -898,33 +898,33 @@ msgstr ""
 "%%</span> <span foreground=\"green\">c:</span><span foreground=\"%s\">"
 "%<PRIu32>%%</span>"
 
-#: ardour_ui.cc:1184
+#: ardour_ui.cc:1187
 msgid "Disk: <span foreground=\"green\">Unknown</span>"
 msgstr "На диске: <span foreground=\"green\">неизвестно</span>"
 
-#: ardour_ui.cc:1186
+#: ardour_ui.cc:1189
 msgid "Disk: <span foreground=\"green\">24hrs+</span>"
 msgstr "На диске: <span foreground=\"green\">24ч+</span>"
 
-#: ardour_ui.cc:1204
+#: ardour_ui.cc:1207
 msgid "Disk: <span foreground=\"green\">&gt;24 hrs</span>"
 msgstr "На диске: <span foreground=\"green\">&gt;24ч</span>"
 
-#: ardour_ui.cc:1215
+#: ardour_ui.cc:1218
 #, c-format
 msgid "Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"
 msgstr "На диске:  <span foreground=\"%s\">%02dч:%02dм:%02dс</span>"
 
-#: ardour_ui.cc:1241
+#: ardour_ui.cc:1244
 #, c-format
 msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
 msgstr "ТК: <span foreground=\"%s\">%s</span>"
 
-#: ardour_ui.cc:1358 ardour_ui.cc:1367 startup.cc:1045
+#: ardour_ui.cc:1361 ardour_ui.cc:1370 startup.cc:1045
 msgid "Recent Sessions"
 msgstr "Недавние сеансы"
 
-#: ardour_ui.cc:1447
+#: ardour_ui.cc:1450
 msgid ""
 "%1 is not connected to JACK\n"
 "You cannot open or close sessions in this condition"
@@ -932,27 +932,27 @@ msgstr ""
 "%1 не соединен с JACK.\n"
 "Открытие и закрытие сеансов невозможно."
 
-#: ardour_ui.cc:1474
+#: ardour_ui.cc:1477
 msgid "Open Session"
 msgstr "Открыть сеанс"
 
-#: ardour_ui.cc:1492 session_import_dialog.cc:169
+#: ardour_ui.cc:1495 session_import_dialog.cc:169
 #: session_metadata_dialog.cc:729 startup.cc:1074
 msgid "%1 sessions"
 msgstr "Cеансы %1"
 
-#: ardour_ui.cc:1529
+#: ardour_ui.cc:1532
 msgid "You cannot add a track without a session already loaded."
 msgstr "Вы не можете добавить дорожку без загруженного сеанса."
 
-#: ardour_ui.cc:1537
+#: ardour_ui.cc:1540
 msgid "could not create %1 new mixed track"
 msgid_plural "could not create %1 new mixed tracks"
 msgstr[0] "Не удалось создать %1 новую смешанную дорожку"
 msgstr[1] "Не удалось создать %1 новых смешанных дорожки"
 msgstr[2] "Не удалось создать %1 новых смешанных дорожек"
 
-#: ardour_ui.cc:1543 ardour_ui.cc:1604
+#: ardour_ui.cc:1546 ardour_ui.cc:1607
 msgid ""
 "There are insufficient JACK ports available\n"
 "to create a new track or bus.\n"
@@ -964,25 +964,25 @@ msgstr ""
 "Необходимо сохранить %1, выйти и запустить\n"
 "JACK с увеличенным количеством портов."
 
-#: ardour_ui.cc:1578
+#: ardour_ui.cc:1581
 msgid "You cannot add a track or bus without a session already loaded."
 msgstr "Вы не можете добавить дорожку или шину без открытого сеанса."
 
-#: ardour_ui.cc:1587
+#: ardour_ui.cc:1590
 msgid "could not create %1 new audio track"
 msgid_plural "could not create %1 new audio tracks"
 msgstr[0] "Не удалось создать %1 новую звуковую дорожку"
 msgstr[1] "Не удалось создать %2 новых звуковых дорожки"
 msgstr[2] "Не удалось создать %2 новых звуковых дорожек"
 
-#: ardour_ui.cc:1596
+#: ardour_ui.cc:1599
 msgid "could not create %1 new audio bus"
 msgid_plural "could not create %1 new audio busses"
 msgstr[0] "Не удалось создать %1 новую звуковую шину"
 msgstr[1] "Не удалось создать %1 новых звуковых шины"
 msgstr[2] "Не удалось создать %1 новых звуковых шин"
 
-#: ardour_ui.cc:1713
+#: ardour_ui.cc:1716
 msgid ""
 "Please create one or more tracks before trying to record.\n"
 "You can do this with the \"Add Track or Bus\" option in the Session menu."
@@ -991,14 +991,14 @@ msgstr ""
 "как пытаться что-либо записать.\n"
 "Используйте меню «Сеанс > Добавить дорожку/шину»."
 
-#: ardour_ui.cc:2103
+#: ardour_ui.cc:2106
 msgid ""
 "The audio backend (JACK) was shutdown because:\n"
 "\n"
 "%1"
 msgstr ""
 
-#: ardour_ui.cc:2105
+#: ardour_ui.cc:2108
 msgid ""
 "JACK has either been shutdown or it\n"
 "disconnected %1 because %1\n"
@@ -1009,19 +1009,19 @@ msgstr ""
 "с %1 и отсоединил его. Необходимо перезапустить \n"
 "JACK, восстановить соединение и сохранить сеанс."
 
-#: ardour_ui.cc:2131
+#: ardour_ui.cc:2134
 msgid "Unable to start the session running"
 msgstr "Невозможно запустить уже выполняемый сеанс"
 
-#: ardour_ui.cc:2211
+#: ardour_ui.cc:2214
 msgid "Take Snapshot"
 msgstr "Создать снимок"
 
-#: ardour_ui.cc:2212
+#: ardour_ui.cc:2215
 msgid "Name of new snapshot"
 msgstr "Название нового снимка"
 
-#: ardour_ui.cc:2236
+#: ardour_ui.cc:2239
 msgid ""
 "To ensure compatibility with various systems\n"
 "snapshot names may not contain a '%1' character"
@@ -1029,27 +1029,27 @@ msgstr ""
 "Для обеспечения совместимости с различными системами\n"
 "названия снимков не могут содержать символ '%1'."
 
-#: ardour_ui.cc:2248
+#: ardour_ui.cc:2251
 msgid "Confirm Snapshot Overwrite"
 msgstr "Подтвердите перезапись снимка"
 
-#: ardour_ui.cc:2249
+#: ardour_ui.cc:2252
 msgid "A snapshot already exists with that name.  Do you want to overwrite it?"
 msgstr "Снимок с таким названием уже есть. Перезаписать его?"
 
-#: ardour_ui.cc:2252 utils_videotl.cc:66
+#: ardour_ui.cc:2255 utils_videotl.cc:66
 msgid "Overwrite"
 msgstr "Перезаписать"
 
-#: ardour_ui.cc:2286
+#: ardour_ui.cc:2289
 msgid "Rename Session"
 msgstr "Переименовать сеанс"
 
-#: ardour_ui.cc:2287
+#: ardour_ui.cc:2290
 msgid "New session name"
 msgstr "Новое название сеанса"
 
-#: ardour_ui.cc:2301 ardour_ui.cc:2681 ardour_ui.cc:2726
+#: ardour_ui.cc:2304 ardour_ui.cc:2684 ardour_ui.cc:2729
 msgid ""
 "To ensure compatibility with various systems\n"
 "session names may not contain a '%1' character"
@@ -1057,12 +1057,12 @@ msgstr ""
 "Для обеспечения совместимости с различными системами\n"
 "названия сеансов не могут содержать символ '%1'."
 
-#: ardour_ui.cc:2309
+#: ardour_ui.cc:2312
 msgid ""
 "That name is already in use by another directory/folder. Please try again."
 msgstr ""
 
-#: ardour_ui.cc:2318
+#: ardour_ui.cc:2321
 msgid ""
 "Renaming this session failed.\n"
 "Things could be seriously messed up at this point"
@@ -1070,19 +1070,19 @@ msgstr ""
 "Не удалось переименовать этот сеанс.\n"
 "Очень может быть, что всё испортилось."
 
-#: ardour_ui.cc:2429
+#: ardour_ui.cc:2432
 msgid "Save Template"
 msgstr "Сохранить шаблон"
 
-#: ardour_ui.cc:2430
+#: ardour_ui.cc:2433
 msgid "Name for template:"
 msgstr "Название шаблона:"
 
-#: ardour_ui.cc:2431
+#: ardour_ui.cc:2434
 msgid "-template"
 msgstr "-шаблон"
 
-#: ardour_ui.cc:2469
+#: ardour_ui.cc:2472
 msgid ""
 "This session\n"
 "%1\n"
@@ -1092,52 +1092,52 @@ msgstr ""
 "%1\n"
 "уже существует. Открыть его?"
 
-#: ardour_ui.cc:2479
+#: ardour_ui.cc:2482
 msgid "Open Existing Session"
 msgstr "Открыть существующий сеанс"
 
-#: ardour_ui.cc:2717
+#: ardour_ui.cc:2720
 msgid "There is no existing session at \"%1\""
 msgstr "По адресу \"%1\" не существующего сеанса"
 
-#: ardour_ui.cc:2804
+#: ardour_ui.cc:2807
 msgid "Please wait while %1 loads your session"
 msgstr "Дождитесь завершения загрузки сеанса в %1"
 
-#: ardour_ui.cc:2819
+#: ardour_ui.cc:2822
 msgid "Port Registration Error"
 msgstr "Ошибка регистрации порта"
 
-#: ardour_ui.cc:2820
+#: ardour_ui.cc:2823
 msgid "Click the Close button to try again."
 msgstr "Щелкните кнопку «Закрыть» для возврата к предыдущему диалогу."
 
-#: ardour_ui.cc:2841
+#: ardour_ui.cc:2844
 msgid "Session \"%1 (snapshot %2)\" did not load successfully"
 msgstr "Не удалось загрузить сеанс \"%1 (снимок %2)\""
 
-#: ardour_ui.cc:2847
+#: ardour_ui.cc:2850
 msgid "Loading Error"
 msgstr "Ошибка при загрузке"
 
-#: ardour_ui.cc:2848
+#: ardour_ui.cc:2851
 msgid "Click the Refresh button to try again."
 msgstr "Щёлкните кнопку «Обновить» для повторной попытки."
 
-#: ardour_ui.cc:2930
+#: ardour_ui.cc:2933
 msgid "Could not create session in \"%1\""
 msgstr "Не удалось создать сеанс «%1»"
 
-#: ardour_ui.cc:3030
+#: ardour_ui.cc:3033
 msgid "No files were ready for clean-up"
 msgstr "Нет готовых к удалению звуковых файлов"
 
-#: ardour_ui.cc:3034 ardour_ui.cc:3044 ardour_ui.cc:3177 ardour_ui.cc:3184
+#: ardour_ui.cc:3037 ardour_ui.cc:3047 ardour_ui.cc:3180 ardour_ui.cc:3187
 #: ardour_ui_ed.cc:104
 msgid "Clean-up"
 msgstr "Очистить"
 
-#: ardour_ui.cc:3035
+#: ardour_ui.cc:3038
 msgid ""
 "If this seems suprising, \n"
 "check for any existing snapshots.\n"
@@ -1149,19 +1149,19 @@ msgstr ""
 "Они могут включать области, которым\n"
 "нужны неиспользуемые файлы."
 
-#: ardour_ui.cc:3094
+#: ardour_ui.cc:3097
 msgid "kilo"
 msgstr "кило"
 
-#: ardour_ui.cc:3097
+#: ardour_ui.cc:3100
 msgid "mega"
 msgstr "мега"
 
-#: ardour_ui.cc:3100
+#: ardour_ui.cc:3103
 msgid "giga"
 msgstr "гига"
 
-#: ardour_ui.cc:3105
+#: ardour_ui.cc:3108
 msgid ""
 "The following file was deleted from %2,\n"
 "releasing %3 %4bytes of disk space"
@@ -1181,7 +1181,7 @@ msgstr[2] ""
 "освободив при этом %3 %4байт\n"
 "дискового пространства."
 
-#: ardour_ui.cc:3112
+#: ardour_ui.cc:3115
 msgid ""
 "The following file was not in use and \n"
 "has been moved to: %2\n"
@@ -1201,7 +1201,7 @@ msgid_plural ""
 "\n"
 "will release an additional %3 %4bytes of disk space.\n"
 msgstr[0] ""
-"Следующий %1 файл не используется и перемещён в пвпку\n"
+"Следующий %1 файл не используется и перемещён в папку\n"
 "%2\n"
 "\n"
 "После повторного запуска %5 команда\n"
@@ -1210,7 +1210,7 @@ msgstr[0] ""
 "\n"
 "дополнительно освободит %3 %4байт дискового пространства.\n"
 msgstr[1] ""
-"Следующие %1 файла не используются и перемещён в пвпку\n"
+"Следующие %1 файла не используются и перемещены в папку\n"
 "%2\n"
 "\n"
 "После повторного запуска %5 команда\n"
@@ -1219,7 +1219,7 @@ msgstr[1] ""
 "\n"
 "дополнительно освободит %3 %4байт дискового пространства.\n"
 msgstr[2] ""
-"Следующие %1 файлов не используются и перемещён в пвпку\n"
+"Следующие %1 файлов не используются и перемещены в папку\n"
 "%2\n"
 "\n"
 "После повторного запуска %5 команда\n"
@@ -1228,11 +1228,11 @@ msgstr[2] ""
 "\n"
 "дополнительно освободит %3 %4байт дискового пространства.\n"
 
-#: ardour_ui.cc:3172
+#: ardour_ui.cc:3175
 msgid "Are you sure you want to clean-up?"
 msgstr "Вы уверены, что хотите выполнить очистку?"
 
-#: ardour_ui.cc:3179
+#: ardour_ui.cc:3182
 msgid ""
 "Clean-up is a destructive operation.\n"
 "ALL undo/redo information will be lost if you clean-up.\n"
@@ -1243,80 +1243,80 @@ msgstr ""
 "неиспользуемые звуковые файлы\n"
 "будут перемещены в «мертвую» зону."
 
-#: ardour_ui.cc:3187
+#: ardour_ui.cc:3190
 msgid "CleanupDialog"
 msgstr "Очистка"
 
-#: ardour_ui.cc:3217
+#: ardour_ui.cc:3220
 msgid "Cleaned Files"
 msgstr "Очищенные файлы"
 
-#: ardour_ui.cc:3234
+#: ardour_ui.cc:3237
 msgid "deleted file"
 msgstr "удалён файл"
 
-#: ardour_ui.cc:3326
+#: ardour_ui.cc:3329
 msgid ""
 "Video-Server was not launched by Ardour. The request to stop it is ignored."
 msgstr ""
 
-#: ardour_ui.cc:3330
+#: ardour_ui.cc:3333
 msgid "Stop Video-Server"
 msgstr ""
 
-#: ardour_ui.cc:3331
+#: ardour_ui.cc:3334
 msgid "Do you really want to stop the Video Server?"
 msgstr "Вы действительно хотите остановить видеосервер?"
 
-#: ardour_ui.cc:3334
+#: ardour_ui.cc:3337
 msgid "Yes, Stop It"
 msgstr "Да, остановить"
 
-#: ardour_ui.cc:3360
+#: ardour_ui.cc:3363
 msgid "The Video Server is already started."
 msgstr ""
 
-#: ardour_ui.cc:3362
+#: ardour_ui.cc:3365
 msgid ""
 "An external Video Server is configured and can be reached. Not starting a "
 "new instance."
 msgstr ""
 
-#: ardour_ui.cc:3370 ardour_ui.cc:3460
+#: ardour_ui.cc:3373 ardour_ui.cc:3463
 msgid ""
 "Could not connect to the Video Server. Start it or configure its access URL "
 "in Edit -> Preferences."
 msgstr ""
 
-#: ardour_ui.cc:3394
+#: ardour_ui.cc:3397
 msgid "Specified docroot is not an existing directory."
 msgstr ""
 
-#: ardour_ui.cc:3399
+#: ardour_ui.cc:3402
 msgid "Given Video Server is not an executable file."
 msgstr ""
 
-#: ardour_ui.cc:3432
+#: ardour_ui.cc:3435
 msgid "Cannot launch the video-server"
 msgstr "Не удалось запустить видеосервер"
 
-#: ardour_ui.cc:3441
+#: ardour_ui.cc:3444
 msgid "Video-server was started but does not respond to requests..."
 msgstr ""
 
-#: ardour_ui.cc:3482 editor_audio_import.cc:629
+#: ardour_ui.cc:3489 editor_audio_import.cc:629
 msgid "could not open %1"
 msgstr "не удалось открыть %1"
 
-#: ardour_ui.cc:3486
+#: ardour_ui.cc:3493
 msgid "no video-file selected"
 msgstr ""
 
-#: ardour_ui.cc:3646
+#: ardour_ui.cc:3658
 msgid "Recording was stopped because your system could not keep up."
 msgstr "Запись остановлена из-за недостаточного быстродействия системы"
 
-#: ardour_ui.cc:3675
+#: ardour_ui.cc:3687
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1330,7 +1330,7 @@ msgstr ""
 "В частности ей не удалось записать данные на диск\n"
 "достаточно быстро для фиксации захваченных данных.\n"
 
-#: ardour_ui.cc:3694
+#: ardour_ui.cc:3706
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1344,11 +1344,11 @@ msgstr ""
 "В частности ей не удалось прочитать данные\n"
 "с диска достаточно быстро для воспроизведения.\n"
 
-#: ardour_ui.cc:3734
+#: ardour_ui.cc:3746
 msgid "Crash Recovery"
 msgstr "Восстановление данных"
 
-#: ardour_ui.cc:3735
+#: ardour_ui.cc:3747
 msgid ""
 "This session appears to have been in the\n"
 "middle of recording when %1 or\n"
@@ -1364,19 +1364,19 @@ msgstr ""
 "%1 может восстановить записанные данные,\n"
 "либо проигнорировать их. Примите решение.\n"
 
-#: ardour_ui.cc:3747
+#: ardour_ui.cc:3759
 msgid "Ignore crash data"
 msgstr "Проигнорировать"
 
-#: ardour_ui.cc:3748
+#: ardour_ui.cc:3760
 msgid "Recover from crash"
 msgstr "Восстановить данные"
 
-#: ardour_ui.cc:3768
+#: ardour_ui.cc:3780
 msgid "Sample Rate Mismatch"
 msgstr "Несовпадение частот сэмплирования"
 
-#: ardour_ui.cc:3769
+#: ardour_ui.cc:3781
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
 "%2 is currently running at %3 Hz.  If you load this session,\n"
@@ -1388,23 +1388,23 @@ msgstr ""
 "Если вы загрузите этот сеанс, звуковые данные могут быть\n"
 "воспроизведены с некорректной частотой сэмплирования.\n"
 
-#: ardour_ui.cc:3778
+#: ardour_ui.cc:3790
 msgid "Do not load session"
 msgstr "Не загружать сеанс"
 
-#: ardour_ui.cc:3779
+#: ardour_ui.cc:3791
 msgid "Load session anyway"
 msgstr "Все равно загрузить"
 
-#: ardour_ui.cc:3802
+#: ardour_ui.cc:3814
 msgid "Could not disconnect from JACK"
 msgstr "Не удалось отсоединиться от сервера JACK"
 
-#: ardour_ui.cc:3815
+#: ardour_ui.cc:3827
 msgid "Could not reconnect to JACK"
 msgstr "Не удалось соединиться с сервером JACK"
 
-#: ardour_ui.cc:4089
+#: ardour_ui.cc:4101
 msgid ""
 "%4This is a session from an older version of %3%5\n"
 "\n"
@@ -1427,57 +1427,61 @@ msgstr "Интерфейс: не удалось инициализировать
 msgid "UI: cannot setup mixer"
 msgstr "Интерфейс: не удалось инициализировать микшер"
 
-#: ardour_ui2.cc:125
+#: ardour_ui2.cc:82
+msgid "UI: cannot setup meterbridge"
+msgstr "Интерфейс: не удалось настроить панель индикаторов"
+
+#: ardour_ui2.cc:130
 msgid "Play from playhead"
 msgstr "Воспроизвести от указателя"
 
-#: ardour_ui2.cc:126
+#: ardour_ui2.cc:131
 msgid "Stop playback"
 msgstr "Стоп"
 
-#: ardour_ui2.cc:127
+#: ardour_ui2.cc:132
 msgid "Toggle record"
 msgstr "Переключить готовность к записи"
 
-#: ardour_ui2.cc:128
+#: ardour_ui2.cc:133
 msgid "Play range/selection"
 msgstr "Воспроизвести выделение"
 
-#: ardour_ui2.cc:129
+#: ardour_ui2.cc:134
 msgid "Go to start of session"
 msgstr "В начало сеанса"
 
-#: ardour_ui2.cc:130
+#: ardour_ui2.cc:135
 msgid "Go to end of session"
 msgstr "В конец сеанса"
 
-#: ardour_ui2.cc:131
+#: ardour_ui2.cc:136
 msgid "Play loop range"
 msgstr "Воспроизвести выделение в петле"
 
-#: ardour_ui2.cc:132
+#: ardour_ui2.cc:137
 msgid ""
 "MIDI Panic\n"
 "Send note off and reset controller messages on all MIDI channels"
 msgstr ""
 
-#: ardour_ui2.cc:133
+#: ardour_ui2.cc:138
 msgid "Return to last playback start when stopped"
 msgstr "Вернуться к точке начала воспроизведения"
 
-#: ardour_ui2.cc:134
+#: ardour_ui2.cc:139
 msgid "Playhead follows Range Selections and Edits"
 msgstr "Указатель воспроизведения следует за выделением областей и правкам"
 
-#: ardour_ui2.cc:135
+#: ardour_ui2.cc:140
 msgid "Be sensible about input monitoring"
 msgstr ""
 
-#: ardour_ui2.cc:136
+#: ardour_ui2.cc:141
 msgid "Enable/Disable audio click"
 msgstr "Включить или выключить метроном"
 
-#: ardour_ui2.cc:137 monitor_section.cc:101
+#: ardour_ui2.cc:142 monitor_section.cc:101
 msgid ""
 "When active, something is soloed.\n"
 "Click to de-solo everything"
@@ -1485,7 +1489,7 @@ msgstr ""
 "Включено, если какие-то дорожки солируют.\n"
 "Щёлкните, чтобы снять солирование везде."
 
-#: ardour_ui2.cc:138
+#: ardour_ui2.cc:143
 msgid ""
 "When active, auditioning is taking place\n"
 "Click to stop the audition"
@@ -1493,11 +1497,11 @@ msgstr ""
 "Включено, если выполняется прослушивание.\n"
 "Щёлкните, чтобы прекратить его."
 
-#: ardour_ui2.cc:139
+#: ardour_ui2.cc:144
 msgid "When active, there is a feedback loop."
 msgstr "Включена, когда есть петля отклика (feedback loop)"
 
-#: ardour_ui2.cc:140
+#: ardour_ui2.cc:145
 msgid ""
 "<b>Primary Clock</b> right-click to set display mode. Click to edit, click"
 "+drag a digit or mouse-over+scroll wheel to modify.\n"
@@ -1510,7 +1514,7 @@ msgstr ""
 "Прямой ввод: <tt>Esc</tt>: отмена; <tt>Enter</tt>: подтверждение; постфикс "
 "'+' или '-' вводит разницу во времени.\n"
 
-#: ardour_ui2.cc:141
+#: ardour_ui2.cc:146
 msgid ""
 "<b>Secondary Clock</b> right-click to set display mode. Click to edit, click"
 "+drag a digit or mouse-over+scroll wheel to modify.\n"
@@ -1523,27 +1527,27 @@ msgstr ""
 "Прямой ввод: <tt>Esc</tt>: отмена; <tt>Enter</tt>: подтверждение; постфикс "
 "'+' или '-' вводит разницу во времени.\n"
 
-#: ardour_ui2.cc:173
+#: ardour_ui2.cc:178
 msgid "[ERROR]: "
 msgstr "[ОШИБКА]: "
 
-#: ardour_ui2.cc:175
+#: ardour_ui2.cc:180
 msgid "[WARNING]: "
 msgstr "[ПРЕДУПРЕЖДЕНИЕ]:"
 
-#: ardour_ui2.cc:177
+#: ardour_ui2.cc:182
 msgid "[INFO]: "
 msgstr "[СПРАВКА]:"
 
-#: ardour_ui2.cc:241 ardour_ui_ed.cc:376
+#: ardour_ui2.cc:246 ardour_ui_ed.cc:377
 msgid "Auto Return"
 msgstr "Автовозврат"
 
-#: ardour_ui2.cc:243 ardour_ui_ed.cc:379
+#: ardour_ui2.cc:248 ardour_ui_ed.cc:380
 msgid "Follow Edits"
 msgstr "Следовать правкам"
 
-#: ardour_ui2.cc:621 rc_option_editor.cc:1004 rc_option_editor.cc:1022
+#: ardour_ui2.cc:626 rc_option_editor.cc:1004 rc_option_editor.cc:1022
 #: rc_option_editor.cc:1025 rc_option_editor.cc:1027 rc_option_editor.cc:1029
 #: rc_option_editor.cc:1037 rc_option_editor.cc:1045 rc_option_editor.cc:1047
 #: rc_option_editor.cc:1055 rc_option_editor.cc:1062 rc_option_editor.cc:1071
@@ -1563,23 +1567,23 @@ msgstr "Настройка редактора"
 msgid "Setup Mixer"
 msgstr "Настройка микшера"
 
-#: ardour_ui_dependents.cc:84
+#: ardour_ui_dependents.cc:85
 msgid "Reload Session History"
 msgstr "Повторная загрузка истории сеансов"
 
-#: ardour_ui_dialogs.cc:206
+#: ardour_ui_dialogs.cc:200
 msgid "Don't close"
 msgstr "Не закрывать"
 
-#: ardour_ui_dialogs.cc:207
+#: ardour_ui_dialogs.cc:201
 msgid "Just close"
 msgstr "Просто закрыть"
 
-#: ardour_ui_dialogs.cc:208
+#: ardour_ui_dialogs.cc:202
 msgid "Save and close"
 msgstr "Сохранить и закрыть"
 
-#: ardour_ui_dialogs.cc:293
+#: ardour_ui_dialogs.cc:291
 msgid "This screen is not tall enough to display the mixer window"
 msgstr "Размеров экрана недостаточно, чтобы показать окно микшера"
 
@@ -1644,7 +1648,7 @@ msgstr "Время задержки"
 msgid "Denormal Handling"
 msgstr "Обработка отклонений"
 
-#: ardour_ui_ed.cc:123 route_time_axis.cc:1475
+#: ardour_ui_ed.cc:123 route_time_axis.cc:1489
 msgid "New..."
 msgstr "Создать..."
 
@@ -1674,7 +1678,7 @@ msgstr "Удалить видео"
 
 #: ardour_ui_ed.cc:141
 msgid "Export To Video File"
-msgstr "Экспортировать видеофайл"
+msgstr "Видеофайл"
 
 #: ardour_ui_ed.cc:145
 msgid "Snapshot..."
@@ -1685,7 +1689,7 @@ msgid "Save As..."
 msgstr "Сохранить как..."
 
 #: ardour_ui_ed.cc:153 editor_actions.cc:1719 editor_markers.cc:858
-#: editor_snapshots.cc:123 mixer_strip.cc:1464 route_time_axis.cc:1471
+#: editor_snapshots.cc:123 mixer_strip.cc:1470 route_time_axis.cc:1485
 msgid "Rename..."
 msgstr "Переименовать..."
 
@@ -1738,8 +1742,8 @@ msgstr "Задержка отклика"
 msgid "Reconnect"
 msgstr "Пересоединить"
 
-#: ardour_ui_ed.cc:195 global_port_matrix.cc:198 io_selector.cc:210
-#: mixer_strip.cc:712 mixer_strip.cc:838
+#: ardour_ui_ed.cc:195 global_port_matrix.cc:207 io_selector.cc:210
+#: mixer_strip.cc:718 mixer_strip.cc:844
 msgid "Disconnect"
 msgstr "Отсоединить"
 
@@ -1755,7 +1759,7 @@ msgstr "Редактор на полный экран"
 msgid "Show Toolbars"
 msgstr "Показывать панели"
 
-#: ardour_ui_ed.cc:230 mixer_ui.cc:1863 mixer_ui.cc:1869
+#: ardour_ui_ed.cc:230 mixer_ui.cc:1865 mixer_ui.cc:1871
 msgid "Window|Mixer"
 msgstr "Микшер"
 
@@ -1763,27 +1767,31 @@ msgstr "Микшер"
 msgid "Toggle Editor+Mixer"
 msgstr "Редактор или микшер на переднем плане"
 
-#: ardour_ui_ed.cc:233 midi_tracer.cc:39
+#: ardour_ui_ed.cc:232 meterbridge.cc:224 meterbridge.cc:230
+msgid "Window|Meterbridge"
+msgstr "Панель индикаторов"
+
+#: ardour_ui_ed.cc:234 midi_tracer.cc:39
 msgid "MIDI Tracer"
 msgstr "Журнал MIDI-событий"
 
-#: ardour_ui_ed.cc:235
+#: ardour_ui_ed.cc:236
 msgid "Chat"
 msgstr "Пообщаться"
 
-#: ardour_ui_ed.cc:237
+#: ardour_ui_ed.cc:238
 msgid "Help|Manual"
 msgstr "Справка"
 
-#: ardour_ui_ed.cc:238
+#: ardour_ui_ed.cc:239
 msgid "Reference"
 msgstr "Справка в Интернете"
 
-#: ardour_ui_ed.cc:240 plugin_ui.cc:419
+#: ardour_ui_ed.cc:241 plugin_ui.cc:418
 msgid "Save"
 msgstr "Сохранить"
 
-#: ardour_ui_ed.cc:248 rc_option_editor.cc:1114 rc_option_editor.cc:1125
+#: ardour_ui_ed.cc:249 rc_option_editor.cc:1114 rc_option_editor.cc:1125
 #: rc_option_editor.cc:1134 rc_option_editor.cc:1147 rc_option_editor.cc:1160
 #: rc_option_editor.cc:1169 rc_option_editor.cc:1179 rc_option_editor.cc:1181
 #: rc_option_editor.cc:1191 rc_option_editor.cc:1207 rc_option_editor.cc:1220
@@ -1793,99 +1801,99 @@ msgstr "Сохранить"
 msgid "Transport"
 msgstr "Транспорт"
 
-#: ardour_ui_ed.cc:254 engine_dialog.cc:85 sfdb_ui.cc:559
+#: ardour_ui_ed.cc:255 engine_dialog.cc:85
 msgid "Stop"
 msgstr "Стоп"
 
-#: ardour_ui_ed.cc:257
+#: ardour_ui_ed.cc:258
 msgid "Roll"
 msgstr ""
 
-#: ardour_ui_ed.cc:261
+#: ardour_ui_ed.cc:262
 msgid "Start/Stop"
 msgstr "Старт/Стоп"
 
-#: ardour_ui_ed.cc:264
+#: ardour_ui_ed.cc:265
 msgid "Start/Continue/Stop"
 msgstr "Старт/Продолжить/Стоп"
 
-#: ardour_ui_ed.cc:267
+#: ardour_ui_ed.cc:268
 msgid "Stop and Forget Capture"
 msgstr "Остановиться и забыть захват"
 
-#: ardour_ui_ed.cc:277
+#: ardour_ui_ed.cc:278
 msgid "Transition To Roll"
 msgstr "В обычном направлении"
 
-#: ardour_ui_ed.cc:281
+#: ardour_ui_ed.cc:282
 msgid "Transition To Reverse"
 msgstr "В обратном направлении"
 
-#: ardour_ui_ed.cc:285
+#: ardour_ui_ed.cc:286
 msgid "Play Loop Range"
 msgstr "Воспроизвести петлю"
 
-#: ardour_ui_ed.cc:288
+#: ardour_ui_ed.cc:289
 msgid "Play Selected Range"
 msgstr ""
 
-#: ardour_ui_ed.cc:291
+#: ardour_ui_ed.cc:292
 msgid "Play Selection w/Preroll"
 msgstr ""
 
-#: ardour_ui_ed.cc:295
+#: ardour_ui_ed.cc:296
 msgid "Enable Record"
 msgstr "Разрешить запись"
 
-#: ardour_ui_ed.cc:298
+#: ardour_ui_ed.cc:299
 msgid "Start Recording"
 msgstr "Начать запись"
 
-#: ardour_ui_ed.cc:302
+#: ardour_ui_ed.cc:303
 msgid "Rewind"
 msgstr "Перемотать назад"
 
-#: ardour_ui_ed.cc:305
+#: ardour_ui_ed.cc:306
 msgid "Rewind (Slow)"
 msgstr "Перемотать назад (медленно)"
 
-#: ardour_ui_ed.cc:308
+#: ardour_ui_ed.cc:309
 msgid "Rewind (Fast)"
 msgstr "Перемотать назад (быстро)"
 
-#: ardour_ui_ed.cc:311 startup.cc:727
+#: ardour_ui_ed.cc:312 startup.cc:727
 msgid "Forward"
 msgstr "Перемотать вперёд"
 
-#: ardour_ui_ed.cc:314
+#: ardour_ui_ed.cc:315
 msgid "Forward (Slow)"
 msgstr "Перемотать вперёд (медленно)"
 
-#: ardour_ui_ed.cc:317
+#: ardour_ui_ed.cc:318
 msgid "Forward (Fast)"
 msgstr "Перемотать вперёд (быстро)"
 
-#: ardour_ui_ed.cc:320
+#: ardour_ui_ed.cc:321
 msgid "Goto Zero"
 msgstr "К нулевой отметке"
 
-#: ardour_ui_ed.cc:323
+#: ardour_ui_ed.cc:324
 msgid "Goto Start"
 msgstr "К началу"
 
-#: ardour_ui_ed.cc:326
+#: ardour_ui_ed.cc:327
 msgid "Goto End"
 msgstr "В конец"
 
-#: ardour_ui_ed.cc:329
+#: ardour_ui_ed.cc:330
 msgid "Goto Wall Clock"
 msgstr "К  текущему времени"
 
-#: ardour_ui_ed.cc:333
+#: ardour_ui_ed.cc:334
 msgid "Focus On Clock"
 msgstr ""
 
-#: ardour_ui_ed.cc:337 ardour_ui_ed.cc:346 audio_clock.cc:2046 editor.cc:237
+#: ardour_ui_ed.cc:338 ardour_ui_ed.cc:347 audio_clock.cc:2046 editor.cc:237
 #: editor_actions.cc:544 editor_actions.cc:553 export_timespan_selector.cc:88
 #: session_option_editor.cc:41 session_option_editor.cc:61
 #: session_option_editor.cc:80 session_option_editor.cc:96
@@ -1894,125 +1902,125 @@ msgstr ""
 msgid "Timecode"
 msgstr "Тайм-код"
 
-#: ardour_ui_ed.cc:339 ardour_ui_ed.cc:348 editor_actions.cc:542
+#: ardour_ui_ed.cc:340 ardour_ui_ed.cc:349 editor_actions.cc:542
 msgid "Bars & Beats"
 msgstr "Такты и доли"
 
-#: ardour_ui_ed.cc:341 ardour_ui_ed.cc:350
+#: ardour_ui_ed.cc:342 ardour_ui_ed.cc:351
 msgid "Minutes & Seconds"
 msgstr "Минуты и секунды"
 
-#: ardour_ui_ed.cc:343 ardour_ui_ed.cc:352 audio_clock.cc:2050 editor.cc:238
+#: ardour_ui_ed.cc:344 ardour_ui_ed.cc:353 audio_clock.cc:2050 editor.cc:238
 #: editor_actions.cc:543
 msgid "Samples"
 msgstr "Сэмплы"
 
-#: ardour_ui_ed.cc:355
+#: ardour_ui_ed.cc:356
 msgid "Punch In"
 msgstr "Начало врезки"
 
-#: ardour_ui_ed.cc:356 mixer_strip.cc:1904 route_ui.cc:132
+#: ardour_ui_ed.cc:357 mixer_strip.cc:1904 route_ui.cc:132
 #: time_info_box.cc:113
 msgid "In"
 msgstr "Вход"
 
-#: ardour_ui_ed.cc:359
+#: ardour_ui_ed.cc:360
 msgid "Punch Out"
 msgstr "Конец врезки"
 
-#: ardour_ui_ed.cc:360 time_info_box.cc:114
+#: ardour_ui_ed.cc:361 time_info_box.cc:114
 msgid "Out"
 msgstr "Выход"
 
-#: ardour_ui_ed.cc:363
+#: ardour_ui_ed.cc:364
 msgid "Punch In/Out"
 msgstr "Врезка"
 
-#: ardour_ui_ed.cc:364
+#: ardour_ui_ed.cc:365
 msgid "In/Out"
 msgstr "Вх/Вых"
 
-#: ardour_ui_ed.cc:367 rc_option_editor.cc:1071
+#: ardour_ui_ed.cc:368 rc_option_editor.cc:1071
 msgid "Click"
 msgstr "Метроном"
 
-#: ardour_ui_ed.cc:370
+#: ardour_ui_ed.cc:371
 msgid "Auto Input"
 msgstr "Автовход"
 
-#: ardour_ui_ed.cc:373
+#: ardour_ui_ed.cc:374
 msgid "Auto Play"
 msgstr "Автовоспр."
 
-#: ardour_ui_ed.cc:384
+#: ardour_ui_ed.cc:385
 msgid "Sync Startup to Video"
 msgstr "Синхронизировать начало с видео"
 
-#: ardour_ui_ed.cc:386
+#: ardour_ui_ed.cc:387
 msgid "Time Master"
 msgstr "Ведущий времени"
 
-#: ardour_ui_ed.cc:393
+#: ardour_ui_ed.cc:394
 msgid "Toggle Record Enable Track %1"
 msgstr "Переключить записываемость дорожки %1"
 
-#: ardour_ui_ed.cc:400
+#: ardour_ui_ed.cc:401
 msgid "Percentage"
 msgstr "Проценты"
 
-#: ardour_ui_ed.cc:401 shuttle_control.cc:169
+#: ardour_ui_ed.cc:402 shuttle_control.cc:169
 msgid "Semitones"
 msgstr "Полутона"
 
-#: ardour_ui_ed.cc:405
+#: ardour_ui_ed.cc:406
 msgid "Send MTC"
 msgstr "Передавать MTC"
 
-#: ardour_ui_ed.cc:407
+#: ardour_ui_ed.cc:408
 msgid "Send MMC"
 msgstr "Передавать MMC"
 
-#: ardour_ui_ed.cc:409
+#: ardour_ui_ed.cc:410
 msgid "Use MMC"
 msgstr "Использовать MMC"
 
-#: ardour_ui_ed.cc:411 rc_option_editor.cc:1702
+#: ardour_ui_ed.cc:412 rc_option_editor.cc:1702
 msgid "Send MIDI Clock"
 msgstr "Отправлять MIDI Clock"
 
-#: ardour_ui_ed.cc:413
+#: ardour_ui_ed.cc:414
 msgid "Send MIDI Feedback"
 msgstr "Отправлять MIDI Feedback"
 
-#: ardour_ui_ed.cc:419
+#: ardour_ui_ed.cc:420
 msgid "Panic"
 msgstr ""
 
-#: ardour_ui_ed.cc:559
+#: ardour_ui_ed.cc:560
 msgid "Wall Clock"
 msgstr "Текущее время"
 
-#: ardour_ui_ed.cc:560
+#: ardour_ui_ed.cc:561
 msgid "Disk Space"
 msgstr "Диск. пространство"
 
-#: ardour_ui_ed.cc:561
+#: ardour_ui_ed.cc:562
 msgid "DSP"
 msgstr "DSP"
 
-#: ardour_ui_ed.cc:562
+#: ardour_ui_ed.cc:563
 msgid "Buffers"
 msgstr "Буферы"
 
-#: ardour_ui_ed.cc:563
+#: ardour_ui_ed.cc:564
 msgid "JACK Sampling Rate and Latency"
 msgstr "Частота сэмплирования и задержка JACK"
 
-#: ardour_ui_ed.cc:564
+#: ardour_ui_ed.cc:565
 msgid "Timecode Format"
 msgstr "Формат тайм-кода"
 
-#: ardour_ui_ed.cc:565
+#: ardour_ui_ed.cc:566
 msgid "File Format"
 msgstr "Формат файлов"
 
@@ -2149,28 +2157,28 @@ msgid "hide track"
 msgstr "Скрыть дорожку"
 
 #: automation_time_axis.cc:255 automation_time_axis.cc:307
-#: automation_time_axis.cc:496 gain_meter.cc:196 generic_pluginui.cc:456
-#: generic_pluginui.cc:733 panner_ui.cc:150
+#: automation_time_axis.cc:496 gain_meter.cc:194 generic_pluginui.cc:456
+#: generic_pluginui.cc:746 panner_ui.cc:150
 msgid "Automation|Manual"
 msgstr "Вручную"
 
 #: automation_time_axis.cc:257 automation_time_axis.cc:318
 #: automation_time_axis.cc:501 editor.cc:1933 editor.cc:2010
-#: editor_actions.cc:118 editor_actions.cc:1865 gain_meter.cc:199
-#: generic_pluginui.cc:459 generic_pluginui.cc:735 midi_time_axis.cc:1488
+#: editor_actions.cc:118 editor_actions.cc:1865 gain_meter.cc:197
+#: generic_pluginui.cc:459 generic_pluginui.cc:748 midi_time_axis.cc:1488
 #: midi_time_axis.cc:1491 midi_time_axis.cc:1494 panner_ui.cc:153
 msgid "Play"
 msgstr "Воспр."
 
 #: automation_time_axis.cc:259 automation_time_axis.cc:329
-#: automation_time_axis.cc:506 gain_meter.cc:202 generic_pluginui.cc:462
-#: generic_pluginui.cc:737 panner_ui.cc:156
+#: automation_time_axis.cc:506 gain_meter.cc:200 generic_pluginui.cc:462
+#: generic_pluginui.cc:750 panner_ui.cc:156
 msgid "Write"
 msgstr "Запись"
 
 #: automation_time_axis.cc:261 automation_time_axis.cc:340
-#: automation_time_axis.cc:511 gain_meter.cc:205 generic_pluginui.cc:465
-#: generic_pluginui.cc:739 panner_ui.cc:159
+#: automation_time_axis.cc:511 gain_meter.cc:203 generic_pluginui.cc:465
+#: generic_pluginui.cc:752 panner_ui.cc:159
 msgid "Touch"
 msgstr "Касание"
 
@@ -2183,7 +2191,7 @@ msgid "clear automation"
 msgstr "Очистить автоматизацию"
 
 #: automation_time_axis.cc:485 editor_actions.cc:613 editor_markers.cc:857
-#: location_ui.cc:55 plugin_selector.cc:85 route_time_axis.cc:699
+#: location_ui.cc:55 plugin_selector.cc:85 route_time_axis.cc:708
 msgid "Hide"
 msgstr "Скрыть"
 
@@ -2204,7 +2212,7 @@ msgstr "Дискретный"
 msgid "Linear"
 msgstr "Линейная"
 
-#: automation_time_axis.cc:543 rhythm_ferret.cc:110 route_time_axis.cc:638
+#: automation_time_axis.cc:543 rhythm_ferret.cc:110 route_time_axis.cc:647
 #: shuttle_control.cc:188
 msgid "Mode"
 msgstr "Режим"
@@ -2221,13 +2229,13 @@ msgstr "Изменение пакета"
 msgid "Direction:"
 msgstr "Направление:"
 
-#: bundle_manager.cc:205 bundle_manager.cc:209 mixer_strip.cc:156
-#: mixer_strip.cc:2132
+#: bundle_manager.cc:205 bundle_manager.cc:209 mixer_strip.cc:157
+#: mixer_strip.cc:2126
 msgid "Input"
 msgstr "Вход"
 
 #: bundle_manager.cc:206 bundle_manager.cc:211 bundle_manager.cc:245
-#: mixer_strip.cc:161 mixer_strip.cc:2135
+#: mixer_strip.cc:162 mixer_strip.cc:2129
 msgid "Output"
 msgstr "Выход"
 
@@ -2237,8 +2245,8 @@ msgid "Edit"
 msgstr "Правка"
 
 #: bundle_manager.cc:265 editor.cc:5493 editor_actions.cc:310
-#: editor_actions.cc:368 plugin_ui.cc:420 processor_box.cc:2227
-#: route_time_axis.cc:704
+#: editor_actions.cc:368 plugin_ui.cc:419 processor_box.cc:2216
+#: route_time_axis.cc:713
 msgid "Delete"
 msgstr "Удалить"
 
@@ -2406,7 +2414,7 @@ msgstr "Время"
 
 #: edit_note_dialog.cc:98 editor_regions.cc:114
 #: export_timespan_selector.cc:359 export_timespan_selector.cc:421
-#: location_ui.cc:313 midi_list_editor.cc:114 time_info_box.cc:105
+#: location_ui.cc:317 midi_list_editor.cc:114 time_info_box.cc:105
 msgid "Length"
 msgstr "Длительность"
 
@@ -2687,8 +2695,8 @@ msgstr "Симметрично"
 msgid "Slow"
 msgstr "Медленно"
 
-#: editor.cc:1390 editor.cc:1483 editor.cc:1545 sfdb_ui.cc:1606
-#: sfdb_ui.cc:1715
+#: editor.cc:1390 editor.cc:1483 editor.cc:1545 sfdb_ui.cc:1633
+#: sfdb_ui.cc:1742
 msgid "Fast"
 msgstr "Быстро"
 
@@ -2708,7 +2716,7 @@ msgstr "Активировать"
 msgid "Slowest"
 msgstr "Медленнее всего"
 
-#: editor.cc:1572 route_time_axis.cc:1863 selection.cc:1009 selection.cc:1064
+#: editor.cc:1572 route_time_axis.cc:1877 selection.cc:1009 selection.cc:1064
 msgid "programming error: "
 msgstr "Ошибка в программе: "
 
@@ -2825,7 +2833,7 @@ msgid "Select All in Track"
 msgstr "Выделить всё на дорожке"
 
 #: editor.cc:1942 editor.cc:2019 editor_actions.cc:185
-#: export_timespan_selector.cc:53 processor_box.cc:2235
+#: export_timespan_selector.cc:53 processor_box.cc:2224
 msgid "Select All"
 msgstr "Выделить всё"
 
@@ -2877,15 +2885,15 @@ msgstr "Создать выделение между указателем и к�
 msgid "Select"
 msgstr "Выделить"
 
-#: editor.cc:1965 editor.cc:2036 editor_actions.cc:309 processor_box.cc:2220
+#: editor.cc:1965 editor.cc:2036 editor_actions.cc:309 processor_box.cc:2209
 msgid "Cut"
 msgstr "Вырезать"
 
-#: editor.cc:1966 editor.cc:2037 editor_actions.cc:312 processor_box.cc:2223
+#: editor.cc:1966 editor.cc:2037 editor_actions.cc:312 processor_box.cc:2212
 msgid "Copy"
 msgstr "Копировать"
 
-#: editor.cc:1967 editor.cc:2038 editor_actions.cc:313 processor_box.cc:2231
+#: editor.cc:1967 editor.cc:2038 editor_actions.cc:313 processor_box.cc:2220
 msgid "Paste"
 msgstr "Вставить"
 
@@ -3090,7 +3098,7 @@ msgstr "Очистить списки воспроизведения"
 msgid "Please wait while %1 loads visual data."
 msgstr "Дождитесь загрузки визуальных данных в %1."
 
-#: editor.cc:5492 editor_markers.cc:940 panner_ui.cc:393 processor_box.cc:2251
+#: editor.cc:5492 editor_markers.cc:940 panner_ui.cc:393 processor_box.cc:2240
 msgid "Edit..."
 msgstr "Изменить"
 
@@ -3139,7 +3147,7 @@ msgstr "Слои"
 msgid "Position"
 msgstr "Положение"
 
-#: editor_actions.cc:101 gain_meter.cc:124 gain_meter.cc:755 panner_ui.cc:177
+#: editor_actions.cc:101 gain_meter.cc:120 gain_meter.cc:787 panner_ui.cc:177
 #: panner_ui.cc:586
 msgid "Trim"
 msgstr "Обрезать"
@@ -3231,8 +3239,8 @@ msgstr "Дополнительный счётчик"
 msgid "Separate"
 msgstr "Разделить"
 
-#: editor_actions.cc:132 mixer_strip.cc:1916 route_time_axis.cc:199
-#: route_time_axis.cc:2397
+#: editor_actions.cc:132 mixer_strip.cc:1913 route_time_axis.cc:208
+#: route_time_axis.cc:2417
 msgid "Solo"
 msgstr "Соло"
 
@@ -3244,7 +3252,7 @@ msgstr "Подвыборки"
 msgid "Timecode fps"
 msgstr "Скорость (FPS) тайм-кода"
 
-#: editor_actions.cc:137 route_time_axis.cc:421
+#: editor_actions.cc:137 route_time_axis.cc:430
 msgid "Height"
 msgstr "Высота"
 
@@ -3368,7 +3376,7 @@ msgstr "К началу области"
 msgid "Playhead to Range End"
 msgstr "К концу области"
 
-#: editor_actions.cc:186 export_timespan_selector.cc:61 processor_box.cc:2237
+#: editor_actions.cc:186 export_timespan_selector.cc:61 processor_box.cc:2226
 msgid "Deselect All"
 msgstr "Снять все выделения"
 
@@ -3637,8 +3645,8 @@ msgid "Toggle Active"
 msgstr "Переключить активность"
 
 #: editor_actions.cc:370 editor_actions.cc:1716 editor_markers.cc:876
-#: editor_markers.cc:941 editor_snapshots.cc:121 mixer_strip.cc:1488
-#: route_time_axis.cc:701
+#: editor_markers.cc:941 editor_snapshots.cc:121 mixer_strip.cc:1494
+#: route_time_axis.cc:710
 msgid "Remove"
 msgstr "Удалить"
 
@@ -3646,19 +3654,19 @@ msgstr "Удалить"
 msgid "Fit Selected Tracks"
 msgstr "Только выделенные дорожки"
 
-#: editor_actions.cc:376 time_axis_view.cc:1298
+#: editor_actions.cc:376 time_axis_view.cc:1301
 msgid "Largest"
 msgstr "Огромная"
 
-#: editor_actions.cc:379 time_axis_view.cc:1299
+#: editor_actions.cc:379 time_axis_view.cc:1302
 msgid "Larger"
 msgstr "Больше"
 
-#: editor_actions.cc:382 editor_rulers.cc:375 time_axis_view.cc:1300
+#: editor_actions.cc:382 editor_rulers.cc:375 time_axis_view.cc:1303
 msgid "Large"
 msgstr "Большая"
 
-#: editor_actions.cc:388 editor_rulers.cc:379 time_axis_view.cc:1302
+#: editor_actions.cc:388 editor_rulers.cc:379 time_axis_view.cc:1305
 msgid "Small"
 msgstr "Маленькая"
 
@@ -4025,7 +4033,7 @@ msgstr ""
 
 #: editor_actions.cc:652 editor_audio_import.cc:279
 #: session_import_dialog.cc:74 session_import_dialog.cc:94
-#: session_metadata_dialog.cc:297 editor_videotimeline.cc:107
+#: session_metadata_dialog.cc:297 editor_videotimeline.cc:108
 msgid "Import"
 msgstr "Импортировать"
 
@@ -4103,7 +4111,7 @@ msgstr "Приклеить к тактам и долям"
 msgid "Remove Sync"
 msgstr "Удалить синхронизатор"
 
-#: editor_actions.cc:1752 mixer_strip.cc:1903 route_time_axis.cc:200
+#: editor_actions.cc:1752 mixer_strip.cc:1903 route_time_axis.cc:209
 msgid "Mute"
 msgstr "Молча"
 
@@ -4376,7 +4384,7 @@ msgstr ""
 "В этом сеансе уже есть исходный файл с именем %1. Вы хотите импортировать %2 "
 "как новый источник или пропустить его?"
 
-#: editor_audio_import.cc:279 editor_videotimeline.cc:107
+#: editor_audio_import.cc:279 editor_videotimeline.cc:108
 msgid "Cancel Import"
 msgstr "Отменить импорт"
 
@@ -4424,7 +4432,7 @@ msgstr "Начало видеофайла"
 
 #: editor_drag.cc:1702
 msgid "Diff:"
-msgstr ""
+msgstr "Разница:"
 
 #: editor_drag.cc:1722
 msgid "Move Video"
@@ -4610,7 +4618,7 @@ msgid "end"
 msgstr "Конец"
 
 #: editor_markers.cc:646 editor_ops.cc:1744 editor_ops.cc:1764
-#: editor_ops.cc:1788 editor_ops.cc:1815 location_ui.cc:1005
+#: editor_ops.cc:1788 editor_ops.cc:1815 location_ui.cc:1017
 msgid "add marker"
 msgstr "добавка маркера"
 
@@ -4618,7 +4626,7 @@ msgstr "добавка маркера"
 msgid "range"
 msgstr "область"
 
-#: editor_markers.cc:713 location_ui.cc:840
+#: editor_markers.cc:713 location_ui.cc:852
 msgid "remove marker"
 msgstr "удаление маркера"
 
@@ -4695,7 +4703,7 @@ msgid "Rename Range"
 msgstr "Переименовать выделение"
 
 #: editor_markers.cc:1363 editor_mouse.cc:2510 processor_box.cc:1768
-#: processor_box.cc:2233 route_time_axis.cc:968 route_ui.cc:1535
+#: processor_box.cc:2222 route_time_axis.cc:982 route_ui.cc:1535
 msgid "Rename"
 msgstr "Переименовать"
 
@@ -5326,7 +5334,7 @@ msgstr ""
 msgid "Length of region fade-out (units: secondary clock), () if dsisabled"
 msgstr ""
 
-#: editor_regions.cc:118 mixer_strip.cc:1960 mono_panner.cc:179
+#: editor_regions.cc:118 mixer_strip.cc:1953 mono_panner.cc:179
 #: stereo_panner.cc:217 stereo_panner.cc:240
 msgid "L"
 msgstr "Л"
@@ -5343,8 +5351,9 @@ msgstr ""
 msgid "Region position glued to Bars|Beats time?"
 msgstr ""
 
-#: editor_regions.cc:120 editor_routes.cc:207 gain_meter.cc:723
-#: mixer_strip.cc:1934 panner_ui.cc:554 stereo_panner.cc:237
+#: editor_regions.cc:120 editor_routes.cc:207 gain_meter.cc:755
+#: mixer_strip.cc:1930 meter_strip.cc:272 panner_ui.cc:554
+#: stereo_panner.cc:237
 msgid "M"
 msgstr "В"
 
@@ -5413,7 +5422,8 @@ msgstr "Название дорожи/шины"
 msgid "Track/Bus visible ?"
 msgstr "Дорожка или шина видима?"
 
-#: editor_routes.cc:204 mixer_strip.cc:1951 route_time_axis.cc:2387
+#: editor_routes.cc:204 mixer_strip.cc:1944 meter_strip.cc:286
+#: route_time_axis.cc:2407
 msgid "A"
 msgstr "A"
 
@@ -5421,7 +5431,7 @@ msgstr "A"
 msgid "Track/Bus active ?"
 msgstr "Дорожка или шина активна?"
 
-#: editor_routes.cc:205 mixer_strip.cc:1935
+#: editor_routes.cc:205 mixer_strip.cc:1931
 msgid "I"
 msgstr "ВХ"
 
@@ -5429,7 +5439,7 @@ msgstr "ВХ"
 msgid "MIDI input enabled"
 msgstr "Вход MIDI включен"
 
-#: editor_routes.cc:206 mixer_strip.cc:1933 mono_panner.cc:198
+#: editor_routes.cc:206 mixer_strip.cc:1929 mono_panner.cc:198
 #: stereo_panner.cc:215 stereo_panner.cc:242
 msgid "R"
 msgstr "П"
@@ -5442,7 +5452,7 @@ msgstr "Готовность к записи"
 msgid "Muted"
 msgstr ""
 
-#: editor_routes.cc:208 mixer_strip.cc:1947
+#: editor_routes.cc:208 mixer_strip.cc:1940 meter_strip.cc:282
 msgid "S"
 msgstr "S"
 
@@ -5454,7 +5464,7 @@ msgstr "..."
 msgid "SI"
 msgstr ""
 
-#: editor_routes.cc:209 mixer_strip.cc:351 rc_option_editor.cc:1872
+#: editor_routes.cc:209 mixer_strip.cc:352 rc_option_editor.cc:1872
 msgid "Solo Isolated"
 msgstr "Изолирование соло"
 
@@ -5736,7 +5746,7 @@ msgstr "192КГц"
 #: engine_dialog.cc:127 engine_dialog.cc:132 engine_dialog.cc:169
 #: engine_dialog.cc:552 midi_channel_selector.cc:163
 #: midi_channel_selector.cc:402 midi_channel_selector.cc:438
-#: rc_option_editor.cc:1250 sfdb_ui.cc:542
+#: rc_option_editor.cc:1250 sfdb_ui.cc:541
 msgid "None"
 msgstr "Нет"
 
@@ -5785,7 +5795,7 @@ msgstr "Драйвер:"
 msgid "Audio Interface:"
 msgstr "Звуковой интерфейс:"
 
-#: engine_dialog.cc:187 sfdb_ui.cc:148 sfdb_ui.cc:261 sfdb_ui.cc:266
+#: engine_dialog.cc:187 sfdb_ui.cc:149 sfdb_ui.cc:262 sfdb_ui.cc:267
 msgid "Sample rate:"
 msgstr "Частота сэмплирования:"
 
@@ -5907,7 +5917,7 @@ msgstr "Значению AudioSetup для %1 не хватает данных"
 msgid "configuration files contain a JACK server path that doesn't exist (%1)"
 msgstr ""
 
-#: export_channel_selector.cc:45 sfdb_ui.cc:146
+#: export_channel_selector.cc:45 sfdb_ui.cc:147
 msgid "Channels:"
 msgstr "Каналов:"
 
@@ -6184,6 +6194,10 @@ msgstr "Параметры FLAC"
 msgid "Broadcast Wave options"
 msgstr "Параметры Broadcast Wave"
 
+#: export_format_selector.cc:136
+msgid "Do you really want to remove the format?"
+msgstr "Вы действительно хотите удалить этот формат?"
+
 #: export_preset_selector.cc:28
 msgid "Preset"
 msgstr "Профиль"
@@ -6193,6 +6207,10 @@ msgid ""
 "The selected preset did not load successfully!\n"
 "Perhaps it references a format that has been removed?"
 msgstr ""
+
+#: export_preset_selector.cc:156
+msgid "Do you really want to remove this preset?"
+msgstr "Вы действительно хотите удалить этот профиль?"
 
 #: export_timespan_selector.cc:46
 msgid "Show Times as:"
@@ -6206,36 +6224,32 @@ msgstr " до "
 msgid "Range"
 msgstr "Диапазон"
 
-#: gain_meter.cc:109 gain_meter.cc:431 gain_meter.cc:820
+#: gain_meter.cc:105 gain_meter.cc:356 gain_meter.cc:461 gain_meter.cc:852
 msgid "-inf"
 msgstr "-inf"
 
-#: gain_meter.cc:115 gain_meter.cc:869
+#: gain_meter.cc:111 gain_meter.cc:909
 msgid "Fader automation mode"
 msgstr "Режим автоматизации фейдера"
 
-#: gain_meter.cc:116 gain_meter.cc:870
+#: gain_meter.cc:112 gain_meter.cc:910
 msgid "Fader automation type"
 msgstr "Тип автоматизации фейдера"
 
-#: gain_meter.cc:125 gain_meter.cc:759 panner_ui.cc:178 panner_ui.cc:590
+#: gain_meter.cc:121 gain_meter.cc:791 panner_ui.cc:178 panner_ui.cc:590
 msgid "Abs"
 msgstr "Абс"
 
-#: gain_meter.cc:334
-msgid "-Inf"
-msgstr "-Inf"
-
-#: gain_meter.cc:726 mixer_strip.cc:1954 panner_ui.cc:557
-#: route_time_axis.cc:2391
+#: gain_meter.cc:758 mixer_strip.cc:1947 meter_strip.cc:289 panner_ui.cc:557
+#: route_time_axis.cc:2411
 msgid "P"
 msgstr "P"
 
-#: gain_meter.cc:729 panner_ui.cc:560
+#: gain_meter.cc:761 panner_ui.cc:560
 msgid "T"
 msgstr "К"
 
-#: gain_meter.cc:732 panner_ui.cc:563
+#: gain_meter.cc:764 panner_ui.cc:563
 msgid "W"
 msgstr "З"
 
@@ -6247,7 +6261,7 @@ msgstr "<span size=\"large\">Профили</span>"
 msgid "Switches"
 msgstr "Переключатели"
 
-#: generic_pluginui.cc:242 generic_pluginui.cc:376 processor_box.cc:2210
+#: generic_pluginui.cc:242 generic_pluginui.cc:376 processor_box.cc:2199
 msgid "Controls"
 msgstr "Управление"
 
@@ -6275,7 +6289,7 @@ msgstr "Управление звуковыми соединениями"
 msgid "MIDI Connection Manager"
 msgstr "Управление MIDI-соединениями"
 
-#: global_port_matrix.cc:204 io_selector.cc:216
+#: global_port_matrix.cc:213 io_selector.cc:216
 msgid "port"
 msgstr "порт"
 
@@ -6427,11 +6441,11 @@ msgstr "Импортируется  файл: %1 из %2"
 msgid "I/O selector"
 msgstr "Выбор входов и выходов"
 
-#: io_selector.cc:266
+#: io_selector.cc:265
 msgid "%1 input"
 msgstr "%1 вход"
 
-#: io_selector.cc:268
+#: io_selector.cc:267
 msgid "%1 output"
 msgstr "%1 выход"
 
@@ -6507,7 +6521,7 @@ msgstr[2] "%1 сэмплов"
 msgid "Reset"
 msgstr "Сбросить"
 
-#: latency_gui.cc:151 rhythm_ferret.cc:274 sfdb_ui.cc:1734
+#: latency_gui.cc:151 rhythm_ferret.cc:274 sfdb_ui.cc:1761
 msgid "programming error: %1 (%2)"
 msgstr "Ошибка в программе: %1 (%2)"
 
@@ -6535,63 +6549,63 @@ msgstr "Композитор:"
 msgid "Pre-Emphasis"
 msgstr ""
 
-#: location_ui.cc:310
+#: location_ui.cc:314
 msgid "Remove this range"
 msgstr "Удалить эту область"
 
-#: location_ui.cc:311
+#: location_ui.cc:315
 msgid "Start time - middle click to locate here"
 msgstr ""
 
-#: location_ui.cc:312
+#: location_ui.cc:316
 msgid "End time - middle click to locate here"
 msgstr ""
 
-#: location_ui.cc:315
+#: location_ui.cc:319
 msgid "Set range start from playhead location"
 msgstr "Установить начало диапазона по указателю воспроизведения"
 
-#: location_ui.cc:316
+#: location_ui.cc:320
 msgid "Set range end from playhead location"
 msgstr "Установить конец диапазона по указателю воспроизведения"
 
-#: location_ui.cc:320
+#: location_ui.cc:324
 msgid "Remove this marker"
 msgstr "Удалить этот маркер"
 
-#: location_ui.cc:321
+#: location_ui.cc:325
 msgid "Position - middle click to locate here"
 msgstr ""
 
-#: location_ui.cc:323
+#: location_ui.cc:327
 msgid "Set marker time from playhead location"
 msgstr ""
 
-#: location_ui.cc:462
+#: location_ui.cc:494
 msgid "You cannot put a CD marker at the start of the session"
 msgstr "Размещение маркера CD в начале сеанса невозможно"
 
-#: location_ui.cc:708
+#: location_ui.cc:720
 msgid "New Marker"
 msgstr "Создать маркер"
 
-#: location_ui.cc:709
+#: location_ui.cc:721
 msgid "New Range"
 msgstr "Создать область"
 
-#: location_ui.cc:722
+#: location_ui.cc:734
 msgid "<b>Loop/Punch Ranges</b>"
 msgstr "<b>Диапазоны петель/врезок</b>"
 
-#: location_ui.cc:747
+#: location_ui.cc:759
 msgid "<b>Markers (Including CD Index)</b>"
 msgstr "<b>Маркеры (включая индекс CD)</b>"
 
-#: location_ui.cc:782
+#: location_ui.cc:794
 msgid "<b>Ranges (Including CD Track Ranges)</b>"
 msgstr "<b>Диапазоны (включая диапазоны дорожек CD)</b>"
 
-#: location_ui.cc:1024
+#: location_ui.cc:1036
 msgid "add range marker"
 msgstr "добавка маркера выделения"
 
@@ -7263,152 +7277,152 @@ msgstr ""
 msgid "Could not find mixer.bindings in search path %1"
 msgstr ""
 
-#: mixer_strip.cc:91 mixer_strip.cc:119 mixer_strip.cc:1720
+#: mixer_strip.cc:92 mixer_strip.cc:120 mixer_strip.cc:1720
 msgid "pre"
 msgstr "lj"
 
-#: mixer_strip.cc:93 mixer_strip.cc:121 mixer_strip.cc:352 mixer_strip.cc:1293
+#: mixer_strip.cc:94 mixer_strip.cc:122 mixer_strip.cc:353 mixer_strip.cc:1299
 #: rc_option_editor.cc:1873
 msgid "Comments"
 msgstr "Комментарии"
 
-#: mixer_strip.cc:145
+#: mixer_strip.cc:146
 msgid "Click to toggle the width of this mixer strip."
 msgstr "Щёлкните для переключения ширины полоски микшера"
 
-#: mixer_strip.cc:147
+#: mixer_strip.cc:148
 msgid ""
 "\n"
 "%1-%2-click to toggle the width of all strips."
 msgstr ""
 
-#: mixer_strip.cc:154
+#: mixer_strip.cc:155
 msgid "Hide this mixer strip"
 msgstr "Скрыть полоску микшера"
 
-#: mixer_strip.cc:165
+#: mixer_strip.cc:166
 msgid "Click to select metering point"
 msgstr "Щёлкните для выбора точка замера"
 
-#: mixer_strip.cc:171
+#: mixer_strip.cc:172
 msgid "tupni"
 msgstr ""
 
-#: mixer_strip.cc:190
+#: mixer_strip.cc:191
 msgid "Isolate Solo"
 msgstr "Изолировать соло"
 
-#: mixer_strip.cc:199
+#: mixer_strip.cc:200
 msgid "Lock Solo Status"
 msgstr "Статус блокировки солирования"
 
-#: mixer_strip.cc:201 mixer_strip.cc:1929
+#: mixer_strip.cc:202 mixer_strip.cc:1925
 msgid "lock"
 msgstr "Блок"
 
-#: mixer_strip.cc:202 mixer_strip.cc:1928
+#: mixer_strip.cc:203 mixer_strip.cc:1924
 msgid "iso"
 msgstr "Изол"
 
-#: mixer_strip.cc:256
+#: mixer_strip.cc:257
 msgid "Mix group"
 msgstr "Группа микса"
 
-#: mixer_strip.cc:349 rc_option_editor.cc:1870
+#: mixer_strip.cc:350 rc_option_editor.cc:1870
 msgid "Phase Invert"
 msgstr "Инверсия фазы"
 
-#: mixer_strip.cc:350 rc_option_editor.cc:1871 route_ui.cc:1213
+#: mixer_strip.cc:351 rc_option_editor.cc:1871 route_ui.cc:1213
 msgid "Solo Safe"
 msgstr "Блокировка солирования"
 
-#: mixer_strip.cc:353 mixer_ui.cc:124 route_time_axis.cc:664
+#: mixer_strip.cc:354 mixer_ui.cc:124 route_time_axis.cc:673
 msgid "Group"
 msgstr "Группа"
 
-#: mixer_strip.cc:354 rc_option_editor.cc:1874
+#: mixer_strip.cc:355 rc_option_editor.cc:1874
 msgid "Meter Point"
 msgstr "Точка измерения"
 
-#: mixer_strip.cc:466
+#: mixer_strip.cc:469
 msgid "Enable/Disable MIDI input"
 msgstr "Включить или выключить MIDI-вход"
 
-#: mixer_strip.cc:616
+#: mixer_strip.cc:621
 msgid ""
 "Aux\n"
 "Sends"
 msgstr ""
 
-#: mixer_strip.cc:640
+#: mixer_strip.cc:645
 msgid "Snd"
 msgstr "Псл"
 
-#: mixer_strip.cc:694 mixer_strip.cc:822 processor_box.cc:2152
+#: mixer_strip.cc:700 mixer_strip.cc:828 processor_box.cc:2141
 msgid "Not connected to JACK - no I/O changes are possible"
 msgstr "Нет соединения с JACK, любые изменения входа-выхода невозможны"
 
-#: mixer_strip.cc:1089
+#: mixer_strip.cc:1095
 msgid "<b>INPUT</b> to %1"
 msgstr "<b>ВХОД</b> в %1"
 
-#: mixer_strip.cc:1092
+#: mixer_strip.cc:1098
 msgid "<b>OUTPUT</b> from %1"
 msgstr "<b>ВЫХОД</b> из %1"
 
-#: mixer_strip.cc:1167
+#: mixer_strip.cc:1173
 msgid "Disconnected"
 msgstr "Нет соединения"
 
-#: mixer_strip.cc:1296
+#: mixer_strip.cc:1302
 msgid "*Comments*"
 msgstr "*Кмт*"
 
-#: mixer_strip.cc:1303
+#: mixer_strip.cc:1309
 msgid "Cmt"
 msgstr "Кмт"
 
-#: mixer_strip.cc:1306
+#: mixer_strip.cc:1312
 msgid "*Cmt*"
 msgstr "*Кмт*"
 
-#: mixer_strip.cc:1312
+#: mixer_strip.cc:1318
 msgid "Click to Add/Edit Comments"
 msgstr "Нажмите для добавления/правки комментариев"
 
-#: mixer_strip.cc:1351
+#: mixer_strip.cc:1357
 msgid ": comment editor"
 msgstr ": редактор комментариев"
 
-#: mixer_strip.cc:1428
+#: mixer_strip.cc:1434
 msgid "Grp"
 msgstr "Грп"
 
-#: mixer_strip.cc:1431
+#: mixer_strip.cc:1437
 msgid "~G"
 msgstr "нГр"
 
-#: mixer_strip.cc:1460
+#: mixer_strip.cc:1466
 msgid "Comments..."
 msgstr "Комментарии..."
 
-#: mixer_strip.cc:1462
+#: mixer_strip.cc:1468
 msgid "Save As Template..."
 msgstr "Сохранить как шаблон..."
 
-#: mixer_strip.cc:1468 route_group_dialog.cc:39 route_time_axis.cc:687
+#: mixer_strip.cc:1474 route_group_dialog.cc:39 route_time_axis.cc:696
 msgid "Active"
 msgstr "Активность"
 
-#: mixer_strip.cc:1475
+#: mixer_strip.cc:1481
 msgid "Adjust Latency..."
 msgstr "Скорректировать задержку..."
 
-#: mixer_strip.cc:1478
+#: mixer_strip.cc:1484
 msgid "Protect Against Denormals"
 msgstr "Защищать от отклонений"
 
-#: mixer_strip.cc:1484 route_time_axis.cc:426
+#: mixer_strip.cc:1490 route_time_axis.cc:435
 msgid "Remote Control ID..."
 msgstr "ID для удалённого управления..."
 
@@ -7448,30 +7462,62 @@ msgstr ""
 msgid "Disk"
 msgstr "Диск"
 
-#: mixer_strip.cc:1920 monitor_section.cc:63
+#: mixer_strip.cc:1917 monitor_section.cc:63
 msgid "AFL"
 msgstr "AFL"
 
-#: mixer_strip.cc:1923 monitor_section.cc:64
+#: mixer_strip.cc:1920 monitor_section.cc:64
 msgid "PFL"
 msgstr "PFL"
 
-#: mixer_strip.cc:1936
+#: mixer_strip.cc:1932
 msgid "D"
 msgstr ""
 
-#: mixer_strip.cc:1959
+#: mixer_strip.cc:1952
 #, fuzzy
 msgid "i"
 msgstr "вх"
 
-#: mixer_strip.cc:2133
+#: mixer_strip.cc:2127
 msgid "Pre-fader"
 msgstr "До фейдера"
 
-#: mixer_strip.cc:2134
+#: mixer_strip.cc:2128
 msgid "Post-fader"
 msgstr "После фейдера"
+
+#: mixer_strip.cc:2135 meter_strip.cc:575
+msgid "Peak"
+msgstr "Пиковое значение"
+
+#: mixer_strip.cc:2136 meter_strip.cc:576
+msgid "RMS + Peak"
+msgstr "Среднеквадратичное + пиковое значение"
+
+#: mixer_strip.cc:2155 meter_strip.cc:579
+msgid "Change all in Group to Peak"
+msgstr "Поменять все в группе на пиковое"
+
+#: mixer_strip.cc:2156 meter_strip.cc:580
+msgid "Change all in Group to RMS + Peak"
+msgstr "Поменять все в группе на среднеквадратичное + пиковое"
+
+#: mixer_strip.cc:2157 meter_strip.cc:581
+msgid "Change all to Peak"
+msgstr "Поменять все на пиковое"
+
+#: mixer_strip.cc:2158 meter_strip.cc:582
+msgid "Change all to RMS + Peak"
+msgstr "Поменять все на среднеквадратичное + пиковое"
+
+#: mixer_strip.cc:2159 meter_strip.cc:583
+msgid "Change same track-type to Peak"
+msgstr "Поменять дорожки одного типа на пиковое"
+
+#: mixer_strip.cc:2160 meter_strip.cc:584
+msgid "Change same track-type to RMS + Peak"
+msgstr "Поменять дорожки одного типа на среднеквадратичное + пиковое"
 
 #: mixer_ui.cc:1189
 msgid "track display list item for renamed strip not found!"
@@ -7481,7 +7527,7 @@ msgstr ""
 msgid "-all-"
 msgstr "-все-"
 
-#: mixer_ui.cc:1792
+#: mixer_ui.cc:1794
 msgid "Strips"
 msgstr "Каналы"
 
@@ -7642,7 +7688,7 @@ msgstr "Левый:%3d, Правый:%3d"
 
 #: mono_panner_editor.cc:33
 msgid "Mono Panner"
-msgstr ""
+msgstr "Монопанорама"
 
 #: mono_panner_editor.cc:44 mono_panner_editor.cc:49
 #: stereo_panner_editor.cc:46 stereo_panner_editor.cc:51
@@ -7865,7 +7911,7 @@ msgstr ""
 msgid "Panner (2D)"
 msgstr "Панорамирование (2D)"
 
-#: panner2d.cc:783 panner_ui.cc:384 plugin_ui.cc:452
+#: panner2d.cc:783 panner_ui.cc:384 plugin_ui.cc:451
 msgid "Bypass"
 msgstr "Обход"
 
@@ -8038,7 +8084,7 @@ msgstr "По категории"
 msgid "Eh? LADSPA plugins don't have editors!"
 msgstr "Что? У эффектов LADSPA нет своих редакторов!"
 
-#: plugin_ui.cc:125 plugin_ui.cc:228
+#: plugin_ui.cc:125 plugin_ui.cc:227
 msgid ""
 "unknown type of editor-supplying plugin (note: no VST support in this "
 "version of %1)"
@@ -8048,51 +8094,51 @@ msgstr ""
 msgid "unknown type of editor-supplying plugin"
 msgstr ""
 
-#: plugin_ui.cc:258
+#: plugin_ui.cc:257
 msgid ""
 "unknown type of editor-supplying plugin (note: no linuxVST support in this "
 "version of %1)"
 msgstr ""
 
-#: plugin_ui.cc:330
+#: plugin_ui.cc:329
 msgid "create_lv2_editor called on non-LV2 plugin"
 msgstr ""
 
-#: plugin_ui.cc:418
+#: plugin_ui.cc:417
 msgid "Add"
 msgstr "Добавить"
 
-#: plugin_ui.cc:422
+#: plugin_ui.cc:421
 msgid "Description"
 msgstr "Описание"
 
-#: plugin_ui.cc:423
+#: plugin_ui.cc:422
 msgid "Plugin analysis"
 msgstr "Частотный анализ модуля"
 
-#: plugin_ui.cc:430
+#: plugin_ui.cc:429
 msgid ""
 "Presets (if any) for this plugin\n"
 "(Both factory and user-created)"
 msgstr "Все доступные профили этого модуля,как «заводские», так и собственные"
 
-#: plugin_ui.cc:431
+#: plugin_ui.cc:430
 msgid "Save a new preset"
 msgstr "Сохранить новый профиль"
 
-#: plugin_ui.cc:432
+#: plugin_ui.cc:431
 msgid "Save the current preset"
 msgstr "Сохранить текущий профиль"
 
-#: plugin_ui.cc:433
+#: plugin_ui.cc:432
 msgid "Delete the current preset"
 msgstr "Удалить текущий профиль"
 
-#: plugin_ui.cc:434
+#: plugin_ui.cc:433
 msgid "Disable signal processing by the plugin"
 msgstr "Выключить обработку сигнала этим модулем"
 
-#: plugin_ui.cc:467 plugin_ui.cc:632
+#: plugin_ui.cc:466 plugin_ui.cc:662
 msgid ""
 "Click to allow the plugin to receive keyboard events that %1 would normally "
 "use as a shortcut"
@@ -8100,30 +8146,42 @@ msgstr ""
 "Щёлкните, чтобы разрешить этому модулю получать клавиатурные события, "
 "которые %1 обычно использует как горячие клавиши"
 
-#: plugin_ui.cc:468
+#: plugin_ui.cc:467
 msgid "Click to enable/disable this plugin"
 msgstr "Щелкните, чтобы включить или отключить этот модуль"
 
-#: plugin_ui.cc:507
+#: plugin_ui.cc:506
 msgid "latency (%1 sample)"
 msgid_plural "latency (%1 samples)"
 msgstr[0] "Задержка (%1 сэмпл)"
 msgstr[1] "Задержка (%1 сэмпла)"
 msgstr[2] "Задержка (%1 сэмплов)"
 
-#: plugin_ui.cc:509
+#: plugin_ui.cc:508
 msgid "latency (%1 ms)"
 msgstr "Задержка (%1 мс)"
 
-#: plugin_ui.cc:520
+#: plugin_ui.cc:519
 msgid "Edit Latency"
 msgstr "Изменить задержку"
 
-#: plugin_ui.cc:559
+#: plugin_ui.cc:558
 msgid "Plugin preset %1 not found"
 msgstr "Предустановка модуля %1 не обнаружена"
 
-#: plugin_ui.cc:639
+#: plugin_ui.cc:595
+msgid ""
+"Plugin presets are not supported in this build of %1. Consider paying for a "
+"full version"
+msgstr ""
+
+#: plugin_ui.cc:615 plugin_ui.cc:630
+msgid ""
+"Plugin presets are not supported in this build of %1. Consider paying for a "
+"newer version"
+msgstr ""
+
+#: plugin_ui.cc:669
 msgid "Click to allow normal use of %1 keyboard shortcuts"
 msgstr ""
 "Щёлкните, чтобы переключиться на обычное использование горячих клавиш %1"
@@ -8228,46 +8286,46 @@ msgstr "Выполняется определение..."
 msgid "Port Insert "
 msgstr "Вставка порта"
 
-#: port_matrix.cc:323 port_matrix.cc:342
+#: port_matrix.cc:325 port_matrix.cc:344
 msgid "<b>Sources</b>"
 msgstr "<b>Источники</b>"
 
-#: port_matrix.cc:324 port_matrix.cc:343
+#: port_matrix.cc:326 port_matrix.cc:345
 msgid "<b>Destinations</b>"
 msgstr "<b>Назначения</b>"
 
-#: port_matrix.cc:419 port_matrix.cc:427
+#: port_matrix.cc:421 port_matrix.cc:429
 #, c-format
 msgid "Add %s %s"
 msgstr "Добавить %s %s"
 
-#: port_matrix.cc:435
+#: port_matrix.cc:437
 #, c-format
 msgid "Rename '%s'..."
 msgstr "Переименовать '%s'..."
 
-#: port_matrix.cc:451
+#: port_matrix.cc:453
 msgid "Remove all"
 msgstr "Удалить все"
 
-#: port_matrix.cc:471 port_matrix.cc:483
+#: port_matrix.cc:473 port_matrix.cc:485
 #, c-format
 msgid "%s all"
 msgstr "%s все"
 
-#: port_matrix.cc:506
+#: port_matrix.cc:508
 msgid "Rescan"
 msgstr "Просканировать заново"
 
-#: port_matrix.cc:508
+#: port_matrix.cc:510
 msgid "Show individual ports"
 msgstr "Показывать порты раздельно"
 
-#: port_matrix.cc:514
+#: port_matrix.cc:516
 msgid "Flip"
 msgstr "Повернуть матрицу"
 
-#: port_matrix.cc:702
+#: port_matrix.cc:704
 msgid ""
 "It is not possible to add a port here, as the first processor in the track "
 "or buss cannot support the new configuration."
@@ -8275,31 +8333,31 @@ msgstr ""
 "Невозможно добавить сюда порт, поскольку первый обработчик дорожки или шины "
 "не может поддерживать новую конфигурацию."
 
-#: port_matrix.cc:705
+#: port_matrix.cc:707
 msgid "Cannot add port"
 msgstr "Невозможно добавить порт"
 
-#: port_matrix.cc:727
+#: port_matrix.cc:729
 msgid "Port removal not allowed"
 msgstr "Удаление портов не разрешено"
 
-#: port_matrix.cc:728
+#: port_matrix.cc:730
 msgid ""
 "This port cannot be removed, as the first plugin in the track or buss cannot "
 "accept the new number of inputs."
 msgstr ""
 
-#: port_matrix.cc:945
+#: port_matrix.cc:947
 #, c-format
 msgid "Remove '%s'"
 msgstr "Удалить '%s'"
 
-#: port_matrix.cc:960
+#: port_matrix.cc:962
 #, c-format
 msgid "%s all from '%s'"
 msgstr "%s все из '%s'"
 
-#: port_matrix.cc:1026
+#: port_matrix.cc:1028
 msgid "channel"
 msgstr "канал"
 
@@ -8317,12 +8375,17 @@ msgid ""
 "Double-click to show GUI.\n"
 "Alt+double-click to show generic GUI."
 msgstr ""
+"<b>%1</b>\n"
+"Двойной щелчок вызывает собственный диалог модуля.\n"
+"Alt+ двойной щелчок вызывает генерируемый хостом диалог с параметрами."
 
 #: processor_box.cc:258
 msgid ""
 "<b>%1</b>\n"
 "Double-click to show generic GUI."
 msgstr ""
+"<b>%1</b>\n"
+"Двойной щелчок вызывает генерируемый хостом диалог с параметрами."
 
 #: processor_box.cc:371
 msgid "Show All Controls"
@@ -8479,51 +8542,51 @@ msgstr ""
 "послефейдерные обработчики из \"%1\" ?\n"
 "(отмена невозможна)"
 
-#: processor_box.cc:2198
+#: processor_box.cc:2187
 msgid "New Plugin"
 msgstr "Добавить модуль"
 
-#: processor_box.cc:2201
+#: processor_box.cc:2190
 msgid "New Insert"
 msgstr "Добавить возврат"
 
-#: processor_box.cc:2204
+#: processor_box.cc:2193
 msgid "New External Send ..."
 msgstr "Добавить внешний посыл с портом JACK..."
 
-#: processor_box.cc:2208
+#: processor_box.cc:2197
 msgid "New Aux Send ..."
 msgstr "Добавить внешний посыл без порта JACK..."
 
-#: processor_box.cc:2212
+#: processor_box.cc:2201
 msgid "Clear (all)"
 msgstr "Очистить (всё)"
 
-#: processor_box.cc:2214
+#: processor_box.cc:2203
 msgid "Clear (pre-fader)"
 msgstr "Очистить (до фейдера)"
 
-#: processor_box.cc:2216
+#: processor_box.cc:2205
 msgid "Clear (post-fader)"
 msgstr "Очистить (после фейдера)"
 
-#: processor_box.cc:2242
+#: processor_box.cc:2231
 msgid "Activate All"
 msgstr "Активировать все"
 
-#: processor_box.cc:2244
+#: processor_box.cc:2233
 msgid "Deactivate All"
 msgstr "Деактивировать все"
 
-#: processor_box.cc:2246
+#: processor_box.cc:2235
 msgid "A/B Plugins"
 msgstr "Отключить все"
 
-#: processor_box.cc:2255
+#: processor_box.cc:2244
 msgid "Edit with generic controls..."
 msgstr "Изменить с интерфейсом хоста..."
 
-#: processor_box.cc:2531
+#: processor_box.cc:2544
 msgid "%1: %2 (by %3)"
 msgstr "%1: %2 (автор — %3)"
 
@@ -8644,7 +8707,6 @@ msgid "Recording (seconds of buffering):"
 msgstr "Запись (в секундах):"
 
 #: rc_option_editor.cc:656
-#, fuzzy
 msgid "Control Surface Protocol"
 msgstr "Устройства управления"
 
@@ -8660,11 +8722,11 @@ msgstr ""
 
 #: rc_option_editor.cc:817
 msgid "Show Video Export Info before export"
-msgstr ""
+msgstr "Показывать диалог с вводной информацией об экспорте видео"
 
 #: rc_option_editor.cc:818
 msgid "Show Video Server Startup Dialog"
-msgstr ""
+msgstr "Показывать диалог с параметрами видеосервера"
 
 #: rc_option_editor.cc:819
 msgid "Advanced Setup (remote video server)"
@@ -8705,12 +8767,16 @@ msgid ""
 "<b>When enabled</b> an information window with details is displayed before "
 "the video-export dialog."
 msgstr ""
+"<b>Если включено,</b> перед экспортом видео показывается окно со справочной "
+"информацией"
 
 #: rc_option_editor.cc:853
 msgid ""
 "<b>When enabled</b> the video server is never launched automatically without "
 "confirmation"
 msgstr ""
+"<b>Если включено,</b> видеосервер никогда автоматически не запускается без "
+"подтверждения"
 
 #: rc_option_editor.cc:993
 msgid "%1 Preferences"
@@ -8772,7 +8838,7 @@ msgstr "Максимальное число недавних сеансов"
 msgid "Click gain level"
 msgstr "Уровень щелчка метронома"
 
-#: rc_option_editor.cc:1083 route_time_axis.cc:206 route_time_axis.cc:667
+#: rc_option_editor.cc:1083 route_time_axis.cc:215 route_time_axis.cc:676
 msgid "Automation"
 msgstr "Автоматизация"
 
@@ -9228,23 +9294,23 @@ msgstr "Солирование приоритетнее приглушения"
 
 #: rc_option_editor.cc:1665
 msgid "Default track / bus muting options"
-msgstr "Параметры приглушения дорожки/шины по умолчанию"
+msgstr "Приглушение дорожек и шин по умолчанию затрагивает"
 
 #: rc_option_editor.cc:1670
 msgid "Mute affects pre-fader sends"
-msgstr "Приглушение затрагивает предфейдерные посылы"
+msgstr "Предфейдерные посылы"
 
 #: rc_option_editor.cc:1678
 msgid "Mute affects post-fader sends"
-msgstr "Приглушение затрагивает послефейдерные посылы"
+msgstr "Послефейдерные посылы"
 
 #: rc_option_editor.cc:1686
 msgid "Mute affects control outputs"
-msgstr "Приглушение затрагивает выходы мониторинга"
+msgstr "Выходы мониторинга"
 
 #: rc_option_editor.cc:1694
 msgid "Mute affects main outputs"
-msgstr "Приглушение затрагивает основные выходы"
+msgstr "Основные выходы"
 
 #: rc_option_editor.cc:1710
 msgid "Send MIDI Time Code"
@@ -9300,6 +9366,9 @@ msgid ""
 "   <i>(requires a restart of %1 to take effect)</i>\n"
 "   <i>(if available for your language preferences)</i>"
 msgstr ""
+"Использовать перевод интерфейса %1\n"
+"   <i>(вступает в силу после перезапуска %1)</i>\n"
+"   <i>(если локализация для вашего языка доступна)</i>"
 
 #: rc_option_editor.cc:1812
 msgid "Keyboard"
@@ -9323,7 +9392,8 @@ msgstr "Следуют порядку редактора"
 
 #: rc_option_editor.cc:1838 rc_option_editor.cc:1846 rc_option_editor.cc:1856
 #: rc_option_editor.cc:1877 rc_option_editor.cc:1886 rc_option_editor.cc:1894
-#: rc_option_editor.cc:1908 rc_option_editor.cc:1925
+#: rc_option_editor.cc:1908 rc_option_editor.cc:1927 rc_option_editor.cc:1943
+#: rc_option_editor.cc:1957
 msgid "Preferences|GUI"
 msgstr "Интерфейс"
 
@@ -9341,7 +9411,7 @@ msgstr "Интерфейс"
 
 #: rc_option_editor.cc:1862
 msgid "update transport clock display every 40ms instead of every 100ms"
-msgstr ""
+msgstr "Обновлять счётчик транспорта каждые 40мс вместо каждых 100мс"
 
 #: rc_option_editor.cc:1879
 msgid "Mixer Strip"
@@ -9352,14 +9422,14 @@ msgid "Use narrow strips in the mixer by default"
 msgstr "Использовать тонкие полоски в микшере по умолчанию"
 
 #: rc_option_editor.cc:1898
-msgid "Meter hold time"
-msgstr "Задержка индикатора"
+msgid "Peak hold time"
+msgstr "Удерживание пика"
 
 #: rc_option_editor.cc:1904
 msgid "short"
 msgstr "Короткое"
 
-#: rc_option_editor.cc:1905 rc_option_editor.cc:1920
+#: rc_option_editor.cc:1905
 msgid "medium"
 msgstr "Среднее"
 
@@ -9368,28 +9438,74 @@ msgid "long"
 msgstr "Долгое"
 
 #: rc_option_editor.cc:1912
-msgid "Meter fall-off"
-msgstr "Спадание индикатора"
+msgid "DPM fall-off"
+msgstr "Скорость спадания"
 
 #: rc_option_editor.cc:1918
-msgid "slowest"
-msgstr "Самое медленное"
+msgid "slowest [6.6dB/sec]"
+msgstr "Самое медленное [6,6 Дб/с]"
 
 #: rc_option_editor.cc:1919
-msgid "slow"
-msgstr "Медленное"
+msgid "slow [8.6dB/sec] (BBC PPM, EBU PPM)"
+msgstr "Медленное [8,6 Дб/с] (BBC PPM, EBU PPM)"
+
+#: rc_option_editor.cc:1920
+msgid "slowish [12.0dB/sec] (DIN)"
+msgstr "Неторопливое [12  Дб/с] (DIN)"
 
 #: rc_option_editor.cc:1921
-msgid "fast"
-msgstr "Быстрое"
+msgid "moderate [13.3dB/sec] (EBU Digi PPM, IRT Digi PPM)"
+msgstr "Умеренное [13,3 Дб/с] (EBU Digi PPM, IRT Digi PPM)"
 
 #: rc_option_editor.cc:1922
-msgid "faster"
-msgstr "Ещё более быстрее"
+msgid "medium [20dB/sec]"
+msgstr "Среднее [20  Дб/с]"
 
 #: rc_option_editor.cc:1923
-msgid "fastest"
-msgstr "Скорейшее"
+msgid "fast [32dB/sec]"
+msgstr "Быстрое [32 Дб/с]"
+
+#: rc_option_editor.cc:1924
+msgid "faster [46dB/sec]"
+msgstr "Ещё быстрее [46 Дб/с]"
+
+#: rc_option_editor.cc:1925
+msgid "fastest [70dB/sec]"
+msgstr "Самое быстрое [70 Дб/с]"
+
+#: rc_option_editor.cc:1931
+msgid "Meter line-up level"
+msgstr "Уровень выравнивания"
+
+#: rc_option_editor.cc:1936
+msgid "-24dB"
+msgstr "-24 Дб"
+
+#: rc_option_editor.cc:1937
+msgid "-20dB (SMPTE)"
+msgstr "-20 Дб (SMPTE)"
+
+#: rc_option_editor.cc:1938
+msgid "-18dB (EBU)"
+msgstr "-18 Дб (EBU)"
+
+#: rc_option_editor.cc:1939
+msgid "-15dB"
+msgstr "-15 Дб"
+
+#: rc_option_editor.cc:1941
+msgid "Configure meter-ticks and color-knee point."
+msgstr ""
+
+#: rc_option_editor.cc:1947
+msgid "Peak threshold [dBFS]"
+msgstr "Порог пика (dbFS)"
+
+#: rc_option_editor.cc:1955
+msgid ""
+"Specify the audio signal level in dbFS at and above which the meter-peak "
+"indicator will flash red."
+msgstr ""
 
 #: region_editor.cc:79
 msgid "audition this region"
@@ -9403,7 +9519,7 @@ msgstr "Позиция:"
 msgid "End:"
 msgstr "Конец:"
 
-#: region_editor.cc:92 sfdb_ui.cc:140
+#: region_editor.cc:92 sfdb_ui.cc:141
 msgid "Length:"
 msgstr "Длительность:"
 
@@ -9427,23 +9543,23 @@ msgstr "Источники:"
 msgid "Source:"
 msgstr "Источник:"
 
-#: region_editor.cc:167
+#: region_editor.cc:166
 msgid "Region '%1'"
 msgstr "Область %1"
 
-#: region_editor.cc:274
+#: region_editor.cc:273
 msgid "change region start position"
 msgstr "смена позиции начала области"
 
-#: region_editor.cc:290
+#: region_editor.cc:289
 msgid "change region end position"
 msgstr "смена позиции конца области"
 
-#: region_editor.cc:310
+#: region_editor.cc:309
 msgid "change region length"
 msgstr "смена длительности области"
 
-#: region_editor.cc:404 region_editor.cc:416
+#: region_editor.cc:403 region_editor.cc:415
 msgid "change region sync point"
 msgstr "смена синхронизатора областей"
 
@@ -9651,198 +9767,197 @@ msgstr "Выходы"
 msgid "Plugins, Inserts & Sends"
 msgstr "Модули, возвраты и посылы"
 
-#: route_params_ui.cc:211
+#: route_params_ui.cc:207
 msgid "route display list item for renamed route not found!"
 msgstr ""
 
-#: route_params_ui.cc:258 route_params_ui.cc:286
+#: route_params_ui.cc:254 route_params_ui.cc:282
 #, c-format
 msgid "Playback delay: %<PRId64> samples"
 msgstr "Задержка воспроизведения: %<PRId64> сэмплов"
 
-#: route_params_ui.cc:478
+#: route_params_ui.cc:474
 msgid "NO TRACK"
 msgstr "НЕТ ДОРОЖЕК"
 
-#: route_params_ui.cc:611 route_params_ui.cc:612
+#: route_params_ui.cc:607 route_params_ui.cc:608
 msgid "No Track or Bus Selected"
 msgstr "Нет выбранных дорожек или шин"
 
-#: route_time_axis.cc:96
+#: route_time_axis.cc:97
 msgid "g"
 msgstr "г"
 
-#: route_time_axis.cc:97
+#: route_time_axis.cc:98
 msgid "p"
 msgstr "сп"
 
-#: route_time_axis.cc:98
+#: route_time_axis.cc:99
 msgid "a"
 msgstr "а"
 
-#: route_time_axis.cc:168
+#: route_time_axis.cc:173
 msgid "Record (Right-click for Step Edit)"
 msgstr "Запись (правая клавиша мыши активирует пошаговый ввод)"
 
-#: route_time_axis.cc:171
+#: route_time_axis.cc:176
 msgid "Record"
 msgstr "Запись"
 
-#: route_time_axis.cc:201
+#: route_time_axis.cc:210
 msgid "Route Group"
 msgstr "Группа маршрутизации"
 
-#: route_time_axis.cc:204
+#: route_time_axis.cc:213
 msgid "MIDI Controllers and Automation"
 msgstr "MIDI-контроллеры и автоматизация"
 
-#: route_time_axis.cc:381
+#: route_time_axis.cc:390
 msgid "Show All Automation"
 msgstr "Показать всю автоматизацию"
 
-#: route_time_axis.cc:384
+#: route_time_axis.cc:393
 msgid "Show Existing Automation"
 msgstr "Показать существующую автоматизацию"
 
-#: route_time_axis.cc:387
+#: route_time_axis.cc:396
 msgid "Hide All Automation"
 msgstr "Скрыть всю автоматизацию"
 
-#: route_time_axis.cc:396
-#, fuzzy
+#: route_time_axis.cc:405
 msgid "Processor automation"
-msgstr "Очистить автоматизацию"
+msgstr "Автоматизация обработчика"
 
-#: route_time_axis.cc:415
+#: route_time_axis.cc:424
 msgid "Color..."
 msgstr "Цвет..."
 
-#: route_time_axis.cc:472
+#: route_time_axis.cc:481
 msgid "Overlaid"
 msgstr "Перекрывают друг друга"
 
-#: route_time_axis.cc:478
+#: route_time_axis.cc:487
 msgid "Stacked"
 msgstr "В стопке"
 
-#: route_time_axis.cc:486
+#: route_time_axis.cc:495
 msgid "Layers"
 msgstr "Слои"
 
-#: route_time_axis.cc:555
+#: route_time_axis.cc:564
 msgid "Automatic (based on I/O connections)"
 msgstr "Автоматическое (по соединениям входа-выхода)"
 
-#: route_time_axis.cc:564
+#: route_time_axis.cc:573
 msgid "(Currently: Existing Material)"
 msgstr "(Сейчас: с записанным материалом)"
 
-#: route_time_axis.cc:567
+#: route_time_axis.cc:576
 msgid "(Currently: Capture Time)"
 msgstr "(Сейчас: по времени захвата)"
 
-#: route_time_axis.cc:575
+#: route_time_axis.cc:584
 msgid "Align With Existing Material"
 msgstr "С записанным материалом"
 
-#: route_time_axis.cc:580
+#: route_time_axis.cc:589
 msgid "Align With Capture Time"
 msgstr "По времени захвата"
 
-#: route_time_axis.cc:585
+#: route_time_axis.cc:594
 msgid "Alignment"
 msgstr "Выравнивание"
 
-#: route_time_axis.cc:620
+#: route_time_axis.cc:629
 msgid "Normal Mode"
 msgstr "Обычный режим"
 
-#: route_time_axis.cc:626
+#: route_time_axis.cc:635
 msgid "Tape Mode"
 msgstr "Плёночный режим"
 
-#: route_time_axis.cc:632
+#: route_time_axis.cc:641
 msgid "Non-Layered Mode"
 msgstr "Бесслойный режим"
 
-#: route_time_axis.cc:645 route_time_axis.cc:1587
+#: route_time_axis.cc:654 route_time_axis.cc:1601
 msgid "Playlist"
 msgstr "Список"
 
-#: route_time_axis.cc:965
+#: route_time_axis.cc:979
 msgid "Rename Playlist"
 msgstr "Переименовать список воспроизведения"
 
-#: route_time_axis.cc:966
+#: route_time_axis.cc:980
 msgid "New name for playlist:"
 msgstr "Новое название списка воспроизведения:"
 
-#: route_time_axis.cc:1051
+#: route_time_axis.cc:1065
 msgid "New Copy Playlist"
 msgstr "Новая копия списка воспроизведения"
 
-#: route_time_axis.cc:1052 route_time_axis.cc:1105
+#: route_time_axis.cc:1066 route_time_axis.cc:1119
 msgid "Name for new playlist:"
 msgstr "Название нового списка воспроизведения:"
 
-#: route_time_axis.cc:1104
+#: route_time_axis.cc:1118
 msgid "New Playlist"
 msgstr "Новый список воспроизведения"
 
-#: route_time_axis.cc:1295
+#: route_time_axis.cc:1309
 msgid "You cannot create a track with that name as it is reserved for %1"
 msgstr ""
 "Вы не можете добавить дорожку с названием, которое зарезервировано для %1"
 
-#: route_time_axis.cc:1476
+#: route_time_axis.cc:1490
 msgid "New Copy..."
 msgstr "Создать копию..."
 
-#: route_time_axis.cc:1480
+#: route_time_axis.cc:1494
 msgid "New Take"
 msgstr "Новый дубль"
 
-#: route_time_axis.cc:1481
+#: route_time_axis.cc:1495
 msgid "Copy Take"
 msgstr "Скопировать дубль"
 
-#: route_time_axis.cc:1486
+#: route_time_axis.cc:1500
 msgid "Clear Current"
 msgstr "Очистить текущий"
 
-#: route_time_axis.cc:1489
+#: route_time_axis.cc:1503
 msgid "Select From All..."
 msgstr "Выбрать из всех..."
 
-#: route_time_axis.cc:1577
+#: route_time_axis.cc:1591
 msgid "Take: %1.%2"
 msgstr "Дубль: %1.%2"
 
-#: route_time_axis.cc:2267
+#: route_time_axis.cc:2291
 msgid "Underlays"
 msgstr ""
 
-#: route_time_axis.cc:2270
+#: route_time_axis.cc:2294
 msgid "Remove \"%1\""
 msgstr "Удалить «%1»"
 
-#: route_time_axis.cc:2320 route_time_axis.cc:2357
+#: route_time_axis.cc:2344 route_time_axis.cc:2381
 msgid "programming error: underlay reference pointer pairs are inconsistent!"
 msgstr ""
 
-#: route_time_axis.cc:2388
+#: route_time_axis.cc:2408
 msgid "After-fade listen (AFL)"
 msgstr "Прослушивание после фейдера (AFL)"
 
-#: route_time_axis.cc:2392
+#: route_time_axis.cc:2412
 msgid "Pre-fade listen (PFL)"
 msgstr "Прослушивание до фейдера (PFL)"
 
-#: route_time_axis.cc:2396
+#: route_time_axis.cc:2416
 msgid "s"
 msgstr "с"
 
-#: route_time_axis.cc:2400
+#: route_time_axis.cc:2419
 msgid "m"
 msgstr "м"
 
@@ -10397,6 +10512,7 @@ msgid ""
 "Use Video File's FPS Instead of Timecode Value for Timeline and Video "
 "Monitor."
 msgstr ""
+"Использовать частоту кадров видео вместо таймкода в проекте и видеомониторе"
 
 #: session_option_editor.cc:91
 msgid ""
@@ -10576,155 +10692,207 @@ msgstr "Приклеивать новые маркеры к тактам и до
 msgid "Glue new regions to bars and beats"
 msgstr "Приклеивать новые области к тактам и долям"
 
-#: sfdb_ui.cc:87 sfdb_ui.cc:107 sfdb_ui.cc:116
+#: session_option_editor.cc:275 session_option_editor.cc:277
+#: session_option_editor.cc:284 session_option_editor.cc:291
+#: session_option_editor.cc:298 session_option_editor.cc:300
+#: session_option_editor.cc:307 session_option_editor.cc:314
+#: session_option_editor.cc:321 session_option_editor.cc:323
+msgid "Meterbridge"
+msgstr "Панель индикаторов"
+
+#: session_option_editor.cc:275
+msgid "Route Display"
+msgstr "Показывать в маршрутизации"
+
+#: session_option_editor.cc:279
+msgid "Show Midi Tracks"
+msgstr "MIDI-дорожки"
+
+#: session_option_editor.cc:286
+msgid "Show Busses"
+msgstr "Шины"
+
+#: session_option_editor.cc:293
+msgid "Include Master Bus"
+msgstr "Мастер-шина"
+
+#: session_option_editor.cc:298
+msgid "Button Area"
+msgstr "Показывать в кнопках"
+
+#: session_option_editor.cc:302
+msgid "Rec-enable Button"
+msgstr "Переключатель записываемости"
+
+#: session_option_editor.cc:309
+msgid "Mute Button"
+msgstr "Переключатель приглушения"
+
+#: session_option_editor.cc:316
+msgid "Solo Button"
+msgstr "Переключатель солирования"
+
+#: session_option_editor.cc:321
+msgid "Name Labels"
+msgstr "Показывать в метках имён"
+
+#: session_option_editor.cc:325
+msgid "Track Name"
+msgstr "Название дорожи"
+
+#: sfdb_ui.cc:88 sfdb_ui.cc:108 sfdb_ui.cc:117
 msgid "as new tracks"
 msgstr "как новые дорожки"
 
-#: sfdb_ui.cc:89 sfdb_ui.cc:109
+#: sfdb_ui.cc:90 sfdb_ui.cc:110
 msgid "to selected tracks"
 msgstr "в выделенные дорожки"
 
-#: sfdb_ui.cc:91 sfdb_ui.cc:111
+#: sfdb_ui.cc:92 sfdb_ui.cc:112
 msgid "to region list"
 msgstr "в список областей"
 
-#: sfdb_ui.cc:93 sfdb_ui.cc:113
+#: sfdb_ui.cc:94 sfdb_ui.cc:114
 msgid "as new tape tracks"
 msgstr "как новые плёночные дорожки"
 
-#: sfdb_ui.cc:97
+#: sfdb_ui.cc:98
 msgid "programming error: unknown import mode string %1"
 msgstr "Ошибка в программе: неизвестная строка режима импорта %1"
 
-#: sfdb_ui.cc:124
+#: sfdb_ui.cc:125
 msgid "Auto-play"
 msgstr "Автовоспр."
 
-#: sfdb_ui.cc:130 sfdb_ui.cc:237
+#: sfdb_ui.cc:131 sfdb_ui.cc:238
 msgid "<b>Sound File Information</b>"
 msgstr "<b>Информация о файле</b>"
 
-#: sfdb_ui.cc:142
+#: sfdb_ui.cc:143
 msgid "Timestamp:"
 msgstr "Отметка времени:"
 
-#: sfdb_ui.cc:144
+#: sfdb_ui.cc:145
 msgid "Format:"
 msgstr "Формат:"
 
-#: sfdb_ui.cc:183 sfdb_ui.cc:530
+#: sfdb_ui.cc:184 sfdb_ui.cc:529
 msgid "Tags:"
 msgstr "Метки:"
 
-#: sfdb_ui.cc:320
+#: sfdb_ui.cc:321
 msgid "Auditioning of MIDI files is not yet supported"
 msgstr "Прослушивание файлов MIDI пока что не реализовано"
 
-#: sfdb_ui.cc:327
+#: sfdb_ui.cc:328
 msgid "Could not read file: %1 (%2)."
 msgstr "Не удалось прочитать файл: %1 (%2)"
 
-#: sfdb_ui.cc:349
+#: sfdb_ui.cc:350
 msgid "Could not access soundfile: "
 msgstr "Файл недоступен: "
 
-#: sfdb_ui.cc:403
+#: sfdb_ui.cc:404
 msgid "SoundFileBox: Could not tokenize string: "
 msgstr ""
 
-#: sfdb_ui.cc:423 sfdb_ui.cc:425
+#: sfdb_ui.cc:424 sfdb_ui.cc:426
 msgid "Search"
 msgstr "Искать"
 
-#: sfdb_ui.cc:449
+#: sfdb_ui.cc:450
 msgid "Audio and MIDI files"
 msgstr "Звуковые и MIDI-файлы"
 
-#: sfdb_ui.cc:452
+#: sfdb_ui.cc:453
 msgid "Audio files"
 msgstr "Звуковые файлы"
 
-#: sfdb_ui.cc:455
+#: sfdb_ui.cc:456
 msgid "MIDI files"
 msgstr "Файлы MIDI"
 
-#: sfdb_ui.cc:458 add_video_dialog.cc:131
+#: sfdb_ui.cc:459 add_video_dialog.cc:131
 msgid "All files"
 msgstr "Все файлы"
 
-#: sfdb_ui.cc:477 add_video_dialog.cc:142
+#: sfdb_ui.cc:478 add_video_dialog.cc:142
 msgid "Browse Files"
 msgstr "Обзор файлов"
 
-#: sfdb_ui.cc:506
+#: sfdb_ui.cc:507
 msgid "Paths"
 msgstr "Расположения"
 
-#: sfdb_ui.cc:517
+#: sfdb_ui.cc:516
 msgid "Search Tags"
 msgstr "Поиск по меткам"
 
-#: sfdb_ui.cc:535
+#: sfdb_ui.cc:534
 msgid "Sort:"
 msgstr "Критерий сортировки:"
 
-#: sfdb_ui.cc:543
+#: sfdb_ui.cc:542
 msgid "Longest"
 msgstr "Более длинные"
 
-#: sfdb_ui.cc:544
+#: sfdb_ui.cc:543
 msgid "Shortest"
 msgstr "Более короткие"
 
-#: sfdb_ui.cc:545
+#: sfdb_ui.cc:544
 msgid "Newest"
 msgstr "Более новые"
 
-#: sfdb_ui.cc:546
+#: sfdb_ui.cc:545
 msgid "Oldest"
 msgstr "Более старые"
 
-#: sfdb_ui.cc:547
+#: sfdb_ui.cc:546
 msgid "Most downloaded"
 msgstr "Чаще скачиваемые"
 
-#: sfdb_ui.cc:548
+#: sfdb_ui.cc:547
 msgid "Least downloaded"
 msgstr "Реже скачиваемые"
 
-#: sfdb_ui.cc:549
+#: sfdb_ui.cc:548
 msgid "Highest rated"
 msgstr "Выше оценённые"
 
-#: sfdb_ui.cc:550
+#: sfdb_ui.cc:549
 msgid "Lowest rated"
 msgstr "Ниже оценённые"
 
-#: sfdb_ui.cc:555
+#: sfdb_ui.cc:554
 msgid "More"
 msgstr ""
 
-#: sfdb_ui.cc:572
+#: sfdb_ui.cc:558
+msgid "Similar"
+msgstr ""
+
+#: sfdb_ui.cc:570
 msgid "ID"
 msgstr "ID"
 
-#: sfdb_ui.cc:573 add_video_dialog.cc:83
+#: sfdb_ui.cc:571 add_video_dialog.cc:83
 msgid "Filename"
 msgstr "Имя файла"
 
-#: sfdb_ui.cc:575
+#: sfdb_ui.cc:573
 msgid "Duration"
 msgstr "Длительность"
 
-#: sfdb_ui.cc:576
+#: sfdb_ui.cc:574
 msgid "Size"
 msgstr "Размер"
 
-#: sfdb_ui.cc:577
+#: sfdb_ui.cc:575
 msgid "Samplerate"
 msgstr "Частота сэмплирования"
 
-#: sfdb_ui.cc:578
+#: sfdb_ui.cc:576
 msgid "License"
 msgstr "Лицензия"
 
@@ -10745,88 +10913,70 @@ msgstr ""
 msgid "Press to close this window without importing any files"
 msgstr "Нажмите, чтобы закрыть это окно, ничего не импортируя"
 
-#: sfdb_ui.cc:846
-msgid "found %1 match"
-msgid_plural "found %1 matches"
-msgstr[0] "Найдено %1 совпадение"
-msgstr[1] "Найдено %1 совпадения"
-msgstr[2] "Найдено %1 совпадений"
-
-#: sfdb_ui.cc:862
+#: sfdb_ui.cc:813
 msgid "SoundFileBrowser: Could not tokenize string: "
 msgstr ""
 
-#: sfdb_ui.cc:960
+#: sfdb_ui.cc:1013
 msgid "%1 more page of 100 results available"
 msgid_plural "%1 more pages of 100 results available"
 msgstr[0] "Ещё %1 страница из 100 доступных"
 msgstr[1] "Ещё %1 страницы из 100 доступных"
 msgstr[2] "Ещё %1 страниц из 100 доступных"
 
-#: sfdb_ui.cc:965
+#: sfdb_ui.cc:1018
 msgid "No more results available"
 msgstr "Больше результатов нет"
 
-#: sfdb_ui.cc:1029
+#: sfdb_ui.cc:1082
 msgid "B"
 msgstr "Б"
 
-#: sfdb_ui.cc:1031
+#: sfdb_ui.cc:1084
 msgid "kB"
 msgstr "КБ"
 
-#: sfdb_ui.cc:1033 sfdb_ui.cc:1035
+#: sfdb_ui.cc:1086 sfdb_ui.cc:1088
 msgid "MB"
 msgstr "МБ"
 
-#: sfdb_ui.cc:1037
+#: sfdb_ui.cc:1090
 msgid "GB"
 msgstr "ГБ"
 
-#: sfdb_ui.cc:1070
-msgid "Search returned no results."
-msgstr ""
-
-#: sfdb_ui.cc:1072
-msgid "Found %1 match"
-msgid_plural "Found %1 matches"
-msgstr[0] "Найдено %1 совпадение"
-msgstr[1] "Найдено %1 совпадения"
-msgstr[2] "Найдено %1 совпадений"
-
-#: sfdb_ui.cc:1277 sfdb_ui.cc:1585 sfdb_ui.cc:1635 sfdb_ui.cc:1653
+#: sfdb_ui.cc:1304 sfdb_ui.cc:1612 sfdb_ui.cc:1662 sfdb_ui.cc:1680
 msgid "one track per file"
 msgstr "Одна дорожка на файл"
 
-#: sfdb_ui.cc:1280 sfdb_ui.cc:1636 sfdb_ui.cc:1654
+#: sfdb_ui.cc:1307 sfdb_ui.cc:1663 sfdb_ui.cc:1681
 msgid "one track per channel"
 msgstr "Одна дорожка на канал"
 
-#: sfdb_ui.cc:1288 sfdb_ui.cc:1638 sfdb_ui.cc:1655
+#: sfdb_ui.cc:1315 sfdb_ui.cc:1665 sfdb_ui.cc:1682
 msgid "sequence files"
 msgstr ""
 
-#: sfdb_ui.cc:1291 sfdb_ui.cc:1643
+#: sfdb_ui.cc:1318 sfdb_ui.cc:1670
 msgid "all files in one track"
 msgstr "Все файлы в одну дорожку"
 
-#: sfdb_ui.cc:1292 sfdb_ui.cc:1637
+#: sfdb_ui.cc:1319 sfdb_ui.cc:1664
 msgid "merge files"
 msgstr "Объединить файлы"
 
-#: sfdb_ui.cc:1298 sfdb_ui.cc:1640
+#: sfdb_ui.cc:1325 sfdb_ui.cc:1667
 msgid "one region per file"
 msgstr "Одна область на файл"
 
-#: sfdb_ui.cc:1301 sfdb_ui.cc:1641
+#: sfdb_ui.cc:1328 sfdb_ui.cc:1668
 msgid "one region per channel"
 msgstr "Одна область на канал"
 
-#: sfdb_ui.cc:1306 sfdb_ui.cc:1642 sfdb_ui.cc:1656
+#: sfdb_ui.cc:1333 sfdb_ui.cc:1669 sfdb_ui.cc:1683
 msgid "all files in one region"
 msgstr "Все файлы в одной области"
 
-#: sfdb_ui.cc:1373
+#: sfdb_ui.cc:1400
 msgid ""
 "One or more of the selected files\n"
 "cannot be used by %1"
@@ -10834,55 +10984,55 @@ msgstr ""
 "Один или более выбранных файлов\n"
 "не могут быть использованы в %1"
 
-#: sfdb_ui.cc:1513
+#: sfdb_ui.cc:1540
 msgid "Copy files to session"
 msgstr "Скопировать файлы в сеанс"
 
-#: sfdb_ui.cc:1530 sfdb_ui.cc:1693
+#: sfdb_ui.cc:1557 sfdb_ui.cc:1720
 msgid "file timestamp"
 msgstr "По отметке времени файла"
 
-#: sfdb_ui.cc:1531 sfdb_ui.cc:1695
+#: sfdb_ui.cc:1558 sfdb_ui.cc:1722
 msgid "edit point"
 msgstr "По курсору редактора"
 
-#: sfdb_ui.cc:1532 sfdb_ui.cc:1697
+#: sfdb_ui.cc:1559 sfdb_ui.cc:1724
 msgid "playhead"
 msgstr "По указателю воспр."
 
-#: sfdb_ui.cc:1533
+#: sfdb_ui.cc:1560
 msgid "session start"
 msgstr "В начало сеанса"
 
-#: sfdb_ui.cc:1538
+#: sfdb_ui.cc:1565
 msgid "<b>Add files as ...</b>"
 msgstr "<b>Добавить файлы как...</b>"
 
-#: sfdb_ui.cc:1560
+#: sfdb_ui.cc:1587
 msgid "<b>Insert at</b>"
 msgstr "<b>Куда вставить</b>"
 
-#: sfdb_ui.cc:1573
+#: sfdb_ui.cc:1600
 msgid "<b>Mapping</b>"
 msgstr "<b>Способ вставки</b>"
 
-#: sfdb_ui.cc:1591
+#: sfdb_ui.cc:1618
 msgid "<b>Conversion quality</b>"
 msgstr "<b>Качество преобразования:</b>"
 
-#: sfdb_ui.cc:1603 sfdb_ui.cc:1709
+#: sfdb_ui.cc:1630 sfdb_ui.cc:1736
 msgid "Best"
 msgstr "Наилучшее"
 
-#: sfdb_ui.cc:1604 sfdb_ui.cc:1711
+#: sfdb_ui.cc:1631 sfdb_ui.cc:1738
 msgid "Good"
 msgstr "Хорошее"
 
-#: sfdb_ui.cc:1605 sfdb_ui.cc:1713
+#: sfdb_ui.cc:1632 sfdb_ui.cc:1740
 msgid "Quick"
 msgstr "Быстрое"
 
-#: sfdb_ui.cc:1607
+#: sfdb_ui.cc:1634
 msgid "Fastest"
 msgstr "Быстрее всего"
 
@@ -11147,10 +11297,6 @@ msgstr ""
 #: startup.cc:576
 msgid "Click to open the program website in your web browser"
 msgstr ""
-
-#: startup.cc:594
-msgid "What would you like to do ?"
-msgstr "Что вы хотите сделать?"
 
 #: startup.cc:729
 msgid "Open"
@@ -11764,7 +11910,7 @@ msgstr "Рисовать кнопки плоскими"
 
 #: theme_manager.cc:61
 msgid "All floating windows are dialogs"
-msgstr ""
+msgstr "Все плавающие окна являются диалогами"
 
 #: theme_manager.cc:62
 msgid "Draw waveforms with color gradient"
@@ -11977,7 +12123,7 @@ msgstr "Соотношение сторон:"
 msgid " %1 fps"
 msgstr " %1 к/с"
 
-#: editor_videotimeline.cc:138
+#: editor_videotimeline.cc:146
 msgid "Export Successful: %1"
 msgstr "Экспорт успешно завершён: %1"
 
@@ -12049,7 +12195,7 @@ msgstr "Файл вывода:"
 
 #: transcode_video_dialog.cc:60 export_video_dialog.cc:72
 msgid "Abort"
-msgstr ""
+msgstr "Прервать"
 
 #: transcode_video_dialog.cc:62
 msgid "Height = "
@@ -12061,7 +12207,7 @@ msgstr ""
 
 #: transcode_video_dialog.cc:69
 msgid "Debug Mode: Print ffmpeg Command and Output to stdout."
-msgstr ""
+msgstr "Режим отладки: вывод команд ffmpeg в stdout"
 
 #: transcode_video_dialog.cc:106
 msgid "<b>File Information</b>"
@@ -12097,9 +12243,8 @@ msgid "Geometry:"
 msgstr "Геометрия:"
 
 #: transcode_video_dialog.cc:154
-#, fuzzy
 msgid "??"
-msgstr "???"
+msgstr ""
 
 #: transcode_video_dialog.cc:175
 msgid "<b>Import Settings</b>"
@@ -12111,7 +12256,7 @@ msgstr "Не импортировать видео"
 
 #: transcode_video_dialog.cc:181
 msgid "Reference From Current Location"
-msgstr ""
+msgstr "Использовать исходный видеофайл"
 
 #: transcode_video_dialog.cc:183
 msgid "Import/Transcode Video to Session"
@@ -12143,7 +12288,7 @@ msgstr "Не удалось извлечь звуковую дорожку."
 
 #: transcode_video_dialog.cc:373
 msgid "Transcoding Video.."
-msgstr ""
+msgstr "Перекодирование видео..."
 
 #: transcode_video_dialog.cc:407
 msgid "Transcoding Failed."
@@ -12162,9 +12307,8 @@ msgid "Server Executable:"
 msgstr "Исполняемый файл сервера:"
 
 #: video_server_dialog.cc:45
-#, fuzzy
 msgid "Server Docroot:"
-msgstr "Сервер:"
+msgstr ""
 
 #: video_server_dialog.cc:51
 msgid "Don't show this dialog again. (Reset in Edit->Preferences)."
@@ -12223,14 +12367,12 @@ msgid "Confirm Overwrite"
 msgstr "Подтвердите перезапись"
 
 #: utils_videotl.cc:63
-#, fuzzy
 msgid "A file with the same name already exists.  Do you want to overwrite it?"
 msgstr "Снимок с таким названием уже есть. Перезаписать его?"
 
 #: utils_videotl.cc:73 utils_videotl.cc:89
-#, fuzzy
 msgid "Cannot create video folder \"%1\" (%2)"
-msgstr "Не удалось создать пользовательскую папку %3:  %1 (%2)"
+msgstr "Не удалось создать папку для видео: \"%1\" (%2)"
 
 #: export_video_dialog.cc:65
 msgid "Export Video File "
@@ -12261,9 +12403,8 @@ msgid "Codec Optimizations:"
 msgstr "Оптимизация кодека:"
 
 #: export_video_dialog.cc:83
-#, fuzzy
 msgid "Deinterlace"
-msgstr "Указатель по центру"
+msgstr ""
 
 #: export_video_dialog.cc:84
 msgid "Use [2] B-frames (MPEG 2 or 4 only)"
@@ -12316,81 +12457,81 @@ msgstr "от 00:00:00:00 до конца видео"
 msgid "from the video's start to the video's end"
 msgstr "от начала до конца видео"
 
-#: export_video_dialog.cc:166
+#: export_video_dialog.cc:183
 msgid "<b>Settings:</b>"
 msgstr "<b>Параметры:</b>"
 
-#: export_video_dialog.cc:174
+#: export_video_dialog.cc:191
 msgid "Range:"
 msgstr "Диапазон:"
 
-#: export_video_dialog.cc:177
+#: export_video_dialog.cc:194
 msgid "Preset:"
 msgstr "Профиль:"
 
-#: export_video_dialog.cc:180
+#: export_video_dialog.cc:197
 msgid "Video Codec:"
 msgstr "Видеокодек:"
 
-#: export_video_dialog.cc:183
+#: export_video_dialog.cc:200
 msgid "Video KBit/s:"
 msgstr "Скорость видеопотока (Кбит/с):"
 
-#: export_video_dialog.cc:186
+#: export_video_dialog.cc:203
 msgid "Audio Codec:"
 msgstr "Звуковой кодек:"
 
-#: export_video_dialog.cc:189
+#: export_video_dialog.cc:206
 msgid "Audio KBit/s:"
 msgstr "Скорость звукового потока (Кбит/с):"
 
-#: export_video_dialog.cc:192
+#: export_video_dialog.cc:209
 msgid "Audio Samplerate:"
 msgstr "Частота сэмплирования звука:"
 
-#: export_video_dialog.cc:369
+#: export_video_dialog.cc:386
 msgid "Normalizing audio"
 msgstr "Выполняется нормировка звука"
 
-#: export_video_dialog.cc:373
+#: export_video_dialog.cc:390
 msgid "Exporting audio"
-msgstr ""
+msgstr "Экспорт звука"
 
-#: export_video_dialog.cc:419
+#: export_video_dialog.cc:436
 msgid "Exporting Audio..."
 msgstr "Экспортируется звук..."
 
-#: export_video_dialog.cc:476
+#: export_video_dialog.cc:493
 msgid ""
 "Export Video: Cannot query duration of video-file, using duration from "
 "timeline instead."
 msgstr ""
 
-#: export_video_dialog.cc:505
+#: export_video_dialog.cc:522
 msgid "Export Video: No Master Out Ports to Connect for Audio Export"
 msgstr ""
 
-#: export_video_dialog.cc:544
+#: export_video_dialog.cc:561
 msgid "Encoding Video..."
 msgstr "Кодируется видео..."
 
-#: export_video_dialog.cc:563
+#: export_video_dialog.cc:580
 msgid "Export Video: Video input file cannot be read."
 msgstr ""
 
-#: export_video_dialog.cc:661
+#: export_video_dialog.cc:678
 msgid "Encoding Video.. Pass 1/2"
 msgstr "Выполняется кодирование видео. Проход 1/2."
 
-#: export_video_dialog.cc:673
+#: export_video_dialog.cc:690
 msgid "Encoding Video.. Pass 2/2"
 msgstr "Выполняется кодирование видео. Проход 2/2."
 
-#: export_video_dialog.cc:761
+#: export_video_dialog.cc:778
 msgid "Transcoding failed."
 msgstr "Не удалось выполнить перекодировку."
 
-#: export_video_dialog.cc:930 export_video_dialog.cc:950
+#: export_video_dialog.cc:947 export_video_dialog.cc:967
 msgid "Save Exported Video File"
 msgstr "Сохранить экспортированный видеофайл"
 
@@ -12404,34 +12545,49 @@ msgstr ""
 
 #: export_video_infobox.cc:43
 msgid "<b>Video Export Info</b>"
+msgstr "<b>Справка по экспорту видео</b>"
+
+#: export_video_infobox.cc:48
+msgid ""
+"Video encoding is a non-trivial task with many details.\n"
+"\n"
+"Please see the manual at %1/video-timeline/operations/#export.\n"
+"\n"
+"Open Manual in Browser? "
 msgstr ""
 
-#: export_video_infobox.cc:46
-msgid ""
-"Ardour video export is not recommended for mastering!\n"
-"While 'ffmpeg' (which is used by ardour) can produce high-quality files, "
-"this export lacks the possibility to tweak many settings. We recommend to "
-"use 'winff', 'devede' or 'dvdauthor' to mux & master. Nevertheless this "
-"video-export comes in handy to do quick snapshots, intermediates, dailies or "
-"online videos.\n"
-"\n"
-"The soundtrack is created from the master-bus of the current Ardour "
-"session.\n"
-"\n"
-"The video soure defaults to the file used in the video timeline, which may "
-"not the best quality to start with, you should the original video file.\n"
-"\n"
-"If the export-range is longer than the original video, black video frames "
-"are prefixed and/or appended. This process may fail with non-standard pixel-"
-"aspect-ratios.\n"
-"\n"
-"The file-format is determined by the extension that you choose for the "
-"output file (.avi, .mov, .flv, .ogv,...)\n"
-"Note: not all combinations of format+codec+settings produce files which are "
-"according so spec. e.g. flv files require sample-rates of 22.1kHz or "
-"44.1kHz, mpeg containers can not be used with ac3 audio-codec, etc. If in "
-"doubt, use one of the built-in presets."
-msgstr ""
+#~ msgid "-Inf"
+#~ msgstr "-Inf"
+
+#~ msgid "slowest"
+#~ msgstr "Самое медленное"
+
+#~ msgid "slow"
+#~ msgstr "Медленное"
+
+#~ msgid "fast"
+#~ msgstr "Быстрое"
+
+#~ msgid "faster"
+#~ msgstr "Ещё более быстрее"
+
+#~ msgid "fastest"
+#~ msgstr "Скорейшее"
+
+#~ msgid "found %1 match"
+#~ msgid_plural "found %1 matches"
+#~ msgstr[0] "Найдено %1 совпадение"
+#~ msgstr[1] "Найдено %1 совпадения"
+#~ msgstr[2] "Найдено %1 совпадений"
+
+#~ msgid "Found %1 match"
+#~ msgid_plural "Found %1 matches"
+#~ msgstr[0] "Найдено %1 совпадение"
+#~ msgstr[1] "Найдено %1 совпадения"
+#~ msgstr[2] "Найдено %1 совпадений"
+
+#~ msgid "What would you like to do ?"
+#~ msgstr "Что вы хотите сделать?"
 
 #~ msgid "Control surfaces"
 #~ msgstr "Устройства управления"
@@ -14226,9 +14382,6 @@ msgstr ""
 
 #~ msgid "solo change"
 #~ msgstr "смена солирования"
-
-#~ msgid "rec-enable change"
-#~ msgstr "смена записываемости"
 
 #~ msgid "Solo Lock"
 #~ msgstr "Запереть солирование"
