@@ -584,7 +584,7 @@ ExportVideoDialog::encode_pass (int pass)
 	}
 
 	std::string preset = preset_combo.get_active_text();
-	FFSettings ffs ; /* = transcoder->default_encoder_settings(); */
+	TranscodeFfmpeg::FFSettings ffs ; /* = transcoder->default_encoder_settings(); */
 	ffs.clear();
 
 	if (fps_checkbox.get_active()) {
@@ -740,7 +740,7 @@ ExportVideoDialog::encode_pass (int pass)
 		transcoder->set_avoffset(av_offset / (double)_session->nominal_frame_rate());
 	}
 
-	FFSettings meta = transcoder->default_meta_data();
+	TranscodeFfmpeg::FFSettings meta = transcoder->default_meta_data();
 	if (meta_checkbox.get_active()) {
 		ARDOUR::SessionMetadata * session_data = ARDOUR::SessionMetadata::Metadata();
 		if (session_data->year() > 0 ) {
