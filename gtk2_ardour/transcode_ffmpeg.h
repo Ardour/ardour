@@ -24,14 +24,6 @@
 #include "ardour/types.h"
 #include "system_exec.h"
 
-/* TODO: use a namespace here ? */
-struct FFAudioStream {
-	std::string name;
-	std::string stream_id;
-	uint32_t channels;
-};
-typedef std::vector<FFAudioStream> AudioStreams;
-typedef std::map<std::string,std::string> FFSettings;
 
 /** @class TranscodeFfmpeg
  *  @brief wrapper around ffmpeg and ffprobe command-line utils
@@ -45,6 +37,15 @@ class TranscodeFfmpeg : public sigc::trackable
                       , public PBD::ScopedConnectionList
 {
 	public:
+
+	struct FFAudioStream {
+		std::string name;
+		std::string stream_id;
+		uint32_t channels;
+	};
+	typedef std::vector<FFAudioStream> FFAudioStreams;
+	typedef std::map<std::string,std::string> FFSettings;
+
 
 		/** instantiate a new transcoder. If a file-name is given, the file's
 		 * attributes (fps, duration, geometry etc) are read.
@@ -110,7 +111,7 @@ class TranscodeFfmpeg : public sigc::trackable
 		ARDOUR::framecnt_t get_duration() { return m_duration; }
 		std::string  get_codec() { return m_codec; }
 
-		AudioStreams get_audio() { return m_audio; }
+		FFAudioStreams get_audio() { return m_audio; }
 
 		/** override file duration used with the \ref Progress signal.
 		 * @param d duration in video-frames = length_in_seconds * get_fps()
@@ -145,7 +146,7 @@ class TranscodeFfmpeg : public sigc::trackable
 		bool ffexecok;
 		bool probeok;
 
-		AudioStreams m_audio;
+		FFAudioStreams m_audio;
 
 		char *format_metadata (std::string, std::string);
 		void ffmpegparse_v (std::string d, size_t s);
