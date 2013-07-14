@@ -485,9 +485,34 @@ gint meter_expose_metrics (GdkEventExpose *ev, std::vector<ARDOUR::DataType> typ
 	return true;
 }
 
-void meter_clear_pattern_cache() {
-	// TODO allow to clear meterbridge "*Left|Right" patterns independenly
-	metric_patterns.clear();
-	ticks_patterns.clear();
+void meter_clear_pattern_cache(int which) {
+	MetricPatterns::iterator i = metric_patterns.begin();
+	TickPatterns::iterator j = ticks_patterns.begin();
+
+	while (i != metric_patterns.end()) {
+		int m = 4;
+		std::string n = i->first;
+		if (n.substr(n.length() - 4) == "Left")  { m = 1; }
+		if (n.substr(n.length() - 5) == "Right") { m = 2; }
+		if (which & m) {
+			cairo_pattern_destroy(i->second);
+			metric_patterns.erase(i++);
+		} else {
+			++i;
+		}
+	}
+
+	while (j != ticks_patterns.end()) {
+		int m = 4;
+		std::string n = j->first;
+		if (n.substr(n.length() - 4) == "Left")  { m = 1; }
+		if (n.substr(n.length() - 5) == "Right") { m = 2; }
+		if (which & m) {
+			cairo_pattern_destroy(j->second);
+			ticks_patterns.erase(j++);
+		} else {
+			++j;
+		}
+	}
 	RedrawMetrics();
 }

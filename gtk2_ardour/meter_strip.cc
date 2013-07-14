@@ -372,14 +372,12 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 void
 MeterStrip::on_size_request (Gtk::Requisition* r)
 {
-	meter_clear_pattern_cache();
 	VBox::on_size_request(r);
 }
 
 void
 MeterStrip::on_size_allocate (Gtk::Allocation& a)
 {
-	meter_clear_pattern_cache();
 	const int wh = a.get_height();
 	int nh = ceilf(wh * .11f);
 	if (nh < 52) nh = 52;
