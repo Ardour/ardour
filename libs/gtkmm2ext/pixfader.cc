@@ -292,13 +292,15 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 		pango_cairo_show_layout (cr, _layout->gobj());
 	} 
 	
-//	if (Config->get_widget_prelight()) {  //pixfader does not have access to config
-		if (_hovering) {
-			Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), 3);
-			cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.1);
-			cairo_fill (cr);
-		}
-//	}
+	if (!get_sensitive()) {
+		Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), 3);
+		cairo_set_source_rgba (cr, 0.505, 0.517, 0.525, 0.4);
+		cairo_fill (cr);
+	} else if (_hovering) {
+		Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), 3);
+		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.1);
+		cairo_fill (cr);
+	}
 
 	last_drawn = ds;
 

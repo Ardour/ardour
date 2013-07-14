@@ -183,7 +183,7 @@ ARDOUR_UI::set_session (Session *s)
 
 	second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_second), 1000);
 	point_one_second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_one_seconds), 100);
-	point_zero_one_second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_zero_one_seconds), 40);
+	point_zero_something_second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_zero_something_seconds), 40);
 
 	update_format ();
 }
@@ -223,8 +223,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 
 	second_connection.disconnect ();
 	point_one_second_connection.disconnect ();
-	point_oh_five_second_connection.disconnect ();
-	point_zero_one_second_connection.disconnect();
+	point_zero_something_second_connection.disconnect();
 
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, false);
 

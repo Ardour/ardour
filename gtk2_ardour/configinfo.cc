@@ -31,9 +31,15 @@ ConfigInfoDialog::ConfigInfoDialog ()
 	text.get_buffer()->set_text (std::string (ARDOUR::ardour_config_info));
 	text.set_wrap_mode (Gtk::WRAP_WORD);
 	text.show ();
-	text.set_size_request (300, 800);
 
-	get_vbox()->pack_start (text, true, true);
+	scroller.set_shadow_type(Gtk::SHADOW_NONE);
+	scroller.set_border_width(0);
+	scroller.add (text);
+	scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	scroller.show();
+
+	get_vbox()->pack_start (scroller, true, true);
+	set_size_request (400, 600);
 
 	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_ACCEPT);
 }
