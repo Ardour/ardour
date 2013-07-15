@@ -2,6 +2,7 @@
 from waflib.extras import autowaf as autowaf
 from waflib import Options
 import os
+import sys
 import re
 import subprocess
 
@@ -99,6 +100,7 @@ libardour_sources = [
         'io.cc',
         'io_processor.cc',
         'jack_slave.cc',
+        'jack_utils.cc',
         'kmeterdsp.cc',
         'ladspa_plugin.cc',
         'ladspa_search_path.cc',
@@ -240,6 +242,12 @@ def configure(conf):
                       atleast_version='0.3.2')
     autowaf.check_pkg(conf, 'jack', uselib_store='JACK',
                       atleast_version='0.118.2')
+    if Options.options.dist_target == 'auto':
+        if re.search ("linux", sys.platform) != None:
+            autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
+    if Options.options.dist_target == 'mingw':
+        autowaf.check_pkg(conf, 'portaudio-2.0', uselib_store='PORTAUDIO',
+                          atleast_version='19')
     autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
     autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF',
                       atleast_version='0.4.0')
@@ -379,8 +387,8 @@ def build(bld):
     obj.name         = 'ardour'
     obj.target       = 'ardour'
     obj.uselib       = ['GLIBMM','GTHREAD','AUBIO','SIGCPP','XML','UUID',
-                        'JACK','SNDFILE','SAMPLERATE','LRDF','AUDIOUNITS',
-                        'OSX','BOOST','CURL','DL']
+                        'JACK', 'ALSA', 'PORTAUDIO', 'SNDFILE','SAMPLERATE','LRDF',
+                        'AUDIOUNITS', 'OSX','BOOST','CURL','DL']
     obj.use          = ['libpbd','libmidipp','libevoral','libvamphost',
                         'libvampplugin','libtaglib','librubberband',
                         'libaudiographer','libltc']
@@ -479,6 +487,7 @@ def build(bld):
             create_ardour_test_program(bld, obj.includes, 'framewalk_to_beats', 'test_framewalk_to_beats', ['test/framewalk_to_beats_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'framepos_plus_beats', 'test_framepos_plus_beats', ['test/framepos_plus_beats_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'framepos_minus_beats', 'test_framepos_minus_beats', ['test/framepos_minus_beats_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'jack_utils', 'test_jack_utils', ['test/jack_utils_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'playlist_equivalent_regions', 'test_playlist_equivalent_regions', ['test/playlist_equivalent_regions_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'playlist_layering', 'test_playlist_layering', ['test/playlist_layering_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'plugins_test', 'test_plugins', ['test/plugins_test.cc'])
@@ -497,6 +506,7 @@ def build(bld):
             test/framewalk_to_beats_test.cc
             test/framepos_plus_beats_test.cc
             test/framepos_minus_beats_test.cc
+            test/jack_utils_test.cc
             test/playlist_equivalent_regions_test.cc
             test/playlist_layering_test.cc
             test/plugins_test.cc
