@@ -43,7 +43,7 @@ def configure(conf):
     #if Options.options.tranzport and conf.is_defined('HAVE_USB'):
     #    conf.define('BUILD_TRANZPORT', 1)
 
-    if conf.check_cc (header_name='poll.h', define_name='BUILD_MACKIE'):
+    if conf.check_cc (header_name='poll.h', define_name='BUILD_MACKIE', mandatory=False):
         sub_config_and_use(conf, 'mackie')
             
     if autowaf.check_pkg (conf, 'liblo', mandatory=False, uselib_store="LO", atleast_version="0.24"):
