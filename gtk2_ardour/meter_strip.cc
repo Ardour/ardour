@@ -52,6 +52,7 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace std;
+using namespace ArdourMeter;
 
 PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
 PBD::Signal0<void> MeterStrip::MetricChanged;

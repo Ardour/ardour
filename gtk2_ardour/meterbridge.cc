@@ -62,6 +62,7 @@ using namespace Gtk;
 using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace std;
+using namespace ArdourMeter;
 
 using PBD::atoi;
 
