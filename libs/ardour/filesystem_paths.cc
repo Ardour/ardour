@@ -86,14 +86,11 @@ user_config_directory ()
 std::string
 ardour_dll_directory ()
 {
-	static std::string s;
-
+	std::string s = Glib::getenv("ARDOUR_DLL_PATH");
 	if (s.empty()) {
-		s = Glib::getenv("ARDOUR_DLL_PATH");
 		std::cerr << _("ARDOUR_DLL_PATH not set in environment - exiting\n");
 		::exit (1);
-	}
-
+	}	
 	return s;
 }
 
