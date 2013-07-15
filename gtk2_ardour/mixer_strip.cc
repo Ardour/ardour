@@ -2135,9 +2135,6 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 
 	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterPeak), MeterPeak);
 	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterKrms), MeterKrms);
-	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterIEC1), MeterIEC1);
-	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterIEC2), MeterIEC2);
-	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterVU),   MeterVU);
 
 	int _strip_type;
 	if (_route->is_master()) {

@@ -177,9 +177,6 @@ setup_enum_writer ()
 	REGISTER_ENUM (MeterMaxPeak);
 	REGISTER_ENUM (MeterPeak);
 	REGISTER_ENUM (MeterKrms);
-	REGISTER_ENUM (MeterIEC1);
-	REGISTER_ENUM (MeterIEC2);
-	REGISTER_ENUM (MeterVU);
 	REGISTER (_MeterType);
 
 	REGISTER_ENUM (Normal);

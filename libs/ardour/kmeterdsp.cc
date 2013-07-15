@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2008-2011 Fons Adriaensen <fons@linuxaudio.org>
-    Adopted for Ardour 2013 by Robin Gareus <robin@gareus.org>
+		Adopted for Ardour 2013 by Robin Gareus <robin@gareus.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,12 +17,11 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <math.h>
-#include "ardour/kmeterdsp.h"
 
+#include <math.h>
+#include "kmeterdsp.h"
 
 float  Kmeterdsp::_omega;
-
 
 Kmeterdsp::Kmeterdsp (void) :
     _z1 (0),
@@ -37,10 +36,6 @@ Kmeterdsp::~Kmeterdsp (void)
 {
 }
 
-void Kmeterdsp::init (int fsamp)
-{
-    _omega = 9.72f / fsamp; // ballistic filter coefficient
-}
 
 void Kmeterdsp::process (float *p, int n)
 {
@@ -98,6 +93,7 @@ void Kmeterdsp::process (float *p, int n)
     if (s > _rms) _rms = s;
 }
 
+
 /* Returns highest _rms value since last call */
 float Kmeterdsp::read ()
 {
@@ -106,10 +102,15 @@ float Kmeterdsp::read ()
     return rv;
 }
 
-void Kmeterdsp::reset ()
+void Kmeterdsp::init (int fsamp)
 {
-    _z1 = _z2 = _rms = .0f;
-    _flag = false;
+    _omega = 9.72f / fsamp; // ballistic filter coefficient
 }
 
-/* vi:set ts=8 sts=8 sw=4: */
+void Kmeterdsp::reset ()
+{
+    _z1 = _z2 = _rms = 0.0;
+    _flag=false;
+}
+
+/* vi:set ts=8 sts=8 sw=8: */
