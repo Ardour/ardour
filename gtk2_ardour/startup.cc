@@ -197,11 +197,11 @@ it is still at the beta stage on OS X. So, a few guidelines:\n\
 \n\
 1) Please do <b>NOT</b> use this software with the expectation that it is stable or reliable\n\
    though it may be so, depending on your workflow.\n\
-3) <b>Please do NOT use the forums at ardour.org to report issues</b>.\n\
-4) Please <b>DO</b> use the bugtracker at http://tracker.ardour.org/ to report issues\n\
+2) <b>Please do NOT use the forums at ardour.org to report issues</b>.\n\
+3) Please <b>DO</b> use the bugtracker at http://tracker.ardour.org/ to report issues\n\
    making sure to note the product version number as 3.0-beta.\n\
-5) Please <b>DO</b> use the ardour-users mailing list to discuss ideas and pass on comments.\n\
-6) Please <b>DO</b> join us on IRC for real time discussions about ardour3. You\n\
+4) Please <b>DO</b> use the ardour-users mailing list to discuss ideas and pass on comments.\n\
+5) Please <b>DO</b> join us on IRC for real time discussions about ardour3. You\n\
    can get there directly from Ardour via the Help->Chat menu option.\n\
 \n\
 Full information on all the above can be found on the support page at\n\
