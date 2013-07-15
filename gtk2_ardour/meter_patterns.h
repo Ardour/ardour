@@ -42,6 +42,8 @@ gint meter_expose_metrics (GdkEventExpose *ev, std::vector<ARDOUR::DataType> typ
 
 void meter_clear_pattern_cache(int which=7);
 
+const std::string meter_type_string (ARDOUR::MeterType);
+
 }
 
 #endif

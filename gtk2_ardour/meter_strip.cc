@@ -571,16 +571,19 @@ MeterStrip::popup_level_meter_menu (GdkEventButton* ev)
 	RadioMenuItem::Group group;
 
 	_suspend_menu_callbacks = true;
-	add_level_meter_item (items, group, _("Peak"), MeterPeak);
-	add_level_meter_item (items, group, _("RMS + Peak"), MeterKrms);
+	add_level_meter_item (items, group, ArdourMeter::meter_type_string(MeterPeak), MeterPeak);
+	add_level_meter_item (items, group, ArdourMeter::meter_type_string(MeterKrms), MeterKrms);
+
+	MeterType cmt = _route->meter_type();
+	const std::string cmn = ArdourMeter::meter_type_string(cmt);
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Change all in Group to Peak"), sigc::bind (SetMeterTypeMulti, -1, _route->route_group(), MeterPeak)));
-	items.push_back (MenuElem (_("Change all in Group to RMS + Peak"), sigc::bind (SetMeterTypeMulti, -1, _route->route_group(), MeterKrms)));
-	items.push_back (MenuElem (_("Change all to Peak"), sigc::bind (SetMeterTypeMulti, 0, _route->route_group(), MeterPeak)));
-	items.push_back (MenuElem (_("Change all to RMS + Peak"), sigc::bind (SetMeterTypeMulti, 0, _route->route_group(), MeterKrms)));
-	items.push_back (MenuElem (_("Change same track-type to Peak"), sigc::bind (SetMeterTypeMulti, _strip_type, _route->route_group(), MeterPeak)));
-	items.push_back (MenuElem (_("Change same track-type to RMS + Peak"), sigc::bind (SetMeterTypeMulti, _strip_type, _route->route_group(), MeterKrms)));
+	items.push_back (MenuElem (string_compose(_("Change all in Group to %1"), cmn),
+				sigc::bind (SetMeterTypeMulti, -1, _route->route_group(), cmt)));
+	items.push_back (MenuElem (string_compose(_("Change all to %1"), cmn),
+				sigc::bind (SetMeterTypeMulti, 0, _route->route_group(), cmt)));
+	items.push_back (MenuElem (string_compose(_("Change same track-type to %1"), cmn),
+				sigc::bind (SetMeterTypeMulti, _strip_type, _route->route_group(), cmt)));
 
 	m->popup (ev->button, ev->time);
 	_suspend_menu_callbacks = false;
