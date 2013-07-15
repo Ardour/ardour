@@ -35,18 +35,27 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace std;
-
+using namespace ArdourMeter;
 
 static const int max_pattern_metric_size = 1026;
 
-sigc::signal<void> ResetAllPeakDisplays;
-sigc::signal<void,ARDOUR::Route*> ResetRoutePeakDisplays;
-sigc::signal<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
-sigc::signal<void> RedrawMetrics;
+sigc::signal<void> ArdourMeter::ResetAllPeakDisplays;
+sigc::signal<void,ARDOUR::Route*> ArdourMeter::ResetRoutePeakDisplays;
+sigc::signal<void,ARDOUR::RouteGroup*> ArdourMeter::ResetGroupPeakDisplays;
+sigc::signal<void> ArdourMeter::RedrawMetrics;
 
-sigc::signal<void, int, ARDOUR::RouteGroup*, ARDOUR::MeterType> SetMeterTypeMulti;
+sigc::signal<void, int, ARDOUR::RouteGroup*, ARDOUR::MeterType> ArdourMeter::SetMeterTypeMulti;
 
-cairo_pattern_t*
+namespace ArdourMeter {
+	typedef std::map<std::string,cairo_pattern_t*> TickPatterns;
+	typedef std::map<std::string,cairo_pattern_t*> MetricPatterns;
+}
+
+static ArdourMeter::TickPatterns ticks_patterns;
+static ArdourMeter::MetricPatterns metric_patterns;
+
+
+static cairo_pattern_t*
 meter_render_ticks (Gtk::Widget& w, vector<ARDOUR::DataType> types)
 {
 	Glib::RefPtr<Gdk::Window> win (w.get_window());
@@ -195,7 +204,7 @@ meter_render_ticks (Gtk::Widget& w, vector<ARDOUR::DataType> types)
 }
 
 
-cairo_pattern_t*
+static cairo_pattern_t*
 meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 {
 	Glib::RefPtr<Gdk::Window> win (w.get_window());
@@ -407,10 +416,8 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 }
 
 
-typedef std::map<std::string,cairo_pattern_t*> TickPatterns;
-static  TickPatterns ticks_patterns;
-
-gint meter_expose_ticks (GdkEventExpose *ev, std::vector<ARDOUR::DataType> types, Gtk::DrawingArea *mta)
+gint
+ArdourMeter::meter_expose_ticks (GdkEventExpose *ev, std::vector<ARDOUR::DataType> types, Gtk::DrawingArea *mta)
 {
 	Glib::RefPtr<Gdk::Window> win (mta->get_window());
 	cairo_t* cr;
@@ -446,10 +453,8 @@ gint meter_expose_ticks (GdkEventExpose *ev, std::vector<ARDOUR::DataType> types
 	return true;
 }
 
-typedef std::map<std::string,cairo_pattern_t*> MetricPatterns;
-static  MetricPatterns metric_patterns;
-
-gint meter_expose_metrics (GdkEventExpose *ev, std::vector<ARDOUR::DataType> types, Gtk::DrawingArea *mma)
+gint
+ArdourMeter::meter_expose_metrics (GdkEventExpose *ev, std::vector<ARDOUR::DataType> types, Gtk::DrawingArea *mma)
 {
 	Glib::RefPtr<Gdk::Window> win (mma->get_window());
 	cairo_t* cr;
@@ -485,7 +490,8 @@ gint meter_expose_metrics (GdkEventExpose *ev, std::vector<ARDOUR::DataType> typ
 	return true;
 }
 
-void meter_clear_pattern_cache(int which) {
+void
+ArdourMeter::meter_clear_pattern_cache(int which) {
 	MetricPatterns::iterator i = metric_patterns.begin();
 	TickPatterns::iterator j = ticks_patterns.begin();
 
