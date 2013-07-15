@@ -65,6 +65,7 @@ def build(bld):
     '''.split()
     obj.export_includes = ['.', 'taglib', 'taglib/toolkit']
     obj.includes     = include_dirs
+    obj.defines      = ['MAKE_TAGLIB_LIB']
     obj.name         = 'libtaglib'
     obj.target       = 'taglib'
     obj.vnum         = LIBTAGLIB_LIB_VERSION
