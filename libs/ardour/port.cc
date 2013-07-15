@@ -21,7 +21,9 @@
 #include "libardour-config.h"
 #endif
 
+#ifndef WIN32
 #include <jack/weakjack.h> // so that we can test for new functions at runtime
+#endif
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
