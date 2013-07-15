@@ -725,12 +725,18 @@ AudioSource::compute_and_write_peaks (Sample* buf, framecnt_t first_frame, frame
 
 			off_t byte = (peak_leftover_frame / fpp) * sizeof (PeakData);
 
-#ifndef WIN32
-			if (::pwrite (_peakfile_fd, &x, sizeof (PeakData), byte) != sizeof (PeakData)) {
+			off_t offset = lseek (_peakfile_fd, byte, SEEK_SET);
+
+			if (offset != byte) {
+				error << string_compose(_("%1: could not seek in peak file data (%2)"), _name, strerror (errno)) << endmsg;
+				return -1;
+			}
+
+			if (::write (_peakfile_fd, &x, sizeof (PeakData)) != sizeof (PeakData)) {
 				error << string_compose(_("%1: could not write peak file data (%2)"), _name, strerror (errno)) << endmsg;
 				return -1;
 			}
-#endif
+
 			_peak_byte_max = max (_peak_byte_max, (off_t) (byte + sizeof(PeakData)));
 
 			{
@@ -840,14 +846,24 @@ AudioSource::compute_and_write_peaks (Sample* buf, framecnt_t first_frame, frame
 		}
 	}
 
-#ifndef WIN32
-	if (::pwrite (_peakfile_fd, peakbuf.get(), sizeof (PeakData) * peaks_computed, first_peak_byte) != (ssize_t) (sizeof (PeakData) * peaks_computed)) {
+
+	off_t offset = lseek(_peakfile_fd, first_peak_byte, SEEK_SET);
+
+	if (offset != first_peak_byte) {
+		error << string_compose(_("%1: could not seek in peak file data (%2)"), _name, strerror (errno)) << endmsg;
+		return -1;
+	}
+
+	ssize_t bytes_to_write = sizeof (PeakData) * peaks_computed;
+
+	ssize_t bytes_written = ::write (_peakfile_fd, peakbuf.get(), bytes_to_write);
+
+	if (bytes_written != bytes_to_write) {
 		error << string_compose(_("%1: could not write peak file data (%2)"), _name, strerror (errno)) << endmsg;
 		return -1;
 	}
-#endif
 
-	_peak_byte_max = max (_peak_byte_max, (off_t) (first_peak_byte + sizeof(PeakData)*peaks_computed));
+	_peak_byte_max = max (_peak_byte_max, (off_t) (first_peak_byte + bytes_to_write));
 
 	if (frames_done) {
 		Glib::Threads::Mutex::Lock lm (_peaks_ready_lock);
