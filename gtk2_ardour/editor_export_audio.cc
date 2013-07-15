@@ -25,6 +25,8 @@
 
 #include <gtkmm/messagedialog.h>
 
+#include <glib/gstdio.h>
+
 #include "gtkmm2ext/choice.h"
 
 #include "pbd/pthread_utils.h"
@@ -158,11 +160,11 @@ Editor::export_region ()
 
 			switch (ret) {
 			case Gtk::RESPONSE_ACCEPT:
-				/* force unlink because the backend code will
+				/* force ::g_unlink because the backend code will
 				   go wrong if it tries to open an existing
 				   file for writing.
 				*/
-				::unlink (path.c_str());
+				::g_unlink (path.c_str());
 				break;
 			default:
 				return;

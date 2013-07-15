@@ -653,7 +653,7 @@ AudioSource::build_peaks_from_scratch ()
   out:
 	if (ret) {
 		DEBUG_TRACE (DEBUG::Peaks, string_compose("Could not write peak data, attempting to remove peakfile %1\n", peakpath));
-		unlink (peakpath.c_str());
+		::g_unlink (peakpath.c_str());
 	}
 
 	return ret;

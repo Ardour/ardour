@@ -31,6 +31,8 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/stock.h>
+
+#include <glib/gstdio.h>
 #include <glibmm/fileutils.h>
 
 #include "pbd/convert.h"
@@ -1487,7 +1489,7 @@ SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths
 			goto out;
 		}
 
-		unlink (tmpc);
+		::g_unlink (tmpc);
 	}
 
 	ret = true;

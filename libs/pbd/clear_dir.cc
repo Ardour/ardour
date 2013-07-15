@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <string.h>
 
+#include <glib/gstdio.h>
 #include <glibmm/miscutils.h>
 
 #include "pbd/error.h"
@@ -66,7 +67,7 @@ PBD::clear_directory (const string& dir, size_t* size, vector<string>* paths)
                         continue;
                 }
                 
-                if (::unlink (fullpath.c_str())) {
+                if (::g_unlink (fullpath.c_str())) {
                         error << string_compose (_("cannot remove file %1 (%2)"), fullpath, strerror (errno))
                               << endmsg;
                         ret = 1;

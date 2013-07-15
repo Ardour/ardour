@@ -2452,7 +2452,7 @@ AUPluginInfo::save_cached_info ()
 
 	if (!tree.write (path)) {
 		error << string_compose (_("could not save AU cache to %1"), path) << endmsg;
-		unlink (path.c_str());
+		::g_unlink (path.c_str());
 	}
 }
 

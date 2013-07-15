@@ -2900,7 +2900,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		string peakpath = peak_path (base);
 
 		if (Glib::file_test (peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
-			if (::unlink (peakpath.c_str()) != 0) {
+			if (::g_unlink (peakpath.c_str()) != 0) {
 				error << string_compose (_("cannot remove peakfile %1 for %2 (%3)"),
                                                          peakpath, _path, strerror (errno))
 				      << endmsg;
