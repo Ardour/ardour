@@ -5,12 +5,12 @@ BASE=$(dirname $BASE) # up one
 BASE=$(dirname $BASE) # up one more
 BASE=$(dirname $BASE) # up one more
 
-HOST=i686-w64-mingw32
+HOST=i686-pc-mingw32
 MINGW_ROOT=/usr/$HOST/sys-root/mingw
 
 export PKG_CONFIG_PREFIX=$MINGW_ROOT
 export PKG_CONFIG_LIBDIR=$MINGW_ROOT/lib/pkgconfig
-export PKGCONFIG=pkg-config
+export PKGCONFIG=mingw32-pkg-config
 export AR=$HOST-ar
 export RANLIB=$HOST-ranlib
 export CC=$HOST-gcc
