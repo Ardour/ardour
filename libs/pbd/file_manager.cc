@@ -228,8 +228,19 @@ bool
 FdFileDescriptor::open ()
 {
 	/* we must have a lock on the FileManager's mutex */
-	
-	_fd = ::g_open (_path.c_str(), _writeable ? (O_RDWR | O_CREAT) : O_RDONLY, _mode);
+
+	/* files must be opened with O_BINARY flag on windows
+	 * or it treats the file as a text stream and puts in
+	 * line endings in etc
+	 */
+#ifdef WIN32
+#define WRITE_FLAGS O_RDWR | O_CREAT | O_BINARY
+#define READ_FLAGS O_RDONLY | O_BINARY
+#else
+#define WRITE_FLAGS O_RDWR | O_CREAT
+#define READ_FLAGS O_RDONLY
+#endif
+	_fd = ::g_open (_path.c_str(), _writeable ? WRITE_FLAGS : READ_FLAGS, _mode);
 	return (_fd == -1);
 }
 
