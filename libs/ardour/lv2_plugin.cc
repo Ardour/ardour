@@ -112,6 +112,8 @@ public:
 	LV2World ();
 	~LV2World ();
 
+	void load_bundled_plugins();
+
 	LilvWorld* world;
 
 	LilvNode* atom_AtomPort;
@@ -140,6 +142,9 @@ public:
 	LilvNode* time_Position;
 	LilvNode* ui_GtkUI;
 	LilvNode* ui_external;
+
+private:
+	bool _bundle_checked;
 };
 
 static LV2World _world;
@@ -1903,26 +1908,9 @@ static bool lv2_filter (const string& str, void *arg)
 
 LV2World::LV2World()
 	: world(lilv_world_new())
+	, _bundle_checked(false)
 {
 	lilv_world_load_all(world);
-
-	cout << "Scanning folders for bundled LV2s: " << ARDOUR::lv2_bundled_search_path().to_string() << endl;
-	PathScanner scanner;
-	vector<string *> *plugin_objects = scanner (ARDOUR::lv2_bundled_search_path().to_string(), lv2_filter, 0, true, true);
-	if (plugin_objects) {
-		for ( vector<string *>::iterator x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
-#ifdef WINDOWS
-			string uri = "file:///" + **x + "/";
-#else
-			string uri = "file://" + **x + "/";
-#endif
-			LilvNode *node = lilv_new_uri(world, uri.c_str());
-			lilv_world_load_bundle(world, node);
-			lilv_node_free(node);
-		}
-	}
-	delete (plugin_objects);
-
 
 	atom_AtomPort      = lilv_new_uri(world, LV2_ATOM__AtomPort);
 	atom_Chunk         = lilv_new_uri(world, LV2_ATOM__Chunk);
@@ -1982,6 +1970,31 @@ LV2World::~LV2World()
 	lilv_node_free(atom_AtomPort);
 }
 
+void
+LV2World::load_bundled_plugins()
+{
+	if (!_bundle_checked) {
+		cout << "Scanning folders for bundled LV2s: " << ARDOUR::lv2_bundled_search_path().to_string() << endl;
+		PathScanner scanner;
+		vector<string *> *plugin_objects = scanner (ARDOUR::lv2_bundled_search_path().to_string(), lv2_filter, 0, true, true);
+		if (plugin_objects) {
+			for ( vector<string *>::iterator x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
+#ifdef WINDOWS
+				string uri = "file:///" + **x + "/";
+#else
+				string uri = "file://" + **x + "/";
+#endif
+				LilvNode *node = lilv_new_uri(world, uri.c_str());
+				lilv_world_load_bundle(world, node);
+				lilv_node_free(node);
+			}
+		}
+		delete (plugin_objects);
+
+		_bundle_checked = true;
+	}
+}
+
 LV2PluginInfo::LV2PluginInfo (const void* c_plugin)
 	: _c_plugin(c_plugin)
 {
@@ -2013,6 +2026,8 @@ LV2PluginInfo::load(Session& session)
 PluginInfoList*
 LV2PluginInfo::discover()
 {
+	_world.load_bundled_plugins();
+
 	PluginInfoList*    plugs   = new PluginInfoList;
 	const LilvPlugins* plugins = lilv_world_get_all_plugins(_world.world);
 
