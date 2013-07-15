@@ -64,6 +64,15 @@ ArdourMeter::meter_type_string (ARDOUR::MeterType mt)
 		case MeterKrms:
 			return _("RMS + Peak");
 			break;
+		case MeterIEC1:
+			return _("DIN");
+			break;
+		case MeterIEC2:
+			return _("EBU/BBC");
+			break;
+		case MeterVU:
+			return _("VU");
+			break;
 		default:
 			return _("???");
 			break;
