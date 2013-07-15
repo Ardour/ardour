@@ -54,6 +54,21 @@ namespace ArdourMeter {
 static ArdourMeter::TickPatterns ticks_patterns;
 static ArdourMeter::MetricPatterns metric_patterns;
 
+const std::string
+ArdourMeter::meter_type_string (ARDOUR::MeterType mt)
+{
+	switch (mt) {
+		case MeterPeak:
+			return _("Peak");
+			break;
+		case MeterKrms:
+			return _("RMS + Peak");
+			break;
+		default:
+			return _("???");
+			break;
+	}
+}
 
 static cairo_pattern_t*
 meter_render_ticks (Gtk::Widget& w, vector<ARDOUR::DataType> types)
