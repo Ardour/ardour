@@ -89,10 +89,10 @@ ardour_dll_directory ()
 	static std::string s;
 
 	if (s.empty()) {
-			s = Glib::getenv("ARDOUR_DLL_PATH");
-			std::cerr << _("ARDOUR_DLL_PATH not set in environment - exiting\n");
-			::exit (1);
-		}
+		s = Glib::getenv("ARDOUR_DLL_PATH");
+		std::cerr << _("ARDOUR_DLL_PATH not set in environment - exiting\n");
+		::exit (1);
+	}
 
 	return s;
 }
