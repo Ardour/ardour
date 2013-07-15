@@ -71,12 +71,16 @@ PannerManager::discover_panners ()
 
 	Glib::PatternSpec so_extension_pattern("*.so");
 	Glib::PatternSpec dylib_extension_pattern("*.dylib");
+	Glib::PatternSpec dll_extension_pattern("*.dll");
 
 	find_matching_files_in_search_path (panner_search_path (),
 	                                    so_extension_pattern, panner_modules);
 
 	find_matching_files_in_search_path (panner_search_path (),
 	                                    dylib_extension_pattern, panner_modules);
+
+	find_matching_files_in_search_path (panner_search_path (),
+	                                    dll_extension_pattern, panner_modules);
 
 	DEBUG_TRACE (DEBUG::Panning, string_compose (_("looking for panners in %1"), panner_search_path().to_string()));
 
