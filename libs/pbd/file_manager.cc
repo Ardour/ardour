@@ -24,6 +24,9 @@
 #include <cassert>
 #include <cstdio>
 
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #ifdef __APPLE__
 #include <mach/mach_time.h>
 #endif
@@ -226,7 +229,7 @@ FdFileDescriptor::open ()
 {
 	/* we must have a lock on the FileManager's mutex */
 	
-	_fd = ::open (_path.c_str(), _writeable ? (O_RDWR | O_CREAT) : O_RDONLY, _mode);
+	_fd = ::g_open (_path.c_str(), _writeable ? (O_RDWR | O_CREAT) : O_RDONLY, _mode);
 	return (_fd == -1);
 }
 
