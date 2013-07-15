@@ -228,7 +228,7 @@ AudioSource::initialize_peakfile (string audio_path)
 		peakpath = find_broken_peakfile (peakpath, audio_path);
 	}
 
-	if (stat (peakpath.c_str(), &statbuf)) {
+	if (g_stat (peakpath.c_str(), &statbuf)) {
 		if (errno != ENOENT) {
 			/* it exists in the peaks dir, but there is some kind of error */
 
