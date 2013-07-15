@@ -101,6 +101,7 @@ libardour_sources = [
         'jack_slave.cc',
         'kmeterdsp.cc',
         'ladspa_plugin.cc',
+        'ladspa_search_path.cc',
         'location.cc',
         'location_importer.cc',
         'ltc_slave.cc',
