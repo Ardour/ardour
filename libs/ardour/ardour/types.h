@@ -181,10 +181,7 @@ namespace ARDOUR {
 		MeterMaxSignal = 0x01,
 		MeterMaxPeak   = 0x02,
 		MeterPeak      = 0x04,
-		MeterKrms      = 0x08,
-		MeterIEC1      = 0x10,
-		MeterIEC2      = 0x20,
-		MeterVU        = 0x40
+		MeterKrms      = 0x08
 	};
 
 	enum TrackMode {

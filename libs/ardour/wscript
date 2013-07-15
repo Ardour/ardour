@@ -91,8 +91,6 @@ libardour_sources = [
         'globals.cc',
         'graph.cc',
         'graphnode.cc',
-        'iec1ppmdsp.cc',
-        'iec2ppmdsp.cc',
         'import.cc',
         'instrument_info.cc',
         'internal_return.cc',
@@ -208,7 +206,6 @@ libardour_sources = [
         'user_bundle.cc',
         'utils.cc',
         'version.cc',
-        'vumeterdsp.cc',
         'worker.cc'
 ]
 
