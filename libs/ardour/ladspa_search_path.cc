@@ -19,6 +19,8 @@
 
 #include <glibmm/miscutils.h>
 
+#include "pbd/pathexpand.h"
+
 #include "ardour/ladspa_search_path.h"
 #include "ardour/directory_names.h"
 #include "ardour/filesystem_paths.h"
@@ -46,6 +48,10 @@ ladspa_search_path ()
 	spath.push_back ("/usr/local/lib/ladspa");
 	spath.push_back ("/usr/lib64/ladspa");
 	spath.push_back ("/usr/lib/ladspa");
+#endif
+
+#ifdef __APPLE__
+	spath.push_back (expand_path ("~/Library/Audio/Plug-Ins/LADSPA"));
 	spath.push_back ("/Library/Audio/Plug-Ins/LADSPA");
 #endif
 
