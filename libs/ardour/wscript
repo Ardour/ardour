@@ -238,6 +238,8 @@ def configure(conf):
         path_prefix + 'version.cc',
         'libardour3', conf.env['MAJOR'], conf.env['MINOR'], 0)
     autowaf.configure(conf)
+    autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO',
+                      atleast_version='0.3.2')
     autowaf.check_pkg(conf, 'jack', uselib_store='JACK',
                       atleast_version='0.118.2')
     if Options.options.dist_target == 'auto':
@@ -247,11 +249,8 @@ def configure(conf):
         autowaf.check_pkg(conf, 'portaudio-2.0', uselib_store='PORTAUDIO',
                           atleast_version='19')
     autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
-    if Options.options.dist_target != 'mingw':
-        autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF',
-                          atleast_version='0.4.0') 
-        autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO',
-                          atleast_version='0.3.2')
+    autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF',
+                      atleast_version='0.4.0')
     autowaf.check_pkg(conf, 'samplerate', uselib_store='SAMPLERATE',
                       atleast_version='0.1.0')
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP',

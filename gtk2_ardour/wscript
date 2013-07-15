@@ -266,9 +266,8 @@ def configure(conf):
         'gtk2_ardour', conf.env['MAJOR'], conf.env['MINOR'], 0)
     autowaf.configure(conf)
 
-    if Options.options.dist_target == 'auto':
-        if re.search ("linux", sys.platform) != None:
-            autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
+    if re.search ("linux", sys.platform) != None:
+        autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
 
     # TODO: Insert a sanity check for on OS X to ensure CoreAudio is present
 
@@ -419,9 +418,6 @@ def build(bld):
                          'libardour_cp',
                          'libgtkmm2ext',
                          'libtaglib' ]
-    if bld.env['build_target'] == 'mingw':
-	if bld.env['DEBUG'] == False:
-            obj.linkflags = ['-mwindows']
     if sys.platform == 'darwin':
         obj.use += ' libappleutility'
     obj.defines     = [
