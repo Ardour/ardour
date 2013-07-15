@@ -1980,16 +1980,18 @@ LV2World::load_bundled_plugins()
 		if (plugin_objects) {
 			for ( vector<string *>::iterator x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
 #ifdef WINDOWS
-					string uri = "file:///" + **x + "/";
+				string uri = "file:///" + **x + "/";
 #else
-					string uri = "file://" + **x + "/";
+				string uri = "file://" + **x + "/";
 #endif
-					LilvNode *node = lilv_new_uri(world, uri.c_str());
-					lilv_world_load_bundle(world, node);
-					lilv_node_free(node);
-				}
+				LilvNode *node = lilv_new_uri(world, uri.c_str());
+				lilv_world_load_bundle(world, node);
+				lilv_node_free(node);
 			}
+		}
 		delete (plugin_objects);
+
+		_bundle_checked = true;
 	}
 }
 
