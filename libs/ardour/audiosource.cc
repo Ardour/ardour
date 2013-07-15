@@ -370,8 +370,9 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 	if (scale == 1.0) {
 
+		off_t offset = 0;
 		off_t first_peak_byte = (start / samples_per_file_peak) * sizeof (PeakData);
-
+		ssize_t bytes_to_read = sizeof (PeakData)* npeaks;
 		/* open, read, close */
 
 		if ((peakfile_fd = peakfile_descriptor->allocate ()) < 0) {
@@ -381,11 +382,16 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 		DEBUG_TRACE (DEBUG::Peaks, "DIRECT PEAKS\n");
 
-#ifndef WIN32
-		nread = ::pread (peakfile_fd, peaks, sizeof (PeakData)* npeaks, first_peak_byte);
-#endif
+		offset = lseek (peakfile_fd, first_peak_byte, SEEK_SET);
 
-		if (nread != sizeof (PeakData) * npeaks) {
+		if (offset != first_peak_byte) {
+			error << string_compose(_("AudioSource: could not seek to correct location in peak file \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
+			return -1;
+		}
+
+		nread = ::read (peakfile_fd, peaks, bytes_to_read);
+
+		if (nread != bytes_to_read) {
 			DEBUG_TRACE (DEBUG::Peaks,  string_compose ("[%1]: Cannot read peaks from peakfile! (read only %2 not %3 at sample %4 = byte %5 )\n"
 			     , _name, nread, npeaks, start, first_peak_byte));
 			return -1;
@@ -448,13 +454,20 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 				uint32_t       start_byte = current_stored_peak * sizeof(PeakData);
 				tnp = min ((framecnt_t)(_length/samples_per_file_peak - current_stored_peak), (framecnt_t) expected_peaks);
 				to_read = min (chunksize, tnp);
+				ssize_t bytes_to_read = sizeof (PeakData) * to_read;
 
 				DEBUG_TRACE (DEBUG::Peaks, string_compose ("reading %1 bytes from peakfile @ %2\n"
-						, sizeof (PeakData) * to_read, start_byte));
+						, bytes_to_read, start_byte));
 
-#ifndef WIN32
-				if ((nread = ::pread (peakfile_fd, staging.get(), sizeof (PeakData) * to_read, start_byte))
-				    != sizeof (PeakData) * to_read) {
+
+				off_t offset = lseek (peakfile_fd, start_byte, SEEK_SET);
+
+				if (offset != start_byte) {
+					error << string_compose(_("AudioSource: could not seek to correct location in peak file \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
+					return -1;
+				}
+
+				if ((nread = ::read (peakfile_fd, staging.get(), bytes_to_read)) != bytes_to_read) {
 
 					off_t fend = lseek (peakfile_fd, 0, SEEK_END);
 
@@ -462,7 +475,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 					     , _name, (nread / sizeof(PeakData)), to_read, g_strerror (errno), start_byte, _length, fend, ((_length - current_frame)/samples_per_file_peak), npeaks));
 					return -1;
 				}
-#endif
 				i = 0;
 				stored_peaks_read = nread / sizeof(PeakData);
 			}
