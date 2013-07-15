@@ -30,8 +30,11 @@
 #include <algorithm>
 #include <vector>
 
-#include <boost/scoped_ptr.hpp>
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #include <boost/scoped_array.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
@@ -179,7 +182,7 @@ AudioSource::touch_peakfile ()
 {
 	struct stat statbuf;
 
-	if (stat (peakpath.c_str(), &statbuf) != 0 || statbuf.st_size == 0) {
+	if (g_stat (peakpath.c_str(), &statbuf) != 0 || statbuf.st_size == 0) {
 		return;
 	}
 
