@@ -590,13 +590,6 @@ def configure(conf):
 
     autowaf.check_header(conf, 'cxx', 'jack/session.h', define="JACK_SESSION", mandatory = False)
 
-    conf.check_cxx(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
-                  execute = "1",
-                  mandatory = True,
-                  msg = 'Checking for boost library >= 1.39',
-                  okmsg = 'ok',
-                  errmsg = 'too old\nPlease install boost version 1.39 or higher.')
-
     autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
     autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.2')
     autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.32.0')
@@ -620,6 +613,13 @@ def configure(conf):
 
     if Options.options.dist_target != 'mingw':
         conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
+
+        conf.check_cxx(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
+                      execute = "1",
+                      mandatory = True,
+                      msg = 'Checking for boost library >= 1.39',
+                      okmsg = 'ok',
+                      errmsg = 'too old\nPlease install boost version 1.39 or higher.')
 
     # Tell everyone that this is a waf build
 
