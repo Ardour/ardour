@@ -416,7 +416,16 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 			bool const tape_machine_mode = Config->get_tape_machine_mode ();
 			bool no_meter = false;
 
+			/* this needs a proper K-map
+			 * and should be separated into a function similar to monitoring_state()
+			 * that also handles roll() states in audio_track.cc, midi_track.cc and route.cc
+			 *
+			 * see http://www.oofus.co.uk/ardour/Ardour3MonitorModesV3.pdf
+			 */
 			if (!auto_input && !track_rec) {
+				no_meter=true;
+			}
+			else if (tape_machine_mode && !track_rec && auto_input) {
 				no_meter=true;
 			}
 			else if (!software_monitor && tape_machine_mode && !track_rec) {
