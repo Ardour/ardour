@@ -112,7 +112,7 @@ set_language_preference ()
 				break;
 			}
 		}
-		NSRange r = { 0, count };
+		NSRange r = { 0, static_cast<NSUInteger> (count) };
 		setenv ("LANGUAGE", [[[languages subarrayWithRange:r] componentsJoinedByString:@":"] UTF8String], 0);
 		cout << "LANGUAGE set to " << getenv ("LANGUAGE") << endl;
 	}
