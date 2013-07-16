@@ -1717,6 +1717,7 @@ AUPlugin::set_state(const XMLNode& node, int version)
 		return -1;
 	}
 
+#ifndef NO_PLUGIN_STATE
 	if (node.children().empty()) {
 		return -1;
 	}
@@ -1752,6 +1753,7 @@ AUPlugin::set_state(const XMLNode& node, int version)
 		}
 		CFRelease (propertyList);
 	}
+#endif
 
 	Plugin::set_state (node, version);
 	return ret;

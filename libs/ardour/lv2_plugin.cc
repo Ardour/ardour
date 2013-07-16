@@ -1233,6 +1233,8 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 		return -1;
 	}
 
+#ifndef NO_PLUGIN_STATE
+
 	if (version < 3000) {
 		nodes = node.children("port");
 	} else {
@@ -1288,6 +1290,7 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 	}
 
 	latency_compute_run();
+#endif
 
 	return Plugin::set_state(node, version);
 }

@@ -197,14 +197,15 @@ int
 VSTPlugin::set_state (const XMLNode& node, int version)
 {
 	LocaleGuard lg (X_("POSIX"));
+	int ret = -1;
 
 	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to VSTPlugin::set_state") << endmsg;
 		return 0;
 	}
 
+#ifndef NO_PLUGIN_STATE
 	XMLNode* child;
-	int ret = -1;
 
 	if ((child = find_named_node (node, X_("chunk"))) != 0) {
 
@@ -237,6 +238,7 @@ VSTPlugin::set_state (const XMLNode& node, int version)
 		ret = 0;
 
 	}
+#endif
 
 	Plugin::set_state (node, version);
 	return ret;
