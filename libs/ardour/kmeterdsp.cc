@@ -46,12 +46,6 @@ void Kmeterdsp::process (float *p, int n)
 
     float  s, t, z1, z2;
 
-    if (_flag) // Display thread has read the rms value.
-    {
-	_rms  = 0;
-	_flag = false;
-    }
-
     // Get filter state.
     z1 = _z1;
     z2 = _z2;
@@ -88,9 +82,18 @@ void Kmeterdsp::process (float *p, int n)
     _z1 = z1 + 1e-20f;
     _z2 = z2 + 1e-20f;
 
-    // Adjust RMS value and update maximum since last read().
     s = sqrtf (2 * z2);
-    if (s > _rms) _rms = s;
+
+    if (_flag) // Display thread has read the rms value.
+    {
+	_rms  = s;
+	_flag = false;
+    }
+    else
+    {
+        // Adjust RMS value and update maximum since last read().
+        if (s > _rms) _rms = s;
+    }
 }
 
 
