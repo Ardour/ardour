@@ -414,12 +414,19 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 			bool const auto_input = _session.config.get_auto_input ();
 			bool const software_monitor = Config->get_monitoring_model() == SoftwareMonitoring;
 			bool const tape_machine_mode = Config->get_tape_machine_mode ();
+			bool no_meter = false;
 
-			if (!software_monitor && tape_machine_mode && !track_rec) {
-				_meter->reset();
-				_input->process_input (boost::shared_ptr<Processor>(), start_frame, end_frame, nframes);
+			if (_monitoring & MonitorDisk && !track_rec) {
+				no_meter=true;
+			}
+			else if (!software_monitor && tape_machine_mode && !track_rec) {
+				no_meter=true;
 			}
 			else if (!software_monitor && !tape_machine_mode && !track_rec && !auto_input) {
+				no_meter=true;
+			}
+
+			if (no_meter) {
 				_meter->reset();
 				_input->process_input (boost::shared_ptr<Processor>(), start_frame, end_frame, nframes);
 			} else {
