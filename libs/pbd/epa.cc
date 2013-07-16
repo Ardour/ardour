@@ -24,7 +24,12 @@
 #include "pbd/epa.h"
 #include "pbd/strsplit.h"
 
+#ifdef COMPILER_MSVC
+#define environ        _environ
+_CRTIMP extern char ** _environ;
+#else
 extern char** environ;
+#endif
 
 using namespace PBD;
 using namespace std;

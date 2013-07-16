@@ -36,7 +36,7 @@ using std::vector;
 string
 PBD::canonical_path (const std::string& path)
 {
-#ifdef WIN32
+#ifdef COMPILER_MINGW
 	return path;
 #endif
 	char buf[PATH_MAX+1];

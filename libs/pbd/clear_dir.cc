@@ -17,9 +17,17 @@
 
 */
 
-#include <string>
+#ifdef COMPILER_MSVC
+#include <io.h>      // Microsoft's nearest equivalent to <unistd.h>
+using PBD::readdir;
+using PBD::opendir;
+using PBD::closedir;
+#else
 #include <dirent.h>
 #include <unistd.h>
+#endif
+
+#include <string>
 #include <sys/stat.h>
 #include <errno.h>
 #include <string.h>

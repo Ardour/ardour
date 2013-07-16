@@ -19,7 +19,11 @@
 
 #include <cstring>
 #include <stdint.h>
+#ifdef COMPILER_MSVC
+#include <io.h>      // Microsoft's nearest equivalent to <unistd.h>
+#else
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <cerrno>
 #include <cstring>

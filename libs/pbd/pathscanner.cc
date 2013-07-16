@@ -18,11 +18,19 @@
     $Id$
 */
 
+#ifdef COMPILER_MSVC
+#include <stdlib.h>
+#include <stdio.h>
+using PBD::readdir;
+using PBD::opendir;
+using PBD::closedir;
+#else
+#include <dirent.h>
 #include <cstdlib>
 #include <cstdio>
+#endif
 #include <cstring>
 #include <vector>
-#include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 

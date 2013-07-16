@@ -20,7 +20,11 @@
 #ifndef __pbd_pthread_utils__
 #define __pbd_pthread_utils__
 
+#ifdef COMPILER_MSVC
+#include <ardourext/pthread.h>
+#else
 #include <pthread.h>
+#endif
 #include <signal.h>
 #include <string>
 #include <stdint.h>
