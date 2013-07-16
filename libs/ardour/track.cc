@@ -408,8 +408,23 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	if (be_silent) {
 
 		if (_meter_point == MeterInput) {
-			/* still need input monitoring */
-			_input->process_input (_meter, start_frame, end_frame, nframes);
+			/* still need input monitoring and metering */
+
+			bool const track_rec = _diskstream->record_enabled ();
+			bool const auto_input = _session.config.get_auto_input ();
+			bool const software_monitor = Config->get_monitoring_model() == SoftwareMonitoring;
+			bool const tape_machine_mode = Config->get_tape_machine_mode ();
+
+			if (!software_monitor && tape_machine_mode && !track_rec) {
+				_meter->reset();
+				_input->process_input (boost::shared_ptr<Processor>(), start_frame, end_frame, nframes);
+			}
+			else if (!software_monitor && !tape_machine_mode && !track_rec && !auto_input) {
+				_meter->reset();
+				_input->process_input (boost::shared_ptr<Processor>(), start_frame, end_frame, nframes);
+			} else {
+				_input->process_input (_meter, start_frame, end_frame, nframes);
+			}
 		}
 
 		passthru_silence (start_frame, end_frame, nframes, 0);
