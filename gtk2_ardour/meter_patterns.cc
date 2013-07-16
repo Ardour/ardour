@@ -364,11 +364,11 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 				snprintf (buf, sizeof (buf), "%+2d", j->first);
 				pos = height - (gint) floor (height * fraction);
 				if (tickleft) {
-					cairo_move_to(cr, width-2.5, pos + .5);
+					cairo_move_to(cr, width-1.5, pos + .5);
 					cairo_line_to(cr, width, pos + .5);
 				} else {
 					cairo_move_to(cr, 0, pos + .5);
-					cairo_line_to(cr, 2.5, pos + .5);
+					cairo_line_to(cr, 1.5, pos + .5);
 				}
 				cairo_stroke (cr);
 				break;
@@ -398,7 +398,7 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 			p = min (p, height - th);
 			p = max (p, 0);
 
-			cairo_move_to (cr, width-4-tw, p);
+			cairo_move_to (cr, width-3-tw, p);
 			pango_cairo_show_layout (cr, layout->gobj());
 		}
 	}
