@@ -116,6 +116,10 @@ PeakMeter::reset ()
 	for (size_t i = 0; i < _peak_signal.size(); ++i) {
 		_peak_signal[i] = 0.0f;
 	}
+
+	for (size_t n = 0; n < _kmeter.size(); ++n) {
+		_kmeter[n]->reset();
+	}
 }
 
 void
