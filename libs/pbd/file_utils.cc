@@ -23,8 +23,8 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#ifdef WIN32
-#include <io.h> // for W_OK
+#ifdef COMPILER_MINGW
+#include <io.h> // For W_OK
 #endif
 
 #include <glibmm/fileutils.h>
