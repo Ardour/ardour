@@ -325,6 +325,9 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 
 	if (!_active) {
 		silence (nframes);
+		if (_meter_point == MeterInput && (_monitoring & MonitorInput || _diskstream->record_enabled())) {
+			_meter->reset();
+		}
 		return 0;
 	}
 
