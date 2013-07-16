@@ -945,6 +945,14 @@ Track::set_monitoring (MonitorChoice mc)
 MeterState
 Track::metering_state () const
 {
-	return (_diskstream->record_enabled() || _meter_point == MeterInput) ? MeteringInput : MeteringRoute;
+	bool rv;
+	if (_session.transport_rolling ()) {
+		// audio_track.cc || midi_track.cc roll() runs meter IFF:
+		rv = _meter_point == MeterInput && (_monitoring & MonitorInput);
+	} else {
+		// track no_roll() always metering if
+		rv = _meter_point == MeterInput;
+	}
+	return rv ? MeteringInput : MeteringRoute;
 }
 
