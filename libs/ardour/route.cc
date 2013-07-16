@@ -2559,12 +2559,15 @@ Route::set_processor_state (const XMLNode& node)
 				}
 
 				if (boost::dynamic_pointer_cast<PluginInsert>(processor)) {	
+					cerr << "Working on plugin processor state for " << processor->name() << endl;
 #ifndef NO_PLUGIN_STATE
+					cerr << "plugin state allowed\n";
 					if (processor->set_state (**niter, Stateful::current_state_version) != 0) {
 						/* This processor could not be configured.  Turn it into a UnknownProcessor */
 						processor.reset (new UnknownProcessor (_session, **niter));
 					}
 #else
+					cerr << "plugin state dis-allowed\n";
 					/* plugin, with NO_PLUGIN_STATE defined
 					 * =>::set_state() not allowed. Do not
 					 * display a message here - things will
