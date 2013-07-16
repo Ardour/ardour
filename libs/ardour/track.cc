@@ -416,7 +416,10 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 			bool const tape_machine_mode = Config->get_tape_machine_mode ();
 			bool no_meter = false;
 
-			if (!software_monitor && tape_machine_mode && !track_rec) {
+			if (!auto_input && !track_rec) {
+				no_meter=true;
+			}
+			else if (!software_monitor && tape_machine_mode && !track_rec) {
 				no_meter=true;
 			}
 			else if (!software_monitor && !tape_machine_mode && !track_rec && !auto_input) {
