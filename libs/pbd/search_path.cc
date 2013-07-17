@@ -27,7 +27,7 @@ using namespace std;
 
 namespace {
 
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 const char * const path_delimiter = ";";
 #else
 const char * const path_delimiter = ":";

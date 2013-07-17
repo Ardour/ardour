@@ -19,7 +19,7 @@
 #ifndef __pbd_semutils_h__
 #define __pbd_semutils_h__
 
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 #include <windows.h>
 #else
 #include <semaphore.h>
@@ -29,7 +29,7 @@ namespace PBD {
 
 class ProcessSemaphore {
   private:
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	HANDLE _sem;
 
 #elif __APPLE__
@@ -44,7 +44,7 @@ class ProcessSemaphore {
 	ProcessSemaphore (const char* name, int val);
 	~ProcessSemaphore ();
 
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 
 	int signal ();
 	int wait ();

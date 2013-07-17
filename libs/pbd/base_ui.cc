@@ -51,13 +51,13 @@ BaseUI::BaseUI (const string& str)
 	: m_context(MainContext::get_default())
 	, run_loop_thread (0)
 	, _name (str)
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	, request_channel (true)
 #endif
 {
 	base_ui_instance = this;
 
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	request_channel.ios()->connect (sigc::mem_fun (*this, &BaseUI::request_handler));
 #endif
 
@@ -124,7 +124,7 @@ BaseUI::quit ()
 	}
 }
 
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 gboolean
 BaseUI::_request_handler (gpointer data)
 {
@@ -172,7 +172,7 @@ void
 BaseUI::signal_new_request ()
 {
 	DEBUG_TRACE (DEBUG::EventLoop, "BaseUI::signal_new_request\n");
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	// handled in timeout, how to signal...?
 #else
 	request_channel.wakeup ();
@@ -186,7 +186,7 @@ void
 BaseUI::attach_request_source ()
 {
 	DEBUG_TRACE (DEBUG::EventLoop, "BaseUI::attach_request_source\n");
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	GSource* request_source = g_timeout_source_new(200);
 	g_source_set_callback (request_source, &BaseUI::_request_handler, this, NULL);
 	g_source_attach (request_source, m_context->gobj());

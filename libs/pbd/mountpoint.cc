@@ -94,7 +94,7 @@ mountpoint (string path)
 	return best;
 }
 
-#elif defined(WIN32)
+#elif defined(PLATFORM_WINDOWS)
 
 string
 mountpoint (string path)

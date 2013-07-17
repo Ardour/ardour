@@ -92,7 +92,7 @@ class BaseUI : public sigc::trackable, public PBD::EventLoop
 
 	virtual void thread_init () {};
 
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	static gboolean _request_handler (gpointer);
 	bool request_handler ();
 #else
@@ -114,7 +114,7 @@ class BaseUI : public sigc::trackable, public PBD::EventLoop
 	std::string _name; 
 	BaseUI* base_ui_instance;
 
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	CrossThreadChannel request_channel;
 #endif
 	

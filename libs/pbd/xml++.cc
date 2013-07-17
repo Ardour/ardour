@@ -167,6 +167,7 @@ XMLTree::write() const
 void
 XMLTree::debug(FILE* out) const
 {
+#ifdef LIBXML_DEBUG_ENABLED
 	xmlDocPtr doc;
 	XMLNodeList children;
 
@@ -176,6 +177,7 @@ XMLTree::debug(FILE* out) const
 	writenode(doc, _root, doc->children, 1);
 	xmlDebugDumpDocument (out, doc);
 	xmlFreeDoc(doc);
+#endif
 }
 
 const string&

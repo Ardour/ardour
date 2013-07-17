@@ -10,7 +10,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION (FilesystemTest);
 void
 FilesystemTest::testPathIsWithin ()
 {
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	system ("rm -r foo");
 	CPPUNIT_ASSERT (g_mkdir_with_parents ("foo/bar/baz", 0755) == 0);
 

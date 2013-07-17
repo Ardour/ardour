@@ -33,7 +33,7 @@ get_resource_limit (ResourceType resource, ResourceLimit& limit)
 {
 	if (resource == OpenFiles)
 	{
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 		limit.current_limit = _getmaxstdio();
 		limit.max_limit = 2048;
 		return true;
@@ -55,7 +55,7 @@ set_resource_limit (ResourceType resource, const ResourceLimit& limit)
 {
 	if (resource == OpenFiles)
 	{
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 		// no soft and hard limits on windows
 		rlimit_t new_max = _setmaxstdio(limit.current_limit);
 

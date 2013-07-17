@@ -192,9 +192,9 @@ get_absolute_path (const std::string & p)
 bool
 equivalent_paths (const std::string& a, const std::string& b)
 {
-	struct stat bA;
+	GStatBuf bA;
 	int const rA = g_stat (a.c_str(), &bA);
-	struct stat bB;
+	GStatBuf bB;
 	int const rB = g_stat (b.c_str(), &bB);
 
 	return (rA == 0 && rB == 0 && bA.st_dev == bB.st_dev && bA.st_ino == bB.st_ino);
@@ -225,7 +225,7 @@ exists_and_writable (const std::string & p)
 	   make us unwritable.
 	*/
 
-	struct stat statbuf;
+	GStatBuf statbuf;
 
 	if (g_stat (p.c_str(), &statbuf) != 0) {
 		/* doesn't exist - not writable */

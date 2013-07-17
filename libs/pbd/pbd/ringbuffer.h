@@ -198,7 +198,7 @@ RingBuffer<T>::write (T const *src, guint cnt)
 }
 
 template<class T> void
-RingBuffer<T>::get_read_vector (RingBuffer<T>::rw_vector *vec)
+RingBuffer<T>::get_read_vector (typename RingBuffer<T>::rw_vector *vec)
 
 {
 	guint free_cnt;
@@ -238,7 +238,7 @@ RingBuffer<T>::get_read_vector (RingBuffer<T>::rw_vector *vec)
 }
 
 template<class T> void
-RingBuffer<T>::get_write_vector (RingBuffer<T>::rw_vector *vec)
+RingBuffer<T>::get_write_vector (typename RingBuffer<T>::rw_vector *vec)
 
 {
 	guint free_cnt;

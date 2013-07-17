@@ -20,10 +20,8 @@
 
 #include "pbd/uuid.h"
 
-using namespace PBD;
-
-UUID&
-UUID::operator= (std::string const & str)
+PBD::UUID&
+PBD::UUID::operator= (std::string const & str)
 {
         boost::uuids::string_generator gen;
         *((boost::uuids::uuid*) this) = gen (str);
@@ -31,7 +29,7 @@ UUID::operator= (std::string const & str)
 }
 
 std::string
-UUID::to_s () const
+PBD::UUID::to_s () const
 {
         return std::string ((const char*) data, size());
 }
