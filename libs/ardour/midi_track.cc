@@ -17,8 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <strings.h> // for ffs(3)
-
+#include "pbd/ffs.h"
 #include "pbd/enumwriter.h"
 #include "pbd/convert.h"
 #include "evoral/midi_util.h"
@@ -504,7 +503,7 @@ MidiTrack::filter_channels (BufferSet& bufs, ChannelMode mode, uint32_t mask)
 				}
 				break;
 			case ForceChannel:
-				ev.set_channel (ffs (mask) - 1);
+				ev.set_channel (PBD::ffs (mask) - 1);
 				++e;
 				break;
 			case AllChannels:
