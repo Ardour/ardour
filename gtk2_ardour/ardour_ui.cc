@@ -3401,11 +3401,19 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 			warning << _("Specified docroot is not an existing directory.") << endmsg;
 			continue;
 		}
+#ifndef WIN32
 		if ( (!g_lstat (icsd_exec.c_str(), &sb) == 0)
 		     || (sb.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) == 0 ) {
 			warning << _("Given Video Server is not an executable file.") << endmsg;
 			continue;
 		}
+#else
+		if ( (!g_lstat (icsd_exec.c_str(), &sb) == 0)
+		     || (sb.st_mode & (S_IXUSR)) == 0 ) {
+			warning << _("Given Video Server is not an executable file.") << endmsg;
+			continue;
+		}
+#endif
 
 		char **argp;
 		argp=(char**) calloc(9,sizeof(char*));
