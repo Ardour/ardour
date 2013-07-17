@@ -28,7 +28,7 @@ ffs (int x)
 #if defined(WIN32) && defined(__GNUC__)
 	return __builtin_ffs(x);
 #else
-	return ffs(x);
+	return ::ffs(x);
 #endif
 }
 
