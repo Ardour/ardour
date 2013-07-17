@@ -90,7 +90,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 
 	int w = 0, h = 0;
 	m_aspect = 4.0/3.0;
-	AudioStreams as; as.clear();
+	TranscodeFfmpeg::FFAudioStreams as; as.clear();
 
 	path_hbox->pack_start (path_label, false, false, 3);
 	path_hbox->pack_start (path_entry, true, true, 3);
@@ -229,7 +229,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	t->attach (audio_combo, 1, 4, 2, 3);
 	audio_combo.append_text("No audio");
 	if (as.size() > 0) {
-		for (AudioStreams::iterator it = as.begin(); it < as.end(); ++it) {
+		for (TranscodeFfmpeg::FFAudioStreams::iterator it = as.begin(); it < as.end(); ++it) {
 			audio_combo.append_text((*it).name);
 		}
 	}

@@ -40,6 +40,7 @@
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/xml++.h"
+#include "pbd/stacktrace.h"
 
 #include "midi++/manager.h"
 
@@ -372,6 +373,7 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 		return set_state_2X (node, version);
 	}
 
+#ifndef NO_PLUGIN_STATE
 	XMLNodeList nodes;
 	XMLProperty *prop;
 	XMLNodeConstIterator iter;
@@ -379,12 +381,15 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 	const char *port;
 	const char *data;
 	uint32_t port_id;
+#endif
 	LocaleGuard lg (X_("POSIX"));
 
 	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to LadspaPlugin::set_state") << endmsg;
 		return -1;
 	}
+
+#ifndef NO_PLUGIN_STATE
 
 	nodes = node.children ("Port");
 
@@ -408,6 +413,7 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 		sscanf (port, "%" PRIu32, &port_id);
 		set_parameter (port_id, atof(data));
 	}
+#endif
 
 	latency_compute_run ();
 
@@ -417,6 +423,7 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 int
 LadspaPlugin::set_state_2X (const XMLNode& node, int /* version */)
 {
+#ifndef NO_PLUGIN_STATE
 	XMLNodeList nodes;
 	XMLProperty *prop;
 	XMLNodeConstIterator iter;
@@ -424,6 +431,7 @@ LadspaPlugin::set_state_2X (const XMLNode& node, int /* version */)
 	const char *port;
 	const char *data;
 	uint32_t port_id;
+#endif
 	LocaleGuard lg (X_("POSIX"));
 
 	if (node.name() != state_node_name()) {
@@ -431,6 +439,7 @@ LadspaPlugin::set_state_2X (const XMLNode& node, int /* version */)
 		return -1;
 	}
 
+#ifndef NO_PLUGIN_STATE
 	nodes = node.children ("port");
 
 	for(iter = nodes.begin(); iter != nodes.end(); ++iter){
@@ -455,6 +464,7 @@ LadspaPlugin::set_state_2X (const XMLNode& node, int /* version */)
 	}
 
 	latency_compute_run ();
+#endif
 
 	return 0;
 }

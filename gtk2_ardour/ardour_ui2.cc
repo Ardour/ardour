@@ -617,11 +617,10 @@ ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
 		return false;
 	}
 
-	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleRCOptionsEditor"));
+	RefPtr<Action> act = ActionManager::get_action (X_("Window"), X_("toggle-rc-options-editor"));
 	assert (act);
 
-	RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
-	tact->set_active ();
+	act->activate();
 
 	rc_option_editor->set_current_page (_("Misc"));
 	return true;

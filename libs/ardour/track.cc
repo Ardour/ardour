@@ -347,6 +347,9 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 
 	if (!_active) {
 		silence (nframes);
+		if (_meter_point == MeterInput && (_monitoring & MonitorInput || _diskstream->record_enabled())) {
+			_meter->reset();
+		}
 		return 0;
 	}
 
@@ -405,8 +408,39 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	if (be_silent) {
 
 		if (_meter_point == MeterInput) {
-			/* still need input monitoring */
-			_input->process_input (_meter, start_frame, end_frame, nframes);
+			/* still need input monitoring and metering */
+
+			bool const track_rec = _diskstream->record_enabled ();
+			bool const auto_input = _session.config.get_auto_input ();
+			bool const software_monitor = Config->get_monitoring_model() == SoftwareMonitoring;
+			bool const tape_machine_mode = Config->get_tape_machine_mode ();
+			bool no_meter = false;
+
+			/* this needs a proper K-map
+			 * and should be separated into a function similar to monitoring_state()
+			 * that also handles roll() states in audio_track.cc, midi_track.cc and route.cc
+			 *
+			 * see http://www.oofus.co.uk/ardour/Ardour3MonitorModesV3.pdf
+			 */
+			if (!auto_input && !track_rec) {
+				no_meter=true;
+			}
+			else if (tape_machine_mode && !track_rec && auto_input) {
+				no_meter=true;
+			}
+			else if (!software_monitor && tape_machine_mode && !track_rec) {
+				no_meter=true;
+			}
+			else if (!software_monitor && !tape_machine_mode && !track_rec && !auto_input) {
+				no_meter=true;
+			}
+
+			if (no_meter) {
+				_meter->reset();
+				_input->process_input (boost::shared_ptr<Processor>(), start_frame, end_frame, nframes);
+			} else {
+				_input->process_input (_meter, start_frame, end_frame, nframes);
+			}
 		}
 
 		passthru_silence (start_frame, end_frame, nframes, 0);
@@ -945,6 +979,14 @@ Track::set_monitoring (MonitorChoice mc)
 MeterState
 Track::metering_state () const
 {
-	return (_diskstream->record_enabled() || _meter_point == MeterInput) ? MeteringInput : MeteringRoute;
+	bool rv;
+	if (_session.transport_rolling ()) {
+		// audio_track.cc || midi_track.cc roll() runs meter IFF:
+		rv = _meter_point == MeterInput && (_monitoring & MonitorInput || _diskstream->record_enabled());
+	} else {
+		// track no_roll() always metering if
+		rv = _meter_point == MeterInput;
+	}
+	return rv ? MeteringInput : MeteringRoute;
 }
 

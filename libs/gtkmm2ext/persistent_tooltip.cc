@@ -48,6 +48,9 @@ PersistentTooltip::~PersistentTooltip ()
 bool
 PersistentTooltip::enter (GdkEventCrossing *)
 {
+	if (_timeout.connected()) {
+		leave(NULL);
+	}
 	_timeout = Glib::signal_timeout().connect (sigc::mem_fun (*this, &PersistentTooltip::timeout), 500);
 	return false;
 }

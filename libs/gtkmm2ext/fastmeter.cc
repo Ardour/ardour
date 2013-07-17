@@ -23,6 +23,8 @@
 #include <algorithm>
 #include <cstring>
 
+#include <stdlib.h>
+
 #include <gdkmm/rectangle.h>
 #include <gtkmm2ext/fastmeter.h>
 #include <gtkmm2ext/utils.h>
@@ -37,6 +39,7 @@ using namespace std;
 
 int FastMeter::min_pattern_metric_size = 16;
 int FastMeter::max_pattern_metric_size = 1024;
+bool FastMeter::no_rgba_overlay = false;
 
 FastMeter::Pattern10Map FastMeter::vm_pattern_cache;
 FastMeter::PatternBgMap FastMeter::vb_pattern_cache;
@@ -61,6 +64,7 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	last_peak_rect.height = 0;
 
 	highlight = false;
+	no_rgba_overlay = ! Glib::getenv("NO_METER_SHADE").empty();
 
 	_clr[0] = clr0;
 	_clr[1] = clr1;
@@ -173,7 +177,7 @@ FastMeter::generate_meter_pattern (
 	cairo_pattern_add_color_stop_rgb (pat, 1.0,
 	                                  r/255.0, g/255.0, b/255.0);
 
-	if (shade) {
+	if (shade && !no_rgba_overlay) {
 		cairo_pattern_t* shade_pattern = cairo_pattern_create_linear (0.0, 0.0, width, 0.0);
 		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, 1.0, 1.0, 1.0, 0.2);
 		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, 0.0, 0.0, 0.0, 0.3);
@@ -221,7 +225,7 @@ FastMeter::generate_meter_background (
 	cairo_pattern_add_color_stop_rgb (pat, 1.0,
 	                                  r0/255.0, g0/255.0, b0/255.0);
 
-	if (shade) {
+	if (shade && !no_rgba_overlay) {
 		cairo_pattern_t* shade_pattern = cairo_pattern_create_linear (0.0, 0.0, width, 0.0);
 		cairo_pattern_add_color_stop_rgba (shade_pattern, 0.0, 1.0, 1.0, 1.0, 0.15);
 		cairo_pattern_add_color_stop_rgba (shade_pattern, 0.6, 0.0, 0.0, 0.0, 0.10);
@@ -417,7 +421,8 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 
 		cairo_set_source (cr, fgpattern->cobj());
 		cairo_rectangle (cr, 1, last_peak_rect.y, pixwidth, last_peak_rect.height);
-		if (bright_hold) {
+
+		if (bright_hold && !no_rgba_overlay) {
 			cairo_fill_preserve (cr);
 			cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 0.3);
 		}

@@ -38,7 +38,7 @@ PBD::canonical_path (const std::string& path)
 {
 #ifdef COMPILER_MINGW
 	return path;
-#endif
+#else
 	char buf[PATH_MAX+1];
 
 	if (!realpath (path.c_str(), buf) && (errno != ENOENT)) {
@@ -46,6 +46,7 @@ PBD::canonical_path (const std::string& path)
 	}
 
 	return string (buf);
+#endif
 }
 
 string

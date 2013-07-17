@@ -45,6 +45,7 @@ libpbd_sources = [
     'enums.cc',
     'epa.cc',
     'error.cc',
+    'ffs.cc',
     'file_manager.cc',
     'file_utils.cc',
     'fpu.cc',

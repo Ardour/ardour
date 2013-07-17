@@ -96,6 +96,8 @@ private:
 	bool vertical_expose (GdkEventExpose*);
 	void queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>&, float);
 
+	static bool no_rgba_overlay;
+
 	static Cairo::RefPtr<Cairo::Pattern> generate_meter_pattern (
 		int w, int h, int *clr, float *stp, bool shade);
 	static Cairo::RefPtr<Cairo::Pattern> request_vertical_meter (

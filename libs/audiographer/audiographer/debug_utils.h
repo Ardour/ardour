@@ -3,6 +3,7 @@
 
 #include "flag_field.h"
 
+#include <cstdlib>
 #include <string>
 
 #ifdef __GNUC__
@@ -25,7 +26,7 @@ struct DebugUtils
 		char * res = abi::__cxa_demangle (typeid(obj).name(), 0, 0, &status);
 		if (status == 0) {
 			std::string s(res);
-			free (res);
+			std::free (res);
 			return s;
 		}
 #endif
