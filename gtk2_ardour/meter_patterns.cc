@@ -244,9 +244,7 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 	Pango::AttrFontDesc* font_attr;
 	Pango::FontDescription font;
 
-	font = Pango::FontDescription (""); // use defaults
-	//font = get_font_for_style("gain-fader");
-	//font = w.get_style()->get_font();
+	font = Pango::FontDescription ("ArdourMono");
 
 	font.set_weight (Pango::WEIGHT_NORMAL);
 	font.set_size (9.0 * PANGO_SCALE);
@@ -256,12 +254,12 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 
 	font.set_weight (Pango::WEIGHT_ULTRALIGHT);
 	font.set_stretch (Pango::STRETCH_ULTRA_CONDENSED);
-	font.set_size (7.5 * PANGO_SCALE);
+	font.set_size (8.0 * PANGO_SCALE);
 	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 	midi_font_attributes.change (*font_attr);
 	delete font_attr;
 
-	font.set_size (7.0 * PANGO_SCALE);
+	font.set_size (6.0 * PANGO_SCALE);
 	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 	unit_font_attributes.change (*font_attr);
 	delete font_attr;
