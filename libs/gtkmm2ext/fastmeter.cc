@@ -189,6 +189,18 @@ FastMeter::generate_meter_pattern (
 		cairo_set_source (tc, pat);
 		cairo_rectangle (tc, 0, 0, width, height);
 		cairo_fill (tc);
+
+		cairo_save (tc);
+		cairo_set_line_width(tc, 1.0);
+		cairo_set_source_rgba(tc, .1, .1, .1, .5);
+		//cairo_set_operator (tc, CAIRO_OPERATOR_SOURCE);
+		for (float y=.5; y < height; y+= 2.0) {
+			cairo_move_to(tc, 0, y);
+			cairo_line_to(tc, width, y);
+			cairo_stroke (tc);
+		}
+		cairo_restore (tc);
+
 		cairo_set_source (tc, shade_pattern);
 		cairo_rectangle (tc, 0, 0, width, height);
 		cairo_fill (tc);
