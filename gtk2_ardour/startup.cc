@@ -917,6 +917,7 @@ ArdourStartup::setup_new_session_page ()
 	if (more_new_session_options_button.get_active()) {
 		set_page_type (session_vbox, ASSISTANT_PAGE_CONTENT);
 	}
+	session_hbox.show_all();
 }
 
 void
@@ -1092,6 +1093,7 @@ ArdourStartup::setup_existing_session_page ()
 
 	set_page_title (session_vbox, _("Select a session"));
 	set_page_type (session_vbox, ASSISTANT_PAGE_CONFIRM);
+	session_hbox.show_all();
 }
 
 void
