@@ -56,8 +56,22 @@ class AbstractUI : public BaseUI
                         , ui (uir) {}
         };
 	typedef typename RequestBuffer::rw_vector RequestBufferVector;
+
+#if defined(__MINGW32__)
+
+	struct pthread_cmp
+	{
+		bool operator() (const ptw32_handle_t& thread1, const ptw32_handle_t& thread2)
+		{
+			return thread1.p < thread2.p;
+		}
+	};
+	typedef typename std::map<pthread_t,RequestBuffer*, pthread_cmp>::iterator RequestBufferMapIterator;
+	typedef std::map<pthread_t,RequestBuffer*, pthread_cmp> RequestBufferMap;
+#else
 	typedef typename std::map<pthread_t,RequestBuffer*>::iterator RequestBufferMapIterator;
 	typedef std::map<pthread_t,RequestBuffer*> RequestBufferMap;
+#endif
 
 	RequestBufferMap request_buffers;
         static Glib::Threads::Private<RequestBuffer> per_thread_request_buffer;

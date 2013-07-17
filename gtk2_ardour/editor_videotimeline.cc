@@ -20,6 +20,8 @@
 
 #include <jack/types.h>
 
+#include <glib/gstdio.h>
+
 #include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/audio_track.h"
@@ -118,7 +120,7 @@ Editor::embed_audio_from_video (std::string path, framepos_t n)
 
 	import_status.all_done = true;
 #endif
-	unlink(path.c_str());
+	::g_unlink(path.c_str());
 }
 
 void

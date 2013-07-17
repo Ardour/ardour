@@ -288,7 +288,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	/* and ambiguous files */
 
-	ARDOUR::FileSource::AmbiguousFileName.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::ambiguous_file, this, _1, _2, _3));
+	ARDOUR::FileSource::AmbiguousFileName.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::ambiguous_file, this, _1, _2));
 
 	/* lets get this party started */
 
@@ -903,8 +903,7 @@ If you still wish to quit, please use the\n\n\
 
 		second_connection.disconnect ();
 		point_one_second_connection.disconnect ();
-		point_oh_five_second_connection.disconnect ();
-		point_zero_one_second_connection.disconnect();
+		point_zero_something_second_connection.disconnect();
 	}
 
 	delete ARDOUR_UI::instance()->video_timeline;
@@ -1034,9 +1033,9 @@ ARDOUR_UI::every_point_one_seconds ()
 }
 
 gint
-ARDOUR_UI::every_point_zero_one_seconds ()
+ARDOUR_UI::every_point_zero_something_seconds ()
 {
-	// august 2007: actual update frequency: 40Hz, not 100Hz
+	// august 2007: actual update frequency: 25Hz (40ms), not 100Hz
 
 	SuperRapidScreenUpdate(); /* EMIT_SIGNAL */
 	return TRUE;
@@ -4051,7 +4050,7 @@ ARDOUR_UI::missing_file (Session*s, std::string str, DataType type)
 }
 
 int
-ARDOUR_UI::ambiguous_file (std::string file, std::string /*path*/, std::vector<std::string> hits)
+ARDOUR_UI::ambiguous_file (std::string file, std::vector<std::string> hits)
 {
 	AmbiguousFileDialog dialog (file, hits);
 

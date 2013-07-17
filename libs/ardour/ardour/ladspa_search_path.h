@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2010 Paul Davis
+    Copyright (C) 2011 Tim Mayberry
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,17 +17,23 @@
 
 */
 
-#include <gtkmm/textview.h>
-#include <gtkmm/scrolledwindow.h>
+#ifndef ARDOUR_LADSPA_SEARCH_PATH_INCLUDED
+#define ARDOUR_LADSPA_SEARCH_PATH_INCLUDED
 
-#include "ardour_dialog.h"
+#include "pbd/search_path.h"
 
-class ConfigInfoDialog : public ArdourDialog
-{
-  public:
-	ConfigInfoDialog();
+namespace ARDOUR {
 
-  private:
-	Gtk::TextView text;
-	Gtk::ScrolledWindow scroller;
-};
+	/**
+	 * return a SearchPath containing directories in which to look for
+	 * LADSPA plugins.
+	 *
+	 * If LADSPA_PATH is defined then the SearchPath returned
+	 * will contain the directories specified in it as well as the
+	 * user and system directories.
+	 */
+	PBD::SearchPath ladspa_search_path ();
+
+} // namespace ARDOUR
+
+#endif

@@ -57,7 +57,13 @@ class JackMIDIPort : public Port {
 	int write (const byte *msg, size_t msglen, timestamp_t timestamp);
 	int read (byte *buf, size_t bufsize);
 	void drain (int check_interval_usecs);
-	int selectable () const { return xthread.selectable(); }
+	int selectable () const {
+#ifdef WIN32
+		return false;
+#else
+		return xthread.selectable();
+#endif
+	}
 
 	pframes_t nframes_this_cycle() const { return _nframes_this_cycle; }
 
@@ -80,7 +86,9 @@ private:
 	RingBuffer< Evoral::Event<double> > output_fifo;
 	Evoral::EventRingBuffer<timestamp_t> input_fifo;
         Glib::Threads::Mutex output_fifo_lock;
+#ifndef WIN32
 	CrossThreadChannel xthread;
+#endif
 
 	int create_port ();
 

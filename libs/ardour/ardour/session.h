@@ -820,7 +820,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void request_resume_timecode_transmission ();
 	bool timecode_transmission_suspended () const;
 
-	std::string source_search_path(DataType) const;
+	std::vector<std::string> source_search_path(DataType) const;
 	void ensure_search_path_includes (const std::string& path, DataType type);
 
 	std::list<std::string> unknown_processors () const;

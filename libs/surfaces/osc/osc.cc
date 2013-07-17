@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <glib/gstdio.h>
 #include <glibmm/miscutils.h>
 
 #include <pbd/pthread_utils.h>
@@ -181,7 +182,7 @@ OSC::start ()
 	int fd = mkstemp(tmpstr);
 	
 	if (fd >= 0 ) {
-		unlink (tmpstr);
+		::g_unlink (tmpstr);
 		close (fd);
 		
 		_osc_unix_server = lo_server_new (tmpstr, error_callback);
@@ -284,11 +285,11 @@ OSC::stop ()
 	}
 	
 	if (!_osc_unix_socket_path.empty()) {
-		unlink (_osc_unix_socket_path.c_str());
+		::g_unlink (_osc_unix_socket_path.c_str());
 	}
 	
 	if (!_osc_url_file.empty() ) {
-		unlink (_osc_url_file.c_str() );
+		::g_unlink (_osc_url_file.c_str() );
 	}
 
 	// Delete any active route observers

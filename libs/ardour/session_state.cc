@@ -807,9 +807,9 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	} else {
 
-		if (::rename (tmp_path.c_str(), xml_path.c_str()) != 0) {
-			error << string_compose (_("could not rename temporary session file %1 to %2"),
-					tmp_path, xml_path) << endmsg;
+		if (::g_rename (tmp_path.c_str(), xml_path.c_str()) != 0) {
+			error << string_compose (_("could not rename temporary session file %1 to %2 (%3)"),
+					tmp_path, xml_path, g_strerror(errno)) << endmsg;
 			if (g_remove (tmp_path.c_str()) != 0) {
 				error << string_compose(_("Could not remove temporary session file at path \"%1\" (%2)"),
 						tmp_path, g_strerror (errno)) << endmsg;
@@ -2900,7 +2900,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		string peakpath = peak_path (base);
 
 		if (Glib::file_test (peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
-			if (::unlink (peakpath.c_str()) != 0) {
+			if (::g_unlink (peakpath.c_str()) != 0) {
 				error << string_compose (_("cannot remove peakfile %1 for %2 (%3)"),
                                                          peakpath, _path, strerror (errno))
 				      << endmsg;

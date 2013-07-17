@@ -35,6 +35,7 @@
 
 #include "pbd/compose.h"
 #include "pbd/file_utils.h"
+#include "pbd/debug.h"
 #include "pbd/error.h"
 #include "pbd/pathscanner.h"
 #include "pbd/stl_delete.h"
@@ -80,6 +81,11 @@ find_matching_files_in_directory (const std::string& directory,
 		std::string full_path(directory);
 		full_path = Glib::build_filename (full_path, *file_iter);
 
+		DEBUG_TRACE (
+			DEBUG::FileUtils,
+			string_compose("Found file %1\n", full_path)
+			);
+
 		result.push_back(full_path);
 	}
 }
@@ -117,23 +123,27 @@ find_file_in_search_path(const SearchPath& search_path,
 
 	if (tmp.size() == 0)
 	{
+		DEBUG_TRACE (
+			DEBUG::FileUtils,
+			string_compose("No file matching %1 found in Path: %2\n", filename, search_path.to_string())
+			    );
 		return false;
 	}
 
-#if 0
 	if (tmp.size() != 1)
 	{
-		info << string_compose
-			(
-			 "Found more than one file matching %1 in search path %2",
-			 filename,
-			 search_path ()
-			)
-			<< endmsg;
+		DEBUG_TRACE (
+			DEBUG::FileUtils,
+			string_compose("Found more that one file matching %1 in Path: %2\n", filename, search_path.to_string())
+			    );
 	}
-#endif
 
 	result = tmp.front();
+
+	DEBUG_TRACE (
+		DEBUG::FileUtils,
+		string_compose("Found file %1 in Path: %2\n", filename, search_path.to_string())
+		    );
 
 	return true;
 }

@@ -659,7 +659,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		control_ui->display_label->set_name ("ParameterValueDisplay");
 
 		control_ui->display->add (*control_ui->display_label);
-		Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->display, "-99,99", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->display, "-888.8g", 2, 6);
 
 		control_ui->display->show_all ();
 
@@ -669,7 +669,17 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		MeterInfo * info = new MeterInfo(port_index);
  		control_ui->meterinfo = info;
 
-		info->meter = new FastMeter (5, 5, FastMeter::Vertical);
+		info->meter = new FastMeter (
+				5, 5, FastMeter::Vertical, 0,
+				0x0000aaff,
+				0x008800ff, 0x008800ff,
+				0x00ff00ff, 0x00ff00ff,
+				0xcccc00ff, 0xcccc00ff,
+				0xffaa00ff, 0xffaa00ff,
+				0xff0000ff,
+				ARDOUR_UI::config()->canvasvar_MeterBackgroundBot.get(),
+				ARDOUR_UI::config()->canvasvar_MeterBackgroundTop.get()
+				);
 
 		info->min_unbound = desc.min_unbound;
 		info->max_unbound = desc.max_unbound;
@@ -679,6 +689,9 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 		control_ui->vbox = manage (new VBox);
 		control_ui->hbox = manage (new HBox);
+
+		control_ui->hbox->set_spacing(1);
+		control_ui->vbox->set_spacing(3);
 
 		control_ui->label.set_angle(90);
 		control_ui->hbox->pack_start (control_ui->label, false, false);
@@ -834,7 +847,7 @@ GenericPluginUI::start_updating (GdkEventAny*)
 {
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
-		screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect
+		screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect
 			(sigc::mem_fun(*this, &GenericPluginUI::output_update));
 	}
 	return false;

@@ -34,6 +34,7 @@ namespace PBD {
 		extern uint64_t SnapBBT;
 		extern uint64_t Configuration;
 		extern uint64_t Latency;
+		extern uint64_t Peaks;
 		extern uint64_t Processors;
 		extern uint64_t ProcessThreads;
 		extern uint64_t Graph;

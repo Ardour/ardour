@@ -25,6 +25,8 @@
 #include <unistd.h>
 #include <stdio.h> /* for snprintf, grrr */
 
+#include <glib/gstdio.h>
+
 #include <gdk/gdkkeysyms.h>
 #include <gtkmm.h>
 
@@ -516,15 +518,15 @@ MotionFeedback::render_pixbuf (int size)
 		pixbuf = Gdk::Pixbuf::create_from_file (path);
 	} catch (const Gdk::PixbufError &e) {
                 std::cerr << "Caught PixbufError: " << e.what() << std::endl;
-                unlink (path);
+                ::g_unlink (path);
                 throw;
 	} catch (...) {
-                unlink (path);
+                ::g_unlink (path);
 		g_message("Caught ... ");
                 throw;
 	}
 
-        unlink (path);
+        ::g_unlink (path);
 
 	g_free(path);
 

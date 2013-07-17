@@ -19,11 +19,11 @@
 */
 #include <iostream>
 #include <errno.h>
-#include <poll.h>
 #include <sys/types.h>
 #include <unistd.h>
 
 #include "pbd/error.h"
+#include "pbd/pthread_utils.h"
 
 #include "ardour/debug.h"
 #include "ardour/slave.h"
@@ -432,7 +432,7 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 
 	frameoffset_t skip = now - (monotonic_cnt + nframes);
 	monotonic_cnt = now;
-	DEBUG_TRACE (DEBUG::LTC, string_compose ("speed_and_position - TID:%1 | latency: %2 | skip %3\n", ::pthread_self(), ltc_slave_latency.max, skip));
+	DEBUG_TRACE (DEBUG::LTC, string_compose ("speed_and_position - TID:%1 | latency: %2 | skip %3\n", pthread_name(), ltc_slave_latency.max, skip));
 
 	if (last_timestamp == 0) {
 		engine_dll_initstate = 0;

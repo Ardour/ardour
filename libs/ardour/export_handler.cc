@@ -20,6 +20,7 @@
 
 #include "ardour/export_handler.h"
 
+#include <glib/gstdio.h>
 #include <glibmm.h>
 #include <glibmm/convert.h>
 
@@ -415,10 +416,10 @@ ExportHandler::export_cd_marker_file (ExportTimespanPtr timespan, ExportFormatSp
 
 	} catch (std::exception& e) {
 		error << string_compose (_("an error occured while writing a TOC/CUE file: %1"), e.what()) << endmsg;
-		::unlink (filepath.c_str());
+		::g_unlink (filepath.c_str());
 	} catch (Glib::Exception& e) {
 		error << string_compose (_("an error occured while writing a TOC/CUE file: %1"), e.what()) << endmsg;
-		::unlink (filepath.c_str());
+		::g_unlink (filepath.c_str());
 	}
 }
 

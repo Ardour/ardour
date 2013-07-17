@@ -40,6 +40,7 @@
 
 #include <sndfile.h>
 
+#include <glib/gstdio.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/threads.h>
@@ -133,8 +134,8 @@ AudioFileSource::~AudioFileSource ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("AudioFileSource destructor %1, removable? %2\n", _path, removable()));
 	if (removable()) {
-		unlink (_path.c_str());
-		unlink (peakpath.c_str());
+		::g_unlink (_path.c_str());
+		::g_unlink (peakpath.c_str());
 	}
 }
 
@@ -292,7 +293,7 @@ AudioFileSource::mark_streaming_write_completed ()
 int
 AudioFileSource::move_dependents_to_trash()
 {
-	return ::unlink (peakpath.c_str());
+	return ::g_unlink (peakpath.c_str());
 }
 
 void

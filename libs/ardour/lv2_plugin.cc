@@ -25,6 +25,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <glib/gstdio.h>
 #include <giomm/file.h>
 #include <glib/gprintf.h>
 #include <glibmm.h>
@@ -1085,7 +1086,7 @@ LV2Plugin::do_remove_preset(string name)
 			name + ".ttl"
 		)
 	);
-	unlink(preset_file.c_str());
+	::g_unlink(preset_file.c_str());
 }
 
 bool

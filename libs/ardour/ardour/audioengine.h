@@ -37,7 +37,10 @@
 #include "pbd/signals.h"
 #include "pbd/stacktrace.h"
 
+#ifndef WIN32
 #include <jack/weakjack.h>
+#endif
+
 #include <jack/jack.h>
 #include <jack/transport.h>
 #include <jack/thread.h>

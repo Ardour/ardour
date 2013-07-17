@@ -40,7 +40,7 @@ cairo_pattern_t* meter_render_metrics (Gtk::Widget& w, std::vector<ARDOUR::DataT
 gint meter_expose_ticks (GdkEventExpose *ev, std::vector<ARDOUR::DataType> types, Gtk::DrawingArea *mta);
 gint meter_expose_metrics (GdkEventExpose *ev, std::vector<ARDOUR::DataType> types, Gtk::DrawingArea *mma);
 
-void meter_clear_pattern_cache();
+void meter_clear_pattern_cache(int which=7);
 
 #endif
 

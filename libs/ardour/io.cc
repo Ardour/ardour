@@ -395,7 +395,9 @@ IO::disconnect (void* src)
 int
 IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 {
+#ifndef WIN32
 	assert (!AudioEngine::instance()->process_lock().trylock());
+#endif
 
 	boost::shared_ptr<Port> port;
 
@@ -466,7 +468,9 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 int
 IO::ensure_ports (ChanCount count, bool clear, void* src)
 {
+#ifndef WIN32
 	assert (!AudioEngine::instance()->process_lock().trylock());
+#endif
 
 	bool changed = false;
 
@@ -501,7 +505,9 @@ IO::ensure_ports (ChanCount count, bool clear, void* src)
 int
 IO::ensure_io (ChanCount count, bool clear, void* src)
 {
+#ifndef WIN32
 	assert (!AudioEngine::instance()->process_lock().trylock());
+#endif
 
 	return ensure_ports (count, clear, src);
 }

@@ -79,7 +79,7 @@ public:
 
 	virtual void set_path (const std::string&);
 	
-	static PBD::Signal3<int,std::string,std::string,std::vector<std::string> > AmbiguousFileName;
+	static PBD::Signal2<int,std::string,std::vector<std::string> > AmbiguousFileName;
 
 protected:
 	FileSource (Session& session, DataType type,

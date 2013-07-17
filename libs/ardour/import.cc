@@ -34,6 +34,7 @@
 #include <sndfile.h>
 #include <samplerate.h>
 
+#include <glib/gstdio.h>
 #include <glibmm.h>
 
 #include <boost/scoped_array.hpp>
@@ -464,7 +465,7 @@ remove_file_source (boost::shared_ptr<Source> source)
 	boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (source);
 
 	if (fs) {
-		::unlink (fs->path().c_str());
+		::g_unlink (fs->path().c_str());
 	}
 }
 

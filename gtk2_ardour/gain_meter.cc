@@ -1086,7 +1086,7 @@ GainMeter::meter_configuration_changed (ChanCount c)
 			set_meter_strip_name ("AudioMidiTrackMetricsInactive");
 		}
 	}
-	meter_clear_pattern_cache(); // XXX only once
+	meter_clear_pattern_cache(4);
 }
 
 void

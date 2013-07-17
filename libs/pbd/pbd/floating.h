@@ -26,6 +26,8 @@
 #ifndef __libpbd__floating_h__
 #define __libpbd__floating_h__
 
+#include <stdint.h>
+
 #include <cmath>
 
 namespace PBD {

@@ -1612,7 +1612,9 @@ Route::reset_instrument_info ()
 int
 Route::configure_processors (ProcessorStreams* err)
 {
+#ifndef WIN32
 	assert (!AudioEngine::instance()->process_lock().trylock());
+#endif
 
 	if (!_in_configure_processors) {
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
@@ -1682,7 +1684,9 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 int
 Route::configure_processors_unlocked (ProcessorStreams* err)
 {
+#ifndef WIN32
 	assert (!AudioEngine::instance()->process_lock().trylock());
+#endif
 
 	if (_in_configure_processors) {
 		return 0;

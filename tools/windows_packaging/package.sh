@@ -96,7 +96,7 @@ libFLAC-8.dll
 libogg-0.dll
 libvorbis-0.dll
 libvorbisenc-2.dll
-libffi-5.dll
+libffi-6.dll
 libidn-11.dll
 libintl-8.dll
 libpango-1.0-0.dll
@@ -105,7 +105,7 @@ libpangoft2-1.0-0.dll
 libpangomm-1.4-1.dll
 libpangowin32-1.0-0.dll
 libpixman-1-0.dll
-libpng14-14.dll
+libpng15-15.dll
 libsamplerate-0.dll
 libsigc-2.0-0.dll
 libsndfile-1.dll
