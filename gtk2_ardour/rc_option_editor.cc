@@ -831,7 +831,7 @@ public:
 		t->attach (*l, 0, 1, 1, 2, FILL);
 		t->attach (_video_server_url_entry, 1, 2, 1, 2, FILL);
 		Gtkmm2ext::UI::instance()->set_tip (_video_server_url_entry,
-					    _("Base URL of the video-server including http prefix. This is usually 'http://hostname.example.org:1554/' and defaults to 'http://localhost:1554/' when the video-server is runing locally"));
+					    _("Base URL of the video-server including http prefix. This is usually 'http://hostname.example.org:1554/' and defaults to 'http://localhost:1554/' when the video-server is running locally"));
 
 		l = manage (new Label (_("Video Folder:")));
 		l->set_alignment (0, 0.5);
