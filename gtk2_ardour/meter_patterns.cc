@@ -224,13 +224,14 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 {
 	Glib::RefPtr<Gdk::Window> win (w.get_window());
 
-	bool tickleft;
+	bool tickleft, tickright;
 	bool background;
 	gint width, height;
 	win->get_size (width, height);
 
 	tickleft = w.get_name().substr(w.get_name().length() - 4) == "Left";
-	background = types.size() == 0 || tickleft || w.get_name().substr(w.get_name().length() - 5) == "Right";
+	tickright = w.get_name().substr(w.get_name().length() - 5) == "Right";
+	background = types.size() == 0 || tickleft || tickright;
 
 	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width, height);
 	cairo_t* cr = cairo_create (surface);
@@ -296,6 +297,11 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 		} else {
 			c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
 			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
+
+			if (!tickleft && !tickright && (*i) == DataType::AUDIO) {
+				tickleft = true;
+			}
+
 		}
 
 		std::map<int,float> points;
@@ -366,11 +372,12 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 				if (tickleft) {
 					cairo_move_to(cr, width-1.5, pos + .5);
 					cairo_line_to(cr, width, pos + .5);
-				} else {
+					cairo_stroke (cr);
+				} else if (tickright) {
 					cairo_move_to(cr, 0, pos + .5);
 					cairo_line_to(cr, 1.5, pos + .5);
+					cairo_stroke (cr);
 				}
-				cairo_stroke (cr);
 				break;
 			case DataType::MIDI:
 				cairo_set_line_width (cr, 1.0);
@@ -378,12 +385,15 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 				snprintf (buf, sizeof (buf), "%3d", j->first);
 				pos = 1 + height - (gint) rintf (height * fraction);
 				pos = min (pos, height);
+#if 0
 				if (tickleft) {
 					cairo_arc(cr, width - 2.0, pos + .5, 1.0, 0, 2 * M_PI);
-				} else {
+					cairo_fill(cr);
+				} else if (tickright) {
 					cairo_arc(cr, 3, pos + .5, 1.0, 0, 2 * M_PI);
+					cairo_fill(cr);
 				}
-				cairo_fill(cr);
+#endif
 				break;
 			}
 
