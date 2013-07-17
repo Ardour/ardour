@@ -26,10 +26,10 @@
 #include <fcntl.h>
 #include <cstdlib>
 #include <ctime>
-#include <strings.h> // for ffs(3)
 #include <sys/stat.h>
 
 #include "pbd/error.h"
+#include "pbd/ffs.h"
 #include "pbd/basename.h"
 #include <glibmm/threads.h>
 #include "pbd/xml++.h"
@@ -438,7 +438,7 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 				break;
 			case ForceChannel:
 				if (ev.is_channel_event()) {
-					ev.set_channel (ffs(mask) - 1);
+					ev.set_channel (PBD::ffs(mask) - 1);
 				}
 				_capture_buf->write(transport_frame + loop_offset + ev.time(),
 						    ev.type(), ev.size(), ev.buffer());

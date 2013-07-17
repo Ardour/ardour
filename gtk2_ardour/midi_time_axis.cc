@@ -19,8 +19,6 @@
 #include <cstdlib>
 #include <cmath>
 
-#include <strings.h> // for ffs(3)
-
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -28,6 +26,7 @@
 #include <sigc++/bind.h>
 
 #include "pbd/error.h"
+#include "pbd/ffs.h"
 #include "pbd/stl_delete.h"
 #include "pbd/whitespace.h"
 #include "pbd/basename.h"
@@ -1491,7 +1490,7 @@ MidiTimeAxisView::playback_channel_mode_changed ()
 		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Play"), _("some")));
 		break;
 	case ForceChannel:
-		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Play"), _("all"), ffs (midi_track()->get_playback_channel_mask())));
+		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Play"), _("all"), PBD::ffs (midi_track()->get_playback_channel_mask())));
 		break;
 	}
 }
@@ -1507,7 +1506,7 @@ MidiTimeAxisView::capture_channel_mode_changed ()
 		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Rec"), _("some")));
 		break;
 	case ForceChannel:
-		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Rec"), _("all"), ffs (midi_track()->get_capture_channel_mask())));
+		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Rec"), _("all"), PBD::ffs (midi_track()->get_capture_channel_mask())));
 		break;
 	}
 }

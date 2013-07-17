@@ -373,11 +373,11 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 		ruler_items.push_back (MenuElem (_("Timeline height")));
 		static_cast<MenuItem*>(&ruler_items.back())->set_sensitive(false);
 		ruler_items.push_back (CheckMenuElem (_("Large"),  sigc::bind ( sigc::mem_fun(*this, &Editor::set_video_timeline_height), 6)));
-		if (videotl_bar_height == 6) { static_cast<CheckMenuItem*>(&ruler_items.back())->set_active(true);}
+		if (videotl_bar_height == 6) { static_cast<Gtk::CheckMenuItem*>(&ruler_items.back())->set_active(true);}
 		ruler_items.push_back (CheckMenuElem (_("Normal"), sigc::bind ( sigc::mem_fun(*this, &Editor::set_video_timeline_height), 4)));
-		if (videotl_bar_height == 4) { static_cast<CheckMenuItem*>(&ruler_items.back())->set_active(true);}
+		if (videotl_bar_height == 4) { static_cast<Gtk::CheckMenuItem*>(&ruler_items.back())->set_active(true);}
 		ruler_items.push_back (CheckMenuElem (_("Small"),  sigc::bind ( sigc::mem_fun(*this, &Editor::set_video_timeline_height), 3)));
-		if (videotl_bar_height == 3) { static_cast<CheckMenuItem*>(&ruler_items.back())->set_active(true);}
+		if (videotl_bar_height == 3) { static_cast<Gtk::CheckMenuItem*>(&ruler_items.back())->set_active(true);}
 		ruler_items.push_back (SeparatorElem ());
 
 		ruler_items.push_back (MenuElem (_("Align Video Track")));
@@ -385,7 +385,7 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 
 		ruler_items.push_back (CheckMenuElem (_("Lock")));
 		{
-		CheckMenuItem* vtl_lock = static_cast<CheckMenuItem*>(&ruler_items.back());
+		Gtk::CheckMenuItem* vtl_lock = static_cast<Gtk::CheckMenuItem*>(&ruler_items.back());
 		vtl_lock->set_active(is_video_timeline_locked());
 		vtl_lock->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_video_timeline_locked));
 		}

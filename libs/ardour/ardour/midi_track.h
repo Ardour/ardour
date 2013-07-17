@@ -20,6 +20,8 @@
 #ifndef __ardour_midi_track_h__
 #define __ardour_midi_track_h__
 
+#include "pbd/ffs.h"
+
 #include "ardour/track.h"
 #include "ardour/midi_ring_buffer.h"
 
@@ -183,7 +185,7 @@ private:
 /* if mode is ForceChannel, force mask to the lowest set channel or 1 if no
  * channels are set.
  */
-#define force_mask(mode,mask) (((mode) == ForceChannel) ? (((mask) ? (1<<(ffs((mask))-1)) : 1)) : mask)
+#define force_mask(mode,mask) (((mode) == ForceChannel) ? (((mask) ? (1<<(PBD::ffs((mask))-1)) : 1)) : mask)
 
 	void _set_playback_channel_mode(ChannelMode mode, uint16_t mask) {
 		mask = force_mask (mode, mask);

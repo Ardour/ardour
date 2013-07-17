@@ -27,6 +27,10 @@
 #include "ardour/audioengine.h"
 #include "ardour/automation_watch.h"
 
+#ifdef interface
+#undef interface
+#endif
+
 #include "actions.h"
 #include "add_route_dialog.h"
 #include "add_video_dialog.h"
