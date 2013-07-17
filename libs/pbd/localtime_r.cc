@@ -5,8 +5,8 @@
 #ifndef HAVE_LOCALTIME_R
 #include <time.h>
 #include <string.h>
-#include <pthread.h>
 
+#include "pbd/pthread_utils.h"
 #include "pbd/localtime_r.h"
 
 #ifdef localtime_r
