@@ -42,7 +42,7 @@ GroupTabs::GroupTabs ()
 	, _dragging (0)
 	, _dragging_new_tab (0)
 {
-
+	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 }
 
 GroupTabs::~GroupTabs ()
@@ -174,6 +174,8 @@ GroupTabs::on_motion_notify_event (GdkEventMotion* ev)
 
 	set_dirty ();
 	queue_draw ();
+
+	gdk_event_request_motions(ev);
 
 	return true;
 }
