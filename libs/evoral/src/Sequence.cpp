@@ -24,6 +24,10 @@
 #include <stdint.h>
 #include <cstdio>
 
+#if __clang__
+#include "evoral/Note.hpp"
+#endif
+
 #include "pbd/compose.h"
 #include "pbd/error.h"
 

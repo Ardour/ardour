@@ -261,10 +261,10 @@ TranscodeFfmpeg::probe ()
 	return true;
 }
 
-FFSettings
+TranscodeFfmpeg::FFSettings
 TranscodeFfmpeg::default_encoder_settings ()
 {
-	FFSettings ffs;
+	TranscodeFfmpeg::FFSettings ffs;
 	ffs.clear();
 	ffs["-vcodec"] = "mpeg4";
 	ffs["-acodec"] = "ac3";
@@ -273,10 +273,10 @@ TranscodeFfmpeg::default_encoder_settings ()
 	return ffs;
 }
 
-FFSettings
+TranscodeFfmpeg::FFSettings
 TranscodeFfmpeg::default_meta_data ()
 {
-	FFSettings ffm;
+	TranscodeFfmpeg::FFSettings ffm;
 	ffm.clear();
 	ffm["comment"] = "Created with ardour";
 	return ffm;
@@ -308,7 +308,7 @@ TranscodeFfmpeg::format_metadata (std::string key, std::string value)
 }
 
 bool
-TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf_v, FFSettings ffs, FFSettings meta, bool map)
+TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf_v, TranscodeFfmpeg::FFSettings ffs, TranscodeFfmpeg::FFSettings meta, bool map)
 {
 #define MAX_FFMPEG_ENCODER_ARGS (100)
 	char **argp;
@@ -327,11 +327,11 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 	argp[a++] = strdup("-i");
 	argp[a++] = strdup(inf_a.c_str());
 
-	for(FFSettings::const_iterator it = ffs.begin(); it != ffs.end(); ++it) {
+	for(TranscodeFfmpeg::FFSettings::const_iterator it = ffs.begin(); it != ffs.end(); ++it) {
 		argp[a++] = strdup(it->first.c_str());
 		argp[a++] = strdup(it->second.c_str());
 	}
-	for(FFSettings::const_iterator it = meta.begin(); it != meta.end(); ++it) {
+	for(TranscodeFfmpeg::FFSettings::const_iterator it = meta.begin(); it != meta.end(); ++it) {
 		argp[a++] = strdup("-metadata");
 		argp[a++] = format_metadata(it->first.c_str(), it->second.c_str());
 	}

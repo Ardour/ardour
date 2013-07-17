@@ -27,6 +27,9 @@
 #include "gtkmm2ext/cairo_widget.h"
 
 #include <sigc++/signal.h>
+
+namespace ArdourMeter {
+
 extern sigc::signal<void> ResetAllPeakDisplays;
 extern sigc::signal<void,ARDOUR::Route*> ResetRoutePeakDisplays;
 extern sigc::signal<void,ARDOUR::RouteGroup*> ResetGroupPeakDisplays;
@@ -34,13 +37,14 @@ extern sigc::signal<void> RedrawMetrics;
 
 extern sigc::signal<void, int, ARDOUR::RouteGroup*, ARDOUR::MeterType> SetMeterTypeMulti;
 
-cairo_pattern_t* meter_render_ticks (Gtk::Widget& w, std::vector<ARDOUR::DataType> types);
-cairo_pattern_t* meter_render_metrics (Gtk::Widget& w, std::vector<ARDOUR::DataType> types);
-
 gint meter_expose_ticks (GdkEventExpose *ev, std::vector<ARDOUR::DataType> types, Gtk::DrawingArea *mta);
 gint meter_expose_metrics (GdkEventExpose *ev, std::vector<ARDOUR::DataType> types, Gtk::DrawingArea *mma);
 
 void meter_clear_pattern_cache(int which=7);
+
+const std::string meter_type_string (ARDOUR::MeterType);
+
+}
 
 #endif
 

@@ -410,6 +410,7 @@ TimeAxisView::controls_ebox_motion (GdkEventMotion* ev)
 		maybe_set_cursor (ev->y);
 	}
 
+	gdk_event_request_motions(ev);
 	return true;
 }
 

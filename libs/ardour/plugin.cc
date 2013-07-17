@@ -397,7 +397,7 @@ Plugin::get_state ()
 	add_state (root);
 #else
 	if (!seen_get_state_message) {
-		info << string_compose (_("Saving AudioUnit settings is not supported in this build of %1. Consider paying for a newer version"),
+		info << string_compose (_("Saving plugin settings is not supported in this build of %1. Consider paying for the full version"),
 					PROGRAM_NAME)
 		     << endmsg;
 		seen_get_state_message = true;

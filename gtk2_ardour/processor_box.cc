@@ -655,10 +655,14 @@ PluginInsertProcessorEntry::SplittingIcon::on_expose_event (GdkEventExpose* ev)
 {
 	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
 
+	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	cairo_clip (cr);
+
 	cairo_set_line_width (cr, 1);
 
-	double const width = ev->area.width;
-	double const height = ev->area.height;
+	Gtk::Allocation a = get_allocation();
+	double const width = a.get_width();
+	double const height = a.get_height();
 
 	Gdk::Color const bg = get_style()->get_bg (STATE_NORMAL);
 	cairo_set_source_rgb (cr, bg.get_red_p (), bg.get_green_p (), bg.get_blue_p ());

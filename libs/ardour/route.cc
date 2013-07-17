@@ -2562,21 +2562,10 @@ Route::set_processor_state (const XMLNode& node)
 					continue;
 				}
 
-#ifndef NO_PLUGIN_STATE
 				if (processor->set_state (**niter, Stateful::current_state_version) != 0) {
 					/* This processor could not be configured.  Turn it into a UnknownProcessor */
 					processor.reset (new UnknownProcessor (_session, **niter));
 				}
-#else
-				if (boost::dynamic_pointer_cast<PluginInsert>(processor)) {	
-					if (processor->set_state (**niter, Stateful::current_state_version) != 0) {
-						/* This processor could not be configured.  Turn it into a UnknownProcessor */
-						processor.reset (new UnknownProcessor (_session, **niter));
-					}
-				} else {
-					/* plugin, but ::set_state() not * allowed no message here - things will get too verbose */
-				}
-#endif
 
 				/* we have to note the monitor send here, otherwise a new one will be created
 				   and the state of this one will be lost.

@@ -997,18 +997,18 @@ AudioClock::set_slave_info ()
 
 		switch (sync_src) {
 		case JACK:
-			_left_layout->set_markup (string_compose ("<span size=\"%1\">"TXTSPAN"%2</span></span>",
+			_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2</span></span>",
 						INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
 			_right_layout->set_text ("");
 			break;
 		case MIDIClock:
 			if (slave) {
-				_left_layout->set_markup (string_compose ("<span size=\"%1\">"TXTSPAN"%2</span></span>",
+				_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2</span></span>",
 							INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
-				_right_layout->set_markup (string_compose ("<span size=\"%1\">"TXTSPAN"%2</span></span>",
+				_right_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2</span></span>",
 							INFO_FONT_SIZE, slave->approximate_current_delta()));
 			} else {
-				_left_layout->set_markup (string_compose ("<span size=\"%1\">"TXTSPAN"%2</span></span>",
+				_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2</span></span>",
 							INFO_FONT_SIZE, _("--pending--")));
 				_right_layout->set_text ("");
 			}
@@ -1020,21 +1020,21 @@ AudioClock::set_slave_info ()
 				TimecodeSlave* tcslave;
 				if ((tcslave = dynamic_cast<TimecodeSlave*>(_session->slave())) != 0) {
 					matching = (tcslave->apparent_timecode_format() == _session->config.get_timecode_format());
-					_left_layout->set_markup (string_compose ("<span size=\"%1\">"TXTSPAN"%2</span><span foreground=\"%3\">%4</span></span>",
+					_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2</span><span foreground=\"%3\">%4</span></span>",
 										  INFO_FONT_SIZE, sync_source_to_string(sync_src, true)[0], (matching?"green":"red"),
 										  dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position()));
-					_right_layout->set_markup (string_compose ("<span size=\"%1\">"TXTSPAN"%2</span></span>",
+					_right_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2</span></span>",
 										   INFO_FONT_SIZE, slave->approximate_current_delta()));
 				}
 			} else {
-				_left_layout->set_markup (string_compose ("<span size=\"%1\">"TXTSPAN"%2</span></span>",
+				_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2</span></span>",
 							INFO_FONT_SIZE, _("--pending--")));
 				_right_layout->set_text ("");
 			}
 			break;
 		}
 	} else {
-		_left_layout->set_markup (string_compose ("<span size=\"%1\">"TXTSPAN"INT/%2</span></span>",
+		_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "INT/%2</span></span>",
 					INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
 		_right_layout->set_text ("");
 	}
@@ -1079,17 +1079,17 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 			sprintf (buf, "%" PRId64 "Hz", rate);
 		}
 
-		_left_layout->set_markup (string_compose ("<span size=\"%1\">"TXTSPAN"%2 </span><span foreground=\"green\">%3</span></span>",
+		_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2 </span><span foreground=\"green\">%3</span></span>",
 				INFO_FONT_SIZE, _("SR"), buf));
 
 		float vid_pullup = _session->config.get_video_pullup();
 
 		if (vid_pullup == 0.0) {
-			_right_layout->set_markup (string_compose ("<span size=\"%1\">"TXTSPAN"%2 </span><span foreground=\"green\">off</span></span>",
+			_right_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2 </span><span foreground=\"green\">off</span></span>",
 					INFO_FONT_SIZE, _("Pull")));
 		} else {
 			sprintf (buf, _("%+.4f%%"), vid_pullup);
-			_right_layout->set_markup (string_compose ("<span size=\"%1\">"TXTSPAN"%2 </span><span foreground=\"green\">%3</span></span>",
+			_right_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2 </span><span foreground=\"green\">%3</span></span>",
 					INFO_FONT_SIZE, _("Pull"), buf));
 		}
 	}
@@ -1233,11 +1233,11 @@ AudioClock::set_bbt (framepos_t when, bool /*force*/)
 		TempoMetric m (_session->tempo_map().metric_at (pos));
 
 		sprintf (buf, "%-5.1f", m.tempo().beats_per_minute());
-		_left_layout->set_markup (string_compose ("<span size=\"%1\">"TXTSPAN"%3</span> <span foreground=\"green\">%2</span></span>",
+		_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%3</span> <span foreground=\"green\">%2</span></span>",
 							  INFO_FONT_SIZE, buf, _("Tempo")));
 
 		sprintf (buf, "%g/%g", m.meter().divisions_per_bar(), m.meter().note_divisor());
-		_right_layout->set_markup (string_compose ("<span size=\"%1\">"TXTSPAN"%3</span> <span foreground=\"green\">%2</span></span>",
+		_right_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%3</span> <span foreground=\"green\">%2</span></span>",
 							   INFO_FONT_SIZE, buf, _("Meter")));
 	}
 }

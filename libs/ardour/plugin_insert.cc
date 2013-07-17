@@ -882,7 +882,12 @@ PluginInsert::set_control_ids (const XMLNode& node, int version)
 
 			if ((prop = (*iter)->property (X_("parameter"))) != 0) {
 				uint32_t p = atoi (prop->value());
+
+				/* this may create the new controllable */
+
 				boost::shared_ptr<Evoral::Control> c = control (Evoral::Parameter (PluginAutomation, 0, p));
+
+#ifndef NO_PLUGIN_STATE
 				if (!c) {
 					continue;
 				}
@@ -890,6 +895,7 @@ PluginInsert::set_control_ids (const XMLNode& node, int version)
 				if (ac) {
 					ac->set_state (**iter, version);
 				}
+#endif
 			}
 		}
 	}

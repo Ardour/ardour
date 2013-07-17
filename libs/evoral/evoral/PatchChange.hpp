@@ -123,7 +123,7 @@ public:
 			return time() < o.time();
 		}
 
-		if (bank != o.bank()) {
+		if (bank() != o.bank()) {
 			return bank() < o.bank();
 		}
 

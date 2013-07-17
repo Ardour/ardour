@@ -1645,7 +1645,9 @@ IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, fr
 	}
 
 	_buffers.get_jack_port_addresses (_ports, nframes);
-	proc->run (_buffers, start_frame, end_frame, nframes, true);
+	if (proc) {
+		proc->run (_buffers, start_frame, end_frame, nframes, true);
+	}
 }
 
 void

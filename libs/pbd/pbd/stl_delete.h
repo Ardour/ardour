@@ -20,11 +20,19 @@
 #ifndef __libmisc_stl_delete_h__
 #define __libmisc_stl_delete_h__
 
+
+#if __clang__ && __APPLE__ && __cplusplus >= 201103L
+#include <vector>
+#ifndef _CPP_VECTOR
+#define _CPP_VECTOR
+#endif
+#endif
+
 /* To actually use any of these deletion functions, you need to
    first include the revelant container type header.
 */
 #if defined(_CPP_VECTOR) || defined(_GLIBCXX_VECTOR) || defined(__SGI_STL_VECTOR)
-template<class T> void vector_delete (std::vector<T *> *vec) 
+template<class T> void vector_delete (std::vector<T *> *vec)
 {
 	typename std::vector<T *>::iterator i;
 	

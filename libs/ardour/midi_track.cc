@@ -329,6 +329,9 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 
 	if (!_active) {
 		silence (nframes);
+		if (_meter_point == MeterInput && (_monitoring & MonitorInput || _diskstream->record_enabled())) {
+			_meter->reset();
+		}
 		return 0;
 	}
 
@@ -353,7 +356,7 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 
 	fill_buffers_with_input (bufs, _input, nframes);
 
-	if (_meter_point == MeterInput) {
+	if (_meter_point == MeterInput && (_monitoring & MonitorInput || _diskstream->record_enabled())) {
 		_meter->run (bufs, start_frame, end_frame, nframes, true);
 	}
 

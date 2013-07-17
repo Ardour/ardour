@@ -151,7 +151,7 @@ class ProxyWithConstructor: public ProxyBase {
 	    : ProxyBase (name, menu_name) , creator (c) {}
 	
     ProxyWithConstructor (const std::string& name, const std::string& menu_name, const boost::function<T*()>& c, const XMLNode* node)
-	    : ProxyBase (name, menu_name, node) , creator (c) {}
+	    : ProxyBase (name, menu_name, *node) , creator (c) {}
 	
     Gtk::Window* get (bool create = false) { 
 	    if (!_window) {
@@ -198,7 +198,7 @@ class Proxy : public ProxyBase {
 	    : ProxyBase (name, menu_name) {}
 
     Proxy (const std::string& name, const std::string& menu_name, const XMLNode* node)
-	    : ProxyBase (name, menu_name, node)  {}
+	    : ProxyBase (name, menu_name, *node)  {}
 	
     Gtk::Window* get (bool create = false) { 
 	    if (!_window) {
