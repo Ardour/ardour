@@ -245,21 +245,22 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 	Pango::FontDescription font;
 
 	font = Pango::FontDescription ("ArdourMono");
+	double fixfontsize = 81920.0 / (double) ARDOUR::Config->get_font_scale();
 
 	font.set_weight (Pango::WEIGHT_NORMAL);
-	font.set_size (9.0 * PANGO_SCALE);
+	font.set_size (9.0 * PANGO_SCALE * fixfontsize);
 	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 	audio_font_attributes.change (*font_attr);
 	delete font_attr;
 
 	font.set_weight (Pango::WEIGHT_ULTRALIGHT);
 	font.set_stretch (Pango::STRETCH_ULTRA_CONDENSED);
-	font.set_size (8.0 * PANGO_SCALE);
+	font.set_size (8.0 * PANGO_SCALE * fixfontsize);
 	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 	midi_font_attributes.change (*font_attr);
 	delete font_attr;
 
-	font.set_size (6.0 * PANGO_SCALE);
+	font.set_size (6.0 * PANGO_SCALE * fixfontsize);
 	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 	unit_font_attributes.change (*font_attr);
 	delete font_attr;
