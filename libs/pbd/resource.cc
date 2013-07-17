@@ -17,7 +17,7 @@
 
 */
 
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 #include <stdio.h>
 #else
 #include <sys/time.h>

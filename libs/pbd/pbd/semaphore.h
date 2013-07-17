@@ -22,7 +22,7 @@
 
 #ifdef __APPLE__
 #    include <mach/mach.h>
-#elif defined(_WIN32)
+#elif defined(PLATFORM_WINDOWS)
 #    include <windows.h>
 #else
 #    include <semaphore.h>
