@@ -278,12 +278,16 @@ GainMeterBase::setup_meters (int len)
 
 	switch (_width) {
 		case Wide:
+			meter_ticks1_area.show();
+			meter_ticks2_area.show();
 			if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
 				meter_width = 10;
 			}
 			break;
 		case Narrow:
 			meter_width = 2;
+			meter_ticks1_area.hide();
+			meter_ticks2_area.hide();
 			break;
 	}
 	level_meter->setup_meters(len, meter_width);
@@ -940,10 +944,10 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	meter_ticks2_area.signal_expose_event().connect (
 			sigc::mem_fun(*this, &GainMeter::meter_ticks2_expose));
 
-	meter_hbox.pack_start (meter_metric_area, false, false);
 	meter_hbox.pack_start (meter_ticks1_area, false, false);
 	meter_hbox.pack_start (meter_alignment, false, false);
 	meter_hbox.pack_start (meter_ticks2_area, false, false);
+	meter_hbox.pack_start (meter_metric_area, false, false);
 }
 
 void
@@ -1002,7 +1006,7 @@ GainMeter::get_gm_width ()
 	if (_width == Wide)
 		return max(sz.width * 2, min_w * 2) + 6;
 	else
-		return sz.width + min_w + 12;
+		return sz.width + min_w + 6;
 
 }
 
