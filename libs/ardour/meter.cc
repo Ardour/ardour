@@ -129,6 +129,16 @@ PeakMeter::reset_max ()
 		_max_peak_power[i] = -INFINITY;
 		_max_peak_signal[i] = 0;
 	}
+
+	const size_t n_midi  = min (_peak_signal.size(), (size_t) current_meters.n_midi());
+
+	for (size_t n = 0; n < _peak_signal.size(); ++n) {
+		if (n < n_midi) {
+			_visible_peak_power[n] = 0;
+		} else {
+			_visible_peak_power[n] = -INFINITY;
+		}
+	}
 }
 
 bool
@@ -159,7 +169,6 @@ PeakMeter::reflect_inputs (const ChanCount& in)
 
 	const size_t limit = min (_peak_signal.size(), (size_t) current_meters.n_total ());
 	const size_t n_midi  = min (_peak_signal.size(), (size_t) current_meters.n_midi());
-	const size_t n_audio = current_meters.n_audio();
 
 	for (size_t n = 0; n < limit; ++n) {
 		if (n < n_midi) {
@@ -169,10 +178,7 @@ PeakMeter::reflect_inputs (const ChanCount& in)
 		}
 	}
 
-	for (size_t n = 0; n < n_audio; ++n) {
-		_kmeter[n]->reset();
-	}
-
+	reset();
 	reset_max();
 
 	ConfigurationChanged (in, in); /* EMIT SIGNAL */
@@ -212,6 +218,9 @@ PeakMeter::reset_max_channels (const ChanCount& chn)
 		_kmeter.push_back(new Kmeterdsp());
 	}
 	assert(_kmeter.size() == n_audio);
+
+	reset();
+	reset_max();
 }
 
 /** To be driven by the Meter signal from IO.
