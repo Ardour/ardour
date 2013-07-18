@@ -35,9 +35,11 @@ def sub_config_and_use(conf, name, has_objects = True):
 def configure(conf):
     autowaf.set_recursive()
     autowaf.configure(conf)
-
+    
     for i in children:
         sub_config_and_use(conf, i)
+
+    if (conf.env['build_target'] == 'mingw'): return
 
     #autowaf.check_pkg(conf, 'libusb-1.0', uselib_store='USB', mandatory=False)
     #if Options.options.tranzport and conf.is_defined('HAVE_USB'):
@@ -63,6 +65,7 @@ def configure(conf):
 
 def build(bld):
     bld.recurse('control_protocol')
+    if (bld.env['build_target'] == 'mingw'): return
     if bld.is_defined ('BUILD_MACKIE'):
         bld.recurse('mackie')
     if bld.is_defined ('HAVE_LO'):
