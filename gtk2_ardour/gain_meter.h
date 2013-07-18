@@ -201,7 +201,7 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 {
   public:
          GainMeter (ARDOUR::Session*, int);
-	~GainMeter () {}
+	virtual ~GainMeter ();
 
 	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
 				   boost::shared_ptr<ARDOUR::PeakMeter> meter,
@@ -210,6 +210,7 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 	int get_gm_width ();
 	void setup_meters (int len=0);
 	void set_type (ARDOUR::MeterType);
+	void route_active_changed ();
 
   protected:
 	void hide_all_meters ();
