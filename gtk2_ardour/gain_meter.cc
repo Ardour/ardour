@@ -950,6 +950,8 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	meter_hbox.pack_start (meter_metric_area, false, false);
 }
 
+GainMeter::~GainMeter () { }
+
 void
 GainMeter::set_controls (boost::shared_ptr<Route> r,
 			 boost::shared_ptr<PeakMeter> meter,
@@ -976,6 +978,10 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 		meter_configuration_changed (_meter->input_streams ());
 	}
 
+
+	if (_route) {
+		_route->active_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::route_active_changed, this), gui_context ());
+	}
 
 	/*
 	   if we have a non-hidden route (ie. we're not the click or the auditioner),
@@ -1067,18 +1073,21 @@ GainMeter::meter_configuration_changed (ChanCount c)
 			set_meter_strip_name ("AudioBusMetricsInactive");
 		}
 	}
+	else if (
+			   (type == (1 << DataType::MIDI))
+			|| (_route && boost::dynamic_pointer_cast<MidiTrack>(_route))
+			) {
+		if (!_route || _route->active()) {
+			set_meter_strip_name ("MidiTrackMetrics");
+		} else {
+			set_meter_strip_name ("MidiTrackMetricsInactive");
+		}
+	}
 	else if (type == (1 << DataType::AUDIO)) {
 		if (!_route || _route->active()) {
 			set_meter_strip_name ("AudioTrackMetrics");
 		} else {
 			set_meter_strip_name ("AudioTrackMetricsInactive");
-		}
-	}
-	else if (type == (1 << DataType::MIDI)) {
-		if (!_route || _route->active()) {
-			set_meter_strip_name ("MidiTrackMetrics");
-		} else {
-			set_meter_strip_name ("MidiTrackMetricsInactive");
 		}
 	} else {
 		if (!_route || _route->active()) {
@@ -1088,6 +1097,14 @@ GainMeter::meter_configuration_changed (ChanCount c)
 		}
 	}
 	meter_clear_pattern_cache(4);
+}
+
+void
+GainMeter::route_active_changed ()
+{
+	if (_meter) {
+		meter_configuration_changed (_meter->input_streams ());
+	}
 }
 
 void
