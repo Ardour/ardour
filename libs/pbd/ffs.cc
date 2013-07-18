@@ -19,14 +19,28 @@
 
 #include "pbd/ffs.h"
 
+#ifndef COMPILER_MSVC
 #include <strings.h>
+#endif
 
 namespace PBD {
 int
 ffs (int x)
 {
-#if defined(WIN32) && defined(__GNUC__)
+#if defined (COMPILER_MINGW)
 	return __builtin_ffs(x);
+#elif defined (COMPILER_MSVC)
+	unsigned long index;
+#ifdef WIN64	
+	if (0 != _BitScanForward64(&index, (__int64)x))
+#else
+	if (0 != _BitScanForward(&index, (unsigned long)x))
+#endif
+		index++;    // Make the result 1-based
+	else
+		index = 0;  // All bits were zero
+
+	return (int)index;
 #else
 	return ::ffs(x);
 #endif
