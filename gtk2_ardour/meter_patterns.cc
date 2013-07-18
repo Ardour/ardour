@@ -233,6 +233,10 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 	tickright = w.get_name().substr(w.get_name().length() - 5) == "Right";
 	background = types.size() == 0 || tickleft || tickright;
 
+	if (!tickleft && !tickright) {
+		tickright = true;
+	}
+
 	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width, height);
 	cairo_t* cr = cairo_create (surface);
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create(w.get_pango_context());
@@ -245,21 +249,22 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 	Pango::FontDescription font;
 
 	font = Pango::FontDescription ("ArdourMono");
+	double fixfontsize = 81920.0 / (double) ARDOUR::Config->get_font_scale();
 
 	font.set_weight (Pango::WEIGHT_NORMAL);
-	font.set_size (9.0 * PANGO_SCALE);
+	font.set_size (9.0 * PANGO_SCALE * fixfontsize);
 	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 	audio_font_attributes.change (*font_attr);
 	delete font_attr;
 
 	font.set_weight (Pango::WEIGHT_ULTRALIGHT);
 	font.set_stretch (Pango::STRETCH_ULTRA_CONDENSED);
-	font.set_size (8.0 * PANGO_SCALE);
+	font.set_size (8.0 * PANGO_SCALE * fixfontsize);
 	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 	midi_font_attributes.change (*font_attr);
 	delete font_attr;
 
-	font.set_size (6.0 * PANGO_SCALE);
+	font.set_size (6.0 * PANGO_SCALE * fixfontsize);
 	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 	unit_font_attributes.change (*font_attr);
 	delete font_attr;
@@ -295,11 +300,6 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 		} else {
 			c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
 			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-
-			if (!tickleft && !tickright && (*i) == DataType::AUDIO) {
-				tickleft = true;
-			}
-
 		}
 
 		std::map<int,float> points;
@@ -383,7 +383,6 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 				snprintf (buf, sizeof (buf), "%3d", j->first);
 				pos = 1 + height - (gint) rintf (height * fraction);
 				pos = min (pos, height);
-#if 0
 				if (tickleft) {
 					cairo_arc(cr, width - 2.0, pos + .5, 1.0, 0, 2 * M_PI);
 					cairo_fill(cr);
@@ -391,7 +390,6 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 					cairo_arc(cr, 3, pos + .5, 1.0, 0, 2 * M_PI);
 					cairo_fill(cr);
 				}
-#endif
 				break;
 			}
 
@@ -402,7 +400,7 @@ meter_render_metrics (Gtk::Widget& w, vector<DataType> types)
 			int tw, th;
 			layout->get_pixel_size(tw, th);
 
-			int p = pos - (th / 2);
+			int p = pos - (th / 2) - 1;
 			p = min (p, height - th);
 			p = max (p, 0);
 
