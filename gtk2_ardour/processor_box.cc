@@ -659,7 +659,8 @@ PluginInsertProcessorEntry::SplittingIcon::on_expose_event (GdkEventExpose* ev)
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_clip (cr);
 
-	cairo_set_line_width (cr, 1);
+	cairo_set_line_width (cr, 1.5);
+	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
 
 	Gtk::Allocation a = get_allocation();
 	double const width = a.get_width();
@@ -674,12 +675,19 @@ PluginInsertProcessorEntry::SplittingIcon::on_expose_event (GdkEventExpose* ev)
 	Gdk::Color const fg = get_style()->get_fg (STATE_NORMAL);
 	cairo_set_source_rgb (cr, fg.get_red_p (), fg.get_green_p (), fg.get_blue_p ());
 
-	cairo_move_to (cr, width * 0.3, height);
-	cairo_line_to (cr, width * 0.3, height * 0.5);
-	cairo_line_to (cr, width * 0.7, height * 0.5);
-	cairo_line_to (cr, width * 0.7, height);
-	cairo_move_to (cr, width * 0.5, height * 0.5);
-	cairo_line_to (cr, width * 0.5, 0);
+	const float si_l = rint(width * 0.3) + .5;
+	const float si_c = rint(width * 0.5) + .5;
+	const float si_r = rint(width * 0.7) + .5;
+	const float si_m = rint(height * 0.5) + .5;
+
+	cairo_move_to (cr, si_l, height);
+	cairo_line_to (cr, si_l, si_m);
+	cairo_line_to (cr, si_r, si_m);
+	cairo_line_to (cr, si_r, height);
+
+	cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
+	cairo_move_to (cr, si_c, si_m);
+	cairo_line_to (cr, si_c, 0);
 	cairo_stroke (cr);
 
 	return true;
