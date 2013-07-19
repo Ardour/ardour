@@ -1491,7 +1491,14 @@ ARDOUR_UI::open_session ()
 			open_session_selector->set_current_folder(Config->get_default_session_parent_dir());
 		}
 
-		open_session_selector->add_shortcut_folder (Config->get_default_session_parent_dir());
+		string default_session_folder = Config->get_default_session_parent_dir();
+		try {
+			/* add_shortcut_folder throws an exception if the folder being added already has a shortcut */
+			open_session_selector->add_shortcut_folder (default_session_folder);
+		}
+		catch (Glib::Error & e) {
+			std::cerr << "open_session_selector->add_shortcut_folder (" << default_session_folder << ") threw Glib::Error " << e.what() << std::endl;
+		}
 
 		FileFilter session_filter;
 		session_filter.add_pattern ("*.ardour");
