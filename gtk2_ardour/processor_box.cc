@@ -213,6 +213,7 @@ void
 ProcessorEntry::set_enum_width (Width w)
 {
 	_width = w;
+	_button.set_text (name (_width));
 }
 
 void
