@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 #include <vector>
 #include <cmath>
 #include <fstream>
@@ -27,17 +31,7 @@
 #include <glibmm.h>
 #include <gtkmm/messagedialog.h>
 
-#include "pbd/epa.h"
 #include "pbd/xml++.h"
-
-#ifdef __APPLE__
-#include <CoreAudio/CoreAudio.h>
-#include <CoreFoundation/CFString.h>
-#include <sys/param.h>
-#include <mach-o/dyld.h>
-#elif !defined(__FreeBSD__)
-#include <alsa/asoundlib.h>
-#endif
 
 #include <jack/jack.h>
 
@@ -50,9 +44,7 @@
 #include "pbd/error.h"
 #include "pbd/pathscanner.h"
 
-#ifdef __APPLE
-#include <CFBundle.h>
-#endif
+#include "ardour/jack_utils.h"
 
 #include "engine_dialog.h"
 #include "i18n.h"
@@ -100,56 +92,25 @@ EngineControl::EngineControl ()
 
 	_used = false;
 
-	strings.push_back (_("8000Hz"));
-	strings.push_back (_("22050Hz"));
-	strings.push_back (_("44100Hz"));
-	strings.push_back (_("48000Hz"));
-	strings.push_back (_("88200Hz"));
-	strings.push_back (_("96000Hz"));
-	strings.push_back (_("192000Hz"));
+	ARDOUR::get_jack_sample_rate_strings (strings);
 	set_popdown_strings (sample_rate_combo, strings);
-	sample_rate_combo.set_active_text ("48000Hz");
+	sample_rate_combo.set_active_text (ARDOUR::get_jack_default_sample_rate ());
 
 	strings.clear ();
-	strings.push_back ("32");
-	strings.push_back ("64");
-	strings.push_back ("128");
-	strings.push_back ("256");
-	strings.push_back ("512");
-	strings.push_back ("1024");
-	strings.push_back ("2048");
-	strings.push_back ("4096");
-	strings.push_back ("8192");
+	ARDOUR::get_jack_period_size_strings (strings);
 	set_popdown_strings (period_size_combo, strings);
-	period_size_combo.set_active_text ("1024");
-
-	strings.clear ();
-	strings.push_back (_("None"));
-	strings.push_back (_("Triangular"));
-	strings.push_back (_("Rectangular"));
-	strings.push_back (_("Shaped"));
-	set_popdown_strings (dither_mode_combo, strings);
-	dither_mode_combo.set_active_text (_("None"));
+	period_size_combo.set_active_text (ARDOUR::get_jack_default_period_size ());
 
 	/* basic parameters */
 
 	basic_packer.set_spacings (6);
 
 	strings.clear ();
-#ifdef __APPLE__
-	strings.push_back (X_("CoreAudio"));
-#else
-#ifndef __FreeBSD__
-	strings.push_back (X_("ALSA"));
-#endif
-	strings.push_back (X_("OSS"));
-	strings.push_back (X_("FreeBoB"));
-	strings.push_back (X_("FFADO"));
-#endif
-	strings.push_back (X_("NetJACK"));
-	strings.push_back (X_("Dummy"));
+	ARDOUR::get_jack_audio_driver_names (strings);
 	set_popdown_strings (driver_combo, strings);
-	driver_combo.set_active_text (strings.front());
+	string default_driver;
+	ARDOUR::get_jack_default_audio_driver_name (default_driver);
+	driver_combo.set_active_text (default_driver);
 
 	driver_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::driver_changed));
 	driver_changed ();
@@ -165,12 +126,6 @@ EngineControl::EngineControl ()
 	audio_mode_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::audio_mode_changed));
 	audio_mode_changed ();
 
-	strings.clear ();
-	strings.push_back (_("None"));
-	strings.push_back (_("seq"));
-	strings.push_back (_("raw"));
-	set_popdown_strings (midi_driver_combo, strings);
-	midi_driver_combo.set_active_text (strings.front ());
 
 	row = 0;
 
@@ -309,15 +264,22 @@ EngineControl::EngineControl ()
 	++row;
 #endif
 
-	find_jack_servers (server_strings);
+	vector<std::string> jack_server_paths;
 
-	if (server_strings.empty()) {
+	if (!ARDOUR::get_jack_server_paths (jack_server_paths)) {
 		fatal << _("No JACK server found anywhere on this system. Please install JACK and restart") << endmsg;
 		/*NOTREACHED*/
 	}
 
+	for (vector<std::string>::const_iterator i = jack_server_paths.begin(); i != jack_server_paths.end(); ++i) {
+		server_strings.push_back (*i);
+	}
+
+	std::string default_server_path;
+	ARDOUR::get_jack_default_server_path (default_server_path);
+
 	set_popdown_strings (serverpath_combo, server_strings);
-	serverpath_combo.set_active_text (server_strings.front());
+	serverpath_combo.set_active_text (default_server_path);
 
 	if (server_strings.size() > 1) {
 		label = manage (left_aligned_label (_("Server:")));
@@ -383,23 +345,16 @@ EngineControl::~EngineControl ()
 
 }
 
-void
-EngineControl::build_command_line (vector<string>& cmd)
+bool
+EngineControl::build_command_line (string& command_line)
 {
-	string str;
-	string driver;
-	bool using_alsa = false;
-	bool using_coreaudio = false;
-	bool using_dummy = false;
-	bool using_ffado = false;
+	ARDOUR::JackCommandLineOptions options;
 
-	/* first, path to jackd */
-
-	cmd.push_back (serverpath_combo.get_active_text ());
+	options.server_path = serverpath_combo.get_active_text ();
 
 	/* now jackd arguments */
 
-	str = timeout_combo.get_active_text ();
+	string str = timeout_combo.get_active_text ();
 
 	if (str != _("Ignore")) {
 
@@ -408,187 +363,38 @@ EngineControl::build_command_line (vector<string>& cmd)
 		secs = atof (str);
 		msecs = (uint32_t) floor (secs * 1000.0);
 
-		if (msecs > 0) {
-			cmd.push_back ("-t");
-			cmd.push_back (to_string (msecs, std::dec));
-		}
+		options.timeout = msecs;
 	}
 
-	if (no_memory_lock_button.get_active()) {
-		cmd.push_back ("-m"); /* no munlock */
-	}
+	options.no_mlock = no_memory_lock_button.get_active();
+	options.ports_max = (uint32_t) floor (ports_spinner.get_value());
+	options.realtime = realtime_button.get_active();
+	options.unlock_gui_libs = unlock_memory_button.get_active();
+	options.verbose = verbose_output_button.get_active();
+	options.driver = driver_combo.get_active_text ();
 
-	cmd.push_back ("-p"); /* port max */
-	cmd.push_back (to_string ((uint32_t) floor (ports_spinner.get_value()), std::dec));
+	options.input_device = input_device_combo.get_active_text ();
+	options.output_device = output_device_combo.get_active_text ();
 
-	if (realtime_button.get_active()) {
-		cmd.push_back ("-R");
-	} else {
-		cmd.push_back ("-r"); /* override jackd's default --realtime */
-	}
+	options.num_periods = periods_spinner.get_value ();
 
-	if (unlock_memory_button.get_active()) {
-		cmd.push_back ("-u");
-	}
+	options.samplerate = get_rate();
 
-	if (verbose_output_button.get_active()) {
-		cmd.push_back ("-v");
-	}
+	options.period_size = atoi (period_size_combo.get_active_text ());
 
-	/* now add fixed arguments (not user-selectable) */
+	options.input_latency = input_latency_adjustment.get_value ();
+	options.output_latency = output_latency_adjustment.get_value ();
 
-	cmd.push_back ("-T"); // temporary */
+	options.hardware_metering = hw_meter_button.get_active();
+	options.hardware_monitoring = hw_monitor_button.get_active();
 
-	/* next the driver */
+	options.dither_mode = dither_mode_combo.get_active_text();
+	options.force16_bit = force16bit_button.get_active();
+	options.soft_mode = soft_mode_button.get_active();
 
-	cmd.push_back ("-d");
+	options.midi_driver = midi_driver_combo.get_active_text ();
 
-	driver = driver_combo.get_active_text ();
-
-	if (driver == X_("ALSA")) {
-		using_alsa = true;
-		cmd.push_back ("alsa");
-	} else if (driver == X_("OSS")) {
-		cmd.push_back ("oss");
-	} else if (driver == X_("CoreAudio")) {
-		using_coreaudio = true;
-		cmd.push_back ("coreaudio");
-	} else if (driver == X_("NetJACK")) {
-		cmd.push_back ("netjack");
-	} else if (driver == X_("FreeBoB")) {
-		cmd.push_back ("freebob");
-	} else if (driver == X_("FFADO")) {
-		using_ffado = true;
-		cmd.push_back ("firewire");
-	} else if ( driver == X_("Dummy")) {
-		using_dummy = true;
-		cmd.push_back ("dummy");
-	}
-
-	/* driver arguments */
-
-	if (!using_coreaudio) {
-		str = audio_mode_combo.get_active_text();
-
-		if (str == _("Playback/recording on 1 device")) {
-
-			/* relax */
-
-		} else if (str == _("Playback/recording on 2 devices")) {
-
-			string input_device = get_device_name (driver, input_device_combo.get_active_text());
-			string output_device = get_device_name (driver, output_device_combo.get_active_text());
-
-			if (input_device.empty() || output_device.empty()) {
-				cmd.clear ();
-				return;
-			}
-
-			cmd.push_back ("-C");
-			cmd.push_back (input_device);
-
-			cmd.push_back ("-P");
-			cmd.push_back (output_device);
-
-		} else if (str == _("Playback only")) {
-			cmd.push_back ("-P");
-		} else if (str == _("Recording only")) {
-			cmd.push_back ("-C");
-		}
-
-		if (!using_dummy) {
-			cmd.push_back ("-n");
-			cmd.push_back (to_string ((uint32_t) floor (periods_spinner.get_value()), std::dec));
-		}
-	}
-
-	cmd.push_back ("-r");
-	cmd.push_back (to_string (get_rate(), std::dec));
-
-	cmd.push_back ("-p");
-	cmd.push_back (period_size_combo.get_active_text());
-
-	if (using_alsa || using_ffado || using_coreaudio) {
-
-		double val = input_latency_adjustment.get_value();
-
-                if (val) {
-                        cmd.push_back ("-I");
-                        cmd.push_back (to_string ((uint32_t) val, std::dec));
-                }
-
-                val = output_latency_adjustment.get_value();
-
-		if (val) {
-                        cmd.push_back ("-O");
-                        cmd.push_back (to_string ((uint32_t) val, std::dec));
-                }
-	}
-
-	if (using_alsa) {
-
-		if (audio_mode_combo.get_active_text() != _("Playback/recording on 2 devices")) {
-
-			string device = get_device_name (driver, interface_combo.get_active_text());
-			if (device.empty()) {
-				cmd.clear ();
-				return;
-			}
-
-			cmd.push_back ("-d");
-			cmd.push_back (device);
-		}
-
-		if (hw_meter_button.get_active()) {
-			cmd.push_back ("-M");
-		}
-
-		if (hw_monitor_button.get_active()) {
-			cmd.push_back ("-H");
-		}
-
-		str = dither_mode_combo.get_active_text();
-
-		if (str == _("None")) {
-		} else if (str == _("Triangular")) {
-			cmd.push_back ("-z triangular");
-		} else if (str == _("Rectangular")) {
-			cmd.push_back ("-z rectangular");
-		} else if (str == _("Shaped")) {
-			cmd.push_back ("-z shaped");
-		}
-
-		if (force16bit_button.get_active()) {
-			cmd.push_back ("-S");
-		}
-
-		if (soft_mode_button.get_active()) {
-			cmd.push_back ("-s");
-		}
-
-		str = midi_driver_combo.get_active_text ();
-
-		if (str == _("seq")) {
-			cmd.push_back ("-X seq");
-		} else if (str == _("raw")) {
-			cmd.push_back ("-X raw");
-		}
-	} else if (using_coreaudio) {
-
-#ifdef __APPLE__
-		// note: older versions of the CoreAudio JACK backend use -n instead of -d here
-
-		string device = get_device_name (driver, interface_combo.get_active_text());
-		if (device.empty()) {
-			cmd.clear ();
-			return;
-		}
-
-		cmd.push_back ("-d");
-		cmd.push_back (device);
-#endif
-
-	}
+	return get_jack_command_line_string (options, command_line);
 }
 
 bool
@@ -600,56 +406,32 @@ EngineControl::need_setup ()
 bool
 EngineControl::engine_running ()
 {
-        EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
-        boost::scoped_ptr<EnvironmentalProtectionAgency> current_epa;
-
-        /* revert all environment settings back to whatever they were when
-	 * ardour started, because ardour's startup script may have reset
-	 * something in ways that interfere with finding/starting JACK.
-         */
-
-        if (global_epa) {
-                current_epa.reset (new EnvironmentalProtectionAgency(true)); /* will restore settings when we leave scope */
-                global_epa->restore ();
-        }
-
-	jack_status_t status;
-	jack_client_t* c = jack_client_open ("ardourprobe", JackNoStartServer, &status);
-
-	if (status == 0) {
-		jack_client_close (c);
-		return true;
-	}
-	return false;
+	return ARDOUR::jack_server_running ();
 }
 
 int
 EngineControl::setup_engine ()
 {
-	vector<string> args;
-	std::string cwd = "/tmp";
+	string command_line;
 
-	build_command_line (args);
-
-	if (args.empty()) {
+	if (!build_command_line (command_line)) {
+		error << _("Unable to start JACK server please try a different configuration") << endmsg;
 		return 1; // try again
 	}
 
-	std::string jackdrc_path = Glib::get_home_dir();
-	jackdrc_path += "/.jackdrc";
+#ifdef WIN32
+	if (!ARDOUR::start_jack_server (command_line)) {
+		error << _("Unable to start JACK server please try a different configuration") << endmsg;
+		return -1;
+	};
+#else
+	std::string config_file_path = ARDOUR::get_jack_server_user_config_file_path ();
 
-	ofstream jackdrc (jackdrc_path.c_str());
-	if (!jackdrc) {
-		error << string_compose (_("cannot open JACK rc file %1 to store parameters"), jackdrc_path) << endmsg;
+	if (ARDOUR::write_jack_config_file (config_file_path, command_line)) {
+		error << string_compose (_("cannot open JACK rc file %1 to store parameters"), config_file_path) << endmsg;
 		return -1;
 	}
-
-	for (vector<string>::iterator i = args.begin(); i != args.end(); ++i) {
-		jackdrc << (*i) << ' ';
-	}
-
-	jackdrc << endl;
-	jackdrc.close ();
+#endif
 
 	_used = true;
 
@@ -659,121 +441,9 @@ EngineControl::setup_engine ()
 void
 EngineControl::enumerate_devices (const string& driver)
 {
-	/* note: case matters for the map keys */
+	devices[driver] = ARDOUR::get_jack_device_names_for_audio_driver (driver);
 
-	if (driver == "CoreAudio") {
-#ifdef __APPLE__
-		devices[driver] = enumerate_coreaudio_devices ();
-#endif
-
-#if !defined(__APPLE__) && !defined(__FreeBSD__)
-	} else if (driver == "ALSA") {
-		devices[driver] = enumerate_alsa_devices ();
-	} else if (driver == "FreeBOB") {
-		devices[driver] = enumerate_freebob_devices ();
-	} else if (driver == "FFADO") {
-		devices[driver] = enumerate_ffado_devices ();
-	} else if (driver == "OSS") {
-		devices[driver] = enumerate_oss_devices ();
-	} else if (driver == "Dummy") {
-		devices[driver] = enumerate_dummy_devices ();
-	} else if (driver == "NetJACK") {
-		devices[driver] = enumerate_netjack_devices ();
-	}
-#else
-        }
-#endif
-}
-
-#ifdef __APPLE__
-static OSStatus
-getDeviceUIDFromID( AudioDeviceID id, char *name, size_t nsize)
-{
-	UInt32 size = sizeof(CFStringRef);
-	CFStringRef UI;
-	OSStatus res = AudioDeviceGetProperty(id, 0, false,
-		kAudioDevicePropertyDeviceUID, &size, &UI);
-	if (res == noErr)
-		CFStringGetCString(UI,name,nsize,CFStringGetSystemEncoding());
-	CFRelease(UI);
-	return res;
-}
-
-vector<string>
-EngineControl::enumerate_coreaudio_devices ()
-{
-	vector<string> devs;
-
-	// Find out how many Core Audio devices are there, if any...
-	// (code snippet gently "borrowed" from St?hane Letz jackdmp;)
-	OSStatus err;
-	Boolean isWritable;
-	UInt32 outSize = sizeof(isWritable);
-
-	backend_devs.clear ();
-
-	err = AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDevices,
-					   &outSize, &isWritable);
-	if (err == noErr) {
-		// Calculate the number of device available...
-		int numCoreDevices = outSize / sizeof(AudioDeviceID);
-		// Make space for the devices we are about to get...
-		AudioDeviceID *coreDeviceIDs = new AudioDeviceID [numCoreDevices];
-		err = AudioHardwareGetProperty(kAudioHardwarePropertyDevices,
-					       &outSize, (void *) coreDeviceIDs);
-		if (err == noErr) {
-			// Look for the CoreAudio device name...
-			char coreDeviceName[256];
-			UInt32 nameSize;
-
-			for (int i = 0; i < numCoreDevices; i++) {
-
-				nameSize = sizeof (coreDeviceName);
-
-				/* enforce duplex devices only */
-
-				err = AudioDeviceGetPropertyInfo(coreDeviceIDs[i],
-								 0, true, kAudioDevicePropertyStreams,
-								 &outSize, &isWritable);
-
-				if (err != noErr || outSize == 0) {
-					continue;
-				}
-
-				err = AudioDeviceGetPropertyInfo(coreDeviceIDs[i],
-								 0, false, kAudioDevicePropertyStreams,
-								 &outSize, &isWritable);
-
-				if (err != noErr || outSize == 0) {
-					continue;
-				}
-
-				err = AudioDeviceGetPropertyInfo(coreDeviceIDs[i],
-								 0, true, kAudioDevicePropertyDeviceName,
-								 &outSize, &isWritable);
-				if (err == noErr) {
-					err = AudioDeviceGetProperty(coreDeviceIDs[i],
-								     0, true, kAudioDevicePropertyDeviceName,
-								     &nameSize, (void *) coreDeviceName);
-					if (err == noErr) {
-						char drivername[128];
-
-						// this returns the unique id for the device
-						// that must be used on the commandline for jack
-
-						if (getDeviceUIDFromID(coreDeviceIDs[i], drivername, sizeof (drivername)) == noErr) {
-							devs.push_back (coreDeviceName);
-							backend_devs.push_back (drivername);
-						}
-					}
-				}
-			}
-		}
-		delete [] coreDeviceIDs;
-	}
-
-
-	if (devs.size() == 0) {
+	if (devices[driver].empty () && driver == ARDOUR::coreaudio_driver_name) {
 		MessageDialog msg (string_compose (_("\
 You do not have any audio devices capable of\n\
 simultaneous playback and recording.\n\n\
@@ -792,92 +462,7 @@ or recording but not both, start JACK before running\n\
 		msg.run ();
 		exit (1);
 	}
-
-
-	return devs;
 }
-#else
-
-#if !defined(__FreeBSD__)
-vector<string>
-EngineControl::enumerate_alsa_devices ()
-{
-	vector<string> devs;
-
-	snd_ctl_t *handle;
-	snd_ctl_card_info_t *info;
-	snd_pcm_info_t *pcminfo;
-	snd_ctl_card_info_alloca(&info);
-	snd_pcm_info_alloca(&pcminfo);
-	string devname;
-	int cardnum = -1;
-	int device = -1;
-
-	backend_devs.clear ();
-
-	while (snd_card_next (&cardnum) >= 0 && cardnum >= 0) {
-
-		devname = "hw:";
-		devname += to_string (cardnum, std::dec);
-
-		if (snd_ctl_open (&handle, devname.c_str(), 0) >= 0 && snd_ctl_card_info (handle, info) >= 0) {
-
-			while (snd_ctl_pcm_next_device (handle, &device) >= 0 && device >= 0) {
-
-				snd_pcm_info_set_device (pcminfo, device);
-				snd_pcm_info_set_subdevice (pcminfo, 0);
-				snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_PLAYBACK);
-
-				if (snd_ctl_pcm_info (handle, pcminfo) >= 0) {
-					devs.push_back (snd_pcm_info_get_name (pcminfo));
-					devname += ',';
-					devname += to_string (device, std::dec);
-					backend_devs.push_back (devname);
-				}
-			}
-
-			snd_ctl_close(handle);
-		}
-	}
-
-	return devs;
-}
-#endif
-
-vector<string>
-EngineControl::enumerate_ffado_devices ()
-{
-	vector<string> devs;
-	backend_devs.clear ();
-	return devs;
-}
-
-vector<string>
-EngineControl::enumerate_freebob_devices ()
-{
-	vector<string> devs;
-	return devs;
-}
-
-vector<string>
-EngineControl::enumerate_oss_devices ()
-{
-	vector<string> devs;
-	return devs;
-}
-vector<string>
-EngineControl::enumerate_dummy_devices ()
-{
-	vector<string> devs;
-	return devs;
-}
-vector<string>
-EngineControl::enumerate_netjack_devices ()
-{
-	vector<string> devs;
-	return devs;
-}
-#endif
 
 void
 EngineControl::driver_changed ()
@@ -890,7 +475,8 @@ EngineControl::driver_changed ()
 
 	vector<string>& strings = devices[driver];
 
-	if (strings.empty() && driver != "FreeBoB" && driver != "FFADO" && driver != "Dummy") {
+	if (strings.empty()) {
+		error << string_compose (_("No devices found for driver \"%1\""), driver) << endmsg;
 		return;
 	}
 
@@ -904,13 +490,23 @@ EngineControl::driver_changed ()
 	set_popdown_strings (input_device_combo, strings);
 	set_popdown_strings (output_device_combo, strings);
 
-	if (!strings.empty()) {
-		interface_combo.set_active_text (strings.front());
-		input_device_combo.set_active_text (strings.front());
-		output_device_combo.set_active_text (strings.front());
-	}
+	interface_combo.set_active_text (strings.front());
+	input_device_combo.set_active_text (strings.front());
+	output_device_combo.set_active_text (strings.front());
 
-	if (driver == "ALSA") {
+	vector<string> dither_modes;
+	ARDOUR::get_jack_dither_mode_strings (driver, dither_modes);
+	set_popdown_strings (dither_mode_combo, dither_modes);
+	dither_mode_combo.set_active_text (ARDOUR::get_jack_default_dither_mode (driver));
+
+	vector<string> midi_systems;
+	ARDOUR::get_jack_midi_system_names (driver, midi_systems);
+	set_popdown_strings (midi_driver_combo, midi_systems);
+	string default_midi_system;
+	ARDOUR::get_jack_default_midi_system_name (driver, default_midi_system);
+	midi_driver_combo.set_active_text (default_midi_system);
+
+	if (driver == ARDOUR::alsa_driver_name) {
 		soft_mode_button.set_sensitive (true);
 		force16bit_button.set_sensitive (true);
 		hw_monitor_button.set_sensitive (true);
@@ -941,18 +537,14 @@ EngineControl::get_rate ()
 void
 EngineControl::redisplay_latency ()
 {
-	uint32_t rate = get_rate();
 #if defined(__APPLE__) || defined(__FreeBSD__)
 	float periods = 2;
 #else
 	float periods = periods_adjustment.get_value();
 #endif
-	float period_size = atof (period_size_combo.get_active_text());
-
-	char buf[32];
-	snprintf (buf, sizeof(buf), "%.1fmsec", (periods * period_size) / (rate/1000.0));
-
-	latency_label.set_text (buf);
+	string latency = ARDOUR::get_jack_latency_string (sample_rate_combo.get_active_text (),
+				periods, period_size_combo.get_active_text ());
+	latency_label.set_text (latency);
 	latency_label.set_alignment (0, 0.5);
 }
 
@@ -976,125 +568,32 @@ EngineControl::audio_mode_changed ()
 	}
 }
 
-static bool jack_server_filter(const string& str, void */*arg*/)
-{
-   return str == "jackd" || str == "jackdmp";
-}
-
 void
 EngineControl::find_jack_servers (vector<string>& strings)
 {
+	vector<std::string> server_paths;
+
+	ARDOUR::get_jack_server_paths (server_paths);
+
 #ifdef __APPLE__
-	/* this magic lets us finds the path to the OSX bundle, and then
-	   we infer JACK's location from there
-	*/
-
-	char execpath[MAXPATHLEN+1];
-	uint32_t pathsz = sizeof (execpath);
-
-	_NSGetExecutablePath (execpath, &pathsz);
-
-	string path (Glib::path_get_dirname (execpath));
-	path += "/jackd";
-
-	if (Glib::file_test (path, FILE_TEST_EXISTS)) {
-		strings.push_back (path);
-	}
-
 	if (getenv ("ARDOUR_WITH_JACK")) {
 		/* no other options - only use the JACK we supply */
-		if (strings.empty()) {
+		if (server_paths.empty()) {
 			fatal << string_compose (_("JACK appears to be missing from the %1 bundle"), PROGRAM_NAME) << endmsg;
 			/*NOTREACHED*/
 		}
 		return;
 	}
-#else
-	string path;
-#endif
 
-	PathScanner scanner;
-	vector<string *> *jack_servers;
-	std::map<string,int> un;
-	char *p;
-	bool need_minimal_path = false;
-
-	p = getenv ("PATH");
-
-	if (p && *p) {
-		path = p;
-	} else {
-		need_minimal_path = true;
-	}
-
-#ifdef __APPLE__
-	// many mac users don't have PATH set up to include
-	// likely installed locations of JACK
-	need_minimal_path = true;
-#endif
-
-	if (need_minimal_path) {
-		if (path.empty()) {
-			path = "/usr/bin:/bin:/usr/local/bin:/opt/local/bin";
-		} else {
-			path += ":/usr/local/bin:/opt/local/bin";
-		}
-	}
-
-#ifdef __APPLE__
 	// push it back into the environment so that auto-started JACK can find it.
 	// XXX why can't we just expect OS X users to have PATH set correctly? we can't ...
-	setenv ("PATH", path.c_str(), 1);
+	ARDOUR::set_path_env_for_jack_autostart (server_paths);
 #endif
 
-	jack_servers = scanner (path, jack_server_filter, 0, false, true);
-	if (!jack_servers) {
-		return;
+	for (vector<std::string>::const_iterator i = server_paths.begin();
+			i != server_paths.end(); ++i) {
+		strings.push_back(*i);
 	}
-
-	vector<string *>::iterator iter;
-
-	for (iter = jack_servers->begin(); iter != jack_servers->end(); iter++) {
-		string p = **iter;
-
-		if (un[p]++ == 0) {
-			strings.push_back(p);
-		}
-	}
-}
-
-
-string
-EngineControl::get_device_name (const string& driver, const string& human_readable)
-{
-	vector<string>::iterator n;
-	vector<string>::iterator i;
-
-	if (human_readable.empty()) {
-		/* this can happen if the user's .ardourrc file has a device name from
-		   another computer system in it
-		*/
-		MessageDialog msg (_("You need to choose an audio device first."));
-                msg.set_position (WIN_POS_MOUSE);
-		msg.run ();
-		return string();
-	}
-
-	if (backend_devs.empty()) {
-		return human_readable;
-	}
-
-	for (i = devices[driver].begin(), n = backend_devs.begin(); i != devices[driver].end(); ++i, ++n) {
-		if (human_readable == (*i)) {
-			return (*n);
-		}
-	}
-
-	if (i == devices[driver].end()) {
-		warning << string_compose (_("Audio device \"%1\" not known on this computer."), human_readable) << endmsg;
-	}
-
-	return string();
 }
 
 XMLNode&

@@ -98,22 +98,10 @@ class EngineControl : public Gtk::VBox {
         static bool engine_running ();
 
 	void driver_changed ();
-	void build_command_line (std::vector<std::string>&);
+	bool build_command_line (std::string&);
 
 	std::map<std::string,std::vector<std::string> > devices;
-	std::vector<std::string> backend_devs;
 	void enumerate_devices (const std::string& driver);
-
-#ifdef __APPLE__
-	std::vector<std::string> enumerate_coreaudio_devices ();
-#else
-	std::vector<std::string> enumerate_alsa_devices ();
-	std::vector<std::string> enumerate_oss_devices ();
-	std::vector<std::string> enumerate_netjack_devices ();
-	std::vector<std::string> enumerate_freebob_devices ();
-	std::vector<std::string> enumerate_ffado_devices ();
-	std::vector<std::string> enumerate_dummy_devices ();
-#endif
 
 	void redisplay_latency ();
 	uint32_t get_rate();
