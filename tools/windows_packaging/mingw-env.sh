@@ -49,4 +49,4 @@ then
 fi
 
 # put this somewhere better...
-VIRT_IMAGE_PATH=$HOME/virt-images/winxp.raw
+VIRT_IMAGE_PATH=$HOME/Data/virt-images/winxp.raw
