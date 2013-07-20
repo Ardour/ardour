@@ -126,7 +126,7 @@ TranscodeFfmpeg::probe ()
 	 * SystemExec::Terminated is emitted and ffcmd set to NULL */
 	int timeout = 300; // 1.5 sec
 	while (ffcmd && --timeout > 0) {
-		usleep(5000);
+		Glib::usleep(5000);
 	}
 	if (timeout == 0 || ffoutput.empty()) {
 		return false;
@@ -507,7 +507,11 @@ TranscodeFfmpeg::cancel ()
 {
 	if (!ffcmd || !ffcmd->is_running()) { return;}
 	ffcmd->write_to_stdin("q");
+#ifdef WIN32
+	Sleep(1000);
+#else
 	sleep (1);
+#endif
 	if (ffcmd) {
 	  ffcmd->terminate();
 	}
