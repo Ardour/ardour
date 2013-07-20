@@ -47,10 +47,8 @@ i18n_children = [
 ]
 
 if sys.platform == 'linux2':
-    children += [ 'tools/sanity_check' ]
     lxvst_default = True
 elif sys.platform == 'darwin':
-    children += [ 'libs/appleutility' ]
     lxvst_default = False
 else:
     lxvst_default = False
