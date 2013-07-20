@@ -34,6 +34,9 @@
     authorization.
 */
 
+#ifdef COMPILER_MSVC
+#include <ardourext/float_cast.h>
+#endif
 #include "PercussionOnsetDetector.h"
 
 using std::string;

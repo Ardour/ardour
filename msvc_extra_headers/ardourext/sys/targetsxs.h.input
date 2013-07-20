@@ -57,8 +57,8 @@ __declspec(selectany) int _forceAtlDllManifestRTM;
    implementation for commonly used integer types. */
 #include <stdint.h>
 
-#if (BUILDING_ARDOUR)
 #if defined(_MSC_VER) && !defined(__MINGW__) && !defined(__MINGW32__)
+#if (INCLUDE_ARDOUR_MISCELLANEOUS)
 #include <ardourext/misc.h>
 #endif
 #endif
