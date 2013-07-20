@@ -46,13 +46,6 @@ i18n_children = [
         'libs/gtkmm2ext',
 ]
 
-if sys.platform == 'linux2':
-    lxvst_default = True
-elif sys.platform == 'darwin':
-    lxvst_default = False
-else:
-    lxvst_default = False
-
 # Version stuff
 
 def fetch_gcc_version (CC):
