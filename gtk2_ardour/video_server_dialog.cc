@@ -29,6 +29,10 @@
 #include "ardour/template_utils.h"
 #include "ardour/session.h"
 
+#ifdef interface
+#undef interface
+#endif
+
 #include "video_server_dialog.h"
 #include "utils_videotl.h"
 #include "i18n.h"
