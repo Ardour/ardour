@@ -106,7 +106,7 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 	// Meter audio in to the rest of the peaks
 	for (uint32_t i = 0; i < n_audio; ++i, ++n) {
 		_peak_signal[n] = compute_peak (bufs.get_audio(i).data(), nframes, _peak_signal[n]);
-		if (_meter_type & (MeterRMS | MeterK20 | MeterK14)) {
+		if (_meter_type & (MeterKrms | MeterK20 | MeterK14)) {
 			_kmeter[i]->process(bufs.get_audio(i).data(), nframes);
 		}
 		if (_meter_type & (MeterIEC1DIN | MeterIEC1NOR)) {
@@ -323,7 +323,7 @@ PeakMeter::meter ()
 float
 PeakMeter::meter_level(uint32_t n, MeterType type) {
 	switch (type) {
-		case MeterRMS:
+		case MeterKrms:
 		case MeterK20:
 		case MeterK14:
 			{
@@ -385,7 +385,7 @@ PeakMeter::set_type(MeterType t)
 
 	_meter_type = t;
 
-	if (t & (MeterRMS | MeterK20 | MeterK14)) {
+	if (t & (MeterKrms | MeterK20 | MeterK14)) {
 		const size_t n_audio = current_meters.n_audio();
 		for (size_t n = 0; n < n_audio; ++n) {
 			_kmeter[n]->reset();

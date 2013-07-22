@@ -2134,7 +2134,7 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 	items.push_back (SeparatorElem());
 
 	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterPeak), MeterPeak);
-	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterRMS),  MeterRMS);
+	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterKrms),  MeterKrms);
 	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterIEC1DIN), MeterIEC1DIN);
 	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterIEC1NOR), MeterIEC1NOR);
 	add_level_meter_item_type (items, tgroup, ArdourMeter::meter_type_string(MeterIEC2BBC), MeterIEC2BBC);
