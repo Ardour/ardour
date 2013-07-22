@@ -85,7 +85,7 @@ ArdourMeter::meter_type_string (ARDOUR::MeterType mt)
 			return _("IEC1/DIN");
 			break;
 		case MeterIEC1NOR:
-			return _("IEC1/NOR");
+			return _("IEC1/Nordic");
 			break;
 		case MeterIEC2BBC:
 			return _("IEC2/BBC");
@@ -773,7 +773,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 		}
 		Gdk::Color c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
 		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-		cairo_move_to (cr, 2, height - th - 1.5);
+		cairo_move_to (cr, 2, height - th - 0.5);
 		pango_cairo_show_layout (cr, layout->gobj());
 	}
 
