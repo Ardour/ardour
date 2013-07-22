@@ -37,6 +37,10 @@
 #include "utils_videotl.h"
 #include "i18n.h"
 
+#ifdef SearchPath
+#undef SearchPath
+#endif
+
 using namespace Gtk;
 using namespace std;
 using namespace PBD;
