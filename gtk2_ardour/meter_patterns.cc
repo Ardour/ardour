@@ -78,7 +78,7 @@ ArdourMeter::meter_type_string (ARDOUR::MeterType mt)
 		case MeterPeak:
 			return _("Peak");
 			break;
-		case MeterRMS:
+		case MeterKrms:
 			return _("RMS + Peak");
 			break;
 		case MeterIEC1DIN:
@@ -116,7 +116,7 @@ static inline float mtr_col_and_fract(
 
 	switch (mt) {
 		default:
-		case MeterRMS:
+		case MeterKrms:
 		case MeterPeak:
 			fraction = log_meter (val);
 			if (val >= 0 || val == -9) {
@@ -568,7 +568,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					break;
 				default:
 				case MeterPeak:
-				case MeterRMS:
+				case MeterKrms:
 					points.insert (std::pair<int,string>(-50.0f, "-50"));
 					points.insert (std::pair<int,string>(-40.0f, "-40"));
 					points.insert (std::pair<int,string>(-30.0f, "-30"));
@@ -745,7 +745,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 						break;
 					default:
 					case MeterPeak:
-					case MeterRMS:
+					case MeterKrms:
 						layout->set_text("dBFS");
 						break;
 					case MeterIEC2EBU:

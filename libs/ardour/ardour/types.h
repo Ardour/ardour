@@ -181,7 +181,7 @@ namespace ARDOUR {
 		MeterMaxSignal = 0x001,
 		MeterMaxPeak   = 0x002,
 		MeterPeak      = 0x004,
-		MeterRMS       = 0x008,
+		MeterKrms      = 0x008,
 		MeterK20       = 0x010,
 		MeterK14       = 0x020,
 		MeterIEC1DIN   = 0x040,
