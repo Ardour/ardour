@@ -44,7 +44,7 @@
 #define isnan(val) (bool)_isnan((double)val)
 #else
 using std::isnan;
-using std:isinf;
+using std::isinf;
 #endif
 
 #include "SpectralCentroid.h"

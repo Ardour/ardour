@@ -94,7 +94,7 @@ VideoMonitor::query_full_state (bool wait)
 	process->write_to_stdin("get osdcfg\n");
 	int timeout = 40;
 	if (wait && knownstate !=127 && --timeout) {
-		usleep(50000);
+		Glib::usleep(50000);
 		sched_yield();
 	}
 }
@@ -113,7 +113,7 @@ VideoMonitor::quit ()
 	 */
 	int timeout = 40;
 	while (is_started() && --timeout) {
-		usleep(50000);
+		Glib::usleep(50000);
 		sched_yield();
 	}
 	if (timeout <= 0) {

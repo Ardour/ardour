@@ -46,15 +46,6 @@ i18n_children = [
         'libs/gtkmm2ext',
 ]
 
-if sys.platform == 'linux2':
-    children += [ 'tools/sanity_check' ]
-    lxvst_default = True
-elif sys.platform == 'darwin':
-    children += [ 'libs/appleutility' ]
-    lxvst_default = False
-else:
-    lxvst_default = False
-
 # Version stuff
 
 def fetch_gcc_version (CC):
@@ -253,7 +244,7 @@ def set_compiler_flags (conf,opt):
         print("However, this is tricky and not recommended for beginners.")
         sys.exit (-1)
 
-    if opt.lxvst:
+    if conf.env['LXVST_SUPPORT'] == True:
         if conf.env['build_target'] == 'x86_64':
             conf.env.append_value('CXXFLAGS', "-DLXVST_64BIT")
         else:
@@ -425,7 +416,7 @@ def options(opt):
                     help='Compile with support for LV2 (if Lilv+Suil is available)')
     opt.add_option('--no-lv2', action='store_false', dest='lv2',
                     help='Do not compile with support for LV2')
-    opt.add_option('--lxvst', action='store_true', default=False, dest='lxvst',
+    opt.add_option('--lxvst', action='store_true', default=True, dest='lxvst',
                     help='Compile with support for linuxVST plugins')
     opt.add_option('--nls', action='store_true', default=True, dest='nls',
                     help='Enable i18n (native language support) (default)')
@@ -618,6 +609,10 @@ def configure(conf):
 
     if Options.options.dist_target == 'mingw':
         Options.options.fpu_optimization = False
+        conf.env.append_value('CFLAGS', '-DPLATFORM_WINDOWS')
+        conf.env.append_value('CFLAGS', '-DCOMPILER_MINGW')
+        conf.env.append_value('CXXFLAGS', '-DPLATFORM_WINDOWS')
+        conf.env.append_value('CXXFLAGS', '-DCOMPILER_MINGW')
         conf.env.append_value('LIB', 'pthreadGC2')
         # needed for at least libsmf
         conf.check_cc(function_name='htonl', header_name='winsock2.h', lib='ws2_32')
@@ -670,8 +665,13 @@ def configure(conf):
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.wine_include)
         autowaf.check_header(conf, 'cxx', 'windows.h', mandatory = True)
     if opts.lxvst:
-        conf.define('LXVST_SUPPORT', 1)
-        conf.env['LXVST_SUPPORT'] = True
+        if sys.platform == 'darwin':
+            conf.env['LXVST_SUPPORT'] = False
+        elif Options.options.dist_target == 'mingw':
+            conf.env['LXVST_SUPPORT'] = False
+	else:
+	    conf.define('LXVST_SUPPORT', 1)
+	    conf.env['LXVST_SUPPORT'] = True
     if bool(conf.env['JACK_SESSION']):
         conf.define('HAVE_JACK_SESSION', 1)
     conf.define('WINDOWS_KEY', opts.windows_key)

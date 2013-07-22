@@ -23,7 +23,7 @@
 #include <cerrno>
 #include <cstdlib>
 
-#include <boost/regex.h>
+#include <regex.h>
 
 #include <glibmm/miscutils.h>
 

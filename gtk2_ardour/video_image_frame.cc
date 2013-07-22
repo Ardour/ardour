@@ -197,7 +197,7 @@ http_get_thread (void *arg) {
 	char *res = NULL;
 	do {
 		res=curl_http_get(url, &status);
-		if (status == 503) usleep(5000); // try-again
+		if (status == 503) Glib::usleep(5000); // try-again
 	} while (status == 503 && --timeout > 0);
 
 	if (status != 200 || !res) {
@@ -246,7 +246,7 @@ VideoImageFrame::http_download_done (char *data){
 
 	exposeimg();
 	/* don't request frames too quickly, wait after user has zoomed */
-	usleep(40000);
+	Glib::usleep(40000);
 
 	if (queued_request) {
 		http_get_again(want_video_frame_number);
