@@ -60,6 +60,7 @@ jackserver-0.dll
 libart_lgpl_2-2.dll
 libatk-1.0-0.dll
 libatkmm-1.6-1.dll
+libbz2-1.dll
 libcairo-2.dll
 libcairo-gobject-2.dll
 libcairomm-1.0-1.dll
@@ -90,6 +91,7 @@ libgobject-2.0-0.dll
 libgthread-2.0-0.dll
 libgtkmm-2.4-1.dll
 libgtk-win32-2.0-0.dll
+libharfbuzz-0.dll
 libiconv-2.dll
 iconv.dll
 libFLAC-8.dll
@@ -99,6 +101,7 @@ libvorbisenc-2.dll
 libffi-6.dll
 libidn-11.dll
 libintl-8.dll
+liblo-7.dll
 libpango-1.0-0.dll
 libpangocairo-1.0-0.dll
 libpangoft2-1.0-0.dll

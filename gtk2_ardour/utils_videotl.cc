@@ -253,6 +253,7 @@ video_query_info (
 			, filepath.c_str());
 	char *res = curl_http_get(url, NULL);
 	int pid=0;
+#ifndef COMPILER_MINGW
 	if (res) {
 		char *pch, *pst;
 		int version;
@@ -285,6 +286,7 @@ video_query_info (
 		}
 	  free(res);
 	}
+#endif
 	if (pid!=5) {
 		return false;
 	}
