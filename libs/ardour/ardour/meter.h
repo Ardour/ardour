@@ -23,7 +23,11 @@
 #include "ardour/types.h"
 #include "ardour/processor.h"
 #include "pbd/fastlog.h"
-#include "kmeterdsp.h"
+
+#include "ardour/kmeterdsp.h"
+#include "ardour/iec1ppmdsp.h"
+#include "ardour/iec2ppmdsp.h"
+#include "ardour/vumeterdsp.h"
 
 namespace ARDOUR {
 
@@ -104,7 +108,11 @@ private:
 	std::vector<float> _visible_peak_power;
 	std::vector<float> _max_peak_signal;
 	std::vector<float> _max_peak_power;
+
 	std::vector<Kmeterdsp *> _kmeter;
+	std::vector<Iec1ppmdsp *> _iec1meter;
+	std::vector<Iec2ppmdsp *> _iec2meter;
+	std::vector<Vumeterdsp *> _vumeter;
 
 	MeterType _meter_type;
 };
