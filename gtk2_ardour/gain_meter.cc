@@ -1019,19 +1019,22 @@ GainMeter::get_gm_width ()
 gint
 GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 {
-	return meter_expose_metrics(ev, _types, &meter_metric_area);
+	assert(_route);
+	return meter_expose_metrics(ev, _route->meter_type(), _types, &meter_metric_area);
 }
 
 gint
 GainMeter::meter_ticks1_expose (GdkEventExpose *ev)
 {
-	return meter_expose_ticks(ev, _types, &meter_ticks1_area);
+	assert(_route);
+	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks1_area);
 }
 
 gint
 GainMeter::meter_ticks2_expose (GdkEventExpose *ev)
 {
-	return meter_expose_ticks(ev, _types, &meter_ticks2_area);
+	assert(_route);
+	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks2_area);
 }
 
 boost::shared_ptr<PBD::Controllable>
@@ -1113,4 +1116,5 @@ void
 GainMeter::meter_type_changed (MeterType t)
 {
 	_route->set_meter_type(t);
+	RedrawMetrics();
 }

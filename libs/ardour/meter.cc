@@ -106,13 +106,13 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 	// Meter audio in to the rest of the peaks
 	for (uint32_t i = 0; i < n_audio; ++i, ++n) {
 		_peak_signal[n] = compute_peak (bufs.get_audio(i).data(), nframes, _peak_signal[n]);
-		if (_meter_type & MeterKrms) {
+		if (_meter_type & (MeterRMS | MeterK20 | MeterK14)) {
 			_kmeter[i]->process(bufs.get_audio(i).data(), nframes);
 		}
-		if (_meter_type & MeterIEC1) {
+		if (_meter_type & (MeterIEC1DIN | MeterIEC1NOR)) {
 			_iec1meter[i]->process(bufs.get_audio(i).data(), nframes);
 		}
-		if (_meter_type & MeterIEC2) {
+		if (_meter_type & (MeterIEC2BBC | MeterIEC2EBU)) {
 			_iec2meter[i]->process(bufs.get_audio(i).data(), nframes);
 		}
 		if (_meter_type & MeterVU) {
@@ -323,7 +323,9 @@ PeakMeter::meter ()
 float
 PeakMeter::meter_level(uint32_t n, MeterType type) {
 	switch (type) {
-		case MeterKrms:
+		case MeterRMS:
+		case MeterK20:
+		case MeterK14:
 			{
 				const uint32_t n_midi = current_meters.n_midi();
 				if ((n - n_midi) < _kmeter.size() && (n - n_midi) >= 0) {
@@ -331,7 +333,8 @@ PeakMeter::meter_level(uint32_t n, MeterType type) {
 				}
 			}
 			break;
-		case MeterIEC1:
+		case MeterIEC1DIN:
+		case MeterIEC1NOR:
 			{
 				const uint32_t n_midi = current_meters.n_midi();
 				if ((n - n_midi) < _iec1meter.size() && (n - n_midi) >= 0) {
@@ -339,7 +342,8 @@ PeakMeter::meter_level(uint32_t n, MeterType type) {
 				}
 			}
 			break;
-		case MeterIEC2:
+		case MeterIEC2BBC:
+		case MeterIEC2EBU:
 			{
 				const uint32_t n_midi = current_meters.n_midi();
 				if ((n - n_midi) < _iec2meter.size() && (n - n_midi) >= 0) {
@@ -381,19 +385,19 @@ PeakMeter::set_type(MeterType t)
 
 	_meter_type = t;
 
-	if (t & MeterKrms) {
+	if (t & (MeterRMS | MeterK20 | MeterK14)) {
 		const size_t n_audio = current_meters.n_audio();
 		for (size_t n = 0; n < n_audio; ++n) {
 			_kmeter[n]->reset();
 		}
 	}
-	if (t & MeterIEC1) {
+	if (t & (MeterIEC1DIN | MeterIEC1NOR)) {
 		const size_t n_audio = current_meters.n_audio();
 		for (size_t n = 0; n < n_audio; ++n) {
 			_iec1meter[n]->reset();
 		}
 	}
-	if (t & MeterIEC2) {
+	if (t & (MeterIEC2BBC | MeterIEC2EBU)) {
 		const size_t n_audio = current_meters.n_audio();
 		for (size_t n = 0; n < n_audio; ++n) {
 			_iec2meter[n]->reset();
