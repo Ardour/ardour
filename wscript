@@ -618,6 +618,10 @@ def configure(conf):
 
     if Options.options.dist_target == 'mingw':
         Options.options.fpu_optimization = False
+        conf.env.append_value('CFLAGS', '-DPLATFORM_WINDOWS')
+        conf.env.append_value('CFLAGS', '-DCOMPILER_MINGW')
+        conf.env.append_value('CXXFLAGS', '-DPLATFORM_WINDOWS')
+        conf.env.append_value('CXXFLAGS', '-DCOMPILER_MINGW')
         conf.env.append_value('LIB', 'pthreadGC2')
         # needed for at least libsmf
         conf.check_cc(function_name='htonl', header_name='winsock2.h', lib='ws2_32')
