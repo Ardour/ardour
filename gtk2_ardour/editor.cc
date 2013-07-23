@@ -698,7 +698,7 @@ Editor::Editor ()
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 	signal_delete_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::exit_on_main_window_close));
 
-	Gtkmm2ext::Keyboard::the_keyboard().ShiftReleased.connect (sigc::mem_fun (*this, &Editor::shift_key_released));
+	Gtkmm2ext::Keyboard::the_keyboard().ZoomVerticalModifierReleased.connect (sigc::mem_fun (*this, &Editor::zoom_vertical_modifier_released));
 	
 	/* allow external control surfaces/protocols to do various things */
 
@@ -5510,7 +5510,7 @@ Editor::popup_control_point_context_menu (ArdourCanvas::Item* item, GdkEvent* ev
 }
 
 void
-Editor::shift_key_released ()
+Editor::zoom_vertical_modifier_released()
 {
 	_stepping_axis_view = 0;
 }
