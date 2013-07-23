@@ -108,7 +108,6 @@ ArdourMeter::meter_type_string (ARDOUR::MeterType mt)
 	}
 }
 
-
 static inline float mtr_col_and_fract(
 		cairo_t* cr, Gdk::Color const * const c, const uint32_t peakcolor, const MeterType mt, const float val)
 {
@@ -198,7 +197,6 @@ static inline float mtr_col_and_fract(
 }
 
 
-
 static cairo_pattern_t*
 meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> types)
 {
@@ -247,38 +245,39 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 		}
 
-		std::map<int,float> points;
+		// tick-maker position in dBFS, line-thickness
+		std::map<float,float> points;
 
 		switch (*i) {
 		case DataType::AUDIO:
 
 			switch (type) {
 				case MeterK14:
-					points.insert (std::pair<int,float>(-54.0f, 1.0));
-					points.insert (std::pair<int,float>(-44.0f, 1.0));
-					points.insert (std::pair<int,float>(-34.0f, 1.0));
-					points.insert (std::pair<int,float>(-24.0f, 1.0));
-					points.insert (std::pair<int,float>(-20.0f, 1.0));
-					points.insert (std::pair<int,float>(-17.0f, 1.0));
-					points.insert (std::pair<int,float>(-14.0f, 1.0));
-					points.insert (std::pair<int,float>(-11.0f, 1.0));
-					points.insert (std::pair<int,float>( -8.0f, 1.0));
-					points.insert (std::pair<int,float>( -4.0f, 1.0));
-					points.insert (std::pair<int,float>(  0.0f, 1.0));
+					points.insert (std::pair<float,float>(-54.0f, 1.0));
+					points.insert (std::pair<float,float>(-44.0f, 1.0));
+					points.insert (std::pair<float,float>(-34.0f, 1.0));
+					points.insert (std::pair<float,float>(-24.0f, 1.0));
+					points.insert (std::pair<float,float>(-20.0f, 1.0));
+					points.insert (std::pair<float,float>(-17.0f, 1.0));
+					points.insert (std::pair<float,float>(-14.0f, 1.0));
+					points.insert (std::pair<float,float>(-11.0f, 1.0));
+					points.insert (std::pair<float,float>( -8.0f, 1.0));
+					points.insert (std::pair<float,float>( -4.0f, 1.0));
+					points.insert (std::pair<float,float>(  0.0f, 1.0));
 					break;
 				case MeterK20:
-					points.insert (std::pair<int,float>(-60.0f, 1.0));
-					points.insert (std::pair<int,float>(-50.0f, 1.0));
-					points.insert (std::pair<int,float>(-40.0f, 1.0));
-					points.insert (std::pair<int,float>(-30.0f, 1.0));
-					points.insert (std::pair<int,float>(-26.0f, 1.0));
-					points.insert (std::pair<int,float>(-23.0f, 1.0));
-					points.insert (std::pair<int,float>(-20.0f, 1.0));
-					points.insert (std::pair<int,float>(-17.0f, 1.0));
-					points.insert (std::pair<int,float>(-14.0f, 1.0));
-					points.insert (std::pair<int,float>(-10.0f, 1.0));
-					points.insert (std::pair<int,float>( -5.0f, 1.0));
-					points.insert (std::pair<int,float>(  0.0f, 1.0));
+					points.insert (std::pair<float,float>(-60.0f, 1.0));
+					points.insert (std::pair<float,float>(-50.0f, 1.0));
+					points.insert (std::pair<float,float>(-40.0f, 1.0));
+					points.insert (std::pair<float,float>(-30.0f, 1.0));
+					points.insert (std::pair<float,float>(-26.0f, 1.0));
+					points.insert (std::pair<float,float>(-23.0f, 1.0));
+					points.insert (std::pair<float,float>(-20.0f, 1.0));
+					points.insert (std::pair<float,float>(-17.0f, 1.0));
+					points.insert (std::pair<float,float>(-14.0f, 1.0));
+					points.insert (std::pair<float,float>(-10.0f, 1.0));
+					points.insert (std::pair<float,float>( -5.0f, 1.0));
+					points.insert (std::pair<float,float>(  0.0f, 1.0));
 					break;
 				case MeterIEC2EBU:
 					points.insert (std::pair<float,float>(-30.0f, 1.0));
@@ -357,64 +356,64 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 					break;
 
 				default:
-					points.insert (std::pair<int,float>(-60, 0.5));
-					points.insert (std::pair<int,float>(-50, 1.0));
-					points.insert (std::pair<int,float>(-40, 1.0));
-					points.insert (std::pair<int,float>(-30, 1.0));
+					points.insert (std::pair<float,float>(-60, 0.5));
+					points.insert (std::pair<float,float>(-50, 1.0));
+					points.insert (std::pair<float,float>(-40, 1.0));
+					points.insert (std::pair<float,float>(-30, 1.0));
 					if (Config->get_meter_line_up_level() == MeteringLineUp24) {
-						points.insert (std::pair<int,float>(-24, 1.0));
+						points.insert (std::pair<float,float>(-24, 1.0));
 					} else {
-						points.insert (std::pair<int,float>(-25, 1.0));
+						points.insert (std::pair<float,float>(-25, 1.0));
 					}
-					points.insert (std::pair<int,float>(-20, 1.0));
+					points.insert (std::pair<float,float>(-20, 1.0));
 
-					points.insert (std::pair<int,float>(-19, 0.5));
-					points.insert (std::pair<int,float>(-18, 1.0));
-					points.insert (std::pair<int,float>(-17, 0.5));
-					points.insert (std::pair<int,float>(-16, 0.5));
-					points.insert (std::pair<int,float>(-15, 1.0));
+					points.insert (std::pair<float,float>(-19, 0.5));
+					points.insert (std::pair<float,float>(-18, 1.0));
+					points.insert (std::pair<float,float>(-17, 0.5));
+					points.insert (std::pair<float,float>(-16, 0.5));
+					points.insert (std::pair<float,float>(-15, 1.0));
 
-					points.insert (std::pair<int,float>(-14, 0.5));
-					points.insert (std::pair<int,float>(-13, 0.5));
-					points.insert (std::pair<int,float>(-12, 0.5));
-					points.insert (std::pair<int,float>(-11, 0.5));
-					points.insert (std::pair<int,float>(-10, 1.0));
+					points.insert (std::pair<float,float>(-14, 0.5));
+					points.insert (std::pair<float,float>(-13, 0.5));
+					points.insert (std::pair<float,float>(-12, 0.5));
+					points.insert (std::pair<float,float>(-11, 0.5));
+					points.insert (std::pair<float,float>(-10, 1.0));
 
-					points.insert (std::pair<int,float>( -9, 1.0));
-					points.insert (std::pair<int,float>( -8, 0.5));
-					points.insert (std::pair<int,float>( -7, 0.5));
-					points.insert (std::pair<int,float>( -6, 0.5));
-					points.insert (std::pair<int,float>( -5, 1.0));
-					points.insert (std::pair<int,float>( -4, 0.5));
-					points.insert (std::pair<int,float>( -3, 1.0));
-					points.insert (std::pair<int,float>( -2, 0.5));
-					points.insert (std::pair<int,float>( -1, 0.5));
+					points.insert (std::pair<float,float>( -9, 1.0));
+					points.insert (std::pair<float,float>( -8, 0.5));
+					points.insert (std::pair<float,float>( -7, 0.5));
+					points.insert (std::pair<float,float>( -6, 0.5));
+					points.insert (std::pair<float,float>( -5, 1.0));
+					points.insert (std::pair<float,float>( -4, 0.5));
+					points.insert (std::pair<float,float>( -3, 1.0));
+					points.insert (std::pair<float,float>( -2, 0.5));
+					points.insert (std::pair<float,float>( -1, 0.5));
 
-					points.insert (std::pair<int,float>(  0, 1.0));
-					points.insert (std::pair<int,float>(  1, 0.5));
-					points.insert (std::pair<int,float>(  2, 0.5));
-					points.insert (std::pair<int,float>(  3, 1.0));
-					points.insert (std::pair<int,float>(  4, 0.5));
-					points.insert (std::pair<int,float>(  5, 0.5));
+					points.insert (std::pair<float,float>(  0, 1.0));
+					points.insert (std::pair<float,float>(  1, 0.5));
+					points.insert (std::pair<float,float>(  2, 0.5));
+					points.insert (std::pair<float,float>(  3, 1.0));
+					points.insert (std::pair<float,float>(  4, 0.5));
+					points.insert (std::pair<float,float>(  5, 0.5));
 					break;
 			}
 			break;
 
 		case DataType::MIDI:
-			points.insert (std::pair<int,float>(  0, 1.0));
-			points.insert (std::pair<int,float>( 16, 0.5));
-			points.insert (std::pair<int,float>( 32, 0.5));
-			points.insert (std::pair<int,float>( 48, 0.5));
-			points.insert (std::pair<int,float>( 64, 1.0));
-			points.insert (std::pair<int,float>( 80, 0.5));
-			points.insert (std::pair<int,float>( 96, 0.5));
-			points.insert (std::pair<int,float>(100, 1.0));
-			points.insert (std::pair<int,float>(112, 0.5));
-			points.insert (std::pair<int,float>(127, 1.0));
+			points.insert (std::pair<float,float>(  0, 1.0));
+			points.insert (std::pair<float,float>( 16, 0.5));
+			points.insert (std::pair<float,float>( 32, 0.5));
+			points.insert (std::pair<float,float>( 48, 0.5));
+			points.insert (std::pair<float,float>( 64, 1.0));
+			points.insert (std::pair<float,float>( 80, 0.5));
+			points.insert (std::pair<float,float>( 96, 0.5));
+			points.insert (std::pair<float,float>(100, 1.0));
+			points.insert (std::pair<float,float>(112, 0.5));
+			points.insert (std::pair<float,float>(127, 1.0));
 			break;
 		}
 
-		for (std::map<int,float>::const_iterator j = points.begin(); j != points.end(); ++j) {
+		for (std::map<float,float>::const_iterator j = points.begin(); j != points.end(); ++j) {
 			cairo_set_line_width (cr, (j->second));
 
 			float fraction = 0;
@@ -533,6 +532,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 		}
 
 
+		// label-pos in dBFS, label-text
 		std::map<float,string> points;
 
 		switch (*i) {
@@ -540,53 +540,53 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 			layout->set_attributes (audio_font_attributes);
 			switch (type) {
 				case MeterK14:
-					points.insert (std::pair<int,string>(-54.0f, "-40"));
-					points.insert (std::pair<int,string>(-44.0f, "-30"));
-					points.insert (std::pair<int,string>(-34.0f, "-20"));
-					points.insert (std::pair<int,string>(-24.0f, "-10"));
-					points.insert (std::pair<int,string>(-20.0f,  "-6"));
-					points.insert (std::pair<int,string>(-17.0f,  "-3"));
-					points.insert (std::pair<int,string>(-14.0f,   "0"));
-					points.insert (std::pair<int,string>(-11.0f,  "+3"));
-					points.insert (std::pair<int,string>( -8.0f,  "+6"));
-					points.insert (std::pair<int,string>( -4.0f, "+10"));
-					points.insert (std::pair<int,string>(  0.0f, "+14"));
+					points.insert (std::pair<float,string>(-54.0f, "-40"));
+					points.insert (std::pair<float,string>(-44.0f, "-30"));
+					points.insert (std::pair<float,string>(-34.0f, "-20"));
+					points.insert (std::pair<float,string>(-24.0f, "-10"));
+					points.insert (std::pair<float,string>(-20.0f,  "-6"));
+					points.insert (std::pair<float,string>(-17.0f,  "-3"));
+					points.insert (std::pair<float,string>(-14.0f,   "0"));
+					points.insert (std::pair<float,string>(-11.0f,  "+3"));
+					points.insert (std::pair<float,string>( -8.0f,  "+6"));
+					points.insert (std::pair<float,string>( -4.0f, "+10"));
+					points.insert (std::pair<float,string>(  0.0f, "+14"));
 					break;
 				case MeterK20:
-					points.insert (std::pair<int,string>(-60.0f, "-40"));
-					points.insert (std::pair<int,string>(-50.0f, "-30"));
-					points.insert (std::pair<int,string>(-40.0f, "-20"));
-					points.insert (std::pair<int,string>(-30.0f, "-10"));
-					points.insert (std::pair<int,string>(-26.0f,  "-6"));
-					points.insert (std::pair<int,string>(-23.0f,  "-3"));
-					points.insert (std::pair<int,string>(-20.0f,   "0"));
-					points.insert (std::pair<int,string>(-17.0f,  "+3"));
-					points.insert (std::pair<int,string>(-14.0f,  "+6"));
-					points.insert (std::pair<int,string>(-10.0f, "+10"));
-					points.insert (std::pair<int,string>( -5.0f, "+15"));
-					points.insert (std::pair<int,string>(  0.0f, "+20"));
+					points.insert (std::pair<float,string>(-60.0f, "-40"));
+					points.insert (std::pair<float,string>(-50.0f, "-30"));
+					points.insert (std::pair<float,string>(-40.0f, "-20"));
+					points.insert (std::pair<float,string>(-30.0f, "-10"));
+					points.insert (std::pair<float,string>(-26.0f,  "-6"));
+					points.insert (std::pair<float,string>(-23.0f,  "-3"));
+					points.insert (std::pair<float,string>(-20.0f,   "0"));
+					points.insert (std::pair<float,string>(-17.0f,  "+3"));
+					points.insert (std::pair<float,string>(-14.0f,  "+6"));
+					points.insert (std::pair<float,string>(-10.0f, "+10"));
+					points.insert (std::pair<float,string>( -5.0f, "+15"));
+					points.insert (std::pair<float,string>(  0.0f, "+20"));
 					break;
 				default:
 				case MeterPeak:
 				case MeterKrms:
-					points.insert (std::pair<int,string>(-50.0f, "-50"));
-					points.insert (std::pair<int,string>(-40.0f, "-40"));
-					points.insert (std::pair<int,string>(-30.0f, "-30"));
-					points.insert (std::pair<int,string>(-20.0f, "-20"));
+					points.insert (std::pair<float,string>(-50.0f, "-50"));
+					points.insert (std::pair<float,string>(-40.0f, "-40"));
+					points.insert (std::pair<float,string>(-30.0f, "-30"));
+					points.insert (std::pair<float,string>(-20.0f, "-20"));
 					if (types.size() == 1) {
 						if (Config->get_meter_line_up_level() == MeteringLineUp24) {
-							points.insert (std::pair<int,string>(-24.0f, "-24"));
+							points.insert (std::pair<float,string>(-24.0f, "-24"));
 						} else {
-							points.insert (std::pair<int,string>(-25.0f, "-25"));
+							points.insert (std::pair<float,string>(-25.0f, "-25"));
 						}
-						points.insert (std::pair<int,string>(-15.0f, "-15"));
+						points.insert (std::pair<float,string>(-15.0f, "-15"));
 					}
-					points.insert (std::pair<int,string>(-18.0f, "-18"));
-					points.insert (std::pair<int,string>(-10.0f, "-10"));
-					points.insert (std::pair<int,string>( -5.0f, "-5"));
-					points.insert (std::pair<int,string>( -3.0f, "-3"));
-					points.insert (std::pair<int,string>(  0.0f, "+0"));
-					points.insert (std::pair<int,string>(  3.0f, "+3"));
+					points.insert (std::pair<float,string>(-18.0f, "-18"));
+					points.insert (std::pair<float,string>(-10.0f, "-10"));
+					points.insert (std::pair<float,string>( -5.0f, "-5"));
+					points.insert (std::pair<float,string>( -3.0f, "-3"));
+					points.insert (std::pair<float,string>(  0.0f, "+0"));
+					points.insert (std::pair<float,string>(  3.0f, "+3"));
 					break;
 
 				case MeterIEC2EBU:
@@ -600,13 +600,13 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					break;
 
 				case MeterIEC2BBC:
-					points.insert (std::pair<float,string>(-30.0f, "1"));
-					points.insert (std::pair<float,string>(-26.0f, "2"));
-					points.insert (std::pair<float,string>(-22.0f, "3"));
-					points.insert (std::pair<float,string>(-18.0f, "4"));
-					points.insert (std::pair<float,string>(-14.0f, "5"));
-					points.insert (std::pair<float,string>(-10.0f, "6"));
-					points.insert (std::pair<float,string>( -6.0f, "7"));
+					points.insert (std::pair<float,string>(-30.0f, " 1 "));
+					points.insert (std::pair<float,string>(-26.0f, " 2 "));
+					points.insert (std::pair<float,string>(-22.0f, " 3 "));
+					points.insert (std::pair<float,string>(-18.0f, " 4 "));
+					points.insert (std::pair<float,string>(-14.0f, " 5 "));
+					points.insert (std::pair<float,string>(-10.0f, " 6 "));
+					points.insert (std::pair<float,string>( -6.0f, " 7 "));
 					break;
 
 				case MeterIEC1NOR:
@@ -661,23 +661,23 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 			break;
 		case DataType::MIDI:
 			layout->set_attributes (midi_font_attributes);
-			points.insert (std::pair<int,string>(  0, "0"));
+			points.insert (std::pair<float,string>(  0, "0"));
 			if (types.size() == 1) {
-				points.insert (std::pair<int,string>( 16,  "16"));
-				points.insert (std::pair<int,string>( 32,  "32"));
-				points.insert (std::pair<int,string>( 48,  "48"));
-				points.insert (std::pair<int,string>( 64,  "64"));
-				points.insert (std::pair<int,string>( 80,  "80"));
-				points.insert (std::pair<int,string>( 96,  "96"));
-				points.insert (std::pair<int,string>(100, "100"));
-				points.insert (std::pair<int,string>(112, "112"));
+				points.insert (std::pair<float,string>( 16,  "16"));
+				points.insert (std::pair<float,string>( 32,  "32"));
+				points.insert (std::pair<float,string>( 48,  "48"));
+				points.insert (std::pair<float,string>( 64,  "64"));
+				points.insert (std::pair<float,string>( 80,  "80"));
+				points.insert (std::pair<float,string>( 96,  "96"));
+				points.insert (std::pair<float,string>(100, "100"));
+				points.insert (std::pair<float,string>(112, "112"));
 			} else {
 				/* labels that don't overlay with dB */
-				points.insert (std::pair<int,string>( 24, "24"));
-				points.insert (std::pair<int,string>( 48, "48"));
-				points.insert (std::pair<int,string>( 72, "74"));
+				points.insert (std::pair<float,string>( 24, "24"));
+				points.insert (std::pair<float,string>( 48, "48"));
+				points.insert (std::pair<float,string>( 72, "74"));
 			}
-			points.insert (std::pair<int,string>(127, "127"));
+			points.insert (std::pair<float,string>(127, "127"));
 			break;
 		}
 
@@ -685,6 +685,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 
 		for (std::map<float,string>::const_iterator j = points.begin(); j != points.end(); ++j) {
 			float fraction = 0;
+			bool align_center = background; // this is true for meterbridge meters w/ fixed background
 			switch (*i) {
 				case DataType::AUDIO:
 					fraction = mtr_col_and_fract(cr, &c, peakcolor, type, j->first);
@@ -703,6 +704,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					break;
 
 				case DataType::MIDI:
+					align_center = false; // don't bleed into legend
 					fraction = (j->first) / 127.0;
 					pos = 1 + height - (gint) rintf (height * fraction);
 					pos = min (pos, height);
@@ -725,7 +727,11 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 			p = min (p, height - th);
 			p = max (p, 0);
 
-			cairo_move_to (cr, width-3-tw, p);
+			if (align_center) {
+				cairo_move_to (cr, (width-tw)/2.0, p);
+			} else {
+				cairo_move_to (cr, width-3-tw, p);
+			}
 			pango_cairo_show_layout (cr, layout->gobj());
 		}
 	}
@@ -767,13 +773,17 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 				layout->get_pixel_size(tw, th);
 				break;
 			case DataType::MIDI:
-				layout->set_text("vel");
+				layout->set_text("mid");
 				layout->get_pixel_size(tw, th);
 				break;
 		}
 		Gdk::Color c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
 		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-		cairo_move_to (cr, 2, height - th - 0.5);
+		if (tickleft) {
+			cairo_move_to (cr, width - 2 - tw, height - th - 0.5);
+		} else {
+			cairo_move_to (cr, 2, height - th - 0.5);
+		}
 		pango_cairo_show_layout (cr, layout->gobj());
 	}
 

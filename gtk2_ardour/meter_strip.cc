@@ -57,7 +57,7 @@ using namespace ArdourMeter;
 PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
 PBD::Signal0<void> MeterStrip::MetricChanged;
 
-MeterStrip::MeterStrip (int metricmode)
+MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	: AxisView(0)
 	, RouteUI(0)
 {
@@ -67,7 +67,7 @@ MeterStrip::MeterStrip (int metricmode)
 	peakbx.set_size_request(-1, 14);
 	namebx.set_size_request(18, 52);
 
-	set_metric_mode(metricmode);
+	set_metric_mode(metricmode, mt);
 
 	meter_metric_area.set_size_request(25, 10);
 	meter_metric_area.signal_expose_event().connect (
@@ -394,13 +394,17 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 gint
 MeterStrip::meter_metrics_expose (GdkEventExpose *ev)
 {
-	// TODO meter-type - set with set_metric_mode()
-	return meter_expose_metrics(ev, /*XXX*/ MeterPeak, _types, &meter_metric_area);
+	if (_route) {
+		return meter_expose_metrics(ev, _route->meter_type(), _types, &meter_metric_area);
+	} else {
+		return meter_expose_metrics(ev, metric_type, _types, &meter_metric_area);
+	}
 }
 
 void
-MeterStrip::set_metric_mode (int metricmode)
+MeterStrip::set_metric_mode (int metricmode, ARDOUR::MeterType mt)
 {
+	metric_type = mt;
 	_types.clear ();
 	switch(metricmode) {
 		case 0:
@@ -425,9 +429,12 @@ MeterStrip::set_metric_mode (int metricmode)
 	meter_metric_area.queue_draw ();
 }
 
-void
-MeterStrip::set_pos (int pos)
+MeterType
+MeterStrip::meter_type()
 {
+	assert((!_route && _strip_type == 0) || (_route && _strip_type != 0));
+	if (!_route) return metric_type;
+	return _route->meter_type();
 }
 
 gint
@@ -619,7 +626,10 @@ MeterStrip::set_meter_type (MeterType type)
 void
 MeterStrip::meter_type_changed (MeterType type)
 {
-	_route->set_meter_type(type);
+	if (_route->meter_type() != type) {
+		_route->set_meter_type(type);
+	}
+	MetricChanged();
 }
 
 void

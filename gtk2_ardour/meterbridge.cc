@@ -101,8 +101,8 @@ Meterbridge::Meterbridge ()
 	, VisibilityTracker (*((Gtk::Window*) this))
 	, _visible (false)
 	, _show_busses (false)
-	, metrics_left (1)
-	, metrics_right (2)
+	, metrics_left (1, MeterPeak)
+	, metrics_right (2, MeterPeak)
 	, cur_max_width (-1)
 {
 	set_name ("Meter Bridge");
@@ -140,7 +140,7 @@ Meterbridge::Meterbridge ()
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Meterbridge::sync_order_keys, this, _1), gui_context());
 	MeterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Meterbridge::remove_strip, this, _1), gui_context());
-	MeterStrip::MetricChanged.connect_same_thread (*this, boost::bind(&Meterbridge::update_metrics, this));
+	MeterStrip::MetricChanged.connect (*this, invalidator (*this), boost::bind(&Meterbridge::resync_order, this), gui_context());
 
 	/* work around ScrolledWindowViewport alignment mess Part one */
 	Gtk::HBox * yspc = manage (new Gtk::HBox());
@@ -192,6 +192,10 @@ Meterbridge::Meterbridge ()
 
 Meterbridge::~Meterbridge ()
 {
+	while (_metrics.size() > 0) {
+		delete (_metrics.back());
+		_metrics.pop_back();
+	}
 }
 
 void
@@ -550,7 +554,6 @@ Meterbridge::add_strips (RouteList& routes)
 	}
 
 	resync_order();
-	update_metrics();
 }
 
 void
@@ -567,24 +570,6 @@ Meterbridge::remove_strip (MeterStrip* strip)
 			break;
 		}
 	}
-	update_metrics();
-}
-
-void
-Meterbridge::update_metrics ()
-{
-	bool have_midi = false;
-	for (list<MeterBridgeStrip>::iterator i = strips.begin(); i != strips.end(); ++i) {
-		if ( (*i).s->has_midi() && (*i).visible) {
-			have_midi = true;
-			break;
-		}
-	}
-	if (have_midi) {
-		metrics_right.set_metric_mode(2);
-	} else {
-		metrics_right.set_metric_mode(3);
-	}
 }
 
 void
@@ -597,6 +582,11 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 
 	int pos = 0;
 	int vis = 0;
+
+	unsigned int metrics = 0;
+	MeterType lmt = MeterPeak;
+	bool have_midi = false;
+	metrics_left.set_metric_mode(1, lmt);
 
 	for (list<MeterBridgeStrip>::iterator i = strips.begin(); i != strips.end(); ++i) {
 
@@ -642,8 +632,54 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 			(*i).visible = true;
 				vis++;
 		}
-		(*i).s->set_pos(vis);
+
+		MeterType nmt = (*i).s->meter_type();
+		if (nmt == MeterKrms) nmt = MeterPeak; // identical metrics
+
+		if ((*i).visible && nmt != lmt && pos == 0) {
+			lmt = nmt;
+			metrics_left.set_metric_mode(1, lmt);
+		} else if ((*i).visible && nmt != lmt) {
+
+			if (_metrics.size() <= metrics) {
+				_metrics.push_back(new MeterStrip(have_midi ? 2 : 3, lmt));
+				meterarea.pack_start (*_metrics[metrics], false, false);
+				_metrics[metrics]->set_session(_session);
+				_metrics[metrics]->show();
+			} else {
+				_metrics[metrics]->set_metric_mode(have_midi ? 2 : 3, lmt);
+			}
+			meterarea.reorder_child(*_metrics[metrics], pos++);
+			metrics++;
+
+			lmt = nmt;
+
+			if (_metrics.size() <= metrics) {
+				_metrics.push_back(new MeterStrip(1, lmt));
+				meterarea.pack_start (*_metrics[metrics], false, false);
+				_metrics[metrics]->set_session(_session);
+				_metrics[metrics]->show();
+			} else {
+				_metrics[metrics]->set_metric_mode(1, lmt);
+			}
+			meterarea.reorder_child(*_metrics[metrics], pos++);
+			metrics++;
+			have_midi = false;
+		}
+
+		if ((*i).visible && (*i).s->has_midi()) {
+			have_midi = true;
+		}
+
 		meterarea.reorder_child(*((*i).s), pos++);
+	}
+
+	metrics_right.set_metric_mode(have_midi ? 2 : 3, lmt);
+
+	while (_metrics.size() > metrics) {
+		meterarea.remove(*_metrics.back());
+		delete (_metrics.back());
+		_metrics.pop_back();
 	}
 }
 
@@ -659,21 +695,17 @@ Meterbridge::parameter_changed (std::string const & p)
 	if (p == "show-busses-on-meterbridge") {
 		_show_busses = _session->config.get_show_busses_on_meterbridge();
 		resync_order();
-		update_metrics();
 	}
 	else if (p == "show-master-on-meterbridge") {
 		_show_master = _session->config.get_show_master_on_meterbridge();
 		resync_order();
-		update_metrics();
 	}
 	else if (p == "show-midi-on-meterbridge") {
 		_show_midi = _session->config.get_show_midi_on_meterbridge();
 		resync_order();
-		update_metrics();
 	}
 	else if (p == "meter-line-up-level") {
 		meter_clear_pattern_cache();
-		update_metrics();
 	}
 	else if (p == "show-rec-on-meterbridge") {
 		scroller.queue_resize();
