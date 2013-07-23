@@ -545,7 +545,7 @@ assert_smf_event_is_identical(const smf_event_t *a, const smf_event_t *b)
 {
 	assert(a->event_number == b->event_number);
 	assert(a->delta_time_pulses == b->delta_time_pulses);
-	assert(abs(a->time_pulses - b->time_pulses) <= 2);
+	assert(abs((long)(a->time_pulses - b->time_pulses)) <= 2);
 	assert(fabs(a->time_seconds - b->time_seconds) <= 0.01);
 	assert(a->track_number == b->track_number);
 	assert(a->midi_buffer_length == b->midi_buffer_length);
