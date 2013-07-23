@@ -87,8 +87,10 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	}
 	else {
 		PBD::warning <<
-			_("The external video server 'harvid' can not be found. The tool is included with the Ardour releases from ardour.org, "
-			  "alternatively you can download it from http://x42.github.com/harvid/ or acquire it from your distribution.") << endmsg;
+			string_compose(
+			_("The external video server 'harvid' can not be found. The tool is included with the %1 releases from ardour.org, "
+			  "alternatively you can download it from http://x42.github.com/harvid/ or acquire it from your distribution."), PROGRAM_NAME)
+			<< endmsg;
 	}
 
 
@@ -129,7 +131,9 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	t->attach (*l, 0, 1, 2, 3, FILL);
 	t->attach (cachesize_spinner, 1, 2, 2, 3);
 
-	l = manage (new Label (_("Ardour relies on an external Video Server for the videotimeline.\nThe server configured in Edit -> Prefereces -> Video is not reachable.\nDo you want ardour to launch 'harvid' on this machine?"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (string_compose(
+					_("%1 relies on an external Video Server for the videotimeline.\nThe server configured in Edit -> Prefereces -> Video is not reachable.\nDo you want ardour to launch 'harvid' on this machine?"), PROGRAM_NAME)
+				, Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	l->set_max_width_chars(80);
 	l->set_line_wrap();
 	vbox->pack_start (*l, true, true, 4);
