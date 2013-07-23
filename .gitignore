@@ -132,3 +132,5 @@ tags
 /libs/taglib/taglib/wavpackfile.h
 /libs/taglib/taglib/wavpackproperties.h
 /libs/taglib/taglib/xingheader.h
+/libs/taglib/taglib/tlist.tcc
+/libs/taglib/taglib/tmap.tcc
