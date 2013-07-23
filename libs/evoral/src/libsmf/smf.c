@@ -39,7 +39,7 @@
 #include <assert.h>
 #include <math.h>
 #include <errno.h>
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 #include <winsock2.h>
 #else
 #include <arpa/inet.h>

@@ -40,7 +40,7 @@
 #include <math.h>
 #include <errno.h>
 #include <ctype.h>
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 #include <winsock2.h>
 #else
 #include <arpa/inet.h>
