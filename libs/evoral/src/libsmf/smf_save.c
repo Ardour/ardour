@@ -58,7 +58,7 @@ static void *
 smf_extend(smf_t *smf, const int length)
 {
 	int i, previous_file_buffer_length = smf->file_buffer_length;
-	char *previous_file_buffer = smf->file_buffer;
+	char *previous_file_buffer = (char*)smf->file_buffer;
 
 	/* XXX: Not terribly efficient. */
 	smf->file_buffer_length += length;
@@ -205,7 +205,7 @@ smf_event_new_textual(int type, const char *text)
 
 	/* "2 +" is for leading 0xFF 0xtype. */
 	event->midi_buffer_length = 2 + text_length + MAX_VLQ_LENGTH;
-	event->midi_buffer = malloc(event->midi_buffer_length);
+	event->midi_buffer = (uint8_t*)malloc(event->midi_buffer_length);
 	if (event->midi_buffer == NULL) {
 		g_critical("Cannot allocate MIDI buffer structure: %s", strerror(errno));
 		smf_event_delete(event);

@@ -59,7 +59,7 @@ new_tempo(smf_t *smf, size_t pulses)
 			return (previous_tempo);
 	}
 
-	tempo = malloc(sizeof(smf_tempo_t));
+	tempo = (smf_tempo_t*)malloc(sizeof(smf_tempo_t));
 	if (tempo == NULL) {
 		g_critical("Cannot allocate smf_tempo_t.");
 		return (NULL);
@@ -152,7 +152,7 @@ maybe_add_to_tempo_map(smf_event_t *event)
 		}
 
 		numerator = event->midi_buffer[3];
-		denominator = (int)pow(2, event->midi_buffer[4]);
+		denominator = (int)pow((double)2, event->midi_buffer[4]);
 		clocks_per_click = event->midi_buffer[5];
 		notes_per_note = event->midi_buffer[6];
 
@@ -259,7 +259,7 @@ smf_get_tempo_by_number(const smf_t *smf, size_t number)
 	if (number >= smf->tempo_array->len)
 		return (NULL);
 
-	return (g_ptr_array_index(smf->tempo_array, number));
+	return ((smf_tempo_t*)g_ptr_array_index(smf->tempo_array, number));
 }
 
 /**
@@ -341,7 +341,7 @@ smf_fini_tempo(smf_t *smf)
 	smf_tempo_t *tempo;
 
 	while (smf->tempo_array->len > 0) {
-		tempo = g_ptr_array_index(smf->tempo_array, smf->tempo_array->len - 1);
+		tempo = (smf_tempo_t*)g_ptr_array_index(smf->tempo_array, smf->tempo_array->len - 1);
 		assert(tempo);
 
 		memset(tempo, 0, sizeof(smf_tempo_t));

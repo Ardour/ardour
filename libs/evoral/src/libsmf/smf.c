@@ -56,7 +56,7 @@ smf_new(void)
 {
 	int cantfail;
 
-	smf_t *smf = malloc(sizeof(smf_t));
+	smf_t *smf = (smf_t*)malloc(sizeof(smf_t));
 	if (smf == NULL) {
 		g_critical("Cannot allocate smf_t structure: %s", strerror(errno));
 		return (NULL);
@@ -89,7 +89,7 @@ smf_delete(smf_t *smf)
 {
 	/* Remove all the tracks, from last to first. */
 	while (smf->tracks_array->len > 0)
-		smf_track_delete(g_ptr_array_index(smf->tracks_array, smf->tracks_array->len - 1));
+		smf_track_delete((smf_track_t*)g_ptr_array_index(smf->tracks_array, smf->tracks_array->len - 1));
 
 	smf_fini_tempo(smf);
 
@@ -109,7 +109,7 @@ smf_delete(smf_t *smf)
 smf_track_t *
 smf_track_new(void)
 {
-	smf_track_t *track = malloc(sizeof(smf_track_t));
+	smf_track_t *track = (smf_track_t*)malloc(sizeof(smf_track_t));
 	if (track == NULL) {
 		g_critical("Cannot allocate smf_track_t structure: %s", strerror(errno));
 		return (NULL);
@@ -135,7 +135,7 @@ smf_track_delete(smf_track_t *track)
 
 	/* Remove all the events, from last to first. */
 	while (track->events_array->len > 0)
-		smf_event_delete(g_ptr_array_index(track->events_array, track->events_array->len - 1));
+		smf_event_delete((smf_event_t*)g_ptr_array_index(track->events_array, track->events_array->len - 1));
 
 	if (track->smf)
 		smf_track_remove_from_smf(track);
@@ -217,7 +217,7 @@ smf_track_remove_from_smf(smf_track_t *track)
 smf_event_t *
 smf_event_new(void)
 {
-	smf_event_t *event = malloc(sizeof(smf_event_t));
+	smf_event_t *event = (smf_event_t*)malloc(sizeof(smf_event_t));
 	if (event == NULL) {
 		g_critical("Cannot allocate smf_event_t structure: %s", strerror(errno));
 		return (NULL);
@@ -250,7 +250,7 @@ smf_event_new_from_pointer(const void *midi_data, size_t len)
 		return (NULL);
 
 	event->midi_buffer_length = len;
-	event->midi_buffer = malloc(event->midi_buffer_length);
+	event->midi_buffer = (uint8_t*)malloc(event->midi_buffer_length);
 	if (event->midi_buffer == NULL) {
 		g_critical("Cannot allocate MIDI buffer structure: %s", strerror(errno));
 		smf_event_delete(event);
@@ -340,7 +340,7 @@ smf_event_new_from_bytes(int first_byte, int second_byte, int third_byte)
 	}
 
 	event->midi_buffer_length = len;
-	event->midi_buffer = malloc(event->midi_buffer_length);
+	event->midi_buffer = (uint8_t*)malloc(event->midi_buffer_length);
 	if (event->midi_buffer == NULL) {
 		g_critical("Cannot allocate MIDI buffer structure: %s", strerror(errno));
 		smf_event_delete(event);
@@ -777,7 +777,7 @@ smf_track_get_event_by_number(const smf_track_t *track, size_t event_number)
 	if (event_number > track->number_of_events)
 		return (NULL);
 
-	event = g_ptr_array_index(track->events_array, event_number - 1);
+	event = (smf_event_t*)g_ptr_array_index(track->events_array, event_number - 1);
 
 	assert(event);
 
