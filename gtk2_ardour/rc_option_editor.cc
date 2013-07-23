@@ -1925,8 +1925,8 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_line_up_level)
 		);
 
-	mlu->add (MeteringLineUp24, _("-24dBFS"));
-	mlu->add (MeteringLineUp20, _("-20dBFS (SMPTE)"));
+	mlu->add (MeteringLineUp24, _("-24dBFS (SMPTE US: 4dBu = -20dBFS)"));
+	mlu->add (MeteringLineUp20, _("-20dBFS (SMPTE RP.0155)"));
 	mlu->add (MeteringLineUp18, _("-18dBFS (EBU, BBC)"));
 	mlu->add (MeteringLineUp15, _("-15dBFS (DIN)"));
 
@@ -1942,9 +1942,9 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_vu_standard)
 		);
 
-	mvu->add (MeteringVUfrench,   _("+2dB (France)"));
-	mvu->add (MeteringVUamerican, _(" 0dB (North America, Australia)"));
-	mvu->add (MeteringVUstandard, _("-4dB (standard)"));
+	mvu->add (MeteringVUfrench,   _("0VU = -2dBu (France)"));
+	mvu->add (MeteringVUamerican, _("0VU = 0dBu (North America, Australia)"));
+	mvu->add (MeteringVUstandard, _("0VU = +4dBu (standard)"));
 
 	add_option (S_("Preferences|GUI"), mvu);
 
