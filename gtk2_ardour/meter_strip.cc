@@ -56,6 +56,7 @@ using namespace ArdourMeter;
 
 PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
 PBD::Signal0<void> MeterStrip::MetricChanged;
+PBD::Signal0<void> MeterStrip::ConfigurationChanged;
 
 MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	: AxisView(0)
@@ -366,8 +367,9 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 		_has_midi = true;
 	}
 
-	if (old_has_midi != _has_midi) MetricChanged();
 	on_theme_changed();
+	if (old_has_midi != _has_midi) MetricChanged();
+	else ConfigurationChanged();
 }
 
 void
