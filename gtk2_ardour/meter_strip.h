@@ -47,7 +47,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 {
   public:
 	MeterStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
-	MeterStrip (int);
+	MeterStrip (int, ARDOUR::MeterType);
 	~MeterStrip ();
 
 	void set_session (ARDOUR::Session* s);
@@ -63,9 +63,10 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 
 	void set_meter_type_multi (int, ARDOUR::RouteGroup*, ARDOUR::MeterType);
 
-	void set_metric_mode (int);
-	void set_pos(int);
+	void set_metric_mode (int, ARDOUR::MeterType);
 	bool has_midi() { return _has_midi; }
+	bool is_metric_display() { return _strip_type == 0; }
+	ARDOUR::MeterType meter_type();
 
   protected:
 	boost::shared_ptr<ARDOUR::Route> _route;
@@ -106,6 +107,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	ArdourButton peak_display;
 
 	std::vector<ARDOUR::DataType> _types;
+	ARDOUR::MeterType metric_type;
 
 	float max_peak;
 	bool _has_midi;
