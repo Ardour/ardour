@@ -264,7 +264,7 @@ Editor::get_nth_selected_midi_track (int nth) const
 }
 
 void
-Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode, SrcQuality quality, framepos_t& pos)
+Editor::do_import (vector<string> paths, ImportDisposition disposition, ImportMode mode, SrcQuality quality, framepos_t& pos)
 {
 	boost::shared_ptr<Track> track;
 	vector<string> to_import;
@@ -280,7 +280,7 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
 
 	bool ok = true;
 
-	if (chns == Editing::ImportMergeFiles) {
+	if (disposition == Editing::ImportMergeFiles) {
 
 		/* create 1 region from all paths, add to 1 track,
 		   ignore "track"
@@ -299,7 +299,7 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
 			ok = false;
 		} else {
 			ipw.show ();
-			ok = (import_sndfiles (paths, mode, quality, pos, 1, 1, track, false) == 0);
+			ok = (import_sndfiles (paths, disposition, mode, quality, pos, 1, 1, track, false) == 0);
 		}
 
 	} else {
@@ -334,7 +334,7 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
 
 			ipw.show ();
 
-			switch (chns) {
+			switch (disposition) {
 			case Editing::ImportDistinctFiles:
 
 				to_import.clear ();
@@ -344,7 +344,7 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
 					track = get_nth_selected_audio_track (nth++);
 				}
 
-				ok = (import_sndfiles (to_import, mode, quality, pos, 1, -1, track, replace) == 0);
+				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, 1, -1, track, replace) == 0);
 				break;
 
 			case Editing::ImportDistinctChannels:
@@ -352,7 +352,7 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
 				to_import.clear ();
 				to_import.push_back (*a);
 
-				ok = (import_sndfiles (to_import, mode, quality, pos, -1, -1, track, replace) == 0);
+				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, -1, -1, track, replace) == 0);
 				break;
 
 			case Editing::ImportSerializeFiles:
@@ -360,7 +360,7 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
 				to_import.clear ();
 				to_import.push_back (*a);
 
-				ok = (import_sndfiles (to_import, mode, quality, pos, 1, 1, track, replace) == 0);
+				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, 1, 1, track, replace) == 0);
 				break;
 
 			case Editing::ImportMergeFiles:
@@ -378,7 +378,7 @@ Editor::do_import (vector<string> paths, ImportDisposition chns, ImportMode mode
 }
 
 void
-Editor::do_embed (vector<string> paths, ImportDisposition chns, ImportMode mode, framepos_t& pos)
+Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode mode, framepos_t& pos)
 {
 	boost::shared_ptr<Track> track;
 	bool check_sample_rate = true;
@@ -388,7 +388,7 @@ Editor::do_embed (vector<string> paths, ImportDisposition chns, ImportMode mode,
 	int nth = 0;
 	bool use_timestamp = (pos == -1);
 
-	switch (chns) {
+	switch (import_as) {
 	case Editing::ImportDistinctFiles:
 		for (vector<string>::iterator a = paths.begin(); a != paths.end(); ++a) {
 
@@ -404,7 +404,7 @@ Editor::do_embed (vector<string> paths, ImportDisposition chns, ImportMode mode,
 				track = get_nth_selected_audio_track (nth++);
 			}
 
-			if (embed_sndfiles (to_embed, multi, check_sample_rate, mode, pos, 1, -1, track) < -1) {
+			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, 1, -1, track) < -1) {
 				goto out;
 			}
 		}
@@ -421,14 +421,14 @@ Editor::do_embed (vector<string> paths, ImportDisposition chns, ImportMode mode,
 			to_embed.clear ();
 			to_embed.push_back (*a);
 
-			if (embed_sndfiles (to_embed, multi, check_sample_rate, mode, pos, -1, -1, track) < -1) {
+			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, -1, -1, track) < -1) {
 				goto out;
 			}
 		}
 		break;
 
 	case Editing::ImportMergeFiles:
-		if (embed_sndfiles (paths, multi, check_sample_rate, mode, pos, 1, 1, track) < -1) {
+		if (embed_sndfiles (paths, multi, check_sample_rate, import_as, mode, pos, 1, 1, track) < -1) {
 			goto out;
 		}
 		break;
@@ -444,7 +444,7 @@ Editor::do_embed (vector<string> paths, ImportDisposition chns, ImportMode mode,
 			to_embed.clear ();
 			to_embed.push_back (*a);
 
-			if (embed_sndfiles (to_embed, multi, check_sample_rate, mode, pos, 1, 1, track) < -1) {
+			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, 1, 1, track) < -1) {
 				goto out;
 			}
 		}
@@ -460,7 +460,7 @@ Editor::do_embed (vector<string> paths, ImportDisposition chns, ImportMode mode,
 }
 
 int
-Editor::import_sndfiles (vector<string> paths, ImportMode mode, SrcQuality quality, framepos_t& pos,
+Editor::import_sndfiles (vector<string> paths, ImportDisposition disposition, ImportMode mode, SrcQuality quality, framepos_t& pos,
 			 int target_regions, int target_tracks, boost::shared_ptr<Track>& track, bool replace)
 {
 	import_status.paths = paths;
@@ -501,6 +501,7 @@ Editor::import_sndfiles (vector<string> paths, ImportMode mode, SrcQuality quali
 			import_status.paths,
 			import_status.sources,
 			import_status.pos,
+			disposition,
 			import_status.mode,
 			import_status.target_regions,
 			import_status.target_tracks,
@@ -518,7 +519,8 @@ Editor::import_sndfiles (vector<string> paths, ImportMode mode, SrcQuality quali
 
 int
 Editor::embed_sndfiles (vector<string> paths, bool multifile,
-			bool& check_sample_rate, ImportMode mode, framepos_t& pos, int target_regions, int target_tracks,
+			bool& check_sample_rate, ImportDisposition disposition, ImportMode mode, 
+			framepos_t& pos, int target_regions, int target_tracks,
 			boost::shared_ptr<Track>& track)
 {
 	boost::shared_ptr<AudioFileSource> source;
@@ -603,6 +605,7 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 		set_canvas_cursor (_cursors->wait);
 
 		for (int n = 0; n < finfo.channels; ++n) {
+
 			try {
 
 				/* check if we have this thing embedded already */
@@ -613,7 +616,7 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 
 					source = boost::dynamic_pointer_cast<AudioFileSource> (
 						SourceFactory::createExternal (DataType::AUDIO, *_session,
-									       path, n,
+									       path, n, 
 									       (mode == ImportAsTapeTrack
 										? Source::Destructive
 										: Source::Flag (0)),
@@ -638,7 +641,8 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 		goto out;
 	}
 
-	ret = add_sources (paths, sources, pos, mode, target_regions, target_tracks, track, true);
+
+	ret = add_sources (paths, sources, pos, disposition, mode, target_regions, target_tracks, track, true);
 
   out:
 	set_canvas_cursor (current_canvas_cursor);
@@ -646,7 +650,7 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 }
 
 int
-Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos, ImportMode mode,
+Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos, ImportDisposition disposition, ImportMode mode,
 		     int target_regions, int target_tracks, boost::shared_ptr<Track>& track, bool /*add_channel_suffix*/)
 {
 	vector<boost::shared_ptr<Region> > regions;
@@ -654,7 +658,7 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 	uint32_t input_chan = 0;
 	uint32_t output_chan = 0;
 	bool use_timestamp;
-
+	
 	use_timestamp = (pos == -1);
 
 	// kludge (for MIDI we're abusing "channel" for "track" here)
@@ -707,10 +711,43 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 
 			boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (*x);
 
-			if (fs) {
-				region_name = region_name_from_path (fs->path(), false, false, sources.size(), n);
-			} else{
-				region_name = (*x)->name();
+			if (sources.size() > 1 && disposition == ImportDistinctChannels) {
+
+				/* generate a per-channel region name so that things work as
+				 * intended
+				 */
+				
+				string path;
+
+				if (fs) {
+					region_name = basename_nosuffix (fs->path());
+				} else {
+					region_name = (*x)->name();
+				}
+				
+				switch (sources.size()) {
+					/* zero and one channel handled
+					   by previous if() condition
+					*/
+				case 2:
+					if (n == 0) {
+						region_name += "-L";
+					} else {
+						region_name += "-R";
+					}
+					break;
+				default:
+					region_name += (char) '-';
+					region_name += (char) ('1' + n);
+					break;
+				}
+				
+			} else {
+				if (fs) {
+					region_name = region_name_from_path (fs->path(), false, false, sources.size(), n);
+				} else{
+					region_name = (*x)->name();
+				}
 			}
 
 			PropertyList plist;

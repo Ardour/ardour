@@ -114,6 +114,18 @@ LevelMeter::update_meters ()
 				const float peak = _meter->meter_level (n, meter_type);
 				if (meter_type == MeterPeak) {
 					(*i).meter->set (log_meter (peak));
+				} else if (meter_type == MeterIEC1NOR) {
+					(*i).meter->set (meter_deflect_nordic (peak));
+				} else if (meter_type == MeterIEC1DIN) {
+					(*i).meter->set (meter_deflect_din (peak));
+				} else if (meter_type == MeterIEC2BBC || meter_type == MeterIEC2EBU) {
+					(*i).meter->set (meter_deflect_ppm (peak));
+				} else if (meter_type == MeterVU) {
+					(*i).meter->set (meter_deflect_vu (peak));
+				} else if (meter_type == MeterK14) {
+					(*i).meter->set (meter_deflect_k (peak, 14), meter_deflect_k(_meter->meter_level(n, MeterPeak), 14));
+				} else if (meter_type == MeterK20) {
+					(*i).meter->set (meter_deflect_k (peak, 20), meter_deflect_k(_meter->meter_level(n, MeterPeak), 20));
 				} else {
 					(*i).meter->set (log_meter (peak), log_meter(_meter->meter_level(n, MeterPeak)));
 				}
@@ -161,6 +173,8 @@ void
 LevelMeter::meter_type_changed (MeterType t)
 {
 	meter_type = t;
+	color_changed = true;
+	setup_meters (meter_length, regular_meter_width, thin_meter_width);
 	MeterTypeChanged(t);
 }
 
@@ -227,33 +241,6 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 			stp[2] = 115.0 * 100.0 / 128.0;
 			stp[3] = 115.0 * 112.0 / 128.0;
 		} else {
-			switch (Config->get_meter_line_up_level()) {
-				case MeteringLineUp24:
-					stp[0] = 42.0;
-					stp[1] = 77.5;
-					stp[2] = 92.5;
-					stp[3] = 100.0;
-					break;
-				case MeteringLineUp20:
-					stp[0] = 50.0;
-					stp[1] = 77.5;
-					stp[2] = 92.5;
-					stp[3] = 100.0;
-					break;
-				default:
-				case MeteringLineUp18:
-					stp[0] = 55.0;
-					stp[1] = 77.5;
-					stp[2] = 92.5;
-					stp[3] = 100.0;
-					break;
-				case MeteringLineUp15:
-					stp[0] = 62.5;
-					stp[1] = 77.5;
-					stp[2] = 92.5;
-					stp[3] = 100.0;
-					break;
-			}
 			c[0] = ARDOUR_UI::config()->canvasvar_MeterColor0.get();
 			c[1] = ARDOUR_UI::config()->canvasvar_MeterColor1.get();
 			c[2] = ARDOUR_UI::config()->canvasvar_MeterColor2.get();
@@ -264,6 +251,75 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 			c[7] = ARDOUR_UI::config()->canvasvar_MeterColor7.get();
 			c[8] = ARDOUR_UI::config()->canvasvar_MeterColor8.get();
 			c[9] = ARDOUR_UI::config()->canvasvar_MeterColor9.get();
+
+			switch (meter_type) {
+				case MeterK20:
+					stp[0] = 115.0 * meter_deflect_k(-40, 20);  //-20
+					stp[1] = 115.0 * meter_deflect_k(-20, 20);  //  0
+					stp[2] = 115.0 * meter_deflect_k(-18, 20);  // +2
+					stp[3] = 115.0 * meter_deflect_k(-16, 20);  // +4
+					c[0] = c[1] = 0x008800ff;
+					c[2] = c[3] = 0x00ff00ff;
+					c[4] = c[5] = 0xffff00ff;
+					c[6] = c[7] = 0xffff00ff;
+					c[8] = c[9] = 0xff0000ff;
+					break;
+				case MeterK14:
+					stp[0] = 115.0 * meter_deflect_k(-34, 14);  //-20
+					stp[1] = 115.0 * meter_deflect_k(-14, 14);  //  0
+					stp[2] = 115.0 * meter_deflect_k(-12, 14);  // +2
+					stp[3] = 115.0 * meter_deflect_k(-10, 14);  // +4
+					c[0] = c[1] = 0x008800ff;
+					c[2] = c[3] = 0x00ff00ff;
+					c[4] = c[5] = 0xffff00ff;
+					c[6] = c[7] = 0xffff00ff;
+					c[8] = c[9] = 0xff0000ff;
+					break;
+				case MeterIEC2EBU:
+				case MeterIEC2BBC:
+					stp[0] = 115.0 * meter_deflect_ppm(-18);
+					stp[1] = 115.0 * meter_deflect_ppm(-14);
+					stp[2] = 115.0 * meter_deflect_ppm(-10);
+					stp[3] = 115.0 * meter_deflect_ppm( -8);
+					break;
+				case MeterIEC1NOR:
+					stp[0] = 115.0 * meter_deflect_nordic(-18);
+					stp[1] = 115.0 * meter_deflect_nordic(-15);
+					stp[2] = 115.0 * meter_deflect_nordic(-12);
+					stp[3] = 115.0 * meter_deflect_nordic( -9);
+					break;
+				case MeterIEC1DIN:
+					stp[0] = 115.0 * meter_deflect_din(-29);
+					stp[1] = 115.0 * meter_deflect_din(-18);
+					stp[2] = 115.0 * meter_deflect_din(-15);
+					stp[3] = 115.0 * meter_deflect_din( -9);
+					break;
+				case MeterVU:
+					stp[0] = 115.0 * meter_deflect_vu(-26); // -6
+					stp[1] = 115.0 * meter_deflect_vu(-23); // -3
+					stp[2] = 115.0 * meter_deflect_vu(-20); // 0
+					stp[3] = 115.0 * meter_deflect_vu(-18); // +2
+					break;
+				default: // PEAK, RMS
+					stp[1] = 77.5;  // 115 * log_meter(-10)
+					stp[2] = 92.5;  // 115 * log_meter(-3)
+					stp[3] = 100.0; // 115 * log_meter(0)
+				switch (Config->get_meter_line_up_level()) {
+					case MeteringLineUp24:
+						stp[0] = 42.0;
+						break;
+					case MeteringLineUp20:
+						stp[0] = 50.0;
+						break;
+					default:
+					case MeteringLineUp18:
+						stp[0] = 55.0;
+						break;
+					case MeteringLineUp15:
+						stp[0] = 62.5;
+						break;
+				}
+			}
 		}
 		if (meters[n].width != width || meters[n].length != len || color_changed) {
 			delete meters[n].meter;

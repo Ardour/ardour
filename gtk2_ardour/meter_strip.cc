@@ -57,7 +57,7 @@ using namespace ArdourMeter;
 PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
 PBD::Signal0<void> MeterStrip::MetricChanged;
 
-MeterStrip::MeterStrip (int metricmode)
+MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	: AxisView(0)
 	, RouteUI(0)
 {
@@ -67,7 +67,7 @@ MeterStrip::MeterStrip (int metricmode)
 	peakbx.set_size_request(-1, 14);
 	namebx.set_size_request(18, 52);
 
-	set_metric_mode(metricmode);
+	set_metric_mode(metricmode, mt);
 
 	meter_metric_area.set_size_request(25, 10);
 	meter_metric_area.signal_expose_event().connect (
@@ -112,8 +112,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	level_meter = new LevelMeter(sess);
 	level_meter->set_meter (_route->shared_peak_meter().get());
 	level_meter->clear_meters();
-	level_meter->setup_meters (220, meter_width, 6);
 	level_meter->set_type (_route->meter_type());
+	level_meter->setup_meters (220, meter_width, 6);
 	level_meter->ButtonPress.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::level_meter_button_press, this, _1));
 	level_meter->MeterTypeChanged.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::meter_type_changed, this, _1));
 
@@ -394,12 +394,17 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 gint
 MeterStrip::meter_metrics_expose (GdkEventExpose *ev)
 {
-	return meter_expose_metrics(ev, _types, &meter_metric_area);
+	if (_route) {
+		return meter_expose_metrics(ev, _route->meter_type(), _types, &meter_metric_area);
+	} else {
+		return meter_expose_metrics(ev, metric_type, _types, &meter_metric_area);
+	}
 }
 
 void
-MeterStrip::set_metric_mode (int metricmode)
+MeterStrip::set_metric_mode (int metricmode, ARDOUR::MeterType mt)
 {
+	metric_type = mt;
 	_types.clear ();
 	switch(metricmode) {
 		case 0:
@@ -424,21 +429,26 @@ MeterStrip::set_metric_mode (int metricmode)
 	meter_metric_area.queue_draw ();
 }
 
-void
-MeterStrip::set_pos (int pos)
+MeterType
+MeterStrip::meter_type()
 {
+	assert((!_route && _strip_type == 0) || (_route && _strip_type != 0));
+	if (!_route) return metric_type;
+	return _route->meter_type();
 }
 
 gint
 MeterStrip::meter_ticks1_expose (GdkEventExpose *ev)
 {
-	return meter_expose_ticks(ev, _types, &meter_ticks1_area);
+	assert(_route);
+	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks1_area);
 }
 
 gint
 MeterStrip::meter_ticks2_expose (GdkEventExpose *ev)
 {
-	return meter_expose_ticks(ev, _types, &meter_ticks2_area);
+	assert(_route);
+	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks2_area);
 }
 
 void
@@ -572,7 +582,14 @@ MeterStrip::popup_level_meter_menu (GdkEventButton* ev)
 
 	_suspend_menu_callbacks = true;
 	add_level_meter_item (items, group, ArdourMeter::meter_type_string(MeterPeak), MeterPeak);
-	add_level_meter_item (items, group, ArdourMeter::meter_type_string(MeterKrms), MeterKrms);
+	add_level_meter_item (items, group, ArdourMeter::meter_type_string(MeterKrms),  MeterKrms);
+	add_level_meter_item (items, group, ArdourMeter::meter_type_string(MeterIEC1DIN), MeterIEC1DIN);
+	add_level_meter_item (items, group, ArdourMeter::meter_type_string(MeterIEC1NOR), MeterIEC1NOR);
+	add_level_meter_item (items, group, ArdourMeter::meter_type_string(MeterIEC2BBC), MeterIEC2BBC);
+	add_level_meter_item (items, group, ArdourMeter::meter_type_string(MeterIEC2EBU), MeterIEC2EBU);
+	add_level_meter_item (items, group, ArdourMeter::meter_type_string(MeterK20), MeterK20);
+	add_level_meter_item (items, group, ArdourMeter::meter_type_string(MeterK14), MeterK14);
+	add_level_meter_item (items, group, ArdourMeter::meter_type_string(MeterVU),  MeterVU);
 
 	MeterType cmt = _route->meter_type();
 	const std::string cmn = ArdourMeter::meter_type_string(cmt);
@@ -609,7 +626,10 @@ MeterStrip::set_meter_type (MeterType type)
 void
 MeterStrip::meter_type_changed (MeterType type)
 {
-	_route->set_meter_type(type);
+	if (_route->meter_type() != type) {
+		_route->set_meter_type(type);
+	}
+	MetricChanged();
 }
 
 void

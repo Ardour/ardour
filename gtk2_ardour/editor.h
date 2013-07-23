@@ -1249,13 +1249,17 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool  idle_drop_paths  (std::vector<std::string> paths, framepos_t frame, double ypos, bool copy);
 	void  drop_paths_part_two  (const std::vector<std::string>& paths, framepos_t frame, double ypos, bool copy);
 
-	int  import_sndfiles (std::vector<std::string> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, framepos_t& pos,
+        int  import_sndfiles (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode,  
+			      ARDOUR::SrcQuality, framepos_t& pos,
 			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool);
-	int  embed_sndfiles (std::vector<std::string> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode,
+	int  embed_sndfiles (std::vector<std::string> paths, bool multiple_files, bool& check_sample_rate, 
+			     Editing::ImportDisposition disposition, Editing::ImportMode mode,
 			     framepos_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&);
 
-	int add_sources (std::vector<std::string> paths, ARDOUR::SourceList& sources, framepos_t& pos, Editing::ImportMode,
+	int add_sources (std::vector<std::string> paths, ARDOUR::SourceList& sources, framepos_t& pos, 
+			 Editing::ImportDisposition, Editing::ImportMode,
 			 int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool add_channel_suffix);
+
 	int finish_bringing_in_material (boost::shared_ptr<ARDOUR::Region> region, uint32_t, uint32_t,  framepos_t& pos, Editing::ImportMode mode,
 				      boost::shared_ptr<ARDOUR::Track>& existing_track);
 
@@ -2078,15 +2082,16 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool _control_point_toggled_on_press;
 
 	/** This is used by TimeAxisView to keep a track of the TimeAxisView that is currently being
-	    stepped in height using Shift-Scrollwheel.  When a scroll event occurs, we do the step on
-	    this _stepping_axis_view if it is non-0 (and we set up this _stepping_axis_view with the
-	    TimeAxisView underneath the mouse if it is 0).  Then Editor resets _stepping_axis_view when
-	    the shift key is released.  In this (hacky) way, pushing shift and moving the scroll wheel
-	    will operate on the same track until shift is released (rather than skipping about to whatever
-	    happens to be underneath the mouse at the time).
+	    stepped in height using ScrollZoomVerticalModifier+Scrollwheel.  When a scroll event
+	    occurs, we do the step on this _stepping_axis_view if it is non-0 (and we set up this
+	    _stepping_axis_view with the TimeAxisView underneath the mouse if it is 0).  Then Editor
+	    resets _stepping_axis_view when the modifier key is released.  In this (hacky) way,
+	    pushing the modifier key and moving the scroll wheel will operate on the same track
+	    until the key is released (rather than skipping about to whatever happens to be
+	    underneath the mouse at the time).
 	*/
 	TimeAxisView* _stepping_axis_view;
-	void shift_key_released ();
+	void zoom_vertical_modifier_released();
 
 	friend class Drag;
 	friend class RegionDrag;

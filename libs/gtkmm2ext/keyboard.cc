@@ -248,12 +248,15 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 		keyval = event->keyval;
 	}
 
-	if (keyval == GDK_Shift_L) {
+	if (event->state & ScrollZoomVerticalModifier) {
 		/* There is a special and rather hacky situation in Editor which makes
-		   it useful to know when a shift key has been released, so emit a signal
-		   here (see Editor::_stepping_axis_view)
+		   it useful to know when the modifier key for vertical zoom has been
+		   released, so emit a signal here (see Editor::_stepping_axis_view).
+		   Note that the state bit for the modifier key is set for the key-up
+		   event when the modifier is released, but not the key-down when it
+		   is pressed, so we get here on key-up, which is what we want.
 		*/
-		ShiftReleased (); /* EMIT SIGNAL */
+		ZoomVerticalModifierReleased (); /* EMIT SIGNAL */
 	}
 
 	if (event->type == GDK_KEY_PRESS) {

@@ -37,8 +37,8 @@ extern sigc::signal<void> RedrawMetrics;
 
 extern sigc::signal<void, int, ARDOUR::RouteGroup*, ARDOUR::MeterType> SetMeterTypeMulti;
 
-gint meter_expose_ticks (GdkEventExpose *ev, std::vector<ARDOUR::DataType> types, Gtk::DrawingArea *mta);
-gint meter_expose_metrics (GdkEventExpose *ev, std::vector<ARDOUR::DataType> types, Gtk::DrawingArea *mma);
+gint meter_expose_ticks (GdkEventExpose *ev, ARDOUR::MeterType type, std::vector<ARDOUR::DataType> types, Gtk::DrawingArea *mta);
+gint meter_expose_metrics (GdkEventExpose *ev, ARDOUR::MeterType type, std::vector<ARDOUR::DataType> types, Gtk::DrawingArea *mma);
 
 void meter_clear_pattern_cache(int which=7);
 
