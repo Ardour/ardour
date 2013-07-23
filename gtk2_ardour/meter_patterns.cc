@@ -128,6 +128,9 @@ static inline float mtr_col_and_fract(
 			}
 			break;
 		case MeterIEC2BBC:
+			fraction = meter_deflect_ppm(val);
+			cairo_set_source_rgb (cr, c->get_red_p(), c->get_green_p(), c->get_blue_p());
+			break;
 		case MeterIEC2EBU:
 			fraction = meter_deflect_ppm(val);
 			if (val >= -10.0) {
