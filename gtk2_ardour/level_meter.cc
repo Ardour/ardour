@@ -104,6 +104,7 @@ static float meter_lineup(float offset) {
 static float vu_standard() {
 	// note - default meter config is +2dB (france)
 	switch (Config->get_meter_vu_standard()) {
+		default:
 		case MeteringVUfrench:   // 0VU = -2dBu
 			return 0;
 		case MeteringVUamerican: // 0VU =  0dBu
