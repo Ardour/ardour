@@ -62,6 +62,7 @@ setup_enum_writer ()
 	ColorMode _ColorMode;
 	MeterFalloff _MeterFalloff;
 	MeterHold _MeterHold;
+	VUMeterStandard _VUMeterStandard;
 	MeterLineUp _MeterLineUp;
 	EditMode _EditMode;
 	RegionPoint _RegionPoint;
@@ -221,6 +222,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (MeterHoldMedium);
 	REGISTER_ENUM (MeterHoldLong);
 	REGISTER (_MeterHold);
+
+	REGISTER_ENUM (MeteringVUfrench);
+	REGISTER_ENUM (MeteringVUamerican);
+	REGISTER_ENUM (MeteringVUstandard);
+	REGISTER (_VUMeterStandard);
 
 	REGISTER_ENUM (MeteringLineUp24);
 	REGISTER_ENUM (MeteringLineUp20);
@@ -670,6 +676,20 @@ std::istream& operator>>(std::istream& o, MonitorModel& var)
 }
 
 std::ostream& operator<<(std::ostream& o, const MonitorModel& var)
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
+std::istream& operator>>(std::istream& o, VUMeterStandard& var)
+{
+	std::string s;
+	o >> s;
+	var = (VUMeterStandard) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const VUMeterStandard& var)
 {
 	std::string s = enum_2_string (var);
 	return o << s;

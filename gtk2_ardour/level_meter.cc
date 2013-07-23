@@ -85,6 +85,34 @@ LevelMeter::set_meter (PeakMeter* meter)
 	}
 }
 
+static float meter_lineup(float offset) {
+	switch (Config->get_meter_line_up_level()) {
+		case MeteringLineUp24:
+			return offset + 6.0;
+		case MeteringLineUp20:
+			return offset + 2.0;
+		case MeteringLineUp18:
+			return offset;
+		case MeteringLineUp15:
+			return offset - 3.0;
+		default:
+			break;
+	}
+	return offset;
+}
+
+static float vu_standard() {
+	// note - default meter config is +2dB (france)
+	switch (Config->get_meter_vu_standard()) {
+		case MeteringVUfrench:   // +2dB
+			return 0;
+		case MeteringVUamerican: //  0dB
+			return -2;
+		case MeteringVUstandard: // -4dB
+			return -6;
+	}
+}
+
 float
 LevelMeter::update_meters ()
 {
@@ -115,18 +143,18 @@ LevelMeter::update_meters ()
 				if (meter_type == MeterPeak) {
 					(*i).meter->set (log_meter (peak));
 				} else if (meter_type == MeterIEC1NOR) {
-					(*i).meter->set (meter_deflect_nordic (peak));
+					(*i).meter->set (meter_deflect_nordic (peak + meter_lineup(0)));
 				} else if (meter_type == MeterIEC1DIN) {
-					(*i).meter->set (meter_deflect_din (peak));
+					(*i).meter->set (meter_deflect_din (peak + meter_lineup(3.0)));
 				} else if (meter_type == MeterIEC2BBC || meter_type == MeterIEC2EBU) {
-					(*i).meter->set (meter_deflect_ppm (peak));
+					(*i).meter->set (meter_deflect_ppm (peak + meter_lineup(0)));
 				} else if (meter_type == MeterVU) {
-					(*i).meter->set (meter_deflect_vu (peak));
+					(*i).meter->set (meter_deflect_vu (peak + vu_standard() + meter_lineup(0)));
 				} else if (meter_type == MeterK14) {
 					(*i).meter->set (meter_deflect_k (peak, 14), meter_deflect_k(_meter->meter_level(n, MeterPeak), 14));
 				} else if (meter_type == MeterK20) {
 					(*i).meter->set (meter_deflect_k (peak, 20), meter_deflect_k(_meter->meter_level(n, MeterPeak), 20));
-				} else {
+				} else { // RMS
 					(*i).meter->set (log_meter (peak), log_meter(_meter->meter_level(n, MeterPeak)));
 				}
 			}

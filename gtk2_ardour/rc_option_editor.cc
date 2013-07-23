@@ -1920,19 +1920,33 @@ RCOptionEditor::RCOptionEditor ()
 
 	ComboOption<MeterLineUp>* mlu = new ComboOption<MeterLineUp> (
 		"meter-line-up-level",
-		_("Meter line-up level"),
+		_("Meter line-up level; 0dBu"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_line_up_level),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_line_up_level)
 		);
 
-	mlu->add (MeteringLineUp24, _("-24dB"));
-	mlu->add (MeteringLineUp20, _("-20dB (SMPTE)"));
-	mlu->add (MeteringLineUp18, _("-18dB (EBU)"));
-	mlu->add (MeteringLineUp15, _("-15dB"));
+	mlu->add (MeteringLineUp24, _("-24dBFS"));
+	mlu->add (MeteringLineUp20, _("-20dBFS (SMPTE)"));
+	mlu->add (MeteringLineUp18, _("-18dBFS (EBU, BBC)"));
+	mlu->add (MeteringLineUp15, _("-15dBFS (DIN)"));
 
-	Gtkmm2ext::UI::instance()->set_tip (mlu->tip_widget(), _("Configure meter-ticks and color-knee point."));
+	Gtkmm2ext::UI::instance()->set_tip (mlu->tip_widget(), _("Configure meter-ticks and color-knee point for dBFS scale DPM, set reference/offset level for IEC PPM."));
 
 	add_option (S_("Preferences|GUI"), mlu);
+
+
+	ComboOption<VUMeterStandard>* mvu = new ComboOption<VUMeterStandard> (
+		"meter-vu-standard",
+		_("VU Meter standard"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_vu_standard),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_vu_standard)
+		);
+
+	mvu->add (MeteringVUfrench,   _("+2dB (France)"));
+	mvu->add (MeteringVUamerican, _(" 0dB (North America, Australia)"));
+	mvu->add (MeteringVUstandard, _("-4dB (standard)"));
+
+	add_option (S_("Preferences|GUI"), mvu);
 
 	Gtk::Adjustment *mpk = manage (new Gtk::Adjustment(0, -10, 0, .1, .1));
 	HSliderOption *mpks = new HSliderOption("meter-peak",
