@@ -2082,15 +2082,16 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool _control_point_toggled_on_press;
 
 	/** This is used by TimeAxisView to keep a track of the TimeAxisView that is currently being
-	    stepped in height using Shift-Scrollwheel.  When a scroll event occurs, we do the step on
-	    this _stepping_axis_view if it is non-0 (and we set up this _stepping_axis_view with the
-	    TimeAxisView underneath the mouse if it is 0).  Then Editor resets _stepping_axis_view when
-	    the shift key is released.  In this (hacky) way, pushing shift and moving the scroll wheel
-	    will operate on the same track until shift is released (rather than skipping about to whatever
-	    happens to be underneath the mouse at the time).
+	    stepped in height using ScrollZoomVerticalModifier+Scrollwheel.  When a scroll event
+	    occurs, we do the step on this _stepping_axis_view if it is non-0 (and we set up this
+	    _stepping_axis_view with the TimeAxisView underneath the mouse if it is 0).  Then Editor
+	    resets _stepping_axis_view when the modifier key is released.  In this (hacky) way,
+	    pushing the modifier key and moving the scroll wheel will operate on the same track
+	    until the key is released (rather than skipping about to whatever happens to be
+	    underneath the mouse at the time).
 	*/
 	TimeAxisView* _stepping_axis_view;
-	void shift_key_released ();
+	void zoom_vertical_modifier_released();
 
 	friend class Drag;
 	friend class RegionDrag;
