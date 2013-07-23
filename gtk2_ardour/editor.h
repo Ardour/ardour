@@ -1215,13 +1215,17 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool  idle_drop_paths  (std::vector<std::string> paths, framepos_t frame, double ypos, bool copy);
 	void  drop_paths_part_two  (const std::vector<std::string>& paths, framepos_t frame, double ypos, bool copy);
 
-	int  import_sndfiles (std::vector<std::string> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, framepos_t& pos,
+        int  import_sndfiles (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode,  
+			      ARDOUR::SrcQuality, framepos_t& pos,
 			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool);
-	int  embed_sndfiles (std::vector<std::string> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode,
+	int  embed_sndfiles (std::vector<std::string> paths, bool multiple_files, bool& check_sample_rate, 
+			     Editing::ImportDisposition disposition, Editing::ImportMode mode,
 			     framepos_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&);
 
-	int add_sources (std::vector<std::string> paths, ARDOUR::SourceList& sources, framepos_t& pos, Editing::ImportMode,
+	int add_sources (std::vector<std::string> paths, ARDOUR::SourceList& sources, framepos_t& pos, 
+			 Editing::ImportDisposition, Editing::ImportMode,
 			 int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool add_channel_suffix);
+
 	int finish_bringing_in_material (boost::shared_ptr<ARDOUR::Region> region, uint32_t, uint32_t,  framepos_t& pos, Editing::ImportMode mode,
 				      boost::shared_ptr<ARDOUR::Track>& existing_track);
 
