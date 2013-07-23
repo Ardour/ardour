@@ -199,6 +199,38 @@ static inline float mtr_col_and_fract(
 	return fraction;
 }
 
+static void set_bg_color(Gtk::Widget& w, cairo_t* cr, MeterType type) {
+	switch(type) {
+		case MeterVU:
+			cairo_set_source_rgb (cr, 1.0, 1.0, 0.85);
+			break;
+		case MeterIEC1DIN:
+		case MeterIEC1NOR:
+		case MeterIEC2BBC:
+		case MeterIEC2EBU:
+		case MeterK14:
+		case MeterK20:
+			cairo_set_source_rgb (cr, 0.1, 0.1, 0.1);
+			break;
+		default:
+			{
+			Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_ACTIVE);
+			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
+			}
+			break;
+	}
+}
+
+static void set_fg_color(MeterType type, Gdk::Color * c) {
+	switch(type) {
+		case MeterVU:
+			c->set_rgb_p(0.0, 0.0, 0.0);
+			break;
+		default:
+			c->set_rgb_p(1.0, 1.0, 1.0);
+			break;
+	}
+}
 
 static cairo_pattern_t*
 meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> types)
@@ -217,8 +249,13 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 
 	cairo_move_to (cr, 0, 0);
 	cairo_rectangle (cr, 0, 0, width, height);
-	{
-		Gdk::Color c = w.get_style()->get_bg (background ? Gtk::STATE_ACTIVE : Gtk::STATE_NORMAL);
+
+	if (background) {
+		/* meterbridge */
+		set_bg_color(w, cr, type);
+	} else {
+		/* mixer */
+		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_NORMAL);
 		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 	}
 	cairo_fill (cr);
@@ -229,24 +266,16 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
 
 		Gdk::Color c;
-		c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
-
-		if (types.size() > 1) {
+		if (types.size() > 1 && (*i) == DataType::MIDI) {
 			/* we're overlaying more than 1 set of marks, so use different colours */
-			switch (*i) {
-			case DataType::AUDIO:
-				c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
-				cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-				break;
-			case DataType::MIDI:
-				c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
-				cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-				break;
-			}
+			c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
+		} else if (background) {
+			set_fg_color(type, &c);
+			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 		} else {
 			c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
-			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 		}
+		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 
 		// tick-maker position in dBFS, line-thickness
 		std::map<float,float> points;
@@ -503,8 +532,12 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 
 	cairo_move_to (cr, 0, 0);
 	cairo_rectangle (cr, 0, 0, width, height);
-	{
-		Gdk::Color c = w.get_style()->get_bg (background ? Gtk::STATE_ACTIVE : Gtk::STATE_NORMAL);
+	if (background) {
+		/* meterbridge */
+		set_bg_color(w, cr, type);
+	} else {
+		/* mixer */
+		Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_NORMAL);
 		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 	}
 	cairo_fill (cr);
@@ -513,26 +546,20 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 
 	height = min(max_pattern_metric_size, height);
 	uint32_t peakcolor = ARDOUR_UI::config()->color_by_name ("meterbridge peaklabel");
+	Gdk::Color c;
 
 	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
 
-		Gdk::Color c;
-		if (types.size() > 1) {
+		if (types.size() > 1 && (*i) == DataType::MIDI) {
 			/* we're overlaying more than 1 set of marks, so use different colours */
-			switch (*i) {
-			case DataType::AUDIO:
-				c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
-				cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-				break;
-			case DataType::MIDI:
-				c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
-				cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-				break;
-			}
+			c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
+		} else if (background) {
+			set_fg_color(type, &c);
+			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 		} else {
 			c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
-			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 		}
+		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 
 
 		// label-pos in dBFS, label-text
@@ -780,7 +807,9 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 				layout->get_pixel_size(tw, th);
 				break;
 		}
-		Gdk::Color c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
+		if (!background) {
+			c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
+		}
 		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 		if (tickleft) {
 			cairo_move_to (cr, width - 2 - tw, height - th - 0.5);
