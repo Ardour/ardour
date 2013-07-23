@@ -273,6 +273,11 @@ PeakMeter::meter ()
 	const size_t limit = min (_peak_signal.size(), (size_t) current_meters.n_total ());
 	const size_t n_midi  = min (_peak_signal.size(), (size_t) current_meters.n_midi());
 
+	/* 0.01f ^= 100 Hz update rate */
+	const float midi_meter_falloff = Config->get_meter_falloff() * 0.01f;
+	/* kmeters: 24dB / 2 sec */
+	const float audio_meter_falloff = (_meter_type & (MeterK20 | MeterK14)) ? 0.12f : midi_meter_falloff;
+
 	for (size_t n = 0; n < limit; ++n) {
 
 		/* grab peak since last read */
@@ -283,11 +288,11 @@ PeakMeter::meter ()
 		if (n < n_midi) {
 			_max_peak_power[n] = -INFINITY; // std::max (new_peak, _max_peak_power[n]); // XXX
 			_max_peak_signal[n] = 0;
-			if (Config->get_meter_falloff() == 0.0f || new_peak > _visible_peak_power[n]) {
+			if (midi_meter_falloff == 0.0f || new_peak > _visible_peak_power[n]) {
 				;
 			} else {
-				/* empirical WRT to falloff times , 0.01f ^= 100 Hz update rate */
-				new_peak = _visible_peak_power[n] - sqrt(_visible_peak_power[n] * Config->get_meter_falloff() * 0.01f * 0.0002f);
+				/* empirical algorithm WRT to audio falloff times */
+				new_peak = _visible_peak_power[n] - sqrt(_visible_peak_power[n] * midi_meter_falloff * 0.0002f);
 				if (new_peak < (1.0 / 512.0)) new_peak = 0;
 			}
 			_visible_peak_power[n] = new_peak;
@@ -310,11 +315,11 @@ PeakMeter::meter ()
 
 		_max_peak_power[n] = std::max (new_peak, _max_peak_power[n]);
 
-		if (Config->get_meter_falloff() == 0.0f || new_peak > _visible_peak_power[n]) {
+		if (audio_meter_falloff == 0.0f || new_peak > _visible_peak_power[n]) {
 			_visible_peak_power[n] = new_peak;
 		} else {
 			// do falloff
-			new_peak = _visible_peak_power[n] - (Config->get_meter_falloff() * 0.01f);
+			new_peak = _visible_peak_power[n] - (audio_meter_falloff);
 			_visible_peak_power[n] = std::max (new_peak, -INFINITY);
 		}
 	}
