@@ -1945,6 +1945,7 @@ RCOptionEditor::RCOptionEditor ()
 	mvu->add (MeteringVUfrench,   _("0VU = -2dBu (France)"));
 	mvu->add (MeteringVUamerican, _("0VU = 0dBu (North America, Australia)"));
 	mvu->add (MeteringVUstandard, _("0VU = +4dBu (standard)"));
+	mvu->add (MeteringVUstandard, _("0VU = +8dBu"));
 
 	add_option (S_("Preferences|GUI"), mvu);
 

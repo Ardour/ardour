@@ -226,6 +226,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (MeteringVUfrench);
 	REGISTER_ENUM (MeteringVUamerican);
 	REGISTER_ENUM (MeteringVUstandard);
+	REGISTER_ENUM (MeteringVUeight);
 	REGISTER (_VUMeterStandard);
 
 	REGISTER_ENUM (MeteringLineUp24);
