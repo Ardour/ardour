@@ -51,7 +51,8 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 		int bgc0, int bgc1,
 		int bgh0, int bgh1,
 		float stp0, float stp1,
-		float stp2, float stp3
+		float stp2, float stp3,
+		int styleflags
 		)
 {
 	orientation = o;
@@ -88,6 +89,8 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	_stp[2] = stp2;
 	_stp[3] = stp3;
 
+	_styleflags = styleflags;
+
 	set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 
 	pixrect.x = 1;
@@ -96,7 +99,7 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	if (!len) {
 		len = 250;
 	}
-	fgpattern = request_vertical_meter(dimen, len, _clr, _stp, true);
+	fgpattern = request_vertical_meter(dimen, len, _clr, _stp, _styleflags);
 	bgpattern = request_vertical_background (dimen, len, _bgc, false);
 	pixheight = len;
 	pixwidth = dimen;
@@ -116,7 +119,7 @@ FastMeter::~FastMeter ()
 
 Cairo::RefPtr<Cairo::Pattern>
 FastMeter::generate_meter_pattern (
-		int width, int height, int *clr, float *stp, bool shade)
+		int width, int height, int *clr, float *stp, int styleflags)
 {
 	guint8 r,g,b,a;
 	double knee;
@@ -177,7 +180,7 @@ FastMeter::generate_meter_pattern (
 	cairo_pattern_add_color_stop_rgb (pat, 1.0,
 	                                  r/255.0, g/255.0, b/255.0);
 
-	if (shade && !no_rgba_overlay) {
+	if ((styleflags & 1) && !no_rgba_overlay) {
 		cairo_pattern_t* shade_pattern = cairo_pattern_create_linear (0.0, 0.0, width, 0.0);
 		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, 1.0, 1.0, 1.0, 0.2);
 		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, 0.0, 0.0, 0.0, 0.3);
@@ -190,16 +193,18 @@ FastMeter::generate_meter_pattern (
 		cairo_rectangle (tc, 0, 0, width, height);
 		cairo_fill (tc);
 
-		cairo_save (tc);
-		cairo_set_line_width(tc, 1.0);
-		cairo_set_source_rgba(tc, .1, .1, .1, .5);
-		//cairo_set_operator (tc, CAIRO_OPERATOR_SOURCE);
-		for (float y=.5; y < height; y+= 2.0) {
-			cairo_move_to(tc, 0, y);
-			cairo_line_to(tc, width, y);
-			cairo_stroke (tc);
+		if (styleflags & 2) { // LED stripes
+			cairo_save (tc);
+			cairo_set_line_width(tc, 1.0);
+			cairo_set_source_rgba(tc, .1, .1, .1, .5);
+			//cairo_set_operator (tc, CAIRO_OPERATOR_SOURCE);
+			for (float y=.5; y < height; y+= 2.0) {
+				cairo_move_to(tc, 0, y);
+				cairo_line_to(tc, width, y);
+				cairo_stroke (tc);
+			}
+			cairo_restore (tc);
 		}
-		cairo_restore (tc);
 
 		cairo_set_source (tc, shade_pattern);
 		cairo_rectangle (tc, 0, 0, width, height);
@@ -270,7 +275,7 @@ FastMeter::generate_meter_background (
 
 Cairo::RefPtr<Cairo::Pattern>
 FastMeter::request_vertical_meter(
-		int width, int height, int *clr, float *stp, bool shade)
+		int width, int height, int *clr, float *stp, int styleflags)
 {
 	if (height < min_pattern_metric_size)
 		height = min_pattern_metric_size;
@@ -281,7 +286,7 @@ FastMeter::request_vertical_meter(
 			stp[0], stp[1], stp[2], stp[3],
 			clr[0], clr[1], clr[2], clr[3],
 			clr[4], clr[5], clr[6], clr[7],
-			clr[8], clr[9]);
+			clr[8], clr[9], styleflags);
 
 	Pattern10Map::iterator i;
 	if ((i = vm_pattern_cache.find (key)) != vm_pattern_cache.end()) {
@@ -290,7 +295,7 @@ FastMeter::request_vertical_meter(
 	// TODO flush pattern cache if it gets too large
 
 	Cairo::RefPtr<Cairo::Pattern> p = generate_meter_pattern (
-		width, height, clr, stp, shade);
+		width, height, clr, stp, styleflags);
 	vm_pattern_cache[key] = p;
 
 	return p;
@@ -361,7 +366,7 @@ FastMeter::on_size_allocate (Gtk::Allocation &alloc)
 	}
 
 	if (pixheight != h) {
-		fgpattern = request_vertical_meter (request_width, h, _clr, _stp, true);
+		fgpattern = request_vertical_meter (request_width, h, _clr, _stp, _styleflags);
 		bgpattern = request_vertical_background (request_width, h, highlight ? _bgh : _bgc, highlight);
 		pixheight = h - 2;
 		pixwidth  = request_width - 2;
