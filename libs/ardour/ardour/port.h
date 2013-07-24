@@ -90,11 +90,11 @@ public:
 	virtual int connect (Port *);
 	int disconnect (Port *);
 
-	void ensure_jack_monitors_input (bool);
-	bool jack_monitoring_input () const;
+	void request_monitor_input (bool);
+	void ensure_monitor_input (bool);
+	bool monitoring_input () const;
 	int reestablish ();
 	int reconnect ();
-	void request_jack_monitors_input (bool);
 
 	bool last_monitor() const { return _last_monitor; }
 	void set_last_monitor (bool yn) { _last_monitor = yn; }

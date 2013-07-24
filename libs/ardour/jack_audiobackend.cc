@@ -114,7 +114,7 @@ JACKAudioBackend::disconnect_from_jack ()
 {
 
 int
-AudioEngine::reconnect_to_jack ()
+JACKAudioBackend::reconnect_to_jack ()
 {
 	if (_running) {
 		disconnect_from_jack ();
@@ -194,41 +194,116 @@ JACKAudioBackend::request_buffer_size (pframes_t nframes)
 /* --- TRANSPORT STATE MANAGEMENT --- */
 
 void
-AudioEngine::transport_stop ()
+JACKAudioBackend::transport_stop ()
 {
 	GET_PRIVATE_JACK_POINTER (_jack);
 	jack_transport_stop (_priv_jack);
 }
 
 void
-AudioEngine::transport_start ()
+JACKAudioBackend::transport_start ()
 {
 	GET_PRIVATE_JACK_POINTER (_jack);
 	jack_transport_start (_priv_jack);
 }
 
 void
-AudioEngine::transport_locate (framepos_t where)
+JACKAudioBackend::transport_locate (framepos_t where)
 {
 	GET_PRIVATE_JACK_POINTER (_jack);
 	jack_transport_locate (_priv_jack, where);
 }
 
 framepos_t 
-AudioEngine::transport_frame () const 
+JACKAudioBackend::transport_frame () const 
 {
 	GET_PRIVATE_JACK_POINTER_RET (_jack, 0);
 	return jack_get_current_transport_frame (_priv_jack);
 }
 
-AudioEngine::TransportState
-AudioEngine::transport_state ()
+JACKAudioBackend::TransportState
+JACKAudioBackend::transport_state ()
 {
 	GET_PRIVATE_JACK_POINTER_RET (_jack, ((TransportState) JackTransportStopped));
 	jack_position_t pos;
 	return (TransportState) jack_transport_query (_priv_jack, &pos);
 }
 
+int
+JACKAudioBackend::set_time_master (bool yn)
+{
+	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
+	if (yn) {
+		return jack_set_timebase_callback (_priv_jack, 0, _jack_timebase_callback, this);
+	} else {
+		return jack_release_timebase (_jack);
+	}
+}
+
+/* process-time */
+
+framecnt_t frame_rate () const;
+pframes_t frames_per_cycle () const;
+
+size_t raw_buffer_size(DataType t);
+
+int usecs_per_cycle () const { return _usecs_per_cycle; }
+
+bool
+JACKAudioBackend::get_sync_offset (pframes_t& offset) const
+{
+
+#ifdef HAVE_JACK_VIDEO_SUPPORT
+
+	GET_PRIVATE_JACK_POINTER_RET (_jack, false);
+
+	jack_position_t pos;
+
+	if (_priv_jack) {
+		(void) jack_transport_query (_priv_jack, &pos);
+
+		if (pos.valid & JackVideoFrameOffset) {
+			offset = pos.video_offset;
+			return true;
+		}
+	}
+#else
+	/* keep gcc happy */
+	offset = 0;
+#endif
+
+	return false;
+}
+
+pframes_t
+JACKAudioBackend::frames_since_cycle_start ()
+{
+	jack_client_t* _priv_jack = _jack;
+	if (!_running || !_priv_jack) {
+		return 0;
+	}
+	return jack_frames_since_cycle_start (_priv_jack);
+}
+
+pframes_t
+JACKAudioBackend::frame_time ()
+{
+	jack_client_t* _priv_jack = _jack;
+	if (!_running || !_priv_jack) {
+		return 0;
+	}
+	return jack_frame_time (_priv_jack);
+}
+
+pframes_t
+JACKAudioBackend::frame_time_at_cycle_start ()
+{
+	jack_client_t* _priv_jack = _jack;
+	if (!_running || !_priv_jack) {
+		return 0;
+	}
+	return jack_last_frame_time (_priv_jack);
+}
 
 /* JACK Callbacks */
 
@@ -416,6 +491,32 @@ JACKAudioBackend::connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, in
 		port_b, jack_port_name (jack_port_b),
 		conn == 0 ? false : true
 		); /* EMIT SIGNAL */
+}
+
+int
+JACKAudioBackend::create_process_thread (boost::function<void()> f, pthread_t* thread, size_t stacksize)
+{
+        GET_PRIVATE_JACK_POINTER_RET (_jack, 0);
+        ThreadData* td = new ThreadData (this, f, stacksize);
+
+        if (jack_client_create_thread (_priv_jack, thread, jack_client_real_time_priority (_priv_jack),
+                                       jack_is_realtime (_priv_jack), _start_process_thread, td)) {
+                return -1;
+        }
+
+        return 0;
+}
+
+void*
+JACKAudioBackend::_start_process_thread (void* arg)
+{
+        ThreadData* td = reinterpret_cast<ThreadData*> (arg);
+        boost::function<void()> f = td->f;
+        delete td;
+
+        f ();
+
+        return 0;
 }
 
 void*

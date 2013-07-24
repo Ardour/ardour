@@ -70,7 +70,6 @@ AudioEngine::AudioEngine ()
 	, port_remove_in_progress (false)
 	, m_meter_thread (0)
 	, _main_thread (0)
-	, ports (new Ports)
 {
 	g_atomic_int_set (&m_meter_exit, 0);
 
@@ -330,7 +329,7 @@ AudioEngine::process_callback (pframes_t nframes)
 
 			bool x;
 
-			if (i->second->last_monitor() != (x = i->second->jack_monitoring_input ())) {
+			if (i->second->last_monitor() != (x = i->second->monitoring_input ())) {
 				i->second->set_last_monitor (x);
 				/* XXX I think this is dangerous, due to
 				   a likely mutex in the signal handlers ...
@@ -878,9 +877,9 @@ AudioEngine::reset_timebase ()
 	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
 	if (_session) {
 		if (_session->config.get_jack_time_master()) {
-			return jack_set_timebase_callback (_priv_jack, 0, _jack_timebase_callback, this);
+			_backend->set_time_master (true);
 		} else {
-			return jack_release_timebase (_jack);
+			_backend->set_time_master (false);
 		}
 	}
 	return 0;

@@ -396,7 +396,7 @@ ARDOUR_UI::create_engine ()
 	loading_message (_("Starting audio engine"));
 
 	try {
-		engine = new ARDOUR::AudioEngine (ARDOUR_COMMAND_LINE::jack_client_name, ARDOUR_COMMAND_LINE::jack_session_uuid);
+		engine = new ARDOUR::AudioEngine (ARDOUR_COMMAND_LINE::backend_client_name, ARDOUR_COMMAND_LINE::backend_session_uuid);
 
 	} catch (...) {
 

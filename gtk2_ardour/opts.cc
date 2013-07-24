@@ -32,7 +32,8 @@
 using namespace std;
 
 string ARDOUR_COMMAND_LINE::session_name = "";
-string ARDOUR_COMMAND_LINE::jack_client_name = "ardour";
+string ARDOUR_COMMAND_LINE::backend_client_name = "ardour";
+string ARDOUR_COMMAND_LINE::backend_session_uuid;
 bool  ARDOUR_COMMAND_LINE::show_key_actions = false;
 bool ARDOUR_COMMAND_LINE::no_splash = false;
 bool ARDOUR_COMMAND_LINE::just_version = false;
@@ -45,7 +46,6 @@ string ARDOUR_COMMAND_LINE::keybindings_path = ""; /* empty means use builtin de
 std::string ARDOUR_COMMAND_LINE::menus_file = "ardour.menus";
 bool ARDOUR_COMMAND_LINE::finder_invoked_ardour = false;
 string ARDOUR_COMMAND_LINE::immediate_save;
-string ARDOUR_COMMAND_LINE::jack_session_uuid;
 string ARDOUR_COMMAND_LINE::load_template;
 bool ARDOUR_COMMAND_LINE::check_announcements = true;
 
@@ -60,7 +60,7 @@ print_help (const char *execname)
 	     << _("  -h, --help                  Print this message\n")
 	     << _("  -a, --no-announcements      Do not contact website for announcements\n")
 	     << _("  -b, --bindings              Print all possible keyboard binding names\n")
-	     << _("  -c, --name <name>           Use a specific jack client name, default is ardour\n")
+	     << _("  -c, --name <name>           Use a specific backend client name, default is ardour\n")
 	     << _("  -d, --disable-plugins       Disable all plugins in an existing session\n")
 	     << _("  -D, --debug <options>       Set debug flags. Use \"-D list\" to see available options\n")
 	     << _("  -n, --no-splash             Do not show splash screen\n")
@@ -199,7 +199,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 			break;
 
 		case 'c':
-			jack_client_name = optarg;
+			backend_client_name = optarg;
 			break;
 
 		case 'C':
@@ -215,7 +215,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 			break;
 
 		case 'U':
-			jack_session_uuid = optarg;
+			backend_session_uuid = optarg;
                         break;
 
 		default:
