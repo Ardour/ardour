@@ -255,7 +255,12 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
 		uint32_t c[10];
+		uint32_t b[4];
 		float stp[4];
+		b[0] = ARDOUR_UI::config()->canvasvar_MeterBackgroundBot.get();
+		b[1] = ARDOUR_UI::config()->canvasvar_MeterBackgroundTop.get();
+		b[2] = 0x991122ff; // red highlight gradient Bot
+		b[3] = 0x551111ff; // red highlight gradient Top
 		if (n < nmidi) {
 			c[0] = ARDOUR_UI::config()->canvasvar_MidiMeterColor0.get();
 			c[1] = ARDOUR_UI::config()->canvasvar_MidiMeterColor1.get();
@@ -330,6 +335,8 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 					stp[1] = 115.0 * meter_deflect_vu(-23); // -3
 					stp[2] = 115.0 * meter_deflect_vu(-20); // 0
 					stp[3] = 115.0 * meter_deflect_vu(-18); // +2
+					b[0] = 0x80806dff;
+					b[1] = 0xc0c0a3ff;
 					break;
 				default: // PEAK, RMS
 					stp[1] = 77.5;  // 115 * log_meter(-10)
@@ -357,9 +364,7 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len,
 					c[0], c[1], c[2], c[3], c[4],
 					c[5], c[6], c[7], c[8], c[9],
-					ARDOUR_UI::config()->canvasvar_MeterBackgroundBot.get(),
-					ARDOUR_UI::config()->canvasvar_MeterBackgroundTop.get(),
-					0x991122ff, 0x551111ff,
+					b[0], b[1], b[2], b[3],
 					stp[0], stp[1], stp[2], stp[3]
 					);
 			meters[n].width = width;
