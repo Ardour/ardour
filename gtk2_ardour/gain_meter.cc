@@ -1019,21 +1019,30 @@ GainMeter::get_gm_width ()
 gint
 GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 {
-	assert(_route);
+	if (!_route) {
+		if (_types.empty()) { _types.push_back(DataType::AUDIO); }
+		return meter_expose_metrics(ev, MeterPeak, _types, &meter_metric_area);
+	}
 	return meter_expose_metrics(ev, _route->meter_type(), _types, &meter_metric_area);
 }
 
 gint
 GainMeter::meter_ticks1_expose (GdkEventExpose *ev)
 {
-	assert(_route);
+	if (!_route) {
+		if (_types.empty()) { _types.push_back(DataType::AUDIO); }
+		return meter_expose_ticks(ev, MeterPeak, _types, &meter_ticks1_area);
+	}
 	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks1_area);
 }
 
 gint
 GainMeter::meter_ticks2_expose (GdkEventExpose *ev)
 {
-	assert(_route);
+	if (!_route) {
+		if (_types.empty()) { _types.push_back(DataType::AUDIO); }
+		return meter_expose_ticks(ev, MeterPeak, _types, &meter_ticks2_area);
+	}
 	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks2_area);
 }
 
