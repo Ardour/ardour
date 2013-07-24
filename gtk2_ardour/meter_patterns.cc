@@ -756,6 +756,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					fraction = (j->first) / 127.0;
 					pos = 1 + height - (gint) rintf (height * fraction);
 					pos = min (pos, height);
+					cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 					if (tickleft) {
 						cairo_arc(cr, width - 2.0, pos + .5, 1.0, 0, 2 * M_PI);
 						cairo_fill(cr);
@@ -781,6 +782,12 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 				cairo_move_to (cr, width-3-tw, p);
 			}
 			pango_cairo_show_layout (cr, layout->gobj());
+
+			cairo_set_line_width(cr, 1.5);
+			cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, .15);
+			pango_cairo_layout_path(cr, layout->gobj());
+			cairo_stroke (cr);
+			cairo_set_line_width(cr, 1.0);
 		}
 	}
 
