@@ -1003,7 +1003,7 @@ style "meter_strip_ppm" = "default"
 
 style "meter_strip_vu" = "default"
 {
-  bg[NORMAL] = { 1.0, 1.0, 0.85 }
+  bg[NORMAL] = { .95, .88, .57 }
   fg[NORMAL] = { 0.0, 0.0, 0.0 }
 }
 
