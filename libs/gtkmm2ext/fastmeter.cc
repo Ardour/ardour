@@ -123,7 +123,8 @@ FastMeter::generate_meter_pattern (
 {
 	guint8 r,g,b,a;
 	double knee;
-	double soft = 1.5 / (double) height;
+	const double soft =  2.5 / (double) height;
+	const double offs = -1.0 / (double) height;
 
 	cairo_pattern_t* pat = cairo_pattern_create_linear (0.0, 0.0, 0.0, height);
 
@@ -136,44 +137,44 @@ FastMeter::generate_meter_pattern (
 	cairo_pattern_add_color_stop_rgb (pat, 0.0,
 	                                  r/255.0, g/255.0, b/255.0);
 
-	knee = ((float)height * stp[3] / 115.0f); // -0dB
+	knee = offs + stp[3] / 115.0f; // -0dB
 
 	UINT_TO_RGBA (clr[8], &r, &g, &b, &a);
-	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height) - soft,
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - knee,
 	                                  r/255.0, g/255.0, b/255.0);
 
 	UINT_TO_RGBA (clr[7], &r, &g, &b, &a);
-	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height) + soft,
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - knee + soft,
 	                                  r/255.0, g/255.0, b/255.0);
 
-	knee = ((float)height * stp[2]/ 115.0f); // -3dB || -2dB
+	knee = offs + stp[2]/ 115.0f; // -3dB || -2dB
 
 	UINT_TO_RGBA (clr[6], &r, &g, &b, &a);
-	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height) - soft,
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - knee,
 	                                  r/255.0, g/255.0, b/255.0);
 
 	UINT_TO_RGBA (clr[5], &r, &g, &b, &a);
-	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height) + soft,
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - knee + soft,
 	                                  r/255.0, g/255.0, b/255.0);
 
-	knee = ((float)height * stp[1] / 115.0f); // -9dB
+	knee = offs + stp[1] / 115.0f; // -9dB
 
 	UINT_TO_RGBA (clr[4], &r, &g, &b, &a);
-	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height) - soft,
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - knee,
 	                                  r/255.0, g/255.0, b/255.0);
 
 	UINT_TO_RGBA (clr[3], &r, &g, &b, &a);
-	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height) + soft,
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - knee + soft,
 	                                  r/255.0, g/255.0, b/255.0);
 
-	knee = ((float)height * stp[0] / 115.0f); // -18dB
+	knee = offs + stp[0] / 115.0f; // -18dB
 
 	UINT_TO_RGBA (clr[2], &r, &g, &b, &a);
-	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height) - soft,
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - knee,
 	                                  r/255.0, g/255.0, b/255.0);
 
 	UINT_TO_RGBA (clr[1], &r, &g, &b, &a);
-	cairo_pattern_add_color_stop_rgb (pat, 1.0 - (knee/(double)height) + soft,
+	cairo_pattern_add_color_stop_rgb (pat, 1.0 - knee + soft,
 	                                  r/255.0, g/255.0, b/255.0);
 
 	UINT_TO_RGBA (clr[0], &r, &g, &b, &a); // bottom
