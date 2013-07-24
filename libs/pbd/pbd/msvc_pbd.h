@@ -23,7 +23,7 @@
 #define PBD_IS_IN_WINDLL 0
 #endif
 
-#ifdef COMPILER_MSVC
+#ifndef COMPILER_MSVC
 #include <sys/time.h>
 #else
 #include <ardourext/misc.h>
