@@ -338,8 +338,24 @@ Meterbridge::on_size_request (Gtk::Requisition* r)
 
 	Gdk::Geometry geom;
 	Gtk::Requisition mr = meterarea.size_request();
+
 	geom.max_width = mr.width + metrics_left.get_width() + metrics_right.get_width();
 	geom.max_height = max_height;
+
+	const Gtk::Scrollbar * hsc = scroller.get_hscrollbar();
+	Glib::RefPtr<Gdk::Screen> screen = get_screen ();
+	Gdk::Rectangle monitor_rect;
+	screen->get_monitor_geometry (0, monitor_rect);
+	const int scr_w = monitor_rect.get_width() - 44;
+
+	if (cur_max_width < geom.max_width
+			&& cur_max_width < scr_w
+			&& !(scroller.get_hscrollbar_visible() && hsc)) {
+		int h = r->height;
+		*r = Gtk::Requisition();
+		r->width = geom.max_width;
+		r->height = h;
+	}
 
 	if (cur_max_width != geom.max_width) {
 		cur_max_width = geom.max_width;
