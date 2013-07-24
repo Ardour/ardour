@@ -181,6 +181,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, solo_alert_button (_("solo"))
 	, feedback_alert_button (_("feedback"))
 
+	, editor_meter(0)
+
 	, speaker_config_window (X_("speaker-config"), _("Speaker Configuration"))
 	, theme_manager (X_("theme-manager"), _("Theme Manager"))
 	, key_editor (X_("key-editor"), _("Key Bindings"))
@@ -1036,6 +1038,9 @@ ARDOUR_UI::every_point_zero_something_seconds ()
 	// august 2007: actual update frequency: 25Hz (40ms), not 100Hz
 
 	SuperRapidScreenUpdate(); /* EMIT_SIGNAL */
+	if (editor_meter) {
+		editor_meter->update_meters();
+	}
 	return TRUE;
 }
 
@@ -4116,4 +4121,30 @@ ARDOUR_UI::session_format_mismatch (std::string xml_path, std::string backup_pat
 					   start_mono, end_mono), true);
 
 	msg.run ();
+}
+
+
+void
+ARDOUR_UI::reset_peak_display ()
+{
+	if (!_session || !_session->master_out() || !editor_meter) return;
+	editor_meter->clear_meters();
+}
+
+void
+ARDOUR_UI::reset_group_peak_display (RouteGroup* group)
+{
+	if (!_session || !_session->master_out()) return;
+	if (group == _session->master_out()->route_group()) {
+		reset_peak_display ();
+	}
+}
+
+void
+ARDOUR_UI::reset_route_peak_display (Route* route)
+{
+	if (!_session || !_session->master_out()) return;
+	if (_session->master_out().get() == route) {
+		reset_peak_display ();
+	}
 }

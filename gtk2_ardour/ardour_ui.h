@@ -103,6 +103,7 @@ class SpeakerDialog;
 class ThemeManager;
 class TimeInfoBox;
 class MidiTracer;
+class LevelMeter;
 class GlobalPortMatrixWindow;
 class GUIObjectState;
 
@@ -280,6 +281,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void get_process_buffers ();
 	void drop_process_buffers ();
 
+	void reset_peak_display ();
+	void reset_route_peak_display (ARDOUR::Route*);
+	void reset_group_peak_display (ARDOUR::RouteGroup*);
+
         const std::string& announce_string() const { return _announce_string; }
 
   protected:
@@ -443,6 +448,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ArdourButton feedback_alert_button;
 
 	Gtk::VBox alert_box;
+	Gtk::VBox meter_box;
+	LevelMeter * editor_meter;
 
 	void solo_blink (bool);
 	void sync_blink (bool);
