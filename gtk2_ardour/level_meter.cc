@@ -361,7 +361,7 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 				}
 			}
 		}
-		if (meters[n].width != width || meters[n].length != len || color_changed) {
+		if (meters[n].width != width || meters[n].length != len || color_changed || meter_type != visible_meter_type) {
 			delete meters[n].meter;
 			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len,
 					c[0], c[1], c[2], c[3], c[4],
@@ -383,6 +383,7 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 	}
 	show();
 	color_changed = false;
+	visible_meter_type = meter_type;
 }
 
 void
