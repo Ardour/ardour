@@ -312,8 +312,10 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 					c[6] = c[7] = 0xffff00ff;
 					c[8] = c[9] = 0xff0000ff;
 					break;
-				case MeterIEC2EBU:
 				case MeterIEC2BBC:
+					c[0] = c[1] = c[2] = c[3] = c[4] = c[5] = c[6] = c[7] = c[8] = c[9] = 0xaaaaaaff;
+					break;
+				case MeterIEC2EBU:
 					stp[0] = 115.0 * meter_deflect_ppm(-18);
 					stp[1] = 115.0 * meter_deflect_ppm(-14);
 					stp[2] = 115.0 * meter_deflect_ppm(-10);
@@ -336,6 +338,8 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 					stp[1] = 115.0 * meter_deflect_vu(-23); // -3
 					stp[2] = 115.0 * meter_deflect_vu(-20); // 0
 					stp[3] = 115.0 * meter_deflect_vu(-18); // +2
+					c[0] = c[1] = c[2] = c[3] = c[4] = c[5] = 0x00aa00ff;
+					c[6] = c[7] = c[8] = c[9] = 0xff8800ff;
 					styleflags = 1;
 					break;
 				default: // PEAK, RMS
