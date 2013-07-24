@@ -141,6 +141,7 @@ Meterbridge::Meterbridge ()
 	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Meterbridge::sync_order_keys, this, _1), gui_context());
 	MeterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Meterbridge::remove_strip, this, _1), gui_context());
 	MeterStrip::MetricChanged.connect (*this, invalidator (*this), boost::bind(&Meterbridge::resync_order, this), gui_context());
+	MeterStrip::ConfigurationChanged.connect (*this, invalidator (*this), boost::bind(&Meterbridge::queue_resize, this), gui_context());
 
 	/* work around ScrolledWindowViewport alignment mess Part one */
 	Gtk::HBox * yspc = manage (new Gtk::HBox());
@@ -336,8 +337,25 @@ Meterbridge::on_size_request (Gtk::Requisition* r)
 	Gtk::Window::on_size_request(r);
 
 	Gdk::Geometry geom;
-	geom.max_width = meterarea.get_width() + metrics_left.get_width() + metrics_right.get_width();
+	Gtk::Requisition mr = meterarea.size_request();
+
+	geom.max_width = mr.width + metrics_left.get_width() + metrics_right.get_width();
 	geom.max_height = max_height;
+
+	const Gtk::Scrollbar * hsc = scroller.get_hscrollbar();
+	Glib::RefPtr<Gdk::Screen> screen = get_screen ();
+	Gdk::Rectangle monitor_rect;
+	screen->get_monitor_geometry (0, monitor_rect);
+	const int scr_w = monitor_rect.get_width() - 44;
+
+	if (cur_max_width < geom.max_width
+			&& cur_max_width < scr_w
+			&& !(scroller.get_hscrollbar_visible() && hsc)) {
+		int h = r->height;
+		*r = Gtk::Requisition();
+		r->width = geom.max_width;
+		r->height = h;
+	}
 
 	if (cur_max_width != geom.max_width) {
 		cur_max_width = geom.max_width;
@@ -681,6 +699,7 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 		delete (_metrics.back());
 		_metrics.pop_back();
 	}
+	queue_resize();
 }
 
 void

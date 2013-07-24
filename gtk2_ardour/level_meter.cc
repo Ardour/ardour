@@ -85,6 +85,37 @@ LevelMeter::set_meter (PeakMeter* meter)
 	}
 }
 
+static float meter_lineup(float offset) {
+	switch (Config->get_meter_line_up_level()) {
+		case MeteringLineUp24:
+			return offset + 6.0;
+		case MeteringLineUp20:
+			return offset + 2.0;
+		case MeteringLineUp18:
+			return offset;
+		case MeteringLineUp15:
+			return offset - 3.0;
+		default:
+			break;
+	}
+	return offset;
+}
+
+static float vu_standard() {
+	// note - default meter config is +2dB (france)
+	switch (Config->get_meter_vu_standard()) {
+		default:
+		case MeteringVUfrench:   // 0VU = -2dBu
+			return 0;
+		case MeteringVUamerican: // 0VU =  0dBu
+			return -2;
+		case MeteringVUstandard: // 0VU = +4dBu
+			return -6;
+		case MeteringVUeight:    // 0VU = +8dBu
+			return -10;
+	}
+}
+
 float
 LevelMeter::update_meters ()
 {
@@ -115,18 +146,18 @@ LevelMeter::update_meters ()
 				if (meter_type == MeterPeak) {
 					(*i).meter->set (log_meter (peak));
 				} else if (meter_type == MeterIEC1NOR) {
-					(*i).meter->set (meter_deflect_nordic (peak));
+					(*i).meter->set (meter_deflect_nordic (peak + meter_lineup(0)));
 				} else if (meter_type == MeterIEC1DIN) {
-					(*i).meter->set (meter_deflect_din (peak));
+					(*i).meter->set (meter_deflect_din (peak + meter_lineup(3.0)));
 				} else if (meter_type == MeterIEC2BBC || meter_type == MeterIEC2EBU) {
-					(*i).meter->set (meter_deflect_ppm (peak));
+					(*i).meter->set (meter_deflect_ppm (peak + meter_lineup(0)));
 				} else if (meter_type == MeterVU) {
-					(*i).meter->set (meter_deflect_vu (peak));
+					(*i).meter->set (meter_deflect_vu (peak + vu_standard() + meter_lineup(0)));
 				} else if (meter_type == MeterK14) {
 					(*i).meter->set (meter_deflect_k (peak, 14), meter_deflect_k(_meter->meter_level(n, MeterPeak), 14));
 				} else if (meter_type == MeterK20) {
 					(*i).meter->set (meter_deflect_k (peak, 20), meter_deflect_k(_meter->meter_level(n, MeterPeak), 20));
-				} else {
+				} else { // RMS
 					(*i).meter->set (log_meter (peak), log_meter(_meter->meter_level(n, MeterPeak)));
 				}
 			}
@@ -224,7 +255,13 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
 		uint32_t c[10];
+		uint32_t b[4];
 		float stp[4];
+		int styleflags = 3;
+		b[0] = ARDOUR_UI::config()->canvasvar_MeterBackgroundBot.get();
+		b[1] = ARDOUR_UI::config()->canvasvar_MeterBackgroundTop.get();
+		b[2] = 0x991122ff; // red highlight gradient Bot
+		b[3] = 0x551111ff; // red highlight gradient Top
 		if (n < nmidi) {
 			c[0] = ARDOUR_UI::config()->canvasvar_MidiMeterColor0.get();
 			c[1] = ARDOUR_UI::config()->canvasvar_MidiMeterColor1.get();
@@ -299,6 +336,7 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 					stp[1] = 115.0 * meter_deflect_vu(-23); // -3
 					stp[2] = 115.0 * meter_deflect_vu(-20); // 0
 					stp[3] = 115.0 * meter_deflect_vu(-18); // +2
+					styleflags = 1;
 					break;
 				default: // PEAK, RMS
 					stp[1] = 77.5;  // 115 * log_meter(-10)
@@ -321,15 +359,14 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 				}
 			}
 		}
-		if (meters[n].width != width || meters[n].length != len || color_changed) {
+		if (meters[n].width != width || meters[n].length != len || color_changed || meter_type != visible_meter_type) {
 			delete meters[n].meter;
 			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len,
 					c[0], c[1], c[2], c[3], c[4],
 					c[5], c[6], c[7], c[8], c[9],
-					ARDOUR_UI::config()->canvasvar_MeterBackgroundBot.get(),
-					ARDOUR_UI::config()->canvasvar_MeterBackgroundTop.get(),
-					0x991122ff, 0x551111ff,
-					stp[0], stp[1], stp[2], stp[3]
+					b[0], b[1], b[2], b[3],
+					stp[0], stp[1], stp[2], stp[3],
+					styleflags
 					);
 			meters[n].width = width;
 			meters[n].length = len;
@@ -344,6 +381,7 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 	}
 	show();
 	color_changed = false;
+	visible_meter_type = meter_type;
 }
 
 void

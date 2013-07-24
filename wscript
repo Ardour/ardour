@@ -111,21 +111,21 @@ def set_compiler_flags (conf,opt):
     # waf adds -O0 -g itself. thanks waf!
     is_clang = conf.env['CXX'][0].endswith('clang++')
     
+    # Append c++11 flags if requested
     if conf.options.cxx11:
         conf.check_cxx(cxxflags=["-std=c++11"])
         conf.env.append_unique('CXXFLAGS', ['-std=c++11'])
-        if platform == "darwin":
-            conf.env.append_unique('CXXFLAGS', ['-stdlib=libc++'])
-            conf.env.append_unique('LINKFLAGS', ['-lc++'])
-            # Prevents visibility issues in standard headers
-            conf.define("_DARWIN_C_SOURCE", 1)
 
     if is_clang and platform == "darwin":
         # Silence warnings about the non-existing osx clang compiler flags
         # -compatibility_version and -current_version.  These are Waf
         # generated and not needed with clang
-        conf.env.append_unique ("CXXFLAGS", ["-Qunused-arguments"])
-        
+        conf.env.append_unique("CFLAGS", ["-Qunused-arguments"])
+        conf.env.append_unique("CXXFLAGS", ["-Qunused-arguments"])
+        conf.env.append_unique('CXXFLAGS', ['-stdlib=libc++'])
+        conf.env.append_unique('LINKFLAGS', ['-lc++'])
+        conf.define("_DARWIN_C_SOURCE", 1)
+
     if opt.gprofile:
         debug_flags = [ '-pg' ]
 

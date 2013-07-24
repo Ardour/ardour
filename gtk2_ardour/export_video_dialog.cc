@@ -85,7 +85,7 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	, fps_checkbox (_("Override FPS (Default is to retain FPS from the input video file):"))
 	, meta_checkbox (_("Include Session Metadata"))
 #if 1 /* tentative debug mode */
-	, debug_checkbox (_("Enable Debug Mode: Print ffmpeg Command & Output to stdout."))
+	, debug_checkbox (_("Debug Mode: Print ffmpeg command and output to stdout."))
 #endif
 {
 	set_session (s);

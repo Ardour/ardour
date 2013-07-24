@@ -383,6 +383,13 @@ namespace ARDOUR {
 		MeteringRoute  ///< meter what is going through the route
 	};
 
+	enum VUMeterStandard {
+		MeteringVUfrench,   // 0VU = -2dBu
+		MeteringVUamerican, // 0VU =  0dBu
+		MeteringVUstandard, // 0VU = +4dBu
+		MeteringVUeight     // 0VU = +8dBu
+	};
+
 	enum MeterLineUp {
 		MeteringLineUp24,
 		MeteringLineUp20,
@@ -590,6 +597,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::AutoConnectOption& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::EditMode& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::MonitorModel& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::VUMeterStandard& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::MeterLineUp& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::PFLPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::AFLPosition& sf);
@@ -612,6 +620,7 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::HeaderFormat& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::AutoConnectOption& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::EditMode& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::MonitorModel& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::VUMeterStandard& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::MeterLineUp& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PFLPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::AFLPosition& sf);

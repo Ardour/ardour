@@ -56,6 +56,7 @@ using namespace ArdourMeter;
 
 PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
 PBD::Signal0<void> MeterStrip::MetricChanged;
+PBD::Signal0<void> MeterStrip::ConfigurationChanged;
 
 MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	: AxisView(0)
@@ -63,9 +64,11 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 {
 	level_meter = 0;
 	_strip_type = 0;
-	set_spacing(2);
+	mtr_vbox.set_spacing(2);
+	nfo_vbox.set_spacing(2);
 	peakbx.set_size_request(-1, 14);
 	namebx.set_size_request(18, 52);
+	spacer.set_size_request(-1,0);
 
 	set_metric_mode(metricmode, mt);
 
@@ -76,15 +79,30 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 
 	meterbox.pack_start(meter_metric_area, true, false);
 
-	pack_start (peakbx, false, false);
-	pack_start (meterbox, true, true);
-	pack_start (btnbox, false, false);
-	pack_start (namebx, false, false);
+	mtr_vbox.pack_start (peakbx, false, false);
+	mtr_vbox.pack_start (meterbox, true, true);
+	mtr_vbox.pack_start (spacer, false, false);
+	mtr_container.add(mtr_vbox);
+
+	mtr_hsep.set_size_request(-1,1);
+	mtr_hsep.set_name("BlackSeparator");
+
+	nfo_vbox.pack_start (mtr_hsep, false, false);
+	nfo_vbox.pack_start (btnbox, false, false);
+	nfo_vbox.pack_start (namebx, false, false);
+
+	pack_start (mtr_container, true, true);
+	pack_start (nfo_vbox, false, false);
 
 	peakbx.show();
 	btnbox.show();
 	meter_metric_area.show();
 	meterbox.show();
+	spacer.show();
+	mtr_vbox.show();
+	mtr_container.show();
+	mtr_hsep.show();
+	nfo_vbox.show();
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
@@ -97,7 +115,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	, _route(rt)
 	, peak_display()
 {
-	set_spacing(2);
+	mtr_vbox.set_spacing(2);
+	nfo_vbox.set_spacing(2);
 	RouteUI::set_route (rt);
 	SessionHandlePtr::set_session (sess);
 
@@ -170,24 +189,42 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	mutebox.set_size_request(16, 16);
 	solobox.set_size_request(16, 16);
 	recbox.set_size_request(16, 16);
+	spacer.set_size_request(-1,0);
 
 	update_button_box();
 	update_name_box();
+	update_background (_route->meter_type());
 
-	pack_start (peakbx, false, false);
-	pack_start (meterbox, true, true);
-	pack_start (btnbox, false, false);
-	pack_start (namebx, false, false);
+	mtr_vbox.pack_start (peakbx, false, false);
+	mtr_vbox.pack_start (meterbox, true, true);
+	mtr_vbox.pack_start (spacer, false, false);
+	mtr_container.add(mtr_vbox);
+
+	mtr_hsep.set_size_request(-1,1);
+	mtr_hsep.set_name("BlackSeparator");
+
+	nfo_vbox.pack_start (mtr_hsep, false, false);
+	nfo_vbox.pack_start (btnbox, false, false);
+	nfo_vbox.pack_start (namebx, false, false);
+
+	pack_start (mtr_container, true, true);
+	pack_start (nfo_vbox, false, false);
+
 	name_label.show();
 	peak_display.show();
 	peakbx.show();
 	meter_ticks1_area.show();
 	meter_ticks2_area.show();
 	meterbox.show();
+	spacer.show();
 	level_meter->show();
 	meter_align.show();
 	peak_align.show();
 	btnbox.show();
+	mtr_vbox.show();
+	mtr_container.show();
+	mtr_hsep.show();
+	nfo_vbox.show();
 
 	_route->shared_peak_meter()->ConfigurationChanged.connect (
 			route_connections, invalidator (*this), boost::bind (&MeterStrip::meter_configuration_changed, this, _1), gui_context()
@@ -366,8 +403,9 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 		_has_midi = true;
 	}
 
-	if (old_has_midi != _has_midi) MetricChanged();
 	on_theme_changed();
+	if (old_has_midi != _has_midi) MetricChanged();
+	else ConfigurationChanged();
 }
 
 void
@@ -425,8 +463,28 @@ MeterStrip::set_metric_mode (int metricmode, ARDOUR::MeterType mt)
 			_types.push_back (DataType::AUDIO);
 			break;
 	}
-
+	update_background (mt);
 	meter_metric_area.queue_draw ();
+}
+
+void
+MeterStrip::update_background(MeterType type)
+{
+	switch(type) {
+		case MeterIEC1DIN:
+		case MeterIEC1NOR:
+		case MeterIEC2BBC:
+		case MeterIEC2EBU:
+		case MeterK14:
+		case MeterK20:
+			mtr_container.set_name ("meterstripPPM");
+			break;
+		case MeterVU:
+			mtr_container.set_name ("meterstripVU");
+			break;
+		default:
+			mtr_container.set_name ("meterstripDPM");
+	}
 }
 
 MeterType
@@ -629,6 +687,7 @@ MeterStrip::meter_type_changed (MeterType type)
 	if (_route->meter_type() != type) {
 		_route->set_meter_type(type);
 	}
+	update_background (type);
 	MetricChanged();
 }
 

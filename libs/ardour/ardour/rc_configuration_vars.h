@@ -149,6 +149,7 @@ CONFIG_VARIABLE (bool, super_rapid_clock_update, "super-rapid-clock-update", fal
 
 CONFIG_VARIABLE (float, meter_hold, "meter-hold", 100.0f)
 CONFIG_VARIABLE (float, meter_falloff, "meter-falloff", 32.0f)
+CONFIG_VARIABLE (VUMeterStandard, meter_vu_standard, "meter-vu-standard", MeteringVUstandard)
 CONFIG_VARIABLE (MeterLineUp, meter_line_up_level, "meter-line-up-level", MeteringLineUp18)
 CONFIG_VARIABLE (float, meter_peak, "meter-peak", 0.0f)
 

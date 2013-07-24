@@ -39,6 +39,7 @@
 #include "keyeditor.h"
 #include "location_ui.h"
 #include "main_clock.h"
+#include "meter_patterns.h"
 #include "midi_tracer.h"
 #include "mixer_ui.h"
 #include "public_editor.h"
@@ -186,6 +187,26 @@ ARDOUR_UI::set_session (Session *s)
 	point_zero_something_second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_zero_something_seconds), 40);
 
 	update_format ();
+
+	if (editor_meter) {
+		meter_box.remove(*editor_meter);
+		delete editor_meter;
+		editor_meter = 0;
+	}
+
+	if (_session && _session->master_out()) {
+		editor_meter = new LevelMeter(_session);
+		editor_meter->set_meter (_session->master_out()->shared_peak_meter().get());
+		editor_meter->clear_meters();
+		editor_meter->set_type (_session->master_out()->meter_type());
+		editor_meter->setup_meters (30, 12, 6);
+		meter_box.pack_start(*editor_meter);
+
+		ArdourMeter::ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_peak_display));
+		ArdourMeter::ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_route_peak_display));
+		ArdourMeter::ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_group_peak_display));
+	}
+
 }
 
 int
@@ -224,6 +245,12 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	second_connection.disconnect ();
 	point_one_second_connection.disconnect ();
 	point_zero_something_second_connection.disconnect();
+
+	if (editor_meter) {
+		meter_box.remove(*editor_meter);
+		delete editor_meter;
+		editor_meter = 0;
+	}
 
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, false);
 

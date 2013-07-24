@@ -56,6 +56,8 @@ Pango::FontDescription get_font_for_style (std::string widgetname);
 
 uint32_t rgba_from_style (std::string, uint32_t, uint32_t, uint32_t, uint32_t, std::string = "fg", int = Gtk::STATE_NORMAL, bool = true);
 
+bool rgba_p_from_style (std::string, float*, float*, float*, std::string = "fg", int = Gtk::STATE_NORMAL);
+
 void decorate (Gtk::Window& w, Gdk::WMDecoration d);
 
 bool canvas_item_visible (ArdourCanvas::Item* item);

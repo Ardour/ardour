@@ -56,6 +56,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 
 	static PBD::Signal1<void,MeterStrip*> CatchDeletion;
 	static PBD::Signal0<void> MetricChanged;
+	static PBD::Signal0<void> ConfigurationChanged;
 
 	void reset_peak_display ();
 	void reset_route_peak_display (ARDOUR::Route*);
@@ -89,7 +90,12 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void set_button_names ();
 
   private:
+	Gtk::VBox mtr_vbox;
+	Gtk::VBox nfo_vbox;
+	Gtk::EventBox mtr_container;
+	Gtk::HSeparator mtr_hsep;
 	Gtk::HBox meterbox;
+	Gtk::HBox spacer;
 	Gtk::HBox namebx;
 	ArdourButton name_label;
 	Gtk::DrawingArea meter_metric_area;
@@ -119,6 +125,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void strip_property_changed (const PBD::PropertyChange&);
 	void meter_configuration_changed (ARDOUR::ChanCount);
 	void meter_type_changed (ARDOUR::MeterType);
+	void update_background (ARDOUR::MeterType);
 
 	static int max_pattern_metric_size; // == FastMeter::max_pattern_metric_size
 
