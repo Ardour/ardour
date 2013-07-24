@@ -47,7 +47,8 @@ class FastMeter : public Gtk::DrawingArea {
 			float stp0 = 55.0, // log_meter(-18);
 			float stp1 = 77.5, // log_meter(-9);
 			float stp2 = 92.5, // log_meter(-3); // 95.0, // log_meter(-2);
-			float stp3 = 100.0
+			float stp3 = 100.0,
+			int styleflags = 3
 			);
 	virtual ~FastMeter ();
 
@@ -79,6 +80,7 @@ private:
 	int _clr[10];
 	int _bgc[2];
 	int _bgh[2];
+	int _styleflags;
 
 	Orientation orientation;
 	GdkRectangle pixrect;
@@ -99,14 +101,14 @@ private:
 	static bool no_rgba_overlay;
 
 	static Cairo::RefPtr<Cairo::Pattern> generate_meter_pattern (
-		int w, int h, int *clr, float *stp, bool shade);
+		int, int, int *, float *, int);
 	static Cairo::RefPtr<Cairo::Pattern> request_vertical_meter (
-		int w, int h, int *clr, float *stp, bool shade);
+		int, int, int *, float *, int);
 
 	static Cairo::RefPtr<Cairo::Pattern> generate_meter_background (
-		int w, int h, int *bgc, bool shade);
+		int, int, int *, bool);
 	static Cairo::RefPtr<Cairo::Pattern> request_vertical_background (
-		int w, int h, int *bgc, bool shade);
+		int, int, int *, bool);
 
 	struct Pattern10MapKey {
 		Pattern10MapKey (
@@ -114,20 +116,23 @@ private:
 				float stp0, float stp1, float stp2, float stp3,
 				int c0, int c1, int c2, int c3,
 				int c4, int c5, int c6, int c7,
-				int c8, int c9
+				int c8, int c9, int st
 				)
 			: dim(w, h)
 			, stp(stp0, stp1, stp2, stp3)
 			, cols(c0, c1, c2, c3, c4, c5, c6, c7, c8, c9)
+			, style(st)
 		{}
 		inline bool operator<(const Pattern10MapKey& rhs) const {
 			return (dim < rhs.dim)
 				|| (dim == rhs.dim && stp < rhs.stp)
-				|| (dim == rhs.dim && stp == rhs.stp && cols < rhs.cols);
+				|| (dim == rhs.dim && stp == rhs.stp && cols < rhs.cols)
+				|| (dim == rhs.dim && stp == rhs.stp && cols == rhs.cols && style < rhs.style);
 		}
 		boost::tuple<int, int> dim;
 		boost::tuple<float, float, float, float> stp;
 		boost::tuple<int, int, int, int, int, int, int, int, int, int> cols;
+		int style;
 	};
 	typedef std::map<Pattern10MapKey, Cairo::RefPtr<Cairo::Pattern> > Pattern10Map;
 
