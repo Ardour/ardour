@@ -197,7 +197,7 @@ RingBufferNPT<T>::write (const T *src, size_t cnt)
 }
 
 template<class T> void
-RingBufferNPT<T>::get_read_vector (RingBufferNPT<T>::rw_vector *vec)
+RingBufferNPT<T>::get_read_vector (typename RingBufferNPT<T>::rw_vector *vec)
 {
 	size_t free_cnt;
 	size_t cnt2;
@@ -237,7 +237,7 @@ RingBufferNPT<T>::get_read_vector (RingBufferNPT<T>::rw_vector *vec)
 }
 
 template<class T> void
-RingBufferNPT<T>::get_write_vector (RingBufferNPT<T>::rw_vector *vec)
+RingBufferNPT<T>::get_write_vector (typename RingBufferNPT<T>::rw_vector *vec)
 {
 	size_t free_cnt;
 	size_t cnt2;

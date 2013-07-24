@@ -53,7 +53,21 @@
 	// Other compilers / platforms could be accommodated here
 	#define PBD_API
 	#define PBD_APICALLTYPE
+	#define GETOPT_API
+	#define GETOPT_APICALLTYPE
 #endif
+
+#ifndef GETOPT_API
+	#if defined(BUILDING_GETOPT)
+		#define GETOPT_API __declspec(dllexport)
+		#define GETOPT_APICALLTYPE __cdecl
+	#elif defined(_MSC_VER) || defined(__CYGWIN__) || defined(__MINGW__) || defined(_MINGW32__)
+		#define GETOPT_API __declspec(dllimport)
+		#define GETOPT_APICALLTYPE __cdecl
+	#else
+		#error "Attempting to define __declspec with an incompatible compiler !"
+	#endif
+#endif  // GETOPT_API
 
 #ifndef _MAX_PATH
 #define _MAX_PATH  260
