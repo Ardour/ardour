@@ -69,20 +69,18 @@ public:
 	AudioEngine (std::string client_name, std::string session_uuid);
 	virtual ~AudioEngine ();
 
-	jack_client_t* jack() const;
-	bool connected() const { return _jack != 0; }
-
-	bool is_realtime () const;
+        static int discover_backends();
+        std::vector<std::string> available_backends() const;
 
 	ProcessThread* main_thread() const { return _main_thread; }
 
 	std::string client_name() const { return jack_client_name; }
 
-	int reconnect_to_jack ();
-	int disconnect_from_jack();
-
 	int stop (bool forever = false);
 	int start ();
+        int pause ();
+        int freewheel (bool);
+    
 	bool running() const { return _running; }
 
 	Glib::Threads::Mutex& process_lock() { return _process_lock; }
@@ -120,14 +118,6 @@ public:
 		return jack_last_frame_time (_priv_jack);
 	}
 
-	pframes_t transport_frame () const {
-  	        const jack_client_t* _priv_jack = _jack;
-		if (!_running || !_priv_jack) {
-			return 0;
-		}
-		return jack_get_current_transport_frame (_priv_jack);
-	}
-
 	int request_buffer_size (pframes_t);
 
 	framecnt_t processed_frames() const { return _processed_frames; }
@@ -143,61 +133,12 @@ public:
 	void set_session (Session *);
 	void remove_session (); // not a replacement for SessionHandle::session_going_away()
 
-	class PortRegistrationFailure : public std::exception {
-	public:
-		PortRegistrationFailure (std::string const & why = "")
-			: reason (why) {}
-
-		~PortRegistrationFailure () throw () {}
-
-		virtual const char *what() const throw () { return reason.c_str(); }
-
-	private:
-		std::string reason;
-	};
-
 	class NoBackendAvailable : public std::exception {
 	public:
 		virtual const char *what() const throw() { return "could not connect to engine backend"; }
 	};
 
-	boost::shared_ptr<Port> register_input_port (DataType, const std::string& portname);
-	boost::shared_ptr<Port> register_output_port (DataType, const std::string& portname);
-	int unregister_port (boost::shared_ptr<Port>);
-
-	bool port_is_physical (const std::string&) const;
-	void request_jack_monitors_input (const std::string&, bool) const;
-
 	void split_cycle (pframes_t offset);
-
-	int connect (const std::string& source, const std::string& destination);
-	int disconnect (const std::string& source, const std::string& destination);
-	int disconnect (boost::shared_ptr<Port>);
-
-	const char ** get_ports (const std::string& port_name_pattern, const std::string& type_name_pattern, uint32_t flags);
-
-	bool can_request_hardware_monitoring ();
-
-	ChanCount n_physical_outputs () const;
-	ChanCount n_physical_inputs () const;
-
-	void get_physical_outputs (DataType type, std::vector<std::string>&);
-	void get_physical_inputs (DataType type, std::vector<std::string>&);
-
-	boost::shared_ptr<Port> get_port_by_name (const std::string &);
-	void port_renamed (const std::string&, const std::string&);
-
-	enum TransportState {
-		TransportStopped = JackTransportStopped,
-		TransportRolling = JackTransportRolling,
-		TransportLooping = JackTransportLooping,
-		TransportStarting = JackTransportStarting
-	};
-
-	void transport_start ();
-	void transport_stop ();
-	void transport_locate (framepos_t);
-	TransportState transport_state ();
 
 	int  reset_timebase ();
 
@@ -263,8 +204,6 @@ _	   the regular process() call to session->process() is not made.
 private:
 	static AudioEngine*       _instance;
 
-	jack_client_t* volatile   _jack; /* could be reset to null by SIGPIPE or another thread */
-	std::string                jack_client_name;
 	Glib::Threads::Mutex      _process_lock;
         Glib::Threads::Cond        session_removed;
 	bool                       session_remove_pending;
@@ -289,6 +228,7 @@ private:
         Glib::Threads::Thread*     m_meter_thread;
 	ProcessThread*            _main_thread;
 
+
 	SerializedRCUManager<Ports> ports;
 
 	boost::shared_ptr<Port> register_port (DataType type, const std::string& portname, bool input);
@@ -297,41 +237,7 @@ private:
 	void*  process_thread ();
 	void   remove_all_ports ();
 
-	ChanCount n_physical (unsigned long) const;
-	void get_physical (DataType, unsigned long, std::vector<std::string> &);
-
 	void port_registration_failure (const std::string& portname);
-
-	static int  _xrun_callback (void *arg);
-#ifdef HAVE_JACK_SESSION
-	static void _session_callback (jack_session_event_t *event, void *arg);
-#endif
-	static int  _graph_order_callback (void *arg);
-	static void* _process_thread (void *arg);
-	static int  _sample_rate_callback (pframes_t nframes, void *arg);
-	static int  _bufsize_callback (pframes_t nframes, void *arg);
-	static void _jack_timebase_callback (jack_transport_state_t, pframes_t, jack_position_t*, int, void*);
-	static int  _jack_sync_callback (jack_transport_state_t, jack_position_t*, void *arg);
-	static void _freewheel_callback (int , void *arg);
-	static void _registration_callback (jack_port_id_t, int, void *);
-	static void _connect_callback (jack_port_id_t, jack_port_id_t, int, void *);
-
-	void jack_timebase_callback (jack_transport_state_t, pframes_t, jack_position_t*, int);
-	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
-	int  jack_bufsize_callback (pframes_t);
-	int  jack_sample_rate_callback (pframes_t);
-	void freewheel_callback (int);
-        void connect_callback (jack_port_id_t, jack_port_id_t, int);
-
-	void set_jack_callbacks ();
-
-	static void _latency_callback (jack_latency_callback_mode_t, void*);
-	void jack_latency_callback (jack_latency_callback_mode_t);
-
-	int connect_to_jack (std::string client_name, std::string session_uuid);
-
-	static void halted (void *);
-	static void halted_info (jack_status_t,const char*,void *);
 
 	void meter_thread ();
 	void start_metering_thread ();
@@ -339,16 +245,6 @@ private:
 
 	static gint      m_meter_exit;
 
-	struct ThreadData {
-		AudioEngine* engine;
-		boost::function<void()> f;
-		size_t stacksize;
-
-		ThreadData (AudioEngine* ae, boost::function<void()> fp, size_t stacksz)
-		: engine (ae) , f (fp) , stacksize (stacksz) {}
-	};
-
-	static void* _start_process_thread (void*);
         void parameter_changed (const std::string&);
         PBD::ScopedConnection config_connection;
 };
