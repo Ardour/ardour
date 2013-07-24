@@ -85,38 +85,6 @@ public:
 
 	Glib::Threads::Mutex& process_lock() { return _process_lock; }
 
-	framecnt_t frame_rate () const;
-	pframes_t frames_per_cycle () const;
-
-	size_t raw_buffer_size(DataType t);
-
-	int usecs_per_cycle () const { return _usecs_per_cycle; }
-
-	bool get_sync_offset (pframes_t & offset) const;
-
-	pframes_t frames_since_cycle_start () {
-  	        jack_client_t* _priv_jack = _jack;
-		if (!_running || !_priv_jack) {
-			return 0;
-		}
-		return jack_frames_since_cycle_start (_priv_jack);
-	}
-
-	pframes_t frame_time () {
-  	        jack_client_t* _priv_jack = _jack;
-		if (!_running || !_priv_jack) {
-			return 0;
-		}
-		return jack_frame_time (_priv_jack);
-	}
-
-	pframes_t frame_time_at_cycle_start () {
-  	        jack_client_t* _priv_jack = _jack;
-		if (!_running || !_priv_jack) {
-			return 0;
-		}
-		return jack_last_frame_time (_priv_jack);
-	}
 
 	int request_buffer_size (pframes_t);
 
