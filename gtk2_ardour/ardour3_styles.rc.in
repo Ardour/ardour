@@ -1006,3 +1006,8 @@ style "meter_strip_vu" = "default"
   bg[NORMAL] = { 1.0, 1.0, 0.85 }
   fg[NORMAL] = { 0.0, 0.0, 0.0 }
 }
+
+style "meter_strip_sep" = "default"
+{
+  bg[NORMAL] = { 0.0, 0.0, 0.0 }
+}
