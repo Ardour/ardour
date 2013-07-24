@@ -336,8 +336,6 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 					stp[1] = 115.0 * meter_deflect_vu(-23); // -3
 					stp[2] = 115.0 * meter_deflect_vu(-20); // 0
 					stp[3] = 115.0 * meter_deflect_vu(-18); // +2
-					b[0] = 0x80806dff;
-					b[1] = 0xc0c0a3ff;
 					styleflags = 1;
 					break;
 				default: // PEAK, RMS
