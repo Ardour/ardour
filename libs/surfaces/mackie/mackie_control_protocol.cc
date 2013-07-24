@@ -1236,7 +1236,7 @@ MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 		}
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("data available on %1\n", port->name()));
-		framepos_t now = session->engine().frame_time();
+		framepos_t now = session->engine().sample_time();
 		port->parse (now);
 	}
 

@@ -420,15 +420,15 @@ bool
 LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 {
 	bool engine_init_called = false;
-	framepos_t now = session.engine().frame_time_at_cycle_start();
+	framepos_t now = session.engine().sample_time_at_cycle_start();
 	framepos_t sess_pos = session.transport_frame(); // corresponds to now
-	framecnt_t nframes = session.engine().frames_per_cycle();
+	framecnt_t nframes = session.engine().samples_per_cycle();
 
-	jack_default_audio_sample_t *in;
+	Sample* in;
 
 	boost::shared_ptr<Port> ltcport = session.ltc_input_port();
 
-	in = (jack_default_audio_sample_t*) jack_port_get_buffer (ltcport->jack_port(), nframes);
+	in = (Sample*) AudioEngine::instance()->port_engine().get_buffer (ltcport->port_handle(), nframes);
 
 	frameoffset_t skip = now - (monotonic_cnt + nframes);
 	monotonic_cnt = now;
@@ -441,7 +441,7 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	else if (engine_dll_initstate != transport_direction && ltc_speed != 0) {
 		engine_dll_initstate = transport_direction;
 		init_engine_dll(last_ltc_frame + rint(ltc_speed * double(2 * nframes + now - last_timestamp)),
-				session.engine().frames_per_cycle());
+				session.engine().samples_per_cycle());
 		engine_init_called = true;
 	}
 
@@ -521,8 +521,8 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 		t0 = t1;
 		t1 += b * e + e2;
 		e2 += c * e;
-		speed_flt = (t1 - t0) / double(session.engine().frames_per_cycle());
-		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC engine DLL t0:%1 t1:%2 err:%3 spd:%4 ddt:%5\n", t0, t1, e, speed_flt, e2 - session.engine().frames_per_cycle() ));
+		speed_flt = (t1 - t0) / double(session.engine().samples_per_cycle());
+		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC engine DLL t0:%1 t1:%2 err:%3 spd:%4 ddt:%5\n", t0, t1, e, speed_flt, e2 - session.engine().samples_per_cycle() ));
 	} else {
 		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC adjusting elapsed (no DLL) from %1 by %2\n", elapsed, (2 * nframes * ltc_speed)));
 		speed_flt = 0;

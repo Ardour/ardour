@@ -6,12 +6,43 @@
 int
 JACKAudioBackend::start ()
 {
-	Glib::Threads::Mutex::Lock lm (_state_lock);
+	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
 
-	if (running()) {
-		/* already running */
-		return 1;
+	if (!_running) {
+
+                if (!jack_port_type_get_buffer_size) {
+                        warning << _("This version of JACK is old - you should upgrade to a newer version that supports jack_port_type_get_buffer_size()") << endmsg;
+		}
+
+		if (_session) {
+			BootMessage (_("Connect session to engine"));
+			_session->set_frame_rate (jack_get_sample_rate (_priv_jack));
+		}
+
+                /* a proxy for whether jack_activate() will definitely call the buffer size
+                 * callback. with older versions of JACK, this function symbol will be null.
+                 * this is reliable, but not clean.
+                 */
+
+                if (!jack_port_type_get_buffer_size) {
+			jack_bufsize_callback (jack_get_buffer_size (_priv_jack));
+                }
+		
+		_processed_frames = 0;
+		last_monitor_check = 0;
+
+                set_jack_callbacks ();
+
+		if (jack_activate (_priv_jack) == 0) {
+			_running = true;
+			_has_run = true;
+			Running(); /* EMIT SIGNAL */
+		} else {
+			// error << _("cannot activate JACK client") << endmsg;
+		}
 	}
+		
+	return _running ? 0 : -1;
 }
 
 int
@@ -69,6 +100,39 @@ JACKAudioBackend::get_parameters (Parameters& params) const
 {
 	return 0;
 }
+
+/* parameters */
+
+ARDOUR::pframes_t
+AudioEngine::frames_per_cycle () const
+{
+ 	GET_PRIVATE_JACK_POINTER_RET (_jack,0);
+	if (_buffer_size == 0) {
+		return jack_get_buffer_size (_jack);
+	} else {
+		return _buffer_size;
+	}
+}
+
+ARDOUR::framecnt_t
+AudioEngine::frame_rate () const
+{
+	GET_PRIVATE_JACK_POINTER_RET (_jack, 0);
+	if (_frame_rate == 0) {
+		return (_frame_rate = jack_get_sample_rate (_priv_jack));
+	} else {
+		return _frame_rate;
+	}
+}
+
+size_t
+AudioEngine::raw_buffer_size (DataType t)
+{
+	std::map<DataType,size_t>::const_iterator s = _raw_buffer_sizes.find(t);
+	return (s != _raw_buffer_sizes.end()) ? s->second : 0;
+}
+
+
 
 /*--- private support methods ---*/
 
@@ -539,8 +603,8 @@ JACKAudioBackend::process_thread ()
                 GET_PRIVATE_JACK_POINTER_RET(_jack,0);
 
                 pframes_t nframes = jack_cycle_wait (_priv_jack);
-
-                if (process_callback (nframes)) {
+		
+                if (engine.process_callback (nframes)) {
                         return 0;
                 }
 

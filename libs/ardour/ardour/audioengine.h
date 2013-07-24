@@ -47,6 +47,7 @@
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
 #include "ardour/chan_count.h"
+#include "ardour/port_manager.h"
 
 #ifdef HAVE_JACK_SESSION
 #include <jack/session.h>
@@ -61,36 +62,59 @@ class Session;
 class ProcessThread;
 class AudioBackend;
 
-class AudioEngine : public SessionHandlePtr
+class AudioEngine : public SessionHandlePtr, public PortManager
 {
 public:
-    typedef std::map<std::string,boost::shared_ptr<Port> > Ports;
-    
-    AudioEngine (std::string client_name, std::string session_uuid);
+
+    static AudioEngine* create (const std::string&  client_name, const std::string& session_uuid);
+
     virtual ~AudioEngine ();
     
-    static int discover_backends();
+    int discover_backends();
     std::vector<std::string> available_backends() const;
     std::string current_backend_name () const;
+    int set_backend (const std::string&);
 
     ProcessThread* main_thread() const { return _main_thread; }
     
     std::string client_name() const { return backend_client_name; }
+
+    /* START BACKEND PROXY API 
+     *
+     * See audio_backend.h for full documentation and semantics. These wrappers
+     * just forward to a backend implementation.
+     */
+
+    int            start ();
+    int            stop ();
+    int            pause ();
+    int            freewheel (bool start_stop);
+    float          get_cpu_load() const ;
+    void           transport_start ();
+    void           transport_stop ();
+    TransportState transport_state ();
+    void           transport_locate (framepos_t pos);
+    framepos_t     transport_frame();
+    framecnt_t     sample_rate () const;
+    pframes_t      samples_per_cycle () const;
+    int            usecs_per_cycle () const;
+    size_t         raw_buffer_size (DataType t);
+    pframes_t      sample_time ();
+    pframes_t      sample_time_at_cycle_start ();
+    pframes_t      samples_since_cycle_start ();
+    bool           get_sync_offset (pframes_t& offset) const;
+    int            create_process_thread (boost::function<void()> func, pthread_t*, size_t stacksize);
     
-    int stop (bool forever = false);
-    int start ();
-    int pause ();
-    int freewheel (bool onoff);
+    /* END BACKEND PROXY API */
+
     bool freewheeling() const { return _freewheeling; }
-   
     bool running() const { return _running; }
+
     Glib::Threads::Mutex& process_lock() { return _process_lock; }
 
     int request_buffer_size (pframes_t);
 
     framecnt_t processed_frames() const { return _processed_frames; }
-    
-    float get_cpu_load();
     
     void set_session (Session *);
     void remove_session (); // not a replacement for SessionHandle::session_going_away()
@@ -161,8 +185,11 @@ public:
     int    process_callback (pframes_t nframes);
     
   private:
+    AudioEngine (const std::string&  client_name, const std::string& session_uuid);
+
     static AudioEngine*       _instance;
-    
+
+    AudioBackend*             _backend;
     Glib::Threads::Mutex      _process_lock;
     Glib::Threads::Cond        session_removed;
     bool                       session_remove_pending;
@@ -187,6 +214,8 @@ public:
     Glib::Threads::Thread*     m_meter_thread;
     ProcessThread*            _main_thread;
     
+    std::string               backend_client_name;
+    std::string               backend_session_uuid;
     
     void meter_thread ();
     void start_metering_thread ();
@@ -196,6 +225,11 @@ public:
     
     void parameter_changed (const std::string&);
     PBD::ScopedConnection config_connection;
+
+    typedef std::map<std::string,AudioBackend*> BackendMap;
+    BackendMap _backends;
+    AudioBackend* backend_discover (const std::string&);
+    void drop_backend ();
 };
 	
 } // namespace ARDOUR

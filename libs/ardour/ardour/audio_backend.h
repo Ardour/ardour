@@ -33,15 +33,15 @@ class AudioEngine;
 class AudioBackend {
   public:
 
-    enum State {
-	    Stopped = 0x1,
-	    Running = 0x2,
-	    Paused =  0x4,
-	    Freewheeling = 0x8,
-    };
-
-    AudioBackend (AudioEngine& e) : engine (e), _state (Stopped) {}
+    AudioBackend (AudioEngine& e) : engine (e){}
     virtual ~AudioBackend () {}
+
+    /** Return the name of this backend.
+     *
+     * Should use a well-known, unique term. Expected examples
+     * might include "JACK", "CoreAudio", "ASIO" etc.
+     */
+    virtual std::string name() const = 0;
 
     /** return true if the underlying mechanism/API is still available
      * for us to utilize. return false if some or all of the AudioBackend
@@ -261,7 +261,7 @@ class AudioBackend {
     virtual TransportState transport_state () { return TransportStopped; }
     /** Attempt to locate the transport to @param pos
      */
-    virtual void transport_locate (framepos_t pos) {}
+    virtual void transport_locate (framepos_t /*pos*/) {}
     /** Return the current transport location, in samples measured
      * from the origin (defined by the transport time master)
      */
@@ -275,11 +275,11 @@ class AudioBackend {
      * JACK is the only currently known audio API with the concept of a shared
      * transport timebase.
      */
-    virtual int set_time_master (bool yn) { return 0; }
+    virtual int set_time_master (bool /*yn*/) { return 0; }
 
     virtual framecnt_t sample_rate () const;
     virtual pframes_t  samples_per_cycle () const;
-    virtual int        usecs_per_cycle () const { return _usecs_per_cycle; }
+    virtual int        usecs_per_cycle () const { return 1000000 * (samples_per_cycle() / sample_rate()); }
     virtual size_t     raw_buffer_size (DataType t);
     
     /* Process time */
@@ -326,7 +326,7 @@ class AudioBackend {
      * Can ONLY be called from within a process() callback tree (which implies
      * that it can only be called by a process thread)
      */
-    virtual bool get_sync_offset (pframes_t& offset) const { return 0; }
+    virtual bool get_sync_offset (pframes_t& /*offset*/) const { return false; }
 
     /** Create a new thread suitable for running part of the buffer process
      * cycle (i.e. Realtime scheduling, memory allocation, etc. etc are all
@@ -338,17 +338,6 @@ class AudioBackend {
     
   private:
     AudioEngine&          engine;
-    State                _state;
-
-    std::string  _target_device;
-    float        _target_sample_rate;
-    uint32_t     _target_buffer_size;
-    SampleFormat _target_sample_format;
-    bool         _target_interleaved;
-    uint32_t     _target_input_channels;
-    uint32_t     _target_output_channels;
-    uin32_t      _target_systemic_input_latency;
-    uin32_t      _target_systemic_input_latency;
 };
 
 }

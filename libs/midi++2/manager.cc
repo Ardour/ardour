@@ -36,17 +36,17 @@ using namespace PBD;
 
 Manager *Manager::theManager = 0;
 
-Manager::Manager (jack_client_t* jack)
+Manager::Manager (ARDOUR::PortEngine& eng)
 	: _ports (new PortList)
 {
-	_mmc = new MachineControl (this, jack);
+	_mmc = new MachineControl (this, eng);
 	
-	_mtc_input_port = add_port (new MIDI::JackMIDIPort ("MTC in", Port::IsInput, jack));
-	_mtc_output_port = add_port (new MIDI::JackMIDIPort ("MTC out", Port::IsOutput, jack));
-	_midi_input_port = add_port (new MIDI::JackMIDIPort ("MIDI control in", Port::IsInput, jack));
-	_midi_output_port = add_port (new MIDI::JackMIDIPort ("MIDI control out", Port::IsOutput, jack));
-	_midi_clock_input_port = add_port (new MIDI::JackMIDIPort ("MIDI clock in", Port::IsInput, jack));
-	_midi_clock_output_port = add_port (new MIDI::JackMIDIPort ("MIDI clock out", Port::IsOutput, jack));
+	_mtc_input_port = add_port (new MIDI::JackMIDIPort ("MTC in", Port::IsInput, eng));
+	_mtc_output_port = add_port (new MIDI::JackMIDIPort ("MTC out", Port::IsOutput, eng));
+	_midi_input_port = add_port (new MIDI::JackMIDIPort ("MIDI control in", Port::IsInput, eng));
+	_midi_output_port = add_port (new MIDI::JackMIDIPort ("MIDI control out", Port::IsOutput, eng));
+	_midi_clock_input_port = add_port (new MIDI::JackMIDIPort ("MIDI clock in", Port::IsInput, eng));
+	_midi_clock_output_port = add_port (new MIDI::JackMIDIPort ("MIDI clock out", Port::IsOutput, eng));
 }
 
 Manager::~Manager ()
@@ -113,14 +113,14 @@ Manager::cycle_end()
 
 /** Re-register ports that disappear on JACK shutdown */
 void
-Manager::reestablish (jack_client_t* jack)
+Manager::reestablish ()
 {
 	boost::shared_ptr<PortList> pr = _ports.reader ();
 
 	for (PortList::const_iterator p = pr->begin(); p != pr->end(); ++p) {
 		JackMIDIPort* pp = dynamic_cast<JackMIDIPort*> (*p);
 		if (pp) {
-			pp->reestablish (jack);
+			pp->reestablish ();
 		}
 	}
 }
@@ -157,10 +157,10 @@ Manager::port (string const & n)
 }
 
 void
-Manager::create (jack_client_t* jack)
+Manager::create (ARDOUR::PortEngine& eng)
 {
 	assert (theManager == 0);
-	theManager = new Manager (jack);
+	theManager = new Manager (eng);
 }
 
 void

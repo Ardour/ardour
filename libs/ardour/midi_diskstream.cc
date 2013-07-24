@@ -1097,7 +1097,7 @@ MidiDiskstream::prep_record_enable ()
 	boost::shared_ptr<MidiPort> sp = _source_port.lock ();
 	
 	if (sp && Config->get_monitoring_model() == HardwareMonitoring) {
-		sp->request_jack_monitors_input (!(_session.config.get_auto_input() && rolling));
+		sp->request_input_monitoring (!(_session.config.get_auto_input() && rolling));
 	}
 
 	return true;
@@ -1250,7 +1250,7 @@ MidiDiskstream::ensure_jack_monitors_input (bool yn)
 	boost::shared_ptr<MidiPort> sp = _source_port.lock ();
 	
 	if (sp) {
-		sp->ensure_jack_monitors_input (yn);
+		sp->ensure_input_monitoring (yn);
 	}
 }
 

@@ -59,7 +59,7 @@ class MidiPort : public Port {
   protected:
 	friend class AudioEngine;
 
-	MidiPort (const std::string& name, Flags);
+	MidiPort (const std::string& name, PortFlags);
 
   private:
 	MidiBuffer* _buffer;

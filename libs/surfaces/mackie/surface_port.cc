@@ -59,10 +59,10 @@ SurfacePort::SurfacePort (Surface& s)
 		_input_port = new MIDI::IPMIDIPort (_surface->mcp().ipmidi_base() +_surface->number());
 		_output_port = _input_port;
 	} else {
-		jack_client_t* jack = MackieControlProtocol::instance()->get_session().engine().jack();
+		ARDOUR::PortEngine& port_engine (ARDOUR::AudioEngine::instance()->port_engine());
 		
-		_input_port = new MIDI::JackMIDIPort (string_compose (_("%1 in"),  _surface->name()), MIDI::Port::IsInput, jack);
-		_output_port =new MIDI::JackMIDIPort (string_compose (_("%1 out"), _surface->name()), MIDI::Port::IsOutput, jack);
+		_input_port = new MIDI::JackMIDIPort (string_compose (_("%1 in"),  _surface->name()), MIDI::Port::IsInput, port_engine);
+		_output_port =new MIDI::JackMIDIPort (string_compose (_("%1 out"), _surface->name()), MIDI::Port::IsOutput, port_engine);
 		
 		/* MackieControl has its own thread for handling input from the input
 		 * port, and we don't want anything handling output from the output

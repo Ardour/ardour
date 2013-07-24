@@ -22,9 +22,6 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include <jack/jack.h>
-#include <jack/midiport.h>
-
 #include "pbd/xml++.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
@@ -45,37 +42,34 @@ template class EventRingBuffer<timestamp_t>;
 }
 
 pthread_t JackMIDIPort::_process_thread;
-Signal0<void> JackMIDIPort::JackHalted;
+Signal0<void> JackMIDIPort::EngineHalted;
 Signal0<void> JackMIDIPort::MakeConnections;
 
-JackMIDIPort::JackMIDIPort (string const & name, Flags flags, jack_client_t* jack_client)
+JackMIDIPort::JackMIDIPort (string const & name, Flags flags, ARDOUR::PortEngine& pengine)
 	: Port (name, flags)
+	, _port_engine (pengine)
+	, _port_handle (0)
 	, _currently_in_cycle (false)
 	, _nframes_this_cycle (0)
-	, _jack_client (jack_client)
-	, _jack_port (0)
 	, _last_write_timestamp (0)
 	, output_fifo (512)
 	, input_fifo (1024)
 	, xthread (true)
 {
-	assert (jack_client);
 	init (name, flags);
 }
 
-JackMIDIPort::JackMIDIPort (const XMLNode& node, jack_client_t* jack_client)
+JackMIDIPort::JackMIDIPort (const XMLNode& node, ARDOUR::PortEngine& pengine)
 	: Port (node)
+	, _port_engine (pengine)
+	, _port_handle (0)
 	, _currently_in_cycle (false)
 	, _nframes_this_cycle (0)
-	, _jack_client (jack_client)
-	, _jack_port (0)
 	, _last_write_timestamp (0)
 	, output_fifo (512)
 	, input_fifo (1024)
 	, xthread (true)
 {
-	assert (jack_client);
-
 	Descriptor desc (node);
 	init (desc.tag, desc.flags);
 	set_state (node);
@@ -89,17 +83,15 @@ JackMIDIPort::init (const string& /*name*/, Flags /*flags*/)
 	}
 
 	MakeConnections.connect_same_thread (connect_connection, boost::bind (&JackMIDIPort::make_connections, this));
-	JackHalted.connect_same_thread (halt_connection, boost::bind (&JackMIDIPort::jack_halted, this));
+	EngineHalted.connect_same_thread (halt_connection, boost::bind (&JackMIDIPort::engine_halted, this));
 }
 
 
 JackMIDIPort::~JackMIDIPort ()
 {
-	if (_jack_port) {
-		if (_jack_client) {
-			jack_port_unregister (_jack_client, _jack_port);
-			_jack_port = 0;
-		}
+	if (_port_handle) {
+		_port_engine.unregister_port (_port_handle);
+		_port_handle = 0;
 	}
 }
 
@@ -143,7 +135,7 @@ JackMIDIPort::parse (framecnt_t timestamp)
 void
 JackMIDIPort::cycle_start (pframes_t nframes)
 {
-	assert (_jack_port);
+	assert (_port_handle);
 	
 	_currently_in_cycle = true;
 	_nframes_this_cycle = nframes;
@@ -151,21 +143,23 @@ JackMIDIPort::cycle_start (pframes_t nframes)
 	assert(_nframes_this_cycle == nframes);
 
 	if (sends_output()) {
-		void *buffer = jack_port_get_buffer (_jack_port, nframes);
+		void *buffer = _port_engine.get_buffer (_port_handle, nframes);
 		jack_midi_clear_buffer (buffer);
 		flush (buffer);	
 	}
 	
 	if (receives_input()) {
-		void* jack_buffer = jack_port_get_buffer(_jack_port, nframes);
-		const pframes_t event_count = jack_midi_get_event_count(jack_buffer);
+		void* buffer = _port_engine.get_buffer (_port_handle, nframes);
+		const pframes_t event_count = _port_engine.get_midi_event_count (buffer);
 
-		jack_midi_event_t ev;
-		timestamp_t cycle_start_frame = jack_last_frame_time (_jack_client);
+		pframes_t time;
+		size_t size;
+		uint8_t* buf;
+		timestamp_t cycle_start_frame = _port_engine.last_frame_time ();
 
 		for (pframes_t i = 0; i < event_count; ++i) {
-			jack_midi_event_get (&ev, jack_buffer, i);
-			input_fifo.write (cycle_start_frame + ev.time, (Evoral::EventType) 0, ev.size, ev.buffer);
+			_port_engine.midi_event_get (time, size, &buf, buffer, i);
+			input_fifo.write (cycle_start_frame + time, (Evoral::EventType) 0, size, buf);
 		}	
 		
 		if (event_count) {
@@ -178,7 +172,7 @@ void
 JackMIDIPort::cycle_end ()
 {
 	if (sends_output()) {
-		flush (jack_port_get_buffer (_jack_port, _nframes_this_cycle));
+		flush (_port_engine.get_buffer (_port_handle, _nframes_this_cycle));
 	}
 
 	_currently_in_cycle = false;
@@ -186,10 +180,9 @@ JackMIDIPort::cycle_end ()
 }
 
 void
-JackMIDIPort::jack_halted ()
+JackMIDIPort::engine_halted ()
 {
-	_jack_client = 0;
-	_jack_port = 0;
+	_port_handle = 0;
 }
 
 void
@@ -216,7 +209,7 @@ JackMIDIPort::write (const byte * msg, size_t msglen, timestamp_t timestamp)
 {
 	int ret = 0;
 
-	if (!_jack_client || !_jack_port) {
+	if (!_port_handle) {
 		/* poof ! make it just vanish into thin air, since we are no
 		   longer connected to JACK.
 		*/
@@ -268,18 +261,18 @@ JackMIDIPort::write (const byte * msg, size_t msglen, timestamp_t timestamp)
 			if (timestamp == 0) {
 				timestamp = _last_write_timestamp;
 			} 
-
-			if ((ret = jack_midi_event_write (jack_port_get_buffer (_jack_port, _nframes_this_cycle), 
-							  timestamp, msg, msglen)) == 0) {
+			
+			if ((ret = _port_engine.midi_event_put (_port_engine.get_buffer (_port_handle, _nframes_this_cycle), 
+								timestamp, msg, msglen)) == 0) {
 				ret = msglen;
 				_last_write_timestamp = timestamp;
 
 			} else {
 				cerr << "write of " << msglen << " @ " << timestamp << " failed, port holds "
-					<< jack_midi_get_event_count (jack_port_get_buffer (_jack_port, _nframes_this_cycle))
-				     << " port is " << _jack_port
+					<< _port_engine.get_midi_event_count (_port_engine.get_buffer (_port_handle, _nframes_this_cycle))
+				     << " port is " << _port_handle
 				     << " ntf = " << _nframes_this_cycle
-				     << " buf = " << jack_port_get_buffer (_jack_port, _nframes_this_cycle)
+				     << " buf = " << _port_engine.get_buffer (_port_handle, _nframes_this_cycle)
 				     << " ret = " << ret
 				     << endl;
 				PBD::stacktrace (cerr, 20);
@@ -305,7 +298,7 @@ JackMIDIPort::write (const byte * msg, size_t msglen, timestamp_t timestamp)
 }
 
 void
-JackMIDIPort::flush (void* jack_port_buffer)
+JackMIDIPort::flush (void* port_buffer)
 {
 	RingBuffer< Evoral::Event<double> >::rw_vector vec = { { 0, 0 }, { 0, 0 } };
 	size_t written;
@@ -320,8 +313,7 @@ JackMIDIPort::flush (void* jack_port_buffer)
 		Evoral::Event<double>* evp = vec.buf[0];
 		
 		for (size_t n = 0; n < vec.len[0]; ++n, ++evp) {
-			jack_midi_event_write (jack_port_buffer,
-					       (timestamp_t) evp->time(), evp->buffer(), evp->size());
+			_port_engine.midi_event_put (port_buffer, (timestamp_t) evp->time(), evp->buffer(), evp->size());
 		}
 	}
 	
@@ -329,8 +321,7 @@ JackMIDIPort::flush (void* jack_port_buffer)
 		Evoral::Event<double>* evp = vec.buf[1];
 
 		for (size_t n = 0; n < vec.len[1]; ++n, ++evp) {
-			jack_midi_event_write (jack_port_buffer,
-					       (timestamp_t) evp->time(), evp->buffer(), evp->size());
+			_port_engine.midi_event_put (port_buffer, (timestamp_t) evp->time(), evp->buffer(), evp->size());
 		}
 	}
 	
@@ -364,8 +355,21 @@ JackMIDIPort::read (byte *, size_t)
 int
 JackMIDIPort::create_port ()
 {
-	_jack_port = jack_port_register(_jack_client, _tagname.c_str(), JACK_DEFAULT_MIDI_TYPE, _flags, 0);
-	return _jack_port == 0 ? -1 : 0;
+	ARDOUR::PortFlags f = ARDOUR::PortFlags (0);
+
+	/* convert MIDI::Port::Flags to ARDOUR::PortFlags ... sigh */
+
+	if (_flags & IsInput) {
+		f = ARDOUR::PortFlags (f | ARDOUR::IsInput);
+	} 
+
+	if (_flags & IsOutput) {
+		f = ARDOUR::PortFlags (f | ARDOUR::IsOutput);
+	}
+
+	_port_handle = _port_engine.register_port (_tagname, ARDOUR::DataType::MIDI, f);
+
+	return _port_handle == 0 ? -1 : 0;
 }
 
 XMLNode& 
@@ -386,18 +390,16 @@ JackMIDIPort::get_state () const
 	write (device_inquiry, sizeof (device_inquiry), 0);
 #endif
 
-	if (_jack_port) {
+	if (_port_handle) {
 		
-		const char** jc = jack_port_get_connections (_jack_port);
+		vector<string> connections;
+		_port_engine.get_connections (_port_handle, connections);
 		string connection_string;
-		if (jc) {
-			for (int i = 0; jc[i]; ++i) {
-				if (i > 0) {
-					connection_string += ',';
-				}
-				connection_string += jc[i];
+		for (vector<string>::iterator i = connections.begin(); i != connections.end(); ++i) {
+			if (i != connections.begin()) {
+				connection_string += ',';
 			}
-			free (jc);
+			connection_string += *i;
 		}
 		
 		if (!connection_string.empty()) {
@@ -435,14 +437,8 @@ JackMIDIPort::make_connections ()
 		vector<string> ports;
 		split (_connections, ports, ',');
 		for (vector<string>::iterator x = ports.begin(); x != ports.end(); ++x) {
-			if (_jack_client) {
-				if (receives_input()) {
-					jack_connect (_jack_client, (*x).c_str(), jack_port_name (_jack_port));
-				} else {
-					jack_connect (_jack_client, jack_port_name (_jack_port), (*x).c_str());
-				}
-				/* ignore failures */
-			}
+			_port_engine.connect (_port_handle, *x);
+			/* ignore failures */
 		}
 	}
 
@@ -462,9 +458,8 @@ JackMIDIPort::is_process_thread()
 }
 
 void
-JackMIDIPort::reestablish (jack_client_t* jack)
+JackMIDIPort::reestablish ()
 {
-	_jack_client = jack;
 	int const r = create_port ();
 
 	if (r) {

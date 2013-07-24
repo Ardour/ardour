@@ -32,10 +32,10 @@
 #include "pbd/rcu.h"
 
 #include "ardour/chan_count.h"
+#include "ardour/port.h"
+#include "ardour/port_engine.h"
 
 namespace ARDOUR {
-
-class Port;
 
 class PortManager 
 {
@@ -44,36 +44,44 @@ class PortManager
     
     PortManager();
     virtual ~PortManager() {}
+
+    PortEngine& port_engine() { return *_impl; }
     
     /* Port registration */
     
-    virtual boost::shared_ptr<Port> register_input_port (DataType, const std::string& portname) = 0;
-    virtual boost::shared_ptr<Port> register_output_port (DataType, const std::string& portname) = 0;
-    virtual int unregister_port (boost::shared_ptr<Port>) = 0;
+    boost::shared_ptr<Port> register_input_port (DataType, const std::string& portname);
+    boost::shared_ptr<Port> register_output_port (DataType, const std::string& portname);
+    int unregister_port (boost::shared_ptr<Port>);
     
     /* Port connectivity */
     
-    virtual int connect (const std::string& source, const std::string& destination) = 0;
-    virtual int disconnect (const std::string& source, const std::string& destination) = 0;
-    virtual int disconnect (boost::shared_ptr<Port>) = 0;
-    
+    int connect (const std::string& source, const std::string& destination);
+    int disconnect (const std::string& source, const std::string& destination);
+    int disconnect (boost::shared_ptr<Port>);
+    bool connected (const std::string&);
+
     /* other Port management */
     
-    virtual bool port_is_physical (const std::string&) const = 0;
-    virtual void get_physical_outputs (DataType type, std::vector<std::string>&) = 0;
-    virtual void get_physical_inputs (DataType type, std::vector<std::string>&) = 0;
-    virtual boost::shared_ptr<Port> get_port_by_name (const std::string &) = 0;
-    virtual void port_renamed (const std::string&, const std::string&) = 0;
-    virtual ChanCount n_physical_outputs () const = 0;
-    virtual ChanCount n_physical_inputs () const = 0;
-    virtual const char ** get_ports (const std::string& port_name_pattern, const std::string& type_name_pattern, uint32_t flags) = 0;
+    bool port_is_physical (const std::string&) const;
+    void get_physical_outputs (DataType type, std::vector<std::string>&);
+    void get_physical_inputs (DataType type, std::vector<std::string>&);
+    boost::shared_ptr<Port> get_port_by_name (const std::string &);
+    void port_renamed (const std::string&, const std::string&);
+    ChanCount n_physical_outputs () const;
+    ChanCount n_physical_inputs () const;
+    const char ** get_ports (const std::string& port_name_pattern, const std::string& type_name_pattern, uint32_t flags);
     
     void remove_all_ports ();
     
     /* per-Port monitoring */
     
-    virtual bool can_request_input_monitoring () const = 0;
-    virtual void request_input_monitoring (const std::string&, bool) const = 0;
+    bool can_request_input_monitoring () const;
+    void request_input_monitoring (const std::string&, bool) const;
+    void ensure_input_monitoring (const std::string&, bool) const;
+
+    std::string make_port_name_relative (const std::string&) const;
+    std::string make_port_name_non_relative (const std::string&) const;
+    bool port_is_mine (const std::string&) const;
     
     class PortRegistrationFailure : public std::exception {
       public:
@@ -82,23 +90,17 @@ class PortManager
 	
 	~PortRegistrationFailure () throw () {}
 	
-	virtual const char *what() const throw () { return reason.c_str(); }
+	const char *what() const throw () { return reason.c_str(); }
 	
       private:
 	std::string reason;
     };
 
-  protected:
-    typedef void* PortHandle;
-    PortHandle register (const std::string&, DataType type, Port::Flags);
-    void  unregister (PortHandle);
-    bool  connected (PortHandle);
-    int   disconnect_all (PortHandle);
-    bool  connected_to (PortHandle, const std::string);
-    int   get_connections (PortHandle, std::vector<std::string>&);
 
-  private:
+  protected:
+    PortEngine* _impl;
     SerializedRCUManager<Ports> ports;
+
     boost::shared_ptr<Port> register_port (DataType type, const std::string& portname, bool input);
     void port_registration_failure (const std::string& portname);
 };

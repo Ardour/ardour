@@ -93,6 +93,18 @@ ifdef HAVE_JACK_SESSION
 
     ChanCount n_physical (unsigned long) const;
     void get_physical (DataType, unsigned long, std::vector<std::string> &);
+
+    /* pffooo */
+
+    std::string  _target_device;
+    float        _target_sample_rate;
+    uint32_t     _target_buffer_size;
+    SampleFormat _target_sample_format;
+    bool         _target_interleaved;
+    uint32_t     _target_input_channels;
+    uint32_t     _target_output_channels;
+    uin32_t      _target_systemic_input_latency;
+    uin32_t      _target_systemic_input_latency;
 };
 
 }

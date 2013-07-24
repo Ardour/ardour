@@ -579,7 +579,7 @@ MTC_Slave::init_engine_dll (framepos_t pos, framepos_t inc)
 bool
 MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 {
-	framepos_t now = session.engine().frame_time_at_cycle_start();
+	framepos_t now = session.engine().sample_time_at_cycle_start();
 	framepos_t sess_pos = session.transport_frame(); // corresponds to now
 	//sess_pos -= session.engine().frames_since_cycle_start();
 
@@ -593,7 +593,7 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	if (last.timestamp == 0) { engine_dll_initstate = 0; }
 	else if (engine_dll_initstate != transport_direction && last.speed != 0) {
 		engine_dll_initstate = transport_direction;
-		init_engine_dll(last.position, session.engine().frames_per_cycle());
+		init_engine_dll(last.position, session.engine().samples_per_cycle());
 		engine_dll_reinitialized = true;
 	}
 
@@ -643,8 +643,8 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 			te0 = te1;
 			te1 += be * e + ee2;
 			ee2 += ce * e;
-			speed_flt = (te1 - te0) / double(session.engine().frames_per_cycle());
-			DEBUG_TRACE (DEBUG::MTC, string_compose ("engine DLL t0:%1 t1:%2 err:%3 spd:%4 ddt:%5\n", te0, te1, e, speed_flt, ee2 - session.engine().frames_per_cycle() ));
+			speed_flt = (te1 - te0) / double(session.engine().samples_per_cycle());
+			DEBUG_TRACE (DEBUG::MTC, string_compose ("engine DLL t0:%1 t1:%2 err:%3 spd:%4 ddt:%5\n", te0, te1, e, speed_flt, ee2 - session.engine().samples_per_cycle() ));
 		}
 	}
 

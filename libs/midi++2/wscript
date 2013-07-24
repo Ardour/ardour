@@ -26,6 +26,7 @@ out = 'build'
 
 path_prefix = 'libs/midi++2/'
 
+
 libmidi_sources = [
         'midi.cc',
         'channel.cc',
@@ -68,7 +69,7 @@ def build(bld):
         obj.cxxflags = [ '-fPIC', '-DWITH_JACK_MIDI' ]
     # everybody loves JACK
     obj.export_includes = ['.']
-    obj.includes     = ['.', '../surfaces/control_protocol']
+    obj.includes     = ['.', '../surfaces/control_protocol', '../ardour' ]
     obj.name         = 'libmidipp'
     obj.target       = 'midipp'
     obj.uselib       = 'GLIBMM SIGCPP XML JACK OSX'

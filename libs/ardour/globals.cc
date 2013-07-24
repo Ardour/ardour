@@ -338,7 +338,7 @@ void
 ARDOUR::init_post_engine ()
 {
 	/* the MIDI Manager is needed by the ControlProtocolManager */
-	MIDI::Manager::create (AudioEngine::instance()->jack());
+	MIDI::Manager::create (AudioEngine::instance()->port_engine());
 
 	ControlProtocolManager::instance().discover_control_protocols ();
 

@@ -454,16 +454,13 @@ Bundle::connected_to_anything (AudioEngine& engine)
 		Bundle::PortList const & ports = channel_ports (i);
 
 		for (uint32_t j = 0; j < ports.size(); ++j) {
-			/* ports[j] may not be an Ardour port, so use JACK directly
+
+			/* ports[j] may not be an Ardour port, so use the port manager directly
 			   rather than doing it with Port.
 			*/
-			jack_port_t* jp = jack_port_by_name (engine.jack(), ports[j].c_str());
-			if (jp) {
-				const char ** c = jack_port_get_all_connections (engine.jack(), jp);
-				if (c) {
-					jack_free (c);
-					return true;
-				}
+
+			if (engine.connected (ports[j])) {
+				return true;
 			}
 		}
 	}

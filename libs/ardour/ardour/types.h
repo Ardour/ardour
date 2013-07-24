@@ -584,6 +584,25 @@ namespace ARDOUR {
 		FadeSymmetric,
 	};
 
+	enum TransportState {
+		/* these values happen to match the constants used by JACK but
+		   this equality cannot be assumed.
+		*/
+		TransportStopped = 0,
+		TransportRolling = 1, 
+		TransportLooping = 2, 
+		TransportStarting = 3,
+	};
+
+	enum PortFlags {
+		/* these values happen to match the constants used by JACK but
+		   this equality cannot be assumed.
+		*/
+		IsInput = 1, 
+		IsOutput = 2,
+	};
+
+
 } // namespace ARDOUR
 
 

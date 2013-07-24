@@ -30,6 +30,7 @@
 #include "pbd/signals.h"
 
 #include "ardour/data_type.h"
+#include "ardour/port_engine.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
@@ -40,11 +41,6 @@ class Buffer;
 class Port : public boost::noncopyable
 {
 public:
-	enum Flags {
-		IsInput = JackPortIsInput,
-		IsOutput = JackPortIsOutput,
-	};
-
 	virtual ~Port ();
 
 	static void set_connecting_blocked( bool yn ) {
@@ -62,7 +58,7 @@ public:
 	int set_name (std::string const &);
 
 	/** @return flags */
-	Flags flags () const {
+        PortFlags flags () const {
 		return _flags;
 	}
 
@@ -90,8 +86,8 @@ public:
 	virtual int connect (Port *);
 	int disconnect (Port *);
 
-	void request_monitor_input (bool);
-	void ensure_monitor_input (bool);
+	void request_input_monitoring (bool);
+	void ensure_input_monitoring (bool);
 	bool monitoring_input () const;
 	int reestablish ();
 	int reconnect ();
@@ -99,7 +95,7 @@ public:
 	bool last_monitor() const { return _last_monitor; }
 	void set_last_monitor (bool yn) { _last_monitor = yn; }
 
-	jack_port_t* jack_port() const { return _jack_port; }
+        PortEngine::PortHandle port_handle() { return _port_handle; }
 
 	void get_connected_latency_range (jack_latency_range_t& range, bool playback) const;
 
@@ -122,8 +118,6 @@ public:
 
 	bool physically_connected () const;
 
-	static void set_engine (AudioEngine *);
-
 	PBD::Signal1<void,bool> MonitorInputChanged;
 	static PBD::Signal2<void,boost::shared_ptr<Port>,boost::shared_ptr<Port> > PostDisconnect;
 	static PBD::Signal0<void> PortDrop;
@@ -143,9 +137,9 @@ public:
 
 protected:
 
-	Port (std::string const &, DataType, Flags);
+	Port (std::string const &, DataType, PortFlags);
 
-	jack_port_t* _jack_port; ///< JACK port
+        PortEngine::PortHandle _port_handle;
 
 	static bool	  _connecting_blocked;
 	static pframes_t  _global_port_buffer_offset;   /* access only from process() tree */
@@ -156,15 +150,13 @@ protected:
 	jack_latency_range_t _private_playback_latency;
 	jack_latency_range_t _private_capture_latency;
 
-	static AudioEngine* _engine; ///< the AudioEngine
-
 private:
 	std::string _name;  ///< port short name
-	Flags       _flags; ///< flags
+	PortFlags       _flags; ///< flags
 	bool        _last_monitor;
 
 	/** ports that we are connected to, kept so that we can
-	    reconnect to JACK when required
+	    reconnect to the backend when required
 	*/
 	std::set<std::string> _connections;
 

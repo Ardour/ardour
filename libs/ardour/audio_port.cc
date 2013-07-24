@@ -21,13 +21,17 @@
 #include "pbd/stacktrace.h"
 
 #include "ardour/audio_buffer.h"
+#include "ardour/audioengine.h"
 #include "ardour/audio_port.h"
 #include "ardour/data_type.h"
+#include "ardour/port_engine.h"
 
 using namespace ARDOUR;
 using namespace std;
 
-AudioPort::AudioPort (const std::string& name, Flags flags)
+#define port_engine AudioEngine::instance()->port_engine()
+
+AudioPort::AudioPort (const std::string& name, PortFlags flags)
 	: Port (name, DataType::AUDIO, flags)
 	, _buffer (new AudioBuffer (0))
 {
@@ -73,7 +77,7 @@ AudioBuffer&
 AudioPort::get_audio_buffer (pframes_t nframes)
 {
 	/* caller must hold process lock */
-	_buffer->set_data ((Sample *) jack_port_get_buffer (_jack_port, _cycle_nframes) +
+	_buffer->set_data ((Sample *) port_engine.get_buffer (_port_handle, _cycle_nframes) +
 			   _global_port_buffer_offset + _port_buffer_offset, nframes);
 	return *_buffer;
 }
@@ -82,7 +86,7 @@ Sample*
 AudioPort::engine_get_whole_audio_buffer ()
 {
 	/* caller must hold process lock */
-	return (Sample *) jack_port_get_buffer (_jack_port, _cycle_nframes);
+	return (Sample *) port_engine.get_buffer (_port_handle, _cycle_nframes);
 }
 
 

@@ -30,6 +30,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
 #include "ardour/port.h"
+#include "ardour/port_engine.h"
 
 #include "i18n.h"
 
@@ -40,13 +41,17 @@ using namespace PBD;
 PBD::Signal2<void,boost::shared_ptr<Port>, boost::shared_ptr<Port> > Port::PostDisconnect;
 PBD::Signal0<void> Port::PortDrop;
 
-AudioEngine* Port::_engine = 0;
 bool         Port::_connecting_blocked = false;
 pframes_t    Port::_global_port_buffer_offset = 0;
 pframes_t    Port::_cycle_nframes = 0;
 
+/* a handy define to shorten what would otherwise be a needlessly verbose
+ * repeated phrase
+ */
+#define port_engine AudioEngine::instance()->port_engine()
+
 /** @param n Port short name */
-Port::Port (std::string const & n, DataType t, Flags f)
+Port::Port (std::string const & n, DataType t, PortFlags f)
 	: _port_buffer_offset (0)
 	, _name (n)
 	, _flags (f)
@@ -64,15 +69,15 @@ Port::Port (std::string const & n, DataType t, Flags f)
 
 	assert (_name.find_first_of (':') == std::string::npos);
 
-	if (!_engine->connected()) {
+	if (!port_engine.connected()) {
 		throw failed_constructor ();
 	}
 
-	if ((_jack_port = jack_port_register (_engine->jack (), _name.c_str (), t.to_jack_type (), _flags, 0)) == 0) {
+	if ((_jack_port = port_engine.register_port (_name, t.to_port_type (), _flags)) == 0) {
 		cerr << "Failed to register JACK port \"" << _name << "\", reason is unknown from here\n";
 		throw failed_constructor ();
 	}
-
+	
 	PortDrop.connect_same_thread (drop_connection, boost::bind (&Port::drop, this));
 }
 
@@ -85,11 +90,9 @@ Port::~Port ()
 void
 Port::drop ()
 {
-	if (_jack_port) {
-		if (_engine->jack ()) {
-			jack_port_unregister (_engine->jack (), _jack_port);
-		}
-		_jack_port = 0;
+	if (_port_handle) {
+		port_engine.unregister_port (port_handle);
+		_port_handle = 0;
 	}
 }
 
@@ -97,7 +100,7 @@ Port::drop ()
 bool
 Port::connected () const
 {
-	return (jack_port_connected (_jack_port) != 0);
+	return (port_engine.connected (_port_handle) != 0);
 }
 
 int
@@ -191,9 +194,9 @@ Port::disconnect (std::string const & other)
 	int r = 0;
 
 	if (sends_output ()) {
-		r = jack_disconnect (_engine->jack (), this_fullname.c_str (), other_fullname.c_str ());
+		r = _engine->disconnect (this_fullname, other_fullname);
 	} else {
-		r = jack_disconnect (_engine->jack (), other_fullname.c_str (), this_fullname.c_str ());
+		r = _engine->disconnect (other_fullname, this_fullname);
 	}
 
 	if (r == 0) {
@@ -236,27 +239,22 @@ Port::disconnect (Port* o)
 }
 
 void
-Port::set_engine (AudioEngine* e)
+Port::request_input_monitoring (bool yn)
 {
-	_engine = e;
+	port_eengine.request_input_monitoring (_port_handle, yn);
 }
 
 void
-Port::request_monitor_input (bool yn)
+Port::ensure_input_monitoring (bool yn)
 {
-	jack_port_request_monitor (_jack_port, yn);
-}
-
-void
-Port::ensure_monitor_input (bool yn)
-{
-	jack_port_ensure_monitor (_jack_port, yn);
+	port_engine.ensure_input_monitoring (_port_handle, yn);
 }
 
 bool
 Port::monitoring_input () const
 {
-	return jack_port_monitoring_input (_jack_port);
+	
+	return port_engine.monitoring_input (_port_handle);
 }
 
 void

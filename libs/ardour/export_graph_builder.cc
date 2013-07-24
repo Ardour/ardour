@@ -54,7 +54,7 @@ ExportGraphBuilder::ExportGraphBuilder (Session const & session)
   : session (session)
   , thread_pool (hardware_concurrency())
 {
-	process_buffer_frames = session.engine().frames_per_cycle();
+	process_buffer_frames = session.engine().samples_per_cycle();
 }
 
 ExportGraphBuilder::~ExportGraphBuilder ()
@@ -505,7 +505,7 @@ ExportGraphBuilder::ChannelConfig::ChannelConfig (ExportGraphBuilder & parent, F
 
 	config = new_config;
 
-	framecnt_t max_frames = parent.session.engine().frames_per_cycle();
+	framecnt_t max_frames = parent.session.engine().samples_per_cycle();
 	interleaver.reset (new Interleaver<Sample> ());
 	interleaver->init (new_config.channel_config->get_n_chans(), max_frames);
 

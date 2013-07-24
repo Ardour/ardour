@@ -22,8 +22,6 @@
 #include <string>
 #include <iostream>
 
-#include <jack/types.h>
-
 #include "pbd/xml++.h"
 #include "pbd/crossthread.h"
 #include "pbd/signals.h"
@@ -36,6 +34,8 @@
 #include "midi++/parser.h"
 #include "midi++/port.h"
 
+#include "ardour/port_engine.h"
+
 namespace MIDI {
 
 class Channel;
@@ -43,8 +43,8 @@ class PortRequest;
 
 class JackMIDIPort : public Port {
   public:
-	JackMIDIPort (std::string const &, Port::Flags, jack_client_t *);
-	JackMIDIPort (const XMLNode&, jack_client_t *);
+        JackMIDIPort (std::string const &, Port::Flags, ARDOUR::PortEngine&);
+        JackMIDIPort (const XMLNode&, ARDOUR::PortEngine&);
 	~JackMIDIPort ();
 
 	XMLNode& get_state () const;
@@ -61,7 +61,7 @@ class JackMIDIPort : public Port {
 
 	pframes_t nframes_this_cycle() const { return _nframes_this_cycle; }
 
-	void reestablish (jack_client_t *);
+	void reestablish ();
 	void reconnect ();
 
 	static void set_process_thread (pthread_t);
@@ -69,13 +69,14 @@ class JackMIDIPort : public Port {
 	static bool is_process_thread();
 
 	static PBD::Signal0<void> MakeConnections;
-	static PBD::Signal0<void> JackHalted;
+	static PBD::Signal0<void> EngineHalted;
 
 private:	
+        ARDOUR::PortEngine&            _port_engine;
+        ARDOUR::PortEngine::PortHandle _port_handle;
+
 	bool              _currently_in_cycle;
 	pframes_t         _nframes_this_cycle;
-	jack_client_t*    _jack_client;
-	jack_port_t*      _jack_port;
 	timestamp_t       _last_write_timestamp;
 	RingBuffer< Evoral::Event<double> > output_fifo;
 	Evoral::EventRingBuffer<timestamp_t> input_fifo;
@@ -89,8 +90,8 @@ private:
 	std::string _connections;
 	PBD::ScopedConnection connect_connection;
 	PBD::ScopedConnection halt_connection;
-	void flush (void* jack_port_buffer);
-	void jack_halted ();
+	void flush (void* port_buffer);
+	void engine_halted ();
 	void make_connections ();
 	void init (std::string const &, Flags);
 

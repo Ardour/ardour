@@ -29,6 +29,10 @@
 #include "midi++/types.h"
 #include "midi++/port.h"
 
+namespace ARDOUR {
+	class PortEngine;
+}
+
 namespace MIDI {
 
 class MachineControl;	
@@ -69,14 +73,14 @@ class Manager {
 
 	boost::shared_ptr<const PortList> get_midi_ports() const { return _ports.reader (); } 
 
-	static void create (jack_client_t* jack);
+        static void create (ARDOUR::PortEngine&);
 	
 	static Manager *instance () {
 		return theManager;
 	}
 	static void destroy ();
 
-	void reestablish (jack_client_t *);
+	void reestablish ();
 	void reconnect ();
 
 	PBD::Signal0<void> PortsChanged;
@@ -84,7 +88,7 @@ class Manager {
   private:
 	/* This is a SINGLETON pattern */
 	
-	Manager (jack_client_t *);
+        Manager (ARDOUR::PortEngine&);
 	static Manager *theManager;
 
 	MIDI::MachineControl*   _mmc;

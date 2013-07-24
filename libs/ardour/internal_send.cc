@@ -310,7 +310,7 @@ bool
 InternalSend::configure_io (ChanCount in, ChanCount out)
 {
 	bool ret = Send::configure_io (in, out);
-	set_block_size (_session.engine().frames_per_cycle());
+	set_block_size (_session.engine().samples_per_cycle());
 	return ret;
 }
 

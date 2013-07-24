@@ -107,7 +107,7 @@ MidiControlUI::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 		CrossThreadChannel::drain (port->selectable());
 
 		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("data available on %1\n", port->name()));
-		framepos_t now = _session.engine().frame_time();
+		framepos_t now = _session.engine().sample_time();
 		port->parse (now);
 	}
 
