@@ -64,9 +64,11 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 {
 	level_meter = 0;
 	_strip_type = 0;
-	strip.set_spacing(2);
+	mtr_vbox.set_spacing(2);
+	nfo_vbox.set_spacing(2);
 	peakbx.set_size_request(-1, 14);
 	namebx.set_size_request(18, 52);
+	spacer.set_size_request(-1,0);
 
 	set_metric_mode(metricmode, mt);
 
@@ -77,17 +79,30 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 
 	meterbox.pack_start(meter_metric_area, true, false);
 
-	strip.pack_start (peakbx, false, false);
-	strip.pack_start (meterbox, true, true);
-	strip.pack_start (btnbox, false, false);
-	strip.pack_start (namebx, false, false);
-	add(strip);
+	mtr_vbox.pack_start (peakbx, false, false);
+	mtr_vbox.pack_start (meterbox, true, true);
+	mtr_vbox.pack_start (spacer, false, false);
+	mtr_container.add(mtr_vbox);
+
+	mtr_hsep.set_size_request(-1,1);
+	mtr_hsep.set_name("BlackSeparator");
+
+	nfo_vbox.pack_start (mtr_hsep, false, false);
+	nfo_vbox.pack_start (btnbox, false, false);
+	nfo_vbox.pack_start (namebx, false, false);
+
+	pack_start (mtr_container, true, true);
+	pack_start (nfo_vbox, false, false);
 
 	peakbx.show();
 	btnbox.show();
 	meter_metric_area.show();
 	meterbox.show();
-	strip.show();
+	spacer.show();
+	mtr_vbox.show();
+	mtr_container.show();
+	mtr_hsep.show();
+	nfo_vbox.show();
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
@@ -100,7 +115,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	, _route(rt)
 	, peak_display()
 {
-	strip.set_spacing(2);
+	mtr_vbox.set_spacing(2);
+	nfo_vbox.set_spacing(2);
 	RouteUI::set_route (rt);
 	SessionHandlePtr::set_session (sess);
 
@@ -173,27 +189,42 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	mutebox.set_size_request(16, 16);
 	solobox.set_size_request(16, 16);
 	recbox.set_size_request(16, 16);
+	spacer.set_size_request(-1,0);
 
 	update_button_box();
 	update_name_box();
 	update_background (_route->meter_type());
 
-	strip.pack_start (peakbx, false, false);
-	strip.pack_start (meterbox, true, true);
-	strip.pack_start (btnbox, false, false);
-	strip.pack_start (namebx, false, false);
+	mtr_vbox.pack_start (peakbx, false, false);
+	mtr_vbox.pack_start (meterbox, true, true);
+	mtr_vbox.pack_start (spacer, false, false);
+	mtr_container.add(mtr_vbox);
+
+	mtr_hsep.set_size_request(-1,1);
+	mtr_hsep.set_name("BlackSeparator");
+
+	nfo_vbox.pack_start (mtr_hsep, false, false);
+	nfo_vbox.pack_start (btnbox, false, false);
+	nfo_vbox.pack_start (namebx, false, false);
+
+	pack_start (mtr_container, true, true);
+	pack_start (nfo_vbox, false, false);
+
 	name_label.show();
 	peak_display.show();
 	peakbx.show();
 	meter_ticks1_area.show();
 	meter_ticks2_area.show();
 	meterbox.show();
+	spacer.show();
 	level_meter->show();
 	meter_align.show();
 	peak_align.show();
 	btnbox.show();
-	add(strip);
-	strip.show();
+	mtr_vbox.show();
+	mtr_container.show();
+	mtr_hsep.show();
+	nfo_vbox.show();
 
 	_route->shared_peak_meter()->ConfigurationChanged.connect (
 			route_connections, invalidator (*this), boost::bind (&MeterStrip::meter_configuration_changed, this, _1), gui_context()
@@ -380,7 +411,7 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 void
 MeterStrip::on_size_request (Gtk::Requisition* r)
 {
-	EventBox::on_size_request(r);
+	VBox::on_size_request(r);
 }
 
 void
@@ -395,7 +426,7 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 		name_label.set_size_request(18, nh-2);
 		name_label.layout()->set_width((nh-4) * PANGO_SCALE);
 	}
-	EventBox::on_size_allocate(a);
+	VBox::on_size_allocate(a);
 }
 
 gint
@@ -446,13 +477,13 @@ MeterStrip::update_background(MeterType type)
 		case MeterIEC2EBU:
 		case MeterK14:
 		case MeterK20:
-			set_name ("meterstripPPM");
+			mtr_container.set_name ("meterstripPPM");
 			break;
 		case MeterVU:
-			set_name ("meterstripVU");
+			mtr_container.set_name ("meterstripVU");
 			break;
 		default:
-			set_name ("meterstripDPM");
+			mtr_container.set_name ("meterstripDPM");
 	}
 }
 
