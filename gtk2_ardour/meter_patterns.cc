@@ -200,6 +200,7 @@ static inline float mtr_col_and_fract(
 }
 
 static void set_bg_color(Gtk::Widget& w, cairo_t* cr, MeterType type) {
+	// TODO use "meterstrip*" stype
 	switch(type) {
 		case MeterVU:
 			cairo_set_source_rgb (cr, 1.0, 1.0, 0.85);
@@ -221,7 +222,8 @@ static void set_bg_color(Gtk::Widget& w, cairo_t* cr, MeterType type) {
 	}
 }
 
-static void set_fg_color(MeterType type, Gdk::Color * c) {
+static void set_fg_color(Gtk::Widget& w, MeterType type, Gdk::Color * c) {
+	// TODO use "meterstrip*" stype
 	switch(type) {
 		case MeterVU:
 			c->set_rgb_p(0.0, 0.0, 0.0);
@@ -270,7 +272,7 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 			/* we're overlaying more than 1 set of marks, so use different colours */
 			c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
 		} else if (background) {
-			set_fg_color(type, &c);
+			set_fg_color(w, type, &c);
 			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 		} else {
 			c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
@@ -554,7 +556,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 			/* we're overlaying more than 1 set of marks, so use different colours */
 			c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
 		} else if (background) {
-			set_fg_color(type, &c);
+			set_fg_color(w, type, &c);
 			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 		} else {
 			c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
