@@ -182,8 +182,9 @@ FastMeter::generate_meter_pattern (
 
 	if ((styleflags & 1) && !no_rgba_overlay) {
 		cairo_pattern_t* shade_pattern = cairo_pattern_create_linear (0.0, 0.0, width, 0.0);
-		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, 1.0, 1.0, 1.0, 0.2);
-		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, 0.0, 0.0, 0.0, 0.3);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0,   0.0, 0.0, 0.0, 0.15);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 0.4, 1.0, 1.0, 1.0, 0.05);
+		cairo_pattern_add_color_stop_rgba (shade_pattern, 1,   0.0, 0.0, 0.0, 0.25);
 
 		cairo_surface_t* surface;
 		cairo_t* tc = 0;
@@ -196,7 +197,7 @@ FastMeter::generate_meter_pattern (
 		if (styleflags & 2) { // LED stripes
 			cairo_save (tc);
 			cairo_set_line_width(tc, 1.0);
-			cairo_set_source_rgba(tc, .1, .1, .1, .5);
+			cairo_set_source_rgba(tc, .0, .0, .0, .3);
 			//cairo_set_operator (tc, CAIRO_OPERATOR_SOURCE);
 			for (float y=.5; y < height; y+= 2.0) {
 				cairo_move_to(tc, 0, y);
