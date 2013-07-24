@@ -43,7 +43,7 @@ namespace Gtk {
 	class Style;
 }
 
-class MeterStrip : public Gtk::VBox, public RouteUI
+class MeterStrip : public Gtk::EventBox, public RouteUI
 {
   public:
 	MeterStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
@@ -90,6 +90,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void set_button_names ();
 
   private:
+	Gtk::VBox strip;
 	Gtk::HBox meterbox;
 	Gtk::HBox namebx;
 	ArdourButton name_label;
@@ -120,6 +121,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void strip_property_changed (const PBD::PropertyChange&);
 	void meter_configuration_changed (ARDOUR::ChanCount);
 	void meter_type_changed (ARDOUR::MeterType);
+	void update_background (ARDOUR::MeterType);
 
 	static int max_pattern_metric_size; // == FastMeter::max_pattern_metric_size
 

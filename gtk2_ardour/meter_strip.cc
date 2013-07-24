@@ -64,7 +64,7 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 {
 	level_meter = 0;
 	_strip_type = 0;
-	set_spacing(2);
+	strip.set_spacing(2);
 	peakbx.set_size_request(-1, 14);
 	namebx.set_size_request(18, 52);
 
@@ -77,15 +77,17 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 
 	meterbox.pack_start(meter_metric_area, true, false);
 
-	pack_start (peakbx, false, false);
-	pack_start (meterbox, true, true);
-	pack_start (btnbox, false, false);
-	pack_start (namebx, false, false);
+	strip.pack_start (peakbx, false, false);
+	strip.pack_start (meterbox, true, true);
+	strip.pack_start (btnbox, false, false);
+	strip.pack_start (namebx, false, false);
+	add(strip);
 
 	peakbx.show();
 	btnbox.show();
 	meter_metric_area.show();
 	meterbox.show();
+	strip.show();
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
@@ -98,7 +100,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	, _route(rt)
 	, peak_display()
 {
-	set_spacing(2);
+	strip.set_spacing(2);
 	RouteUI::set_route (rt);
 	SessionHandlePtr::set_session (sess);
 
@@ -174,11 +176,12 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 
 	update_button_box();
 	update_name_box();
+	update_background (_route->meter_type());
 
-	pack_start (peakbx, false, false);
-	pack_start (meterbox, true, true);
-	pack_start (btnbox, false, false);
-	pack_start (namebx, false, false);
+	strip.pack_start (peakbx, false, false);
+	strip.pack_start (meterbox, true, true);
+	strip.pack_start (btnbox, false, false);
+	strip.pack_start (namebx, false, false);
 	name_label.show();
 	peak_display.show();
 	peakbx.show();
@@ -189,6 +192,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	meter_align.show();
 	peak_align.show();
 	btnbox.show();
+	add(strip);
+	strip.show();
 
 	_route->shared_peak_meter()->ConfigurationChanged.connect (
 			route_connections, invalidator (*this), boost::bind (&MeterStrip::meter_configuration_changed, this, _1), gui_context()
@@ -375,7 +380,7 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 void
 MeterStrip::on_size_request (Gtk::Requisition* r)
 {
-	VBox::on_size_request(r);
+	EventBox::on_size_request(r);
 }
 
 void
@@ -390,7 +395,7 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 		name_label.set_size_request(18, nh-2);
 		name_label.layout()->set_width((nh-4) * PANGO_SCALE);
 	}
-	VBox::on_size_allocate(a);
+	EventBox::on_size_allocate(a);
 }
 
 gint
@@ -427,8 +432,28 @@ MeterStrip::set_metric_mode (int metricmode, ARDOUR::MeterType mt)
 			_types.push_back (DataType::AUDIO);
 			break;
 	}
-
+	update_background (mt);
 	meter_metric_area.queue_draw ();
+}
+
+void
+MeterStrip::update_background(MeterType type)
+{
+	switch(type) {
+		case MeterIEC1DIN:
+		case MeterIEC1NOR:
+		case MeterIEC2BBC:
+		case MeterIEC2EBU:
+		case MeterK14:
+		case MeterK20:
+			set_name ("meterstripPPM");
+			break;
+		case MeterVU:
+			set_name ("meterstripVU");
+			break;
+		default:
+			set_name ("meterstripDPM");
+	}
 }
 
 MeterType
@@ -631,6 +656,7 @@ MeterStrip::meter_type_changed (MeterType type)
 	if (_route->meter_type() != type) {
 		_route->set_meter_type(type);
 	}
+	update_background (type);
 	MetricChanged();
 }
 

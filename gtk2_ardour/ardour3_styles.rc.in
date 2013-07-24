@@ -989,3 +989,20 @@ style "default_toggle_button"
 	bg[ACTIVE] = @@COLPREFIX@_contrasting_indicator
 	fg[ACTIVE] = @@COLPREFIX@_darkest
 }
+
+
+style "meter_strip_dpm" = "default"
+{
+}
+
+style "meter_strip_ppm" = "default"
+{
+  bg[NORMAL] = { 0.1, 0.1, 0.1 }
+  fg[NORMAL] = { 1.0, 1.0, 1.0 }
+}
+
+style "meter_strip_vu" = "default"
+{
+  bg[NORMAL] = { 1.0, 1.0, 0.85 }
+  fg[NORMAL] = { 0.0, 0.0, 0.0 }
+}
