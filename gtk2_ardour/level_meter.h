@@ -101,6 +101,7 @@ class LevelMeter : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	std::vector<MeterInfo> meters;
 	float                  max_peak;
 	ARDOUR::MeterType      meter_type;
+	ARDOUR::MeterType      visible_meter_type;
 
 	PBD::ScopedConnection _configuration_connection;
 	PBD::ScopedConnection _meter_type_connection;
