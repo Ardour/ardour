@@ -200,10 +200,14 @@ static inline float mtr_col_and_fract(
 }
 
 static void set_bg_color(Gtk::Widget& w, cairo_t* cr, MeterType type) {
-	// TODO use "meterstrip*" stype
+	float r,g,b;
 	switch(type) {
 		case MeterVU:
-			cairo_set_source_rgb (cr, 1.0, 1.0, 0.85);
+			if (rgba_p_from_style("meterstripVU", &r, &g, &b, "bg")) {
+				cairo_set_source_rgb (cr, r, g, b);
+			} else {
+				cairo_set_source_rgb (cr, 1.0, 1.0, 0.85);
+			}
 			break;
 		case MeterIEC1DIN:
 		case MeterIEC1NOR:
@@ -211,7 +215,11 @@ static void set_bg_color(Gtk::Widget& w, cairo_t* cr, MeterType type) {
 		case MeterIEC2EBU:
 		case MeterK14:
 		case MeterK20:
-			cairo_set_source_rgb (cr, 0.1, 0.1, 0.1);
+			if (rgba_p_from_style("meterstripPPM", &r, &g, &b, "bg")) {
+				cairo_set_source_rgb (cr, r, g, b);
+			} else {
+				cairo_set_source_rgb (cr, 0.1, 0.1, 0.1);
+			}
 			break;
 		default:
 			{
@@ -223,13 +231,21 @@ static void set_bg_color(Gtk::Widget& w, cairo_t* cr, MeterType type) {
 }
 
 static void set_fg_color(Gtk::Widget& w, MeterType type, Gdk::Color * c) {
-	// TODO use "meterstrip*" stype
+	float r,g,b;
 	switch(type) {
 		case MeterVU:
-			c->set_rgb_p(0.0, 0.0, 0.0);
+			if (rgba_p_from_style("meterstripVU", &r, &g, &b)) {
+				c->set_rgb_p(r, g, b);
+			} else {
+				c->set_rgb_p(0.0, 0.0, 0.0);
+			}
 			break;
 		default:
-			c->set_rgb_p(1.0, 1.0, 1.0);
+			if (rgba_p_from_style("meterstripPPM", &r, &g, &b)) {
+				c->set_rgb_p(r, g, b);
+			} else {
+				c->set_rgb_p(1.0, 1.0, 1.0);
+			}
 			break;
 	}
 }

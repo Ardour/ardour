@@ -287,6 +287,53 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a, s
 	}
 }
 
+bool
+rgba_p_from_style (string style, float *r, float *g, float *b, string attr, int state)
+{
+	static Gtk::Window* window = 0;
+	assert (r && g && b);
+
+	if (window == 0) {
+		window = new Window (WINDOW_TOPLEVEL);
+	}
+
+	Gtk::EventBox foo;
+
+	window->add (foo);
+
+	foo.set_name (style);
+	foo.ensure_style ();
+
+	GtkRcStyle* rc = foo.get_style()->gobj()->rc_style;
+
+	if (!rc) {
+		warning << string_compose (_("missing RGBA style for \"%1\""), style) << endl;
+		return false;
+	}
+	if (attr == "fg") {
+		*r = rc->fg[state].red / 65535.0;
+		*g = rc->fg[state].green / 65535.0;
+		*b = rc->fg[state].blue / 65535.0;
+	} else if (attr == "bg") {
+		*r = rc->bg[state].red / 65535.0;
+		*g = rc->bg[state].green / 65535.0;
+		*b = rc->bg[state].blue / 65535.0;
+	} else if (attr == "base") {
+		*r = rc->base[state].red / 65535.0;
+		*g = rc->base[state].green / 65535.0;
+		*b = rc->base[state].blue / 65535.0;
+	} else if (attr == "text") {
+		*r = rc->text[state].red / 65535.0;
+		*g = rc->text[state].green / 65535.0;
+		*b = rc->text[state].blue / 65535.0;
+	} else {
+		return false;
+	}
+
+	window->remove ();
+	return true;
+}
+
 void
 set_color (Gdk::Color& c, int rgb)
 {
