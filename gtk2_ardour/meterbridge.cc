@@ -683,6 +683,7 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 		delete (_metrics.back());
 		_metrics.pop_back();
 	}
+	queue_resize();
 }
 
 void
