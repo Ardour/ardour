@@ -43,6 +43,8 @@ PeakMeter::PeakMeter (Session& s, const std::string& name)
 	Iec1ppmdsp::init(s.nominal_frame_rate());
 	Iec2ppmdsp::init(s.nominal_frame_rate());
 	Vumeterdsp::init(s.nominal_frame_rate());
+	_pending_active = true;
+	_active = true;
 }
 
 PeakMeter::~PeakMeter ()
