@@ -52,15 +52,17 @@ sigc::signal<void, int, ARDOUR::RouteGroup*, ARDOUR::MeterType> ArdourMeter::Set
 /* pattern cache */
 
 struct MeterMatricsMapKey {
-	MeterMatricsMapKey (std::string n, MeterType t)
+	MeterMatricsMapKey (std::string n, MeterType t, int dt)
 		: _n(n)
 		, _t(t)
+		, _dt(dt)
 	{}
 	inline bool operator<(const MeterMatricsMapKey& rhs) const {
-		return (_n < rhs._n) || (_n == rhs._n && _t < rhs._t);
+		return (_n < rhs._n) || (_n == rhs._n && _t < rhs._t) || (_n == rhs._n && _t == rhs._t && _dt < rhs._dt);
 	}
 	std::string _n;
 	MeterType _t;
+	int _dt;
 };
 
 namespace ArdourMeter {
@@ -106,6 +108,14 @@ ArdourMeter::meter_type_string (ARDOUR::MeterType mt)
 			return _("???");
 			break;
 	}
+}
+
+static inline int types_to_bit (vector<ARDOUR::DataType> types) {
+	int rv = 0;
+	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
+		rv |= 1 << (*i);
+	}
+	return rv;
 }
 
 static inline float mtr_col_and_fract(
@@ -906,7 +916,7 @@ ArdourMeter::meter_expose_ticks (GdkEventExpose *ev, MeterType type, std::vector
 	cairo_clip (cr);
 
 	cairo_pattern_t* pattern;
-	const MeterMatricsMapKey key (mta->get_name(), type);
+	const MeterMatricsMapKey key (mta->get_name(), type, types_to_bit(types));
 	MetricPatternMap::iterator i = ticks_patterns.find (key);
 
 	if (i == ticks_patterns.end()) {
@@ -944,7 +954,7 @@ ArdourMeter::meter_expose_metrics (GdkEventExpose *ev, MeterType type, std::vect
 	cairo_clip (cr);
 
 	cairo_pattern_t* pattern;
-	const MeterMatricsMapKey key (mma->get_name(), type);
+	const MeterMatricsMapKey key (mma->get_name(), type, types_to_bit(types));
 	MetricPatternMap::iterator i = metric_patterns.find (key);
 
 	if (i == metric_patterns.end()) {
