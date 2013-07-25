@@ -107,6 +107,8 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
+bool libardour_initialized = false;
+
 compute_peak_t          ARDOUR::compute_peak = 0;
 find_peaks_t            ARDOUR::find_peaks = 0;
 apply_gain_to_buffer_t  ARDOUR::apply_gain_to_buffer = 0;
@@ -218,6 +220,10 @@ lotsa_files_please ()
 bool
 ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir)
 {
+	if (libardour_initialized) {
+		return true;
+	}
+
 	if (!Glib::thread_supported()) {
 		Glib::thread_init();
 	}
@@ -330,6 +336,8 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	EventTypeMap::instance().new_parameter(FadeOutAutomation);
 	EventTypeMap::instance().new_parameter(EnvelopeAutomation);
 	EventTypeMap::instance().new_parameter(MidiCCAutomation);
+
+	libardour_initialized = true;
 
 	return true;
 }
