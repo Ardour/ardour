@@ -436,7 +436,8 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 			}
 
 			if (no_meter) {
-				_meter->reset();
+				BufferSet& bufs (_session.get_silent_buffers (n_process_buffers()));
+				_meter->run (bufs, 0, 0, nframes, true);
 				_input->process_input (boost::shared_ptr<Processor>(), start_frame, end_frame, nframes);
 			} else {
 				_input->process_input (_meter, start_frame, end_frame, nframes);
