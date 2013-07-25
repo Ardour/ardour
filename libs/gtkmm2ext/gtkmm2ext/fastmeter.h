@@ -68,7 +68,6 @@ protected:
 	bool on_expose_event (GdkEventExpose*);
 	void on_size_request (GtkRequisition*);
 	void on_size_allocate (Gtk::Allocation&);
-
 private:
 
 	Cairo::RefPtr<Cairo::Pattern> fgpattern;
@@ -96,18 +95,29 @@ private:
 	bool highlight;
 
 	bool vertical_expose (GdkEventExpose*);
+	void vertical_size_request (GtkRequisition*);
+	void vertical_size_allocate (Gtk::Allocation&);
 	void queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>&, float);
+
+	bool horizontal_expose (GdkEventExpose*);
+	void horizontal_size_request (GtkRequisition*);
+	void horizontal_size_allocate (Gtk::Allocation&);
+	void queue_horizontal_redraw (const Glib::RefPtr<Gdk::Window>&, float);
 
 	static bool no_rgba_overlay;
 
 	static Cairo::RefPtr<Cairo::Pattern> generate_meter_pattern (
-		int, int, int *, float *, int);
+		int, int, int *, float *, int, bool);
 	static Cairo::RefPtr<Cairo::Pattern> request_vertical_meter (
+		int, int, int *, float *, int);
+	static Cairo::RefPtr<Cairo::Pattern> request_horizontal_meter (
 		int, int, int *, float *, int);
 
 	static Cairo::RefPtr<Cairo::Pattern> generate_meter_background (
-		int, int, int *, bool);
+		int, int, int *, bool, bool);
 	static Cairo::RefPtr<Cairo::Pattern> request_vertical_background (
+		int, int, int *, bool);
+	static Cairo::RefPtr<Cairo::Pattern> request_horizontal_background (
 		int, int, int *, bool);
 
 	struct Pattern10MapKey {
@@ -151,6 +161,8 @@ private:
 
 	static Pattern10Map vm_pattern_cache;
 	static PatternBgMap vb_pattern_cache;
+	static Pattern10Map hm_pattern_cache;
+	static PatternBgMap hb_pattern_cache;
 	static int min_pattern_metric_size; // min dimension for axis that displays the meter level
 	static int max_pattern_metric_size; // max dimension for axis that displays the meter level
 };
