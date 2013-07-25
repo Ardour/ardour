@@ -500,14 +500,18 @@ VideoTimeLine::video_file_info (std::string filename, bool local)
 				_session->config.set_timecode_format(timecode_60);
 				break;
 			default:
-				warning << _("Failed to set session-fps: ") << video_file_fps << _(" does not have a corresponding option setting in Ardour.") << endmsg; /* TODO: gettext arg */
+				warning << string_compose (
+						_("Failed to set session-framerate: '%1' does not have a corresponding option setting in %2."),
+						video_file_fps, PROGRAM_NAME ) << endmsg;
 				break;
 		}
 		_session->config.set_video_pullup(0); /* TODO only set if set_timecode_format() was successful ?!*/
 	}
 	if (floor(video_file_fps*100) != floor(_session->timecode_frames_per_second()*100)) {
-		warning << _("Video file's framerate is not equal to Ardour session timecode's framerate: ")
-		        << video_file_fps << _(" vs ") << _session->timecode_frames_per_second() << endmsg;
+		warning << string_compose(
+				_("Video file's framerate is not equal to %1 session timecode's framerate: '%2' vs '%3'"),
+					PROGRAM_NAME, video_file_fps, _session->timecode_frames_per_second())
+				<< endmsg;
 	}
 	flush_local_cache ();
 
@@ -578,8 +582,8 @@ VideoTimeLine::check_server_docroot ()
 			|| lines.at(0).empty()
 			|| lines.at(0).at(0) != video_get_docroot(Config)) {
 		warning << string_compose(
-				_("Video-server docroot mismatch. Ardour: '%1', video-server: '%2'. This usually means that the video server was not started by ardour and uses a different document-root."),
-				video_get_docroot(Config), lines.at(0).at(0))
+				_("Video-server docroot mismatch. %1: '%2', video-server: '%3'. This usually means that the video server was not started by ardour and uses a different document-root."),
+				PROGRAM_NAME, video_get_docroot(Config), lines.at(0).at(0))
 		<< endmsg;
 		ok = false; // TODO allow to override
 	}
