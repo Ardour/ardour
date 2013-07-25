@@ -75,6 +75,9 @@ public:
 	/** Compute peaks */
 	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool);
 
+	void activate ()   { }
+	void deactivate () { }
+
 	ChanCount input_streams () const { return current_meters; }
 	ChanCount output_streams () const { return current_meters; }
 
