@@ -332,7 +332,7 @@ PeakMeter::meter_level(uint32_t n, MeterType type) {
 		case MeterK20:
 		case MeterK14:
 			{
-				const uint32_t n_midi = current_meters.n_midi();
+				const int n_midi = current_meters.n_midi();
 				if ((n - n_midi) < _kmeter.size() && (n - n_midi) >= 0) {
 					return accurate_coefficient_to_dB (_kmeter[n - n_midi]->read());
 				}
@@ -341,7 +341,7 @@ PeakMeter::meter_level(uint32_t n, MeterType type) {
 		case MeterIEC1DIN:
 		case MeterIEC1NOR:
 			{
-				const uint32_t n_midi = current_meters.n_midi();
+				const int n_midi = current_meters.n_midi();
 				if ((n - n_midi) < _iec1meter.size() && (n - n_midi) >= 0) {
 					return accurate_coefficient_to_dB (_iec1meter[n - n_midi]->read());
 				}
@@ -350,7 +350,7 @@ PeakMeter::meter_level(uint32_t n, MeterType type) {
 		case MeterIEC2BBC:
 		case MeterIEC2EBU:
 			{
-				const uint32_t n_midi = current_meters.n_midi();
+				const int n_midi = current_meters.n_midi();
 				if ((n - n_midi) < _iec2meter.size() && (n - n_midi) >= 0) {
 					return accurate_coefficient_to_dB (_iec2meter[n - n_midi]->read());
 				}
@@ -358,7 +358,7 @@ PeakMeter::meter_level(uint32_t n, MeterType type) {
 			break;
 		case MeterVU:
 			{
-				const uint32_t n_midi = current_meters.n_midi();
+				const int n_midi = current_meters.n_midi();
 				if ((n - n_midi) < _vumeter.size() && (n - n_midi) >= 0) {
 					return accurate_coefficient_to_dB (_vumeter[n - n_midi]->read());
 				}
