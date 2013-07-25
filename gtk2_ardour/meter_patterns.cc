@@ -782,8 +782,8 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 				cairo_move_to (cr, width-3-tw, p);
 			}
 
-			cairo_set_line_width(cr, 1.5);
-			cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, .15);
+			cairo_set_line_width(cr, 0.12);
+			cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1.0);
 			pango_cairo_layout_path(cr, layout->gobj());
 			cairo_stroke_preserve (cr);
 			cairo_set_line_width(cr, 1.0);
