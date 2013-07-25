@@ -36,7 +36,7 @@
 using namespace std;
 using namespace RubberBand;
 
-#ifdef _WIN32
+#ifdef PLATFORM_WINDOWS
 using RubberBand::gettimeofday;
 using RubberBand::usleep;
 #endif
@@ -324,7 +324,7 @@ int main(int argc, char **argv)
     cerr << "Using time ratio " << ratio;
     cerr << " and frequency ratio " << frequencyshift << endl;
 
-#ifdef _WIN32
+#ifdef PLATFORM_WINDOWS
     RubberBand::
 #endif
     timeval tv;
@@ -495,7 +495,7 @@ int main(int argc, char **argv)
             }
             delete[] obf;
         } else {
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
             RubberBand::usleep(10000);
 #else
             usleep(10000);
@@ -510,7 +510,7 @@ int main(int argc, char **argv)
 
         cerr << "in: " << countIn << ", out: " << countOut << ", ratio: " << float(countOut)/float(countIn) << ", ideal output: " << lrint(countIn * ratio) << ", error: " << abs(lrint(countIn * ratio) - int(countOut)) << endl;
 
-#ifdef _WIN32
+#ifdef PLATFORM_WINDOWS
         RubberBand::
 #endif
         timeval etv;
