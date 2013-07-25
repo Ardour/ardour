@@ -25,6 +25,10 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef   COMPILER_MSVC
+#undef   O_NONBLOCK
+#define  O_NONBLOCK 0
+#endif
 #if defined(WIN32)
 #include <winsock2.h>
 #else
