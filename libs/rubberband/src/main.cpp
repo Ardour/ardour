@@ -23,7 +23,7 @@
 #include <cstring>
 #include "sysutils.h"
 
-#ifdef __MSVC__
+#ifdef COMPILER_MSVC
 #include "bsd-3rdparty/getopt/getopt.h"
 #else
 #include <getopt.h>

@@ -16,11 +16,11 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <cstdlib>
 
-#include <cstdlib>
+#ifndef COMPILER_MSVC
 #include <sys/time.h>
 #include <time.h>
+#endif
 
 using std::cerr;
 using std::endl;
