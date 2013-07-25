@@ -195,7 +195,7 @@ ARDOUR_UI::set_session (Session *s)
 	}
 
 	if (_session && _session->master_out()) {
-		editor_meter = new LevelMeter(_session);
+		editor_meter = new LevelMeterHBox(_session);
 		editor_meter->set_meter (_session->master_out()->shared_peak_meter().get());
 		editor_meter->clear_meters();
 		editor_meter->set_type (_session->master_out()->meter_type());

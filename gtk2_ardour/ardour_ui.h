@@ -103,7 +103,7 @@ class SpeakerDialog;
 class ThemeManager;
 class TimeInfoBox;
 class MidiTracer;
-class LevelMeter;
+class LevelMeterHBox;
 class GlobalPortMatrixWindow;
 class GUIObjectState;
 
@@ -449,7 +449,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	Gtk::VBox alert_box;
 	Gtk::VBox meter_box;
-	LevelMeter * editor_meter;
+	LevelMeterHBox * editor_meter;
 
 	void solo_blink (bool);
 	void sync_blink (bool);

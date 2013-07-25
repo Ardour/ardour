@@ -128,7 +128,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	}
 
 	// level meter + ticks
-	level_meter = new LevelMeter(sess);
+	level_meter = new LevelMeterHBox(sess);
 	level_meter->set_meter (_route->shared_peak_meter().get());
 	level_meter->clear_meters();
 	level_meter->set_type (_route->meter_type());

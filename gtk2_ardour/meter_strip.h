@@ -119,7 +119,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	bool _has_midi;
 	int _strip_type;
 
-	LevelMeter   *level_meter;
+	LevelMeterHBox *level_meter;
 
 	PBD::ScopedConnection _config_connection;
 	void strip_property_changed (const PBD::PropertyChange&);

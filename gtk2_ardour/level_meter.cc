@@ -22,7 +22,6 @@
 #include "ardour/meter.h"
 
 #include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/fastmeter.h>
 #include <gtkmm2ext/barcontroller.h>
 #include "midi++/manager.h"
 #include "pbd/fastlog.h"
@@ -44,27 +43,28 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace std;
 
-LevelMeter::LevelMeter (Session* s)
+LevelMeterBase::LevelMeterBase (Session* s, FastMeter::Orientation o)
 	: _meter (0)
+	, _meter_orientation(o)
 	, meter_length (0)
 	, thin_meter_width(2)
 {
 	set_session (s);
-	set_spacing (1);
-	Config->ParameterChanged.connect (_parameter_connection, invalidator (*this), boost::bind (&LevelMeter::parameter_changed, this, _1), gui_context());
-	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &LevelMeter::on_theme_changed));
-	ColorsChanged.connect (sigc::mem_fun (*this, &LevelMeter::color_handler));
+	//set_spacing (1);
+	Config->ParameterChanged.connect (_parameter_connection, invalidator (*this), boost::bind (&LevelMeterBase::parameter_changed, this, _1), gui_context());
+	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &LevelMeterBase::on_theme_changed));
+	ColorsChanged.connect (sigc::mem_fun (*this, &LevelMeterBase::color_handler));
 	max_peak = minus_infinity();
 	meter_type = MeterPeak;
 }
 
 void
-LevelMeter::on_theme_changed()
+LevelMeterBase::on_theme_changed()
 {
 	style_changed = true;
 }
 
-LevelMeter::~LevelMeter ()
+LevelMeterBase::~LevelMeterBase ()
 {
 	for (vector<MeterInfo>::iterator i = meters.begin(); i != meters.end(); i++) {
 		delete (*i).meter;
@@ -72,7 +72,7 @@ LevelMeter::~LevelMeter ()
 }
 
 void
-LevelMeter::set_meter (PeakMeter* meter)
+LevelMeterBase::set_meter (PeakMeter* meter)
 {
 	_configuration_connection.disconnect();
 	_meter_type_connection.disconnect();
@@ -80,8 +80,8 @@ LevelMeter::set_meter (PeakMeter* meter)
 	_meter = meter;
 
 	if (_meter) {
-		_meter->ConfigurationChanged.connect (_configuration_connection, invalidator (*this), boost::bind (&LevelMeter::configuration_changed, this, _1, _2), gui_context());
-		_meter->TypeChanged.connect (_meter_type_connection, invalidator (*this), boost::bind (&LevelMeter::meter_type_changed, this, _1), gui_context());
+		_meter->ConfigurationChanged.connect (_configuration_connection, invalidator (*this), boost::bind (&LevelMeterBase::configuration_changed, this, _1, _2), gui_context());
+		_meter->TypeChanged.connect (_meter_type_connection, invalidator (*this), boost::bind (&LevelMeterBase::meter_type_changed, this, _1), gui_context());
 	}
 }
 
@@ -117,7 +117,7 @@ static float vu_standard() {
 }
 
 float
-LevelMeter::update_meters ()
+LevelMeterBase::update_meters ()
 {
 	vector<MeterInfo>::iterator i;
 	uint32_t n;
@@ -167,9 +167,9 @@ LevelMeter::update_meters ()
 }
 
 void
-LevelMeter::parameter_changed (string p)
+LevelMeterBase::parameter_changed (string p)
 {
-	ENSURE_GUI_THREAD (*this, &LevelMeter::parameter_changed, p)
+	ENSURE_GUI_THREAD (*this, &LevelMeterBase::parameter_changed, p)
 
 	if (p == "meter-hold") {
 		vector<MeterInfo>::iterator i;
@@ -194,14 +194,14 @@ LevelMeter::parameter_changed (string p)
 }
 
 void
-LevelMeter::configuration_changed (ChanCount /*in*/, ChanCount /*out*/)
+LevelMeterBase::configuration_changed (ChanCount /*in*/, ChanCount /*out*/)
 {
 	color_changed = true;
 	setup_meters (meter_length, regular_meter_width, thin_meter_width);
 }
 
 void
-LevelMeter::meter_type_changed (MeterType t)
+LevelMeterBase::meter_type_changed (MeterType t)
 {
 	meter_type = t;
 	color_changed = true;
@@ -210,18 +210,18 @@ LevelMeter::meter_type_changed (MeterType t)
 }
 
 void
-LevelMeter::hide_all_meters ()
+LevelMeterBase::hide_all_meters ()
 {
 	for (vector<MeterInfo>::iterator i = meters.begin(); i != meters.end(); ++i) {
 		if ((*i).packed) {
-			remove (*((*i).meter));
+			mtr_remove (*((*i).meter));
 			(*i).packed = false;
 		}
 	}
 }
 
 void
-LevelMeter::setup_meters (int len, int initial_width, int thin_width)
+LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 {
 	hide_all_meters ();
 
@@ -251,7 +251,7 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 		meters.push_back (MeterInfo());
 	}
 
-	//cerr << "LevelMeter::setup_meters() called color_changed = " << color_changed << " colors: " << endl;//DEBUG
+	//cerr << "LevelMeterBase::setup_meters() called color_changed = " << color_changed << " colors: " << endl;//DEBUG
 
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
 		uint32_t c[10];
@@ -365,7 +365,7 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 		}
 		if (meters[n].width != width || meters[n].length != len || color_changed || meter_type != visible_meter_type) {
 			delete meters[n].meter;
-			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, FastMeter::Vertical, len,
+			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, _meter_orientation, len,
 					c[0], c[1], c[2], c[3], c[4],
 					c[5], c[6], c[7], c[8], c[9],
 					b[0], b[1], b[2], b[3],
@@ -375,34 +375,35 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 			meters[n].width = width;
 			meters[n].length = len;
 			meters[n].meter->add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
-			meters[n].meter->signal_button_press_event().connect (sigc::mem_fun (*this, &LevelMeter::meter_button_press));
-			meters[n].meter->signal_button_release_event().connect (sigc::mem_fun (*this, &LevelMeter::meter_button_release));
+			meters[n].meter->signal_button_press_event().connect (sigc::mem_fun (*this, &LevelMeterBase::meter_button_press));
+			meters[n].meter->signal_button_release_event().connect (sigc::mem_fun (*this, &LevelMeterBase::meter_button_release));
 		}
 
-		pack_end (*meters[n].meter, false, false);
+		//pack_end (*meters[n].meter, false, false);
+		mtr_pack (*meters[n].meter);
 		meters[n].meter->show_all ();
 		meters[n].packed = true;
 	}
-	show();
+	//show();
 	color_changed = false;
 	visible_meter_type = meter_type;
 }
 
 void
-LevelMeter::set_type(MeterType t)
+LevelMeterBase::set_type(MeterType t)
 {
 	meter_type = t;
 	_meter->set_type(t);
 }
 
 bool
-LevelMeter::meter_button_press (GdkEventButton* ev)
+LevelMeterBase::meter_button_press (GdkEventButton* ev)
 {
 	return ButtonPress (ev); /* EMIT SIGNAL */
 }
 
 bool
-LevelMeter::meter_button_release (GdkEventButton* ev)
+LevelMeterBase::meter_button_release (GdkEventButton* ev)
 {
 	if (ev->button == 1) {
 		clear_meters (false);
@@ -412,7 +413,7 @@ LevelMeter::meter_button_release (GdkEventButton* ev)
 }
 
 
-void LevelMeter::clear_meters (bool reset_highlight)
+void LevelMeterBase::clear_meters (bool reset_highlight)
 {
 	for (vector<MeterInfo>::iterator i = meters.begin(); i < meters.end(); i++) {
 		(*i).meter->clear();
@@ -423,14 +424,52 @@ void LevelMeter::clear_meters (bool reset_highlight)
 	max_peak = minus_infinity();
 }
 
-void LevelMeter::hide_meters ()
+void LevelMeterBase::hide_meters ()
 {
 	hide_all_meters();
 }
 
 void
-LevelMeter::color_handler ()
+LevelMeterBase::color_handler ()
 {
 	color_changed = true;
 }
 
+LevelMeterHBox::LevelMeterHBox(Session* s)
+	: LevelMeterBase(s)
+{
+	set_spacing(1);
+	show();
+}
+
+
+LevelMeterHBox::~LevelMeterHBox() {}
+
+void
+LevelMeterHBox::mtr_pack(Gtk::Widget &w) {
+	pack_end (w, false, false);
+}
+
+void
+LevelMeterHBox::mtr_remove(Gtk::Widget &w) {
+	remove (w);
+}
+
+
+LevelMeterVBox::LevelMeterVBox(Session* s)
+	: LevelMeterBase(s, FastMeter::Horizontal)
+{
+	set_spacing(1);
+	show();
+}
+LevelMeterVBox::~LevelMeterVBox() {}
+
+void
+LevelMeterVBox::mtr_pack(Gtk::Widget &w) {
+	pack_end (w, false, false);
+}
+
+void
+LevelMeterVBox::mtr_remove(Gtk::Widget &w) {
+	remove (w);
+}
