@@ -58,7 +58,7 @@ JackMIDIPort::JackMIDIPort (string const & name, Flags flags, jack_client_t* jac
 	, _last_write_timestamp (0)
 	, output_fifo (512)
 	, input_fifo (1024)
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	, xthread (true)
 #endif
 {
@@ -75,7 +75,7 @@ JackMIDIPort::JackMIDIPort (const XMLNode& node, jack_client_t* jack_client)
 	, _last_write_timestamp (0)
 	, output_fifo (512)
 	, input_fifo (1024)
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	, xthread (true)
 #endif
 {
@@ -174,7 +174,7 @@ JackMIDIPort::cycle_start (pframes_t nframes)
 		}	
 		
 		if (event_count) {
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 			xthread.wakeup ();
 #endif
 		}

@@ -58,7 +58,7 @@ class JackMIDIPort : public Port {
 	int read (byte *buf, size_t bufsize);
 	void drain (int check_interval_usecs);
 	int selectable () const {
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 		return false;
 #else
 		return xthread.selectable();
@@ -86,7 +86,7 @@ private:
 	RingBuffer< Evoral::Event<double> > output_fifo;
 	Evoral::EventRingBuffer<timestamp_t> input_fifo;
         Glib::Threads::Mutex output_fifo_lock;
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	CrossThreadChannel xthread;
 #endif
 

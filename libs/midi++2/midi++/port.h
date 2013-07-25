@@ -27,7 +27,7 @@
 #include <pthread.h>
 
 #include "pbd/xml++.h"
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 #include "pbd/crossthread.h"
 #endif
 #include "pbd/signals.h"
