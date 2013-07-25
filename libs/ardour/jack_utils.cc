@@ -872,11 +872,7 @@ ARDOUR::get_jack_command_line_string (const JackCommandLineOptions& options, str
 	ostringstream oss;
 
 	for (vector<string>::const_iterator i = args.begin(); i != args.end();) {
-#ifdef PLATFORM_WINDOWS
-		oss << quote_string (*i);
-#else
 		oss << *i;
-#endif
 		if (++i != args.end()) oss << ' ';
 	}
 
