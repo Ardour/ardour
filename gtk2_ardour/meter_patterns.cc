@@ -505,6 +505,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 
 	bool tickleft, tickright;
 	bool background;
+	int overlay_midi = 1;
 	gint width, height;
 	win->get_size (width, height);
 
@@ -564,30 +565,31 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 
 	height = min(max_pattern_metric_size, height);
 	uint32_t peakcolor = ARDOUR_UI::config()->color_by_name ("meterbridge peaklabel");
-	Gdk::Color c;
+	Gdk::Color c; // default text color
 
 	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
+
+		if (types.size() > 1 && (*i) == DataType::MIDI && overlay_midi == 0) {
+			continue;
+		}
 
 		if (types.size() > 1 && (*i) == DataType::MIDI) {
 			/* we're overlaying more than 1 set of marks, so use different colours */
 			c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
 		} else if (background) {
 			set_fg_color(w, type, &c);
-			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 		} else {
 			c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
 		}
-		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 
-
-		// label-pos in dBFS, label-text
-		std::map<float,string> points;
+		std::map<float,string> points; // map: label-pos in dBFS, label-text
 
 		switch (*i) {
 		case DataType::AUDIO:
 			layout->set_attributes (audio_font_attributes);
 			switch (type) {
 				case MeterK14:
+					overlay_midi = 0;
 					points.insert (std::pair<float,string>(-54.0f, "-40"));
 					points.insert (std::pair<float,string>(-44.0f, "-30"));
 					points.insert (std::pair<float,string>(-34.0f, "-20"));
@@ -601,6 +603,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					points.insert (std::pair<float,string>(  0.0f, "+14"));
 					break;
 				case MeterK20:
+					overlay_midi = 0;
 					points.insert (std::pair<float,string>(-60.0f, "-40"));
 					points.insert (std::pair<float,string>(-50.0f, "-30"));
 					points.insert (std::pair<float,string>(-40.0f, "-20"));
@@ -638,6 +641,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					break;
 
 				case MeterIEC2EBU:
+					overlay_midi = 3;
 					points.insert (std::pair<float,string>(-30.0f, "-12"));
 					points.insert (std::pair<float,string>(-26.0f, "-8"));
 					points.insert (std::pair<float,string>(-22.0f, "-4"));
@@ -648,6 +652,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					break;
 
 				case MeterIEC2BBC:
+					overlay_midi = 3;
 					points.insert (std::pair<float,string>(-30.0f, " 1 "));
 					points.insert (std::pair<float,string>(-26.0f, " 2 "));
 					points.insert (std::pair<float,string>(-22.0f, " 3 "));
@@ -658,6 +663,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					break;
 
 				case MeterIEC1NOR:
+					overlay_midi = 0;
 					//points.insert (std::pair<float,string>(-60.0f, "-42"));
 					points.insert (std::pair<float,string>(-54.0f, "-36"));
 					points.insert (std::pair<float,string>(-48.0f, "-30"));
@@ -678,6 +684,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					break;
 
 				case MeterIEC1DIN:
+					overlay_midi = 2;
 					//points.insert (std::pair<float,string>( -3.0f, "200%"));
 					points.insert (std::pair<float,string>( -4.0f, "+5")); // "100%"
 					points.insert (std::pair<float,string>( -9.0f, "0"));
@@ -693,6 +700,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					break;
 
 				case MeterVU:
+					overlay_midi = 0;
 					points.insert (std::pair<float,string>(-17.0f, "+3"));
 					points.insert (std::pair<float,string>(-18.0f, "+2"));
 					points.insert (std::pair<float,string>(-19.0f, "+1"));
@@ -709,8 +717,8 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 			break;
 		case DataType::MIDI:
 			layout->set_attributes (midi_font_attributes);
-			points.insert (std::pair<float,string>(  0, "0"));
 			if (types.size() == 1) {
+				points.insert (std::pair<float,string>(  0, "0"));
 				points.insert (std::pair<float,string>( 16,  "16"));
 				points.insert (std::pair<float,string>( 32,  "32"));
 				points.insert (std::pair<float,string>( 48,  "48"));
@@ -720,12 +728,36 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 				points.insert (std::pair<float,string>(100, "100"));
 				points.insert (std::pair<float,string>(112, "112"));
 			} else {
-				/* labels that don't overlay with dB */
-				points.insert (std::pair<float,string>( 24, "24"));
-				points.insert (std::pair<float,string>( 48, "48"));
-				points.insert (std::pair<float,string>( 72, "74"));
+				switch (overlay_midi) {
+					case 1:
+						/* labels that don't overlay with dBFS */
+						points.insert (std::pair<float,string>(  0, "0"));
+						points.insert (std::pair<float,string>( 24, "24"));
+						points.insert (std::pair<float,string>( 48, "48"));
+						points.insert (std::pair<float,string>( 72, "72"));
+						points.insert (std::pair<float,string>(127, "127"));
+						break;
+					case 2:
+						/* labels that don't overlay with DIN */
+						points.insert (std::pair<float,string>(  0, "0"));
+						points.insert (std::pair<float,string>( 16,  "16"));
+						points.insert (std::pair<float,string>( 40,  "40"));
+						points.insert (std::pair<float,string>( 64,  "64"));
+						points.insert (std::pair<float,string>(112, "112"));
+						points.insert (std::pair<float,string>(127, "127"));
+						break;
+					case 3:
+						/* labels that don't overlay with BBC nor EBU*/
+						points.insert (std::pair<float,string>(  0, "0"));
+						points.insert (std::pair<float,string>( 16, "16"));
+						points.insert (std::pair<float,string>( 56, "56"));
+						points.insert (std::pair<float,string>( 72, "72"));
+						points.insert (std::pair<float,string>(112, "112"));
+						points.insert (std::pair<float,string>(127, "127"));
+					default:
+						break;
+				}
 			}
-			points.insert (std::pair<float,string>(127, "127"));
 			break;
 		}
 
@@ -800,7 +832,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 	}
 
 	// add legend
-	if (types.size() == 1) {
+	if (types.size() == 1 || overlay_midi == 0) {
 		int tw, th;
 		layout->set_attributes (unit_font_attributes);
 		switch (types.at(0)) {
