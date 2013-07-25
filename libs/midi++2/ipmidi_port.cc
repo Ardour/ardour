@@ -254,7 +254,7 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 }
 
 int
-IPMIDIPort::write (const byte* msg, size_t msglen, timestamp_t /* ignored */) {
+IPMIDIPort::write (const MIDI::byte* msg, size_t msglen, timestamp_t /* ignored */) {
 
 	if (sockout) {
 		Glib::Threads::Mutex::Lock lm (write_lock);
@@ -268,7 +268,7 @@ IPMIDIPort::write (const byte* msg, size_t msglen, timestamp_t /* ignored */) {
 }
 
 int
-IPMIDIPort::read (byte* /*buf*/, size_t /*bufsize*/)
+IPMIDIPort::read (MIDI::byte* /*buf*/, size_t /*bufsize*/)
 {
 	/* nothing to do here - all handled by parse() */
 	return 0;

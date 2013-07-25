@@ -214,12 +214,12 @@ JackMIDIPort::drain (int check_interval_usecs)
 		if (vec.len[0] + vec.len[1] >= output_fifo.bufsize() - 1) {
 			break;
 		}
-		usleep (check_interval_usecs);
+		g_usleep (check_interval_usecs);
 	}
 }
 
 int
-JackMIDIPort::write (const byte * msg, size_t msglen, timestamp_t timestamp)
+JackMIDIPort::write (const MIDI::byte * msg, size_t msglen, timestamp_t timestamp)
 {
 	int ret = 0;
 
@@ -347,7 +347,7 @@ JackMIDIPort::flush (void* jack_port_buffer)
 }
 
 int
-JackMIDIPort::read (byte *, size_t)
+JackMIDIPort::read (MIDI::byte *, size_t)
 {
 	if (!receives_input()) {
 		return 0;
@@ -356,9 +356,9 @@ JackMIDIPort::read (byte *, size_t)
 	timestamp_t time;
 	Evoral::EventType type;
 	uint32_t size;
-	byte buffer[input_fifo.capacity()];
+	vector<MIDI::byte> buffer(input_fifo.capacity());
 
-	while (input_fifo.read (&time, &type, &size, buffer)) {
+	while (input_fifo.read (&time, &type, &size, &buffer[0])) {
 		_parser->set_timestamp (time);
 		for (uint32_t i = 0; i < size; ++i) {
 			_parser->scanner (buffer[i]);

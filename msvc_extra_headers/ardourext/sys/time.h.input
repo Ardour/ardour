@@ -2,7 +2,7 @@
 #define _WINX_SYS_TIME_H_
 
 //#include <features.h>
-#include <WinSock.h> // gets 'struct timeval'
+#include <WinSock2.h> // gets 'struct timeval' - Changed by JE - 23-07-2013. Was formerly. . . #include <WinSock.h>
 
 #ifdef _TIMEVAL_DEFINED
 # define _STRUCT_TIMEVAL     1
