@@ -364,6 +364,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 			}
 		}
 		if (meters[n].width != width || meters[n].length != len || color_changed || meter_type != visible_meter_type) {
+			bool hl = meters[n].meter ? meters[n].meter->get_highlight() : false;
 			delete meters[n].meter;
 			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, _meter_orientation, len,
 					c[0], c[1], c[2], c[3], c[4],
@@ -372,6 +373,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					stp[0], stp[1], stp[2], stp[3],
 					styleflags
 					);
+			meters[n].meter->set_highlight(hl);
 			meters[n].width = width;
 			meters[n].length = len;
 			meters[n].meter->add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
