@@ -781,13 +781,21 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 			} else {
 				cairo_move_to (cr, width-3-tw, p);
 			}
-			pango_cairo_show_layout (cr, layout->gobj());
 
 			cairo_set_line_width(cr, 1.5);
 			cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, .15);
 			pango_cairo_layout_path(cr, layout->gobj());
-			cairo_stroke (cr);
+			cairo_stroke_preserve (cr);
 			cairo_set_line_width(cr, 1.0);
+
+			if ((*i) == DataType::AUDIO) {
+				mtr_col_and_fract(cr, &c, peakcolor, type, j->first);
+			} else {
+				cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
+			}
+
+			pango_cairo_show_layout (cr, layout->gobj());
+			cairo_new_path(cr);
 		}
 	}
 
