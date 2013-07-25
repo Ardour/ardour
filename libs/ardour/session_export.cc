@@ -147,7 +147,7 @@ Session::start_audio_export (framepos_t position)
 
 	/* we are ready to go ... */
 
-	if (!_engine.connected()) {
+	if (!_engine.port_engine().connected()) {
 		return -1;
 	}
 

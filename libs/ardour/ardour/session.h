@@ -1213,7 +1213,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	framepos_t        ltc_timecode_offset;
 	bool              ltc_timecode_negative_offset;
 
-	jack_latency_range_t ltc_out_latency;
+	LatencyRange      ltc_out_latency;
 
 	void ltc_tx_initialize();
 	void ltc_tx_cleanup();

@@ -17,34 +17,62 @@
 
 */
 
-#ifndef __ardour_jack_audiobackend_h__
-#define __ardour_jack_audiobackend_h__
+#ifndef __libardour_jack_audiobackend_h__
+#define __libardour_jack_audiobackend_h__
 
 #include <string>
 #include <vector>
 
 #include <stdint.h>
 
+#include <jack/jack.h>
+#ifdef HAVE_JACK_SESSION
+#include <jack/session.h>
+#endif
+
 #include "ardour/audio_backend.h"
 
 namespace ARDOUR {
 
-class JACKAudioBackend : public {
+class JACKAudioBackend : public AudioBackend {
   public:
     JACKAudioBackend (AudioEngine& e);
     ~JACKAudioBackend ();
 
+    std::string name() const;
+    bool connected() const;
+    bool is_realtime () const;
+
     std::vector<std::string> enumerate_devices () const;
     std::vector<float> available_sample_rates (const std::string& device) const;
     std::vector<uint32_t> available_buffer_sizes (const std::string& device) const;
+    uint32_t available_input_channel_count (const std::string& device) const;
+    uint32_t available_output_channel_count (const std::string& device) const;
 
-    int set_parameters (const Parameters&);
-    int get_parameters (Parameters&) const;
+    int set_device_name (const std::string&);
+    int set_sample_rate (float);
+    int set_buffer_size (uint32_t);
+    int set_sample_format (SampleFormat);
+    int set_interleaved (bool yn);
+    int set_input_channels (uint32_t);
+    int set_output_channels (uint32_t);
+    int set_systemic_input_latency (uint32_t);
+    int set_systemic_output_latency (uint32_t);
+
+    std::string  get_device_name () const;
+    float        get_sample_rate () const;
+    uint32_t     get_buffer_size () const;
+    SampleFormat get_sample_format () const;
+    bool         get_interleaved () const;
+    uint32_t     get_input_channels () const;
+    uint32_t     get_output_channels () const;
+    uint32_t     get_systemic_input_latency () const;
+    uint32_t     get_systemic_output_latency () const;
 
     int start ();
     int stop ();
     int pause ();
-    int freewheel ();
+    int freewheel (bool);
 
   private:
     jack_client_t* volatile   _jack; /* could be reset to null by SIGPIPE or another thread */
@@ -60,10 +88,10 @@ class JACKAudioBackend : public {
     static void _freewheel_callback (int , void *arg);
     static void _registration_callback (jack_port_id_t, int, void *);
     static void _connect_callback (jack_port_id_t, jack_port_id_t, int, void *);
-    static void _latency_callback (jack_latency_callback_mode_t, void*);#
+    static void _latency_callback (jack_latency_callback_mode_t, void*);
     static void  halted (void *);
     static void  halted_info (jack_status_t,const char*,void *);
-ifdef HAVE_JACK_SESSION
+#ifdef HAVE_JACK_SESSION
     static void _session_callback (jack_session_event_t *event, void *arg);
 #endif
     
@@ -103,11 +131,11 @@ ifdef HAVE_JACK_SESSION
     bool         _target_interleaved;
     uint32_t     _target_input_channels;
     uint32_t     _target_output_channels;
-    uin32_t      _target_systemic_input_latency;
-    uin32_t      _target_systemic_input_latency;
+    uint32_t      _target_systemic_input_latency;
+    uint32_t      _target_systemic_output_latency;
 };
 
-}
+} // namespace
 
 #endif /* __ardour_audiobackend_h__ */
     

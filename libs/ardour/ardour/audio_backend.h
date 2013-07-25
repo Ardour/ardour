@@ -17,14 +17,16 @@
 
 */
 
-#ifndef __ardour_audiobackend_h__
-#define __ardour_audiobackend_h__
+#ifndef __libardour_audiobackend_h__
+#define __libardour_audiobackend_h__
 
 #include <string>
 #include <vector>
 
 #include <stdint.h>
 #include <stdlib.h>
+
+#include <boost/function.hpp>
 
 namespace ARDOUR {
 
@@ -342,5 +344,5 @@ class AudioBackend {
 
 }
 
-#endif /* __ardour_audiobackend_h__ */
+#endif /* __libardour_audiobackend_h__ */
     

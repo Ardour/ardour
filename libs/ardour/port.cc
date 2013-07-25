@@ -63,7 +63,7 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 	_private_capture_latency.max = 0;
 
 	/* Unfortunately we have to pass the DataType into this constructor so that
-	   we can create the right kind of JACK port; aside from this we'll use the
+	   we can create the right kind of port; aside from this we'll use the
 	   virtual function type () to establish type.
 	*/
 
@@ -73,8 +73,8 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 		throw failed_constructor ();
 	}
 
-	if ((_jack_port = port_engine.register_port (_name, t.to_port_type (), _flags)) == 0) {
-		cerr << "Failed to register JACK port \"" << _name << "\", reason is unknown from here\n";
+	if ((_port_handle = port_engine.register_port (_name, t, _flags)) == 0) {
+		cerr << "Failed to register port \"" << _name << "\", reason is unknown from here\n";
 		throw failed_constructor ();
 	}
 	
@@ -91,7 +91,7 @@ void
 Port::drop ()
 {
 	if (_port_handle) {
-		port_engine.unregister_port (port_handle);
+		port_engine.unregister_port (_port_handle);
 		_port_handle = 0;
 	}
 }
@@ -106,12 +106,12 @@ Port::connected () const
 int
 Port::disconnect_all ()
 {
-	jack_port_disconnect (_engine->jack(), _jack_port);
+	port_engine.disconnect_all (_port_handle);
 	_connections.clear ();
 
 	/* a cheaper, less hacky way to do boost::shared_from_this() ... 
 	 */
-	boost::shared_ptr<Port> pself = _engine->get_port_by_name (name());
+	boost::shared_ptr<Port> pself = AudioEngine::instance()->get_port_by_name (name());
 	PostDisconnect (pself, boost::shared_ptr<Port>()); // emit signal
 
 	return 0;
@@ -123,48 +123,28 @@ Port::disconnect_all ()
 bool
 Port::connected_to (std::string const & o) const
 {
-	if (!_engine->connected()) {
+	if (!port_engine.connected()) {
 		/* in some senses, this answer isn't the right one all the time,
 		   because we know about our connections and will re-establish
-		   them when we reconnect to JACK.
+		   them when we reconnect to the port engine.
 		*/
 		return false;
 	}
 
-	return jack_port_connected_to (_jack_port,
-	                               _engine->make_port_name_non_relative(o).c_str ());
+	return port_engine.connected_to (_port_handle, port_engine.make_port_name_non_relative (o));
 }
 
-/** @param o Filled in with port full names of ports that we are connected to */
 int
 Port::get_connections (std::vector<std::string> & c) const
 {
-	int n = 0;
-
-	if (_engine->connected()) {
-		const char** jc = jack_port_get_connections (_jack_port);
-		if (jc) {
-			for (int i = 0; jc[i]; ++i) {
-				c.push_back (jc[i]);
-				++n;
-			}
-
-                        if (jack_free) {
-                                jack_free (jc);
-                        } else {
-                                free (jc);
-                        }
-		}
-	}
-
-	return n;
+	return port_engine.get_connections (_port_handle, c);
 }
 
 int
 Port::connect (std::string const & other)
 {
-	std::string const other_shrt = _engine->make_port_name_non_relative (other);
-	std::string const this_shrt = _engine->make_port_name_non_relative (_name);
+	std::string const other_name = port_engine.make_port_name_non_relative (other);
+	std::string const our_name = port_engine.make_port_name_non_relative (_name);
 
 	int r = 0;
 
@@ -173,9 +153,9 @@ Port::connect (std::string const & other)
 	}
 
 	if (sends_output ()) {
-		r = jack_connect (_engine->jack (), this_shrt.c_str (), other_shrt.c_str ());
+		port_engine.connect (our_name, other_name);
 	} else {
-		r = jack_connect (_engine->jack (), other_shrt.c_str (), this_shrt.c_str());
+		port_engine.connect (other_name, our_name);
 	}
 
 	if (r == 0) {
@@ -188,15 +168,15 @@ Port::connect (std::string const & other)
 int
 Port::disconnect (std::string const & other)
 {
-	std::string const other_fullname = _engine->make_port_name_non_relative (other);
-	std::string const this_fullname = _engine->make_port_name_non_relative (_name);
+	std::string const other_fullname = port_engine.make_port_name_non_relative (other);
+	std::string const this_fullname = port_engine.make_port_name_non_relative (_name);
 
 	int r = 0;
 
 	if (sends_output ()) {
-		r = _engine->disconnect (this_fullname, other_fullname);
+		r = port_engine.disconnect (this_fullname, other_fullname);
 	} else {
-		r = _engine->disconnect (other_fullname, this_fullname);
+		r = port_engine.disconnect (other_fullname, this_fullname);
 	}
 
 	if (r == 0) {
@@ -205,8 +185,8 @@ Port::disconnect (std::string const & other)
 
 	/* a cheaper, less hacky way to do boost::shared_from_this() ... 
 	 */
-	boost::shared_ptr<Port> pself = _engine->get_port_by_name (name());
-	boost::shared_ptr<Port> pother = _engine->get_port_by_name (other);
+	boost::shared_ptr<Port> pself = AudioEngine::instance()->get_port_by_name (name());
+	boost::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (other);
 
 	if (pself && pother) {
 		/* Disconnecting from another Ardour port: need to allow
@@ -241,7 +221,7 @@ Port::disconnect (Port* o)
 void
 Port::request_input_monitoring (bool yn)
 {
-	port_eengine.request_input_monitoring (_port_handle, yn);
+	port_engine.request_input_monitoring (_port_handle, yn);
 }
 
 void
@@ -276,28 +256,23 @@ Port::increment_port_buffer_offset (pframes_t nframes)
 }
 
 void
-Port::set_public_latency_range (jack_latency_range_t& range, bool playback) const
+Port::set_public_latency_range (LatencyRange& range, bool playback) const
 {
-	/* this sets the visible latency that the rest of JACK sees. because we do latency
-	   compensation, all (most) of our visible port latency values are identical.
+	/* this sets the visible latency that the rest of the port system
+	   sees. because we do latency compensation, all (most) of our visible
+	   port latency values are identical.
 	*/
-
-	if (!jack_port_set_latency_range) {
-		return;
-	}
 
 	DEBUG_TRACE (DEBUG::Latency,
 	             string_compose ("SET PORT %1 %4 PUBLIC latency now [%2 - %3]\n",
 	                             name(), range.min, range.max,
 	                             (playback ? "PLAYBACK" : "CAPTURE")));;
 
-	jack_port_set_latency_range (_jack_port,
-	                             (playback ? JackPlaybackLatency : JackCaptureLatency),
-	                             &range);
+	port_engine.set_latency_range (_port_handle, playback, range);
 }
 
 void
-Port::set_private_latency_range (jack_latency_range_t& range, bool playback)
+Port::set_private_latency_range (LatencyRange& range, bool playback)
 {
 	if (playback) {
 		_private_playback_latency = range;
@@ -315,12 +290,12 @@ Port::set_private_latency_range (jack_latency_range_t& range, bool playback)
 			             _private_capture_latency.max));
 	}
 
-	/* push to public (JACK) location so that everyone else can see it */
+	/* push to public (port system) location so that everyone else can see it */
 
 	set_public_latency_range (range, playback);
 }
 
-const jack_latency_range_t&
+const LatencyRange&
 Port::private_latency_range (bool playback) const
 {
 	if (playback) {
@@ -340,14 +315,13 @@ Port::private_latency_range (bool playback) const
 	}
 }
 
-jack_latency_range_t
+LatencyRange
 Port::public_latency_range (bool /*playback*/) const
 {
-	jack_latency_range_t r;
+	LatencyRange r;
 
-	jack_port_get_latency_range (_jack_port,
-	                             sends_output() ? JackPlaybackLatency : JackCaptureLatency,
-	                             &r);
+	r = port_engine.get_latency_range (_port_handle, sends_output() ? true : false);
+
 	DEBUG_TRACE (DEBUG::Latency, string_compose (
 		             "GET PORT %1: %4 PUBLIC latency range %2 .. %3\n",
 		             name(), r.min, r.max,
@@ -356,21 +330,9 @@ Port::public_latency_range (bool /*playback*/) const
 }
 
 void
-Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) const
+Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 {
-	if (!jack_port_get_latency_range) {
-		return;
-	}
-
 	vector<string> connections;
-	jack_client_t* jack = _engine->jack();
-
-	if (!jack) {
-		range.min = 0;
-		range.max = 0;
-		PBD::warning << _("get_connected_latency_range() called while disconnected from JACK") << endmsg;
-		return;
-	}
 
 	get_connections (connections);
 
@@ -384,21 +346,18 @@ Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) c
 		for (vector<string>::const_iterator c = connections.begin();
 		     c != connections.end(); ++c) {
 
-                        jack_latency_range_t lr;
+                        LatencyRange lr;
 
                         if (!AudioEngine::instance()->port_is_mine (*c)) {
 
-                                /* port belongs to some other JACK client, use
-                                 * JACK to lookup its latency information.
+                                /* port belongs to some other port-system client, use
+                                 * the port engine to lookup its latency information.
                                  */
 
-                                jack_port_t* remote_port = jack_port_by_name (_engine->jack(), (*c).c_str());
+				PortEngine::PortHandle remote_port = port_engine.get_port_by_name (*c);
 
                                 if (remote_port) {
-                                        jack_port_get_latency_range (
-                                                remote_port,
-                                                (playback ? JackPlaybackLatency : JackCaptureLatency),
-                                                &lr);
+                                        lr = port_engine.get_latency_range (remote_port, playback);
 
                                         DEBUG_TRACE (DEBUG::Latency, string_compose (
                                                              "\t%1 <-> %2 : latter has latency range %3 .. %4\n",
@@ -442,15 +401,9 @@ Port::get_connected_latency_range (jack_latency_range_t& range, bool playback) c
 int
 Port::reestablish ()
 {
-	jack_client_t* jack = _engine->jack();
+	_port_handle = port_engine.register_port (_name, type(), _flags);
 
-	if (!jack) {
-		return -1;
-	}
-
-	_jack_port = jack_port_register (jack, _name.c_str(), type().to_jack_type(), _flags, 0);
-
-	if (_jack_port == 0) {
+	if (_port_handle == 0) {
 		PBD::error << string_compose (_("could not reregister %1"), _name) << endmsg;
 		return -1;
 	}
@@ -475,7 +428,7 @@ Port::reconnect ()
 	return 0;
 }
 
-/** @param n Short port name (no JACK client name) */
+/** @param n Short port name (no port-system client name) */
 int
 Port::set_name (std::string const & n)
 {
@@ -483,10 +436,10 @@ Port::set_name (std::string const & n)
 		return 0;
 	}
 
-	int const r = jack_port_set_name (_jack_port, n.c_str());
+	int const r = port_engine.set_port_name (_port_handle, n);
 
 	if (r == 0) {
-		_engine->port_renamed (_name, n);
+		AudioEngine::instance()->port_renamed (_name, n);
 		_name = n;
 	}
 
@@ -497,29 +450,6 @@ Port::set_name (std::string const & n)
 bool
 Port::physically_connected () const
 {
-	const char** jc = jack_port_get_connections (_jack_port);
-
-	if (jc) {
-		for (int i = 0; jc[i]; ++i) {
-
-			jack_port_t* port = jack_port_by_name (_engine->jack(), jc[i]);
-
-			if (port && (jack_port_flags (port) & JackPortIsPhysical)) {
-                                if (jack_free) {
-                                        jack_free (jc);
-                                } else {
-                                        free (jc);
-                                }
-				return true;
-			}
-		}
-                if (jack_free) {
-                        jack_free (jc);
-                } else {
-                        free (jc);
-                }
-	}
-
-	return false;
+	return port_engine.physically_connected (_port_handle);
 }
 

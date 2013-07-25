@@ -170,7 +170,7 @@ Session::Session (AudioEngine &eng,
 
 	interpolation.add_channel_to (0, 0);
 
-	if (!eng.connected()) {
+	if (!eng.port_engine().connected()) {
 		throw failed_constructor();
 	}
 
@@ -346,8 +346,8 @@ Session::when_engine_running ()
 
 	BootMessage (_("Set block size and sample rate"));
 
-	set_block_size (_engine.frames_per_cycle());
-	set_frame_rate (_engine.frame_rate());
+	set_block_size (_engine.samples_per_cycle());
+	set_frame_rate (_engine.sample_rate());
 
 	BootMessage (_("Using configuration"));
 
@@ -4677,7 +4677,7 @@ Session::set_worst_playback_latency ()
 
 	_worst_output_latency = 0;
 
-	if (!_engine.connected()) {
+	if (!_engine.port_engine().connected()) {
 		return;
 	}
 
@@ -4699,7 +4699,7 @@ Session::set_worst_capture_latency ()
 
 	_worst_input_latency = 0;
 
-	if (!_engine.connected()) {
+	if (!_engine.port_engine().connected()) {
 		return;
 	}
 

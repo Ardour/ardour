@@ -87,28 +87,39 @@ class PortEngine {
        
     typedef void* PortHandle;
 
-    virtual bool connected() const = 0;
+    virtual bool  connected() const = 0;
+    virtual void* private_handle() const = 0;
 
     virtual int         set_port_name (PortHandle, const std::string&) = 0;
     virtual std::string get_port_name (PortHandle) const = 0;
     virtual PortHandle* get_port_by_name (const std::string&) const = 0;
 
-    virtual PortHandle register_port (const std::string&, DataType::Symbol, ARDOUR::PortFlags) = 0;
+    virtual std::string make_port_name_relative (const std::string& name) const = 0;
+    virtual std::string make_port_name_non_relative (const std::string& name) const = 0;
+    virtual bool        port_is_mine (const std::string& fullname) const = 0;
+
+    virtual PortHandle register_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags) = 0;
     virtual void  unregister_port (PortHandle) = 0;
+
     virtual bool  connected (PortHandle) = 0;
-    virtual int   disconnect_all (PortHandle) = 0;
     virtual bool  connected_to (PortHandle, const std::string&) = 0;
-    virtual int   get_connections (PortHandle, std::vector<std::string>&) = 0;
     virtual bool  physically_connected (PortHandle) = 0;
+
+    virtual int   get_connections (PortHandle, std::vector<std::string>&) = 0;
+
     virtual int   connect (PortHandle, const std::string&) = 0;
     virtual int   disconnect (PortHandle, const std::string&) = 0;
+    virtual int   disconnect_all (PortHandle) = 0;
+
+    virtual int   connect (const std::string& src, const std::string& dst) = 0;
+    virtual int   disconnect (const std::string& src, const std::string& dst) = 0;
     
     /* MIDI */
 
-    virtual void midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index) = 0;
-    virtual int  midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size) = 0;
+    virtual void     midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index) = 0;
+    virtual int      midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size) = 0;
     virtual uint32_t get_midi_event_count (void* port_buffer);
-    virtual void midi_clear (void* port_buffer);
+    virtual void     midi_clear (void* port_buffer);
 
     /* Monitoring */
 
@@ -120,13 +131,8 @@ class PortEngine {
     /* Latency management
      */
     
-    struct LatencyRange {
-	uint32_t min;
-	uint32_t max;
-    };
-    
-    virtual void          set_latency_range (PortHandle, int dir, LatencyRange) = 0;
-    virtual LatencyRange  get_latency_range (PortHandle, int dir) = 0;
+    virtual void          set_latency_range (PortHandle, bool for_playback, LatencyRange) = 0;
+    virtual LatencyRange  get_latency_range (PortHandle, bool for_playback) = 0;
     virtual LatencyRange  get_connected_latency_range (PortHandle, int dir) = 0;
 
     virtual void* get_buffer (PortHandle, pframes_t) = 0;

@@ -155,7 +155,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	set_history_depth (Config->get_history_depth());
 
-	_current_frame_rate = _engine.frame_rate ();
+	_current_frame_rate = _engine.sample_rate ();
 	_nominal_frame_rate = _current_frame_rate;
 	_base_frame_rate = _current_frame_rate;
 
@@ -736,7 +736,15 @@ Session::jack_session_event (jack_session_event_t * event)
                 }
         }
 
-	jack_session_reply (_engine.jack(), event);
+	/* this won't be called if the port engine in use is not JACK, so we do 
+	   not have to worry about the type of PortEngine::private_handle()
+	*/
+
+	jack_client_t* jack_client = (jack_client_t*) AudioEngine::instance()->port_engine().private_handle();
+	
+	if (jack_client) {
+		jack_session_reply (jack_client, event);
+	}
 
 	if (event->type == JackSessionSaveAndQuit) {
 		Quit (); /* EMIT SIGNAL */
@@ -757,7 +765,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		return 1;
 	}
 
-	if (!_engine.connected ()) {
+	if (!_engine.port_engine().connected ()) {
 		error << string_compose (_("the %1 audio engine is not connected and state saving would lose all I/O connections. Session not saved"),
                                          PROGRAM_NAME)
 		      << endmsg;

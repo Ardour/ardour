@@ -602,6 +602,10 @@ namespace ARDOUR {
 		IsOutput = 2,
 	};
 
+	struct LatencyRange {
+	    uint32_t min; //< samples
+	    uint32_t max; //< samples
+	};
 
 } // namespace ARDOUR
 

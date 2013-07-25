@@ -97,13 +97,13 @@ public:
 
         PortEngine::PortHandle port_handle() { return _port_handle; }
 
-	void get_connected_latency_range (jack_latency_range_t& range, bool playback) const;
+        void get_connected_latency_range (LatencyRange& range, bool playback) const;
 
-	void set_private_latency_range (jack_latency_range_t& range, bool playback);
-	const jack_latency_range_t&  private_latency_range (bool playback) const;
+	void set_private_latency_range (LatencyRange& range, bool playback);
+	const LatencyRange&  private_latency_range (bool playback) const;
 
-	void set_public_latency_range (jack_latency_range_t& range, bool playback) const;
-	jack_latency_range_t public_latency_range (bool playback) const;
+	void set_public_latency_range (LatencyRange& range, bool playback) const;
+	LatencyRange public_latency_range (bool playback) const;
 
 	virtual void reset ();
 
@@ -147,8 +147,8 @@ protected:
 
 	framecnt_t _port_buffer_offset; /* access only from process() tree */
 
-	jack_latency_range_t _private_playback_latency;
-	jack_latency_range_t _private_capture_latency;
+	LatencyRange _private_playback_latency;
+	LatencyRange _private_capture_latency;
 
 private:
 	std::string _name;  ///< port short name

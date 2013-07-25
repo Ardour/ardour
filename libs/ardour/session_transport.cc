@@ -44,6 +44,7 @@
 #include "ardour/session.h"
 #include "ardour/slave.h"
 #include "ardour/operations.h"
+#include "ardour/jack_portengine.h"
 
 #include "i18n.h"
 
@@ -1416,6 +1417,13 @@ Session::switch_to_sync_source (SyncSource src)
 		break;
 
 	case JACK:
+		/* if we are not using JACK as the port engine, we can't do
+		 * this
+		 */
+		if (dynamic_cast<JACKPortEngine*>(&AudioEngine::instance()->port_engine())) {
+			return;
+		}
+
 		if (_slave && dynamic_cast<JACK_Slave*>(_slave)) {
 			return;
 		}
@@ -1424,7 +1432,7 @@ Session::switch_to_sync_source (SyncSource src)
 			return;
 		}
 
-		new_slave = new JACK_Slave (_engine.jack());
+		new_slave = new JACK_Slave ((jack_client_t*) AudioEngine::instance()->port_engine().private_handle());
 		break;
 
 	default:

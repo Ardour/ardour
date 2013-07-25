@@ -391,7 +391,7 @@ public:
 
 	PBD::ScopedConnectionList port_connections;
 	PBD::ScopedConnection     config_connection;
-	jack_latency_range_t      ltc_slave_latency;
+        LatencyRange  ltc_slave_latency;
 
 	/* DLL - chase LTC */
 	int    transport_direction;

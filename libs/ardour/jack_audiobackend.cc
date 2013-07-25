@@ -1,7 +1,54 @@
+/*
+    Copyright (C) 2013 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
+#include <jack/jack.h>
+
+#include "ardour/audioengine.h"
+#include "ardour/types.h"
 #include "ardour/jack_audiobackend.h"
+
+using namespace ARDOUR;
+using std::string;
 
 #define GET_PRIVATE_JACK_POINTER(j)  jack_client_t* _priv_jack = (jack_client_t*) (j); if (!_priv_jack) { return; }
 #define GET_PRIVATE_JACK_POINTER_RET(j,r) jack_client_t* _priv_jack = (jack_client_t*) (j); if (!_priv_jack) { return r; }
+
+JACKAudioBackend::JACKAudioBackend (AudioEngine& e)
+	: AudioBackend (e)
+	, _jack (0)
+	, _target_sample_rate (48000)
+	, _target_buffer_size (1024)
+	, _target_sample_format (FloatingPoint)
+	, _target_interleaved (false)
+	, _target_input_channels (-1)
+	, _target_output_channels (-1)
+	, _target_systemic_input_latency (0)
+	, _target_systemic_output_latency (0)
+{
+}
+
+int
+JACKAudioBackend::set_device_name (const string& dev)
+{
+	_target_device = dev;
+	return 0;
+}
 
 int
 JACKAudioBackend::start ()

@@ -78,10 +78,6 @@ class PortManager
     bool can_request_input_monitoring () const;
     void request_input_monitoring (const std::string&, bool) const;
     void ensure_input_monitoring (const std::string&, bool) const;
-
-    std::string make_port_name_relative (const std::string&) const;
-    std::string make_port_name_non_relative (const std::string&) const;
-    bool port_is_mine (const std::string&) const;
     
     class PortRegistrationFailure : public std::exception {
       public:
