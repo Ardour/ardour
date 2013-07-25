@@ -15,7 +15,6 @@ class JackUtilsTest : public CppUnit::TestFixture
 	CPPUNIT_TEST (test_server_paths);
 	CPPUNIT_TEST (test_config);
 	CPPUNIT_TEST (test_command_line);
-	CPPUNIT_TEST (test_start_server);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
@@ -29,5 +28,4 @@ public:
 	void test_server_paths ();
 	void test_config ();
 	void test_command_line ();
-	void test_start_server ();
 };

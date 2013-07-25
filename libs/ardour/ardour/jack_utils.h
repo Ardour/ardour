@@ -250,12 +250,4 @@ namespace ARDOUR {
 	 * We don't need this at the moment because the gui stores all its settings
 	 */
 	//std::string get_jack_command_line_from_config_file (const std::string& config_file_path);
-
-	/**
-	 * Temporary for WIN32 only as jack_client_open doesn't start the server on that platform
-	 *
-	 * @return true if server was able to be started
-	 */
-	bool start_jack_server (const std::string& command_line);
-
 }
