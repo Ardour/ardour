@@ -186,20 +186,20 @@ PeakMeter::configure_io (ChanCount in, ChanCount out)
 void
 PeakMeter::reflect_inputs (const ChanCount& in)
 {
-	current_meters = in;
-
-	const size_t limit = min (_peak_signal.size(), (size_t) current_meters.n_total ());
-	const size_t n_midi  = min (_peak_signal.size(), (size_t) current_meters.n_midi());
-
-	for (size_t n = 0; n < limit; ++n) {
-		if (n < n_midi) {
-			_visible_peak_power[n] = 0;
-		} else {
-			_visible_peak_power[n] = -INFINITY;
+	for (uint32_t i = in.n_total(); i < current_meters.n_total(); ++i) {
+		if (i < _peak_signal.size()) {
+			_peak_signal[i] = 0.0f;
 		}
 	}
+	for (uint32_t i = in.n_audio(); i < current_meters.n_audio(); ++i) {
+		if (i >= _kmeter.size()) continue;
+		_kmeter[i]->reset();
+		_iec1meter[i]->reset();
+		_iec2meter[i]->reset();
+		_vumeter[i]->reset();
+	}
 
-	reset();
+	current_meters = in;
 	reset_max();
 
 	ConfigurationChanged (in, in); /* EMIT SIGNAL */

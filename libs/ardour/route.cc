@@ -3152,9 +3152,6 @@ Route::set_meter_point (MeterPoint p, bool force)
 		*/
 	}
 
-	_meter->reset();
-	_meter->reset_max();
-
 	meter_change (); /* EMIT SIGNAL */
 
 	bool const meter_visibly_changed = (_meter->display_to_user() != meter_was_visible_to_user);
