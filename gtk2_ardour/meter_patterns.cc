@@ -594,7 +594,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					points.insert (std::pair<float,string>(-24.0f, "-10"));
 					points.insert (std::pair<float,string>(-20.0f,  "-6"));
 					points.insert (std::pair<float,string>(-17.0f,  "-3"));
-					points.insert (std::pair<float,string>(-14.0f,   "0"));
+					points.insert (std::pair<float,string>(-14.0f,  " 0"));
 					points.insert (std::pair<float,string>(-11.0f,  "+3"));
 					points.insert (std::pair<float,string>( -8.0f,  "+6"));
 					points.insert (std::pair<float,string>( -4.0f, "+10"));
@@ -607,7 +607,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					points.insert (std::pair<float,string>(-30.0f, "-10"));
 					points.insert (std::pair<float,string>(-26.0f,  "-6"));
 					points.insert (std::pair<float,string>(-23.0f,  "-3"));
-					points.insert (std::pair<float,string>(-20.0f,   "0"));
+					points.insert (std::pair<float,string>(-20.0f,  " 0"));
 					points.insert (std::pair<float,string>(-17.0f,  "+3"));
 					points.insert (std::pair<float,string>(-14.0f,  "+6"));
 					points.insert (std::pair<float,string>(-10.0f, "+10"));
@@ -696,7 +696,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					points.insert (std::pair<float,string>(-17.0f, "+3"));
 					points.insert (std::pair<float,string>(-18.0f, "+2"));
 					points.insert (std::pair<float,string>(-19.0f, "+1"));
-					points.insert (std::pair<float,string>(-20.0f, "0"));
+					points.insert (std::pair<float,string>(-20.0f, " 0"));
 					points.insert (std::pair<float,string>(-21.0f, "-1"));
 					points.insert (std::pair<float,string>(-22.0f, "-2"));
 					points.insert (std::pair<float,string>(-23.0f, "-3"));
