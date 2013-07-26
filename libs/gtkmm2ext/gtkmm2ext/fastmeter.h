@@ -147,15 +147,17 @@ private:
 	typedef std::map<Pattern10MapKey, Cairo::RefPtr<Cairo::Pattern> > Pattern10Map;
 
 	struct PatternBgMapKey {
-		PatternBgMapKey (int w, int h, int c0, int c1)
+		PatternBgMapKey (int w, int h, int c0, int c1, bool shade)
 			: dim(w, h)
 			, cols(c0, c1)
+			, sh(shade)
 		{}
 		inline bool operator<(const PatternBgMapKey& rhs) const {
-			return (dim < rhs.dim) || (dim == rhs.dim && cols < rhs.cols);
+			return (dim < rhs.dim) || (dim == rhs.dim && cols < rhs.cols) || (dim == rhs.dim && cols == rhs.cols && (sh && !rhs.sh));
 		}
 		boost::tuple<int, int> dim;
 		boost::tuple<int, int> cols;
+		bool sh;
 	};
 	typedef std::map<PatternBgMapKey, Cairo::RefPtr<Cairo::Pattern> > PatternBgMap;
 

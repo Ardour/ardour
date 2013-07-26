@@ -357,7 +357,7 @@ FastMeter::request_vertical_background(
 	height = min(height, max_pattern_metric_size);
 	height += 2;
 
-	const PatternBgMapKey key (width, height, bgc[0], bgc[1]);
+	const PatternBgMapKey key (width, height, bgc[0], bgc[1], shade);
 	PatternBgMap::iterator i;
 	if ((i = vb_pattern_cache.find (key)) != vb_pattern_cache.end()) {
 		return i->second;
@@ -405,7 +405,7 @@ FastMeter::request_horizontal_background(
 	width = min(width, max_pattern_metric_size);
 	width += 2;
 
-	const PatternBgMapKey key (width, height, bgc[0], bgc[1]);
+	const PatternBgMapKey key (width, height, bgc[0], bgc[1], shade);
 	PatternBgMap::iterator i;
 	if ((i = hb_pattern_cache.find (key)) != hb_pattern_cache.end()) {
 		return i->second;
