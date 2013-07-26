@@ -16,25 +16,21 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __option_group_h__
-#define __option_group_h__
+#ifndef __command_line_options_h__
+#define __command_line_options_h__
 
 #include <glibmm/optioncontext.h>
 
 namespace ARDOUR {
 
 /**
- * This class could be called CommandLineOptions or something similar
- * but I think that only really makes sense if these options are not
- * going to change during the execution of the program, otherwise these
- * are just a group of options that just happen to also be accessible
- * via the command line. Although as a class name OptionGroup isn't
- * very explanatory whereas CommandLineOptions is.
+ * These options are not supposed to be modified during the execution of
+ * the application.
  */
-class OptionGroup : public Glib::OptionGroup
+class CommandLineOptions : public Glib::OptionGroup
 {
 public:
-	OptionGroup();
+	CommandLineOptions();
 
 	virtual bool on_post_parse (Glib::OptionContext&, Glib::OptionGroup&);
 

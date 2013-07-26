@@ -16,16 +16,14 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <glibmm/optioncontext.h>
-
-#include "ardour/option_group.h"
+#include "ardour/command_line_options.h"
 #include "ardour/session.h"
 
 #include "i18n.h"
 
 namespace ARDOUR {
 
-OptionGroup::OptionGroup()
+CommandLineOptions::CommandLineOptions()
 	: Glib::OptionGroup("libardour", _("libardour options"), _("Command-line options for libardour"))
 	, m_arg_novst(false)
 	, m_arg_no_hw_optimizations(false)
@@ -53,7 +51,7 @@ OptionGroup::OptionGroup()
 }
 
 bool
-OptionGroup::on_post_parse (Glib::OptionContext&, Glib::OptionGroup&)
+CommandLineOptions::on_post_parse (Glib::OptionContext&, Glib::OptionGroup&)
 {
 	if (m_disable_plugins) {
 		ARDOUR::Session::set_disable_all_loaded_plugins (true);

@@ -77,12 +77,12 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/buffer_manager.h"
+#include "ardour/command_line_options.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_region.h"
 #include "ardour/mix.h"
 #include "ardour/panner_manager.h"
-#include "ardour/option_group.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/process_thread.h"
 #include "ardour/profile.h"
@@ -221,23 +221,23 @@ lotsa_files_please ()
 }
 
 
-ARDOUR::OptionGroup&
-ARDOUR::get_ardour_options ()
+ARDOUR::CommandLineOptions&
+ARDOUR::get_cmdline_options ()
 {
-	static ARDOUR::OptionGroup options;
+	static ARDOUR::CommandLineOptions options;
 	return options;
 }
 
 Glib::OptionGroup&
 ARDOUR::get_options ()
 {
-	return get_ardour_options ();
+	return get_cmdline_options ();
 }
 
 bool
 parse_args (int *argc, char ***argv)
 {
-	if (ARDOUR::get_ardour_options().m_parsed) {
+	if (ARDOUR::get_cmdline_options().m_parsed) {
 		return true;
 	}
 
@@ -326,7 +326,7 @@ ARDOUR::init (int *argc, char ***argv, const char* localedir)
 		return false;
 	}
 
-	Config->set_use_windows_vst (!get_ardour_options().m_arg_novst);
+	Config->set_use_windows_vst (!get_cmdline_options().m_arg_novst);
 #ifdef LXVST_SUPPORT
 	Config->set_use_lxvst(true);
 #endif
@@ -350,7 +350,7 @@ ARDOUR::init (int *argc, char ***argv, const char* localedir)
 	AUPluginInfo::load_cached_info ();
 #endif
 
-	setup_hardware_optimization (!get_ardour_options().m_arg_no_hw_optimizations);
+	setup_hardware_optimization (!get_cmdline_options().m_arg_no_hw_optimizations);
 
 	SourceFactory::init ();
 	Analyser::init ();
