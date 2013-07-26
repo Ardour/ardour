@@ -56,6 +56,7 @@ libpbd_sources = [
     'openuri.cc',
     'pathexpand.cc',
     'pathscanner.cc',
+    'pbd.cc',
     'pool.cc',
     'property_list.cc',
     'pthread_utils.cc',

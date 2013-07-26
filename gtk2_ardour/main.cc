@@ -511,10 +511,6 @@ int main (int argc, char *argv[])
 		     << endl;
 	}
 
-	/* some GUI objects need this */
-
-	PBD::ID::init ();
-
 	try {
 		// not sure if init should both return true to indicate success but
 		// then also possibly throw, best to just be consistant and pick one.

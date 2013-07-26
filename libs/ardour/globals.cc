@@ -66,6 +66,7 @@
 #include "pbd/file_utils.h"
 #include "pbd/enumwriter.h"
 #include "pbd/basename.h"
+#include "pbd/pbd.h"
 
 #include "midi++/port.h"
 #include "midi++/manager.h"
@@ -310,8 +311,8 @@ ARDOUR::init (int *argc, char ***argv, const char* localedir)
 		return true;
 	}
 
-	if (!Glib::thread_supported()) {
-		Glib::thread_init();
+	if (!PBD::init (argc, argv)) {
+		return false;
 	}
 
 	// this really should be in PBD::init..if there was one
@@ -325,7 +326,6 @@ ARDOUR::init (int *argc, char ***argv, const char* localedir)
 		return false;
 	}
 
-	PBD::ID::init ();
 	SessionEvent::init_event_pool ();
 
 	SessionObject::make_property_quarks ();
@@ -463,7 +463,7 @@ ARDOUR::cleanup ()
 #ifdef LXVST_SUPPORT
 	vstfx_exit();
 #endif
-	EnumWriter::destroy ();
+	PBD::cleanup ();
 	return 0;
 }
 
