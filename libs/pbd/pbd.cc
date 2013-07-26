@@ -20,6 +20,8 @@
 #include <iostream>
 #include <cstdlib>
 
+#include <giomm.h>
+
 #include <glibmm/optioncontext.h>
 #include <glibmm/thread.h>
 
@@ -135,6 +137,8 @@ PBD::init (int *argc, char ***argv)
 	PBD::ID::init ();
 
 	setup_libpbd_enums ();
+
+	Gio::init ();
 
 	libpbd_initialized = true;
 	return true;

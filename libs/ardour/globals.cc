@@ -50,8 +50,6 @@
 #undef check /* stupid Apple and their un-namespaced, generic Carbon macros */
 #endif 
 
-#include <giomm.h>
-
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
@@ -272,9 +270,6 @@ ARDOUR::init (int *argc, char ***argv, const char* localedir)
 	if (!PBD::init (argc, argv)) {
 		return false;
 	}
-
-	// this really should be in PBD::init..if there was one
-	Gio::init ();
 
 #ifdef ENABLE_NLS
 	(void) bindtextdomain(PACKAGE, localedir);
