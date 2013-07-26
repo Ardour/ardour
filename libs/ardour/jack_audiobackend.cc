@@ -17,7 +17,12 @@
 
 */
 
+#include <math.h>
 #include <jack/jack.h>
+
+#include <boost/scoped_ptr.hpp>
+
+#include "pbd/epa.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/types.h"
@@ -28,6 +33,20 @@ using std::string;
 
 #define GET_PRIVATE_JACK_POINTER(j)  jack_client_t* _priv_jack = (jack_client_t*) (j); if (!_priv_jack) { return; }
 #define GET_PRIVATE_JACK_POINTER_RET(j,r) jack_client_t* _priv_jack = (jack_client_t*) (j); if (!_priv_jack) { return r; }
+
+extern "C" {
+
+	/* functions looked up using dlopen-and-cousins, and so naming scope
+	 * must be non-mangled.
+	 */
+
+	AudioBackend* backend_factory (AudioEngine& ae)
+	{
+		JACKAudioBackend* ab = new JACKAudioBackend (ae);
+		return ab;
+	}
+	
+}
 
 JACKAudioBackend::JACKAudioBackend (AudioEngine& e)
 	: AudioBackend (e)
@@ -43,12 +62,273 @@ JACKAudioBackend::JACKAudioBackend (AudioEngine& e)
 {
 }
 
+string
+JACKAudioBackend::name() const 
+{
+	return X_("JACK");
+}
+
+void*
+JACKAudioBackend::private_handle()
+{
+	return _jack;
+}
+
+bool
+JACKAudioBackend::connected() const
+{
+	return (_jack != 0);
+}
+
+bool
+JACKAudioBackend::is_realtime ()
+{
+	GET_PRIVATE_JACK_POINTER_RET (_jack,false);
+	return jack_is_realtime (_priv_jack);
+}
+
+vector<string>
+JACKAudioBackend::enumerate_devices () const
+{
+	vector<string> devices;
+	return devices;
+}
+
+vector<float>
+JACKAudioBackend::available_sample_rates (const string& /*device*/) const
+{
+	vector<float> f;
+	
+	if (_jack) {
+		f.push_back (get_sample_rate());
+		return f;
+	}
+
+	/* if JACK is not already running, just list a bunch of reasonable 
+	   values and let the future sort it all out.
+	*/
+
+	f.push_back (8000.0);
+	f.push_back (16000.0);
+	f.push_back (24000.0);
+	f.push_back (32000.0);
+	f.push_back (44100.0);
+	f.push_back (48000.0);
+	f.push_back (88200.0);
+	f.push_back (96000.0);
+	f.push_back (192000.0);
+	f.push_back (384000.0);
+	
+	return f;
+}
+
+vector<uint32_t>
+JACKAudioBackend::available_buffer_sizes (const string& /*device*/) const
+{
+	vector<uint32_t> s;
+	
+	if (_jack) {
+		s.push_back (get_buffer_size());
+		return s;
+	}
+
+	s.push_back (8);
+	s.push_back (16);
+	s.push_back (32);
+	s.push_back (64);
+	s.push_back (128);
+	s.push_back (256);
+	s.push_back (512);
+	s.push_back (1024);
+	s.push_back (2048);
+	s.push_back (4096);
+	s.push_back (8192);
+
+	return s;
+}
+
+uint32_t
+JACKAudioBackend::available_input_channel_count (const string& /*device*/)
+{
+	return 128;
+}
+
+uint32_t
+JACKAudioBackend::available_output_channel_count (const string& /*device*/)
+{
+	return 128;
+}
+
+/* -- parameter setting -- */
+
 int
 JACKAudioBackend::set_device_name (const string& dev)
 {
+	if (_jack) {
+		/* need to stop and restart JACK for this to work, at present */
+		return -1;
+	}
+
 	_target_device = dev;
 	return 0;
 }
+
+int
+JACKAudioBackend::set_sample_rate (float sr)
+{
+	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
+
+	if (sr == jack_get_sample_rate (_priv_jack)) {
+                return 0;
+	}
+
+	return jack_set_sample_rate (_priv_jack, lrintf (sr));
+}
+
+int
+JACKAudioBackend::set_buffer_size (uint32_t nframes)
+{
+	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
+
+	if (nframes == jack_get_buffer_size (_priv_jack)) {
+                return 0;
+	}
+
+	return jack_set_buffer_size (_priv_jack, nframes);
+}
+
+int
+JACKAudioBackend::set_sample_format (SampleFormat sf)
+{
+	/* as far as JACK clients are concerned, the hardware is always
+	 * floating point format.
+	 */
+	if (sf == FloatingPoint) {
+		return 0;
+	}
+	return -1;
+}
+
+int
+JACKAudioBackend::set_interleaved (bool yn)
+{
+	/* as far as JACK clients are concerned, the hardware is always
+	 * non-interleaved
+	 */
+	if (!yn) {
+		return 0;
+	}
+	return -1;
+}
+
+int
+JACKAudioBackend::set_input_channels (uint32_t cnt)
+{
+	if (_jack) {
+		return -1;
+	}
+
+	_target_input_channels = cnt;
+}
+
+int
+JACKAudioBackend::set_output_channels (uint32_t cnt)
+{
+	if (_jack) {
+		return -1;
+	}
+
+	_target_output_channels = cnt;
+}
+
+int
+JACKAudioBackend::set_systemic_input_latency (uint32_t l)
+{
+	if (_jack) {
+		return -1;
+	}
+
+	_target_systemic_input_latency = l;
+}
+
+int
+JACKAudioBackend::set_systemic_output_latency (uint32_t l)
+{
+	if (_jack) {
+		return -1;
+	}
+
+	_target_systemic_output_latency = l;
+}
+
+/* --- Parameter retrieval --- */
+
+std::string
+JACKAudioBackend::get_device_name () const
+{
+}
+
+float
+JACKAudioBackend::get_sample_rate () const
+{
+	if (_jack) {
+		return _current_sample_rate;
+	}
+	return _target_sample_rate;
+}
+
+uint32_t
+JACKAudioBackend::get_buffer_size () const
+{
+	if (_jack) {
+		return _current_buffer_size;
+	}
+	return _target_buffer_size;
+}
+
+SampleFormat
+JACKAudioBackend::get_sample_format () const
+{
+	return FloatingPoint;
+}
+
+bool
+JACKAudioBackend::get_interleaved () const
+{
+	return false;
+}
+
+uint32_t
+JACKAudioBackend::get_input_channels () const
+{
+	if (_jack) {
+		return n_physical (JackPortIsInput);
+	} 
+	return _target_input_channels;
+}
+
+uint32_t
+JACKAudioBackend::get_output_channels () const
+{
+	if (_jack) {
+		return n_physical (JackPortIsOutput);
+	} 
+	return _target_output_channels;
+}
+
+uint32_t
+JACKAudioBackend::get_systemic_input_latency () const
+{
+	return _current_systemic_output_latency;
+}
+
+uint32_t
+JACKAudioBackend::get_systemic_output_latency () const
+{
+	return _current_systemic_output_latency;
+}
+
+/* ---- BASIC STATE CONTROL API: start/stop/pause/freewheel --- */
 
 int
 JACKAudioBackend::start ()
@@ -223,6 +503,7 @@ JACKAudioBackend::connect_to_jack (string client_name, string session_uuid)
 int
 JACKAudioBackend::disconnect_from_jack ()
 {
+}
 
 int
 JACKAudioBackend::reconnect_to_jack ()
@@ -290,18 +571,6 @@ JACKAudioBackend::reconnect_to_jack ()
 	return 0;
 }
 
-int
-JACKAudioBackend::request_buffer_size (pframes_t nframes)
-{
-	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
-
-	if (nframes == jack_get_buffer_size (_priv_jack)) {
-                return 0;
-	}
-
-	return jack_set_buffer_size (_priv_jack, nframes);
-}
-
 /* --- TRANSPORT STATE MANAGEMENT --- */
 
 void
@@ -353,12 +622,22 @@ JACKAudioBackend::set_time_master (bool yn)
 
 /* process-time */
 
-framecnt_t frame_rate () const;
-pframes_t frames_per_cycle () const;
+framecnt_t 
+JACKAudioBackend::sample_rate () const
+{
 
-size_t raw_buffer_size(DataType t);
+}
+pframes_t 
+JACKAudioBackend::samples_per_cycle () const
+{
+}
 
-int usecs_per_cycle () const { return _usecs_per_cycle; }
+size_t 
+JACKAudioBackend::raw_buffer_size(DataType t)
+{
+	std::map<DataType,size_t>::const_iterator s = _raw_buffer_sizes.find(t);
+	return (s != _raw_buffer_sizes.end()) ? s->second : 0;
+}
 
 bool
 JACKAudioBackend::get_sync_offset (pframes_t& offset) const
@@ -586,7 +865,6 @@ JACKAudioBackend::connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, in
 	Ports::iterator x;
 	boost::shared_ptr<Ports> pr = ports.reader ();
 
-
 	x = pr->find (make_port_name_relative (jack_port_name (jack_port_a)));
 	if (x != pr->end()) {
 		port_a = x->second;
@@ -706,14 +984,14 @@ JACKAudioBackend::jack_bufsize_callback (pframes_t nframes)
 {
         /* if the size has not changed, this should be a no-op */
 
-        if (nframes == _buffer_size) {
+        if (nframes == _current_buffer_size) {
                 return 0;
         }
 
 	GET_PRIVATE_JACK_POINTER_RET (_jack, 1);
 
-	_buffer_size = nframes;
-	_usecs_per_cycle = (int) floor ((((double) nframes / frame_rate())) * 1000000.0);
+	_current_buffer_size = nframes;
+	_current_usecs_per_cycle = (int) floor ((((double) nframes / frame_rate())) * 1000000.0);
 	last_monitor_check = 0;
 
         if (jack_port_type_get_buffer_size) {
@@ -736,15 +1014,7 @@ JACKAudioBackend::jack_bufsize_callback (pframes_t nframes)
                 _raw_buffer_sizes[DataType::MIDI] = nframes * 4 - (nframes/2);
         }
 
-	{
-		Glib::Threads::Mutex::Lock lm (_process_lock);
-
-		boost::shared_ptr<Ports> p = ports.reader();
-
-		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-			i->second->reset();
-		}
-	}
+	BufferSizeChange (nframes);
 
 	if (_session) {
 		_session->set_block_size (_buffer_size);
