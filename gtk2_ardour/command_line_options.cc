@@ -36,7 +36,6 @@ CommandLineOptions::CommandLineOptions()
 	, session_name()
 	, show_key_actions(false)
 	, check_announcements(false)
-	, disable_plugins(false)
 	, no_splash(true)
 	, just_version(false)
 	, jack_client_name("ardour")
@@ -77,11 +76,6 @@ CommandLineOptions::CommandLineOptions()
 	entry.set_short_name('a');
 	entry.set_description(_("Do not contact website for announcements"));
 	add_entry(entry, check_announcements);
-
-	entry.set_long_name("disable-plugins");
-	entry.set_short_name('d');
-	entry.set_description(_("Disable all plugins in an existing session"));
-	add_entry(entry, disable_plugins);
 
 	entry.set_long_name("no-splash");
 	entry.set_short_name('n');
@@ -139,11 +133,6 @@ CommandLineOptions::on_pre_parse (Glib::OptionContext&, Glib::OptionGroup&)
 bool
 CommandLineOptions::on_post_parse (Glib::OptionContext&, Glib::OptionGroup&)
 {
-	// maybe this should be in libardour's options
-	if (disable_plugins) {
-		ARDOUR::Session::set_disable_all_loaded_plugins (true);
-	}
-
 	if (!new_session_name.empty()) {
 		new_session = true;
 		session_name = new_session_name;

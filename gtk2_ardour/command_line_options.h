@@ -35,7 +35,6 @@ public:
 	std::string    session_name;
 	bool           show_key_actions;
 	bool           check_announcements;
-	bool           disable_plugins;
 	bool           no_splash;
 	bool           just_version;
 	Glib::ustring  jack_client_name;

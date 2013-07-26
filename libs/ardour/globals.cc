@@ -90,6 +90,7 @@
 #include "ardour/region.h"
 #include "ardour/route_group.h"
 #include "ardour/runtime_functions.h"
+#include "ardour/session.h"
 #include "ardour/session_event.h"
 #include "ardour/source_factory.h"
 
@@ -231,12 +232,14 @@ public:
 
 	bool m_arg_novst;
 	bool m_arg_no_hw_optimizations;
+	bool m_disable_plugins;
 };
 
 OptionGroup::OptionGroup()
 	: Glib::OptionGroup("libardour", _("libardour options"), _("Command-line options for libardour"))
 	, m_arg_novst(false)
 	, m_arg_no_hw_optimizations(false)
+	, m_disable_plugins(false)
 {
 	Glib::OptionEntry entry;
 
@@ -251,11 +254,20 @@ OptionGroup::OptionGroup()
 	entry.set_short_name('O');
 	entry.set_description(_("Disable h/w specific optimizations."));
 	add_entry(entry, m_arg_no_hw_optimizations);
+
+	entry.set_long_name("disable-plugins");
+	entry.set_short_name('d');
+	entry.set_description(_("Disable all plugins in an existing session"));
+	add_entry(entry, m_disable_plugins);
 }
 
  bool
 OptionGroup::on_post_parse (Glib::OptionContext&, Glib::OptionGroup&)
 {
+	if (m_disable_plugins) {
+		ARDOUR::Session::set_disable_all_loaded_plugins (true);
+	}
+
 	libardour_options_parsed = true;
 
 	return true;
