@@ -37,7 +37,6 @@
 #include "keyboard.h"
 #include "splash.h"
 #include "route_params_ui.h"
-#include "opts.h"
 #include "i18n.h"
 
 using namespace Gtk;

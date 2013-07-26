@@ -24,7 +24,7 @@
 
 #include "ardour_ui.h"
 #include "keyboard.h"
-#include "opts.h"
+#include "command_line_options.h"
 
 #include "i18n.h"
 
@@ -49,7 +49,7 @@ accel_map_changed (GtkAccelMap* /*map*/,
 void
 ArdourKeyboard::setup_keybindings ()
 {
-	using namespace ARDOUR_COMMAND_LINE;
+	string keybindings_path = get_cmdline_opts().keybindings_path;
 	string default_bindings = "mnemonic-us.bindings";
 	vector<string> strs;
 

@@ -43,7 +43,7 @@
 
 #include "ardour_ui.h"
 #include "startup.h"
-#include "opts.h"
+#include "command_line_options.h"
 #include "engine_dialog.h"
 #include "i18n.h"
 #include "utils.h"
@@ -775,8 +775,8 @@ ArdourStartup::setup_new_session_page ()
 		label1->set_text (_("Session name:"));
 
 
-		if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
-			new_name_entry.set_text  (Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name));
+		if (!get_cmdline_opts().session_name.empty()) {
+			new_name_entry.set_text  (Glib::path_get_basename (get_cmdline_opts().session_name));
 			/* name provided - they can move right along */
 			set_page_complete (session_vbox, true);
 		}
@@ -797,8 +797,8 @@ ArdourStartup::setup_new_session_page ()
 
 		label2->set_text (_("Create session folder in:"));
 
-		if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
-			new_folder_chooser.set_current_folder (poor_mans_glob (Glib::path_get_dirname (ARDOUR_COMMAND_LINE::session_name)));
+		if (!get_cmdline_opts().session_name.empty()) {
+			new_folder_chooser.set_current_folder (poor_mans_glob (Glib::path_get_dirname (get_cmdline_opts().session_name)));
 		} else if (ARDOUR_UI::instance()->session_loaded) {
 			// point the new session file chooser at the parent directory of the current session
 			string session_parent_dir = Glib::path_get_dirname(ARDOUR_UI::instance()->the_session()->path());
