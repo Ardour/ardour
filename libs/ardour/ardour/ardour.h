@@ -37,6 +37,7 @@
 #include "pbd/stateful.h"
 
 #include "ardour/types.h"
+#include "ardour/option_group.h"
 
 #include <jack/jack.h>
 
@@ -53,6 +54,8 @@ namespace ARDOUR {
 	extern PBD::Signal0<void> GUIIdle;
 
 	Glib::OptionGroup& get_options ();
+
+	OptionGroup& get_ardour_options ();
 
 	bool init (int *argc, char ***argv, const char* localedir);
 	void init_post_engine ();

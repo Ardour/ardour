@@ -54,7 +54,6 @@
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
-#include <glibmm/optioncontext.h>
 
 #include <lrdf.h>
 
@@ -83,6 +82,7 @@
 #include "ardour/midi_region.h"
 #include "ardour/mix.h"
 #include "ardour/panner_manager.h"
+#include "ardour/option_group.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/process_thread.h"
 #include "ardour/profile.h"
@@ -111,7 +111,6 @@ using namespace std;
 using namespace PBD;
 
 bool libardour_initialized = false;
-bool libardour_options_parsed = false;
 
 compute_peak_t          ARDOUR::compute_peak = 0;
 find_peaks_t            ARDOUR::find_peaks = 0;
@@ -221,62 +220,9 @@ lotsa_files_please ()
 	}
 }
 
-namespace ARDOUR {
-
-class OptionGroup : public Glib::OptionGroup
-{
-public:
-	OptionGroup();
-
-	virtual bool on_post_parse (Glib::OptionContext&, Glib::OptionGroup&);
-
-	bool m_arg_novst;
-	bool m_arg_no_hw_optimizations;
-	bool m_disable_plugins;
-};
-
-OptionGroup::OptionGroup()
-	: Glib::OptionGroup("libardour", _("libardour options"), _("Command-line options for libardour"))
-	, m_arg_novst(false)
-	, m_arg_no_hw_optimizations(false)
-	, m_disable_plugins(false)
-{
-	Glib::OptionEntry entry;
-
-#if defined(WINDOWS_VST_SUPPORT) || defined(LXVST_SUPPORT)
-	entry.set_long_name("novst");
-	entry.set_short_name('V');
-	entry.set_description(_("Do not use VST support."));
-	add_entry(entry, m_arg_novst);
-#endif
-
-	entry.set_long_name("no-hw-optimizations");
-	entry.set_short_name('O');
-	entry.set_description(_("Disable h/w specific optimizations."));
-	add_entry(entry, m_arg_no_hw_optimizations);
-
-	entry.set_long_name("disable-plugins");
-	entry.set_short_name('d');
-	entry.set_description(_("Disable all plugins in an existing session"));
-	add_entry(entry, m_disable_plugins);
-}
-
- bool
-OptionGroup::on_post_parse (Glib::OptionContext&, Glib::OptionGroup&)
-{
-	if (m_disable_plugins) {
-		ARDOUR::Session::set_disable_all_loaded_plugins (true);
-	}
-
-	libardour_options_parsed = true;
-
-	return true;
-}
-
-} // namespace ARDOUR
 
 ARDOUR::OptionGroup&
-get_ardour_options ()
+ARDOUR::get_ardour_options ()
 {
 	static ARDOUR::OptionGroup options;
 	return options;
@@ -291,7 +237,7 @@ ARDOUR::get_options ()
 bool
 parse_args (int *argc, char ***argv)
 {
-	if (libardour_options_parsed) {
+	if (ARDOUR::get_ardour_options().m_parsed) {
 		return true;
 	}
 
