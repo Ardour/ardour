@@ -30,6 +30,8 @@
 
 #include "i18n.h"
 
+extern void setup_libpbd_enums ();
+
 namespace {
 
 static bool libpbd_initialized = false;
@@ -131,6 +133,8 @@ PBD::init (int *argc, char ***argv)
 	}
 
 	PBD::ID::init ();
+
+	setup_libpbd_enums ();
 
 	libpbd_initialized = true;
 	return true;
