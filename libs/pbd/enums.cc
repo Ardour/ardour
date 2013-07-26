@@ -20,8 +20,6 @@
 #include "pbd/controllable.h"
 #include "pbd/enumwriter.h"
 
-void setup_libpbd_enums () __attribute__ ((constructor));
-
 using namespace PBD;
 using namespace std;
 
