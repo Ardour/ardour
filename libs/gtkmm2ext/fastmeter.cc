@@ -476,6 +476,7 @@ FastMeter::on_size_allocate (Gtk::Allocation &alloc)
 	} else {
 		horizontal_size_allocate (alloc);
 	}
+	queue_draw ();
 }
 
 void
@@ -810,7 +811,6 @@ FastMeter::queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>& win, float ol
 void
 FastMeter::queue_horizontal_redraw (const Glib::RefPtr<Gdk::Window>& win, float old_level)
 {
-#if 1
 	GdkRectangle rect;
 
 	gint new_right = (gint) floor (pixwidth * current_level);
@@ -877,9 +877,6 @@ FastMeter::queue_horizontal_redraw (const Glib::RefPtr<Gdk::Window>& win, float 
 		gdk_region_destroy(region);
 		region = 0;
 	}
-#else
-	queue_draw ();
-#endif
 }
 
 void
@@ -890,9 +887,9 @@ FastMeter::set_highlight (bool onoff)
 	}
 	highlight = onoff;
 	if (orientation == Vertical) {
-		bgpattern = request_vertical_background (request_width, request_height, highlight ? _bgh : _bgc, highlight);
+		bgpattern = request_vertical_background (pixwidth + 2, pixheight + 2, highlight ? _bgh : _bgc, highlight);
 	} else {
-		bgpattern = request_horizontal_background (request_width, request_height, highlight ? _bgh : _bgc, highlight);
+		bgpattern = request_horizontal_background (pixwidth + 2, pixheight + 2, highlight ? _bgh : _bgc, highlight);
 	}
 	queue_draw ();
 }
