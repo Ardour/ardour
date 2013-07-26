@@ -160,7 +160,6 @@ gtk2_ardour_sources = [
         'nsm.cc',
         'nsmclient.cc',
         'option_editor.cc',
-        'opts.cc',
         'panner2d.cc',
         'panner_editor.cc',
         'panner_interface.cc',
