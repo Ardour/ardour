@@ -36,10 +36,8 @@ string ARDOUR_COMMAND_LINE::jack_client_name = "ardour";
 bool  ARDOUR_COMMAND_LINE::show_key_actions = false;
 bool ARDOUR_COMMAND_LINE::no_splash = false;
 bool ARDOUR_COMMAND_LINE::just_version = false;
-bool ARDOUR_COMMAND_LINE::use_vst = true;
 bool ARDOUR_COMMAND_LINE::new_session = false;
 char* ARDOUR_COMMAND_LINE::curvetest_file = 0;
-bool ARDOUR_COMMAND_LINE::try_hw_optimization = true;
 bool ARDOUR_COMMAND_LINE::no_connect_ports = false;
 string ARDOUR_COMMAND_LINE::keybindings_path = ""; /* empty means use builtin default */
 std::string ARDOUR_COMMAND_LINE::menus_file = "ardour.menus";
@@ -107,9 +105,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		{ "no-splash", 0, 0, 'n' },
 		{ "menus", 1, 0, 'm' },
 		{ "name", 1, 0, 'c' },
-		{ "novst", 0, 0, 'V' },
 		{ "new", 1, 0, 'N' },
-		{ "no-hw-optimizations", 0, 0, 'O' },
 		{ "sync", 0, 0, 'S' },
 		{ "curvetest", 1, 0, 'C' },
 		{ "save", 1, 0, 'E' },
@@ -184,18 +180,8 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 			session_name = optarg;
 			break;
 
-		case 'O':
-			try_hw_optimization = false;
-			break;
-
 		case 'P':
 			no_connect_ports = true;
-			break;
-
-		case 'V':
-#ifdef WINDOWS_VST_SUPPORT
-			use_vst = false;
-#endif /* WINDOWS_VST_SUPPORT */
 			break;
 
 		case 'c':

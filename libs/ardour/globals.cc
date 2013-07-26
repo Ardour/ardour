@@ -54,6 +54,7 @@
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
+#include <glibmm/optioncontext.h>
 
 #include <lrdf.h>
 
@@ -108,6 +109,7 @@ using namespace std;
 using namespace PBD;
 
 bool libardour_initialized = false;
+bool libardour_options_parsed = false;
 
 compute_peak_t          ARDOUR::compute_peak = 0;
 find_peaks_t            ARDOUR::find_peaks = 0;
@@ -217,8 +219,92 @@ lotsa_files_please ()
 	}
 }
 
+namespace ARDOUR {
+
+class OptionGroup : public Glib::OptionGroup
+{
+public:
+	OptionGroup();
+
+	virtual bool on_post_parse (Glib::OptionContext&, Glib::OptionGroup&);
+
+	bool m_arg_novst;
+	bool m_arg_no_hw_optimizations;
+};
+
+OptionGroup::OptionGroup()
+	: Glib::OptionGroup("libardour", _("libardour options"), _("Command-line options for libardour"))
+	, m_arg_novst(false)
+	, m_arg_no_hw_optimizations(false)
+{
+	Glib::OptionEntry entry;
+
+#if defined(WINDOWS_VST_SUPPORT) || defined(LXVST_SUPPORT)
+	entry.set_long_name("novst");
+	entry.set_short_name('V');
+	entry.set_description(_("Do not use VST support."));
+	add_entry(entry, m_arg_novst);
+#endif
+
+	entry.set_long_name("no-hw-optimizations");
+	entry.set_short_name('O');
+	entry.set_description(_("Disable h/w specific optimizations."));
+	add_entry(entry, m_arg_no_hw_optimizations);
+}
+
+ bool
+OptionGroup::on_post_parse (Glib::OptionContext&, Glib::OptionGroup&)
+{
+	libardour_options_parsed = true;
+
+	return true;
+}
+
+} // namespace ARDOUR
+
+ARDOUR::OptionGroup&
+get_ardour_options ()
+{
+	static ARDOUR::OptionGroup options;
+	return options;
+}
+
+Glib::OptionGroup&
+ARDOUR::get_options ()
+{
+	return get_ardour_options ();
+}
+
 bool
-ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir)
+parse_args (int *argc, char ***argv)
+{
+	if (libardour_options_parsed) {
+		return true;
+	}
+
+	Glib::OptionContext context;
+
+	context.set_main_group(ARDOUR::get_options());
+
+	try {
+		context.parse(*argc, *argv);
+	}
+
+	catch(const Glib::OptionError& ex) {
+		std::cout << _("Error while parsing command-line options: ") << std::endl << ex.what() << std::endl;
+		std::cout << _("Use --help to see a list of available command-line options.") << std::endl;
+		return false;
+	}
+
+	catch(const Glib::Error& ex) {
+		std::cout << "Error: " << ex.what() << std::endl;
+		return false;
+	}
+	return true;
+}
+
+bool
+ARDOUR::init (int *argc, char ***argv, const char* localedir)
 {
 	if (libardour_initialized) {
 		return true;
@@ -234,6 +320,10 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 #ifdef ENABLE_NLS
 	(void) bindtextdomain(PACKAGE, localedir);
 #endif
+
+	if (!parse_args (argc, argv)) {
+		return false;
+	}
 
 	PBD::ID::init ();
 	SessionEvent::init_event_pool ();
@@ -278,7 +368,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 		return false;
 	}
 
-	Config->set_use_windows_vst (use_windows_vst);
+	Config->set_use_windows_vst (!get_ardour_options().m_arg_novst);
 #ifdef LXVST_SUPPORT
 	Config->set_use_lxvst(true);
 #endif
@@ -302,7 +392,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	AUPluginInfo::load_cached_info ();
 #endif
 
-	setup_hardware_optimization (try_optimization);
+	setup_hardware_optimization (!get_ardour_options().m_arg_no_hw_optimizations);
 
 	SourceFactory::init ();
 	Analyser::init ();

@@ -19,7 +19,9 @@ int main (int argc, char* argv[])
 		exit (EXIT_FAILURE);
 	}
 
-	ARDOUR::init (false, true, localedir);
+	if (!ARDOUR::init (&argc, &argv, localedir)) {
+		exit (EXIT_FAILURE);
+	}
 
 	Session* s = 0;
 	

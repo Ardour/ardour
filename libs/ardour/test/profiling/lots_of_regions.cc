@@ -15,7 +15,10 @@ static const char* localedir = LOCALEDIR;
 int
 main (int argc, char* argv[])
 {
-	ARDOUR::init (false, true, localedir);
+	if (!ARDOUR::init (&argc, &argv, localedir)){
+		exit(EXIT_FAILURE);
+	}
+
 	Session* session = load_session ("../libs/ardour/test/profiling/sessions/1region", "1region");
 
 	assert (session->get_routes()->size() == 2);

@@ -515,6 +515,16 @@ int main (int argc, char *argv[])
 
 	PBD::ID::init ();
 
+	try {
+		// not sure if init should both return true to indicate success but
+		// then also possibly throw, best to just be consistant and pick one.
+		if (!ARDOUR::init (&argc, &argv, localedir)) {
+			exit (1);
+		}
+	} catch (failed_constructor& err) {
+		error << string_compose (_("could not initialize %1."), PROGRAM_NAME) << endmsg;
+	}
+
 	if (::signal (SIGPIPE, sigpipe_handler)) {
 		cerr << _("Cannot xinstall SIGPIPE error handler") << endl;
 	}
