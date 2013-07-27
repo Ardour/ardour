@@ -328,7 +328,8 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					stp[1] = 115.0 * meter_deflect_nordic(-18);
 					stp[2] = 115.0 * meter_deflect_nordic(-12);
 					stp[3] = 115.0 * meter_deflect_nordic( -9); // ignored
-					c[1] = c[2] = c[3];
+					//c[2] = c[3] = c[1]; // dark-green
+					c[0] = c[1] = c[2]; // bright-green
 					c[6] = c[7] = c[8] = c[9];
 					break;
 				case MeterIEC1DIN:
