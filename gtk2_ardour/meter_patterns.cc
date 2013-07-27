@@ -260,11 +260,21 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 	Glib::RefPtr<Gdk::Window> win (w.get_window());
 
 	bool background;
+	bool tickleft, tickright;
 	gint width, height;
 	win->get_size (width, height);
-	background = types.size() == 0
-		|| w.get_name().substr(w.get_name().length() - 4) == "Left"
-		|| w.get_name().substr(w.get_name().length() - 5) == "Right";
+	tickleft = w.get_name().substr(w.get_name().length() - 4) == "Left";
+	tickright = w.get_name().substr(w.get_name().length() - 5) == "Right";
+	background = types.size() == 0 || tickleft || tickright;
+
+	int box_l, box_r;
+	if (tickleft) {
+		box_l = 2; box_r = 3;
+	} else if (tickright) {
+		box_l = 0; box_r = 1;
+	} else {
+		box_l = 0; box_r = 3;
+	}
 
 	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width, height);
 	cairo_t* cr = cairo_create (surface);
@@ -301,6 +311,8 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 
 		// tick-maker position in dBFS, line-thickness
 		std::map<float,float> points;
+
+#define DFL_H(fract) (height - floor (height * (fract)) + .5)
 
 		switch (*i) {
 		case DataType::AUDIO:
@@ -377,9 +389,14 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 
 					points.insert (std::pair<float,float>(-18.0f, 1.0));
 					points.insert (std::pair<float,float>(-15.0f, 0.5));
-					points.insert (std::pair<float,float>(-12.0f, 0.5));
+					points.insert (std::pair<float,float>(-12.0f, 1.0));
 					points.insert (std::pair<float,float>( -9.0f, 1.0));
 					points.insert (std::pair<float,float>( -6.0f, 0.5));
+					cairo_set_source_rgba (cr, .8, 0, 0, 0.8);
+					cairo_rectangle (cr,
+							box_l, DFL_H(meter_deflect_nordic( -6)),
+							box_r, DFL_H(meter_deflect_nordic(-12)));
+					cairo_fill (cr);
 					break;
 				case MeterIEC1DIN:
 					points.insert (std::pair<float,float>( -3.0f, 0.5)); // "200%"
@@ -405,6 +422,11 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 					points.insert (std::pair<float,float>(-49.0f, 1.0));
 					points.insert (std::pair<float,float>(-54.0f, 0.5));
 					points.insert (std::pair<float,float>(-59.0f, 1.0));
+					cairo_set_source_rgba (cr, .8, 0, 0, 0.8);
+					cairo_rectangle (cr,
+							box_l, DFL_H(meter_deflect_din(0)),
+							box_r, DFL_H(meter_deflect_din(-9.0)));
+					cairo_fill (cr);
 					break;
 				case MeterVU:
 					points.insert (std::pair<float,float>(-17.0f, 1.0)); //+3 VU
@@ -423,6 +445,12 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 					points.insert (std::pair<float,float>(-30.0f, 1.0));
 					points.insert (std::pair<float,float>(-35.0f, 0.5));
 					points.insert (std::pair<float,float>(-40.0f, 1.0));
+					// red-box
+					cairo_set_source_rgba (cr, .8, 0, 0, 0.8);
+					cairo_rectangle (cr,
+							box_l, DFL_H(meter_deflect_vu(-16)),
+							box_r, DFL_H(meter_deflect_vu(-20)));
+					cairo_fill (cr);
 					break;
 
 				default:
