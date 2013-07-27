@@ -316,22 +316,29 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					c[0] = c[1] = c[2] = c[3] = c[4] = c[5] = c[6] = c[7] = c[8] = c[9] = 0xaaaaaaff;
 					break;
 				case MeterIEC2EBU:
-					stp[0] = 115.0 * meter_deflect_ppm(-18);
-					stp[1] = 115.0 * meter_deflect_ppm(-14);
-					stp[2] = 115.0 * meter_deflect_ppm(-10);
-					stp[3] = 115.0 * meter_deflect_ppm( -8);
+					stp[0] = 115.0 * meter_deflect_ppm(-24); // ignored
+					stp[1] = 115.0 * meter_deflect_ppm(-18);
+					stp[2] = 115.0 * meter_deflect_ppm( -9);
+					stp[3] = 115.0 * meter_deflect_ppm(  0); // ignored
+					c[3] = c[2] = c[1];
+					c[6] = c[7] = c[8] = c[9];
 					break;
 				case MeterIEC1NOR:
-					stp[0] = 115.0 * meter_deflect_nordic(-18);
-					stp[1] = 115.0 * meter_deflect_nordic(-15);
+					stp[0] = 115.0 * meter_deflect_nordic(-30); // ignored
+					stp[1] = 115.0 * meter_deflect_nordic(-18);
 					stp[2] = 115.0 * meter_deflect_nordic(-12);
-					stp[3] = 115.0 * meter_deflect_nordic( -9);
+					stp[3] = 115.0 * meter_deflect_nordic( -9); // ignored
+					c[1] = c[2] = c[3];
+					c[6] = c[7] = c[8] = c[9];
 					break;
 				case MeterIEC1DIN:
-					stp[0] = 115.0 * meter_deflect_din(-29);
+					stp[0] = 115.0 * meter_deflect_din(-29); // ignored
 					stp[1] = 115.0 * meter_deflect_din(-18);
-					stp[2] = 115.0 * meter_deflect_din(-15);
+					stp[2] = 115.0 * meter_deflect_din(-15); // ignored
 					stp[3] = 115.0 * meter_deflect_din( -9);
+					c[0] = c[1] = c[2] = c[3] = 0x00aa00ff;
+					c[4] = c[6];
+					c[5] = c[7];
 					break;
 				case MeterVU:
 					stp[0] = 115.0 * meter_deflect_vu(-26); // -6

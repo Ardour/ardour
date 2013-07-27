@@ -138,23 +138,14 @@ static inline float mtr_col_and_fract(
 			}
 			break;
 		case MeterIEC2BBC:
+		case MeterIEC2EBU:
 			fraction = meter_deflect_ppm(val);
 			cairo_set_source_rgb (cr, c->get_red_p(), c->get_green_p(), c->get_blue_p());
 			break;
-		case MeterIEC2EBU:
-			fraction = meter_deflect_ppm(val);
-			if (val >= -10.0) {
-				cairo_set_source_rgb (cr,
-						UINT_RGBA_R_FLT(peakcolor),
-						UINT_RGBA_G_FLT(peakcolor),
-						UINT_RGBA_B_FLT(peakcolor));
-			} else {
-				cairo_set_source_rgb (cr, c->get_red_p(), c->get_green_p(), c->get_blue_p());
-			}
-			break;
 		case MeterIEC1NOR:
 			fraction = meter_deflect_nordic(val);
-			if (val >= -12.0) {
+#if 0
+			if (val == -18.0) {
 				cairo_set_source_rgb (cr,
 						UINT_RGBA_R_FLT(peakcolor),
 						UINT_RGBA_G_FLT(peakcolor),
@@ -162,10 +153,13 @@ static inline float mtr_col_and_fract(
 			} else {
 				cairo_set_source_rgb (cr, c->get_red_p(), c->get_green_p(), c->get_blue_p());
 			}
+#else
+			cairo_set_source_rgb (cr, c->get_red_p(), c->get_green_p(), c->get_blue_p());
+#endif
 			break;
 		case MeterIEC1DIN:
 			fraction = meter_deflect_din(val);
-			if (val >= -9.0) {
+			if (val == -9.0 || val == -15 || val == -18) {
 				cairo_set_source_rgb (cr,
 						UINT_RGBA_R_FLT(peakcolor),
 						UINT_RGBA_G_FLT(peakcolor),
@@ -351,7 +345,7 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 					points.insert (std::pair<float,float>(-14.0f, 1.0));
 					points.insert (std::pair<float,float>(-12.0f, 0.5));
 					points.insert (std::pair<float,float>(-10.0f, 1.0));
-					points.insert (std::pair<float,float>( -9.0f, 0.5));
+					points.insert (std::pair<float,float>( -9.0f, 0.8));
 					points.insert (std::pair<float,float>( -8.0f, 0.5));
 					points.insert (std::pair<float,float>( -6.0f, 1.0));
 					break;
@@ -375,30 +369,41 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 					points.insert (std::pair<float,float>(-39.0f, 0.5));
 					points.insert (std::pair<float,float>(-36.0f, 1.0));
 
-					points.insert (std::pair<float,float>(-33.0f, 1.0));
+					points.insert (std::pair<float,float>(-33.0f, 0.5));
 					points.insert (std::pair<float,float>(-30.0f, 1.0));
-					points.insert (std::pair<float,float>(-27.0f, 1.0));
+					points.insert (std::pair<float,float>(-27.0f, 0.5));
 					points.insert (std::pair<float,float>(-24.0f, 1.0));
-					points.insert (std::pair<float,float>(-21.0f, 1.0));
+					points.insert (std::pair<float,float>(-21.0f, 0.5));
 
 					points.insert (std::pair<float,float>(-18.0f, 1.0));
-					points.insert (std::pair<float,float>(-15.0f, 1.0));
-					points.insert (std::pair<float,float>(-12.0f, 1.0));
+					points.insert (std::pair<float,float>(-15.0f, 0.5));
+					points.insert (std::pair<float,float>(-12.0f, 0.5));
 					points.insert (std::pair<float,float>( -9.0f, 1.0));
-					points.insert (std::pair<float,float>( -6.0f, 1.0));
+					points.insert (std::pair<float,float>( -6.0f, 0.5));
 					break;
 				case MeterIEC1DIN:
 					points.insert (std::pair<float,float>( -3.0f, 0.5)); // "200%"
-					points.insert (std::pair<float,float>( -4.0f, 1.0)); // "100%"
-					points.insert (std::pair<float,float>( -9.0f, 1.0));
+					points.insert (std::pair<float,float>( -4.0f, 1.0));
+					points.insert (std::pair<float,float>( -5.0f, 0.5));
+					points.insert (std::pair<float,float>( -6.0f, 0.5));
+					points.insert (std::pair<float,float>( -7.0f, 0.5));
+					points.insert (std::pair<float,float>( -8.0f, 0.5));
+					points.insert (std::pair<float,float>( -9.0f, 1.0)); // "100%"
+					points.insert (std::pair<float,float>(-10.0f, 0.5));
+					points.insert (std::pair<float,float>(-11.0f, 0.5));
+					points.insert (std::pair<float,float>(-12.0f, 0.5));
+					points.insert (std::pair<float,float>(-13.0f, 0.5));
 					points.insert (std::pair<float,float>(-14.0f, 1.0));
-					points.insert (std::pair<float,float>(-15.0f, 0.5)); // "50%"
-					points.insert (std::pair<float,float>(-18.0f, 0.5)); // "-9"
-					points.insert (std::pair<float,float>(-19.0f, 1.0)); // "30%"
-					points.insert (std::pair<float,float>(-29.0f, 1.0)); // "10%"
-					points.insert (std::pair<float,float>(-35.0f, 0.5)); // "5%" " -20"
-					points.insert (std::pair<float,float>(-39.0f, 1.0)); // "3%"
-					points.insert (std::pair<float,float>(-49.0f, 0.5)); // "1%"
+					points.insert (std::pair<float,float>(-15.0f, 0.8)); // "50%"
+					points.insert (std::pair<float,float>(-18.0f, 0.8)); // "-9"
+					points.insert (std::pair<float,float>(-19.0f, 1.0));
+					points.insert (std::pair<float,float>(-24.0f, 0.5));
+					points.insert (std::pair<float,float>(-29.0f, 1.0)); // "-20", "10%"
+					points.insert (std::pair<float,float>(-34.0f, 0.5)); // -25
+					//points.insert (std::pair<float,float>(-35.0f, 0.5)); // "5%" " -20"
+					points.insert (std::pair<float,float>(-39.0f, 1.0));
+					points.insert (std::pair<float,float>(-49.0f, 1.0));
+					points.insert (std::pair<float,float>(-54.0f, 0.5));
 					points.insert (std::pair<float,float>(-59.0f, 1.0));
 					break;
 				case MeterVU:
@@ -685,31 +690,31 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					points.insert (std::pair<float,string>(-42.0f, "-24"));
 					points.insert (std::pair<float,string>(-36.0f, "-18"));
 
-					points.insert (std::pair<float,string>(-33.0f, "-15"));
+					//points.insert (std::pair<float,string>(-33.0f, "-15"));
 					points.insert (std::pair<float,string>(-30.0f, "-12"));
-					points.insert (std::pair<float,string>(-27.0f, "-9"));
+					//points.insert (std::pair<float,string>(-27.0f, "-9"));
 					points.insert (std::pair<float,string>(-24.0f, "-6"));
-					points.insert (std::pair<float,string>(-21.0f, "-3"));
+					//points.insert (std::pair<float,string>(-21.0f, "-3"));
 
 					points.insert (std::pair<float,string>(-18.0f, "TST"));
-					points.insert (std::pair<float,string>(-15.0f, "+3"));
+					//points.insert (std::pair<float,string>(-15.0f, "+3"));
 					points.insert (std::pair<float,string>(-12.0f, "+6"));
 					points.insert (std::pair<float,string>( -9.0f, "+9"));
-					points.insert (std::pair<float,string>( -6.0f, "+12"));
+					//points.insert (std::pair<float,string>( -6.0f, "+12"));
 					break;
 
 				case MeterIEC1DIN:
 					overlay_midi = 2;
 					//points.insert (std::pair<float,string>( -3.0f, "200%"));
-					points.insert (std::pair<float,string>( -4.0f, "+5")); // "100%"
-					points.insert (std::pair<float,string>( -9.0f, "0"));
+					points.insert (std::pair<float,string>( -4.0f, "+5"));
+					points.insert (std::pair<float,string>( -9.0f, "0")); // "100%";
 					points.insert (std::pair<float,string>(-14.0f, "-5"));
 					//points.insert (std::pair<float,string>(-15.0f, "50%"));
 					//points.insert (std::pair<float,string>(-18.0f, "-9"));
 					points.insert (std::pair<float,string>(-19.0f, "-10")); // "30%"
 					points.insert (std::pair<float,string>(-29.0f, "-20")); // "10%"
-					//points.insert (std::pair<float,string>(-35.0f, "-20")); // "5%"
-					points.insert (std::pair<float,string>(-39.0f, "-30")); // "3%"
+					//points.insert (std::pair<float,string>(-35.0f, "5%")); // "5%"
+					points.insert (std::pair<float,string>(-39.0f, "-30"));
 					//points.insert (std::pair<float,string>(-49.0f, "1%"));
 					points.insert (std::pair<float,string>(-59.0f, "-50"));
 					break;
