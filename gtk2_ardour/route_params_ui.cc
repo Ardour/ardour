@@ -32,6 +32,7 @@
 #include "ardour/return.h"
 #include "ardour/route.h"
 #include "ardour/send.h"
+#include "ardour/internal_send.h"
 
 #include "ardour_ui.h"
 #include "gui_thread.h"
@@ -510,7 +511,12 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
 	boost::shared_ptr<PluginInsert> plugin_insert;
 	boost::shared_ptr<PortInsert> port_insert;
 
-	if ((send = boost::dynamic_pointer_cast<Send> (proc)) != 0) {
+	if ((boost::dynamic_pointer_cast<InternalSend> (proc)) != 0) {
+		cleanup_view();
+		_processor.reset ((Processor*) 0);
+		update_title();
+		return;
+	} else if ((send = boost::dynamic_pointer_cast<Send> (proc)) != 0) {
 
 		SendUI *send_ui = new SendUI (this, send, _session);
 
