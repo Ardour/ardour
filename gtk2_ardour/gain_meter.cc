@@ -526,9 +526,12 @@ GainMeterBase::gain_changed ()
 void
 GainMeterBase::set_meter_strip_name (const char * name)
 {
+	char tmp[256];
 	meter_metric_area.set_name (name);
-	meter_ticks1_area.set_name (name);
-	meter_ticks2_area.set_name (name);
+	sprintf(tmp, "Mark%sLeft", name);
+	meter_ticks1_area.set_name (tmp);
+	sprintf(tmp, "Mark%sRight", name);
+	meter_ticks2_area.set_name (tmp);
 }
 
 void

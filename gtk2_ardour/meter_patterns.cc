@@ -281,10 +281,16 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 	if (tickleft) {
 		if (w.get_name().substr(0, 3) == "Bar") {
 			box_l = width-2; box_w = 2;
+		} else if (w.get_name().substr(0, 4) == "Mark") {
+			box_l = width-2; box_w = 2;
+			background = false;
 		}
 	} else if (tickright) {
 		if (w.get_name().substr(0, 3) == "Bar") {
 			box_l = 0; box_w = 2;
+		} else if (w.get_name().substr(0, 4) == "Mark") {
+			box_l = 0; box_w = 2;
+			background = false;
 		}
 	} else {
 		box_l = 0; box_w = 3;
