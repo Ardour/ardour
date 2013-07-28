@@ -64,6 +64,7 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 {
 	level_meter = 0;
 	_strip_type = 0;
+	_tick_bar = 0;
 	mtr_vbox.set_spacing(2);
 	nfo_vbox.set_spacing(2);
 	peakbx.set_size_request(-1, 14);
@@ -121,6 +122,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	SessionHandlePtr::set_session (sess);
 
 	_has_midi = false;
+	_tick_bar = 0;
 
 	int meter_width = 6;
 	if (_route->shared_peak_meter()->input_streams().n_total() == 1) {
@@ -384,13 +386,13 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 	if (boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
 			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0
 			) {
-		meter_ticks1_area.set_name ("AudioBusMetricsLeft");
-		meter_ticks2_area.set_name ("AudioBusMetricsRight");
+		meter_ticks1_area.set_name ("MyAudioBusMetricsLeft");
+		meter_ticks2_area.set_name ("MyAudioBusMetricsRight");
 		_has_midi = false;
 	}
 	else if (type == (1 << DataType::AUDIO)) {
-		meter_ticks1_area.set_name ("AudioTrackMetricsLeft");
-		meter_ticks2_area.set_name ("AudioTrackMetricsRight");
+		meter_ticks1_area.set_name ("MyAudioTrackMetricsLeft");
+		meter_ticks2_area.set_name ("MyAudioTrackMetricsRight");
 		_has_midi = false;
 	}
 	else if (type == (1 << DataType::MIDI)) {
@@ -402,10 +404,40 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 		meter_ticks2_area.set_name ("AudioMidiTrackMetricsRight");
 		_has_midi = true;
 	}
+	set_tick_bar(_tick_bar);
 
 	on_theme_changed();
 	if (old_has_midi != _has_midi) MetricChanged();
 	else ConfigurationChanged();
+}
+
+void
+MeterStrip::set_tick_bar (int m)
+{
+	std::string n;
+	_tick_bar = m;
+	if (_tick_bar & 1) {
+		n = meter_ticks1_area.get_name();
+		if (n.substr(0,3) != "Bar") {
+			meter_ticks1_area.set_name("Bar" + n);
+		}
+	} else {
+		n = meter_ticks1_area.get_name();
+		if (n.substr(0,3) == "Bar") {
+			meter_ticks1_area.set_name(n.substr(3,-1));
+		}
+	}
+	if (_tick_bar & 2) {
+		n = meter_ticks2_area.get_name();
+		if (n.substr(0,3) != "Bar") {
+			meter_ticks2_area.set_name("Bar" + n);
+		}
+	} else {
+		n = meter_ticks2_area.get_name();
+		if (n.substr(0,3) == "Bar") {
+			meter_ticks2_area.set_name(n.substr(3,-1));
+		}
+	}
 }
 
 void
