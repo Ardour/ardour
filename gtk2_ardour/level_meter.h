@@ -49,12 +49,12 @@ namespace Gtk {
 	class Menu;
 }
 
-class LevelMeterBase : public sigc::trackable, public ARDOUR::SessionHandlePtr
+class LevelMeterBase : public ARDOUR::SessionHandlePtr
 {
   public:
-	LevelMeterBase (ARDOUR::Session*,
+	LevelMeterBase (ARDOUR::Session*, PBD::EventLoop::InvalidationRecord* ir,
 			Gtkmm2ext::FastMeter::Orientation o = Gtkmm2ext::FastMeter::Vertical);
-	~LevelMeterBase ();
+	virtual ~LevelMeterBase ();
 
 	virtual void set_meter (ARDOUR::PeakMeter* meter);
 
@@ -78,6 +78,7 @@ class LevelMeterBase : public sigc::trackable, public ARDOUR::SessionHandlePtr
 	virtual void mtr_remove(Gtk::Widget &w) = 0;
 
   private:
+	PBD::EventLoop::InvalidationRecord* parent_invalidator;
 	ARDOUR::PeakMeter* _meter;
 	Gtkmm2ext::FastMeter::Orientation _meter_orientation;
 
