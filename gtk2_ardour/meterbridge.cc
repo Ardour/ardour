@@ -600,6 +600,7 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 
 	int pos = 0;
 	int vis = 0;
+	MeterStrip * last = 0;
 
 	unsigned int metrics = 0;
 	MeterType lmt = MeterPeak;
@@ -651,13 +652,23 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 				vis++;
 		}
 
+		(*i).s->set_tick_bar(0);
+
 		MeterType nmt = (*i).s->meter_type();
 		if (nmt == MeterKrms) nmt = MeterPeak; // identical metrics
+		if (pos == 0) {
+			(*i).s->set_tick_bar(1);
+		}
 
 		if ((*i).visible && nmt != lmt && pos == 0) {
 			lmt = nmt;
 			metrics_left.set_metric_mode(1, lmt);
 		} else if ((*i).visible && nmt != lmt) {
+
+			if (last) {
+				last->set_tick_bar(last->get_tick_bar() | 2);
+			}
+			(*i).s->set_tick_bar((*i).s->get_tick_bar() | 1);
 
 			if (_metrics.size() <= metrics) {
 				_metrics.push_back(new MeterStrip(have_midi ? 2 : 3, lmt));
@@ -690,6 +701,13 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 		}
 
 		meterarea.reorder_child(*((*i).s), pos++);
+		if ((*i).visible) {
+			last = (*i).s;
+		}
+	}
+
+	if (last) {
+		last->set_tick_bar(last->get_tick_bar() | 2);
 	}
 
 	metrics_right.set_metric_mode(have_midi ? 2 : 3, lmt);

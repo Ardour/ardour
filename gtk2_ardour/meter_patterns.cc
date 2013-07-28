@@ -203,6 +203,15 @@ static inline float mtr_col_and_fract(
 	return fraction;
 }
 
+static void mtr_red_stripe(cairo_t* cr, float l, float w, int h, float top, float bot) {
+	if (w <= 0) return;
+	int t = h - floorf (h * (top));
+	int b = h - floorf (h * (bot));
+	cairo_set_source_rgba (cr, .75, 0, 0, 0.75);
+	cairo_rectangle (cr, l, t + .5, w, b - t);
+	cairo_fill (cr);
+}
+
 static void set_bg_color(Gtk::Widget& w, cairo_t* cr, MeterType type) {
 	float r,g,b;
 	switch(type) {
@@ -267,13 +276,18 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 	tickright = w.get_name().substr(w.get_name().length() - 5) == "Right";
 	background = types.size() == 0 || tickleft || tickright;
 
-	int box_l, box_r;
+	float box_l=0;
+	float box_w=0;
 	if (tickleft) {
-		box_l = 2; box_r = 3;
+		if (w.get_name().substr(0, 3) == "Bar") {
+			box_l = width-2; box_w = 2;
+		}
 	} else if (tickright) {
-		box_l = 0; box_r = 1;
+		if (w.get_name().substr(0, 3) == "Bar") {
+			box_l = 0; box_w = 2;
+		}
 	} else {
-		box_l = 0; box_r = 3;
+		box_l = 0; box_w = 3;
 	}
 
 	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width, height);
@@ -303,16 +317,12 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 			c = w.get_style()->get_fg (Gtk::STATE_ACTIVE);
 		} else if (background) {
 			set_fg_color(w, type, &c);
-			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 		} else {
 			c = w.get_style()->get_fg (Gtk::STATE_NORMAL);
 		}
-		cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 
 		// tick-maker position in dBFS, line-thickness
 		std::map<float,float> points;
-
-#define DFL_H(fract) (height - floor (height * (fract)) + .5)
 
 		switch (*i) {
 		case DataType::AUDIO:
@@ -392,11 +402,8 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 					points.insert (std::pair<float,float>(-12.0f, 1.0));
 					points.insert (std::pair<float,float>( -9.0f, 1.0));
 					points.insert (std::pair<float,float>( -6.0f, 0.5));
-					cairo_set_source_rgba (cr, .8, 0, 0, 0.8);
-					cairo_rectangle (cr,
-							box_l, DFL_H(meter_deflect_nordic( -6)),
-							box_r, DFL_H(meter_deflect_nordic(-12)));
-					cairo_fill (cr);
+					mtr_red_stripe(cr, box_l, box_w, height,
+							meter_deflect_nordic(-6.0f), meter_deflect_nordic(-12.0f));
 					break;
 				case MeterIEC1DIN:
 					points.insert (std::pair<float,float>( -3.0f, 0.5)); // "200%"
@@ -422,11 +429,8 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 					points.insert (std::pair<float,float>(-49.0f, 1.0));
 					points.insert (std::pair<float,float>(-54.0f, 0.5));
 					points.insert (std::pair<float,float>(-59.0f, 1.0));
-					cairo_set_source_rgba (cr, .8, 0, 0, 0.8);
-					cairo_rectangle (cr,
-							box_l, DFL_H(meter_deflect_din(0)),
-							box_r, DFL_H(meter_deflect_din(-9.0)));
-					cairo_fill (cr);
+					mtr_red_stripe(cr, box_l, box_w, height,
+							meter_deflect_din(0.0f), meter_deflect_din(-9.0f));
 					break;
 				case MeterVU:
 					points.insert (std::pair<float,float>(-17.0f, 1.0)); //+3 VU
@@ -445,12 +449,8 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 					points.insert (std::pair<float,float>(-30.0f, 1.0));
 					points.insert (std::pair<float,float>(-35.0f, 0.5));
 					points.insert (std::pair<float,float>(-40.0f, 1.0));
-					// red-box
-					cairo_set_source_rgba (cr, .8, 0, 0, 0.8);
-					cairo_rectangle (cr,
-							box_l, DFL_H(meter_deflect_vu(-16)),
-							box_r, DFL_H(meter_deflect_vu(-20)));
-					cairo_fill (cr);
+					mtr_red_stripe(cr, box_l, box_w, height,
+							meter_deflect_vu(-17.0f), meter_deflect_vu(-20.0f));
 					break;
 
 				default:
@@ -531,6 +531,7 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 				fraction = (j->first) / 127.0;
 				pos = 1 + height - (gint) floor (height * fraction);
 				pos = min (pos, height);
+				cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 				cairo_arc(cr, 1.5, pos + .5, 1.0, 0, 2 * M_PI);
 				cairo_fill(cr);
 				break;
