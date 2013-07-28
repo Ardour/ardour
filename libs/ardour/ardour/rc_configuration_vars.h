@@ -152,6 +152,7 @@ CONFIG_VARIABLE (float, meter_falloff, "meter-falloff", 32.0f)
 CONFIG_VARIABLE (VUMeterStandard, meter_vu_standard, "meter-vu-standard", MeteringVUstandard)
 CONFIG_VARIABLE (MeterLineUp, meter_line_up_level, "meter-line-up-level", MeteringLineUp18)
 CONFIG_VARIABLE (float, meter_peak, "meter-peak", 0.0f)
+CONFIG_VARIABLE (bool, meter_style_led, "meter-style-led", true)
 
 /* miscellany */
 

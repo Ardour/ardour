@@ -1962,6 +1962,15 @@ RCOptionEditor::RCOptionEditor ()
 		 _("Specify the audio signal level in dbFS at and above which the meter-peak indicator will flash red."));
 
 	add_option (S_("Preferences|GUI"), mpks);
+
+	add_option (S_("Preferences|GUI"),
+	     new BoolOption (
+		     "meter-style-led",
+		     _("LED meter style"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_style_led),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_style_led)
+		     ));
+
 }
 
 void

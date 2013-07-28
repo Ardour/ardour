@@ -183,6 +183,10 @@ LevelMeterBase::parameter_changed (string p)
 		color_changed = true;
 		setup_meters (meter_length, regular_meter_width, thin_meter_width);
 	}
+	else if (p == "meter-style-led") {
+		color_changed = true;
+		setup_meters (meter_length, regular_meter_width, thin_meter_width);
+	}
 	else if (p == "meter-peak") {
 		vector<MeterInfo>::iterator i;
 		uint32_t n;
@@ -257,7 +261,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 		uint32_t c[10];
 		uint32_t b[4];
 		float stp[4];
-		int styleflags = 3;
+		int styleflags = Config->get_meter_style_led() ? 3 : 1;
 		b[0] = ARDOUR_UI::config()->canvasvar_MeterBackgroundBot.get();
 		b[1] = ARDOUR_UI::config()->canvasvar_MeterBackgroundTop.get();
 		b[2] = 0x991122ff; // red highlight gradient Bot
@@ -348,7 +352,6 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					stp[3] = 115.0 * meter_deflect_vu(-18); // +2
 					c[0] = c[1] = c[2] = c[3] = c[4] = c[5] = 0x00aa00ff;
 					c[6] = c[7] = c[8] = c[9] = 0xff8800ff;
-					styleflags = 1;
 					break;
 				default: // PEAK, RMS
 					stp[1] = 77.5;  // 115 * log_meter(-10)
