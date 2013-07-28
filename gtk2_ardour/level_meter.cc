@@ -43,15 +43,15 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace std;
 
-LevelMeterBase::LevelMeterBase (Session* s, FastMeter::Orientation o)
+LevelMeterBase::LevelMeterBase (Session* s, PBD::EventLoop::InvalidationRecord* ir, FastMeter::Orientation o)
 	: _meter (0)
+	, parent_invalidator(ir)
 	, _meter_orientation(o)
 	, meter_length (0)
 	, thin_meter_width(2)
 {
 	set_session (s);
-	//set_spacing (1);
-	Config->ParameterChanged.connect (_parameter_connection, invalidator (*this), boost::bind (&LevelMeterBase::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (_parameter_connection, parent_invalidator, boost::bind (&LevelMeterBase::parameter_changed, this, _1), gui_context());
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &LevelMeterBase::on_theme_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &LevelMeterBase::color_handler));
 	max_peak = minus_infinity();
@@ -80,8 +80,8 @@ LevelMeterBase::set_meter (PeakMeter* meter)
 	_meter = meter;
 
 	if (_meter) {
-		_meter->ConfigurationChanged.connect (_configuration_connection, invalidator (*this), boost::bind (&LevelMeterBase::configuration_changed, this, _1, _2), gui_context());
-		_meter->TypeChanged.connect (_meter_type_connection, invalidator (*this), boost::bind (&LevelMeterBase::meter_type_changed, this, _1), gui_context());
+		_meter->ConfigurationChanged.connect (_configuration_connection, parent_invalidator, boost::bind (&LevelMeterBase::configuration_changed, this, _1, _2), gui_context());
+		_meter->TypeChanged.connect (_meter_type_connection, parent_invalidator, boost::bind (&LevelMeterBase::meter_type_changed, this, _1), gui_context());
 	}
 }
 
@@ -322,6 +322,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					break;
 				case MeterIEC2BBC:
 					c[0] = c[1] = c[2] = c[3] = c[4] = c[5] = c[6] = c[7] = c[8] = c[9] = 0xaaaaaaff;
+					stp[0] = stp[1] = stp[2] = stp[3] = 115.0;
 					break;
 				case MeterIEC2EBU:
 					stp[0] = 115.0 * meter_deflect_ppm(-24); // ignored
@@ -453,7 +454,7 @@ LevelMeterBase::color_handler ()
 }
 
 LevelMeterHBox::LevelMeterHBox(Session* s)
-	: LevelMeterBase(s)
+	: LevelMeterBase(s, invalidator(*this))
 {
 	set_spacing(1);
 	show();
@@ -474,7 +475,7 @@ LevelMeterHBox::mtr_remove(Gtk::Widget &w) {
 
 
 LevelMeterVBox::LevelMeterVBox(Session* s)
-	: LevelMeterBase(s, FastMeter::Horizontal)
+	: LevelMeterBase(s, invalidator(*this), FastMeter::Horizontal)
 {
 	set_spacing(1);
 	show();
