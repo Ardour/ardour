@@ -586,8 +586,8 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 		last_peak_rect.x = 1;
 		last_peak_rect.width = pixwidth;
 		last_peak_rect.y = max(1, 1 + pixheight - (gint) floor (pixheight * current_peak));
-		if (bright_hold) {
-			last_peak_rect.height = max(0, min(4, pixheight - last_peak_rect.y -1 ));
+		if (bright_hold || (_styleflags & 2)) {
+			last_peak_rect.height = max(0, min(3, pixheight - last_peak_rect.y -1 ));
 		} else {
 			last_peak_rect.height = max(0, min(2, pixheight - last_peak_rect.y -1 ));
 		}
