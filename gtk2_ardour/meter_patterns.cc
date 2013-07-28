@@ -335,10 +335,11 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 					points.insert (std::pair<float,float>(-24.0f, 1.0));
 					points.insert (std::pair<float,float>(-20.0f, 1.0));
 					points.insert (std::pair<float,float>(-17.0f, 1.0));
-					points.insert (std::pair<float,float>(-14.0f, 1.0));
-					points.insert (std::pair<float,float>(-11.0f, 1.0));
-					points.insert (std::pair<float,float>( -8.0f, 1.0));
-					points.insert (std::pair<float,float>( -4.0f, 1.0));
+					points.insert (std::pair<float,float>(-14.0f, 1.0)); //   0
+					points.insert (std::pair<float,float>(-11.0f, 1.0)); //  +3
+					points.insert (std::pair<float,float>(-10.0f, 0.8)); //  +4
+					points.insert (std::pair<float,float>( -8.0f, 1.0)); //  +6
+					points.insert (std::pair<float,float>( -4.0f, 1.0)); // +10
 					points.insert (std::pair<float,float>(  0.0f, 1.0));
 					break;
 				case MeterK20:
@@ -348,12 +349,13 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 					points.insert (std::pair<float,float>(-30.0f, 1.0));
 					points.insert (std::pair<float,float>(-26.0f, 1.0));
 					points.insert (std::pair<float,float>(-23.0f, 1.0));
-					points.insert (std::pair<float,float>(-20.0f, 1.0));
+					points.insert (std::pair<float,float>(-20.0f, 1.0)); //  0
 					points.insert (std::pair<float,float>(-17.0f, 1.0));
-					points.insert (std::pair<float,float>(-14.0f, 1.0));
+					points.insert (std::pair<float,float>(-16.0f, 0.8));
+					points.insert (std::pair<float,float>(-14.0f, 1.0)); // +6
 					points.insert (std::pair<float,float>(-10.0f, 1.0));
 					points.insert (std::pair<float,float>( -5.0f, 1.0));
-					points.insert (std::pair<float,float>(  0.0f, 1.0));
+					points.insert (std::pair<float,float>(  0.0f, 1.0)); //+20
 					break;
 				case MeterIEC2EBU:
 					points.insert (std::pair<float,float>(-30.0f, 1.0));
