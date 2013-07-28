@@ -1930,10 +1930,25 @@ RCOptionEditor::RCOptionEditor ()
 	mlu->add (MeteringLineUp18, _("-18dBFS (EBU, BBC)"));
 	mlu->add (MeteringLineUp15, _("-15dBFS (DIN)"));
 
-	Gtkmm2ext::UI::instance()->set_tip (mlu->tip_widget(), _("Configure meter-ticks and color-knee point for dBFS scale DPM, set reference/offset level for IEC PPM."));
+	Gtkmm2ext::UI::instance()->set_tip (mlu->tip_widget(), _("Configure meter-marks and color-knee point for dBFS scale DPM, set reference level for IEC1/Nordic, IEC2 PPM and VU meter."));
 
 	add_option (S_("Preferences|GUI"), mlu);
 
+	ComboOption<MeterLineUp>* mld = new ComboOption<MeterLineUp> (
+		"meter-line-up-din",
+		_("IEC1/DIN Meter line-up level; 0dBu"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_line_up_din),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_line_up_din)
+		);
+
+	mld->add (MeteringLineUp24, _("-24dBFS (SMPTE US: 4dBu = -20dBFS)"));
+	mld->add (MeteringLineUp20, _("-20dBFS (SMPTE RP.0155)"));
+	mld->add (MeteringLineUp18, _("-18dBFS (EBU, BBC)"));
+	mld->add (MeteringLineUp15, _("-15dBFS (DIN)"));
+
+	Gtkmm2ext::UI::instance()->set_tip (mld->tip_widget(), _("Reference level for IEC1/DIN meter."));
+
+	add_option (S_("Preferences|GUI"), mld);
 
 	ComboOption<VUMeterStandard>* mvu = new ComboOption<VUMeterStandard> (
 		"meter-vu-standard",

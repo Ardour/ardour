@@ -85,8 +85,8 @@ LevelMeterBase::set_meter (PeakMeter* meter)
 	}
 }
 
-static float meter_lineup(float offset) {
-	switch (Config->get_meter_line_up_level()) {
+static float meter_lineup_cfg(MeterLineUp lul, float offset) {
+	switch (lul) {
 		case MeteringLineUp24:
 			return offset + 6.0;
 		case MeteringLineUp20:
@@ -99,6 +99,10 @@ static float meter_lineup(float offset) {
 			break;
 	}
 	return offset;
+}
+
+static float meter_lineup(float offset) {
+	return meter_lineup_cfg(Config->get_meter_line_up_level(), offset);
 }
 
 static float vu_standard() {
@@ -148,7 +152,7 @@ LevelMeterBase::update_meters ()
 				} else if (meter_type == MeterIEC1NOR) {
 					(*i).meter->set (meter_deflect_nordic (peak + meter_lineup(0)));
 				} else if (meter_type == MeterIEC1DIN) {
-					(*i).meter->set (meter_deflect_din (peak + meter_lineup(3.0)));
+					(*i).meter->set (meter_deflect_din (peak + meter_lineup_cfg(Config->get_meter_line_up_din(), 3.0)));
 				} else if (meter_type == MeterIEC2BBC || meter_type == MeterIEC2EBU) {
 					(*i).meter->set (meter_deflect_ppm (peak + meter_lineup(0)));
 				} else if (meter_type == MeterVU) {
