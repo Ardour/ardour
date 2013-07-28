@@ -134,7 +134,7 @@ FastMeter::generate_meter_pattern (
 {
 	guint8 r,g,b,a;
 	double knee;
-	const double soft =  2.5 / (double) height;
+	const double soft =  3.0 / (double) height;
 	const double offs = -1.0 / (double) height;
 
 	cairo_pattern_t* pat = cairo_pattern_create_linear (0.0, 0.0, 0.0, height);
@@ -205,13 +205,19 @@ FastMeter::generate_meter_pattern (
 		cairo_set_source (tc, pat);
 		cairo_rectangle (tc, 0, 0, width, height);
 		cairo_fill (tc);
+		cairo_pattern_destroy (pat);
+
+		cairo_set_source (tc, shade_pattern);
+		cairo_rectangle (tc, 0, 0, width, height);
+		cairo_fill (tc);
+		cairo_pattern_destroy (shade_pattern);
 
 		if (styleflags & 2) { // LED stripes
 			cairo_save (tc);
 			cairo_set_line_width(tc, 1.0);
-			cairo_set_source_rgba(tc, .0, .0, .0, .3);
+			cairo_set_source_rgba(tc, .0, .0, .0, 0.4);
 			//cairo_set_operator (tc, CAIRO_OPERATOR_SOURCE);
-			for (float y=.5; y < height; y+= 2.0) {
+			for (float y=0.5; y < height; y+= 2.0) {
 				cairo_move_to(tc, 0, y);
 				cairo_line_to(tc, width, y);
 				cairo_stroke (tc);
@@ -219,15 +225,7 @@ FastMeter::generate_meter_pattern (
 			cairo_restore (tc);
 		}
 
-		cairo_set_source (tc, shade_pattern);
-		cairo_rectangle (tc, 0, 0, width, height);
-		cairo_fill (tc);
-
-		cairo_pattern_destroy (pat);
-		cairo_pattern_destroy (shade_pattern);
-
 		pat = cairo_pattern_create_for_surface (surface);
-
 		cairo_destroy (tc);
 		cairo_surface_destroy (surface);
 	}
