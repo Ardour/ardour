@@ -243,7 +243,7 @@ static void set_bg_color(Gtk::Widget& w, cairo_t* cr, MeterType type) {
 	}
 }
 
-static void set_fg_color(Gtk::Widget& w, MeterType type, Gdk::Color * c) {
+static void set_fg_color(Gtk::Widget&, MeterType type, Gdk::Color * c) {
 	float r,g,b;
 	switch(type) {
 		case MeterVU:
@@ -812,7 +812,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 			break;
 		}
 
-		gint pos;
+		gint pos = -1;
 
 		for (std::map<float,string>::const_iterator j = points.begin(); j != points.end(); ++j) {
 			float fraction = 0;
@@ -849,6 +849,8 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					}
 					break;
 			}
+
+			if (pos < 0) continue;
 
 			layout->set_text(j->second.c_str());
 

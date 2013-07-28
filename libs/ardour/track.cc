@@ -398,6 +398,9 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		case MonitoringInput:
 			be_silent = false;
 			break;
+		default:
+			be_silent = false;
+			break;
 		}
 	}
 

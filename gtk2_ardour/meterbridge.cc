@@ -596,7 +596,7 @@ Meterbridge::remove_strip (MeterStrip* strip)
 }
 
 void
-Meterbridge::sync_order_keys (RouteSortOrderKey src)
+Meterbridge::sync_order_keys (RouteSortOrderKey)
 {
 	Glib::Threads::Mutex::Lock lm (_resync_mutex);
 

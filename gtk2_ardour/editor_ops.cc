@@ -6948,7 +6948,7 @@ Editor::uncombine_regions ()
 void
 Editor::toggle_midi_input_active (bool flip_others)
 {
-	bool onoff;
+	bool onoff = false;
 	boost::shared_ptr<RouteList> rl (new RouteList);
 
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
