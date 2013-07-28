@@ -813,6 +813,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void send_mmc_locate (framepos_t);
 	int send_full_time_code (framepos_t);
+	void send_song_position_pointer (framepos_t);
 
 	bool step_editing() const { return (_step_editors > 0); }
 
