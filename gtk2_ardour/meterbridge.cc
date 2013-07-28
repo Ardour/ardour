@@ -342,6 +342,10 @@ Meterbridge::on_size_request (Gtk::Requisition* r)
 	geom.max_width = mr.width + metrics_left.get_width() + metrics_right.get_width();
 	geom.max_height = max_height;
 
+#ifndef GTKOSX
+	/* on OSX this leads to a constant live-loop: show/hide scrollbar
+	 * on Linux, the window is resized IFF the scrollbar was not visible
+	 */
 	const Gtk::Scrollbar * hsc = scroller.get_hscrollbar();
 	Glib::RefPtr<Gdk::Screen> screen = get_screen ();
 	Gdk::Rectangle monitor_rect;
@@ -356,6 +360,7 @@ Meterbridge::on_size_request (Gtk::Requisition* r)
 		r->width = geom.max_width;
 		r->height = h;
 	}
+#endif
 
 	if (cur_max_width != geom.max_width) {
 		cur_max_width = geom.max_width;
