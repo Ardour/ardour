@@ -427,6 +427,7 @@ LevelMeterBase::meter_button_release (GdkEventButton* ev)
 	if (ev->button == 1) {
 		clear_meters (false);
 	}
+	ButtonRelease(ev);
 
 	return true;
 }
