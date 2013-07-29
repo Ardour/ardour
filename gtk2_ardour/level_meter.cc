@@ -452,6 +452,7 @@ void
 LevelMeterBase::color_handler ()
 {
 	color_changed = true;
+	setup_meters (meter_length, regular_meter_width, thin_meter_width);
 }
 
 LevelMeterHBox::LevelMeterHBox(Session* s)
