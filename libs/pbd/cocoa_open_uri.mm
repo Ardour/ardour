@@ -4,6 +4,7 @@
 #import  <Foundation/NSAutoreleasePool.h>
 #import  <AppKit/NSWorkspace.h>
 
+#if ! defined (__clang__)
 bool
 cocoa_open_url (const char* uri)
 {
@@ -17,3 +18,5 @@ cocoa_open_url (const char* uri)
 
 	return ret;
 }
+#endif
+
