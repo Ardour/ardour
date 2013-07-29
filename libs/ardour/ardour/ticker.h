@@ -42,7 +42,7 @@ class MidiClockTicker : public SessionHandlePtr, boost::noncopyable
 {
 public:
 	MidiClockTicker ();
-	virtual ~MidiClockTicker() {};
+	virtual ~MidiClockTicker() {}
 
 	void tick (const framepos_t& transport_frames);
 
@@ -77,6 +77,7 @@ private:
 	void send_start_event (pframes_t offset);
 	void send_continue_event (pframes_t offset);
 	void send_stop_event (pframes_t offset);
+	void send_position_event (framepos_t transport_position, pframes_t offset);
 };
 
 }
