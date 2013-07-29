@@ -376,6 +376,10 @@ Meterbridge::on_size_allocate (Gtk::Allocation& a)
 	const Gtk::Scrollbar * hsc = scroller.get_hscrollbar();
 
 	if (scroller.get_hscrollbar_visible() && hsc) {
+		if (!scroll_connection.connected()) {
+			scroll_connection = scroller.get_hscrollbar()->get_adjustment()->signal_value_changed().connect(sigc::mem_fun (*this, &Meterbridge::on_scroll));
+			scroller.get_hscrollbar()->get_adjustment()->signal_changed().connect(sigc::mem_fun (*this, &Meterbridge::on_scroll));
+		}
 		gint scrollbar_spacing;
 		gtk_widget_style_get (GTK_WIDGET (scroller.gobj()),
 				"scrollbar-spacing", &scrollbar_spacing, NULL);
@@ -387,6 +391,41 @@ Meterbridge::on_size_allocate (Gtk::Allocation& a)
 		metrics_spacer_right.set_size_request(-1, 0);
 	}
 	Gtk::Window::on_size_allocate(a);
+}
+
+void
+Meterbridge::on_scroll()
+{
+	if (!scroller.get_hscrollbar()) return;
+
+	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
+	int leftend = adj->get_value();
+	int rightend = scroller.get_width() + leftend;
+
+	int mm_left = _mm_left;
+	int mm_right = _mm_right;
+	ARDOUR::MeterType mt_left = _mt_left;
+	ARDOUR::MeterType mt_right = _mt_right;
+
+	for (unsigned int i = 0; i < _metrics.size(); ++i) {
+		int sx, dx, dy;
+		int mm = _metrics[i]->get_metric_mode();
+		sx = (mm & 2) ? _metrics[i]->get_width() : 0;
+
+		_metrics[i]->translate_coordinates(meterarea, sx, 0, dx, dy);
+
+		if (dx < leftend && !(mm&2)) {
+			mm_left = mm;
+			mt_left = _metrics[i]->meter_type();
+		}
+		if (dx > rightend && (mm&2)) {
+			mm_right = mm;
+			mt_right = _metrics[i]->meter_type();
+			break;
+		}
+	}
+	metrics_left.set_metric_mode(mm_left, mt_left);
+	metrics_right.set_metric_mode(mm_right, mt_right);
 }
 
 void
@@ -722,6 +761,13 @@ Meterbridge::sync_order_keys (RouteSortOrderKey)
 		delete (_metrics.back());
 		_metrics.pop_back();
 	}
+
+	_mm_left = metrics_left.get_metric_mode();
+	_mt_left = metrics_left.meter_type();
+	_mm_right = metrics_right.get_metric_mode();
+	_mt_right = metrics_right.meter_type();
+
+	on_scroll();
 	queue_resize();
 }
 

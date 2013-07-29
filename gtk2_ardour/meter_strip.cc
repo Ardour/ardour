@@ -474,7 +474,12 @@ MeterStrip::meter_metrics_expose (GdkEventExpose *ev)
 void
 MeterStrip::set_metric_mode (int metricmode, ARDOUR::MeterType mt)
 {
+	if (metric_type == mt && _metricmode == metricmode) {
+		return;
+	}
 	metric_type = mt;
+	_metricmode = metricmode;
+
 	_types.clear ();
 	switch(metricmode) {
 		case 0:

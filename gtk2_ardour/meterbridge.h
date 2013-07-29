@@ -147,6 +147,12 @@ class Meterbridge :
 
 	void parameter_changed (std::string const & p);
 	void on_theme_changed ();
+
+	void on_scroll ();
+	sigc::connection scroll_connection;
+
+	int _mm_left, _mm_right;
+	ARDOUR::MeterType _mt_left, _mt_right;
 };
 
 #endif
