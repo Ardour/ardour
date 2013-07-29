@@ -1824,7 +1824,6 @@ AUPlugin::do_save_preset (string preset_name)
 	CFPropertyListRef propertyList;
 	vector<Glib::ustring> v;
 	Glib::ustring user_preset_path;
-	bool ret = true;
 
 	std::string m = maker();
 	std::string n = name();
@@ -1843,12 +1842,12 @@ AUPlugin::do_save_preset (string preset_name)
 
 	if (g_mkdir_with_parents (user_preset_path.c_str(), 0775) < 0) {
 		error << string_compose (_("Cannot create user plugin presets folder (%1)"), user_preset_path) << endmsg;
-		return false;
+		return string();
 	}
 
 	DEBUG_TRACE (DEBUG::AudioUnits, "get current preset\n");
 	if (unit->GetAUPreset (propertyList) != noErr) {
-		return false;
+		return string();
 	}
 
 	// add the actual preset name */
@@ -1863,7 +1862,7 @@ AUPlugin::do_save_preset (string preset_name)
 
 	if (save_property_list (propertyList, user_preset_path)) {
 		error << string_compose (_("Saving plugin state to %1 failed"), user_preset_path) << endmsg;
-		ret = false;
+		return string();
 	}
 
 	CFRelease(propertyList);

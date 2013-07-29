@@ -21,17 +21,10 @@
 #define __libmisc_stl_delete_h__
 
 
-#if __clang__ && __APPLE__ && __cplusplus >= 201103L
-#include <vector>
-#ifndef _CPP_VECTOR
-#define _CPP_VECTOR
-#endif
-#endif
-
 /* To actually use any of these deletion functions, you need to
    first include the revelant container type header.
 */
-#if defined(_CPP_VECTOR) || defined(_GLIBCXX_VECTOR) || defined(__SGI_STL_VECTOR)
+#if defined(_CPP_VECTOR) || defined(_GLIBCXX_VECTOR) || defined(__SGI_STL_VECTOR) || defined(_LIBCPP_VECTOR)
 template<class T> void vector_delete (std::vector<T *> *vec)
 {
 	typename std::vector<T *>::iterator i;
@@ -41,7 +34,7 @@ template<class T> void vector_delete (std::vector<T *> *vec)
 	}
 	vec->clear ();
 }
-#endif // _CPP_VECTOR || _GLIBCXX_VECTOR || __SGI_STL_VECTOR
+#endif // _CPP_VECTOR || _GLIBCXX_VECTOR || __SGI_STL_VECTOR || _LIBCPP_VECTOR
 
 #if defined(_CPP_MAP) || defined(_GLIBCXX_MAP) || defined(__SGI_STL_MAP)
 template<class K, class T> void map_delete (std::map<K, T *> *m) 
