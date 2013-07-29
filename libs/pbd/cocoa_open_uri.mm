@@ -1,6 +1,7 @@
 #include <CoreFoundation/CFLocale.h>
 #import  <CoreFoundation/CFString.h>
 #import  <Foundation/NSString.h>
+#import  <Foundation/NSURL.h>
 #import  <Foundation/NSAutoreleasePool.h>
 #import  <AppKit/NSWorkspace.h>
 
