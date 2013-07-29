@@ -459,19 +459,21 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 	switch (mh) {
 		default:
 		case 0:
-			nh = ceilf(wh * .11f);
+			nh = ceilf(wh * .12f);
 			if (nh < 52) nh = 52;
 			if (nh > 148) nh = 148;
 			break;
-		case 2:
-			nh = ceilf(wh * .22);
-			if (nh < 52) nh = 52;
-			if (nh > 256) nh = 256;
-			break;
 		case 1:
-			nh = ceilf(wh * .08);
-			if (nh < 36) nh = 36;
-			if (nh > 128) nh = 128;
+			nh = 52;
+			break;
+		case 2:
+			nh = 106;
+			break;
+		case 3:
+			nh = 148;
+			break;
+		case 4:
+			nh = 254;
 			break;
 	}
 	namebx.set_size_request(18, nh);
@@ -749,10 +751,11 @@ MeterStrip::popup_name_label_menu (GdkEventButton* ev)
 	RadioMenuItem::Group group;
 
 	_suspend_menu_callbacks = true;
-	items.push_back (SeparatorElem());
-	add_label_height_item (items, group, _("Short labels"), 1);
-	add_label_height_item (items, group, _("Medium labels"), 0);
-	add_label_height_item (items, group, _("Tall labels"), 2);
+	add_label_height_item (items, group, _("Variable height"), 0);
+	add_label_height_item (items, group, _("Short"), 1);
+	add_label_height_item (items, group, _("Tall"), 2);
+	add_label_height_item (items, group, _("Grande"), 3);
+	add_label_height_item (items, group, _("Venti"), 4);
 
 	m->popup (ev->button, ev->time);
 	_suspend_menu_callbacks = false;
