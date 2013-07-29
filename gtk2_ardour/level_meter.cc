@@ -44,8 +44,8 @@ using namespace Gtk;
 using namespace std;
 
 LevelMeterBase::LevelMeterBase (Session* s, PBD::EventLoop::InvalidationRecord* ir, FastMeter::Orientation o)
-	: _meter (0)
-	, parent_invalidator(ir)
+	: parent_invalidator(ir)
+	, _meter (0)
 	, _meter_orientation(o)
 	, meter_length (0)
 	, thin_meter_width(2)
