@@ -71,6 +71,7 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr
 
 	/** Emitted in the GUI thread when a button is pressed over the meter */
 	PBD::Signal1<bool, GdkEventButton *> ButtonPress;
+	PBD::Signal1<bool, GdkEventButton *> ButtonRelease;
 	PBD::Signal1<void, ARDOUR::MeterType> MeterTypeChanged;
 
 	protected:

@@ -132,8 +132,6 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void meter_type_changed (ARDOUR::MeterType);
 	void update_background (ARDOUR::MeterType);
 
-	static int max_pattern_metric_size; // == FastMeter::max_pattern_metric_size
-
 	bool peak_button_release (GdkEventButton*);
 
 	void parameter_changed (std::string const & p);
@@ -142,10 +140,16 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void update_name_box ();
 
 	bool _suspend_menu_callbacks;
-	bool level_meter_button_press (GdkEventButton* ev);
+	bool level_meter_button_release (GdkEventButton* ev);
 	void popup_level_meter_menu (GdkEventButton* ev);
-	void add_level_meter_item (Gtk::Menu_Helpers::MenuList& items, Gtk::RadioMenuItem::Group& group, std::string const & name, ARDOUR::MeterType mode);
+	void add_level_meter_type_item (Gtk::Menu_Helpers::MenuList&, Gtk::RadioMenuItem::Group&, std::string const &, ARDOUR::MeterType);
+
+	bool name_label_button_release (GdkEventButton* ev);
+	void popup_name_label_menu (GdkEventButton* ev);
+	void add_label_height_item (Gtk::Menu_Helpers::MenuList&, Gtk::RadioMenuItem::Group&, std::string const &, uint32_t);
+
 	void set_meter_type (ARDOUR::MeterType mode);
+	void set_label_height (uint32_t);
 };
 
 #endif /* __ardour_mixer_strip__ */

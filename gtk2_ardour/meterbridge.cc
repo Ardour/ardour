@@ -807,6 +807,9 @@ Meterbridge::parameter_changed (std::string const & p)
 	else if (p == "show-name-on-meterbridge") {
 		scroller.queue_resize();
 	}
+	else if (p == "meterbridge-label-height") {
+		scroller.queue_resize();
+	}
 }
 
 void
