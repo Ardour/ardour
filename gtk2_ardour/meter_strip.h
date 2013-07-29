@@ -65,6 +65,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void set_meter_type_multi (int, ARDOUR::RouteGroup*, ARDOUR::MeterType);
 
 	void set_metric_mode (int, ARDOUR::MeterType);
+	int  get_metric_mode() { return _metricmode; }
 	void set_tick_bar (int);
 	int  get_tick_bar() { return _tick_bar; }
 	bool has_midi() { return _has_midi; }
@@ -121,6 +122,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	bool _has_midi;
 	int _tick_bar;
 	int _strip_type;
+	int _metricmode;
 
 	LevelMeterHBox *level_meter;
 
