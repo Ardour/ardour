@@ -45,7 +45,7 @@
 #include "ardour/midi_ui.h"
 #include "ardour/session.h"
 #include "ardour/slave.h"
-#include "ardour/tempo.h"
+#include "ardour/ticker.h"
 
 #include "i18n.h"
 
@@ -590,33 +590,8 @@ Session::mmc_step_timeout ()
 void
 Session::send_song_position_pointer (framepos_t t)
 {
-	/* This doesn't account for the Meter's note divisor */
-	if (!_engine.freewheeling()) {
-
-		Timecode::BBT_Time time;
-		bbt_time (t, time);
-
-		const double beats_per_bar = tempo_map().meter_at(t).divisions_per_bar();
-
-		/* Midi Beats in terms of Song Position Pointer is equivalent to total
-		   sixteenth notes at 'time' */
-		const uint32_t midi_beats = 4 * (((time.bars - 1) * beats_per_bar) + time.beats - 1);
-
-		/* can only use 14bits worth */
-		if (midi_beats > 0x3fff) {
-			return;
-		}
-
-		/* split midi beats into a 14bit value */
-		MIDI::byte msg[3] = {
-			0xf2, /* MIDI System Common - Song Position Pointer status */
-			midi_beats & 0x7f,
-			midi_beats & 0x3f80
-		};
-
-		if (MIDI::Port* port = MIDI::Manager::instance()->midi_clock_output_port()) {
-			port->midimsg (msg, sizeof (msg), 0);
-		}
+	if (midi_clock) {
+		midi_clock->position_changed (t);
 	}
 }
 
