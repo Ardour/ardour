@@ -40,7 +40,8 @@ MidiClockTicker::MidiClockTicker ()
 {
 }
 
-void MidiClockTicker::set_session (Session* s)
+void
+MidiClockTicker::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 	
@@ -59,12 +60,14 @@ MidiClockTicker::session_going_away ()
 	_midi_port = 0;
 }
 
-void MidiClockTicker::update_midi_clock_port()
+void
+MidiClockTicker::update_midi_clock_port()
 {
 	_midi_port = MIDI::Manager::instance()->midi_clock_output_port();
 }
 
-void MidiClockTicker::transport_state_changed()
+void
+MidiClockTicker::transport_state_changed()
 {
 	if (_session->exporting()) {
 		/* no midi clock during export, for now */
@@ -115,7 +118,8 @@ void MidiClockTicker::transport_state_changed()
 	tick (position);
 }
 
-void MidiClockTicker::position_changed (framepos_t position)
+void
+MidiClockTicker::position_changed (framepos_t position)
 {
 	const double speed = _session->transport_speed();
 	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Transport Position Change: %1, speed: %2\n", position, speed));
@@ -127,7 +131,8 @@ void MidiClockTicker::position_changed (framepos_t position)
 	_last_tick = position;
 }
 
-void MidiClockTicker::transport_looped()
+void
+MidiClockTicker::transport_looped()
 {
 	Location* loop_location = _session->locations()->auto_loop_location();
 	assert(loop_location);
@@ -149,7 +154,8 @@ void MidiClockTicker::transport_looped()
 	}
 }
 
-void MidiClockTicker::tick (const framepos_t& transport_frame)
+void
+MidiClockTicker::tick (const framepos_t& transport_frame)
 {
 	if (!Config->get_send_midi_clock() || _session == 0 || _session->transport_speed() != 1.0f || _midi_port == 0) {
 		return;
@@ -179,7 +185,8 @@ void MidiClockTicker::tick (const framepos_t& transport_frame)
 	}
 }
 
-double MidiClockTicker::one_ppqn_in_frames (framepos_t transport_position)
+double
+MidiClockTicker::one_ppqn_in_frames (framepos_t transport_position)
 {
 	const Tempo& current_tempo = _session->tempo_map().tempo_at (transport_position);
 	double frames_per_beat = current_tempo.frames_per_beat (_session->nominal_frame_rate());
@@ -190,7 +197,8 @@ double MidiClockTicker::one_ppqn_in_frames (framepos_t transport_position)
 	return frames_per_quarter_note / double (_ppqn);
 }
 
-void MidiClockTicker::send_midi_clock_event (pframes_t offset)
+void
+MidiClockTicker::send_midi_clock_event (pframes_t offset)
 {
 	if (!_midi_port) {
 		return;
@@ -202,7 +210,8 @@ void MidiClockTicker::send_midi_clock_event (pframes_t offset)
 	_midi_port->write (_midi_clock_tick, 1, offset);
 }
 
-void MidiClockTicker::send_start_event (pframes_t offset)
+void
+MidiClockTicker::send_start_event (pframes_t offset)
 {
 	if (!_midi_port) {
 		return;
@@ -214,7 +223,8 @@ void MidiClockTicker::send_start_event (pframes_t offset)
 	_midi_port->write (_midi_clock_tick, 1, offset);
 }
 
-void MidiClockTicker::send_continue_event (pframes_t offset)
+void
+MidiClockTicker::send_continue_event (pframes_t offset)
 {
 	if (!_midi_port) {
 		return;
@@ -226,7 +236,8 @@ void MidiClockTicker::send_continue_event (pframes_t offset)
 	_midi_port->write (_midi_clock_tick, 1, offset);
 }
 
-void MidiClockTicker::send_stop_event (pframes_t offset)
+void
+MidiClockTicker::send_stop_event (pframes_t offset)
 {
 	if (!_midi_port) {
 		return;
