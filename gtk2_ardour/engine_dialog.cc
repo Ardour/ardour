@@ -167,8 +167,12 @@ EngineControl::EngineControl ()
 
 	strings.clear ();
 	strings.push_back (_("None"));
+#ifdef __APPLE__
+	strings.push_back (_("coremidi"));
+#else
 	strings.push_back (_("seq"));
 	strings.push_back (_("raw"));
+#endif
 	set_popdown_strings (midi_driver_combo, strings);
 	midi_driver_combo.set_active_text (strings.front ());
 
@@ -438,6 +442,12 @@ EngineControl::build_command_line (vector<string>& cmd)
 	/* now add fixed arguments (not user-selectable) */
 
 	cmd.push_back ("-T"); // temporary */
+
+	/* setup coremidi before the driver, otherwise jack won't start */
+
+	if (midi_driver_combo.get_active_text() == _("coremidi")) {
+		cmd.push_back ("-X coremidi");
+	}
 
 	/* next the driver */
 
