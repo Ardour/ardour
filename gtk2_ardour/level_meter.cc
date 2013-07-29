@@ -321,7 +321,8 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					c[8] = c[9] = 0xff0000ff;
 					break;
 				case MeterIEC2BBC:
-					c[0] = c[1] = c[2] = c[3] = c[4] = c[5] = c[6] = c[7] = c[8] = c[9] = 0xaaaaaaff;
+					c[0] = c[1] = c[2] = c[3] = c[4] = c[5] = c[6] = c[7] = c[8] = c[9] =
+						ARDOUR_UI::config()->color_by_name ("meter color BBC");
 					stp[0] = stp[1] = stp[2] = stp[3] = 115.0;
 					break;
 				case MeterIEC2EBU:
