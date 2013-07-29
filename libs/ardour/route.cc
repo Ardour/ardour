@@ -101,6 +101,9 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _custom_meter_position_noted (false)
 	, _last_custom_meter_was_at_end (false)
 {
+	if (is_master()) {
+		_meter_type = MeterK20;
+	}
 	processor_max_streams.reset();
 }
 
