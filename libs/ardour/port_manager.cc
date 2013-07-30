@@ -473,3 +473,42 @@ AudioEngine::disconnect (boost::shared_ptr<Port> port)
 	return port->disconnect_all ();
 }
 
+int
+PortManager::reestablish_ports ()
+{
+	Ports::iterator i;
+
+	boost::shared_ptr<Ports> p = ports.reader ();
+
+	for (i = p->begin(); i != p->end(); ++i) {
+		if (i->second->reestablish ()) {
+			break;
+		}
+	}
+
+	if (i != p->end()) {
+		/* failed */
+		remove_all_ports ();
+		return -1;
+	}
+
+	MIDI::Manager::instance()->reestablish ();
+
+	return 0;
+}
+
+int
+PortManager::reconnect_ports ()
+{
+	boost::shared_ptr<Ports> p = ports.reader ();
+
+	/* re-establish connections */
+	
+	for (i = p->begin(); i != p->end(); ++i) {
+		i->second->reconnect ();
+	}
+
+	MIDI::Manager::instance()->reconnect ();
+
+	return 0;
+}

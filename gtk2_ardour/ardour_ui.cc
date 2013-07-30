@@ -396,7 +396,7 @@ ARDOUR_UI::create_engine ()
 	loading_message (_("Starting audio engine"));
 
 	try {
-		engine = new ARDOUR::AudioEngine (ARDOUR_COMMAND_LINE::backend_client_name, ARDOUR_COMMAND_LINE::backend_session_uuid);
+		engine = ARDOUR::AudioEngine::create (ARDOUR_COMMAND_LINE::backend_client_name, ARDOUR_COMMAND_LINE::backend_session_uuid);
 
 	} catch (...) {
 
@@ -487,7 +487,7 @@ ARDOUR_UI::post_engine ()
 
 	update_disk_space ();
 	update_cpu_load ();
-	update_sample_rate (engine->frame_rate());
+	update_sample_rate (engine->sample_rate());
 	update_timecode_format ();
 
 	Config->ParameterChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::parameter_changed, this, _1), gui_context());
@@ -923,7 +923,7 @@ If you still wish to quit, please use the\n\n\
 		_session = 0;
 	}
 
-	engine->stop (true);
+	engine->stop ();
 	quit ();
 }
 

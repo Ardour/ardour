@@ -22,6 +22,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include <stdint.h>
 
@@ -38,10 +39,11 @@ class JackConnection;
 
 class JACKAudioBackend : public AudioBackend {
   public:
-    JACKAudioBackend (AudioEngine& e);
+    JACKAudioBackend (AudioEngine& e, void*);
     ~JACKAudioBackend ();
 
     std::string name() const;
+    void* private_handle() const;
     bool connected() const;
     bool is_realtime () const;
 
@@ -61,34 +63,53 @@ class JACKAudioBackend : public AudioBackend {
     int set_systemic_input_latency (uint32_t);
     int set_systemic_output_latency (uint32_t);
 
-    std::string  get_device_name () const;
-    float        get_sample_rate () const;
-    uint32_t     get_buffer_size () const;
-    SampleFormat get_sample_format () const;
-    bool         get_interleaved () const;
-    uint32_t     get_input_channels () const;
-    uint32_t     get_output_channels () const;
-    uint32_t     get_systemic_input_latency () const;
-    uint32_t     get_systemic_output_latency () const;
+    std::string  device_name () const;
+    float        sample_rate () const;
+    uint32_t     buffer_size () const;
+    SampleFormat sample_format () const;
+    bool         interleaved () const;
+    uint32_t     input_channels () const;
+    uint32_t     output_channels () const;
+    uint32_t     systemic_input_latency () const;
+    uint32_t     systemic_output_latency () const;
 
     int start ();
     int stop ();
     int pause ();
     int freewheel (bool);
 
+    float cpu_load() const;
+
+    pframes_t sample_time ();
+    pframes_t sample_time_at_cycle_start ();
+    pframes_t samples_since_cycle_start ();
+
+    size_t raw_buffer_size (DataType t);
+
+    int create_process_thread (boost::function<void()> func, pthread_t*, size_t stacksize);
+
+    void transport_start ();
+    void transport_stop ();
+    void transport_locate (framepos_t /*pos*/);
+    TransportState transport_state () const;
+    framepos_t transport_frame() const;
+
+    int set_time_master (bool /*yn*/);
+    bool get_sync_offset (pframes_t& /*offset*/) const;
+
   private:
-    JackConnection* _jack_connection;
+    JackConnection* _jack_connection; //< shared with JACKPortEngine
+    bool            _running;
+    bool            _freewheeling;
+    std::map<DataType,size_t> _raw_buffer_sizes;
 
     static int  _xrun_callback (void *arg);
-    static int  _graph_order_callback (void *arg);
     static void* _process_thread (void *arg);
     static int  _sample_rate_callback (pframes_t nframes, void *arg);
     static int  _bufsize_callback (pframes_t nframes, void *arg);
     static void _jack_timebase_callback (jack_transport_state_t, pframes_t, jack_position_t*, int, void*);
     static int  _jack_sync_callback (jack_transport_state_t, jack_position_t*, void *arg);
     static void _freewheel_callback (int , void *arg);
-    static void _registration_callback (jack_port_id_t, int, void *);
-    static void _connect_callback (jack_port_id_t, jack_port_id_t, int, void *);
     static void _latency_callback (jack_latency_callback_mode_t, void*);
 #ifdef HAVE_JACK_SESSION
     static void _session_callback (jack_session_event_t *event, void *arg);
@@ -99,12 +120,12 @@ class JACKAudioBackend : public AudioBackend {
     int  jack_bufsize_callback (pframes_t);
     int  jack_sample_rate_callback (pframes_t);
     void freewheel_callback (int);
-    void connect_callback (jack_port_id_t, jack_port_id_t, int);
     int  process_callback (pframes_t nframes);
     void jack_latency_callback (jack_latency_callback_mode_t);
-    
+    void disconnected (const char*);
+
     void set_jack_callbacks ();
-    int connect_to_jack (std::string client_name, std::string session_uuid);
+    int reconnect_to_jack ();
     
     struct ThreadData {
 	JACKAudioBackend* engine;
@@ -136,6 +157,8 @@ class JACKAudioBackend : public AudioBackend {
     uint32_t _current_sample_rate;
     uint32_t _current_buffer_size;
     uint32_t _current_usecs_per_cycle;
+    uint32_t _current_systemic_input_latency;
+    uint32_t _current_systemic_output_latency;
     
 };
 

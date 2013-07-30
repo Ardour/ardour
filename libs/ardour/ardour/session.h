@@ -1426,8 +1426,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	 */
 	std::list<GQuark> _current_trans_quarks;
 
-	void jack_timebase_callback (jack_transport_state_t, pframes_t, jack_position_t*, int);
-	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
+        // void timebase_callback (TransportState, pframes_t, jack_position_t*, int);
+        int  jack_sync_callback (TransportState, framepos_t);
 	void reset_jack_connection (jack_client_t* jack);
 	void process_rtop (SessionEvent*);
 

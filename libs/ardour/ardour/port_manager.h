@@ -55,10 +55,12 @@ class PortManager
     
     /* Port connectivity */
     
-    int connect (const std::string& source, const std::string& destination);
-    int disconnect (const std::string& source, const std::string& destination);
-    int disconnect (boost::shared_ptr<Port>);
+    int  connect (const std::string& source, const std::string& destination);
+    int  disconnect (const std::string& source, const std::string& destination);
+    int  disconnect (boost::shared_ptr<Port>);
     bool connected (const std::string&);
+    int  reestablish_ports ();
+    int  reconnect_ports ();
 
     /* other Port management */
     

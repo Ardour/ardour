@@ -165,6 +165,33 @@ AudioEngine::split_cycle (pframes_t offset)
 	}
 }
 
+int
+AudioEngine::sample_rate_change (pframes_t nframes)
+{
+	/* check for monitor input change every 1/10th of second */
+
+	monitor_check_interval = nframes / 10;
+	last_monitor_check = 0;
+
+	if (_session) {
+		_session->set_frame_rate (nframes);
+	}
+
+	SampleRateChanged (nframes); /* EMIT SIGNAL */
+
+	return 0;
+}
+
+int 
+AudioEngine::buffer_size_change (pframes_t bufsiz)
+{
+	if (_session) {
+		_session->set_block_size (bufsiz);
+		last_monitor_check = 0;
+	}
+
+	return 0;
+}
 
 /** Method called by our ::process_thread when there is work to be done.
  *  @param nframes Number of frames to process.
@@ -399,7 +426,7 @@ AudioEngine::set_session (Session *s)
 
 		start_metering_thread ();
 
-		pframes_t blocksize = _backend->get_buffer_size ();
+		pframes_t blocksize = _backend->buffer_size ();
 
 		/* page in as much of the session process code as we
 		   can before we really start running.
@@ -558,6 +585,12 @@ AudioEngine::start ()
 		if (_backend->start() == 0) {
 			_running = true;
 			_has_run = true;
+			last_monitor_check = 0;
+
+			if (_session && _session->config.get_jack_time_master()) {
+				_backend->set_time_master (true);
+			}
+
 			Running(); /* EMIT SIGNAL */
 		} else {
 			/* should report error? */
@@ -573,8 +606,19 @@ AudioEngine::stop ()
 	if (!_backend) {
 		return 0;
 	}
-	
-	return _backend->stop ();
+
+	Glib::Threads::Mutex::Lock lm (_process_lock);
+
+	if (_backend->stop () == 0) {
+		_running = false;
+		stop_metering_thread ();
+
+		Stopped (); /* EMIT SIGNAL */
+
+		return 0;
+	}
+
+	return -1;
 }
 
 int
@@ -584,7 +628,13 @@ AudioEngine::pause ()
 		return 0;
 	}
 	
-	return _backend->pause ();
+	if (_backend->pause () == 0) {
+		_running = false;
+		Stopped(); /* EMIT SIGNAL */
+		return 0;
+	}
+
+	return -1;
 }
 
 int
@@ -605,7 +655,17 @@ AudioEngine::get_cpu_load() const
 	if (!_backend) {
 		return 0.0;
 	}
-	return _backend->get_cpu_load ();
+	return _backend->cpu_load ();
+}
+
+bool
+AudioEngine::is_realtime() const 
+{
+	if (!_backend) {
+		return false;
+	}
+
+	return _backend->is_realtime();
 }
 
 void
@@ -668,7 +728,7 @@ AudioEngine::samples_per_cycle () const
 	if (!_backend) {
 		return 0;
 	}
-	return _backend->samples_per_cycle ();
+	return _backend->buffer_size ();
 }
 
 int
@@ -677,7 +737,7 @@ AudioEngine::usecs_per_cycle () const
 	if (!_backend) {
 		return -1;
 	}
-	return _backend->start ();
+	return _backend->usecs_per_cycle ();
 }
 
 size_t
@@ -734,3 +794,73 @@ AudioEngine::create_process_thread (boost::function<void()> func, pthread_t* thr
 	return _backend->create_process_thread (func, thr, stacksize);
 }
 
+
+void
+AudioEngine::thread_init_callback (void* arg)
+{
+	/* make sure that anybody who needs to know about this thread
+	   knows about it.
+	*/
+
+	pthread_set_name (X_("audioengine"));
+
+	PBD::notify_gui_about_thread_creation ("gui", pthread_self(), X_("AudioEngine"), 4096);
+	PBD::notify_gui_about_thread_creation ("midiui", pthread_self(), X_("AudioEngine"), 128);
+
+	SessionEvent::create_per_thread_pool (X_("AudioEngine"), 512);
+
+	MIDI::JackMIDIPort::set_process_thread (pthread_self());
+
+	if (arg) {
+		AudioEngine* ae = static_cast<AudioEngine*> (arg);
+		/* the special thread created/managed by the backend */
+		ae->_main_thread = new ProcessThread;
+	}
+}
+
+/* XXXX
+void
+AudioEngine::timebase_callback (TransportState state, pframes_t nframes, jack_position_t pos, int new_position)
+{
+	if (_session && _session->synced_to_jack()) {
+		// _session->timebase_callback (state, nframes, pos, new_position);
+	}
+}
+*/
+
+int
+AudioEngine::sync_callback (TransportState state, framepos_t position)
+{
+	if (_session) {
+		return _session->jack_sync_callback (state, position);
+	}
+	return 0;
+}
+
+void
+AudioEngine::freewheel_callback (bool onoff)
+{
+	if (onoff) {
+		_pre_freewheel_mmc_enabled = MIDI::Manager::instance()->mmc()->send_enabled ();
+		MIDI::Manager::instance()->mmc()->enable_send (false);
+	} else {
+		MIDI::Manager::instance()->mmc()->enable_send (_pre_freewheel_mmc_enabled);
+	}
+}
+
+void
+AudioEngine::latency_callback (bool for_playback)
+{
+        if (_session) {
+                _session->update_latency (for_playback);
+        }
+}
+
+void
+AudioEngine::halted_callback (const char* why)
+{
+        stop_metering_thread ();
+	
+	MIDI::JackMIDIPort::EngineHalted (); /* EMIT SIGNAL */
+	Halted (why); /* EMIT SIGNAL */
+}

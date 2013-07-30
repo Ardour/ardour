@@ -289,7 +289,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_latency_control_port   = 0;
 	_next_cycle_start       = std::numeric_limits<framepos_t>::max();
 	_next_cycle_speed       = 1.0;
-	_block_length           = _engine.frames_per_cycle();
+	_block_length           = _engine.samples_per_cycle();
 	_seq_size               = _engine.raw_buffer_size(DataType::MIDI);
 	_state_version          = 0;
 	_was_activated          = false;
@@ -1901,7 +1901,7 @@ LV2Plugin::Impl::designated_input (const char* uri, void** bufptrs[], void** buf
 	return port;
 }
 
-static bool lv2_filter (const string& str, void *arg)
+static bool lv2_filter (const string& str, void* /*arg*/)
 {
 	/* Not a dotfile, has a prefix before a period, suffix is "lv2" */
 	

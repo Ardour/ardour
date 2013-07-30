@@ -28,6 +28,8 @@
 
 #include <boost/function.hpp>
 
+#include "ardour/types.h"
+
 namespace ARDOUR {
 
 class AudioEngine;
@@ -44,6 +46,8 @@ class AudioBackend {
      * might include "JACK", "CoreAudio", "ASIO" etc.
      */
     virtual std::string name() const = 0;
+
+    virtual void* private_handle() const = 0;
 
     /** return true if the underlying mechanism/API is still available
      * for us to utilize. return false if some or all of the AudioBackend
@@ -97,13 +101,6 @@ class AudioBackend {
      * count may turn out to be unavailable, or become invalid at any time.
      */
     virtual uint32_t available_output_channel_count (const std::string& device) const = 0;
-
-    enum SampleFormat {
-	    Signed16bitInteger,
-	    Signed24bitInteger,
-	    Signed32bitInteger,
-	    FloatingPoint
-    };
 
     /* Set the hardware parameters.
      * 
@@ -163,15 +160,15 @@ class AudioBackend {
      */
     virtual int set_systemic_output_latency (uint32_t) = 0;
 
-    virtual std::string  get_device_name () const = 0;
-    virtual float        get_sample_rate () const = 0;
-    virtual uint32_t     get_buffer_size () const = 0;
-    virtual SampleFormat get_sample_format () const = 0;
-    virtual bool         get_interleaved () const = 0;
-    virtual uint32_t     get_input_channels () const = 0;
-    virtual uint32_t     get_output_channels () const = 0;
-    virtual uint32_t     get_systemic_input_latency () const = 0;
-    virtual uint32_t     get_systemic_output_latency () const = 0;
+    virtual std::string  device_name () const = 0;
+    virtual float        sample_rate () const = 0;
+    virtual uint32_t     buffer_size () const = 0;
+    virtual SampleFormat sample_format () const = 0;
+    virtual bool         interleaved () const = 0;
+    virtual uint32_t     input_channels () const = 0;
+    virtual uint32_t     output_channels () const = 0;
+    virtual uint32_t     systemic_input_latency () const = 0;
+    virtual uint32_t     systemic_output_latency () const = 0;
 
     /* Basic state control */
 
@@ -246,7 +243,7 @@ class AudioBackend {
      * Implementations can feel free to smooth the values returned over
      * time (e.g. high pass filtering, or its equivalent).
      */
-    virtual float get_cpu_load() const  = 0;
+    virtual float cpu_load() const  = 0;
 
     /* Transport Control (JACK is the only audio API that currently offers
        the concept of shared transport control)
@@ -260,14 +257,14 @@ class AudioBackend {
     virtual void transport_stop () {}
     /** return the current transport state
      */
-    virtual TransportState transport_state () { return TransportStopped; }
+    virtual TransportState transport_state () const { return TransportStopped; }
     /** Attempt to locate the transport to @param pos
      */
     virtual void transport_locate (framepos_t /*pos*/) {}
     /** Return the current transport location, in samples measured
      * from the origin (defined by the transport time master)
      */
-    virtual framepos_t transport_frame() { return 0; }
+    virtual framepos_t transport_frame() const { return 0; }
 
     /** If @param yn is true, become the time master for any inter-application transport
      * timebase, otherwise cease to be the time master for the same.
@@ -279,9 +276,7 @@ class AudioBackend {
      */
     virtual int set_time_master (bool /*yn*/) { return 0; }
 
-    virtual framecnt_t sample_rate () const;
-    virtual pframes_t  samples_per_cycle () const;
-    virtual int        usecs_per_cycle () const { return 1000000 * (samples_per_cycle() / sample_rate()); }
+    virtual int        usecs_per_cycle () const { return 1000000 * (buffer_size() / sample_rate()); }
     virtual size_t     raw_buffer_size (DataType t);
     
     /* Process time */
@@ -338,7 +333,7 @@ class AudioBackend {
      */
     virtual int create_process_thread (boost::function<void()> func, pthread_t*, size_t stacksize) = 0;
     
-  private:
+  protected:
     AudioEngine&          engine;
 };
 

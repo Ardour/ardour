@@ -180,31 +180,30 @@ Session::timecode_time (Timecode::Time &t)
 }
 
 int
-Session::jack_sync_callback (jack_transport_state_t state,
-			     jack_position_t* pos)
+Session::jack_sync_callback (TransportState state, framepos_t pos)
 {
 	bool slave = synced_to_jack();
 
 	switch (state) {
-	case JackTransportStopped:
-		if (slave && _transport_frame != pos->frame && post_transport_work() == 0) {
-			request_locate (pos->frame, false);
+	case TransportStopped:
+		if (slave && _transport_frame != pos && post_transport_work() == 0) {
+			request_locate (pos, false);
 			// cerr << "SYNC: stopped, locate to " << pos->frame << " from " << _transport_frame << endl;
 			return false;
 		} else {
 			return true;
 		}
 
-	case JackTransportStarting:
+	case TransportStarting:
 		// cerr << "SYNC: starting @ " << pos->frame << " a@ " << _transport_frame << " our work = " <<  post_transport_work() << " pos matches ? " << (_transport_frame == pos->frame) << endl;
 		if (slave) {
-			return _transport_frame == pos->frame && post_transport_work() == 0;
+			return _transport_frame == pos && post_transport_work() == 0;
 		} else {
 			return true;
 		}
 		break;
 
-	case JackTransportRolling:
+	case TransportRolling:
 		// cerr << "SYNC: rolling slave = " << slave << endl;
 		if (slave) {
 			start_transport ();
@@ -212,17 +211,21 @@ Session::jack_sync_callback (jack_transport_state_t state,
 		break;
 
 	default:
-		error << string_compose (_("Unknown JACK transport state %1 in sync callback"), state)
+		error << string_compose (_("Unknown transport state %1 in sync callback"), state)
 		      << endmsg;
 	}
 
 	return true;
 }
 
+/* XXX REQUIRES SOMEWAY TO EFFICIENTLY ACCESS jack_position_t WITHOUT BRIDGING
+ * THE ENTIRE DATA STRUCTURE
+ */
+#if 0 
 void
-Session::jack_timebase_callback (jack_transport_state_t /*state*/,
+Session::jack_timebase_callback (TransportState /*state*/,
 				 pframes_t /*nframes*/,
-				 jack_position_t* pos,
+				 framepos_t pos,
 				 int /*new_position*/)
 {
 	Timecode::BBT_Time bbt;
@@ -299,6 +302,7 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 	}
 #endif
 }
+#endif /* jack data structure issues */
 
 ARDOUR::framecnt_t
 Session::convert_to_frames (AnyTime const & position)

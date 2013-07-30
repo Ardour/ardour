@@ -435,9 +435,11 @@ def build(bld):
     # the JACK audio backend
 
     obj = bld.shlib (features = 'c cxx cshlib cxxshlib', 
-                     source = [ 'jack_connection.cc',
-                               'jack_audiobackend.cc'
-                               ])
+                     source = [ 
+            'jack_api.cc',
+            'jack_connection.cc',
+            'jack_audiobackend.cc'
+            ])
     obj.cxxflags = [ '-fPIC' ]
     obj.name     = 'jack_audiobackend'
     obj.target   = 'jack_audiobackend'

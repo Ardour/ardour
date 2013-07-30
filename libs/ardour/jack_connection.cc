@@ -62,6 +62,8 @@ JackConnection::open ()
         boost::scoped_ptr<EnvironmentalProtectionAgency> current_epa;
 	jack_status_t status;
 
+	close ();
+
         /* revert all environment settings back to whatever they were when ardour started
          */
 

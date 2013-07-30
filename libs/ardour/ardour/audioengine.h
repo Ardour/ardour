@@ -104,7 +104,8 @@ public:
     pframes_t      samples_since_cycle_start ();
     bool           get_sync_offset (pframes_t& offset) const;
     int            create_process_thread (boost::function<void()> func, pthread_t*, size_t stacksize);
-    
+    bool           is_realtime() const;
+
     /* END BACKEND PROXY API */
 
     bool freewheeling() const { return _freewheeling; }
@@ -180,13 +181,21 @@ public:
     static void destroy();
     void died ();
     
-    /* The backend will cause this at the appropriate time(s)
+    /* The backend will cause these at the appropriate time(s)
      */
-    int process_callback (pframes_t nframes);
+    int  process_callback (pframes_t nframes);
+    int  buffer_size_change (pframes_t nframes);
+    int  sample_rate_change (pframes_t nframes);
+    void freewheel_callback (bool);
+    void timebase_callback (TransportState state, pframes_t nframes, framepos_t pos, int new_position);
+    int  sync_callback (TransportState state, framepos_t position);
+    int  port_registration_callback ();
+    void latency_callback (bool for_playback);
+    void halted_callback (const char* reason);
 
-    int buffer_size_change (pframes_t nframes);
-    int sample_rate_change (pframes_t nframes);
-    
+    /* sets up the process callback thread */
+    static void thread_init_callback (void *);
+
   private:
     AudioEngine (const std::string&  client_name, const std::string& session_uuid);
 
