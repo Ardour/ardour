@@ -46,6 +46,7 @@ public:
 
 	static BufferSet& get_silent_buffers (ChanCount count = ChanCount::ZERO);
 	static BufferSet& get_scratch_buffers (ChanCount count = ChanCount::ZERO);
+	static BufferSet& get_route_buffers (ChanCount count = ChanCount::ZERO, bool silence = false);
 	static BufferSet& get_mix_buffers (ChanCount count = ChanCount::ZERO);
 	static gain_t* gain_automation_buffer ();
 	static gain_t* send_gain_automation_buffer ();

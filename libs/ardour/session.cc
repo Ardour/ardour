@@ -4176,6 +4176,13 @@ Session::get_scratch_buffers (ChanCount count)
 }
 
 BufferSet&
+Session::get_route_buffers (ChanCount count, bool silence)
+{
+	return ProcessThread::get_route_buffers (count, silence);
+}
+
+
+BufferSet&
 Session::get_mix_buffers (ChanCount count)
 {
 	return ProcessThread::get_mix_buffers (count);
