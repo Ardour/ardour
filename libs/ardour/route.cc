@@ -597,7 +597,7 @@ Route::passthru (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, 
 void
 Route::passthru_silence (framepos_t start_frame, framepos_t end_frame, pframes_t nframes, int declick)
 {
-	BufferSet& bufs (_session.get_silent_buffers (n_process_buffers()));
+	BufferSet& bufs (_session.get_scratch_buffers (n_process_buffers()));
 
 	bufs.set_count (_input->n_ports());
 	write_out_of_band_data (bufs, start_frame, end_frame, nframes);
