@@ -61,7 +61,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 uint32_t RouteUI::_max_invert_buttons = 3;
-sigc::signal<void, boost::shared_ptr<Route> > RouteUI::BusSendDisplayChanged;
+PBD::Signal1<void, boost::shared_ptr<Route> > RouteUI::BusSendDisplayChanged;
 boost::weak_ptr<Route> RouteUI::_showing_sends_to;
 
 RouteUI::RouteUI (ARDOUR::Session* sess)
@@ -171,7 +171,7 @@ RouteUI::init ()
 	monitor_disk_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_press));
 	monitor_disk_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_release));
 
-	BusSendDisplayChanged.connect (sigc::mem_fun (*this, &RouteUI::bus_send_display_changed));
+	BusSendDisplayChanged.connect (*this, invalidator (*this), boost::bind(&RouteUI::bus_send_display_changed, this, _1), gui_context());
 }
 
 void
