@@ -471,13 +471,13 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 			nh = 52;
 			break;
 		case 2:
-			nh = 106;
+			nh = 88;
 			break;
 		case 3:
-			nh = 148;
+			nh = 106;
 			break;
 		case 4:
-			nh = 254;
+			nh = 148;
 			break;
 	}
 	namebx.set_size_request(18, nh);
