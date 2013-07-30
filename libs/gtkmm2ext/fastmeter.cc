@@ -587,9 +587,9 @@ FastMeter::vertical_expose (GdkEventExpose* ev)
 		last_peak_rect.width = pixwidth;
 		last_peak_rect.y = max(1, 1 + pixheight - (gint) floor (pixheight * current_peak));
 		if (bright_hold || (_styleflags & 2)) {
-			last_peak_rect.height = max(0, min(3, pixheight - last_peak_rect.y -1 ));
+			last_peak_rect.height = max(0, min(3, pixheight - last_peak_rect.y - 1 ));
 		} else {
-			last_peak_rect.height = max(0, min(2, pixheight - last_peak_rect.y -1 ));
+			last_peak_rect.height = max(0, min(2, pixheight - last_peak_rect.y - 1 ));
 		}
 
 		cairo_set_source (cr, fgpattern->cobj());
@@ -658,8 +658,8 @@ FastMeter::horizontal_expose (GdkEventExpose* ev)
 		last_peak_rect.y = 1;
 		last_peak_rect.height = pixheight;
 		const int xpos = floor (pixwidth * current_peak);
-		if (bright_hold) {
-			last_peak_rect.width = min(4, xpos );
+		if (bright_hold || (_styleflags & 2)) {
+			last_peak_rect.width = min(3, xpos );
 		} else {
 			last_peak_rect.width = min(2, xpos );
 		}
@@ -788,8 +788,8 @@ FastMeter::queue_vertical_redraw (const Glib::RefPtr<Gdk::Window>& win, float ol
 		}
 		rect.x = 1;
 		rect.y = max(1, 1 + pixheight - (gint) floor (pixheight * current_peak));
-		if (bright_hold) {
-			rect.height = max(0, min(4, pixheight - last_peak_rect.y -1 ));
+		if (bright_hold || (_styleflags & 2)) {
+			rect.height = max(0, min(3, pixheight - last_peak_rect.y -1 ));
 		} else {
 			rect.height = max(0, min(2, pixheight - last_peak_rect.y -1 ));
 		}
@@ -859,8 +859,8 @@ FastMeter::queue_horizontal_redraw (const Glib::RefPtr<Gdk::Window>& win, float 
 		rect.y = 1;
 		rect.height = pixheight;
 		const int xpos = floor (pixwidth * current_peak);
-		if (bright_hold) {
-			rect.width = min(4, xpos);
+		if (bright_hold || (_styleflags & 2)) {
+			rect.width = min(3, xpos);
 		} else {
 			rect.width = min(2, xpos);
 		}
