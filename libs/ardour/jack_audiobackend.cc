@@ -18,39 +18,65 @@
 */
 
 #include <math.h>
-#include <jack/jack.h>
 
 #include <boost/scoped_ptr.hpp>
-
-#include "pbd/epa.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/types.h"
 #include "ardour/jack_audiobackend.h"
+#include "ardour/jack_connection.h"
+#include "ardour/jack_portengine.h"
 
 using namespace ARDOUR;
 using std::string;
 
-#define GET_PRIVATE_JACK_POINTER(j)  jack_client_t* _priv_jack = (jack_client_t*) (j); if (!_priv_jack) { return; }
-#define GET_PRIVATE_JACK_POINTER_RET(j,r) jack_client_t* _priv_jack = (jack_client_t*) (j); if (!_priv_jack) { return r; }
+#define GET_PRIVATE_JACK_POINTER(localvar)  jack_client_t* localvar = _jack_connection->jack(); if (!(v)) { return; }
+#define GET_PRIVATE_JACK_POINTER_RET(localvar,r) jack_client_t* localvar = _jack_connection->jack(); if (!(v)) { return r; }
 
 extern "C" {
+
 
 	/* functions looked up using dlopen-and-cousins, and so naming scope
 	 * must be non-mangled.
 	 */
 
-	AudioBackend* backend_factory (AudioEngine& ae)
+	AudioBackend* backend_factory (AudioEngine& ae, void* backend_data)
 	{
-		JACKAudioBackend* ab = new JACKAudioBackend (ae);
+		JACKAudioBackend* ab = new JACKAudioBackend (ae, backend_data);
 		return ab;
 	}
+
+	PortEngine* portengine_factory (PortEngine& ae, void* backend_data)
+	{
+		JACKPortEngine* pe = new JACKPortEngine (ae, backend_data);
+		return pe;
+	}
+
+	int
+	instantiate (const std::string& arg1, const std::string& arg2, void** backend_data)
+	{
+		JackConnection *jc;
+		try {
+			jc = new JackConnection (arg1, arg2);
+		} catch {
+			return -1;
+		}
+		
+		*backend_data = (void*) jc;
+		return 0;
+	}
 	
+	int 
+	deinstantiate (void* backend_data)
+	{
+		JackConnection* jc = static_cast<JackConnection*> (backend_data);
+		delete jc;
+	}
 }
 
-JACKAudioBackend::JACKAudioBackend (AudioEngine& e)
+JACKAudioBackend::JACKAudioBackend (AudioEngine& e, void* jc)
 	: AudioBackend (e)
-	, _jack (0)
+	, _jack_connection (jc)
 	, _target_sample_rate (48000)
 	, _target_buffer_size (1024)
 	, _target_sample_format (FloatingPoint)
@@ -71,19 +97,19 @@ JACKAudioBackend::name() const
 void*
 JACKAudioBackend::private_handle()
 {
-	return _jack;
+	return _jack_connection->jack()
 }
 
 bool
 JACKAudioBackend::connected() const
 {
-	return (_jack != 0);
+	return (private_handle() != 0);
 }
 
 bool
 JACKAudioBackend::is_realtime ()
 {
-	GET_PRIVATE_JACK_POINTER_RET (_jack,false);
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack,false);
 	return jack_is_realtime (_priv_jack);
 }
 
@@ -176,7 +202,7 @@ JACKAudioBackend::set_device_name (const string& dev)
 int
 JACKAudioBackend::set_sample_rate (float sr)
 {
-	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 
 	if (sr == jack_get_sample_rate (_priv_jack)) {
                 return 0;
@@ -188,7 +214,7 @@ JACKAudioBackend::set_sample_rate (float sr)
 int
 JACKAudioBackend::set_buffer_size (uint32_t nframes)
 {
-	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 
 	if (nframes == jack_get_buffer_size (_priv_jack)) {
                 return 0;
@@ -333,7 +359,7 @@ JACKAudioBackend::get_systemic_output_latency () const
 int
 JACKAudioBackend::start ()
 {
-	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 
 	if (!_running) {
 
@@ -375,7 +401,7 @@ JACKAudioBackend::start ()
 int
 JACKAudioBackend::stop ()
 {
-	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 
 	{
 		Glib::Threads::Mutex::Lock lm (_process_lock);
@@ -393,7 +419,7 @@ JACKAudioBackend::stop ()
 int
 JACKAudioBackend::pause ()
 {
-	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 
 	if (_priv_jack) {
 		jack_deactivate (_priv_jack);
@@ -405,7 +431,7 @@ JACKAudioBackend::pause ()
 int
 JACKAudioBackend::freewheel (bool onoff)
 {
-	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 
 	if (onoff == _freewheeling) {
 		/* already doing what has been asked for */
@@ -433,9 +459,10 @@ JACKAudioBackend::get_parameters (Parameters& params) const
 ARDOUR::pframes_t
 AudioEngine::frames_per_cycle () const
 {
- 	GET_PRIVATE_JACK_POINTER_RET (_jack,0);
+ 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack,0);
+
 	if (_buffer_size == 0) {
-		return jack_get_buffer_size (_jack);
+		return jack_get_buffer_size (_priv_jack);
 	} else {
 		return _buffer_size;
 	}
@@ -444,7 +471,7 @@ AudioEngine::frames_per_cycle () const
 ARDOUR::framecnt_t
 AudioEngine::frame_rate () const
 {
-	GET_PRIVATE_JACK_POINTER_RET (_jack, 0);
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
 	if (_frame_rate == 0) {
 		return (_frame_rate = jack_get_sample_rate (_priv_jack));
 	} else {
@@ -464,57 +491,15 @@ AudioEngine::raw_buffer_size (DataType t)
 /*--- private support methods ---*/
 
 int
-JACKAudioBackend::connect_to_jack (string client_name, string session_uuid)
-{
-        EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
-        boost::scoped_ptr<EnvironmentalProtectionAgency> current_epa;
-	jack_status_t status;
-
-        /* revert all environment settings back to whatever they were when ardour started
-         */
-
-        if (global_epa) {
-                current_epa.reset (new EnvironmentalProtectionAgency(true)); /* will restore settings when we leave scope */
-                global_epa->restore ();
-        }
-
-	jack_client_name = client_name; /* might be reset below */
-#ifdef HAVE_JACK_SESSION
-	if (!session_uuid.empty())
-	    _jack = jack_client_open (jack_client_name.c_str(), JackSessionID, &status, session_uuid.c_str());
-	else
-#endif
-	_jack = jack_client_open (jack_client_name.c_str(), JackNullOption, &status, 0);
-
-	if (_jack == NULL) {
-		// error message is not useful here
-		return -1;
-	}
-
-	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
-
-	if (status & JackNameNotUnique) {
-		jack_client_name = jack_get_client_name (_priv_jack);
-	}
-
-	return 0;
-}
-
-int
-JACKAudioBackend::disconnect_from_jack ()
-{
-}
-
-int
 JACKAudioBackend::reconnect_to_jack ()
 {
-	if (_running) {
-		disconnect_from_jack ();
+	if (_jack_connection->connected()) {
+		_jack_connection->close ();
 		/* XXX give jackd a chance */
 		Glib::usleep (250000);
 	}
 
-	if (connect_to_jack (jack_client_name, "")) {
+	if (_jack_connection->open()) {
 		error << _("failed to connect to JACK") << endmsg;
 		return -1;
 	}
@@ -535,7 +520,7 @@ JACKAudioBackend::reconnect_to_jack ()
 		return -1;
 	}
 
-	GET_PRIVATE_JACK_POINTER_RET (_jack,-1);
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack,-1);
 
 	MIDI::Manager::instance()->reestablish (_priv_jack);
 
@@ -576,35 +561,35 @@ JACKAudioBackend::reconnect_to_jack ()
 void
 JACKAudioBackend::transport_stop ()
 {
-	GET_PRIVATE_JACK_POINTER (_jack);
+	GET_PRIVATE_JACK_POINTER (_priv_jack);
 	jack_transport_stop (_priv_jack);
 }
 
 void
 JACKAudioBackend::transport_start ()
 {
-	GET_PRIVATE_JACK_POINTER (_jack);
+	GET_PRIVATE_JACK_POINTER (_priv_jack);
 	jack_transport_start (_priv_jack);
 }
 
 void
 JACKAudioBackend::transport_locate (framepos_t where)
 {
-	GET_PRIVATE_JACK_POINTER (_jack);
+	GET_PRIVATE_JACK_POINTER (_priv_jack);
 	jack_transport_locate (_priv_jack, where);
 }
 
 framepos_t 
 JACKAudioBackend::transport_frame () const 
 {
-	GET_PRIVATE_JACK_POINTER_RET (_jack, 0);
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
 	return jack_get_current_transport_frame (_priv_jack);
 }
 
 JACKAudioBackend::TransportState
 JACKAudioBackend::transport_state ()
 {
-	GET_PRIVATE_JACK_POINTER_RET (_jack, ((TransportState) JackTransportStopped));
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, ((TransportState) JackTransportStopped));
 	jack_position_t pos;
 	return (TransportState) jack_transport_query (_priv_jack, &pos);
 }
@@ -612,7 +597,7 @@ JACKAudioBackend::transport_state ()
 int
 JACKAudioBackend::set_time_master (bool yn)
 {
-	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 	if (yn) {
 		return jack_set_timebase_callback (_priv_jack, 0, _jack_timebase_callback, this);
 	} else {
@@ -645,7 +630,7 @@ JACKAudioBackend::get_sync_offset (pframes_t& offset) const
 
 #ifdef HAVE_JACK_VIDEO_SUPPORT
 
-	GET_PRIVATE_JACK_POINTER_RET (_jack, false);
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, false);
 
 	jack_position_t pos;
 
@@ -706,13 +691,7 @@ ardour_jack_error (const char* msg)
 void
 JACKAudioBackend::set_jack_callbacks ()
 {
-	GET_PRIVATE_JACK_POINTER (_jack);
-
-        if (jack_on_info_shutdown) {
-                jack_on_info_shutdown (_priv_jack, halted_info, this);
-        } else {
-                jack_on_shutdown (_priv_jack, halted, this);
-        }
+	GET_PRIVATE_JACK_POINTER (_priv_jack);
 
         jack_set_thread_init_callback (_priv_jack, _thread_init_callback, this);
         jack_set_process_thread (_priv_jack, _process_thread, this);
@@ -855,7 +834,7 @@ JACKAudioBackend::connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, in
 		return;
 	}
 
-	GET_PRIVATE_JACK_POINTER (_jack);
+	GET_PRIVATE_JACK_POINTER (_priv_jack);
 
 	jack_port_t* jack_port_a = jack_port_by_id (_priv_jack, id_a);
 	jack_port_t* jack_port_b = jack_port_by_id (_priv_jack, id_b);
@@ -885,7 +864,7 @@ JACKAudioBackend::connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, in
 int
 JACKAudioBackend::create_process_thread (boost::function<void()> f, pthread_t* thread, size_t stacksize)
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack, 0);
+        GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
         ThreadData* td = new ThreadData (this, f, stacksize);
 
         if (jack_client_create_thread (_priv_jack, thread, jack_client_real_time_priority (_priv_jack),
@@ -925,7 +904,7 @@ JACKAudioBackend::process_thread ()
         _main_thread = new ProcessThread;
 
         while (1) {
-                GET_PRIVATE_JACK_POINTER_RET(_jack,0);
+                GET_PRIVATE_JACK_POINTER_RET(_priv_jack,0);
 
                 pframes_t nframes = jack_cycle_wait (_priv_jack);
 		
@@ -988,7 +967,7 @@ JACKAudioBackend::jack_bufsize_callback (pframes_t nframes)
                 return 0;
         }
 
-	GET_PRIVATE_JACK_POINTER_RET (_jack, 1);
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 1);
 
 	_current_buffer_size = nframes;
 	_current_usecs_per_cycle = (int) floor ((((double) nframes / frame_rate())) * 1000000.0);

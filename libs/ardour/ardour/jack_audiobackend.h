@@ -34,6 +34,8 @@
 
 namespace ARDOUR {
 
+class JackConnection;
+
 class JACKAudioBackend : public AudioBackend {
   public:
     JACKAudioBackend (AudioEngine& e);
@@ -75,8 +77,7 @@ class JACKAudioBackend : public AudioBackend {
     int freewheel (bool);
 
   private:
-    jack_client_t* volatile   _jack; /* could be reset to null by SIGPIPE or another thread */
-    std::string                jack_client_name;
+    JackConnection* _jack_connection;
 
     static int  _xrun_callback (void *arg);
     static int  _graph_order_callback (void *arg);
@@ -89,8 +90,6 @@ class JACKAudioBackend : public AudioBackend {
     static void _registration_callback (jack_port_id_t, int, void *);
     static void _connect_callback (jack_port_id_t, jack_port_id_t, int, void *);
     static void _latency_callback (jack_latency_callback_mode_t, void*);
-    static void  halted (void *);
-    static void  halted_info (jack_status_t,const char*,void *);
 #ifdef HAVE_JACK_SESSION
     static void _session_callback (jack_session_event_t *event, void *arg);
 #endif
@@ -133,6 +132,11 @@ class JACKAudioBackend : public AudioBackend {
     uint32_t     _target_output_channels;
     uint32_t      _target_systemic_input_latency;
     uint32_t      _target_systemic_output_latency;
+
+    uint32_t _current_sample_rate;
+    uint32_t _current_buffer_size;
+    uint32_t _current_usecs_per_cycle;
+    
 };
 
 } // namespace

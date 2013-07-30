@@ -182,7 +182,10 @@ public:
     
     /* The backend will cause this at the appropriate time(s)
      */
-    int    process_callback (pframes_t nframes);
+    int process_callback (pframes_t nframes);
+
+    int buffer_size_change (pframes_t nframes);
+    int sample_rate_change (pframes_t nframes);
     
   private:
     AudioEngine (const std::string&  client_name, const std::string& session_uuid);
