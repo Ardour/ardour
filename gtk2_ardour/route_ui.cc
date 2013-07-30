@@ -171,7 +171,7 @@ RouteUI::init ()
 	monitor_disk_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_press));
 	monitor_disk_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_disk_release));
 
-	BusSendDisplayChanged.connect (*this, invalidator (*this), boost::bind(&RouteUI::bus_send_display_changed, this, _1), gui_context());
+	BusSendDisplayChanged.connect_same_thread (*this, boost::bind(&RouteUI::bus_send_display_changed, this, _1));
 }
 
 void
