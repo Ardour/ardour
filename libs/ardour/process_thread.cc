@@ -114,7 +114,7 @@ ProcessThread::get_route_buffers (ChanCount count, bool silence)
 	ThreadBuffers* tb = _private_thread_buffers.get();
 	assert (tb);
 
-	BufferSet* sb = tb->scratch_buffers;
+	BufferSet* sb = tb->route_buffers;
 	assert (sb);
 
 	if (count != ChanCount::ZERO) {
