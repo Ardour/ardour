@@ -33,11 +33,84 @@
 
 using namespace ARDOUR;
 
+
+/** MIDI Clock Position tracking */
+class MidiClockTicker::Position : public Timecode::BBT_Time
+{
+public:
+
+	Position() : speed(0.0f), frame(0), clocks_till_locate(-1) { }
+	~Position() { }
+
+	/** Sync timing information taken from the given Session
+		@return True if timings differed */
+	bool sync (Session* s) {
+
+		bool didit = false;
+
+		double     sp = s->transport_speed();
+		framecnt_t fr = s->transport_frame();
+
+		if (speed != sp) {
+			speed = sp;
+			didit = true;
+		}
+
+		if (frame != fr) {
+
+			s->bbt_time (fr, *this);
+
+			const TempoMap& tempo = s->tempo_map();
+
+			const double divisions   = tempo.meter_at(frame).divisions_per_bar();
+			const double divisor     = tempo.meter_at(frame).note_divisor();
+			const double qnote_scale = divisor * 0.25f;
+
+			frame = fr;
+
+			/* Midi Beats in terms of Song Position Pointer is equivalent to total
+			   sixteenth notes at 'time' */
+
+			midi_beats  = (((bars - 1) * divisions) + beats - 1);
+			midi_beats += (double)ticks / (double)Position::ticks_per_beat * qnote_scale;
+			midi_beats *= 16.0f / divisor;
+
+			midi_clocks = midi_beats * 6.0f;
+
+			didit = true;
+		}
+
+		print (std::clog);
+
+		return didit;
+	}
+
+	double      speed;
+	framecnt_t  frame;
+	double      midi_beats;
+	double      midi_clocks;
+
+	void print (std::ostream& s) {
+		s << "MCLK Position: frames: " << frame << " midi beats: " << midi_beats << " speed: " << speed << std::endl;
+	}
+};
+
+
 MidiClockTicker::MidiClockTicker ()
 	: _midi_port (0)
 	, _ppqn (24)
 	, _last_tick (0.0)
 {
+	_pos = new Position();
+}
+
+MidiClockTicker::~MidiClockTicker()
+{
+	_midi_port = 0;
+	if (_pos) {
+		delete _pos;
+		_pos = 0;
+	}
 }
 
 void
@@ -49,8 +122,30 @@ MidiClockTicker::set_session (Session* s)
 		 _session->TransportStateChange.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::transport_state_changed, this));
 		 _session->PositionChanged.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::position_changed, this, _1));
 		 _session->TransportLooped.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::transport_looped, this));
+		 _session->Located.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::session_located, this));
+
 		 update_midi_clock_port();
+		 _pos->sync (_session);
 	 }
+}
+
+void
+MidiClockTicker::session_located()
+{
+	if (0 == _session || ! _pos->sync (_session)) {
+		return;
+	}
+
+	_last_tick = _pos->frame;
+
+	// WIP - Testing code
+	if (0 == _pos->frame) {
+		std::clog << "zero frame\n";
+		if (1.0f == _pos->speed) {
+			std::clog << "normal speed:\n";
+			_pos->clocks_till_locate = 0;
+		}
+	}
 }
 
 void
@@ -157,6 +252,12 @@ MidiClockTicker::transport_looped()
 void
 MidiClockTicker::tick (const framepos_t& transport_frame)
 {
+	if (_pos->clocks_till_locate == 0) {
+		std::clog << "Locate: " << transport_frame << std::endl;
+	}
+
+	--_pos->clocks_till_locate;
+
 	if (!Config->get_send_midi_clock() || _session == 0 || _session->transport_speed() != 1.0f || _midi_port == 0) {
 		return;
 	}
@@ -165,13 +266,14 @@ MidiClockTicker::tick (const framepos_t& transport_frame)
 		double next_tick = _last_tick + one_ppqn_in_frames (transport_frame);
 		frameoffset_t next_tick_offset = llrint (next_tick) - transport_frame;
 
+
 		MIDI::JackMIDIPort* mp = dynamic_cast<MIDI::JackMIDIPort*> (_midi_port);
 		
-		/*
+
 		DEBUG_TRACE (PBD::DEBUG::MidiClock,
 			     string_compose ("Transport: %1, last tick time: %2, next tick time: %3, offset: %4, cycle length: %5\n",
 					     transport_frame, _last_tick, next_tick, next_tick_offset, mp ? mp->nframes_this_cycle() : 0));
-		*/
+
 
 		if (!mp || (next_tick_offset >= mp->nframes_this_cycle())) {
 			break;
@@ -181,7 +283,7 @@ MidiClockTicker::tick (const framepos_t& transport_frame)
 			send_midi_clock_event (next_tick_offset);
 		}
 
-		_last_tick = next_tick;
+		_pos->frame = _last_tick = next_tick;
 	}
 }
 
