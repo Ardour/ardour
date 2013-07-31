@@ -724,10 +724,8 @@ SystemExec::start (int stderr_mode)
 	signal(SIGPIPE, SIG_DFL);
 #endif
 
-#ifndef __WIN32__
-	int good_fds[1] = { 0 };
+	int good_fds[1] = { -1 };
 	close_allv(good_fds);
-#endif
 
 	::execve(argp[0], argp, envp);
 	/* if we reach here something went wrong.. */
