@@ -25,6 +25,7 @@
 #include "pbd/file_utils.h"
 #include "pbd/error.h"
 
+#include "ardour/filename_extensions.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/midi_patch_manager.h"
@@ -71,7 +72,7 @@ MidiPatchManager::add_session_patches ()
 
 	vector<std::string> result;
 
-	find_files_matching_pattern (result, path_to_patches, "*.midnam");
+	find_files_matching_pattern (result, path_to_patches, midnam_suffix);
 
 	info << "Loading " << result.size() << " MIDI patches from " << path_to_patches << endmsg;
 
@@ -113,7 +114,7 @@ MidiPatchManager::refresh()
 	Searchpath search_path = midi_patch_search_path ();
 	vector<std::string> result;
 
-	find_files_matching_pattern (result, search_path, "*.midnam");
+	find_files_matching_pattern (result, search_path, midnam_suffix);
 
 	info << "Loading " << result.size() << " MIDI patches from " << search_path.to_string() << endmsg;
 
