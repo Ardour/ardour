@@ -2013,7 +2013,7 @@ framepos_t
 AudioClock::frame_duration_from_bbt_string (framepos_t pos, const string& str) const
 {
 	if (_session == 0) {
-		error << "AudioClock::current_time() called with BBT mode but without session!" << endmsg;
+		error << "AudioClock::frame_duration_from_bbt_string() called with BBT mode but without session!" << endmsg;
 		return 0;
 	}
 
