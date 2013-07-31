@@ -270,7 +270,17 @@ PeakMeter::meter ()
 		return;
 	}
 
-	assert(_visible_peak_power.size() == _peak_signal.size());
+	// TODO block this thread while PeakMeter::reset_max_channels() is
+	// reallocating channels.
+	// (may happen with Session > New: old session not yet closed,
+	// meter-thread still active while new one is initializing and
+	// maybe on other occasions, too)
+	if (   (visible_peak_power.size() != _peak_signal.size())
+			|| (_max_peak_power.size()    != _peak_signal.size())
+			|| (_max_peak_signal.size()   != _peak_signal.size())
+			 ) {
+		return;
+	}
 
 	const size_t limit = min (_peak_signal.size(), (size_t) current_meters.n_total ());
 	const size_t n_midi  = min (_peak_signal.size(), (size_t) current_meters.n_midi());
