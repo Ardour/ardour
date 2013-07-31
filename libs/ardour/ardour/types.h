@@ -598,8 +598,11 @@ namespace ARDOUR {
 		/* these values happen to match the constants used by JACK but
 		   this equality cannot be assumed.
 		*/
-		IsInput = 1, 
-		IsOutput = 2,
+		IsInput = 0x1, 
+		IsOutput = 0x2,
+		IsPhysical = 0x4,
+		CanMonitor = 0x8,
+		IsTerminal = 0x10
 	};
 
 	struct LatencyRange {

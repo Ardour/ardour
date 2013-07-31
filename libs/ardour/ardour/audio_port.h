@@ -46,10 +46,12 @@ class AudioPort : public Port
 	AudioBuffer& get_audio_buffer (pframes_t nframes);
 
   protected:
-	friend class AudioEngine;
-
+	friend class PortManager;
 	AudioPort (std::string const &, PortFlags);
-        /* special access for engine only */
+
+  protected:
+	friend class AudioEngine;
+        /* special access for engine only (hah, C++) */
         Sample* engine_get_whole_audio_buffer ();
 
   private:

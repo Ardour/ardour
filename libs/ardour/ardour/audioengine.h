@@ -61,6 +61,7 @@ class Port;
 class Session;
 class ProcessThread;
 class AudioBackend;
+class AudioBackendInfo;
 
 class AudioEngine : public SessionHandlePtr, public PortManager
 {
@@ -164,16 +165,6 @@ public:
     PBD::Signal0<void> Running;
     PBD::Signal0<void> Stopped;
     
-    /** Emitted if a Port is registered or unregistered */
-    PBD::Signal0<void> PortRegisteredOrUnregistered;
-    
-    /** Emitted if a Port is connected or disconnected.
-     *  The Port parameters are the ports being connected / disconnected, or 0 if they are not known to Ardour.
-     *  The std::string parameters are the (long) port names.
-     *  The bool parameter is true if ports were connected, or false for disconnected.
-     */
-    PBD::Signal5<void, boost::weak_ptr<Port>, std::string, boost::weak_ptr<Port>, std::string, bool> PortConnectedOrDisconnected;
-    
     std::string make_port_name_relative (std::string) const;
     std::string make_port_name_non_relative (std::string) const;
     bool port_is_mine (const std::string&) const;
@@ -202,7 +193,8 @@ public:
 
     static AudioEngine*       _instance;
 
-    AudioBackend*             _backend;
+    boost::shared_ptr<AudioBackend> _backend;
+
     Glib::Threads::Mutex      _process_lock;
     Glib::Threads::Cond        session_removed;
     bool                       session_remove_pending;
@@ -239,9 +231,9 @@ public:
     void parameter_changed (const std::string&);
     PBD::ScopedConnection config_connection;
 
-    typedef std::map<std::string,AudioBackend*> BackendMap;
+    typedef std::map<std::string,AudioBackendInfo*> BackendMap;
     BackendMap _backends;
-    AudioBackend* backend_discover (const std::string&);
+    AudioBackendInfo* backend_discover (const std::string&);
     void drop_backend ();
 };
 	

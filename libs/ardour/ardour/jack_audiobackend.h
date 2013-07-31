@@ -26,6 +26,8 @@
 
 #include <stdint.h>
 
+#include <boost/shared_ptr.hpp>
+
 #include <jack/jack.h>
 #ifdef HAVE_JACK_SESSION
 #include <jack/session.h>
@@ -39,7 +41,7 @@ class JackConnection;
 
 class JACKAudioBackend : public AudioBackend {
   public:
-    JACKAudioBackend (AudioEngine& e, void*);
+    JACKAudioBackend (AudioEngine& e, boost::shared_ptr<JackConnection>);
     ~JACKAudioBackend ();
 
     std::string name() const;
@@ -98,7 +100,7 @@ class JACKAudioBackend : public AudioBackend {
     bool get_sync_offset (pframes_t& /*offset*/) const;
 
   private:
-    JackConnection* _jack_connection; //< shared with JACKPortEngine
+    boost::shared_ptr<JackConnection>  _jack_connection; //< shared with JACKPortEngine
     bool            _running;
     bool            _freewheeling;
     std::map<DataType,size_t> _raw_buffer_sizes;

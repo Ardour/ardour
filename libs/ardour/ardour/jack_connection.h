@@ -13,6 +13,8 @@ class JackConnection {
     JackConnection (const std::string& client_name, const std::string& session_uuid);
     ~JackConnection ();
 
+    const std::string& client_name() const { return _client_name; }
+
     int open ();
     int close ();
     bool connected () const { return _jack != 0; }
@@ -26,7 +28,7 @@ class JackConnection {
 
   private:
     jack_client_t* volatile _jack;
-    std::string client_name;
+    std::string _client_name;
     std::string session_uuid;
 };
 

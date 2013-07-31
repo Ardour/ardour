@@ -42,9 +42,10 @@ class PortManager
   public:
     typedef std::map<std::string,boost::shared_ptr<Port> > Ports;
     
-    PortManager();
+    PortManager ();
     virtual ~PortManager() {}
 
+    void set_port_engine (PortEngine& pe);
     PortEngine& port_engine() { return *_impl; }
     
     /* Port registration */
@@ -62,16 +63,28 @@ class PortManager
     int  reestablish_ports ();
     int  reconnect_ports ();
 
+    bool  connected (const std::string&);
+    bool  connected_to (const std::string&, const std::string&);
+    bool  physically_connected (const std::string&);
+    int   get_connections (const std::string&, std::vector<std::string>&);
+
+    /* Naming */
+
+    boost::shared_ptr<Port> get_port_by_name (const std::string &);
+    void                    port_renamed (const std::string&, const std::string&);
+    std::string             make_port_name_relative (const std::string& name) const;
+    std::string             make_port_name_non_relative (const std::string& name) const;
+    bool                    port_is_mine (const std::string& fullname) const;
+
     /* other Port management */
     
-    bool port_is_physical (const std::string&) const;
-    void get_physical_outputs (DataType type, std::vector<std::string>&);
-    void get_physical_inputs (DataType type, std::vector<std::string>&);
-    boost::shared_ptr<Port> get_port_by_name (const std::string &);
-    void port_renamed (const std::string&, const std::string&);
+    bool      port_is_physical (const std::string&) const;
+    void      get_physical_outputs (DataType type, std::vector<std::string>&);
+    void      get_physical_inputs (DataType type, std::vector<std::string>&);
     ChanCount n_physical_outputs () const;
     ChanCount n_physical_inputs () const;
-    const char ** get_ports (const std::string& port_name_pattern, DataType type, uint32_t flags);
+
+    int get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>&);
     
     void remove_all_ports ();
     
@@ -94,15 +107,33 @@ class PortManager
 	std::string reason;
     };
 
+    /* the port engine will invoke these callbacks when the time is right */
+    
+    void registration_callback ();
+    int graph_order_callback ();
+    void connect_callback (const std::string&, const std::string&, bool connection);
+
+    bool port_remove_in_progress() const { return _port_remove_in_progress; }
+
+    /** Emitted if a Port is registered or unregistered */
+    PBD::Signal0<void> PortRegisteredOrUnregistered;
+    
+    /** Emitted if a Port is connected or disconnected.
+     *  The Port parameters are the ports being connected / disconnected, or 0 if they are not known to Ardour.
+     *  The std::string parameters are the (long) port names.
+     *  The bool parameter is true if ports were connected, or false for disconnected.
+     */
+    PBD::Signal5<void, boost::weak_ptr<Port>, std::string, boost::weak_ptr<Port>, std::string, bool> PortConnectedOrDisconnected;
 
   protected:
-    PortEngine* _impl;
+    boost::shared_ptr<PortEngine> _impl;
     SerializedRCUManager<Ports> ports;
+    bool _port_remove_in_progress;
 
     boost::shared_ptr<Port> register_port (DataType type, const std::string& portname, bool input);
     void port_registration_failure (const std::string& portname);
 };
 	
-}
+} // namespace
 
 #endif /* __libardour_port_manager_h__ */

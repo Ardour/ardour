@@ -57,9 +57,9 @@ class MidiPort : public Port {
 	MidiBuffer& get_midi_buffer (pframes_t nframes);
 
   protected:
-	friend class AudioEngine;
+    friend class PortManager;
 
-	MidiPort (const std::string& name, PortFlags);
+    MidiPort (const std::string& name, PortFlags);
 
   private:
 	MidiBuffer* _buffer;

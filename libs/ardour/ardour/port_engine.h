@@ -30,6 +30,8 @@
 
 namespace ARDOUR {
 
+class PortManager;
+
 /** PortEngine is an abstract base class that defines the functionality
  * required by Ardour. 
  * 
@@ -74,7 +76,7 @@ namespace ARDOUR {
 
 class PortEngine {
   public:
-    PortEngine() {}
+    PortEngine (PortManager& pm) : manager (pm) {}
     virtual ~PortEngine();
     
     /* We use void* here so that the API can be defined for any implementation.
@@ -90,32 +92,37 @@ class PortEngine {
     virtual bool  connected() const = 0;
     virtual void* private_handle() const = 0;
 
+    virtual const std::string& my_name() const = 0;
+
     virtual int         set_port_name (PortHandle, const std::string&) = 0;
     virtual std::string get_port_name (PortHandle) const = 0;
     virtual PortHandle* get_port_by_name (const std::string&) const = 0;
 
-    DataType port_data_type (PortHandle) const;
+    /* Discovering the set of ports whose names, types and flags match
+     * specified values.
+     */
 
-    virtual std::string make_port_name_relative (const std::string& name) const = 0;
-    virtual std::string make_port_name_non_relative (const std::string& name) const = 0;
-    virtual bool        port_is_mine (const std::string& fullname) const = 0;
+    virtual int get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>&) const = 0;
+
+    virtual DataType port_data_type (PortHandle) const = 0;
 
     virtual PortHandle register_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags) = 0;
-    virtual void  unregister_port (PortHandle) = 0;
-
-    virtual bool  connected (PortHandle) = 0;
-    virtual bool  connected_to (PortHandle, const std::string&) = 0;
-    virtual bool  physically_connected (PortHandle) = 0;
-
-    virtual int   get_connections (PortHandle, std::vector<std::string>&) = 0;
-
-    virtual int   connect (PortHandle, const std::string&) = 0;
-    virtual int   disconnect (PortHandle, const std::string&) = 0;
-    virtual int   disconnect_all (PortHandle) = 0;
+    virtual void       unregister_port (PortHandle) = 0;
+    
+    /* Connection management */
 
     virtual int   connect (const std::string& src, const std::string& dst) = 0;
     virtual int   disconnect (const std::string& src, const std::string& dst) = 0;
     
+    virtual int   connect (PortHandle, const std::string&) = 0;
+    virtual int   disconnect (PortHandle, const std::string&) = 0;
+    virtual int   disconnect_all (PortHandle) = 0;
+
+    virtual bool  connected (PortHandle) = 0;
+    virtual bool  connected_to (PortHandle, const std::string&) = 0;
+    virtual bool  physically_connected (PortHandle) = 0;
+    virtual int   get_connections (PortHandle, std::vector<std::string>&) = 0;
+
     /* MIDI */
 
     virtual void     midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index) = 0;
@@ -137,9 +144,24 @@ class PortEngine {
     virtual LatencyRange  get_latency_range (PortHandle, bool for_playback) = 0;
     virtual LatencyRange  get_connected_latency_range (PortHandle, int dir) = 0;
 
+    /* Discovering physical ports */
+
+    virtual bool      port_is_physical (PortHandle) const = 0;
+    virtual void      get_physical_outputs (DataType type, std::vector<std::string>&) = 0;
+    virtual void      get_physical_inputs (DataType type, std::vector<std::string>&) = 0;
+    virtual ChanCount n_physical_outputs () const = 0;
+    virtual ChanCount n_physical_inputs () const = 0;
+
+    /* getting the port buffer. untyped (void*) because this will return
+     * buffers containing different data depending on the port type 
+     */
+
     virtual void* get_buffer (PortHandle, pframes_t) = 0;
 
-    virtual pframes_t last_frame_time () const = 0;
+    virtual framecnt_t last_frame_time() const = 0;
+
+  protected:
+    PortManager& manager;
 };
 
 }

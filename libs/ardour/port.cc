@@ -49,6 +49,7 @@ pframes_t    Port::_cycle_nframes = 0;
  * repeated phrase
  */
 #define port_engine AudioEngine::instance()->port_engine()
+#define port_manager AudioEngine::instance()
 
 /** @param n Port short name */
 Port::Port (std::string const & n, DataType t, PortFlags f)
@@ -111,7 +112,7 @@ Port::disconnect_all ()
 
 	/* a cheaper, less hacky way to do boost::shared_from_this() ... 
 	 */
-	boost::shared_ptr<Port> pself = AudioEngine::instance()->get_port_by_name (name());
+	boost::shared_ptr<Port> pself = port_manager->get_port_by_name (name());
 	PostDisconnect (pself, boost::shared_ptr<Port>()); // emit signal
 
 	return 0;
@@ -131,7 +132,7 @@ Port::connected_to (std::string const & o) const
 		return false;
 	}
 
-	return port_engine.connected_to (_port_handle, port_engine.make_port_name_non_relative (o));
+	return port_engine.connected_to (_port_handle, AudioEngine::instance()->make_port_name_non_relative (o));
 }
 
 int
@@ -143,8 +144,8 @@ Port::get_connections (std::vector<std::string> & c) const
 int
 Port::connect (std::string const & other)
 {
-	std::string const other_name = port_engine.make_port_name_non_relative (other);
-	std::string const our_name = port_engine.make_port_name_non_relative (_name);
+	std::string const other_name = AudioEngine::instance()->make_port_name_non_relative (other);
+	std::string const our_name = AudioEngine::instance()->make_port_name_non_relative (_name);
 
 	int r = 0;
 
@@ -168,8 +169,8 @@ Port::connect (std::string const & other)
 int
 Port::disconnect (std::string const & other)
 {
-	std::string const other_fullname = port_engine.make_port_name_non_relative (other);
-	std::string const this_fullname = port_engine.make_port_name_non_relative (_name);
+	std::string const other_fullname = port_manager->make_port_name_non_relative (other);
+	std::string const this_fullname = port_manager->make_port_name_non_relative (_name);
 
 	int r = 0;
 

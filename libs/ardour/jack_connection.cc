@@ -45,7 +45,7 @@ static void jack_halted_info_callback (jack_status_t code, const char* reason, v
 
 JackConnection::JackConnection (const std::string& arg1, const std::string& arg2)
 	: _jack (0)
-	, client_name (arg1)
+	, _client_name (arg1)
 	, session_uuid (arg2)
 {
 }
@@ -72,12 +72,12 @@ JackConnection::open ()
                 global_epa->restore ();
         }
 
-	if ((_jack = jack_client_open (client_name.c_str(), JackSessionID, &status, session_uuid.c_str())) == 0) {
+	if ((_jack = jack_client_open (_client_name.c_str(), JackSessionID, &status, session_uuid.c_str())) == 0) {
 		return -1;
 	}
 
 	if (status & JackNameNotUnique) {
-		client_name = jack_get_client_name (_jack);
+		_client_name = jack_get_client_name (_jack);
 	}
 
 	/* attach halted handler */

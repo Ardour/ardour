@@ -17,24 +17,35 @@
 
 */
 
+#include "pbd/error.h"
+
+#include "midi++/manager.h"
 
 #include "ardour/port_manager.h"
+#include "ardour/audio_port.h"
+#include "ardour/midi_port.h"
+
+#include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
+using std::string;
+using std::vector;
 
 PortManager::PortManager ()
-	, ports (new Ports)
+	: ports (new Ports)
+	, _port_remove_in_progress (false)
 {
 }
 
 void
-AudioEngine::remove_all_ports ()
+PortManager::remove_all_ports ()
 {
 	/* make sure that JACK callbacks that will be invoked as we cleanup
 	 * ports know that they have nothing to do.
 	 */
 
-	port_remove_in_progress = true;
+	_port_remove_in_progress = true;
 
 	/* process lock MUST be held by caller
 	*/
@@ -49,15 +60,16 @@ AudioEngine::remove_all_ports ()
 
 	ports.flush ();
 
-	port_remove_in_progress = false;
+	_port_remove_in_progress = false;
 }
 
 
 string
-AudioEngine::make_port_name_relative (const string& portname) const
+PortManager::make_port_name_relative (const string& portname) const
 {
 	string::size_type len;
 	string::size_type n;
+	string self = _impl->my_name();
 
 	len = portname.length();
 
@@ -67,7 +79,7 @@ AudioEngine::make_port_name_relative (const string& portname) const
 		}
 	}
 
-	if ((n != len) && (portname.substr (0, n) == jack_client_name)) {
+	if ((n != len) && (portname.substr (0, n) == self)) {
 		return portname.substr (n+1);
 	}
 
@@ -75,7 +87,7 @@ AudioEngine::make_port_name_relative (const string& portname) const
 }
 
 string
-AudioEngine::make_port_name_non_relative (const string& portname) const
+PortManager::make_port_name_non_relative (const string& portname) const
 {
 	string str;
 
@@ -83,7 +95,7 @@ AudioEngine::make_port_name_non_relative (const string& portname) const
 		return portname;
 	}
 
-	str  = jack_client_name;
+	str  = _impl->my_name();
 	str += ':';
 	str += portname;
 
@@ -91,136 +103,40 @@ AudioEngine::make_port_name_non_relative (const string& portname) const
 }
 
 bool
-AudioEngine::port_is_mine (const string& portname) const
+PortManager::port_is_mine (const string& portname) const
 {
+	string self = _impl->my_name();
+
 	if (portname.find_first_of (':') != string::npos) {
-		if (portname.substr (0, jack_client_name.length ()) != jack_client_name) {
+		if (portname.substr (0, self.length ()) != self) {
                         return false;
                 }
         }
+
         return true;
 }
 
 bool
-AudioEngine::port_is_physical (const std::string& portname) const
+PortManager::port_is_physical (const std::string& portname) const
 {
-        GET_PRIVATE_JACK_POINTER_RET(_jack, false);
-
-        jack_port_t *port = jack_port_by_name (_priv_jack, portname.c_str());
-
-        if (!port) {
-                return false;
-        }
-
-        return jack_port_flags (port) & JackPortIsPhysical;
-}
-
-ChanCount
-AudioEngine::n_physical (unsigned long flags) const
-{
-	ChanCount c;
-
-	GET_PRIVATE_JACK_POINTER_RET (_jack, c);
-
-	const char ** ports = jack_get_ports (_priv_jack, NULL, NULL, JackPortIsPhysical | flags);
-	if (ports == 0) {
-		return c;
-	}
-
-	for (uint32_t i = 0; ports[i]; ++i) {
-		if (!strstr (ports[i], "Midi-Through")) {
-			DataType t (jack_port_type (jack_port_by_name (_jack, ports[i])));
-			c.set (t, c.get (t) + 1);
-		}
-	}
-
-	free (ports);
-
-	return c;
-}
-
-ChanCount
-AudioEngine::n_physical_inputs () const
-{
-	return n_physical (JackPortIsInput);
-}
-
-ChanCount
-AudioEngine::n_physical_outputs () const
-{
-	return n_physical (JackPortIsOutput);
-}
-
-void
-AudioEngine::get_physical (DataType type, unsigned long flags, vector<string>& phy)
-{
-	GET_PRIVATE_JACK_POINTER (_jack);
-	const char ** ports;
-
-	if ((ports = jack_get_ports (_priv_jack, NULL, type.to_jack_type(), JackPortIsPhysical | flags)) == 0) {
-		return;
-	}
-
-	if (ports) {
-		for (uint32_t i = 0; ports[i]; ++i) {
-                        if (strstr (ports[i], "Midi-Through")) {
-                                continue;
-                        }
-			phy.push_back (ports[i]);
-		}
-		free (ports);
-	}
-}
-
-/** Get physical ports for which JackPortIsOutput is set; ie those that correspond to
- *  a physical input connector.
- */
-void
-AudioEngine::get_physical_inputs (DataType type, vector<string>& ins)
-{
-	get_physical (type, JackPortIsOutput, ins);
-}
-
-/** Get physical ports for which JackPortIsInput is set; ie those that correspond to
- *  a physical output connector.
- */
-void
-AudioEngine::get_physical_outputs (DataType type, vector<string>& outs)
-{
-	get_physical (type, JackPortIsInput, outs);
-}
-
-
-bool
-AudioEngine::can_request_hardware_monitoring ()
-{
-	GET_PRIVATE_JACK_POINTER_RET (_jack,false);
-	const char ** ports;
-
-	if ((ports = jack_get_ports (_priv_jack, NULL, JACK_DEFAULT_AUDIO_TYPE, JackPortCanMonitor)) == 0) {
+	PortEngine::PortHandle ph = _impl->get_port_by_name (portname);
+	if (!ph) {
 		return false;
 	}
 
-	free (ports);
-
-	return true;
+	return _impl->port_is_physical (ph);
 }
-
 
 /** @param name Full or short name of port
  *  @return Corresponding Port or 0.
  */
 
 boost::shared_ptr<Port>
-AudioEngine::get_port_by_name (const string& portname)
+PortManager::get_port_by_name (const string& portname)
 {
-	if (!_running) {
-		if (!_has_run) {
-			fatal << _("get_port_by_name() called before engine was started") << endmsg;
-			/*NOTREACHED*/
-		} else {
-			boost::shared_ptr<Port> ();
-		}
+	if (!_impl->connected()) {
+		fatal << _("get_port_by_name() called before engine was started") << endmsg;
+		/*NOTREACHED*/
 	}
 
         if (!port_is_mine (portname)) {
@@ -238,7 +154,7 @@ AudioEngine::get_port_by_name (const string& portname)
 		   and cheap), and if so, rename the port (which will alter
 		   the port map as a side effect).
 		*/
-		const std::string check = make_port_name_relative (jack_port_name (x->second->jack_port()));
+		const std::string check = make_port_name_relative (_impl->get_port_name (x->second->port_handle()));
 		if (check != rel) {
 			x->second->set_name (check);
 		}
@@ -249,7 +165,7 @@ AudioEngine::get_port_by_name (const string& portname)
 }
 
 void
-AudioEngine::port_renamed (const std::string& old_relative_name, const std::string& new_relative_name)
+PortManager::port_renamed (const std::string& old_relative_name, const std::string& new_relative_name)
 {
 	RCUWriter<Ports> writer (ports);
 	boost::shared_ptr<Ports> p = writer.get_copy();
@@ -262,66 +178,42 @@ AudioEngine::port_renamed (const std::string& old_relative_name, const std::stri
 	}
 }
 
-const char **
-AudioEngine::get_ports (const string& port_name_pattern, DataType type, uint32_t flags)
+int
+PortManager::get_ports (const string& port_name_pattern, DataType type, PortFlags flags, vector<string>& s)
 {
-	GET_PRIVATE_JACK_POINTER_RET (_jack,0);
-	if (!_running) {
-		if (!_has_run) {
-			fatal << _("get_ports called before engine was started") << endmsg;
-			/*NOTREACHED*/
-		} else {
-			return 0;
-		}
-	}
-
-	const char* jack_type_string;
-
-	switch (type) {
-	case DataType::AUDIO:
-		jack_type_string = JACK_DEFAULT_AUDIO_TYPE;
-		break;
-	case DataType::AUDIO:
-		jack_type_string = JACK_DEFAULT_MIDI_TYPE;
-		break;
-	case DataType::NIL
-		return 0;
-	}
-
-	return jack_get_ports (_priv_jack, port_name_pattern.c_str(), jack_type_string, flags);
+	return _impl->get_ports (port_name_pattern, type, flags, s);
 }
 
 void
-AudioEngine::port_registration_failure (const std::string& portname)
+PortManager::port_registration_failure (const std::string& portname)
 {
-	GET_PRIVATE_JACK_POINTER (_jack);
-	string full_portname = jack_client_name;
+	string full_portname = _impl->my_name();
 	full_portname += ':';
 	full_portname += portname;
 
 
-	jack_port_t* p = jack_port_by_name (_priv_jack, full_portname.c_str());
+	PortEngine::PortHandle p = _impl->get_port_by_name (full_portname);
 	string reason;
 
 	if (p) {
 		reason = string_compose (_("a port with the name \"%1\" already exists: check for duplicated track/bus names"), portname);
 	} else {
-		reason = string_compose (_("No more JACK ports are available. You will need to stop %1 and restart JACK with more ports if you need this many tracks."), PROGRAM_NAME);
+		reason = string_compose (_("No more ports are available. You will need to stop %1 and restart with more ports if you need this many tracks."), PROGRAM_NAME);
 	}
 
 	throw PortRegistrationFailure (string_compose (_("AudioEngine: cannot register port \"%1\": %2"), portname, reason).c_str());
 }
 
 boost::shared_ptr<Port>
-AudioEngine::register_port (DataType dtype, const string& portname, bool input)
+PortManager::register_port (DataType dtype, const string& portname, bool input)
 {
 	boost::shared_ptr<Port> newport;
 
 	try {
 		if (dtype == DataType::AUDIO) {
-			newport.reset (new AudioPort (portname, (input ? Port::IsInput : Port::IsOutput)));
+			newport.reset (new AudioPort (portname, (input ? IsInput : IsOutput)));
 		} else if (dtype == DataType::MIDI) {
-			newport.reset (new MidiPort (portname, (input ? Port::IsInput : Port::IsOutput)));
+			newport.reset (new MidiPort (portname, (input ? IsInput : IsOutput)));
 		} else {
 			throw PortRegistrationFailure("unable to create port (unknown type)");
 		}
@@ -346,23 +238,23 @@ AudioEngine::register_port (DataType dtype, const string& portname, bool input)
 }
 
 boost::shared_ptr<Port>
-AudioEngine::register_input_port (DataType type, const string& portname)
+PortManager::register_input_port (DataType type, const string& portname)
 {
 	return register_port (type, portname, true);
 }
 
 boost::shared_ptr<Port>
-AudioEngine::register_output_port (DataType type, const string& portname)
+PortManager::register_output_port (DataType type, const string& portname)
 {
 	return register_port (type, portname, false);
 }
 
 int
-AudioEngine::unregister_port (boost::shared_ptr<Port> port)
+PortManager::unregister_port (boost::shared_ptr<Port> port)
 {
 	/* caller must hold process lock */
 
-	if (!_running) {
+	if (!_impl->connected()) {
 		/* probably happening when the engine has been halted by JACK,
 		   in which case, there is nothing we can do here.
 		   */
@@ -399,22 +291,16 @@ PortManager::connected (const string& port_name)
 }
 
 int
-AudioEngine::connect (const string& source, const string& destination)
+PortManager::connect (const string& source, const string& destination)
 {
 	int ret;
 
-	if (!_running) {
-		if (!_has_run) {
-			fatal << _("connect called before engine was started") << endmsg;
-			/*NOTREACHED*/
-		} else {
-			return -1;
-		}
+	if (!_impl->connected()) {
+		return -1;
 	}
 
 	string s = make_port_name_non_relative (source);
 	string d = make_port_name_non_relative (destination);
-
 
 	boost::shared_ptr<Port> src = get_port_by_name (s);
 	boost::shared_ptr<Port> dst = get_port_by_name (d);
@@ -440,17 +326,12 @@ AudioEngine::connect (const string& source, const string& destination)
 }
 
 int
-AudioEngine::disconnect (const string& source, const string& destination)
+PortManager::disconnect (const string& source, const string& destination)
 {
 	int ret;
 
-	if (!_running) {
-		if (!_has_run) {
-			fatal << _("disconnect called before engine was started") << endmsg;
-			/*NOTREACHED*/
-		} else {
-			return -1;
-		}
+	if (!_impl->connected()) {
+		return -1;
 	}
 
 	string s = make_port_name_non_relative (source);
@@ -471,19 +352,8 @@ AudioEngine::disconnect (const string& source, const string& destination)
 }
 
 int
-AudioEngine::disconnect (boost::shared_ptr<Port> port)
+PortManager::disconnect (boost::shared_ptr<Port> port)
 {
-	GET_PRIVATE_JACK_POINTER_RET (_jack,-1);
-
-	if (!_running) {
-		if (!_has_run) {
-			fatal << _("disconnect called before engine was started") << endmsg;
-			/*NOTREACHED*/
-		} else {
-			return -1;
-		}
-	}
-
 	return port->disconnect_all ();
 }
 
@@ -518,11 +388,44 @@ PortManager::reconnect_ports ()
 
 	/* re-establish connections */
 	
-	for (i = p->begin(); i != p->end(); ++i) {
+	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
 		i->second->reconnect ();
 	}
 
 	MIDI::Manager::instance()->reconnect ();
 
 	return 0;
+}
+
+void
+PortManager::connect_callback (const string& a, const string& b, bool conn)
+{
+	boost::shared_ptr<Port> port_a;
+	boost::shared_ptr<Port> port_b;
+	Ports::iterator x;
+	boost::shared_ptr<Ports> pr = ports.reader ();
+
+	x = pr->find (make_port_name_relative (a));
+	if (x != pr->end()) {
+		port_a = x->second;
+	}
+
+	x = pr->find (make_port_name_relative (b));
+	if (x != pr->end()) {
+		port_b = x->second;
+	}
+
+	PortConnectedOrDisconnected (
+		port_a, a,
+		port_b, b,
+		conn
+		); /* EMIT SIGNAL */
+}	
+
+void
+PortManager::registration_callback ()
+{
+	if (!_port_remove_in_progress) {
+		PortRegisteredOrUnregistered (); /* EMIT SIGNAL */
+	}
 }

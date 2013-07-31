@@ -25,6 +25,8 @@
 
 #include <stdint.h>
 
+#include <boost/shared_ptr.hpp>
+
 #include "ardour/port_engine.h"
 #include "ardour/types.h"
 
@@ -35,10 +37,12 @@ class JackConnection;
 class JACKPortEngine : public PortEngine 
 {
   public:
-    JACKPortEngine (void* arg); // argument is a JackConnection
+    JACKPortEngine (PortManager&, boost::shared_ptr<JackConnection>);
 
     bool  connected() const;
     void* private_handle() const;
+
+    const std::string& my_name() const;
 
     int         set_port_name (PortHandle, const std::string&);
     std::string get_port_name (PortHandle) const;
@@ -47,6 +51,10 @@ class JACKPortEngine : public PortEngine
     std::string make_port_name_relative (const std::string& name) const;
     std::string make_port_name_non_relative (const std::string& name) const;
     bool        port_is_mine (const std::string& fullname) const;
+
+    int get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>&) const;
+
+    DataType port_data_type (PortHandle) const;
 
     PortHandle register_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
     void  unregister_port (PortHandle);
@@ -85,16 +93,24 @@ class JACKPortEngine : public PortEngine
     LatencyRange  get_latency_range (PortHandle, bool for_playback);
     LatencyRange  get_connected_latency_range (PortHandle, int dir);
 
+    bool      port_is_physical (PortHandle) const;
+    void      get_physical_outputs (DataType type, std::vector<std::string>&);
+    void      get_physical_inputs (DataType type, std::vector<std::string>&);
+    ChanCount n_physical_outputs () const;
+    ChanCount n_physical_inputs () const;
+
     void* get_buffer (PortHandle, pframes_t);
 
-    pframes_t last_frame_time () const;
-
+    framecnt_t last_frame_time () const;
+    
   private:
-    JackConnection* _jack_connection;
+    boost::shared_ptr<JackConnection> _jack_connection;
 
     static int  _graph_order_callback (void *arg);
     static void _registration_callback (jack_port_id_t, int, void *);
     static void _connect_callback (jack_port_id_t, jack_port_id_t, int, void *);
+
+    int graph_order_callback ();
 
     void connect_callback (jack_port_id_t, jack_port_id_t, int);
 

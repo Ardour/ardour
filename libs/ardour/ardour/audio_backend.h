@@ -33,6 +33,8 @@
 namespace ARDOUR {
 
 class AudioEngine;
+class PortEngine;
+class PortManager;
 
 class AudioBackend {
   public:
@@ -47,15 +49,18 @@ class AudioBackend {
      */
     virtual std::string name() const = 0;
 
+    /** Return a private, type-free pointer to any data
+     * that might be useful to a concrete implementation
+     */
     virtual void* private_handle() const = 0;
 
-    /** return true if the underlying mechanism/API is still available
+    /** Return true if the underlying mechanism/API is still available
      * for us to utilize. return false if some or all of the AudioBackend
      * API can no longer be effectively used.
      */
     virtual bool connected() const = 0;
 
-    /** return true if the callback from the underlying mechanism/API
+    /** Return true if the callback from the underlying mechanism/API
      * (CoreAudio, JACK, ASIO etc.) occurs in a thread subject to realtime
      * constraints. Return false otherwise.
     */
@@ -159,6 +164,8 @@ class AudioBackend {
      * external D-A/D-A converters. Units are samples.
      */
     virtual int set_systemic_output_latency (uint32_t) = 0;
+
+    /* Retrieving parameters */
 
     virtual std::string  device_name () const = 0;
     virtual float        sample_rate () const = 0;
@@ -337,7 +344,17 @@ class AudioBackend {
     AudioEngine&          engine;
 };
 
-}
+struct AudioBackendInfo {
+    const char* name;
+
+    int (*instantiate) (const std::string& arg1, const std::string& arg2);
+    int (*deinstantiate) (void);
+
+    boost::shared_ptr<AudioBackend> (*backend_factory) (AudioEngine&);
+    boost::shared_ptr<PortEngine> (*portengine_factory) (PortManager&);
+};
+
+} // namespace
 
 #endif /* __libardour_audiobackend_h__ */
     

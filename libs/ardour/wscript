@@ -148,6 +148,7 @@ libardour_sources = [
         'plugin_manager.cc',
         'port.cc',
         'port_insert.cc',
+        'port_manager.cc',
         'port_set.cc',
         'process_thread.cc',
         'processor.cc',

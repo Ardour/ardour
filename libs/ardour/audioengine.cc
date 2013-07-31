@@ -64,8 +64,7 @@ gint AudioEngine::m_meter_exit;
 AudioEngine* AudioEngine::_instance = 0;
 
 AudioEngine::AudioEngine (const std::string& bcn, const std::string& bsu)
-	: _backend (0)
-	, session_remove_pending (false)
+	: session_remove_pending (false)
 	, session_removal_countdown (-1)
 	, monitor_check_interval (INT32_MAX)
 	, last_monitor_check (0)
@@ -109,8 +108,7 @@ AudioEngine::drop_backend ()
 {
 	if (_backend) {
 		_backend->stop ();
-		delete _backend;
-		_backend = 0;
+		_backend.reset ();
 	}
 }
 
@@ -125,7 +123,15 @@ AudioEngine::set_backend (const std::string& name)
 
 	drop_backend ();
 
-	_backend = b->second;
+	try {
+
+		_backend = b->second->backend_factory (*this);
+		_impl = b->second->portengine_factory (*this);
+
+	} catch (...) {
+		error << string_compose (_("Could not create backend for %1"), name) << endmsg;
+		return -1;
+	}
 
 	return 0;
 }
@@ -512,7 +518,6 @@ int
 AudioEngine::discover_backends ()
 {
 	vector<std::string> backend_modules;
-	AudioBackend* backend;
 
 	_backends.clear ();
 
@@ -528,20 +533,23 @@ AudioEngine::discover_backends ()
 	DEBUG_TRACE (DEBUG::Panning, string_compose (_("looking for backends in %1"), backend_search_path().to_string()));
 
 	for (vector<std::string>::iterator i = backend_modules.begin(); i != backend_modules.end(); ++i) {
-		if ((backend = backend_discover (*i)) != 0) {
-			_backends.insert (make_pair (backend->name(), backend));
+
+		AudioBackendInfo* info;
+
+		if ((info = backend_discover (*i)) != 0) {
+			_backends.insert (make_pair (info->name, info));
 		}
 	}
 
 	return _backends.size();
 }
 
-AudioBackend*
+AudioBackendInfo*
 AudioEngine::backend_discover (const string& path)
 {
 	Glib::Module* module = new Glib::Module(path);
-	AudioBackend* (*dfunc)(void);
-	void* func = 0;
+	AudioBackendInfo* info;
+	void* sym = 0;
 
 	if (!module) {
 		error << string_compose(_("AudioEngine: cannot load module \"%1\" (%2)"), path,
@@ -550,17 +558,16 @@ AudioEngine::backend_discover (const string& path)
 		return 0;
 	}
 
-	if (!module->get_symbol("backend_factory", func)) {
-		error << string_compose(_("AudioEngine: module \"%1\" has no factory function."), path) << endmsg;
+	if (!module->get_symbol("descriptor", sym)) {
+		error << string_compose(_("AudioEngine: backend at \"%1\" has no descriptor."), path) << endmsg;
 		error << Glib::Module::get_last_error() << endmsg;
 		delete module;
 		return 0;
 	}
 
-	dfunc = (AudioBackend* (*)(void))func;
-	AudioBackend* backend = dfunc();
+	info = (AudioBackendInfo*) sym;
 
-	return backend;
+	return info;
 }
 
 /* BACKEND PROXY WRAPPERS */
