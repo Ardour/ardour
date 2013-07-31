@@ -44,7 +44,7 @@ PeakMeter::PeakMeter (Session& s, const std::string& name)
 	Iec2ppmdsp::init(s.nominal_frame_rate());
 	Vumeterdsp::init(s.nominal_frame_rate());
 	_pending_active = true;
-	_active = true;
+	_meter_type = MeterPeak;
 }
 
 PeakMeter::~PeakMeter ()

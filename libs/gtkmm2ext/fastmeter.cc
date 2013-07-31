@@ -121,7 +121,7 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	request_width = pixrect.width + 2;
 	request_height= pixrect.height + 2;
 
-	queue_draw ();
+	clear ();
 }
 
 FastMeter::~FastMeter ()
