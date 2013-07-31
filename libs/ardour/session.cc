@@ -4170,9 +4170,9 @@ Session::get_silent_buffers (ChanCount count)
 }
 
 BufferSet&
-Session::get_scratch_buffers (ChanCount count)
+Session::get_scratch_buffers (ChanCount count, bool silence)
 {
-	return ProcessThread::get_scratch_buffers (count);
+	return ProcessThread::get_scratch_buffers (count, silence);
 }
 
 BufferSet&
