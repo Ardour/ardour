@@ -47,6 +47,7 @@ LevelMeterBase::LevelMeterBase (Session* s, PBD::EventLoop::InvalidationRecord* 
 	: parent_invalidator(ir)
 	, _meter (0)
 	, _meter_orientation(o)
+	, regular_meter_width (6)
 	, meter_length (0)
 	, thin_meter_width(2)
 {
@@ -382,6 +383,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 		}
 		if (meters[n].width != width || meters[n].length != len || color_changed || meter_type != visible_meter_type) {
 			bool hl = meters[n].meter ? meters[n].meter->get_highlight() : false;
+			meters[n].packed = false;
 			delete meters[n].meter;
 			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, _meter_orientation, len,
 					c[0], c[1], c[2], c[3], c[4],

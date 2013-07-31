@@ -57,17 +57,22 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 		float stp2, float stp3,
 		int styleflags
 		)
+	: pixheight(0)
+	, pixwidth(0)
+	, _styleflags(styleflags)
+	, orientation(o)
+	, hold_cnt(hold)
+	, hold_state(0)
+	, bright_hold(false)
+	, current_level(0)
+	, current_peak(0)
+	, highlight(false)
 {
-	orientation = o;
-	hold_cnt = hold;
-	hold_state = 0;
-	bright_hold = false;
-	current_peak = 0;
-	current_level = 0;
 	last_peak_rect.width = 0;
 	last_peak_rect.height = 0;
+	last_peak_rect.x = 0;
+	last_peak_rect.y = 0;
 
-	highlight = false;
 	no_rgba_overlay = ! Glib::getenv("NO_METER_SHADE").empty();
 
 	_clr[0] = clr0;
@@ -91,8 +96,6 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	_stp[1] = stp1;
 	_stp[2] = stp2;
 	_stp[3] = stp3;
-
-	_styleflags = styleflags;
 
 	set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 
@@ -689,6 +692,8 @@ FastMeter::set (float lvl, float peak)
 {
 	float old_level = current_level;
 	float old_peak = current_peak;
+
+	if (pixwidth <= 0 || pixheight <=0) return;
 
 	if (peak == -1) {
 		if (lvl >= current_peak) {
