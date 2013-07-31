@@ -135,3 +135,17 @@
   fun:ladspa_descriptor
   fun:*
 }
+{
+  <glib utf8>
+  Memcheck:Addr8
+  fun:wcslen
+  fun:wcscoll_l
+  fun:*
+}
+{
+  <glib utf8>
+  Memcheck:Addr8
+  fun:wcslen
+  fun:wcsxfrm_l
+  fun:*
+}
