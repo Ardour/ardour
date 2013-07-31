@@ -126,7 +126,7 @@ ProcessThread::get_route_buffers (ChanCount count, bool silence)
 
 	if (silence) {
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-			for (size_t i= 0; i < count.get(*t); ++i) {
+			for (uint32_t i = 0; i < sb->count().get(*t); ++i) {
 				sb->get(*t, i).clear();
 			}
 		}
