@@ -3737,8 +3737,8 @@ ARDOUR_UI::session_dialog (std::string msg)
 int
 ARDOUR_UI::pending_state_dialog ()
 {
- 	HBox* hbox = new HBox();
-	Image* image = new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG);
+	HBox* hbox = manage (new HBox());
+	Image* image = manage (new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG));
 	ArdourDialog dialog (_("Crash Recovery"), true);
 	Label  message (string_compose (_("\
 This session appears to have been in the\n\
