@@ -828,13 +828,6 @@ ARDOUR_UI::starting ()
 }
 
 void
-ARDOUR_UI::no_memory_warning ()
-{
-	XMLNode node (X_("no-memory-warning"));
-	Config->add_instant_xml (node);
-}
-
-void
 ARDOUR_UI::check_memory_locking ()
 {
 #ifdef __APPLE__
@@ -890,9 +883,6 @@ ARDOUR_UI::check_memory_locking ()
 				VBox* vbox = msg.get_vbox();
 				HBox hbox;
 				CheckButton cb (_("Do not show this window again"));
-
-				cb.signal_toggled().connect (sigc::mem_fun (*this, &ARDOUR_UI::no_memory_warning));
-				
 				hbox.pack_start (cb, true, false);
 				vbox->pack_start (hbox);
 				cb.show();
@@ -903,6 +893,11 @@ ARDOUR_UI::check_memory_locking ()
 
 				editor->ensure_float (msg);
 				msg.run ();
+
+				if (cb.get_active()) {
+					XMLNode node (X_("no-memory-warning"));
+					Config->add_instant_xml (node);
+				}
 			}
 		}
 	}

@@ -692,7 +692,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	bool first_idle ();
 
-	void no_memory_warning ();
 	void check_memory_locking ();
 
 	bool check_audioengine();
