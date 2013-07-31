@@ -39,7 +39,7 @@ class MidiClockTicker::Position : public Timecode::BBT_Time
 {
 public:
 
-	Position() : speed(0.0f), frame(0), clocks_till_locate(-1) { }
+	Position() : speed(0.0f), frame(0) { }
 	~Position() { }
 
 	/** Sync timing information taken from the given Session
@@ -143,7 +143,7 @@ MidiClockTicker::session_located()
 		std::clog << "zero frame\n";
 		if (1.0f == _pos->speed) {
 			std::clog << "normal speed:\n";
-			_pos->clocks_till_locate = 0;
+
 		}
 	}
 }
@@ -252,11 +252,6 @@ MidiClockTicker::transport_looped()
 void
 MidiClockTicker::tick (const framepos_t& transport_frame)
 {
-	if (_pos->clocks_till_locate == 0) {
-		std::clog << "Locate: " << transport_frame << std::endl;
-	}
-
-	--_pos->clocks_till_locate;
 
 	if (!Config->get_send_midi_clock() || _session == 0 || _session->transport_speed() != 1.0f || _midi_port == 0) {
 		return;
