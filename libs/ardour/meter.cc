@@ -275,9 +275,9 @@ PeakMeter::meter ()
 	// (may happen with Session > New: old session not yet closed,
 	// meter-thread still active while new one is initializing and
 	// maybe on other occasions, too)
-	if (   (visible_peak_power.size() != _peak_signal.size())
-			|| (_max_peak_power.size()    != _peak_signal.size())
-			|| (_max_peak_signal.size()   != _peak_signal.size())
+	if (   (_visible_peak_power.size() != _peak_signal.size())
+			|| (_max_peak_power.size()     != _peak_signal.size())
+			|| (_max_peak_signal.size()    != _peak_signal.size())
 			 ) {
 		return;
 	}
