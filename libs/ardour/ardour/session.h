@@ -200,7 +200,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void process (pframes_t nframes);
 
 	BufferSet& get_silent_buffers (ChanCount count = ChanCount::ZERO);
-	BufferSet& get_scratch_buffers (ChanCount count = ChanCount::ZERO);
+	BufferSet& get_scratch_buffers (ChanCount count = ChanCount::ZERO, bool silence = true );
 	BufferSet& get_route_buffers (ChanCount count = ChanCount::ZERO, bool silence = true);
 	BufferSet& get_mix_buffers (ChanCount count = ChanCount::ZERO);
 
