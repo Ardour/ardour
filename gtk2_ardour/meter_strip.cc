@@ -65,6 +65,8 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	level_meter = 0;
 	_strip_type = 0;
 	_tick_bar = 0;
+	_metricmode = -1;
+	metric_type = MeterPeak;
 	mtr_vbox.set_spacing(2);
 	nfo_vbox.set_spacing(2);
 	peakbx.set_size_request(-1, 14);
@@ -123,6 +125,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 
 	_has_midi = false;
 	_tick_bar = 0;
+	_metricmode = -1;
+	metric_type = MeterPeak;
 
 	int meter_width = 6;
 	if (_route->shared_peak_meter()->input_streams().n_total() == 1) {
