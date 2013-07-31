@@ -499,16 +499,12 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
         string lpnc = lpn;
         lpnc += ':';
 
-	const char ** ports = 0;
-	ports = AudioEngine::instance()->get_ports ("", type, inputs ? IsInput : IsOutput);
+	vector<string> ports;
+	if (AudioEngine::instance()->get_ports ("", type, inputs ? IsInput : IsOutput, ports) > 0) {
 
- 	if (ports) {
+		for (vector<string>::const_iterator s = ports.begin(); s != ports.end(); ) {
 
-		int n = 0;
-
-		while (ports[n]) {
-
-			std::string const p = ports[n];
+			std::string const p = *s;
 
 			if (!system->has_port(p) &&
 			    !bus->has_port(p) &&
@@ -522,7 +518,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
                                 */
 
                                 if (p.find ("Midi-Through") != string::npos) {
-                                        ++n;
+                                        ++s;
                                         continue;
                                 }
 
@@ -535,7 +531,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
                                 if ((lp.find (N_(":monitor")) != string::npos) &&
                                     (lp.find (lpn) != string::npos)) {
-                                        ++n;
+                                        ++s;
                                         continue;
                                 }
 
@@ -556,10 +552,8 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 				}
 			}
 
-			++n;
+			++s;
 		}
-
-		free (ports);
 	}
 
 	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
