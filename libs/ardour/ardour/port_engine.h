@@ -94,6 +94,8 @@ class PortEngine {
     virtual std::string get_port_name (PortHandle) const = 0;
     virtual PortHandle* get_port_by_name (const std::string&) const = 0;
 
+    DataType port_data_type (PortHandle) const;
+
     virtual std::string make_port_name_relative (const std::string& name) const = 0;
     virtual std::string make_port_name_non_relative (const std::string& name) const = 0;
     virtual bool        port_is_mine (const std::string& fullname) const = 0;

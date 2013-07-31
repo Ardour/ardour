@@ -392,7 +392,7 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 }
 
 bool
-TranscodeFfmpeg::extract_audio (std::string outfile, ARDOUR::framecnt_t samplerate, unsigned int stream)
+TranscodeFfmpeg::extract_audio (std::string outfile, ARDOUR::framecnt_t /*samplerate*/, unsigned int stream)
 {
 	if (!probeok) return false;
   if (stream >= m_audio.size()) return false;

@@ -263,7 +263,7 @@ AudioEngine::port_renamed (const std::string& old_relative_name, const std::stri
 }
 
 const char **
-AudioEngine::get_ports (const string& port_name_pattern, const string& type_name_pattern, uint32_t flags)
+AudioEngine::get_ports (const string& port_name_pattern, DataType type, uint32_t flags)
 {
 	GET_PRIVATE_JACK_POINTER_RET (_jack,0);
 	if (!_running) {
@@ -274,7 +274,21 @@ AudioEngine::get_ports (const string& port_name_pattern, const string& type_name
 			return 0;
 		}
 	}
-	return jack_get_ports (_priv_jack, port_name_pattern.c_str(), type_name_pattern.c_str(), flags);
+
+	const char* jack_type_string;
+
+	switch (type) {
+	case DataType::AUDIO:
+		jack_type_string = JACK_DEFAULT_AUDIO_TYPE;
+		break;
+	case DataType::AUDIO:
+		jack_type_string = JACK_DEFAULT_MIDI_TYPE;
+		break;
+	case DataType::NIL
+		return 0;
+	}
+
+	return jack_get_ports (_priv_jack, port_name_pattern.c_str(), jack_type_string, flags);
 }
 
 void

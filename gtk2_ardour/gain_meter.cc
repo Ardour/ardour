@@ -861,7 +861,7 @@ GainMeterBase::update_meters()
 	}
 }
 
-void GainMeterBase::color_handler(bool dpi)
+void GainMeterBase::color_handler(bool /*dpi*/)
 {
 	setup_meters();
 }

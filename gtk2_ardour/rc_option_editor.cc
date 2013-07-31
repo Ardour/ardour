@@ -1460,8 +1460,8 @@ RCOptionEditor::RCOptionEditor ()
 
 #ifndef __APPLE__
         /* no JACK monitoring on CoreAudio */
-        if (AudioEngine::instance()->can_request_hardware_monitoring()) {
-                mm->add (HardwareMonitoring, _("JACK"));
+        if (AudioEngine::instance()->port_engine().can_monitor_input()) {
+                mm->add (HardwareMonitoring, _("via Audio Driver"));
         }
 #endif
 	mm->add (SoftwareMonitoring, _("ardour"));

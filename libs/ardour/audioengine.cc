@@ -668,6 +668,16 @@ AudioEngine::is_realtime() const
 	return _backend->is_realtime();
 }
 
+bool
+AudioEngine::connected() const 
+{
+	if (!_backend) {
+		return false;
+	}
+
+	return _backend->connected();
+}
+
 void
 AudioEngine::transport_start ()
 {

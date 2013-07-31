@@ -459,7 +459,7 @@ Bundle::connected_to_anything (AudioEngine& engine)
 			   rather than doing it with Port.
 			*/
 
-			if (engine.connected (ports[j])) {
+			if (engine.has_connections (ports[j])) {
 				return true;
 			}
 		}

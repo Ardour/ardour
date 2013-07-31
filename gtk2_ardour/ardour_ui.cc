@@ -1049,16 +1049,16 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 
 	} else {
 
-		framecnt_t rate = engine->frame_rate();
+		framecnt_t rate = engine->sample_rate();
 
 		if (fmod (rate, 1000.0) != 0.0) {
 			snprintf (buf, sizeof (buf), _("JACK: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"),
-				  (float) rate/1000.0f,
-				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
+				  (float) rate / 1000.0f,
+				  (engine->usecs_per_cycle() / 1000.0f));
 		} else {
 			snprintf (buf, sizeof (buf), _("JACK: <span foreground=\"green\">%" PRId64 " kHz / %4.1f ms</span>"),
 				  rate/1000,
-				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
+				  (engine->usecs_per_cycle() * 1000.0f));
 		}
 	}
 
@@ -2044,7 +2044,7 @@ ARDOUR_UI::engine_running ()
 	Glib::RefPtr<Action> action;
 	const char* action_name = 0;
 
-	switch (engine->frames_per_cycle()) {
+	switch (engine->samples_per_cycle()) {
 	case 32:
 		action_name = X_("JACKLatency32");
 		break;
@@ -3817,7 +3817,7 @@ void
 ARDOUR_UI::disconnect_from_jack ()
 {
 	if (engine) {
-		if (engine->disconnect_from_jack ()) {
+		if (engine->pause ()) {
 			MessageDialog msg (*editor, _("Could not disconnect from JACK"));
 			msg.run ();
 		}
@@ -3830,7 +3830,7 @@ void
 ARDOUR_UI::reconnect_to_jack ()
 {
 	if (engine) {
-		if (engine->reconnect_to_jack ()) {
+		if (engine->start ()) {
 			MessageDialog msg (*editor,  _("Could not reconnect to JACK"));
 			msg.run ();
 		}

@@ -58,7 +58,7 @@ class PortManager
     int  connect (const std::string& source, const std::string& destination);
     int  disconnect (const std::string& source, const std::string& destination);
     int  disconnect (boost::shared_ptr<Port>);
-    bool connected (const std::string&);
+    bool has_connections (const std::string&);
     int  reestablish_ports ();
     int  reconnect_ports ();
 
@@ -71,7 +71,7 @@ class PortManager
     void port_renamed (const std::string&, const std::string&);
     ChanCount n_physical_outputs () const;
     ChanCount n_physical_inputs () const;
-    const char ** get_ports (const std::string& port_name_pattern, const std::string& type_name_pattern, uint32_t flags);
+    const char ** get_ports (const std::string& port_name_pattern, DataType type, uint32_t flags);
     
     void remove_all_ports ();
     

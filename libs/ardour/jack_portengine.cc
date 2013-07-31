@@ -98,3 +98,17 @@ JACKPortEngine::physically_connected (PortHandle p)
 
 	return false;
 }
+
+DataType
+JACKPortEngine::port_data_type (PortHandle p)
+{
+	const char* t = jack_port_type (p);
+
+	if (strcmp (p, JACK_DEFAULT_AUDIO_TYPE) == 0) {
+		return DataType::AUDIO;
+	} else if (strcmp (p, JACK_DEFAULT_MIDI_TYPE) == 0) {
+		return DataType::MIDI;
+	}
+
+	return DataType::NIL;
+}

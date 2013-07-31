@@ -105,6 +105,7 @@ public:
     bool           get_sync_offset (pframes_t& offset) const;
     int            create_process_thread (boost::function<void()> func, pthread_t*, size_t stacksize);
     bool           is_realtime() const;
+    bool           connected() const;
 
     /* END BACKEND PROXY API */
 

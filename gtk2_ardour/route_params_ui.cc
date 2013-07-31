@@ -276,7 +276,7 @@ RouteParams_UI::cleanup_latency_frame ()
 void
 RouteParams_UI::setup_latency_frame ()
 {
-	latency_widget = new LatencyGUI (*(_route->output()), _session->frame_rate(), _session->engine().frames_per_cycle());
+	latency_widget = new LatencyGUI (*(_route->output()), _session->frame_rate(), AudioEngine::instance()->samples_per_cycle());
 
 	char buf[128];
 	snprintf (buf, sizeof (buf), _("Playback delay: %" PRId64 " samples"), _route->initial_delay());

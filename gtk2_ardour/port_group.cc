@@ -500,11 +500,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
         lpnc += ':';
 
 	const char ** ports = 0;
-	if (type == DataType::NIL) {
-		ports = session->engine().get_ports ("", "", inputs ? JackPortIsInput : JackPortIsOutput);
-	} else {
-		ports = session->engine().get_ports ("", type.to_jack_type(), inputs ? JackPortIsInput : JackPortIsOutput);
-	}
+	ports = AudioEngine::instance()->get_ports ("", type, inputs ? IsInput : IsOutput);
 
  	if (ports) {
 
@@ -545,9 +541,9 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 				/* can't use the audio engine for this as we are looking at non-Ardour ports */
 
-				jack_port_t* jp = jack_port_by_name (session->engine().jack(), p.c_str());
-				if (jp) {
-					DataType t (jack_port_type (jp));
+				PortEngine::PortHandle ph = AudioEngine::instance()->port_engine().get_port_by_name (p);
+				if (ph) {
+					DataType t (AudioEngine::instance()->port_engine().port_data_type (ph));
 					if (t != DataType::NIL) {
 						if (port_has_prefix (p, N_("system:")) ||
                                                     port_has_prefix (p, N_("alsa_pcm")) ||
