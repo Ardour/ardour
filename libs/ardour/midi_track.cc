@@ -353,7 +353,7 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		return dret;
 	}
 
-	BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
+	BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
 
 	fill_buffers_with_input (bufs, _input, nframes);
 
