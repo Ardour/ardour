@@ -284,7 +284,7 @@ Playlist::copy_regions (RegionList& newlist) const
 	RegionReadLock rlock (const_cast<Playlist *> (this));
 
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		newlist.push_back (RegionFactory::RegionFactory::create (*i, true));
+		newlist.push_back (RegionFactory::create (*i, true));
 	}
 }
 
