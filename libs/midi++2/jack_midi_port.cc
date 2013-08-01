@@ -155,7 +155,7 @@ JackMIDIPort::cycle_start (pframes_t nframes)
 		pframes_t time;
 		size_t size;
 		uint8_t* buf;
-		timestamp_t cycle_start_frame = _port_engine.last_frame_time ();
+		timestamp_t cycle_start_frame = _port_engine.sample_time_at_cycle_start ();
 
 		for (pframes_t i = 0; i < event_count; ++i) {
 			_port_engine.midi_event_get (time, size, &buf, buffer, i);

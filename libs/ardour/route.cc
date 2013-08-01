@@ -967,7 +967,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 	DEBUG_TRACE (DEBUG::Processors, string_compose (
 		             "%1 adding processor %2\n", name(), processor->name()));
 
-	if (!AudioEngine::instance()->port_engine().connected() || !processor) {
+	if (!AudioEngine::instance()->connected() || !processor) {
 		return 1;
 	}
 
@@ -1132,7 +1132,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 		loc = _processors.end ();
 	}
 
-	if (!_session.engine().port_engine().connected()) {
+	if (!_session.engine().connected()) {
 		return 1;
 	}
 
@@ -1329,7 +1329,7 @@ Route::ab_plugins (bool forward)
 void
 Route::clear_processors (Placement p)
 {
-	if (!_session.engine().port_engine().connected()) {
+	if (!_session.engine().connected()) {
 		return;
 	}
 
@@ -1416,7 +1416,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 		return 0;
 	}
 
-	if (!_session.engine().port_engine().connected()) {
+	if (!_session.engine().connected()) {
 		return 1;
 	}
 
@@ -1508,7 +1508,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 {
 	ProcessorList deleted;
 
-	if (!_session.engine().port_engine().connected()) {
+	if (!_session.engine().connected()) {
 		return 1;
 	}
 

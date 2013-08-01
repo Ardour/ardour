@@ -48,6 +48,7 @@ namespace ARDOUR {
 
 class TempoMap;
 class Session;
+class AudioEngine;
 
 /**
  * @class Slave
@@ -492,7 +493,7 @@ class MIDIClock_Slave : public Slave {
 class JACK_Slave : public Slave
 {
   public:
-	JACK_Slave (jack_client_t*);
+	JACK_Slave (AudioEngine&);
 	~JACK_Slave ();
 
 	bool speed_and_position (double& speed, framepos_t& pos);
@@ -502,11 +503,10 @@ class JACK_Slave : public Slave
 	bool ok() const;
 	framecnt_t resolution () const { return 1; }
 	bool requires_seekahead () const { return false; }
-	void reset_client (jack_client_t* jack);
 	bool is_always_synced() const { return true; }
 
   private:
-	jack_client_t* jack;
+        AudioEngine& engine;
 	double speed;
 	bool _starting;
 };

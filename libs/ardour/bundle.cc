@@ -450,6 +450,8 @@ Bundle::connected_to (boost::shared_ptr<Bundle> other, AudioEngine & engine)
 bool
 Bundle::connected_to_anything (AudioEngine& engine)
 {
+	PortManager& pm (engine);
+
 	for (uint32_t i = 0; i < nchannels().n_total(); ++i) {
 		Bundle::PortList const & ports = channel_ports (i);
 
@@ -459,7 +461,7 @@ Bundle::connected_to_anything (AudioEngine& engine)
 			   rather than doing it with Port.
 			*/
 
-			if (engine.has_connections (ports[j])) {
+			if (pm.connected (ports[j])) {
 				return true;
 			}
 		}

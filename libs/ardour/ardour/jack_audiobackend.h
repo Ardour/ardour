@@ -99,6 +99,8 @@ class JACKAudioBackend : public AudioBackend {
     int set_time_master (bool /*yn*/);
     bool get_sync_offset (pframes_t& /*offset*/) const;
 
+    void update_latencies ();
+
   private:
     boost::shared_ptr<JackConnection>  _jack_connection; //< shared with JACKPortEngine
     bool            _running;

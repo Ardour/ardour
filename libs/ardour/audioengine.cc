@@ -104,39 +104,6 @@ AudioEngine::create (const std::string& bcn, const std::string& bsu)
 }
 
 void
-AudioEngine::drop_backend ()
-{
-	if (_backend) {
-		_backend->stop ();
-		_backend.reset ();
-	}
-}
-
-int
-AudioEngine::set_backend (const std::string& name)
-{
-	BackendMap::iterator b = _backends.find (name);
-
-	if (b == _backends.end()) {
-		return -1;
-	}
-
-	drop_backend ();
-
-	try {
-
-		_backend = b->second->backend_factory (*this);
-		_impl = b->second->portengine_factory (*this);
-
-	} catch (...) {
-		error << string_compose (_("Could not create backend for %1"), name) << endmsg;
-		return -1;
-	}
-
-	return 0;
-}
-
-void
 _thread_init_callback (void * /*arg*/)
 {
 	/* make sure that anybody who needs to know about this thread
@@ -570,6 +537,60 @@ AudioEngine::backend_discover (const string& path)
 	return info;
 }
 
+vector<string>
+AudioEngine::available_backends() const
+{
+	vector<string> r;
+	
+	for (BackendMap::const_iterator i = _backends.begin(); i != _backends.end(); ++i) {
+		r.push_back (i->first);
+	}
+
+	return r;
+}
+
+string
+AudioEngine::current_backend_name() const
+{
+	if (_backend) {
+		return _backend->name();
+	} 
+	return string();
+}
+
+void
+AudioEngine::drop_backend ()
+{
+	if (_backend) {
+		_backend->stop ();
+		_backend.reset ();
+	}
+}
+
+int
+AudioEngine::set_backend (const std::string& name)
+{
+	BackendMap::iterator b = _backends.find (name);
+
+	if (b == _backends.end()) {
+		return -1;
+	}
+
+	drop_backend ();
+
+	try {
+
+		_backend = b->second->backend_factory (*this);
+		_impl = b->second->portengine_factory (*this);
+
+	} catch (...) {
+		error << string_compose (_("Could not create backend for %1"), name) << endmsg;
+		return -1;
+	}
+
+	return 0;
+}
+
 /* BACKEND PROXY WRAPPERS */
 
 int
@@ -812,6 +833,89 @@ AudioEngine::create_process_thread (boost::function<void()> func, pthread_t* thr
 }
 
 
+int
+AudioEngine::set_device_name (const std::string& name)
+{
+	if (!_backend) {
+		return -1;
+	}
+	return _backend->set_device_name  (name);
+}
+
+int
+AudioEngine::set_sample_rate (float sr)
+{
+	if (!_backend) {
+		return -1;
+	}
+	return _backend->set_sample_rate  (sr);
+}
+
+int
+AudioEngine::set_buffer_size (uint32_t bufsiz)
+{
+	if (!_backend) {
+		return -1;
+	}
+	return _backend->set_buffer_size  (bufsiz);
+}
+
+int
+AudioEngine::set_sample_format (SampleFormat sf)
+{
+	if (!_backend) {
+		return -1;
+	}
+	return _backend->set_sample_format  (sf);
+}
+
+int
+AudioEngine::set_interleaved (bool yn)
+{
+	if (!_backend) {
+		return -1;
+	}
+	return _backend->set_interleaved  (yn);
+}
+
+int
+AudioEngine::set_input_channels (uint32_t ic)
+{
+	if (!_backend) {
+		return -1;
+	}
+	return _backend->set_input_channels  (ic);
+}
+
+int
+AudioEngine::set_output_channels (uint32_t oc)
+{
+	if (!_backend) {
+		return -1;
+	}
+	return _backend->set_output_channels (oc);
+}
+
+int
+AudioEngine::set_systemic_input_latency (uint32_t il)
+{
+	if (!_backend) {
+		return -1;
+	}
+	return _backend->set_systemic_input_latency  (il);
+}
+
+int
+AudioEngine::set_systemic_output_latency (uint32_t ol)
+{
+	if (!_backend) {
+		return -1;
+	}
+	return _backend->set_systemic_output_latency  (ol);
+}
+
+/* END OF BACKEND PROXY API */
+
 void
 AudioEngine::thread_init_callback (void* arg)
 {
@@ -871,6 +975,14 @@ AudioEngine::latency_callback (bool for_playback)
         if (_session) {
                 _session->update_latency (for_playback);
         }
+}
+
+void
+AudioEngine::update_latencies ()
+{
+	if (_backend) {
+		_backend->update_latencies ();
+	}
 }
 
 void

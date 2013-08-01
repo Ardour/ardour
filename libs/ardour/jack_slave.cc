@@ -20,16 +20,14 @@
 #include <iostream>
 #include <cerrno>
 
-#include <jack/jack.h>
-#include <jack/transport.h>
-
+#include "ardour/audioengine.h"
 #include "ardour/slave.h"
 
 using namespace std;
 using namespace ARDOUR;
 
-JACK_Slave::JACK_Slave (jack_client_t* j)
-	: jack (j)
+JACK_Slave::JACK_Slave (AudioEngine& e)
+	: engine (e)
 {
 	double x;
 	framepos_t p;
@@ -39,12 +37,6 @@ JACK_Slave::JACK_Slave (jack_client_t* j)
 
 JACK_Slave::~JACK_Slave ()
 {
-}
-
-void
-JACK_Slave::reset_client (jack_client_t* j)
-{
-	jack = j;
 }
 
 bool
@@ -62,33 +54,26 @@ JACK_Slave::ok() const
 bool
 JACK_Slave::speed_and_position (double& sp, framepos_t& position)
 {
-	jack_position_t pos;
-	jack_transport_state_t state;
-
-	state = jack_transport_query (jack, &pos);
-
-	switch (state) {
-	case JackTransportStopped:
+	switch (engine.transport_state()) {
+	case TransportStopped:
 		speed = 0;
 		_starting = false;
 		break;
-	case JackTransportRolling:
+	case TransportRolling:
 		speed = 1.0;
 		_starting = false;
 		break;
-	case JackTransportLooping:
+	case TransportLooping:
 		speed = 1.0;
 		_starting = false;
 		break;
-	case JackTransportStarting:
+	case TransportStarting:
 		_starting = true;
 		// don't adjust speed here, just leave it as it was
 		break;
-	default:
-		cerr << "WARNING: Unknown JACK transport state: " << state << endl;
 	}
 
 	sp = speed;
-	position = pos.frame;
+	position = engine.transport_frame();
 	return true;
 }

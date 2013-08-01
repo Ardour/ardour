@@ -765,7 +765,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		return 1;
 	}
 
-	if (!_engine.port_engine().connected ()) {
+	if (!_engine.connected ()) {
 		error << string_compose (_("the %1 audio engine is not connected and state saving would lose all I/O connections. Session not saved"),
                                          PROGRAM_NAME)
 		      << endmsg;

@@ -127,6 +127,30 @@ PortManager::port_is_physical (const std::string& portname) const
 	return _impl->port_is_physical (ph);
 }
 
+void
+PortManager::get_physical_outputs (DataType type, std::vector<std::string>& s)
+{
+	_impl->get_physical_outputs (type, s);
+}
+ 
+void
+PortManager::get_physical_inputs (DataType type, std::vector<std::string>& s)
+{
+	_impl->get_physical_inputs (type, s);
+}
+ 
+ChanCount
+PortManager::n_physical_outputs () const
+{
+	return _impl->n_physical_outputs ();
+}
+ 
+ChanCount
+PortManager::n_physical_inputs () const
+{
+	return _impl->n_physical_inputs ();
+}
+
 /** @param name Full or short name of port
  *  @return Corresponding Port or 0.
  */
@@ -134,11 +158,6 @@ PortManager::port_is_physical (const std::string& portname) const
 boost::shared_ptr<Port>
 PortManager::get_port_by_name (const string& portname)
 {
-	if (!_impl->connected()) {
-		fatal << _("get_port_by_name() called before engine was started") << endmsg;
-		/*NOTREACHED*/
-	}
-
         if (!port_is_mine (portname)) {
                 /* not an ardour port */
                 return boost::shared_ptr<Port> ();
@@ -254,13 +273,6 @@ PortManager::unregister_port (boost::shared_ptr<Port> port)
 {
 	/* caller must hold process lock */
 
-	if (!_impl->connected()) {
-		/* probably happening when the engine has been halted by JACK,
-		   in which case, there is nothing we can do here.
-		   */
-		return 0;
-	}
-
 	{
 		RCUWriter<Ports> writer (ports);
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
@@ -295,10 +307,6 @@ PortManager::connect (const string& source, const string& destination)
 {
 	int ret;
 
-	if (!_impl->connected()) {
-		return -1;
-	}
-
 	string s = make_port_name_non_relative (source);
 	string d = make_port_name_non_relative (destination);
 
@@ -329,10 +337,6 @@ int
 PortManager::disconnect (const string& source, const string& destination)
 {
 	int ret;
-
-	if (!_impl->connected()) {
-		return -1;
-	}
 
 	string s = make_port_name_non_relative (source);
 	string d = make_port_name_non_relative (destination);
@@ -429,3 +433,30 @@ PortManager::registration_callback ()
 		PortRegisteredOrUnregistered (); /* EMIT SIGNAL */
 	}
 }
+
+bool
+PortManager::can_request_input_monitoring () const
+{
+	return _impl->can_monitor_input ();
+}
+ 
+void
+PortManager::request_input_monitoring (const string& name, bool yn) const
+{
+	PortEngine::PortHandle ph = _impl->get_port_by_name (name);
+
+	if (ph) {
+		_impl->request_input_monitoring (ph, yn);
+	}
+}
+ 
+void
+PortManager::ensure_input_monitoring (const string& name, bool yn) const
+{
+	PortEngine::PortHandle ph = _impl->get_port_by_name (name);
+
+	if (ph) {
+		_impl->ensure_input_monitoring (ph, yn);
+	}
+}
+

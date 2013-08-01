@@ -108,6 +108,16 @@ public:
     bool           is_realtime() const;
     bool           connected() const;
 
+    int set_device_name (const std::string&);
+    int set_sample_rate (float);
+    int set_buffer_size (uint32_t);
+    int set_sample_format (SampleFormat);
+    int set_interleaved (bool yn);
+    int set_input_channels (uint32_t);
+    int set_output_channels (uint32_t);
+    int set_systemic_input_latency (uint32_t);
+    int set_systemic_output_latency (uint32_t);
+
     /* END BACKEND PROXY API */
 
     bool freewheeling() const { return _freewheeling; }
@@ -115,7 +125,9 @@ public:
 
     Glib::Threads::Mutex& process_lock() { return _process_lock; }
 
-    int request_buffer_size (pframes_t);
+    int request_buffer_size (pframes_t samples) {
+	    return set_buffer_size (samples);
+    }
 
     framecnt_t processed_frames() const { return _processed_frames; }
     
@@ -164,10 +176,6 @@ public:
     
     PBD::Signal0<void> Running;
     PBD::Signal0<void> Stopped;
-    
-    std::string make_port_name_relative (std::string) const;
-    std::string make_port_name_non_relative (std::string) const;
-    bool port_is_mine (const std::string&) const;
     
     static AudioEngine* instance() { return _instance; }
     static void destroy();

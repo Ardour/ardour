@@ -170,7 +170,7 @@ Session::Session (AudioEngine &eng,
 
 	interpolation.add_channel_to (0, 0);
 
-	if (!eng.port_engine().connected()) {
+	if (!eng.connected()) {
 		throw failed_constructor();
 	}
 
@@ -4677,7 +4677,7 @@ Session::set_worst_playback_latency ()
 
 	_worst_output_latency = 0;
 
-	if (!_engine.port_engine().connected()) {
+	if (!_engine.connected()) {
 		return;
 	}
 
@@ -4699,7 +4699,7 @@ Session::set_worst_capture_latency ()
 
 	_worst_input_latency = 0;
 
-	if (!_engine.port_engine().connected()) {
+	if (!_engine.connected()) {
 		return;
 	}
 

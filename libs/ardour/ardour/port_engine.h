@@ -77,7 +77,7 @@ class PortManager;
 class PortEngine {
   public:
     PortEngine (PortManager& pm) : manager (pm) {}
-    virtual ~PortEngine();
+    virtual ~PortEngine() {}
     
     /* We use void* here so that the API can be defined for any implementation.
      * 
@@ -89,7 +89,6 @@ class PortEngine {
        
     typedef void* PortHandle;
 
-    virtual bool  connected() const = 0;
     virtual void* private_handle() const = 0;
 
     virtual const std::string& my_name() const = 0;
@@ -125,10 +124,10 @@ class PortEngine {
 
     /* MIDI */
 
-    virtual void     midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index) = 0;
+    virtual int      midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index) = 0;
     virtual int      midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size) = 0;
-    virtual uint32_t get_midi_event_count (void* port_buffer);
-    virtual void     midi_clear (void* port_buffer);
+    virtual uint32_t get_midi_event_count (void* port_buffer) = 0;
+    virtual void     midi_clear (void* port_buffer) = 0;
 
     /* Monitoring */
 
@@ -142,7 +141,6 @@ class PortEngine {
     
     virtual void          set_latency_range (PortHandle, bool for_playback, LatencyRange) = 0;
     virtual LatencyRange  get_latency_range (PortHandle, bool for_playback) = 0;
-    virtual LatencyRange  get_connected_latency_range (PortHandle, int dir) = 0;
 
     /* Discovering physical ports */
 
@@ -158,7 +156,16 @@ class PortEngine {
 
     virtual void* get_buffer (PortHandle, pframes_t) = 0;
 
-    virtual framecnt_t last_frame_time() const = 0;
+    /* MIDI ports (the ones in libmidi++) need this to be able to correctly
+     * schedule MIDI events within their buffers. It is a bit odd that we
+     * expose this here, because it is also exposed by AudioBackend, but they
+     * only have access to a PortEngine object, not an AudioBackend.
+     * 
+     * Return the time according to the sample clock in use when the current 
+     * buffer process cycle began. 
+     * 
+     */
+    virtual pframes_t sample_time_at_cycle_start () = 0;
 
   protected:
     PortManager& manager;

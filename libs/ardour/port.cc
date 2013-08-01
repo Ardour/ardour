@@ -70,10 +70,6 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 
 	assert (_name.find_first_of (':') == std::string::npos);
 
-	if (!port_engine.connected()) {
-		throw failed_constructor ();
-	}
-
 	if ((_port_handle = port_engine.register_port (_name, t, _flags)) == 0) {
 		cerr << "Failed to register port \"" << _name << "\", reason is unknown from here\n";
 		throw failed_constructor ();
@@ -124,14 +120,6 @@ Port::disconnect_all ()
 bool
 Port::connected_to (std::string const & o) const
 {
-	if (!port_engine.connected()) {
-		/* in some senses, this answer isn't the right one all the time,
-		   because we know about our connections and will re-establish
-		   them when we reconnect to the port engine.
-		*/
-		return false;
-	}
-
 	return port_engine.connected_to (_port_handle, AudioEngine::instance()->make_port_name_non_relative (o));
 }
 

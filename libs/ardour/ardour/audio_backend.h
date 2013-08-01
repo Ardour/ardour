@@ -296,18 +296,17 @@ class AudioBackend {
      * It is extremely likely that any implementation will use a DLL, since
      * this function can be called from any thread, at any time, and must be 
      * able to accurately determine the correct sample time.
+     *
+     * Can be called from any thread.
      */
     virtual pframes_t sample_time () = 0;
 
-    /** return the time according to the sample clock in use when the current 
-     * buffer process cycle began. 
-     * 
-     * Can ONLY be called from within a process() callback tree (which
-     * implies that it can only be called by a process thread)
+    /** Return the time according to the sample clock in use when the most
+     * recent buffer process cycle began. Can be called from any thread.
      */
     virtual pframes_t sample_time_at_cycle_start () = 0;
 
-    /** return the time since the current buffer process cycle started,
+    /** Return the time since the current buffer process cycle started,
      * in samples, according to the sample clock in use.
      * 
      * Can ONLY be called from within a process() callback tree (which
@@ -315,7 +314,7 @@ class AudioBackend {
      */
     virtual pframes_t samples_since_cycle_start () = 0;
 
-    /** return true if it possible to determine the offset in samples of the
+    /** Return true if it possible to determine the offset in samples of the
      * first video frame that starts within the current buffer process cycle,
      * measured from the first sample of the cycle. If returning true,
      * set @param offset to that offset.
@@ -339,6 +338,8 @@ class AudioBackend {
      * when that function returns.
      */
     virtual int create_process_thread (boost::function<void()> func, pthread_t*, size_t stacksize) = 0;
+
+    virtual void update_latencies () = 0;
     
   protected:
     AudioEngine&          engine;

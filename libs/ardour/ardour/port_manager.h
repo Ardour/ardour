@@ -59,7 +59,6 @@ class PortManager
     int  connect (const std::string& source, const std::string& destination);
     int  disconnect (const std::string& source, const std::string& destination);
     int  disconnect (boost::shared_ptr<Port>);
-    bool has_connections (const std::string&);
     int  reestablish_ports ();
     int  reconnect_ports ();
 

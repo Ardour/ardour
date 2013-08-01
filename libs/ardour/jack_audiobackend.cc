@@ -818,3 +818,10 @@ JACKAudioBackend::cpu_load() const
 	GET_PRIVATE_JACK_POINTER_RET(_priv_jack,0);
 	return jack_cpu_load (_priv_jack);
 }
+
+void
+JACKAudioBackend::update_latencies ()
+{
+	GET_PRIVATE_JACK_POINTER (_priv_jack);
+	jack_recompute_total_latencies (_priv_jack);
+}
