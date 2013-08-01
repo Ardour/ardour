@@ -19,6 +19,7 @@
 */
 
 #include <boost/noncopyable.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include "pbd/signals.h"
 
@@ -75,7 +76,7 @@ private:
 	double       _last_tick;
 
 	class Position;
-	Position* _pos;
+	boost::scoped_ptr<Position> _pos;
 
 	double one_ppqn_in_frames (framepos_t transport_position);
 
