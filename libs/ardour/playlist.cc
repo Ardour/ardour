@@ -250,7 +250,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, f
 		plist.add (Properties::layer, region->layer());
 		plist.add (Properties::layering_index, region->layering_index());
 
-		new_region = RegionFactory::RegionFactory::create (region, plist);
+		new_region = RegionFactory::create (region, plist);
 
 		add_region_internal (new_region, position);
 	}
