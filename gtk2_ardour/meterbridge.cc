@@ -632,6 +632,8 @@ Meterbridge::remove_strip (MeterStrip* strip)
 			break;
 		}
 	}
+
+	resync_order();
 }
 
 void

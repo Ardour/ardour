@@ -280,8 +280,10 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 
 MeterStrip::~MeterStrip ()
 {
-	delete level_meter;
-	CatchDeletion (this);
+	if (level_meter) {
+		delete level_meter;
+		CatchDeletion (this);
+	}
 }
 
 void
