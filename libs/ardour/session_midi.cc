@@ -44,6 +44,7 @@
 #include "ardour/midi_ui.h"
 #include "ardour/session.h"
 #include "ardour/slave.h"
+#include "ardour/ticker.h"
 
 #include "i18n.h"
 
@@ -578,6 +579,19 @@ Session::mmc_step_timeout ()
 
 	request_transport_speed_nonzero (_transport_speed * 0.75);
 	return true;
+}
+
+/***********************************************************************
+ OUTBOUND SYSTEM COMMON STUFF
+**********************************************************************/
+
+
+void
+Session::send_song_position_pointer (framepos_t t)
+{
+	if (midi_clock) {
+		midi_clock->position_changed (t);
+	}
 }
 
 int

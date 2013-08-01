@@ -78,7 +78,6 @@ class Meterbridge :
 
 	void add_strips (ARDOUR::RouteList&);
 	void remove_strip (MeterStrip *);
-	void update_metrics ();
 
 	void session_going_away ();
 	void sync_order_keys (ARDOUR::RouteSortOrderKey src);
@@ -116,6 +115,7 @@ class Meterbridge :
 
 	MeterStrip metrics_left;
 	MeterStrip metrics_right;
+	std::vector<MeterStrip *> _metrics;
 
 	Gtk::VBox metrics_vpacker_left;
 	Gtk::VBox metrics_vpacker_right;
@@ -147,6 +147,12 @@ class Meterbridge :
 
 	void parameter_changed (std::string const & p);
 	void on_theme_changed ();
+
+	void on_scroll ();
+	sigc::connection scroll_connection;
+
+	int _mm_left, _mm_right;
+	ARDOUR::MeterType _mt_left, _mt_right;
 };
 
 #endif

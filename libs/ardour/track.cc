@@ -398,6 +398,9 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		case MonitoringInput:
 			be_silent = false;
 			break;
+		default:
+			be_silent = false;
+			break;
 		}
 	}
 
@@ -436,7 +439,8 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 			}
 
 			if (no_meter) {
-				_meter->reset();
+				BufferSet& bufs (_session.get_silent_buffers (n_process_buffers()));
+				_meter->run (bufs, 0, 0, nframes, true);
 				_input->process_input (boost::shared_ptr<Processor>(), start_frame, end_frame, nframes);
 			} else {
 				_input->process_input (_meter, start_frame, end_frame, nframes);
@@ -447,7 +451,7 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 
 	} else {
 
-		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
+		BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
 		
 		fill_buffers_with_input (bufs, _input, nframes);
 
@@ -492,7 +496,7 @@ Track::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*
 
 	framecnt_t playback_distance;
 
-	BufferSet& bufs (_session.get_silent_buffers (n_process_buffers()));
+	BufferSet& bufs (_session.get_route_buffers (n_process_buffers(), true));
 
 	int const dret = _diskstream->process (bufs, _session.transport_frame(), nframes, playback_distance, false);
 	need_butler = _diskstream->commit (playback_distance);

@@ -111,7 +111,7 @@ Editor::embed_audio_from_video (std::string path, framepos_t n)
 	ipw.show ();
 
 	boost::shared_ptr<ARDOUR::Track> track;
-	bool ok = (import_sndfiles (paths, Editing::ImportAsTrack, ARDOUR::SrcBest, n, 1, 1, track, false) == 0);
+	bool ok = (import_sndfiles (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, ARDOUR::SrcBest, n, 1, 1, track, false) == 0);
 	if (ok && track) {
 		boost::shared_ptr<ARDOUR::Playlist> pl = track->playlist();
 		pl->find_next_region(n, ARDOUR::End, 0)->set_video_locked(true);

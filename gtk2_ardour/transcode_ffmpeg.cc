@@ -71,18 +71,19 @@ TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 	}
 
 	if (ffmpeg_exe.empty() || ffprobe_exe.empty()) {
-		warning << _(
+		warning << string_compose(
+				_(
 				"No ffprobe or ffmpeg executables could be found on this system.\n"
 				"Video import and export is not possible until you install those tools.\n"
-				"Ardour requires ffmpeg and ffprobe from ffmpeg.org - version 1.1 or newer.\n"
+				"%1 requires ffmpeg and ffprobe from ffmpeg.org - version 1.1 or newer.\n"
 				"\n"
-				"The tools are included with the Ardour releases from ardour.org "
+				"The tools are included with the %1 releases from ardour.org "
 				"and also available with the video-server at http://x42.github.com/harvid/\n"
 				"\n"
 				"Important: the files need to be installed in $PATH and named ffmpeg_harvid and ffprobe_harvid.\n"
 				"If you already have a suitable ffmpeg installation on your system, we recommend creating "
 				"symbolic links from ffmpeg to ffmpeg_harvid and from ffprobe to ffprobe_harvid.\n"
-				) << endmsg;
+				), PROGRAM_NAME) << endmsg;
 		return;
 	}
 	ffexecok = true;
@@ -395,7 +396,7 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 }
 
 bool
-TranscodeFfmpeg::extract_audio (std::string outfile, ARDOUR::framecnt_t samplerate, unsigned int stream)
+TranscodeFfmpeg::extract_audio (std::string outfile, ARDOUR::framecnt_t /*samplerate*/, unsigned int stream)
 {
 	if (!probeok) return false;
   if (stream >= m_audio.size()) return false;

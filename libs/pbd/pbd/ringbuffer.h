@@ -233,6 +233,7 @@ RingBuffer<T>::get_read_vector (typename RingBuffer<T>::rw_vector *vec)
 		
 		vec->buf[0] = &buf[r];
 		vec->len[0] = free_cnt;
+		vec->buf[1] = 0;
 		vec->len[1] = 0;
 	}
 }

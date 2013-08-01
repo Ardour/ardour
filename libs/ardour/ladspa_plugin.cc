@@ -574,7 +574,7 @@ LadspaPlugin::connect_and_run (BufferSet& bufs,
 	cycles_t then = get_cycles ();
 
 	BufferSet& silent_bufs  = _session.get_silent_buffers(ChanCount(DataType::AUDIO, 1));
-	BufferSet& scratch_bufs = _session.get_silent_buffers(ChanCount(DataType::AUDIO, 1));
+	BufferSet& scratch_bufs = _session.get_scratch_buffers(ChanCount(DataType::AUDIO, 1));
 
 	uint32_t audio_in_index  = 0;
 	uint32_t audio_out_index = 0;

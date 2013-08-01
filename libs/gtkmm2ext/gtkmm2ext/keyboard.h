@@ -164,7 +164,7 @@ class Keyboard : public sigc::trackable, PBD::Stateful
 	    }
 	};
 
-	sigc::signal0<void> ShiftReleased;
+	sigc::signal0<void> ZoomVerticalModifierReleased;
 
   protected:
 	static Keyboard* _the_keyboard;

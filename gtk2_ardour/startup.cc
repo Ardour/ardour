@@ -805,7 +805,15 @@ ArdourStartup::setup_new_session_page ()
 			string::size_type last_dir_sep = session_parent_dir.rfind(G_DIR_SEPARATOR);
 			session_parent_dir = session_parent_dir.substr(0, last_dir_sep);
 			new_folder_chooser.set_current_folder (session_parent_dir);
-			new_folder_chooser.add_shortcut_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
+			string default_session_folder = poor_mans_glob (Config->get_default_session_parent_dir());
+
+			try {
+				/* add_shortcut_folder throws an exception if the folder being added already has a shortcut */
+				new_folder_chooser.add_shortcut_folder (default_session_folder);
+			}
+			catch (Glib::Error & e) {
+				std::cerr << "new_folder_chooser.add_shortcut_folder (" << default_session_folder << ") threw Glib::Error " << e.what() << std::endl;
+			}
 		} else {
 			new_folder_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 		}

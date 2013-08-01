@@ -56,18 +56,24 @@ using namespace ArdourMeter;
 
 PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
 PBD::Signal0<void> MeterStrip::MetricChanged;
+PBD::Signal0<void> MeterStrip::ConfigurationChanged;
 
-MeterStrip::MeterStrip (int metricmode)
+MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	: AxisView(0)
 	, RouteUI(0)
 {
 	level_meter = 0;
 	_strip_type = 0;
-	set_spacing(2);
+	_tick_bar = 0;
+	_metricmode = -1;
+	metric_type = MeterPeak;
+	mtr_vbox.set_spacing(2);
+	nfo_vbox.set_spacing(2);
 	peakbx.set_size_request(-1, 14);
 	namebx.set_size_request(18, 52);
+	spacer.set_size_request(-1,0);
 
-	set_metric_mode(metricmode);
+	set_metric_mode(metricmode, mt);
 
 	meter_metric_area.set_size_request(25, 10);
 	meter_metric_area.signal_expose_event().connect (
@@ -76,15 +82,30 @@ MeterStrip::MeterStrip (int metricmode)
 
 	meterbox.pack_start(meter_metric_area, true, false);
 
-	pack_start (peakbx, false, false);
-	pack_start (meterbox, true, true);
-	pack_start (btnbox, false, false);
-	pack_start (namebx, false, false);
+	mtr_vbox.pack_start (peakbx, false, false);
+	mtr_vbox.pack_start (meterbox, true, true);
+	mtr_vbox.pack_start (spacer, false, false);
+	mtr_container.add(mtr_vbox);
+
+	mtr_hsep.set_size_request(-1,1);
+	mtr_hsep.set_name("BlackSeparator");
+
+	nfo_vbox.pack_start (mtr_hsep, false, false);
+	nfo_vbox.pack_start (btnbox, false, false);
+	nfo_vbox.pack_start (namebx, false, false);
+
+	pack_start (mtr_container, true, true);
+	pack_start (nfo_vbox, false, false);
 
 	peakbx.show();
 	btnbox.show();
 	meter_metric_area.show();
 	meterbox.show();
+	spacer.show();
+	mtr_vbox.show();
+	mtr_container.show();
+	mtr_hsep.show();
+	nfo_vbox.show();
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
@@ -97,11 +118,15 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	, _route(rt)
 	, peak_display()
 {
-	set_spacing(2);
+	mtr_vbox.set_spacing(2);
+	nfo_vbox.set_spacing(2);
 	RouteUI::set_route (rt);
 	SessionHandlePtr::set_session (sess);
 
 	_has_midi = false;
+	_tick_bar = 0;
+	_metricmode = -1;
+	metric_type = MeterPeak;
 
 	int meter_width = 6;
 	if (_route->shared_peak_meter()->input_streams().n_total() == 1) {
@@ -109,12 +134,12 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	}
 
 	// level meter + ticks
-	level_meter = new LevelMeter(sess);
+	level_meter = new LevelMeterHBox(sess);
 	level_meter->set_meter (_route->shared_peak_meter().get());
 	level_meter->clear_meters();
-	level_meter->setup_meters (220, meter_width, 6);
 	level_meter->set_type (_route->meter_type());
-	level_meter->ButtonPress.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::level_meter_button_press, this, _1));
+	level_meter->setup_meters (220, meter_width, 6);
+	level_meter->ButtonRelease.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::level_meter_button_release, this, _1));
 	level_meter->MeterTypeChanged.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::meter_type_changed, this, _1));
 
 	meter_align.set(0.5, 0.5, 0.0, 1.0);
@@ -147,6 +172,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	name_label.set_size_request(18, 50);
 	name_label.set_alignment(-1.0, .5);
 	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
+	ARDOUR_UI::instance()->set_tip (*level_meter, _route->name());
 
 	namebx.set_size_request(18, 52);
 	namebx.pack_start(name_label, true, false, 3);
@@ -170,24 +196,42 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	mutebox.set_size_request(16, 16);
 	solobox.set_size_request(16, 16);
 	recbox.set_size_request(16, 16);
+	spacer.set_size_request(-1,0);
 
 	update_button_box();
 	update_name_box();
+	update_background (_route->meter_type());
 
-	pack_start (peakbx, false, false);
-	pack_start (meterbox, true, true);
-	pack_start (btnbox, false, false);
-	pack_start (namebx, false, false);
+	mtr_vbox.pack_start (peakbx, false, false);
+	mtr_vbox.pack_start (meterbox, true, true);
+	mtr_vbox.pack_start (spacer, false, false);
+	mtr_container.add(mtr_vbox);
+
+	mtr_hsep.set_size_request(-1,1);
+	mtr_hsep.set_name("BlackSeparator");
+
+	nfo_vbox.pack_start (mtr_hsep, false, false);
+	nfo_vbox.pack_start (btnbox, false, false);
+	nfo_vbox.pack_start (namebx, false, false);
+
+	pack_start (mtr_container, true, true);
+	pack_start (nfo_vbox, false, false);
+
 	name_label.show();
 	peak_display.show();
 	peakbx.show();
 	meter_ticks1_area.show();
 	meter_ticks2_area.show();
 	meterbox.show();
+	spacer.show();
 	level_meter->show();
 	meter_align.show();
 	peak_align.show();
 	btnbox.show();
+	mtr_vbox.show();
+	mtr_container.show();
+	mtr_hsep.show();
+	nfo_vbox.show();
 
 	_route->shared_peak_meter()->ConfigurationChanged.connect (
 			route_connections, invalidator (*this), boost::bind (&MeterStrip::meter_configuration_changed, this, _1), gui_context()
@@ -210,6 +254,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&MeterStrip::strip_property_changed, this, _1), gui_context());
 
 	peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &MeterStrip::peak_button_release), false);
+	name_label.signal_button_release_event().connect (sigc::mem_fun(*this, &MeterStrip::name_label_button_release), false);
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
@@ -303,6 +348,9 @@ MeterStrip::strip_property_changed (const PropertyChange& what_changed)
 	ENSURE_GUI_THREAD (*this, &MeterStrip::strip_name_changed, what_changed)
 	name_label.set_text(_route->name());
 	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
+	if (level_meter) {
+		ARDOUR_UI::instance()->set_tip (*level_meter, _route->name());
+	}
 }
 
 void
@@ -347,13 +395,13 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 	if (boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
 			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0
 			) {
-		meter_ticks1_area.set_name ("AudioBusMetricsLeft");
-		meter_ticks2_area.set_name ("AudioBusMetricsRight");
+		meter_ticks1_area.set_name ("MyAudioBusMetricsLeft");
+		meter_ticks2_area.set_name ("MyAudioBusMetricsRight");
 		_has_midi = false;
 	}
 	else if (type == (1 << DataType::AUDIO)) {
-		meter_ticks1_area.set_name ("AudioTrackMetricsLeft");
-		meter_ticks2_area.set_name ("AudioTrackMetricsRight");
+		meter_ticks1_area.set_name ("MyAudioTrackMetricsLeft");
+		meter_ticks2_area.set_name ("MyAudioTrackMetricsRight");
 		_has_midi = false;
 	}
 	else if (type == (1 << DataType::MIDI)) {
@@ -365,9 +413,40 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 		meter_ticks2_area.set_name ("AudioMidiTrackMetricsRight");
 		_has_midi = true;
 	}
+	set_tick_bar(_tick_bar);
 
-	if (old_has_midi != _has_midi) MetricChanged();
 	on_theme_changed();
+	if (old_has_midi != _has_midi) MetricChanged();
+	else ConfigurationChanged();
+}
+
+void
+MeterStrip::set_tick_bar (int m)
+{
+	std::string n;
+	_tick_bar = m;
+	if (_tick_bar & 1) {
+		n = meter_ticks1_area.get_name();
+		if (n.substr(0,3) != "Bar") {
+			meter_ticks1_area.set_name("Bar" + n);
+		}
+	} else {
+		n = meter_ticks1_area.get_name();
+		if (n.substr(0,3) == "Bar") {
+			meter_ticks1_area.set_name(n.substr(3,-1));
+		}
+	}
+	if (_tick_bar & 2) {
+		n = meter_ticks2_area.get_name();
+		if (n.substr(0,3) != "Bar") {
+			meter_ticks2_area.set_name("Bar" + n);
+		}
+	} else {
+		n = meter_ticks2_area.get_name();
+		if (n.substr(0,3) == "Bar") {
+			meter_ticks2_area.set_name(n.substr(3,-1));
+		}
+	}
 }
 
 void
@@ -380,9 +459,31 @@ void
 MeterStrip::on_size_allocate (Gtk::Allocation& a)
 {
 	const int wh = a.get_height();
-	int nh = ceilf(wh * .11f);
-	if (nh < 52) nh = 52;
-	if (nh > 148) nh = 148;
+	int nh;
+	int mh = 0;
+	if (_session) {
+		mh = _session->config.get_meterbridge_label_height();
+	}
+	switch (mh) {
+		default:
+		case 0:
+			nh = ceilf(wh * .12f);
+			if (nh < 52) nh = 52;
+			if (nh > 148) nh = 148;
+			break;
+		case 1:
+			nh = 52;
+			break;
+		case 2:
+			nh = 88;
+			break;
+		case 3:
+			nh = 106;
+			break;
+		case 4:
+			nh = 148;
+			break;
+	}
 	namebx.set_size_request(18, nh);
 	if (_route) {
 		name_label.set_size_request(18, nh-2);
@@ -394,12 +495,22 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 gint
 MeterStrip::meter_metrics_expose (GdkEventExpose *ev)
 {
-	return meter_expose_metrics(ev, _types, &meter_metric_area);
+	if (_route) {
+		return meter_expose_metrics(ev, _route->meter_type(), _types, &meter_metric_area);
+	} else {
+		return meter_expose_metrics(ev, metric_type, _types, &meter_metric_area);
+	}
 }
 
 void
-MeterStrip::set_metric_mode (int metricmode)
+MeterStrip::set_metric_mode (int metricmode, ARDOUR::MeterType mt)
 {
+	if (metric_type == mt && _metricmode == metricmode) {
+		return;
+	}
+	metric_type = mt;
+	_metricmode = metricmode;
+
 	_types.clear ();
 	switch(metricmode) {
 		case 0:
@@ -420,25 +531,50 @@ MeterStrip::set_metric_mode (int metricmode)
 			_types.push_back (DataType::AUDIO);
 			break;
 	}
-
+	update_background (mt);
 	meter_metric_area.queue_draw ();
 }
 
 void
-MeterStrip::set_pos (int pos)
+MeterStrip::update_background(MeterType type)
 {
+	switch(type) {
+		case MeterIEC1DIN:
+		case MeterIEC1NOR:
+		case MeterIEC2BBC:
+		case MeterIEC2EBU:
+		case MeterK14:
+		case MeterK20:
+			mtr_container.set_name ("meterstripPPM");
+			break;
+		case MeterVU:
+			mtr_container.set_name ("meterstripVU");
+			break;
+		default:
+			mtr_container.set_name ("meterstripDPM");
+	}
+}
+
+MeterType
+MeterStrip::meter_type()
+{
+	assert((!_route && _strip_type == 0) || (_route && _strip_type != 0));
+	if (!_route) return metric_type;
+	return _route->meter_type();
 }
 
 gint
 MeterStrip::meter_ticks1_expose (GdkEventExpose *ev)
 {
-	return meter_expose_ticks(ev, _types, &meter_ticks1_area);
+	assert(_route);
+	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks1_area);
 }
 
 gint
 MeterStrip::meter_ticks2_expose (GdkEventExpose *ev)
 {
-	return meter_expose_ticks(ev, _types, &meter_ticks2_area);
+	assert(_route);
+	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks2_area);
 }
 
 void
@@ -546,11 +682,13 @@ MeterStrip::parameter_changed (std::string const & p)
 	else if (p == "show-name-on-meterbridge") {
 		update_name_box();
 	}
+	else if (p == "meterbridge-label-height") {
+		queue_resize();
+	}
 }
 
-
 bool
-MeterStrip::level_meter_button_press (GdkEventButton* ev)
+MeterStrip::level_meter_button_release (GdkEventButton* ev)
 {
 	if (ev->button == 3) {
 		popup_level_meter_menu (ev);
@@ -571,8 +709,15 @@ MeterStrip::popup_level_meter_menu (GdkEventButton* ev)
 	RadioMenuItem::Group group;
 
 	_suspend_menu_callbacks = true;
-	add_level_meter_item (items, group, ArdourMeter::meter_type_string(MeterPeak), MeterPeak);
-	add_level_meter_item (items, group, ArdourMeter::meter_type_string(MeterKrms), MeterKrms);
+	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterPeak), MeterPeak);
+	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterKrms),  MeterKrms);
+	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterIEC1DIN), MeterIEC1DIN);
+	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterIEC1NOR), MeterIEC1NOR);
+	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterIEC2BBC), MeterIEC2BBC);
+	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterIEC2EBU), MeterIEC2EBU);
+	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterK20), MeterK20);
+	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterK14), MeterK14);
+	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterVU),  MeterVU);
 
 	MeterType cmt = _route->meter_type();
 	const std::string cmn = ArdourMeter::meter_type_string(cmt);
@@ -589,8 +734,53 @@ MeterStrip::popup_level_meter_menu (GdkEventButton* ev)
 	_suspend_menu_callbacks = false;
 }
 
+bool
+MeterStrip::name_label_button_release (GdkEventButton* ev)
+{
+	if (!_session) return true;
+	if (!_session->config.get_show_name_on_meterbridge()) return true;
+
+	if (ev->button == 3) {
+		popup_name_label_menu (ev);
+		return true;
+	}
+
+	return false;
+}
+
 void
-MeterStrip::add_level_meter_item (Menu_Helpers::MenuList& items, RadioMenuItem::Group& group, string const & name, MeterType type)
+MeterStrip::popup_name_label_menu (GdkEventButton* ev)
+{
+	using namespace Gtk::Menu_Helpers;
+
+	Gtk::Menu* m = manage (new Menu);
+	MenuList& items = m->items ();
+
+	RadioMenuItem::Group group;
+
+	_suspend_menu_callbacks = true;
+	add_label_height_item (items, group, _("Variable height"), 0);
+	add_label_height_item (items, group, _("Short"), 1);
+	add_label_height_item (items, group, _("Tall"), 2);
+	add_label_height_item (items, group, _("Grande"), 3);
+	add_label_height_item (items, group, _("Venti"), 4);
+
+	m->popup (ev->button, ev->time);
+	_suspend_menu_callbacks = false;
+}
+
+void
+MeterStrip::add_label_height_item (Menu_Helpers::MenuList& items, RadioMenuItem::Group& group, string const & name, uint32_t h)
+{
+	using namespace Menu_Helpers;
+
+	items.push_back (RadioMenuElem (group, name, sigc::bind (sigc::mem_fun (*this, &MeterStrip::set_label_height), h)));
+	RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&items.back ());
+	i->set_active (_session && _session->config.get_meterbridge_label_height() == h);
+}
+
+void
+MeterStrip::add_level_meter_type_item (Menu_Helpers::MenuList& items, RadioMenuItem::Group& group, string const & name, MeterType type)
 {
 	using namespace Menu_Helpers;
 
@@ -603,13 +793,26 @@ void
 MeterStrip::set_meter_type (MeterType type)
 {
 	if (_suspend_menu_callbacks) return;
+	if (_route->meter_type() == type) return;
+
 	level_meter->set_type (type);
+}
+
+void
+MeterStrip::set_label_height (uint32_t h)
+{
+	if (_suspend_menu_callbacks) return;
+	_session->config.set_meterbridge_label_height(h);
 }
 
 void
 MeterStrip::meter_type_changed (MeterType type)
 {
-	_route->set_meter_type(type);
+	if (_route->meter_type() != type) {
+		_route->set_meter_type(type);
+	}
+	update_background (type);
+	MetricChanged();
 }
 
 void

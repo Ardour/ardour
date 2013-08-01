@@ -189,7 +189,7 @@ AudioSource::touch_peakfile ()
 	struct utimbuf tbuf;
 
 	tbuf.actime = statbuf.st_atime;
-	tbuf.modtime = time ((time_t) 0);
+	tbuf.modtime = time ((time_t*) 0);
 
 	g_utime (peakpath.c_str(), &tbuf);
 }

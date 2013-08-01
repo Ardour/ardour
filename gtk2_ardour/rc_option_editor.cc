@@ -831,7 +831,7 @@ public:
 		t->attach (*l, 0, 1, 1, 2, FILL);
 		t->attach (_video_server_url_entry, 1, 2, 1, 2, FILL);
 		Gtkmm2ext::UI::instance()->set_tip (_video_server_url_entry,
-					    _("Base URL of the video-server including http prefix. This is usually 'http://hostname.example.org:1554/' and defaults to 'http://localhost:1554/' when the video-server is runing locally"));
+					    _("Base URL of the video-server including http prefix. This is usually 'http://hostname.example.org:1554/' and defaults to 'http://localhost:1554/' when the video-server is running locally"));
 
 		l = manage (new Label (_("Video Folder:")));
 		l->set_alignment (0, 0.5);
@@ -1928,19 +1928,49 @@ RCOptionEditor::RCOptionEditor ()
 
 	ComboOption<MeterLineUp>* mlu = new ComboOption<MeterLineUp> (
 		"meter-line-up-level",
-		_("Meter line-up level"),
+		_("Meter line-up level; 0dBu"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_line_up_level),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_line_up_level)
 		);
 
-	mlu->add (MeteringLineUp24, _("-24dB"));
-	mlu->add (MeteringLineUp20, _("-20dB (SMPTE)"));
-	mlu->add (MeteringLineUp18, _("-18dB (EBU)"));
-	mlu->add (MeteringLineUp15, _("-15dB"));
+	mlu->add (MeteringLineUp24, _("-24dBFS (SMPTE US: 4dBu = -20dBFS)"));
+	mlu->add (MeteringLineUp20, _("-20dBFS (SMPTE RP.0155)"));
+	mlu->add (MeteringLineUp18, _("-18dBFS (EBU, BBC)"));
+	mlu->add (MeteringLineUp15, _("-15dBFS (DIN)"));
 
-	Gtkmm2ext::UI::instance()->set_tip (mlu->tip_widget(), _("Configure meter-ticks and color-knee point."));
+	Gtkmm2ext::UI::instance()->set_tip (mlu->tip_widget(), _("Configure meter-marks and color-knee point for dBFS scale DPM, set reference level for IEC1/Nordic, IEC2 PPM and VU meter."));
 
 	add_option (S_("Preferences|GUI"), mlu);
+
+	ComboOption<MeterLineUp>* mld = new ComboOption<MeterLineUp> (
+		"meter-line-up-din",
+		_("IEC1/DIN Meter line-up level; 0dBu"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_line_up_din),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_line_up_din)
+		);
+
+	mld->add (MeteringLineUp24, _("-24dBFS (SMPTE US: 4dBu = -20dBFS)"));
+	mld->add (MeteringLineUp20, _("-20dBFS (SMPTE RP.0155)"));
+	mld->add (MeteringLineUp18, _("-18dBFS (EBU, BBC)"));
+	mld->add (MeteringLineUp15, _("-15dBFS (DIN)"));
+
+	Gtkmm2ext::UI::instance()->set_tip (mld->tip_widget(), _("Reference level for IEC1/DIN meter."));
+
+	add_option (S_("Preferences|GUI"), mld);
+
+	ComboOption<VUMeterStandard>* mvu = new ComboOption<VUMeterStandard> (
+		"meter-vu-standard",
+		_("VU Meter standard"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_vu_standard),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_vu_standard)
+		);
+
+	mvu->add (MeteringVUfrench,   _("0VU = -2dBu (France)"));
+	mvu->add (MeteringVUamerican, _("0VU = 0dBu (North America, Australia)"));
+	mvu->add (MeteringVUstandard, _("0VU = +4dBu (standard)"));
+	mvu->add (MeteringVUeight,    _("0VU = +8dBu"));
+
+	add_option (S_("Preferences|GUI"), mvu);
 
 	Gtk::Adjustment *mpk = manage (new Gtk::Adjustment(0, -10, 0, .1, .1));
 	HSliderOption *mpks = new HSliderOption("meter-peak",
@@ -1955,6 +1985,15 @@ RCOptionEditor::RCOptionEditor ()
 		 _("Specify the audio signal level in dbFS at and above which the meter-peak indicator will flash red."));
 
 	add_option (S_("Preferences|GUI"), mpks);
+
+	add_option (S_("Preferences|GUI"),
+	     new BoolOption (
+		     "meter-style-led",
+		     _("LED meter style"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_style_led),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_style_led)
+		     ));
+
 }
 
 void

@@ -89,7 +89,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 
 	boost::shared_ptr<PBD::Controllable> get_controllable();
 
-	LevelMeter& get_level_meter() const { return *level_meter; }
+	LevelMeterHBox& get_level_meter() const { return *level_meter; }
 	Gtkmm2ext::SliderController& get_gain_slider() const { return *gain_slider; }
 
 	/** Emitted in the GUI thread when a button is pressed over the level meter;
@@ -117,7 +117,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	Gtk::DrawingArea             meter_metric_area;
 	Gtk::DrawingArea             meter_ticks1_area;
 	Gtk::DrawingArea             meter_ticks2_area;
-	LevelMeter                  *level_meter;
+	LevelMeterHBox              *level_meter;
 
 	sigc::connection gain_watching;
 
@@ -201,7 +201,7 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 {
   public:
          GainMeter (ARDOUR::Session*, int);
-	~GainMeter () {}
+	virtual ~GainMeter ();
 
 	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
 				   boost::shared_ptr<ARDOUR::PeakMeter> meter,
@@ -210,6 +210,7 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 	int get_gm_width ();
 	void setup_meters (int len=0);
 	void set_type (ARDOUR::MeterType);
+	void route_active_changed ();
 
   protected:
 	void hide_all_meters ();

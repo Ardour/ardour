@@ -37,6 +37,7 @@
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/focus_entry.h>
 #include <gtkmm2ext/slider_controller.h>
+#include <gtkmm2ext/fastmeter.h>
 
 #include "enums.h"
 
@@ -44,18 +45,16 @@ namespace ARDOUR {
 	class Session;
 	class PeakMeter;
 }
-namespace Gtkmm2ext {
-	class FastMeter;
-}
 namespace Gtk {
 	class Menu;
 }
 
-class LevelMeter : public Gtk::HBox, public ARDOUR::SessionHandlePtr
+class LevelMeterBase : public ARDOUR::SessionHandlePtr
 {
   public:
-	LevelMeter (ARDOUR::Session*);
-	~LevelMeter ();
+	LevelMeterBase (ARDOUR::Session*, PBD::EventLoop::InvalidationRecord* ir,
+			Gtkmm2ext::FastMeter::Orientation o = Gtkmm2ext::FastMeter::Vertical);
+	virtual ~LevelMeterBase ();
 
 	virtual void set_meter (ARDOUR::PeakMeter* meter);
 
@@ -72,10 +71,17 @@ class LevelMeter : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	/** Emitted in the GUI thread when a button is pressed over the meter */
 	PBD::Signal1<bool, GdkEventButton *> ButtonPress;
+	PBD::Signal1<bool, GdkEventButton *> ButtonRelease;
 	PBD::Signal1<void, ARDOUR::MeterType> MeterTypeChanged;
 
+	protected:
+	virtual void mtr_pack(Gtk::Widget &w) = 0;
+	virtual void mtr_remove(Gtk::Widget &w) = 0;
+
   private:
+	PBD::EventLoop::InvalidationRecord* parent_invalidator;
 	ARDOUR::PeakMeter* _meter;
+	Gtkmm2ext::FastMeter::Orientation _meter_orientation;
 
 	Width _width;
 
@@ -101,6 +107,7 @@ class LevelMeter : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	std::vector<MeterInfo> meters;
 	float                  max_peak;
 	ARDOUR::MeterType      meter_type;
+	ARDOUR::MeterType      visible_meter_type;
 
 	PBD::ScopedConnection _configuration_connection;
 	PBD::ScopedConnection _meter_type_connection;
@@ -118,6 +125,28 @@ class LevelMeter : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	bool style_changed;
 	bool color_changed;
 	void color_handler ();
+};
+
+class LevelMeterHBox : public LevelMeterBase, public Gtk::HBox
+{
+  public:
+	LevelMeterHBox (ARDOUR::Session*);
+	~LevelMeterHBox();
+
+	protected:
+	void mtr_pack(Gtk::Widget &w);
+	void mtr_remove(Gtk::Widget &w);
+};
+
+class LevelMeterVBox : public LevelMeterBase, public Gtk::VBox
+{
+  public:
+	LevelMeterVBox (ARDOUR::Session*);
+	~LevelMeterVBox();
+
+	protected:
+	void mtr_pack(Gtk::Widget &w);
+	void mtr_remove(Gtk::Widget &w);
 };
 
 #endif /* __ardour_gtk_track_meter_h__ */

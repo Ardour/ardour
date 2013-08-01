@@ -40,13 +40,24 @@ PeakMeter::PeakMeter (Session& s, const std::string& name)
     : Processor (s, string_compose ("meter-%1", name))
 {
 	Kmeterdsp::init(s.nominal_frame_rate());
+	Iec1ppmdsp::init(s.nominal_frame_rate());
+	Iec2ppmdsp::init(s.nominal_frame_rate());
+	Vumeterdsp::init(s.nominal_frame_rate());
+	_pending_active = true;
+	_meter_type = MeterPeak;
 }
 
 PeakMeter::~PeakMeter ()
 {
 	while (_kmeter.size() > 0) {
 		delete (_kmeter.back());
+		delete (_iec1meter.back());
+		delete (_iec2meter.back());
+		delete (_vumeter.back());
 		_kmeter.pop_back();
+		_iec1meter.pop_back();
+		_iec2meter.pop_back();
+		_vumeter.pop_back();
 	}
 }
 
@@ -97,8 +108,17 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 	// Meter audio in to the rest of the peaks
 	for (uint32_t i = 0; i < n_audio; ++i, ++n) {
 		_peak_signal[n] = compute_peak (bufs.get_audio(i).data(), nframes, _peak_signal[n]);
-		if (_meter_type & MeterKrms) {
+		if (_meter_type & (MeterKrms | MeterK20 | MeterK14)) {
 			_kmeter[i]->process(bufs.get_audio(i).data(), nframes);
+		}
+		if (_meter_type & (MeterIEC1DIN | MeterIEC1NOR)) {
+			_iec1meter[i]->process(bufs.get_audio(i).data(), nframes);
+		}
+		if (_meter_type & (MeterIEC2BBC | MeterIEC2EBU)) {
+			_iec2meter[i]->process(bufs.get_audio(i).data(), nframes);
+		}
+		if (_meter_type & MeterVU) {
+			_vumeter[i]->process(bufs.get_audio(i).data(), nframes);
 		}
 	}
 
@@ -119,6 +139,9 @@ PeakMeter::reset ()
 
 	for (size_t n = 0; n < _kmeter.size(); ++n) {
 		_kmeter[n]->reset();
+		_iec1meter[n]->reset();
+		_iec2meter[n]->reset();
+		_vumeter[n]->reset();
 	}
 }
 
@@ -128,6 +151,16 @@ PeakMeter::reset_max ()
 	for (size_t i = 0; i < _max_peak_power.size(); ++i) {
 		_max_peak_power[i] = -INFINITY;
 		_max_peak_signal[i] = 0;
+	}
+
+	const size_t n_midi  = min (_peak_signal.size(), (size_t) current_meters.n_midi());
+
+	for (size_t n = 0; n < _peak_signal.size(); ++n) {
+		if (n < n_midi) {
+			_visible_peak_power[n] = 0;
+		} else {
+			_visible_peak_power[n] = -INFINITY;
+		}
 	}
 }
 
@@ -155,24 +188,20 @@ PeakMeter::configure_io (ChanCount in, ChanCount out)
 void
 PeakMeter::reflect_inputs (const ChanCount& in)
 {
-	current_meters = in;
-
-	const size_t limit = min (_peak_signal.size(), (size_t) current_meters.n_total ());
-	const size_t n_midi  = min (_peak_signal.size(), (size_t) current_meters.n_midi());
-	const size_t n_audio = current_meters.n_audio();
-
-	for (size_t n = 0; n < limit; ++n) {
-		if (n < n_midi) {
-			_visible_peak_power[n] = 0;
-		} else {
-			_visible_peak_power[n] = -INFINITY;
+	for (uint32_t i = in.n_total(); i < current_meters.n_total(); ++i) {
+		if (i < _peak_signal.size()) {
+			_peak_signal[i] = 0.0f;
 		}
 	}
-
-	for (size_t n = 0; n < n_audio; ++n) {
-		_kmeter[n]->reset();
+	for (uint32_t i = in.n_audio(); i < current_meters.n_audio(); ++i) {
+		if (i >= _kmeter.size()) continue;
+		_kmeter[i]->reset();
+		_iec1meter[i]->reset();
+		_iec2meter[i]->reset();
+		_vumeter[i]->reset();
 	}
 
+	current_meters = in;
 	reset_max();
 
 	ConfigurationChanged (in, in); /* EMIT SIGNAL */
@@ -206,12 +235,27 @@ PeakMeter::reset_max_channels (const ChanCount& chn)
 	/* alloc/free other audio-only meter types. */
 	while (_kmeter.size() > n_audio) {
 		delete (_kmeter.back());
+		delete (_iec1meter.back());
+		delete (_iec2meter.back());
+		delete (_vumeter.back());
 		_kmeter.pop_back();
+		_iec1meter.pop_back();
+		_iec2meter.pop_back();
+		_vumeter.pop_back();
 	}
 	while (_kmeter.size() < n_audio) {
 		_kmeter.push_back(new Kmeterdsp());
+		_iec1meter.push_back(new Iec1ppmdsp());
+		_iec2meter.push_back(new Iec2ppmdsp());
+		_vumeter.push_back(new Vumeterdsp());
 	}
 	assert(_kmeter.size() == n_audio);
+	assert(_iec1meter.size() == n_audio);
+	assert(_iec2meter.size() == n_audio);
+	assert(_vumeter.size() == n_audio);
+
+	reset();
+	reset_max();
 }
 
 /** To be driven by the Meter signal from IO.
@@ -226,10 +270,25 @@ PeakMeter::meter ()
 		return;
 	}
 
-	assert(_visible_peak_power.size() == _peak_signal.size());
+	// TODO block this thread while PeakMeter::reset_max_channels() is
+	// reallocating channels.
+	// (may happen with Session > New: old session not yet closed,
+	// meter-thread still active while new one is initializing and
+	// maybe on other occasions, too)
+	if (   (_visible_peak_power.size() != _peak_signal.size())
+			|| (_max_peak_power.size()     != _peak_signal.size())
+			|| (_max_peak_signal.size()    != _peak_signal.size())
+			 ) {
+		return;
+	}
 
 	const size_t limit = min (_peak_signal.size(), (size_t) current_meters.n_total ());
 	const size_t n_midi  = min (_peak_signal.size(), (size_t) current_meters.n_midi());
+
+	/* 0.01f ^= 100 Hz update rate */
+	const float midi_meter_falloff = Config->get_meter_falloff() * 0.01f;
+	/* kmeters: 24dB / 2 sec */
+	const float audio_meter_falloff = (_meter_type & (MeterK20 | MeterK14)) ? 0.12f : midi_meter_falloff;
 
 	for (size_t n = 0; n < limit; ++n) {
 
@@ -241,11 +300,11 @@ PeakMeter::meter ()
 		if (n < n_midi) {
 			_max_peak_power[n] = -INFINITY; // std::max (new_peak, _max_peak_power[n]); // XXX
 			_max_peak_signal[n] = 0;
-			if (Config->get_meter_falloff() == 0.0f || new_peak > _visible_peak_power[n]) {
+			if (midi_meter_falloff == 0.0f || new_peak > _visible_peak_power[n]) {
 				;
 			} else {
-				/* empirical WRT to falloff times , 0.01f ^= 100 Hz update rate */
-				new_peak = _visible_peak_power[n] - sqrt(_visible_peak_power[n] * Config->get_meter_falloff() * 0.01f * 0.0002f);
+				/* empirical algorithm WRT to audio falloff times */
+				new_peak = _visible_peak_power[n] - sqrt(_visible_peak_power[n] * midi_meter_falloff * 0.0002f);
 				if (new_peak < (1.0 / 512.0)) new_peak = 0;
 			}
 			_visible_peak_power[n] = new_peak;
@@ -268,47 +327,72 @@ PeakMeter::meter ()
 
 		_max_peak_power[n] = std::max (new_peak, _max_peak_power[n]);
 
-		if (Config->get_meter_falloff() == 0.0f || new_peak > _visible_peak_power[n]) {
+		if (audio_meter_falloff == 0.0f || new_peak > _visible_peak_power[n]) {
 			_visible_peak_power[n] = new_peak;
 		} else {
 			// do falloff
-			new_peak = _visible_peak_power[n] - (Config->get_meter_falloff() * 0.01f);
-			_visible_peak_power[n] = std::max (new_peak, (float)-INFINITY);
+			new_peak = _visible_peak_power[n] - (audio_meter_falloff);
+			_visible_peak_power[n] = std::max (new_peak, -INFINITY);
 		}
 	}
 }
+
+#define CHECKSIZE(MTR) (n < MTR.size() + n_midi && n >= n_midi)
 
 float
 PeakMeter::meter_level(uint32_t n, MeterType type) {
 	switch (type) {
 		case MeterKrms:
+		case MeterK20:
+		case MeterK14:
 			{
-				const uint32_t n_midi  = current_meters.n_midi();
-				if ((n - n_midi) < _kmeter.size() && (n - n_midi) >= 0) {
-#if 0
-					return fast_coefficient_to_dB (_kmeter[n-n_midi]->read());
-#else
-					return accurate_coefficient_to_dB (_kmeter[n-n_midi]->read());
-#endif
+				const uint32_t n_midi = current_meters.n_midi();
+				if (CHECKSIZE(_kmeter)) {
+					return accurate_coefficient_to_dB (_kmeter[n - n_midi]->read());
 				}
-				return minus_infinity();
 			}
+			break;
+		case MeterIEC1DIN:
+		case MeterIEC1NOR:
+			{
+				const uint32_t n_midi = current_meters.n_midi();
+				if (CHECKSIZE(_iec1meter)) {
+					return accurate_coefficient_to_dB (_iec1meter[n - n_midi]->read());
+				}
+			}
+			break;
+		case MeterIEC2BBC:
+		case MeterIEC2EBU:
+			{
+				const uint32_t n_midi = current_meters.n_midi();
+				if (CHECKSIZE(_iec2meter)) {
+					return accurate_coefficient_to_dB (_iec2meter[n - n_midi]->read());
+				}
+			}
+			break;
+		case MeterVU:
+			{
+				const uint32_t n_midi = current_meters.n_midi();
+				if (CHECKSIZE(_vumeter)) {
+					return accurate_coefficient_to_dB (_vumeter[n - n_midi]->read());
+				}
+			}
+			break;
 		case MeterPeak:
 			return peak_power(n);
 		case MeterMaxSignal:
 			if (n < _max_peak_signal.size()) {
 				return _max_peak_signal[n];
-			} else {
-				return minus_infinity();
 			}
+			break;
 		default:
 		case MeterMaxPeak:
 			if (n < _max_peak_power.size()) {
 				return _max_peak_power[n];
-			} else {
-				return minus_infinity();
 			}
+			break;
 	}
+	return minus_infinity();
 }
 
 void
@@ -320,12 +404,31 @@ PeakMeter::set_type(MeterType t)
 
 	_meter_type = t;
 
-	if (t & MeterKrms) {
+	if (t & (MeterKrms | MeterK20 | MeterK14)) {
 		const size_t n_audio = current_meters.n_audio();
 		for (size_t n = 0; n < n_audio; ++n) {
 			_kmeter[n]->reset();
 		}
 	}
+	if (t & (MeterIEC1DIN | MeterIEC1NOR)) {
+		const size_t n_audio = current_meters.n_audio();
+		for (size_t n = 0; n < n_audio; ++n) {
+			_iec1meter[n]->reset();
+		}
+	}
+	if (t & (MeterIEC2BBC | MeterIEC2EBU)) {
+		const size_t n_audio = current_meters.n_audio();
+		for (size_t n = 0; n < n_audio; ++n) {
+			_iec2meter[n]->reset();
+		}
+	}
+	if (t & MeterVU) {
+		const size_t n_audio = current_meters.n_audio();
+		for (size_t n = 0; n < n_audio; ++n) {
+			_vumeter[n]->reset();
+		}
+	}
+
 	TypeChanged(t);
 }
 

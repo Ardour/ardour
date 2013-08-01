@@ -1,6 +1,6 @@
 /*
-    Copyright (C) 2008-2011 Fons Adriaensen <fons@linuxaudio.org>
-		Adopted for Ardour 2013 by Robin Gareus <robin@gareus.org>
+    Copyright (C) 2012 Fons Adriaensen <fons@linuxaudio.org>
+    Adopted for Ardour 2013 by Robin Gareus <robin@gareus.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,29 +17,35 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __KMETERDSP_H
-#define	__KMETERDSP_H
+#ifndef __IEC2PPMDSP_H
+#define	__IEC2PPMDSP_H
 
-class Kmeterdsp
+
+class Iec2ppmdsp
 {
 public:
 
-    Kmeterdsp (void);
-    ~Kmeterdsp (void);
+    Iec2ppmdsp (void);
+    ~Iec2ppmdsp (void);
 
-    void process (float *p, int n);
-    float read ();
-    static void init (int fsamp);
+    void process (float *p, int n);  
+    float read (void);
     void reset ();
+
+    static void init (float fsamp); 
 
 private:
 
     float          _z1;          // filter state
     float          _z2;          // filter state
-    float          _rms;         // max rms value since last read()
-    bool           _flag;        // flag set by read(), resets _rms
+    float          _m;           // max value since last read()
+    bool           _res;         // flag to reset m
 
-    static float   _omega;       // ballistics filter constant.
+    static float   _w1;          // attack filter coefficient
+    static float   _w2;          // attack filter coefficient
+    static float   _w3;          // release filter coefficient
+    static float   _g;           // gain factor
 };
+
 
 #endif

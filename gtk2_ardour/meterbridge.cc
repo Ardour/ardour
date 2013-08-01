@@ -101,8 +101,8 @@ Meterbridge::Meterbridge ()
 	, VisibilityTracker (*((Gtk::Window*) this))
 	, _visible (false)
 	, _show_busses (false)
-	, metrics_left (1)
-	, metrics_right (2)
+	, metrics_left (1, MeterPeak)
+	, metrics_right (2, MeterPeak)
 	, cur_max_width (-1)
 {
 	set_name ("Meter Bridge");
@@ -140,7 +140,8 @@ Meterbridge::Meterbridge ()
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Meterbridge::sync_order_keys, this, _1), gui_context());
 	MeterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Meterbridge::remove_strip, this, _1), gui_context());
-	MeterStrip::MetricChanged.connect_same_thread (*this, boost::bind(&Meterbridge::update_metrics, this));
+	MeterStrip::MetricChanged.connect (*this, invalidator (*this), boost::bind(&Meterbridge::resync_order, this), gui_context());
+	MeterStrip::ConfigurationChanged.connect (*this, invalidator (*this), boost::bind(&Meterbridge::queue_resize, this), gui_context());
 
 	/* work around ScrolledWindowViewport alignment mess Part one */
 	Gtk::HBox * yspc = manage (new Gtk::HBox());
@@ -192,6 +193,10 @@ Meterbridge::Meterbridge ()
 
 Meterbridge::~Meterbridge ()
 {
+	while (_metrics.size() > 0) {
+		delete (_metrics.back());
+		_metrics.pop_back();
+	}
 }
 
 void
@@ -332,8 +337,30 @@ Meterbridge::on_size_request (Gtk::Requisition* r)
 	Gtk::Window::on_size_request(r);
 
 	Gdk::Geometry geom;
-	geom.max_width = meterarea.get_width() + metrics_left.get_width() + metrics_right.get_width();
+	Gtk::Requisition mr = meterarea.size_request();
+
+	geom.max_width = mr.width + metrics_left.get_width() + metrics_right.get_width();
 	geom.max_height = max_height;
+
+#ifndef GTKOSX
+	/* on OSX this leads to a constant live-loop: show/hide scrollbar
+	 * on Linux, the window is resized IFF the scrollbar was not visible
+	 */
+	const Gtk::Scrollbar * hsc = scroller.get_hscrollbar();
+	Glib::RefPtr<Gdk::Screen> screen = get_screen ();
+	Gdk::Rectangle monitor_rect;
+	screen->get_monitor_geometry (0, monitor_rect);
+	const int scr_w = monitor_rect.get_width() - 44;
+
+	if (cur_max_width < geom.max_width
+			&& cur_max_width < scr_w
+			&& !(scroller.get_hscrollbar_visible() && hsc)) {
+		int h = r->height;
+		*r = Gtk::Requisition();
+		r->width = geom.max_width;
+		r->height = h;
+	}
+#endif
 
 	if (cur_max_width != geom.max_width) {
 		cur_max_width = geom.max_width;
@@ -349,6 +376,10 @@ Meterbridge::on_size_allocate (Gtk::Allocation& a)
 	const Gtk::Scrollbar * hsc = scroller.get_hscrollbar();
 
 	if (scroller.get_hscrollbar_visible() && hsc) {
+		if (!scroll_connection.connected()) {
+			scroll_connection = scroller.get_hscrollbar()->get_adjustment()->signal_value_changed().connect(sigc::mem_fun (*this, &Meterbridge::on_scroll));
+			scroller.get_hscrollbar()->get_adjustment()->signal_changed().connect(sigc::mem_fun (*this, &Meterbridge::on_scroll));
+		}
 		gint scrollbar_spacing;
 		gtk_widget_style_get (GTK_WIDGET (scroller.gobj()),
 				"scrollbar-spacing", &scrollbar_spacing, NULL);
@@ -360,6 +391,41 @@ Meterbridge::on_size_allocate (Gtk::Allocation& a)
 		metrics_spacer_right.set_size_request(-1, 0);
 	}
 	Gtk::Window::on_size_allocate(a);
+}
+
+void
+Meterbridge::on_scroll()
+{
+	if (!scroller.get_hscrollbar()) return;
+
+	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
+	int leftend = adj->get_value();
+	int rightend = scroller.get_width() + leftend;
+
+	int mm_left = _mm_left;
+	int mm_right = _mm_right;
+	ARDOUR::MeterType mt_left = _mt_left;
+	ARDOUR::MeterType mt_right = _mt_right;
+
+	for (unsigned int i = 0; i < _metrics.size(); ++i) {
+		int sx, dx, dy;
+		int mm = _metrics[i]->get_metric_mode();
+		sx = (mm & 2) ? _metrics[i]->get_width() : 0;
+
+		_metrics[i]->translate_coordinates(meterarea, sx, 0, dx, dy);
+
+		if (dx < leftend && !(mm&2)) {
+			mm_left = mm;
+			mt_left = _metrics[i]->meter_type();
+		}
+		if (dx > rightend && (mm&2)) {
+			mm_right = mm;
+			mt_right = _metrics[i]->meter_type();
+			break;
+		}
+	}
+	metrics_left.set_metric_mode(mm_left, mt_left);
+	metrics_right.set_metric_mode(mm_right, mt_right);
 }
 
 void
@@ -550,7 +616,6 @@ Meterbridge::add_strips (RouteList& routes)
 	}
 
 	resync_order();
-	update_metrics();
 }
 
 void
@@ -567,28 +632,10 @@ Meterbridge::remove_strip (MeterStrip* strip)
 			break;
 		}
 	}
-	update_metrics();
 }
 
 void
-Meterbridge::update_metrics ()
-{
-	bool have_midi = false;
-	for (list<MeterBridgeStrip>::iterator i = strips.begin(); i != strips.end(); ++i) {
-		if ( (*i).s->has_midi() && (*i).visible) {
-			have_midi = true;
-			break;
-		}
-	}
-	if (have_midi) {
-		metrics_right.set_metric_mode(2);
-	} else {
-		metrics_right.set_metric_mode(3);
-	}
-}
-
-void
-Meterbridge::sync_order_keys (RouteSortOrderKey src)
+Meterbridge::sync_order_keys (RouteSortOrderKey)
 {
 	Glib::Threads::Mutex::Lock lm (_resync_mutex);
 
@@ -597,6 +644,12 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 
 	int pos = 0;
 	int vis = 0;
+	MeterStrip * last = 0;
+
+	unsigned int metrics = 0;
+	MeterType lmt = MeterPeak;
+	bool have_midi = false;
+	metrics_left.set_metric_mode(1, lmt);
 
 	for (list<MeterBridgeStrip>::iterator i = strips.begin(); i != strips.end(); ++i) {
 
@@ -642,9 +695,80 @@ Meterbridge::sync_order_keys (RouteSortOrderKey src)
 			(*i).visible = true;
 				vis++;
 		}
-		(*i).s->set_pos(vis);
+
+		(*i).s->set_tick_bar(0);
+
+		MeterType nmt = (*i).s->meter_type();
+		if (nmt == MeterKrms) nmt = MeterPeak; // identical metrics
+		if (pos == 0) {
+			(*i).s->set_tick_bar(1);
+		}
+
+		if ((*i).visible && nmt != lmt && pos == 0) {
+			lmt = nmt;
+			metrics_left.set_metric_mode(1, lmt);
+		} else if ((*i).visible && nmt != lmt) {
+
+			if (last) {
+				last->set_tick_bar(last->get_tick_bar() | 2);
+			}
+			(*i).s->set_tick_bar((*i).s->get_tick_bar() | 1);
+
+			if (_metrics.size() <= metrics) {
+				_metrics.push_back(new MeterStrip(have_midi ? 2 : 3, lmt));
+				meterarea.pack_start (*_metrics[metrics], false, false);
+				_metrics[metrics]->set_session(_session);
+				_metrics[metrics]->show();
+			} else {
+				_metrics[metrics]->set_metric_mode(have_midi ? 2 : 3, lmt);
+			}
+			meterarea.reorder_child(*_metrics[metrics], pos++);
+			metrics++;
+
+			lmt = nmt;
+
+			if (_metrics.size() <= metrics) {
+				_metrics.push_back(new MeterStrip(1, lmt));
+				meterarea.pack_start (*_metrics[metrics], false, false);
+				_metrics[metrics]->set_session(_session);
+				_metrics[metrics]->show();
+			} else {
+				_metrics[metrics]->set_metric_mode(1, lmt);
+			}
+			meterarea.reorder_child(*_metrics[metrics], pos++);
+			metrics++;
+			have_midi = false;
+		}
+
+		if ((*i).visible && (*i).s->has_midi()) {
+			have_midi = true;
+		}
+
 		meterarea.reorder_child(*((*i).s), pos++);
+		if ((*i).visible) {
+			last = (*i).s;
+		}
 	}
+
+	if (last) {
+		last->set_tick_bar(last->get_tick_bar() | 2);
+	}
+
+	metrics_right.set_metric_mode(have_midi ? 2 : 3, lmt);
+
+	while (_metrics.size() > metrics) {
+		meterarea.remove(*_metrics.back());
+		delete (_metrics.back());
+		_metrics.pop_back();
+	}
+
+	_mm_left = metrics_left.get_metric_mode();
+	_mt_left = metrics_left.meter_type();
+	_mm_right = metrics_right.get_metric_mode();
+	_mt_right = metrics_right.meter_type();
+
+	on_scroll();
+	queue_resize();
 }
 
 void
@@ -659,21 +783,17 @@ Meterbridge::parameter_changed (std::string const & p)
 	if (p == "show-busses-on-meterbridge") {
 		_show_busses = _session->config.get_show_busses_on_meterbridge();
 		resync_order();
-		update_metrics();
 	}
 	else if (p == "show-master-on-meterbridge") {
 		_show_master = _session->config.get_show_master_on_meterbridge();
 		resync_order();
-		update_metrics();
 	}
 	else if (p == "show-midi-on-meterbridge") {
 		_show_midi = _session->config.get_show_midi_on_meterbridge();
 		resync_order();
-		update_metrics();
 	}
 	else if (p == "meter-line-up-level") {
 		meter_clear_pattern_cache();
-		update_metrics();
 	}
 	else if (p == "show-rec-on-meterbridge") {
 		scroller.queue_resize();
@@ -685,6 +805,9 @@ Meterbridge::parameter_changed (std::string const & p)
 		scroller.queue_resize();
 	}
 	else if (p == "show-name-on-meterbridge") {
+		scroller.queue_resize();
+	}
+	else if (p == "meterbridge-label-height") {
 		scroller.queue_resize();
 	}
 }

@@ -84,7 +84,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 		gain_slider = manage (new VSliderController (&gain_adjustment, fader_length, fader_girth, false));
 	}
 
-	level_meter = new LevelMeter(_session);
+	level_meter = new LevelMeterHBox(_session);
 
 	level_meter->ButtonPress.connect_same_thread (_level_meter_connection, boost::bind (&GainMeterBase::level_meter_button_press, this, _1));
 	meter_metric_area.signal_button_press_event().connect (sigc::mem_fun (*this, &GainMeterBase::level_meter_button_press));
@@ -526,9 +526,12 @@ GainMeterBase::gain_changed ()
 void
 GainMeterBase::set_meter_strip_name (const char * name)
 {
+	char tmp[256];
 	meter_metric_area.set_name (name);
-	meter_ticks1_area.set_name (name);
-	meter_ticks2_area.set_name (name);
+	sprintf(tmp, "Mark%sLeft", name);
+	meter_ticks1_area.set_name (tmp);
+	sprintf(tmp, "Mark%sRight", name);
+	meter_ticks2_area.set_name (tmp);
 }
 
 void
@@ -950,6 +953,8 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	meter_hbox.pack_start (meter_metric_area, false, false);
 }
 
+GainMeter::~GainMeter () { }
+
 void
 GainMeter::set_controls (boost::shared_ptr<Route> r,
 			 boost::shared_ptr<PeakMeter> meter,
@@ -976,6 +981,10 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 		meter_configuration_changed (_meter->input_streams ());
 	}
 
+
+	if (_route) {
+		_route->active_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::route_active_changed, this), gui_context ());
+	}
 
 	/*
 	   if we have a non-hidden route (ie. we're not the click or the auditioner),
@@ -1013,19 +1022,31 @@ GainMeter::get_gm_width ()
 gint
 GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 {
-	return meter_expose_metrics(ev, _types, &meter_metric_area);
+	if (!_route) {
+		if (_types.empty()) { _types.push_back(DataType::AUDIO); }
+		return meter_expose_metrics(ev, MeterPeak, _types, &meter_metric_area);
+	}
+	return meter_expose_metrics(ev, _route->meter_type(), _types, &meter_metric_area);
 }
 
 gint
 GainMeter::meter_ticks1_expose (GdkEventExpose *ev)
 {
-	return meter_expose_ticks(ev, _types, &meter_ticks1_area);
+	if (!_route) {
+		if (_types.empty()) { _types.push_back(DataType::AUDIO); }
+		return meter_expose_ticks(ev, MeterPeak, _types, &meter_ticks1_area);
+	}
+	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks1_area);
 }
 
 gint
 GainMeter::meter_ticks2_expose (GdkEventExpose *ev)
 {
-	return meter_expose_ticks(ev, _types, &meter_ticks2_area);
+	if (!_route) {
+		if (_types.empty()) { _types.push_back(DataType::AUDIO); }
+		return meter_expose_ticks(ev, MeterPeak, _types, &meter_ticks2_area);
+	}
+	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks2_area);
 }
 
 boost::shared_ptr<PBD::Controllable>
@@ -1067,18 +1088,21 @@ GainMeter::meter_configuration_changed (ChanCount c)
 			set_meter_strip_name ("AudioBusMetricsInactive");
 		}
 	}
+	else if (
+			   (type == (1 << DataType::MIDI))
+			|| (_route && boost::dynamic_pointer_cast<MidiTrack>(_route))
+			) {
+		if (!_route || _route->active()) {
+			set_meter_strip_name ("MidiTrackMetrics");
+		} else {
+			set_meter_strip_name ("MidiTrackMetricsInactive");
+		}
+	}
 	else if (type == (1 << DataType::AUDIO)) {
 		if (!_route || _route->active()) {
 			set_meter_strip_name ("AudioTrackMetrics");
 		} else {
 			set_meter_strip_name ("AudioTrackMetricsInactive");
-		}
-	}
-	else if (type == (1 << DataType::MIDI)) {
-		if (!_route || _route->active()) {
-			set_meter_strip_name ("MidiTrackMetrics");
-		} else {
-			set_meter_strip_name ("MidiTrackMetricsInactive");
 		}
 	} else {
 		if (!_route || _route->active()) {
@@ -1087,11 +1111,22 @@ GainMeter::meter_configuration_changed (ChanCount c)
 			set_meter_strip_name ("AudioMidiTrackMetricsInactive");
 		}
 	}
+
+	setup_meters();
 	meter_clear_pattern_cache(4);
+}
+
+void
+GainMeter::route_active_changed ()
+{
+	if (_meter) {
+		meter_configuration_changed (_meter->input_streams ());
+	}
 }
 
 void
 GainMeter::meter_type_changed (MeterType t)
 {
 	_route->set_meter_type(t);
+	RedrawMetrics();
 }

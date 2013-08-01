@@ -101,6 +101,9 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _custom_meter_position_noted (false)
 	, _last_custom_meter_was_at_end (false)
 {
+	if (is_master()) {
+		_meter_type = MeterK20;
+	}
 	processor_max_streams.reset();
 }
 
@@ -568,7 +571,7 @@ void
 Route::monitor_run (framepos_t start_frame, framepos_t end_frame, pframes_t nframes, int declick)
 {
 	assert (is_monitor());
-	BufferSet& bufs (_session.get_scratch_buffers (n_process_buffers()));
+	BufferSet& bufs (_session.get_route_buffers (n_process_buffers()));
 	passthru (bufs, start_frame, end_frame, nframes, declick);
 }
 
@@ -594,7 +597,7 @@ Route::passthru (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, 
 void
 Route::passthru_silence (framepos_t start_frame, framepos_t end_frame, pframes_t nframes, int declick)
 {
-	BufferSet& bufs (_session.get_silent_buffers (n_process_buffers()));
+	BufferSet& bufs (_session.get_route_buffers (n_process_buffers(), true));
 
 	bufs.set_count (_input->n_ports());
 	write_out_of_band_data (bufs, start_frame, end_frame, nframes);
@@ -3017,7 +3020,7 @@ Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		*/
 	}
 
-	BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
+	BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
 
 	fill_buffers_with_input (bufs, _input, nframes);
 
@@ -3056,7 +3059,7 @@ Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, in
 
 	_silent = false;
 
-	BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
+	BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
 
 	fill_buffers_with_input (bufs, _input, nframes);
 

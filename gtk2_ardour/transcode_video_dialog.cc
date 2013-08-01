@@ -68,7 +68,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	, bitrate_adjustment (2000, 500, 10000, 10, 100, 0)
 	, bitrate_spinner (bitrate_adjustment)
 #if 1 /* tentative debug mode */
-	, debug_checkbox (_("Debug Mode: Print ffmpeg Command and Output to stdout."))
+	, debug_checkbox (_("Debug Mode: Print ffmpeg command and output to stdout."))
 #endif
 {
 	set_session (s);

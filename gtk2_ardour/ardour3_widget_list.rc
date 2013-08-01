@@ -290,6 +290,11 @@ widget "*PluginLoadButton" style:highest "small_button"
 widget "*PluginLoadButton*" style:highest "small_button"
 widget "*PluginEditorButton" style:highest "default_toggle_button"
 
+widget "*meterstripPPM" style:highest "meter_strip_ppm"
+widget "*meterstripDPM" style:highest "meter_strip_dpm"
+widget "*meterstripVU" style:highest "meter_strip_vu"
+widget "*BlackSeparator" style:highest "meter_strip_sep"
+
 widget "*MetricDialogFrame" style:highest "base_frame"
 widget "*MetricEntry" style:highest "medium_bold_entry"
 widget "*MetricButton" style:highest "default_button"

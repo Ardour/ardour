@@ -40,7 +40,8 @@ MidiClockTicker::MidiClockTicker ()
 {
 }
 
-void MidiClockTicker::set_session (Session* s)
+void
+MidiClockTicker::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 	
@@ -59,12 +60,14 @@ MidiClockTicker::session_going_away ()
 	_midi_port = 0;
 }
 
-void MidiClockTicker::update_midi_clock_port()
+void
+MidiClockTicker::update_midi_clock_port()
 {
 	_midi_port = MIDI::Manager::instance()->midi_clock_output_port();
 }
 
-void MidiClockTicker::transport_state_changed()
+void
+MidiClockTicker::transport_state_changed()
 {
 	if (_session->exporting()) {
 		/* no midi clock during export, for now */
@@ -80,8 +83,8 @@ void MidiClockTicker::transport_state_changed()
 	framepos_t position = _session->transport_frame();
 
 	DEBUG_TRACE (PBD::DEBUG::MidiClock,
-		     string_compose ("Transport state change @ %4, speed: %1 position: %2 play loop: %3\n", speed, position, _session->get_play_loop(), position)
-		);
+		 string_compose ("Transport state change @ %4, speed: %1 position: %2 play loop: %3\n", speed, position, _session->get_play_loop(), position)
+	);
 
 	if (speed == 1.0f) {
 		_last_tick = position;
@@ -109,19 +112,27 @@ void MidiClockTicker::transport_state_changed()
 			return;
 
 		send_stop_event(0);
+		send_position_event (position, 0);
 	}
 
 	tick (position);
 }
 
-void MidiClockTicker::position_changed (framepos_t position)
+void
+MidiClockTicker::position_changed (framepos_t position)
 {
-	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Position change: %1\n", position));
+	const double speed = _session->transport_speed();
+	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Transport Position Change: %1, speed: %2\n", position, speed));
+
+	if (speed == 0.0f && Config->get_send_midi_clock()) {
+		send_position_event (position, 0);
+	}
 
 	_last_tick = position;
 }
 
-void MidiClockTicker::transport_looped()
+void
+MidiClockTicker::transport_looped()
 {
 	Location* loop_location = _session->locations()->auto_loop_location();
 	assert(loop_location);
@@ -143,7 +154,8 @@ void MidiClockTicker::transport_looped()
 	}
 }
 
-void MidiClockTicker::tick (const framepos_t& transport_frame)
+void
+MidiClockTicker::tick (const framepos_t& transport_frame)
 {
 	if (!Config->get_send_midi_clock() || _session == 0 || _session->transport_speed() != 1.0f || _midi_port == 0) {
 		return;
@@ -155,9 +167,11 @@ void MidiClockTicker::tick (const framepos_t& transport_frame)
 
 		MIDI::JackMIDIPort* mp = dynamic_cast<MIDI::JackMIDIPort*> (_midi_port);
 		
+		/*
 		DEBUG_TRACE (PBD::DEBUG::MidiClock,
 			     string_compose ("Transport: %1, last tick time: %2, next tick time: %3, offset: %4, cycle length: %5\n",
 					     transport_frame, _last_tick, next_tick, next_tick_offset, mp ? mp->nframes_this_cycle() : 0));
+		*/
 
 		if (!mp || (next_tick_offset >= mp->nframes_this_cycle())) {
 			break;
@@ -171,7 +185,8 @@ void MidiClockTicker::tick (const framepos_t& transport_frame)
 	}
 }
 
-double MidiClockTicker::one_ppqn_in_frames (framepos_t transport_position)
+double
+MidiClockTicker::one_ppqn_in_frames (framepos_t transport_position)
 {
 	const Tempo& current_tempo = _session->tempo_map().tempo_at (transport_position);
 	double frames_per_beat = current_tempo.frames_per_beat (_session->nominal_frame_rate());
@@ -182,47 +197,88 @@ double MidiClockTicker::one_ppqn_in_frames (framepos_t transport_position)
 	return frames_per_quarter_note / double (_ppqn);
 }
 
-void MidiClockTicker::send_midi_clock_event (pframes_t offset)
+void
+MidiClockTicker::send_midi_clock_event (pframes_t offset)
 {
 	if (!_midi_port) {
 		return;
 	}
 
-	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Tick with offset %1\n", offset));
+	// DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Tick with offset %1\n", offset));
 
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_CLOCK };
 	_midi_port->write (_midi_clock_tick, 1, offset);
 }
 
-void MidiClockTicker::send_start_event (pframes_t offset)
+void
+MidiClockTicker::send_start_event (pframes_t offset)
 {
 	if (!_midi_port) {
 		return;
 	}
+
+	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Start %1\n", _last_tick));
 
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_START };
 	_midi_port->write (_midi_clock_tick, 1, offset);
 }
 
-void MidiClockTicker::send_continue_event (pframes_t offset)
+void
+MidiClockTicker::send_continue_event (pframes_t offset)
 {
 	if (!_midi_port) {
 		return;
 	}
+
+	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Continue %1\n", _last_tick));
 
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_CONTINUE };
 	_midi_port->write (_midi_clock_tick, 1, offset);
 }
 
-void MidiClockTicker::send_stop_event (pframes_t offset)
+void
+MidiClockTicker::send_stop_event (pframes_t offset)
 {
 	if (!_midi_port) {
 		return;
 	}
 
+	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Stop %1\n", _last_tick));
+
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_STOP };
 	_midi_port->write (_midi_clock_tick, 1, offset);
 }
 
+void
+MidiClockTicker::send_position_event (framepos_t transport_position, pframes_t offset)
+{
+	if (_midi_port == 0 || _session == 0 || _session->engine().freewheeling()) {
+		return;
+	}
 
+	const TempoMap& tempo = _session->tempo_map();
 
+	Timecode::BBT_Time time;
+	_session->bbt_time (transport_position, time);
+	const double beats_per_bar = tempo.meter_at(transport_position).divisions_per_bar();
+
+	/* Midi Beats in terms of Song Position Pointer is equivalent to total
+	   sixteenth notes at 'time' */
+	const uint32_t midi_beats = 4 * (((time.bars - 1) * beats_per_bar) + time.beats - 1);
+
+	/* can only use 14bits worth */
+	if (midi_beats > 0x3fff) {
+		return;
+	}
+
+	/* split midi beats into a 14bit value */
+	MIDI::byte msg[3] = {
+		MIDI_CMD_COMMON_SONG_POS,
+		midi_beats & 0x007f,
+		midi_beats & 0x3f80
+	};
+
+	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Song Position: %1\n", midi_beats));
+
+	_midi_port->midimsg (msg, sizeof (msg), offset);
+}
