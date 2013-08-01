@@ -395,23 +395,16 @@ ARDOUR_UI::create_engine ()
 
 	loading_message (_("Starting audio engine"));
 
-	try {
-		engine = ARDOUR::AudioEngine::create (ARDOUR_COMMAND_LINE::backend_client_name, ARDOUR_COMMAND_LINE::backend_session_uuid);
-
-	} catch (...) {
-
-		return -1;
-	}
+	AudioEngine* engine = AudioEngine::instance();
 
 	engine->Stopped.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_stopped, this), gui_context());
 	engine->Running.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_running, this), gui_context());
 	engine->SampleRateChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_sample_rate, this, _1), gui_context());
 
 	engine->Halted.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
+	engine->BackendAvailable.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::post_engine, this));
 
 	ARDOUR::Port::set_connecting_blocked (ARDOUR_COMMAND_LINE::no_connect_ports);
-
-	post_engine ();
 
 	return 0;
 }
@@ -419,6 +412,8 @@ ARDOUR_UI::create_engine ()
 void
 ARDOUR_UI::post_engine ()
 {
+	cerr << "Backend available!\n";
+
 	/* Things to be done once we create the AudioEngine
 	 */
 
@@ -689,6 +684,7 @@ ARDOUR_UI::startup ()
 {
 	Application* app = Application::instance ();
 	char *nsm_url;
+
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
 	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_load));
 

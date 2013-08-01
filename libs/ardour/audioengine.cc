@@ -63,7 +63,7 @@ using namespace PBD;
 gint AudioEngine::m_meter_exit;
 AudioEngine* AudioEngine::_instance = 0;
 
-AudioEngine::AudioEngine (const std::string& bcn, const std::string& bsu)
+AudioEngine::AudioEngine ()
 	: session_remove_pending (false)
 	, session_removal_countdown (-1)
 	, monitor_check_interval (INT32_MAX)
@@ -75,10 +75,9 @@ AudioEngine::AudioEngine (const std::string& bcn, const std::string& bsu)
 	, port_remove_in_progress (false)
 	, m_meter_thread (0)
 	, _main_thread (0)
-	, backend_client_name (bcn)
-	, backend_session_uuid (bsu)
 {
 	g_atomic_int_set (&m_meter_exit, 0);
+	discover_backends ();
 }
 
 AudioEngine::~AudioEngine ()
@@ -95,12 +94,15 @@ AudioEngine::~AudioEngine ()
 }
 
 AudioEngine*
-AudioEngine::create (const std::string& bcn, const std::string& bsu)
+AudioEngine::create ()
 {
 	if (_instance) {
 		return _instance;
 	}
-	return new AudioEngine (bcn, bsu);
+
+	_instance = new AudioEngine ();
+	
+	return _instance;
 }
 
 void
@@ -119,8 +121,6 @@ _thread_init_callback (void * /*arg*/)
 
 	MIDI::JackMIDIPort::set_process_thread (pthread_self());
 }
-
-
 
 void
 AudioEngine::split_cycle (pframes_t offset)
@@ -488,8 +488,8 @@ AudioEngine::discover_backends ()
 
 	_backends.clear ();
 
-	Glib::PatternSpec so_extension_pattern("*.so");
-	Glib::PatternSpec dylib_extension_pattern("*.dylib");
+	Glib::PatternSpec so_extension_pattern("*backend.so");
+	Glib::PatternSpec dylib_extension_pattern("*backend.dylib");
 
 	find_matching_files_in_search_path (backend_search_path (),
 	                                    so_extension_pattern, backend_modules);
@@ -497,7 +497,7 @@ AudioEngine::discover_backends ()
 	find_matching_files_in_search_path (backend_search_path (),
 	                                    dylib_extension_pattern, backend_modules);
 
-	DEBUG_TRACE (DEBUG::Panning, string_compose (_("looking for backends in %1"), backend_search_path().to_string()));
+	DEBUG_TRACE (DEBUG::Panning, string_compose (_("looking for backends in %1\n"), backend_search_path().to_string()));
 
 	for (vector<std::string>::iterator i = backend_modules.begin(); i != backend_modules.end(); ++i) {
 
@@ -514,26 +514,26 @@ AudioEngine::discover_backends ()
 AudioBackendInfo*
 AudioEngine::backend_discover (const string& path)
 {
-	Glib::Module* module = new Glib::Module(path);
+	Glib::Module module (path);
 	AudioBackendInfo* info;
 	void* sym = 0;
 
 	if (!module) {
 		error << string_compose(_("AudioEngine: cannot load module \"%1\" (%2)"), path,
-				Glib::Module::get_last_error()) << endmsg;
-		delete module;
+					Glib::Module::get_last_error()) << endmsg;
 		return 0;
 	}
-
-	if (!module->get_symbol("descriptor", sym)) {
+	
+	if (!module.get_symbol ("descriptor", sym)) {
 		error << string_compose(_("AudioEngine: backend at \"%1\" has no descriptor."), path) << endmsg;
 		error << Glib::Module::get_last_error() << endmsg;
-		delete module;
 		return 0;
 	}
 
+	module.make_resident ();
+	
 	info = (AudioBackendInfo*) sym;
-
+	
 	return info;
 }
 
@@ -564,11 +564,13 @@ AudioEngine::drop_backend ()
 	if (_backend) {
 		_backend->stop ();
 		_backend.reset ();
+
+		BackendRemoved(); /* EMIT SIGNAL */
 	}
 }
 
 int
-AudioEngine::set_backend (const std::string& name)
+AudioEngine::set_backend (const std::string& name, const std::string& arg1, const std::string& arg2)
 {
 	BackendMap::iterator b = _backends.find (name);
 
@@ -580,13 +582,20 @@ AudioEngine::set_backend (const std::string& name)
 
 	try {
 
+		if (b->second->instantiate (arg1, arg2)) {
+			throw failed_constructor ();
+		}
+
 		_backend = b->second->backend_factory (*this);
 		_impl = b->second->portengine_factory (*this);
+
 
 	} catch (...) {
 		error << string_compose (_("Could not create backend for %1"), name) << endmsg;
 		return -1;
 	}
+
+	BackendAvailable (); /* EMIT SIGNAL */
 
 	return 0;
 }
@@ -993,3 +1002,4 @@ AudioEngine::halted_callback (const char* why)
 	MIDI::JackMIDIPort::EngineHalted (); /* EMIT SIGNAL */
 	Halted (why); /* EMIT SIGNAL */
 }
+

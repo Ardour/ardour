@@ -58,6 +58,10 @@ JACKAudioBackend::JACKAudioBackend (AudioEngine& e, boost::shared_ptr<JackConnec
 {
 }
 
+JACKAudioBackend::~JACKAudioBackend()
+{
+}
+
 string
 JACKAudioBackend::name() const 
 {
@@ -824,4 +828,27 @@ JACKAudioBackend::update_latencies ()
 {
 	GET_PRIVATE_JACK_POINTER (_priv_jack);
 	jack_recompute_total_latencies (_priv_jack);
+}
+
+ChanCount
+JACKAudioBackend::n_physical (unsigned long flags) const
+{
+	ChanCount c;
+
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, c);
+
+	const char ** ports = jack_get_ports (_priv_jack, NULL, NULL, JackPortIsPhysical | flags);
+
+	if (ports) {
+		for (uint32_t i = 0; ports[i]; ++i) {
+			if (!strstr (ports[i], "Midi-Through")) {
+				DataType t (jack_port_type (jack_port_by_name (_priv_jack, ports[i])));
+				c.set (t, c.get (t) + 1);
+			}
+		}
+		
+		jack_free (ports);
+	}
+
+	return c;
 }

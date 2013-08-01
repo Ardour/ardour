@@ -1337,7 +1337,7 @@ IO::bundle_changed (Bundle::Change /*c*/)
 string
 IO::build_legal_port_name (DataType type)
 {
-	const int name_size = jack_port_name_size();
+	const int name_size = AudioEngine::instance()->port_name_size();
 	int limit;
 	string suffix;
 
@@ -1371,7 +1371,7 @@ IO::build_legal_port_name (DataType type)
 
 	// allow up to 4 digits for the output port number, plus the slash, suffix and extra space
 
-	limit = name_size - _session.engine().client_name().length() - (suffix.length() + 5);
+	limit = name_size - AudioEngine::instance()->my_name().length() - (suffix.length() + 5);
 
 	char buf1[name_size+1];
 	char buf2[name_size+1];

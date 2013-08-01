@@ -331,6 +331,17 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	EventTypeMap::instance().new_parameter(EnvelopeAutomation);
 	EventTypeMap::instance().new_parameter(MidiCCAutomation);
 
+	ARDOUR::AudioEngine::create ();
+
+	uint32_t backend_cnt;
+
+	if ((backend_cnt = AudioEngine::instance()->available_backends().size()) == 0) {
+		error << _("No audio/MIDI backends are available") << endmsg;
+		return -1;
+	}
+
+	cerr << "We have " << backend_cnt << endl;
+
 	return 0;
 }
 

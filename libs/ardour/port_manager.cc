@@ -67,6 +67,10 @@ PortManager::remove_all_ports ()
 string
 PortManager::make_port_name_relative (const string& portname) const
 {
+	if (!_impl) {
+		return portname;
+	}
+
 	string::size_type len;
 	string::size_type n;
 	string self = _impl->my_name();
@@ -105,6 +109,10 @@ PortManager::make_port_name_non_relative (const string& portname) const
 bool
 PortManager::port_is_mine (const string& portname) const
 {
+	if (!_impl) {
+		return true;
+	}
+
 	string self = _impl->my_name();
 
 	if (portname.find_first_of (':') != string::npos) {
@@ -119,6 +127,10 @@ PortManager::port_is_mine (const string& portname) const
 bool
 PortManager::port_is_physical (const std::string& portname) const
 {
+	if (!_impl) {
+		return false;
+	}
+
 	PortEngine::PortHandle ph = _impl->get_port_by_name (portname);
 	if (!ph) {
 		return false;
@@ -130,24 +142,38 @@ PortManager::port_is_physical (const std::string& portname) const
 void
 PortManager::get_physical_outputs (DataType type, std::vector<std::string>& s)
 {
+	if (!_impl) {
+		return;
+	}
 	_impl->get_physical_outputs (type, s);
 }
  
 void
 PortManager::get_physical_inputs (DataType type, std::vector<std::string>& s)
 {
+	if (!_impl) {
+		return;
+	}
+
 	_impl->get_physical_inputs (type, s);
 }
  
 ChanCount
 PortManager::n_physical_outputs () const
 {
+	if (!_impl) {
+		return ChanCount::ZERO;
+	}
+
 	return _impl->n_physical_outputs ();
 }
  
 ChanCount
 PortManager::n_physical_inputs () const
 {
+	if (!_impl) {
+		return ChanCount::ZERO;
+	}
 	return _impl->n_physical_inputs ();
 }
 
@@ -158,6 +184,10 @@ PortManager::n_physical_inputs () const
 boost::shared_ptr<Port>
 PortManager::get_port_by_name (const string& portname)
 {
+	if (!_impl) {
+		return boost::shared_ptr<Port>();
+	}
+
         if (!port_is_mine (portname)) {
                 /* not an ardour port */
                 return boost::shared_ptr<Port> ();
@@ -200,12 +230,20 @@ PortManager::port_renamed (const std::string& old_relative_name, const std::stri
 int
 PortManager::get_ports (const string& port_name_pattern, DataType type, PortFlags flags, vector<string>& s)
 {
+	if (!_impl) {
+		return 0;
+	}
+
 	return _impl->get_ports (port_name_pattern, type, flags, s);
 }
 
 void
 PortManager::port_registration_failure (const std::string& portname)
 {
+	if (!_impl) {
+		return;
+	}
+
 	string full_portname = _impl->my_name();
 	full_portname += ':';
 	full_portname += portname;
@@ -293,6 +331,10 @@ PortManager::unregister_port (boost::shared_ptr<Port> port)
 bool
 PortManager::connected (const string& port_name)
 {
+	if (!_impl) {
+		return false;
+	}
+
 	PortEngine::PortHandle handle = _impl->get_port_by_name (port_name);
 
 	if (!handle) {
@@ -437,12 +479,20 @@ PortManager::registration_callback ()
 bool
 PortManager::can_request_input_monitoring () const
 {
+	if (!_impl) {
+		return false;
+	}
+
 	return _impl->can_monitor_input ();
 }
  
 void
 PortManager::request_input_monitoring (const string& name, bool yn) const
 {
+	if (!_impl) {
+		return;
+	}
+
 	PortEngine::PortHandle ph = _impl->get_port_by_name (name);
 
 	if (ph) {
@@ -453,6 +503,10 @@ PortManager::request_input_monitoring (const string& name, bool yn) const
 void
 PortManager::ensure_input_monitoring (const string& name, bool yn) const
 {
+	if (!_impl) {
+		return;
+	}
+
 	PortEngine::PortHandle ph = _impl->get_port_by_name (name);
 
 	if (ph) {
@@ -460,3 +514,32 @@ PortManager::ensure_input_monitoring (const string& name, bool yn) const
 	}
 }
 
+uint32_t
+PortManager::port_name_size() const
+{
+	if (!_impl) {
+		return 0;
+	}
+	
+	return _impl->port_name_size ();
+}
+
+string
+PortManager::my_name() const
+{
+	if (!_impl) {
+		return string();
+	}
+	
+	return _impl->my_name();
+}
+
+int
+PortManager::graph_order_callback ()
+{
+	if (!_port_remove_in_progress) {
+		GraphReordered(); /* EMIT SIGNAL */
+	}
+
+	return 0;
+}

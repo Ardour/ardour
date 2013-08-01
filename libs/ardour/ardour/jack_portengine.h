@@ -44,6 +44,8 @@ class JACKPortEngine : public PortEngine
 
     const std::string& my_name() const;
 
+    uint32_t port_name_size() const;
+
     int         set_port_name (PortHandle, const std::string&);
     std::string get_port_name (PortHandle) const;
     PortHandle* get_port_by_name (const std::string&) const;

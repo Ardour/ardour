@@ -67,19 +67,17 @@ class AudioEngine : public SessionHandlePtr, public PortManager
 {
 public:
 
-    static AudioEngine* create (const std::string&  client_name, const std::string& session_uuid);
+    static AudioEngine* create ();
 
     virtual ~AudioEngine ();
     
     int discover_backends();
     std::vector<std::string> available_backends() const;
     std::string current_backend_name () const;
-    int set_backend (const std::string&);
+    int set_backend (const std::string&, const std::string& arg1, const std::string& arg2);
 
     ProcessThread* main_thread() const { return _main_thread; }
     
-    std::string client_name() const { return backend_client_name; }
-
     /* START BACKEND PROXY API 
      *
      * See audio_backend.h for full documentation and semantics. These wrappers
@@ -144,7 +142,6 @@ public:
     int  reset_timebase ();
     
     void update_latencies ();
-
     
     /* this signal is sent for every process() cycle while freewheeling.
        (the regular process() call to session->process() is not made)
@@ -154,10 +151,7 @@ public:
     
     PBD::Signal0<void> Xrun;
     
-    /* this signal is if the backend notifies us of a graph order event */
-    
-    PBD::Signal0<void> GraphReordered;
-    
+
 #ifdef HAVE_JACK_SESSION
     PBD::Signal1<void,jack_session_event_t *> JackSessionEvent;
 #endif
@@ -176,6 +170,13 @@ public:
     
     PBD::Signal0<void> Running;
     PBD::Signal0<void> Stopped;
+
+    /* these two are emitted as we create backends that
+       can actually be used to do stuff (e.g. register ports)
+    */
+    
+    PBD::Signal0<void> BackendAvailable;
+    PBD::Signal0<void> BackendRemoved;
     
     static AudioEngine* instance() { return _instance; }
     static void destroy();
@@ -197,7 +198,7 @@ public:
     static void thread_init_callback (void *);
 
   private:
-    AudioEngine (const std::string&  client_name, const std::string& session_uuid);
+    AudioEngine ();
 
     static AudioEngine*       _instance;
 
@@ -226,9 +227,6 @@ public:
     bool                       port_remove_in_progress;
     Glib::Threads::Thread*     m_meter_thread;
     ProcessThread*            _main_thread;
-    
-    std::string               backend_client_name;
-    std::string               backend_session_uuid;
     
     void meter_thread ();
     void start_metering_thread ();

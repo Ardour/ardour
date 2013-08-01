@@ -144,7 +144,6 @@ class JACKAudioBackend : public AudioBackend {
     static void* _start_process_thread (void*);
 
     ChanCount n_physical (unsigned long) const;
-    void get_physical (DataType, unsigned long, std::vector<std::string> &);
 
     /* pffooo */
 

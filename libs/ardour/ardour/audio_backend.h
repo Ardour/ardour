@@ -284,7 +284,7 @@ class AudioBackend {
     virtual int set_time_master (bool /*yn*/) { return 0; }
 
     virtual int        usecs_per_cycle () const { return 1000000 * (buffer_size() / sample_rate()); }
-    virtual size_t     raw_buffer_size (DataType t);
+    virtual size_t     raw_buffer_size (DataType t) = 0;
     
     /* Process time */
     

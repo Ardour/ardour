@@ -222,6 +222,21 @@ JACKPortEngine::physically_connected (PortHandle p)
 	return false;
 }
 
+int
+JACKPortEngine::get_connections (PortHandle port, vector<string>& s)
+{
+	const char** ports = jack_port_get_connections ((jack_port_t*) port);
+
+	if (ports) {
+		for (int i = 0; ports[i]; ++i) {
+			s.push_back (ports[i]);
+		}
+		jack_free (ports);
+	}
+
+	return s.size();
+}
+
 DataType
 JACKPortEngine::port_data_type (PortHandle p) const
 {
@@ -357,6 +372,23 @@ JACKPortEngine::can_monitor_input () const
 	return true;
 }
 
+int
+JACKPortEngine::request_input_monitoring (PortHandle port, bool yn)
+{
+	return jack_port_request_monitor ((jack_port_t*) port, yn);
+}
+int
+JACKPortEngine::ensure_input_monitoring (PortHandle port, bool yn)
+{
+	return jack_port_ensure_monitor ((jack_port_t*) port, yn);
+}
+bool
+JACKPortEngine::monitoring_input (PortHandle port)
+{
+	return jack_port_monitoring_input ((jack_port_t*) port);
+}
+
+
 pframes_t
 JACKPortEngine::sample_time_at_cycle_start ()
 {
@@ -479,4 +511,10 @@ void*
 JACKPortEngine::get_buffer (PortHandle port, pframes_t nframes)
 {
 	return jack_port_get_buffer ((jack_port_t*) port, nframes);
+}
+
+uint32_t
+JACKPortEngine::port_name_size() const
+{
+	return jack_port_name_size ();
 }

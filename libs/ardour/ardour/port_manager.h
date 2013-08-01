@@ -47,7 +47,10 @@ class PortManager
 
     void set_port_engine (PortEngine& pe);
     PortEngine& port_engine() { return *_impl; }
-    
+
+    uint32_t port_name_size() const;
+    std::string my_name() const;
+
     /* Port registration */
     
     boost::shared_ptr<Port> register_input_port (DataType, const std::string& portname);
@@ -113,6 +116,9 @@ class PortManager
     void connect_callback (const std::string&, const std::string&, bool connection);
 
     bool port_remove_in_progress() const { return _port_remove_in_progress; }
+
+    /** Emitted if the backend notifies us of a graph order event */
+    PBD::Signal0<void> GraphReordered;
 
     /** Emitted if a Port is registered or unregistered */
     PBD::Signal0<void> PortRegisteredOrUnregistered;

@@ -93,6 +93,8 @@ class PortEngine {
 
     virtual const std::string& my_name() const = 0;
 
+    virtual uint32_t port_name_size() const = 0;
+
     virtual int         set_port_name (PortHandle, const std::string&) = 0;
     virtual std::string get_port_name (PortHandle) const = 0;
     virtual PortHandle* get_port_by_name (const std::string&) const = 0;
