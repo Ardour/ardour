@@ -126,6 +126,8 @@ MidiClockTicker::set_session (Session* s)
 	 }
 }
 
+static bool need_reset = false;
+
 void
 MidiClockTicker::session_located()
 {
@@ -136,6 +138,7 @@ MidiClockTicker::session_located()
 	}
 
 	_last_tick = _pos->frame;
+	need_reset = true;
 
 	if (_pos->speed == 0.0f && Config->get_send_midi_clock()) {
 		uint32_t where = std::floor (_pos->midi_beats);
@@ -253,34 +256,37 @@ MidiClockTicker::transport_looped()
 void
 MidiClockTicker::tick (const framepos_t& transport_frame)
 {
-
 	if (!Config->get_send_midi_clock() || _session == 0 || _session->transport_speed() != 1.0f || _midi_port == 0) {
 		return;
 	}
 
-	while (true) {
-		double next_tick = _last_tick + one_ppqn_in_frames (transport_frame);
-		frameoffset_t next_tick_offset = llrint (next_tick) - transport_frame;
+	double iter = _last_tick;
+	double clock_delta = one_ppqn_in_frames (transport_frame);
 
+	while (true) {
+		double next_tick = iter + clock_delta;
+		frameoffset_t next_tick_offset = llrint (next_tick) - transport_frame;
 
 		MIDI::JackMIDIPort* mp = dynamic_cast<MIDI::JackMIDIPort*> (_midi_port);
 		
-
 		DEBUG_TRACE (PBD::DEBUG::MidiClock,
 			     string_compose ("Transport: %1, last tick time: %2, next tick time: %3, offset: %4, cycle length: %5\n",
 					     transport_frame, _last_tick, next_tick, next_tick_offset, mp ? mp->nframes_this_cycle() : 0));
 
 
 		if (!mp || (next_tick_offset >= mp->nframes_this_cycle())) {
-			break;
+			return;
 		}
 
 		if (next_tick_offset >= 0) {
 			send_midi_clock_event (next_tick_offset);
+			_last_tick += clock_delta;
 		}
 
-		_pos->frame = _last_tick = next_tick;
+		iter = next_tick;
 	}
+
+	_pos->frame = _last_tick;
 }
 
 double
