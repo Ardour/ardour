@@ -193,7 +193,7 @@ MidiClockTicker::transport_state_changed()
 		return;
 	}
 
-	DEBUG_TRACE (PBD::DEBUG::MidiClock,
+	DEBUG_TRACE (DEBUG::MidiClock,
 		 string_compose ("Transport state change @ %4, speed: %1 position: %2 play loop: %3\n",
 							_pos->speed, _pos->frame, _session->get_play_loop(), _pos->frame)
 	);
@@ -236,7 +236,7 @@ MidiClockTicker::position_changed (framepos_t)
 {
 #if 0
 	const double speed = _session->transport_speed();
-	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Transport Position Change: %1, speed: %2\n", position, speed));
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Transport Position Change: %1, speed: %2\n", position, speed));
 
 	if (speed == 0.0f && Config->get_send_midi_clock()) {
 		send_position_event (position, 0);
@@ -252,7 +252,7 @@ MidiClockTicker::transport_looped()
 	Location* loop_location = _session->locations()->auto_loop_location();
 	assert(loop_location);
 
-	DEBUG_TRACE (PBD::DEBUG::MidiClock,
+	DEBUG_TRACE (DEBUG::MidiClock,
 		     string_compose ("Transport looped, position: %1, loop start: %2, loop end: %3, play loop: %4\n",
 				     _session->transport_frame(), loop_location->start(), loop_location->end(), _session->get_play_loop())
 		);
@@ -328,7 +328,7 @@ MidiClockTicker::send_midi_clock_event (pframes_t offset)
 		return;
 	}
 
-	// DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Tick with offset %1\n", offset));
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Tick with offset %1\n", offset));
 
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_CLOCK };
 	_midi_port->write (_midi_clock_tick, 1, offset);
@@ -341,7 +341,7 @@ MidiClockTicker::send_start_event (pframes_t offset)
 		return;
 	}
 
-	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Start %1\n", _last_tick));
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Start %1\n", _last_tick));
 
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_START };
 	_midi_port->write (_midi_clock_tick, 1, offset);
@@ -354,7 +354,7 @@ MidiClockTicker::send_continue_event (pframes_t offset)
 		return;
 	}
 
-	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Continue %1\n", _last_tick));
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Continue %1\n", _last_tick));
 
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_CONTINUE };
 	_midi_port->write (_midi_clock_tick, 1, offset);
@@ -367,7 +367,7 @@ MidiClockTicker::send_stop_event (pframes_t offset)
 		return;
 	}
 
-	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Stop %1\n", _last_tick));
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Stop %1\n", _last_tick));
 
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_STOP };
 	_midi_port->write (_midi_clock_tick, 1, offset);
@@ -394,5 +394,5 @@ MidiClockTicker::send_position_event (uint32_t midi_beats, pframes_t offset)
 
 	_midi_port->midimsg (msg, sizeof (msg), offset);
 
-	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Song Position Sent: %1\n", midi_beats));
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Song Position Sent: %1\n", midi_beats));
 }
