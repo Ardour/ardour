@@ -16,11 +16,6 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-// 'std::isnan()' is not available in MSVC.
-#ifndef COMPILER_MSVC
-using std::isnan;
-#endif
-
 #include <cmath>
 #include <cassert>
 #include <utility>
@@ -817,7 +812,7 @@ ControlList::modify (iterator iter, double when, double val)
 		(*iter)->when = when;
 		(*iter)->value = val;
 
-		if (isnan (val)) {
+		if (::isnan (val)) {
 			abort ();
 		}
 

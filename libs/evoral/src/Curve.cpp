@@ -22,6 +22,7 @@
 #include <climits>
 #include <cfloat>
 #include <cmath>
+#include <vector>
 
 #include <glibmm/threads.h>
 

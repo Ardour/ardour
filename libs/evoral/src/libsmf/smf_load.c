@@ -123,7 +123,7 @@ parse_mthd_header(smf_t *smf)
 		return (-1);
 	}
 
-	tmp_mthd = (chunk_header_struct*)smf->file_buffer;
+	tmp_mthd = (struct chunk_header_struct*)smf->file_buffer;
 
 	if (!chunk_signature_matches(tmp_mthd, "MThd")) {
 		g_critical("SMF error: MThd signature not found, is that a MIDI file?");
