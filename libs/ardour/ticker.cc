@@ -32,7 +32,7 @@
 #include "ardour/debug.h"
 
 using namespace ARDOUR;
-
+using namespace PBD;
 
 /** MIDI Clock Position tracking */
 class MidiClockTicker::Position : public Timecode::BBT_Time
@@ -57,16 +57,15 @@ public:
 		}
 
 		if (frame != fr) {
+			frame = fr;
 
-			s->bbt_time (fr, *this);
+			s->bbt_time (this->frame, *this);
 
 			const TempoMap& tempo = s->tempo_map();
 
 			const double divisions   = tempo.meter_at(frame).divisions_per_bar();
 			const double divisor     = tempo.meter_at(frame).note_divisor();
 			const double qnote_scale = divisor * 0.25f;
-
-			frame = fr;
 
 			/* Midi Beats in terms of Song Position Pointer is equivalent to total
 			   sixteenth notes at 'time' */
@@ -80,8 +79,6 @@ public:
 			didit = true;
 		}
 
-		print (std::clog);
-
 		return didit;
 	}
 
@@ -91,7 +88,7 @@ public:
 	double      midi_clocks;
 
 	void print (std::ostream& s) {
-		s << "MCLK Position: frames: " << frame << " midi beats: " << midi_beats << " speed: " << speed << std::endl;
+		s << "frames: " << frame << " midi beats: " << midi_beats << " speed: " << speed;
 	}
 };
 
@@ -132,19 +129,18 @@ MidiClockTicker::set_session (Session* s)
 void
 MidiClockTicker::session_located()
 {
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Session Located: %1, speed: %2\n", _session->transport_frame(), _session->transport_speed()));
+
 	if (0 == _session || ! _pos->sync (_session)) {
 		return;
 	}
 
 	_last_tick = _pos->frame;
 
-	// WIP - Testing code
-	if (0 == _pos->frame) {
-		std::clog << "zero frame\n";
-		if (1.0f == _pos->speed) {
-			std::clog << "normal speed:\n";
-
-		}
+	if (_pos->speed == 0.0f && Config->get_send_midi_clock()) {
+		uint32_t where = std::floor (_pos->midi_beats);
+		send_position_event (where, 0);
+		return;
 	}
 }
 
@@ -174,48 +170,52 @@ MidiClockTicker::transport_state_changed()
 		return;
 	}
 
-	float      speed    = _session->transport_speed();
-	framepos_t position = _session->transport_frame();
+	if (! _pos->sync (_session)) {
+		return;
+	}
 
 	DEBUG_TRACE (PBD::DEBUG::MidiClock,
-		 string_compose ("Transport state change @ %4, speed: %1 position: %2 play loop: %3\n", speed, position, _session->get_play_loop(), position)
+		 string_compose ("Transport state change @ %4, speed: %1 position: %2 play loop: %3\n",
+							_pos->speed, _pos->frame, _session->get_play_loop(), _pos->frame)
 	);
 
-	if (speed == 1.0f) {
-		_last_tick = position;
+	_last_tick = _pos->frame;
 
-		if (!Config->get_send_midi_clock())
-			return;
+	if (! Config->get_send_midi_clock()) {
+		return;
+	}
+
+	if (_pos->speed == 1.0f) {
 
 		if (_session->get_play_loop()) {
 			assert(_session->locations()->auto_loop_location());
-			if (position == _session->locations()->auto_loop_location()->start()) {
+
+			if (_pos->frame == _session->locations()->auto_loop_location()->start()) {
 				send_start_event(0);
 			} else {
 				send_continue_event(0);
 			}
-		} else if (position == 0) {
+
+		} else if (_pos->frame == 0) {
 			send_start_event(0);
 		} else {
 			send_continue_event(0);
 		}
 
-		send_midi_clock_event(0);
+		// send_midi_clock_event (0);
 
-	} else if (speed == 0.0f) {
-		if (!Config->get_send_midi_clock())
-			return;
-
-		send_stop_event(0);
-		send_position_event (position, 0);
+	} else if (_pos->speed == 0.0f) {
+		send_stop_event (0);
+		send_position_event (std::floor (_pos->midi_beats), 0);
 	}
 
-	tick (position);
+	// tick (_pos->frame);
 }
 
 void
-MidiClockTicker::position_changed (framepos_t position)
+MidiClockTicker::position_changed (framepos_t)
 {
+#if 0
 	const double speed = _session->transport_speed();
 	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Transport Position Change: %1, speed: %2\n", position, speed));
 
@@ -224,6 +224,7 @@ MidiClockTicker::position_changed (framepos_t position)
 	}
 
 	_last_tick = position;
+#endif
 }
 
 void
@@ -347,21 +348,11 @@ MidiClockTicker::send_stop_event (pframes_t offset)
 }
 
 void
-MidiClockTicker::send_position_event (framepos_t transport_position, pframes_t offset)
+MidiClockTicker::send_position_event (uint32_t midi_beats, pframes_t offset)
 {
-	if (_midi_port == 0 || _session == 0 || _session->engine().freewheeling()) {
+	if (!_midi_port) {
 		return;
 	}
-
-	const TempoMap& tempo = _session->tempo_map();
-
-	Timecode::BBT_Time time;
-	_session->bbt_time (transport_position, time);
-	const double beats_per_bar = tempo.meter_at(transport_position).divisions_per_bar();
-
-	/* Midi Beats in terms of Song Position Pointer is equivalent to total
-	   sixteenth notes at 'time' */
-	const uint32_t midi_beats = 4 * (((time.bars - 1) * beats_per_bar) + time.beats - 1);
 
 	/* can only use 14bits worth */
 	if (midi_beats > 0x3fff) {
@@ -375,7 +366,7 @@ MidiClockTicker::send_position_event (framepos_t transport_position, pframes_t o
 		midi_beats & 0x3f80
 	};
 
-	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Song Position: %1\n", midi_beats));
-
 	_midi_port->midimsg (msg, sizeof (msg), offset);
+
+	DEBUG_TRACE (PBD::DEBUG::MidiClock, string_compose ("Song Position Sent: %1\n", midi_beats));
 }

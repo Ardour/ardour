@@ -83,7 +83,7 @@ private:
 	void send_start_event (pframes_t offset);
 	void send_continue_event (pframes_t offset);
 	void send_stop_event (pframes_t offset);
-	void send_position_event (framepos_t transport_position, pframes_t offset);
+	void send_position_event (uint32_t midi_clocks, pframes_t offset);
 };
 
 }
