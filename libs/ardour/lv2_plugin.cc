@@ -970,7 +970,7 @@ LV2Plugin::find_presets()
 				                               lilv_node_as_string(name))));
 		} else {
 			warning << string_compose(
-			    _("Plugin \"%1\% preset \"%2%\" is missing a label\n"),
+			    _("Plugin \"%1\" preset \"%2\" is missing a label\n"),
 			    lilv_node_as_string(lilv_plugin_get_uri(_impl->plugin)),
 			    lilv_node_as_string(preset)) << endmsg;
 		}
