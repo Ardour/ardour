@@ -98,6 +98,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _default_type (default_type)
 	, _remote_control_id (0)
 	, _in_configure_processors (false)
+	, _initial_io_setup (false)
 	, _custom_meter_position_noted (false)
 	, _last_custom_meter_was_at_end (false)
 {
@@ -2011,6 +2012,7 @@ Route::set_state (const XMLNode& node, int version)
 	}
 
 	set_id (node);
+	_initial_io_setup = true;
 
 	if ((prop = node.property (X_("flags"))) != 0) {
 		_flags = Flag (string_2_enum (prop->value(), _flags));
@@ -2077,6 +2079,8 @@ Route::set_state (const XMLNode& node, int version)
 	if ((prop = node.property (X_("meter-type"))) != 0) {
 		_meter_type = MeterType (string_2_enum (prop->value (), _meter_type));
 	}
+
+	_initial_io_setup = false;
 
 	set_processor_state (processor_state);
 
@@ -2958,6 +2962,9 @@ void
 Route::output_change_handler (IOChange change, void * /*src*/)
 {
 	bool need_to_queue_solo_change = true;
+	if (_initial_io_setup) {
+		return;
+	}
 
 	if ((change.type & IOChange::ConfigurationChanged)) {
 		/* This is called with the process lock held if change 

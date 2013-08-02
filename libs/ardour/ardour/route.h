@@ -557,6 +557,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	bool output_port_count_changing (ChanCount);
 
 	bool _in_configure_processors;
+	bool _initial_io_setup;
 
 	int configure_processors_unlocked (ProcessorStreams*);
 	std::list<std::pair<ChanCount, ChanCount> > try_configure_processors (ChanCount, ProcessorStreams *);
