@@ -62,7 +62,7 @@ CapturingProcessor::configure_io (ChanCount in, ChanCount out)
 }
 
 bool
-CapturingProcessor::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
+CapturingProcessor::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
 	out = in;
 	return true;

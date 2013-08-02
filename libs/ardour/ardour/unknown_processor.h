@@ -49,7 +49,7 @@ public:
 		return false;
 	}
 
-	bool can_support_io_configuration (const ChanCount &, ChanCount &) const {
+	bool can_support_io_configuration (const ChanCount &, ChanCount &) {
 		return false;
 	}
 

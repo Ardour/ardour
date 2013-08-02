@@ -118,7 +118,7 @@ public:
 	int set_state (const XMLNode&, int /* version */);
 
 	bool configure_io (ChanCount in, ChanCount out);
-	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
+	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 
 	void set_cut_all (bool);
 	void set_dim_all (bool);

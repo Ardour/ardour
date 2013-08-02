@@ -152,6 +152,7 @@ PortMatrix::init ()
 
 	/* and also bundles */
 	_session->BundleAdded.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
+	_session->BundleRemoved.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
 
 	/* and also ports */
 	_session->engine().PortRegisteredOrUnregistered.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
@@ -180,6 +181,7 @@ PortMatrix::reconnect_to_routes ()
 	boost::shared_ptr<RouteList> routes = _session->get_routes ();
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 		(*i)->processors_changed.connect (_route_connections, invalidator (*this), boost::bind (&PortMatrix::route_processors_changed, this, _1), gui_context());
+		(*i)->DropReferences.connect (_route_connections, invalidator (*this), boost::bind (&PortMatrix::routes_changed, this), gui_context());
 	}
 }
 
@@ -198,6 +200,7 @@ PortMatrix::route_processors_changed (RouteProcessorChange c)
 void
 PortMatrix::routes_changed ()
 {
+	if (!_session) return;
 	reconnect_to_routes ();
 	setup_global_ports ();
 }
@@ -206,7 +209,10 @@ PortMatrix::routes_changed ()
 void
 PortMatrix::setup ()
 {
-	if (!_session) return; // session went away
+	if (!_session) {
+		_route_connections.drop_connections ();
+		return; // session went away
+	}
 
 	/* this needs to be done first, as the visible_ports() method uses the
 	   notebook state to decide which ports are being shown */

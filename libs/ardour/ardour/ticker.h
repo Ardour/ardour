@@ -19,6 +19,7 @@
 */
 
 #include <boost/noncopyable.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include "pbd/signals.h"
 
@@ -42,7 +43,7 @@ class MidiClockTicker : public SessionHandlePtr, boost::noncopyable
 {
 public:
 	MidiClockTicker ();
-	virtual ~MidiClockTicker() {}
+	virtual ~MidiClockTicker();
 
 	void tick (const framepos_t& transport_frames);
 
@@ -63,6 +64,9 @@ public:
 	/// slot for the signal session::TransportLooped
 	void transport_looped();
 
+	/// slot for the signal session::Located
+	void session_located();
+
 	/// pulses per quarter note (default 24)
 	void set_ppqn(int ppqn) { _ppqn = ppqn; }
 
@@ -71,13 +75,16 @@ private:
 	int          _ppqn;
 	double       _last_tick;
 
+	class Position;
+	boost::scoped_ptr<Position> _pos;
+
 	double one_ppqn_in_frames (framepos_t transport_position);
 
 	void send_midi_clock_event (pframes_t offset);
 	void send_start_event (pframes_t offset);
 	void send_continue_event (pframes_t offset);
 	void send_stop_event (pframes_t offset);
-	void send_position_event (framepos_t transport_position, pframes_t offset);
+	void send_position_event (uint32_t midi_clocks, pframes_t offset);
 };
 
 }

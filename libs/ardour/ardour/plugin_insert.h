@@ -69,7 +69,7 @@ class PluginInsert : public Processor
 	bool     set_count (uint32_t num);
 	uint32_t get_count () const { return _plugins.size(); }
 
-	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
+	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
 
 	bool has_no_inputs() const;
@@ -160,6 +160,8 @@ class PluginInsert : public Processor
 	BufferSet _signal_analysis_inputs;
 	BufferSet _signal_analysis_outputs;
 
+	ChanCount midi_bypass;
+
 	/** Description of how we can match our plugin's IO to our own insert IO */
 	struct Match {
 		Match () : method (Impossible), plugins (0) {}
@@ -170,7 +172,7 @@ class PluginInsert : public Processor
 		ChanCount hide;        ///< number of channels to hide
 	};
 
-	Match private_can_support_io_configuration (ChanCount const &, ChanCount &) const;
+	Match private_can_support_io_configuration (ChanCount const &, ChanCount &);
 
 	/** details of the match currently being used */
 	Match _match;

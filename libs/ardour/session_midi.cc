@@ -590,7 +590,7 @@ void
 Session::send_song_position_pointer (framepos_t t)
 {
 	if (midi_clock) {
-		midi_clock->position_changed (t);
+		/* Do nothing for the moment */
 	}
 }
 

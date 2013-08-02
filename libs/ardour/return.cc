@@ -136,7 +136,7 @@ Return::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pfra
 }
 
 bool
-Return::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
+Return::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
 	out = in + _input->n_ports();
 	return true;

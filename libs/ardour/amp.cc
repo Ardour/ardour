@@ -61,7 +61,7 @@ Amp::display_name() const
 }
 
 bool
-Amp::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
+Amp::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
 	out = in;
 	return true;

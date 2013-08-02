@@ -998,7 +998,7 @@ AUPlugin::output_streams() const
 }
 
 bool
-AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
+AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
 	// Note: We never attempt to multiply-instantiate plugins to meet io configurations.
 
