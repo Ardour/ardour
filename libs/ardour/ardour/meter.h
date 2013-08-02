@@ -56,7 +56,7 @@ public:
 	void reset ();
 	void reset_max ();
 
-	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
+	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
 
 	/* special method for meter, to ensure that it can always handle the maximum

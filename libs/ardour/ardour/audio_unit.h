@@ -104,7 +104,7 @@ class AUPlugin : public ARDOUR::Plugin
 
 	bool has_editor () const;
 
-	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
+	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	ChanCount output_streams() const;
 	ChanCount input_streams() const;
 	bool configure_io (ChanCount in, ChanCount out);

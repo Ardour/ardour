@@ -42,7 +42,7 @@ class InternalSend : public Send
 	void cycle_start (pframes_t);
 	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool);
 	bool feeds (boost::shared_ptr<Route> other) const;
-	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
+	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
 	int  set_block_size (pframes_t);
 

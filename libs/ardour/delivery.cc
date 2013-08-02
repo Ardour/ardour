@@ -124,7 +124,7 @@ Delivery::display_name () const
 }
 
 bool
-Delivery::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
+Delivery::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
 	if (_role == Main) {
 

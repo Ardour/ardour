@@ -270,7 +270,7 @@ Send::set_state_2X (const XMLNode& node, int /* version */)
 }
 
 bool
-Send::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
+Send::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
 	/* sends have no impact at all on the channel configuration of the
 	   streams passing through the route. so, out == in.

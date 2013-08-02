@@ -165,7 +165,7 @@ PeakMeter::reset_max ()
 }
 
 bool
-PeakMeter::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
+PeakMeter::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
 	out = in;
 	return true;
