@@ -530,6 +530,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void silence_unlocked (framecnt_t);
 
 	ChanCount processor_max_streams;
+	ChanCount processor_out_streams;
 
 	uint32_t pans_required() const;
 	ChanCount n_process_buffers ();
@@ -553,6 +554,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	void output_change_handler (IOChange, void *src);
 
 	bool input_port_count_changing (ChanCount);
+	bool output_port_count_changing (ChanCount);
 
 	bool _in_configure_processors;
 

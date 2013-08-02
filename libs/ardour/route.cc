@@ -136,6 +136,7 @@ Route::init ()
 	_input->PortCountChanging.connect_same_thread (*this, boost::bind (&Route::input_port_count_changing, this, _1));
 
 	_output->changed.connect_same_thread (*this, boost::bind (&Route::output_change_handler, this, _1, _2));
+	_output->PortCountChanging.connect_same_thread (*this, boost::bind (&Route::output_port_count_changing, this, _1));
 
 	/* add amp processor  */
 
@@ -1704,6 +1705,8 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	}
 
 	ChanCount out;
+	bool seen_mains_out = false;
+	processor_out_streams = _input->n_ports();
 
 	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
@@ -1716,7 +1719,20 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 		processor_max_streams = ChanCount::max(processor_max_streams, c->first);
 		processor_max_streams = ChanCount::max(processor_max_streams, c->second);
 		out = c->second;
+
+		if (boost::dynamic_pointer_cast<Delivery> (*p)
+				&& boost::dynamic_pointer_cast<Delivery> (*p)->role() == Delivery::Main) {
+			/* main delivery will increase port count to match input.
+			 * the Delivery::Main is usually the last processor - followed only by
+			 * 'MeterOutput'.
+			 */
+			seen_mains_out = true;
+		}
+		if (!seen_mains_out) {
+			processor_out_streams = out;
+		}
 	}
+
 
 	if (_meter) {
 		_meter->reset_max_channels (processor_max_streams);
@@ -3750,6 +3766,19 @@ Route::input_port_count_changing (ChanCount to)
 		return true;
 	}
 
+	/* The change is ok */
+	return false;
+}
+
+/** Called when there is a proposed change to the output port count */
+bool
+Route::output_port_count_changing (ChanCount to)
+{
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		if (processor_out_streams.get(*t) > to.get(*t)) {
+			return true;
+		}
+	}
 	/* The change is ok */
 	return false;
 }
