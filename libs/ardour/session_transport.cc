@@ -384,6 +384,7 @@ Session::butler_transport_work ()
 	g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
 
 	DEBUG_TRACE (DEBUG::Transport, X_("Butler transport work all done\n"));
+	DEBUG_TRACE (DEBUG::Transport, X_(string_compose ("Frame %1\n", _transport_frame)));
 }
 
 void
@@ -1007,6 +1008,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 		send_mmc_locate (_transport_frame);
 	}
 
+	_last_roll_location = _last_roll_or_reversal_location =  _transport_frame;
 	Located (); /* EMIT SIGNAL */
 }
 
