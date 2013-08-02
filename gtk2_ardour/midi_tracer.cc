@@ -303,8 +303,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 		} else if (len == 3 && msg[0] == MIDI::position) {
 
 			/* MIDI Song Position */
-			uint16_t midi_beats = (uint16_t) msg[1];
-			midi_beats |= msg[2];
+			int midi_beats = (msg[2] << 7) | msg[1];
 			s += snprintf (&buf[s], bufsize, "%16s %d\n", "Position", (int) midi_beats);
 		} else {
 
