@@ -53,7 +53,7 @@ public:
 
 	std::string describe_parameter (Evoral::Parameter param);
 
-	bool can_support_io_configuration (const ChanCount& /*in*/, ChanCount& /*out*/) const { return true; };
+	bool can_support_io_configuration (const ChanCount& /*in*/, ChanCount& /*out*/) { return true; };
 	void configure_io (ChanCount in, ChanCount out);
 
 	/// The fundamental Panner function

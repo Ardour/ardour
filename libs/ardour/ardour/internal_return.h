@@ -39,7 +39,7 @@ class InternalReturn : public Return
 
 	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool);
 	bool configure_io (ChanCount, ChanCount);
-	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
+	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 
 	void add_send (InternalSend *);
 	void remove_send (InternalSend *);

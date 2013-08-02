@@ -543,11 +543,10 @@ Route::process_output_buffers (BufferSet& bufs,
 			if (bufs.count() != (*i)->input_streams()) {
 				DEBUG_TRACE (
 					DEBUG::Processors, string_compose (
-						"%1 bufs = %2 input for %3 = %4\n",
+						"input port mismatch %1 bufs = %2 input for %3 = %4\n",
 						_name, bufs.count(), (*i)->name(), (*i)->input_streams()
 						)
 					);
-				continue;
 			}
 		}
 #endif
@@ -1654,7 +1653,8 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 
 		if (boost::dynamic_pointer_cast<UnknownProcessor> (*p)) {
 			DEBUG_TRACE (DEBUG::Processors, "--- CONFIGURE ABORTED due to unknown processor.\n");
-			break;
+			DEBUG_TRACE (DEBUG::Processors, "}\n");
+			return list<pair<ChanCount, ChanCount> > ();
 		}
 
 		if ((*p)->can_support_io_configuration(in, out)) {

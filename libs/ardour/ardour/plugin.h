@@ -242,7 +242,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	/* specific types of plugins can overload this. As of September 2008, only
 	   AUPlugin does this.
 	*/
-	virtual bool can_support_io_configuration (const ChanCount& /*in*/, ChanCount& /*out*/) const { return false; }
+	virtual bool can_support_io_configuration (const ChanCount& /*in*/, ChanCount& /*out*/) { return false; }
 	virtual ChanCount output_streams() const;
 	virtual ChanCount input_streams() const;
 

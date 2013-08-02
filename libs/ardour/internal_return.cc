@@ -80,7 +80,7 @@ InternalReturn::get_state()
 }
 
 bool
-InternalReturn::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
+InternalReturn::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
 	out = in;
 	return true;
