@@ -386,11 +386,10 @@ MidiClockTicker::send_position_event (uint32_t midi_beats, pframes_t offset)
 	}
 
 	/* split midi beats into a 14bit value */
-	MIDI::byte msg[3] = {
-		MIDI_CMD_COMMON_SONG_POS,
-		midi_beats & 0x007f,
-		midi_beats & 0x3f80
-	};
+	MIDI::byte msg[3];
+	msg[0] = MIDI_CMD_COMMON_SONG_POS;
+	msg[1] = midi_beats & 0x007f;
+	msg[2] = midi_beats >> 7;
 
 	_midi_port->midimsg (msg, sizeof (msg), offset);
 
