@@ -194,18 +194,14 @@ AudioEngine::process_callback (pframes_t nframes)
 		return 0;
 	}
 
-	cerr << "pc, srp = " << session_remove_pending << endl;
-
 	if (session_remove_pending) {
 
 		/* perform the actual session removal */
 
-		cerr << "\tsrc = " << session_removal_countdown << endl;
-
 		if (session_removal_countdown < 0) {
 
 			/* fade out over 1 second */
-			session_removal_countdown = _frame_rate/2;
+			session_removal_countdown = sample_rate()/2;
 			session_removal_gain = 1.0;
 			session_removal_gain_step = 1.0/session_removal_countdown;
 
@@ -230,7 +226,6 @@ AudioEngine::process_callback (pframes_t nframes)
 			_session = 0;
 			session_removal_countdown = -1; // reset to "not in progress"
 			session_remove_pending = false;
-			cerr << "Send removed signal\n";
 			session_removed.signal(); // wakes up thread that initiated session removal
 		}
 	}
@@ -462,8 +457,6 @@ AudioEngine::died ()
 	stop_metering_thread ();
 
         _running = false;
-	_buffer_size = 0;
-	_frame_rate = 0;
 }
 
 int

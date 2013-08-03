@@ -213,9 +213,7 @@ public:
     gain_t                     session_removal_gain_step;
     bool                      _running;
     bool                      _has_run;
-    mutable framecnt_t        _buffer_size;
     std::map<DataType,size_t> _raw_buffer_sizes;
-    mutable framecnt_t        _frame_rate;
     /// number of frames between each check for changes in monitor input
     framecnt_t                 monitor_check_interval;
     /// time of the last monitor check in frames
