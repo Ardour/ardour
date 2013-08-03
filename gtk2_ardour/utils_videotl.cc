@@ -247,47 +247,27 @@ video_query_info (
 {
 	char url[2048];
 
-	snprintf(url, sizeof(url), "%s%sinfo/?file=%s&format=plain"
+	snprintf(url, sizeof(url), "%s%sinfo/?file=%s&format=csv"
 			, video_server_url.c_str()
 			, (video_server_url.length()>0 && video_server_url.at(video_server_url.length()-1) == '/')?"":"/"
 			, filepath.c_str());
 	char *res = curl_http_get(url, NULL);
-	int pid=0;
-	if (res) {
-		char *pch, *pst;
-		int version;
-		pch = strtok_r(res, "\n", &pst);
-		while (pch) {
-#if 0 /* DEBUG */
-			printf("VideoFileInfo [%i] -> '%s'\n", pid, pch);
-#endif
-			switch (pid) {
-				case 0:
-				  version = atoi(pch);
-					if (version != 1) break;
-				case 1:
-				  video_file_fps = atof(pch);
-					break;
-				case 2:
-					video_duration = atoll(pch);
-					break;
-				case 3:
-					video_start_offset = atof(pch);
-					break;
-				case 4:
-					video_aspect_ratio = atof(pch);
-					break;
-				default:
-					break;
-			}
-			pch = strtok_r(NULL,"\n", &pst);
-			++pid;
-		}
-	  free(res);
-	}
-	if (pid!=5) {
+	if (!res) {
 		return false;
 	}
+
+	std::vector<std::vector<std::string> > lines;
+	ParseCSV(std::string(res), lines);
+	free(res);
+
+	if (lines.empty() || lines.at(0).empty() || lines.at(0).size() != 6) {
+		return false;
+	}
+	if (atoi(lines.at(0).at(0)) != 1) return false; // version
+	video_start_offset = 0.0;
+	video_aspect_ratio = atof (lines.at(0).at(3));
+	video_file_fps = atof (lines.at(0).at(4));
+	video_duration = atoll(lines.at(0).at(5));
 	return true;
 }
 
