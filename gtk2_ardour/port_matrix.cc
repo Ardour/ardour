@@ -336,6 +336,13 @@ PortMatrix::select_arrangement ()
 		_vbox.pack_end (_vnotebook, false, false);
 		_vbox.pack_end (_vspacer, true, true);
 
+#define REMOVE_FROM_GTK_PARENT(WGT) if ((WGT).get_parent()) { (WGT).get_parent()->remove(WGT);}
+		REMOVE_FROM_GTK_PARENT(*_body)
+		REMOVE_FROM_GTK_PARENT(_vscroll)
+		REMOVE_FROM_GTK_PARENT(_hscroll)
+		REMOVE_FROM_GTK_PARENT(_vbox)
+		REMOVE_FROM_GTK_PARENT(_hbox)
+
 		attach (*_body, 2, 3, 1, 2, FILL | EXPAND, FILL | EXPAND);
 		attach (_vscroll, 3, 4, 1, 2, SHRINK);
 		attach (_hscroll, 2, 3, 3, 4, FILL | EXPAND, SHRINK);
@@ -354,6 +361,12 @@ PortMatrix::select_arrangement ()
 		_vbox.pack_end (_vspacer, true, true);
 		_vbox.pack_end (_vnotebook, false, false);
 		_vbox.pack_end (_vlabel, false, false);
+
+		REMOVE_FROM_GTK_PARENT(*_body)
+		REMOVE_FROM_GTK_PARENT(_vscroll)
+		REMOVE_FROM_GTK_PARENT(_hscroll)
+		REMOVE_FROM_GTK_PARENT(_vbox)
+		REMOVE_FROM_GTK_PARENT(_hbox)
 
 		attach (*_body, 1, 2, 2, 3, FILL | EXPAND, FILL | EXPAND);
 		attach (_vscroll, 3, 4, 2, 3, SHRINK);
