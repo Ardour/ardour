@@ -1315,6 +1315,14 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_track_meters)
 		     ));
 
+	add_option (_("Editor"),
+	     new BoolOption (
+		     "show-editor-meter",
+		     _("Display master-meter in the toolbar"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_editor_meter),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_editor_meter)
+		     ));
+
 	bco = new BoolComboOption (
 		     "use-overlap-equivalency",
 		     _("Regions in active edit groups are edited together"),

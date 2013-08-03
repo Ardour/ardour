@@ -203,6 +203,7 @@ ARDOUR_UI::set_session (Session *s)
 		editor_meter->clear_meters();
 		editor_meter->set_type (_session->master_out()->meter_type());
 		editor_meter->setup_meters (30, 12, 6);
+		editor_meter->show();
 		meter_box.pack_start(*editor_meter);
 
 		ArdourMeter::ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_peak_display));
@@ -214,10 +215,17 @@ ARDOUR_UI::set_session (Session *s)
 		editor_meter_peak_display.unset_flags (Gtk::CAN_FOCUS);
 		editor_meter_peak_display.set_size_request(6, -1);
 		editor_meter_peak_display.set_corner_radius(2);
-		editor_meter_peak_display.show();
 
 		editor_meter_max_peak = -INFINITY;
 		editor_meter_peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::editor_meter_peak_button_release), false);
+
+		if (Config->get_show_editor_meter()) {
+			meter_box.show();
+			editor_meter_peak_display.show();
+		} else {
+			meter_box.hide();
+			editor_meter_peak_display.hide();
+		}
 	}
 
 }
