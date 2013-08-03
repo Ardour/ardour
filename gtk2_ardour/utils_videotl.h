@@ -32,6 +32,8 @@
 #include "ardour/template_utils.h"
 #include "ardour_dialog.h"
 
+namespace VideoUtils {
+
 bool confirm_video_outfn (std::string, std::string docroot="");
 std::string video_dest_dir (const std::string, const std::string);
 std::string video_dest_file (const std::string, const std::string);
@@ -52,9 +54,10 @@ bool video_query_info (
 		double &video_start_offset,
 		double &video_aspect_ratio
 		);
+};
 
 extern "C" {
-	char *curl_http_get (const char *u, int *status);
+	char *a3_curl_http_get (const char *u, int *status);
 }
 
 #endif /* __gtk_ardour_video_utils_h__ */

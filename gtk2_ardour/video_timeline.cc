@@ -43,6 +43,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Timecode;
+using namespace VideoUtils;
 
 VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Group *vbg, int initial_height)
 	: editor (ed)
@@ -550,7 +551,7 @@ VideoTimeLine::check_server ()
 			, video_server_url.c_str()
 			, (video_server_url.length()>0 && video_server_url.at(video_server_url.length()-1) == '/')?"":"/"
 			);
-	char *res=curl_http_get(url, NULL);
+	char *res=a3_curl_http_get(url, NULL);
 	if (res) {
 		if (strstr(res, "status: ok, online.")) { ok = true; }
 		free(res);
@@ -572,7 +573,7 @@ VideoTimeLine::check_server_docroot ()
 			, video_server_url.c_str()
 			, (video_server_url.length()>0 && video_server_url.at(video_server_url.length()-1) == '/')?"":"/"
 			);
-	char *res=curl_http_get(url, NULL);
+	char *res=a3_curl_http_get(url, NULL);
 	if (!res) {
 		return false;
 	}
@@ -668,7 +669,7 @@ VideoTimeLine::flush_cache () {
 			, video_server_url.c_str()
 			, (video_server_url.length()>0 && video_server_url.at(video_server_url.length()-1) == '/')?"":"/"
 			);
-	char *res=curl_http_get(url, NULL);
+	char *res=a3_curl_http_get(url, NULL);
 	if (res) {
 		free (res);
 	}

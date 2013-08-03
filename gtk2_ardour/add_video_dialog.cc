@@ -42,6 +42,7 @@ using namespace Gtk;
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace VideoUtils;
 
 #define PREVIEW_WIDTH (240)
 #define PREVIEW_HEIGHT (180)
@@ -482,7 +483,7 @@ AddVideoDialog::harvid_request(std::string u)
 
 	harvid_list->clear();
 
-	char *res = curl_http_get(url, &status);
+	char *res = a3_curl_http_get(url, &status);
 	if (status != 200) {
 		printf("request failed\n"); // XXX
 		harvid_path.set_text(" - request failed -");
@@ -662,7 +663,7 @@ AddVideoDialog::request_preview(std::string u)
 		, (long long) (video_duration * seek_slider.get_value() / 1000.0)
 		, clip_width, clip_height, u.c_str());
 
-	char *data = curl_http_get(url, NULL);
+	char *data = a3_curl_http_get(url, NULL);
 	if (!data) {
 		printf("image preview request failed %s\n", url);
 		imgbuf->fill(RGBA_TO_UINT(0,0,0,255));

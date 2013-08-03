@@ -34,6 +34,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace VideoUtils;
 
 static void freedata_cb (uint8_t *d, void* /*arg*/) {
 	/* later this can be used with libharvid
@@ -209,7 +210,7 @@ http_get_thread (void *arg) {
 	int timeout = 1000; // * 5ms -> 5sec
 	char *res = NULL;
 	do {
-		res=curl_http_get(url, &status);
+		res=a3_curl_http_get(url, &status);
 		if (status == 503) usleep(5000); // try-again
 	} while (status == 503 && --timeout > 0);
 
