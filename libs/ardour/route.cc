@@ -1708,6 +1708,7 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	ChanCount out;
 	bool seen_mains_out = false;
 	processor_out_streams = _input->n_ports();
+	processor_max_streams.reset();
 
 	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
