@@ -61,7 +61,6 @@ instantiate (const std::string& arg1, const std::string& arg2)
 	try {
 		jack_connection.reset (new JackConnection (arg1, arg2));
 	} catch (...) {
-		std::cerr << "JC failed\n";
 		return -1;
 	}
 
