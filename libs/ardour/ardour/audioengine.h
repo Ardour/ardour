@@ -212,8 +212,6 @@ public:
     gain_t                     session_removal_gain;
     gain_t                     session_removal_gain_step;
     bool                      _running;
-    bool                      _has_run;
-    std::map<DataType,size_t> _raw_buffer_sizes;
     /// number of frames between each check for changes in monitor input
     framecnt_t                 monitor_check_interval;
     /// time of the last monitor check in frames
@@ -222,8 +220,6 @@ public:
     framecnt_t                _processed_frames;
     bool                      _freewheeling;
     bool                      _pre_freewheel_mmc_enabled;
-    int                       _usecs_per_cycle;
-    bool                       port_remove_in_progress;
     Glib::Threads::Thread*     m_meter_thread;
     ProcessThread*            _main_thread;
     

@@ -71,8 +71,6 @@ AudioEngine::AudioEngine ()
 	, _processed_frames (0)
 	, _freewheeling (false)
 	, _pre_freewheel_mmc_enabled (false)
-	, _usecs_per_cycle (0)
-	, port_remove_in_progress (false)
 	, m_meter_thread (0)
 	, _main_thread (0)
 {
@@ -621,7 +619,6 @@ AudioEngine::start ()
 
 		if (_backend->start() == 0) {
 			_running = true;
-			_has_run = true;
 			last_monitor_check = 0;
 
 			if (_session && _session->config.get_jack_time_master()) {
