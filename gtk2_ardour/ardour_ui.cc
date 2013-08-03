@@ -61,6 +61,7 @@
 #include "midi++/manager.h"
 
 #include "ardour/ardour.h"
+#include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/automation_watch.h"
@@ -373,6 +374,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	_process_thread->init ();
 
 	DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
+
+	attach_to_engine ();
 }
 
 GlobalPortMatrixWindow*
@@ -384,18 +387,10 @@ ARDOUR_UI::create_global_port_matrix (ARDOUR::DataType type)
 	return new GlobalPortMatrixWindow (_session, type);
 }
 
-int
-ARDOUR_UI::create_engine ()
+void
+ARDOUR_UI::attach_to_engine ()
 {
-	// this gets called every time by new_session()
-
-	if (engine) {
-		return 0;
-	}
-
-	loading_message (_("Starting audio engine"));
-
-	AudioEngine* engine = AudioEngine::instance();
+	engine = AudioEngine::instance();
 
 	engine->Stopped.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_stopped, this), gui_context());
 	engine->Running.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_running, this), gui_context());
@@ -405,8 +400,6 @@ ARDOUR_UI::create_engine ()
 	engine->BackendAvailable.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::post_engine, this));
 
 	ARDOUR::Port::set_connecting_blocked (ARDOUR_COMMAND_LINE::no_connect_ports);
-
-	return 0;
 }
 
 void
@@ -414,7 +407,7 @@ ARDOUR_UI::post_engine ()
 {
 	cerr << "Backend available!\n";
 
-	/* Things to be done once we create the AudioEngine
+	/* Things to be done once we have a backend running in the AudioEngine
 	 */
 
 	ARDOUR::init_post_engine ();
@@ -2572,6 +2565,17 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	int ret = -1;
 	bool likely_new = false;
 
+	/* if the audio/midi backend does not require setup, get our use of it underway
+	 * right here
+	 */
+
+	if (!EngineControl::need_setup()) {
+		vector<const AudioBackendInfo*> backends = AudioEngine::instance()->available_backends();
+		cerr << "Setting up backend " << backends.front()->name;
+		AudioEngine::instance()->set_backend (backends.front()->name, ARDOUR_COMMAND_LINE::backend_client_name, ARDOUR_COMMAND_LINE::backend_session_uuid);
+		AudioEngine::instance()->start ();
+	}
+
 	/* deal with any existing DIRTY session now, rather than later. don't
 	 * treat a non-dirty session this way, so that it stays visible 
 	 * as we bring up the new session dialog.
@@ -2693,10 +2697,6 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			}
 		}
 	
-		if (create_engine ()) {
-			break;
-		}
-
 		if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
 
 			if (likely_new && !nsm) {

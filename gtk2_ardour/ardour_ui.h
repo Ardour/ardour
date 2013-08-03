@@ -263,7 +263,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 		session_add_midi_route (false);
 	}*/
 
-	int  create_engine ();
+        void attach_to_engine ();
 	void post_engine ();
 
 	gint exit_on_main_window_close (GdkEventAny *);

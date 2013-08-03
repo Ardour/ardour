@@ -354,12 +354,26 @@ JACKAudioBackend::raw_buffer_size(DataType t)
 	return (s != _raw_buffer_sizes.end()) ? s->second : 0;
 }
 
+void
+JACKAudioBackend::preset_jack_startup_command ()
+{
+	/* write parameter settings to ~/.jackdrc file so that next invocation
+	 * of JACK (presumably from a call to jack_client_open() from this
+	 * process) will do the right thing.
+	 */
+}
+
 /* ---- BASIC STATE CONTROL API: start/stop/pause/freewheel --- */
 
 int
 JACKAudioBackend::start ()
 {
 	if (!connected()) {
+
+		if (!_jack_connection->server_running()) {
+			preset_jack_startup_command ();
+		}
+		std::cerr << "Open JACK connection\n";
 		_jack_connection->open ();
 	}
 

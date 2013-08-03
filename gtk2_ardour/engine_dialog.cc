@@ -44,6 +44,8 @@
 #include <gtkmm/stock.h>
 #include <gtkmm2ext/utils.h>
 
+#include "ardour/audio_backend.h"
+#include "ardour/audioengine.h"
 #include "ardour/rc_configuration.h"
 
 #include "pbd/convert.h"
@@ -594,33 +596,13 @@ EngineControl::build_command_line (vector<string>& cmd)
 bool
 EngineControl::need_setup ()
 {
-	return !engine_running();
-}
+	vector<const ARDOUR::AudioBackendInfo*> backends = ARDOUR::AudioEngine::instance()->available_backends();
 
-bool
-EngineControl::engine_running ()
-{
-        EnvironmentalProtectionAgency* global_epa = EnvironmentalProtectionAgency::get_global_epa ();
-        boost::scoped_ptr<EnvironmentalProtectionAgency> current_epa;
-
-        /* revert all environment settings back to whatever they were when
-	 * ardour started, because ardour's startup script may have reset
-	 * something in ways that interfere with finding/starting JACK.
-         */
-
-        if (global_epa) {
-                current_epa.reset (new EnvironmentalProtectionAgency(true)); /* will restore settings when we leave scope */
-                global_epa->restore ();
-        }
-
-	jack_status_t status;
-	jack_client_t* c = jack_client_open ("ardourprobe", JackNoStartServer, &status);
-
-	if (status == 0) {
-		jack_client_close (c);
-		return true;
+	if (backends.size() == 1 && backends.front()->already_configured()) {
+		return false;
 	}
-	return false;
+
+	return true;
 }
 
 int

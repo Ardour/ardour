@@ -27,6 +27,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "pbd/signals.h"
+
 #include "ardour/port_engine.h"
 #include "ardour/types.h"
 
@@ -114,6 +116,9 @@ class JACKPortEngine : public PortEngine
 
     ChanCount n_physical (unsigned long flags) const;
     void get_physical (DataType type, unsigned long flags, std::vector<std::string>& phy) const;
+
+    PBD::ScopedConnection jack_connection_connection;
+    void connected_to_jack ();
 
 };
 

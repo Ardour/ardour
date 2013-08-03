@@ -340,7 +340,7 @@ class AudioBackend {
     virtual int create_process_thread (boost::function<void()> func, pthread_t*, size_t stacksize) = 0;
 
     virtual void update_latencies () = 0;
-    
+
   protected:
     AudioEngine&          engine;
 };
@@ -353,6 +353,15 @@ struct AudioBackendInfo {
 
     boost::shared_ptr<AudioBackend> (*backend_factory) (AudioEngine&);
     boost::shared_ptr<PortEngine> (*portengine_factory) (PortManager&);
+
+    /** Return true if the underlying mechanism/API has been
+     * configured and does not need (re)configuration in order
+     * to be usable. Return false otherwise.
+     *
+     * Note that this may return true if (re)configuration is possible,
+     * but not required. 
+     */
+    bool (*already_configured)();
 };
 
 } // namespace

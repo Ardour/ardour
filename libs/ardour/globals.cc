@@ -72,6 +72,7 @@
 
 #include "ardour/analyser.h"
 #include "ardour/audio_library.h"
+#include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
@@ -333,14 +334,11 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 	ARDOUR::AudioEngine::create ();
 
-	uint32_t backend_cnt;
+	vector<const AudioBackendInfo*> backends = AudioEngine::instance()->available_backends();
 
-	if ((backend_cnt = AudioEngine::instance()->available_backends().size()) == 0) {
-		error << _("No audio/MIDI backends are available") << endmsg;
-		return -1;
+	for (vector<const AudioBackendInfo*>::const_iterator i = backends.begin(); i != backends.end(); ++i) {
+		cerr << "BACKEND: [" << (*i)->name << "] already configured " << (*i)->already_configured() << endl;
 	}
-
-	cerr << "We have " << backend_cnt << endl;
 
 	return 0;
 }

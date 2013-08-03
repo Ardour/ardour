@@ -20,13 +20,16 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "pbd/failed_constructor.h"
+#include "pbd/error.h"
 
 #include "ardour/jack_portengine.h"
 #include "ardour/jack_connection.h"
 #include "ardour/port_manager.h"
 
+#include "i18n.h"
+
 using namespace ARDOUR;
+using namespace PBD;
 using std::string;
 using std::vector;
 
@@ -85,17 +88,7 @@ JACKPortEngine::JACKPortEngine (PortManager& pm, boost::shared_ptr<JackConnectio
 	: PortEngine (pm)
 	, _jack_connection (jc)
 {
-	jack_client_t* client = _jack_connection->jack();
-
-	if (!client) {
-		throw failed_constructor ();
-	}
-
-	/* register callbacks for stuff that is our responsibility */
-
-        jack_set_port_registration_callback (client, _registration_callback, this);
-        jack_set_port_connect_callback (client, _connect_callback, this);
-        jack_set_graph_order_callback (client, _graph_order_callback, this);
+	_jack_connection->Connected.connect_same_thread (jack_connection_connection, boost::bind (&JACKPortEngine::connected_to_jack, this));
 }
 
 JACKPortEngine::~JACKPortEngine ()
@@ -105,6 +98,24 @@ JACKPortEngine::~JACKPortEngine ()
 	   the lifetime of the JACKConnection
 	*/
 	_jack_connection.reset ();
+}
+
+void
+JACKPortEngine::connected_to_jack ()
+{
+	/* register callbacks for stuff that is our responsibility */
+
+	jack_client_t* client = _jack_connection->jack();
+
+	if (!client) {
+		/* how could this happen? it could ... */
+		error << _("Already disconnected from JACK before PortEngine could register callbacks") << endmsg;
+		return;
+	}
+
+        jack_set_port_registration_callback (client, _registration_callback, this);
+        jack_set_port_connect_callback (client, _connect_callback, this);
+        jack_set_graph_order_callback (client, _graph_order_callback, this);
 }
 
 void*
@@ -294,8 +305,10 @@ JACKPortEngine::n_physical (unsigned long flags) const
 	if (ports) {
 		for (uint32_t i = 0; ports[i]; ++i) {
 			if (!strstr (ports[i], "Midi-Through")) {
-				DataType t (jack_port_type (jack_port_by_name (_priv_jack, ports[i])));
-				c.set (t, c.get (t) + 1);
+				DataType t = port_data_type (jack_port_by_name (_priv_jack, ports[i]));
+				if (t != DataType::NIL) {
+					c.set (t, c.get (t) + 1);
+				}
 			}
 		}
 		

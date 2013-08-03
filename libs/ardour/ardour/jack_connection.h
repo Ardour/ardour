@@ -21,10 +21,13 @@ class JackConnection {
 
     jack_client_t* jack() const { return _jack; }
 
+    PBD::Signal0<void> Connected;
     PBD::Signal1<void,const char*> Disconnected;
 
     void halted_callback ();
     void halted_info_callback (jack_status_t, const char*);
+
+    static bool server_running();
 
   private:
     jack_client_t* volatile _jack;

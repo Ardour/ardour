@@ -101,6 +101,8 @@ class JACKAudioBackend : public AudioBackend {
 
     void update_latencies ();
 
+    static bool already_configured();
+
   private:
     boost::shared_ptr<JackConnection>  _jack_connection; //< shared with JACKPortEngine
     bool            _running;
@@ -144,6 +146,8 @@ class JACKAudioBackend : public AudioBackend {
     static void* _start_process_thread (void*);
 
     ChanCount n_physical (unsigned long) const;
+    
+    void preset_jack_startup_command ();
 
     /* pffooo */
 

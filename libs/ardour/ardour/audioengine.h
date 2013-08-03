@@ -72,7 +72,7 @@ public:
     virtual ~AudioEngine ();
     
     int discover_backends();
-    std::vector<std::string> available_backends() const;
+    std::vector<const AudioBackendInfo*> available_backends() const;
     std::string current_backend_name () const;
     int set_backend (const std::string&, const std::string& arg1, const std::string& arg2);
 

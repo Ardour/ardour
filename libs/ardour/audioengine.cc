@@ -537,13 +537,13 @@ AudioEngine::backend_discover (const string& path)
 	return info;
 }
 
-vector<string>
+vector<const AudioBackendInfo*>
 AudioEngine::available_backends() const
 {
-	vector<string> r;
+	vector<const AudioBackendInfo*> r;
 	
 	for (BackendMap::const_iterator i = _backends.begin(); i != _backends.end(); ++i) {
-		r.push_back (i->first);
+		r.push_back (i->second);
 	}
 
 	return r;
@@ -581,17 +581,21 @@ AudioEngine::set_backend (const std::string& name, const std::string& arg1, cons
 	drop_backend ();
 
 	try {
+		cerr << "Instantiate " << b->second->name << " with " << arg1 << " + " << arg2 << endl;
 
 		if (b->second->instantiate (arg1, arg2)) {
+			cerr << "i failed\n";
 			throw failed_constructor ();
 		}
 
+		cerr << "bf\n";
 		_backend = b->second->backend_factory (*this);
+		cerr << "pf\n";
 		_impl = b->second->portengine_factory (*this);
+		cerr << "done\n";
 
-
-	} catch (...) {
-		error << string_compose (_("Could not create backend for %1"), name) << endmsg;
+	} catch (exception& e) {
+		error << string_compose (_("Could not create backend for %1: %2"), name, e.what()) << endmsg;
 		return -1;
 	}
 
