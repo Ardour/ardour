@@ -450,6 +450,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtk::VBox alert_box;
 	Gtk::VBox meter_box;
 	LevelMeterHBox * editor_meter;
+	float            editor_meter_max_peak;
+	ArdourButton     editor_meter_peak_display;
+	bool             editor_meter_peak_button_release (GdkEventButton*);
 
 	void solo_blink (bool);
 	void sync_blink (bool);
