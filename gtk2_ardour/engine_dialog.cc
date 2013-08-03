@@ -593,18 +593,6 @@ EngineControl::build_command_line (vector<string>& cmd)
 	}
 }
 
-bool
-EngineControl::need_setup ()
-{
-	vector<const ARDOUR::AudioBackendInfo*> backends = ARDOUR::AudioEngine::instance()->available_backends();
-
-	if (backends.size() == 1 && backends.front()->already_configured()) {
-		return false;
-	}
-
-	return true;
-}
-
 int
 EngineControl::setup_engine ()
 {

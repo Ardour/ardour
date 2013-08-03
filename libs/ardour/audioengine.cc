@@ -194,9 +194,13 @@ AudioEngine::process_callback (pframes_t nframes)
 		return 0;
 	}
 
+	cerr << "pc, srp = " << session_remove_pending << endl;
+
 	if (session_remove_pending) {
 
 		/* perform the actual session removal */
+
+		cerr << "\tsrc = " << session_removal_countdown << endl;
 
 		if (session_removal_countdown < 0) {
 
@@ -226,6 +230,7 @@ AudioEngine::process_callback (pframes_t nframes)
 			_session = 0;
 			session_removal_countdown = -1; // reset to "not in progress"
 			session_remove_pending = false;
+			cerr << "Send removed signal\n";
 			session_removed.signal(); // wakes up thread that initiated session removal
 		}
 	}
@@ -437,6 +442,7 @@ AudioEngine::remove_session ()
 
 		if (_session) {
 			session_remove_pending = true;
+			session_removal_countdown = 0;
 			session_removed.wait(_process_lock);
 		}
 
@@ -588,11 +594,8 @@ AudioEngine::set_backend (const std::string& name, const std::string& arg1, cons
 			throw failed_constructor ();
 		}
 
-		cerr << "bf\n";
 		_backend = b->second->backend_factory (*this);
-		cerr << "pf\n";
 		_impl = b->second->portengine_factory (*this);
-		cerr << "done\n";
 
 	} catch (exception& e) {
 		error << string_compose (_("Could not create backend for %1: %2"), name, e.what()) << endmsg;
@@ -1007,3 +1010,12 @@ AudioEngine::halted_callback (const char* why)
 	Halted (why); /* EMIT SIGNAL */
 }
 
+bool
+AudioEngine::setup_required () const
+{
+	if (_backends.size() == 1 && _backends.begin()->second->already_configured()) {
+		return false;
+	}
+
+	return true;
+}

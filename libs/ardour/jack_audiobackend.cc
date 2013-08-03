@@ -31,6 +31,7 @@
 #include "ardour/jack_audiobackend.h"
 #include "ardour/jack_connection.h"
 #include "ardour/jack_portengine.h"
+#include "ardour/jack_utils.h"
 
 #include "i18n.h"
 
@@ -355,12 +356,39 @@ JACKAudioBackend::raw_buffer_size(DataType t)
 }
 
 void
-JACKAudioBackend::preset_jack_startup_command ()
+JACKAudioBackend::setup_jack_startup_command ()
 {
-	/* write parameter settings to ~/.jackdrc file so that next invocation
-	 * of JACK (presumably from a call to jack_client_open() from this
-	 * process) will do the right thing.
+	/* first we map the parameters that have been set onto a
+	 * JackCommandLineOptions object.
 	 */
+
+	JackCommandLineOptions options;
+
+	options.samplerate = _target_sample_rate;
+	options.period_size = _target_buffer_size;
+	options.num_periods = 2;
+	options.input_device = _target_device;
+	options.output_device = _target_device;
+	options.input_latency = _target_systemic_input_latency;
+	options.output_latency = _target_systemic_output_latency;
+	if (_target_sample_format == FormatInt16) {
+		options.force16_bit = _target_sample_format;
+	}
+
+	/* this must always be true for any server instance we start ourselves
+	 */
+
+	options.temporary = true;
+
+	string cmdline;
+
+	if (!get_jack_command_line_string (options, cmdline)) {
+		/* error, somehow */
+	}
+
+	std::cerr << "JACK command line will be: " << cmdline << std::endl;
+
+	// write_jack_config_file (get_jack_server_user_config_file_path(), cmdline);
 }
 
 /* ---- BASIC STATE CONTROL API: start/stop/pause/freewheel --- */
@@ -371,8 +399,9 @@ JACKAudioBackend::start ()
 	if (!connected()) {
 
 		if (!_jack_connection->server_running()) {
-			preset_jack_startup_command ();
+			setup_jack_startup_command ();
 		}
+
 		std::cerr << "Open JACK connection\n";
 		_jack_connection->open ();
 	}

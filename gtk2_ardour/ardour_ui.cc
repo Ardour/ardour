@@ -400,13 +400,23 @@ ARDOUR_UI::attach_to_engine ()
 	engine->BackendAvailable.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::post_engine, this));
 
 	ARDOUR::Port::set_connecting_blocked (ARDOUR_COMMAND_LINE::no_connect_ports);
+
+	/* if there is only one audio/midi backend, and it does not require setup, get our use of it underway
+	 * right here (we need to know the client name and potential session ID
+	 * to do this, which is why this is here, rather than in, say,
+	 * ARDOUR::init().
+	 */
+
+	if (!AudioEngine::instance()->setup_required()) {
+		const AudioBackendInfo* backend = AudioEngine::instance()->available_backends().front();
+		AudioEngine::instance()->set_backend (backend->name, ARDOUR_COMMAND_LINE::backend_client_name, ARDOUR_COMMAND_LINE::backend_session_uuid);
+		AudioEngine::instance()->start ();
+	}
 }
 
 void
 ARDOUR_UI::post_engine ()
 {
-	cerr << "Backend available!\n";
-
 	/* Things to be done once we have a backend running in the AudioEngine
 	 */
 
@@ -2564,17 +2574,6 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	string template_name;
 	int ret = -1;
 	bool likely_new = false;
-
-	/* if the audio/midi backend does not require setup, get our use of it underway
-	 * right here
-	 */
-
-	if (!EngineControl::need_setup()) {
-		vector<const AudioBackendInfo*> backends = AudioEngine::instance()->available_backends();
-		cerr << "Setting up backend " << backends.front()->name;
-		AudioEngine::instance()->set_backend (backends.front()->name, ARDOUR_COMMAND_LINE::backend_client_name, ARDOUR_COMMAND_LINE::backend_session_uuid);
-		AudioEngine::instance()->start ();
-	}
 
 	/* deal with any existing DIRTY session now, rather than later. don't
 	 * treat a non-dirty session this way, so that it stays visible 

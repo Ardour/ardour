@@ -334,12 +334,6 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 	ARDOUR::AudioEngine::create ();
 
-	vector<const AudioBackendInfo*> backends = AudioEngine::instance()->available_backends();
-
-	for (vector<const AudioBackendInfo*>::const_iterator i = backends.begin(); i != backends.end(); ++i) {
-		cerr << "BACKEND: [" << (*i)->name << "] already configured " << (*i)->already_configured() << endl;
-	}
-
 	return 0;
 }
 

@@ -461,7 +461,6 @@ JACKPortEngine::disconnect_all (PortHandle port)
 	return jack_port_disconnect (_priv_jack, (jack_port_t*) port);
 }
 
-
 int
 JACKPortEngine::midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index)
 {

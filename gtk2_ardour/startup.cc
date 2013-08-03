@@ -34,6 +34,7 @@
 #include "pbd/stacktrace.h"
 #include "pbd/openuri.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/recent_sessions.h"
 #include "ardour/session.h"
@@ -91,7 +92,7 @@ ArdourStartup::ArdourStartup (bool require_new, const std::string& session_name,
 	, _existing_session_chooser_used (false)
 {
 	new_user = !Glib::file_test (been_here_before_path(), Glib::FILE_TEST_EXISTS);
-	need_audio_setup = EngineControl::need_setup ();
+	need_audio_setup = AudioEngine::instance()->setup_required ();
 	need_session_info = (session_name.empty() || require_new);
 
 	_provided_session_name = session_name;

@@ -75,6 +75,7 @@ public:
     std::vector<const AudioBackendInfo*> available_backends() const;
     std::string current_backend_name () const;
     int set_backend (const std::string&, const std::string& arg1, const std::string& arg2);
+    bool setup_required () const;
 
     ProcessThread* main_thread() const { return _main_thread; }
     

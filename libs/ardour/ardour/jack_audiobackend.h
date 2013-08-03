@@ -147,7 +147,7 @@ class JACKAudioBackend : public AudioBackend {
 
     ChanCount n_physical (unsigned long) const;
     
-    void preset_jack_startup_command ();
+    void setup_jack_startup_command ();
 
     /* pffooo */
 

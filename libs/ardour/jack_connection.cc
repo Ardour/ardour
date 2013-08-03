@@ -23,12 +23,15 @@
 #include "pbd/epa.h"
 
 #include "ardour/jack_connection.h"
+#include "ardour/jack_utils.h"
 
 #define GET_PRIVATE_JACK_POINTER(j)  jack_client_t* _priv_jack = (jack_client_t*) (j); if (!_priv_jack) { return; }
 #define GET_PRIVATE_JACK_POINTER_RET(j,r) jack_client_t* _priv_jack = (jack_client_t*) (j); if (!_priv_jack) { return r; }
 
 using namespace ARDOUR;
 using namespace PBD;
+using std::string;
+using std::vector;
 
 static void jack_halted_callback (void* arg)
 {
@@ -98,6 +101,14 @@ JackConnection::open ()
                 current_epa.reset (new EnvironmentalProtectionAgency(true)); /* will restore settings when we leave scope */
                 global_epa->restore ();
         }
+
+	/* ensure that PATH or equivalent includes likely locations of the JACK
+	 * server, in case the user's default does not.
+	 */
+
+	vector<string> dirs;
+	get_jack_server_dir_paths (dirs);
+	set_path_env_for_jack_autostart (dirs);
 
 	if ((_jack = jack_client_open (_client_name.c_str(), JackSessionID, &status, session_uuid.c_str())) == 0) {
 		return -1;
