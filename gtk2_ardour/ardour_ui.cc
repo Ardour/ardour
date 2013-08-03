@@ -182,6 +182,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, feedback_alert_button (_("feedback"))
 
 	, editor_meter(0)
+	, editor_meter_peak_display()
 
 	, speaker_config_window (X_("speaker-config"), _("Speaker Configuration"))
 	, theme_manager (X_("theme-manager"), _("Theme Manager"))
@@ -1036,7 +1037,13 @@ ARDOUR_UI::every_point_zero_something_seconds ()
 
 	SuperRapidScreenUpdate(); /* EMIT_SIGNAL */
 	if (editor_meter) {
-		editor_meter->update_meters();
+		float mpeak = editor_meter->update_meters();
+		if (mpeak > editor_meter_max_peak) {
+			if (mpeak >= Config->get_meter_peak()) {
+				editor_meter_peak_display.set_name ("meterbridge peakindicator on");
+				editor_meter_peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
+			}
+		}
 	}
 	return TRUE;
 }
@@ -4126,6 +4133,9 @@ ARDOUR_UI::reset_peak_display ()
 {
 	if (!_session || !_session->master_out() || !editor_meter) return;
 	editor_meter->clear_meters();
+	editor_meter_max_peak = -INFINITY;
+	editor_meter_peak_display.set_name ("meterbridge peakindicator");
+	editor_meter_peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
 }
 
 void
