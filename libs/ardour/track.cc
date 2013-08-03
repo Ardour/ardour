@@ -477,6 +477,10 @@ Track::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
+		framecnt_t playback_distance = _diskstream->calculate_playback_distance(nframes);
+		if (can_internal_playback_seek(playback_distance)) {
+			internal_playback_seek(playback_distance);
+		}
 		return 0;
 	}
 

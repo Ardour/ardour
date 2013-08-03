@@ -193,6 +193,7 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	friend class Track;
 
     virtual int  process (BufferSet&, framepos_t transport_frame, pframes_t nframes, framecnt_t &, bool need_disk_signal) = 0;
+    virtual frameoffset_t calculate_playback_distance (pframes_t nframes) = 0;
 	virtual bool commit  (framecnt_t) = 0;
 
 	//private:
