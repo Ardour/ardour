@@ -35,9 +35,10 @@ using namespace Gtk;
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace VideoUtils;
 
 bool
-confirm_video_outfn (std::string outfn, std::string docroot)
+VideoUtils::confirm_video_outfn (std::string outfn, std::string docroot)
 {
 	/* replace docroot's '/' to G_DIR_SEPARATOR for the comparison */
 	size_t look_here = 0;
@@ -77,7 +78,7 @@ confirm_video_outfn (std::string outfn, std::string docroot)
 }
 
 std::string
-video_dest_dir (const std::string sessiondir, const std::string docroot)
+VideoUtils::video_dest_dir (const std::string sessiondir, const std::string docroot)
 {
 	std::string dir = docroot;
 	if (dir.empty() || !dir.compare(0, dir.length(), sessiondir, 0, dir.length())) {
@@ -92,7 +93,7 @@ video_dest_dir (const std::string sessiondir, const std::string docroot)
 }
 
 std::string
-video_get_docroot (ARDOUR::RCConfiguration* config)
+VideoUtils::video_get_docroot (ARDOUR::RCConfiguration* config)
 {
 	if (config->get_video_advanced_setup()) {
 		return config->get_video_server_docroot();
@@ -101,7 +102,7 @@ video_get_docroot (ARDOUR::RCConfiguration* config)
 }
 
 std::string
-video_get_server_url (ARDOUR::RCConfiguration* config)
+VideoUtils::video_get_server_url (ARDOUR::RCConfiguration* config)
 {
 	if (config->get_video_advanced_setup()) {
 		return config->get_video_server_url();
@@ -111,7 +112,7 @@ video_get_server_url (ARDOUR::RCConfiguration* config)
 
 
 std::string
-strip_file_extension (const std::string infile)
+VideoUtils::strip_file_extension (const std::string infile)
 {
 	std::string rv;
 	char *ext, *bn = strdup(infile.c_str());
@@ -126,7 +127,7 @@ strip_file_extension (const std::string infile)
 }
 
 std::string
-get_file_extension (const std::string infile)
+VideoUtils::get_file_extension (const std::string infile)
 {
 	std::string rv = "";
 	char *ext, *bn = strdup(infile.c_str());
@@ -140,13 +141,13 @@ get_file_extension (const std::string infile)
 }
 
 std::string
-video_dest_file (const std::string dir, const std::string infile)
+VideoUtils::video_dest_file (const std::string dir, const std::string infile)
 {
 	return dir + "a3_" + strip_file_extension(Glib::path_get_basename(infile)) + ".avi";
 }
 
 std::string
-video_map_path (std::string server_docroot, std::string filepath)
+VideoUtils::video_map_path (std::string server_docroot, std::string filepath)
 {
 	std::string rv = filepath;
 
@@ -179,7 +180,7 @@ video_map_path (std::string server_docroot, std::string filepath)
 }
 
 void
-ParseCSV (const std::string &csv, std::vector<std::vector<std::string> > &lines)
+VideoUtils::ParseCSV (const std::string &csv, std::vector<std::vector<std::string> > &lines)
 {
 	bool inQuote(false);
 	bool newLine(false);
@@ -236,7 +237,7 @@ ParseCSV (const std::string &csv, std::vector<std::vector<std::string> > &lines)
 }
 
 bool
-video_query_info (
+VideoUtils::video_query_info (
 		std::string video_server_url,
 		std::string filepath,
 		double &video_file_fps,
@@ -251,7 +252,7 @@ video_query_info (
 			, video_server_url.c_str()
 			, (video_server_url.length()>0 && video_server_url.at(video_server_url.length()-1) == '/')?"":"/"
 			, filepath.c_str());
-	char *res = curl_http_get(url, NULL);
+	char *res = a3_curl_http_get(url, NULL);
 	if (!res) {
 		return false;
 	}
@@ -272,7 +273,7 @@ video_query_info (
 }
 
 void
-video_draw_cross (Glib::RefPtr<Gdk::Pixbuf> img)
+VideoUtils::video_draw_cross (Glib::RefPtr<Gdk::Pixbuf> img)
 {
 
 	int rowstride = img->get_rowstride();
@@ -299,7 +300,7 @@ video_draw_cross (Glib::RefPtr<Gdk::Pixbuf> img)
 extern "C" {
 #include <curl/curl.h>
 
-	struct MemoryStruct {
+	struct A3MemoryStruct {
 		char *data;
 		size_t size;
 	};
@@ -307,7 +308,7 @@ extern "C" {
 	static size_t
 	WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data) {
 		size_t realsize = size * nmemb;
-		struct MemoryStruct *mem = (struct MemoryStruct *)data;
+		struct A3MemoryStruct *mem = (struct A3MemoryStruct *)data;
 
 		mem->data = (char *)realloc(mem->data, mem->size + realsize + 1);
 		if (mem->data) {
@@ -318,10 +319,10 @@ extern "C" {
 		return realsize;
 	}
 
-	char *curl_http_get (const char *u, int *status) {
+	char *a3_curl_http_get (const char *u, int *status) {
 		CURL *curl;
 		CURLcode res;
-		struct MemoryStruct chunk;
+		struct A3MemoryStruct chunk;
 		long int httpstatus;
 		if (status) *status = 0;
 		//usleep(500000); return NULL; // TEST & DEBUG
@@ -350,7 +351,7 @@ extern "C" {
 		if (status) *status = httpstatus;
 		if (res) {
 #ifdef CURLERRORDEBUG
-			printf("curl_http_get() failed: %s\n", curlerror);
+			printf("a3_curl_http_get() failed: %s\n", curlerror);
 #endif
 			return NULL;
 		}
