@@ -3,9 +3,11 @@
 
 #pragma warning( disable : 4996 )
 
-#ifndef HAVE_LV2
-#define HAVE_SUIL
-#define HAVE_LV2
+#ifndef LV2_SUPPORT
+#define LV2_SUPPORT   1
+#define HAVE_SUIL     1
+#define HAVE_LV2      1
+//#define HAVE_NEW_LV2  1
 /* Comment out the above lines to build Mixbus without LV2 support */
 #endif
 

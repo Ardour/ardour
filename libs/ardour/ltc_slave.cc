@@ -150,7 +150,7 @@ LTC_Slave::reset()
 }
 
 void
-LTC_Slave::parse_ltc(const jack_nframes_t nframes, const jack_default_audio_sample_t * const in, const framecnt_t posinfo)
+LTC_Slave::parse_ltc(const jack_nframes_t nframes, const jack_default_audio_sample_t * const in, const ARDOUR::framecnt_t posinfo)
 {
 	jack_nframes_t i;
 	unsigned char sound[8192];
@@ -591,7 +591,7 @@ LTC_Slave::approximate_current_delta() const
 		snprintf(delta, sizeof(delta), _("flywheel"));
 	} else {
 		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%" PRIi64 "</span>sm",
-				LEADINGZERO(abs(current_delta)), PLUSMINUS(-current_delta), abs(current_delta));
+				LEADINGZERO(llabs(current_delta)), PLUSMINUS(-current_delta), llabs(current_delta));
 	}
 	return std::string(delta);
 }

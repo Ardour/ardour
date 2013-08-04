@@ -32,7 +32,6 @@ namespace ARDOUR
 {
 
 class Session;
-class Region;
 class MidiRegion;
 class Source;
 template<typename T> class MidiRingBuffer;

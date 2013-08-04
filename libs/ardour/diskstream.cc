@@ -600,7 +600,7 @@ Diskstream::check_record_status (framepos_t transport_frame, bool can_record)
 	*/
 
 	rolling = _session.transport_speed() != 0.0f;
-	possibly_recording = (rolling << 2) | (record_enabled() << 1) | can_record;
+	possibly_recording = (rolling << 2) | ((int)record_enabled() << 1) | (int)can_record;
 	change = possibly_recording ^ last_possibly_recording;
 
 	if (possibly_recording == last_possibly_recording) {

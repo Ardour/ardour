@@ -70,7 +70,7 @@ user_route_template_directory ()
 }
 
 static bool
-template_filter (const string &str, void */*arg*/)
+template_filter (const string &str, void* /*arg*/)
 {
 	if (!Glib::file_test (str, Glib::FILE_TEST_IS_DIR)) {
 		return false;
@@ -80,7 +80,7 @@ template_filter (const string &str, void */*arg*/)
 }
 
 static bool
-route_template_filter (const string &str, void */*arg*/)
+route_template_filter (const string &str, void* /*arg*/)
 {
 	if (str.find (template_suffix) == str.length() - strlen (template_suffix)) {
 		return true;

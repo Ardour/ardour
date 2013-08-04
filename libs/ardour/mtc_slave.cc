@@ -31,6 +31,8 @@
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
 
+#include <glibmm/timer.h>
+
 #include "i18n.h"
 
 using namespace std;
@@ -233,7 +235,7 @@ MTC_Slave::read_current (SafeTime *st) const
 	do {
 		if (tries == 10) {
 			error << _("MTC Slave: atomic read of current time failed, sleeping!") << endmsg;
-			usleep (20);
+			Glib::usleep (20);
 			tries = 0;
 		}
 		*st = current;
@@ -297,7 +299,7 @@ MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, framepos_t now)
  * when a full TC has been received
  * OR on locate */
 void
-MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
+MTC_Slave::update_mtc_time (const MIDI::byte *msg, bool was_full, framepos_t now)
 {
 	busy_guard1++;
 

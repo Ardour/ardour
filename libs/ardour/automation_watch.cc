@@ -136,7 +136,7 @@ void
 AutomationWatch::thread ()
 {
 	while (_run_thread) {
-		Glib::usleep ((useconds_t) floor (Config->get_automation_interval_msecs() * 1000));
+		Glib::usleep ((gulong) floor (Config->get_automation_interval_msecs() * 1000));
 		timer ();
 	}
 }

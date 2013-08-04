@@ -626,9 +626,9 @@ void
 MidiTrack::MidiControl::set_value(double val)
 {
 	bool valid = false;
-	if (std::isinf(val)) {
+	if (isinf(val)) {
 		cerr << "MIDIControl value is infinity" << endl;
-	} else if (std::isnan(val)) {
+	} else if (isnan(val)) {
 		cerr << "MIDIControl value is NaN" << endl;
 	} else if (val < _list->parameter().min()) {
 		cerr << "MIDIControl value is < " << _list->parameter().min() << endl;

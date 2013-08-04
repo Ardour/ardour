@@ -251,7 +251,7 @@ MIDIClock_Slave::stop (Parser& /*parser*/, framepos_t /*timestamp*/)
 }
 
 void
-MIDIClock_Slave::position (Parser& /*parser*/, byte* message, size_t size)
+MIDIClock_Slave::position (Parser& /*parser*/, MIDI::byte* message, size_t size)
 {
 	// we are note supposed to get position messages while we are running
 	// so lets be robust and ignore those
@@ -260,8 +260,8 @@ MIDIClock_Slave::position (Parser& /*parser*/, byte* message, size_t size)
 	}
 
 	assert(size == 3);
-	byte lsb = message[1];
-	byte msb = message[2];
+	MIDI::byte lsb = message[1];
+	MIDI::byte msb = message[2];
 	assert((lsb <= 0x7f) && (msb <= 0x7f));
 
 	uint16_t position_in_sixteenth_notes = (uint16_t(msb) << 7) | uint16_t(lsb);

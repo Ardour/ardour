@@ -20,6 +20,10 @@
 #include "libardour-config.h"
 #endif
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <cstdio> // Needed so that libraptor (included in lrdf) won't complain
 #include <cstdlib>
 #include <sys/stat.h>
@@ -44,7 +48,7 @@
 #include "ardour/audio_unit.h"
 #endif
 
-#ifdef __SSE__
+#if defined(__SSE__) || defined(USE_XMMINTRIN)
 #include <xmmintrin.h>
 #endif
 

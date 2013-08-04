@@ -220,6 +220,7 @@ PBD_API int				PBD_APICALLTYPE gettimeofday(struct timeval *__restrict tv, __tim
 PBD_API ssize_t			PBD_APICALLTYPE pread(int handle, void *buf, size_t nbytes, off_t offset);
 PBD_API ssize_t			PBD_APICALLTYPE pwrite(int handle, const void *buf, size_t nbytes, off_t offset);
 PBD_API int				PBD_APICALLTYPE poll(struct pollfd *fds, nfds_t nfds, int timeout);
+PBD_API double			PBD_APICALLTYPE round(double x);
 
 namespace PBD {
 

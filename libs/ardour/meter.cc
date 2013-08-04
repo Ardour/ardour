@@ -332,7 +332,7 @@ PeakMeter::meter ()
 		} else {
 			// do falloff
 			new_peak = _visible_peak_power[n] - (audio_meter_falloff);
-			_visible_peak_power[n] = std::max (new_peak, -INFINITY);
+			_visible_peak_power[n] = std::max ((double)new_peak, -INFINITY);
 		}
 	}
 }

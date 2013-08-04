@@ -31,7 +31,6 @@
 
 using namespace std;
 using namespace ARDOUR;
-using namespace MIDI;
 using namespace PBD;
 using namespace Timecode;
 

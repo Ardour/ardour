@@ -24,6 +24,9 @@
 #    include <mach/mach.h>
 #elif defined(PLATFORM_WINDOWS)
 #    include <windows.h>
+#ifndef INFINITE
+#define INFINITE 0xffffffffL
+#endif
 #else
 #    include <semaphore.h>
 #    include <errno.h>

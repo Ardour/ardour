@@ -36,10 +36,10 @@
 #include <ardourext/float_cast.h>
 
 // 'std::isnan()' is not available in MSVC. Assume '_isnan(double)'
-#define isnan(val) (bool)_isnan((double)val)
+#define isnan(val)  _isnan((double)val)
 
 // 'std::isinf()' is not available in MSVC. Assume '!_finite(double)'
-#define isinf(val) !((bool)_finite((double)val))
+#define isinf(val) !_finite((double)val)
 
 // 'INFINITY' is not defined in MSVC. Assume 'HUGE_VAL'
 #ifndef INFINITY
@@ -179,7 +179,9 @@ typedef int register_t;
 // Fortunately, 'round to nearest' seems to be the default action
 // under Linux, so let's copy that until we find out otherwise.
 #define rint(value)  round(value)
-#define round(value) floor((value) + 0.5)
+#if !defined(PBD_API) || defined(PBD_IS_IN_WIN_STATIC_LIB)
+extern  double round(double x);
+#endif
 
 // System V compatibility
 typedef unsigned short ushort;
@@ -194,6 +196,15 @@ typedef unsigned short _mode_t;
 typedef _mode_t mode_t;
 #endif /* NO_OLDNAMES */
 #endif /* _MODE_T_ */
+
+// int64 abs()
+inline uint64_t abs(int64_t val)
+{
+	if (val < 0)
+		return val * (-1);
+	else
+		return val;
+}
 
 // fmin() and fmax()
 #define fmin(a, b) min((double)a, (double)b)

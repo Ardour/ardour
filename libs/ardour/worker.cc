@@ -23,6 +23,8 @@
 #include "ardour/worker.h"
 #include "pbd/error.h"
 
+#include <glibmm/timer.h>
+
 namespace ARDOUR {
 
 Worker::Worker(Workee* workee, uint32_t ring_size)
@@ -128,7 +130,7 @@ Worker::run()
 			continue;
 		}
 		while (!verify_message_completeness(_requests)) {
-			::usleep(2000);
+			Glib::usleep(2000);
 			if (_exit) {
 				return;
 			}

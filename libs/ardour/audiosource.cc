@@ -180,7 +180,7 @@ AudioSource::peaks_ready (boost::function<void()> doThisWhenReady, ScopedConnect
 void
 AudioSource::touch_peakfile ()
 {
-	struct stat statbuf;
+	GStatBuf statbuf;
 
 	if (g_stat (peakpath.c_str(), &statbuf) != 0 || statbuf.st_size == 0) {
 		return;
@@ -216,7 +216,7 @@ AudioSource::rename_peakfile (string newpath)
 int
 AudioSource::initialize_peakfile (string audio_path)
 {
-	struct stat statbuf;
+	GStatBuf statbuf;
 
 	peakpath = peak_path (audio_path);
 

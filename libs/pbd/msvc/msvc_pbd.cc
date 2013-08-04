@@ -29,6 +29,7 @@ CreateHardLinkA( LPCSTR lpFileName,
 #include <algorithm>
 #include <string>
 #include <io.h>
+#include <math.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -220,6 +221,24 @@ ssize_t ret;
 	}
 
 	return (ret);
+}
+
+//***************************************************************
+//
+//	round()
+//
+// Emulates round() using floor().
+//
+//	Returns:
+//
+//    On Success: The largest integer that is less than or
+//                equal to 'x'.
+//    On Failure: None
+//
+PBD_API double PBD_APICALLTYPE
+round(double x)
+{
+	return (floor(x));
 }
 
 namespace PBD {

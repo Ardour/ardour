@@ -440,7 +440,7 @@ Session::send_full_time_code (framepos_t const t)
  * earlier already this cycle by send_full_time_code)
  */
 int
-Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_frame, pframes_t nframes)
+Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_frame, ARDOUR::pframes_t nframes)
 {
 	if (_engine.freewheeling() || !_send_qf_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
 		// cerr << "(MTC) Not sending MTC\n";
@@ -512,7 +512,7 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 		assert (msg_time < end_frame);
 
 		/* convert from session frames back to JACK frames using the transport speed */
-		pframes_t const out_stamp = (msg_time - start_frame) / _transport_speed;
+		ARDOUR::pframes_t const out_stamp = (msg_time - start_frame) / _transport_speed;
 		assert (out_stamp < nframes);
 
 		if (MIDI::Manager::instance()->mtc_output_port()->midimsg (mtc_msg, 2, out_stamp)) {
