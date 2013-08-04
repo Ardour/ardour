@@ -806,7 +806,7 @@ sample_to_timecode (
 		double timecode_frames_fraction;
 		int64_t timecode_frames_left;
 		const double frames_per_timecode_frame = sample_frame_rate / timecode_frames_per_second;
-		const int64_t frames_per_hour = (int32_t)(3600 * rint(timecode_frames_per_second) * frames_per_timecode_frame);
+		const int64_t frames_per_hour = (int64_t)(3600 * rint(timecode_frames_per_second) * frames_per_timecode_frame);
 
 		timecode.hours = offset_sample / frames_per_hour;
 
@@ -818,7 +818,7 @@ sample_to_timecode (
 		timecode.subframes = (int32_t) rint(timecode_frames_fraction * subframes_per_frame);
 		timecode_frames_left = (int64_t) floor (timecode_frames_left_exact);
 
-		if (timecode.subframes == subframes_per_frame) {
+		if (use_subframes && timecode.subframes == subframes_per_frame) {
 			timecode_frames_left++;
 			timecode.subframes = 0;
 		}
