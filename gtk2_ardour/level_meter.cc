@@ -138,7 +138,7 @@ LevelMeterBase::update_meters ()
 			const float mpeak = _meter->meter_level(n, MeterMaxPeak);
 			if (mpeak > (*i).max_peak) {
 				(*i).max_peak = mpeak;
-				(*i).meter->set_highlight(mpeak > Config->get_meter_peak());
+				(*i).meter->set_highlight(mpeak >= Config->get_meter_peak());
 			}
 			if (mpeak > max_peak) {
 				max_peak = mpeak;
