@@ -3528,7 +3528,10 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 					return;
 				}
 				if (!transcode_video_dialog->get_audiofile().empty()) {
-					editor->embed_audio_from_video(transcode_video_dialog->get_audiofile());
+					editor->embed_audio_from_video(
+							transcode_video_dialog->get_audiofile(),
+							video_timeline->get_offset()
+							);
 				}
 				switch (transcode_video_dialog->import_option()) {
 					case VTL_IMPORT_TRANSCODED:
@@ -3591,6 +3594,10 @@ ARDOUR_UI::remove_video ()
 {
 	video_timeline->close_session();
 	editor->toggle_ruler_video(false);
+
+	/* reset state */
+	video_timeline->set_offset_locked(false);
+	video_timeline->set_offset(0);
 
 	/* delete session state */
 	XMLNode* node = new XMLNode(X_("Videotimeline"));
