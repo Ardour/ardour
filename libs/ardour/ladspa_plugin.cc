@@ -29,7 +29,9 @@
 #include <cstdlib>
 #include <cstdio> // so libraptor doesn't complain
 #include <cmath>
+#ifndef COMPILER_MSVC
 #include <dirent.h>
+#endif
 #include <sys/stat.h>
 #include <cerrno>
 

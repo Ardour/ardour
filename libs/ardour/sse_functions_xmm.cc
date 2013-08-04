@@ -45,8 +45,11 @@ x86_sse_find_peaks(const ARDOUR::Sample* buf, ARDOUR::pframes_t nframes, float *
 
         // use 64 byte prefetch for quadruple quads
         while (nframes >= 16) {
+#ifdef COMPILER_MSVC                                    
+				_mm_prefetch(((char*)buf+64), 0);  // A total guess! Assumed to be eqivalent to
+#else                                              // the line below but waiting to be tested !!
                 __builtin_prefetch(buf+64,0,0);
-
+#endif
                 work = _mm_load_ps(buf);
                 current_min = _mm_min_ps(current_min, work);
                 current_max = _mm_max_ps(current_max, work);

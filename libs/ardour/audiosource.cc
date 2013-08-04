@@ -17,11 +17,15 @@
 
 */
 
-#include <sys/stat.h>
+#ifdef COMPILER_MSVC
+#include <sys/utime.h>
+#else
 #include <unistd.h>
+#include <utime.h>
+#endif
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <float.h>
-#include <utime.h>
 #include <cerrno>
 #include <ctime>
 #include <cmath>

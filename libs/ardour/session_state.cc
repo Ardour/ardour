@@ -2114,6 +2114,54 @@ Session::refresh_disk_space ()
 			_total_free_4k_blocks_uncertain = true;
 		}
 	}
+#elif defined (COMPILER_MSVC)
+	vector<string> scanned_volumes;
+	vector<string>::iterator j;
+	vector<space_and_path>::iterator i;
+    DWORD nSectorsPerCluster, nBytesPerSector,
+          nFreeClusters, nTotalClusters;
+    char disk_drive[4];
+	bool volume_found;
+
+	_total_free_4k_blocks = 0;
+
+	for (i = session_dirs.begin(); i != session_dirs.end(); i++) {
+		strncpy (disk_drive, (*i).path.c_str(), 3);
+		disk_drive[3] = 0;
+		strupr(disk_drive);
+
+		volume_found = false;
+		if (0 != (GetDiskFreeSpace(disk_drive, &nSectorsPerCluster, &nBytesPerSector, &nFreeClusters, &nTotalClusters)))
+		{
+			int64_t nBytesPerCluster = nBytesPerSector * nSectorsPerCluster;
+			int64_t nFreeBytes = nBytesPerCluster * (int64_t)nFreeClusters;
+			i->blocks = (uint32_t)(nFreeBytes / 4096);
+
+			for (j = scanned_volumes.begin(); j != scanned_volumes.end(); j++) {
+				if (0 == j->compare(disk_drive)) {
+					volume_found = true;
+					break;
+				}
+			}
+
+			if (!volume_found) {
+				scanned_volumes.push_back(disk_drive);
+				_total_free_4k_blocks += i->blocks;
+			}
+		}
+	}
+
+	if (0 == _total_free_4k_blocks) {
+		strncpy (disk_drive, path().c_str(), 3);
+		disk_drive[3] = 0;
+
+		if (0 != (GetDiskFreeSpace(disk_drive, &nSectorsPerCluster, &nBytesPerSector, &nFreeClusters, &nTotalClusters)))
+		{
+			int64_t nBytesPerCluster = nBytesPerSector * nSectorsPerCluster;
+			int64_t nFreeBytes = nBytesPerCluster * (int64_t)nFreeClusters;
+			_total_free_4k_blocks = (uint32_t)(nFreeBytes / 4096);
+		}
+	}
 #endif
 }
 
