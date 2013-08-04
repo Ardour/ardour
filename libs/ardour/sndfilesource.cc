@@ -766,12 +766,12 @@ SndFileSource::crossfade (Sample* data, framecnt_t cnt, int fade_in)
 
 	} else if (xfade < xfade_frames) {
 
-		gain_t in[xfade];
-		gain_t out[xfade];
+		std::vector<gain_t> in(xfade);
+		std::vector<gain_t> out(xfade);
 
 		/* short xfade, compute custom curve */
 
-		compute_equal_power_fades (xfade, in, out);
+		compute_equal_power_fades (xfade, &in[0], &out[0]);
 
 		for (framecnt_t n = 0; n < xfade; ++n) {
 			xfade_buf[n] = (xfade_buf[n] * out[n]) + (fade_data[n] * in[n]);

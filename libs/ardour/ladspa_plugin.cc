@@ -919,8 +919,8 @@ LadspaPlugin::do_save_preset (string name)
 
 	lrdf_defaults defaults;
 	defaults.count = input_parameter_pids.size ();
-	lrdf_portvalue portvalues[input_parameter_pids.size()];
-	defaults.items = portvalues;
+	std::vector<lrdf_portvalue> portvalues(input_parameter_pids.size());
+	defaults.items = &portvalues[0];
 
 	for (vector<int>::size_type i = 0; i < input_parameter_pids.size(); ++i) {
 		portvalues[i].pid = input_parameter_pids[i];

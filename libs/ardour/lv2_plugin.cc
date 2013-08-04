@@ -1119,16 +1119,16 @@ LV2Plugin::write_to(RingBuffer<uint8_t>* dest,
                     uint32_t             size,
                     const uint8_t*       body)
 {
-	const uint32_t buf_size = sizeof(UIMessage) + size;
-	uint8_t        buf[buf_size];
+	const uint32_t  buf_size = sizeof(UIMessage) + size;
+	vector<uint8_t> buf(buf_size);
 
-	UIMessage* msg = (UIMessage*)buf;
+	UIMessage* msg = (UIMessage*)&buf[0];
 	msg->index    = index;
 	msg->protocol = protocol;
 	msg->size     = size;
 	memcpy(msg + 1, body, size);
 
-	return (dest->write(buf, buf_size) == buf_size);
+	return (dest->write(&buf[0], buf_size) == buf_size);
 }
 
 bool
@@ -1185,13 +1185,13 @@ LV2Plugin::emit_to_ui(void* controller, UIMessageSink sink)
 			error << "Error reading from Plugin=>UI RingBuffer" << endmsg;
 			break;
 		}
-		uint8_t body[msg.size];
-		if (_to_ui->read(body, msg.size) != msg.size) {
+		vector<uint8_t> body(msg.size);
+		if (_to_ui->read(&body[0], msg.size) != msg.size) {
 			error << "Error reading from Plugin=>UI RingBuffer" << endmsg;
 			break;
 		}
 
-		sink(controller, msg.index, msg.size, msg.protocol, body);
+		sink(controller, msg.index, msg.size, msg.protocol, &body[0]);
 
 		read_space -= sizeof(msg) + msg.size;
 	}
@@ -1671,15 +1671,15 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				error << "Error reading from UI=>Plugin RingBuffer" << endmsg;
 				break;
 			}
-			uint8_t body[msg.size];
-			if (_from_ui->read(body, msg.size) != msg.size) {
+			vector<uint8_t> body(msg.size);
+			if (_from_ui->read(&body[0], msg.size) != msg.size) {
 				error << "Error reading from UI=>Plugin RingBuffer" << endmsg;
 				break;
 			}
 			if (msg.protocol == urids.atom_eventTransfer) {
 				LV2_Evbuf*            buf  = _ev_buffers[msg.index];
 				LV2_Evbuf_Iterator    i    = lv2_evbuf_end(buf);
-				const LV2_Atom* const atom = (const LV2_Atom*)body;
+				const LV2_Atom* const atom = (const LV2_Atom*)&body[0];
 				if (!lv2_evbuf_write(&i, nframes, 0, atom->type, atom->size,
 				                (const uint8_t*)(atom + 1))) {
 					error << "Failed to write data to LV2 event buffer\n";

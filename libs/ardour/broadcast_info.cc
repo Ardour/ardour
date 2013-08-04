@@ -22,6 +22,7 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <vector>
 
 #include <glibmm.h>
 
@@ -37,15 +38,15 @@ namespace ARDOUR
 static void
 snprintf_bounded_null_filled (char* target, size_t target_size, char const * fmt, ...)
 {
-	char buf[target_size+1];
+	std::vector<char> buf(target_size+1);
 	va_list ap;
 
 	va_start (ap, fmt);
-	vsnprintf (buf, target_size+1, fmt, ap);
+	vsnprintf (&buf[0], target_size+1, fmt, ap);
 	va_end (ap);
 
 	memset (target, 0, target_size);
-	memcpy (target, buf, target_size);
+	memcpy (target, &buf[0], target_size);
 
 }
 

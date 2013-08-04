@@ -564,7 +564,7 @@ RegionFactory::new_region_name (string old)
 	uint32_t number;
 	string::size_type len = old.length() + 64;
 	string remainder;
-	char buf[len];
+	std::vector<char> buf(len);
 
 	if ((last_period = old.find_last_of ('.')) == string::npos) {
 
@@ -603,8 +603,8 @@ RegionFactory::new_region_name (string old)
 
 		number++;
 
-		snprintf (buf, len, "%s%" PRIu32 "%s", old.substr (0, last_period + 1).c_str(), number, remainder.c_str());
-		sbuf = buf;
+		snprintf (&buf[0], len, "%s%" PRIu32 "%s", old.substr (0, last_period + 1).c_str(), number, remainder.c_str());
+		sbuf = &buf[0];
 
 		if (region_name_map.find (sbuf) == region_name_map.end ()) {
 			break;
@@ -612,7 +612,7 @@ RegionFactory::new_region_name (string old)
 	}
 
 	if (number != (UINT_MAX-1)) {
-		return buf;
+		return &buf[0];
 	}
 
 	error << string_compose (_("cannot create new name for region \"%1\""), old) << endmsg;
