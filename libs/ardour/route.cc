@@ -2833,7 +2833,7 @@ Route::feeds (boost::shared_ptr<Route> other, bool* via_sends_only)
 {
 	const FedBy& fed_by (other->fed_by());
 
-	for (FedBy::iterator f = fed_by.begin(); f != fed_by.end(); ++f) {
+	for (FedBy::const_iterator f = fed_by.begin(); f != fed_by.end(); ++f) {
 		boost::shared_ptr<Route> sr = f->r.lock();
 
 		if (sr && (sr.get() == this)) {

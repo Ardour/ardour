@@ -570,7 +570,7 @@ Diskstream::move_processor_automation (boost::weak_ptr<Processor> p, list< Evora
 
 	set<Evoral::Parameter> const a = processor->what_can_be_automated ();
 
-	for (set<Evoral::Parameter>::iterator i = a.begin (); i != a.end (); ++i) {
+	for (set<Evoral::Parameter>::const_iterator i = a.begin (); i != a.end (); ++i) {
 		boost::shared_ptr<AutomationList> al = processor->automation_control(*i)->alist();
 		XMLNode & before = al->get_state ();
 		bool const things_moved = al->move_ranges (movements);
