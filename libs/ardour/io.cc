@@ -396,7 +396,7 @@ IO::disconnect (void* src)
 int
 IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 {
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	assert (!AudioEngine::instance()->process_lock().trylock());
 #endif
 
@@ -469,7 +469,7 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 int
 IO::ensure_ports (ChanCount count, bool clear, void* src)
 {
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	assert (!AudioEngine::instance()->process_lock().trylock());
 #endif
 
@@ -506,7 +506,7 @@ IO::ensure_ports (ChanCount count, bool clear, void* src)
 int
 IO::ensure_io (ChanCount count, bool clear, void* src)
 {
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	assert (!AudioEngine::instance()->process_lock().trylock());
 #endif
 

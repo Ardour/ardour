@@ -29,7 +29,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 #include <sys/resource.h>
 #endif
 #include <unistd.h>
@@ -201,7 +201,7 @@ setup_hardware_optimization (bool try_optimization)
 static void
 lotsa_files_please ()
 {
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	struct rlimit rl;
 
 	if (getrlimit (RLIMIT_NOFILE, &rl) == 0) {

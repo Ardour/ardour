@@ -43,7 +43,7 @@ ladspa_search_path ()
 	spath += ardour_dll_directory ();
 	spath.add_subdirectory_to_paths (ladspa_dir_name);
 
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	spath.push_back ("/usr/local/lib64/ladspa");
 	spath.push_back ("/usr/local/lib/ladspa");
 	spath.push_back ("/usr/lib64/ladspa");

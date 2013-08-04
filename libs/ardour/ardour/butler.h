@@ -24,7 +24,7 @@
 
 #include <glibmm/threads.h>
 
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 #include "pbd/glib_semaphore.h"
 #endif
 
@@ -84,7 +84,7 @@ class Butler : public SessionHandleRef
 	uint32_t     midi_dstream_buffer_size;
 	RingBuffer<CrossThreadPool*> pool_trash;
 
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	PBD::atomic_counter m_request_state;
 	PBD::GlibSemaphore   m_request_sem;
 #else
@@ -95,7 +95,7 @@ private:
 	void empty_pool_trash ();
 	void config_changed (std::string);
 
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	int setup_request_pipe ();
 #endif
 

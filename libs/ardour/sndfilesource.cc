@@ -28,6 +28,9 @@
 
 #include <sys/stat.h>
 
+#ifdef PLATFORM_WINDOWS
+#include <glibmm/convert.h>
+#endif
 #include <glibmm/miscutils.h>
 
 #include "ardour/sndfilesource.h"
@@ -182,22 +185,30 @@ SndFileSource::init_sndfile ()
 int
 SndFileSource::open ()
 {
-	_descriptor = new SndFileDescriptor (_path, writable(), &_info);
+	string path_to_open;
+
+#ifdef PLATFORM_WINDOWS
+	path_to_open = Glib::locale_from_utf8(_path);
+#else
+	path_to_open = _path;
+#endif
+
+	_descriptor = new SndFileDescriptor (path_to_open.c_str(), writable(), &_info);
 	_descriptor->Closed.connect_same_thread (file_manager_connection, boost::bind (&SndFileSource::file_closed, this));
 	SNDFILE* sf = _descriptor->allocate ();
 
 	if (sf == 0) {
-		char errbuf[256];
+		char errbuf[1024];
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 #ifndef HAVE_COREAUDIO
 		/* if we have CoreAudio, we will be falling back to that if libsndfile fails,
 		   so we don't want to see this message.
 		*/
 
-                cerr << "failed to open " << _path << " with name " << _name << endl;
+                cerr << "failed to open " << path_to_open << " with name " << _name << endl;
 
 		error << string_compose(_("SndFileSource: cannot open file \"%1\" for %2 (%3)"),
-					_path, (writable() ? "read+write" : "reading"), errbuf) << endmsg;
+					path_to_open, (writable() ? "read+write" : "reading"), errbuf) << endmsg;
 #endif
 		return -1;
 	}
@@ -251,7 +262,7 @@ SndFileSource::open ()
 
                         if (!_broadcast_info->write_to_file (sf)) {
                                 error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"),
-                                                         _path, _broadcast_info->get_error())
+                                                         path_to_open, _broadcast_info->get_error())
                                       << endmsg;
                                 _flags = Flag (_flags & ~Broadcast);
                                 delete _broadcast_info;

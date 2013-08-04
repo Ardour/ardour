@@ -487,7 +487,7 @@ FileSource::find_2X (Session& s, DataType type, const string& path, bool must_ex
 				goto out;
 			}
 
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 			if (errno != ENOENT) {
 				error << string_compose(
 						_("Filesource: cannot check for existing file (%1): %2"),

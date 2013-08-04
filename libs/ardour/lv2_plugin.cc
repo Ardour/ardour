@@ -1983,7 +1983,7 @@ LV2World::load_bundled_plugins()
 		vector<string *> *plugin_objects = scanner (ARDOUR::lv2_bundled_search_path().to_string(), lv2_filter, 0, true, true);
 		if (plugin_objects) {
 			for ( vector<string *>::iterator x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
-#ifdef WINDOWS
+#ifdef PLATFORM_WINDOWS
 				string uri = "file:///" + **x + "/";
 #else
 				string uri = "file://" + **x + "/";

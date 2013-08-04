@@ -104,7 +104,7 @@ MidiControlUI::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 
 	if (ioc & IO_IN) {
 
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 		CrossThreadChannel::drain (port->selectable());
 #endif
 

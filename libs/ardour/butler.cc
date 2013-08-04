@@ -21,7 +21,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 #include <poll.h>
 #endif
 
@@ -72,7 +72,7 @@ Butler::config_changed (std::string p)
         }
 }
 
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 int
 Butler::setup_request_pipe ()
 {
@@ -116,7 +116,7 @@ Butler::start_thread()
 
 	should_run = false;
 
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	if (setup_request_pipe() != 0) return -1;
 #endif
 
@@ -149,7 +149,7 @@ Butler::_thread_work (void* arg)
 bool
 Butler::wait_for_requests ()
 {
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	struct pollfd pfd[1];
 
 	pfd[0].fd = request_pipe[0];
@@ -187,7 +187,7 @@ Butler::wait_for_requests ()
 bool
 Butler::dequeue_request (Request::Type& r)
 {
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	char req;
 	size_t nread = ::read (request_pipe[0], &req, sizeof (req));
 	if (nread == 1) {
@@ -221,7 +221,7 @@ Butler::thread_work ()
 				Request::Type req;
 
 				/* empty the pipe of all current requests */
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 				dequeue_request (req);
 				{
 #else
@@ -387,7 +387,7 @@ Butler::schedule_transport_work ()
 void
 Butler::queue_request (Request::Type r)
 {
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	char c = r;
 	(void) ::write (request_pipe[1], &c, 1);
 #else

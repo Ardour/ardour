@@ -1614,7 +1614,7 @@ Route::reset_instrument_info ()
 int
 Route::configure_processors (ProcessorStreams* err)
 {
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	assert (!AudioEngine::instance()->process_lock().trylock());
 #endif
 
@@ -1687,7 +1687,7 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 int
 Route::configure_processors_unlocked (ProcessorStreams* err)
 {
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	assert (!AudioEngine::instance()->process_lock().trylock());
 #endif
 

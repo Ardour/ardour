@@ -250,7 +250,7 @@ PortInsert::signal_latency() const
 bool
 PortInsert::configure_io (ChanCount in, ChanCount out)
 {
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	assert (!AudioEngine::instance()->process_lock().trylock());
 #endif
 

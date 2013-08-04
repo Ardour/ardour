@@ -86,7 +86,7 @@ user_config_directory ()
 std::string
 ardour_dll_directory ()
 {
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	std::string dll_dir_path(g_win32_get_package_installation_directory_of_module(NULL));
 	dll_dir_path = Glib::build_filename (dll_dir_path, "lib");
 	return Glib::build_filename (dll_dir_path, "ardour3");
@@ -100,7 +100,7 @@ ardour_dll_directory ()
 #endif
 }
 
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 SearchPath
 windows_search_path ()
 {
@@ -117,7 +117,7 @@ ardour_config_search_path ()
 
 	if (search_path.empty()) {
 		search_path += user_config_directory();
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 		search_path += windows_search_path ();
 #else
 		std::string s = Glib::getenv("ARDOUR_CONFIG_PATH");
@@ -140,7 +140,7 @@ ardour_data_search_path ()
 
 	if (search_path.empty()) {
 		search_path += user_config_directory();
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 		search_path += windows_search_path ();
 #else
 		std::string s = Glib::getenv("ARDOUR_DATA_PATH");

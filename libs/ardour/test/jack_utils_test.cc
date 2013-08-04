@@ -1,7 +1,7 @@
 
 #include <stdexcept>
 
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 #include <windows.h> // only for Sleep
 #endif
 
@@ -274,7 +274,7 @@ JackUtilsTest::test_command_line ()
 void
 JackUtilsTest::test_start_server ()
 {
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	cout << endl;
 
 	JackCommandLineOptions options;

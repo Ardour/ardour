@@ -1568,7 +1568,7 @@ AudioEngine::stop_process_thread (jack_native_thread_t thread)
 	 * Jack 2 _jack arg is not used so it should be OK
 	 */
 
-#if defined(USING_JACK2_EXPANSION_OF_JACK_API) || defined(WIN32)
+#if defined(USING_JACK2_EXPANSION_OF_JACK_API) || defined(PLATFORM_WINDOWS)
 	if (jack_client_stop_thread (_jack, thread) != 0) {
 		error << "AudioEngine: cannot stop process thread" << endmsg;
 		return false;

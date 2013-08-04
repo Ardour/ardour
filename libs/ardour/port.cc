@@ -21,7 +21,7 @@
 #include "libardour-config.h"
 #endif
 
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 #include <jack/weakjack.h> // so that we can test for new functions at runtime
 #endif
 
