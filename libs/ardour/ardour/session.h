@@ -1211,6 +1211,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	double            ltc_enc_cnt;
 	framepos_t        ltc_enc_off;
 	bool              restarting;
+	framepos_t        ltc_prev_cycle;
 
 	framepos_t        ltc_timecode_offset;
 	bool              ltc_timecode_negative_offset;
