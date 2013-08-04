@@ -561,18 +561,16 @@ AudioEngine::drop_backend ()
 	if (_backend) {
 		_backend->stop ();
 		_backend.reset ();
-
-		BackendRemoved(); /* EMIT SIGNAL */
 	}
 }
 
-int
+boost::shared_ptr<AudioBackend>
 AudioEngine::set_backend (const std::string& name, const std::string& arg1, const std::string& arg2)
 {
 	BackendMap::iterator b = _backends.find (name);
 
 	if (b == _backends.end()) {
-		return -1;
+		return boost::shared_ptr<AudioBackend>();
 	}
 
 	drop_backend ();
@@ -590,12 +588,10 @@ AudioEngine::set_backend (const std::string& name, const std::string& arg1, cons
 
 	} catch (exception& e) {
 		error << string_compose (_("Could not create backend for %1: %2"), name, e.what()) << endmsg;
-		return -1;
+		return boost::shared_ptr<AudioBackend>();
 	}
 
-	BackendAvailable (); /* EMIT SIGNAL */
-
-	return 0;
+	return _backend;
 }
 
 /* BACKEND PROXY WRAPPERS */

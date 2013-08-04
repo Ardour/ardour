@@ -397,7 +397,6 @@ ARDOUR_UI::attach_to_engine ()
 	engine->SampleRateChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_sample_rate, this, _1), gui_context());
 
 	engine->Halted.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
-	engine->BackendAvailable.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::post_engine, this));
 
 	ARDOUR::Port::set_connecting_blocked (ARDOUR_COMMAND_LINE::no_connect_ports);
 

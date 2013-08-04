@@ -88,11 +88,31 @@ JACKAudioBackend::is_realtime () const
 	return jack_is_realtime (_priv_jack);
 }
 
+bool
+JACKAudioBackend::requires_driver_selection() const
+{
+	return true;
+}
+
+vector<string>
+JACKAudioBackend::enumerate_drivers () const
+{
+	vector<string> s;
+	get_jack_audio_driver_names (s);
+	return s;
+}
+
+int
+JACKAudioBackend::set_driver (const std::string& name)
+{
+	_target_driver = name;
+	return 0;
+}
+
 vector<string>
 JACKAudioBackend::enumerate_devices () const
 {
-	vector<string> devices;
-	return devices;
+	return get_jack_device_names_for_audio_driver (_target_driver);
 }
 
 vector<float>

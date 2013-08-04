@@ -90,16 +90,13 @@ extern "C" {
 	 * must be non-mangled.
 	 */
 
-	using namespace ARDOUR;
-
-	AudioBackendInfo descriptor = {
+	ARDOUR::AudioBackendInfo descriptor = {
 		"JACK",
 		instantiate,
 		deinstantiate,
 		backend_factory,
 		portengine_factory,
-		already_configured
+		already_configured,
 	};
-
 }
 

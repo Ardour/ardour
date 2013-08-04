@@ -68,6 +68,33 @@ class AudioBackend {
 
     /* Discovering devices and parameters */
 
+    /** Return true if this backend requires the selection of a "driver"
+     * before any device can be selected. Return false otherwise.
+     *
+     * Intended mainly to differentiate between meta-APIs like JACK
+     * which can still expose different backends (such as ALSA or CoreAudio 
+     * or FFADO or netjack) and those like ASIO or CoreAudio which
+     * do not.
+     */
+    virtual bool requires_driver_selection() const { return false; }
+
+    /** If the return value of requires_driver_selection() is true,
+     * then this function can return the list of known driver names.
+     *
+     * If the return value of requires_driver_selection() is false,
+     * then this function should not be called. If it is called
+     * its return value is an empty vector of strings.
+     */
+    virtual std::vector<std::string> enumerate_drivers() const { return std::vector<std::string>(); }
+
+    /** Returns zero if the backend can successfully use @param name as the
+     * driver, non-zero otherwise.
+     *
+     * Should not be used unless the backend returns true from
+     * requires_driver_selection()
+     */
+    virtual int set_driver (const std::string& /*drivername*/) { return 0; }
+
     /** Returns a collection of strings identifying devices known
      * to this backend. Any of these strings may be used to identify a
      * device in other calls to the backend, though any of them may become
@@ -358,8 +385,8 @@ struct AudioBackendInfo {
      * configured and does not need (re)configuration in order
      * to be usable. Return false otherwise.
      *
-     * Note that this may return true if (re)configuration is possible,
-     * but not required. 
+     * Note that this may return true if (re)configuration, even though
+     * not currently required, is still possible.
      */
     bool (*already_configured)();
 };

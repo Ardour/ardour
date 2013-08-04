@@ -49,7 +49,12 @@ class JACKAudioBackend : public AudioBackend {
     bool connected() const;
     bool is_realtime () const;
 
+    bool requires_driver_selection() const;
+    std::vector<std::string> enumerate_drivers () const;
+    int set_driver (const std::string&);
+
     std::vector<std::string> enumerate_devices () const;
+
     std::vector<float> available_sample_rates (const std::string& device) const;
     std::vector<uint32_t> available_buffer_sizes (const std::string& device) const;
     uint32_t available_input_channel_count (const std::string& device) const;
@@ -151,6 +156,7 @@ class JACKAudioBackend : public AudioBackend {
 
     /* pffooo */
 
+    std::string  _target_driver;
     std::string  _target_device;
     float        _target_sample_rate;
     uint32_t     _target_buffer_size;
