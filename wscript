@@ -373,8 +373,12 @@ def set_compiler_flags (conf,opt):
 
     conf.env.append_value('CFLAGS', '-DBOOST_SYSTEM_NO_DEPRECATED')
     conf.env.append_value('CXXFLAGS', '-DBOOST_SYSTEM_NO_DEPRECATED')
+    # need ISOC9X for llabs()
+    conf.env.append_value('CFLAGS', '-D_ISOC9X_SOURCE')
     conf.env.append_value('CFLAGS', '-D_LARGEFILE64_SOURCE')
     conf.env.append_value('CFLAGS', '-D_FILE_OFFSET_BITS=64')
+    # need ISOC9X for llabs()
+    conf.env.append_value('CXXFLAGS', '-D_ISOC9X_SOURCE')
     conf.env.append_value('CXXFLAGS', '-D_LARGEFILE64_SOURCE')
     conf.env.append_value('CXXFLAGS', '-D_FILE_OFFSET_BITS=64')
 

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-06-11 08:49-0400\n"
-"PO-Revision-Date: 2013-02-05 19:52+0100\n"
+"POT-Creation-Date: 2013-07-17 11:09+0200\n"
+"PO-Revision-Date: 2013-07-23 15:04+0200\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
@@ -218,7 +218,7 @@ msgstr ""
 msgid "Connect session to engine"
 msgstr "Verbinde Projekt mit Engine"
 
-#: audioengine.cc:844
+#: audioengine.cc:843
 msgid ""
 "a port with the name \"%1\" already exists: check for duplicated track/bus "
 "names"
@@ -226,7 +226,7 @@ msgstr ""
 "Ein Port mit Namen \"%1\" existiert bereits: Prüfen Sie auf doppelte Spur/"
 "Busnamen"
 
-#: audioengine.cc:846 session.cc:1698
+#: audioengine.cc:845 session.cc:1698
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
@@ -234,35 +234,35 @@ msgstr ""
 "Keine JACK-Ports mehr verfügbar. Wenn Sie so viele Spuren benötigen, müssen "
 "Sie %1 stoppen und JACK mit mehr Ports neu starten."
 
-#: audioengine.cc:849
+#: audioengine.cc:848
 msgid "AudioEngine: cannot register port \"%1\": %2"
 msgstr "AudioEngine: kann Port \"%1\": %2 nicht registrieren"
 
-#: audioengine.cc:879
+#: audioengine.cc:878
 msgid "unable to create port: %1"
 msgstr "kann Port: %1 nicht erzeugen"
 
-#: audioengine.cc:933
+#: audioengine.cc:932
 msgid "connect called before engine was started"
 msgstr "Aufruf von connect vor dem Start der Engine"
 
-#: audioengine.cc:959
+#: audioengine.cc:958
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
 msgstr "AudioEngine: kann %1 (%2) nicht mit %3 (%4) verbinden"
 
-#: audioengine.cc:974 audioengine.cc:1005
+#: audioengine.cc:973 audioengine.cc:1004
 msgid "disconnect called before engine was started"
 msgstr "Aufruf von disconnect vor dem Start der Engine"
 
-#: audioengine.cc:1053
+#: audioengine.cc:1052
 msgid "get_port_by_name() called before engine was started"
 msgstr "Aufruf von get_port_by_name() vor dem Start der Engine"
 
-#: audioengine.cc:1105
+#: audioengine.cc:1104
 msgid "get_ports called before engine was started"
 msgstr "Aufruf von get_ports vor dem Start der Engine"
 
-#: audioengine.cc:1428
+#: audioengine.cc:1427
 msgid "failed to connect to JACK"
 msgstr "Verbindung zu JACK fehlgeschlagen"
 
@@ -316,8 +316,8 @@ msgstr "AudioSource: kann Pfad für Peaks (b) \"%1\" nicht öffnen (%2)"
 msgid ""
 "AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"
 msgstr ""
-"AudioSource[%1]: peak read - kann %2 Samples bei Offset %3 von %4 nicht lesen"
-"(%5)"
+"AudioSource[%1]: peak read - kann %2 Samples bei Offset %3 von %4 nicht "
+"lesen(%5)"
 
 #: audiosource.cc:667
 msgid "%1: could not write read raw data for peak computation (%2)"
@@ -971,21 +971,21 @@ msgstr "R"
 msgid "%d"
 msgstr "%d"
 
-#: ladspa_plugin.cc:87
+#: ladspa_plugin.cc:88
 msgid "LADSPA: module has no descriptor function."
 msgstr "LADSPA: Modul hat keine Beschreibungsfunktion"
 
-#: ladspa_plugin.cc:92
+#: ladspa_plugin.cc:93
 msgid "LADSPA: plugin has gone away since discovery!"
 msgstr "LADSPA: Plugin ist nicht mehr auffindbar!"
 
-#: ladspa_plugin.cc:99
+#: ladspa_plugin.cc:100
 msgid "LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"
 msgstr ""
 "LADSPA: \"%1\" kann nicht verwendet werdeen, da es kein \"inplace processing"
 "\" beherrscht"
 
-#: ladspa_plugin.cc:296
+#: ladspa_plugin.cc:297
 msgid ""
 "illegal parameter number used with plugin \"%1\". This may indicate a change "
 "in the plugin design, and presets may be invalid"
@@ -993,35 +993,35 @@ msgstr ""
 "Falsche Parameterzahl für Plugin \"%1\". Das auf eine Änderung im Plugin-"
 "Design hindeuten, und Presets sind eventuell ungültig"
 
-#: ladspa_plugin.cc:373 ladspa_plugin.cc:418
+#: ladspa_plugin.cc:376 ladspa_plugin.cc:426
 msgid "Bad node sent to LadspaPlugin::set_state"
 msgstr "Schlechter Knoten an LadspaPlugin::set_state gesendet"
 
-#: ladspa_plugin.cc:386 ladspa_plugin.cc:431
+#: ladspa_plugin.cc:391 ladspa_plugin.cc:440
 msgid "LADSPA: no ladspa port number"
 msgstr "LADSPA: keine LADSPA-Portnummer"
 
-#: ladspa_plugin.cc:392 ladspa_plugin.cc:437
+#: ladspa_plugin.cc:397 ladspa_plugin.cc:446
 msgid "LADSPA: no ladspa port data"
 msgstr "LADSPA: keine LADSPA-Portdaten"
 
-#: ladspa_plugin.cc:707
+#: ladspa_plugin.cc:717
 msgid "LADSPA: cannot load module from \"%1\""
 msgstr "LADSPA: kann Modul nicht aus \"%1\" laden"
 
-#: ladspa_plugin.cc:817
+#: ladspa_plugin.cc:827
 msgid "Could not locate HOME.  Preset not removed."
 msgstr "Konnte HOME nicht eruieren. Preset nicht entfernt."
 
-#: ladspa_plugin.cc:854 ladspa_plugin.cc:860
+#: ladspa_plugin.cc:864 ladspa_plugin.cc:870
 msgid "Could not create %1.  Preset not saved. (%2)"
 msgstr "Konnte %1 nicht erzeugen. Preset nicht gesichert. (%2)"
 
-#: ladspa_plugin.cc:867
+#: ladspa_plugin.cc:877
 msgid "Error saving presets file %1."
 msgstr "Fehler beim Sichern der Preset-Datei %1."
 
-#: ladspa_plugin.cc:905
+#: ladspa_plugin.cc:915
 msgid "Could not locate HOME.  Preset not saved."
 msgstr "Konnte HOME nicht eruieren. Preset nicht gesichert."
 
@@ -1368,23 +1368,39 @@ msgstr ""
 "Konnte die Wiedergabeliste nicht aus den Quelldaten des Projekts "
 "konstruieren!"
 
+#: plugin.cc:324
+msgid ""
+"Plugin presets are not supported in this build of %1. Consider paying for a "
+"full version"
+msgstr ""
+"Pluginpresets werden in diesem %1-Binärpaket nicht unterstützt. Erwägen Sie, "
+"für die Vollversion zu bezahlen"
+
+#: plugin.cc:398
+msgid ""
+"Saving plugin settings is not supported in this build of %1. Consider paying "
+"for the full version"
+msgstr ""
+"Das Speichern von Pluginpresets werden in diesem %1-Binärpaket nicht "
+"unterstützt. Erwägen Sie, für die Vollversion zu bezahlen"
+
 #: plugin_insert.cc:599
 msgid "programming error: "
 msgstr "Programmierfehler:"
 
-#: plugin_insert.cc:908
+#: plugin_insert.cc:914
 msgid "XML node describing plugin is missing the `type' field"
 msgstr "Dem XML-Knoten zur Beschreibung des Plugins fehlt das \"type\"-Feld"
 
-#: plugin_insert.cc:923
+#: plugin_insert.cc:929
 msgid "unknown plugin type %1 in plugin insert state"
 msgstr "Unbekannter Plugintyp %1 im Einfüge-Status des Plugins"
 
-#: plugin_insert.cc:951
+#: plugin_insert.cc:957
 msgid "Plugin has no unique ID field"
 msgstr "Das Plugin hat kein Feld für die eindeutige ID"
 
-#: plugin_insert.cc:960
+#: plugin_insert.cc:966
 msgid ""
 "Found a reference to a plugin (\"%1\") that is unknown.\n"
 "Perhaps it was removed or moved since it was last used."
@@ -1392,15 +1408,15 @@ msgstr ""
 "Referenz auf ein unbekanntes Plugin (\"%1\") gefunden.\n"
 "Vielleicht wurde es seit der letzten Verwendung entfernt oder verschoben."
 
-#: plugin_insert.cc:1076
+#: plugin_insert.cc:1082
 msgid "PluginInsert: Auto: no ladspa port number"
 msgstr "PluginInsert: Auto: keine LADSPA Portnummer"
 
-#: plugin_insert.cc:1083
+#: plugin_insert.cc:1089
 msgid "PluginInsert: Auto: port id out of range"
 msgstr "PluginInsert: Auto: Port-ID Bereichsüberschreitung"
 
-#: plugin_insert.cc:1119
+#: plugin_insert.cc:1125
 msgid "PluginInsert: automatable control %1 not found - ignored"
 msgstr ""
 "PluginInsert: automatisierbares Kontrollelement %1 nicht gefunden - ignoriert"
@@ -1550,23 +1566,23 @@ msgstr "Import: Fehler in src_new() : %1"
 msgid "return %1"
 msgstr "Rückgabewert: %1"
 
-#: route.cc:1100 route.cc:2550
+#: route.cc:1101 route.cc:2557
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr "unbekannter Prozessortyp \"%1\"; ignoriert"
 
-#: route.cc:1112
+#: route.cc:1113
 msgid "processor could not be created. Ignored."
 msgstr "Prozessor konnte nicht erzeugt werden. Ignoriert."
 
-#: route.cc:1983 route.cc:2203
+#: route.cc:1986 route.cc:2210
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr "Schlechter Knoten an Route::set_state() gesendet [%1]"
 
-#: route.cc:2042
+#: route.cc:2045
 msgid "Pannable state found for route (%1) without a panner!"
 msgstr "Pannerziel-Status für Route (%1) ohne Panner gefunden!"
 
-#: route.cc:2106 route.cc:2110 route.cc:2317 route.cc:2321
+#: route.cc:2113 route.cc:2117 route.cc:2324 route.cc:2328
 msgid "badly formed order key string in state file! [%1] ... ignored."
 msgstr ""
 "schlecht geformte Zeichenkette für den Schlüssel der Sortierreihenfolge in "
@@ -1857,18 +1873,17 @@ msgstr "Session: kann quarter-frame MTC-Nachricht nicht senden (%1)"
 msgid "Session: cannot create Playlist from XML description."
 msgstr "Session: kann Wiedergabeliste nicht aus der XML-Beschreibung erzeugen"
 
-#: session_process.cc:135
+#: session_process.cc:133
 msgid "Session: error in no roll for %1"
 msgstr "Session: Fehler in no_roll für %1"
 
-#: session_process.cc:1160
+#: session_process.cc:1158
 msgid "Programming error: illegal event type in process_event (%1)"
 msgstr "Programmierfehler: illegaler Ereignistyp in process_event (%1)"
 
 #: session_state.cc:139
-#, fuzzy
 msgid "Could not use path %1 (%2)"
-msgstr "Konnte Pfad %1 nicht benutzen (%s)"
+msgstr "Konnte Pfad %1 nicht benutzen (%2)"
 
 #: session_state.cc:267
 msgid "solo cut control (dB)"
@@ -2406,7 +2421,7 @@ msgstr ""
 msgid "attempt to write a non-writable audio file source (%1)"
 msgstr "Versuch, in eine schreibgeschützte Audio-Dateiquelle zu schreiben (%1)"
 
-#: sndfilesource.cc:396 utils.cc:497 utils.cc:521 utils.cc:535 utils.cc:554
+#: sndfilesource.cc:396 utils.cc:507 utils.cc:531 utils.cc:545 utils.cc:564
 msgid "programming error: %1 %2"
 msgstr "Programmierfehler: %1 %2"
 
@@ -2672,11 +2687,11 @@ msgstr "M-Clock"
 msgid "LTC"
 msgstr "LTC"
 
-#: utils.cc:589
+#: utils.cc:599
 msgid "programming error: unknown native header format: %1"
 msgstr "Programmierfehler: unbekanntes natives Dateikopfformat: %1"
 
-#: utils.cc:604
+#: utils.cc:614
 msgid "cannot open directory %1 (%2)"
 msgstr "kann Verzeichnis %1 nicht öffnen (%2)"
 

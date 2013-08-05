@@ -82,7 +82,7 @@ class Processor : public SessionObject, public Automatable, public Latent
 
 	/* Derived classes should override these, or processor appears as an in-place pass-through */
 
-	virtual bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const = 0;
+	virtual bool can_support_io_configuration (const ChanCount& in, ChanCount& out) = 0;
 	virtual ChanCount input_streams () const { return _configured_input; }
 	virtual ChanCount output_streams() const { return _configured_output; }
 

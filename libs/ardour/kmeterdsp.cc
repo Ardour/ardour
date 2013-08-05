@@ -49,45 +49,37 @@ void Kmeterdsp::process (float *p, int n)
     // p : pointer to sample buffer
     // n : number of samples to process
 
-    float  s, t, z1, z2;
+    float  s, z1, z2;
 
     // Get filter state.
     z1 = _z1;
     z2 = _z2;
 
-    // Process n samples. Find digital peak value for this
-    // period and perform filtering. The second filter is
-    // evaluated only every 4th sample - this is just an
-    // optimisation.
-    t = 0;
+    // Perform filtering. The second filter is evaluated
+    // only every 4th sample - this is just an optimisation.
     n /= 4;  // Loop is unrolled by 4.
     while (n--)
     {
 	s = *p++;
 	s *= s;
-	if (t < s) t = s;             // Update digital peak.
 	z1 += _omega * (s - z1);      // Update first filter.
 	s = *p++;
 	s *= s;
-	if (t < s) t = s;             // Update digital peak.
 	z1 += _omega * (s - z1);      // Update first filter.
 	s = *p++;
 	s *= s;
-	if (t < s) t = s;             // Update digital peak.
 	z1 += _omega * (s - z1);      // Update first filter.
 	s = *p++;
 	s *= s;
-	if (t < s) t = s;             // Update digital peak.
 	z1 += _omega * (s - z1);      // Update first filter.
         z2 += 4 * _omega * (z1 - z2); // Update second filter.
     }
-    t = sqrtf (t);
 
     // Save filter state. The added constants avoid denormals.
     _z1 = z1 + 1e-20f;
     _z2 = z2 + 1e-20f;
 
-    s = sqrtf (2 * z2);
+    s = sqrtf (2.0f * z2);
 
     if (_flag) // Display thread has read the rms value.
     {

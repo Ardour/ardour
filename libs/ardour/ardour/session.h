@@ -200,7 +200,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void process (pframes_t nframes);
 
 	BufferSet& get_silent_buffers (ChanCount count = ChanCount::ZERO);
-	BufferSet& get_scratch_buffers (ChanCount count = ChanCount::ZERO);
+	BufferSet& get_scratch_buffers (ChanCount count = ChanCount::ZERO, bool silence = true );
+	BufferSet& get_route_buffers (ChanCount count = ChanCount::ZERO, bool silence = true);
 	BufferSet& get_mix_buffers (ChanCount count = ChanCount::ZERO);
 
 	bool have_rec_enabled_track () const;
@@ -813,6 +814,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void send_mmc_locate (framepos_t);
 	int send_full_time_code (framepos_t);
+	void send_song_position_pointer (framepos_t);
 
 	bool step_editing() const { return (_step_editors > 0); }
 
@@ -1209,6 +1211,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	double            ltc_enc_cnt;
 	framepos_t        ltc_enc_off;
 	bool              restarting;
+	framepos_t        ltc_prev_cycle;
 
 	framepos_t        ltc_timecode_offset;
 	bool              ltc_timecode_negative_offset;

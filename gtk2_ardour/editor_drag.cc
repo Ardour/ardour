@@ -1665,7 +1665,7 @@ VideoTimeLineDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	framecnt_t dt = adjusted_current_frame (event) - raw_grab_frame() + _pointer_frame_offset;
-	dt = ARDOUR_UI::instance()->video_timeline->quantify_frames_to_apv(dt);
+	dt = ARDOUR_UI::instance()->video_timeline->quantify_frames_to_apv(_startdrag_video_offset+dt) - _startdrag_video_offset;
 
 	if (_max_backwards_drag >= 0 && dt <= - _max_backwards_drag) {
 		dt = - _max_backwards_drag;
@@ -2373,6 +2373,7 @@ CursorDrag::fake_locate (framepos_t t)
 		framepos_t const f = _editor->playhead_cursor->current_frame;
 		s->send_mmc_locate (f);
 		s->send_full_time_code (f);
+		s->send_song_position_pointer (f);
 	}
 
 	show_verbose_cursor_time (t);

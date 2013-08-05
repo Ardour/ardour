@@ -970,7 +970,7 @@ LV2Plugin::find_presets()
 				                               lilv_node_as_string(name))));
 		} else {
 			warning << string_compose(
-			    _("Plugin \"%1\% preset \"%2%\" is missing a label\n"),
+			    _("Plugin \"%1\" preset \"%2\" is missing a label\n"),
 			    lilv_node_as_string(lilv_plugin_get_uri(_impl->plugin)),
 			    lilv_node_as_string(preset)) << endmsg;
 		}
@@ -1651,7 +1651,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				}
 			} else if (!valid) {
 				// Nothing we understand or care about, connect to scratch
-				_ev_buffers[port_index] = silent_bufs.get_lv2_midi(
+				_ev_buffers[port_index] = scratch_bufs.get_lv2_midi(
 					(flags & PORT_INPUT), 0, (flags & PORT_EVENT));
 			}
 			buf = lv2_evbuf_get_buffer(_ev_buffers[port_index]);

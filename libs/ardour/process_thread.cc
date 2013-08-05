@@ -90,7 +90,7 @@ ProcessThread::get_silent_buffers (ChanCount count)
 }
 
 BufferSet&
-ProcessThread::get_scratch_buffers (ChanCount count)
+ProcessThread::get_scratch_buffers (ChanCount count, bool silence)
 {
         ThreadBuffers* tb = _private_thread_buffers.get();
         assert (tb);
@@ -103,6 +103,41 @@ ProcessThread::get_scratch_buffers (ChanCount count)
 		sb->set_count (count);
 	} else {
 		sb->set_count (sb->available());
+	}
+
+	if (silence) {
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			for (uint32_t i = 0; i < sb->count().get(*t); ++i) {
+				sb->get(*t, i).clear();
+			}
+		}
+	}
+
+	return *sb;
+}
+
+BufferSet&
+ProcessThread::get_route_buffers (ChanCount count, bool silence)
+{
+	ThreadBuffers* tb = _private_thread_buffers.get();
+	assert (tb);
+
+	BufferSet* sb = tb->route_buffers;
+	assert (sb);
+
+	if (count != ChanCount::ZERO) {
+		assert(sb->available() >= count);
+		sb->set_count (count);
+	} else {
+		sb->set_count (sb->available());
+	}
+
+	if (silence) {
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			for (uint32_t i = 0; i < sb->count().get(*t); ++i) {
+				sb->get(*t, i).clear();
+			}
+		}
 	}
 
 	return *sb;

@@ -1926,7 +1926,7 @@ void
 Mixer_UI::toggle_midi_input_active (bool flip_others)
 {
 	boost::shared_ptr<RouteList> rl (new RouteList);
-	bool onoff;
+	bool onoff = false;
 
 	set_route_targets_for_operation ();
 

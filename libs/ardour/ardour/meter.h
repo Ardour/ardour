@@ -56,7 +56,7 @@ public:
 	void reset ();
 	void reset_max ();
 
-	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
+	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
 
 	/* special method for meter, to ensure that it can always handle the maximum
@@ -74,6 +74,9 @@ public:
 
 	/** Compute peaks */
 	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool);
+
+	void activate ()   { }
+	void deactivate () { }
 
 	ChanCount input_streams () const { return current_meters; }
 	ChanCount output_streams () const { return current_meters; }

@@ -300,7 +300,11 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 			s += snprintf (
 				&buf[s], bufsize, " MTC full frame to %02d:%02d:%02d:%02d\n", msg[5] & 0x1f, msg[6], msg[7], msg[8]
 				);
+		} else if (len == 3 && msg[0] == MIDI::position) {
 
+			/* MIDI Song Position */
+			int midi_beats = (msg[2] << 7) | msg[1];
+			s += snprintf (&buf[s], bufsize, "%16s %d\n", "Position", (int) midi_beats);
 		} else {
 
 			/* other sys-ex */

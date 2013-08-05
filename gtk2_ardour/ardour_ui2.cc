@@ -144,6 +144,7 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (feedback_alert_button, _("When active, there is a feedback loop."));
 	set_tip (primary_clock, _("<b>Primary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
 	set_tip (secondary_clock, _("<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
+	set_tip (editor_meter_peak_display, _("Reset Level Meter"));
 
 	synchronize_sync_source_and_video_pullup ();
 
@@ -417,6 +418,8 @@ ARDOUR_UI::setup_transport ()
                 transport_tearoff_hbox.pack_start (_editor_transport_box, false, false);
         }
 	transport_tearoff_hbox.pack_start (alert_box, false, false);
+	transport_tearoff_hbox.pack_start (meter_box, false, false);
+	transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
 
 	if (Profile->get_sae()) {
 		Image* img = manage (new Image ((::get_icon (X_("sae")))));

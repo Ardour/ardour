@@ -182,6 +182,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, solo_alert_button (_("solo"))
 	, feedback_alert_button (_("feedback"))
 
+	, editor_meter(0)
+	, editor_meter_peak_display()
+
 	, speaker_config_window (X_("speaker-config"), _("Speaker Configuration"))
 	, theme_manager (X_("theme-manager"), _("Theme Manager"))
 	, key_editor (X_("key-editor"), _("Key Bindings"))
@@ -1020,6 +1023,15 @@ ARDOUR_UI::every_point_zero_something_seconds ()
 	// august 2007: actual update frequency: 25Hz (40ms), not 100Hz
 
 	SuperRapidScreenUpdate(); /* EMIT_SIGNAL */
+	if (editor_meter && Config->get_show_editor_meter()) {
+		float mpeak = editor_meter->update_meters();
+		if (mpeak > editor_meter_max_peak) {
+			if (mpeak >= Config->get_meter_peak()) {
+				editor_meter_peak_display.set_name ("meterbridge peakindicator on");
+				editor_meter_peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
+			}
+		}
+	}
 	return TRUE;
 }
 
@@ -3479,7 +3491,10 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 					return;
 				}
 				if (!transcode_video_dialog->get_audiofile().empty()) {
-					editor->embed_audio_from_video(transcode_video_dialog->get_audiofile());
+					editor->embed_audio_from_video(
+							transcode_video_dialog->get_audiofile(),
+							video_timeline->get_offset()
+							);
 				}
 				switch (transcode_video_dialog->import_option()) {
 					case VTL_IMPORT_TRANSCODED:
@@ -3542,6 +3557,10 @@ ARDOUR_UI::remove_video ()
 {
 	video_timeline->close_session();
 	editor->toggle_ruler_video(false);
+
+	/* reset state */
+	video_timeline->set_offset_locked(false);
+	video_timeline->set_offset(0);
 
 	/* delete session state */
 	XMLNode* node = new XMLNode(X_("Videotimeline"));
@@ -4079,4 +4098,33 @@ ARDOUR_UI::session_format_mismatch (std::string xml_path, std::string backup_pat
 					   start_mono, end_mono), true);
 
 	msg.run ();
+}
+
+
+void
+ARDOUR_UI::reset_peak_display ()
+{
+	if (!_session || !_session->master_out() || !editor_meter) return;
+	editor_meter->clear_meters();
+	editor_meter_max_peak = -INFINITY;
+	editor_meter_peak_display.set_name ("meterbridge peakindicator");
+	editor_meter_peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
+}
+
+void
+ARDOUR_UI::reset_group_peak_display (RouteGroup* group)
+{
+	if (!_session || !_session->master_out()) return;
+	if (group == _session->master_out()->route_group()) {
+		reset_peak_display ();
+	}
+}
+
+void
+ARDOUR_UI::reset_route_peak_display (Route* route)
+{
+	if (!_session || !_session->master_out()) return;
+	if (_session->master_out().get() == route) {
+		reset_peak_display ();
+	}
 }

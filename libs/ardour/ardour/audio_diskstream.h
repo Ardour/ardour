@@ -152,6 +152,7 @@ class AudioDiskstream : public Diskstream
 	friend class AudioTrack;
 
         int  process (BufferSet&, framepos_t transport_frame, pframes_t nframes, framecnt_t &, bool need_disk_signal);
+        frameoffset_t calculate_playback_distance (pframes_t nframes);
 	bool commit  (framecnt_t);
 
   private:

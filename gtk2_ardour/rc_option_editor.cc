@@ -1315,6 +1315,14 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_track_meters)
 		     ));
 
+	add_option (_("Editor"),
+	     new BoolOption (
+		     "show-editor-meter",
+		     _("Display master-meter in the toolbar"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_editor_meter),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_editor_meter)
+		     ));
+
 	bco = new BoolComboOption (
 		     "use-overlap-equivalency",
 		     _("Regions in active edit groups are edited together"),
@@ -1933,15 +1941,30 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_line_up_level)
 		);
 
-	mlu->add (MeteringLineUp24, _("-24dBFS"));
-	mlu->add (MeteringLineUp20, _("-20dBFS (SMPTE)"));
+	mlu->add (MeteringLineUp24, _("-24dBFS (SMPTE US: 4dBu = -20dBFS)"));
+	mlu->add (MeteringLineUp20, _("-20dBFS (SMPTE RP.0155)"));
 	mlu->add (MeteringLineUp18, _("-18dBFS (EBU, BBC)"));
 	mlu->add (MeteringLineUp15, _("-15dBFS (DIN)"));
 
-	Gtkmm2ext::UI::instance()->set_tip (mlu->tip_widget(), _("Configure meter-ticks and color-knee point for dBFS scale DPM, set reference/offset level for IEC PPM."));
+	Gtkmm2ext::UI::instance()->set_tip (mlu->tip_widget(), _("Configure meter-marks and color-knee point for dBFS scale DPM, set reference level for IEC1/Nordic, IEC2 PPM and VU meter."));
 
 	add_option (S_("Preferences|GUI"), mlu);
 
+	ComboOption<MeterLineUp>* mld = new ComboOption<MeterLineUp> (
+		"meter-line-up-din",
+		_("IEC1/DIN Meter line-up level; 0dBu"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_line_up_din),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_line_up_din)
+		);
+
+	mld->add (MeteringLineUp24, _("-24dBFS (SMPTE US: 4dBu = -20dBFS)"));
+	mld->add (MeteringLineUp20, _("-20dBFS (SMPTE RP.0155)"));
+	mld->add (MeteringLineUp18, _("-18dBFS (EBU, BBC)"));
+	mld->add (MeteringLineUp15, _("-15dBFS (DIN)"));
+
+	Gtkmm2ext::UI::instance()->set_tip (mld->tip_widget(), _("Reference level for IEC1/DIN meter."));
+
+	add_option (S_("Preferences|GUI"), mld);
 
 	ComboOption<VUMeterStandard>* mvu = new ComboOption<VUMeterStandard> (
 		"meter-vu-standard",
@@ -1950,9 +1973,10 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_vu_standard)
 		);
 
-	mvu->add (MeteringVUfrench,   _("+2dB (France)"));
-	mvu->add (MeteringVUamerican, _(" 0dB (North America, Australia)"));
-	mvu->add (MeteringVUstandard, _("-4dB (standard)"));
+	mvu->add (MeteringVUfrench,   _("0VU = -2dBu (France)"));
+	mvu->add (MeteringVUamerican, _("0VU = 0dBu (North America, Australia)"));
+	mvu->add (MeteringVUstandard, _("0VU = +4dBu (standard)"));
+	mvu->add (MeteringVUeight,    _("0VU = +8dBu"));
 
 	add_option (S_("Preferences|GUI"), mvu);
 
@@ -1969,6 +1993,15 @@ RCOptionEditor::RCOptionEditor ()
 		 _("Specify the audio signal level in dbFS at and above which the meter-peak indicator will flash red."));
 
 	add_option (S_("Preferences|GUI"), mpks);
+
+	add_option (S_("Preferences|GUI"),
+	     new BoolOption (
+		     "meter-style-led",
+		     _("LED meter style"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_style_led),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_style_led)
+		     ));
+
 }
 
 void

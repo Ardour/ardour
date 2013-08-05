@@ -50,6 +50,7 @@ using namespace Gtk;
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace VideoUtils;
 
 TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	: ArdourDialog (_("Transcode/Import Video File "))

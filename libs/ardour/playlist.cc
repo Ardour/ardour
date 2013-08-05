@@ -250,7 +250,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, f
 		plist.add (Properties::layer, region->layer());
 		plist.add (Properties::layering_index, region->layering_index());
 
-		new_region = RegionFactory::RegionFactory::create (region, plist);
+		new_region = RegionFactory::create (region, plist);
 
 		add_region_internal (new_region, position);
 	}
@@ -284,7 +284,7 @@ Playlist::copy_regions (RegionList& newlist) const
 	RegionReadLock rlock (const_cast<Playlist *> (this));
 
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		newlist.push_back (RegionFactory::RegionFactory::create (*i, true));
+		newlist.push_back (RegionFactory::create (*i, true));
 	}
 }
 

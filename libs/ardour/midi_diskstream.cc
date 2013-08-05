@@ -517,6 +517,20 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 	return 0;
 }
 
+frameoffset_t
+MidiDiskstream::calculate_playback_distance (pframes_t nframes)
+{
+	frameoffset_t playback_distance = nframes;
+
+	/* XXX: should be doing varispeed stuff once it's implemented in ::process() above */
+
+	if (_actual_speed < 0.0) {
+		return -playback_distance;
+	} else {
+		return playback_distance;
+	}
+}
+
 bool
 MidiDiskstream::commit (framecnt_t playback_distance)
 {

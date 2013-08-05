@@ -564,8 +564,22 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	}
 
 	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-		if (!extra_other[*i].empty()) {
-			boost::shared_ptr<Bundle> b = make_bundle_from_ports (extra_other[*i], *i, inputs);
+		if (extra_other[*i].empty()) continue;
+		std::string cp;
+		std::vector<std::string> nb;
+		for (uint32_t j = 0; j < extra_other[*i].size(); ++j) {
+			std::string nn = extra_other[*i][j];
+			std::string pf = nn.substr (0, nn.find_first_of (":") + 1);
+			if (pf != cp && !nb.empty()) {
+				boost::shared_ptr<Bundle> b = make_bundle_from_ports (nb, *i, inputs);
+				other->add_bundle (b);
+				nb.clear();
+			}
+			cp = pf;
+			nb.push_back(extra_other[*i][j]);
+		}
+		if (!nb.empty()) {
+			boost::shared_ptr<Bundle> b = make_bundle_from_ports (nb, *i, inputs);
 			other->add_bundle (b);
 		}
 	}

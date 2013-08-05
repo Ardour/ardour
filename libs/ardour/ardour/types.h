@@ -384,9 +384,10 @@ namespace ARDOUR {
 	};
 
 	enum VUMeterStandard {
-		MeteringVUfrench,   // + 2
-		MeteringVUamerican, // +-0
-		MeteringVUstandard  // -4
+		MeteringVUfrench,   // 0VU = -2dBu
+		MeteringVUamerican, // 0VU =  0dBu
+		MeteringVUstandard, // 0VU = +4dBu
+		MeteringVUeight     // 0VU = +8dBu
 	};
 
 	enum MeterLineUp {

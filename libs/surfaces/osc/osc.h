@@ -188,7 +188,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
                return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
         } \
-        int cb_ ## name (const char *, const char *, lo_arg **argv, int argc, void *data) { \
+        int cb_ ## name (const char *, const char *, lo_arg **argv, int argc, void *) { \
                 if (argc > 1) {                                                \
                  name (argv[0]->arg1type, argv[1]->arg2type,argv[2]->arg3type); \
                 }                                                      \
@@ -199,7 +199,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
         static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
                return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
         } \
-        int cb_ ## name (const char *, const char *, lo_arg **argv, int argc, void *data) { \
+        int cb_ ## name (const char *, const char *, lo_arg **argv, int argc, void *) { \
                 if (argc > 1) {                                                \
                  name (argv[0]->arg1type, argv[1]->arg2type,argv[2]->arg3type,argv[3]->arg4type); \
                 }                                                      \

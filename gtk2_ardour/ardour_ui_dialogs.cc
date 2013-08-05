@@ -39,6 +39,7 @@
 #include "keyeditor.h"
 #include "location_ui.h"
 #include "main_clock.h"
+#include "meter_patterns.h"
 #include "midi_tracer.h"
 #include "mixer_ui.h"
 #include "public_editor.h"
@@ -51,6 +52,8 @@
 #include "sfdb_ui.h"
 #include "theme_manager.h"
 #include "time_info_box.h"
+
+#include <gtkmm2ext/keyboard.h>
 
 #include "i18n.h"
 
@@ -186,6 +189,45 @@ ARDOUR_UI::set_session (Session *s)
 	point_zero_something_second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_zero_something_seconds), 40);
 
 	update_format ();
+
+	if (editor_meter) {
+		meter_box.remove(*editor_meter);
+		delete editor_meter;
+		editor_meter = 0;
+		editor_meter_peak_display.hide();
+	}
+
+	if (_session && _session->master_out()) {
+		editor_meter = new LevelMeterHBox(_session);
+		editor_meter->set_meter (_session->master_out()->shared_peak_meter().get());
+		editor_meter->clear_meters();
+		editor_meter->set_type (_session->master_out()->meter_type());
+		editor_meter->setup_meters (30, 12, 6);
+		editor_meter->show();
+		meter_box.pack_start(*editor_meter);
+
+		ArdourMeter::ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_peak_display));
+		ArdourMeter::ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_route_peak_display));
+		ArdourMeter::ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_group_peak_display));
+
+		editor_meter_peak_display.set_name ("meterbridge peakindicator");
+		editor_meter_peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
+		editor_meter_peak_display.unset_flags (Gtk::CAN_FOCUS);
+		editor_meter_peak_display.set_size_request(6, -1);
+		editor_meter_peak_display.set_corner_radius(2);
+
+		editor_meter_max_peak = -INFINITY;
+		editor_meter_peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::editor_meter_peak_button_release), false);
+
+		if (Config->get_show_editor_meter()) {
+			meter_box.show();
+			editor_meter_peak_display.show();
+		} else {
+			meter_box.hide();
+			editor_meter_peak_display.hide();
+		}
+	}
+
 }
 
 int
@@ -224,6 +266,13 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	second_connection.disconnect ();
 	point_one_second_connection.disconnect ();
 	point_zero_something_second_connection.disconnect();
+
+	if (editor_meter) {
+		meter_box.remove(*editor_meter);
+		delete editor_meter;
+		editor_meter = 0;
+		editor_meter_peak_display.hide();
+	}
 
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, false);
 
@@ -496,4 +545,19 @@ ARDOUR_UI::main_window_state_event_handler (GdkEventWindowState* ev, bool window
 	}
 
 	return false;
+}
+
+bool
+ARDOUR_UI::editor_meter_peak_button_release (GdkEventButton* ev)
+{
+	if (ev->button == 1 && Gtkmm2ext::Keyboard::modifier_state_equals (ev->state, Gtkmm2ext::Keyboard::PrimaryModifier|Gtkmm2ext::Keyboard::TertiaryModifier)) {
+		ArdourMeter::ResetAllPeakDisplays ();
+	} else if (ev->button == 1 && Gtkmm2ext::Keyboard::modifier_state_equals (ev->state, Gtkmm2ext::Keyboard::PrimaryModifier)) {
+		if (_session->master_out()) {
+			ArdourMeter::ResetGroupPeakDisplays (_session->master_out()->route_group());
+		}
+	} else if (_session->master_out()) {
+		ArdourMeter::ResetRoutePeakDisplays (_session->master_out().get());
+	}
+	return true;
 }

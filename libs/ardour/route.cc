@@ -98,9 +98,13 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _default_type (default_type)
 	, _remote_control_id (0)
 	, _in_configure_processors (false)
+	, _initial_io_setup (false)
 	, _custom_meter_position_noted (false)
 	, _last_custom_meter_was_at_end (false)
 {
+	if (is_master()) {
+		_meter_type = MeterK20;
+	}
 	processor_max_streams.reset();
 }
 
@@ -133,6 +137,7 @@ Route::init ()
 	_input->PortCountChanging.connect_same_thread (*this, boost::bind (&Route::input_port_count_changing, this, _1));
 
 	_output->changed.connect_same_thread (*this, boost::bind (&Route::output_change_handler, this, _1, _2));
+	_output->PortCountChanging.connect_same_thread (*this, boost::bind (&Route::output_port_count_changing, this, _1));
 
 	/* add amp processor  */
 
@@ -540,11 +545,10 @@ Route::process_output_buffers (BufferSet& bufs,
 			if (bufs.count() != (*i)->input_streams()) {
 				DEBUG_TRACE (
 					DEBUG::Processors, string_compose (
-						"%1 bufs = %2 input for %3 = %4\n",
+						"input port mismatch %1 bufs = %2 input for %3 = %4\n",
 						_name, bufs.count(), (*i)->name(), (*i)->input_streams()
 						)
 					);
-				continue;
 			}
 		}
 #endif
@@ -568,7 +572,7 @@ void
 Route::monitor_run (framepos_t start_frame, framepos_t end_frame, pframes_t nframes, int declick)
 {
 	assert (is_monitor());
-	BufferSet& bufs (_session.get_scratch_buffers (n_process_buffers()));
+	BufferSet& bufs (_session.get_route_buffers (n_process_buffers()));
 	passthru (bufs, start_frame, end_frame, nframes, declick);
 }
 
@@ -594,7 +598,7 @@ Route::passthru (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, 
 void
 Route::passthru_silence (framepos_t start_frame, framepos_t end_frame, pframes_t nframes, int declick)
 {
-	BufferSet& bufs (_session.get_silent_buffers (n_process_buffers()));
+	BufferSet& bufs (_session.get_route_buffers (n_process_buffers(), true));
 
 	bufs.set_count (_input->n_ports());
 	write_out_of_band_data (bufs, start_frame, end_frame, nframes);
@@ -1651,7 +1655,8 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 
 		if (boost::dynamic_pointer_cast<UnknownProcessor> (*p)) {
 			DEBUG_TRACE (DEBUG::Processors, "--- CONFIGURE ABORTED due to unknown processor.\n");
-			break;
+			DEBUG_TRACE (DEBUG::Processors, "}\n");
+			return list<pair<ChanCount, ChanCount> > ();
 		}
 
 		if ((*p)->can_support_io_configuration(in, out)) {
@@ -1701,6 +1706,9 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	}
 
 	ChanCount out;
+	bool seen_mains_out = false;
+	processor_out_streams = _input->n_ports();
+	processor_max_streams.reset();
 
 	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
@@ -1713,7 +1721,20 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 		processor_max_streams = ChanCount::max(processor_max_streams, c->first);
 		processor_max_streams = ChanCount::max(processor_max_streams, c->second);
 		out = c->second;
+
+		if (boost::dynamic_pointer_cast<Delivery> (*p)
+				&& boost::dynamic_pointer_cast<Delivery> (*p)->role() == Delivery::Main) {
+			/* main delivery will increase port count to match input.
+			 * the Delivery::Main is usually the last processor - followed only by
+			 * 'MeterOutput'.
+			 */
+			seen_mains_out = true;
+		}
+		if (!seen_mains_out) {
+			processor_out_streams = out;
+		}
 	}
+
 
 	if (_meter) {
 		_meter->reset_max_channels (processor_max_streams);
@@ -1992,6 +2013,7 @@ Route::set_state (const XMLNode& node, int version)
 	}
 
 	set_id (node);
+	_initial_io_setup = true;
 
 	if ((prop = node.property (X_("flags"))) != 0) {
 		_flags = Flag (string_2_enum (prop->value(), _flags));
@@ -2058,6 +2080,8 @@ Route::set_state (const XMLNode& node, int version)
 	if ((prop = node.property (X_("meter-type"))) != 0) {
 		_meter_type = MeterType (string_2_enum (prop->value (), _meter_type));
 	}
+
+	_initial_io_setup = false;
 
 	set_processor_state (processor_state);
 
@@ -2939,6 +2963,9 @@ void
 Route::output_change_handler (IOChange change, void * /*src*/)
 {
 	bool need_to_queue_solo_change = true;
+	if (_initial_io_setup) {
+		return;
+	}
 
 	if ((change.type & IOChange::ConfigurationChanged)) {
 		/* This is called with the process lock held if change 
@@ -3013,7 +3040,7 @@ Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		*/
 	}
 
-	BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
+	BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
 
 	fill_buffers_with_input (bufs, _input, nframes);
 
@@ -3052,7 +3079,7 @@ Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, in
 
 	_silent = false;
 
-	BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
+	BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
 
 	fill_buffers_with_input (bufs, _input, nframes);
 
@@ -3151,9 +3178,6 @@ Route::set_meter_point (MeterPoint p, bool force)
 		   it doesn't require any changes to the other processors.
 		*/
 	}
-
-	_meter->reset();
-	_meter->reset_max();
 
 	meter_change (); /* EMIT SIGNAL */
 
@@ -3750,6 +3774,19 @@ Route::input_port_count_changing (ChanCount to)
 		return true;
 	}
 
+	/* The change is ok */
+	return false;
+}
+
+/** Called when there is a proposed change to the output port count */
+bool
+Route::output_port_count_changing (ChanCount to)
+{
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		if (processor_out_streams.get(*t) > to.get(*t)) {
+			return true;
+		}
+	}
 	/* The change is ok */
 	return false;
 }

@@ -125,6 +125,7 @@ class MidiDiskstream : public Diskstream
 	friend class MidiTrack;
 
         int  process (BufferSet&, framepos_t transport_frame, pframes_t nframes, framecnt_t &, bool need_diskstream);
+        frameoffset_t calculate_playback_distance (pframes_t nframes);
 	bool commit  (framecnt_t nframes);
 	static framecnt_t midi_readahead;
 

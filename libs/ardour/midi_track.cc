@@ -319,6 +319,12 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
+		boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
+		framecnt_t playback_distance = diskstream->calculate_playback_distance(nframes);
+		if (can_internal_playback_seek(llabs(playback_distance))) {
+			/* TODO should declick, and/or note-off */
+			internal_playback_seek(playback_distance);
+		}
 		return 0;
 	}
 
@@ -353,7 +359,7 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		return dret;
 	}
 
-	BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
+	BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
 
 	fill_buffers_with_input (bufs, _input, nframes);
 

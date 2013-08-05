@@ -111,8 +111,12 @@ EngineControl::EngineControl ()
 
 	strings.clear ();
 	strings.push_back (_("None"));
+#ifdef __APPLE__
+	strings.push_back (_("coremidi"));
+#else
 	strings.push_back (_("seq"));
 	strings.push_back (_("raw"));
+#endif
 	set_popdown_strings (midi_driver_combo, strings);
 	midi_driver_combo.set_active_text (strings.front ());
 

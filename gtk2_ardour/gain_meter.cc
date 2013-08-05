@@ -84,7 +84,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 		gain_slider = manage (new VSliderController (&gain_adjustment, fader_length, fader_girth, false));
 	}
 
-	level_meter = new LevelMeter(_session);
+	level_meter = new LevelMeterHBox(_session);
 
 	level_meter->ButtonPress.connect_same_thread (_level_meter_connection, boost::bind (&GainMeterBase::level_meter_button_press, this, _1));
 	meter_metric_area.signal_button_press_event().connect (sigc::mem_fun (*this, &GainMeterBase::level_meter_button_press));
@@ -526,9 +526,12 @@ GainMeterBase::gain_changed ()
 void
 GainMeterBase::set_meter_strip_name (const char * name)
 {
+	char tmp[256];
 	meter_metric_area.set_name (name);
-	meter_ticks1_area.set_name (name);
-	meter_ticks2_area.set_name (name);
+	sprintf(tmp, "Mark%sLeft", name);
+	meter_ticks1_area.set_name (tmp);
+	sprintf(tmp, "Mark%sRight", name);
+	meter_ticks2_area.set_name (tmp);
 }
 
 void
@@ -1019,21 +1022,30 @@ GainMeter::get_gm_width ()
 gint
 GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 {
-	assert(_route);
+	if (!_route) {
+		if (_types.empty()) { _types.push_back(DataType::AUDIO); }
+		return meter_expose_metrics(ev, MeterPeak, _types, &meter_metric_area);
+	}
 	return meter_expose_metrics(ev, _route->meter_type(), _types, &meter_metric_area);
 }
 
 gint
 GainMeter::meter_ticks1_expose (GdkEventExpose *ev)
 {
-	assert(_route);
+	if (!_route) {
+		if (_types.empty()) { _types.push_back(DataType::AUDIO); }
+		return meter_expose_ticks(ev, MeterPeak, _types, &meter_ticks1_area);
+	}
 	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks1_area);
 }
 
 gint
 GainMeter::meter_ticks2_expose (GdkEventExpose *ev)
 {
-	assert(_route);
+	if (!_route) {
+		if (_types.empty()) { _types.push_back(DataType::AUDIO); }
+		return meter_expose_ticks(ev, MeterPeak, _types, &meter_ticks2_area);
+	}
 	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks2_area);
 }
 

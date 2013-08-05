@@ -35,16 +35,16 @@ alt_log_meter (float power)
 #endif
 
 /* prototypes - avoid compiler warning */
-inline float log_meter (float db);
-inline float meter_deflect_ppm (float);
-inline float meter_deflect_din (float);
-inline float meter_deflect_nordic (float);
-inline float meter_deflect_vu (float);
-inline float meter_deflect_k (float, float);
+static inline float log_meter (float db);
+static inline float meter_deflect_ppm (float);
+static inline float meter_deflect_din (float);
+static inline float meter_deflect_nordic (float);
+static inline float meter_deflect_vu (float);
+static inline float meter_deflect_k (float, float);
 
 
 
-inline float
+static inline float
 log_meter (float db)
 {
          gfloat def = 0.0f; /* Meter deflection %age */
@@ -75,7 +75,7 @@ log_meter (float db)
          return def/115.0f;
 }
 
-inline float
+static inline float
 meter_deflect_ppm (float db)
 {
 	if (db < -30) {
@@ -91,7 +91,7 @@ meter_deflect_ppm (float db)
 	}
 }
 
-inline float
+static inline float
 meter_deflect_din (float db)
 {
 	float rv = dB_to_coefficient(db);
@@ -103,7 +103,7 @@ meter_deflect_din (float db)
 	}
 }
 
-inline float
+static inline float
 meter_deflect_nordic (float db)
 {
 	if (db < -60) {
@@ -118,7 +118,7 @@ meter_deflect_nordic (float db)
 	}
 }
 
-inline float
+static inline float
 meter_deflect_vu (float db)
 {
 	const float rv = 6.77165f * dB_to_coefficient(db);
@@ -126,7 +126,7 @@ meter_deflect_vu (float db)
 	return rv;
 }
 
-inline float
+static inline float
 meter_deflect_k (float db, float krange)
 {
 	db+=krange;

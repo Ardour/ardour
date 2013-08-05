@@ -56,7 +56,7 @@ public:
 
 	uint32_t pans_required() const { return _configured_input.n_audio(); }
 
-	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
+	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
 
 	static uint32_t how_many_returns();

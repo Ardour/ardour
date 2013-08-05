@@ -60,6 +60,7 @@ using namespace Gtk;
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace VideoUtils;
 
 ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	: ArdourDialog (_("Export Video File "))

@@ -355,7 +355,7 @@ MonitorProcessor::configure_io (ChanCount in, ChanCount out)
 }
 
 bool
-MonitorProcessor::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
+MonitorProcessor::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
 	out = in;
 	return true;

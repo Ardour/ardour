@@ -225,7 +225,7 @@ class RouteUI : public virtual AxisView
 	 *  by a click on the `Sends' button.  The parameter is the route that the sends are
 	 *  to, or 0 if no route is now in this mode.
 	 */
-	static sigc::signal<void, boost::shared_ptr<ARDOUR::Route> > BusSendDisplayChanged;
+	static PBD::Signal1<void, boost::shared_ptr<ARDOUR::Route> > BusSendDisplayChanged;
 
    protected:
 	PBD::ScopedConnectionList route_connections;

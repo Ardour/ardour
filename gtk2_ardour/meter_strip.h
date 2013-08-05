@@ -56,6 +56,7 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 
 	static PBD::Signal1<void,MeterStrip*> CatchDeletion;
 	static PBD::Signal0<void> MetricChanged;
+	static PBD::Signal0<void> ConfigurationChanged;
 
 	void reset_peak_display ();
 	void reset_route_peak_display (ARDOUR::Route*);
@@ -64,6 +65,9 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void set_meter_type_multi (int, ARDOUR::RouteGroup*, ARDOUR::MeterType);
 
 	void set_metric_mode (int, ARDOUR::MeterType);
+	int  get_metric_mode() { return _metricmode; }
+	void set_tick_bar (int);
+	int  get_tick_bar() { return _tick_bar; }
 	bool has_midi() { return _has_midi; }
 	bool is_metric_display() { return _strip_type == 0; }
 	ARDOUR::MeterType meter_type();
@@ -89,7 +93,12 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void set_button_names ();
 
   private:
+	Gtk::VBox mtr_vbox;
+	Gtk::VBox nfo_vbox;
+	Gtk::EventBox mtr_container;
+	Gtk::HSeparator mtr_hsep;
 	Gtk::HBox meterbox;
+	Gtk::HBox spacer;
 	Gtk::HBox namebx;
 	ArdourButton name_label;
 	Gtk::DrawingArea meter_metric_area;
@@ -111,16 +120,17 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 
 	float max_peak;
 	bool _has_midi;
+	int _tick_bar;
 	int _strip_type;
+	int _metricmode;
 
-	LevelMeter   *level_meter;
+	LevelMeterHBox *level_meter;
 
 	PBD::ScopedConnection _config_connection;
 	void strip_property_changed (const PBD::PropertyChange&);
 	void meter_configuration_changed (ARDOUR::ChanCount);
 	void meter_type_changed (ARDOUR::MeterType);
-
-	static int max_pattern_metric_size; // == FastMeter::max_pattern_metric_size
+	void update_background (ARDOUR::MeterType);
 
 	bool peak_button_release (GdkEventButton*);
 
@@ -130,10 +140,16 @@ class MeterStrip : public Gtk::VBox, public RouteUI
 	void update_name_box ();
 
 	bool _suspend_menu_callbacks;
-	bool level_meter_button_press (GdkEventButton* ev);
+	bool level_meter_button_release (GdkEventButton* ev);
 	void popup_level_meter_menu (GdkEventButton* ev);
-	void add_level_meter_item (Gtk::Menu_Helpers::MenuList& items, Gtk::RadioMenuItem::Group& group, std::string const & name, ARDOUR::MeterType mode);
+	void add_level_meter_type_item (Gtk::Menu_Helpers::MenuList&, Gtk::RadioMenuItem::Group&, std::string const &, ARDOUR::MeterType);
+
+	bool name_label_button_release (GdkEventButton* ev);
+	void popup_name_label_menu (GdkEventButton* ev);
+	void add_label_height_item (Gtk::Menu_Helpers::MenuList&, Gtk::RadioMenuItem::Group&, std::string const &, uint32_t);
+
 	void set_meter_type (ARDOUR::MeterType mode);
+	void set_label_height (uint32_t);
 };
 
 #endif /* __ardour_mixer_strip__ */

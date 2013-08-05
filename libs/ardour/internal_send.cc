@@ -284,7 +284,7 @@ InternalSend::connect_when_legal ()
 }
 
 bool
-InternalSend::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
+InternalSend::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
 	out = in;
 	return true;

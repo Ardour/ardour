@@ -145,7 +145,7 @@ PluginInsert::output_streams() const
 		ChanCount out = info->n_outputs;
 		// DEBUG_TRACE (DEBUG::Processors, string_compose ("Plugin insert, static output streams = %1 for %2 plugins\n", out, _plugins.size()));
 		out.set_audio (out.n_audio() * _plugins.size());
-		out.set_midi (out.n_midi() * _plugins.size());
+		out.set_midi (out.n_midi() * _plugins.size() + midi_bypass.n_midi());
 		return out;
 	}
 }
@@ -448,7 +448,7 @@ PluginInsert::silence (framecnt_t nframes)
 	}
 
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-		(*i)->connect_and_run (_session.get_silent_buffers ((*i)->get_info()->n_inputs), in_map, out_map, nframes, 0);
+		(*i)->connect_and_run (_session.get_scratch_buffers ((*i)->get_info()->n_inputs, true), in_map, out_map, nframes, 0);
 	}
 }
 
@@ -465,7 +465,6 @@ PluginInsert::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end
 		}
 
 	} else {
-
 		if (has_no_audio_inputs()) {
 
 			/* silence all (audio) outputs. Should really declick
@@ -704,7 +703,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
  *  @return true if the given IO configuration can be supported.
  */
 bool
-PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
+PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 {
 	return private_can_support_io_configuration (in, out).method != Impossible;
 }
@@ -714,9 +713,11 @@ PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
  *  it can be.
  */
 PluginInsert::Match
-PluginInsert::private_can_support_io_configuration (ChanCount const & in, ChanCount& out) const
+PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanCount& out)
 {
 	PluginInfoPtr info = _plugins.front()->get_info();
+	ChanCount in; in += inx;
+	midi_bypass.reset();
 
 	if (info->reconfigurable_io()) {
 		/* Plugin has flexible I/O, so delegate to it */
@@ -731,6 +732,15 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & in, ChanCo
 	ChanCount inputs  = info->n_inputs;
 	ChanCount outputs = info->n_outputs;
 
+	if (in.get(DataType::MIDI) == 1 && outputs.get(DataType::MIDI) == 0) {
+		DEBUG_TRACE ( DEBUG::Processors, string_compose ("bypassing midi-data around %1\n", name()));
+		midi_bypass.set(DataType::MIDI, 1);
+	}
+	if (in.get(DataType::MIDI) == 1 && inputs.get(DataType::MIDI) == 0) {
+		DEBUG_TRACE ( DEBUG::Processors, string_compose ("hiding midi-port from plugin %1\n", name()));
+		in.set(DataType::MIDI, 0);
+	}
+
 	bool no_inputs = true;
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		if (inputs.get (*t) != 0) {
@@ -741,13 +751,13 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & in, ChanCo
 
 	if (no_inputs) {
 		/* no inputs so we can take any input configuration since we throw it away */
-		out = outputs;
+		out = outputs + midi_bypass;
 		return Match (NoInputs, 1);
 	}
 
 	/* Plugin inputs match requested inputs exactly */
 	if (inputs == in) {
-		out = outputs;
+		out = outputs + midi_bypass;
 		return Match (ExactMatch, 1);
 	}
 
@@ -789,6 +799,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & in, ChanCo
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			out.set (*t, outputs.get(*t) * f);
 		}
+		out += midi_bypass;
 		return Match (Replicate, f);
 	}
 
@@ -812,7 +823,7 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & in, ChanCo
 	}
 
 	if (can_split) {
-		out = outputs;
+		out = outputs + midi_bypass;
 		return Match (Split, 1);
 	}
 
@@ -836,10 +847,11 @@ PluginInsert::private_can_support_io_configuration (ChanCount const & in, ChanCo
 	}
 
 	if (could_hide && !cannot_hide) {
-		out = outputs;
+		out = outputs + midi_bypass;
 		return Match (Hide, 1, hide_channels);
 	}
 
+	midi_bypass.reset();
 	return Match (Impossible, 0);
 }
 
