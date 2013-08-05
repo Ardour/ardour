@@ -280,14 +280,29 @@ EngineControl::list_devices ()
 
 	/* now fill out devices, mark sample rates, buffer sizes insensitive */
 	    
-	vector<string> devices = backend->enumerate_devices ();
+	vector<ARDOUR::AudioBackend::DeviceStatus> all_devices = backend->enumerate_devices ();
 	
-	set_popdown_strings (interface_combo, devices);
-	interface_combo.set_active_text (devices.front());
-	set_popdown_strings (input_device_combo, devices);
-	input_device_combo.set_active_text (devices.front());
-	set_popdown_strings (output_device_combo, devices);
-	output_device_combo.set_active_text (devices.front());
+	/* NOTE: Ardour currently does not display the "available" field of the
+	 * returned devices.
+	 *
+	 * Doing so would require a different GUI widget than the combo
+	 * box/popdown that we currently use, since it has no way to list
+	 * items that are not selectable. Something more like a popup menu,
+	 * which could have unselectable items, would be appropriate.
+	 */
+
+	vector<string> available_devices;
+
+	for (vector<ARDOUR::AudioBackend::DeviceStatus>::const_iterator i = all_devices.begin(); i != all_devices.end(); ++i) {
+		available_devices.push_back (i->name);
+	}
+
+	set_popdown_strings (interface_combo, available_devices);
+	interface_combo.set_active_text (available_devices.front());
+	set_popdown_strings (input_device_combo, available_devices);
+	input_device_combo.set_active_text (available_devices.front());
+	set_popdown_strings (output_device_combo, available_devices);
+	output_device_combo.set_active_text (available_devices.front());
 	
 	interface_changed ();
 }

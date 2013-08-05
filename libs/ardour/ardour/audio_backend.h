@@ -95,12 +95,25 @@ class AudioBackend {
      */
     virtual int set_driver (const std::string& /*drivername*/) { return 0; }
 
-    /** Returns a collection of strings identifying devices known
-     * to this backend. Any of these strings may be used to identify a
+    /** used to list device names along with whether or not they are currently
+     *  available. 
+    */
+    struct DeviceStatus {
+	std::string name;
+	bool        available;
+
+	DeviceStatus (const std::string& s, bool avail) : name (s), available (avail) {}
+    };
+
+    /** Returns a collection of DeviceStatuses identifying devices discovered
+     * by this backend since the start of the process.
+     *
+     * Any of the names in each DeviceStatus may be used to identify a
      * device in other calls to the backend, though any of them may become
      * invalid at any time.
      */
-    virtual std::vector<std::string> enumerate_devices () const = 0;
+    virtual std::vector<DeviceStatus> enumerate_devices () const = 0;
+
     /** Returns a collection of float identifying sample rates that are
      * potentially usable with the hardware identified by @param device.
      * Any of these values may be supplied in other calls to this backend

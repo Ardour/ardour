@@ -97,9 +97,9 @@ JACKAudioBackend::requires_driver_selection() const
 vector<string>
 JACKAudioBackend::enumerate_drivers () const
 {
-	vector<string> s;
-	get_jack_audio_driver_names (s);
-	return s;
+	vector<string> currently_available;
+	get_jack_audio_driver_names (currently_available);
+	return currently_available;
 }
 
 int
@@ -109,10 +109,37 @@ JACKAudioBackend::set_driver (const std::string& name)
 	return 0;
 }
 
-vector<string>
+vector<AudioBackend::DeviceStatus>
 JACKAudioBackend::enumerate_devices () const
 {
-	return get_jack_device_names_for_audio_driver (_target_driver);
+	vector<string> currently_available = get_jack_device_names_for_audio_driver (_target_driver);
+	vector<DeviceStatus> statuses;
+
+	if (all_devices.find (_target_driver) == all_devices.end()) {
+		all_devices.insert (make_pair (_target_driver, std::set<string>()));
+	}
+	
+	/* store every device we've found, by driver name. 
+	 *
+	 * This is so we do not confuse ALSA, FFADO, netjack etc. devices
+	 * with each other.
+	 */
+
+	DeviceList& all (all_devices[_target_driver]);
+
+	for (vector<string>::const_iterator d = currently_available.begin(); d != currently_available.end(); ++d) {
+		all.insert (*d);
+	}
+	
+	for (DeviceList::const_iterator d = all.begin(); d != all.end(); ++d) {
+		if (find (currently_available.begin(), currently_available.end(), *d) == currently_available.end()) {
+			statuses.push_back (DeviceStatus (*d, false));
+		} else {
+			statuses.push_back (DeviceStatus (*d, false));
+		}
+	}
+	
+	return statuses;
 }
 
 vector<float>

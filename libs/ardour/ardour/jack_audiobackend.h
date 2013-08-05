@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 
 #include <stdint.h>
 
@@ -53,7 +54,7 @@ class JACKAudioBackend : public AudioBackend {
     std::vector<std::string> enumerate_drivers () const;
     int set_driver (const std::string&);
 
-    std::vector<std::string> enumerate_devices () const;
+    std::vector<DeviceStatus> enumerate_devices () const;
 
     std::vector<float> available_sample_rates (const std::string& device) const;
     std::vector<uint32_t> available_buffer_sizes (const std::string& device) const;
@@ -172,7 +173,11 @@ class JACKAudioBackend : public AudioBackend {
     uint32_t _current_usecs_per_cycle;
     uint32_t _current_systemic_input_latency;
     uint32_t _current_systemic_output_latency;
+
+    typedef std::set<std::string> DeviceList;
+    typedef std::map<std::string,DeviceList> DriverDeviceMap;
     
+    mutable DriverDeviceMap all_devices;
 };
 
 } // namespace
