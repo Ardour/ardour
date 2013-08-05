@@ -40,7 +40,7 @@ class EngineControl : public Gtk::VBox {
 	~EngineControl ();
 
 	static bool need_setup ();
-	int setup_engine ();
+	int setup_engine (bool start);
 
 	bool was_used() const { return _used; }
 	XMLNode& get_state ();
@@ -104,7 +104,16 @@ class EngineControl : public Gtk::VBox {
     void backend_changed ();
 
     void redisplay_latency ();
-    uint32_t get_rate();
+
+    uint32_t get_rate() const;
+    uint32_t get_buffer_size() const;
+    uint32_t get_input_channels() const;
+    uint32_t get_output_channels() const;
+    uint32_t get_input_latency() const;
+    uint32_t get_output_latency() const;
+    std::string get_device_name() const;
+    std::string get_driver() const;
+
     void audio_mode_changed ();
     void interface_changed ();
     void list_devices ();

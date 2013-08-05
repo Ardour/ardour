@@ -662,8 +662,10 @@ ArdourStartup::on_delete_event (GdkEventAny*)
 void
 ArdourStartup::on_apply ()
 {
+	cerr << "apply, engine = " << engine_dialog << endl;
 	if (engine_dialog) {
-		if (engine_dialog->setup_engine ()) {
+		cerr << "Set up engine\n";
+		if (engine_dialog->setup_engine (true)) {
                         set_current_page (audio_page_index);
                         return;
                 }

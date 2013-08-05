@@ -490,17 +490,6 @@ ARDOUR_UI::post_engine ()
 	Config->ParameterChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::parameter_changed, this, _1), gui_context());
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	Config->map_parameters (pc);
-
-	/* now start and maybe save state */
-
-	if (do_engine_start () == 0) {
-		if (_session && _session_is_new) {
-			/* we need to retain initial visual
-			   settings for a new session
-			*/
-			_session->save_state ("");
-		}
-	}
 }
 
 ARDOUR_UI::~ARDOUR_UI ()
@@ -2035,7 +2024,8 @@ ARDOUR_UI::engine_stopped ()
 void
 ARDOUR_UI::engine_running ()
 {
-	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::engine_running)
+	post_engine();
+	
 	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, true);
 	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, false);
 
@@ -2125,24 +2115,6 @@ JACK, reconnect and save the session."), PROGRAM_NAME);
 	if (free_reason) {
 		free (const_cast<char*> (reason));
 	}
-}
-
-int32_t
-ARDOUR_UI::do_engine_start ()
-{
-	try {
-		engine->start();
-	}
-
-	catch (...) {
-		engine->stop ();
-		error << _("Unable to start the session running")
-		      << endmsg;
-		unload_session ();
-		return -2;
-	}
-
-	return 0;
 }
 
 void

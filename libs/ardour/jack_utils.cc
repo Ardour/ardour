@@ -667,7 +667,7 @@ ARDOUR::JackCommandLineOptions::JackCommandLineOptions ()
 	, ports_max(128)
 	, realtime(true)
 	, priority(0)
-	, unlock_gui_libs(true)
+	, unlock_gui_libs(false)
 	, verbose(false)
 	, temporary(true)
 	, driver()
@@ -759,14 +759,12 @@ ARDOUR::get_jack_command_line_string (const JackCommandLineOptions& options, str
 	string command_line_output_device_name;
 
 	if (!get_jack_command_line_audio_device_name (options.driver,
-		options.input_device, command_line_input_device_name))
-	{
+		options.input_device, command_line_input_device_name)) {
 		return false;
 	}
 
 	if (!get_jack_command_line_audio_device_name (options.driver,
-		options.output_device, command_line_output_device_name))
-	{
+		options.output_device, command_line_output_device_name)) {
 		return false;
 	}
 

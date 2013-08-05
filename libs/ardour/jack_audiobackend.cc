@@ -197,12 +197,12 @@ JACKAudioBackend::set_device_name (const string& dev)
 int
 JACKAudioBackend::set_sample_rate (float sr)
 {
-	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
-	
 	if (!connected()) {
 		_target_sample_rate = sr;
 		return 0;
 	}
+
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 
 	if (sr == jack_get_sample_rate (_priv_jack)) {
                 return 0;
@@ -214,12 +214,12 @@ JACKAudioBackend::set_sample_rate (float sr)
 int
 JACKAudioBackend::set_buffer_size (uint32_t nframes)
 {
-	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
-
 	if (!connected()) {
 		_target_buffer_size = nframes;
 		return 0;
 	}
+
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 
 	if (nframes == jack_get_buffer_size (_priv_jack)) {
                 return 0;
@@ -384,6 +384,8 @@ JACKAudioBackend::setup_jack_startup_command ()
 
 	JackCommandLineOptions options;
 
+	get_jack_default_server_path (options.server_path);
+	options.driver = _target_driver;
 	options.samplerate = _target_sample_rate;
 	options.period_size = _target_buffer_size;
 	options.num_periods = 2;
@@ -394,7 +396,9 @@ JACKAudioBackend::setup_jack_startup_command ()
 	if (_target_sample_format == FormatInt16) {
 		options.force16_bit = _target_sample_format;
 	}
-
+	options.realtime = true;
+	options.ports_max = 2048;
+	
 	/* this must always be true for any server instance we start ourselves
 	 */
 
@@ -422,7 +426,6 @@ JACKAudioBackend::start ()
 			setup_jack_startup_command ();
 		}
 
-		std::cerr << "Open JACK connection\n";
 		_jack_connection->open ();
 	}
 

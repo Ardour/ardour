@@ -17,6 +17,7 @@
 
 */
 
+#include <exception>
 #include <vector>
 #include <cmath>
 #include <fstream>
@@ -27,19 +28,8 @@
 #include <glibmm.h>
 #include <gtkmm/messagedialog.h>
 
-#include "pbd/epa.h"
+#include "pbd/error.h"
 #include "pbd/xml++.h"
-
-#ifdef __APPLE__
-#include <CoreAudio/CoreAudio.h>
-#include <CoreFoundation/CFString.h>
-#include <sys/param.h>
-#include <mach-o/dyld.h>
-#elif !defined(__FreeBSD__)
-#include <alsa/asoundlib.h>
-#endif
-
-#include <jack/jack.h>
 
 #include <gtkmm/stock.h>
 #include <gtkmm2ext/utils.h>
@@ -50,11 +40,6 @@
 
 #include "pbd/convert.h"
 #include "pbd/error.h"
-#include "pbd/pathscanner.h"
-
-#ifdef __APPLE
-#include <CFBundle.h>
-#endif
 
 #include "engine_dialog.h"
 #include "i18n.h"
@@ -355,19 +340,6 @@ EngineControl::interface_changed ()
 	buffer_size_combo.set_active_text (s.front());
 }	
 
-uint32_t
-EngineControl::get_rate ()
-{
-	double r = atof (sample_rate_combo.get_active_text ());
-	/* the string may have been translated with an abbreviation for
-	 * thousands, so use a crude heuristic to fix this.
-	 */
-	if (r < 1000.0) {
-		r *= 1000.0;
-	}
-	return lrint (r);
-}
-
 void
 EngineControl::redisplay_latency ()
 {
@@ -507,6 +479,7 @@ EngineControl::get_state ()
 void
 EngineControl::set_state (const XMLNode& root)
 {
+#if 0
 	XMLNodeList          clist;
 	XMLNodeConstIterator citer;
 	XMLNode* child;
@@ -516,7 +489,7 @@ EngineControl::set_state (const XMLNode& root)
 
 	int val;
 	string strval;
-#if 0
+
 	if ( (child = root.child ("driver"))){
 		prop = child->property("val");
 
@@ -655,6 +628,120 @@ EngineControl::set_state (const XMLNode& root)
 }
 
 int
-EngineControl::setup_engine ()
+EngineControl::setup_engine (bool start)
 {
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	assert (backend);
+
+	/* grab the parameters from the GUI and apply them */
+
+	try {
+		if (backend->requires_driver_selection()) {
+			if (backend->set_driver (get_driver())) {
+				return -1;
+			}
+		}
+
+		if (backend->set_device_name (get_device_name())) {
+			return -1;
+		}
+
+		if (backend->set_sample_rate (get_rate())) {
+			error << string_compose (_("Cannot set sample rate to %1"), get_rate()) << endmsg;
+			return -1;
+		}
+		if (backend->set_buffer_size (get_buffer_size())) {
+			error << string_compose (_("Cannot set buffer size to %1"), get_buffer_size()) << endmsg;
+			return -1;
+		}
+		if (backend->set_input_channels (get_input_channels())) {
+			error << string_compose (_("Cannot set input channels to %1"), get_input_channels()) << endmsg;
+			return -1;
+		}
+		if (backend->set_output_channels (get_output_channels())) {
+			error << string_compose (_("Cannot set output channels to %1"), get_output_channels()) << endmsg;
+			return -1;
+		}
+		if (backend->set_systemic_input_latency (get_input_latency())) {
+			error << string_compose (_("Cannot set input latency to %1"), get_input_latency()) << endmsg;
+			return -1;
+		}
+		if (backend->set_systemic_output_latency (get_output_latency())) {
+			error << string_compose (_("Cannot set output latency to %1"), get_output_latency()) << endmsg;
+			return -1;
+		}
+
+		if (start) {
+			return ARDOUR::AudioEngine::instance()->start();
+		}
+
+		return 0;
+
+	} catch (...) {
+		cerr << "exception thrown...\n";
+		return -1;
+	}
 }
+
+uint32_t
+EngineControl::get_rate () const
+{
+	double r = atof (sample_rate_combo.get_active_text ());
+	/* the string may have been translated with an abbreviation for
+	 * thousands, so use a crude heuristic to fix this.
+	 */
+	if (r < 1000.0) {
+		r *= 1000.0;
+	}
+	return lrint (r);
+}
+
+uint32_t
+EngineControl::get_buffer_size () const
+{
+	string txt = buffer_size_combo.get_active_text ();
+	uint32_t samples;
+
+	if (sscanf (txt.c_str(), "%d", &samples) != 1) {
+		throw exception ();
+	}
+
+	return samples;
+}
+
+uint32_t
+EngineControl::get_input_channels() const
+{
+	return (uint32_t) input_channels_adjustment.get_value();
+}
+
+uint32_t
+EngineControl::get_output_channels() const
+{
+	return (uint32_t) output_channels_adjustment.get_value();
+}
+
+uint32_t
+EngineControl::get_input_latency() const
+{
+	return (uint32_t) input_latency_adjustment.get_value();
+}
+
+uint32_t
+EngineControl::get_output_latency() const
+{
+	return (uint32_t) output_latency_adjustment.get_value();
+}
+
+string
+EngineControl::get_driver () const
+{
+	return driver_combo.get_active_text ();
+}
+
+string
+EngineControl::get_device_name () const
+{
+	return interface_combo.get_active_text ();
+}
+
