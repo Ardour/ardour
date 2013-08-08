@@ -346,8 +346,6 @@ AudioEngine::set_session (Session *s)
 
 	if (_session) {
 
-		start_metering_thread ();
-
 		pframes_t blocksize = _backend->buffer_size ();
 
 		/* page in as much of the session process code as we
@@ -567,32 +565,30 @@ AudioEngine::start ()
 	_processed_frames = 0;
 	last_monitor_check = 0;
 	
-	if (_backend->start() == 0) {
+	if (_backend->start()) {
+		return -1;
+	}
 
-		_running = true;
-		last_monitor_check = 0;
+	_running = true;
+	
+	if (_session) {
+		_session->set_frame_rate (_backend->sample_rate());
 		
-		if (_session) {
-			_session->set_frame_rate (_backend->sample_rate());
-
-			if (_session->config.get_jack_time_master()) {
-				_backend->set_time_master (true);
-			}
+		if (_session->config.get_jack_time_master()) {
+			_backend->set_time_master (true);
 		}
-		
-		if (!have_ports) {
-			PortManager::create_ports ();
-		} 
-		
+	}
+	
+	if (!have_ports) {
+		PortManager::create_ports ();
 		_mmc.set_ports (mmc_input_port(), mmc_output_port());
-		
-		Running(); /* EMIT SIGNAL */
-
-		return 0;
-	} 
-
-	/* should report error ... */
-	return -1;
+	}
+	
+	start_metering_thread ();
+	
+	Running(); /* EMIT SIGNAL */
+	
+	return 0;
 }
 
 int
@@ -604,17 +600,18 @@ AudioEngine::stop ()
 
 	Glib::Threads::Mutex::Lock lm (_process_lock);
 
-	if (_backend->stop () == 0) {
-		_running = false;
-		_processed_frames = 0;
-		stop_metering_thread ();
-
-		Stopped (); /* EMIT SIGNAL */
-
-		return 0;
+	if (_backend->stop ()) {
+		return -1;
 	}
-
-	return -1;
+	
+	_running = false;
+	_processed_frames = 0;
+	stop_metering_thread ();
+	
+	Port::PortDrop ();
+	Stopped (); /* EMIT SIGNAL */
+	
+	return 0;
 }
 
 int
@@ -624,13 +621,14 @@ AudioEngine::pause ()
 		return 0;
 	}
 	
-	if (_backend->pause () == 0) {
-		_running = false;
-		Stopped(); /* EMIT SIGNAL */
-		return 0;
+	if (_backend->pause ()) {
+		return -1;
 	}
 
-	return -1;
+	_running = false;
+	
+	Stopped(); /* EMIT SIGNAL */
+	return 0;
 }
 
 int
@@ -957,7 +955,9 @@ void
 AudioEngine::halted_callback (const char* why)
 {
         stop_metering_thread ();
-	Halted (why); /* EMIT SIGNAL */
+
+	Port::PortDrop (); /* EMIT SIGNAL */
+	Halted (why);      /* EMIT SIGNAL */
 }
 
 bool

@@ -206,6 +206,7 @@ MidiPort::reset ()
 {
 	Port::reset ();
 	delete _buffer;
+	cerr << name() << " new MIDI buffer of size " << AudioEngine::instance()->raw_buffer_size (DataType::MIDI) << endl;
 	_buffer = new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI));
 }
 

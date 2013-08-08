@@ -315,6 +315,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	NSM_Client          *nsm;
 	bool                 _was_dirty;
         bool                 _mixer_on_top;
+        bool first_time_engine_run;
 
 	void goto_editor_window ();
 	void goto_mixer_window ();

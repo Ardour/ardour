@@ -40,6 +40,8 @@ using namespace ARDOUR;
 using namespace PBD;
 using std::string;
 using std::vector;
+using std::cerr;
+using std::endl;
 
 #define GET_PRIVATE_JACK_POINTER(localvar)  jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return; }
 #define GET_PRIVATE_JACK_POINTER_RET(localvar,r) jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return r; }
@@ -57,6 +59,8 @@ JACKAudioBackend::JACKAudioBackend (AudioEngine& e, boost::shared_ptr<JackConnec
 	, _target_output_channels (-1)
 	, _target_systemic_input_latency (0)
 	, _target_systemic_output_latency (0)
+	, _current_sample_rate (0)
+	, _current_buffer_size (0)
 {
 	_jack_connection->Disconnected.connect_same_thread (disconnect_connection, boost::bind (&JACKAudioBackend::disconnected, this, _1));
 }
@@ -388,13 +392,13 @@ JACKAudioBackend::output_channels () const
 uint32_t
 JACKAudioBackend::systemic_input_latency () const
 {
-	return _current_systemic_output_latency;
+	return _target_systemic_output_latency;
 }
 
 uint32_t
 JACKAudioBackend::systemic_output_latency () const
 {
-	return _current_systemic_output_latency;
+	return _target_systemic_output_latency;
 }
 
 size_t 
@@ -455,28 +459,26 @@ JACKAudioBackend::start ()
 			setup_jack_startup_command ();
 		}
 
-		_jack_connection->open ();
-	}
-
-	engine.reestablish_ports ();
-	
-	if (!jack_port_type_get_buffer_size) {
-		warning << _("This version of JACK is old - you should upgrade to a newer version that supports jack_port_type_get_buffer_size()") << endmsg;
+		if (_jack_connection->open ()) {
+			return -1;
+		}
 	}
 	
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 
-	engine.sample_rate_change (jack_get_sample_rate (_priv_jack));
+	/* get the buffer size and sample rates established */
+
+	jack_sample_rate_callback (jack_get_sample_rate (_priv_jack));
+	jack_bufsize_callback (jack_get_buffer_size (_priv_jack));
 	
-	/* testing the nullity of this function name is a proxy for
-	 * whether jack_activate() will definitely call the buffer size
-	 * callback. with older versions of JACK, this function symbol
-	 * will be null.  this is sort of reliable, but not clean since
-	 * weak symbol support is highly platform and compiler
-	 * specific.
-	 */
+	/* Now that we have buffer size and sample rate established, the engine 
+	   can go ahead and do its stuff
+	*/
+	
+	engine.reestablish_ports ();
+
 	if (!jack_port_type_get_buffer_size) {
-		jack_bufsize_callback (jack_get_buffer_size (_priv_jack));
+		warning << _("This version of JACK is old - you should upgrade to a newer version that supports jack_port_type_get_buffer_size()") << endmsg;
 	}
 	
 	set_jack_callbacks ();
@@ -486,7 +488,7 @@ JACKAudioBackend::start ()
 	} else {
 		// error << _("cannot activate JACK client") << endmsg;
 	}
-	
+
 	engine.reconnect_ports ();
 
 	return 0;
@@ -869,7 +871,6 @@ JACKAudioBackend::jack_bufsize_callback (pframes_t nframes)
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 1);
 
 	_current_buffer_size = nframes;
-	_current_usecs_per_cycle = (int) floor ((((double) nframes / sample_rate())) * 1000000.0);
 
         if (jack_port_type_get_buffer_size) {
                 _raw_buffer_sizes[DataType::AUDIO] = jack_port_type_get_buffer_size (_priv_jack, JACK_DEFAULT_AUDIO_TYPE);

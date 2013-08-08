@@ -165,14 +165,10 @@ class JACKAudioBackend : public AudioBackend {
     bool         _target_interleaved;
     uint32_t     _target_input_channels;
     uint32_t     _target_output_channels;
-    uint32_t      _target_systemic_input_latency;
-    uint32_t      _target_systemic_output_latency;
-
-    uint32_t _current_sample_rate;
-    uint32_t _current_buffer_size;
-    uint32_t _current_usecs_per_cycle;
-    uint32_t _current_systemic_input_latency;
-    uint32_t _current_systemic_output_latency;
+    uint32_t     _target_systemic_input_latency;
+    uint32_t     _target_systemic_output_latency;
+    uint32_t     _current_sample_rate;
+    uint32_t     _current_buffer_size;
 
     typedef std::set<std::string> DeviceList;
     typedef std::map<std::string,DeviceList> DriverDeviceMap;

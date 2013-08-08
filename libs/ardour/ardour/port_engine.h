@@ -98,6 +98,8 @@ class PortEngine {
      */
     virtual void* private_handle() const = 0;
 
+    virtual bool connected() const = 0;
+
     /** Return the name of this process as used by the port manager
      * when naming ports.
      */

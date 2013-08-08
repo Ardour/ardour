@@ -439,6 +439,8 @@ PortManager::reestablish_ports ()
 
 	for (i = p->begin(); i != p->end(); ++i) {
 		if (i->second->reestablish ()) {
+			error << string_compose (_("Re-establising port %1 failed"), i->second->name()) << endmsg;
+			cerr << string_compose (_("Re-establising port %1 failed"), i->second->name()) << endl;
 			break;
 		}
 	}
@@ -458,7 +460,7 @@ PortManager::reconnect_ports ()
 	boost::shared_ptr<Ports> p = ports.reader ();
 
 	/* re-establish connections */
-	
+
 	DEBUG_TRACE (DEBUG::Ports, string_compose ("reconnect %1 ports\n", p->size()));
 
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {

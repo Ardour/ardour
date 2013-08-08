@@ -43,6 +43,7 @@ class JACKPortEngine : public PortEngine
     ~JACKPortEngine();
 
     void* private_handle() const;
+    bool connected() const;
 
     const std::string& my_name() const;
 

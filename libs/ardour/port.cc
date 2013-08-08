@@ -88,6 +88,7 @@ void
 Port::drop ()
 {
 	if (_port_handle) {
+		DEBUG_TRACE (DEBUG::Ports, string_compose ("drop handle for port %1\n", name()));
 		port_engine.unregister_port (_port_handle);
 		_port_handle = 0;
 	}
@@ -120,12 +121,21 @@ Port::disconnect_all ()
 bool
 Port::connected_to (std::string const & o) const
 {
+	if (!port_engine.connected()) {
+		return false;
+	}
+
 	return port_engine.connected_to (_port_handle, AudioEngine::instance()->make_port_name_non_relative (o));
 }
 
 int
 Port::get_connections (std::vector<std::string> & c) const
 {
+	if (!port_engine.connected()) {
+		c.insert (c.end(), _connections.begin(), _connections.end());
+		return c.size();
+	}
+
 	return port_engine.get_connections (_port_handle, c);
 }
 
@@ -142,9 +152,9 @@ Port::connect (std::string const & other)
 	}
 
 	if (sends_output ()) {
-		port_engine.connect (our_name, other_name);
+		r = port_engine.connect (our_name, other_name);
 	} else {
-		port_engine.connect (other_name, our_name);
+		r = port_engine.connect (other_name, our_name);
 	}
 
 	if (r == 0) {

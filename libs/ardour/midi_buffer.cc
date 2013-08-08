@@ -22,6 +22,7 @@
 #include "pbd/malign.h"
 #include "pbd/compose.h"
 #include "pbd/debug.h"
+#include "pbd/stacktrace.h"
 
 #include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
@@ -133,6 +134,7 @@ MidiBuffer::push_back(const Evoral::MIDIEvent<TimeType>& ev)
 
 	if (_size + stamp_size + ev.size() >= _capacity) {
 		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
+		PBD::stacktrace (cerr, 20);
 		return false;
 	}
 
@@ -171,7 +173,9 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 #endif
 
 	if (_size + stamp_size + size >= _capacity) {
-		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
+		cerr << "MidiBuffer::push_back2 failed (buffer is full; _size = " << _size << " capacity " 
+		     << _capacity << " stamp " << stamp_size << " size = " << size << ")" << endl;
+		PBD::stacktrace (cerr, 20);
 		return false;
 	}
 

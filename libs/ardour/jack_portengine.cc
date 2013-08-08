@@ -124,6 +124,12 @@ JACKPortEngine::private_handle() const
 	return _jack_connection->jack();
 }
 
+bool
+JACKPortEngine::connected() const
+{
+	return _jack_connection->connected();
+}
+
 int
 JACKPortEngine::set_port_name (PortHandle port, const std::string& name)
 {
