@@ -33,7 +33,6 @@
 #include "ardour/session.h"
 #include "ardour/user_bundle.h"
 #include "ardour/port.h"
-#include "ardour/syncport_manager.h"
 
 #include "control_protocol/control_protocol.h"
 
