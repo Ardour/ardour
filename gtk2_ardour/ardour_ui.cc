@@ -1050,7 +1050,7 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 
 		if (rate == 0) {
 			/* no sample rate available */
-			snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"red\">disconnected</span>"));
+			snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"red\">none</span>"));
 		} else {
 
 			if (fmod (rate, 1000.0) != 0.0) {
