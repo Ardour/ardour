@@ -813,8 +813,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::shared_ptr<SessionPlaylists> playlists;
 
 	void send_mmc_locate (framepos_t);
-        int send_full_time_code (framepos_t, pframes_t nframes);
-	void send_song_position_pointer (framepos_t);
+        void queue_full_time_code () { _send_timecode_update = true; }
+        void queue_song_position_pointer () { /* currently does nothing */ }
 
 	bool step_editing() const { return (_step_editors > 0); }
 
@@ -1260,6 +1260,13 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void post_transport ();
 	void engine_halted ();
 	void xrun_recovery ();
+
+    /* These are synchronous and so can only be called from within the process
+     * cycle
+     */
+
+    int  send_full_time_code (framepos_t, pframes_t nframes);
+    void send_song_position_pointer (framepos_t);
 
 	TempoMap    *_tempo_map;
 	void          tempo_map_changed (const PBD::PropertyChange&);
