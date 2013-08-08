@@ -259,6 +259,8 @@ GtkCanvas::button_handler (GdkEventButton* ev)
 bool
 GtkCanvas::motion_notify_handler (GdkEventMotion* ev)
 {
+	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas motion @ %1, %2\n", ev->x, ev->y));
+
 	if (_grabbed_item) {
 		/* if we have a grabbed item, it gets just the motion event,
 		   since no enter/leave events can have happened.
@@ -338,31 +340,44 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 	 * to top to find the lowest, first event-sensitive item and notify that
 	 * we have entered it
 	 */
-	
+
+	cerr << "E/L: " << items.size() << " to check at " << point << endl;
+	for (vector<Item const*>::const_reverse_iterator i = items.rbegin(); i != items.rend(); ++i) {
+		cerr << '\t' << (*i)->whatami() << ' ' << (*i)->name << " ignore ? " << (*i)->ignore_events() << " current ? " << (_current_item == (*i)) << endl;
+	}
+	cerr << "------------\n";
+
 	for (vector<Item const*>::const_reverse_iterator i = items.rbegin(); i != items.rend(); ++i) {
 
 		Item const *  new_item = *i;
+		
+		cerr << "\tE/L check out " << new_item->whatami() << ' ' << new_item->name << " ignore ? " << new_item->ignore_events() << " current ? " << (_current_item == new_item) << endl;
 
 		if (new_item->ignore_events()) {
+			cerr << "continue1\n";
 			continue;
 		}
 
 		if (_current_item == new_item) {
-			break;
+			cerr << "continue2\n";
+			continue;
 		}
 
 		if (_current_item) {
 			/* leave event */
+			DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Leave %1 %2\n", _current_item->whatami(), _current_item->name));
 			_current_item->Event (reinterpret_cast<GdkEvent*> (&leave_event));
 		}
 
 		if (new_item && _current_item != new_item) {
 			/* enter event */
 			_current_item = new_item;
+			DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Enter %1 %2\n", _current_item->whatami(), _current_item->name));
 			_current_item->Event (reinterpret_cast<GdkEvent*> (&enter_event));
 			break;
 		}
-	
+
+		cerr << "Loop around again\n";
 	}
 }
 
