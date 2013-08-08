@@ -267,8 +267,8 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 		uint32_t b[4];
 		float stp[4];
 		int styleflags = Config->get_meter_style_led() ? 3 : 1;
-		b[0] = ARDOUR_UI::config()->canvasvar_MeterBackgroundBot.get();
-		b[1] = ARDOUR_UI::config()->canvasvar_MeterBackgroundTop.get();
+		b[0] = ARDOUR_UI::config()->get_canvasvar_MeterBackgroundBot();
+		b[1] = ARDOUR_UI::config()->get_canvasvar_MeterBackgroundTop();
 		b[2] = 0x991122ff; // red highlight gradient Bot
 		b[3] = 0x551111ff; // red highlight gradient Top
 		if (n < nmidi) {
