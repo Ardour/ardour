@@ -346,17 +346,9 @@ AudioEngine::set_session (Session *s)
 
 	if (_session) {
 
-		pframes_t blocksize = _backend->buffer_size ();
+		pframes_t blocksize = samples_per_cycle ();
 
-		/* page in as much of the session process code as we
-		   can before we really start running.
-		*/
-
-		boost::shared_ptr<Ports> p = ports.reader();
-
-		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-			i->second->cycle_start (blocksize);
-		}
+		PortManager::cycle_start (blocksize);
 
 		_session->process (blocksize);
 		_session->process (blocksize);
@@ -367,9 +359,7 @@ AudioEngine::set_session (Session *s)
 		_session->process (blocksize);
 		_session->process (blocksize);
 
-		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-			i->second->cycle_end (blocksize);
-		}
+		PortManager::cycle_end (blocksize);
 	}
 }
 
@@ -525,10 +515,7 @@ AudioEngine::set_backend (const std::string& name, const std::string& arg1, cons
 	drop_backend ();
 	
 	try {
-		cerr << "Instantiate " << b->second->name << " with " << arg1 << " + " << arg2 << endl;
-
 		if (b->second->instantiate (arg1, arg2)) {
-			cerr << "i failed\n";
 			throw failed_constructor ();
 		}
 
@@ -899,9 +886,8 @@ AudioEngine::thread_init_callback (void* arg)
 	AsyncMIDIPort::set_process_thread (pthread_self());
 
 	if (arg) {
-		AudioEngine* ae = static_cast<AudioEngine*> (arg);
 		/* the special thread created/managed by the backend */
-		ae->_main_thread = new ProcessThread;
+		AudioEngine::instance()->_main_thread = new ProcessThread;
 	}
 }
 
