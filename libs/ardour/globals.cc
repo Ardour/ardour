@@ -67,7 +67,6 @@
 #include "pbd/basename.h"
 
 #include "midi++/port.h"
-#include "midi++/manager.h"
 #include "midi++/mmc.h"
 
 #include "ardour/analyser.h"
@@ -80,6 +79,7 @@
 #include "ardour/control_protocol_manager.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_region.h"
+#include "ardour/midiport_manager.h"
 #include "ardour/mix.h"
 #include "ardour/panner_manager.h"
 #include "ardour/plugin_manager.h"
@@ -340,9 +340,6 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 void
 ARDOUR::init_post_engine ()
 {
-	/* the MIDI Manager is needed by the ControlProtocolManager */
-	MIDI::Manager::create (AudioEngine::instance()->port_engine());
-
 	ControlProtocolManager::instance().discover_control_protocols ();
 
 	XMLNode* node;

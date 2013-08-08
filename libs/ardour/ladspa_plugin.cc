@@ -36,8 +36,6 @@
 #include "pbd/xml++.h"
 #include "pbd/stacktrace.h"
 
-#include "midi++/manager.h"
-
 #include "ardour/session.h"
 #include "ardour/ladspa_plugin.h"
 #include "ardour/buffer_set.h"

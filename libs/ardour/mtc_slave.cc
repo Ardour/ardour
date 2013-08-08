@@ -25,11 +25,12 @@
 
 #include "pbd/error.h"
 
-#include "midi++/port.h"
-#include "ardour/debug.h"
-#include "ardour/slave.h"
-#include "ardour/session.h"
 #include "ardour/audioengine.h"
+#include "ardour/debug.h"
+#include "ardour/midi_buffer.h"
+#include "ardour/midi_port.h"
+#include "ardour/session.h"
+#include "ardour/slave.h"
 
 #include "i18n.h"
 
@@ -48,8 +49,9 @@ using namespace Timecode;
 */
 const int MTC_Slave::frame_tolerance = 2;
 
-MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
+MTC_Slave::MTC_Slave (Session& s, MidiPort& p)
 	: session (s)
+	, port (&p)
 {
 	can_notify_on_unknown_rate = true;
 	did_reset_tc_format = false;
@@ -70,7 +72,11 @@ MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 	session.config.ParameterChanged.connect_same_thread (config_connection, boost::bind (&MTC_Slave::parameter_changed, this, _1));
 	parse_timecode_offset();
 	reset (true);
-	rebind (p);
+
+	parser.mtc_time.connect_same_thread (port_connections,  boost::bind (&MTC_Slave::update_mtc_time, this, _1, _2, _3));
+	parser.mtc_qtr.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_qtr, this, _1, _2, _3));
+	parser.mtc_status.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_status, this, _1));
+	
 }
 
 MTC_Slave::~MTC_Slave()
@@ -93,16 +99,35 @@ MTC_Slave::~MTC_Slave()
 	}
 }
 
+int
+MTC_Slave::process (pframes_t nframes)
+{
+	MidiBuffer& mb (port->get_midi_buffer (nframes));
+
+	/* dump incoming MIDI to parser */
+
+	for (MidiBuffer::iterator b = mb.begin(); b != mb.end(); ++b) {
+		uint8_t* buf = (*b).buffer();
+
+		parser.set_timestamp ((*b).time());
+
+		uint32_t limit = (*b).size();
+
+		for (size_t n = 0; n < limit; ++n) {
+			parser.scanner (buf[n]);
+		}
+	}
+
+	return 0;
+}
+
 void
-MTC_Slave::rebind (MIDI::Port& p)
+MTC_Slave::rebind (MidiPort& p)
 {
 	port_connections.drop_connections ();
 
 	port = &p;
 
-	port->parser()->mtc_time.connect_same_thread (port_connections,  boost::bind (&MTC_Slave::update_mtc_time, this, _1, _2, _3));
-	port->parser()->mtc_qtr.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_qtr, this, _1, _2, _3));
-	port->parser()->mtc_status.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_status, this, _1));
 }
 
 void
@@ -154,7 +179,7 @@ MTC_Slave::outside_window (framepos_t pos) const
 bool
 MTC_Slave::locked () const
 {
-	return port->parser()->mtc_locked() && last_inbound_frame !=0 && engine_dll_initstate !=0;
+	return parser.mtc_locked() && last_inbound_frame !=0 && engine_dll_initstate !=0;
 }
 
 bool
@@ -446,7 +471,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("new mtc_frame: %1 | MTC-FpT: %2 A3-FpT:%3\n",
 							 mtc_frame, (4.0*qtr), session.frames_per_timecode_frame()));
 
-		switch (port->parser()->mtc_running()) {
+		switch (parser.mtc_running()) {
 		case MTC_Backward:
 			mtc_frame -= mtc_off;
 			qtr *= -1.0;
@@ -528,7 +553,7 @@ MTC_Slave::reset_window (framepos_t root)
 	*/
 	framecnt_t const d = (quarter_frame_duration * 4 * frame_tolerance);
 
-	switch (port->parser()->mtc_running()) {
+	switch (parser.mtc_running()) {
 	case MTC_Forward:
 		window_begin = root;
 		transport_direction = 1;

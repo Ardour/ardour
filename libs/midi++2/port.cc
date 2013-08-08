@@ -71,7 +71,7 @@ Port::init (string const & name, Flags flags)
 	_tagname = name;
 	_flags = flags;
 
-	_parser = new Parser (*this);
+	_parser = new Parser ();
 
 	for (int i = 0; i < 16; i++) {
 		_channel[i] = new Channel (i, *this);

@@ -24,7 +24,8 @@
 
 #include "pbd/error.h"
 
-#include "midi++/manager.h"
+#include "jack/jack.h"
+#include "jack/thread.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/types.h"
@@ -57,6 +58,7 @@ JACKAudioBackend::JACKAudioBackend (AudioEngine& e, boost::shared_ptr<JackConnec
 	, _target_systemic_input_latency (0)
 	, _target_systemic_output_latency (0)
 {
+	_jack_connection->Disconnected.connect_same_thread (disconnect_connection, boost::bind (&JACKAudioBackend::disconnected, this, _1));
 }
 
 JACKAudioBackend::~JACKAudioBackend()
@@ -897,8 +899,6 @@ JACKAudioBackend::jack_bufsize_callback (pframes_t nframes)
 void
 JACKAudioBackend::disconnected (const char* why)
 {
-        /* called from jack shutdown handler  */
-
 	bool was_running = _running;
 
         _running = false;

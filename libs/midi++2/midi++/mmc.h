@@ -38,7 +38,6 @@ namespace MIDI {
 class Port;
 class Parser;
 class MachineControlCommand;
-class Manager;	
 
 /** Class to handle incoming and outgoing MIDI machine control messages */
 class MachineControl 
@@ -95,7 +94,9 @@ class MachineControl
 		cmdResume = 0x7F
 	};
 	
-        MachineControl (Manager *, ARDOUR::PortEngine&);
+        MachineControl ();
+    
+        void set_ports (MIDI::Port* input, MIDI::Port* output);
 
 	Port* input_port() { return _input_port; }
 	Port* output_port() { return _output_port; }

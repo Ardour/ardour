@@ -49,6 +49,7 @@
 
 #include "ardour/amp.h"
 #include "ardour/analyser.h"
+#include "ardour/async_midi_port.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/audio_diskstream.h"
 #include "ardour/audio_port.h"
@@ -66,6 +67,7 @@
 #include "ardour/debug.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/graph.h"
+#include "ardour/midiport_manager.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_ui.h"
 #include "ardour/operations.h"
@@ -88,9 +90,7 @@
 #include "ardour/utils.h"
 
 #include "midi++/port.h"
-#include "midi++/jack_midi_port.h"
 #include "midi++/mmc.h"
-#include "midi++/manager.h"
 
 #include "i18n.h"
 
@@ -584,7 +584,8 @@ Session::when_engine_running ()
 	   as it will set states for ports which the ControlProtocolManager creates.
 	*/
 
-	MIDI::Manager::instance()->set_port_states (Config->midi_port_states ());
+	// XXX set state of MIDI::Port's
+	// MidiPortManager::instance()->set_port_states (Config->midi_port_states ());
 
 	/* And this must be done after the MIDI::Manager::set_port_states as
 	 * it will try to make connections whose details are loaded by set_port_states.
@@ -874,7 +875,12 @@ Session::hookup_io ()
 	/* Tell all IO objects to connect themselves together */
 
 	IO::enable_connecting ();
-	MIDI::JackMIDIPort::MakeConnections ();
+
+	/* Now tell all "floating" ports to connect to whatever
+	   they should be connected to.
+	*/
+
+	AudioEngine::instance()->reconnect_ports ();
 
 	/* Anyone who cares about input state, wake up and do something */
 
@@ -1169,7 +1175,7 @@ Session::enable_record ()
 		if (g_atomic_int_compare_and_exchange (&_record_status, rs, Recording)) {
 
 			_last_record_location = _transport_frame;
-			MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordStrobe));
+			AudioEngine::instance()->mmc().send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordStrobe));
 
 			if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
 				set_track_monitor_input_status (true);
@@ -1190,7 +1196,7 @@ Session::disable_record (bool rt_context, bool force)
 
 		if ((!Config->get_latched_record_enable () && !play_loop) || force) {
 			g_atomic_int_set (&_record_status, Disabled);
-			MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordExit));
+			AudioEngine::instance()->mmc().send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordExit));
 		} else {
 			if (rs == Recording) {
 				g_atomic_int_set (&_record_status, Enabled);
@@ -1244,7 +1250,7 @@ Session::maybe_enable_record ()
 			enable_record ();
 		}
 	} else {
-		MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordPause));
+		AudioEngine::instance()->mmc().send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordPause));
 		RecordStateChanged (); /* EMIT SIGNAL */
 	}
 

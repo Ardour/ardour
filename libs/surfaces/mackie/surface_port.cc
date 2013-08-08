@@ -24,27 +24,27 @@
 #include <boost/shared_array.hpp>
 
 #include "midi++/types.h"
-#include "midi++/port.h"
-#include "midi++/jack_midi_port.h"
 #include "midi++/ipmidi_port.h"
-#include "midi++/manager.h"
 
+#include "ardour/async_midi_port.h"
 #include "ardour/debug.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
+#include "ardour/async_midi_port.h"
+#include "ardour/midiport_manager.h"
 
 #include "controls.h"
 #include "mackie_control_protocol.h"
 #include "surface.h"
 #include "surface_port.h"
 
-
 #include "i18n.h"
 
 using namespace std;
 using namespace Mackie;
 using namespace PBD;
+using namespace ARDOUR;
 
 /** @param input_port Input MIDI::Port; this object takes responsibility for
  *  adding & removing it from the MIDI::Manager and destroying it.  @param
@@ -52,31 +52,16 @@ using namespace PBD;
  */
 SurfacePort::SurfacePort (Surface& s)
 	: _surface (&s)
-	, _input_port (0)
-	, _output_port (0)
 {
 	if (_surface->mcp().device_info().uses_ipmidi()) {
 		_input_port = new MIDI::IPMIDIPort (_surface->mcp().ipmidi_base() +_surface->number());
 		_output_port = _input_port;
 	} else {
-		ARDOUR::PortEngine& port_engine (ARDOUR::AudioEngine::instance()->port_engine());
-		
-		_input_port = new MIDI::JackMIDIPort (string_compose (_("%1 in"),  _surface->name()), MIDI::Port::IsInput, port_engine);
-		_output_port =new MIDI::JackMIDIPort (string_compose (_("%1 out"), _surface->name()), MIDI::Port::IsOutput, port_engine);
-		
-		/* MackieControl has its own thread for handling input from the input
-		 * port, and we don't want anything handling output from the output
-		 * port. This stops the Generic MIDI UI event loop in ardour from
-		 * attempting to handle these ports.
-		 */
-		
-		_input_port->set_centrally_parsed (false);
-		_output_port->set_centrally_parsed (false);
-		
-		MIDI::Manager * mm = MIDI::Manager::instance();
-		
-		mm->add_port (_input_port);
-		mm->add_port (_output_port);
+		_async_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, string_compose (_("%1 in"),  _surface->name()), true);
+		_async_out = AudioEngine::instance()->register_output_port (DataType::MIDI, string_compose (_("%1 out"),  _surface->name()), true);
+
+		_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in).get();
+		_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_out).get();
 	}
 }
 
@@ -86,17 +71,15 @@ SurfacePort::~SurfacePort()
 		delete _input_port;
 	} else {
 
-		MIDI::Manager* mm = MIDI::Manager::instance ();
-		
-		if (_input_port) {
-			mm->remove_port (_input_port);
-			delete _input_port;
+		if (_async_in) {
+			AudioEngine::instance()->unregister_port (_async_in);
+			_async_in.reset ();
 		}
 		
-		if (_output_port) {
+		if (_async_out) {
 			_output_port->drain (10000);
-			mm->remove_port (_output_port);
-			delete _output_port;
+			AudioEngine::instance()->unregister_port (_async_out);
+			_async_out.reset ();
 		}
 	}
 }

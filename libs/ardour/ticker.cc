@@ -19,13 +19,12 @@
 #include "pbd/compose.h"
 #include "pbd/stacktrace.h"
 
-#include "midi++/port.h"
-#include "midi++/jack_midi_port.h"
-#include "midi++/manager.h"
-
 #include "evoral/midi_events.h"
 
+#include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
+#include "ardour/midi_buffer.h"
+#include "ardour/midi_port.h"
 #include "ardour/ticker.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
@@ -95,16 +94,16 @@ public:
 
 
 MidiClockTicker::MidiClockTicker ()
-	: _midi_port (0)
-	, _ppqn (24)
+	: _ppqn (24)
 	, _last_tick (0.0)
+	, _send_pos (false)
+	, _send_state (false)
 {
 	_pos.reset (new Position());
 }
 
 MidiClockTicker::~MidiClockTicker()
 {
-	_midi_port = 0;
 	_pos.reset (0);
 }
 
@@ -115,7 +114,6 @@ MidiClockTicker::set_session (Session* s)
 	
 	 if (_session) {
 		 _session->TransportStateChange.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::transport_state_changed, this));
-		 _session->PositionChanged.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::position_changed, this, _1));
 		 _session->TransportLooped.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::transport_looped, this));
 		 _session->Located.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::session_located, this));
 
@@ -139,41 +137,20 @@ MidiClockTicker::session_located()
 		return;
 	}
 
-	if (_pos->speed == 0.0f) {
-		uint32_t where = llrint (_pos->midi_beats);
-		send_position_event (where, 0);
-	} else if (_pos->speed == 1.0f) {
-#if 1
-		/* Experimental.  To really do this and have accuracy, the
-		   stop/locate/continue sequence would need queued to send immediately
-		   before the next midi clock. */
-
-		send_stop_event (0);
-
-		if (_pos->frame == 0) {
-			send_start_event (0);
-		} else {
-			uint32_t where = llrint (_pos->midi_beats);
-			send_position_event (where, 0);
-			send_continue_event (0);
-		}
-#endif
-	} else {
-		/* Varispeed not supported */
-	}
+	_send_pos = true;
 }
 
 void
 MidiClockTicker::session_going_away ()
 {
 	SessionHandlePtr::session_going_away();
-	_midi_port = 0;
+	_midi_port.reset ();
 }
 
 void
 MidiClockTicker::update_midi_clock_port()
 {
-	_midi_port = MIDI::Manager::instance()->midi_clock_output_port();
+	_midi_port = AudioEngine::instance()->midi_clock_output_port();
 }
 
 void
@@ -204,46 +181,9 @@ MidiClockTicker::transport_state_changed()
 		return;
 	}
 
-	if (_pos->speed == 1.0f) {
-
-		if (_session->get_play_loop()) {
-			assert(_session->locations()->auto_loop_location());
-
-			if (_pos->frame == _session->locations()->auto_loop_location()->start()) {
-				send_start_event(0);
-			} else {
-				send_continue_event(0);
-			}
-
-		} else if (_pos->frame == 0) {
-			send_start_event(0);
-		} else {
-			send_continue_event(0);
-		}
-
-		// send_midi_clock_event (0);
-
-	} else if (_pos->speed == 0.0f) {
-		send_stop_event (0);
-		send_position_event (llrint (_pos->midi_beats), 0);
-	}
+	_send_state = true;
 
 	// tick (_pos->frame);
-}
-
-void
-MidiClockTicker::position_changed (framepos_t)
-{
-#if 0
-	const double speed = _session->transport_speed();
-	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Transport Position Change: %1, speed: %2\n", position, speed));
-
-	if (speed == 0.0f && Config->get_send_midi_clock()) {
-		send_position_event (position, 0);
-	}
-
-	_last_tick = position;
-#endif
 }
 
 void
@@ -270,18 +210,68 @@ MidiClockTicker::transport_looped()
 }
 
 void
-MidiClockTicker::tick (const framepos_t& /* transport_frame */)
+MidiClockTicker::tick (const framepos_t& /* transport_frame */, pframes_t nframes)
 {
 	if (!Config->get_send_midi_clock() || _session == 0 || _session->transport_speed() != 1.0f || _midi_port == 0) {
 		return;
 	}
 
-	MIDI::JackMIDIPort* mp = dynamic_cast<MIDI::JackMIDIPort*> (_midi_port);
-	if (! mp) {
-		return;
+	if (_send_pos) {
+		if (_pos->speed == 0.0f) {
+			uint32_t where = llrint (_pos->midi_beats);
+			send_position_event (where, 0, nframes);
+		} else if (_pos->speed == 1.0f) {
+#if 1
+			/* Experimental.  To really do this and have accuracy, the
+			   stop/locate/continue sequence would need queued to send immediately
+			   before the next midi clock. */
+			
+			send_stop_event (0, nframes);
+			
+			if (_pos->frame == 0) {
+				send_start_event (0, nframes);
+			} else {
+				uint32_t where = llrint (_pos->midi_beats);
+				send_position_event (where, 0, nframes);
+				send_continue_event (0, nframes);
+			}
+#endif
+		} else {
+			/* Varispeed not supported */
+		}
+
+		_send_pos = true;
 	}
 
-	const framepos_t end = _pos->frame + mp->nframes_this_cycle();
+	if (_send_state) {
+		if (_pos->speed == 1.0f) {
+			if (_session->get_play_loop()) {
+				assert(_session->locations()->auto_loop_location());
+				
+				if (_pos->frame == _session->locations()->auto_loop_location()->start()) {
+					send_start_event (0, nframes);
+				} else {
+					send_continue_event (0, nframes);
+				}
+				
+			} else if (_pos->frame == 0) {
+				send_start_event (0, nframes);
+			} else {
+				send_continue_event (0, nframes);
+			}
+			
+			// send_midi_clock_event (0);
+			
+		} else if (_pos->speed == 0.0f) {
+			send_stop_event (0, nframes);
+			send_position_event (llrint (_pos->midi_beats), 0, nframes);
+		}
+
+		_send_state = false;
+	}
+
+
+	const framepos_t end = _pos->frame + nframes;
 	double iter = _last_tick;
 
 	while (true) {
@@ -291,14 +281,14 @@ MidiClockTicker::tick (const framepos_t& /* transport_frame */)
 
 		DEBUG_TRACE (DEBUG::MidiClock,
 				 string_compose ("Tick: iter: %1, last tick time: %2, next tick time: %3, offset: %4, cycle length: %5\n",
-						 iter, _last_tick, next_tick, next_tick_offset, mp ? mp->nframes_this_cycle() : 0));
+						 iter, _last_tick, next_tick, next_tick_offset, nframes));
 
-		if (!mp || (next_tick_offset >= mp->nframes_this_cycle())) {
+		if (next_tick_offset >= nframes) {
 			break;
 		}
 
 		if (next_tick_offset >= 0) {
-			send_midi_clock_event (next_tick_offset);
+			send_midi_clock_event (next_tick_offset, nframes);
 		}
 
 		iter = next_tick;
@@ -307,7 +297,6 @@ MidiClockTicker::tick (const framepos_t& /* transport_frame */)
 	_last_tick  = iter;
 	_pos->frame = end;
 }
-
 
 double
 MidiClockTicker::one_ppqn_in_frames (framepos_t transport_position)
@@ -322,7 +311,7 @@ MidiClockTicker::one_ppqn_in_frames (framepos_t transport_position)
 }
 
 void
-MidiClockTicker::send_midi_clock_event (pframes_t offset)
+MidiClockTicker::send_midi_clock_event (pframes_t offset, pframes_t nframes)
 {
 	if (!_midi_port) {
 		return;
@@ -330,12 +319,13 @@ MidiClockTicker::send_midi_clock_event (pframes_t offset)
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Tick with offset %1\n", offset));
 
-	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_CLOCK };
-	_midi_port->write (_midi_clock_tick, 1, offset);
+	static uint8_t tick_byte = { MIDI_CMD_COMMON_CLOCK };
+	MidiBuffer& mb (_midi_port->get_midi_buffer (nframes));
+	mb.push_back (offset, 1, &tick_byte);
 }
 
 void
-MidiClockTicker::send_start_event (pframes_t offset)
+MidiClockTicker::send_start_event (pframes_t offset, pframes_t nframes)
 {
 	if (!_midi_port) {
 		return;
@@ -343,12 +333,13 @@ MidiClockTicker::send_start_event (pframes_t offset)
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Start %1\n", _last_tick));
 
-	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_START };
-	_midi_port->write (_midi_clock_tick, 1, offset);
+	static uint8_t tick_byte = { MIDI_CMD_COMMON_START };
+	MidiBuffer& mb (_midi_port->get_midi_buffer (nframes));
+	mb.push_back (offset, 1, &tick_byte);
 }
 
 void
-MidiClockTicker::send_continue_event (pframes_t offset)
+MidiClockTicker::send_continue_event (pframes_t offset, pframes_t nframes)
 {
 	if (!_midi_port) {
 		return;
@@ -356,12 +347,13 @@ MidiClockTicker::send_continue_event (pframes_t offset)
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Continue %1\n", _last_tick));
 
-	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_CONTINUE };
-	_midi_port->write (_midi_clock_tick, 1, offset);
+	static uint8_t tick_byte = { MIDI_CMD_COMMON_CONTINUE };
+	MidiBuffer& mb (_midi_port->get_midi_buffer (nframes));
+	mb.push_back (offset, 1, &tick_byte);
 }
 
 void
-MidiClockTicker::send_stop_event (pframes_t offset)
+MidiClockTicker::send_stop_event (pframes_t offset, pframes_t nframes)
 {
 	if (!_midi_port) {
 		return;
@@ -369,12 +361,13 @@ MidiClockTicker::send_stop_event (pframes_t offset)
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Stop %1\n", _last_tick));
 
-	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_STOP };
-	_midi_port->write (_midi_clock_tick, 1, offset);
+	static uint8_t tick_byte = { MIDI_CMD_COMMON_STOP };
+	MidiBuffer& mb (_midi_port->get_midi_buffer (nframes));
+	mb.push_back (offset, 1, &tick_byte);
 }
 
 void
-MidiClockTicker::send_position_event (uint32_t midi_beats, pframes_t offset)
+MidiClockTicker::send_position_event (uint32_t midi_beats, pframes_t offset, pframes_t nframes)
 {
 	if (!_midi_port) {
 		return;
@@ -391,7 +384,8 @@ MidiClockTicker::send_position_event (uint32_t midi_beats, pframes_t offset)
 	msg[1] = midi_beats & 0x007f;
 	msg[2] = midi_beats >> 7;
 
-	_midi_port->midimsg (msg, sizeof (msg), offset);
+	MidiBuffer& mb (_midi_port->get_midi_buffer (nframes));
+	mb.push_back (offset, 3, &msg[0]);
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Song Position Sent: %1\n", midi_beats));
 }

@@ -40,7 +40,6 @@
 #include "ardour/ticker.h"
 #include "ardour/types.h"
 
-#include "midi++/manager.h"
 #include "midi++/mmc.h"
 
 #include "i18n.h"
@@ -85,7 +84,7 @@ Session::process (pframes_t nframes)
 
 	try {
 		if (!_engine.freewheeling() && Config->get_send_midi_clock() && transport_speed() == 1.0f && midi_clock->has_midi_port()) {
-			midi_clock->tick (transport_at_start);
+			midi_clock->tick (transport_at_start, nframes);
 		}
 	} catch (...) {
 		/* don't bother with a message */
@@ -325,7 +324,7 @@ Session::process_with_events (pframes_t nframes)
 	 * and prepare for rolling)
 	 */
 	if (_send_timecode_update) {
-		send_full_time_code (_transport_frame);
+		send_full_time_code (_transport_frame, nframes);
 	}
 
 	if (!process_can_proceed()) {
@@ -492,6 +491,7 @@ Session::follow_slave (pframes_t nframes)
 		goto noroll;
 	}
 
+	_slave->process (nframes);
 	_slave->speed_and_position (slave_speed, slave_transport_frame);
 
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("Slave position %1 speed %2\n", slave_transport_frame, slave_speed));

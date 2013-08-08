@@ -66,11 +66,47 @@ MidiPortManager::port (string const & n)
 void
 MidiPortManager::create_ports ()
 {
-	_midi_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, _("MIDI control in"), true);
-	_midi_out = AudioEngine::instance()->register_output_port (DataType::MIDI, _("MIDI control out"), true);
+	/* this method is idempotent
+	 */
+
+	if (_midi_in) {
+		return;
+	}
+	      
+	_midi_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, _("control in"), true);
+	_midi_out = AudioEngine::instance()->register_output_port (DataType::MIDI, _("control out"), true);
+
+	_mmc_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, _("mmc in"), true);
+	_mmc_out = AudioEngine::instance()->register_output_port (DataType::MIDI, _("mmc out"), true);
 	
+	/* XXX nasty type conversion needed because of the mixed inheritance
+	 * required to integrate MIDI::IPMidiPort and ARDOUR::AsyncMIDIPort.
+	 *
+	 * At some point, we'll move IPMidiPort into Ardour and make it 
+	 * inherit from ARDOUR::MidiPort not MIDI::Port, and then this
+	 * mess can go away 
+	 */
+
 	_midi_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_midi_in).get();
 	_midi_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_midi_out).get();
+
+	_mmc_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_mmc_in).get();
+	_mmc_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_mmc_out).get();
+
+	/* Now register ports used for sync (MTC and MIDI Clock)
+	 */
+
+	boost::shared_ptr<ARDOUR::Port> p;
+
+	p = AudioEngine::instance()->register_input_port (DataType::MIDI, _("timecode in"));
+	_mtc_input_port = boost::dynamic_pointer_cast<MidiPort> (p);
+	p = AudioEngine::instance()->register_output_port (DataType::MIDI, _("timecode out"));
+	_mtc_output_port= boost::dynamic_pointer_cast<MidiPort> (p);
+
+	p = AudioEngine::instance()->register_input_port (DataType::MIDI, _("clock in"));
+	_midi_clock_input_port = boost::dynamic_pointer_cast<MidiPort> (p);
+	p = AudioEngine::instance()->register_output_port (DataType::MIDI, _("clock out"));
+	_midi_clock_output_port= boost::dynamic_pointer_cast<MidiPort> (p);
 }
 
 void

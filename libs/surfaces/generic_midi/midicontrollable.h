@@ -36,17 +36,20 @@ namespace PBD {
 
 namespace MIDI {
 	class Channel;
-	class Port;
 	class Parser;
 }
 
 class GenericMidiControlProtocol;
 
+namespace ARDOUR {
+	class AsyncMIDIPort;
+}
+
 class MIDIControllable : public PBD::Stateful
 {
   public:
-	MIDIControllable (GenericMidiControlProtocol *, MIDI::Port&, PBD::Controllable&, bool momentary);
-	MIDIControllable (GenericMidiControlProtocol *, MIDI::Port&, bool momentary = false);
+        MIDIControllable (GenericMidiControlProtocol *, MIDI::Parser&, PBD::Controllable&, bool momentary);
+        MIDIControllable (GenericMidiControlProtocol *, MIDI::Parser&, bool momentary = false);
 	virtual ~MIDIControllable ();
 
 	int init (const std::string&);
@@ -72,7 +75,7 @@ class MIDIControllable : public PBD::Stateful
 
 	bool learned() const { return _learned; }
 
-	MIDI::Port& get_port() const { return _port; }
+        MIDI::Parser& get_parser() { return _parser; }
 	PBD::Controllable* get_controllable() const { return controllable; }
 	void set_controllable (PBD::Controllable*);
 	const std::string& current_uri() const { return _current_uri; }
@@ -98,8 +101,8 @@ class MIDIControllable : public PBD::Stateful
 	GenericMidiControlProtocol* _surface;
 	PBD::Controllable* controllable;
 	PBD::ControllableDescriptor* _descriptor;
-	std::string        _current_uri;
-	MIDI::Port&     _port;
+	std::string     _current_uri;
+        MIDI::Parser&   _parser;
 	bool             setting;
 	int              last_value;
 	float            last_controllable_value;

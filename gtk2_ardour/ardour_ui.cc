@@ -58,8 +58,6 @@
 #include "gtkmm2ext/popup.h"
 #include "gtkmm2ext/window_title.h"
 
-#include "midi++/manager.h"
-
 #include "ardour/ardour.h"
 #include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
@@ -1050,14 +1048,20 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 
 		framecnt_t rate = engine->sample_rate();
 
-		if (fmod (rate, 1000.0) != 0.0) {
-			snprintf (buf, sizeof (buf), _("JACK: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"),
-				  (float) rate / 1000.0f,
-				  (engine->usecs_per_cycle() / 1000.0f));
+		if (rate == 0) {
+			/* no sample rate available */
+			snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"red\">disconnected</span>"));
 		} else {
-			snprintf (buf, sizeof (buf), _("JACK: <span foreground=\"green\">%" PRId64 " kHz / %4.1f ms</span>"),
-				  rate/1000,
-				  (engine->usecs_per_cycle() * 1000.0f));
+
+			if (fmod (rate, 1000.0) != 0.0) {
+				snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"),
+					  (float) rate / 1000.0f,
+					  (engine->usecs_per_cycle() / 1000.0f));
+			} else {
+				snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"green\">%" PRId64 " kHz / %4.1f ms</span>"),
+					  rate/1000,
+					  (engine->usecs_per_cycle() * 1000.0f));
+			}
 		}
 	}
 
@@ -1180,6 +1184,11 @@ ARDOUR_UI::update_disk_space()
 	boost::optional<framecnt_t> opt_frames = _session->available_capture_duration();
 	char buf[64];
 	framecnt_t fr = _session->frame_rate();
+
+	if (fr == 0) {
+		/* skip update - no SR available */
+		return;
+	}
 
 	if (!opt_frames) {
 		/* Available space is unknown */
@@ -1662,10 +1671,17 @@ ARDOUR_UI::transport_goto_wallclock ()
 
 		time (&now);
 		localtime_r (&now, &tmnow);
+		
+		int frame_rate = _session->frame_rate();
+		
+		if (frame_rate == 0) {
+			/* no frame rate available */
+			return;
+		}
 
-		frames = tmnow.tm_hour * (60 * 60 * _session->frame_rate());
-		frames += tmnow.tm_min * (60 * _session->frame_rate());
-		frames += tmnow.tm_sec * _session->frame_rate();
+		frames = tmnow.tm_hour * (60 * 60 * frame_rate);
+		frames += tmnow.tm_min * (60 * frame_rate);
+		frames += tmnow.tm_sec * frame_rate;
 
 		_session->request_locate (frames, _session->transport_rolling ());
 
@@ -3802,7 +3818,7 @@ void
 ARDOUR_UI::disconnect_from_jack ()
 {
 	if (engine) {
-		if (engine->pause ()) {
+		if (engine->stop ()) {
 			MessageDialog msg (*editor, _("Could not disconnect from JACK"));
 			msg.run ();
 		}

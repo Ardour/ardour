@@ -2372,8 +2372,9 @@ CursorDrag::fake_locate (framepos_t t)
 	if (s->timecode_transmission_suspended ()) {
 		framepos_t const f = _editor->playhead_cursor->current_frame;
 		s->send_mmc_locate (f);
-		s->send_full_time_code (f);
-		s->send_song_position_pointer (f);
+		// XXX need to queue full time code and SPP messages somehow
+		// s->send_full_time_code (f);
+		// s->send_song_position_pointer (f);
 	}
 
 	show_verbose_cursor_time (t);

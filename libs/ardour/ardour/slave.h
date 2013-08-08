@@ -40,15 +40,12 @@
 #define PLUSMINUS(A) ( ((A)<0) ? "-" : (((A)>0) ? "+" : "\u00B1") )
 #define LEADINGZERO(A) ( (A)<10 ? "   " : (A)<100 ? "  " : (A)<1000 ? " " : "" )
 
-namespace MIDI {
-	class Port;
-}
-
 namespace ARDOUR {
 
 class TempoMap;
 class Session;
 class AudioEngine;
+class MidiPort;
 
 /**
  * @class Slave
@@ -66,6 +63,15 @@ class Slave {
   public:
 	Slave() { }
 	virtual ~Slave() {}
+
+        /** The slave should read any incoming information in this method
+	 *  and use it adjust its current idea of reality. If no such
+	 *  processing is required, it does need to be implemented.
+	 *
+	 * @param nframes specifies the number of frames-worth of data that
+	 * can be read from any ports used by the slave.
+	 */
+         virtual int process (pframes_t) { return 0; }
 
 	/**
 	 * This is the most important function to implement:
@@ -253,10 +259,11 @@ class TimecodeSlave : public Slave {
 
 class MTC_Slave : public TimecodeSlave {
   public:
-	MTC_Slave (Session&, MIDI::Port&);
+	MTC_Slave (Session&, MidiPort&);
 	~MTC_Slave ();
 
-	void rebind (MIDI::Port&);
+	void rebind (MidiPort&);
+        int process (pframes_t);
 	bool speed_and_position (double&, framepos_t&);
 
 	bool locked() const;
@@ -274,7 +281,8 @@ class MTC_Slave : public TimecodeSlave {
 
   private:
 	Session&    session;
-	MIDI::Port* port;
+	MidiPort*   port;
+        MIDI::Parser    parser;
 	PBD::ScopedConnectionList port_connections;
 	PBD::ScopedConnection     config_connection;
 	bool        can_notify_on_unknown_rate;
@@ -405,13 +413,14 @@ public:
 
 class MIDIClock_Slave : public Slave {
   public:
-	MIDIClock_Slave (Session&, MIDI::Port&, int ppqn = 24);
+	MIDIClock_Slave (Session&, MidiPort&, int ppqn = 24);
 
 	/// Constructor for unit tests
 	MIDIClock_Slave (ISlaveSessionProxy* session_proxy = 0, int ppqn = 24);
 	~MIDIClock_Slave ();
 
-	void rebind (MIDI::Port&);
+	void rebind (MidiPort&);
+        int process (pframes_t);
 	bool speed_and_position (double&, framepos_t&);
 
 	bool locked() const;
@@ -427,7 +436,8 @@ class MIDIClock_Slave : public Slave {
 
   protected:
 	ISlaveSessionProxy* session;
-	MIDI::Port* port;
+	MidiPort* port;
+        MIDI::Parser parser;
 	PBD::ScopedConnectionList port_connections;
 
 	/// pulses per quarter note for one MIDI clock frame (default 24)

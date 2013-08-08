@@ -37,10 +37,9 @@
 #include <jack/weakjack.h>
 
 #include "midi++/port.h"
-#include "midi++/jack_midi_port.h"
 #include "midi++/mmc.h"
-#include "midi++/manager.h"
 
+#include "ardour/async_midi_port.h"
 #include "ardour/audio_port.h"
 #include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
@@ -50,6 +49,7 @@
 #include "ardour/internal_send.h"
 #include "ardour/meter.h"
 #include "ardour/midi_port.h"
+#include "ardour/midiport_manager.h"
 #include "ardour/port.h"
 #include "ardour/process_thread.h"
 #include "ardour/session.h"
@@ -66,10 +66,11 @@ AudioEngine* AudioEngine::_instance = 0;
 AudioEngine::AudioEngine ()
 	: session_remove_pending (false)
 	, session_removal_countdown (-1)
+	, _running (false)
+	, _freewheeling (false)
 	, monitor_check_interval (INT32_MAX)
 	, last_monitor_check (0)
 	, _processed_frames (0)
-	, _freewheeling (false)
 	, _pre_freewheel_mmc_enabled (false)
 	, m_meter_thread (0)
 	, _main_thread (0)
@@ -117,7 +118,7 @@ _thread_init_callback (void * /*arg*/)
 
 	SessionEvent::create_per_thread_pool (X_("Audioengine"), 512);
 
-	MIDI::JackMIDIPort::set_process_thread (pthread_self());
+	AsyncMIDIPort::set_process_thread (pthread_self());
 }
 
 void
@@ -231,8 +232,8 @@ AudioEngine::process_callback (pframes_t nframes)
 	if (_session == 0) {
 
 		if (!_freewheeling) {
-			MIDI::Manager::instance()->cycle_start(nframes);
-			MIDI::Manager::instance()->cycle_end();
+			PortManager::cycle_start (nframes);
+			PortManager::cycle_end (nframes);
 		}
 
 		_processed_frames = next_processed_frames;
@@ -243,34 +244,22 @@ AudioEngine::process_callback (pframes_t nframes)
 	/* tell all relevant objects that we're starting a new cycle */
 
 	InternalSend::CycleStart (nframes);
-	Port::set_global_port_buffer_offset (0);
-        Port::set_cycle_framecnt (nframes);
 
 	/* tell all Ports that we're starting a new cycle */
 
-	boost::shared_ptr<Ports> p = ports.reader();
-
-	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-		i->second->cycle_start (nframes);
-	}
+	PortManager::cycle_start (nframes);
 
 	/* test if we are freewheeling and there are freewheel signals connected.
            ardour should act normally even when freewheeling unless /it/ is
-           exporting 
+           exporting (which is what Freewheel.empty() tests for).
 	*/
 
 	if (_freewheeling && !Freewheel.empty()) {
-
                 Freewheel (nframes);
-
 	} else {
-		MIDI::Manager::instance()->cycle_start(nframes);
-
 		if (_session) {
 			_session->process (nframes);
 		}
-
-		MIDI::Manager::instance()->cycle_end();
 	}
 
 	if (_freewheeling) {
@@ -283,52 +272,18 @@ AudioEngine::process_callback (pframes_t nframes)
 	}
 
 	if (last_monitor_check + monitor_check_interval < next_processed_frames) {
-
-		boost::shared_ptr<Ports> p = ports.reader();
-
-		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-
-			bool x;
-
-			if (i->second->last_monitor() != (x = i->second->monitoring_input ())) {
-				i->second->set_last_monitor (x);
-				/* XXX I think this is dangerous, due to
-				   a likely mutex in the signal handlers ...
-				*/
-				i->second->MonitorInputChanged (x); /* EMIT SIGNAL */
-			}
-		}
+		
+		PortManager::check_monitoring ();
 		last_monitor_check = next_processed_frames;
 	}
 
 	if (_session->silent()) {
-
-		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-
-			if (i->second->sends_output()) {
-				i->second->get_buffer(nframes).silence(nframes);
-			}
-		}
+		PortManager::silence (nframes);
 	}
 
 	if (session_remove_pending && session_removal_countdown) {
 
-		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-
-			if (i->second->sends_output()) {
-
-				boost::shared_ptr<AudioPort> ap = boost::dynamic_pointer_cast<AudioPort> (i->second);
-				if (ap) {
-					Sample* s = ap->engine_get_whole_audio_buffer ();
-					gain_t g = session_removal_gain;
-					
-					for (pframes_t n = 0; n < nframes; ++n) {
-						*s++ *= g;
-						g -= session_removal_gain_step;
-					}
-				}
-			}
-		}
+		PortManager::fade_out (session_removal_gain, session_removal_gain_step, nframes);
 		
 		if (session_removal_countdown > nframes) {
 			session_removal_countdown -= nframes;
@@ -339,11 +294,7 @@ AudioEngine::process_callback (pframes_t nframes)
 		session_removal_gain -= (nframes * session_removal_gain_step);
 	}
 
-	// Finalize ports
-
-	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-		i->second->cycle_end (nframes);
-	}
+	PortManager::cycle_end (nframes);
 
 	_processed_frames = next_processed_frames;
 
@@ -574,7 +525,7 @@ AudioEngine::set_backend (const std::string& name, const std::string& arg1, cons
 	}
 
 	drop_backend ();
-
+	
 	try {
 		cerr << "Instantiate " << b->second->name << " with " << arg1 << " + " << arg2 << endl;
 
@@ -603,31 +554,45 @@ AudioEngine::start ()
 		return -1;
 	}
 
-	if (!_running) {
+	if (_running) {
+		return 0;
+	}
 
-		if (_session) {
-			BootMessage (_("Connect session to engine"));
-			_session->set_frame_rate (_backend->sample_rate());
-		}
+	/* if we're still connected (i.e. previously paused), no need to
+	 * re-register ports.
+	 */
+	 
+	bool have_ports = (!ports.reader()->empty());
 
-		_processed_frames = 0;
+	_processed_frames = 0;
+	last_monitor_check = 0;
+	
+	if (_backend->start() == 0) {
+
+		_running = true;
 		last_monitor_check = 0;
+		
+		if (_session) {
+			_session->set_frame_rate (_backend->sample_rate());
 
-		if (_backend->start() == 0) {
-			_running = true;
-			last_monitor_check = 0;
-
-			if (_session && _session->config.get_jack_time_master()) {
+			if (_session->config.get_jack_time_master()) {
 				_backend->set_time_master (true);
 			}
-
-			Running(); /* EMIT SIGNAL */
-		} else {
-			/* should report error? */
 		}
-	}
 		
-	return _running ? 0 : -1;
+		if (!have_ports) {
+			PortManager::create_ports ();
+		} 
+		
+		_mmc.set_ports (mmc_input_port(), mmc_output_port());
+		
+		Running(); /* EMIT SIGNAL */
+
+		return 0;
+	} 
+
+	/* should report error ... */
+	return -1;
 }
 
 int
@@ -641,6 +606,7 @@ AudioEngine::stop ()
 
 	if (_backend->stop () == 0) {
 		_running = false;
+		_processed_frames = 0;
 		stop_metering_thread ();
 
 		Stopped (); /* EMIT SIGNAL */
@@ -932,7 +898,7 @@ AudioEngine::thread_init_callback (void* arg)
 
 	SessionEvent::create_per_thread_pool (X_("AudioEngine"), 512);
 
-	MIDI::JackMIDIPort::set_process_thread (pthread_self());
+	AsyncMIDIPort::set_process_thread (pthread_self());
 
 	if (arg) {
 		AudioEngine* ae = static_cast<AudioEngine*> (arg);
@@ -964,10 +930,10 @@ void
 AudioEngine::freewheel_callback (bool onoff)
 {
 	if (onoff) {
-		_pre_freewheel_mmc_enabled = MIDI::Manager::instance()->mmc()->send_enabled ();
-		MIDI::Manager::instance()->mmc()->enable_send (false);
+		_pre_freewheel_mmc_enabled = _mmc.send_enabled ();
+		_mmc.enable_send (false);
 	} else {
-		MIDI::Manager::instance()->mmc()->enable_send (_pre_freewheel_mmc_enabled);
+		_mmc.enable_send (_pre_freewheel_mmc_enabled);
 	}
 }
 
@@ -991,8 +957,6 @@ void
 AudioEngine::halted_callback (const char* why)
 {
         stop_metering_thread ();
-	
-	MIDI::JackMIDIPort::EngineHalted (); /* EMIT SIGNAL */
 	Halted (why); /* EMIT SIGNAL */
 }
 

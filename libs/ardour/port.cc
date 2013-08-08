@@ -390,6 +390,7 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 int
 Port::reestablish ()
 {
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("re-establish %1 port %2\n", type().to_string(), _name));
 	_port_handle = port_engine.register_port (_name, type(), _flags);
 
 	if (_port_handle == 0) {

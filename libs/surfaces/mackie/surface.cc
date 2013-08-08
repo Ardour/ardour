@@ -24,7 +24,6 @@
 #include <cmath>
 
 #include "midi++/port.h"
-#include "midi++/manager.h"
 
 #include "ardour/automation_control.h"
 #include "ardour/debug.h"

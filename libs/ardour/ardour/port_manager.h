@@ -32,15 +32,17 @@
 #include "pbd/rcu.h"
 
 #include "ardour/chan_count.h"
+#include "ardour/midiport_manager.h"
 #include "ardour/port.h"
 #include "ardour/port_engine.h"
 
 namespace ARDOUR {
 
-class PortManager 
+class PortManager : public MidiPortManager
 {
   public:
     typedef std::map<std::string,boost::shared_ptr<Port> > Ports;
+    typedef std::list<boost::shared_ptr<Port> > PortList;
     
     PortManager ();
     virtual ~PortManager() {}
@@ -53,8 +55,8 @@ class PortManager
 
     /* Port registration */
     
-    boost::shared_ptr<Port> register_input_port (DataType, const std::string& portname);
-    boost::shared_ptr<Port> register_output_port (DataType, const std::string& portname);
+    boost::shared_ptr<Port> register_input_port (DataType, const std::string& portname, bool async = false);
+    boost::shared_ptr<Port> register_output_port (DataType, const std::string& portname, bool async = false);
     int unregister_port (boost::shared_ptr<Port>);
     
     /* Port connectivity */
@@ -87,7 +89,8 @@ class PortManager
     ChanCount n_physical_inputs () const;
 
     int get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>&);
-    
+    int get_ports (DataType, PortList&);
+
     void remove_all_ports ();
     
     /* per-Port monitoring */
@@ -135,9 +138,31 @@ class PortManager
     SerializedRCUManager<Ports> ports;
     bool _port_remove_in_progress;
 
-    boost::shared_ptr<Port> register_port (DataType type, const std::string& portname, bool input);
+    boost::shared_ptr<Port> register_port (DataType type, const std::string& portname, bool input, bool async = false);
     void port_registration_failure (const std::string& portname);
+
+    /** List of ports to be used between ::cycle_start() and ::cycle_end()
+     */
+    boost::shared_ptr<Ports> _cycle_ports;
+
+    void fade_out (gain_t, gain_t, pframes_t);
+    void silence (pframes_t nframes);
+    void check_monitoring ();
+    /** Signal the start of an audio cycle.
+     * This MUST be called before any reading/writing for this cycle.
+     * Realtime safe.
+     */
+    void cycle_start (pframes_t nframes);
+	
+    /** Signal the end of an audio cycle.
+     * This signifies that the cycle began with @ref cycle_start has ended.
+     * This MUST be called at the end of each cycle.
+     * Realtime safe.
+     */
+    void cycle_end (pframes_t nframes);
 };
+
+
 	
 } // namespace
 

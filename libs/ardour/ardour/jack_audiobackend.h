@@ -178,6 +178,8 @@ class JACKAudioBackend : public AudioBackend {
     typedef std::map<std::string,DeviceList> DriverDeviceMap;
     
     mutable DriverDeviceMap all_devices;
+
+    PBD::ScopedConnection disconnect_connection;
 };
 
 } // namespace

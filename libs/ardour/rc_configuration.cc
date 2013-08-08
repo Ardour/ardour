@@ -27,13 +27,12 @@
 #include "pbd/xml++.h"
 #include "pbd/file_utils.h"
 
-#include "midi++/manager.h"
-
 #include "ardour/control_protocol_manager.h"
 #include "ardour/diskstream.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session_metadata.h"
+#include "ardour/midiport_manager.h"
 
 #include "i18n.h"
 
@@ -177,15 +176,20 @@ RCConfiguration::get_state ()
 
 	root = new XMLNode("Ardour");
 
-        MIDI::Manager* mm = MIDI::Manager::instance();
+	/* XXX 
+	 * GET STATE OF MIDI::Port HERE
+	 */
+#if 0
+        MidiPortManager* mm = MidiPortManager::instance();
 
         if (mm) {
-		boost::shared_ptr<const MIDI::Manager::PortList> ports = mm->get_midi_ports();
+		boost::shared_ptr<const MidiPortManager::PortList> ports = mm->get_midi_ports();
 
-                for (MIDI::Manager::PortList::const_iterator i = ports->begin(); i != ports->end(); ++i) {
-                        root->add_child_nocopy((*i)->get_state());
+                for (MidiPortManager::PortList::const_iterator i = ports->begin(); i != ports->end(); ++i) {
+                        // root->add_child_nocopy ((*i)->get_state());
                 }
         }
+#endif
 
 	root->add_child_nocopy (get_variables ());
 

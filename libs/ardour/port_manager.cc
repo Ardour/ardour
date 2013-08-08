@@ -19,11 +19,12 @@
 
 #include "pbd/error.h"
 
-#include "midi++/manager.h"
-
+#include "ardour/async_midi_port.h"
+#include "ardour/debug.h"
 #include "ardour/port_manager.h"
 #include "ardour/audio_port.h"
 #include "ardour/midi_port.h"
+#include "ardour/midiport_manager.h"
 
 #include "i18n.h"
 
@@ -228,6 +229,18 @@ PortManager::port_renamed (const std::string& old_relative_name, const std::stri
 }
 
 int
+PortManager::get_ports (DataType type, PortList& pl)
+{
+	boost::shared_ptr<Ports> plist = ports.reader();
+	for (Ports::iterator p = plist->begin(); p != plist->end(); ++p) {
+		if (p->second->type() == type) {
+			pl.push_back (p->second);
+		}
+	}
+	return pl.size();
+}
+
+int
 PortManager::get_ports (const string& port_name_pattern, DataType type, PortFlags flags, vector<string>& s)
 {
 	if (!_impl) {
@@ -262,15 +275,25 @@ PortManager::port_registration_failure (const std::string& portname)
 }
 
 boost::shared_ptr<Port>
-PortManager::register_port (DataType dtype, const string& portname, bool input)
+PortManager::register_port (DataType dtype, const string& portname, bool input, bool async)
 {
 	boost::shared_ptr<Port> newport;
 
 	try {
 		if (dtype == DataType::AUDIO) {
+			DEBUG_TRACE (DEBUG::Ports, string_compose ("registering AUDIO port %1, input %2\n",
+								   portname, input));
 			newport.reset (new AudioPort (portname, (input ? IsInput : IsOutput)));
 		} else if (dtype == DataType::MIDI) {
-			newport.reset (new MidiPort (portname, (input ? IsInput : IsOutput)));
+			if (async) {
+				DEBUG_TRACE (DEBUG::Ports, string_compose ("registering ASYNC MIDI port %1, input %2\n",
+									   portname, input));
+				newport.reset (new AsyncMIDIPort (portname, (input ? IsInput : IsOutput)));
+			} else {
+				DEBUG_TRACE (DEBUG::Ports, string_compose ("registering MIDI port %1, input %2\n",
+									   portname, input));
+				newport.reset (new MidiPort (portname, (input ? IsInput : IsOutput)));
+			}
 		} else {
 			throw PortRegistrationFailure("unable to create port (unknown type)");
 		}
@@ -281,7 +304,6 @@ PortManager::register_port (DataType dtype, const string& portname, bool input)
 
 		/* writer goes out of scope, forces update */
 
-		return newport;
 	}
 
 	catch (PortRegistrationFailure& err) {
@@ -292,18 +314,21 @@ PortManager::register_port (DataType dtype, const string& portname, bool input)
 	} catch (...) {
 		throw PortRegistrationFailure("unable to create port (unknown error)");
 	}
+
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("\t%2 port registration success, ports now = %1\n", ports.reader()->size(), this));
+	return newport;
 }
 
 boost::shared_ptr<Port>
-PortManager::register_input_port (DataType type, const string& portname)
+PortManager::register_input_port (DataType type, const string& portname, bool async)
 {
-	return register_port (type, portname, true);
+	return register_port (type, portname, true, async);
 }
 
 boost::shared_ptr<Port>
-PortManager::register_output_port (DataType type, const string& portname)
+PortManager::register_output_port (DataType type, const string& portname, bool async)
 {
-	return register_port (type, portname, false);
+	return register_port (type, portname, false, async);
 }
 
 int
@@ -410,6 +435,8 @@ PortManager::reestablish_ports ()
 
 	boost::shared_ptr<Ports> p = ports.reader ();
 
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("reestablish %1 ports\n", p->size()));
+
 	for (i = p->begin(); i != p->end(); ++i) {
 		if (i->second->reestablish ()) {
 			break;
@@ -422,8 +449,6 @@ PortManager::reestablish_ports ()
 		return -1;
 	}
 
-	MIDI::Manager::instance()->reestablish ();
-
 	return 0;
 }
 
@@ -434,11 +459,11 @@ PortManager::reconnect_ports ()
 
 	/* re-establish connections */
 	
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("reconnect %1 ports\n", p->size()));
+
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
 		i->second->reconnect ();
 	}
-
-	MIDI::Manager::instance()->reconnect ();
 
 	return 0;
 }
@@ -542,4 +567,81 @@ PortManager::graph_order_callback ()
 	}
 
 	return 0;
+}
+
+void
+PortManager::cycle_start (pframes_t nframes)
+{
+	Port::set_global_port_buffer_offset (0);
+        Port::set_cycle_framecnt (nframes);
+
+	_cycle_ports = ports.reader ();
+
+	for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
+		p->second->cycle_start (nframes);
+	}
+}
+
+void
+PortManager::cycle_end (pframes_t nframes)
+{
+	for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
+		p->second->cycle_end (nframes);
+	}
+
+	for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
+		p->second->flush_buffers (nframes);
+	}
+
+	_cycle_ports.reset ();
+
+	/* we are done */
+}
+
+void
+PortManager::silence (pframes_t nframes)
+{
+	for (Ports::iterator i = _cycle_ports->begin(); i != _cycle_ports->end(); ++i) {
+		if (i->second->sends_output()) {
+			i->second->get_buffer(nframes).silence(nframes);
+		}
+	}
+}
+
+void
+PortManager::check_monitoring ()
+{
+	for (Ports::iterator i = _cycle_ports->begin(); i != _cycle_ports->end(); ++i) {
+		
+		bool x;
+		
+		if (i->second->last_monitor() != (x = i->second->monitoring_input ())) {
+			i->second->set_last_monitor (x);
+			/* XXX I think this is dangerous, due to
+			   a likely mutex in the signal handlers ...
+			*/
+			i->second->MonitorInputChanged (x); /* EMIT SIGNAL */
+		}
+	}
+}
+
+void
+PortManager::fade_out (gain_t base_gain, gain_t gain_step, pframes_t nframes)
+{
+	for (Ports::iterator i = _cycle_ports->begin(); i != _cycle_ports->end(); ++i) {
+		
+		if (i->second->sends_output()) {
+			
+			boost::shared_ptr<AudioPort> ap = boost::dynamic_pointer_cast<AudioPort> (i->second);
+			if (ap) {
+				Sample* s = ap->engine_get_whole_audio_buffer ();
+				gain_t g = base_gain;
+				
+				for (pframes_t n = 0; n < nframes; ++n) {
+					*s++ *= g;
+					g -= gain_step;
+				}
+			}
+		}
+	}
 }

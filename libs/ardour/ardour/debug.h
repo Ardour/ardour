@@ -63,6 +63,7 @@ namespace PBD {
 		extern uint64_t OrderKeys;
 		extern uint64_t Automation;
 		extern uint64_t WiimoteControl;
+		extern uint64_t Ports;
 	}
 }
 

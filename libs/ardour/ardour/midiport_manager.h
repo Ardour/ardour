@@ -56,8 +56,10 @@ class MidiPortManager {
      * callback. 
      */
 
-    MIDI::Port* midi_input_port () { return _midi_input_port; }
-    MIDI::Port* midi_output_port () { return _midi_output_port; }
+    MIDI::Port* midi_input_port () const { return _midi_input_port; }
+    MIDI::Port* midi_output_port () const { return _midi_output_port; }
+    MIDI::Port* mmc_input_port () const { return _mmc_input_port; }
+    MIDI::Port* mmc_output_port () const { return _mmc_output_port; }
     
     /* Ports used for synchronization. These have their I/O handled inside the
      * process callback.
@@ -76,8 +78,12 @@ class MidiPortManager {
     /* asynchronously handled ports: MIDI::Port */
     MIDI::Port* _midi_input_port;
     MIDI::Port* _midi_output_port;
+    MIDI::Port* _mmc_input_port;
+    MIDI::Port* _mmc_output_port;
     boost::shared_ptr<Port> _midi_in;
     boost::shared_ptr<Port> _midi_out;
+    boost::shared_ptr<Port> _mmc_in;
+    boost::shared_ptr<Port> _mmc_out;
 
     /* synchronously handled ports: ARDOUR::MidiPort */
     boost::shared_ptr<MidiPort> _mtc_input_port;

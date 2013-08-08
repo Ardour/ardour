@@ -36,8 +36,6 @@ namespace Gtk {
 }
 
 namespace MIDI {
-	class Channel;
-	class Port;
 	class Parser;
 }
 
@@ -46,7 +44,7 @@ class GenericMidiControlProtocol;
 class MIDIAction : public MIDIInvokable
 {
   public:
-	MIDIAction (MIDI::Port&);
+	MIDIAction (MIDI::Parser&);
 	virtual ~MIDIAction ();
 
 	int init (GenericMidiControlProtocol&, const std::string& action_name, MIDI::byte* sysex = 0, size_t ssize = 0);

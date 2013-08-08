@@ -21,6 +21,7 @@ path_prefix = 'libs/ardour/'
 libardour_sources = [
         'amp.cc',
         'analyser.cc',
+        'async_midi_port.cc',
         'audio_buffer.cc',
         'audio_diskstream.cc',
         'audio_library.cc',
@@ -126,6 +127,7 @@ libardour_sources = [
         'midi_stretch.cc',
         'midi_track.cc',
         'midi_ui.cc',
+        'midiport_manager.cc',
         'mix.cc',
         'monitor_processor.cc',
         'mtc_slave.cc',

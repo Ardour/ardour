@@ -104,8 +104,7 @@ Parser::midi_event_type_name (eventType t)
 	}
 }
 
-Parser::Parser (Port &p) 
-	: _port(p)
+Parser::Parser () 
 {
 	trace_stream = 0;
 	trace_prefix = "";

@@ -32,13 +32,14 @@
 #include "pbd/xml++.h"
 
 #include "midi++/port.h"
-#include "midi++/manager.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/session.h"
 #include "ardour/route.h"
 #include "ardour/midi_ui.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/midiport_manager.h"
 
 #include "generic_midi_control_protocol.h"
 #include "midicontrollable.h"
@@ -59,8 +60,8 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	, _threshold (10)
 	, gui (0)
 {
-	_input_port = MIDI::Manager::instance()->midi_input_port ();
-	_output_port = MIDI::Manager::instance()->midi_output_port ();
+	_input_port = AudioEngine::instance()->midi_input_port ();
+	_output_port = AudioEngine::instance()->midi_output_port ();
 
 	do_feedback = false;
 	_feedback_interval = 10000; // microseconds
@@ -338,7 +339,7 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	}
 
 	if (!mc) {
-		mc = new MIDIControllable (this, *_input_port, *c, false);
+		mc = new MIDIControllable (this, *_input_port->parser(), *c, false);
 	}
 	
 	{
@@ -435,7 +436,7 @@ GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos,
 		MIDI::byte value = control_number;
 		
 		// Create a MIDIControllable
-		MIDIControllable* mc = new MIDIControllable (this, *_input_port, *control, false);
+		MIDIControllable* mc = new MIDIControllable (this, *_input_port->parser(), *control, false);
 
 		// Remove any old binding for this midi channel/type/value pair
 		// Note:  can't use delete_binding() here because we don't know the specific controllable we want to remove, only the midi information
@@ -559,7 +560,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 						Controllable* c = Controllable::by_id (id);
 						
 						if (c) {
-							MIDIControllable* mc = new MIDIControllable (this, *_input_port, *c, false);
+							MIDIControllable* mc = new MIDIControllable (this, *_input_port->parser(), *c, false);
 							
 							if (mc->set_state (**niter, version) == 0) {
 								controllables.push_back (mc);
@@ -754,7 +755,7 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 	prop = node.property (X_("uri"));
 	uri = prop->value();
 
-	MIDIControllable* mc = new MIDIControllable (this, *_input_port, momentary);
+	MIDIControllable* mc = new MIDIControllable (this, *_input_port->parser(), momentary);
 
 	if (mc->init (uri)) {
 		delete mc;
@@ -892,7 +893,7 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 
 	prop = node.property (X_("function"));
 	
-	MIDIFunction* mf = new MIDIFunction (*_input_port);
+	MIDIFunction* mf = new MIDIFunction (*_input_port->parser());
 	
 	if (mf->setup (*this, prop->value(), argument, data, data_size)) {
 		delete mf;
@@ -988,7 +989,7 @@ GenericMidiControlProtocol::create_action (const XMLNode& node)
 
 	prop = node.property (X_("action"));
 	
-	MIDIAction* ma = new MIDIAction (*_input_port);
+	MIDIAction* ma = new MIDIAction (*_input_port->parser());
         
 	if (ma->init (*this, prop->value(), data, data_size)) {
 		delete ma;

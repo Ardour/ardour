@@ -31,8 +31,6 @@
 #include "pbd/fpu.h"
 #include "pbd/cpus.h"
 
-#include "midi++/manager.h"
-
 #include "ardour/audioengine.h"
 #include "ardour/dB.h"
 #include "ardour/rc_configuration.h"

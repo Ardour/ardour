@@ -49,9 +49,7 @@ class AudioPort : public Port
 	friend class PortManager;
 	AudioPort (std::string const &, PortFlags);
 
-  protected:
-	friend class AudioEngine;
-        /* special access for engine only (hah, C++) */
+        /* special access for PortManager only (hah, C++) */
         Sample* engine_get_whole_audio_buffer ();
 
   private:

@@ -31,8 +31,6 @@ libmidi_sources = [
         'midi.cc',
         'channel.cc',
         'ipmidi_port.cc',
-        'jack_midi_port.cc',
-        'manager.cc',
         'parser.cc',
         'port.cc',
         'midnam_patch.cc',

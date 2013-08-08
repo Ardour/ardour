@@ -26,13 +26,11 @@
 #include "pbd/signals.h"
 #include "pbd/stacktrace.h"
 
-namespace MIDI {
-	class Port;
-}
 
 namespace ARDOUR {
 
 class Session;
+class AsyncMIDIPort;
 
 /* this is mostly a placeholder because I suspect that at some
    point we will want to add more members to accomodate
@@ -67,7 +65,7 @@ class MidiControlUI : public AbstractUI<MidiUIRequest>
 	ARDOUR::Session& _session;
 	PBD::ScopedConnection rebind_connection;
 
-	bool midi_input_handler (Glib::IOCondition, MIDI::Port*);
+	bool midi_input_handler (Glib::IOCondition, AsyncMIDIPort*);
 	void reset_ports ();
 	void clear_ports ();
 

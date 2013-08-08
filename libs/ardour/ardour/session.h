@@ -813,7 +813,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::shared_ptr<SessionPlaylists> playlists;
 
 	void send_mmc_locate (framepos_t);
-	int send_full_time_code (framepos_t);
+        int send_full_time_code (framepos_t, pframes_t nframes);
 	void send_song_position_pointer (framepos_t);
 
 	bool step_editing() const { return (_step_editors > 0); }
