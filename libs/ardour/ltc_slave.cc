@@ -150,9 +150,9 @@ LTC_Slave::reset()
 }
 
 void
-LTC_Slave::parse_ltc(const jack_nframes_t nframes, const jack_default_audio_sample_t * const in, const framecnt_t posinfo)
+LTC_Slave::parse_ltc(const pframes_t nframes, const Sample* const in, const framecnt_t posinfo)
 {
-	jack_nframes_t i;
+	pframes_t i;
 	unsigned char sound[8192];
 	if (nframes > 8192) {
 		/* TODO warn once or wrap, loop conversion below
@@ -413,8 +413,8 @@ LTC_Slave::init_engine_dll (framepos_t pos, int32_t inc)
 }
 
 /* main entry point from session_process.cc
- * called from jack_process callback context
- * so it is OK to use jack_port_get_buffer()
+ * called from process callback context
+ * so it is OK to use get_buffer()
  */
 bool
 LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
