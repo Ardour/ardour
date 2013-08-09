@@ -8,8 +8,8 @@ not all are yet.
 
 Prerequisites
 
-Follow instructions in Fedora-16.txt to build and/or install the required
-packages.
+For setting up the required packages to build Ardour refer to the README
+file located at https://github.com/mojofunk/fedora-mingw-ardour
 
 
 Configuring
