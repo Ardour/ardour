@@ -4,6 +4,7 @@ from waflib import Options
 import os
 import re
 import subprocess
+import sys
 
 # default state file version for this build
 CURRENT_SESSION_FILE_VERSION = 3001
@@ -253,6 +254,10 @@ def configure(conf):
                       atleast_version='0.1.0')
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP',
                       atleast_version='2.0')
+
+    if re.search ("linux", sys.platform) != None:
+        autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
+
     if Options.options.lv2:
         autowaf.check_pkg(conf, 'lv2', uselib_store='LV2',
                           atleast_version='1.0.0', mandatory=True)
@@ -450,6 +455,15 @@ def build(bld):
     obj.name     = 'jack_audiobackend'
     obj.target   = 'jack_audiobackend'
     obj.uselib   = [ 'JACK' ]
+    
+    #
+    # device discovery code in the jack backend needs ALSA
+    # on Linux.
+    # 
+
+    if re.search ("linux", sys.platform) != None:
+       obj.uselib += [ 'ALSA' ]
+
     obj.use      = [ 'ardour' ]
     obj.vnum     = '1.0.0'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
