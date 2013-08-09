@@ -32,6 +32,7 @@ public:
 	float sample_rate () const { return _sample_rate; }
 
 	void set_length (framecnt_t len) { _length = len; }
+	void flush () {}
 
 	bool destructive() const { return false; }
 	bool can_be_analysed() const { return false; }

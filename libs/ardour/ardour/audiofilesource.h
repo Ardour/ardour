@@ -64,6 +64,7 @@ public:
 	virtual void      clear_capture_marks() {}
 	virtual bool      one_of_several_channels () const { return false; }
 
+	virtual void flush () = 0;
 	virtual int update_header (framepos_t when, struct tm&, time_t) = 0;
 	virtual int flush_header () = 0;
 

@@ -550,6 +550,30 @@ SndFileSource::flush_header ()
 	return r;
 }
 
+void
+SndFileSource::flush ()
+{
+	if (!_open) {
+		warning << string_compose (_("attempt to flush an un-opened audio file source (%1)"), _path) << endmsg;
+		return;
+	}
+
+	if (!writable()) {
+		warning << string_compose (_("attempt to flush a non-writable audio file source (%1)"), _path) << endmsg;
+		return;
+	}
+
+	SNDFILE* sf = _descriptor->allocate ();
+	if (sf == 0) {
+		error << string_compose (_("could not allocate file %1 to flush contents"), _path) << endmsg;
+		return;
+	}
+
+	// Hopefully everything OK
+	sf_write_sync (sf);
+	_descriptor->release ();
+}
+
 int
 SndFileSource::setup_broadcast_info (framepos_t /*when*/, struct tm& now, time_t /*tnow*/)
 {

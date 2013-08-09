@@ -334,6 +334,14 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 		uint32_t chn;
 
 		if ((nread = source->read (data.get(), nframes)) == 0) {
+#ifdef PLATFORM_WINDOWS
+			/* Flush the data once we've finished importing the file. Windows can  */
+			/* cache the data for very long periods of time (perhaps not writing   */
+			/* it to disk until Ardour closes). So let's force it to flush now.    */
+			for (chn = 0; chn < channels; ++chn)
+				if ((afs = boost::dynamic_pointer_cast<AudioFileSource>(newfiles[chn])) != 0)
+					afs->flush ();
+#endif
 			break;
 		}
 
