@@ -891,21 +891,11 @@ AudioEngine::thread_init_callback (void* arg)
 	}
 }
 
-/* XXXX
-void
-AudioEngine::timebase_callback (TransportState state, pframes_t nframes, jack_position_t pos, int new_position)
-{
-	if (_session && _session->synced_to_jack()) {
-		// _session->timebase_callback (state, nframes, pos, new_position);
-	}
-}
-*/
-
 int
 AudioEngine::sync_callback (TransportState state, framepos_t position)
 {
 	if (_session) {
-		return _session->jack_sync_callback (state, position);
+		return _session->backend_sync_callback (state, position);
 	}
 	return 0;
 }

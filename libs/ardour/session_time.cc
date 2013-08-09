@@ -180,7 +180,7 @@ Session::timecode_time (Timecode::Time &t)
 }
 
 int
-Session::jack_sync_callback (TransportState state, framepos_t pos)
+Session::backend_sync_callback (TransportState state, framepos_t pos)
 {
 	bool slave = synced_to_jack();
 
@@ -218,91 +218,6 @@ Session::jack_sync_callback (TransportState state, framepos_t pos)
 	return true;
 }
 
-/* XXX REQUIRES SOMEWAY TO EFFICIENTLY ACCESS jack_position_t WITHOUT BRIDGING
- * THE ENTIRE DATA STRUCTURE
- */
-#if 0 
-void
-Session::jack_timebase_callback (TransportState /*state*/,
-				 pframes_t /*nframes*/,
-				 framepos_t pos,
-				 int /*new_position*/)
-{
-	Timecode::BBT_Time bbt;
-
-	/* BBT info */
-
-	if (_tempo_map) {
-
-		TempoMetric metric (_tempo_map->metric_at (_transport_frame));
-
-		try {
-			_tempo_map->bbt_time_rt (_transport_frame, bbt);
-
-			pos->bar = bbt.bars;
-			pos->beat = bbt.beats;
-			pos->tick = bbt.ticks;
-			
-			// XXX still need to set bar_start_tick
-			
-			pos->beats_per_bar = metric.meter().divisions_per_bar();
-			pos->beat_type = metric.meter().note_divisor();
-			pos->ticks_per_beat = Timecode::BBT_Time::ticks_per_beat;
-			pos->beats_per_minute = metric.tempo().beats_per_minute();
-			
-			pos->valid = jack_position_bits_t (pos->valid | JackPositionBBT);
-
-		} catch (...) {
-			/* no message */
-		}
-	}
-
-#ifdef HAVE_JACK_VIDEO_SUPPORT
-	//poke audio video ratio so Ardour can track Video Sync
-	pos->audio_frames_per_video_frame = frame_rate() / timecode_frames_per_second();
-	pos->valid = jack_position_bits_t (pos->valid | JackAudioVideoRatio);
-#endif
-
-#if 0
-	/* Timecode info */
-
-	pos->timecode_offset = config.get_timecode_offset();
-	t.timecode_frame_rate = timecode_frames_per_second();
-	pos->valid = jack_position_bits_t (pos->valid | JackPositionTimecode;
-
-	if (_transport_speed) {
-
-		if (play_loop) {
-
-			Location* location = _locations.auto_loop_location();
-
-			if (location) {
-
-				t.transport_state = JackTransportLooping;
-				t.loop_start = location->start();
-				t.loop_end = location->end();
-				t.valid = jack_transport_bits_t (t.valid | JackTransportLoop);
-
-			} else {
-
-				t.loop_start = 0;
-				t.loop_end = 0;
-				t.transport_state = JackTransportRolling;
-
-			}
-
-		} else {
-
-			t.loop_start = 0;
-			t.loop_end = 0;
-			t.transport_state = JackTransportRolling;
-
-		}
-
-	}
-#endif
-}
-#endif /* jack data structure issues */
 
 ARDOUR::framecnt_t
 Session::convert_to_frames (AnyTime const & position)

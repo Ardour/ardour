@@ -28,7 +28,9 @@
 #include "jack/thread.h"
 
 #include "ardour/audioengine.h"
+#include "ardour/session.h"
 #include "ardour/types.h"
+
 #include "ardour/jack_audiobackend.h"
 #include "ardour/jack_connection.h"
 #include "ardour/jack_portengine.h"
@@ -680,32 +682,14 @@ JACKAudioBackend::_jack_timebase_callback (jack_transport_state_t state, pframes
 }
 
 void
-JACKAudioBackend::jack_timebase_callback (jack_transport_state_t state, pframes_t /*nframes*/,
-					  jack_position_t* pos, int /*new_position*/)
+JACKAudioBackend::jack_timebase_callback (jack_transport_state_t state, pframes_t nframes,
+					  jack_position_t* pos, int new_position)
 {
-	TransportState tstate;
-	framepos_t position;
+	ARDOUR::Session* session = engine.session();
 
-	switch (state) {
-	case JackTransportStopped:
-		tstate = TransportStopped;
-		break;
-	case JackTransportRolling:
-		tstate = TransportRolling;
-		break;
-	case JackTransportLooping:
-		tstate = TransportLooping;
-		break;
-	case JackTransportStarting:
-		tstate = TransportStarting;
-		break;
+	if (session) {
+		session->jack_timebase_callback (state, nframes, pos, new_position);
 	}
-
-	if (pos) {
-		position = pos->frame;
-	}
-
-	// engine.timebase_callback (tstate, nframes, position, new_position);
 }
 
 int
@@ -754,8 +738,10 @@ void
 JACKAudioBackend::_session_callback (jack_session_event_t *event, void *arg)
 {
 	JACKAudioBackend* ae = static_cast<JACKAudioBackend*> (arg);
-	if (ae->connected()) {
-		ae->engine.JackSessionEvent (event); /* EMIT SIGNAL */
+	ARDOUR::Session* session = ae->engine.session();
+
+	if (session) {
+		session->jack_session_event (event);
 	}
 }
 #endif

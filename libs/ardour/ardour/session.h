@@ -381,9 +381,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	framecnt_t worst_track_latency ()  const { return _worst_track_latency; }
 	framecnt_t worst_playback_latency () const { return _worst_output_latency + _worst_track_latency; }
 
-#ifdef HAVE_JACK_SESSION
-	void jack_session_event (jack_session_event_t* event);
-#endif
 	int save_state (std::string snapshot_name, bool pending = false, bool switch_to_snapshot = false);
 	int restore_state (std::string snapshot_name);
 	int save_template (std::string template_name);
@@ -862,6 +859,15 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	boost::shared_ptr<IO> ltc_input_io() { return _ltc_input; }
 	boost::shared_ptr<IO> ltc_output_io() { return _ltc_output; }
+
+        /* Callbacks specifically related to JACK, and called directly
+	 * from the JACK audio backend.
+         */
+
+#ifdef HAVE_JACK_SESSION
+	void jack_session_event (jack_session_event_t* event);
+#endif
+        void jack_timebase_callback (jack_transport_state_t, pframes_t, jack_position_t*, int);
 
   protected:
 	friend class AudioEngine;
@@ -1436,9 +1442,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	 */
 	std::list<GQuark> _current_trans_quarks;
 
-        // void timebase_callback (TransportState, pframes_t, jack_position_t*, int);
-        int  jack_sync_callback (TransportState, framepos_t);
-	void reset_jack_connection (jack_client_t* jack);
+        int  backend_sync_callback (TransportState, framepos_t);
+
 	void process_rtop (SessionEvent*);
 
 	void  update_latency (bool playback);

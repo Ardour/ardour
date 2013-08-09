@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1999-2002 Paul Davis
+  Copyright (C) 1999-2013 Paul Davis
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -688,70 +688,6 @@ Session::remove_state (string snapshot_name)
 				xml_path, g_strerror (errno)) << endmsg;
 	}
 }
-
-#ifdef HAVE_JACK_SESSION
-void
-Session::jack_session_event (jack_session_event_t * event)
-{
-        char timebuf[128], *tmp;
-        time_t n;
-        struct tm local_time;
-
-        time (&n);
-        localtime_r (&n, &local_time);
-        strftime (timebuf, sizeof(timebuf), "JS_%FT%T", &local_time);
-
-        while ((tmp = strchr(timebuf, ':'))) { *tmp = '.'; }
-
-        if (event->type == JackSessionSaveTemplate)
-        {
-                if (save_template( timebuf )) {
-                        event->flags = JackSessionSaveError;
-                } else {
-                        string cmd ("ardour3 -P -U ");
-                        cmd += event->client_uuid;
-                        cmd += " -T ";
-                        cmd += timebuf;
-
-                        event->command_line = strdup (cmd.c_str());
-                }
-        }
-        else
-        {
-                if (save_state (timebuf)) {
-                        event->flags = JackSessionSaveError;
-                } else {
-			std::string xml_path (_session_dir->root_path());
-			std::string legalized_filename = legalize_for_path (timebuf) + statefile_suffix;
-			xml_path = Glib::build_filename (xml_path, legalized_filename);
-
-                        string cmd ("ardour3 -P -U ");
-                        cmd += event->client_uuid;
-                        cmd += " \"";
-                        cmd += xml_path;
-                        cmd += '\"';
-
-                        event->command_line = strdup (cmd.c_str());
-                }
-        }
-
-	/* this won't be called if the port engine in use is not JACK, so we do 
-	   not have to worry about the type of PortEngine::private_handle()
-	*/
-
-	jack_client_t* jack_client = (jack_client_t*) AudioEngine::instance()->port_engine().private_handle();
-	
-	if (jack_client) {
-		jack_session_reply (jack_client, event);
-	}
-
-	if (event->type == JackSessionSaveAndQuit) {
-		Quit (); /* EMIT SIGNAL */
-	}
-
-	jack_session_event_free( event );
-}
-#endif
 
 /** @param snapshot_name Name to save under, without .ardour / .pending prefix */
 int

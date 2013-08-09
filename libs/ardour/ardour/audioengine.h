@@ -129,7 +129,8 @@ public:
     
     void set_session (Session *);
     void remove_session (); // not a replacement for SessionHandle::session_going_away()
-    
+    Session* session() const { return _session; }
+
     class NoBackendAvailable : public std::exception {
       public:
 	virtual const char *what() const throw() { return "could not connect to engine backend"; }
@@ -148,12 +149,7 @@ public:
     PBD::Signal1<int, pframes_t> Freewheel;
     
     PBD::Signal0<void> Xrun;
-    
 
-#ifdef HAVE_JACK_SESSION
-    PBD::Signal1<void,jack_session_event_t *> JackSessionEvent;
-#endif
-    
     /* this signal is emitted if the sample rate changes */
     
     PBD::Signal1<void, framecnt_t> SampleRateChanged;
