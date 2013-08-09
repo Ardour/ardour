@@ -443,6 +443,7 @@ JACKAudioBackend::setup_jack_startup_command ()
 
 	if (!get_jack_command_line_string (options, cmdline)) {
 		/* error, somehow */
+		return;
 	}
 
 	std::cerr << "JACK command line will be: " << cmdline << std::endl;
