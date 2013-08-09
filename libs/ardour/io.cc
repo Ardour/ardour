@@ -1391,7 +1391,7 @@ IO::build_legal_port_name (DataType type)
 	snprintf (&buf1[0], name_size+1, ("%.*s/%s"), limit, nom.c_str(), suffix.c_str());
 
 	int port_number = find_port_hole (&buf1[0]);
-	snprintf (&buf2[0], name_size+1, "%s %d", buf1, port_number);
+	snprintf (&buf2[0], name_size+1, "%s %d", &buf1[0], port_number);
 
 	return string (&buf2[0]);
 }
