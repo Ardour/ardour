@@ -313,6 +313,18 @@ ARDOUR::get_jack_alsa_device_names (device_map_t& devices)
 
 		if (snd_ctl_open (&handle, devname.c_str(), 0) >= 0 && snd_ctl_card_info (handle, info) >= 0) {
 
+			if (snd_ctl_card_info (handle, info) < 0) {
+				continue;
+			}
+			
+			std::cerr << "Ctl card name is " << snd_ctl_card_info_get_name (info) << std::endl;
+			std::cerr << "Ctl ID is " << snd_ctl_card_info_get_id (info) << std::endl;
+
+			/* change devname to use ID, not number */
+
+			devname = "hw:";
+			devname += snd_ctl_card_info_get_id (info);
+
 			while (snd_ctl_pcm_next_device (handle, &device) >= 0 && device >= 0) {
 
 				snd_pcm_info_set_device (pcminfo, device);
