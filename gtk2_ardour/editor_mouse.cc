@@ -1405,6 +1405,10 @@ Editor::button_double_click_handler (ArdourCanvas::Item* item, GdkEvent* event, 
 
 	switch (item_type) {
 		case RegionItem:
+			RegionView *rv;
+			rv = clicked_regionview;
+			rv->show_region_editor ();
+			return true;
 		case NoteItem:
 		case PlayheadCursorItem:
 			break;
