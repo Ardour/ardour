@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 #include "pbd/compose.h"
 
@@ -149,7 +150,7 @@ void
 PeakMeter::reset_max ()
 {
 	for (size_t i = 0; i < _max_peak_power.size(); ++i) {
-		_max_peak_power[i] = -INFINITY;
+		_max_peak_power[i] = -std::numeric_limits<float>::infinity();
 		_max_peak_signal[i] = 0;
 	}
 
@@ -159,7 +160,7 @@ PeakMeter::reset_max ()
 		if (n < n_midi) {
 			_visible_peak_power[n] = 0;
 		} else {
-			_visible_peak_power[n] = -INFINITY;
+			_visible_peak_power[n] = -std::numeric_limits<float>::infinity();
 		}
 	}
 }
@@ -298,7 +299,7 @@ PeakMeter::meter ()
 		_peak_signal[n] = 0;              /* ... to here */
 
 		if (n < n_midi) {
-			_max_peak_power[n] = -INFINITY; // std::max (new_peak, _max_peak_power[n]); // XXX
+			_max_peak_power[n] = -std::numeric_limits<float>::infinity(); // std::max (new_peak, _max_peak_power[n]); // XXX
 			_max_peak_signal[n] = 0;
 			if (midi_meter_falloff == 0.0f || new_peak > _visible_peak_power[n]) {
 				;
@@ -332,7 +333,7 @@ PeakMeter::meter ()
 		} else {
 			// do falloff
 			new_peak = _visible_peak_power[n] - (audio_meter_falloff);
-			_visible_peak_power[n] = std::max ((double)new_peak, -INFINITY);
+			_visible_peak_power[n] = std::max (new_peak, -std::numeric_limits<float>::infinity());
 		}
 	}
 }

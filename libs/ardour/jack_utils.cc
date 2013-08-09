@@ -130,13 +130,13 @@ ARDOUR::get_jack_default_audio_driver_name (string& audio_driver_name)
 }
 
 void
-ARDOUR::get_jack_midi_system_names (const string& driver, vector<string>& midi_system_names)
+ARDOUR::get_jack_midi_system_names (const string& /*driver*/, vector<string>& midi_system_names)
 {
 	midi_system_names.push_back (get_none_string ());
 #ifdef PLATFORM_WINDOWS
 	midi_system_names.push_back (winmme_midi_driver_name);
 #elif __APPLE__
-	midi_system_names.push_back (coreaudio_midi_driver_name);
+	midi_system_names.push_back (coremidi_midi_driver_name);
 #else
 #ifdef HAVE_ALSA
 	if (driver == alsa_driver_name) {
@@ -207,7 +207,7 @@ ARDOUR::get_jack_dither_mode_strings (const string& driver, vector<string>& dith
 }
 
 string
-ARDOUR::get_jack_default_dither_mode (const string& driver)
+ARDOUR::get_jack_default_dither_mode (const string& /*driver*/)
 {
 	return get_none_string ();
 }
@@ -354,6 +354,8 @@ ARDOUR::get_jack_alsa_device_names (device_map_t& devices)
 			snd_ctl_close(handle);
 		}
 	}
+#else
+        (void) devices;
 #endif
 }
 
@@ -465,6 +467,8 @@ ARDOUR::get_jack_portaudio_device_names (device_map_t& devices)
 		}
 	}
 	Pa_Terminate();
+#else
+        (void) devices;
 #endif
 }
 
@@ -578,7 +582,7 @@ ARDOUR::set_path_env_for_jack_autostart (const vector<std::string>& dirs)
 #ifdef __APPLE__
 	// push it back into the environment so that auto-started JACK can find it.
 	// XXX why can't we just expect OS X users to have PATH set correctly? we can't ...
-	setenv ("PATH", SearchPath(dirs).to_string(), 1);
+	setenv ("PATH", SearchPath(dirs).to_string().c_str(), 1);
 #endif
 }
 
@@ -627,7 +631,8 @@ ARDOUR::get_jack_server_paths (const vector<std::string>& server_dir_paths,
 		vector<std::string>& server_paths)
 {
 	for (vector<string>::const_iterator i = server_names.begin(); i != server_names.end(); ++i) {
-		find_matching_files_in_directories (server_dir_paths, Glib::PatternSpec(*i), server_paths);
+                Glib::PatternSpec ps (*i);
+                find_matching_files_in_directories (server_dir_paths, ps, server_paths);
 	}
 	return !server_paths.empty();
 }
@@ -942,6 +947,8 @@ ARDOUR::start_jack_server (const string& command_line)
 		Sleep (250); // 1/4 second
 		if (jack_server_running ()) return true;
 	}
+#else
+        (void) command_line;
 #endif
 	return false;
 }

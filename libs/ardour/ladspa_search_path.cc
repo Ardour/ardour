@@ -51,7 +51,7 @@ ladspa_search_path ()
 #endif
 
 #ifdef __APPLE__
-	spath.push_back (expand_path ("~/Library/Audio/Plug-Ins/LADSPA"));
+	spath.push_back (path_expand ("~/Library/Audio/Plug-Ins/LADSPA"));
 	spath.push_back ("/Library/Audio/Plug-Ins/LADSPA");
 #endif
 
