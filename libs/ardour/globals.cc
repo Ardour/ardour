@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <time.h>
 
 #ifdef WINDOWS_VST_SUPPORT
 #include <fst.h>
@@ -534,4 +535,19 @@ ARDOUR::get_available_sync_options ()
 	ret.push_back (LTC);
 
 	return ret;
+}
+
+/** Return a monotonic value for the number of microseconds that have elapsed
+ * since an arbitrary zero origin.
+ */
+ 
+microseconds_t
+ARDOUR::get_microseconds ()
+{
+	struct timespec ts;
+	if (clock_gettime (CLOCK_MONOTONIC, &ts) != 0) {
+		/* EEEK! */
+		return 0;
+	}
+	return (microseconds_t) ts.tv_sec * 1000000 + (ts.tv_nsec/1000);
 }
