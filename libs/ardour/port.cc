@@ -337,7 +337,7 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 
 	if (!connections.empty()) {
 
-		range.min = ~((jack_nframes_t) 0);
+		range.min = ~((pframes_t) 0);
 		range.max = 0;
 
 		DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: %2 connections to check for latency range\n", name(), connections.size()));

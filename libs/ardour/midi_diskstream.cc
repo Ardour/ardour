@@ -1259,7 +1259,7 @@ MidiDiskstream::allocate_temporary_buffers ()
 }
 
 void
-MidiDiskstream::ensure_jack_monitors_input (bool yn)
+MidiDiskstream::ensure_input_monitoring (bool yn)
 {
 	boost::shared_ptr<MidiPort> sp = _source_port.lock ();
 	

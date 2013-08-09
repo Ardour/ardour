@@ -67,7 +67,7 @@ class MidiPort : public Port {
 	bool        _resolve_required;
 	bool        _input_active;
 
-	void resolve_notes (void* jack_buffer, MidiBuffer::TimeType when);
+	void resolve_notes (void* buffer, MidiBuffer::TimeType when);
 };
 
 } // namespace ARDOUR

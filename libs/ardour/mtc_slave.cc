@@ -600,7 +600,7 @@ MTC_Slave::init_engine_dll (framepos_t pos, framepos_t inc)
 }
 
 /* main entry point from session_process.cc
- * in jack_process callback context */
+xo * in process callback context */
 bool
 MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 {

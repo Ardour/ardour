@@ -942,7 +942,7 @@ Session::set_track_monitor_input_status (bool yn)
 		boost::shared_ptr<AudioTrack> tr = boost::dynamic_pointer_cast<AudioTrack> (*i);
 		if (tr && tr->record_enabled ()) {
 			//cerr << "switching to input = " << !auto_input << __FILE__ << __LINE__ << endl << endl;
-			tr->request_jack_monitors_input (yn);
+			tr->request_input_monitoring (yn);
 		}
 	}
 }

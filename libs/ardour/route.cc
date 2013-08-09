@@ -3820,7 +3820,7 @@ Route::update_port_latencies (PortSet& from, PortSet& to, bool playback, framecn
 		all_connections.min = 0;
 		all_connections.max = 0;
 	} else {
-		all_connections.min = ~((jack_nframes_t) 0);
+		all_connections.min = ~((pframes_t) 0);
 		all_connections.max = 0;
 		
 		/* iterate over all "from" ports and determine the latency range for all of their

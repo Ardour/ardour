@@ -33,8 +33,8 @@ public:
 	virtual ~PublicDiskstream() {}
 
 	virtual boost::shared_ptr<Playlist> playlist () = 0;
-	virtual void request_jack_monitors_input (bool) = 0;
-	virtual void ensure_jack_monitors_input (bool) = 0;
+	virtual void request_input_monitoring (bool) = 0;
+	virtual void ensure_input_monitoring (bool) = 0;
 	virtual bool destructive () const = 0;
 	virtual std::list<boost::shared_ptr<Source> > & last_capture_sources () = 0;
 	virtual void set_capture_offset () = 0;

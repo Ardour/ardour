@@ -25,6 +25,9 @@
 
 #include <stdint.h>
 
+#include <jack/types.h>
+#include <jack/midiport.h>
+
 #include <boost/shared_ptr.hpp>
 
 #include "pbd/signals.h"

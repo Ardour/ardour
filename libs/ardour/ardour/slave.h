@@ -363,7 +363,7 @@ public:
 	std::string approximate_current_delta() const;
 
   private:
-	void parse_ltc(const jack_nframes_t, const jack_default_audio_sample_t * const, const framecnt_t);
+	void parse_ltc(const pframes_t, const Sample* const, const framecnt_t);
 	void process_ltc(framepos_t const);
 	void init_engine_dll (framepos_t, int32_t);
 	bool detect_discontinuity(LTCFrameExt *, int, bool);
