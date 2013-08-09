@@ -60,6 +60,7 @@
 #include "pbd/cpus.h"
 #include "pbd/error.h"
 #include "pbd/id.h"
+#include "pbd/pbd.h"
 #include "pbd/strsplit.h"
 #include "pbd/fpu.h"
 #include "pbd/file_utils.h"
@@ -224,9 +225,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 		return true;
 	}
 
-	if (!Glib::thread_supported()) {
-		Glib::thread_init();
-	}
+	if (!PBD::init()) return false;
 
 	// this really should be in PBD::init..if there was one
 	Gio::init ();
@@ -235,7 +234,6 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	(void) bindtextdomain(PACKAGE, localedir);
 #endif
 
-	PBD::ID::init ();
 	SessionEvent::init_event_pool ();
 
 	SessionObject::make_property_quarks ();
@@ -373,7 +371,7 @@ ARDOUR::cleanup ()
 #ifdef LXVST_SUPPORT
 	vstfx_exit();
 #endif
-	EnumWriter::destroy ();
+	PBD::cleanup ();
 	return 0;
 }
 
