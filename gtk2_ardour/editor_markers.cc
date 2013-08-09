@@ -1350,7 +1350,11 @@ Editor::rename_marker(Marker *marker)
 
 	loc = find_location_from_marker (marker, is_start);
 
-	if (!loc) return;
+	if (!loc)
+	       return;
+
+	if (loc == transport_loop_location() || loc == transport_punch_location() || loc->is_session_range())
+		return;
 
 	ArdourPrompter dialog (true);
 	string txt;
