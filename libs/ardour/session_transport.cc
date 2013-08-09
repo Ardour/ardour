@@ -609,12 +609,23 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	have_looped = false;
 
-	if (!_engine.freewheeling()) {
+	/* don't bother with this stuff if we're disconnected from the engine,
+	   because there will be no process callbacks to deliver stuff from
+	*/
+
+	if (_engine.connected() && !_engine.freewheeling()) {
 		// need to queue this in the next RT cycle
 		_send_timecode_update = true;
 		
 		if (!dynamic_cast<MTC_Slave*>(_slave)) {
 			AudioEngine::instance()->mmc().send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
+
+			/* This (::non_realtime_stop()) gets called by main
+			   process thread, which will lead to confusion
+			   when calling AsyncMIDIPort::write().
+			   
+			   Something must be done. XXX
+			*/
 			send_mmc_locate (_transport_frame);
 		}
 	}
