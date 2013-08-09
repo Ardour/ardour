@@ -919,6 +919,8 @@ AudioEngine::freewheel_callback (bool onoff)
 	} else {
 		_mmc.enable_send (_pre_freewheel_mmc_enabled);
 	}
+
+	_freewheeling = onoff;
 }
 
 void
