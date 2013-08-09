@@ -496,7 +496,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX4: now: %1 trs: %2 toff %3\n", cycle_start_frame, tc_sample_start, soff));
 
-		uint32_t cyc_off;
+		int32_t cyc_off;
 		if (soff < 0 || soff >= fptcf) {
 			/* session framerate change between (2) and now */
 			ltc_tx_reset();
@@ -532,7 +532,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 			restarting = true;
 		}
 
-		if (cyc_off >= 0 && cyc_off <= nframes) {
+		if (cyc_off >= 0 && cyc_off <= (int32_t) nframes) {
 			/* offset in this cycle */
 			txf= rint(cyc_off / fabs(ltc_speed));
 			memset(out, 0, cyc_off * sizeof(Sample));

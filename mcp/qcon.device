@@ -1,0 +1,14 @@
+<MackieProtocolDevice>
+  <Name value="Qcon"/>
+  <Strips value="8"/>
+  <Extenders value="0"/>
+  <MasterFader value="yes"/>
+  <TimecodeDisplay value="yes"/>
+  <TwoCharacterDisplay value="no"/>
+  <GlobalControls value="yes"/>
+  <JogWheel value="yes"/>
+  <TouchSenseFaders value="yes"/>
+  <LogicControlButtons value="yes"/>
+  <usesIPMIDI value="no"/>
+  <NoHandShake value="yes"/>
+</MackieProtocolDevice>
