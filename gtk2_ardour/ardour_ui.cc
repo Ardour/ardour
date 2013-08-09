@@ -1169,7 +1169,7 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 			} else {
 				snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"green\">%" PRId64 " kHz / %4.1f ms</span>"),
 					  rate/1000,
-					  (engine->usecs_per_cycle() * 1000.0f));
+					  (engine->usecs_per_cycle() / 1000.0f));
 			}
 		}
 	}
