@@ -1085,6 +1085,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool button_press_handler_1 (ArdourCanvas::Item *, GdkEvent *, ItemType);
 	bool button_press_handler_2 (ArdourCanvas::Item *, GdkEvent *, ItemType);
 	bool button_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool button_double_click_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_dispatch (GdkEventButton*);
 	bool button_release_dispatch (GdkEventButton*);
 	bool motion_handler (ArdourCanvas::Item*, GdkEvent*, bool from_autoscroll = false);
