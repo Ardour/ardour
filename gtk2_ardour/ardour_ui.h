@@ -711,6 +711,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void loading_message (const std::string& msg);
 
 	PBD::ScopedConnectionList forever_connections;
+        PBD::ScopedConnection halt_connection; 
 
         void step_edit_status_change (bool);
 

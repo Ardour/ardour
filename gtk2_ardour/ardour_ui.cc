@@ -398,7 +398,7 @@ ARDOUR_UI::attach_to_engine ()
 	engine->Running.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_running, this), gui_context());
 	engine->SampleRateChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_sample_rate, this, _1), gui_context());
 
-	engine->Halted.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
+	engine->Halted.connect_same_thread (halt_connection, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
 
 	ARDOUR::Port::set_connecting_blocked (ARDOUR_COMMAND_LINE::no_connect_ports);
 
@@ -1019,6 +1019,7 @@ If you still wish to quit, please use the\n\n\
 		_session = 0;
 	}
 
+	halt_connection.disconnect ();
 	engine->stop ();
 	quit ();
 }
@@ -3822,9 +3823,16 @@ void
 ARDOUR_UI::disconnect_from_jack ()
 {
 	if (engine) {
+		/* drop connection to AudioEngine::Halted so that we don't act
+		 *  as if the engine unexpectedly shut down
+		 */
+		halt_connection.disconnect ();
+
 		if (engine->stop ()) {
 			MessageDialog msg (*editor, _("Could not disconnect from JACK"));
 			msg.run ();
+		} else {
+			engine->Halted.connect_same_thread (halt_connection, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
 		}
 
 		update_sample_rate (0);
