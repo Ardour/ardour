@@ -24,7 +24,7 @@
 
 #include "pbd/convert.h"
 
-#include "taglib/taglib/fileref.h"
+#include "taglib/fileref.h"
 #include "taglib/flac/flacfile.h"
 #include "taglib/ogg/oggfile.h"
 #include "taglib/tag.h"
