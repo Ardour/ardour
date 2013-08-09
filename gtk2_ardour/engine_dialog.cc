@@ -32,6 +32,7 @@
 #include "pbd/xml++.h"
 
 #include <gtkmm/stock.h>
+#include <gtkmm/notebook.h>
 #include <gtkmm2ext/utils.h>
 
 #include "ardour/audio_backend.h"
@@ -64,12 +65,8 @@ EngineControl::EngineControl ()
 	, realtime_button (_("Realtime"))
 #ifdef __APPLE___
 	, basic_packer (6, 2)
-	, options_packer (4, 2)
-	, device_packer (4, 2)
 #else
 	, basic_packer (9, 2)
-	, options_packer (14, 2)
-	, device_packer (6, 2)
 #endif
 {
 	using namespace Notebook_Helpers;
@@ -111,7 +108,7 @@ EngineControl::EngineControl ()
 
 	row = 0;
 
-	label = manage (left_aligned_label (_("Audio Driver:")));
+	label = manage (left_aligned_label (_("Audio System:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (backend_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
@@ -121,7 +118,7 @@ EngineControl::EngineControl ()
 	basic_packer.attach (driver_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
 
-	label = manage (left_aligned_label (_("Audio Interface:")));
+	label = manage (left_aligned_label (_("Device:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (interface_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
@@ -158,60 +155,19 @@ EngineControl::EngineControl ()
 
 	interface_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::interface_changed));
 
-	/* options */
-
-	options_packer.set_spacings (6);
-	row = 0;
-
-	options_packer.attach (realtime_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	++row;
-
-	realtime_button.set_active (true);
-
-	label = manage (left_aligned_label (_("Number of ports:")));
-	options_packer.attach (ports_spinner, 1, 2, row, row + 1, FILL|EXPAND, AttachOptions(0));
-	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	++row;
-
-	label = manage (left_aligned_label (_("MIDI driver:")));
-	options_packer.attach (midi_driver_combo, 1, 2, row, row + 1, FILL|EXPAND, AttachOptions(0));
-	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	++row;
-
-#if !defined(__APPLE__) && !defined(__FreeBSD__)
-	label = manage (left_aligned_label (_("Dither:")));
-	options_packer.attach (dither_mode_combo, 1, 2, row, row + 1, FILL|EXPAND, AttachOptions(0));
-	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	++row;
-#endif
-
-	/* device settings */
-
-	device_packer.set_spacings (6);
-	row = 0;
-
-#if !defined(__APPLE__) && !defined(__FreeBSD__)
-	label = manage (left_aligned_label (_("Input device:")));
-	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	device_packer.attach (input_device_combo, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	++row;
-	label = manage (left_aligned_label (_("Output device:")));
-	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	device_packer.attach (output_device_combo, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	++row;
-#endif
-
 	basic_hbox.pack_start (basic_packer, false, false);
-	options_hbox.pack_start (options_packer, false, false);
 
-	device_packer.set_border_width (12);
-	options_packer.set_border_width (12);
 	basic_packer.set_border_width (12);
+	midi_packer.set_border_width (12);
 
-	notebook.pages().push_back (TabElem (basic_hbox, _("Device")));
-	notebook.pages().push_back (TabElem (options_hbox, _("Options")));
-	notebook.pages().push_back (TabElem (device_packer, _("Advanced")));
+	notebook.pages().push_back (TabElem (basic_hbox, _("Audio System Settings")));
+	notebook.pages().push_back (TabElem (midi_hbox, _("MIDI Settings")));
 	notebook.set_border_width (12);
+
+	notebook.set_tab_pos (POS_RIGHT);
+	notebook.show_all ();
+
+	notebook.set_name ("SettingsNotebook");
 
 	set_border_width (12);
 	pack_start (notebook);
@@ -243,10 +199,12 @@ EngineControl::backend_changed ()
 
 	if (backend->requires_driver_selection()) {
 		vector<string> drivers = backend->enumerate_drivers();
+		driver_combo.set_sensitive (true);
 		set_popdown_strings (driver_combo, drivers);
 		driver_combo.set_active_text (drivers.front());
 		driver_changed ();
 	} else {
+		driver_combo.set_sensitive (false);
 		list_devices ();
 	}
 }
@@ -277,12 +235,15 @@ EngineControl::list_devices ()
 	}
 
 	set_popdown_strings (interface_combo, available_devices);
-	interface_combo.set_active_text (available_devices.front());
 	set_popdown_strings (input_device_combo, available_devices);
-	input_device_combo.set_active_text (available_devices.front());
 	set_popdown_strings (output_device_combo, available_devices);
-	output_device_combo.set_active_text (available_devices.front());
 	
+	if (!available_devices.empty()) {
+		interface_combo.set_active_text (available_devices.front());
+		input_device_combo.set_active_text (available_devices.front());
+		output_device_combo.set_active_text (available_devices.front());
+	}
+
 	interface_changed ();
 }
 	

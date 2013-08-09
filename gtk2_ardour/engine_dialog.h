@@ -26,7 +26,6 @@
 
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/spinbutton.h>
-#include <gtkmm/notebook.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/table.h>
 #include <gtkmm/expander.h>
@@ -47,6 +46,8 @@ class EngineControl : public Gtk::VBox {
 	void set_state (const XMLNode&);
 
   private:
+    Gtk::Notebook notebook;
+
     /* core fields used by all backends */
 
     Gtk::ComboBoxText backend_combo;
@@ -88,12 +89,9 @@ class EngineControl : public Gtk::VBox {
     Gtk::ComboBoxText midi_driver_combo;
     
     Gtk::Table basic_packer;
-    Gtk::Table options_packer;
-    Gtk::Table device_packer;
+    Gtk::Table midi_packer;
     Gtk::HBox basic_hbox;
-    Gtk::HBox options_hbox;
-    Gtk::HBox device_hbox;
-    Gtk::Notebook notebook;
+    Gtk::HBox midi_hbox;
 
     sigc::connection sr_connection;
     
