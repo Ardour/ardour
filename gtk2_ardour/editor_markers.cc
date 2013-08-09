@@ -1338,6 +1338,13 @@ Editor::marker_menu_rename ()
 		/*NOTREACHED*/
 	}
 
+
+	rename_marker (marker);
+}
+
+void
+Editor::rename_marker(Marker *marker)
+{
 	Location* loc;
 	bool is_start;
 

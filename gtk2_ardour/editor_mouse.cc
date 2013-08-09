@@ -1407,9 +1407,16 @@ Editor::button_double_click_handler (ArdourCanvas::Item* item, GdkEvent* event, 
 		case RegionItem:
 		case NoteItem:
 		case PlayheadCursorItem:
+			break;
 		case MarkerItem:
 		case RangeMarkerBarItem:
 		case CdMarkerBarItem:
+			Marker* marker;
+			if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
+				break;
+			}
+			rename_marker (marker);
+			return true;
 		case TempoMarkerItem:
 		case MeterMarkerItem:
 		case MarkerBarItem:

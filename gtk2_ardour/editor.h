@@ -1524,6 +1524,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void marker_menu_edit ();
 	void marker_menu_remove ();
 	void marker_menu_rename ();
+	void rename_marker (Marker *marker);
 	void toggle_marker_menu_lock ();
 	void toggle_marker_menu_glue ();
 	void marker_menu_hide ();
