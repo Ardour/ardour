@@ -40,6 +40,11 @@
 #include <sys/vfs.h>
 #endif
 
+#ifdef __APPLE__
+#include <sys/param.h>
+#include <sys/mount.h>
+#endif
+
 #ifdef HAVE_SYS_STATVFS_H
 #include <sys/statvfs.h>
 #endif

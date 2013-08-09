@@ -587,7 +587,7 @@ Session::mmc_step_timeout ()
 
 
 void
-Session::send_song_position_pointer (framepos_t t)
+Session::send_song_position_pointer (framepos_t)
 {
 	if (midi_clock) {
 		/* Do nothing for the moment */
