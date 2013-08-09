@@ -933,6 +933,7 @@ void
 AudioEngine::halted_callback (const char* why)
 {
         stop_metering_thread ();
+	_running = false;
 
 	Port::PortDrop (); /* EMIT SIGNAL */
 	Halted (why);      /* EMIT SIGNAL */
