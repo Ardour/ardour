@@ -215,7 +215,7 @@ lotsa_files_please ()
 	}
 }
 
-int
+bool
 ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir)
 {
 	if (!Glib::thread_supported()) {
@@ -269,7 +269,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	Config = new RCConfiguration;
 
 	if (Config->load_state ()) {
-		return -1;
+		return false;
 	}
 
 	Config->set_use_windows_vst (use_windows_vst);
@@ -282,13 +282,13 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 #ifdef WINDOWS_VST_SUPPORT
 	if (Config->get_use_windows_vst() && fst_init (0)) {
-		return -1;
+		return false;
 	}
 #endif
 
 #ifdef LXVST_SUPPORT
 	if (Config->get_use_lxvst() && vstfx_init (0)) {
-		return -1;
+		return false;
 	}
 #endif
 
@@ -331,7 +331,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	EventTypeMap::instance().new_parameter(EnvelopeAutomation);
 	EventTypeMap::instance().new_parameter(MidiCCAutomation);
 
-	return 0;
+	return true;
 }
 
 void
