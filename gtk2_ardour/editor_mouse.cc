@@ -1422,7 +1422,11 @@ Editor::button_double_click_handler (ArdourCanvas::Item* item, GdkEvent* event, 
 			rename_marker (marker);
 			return true;
 		case TempoMarkerItem:
+			edit_tempo_marker (item);
+			return true;
 		case MeterMarkerItem:
+			edit_meter_marker (item);
+			return true;
 		case MarkerBarItem:
 		case TempoBarItem:
 		case MeterBarItem:
