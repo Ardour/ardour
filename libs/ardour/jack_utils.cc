@@ -317,8 +317,7 @@ ARDOUR::get_jack_alsa_device_names (device_map_t& devices)
 				continue;
 			}
 			
-			std::cerr << "Ctl card name is " << snd_ctl_card_info_get_name (info) << std::endl;
-			std::cerr << "Ctl ID is " << snd_ctl_card_info_get_id (info) << std::endl;
+			string card_name = snd_ctl_card_info_get_name (info);
 
 			/* change devname to use ID, not number */
 
@@ -326,15 +325,26 @@ ARDOUR::get_jack_alsa_device_names (device_map_t& devices)
 			devname += snd_ctl_card_info_get_id (info);
 
 			while (snd_ctl_pcm_next_device (handle, &device) >= 0 && device >= 0) {
+				
+				/* only detect duplex devices here. more
+				 * complex arrangements are beyond our scope
+				 */
 
 				snd_pcm_info_set_device (pcminfo, device);
 				snd_pcm_info_set_subdevice (pcminfo, 0);
-				snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_PLAYBACK);
-
+				snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_CAPTURE);
+				
 				if (snd_ctl_pcm_info (handle, pcminfo) >= 0) {
-					devname += ',';
-					devname += PBD::to_string (device, std::dec);
-					devices.insert (std::make_pair (snd_pcm_info_get_name (pcminfo), devname));
+
+					snd_pcm_info_set_device (pcminfo, device);
+					snd_pcm_info_set_subdevice (pcminfo, 0);
+					snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_PLAYBACK);
+
+					if (snd_ctl_pcm_info (handle, pcminfo) >= 0) {
+						devname += ',';
+						devname += PBD::to_string (device, std::dec);
+						devices.insert (std::make_pair (card_name, devname));
+					}
 				}
 			}
 
