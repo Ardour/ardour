@@ -64,7 +64,6 @@ class EngineControl : public Gtk::VBox {
     Gtk::SpinButton output_channels;
     Gtk::Adjustment ports_adjustment;
     Gtk::SpinButton ports_spinner;
-    Gtk::Label latency_label;
 
     /* JACK specific */
     
@@ -95,6 +94,8 @@ class EngineControl : public Gtk::VBox {
     Gtk::HBox options_hbox;
     Gtk::HBox device_hbox;
     Gtk::Notebook notebook;
+
+    sigc::connection sr_connection;
     
     bool _used;
     
@@ -102,8 +103,6 @@ class EngineControl : public Gtk::VBox {
     
     void driver_changed ();
     void backend_changed ();
-
-    void redisplay_latency ();
 
     uint32_t get_rate() const;
     uint32_t get_buffer_size() const;
@@ -117,6 +116,7 @@ class EngineControl : public Gtk::VBox {
     void audio_mode_changed ();
     void interface_changed ();
     void list_devices ();
+    void reshow_buffer_sizes ();
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

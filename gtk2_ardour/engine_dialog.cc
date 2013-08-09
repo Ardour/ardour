@@ -99,17 +99,6 @@ EngineControl::EngineControl ()
 	driver_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::driver_changed));
 
 	strings.clear ();
-	strings.push_back (_("Playback/recording on 1 device"));
-	strings.push_back (_("Playback/recording on 2 devices"));
-	strings.push_back (_("Playback only"));
-	strings.push_back (_("Recording only"));
-	set_popdown_strings (audio_mode_combo, strings);
-	audio_mode_combo.set_active_text (strings.front());
-
-	audio_mode_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::audio_mode_changed));
-	audio_mode_changed ();
-
-	strings.clear ();
 	strings.push_back (_("None"));
 #ifdef __APPLE__
 	strings.push_back (_("coremidi"));
@@ -147,23 +136,21 @@ EngineControl::EngineControl ()
 	basic_packer.attach (buffer_size_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
 
-	label = manage (left_aligned_label (_("Approximate latency:")));
-	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (latency_label, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	row++;
+	label = manage (left_aligned_label (_("Hardware input latency:")));
+	basic_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (input_latency, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	label = manage (left_aligned_label (_("samples")));
+	basic_packer.attach (*label, 2, 3, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
 
-	sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::redisplay_latency));
-	buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::redisplay_latency));
-	redisplay_latency();
-	row++;
-	/* no audio mode with CoreAudio, its duplex or nuthin' */
+	label = manage (left_aligned_label (_("Hardware output latency:")));
+	basic_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (output_latency, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	label = manage (left_aligned_label (_("samples")));
+	basic_packer.attach (*label, 2, 3, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	++row;
 
-#if !defined(__APPLE__) && !defined(__FreeBSD__)
-	label = manage (left_aligned_label (_("Audio mode:")));
-	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (audio_mode_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	row++;
-#endif
+	sr_connection = sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::reshow_buffer_sizes));
 
 	interface_combo.set_size_request (250, -1);
 	input_device_combo.set_size_request (250, -1);
@@ -213,18 +200,6 @@ EngineControl::EngineControl ()
 	device_packer.attach (output_device_combo, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 #endif
-	label = manage (left_aligned_label (_("Hardware input latency:")));
-	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	device_packer.attach (input_latency, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	label = manage (left_aligned_label (_("samples")));
-	device_packer.attach (*label, 2, 3, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	++row;
-	label = manage (left_aligned_label (_("Hardware output latency:")));
-	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	device_packer.attach (output_latency, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	label = manage (left_aligned_label (_("samples")));
-	device_packer.attach (*label, 2, 3, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	++row;
 
 	basic_hbox.pack_start (basic_packer, false, false);
 	options_hbox.pack_start (options_packer, false, false);
@@ -329,6 +304,12 @@ EngineControl::interface_changed ()
 	string device_name = interface_combo.get_active_text ();
 	vector<string> s;
 
+	/* don't allow programmatic change to sample_rate_combo to cause a
+	   recursive call to this method.
+	*/
+	   
+	sr_connection.block ();
+
 	/* sample rates */
 
 	vector<float> sr = backend->available_sample_rates (device_name);
@@ -345,31 +326,36 @@ EngineControl::interface_changed ()
 	set_popdown_strings (sample_rate_combo, s);
 	sample_rate_combo.set_active_text (s.front());
 
+	reshow_buffer_sizes ();
+	
+	sr_connection.unblock ();
+}	
+
+void
+EngineControl::reshow_buffer_sizes ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	assert (backend);
+	string device_name = interface_combo.get_active_text ();
+	vector<string> s;
+
 	/* buffer sizes */
 
 	s.clear ();
 	vector<uint32_t> bs = backend->available_buffer_sizes(device_name);
+	uint32_t rate = get_rate();
+
 	for (vector<uint32_t>::const_iterator x = bs.begin(); x != bs.end(); ++x) {
 		char buf[32];
-		snprintf (buf, sizeof (buf), "%u", *x);
+		/* Translators: "samples" is ALWAYS plural here, so we do not
+		   need singular form as well. Same for msecs.
+		*/
+		snprintf (buf, sizeof (buf), _("%u samples (%.1f msecs)"), *x, (2 * (*x)) / (rate/1000.0));
 		s.push_back (buf);
 	}
 
 	set_popdown_strings (buffer_size_combo, s);
 	buffer_size_combo.set_active_text (s.front());
-}	
-
-void
-EngineControl::redisplay_latency ()
-{
-	uint32_t rate = get_rate();
-	float period_size = atof (buffer_size_combo.get_active_text());
-
-	char buf[32];
-	snprintf (buf, sizeof(buf), "%.1fmsec", (2 * period_size) / (rate/1000.0));
-
-	latency_label.set_text (buf);
-	latency_label.set_alignment (0, 0.5);
 }
 
 void
