@@ -24,7 +24,7 @@
 #endif
 
 #if !defined(RUBBERBAND_IS_IN_WINDLL)
-	#if defined(_MSC_VER) || defined(__MINGW__) || defined(_MINGW32__)
+	#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
 	// If you need '__declspec' compatibility, add extra compilers to the above as necessary
 		#define RUBBERBAND_IS_IN_WINDLL 1
 	#else
@@ -36,7 +36,7 @@
 	#if defined(BUILDING_RUBBERBAND)
 		#define RUBBERBAND_API __declspec(dllexport)
 		#define RUBBERBAND_APICALLTYPE __stdcall
-	#elif defined(_MSC_VER) || defined(__CYGWIN__) || defined(__MINGW__) || defined(_MINGW32__)
+	#elif defined(COMPILER_MSVC) || defined(COMPILER_MINGW) // Probably needs Cygwin too, at some point
 		#define RUBBERBAND_API __declspec(dllimport)
 		#define RUBBERBAND_APICALLTYPE __stdcall
 	#else
@@ -54,7 +54,7 @@
 	#if defined(BUILDING_GETOPT)
 		#define GETOPT_API __declspec(dllexport)
 		#define GETOPT_APICALLTYPE __cdecl
-	#elif defined(_MSC_VER) || defined(__CYGWIN__) || defined(__MINGW__) || defined(_MINGW32__)
+	#elif defined(COMPILER_MSVC) || defined(COMPILER_MINGW) // Probably needs Cygwin too, at some point
 		#define GETOPT_API __declspec(dllimport)
 		#define GETOPT_APICALLTYPE __cdecl
 	#else
@@ -62,7 +62,7 @@
 	#endif
 #endif  // GETOPT_API
 
-#ifdef _MSC_VER
+#ifdef COMPILER_MSVC
 #include <rpc.h>
 
 #ifndef __THROW
@@ -84,5 +84,5 @@ extern "C" {
 
 }  // namespace Rubberband
 
-#endif  // _MSC_VER
+#endif  // 	COMPILER_MSVC
 #endif  // __msvc_rubberband_h__
