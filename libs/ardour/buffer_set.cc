@@ -90,7 +90,7 @@ BufferSet::clear()
 
 /** Set up this BufferSet so that its data structures mirror a PortSet's buffers.
  *  This is quite expensive and not RT-safe, so it should not be called in a process context;
- *  get_jack_port_addresses() will fill in a structure set up by this method.
+ *  get_backend_port_addresses() will fill in a structure set up by this method.
  *
  *  XXX: this *is* called in a process context; I'm not sure quite what `should not' means above.
  */
