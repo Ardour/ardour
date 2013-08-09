@@ -20,6 +20,8 @@
 #include <iostream>
 #include <cstdlib>
 
+#include <giomm.h>
+
 #include <glibmm/thread.h>
 
 #include "pbd/pbd.h"
@@ -45,6 +47,8 @@ PBD::init ()
 	if (!Glib::thread_supported()) {
 		Glib::thread_init();
 	}
+
+	Gio::init ();
 
 	PBD::ID::init ();
 
