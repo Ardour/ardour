@@ -447,7 +447,7 @@ JACKAudioBackend::setup_jack_startup_command ()
 
 	std::cerr << "JACK command line will be: " << cmdline << std::endl;
 
-	// write_jack_config_file (get_jack_server_user_config_file_path(), cmdline);
+	write_jack_config_file (get_jack_server_user_config_file_path(), cmdline);
 }
 
 /* ---- BASIC STATE CONTROL API: start/stop/pause/freewheel --- */
