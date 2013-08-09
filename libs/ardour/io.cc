@@ -1404,10 +1404,11 @@ IO::find_port_hole (const char* base)
 	 */
 
 	for (n = 1; n < 9999; ++n) {
-		char buf[jack_port_name_size()];
+		size_t size = AudioEngine::instance()->port_name_size() + 1;
+		char buf[size];
 		PortSet::iterator i = _ports.begin();
 
-		snprintf (buf, jack_port_name_size(), _("%s %u"), base, n);
+		snprintf (buf, size, _("%s %u"), base, n);
 
 		for ( ; i != _ports.end(); ++i) {
 			if (i->name() == buf) {
@@ -1638,7 +1639,7 @@ IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, fr
 		return;
 	}
 
-	_buffers.get_jack_port_addresses (_ports, nframes);
+	_buffers.get_backend_port_addresses (_ports, nframes);
 	if (proc) {
 		proc->run (_buffers, start_frame, end_frame, nframes, true);
 	}

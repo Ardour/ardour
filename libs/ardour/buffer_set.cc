@@ -114,13 +114,13 @@ BufferSet::attach_buffers (PortSet& ports)
 	_is_mirror = true;
 }
 
-/** Write the JACK port addresses from a PortSet into our data structures.  This
+/** Write the backend port addresses from a PortSet into our data structures.  This
  *  call assumes that attach_buffers() has already been called for the same PortSet.
  *  Does not allocate, so RT-safe BUT you can only call Port::get_buffer() from
  *  the process() callback tree anyway, so this has to be called in RT context.
  */
 void
-BufferSet::get_jack_port_addresses (PortSet& ports, framecnt_t nframes)
+BufferSet::get_backend_port_addresses (PortSet& ports, framecnt_t nframes)
 {
 	assert (_count == ports.count ());
 	assert (_available == ports.count ());

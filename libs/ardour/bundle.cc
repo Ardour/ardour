@@ -443,8 +443,8 @@ Bundle::connected_to (boost::shared_ptr<Bundle> other, AudioEngine & engine)
 	return true;
 }
 
-/** This must not be called in code executed as a response to a JACK event,
- *  as it uses jack_port_get_all_connections().
+/** This must not be called in code executed as a response to a backend event,
+ *  as it uses the backend port_get_all_connections().
  *  @return true if any of this bundle's channels are connected to anything.
  */
 bool
