@@ -1385,6 +1385,7 @@ Editor::rename_marker(Marker *marker)
 
 	dialog.get_result(txt);
 	loc->set_name (txt);
+	_session->set_dirty ();
 
 	XMLNode &after = _session->locations()->get_state();
 	_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
