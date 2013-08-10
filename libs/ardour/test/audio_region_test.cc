@@ -41,7 +41,7 @@ AudioRegionTest::setUp ()
 	std::string const test_wav_path = Glib::build_filename (new_test_output_dir(), "test.wav");
 	_playlist = PlaylistFactory::create (DataType::AUDIO, *_session, "test");
 	_audio_playlist = boost::dynamic_pointer_cast<AudioPlaylist> (_playlist);
-	_source = SourceFactory::createWritable (DataType::AUDIO, *_session, test_wav_path, "", false, get_test_sample_rate ());
+	_source = SourceFactory::createWritable (DataType::AUDIO, *_session, test_wav_path, false, get_test_sample_rate ());
 
 	/* Write a staircase to the source */
 
