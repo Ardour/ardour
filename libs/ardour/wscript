@@ -53,6 +53,7 @@ libardour_sources = [
         'capturing_processor.cc',
         'chan_count.cc',
         'chan_mapping.cc',
+	'command_line_options.cc',
         'configuration.cc',
         'config_text.cc',
         'control_protocol_manager.cc',

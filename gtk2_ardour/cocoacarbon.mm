@@ -28,7 +28,7 @@
 
 #include "ardour_ui.h"
 #include "actions.h"
-#include "opts.h"
+#include "command_line_options.h"
 
 #include <CoreFoundation/CFLocale.h>
 #import <CoreFoundation/CFString.h>
@@ -43,7 +43,7 @@ ARDOUR_UI::platform_specific ()
 {
 	gtk_application_ready ();
 
-	if (!ARDOUR_COMMAND_LINE::finder_invoked_ardour) {
+	if (!get_cmdline_opts().finder_invoked_ardour) {
 		
 		/* if invoked from the command line, make sure we're visible */
 		

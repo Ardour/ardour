@@ -21,7 +21,9 @@ main (int argc, char* argv[])
 		exit (EXIT_FAILURE);
 	}
 
-	ARDOUR::init (false, true, localedir);
+	if (!ARDOUR::init (&argc, &argv, localedir)) {
+		exit(1);
+	}
 
 	Session* session = load_session (
 		string_compose ("../libs/ardour/test/profiling/sessions/%1", argv[1]),

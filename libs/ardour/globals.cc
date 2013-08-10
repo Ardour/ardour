@@ -50,8 +50,6 @@
 #undef check /* stupid Apple and their un-namespaced, generic Carbon macros */
 #endif 
 
-#include <giomm.h>
-
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
@@ -65,6 +63,7 @@
 #include "pbd/file_utils.h"
 #include "pbd/enumwriter.h"
 #include "pbd/basename.h"
+#include "pbd/pbd.h"
 
 #include "midi++/port.h"
 #include "midi++/manager.h"
@@ -76,6 +75,7 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/buffer_manager.h"
+#include "ardour/command_line_options.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_region.h"
@@ -88,6 +88,7 @@
 #include "ardour/region.h"
 #include "ardour/route_group.h"
 #include "ardour/runtime_functions.h"
+#include "ardour/session.h"
 #include "ardour/session_event.h"
 #include "ardour/source_factory.h"
 
@@ -106,6 +107,8 @@ ARDOUR::AudioLibrary* ARDOUR::Library = 0;
 using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
+
+bool libardour_initialized = false;
 
 compute_peak_t          ARDOUR::compute_peak = 0;
 find_peaks_t            ARDOUR::find_peaks = 0;
@@ -215,21 +218,67 @@ lotsa_files_please ()
 	}
 }
 
-int
-ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir)
+
+ARDOUR::CommandLineOptions&
+ARDOUR::get_cmdline_options ()
 {
-	if (!Glib::thread_supported()) {
-		Glib::thread_init();
+	static ARDOUR::CommandLineOptions options;
+	return options;
+}
+
+Glib::OptionGroup&
+ARDOUR::get_options ()
+{
+	return get_cmdline_options ();
+}
+
+bool
+parse_args (int *argc, char ***argv)
+{
+	if (ARDOUR::get_cmdline_options().m_parsed) {
+		return true;
 	}
 
-	// this really should be in PBD::init..if there was one
-	Gio::init ();
+	Glib::OptionContext context;
+
+	context.set_main_group(ARDOUR::get_options());
+
+	try {
+		context.parse(*argc, *argv);
+	}
+
+	catch(const Glib::OptionError& ex) {
+		std::cout << _("Error while parsing command-line options: ") << std::endl << ex.what() << std::endl;
+		std::cout << _("Use --help to see a list of available command-line options.") << std::endl;
+		return false;
+	}
+
+	catch(const Glib::Error& ex) {
+		std::cout << "Error: " << ex.what() << std::endl;
+		return false;
+	}
+	return true;
+}
+
+bool
+ARDOUR::init (int *argc, char ***argv, const char* localedir)
+{
+	if (libardour_initialized) {
+		return true;
+	}
+
+	if (!PBD::init (argc, argv)) {
+		return false;
+	}
 
 #ifdef ENABLE_NLS
 	(void) bindtextdomain(PACKAGE, localedir);
 #endif
 
-	PBD::ID::init ();
+	if (!parse_args (argc, argv)) {
+		return false;
+	}
+
 	SessionEvent::init_event_pool ();
 
 	SessionObject::make_property_quarks ();
@@ -269,10 +318,10 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	Config = new RCConfiguration;
 
 	if (Config->load_state ()) {
-		return -1;
+		return false;
 	}
 
-	Config->set_use_windows_vst (use_windows_vst);
+	Config->set_use_windows_vst (!get_cmdline_options().m_arg_novst);
 #ifdef LXVST_SUPPORT
 	Config->set_use_lxvst(true);
 #endif
@@ -282,13 +331,13 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 #ifdef WINDOWS_VST_SUPPORT
 	if (Config->get_use_windows_vst() && fst_init (0)) {
-		return -1;
+		return false;
 	}
 #endif
 
 #ifdef LXVST_SUPPORT
 	if (Config->get_use_lxvst() && vstfx_init (0)) {
-		return -1;
+		return false;
 	}
 #endif
 
@@ -296,7 +345,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	AUPluginInfo::load_cached_info ();
 #endif
 
-	setup_hardware_optimization (try_optimization);
+	setup_hardware_optimization (!get_cmdline_options().m_arg_no_hw_optimizations);
 
 	SourceFactory::init ();
 	Analyser::init ();
@@ -331,7 +380,9 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	EventTypeMap::instance().new_parameter(EnvelopeAutomation);
 	EventTypeMap::instance().new_parameter(MidiCCAutomation);
 
-	return 0;
+	libardour_initialized = true;
+
+	return true;
 }
 
 void
@@ -365,7 +416,7 @@ ARDOUR::cleanup ()
 #ifdef LXVST_SUPPORT
 	vstfx_exit();
 #endif
-	EnumWriter::destroy ();
+	PBD::cleanup ();
 	return 0;
 }
 

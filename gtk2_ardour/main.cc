@@ -55,7 +55,7 @@
 #include "version.h"
 #include "utils.h"
 #include "ardour_ui.h"
-#include "opts.h"
+#include "command_line_options.h"
 #include "enums.h"
 
 #include "i18n.h"
@@ -66,7 +66,6 @@
 
 using namespace std;
 using namespace Gtk;
-using namespace ARDOUR_COMMAND_LINE;
 using namespace ARDOUR;
 using namespace PBD;
 
@@ -98,7 +97,7 @@ Please consider the possibilities, and perhaps (re)start JACK."), PROGRAM_NAME))
 	win.show_all ();
 	win.set_position (Gtk::WIN_POS_CENTER);
 
-	if (!no_splash) {
+	if (get_cmdline_opts().no_splash) {
 		ui->hide_splash ();
 	}
 
@@ -478,12 +477,12 @@ int main (int argc, char *argv[])
 	}
 #endif
 
-	if (parse_opts (argc, argv)) {
+	if (!parse_cmdline_opts (&argc, &argv)) {
 		exit (1);
 	}
 
-	if (curvetest_file) {
-		return curvetest (curvetest_file);
+	if (!get_cmdline_opts().curvetest_file.empty()) {
+		return curvetest (get_cmdline_opts().curvetest_file);
 	}
 
 	cout << PROGRAM_NAME
@@ -496,11 +495,11 @@ int main (int argc, char *argv[])
 	     << ')'
 	     << endl;
 
-	if (just_version) {
+	if (get_cmdline_opts().just_version) {
 		exit (0);
 	}
 
-	if (no_splash) {
+	if (get_cmdline_opts().no_splash) {
 		cerr << _("Copyright (C) 1999-2012 Paul Davis") << endl
 		     << _("Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker, Robin Gareus") << endl
 		     << endl
@@ -511,9 +510,15 @@ int main (int argc, char *argv[])
 		     << endl;
 	}
 
-	/* some GUI objects need this */
-
-	PBD::ID::init ();
+	try {
+		// not sure if init should both return true to indicate success but
+		// then also possibly throw, best to just be consistant and pick one.
+		if (!ARDOUR::init (&argc, &argv, localedir)) {
+			exit (1);
+		}
+	} catch (failed_constructor& err) {
+		error << string_compose (_("could not initialize %1."), PROGRAM_NAME) << endmsg;
+	}
 
 	if (::signal (SIGPIPE, sigpipe_handler)) {
 		cerr << _("Cannot xinstall SIGPIPE error handler") << endl;

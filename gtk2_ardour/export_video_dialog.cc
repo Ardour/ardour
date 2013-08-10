@@ -51,7 +51,6 @@
 #include "ardour/broadcast_info.h"
 
 #include "utils.h"
-#include "opts.h"
 #include "export_video_dialog.h"
 #include "utils_videotl.h"
 #include "i18n.h"

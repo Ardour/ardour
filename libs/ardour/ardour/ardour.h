@@ -27,6 +27,8 @@
 #include <limits.h>
 #include <signal.h>
 
+#include <glibmm/optiongroup.h>
+
 #include "pbd/signals.h"
 
 #include "pbd/error.h"
@@ -35,6 +37,7 @@
 #include "pbd/stateful.h"
 
 #include "ardour/types.h"
+#include "ardour/command_line_options.h"
 
 #include <jack/jack.h>
 
@@ -50,7 +53,11 @@ namespace ARDOUR {
 	extern PBD::Signal1<void,std::string> BootMessage;
 	extern PBD::Signal0<void> GUIIdle;
 
-	int init (bool with_vst, bool try_optimization, const char* localedir);
+	Glib::OptionGroup& get_options ();
+
+	CommandLineOptions& get_cmdline_options ();
+
+	bool init (int *argc, char ***argv, const char* localedir);
 	void init_post_engine ();
 	int cleanup ();
 	bool no_auto_connect ();
