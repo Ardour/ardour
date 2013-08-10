@@ -51,3 +51,9 @@ new_test_output_dir ()
 	} while (g_mkdir_with_parents (new_test_dir.c_str(), 0755) != 0);
 	return new_test_dir;
 }
+
+int
+get_test_sample_rate ()
+{
+	return 44100;
+}

@@ -25,4 +25,6 @@ PBD::SearchPath test_search_path ();
 
 std::string new_test_output_dir ();
 
+int get_test_sample_rate ();
+
 #endif
