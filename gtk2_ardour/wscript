@@ -93,6 +93,7 @@ gtk2_ardour_sources = [
         'fft.cc',
         'fft_graph.cc',
         'fft_result.cc',
+        'sfdb_freesound_mootcher.cc',
         'gain_meter.cc',
         'generic_pluginui.cc',
         'ghostregion.cc',
@@ -423,10 +424,6 @@ def build(bld):
     if bld.is_defined('HAVE_SUIL'):
         obj.source += [ 'lv2_plugin_ui.cc' ]
         obj.use += [ 'SUIL' ]
-
-    if bld.is_defined('FREESOUND'):
-        obj.source +=  [ 'sfdb_freesound_mootcher.cc' ]
-        obj.defines += [ 'FREESOUND' ]
 
     if bld.is_defined('NEED_INTL'):
         obj.linkflags = ' -lintl'

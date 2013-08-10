@@ -421,8 +421,6 @@ def options(opt):
                     help='Install MIME type, icons and .desktop file as per freedesktop.org standards')
     opt.add_option('--freebie', action='store_true', default=False, dest='freebie',
                     help='Build a version suitable for distribution as a zero-cost binary')
-    opt.add_option('--no-freesound', action='store_false', default=True, dest='freesound',
-                    help='Do not build with Freesound database support')
     opt.add_option('--gprofile', action='store_true', default=False, dest='gprofile',
                     help='Compile for use with gprofile')
     opt.add_option('--internal-shared-libs', action='store_true', default=True, dest='internal_shared_libs',
@@ -645,9 +643,6 @@ def configure(conf):
         conf.env['PHONE_HOME'] = True
     if opts.fpu_optimization:
         conf.env['FPU_OPTIMIZATION'] = True
-    if opts.freesound:
-        conf.define('FREESOUND',1)
-        conf.env['FREESOUND'] = True
     if opts.nls:
         conf.define('ENABLE_NLS', 1)
         conf.env['ENABLE_NLS'] = True
@@ -721,7 +716,6 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('FLAC',                  conf.is_defined('HAVE_FLAC'))
     write_config_text('FPU optimization',      opts.fpu_optimization)
     write_config_text('Freedesktop files',     opts.freedesktop)
-    write_config_text('Freesound',             opts.freesound)
     write_config_text('JACK session support',  conf.is_defined('JACK_SESSION'))
     write_config_text('LV2 UI embedding',      conf.is_defined('HAVE_SUIL'))
     write_config_text('LV2 support',           conf.is_defined('LV2_SUPPORT'))
