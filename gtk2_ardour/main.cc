@@ -513,8 +513,6 @@ int main (int argc, char *argv[])
 
 	/* some GUI objects need this */
 
-	PBD::ID::init ();
-
 	if (!ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization, localedir)) {
 		error << string_compose (_("could not initialize %1."), PROGRAM_NAME) << endmsg;
 		exit (1);
