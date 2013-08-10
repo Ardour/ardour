@@ -831,7 +831,7 @@ ARDOUR::get_jack_command_line_string (const JackCommandLineOptions& options, str
 			args.push_back (to_string (options.input_latency, std::dec));
 		}
 		if (options.output_latency) {
-			args.push_back ("-0");
+			args.push_back ("-O");
 			args.push_back (to_string (options.output_latency, std::dec));
 		}
 	}
