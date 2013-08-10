@@ -37,13 +37,14 @@ test_search_path ()
 }
 
 std::string
-new_test_output_dir ()
+new_test_output_dir (std::string prefix)
 {
 	std::string tmp_dir = Glib::build_filename (g_get_tmp_dir(), "ardour_test");
 	std::string dir_name;
 	std::string new_test_dir;
 	do {
 		ostringstream oss;
+		oss << prefix;
 		oss << g_random_int ();
 		dir_name = oss.str();
 		new_test_dir = Glib::build_filename (tmp_dir, dir_name);
