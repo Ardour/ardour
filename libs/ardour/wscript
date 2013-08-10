@@ -396,7 +396,7 @@ def build(bld):
         # only build these common sources once
         testcommon              = bld(features = 'cxx')
         testcommon.includes     = obj.includes + ['test', '../pbd', '..']
-        testcommon.source       = ['test/test_globals.cc', 'test/testrunner.cc', 'test/test_needing_session.cc',
+        testcommon.source       = ['test/testrunner.cc', 'test/test_needing_session.cc',
                                    'test/test_common.cc', 'test/dummy_lxvst.cc', 'test/audio_region_test.cc', 'test/test_util.cc']
         testcommon.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                                    'SAMPLERATE','XML','LRDF','COREAUDIO']

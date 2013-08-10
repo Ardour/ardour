@@ -27,7 +27,6 @@
 #include "ardour/audioregion.h"
 #include "ardour/audioplaylist.h"
 #include "audio_region_test.h"
-#include "test_globals.h"
 #include "test_common.h"
 
 using namespace std;
