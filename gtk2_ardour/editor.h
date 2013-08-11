@@ -342,6 +342,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void nudge_forward_capture_offset ();
 	void nudge_backward_capture_offset ();
 
+	void sequence_regions ();
+
 	/* playhead/screen stuff */
 
 	void set_stationary_playhead (bool yn);

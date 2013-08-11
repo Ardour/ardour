@@ -292,6 +292,7 @@
         <menuitem action='nudge-backward'/>
         <menuitem action='nudge-forward-by-capture-offset'/>
         <menuitem action='nudge-backward-by-capture-offset'/>
+	<menuitem action='sequence-regions'/>
       </menu>
       <menu action='RegionMenuTrim'>
         <menuitem action='trim-front'/>
@@ -670,6 +671,7 @@
       <menuitem action='nudge-backward'/>
       <menuitem action='nudge-forward-by-capture-offset'/>
       <menuitem action='nudge-backward-by-capture-offset'/>
+      <menuitem action='sequence-regions'/>
     </menu>
     <menu action='RegionMenuTrim'>
       <menuitem action='trim-front'/>

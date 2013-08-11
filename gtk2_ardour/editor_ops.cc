@@ -509,6 +509,60 @@ Editor::nudge_backward_capture_offset ()
 	commit_reversible_command ();
 }
 
+struct RegionSelectionPositionSorter {
+        bool operator() (RegionView* a, RegionView* b) {
+                return a->region()->position() < b->region()->position();
+        }
+};
+
+void
+Editor::sequence_regions ()
+{
+	framepos_t r_end;
+	framepos_t r_end_prev;
+
+	int iCount=0;
+
+	if (!_session) {
+		return;
+	}
+
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+	rs.sort(RegionSelectionPositionSorter());
+
+	if (!rs.empty()) {
+
+		begin_reversible_command (_("sequence regions"));
+		for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+			boost::shared_ptr<Region> r ((*i)->region());
+
+			r->clear_changes();
+
+			if(r->locked())
+			{
+				continue;
+			}
+			if(r->position_locked())
+			{
+				continue;
+			}
+			if(iCount>0)
+			{
+				r_end_prev=r_end;
+				r->set_position(r_end_prev);
+			}
+
+			_session->add_command (new StatefulDiffCommand (r));
+
+			r_end=r->position() + r->length();
+
+			iCount++;
+		}
+		commit_reversible_command ();
+	} 
+} 
+
+
 /* DISPLAY MOTION */
 
 void
