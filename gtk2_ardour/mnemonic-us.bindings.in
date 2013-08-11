@@ -236,14 +236,16 @@ This mode provides many different operations on both regions and control points,
 
 ;; arrow keys, navigation etc.
 
-@vis|Editor/step-tracks-up|uparrow|scroll up (step)
-@trans|Transport/TransitionToRoll|<@TERTIARY@>uparrow|transition to roll
-@select|Editor/select-prev-route|<@SECONDARY@>uparrow|select previous track/bus
+@vis|Editor/step-tracks-up|<@SECONDARY@>uparrow|scroll up (step)
+; @trans|Transport/TransitionToRoll|<@TERTIARY@>uparrow|transition to roll
+@select|Editor/select-prev-route|uparrow|select previous track/bus
+@select|Editor/reduce-track-selection-last|<@TERTIARY@>uparrow|remove last addition to track selection
 @vis|Editor/move-selected-tracks-up|<@PRIMARY@>uparrow|move selected tracks up
 
-@vis|Editor/step-tracks-down|downarrow|scroll down (step)
-@trans|Transport/TransitionToReverse|<@TERTIARY@>downarrow|transition to reverse
-@select|Editor/select-next-route|<@SECONDARY@>downarrow|select next track/bus
+@vis|Editor/step-tracks-down|<@SECONDARY@>downarrow|scroll down (step)
+; @trans|Transport/TransitionToReverse|<@TERTIARY@>downarrow|transition to reverse
+@select|Editor/select-next-route|downarrow|select next track/bus
+@select|Editor/expand-track-selection-downwards|<@TERTIARY@>downarrow|expand track selection downwards
 @vis|Editor/move-selected-tracks-down|<@PRIMARY@>downarrow|move selected tracks down
 
 @movp|Editor/playhead-to-previous-region-boundary|leftarrow|to previous region edge
