@@ -161,11 +161,12 @@ if test x$DEBUG != x ; then
 	echo "Copying any debug files to $PACKAGE_DIR ..."
 	cp $MINGW_ROOT/bin/*.debug $PACKAGE_DIR
 
-	echo "Copying gdb to $PACKAGE_DIR ..."
+	echo "Copying gdb and config files to $PACKAGE_DIR ..."
 	cp $MINGW_ROOT/bin/gdb.exe $PACKAGE_DIR
-
-	echo "Copying .gdbinit to $PACKAGE_DIR ..."
 	cp $TOOLS_DIR/gdbinit $PACKAGE_DIR/.gdbinit
+	cp $TOOLS_DIR/gdbinit_home $PACKAGE_DIR/gdbinit_home
+	cp $TOOLS_DIR/gdb.bat $PACKAGE_DIR/gdb.bat
+	cp $TOOLS_DIR/gdb-ardour.bat $PACKAGE_DIR/gdb-ardour.bat
 
 	echo "Copying Gtk demo to $PACKAGE_DIR ..."
 	cp $MINGW_ROOT/bin/gtk-demo.exe $PACKAGE_DIR

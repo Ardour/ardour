@@ -100,17 +100,43 @@ When configured for debugging the package contains gdb along with a .gdbinit
 file to automatically set the source directory so that the "list" gdb command
 will show the source code corresponding to the current stack frame.
 
-Use break `Somenamespace::somepartialsymbolname + tab to list symbols, then remove 
-` to set break. If you press tab with when there are thousands of possible
-matching symbols be prepared to wait a long time(this can also cause gdb to use a
-lot of memory).
+New versions of gdb will not load a .gdbinit file unless it is located in the directory
+set in the HOME environment variable and auto-load safe-path is set appropriately.
 
-For reasons I've yet to determine many symbols are not accessible so the best way
-to set a breakpoint is by using filename and line number.
+So the gdbinit_home file needs to be moved to directory set in %USERPROFILE% and
+gdb started via gdb.bat for source file listing to work.
+
+The gdb batch scripts cannot be used if the package directory is on a network share
+so the package will need to be copied to a local drive first.
+
+When starting gdb using gdb.bat the Ardour executable needs to be set as the program
+to be debugged with the "file" command
+
+e.g (gdb) file ardour-3.5.exe
+
+You can then set a break point at main() with the "break" command as usual
+
+e.g (gdb) break main
+
+To set a breakpoint in a dll/shared library like libardour you need to wait for
+the symbols to be loaded which only occurs once the program has been executed using
+the "run" command
+
+You can set a breakpoint at a function
+
+e.g break `Somenamespace::somepartialsymbolname + tab to list symbols
+
+then remove ` to set the breakpoint.
+
+If you press tab with when there are thousands of possible matching symbols be
+prepared to wait a long time(this can also cause gdb to use a lot of memory).
+For this reason I prefer to set breakpoints by specifying the source file and line
+number.
 
 e.g (gdb) break audiosource.cc:976
 
-but this seems to only work after running Ardour at least once.
+using "catch throw" or "catch catch" can be useful to break at points where exceptions
+are thrown or caught.
 
 They are a number of glib debugging options see
 
