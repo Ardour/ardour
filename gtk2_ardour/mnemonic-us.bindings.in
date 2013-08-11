@@ -16,6 +16,14 @@
 ;                                       if the group is a mouse binding group, action should contain a ':', and
 ;                                            have the binding before the colon, and the target area after it
 
+;Keys: https://git.gnome.org/browse/gtk+/plain/gdk/gdkkeysyms.h
+;
+;Linux
+;
+;Primary: Ctrl
+;Secondary: Alt
+;Tertiary: Shift
+
 ;; Title
 $ARDOUR Shortcuts \linebreak Mnemonic US-Keypad
 
@@ -217,6 +225,9 @@ This mode provides many different operations on both regions and control points,
 @wvis|Window/toggle-big-clock|<@WINDOW@>b|toggle big clock
 @rop|Region/normalize-region|n|normalize
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
+@edit|Editor/add-mono-track|<@SECONDARY@>n|add audio track (mono)
+@edit|Editor/add-stereo-track|<@PRIMARY@><@SECONDARY@>n|add audio track (stereo)
+@edit|Editor/remove-track|<@PRIMARY@><@SECONDARY@>x|remove track
 @sess|Main/New|<@PRIMARY@>n|open a new session
 @rop|Region/toggle-region-mute|<@PRIMARY@>m|mute/unmute
 @wvis|Common/toggle-editor-mixer|<@WINDOW@>m|rotate editor \& mixer window
