@@ -185,8 +185,10 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "select-all", _("Select All"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all), Selection::Set));
 	reg_sens (editor_actions, "deselect-all", _("Deselect All"), sigc::mem_fun(*this, &Editor::deselect_all));
 	reg_sens (editor_actions, "invert-selection", _("Invert Selection"), sigc::mem_fun(*this, &Editor::invert_selection));
-	reg_sens (editor_actions, "select-all-after-edit-cursor", _("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true));
 	reg_sens (editor_actions, "select-all-before-edit-cursor", _("Select All Before Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), false));
+	reg_sens (editor_actions, "select-all-at-playhead", _("Select All At Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_at_cursor), playhead_cursor));
+	reg_sens (editor_actions, "select-all-after-edit-cursor", _("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true));
+
 
 	reg_sens (editor_actions, "select-all-between-cursors", _("Select All Overlapping Edit Range"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_between), false));
 	reg_sens (editor_actions, "select-all-within-cursors", _("Select All Inside Edit Range"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_between), true));
@@ -198,6 +200,9 @@ Editor::register_actions ()
 
 	reg_sens (editor_actions, "select-next-route", _("Select Next Track or Bus"), sigc::mem_fun(*this, &Editor::select_next_route));
 	reg_sens (editor_actions, "select-prev-route", _("Select Previous Track or Bus"), sigc::mem_fun(*this, &Editor::select_prev_route));
+
+	reg_sens (editor_actions, "expand-track-selection-downwards", _("Expand Track Selection Downwards"), sigc::bind (sigc::mem_fun(*this, &Editor::select_next_route_add),true));
+	reg_sens (editor_actions, "reduce-track-selection-last", _("Remove Last Addition to Track Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::select_prev_route_add),true));
 
 	act = reg_sens (editor_actions, "track-record-enable-toggle", _("Toggle Record Enable"), sigc::mem_fun(*this, &Editor::toggle_record_enable));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
@@ -309,6 +314,8 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "editor-cut", _("Cut"), sigc::mem_fun(*this, &Editor::cut));
 	reg_sens (editor_actions, "editor-delete", _("Delete"), sigc::mem_fun(*this, &Editor::delete_));
 
+	reg_sens (editor_actions, "editor-delete-time", _("Delete Time"), sigc::mem_fun(*this, &Editor::delete_time));
+
 	reg_sens (editor_actions, "editor-copy", _("Copy"), sigc::mem_fun(*this, &Editor::copy));
 	reg_sens (editor_actions, "editor-paste", _("Paste"), sigc::mem_fun(*this, &Editor::keyboard_paste));
 
@@ -359,7 +366,10 @@ Editor::register_actions ()
 
 	ActionManager::register_toggle_action (editor_actions, "toggle-stationary-playhead", _("Stationary Playhead"), (mem_fun(*this, &Editor::toggle_stationary_playhead)));
 
-	act = reg_sens (editor_actions, "insert-time", _("Insert Time"), (sigc::mem_fun(*this, &Editor::do_insert_time)));
+	reg_sens (editor_actions, "add-mono-track", _("Add Audio Track (Mono)"), sigc::bind (sigc::mem_fun(*this, &Editor::add_single_audio_track),1));
+	reg_sens (editor_actions, "add-stereo-track", _("Add Audio Track (Stereo)") ,sigc::bind (sigc::mem_fun(*this, &Editor::add_single_audio_track),2));
+
+	act = reg_sens (editor_actions, "insert-time", _("Insert Time..."), (sigc::mem_fun(*this, &Editor::do_insert_time)));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, "toggle-track-active", _("Toggle Active"), (sigc::mem_fun(*this, &Editor::toggle_tracks_active)));
@@ -1860,7 +1870,7 @@ Editor::register_region_actions ()
 	reg_sens (_region_actions, "show-region-list-editor", _("List Editor..."), sigc::mem_fun (*this, &Editor::show_midi_list_editor));
 
 	/* Open the region properties dialogue for the selected regions */
-	reg_sens (_region_actions, "show-region-properties", _("Properties..."), sigc::mem_fun (*this, &Editor::show_region_properties));
+	reg_sens (_region_actions, "show-region-properties", _("Properties"), sigc::mem_fun (*this, &Editor::show_region_properties));
 
 	reg_sens (_region_actions, "play-selected-regions", _("Play"), sigc::mem_fun(*this, &Editor::play_selected_region));
 
@@ -1891,6 +1901,8 @@ Editor::register_region_actions ()
 
 	reg_sens (_region_actions, "nudge-forward", _("Nudge Later"), sigc::bind (sigc::mem_fun (*this, &Editor::nudge_forward), false, false));
 	reg_sens (_region_actions, "nudge-backward", _("Nudge Earlier"), sigc::bind (sigc::mem_fun (*this, &Editor::nudge_backward), false, false));
+
+	reg_sens (_region_actions, "sequence-regions", _("Sequence Regions"), sigc::mem_fun (*this, &Editor::sequence_regions));
 
 	reg_sens (
 		_region_actions,

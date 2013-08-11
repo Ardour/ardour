@@ -64,7 +64,9 @@
 #include "main_clock.h"
 #include "public_editor.h"
 
+#ifdef FREESOUND
 #include "sfdb_freesound_mootcher.h"
+#endif
 
 #include "i18n.h"
 
@@ -514,6 +516,8 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	
 	notebook.append_page (*vbox, _("Search Tags"));
 
+#ifdef FREESOUND
+
 	//add freesound search
 
 	HBox* passbox;
@@ -589,6 +593,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	freesound_more_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_more_clicked));
 	freesound_similar_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_similar_clicked));
 	notebook.append_page (*vbox, _("Search Freesound"));
+#endif
 
 	notebook.set_size_request (500, -1);
 	notebook.signal_switch_page().connect (sigc::hide_return (sigc::hide (sigc::hide (sigc::mem_fun (*this, &SoundFileBrowser::reset_options)))));
@@ -1144,6 +1149,7 @@ SoundFileBrowser::get_paths ()
 			results.push_back (str);
 		}
 	} else {
+#ifdef FREESOUND
 		ListPath rows = freesound_list_view.get_selection()->get_selected_rows ();
 		for (ListPath::iterator i = rows.begin() ; i != rows.end(); ++i) {
 			string str = freesound_get_audio_file (freesound_list->get_iter(*i));
@@ -1151,6 +1157,7 @@ SoundFileBrowser::get_paths ()
 				results.push_back (str);
 			}
 		}
+#endif
 	}
 
 	return results;
