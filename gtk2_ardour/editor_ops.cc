@@ -509,6 +509,65 @@ Editor::nudge_backward_capture_offset ()
 	commit_reversible_command ();
 }
 
+struct RegionSelectionPositionSorter {
+        bool operator() (RegionView* a, RegionView* b) {
+                return a->region()->position() < b->region()->position();
+        }
+};
+
+void
+Editor::sequence_regions ()
+{
+	framepos_t r_end;
+	framepos_t r_end_prev;
+
+	int iCount=0;
+
+	if (!_session) {
+		return;
+	}
+
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+	rs.sort(RegionSelectionPositionSorter());
+
+	if (!rs.empty()) {
+
+		begin_reversible_command (_("sequence regions"));
+
+		for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+			boost::shared_ptr<Region> r ((*i)->region());
+
+			r->clear_changes();
+
+			if(r->locked())
+			{
+				continue;
+			}
+			if(r->position_locked())
+			{
+				continue;
+			}
+/*
+			cerr << "START POSITION " << r->position() << " # " << iCount << "\n";
+			cerr << "LENGTH " << r->length() << "\n";
+			cerr << "END " << (r->position() + r->length()) << "\n";
+*/
+			if(iCount>0)
+			{
+				r_end_prev=r_end;
+				r->set_position(r_end_prev);
+			}
+
+			_session->add_command (new StatefulDiffCommand (r));
+
+			r_end=r->position() + r->length();
+
+			iCount++;
+		}
+		commit_reversible_command ();
+	} 
+} 
+
 /* DISPLAY MOTION */
 
 void
@@ -3622,6 +3681,39 @@ Editor::delete_ ()
 	cut_copy (Delete);
 }
 
+/** Delete selected regions, automation points or a time range
+    && remove Time (regions after the selection will be nudged ) */
+void
+Editor::delete_time ()
+{
+	if (_session == 0 || selection->time.empty()) {
+		 return;
+	}
+
+	framepos_t start = selection->time.start();
+	framepos_t end = selection->time.end_frame();
+
+	begin_reversible_command (_("delete time"));
+
+	//delete regions in range (split intersected)
+	cut_copy (Delete);
+	//remove time in range
+	InsertTimeOption opt = SplitIntersected;
+	insert_time (
+		 start,
+		 -(end-start), //negative shift
+		 opt,
+		 false,  //all playlists
+		 true,   //move glued regions
+		 false,  //move markers
+		 false,  //move glued markers
+		 false,  //move locked markers
+		 false   //move tempo
+	);
+
+	commit_reversible_command ();
+}
+
 /** Cut selected regions, automation points or a time range */
 void
 Editor::cut ()
@@ -5535,21 +5627,43 @@ struct EditorOrderRouteSorter {
 void
 Editor::select_next_route()
 {
+	//just select next route, de-select others
+	select_next_route_add(false);
+}
+
+void
+Editor::select_next_route_add(bool keep_selection)
+{
+	/*
+	if keep_selection true:
+	-> the next route will be added to the existing track selection
+	*/
+
 	if (selection->tracks.empty()) {
 		selection->set (track_views.front());
 		return;
 	}
 
-	TimeAxisView* current = selection->tracks.front();
+	TimeAxisView* current;
+	if(!keep_selection)
+	{
+		current = selection->tracks.front();	
+	}
+	else
+	{
+		//current = *(--(selection->tracks.end()));
+		current = selection->tracks.back();
+	}
 
 	RouteUI *rui;
 	do {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+
 			if (*i == current) {
 				++i;
 				if (i != track_views.end()) {
 					current = (*i);
-				} else {
+				} else if (!keep_selection) {
 					current = (*(track_views.begin()));
 					//selection->set (*(track_views.begin()));
 				}
@@ -5559,7 +5673,16 @@ Editor::select_next_route()
 		rui = dynamic_cast<RouteUI *>(current);
 	} while ( current->hidden() || (rui != NULL && !rui->route()->active()));
 
-	selection->set(current);
+	if(!keep_selection)
+	{
+		//single exclusive selection
+		selection->set(current);
+	}
+	else
+	{
+		//expand
+		selection->add(current);
+	}
 
 	ensure_track_visible(current);
 }
@@ -5567,22 +5690,50 @@ Editor::select_next_route()
 void
 Editor::select_prev_route()
 {
+	//just select prev route, de-select others
+	select_prev_route_add(false);
+}
+
+void
+Editor::select_prev_route_add(bool keep_selection)
+{
+	/*
+	if keep_selection true:
+	-> the last route added to the selection will be *removed* from the selection
+	*/
+
 	if (selection->tracks.empty()) {
 		selection->set (track_views.front());
 		return;
 	}
 
-	TimeAxisView* current = selection->tracks.front();
+	TimeAxisView* current;
+	if(!keep_selection)
+	{
+		current = selection->tracks.front();	
+	}
+	else
+	{
+		current = selection->tracks.back();
+	}
 
 	RouteUI *rui;
 	do {
 		for (TrackViewList::reverse_iterator i = track_views.rbegin(); i != track_views.rend(); ++i) {
 			if (*i == current) {
-				++i;
-				if (i != track_views.rend()) {
+
+				if(selection->tracks.size()>1)
+				{
 					current = (*i);
-				} else {
-					current = *(track_views.rbegin());
+				}
+				else
+				{
+					++i;
+					if (i != track_views.rend()) {
+						current = (*i);
+					} else if(!keep_selection){
+						current = *(track_views.rbegin());
+					}
 				}
 				break;
 			}
@@ -5590,7 +5741,14 @@ Editor::select_prev_route()
 		rui = dynamic_cast<RouteUI *>(current);
 	} while ( current->hidden() || (rui != NULL && !rui->route()->active()));
 
-	selection->set (current);
+	if(!keep_selection)
+	{
+		selection->set(current);
+	}
+	else
+	{
+		selection->remove(current);
+	}
 
 	ensure_track_visible(current);
 }
@@ -5641,6 +5799,33 @@ Editor::set_loop_from_selection (bool play)
 		_session->request_play_loop (true);
 		_session->request_locate (start, true);
 	}
+}
+
+void
+Editor::insert_time_from_selection ()
+{
+	if (_session == 0 || selection->time.empty()) {
+		return;
+	}
+
+	framepos_t start = selection->time[clicked_selection].start;
+	framepos_t end = selection->time[clicked_selection].end;
+
+	//cerr << "INSERT TIME FROM RANGE " << start << " " << end << "\n";
+
+	InsertTimeOption opt = SplitIntersected;
+
+        insert_time (
+		start,
+		(end-start),
+                opt,
+                false,  //all playlists
+                true,   //move glued regions
+                false,  //move markers
+                false,  //move glued markers
+                false,  //move locked markers
+                false   //move tempo
+                );
 }
 
 void
@@ -6532,6 +6717,50 @@ edit your ardour.rc file to set the\n\
 	for (vector<boost::shared_ptr<Route> >::iterator x = routes.begin(); x != routes.end(); ++x) {
 		_session->remove_route (*x);
 	}
+}
+
+void
+Editor::add_single_audio_track (int channels) //1=mono, 2=stereo
+{
+	if (!_session) {
+		 return;
+	}
+
+	int track_count=1;
+
+	ChanCount input_chan;
+	input_chan.set (DataType::AUDIO, channels);
+	ChanCount output_chan;
+
+	AutoConnectOption oac = Config->get_output_auto_connect();
+
+	if (oac & AutoConnectMaster) {
+		 output_chan.set (DataType::AUDIO, (_session->master_out() ? _session->master_out()->n_inputs().n_audio() : input_chan.n_audio()));
+		 output_chan.set (DataType::MIDI, 0);
+	} else {
+		 output_chan = input_chan;
+	}
+
+	string name_template="Audio";
+	RouteGroup* route_group=_session->route_group_by_name("No Group");
+
+	list<boost::shared_ptr<AudioTrack> > tracks_add;
+
+	try
+	{
+		 tracks_add = _session->new_audio_track (input_chan.n_audio(), output_chan.n_audio(), ARDOUR::Normal, route_group, track_count, name_template);
+
+		 if (tracks_add.size() != track_count) {
+			  cerr << "COULD NOT CREATE AUDIO TRACK\n";
+		 }
+	}
+	catch (...) {
+		 cerr << "NOT ENOUGH PORTS\n";
+	}
+
+	//select last track an make visible in view port
+	selection->set(track_views.back());
+	ensure_track_visible(track_views.back());
 }
 
 void

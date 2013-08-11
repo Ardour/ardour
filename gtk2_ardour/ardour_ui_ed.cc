@@ -132,13 +132,13 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("OpenVideo"), _("Open Video"),
+	act = ActionManager::register_action (main_actions, X_("OpenVideo"), _("Open Video..."),
 					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_video), (Gtk::Window*) 0));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (main_actions, X_("CloseVideo"), _("Remove Video"),
 					      sigc::mem_fun (*this, &ARDOUR_UI::remove_video));
 	act->set_sensitive (false);
-	act = ActionManager::register_action (main_actions, X_("ExportVideo"), _("Export To Video File"),
+	act = ActionManager::register_action (main_actions, X_("ExportVideo"), _("Export To Video File..."),
 					      sigc::mem_fun (*editor, &PublicEditor::export_video));
 	ActionManager::session_sensitive_actions.push_back (act);
 
@@ -233,10 +233,10 @@ ARDOUR_UI::install_actions ()
 
 	act = ActionManager::register_action (common_actions, X_("NewMIDITracer"), _("MIDI Tracer"), sigc::mem_fun(*this, &ARDOUR_UI::new_midi_tracer_window));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::register_action (common_actions, X_("Chat"), _("Chat"),  sigc::mem_fun(*this, &ARDOUR_UI::launch_chat));
+	ActionManager::register_action (common_actions, X_("Chat"), _("Chat (Browser)"),  sigc::mem_fun(*this, &ARDOUR_UI::launch_chat));
 	/** TRANSLATORS: This is `Manual' in the sense of an instruction book that tells a user how to use Ardour */
-	ActionManager::register_action (common_actions, X_("Manual"), S_("Help|Manual"),  mem_fun(*this, &ARDOUR_UI::launch_manual));
-	ActionManager::register_action (common_actions, X_("Reference"), _("Reference"),  mem_fun(*this, &ARDOUR_UI::launch_reference));
+	ActionManager::register_action (common_actions, X_("Manual"), S_("Help (Browser)|Manual (Browser)"),  mem_fun(*this, &ARDOUR_UI::launch_manual));
+	ActionManager::register_action (common_actions, X_("Reference"), _("Reference (Browser)"),  mem_fun(*this, &ARDOUR_UI::launch_reference));
 
 	act = ActionManager::register_action (common_actions, X_("Save"), _("Save"),  sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::save_state), string(""), false));
 	ActionManager::session_sensitive_actions.push_back (act);
