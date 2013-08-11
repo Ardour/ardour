@@ -172,8 +172,9 @@
         <menuitem action='select-all'/>
         <menuitem action='deselect-all'/>
         <menuitem action='invert-selection'/>
-        <menuitem action='select-all-after-edit-cursor'/>
         <menuitem action='select-all-before-edit-cursor'/>
+	<menuitem action='select-all-at-playhead'/>
+	<menuitem action='select-all-after-edit-cursor'/>
         <menuitem action='select-all-between-cursors'/>
         <menuitem action='select-all-within-cursors'/>
         <menuitem action='select-all-in-punch-range'/>

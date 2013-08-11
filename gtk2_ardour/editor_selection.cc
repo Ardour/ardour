@@ -1723,6 +1723,43 @@ Editor::select_all_selectables_using_cursor (EditorCursor *cursor, bool after)
 }
 
 void
+Editor::select_all_selectables_at_cursor (EditorCursor *cursor)
+{
+	framepos_t start;
+	framepos_t end;
+	list<Selectable *> touched;
+
+	start = cursor->current_frame;
+	end = cursor->current_frame+1;
+
+	if (_internal_editing) {
+		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
+			if (mrv) {
+				mrv->select_range (start, end);
+			}
+		}
+		return;
+	}
+
+	TrackViewList* ts;
+
+	if (selection->tracks.empty()) {
+		ts = &track_views;
+	} else {
+		ts = &selection->tracks;
+	}
+
+	for (TrackViewList::iterator iter = ts->begin(); iter != ts->end(); ++iter) {
+		if ((*iter)->hidden()) {
+			continue;
+		}
+		(*iter)->get_selectables (start, end, 0, DBL_MAX, touched);
+	}
+	selection->set (touched);
+}
+
+void
 Editor::select_all_selectables_using_edit (bool after)
 {
 	framepos_t start;
