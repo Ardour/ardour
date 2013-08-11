@@ -1137,8 +1137,20 @@ LV2Plugin::write_from_ui(uint32_t       index,
                          const uint8_t* body)
 {
 	if (!_from_ui) {
-		_from_ui = new RingBuffer<uint8_t>(
-			_session.engine().raw_buffer_size(DataType::MIDI) * NBUFS);
+		size_t rbs = _session.engine().raw_buffer_size(DataType::MIDI) * NBUFS;
+		/* buffer data communication from plugin UI to plugin instance.
+		 * this buffer needs to potentially hold
+		 *   (port's minimumSize) * (audio-periods) / (UI-periods)
+		 * bytes.
+		 *
+		 *  e.g 48kSPS / 128fpp -> audio-periods = 375 Hz
+		 *  ui-periods = 25 Hz (SuperRapidScreenUpdate)
+		 *  default minimumSize = 32K (see LV2Plugin::allocate_atom_event_buffers()
+		 *  -> 15 * 32K
+		 * it is safe to overflow (but the plugin state may be inconsistent).
+		 */
+		rbs = min(32768u * 6, rbs);
+		_from_ui = new RingBuffer<uint8_t>(rbs);
 	}
 
 	if (!write_to(_from_ui, index, protocol, size, body)) {
@@ -1165,8 +1177,10 @@ void
 LV2Plugin::enable_ui_emmission()
 {
 	if (!_to_ui) {
-		_to_ui = new RingBuffer<uint8_t>(
-			_session.engine().raw_buffer_size(DataType::MIDI) * NBUFS);
+		/* see note in LV2Plugin::write_from_ui() */
+		size_t rbs = _session.engine().raw_buffer_size(DataType::MIDI) * NBUFS;
+		rbs = min(32768u * 8, rbs);
+		_to_ui = new RingBuffer<uint8_t>(rbs);
 	}
 }
 
@@ -1901,7 +1915,7 @@ LV2Plugin::Impl::designated_input (const char* uri, void** bufptrs[], void** buf
 	return port;
 }
 
-static bool lv2_filter (const string& str, void *arg)
+static bool lv2_filter (const string& str, void * /* arg*/)
 {
 	/* Not a dotfile, has a prefix before a period, suffix is "lv2" */
 	
