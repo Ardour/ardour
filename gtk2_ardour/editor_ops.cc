@@ -3676,6 +3676,39 @@ Editor::delete_ ()
 	cut_copy (Delete);
 }
 
+/** Delete selected regions, automation points or a time range
+    && remove Time (regions after the selection will be nudged ) */
+void
+Editor::delete_time ()
+{
+	if (_session == 0 || selection->time.empty()) {
+		return;
+	}
+
+	framepos_t start = selection->time.start();
+	framepos_t end = selection->time.end_frame();
+
+        begin_reversible_command (_("delete time"));
+
+	//delete regions in range (split intersected)
+	cut_copy (Delete);
+	//remove time in range
+	InsertTimeOption opt = SplitIntersected;
+	insert_time (
+		 start,
+		 -(end-start), //negative shift
+		 opt,
+		 false,  //all playlists
+		 true,   //move glued regions
+		 false,  //move markers
+		 false,  //move glued markers
+		 false,  //move locked markers
+		 false   //move tempo
+	);
+
+	commit_reversible_command ();
+}
+
 /** Cut selected regions, automation points or a time range */
 void
 Editor::cut ()
@@ -5695,6 +5728,31 @@ Editor::set_loop_from_selection (bool play)
 		_session->request_play_loop (true);
 		_session->request_locate (start, true);
 	}
+}
+
+void
+Editor::insert_time_from_selection ()
+{
+	if (_session == 0 || selection->time.empty()) {
+		return;
+	}
+
+	framepos_t start = selection->time[clicked_selection].start;
+	framepos_t end = selection->time[clicked_selection].end;
+
+	InsertTimeOption opt = SplitIntersected;
+
+	insert_time (
+		start,
+		(end-start),
+		opt,
+		false,  //all playlists
+		true,   //move glued regions
+		false,  //move markers
+		false,  //move glued markers
+		false,  //move locked markers
+		false   //move tempo
+	);
 }
 
 void

@@ -1897,6 +1897,10 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Set Punch from Range"), sigc::mem_fun(*this, &Editor::set_punch_from_selection)));
 
 	edit_items.push_back (SeparatorElem());
+        edit_items.push_back (MenuElem (_("Insert Time from Range (Split Intersected)"), sigc::mem_fun(*this, &Editor::insert_time_from_selection)));
+        edit_items.push_back (MenuElem (_("Delete Time from Range (Split Intersected)"), sigc::mem_fun(*this, &Editor::delete_time)));
+
+	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Add Range Markers"), sigc::mem_fun (*this, &Editor::add_location_from_selection)));
 
 	edit_items.push_back (SeparatorElem());

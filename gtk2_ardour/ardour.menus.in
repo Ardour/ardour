@@ -194,6 +194,7 @@
       </menu>	   
       <separator/>
       <menuitem action='editor-delete'/>
+      <menuitem action='editor-delete-time'/>
       <menuitem action='editor-crop'/>
       <menuitem action='split-region'/>
       <menuitem action='split-region-at-transients'/>

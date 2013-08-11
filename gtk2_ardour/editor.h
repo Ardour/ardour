@@ -1203,6 +1203,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void split_region ();
 
 	void delete_ ();
+	void delete_time ();
 	void cut ();
 	void copy ();
 	void paste (float times, bool from_context_menu = false);
@@ -1335,6 +1336,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_loop_from_selection (bool play);
 	void set_punch_from_selection ();
 	void set_punch_from_region ();
+
+        void insert_time_from_selection();
 
 	void set_loop_from_edit_range (bool play);
 	void set_loop_from_region (bool play);
