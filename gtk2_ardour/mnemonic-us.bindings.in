@@ -269,6 +269,7 @@ This mode provides many different operations on both regions and control points,
 @movp|Transport/GotoStart|Home|to start marker
 @movp|Transport/GotoEnd|End|to end marker
 @edit|Editor/editor-delete|Delete|delete
+@edit|Editor/editor-delete-time|<@SECONDARY@>Delete|delete time
 
 @movp|Editor/playhead-to-edit|Return|to edit point
 @eep|Editor/edit-to-playhead|<@SECONDARY@>Return|move EP to playhead
