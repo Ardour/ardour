@@ -1,8 +1,8 @@
 Building Ardour for Windows
 
 The windows build is compiled and tested with the MinGW compiler that is
-packaged in Fedora, Currently using Fedora 16. There are many cross compiled
-"mingw" libraries that Ardour requires that are also available on Fedora but
+packaged in Fedora, Currently using Fedora 19. There are many cross compiled
+"mingw" libraries that Ardour requires that are available on Fedora but
 not all are yet.
 
 
@@ -28,6 +28,8 @@ These scripts both source the mingw-env.sh script to setup the appropriate
 environment variables and then call waf with a specific set of parameters
 that are appropriate to configure for the windows build.
 
+There is also configure-distcc-debug.sh and configure-distcc-release.sh that
+configure to use distcc for building.
 
 Building
 
@@ -81,8 +83,8 @@ in a separate terminal(Command Prompt) before starting Ardour so that they are
 not both writing to the same terminal. This will probably be fixed at some point
 so when jackd is started by Ardour the output is redirected etc.
 
-The cptovm.sh and startvm.sh scripts are intended for testing Ardour in a 
-Windows XP virt image and may need to be altered to be used successfully.
+The cptovmshare.sh script will copy the package to a directory specified in the
+ARDOUR_VM_SHARE_DIR for testing in a virtual machine.
 
 
 Testing
@@ -90,6 +92,8 @@ Testing
 When configured for debugging there are a number of test programs(prefixed with
 test_) included in the package.
 
+The tests for libpbd, libevoral and libardour can be run under wine from the
+windows packaging directory using the wine-*-tests.sh scripts
 
 Debugging
 
