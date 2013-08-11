@@ -6571,14 +6571,12 @@ Editor::add_single_audio_track (int channels) //1=mono, 2=stereo
 	}
 	catch (...) {
 		 cerr << "NOT ENOUGH PORTS\n";
+	}
 
 	//select last track an make visible in view port
 	selection->set(track_views.back());
 	ensure_track_visible(track_views.back());
 }
-
-
-
 
 void
 Editor::do_insert_time ()
