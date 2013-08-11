@@ -6758,16 +6758,9 @@ Editor::add_single_audio_track (int channels) //1=mono, 2=stereo
 		 cerr << "NOT ENOUGH PORTS\n";
 	}
 
-	//find & select last track an make visible in view port
-	for (TrackViewList::iterator i = track_views.end(); i != track_views.begin(); --i) 
-	{
-		if (i != track_views.end() && i != track_views.begin()) 
-		{
-			selection->set(*i);
-			ensure_track_visible(*i);
-			break;
- 		}
-        }
+	//select last track an make visible in view port
+	selection->set(track_views.back());
+	ensure_track_visible(track_views.back());
 }
 
 void
