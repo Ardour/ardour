@@ -1180,6 +1180,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void do_insert_time ();
 	void insert_time (framepos_t, framecnt_t, Editing::InsertTimeOption, bool, bool, bool, bool, bool, bool);
 
+	void add_single_audio_track (int channels);
+
 	void tab_to_transient (bool forward);
 
 	void set_tempo_from_region ();

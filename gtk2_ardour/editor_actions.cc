@@ -359,6 +359,9 @@ Editor::register_actions ()
 
 	ActionManager::register_toggle_action (editor_actions, "toggle-stationary-playhead", _("Stationary Playhead"), (mem_fun(*this, &Editor::toggle_stationary_playhead)));
 
+	reg_sens (editor_actions, "add-mono-track", _("Add Audio Track (Mono)"), sigc::bind (sigc::mem_fun(*this, &Editor::add_single_audio_track),1));
+        reg_sens (editor_actions, "add-stereo-track", _("Add Audio Track (Stereo)") ,sigc::bind (sigc::mem_fun(*this, &Editor::add_single_audio_track),2));
+
 	act = reg_sens (editor_actions, "insert-time", _("Insert Time"), (sigc::mem_fun(*this, &Editor::do_insert_time)));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 

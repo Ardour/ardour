@@ -6535,6 +6535,52 @@ edit your ardour.rc file to set the\n\
 }
 
 void
+Editor::add_single_audio_track (int channels) //1=mono, 2=stereo
+{
+	if (!_session) {
+		 return;
+	}
+
+	int track_count=1;
+
+	ChanCount input_chan;
+	input_chan.set (DataType::AUDIO, channels);
+	ChanCount output_chan;
+
+	AutoConnectOption oac = Config->get_output_auto_connect();
+
+	if (oac & AutoConnectMaster) {
+		 output_chan.set (DataType::AUDIO, (_session->master_out() ? _session->master_out()->n_inputs().n_audio() : input_chan.n_audio()));
+		 output_chan.set (DataType::MIDI, 0);
+	} else {
+		 output_chan = input_chan;
+	}
+
+	string name_template="Audio";
+	RouteGroup* route_group=_session->route_group_by_name("No Group");
+
+	list<boost::shared_ptr<AudioTrack> > tracks_add;
+
+	try
+	{
+		 tracks_add = _session->new_audio_track (input_chan.n_audio(), output_chan.n_audio(), ARDOUR::Normal, route_group, track_count, name_template);
+
+		 if (tracks_add.size() != track_count) {
+			  cerr << "COULD NOT CREATE AUDIO TRACK\n";
+		 }
+	}
+	catch (...) {
+		 cerr << "NOT ENOUGH PORTS\n";
+
+	//select last track an make visible in view port
+	selection->set(track_views.back());
+	ensure_track_visible(track_views.back());
+}
+
+
+
+
+void
 Editor::do_insert_time ()
 {
 	if (selection->tracks.empty()) {

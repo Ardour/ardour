@@ -325,7 +325,9 @@
     </menu>
 
     <menu action='TrackMenu'>
-      <menuitem action='AddTrackBus'/>	
+      <menuitem action='AddTrackBus'/>
+      <menuitem action='add-mono-track'/>
+      <menuitem action='add-stereo-track'/>	
       <menuitem action='insert-time'/>
       <menuitem action="move-selected-tracks-up"/>
       <menuitem action="move-selected-tracks-down"/>
