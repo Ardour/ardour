@@ -1149,7 +1149,7 @@ LV2Plugin::write_from_ui(uint32_t       index,
 		 *  -> 15 * 32K
 		 * it is safe to overflow (but the plugin state may be inconsistent).
 		 */
-		rbs = min(32768u * 6, rbs);
+		rbs = min((size_t) 32768 * 6, rbs);
 		_from_ui = new RingBuffer<uint8_t>(rbs);
 	}
 
@@ -1179,7 +1179,7 @@ LV2Plugin::enable_ui_emmission()
 	if (!_to_ui) {
 		/* see note in LV2Plugin::write_from_ui() */
 		size_t rbs = _session.engine().raw_buffer_size(DataType::MIDI) * NBUFS;
-		rbs = min(32768u * 8, rbs);
+		rbs = min((size_t) 32768 * 8, rbs);
 		_to_ui = new RingBuffer<uint8_t>(rbs);
 	}
 }
