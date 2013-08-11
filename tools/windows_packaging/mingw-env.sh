@@ -47,6 +47,3 @@ then
 
 	ARDOUR_DATA_DIR=$PACKAGE_DIR/share/ardour3
 fi
-
-# put this somewhere better...
-VIRT_IMAGE_PATH=$HOME/Data/virt-images/winxp.raw
