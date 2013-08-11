@@ -196,10 +196,11 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/multi-duplicate-region|<@TERTIARY@>d|duplicate region (multi)
 @select|Editor/select-all-in-punch-range|<@PRIMARY@>d|select all in punch range
 @vis|Editor/fit-tracks|f|fit tracks vertically
+@vis|Editor/track-height-normal|<@SECONDARY@>f|set normal track height
 @trans|Editor/toggle-follow-playhead|<@PRIMARY@>f|toggle playhead tracking
 @trans|Transport/ToggleFollowEdits|<@TERTIARY@>f|toggle playhead follows edits
 @wvis|Common/ToggleMaximalEditor|<@PRIMARY@><@SECONDARY@>f|maximise editor space
-@wvis|Region/show-rhythm-ferret|<@WINDOW@>f|show rhythm ferret window 
+; @wvis|Region/show-rhythm-ferret|<@WINDOW@>f|show rhythm ferret window 
 @mmode|MouseMode/set-mouse-mode-gain|g|region gain mode
 @epp|Region/play-selected-regions|h|play selected region(s)
 @eep|Region/trim-front|j|trim front
@@ -355,7 +356,8 @@ This mode provides many different operations on both regions and control points,
 @trans|Transport/ToggleAutoReturn|6|toggle auto return
 @trans|Transport/ToggleClick|7|toggle click (metronome)
 @ranges|Editor/set-tempo-from-region|9|set tempo (1 bar) from region(s)
-@ranges|Editor/set-tempo-from-edit-range|0|set tempo (1 bar) from edit range
+; @ranges|Editor/set-tempo-from-edit-range|0|set tempo (1 bar) from edit range
+@select|Editor/deselect-all|0|deselect all
 
 ; mouse stuff
 
