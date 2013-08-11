@@ -5622,21 +5622,43 @@ struct EditorOrderRouteSorter {
 void
 Editor::select_next_route()
 {
+	//just select next route, de-select others
+	select_next_route_add(false);
+}
+
+void
+Editor::select_next_route_add(bool keep_selection)
+{
+	/*
+	if keep_selection true:
+	-> the next route will be added to the existing track selection
+	*/
+
 	if (selection->tracks.empty()) {
 		selection->set (track_views.front());
 		return;
 	}
 
-	TimeAxisView* current = selection->tracks.front();
+	TimeAxisView* current;
+	if(!keep_selection)
+	{
+		current = selection->tracks.front();    
+	}
+	else
+	{
+		//current = *(--(selection->tracks.end()));
+		current = selection->tracks.back();
+	}
 
 	RouteUI *rui;
 	do {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+
 			if (*i == current) {
 				++i;
 				if (i != track_views.end()) {
 					current = (*i);
-				} else {
+				} else if (!keep_selection) {
 					current = (*(track_views.begin()));
 					//selection->set (*(track_views.begin()));
 				}
@@ -5645,31 +5667,68 @@ Editor::select_next_route()
 		}
 		rui = dynamic_cast<RouteUI *>(current);
 	} while ( current->hidden() || (rui != NULL && !rui->route()->active()));
-
-	selection->set(current);
+	if(!keep_selection)
+	{
+		//single exclusive selection
+		selection->set(current);
+	}
+	else
+	{
+		//expand
+		selection->add(current);
+	}
 
 	ensure_track_visible(current);
+
 }
 
 void
 Editor::select_prev_route()
 {
+	//just select prev route, de-select others
+	select_prev_route_add(false);
+}
+
+void
+Editor::select_prev_route_add(bool keep_selection)
+{
+	/*
+	if keep_selection true:
+	-> the last route added to the selection will be *removed* from the selection
+	*/
+
 	if (selection->tracks.empty()) {
 		selection->set (track_views.front());
 		return;
 	}
 
-	TimeAxisView* current = selection->tracks.front();
+	TimeAxisView* current;
+	if(!keep_selection)
+	{
+		current = selection->tracks.front();    
+	}
+	else
+	{
+		current = selection->tracks.back();
+	}
 
 	RouteUI *rui;
 	do {
 		for (TrackViewList::reverse_iterator i = track_views.rbegin(); i != track_views.rend(); ++i) {
 			if (*i == current) {
-				++i;
-				if (i != track_views.rend()) {
+
+				if(selection->tracks.size()>1)
+				{
 					current = (*i);
-				} else {
-					current = *(track_views.rbegin());
+				}
+				else
+				{
+					++i;
+					if (i != track_views.rend()) {
+						current = (*i);
+					} else if(!keep_selection){
+						current = *(track_views.rbegin());
+					}
 				}
 				break;
 			}
@@ -5677,7 +5736,14 @@ Editor::select_prev_route()
 		rui = dynamic_cast<RouteUI *>(current);
 	} while ( current->hidden() || (rui != NULL && !rui->route()->active()));
 
-	selection->set (current);
+	if(!keep_selection)
+	{
+		selection->set(current);
+	}
+	else
+	{
+		selection->remove(current);
+	}
 
 	ensure_track_visible(current);
 }

@@ -2002,6 +2002,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void select_next_route ();
 	void select_prev_route ();
 
+	void select_prev_route_add (bool keep_selection);
+	void select_next_route_add (bool keep_selection);
+
 	void snap_to_internal (framepos_t& first, int32_t direction = 0, bool for_mark = false);
 	void timecode_snap_to_internal (framepos_t& first, int32_t direction = 0, bool for_mark = false);
 

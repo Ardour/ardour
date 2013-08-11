@@ -191,6 +191,9 @@
         <separator/>
         <menuitem action='select-next-route'/>
         <menuitem action='select-prev-route'/>
+	<separator/>
+        <menuitem action='reduce-track-selection-last'/>
+        <menuitem action='expand-track-selection-downwards'/>
       </menu>	   
       <separator/>
       <menuitem action='editor-delete'/>

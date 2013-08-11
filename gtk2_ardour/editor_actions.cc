@@ -201,6 +201,9 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "select-next-route", _("Select Next Track or Bus"), sigc::mem_fun(*this, &Editor::select_next_route));
 	reg_sens (editor_actions, "select-prev-route", _("Select Previous Track or Bus"), sigc::mem_fun(*this, &Editor::select_prev_route));
 
+	reg_sens (editor_actions, "expand-track-selection-downwards", _("Expand Track Selection Downwards"), sigc::bind (sigc::mem_fun(*this, &Editor::select_next_route_add),true));
+        reg_sens (editor_actions, "reduce-track-selection-last", _("Remove Last Addition to Track Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::select_prev_route_add),true));
+
 	act = reg_sens (editor_actions, "track-record-enable-toggle", _("Toggle Record Enable"), sigc::mem_fun(*this, &Editor::toggle_record_enable));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "track-solo-toggle", _("Toggle Solo"), sigc::mem_fun(*this, &Editor::toggle_solo));
