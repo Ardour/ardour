@@ -170,11 +170,13 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/naturalize-region|<@SECONDARY@>o|move to original position
 @trans|Editor/set-playhead|p|set playhead position
 @select|Editor/select-all-before-playhead|<@PRIMARY@>p|all before playhead
+@select|Editor/select-all-at-playhead|<@PRIMARY@><@SECONDARY@>e|select at playhead
+@select|Editor/select-all-after-playhead|<@TERTIARY@><@PRIMARY@>p|all after playhead
 @wvis|Window/toggle-rc-options-editor|<@PRIMARY@><@TERTIARY@>p|toggle preferences dialog
 @wvis|Window/toggle-audio-connection-manager|<@WINDOW@>p|toggle global audio patchbay
 @wvis|Window/toggle-midi-connection-manager|<@WINDOW@><@TERTIARY@>p|toggle global midi patchbay
 @midi|MIDI/panic|<@PRIMARY@><@SECONDARY@>p|MIDI panic (stop all notes etc)
-@select|Editor/select-all-after-playhead|<@TERTIARY@><@PRIMARY@>p|all after playhead
+
 
 ;; MIDDLE ROW
 
