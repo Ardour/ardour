@@ -71,7 +71,9 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 			/* suck all relevant MIDI events from the MIDI port buffer
 			   into our MidiBuffer
 			*/
-			
+
+			cerr << "grabbing " << event_count << " events\n";
+
 			for (pframes_t i = 0; i < event_count; ++i) {
 				
 				pframes_t timestamp;

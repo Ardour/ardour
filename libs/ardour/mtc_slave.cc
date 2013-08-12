@@ -106,6 +106,8 @@ MTC_Slave::process (pframes_t nframes)
 
 	/* dump incoming MIDI to parser */
 
+	cerr << "\n\n\n<<<< MTC slave, process " << mb.size() << endl;
+
 	for (MidiBuffer::iterator b = mb.begin(); b != mb.end(); ++b) {
 		uint8_t* buf = (*b).buffer();
 
@@ -113,10 +115,14 @@ MTC_Slave::process (pframes_t nframes)
 
 		uint32_t limit = (*b).size();
 
+		cerr << "msg of " << limit << " bytes\n";
+
 		for (size_t n = 0; n < limit; ++n) {
 			parser.scanner (buf[n]);
 		}
 	}
+
+	cerr << ">>>> MTC slave, done processing\n\n\n";
 
 	return 0;
 }
@@ -331,7 +337,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 	   a locate command via MMC.
 	*/
 
-	//DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::update_mtc_time - TID:%1\n", ::pthread_self()));
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::update_mtc_time - TID:%1\n", ::pthread_self()));
 	TimecodeFormat tc_format;
 	bool reset_tc = true;
 
