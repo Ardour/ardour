@@ -107,6 +107,15 @@ MidiPortManager::create_ports ()
 	_midi_clock_input_port = boost::dynamic_pointer_cast<MidiPort> (p);
 	p = AudioEngine::instance()->register_output_port (DataType::MIDI, _("MIDI Clock out"));
 	_midi_clock_output_port= boost::dynamic_pointer_cast<MidiPort> (p);
+
+	/* These ports all need their incoming data handled in
+	 * Port::cycle_start() and so ...
+	 */
+
+	_mtc_input_port->set_always_parse (true);
+	_mtc_output_port->set_always_parse (true);
+	_midi_clock_input_port->set_always_parse (true);
+	_midi_clock_output_port->set_always_parse (true);
 }
 
 void

@@ -64,15 +64,6 @@ class Slave {
 	Slave() { }
 	virtual ~Slave() {}
 
-        /** The slave should read any incoming information in this method
-	 *  and use it adjust its current idea of reality. If no such
-	 *  processing is required, it does need to be implemented.
-	 *
-	 * @param nframes specifies the number of frames-worth of data that
-	 * can be read from any ports used by the slave.
-	 */
-         virtual int process (pframes_t) { return 0; }
-
 	/**
 	 * This is the most important function to implement:
 	 * Each process cycle, Session::follow_slave will call this method.
@@ -263,7 +254,6 @@ class MTC_Slave : public TimecodeSlave {
 	~MTC_Slave ();
 
 	void rebind (MidiPort&);
-        int process (pframes_t);
 	bool speed_and_position (double&, framepos_t&);
 
 	bool locked() const;
@@ -282,7 +272,6 @@ class MTC_Slave : public TimecodeSlave {
   private:
 	Session&    session;
 	MidiPort*   port;
-        MIDI::Parser    parser;
 	PBD::ScopedConnectionList port_connections;
 	PBD::ScopedConnection     config_connection;
 	bool        can_notify_on_unknown_rate;
@@ -420,7 +409,6 @@ class MIDIClock_Slave : public Slave {
 	~MIDIClock_Slave ();
 
 	void rebind (MidiPort&);
-        int process (pframes_t);
 	bool speed_and_position (double&, framepos_t&);
 
 	bool locked() const;
@@ -436,8 +424,6 @@ class MIDIClock_Slave : public Slave {
 
   protected:
 	ISlaveSessionProxy* session;
-	MidiPort* port;
-        MIDI::Parser parser;
 	PBD::ScopedConnectionList port_connections;
 
 	/// pulses per quarter note for one MIDI clock frame (default 24)

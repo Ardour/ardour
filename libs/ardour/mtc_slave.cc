@@ -73,10 +73,9 @@ MTC_Slave::MTC_Slave (Session& s, MidiPort& p)
 	parse_timecode_offset();
 	reset (true);
 
-	parser.mtc_time.connect_same_thread (port_connections,  boost::bind (&MTC_Slave::update_mtc_time, this, _1, _2, _3));
-	parser.mtc_qtr.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_qtr, this, _1, _2, _3));
-	parser.mtc_status.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_status, this, _1));
-	
+	port->self_parser().mtc_time.connect_same_thread (port_connections,  boost::bind (&MTC_Slave::update_mtc_time, this, _1, _2, _3));
+	port->self_parser().mtc_qtr.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_qtr, this, _1, _2, _3));
+	port->self_parser().mtc_status.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_status, this, _1));
 }
 
 MTC_Slave::~MTC_Slave()
@@ -97,34 +96,6 @@ MTC_Slave::~MTC_Slave()
 	if (did_reset_tc_format) {
 		session.config.set_timecode_format (saved_tc_format);
 	}
-}
-
-int
-MTC_Slave::process (pframes_t nframes)
-{
-	MidiBuffer& mb (port->get_midi_buffer (nframes));
-
-	/* dump incoming MIDI to parser */
-
-	cerr << "\n\n\n<<<< MTC slave, process " << mb.size() << endl;
-
-	for (MidiBuffer::iterator b = mb.begin(); b != mb.end(); ++b) {
-		uint8_t* buf = (*b).buffer();
-
-		parser.set_timestamp ((*b).time());
-
-		uint32_t limit = (*b).size();
-
-		cerr << "msg of " << limit << " bytes\n";
-
-		for (size_t n = 0; n < limit; ++n) {
-			parser.scanner (buf[n]);
-		}
-	}
-
-	cerr << ">>>> MTC slave, done processing\n\n\n";
-
-	return 0;
 }
 
 void
@@ -185,7 +156,8 @@ MTC_Slave::outside_window (framepos_t pos) const
 bool
 MTC_Slave::locked () const
 {
-	return parser.mtc_locked() && last_inbound_frame !=0 && engine_dll_initstate !=0;
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("locked ? %1 last %2 initstate %3\n", port->self_parser().mtc_locked(), last_inbound_frame, engine_dll_initstate));
+	return port->self_parser().mtc_locked() && last_inbound_frame !=0 && engine_dll_initstate !=0;
 }
 
 bool
@@ -285,7 +257,6 @@ MTC_Slave::init_mtc_dll(framepos_t tme, double qtr)
 	t1 = t0 + e2;
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("[re-]init MTC DLL %1 %2 %3\n", t0, t1, e2));
 }
-
 
 /* called from MIDI parser */
 void
@@ -453,7 +424,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 						 now, timecode, mtc_frame, was_full, speedup_due_to_tc_mismatch));
 
 	if (was_full || outside_window (mtc_frame)) {
-		DEBUG_TRACE (DEBUG::MTC, string_compose ("update_mtc_time: full TC or outside window. - TID:%1\n", ::pthread_self()));
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("update_mtc_time: full TC %1 or outside window %2\n", was_full, outside_window (mtc_frame)));
 		session.request_locate (mtc_frame, false);
 		session.request_transport_speed (0);
 		update_mtc_status (MIDI::MTC_Stopped);
@@ -477,7 +448,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("new mtc_frame: %1 | MTC-FpT: %2 A3-FpT:%3\n",
 							 mtc_frame, (4.0*qtr), session.frames_per_timecode_frame()));
 
-		switch (parser.mtc_running()) {
+		switch (port->self_parser().mtc_running()) {
 		case MTC_Backward:
 			mtc_frame -= mtc_off;
 			qtr *= -1.0;
@@ -557,9 +528,10 @@ MTC_Slave::reset_window (framepos_t root)
 	   of acceptable MTC frames wide open. otherwise, shrink it down to just 2 video frames
 	   ahead of the window root (taking direction into account).
 	*/
+
 	framecnt_t const d = (quarter_frame_duration * 4 * frame_tolerance);
 
-	switch (parser.mtc_running()) {
+	switch (port->self_parser().mtc_running()) {
 	case MTC_Forward:
 		window_begin = root;
 		transport_direction = 1;
@@ -582,7 +554,7 @@ MTC_Slave::reset_window (framepos_t root)
 		break;
 	}
 
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("legal MTC window now %1 .. %2\n", window_begin, window_end));
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("reset MTC window @ %3, now %1 .. %2\n", window_begin, window_end, root));
 }
 
 void
@@ -620,9 +592,19 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 
 	read_current (&last);
 
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("speed&pos: timestamp %1 speed %2 initstate %3 dir %4 tpos %5 now %6 last-in %7\n",
+						 last.timestamp, 
+						 last.speed,
+						 engine_dll_initstate,
+						 transport_direction,
+						 sess_pos,
+						 now,
+						 last_inbound_frame));
+
 	/* re-init engine DLL here when state changed (direction, first_mtc_timestamp) */
-	if (last.timestamp == 0) { engine_dll_initstate = 0; }
-	else if (engine_dll_initstate != transport_direction && last.speed != 0) {
+	if (last.timestamp == 0) { 
+		engine_dll_initstate = 0; 
+	} else if (engine_dll_initstate != transport_direction && last.speed != 0) {
 		engine_dll_initstate = transport_direction;
 		init_engine_dll(last.position, session.engine().samples_per_cycle());
 		engine_dll_reinitialized = true;
@@ -656,9 +638,7 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	/* interpolate position according to speed and time since last quarter-frame*/
 	if (speed_flt == 0.0f) {
 		elapsed = 0;
-	}
-	else
-	{
+	} else {
 		/* scale elapsed time by the current MTC speed */
 		elapsed = (framecnt_t) rint (speed_flt * (now - last.timestamp));
 		if (give_slave_full_control_over_transport_speed() && !engine_dll_reinitialized) {
@@ -688,14 +668,13 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	 */
 	if (!session.actively_recording()
 	    && speed != 0
-			&& ( (pos < 0) || (labs(pos - sess_pos) > 3 * session.frame_rate()) )
-	    ) {
+	    && ((pos < 0) || (labs(pos - sess_pos) > 3 * session.frame_rate()))) {
 		engine_dll_initstate = 0;
 		queue_reset (false);
 	}
 
 	/* provide a .1% deadzone to lock the speed */
-	if (fabs(speed - 1.0) <= 0.001)
+	if (fabs (speed - 1.0) <= 0.001)
 	        speed = 1.0;
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTCsync spd: %1 pos: %2 | last-pos: %3 elapsed: %4 delta: %5\n",

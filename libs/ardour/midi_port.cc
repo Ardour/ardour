@@ -33,6 +33,7 @@ MidiPort::MidiPort (const std::string& name, PortFlags flags)
 	, _has_been_mixed_down (false)
 	, _resolve_required (false)
 	, _input_active (true)
+	, _always_parse (false)
 {
 	_buffer = new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI));
 }
@@ -45,12 +46,32 @@ MidiPort::~MidiPort()
 void
 MidiPort::cycle_start (pframes_t nframes)
 {
+	framepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();
+
 	Port::cycle_start (nframes);
 
 	_buffer->clear ();
 
 	if (sends_output ()) {
 		port_engine.midi_clear (port_engine.get_buffer (_port_handle, nframes));
+	}
+
+	if (_always_parse) {
+		MidiBuffer& mb (get_midi_buffer (nframes));
+
+		/* dump incoming MIDI to parser */
+		
+		for (MidiBuffer::iterator b = mb.begin(); b != mb.end(); ++b) {
+			uint8_t* buf = (*b).buffer();
+			
+			_self_parser.set_timestamp (now + (*b).time());
+			
+			uint32_t limit = (*b).size();
+			
+			for (size_t n = 0; n < limit; ++n) {
+				_self_parser.scanner (buf[n]);
+			}
+		}
 	}
 }
 
@@ -71,8 +92,6 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 			/* suck all relevant MIDI events from the MIDI port buffer
 			   into our MidiBuffer
 			*/
-
-			cerr << "grabbing " << event_count << " events\n";
 
 			for (pframes_t i = 0; i < event_count; ++i) {
 				
@@ -216,4 +235,10 @@ void
 MidiPort::set_input_active (bool yn)
 {
 	_input_active = yn;
+}
+
+void
+MidiPort::set_always_parse (bool yn)
+{
+	_always_parse = yn;
 }

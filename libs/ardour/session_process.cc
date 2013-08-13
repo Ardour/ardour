@@ -491,7 +491,6 @@ Session::follow_slave (pframes_t nframes)
 		goto noroll;
 	}
 
-	_slave->process (nframes);
 	_slave->speed_and_position (slave_speed, slave_transport_frame);
 
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("Slave position %1 speed %2\n", slave_transport_frame, slave_speed));

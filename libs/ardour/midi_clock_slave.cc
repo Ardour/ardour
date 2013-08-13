@@ -50,13 +50,6 @@ MIDIClock_Slave::MIDIClock_Slave (Session& s, MidiPort& p, int ppqn)
 	session = (ISlaveSessionProxy *) new SlaveSessionProxy(s);
 	rebind (p);
 	reset ();
-
-	parser.timing.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::update_midi_clock, this, _1, _2));
-	parser.start.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::start, this, _1, _2));
-	parser.contineu.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::contineu, this, _1, _2));
-	parser.stop.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::stop, this, _1, _2));
-	parser.position.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::position, this, _1, _2, 3));
-
 }
 
 MIDIClock_Slave::MIDIClock_Slave (ISlaveSessionProxy* session_proxy, int ppqn)
@@ -72,33 +65,19 @@ MIDIClock_Slave::~MIDIClock_Slave()
 	delete session;
 }
 
-int
-MIDIClock_Slave::process (pframes_t nframes)
-{
-	MidiBuffer& mb (port->get_midi_buffer (nframes));
-
-	/* dump incoming MIDI to parser */
-
-	for (MidiBuffer::iterator b = mb.begin(); b != mb.end(); ++b) {
-		uint8_t* buf = (*b).buffer();
-
-		parser.set_timestamp ((*b).time());
-
-		uint32_t limit = (*b).size();
-
-		for (size_t n = 0; n < limit; ++n) {
-			parser.scanner (buf[n]);
-		}
-	}
-
-	return 0;
-}
-
 void
-MIDIClock_Slave::rebind (MidiPort& p)
+MIDIClock_Slave::rebind (MidiPort& port)
 {
-	port = &p;
-	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MIDIClock_Slave: connecting to port %1\n", port->name()));
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MIDIClock_Slave: connecting to port %1\n", port.name()));
+
+	port_connections.drop_connections ();
+
+	port.self_parser().timing.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::update_midi_clock, this, _1, _2));
+	port.self_parser().start.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::start, this, _1, _2));
+	port.self_parser().contineu.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::contineu, this, _1, _2));
+	port.self_parser().stop.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::stop, this, _1, _2));
+	port.self_parser().position.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::position, this, _1, _2, 3));
+
 }
 
 void
