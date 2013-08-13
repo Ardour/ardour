@@ -164,16 +164,25 @@ MidiTracer::port_changed ()
 		return;
 	}
 
+	/* The inheritance heirarchy makes this messy. AsyncMIDIPort has two
+	 * available MIDI::Parsers what we could connect to, ::self_parser()
+	 * (from ARDOUR::MidiPort) and ::parser() from MIDI::Port. One day,
+	 * this mess will all go away ...
+	 */
+
 	boost::shared_ptr<AsyncMIDIPort> async = boost::dynamic_pointer_cast<AsyncMIDIPort> (p);
 
 	if (!async) {
-		/* pure ARDOUR::MidiPort ... cannot currently attach to it because it
-		 * has no Parser.
-		 */
-		return;
+
+		boost::shared_ptr<ARDOUR::MidiPort> mp = boost::dynamic_pointer_cast<ARDOUR::MidiPort> (p);
+
+		if (mp) {
+			mp->self_parser().any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3));
+		}
+		
+	} else {
+		async->parser()->any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3));
 	}
-	
-	async->parser()->any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3));
 }
 
 void
