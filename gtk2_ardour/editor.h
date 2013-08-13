@@ -1020,6 +1020,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void control_select (uint32_t rid, Selection::Operation);
 	void control_unselect ();
 	void access_action (std::string,std::string);
+	bool is_access_action_available(std::string,std::string);
 	bool deferred_control_scroll (framepos_t);
 	sigc::connection control_scroll_connection;
 

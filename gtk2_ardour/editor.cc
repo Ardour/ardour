@@ -1093,6 +1093,33 @@ Editor::access_action (std::string action_group, std::string action_item)
 	if (act) {
 		act->activate();
 	}
+	else
+	{
+		cerr << "/ardour/access_action not found! group: " << action_group << " action: " << action_item << endl;
+	}
+}
+
+bool
+Editor::is_access_action_available (std::string action_group, std::string action_item)
+{
+	if (!_session) {
+		return false;
+	}
+
+	ENSURE_GUI_THREAD (*this, &Editor::access_action, action_group, action_item)
+
+	RefPtr<Action> act;
+	act = ActionManager::get_action( action_group.c_str(), action_item.c_str() );
+
+	if (act) {
+		cerr << "/ardour/access_action exists: group: " << action_group << " action: " << action_item << endl;
+		return true;
+	}
+	else
+	{
+		cerr << "/ardour/access_action not found! group: " << action_group << " action: " << action_item << endl;
+		return false;
+	}
 }
 
 void
