@@ -87,9 +87,10 @@ Editor::show_editor_mixer (bool yn)
 		}
 
 		if (screen && screen->get_height() < 700) {
-			Gtk::MessageDialog msg (_("This screen is not tall enough to display the editor mixer"));
-			msg.run ();
-			return;
+			//Gtk::MessageDialog msg (_("This screen is not tall enough to display the editor mixer"));
+			//msg.run ();
+			//return;
+			cerr << "This screen is not tall enough to display the editor mixer\n";
 		}
 	}
 
