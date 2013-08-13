@@ -143,7 +143,7 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (auditioning_alert_button, _("When active, auditioning is taking place\nClick to stop the audition"));
 	set_tip (feedback_alert_button, _("When active, there is a feedback loop."));
 	set_tip (primary_clock, _("<b>Primary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
-	set_tip (secondary_clock, _("<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
+	//set_tip (secondary_clock, _("<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
 	set_tip (editor_meter_peak_display, _("Reset Level Meter"));
 
 	synchronize_sync_source_and_video_pullup ();
@@ -250,6 +250,7 @@ ARDOUR_UI::setup_transport ()
 
 //	auto_input_button.set_text (_("Auto Input"));
 
+	
 	click_button.set_image (get_icon (X_("metronome")));
 	act = ActionManager::get_action ("Transport", "ToggleClick");
 	click_button.set_related_action (act);
@@ -300,10 +301,10 @@ ARDOUR_UI::setup_transport ()
 	/* clocks, etc. */
 
 	ARDOUR_UI::Clock.connect (sigc::mem_fun (primary_clock, &AudioClock::set));
-	ARDOUR_UI::Clock.connect (sigc::mem_fun (secondary_clock, &AudioClock::set));
+	//ARDOUR_UI::Clock.connect (sigc::mem_fun (secondary_clock, &AudioClock::set));
 
 	primary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::primary_clock_value_changed));
-	secondary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));
+	//secondary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));
 	big_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::big_clock_value_changed));
 
 	act = ActionManager::get_action ("Transport", "ToggleAutoReturn");
@@ -341,7 +342,7 @@ ARDOUR_UI::setup_transport ()
 	transport_button_size_group->add_widget (roll_button);
 	transport_button_size_group->add_widget (stop_button);
 
-	goto_start_button.set_size_request (-1, 40);
+	goto_start_button.set_size_request (60, 60);
 
 	HBox* tbox1 = manage (new HBox);
 	HBox* tbox2 = manage (new HBox);
@@ -357,8 +358,8 @@ ARDOUR_UI::setup_transport ()
 	tbox2->set_spacing (2);
 	tbox->set_spacing (2);
 
-	tbox1->pack_start (midi_panic_button, false, false, 5);
-	tbox1->pack_start (click_button, false, false, 5);
+	//tbox1->pack_start (midi_panic_button, false, false, 5);
+	//tbox1->pack_start (click_button, false, false, 5);
 	tbox1->pack_start (goto_start_button, false, false);
 	tbox1->pack_start (goto_end_button, false, false);
 	tbox1->pack_start (auto_loop_button, false, false);
@@ -382,22 +383,16 @@ ARDOUR_UI::setup_transport ()
 	HBox* clock_box = manage (new HBox);
 
 	clock_box->pack_start (*primary_clock, false, false);
+/*
 	if (!ARDOUR::Profile->get_small_screen()) {
 		clock_box->pack_start (*secondary_clock, false, false);
 	}
+*/
 	clock_box->set_spacing (3);
 
 	shuttle_box = new ShuttleControl;
 	shuttle_box->show ();
 
-	VBox* transport_vbox = manage (new VBox);
-	transport_vbox->set_name ("TransportBase");
-	transport_vbox->set_border_width (0);
-	transport_vbox->set_spacing (3);
-	transport_vbox->pack_start (*tbox, true, true, 0);
-	transport_vbox->pack_start (*shuttle_box, false, false, 0);
-
-	transport_tearoff_hbox.pack_start (*transport_vbox, false, false);
 
 	/* transport related toggle controls */
 
@@ -411,12 +406,23 @@ ARDOUR_UI::setup_transport ()
 	transport_tearoff_hbox.pack_start (*auto_box, false, false);
 	transport_tearoff_hbox.pack_start (*clock_box, true, true);
 
+
+	VBox* transport_vbox = manage (new VBox);
+	transport_vbox->set_name ("TransportBase");
+	transport_vbox->set_border_width (0);
+	transport_vbox->set_spacing (3);
+	transport_vbox->pack_start (*tbox, true, true, 0);
+	transport_vbox->pack_start (*shuttle_box, false, false, 0);
+
+	transport_tearoff_hbox.pack_start (*transport_vbox, false, false);
+
+
 	time_info_box = manage (new TimeInfoBox);
 	transport_tearoff_hbox.pack_start (*time_info_box, false, false);
 
-        if (Profile->get_small_screen()) {
+        //if (Profile->get_small_screen()) {
                 transport_tearoff_hbox.pack_start (_editor_transport_box, false, false);
-        }
+        //}
 	transport_tearoff_hbox.pack_start (alert_box, false, false);
 	transport_tearoff_hbox.pack_start (meter_box, false, false);
 	transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
