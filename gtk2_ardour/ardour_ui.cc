@@ -1925,8 +1925,7 @@ ARDOUR_UI::transport_rewind (int option)
 		{
 			_session->request_transport_speed (1.0f);
 		}
-
-		if (current_transport_speed > 0.0f) {
+		else if (current_transport_speed > 0.0f) {
 			switch (option) {
 			case 0:
 				_session->request_transport_speed (0.0f);
@@ -1962,8 +1961,7 @@ ARDOUR_UI::transport_forward (int option)
 	{
 		_session->request_transport_speed (-1.0f);
 	}
-
-	if (current_transport_speed < 0.0f) {
+	else if (current_transport_speed < 0.0f) {
 		switch (option) {
 		case 0:
 			_session->request_transport_speed (0.0f);
