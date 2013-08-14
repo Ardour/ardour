@@ -404,9 +404,9 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 
 	fifo.write (&buf, 1);
 
-	if (g_atomic_int_get (&_update_queued) == 0) {
+	if (g_atomic_int_get (const_cast<gint*> (&_update_queued)) == 0) {
 		gui_context()->call_slot (invalidator (*this), boost::bind (&MidiTracer::update, this));
-		g_atomic_int_inc (&_update_queued);
+		g_atomic_int_inc (const_cast<gint*> (&_update_queued));
 	}
 }
 
@@ -414,7 +414,7 @@ void
 MidiTracer::update ()
 {
 	bool updated = false;
-	g_atomic_int_dec_and_test (&_update_queued);
+	g_atomic_int_dec_and_test (const_cast<gint*> (&_update_queued));
 
 	RefPtr<TextBuffer> buf (text.get_buffer());
 

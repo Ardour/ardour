@@ -891,7 +891,7 @@ GType prolooks_hsl_get_type (void) {
 gpointer prolooks_hsl_ref (gpointer instance) {
 	ProlooksHSL* self;
 	self = instance;
-	g_atomic_int_inc (&self->ref_count);
+        g_atomic_int_inc (&self->ref_count);
 	return instance;
 }
 
