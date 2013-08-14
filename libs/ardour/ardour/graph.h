@@ -31,8 +31,6 @@
 #include <glib.h>
 #include <cassert>
 
-#include <pthread.h>
-
 #include "pbd/semutils.h"
 
 #include "ardour/types.h"
@@ -48,6 +46,8 @@ class Graph;
 class Route;
 class Session;
 class GraphEdges;	
+
+class AudioBackendThread;
 
 typedef boost::shared_ptr<GraphNode> node_ptr_t;
 
@@ -93,7 +93,7 @@ protected:
 	virtual void session_going_away ();
 
 private:
-	std::list<AudioBackendNativeThread> _thread_list;
+	std::list<AudioBackendThread*> _thread_list;
 	volatile bool        _quit_threads;
 
 	void reset_thread_list ();

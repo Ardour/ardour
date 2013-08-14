@@ -101,24 +101,24 @@ Graph::reset_thread_list ()
         }
 
         Glib::Threads::Mutex::Lock lm (_session.engine().process_lock());
-	AudioBackendNativeThread a_thread;
+	AudioBackendThread* backend_thread;
 
         if (!_thread_list.empty()) {
                 drop_threads ();
         }
 
-	if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::main_thread, this), &a_thread, 100000) != 0) {
+	if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::main_thread, this), backend_thread, 100000) != 0) {
 		throw failed_constructor ();
 	}
 
-	_thread_list.push_back (a_thread);
+	_thread_list.push_back (backend_thread);
 
         for (uint32_t i = 1; i < num_threads; ++i) {
-		if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::helper_thread, this), &a_thread, 100000) != 0) {
+		if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::helper_thread, this), backend_thread, 100000) != 0) {
 			throw failed_constructor ();
 		}
 		
-		_thread_list.push_back (a_thread);
+		_thread_list.push_back (backend_thread);
         }
 }
 
@@ -146,8 +146,8 @@ Graph::drop_threads ()
 
         _callback_start_sem.signal ();
 
-        for (list<AudioBackendNativeThread>::iterator i = _thread_list.begin(); i != _thread_list.end(); ++i) {
-		AudioEngine::instance()->wait_for_process_thread_exit (*i);
+        for (list<AudioBackendThread*>::iterator i = _thread_list.begin(); i != _thread_list.end(); ++i) {
+		AudioEngine::instance()->join_process_thread (*i);
         }
 
         _thread_list.clear ();
@@ -583,10 +583,5 @@ Graph::process_one_route (Route* route)
 bool
 Graph::in_process_thread () const
 {
-	for (list<AudioBackendNativeThread>::const_iterator i = _thread_list.begin (); i != _thread_list.end(); ++i) {
-		if (self_thread_equal (*i)) {
-			return true;
-		}
-	}
-	return false;
+	return AudioEngine::instance()->in_process_thread ();
 }

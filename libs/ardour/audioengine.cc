@@ -826,21 +826,30 @@ AudioEngine::get_sync_offset (pframes_t& offset) const
 }
 
 int
-AudioEngine::create_process_thread (boost::function<void()> func, AudioBackendNativeThread* thr, size_t stacksize)
+AudioEngine::create_process_thread (boost::function<void()> func, AudioBackendThread* thread, size_t stacksize)
 {
 	if (!_backend) {
 		return -1;
 	}
-	return _backend->create_process_thread (func, thr, stacksize);
+	return _backend->create_process_thread (func, thread, stacksize);
 }
 
 int
-AudioEngine::wait_for_process_thread_exit (AudioBackendNativeThread thr)
+AudioEngine::join_process_thread (AudioBackendThread* thr)
 {
 	if (!_backend) {
-		return 0;
+		return -1;
 	}
-	return _backend->wait_for_process_thread_exit (thr);
+	return _backend->join_process_thread (thr);
+}
+
+bool
+AudioEngine::in_process_thread ()
+{
+	if (!_backend) {
+		return false;
+	}
+	return _backend->in_process_thread ();
 }
 
 int

@@ -58,6 +58,7 @@ class Session;
 class ProcessThread;
 class AudioBackend;
 class AudioBackendInfo;
+class AudioBackendThread;
 
 class AudioEngine : public SessionHandlePtr, public PortManager
 {
@@ -100,8 +101,12 @@ public:
     pframes_t      sample_time_at_cycle_start ();
     pframes_t      samples_since_cycle_start ();
     bool           get_sync_offset (pframes_t& offset) const;
-    int            create_process_thread (boost::function<void()> func, AudioBackendNativeThread*, size_t stacksize);
-    int            wait_for_process_thread_exit (AudioBackendNativeThread);
+
+    int            create_process_thread (boost::function<void()> func, AudioBackendThread*, size_t stacksize);
+    int            join_process_thread (AudioBackendThread*);
+
+    bool           in_process_thread ();
+
     bool           is_realtime() const;
     bool           connected() const;
 
