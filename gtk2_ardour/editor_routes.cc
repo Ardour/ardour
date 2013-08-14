@@ -1521,6 +1521,10 @@ EditorRoutes::move_selected_tracks (bool up)
 #endif	
 
 	_model->reorder (neworder);
+
+	//make sure the moved track is visible in the viewport
+        TrackViewList* ts = &_editor->selection->tracks;
+        _editor->ensure_track_visible(*ts->begin());
 }
 
 void

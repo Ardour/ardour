@@ -172,8 +172,9 @@
         <menuitem action='select-all'/>
         <menuitem action='deselect-all'/>
         <menuitem action='invert-selection'/>
-        <menuitem action='select-all-after-edit-cursor'/>
         <menuitem action='select-all-before-edit-cursor'/>
+	<menuitem action='select-all-at-playhead'/>
+	<menuitem action='select-all-after-edit-cursor'/>
         <menuitem action='select-all-between-cursors'/>
         <menuitem action='select-all-within-cursors'/>
         <menuitem action='select-all-in-punch-range'/>
@@ -190,9 +191,13 @@
         <separator/>
         <menuitem action='select-next-route'/>
         <menuitem action='select-prev-route'/>
+	<separator/>
+        <menuitem action='reduce-track-selection-last'/>
+        <menuitem action='expand-track-selection-downwards'/>
       </menu>	   
       <separator/>
       <menuitem action='editor-delete'/>
+      <menuitem action='editor-delete-time'/>
       <menuitem action='editor-crop'/>
       <menuitem action='split-region'/>
       <menuitem action='split-region-at-transients'/>
@@ -291,6 +296,7 @@
         <menuitem action='nudge-backward'/>
         <menuitem action='nudge-forward-by-capture-offset'/>
         <menuitem action='nudge-backward-by-capture-offset'/>
+	<menuitem action='sequence-regions'/>
       </menu>
       <menu action='RegionMenuTrim'>
         <menuitem action='trim-front'/>
@@ -325,7 +331,9 @@
     </menu>
 
     <menu action='TrackMenu'>
-      <menuitem action='AddTrackBus'/>	
+      <menuitem action='AddTrackBus'/>
+      <menuitem action='add-mono-track'/>
+      <menuitem action='add-stereo-track'/>	
       <menuitem action='insert-time'/>
       <menuitem action="move-selected-tracks-up"/>
       <menuitem action="move-selected-tracks-down"/>
@@ -667,6 +675,7 @@
       <menuitem action='nudge-backward'/>
       <menuitem action='nudge-forward-by-capture-offset'/>
       <menuitem action='nudge-backward-by-capture-offset'/>
+      <menuitem action='sequence-regions'/>
     </menu>
     <menu action='RegionMenuTrim'>
       <menuitem action='trim-front'/>

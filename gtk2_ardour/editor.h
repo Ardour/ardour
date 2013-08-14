@@ -342,6 +342,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void nudge_forward_capture_offset ();
 	void nudge_backward_capture_offset ();
 
+	void sequence_regions ();
+
 	/* playhead/screen stuff */
 
 	void set_stationary_playhead (bool yn);
@@ -956,6 +958,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void    selected_marker_to_selection_end   ();
 
 	void    select_all_selectables_using_cursor (EditorCursor *, bool);
+	void    select_all_selectables_at_cursor (EditorCursor *);
 	void    select_all_selectables_using_edit (bool);
 	void    select_all_selectables_between (bool within);
 	void    select_range_between ();
@@ -1017,6 +1020,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void control_select (uint32_t rid, Selection::Operation);
 	void control_unselect ();
 	void access_action (std::string,std::string);
+	bool is_access_action_available(std::string,std::string);
 	bool deferred_control_scroll (framepos_t);
 	sigc::connection control_scroll_connection;
 
@@ -1180,6 +1184,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void do_insert_time ();
 	void insert_time (framepos_t, framecnt_t, Editing::InsertTimeOption, bool, bool, bool, bool, bool, bool);
 
+	void add_single_audio_track (int channels);
+
 	void tab_to_transient (bool forward);
 
 	void set_tempo_from_region ();
@@ -1198,6 +1204,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void split_region ();
 
 	void delete_ ();
+	void delete_time ();
 	void cut ();
 	void copy ();
 	void paste (float times, bool from_context_menu = false);
@@ -1330,6 +1337,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_loop_from_selection (bool play);
 	void set_punch_from_selection ();
 	void set_punch_from_region ();
+
+        void insert_time_from_selection();
 
 	void set_loop_from_edit_range (bool play);
 	void set_loop_from_region (bool play);
@@ -1993,6 +2002,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void select_next_route ();
 	void select_prev_route ();
+
+	void select_prev_route_add (bool keep_selection);
+	void select_next_route_add (bool keep_selection);
 
 	void snap_to_internal (framepos_t& first, int32_t direction = 0, bool for_mark = false);
 	void timecode_snap_to_internal (framepos_t& first, int32_t direction = 0, bool for_mark = false);

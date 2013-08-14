@@ -16,6 +16,14 @@
 ;                                       if the group is a mouse binding group, action should contain a ':', and
 ;                                            have the binding before the colon, and the target area after it
 
+;Keys: https://git.gnome.org/browse/gtk+/plain/gdk/gdkkeysyms.h
+;
+;Linux
+;
+;Primary: Ctrl
+;Secondary: Alt
+;Tertiary: Shift
+
 ;; Title
 $ARDOUR Shortcuts \linebreak Mnemonic US-Keypad
 
@@ -162,11 +170,13 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/naturalize-region|<@SECONDARY@>o|move to original position
 @trans|Editor/set-playhead|p|set playhead position
 @select|Editor/select-all-before-playhead|<@PRIMARY@>p|all before playhead
+@select|Editor/select-all-at-playhead|<@PRIMARY@><@SECONDARY@>e|select at playhead
+@select|Editor/select-all-after-playhead|<@TERTIARY@><@PRIMARY@>p|all after playhead
 @wvis|Window/toggle-rc-options-editor|<@PRIMARY@><@TERTIARY@>p|toggle preferences dialog
 @wvis|Window/toggle-audio-connection-manager|<@WINDOW@>p|toggle global audio patchbay
 @wvis|Window/toggle-midi-connection-manager|<@WINDOW@><@TERTIARY@>p|toggle global midi patchbay
 @midi|MIDI/panic|<@PRIMARY@><@SECONDARY@>p|MIDI panic (stop all notes etc)
-@select|Editor/select-all-after-playhead|<@TERTIARY@><@PRIMARY@>p|all after playhead
+
 
 ;; MIDDLE ROW
 
@@ -186,10 +196,11 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/multi-duplicate-region|<@TERTIARY@>d|duplicate region (multi)
 @select|Editor/select-all-in-punch-range|<@PRIMARY@>d|select all in punch range
 @vis|Editor/fit-tracks|f|fit tracks vertically
+@vis|Editor/track-height-normal|<@SECONDARY@>f|set normal track height
 @trans|Editor/toggle-follow-playhead|<@PRIMARY@>f|toggle playhead tracking
 @trans|Transport/ToggleFollowEdits|<@TERTIARY@>f|toggle playhead follows edits
 @wvis|Common/ToggleMaximalEditor|<@PRIMARY@><@SECONDARY@>f|maximise editor space
-@wvis|Region/show-rhythm-ferret|<@WINDOW@>f|show rhythm ferret window 
+; @wvis|Region/show-rhythm-ferret|<@WINDOW@>f|show rhythm ferret window 
 @mmode|MouseMode/set-mouse-mode-gain|g|region gain mode
 @epp|Region/play-selected-regions|h|play selected region(s)
 @eep|Region/trim-front|j|trim front
@@ -217,20 +228,25 @@ This mode provides many different operations on both regions and control points,
 @wvis|Window/toggle-big-clock|<@WINDOW@>b|toggle big clock
 @rop|Region/normalize-region|n|normalize
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
+@edit|Editor/add-mono-track|<@SECONDARY@>n|add audio track (mono)
+@edit|Editor/add-stereo-track|<@PRIMARY@><@SECONDARY@>n|add audio track (stereo)
+@edit|Editor/remove-track|<@PRIMARY@><@SECONDARY@>x|remove track
 @sess|Main/New|<@PRIMARY@>n|open a new session
 @rop|Region/toggle-region-mute|<@PRIMARY@>m|mute/unmute
 @wvis|Common/toggle-editor-mixer|<@WINDOW@>m|rotate editor \& mixer window
 
 ;; arrow keys, navigation etc.
 
-@vis|Editor/step-tracks-up|uparrow|scroll up (step)
-@trans|Transport/TransitionToRoll|<@TERTIARY@>uparrow|transition to roll
-@select|Editor/select-prev-route|<@SECONDARY@>uparrow|select previous track/bus
+@vis|Editor/step-tracks-up|<@SECONDARY@>uparrow|scroll up (step)
+; @trans|Transport/TransitionToRoll|<@TERTIARY@>uparrow|transition to roll
+@select|Editor/select-prev-route|uparrow|select previous track/bus
+@select|Editor/reduce-track-selection-last|<@TERTIARY@>uparrow|remove last addition to track selection
 @vis|Editor/move-selected-tracks-up|<@PRIMARY@>uparrow|move selected tracks up
 
-@vis|Editor/step-tracks-down|downarrow|scroll down (step)
-@trans|Transport/TransitionToReverse|<@TERTIARY@>downarrow|transition to reverse
-@select|Editor/select-next-route|<@SECONDARY@>downarrow|select next track/bus
+@vis|Editor/step-tracks-down|<@SECONDARY@>downarrow|scroll down (step)
+; @trans|Transport/TransitionToReverse|<@TERTIARY@>downarrow|transition to reverse
+@select|Editor/select-next-route|downarrow|select next track/bus
+@select|Editor/expand-track-selection-downwards|<@TERTIARY@>downarrow|expand track selection downwards
 @vis|Editor/move-selected-tracks-down|<@PRIMARY@>downarrow|move selected tracks down
 
 @movp|Editor/playhead-to-previous-region-boundary|leftarrow|to previous region edge
@@ -256,6 +272,7 @@ This mode provides many different operations on both regions and control points,
 @movp|Transport/GotoStart|Home|to start marker
 @movp|Transport/GotoEnd|End|to end marker
 @edit|Editor/editor-delete|Delete|delete
+@edit|Editor/editor-delete-time|<@SECONDARY@>Delete|delete time
 
 @movp|Editor/playhead-to-edit|Return|to edit point
 @eep|Editor/edit-to-playhead|<@SECONDARY@>Return|move EP to playhead
@@ -339,7 +356,8 @@ This mode provides many different operations on both regions and control points,
 @trans|Transport/ToggleAutoReturn|6|toggle auto return
 @trans|Transport/ToggleClick|7|toggle click (metronome)
 @ranges|Editor/set-tempo-from-region|9|set tempo (1 bar) from region(s)
-@ranges|Editor/set-tempo-from-edit-range|0|set tempo (1 bar) from edit range
+; @ranges|Editor/set-tempo-from-edit-range|0|set tempo (1 bar) from edit range
+@select|Editor/deselect-all|0|deselect all
 
 ; mouse stuff
 

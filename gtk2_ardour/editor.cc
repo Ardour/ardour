@@ -131,7 +131,7 @@ using PBD::internationalize;
 using PBD::atoi;
 using Gtkmm2ext::Keyboard;
 
-const double Editor::timebar_height = 15.0;
+const double Editor::timebar_height = 35.0;
 
 static const gchar *_snap_type_strings[] = {
 	N_("CD Frames"),
@@ -1093,6 +1093,33 @@ Editor::access_action (std::string action_group, std::string action_item)
 	if (act) {
 		act->activate();
 	}
+	else
+	{
+		cerr << "/ardour/access_action not found! group: " << action_group << " action: " << action_item << endl;
+	}
+}
+
+bool
+Editor::is_access_action_available (std::string action_group, std::string action_item)
+{
+	if (!_session) {
+		return false;
+	}
+
+	ENSURE_GUI_THREAD (*this, &Editor::access_action, action_group, action_item)
+
+	RefPtr<Action> act;
+	act = ActionManager::get_action( action_group.c_str(), action_item.c_str() );
+
+	if (act) {
+		cerr << "/ardour/access_action exists: group: " << action_group << " action: " << action_item << endl;
+		return true;
+	}
+	else
+	{
+		cerr << "/ardour/access_action not found! group: " << action_group << " action: " << action_item << endl;
+		return false;
+	}
 }
 
 void
@@ -1895,6 +1922,10 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Set Loop from Range"), sigc::bind (sigc::mem_fun(*this, &Editor::set_loop_from_selection), false)));
 	edit_items.push_back (MenuElem (_("Set Punch from Range"), sigc::mem_fun(*this, &Editor::set_punch_from_selection)));
+
+	edit_items.push_back (SeparatorElem());
+        edit_items.push_back (MenuElem (_("Insert Time from Range (Split Intersected)"), sigc::mem_fun(*this, &Editor::insert_time_from_selection)));
+        edit_items.push_back (MenuElem (_("Delete Time from Range (Split Intersected)"), sigc::mem_fun(*this, &Editor::delete_time)));
 
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Add Range Markers"), sigc::mem_fun (*this, &Editor::add_location_from_selection)));
@@ -2878,6 +2909,7 @@ Editor::setup_toolbar ()
 
 	mouse_mode_box->pack_start (*mouse_mode_align, false, false);
 
+/*
 	edit_mode_strings.push_back (edit_mode_to_string (Slide));
 	if (!Profile->get_sae()) {
 		edit_mode_strings.push_back (edit_mode_to_string (Splice));
@@ -2887,8 +2919,9 @@ Editor::setup_toolbar ()
 	edit_mode_selector.set_name ("EditModeSelector");
 	set_popdown_strings (edit_mode_selector, edit_mode_strings);
 	edit_mode_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::edit_mode_selection_done));
-
 	mode_box->pack_start (edit_mode_selector, false, false);
+*/
+
 	mode_box->pack_start (*mouse_mode_box, false, false);
 
 	_mouse_mode_tearoff = manage (new TearOff (*mode_box));
@@ -2940,8 +2973,8 @@ Editor::setup_toolbar ()
 	set_popdown_strings (zoom_focus_selector, zoom_focus_strings);
 	zoom_focus_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done));
 
-	_zoom_box.pack_start (zoom_out_button, false, false);
 	_zoom_box.pack_start (zoom_in_button, false, false);
+	_zoom_box.pack_start (zoom_out_button, false, false);
 	_zoom_box.pack_start (zoom_out_full_button, false, false);
 
 	_zoom_box.pack_start (zoom_focus_selector, false, false);
@@ -2950,7 +2983,7 @@ Editor::setup_toolbar ()
 	tav_expand_button.set_name ("zoom button");
 	tav_expand_button.add_elements ( ArdourButton::FlatFace );
 	tav_expand_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
-	tav_expand_button.set_size_request (-1, 20);
+	tav_expand_button.set_size_request (-1, 30);
 	tav_expand_button.set_image(::get_icon ("tav_exp"));
 	act = ActionManager::get_action (X_("Editor"), X_("expand-tracks"));
 	tav_expand_button.set_related_action (act);
@@ -2958,7 +2991,7 @@ Editor::setup_toolbar ()
 	tav_shrink_button.set_name ("zoom button");
 	tav_shrink_button.add_elements ( ArdourButton::FlatFace );
 	tav_shrink_button.set_tweaks ((ArdourButton::Tweaks) (ArdourButton::ShowClick) );
-	tav_shrink_button.set_size_request (-1, 20);
+	tav_shrink_button.set_size_request (-1, 30);
 	tav_shrink_button.set_image(::get_icon ("tav_shrink"));
 	act = ActionManager::get_action (X_("Editor"), X_("shrink-tracks"));
 	tav_shrink_button.set_related_action (act);

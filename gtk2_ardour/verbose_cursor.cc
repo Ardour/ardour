@@ -129,11 +129,11 @@ VerboseCursor::set_time (framepos_t frame, double x, double y)
 
 	AudioClock::Mode m;
 
-	if (Profile->get_sae() || Profile->get_small_screen()) {
+	//if (Profile->get_sae() || Profile->get_small_screen()) {
 		m = ARDOUR_UI::instance()->primary_clock->mode();
-	} else {
-		m = ARDOUR_UI::instance()->secondary_clock->mode();
-	}
+	//} else {
+	//	m = ARDOUR_UI::instance()->secondary_clock->mode();
+	//}
 
 	switch (m) {
 	case AudioClock::BBT:

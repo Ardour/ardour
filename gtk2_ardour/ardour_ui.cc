@@ -1906,10 +1906,18 @@ ARDOUR_UI::transport_rewind (int option)
        	if (_session) {
 		current_transport_speed = _session->transport_speed();
 
-		if (current_transport_speed >= 0.0f) {
+		if(current_transport_speed == 0.0f)
+		{
+			_session->request_transport_speed (-1.0f);
+		}
+		else if(current_transport_speed > 1.0f)
+		{
+			_session->request_transport_speed (1.0f);
+		}
+		else if (current_transport_speed > 0.0f) {
 			switch (option) {
 			case 0:
-				_session->request_transport_speed (-1.0f);
+				_session->request_transport_speed (0.0f);
 				break;
 			case 1:
 				_session->request_transport_speed (-4.0f);
@@ -1934,10 +1942,18 @@ ARDOUR_UI::transport_forward (int option)
 	
 	float current_transport_speed = _session->transport_speed();
 	
-	if (current_transport_speed <= 0.0f) {
+	if(current_transport_speed == 0.0f)
+	{
+		_session->request_transport_speed (1.0f);
+	}
+	else if(current_transport_speed < -1.0f)
+	{
+		_session->request_transport_speed (-1.0f);
+	}
+	else if (current_transport_speed < 0.0f) {
 		switch (option) {
 		case 0:
-			_session->request_transport_speed (1.0f);
+			_session->request_transport_speed (0.0f);
 			break;
 		case 1:
 			_session->request_transport_speed (4.0f);

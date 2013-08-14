@@ -39,12 +39,12 @@ EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,Ardour
 	points.push_back(Gnome::Art::Point(1.0, 1.0));
 
 	canvas_item.property_points() = points;
-	canvas_item.property_width_pixels() = 1;
-	canvas_item.property_first_arrowhead() = TRUE;
+	canvas_item.property_width_pixels() = 3;
+	canvas_item.property_first_arrowhead() = FALSE;
 	canvas_item.property_last_arrowhead() = TRUE;
-	canvas_item.property_arrow_shape_a() = 11.0;
-	canvas_item.property_arrow_shape_b() = 0.0;
-	canvas_item.property_arrow_shape_c() = 9.0;
+	canvas_item.property_arrow_shape_a() = 60.0;
+	canvas_item.property_arrow_shape_b() = 5.0;
+	canvas_item.property_arrow_shape_c() = 80.0;
 
 	canvas_item.set_data ("cursor", this);
 	canvas_item.signal_event().connect (sigc::bind (sigc::mem_fun (ed, callbck), &canvas_item));
