@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis
+    Copyright (C) 2011 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,27 +17,51 @@
 
 */
 
-#include "pbd/controllable.h"
+#include <iostream>
+#include <cstdlib>
+
+#include <giomm.h>
+
+#include <glibmm/thread.h>
+
+#include "pbd/pbd.h"
+#include "pbd/debug.h"
+#include "pbd/id.h"
 #include "pbd/enumwriter.h"
 
-using namespace PBD;
-using namespace std;
+#include "i18n.h"
+
+extern void setup_libpbd_enums ();
+
+namespace {
+
+static bool libpbd_initialized = false;
+
+}
+
+bool
+PBD::init ()
+{
+	if (libpbd_initialized) {
+		return true;
+	}
+
+	if (!Glib::thread_supported()) {
+		Glib::thread_init();
+	}
+
+	Gio::init ();
+
+	PBD::ID::init ();
+
+	setup_libpbd_enums ();
+
+	libpbd_initialized = true;
+	return true;
+}
 
 void
-setup_libpbd_enums () 
+PBD::cleanup ()
 {
-	EnumWriter& enum_writer (EnumWriter::instance());
-	vector<int> i;
-	vector<string> s;
-
-	Controllable::Flag controllable_flags;
-
-#define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
-#define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
-#define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
-#define REGISTER_CLASS_ENUM(t,e) i.push_back (t::e); s.push_back (#e)
-
-	REGISTER_CLASS_ENUM (Controllable, Toggle);
-	REGISTER_CLASS_ENUM (Controllable, GainLike);
-	REGISTER (controllable_flags);
+	EnumWriter::destroy ();
 }

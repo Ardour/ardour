@@ -32,11 +32,6 @@ using namespace PBD;
 int
 curvetest (string filename)
 {
-	// needed to initialize ID objects/counter used
-	// by Curve et al.
-
-	PBD::ID::init ();
-
 	ifstream in (filename.c_str());
 	stringstream line;
 	//Evoral::Parameter param(GainAutomation, -1.0, +1.0, 0.0);

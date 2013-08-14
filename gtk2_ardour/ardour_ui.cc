@@ -293,21 +293,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	/* lets get this party started */
 
-	try {
-		if (ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization, localedir)) {
-			throw failed_constructor ();
-		}
+	setup_gtk_ardour_enums ();
+	setup_profile ();
 
-		setup_gtk_ardour_enums ();
-		setup_profile ();
-
-		SessionEvent::create_per_thread_pool ("GUI", 512);
-
-	} catch (failed_constructor& err) {
-		error << string_compose (_("could not initialize %1."), PROGRAM_NAME) << endmsg;
-		// pass it on up
-		throw;
-	}
+	SessionEvent::create_per_thread_pool ("GUI", 512);
 
 	/* we like keyboards */
 
