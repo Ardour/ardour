@@ -20,6 +20,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/async_midi_port.h"
 #include "ardour/midiport_manager.h"
+#include "ardour/rc_configuration.h"
 
 #include "i18n.h"
 
@@ -54,13 +55,6 @@ MidiPortManager::~MidiPortManager ()
 		AudioEngine::instance()->unregister_port (_midi_clock_output_port);
 	}
 
-}
-
-MidiPort*
-MidiPortManager::port (string const & n)
-{
-	boost::shared_ptr<MidiPort> mp =  boost::dynamic_pointer_cast<MidiPort> (AudioEngine::instance()->get_port_by_name (n));
-	return mp.get();
 }
 
 void
@@ -116,19 +110,65 @@ MidiPortManager::create_ports ()
 	_mtc_output_port->set_always_parse (true);
 	_midi_clock_input_port->set_always_parse (true);
 	_midi_clock_output_port->set_always_parse (true);
+
+	set_midi_port_states ();
 }
 
 void
-MidiPortManager::set_port_states (list<XMLNode*> s)
+MidiPortManager::set_midi_port_states ()
 {
-	PortManager::PortList pl;
+	list<XMLNode*> nodes;
+	XMLProperty* prop;
+	typedef map<std::string,boost::shared_ptr<Port> > PortMap;
+	PortMap ports;
+	const int version = 0;
 
-	AudioEngine::instance()->get_ports (DataType::MIDI, pl);
+	nodes = Config->midi_port_states ();
+
+	ports.insert (make_pair (_mtc_input_port->name(), _mtc_input_port));
+	ports.insert (make_pair (_mtc_output_port->name(), _mtc_output_port));
+	ports.insert (make_pair (_midi_clock_input_port->name(), _midi_clock_input_port));
+	ports.insert (make_pair (_midi_clock_output_port->name(), _midi_clock_output_port));
+	ports.insert (make_pair (_midi_input_port->name(), _midi_in));
+	ports.insert (make_pair (_midi_output_port->name(), _midi_out));
+	ports.insert (make_pair (_mmc_input_port->name(), _mmc_in));
+	ports.insert (make_pair (_mmc_output_port->name(), _mmc_out));
 	
-	for (list<XMLNode*>::iterator i = s.begin(); i != s.end(); ++i) {
-		for (PortManager::PortList::const_iterator j = pl.begin(); j != pl.end(); ++j) {
-			// (*j)->set_state (**i);
+	for (list<XMLNode*>::iterator n = nodes.begin(); n != nodes.end(); ++n) {
+		if ((prop = (*n)->property (X_("name"))) == 0) {
+			continue;
 		}
+
+		PortMap::iterator p = ports.find (prop->value());
+		if (p == ports.end()) {
+			continue;
+		}
+		
+		p->second->set_state (**n, version);
 	}
 }
+
+list<XMLNode*>
+MidiPortManager::get_midi_port_states () const
+{
+	typedef map<std::string,boost::shared_ptr<Port> > PortMap;
+	PortMap ports;
+	list<XMLNode*> s;
+
+	ports.insert (make_pair (_mtc_input_port->name(), _mtc_input_port));
+	ports.insert (make_pair (_mtc_output_port->name(), _mtc_output_port));
+	ports.insert (make_pair (_midi_clock_input_port->name(), _midi_clock_input_port));
+	ports.insert (make_pair (_midi_clock_output_port->name(), _midi_clock_output_port));
+	ports.insert (make_pair (_midi_input_port->name(), _midi_in));
+	ports.insert (make_pair (_midi_output_port->name(), _midi_out));
+	ports.insert (make_pair (_mmc_input_port->name(), _mmc_in));
+	ports.insert (make_pair (_mmc_output_port->name(), _mmc_out));
+
+	for (PortMap::const_iterator p = ports.begin(); p != ports.end(); ++p) {
+		s.push_back (&p->second->get_state());
+	}
+
+	return s;
+}
+
 

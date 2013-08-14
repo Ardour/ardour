@@ -27,12 +27,13 @@
 #include "pbd/xml++.h"
 #include "pbd/file_utils.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/diskstream.h"
 #include "ardour/filesystem_paths.h"
+#include "ardour/port.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session_metadata.h"
-#include "ardour/midiport_manager.h"
 
 #include "i18n.h"
 
@@ -62,9 +63,12 @@ RCConfiguration::RCConfiguration ()
 {
 }
 
-
 RCConfiguration::~RCConfiguration ()
 {
+	for (list<XMLNode*>::iterator i = _old_midi_port_states.begin(); i != _old_midi_port_states.end(); ++i) {
+		delete *i;
+	}
+
 	for (list<XMLNode*>::iterator i = _midi_port_states.begin(); i != _midi_port_states.end(); ++i) {
 		delete *i;
 	}
@@ -176,20 +180,10 @@ RCConfiguration::get_state ()
 
 	root = new XMLNode("Ardour");
 
-	/* XXX 
-	 * GET STATE OF MIDI::Port HERE
-	 */
-#if 0
-        MidiPortManager* mm = MidiPortManager::instance();
-
-        if (mm) {
-		boost::shared_ptr<const MidiPortManager::PortList> ports = mm->get_midi_ports();
-
-                for (MidiPortManager::PortList::const_iterator i = ports->begin(); i != ports->end(); ++i) {
-                        // root->add_child_nocopy ((*i)->get_state());
-                }
-        }
-#endif
+	list<XMLNode*> midi_port_nodes = AudioEngine::instance()->get_midi_port_states();
+	for (list<XMLNode*>::const_iterator n = midi_port_nodes.begin(); n != midi_port_nodes.end(); ++n) {
+		 root->add_child_nocopy (**n);
+	}
 
 	root->add_child_nocopy (get_variables ());
 
@@ -255,6 +249,8 @@ RCConfiguration::set_state (const XMLNode& root, int version)
 		} else if (node->name() == ControlProtocolManager::state_node_name) {
 			_control_protocol_state = new XMLNode (*node);
 		} else if (node->name() == MIDI::Port::state_node_name) {
+			_old_midi_port_states.push_back (new XMLNode (*node));
+		} else if (node->name() == ARDOUR::Port::state_node_name) {
 			_midi_port_states.push_back (new XMLNode (*node));
 		}
 	}

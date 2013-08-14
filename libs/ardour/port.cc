@@ -44,6 +44,7 @@ PBD::Signal0<void> Port::PortDrop;
 bool         Port::_connecting_blocked = false;
 pframes_t    Port::_global_port_buffer_offset = 0;
 pframes_t    Port::_cycle_nframes = 0;
+std::string  Port::state_node_name = X_("Port");
 
 /* a handy define to shorten what would otherwise be a needlessly verbose
  * repeated phrase
@@ -453,3 +454,61 @@ Port::physically_connected () const
 	return port_engine.physically_connected (_port_handle);
 }
 
+XMLNode&
+Port::get_state () const
+{
+	XMLNode* root = new XMLNode (state_node_name);
+
+	root->add_property (X_("name"), AudioEngine::instance()->make_port_name_relative (name()));
+
+	if (receives_input()) {
+		root->add_property (X_("direction"), X_("input"));
+	} else {
+		root->add_property (X_("direction"), X_("output"));
+	}
+
+	vector<string> c;
+	
+	get_connections (c);
+
+	for (vector<string>::const_iterator i = c.begin(); i != c.end(); ++i) {
+		XMLNode* child = new XMLNode (X_("Connection"));
+		child->add_property (X_("other"), *i);
+		root->add_child_nocopy (*child);
+	}
+
+	return *root;
+}
+
+int
+Port::set_state (const XMLNode& node, int)
+{
+	const XMLProperty* prop;
+
+	if (node.name() != state_node_name) {
+		return -1;
+	}
+
+	if ((prop = node.property (X_("name"))) != 0) {
+		set_name (prop->value());
+	}
+
+	const XMLNodeList& children (node.children());
+
+	_connections.clear ();
+
+	for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
+
+		if ((*c)->name() != X_("Connection")) {
+			continue;
+		}
+		
+		if ((prop = (*c)->property (X_("other"))) == 0) {
+			continue;
+		}
+
+		_connections.insert (prop->value());
+	}
+
+	return 0;
+}

@@ -41,11 +41,6 @@ class MidiPortManager {
     MidiPortManager();
     virtual ~MidiPortManager ();
 	
-    MidiPort* add_port (MidiPort *);
-    void remove_port (MidiPort *);
-
-    MidiPort* port (const std::string&);
-    
     /* Ports used for control. These are read/written to outside of the
      * process callback (asynchronously with respect to when data
      * actually arrives). 
@@ -70,7 +65,8 @@ class MidiPortManager {
     boost::shared_ptr<MidiPort> midi_clock_input_port() const { return _midi_clock_input_port; }
     boost::shared_ptr<MidiPort> midi_clock_output_port() const { return _midi_clock_output_port; }
     
-    void set_port_states (std::list<XMLNode*>);
+    void set_midi_port_states ();
+    std::list<XMLNode*> get_midi_port_states () const;
 
     PBD::Signal0<void> PortsChanged;
 
@@ -80,6 +76,9 @@ class MidiPortManager {
     MIDI::Port* _midi_output_port;
     MIDI::Port* _mmc_input_port;
     MIDI::Port* _mmc_output_port;
+    /* these point to the same objects as the 4 members above,
+       but cast to their ARDOUR::Port base class
+    */
     boost::shared_ptr<Port> _midi_in;
     boost::shared_ptr<Port> _midi_out;
     boost::shared_ptr<Port> _mmc_in;

@@ -135,6 +135,11 @@ public:
 
 	virtual void increment_port_buffer_offset (pframes_t n);
 
+	virtual XMLNode& get_state (void) const;
+	virtual int set_state (const XMLNode&, int version);
+
+        static std::string state_node_name;
+
 protected:
 
 	Port (std::string const &, DataType, PortFlags);
