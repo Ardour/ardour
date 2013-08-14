@@ -130,32 +130,6 @@ ARDOUR::get_jack_default_audio_driver_name (string& audio_driver_name)
 }
 
 void
-ARDOUR::get_jack_midi_system_names (const string& driver, vector<string>& midi_system_names)
-{
-	midi_system_names.push_back (get_none_string ());
-#ifdef WIN32
-	midi_system_names.push_back (winmme_midi_driver_name);
-#elif __APPLE__
-	midi_system_names.push_back (coreaudio_midi_driver_name);
-#else
-#ifdef HAVE_ALSA
-	if (driver == alsa_driver_name) {
-		midi_system_names.push_back (alsaseq_midi_driver_name);
-		midi_system_names.push_back (alsaraw_midi_driver_name);
-	}
-#endif
-#endif
-}
-
-void
-ARDOUR::get_jack_default_midi_system_name (const string& driver, string& midi_system_name)
-{
-	vector<string> drivers;
-	get_jack_midi_system_names (driver, drivers);
-	midi_system_name = drivers.front ();
-}
-
-void
 ARDOUR::get_jack_sample_rate_strings (vector<string>& samplerates)
 {
 	// do these really need to be translated?
@@ -584,7 +558,7 @@ ARDOUR::set_path_env_for_jack_autostart (const vector<std::string>& dirs)
 #ifdef __APPLE__
 	// push it back into the environment so that auto-started JACK can find it.
 	// XXX why can't we just expect OS X users to have PATH set correctly? we can't ...
-	setenv ("PATH", SearchPath(dirs).to_string(), 1);
+	setenv ("PATH", SearchPath(dirs).to_string().c_str(), 1);
 #else
 	/* silence a compiler unused variable warning */
 	(void) dirs;
@@ -636,7 +610,8 @@ ARDOUR::get_jack_server_paths (const vector<std::string>& server_dir_paths,
 		vector<std::string>& server_paths)
 {
 	for (vector<string>::const_iterator i = server_names.begin(); i != server_names.end(); ++i) {
-		find_matching_files_in_directories (server_dir_paths, Glib::PatternSpec(*i), server_paths);
+                Glib::PatternSpec ps (*i);
+		find_matching_files_in_directories (server_dir_paths, ps, server_paths);
 	}
 	return !server_paths.empty();
 }

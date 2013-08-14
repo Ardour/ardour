@@ -46,16 +46,6 @@ namespace ARDOUR {
 	void get_jack_default_audio_driver_name (std::string& driver_name);
 
 	/**
-	 * Get a list of possible JACK midi driver names based on platform
-	 */
-	void get_jack_midi_system_names (const std::string& driver, std::vector<std::string>& driver_names);
-
-	/**
-	 * Get the default JACK midi driver based on platform
-	 */
-	void get_jack_default_midi_system_name (const std::string& driver_name, std::string& midi_system);
-
-	/**
 	 * Get a list of possible samplerates supported be JACK
 	 */
 	void get_jack_sample_rate_strings (std::vector<std::string>& sample_rates);
