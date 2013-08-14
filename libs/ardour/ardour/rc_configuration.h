@@ -53,7 +53,6 @@ class RCConfiguration : public Configuration
 
 	XMLNode* control_protocol_state () { return _control_protocol_state; }
 	std::list<XMLNode*> midi_port_states () { return _midi_port_states; }
-	std::list<XMLNode*> old_midi_port_states () { return _old_midi_port_states; }
 
 	/* define accessor methods */
 
@@ -87,7 +86,6 @@ class RCConfiguration : public Configuration
 	    state once the audio engine and hence ports are up.
 	*/
 	std::list<XMLNode*> _midi_port_states;
-	std::list<XMLNode*> _old_midi_port_states;
 };
 
 /* XXX: rename this */

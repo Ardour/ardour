@@ -65,10 +65,6 @@ RCConfiguration::RCConfiguration ()
 
 RCConfiguration::~RCConfiguration ()
 {
-	for (list<XMLNode*>::iterator i = _old_midi_port_states.begin(); i != _old_midi_port_states.end(); ++i) {
-		delete *i;
-	}
-
 	for (list<XMLNode*>::iterator i = _midi_port_states.begin(); i != _midi_port_states.end(); ++i) {
 		delete *i;
 	}
@@ -248,8 +244,6 @@ RCConfiguration::set_state (const XMLNode& root, int version)
 			SessionMetadata::Metadata()->set_state (*node, version);
 		} else if (node->name() == ControlProtocolManager::state_node_name) {
 			_control_protocol_state = new XMLNode (*node);
-		} else if (node->name() == MIDI::Port::state_node_name) {
-			_old_midi_port_states.push_back (new XMLNode (*node));
 		} else if (node->name() == ARDOUR::Port::state_node_name) {
 			_midi_port_states.push_back (new XMLNode (*node));
 		}
