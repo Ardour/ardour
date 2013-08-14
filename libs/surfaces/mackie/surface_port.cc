@@ -46,10 +46,6 @@ using namespace Mackie;
 using namespace PBD;
 using namespace ARDOUR;
 
-/** @param input_port Input MIDI::Port; this object takes responsibility for
- *  adding & removing it from the MIDI::Manager and destroying it.  @param
- *  output_port Output MIDI::Port; responsibility similarly taken.
- */
 SurfacePort::SurfacePort (Surface& s)
 	: _surface (&s)
 {
