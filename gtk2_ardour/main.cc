@@ -478,10 +478,6 @@ int main (int argc, char *argv[])
 		exit (1);
 	}
 
-	if (curvetest_file) {
-		return curvetest (curvetest_file);
-	}
-
 	cout << PROGRAM_NAME
 	     << VERSIONSTRING
 	     << _(" (built using ")
@@ -509,7 +505,14 @@ int main (int argc, char *argv[])
 
 	/* some GUI objects need this */
 
-	PBD::ID::init ();
+	if (!ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization, localedir)) {
+		error << string_compose (_("could not initialize %1."), PROGRAM_NAME) << endmsg;
+		exit (1);
+	}
+
+	if (curvetest_file) {
+		return curvetest (curvetest_file);
+	}
 
 	if (::signal (SIGPIPE, sigpipe_handler)) {
 		cerr << _("Cannot xinstall SIGPIPE error handler") << endl;

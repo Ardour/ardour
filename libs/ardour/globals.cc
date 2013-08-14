@@ -51,8 +51,6 @@
 #undef check /* stupid Apple and their un-namespaced, generic Carbon macros */
 #endif 
 
-#include <giomm.h>
-
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
@@ -61,6 +59,7 @@
 #include "pbd/cpus.h"
 #include "pbd/error.h"
 #include "pbd/id.h"
+#include "pbd/pbd.h"
 #include "pbd/strsplit.h"
 #include "pbd/fpu.h"
 #include "pbd/file_utils.h"
@@ -108,6 +107,8 @@ ARDOUR::AudioLibrary* ARDOUR::Library = 0;
 using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
+
+bool libardour_initialized = false;
 
 compute_peak_t          ARDOUR::compute_peak = 0;
 find_peaks_t            ARDOUR::find_peaks = 0;
@@ -217,21 +218,19 @@ lotsa_files_please ()
 	}
 }
 
-int
+bool
 ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir)
 {
-	if (!Glib::thread_supported()) {
-		Glib::thread_init();
+	if (libardour_initialized) {
+		return true;
 	}
 
-	// this really should be in PBD::init..if there was one
-	Gio::init ();
+	if (!PBD::init()) return false;
 
 #ifdef ENABLE_NLS
 	(void) bindtextdomain(PACKAGE, localedir);
 #endif
 
-	PBD::ID::init ();
 	SessionEvent::init_event_pool ();
 
 	SessionObject::make_property_quarks ();
@@ -271,7 +270,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	Config = new RCConfiguration;
 
 	if (Config->load_state ()) {
-		return -1;
+		return false;
 	}
 
 	Config->set_use_windows_vst (use_windows_vst);
@@ -284,13 +283,13 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 #ifdef WINDOWS_VST_SUPPORT
 	if (Config->get_use_windows_vst() && fst_init (0)) {
-		return -1;
+		return false;
 	}
 #endif
 
 #ifdef LXVST_SUPPORT
 	if (Config->get_use_lxvst() && vstfx_init (0)) {
-		return -1;
+		return false;
 	}
 #endif
 
@@ -335,7 +334,9 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 	ARDOUR::AudioEngine::create ();
 
-	return 0;
+	libardour_initialized = true;
+
+	return true;
 }
 
 void
@@ -366,7 +367,7 @@ ARDOUR::cleanup ()
 #ifdef LXVST_SUPPORT
 	vstfx_exit();
 #endif
-	EnumWriter::destroy ();
+	PBD::cleanup ();
 	return 0;
 }
 

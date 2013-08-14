@@ -50,7 +50,15 @@ namespace ARDOUR {
 	extern PBD::Signal1<void,std::string> BootMessage;
 	extern PBD::Signal0<void> GUIIdle;
 
-	int init (bool with_vst, bool try_optimization, const char* localedir);
+	/**
+	 * @param with_vst true to enable VST Support
+	 * @param try_optimization true to enable hardware optimized routines
+	 * for mixing, finding peak values etc.
+	 * @param localedir Directory to look for localisation files
+	 *
+	 * @return true if Ardour library was successfully initialized
+	 */
+	bool init (bool with_vst, bool try_optimization, const char* localedir);
 	void init_post_engine ();
 	int cleanup ();
 	bool no_auto_connect ();
