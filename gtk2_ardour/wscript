@@ -211,6 +211,7 @@ gtk2_ardour_sources = [
         'shuttle_control.cc',
         'simpleline.cc',
         'simplerect.cc',
+	'soundcloud_export.cc',
         'splash.cc',
         'speaker_dialog.cc',
         'startup.cc',

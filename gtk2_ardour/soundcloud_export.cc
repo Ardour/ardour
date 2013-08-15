@@ -37,7 +37,8 @@ using namespace PBD;
 
 static const std::string base_url = "http://api.soundcloud.com/tracks/13158665?client_id=";
 
-size_t WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
+size_t
+WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
 {
 	register int realsize = (int)(size * nmemb);
 	struct MemoryStruct *mem = (struct MemoryStruct *)data;
@@ -58,8 +59,8 @@ SoundcloudUploader::SoundcloudUploader()
 	multi_handle = curl_multi_init();
 }
 
-string
-SoundcloudUploader::Get_Auth_Token( string username, string password )
+std::string
+SoundcloudUploader::Get_Auth_Token( std::string username, std::string password )
 {
 	struct MemoryStruct xml_page;
 	xml_page.memory = NULL;
@@ -131,7 +132,7 @@ SoundcloudUploader::Get_Auth_Token( string username, string password )
 			return "";
 		}
 
-		string token = strtok( xml_page.memory, "access_token" );
+		std::string token = strtok( xml_page.memory, "access_token" );
 		token = strtok( NULL, "\"" );
 		token = strtok( NULL, "\"" );
 		token = strtok( NULL, "\"" );
@@ -144,7 +145,7 @@ SoundcloudUploader::Get_Auth_Token( string username, string password )
 }
 
 std::string
-SoundcloudUploader::Upload(string file_path, string title, string auth_token, bool ispublic, curl_progress_callback progress_callback, void *caller )
+SoundcloudUploader::Upload(std::string file_path, std::string title, std::string auth_token, bool ispublic, curl_progress_callback progress_callback, void *caller )
 {
 	int still_running;
 
@@ -197,7 +198,7 @@ SoundcloudUploader::Upload(string file_path, string title, string auth_token, bo
 	if(curl_handle && multi_handle) {
 
 		/* what URL that receives this POST */ 
-		string url = "https://api.soundcloud.com/tracks";
+		std::string url = "https://api.soundcloud.com/tracks";
 		curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
 		curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
 
