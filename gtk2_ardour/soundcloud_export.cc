@@ -66,55 +66,55 @@ SoundcloudUploader::Get_Auth_Token( string username, string password )
 	xml_page.size = 0;
 
 	setcUrlOptions();
-	
+
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &xml_page);
 
-  struct curl_httppost *formpost=NULL;
-  struct curl_httppost *lastptr=NULL;
- 
-  /* Fill in the filename field */ 
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "client_id",
-               CURLFORM_COPYCONTENTS, "e7ac891eef866f139773cf8102b7a719",
-               CURLFORM_END);
- 
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "client_secret",
-               CURLFORM_COPYCONTENTS, "d78f34d19f09d26731801a0cb0f382c4",
-               CURLFORM_END);
- 
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "grant_type",
-               CURLFORM_COPYCONTENTS, "password",
-               CURLFORM_END);
- 
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "username",
-               CURLFORM_COPYCONTENTS, username.c_str(),
-               CURLFORM_END);
- 
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "password",
-               CURLFORM_COPYCONTENTS, password.c_str(),
-               CURLFORM_END);
- 
+	struct curl_httppost *formpost=NULL;
+	struct curl_httppost *lastptr=NULL;
+
+	/* Fill in the filename field */ 
+	curl_formadd(&formpost,
+			&lastptr,
+			CURLFORM_COPYNAME, "client_id",
+			CURLFORM_COPYCONTENTS, "e7ac891eef866f139773cf8102b7a719",
+			CURLFORM_END);
+
+	curl_formadd(&formpost,
+			&lastptr,
+			CURLFORM_COPYNAME, "client_secret",
+			CURLFORM_COPYCONTENTS, "d78f34d19f09d26731801a0cb0f382c4",
+			CURLFORM_END);
+
+	curl_formadd(&formpost,
+			&lastptr,
+			CURLFORM_COPYNAME, "grant_type",
+			CURLFORM_COPYCONTENTS, "password",
+			CURLFORM_END);
+
+	curl_formadd(&formpost,
+			&lastptr,
+			CURLFORM_COPYNAME, "username",
+			CURLFORM_COPYCONTENTS, username.c_str(),
+			CURLFORM_END);
+
+	curl_formadd(&formpost,
+			&lastptr,
+			CURLFORM_COPYNAME, "password",
+			CURLFORM_COPYCONTENTS, password.c_str(),
+			CURLFORM_END);
+
 	struct curl_slist *headerlist=NULL;
 	headerlist = curl_slist_append(headerlist, "Expect:");
 	headerlist = curl_slist_append(headerlist, "Accept: application/xml");
-    curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headerlist);
+	curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headerlist);
 
-    /* what URL that receives this POST */ 
+	/* what URL that receives this POST */ 
 	std::string url = "https://api.soundcloud.com/oauth2/token";
-    curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, formpost);
+	curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
+	curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, formpost);
 
-    curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
+	curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
 
 	// perform online request
 	CURLcode res = curl_easy_perform(curl_handle);
@@ -130,7 +130,7 @@ SoundcloudUploader::Get_Auth_Token( string username, string password )
 			error << _("Upload to Soundcloud failed.  Perhaps your email or password are incorrect?\n") << endmsg;
 			return "";
 		}
-		
+
 		string token = strtok( xml_page.memory, "access_token" );
 		token = strtok( NULL, "\"" );
 		token = strtok( NULL, "\"" );
@@ -146,136 +146,136 @@ SoundcloudUploader::Get_Auth_Token( string username, string password )
 std::string
 SoundcloudUploader::Upload(string file_path, string title, string auth_token, bool ispublic, curl_progress_callback progress_callback, void *caller )
 {
-  int still_running;
- 
- 	struct MemoryStruct xml_page;
+	int still_running;
+
+	struct MemoryStruct xml_page;
 	xml_page.memory = NULL;
 	xml_page.size = 0;
 
 	setcUrlOptions();
-	
+
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) &xml_page);
 
 	struct curl_httppost *formpost=NULL;
 	struct curl_httppost *lastptr=NULL;
- 
-  /* Fill in the file upload field. This makes libcurl load data from
-     the given file name when curl_easy_perform() is called. */ 
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "track[asset_data]",
-               CURLFORM_FILE, file_path.c_str(),
-               CURLFORM_END);
- 
-  /* Fill in the filename field */ 
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "oauth_token",
-               CURLFORM_COPYCONTENTS, auth_token.c_str(),
-               CURLFORM_END);
- 
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "track[title]",
-               CURLFORM_COPYCONTENTS, title.c_str(),
-               CURLFORM_END);
- 
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "track[sharing]",
-               CURLFORM_COPYCONTENTS, ispublic ? "public" : "private",
-               CURLFORM_END);
- 
-  /* initalize custom header list (stating that Expect: 100-continue is not
-     wanted */ 
-  struct curl_slist *headerlist=NULL;
-  static const char buf[] = "Expect:";
-  headerlist = curl_slist_append(headerlist, buf);
- 
- 
-  if(curl_handle && multi_handle) {
- 
-    /* what URL that receives this POST */ 
-    string url = "https://api.soundcloud.com/tracks";
-    curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
- 
-    curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headerlist);
-    curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, formpost);
- 
-	curl_easy_setopt (curl_handle, CURLOPT_NOPROGRESS, 0); // turn on the progress bar
-	curl_easy_setopt (curl_handle, CURLOPT_PROGRESSFUNCTION, progress_callback);
-	curl_easy_setopt (curl_handle, CURLOPT_PROGRESSDATA, caller);
 
-    curl_multi_add_handle(multi_handle, curl_handle);
- 
-    curl_multi_perform(multi_handle, &still_running);
- 
+	/* Fill in the file upload field. This makes libcurl load data from
+	   the given file name when curl_easy_perform() is called. */ 
+	curl_formadd(&formpost,
+			&lastptr,
+			CURLFORM_COPYNAME, "track[asset_data]",
+			CURLFORM_FILE, file_path.c_str(),
+			CURLFORM_END);
 
-    while(still_running) {
-      struct timeval timeout;
-      int rc; /* select() return code */ 
- 
-      fd_set fdread;
-      fd_set fdwrite;
-      fd_set fdexcep;
-      int maxfd = -1;
- 
-      long curl_timeo = -1;
- 
-      FD_ZERO(&fdread);
-      FD_ZERO(&fdwrite);
-      FD_ZERO(&fdexcep);
- 
-      /* set a suitable timeout to play around with */ 
-      timeout.tv_sec = 1;
-      timeout.tv_usec = 0;
- 
-      curl_multi_timeout(multi_handle, &curl_timeo);
-      if(curl_timeo >= 0) {
-        timeout.tv_sec = curl_timeo / 1000;
-        if(timeout.tv_sec > 1)
-          timeout.tv_sec = 1;
-        else
-          timeout.tv_usec = (curl_timeo % 1000) * 1000;
-      }
- 
-      /* get file descriptors from the transfers */ 
-      curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
- 
-      /* In a real-world program you OF COURSE check the return code of the
-         function calls.  On success, the value of maxfd is guaranteed to be
-         greater or equal than -1.  We call select(maxfd + 1, ...), specially in
-         case of (maxfd == -1), we call select(0, ...), which is basically equal
-         to sleep. */ 
- 
-      rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
- 
-      switch(rc) {
-      case -1:
-        /* select error */ 
-        break;
-      case 0:
-      default:
-        /* timeout or readable/writable sockets */ 
+	/* Fill in the filename field */ 
+	curl_formadd(&formpost,
+			&lastptr,
+			CURLFORM_COPYNAME, "oauth_token",
+			CURLFORM_COPYCONTENTS, auth_token.c_str(),
+			CURLFORM_END);
+
+	curl_formadd(&formpost,
+			&lastptr,
+			CURLFORM_COPYNAME, "track[title]",
+			CURLFORM_COPYCONTENTS, title.c_str(),
+			CURLFORM_END);
+
+	curl_formadd(&formpost,
+			&lastptr,
+			CURLFORM_COPYNAME, "track[sharing]",
+			CURLFORM_COPYCONTENTS, ispublic ? "public" : "private",
+			CURLFORM_END);
+
+	/* initalize custom header list (stating that Expect: 100-continue is not
+	   wanted */ 
+	struct curl_slist *headerlist=NULL;
+	static const char buf[] = "Expect:";
+	headerlist = curl_slist_append(headerlist, buf);
+
+
+	if(curl_handle && multi_handle) {
+
+		/* what URL that receives this POST */ 
+		string url = "https://api.soundcloud.com/tracks";
+		curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
+		curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
+
+		curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headerlist);
+		curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, formpost);
+
+		curl_easy_setopt (curl_handle, CURLOPT_NOPROGRESS, 0); // turn on the progress bar
+		curl_easy_setopt (curl_handle, CURLOPT_PROGRESSFUNCTION, progress_callback);
+		curl_easy_setopt (curl_handle, CURLOPT_PROGRESSDATA, caller);
+
+		curl_multi_add_handle(multi_handle, curl_handle);
+
 		curl_multi_perform(multi_handle, &still_running);
-        break;
-      }
-    } 
- 
-    /* then cleanup the formpost chain */ 
-	curl_formfree(formpost);
- 
-    /* free slist */ 
-	curl_slist_free_all (headerlist);
-  }
-  
-  curl_easy_setopt (curl_handle, CURLOPT_NOPROGRESS, 1); // turn off the progress bar
 
- 	if(xml_page.memory){
 
-std::cout << xml_page.memory << std::endl;
+		while(still_running) {
+			struct timeval timeout;
+			int rc; /* select() return code */ 
+
+			fd_set fdread;
+			fd_set fdwrite;
+			fd_set fdexcep;
+			int maxfd = -1;
+
+			long curl_timeo = -1;
+
+			FD_ZERO(&fdread);
+			FD_ZERO(&fdwrite);
+			FD_ZERO(&fdexcep);
+
+			/* set a suitable timeout to play around with */ 
+			timeout.tv_sec = 1;
+			timeout.tv_usec = 0;
+
+			curl_multi_timeout(multi_handle, &curl_timeo);
+			if(curl_timeo >= 0) {
+				timeout.tv_sec = curl_timeo / 1000;
+				if(timeout.tv_sec > 1)
+					timeout.tv_sec = 1;
+				else
+					timeout.tv_usec = (curl_timeo % 1000) * 1000;
+			}
+
+			/* get file descriptors from the transfers */ 
+			curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
+
+			/* In a real-world program you OF COURSE check the return code of the
+			   function calls.  On success, the value of maxfd is guaranteed to be
+			   greater or equal than -1.  We call select(maxfd + 1, ...), specially in
+			   case of (maxfd == -1), we call select(0, ...), which is basically equal
+			   to sleep. */ 
+
+			rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+
+			switch(rc) {
+				case -1:
+					/* select error */ 
+					break;
+				case 0:
+				default:
+					/* timeout or readable/writable sockets */ 
+					curl_multi_perform(multi_handle, &still_running);
+					break;
+			}
+		} 
+
+		/* then cleanup the formpost chain */ 
+		curl_formfree(formpost);
+
+		/* free slist */ 
+		curl_slist_free_all (headerlist);
+	}
+
+	curl_easy_setopt (curl_handle, CURLOPT_NOPROGRESS, 1); // turn off the progress bar
+
+	if(xml_page.memory){
+
+		std::cout << xml_page.memory << std::endl;
 
 		XMLTree doc;
 		doc.read_buffer( xml_page.memory );
@@ -291,13 +291,13 @@ std::cout << xml_page.memory << std::endl;
 			std::cout << "no child node \"permalink-url\" found!" << std::endl;
 			return "";
 		}
-		
+
 		XMLNode *text_node = url_node->child("text");
 		if (!text_node) {
 			std::cout << "no text node found!" << std::endl;
 			return "";
 		}
-		
+
 		free( xml_page.memory );
 		return text_node->content();
 	}
