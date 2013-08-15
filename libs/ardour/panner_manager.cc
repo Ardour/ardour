@@ -29,10 +29,6 @@
 #include "ardour/debug.h"
 #include "ardour/panner_manager.h"
 
-#ifdef SearchPath
-#undef SearchPath
-#endif
-
 #include "ardour/panner_search_path.h"
 
 #include "i18n.h"

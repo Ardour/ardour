@@ -20,36 +20,32 @@
 #ifndef PBD_SEARCH_PATH_INCLUDED
 #define PBD_SEARCH_PATH_INCLUDED
 
-#ifdef SearchPath
-#undef SearchPath
-#endif
-
 #include <string>
 #include <vector>
 
 namespace PBD {
 
 /**
- * @class SearchPath
+ * @class Searchpath
  *
- * The SearchPath class is a helper class for getting a
+ * The Searchpath class is a helper class for getting a
  * vector of paths contained in a search path string where a 
  * "search path string" contains absolute directory paths 
  * separated by a colon(:) or a semi-colon(;) on windows.
  *
- * The SearchPath class does not test whether the paths exist
+ * The Searchpath class does not test whether the paths exist
  * or are directories. It is basically just a container.
  */
-class SearchPath : public std::vector<std::string>
+class Searchpath : public std::vector<std::string>
 {
 public:
 	/**
-	 * Create an empty SearchPath.
+	 * Create an empty Searchpath.
 	 */
-	SearchPath ();
+	Searchpath ();
 
 	/**
-	 * Initialize SearchPath from a string where the string contains
+	 * Initialize Searchpath from a string where the string contains
 	 * one or more absolute paths to directories which are delimited 
 	 * by a path separation character. The path delimeter is a 
 	 * colon(:) on unix and a semi-colon(;) on windows.
@@ -59,15 +55,15 @@ public:
 	 * 
 	 * @param search_path A path string.
 	 */
-	SearchPath (const std::string& search_path);
+	Searchpath (const std::string& search_path);
 
 	/**
-	 * Initialize SearchPath from a vector of paths that may or may
+	 * Initialize Searchpath from a vector of paths that may or may
 	 * not exist.
 	 *
 	 * @param paths A vector of paths.
 	 */
-	SearchPath (const std::vector<std::string>& paths);
+	Searchpath (const std::vector<std::string>& paths);
 
 	/**
 	 * @return a search path string.
@@ -80,29 +76,29 @@ public:
 	/**
 	 * Add all the directories in path to this.
 	 */
-	SearchPath& operator+= (const SearchPath& spath);
+	Searchpath& operator+= (const Searchpath& spath);
 
 	/**
 	 * Add another directory path to the search path.
 	 */
-	SearchPath& operator+= (const std::string& directory_path);
+	Searchpath& operator+= (const std::string& directory_path);
 	
 	/**
-	 * Concatenate another SearchPath onto this.
+	 * Concatenate another Searchpath onto this.
 	 */
-	SearchPath& operator+ (const SearchPath& other);
+	Searchpath& operator+ (const Searchpath& other);
 	
 	/**
 	 * Add another path to the search path.
 	 */
-	SearchPath& operator+ (const std::string& directory_path);
+	Searchpath& operator+ (const std::string& directory_path);
 
 	/**
 	 * Add a sub-directory to each path in the search path.
 	 * @param subdir The directory name, it should not contain 
 	 * any path separating tokens.
 	 */
-	SearchPath& add_subdirectory_to_paths (const std::string& subdir);
+	Searchpath& add_subdirectory_to_paths (const std::string& subdir);
 
 protected:
 

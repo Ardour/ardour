@@ -101,7 +101,7 @@ ardour_dll_directory ()
 }
 
 #ifdef PLATFORM_WINDOWS
-SearchPath
+Searchpath
 windows_search_path ()
 {
 	std::string dll_dir_path(g_win32_get_package_installation_directory_of_module(NULL));
@@ -110,10 +110,10 @@ windows_search_path ()
 }
 #endif
 
-SearchPath
+Searchpath
 ardour_config_search_path ()
 {
-	static SearchPath search_path;
+	static Searchpath search_path;
 
 	if (search_path.empty()) {
 		search_path += user_config_directory();
@@ -126,17 +126,17 @@ ardour_config_search_path ()
 			::exit (1);
 		}
 		
-		search_path += SearchPath (s);
+		search_path += Searchpath (s);
 #endif
 	}
 
 	return search_path;
 }
 
-SearchPath
+Searchpath
 ardour_data_search_path ()
 {
-	static SearchPath search_path;
+	static Searchpath search_path;
 
 	if (search_path.empty()) {
 		search_path += user_config_directory();
@@ -149,7 +149,7 @@ ardour_data_search_path ()
 			::exit (1);
 		}
 		
-		search_path += SearchPath (s);
+		search_path += Searchpath (s);
 #endif
 	}
 

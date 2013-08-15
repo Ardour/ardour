@@ -24,10 +24,10 @@
 namespace ARDOUR {
 
 	/**
-	 * return a SearchPath containing directories in which to look for
+	 * return a Searchpath containing directories in which to look for
 	 * export_formats.
 	 */
-	PBD::SearchPath export_formats_search_path ();
+	PBD::Searchpath export_formats_search_path ();
 
 } // namespace ARDOUR
 

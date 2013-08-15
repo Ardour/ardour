@@ -22,10 +22,6 @@
 
 #include "pbd/search_path.h"
 
-#ifdef SearchPath
-#undef SearchPath
-#endif
-
 namespace ARDOUR {
 
 	/**
@@ -45,14 +41,14 @@ namespace ARDOUR {
 	 * @return the search path to be used when looking for per-system
 	 * configuration files. This may include user configuration files.
 	 */
-	PBD::SearchPath ardour_config_search_path ();
+	PBD::Searchpath ardour_config_search_path ();
 
 	/**
 	 * @return the search path to be used when looking for data files
 	 * that could be shared by systems (h/w and configuration independent
 	 * files, such as icons, XML files, etc)
 	 */
-	PBD::SearchPath ardour_data_search_path ();
+	PBD::Searchpath ardour_data_search_path ();
 
 } // namespace ARDOUR
 

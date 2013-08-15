@@ -33,12 +33,12 @@ using namespace PBD;
 
 namespace ARDOUR {
 
-SearchPath
+Searchpath
 ladspa_search_path ()
 {
-	SearchPath spath_env (Glib::getenv(ladspa_env_variable_name));
+	Searchpath spath_env (Glib::getenv(ladspa_env_variable_name));
 
-	SearchPath spath (user_config_directory ());
+	Searchpath spath (user_config_directory ());
 
 	spath += ardour_dll_directory ();
 	spath.add_subdirectory_to_paths (ladspa_dir_name);

@@ -38,10 +38,6 @@
 #include "ardour/types.h"
 #include "ardour/export_handler.h"
 
-#ifdef SearchPath
-#undef SearchPath
-#endif
-
 namespace ARDOUR
 {
 
@@ -106,7 +102,7 @@ class ExportProfileManager
 	std::vector<std::string> find_file (std::string const & pattern);
 
 	std::string  export_config_dir;
-	PBD::SearchPath search_path;
+	PBD::Searchpath search_path;
 
 /* Timespans */
   public:

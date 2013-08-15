@@ -442,7 +442,7 @@ static const char * const devinfo_env_variable_name = "ARDOUR_MCP_PATH";
 static const char* const devinfo_dir_name = "mcp";
 static const char* const devinfo_suffix = ".device";
 
-static SearchPath
+static Searchpath
 devinfo_search_path ()
 {
 	bool devinfo_path_defined = false;
@@ -452,7 +452,7 @@ devinfo_search_path ()
 		return spath_env;
 	}
 
-	SearchPath spath (ardour_data_search_path());
+	Searchpath spath (ardour_data_search_path());
 	spath.add_subdirectory_to_paths(devinfo_dir_name);
 
 	return spath;
@@ -472,7 +472,7 @@ DeviceInfo::reload_device_info ()
 	vector<string> s;
 	vector<string *> *devinfos;
 	PathScanner scanner;
-	SearchPath spath (devinfo_search_path());
+	Searchpath spath (devinfo_search_path());
 
 	devinfos = scanner (spath.to_string(), devinfo_filter, 0, false, true);
 	device_info.clear ();

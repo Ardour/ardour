@@ -94,10 +94,6 @@
 
 #include "i18n.h"
 
-#ifdef SearchPath
-#undef SearchPath
-#endif
-
 namespace ARDOUR {
 class MidiSource;
 class Processor;
@@ -4434,7 +4430,7 @@ Session::end_time_changed (framepos_t old)
 std::vector<std::string>
 Session::source_search_path (DataType type) const
 {
-	SearchPath sp;
+	Searchpath sp;
 
 	if (session_dirs.size() == 1) {
 		switch (type) {
@@ -4472,10 +4468,10 @@ Session::source_search_path (DataType type) const
 
 	switch (type) {
 	case DataType::AUDIO:
-		sp += SearchPath(config.get_audio_search_path ());
+		sp += Searchpath(config.get_audio_search_path ());
 		break;
 	case DataType::MIDI:
-		sp += SearchPath(config.get_midi_search_path ());
+		sp += Searchpath(config.get_midi_search_path ());
 		break;
 	}
 
@@ -4485,7 +4481,7 @@ Session::source_search_path (DataType type) const
 void
 Session::ensure_search_path_includes (const string& path, DataType type)
 {
-	SearchPath sp;
+	Searchpath sp;
 
 	if (path == ".") {
 		return;
@@ -4493,10 +4489,10 @@ Session::ensure_search_path_includes (const string& path, DataType type)
 
 	switch (type) {
 	case DataType::AUDIO:
-		sp += SearchPath(config.get_audio_search_path ());
+		sp += Searchpath(config.get_audio_search_path ());
 		break;
 	case DataType::MIDI:
-		sp += SearchPath (config.get_midi_search_path ());
+		sp += Searchpath (config.get_midi_search_path ());
 		break;
 	}
 

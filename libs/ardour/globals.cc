@@ -388,7 +388,7 @@ void
 ARDOUR::find_bindings_files (map<string,string>& files)
 {
 	vector<std::string> found;
-	SearchPath spath = ardour_config_search_path();
+	Searchpath spath = ardour_config_search_path();
 
 	if (getenv ("ARDOUR_SAE")) {
 		Glib::PatternSpec pattern("*SAE-*.bindings");

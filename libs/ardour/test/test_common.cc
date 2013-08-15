@@ -25,7 +25,7 @@
 
 using namespace std;
 
-PBD::SearchPath
+PBD::Searchpath
 test_search_path ()
 {
 #ifdef PLATFORM_WINDOWS

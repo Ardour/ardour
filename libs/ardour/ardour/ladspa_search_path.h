@@ -25,14 +25,14 @@
 namespace ARDOUR {
 
 	/**
-	 * return a SearchPath containing directories in which to look for
+	 * return a Searchpath containing directories in which to look for
 	 * LADSPA plugins.
 	 *
-	 * If LADSPA_PATH is defined then the SearchPath returned
+	 * If LADSPA_PATH is defined then the Searchpath returned
 	 * will contain the directories specified in it as well as the
 	 * user and system directories.
 	 */
-	PBD::SearchPath ladspa_search_path ();
+	PBD::Searchpath ladspa_search_path ();
 
 } // namespace ARDOUR
 

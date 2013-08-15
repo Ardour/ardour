@@ -25,10 +25,10 @@
 namespace ARDOUR {
 
 	/**
-	 * return a SearchPath containing directories in which to look for
+	 * return a Searchpath containing directories in which to look for
 	 * lv2 plugins.
 	 */
-	PBD::SearchPath lv2_bundled_search_path ();
+	PBD::Searchpath lv2_bundled_search_path ();
 
 } // namespace ARDOUR
 
