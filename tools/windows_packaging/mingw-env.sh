@@ -34,8 +34,7 @@ then
         . ../define_versions.sh
 
 	# Figure out the Build Type
-	if grep -q "DEBUG = True" $BUILD_CACHE_FILE; then
-		DEBUG=1
+	if [ x$DEBUG = xT ]; then
 		PACKAGE_DIR="$APPNAME-${version}-win32-dbg"
 	else
 		PACKAGE_DIR="$APPNAME-${version}-win32"

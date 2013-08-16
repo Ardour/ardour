@@ -144,7 +144,7 @@ libs/timecode
 libs/audiographer
 '
 
-if test x$DEBUG != x ; then
+if [ x$DEBUG = xT ]; then
 
 	PACKAGE_SRC_DIR=$PACKAGE_DIR/src
 	echo "Copying source files to $PACKAGE_SRC_DIR ..."
