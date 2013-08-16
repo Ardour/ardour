@@ -158,8 +158,8 @@ if [ x$DEBUG = xT ]; then
 	echo "Copying JACK utility programs to $PACKAGE_DIR ..."
 	cp $MINGW_ROOT/bin/jack_*.exe $PACKAGE_DIR
 
-	echo "Copying any debug files to $PACKAGE_DIR ..."
-	cp $MINGW_ROOT/bin/*.debug $PACKAGE_DIR
+	#echo "Copying any debug files to $PACKAGE_DIR ..."
+	#cp $MINGW_ROOT/bin/*.debug $PACKAGE_DIR
 
 	echo "Copying gdb and config files to $PACKAGE_DIR ..."
 	cp $MINGW_ROOT/bin/gdb.exe $PACKAGE_DIR
