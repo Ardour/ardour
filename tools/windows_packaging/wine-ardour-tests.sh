@@ -2,6 +2,15 @@
 
 . ./wine-env.sh
 
+if [ "$1" == "--list" ]; then
+	TESTS='test_*'
+	for test_program in `find  -name "$TESTS" -type f -perm /u+x`;
+	do
+		echo "$test_program"
+	done
+	exit 0
+fi
+
 if [ "$1" == "--single" ] || [ "$2" == "--single" ]; then
         if [ "$1" == "--single" ]; then
 	        TESTS="test_*$2*"
