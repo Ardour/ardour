@@ -172,7 +172,7 @@ if [ x$DEBUG = xT ]; then
 	cp $MINGW_ROOT/bin/gtk-demo.exe $PACKAGE_DIR
 else
 	echo "Optimized build Stripping executable ..."
-	$STRIP $PACKAGE_DIR/ardour-3.0.exe
+	find $PACKAGE_DIR -type f -name "*.exe*" | xargs $STRIP
 	echo "Stripping libraries ..."
 	find $PACKAGE_DIR -type f -name "*.dll*" | xargs $STRIP
 fi
