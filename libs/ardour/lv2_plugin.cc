@@ -1368,11 +1368,6 @@ LV2Plugin::describe_parameter(Evoral::Parameter which)
 		}
 
 		if (lilv_port_has_property(_impl->plugin,
-					lilv_plugin_get_port_by_index(_impl->plugin, which.id()), _world.lv2_sampleRate)) {
-			return X_("hidden");
-		}
-
-		if (lilv_port_has_property(_impl->plugin,
 					lilv_plugin_get_port_by_index(_impl->plugin, which.id()), _world.lv2_reportsLatency)) {
 			return X_("latency");
 		}
