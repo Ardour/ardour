@@ -113,6 +113,10 @@ SendUI::update ()
 void
 SendUI::fast_update ()
 {
+	if (!is_mapped()) {
+		return;
+	}
+
 	if (Config->get_meter_falloff() > 0.0f) {
 		_gpm.update_meters ();
 	}
