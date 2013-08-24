@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-02-05 19:32+0100\n"
+"POT-Creation-Date: 2013-08-15 15:09-0400\n"
 "PO-Revision-Date: 2013-02-05 19:50+0100\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
@@ -77,11 +77,11 @@ msgstr "Alt"
 msgid "Meta"
 msgstr "Meta"
 
-#: keyboard.cc:134 keyboard.cc:523
+#: keyboard.cc:139 keyboard.cc:531
 msgid "Unknown"
 msgstr "Unbekannt"
 
-#: keyboard.cc:534
+#: keyboard.cc:542
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "Die Tastenkürzel-Datei \"%1\" konnte nicht gefunden werden oder enthält "
@@ -98,4 +98,3 @@ msgstr "Klicken, um an das Hauptfenster anzudocken"
 #: textviewer.cc:34
 msgid "Close"
 msgstr "Schließen"
-

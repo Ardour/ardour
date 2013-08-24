@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-04-09 09:28-0400\n"
+"POT-Creation-Date: 2013-08-15 15:09-0400\n"
 "PO-Revision-Date: 2013-06-13 22:33+0200\n"
 "Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
 "Language-Team: Czech <kde-i18n-doc@kde.org>\n"
@@ -75,15 +75,14 @@ msgstr "Alt"
 msgid "Meta"
 msgstr "Meta"
 
-#: keyboard.cc:134 keyboard.cc:523
+#: keyboard.cc:139 keyboard.cc:531
 msgid "Unknown"
 msgstr "Neznámý"
 
-#: keyboard.cc:534
+#: keyboard.cc:542
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
-"Soubor s přiřazením kláves \"%2\"se nepodařilo najít, nebo "
-"obsahuje chyby."
+"Soubor s přiřazením kláves \"%2\"se nepodařilo najít, nebo obsahuje chyby."
 
 #: tearoff.cc:57
 msgid "Click to tear this into its own window"
@@ -96,4 +95,3 @@ msgstr "Klepněte pro ukotvení do hlavního okna"
 #: textviewer.cc:34
 msgid "Close"
 msgstr "Zavřít"
-

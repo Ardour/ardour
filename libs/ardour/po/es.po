@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-06-11 08:49-0400\n"
+"POT-Creation-Date: 2013-08-15 15:09-0400\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Pablo Fernández <pablo.fbus@gmail.com>\n"
 "Language-Team: Grupo de Traducción al Español <traductores@teklibre.com>\n"
@@ -32,57 +32,57 @@ msgstr ""
 msgid "AudioDiskstream %1: there is no existing playlist to make a copy of!"
 msgstr "AudioDiskstream %1: ¡No hay ninguna lista de reproducción para copiar!"
 
-#: audio_diskstream.cc:823 audio_diskstream.cc:833
+#: audio_diskstream.cc:848 audio_diskstream.cc:858
 msgid ""
 "AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"
 msgstr ""
 "AudioDiskstream %1: al rellenar, no se puede leer %2 de la lista de "
 "reproducción en el cuadro %3."
 
-#: audio_diskstream.cc:989
+#: audio_diskstream.cc:1014
 msgid "AudioDiskstream %1: cannot read %2 from playlist at frame %3"
 msgstr ""
 "AudioDiskstream %1: no se puede leer %2 de la lista de reproducción en el "
 "cuadro %3."
 
-#: audio_diskstream.cc:1358 audio_diskstream.cc:1375
+#: audio_diskstream.cc:1383 audio_diskstream.cc:1400
 msgid "AudioDiskstream %1: cannot write to disk"
 msgstr "AudioDiskstream %1: no se puede escribir en el disco."
 
-#: audio_diskstream.cc:1418
+#: audio_diskstream.cc:1443
 msgid "AudioDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr ""
 
-#: audio_diskstream.cc:1512
+#: audio_diskstream.cc:1537
 msgid "%1: could not create region for complete audio file"
 msgstr "%1: no se pudo crear la región para el archivo de audio completo"
 
-#: audio_diskstream.cc:1546
+#: audio_diskstream.cc:1571
 msgid "AudioDiskstream: could not create region for captured audio!"
 msgstr "AudioDiskstream: ¡No se pudo crear región para el audio capturado!"
 
-#: audio_diskstream.cc:1654
+#: audio_diskstream.cc:1679
 msgid "programmer error: %1"
 msgstr "error de programador: %1"
 
-#: audio_diskstream.cc:1880
+#: audio_diskstream.cc:1905
 msgid "AudioDiskstream: channel %1 out of range"
 msgstr "AudioDiskstream: canal %1 fuera de rango"
 
-#: audio_diskstream.cc:1894 midi_diskstream.cc:1196
+#: audio_diskstream.cc:1919 midi_diskstream.cc:1210
 msgid "%1:%2 new capture file not initialized correctly"
 msgstr "%1:%2 archivo de captura nuevo no inicializado correctamente"
 
-#: audio_diskstream.cc:2175
+#: audio_diskstream.cc:2200
 msgid "%1: cannot restore pending capture source file %2"
 msgstr "%1: no se puede restaurar el archivo de captura pendiente %2"
 
-#: audio_diskstream.cc:2197
+#: audio_diskstream.cc:2222
 msgid "%1: incorrect number of pending sources listed - ignoring them all"
 msgstr ""
 "%1: cantidad listada de fuentes pendientes incorrecta - se ignorarán todas"
 
-#: audio_diskstream.cc:2221
+#: audio_diskstream.cc:2246
 msgid "%1: cannot create whole-file region from pending capture sources"
 msgstr ""
 "%1: no se puede crear la región del archivo entero desde las fuentes de "
@@ -130,7 +130,7 @@ msgstr ""
 
 #: audio_playlist_source.cc:171 audiosource.cc:913 file_source.cc:529
 #: midi_playlist_source.cc:144 midi_playlist_source.cc:152
-#: midi_playlist_source.cc:159 midi_source.cc:371 plugin_insert.cc:644
+#: midi_playlist_source.cc:159 midi_source.cc:371 plugin_insert.cc:643
 #: rb_effect.cc:332 session.cc:2465 session.cc:2498 session.cc:3643
 #: session_handle.cc:87 sndfilesource.cc:121
 msgid "programming error: %1"
@@ -210,7 +210,7 @@ msgstr ""
 msgid "Connect session to engine"
 msgstr "Conectar sesión al motor"
 
-#: audioengine.cc:844
+#: audioengine.cc:843
 msgid ""
 "a port with the name \"%1\" already exists: check for duplicated track/bus "
 "names"
@@ -218,7 +218,7 @@ msgstr ""
 "ya existe un puerto con el nombre \"%1\": compruebe si hay nombres de pistas/"
 "buses duplicados"
 
-#: audioengine.cc:846 session.cc:1698
+#: audioengine.cc:845 session.cc:1698
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
@@ -226,35 +226,35 @@ msgstr ""
 "JACK no dispone de más puertos. Debes salir de %1 y reiniciar JACK con más "
 "puertos si necesitas tantas pistas."
 
-#: audioengine.cc:849
+#: audioengine.cc:848
 msgid "AudioEngine: cannot register port \"%1\": %2"
 msgstr "AudioEngine: no se puede registrar el puerto \"%1\": %2"
 
-#: audioengine.cc:879
+#: audioengine.cc:878
 msgid "unable to create port: %1"
 msgstr "Incapaz de crear puerto: %1"
 
-#: audioengine.cc:933
+#: audioengine.cc:932
 msgid "connect called before engine was started"
 msgstr "conexión invocada antes de que se inicie el motor"
 
-#: audioengine.cc:959
+#: audioengine.cc:958
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
 msgstr "AudioEngine: no se puede conectar %1 (%2) a %3 (%4)"
 
-#: audioengine.cc:974 audioengine.cc:1005
+#: audioengine.cc:973 audioengine.cc:1004
 msgid "disconnect called before engine was started"
 msgstr "desconexión invocada antes de que se inicie el motor"
 
-#: audioengine.cc:1053
+#: audioengine.cc:1052
 msgid "get_port_by_name() called before engine was started"
 msgstr "get_port_by_name() invocada antes de que se inicie el motor"
 
-#: audioengine.cc:1105
+#: audioengine.cc:1104
 msgid "get_ports called before engine was started"
 msgstr "get_ports invocada antes de que se inicie el motor"
 
-#: audioengine.cc:1428
+#: audioengine.cc:1427
 msgid "failed to connect to JACK"
 msgstr "falló la conexión a JACK"
 
@@ -568,7 +568,7 @@ msgstr ""
 msgid "Rectangular"
 msgstr ""
 
-#: export_formats.cc:52 session.cc:4854 session.cc:4870
+#: export_formats.cc:52 session.cc:4861 session.cc:4877
 msgid "None"
 msgstr ""
 
@@ -776,23 +776,23 @@ msgstr ""
 msgid "unknown file type for session %1"
 msgstr "tipo de archivo desconocido para la sesión %1"
 
-#: globals.cc:204
+#: globals.cc:205
 msgid "Could not set system open files limit to \"unlimited\""
 msgstr "No se pudo establecer el límite de archivos abiertos a \"unlimited\""
 
-#: globals.cc:206
+#: globals.cc:207
 msgid "Could not set system open files limit to %1"
 msgstr "No se pudo establecer el límite de archivos abiertos a \"unlimited\""
 
-#: globals.cc:210
+#: globals.cc:211
 msgid "Your system is configured to limit %1 to only %2 open files"
 msgstr ""
 
-#: globals.cc:214
+#: globals.cc:215
 msgid "Could not get system open files limit (%1)"
 msgstr "No se pudo obtener el límite de archivos abiertos del sistema (%1) "
 
-#: globals.cc:267
+#: globals.cc:266
 msgid "Loading configuration"
 msgstr "Cargando configuración"
 
@@ -944,53 +944,53 @@ msgstr ""
 msgid "%d"
 msgstr ""
 
-#: ladspa_plugin.cc:87
+#: ladspa_plugin.cc:88
 msgid "LADSPA: module has no descriptor function."
 msgstr ""
 
-#: ladspa_plugin.cc:92
+#: ladspa_plugin.cc:93
 msgid "LADSPA: plugin has gone away since discovery!"
 msgstr ""
 
-#: ladspa_plugin.cc:99
+#: ladspa_plugin.cc:100
 msgid "LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"
 msgstr ""
 
-#: ladspa_plugin.cc:296
+#: ladspa_plugin.cc:297
 msgid ""
 "illegal parameter number used with plugin \"%1\". This may indicate a change "
 "in the plugin design, and presets may be invalid"
 msgstr ""
 
-#: ladspa_plugin.cc:373 ladspa_plugin.cc:418
+#: ladspa_plugin.cc:376 ladspa_plugin.cc:426
 msgid "Bad node sent to LadspaPlugin::set_state"
 msgstr ""
 
-#: ladspa_plugin.cc:386 ladspa_plugin.cc:431
+#: ladspa_plugin.cc:391 ladspa_plugin.cc:440
 msgid "LADSPA: no ladspa port number"
 msgstr ""
 
-#: ladspa_plugin.cc:392 ladspa_plugin.cc:437
+#: ladspa_plugin.cc:397 ladspa_plugin.cc:446
 msgid "LADSPA: no ladspa port data"
 msgstr ""
 
-#: ladspa_plugin.cc:707
+#: ladspa_plugin.cc:717
 msgid "LADSPA: cannot load module from \"%1\""
 msgstr ""
 
-#: ladspa_plugin.cc:817
+#: ladspa_plugin.cc:827
 msgid "Could not locate HOME.  Preset not removed."
 msgstr ""
 
-#: ladspa_plugin.cc:854 ladspa_plugin.cc:860
+#: ladspa_plugin.cc:864 ladspa_plugin.cc:870
 msgid "Could not create %1.  Preset not saved. (%2)"
 msgstr "No se pudo crear %1. El preset no se guardó. (%2)"
 
-#: ladspa_plugin.cc:867
+#: ladspa_plugin.cc:877
 msgid "Error saving presets file %1."
 msgstr "Error al guardar el archivo de preset %1."
 
-#: ladspa_plugin.cc:905
+#: ladspa_plugin.cc:915
 msgid "Could not locate HOME.  Preset not saved."
 msgstr ""
 
@@ -1030,7 +1030,7 @@ msgstr ""
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr ""
 
-#: location.cc:842 session.cc:4355 session_state.cc:1114
+#: location.cc:842 session.cc:4362 session_state.cc:1114
 msgid "session"
 msgstr "sesión"
 
@@ -1107,23 +1107,23 @@ msgstr ""
 msgid "MidiDiskstream %1: there is no existing playlist to make a copy of!"
 msgstr ""
 
-#: midi_diskstream.cc:685
+#: midi_diskstream.cc:699
 msgid "MidiDiskstream %1: cannot read %2 from playlist at frame %3"
 msgstr ""
 
-#: midi_diskstream.cc:820
+#: midi_diskstream.cc:834
 msgid "MidiDiskstream %1: cannot write to disk"
 msgstr ""
 
-#: midi_diskstream.cc:854
+#: midi_diskstream.cc:868
 msgid "MidiDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr ""
 
-#: midi_diskstream.cc:941
+#: midi_diskstream.cc:955
 msgid "%1: could not create region for complete midi file"
 msgstr ""
 
-#: midi_diskstream.cc:978
+#: midi_diskstream.cc:992
 msgid "MidiDiskstream: could not create region for captured midi!"
 msgstr ""
 
@@ -1317,23 +1317,35 @@ msgstr ""
 msgid "Could not construct playlist for PlaylistSource from session data!"
 msgstr ""
 
-#: plugin_insert.cc:599
+#: plugin.cc:324
+msgid ""
+"Plugin presets are not supported in this build of %1. Consider paying for a "
+"full version"
+msgstr ""
+
+#: plugin.cc:398
+msgid ""
+"Saving plugin settings is not supported in this build of %1. Consider paying "
+"for the full version"
+msgstr ""
+
+#: plugin_insert.cc:598
 msgid "programming error: "
 msgstr "error de programación:"
 
-#: plugin_insert.cc:908
+#: plugin_insert.cc:926
 msgid "XML node describing plugin is missing the `type' field"
 msgstr ""
 
-#: plugin_insert.cc:923
+#: plugin_insert.cc:941
 msgid "unknown plugin type %1 in plugin insert state"
 msgstr "Tipo de plugin desconocido %1 en estado de inserción de plugins"
 
-#: plugin_insert.cc:951
+#: plugin_insert.cc:969
 msgid "Plugin has no unique ID field"
 msgstr "El plugin no tiene un campo de ID único."
 
-#: plugin_insert.cc:960
+#: plugin_insert.cc:978
 msgid ""
 "Found a reference to a plugin (\"%1\") that is unknown.\n"
 "Perhaps it was removed or moved since it was last used."
@@ -1341,15 +1353,15 @@ msgstr ""
 "Se encontró una referencia a un plugin (\"%1\") que no se conoce.\n"
 "Quizás se suprimió o se movió desde la última vez que fue usado."
 
-#: plugin_insert.cc:1076
+#: plugin_insert.cc:1094
 msgid "PluginInsert: Auto: no ladspa port number"
 msgstr ""
 
-#: plugin_insert.cc:1083
+#: plugin_insert.cc:1101
 msgid "PluginInsert: Auto: port id out of range"
 msgstr ""
 
-#: plugin_insert.cc:1119
+#: plugin_insert.cc:1137
 msgid "PluginInsert: automatable control %1 not found - ignored"
 msgstr ""
 
@@ -1494,23 +1506,23 @@ msgstr ""
 msgid "return %1"
 msgstr "retorno %1"
 
-#: route.cc:1100 route.cc:2550
+#: route.cc:1105 route.cc:2581
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr ""
 
-#: route.cc:1112
+#: route.cc:1117
 msgid "processor could not be created. Ignored."
 msgstr ""
 
-#: route.cc:1983 route.cc:2203
+#: route.cc:2007 route.cc:2234
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr ""
 
-#: route.cc:2042
+#: route.cc:2067
 msgid "Pannable state found for route (%1) without a panner!"
 msgstr ""
 
-#: route.cc:2106 route.cc:2110 route.cc:2317 route.cc:2321
+#: route.cc:2137 route.cc:2141 route.cc:2348 route.cc:2352
 msgid "badly formed order key string in state file! [%1] ... ignored."
 msgstr ""
 
@@ -1763,17 +1775,17 @@ msgstr ""
 msgid "Export ended unexpectedly: %1"
 msgstr ""
 
-#: session_ltc.cc:220
+#: session_ltc.cc:222
 msgid ""
 "LTC encoder: invalid framerate - LTC encoding is disabled for the remainder "
 "of this session."
 msgstr ""
 
-#: session_midi.cc:427
+#: session_midi.cc:428
 msgid "Session: could not send full MIDI time code"
 msgstr ""
 
-#: session_midi.cc:519
+#: session_midi.cc:520
 msgid "Session: cannot send quarter-frame MTC message (%1)"
 msgstr ""
 
@@ -1781,11 +1793,11 @@ msgstr ""
 msgid "Session: cannot create Playlist from XML description."
 msgstr ""
 
-#: session_process.cc:135
+#: session_process.cc:133
 msgid "Session: error in no roll for %1"
 msgstr ""
 
-#: session_process.cc:1160
+#: session_process.cc:1158
 msgid "Programming error: illegal event type in process_event (%1)"
 msgstr ""
 
@@ -2141,13 +2153,13 @@ msgstr ""
 msgid "Cannot loop - no loop range defined"
 msgstr "No se puede reproducir en bucle - no se definió un rango de bucle."
 
-#: session_transport.cc:727
+#: session_transport.cc:728
 msgid ""
 "Seamless looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
 msgstr ""
 
-#: session_transport.cc:1092
+#: session_transport.cc:1094
 msgid ""
 "Global varispeed cannot be supported while %1 is connected to JACK transport "
 "control"
@@ -2290,7 +2302,7 @@ msgstr ""
 msgid "attempt to write a non-writable audio file source (%1)"
 msgstr ""
 
-#: sndfilesource.cc:396 utils.cc:497 utils.cc:521 utils.cc:535 utils.cc:554
+#: sndfilesource.cc:396 utils.cc:507 utils.cc:531 utils.cc:545 utils.cc:564
 msgid "programming error: %1 %2"
 msgstr "error de programación: %1 %2"
 
@@ -2536,11 +2548,11 @@ msgstr ""
 msgid "LTC"
 msgstr "LTC"
 
-#: utils.cc:589
+#: utils.cc:599
 msgid "programming error: unknown native header format: %1"
 msgstr ""
 
-#: utils.cc:604
+#: utils.cc:614
 msgid "cannot open directory %1 (%2)"
 msgstr ""
 
