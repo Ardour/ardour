@@ -130,7 +130,7 @@ ARDOUR::get_jack_default_audio_driver_name (string& audio_driver_name)
 }
 
 void
-ARDOUR::get_jack_midi_system_names (const string& /*driver*/, vector<string>& midi_system_names)
+ARDOUR::get_jack_midi_system_names (const string& driver, vector<string>& midi_system_names)
 {
 	midi_system_names.push_back (get_none_string ());
 #ifdef PLATFORM_WINDOWS
