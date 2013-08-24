@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-06-11 08:49-0400\n"
+"POT-Creation-Date: 2013-08-15 15:09-0400\n"
 "PO-Revision-Date: 2011-09-13 22:43+0100\n"
 "Last-Translator: Eivind Ødegård <meinmycell-lists@yahoo.no>\n"
 "Language-Team: Nynorsk <i18n-nn@lister.ping.uio.no>\n"
@@ -32,54 +32,54 @@ msgstr "Lyd-diskstraum: Spelelista \"%1\" er ikkje ei lydspeleliste"
 msgid "AudioDiskstream %1: there is no existing playlist to make a copy of!"
 msgstr "Lyd-diskstraum %1: det finst inga speleliste å kopiera!"
 
-#: audio_diskstream.cc:823 audio_diskstream.cc:833
+#: audio_diskstream.cc:848 audio_diskstream.cc:858
 msgid ""
 "AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"
 msgstr ""
 "Lyd-diskstraum %1: greidde ikkje lesa %2 frå spelelista, ramme %3, ved "
 "attfylling"
 
-#: audio_diskstream.cc:989
+#: audio_diskstream.cc:1014
 msgid "AudioDiskstream %1: cannot read %2 from playlist at frame %3"
 msgstr "Lyd-diskstraum %1: greidde ikkje lesa %2 frå spelelista, ramme %3"
 
-#: audio_diskstream.cc:1358 audio_diskstream.cc:1375
+#: audio_diskstream.cc:1383 audio_diskstream.cc:1400
 msgid "AudioDiskstream %1: cannot write to disk"
 msgstr "Lyd-diskstraum %1: greidde ikkje skriva til disk"
 
-#: audio_diskstream.cc:1418
+#: audio_diskstream.cc:1443
 msgid "AudioDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr "Lyd-diskstraum \"%1\": greier ikkje skriva opptaket til disken!"
 
-#: audio_diskstream.cc:1512
+#: audio_diskstream.cc:1537
 msgid "%1: could not create region for complete audio file"
 msgstr "%1: greidde ikkje laga bolk for heil lydfil"
 
-#: audio_diskstream.cc:1546
+#: audio_diskstream.cc:1571
 msgid "AudioDiskstream: could not create region for captured audio!"
 msgstr "Lyd-diskstraum: greidde ikkje laga bolk frå opptaket!"
 
-#: audio_diskstream.cc:1654
+#: audio_diskstream.cc:1679
 msgid "programmer error: %1"
 msgstr "Programmerarfeil: %1"
 
-#: audio_diskstream.cc:1880
+#: audio_diskstream.cc:1905
 msgid "AudioDiskstream: channel %1 out of range"
 msgstr "Lyd-diskstraum: kanal %1 utanfor rekkjevidd"
 
-#: audio_diskstream.cc:1894 midi_diskstream.cc:1196
+#: audio_diskstream.cc:1919 midi_diskstream.cc:1210
 msgid "%1:%2 new capture file not initialized correctly"
 msgstr "%1: ny opptaksfil %2 vart ikkje påbyrja rett"
 
-#: audio_diskstream.cc:2175
+#: audio_diskstream.cc:2200
 msgid "%1: cannot restore pending capture source file %2"
 msgstr "%1: greidde ikkje henta fram att den ventande opptakskjeldefila %2"
 
-#: audio_diskstream.cc:2197
+#: audio_diskstream.cc:2222
 msgid "%1: incorrect number of pending sources listed - ignoring them all"
 msgstr "%1: feil tal på ventande kjelder på lista - ser bort frå alle"
 
-#: audio_diskstream.cc:2221
+#: audio_diskstream.cc:2246
 msgid "%1: cannot create whole-file region from pending capture sources"
 msgstr "%1: greidde ikkje laga heilfilbolk frå ventande opptakskjelder"
 
@@ -125,7 +125,7 @@ msgstr "Lydspelelister (ubrukte)"
 
 #: audio_playlist_source.cc:171 audiosource.cc:913 file_source.cc:529
 #: midi_playlist_source.cc:144 midi_playlist_source.cc:152
-#: midi_playlist_source.cc:159 midi_source.cc:371 plugin_insert.cc:644
+#: midi_playlist_source.cc:159 midi_source.cc:371 plugin_insert.cc:643
 #: rb_effect.cc:332 session.cc:2465 session.cc:2498 session.cc:3643
 #: session_handle.cc:87 sndfilesource.cc:121
 msgid "programming error: %1"
@@ -207,7 +207,7 @@ msgstr ""
 msgid "Connect session to engine"
 msgstr "Kople økta til maskin"
 
-#: audioengine.cc:844
+#: audioengine.cc:843
 msgid ""
 "a port with the name \"%1\" already exists: check for duplicated track/bus "
 "names"
@@ -215,7 +215,7 @@ msgstr ""
 "ein port med namnet \"%1\" finst frå før: sjekk opp dublettar i namn på spor "
 "eller bussar"
 
-#: audioengine.cc:846 session.cc:1698
+#: audioengine.cc:845 session.cc:1698
 #, fuzzy
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
@@ -224,35 +224,35 @@ msgstr ""
 "Det finst ikkje fleire JACK-portar. Du må stoppa %1 og starta JACK på nytt "
 "med nok portar viss du treng så mange spor."
 
-#: audioengine.cc:849
+#: audioengine.cc:848
 msgid "AudioEngine: cannot register port \"%1\": %2"
 msgstr "AudioEngine: greier ikkje registrera porten \"%1\": %2"
 
-#: audioengine.cc:879
+#: audioengine.cc:878
 msgid "unable to create port: %1"
 msgstr "greidde ikkje laga port: %1"
 
-#: audioengine.cc:933
+#: audioengine.cc:932
 msgid "connect called before engine was started"
 msgstr "tilkoplinga vart oppkalla frø tenaren starta"
 
-#: audioengine.cc:959
+#: audioengine.cc:958
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
 msgstr "Lydmaskineri: Klarte ikkje kopla %1 (%2) til %3 (%4)."
 
-#: audioengine.cc:974 audioengine.cc:1005
+#: audioengine.cc:973 audioengine.cc:1004
 msgid "disconnect called before engine was started"
 msgstr "fråkoplinga vart oppkalla før tenaren starta"
 
-#: audioengine.cc:1053
+#: audioengine.cc:1052
 msgid "get_port_by_name() called before engine was started"
 msgstr "get_port_by_name() vart oppkalla før tenaren starta"
 
-#: audioengine.cc:1105
+#: audioengine.cc:1104
 msgid "get_ports called before engine was started"
 msgstr "get_ports vart oppkalla før tenaren starta"
 
-#: audioengine.cc:1428
+#: audioengine.cc:1427
 msgid "failed to connect to JACK"
 msgstr "greidde ikkje kopla til JACK"
 
@@ -577,7 +577,7 @@ msgstr "Trekant"
 msgid "Rectangular"
 msgstr "Firkant"
 
-#: export_formats.cc:52 session.cc:4854 session.cc:4870
+#: export_formats.cc:52 session.cc:4861 session.cc:4877
 msgid "None"
 msgstr "Ingen"
 
@@ -795,23 +795,23 @@ msgstr "greier ikkje avgjera kva som er arbeidsmappa no (%1)"
 msgid "unknown file type for session %1"
 msgstr "ukjend filtype for økta %1"
 
-#: globals.cc:204
+#: globals.cc:205
 msgid "Could not set system open files limit to \"unlimited\""
 msgstr "Greidde ikkje setja systemgrensa for opne filer til \"uavgrensa\""
 
-#: globals.cc:206
+#: globals.cc:207
 msgid "Could not set system open files limit to %1"
 msgstr "Greidde ikkje setja grensa for opne systemfiler til %1"
 
-#: globals.cc:210
+#: globals.cc:211
 msgid "Your system is configured to limit %1 to only %2 open files"
 msgstr ""
 
-#: globals.cc:214
+#: globals.cc:215
 msgid "Could not get system open files limit (%1)"
 msgstr "Greidde ikkje få tak i grensa for opne systemfiler (%1)"
 
-#: globals.cc:267
+#: globals.cc:266
 msgid "Loading configuration"
 msgstr "Lastar oppsettet"
 
@@ -966,20 +966,20 @@ msgstr "H"
 msgid "%d"
 msgstr "%d"
 
-#: ladspa_plugin.cc:87
+#: ladspa_plugin.cc:88
 msgid "LADSPA: module has no descriptor function."
 msgstr "LADSPA: modulen har ingen skildringsfunksjon"
 
-#: ladspa_plugin.cc:92
+#: ladspa_plugin.cc:93
 msgid "LADSPA: plugin has gone away since discovery!"
 msgstr "LADSPA: tilleggsprogrammet har vorte borte sidan det vart oppdaga!"
 
-#: ladspa_plugin.cc:99
+#: ladspa_plugin.cc:100
 msgid "LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"
 msgstr ""
 "LADSPA: kan ikkje bruka \"%1\", sidan han ikkje kan prosessera på staden"
 
-#: ladspa_plugin.cc:296
+#: ladspa_plugin.cc:297
 #, fuzzy
 msgid ""
 "illegal parameter number used with plugin \"%1\". This may indicate a change "
@@ -989,35 +989,35 @@ msgstr ""
 "tyda på feil i korleis tilleggsprogrammet er utforma, og at eventuelle "
 "ferdigprogram kan vera ugyldige."
 
-#: ladspa_plugin.cc:373 ladspa_plugin.cc:418
+#: ladspa_plugin.cc:376 ladspa_plugin.cc:426
 msgid "Bad node sent to LadspaPlugin::set_state"
 msgstr "Feil punkt sendt til LadspaPlugin::set_state"
 
-#: ladspa_plugin.cc:386 ladspa_plugin.cc:431
+#: ladspa_plugin.cc:391 ladspa_plugin.cc:440
 msgid "LADSPA: no ladspa port number"
 msgstr "LADSPA: ikkje noko Ladspa-portnummer"
 
-#: ladspa_plugin.cc:392 ladspa_plugin.cc:437
+#: ladspa_plugin.cc:397 ladspa_plugin.cc:446
 msgid "LADSPA: no ladspa port data"
 msgstr "LADSPA: ingen portdata"
 
-#: ladspa_plugin.cc:707
+#: ladspa_plugin.cc:717
 msgid "LADSPA: cannot load module from \"%1\""
 msgstr "LADSPA: greier ikkje lasta modul frå \"%1\""
 
-#: ladspa_plugin.cc:817
+#: ladspa_plugin.cc:827
 msgid "Could not locate HOME.  Preset not removed."
 msgstr "Greidde ikkje finna heimemappa. Har ikkje fjera ferdigoppsett."
 
-#: ladspa_plugin.cc:854 ladspa_plugin.cc:860
+#: ladspa_plugin.cc:864 ladspa_plugin.cc:870
 msgid "Could not create %1.  Preset not saved. (%2)"
 msgstr "Greidde ikkje laga %1. Har ikkje lagra ferdigoppsett. (%2)"
 
-#: ladspa_plugin.cc:867
+#: ladspa_plugin.cc:877
 msgid "Error saving presets file %1."
 msgstr "Feil med å lagra ferdigoppsettfila %1."
 
-#: ladspa_plugin.cc:905
+#: ladspa_plugin.cc:915
 msgid "Could not locate HOME.  Preset not saved."
 msgstr "Greidde ikkje finna heimemappa. Har ikkje lagra ferdigoppsett."
 
@@ -1057,7 +1057,7 @@ msgstr "Stader: forsøk på å bruka ukjend stad som vald stad"
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "feil XML-modus send til Locations::set_state"
 
-#: location.cc:842 session.cc:4355 session_state.cc:1114
+#: location.cc:842 session.cc:4362 session_state.cc:1114
 msgid "session"
 msgstr "økt"
 
@@ -1140,23 +1140,23 @@ msgstr "MIDI-diskstraum: Spelelista \"%1\" er ikkje ei midispeleliste"
 msgid "MidiDiskstream %1: there is no existing playlist to make a copy of!"
 msgstr "MIDI-diskstraum %1: det finst inga speleliste å kopiera!"
 
-#: midi_diskstream.cc:685
+#: midi_diskstream.cc:699
 msgid "MidiDiskstream %1: cannot read %2 from playlist at frame %3"
 msgstr "MIDI-diskstraum %1: greidde ikkje lesa %2 frå spelelista, ramme %3"
 
-#: midi_diskstream.cc:820
+#: midi_diskstream.cc:834
 msgid "MidiDiskstream %1: cannot write to disk"
 msgstr "MIDI-diskstraum %1: greidde ikkje skriva til disk"
 
-#: midi_diskstream.cc:854
+#: midi_diskstream.cc:868
 msgid "MidiDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr "MIDI-diskstraum \"%1\": greier ikkje skriva opptaket til disken!"
 
-#: midi_diskstream.cc:941
+#: midi_diskstream.cc:955
 msgid "%1: could not create region for complete midi file"
 msgstr "%1: greidde ikkje laga bolk for heil midifil"
 
-#: midi_diskstream.cc:978
+#: midi_diskstream.cc:992
 msgid "MidiDiskstream: could not create region for captured midi!"
 msgstr "MIDI-diskstraum: greidde ikkje laga bolk frå midi-opptaket!"
 
@@ -1355,23 +1355,41 @@ msgstr "Fann ingen speleliste-ID i PlaylistSource-XML!"
 msgid "Could not construct playlist for PlaylistSource from session data!"
 msgstr "Greidde ikkje byggja speleliste for PlaylistSource frå øktdata!"
 
-#: plugin_insert.cc:599
+#: plugin.cc:324
+#, fuzzy
+msgid ""
+"Plugin presets are not supported in this build of %1. Consider paying for a "
+"full version"
+msgstr ""
+"Du kan ikkje lagra førehandsoppsett for AudioUnit i denne versjonen av "
+"Ardour. Du bør vurdera å betala for ein nyare verjson"
+
+#: plugin.cc:398
+#, fuzzy
+msgid ""
+"Saving plugin settings is not supported in this build of %1. Consider paying "
+"for the full version"
+msgstr ""
+"Du kan ikkje lagra AudioUnit-innstillingar i denne versjonen av Ardour. Du "
+"bør vurdera å betala for ein nyare verjson"
+
+#: plugin_insert.cc:598
 msgid "programming error: "
 msgstr "programmeringsfeil: "
 
-#: plugin_insert.cc:908
+#: plugin_insert.cc:926
 msgid "XML node describing plugin is missing the `type' field"
 msgstr "XML-punktet som skildrar utvidinga manglar 'type'-feltet"
 
-#: plugin_insert.cc:923
+#: plugin_insert.cc:941
 msgid "unknown plugin type %1 in plugin insert state"
 msgstr "ukjent programtilleggstype %1 i innpluggingstilstanden"
 
-#: plugin_insert.cc:951
+#: plugin_insert.cc:969
 msgid "Plugin has no unique ID field"
 msgstr "Innstikket har ikkje noko eige ID-felt"
 
-#: plugin_insert.cc:960
+#: plugin_insert.cc:978
 msgid ""
 "Found a reference to a plugin (\"%1\") that is unknown.\n"
 "Perhaps it was removed or moved since it was last used."
@@ -1379,15 +1397,15 @@ msgstr ""
 "Fann ein referanse til det ukjende tilleggsprogrammet \"%1\".\n"
 "Kanskje det har vorte fjerna eller flytt sidan sist det vart brukt."
 
-#: plugin_insert.cc:1076
+#: plugin_insert.cc:1094
 msgid "PluginInsert: Auto: no ladspa port number"
 msgstr "PluginInsert:Auto: ikkje noko ladspa-portnummer"
 
-#: plugin_insert.cc:1083
+#: plugin_insert.cc:1101
 msgid "PluginInsert: Auto: port id out of range"
 msgstr "PluginInsert: Auto: port-id utanfor rekkjevidd"
 
-#: plugin_insert.cc:1119
+#: plugin_insert.cc:1137
 msgid "PluginInsert: automatable control %1 not found - ignored"
 msgstr ""
 "PluginInsert: fann ikkje den automasjonsferdige kontrollen %1, såg bort frå "
@@ -1541,23 +1559,23 @@ msgstr "Import: src_new()-funkjsonen lukkast ikkje: %1"
 msgid "return %1"
 msgstr "retur %1"
 
-#: route.cc:1100 route.cc:2550
+#: route.cc:1105 route.cc:2581
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr "\"%1\" er ein ukjend prosesseringstype, hoppa over"
 
-#: route.cc:1112
+#: route.cc:1117
 msgid "processor could not be created. Ignored."
 msgstr "greidde ikkje laga prosessering. Hoppa over."
 
-#: route.cc:1983 route.cc:2203
+#: route.cc:2007 route.cc:2234
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr "Feil punkt sendt til Route::set_state()-funksjonen [%1]"
 
-#: route.cc:2042
+#: route.cc:2067
 msgid "Pannable state found for route (%1) without a panner!"
 msgstr "Fann panoreringsstatus for ruta (%1) utan panorering!"
 
-#: route.cc:2106 route.cc:2110 route.cc:2317 route.cc:2321
+#: route.cc:2137 route.cc:2141 route.cc:2348 route.cc:2352
 msgid "badly formed order key string in state file! [%1] ... ignored."
 msgstr "feilforma tingingsnykjelstreng i tilstandsfil! [%1] ... hoppa over."
 
@@ -1821,17 +1839,17 @@ msgstr "%1: greier ikkje finna %2 for eksportering"
 msgid "Export ended unexpectedly: %1"
 msgstr ""
 
-#: session_ltc.cc:220
+#: session_ltc.cc:222
 msgid ""
 "LTC encoder: invalid framerate - LTC encoding is disabled for the remainder "
 "of this session."
 msgstr ""
 
-#: session_midi.cc:427
+#: session_midi.cc:428
 msgid "Session: could not send full MIDI time code"
 msgstr "Økt: greidde ikke senda full MIDI-tidskode"
 
-#: session_midi.cc:519
+#: session_midi.cc:520
 msgid "Session: cannot send quarter-frame MTC message (%1)"
 msgstr "Økt: greidde ikkje senda kvartramme-MTC-melding (%1)"
 
@@ -1839,11 +1857,11 @@ msgstr "Økt: greidde ikkje senda kvartramme-MTC-melding (%1)"
 msgid "Session: cannot create Playlist from XML description."
 msgstr "Økt: greier ikkje laga speleliste ut frå XML-skildringa."
 
-#: session_process.cc:135
+#: session_process.cc:133
 msgid "Session: error in no roll for %1"
 msgstr "Økt: feil på ingen rull for %1"
 
-#: session_process.cc:1160
+#: session_process.cc:1158
 msgid "Programming error: illegal event type in process_event (%1)"
 msgstr "Programmeringsfeil: ulovleg handlingstype i process-event (%1)"
 
@@ -2225,7 +2243,7 @@ msgstr "Ukjend JACK-transporttilstand %1 i synk-tilbakekallet"
 msgid "Cannot loop - no loop range defined"
 msgstr "Greidde ikkje spela i lykkje - du har ikkje gjeve noko lykkjeområde"
 
-#: session_transport.cc:727
+#: session_transport.cc:728
 msgid ""
 "Seamless looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
@@ -2233,7 +2251,7 @@ msgstr ""
 "Samanhengande lykkjespeling er ikkje støtta når %1 bruker JACK-transporten.\n"
 "Me rår til at du endrar innstillingane."
 
-#: session_transport.cc:1092
+#: session_transport.cc:1094
 msgid ""
 "Global varispeed cannot be supported while %1 is connected to JACK transport "
 "control"
@@ -2384,7 +2402,7 @@ msgstr "SndFileSource: @ %1 greidde ikkje lesa %2 i %3 (%4) (len = %5)"
 msgid "attempt to write a non-writable audio file source (%1)"
 msgstr "prøvde å skriva til ei ikkje-skrivbar lydkjeldefil (%1)"
 
-#: sndfilesource.cc:396 utils.cc:497 utils.cc:521 utils.cc:535 utils.cc:554
+#: sndfilesource.cc:396 utils.cc:507 utils.cc:531 utils.cc:545 utils.cc:564
 msgid "programming error: %1 %2"
 msgstr "programmeringsfeil: %1 %2"
 
@@ -2650,11 +2668,11 @@ msgstr "MIDI-klokke"
 msgid "LTC"
 msgstr "MTC"
 
-#: utils.cc:589
+#: utils.cc:599
 msgid "programming error: unknown native header format: %1"
 msgstr "programmeringsfeil: ukjent opphavleg hovudformat: \"%1\""
 
-#: utils.cc:604
+#: utils.cc:614
 msgid "cannot open directory %1 (%2)"
 msgstr "greier ikkje opna mappa %1 (%2)"
 
@@ -3267,13 +3285,6 @@ msgstr "greier ikkje opna mappa %1 (%2)"
 #~ msgid "AUPlugin: render callback called illegally!"
 #~ msgstr "AUPlugin: oppteiknings-tilbakekall påkalla ulovleg!"
 
-#~ msgid ""
-#~ "Saving AudioUnit settings is not supported in this build of Ardour. "
-#~ "Consider paying for a newer version"
-#~ msgstr ""
-#~ "Du kan ikkje lagra AudioUnit-innstillingar i denne versjonen av Ardour. "
-#~ "Du bør vurdera å betala for ein nyare verjson"
-
 #~ msgid "Bad node sent to AUPlugin::set_state"
 #~ msgstr "Feil punkt sendt til AUPlugin::set_state"
 
@@ -3296,13 +3307,6 @@ msgstr "greier ikkje opna mappa %1 (%2)"
 
 #~ msgid "Saving plugin state to %1 failed"
 #~ msgstr "Greidde ikkje lagra innstikkstatus til %1"
-
-#~ msgid ""
-#~ "Saving AudioUnit presets is not supported in this build of Ardour. "
-#~ "Consider paying for a newer version"
-#~ msgstr ""
-#~ "Du kan ikkje lagra førehandsoppsett for AudioUnit i denne versjonen av "
-#~ "Ardour. Du bør vurdera å betala for ein nyare verjson"
 
 #~ msgid "Discovering AudioUnit plugins (could take some time ...)"
 #~ msgstr "Finn AudioUnit-innstikk (dette kan ta litt tid...)"

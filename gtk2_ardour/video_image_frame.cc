@@ -36,6 +36,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace VideoUtils;
 
 VideoImageFrame::VideoImageFrame (PublicEditor& ed, ArdourCanvas::Group& parent, int w, int h, std::string vsurl, std::string vfn)
 	: editor (ed)
@@ -196,8 +197,8 @@ http_get_thread (void *arg) {
 	int timeout = 1000; // * 5ms -> 5sec
 	char *res = NULL;
 	do {
-		res=curl_http_get(url, &status);
-		if (status == 503) Glib::usleep(5000); // try-again
+		res=a3_curl_http_get(url, &status);
+		if (status == 503) usleep(5000); // try-again
 	} while (status == 503 && --timeout > 0);
 
 	if (status != 200 || !res) {

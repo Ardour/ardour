@@ -178,6 +178,17 @@ ExportFormatManager::init_formats ()
 	fl_ptr->set_extension ("w64");
 	add_format (f_ptr);
 
+	f_ptr.reset (fl_ptr = new ExportFormatLinear ("CAF", ExportFormatBase::F_CAF));
+	fl_ptr->add_sample_format (ExportFormatBase::SF_U8);
+	fl_ptr->add_sample_format (ExportFormatBase::SF_16);
+	fl_ptr->add_sample_format (ExportFormatBase::SF_24);
+	fl_ptr->add_sample_format (ExportFormatBase::SF_32);
+	fl_ptr->add_sample_format (ExportFormatBase::SF_Float);
+	fl_ptr->add_sample_format (ExportFormatBase::SF_Double);
+	fl_ptr->set_default_sample_format (ExportFormatBase::SF_Float);
+	fl_ptr->set_extension ("caf");
+	add_format (f_ptr);
+
 	f_ptr.reset (fl_ptr = new ExportFormatLinear ("RAW", ExportFormatBase::F_RAW));
 	fl_ptr->add_sample_format (ExportFormatBase::SF_U8);
 	fl_ptr->add_sample_format (ExportFormatBase::SF_8);

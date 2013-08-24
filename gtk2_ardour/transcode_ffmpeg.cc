@@ -37,6 +37,7 @@
 #endif
 
 using namespace PBD;
+using namespace VideoUtils;
 
 TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 	: infile(f)

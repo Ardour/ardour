@@ -313,6 +313,12 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 
 	if (!lm.locked()) {
+		boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
+		framecnt_t playback_distance = diskstream->calculate_playback_distance(nframes);
+		if (can_internal_playback_seek(llabs(playback_distance))) {
+			/* TODO should declick */
+			internal_playback_seek(playback_distance);
+		}
 		return 0;
 	}
 

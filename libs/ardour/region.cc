@@ -1490,6 +1490,20 @@ Region::uses_source (boost::shared_ptr<const Source> source) const
 		}
 	}
 
+	for (SourceList::const_iterator i = _master_sources.begin(); i != _master_sources.end(); ++i) {
+		if (*i == source) {
+			return true;
+		}
+
+		boost::shared_ptr<PlaylistSource> ps = boost::dynamic_pointer_cast<PlaylistSource> (*i);
+
+		if (ps) {
+			if (ps->playlist()->uses_source (source)) {
+				return true;
+			}
+		}
+	}
+
 	return false;
 }
 

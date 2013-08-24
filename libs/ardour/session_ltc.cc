@@ -81,6 +81,7 @@ Session::ltc_tx_initialize()
 	 * since the fps can change and A3's  min fps: 24000/1001 */
 	ltc_enc_buf = (ltcsnd_sample_t*) calloc((nominal_frame_rate() / 23), sizeof(ltcsnd_sample_t));
 	ltc_speed = 0;
+	ltc_prev_cycle = -1;
 	ltc_tx_reset();
 	ltc_tx_resync_latency();
 	Xrun.connect_same_thread (*this, boost::bind (&Session::ltc_tx_reset, this));
@@ -131,6 +132,7 @@ Session::ltc_tx_parse_offset() {
 	offset_tc.drop = timecode_drop_frames();
 	timecode_to_sample(offset_tc, ltc_timecode_offset, false, false);
 	ltc_timecode_negative_offset = !offset_tc.negative;
+	ltc_prev_cycle = -1;
 }
 
 void
@@ -213,7 +215,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	if (cur_timecode != ltc_enc_tcformat) {
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX1: TC format mismatch - reinit sr: %1 fps: %2\n", nominal_frame_rate(), timecode_to_frames_per_second(cur_timecode)));
 		if (ltc_encoder_reinit(ltc_encoder, nominal_frame_rate(),
-					timecode_to_frames_per_second(cur_timecode), 
+					timecode_to_frames_per_second(cur_timecode),
 					TV_STANDARD(cur_timecode), 0
 					)) {
 			PBD::error << _("LTC encoder: invalid framerate - LTC encoding is disabled for the remainder of this session.") << endmsg;
@@ -243,10 +245,25 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	 * The _generated timecode_ is offset by the port-latency,
 	 * therefore the offset depends on the direction of transport.
 	 */
-	framepos_t cycle_start_frame = (current_speed < 0) ? (start_frame - ltc_out_latency.max) : (start_frame + ltc_out_latency.max);
+	framepos_t cycle_start_frame;
+
+	if (current_speed < 0) {
+		cycle_start_frame = (start_frame - ltc_out_latency.max);
+	} else if (current_speed > 0) {
+		cycle_start_frame = (start_frame + ltc_out_latency.max);
+	} else {
+		/* There is no need to compensate for latency when not rolling
+		 * rather send the accurate NOW timecode
+		 * (LTC encoder compenates latency by sending earlier timecode)
+		 */
+		cycle_start_frame = start_frame;
+	}
 
 	/* LTC TV standard offset */
-	cycle_start_frame -= ltc_frame_alignment(frames_per_timecode_frame(), TV_STANDARD(cur_timecode));
+	if (current_speed != 0) {
+		/* ditto - send "NOW" if not rolling */
+		cycle_start_frame -= ltc_frame_alignment(frames_per_timecode_frame(), TV_STANDARD(cur_timecode));
+	}
 
 	/* cycle-start may become negative due to latency compensation */
 	if (cycle_start_frame < 0) { cycle_start_frame = 0; }
@@ -261,7 +278,13 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		ltc_tx_reset();
 	}
 
-	if (ltc_speed != new_ltc_speed) {
+	if (ltc_speed != new_ltc_speed
+			/* but only once if, current_speed changes to 0. In that case
+			 * new_ltc_speed is > 0 because (end_frame - start_frame) == jack-period for no-roll
+			 * but ltc_speed will still be 0
+			 */
+			&& (current_speed != 0 || ltc_speed != current_speed)
+			) {
 		/* check ./libs/ardour/interpolation.cc  CubicInterpolation::interpolate
 		 * if target_speed != current_speed we should interpolate, too.
 		 *
@@ -271,7 +294,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		 * end_frame is calculated from 'frames_moved' which includes the interpolation.
 		 * so we're good.
 		 */
-		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: speed change old: %1 cur: %2 tgt: %3 ctd: %4\n", ltc_speed, current_speed, target_speed, fabs(current_speed) - target_speed));
+		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: speed change old: %1 cur: %2 tgt: %3 ctd: %4\n", ltc_speed, current_speed, target_speed, fabs(current_speed) - target_speed, new_ltc_speed));
 		speed_changed = true;
 		ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME(new_ltc_speed));
 	}
@@ -290,6 +313,10 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		if (!Config->get_ltc_send_continuously()) {
 			ltc_speed = new_ltc_speed;
 			return;
+		}
+		if (start_frame != ltc_prev_cycle) {
+			DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: no-roll seek from %1 to %2 (%3)\n", ltc_prev_cycle, start_frame, cycle_start_frame));
+			ltc_tx_reset();
 		}
 	}
 
@@ -374,6 +401,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		}
 	}
 
+	ltc_prev_cycle = start_frame;
 	ltc_speed = new_ltc_speed;
 	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: transport speed %1.\n", ltc_speed));
 
@@ -399,6 +427,9 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 
 	/* difference between current frame and TC frame in samples */
 	frameoffset_t soff = cycle_start_frame - tc_sample_start;
+	if (current_speed == 0) {
+		soff = 0;
+	}
 	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX3: A3cycle: %1 = A3tc: %2 +off: %3\n",
 				cycle_start_frame, tc_sample_start, soff));
 
@@ -464,7 +495,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 
 		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX4: now: %1 trs: %2 toff %3\n", cycle_start_frame, tc_sample_start, soff));
 
-		uint32_t cyc_off;
+		int32_t cyc_off;
 		if (soff < 0 || soff >= fptcf) {
 			/* session framerate change between (2) and now */
 			ltc_tx_reset();
@@ -500,7 +531,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 			restarting = true;
 		}
 
-		if (cyc_off > 0 && cyc_off <= nframes) {
+		if (cyc_off >= 0 && cyc_off <= (int32_t) nframes) {
 			/* offset in this cycle */
 			txf= rint(cyc_off / fabs(ltc_speed));
 			memset(out, 0, cyc_off * sizeof(Sample));

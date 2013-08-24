@@ -96,7 +96,7 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	float get_apv(); /* audio frames per video frame; */
 	ARDOUR::framecnt_t get_duration () { return video_duration;}
 	ARDOUR::frameoffset_t get_offset () { return video_offset;}
-	ARDOUR::frameoffset_t quantify_frames_to_apv (ARDOUR::frameoffset_t offset) { return floor(offset/get_apv())*get_apv(); }
+	ARDOUR::frameoffset_t quantify_frames_to_apv (ARDOUR::frameoffset_t offset) { return rint(offset/get_apv())*get_apv(); }
 	void set_offset (ARDOUR::frameoffset_t offset) { video_offset = quantify_frames_to_apv(offset); } // this function does not update video_offset_p, call save_undo() to finalize changes to this! - this fn is currently only used from editor_drag.cc
 
 	protected:

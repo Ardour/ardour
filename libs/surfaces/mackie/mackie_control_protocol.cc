@@ -101,7 +101,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _gui (0)
 	, _zoom_mode (false)
 	, _scrub_mode (false)
-	, _flip_mode (false)
+	, _flip_mode (Normal)
 	, _view_mode (Mixer)
 	, _current_selected_track (-1)
 	, _modifier_state (0)
@@ -1271,11 +1271,11 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 }
 
 void
-MackieControlProtocol::set_flip_mode (bool yn)
+MackieControlProtocol::set_flip_mode (FlipMode fm)
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
-	_flip_mode = yn;
+	_flip_mode = fm;
 	
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->update_flip_mode_display ();

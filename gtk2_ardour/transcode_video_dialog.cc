@@ -52,6 +52,7 @@ using namespace Gtk;
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace VideoUtils;
 
 TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	: ArdourDialog (_("Transcode/Import Video File "))
@@ -111,7 +112,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 
 	bool ffok = false;
 	if (!transcoder->ffexec_ok()) {
-		l = manage (new Label (_("No ffprobe or ffmpeg executables could be found on this system. Video Import is not possible until you install those tools. See the Log widow for more information."), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (_("No ffprobe or ffmpeg executables could be found on this system. Video Import is not possible until you install those tools. See the Log window for more information."), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 		l->set_line_wrap();
 		options_box->pack_start (*l, false, true, 4);
 		aspect_checkbox.set_sensitive(false);

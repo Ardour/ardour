@@ -49,6 +49,7 @@ class ExportFormatBase {
 		F_None = 0,
 		F_WAV = SF_FORMAT_WAV,
 		F_W64 = SF_FORMAT_W64,
+		F_CAF = SF_FORMAT_CAF,
 		F_AIFF = SF_FORMAT_AIFF,
 		F_AU = SF_FORMAT_AU,
 		F_IRCAM = SF_FORMAT_IRCAM,

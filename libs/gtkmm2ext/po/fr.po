@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-03-03 11:35-0500\n"
+"POT-Creation-Date: 2013-08-15 15:09-0400\n"
 "PO-Revision-Date: 2011-06-13 00:30+0200\n"
 "Language-Team: American English <kde-i18n-doc@kde.org>\n"
 "Language: en_US\n"
@@ -71,11 +71,11 @@ msgstr "Alt"
 msgid "Meta"
 msgstr "Meta"
 
-#: keyboard.cc:134 keyboard.cc:523
+#: keyboard.cc:139 keyboard.cc:531
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: keyboard.cc:534
+#: keyboard.cc:542
 #, fuzzy
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr "Raccourcis clavier pour %1 introuvable dans \"%1\" ou corrompu."

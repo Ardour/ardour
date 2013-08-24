@@ -45,6 +45,7 @@ using namespace Gtk;
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace VideoUtils;
 
 VideoServerDialog::VideoServerDialog (Session* s)
 	: ArdourDialog (_("Launch Video Server"))

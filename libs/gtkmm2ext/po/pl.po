@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libgtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-03-03 11:35-0500\n"
+"POT-Creation-Date: 2013-08-15 15:09-0400\n"
 "PO-Revision-Date: 2008-04-10 10:54+0100\n"
 "Last-Translator: Piotr Zaryk <pzaryk@gmail.com>\n"
 "Language-Team: Polish <pl@li.org>\n"
@@ -71,11 +71,11 @@ msgstr ""
 msgid "Meta"
 msgstr ""
 
-#: keyboard.cc:134 keyboard.cc:523
+#: keyboard.cc:139 keyboard.cc:531
 msgid "Unknown"
 msgstr ""
 
-#: keyboard.cc:534
+#: keyboard.cc:542
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 

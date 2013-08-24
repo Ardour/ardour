@@ -318,6 +318,12 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
+		boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
+		framecnt_t playback_distance = diskstream->calculate_playback_distance(nframes);
+		if (can_internal_playback_seek(llabs(playback_distance))) {
+			/* TODO should declick, and/or note-off */
+			internal_playback_seek(playback_distance);
+		}
 		return 0;
 	}
 

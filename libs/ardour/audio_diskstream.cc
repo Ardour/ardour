@@ -698,6 +698,31 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 	return 0;
 }
 
+frameoffset_t
+AudioDiskstream::calculate_playback_distance (pframes_t nframes)
+{
+	frameoffset_t playback_distance = nframes;
+
+	if (record_enabled()) {
+		playback_distance = nframes;
+	} else if (_actual_speed != 1.0f && _actual_speed != -1.0f) {
+		interpolation.set_speed (_target_speed);
+		boost::shared_ptr<ChannelList> c = channels.reader();
+		int channel = 0;
+		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan, ++channel) {
+			playback_distance = interpolation.interpolate (channel, nframes, NULL, NULL);
+		}
+	} else {
+		playback_distance = nframes;
+	}
+
+	if (_actual_speed < 0.0) {
+		return -playback_distance;
+	} else {
+		return playback_distance;
+	}
+}
+
 /** Update various things including playback_sample, read pointer on each channel's playback_buf
  *  and write pointer on each channel's capture_buf.  Also wout whether the butler is needed.
  *  @return true if the butler is required.
@@ -898,7 +923,7 @@ AudioDiskstream::internal_playback_seek (framecnt_t distance)
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	for (chan = c->begin(); chan != c->end(); ++chan) {
-		(*chan)->playback_buf->increment_read_ptr (distance);
+		(*chan)->playback_buf->increment_read_ptr (llabs(distance));
 	}
 
 	if (first_recordable_frame < max_framepos) {
