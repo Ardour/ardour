@@ -116,6 +116,10 @@ LV2PluginUI::on_external_ui_closed(void* controller)
 	LV2PluginUI* me = (LV2PluginUI*)controller;
 	me->_screen_update_connection.disconnect();
 	me->_external_ui_ptr = NULL;
+#if 1
+	suil_instance_free((SuilInstance*)me->_inst);
+	me->_inst = NULL;
+#endif
 }
 
 void
@@ -450,9 +454,12 @@ LV2PluginUI::on_window_hide()
 
 	if (_external_ui_ptr) {
 		LV2_EXTERNAL_UI_HIDE(_external_ui_ptr);
-		//slv2_ui_instance_get_descriptor(_inst)->cleanup(_inst);
-		//_external_ui_ptr = NULL;
-		//_screen_update_connection.disconnect();
+		_screen_update_connection.disconnect();
+		_external_ui_ptr = NULL;
+#if 1
+		suil_instance_free((SuilInstance*)_inst);
+		_inst = NULL;
+#endif
 	} else {
 		lv2ui_free();
 	}
