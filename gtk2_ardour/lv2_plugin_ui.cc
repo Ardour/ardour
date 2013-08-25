@@ -171,6 +171,7 @@ LV2PluginUI::output_update()
 	//cout << "output_update" << endl;
 	if (_external_ui_ptr) {
 		LV2_EXTERNAL_UI_RUN(_external_ui_ptr);
+		if (!_external_ui_ptr) return; // ui was closed here
 	}
 
 	/* FIXME only works with control output ports (which is all we support now anyway) */
@@ -222,12 +223,16 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		_external_ui_feature.URI  = LV2_EXTERNAL_UI_URI;
 		_external_ui_feature.data = &_external_ui_host;
 
+		_external_kxui_feature.URI  = LV2_EXTERNAL_UI_KX__Host;
+		_external_kxui_feature.data = &_external_ui_host;
+
 		++features_count;
 		features = (LV2_Feature**)malloc(
-			sizeof(LV2_Feature*) * (features_count + 1));
-		for (size_t i = 0; i < features_count - 1; ++i) {
+			sizeof(LV2_Feature*) * (features_count + 2));
+		for (size_t i = 0; i < features_count - 2; ++i) {
 			features[i] = features_src[i];
 		}
+		features[features_count - 2] = &_external_kxui_feature;
 		features[features_count - 1] = &_external_ui_feature;
 		features[features_count]     = NULL;
 	} else {

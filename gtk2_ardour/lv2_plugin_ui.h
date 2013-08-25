@@ -78,6 +78,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	std::vector<ControllableRef>         _controllables;
 	struct lv2_external_ui_host          _external_ui_host;
 	LV2_Feature                          _external_ui_feature;
+	LV2_Feature                          _external_kxui_feature;
 	struct lv2_external_ui*              _external_ui_ptr;
 	LV2_Feature                          _parent_feature;
 	Gtk::Window*                         _win_ptr;
