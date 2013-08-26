@@ -188,7 +188,7 @@ static gchar* cairo_value_color_collect_value (GValue* value, guint n_collect_va
 	(void) collect_flags;
 	if (collect_values[0].v_pointer) {
 		CairoColor* object;
-		object = collect_values[0].v_pointer;
+		object = (CairoColor*)collect_values[0].v_pointer;
 		if (object->parent_instance.g_class == NULL) {
 			return g_strconcat ("invalid unclassed object pointer for value type `", G_VALUE_TYPE_NAME (value), "'", NULL);
 		} else if (!g_value_type_compatible (G_TYPE_FROM_INSTANCE (object), G_VALUE_TYPE (value))) {
@@ -205,16 +205,16 @@ static gchar* cairo_value_color_collect_value (GValue* value, guint n_collect_va
 static gchar* cairo_value_color_lcopy_value (const GValue* value, guint n_collect_values, GTypeCValue* collect_values, guint collect_flags) {
 	CairoColor** object_p;
 	(void) n_collect_values;
-	object_p = collect_values[0].v_pointer;
+	object_p = (CairoColor**)collect_values[0].v_pointer;
 	if (!object_p) {
 		return g_strdup_printf ("value location for `%s' passed as NULL", G_VALUE_TYPE_NAME ((GValue*)value));
 	}
 	if (!value->data[0].v_pointer) {
 		*object_p = NULL;
 	} else if (collect_flags & G_VALUE_NOCOPY_CONTENTS) {
-		*object_p = value->data[0].v_pointer;
+		*object_p = (CairoColor*)value->data[0].v_pointer;
 	} else {
-		*object_p = cairo_color_ref (value->data[0].v_pointer);
+		*object_p = (CairoColor*)cairo_color_ref (value->data[0].v_pointer);
 	}
 	return NULL;
 }
@@ -223,7 +223,7 @@ static gchar* cairo_value_color_lcopy_value (const GValue* value, guint n_collec
 GParamSpec* cairo_param_spec_color (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags) {
 	CairoParamSpecColor* spec;
 	g_return_val_if_fail (g_type_is_a (object_type, CAIRO_TYPE_COLOR), NULL);
-	spec = g_param_spec_internal (G_TYPE_PARAM_OBJECT, name, nick, blurb, flags);
+	spec = (CairoParamSpecColor*)g_param_spec_internal (G_TYPE_PARAM_OBJECT, name, nick, blurb, flags);
 	G_PARAM_SPEC (spec)->value_type = object_type;
 	return G_PARAM_SPEC (spec);
 }
@@ -238,7 +238,7 @@ gpointer cairo_value_get_color (const GValue* value) {
 void cairo_value_set_color (GValue* value, gpointer v_object) {
 	CairoColor* old;
 	g_return_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, CAIRO_TYPE_COLOR));
-	old = value->data[0].v_pointer;
+	old = (CairoColor*)value->data[0].v_pointer;
 	if (v_object) {
 		g_return_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (v_object, CAIRO_TYPE_COLOR));
 		g_return_if_fail (g_value_type_compatible (G_TYPE_FROM_INSTANCE (v_object), G_VALUE_TYPE (value)));
@@ -256,7 +256,7 @@ void cairo_value_set_color (GValue* value, gpointer v_object) {
 void cairo_value_take_color (GValue* value, gpointer v_object) {
 	CairoColor* old;
 	g_return_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, CAIRO_TYPE_COLOR));
-	old = value->data[0].v_pointer;
+	old = (CairoColor*)value->data[0].v_pointer;
 	if (v_object) {
 		g_return_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (v_object, CAIRO_TYPE_COLOR));
 		g_return_if_fail (g_value_type_compatible (G_TYPE_FROM_INSTANCE (v_object), G_VALUE_TYPE (value)));
@@ -293,9 +293,9 @@ GType cairo_color_get_type (void) {
 	if (g_once_init_enter (&cairo_color_type_id__volatile)) {
 		static const GTypeValueTable g_define_type_value_table = { cairo_value_color_init, cairo_value_color_free_value, cairo_value_color_copy_value, cairo_value_color_peek_pointer, "p", cairo_value_color_collect_value, "p", cairo_value_color_lcopy_value };
 		static const GTypeInfo g_define_type_info = { sizeof (CairoColorClass), (GBaseInitFunc) NULL, (GBaseFinalizeFunc) NULL, (GClassInitFunc) cairo_color_class_init, (GClassFinalizeFunc) NULL, NULL, sizeof (CairoColor), 0, (GInstanceInitFunc) cairo_color_instance_init, &g_define_type_value_table };
-		static const GTypeFundamentalInfo g_define_type_fundamental_info = { (G_TYPE_FLAG_CLASSED | G_TYPE_FLAG_INSTANTIATABLE | G_TYPE_FLAG_DERIVABLE | G_TYPE_FLAG_DEEP_DERIVABLE) };
+		static const GTypeFundamentalInfo g_define_type_fundamental_info = { (GTypeFundamentalFlags)(G_TYPE_FLAG_CLASSED | G_TYPE_FLAG_INSTANTIATABLE | G_TYPE_FLAG_DERIVABLE | G_TYPE_FLAG_DEEP_DERIVABLE) };
 		GType cairo_color_type_id;
-		cairo_color_type_id = g_type_register_fundamental (g_type_fundamental_next (), "CairoColor", &g_define_type_info, &g_define_type_fundamental_info, 0);
+		cairo_color_type_id = g_type_register_fundamental (g_type_fundamental_next (), "CairoColor", &g_define_type_info, &g_define_type_fundamental_info, (GTypeFlags)0);
 		g_once_init_leave (&cairo_color_type_id__volatile, cairo_color_type_id);
 	}
 	return cairo_color_type_id__volatile;
@@ -304,7 +304,7 @@ GType cairo_color_get_type (void) {
 
 gpointer cairo_color_ref (gpointer instance) {
 	CairoColor* self;
-	self = instance;
+	self = (CairoColor*)instance;
 	g_atomic_int_inc (&self->ref_count);
 	return instance;
 }
@@ -312,7 +312,7 @@ gpointer cairo_color_ref (gpointer instance) {
 
 void cairo_color_unref (gpointer instance) {
 	CairoColor* self;
-	self = instance;
+	self = (CairoColor*)instance;
 	if (g_atomic_int_dec_and_test (&self->ref_count)) {
 		CAIRO_COLOR_GET_CLASS (self)->finalize (self);
 		g_type_free_instance ((GTypeInstance *) self);
@@ -774,7 +774,7 @@ static gchar* prolooks_value_hsl_collect_value (GValue* value, guint n_collect_v
 	(void) collect_flags;
 	if (collect_values[0].v_pointer) {
 		ProlooksHSL* object;
-		object = collect_values[0].v_pointer;
+		object = (ProlooksHSL*)collect_values[0].v_pointer;
 		if (object->parent_instance.g_class == NULL) {
 			return g_strconcat ("invalid unclassed object pointer for value type `", G_VALUE_TYPE_NAME (value), "'", NULL);
 		} else if (!g_value_type_compatible (G_TYPE_FROM_INSTANCE (object), G_VALUE_TYPE (value))) {
@@ -791,16 +791,16 @@ static gchar* prolooks_value_hsl_collect_value (GValue* value, guint n_collect_v
 static gchar* prolooks_value_hsl_lcopy_value (const GValue* value, guint n_collect_values, GTypeCValue* collect_values, guint collect_flags) {
 	ProlooksHSL** object_p;
 	(void) n_collect_values;
-	object_p = collect_values[0].v_pointer;
+	object_p = (ProlooksHSL**)collect_values[0].v_pointer;
 	if (!object_p) {
 		return g_strdup_printf ("value location for `%s' passed as NULL", G_VALUE_TYPE_NAME ((GValue*)value));
 	}
 	if (!value->data[0].v_pointer) {
 		*object_p = NULL;
 	} else if (collect_flags & G_VALUE_NOCOPY_CONTENTS) {
-		*object_p = value->data[0].v_pointer;
+		*object_p = (ProlooksHSL*)value->data[0].v_pointer;
 	} else {
-		*object_p = prolooks_hsl_ref (value->data[0].v_pointer);
+		*object_p = (ProlooksHSL*)prolooks_hsl_ref (value->data[0].v_pointer);
 	}
 	return NULL;
 }
@@ -809,7 +809,7 @@ static gchar* prolooks_value_hsl_lcopy_value (const GValue* value, guint n_colle
 GParamSpec* prolooks_param_spec_hsl (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags) {
 	ProlooksParamSpecHSL* spec;
 	g_return_val_if_fail (g_type_is_a (object_type, PROLOOKS_TYPE_HSL), NULL);
-	spec = g_param_spec_internal (G_TYPE_PARAM_OBJECT, name, nick, blurb, flags);
+	spec = (ProlooksParamSpecHSL*)g_param_spec_internal (G_TYPE_PARAM_OBJECT, name, nick, blurb, flags);
 	G_PARAM_SPEC (spec)->value_type = object_type;
 	return G_PARAM_SPEC (spec);
 }
@@ -824,7 +824,7 @@ gpointer prolooks_value_get_hsl (const GValue* value) {
 void prolooks_value_set_hsl (GValue* value, gpointer v_object) {
 	ProlooksHSL* old;
 	g_return_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, PROLOOKS_TYPE_HSL));
-	old = value->data[0].v_pointer;
+	old = (ProlooksHSL*)value->data[0].v_pointer;
 	if (v_object) {
 		g_return_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (v_object, PROLOOKS_TYPE_HSL));
 		g_return_if_fail (g_value_type_compatible (G_TYPE_FROM_INSTANCE (v_object), G_VALUE_TYPE (value)));
@@ -842,7 +842,7 @@ void prolooks_value_set_hsl (GValue* value, gpointer v_object) {
 void prolooks_value_take_hsl (GValue* value, gpointer v_object) {
 	ProlooksHSL* old;
 	g_return_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, PROLOOKS_TYPE_HSL));
-	old = value->data[0].v_pointer;
+	old = (ProlooksHSL*)value->data[0].v_pointer;
 	if (v_object) {
 		g_return_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (v_object, PROLOOKS_TYPE_HSL));
 		g_return_if_fail (g_value_type_compatible (G_TYPE_FROM_INSTANCE (v_object), G_VALUE_TYPE (value)));
@@ -879,9 +879,9 @@ GType prolooks_hsl_get_type (void) {
 	if (g_once_init_enter (&prolooks_hsl_type_id__volatile)) {
 		static const GTypeValueTable g_define_type_value_table = { prolooks_value_hsl_init, prolooks_value_hsl_free_value, prolooks_value_hsl_copy_value, prolooks_value_hsl_peek_pointer, "p", prolooks_value_hsl_collect_value, "p", prolooks_value_hsl_lcopy_value };
 		static const GTypeInfo g_define_type_info = { sizeof (ProlooksHSLClass), (GBaseInitFunc) NULL, (GBaseFinalizeFunc) NULL, (GClassInitFunc) prolooks_hsl_class_init, (GClassFinalizeFunc) NULL, NULL, sizeof (ProlooksHSL), 0, (GInstanceInitFunc) prolooks_hsl_instance_init, &g_define_type_value_table };
-		static const GTypeFundamentalInfo g_define_type_fundamental_info = { (G_TYPE_FLAG_CLASSED | G_TYPE_FLAG_INSTANTIATABLE | G_TYPE_FLAG_DERIVABLE | G_TYPE_FLAG_DEEP_DERIVABLE) };
+		static const GTypeFundamentalInfo g_define_type_fundamental_info = { (GTypeFundamentalFlags)(G_TYPE_FLAG_CLASSED | G_TYPE_FLAG_INSTANTIATABLE | G_TYPE_FLAG_DERIVABLE | G_TYPE_FLAG_DEEP_DERIVABLE) };
 		GType prolooks_hsl_type_id;
-		prolooks_hsl_type_id = g_type_register_fundamental (g_type_fundamental_next (), "ProlooksHSL", &g_define_type_info, &g_define_type_fundamental_info, 0);
+		prolooks_hsl_type_id = g_type_register_fundamental (g_type_fundamental_next (), "ProlooksHSL", &g_define_type_info, &g_define_type_fundamental_info, (GTypeFlags)0);
 		g_once_init_leave (&prolooks_hsl_type_id__volatile, prolooks_hsl_type_id);
 	}
 	return prolooks_hsl_type_id__volatile;
@@ -890,7 +890,7 @@ GType prolooks_hsl_get_type (void) {
 
 gpointer prolooks_hsl_ref (gpointer instance) {
 	ProlooksHSL* self;
-	self = instance;
+	self = (ProlooksHSL*)instance;
 	g_atomic_int_inc (&self->ref_count);
 	return instance;
 }
@@ -898,7 +898,7 @@ gpointer prolooks_hsl_ref (gpointer instance) {
 
 void prolooks_hsl_unref (gpointer instance) {
 	ProlooksHSL* self;
-	self = instance;
+	self = (ProlooksHSL*)instance;
 	if (g_atomic_int_dec_and_test (&self->ref_count)) {
 		PROLOOKS_HSL_GET_CLASS (self)->finalize (self);
 		g_type_free_instance ((GTypeInstance *) self);
@@ -1183,7 +1183,7 @@ static gchar* prolooks_value_hsv_collect_value (GValue* value, guint n_collect_v
 	(void) n_collect_values;
 	if (collect_values[0].v_pointer) {
 		ProlooksHSV* object;
-		object = collect_values[0].v_pointer;
+		object = (ProlooksHSV*)collect_values[0].v_pointer;
 		if (object->parent_instance.g_class == NULL) {
 			return g_strconcat ("invalid unclassed object pointer for value type `", G_VALUE_TYPE_NAME (value), "'", NULL);
 		} else if (!g_value_type_compatible (G_TYPE_FROM_INSTANCE (object), G_VALUE_TYPE (value))) {
@@ -1200,16 +1200,16 @@ static gchar* prolooks_value_hsv_collect_value (GValue* value, guint n_collect_v
 static gchar* prolooks_value_hsv_lcopy_value (const GValue* value, guint n_collect_values, GTypeCValue* collect_values, guint collect_flags) {
 	ProlooksHSV** object_p;
 	(void) n_collect_values;
-	object_p = collect_values[0].v_pointer;
+	object_p = (ProlooksHSV**)collect_values[0].v_pointer;
 	if (!object_p) {
 		return g_strdup_printf ("value location for `%s' passed as NULL", G_VALUE_TYPE_NAME ((GValue*)value));
 	}
 	if (!value->data[0].v_pointer) {
 		*object_p = NULL;
 	} else if (collect_flags & G_VALUE_NOCOPY_CONTENTS) {
-		*object_p = value->data[0].v_pointer;
+		*object_p = (ProlooksHSV*)value->data[0].v_pointer;
 	} else {
-		*object_p = prolooks_hsv_ref (value->data[0].v_pointer);
+		*object_p = (ProlooksHSV*)prolooks_hsv_ref (value->data[0].v_pointer);
 	}
 	return NULL;
 }
@@ -1218,7 +1218,7 @@ static gchar* prolooks_value_hsv_lcopy_value (const GValue* value, guint n_colle
 GParamSpec* prolooks_param_spec_hsv (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags) {
 	ProlooksParamSpecHSV* spec;
 	g_return_val_if_fail (g_type_is_a (object_type, PROLOOKS_TYPE_HSV), NULL);
-	spec = g_param_spec_internal (G_TYPE_PARAM_OBJECT, name, nick, blurb, flags);
+	spec = (ProlooksParamSpecHSV*)g_param_spec_internal (G_TYPE_PARAM_OBJECT, name, nick, blurb, flags);
 	G_PARAM_SPEC (spec)->value_type = object_type;
 	return G_PARAM_SPEC (spec);
 }
@@ -1233,7 +1233,7 @@ gpointer prolooks_value_get_hsv (const GValue* value) {
 void prolooks_value_set_hsv (GValue* value, gpointer v_object) {
 	ProlooksHSV* old;
 	g_return_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, PROLOOKS_TYPE_HSV));
-	old = value->data[0].v_pointer;
+	old = (ProlooksHSV*)value->data[0].v_pointer;
 	if (v_object) {
 		g_return_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (v_object, PROLOOKS_TYPE_HSV));
 		g_return_if_fail (g_value_type_compatible (G_TYPE_FROM_INSTANCE (v_object), G_VALUE_TYPE (value)));
@@ -1251,7 +1251,7 @@ void prolooks_value_set_hsv (GValue* value, gpointer v_object) {
 void prolooks_value_take_hsv (GValue* value, gpointer v_object) {
 	ProlooksHSV* old;
 	g_return_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, PROLOOKS_TYPE_HSV));
-	old = value->data[0].v_pointer;
+	old = (ProlooksHSV*)value->data[0].v_pointer;
 	if (v_object) {
 		g_return_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (v_object, PROLOOKS_TYPE_HSV));
 		g_return_if_fail (g_value_type_compatible (G_TYPE_FROM_INSTANCE (v_object), G_VALUE_TYPE (value)));
@@ -1286,9 +1286,9 @@ GType prolooks_hsv_get_type (void) {
 	if (g_once_init_enter (&prolooks_hsv_type_id__volatile)) {
 		static const GTypeValueTable g_define_type_value_table = { prolooks_value_hsv_init, prolooks_value_hsv_free_value, prolooks_value_hsv_copy_value, prolooks_value_hsv_peek_pointer, "p", prolooks_value_hsv_collect_value, "p", prolooks_value_hsv_lcopy_value };
 		static const GTypeInfo g_define_type_info = { sizeof (ProlooksHSVClass), (GBaseInitFunc) NULL, (GBaseFinalizeFunc) NULL, (GClassInitFunc) prolooks_hsv_class_init, (GClassFinalizeFunc) NULL, NULL, sizeof (ProlooksHSV), 0, (GInstanceInitFunc) prolooks_hsv_instance_init, &g_define_type_value_table };
-		static const GTypeFundamentalInfo g_define_type_fundamental_info = { (G_TYPE_FLAG_CLASSED | G_TYPE_FLAG_INSTANTIATABLE | G_TYPE_FLAG_DERIVABLE | G_TYPE_FLAG_DEEP_DERIVABLE) };
+		static const GTypeFundamentalInfo g_define_type_fundamental_info = { (GTypeFundamentalFlags)(G_TYPE_FLAG_CLASSED | G_TYPE_FLAG_INSTANTIATABLE | G_TYPE_FLAG_DERIVABLE | G_TYPE_FLAG_DEEP_DERIVABLE) };
 		GType prolooks_hsv_type_id;
-		prolooks_hsv_type_id = g_type_register_fundamental (g_type_fundamental_next (), "ProlooksHSV", &g_define_type_info, &g_define_type_fundamental_info, 0);
+		prolooks_hsv_type_id = g_type_register_fundamental (g_type_fundamental_next (), "ProlooksHSV", &g_define_type_info, &g_define_type_fundamental_info, (GTypeFlags)0);
 		g_once_init_leave (&prolooks_hsv_type_id__volatile, prolooks_hsv_type_id);
 	}
 	return prolooks_hsv_type_id__volatile;
@@ -1297,7 +1297,7 @@ GType prolooks_hsv_get_type (void) {
 
 gpointer prolooks_hsv_ref (gpointer instance) {
 	ProlooksHSV* self;
-	self = instance;
+	self = (ProlooksHSV*)instance;
 	g_atomic_int_inc (&self->ref_count);
 	return instance;
 }
@@ -1305,7 +1305,7 @@ gpointer prolooks_hsv_ref (gpointer instance) {
 
 void prolooks_hsv_unref (gpointer instance) {
 	ProlooksHSV* self;
-	self = instance;
+	self = (ProlooksHSV*)instance;
 	if (g_atomic_int_dec_and_test (&self->ref_count)) {
 		PROLOOKS_HSV_GET_CLASS (self)->finalize (self);
 		g_type_free_instance ((GTypeInstance *) self);
