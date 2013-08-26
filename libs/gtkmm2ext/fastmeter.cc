@@ -25,14 +25,16 @@
 
 #include <stdlib.h>
 
+#include <glibmm.h>
+#include <gdkmm.h>
 #include <gdkmm/rectangle.h>
 #include <gtkmm2ext/fastmeter.h>
 #include <gtkmm2ext/utils.h>
 
 #define UINT_TO_RGB(u,r,g,b) { (*(r)) = ((u)>>16)&0xff; (*(g)) = ((u)>>8)&0xff; (*(b)) = (u)&0xff; }
 #define UINT_TO_RGBA(u,r,g,b,a) { UINT_TO_RGB(((u)>>8),r,g,b); (*(a)) = (u)&0xff; }
+
 using namespace Gtk;
-using namespace Gdk;
 using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace std;
@@ -97,7 +99,7 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	_stp[2] = stp2;
 	_stp[3] = stp3;
 
-	set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
+	set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
 	pixrect.x = 1;
 	pixrect.y = 1;
