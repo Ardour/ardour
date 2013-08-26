@@ -6,6 +6,11 @@
     License: LGPLv2+ 
 */
 
+#ifdef COMPILER_MSVC
+#include <algorithm>
+using std::min; using std::max;
+#endif
+
 #include "gtkmm2ext/prolooks-helpers.h"
 
 static gpointer cairo_color_parent_class = NULL;
