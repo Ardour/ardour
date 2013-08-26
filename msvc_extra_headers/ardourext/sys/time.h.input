@@ -1,8 +1,8 @@
 #ifndef _WINX_SYS_TIME_H_
 #define _WINX_SYS_TIME_H_
 
-//#include <features.h>
-#include <WinSock2.h> // gets 'struct timeval' - Changed by JE - 23-07-2013. Was formerly. . . #include <WinSock.h>
+#define WIN32_LEAN_AND_MEAN /* This line found to be needed by JE - 18-08-2013. Line was formerly. . . #include <features.h> */
+#include <WinSock2.h> /* gets 'struct timeval' - Changed by JE - 23-07-2013. Was formerly. . . #include <WinSock.h> */
 
 #ifdef _TIMEVAL_DEFINED
 # define _STRUCT_TIMEVAL     1

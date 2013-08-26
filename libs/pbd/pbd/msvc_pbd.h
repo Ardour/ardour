@@ -82,7 +82,7 @@ extern "C" {
 
 // This function is (hopefully) temporary and is placed here
 // because 'g_usleep()' doesn't seem to work very well for glib-win32
-void    pbd_g_usleep (unsigned long microseconds);
+// JE -  let's see if we can do without this now! void    pbd_g_usleep (unsigned long microseconds);
 
 #ifdef __cplusplus
 }		/* extern "C" */
