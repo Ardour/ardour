@@ -27,7 +27,10 @@
 #define _CPP_VECTOR  1
 #endif
 
+#ifdef __cplusplus
 #include <vector>
+#endif
+
 #include <math.h>
 #include <float.h>
 #include <direct.h>
@@ -171,7 +174,11 @@ typedef int register_t;
 
 // throw()
 #ifndef __THROW
+#ifdef __cplusplus
 #define __THROW  throw()
+#else
+#define __THROW
+#endif
 #endif
 
 // round().... Unlike Linux, Windows doesn't seem to support the
@@ -198,6 +205,7 @@ typedef _mode_t mode_t;
 #endif /* _MODE_T_ */
 
 // int64 abs()
+#ifdef __cplusplus // Normal 'C' doesn't permit over-ridden functions !!
 inline uint64_t abs(int64_t val)
 {
 	if (val < 0)
@@ -205,6 +213,7 @@ inline uint64_t abs(int64_t val)
 	else
 		return val;
 }
+#endif
 
 // fmin() and fmax()
 #define fmin(a, b) min((double)a, (double)b)
@@ -221,6 +230,7 @@ inline uint64_t abs(int64_t val)
 
 
 // #include the main headers for Ardour MSVC
+#ifdef __cplusplus
 #if defined(BUILDING_PBD) || defined(PBD_IS_IN_WIN_STATIC_LIB)
 #include <pbd/msvc_pbd.h>
 #endif
@@ -230,5 +240,6 @@ inline uint64_t abs(int64_t val)
 #if defined(BUILDING_RUBBERBAND) || defined(RUBBERBAND_IS_IN_WIN_STATIC_LIB)
 #include <rubberband/msvc_rubberband.h>
 #endif
+#endif // __cplusplus
 
 #endif /* __ardour_msvc_extensions_h__ */
