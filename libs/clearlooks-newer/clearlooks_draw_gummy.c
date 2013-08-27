@@ -790,10 +790,10 @@ clearlooks_gummy_draw_separator (cairo_t                   *cr,
                                  const SeparatorParameters *separator,
                                  int x, int y, int width, int height)
 {
-	(void) widget;
-	
-	CairoColor color = colors->shade[3];
 	CairoColor hilight;
+	CairoColor color = colors->shade[3];
+
+	(void) widget;
 	ge_shade_color (&color, 1.3, &hilight);
 
 	cairo_save (cr);
@@ -1162,11 +1162,14 @@ clearlooks_gummy_draw_toolbar (cairo_t                 *cr,
                                const ToolbarParameters *toolbar,
                                int x, int y, int width, int height)
 {
-	(void) widget;
-	
-	const CairoColor *fill = &colors->bg[GTK_STATE_NORMAL];
-	const CairoColor *dark = &colors->shade[3];
 	CairoColor light;
+	const CairoColor *dark;
+	const CairoColor *fill = &colors->bg[GTK_STATE_NORMAL];
+
+	(void) widget;
+
+	dark = &colors->shade[3];
+
 	ge_shade_color (fill, toolbar->style == 1 ? 1.1 : 1.05, &light);
 
 	cairo_set_line_width (cr, 1.0);
@@ -1302,11 +1305,11 @@ clearlooks_gummy_draw_statusbar (cairo_t                *cr,
                                  const WidgetParameters *widget,
                                  int x, int y, int width, int height)
 {
+	CairoColor hilight;
+	const CairoColor *dark = &colors->shade[3];
+
 	(void) widget;
 	(void) height;
-
-	const CairoColor *dark = &colors->shade[3];
-	CairoColor hilight;
 
 	ge_shade_color (dark, 1.3, &hilight);
 
@@ -1331,9 +1334,6 @@ clearlooks_gummy_draw_radiobutton (cairo_t                  *cr,
                                    const CheckboxParameters *checkbox,
                                    int x, int y, int width, int height)
 {
-	(void) width;
-	(void) height;
-	
 	const CairoColor *border;
 	const CairoColor *dot;
 	CairoColor shadow;
@@ -1341,6 +1341,9 @@ clearlooks_gummy_draw_radiobutton (cairo_t                  *cr,
 	cairo_pattern_t *pt;
 	gboolean inconsistent;
 	gboolean draw_bullet = (checkbox->shadow_type == GTK_SHADOW_IN);
+
+	(void) width;
+	(void) height;
 
 	inconsistent = (checkbox->shadow_type == GTK_SHADOW_ETCHED_IN);
 	draw_bullet |= inconsistent;

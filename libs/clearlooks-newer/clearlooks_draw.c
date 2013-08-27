@@ -945,11 +945,11 @@ clearlooks_draw_menubar0 (cairo_t *cr,
                           const MenuBarParameters *menubar,
                           int x, int y, int width, int height)
 {
-	(void) params;
-	(void) menubar;
-	
 /* 	const CairoColor *light = &colors->shade[0]; */
 	const CairoColor *dark = &colors->shade[3];
+
+	(void) params;
+	(void) menubar;
 
 	cairo_set_line_width (cr, 1);
 	cairo_translate (cr, x, y+0.5);
@@ -972,11 +972,11 @@ clearlooks_draw_menubar2 (cairo_t *cr,
                           const MenuBarParameters *menubar,
                           int x, int y, int width, int height)
 {
-	(void) params;
-	(void) menubar;
-	
 	CairoColor lower;
 	cairo_pattern_t *pattern;
+
+	(void) params;
+	(void) menubar;
 
 	ge_shade_color (&colors->bg[0], 0.96, &lower);
 	
@@ -1316,10 +1316,10 @@ clearlooks_draw_separator (cairo_t *cr,
                            const SeparatorParameters  *separator,
                            int x, int y, int width, int height)
 {
-	(void) widget;
-	
+	CairoColor hilight;
 	CairoColor color = colors->shade[3];
-	CairoColor hilight; 
+
+	(void) widget;
 	ge_shade_color (&color, 1.4, &hilight);
 
 	cairo_save (cr);
@@ -1432,11 +1432,12 @@ clearlooks_draw_toolbar (cairo_t *cr,
                          const ToolbarParameters         *toolbar,
                          int x, int y, int width, int height)
 {
-	(void) widget;
-
-	const CairoColor *fill  = &colors->bg[GTK_STATE_NORMAL];
-	const CairoColor *dark  = &colors->shade[3];
 	CairoColor light;
+	const CairoColor *dark;
+	const CairoColor *fill  = &colors->bg[GTK_STATE_NORMAL];
+
+	(void) widget;
+	dark  = &colors->shade[3];
 	ge_shade_color (fill, 1.1, &light);
 	
 	cairo_set_line_width (cr, 1.0);
@@ -1575,13 +1576,13 @@ clearlooks_draw_scrollbar_trough (cairo_t *cr,
                                   const ScrollBarParameters        *scrollbar,
                                   int x, int y, int width, int height)
 {
-	(void) widget;
-
-	const CairoColor *bg     = &colors->shade[2];
-	const CairoColor *border = &colors->shade[5];
+	const CairoColor *bg;
 	CairoColor        bg_shade;
-	cairo_pattern_t *pattern;
+	cairo_pattern_t  *pattern;
+	const CairoColor *border = &colors->shade[5];
 	
+	(void) widget;
+	bg = &colors->shade[2];
 	ge_shade_color (bg, 0.95, &bg_shade);
 	
 	cairo_set_line_width (cr, 1);
@@ -1809,11 +1810,11 @@ clearlooks_draw_statusbar (cairo_t *cr,
                            const WidgetParameters          *widget,
                            int x, int y, int width, int height)
 {
+	CairoColor hilight;
+	const CairoColor *dark = &colors->shade[3];
+
 	(void) widget;
 	(void) height;
-	
-	const CairoColor *dark = &colors->shade[3];
-	CairoColor hilight;
 
 	ge_shade_color (dark, 1.4, &hilight);
 
@@ -1837,9 +1838,9 @@ clearlooks_draw_menu_frame (cairo_t *cr,
                             const WidgetParameters          *widget,
                             int x, int y, int width, int height)
 {
+	const CairoColor *border = &colors->shade[5];
 	(void) widget;
 
-	const CairoColor *border = &colors->shade[5];
 	cairo_translate      (cr, x, y);
 	cairo_set_line_width (cr, 1);
 /*
@@ -1924,15 +1925,15 @@ clearlooks_draw_resize_grip (cairo_t *cr,
                              const ResizeGripParameters      *grip,
                              int x, int y, int width, int height)
 {
-	(void) widget;
-	
-	const CairoColor *dark   = &colors->shade[4];
 	CairoColor hilight;
 	int lx, ly;
 	int x_down;
 	int y_down;
 	int dots;
-	
+	const CairoColor *dark   = &colors->shade[4];
+
+	(void) widget;
+
 	ge_shade_color (dark, 1.5, &hilight);
 
 	/* The number of dots fitting into the area. Just hardcoded to 4 right now. */
@@ -1996,16 +1997,17 @@ clearlooks_draw_radiobutton (cairo_t *cr,
                              const CheckboxParameters *checkbox,
                              int x, int y, int width, int height)
 {
-	(void) width;
-	(void) height;
-	
 	const CairoColor *border;
 	const CairoColor *dot;
 	CairoColor shadow;
 	CairoColor highlight;
 	cairo_pattern_t *pt;
 	gboolean inconsistent;
+
 	gboolean draw_bullet = (checkbox->shadow_type == GTK_SHADOW_IN);
+
+	(void) width;
+	(void) height;
 
 	inconsistent = (checkbox->shadow_type == GTK_SHADOW_ETCHED_IN);
 	draw_bullet |= inconsistent;
