@@ -113,13 +113,13 @@ LV2PluginUI::update_timeout()
 void
 LV2PluginUI::on_external_ui_closed(void* controller)
 {
+	//printf("LV2PluginUI::on_external_ui_closed\n");
 	LV2PluginUI* me = (LV2PluginUI*)controller;
 	me->_screen_update_connection.disconnect();
-	me->_external_ui_ptr = NULL;
-#if 1
-	suil_instance_free((SuilInstance*)me->_inst);
-	me->_inst = NULL;
-#endif
+	if (me->_lv2->is_external_kx() /* called from plugin's UI_RUN() */) {
+		// plugin is free()d in parent function - LV2PluginUI::output_update()
+		me->_external_ui_ptr = NULL;
+	}
 }
 
 void
@@ -171,7 +171,19 @@ LV2PluginUI::output_update()
 	//cout << "output_update" << endl;
 	if (_external_ui_ptr) {
 		LV2_EXTERNAL_UI_RUN(_external_ui_ptr);
-		if (!_external_ui_ptr) return; // ui was closed here
+		if (_lv2->is_external_kx() && !_external_ui_ptr) {
+			// clean up external UI if it closes itself via
+			// on_external_ui_closed() during run()
+			//printf("LV2PluginUI::output_update -- UI was closed\n");
+			_screen_update_connection.disconnect();
+			_message_update_connection.disconnect();
+			if (_inst) {
+				suil_instance_free((SuilInstance*)_inst);
+			}
+			_inst = NULL;
+			_external_ui_ptr = NULL;
+			return;
+		}
 	}
 
 	/* FIXME only works with control output ports (which is all we support now anyway) */
@@ -269,6 +281,10 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		? NS_UI "external"
 		: NS_UI "GtkUI";
 
+	if (_lv2->has_message_output()) {
+		_lv2->enable_ui_emmission();
+	}
+
 	const LilvUI* ui = (const LilvUI*)_lv2->c_ui();
 	_inst = suil_instance_new(
 		ui_host,
@@ -331,8 +347,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	}
 
 	if (_lv2->has_message_output()) {
-		_lv2->enable_ui_emmission();
-		ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect(
+		_message_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect(
 			sigc::mem_fun(*this, &LV2PluginUI::update_timeout));
 	}
 }
@@ -359,17 +374,7 @@ LV2PluginUI::~LV2PluginUI ()
 		delete[] _values;
 	}
 
-	/* Close and delete GUI. */
-	lv2ui_free();
-
-	_screen_update_connection.disconnect();
-
-	if (_lv2->is_external_ui()) {
-		/* External UI is no longer valid.
-		   on_window_hide() will not try to use it if is NULL.
-		*/
-		_external_ui_ptr = NULL;
-	}
+	on_window_hide();
 }
 
 int
@@ -432,7 +437,15 @@ LV2PluginUI::on_window_show(const std::string& title)
 
 	if (_lv2->is_external_ui()) {
 		if (_external_ui_ptr) {
+			_screen_update_connection.disconnect();
+			_message_update_connection.disconnect();
 			LV2_EXTERNAL_UI_SHOW(_external_ui_ptr);
+			_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect
+		        (sigc::mem_fun(*this, &LV2PluginUI::output_update));
+			if (_lv2->has_message_output()) {
+				_message_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect(
+					sigc::mem_fun(*this, &LV2PluginUI::update_timeout));
+			}
 			return false;
 		}
 		lv2ui_instantiate(title);
@@ -440,10 +453,15 @@ LV2PluginUI::on_window_show(const std::string& title)
 			return false;
 		}
 
-		LV2_EXTERNAL_UI_SHOW(_external_ui_ptr);
 		_screen_update_connection.disconnect();
+		_message_update_connection.disconnect();
+		LV2_EXTERNAL_UI_SHOW(_external_ui_ptr);
 		_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect
-		        (sigc::mem_fun(*this, &LV2PluginUI::output_update));
+			(sigc::mem_fun(*this, &LV2PluginUI::output_update));
+		if (_lv2->has_message_output()) {
+			_message_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect(
+				sigc::mem_fun(*this, &LV2PluginUI::update_timeout));
+		}
 		return false;
 	} else {
 		lv2ui_instantiate("gtk2gui");
@@ -455,16 +473,16 @@ LV2PluginUI::on_window_show(const std::string& title)
 void
 LV2PluginUI::on_window_hide()
 {
-	//cout << "on_window_hide" << endl; flush(cout);
+	//printf("LV2PluginUI::on_window_hide\n");
+	_message_update_connection.disconnect();
 
-	if (_external_ui_ptr) {
-		LV2_EXTERNAL_UI_HIDE(_external_ui_ptr);
+	if (_lv2->is_external_ui()) {
+		if (!_external_ui_ptr) { return; }
 		_screen_update_connection.disconnect();
+		LV2_EXTERNAL_UI_HIDE(_external_ui_ptr);
 		_external_ui_ptr = NULL;
-#if 1
 		suil_instance_free((SuilInstance*)_inst);
 		_inst = NULL;
-#endif
 	} else {
 		lv2ui_free();
 	}

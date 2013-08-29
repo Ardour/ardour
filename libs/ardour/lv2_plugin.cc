@@ -622,6 +622,15 @@ LV2Plugin::is_external_ui() const
 }
 
 bool
+LV2Plugin::is_external_kx() const
+{
+	if (!_impl->ui) {
+		return false;
+	}
+	return lilv_ui_is_a(_impl->ui, _world.ui_externalkx);
+}
+
+bool
 LV2Plugin::ui_is_resizable () const
 {
 	const LilvNode* s   = lilv_ui_get_uri(_impl->ui);
