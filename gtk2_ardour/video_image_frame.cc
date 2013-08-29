@@ -198,7 +198,7 @@ http_get_thread (void *arg) {
 	char *res = NULL;
 	do {
 		res=a3_curl_http_get(url, &status);
-		if (status == 503) usleep(5000); // try-again
+		if (status == 503) Glib::usleep(5000); // try-again
 	} while (status == 503 && --timeout > 0);
 
 	if (status != 200 || !res) {
