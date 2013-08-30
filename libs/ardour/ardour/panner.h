@@ -34,6 +34,31 @@
 #include "ardour/automation_control.h"
 #include "ardour/automatable.h"
 
+#if !defined(ARDOURPANNER_IS_IN_WINDLL)
+	#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
+	// If you need '__declspec' compatibility, add extra compilers to the above as necessary
+		#define ARDOURPANNER_IS_IN_WINDLL 1
+	#else
+		#define ARDOURPANNER_IS_IN_WINDLL 0
+	#endif
+#endif
+
+#if ARDOURPANNER_IS_IN_WINDLL && !defined(ARDOURPANNER_API)
+	#if defined(BUILDING_ARDOURPANNERS)
+		#define ARDOURPANNER_API __declspec(dllexport)
+		#define ARDOURPANNER_APICALLTYPE __thiscall
+	#elif defined(COMPILER_MSVC) || defined(COMPILER_MINGW) // Probably needs Cygwin too, at some point
+		#define ARDOURPANNER_API __declspec(dllimport)
+		#define ARDOURPANNER_APICALLTYPE __thiscall
+	#else
+		#error "Attempting to define __declspec with an incompatible compiler !"
+	#endif
+#elif !defined(ARDOURPANNER_API)
+	// Other compilers / platforms could be accommodated here
+	#define ARDOURPANNER_API
+	#define ARDOURPANNER_APICALLTYPE
+#endif
+
 namespace ARDOUR {
 
 class Session;
@@ -67,7 +92,7 @@ public:
 	   * return false
 	*/
 
-	virtual bool clamp_position (double&) { return true; }
+	virtual bool ARDOURPANNER_APICALLTYPE clamp_position (double&) { return true; }
 	virtual bool clamp_width (double&) { return true; }
 	virtual bool clamp_elevation (double&) { return true; }
 
@@ -75,7 +100,7 @@ public:
 	virtual std::pair<double, double> width_range () const { return std::make_pair (-DBL_MAX, DBL_MAX); }
 	virtual std::pair<double, double> elevation_range () const { return std::make_pair (-DBL_MAX, DBL_MAX); }
 
-	virtual void set_position (double) { }
+	virtual void ARDOURPANNER_APICALLTYPE set_position (double) { }
 	virtual void set_width (double) { }
 	virtual void set_elevation (double) { }
 
