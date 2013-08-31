@@ -47,9 +47,11 @@
 	#if defined(BUILDING_ARDOURPANNERS)
 		#define ARDOURPANNER_API __declspec(dllexport)
 		#define ARDOURPANNER_APICALLTYPE __thiscall
+		#define ARDOURPANNER_CAPICALLTYPE __cdecl
 	#elif defined(COMPILER_MSVC) || defined(COMPILER_MINGW) // Probably needs Cygwin too, at some point
 		#define ARDOURPANNER_API __declspec(dllimport)
 		#define ARDOURPANNER_APICALLTYPE __thiscall
+		#define ARDOURPANNER_CAPICALLTYPE __cdecl
 	#else
 		#error "Attempting to define __declspec with an incompatible compiler !"
 	#endif
@@ -57,6 +59,7 @@
 	// Other compilers / platforms could be accommodated here
 	#define ARDOURPANNER_API
 	#define ARDOURPANNER_APICALLTYPE
+	#define ARDOURPANNER_CAPICALLTYPE
 #endif
 
 namespace ARDOUR {

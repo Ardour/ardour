@@ -67,7 +67,7 @@ static PanPluginDescriptor _descriptor = {
         Panner1in2out::factory
 };
 
-extern "C" { PanPluginDescriptor* panner_descriptor () { return &_descriptor; } }
+extern "C" { ARDOURPANNER_API PanPluginDescriptor* ARDOURPANNER_CAPICALLTYPE panner_descriptor () { return &_descriptor; } }
 
 Panner1in2out::Panner1in2out (boost::shared_ptr<Pannable> p)
 	: Panner (p)
