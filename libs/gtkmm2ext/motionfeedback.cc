@@ -298,7 +298,7 @@ MotionFeedback::pixwin_key_press_event (GdkEventKey *ev)
 
 	case GDK_Page_Down:
 	        retval = true;
-		_controllable->set_value (adjust (multiplier * page_inc));
+		_controllable->set_value (adjust (-multiplier * page_inc));
 		break;
 
 	case GDK_Up:
@@ -308,7 +308,7 @@ MotionFeedback::pixwin_key_press_event (GdkEventKey *ev)
 
 	case GDK_Down:
 	        retval = true;
-		_controllable->set_value (adjust (multiplier * step_inc));
+		_controllable->set_value (adjust (-multiplier * step_inc));
 		break;
 
 	case GDK_Home:
