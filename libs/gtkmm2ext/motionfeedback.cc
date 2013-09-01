@@ -389,10 +389,10 @@ MotionFeedback::pixwin_scroll_event (GdkEventScroll* ev)
 		if (ev->state & Keyboard::GainExtraFineScaleModifier) {
 			scale = 0.01;
 		} else {
-			scale = 0.05;
+			scale = 0.10;
 		}
 	} else {
-		scale = 0.25;
+		scale = 0.20;
 	}
 
 	switch (ev->direction) {
