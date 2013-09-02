@@ -115,8 +115,8 @@ LV2PluginUI::on_external_ui_closed(void* controller)
 {
 	//printf("LV2PluginUI::on_external_ui_closed\n");
 	LV2PluginUI* me = (LV2PluginUI*)controller;
-	me->_screen_update_connection.disconnect();
 	if (me->_lv2->is_external_kx() /* called from plugin's UI_RUN() */) {
+		me->_screen_update_connection.disconnect();
 		// plugin is free()d in parent function - LV2PluginUI::output_update()
 		me->_external_ui_ptr = NULL;
 	}
@@ -374,7 +374,14 @@ LV2PluginUI::~LV2PluginUI ()
 		delete[] _values;
 	}
 
-	on_window_hide();
+	_message_update_connection.disconnect();
+	_screen_update_connection.disconnect();
+
+	if (_external_ui_ptr && _lv2->is_external_kx()) {
+		LV2_EXTERNAL_UI_HIDE(_external_ui_ptr);
+	}
+	lv2ui_free();
+	_external_ui_ptr = NULL;
 }
 
 int
@@ -478,6 +485,7 @@ LV2PluginUI::on_window_hide()
 
 	if (_lv2->is_external_ui()) {
 		if (!_external_ui_ptr) { return; }
+		if (!_lv2->is_external_kx()) { return ; }
 		_screen_update_connection.disconnect();
 		LV2_EXTERNAL_UI_HIDE(_external_ui_ptr);
 		_external_ui_ptr = NULL;
