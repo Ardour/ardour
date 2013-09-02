@@ -50,7 +50,7 @@ static PanPluginDescriptor _descriptor = {
         VBAPanner::factory
 };
 
-extern "C" { PanPluginDescriptor* panner_descriptor () { return &_descriptor; } }
+extern "C" ARDOURPANNER_API PanPluginDescriptor* panner_descriptor () { return &_descriptor; }
 
 VBAPanner::Signal::Signal (Session&, VBAPanner&, uint32_t, uint32_t n_speakers)
 {

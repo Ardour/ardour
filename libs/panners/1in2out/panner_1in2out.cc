@@ -51,6 +51,7 @@
 #include "ardour/buffer_set.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/pannable.h"
+#include "ardour/visibility.h"
 
 #include "i18n.h"
 #include "panner_1in2out.h"
@@ -67,7 +68,7 @@ static PanPluginDescriptor _descriptor = {
         Panner1in2out::factory
 };
 
-extern "C" ARDOURPANNER_API PanPluginDescriptor* ARDOURPANNER_CAPICALLTYPE panner_descriptor () { return &_descriptor; }
+extern "C" ARDOURPANNER_API PanPluginDescriptor*  panner_descriptor () { return &_descriptor; }
 
 Panner1in2out::Panner1in2out (boost::shared_ptr<Pannable> p)
 	: Panner (p)

@@ -33,38 +33,14 @@
 #include "ardour/types.h"
 #include "ardour/automation_control.h"
 #include "ardour/automatable.h"
+#include "ardour/visibility.h"
 
-#ifndef ARDOURPANNER_IS_IN_SHARED_LIB
-	#define ARDOURPANNER_IS_IN_SHARED_LIB 1
-#endif
-
-#if ARDOURPANNER_IS_IN_SHARED_LIB && !defined(ARDOURPANNER_API)
-	#define ARDOURPANNER_CAPICALLTYPE __cdecl
-
-	#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-		#if defined(BUILDING_ARDOURPANNERS)
-			#define ARDOURPANNER_LOCAL
-			#define ARDOURPANNER_API   __declspec(dllexport)
-		#else
-			#define ARDOURPANNER_LOCAL
-			#define ARDOURPANNER_API   __declspec(dllimport)
-		#endif
-	#else
-		#if !defined(COMPILER_GCC)
-			#warning "Attempting to export symbols with an unspecified compiler! GCC assumed!"
-		#endif
-
-		#define ARDOURPANNER_LOCAL __attribute__ ((visibility("hidden")))
-		#define ARDOURPANNER_API   __attribute__ ((visibility("default")))
-	#endif
-#elif !defined(ARDOURPANNER_API)
-	#define ARDOURPANNER_CAPICALLTYPE __cdecl
-
-	/* This library was built statically.    */
-	/* Visibility is determined by the code. */
-	#define ARDOURPANNER_API
-	#define ARDOURPANNER_LOCAL
-#endif
+#ifdef ARDOURPANNER_DLL_EXPORTS // defined if we are building the ARDOUR Panners DLLs (instead of using them)
+    #define ARDOURPANNER_API LIBARDOUR_HELPER_DLL_EXPORT
+#else
+    #define ARDOURPANNER_API LIBARDOUR_HELPER_DLL_IMPORT
+#endif 
+#define ARDOURPANNER_LOCAL LIBARDOUR_HELPER_DLL_LOCAL
 
 namespace ARDOUR {
 

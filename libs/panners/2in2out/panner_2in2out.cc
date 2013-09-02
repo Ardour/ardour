@@ -49,6 +49,7 @@
 #include "ardour/runtime_functions.h"
 #include "ardour/session.h"
 #include "ardour/utils.h"
+#include "ardour/visibility.h"
 #include "ardour/mix.h"
 
 #include "panner_2in2out.h"
@@ -67,7 +68,7 @@ static PanPluginDescriptor _descriptor = {
         Panner2in2out::factory
 };
 
-extern "C" { PanPluginDescriptor* panner_descriptor () { return &_descriptor; } }
+extern "C" ARDOURPANNER_API PanPluginDescriptor* panner_descriptor () { return &_descriptor; }
 
 Panner2in2out::Panner2in2out (boost::shared_ptr<Pannable> p)
 	: Panner (p)

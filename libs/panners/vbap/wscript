@@ -23,6 +23,7 @@ def build(bld):
     obj.source = [ 'vbap_speakers.cc', 'vbap.cc'  ]
     obj.export_includes = ['.']
     obj.cxxflags     = '-DPACKAGE="libardour_panvbap"'
+    obj.defines      = [ 'ARDOURPANNER_DLL_EXPORTS' ]
     obj.includes     = ['.']
     obj.name         = 'libardour_panvbap'
     obj.target       = 'panvbap'

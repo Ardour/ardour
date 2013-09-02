@@ -23,6 +23,7 @@ def build(bld):
     obj.source = [ 'panner_2in2out.cc' ]
     obj.export_includes = ['.']
     obj.cxxflags     = '-DPACKAGE="libardour_pan2in2out"'
+    obj.defines      = [ 'ARDOURPANNER_DLL_EXPORTS' ]
     obj.includes     = ['.']
     obj.name         = 'libardour_pan2in2out'
     obj.target       = 'pan2in2out'
