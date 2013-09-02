@@ -34,32 +34,36 @@
 #include "ardour/automation_control.h"
 #include "ardour/automatable.h"
 
-#if !defined(ARDOURPANNER_IS_IN_WINDLL)
-	#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-	// If you need '__declspec' compatibility, add extra compilers to the above as necessary
-		#define ARDOURPANNER_IS_IN_WINDLL 1
-	#else
-		#define ARDOURPANNER_IS_IN_WINDLL 0
-	#endif
+#ifndef ARDOURPANNER_IS_IN_SHARED_LIB
+	#define ARDOURPANNER_IS_IN_SHARED_LIB 1
 #endif
 
-#if ARDOURPANNER_IS_IN_WINDLL && !defined(ARDOURPANNER_API)
-	#if defined(BUILDING_ARDOURPANNERS)
-		#define ARDOURPANNER_API __declspec(dllexport)
-		#define ARDOURPANNER_APICALLTYPE __thiscall
-		#define ARDOURPANNER_CAPICALLTYPE __cdecl
-	#elif defined(COMPILER_MSVC) || defined(COMPILER_MINGW) // Probably needs Cygwin too, at some point
-		#define ARDOURPANNER_API __declspec(dllimport)
-		#define ARDOURPANNER_APICALLTYPE __thiscall
-		#define ARDOURPANNER_CAPICALLTYPE __cdecl
+#if ARDOURPANNER_IS_IN_SHARED_LIB && !defined(ARDOURPANNER_API)
+	#define ARDOURPANNER_CAPICALLTYPE __cdecl
+
+	#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
+		#if defined(BUILDING_ARDOURPANNERS)
+			#define ARDOURPANNER_LOCAL
+			#define ARDOURPANNER_API   __declspec(dllexport)
+		#else
+			#define ARDOURPANNER_LOCAL
+			#define ARDOURPANNER_API   __declspec(dllimport)
+		#endif
 	#else
-		#error "Attempting to define __declspec with an incompatible compiler !"
+		#if !defined(COMPILER_GCC)
+			#warning "Attempting to export symbols with an unspecified compiler! GCC assumed!"
+		#endif
+
+		#define ARDOURPANNER_LOCAL __attribute__ ((visibility("hidden")))
+		#define ARDOURPANNER_API   __attribute__ ((visibility("default")))
 	#endif
 #elif !defined(ARDOURPANNER_API)
-	// Other compilers / platforms could be accommodated here
+	#define ARDOURPANNER_CAPICALLTYPE __cdecl
+
+	/* This library was built statically.    */
+	/* Visibility is determined by the code. */
 	#define ARDOURPANNER_API
-	#define ARDOURPANNER_APICALLTYPE
-	#define ARDOURPANNER_CAPICALLTYPE
+	#define ARDOURPANNER_LOCAL
 #endif
 
 namespace ARDOUR {
@@ -95,7 +99,7 @@ public:
 	   * return false
 	*/
 
-	virtual bool ARDOURPANNER_APICALLTYPE clamp_position (double&) { return true; }
+	virtual bool clamp_position (double&) { return true; }
 	virtual bool clamp_width (double&) { return true; }
 	virtual bool clamp_elevation (double&) { return true; }
 
@@ -103,7 +107,7 @@ public:
 	virtual std::pair<double, double> width_range () const { return std::make_pair (-DBL_MAX, DBL_MAX); }
 	virtual std::pair<double, double> elevation_range () const { return std::make_pair (-DBL_MAX, DBL_MAX); }
 
-	virtual void ARDOURPANNER_APICALLTYPE set_position (double) { }
+	virtual void set_position (double) { }
 	virtual void set_width (double) { }
 	virtual void set_elevation (double) { }
 

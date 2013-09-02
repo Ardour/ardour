@@ -42,8 +42,8 @@ class Panner1in2out : public Panner
 	Panner1in2out (boost::shared_ptr<Pannable>);
 	~Panner1in2out ();
 
-    ARDOURPANNER_API void ARDOURPANNER_APICALLTYPE set_position (double);
-    ARDOURPANNER_API bool ARDOURPANNER_APICALLTYPE clamp_position (double&);
+    ARDOURPANNER_API void set_position (double);
+    ARDOURPANNER_API bool clamp_position (double&);
 	std::pair<double, double> position_range () const;
 
         double position() const;

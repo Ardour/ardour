@@ -67,7 +67,7 @@ static PanPluginDescriptor _descriptor = {
         Panner1in2out::factory
 };
 
-extern "C" { ARDOURPANNER_API PanPluginDescriptor* ARDOURPANNER_CAPICALLTYPE panner_descriptor () { return &_descriptor; } }
+extern "C" ARDOURPANNER_API PanPluginDescriptor* ARDOURPANNER_CAPICALLTYPE panner_descriptor () { return &_descriptor; }
 
 Panner1in2out::Panner1in2out (boost::shared_ptr<Pannable> p)
 	: Panner (p)
@@ -104,7 +104,7 @@ Panner1in2out::update ()
         desired_right = panR * (scale * panR + 1.0f - scale);
 }
 
-ARDOURPANNER_API void ARDOURPANNER_APICALLTYPE
+ARDOURPANNER_API void
 Panner1in2out::set_position (double p)
 {
         if (clamp_position (p)) {
@@ -112,7 +112,7 @@ Panner1in2out::set_position (double p)
         }
 }
 
-ARDOURPANNER_API bool ARDOURPANNER_APICALLTYPE
+ARDOURPANNER_API bool
 Panner1in2out::clamp_position (double& p)
 {
         /* any position between 0.0 and 1.0 is legal */
