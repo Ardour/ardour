@@ -795,6 +795,9 @@ if env['FPU_OPTIMIZATION']:
         if env['GENERIC'] != 1 and env['DIST_TARGET'] in ('lion', 'mountainlion'):
             opt_flags.append ("-DUSE_X86_64_ASM")
             debug_flags.append ("-DUSE_X86_64_ASM")
+        elif env['GENERIC'] == 1 and env['DIST_TARGET'] in ('lion', 'mountainlion'):
+            opt_flags.append ("-m32")
+            debug_flags.append ("-m32")
     elif env['DIST_TARGET'] == 'i686' or env['DIST_TARGET'] == 'x86_64':
         opt_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")

@@ -4,6 +4,8 @@
 
 GTKSTACK_ROOT=$HOME/gtk/inst
 ARDOURSTACK_ROOT=$HOME/a3/inst
+PGROOT=/Users/paul/gtk/inst
+PAROOT=/Users/paul/a3/inst
 BUILD_ROOT=../..
 
 if pkg-config --modversion gtk+-2.0 | grep -s 2.22 ; then
@@ -319,8 +321,19 @@ gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loade
 
 echo "Copying clearlooks ..."
 cp $BUILD_ROOT/libs/clearlooks-newer/libclearlooks.dylib $Frameworks
+# Copy over libpixmap for Calf plugins
+cp $GTKSTACK_ROOT/lib/gtk-2.0/2.10.0/engines/libpixmap.so $Frameworks
+
+# Symbolically Link them for GTK to find
 mkdir -p $Frameworks/clearlooks/engines
 (cd $Frameworks/clearlooks/engines && ln -s ../../libclearlooks.dylib libclearlooks.dylib && ln -s ../../libclearlooks.dylib libclearlooks.so)
+(cd $Frameworks/clearlooks/engines && ln -s ../../libpixmap.so libpixmap.dylib && ln -s ../../libpixmap.so libpixmap.so)
+
+# Copy over libreadline for Calf plugins
+cp $GTKSTACK_ROOT/lib/libreadline.6.2.dylib $Frameworks
+
+# Chmod libreadline to ensure writeability, needed for install_name_tool later
+chmod +w $Frameworks/libreadline.6.2.dylib
 
 if test x$WITH_LADSPA != x ; then
     if test x$SAE != x ; then
@@ -356,10 +369,10 @@ while [ true ] ; do
 	    continue
 	fi
 	if test x$INTERNAL_JACK != x ; then
-	    deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)"`
+	    deps=`otool -L $file | awk '{print $1}' | egrep "($PGROOT|$PAROOT|$GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)"`
 	else
 	    # do not include libjack
-	    deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.'`
+	    deps=`otool -L $file | awk '{print $1}' | egrep "($PGROOT|$PAROOT|$GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.'`
 	fi
 	echo -n "."
 	for dep in $deps ; do
