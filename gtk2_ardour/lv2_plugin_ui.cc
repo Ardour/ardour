@@ -115,11 +115,8 @@ LV2PluginUI::on_external_ui_closed(void* controller)
 {
 	//printf("LV2PluginUI::on_external_ui_closed\n");
 	LV2PluginUI* me = (LV2PluginUI*)controller;
-	if (me->_lv2->is_external_kx() /* called from plugin's UI_RUN() */) {
-		me->_screen_update_connection.disconnect();
-		// plugin is free()d in parent function - LV2PluginUI::output_update()
-		me->_external_ui_ptr = NULL;
-	}
+	me->_screen_update_connection.disconnect();
+	me->_external_ui_ptr = NULL;
 }
 
 void
@@ -175,7 +172,7 @@ LV2PluginUI::output_update()
 			// clean up external UI if it closes itself via
 			// on_external_ui_closed() during run()
 			//printf("LV2PluginUI::output_update -- UI was closed\n");
-			_screen_update_connection.disconnect();
+			//_screen_update_connection.disconnect();
 			_message_update_connection.disconnect();
 			if (_inst) {
 				suil_instance_free((SuilInstance*)_inst);
@@ -485,9 +482,9 @@ LV2PluginUI::on_window_hide()
 
 	if (_lv2->is_external_ui()) {
 		if (!_external_ui_ptr) { return; }
+		LV2_EXTERNAL_UI_HIDE(_external_ui_ptr);
 		if (!_lv2->is_external_kx()) { return ; }
 		_screen_update_connection.disconnect();
-		LV2_EXTERNAL_UI_HIDE(_external_ui_ptr);
 		_external_ui_ptr = NULL;
 		suil_instance_free((SuilInstance*)_inst);
 		_inst = NULL;
