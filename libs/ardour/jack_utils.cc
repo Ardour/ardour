@@ -442,6 +442,8 @@ ARDOUR::get_jack_coreaudio_device_names (device_map_t& devices)
 		}
 		delete [] coreDeviceIDs;
 	}
+#else
+	(void) devices;
 #endif
 }
 
@@ -583,6 +585,8 @@ ARDOUR::set_path_env_for_jack_autostart (const vector<std::string>& dirs)
 	// push it back into the environment so that auto-started JACK can find it.
 	// XXX why can't we just expect OS X users to have PATH set correctly? we can't ...
 	setenv ("PATH", SearchPath(dirs).to_string().c_str(), 1);
+#else
+	(void) dirs;
 #endif
 }
 
