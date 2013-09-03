@@ -64,7 +64,7 @@ VBAPanner::Signal::Signal (Session&, VBAPanner&, uint32_t, uint32_t n_speakers)
 }
 
 void
-VBAPanner::Signal::Signal::resize_gains (uint32_t n)
+VBAPanner::Signal::resize_gains (uint32_t n)
 {
         gains.assign (n, 0.0);
 }        
