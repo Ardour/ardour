@@ -31,6 +31,7 @@
    of the software.
 */
 
+#include <vector>
 #include <cmath>
 #include <algorithm>
 #include <stdlib.h>
@@ -44,6 +45,13 @@ using namespace PBD;
 using namespace std;
 
 const double VBAPSpeakers::MIN_VOL_P_SIDE_LGTH = 0.01;
+
+typedef std::vector<double>        DoubleVector;
+typedef std::vector<float>         FloatVector;
+typedef std::vector<bool>          BoolVector;
+typedef std::vector<int>           IntVector;
+typedef std::vector<IntVector>     IntVector2D;
+typedef std::vector<DoubleVector>  DoubleVector2D;
 
 VBAPSpeakers::VBAPSpeakers (boost::shared_ptr<Speakers> s)
 	: _dimension (2)
@@ -104,16 +112,17 @@ VBAPSpeakers::choose_speaker_triplets(struct ls_triplet_chain **ls_triplets)
 
 	int i,j,k,l,table_size;
 	int n_speakers = _speakers.size ();
-	int connections[n_speakers][n_speakers];
-	float distance_table[((n_speakers * (n_speakers - 1)) / 2)];
-	int distance_table_i[((n_speakers * (n_speakers - 1)) / 2)];
-	int distance_table_j[((n_speakers * (n_speakers - 1)) / 2)];
-	float distance;
-	struct ls_triplet_chain *trip_ptr, *prev, *tmp_ptr;
 
-	if (n_speakers == 0) {
+	if (n_speakers < 1) {
 		return;
 	}
+
+	FloatVector  distance_table(((n_speakers * (n_speakers - 1)) / 2));
+	IntVector    distance_table_i(((n_speakers * (n_speakers - 1)) / 2));
+	IntVector    distance_table_j(((n_speakers * (n_speakers - 1)) / 2));
+	IntVector2D  connections(n_speakers, IntVector(n_speakers));
+	float        distance;
+	struct ls_triplet_chain *trip_ptr, *prev, *tmp_ptr;
 
 	for (i = 0; i < n_speakers; i++) {
 		for (j = i+1; j < n_speakers; j++) {
@@ -505,25 +514,25 @@ VBAPSpeakers::choose_speaker_pairs (){
 	   matrices and stores the data to a global array
 	*/
 	const int n_speakers = _speakers.size();
-	const double AZIMUTH_DELTA_THRESHOLD_DEGREES = (180.0/M_PI) * (M_PI - 0.175);
-	int sorted_speakers[n_speakers];
-	bool exists[n_speakers];
-	double inverse_matrix[n_speakers][4]; 
+
+	if (n_speakers < 1) {
+		return;
+	}
+
+	IntVector      sorted_speakers(n_speakers);
+	BoolVector     exists(n_speakers);
+	DoubleVector2D inverse_matrix(n_speakers, DoubleVector(4)); 
+	const double   AZIMUTH_DELTA_THRESHOLD_DEGREES = (180.0/M_PI) * (M_PI - 0.175);
 	int expected_pairs = 0;
 	int pair;
 	int speaker;
-
-
-	if (n_speakers == 0) {
-		return;
-	}
 
 	for (speaker = 0; speaker < n_speakers; ++speaker) {
 		exists[speaker] = false;
 	}
 
 	/* sort loudspeakers according their aximuth angle */
-	sort_2D_lss (sorted_speakers);
+	sort_2D_lss (&sorted_speakers[0]);
         
 	/* adjacent loudspeakers are the loudspeaker pairs to be used.*/
 	for (speaker = 0; speaker < n_speakers-1; speaker++) {
@@ -532,7 +541,7 @@ VBAPSpeakers::choose_speaker_pairs (){
 		     _speakers[sorted_speakers[speaker]].angles().azi) <= AZIMUTH_DELTA_THRESHOLD_DEGREES) {
 			if (calc_2D_inv_tmatrix( _speakers[sorted_speakers[speaker]].angles().azi, 
 			                         _speakers[sorted_speakers[speaker+1]].angles().azi, 
-			                         inverse_matrix[speaker]) != 0){
+			                         &inverse_matrix[speaker][0]) != 0){
 				exists[speaker] = true;
 				expected_pairs++;
 			}
@@ -543,7 +552,7 @@ VBAPSpeakers::choose_speaker_pairs (){
 	     +_speakers[sorted_speakers[0]].angles().azi) <= AZIMUTH_DELTA_THRESHOLD_DEGREES) {
 		if (calc_2D_inv_tmatrix(_speakers[sorted_speakers[n_speakers-1]].angles().azi, 
 		                        _speakers[sorted_speakers[0]].angles().azi, 
-		                        inverse_matrix[n_speakers-1]) != 0) { 
+		                        &inverse_matrix[n_speakers-1][0]) != 0) { 
 			exists[n_speakers-1] = true;
 			expected_pairs++;
 		} 
