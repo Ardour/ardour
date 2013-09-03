@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ardour 0.688.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-15 15:09-0400\n"
+"POT-Creation-Date: 2013-09-03 07:59-0400\n"
 "PO-Revision-Date: 2005-08-15 21:50-0000\n"
 "Last-Translator: Chris Ross, Alexander Franca & Leandro Marco\n"
 "Language-Team: Portuguese\n"
@@ -11153,7 +11153,7 @@ msgstr "Apagar todas as localizações"
 msgid "the session folder"
 msgstr "Loop região selecionada"
 
-#: send_ui.cc:122
+#: send_ui.cc:126
 #, fuzzy
 msgid "Send "
 msgstr "Segundos"

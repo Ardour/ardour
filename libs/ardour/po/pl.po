@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-15 15:09-0400\n"
+"POT-Creation-Date: 2013-09-03 07:59-0400\n"
 "PO-Revision-Date: 2008-04-10 10:51+0100\n"
 "Last-Translator: Piotr Zaryk <pzaryk@gmail.com>\n"
 "Language-Team: Polish <pl@li.org>\n"
@@ -499,7 +499,7 @@ msgstr ""
 msgid "Lossless compression"
 msgstr ""
 
-#: export_format_manager.cc:207 export_format_specification.cc:579
+#: export_format_manager.cc:218 export_format_specification.cc:579
 msgid "Session rate"
 msgstr ""
 

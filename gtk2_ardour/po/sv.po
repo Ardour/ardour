@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ardour-gtk 1.0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-15 15:09-0400\n"
+"POT-Creation-Date: 2013-09-03 07:59-0400\n"
 "PO-Revision-Date: 2006-06-26 23:57+GMT+1\n"
 "Last-Translator: Petter Sundlöf <petter.sundlof@findus.dhs.org>\n"
 "Language-Team: Svenska <sv@li.org>\n"
@@ -10757,7 +10757,7 @@ msgstr " Klicka här för att lägga till ett format"
 msgid "the session folder"
 msgstr "Skapa sessionsmappen i:"
 
-#: send_ui.cc:122
+#: send_ui.cc:126
 #, fuzzy
 msgid "Send "
 msgstr "Skicka MTC"

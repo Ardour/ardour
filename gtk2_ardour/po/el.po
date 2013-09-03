@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-15 15:09-0400\n"
+"POT-Creation-Date: 2013-09-03 07:59-0400\n"
 "PO-Revision-Date: 2007-04-11 02:27+0200\n"
 "Last-Translator: Klearchos Gourgourinis <muadib@in.gr>\n"
 "Language-Team: Hellenic\n"
@@ -11084,7 +11084,7 @@ msgstr "Εκκαθάριση όλων των θέσεων"
 msgid "the session folder"
 msgstr "Αντιγραφή αρχείου στο φάκελο της συνεδρίας"
 
-#: send_ui.cc:122
+#: send_ui.cc:126
 #, fuzzy
 msgid "Send "
 msgstr "Δευτερόλεπτα"
