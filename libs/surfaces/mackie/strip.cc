@@ -291,7 +291,7 @@ Strip::notify_gain_changed (bool force_update)
 		
 		Control* control;
 
-		if (_surface->mcp().flip_mode()) {
+		if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 			control = _vpot;
 		} else {
 			control = _fader;
@@ -304,7 +304,7 @@ Strip::notify_gain_changed (bool force_update)
 
 		if (force_update || normalized_position != _last_gain_position_written) {
 			
-			if (_surface->mcp().flip_mode()) {
+			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 				if (!control->in_use()) {
 					_surface->write (_vpot->set (normalized_position, true, Pot::wrap));
 				}
@@ -407,7 +407,7 @@ Strip::notify_panner_width_changed (bool force_update)
 		
 		if (force_update || pos != _last_pan_azi_position_written) {
 			
-			if (_surface->mcp().flip_mode()) {
+			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 
 				if (control == _fader) {
 					if (!control->in_use()) {
@@ -944,7 +944,7 @@ Strip::next_pot_mode ()
 {
 	vector<Evoral::Parameter>::iterator i;
 
-	if (_surface->mcp().flip_mode()) {
+	if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 		/* do not change vpot mode while in flipped mode */
 		DEBUG_TRACE (DEBUG::MackieControl, "not stepping pot mode - in flip mode\n");
 		_surface->write (display (1, "Flip"));
@@ -997,7 +997,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 	case PanAzimuthAutomation:
 		pannable = _route->pannable ();
 		if (pannable) {
-			if (_surface->mcp().flip_mode()) {
+			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 				/* gain to vpot, pan azi to fader */
 				_vpot->set_control (_route->gain_control());
 				control_by_parameter[GainAutomation] = _vpot;
@@ -1025,7 +1025,7 @@ Strip::set_vpot_parameter (Evoral::Parameter p)
 	case PanWidthAutomation:
 		pannable = _route->pannable ();
 		if (pannable) {
-			if (_surface->mcp().flip_mode()) {
+			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 				/* gain to vpot, pan width to fader */
 				_vpot->set_control (_route->gain_control());
 				control_by_parameter[GainAutomation] = _vpot;

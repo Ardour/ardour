@@ -962,7 +962,5 @@ void *
 Editor::import_thread ()
 {
 	_session->import_files (import_status);
-	pthread_exit_pbd (0);
-	/*NOTREACHED*/
 	return 0;
 }

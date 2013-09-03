@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-07-17 11:09+0200\n"
+"POT-Creation-Date: 2013-09-03 07:59-0400\n"
 "PO-Revision-Date: 2013-07-23 15:04+0200\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
@@ -31,58 +31,58 @@ msgid "AudioDiskstream %1: there is no existing playlist to make a copy of!"
 msgstr ""
 "AudioDiskstream %1: es gibt keine Wiedergabeliste, die kopiert werden kann!"
 
-#: audio_diskstream.cc:823 audio_diskstream.cc:833
+#: audio_diskstream.cc:848 audio_diskstream.cc:858
 msgid ""
 "AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"
 msgstr ""
 "AudioDiskstream %1: Kann während des Befüllens %2 nicht aus Wiedergabeliste "
 "bei Frame %3 lesen"
 
-#: audio_diskstream.cc:989
+#: audio_diskstream.cc:1014
 msgid "AudioDiskstream %1: cannot read %2 from playlist at frame %3"
 msgstr ""
 "AudioDiskstream %1: Kann %2 nicht aus Wiedergabeliste bei Frame %3 lesen"
 
-#: audio_diskstream.cc:1358 audio_diskstream.cc:1375
+#: audio_diskstream.cc:1383 audio_diskstream.cc:1400
 msgid "AudioDiskstream %1: cannot write to disk"
 msgstr "AudioDiskstream %1: Kann nicht auf Disk schreiben"
 
-#: audio_diskstream.cc:1418
+#: audio_diskstream.cc:1443
 msgid "AudioDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr "AudioDiskstream %1: Kann aufgenommene Daten nicht auf Disk schreiben!"
 
-#: audio_diskstream.cc:1512
+#: audio_diskstream.cc:1537
 msgid "%1: could not create region for complete audio file"
 msgstr "%1: konnte keine Region für die komplette Audiodatei erzeugen"
 
-#: audio_diskstream.cc:1546
+#: audio_diskstream.cc:1571
 msgid "AudioDiskstream: could not create region for captured audio!"
 msgstr ""
 "AudioDiskstream: konnte keine Region für das aufgenommene Audiomaterial "
 "erzeugen!"
 
-#: audio_diskstream.cc:1654
+#: audio_diskstream.cc:1679
 msgid "programmer error: %1"
 msgstr "Programmierfehler: %1"
 
-#: audio_diskstream.cc:1880
+#: audio_diskstream.cc:1905
 msgid "AudioDiskstream: channel %1 out of range"
 msgstr "AudioDiskstream: Kanal %1 Bereichsüberschreitung"
 
-#: audio_diskstream.cc:1894 midi_diskstream.cc:1196
+#: audio_diskstream.cc:1919 midi_diskstream.cc:1210
 msgid "%1:%2 new capture file not initialized correctly"
 msgstr "%1:%2 neue Aufnahmedatei nicht korrekt initialisiert"
 
-#: audio_diskstream.cc:2175
+#: audio_diskstream.cc:2200
 msgid "%1: cannot restore pending capture source file %2"
 msgstr "%1: kann vorläufige Aufnahme-Quelldatei %2 nicht wiederherstellen"
 
-#: audio_diskstream.cc:2197
+#: audio_diskstream.cc:2222
 msgid "%1: incorrect number of pending sources listed - ignoring them all"
 msgstr ""
 "%1: Liste enthält falsche Anzahl vorläufiger Quellen - alle werden ignoriert"
 
-#: audio_diskstream.cc:2221
+#: audio_diskstream.cc:2246
 msgid "%1: cannot create whole-file region from pending capture sources"
 msgstr ""
 "%1: kann aus vorläufigen Aufnahmequellen keine Region für die komplette "
@@ -136,7 +136,7 @@ msgstr "Audio-Wiedergabelisten (unbenutzt)"
 
 #: audio_playlist_source.cc:171 audiosource.cc:913 file_source.cc:529
 #: midi_playlist_source.cc:144 midi_playlist_source.cc:152
-#: midi_playlist_source.cc:159 midi_source.cc:371 plugin_insert.cc:644
+#: midi_playlist_source.cc:159 midi_source.cc:371 plugin_insert.cc:643
 #: rb_effect.cc:332 session.cc:2465 session.cc:2498 session.cc:3643
 #: session_handle.cc:87 sndfilesource.cc:121
 msgid "programming error: %1"
@@ -316,8 +316,8 @@ msgstr "AudioSource: kann Pfad für Peaks (b) \"%1\" nicht öffnen (%2)"
 msgid ""
 "AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"
 msgstr ""
-"AudioSource[%1]: peak read - kann %2 Samples bei Offset %3 von %4 nicht "
-"lesen(%5)"
+"AudioSource[%1]: peak read - kann %2 Samples bei Offset %3 von %4 nicht lesen"
+"(%5)"
 
 #: audiosource.cc:667
 msgid "%1: could not write read raw data for peak computation (%2)"
@@ -550,7 +550,7 @@ msgstr "Verlustbehaftete Kompression"
 msgid "Lossless compression"
 msgstr "Verlustfreie  Kompression"
 
-#: export_format_manager.cc:207 export_format_specification.cc:579
+#: export_format_manager.cc:218 export_format_specification.cc:579
 msgid "Session rate"
 msgstr "Projektrate"
 
@@ -582,7 +582,7 @@ msgstr "Dreieck"
 msgid "Rectangular"
 msgstr "Rechteck"
 
-#: export_formats.cc:52 session.cc:4854 session.cc:4870
+#: export_formats.cc:52 session.cc:4861 session.cc:4877
 msgid "None"
 msgstr "Kein"
 
@@ -800,24 +800,24 @@ msgstr "kann momentanes Arbeitsverzeichnis nicht bestimmen (%1)"
 msgid "unknown file type for session %1"
 msgstr "Unbekannter Dateityp für Projekt %1"
 
-#: globals.cc:204
+#: globals.cc:205
 msgid "Could not set system open files limit to \"unlimited\""
 msgstr ""
 "Konnte die Systemgrenze für offene Dateien nicht auf \"unbeschränkt\" setzen"
 
-#: globals.cc:206
+#: globals.cc:207
 msgid "Could not set system open files limit to %1"
 msgstr "Konnte die Systemgrenze für offene Dateien nicht auf %1 setzen"
 
-#: globals.cc:210
+#: globals.cc:211
 msgid "Your system is configured to limit %1 to only %2 open files"
 msgstr "Ihre Systemkonfiguration beschränkt %1 auf nur %2 offene Dateien"
 
-#: globals.cc:214
+#: globals.cc:215
 msgid "Could not get system open files limit (%1)"
 msgstr "Konnte die Grenze für offene Dateien nicht erhalten (%1)"
 
-#: globals.cc:267
+#: globals.cc:266
 msgid "Loading configuration"
 msgstr "Lade Konfiguration"
 
@@ -1063,7 +1063,7 @@ msgstr ""
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "unkorrekter XML-Modus an Locations::set_state weitergereicht"
 
-#: location.cc:842 session.cc:4355 session_state.cc:1114
+#: location.cc:842 session.cc:4362 session_state.cc:1114
 msgid "session"
 msgstr "Projekt"
 
@@ -1149,25 +1149,25 @@ msgstr "MidiDiskstream: Wiedergabeliste \"%1\" ist keine MIDI-Wiedergabeliste"
 msgid "MidiDiskstream %1: there is no existing playlist to make a copy of!"
 msgstr "MidiDiskstream %1: es gibt keine Wiedergabeliste zum Kopieren!"
 
-#: midi_diskstream.cc:685
+#: midi_diskstream.cc:699
 msgid "MidiDiskstream %1: cannot read %2 from playlist at frame %3"
 msgstr ""
 "MidiDiskstream %1: kann %2 nicht von Wiedergabeliste bei Frame %3 lesen"
 
-#: midi_diskstream.cc:820
+#: midi_diskstream.cc:834
 msgid "MidiDiskstream %1: cannot write to disk"
 msgstr "MidiDiskstream %1: kann nicht auf Disk schreiben"
 
-#: midi_diskstream.cc:854
+#: midi_diskstream.cc:868
 msgid "MidiDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr ""
 "MidiDiskstream \"%1\": kann aufgenommene Daten nicht auf Disk schreiben!"
 
-#: midi_diskstream.cc:941
+#: midi_diskstream.cc:955
 msgid "%1: could not create region for complete midi file"
 msgstr "%1: konnte Region für die komplette MIDI-Datei nicht erzeugen"
 
-#: midi_diskstream.cc:978
+#: midi_diskstream.cc:992
 msgid "MidiDiskstream: could not create region for captured midi!"
 msgstr "MidiDiskstream: konnte Region für aufgenommenes MIDI nicht erzeugen"
 
@@ -1384,23 +1384,23 @@ msgstr ""
 "Das Speichern von Pluginpresets werden in diesem %1-Binärpaket nicht "
 "unterstützt. Erwägen Sie, für die Vollversion zu bezahlen"
 
-#: plugin_insert.cc:599
+#: plugin_insert.cc:598
 msgid "programming error: "
 msgstr "Programmierfehler:"
 
-#: plugin_insert.cc:914
+#: plugin_insert.cc:926
 msgid "XML node describing plugin is missing the `type' field"
 msgstr "Dem XML-Knoten zur Beschreibung des Plugins fehlt das \"type\"-Feld"
 
-#: plugin_insert.cc:929
+#: plugin_insert.cc:941
 msgid "unknown plugin type %1 in plugin insert state"
 msgstr "Unbekannter Plugintyp %1 im Einfüge-Status des Plugins"
 
-#: plugin_insert.cc:957
+#: plugin_insert.cc:969
 msgid "Plugin has no unique ID field"
 msgstr "Das Plugin hat kein Feld für die eindeutige ID"
 
-#: plugin_insert.cc:966
+#: plugin_insert.cc:978
 msgid ""
 "Found a reference to a plugin (\"%1\") that is unknown.\n"
 "Perhaps it was removed or moved since it was last used."
@@ -1408,15 +1408,15 @@ msgstr ""
 "Referenz auf ein unbekanntes Plugin (\"%1\") gefunden.\n"
 "Vielleicht wurde es seit der letzten Verwendung entfernt oder verschoben."
 
-#: plugin_insert.cc:1082
+#: plugin_insert.cc:1094
 msgid "PluginInsert: Auto: no ladspa port number"
 msgstr "PluginInsert: Auto: keine LADSPA Portnummer"
 
-#: plugin_insert.cc:1089
+#: plugin_insert.cc:1101
 msgid "PluginInsert: Auto: port id out of range"
 msgstr "PluginInsert: Auto: Port-ID Bereichsüberschreitung"
 
-#: plugin_insert.cc:1125
+#: plugin_insert.cc:1137
 msgid "PluginInsert: automatable control %1 not found - ignored"
 msgstr ""
 "PluginInsert: automatisierbares Kontrollelement %1 nicht gefunden - ignoriert"
@@ -1566,23 +1566,23 @@ msgstr "Import: Fehler in src_new() : %1"
 msgid "return %1"
 msgstr "Rückgabewert: %1"
 
-#: route.cc:1101 route.cc:2557
+#: route.cc:1105 route.cc:2581
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr "unbekannter Prozessortyp \"%1\"; ignoriert"
 
-#: route.cc:1113
+#: route.cc:1117
 msgid "processor could not be created. Ignored."
 msgstr "Prozessor konnte nicht erzeugt werden. Ignoriert."
 
-#: route.cc:1986 route.cc:2210
+#: route.cc:2007 route.cc:2234
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr "Schlechter Knoten an Route::set_state() gesendet [%1]"
 
-#: route.cc:2045
+#: route.cc:2067
 msgid "Pannable state found for route (%1) without a panner!"
 msgstr "Pannerziel-Status für Route (%1) ohne Panner gefunden!"
 
-#: route.cc:2113 route.cc:2117 route.cc:2324 route.cc:2328
+#: route.cc:2137 route.cc:2141 route.cc:2348 route.cc:2352
 msgid "badly formed order key string in state file! [%1] ... ignored."
 msgstr ""
 "schlecht geformte Zeichenkette für den Schlüssel der Sortierreihenfolge in "
@@ -1853,7 +1853,7 @@ msgstr "%1: kann für Export nicht Dateiposition %2 aufsuchen"
 msgid "Export ended unexpectedly: %1"
 msgstr "Export endet unerwartet: %1"
 
-#: session_ltc.cc:220
+#: session_ltc.cc:222
 msgid ""
 "LTC encoder: invalid framerate - LTC encoding is disabled for the remainder "
 "of this session."
@@ -1861,11 +1861,11 @@ msgstr ""
 "LTC-Kodierer: ungültige Framerate - das Kodieren von LTC wird für den "
 "restlichen Teil dieses Projekts ausgesetzt."
 
-#: session_midi.cc:427
+#: session_midi.cc:428
 msgid "Session: could not send full MIDI time code"
 msgstr "Session: konnte vollständigen MIDI-Timecode nicht senden"
 
-#: session_midi.cc:519
+#: session_midi.cc:520
 msgid "Session: cannot send quarter-frame MTC message (%1)"
 msgstr "Session: kann quarter-frame MTC-Nachricht nicht senden (%1)"
 
@@ -2262,7 +2262,7 @@ msgstr "Unbekannter JACK-Transportstatus im Sync-Callback"
 msgid "Cannot loop - no loop range defined"
 msgstr "Kann nicht loopen - kein Schleifenbereich definieert"
 
-#: session_transport.cc:727
+#: session_transport.cc:728
 msgid ""
 "Seamless looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
@@ -2271,7 +2271,7 @@ msgstr ""
 "benutzt.\n"
 "Ändern Sie die Konfigurationsoption"
 
-#: session_transport.cc:1092
+#: session_transport.cc:1094
 msgid ""
 "Global varispeed cannot be supported while %1 is connected to JACK transport "
 "control"

@@ -185,7 +185,7 @@ Butler::thread_work ()
 						break;
 
 					case Request::Quit:
-						pthread_exit_pbd (0);
+						return 0;
 						/*NOTREACHED*/
 						break;
 
@@ -327,8 +327,6 @@ restart:
 		empty_pool_trash ();
 	}
 
-	pthread_exit_pbd (0);
-	/*NOTREACHED*/
 	return (0);
 }
 
@@ -403,6 +401,7 @@ Butler::empty_pool_trash ()
 void
 Butler::drop_references ()
 {
+	cerr << "Butler drops pool trash\n";
 	SessionEvent::pool->set_trash (0);
 }
 

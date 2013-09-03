@@ -142,6 +142,7 @@ public:
 	LilvNode* time_Position;
 	LilvNode* ui_GtkUI;
 	LilvNode* ui_external;
+	LilvNode* ui_externalkx;
 
 private:
 	bool _bundle_checked;
@@ -561,10 +562,14 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 		if (!_impl->ui) {
 			LILV_FOREACH(uis, i, uis) {
 				const LilvUI* ui = lilv_uis_get(uis, i);
-				if (lilv_ui_is_a(ui, _world.ui_external)) {
+				if (lilv_ui_is_a(ui, _world.ui_externalkx)) {
 					_impl->ui      = ui;
 					_impl->ui_type = _world.ui_external;
 					break;
+				}
+				if (lilv_ui_is_a(ui, _world.ui_external)) {
+					_impl->ui      = ui;
+					_impl->ui_type = _world.ui_external;
 				}
 			}
 		}
@@ -613,7 +618,16 @@ LV2Plugin::is_external_ui() const
 	if (!_impl->ui) {
 		return false;
 	}
-	return lilv_ui_is_a(_impl->ui, _world.ui_external);
+	return lilv_ui_is_a(_impl->ui, _world.ui_external) || lilv_ui_is_a(_impl->ui, _world.ui_externalkx);
+}
+
+bool
+LV2Plugin::is_external_kx() const
+{
+	if (!_impl->ui) {
+		return false;
+	}
+	return lilv_ui_is_a(_impl->ui, _world.ui_externalkx);
 }
 
 bool
@@ -1368,11 +1382,6 @@ LV2Plugin::describe_parameter(Evoral::Parameter which)
 		}
 
 		if (lilv_port_has_property(_impl->plugin,
-					lilv_plugin_get_port_by_index(_impl->plugin, which.id()), _world.lv2_sampleRate)) {
-			return X_("hidden");
-		}
-
-		if (lilv_port_has_property(_impl->plugin,
 					lilv_plugin_get_port_by_index(_impl->plugin, which.id()), _world.lv2_reportsLatency)) {
 			return X_("latency");
 		}
@@ -1955,10 +1964,12 @@ LV2World::LV2World()
 	time_Position      = lilv_new_uri(world, LV2_TIME__Position);
 	ui_GtkUI           = lilv_new_uri(world, LV2_UI__GtkUI);
 	ui_external        = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
+	ui_externalkx      = lilv_new_uri(world, "http://kxstudio.sf.net/ns/lv2ext/external-ui#Widget");
 }
 
 LV2World::~LV2World()
 {
+	lilv_node_free(ui_externalkx);
 	lilv_node_free(ui_external);
 	lilv_node_free(ui_GtkUI);
 	lilv_node_free(time_Position);
