@@ -105,7 +105,7 @@ Panner1in2out::update ()
         desired_right = panR * (scale * panR + 1.0f - scale);
 }
 
-ARDOURPANNER_API void
+void
 Panner1in2out::set_position (double p)
 {
         if (clamp_position (p)) {
@@ -113,7 +113,7 @@ Panner1in2out::set_position (double p)
         }
 }
 
-ARDOURPANNER_API bool
+bool
 Panner1in2out::clamp_position (double& p)
 {
         /* any position between 0.0 and 1.0 is legal */
