@@ -25,6 +25,8 @@
 #include <iostream>
 #include <string>
 
+#include <malloc.h>
+
 #include "pbd/cartesian.h"
 #include "pbd/compose.h"
 
@@ -290,7 +292,7 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 
         assert (sz == obufs.count().n_audio());
 
-        int8_t outputs[sz]; // on the stack, no malloc
+        int8_t *outputs = (int8_t*)alloca(sz); // on the stack, no malloc
         
         /* set initial state of each output "record"
          */
@@ -319,10 +321,10 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 
         /* at this point, we can test a speaker's status:
 
-           (outputs[o] & 1)      <= in use before
-           (outputs[o] & 2)      <= in use this time
-           (outputs[o] & 3) == 3 <= in use both times
-            outputs[o] == 0      <= not in use either time
+           (*outputs[o] & 1)      <= in use before
+           (*outputs[o] & 2)      <= in use this time
+           (*outputs[o] & 3) == 3 <= in use both times
+            *outputs[o] == 0      <= not in use either time
            
         */
 
