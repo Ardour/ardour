@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-15 15:09-0400\n"
+"POT-Creation-Date: 2013-09-03 07:59-0400\n"
 "PO-Revision-Date: 2013-07-14 18:04+0300\n"
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
@@ -10323,7 +10323,7 @@ msgstr "Щёлкните для добавления нового располо
 msgid "the session folder"
 msgstr "в папке сеанса"
 
-#: send_ui.cc:122
+#: send_ui.cc:126
 msgid "Send "
 msgstr "Посыл"
 

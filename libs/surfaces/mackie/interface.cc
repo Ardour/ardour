@@ -29,7 +29,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-ControlProtocol*
+static ControlProtocol*
 new_mackie_protocol (ControlProtocolDescriptor*, Session* s)
 {
 	MackieControlProtocol* mcp = 0;
@@ -47,7 +47,7 @@ new_mackie_protocol (ControlProtocolDescriptor*, Session* s)
 	return mcp;
 }
 
-void
+static void
 delete_mackie_protocol (ControlProtocolDescriptor*, ControlProtocol* cp)
 {
 	try
@@ -66,7 +66,7 @@ delete_mackie_protocol (ControlProtocolDescriptor*, ControlProtocol* cp)
 	So anything that can be changed in the UI should not be used here to
 	prevent loading of the lib.
 */
-bool
+static bool
 probe_mackie_protocol (ControlProtocolDescriptor*)
 {
 	return MackieControlProtocol::probe();
@@ -89,11 +89,4 @@ static ControlProtocolDescriptor mackie_descriptor = {
 };
 	
 
-extern "C" {
-
-ControlProtocolDescriptor* 
-protocol_descriptor () {
-	return &mackie_descriptor;
-}
-
-}
+extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &mackie_descriptor; }

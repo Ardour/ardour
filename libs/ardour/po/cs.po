@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-15 15:09-0400\n"
+"POT-Creation-Date: 2013-09-03 07:59-0400\n"
 "PO-Revision-Date: 2013-06-13 22:47+0200\n"
 "Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
 "Language-Team: Czech <kde-i18n-doc@kde.org>\n"
@@ -545,7 +545,7 @@ msgstr "Ztrátová komprese"
 msgid "Lossless compression"
 msgstr "Bezztrátová komprese"
 
-#: export_format_manager.cc:207 export_format_specification.cc:579
+#: export_format_manager.cc:218 export_format_specification.cc:579
 msgid "Session rate"
 msgstr "Kmitočet sezení"
 

@@ -135,17 +135,18 @@ CubicInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input,
 		    inm1 = input[i];
 	    }
 
+	    i = floor(distance);
+	    phase[channel] = distance - floor(distance);
+
     } else {
-
-	    /* not sure that this is ever utilized - it implies that one of the input/output buffers is missing */
-
+	    /* used to calculate play-distance with acceleration (silent roll)
+	     * (use same algorithm as real playback for identical rounding/floor'ing)
+	     */
 	    for (framecnt_t outsample = 0; outsample < nframes; ++outsample) {
 		    distance += _speed + acceleration;
 	    }
+	    i = floor(distance);
     }
-
-    i = floor(distance);
-    phase[channel] = distance - floor(distance);
 
     return i;
 }

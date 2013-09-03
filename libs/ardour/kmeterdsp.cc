@@ -52,8 +52,8 @@ void Kmeterdsp::process (float *p, int n)
     float  s, z1, z2;
 
     // Get filter state.
-    z1 = _z1;
-    z2 = _z2;
+    z1 = _z1 > 50 ? 50 : (_z1 < 0 ? 0 : _z1);
+    z2 = _z2 > 50 ? 50 : (_z2 < 0 ? 0 : _z2);
 
     // Perform filtering. The second filter is evaluated
     // only every 4th sample - this is just an optimisation.
@@ -75,6 +75,8 @@ void Kmeterdsp::process (float *p, int n)
         z2 += 4 * _omega * (z1 - z2); // Update second filter.
     }
 
+    if (isnan(z1)) z1 = 0;
+    if (isnan(z2)) z2 = 0;
     // Save filter state. The added constants avoid denormals.
     _z1 = z1 + 1e-20f;
     _z2 = z2 + 1e-20f;

@@ -23,7 +23,7 @@
 
 using namespace ARDOUR;
 
-ControlProtocol*
+static ControlProtocol*
 new_tranzport_protocol (ControlProtocolDescriptor* descriptor, Session* s)
 {
 	TranzportControlProtocol* tcp = new TranzportControlProtocol (*s);
@@ -37,13 +37,13 @@ new_tranzport_protocol (ControlProtocolDescriptor* descriptor, Session* s)
 	
 }
 
-void
+static void
 delete_tranzport_protocol (ControlProtocolDescriptor* descriptor, ControlProtocol* cp)
 {
 	delete cp;
 }
 
-bool
+static bool
 probe_tranzport_protocol (ControlProtocolDescriptor* descriptor)
 {
 	return TranzportControlProtocol::probe();
@@ -62,10 +62,6 @@ static ControlProtocolDescriptor tranzport_descriptor = {
 };
 	
 
-extern "C" {
-ControlProtocolDescriptor* 
-protocol_descriptor () {
-	return &tranzport_descriptor;
-}
-}
+extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &tranzport_descriptor; }
+
 

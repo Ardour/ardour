@@ -300,7 +300,7 @@ MotionFeedback::pixwin_key_press_event (GdkEventKey *ev)
 
 	case GDK_Page_Down:
 	        retval = true;
-		_controllable->set_value (adjust (multiplier * page_inc));
+		_controllable->set_value (adjust (-multiplier * page_inc));
 		break;
 
 	case GDK_Up:
@@ -310,7 +310,7 @@ MotionFeedback::pixwin_key_press_event (GdkEventKey *ev)
 
 	case GDK_Down:
 	        retval = true;
-		_controllable->set_value (adjust (multiplier * step_inc));
+		_controllable->set_value (adjust (-multiplier * step_inc));
 		break;
 
 	case GDK_Home:
@@ -391,10 +391,10 @@ MotionFeedback::pixwin_scroll_event (GdkEventScroll* ev)
 		if (ev->state & Keyboard::GainExtraFineScaleModifier) {
 			scale = 0.01;
 		} else {
-			scale = 0.05;
+			scale = 0.10;
 		}
 	} else {
-		scale = 0.25;
+		scale = 0.20;
 	}
 
 	switch (ev->direction) {

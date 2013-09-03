@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk2_ardour 3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-15 15:09-0400\n"
+"POT-Creation-Date: 2013-09-03 07:59-0400\n"
 "PO-Revision-Date: 2013-01-05 14:48+0100\n"
 "Last-Translator: Eivind Ødegård <meinmycell-lists@yahoo.no>\n"
 "Language-Team:  <i18n-nn@lister.ping.uio.no>\n"
@@ -10467,7 +10467,7 @@ msgstr "Klikk for å leggja til ein ny stad"
 msgid "the session folder"
 msgstr "øktmappa"
 
-#: send_ui.cc:122
+#: send_ui.cc:126
 msgid "Send "
 msgstr "Send"
 

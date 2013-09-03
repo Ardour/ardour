@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-15 15:09-0400\n"
-"PO-Revision-Date: 2013-07-28 15:37+0200\n"
+"POT-Creation-Date: 2013-09-03 10:44+0200\n"
+"PO-Revision-Date: 2013-09-03 11:41+0200\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
@@ -1547,9 +1547,8 @@ msgstr ""
 "Einzelheiten."
 
 #: ardour_ui2.cc:147
-#, fuzzy
 msgid "Reset Level Meter"
-msgstr "Lautstärkekurve zurücksetzen"
+msgstr "Lautstärkepegelanzeige zurücksetzen"
 
 #: ardour_ui2.cc:179
 msgid "[ERROR]: "
@@ -5836,7 +5835,7 @@ msgstr "Nur Aufnahme"
 
 #: engine_dialog.cc:171 engine_dialog.cc:448
 msgid "coremidi"
-msgstr ""
+msgstr "coremidi"
 
 #: engine_dialog.cc:173 engine_dialog.cc:581
 msgid "seq"
@@ -6311,22 +6310,20 @@ msgid "Range"
 msgstr "Bereiche"
 
 #: sfdb_freesound_mootcher.cc:189 sfdb_freesound_mootcher.cc:324
-#, fuzzy
 msgid "curl error %1 (%2)"
-msgstr "Programmierfehler: %1 (%2)"
+msgstr "curl Fehler %1 (%2)"
 
 #: sfdb_freesound_mootcher.cc:266
 msgid "getSoundResourceFile: There is no valid root in the xml file"
-msgstr ""
+msgstr "getSoundResourceFile: Keine gültige Wurzel in der XML-Datei"
 
 #: sfdb_freesound_mootcher.cc:271
 msgid "getSoundResourceFile: root = %1, != response"
-msgstr ""
+msgstr "getSoundResourceFile: Wurzel = %1, != Antwort"
 
 #: sfdb_freesound_mootcher.cc:410
-#, fuzzy
 msgid "%1"
-msgstr "%"
+msgstr "%1"
 
 #: gain_meter.cc:106 gain_meter.cc:357 gain_meter.cc:462 gain_meter.cc:856
 msgid "-inf"
@@ -7649,26 +7646,24 @@ msgid "Strips"
 msgstr "Spur"
 
 #: meter_strip.cc:764
-#, fuzzy
 msgid "Variable height"
-msgstr "Höhe der Zeitleiste"
+msgstr "Variable Höhe"
 
 #: meter_strip.cc:765
-#, fuzzy
 msgid "Short"
-msgstr "Kurz"
+msgstr "Short"
 
 #: meter_strip.cc:766
 msgid "Tall"
-msgstr ""
+msgstr "Tall"
 
 #: meter_strip.cc:767
 msgid "Grande"
-msgstr ""
+msgstr "Grande"
 
 #: meter_strip.cc:768
 msgid "Venti"
-msgstr ""
+msgstr "Venti"
 
 #: meter_patterns.cc:81
 msgid "Peak"
@@ -8539,14 +8534,15 @@ msgid "Port removal not allowed"
 msgstr "Entfernen des Ports nicht erlaubt"
 
 #: port_matrix.cc:749
-#, fuzzy
 msgid ""
 "This port cannot be removed.\n"
 "Either the first plugin in the track or buss cannot accept\n"
 "the new number of inputs or the last plugin has more outputs."
 msgstr ""
-"Der Port kann nicht entfernt werden, da das erste Plugin der Spur die neue "
-"Portanzahl nicht unterstützt."
+"Dieser Port kann nicht entfernt werden.\n"
+"Entweder kann das erste Plugin auf der Spur oder dem Bus \n"
+"die neue Anzahl an Eingängen nicht verarbeiten, oder das \n"
+"letzte Plugin hat mehr Ausgänge."
 
 #: port_matrix.cc:966
 #, c-format
@@ -9268,7 +9264,7 @@ msgstr "Aktiviere Pegelanzeigen im Editor"
 
 #: rc_option_editor.cc:1321
 msgid "Display master-meter in the toolbar"
-msgstr ""
+msgstr "Master-Pegelanzeige in der Werkzeugleiste anzeigen"
 
 #: rc_option_editor.cc:1328
 msgid "Regions in active edit groups are edited together"
@@ -10496,7 +10492,7 @@ msgstr "Hier klicken, um einen Pfad hinzuzufügen"
 msgid "the session folder"
 msgstr "Projektordner"
 
-#: send_ui.cc:122
+#: send_ui.cc:126
 msgid "Send "
 msgstr "Send "
 
@@ -12552,7 +12548,6 @@ msgid "<b>File Information</b>"
 msgstr "<b>Dateiinformationen</b>"
 
 #: transcode_video_dialog.cc:113
-#, fuzzy
 msgid ""
 "No ffprobe or ffmpeg executables could be found on this system. Video Import "
 "is not possible until you install those tools. See the Log window for more "
@@ -12777,7 +12772,6 @@ msgid "Include Session Metadata"
 msgstr "Projekt-Metadaten verwenden"
 
 #: export_video_dialog.cc:107
-#, fuzzy
 msgid ""
 "No ffprobe or ffmpeg executables could be found on this system. Video Export "
 "is not possible until you install those tools. See the Log window for more "

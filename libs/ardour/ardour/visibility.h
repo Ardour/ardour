@@ -20,7 +20,12 @@
 #ifndef __libardour_visibility_h__
 #define __libardour_visibility_h__
 
-#if defined _WIN32 || defined __CYGWIN__
+/* _WIN32 is defined by most compilers targetting Windows, but within the
+ * ardour source tree, we also define COMPILER_MSVC or COMPILER_MINGW depending
+ * on how a Windows build is built.
+ */
+
+#if defined _WIN32 || defined __CYGWIN__ || defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
   #define LIBARDOUR_HELPER_DLL_IMPORT __declspec(dllimport)
   #define LIBARDOUR_HELPER_DLL_EXPORT __declspec(dllexport)
   #define LIBARDOUR_HELPER_DLL_LOCAL

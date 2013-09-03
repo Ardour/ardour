@@ -37,6 +37,8 @@
 /** UI extension suitable for out-of-process UIs */
 #define LV2_EXTERNAL_UI_URI "http://lv2plug.in/ns/extensions/ui#external"
 
+#define LV2_EXTERNAL_UI_KX__Host   "http://kxstudio.sf.net/ns/lv2ext/external-ui#Host"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
