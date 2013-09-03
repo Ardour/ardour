@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ardour 0.354.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-15 15:09-0400\n"
+"POT-Creation-Date: 2013-09-03 07:59-0400\n"
 "PO-Revision-Date: 2011-11-05 12:43+0100\n"
 "Last-Translator: \n"
 "Language-Team: American English <kde-i18n-doc@kde.org>\n"
@@ -10715,7 +10715,7 @@ msgstr "Pulisci tutte le posizioni"
 msgid "the session folder"
 msgstr "la cartella di sessione"
 
-#: send_ui.cc:122
+#: send_ui.cc:126
 #, fuzzy
 msgid "Send "
 msgstr "Secondi"

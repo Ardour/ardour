@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk2_ardour\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-15 15:09-0400\n"
+"POT-Creation-Date: 2013-09-03 07:59-0400\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Pablo Fernández <pablo.fbus@gmail.com>\n"
 "Language-Team: Grupo de Traducción al Español <traductores@teklibre.com>\n"
@@ -10451,7 +10451,7 @@ msgstr "Clicar para añadir nueva localización"
 msgid "the session folder"
 msgstr "el archivo de sesión"
 
-#: send_ui.cc:122
+#: send_ui.cc:126
 msgid "Send "
 msgstr "Enviar "
 

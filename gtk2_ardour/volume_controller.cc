@@ -142,7 +142,6 @@ VolumeController::adjust (double control_delta)
 	double v;
 
 	if (!_linear) {
-
 		/* we map back into the linear/fractional slider position,
 		 * because this kind of control goes all the way down
 		 * to -inf dB, and we want this occur in a reasonable way in
@@ -150,7 +149,7 @@ VolumeController::adjust (double control_delta)
 		 * gain coefficient domain (or dB domain), the lower end of the
 		 * control range (getting close to -inf dB) takes forever.
 		 */
-
+#if 0
 		/* convert to linear/fractional slider position domain */
 		v = gain_to_slider_position_with_max (_controllable->get_value (), _controllable->upper());
 		/* increment in this domain */
@@ -171,6 +170,57 @@ VolumeController::adjust (double control_delta)
 		}
 		/* and return it */
 		return dB_to_coefficient (v);
+#else
+		/* ^^ Above algorithm is not symmetric. Scroll up to steps, scoll down two steps, -> different gain.
+		 *
+		 * see ./libs/gtkmm2ext/gtkmm2ext/motionfeedback.h and gtk2_ardour/monitor_section.cc:
+		 * min-delta (corr) = MIN(0.01 * page inc, 1 * size_inc) // (gain_control uses size_inc=0.01, page_inc=0.1)
+		 * range corr: 0..2   -> -inf..+6dB
+		 * step sizes  [0.01, 0.10, 0.20] * page_inc,   [1,2,10,100] * step_inc. [1,2,10,100] * page_inc
+		 *
+		 * 0.001, 0.01, 0.02, 0.1, .2,  1, 10
+		 * -> 1k steps between -inf..0dB
+		 * -> 1k steps between 0..+dB
+		 *
+		 *  IOW:
+		 *  the range is from *0  (-inf dB)  to  *2.0  ( +6dB)
+		 *  the knob is configured to to go in steps of 0.001  - that's 2000 steps between 0 and 2.
+		 *  or 1000 steps between 0 and 1.
+		 *
+		 *  we cannot round to .01dB steps because
+		 *  There are only 600 possible values between  +0db and +6dB when going in steps of .01dB
+		 *  1000/600 = 1.66666...
+		 *
+		 ******
+		 * idea: make the 'controllable use a fixed range of dB.
+		 * do a 1:1 mapping between values.  :et's stick with the range of 0..2 in 0.001 steps
+		 *
+		 * "-80" becomes 0 and "+6" becomes 2000. (NB +6dB is actually 1995, but we clamp that to the top)
+		 *
+		 * This approach is better (more consistet) but not good. At least the dial does not annoy me as much
+		 * anymore as it did before.
+		 *
+		 * const double stretchfactor = rint((_controllable->upper() - _controllable->lower()) / 0.001); // 2000;
+		 * const double logfactor =  stretchfactor / ((20.0 * log10( _controllable->upper())) + 80.0); // = 23.250244732
+		 */
+		v = _controllable->get_value ();
+		/* assume everything below -60dB is silent (.001 ^= -60dB)
+		 * but map range -80db..+6dB to a scale of 0..2000
+		 * 80db was motivated because 2000/((20.0 * log(1)) + 80.0) is an integer value. "0dB" is included on the scale.
+		 * but this leaves a dead area at the bottom of the meter..
+		 */
+		double arange = (v >= 0.001) ? ( ((20.0 * log10(v)) + 80.0) * 23.250244732 ) : ( 0 );
+		/* add the delta */
+		v = rint(arange) + rint(control_delta * 1000.0); // (min steps is 1.0/0.001 == 1000.0)
+		/* catch bottom -80..-60 db in one step */
+		if (v < 466) v = (control_delta > 0) ? 0.001 : 0;
+		/* reverse operation  (pow(10, .05 * ((v / 23.250244732) - 80.0)))
+		 * can be simplified to :*/
+		else v = pow(10, (v * 0.00215051499) - 4.0);
+		/* clamp value in coefficient domain */
+		v = std::max (_controllable->lower(), std::min (_controllable->upper(), v));
+		return v;
+#endif
 	} else {
 		double mult;
 

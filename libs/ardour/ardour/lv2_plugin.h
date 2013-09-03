@@ -77,6 +77,7 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	const void* c_ui_type();
 
 	bool is_external_ui () const;
+	bool is_external_kx () const;
 	bool ui_is_resizable () const;
 
 	const char* port_symbol (uint32_t port) const;
