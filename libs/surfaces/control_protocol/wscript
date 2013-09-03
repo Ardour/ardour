@@ -28,6 +28,7 @@ def build(bld):
     obj.export_includes = ['.', './control_protocol' ]
     obj.cxxflags     = '-DPACKAGE="ardour_cp" -fPIC'
     obj.includes     = ['.', './control_protocol']
+    obj.defines      = [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.name         = 'libardour_cp'
     obj.target       = 'ardourcp'
     obj.use          = 'ardour libtimecode'

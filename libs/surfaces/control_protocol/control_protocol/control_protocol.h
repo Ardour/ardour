@@ -33,13 +33,22 @@
 #include "control_protocol/basic_ui.h"
 #include "control_protocol/types.h"
 
+#include "ardour/visibility.h"
+
+#ifdef ARDOURSURFACE_DLL_EXPORTS // defined if we are building the ARDOUR surface DLLs (instead of using them)
+    #define ARDOURSURFACE_API LIBARDOUR_HELPER_DLL_EXPORT
+#else
+    #define ARDOURSURFACE_API LIBARDOUR_HELPER_DLL_IMPORT
+#endif 
+#define ARDOURSURFACE_LOCAL LIBARDOUR_HELPER_DLL_LOCAL
+
 namespace ARDOUR {
 
 class Route;
 class Session;
 class Bundle;
 
-class ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI
+class ARDOURSURFACE_API ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI
 {
   public:
 	ControlProtocol (Session&, std::string name);
@@ -142,7 +151,7 @@ class ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, 
 	void prev_track (uint32_t initial_id);
 
   private:
-	ControlProtocol (const ControlProtocol&); /* noncopyable */
+	ARDOURSURFACE_LOCAL ControlProtocol (const ControlProtocol&); /* noncopyable */
 };
 
 extern "C" {

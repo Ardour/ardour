@@ -34,6 +34,7 @@ def build(bld):
     obj.includes     = ['.', './generic_midi']
     obj.name         = 'libardour_generic_midi'
     obj.target       = 'ardour_generic_midi'
+    obj.defines      = [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.uselib       = 'GTKMM GTK GDK'
     obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd'
     obj.vnum         = LIBARDOUR_GENERIC_MIDI_LIB_VERSION
