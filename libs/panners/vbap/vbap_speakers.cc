@@ -31,6 +31,10 @@
    of the software.
 */
 
+#ifdef COMPILER_MSVC
+#pragma warning ( disable : 4244 )
+#endif
+
 #include <vector>
 #include <cmath>
 #include <algorithm>
