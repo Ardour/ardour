@@ -32,12 +32,21 @@
 
 #include "timecode/time.h"
 
+#include "ardour/visibility.h"
+
 namespace ARDOUR {
 	class Session;
 	class SessionEvent;
 }
 
-class BasicUI {
+#ifdef ARDOURCP_DLL_EXPORTS // defined if we are building the ARDOUR Control Protocol DLL (instead of using it)
+    #define ARDOURCP_API LIBARDOUR_HELPER_DLL_EXPORT
+#else
+    #define ARDOURCP_API LIBARDOUR_HELPER_DLL_IMPORT
+#endif 
+#define ARDOURCP_LOCAL LIBARDOUR_HELPER_DLL_LOCAL
+
+class ARDOURCP_API BasicUI {
   public:
 	BasicUI (ARDOUR::Session&);
 	virtual ~BasicUI ();
