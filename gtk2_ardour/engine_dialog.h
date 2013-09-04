@@ -94,6 +94,7 @@ class EngineControl : public Gtk::VBox {
     Gtk::HBox midi_hbox;
 
     sigc::connection sr_connection;
+    sigc::connection bs_connection;
     
     bool _used;
     
@@ -101,6 +102,8 @@ class EngineControl : public Gtk::VBox {
     
     void driver_changed ();
     void backend_changed ();
+    void sample_rate_changed ();
+    void buffer_size_changed ();
 
     uint32_t get_rate() const;
     uint32_t get_buffer_size() const;
@@ -114,7 +117,25 @@ class EngineControl : public Gtk::VBox {
     void audio_mode_changed ();
     void device_changed ();
     void list_devices ();
-    void reshow_buffer_sizes ();
+    void reshow_buffer_sizes (bool choice_changed);
+
+    struct State {
+	    std::string backend;
+	    std::string driver;
+	    std::string device;
+	    std::string sample_rate;
+	    std::string buffer_size;
+    };
+    
+    typedef std::list<State> StateList;
+
+    StateList states;
+
+    State* get_matching_state (const std::string& backend,
+			       const std::string& driver,
+			       const std::string& device);
+    State* get_current_state ();
+    void maybe_set_state ();
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

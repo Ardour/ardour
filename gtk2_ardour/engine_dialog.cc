@@ -128,10 +128,14 @@ EngineControl::EngineControl ()
 	basic_packer.attach (sample_rate_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
 
+	sr_connection = sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::sample_rate_changed));
+
 	label = manage (left_aligned_label (_("Buffer size:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	basic_packer.attach (buffer_size_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
+
+	bs_connection = buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::buffer_size_changed));
 
 	label = manage (left_aligned_label (_("Hardware input latency:")));
 	basic_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
@@ -146,8 +150,6 @@ EngineControl::EngineControl ()
 	label = manage (left_aligned_label (_("samples")));
 	basic_packer.attach (*label, 2, 3, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
-
-	sr_connection = sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::reshow_buffer_sizes));
 
 	device_combo.set_size_request (250, -1);
 	input_device_combo.set_size_request (250, -1);
@@ -207,6 +209,8 @@ EngineControl::backend_changed ()
 		driver_combo.set_sensitive (false);
 		list_devices ();
 	}
+	
+	maybe_set_state ();
 }
 
 void
@@ -255,6 +259,8 @@ EngineControl::driver_changed ()
 
 	backend->set_driver (driver_combo.get_active_text());
 	list_devices ();
+
+	maybe_set_state ();
 }
 
 void
@@ -287,20 +293,78 @@ EngineControl::device_changed ()
 	set_popdown_strings (sample_rate_combo, s);
 	sample_rate_combo.set_active_text (s.front());
 
-	reshow_buffer_sizes ();
-	
+	reshow_buffer_sizes (true);
+
 	sr_connection.unblock ();
+	
+	maybe_set_state ();
 }	
 
+void 
+EngineControl::sample_rate_changed ()
+{
+	bool existing = true;
+	State* state = get_current_state ();
+
+	if (!state) {
+		existing = false;
+		state = new State;
+		state->backend = backend_combo.get_active_text ();
+		state->driver = driver_combo.get_active_text ();
+		state->device = device_combo.get_active_text ();
+		state->buffer_size = buffer_size_combo.get_active_text ();
+	}
+		
+	state->sample_rate = sample_rate_combo.get_active_text ();
+
+	if (!existing) {
+		states.push_back (*state);
+	}
+
+	reshow_buffer_sizes (false);
+}
+
+void 
+EngineControl::buffer_size_changed ()
+{
+	bool existing = true;
+	State* state = get_current_state ();
+
+	if (!state) {
+		existing = false;
+		state = new State;
+		state->backend = backend_combo.get_active_text ();
+		state->driver = driver_combo.get_active_text ();
+		state->device = device_combo.get_active_text ();
+		state->sample_rate = sample_rate_combo.get_active_text ();
+	}
+		
+	state->buffer_size = buffer_size_combo.get_active_text ();
+
+	if (!existing) {
+		states.push_back (*state);
+	}
+}
+
 void
-EngineControl::reshow_buffer_sizes ()
+EngineControl::reshow_buffer_sizes (bool size_choice_changed)
 {
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
 	string device_name = device_combo.get_active_text ();
 	vector<string> s;
+	int existing_size_choice = 0;
+	string new_target_string;
 
-	/* buffer sizes */
+	/* buffer sizes  - convert from just samples to samples + msecs for
+	 * the displayed string
+	 */
+
+	bs_connection.block ();
+
+	if (!size_choice_changed) {
+		sscanf (buffer_size_combo.get_active_text().c_str(), "%d", &existing_size_choice);
+	}
 
 	s.clear ();
 	vector<uint32_t> bs = backend->available_buffer_sizes(device_name);
@@ -308,15 +372,32 @@ EngineControl::reshow_buffer_sizes ()
 
 	for (vector<uint32_t>::const_iterator x = bs.begin(); x != bs.end(); ++x) {
 		char buf[32];
+
 		/* Translators: "samples" is ALWAYS plural here, so we do not
 		   need singular form as well. Same for msecs.
 		*/
 		snprintf (buf, sizeof (buf), _("%u samples (%.1f msecs)"), *x, (2 * (*x)) / (rate/1000.0));
 		s.push_back (buf);
+
+		/* if this is the size previously chosen, this is the string we
+		 * will want to be active in the combo.
+		 */
+
+		if (existing_size_choice == *x) {
+			new_target_string = buf;
+		}
+			
 	}
 
 	set_popdown_strings (buffer_size_combo, s);
-	buffer_size_combo.set_active_text (s.front());
+
+	if (!new_target_string.empty()) {
+		buffer_size_combo.set_active_text (new_target_string);
+	} else {
+		buffer_size_combo.set_active_text (s.front());
+	}
+
+	bs_connection.unblock ();
 }
 
 void
@@ -339,15 +420,53 @@ EngineControl::audio_mode_changed ()
 	}
 }
 
-struct EngineStateKey 
+EngineControl::State*
+EngineControl::get_matching_state (const string& backend,
+				   const string& driver,
+				   const string& device)
 {
-    std::string system;
-    std::string driver;
-    std::string device;
-};
+	for (StateList::iterator i = states.begin(); i != states.end(); ++i) {
+		if ((*i).backend == backend &&
+		    (*i).driver == driver &&
+		    (*i).device == device) {
+			return &(*i);
+		}
+	}
+	return 0;
+}
 
-typedef std::map<EngineStateKey,XMLNode*> EngineStateMap;
+EngineControl::State*
+EngineControl::get_current_state ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 
+	if (backend) {
+		return get_matching_state (backend_combo.get_active_text(),
+					    (backend->requires_driver_selection() ? (std::string) driver_combo.get_active_text() : string()),
+					    device_combo.get_active_text());
+	}
+
+
+	return get_matching_state (backend_combo.get_active_text(),
+				   string(),
+				   device_combo.get_active_text());
+}
+
+void
+EngineControl::maybe_set_state ()
+{
+	State* state = get_current_state ();
+
+	if (state) {
+		sr_connection.block ();
+		bs_connection.block ();
+		sample_rate_combo.set_active_text (state->sample_rate);
+		buffer_size_combo.set_active_text (state->buffer_size);
+		bs_connection.unblock ();
+		sr_connection.unblock ();
+	}
+}
+	
 XMLNode&
 EngineControl::get_state ()
 {
