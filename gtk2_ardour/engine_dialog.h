@@ -82,7 +82,7 @@ class EngineControl : public Gtk::VBox {
     Gtk::ComboBoxText preset_combo;
     Gtk::ComboBoxText serverpath_combo;
     Gtk::ComboBoxText driver_combo;
-    Gtk::ComboBoxText interface_combo;
+    Gtk::ComboBoxText device_combo;
     Gtk::ComboBoxText timeout_combo;
     Gtk::ComboBoxText dither_mode_combo;
     Gtk::ComboBoxText audio_mode_combo;
@@ -112,7 +112,7 @@ class EngineControl : public Gtk::VBox {
     std::string get_driver() const;
 
     void audio_mode_changed ();
-    void interface_changed ();
+    void device_changed ();
     void list_devices ();
     void reshow_buffer_sizes ();
 };

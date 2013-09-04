@@ -948,3 +948,4 @@ AudioEngine::setup_required () const
 
 	return true;
 }
+

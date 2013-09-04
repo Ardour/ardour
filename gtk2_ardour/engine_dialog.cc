@@ -120,7 +120,7 @@ EngineControl::EngineControl ()
 
 	label = manage (left_aligned_label (_("Device:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (interface_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (device_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
 
 	label = manage (left_aligned_label (_("Sample rate:")));
@@ -149,11 +149,11 @@ EngineControl::EngineControl ()
 
 	sr_connection = sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::reshow_buffer_sizes));
 
-	interface_combo.set_size_request (250, -1);
+	device_combo.set_size_request (250, -1);
 	input_device_combo.set_size_request (250, -1);
 	output_device_combo.set_size_request (250, -1);
 
-	interface_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::interface_changed));
+	device_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::device_changed));
 
 	basic_hbox.pack_start (basic_packer, false, false);
 
@@ -234,17 +234,17 @@ EngineControl::list_devices ()
 		available_devices.push_back (i->name);
 	}
 
-	set_popdown_strings (interface_combo, available_devices);
+	set_popdown_strings (device_combo, available_devices);
 	set_popdown_strings (input_device_combo, available_devices);
 	set_popdown_strings (output_device_combo, available_devices);
 	
 	if (!available_devices.empty()) {
-		interface_combo.set_active_text (available_devices.front());
+		device_combo.set_active_text (available_devices.front());
 		input_device_combo.set_active_text (available_devices.front());
 		output_device_combo.set_active_text (available_devices.front());
 	}
 
-	interface_changed ();
+	device_changed ();
 }
 	
 void
@@ -258,11 +258,11 @@ EngineControl::driver_changed ()
 }
 
 void
-EngineControl::interface_changed ()
+EngineControl::device_changed ()
 {
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
-	string device_name = interface_combo.get_active_text ();
+	string device_name = device_combo.get_active_text ();
 	vector<string> s;
 
 	/* don't allow programmatic change to sample_rate_combo to cause a
@@ -297,7 +297,7 @@ EngineControl::reshow_buffer_sizes ()
 {
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
-	string device_name = interface_combo.get_active_text ();
+	string device_name = device_combo.get_active_text ();
 	vector<string> s;
 
 	/* buffer sizes */
@@ -339,6 +339,15 @@ EngineControl::audio_mode_changed ()
 	}
 }
 
+struct EngineStateKey 
+{
+    std::string system;
+    std::string driver;
+    std::string device;
+};
+
+typedef std::map<EngineStateKey,XMLNode*> EngineStateMap;
+
 XMLNode&
 EngineControl::get_state ()
 {
@@ -347,6 +356,15 @@ EngineControl::get_state ()
 	std::string path;
 
 #if 0
+	audio system
+		driver
+		device
+	sample rate
+buffer size
+		input latency
+		output latency
+		
+
 	child = new XMLNode ("periods");
 	child->add_property ("val", to_string (periods_adjustment.get_value(), std::dec));
 	root->add_child_nocopy (*child);
@@ -412,7 +430,7 @@ EngineControl::get_state ()
 	root->add_child_nocopy (*child);
 
 	child = new XMLNode ("interface");
-	child->add_property ("val", interface_combo.get_active_text());
+	child->add_property ("val", device_combo.get_active_text());
 	root->add_child_nocopy (*child);
 
 	child = new XMLNode ("timeout");
@@ -575,7 +593,7 @@ EngineControl::set_state (const XMLNode& root)
 		} else if (child->name() == "driver") {
 			driver_combo.set_active_text(strval);
 		} else if (child->name() == "interface") {
-			interface_combo.set_active_text(strval);
+			device_combo.set_active_text(strval);
 		} else if (child->name() == "timeout") {
 			timeout_combo.set_active_text(strval);
 		} else if (child->name() == "dither") {
@@ -708,6 +726,6 @@ EngineControl::get_driver () const
 string
 EngineControl::get_device_name () const
 {
-	return interface_combo.get_active_text ();
+	return device_combo.get_active_text ();
 }
 

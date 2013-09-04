@@ -66,7 +66,7 @@ public:
     static AudioEngine* create ();
 
     virtual ~AudioEngine ();
-    
+
     int discover_backends();
     std::vector<const AudioBackendInfo*> available_backends() const;
     std::string current_backend_name () const;
