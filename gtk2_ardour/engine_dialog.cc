@@ -68,13 +68,13 @@ EngineControl::EngineControl ()
 #else
 	, basic_packer (9, 2)
 #endif
+	, _used (false)
 {
 	using namespace Notebook_Helpers;
 	Label* label;
 	vector<string> strings;
 	int row = 0;
 
-	_used = false;
 
 	/* basic parameters */
 
@@ -176,7 +176,7 @@ EngineControl::EngineControl ()
 
 	/* Pick up any existing audio setup configuration, if appropriate */
 
-	XMLNode* audio_setup = ARDOUR::Config->extra_xml ("AudioSetup");
+	XMLNode* audio_setup = ARDOUR::Config->extra_xml ("AudioMIDISetup");
 	
 	if (audio_setup) {
 		set_state (*audio_setup);
@@ -353,7 +353,7 @@ EngineControl::reshow_buffer_sizes (bool size_choice_changed)
 	assert (backend);
 	string device_name = device_combo.get_active_text ();
 	vector<string> s;
-	int existing_size_choice = 0;
+	uint32_t existing_size_choice = 0;
 	string new_target_string;
 
 	/* buffer sizes  - convert from just samples to samples + msecs for
@@ -363,7 +363,7 @@ EngineControl::reshow_buffer_sizes (bool size_choice_changed)
 	bs_connection.block ();
 
 	if (!size_choice_changed) {
-		sscanf (buffer_size_combo.get_active_text().c_str(), "%d", &existing_size_choice);
+		sscanf (buffer_size_combo.get_active_text().c_str(), "%" PRIu32, &existing_size_choice);
 	}
 
 	s.clear ();
@@ -470,264 +470,122 @@ EngineControl::maybe_set_state ()
 XMLNode&
 EngineControl::get_state ()
 {
-	XMLNode* root = new XMLNode ("AudioSetup");
-	XMLNode* child;
+	XMLNode* root = new XMLNode ("AudioMIDISetup");
 	std::string path;
 
-#if 0
-	audio system
-		driver
-		device
-	sample rate
-buffer size
-		input latency
-		output latency
-		
+	if (_used) {
 
-	child = new XMLNode ("periods");
-	child->add_property ("val", to_string (periods_adjustment.get_value(), std::dec));
-	root->add_child_nocopy (*child);
+		if (!states.empty()) {
+			XMLNode* state_nodes = new XMLNode ("EngineStates");
+			
+			for (StateList::const_iterator i = states.begin(); i != states.end(); ++i) {
 
-	child = new XMLNode ("ports");
-	child->add_property ("val", to_string (ports_adjustment.get_value(), std::dec));
-	root->add_child_nocopy (*child);
+				XMLNode* node = new XMLNode ("State");
 
-	child = new XMLNode ("inlatency");
-	child->add_property ("val", to_string (input_latency.get_value(), std::dec));
-	root->add_child_nocopy (*child);
+				node->add_property ("backend", (*i).backend);
+				node->add_property ("driver", (*i).driver);
+				node->add_property ("device", (*i).device);
+				node->add_property ("sample-rate", (*i).sample_rate);
+				node->add_property ("buffer-size", (*i).buffer_size);
+				node->add_property ("input-latency", (*i).input_latency);
+				node->add_property ("output-latency", (*i).output_latency);
+				node->add_property ("input-channels", (*i).input_channels);
+				node->add_property ("output-channels", (*i).output_channels);
+					
+				state_nodes->add_child_nocopy (*node);
+			}
 
-	child = new XMLNode ("outlatency");
-	child->add_property ("val", to_string (output_latency.get_value(), std::dec));
-	root->add_child_nocopy (*child);
+			root->add_child_nocopy (*state_nodes);
+		}
+	}
 
-	child = new XMLNode ("realtime");
-	child->add_property ("val", to_string (realtime_button.get_active(), std::dec));
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("nomemorylock");
-	child->add_property ("val", to_string (no_memory_lock_button.get_active(), std::dec));
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("unlockmemory");
-	child->add_property ("val", to_string (unlock_memory_button.get_active(), std::dec));
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("softmode");
-	child->add_property ("val", to_string (soft_mode_button.get_active(), std::dec));
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("force16bit");
-	child->add_property ("val", to_string (force16bit_button.get_active(), std::dec));
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("hwmonitor");
-	child->add_property ("val", to_string (hw_monitor_button.get_active(), std::dec));
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("hwmeter");
-	child->add_property ("val", to_string (hw_meter_button.get_active(), std::dec));
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("verbose");
-	child->add_property ("val", to_string (verbose_output_button.get_active(), std::dec));
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("samplerate");
-	child->add_property ("val", sample_rate_combo.get_active_text());
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("periodsize");
-	child->add_property ("val", period_size_combo.get_active_text());
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("serverpath");
-	child->add_property ("val", serverpath_combo.get_active_text());
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("driver");
-	child->add_property ("val", driver_combo.get_active_text());
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("interface");
-	child->add_property ("val", device_combo.get_active_text());
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("timeout");
-	child->add_property ("val", timeout_combo.get_active_text());
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("dither");
-	child->add_property ("val", dither_mode_combo.get_active_text());
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("audiomode");
-	child->add_property ("val", audio_mode_combo.get_active_text());
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("inputdevice");
-	child->add_property ("val", input_device_combo.get_active_text());
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("outputdevice");
-	child->add_property ("val", output_device_combo.get_active_text());
-	root->add_child_nocopy (*child);
-
-	child = new XMLNode ("mididriver");
-	child->add_property ("val", midi_driver_combo.get_active_text());
-	root->add_child_nocopy (*child);
-#endif
 	return *root;
 }
 
 void
 EngineControl::set_state (const XMLNode& root)
 {
-#if 0
-	XMLNodeList          clist;
-	XMLNodeConstIterator citer;
+	XMLNodeList          clist, cclist;
+	XMLNodeConstIterator citer, cciter;
 	XMLNode* child;
+	XMLNode* grandchild;
 	XMLProperty* prop = NULL;
-	bool using_dummy = false;
-	bool using_ffado = false;
 
-	int val;
-	string strval;
-
-	if ( (child = root.child ("driver"))){
-		prop = child->property("val");
-
-		if (prop && (prop->value() == "Dummy") ) {
-			using_dummy = true;
-		}
-		if (prop && (prop->value() == "FFADO") ) {
-			using_ffado = true;
-		}
-
+	if (root.name() != "AudioMIDISetup") {
+		return;
 	}
 
 	clist = root.children();
 
+	states.clear ();
+
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
 
 		child = *citer;
-
-		prop = child->property ("val");
-
-		if (!prop || prop->value().empty()) {
-
-			if (((using_dummy || using_ffado)
-				&& ( child->name() == "interface"
-					|| child->name() == "inputdevice"
-					|| child->name() == "outputdevice"))
-				|| child->name() == "timeout")
-			{
-				continue;
-			}
-
-			error << string_compose (_("AudioSetup value for %1 is missing data"), child->name()) << endmsg;
+		
+		if (child->name() != "EngineStates") {
 			continue;
 		}
 
-		strval = prop->value();
+		cclist = child->children();
 
-		/* adjustments/spinners */
+		for (cciter = cclist.begin(); cciter != cclist.end(); ++cciter) {
+			State state;
+			
+			grandchild = *cciter;
 
-		if (child->name() == "periods") {
-			val = atoi (strval);
-			periods_adjustment.set_value(val);
-		} else if (child->name() == "ports") {
-			val = atoi (strval);
-			ports_adjustment.set_value(val);
-		} else if (child->name() == "inlatency") {
-			val = atoi (strval);
-			input_latency.set_value(val);
-		} else if (child->name() == "outlatency") {
-			val = atoi (strval);
-			output_latency.set_value(val);
-		}
-
-		/* buttons */
-
-		else if (child->name() == "realtime") {
-			val = atoi (strval);
-			realtime_button.set_active(val);
-		} else if (child->name() == "nomemorylock") {
-			val = atoi (strval);
-			no_memory_lock_button.set_active(val);
-		} else if (child->name() == "unlockmemory") {
-			val = atoi (strval);
-			unlock_memory_button.set_active(val);
-		} else if (child->name() == "softmode") {
-			val = atoi (strval);
-			soft_mode_button.set_active(val);
-		} else if (child->name() == "force16bit") {
-			val = atoi (strval);
-			force16bit_button.set_active(val);
-		} else if (child->name() == "hwmonitor") {
-			val = atoi (strval);
-			hw_monitor_button.set_active(val);
-		} else if (child->name() == "hwmeter") {
-			val = atoi (strval);
-			hw_meter_button.set_active(val);
-		} else if (child->name() == "verbose") {
-			val = atoi (strval);
-			verbose_output_button.set_active(val);
-		}
-
-		/* combos */
-
-		else if (child->name() == "samplerate") {
-			sample_rate_combo.set_active_text(strval);
-		} else if (child->name() == "periodsize") {
-			period_size_combo.set_active_text(strval);
-		} else if (child->name() == "serverpath") {
-
-                        /* only attempt to set this if we have bothered to look
-                           up server names already. otherwise this is all
-                           redundant (actually, all of this dialog/widget
-                           is redundant in that case ...)
-                        */
-
-                        if (!server_strings.empty()) {
-                                /* do not allow us to use a server path that doesn't
-                                   exist on this system. this handles cases where
-                                   the user has an RC file listing a serverpath
-                                   from some other machine.
-                                */
-                                vector<string>::iterator x;
-                                for (x = server_strings.begin(); x != server_strings.end(); ++x) {
-                                        if (*x == strval) {
-                                                break;
-                                        }
-                                }
-                                if (x != server_strings.end()) {
-                                        serverpath_combo.set_active_text (strval);
-                                } else {
-                                        warning << string_compose (_("configuration files contain a JACK server path that doesn't exist (%1)"),
-                                                                   strval)
-                                                << endmsg;
-                                }
-                        }
-
-		} else if (child->name() == "driver") {
-			driver_combo.set_active_text(strval);
-		} else if (child->name() == "interface") {
-			device_combo.set_active_text(strval);
-		} else if (child->name() == "timeout") {
-			timeout_combo.set_active_text(strval);
-		} else if (child->name() == "dither") {
-			dither_mode_combo.set_active_text(strval);
-		} else if (child->name() == "audiomode") {
-			audio_mode_combo.set_active_text(strval);
-		} else if (child->name() == "inputdevice") {
-			input_device_combo.set_active_text(strval);
-		} else if (child->name() == "outputdevice") {
-			output_device_combo.set_active_text(strval);
-		} else if (child->name() == "mididriver") {
-			midi_driver_combo.set_active_text(strval);
+			if (grandchild->name() != "State") {
+				continue;
+			}
+			
+			if ((prop = grandchild->property ("backend")) == 0) {
+				continue;
+			}
+			state.backend = prop->value ();
+			
+			if ((prop = grandchild->property ("driver")) == 0) {
+				continue;
+			}
+			state.driver = prop->value ();
+			
+			if ((prop = grandchild->property ("device")) == 0) {
+				continue;
+			}
+			state.device = prop->value ();
+			
+			if ((prop = grandchild->property ("sample-rate")) == 0) {
+				continue;
+			}
+			state.sample_rate = prop->value ();
+			
+			if ((prop = grandchild->property ("buffer-size")) == 0) {
+				continue;
+			}
+			state.buffer_size = prop->value ();
+			
+			if ((prop = grandchild->property ("input-latency")) == 0) {
+				continue;
+			}
+			state.input_latency = prop->value ();
+			
+			if ((prop = grandchild->property ("output-latency")) == 0) {
+				continue;
+			}
+			state.output_latency = prop->value ();
+			
+			if ((prop = grandchild->property ("input-channels")) == 0) {
+				continue;
+			}
+			state.input_channels = prop->value ();
+			
+			if ((prop = grandchild->property ("output-channels")) == 0) {
+				continue;
+			}
+			state.output_channels = prop->value ();
+			
+			states.push_back (state);
 		}
 	}
-#endif
 }
 
 int
@@ -773,6 +631,13 @@ EngineControl::setup_engine (bool start)
 			error << string_compose (_("Cannot set output latency to %1"), get_output_latency()) << endmsg;
 			return -1;
 		}
+
+		/* we've used this dialog to configure the engine, which means
+		 * that our state becomes relevant for saving (and thus
+		 * implicitly, restoring.
+		 */
+
+		_used = true;
 
 		if (start) {
 			return ARDOUR::AudioEngine::instance()->start();

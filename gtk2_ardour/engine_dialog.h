@@ -120,11 +120,15 @@ class EngineControl : public Gtk::VBox {
     void reshow_buffer_sizes (bool choice_changed);
 
     struct State {
-	    std::string backend;
-	    std::string driver;
-	    std::string device;
-	    std::string sample_rate;
-	    std::string buffer_size;
+	std::string backend;
+	std::string driver;
+	std::string device;
+	std::string sample_rate;
+	std::string buffer_size;
+	std::string input_latency;
+	std::string output_latency;
+	std::string input_channels;
+	std::string output_channels;
     };
     
     typedef std::list<State> StateList;

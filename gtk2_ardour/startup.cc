@@ -404,8 +404,6 @@ Where would you like new %1 sessions to be stored by default?\n\n\
 	vbox->pack_start (*txt, false, false);
 	vbox->pack_start (*hbox, false, true);
 
-	cerr << "Setting defaultDIR session dir to [" << Config->get_default_session_parent_dir() << "]\n";
-
 	default_dir_chooser->set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 	default_dir_chooser->signal_current_folder_changed().connect (sigc::mem_fun (*this, &ArdourStartup::default_dir_changed));
 	default_dir_chooser->show ();
@@ -662,9 +660,7 @@ ArdourStartup::on_delete_event (GdkEventAny*)
 void
 ArdourStartup::on_apply ()
 {
-	cerr << "apply, engine = " << engine_dialog << endl;
 	if (engine_dialog) {
-		cerr << "Set up engine\n";
 		if (engine_dialog->setup_engine (true)) {
                         set_current_page (audio_page_index);
                         return;
