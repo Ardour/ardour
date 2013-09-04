@@ -120,8 +120,9 @@ def set_compiler_flags (conf,opt):
         debug_flags = [ '-pg' ]
 
     if opt.backtrace:
-        if platform != 'darwin' and not is_clang:
-            debug_flags = [ '-rdynamic' ]
+        if opt.dist_target == 'auto':
+            if platform != 'darwin' and not is_clang:
+                debug_flags = [ '-rdynamic' ]
 
     # Autodetect
     if opt.dist_target == 'auto':
