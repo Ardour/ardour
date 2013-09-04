@@ -408,8 +408,8 @@ void
 ARDOUR_UI::engine_stopped ()
 {
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::engine_stopped)
-	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, false);
-	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, true);
+	ActionManager::set_sensitive (ActionManager::engine_sensitive_actions, false);
+	ActionManager::set_sensitive (ActionManager::engine_opposite_sensitive_actions, true);
 }
 
 void
@@ -420,8 +420,8 @@ ARDOUR_UI::engine_running ()
 		first_time_engine_run = false;
 	}
 	
-	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, true);
-	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, false);
+	ActionManager::set_sensitive (ActionManager::engine_sensitive_actions, true);
+	ActionManager::set_sensitive (ActionManager::engine_opposite_sensitive_actions, false);
 
 	Glib::RefPtr<Action> action;
 	const char* action_name = 0;
@@ -485,8 +485,8 @@ ARDOUR_UI::engine_halted (const char* reason, bool free_reason)
 		return;
 	}
 
-	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, false);
-	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, true);
+	ActionManager::set_sensitive (ActionManager::engine_sensitive_actions, false);
+	ActionManager::set_sensitive (ActionManager::engine_opposite_sensitive_actions, true);
 
 	update_sample_rate (0);
 
