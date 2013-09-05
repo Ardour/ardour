@@ -72,20 +72,21 @@ probe_mackie_protocol (ControlProtocolDescriptor*)
 	return MackieControlProtocol::probe();
 }
 
+// Field names commented out by JE - 06-01-2010
 static ControlProtocolDescriptor mackie_descriptor = {
-	name : "Mackie",
-	id : "uri://ardour.org/surfaces/mackie:0",
-	ptr : 0,
-	module : 0,
-	mandatory : 0,
+	/*name :              */   "Mackie",
+	/*id :                */   "uri://ardour.org/surfaces/mackie:0",
+	/*ptr :               */   0,
+	/*module :            */   0,
+	/*mandatory :         */   0,
 	// actually, the surface does support feedback, but all this
 	// flag does is show a submenu on the UI, which is useless for the mackie
 	// because feedback is always on. In any case, who'd want to use the
 	// mcu without the motorised sliders doing their thing?
-	supports_feedback : false,
-	probe : probe_mackie_protocol,
-	initialize : new_mackie_protocol,
-	destroy : delete_mackie_protocol
+	/*supports_feedback : */   false,
+	/*probe :             */   probe_mackie_protocol,
+	/*initialize :        */   new_mackie_protocol,
+	/*destroy :           */   delete_mackie_protocol
 };
 	
 
