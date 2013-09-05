@@ -162,8 +162,8 @@ EngineControl::EngineControl ()
 	basic_packer.set_border_width (12);
 	midi_packer.set_border_width (12);
 
-	notebook.pages().push_back (TabElem (basic_hbox, _("Audio System Settings")));
-	notebook.pages().push_back (TabElem (midi_hbox, _("MIDI Settings")));
+	notebook.pages().push_back (TabElem (basic_hbox, _("Audio")));
+	notebook.pages().push_back (TabElem (midi_hbox, _("MIDI")));
 	notebook.set_border_width (12);
 
 	notebook.set_tab_pos (POS_RIGHT);
