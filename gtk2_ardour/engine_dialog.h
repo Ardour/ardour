@@ -129,6 +129,9 @@ class EngineControl : public Gtk::VBox {
 	std::string output_latency;
 	std::string input_channels;
 	std::string output_channels;
+	bool active;
+
+	State() : active (false) {};
     };
     
     typedef std::list<State> StateList;

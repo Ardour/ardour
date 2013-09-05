@@ -489,7 +489,8 @@ EngineControl::get_state ()
 				node->add_property ("output-latency", (*i).output_latency);
 				node->add_property ("input-channels", (*i).input_channels);
 				node->add_property ("output-channels", (*i).output_channels);
-					
+				node->add_property ("active", (*i).active ? "yes" : "no");
+	
 				state_nodes->add_child_nocopy (*node);
 			}
 
@@ -580,8 +581,30 @@ EngineControl::set_state (const XMLNode& root)
 				continue;
 			}
 			state.output_channels = prop->value ();
+
+			if ((prop = grandchild->property ("active")) == 0) {
+				continue;
+			}
+			state.active = string_is_affirmative (prop->value ());
 			
 			states.push_back (state);
+		}
+	}
+
+	/* now see if there was an active state and switch the setup to it */
+	
+	for (StateList::const_iterator i = states.begin(); i != states.end(); ++i) {
+		if ((*i).active) {
+			sr_connection.block ();
+			bs_connection.block ();
+			backend_combo.set_active_text ((*i).backend);
+			driver_combo.set_active_text ((*i).driver);
+			device_combo.set_active_text ((*i).device);
+			sample_rate_combo.set_active_text ((*i).sample_rate);
+			buffer_size_combo.set_active_text ((*i).buffer_size);
+			sr_connection.unblock ();
+			bs_connection.unblock ();
+			break;
 		}
 	}
 }
@@ -637,6 +660,30 @@ EngineControl::setup_engine (bool start)
 
 		_used = true;
 
+		/* get a pointer to the current state object, creating one if
+		 * necessary
+		 */
+
+		State* state = get_current_state ();
+
+		if (!state) {
+			save_state ();
+			state = get_current_state ();
+			assert (state);
+		}
+
+		/* all off */
+
+		for (StateList::iterator i = states.begin(); i != states.end(); ++i) {
+			(*i).active = false;
+		}
+
+		/* mark this one active (to be used next time the dialog is
+		 * shown)
+		 */
+
+		state->active = true;
+		
 		if (start) {
 			return ARDOUR::AudioEngine::instance()->start();
 		}
