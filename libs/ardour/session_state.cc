@@ -2353,7 +2353,7 @@ Session::auto_save()
 }
 
 static bool
-state_file_filter (const string &str, void */*arg*/)
+state_file_filter (const string &str, void* /*arg*/)
 {
 	return (str.length() > strlen(statefile_suffix) &&
 		str.find (statefile_suffix) == (str.length() - strlen (statefile_suffix)));
@@ -2530,7 +2530,7 @@ Session::commit_reversible_command (Command *cmd)
 }
 
 static bool
-accept_all_audio_files (const string& path, void */*arg*/)
+accept_all_audio_files (const string& path, void* /*arg*/)
 {
         if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
                 return false;
@@ -2544,7 +2544,7 @@ accept_all_audio_files (const string& path, void */*arg*/)
 }
 
 static bool
-accept_all_midi_files (const string& path, void */*arg*/)
+accept_all_midi_files (const string& path, void* /*arg*/)
 {
         if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
                 return false;
@@ -2556,7 +2556,7 @@ accept_all_midi_files (const string& path, void */*arg*/)
 }
 
 static bool
-accept_all_state_files (const string& path, void */*arg*/)
+accept_all_state_files (const string& path, void* /*arg*/)
 {
         if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
                 return false;
