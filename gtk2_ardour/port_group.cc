@@ -457,33 +457,32 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	if ((type == DataType::MIDI || type == DataType::NIL)) {
 		boost::shared_ptr<Bundle> sync (new Bundle (_("Sync"), inputs));
 		AudioEngine* ae = AudioEngine::instance();
-		MIDI::MachineControl& mmc (ae->mmc());
 
 		if (inputs) {
 			sync->add_channel (
-				_("MTC in"), DataType::MIDI, ae->make_port_name_non_relative (ae->mtc_input_port()->name())
+				_("MTC in"), DataType::MIDI, ae->make_port_name_non_relative (session->mtc_input_port()->name())
 				);
 			sync->add_channel (
-				_("MIDI control in"), DataType::MIDI, ae->make_port_name_non_relative (ae->midi_input_port()->name())
+				_("MIDI control in"), DataType::MIDI, ae->make_port_name_non_relative (session->midi_input_port()->name())
 				);
 			sync->add_channel (
-				_("MIDI clock in"), DataType::MIDI, ae->make_port_name_non_relative (ae->midi_clock_input_port()->name())
+				_("MIDI clock in"), DataType::MIDI, ae->make_port_name_non_relative (session->midi_clock_input_port()->name())
 				);
 			sync->add_channel (
-				_("MMC in"), DataType::MIDI, ae->make_port_name_non_relative (mmc.input_port()->name())
+				_("MMC in"), DataType::MIDI, ae->make_port_name_non_relative (session->mmc_input_port()->name())
 				);
 		} else {
 			sync->add_channel (
-				_("MTC out"), DataType::MIDI, ae->make_port_name_non_relative (ae->mtc_output_port()->name())
+				_("MTC out"), DataType::MIDI, ae->make_port_name_non_relative (session->mtc_output_port()->name())
 				);
 			sync->add_channel (
-				_("MIDI control out"), DataType::MIDI, ae->make_port_name_non_relative (ae->midi_output_port()->name())
+				_("MIDI control out"), DataType::MIDI, ae->make_port_name_non_relative (session->midi_output_port()->name())
 				);
 			sync->add_channel (
-				_("MIDI clock out"), DataType::MIDI, ae->make_port_name_non_relative (ae->midi_clock_output_port()->name())
+				_("MIDI clock out"), DataType::MIDI, ae->make_port_name_non_relative (session->midi_clock_output_port()->name())
 				);
 			sync->add_channel (
-				_("MMC out"), DataType::MIDI, ae->make_port_name_non_relative (mmc.output_port()->name())
+				_("MMC out"), DataType::MIDI, ae->make_port_name_non_relative (session->mmc_output_port()->name())
 				);
 		}
 

@@ -38,7 +38,7 @@
 
 namespace ARDOUR {
 
-class PortManager : public MidiPortManager
+class PortManager 
 {
   public:
     typedef std::map<std::string,boost::shared_ptr<Port> > Ports;

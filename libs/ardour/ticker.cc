@@ -150,7 +150,7 @@ MidiClockTicker::session_going_away ()
 void
 MidiClockTicker::update_midi_clock_port()
 {
-	_midi_port = AudioEngine::instance()->midi_clock_output_port();
+	_midi_port = _session->midi_clock_output_port();
 }
 
 void

@@ -618,7 +618,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		_send_timecode_update = true;
 		
 		if (!dynamic_cast<MTC_Slave*>(_slave)) {
-			AudioEngine::instance()->mmc().send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
+			_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
 
 			/* This (::non_realtime_stop()) gets called by main
 			   process thread, which will lead to confusion
@@ -1271,7 +1271,7 @@ Session::start_transport ()
 		Timecode::Time time;
 		timecode_time_subframes (_transport_frame, time);
 		if (!dynamic_cast<MTC_Slave*>(_slave)) {
-			AudioEngine::instance()->mmc().send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
+			_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
 		}
 	}
 
@@ -1392,7 +1392,7 @@ Session::switch_to_sync_source (SyncSource src)
 		}
 
 		try {
-			new_slave = new MTC_Slave (*this, *AudioEngine::instance()->mtc_input_port());
+			new_slave = new MTC_Slave (*this, *_midi_ports->mtc_input_port());
 		}
 
 		catch (failed_constructor& err) {
@@ -1421,7 +1421,7 @@ Session::switch_to_sync_source (SyncSource src)
 		}
 
 		try {
-			new_slave = new MIDIClock_Slave (*this, *AudioEngine::instance()->midi_clock_input_port(), 24);
+			new_slave = new MIDIClock_Slave (*this, *_midi_ports->midi_clock_input_port(), 24);
 		}
 
 		catch (failed_constructor& err) {
@@ -1648,7 +1648,7 @@ Session::send_mmc_locate (framepos_t t)
 	if (!_engine.freewheeling()) {
 		Timecode::Time time;
 		timecode_time_subframes (t, time);
-		AudioEngine::instance()->mmc().send (MIDI::MachineControlCommand (time));
+		_mmc->send (MIDI::MachineControlCommand (time));
 	}
 }
 

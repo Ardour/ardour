@@ -52,7 +52,6 @@ class RCConfiguration : public Configuration
 	XMLNode * instant_xml (const std::string& str);
 
 	XMLNode* control_protocol_state () { return _control_protocol_state; }
-	std::list<XMLNode*> midi_port_states () { return _midi_port_states; }
 
 	/* define accessor methods */
 
@@ -81,11 +80,6 @@ class RCConfiguration : public Configuration
 #undef  CONFIG_VARIABLE_SPECIAL
 
 	XMLNode* _control_protocol_state;
-
-	/** MIDI port nodes from the RC configuration.  We store them so that we can set their
-	    state once the audio engine and hence ports are up.
-	*/
-	std::list<XMLNode*> _midi_port_states;
 };
 
 /* XXX: rename this */

@@ -92,8 +92,8 @@ Session::pre_export ()
 	
 	/* disable MMC output early */
 
-	_pre_export_mmc_enabled = AudioEngine::instance()->mmc().send_enabled ();
-	AudioEngine::instance()->mmc().enable_send (false);
+	_pre_export_mmc_enabled = _mmc->send_enabled ();
+	_mmc->enable_send (false);
 
 	return 0;
 }
@@ -236,7 +236,7 @@ Session::finalize_audio_export ()
 
 	export_freewheel_connection.disconnect();
 	
-	AudioEngine::instance()->mmc().enable_send (_pre_export_mmc_enabled);
+	_mmc->enable_send (_pre_export_mmc_enabled);
 
 	/* maybe write CUE/TOC */
 

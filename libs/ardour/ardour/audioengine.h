@@ -36,8 +36,6 @@
 #include "pbd/signals.h"
 #include "pbd/stacktrace.h"
 
-#include "midi++/mmc.h"
-
 #include "ardour/ardour.h"
 #include "ardour/data_type.h"
 #include "ardour/session_handle.h"
@@ -184,8 +182,6 @@ public:
     /* sets up the process callback thread */
     static void thread_init_callback (void *);
 
-    MIDI::MachineControl& mmc() { return _mmc; }
-
   private:
     AudioEngine ();
 
@@ -207,10 +203,8 @@ public:
     framecnt_t                 last_monitor_check;
     /// the number of frames processed since start() was called
     framecnt_t                _processed_frames;
-    bool                      _pre_freewheel_mmc_enabled;
     Glib::Threads::Thread*     m_meter_thread;
     ProcessThread*            _main_thread;
-    MIDI::MachineControl      _mmc;
     
     void meter_thread ();
     void start_metering_thread ();

@@ -60,8 +60,8 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	, _threshold (10)
 	, gui (0)
 {
-	_input_port = AudioEngine::instance()->midi_input_port ();
-	_output_port = AudioEngine::instance()->midi_output_port ();
+	_input_port = s.midi_input_port ();
+	_output_port = s.midi_output_port ();
 
 	do_feedback = false;
 	_feedback_interval = 10000; // microseconds

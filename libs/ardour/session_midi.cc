@@ -425,7 +425,7 @@ Session::send_full_time_code (framepos_t const t, pframes_t nframes)
 
 	// Send message at offset 0, sent time is for the start of this cycle
 	
-	MidiBuffer& mb (AudioEngine::instance()->mtc_output_port()->get_midi_buffer (nframes));
+	MidiBuffer& mb (_midi_ports->mtc_output_port()->get_midi_buffer (nframes));
 	mb.push_back (0, sizeof (msg), msg);
 
 	_pframes_since_last_mtc = 0;
@@ -515,7 +515,7 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 		pframes_t const out_stamp = (msg_time - start_frame) / _transport_speed;
 		assert (out_stamp < nframes);
 
-		MidiBuffer& mb (AudioEngine::instance()->mtc_output_port()->get_midi_buffer(nframes));
+		MidiBuffer& mb (_midi_ports->mtc_output_port()->get_midi_buffer(nframes));
 		if (!mb.push_back (out_stamp, 2, mtc_msg)) {
 			error << string_compose(_("Session: cannot send quarter-frame MTC message (%1)"), strerror (errno))
 			      << endmsg;
@@ -603,3 +603,45 @@ Session::start_midi_thread ()
 	return 0;
 }
 
+MIDI::Port* 
+Session::midi_input_port () const
+{
+	return _midi_ports->midi_input_port ();
+}
+MIDI::Port* 
+Session::midi_output_port () const
+{
+	return _midi_ports->midi_output_port ();
+}
+boost::shared_ptr<MidiPort> 
+Session::midi_clock_output_port () const
+{
+	return _midi_ports->midi_clock_output_port ();
+}
+boost::shared_ptr<MidiPort> 
+Session::midi_clock_input_port () const
+{
+	return _midi_ports->midi_clock_input_port ();
+}
+boost::shared_ptr<MidiPort> 
+Session::mtc_output_port () const
+{
+	return _midi_ports->mtc_output_port ();
+}
+boost::shared_ptr<MidiPort> 
+Session::mtc_input_port () const
+{
+	return _midi_ports->mtc_input_port ();
+}
+
+MIDI::Port*
+Session::mmc_output_port () const
+{
+	return _midi_ports->mmc_output_port ();
+}
+
+MIDI::Port*
+Session::mmc_input_port () const
+{
+	return _midi_ports->mmc_input_port ();
+}

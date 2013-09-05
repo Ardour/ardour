@@ -65,10 +65,6 @@ RCConfiguration::RCConfiguration ()
 
 RCConfiguration::~RCConfiguration ()
 {
-	for (list<XMLNode*>::iterator i = _midi_port_states.begin(); i != _midi_port_states.end(); ++i) {
-		delete *i;
-	}
-
 	delete _control_protocol_state;
 }
 
@@ -176,11 +172,6 @@ RCConfiguration::get_state ()
 
 	root = new XMLNode("Ardour");
 
-	list<XMLNode*> midi_port_nodes = AudioEngine::instance()->get_midi_port_states();
-	for (list<XMLNode*>::const_iterator n = midi_port_nodes.begin(); n != midi_port_nodes.end(); ++n) {
-		 root->add_child_nocopy (**n);
-	}
-
 	root->add_child_nocopy (get_variables ());
 
 	root->add_child_nocopy (SessionMetadata::Metadata()->get_user_state());
@@ -226,12 +217,6 @@ RCConfiguration::set_state (const XMLNode& root, int version)
 	XMLNodeConstIterator niter;
 	XMLNode *node;
 
-	for (list<XMLNode*>::iterator i = _midi_port_states.begin(); i != _midi_port_states.end(); ++i) {
-		delete *i;
-	}
-
-	_midi_port_states.clear ();
-
 	Stateful::save_extra_xml (root);
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
@@ -244,8 +229,6 @@ RCConfiguration::set_state (const XMLNode& root, int version)
 			SessionMetadata::Metadata()->set_state (*node, version);
 		} else if (node->name() == ControlProtocolManager::state_node_name) {
 			_control_protocol_state = new XMLNode (*node);
-		} else if (node->name() == ARDOUR::Port::state_node_name) {
-			_midi_port_states.push_back (new XMLNode (*node));
 		}
 	}
 

@@ -65,7 +65,7 @@ class MidiPortManager {
     boost::shared_ptr<MidiPort> midi_clock_input_port() const { return _midi_clock_input_port; }
     boost::shared_ptr<MidiPort> midi_clock_output_port() const { return _midi_clock_output_port; }
     
-    void set_midi_port_states ();
+    void set_midi_port_states (const XMLNodeList&);
     std::list<XMLNode*> get_midi_port_states () const;
 
     PBD::Signal0<void> PortsChanged;

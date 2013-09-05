@@ -32,6 +32,7 @@ using namespace PBD;
 
 MidiPortManager::MidiPortManager ()
 {
+	create_ports ();
 }
 
 MidiPortManager::~MidiPortManager ()
@@ -110,20 +111,15 @@ MidiPortManager::create_ports ()
 	_mtc_output_port->set_always_parse (true);
 	_midi_clock_input_port->set_always_parse (true);
 	_midi_clock_output_port->set_always_parse (true);
-
-	set_midi_port_states ();
 }
 
 void
-MidiPortManager::set_midi_port_states ()
+MidiPortManager::set_midi_port_states (const XMLNodeList&nodes)
 {
-	list<XMLNode*> nodes;
 	XMLProperty* prop;
 	typedef map<std::string,boost::shared_ptr<Port> > PortMap;
 	PortMap ports;
 	const int version = 0;
-
-	nodes = Config->midi_port_states ();
 
 	ports.insert (make_pair (_mtc_input_port->name(), _mtc_input_port));
 	ports.insert (make_pair (_mtc_output_port->name(), _mtc_output_port));
@@ -134,7 +130,7 @@ MidiPortManager::set_midi_port_states ()
 	ports.insert (make_pair (_mmc_input_port->name(), _mmc_in));
 	ports.insert (make_pair (_mmc_output_port->name(), _mmc_out));
 	
-	for (list<XMLNode*>::iterator n = nodes.begin(); n != nodes.end(); ++n) {
+	for (XMLNodeList::const_iterator n = nodes.begin(); n != nodes.end(); ++n) {
 		if ((prop = (*n)->property (X_("name"))) == 0) {
 			continue;
 		}

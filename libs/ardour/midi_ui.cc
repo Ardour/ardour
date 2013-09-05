@@ -118,7 +118,7 @@ void
 MidiControlUI::reset_ports ()
 {
 	if (port_sources.empty()) {
-		AsyncMIDIPort* async = dynamic_cast<AsyncMIDIPort*> (AudioEngine::instance()->midi_input_port());
+		AsyncMIDIPort* async = dynamic_cast<AsyncMIDIPort*> (_session.midi_input_port());
 
 		if (!async) {
 			return;

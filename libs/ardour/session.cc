@@ -157,6 +157,11 @@ Session::Session (AudioEngine &eng,
 	_locations = new Locations (*this);
 	ltc_encoder = NULL;
 
+	_midi_ports = new MidiPortManager;
+	_mmc = new MIDI::MachineControl;
+
+	_mmc->set_ports (_midi_ports->mmc_input_port(), _midi_ports->mmc_output_port());
+
 	if (how_many_dsp_threads () > 1) {
 		/* For now, only create the graph if we are using >1 DSP threads, as
 		   it is a bit slower than the old code with 1 thread.
@@ -330,6 +335,8 @@ Session::destroy ()
 	/* not strictly necessary, but doing it here allows the shared_ptr debugging to work */
 	playlists.reset ();
 
+	delete _mmc;
+	delete _midi_ports;
 	delete _locations;
 
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
@@ -1175,7 +1182,7 @@ Session::enable_record ()
 		if (g_atomic_int_compare_and_exchange (&_record_status, rs, Recording)) {
 
 			_last_record_location = _transport_frame;
-			AudioEngine::instance()->mmc().send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordStrobe));
+			_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordStrobe));
 
 			if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
 				set_track_monitor_input_status (true);
@@ -1196,7 +1203,7 @@ Session::disable_record (bool rt_context, bool force)
 
 		if ((!Config->get_latched_record_enable () && !play_loop) || force) {
 			g_atomic_int_set (&_record_status, Disabled);
-			AudioEngine::instance()->mmc().send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordExit));
+			_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordExit));
 		} else {
 			if (rs == Recording) {
 				g_atomic_int_set (&_record_status, Enabled);
@@ -1250,7 +1257,7 @@ Session::maybe_enable_record ()
 			enable_record ();
 		}
 	} else {
-		AudioEngine::instance()->mmc().send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordPause));
+		_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordPause));
 		RecordStateChanged (); /* EMIT SIGNAL */
 	}
 

@@ -110,6 +110,8 @@ class IOProcessor;
 class ImportStatus;
 class MidiClockTicker;
 class MidiControlUI;
+class MidiPortManager;
+class MidiPort;
 class MidiRegion;
 class MidiSource;
 class MidiTrack;
@@ -860,6 +862,18 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::shared_ptr<IO> ltc_input_io() { return _ltc_input; }
 	boost::shared_ptr<IO> ltc_output_io() { return _ltc_output; }
 
+    MIDI::Port* midi_input_port () const;
+    MIDI::Port* midi_output_port () const;
+    MIDI::Port* mmc_output_port () const;
+    MIDI::Port* mmc_input_port () const;
+
+    boost::shared_ptr<MidiPort> midi_clock_output_port () const;
+    boost::shared_ptr<MidiPort> midi_clock_input_port () const;
+    boost::shared_ptr<MidiPort> mtc_output_port () const;
+    boost::shared_ptr<MidiPort> mtc_input_port () const;
+
+    MIDI::MachineControl& mmc() { return *_mmc; }
+
         /* Callbacks specifically related to JACK, and called directly
 	 * from the JACK audio backend.
          */
@@ -1597,6 +1611,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
         void reconnect_ltc_input ();
         void reconnect_ltc_output ();
+
+    /* persistent, non-track related MIDI ports */
+    MidiPortManager* _midi_ports;
+    MIDI::MachineControl* _mmc;
 };
 
 } // namespace ARDOUR

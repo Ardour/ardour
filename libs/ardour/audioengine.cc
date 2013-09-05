@@ -71,7 +71,6 @@ AudioEngine::AudioEngine ()
 	, monitor_check_interval (INT32_MAX)
 	, last_monitor_check (0)
 	, _processed_frames (0)
-	, _pre_freewheel_mmc_enabled (false)
 	, m_meter_thread (0)
 	, _main_thread (0)
 {
@@ -543,12 +542,6 @@ AudioEngine::start ()
 		return 0;
 	}
 
-	/* if we're still connected (i.e. previously paused), no need to
-	 * re-register ports.
-	 */
-	 
-	bool have_ports = (!ports.reader()->empty());
-
 	_processed_frames = 0;
 	last_monitor_check = 0;
 	
@@ -564,11 +557,6 @@ AudioEngine::start ()
 		if (_session->config.get_jack_time_master()) {
 			_backend->set_time_master (true);
 		}
-	}
-	
-	if (!have_ports) {
-		PortManager::create_ports ();
-		_mmc.set_ports (mmc_input_port(), mmc_output_port());
 	}
 	
 	start_metering_thread ();
@@ -903,13 +891,6 @@ AudioEngine::sync_callback (TransportState state, framepos_t position)
 void
 AudioEngine::freewheel_callback (bool onoff)
 {
-	if (onoff) {
-		_pre_freewheel_mmc_enabled = _mmc.send_enabled ();
-		_mmc.enable_send (false);
-	} else {
-		_mmc.enable_send (_pre_freewheel_mmc_enabled);
-	}
-
 	_freewheeling = onoff;
 }
 
