@@ -27,6 +27,7 @@
 #include "pbd/xml++.h"
 #include "pbd/stacktrace.h"
 
+#include "midi++/types.h" // Added by JE - 06-01-2009. All instances of 'byte' changed to 'MIDI::byte' (for clarification)
 #include "midi++/port.h"
 #include "midi++/channel.h"
 
@@ -55,7 +56,7 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, Port& p, bool
 	last_controllable_value = 0.0f;
 	control_type = none;
 	_control_description = "MIDI Control: none";
-	control_additional = (byte) -1;
+	control_additional = (MIDI::byte) -1;
 	feedback = true; // for now
 }
 
@@ -73,7 +74,7 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, Port& p, Cont
 	last_controllable_value = 0.0f;
 	control_type = none;
 	_control_description = "MIDI Control: none";
-	control_additional = (byte) -1;
+	control_additional = (MIDI::byte) -1;
 	feedback = true; // for now
 }
 
@@ -108,7 +109,7 @@ MIDIControllable::drop_external_control ()
 {
 	midi_forget ();
 	control_type = none;
-	control_additional = (byte) -1;
+	control_additional = (MIDI::byte) -1;
 }
 
 void
@@ -313,7 +314,7 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 }
 
 void
-MIDIControllable::midi_sense_program_change (Parser &, byte msg)
+MIDIControllable::midi_sense_program_change (Parser &, MIDI::byte msg)
 {
 	if (!controllable) { 
 		if (lookup_controllable ()) {
@@ -349,7 +350,7 @@ MIDIControllable::midi_sense_pitchbend (Parser &, pitchbend_t pb)
 }
 
 void
-MIDIControllable::midi_receiver (Parser &, byte *msg, size_t /*len*/)
+MIDIControllable::midi_receiver (Parser &, MIDI::byte *msg, size_t /*len*/)
 {
 	/* we only respond to channel messages */
 
