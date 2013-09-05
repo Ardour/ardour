@@ -68,7 +68,6 @@ EngineControl::EngineControl ()
 #else
 	, basic_packer (9, 2)
 #endif
-	, _used (false)
 {
 	using namespace Notebook_Helpers;
 	Label* label;
@@ -471,31 +470,28 @@ EngineControl::get_state ()
 	XMLNode* root = new XMLNode ("AudioMIDISetup");
 	std::string path;
 
-	if (_used) {
-
-		if (!states.empty()) {
-			XMLNode* state_nodes = new XMLNode ("EngineStates");
+	if (!states.empty()) {
+		XMLNode* state_nodes = new XMLNode ("EngineStates");
+		
+		for (StateList::const_iterator i = states.begin(); i != states.end(); ++i) {
 			
-			for (StateList::const_iterator i = states.begin(); i != states.end(); ++i) {
-
-				XMLNode* node = new XMLNode ("State");
-
-				node->add_property ("backend", (*i).backend);
-				node->add_property ("driver", (*i).driver);
-				node->add_property ("device", (*i).device);
-				node->add_property ("sample-rate", (*i).sample_rate);
-				node->add_property ("buffer-size", (*i).buffer_size);
-				node->add_property ("input-latency", (*i).input_latency);
-				node->add_property ("output-latency", (*i).output_latency);
-				node->add_property ("input-channels", (*i).input_channels);
-				node->add_property ("output-channels", (*i).output_channels);
-				node->add_property ("active", (*i).active ? "yes" : "no");
-	
-				state_nodes->add_child_nocopy (*node);
-			}
-
-			root->add_child_nocopy (*state_nodes);
+			XMLNode* node = new XMLNode ("State");
+			
+			node->add_property ("backend", (*i).backend);
+			node->add_property ("driver", (*i).driver);
+			node->add_property ("device", (*i).device);
+			node->add_property ("sample-rate", (*i).sample_rate);
+			node->add_property ("buffer-size", (*i).buffer_size);
+			node->add_property ("input-latency", (*i).input_latency);
+			node->add_property ("output-latency", (*i).output_latency);
+			node->add_property ("input-channels", (*i).input_channels);
+			node->add_property ("output-channels", (*i).output_channels);
+			node->add_property ("active", (*i).active ? "yes" : "no");
+			
+			state_nodes->add_child_nocopy (*node);
 		}
+		
+		root->add_child_nocopy (*state_nodes);
 	}
 
 	return *root;
@@ -517,6 +513,7 @@ EngineControl::set_state (const XMLNode& root)
 	clist = root.children();
 
 	states.clear ();
+
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
 
@@ -652,13 +649,6 @@ EngineControl::setup_engine (bool start)
 			error << string_compose (_("Cannot set output latency to %1"), get_output_latency()) << endmsg;
 			return -1;
 		}
-
-		/* we've used this dialog to configure the engine, which means
-		 * that our state becomes relevant for saving (and thus
-		 * implicitly, restoring.
-		 */
-
-		_used = true;
 
 		/* get a pointer to the current state object, creating one if
 		 * necessary

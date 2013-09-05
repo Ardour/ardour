@@ -314,7 +314,7 @@ ArdourStartup::session_folder ()
 void
 ArdourStartup::setup_audio_page ()
 {
-	engine_dialog = manage (new EngineControl);
+	engine_dialog = ARDOUR_UI::instance()->audio_midi_setup_widget ();
 
 	engine_dialog->set_border_width (12);
 

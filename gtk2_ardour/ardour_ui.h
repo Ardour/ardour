@@ -90,6 +90,7 @@ class BigClockWindow;
 class BundleManager;
 class ButtonJoiner;
 class ConnectionEditor;
+class EngineControl;
 class KeyEditor;
 class LocationUIWindow;
 class MainClock;
@@ -287,6 +288,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
 
         const std::string& announce_string() const { return _announce_string; }
+
+        EngineControl* audio_midi_setup_widget();
 
   protected:
 	friend class PublicEditor;
@@ -748,6 +751,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
         std::string _announce_string;
         void check_announcements ();
+
+        EngineControl* _audio_midi_setup;
 };
 
 #endif /* __ardour_gui_h__ */

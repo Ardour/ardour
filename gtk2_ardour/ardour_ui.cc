@@ -214,6 +214,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	}
 
 	ui_config = new UIConfiguration();
+	_audio_midi_setup = new EngineControl;
 
 	editor = 0;
 	mixer = 0;
@@ -4144,4 +4145,20 @@ ARDOUR_UI::reset_route_peak_display (Route* route)
 	if (_session->master_out().get() == route) {
 		reset_peak_display ();
 	}
+}
+
+EngineControl*
+ARDOUR_UI::audio_midi_setup_widget ()
+{
+	/* remove widget from any existing parent, since it is about
+	   to be packed somewhere else.
+	*/
+	
+	Gtk::Container* parent = _audio_midi_setup->get_parent ();
+
+	if (parent) {
+		parent->remove (*_audio_midi_setup);
+	}
+
+	return _audio_midi_setup;
 }

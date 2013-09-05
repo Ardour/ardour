@@ -41,7 +41,6 @@ class EngineControl : public Gtk::VBox {
 	static bool need_setup ();
 	int setup_engine (bool start);
 
-	bool was_used() const { return _used; }
 	XMLNode& get_state ();
 	void set_state (const XMLNode&);
 
@@ -95,8 +94,6 @@ class EngineControl : public Gtk::VBox {
 
     sigc::connection sr_connection;
     sigc::connection bs_connection;
-    
-    bool _used;
     
     static bool engine_running ();
     

@@ -647,11 +647,10 @@ ARDOUR_UI::save_ardour_state ()
 	window_node->add_child_nocopy (*tearoff_node);
 
 	Config->add_extra_xml (*window_node);
+	Config->add_extra_xml (_audio_midi_setup->get_state());
 
-	if (_startup && _startup->engine_control() && _startup->engine_control()->was_used()) {
-		Config->add_extra_xml (_startup->engine_control()->get_state());
-	}
 	Config->save_state();
+
 	if (ui_config->dirty()) {
 		ui_config->save_state ();
 	}
