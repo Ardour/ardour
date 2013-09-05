@@ -292,7 +292,7 @@ inline static void gdither_innner_loop_fp(const GDitherType dt,
 	    break;
 	}
 
-	clamped = rintf(tmp);
+	clamped = (double)lrintf(tmp);
 	if (clamped > clamp_u) {
 		clamped = clamp_u;
 	} else if (clamped < clamp_l) {
