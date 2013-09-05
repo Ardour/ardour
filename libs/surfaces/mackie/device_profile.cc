@@ -78,7 +78,7 @@ user_devprofile_directory ()
 }
 
 static bool
-devprofile_filter (const string &str, void */*arg*/)
+devprofile_filter (const string &str, void* /*arg*/)
 {
 	return (str.length() > strlen(devprofile_suffix) &&
 		str.find (devprofile_suffix) == (str.length() - strlen (devprofile_suffix)));

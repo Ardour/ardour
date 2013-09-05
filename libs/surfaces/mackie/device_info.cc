@@ -24,6 +24,7 @@
 #include "pbd/xml++.h"
 #include "pbd/error.h"
 #include "pbd/pathscanner.h"
+#include "pbd/convert.h"
 
 #include "ardour/filesystem_paths.h"
 
@@ -221,7 +222,7 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 	/* strip count is mandatory */
 	if ((child = node.child ("Strips")) != 0) {
 		if ((prop = child->property ("value")) != 0) {
-			if ((_strip_cnt = atoi (prop->value())) == 0) {
+			if ((_strip_cnt = atoi (prop->value().c_str())) == 0) {
 				_strip_cnt = 8;
 			}
 		}
@@ -231,7 +232,7 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 
 	if ((child = node.child ("Extenders")) != 0) {
 		if ((prop = child->property ("value")) != 0) {
-			if ((_extenders = atoi (prop->value())) == 0) {
+			if ((_extenders = atoi (prop->value().c_str())) == 0) {
 				_extenders = 0;
 			}
 		}
@@ -458,7 +459,7 @@ devinfo_search_path ()
 }
 
 static bool
-devinfo_filter (const string &str, void */*arg*/)
+devinfo_filter (const string &str, void* /*arg*/)
 {
 	return (str.length() > strlen(devinfo_suffix) &&
 		str.find (devinfo_suffix) == (str.length() - strlen (devinfo_suffix)));
