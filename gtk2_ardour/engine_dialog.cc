@@ -303,47 +303,19 @@ EngineControl::device_changed ()
 void 
 EngineControl::sample_rate_changed ()
 {
-	bool existing = true;
-	State* state = get_current_state ();
-
-	if (!state) {
-		existing = false;
-		state = new State;
-		state->backend = backend_combo.get_active_text ();
-		state->driver = driver_combo.get_active_text ();
-		state->device = device_combo.get_active_text ();
-		state->buffer_size = buffer_size_combo.get_active_text ();
-	}
-		
-	state->sample_rate = sample_rate_combo.get_active_text ();
-
-	if (!existing) {
-		states.push_back (*state);
-	}
+	/* reset the strings for buffer size to show the correct msec value
+	   (reflecting the new sample rate
+	*/
 
 	reshow_buffer_sizes (false);
+	save_state ();
+
 }
 
 void 
 EngineControl::buffer_size_changed ()
 {
-	bool existing = true;
-	State* state = get_current_state ();
-
-	if (!state) {
-		existing = false;
-		state = new State;
-		state->backend = backend_combo.get_active_text ();
-		state->driver = driver_combo.get_active_text ();
-		state->device = device_combo.get_active_text ();
-		state->sample_rate = sample_rate_combo.get_active_text ();
-	}
-		
-	state->buffer_size = buffer_size_combo.get_active_text ();
-
-	if (!existing) {
-		states.push_back (*state);
-	}
+	save_state ();
 }
 
 void
@@ -453,6 +425,28 @@ EngineControl::get_current_state ()
 }
 
 void
+EngineControl::save_state ()
+{
+	bool existing = true;
+	State* state = get_current_state ();
+
+	if (!state) {
+		existing = false;
+		state = new State;
+	}
+	
+	state->backend = backend_combo.get_active_text ();
+	state->driver = driver_combo.get_active_text ();
+	state->device = device_combo.get_active_text ();
+	state->buffer_size = buffer_size_combo.get_active_text ();
+	state->sample_rate = sample_rate_combo.get_active_text ();
+
+	if (!existing) {
+		states.push_back (*state);
+	}
+}
+
+void
 EngineControl::maybe_set_state ()
 {
 	State* state = get_current_state ();
@@ -461,6 +455,10 @@ EngineControl::maybe_set_state ()
 		sr_connection.block ();
 		bs_connection.block ();
 		sample_rate_combo.set_active_text (state->sample_rate);
+		/* need to reset possible strings for buffer size before we do
+		   this
+		*/
+		reshow_buffer_sizes (false);
 		buffer_size_combo.set_active_text (state->buffer_size);
 		bs_connection.unblock ();
 		sr_connection.unblock ();

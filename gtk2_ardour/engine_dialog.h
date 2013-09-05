@@ -140,6 +140,7 @@ class EngineControl : public Gtk::VBox {
 			       const std::string& device);
     State* get_current_state ();
     void maybe_set_state ();
+    void save_state ();
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */
