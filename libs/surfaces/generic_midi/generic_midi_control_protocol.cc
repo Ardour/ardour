@@ -128,7 +128,7 @@ user_midi_map_directory ()
 }
 
 static bool
-midi_map_filter (const string &str, void */*arg*/)
+midi_map_filter (const string &str, void* /*arg*/)
 {
 	return (str.length() > strlen(midi_map_suffix) &&
 		str.find (midi_map_suffix) == (str.length() - strlen (midi_map_suffix)));
