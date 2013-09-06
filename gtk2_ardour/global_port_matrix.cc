@@ -19,6 +19,7 @@
 
 #include <gtkmm/image.h>
 #include <gtkmm/stock.h>
+
 #include "global_port_matrix.h"
 #include "utils.h"
 
@@ -118,15 +119,17 @@ GlobalPortMatrix::get_state (BundleChannel c[2]) const
 
 			if (!p && !q) {
 				/* two non-Ardour ports; things are slightly more involved */
-				/* XXX: is this the easiest way to do this? */
-				/* XXX: isn't this very inefficient? */
+
+				/* get a port handle for one of them .. */
 
 				PortEngine::PortHandle ph = AudioEngine::instance()->port_engine().get_port_by_name (*i);
 				if (!ph) {
 					return PortMatrixNode::NOT_ASSOCIATED;
 				}
 
-				if (AudioEngine::instance()->port_engine().connected (ph)) {
+				/* see if it is connected to the other one ... */
+
+				if (AudioEngine::instance()->port_engine().connected_to (ph, *j, false)) {
 					return PortMatrixNode::ASSOCIATED;
 				}
 

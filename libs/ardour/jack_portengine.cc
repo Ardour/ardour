@@ -183,11 +183,18 @@ JACKPortEngine::connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int 
 }
 
 bool
-JACKPortEngine::connected (PortHandle port)
+JACKPortEngine::connected (PortHandle port, bool process_callback_safe)
 {
 	bool ret = false;
 
-	const char** ports = jack_port_get_connections ((jack_port_t*) port);
+	const char** ports;
+
+	if (process_callback_safe) {
+		ports = jack_port_get_connections ((jack_port_t*)port);
+	} else {
+		GET_PRIVATE_JACK_POINTER_RET (_priv_jack, false);
+		ports = jack_port_get_all_connections (_priv_jack, (jack_port_t*)port);
+	}
 
 	if (ports) {
 		ret = true;
@@ -199,10 +206,17 @@ JACKPortEngine::connected (PortHandle port)
 }
 
 bool
-JACKPortEngine::connected_to (PortHandle port, const std::string& other)
+JACKPortEngine::connected_to (PortHandle port, const std::string& other, bool process_callback_safe)
 {
 	bool ret = false;
-	const char** ports = jack_port_get_connections ((jack_port_t*) port);
+	const char** ports;
+
+	if (process_callback_safe) {
+		ports = jack_port_get_connections ((jack_port_t*)port);
+	} else {
+		GET_PRIVATE_JACK_POINTER_RET (_priv_jack, false);
+		ports = jack_port_get_all_connections (_priv_jack, (jack_port_t*)port);
+	}
 
 	if (ports) {
 		for (int i = 0; ports[i]; ++i) {
@@ -217,12 +231,19 @@ JACKPortEngine::connected_to (PortHandle port, const std::string& other)
 }
 
 bool
-JACKPortEngine::physically_connected (PortHandle p)
+JACKPortEngine::physically_connected (PortHandle p, bool process_callback_safe)
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, false);
 	jack_port_t* port = (jack_port_t*) p;
 
-	const char** ports = jack_port_get_connections (port);
+	const char** ports;
+	
+	if (process_callback_safe) {
+		ports = jack_port_get_connections ((jack_port_t*)port);
+	} else {
+		GET_PRIVATE_JACK_POINTER_RET (_priv_jack, false);
+		ports = jack_port_get_all_connections (_priv_jack, (jack_port_t*)port);
+	}
 
 	if (ports) {
 		for (int i = 0; ports[i]; ++i) {
@@ -240,9 +261,16 @@ JACKPortEngine::physically_connected (PortHandle p)
 }
 
 int
-JACKPortEngine::get_connections (PortHandle port, vector<string>& s)
+JACKPortEngine::get_connections (PortHandle port, vector<string>& s, bool process_callback_safe)
 {
-	const char** ports = jack_port_get_connections ((jack_port_t*) port);
+	const char** ports;
+
+	if (process_callback_safe) {
+		ports = jack_port_get_connections ((jack_port_t*)port);
+	} else {
+		GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
+		ports = jack_port_get_all_connections (_priv_jack, (jack_port_t*)port);
+	}
 
 	if (ports) {
 		for (int i = 0; ports[i]; ++i) {
@@ -443,7 +471,9 @@ int
 JACKPortEngine::connect (const std::string& src, const std::string& dst)
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
-	return jack_connect (_priv_jack, src.c_str(), dst.c_str());
+	
+	int r = jack_connect (_priv_jack, src.c_str(), dst.c_str());
+	return r;
 }
 
 int

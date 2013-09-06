@@ -185,21 +185,21 @@ class PortEngine {
     /** Return true if the port referred to by @param port has any connections
      * to other ports. Return false otherwise.
      */
-    virtual bool  connected (PortHandle port) = 0;
+    virtual bool  connected (PortHandle port, bool process_callback_safe = true) = 0;
     /** Return true if the port referred to by @param port is connected to
      * the port named by @param name. Return false otherwise.
      */
-    virtual bool  connected_to (PortHandle, const std::string& name) = 0;
+    virtual bool  connected_to (PortHandle, const std::string& name, bool process_callback_safe = true) = 0;
 
     /** Return true if the port referred to by @param port has any connections
      * to ports marked with the PortFlag IsPhysical. Return false otherwise.
      */
-    virtual bool  physically_connected (PortHandle port) = 0;
+    virtual bool  physically_connected (PortHandle port, bool process_callback_safe = true) = 0;
 
     /** Place the names of all ports connected to the port named by @param
      * ports into @param names, and return the number of connections.
      */
-    virtual int   get_connections (PortHandle port, std::vector<std::string>& names) = 0;
+    virtual int   get_connections (PortHandle port, std::vector<std::string>& names, bool process_callback_safe = true) = 0;
 
     /* MIDI */
 

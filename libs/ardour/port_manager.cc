@@ -385,8 +385,13 @@ PortManager::connect (const string& source, const string& destination)
 	} else if (dst) {
 		ret = dst->connect (s);
 	} else {
-		/* neither port is known to us, and this API isn't intended for use as a general patch bay */
-		ret = -1;
+		/* neither port is known to us ...hand-off to the PortEngine
+		 */
+		if (_impl) {
+			ret = _impl->connect (s, d);
+		} else {
+			ret = -1;
+		}
 	}
 
 	if (ret > 0) {
@@ -412,12 +417,17 @@ PortManager::disconnect (const string& source, const string& destination)
 	boost::shared_ptr<Port> dst = get_port_by_name (d);
 
 	if (src) {
-			ret = src->disconnect (d);
+		ret = src->disconnect (d);
 	} else if (dst) {
-			ret = dst->disconnect (s);
+		ret = dst->disconnect (s);
 	} else {
-		/* neither port is known to us, and this API isn't intended for use as a general patch bay */
-		ret = -1;
+		/* neither port is known to us ...hand-off to the PortEngine
+		 */
+		if (_impl) {
+			ret = _impl->disconnect (s, d);
+		} else {
+			ret = -1;
+		}
 	}
 	return ret;
 }

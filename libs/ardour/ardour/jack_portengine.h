@@ -63,11 +63,12 @@ class JACKPortEngine : public PortEngine
     PortHandle register_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
     void  unregister_port (PortHandle);
 
-    bool  connected (PortHandle);
-    bool  connected_to (PortHandle, const std::string&);
-    bool  physically_connected (PortHandle);
-    int   get_connections (PortHandle, std::vector<std::string>&);
+    bool  connected (PortHandle, bool process_callback_safe);
+    bool  connected_to (PortHandle, const std::string&, bool process_callback_safe);
+    bool  physically_connected (PortHandle, bool process_callback_safe);
+    int   get_connections (PortHandle, std::vector<std::string>&, bool process_callback_safe);
     int   connect (PortHandle, const std::string&);
+
     int   disconnect (PortHandle, const std::string&);
     int   disconnect_all (PortHandle);
     int   connect (const std::string& src, const std::string& dst);
