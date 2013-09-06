@@ -126,6 +126,9 @@ JackConnection::open ()
                 jack_on_shutdown (_jack, jack_halted_callback, this);
         }
 
+
+	Connected(); /* EMIT SIGNAL */
+
 	return 0;
 }
 
