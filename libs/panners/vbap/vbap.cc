@@ -25,7 +25,9 @@
 #include <iostream>
 #include <string>
 
+#ifdef COMPILER_MSVC
 #include <malloc.h>
+#endif
 
 #include "pbd/cartesian.h"
 #include "pbd/compose.h"
