@@ -145,6 +145,12 @@ AsyncMIDIPort::drain (int check_interval_usecs)
 {
 	RingBuffer< Evoral::Event<double> >::rw_vector vec = { { 0, 0 }, { 0, 0} };
 
+	if (!AudioEngine::instance()->running() || AudioEngine::instance()->session() == 0) {
+		/* no more process calls - it will never drain */
+		return;
+	}
+
+
 	if (is_process_thread()) {
 		error << "Process thread called MIDI::AsyncMIDIPort::drain() - this cannot work" << endmsg;
 		return;
