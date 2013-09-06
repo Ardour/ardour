@@ -59,10 +59,6 @@
 #include "ardour/plugin_manager.h"
 #include "ardour/rc_configuration.h"
 
-#ifdef SearchPath
-#undef SearchPath
-#endif
-
 #include "ardour/ladspa_search_path.h"
 
 #ifdef LV2_SUPPORT

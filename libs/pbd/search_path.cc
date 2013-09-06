@@ -37,12 +37,12 @@ const char * const path_delimiter = ":";
 
 namespace PBD {
 
-SearchPath::SearchPath ()
+Searchpath::Searchpath ()
 {
 
 }
 
-SearchPath::SearchPath (const string& path)
+Searchpath::Searchpath (const string& path)
 {
 	vector<std::string> tmp;
 
@@ -51,13 +51,13 @@ SearchPath::SearchPath (const string& path)
 	}
 }
 
-SearchPath::SearchPath (const vector<std::string>& paths)
+Searchpath::Searchpath (const vector<std::string>& paths)
 {
 	add_directories (paths);
 }
 
 void
-SearchPath::add_directory (const std::string& directory_path)
+Searchpath::add_directory (const std::string& directory_path)
 {
 	if (!directory_path.empty()) {
 		push_back(directory_path);
@@ -65,7 +65,7 @@ SearchPath::add_directory (const std::string& directory_path)
 }
 
 void
-SearchPath::add_directories (const vector<std::string>& paths)
+Searchpath::add_directories (const vector<std::string>& paths)
 {
 	for(vector<std::string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
 		add_directory (*i);
@@ -73,7 +73,7 @@ SearchPath::add_directories (const vector<std::string>& paths)
 }
 
 const string
-SearchPath::to_string () const
+Searchpath::to_string () const
 {
 	string path;
 
@@ -87,37 +87,37 @@ SearchPath::to_string () const
 	return path;
 }
 
-SearchPath& 
-SearchPath::operator+= (const SearchPath& spath)
+Searchpath&
+Searchpath::operator+= (const Searchpath& spath)
 {
 	insert(end(), spath.begin(), spath.end());
 	return *this;
 }
 
-SearchPath& 
-SearchPath::operator+= (const std::string& directory_path)
+Searchpath&
+Searchpath::operator+= (const std::string& directory_path)
 {
 	add_directory (directory_path);
 	return *this;
 }
 
-SearchPath& 
-SearchPath::operator+ (const std::string& directory_path)
+Searchpath&
+Searchpath::operator+ (const std::string& directory_path)
 {
 	add_directory (directory_path);
 	return *this;
 }
 
-SearchPath& 
-SearchPath::operator+ (const SearchPath& spath)
+Searchpath&
+Searchpath::operator+ (const Searchpath& spath)
 {
-	// concatenate paths into new SearchPath
+	// concatenate paths into new Searchpath
 	insert(end(), spath.begin(), spath.end());
 	return *this;
 }
 
-SearchPath&
-SearchPath::add_subdirectory_to_paths (const string& subdir)
+Searchpath&
+Searchpath::add_subdirectory_to_paths (const string& subdir)
 {
 	for (vector<std::string>::iterator i = begin(); i != end(); ++i) {
 		// should these new paths just be added to the end of 

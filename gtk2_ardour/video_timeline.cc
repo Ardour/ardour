@@ -719,7 +719,7 @@ VideoTimeLine::find_xjadeo () {
 	std::string xjadeo_file_path;
 	if (getenv("XJREMOTE")) {
 		_xjadeo_bin = strdup(getenv("XJREMOTE")); // XXX TODO: free it?!
-	} else if (find_file_in_search_path (SearchPath(Glib::getenv("PATH")), X_("xjremote"), xjadeo_file_path)) {
+	} else if (find_file_in_search_path (Searchpath(Glib::getenv("PATH")), X_("xjremote"), xjadeo_file_path)) {
 		_xjadeo_bin = xjadeo_file_path;
 	}
 	else if (Glib::file_test(X_("/Applications/Jadeo.app/Contents/MacOS/xjremote"), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)) {

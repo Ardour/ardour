@@ -104,7 +104,7 @@ find_matching_files_in_directories (const vector<std::string>& paths,
 }
 
 void
-find_matching_files_in_search_path (const SearchPath& search_path,
+find_matching_files_in_search_path (const Searchpath& search_path,
                                     const Glib::PatternSpec& pattern,
                                     vector<std::string>& result)
 {
@@ -112,7 +112,7 @@ find_matching_files_in_search_path (const SearchPath& search_path,
 }
 
 bool
-find_file_in_search_path(const SearchPath& search_path,
+find_file_in_search_path(const Searchpath& search_path,
                          const string& filename,
                          std::string& result)
 {

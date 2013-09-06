@@ -222,14 +222,8 @@ JackUtilsTest::test_server_paths ()
 	cout << "The default JACK server on this system: " << default_server_path << endl;
 }
 
-void
-JackUtilsTest::test_config ()
-{
-
-}
-
-void
-JackUtilsTest::test_command_line ()
+bool
+get_default_jack_command_line (std::string& command_line)
 {
 	cout << endl;
 
@@ -239,7 +233,6 @@ JackUtilsTest::test_command_line ()
 
 	get_jack_default_audio_driver_name (options.driver);
 
-	string command_line;
 
 	// should fail, haven't set any device yet
 	CPPUNIT_ASSERT (!get_jack_command_line_string (options, command_line));
@@ -264,52 +257,34 @@ JackUtilsTest::test_command_line ()
 	string midi_driver;
 
 	get_jack_default_midi_system_name (options.driver, options.midi_driver);
-
+	//
 	// this at least should create a valid jack command line
-	CPPUNIT_ASSERT (get_jack_command_line_string (options, command_line));
+	return get_jack_command_line_string (options, command_line);
 
-	cout << "Default JACK command line: " << command_line << endl;
 }
 
 void
-JackUtilsTest::test_start_server ()
+JackUtilsTest::test_config ()
 {
-#ifdef PLATFORM_WINDOWS
-	cout << endl;
+	std::string config_path(get_jack_server_user_config_file_path());
 
-	JackCommandLineOptions options;
+	cout << "Jack server config file path: " << config_path << endl;
 
-	CPPUNIT_ASSERT (get_jack_default_server_path (options.server_path));
+	std::string command_line;
 
-	cout << "Starting JACK server at path: " << options.server_path << endl;
+	CPPUNIT_ASSERT (get_default_jack_command_line (command_line));
+	
+	CPPUNIT_ASSERT (write_jack_config_file (config_path, command_line));
+}
 
-	get_jack_default_audio_driver_name (options.driver);
 
-	vector<string> devices = get_jack_device_names_for_audio_driver (options.driver);
-
-	if (!devices.empty()) {
-		options.input_device = devices.front ();
-		options.output_device = devices.front ();
-	} else {
-		cout << "No audio devices available using default JACK driver using Dummy driver" << endl;
-		options.driver = dummy_driver_name;
-		devices = get_jack_device_names_for_audio_driver (options.driver);
-		CPPUNIT_ASSERT (!devices.empty ());
-		options.input_device = devices.front ();
-		options.output_device = devices.front ();
-	}
-
+void
+JackUtilsTest::test_command_line ()
+{
 	string command_line;
+
 	// this at least should create a valid jack command line
-	CPPUNIT_ASSERT (get_jack_command_line_string (options, command_line));
+	CPPUNIT_ASSERT (get_default_jack_command_line (command_line));
 
-	cout << "Calling start_jack_server with command line: " << command_line << endl;
-
-	CPPUNIT_ASSERT (start_jack_server (command_line));
-
-	// sleep for 10 seconds
-	Sleep (10*1000);
-
-	CPPUNIT_ASSERT (jack_server_running ());
-#endif
+	cout << "Default JACK command line: " << command_line << endl;
 }

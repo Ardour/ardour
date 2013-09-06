@@ -25,7 +25,7 @@
  * in an installed location on windows or by setting an environment variable
  * on unix.
  */
-PBD::SearchPath
+PBD::Searchpath
 test_search_path ()
 {
 #ifdef PLATFORM_WINDOWS

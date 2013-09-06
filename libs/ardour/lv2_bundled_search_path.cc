@@ -29,10 +29,10 @@ using namespace PBD;
 
 namespace ARDOUR {
 
-SearchPath
+Searchpath
 lv2_bundled_search_path ()
 {
-	SearchPath spath( ardour_dll_directory () );
+	Searchpath spath( ardour_dll_directory () );
 	spath.add_subdirectory_to_paths ("LV2");
 
 	return spath;

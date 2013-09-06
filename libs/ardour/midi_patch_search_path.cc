@@ -31,14 +31,14 @@ using namespace PBD;
 
 namespace ARDOUR {
 
-SearchPath
+Searchpath
 midi_patch_search_path ()
 {
-	SearchPath spath (ardour_data_search_path());
+	Searchpath spath (ardour_data_search_path());
 	spath.add_subdirectory_to_paths(midi_patch_dir_name);
 
 	bool midi_patch_path_defined = false;
-	SearchPath spath_env (Glib::getenv(midi_patch_env_variable_name, midi_patch_path_defined));
+	Searchpath spath_env (Glib::getenv(midi_patch_env_variable_name, midi_patch_path_defined));
 
 	if (midi_patch_path_defined) {
 		spath += spath_env;

@@ -55,7 +55,7 @@ static const char * const devprofile_env_variable_name = "ARDOUR_MCP_PATH";
 static const char* const devprofile_dir_name = "mcp";
 static const char* const devprofile_suffix = ".profile";
 
-static SearchPath
+static Searchpath
 devprofile_search_path ()
 {
 	bool devprofile_path_defined = false;
@@ -65,7 +65,7 @@ devprofile_search_path ()
 		return spath_env;
 	}
 
-	SearchPath spath (ardour_data_search_path());
+	Searchpath spath (ardour_data_search_path());
 	spath.add_subdirectory_to_paths(devprofile_dir_name);
 
 	return spath;
@@ -91,7 +91,7 @@ DeviceProfile::reload_device_profiles ()
 	vector<string> s;
 	vector<string *> *devprofiles;
 	PathScanner scanner;
-	SearchPath spath (devprofile_search_path());
+	Searchpath spath (devprofile_search_path());
 
 	devprofiles = scanner (spath.to_string(), devprofile_filter, 0, false, true);
 	device_profiles.clear ();

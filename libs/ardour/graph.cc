@@ -584,10 +584,12 @@ Graph::process_one_route (Route* route)
 bool
 Graph::in_process_thread () const
 {
+#ifndef COMPILER_MINGW
 	for (list<pthread_t>::const_iterator i = _thread_list.begin (); i != _thread_list.end(); ++i) {
 		if (pthread_equal(*i, pthread_self())) {
 			return true;
 		}
 	}
+#endif
 	return false;
 }

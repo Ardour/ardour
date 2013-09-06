@@ -584,7 +584,7 @@ ARDOUR::set_path_env_for_jack_autostart (const vector<std::string>& dirs)
 #ifdef __APPLE__
 	// push it back into the environment so that auto-started JACK can find it.
 	// XXX why can't we just expect OS X users to have PATH set correctly? we can't ...
-	setenv ("PATH", SearchPath(dirs).to_string().c_str(), 1);
+	setenv ("PATH", Searchpath(dirs).to_string().c_str(), 1);
 #else
 	(void) dirs;
 #endif
@@ -606,7 +606,7 @@ ARDOUR::get_jack_server_dir_paths (vector<std::string>& server_dir_paths)
 	server_dir_paths.push_back (Glib::path_get_dirname (execpath));
 #endif
 
-	SearchPath sp(string(g_getenv("PATH")));
+	Searchpath sp(string(g_getenv("PATH")));
 
 #ifdef PLATFORM_WINDOWS
 	gchar *install_dir = g_win32_get_package_installation_directory_of_module (NULL);
@@ -872,11 +872,7 @@ ARDOUR::get_jack_command_line_string (const JackCommandLineOptions& options, str
 	ostringstream oss;
 
 	for (vector<string>::const_iterator i = args.begin(); i != args.end();) {
-#ifdef PLATFORM_WINDOWS
-		oss << quote_string (*i);
-#else
 		oss << *i;
-#endif
 		if (++i != args.end()) oss << ' ';
 	}
 
@@ -915,44 +911,4 @@ ARDOUR::write_jack_config_file (const std::string& config_file_path, const strin
 	jackdrc << command_line << endl;
 	jackdrc.close ();
 	return true;
-}
-
-bool
-ARDOUR::start_jack_server (const string& command_line)
-{
-#ifdef PLATFORM_WINDOWS
-	STARTUPINFO si;
-	PROCESS_INFORMATION pi;
-	char * cmdline = g_strdup (command_line.c_str());
-
-	memset (&si, 0, sizeof (si));
-	si.cb = sizeof (&si);
-	memset (&pi, 0, sizeof (pi));
-
-	if (!CreateProcess (
-			NULL,                  // No module name, use command line
-			cmdline,
-			NULL,                  // Process handle not inheritable
-			NULL,                  // Thread handle not inheritable
-			FALSE,                 // set handle inheritance to false
-			0,                     // No creation flags
-			NULL,                  // Use parents environment block
-			NULL,                  // Use parents starting directory
-			&si,
-			&pi))
-	{
-		error << string_compose ("cannot start JACK server: %s", g_win32_error_message (GetLastError ())) << endmsg;
-	}
-
-	g_free (cmdline);
-
-	// wait for 2 seconds for server to start
-	for (int i = 0; i < 8; ++i) {
-		Sleep (250); // 1/4 second
-		if (jack_server_running ()) return true;
-	}
-#else
-        (void) command_line;
-#endif
-	return false;
 }

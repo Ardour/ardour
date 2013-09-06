@@ -30,10 +30,6 @@
 #include "ardour/debug.h"
 #include "ardour/control_protocol_manager.h"
 
-#ifdef SearchPath
-#undef SearchPath
-#endif
-
 #include "ardour/control_protocol_search_path.h"
 
 

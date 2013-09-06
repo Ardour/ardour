@@ -1,4 +1,4 @@
-// this is included first to avoid SearchPath definition on windows
+// this is included first to avoid Searchpath definition on windows
 #include "test_common.h"
 
 #include "pbd/file_utils.h"

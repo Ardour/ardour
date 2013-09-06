@@ -35,10 +35,6 @@
 
 #include "i18n.h"
 
-#ifdef SearchPath
-#undef SearchPath
-#endif
-
 using namespace ARDOUR;
 using namespace Gtk;
 using namespace PBD;

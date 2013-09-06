@@ -32,7 +32,7 @@ PluginsTest::test ()
 
 	pm.refresh ();
 
-	SearchPath ladspa_paths(ladspa_search_path ());
+	Searchpath ladspa_paths(ladspa_search_path ());
 
 	cout << "Number of Ladspa paths found: " << ladspa_paths.size () << endl;
 

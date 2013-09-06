@@ -581,7 +581,7 @@ get_xpm (std::string name)
 {
 	if (!xpm_map[name]) {
 
-		SearchPath spath(ARDOUR::ardour_data_search_path());
+		Searchpath spath(ARDOUR::ardour_data_search_path());
 
 		spath.add_subdirectory_to_paths("pixmaps");
 
@@ -607,7 +607,7 @@ get_icon_path (const char* cname)
 	string name = cname;
 	name += X_(".png");
 
-	SearchPath spath(ARDOUR::ardour_data_search_path());
+	Searchpath spath(ARDOUR::ardour_data_search_path());
 
 	spath.add_subdirectory_to_paths("icons");
 

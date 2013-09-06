@@ -384,7 +384,7 @@ Session::second_stage_init ()
 string
 Session::raid_path () const
 {
-	SearchPath raid_search_path;
+	Searchpath raid_search_path;
 
 	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 		raid_search_path += (*i).path;
@@ -405,11 +405,11 @@ Session::setup_raid_path (string path)
 
 	session_dirs.clear ();
 
-	SearchPath search_path(path);
-	SearchPath sound_search_path;
-	SearchPath midi_search_path;
+	Searchpath search_path(path);
+	Searchpath sound_search_path;
+	Searchpath midi_search_path;
 
-	for (SearchPath::const_iterator i = search_path.begin(); i != search_path.end(); ++i) {
+	for (Searchpath::const_iterator i = search_path.begin(); i != search_path.end(); ++i) {
 		sp.path = *i;
 		sp.blocks = 0; // not needed
 		session_dirs.push_back (sp);
