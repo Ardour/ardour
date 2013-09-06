@@ -22,11 +22,11 @@
 
 #include "pbd/pthread_utils.h"
 
-#include "midi++/manager.h"
-#include "midi++/port.h"
-
+#include "ardour/async_midi_port.h"
 #include "ardour/debug.h"
 #include "ardour/audioengine.h"
+#include "ardour/midi_port.h"
+#include "ardour/midiport_manager.h"
 #include "ardour/midi_ui.h"
 #include "ardour/session.h"
 #include "ardour/session_event.h"
@@ -48,7 +48,6 @@ MidiControlUI::MidiControlUI (Session& s)
 	: AbstractUI<MidiUIRequest> (X_("midiui"))
 	, _session (s)
 {
-	MIDI::Manager::instance()->PortsChanged.connect_same_thread (rebind_connection, boost::bind (&MidiControlUI::change_midi_ports, this));
 	_instance = this;
 }
 
@@ -83,20 +82,10 @@ MidiControlUI::do_request (MidiUIRequest* req)
 	}
 }
 
-void
-MidiControlUI::change_midi_ports ()
-{
-	MidiUIRequest* req = get_request (PortChange);
-	if (req == 0) {
-		return;
-	}
-	send_request (req);
-}
-
 bool
-MidiControlUI::midi_input_handler (IOCondition ioc, MIDI::Port* port)
+MidiControlUI::midi_input_handler (IOCondition ioc, AsyncMIDIPort* port)
 {
-	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("something happend on  %1\n", port->name()));
+	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("something happend on  %1\n", ((ARDOUR::Port*)port)->name()));
 
 	if (ioc & ~IO_IN) {
 		return false;
@@ -106,8 +95,8 @@ MidiControlUI::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 
 		CrossThreadChannel::drain (port->selectable());
 
-		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("data available on %1\n", port->name()));
-		framepos_t now = _session.engine().frame_time();
+		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("data available on %1\n", ((ARDOUR::Port*)port)->name()));
+		framepos_t now = _session.engine().sample_time();
 		port->parse (now);
 	}
 
@@ -128,22 +117,19 @@ MidiControlUI::clear_ports ()
 void
 MidiControlUI::reset_ports ()
 {
-	clear_ports ();
+	if (port_sources.empty()) {
+		AsyncMIDIPort* async = dynamic_cast<AsyncMIDIPort*> (_session.midi_input_port());
 
-	boost::shared_ptr<const MIDI::Manager::PortList> plist = MIDI::Manager::instance()->get_midi_ports ();
-
-	for (MIDI::Manager::PortList::const_iterator i = plist->begin(); i != plist->end(); ++i) {
-
-		if (!(*i)->centrally_parsed()) {
-			continue;
+		if (!async) {
+			return;
 		}
 
 		int fd;
 
-		if ((fd = (*i)->selectable ()) >= 0) {
+		if ((fd = async->selectable ()) >= 0) {
 			Glib::RefPtr<IOSource> psrc = IOSource::create (fd, IO_IN|IO_HUP|IO_ERR);
-
-			psrc->connect (sigc::bind (sigc::mem_fun (this, &MidiControlUI::midi_input_handler), *i));
+			
+			psrc->connect (sigc::bind (sigc::mem_fun (this, &MidiControlUI::midi_input_handler), async));
 			psrc->attach (_main_loop->get_context());
 
 			// glibmm hack: for now, store only the GSource*

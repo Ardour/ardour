@@ -245,7 +245,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 	   processing pathway that wants to use this->output_buffers() for some reason.
 	*/
 
-	output_buffers().get_jack_port_addresses (ports, nframes);
+	output_buffers().get_backend_port_addresses (ports, nframes);
 
 	// this Delivery processor is not a derived type, and thus we assume
 	// we really can modify the buffers passed in (it is almost certainly

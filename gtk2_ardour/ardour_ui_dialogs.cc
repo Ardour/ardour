@@ -161,10 +161,6 @@ ARDOUR_UI::set_session (Session *s)
 	_session->locations()->removed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_parameter_changed, this, _1), gui_context ());
 
-#ifdef HAVE_JACK_SESSION
-	engine->JackSessionEvent.connect (*_session, MISSING_INVALIDATOR, boost::bind (&Session::jack_session_event, _session, _1), gui_context());
-#endif
-
 	/* Clocks are on by default after we are connected to a session, so show that here.
 	*/
 

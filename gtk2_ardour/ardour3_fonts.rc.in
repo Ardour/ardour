@@ -50,6 +50,11 @@ style "large_bold_text"
  	font_name = "bold @FONT_LARGE@"
 }
 
+style "big_text"
+{
+        font_name = "@FONT_BIG@"
+}
+
 style "bigger_mono_text"
 {
 	font_name = "@MONOSPACE@ @FONT_BIGGER@"

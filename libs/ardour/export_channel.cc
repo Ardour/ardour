@@ -117,7 +117,7 @@ RegionExportChannelFactory::RegionExportChannelFactory (Session * session, Audio
 	: region (region)
 	, track (track)
 	, type (type)
-	, frames_per_cycle (session->engine().frames_per_cycle ())
+	, frames_per_cycle (session->engine().samples_per_cycle ())
 	, buffers_up_to_date (false)
 	, region_start (region.position())
 	, position (region_start)

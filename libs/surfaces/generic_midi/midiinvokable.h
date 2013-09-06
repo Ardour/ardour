@@ -31,7 +31,6 @@
 
 namespace MIDI {
 	class Channel;
-	class Port;
 	class Parser;
 }
 
@@ -40,12 +39,12 @@ class GenericMidiControlProtocol;
 class MIDIInvokable : public PBD::Stateful
 {
   public:
-	MIDIInvokable (MIDI::Port&);
+	MIDIInvokable (MIDI::Parser&);
 	virtual ~MIDIInvokable ();
 
 	virtual int init (GenericMidiControlProtocol&, const std::string&, MIDI::byte* data = 0, size_t dsize = 0);
 
-	MIDI::Port& get_port() const { return _port; }
+	MIDI::Parser& get_parser() { return _parser; }
 
 	void bind_midi (MIDI::channel_t, MIDI::eventType, MIDI::byte);
 	MIDI::channel_t get_control_channel () { return control_channel; }
@@ -55,7 +54,7 @@ class MIDIInvokable : public PBD::Stateful
   protected:
 	GenericMidiControlProtocol* _ui;
 	std::string     _invokable_name;
-	MIDI::Port&     _port;
+	MIDI::Parser&     _parser;
 	PBD::ScopedConnection midi_sense_connection[2];
 	MIDI::eventType  control_type;
 	MIDI::byte       control_additional;

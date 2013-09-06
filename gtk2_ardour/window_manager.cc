@@ -410,7 +410,7 @@ ProxyBase::hide ()
 }
 
 bool
-ProxyBase::handle_win_event (GdkEventAny *ev)
+ProxyBase::handle_win_event (GdkEventAny* /*ev*/)
 {
 	hide();
 	return true;

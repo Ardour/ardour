@@ -27,9 +27,9 @@
 #include "pbd/xml++.h"
 #include "pbd/stacktrace.h"
 
-#include "midi++/port.h"
 #include "midi++/channel.h"
 
+#include "ardour/async_midi_port.h"
 #include "ardour/automation_control.h"
 #include "ardour/midi_ui.h"
 #include "ardour/utils.h"
@@ -42,11 +42,11 @@ using namespace MIDI;
 using namespace PBD;
 using namespace ARDOUR;
 
-MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, Port& p, bool m)
+MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser& p, bool m)
 	: _surface (s)
 	, controllable (0)
 	, _descriptor (0)
-	, _port (p)
+	, _parser (p)
 	, _momentary (m)
 {
 	_learned = false; /* from URI */
@@ -59,10 +59,10 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, Port& p, bool
 	feedback = true; // for now
 }
 
-MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, Port& p, Controllable& c, bool m)
+MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser& p, Controllable& c, bool m)
 	: _surface (s)
 	, _descriptor (0)
-	, _port (p)
+	, _parser (p)
 	, _momentary (m)
 {
 	set_controllable (&c);
@@ -149,7 +149,7 @@ void
 MIDIControllable::learn_about_external_control ()
 {
 	drop_external_control ();
-	_port.parser()->any.connect_same_thread (midi_learn_connection, boost::bind (&MIDIControllable::midi_receiver, this, _1, _2, _3));
+	_parser.any.connect_same_thread (midi_learn_connection, boost::bind (&MIDIControllable::midi_receiver, this, _1, _2, _3));
 }
 
 void
@@ -357,12 +357,6 @@ MIDIControllable::midi_receiver (Parser &, byte *msg, size_t /*len*/)
 		return;
 	}
 
-	/* if the our port doesn't do input anymore, forget it ... */
-
-	if (!_port.parser()) {
-		return;
-	}
-
 	bind_midi ((channel_t) (msg[0] & 0xf), eventType (msg[0] & 0xF0), msg[1]);
 
 	if (controllable) {
@@ -381,49 +375,43 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 	control_channel = chn;
 	control_additional = additional;
 
-	if (_port.parser() == 0) {
-		return;
-	}
-
-	Parser& p = *_port.parser();
-
 	int chn_i = chn;
 	switch (ev) {
 	case MIDI::off:
-		p.channel_note_off[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
+		_parser.channel_note_off[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
 
 		/* if this is a togglee, connect to noteOn as well,
 		   and we'll toggle back and forth between the two.
 		*/
 
 		if (_momentary) {
-			p.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[1], boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
+			_parser.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[1], boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
 		} 
 
 		_control_description = "MIDI control: NoteOff";
 		break;
 
 	case MIDI::on:
-		p.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
+		_parser.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
 		if (_momentary) {
-			p.channel_note_off[chn_i].connect_same_thread (midi_sense_connection[1], boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
+			_parser.channel_note_off[chn_i].connect_same_thread (midi_sense_connection[1], boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
 		}
 		_control_description = "MIDI control: NoteOn";
 		break;
 		
 	case MIDI::controller:
-		p.channel_controller[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_controller, this, _1, _2));
+		_parser.channel_controller[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_controller, this, _1, _2));
 		snprintf (buf, sizeof (buf), "MIDI control: Controller %d", control_additional);
 		_control_description = buf;
 		break;
 
 	case MIDI::program:
-		p.channel_program_change[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_program_change, this, _1, _2));
+		_parser.channel_program_change[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_program_change, this, _1, _2));
 		_control_description = "MIDI control: ProgramChange";
 		break;
 
 	case MIDI::pitchbend:
-		p.channel_pitchbend[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_pitchbend, this, _1, _2));
+		_parser.channel_pitchbend[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_pitchbend, this, _1, _2));
 		_control_description = "MIDI control: Pitchbend";
 		break;
 

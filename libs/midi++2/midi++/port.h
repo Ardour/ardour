@@ -51,13 +51,6 @@ class Port {
 	virtual XMLNode& get_state () const;
 	virtual void set_state (const XMLNode&);
 
-	// FIXME: make Manager a friend of port so these can be hidden?
-
-	/* Only for use by MidiManager.  Don't ever call this. */
-	virtual void cycle_start (pframes_t) {}
-	/* Only for use by MidiManager.  Don't ever call this. */
-	virtual void cycle_end () {}
-
 	/** Write a message to port.
 	 * @param msg Raw MIDI message to send
 	 * @param msglen Size of @a msg

@@ -21,7 +21,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "midi++/manager.h"
 #include "midi++/mmc.h"
 
 #include "ardour/audioengine.h"
@@ -29,9 +28,12 @@
 #include "ardour/bundle.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/io_processor.h"
+#include "ardour/midi_port.h"
+#include "ardour/midiport_manager.h"
 #include "ardour/session.h"
 #include "ardour/user_bundle.h"
 #include "ardour/port.h"
+
 #include "control_protocol/control_protocol.h"
 
 #include "gui_thread.h"
@@ -452,37 +454,35 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 	/* Ardour's sync ports */
 
-	MIDI::Manager* midi_manager = MIDI::Manager::instance ();
-	if (midi_manager && (type == DataType::MIDI || type == DataType::NIL)) {
+	if ((type == DataType::MIDI || type == DataType::NIL)) {
 		boost::shared_ptr<Bundle> sync (new Bundle (_("Sync"), inputs));
-		MIDI::MachineControl* mmc = midi_manager->mmc ();
-		AudioEngine& ae = session->engine ();
+		AudioEngine* ae = AudioEngine::instance();
 
 		if (inputs) {
 			sync->add_channel (
-				_("MTC in"), DataType::MIDI, ae.make_port_name_non_relative (midi_manager->mtc_input_port()->name())
+				_("MTC in"), DataType::MIDI, ae->make_port_name_non_relative (session->mtc_input_port()->name())
 				);
 			sync->add_channel (
-				_("MIDI control in"), DataType::MIDI, ae.make_port_name_non_relative (midi_manager->midi_input_port()->name())
+				_("MIDI control in"), DataType::MIDI, ae->make_port_name_non_relative (session->midi_input_port()->name())
 				);
 			sync->add_channel (
-				_("MIDI clock in"), DataType::MIDI, ae.make_port_name_non_relative (midi_manager->midi_clock_input_port()->name())
+				_("MIDI clock in"), DataType::MIDI, ae->make_port_name_non_relative (session->midi_clock_input_port()->name())
 				);
 			sync->add_channel (
-				_("MMC in"), DataType::MIDI, ae.make_port_name_non_relative (mmc->input_port()->name())
+				_("MMC in"), DataType::MIDI, ae->make_port_name_non_relative (session->mmc_input_port()->name())
 				);
 		} else {
 			sync->add_channel (
-				_("MTC out"), DataType::MIDI, ae.make_port_name_non_relative (midi_manager->mtc_output_port()->name())
+				_("MTC out"), DataType::MIDI, ae->make_port_name_non_relative (session->mtc_output_port()->name())
 				);
 			sync->add_channel (
-				_("MIDI control out"), DataType::MIDI, ae.make_port_name_non_relative (midi_manager->midi_output_port()->name())
+				_("MIDI control out"), DataType::MIDI, ae->make_port_name_non_relative (session->midi_output_port()->name())
 				);
 			sync->add_channel (
-				_("MIDI clock out"), DataType::MIDI, ae.make_port_name_non_relative (midi_manager->midi_clock_output_port()->name())
+				_("MIDI clock out"), DataType::MIDI, ae->make_port_name_non_relative (session->midi_clock_output_port()->name())
 				);
 			sync->add_channel (
-				_("MMC out"), DataType::MIDI, ae.make_port_name_non_relative (mmc->output_port()->name())
+				_("MMC out"), DataType::MIDI, ae->make_port_name_non_relative (session->mmc_output_port()->name())
 				);
 		}
 
@@ -499,20 +499,12 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
         string lpnc = lpn;
         lpnc += ':';
 
-	const char ** ports = 0;
-	if (type == DataType::NIL) {
-		ports = session->engine().get_ports ("", "", inputs ? JackPortIsInput : JackPortIsOutput);
-	} else {
-		ports = session->engine().get_ports ("", type.to_jack_type(), inputs ? JackPortIsInput : JackPortIsOutput);
-	}
+	vector<string> ports;
+	if (AudioEngine::instance()->get_ports ("", type, inputs ? IsInput : IsOutput, ports) > 0) {
 
- 	if (ports) {
+		for (vector<string>::const_iterator s = ports.begin(); s != ports.end(); ) {
 
-		int n = 0;
-
-		while (ports[n]) {
-
-			std::string const p = ports[n];
+			std::string const p = *s;
 
 			if (!system->has_port(p) &&
 			    !bus->has_port(p) &&
@@ -526,7 +518,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
                                 */
 
                                 if (p.find ("Midi-Through") != string::npos) {
-                                        ++n;
+                                        ++s;
                                         continue;
                                 }
 
@@ -539,15 +531,15 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
                                 if ((lp.find (N_(":monitor")) != string::npos) &&
                                     (lp.find (lpn) != string::npos)) {
-                                        ++n;
+                                        ++s;
                                         continue;
                                 }
 
 				/* can't use the audio engine for this as we are looking at non-Ardour ports */
 
-				jack_port_t* jp = jack_port_by_name (session->engine().jack(), p.c_str());
-				if (jp) {
-					DataType t (jack_port_type (jp));
+				PortEngine::PortHandle ph = AudioEngine::instance()->port_engine().get_port_by_name (p);
+				if (ph) {
+					DataType t (AudioEngine::instance()->port_engine().port_data_type (ph));
 					if (t != DataType::NIL) {
 						if (port_has_prefix (p, N_("system:")) ||
                                                     port_has_prefix (p, N_("alsa_pcm")) ||
@@ -560,10 +552,8 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 				}
 			}
 
-			++n;
+			++s;
 		}
-
-		free (ports);
 	}
 
 	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {

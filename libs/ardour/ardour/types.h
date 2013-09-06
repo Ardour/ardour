@@ -28,8 +28,6 @@
 #include <stdint.h>
 
 #include <inttypes.h>
-#include <jack/types.h>
-#include <jack/midiport.h>
 
 #include "timecode/bbt_time.h"
 #include "timecode/time.h"
@@ -53,12 +51,12 @@ namespace ARDOUR {
 	class Route;
 	class Region;
 
-	typedef jack_default_audio_sample_t Sample;
-	typedef float                       pan_t;
-	typedef float                       gain_t;
-	typedef uint32_t                    layer_t;
-	typedef uint64_t                    microseconds_t;
-	typedef jack_nframes_t              pframes_t;
+	typedef float    Sample;
+	typedef float    pan_t;
+	typedef float    gain_t;
+	typedef uint32_t layer_t;
+	typedef uint64_t microseconds_t;
+	typedef uint32_t pframes_t;
 
 	/* Any position measured in audio frames.
 	   Assumed to be non-negative but not enforced.
@@ -583,6 +581,32 @@ namespace ARDOUR {
 		FadeSlow,
 		FadeConstantPower,
 		FadeSymmetric,
+	};
+
+	enum TransportState {
+		/* these values happen to match the constants used by JACK but
+		   this equality cannot be assumed.
+		*/
+		TransportStopped = 0,
+		TransportRolling = 1, 
+		TransportLooping = 2, 
+		TransportStarting = 3,
+	};
+
+	enum PortFlags {
+		/* these values happen to match the constants used by JACK but
+		   this equality cannot be assumed.
+		*/
+		IsInput = 0x1, 
+		IsOutput = 0x2,
+		IsPhysical = 0x4,
+		CanMonitor = 0x8,
+		IsTerminal = 0x10
+	};
+
+	struct LatencyRange {
+	    uint32_t min; //< samples
+	    uint32_t max; //< samples
 	};
 
 } // namespace ARDOUR

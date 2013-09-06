@@ -26,7 +26,6 @@
 
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/spinbutton.h>
-#include <gtkmm/notebook.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/table.h>
 #include <gtkmm/expander.h>
@@ -40,87 +39,108 @@ class EngineControl : public Gtk::VBox {
 	~EngineControl ();
 
 	static bool need_setup ();
-	int setup_engine ();
+	int setup_engine (bool start);
 
-	bool was_used() const { return _used; }
 	XMLNode& get_state ();
 	void set_state (const XMLNode&);
 
   private:
-	Gtk::Adjustment periods_adjustment;
-	Gtk::SpinButton periods_spinner;
-	Gtk::Adjustment ports_adjustment;
-	Gtk::SpinButton ports_spinner;
-	Gtk::Adjustment input_latency_adjustment;
-	Gtk::SpinButton input_latency;
-	Gtk::Adjustment output_latency_adjustment;
-	Gtk::SpinButton output_latency;
-	Gtk::Label latency_label;
+    Gtk::Notebook notebook;
 
-	Gtk::CheckButton realtime_button;
-	Gtk::CheckButton no_memory_lock_button;
-	Gtk::CheckButton unlock_memory_button;
-	Gtk::CheckButton soft_mode_button;
-	Gtk::CheckButton monitor_button;
-	Gtk::CheckButton force16bit_button;
-	Gtk::CheckButton hw_monitor_button;
-	Gtk::CheckButton hw_meter_button;
-	Gtk::CheckButton verbose_output_button;
+    /* core fields used by all backends */
 
-	Gtk::Button start_button;
-	Gtk::Button stop_button;
-	Gtk::HButtonBox button_box;
+    Gtk::ComboBoxText backend_combo;
+    Gtk::ComboBoxText input_device_combo;
+    Gtk::ComboBoxText output_device_combo;
+    Gtk::ComboBoxText sample_rate_combo;
+    Gtk::ComboBoxText buffer_size_combo;
+    Gtk::Adjustment input_latency_adjustment;
+    Gtk::SpinButton input_latency;
+    Gtk::Adjustment output_latency_adjustment;
+    Gtk::SpinButton output_latency;
+    Gtk::Adjustment input_channels_adjustment;
+    Gtk::SpinButton input_channels;
+    Gtk::Adjustment output_channels_adjustment;
+    Gtk::SpinButton output_channels;
+    Gtk::Adjustment ports_adjustment;
+    Gtk::SpinButton ports_spinner;
 
-	Gtk::ComboBoxText sample_rate_combo;
-	Gtk::ComboBoxText period_size_combo;
+    /* JACK specific */
+    
+    Gtk::CheckButton realtime_button;
+    Gtk::CheckButton no_memory_lock_button;
+    Gtk::CheckButton unlock_memory_button;
+    Gtk::CheckButton soft_mode_button;
+    Gtk::CheckButton monitor_button;
+    Gtk::CheckButton force16bit_button;
+    Gtk::CheckButton hw_monitor_button;
+    Gtk::CheckButton hw_meter_button;
+    Gtk::CheckButton verbose_output_button;
+    
+    
+    Gtk::ComboBoxText preset_combo;
+    Gtk::ComboBoxText serverpath_combo;
+    Gtk::ComboBoxText driver_combo;
+    Gtk::ComboBoxText device_combo;
+    Gtk::ComboBoxText timeout_combo;
+    Gtk::ComboBoxText dither_mode_combo;
+    Gtk::ComboBoxText audio_mode_combo;
+    Gtk::ComboBoxText midi_driver_combo;
+    
+    Gtk::Table basic_packer;
+    Gtk::Table midi_packer;
+    Gtk::HBox basic_hbox;
+    Gtk::HBox midi_hbox;
 
-	Gtk::ComboBoxText preset_combo;
-	Gtk::ComboBoxText serverpath_combo;
-	Gtk::ComboBoxText driver_combo;
-	Gtk::ComboBoxText interface_combo;
-	Gtk::ComboBoxText timeout_combo;
-	Gtk::ComboBoxText dither_mode_combo;
-	Gtk::ComboBoxText audio_mode_combo;
-	Gtk::ComboBoxText input_device_combo;
-	Gtk::ComboBoxText output_device_combo;
-	Gtk::ComboBoxText midi_driver_combo;
+    sigc::connection sr_connection;
+    sigc::connection bs_connection;
+    
+    static bool engine_running ();
+    
+    void driver_changed ();
+    void backend_changed ();
+    void sample_rate_changed ();
+    void buffer_size_changed ();
 
-	Gtk::Table basic_packer;
-	Gtk::Table options_packer;
-	Gtk::Table device_packer;
-	Gtk::HBox basic_hbox;
-	Gtk::HBox options_hbox;
-	Gtk::HBox device_hbox;
-	Gtk::Notebook notebook;
+    uint32_t get_rate() const;
+    uint32_t get_buffer_size() const;
+    uint32_t get_input_channels() const;
+    uint32_t get_output_channels() const;
+    uint32_t get_input_latency() const;
+    uint32_t get_output_latency() const;
+    std::string get_device_name() const;
+    std::string get_driver() const;
 
-	bool _used;
+    void audio_mode_changed ();
+    void device_changed ();
+    void list_devices ();
+    void reshow_buffer_sizes (bool choice_changed);
 
-        static bool engine_running ();
+    struct State {
+	std::string backend;
+	std::string driver;
+	std::string device;
+	std::string sample_rate;
+	std::string buffer_size;
+	std::string input_latency;
+	std::string output_latency;
+	std::string input_channels;
+	std::string output_channels;
+	bool active;
 
-	void driver_changed ();
-	void build_command_line (std::vector<std::string>&);
+	State() : active (false) {};
+    };
+    
+    typedef std::list<State> StateList;
 
-	std::map<std::string,std::vector<std::string> > devices;
-	std::vector<std::string> backend_devs;
-	void enumerate_devices (const std::string& driver);
+    StateList states;
 
-#ifdef __APPLE__
-	std::vector<std::string> enumerate_coreaudio_devices ();
-#else
-	std::vector<std::string> enumerate_alsa_devices ();
-	std::vector<std::string> enumerate_oss_devices ();
-	std::vector<std::string> enumerate_netjack_devices ();
-	std::vector<std::string> enumerate_freebob_devices ();
-	std::vector<std::string> enumerate_ffado_devices ();
-	std::vector<std::string> enumerate_dummy_devices ();
-#endif
-
-	void redisplay_latency ();
-	uint32_t get_rate();
-	void audio_mode_changed ();
-	std::vector<std::string> server_strings;
-	void find_jack_servers (std::vector<std::string>&);
-	std::string get_device_name (const std::string& driver, const std::string& human_readable_name);
+    State* get_matching_state (const std::string& backend,
+			       const std::string& driver,
+			       const std::string& device);
+    State* get_current_state ();
+    void maybe_set_state ();
+    void save_state ();
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

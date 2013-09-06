@@ -26,11 +26,14 @@
 using namespace ARDOUR;
 using namespace std;
 
-MidiPort::MidiPort (const std::string& name, Flags flags)
+#define port_engine AudioEngine::instance()->port_engine()
+
+MidiPort::MidiPort (const std::string& name, PortFlags flags)
 	: Port (name, DataType::MIDI, flags)
 	, _has_been_mixed_down (false)
 	, _resolve_required (false)
 	, _input_active (true)
+	, _always_parse (false)
 {
 	_buffer = new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI));
 }
@@ -43,12 +46,32 @@ MidiPort::~MidiPort()
 void
 MidiPort::cycle_start (pframes_t nframes)
 {
+	framepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();
+
 	Port::cycle_start (nframes);
 
 	_buffer->clear ();
 
 	if (sends_output ()) {
-		jack_midi_clear_buffer (jack_port_get_buffer (_jack_port, nframes));
+		port_engine.midi_clear (port_engine.get_buffer (_port_handle, nframes));
+	}
+
+	if (_always_parse) {
+		MidiBuffer& mb (get_midi_buffer (nframes));
+
+		/* dump incoming MIDI to parser */
+		
+		for (MidiBuffer::iterator b = mb.begin(); b != mb.end(); ++b) {
+			uint8_t* buf = (*b).buffer();
+			
+			_self_parser.set_timestamp (now + (*b).time());
+			
+			uint32_t limit = (*b).size();
+			
+			for (size_t n = 0; n < limit; ++n) {
+				_self_parser.scanner (buf[n]);
+			}
+		}
 	}
 }
 
@@ -63,31 +86,33 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 
 		if (_input_active) {
 
-			void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
-			const pframes_t event_count = jack_midi_get_event_count (jack_buffer);
+			void* buffer = port_engine.get_buffer (_port_handle, nframes);
+			const pframes_t event_count = port_engine.get_midi_event_count (buffer);
 			
-			/* suck all relevant MIDI events from the JACK MIDI port buffer
+			/* suck all relevant MIDI events from the MIDI port buffer
 			   into our MidiBuffer
 			*/
-			
+
 			for (pframes_t i = 0; i < event_count; ++i) {
 				
-				jack_midi_event_t ev;
+				pframes_t timestamp;
+				size_t size;
+				uint8_t* buf;
 				
-				jack_midi_event_get (&ev, jack_buffer, i);
+				port_engine.midi_event_get (timestamp, size, &buf, buffer, i);
 				
-				if (ev.buffer[0] == 0xfe) {
+				if (buf[0] == 0xfe) {
 					/* throw away active sensing */
 					continue;
 				}
 				
 				/* check that the event is in the acceptable time range */
 				
-				if ((ev.time >= (_global_port_buffer_offset + _port_buffer_offset)) &&
-				    (ev.time < (_global_port_buffer_offset + _port_buffer_offset + nframes))) {
-					_buffer->push_back (ev);
+				if ((timestamp >= (_global_port_buffer_offset + _port_buffer_offset)) &&
+				    (timestamp < (_global_port_buffer_offset + _port_buffer_offset + nframes))) {
+					_buffer->push_back (timestamp, size, buf);
 				} else {
-					cerr << "Dropping incoming MIDI at time " << ev.time << "; offset="
+					cerr << "Dropping incoming MIDI at time " << timestamp << "; offset="
 					     << _global_port_buffer_offset << " limit="
 					     << (_global_port_buffer_offset + _port_buffer_offset + nframes) << "\n";
 				}
@@ -121,7 +146,7 @@ MidiPort::cycle_split ()
 }
 
 void
-MidiPort::resolve_notes (void* jack_buffer, MidiBuffer::TimeType when)
+MidiPort::resolve_notes (void* port_buffer, MidiBuffer::TimeType when)
 {
 	for (uint8_t channel = 0; channel <= 0xF; channel++) {
 
@@ -132,13 +157,13 @@ MidiPort::resolve_notes (void* jack_buffer, MidiBuffer::TimeType when)
 		 * that prioritize sustain over AllNotesOff
 		 */
 
-		if (jack_midi_event_write (jack_buffer, when, ev, 3) != 0) {
+		if (port_engine.midi_event_put (port_buffer, when, ev, 3) != 0) {
 			cerr << "failed to deliver sustain-zero on channel " << channel << " on port " << name() << endl;
 		}
 
 		ev[1] = MIDI_CTL_ALL_NOTES_OFF;
 
-		if (jack_midi_event_write (jack_buffer, 0, ev, 3) != 0) {
+		if (port_engine.midi_event_put (port_buffer, 0, ev, 3) != 0) {
 			cerr << "failed to deliver ALL NOTES OFF on channel " << channel << " on port " << name() << endl;
 		}
 	}
@@ -149,11 +174,11 @@ MidiPort::flush_buffers (pframes_t nframes)
 {
 	if (sends_output ()) {
 
-		void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
-
+		void* port_buffer = port_engine.get_buffer (_port_handle, nframes);
+		
 		if (_resolve_required) {
 			/* resolve all notes at the start of the buffer */
-			resolve_notes (jack_buffer, 0);
+			resolve_notes (port_buffer, 0);
 			_resolve_required = false;
 		}
 
@@ -166,7 +191,7 @@ MidiPort::flush_buffers (pframes_t nframes)
 			assert (ev.time() < (nframes + _global_port_buffer_offset + _port_buffer_offset));
 
 			if (ev.time() >= _global_port_buffer_offset + _port_buffer_offset) {
-				if (jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size()) != 0) {
+				if (port_engine.midi_event_put (port_buffer, (pframes_t) ev.time(), ev.buffer(), ev.size()) != 0) {
 					cerr << "write failed, drop flushed note off on the floor, time "
 					     << ev.time() << " > " << _global_port_buffer_offset + _port_buffer_offset << endl;
 				}
@@ -202,6 +227,7 @@ MidiPort::reset ()
 {
 	Port::reset ();
 	delete _buffer;
+	cerr << name() << " new MIDI buffer of size " << AudioEngine::instance()->raw_buffer_size (DataType::MIDI) << endl;
 	_buffer = new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI));
 }
 
@@ -209,4 +235,10 @@ void
 MidiPort::set_input_active (bool yn)
 {
 	_input_active = yn;
+}
+
+void
+MidiPort::set_always_parse (bool yn)
+{
+	_always_parse = yn;
 }

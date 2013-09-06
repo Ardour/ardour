@@ -34,6 +34,7 @@
 #include "pbd/stacktrace.h"
 #include "pbd/openuri.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/recent_sessions.h"
 #include "ardour/session.h"
@@ -91,7 +92,7 @@ ArdourStartup::ArdourStartup (bool require_new, const std::string& session_name,
 	, _existing_session_chooser_used (false)
 {
 	new_user = !Glib::file_test (been_here_before_path(), Glib::FILE_TEST_EXISTS);
-	need_audio_setup = EngineControl::need_setup ();
+	need_audio_setup = AudioEngine::instance()->setup_required ();
 	need_session_info = (session_name.empty() || require_new);
 
 	_provided_session_name = session_name;
@@ -313,7 +314,7 @@ ArdourStartup::session_folder ()
 void
 ArdourStartup::setup_audio_page ()
 {
-	engine_dialog = manage (new EngineControl);
+	engine_dialog = ARDOUR_UI::instance()->audio_midi_setup_widget ();
 
 	engine_dialog->set_border_width (12);
 
@@ -402,8 +403,6 @@ Where would you like new %1 sessions to be stored by default?\n\n\
 	hbox->pack_start (*default_dir_chooser, false, true, 8);
 	vbox->pack_start (*txt, false, false);
 	vbox->pack_start (*hbox, false, true);
-
-	cerr << "Setting defaultDIR session dir to [" << Config->get_default_session_parent_dir() << "]\n";
 
 	default_dir_chooser->set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 	default_dir_chooser->signal_current_folder_changed().connect (sigc::mem_fun (*this, &ArdourStartup::default_dir_changed));
@@ -662,7 +661,7 @@ void
 ArdourStartup::on_apply ()
 {
 	if (engine_dialog) {
-		if (engine_dialog->setup_engine ()) {
+		if (engine_dialog->setup_engine (true)) {
                         set_current_page (audio_page_index);
                         return;
                 }

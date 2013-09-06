@@ -202,8 +202,8 @@ MidiDiskstream::non_realtime_input_change ()
 		seek (_session.transport_frame());
 	}
 
-	g_atomic_int_set(&_frames_pending_write, 0);
-	g_atomic_int_set(&_num_captured_loops, 0);
+	g_atomic_int_set(const_cast<gint*> (&_frames_pending_write), 0);
+	g_atomic_int_set(const_cast<gint*> (&_num_captured_loops), 0);
 }
 
 int
@@ -376,8 +376,8 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 			}
 			_write_source->mark_write_starting_now(
 				capture_start_frame, capture_captured, loop_length);
-			g_atomic_int_set(&_frames_pending_write, 0);
-			g_atomic_int_set(&_num_captured_loops, 0);
+			g_atomic_int_set(const_cast<gint*> (&_frames_pending_write), 0);
+			g_atomic_int_set(const_cast<gint*> (&_num_captured_loops), 0);
 			was_recording = true;
 		}
 	}
@@ -446,7 +446,7 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 				break;
 			}
 		}
-		g_atomic_int_add(&_frames_pending_write, nframes);
+		g_atomic_int_add(const_cast<gint*> (&_frames_pending_write), nframes);
 
 		if (buf.size() != 0) {
 			Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex, Glib::Threads::TRY_LOCK);
@@ -799,7 +799,7 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 		return 0;
 	}
 
-	const framecnt_t total = g_atomic_int_get(&_frames_pending_write);
+	const framecnt_t total = g_atomic_int_get(const_cast<gint*> (&_frames_pending_write));
 
 	if (total == 0 || 
 	    _capture_buf->read_space() == 0 || 
@@ -834,7 +834,7 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 			error << string_compose(_("MidiDiskstream %1: cannot write to disk"), id()) << endmsg;
 			return -1;
 		} 
-		g_atomic_int_add(&_frames_pending_write, -to_write);
+		g_atomic_int_add(const_cast<gint*> (&_frames_pending_write), -to_write);
 	}
 
 out:
@@ -1044,7 +1044,7 @@ MidiDiskstream::transport_looped (framepos_t)
 	   the Source and/or entirely after the capture is finished.
 	*/
 	if (was_recording) {
-		g_atomic_int_add(&_num_captured_loops, 1);
+		g_atomic_int_add(const_cast<gint*> (&_num_captured_loops), 1);
 	}
 }
 
@@ -1111,7 +1111,7 @@ MidiDiskstream::prep_record_enable ()
 	boost::shared_ptr<MidiPort> sp = _source_port.lock ();
 	
 	if (sp && Config->get_monitoring_model() == HardwareMonitoring) {
-		sp->request_jack_monitors_input (!(_session.config.get_auto_input() && rolling));
+		sp->request_input_monitoring (!(_session.config.get_auto_input() && rolling));
 	}
 
 	return true;
@@ -1259,12 +1259,12 @@ MidiDiskstream::allocate_temporary_buffers ()
 }
 
 void
-MidiDiskstream::ensure_jack_monitors_input (bool yn)
+MidiDiskstream::ensure_input_monitoring (bool yn)
 {
 	boost::shared_ptr<MidiPort> sp = _source_port.lock ();
 	
 	if (sp) {
-		sp->ensure_jack_monitors_input (yn);
+		sp->ensure_input_monitoring (yn);
 	}
 }
 

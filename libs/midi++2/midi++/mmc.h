@@ -22,17 +22,22 @@
 
 #include <jack/types.h>
 #include "timecode/time.h"
+
 #include "pbd/signals.h"
 #include "pbd/ringbuffer.h"
+
 #include "midi++/types.h"
 #include "midi++/parser.h"
+
+namespace ARDOUR {
+	class PortEngine;
+}
 
 namespace MIDI {
 
 class Port;
 class Parser;
 class MachineControlCommand;
-class Manager;	
 
 /** Class to handle incoming and outgoing MIDI machine control messages */
 class MachineControl 
@@ -89,7 +94,9 @@ class MachineControl
 		cmdResume = 0x7F
 	};
 	
-	MachineControl (Manager *, jack_client_t *);
+        MachineControl ();
+    
+        void set_ports (MIDI::Port* input, MIDI::Port* output);
 
 	Port* input_port() { return _input_port; }
 	Port* output_port() { return _output_port; }

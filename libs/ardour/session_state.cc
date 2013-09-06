@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1999-2002 Paul Davis
+  Copyright (C) 1999-2013 Paul Davis
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -60,7 +60,6 @@
 
 #include "midi++/mmc.h"
 #include "midi++/port.h"
-#include "midi++/manager.h"
 
 #include "evoral/SMF.hpp"
 
@@ -155,7 +154,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	set_history_depth (Config->get_history_depth());
 
-	_current_frame_rate = _engine.frame_rate ();
+	_current_frame_rate = _engine.sample_rate ();
 	_nominal_frame_rate = _current_frame_rate;
 	_base_frame_rate = _current_frame_rate;
 
@@ -359,11 +358,11 @@ Session::second_stage_init ()
 
 	BootMessage (_("Reset Remote Controls"));
 
-	send_full_time_code (0);
+	// send_full_time_code (0);
 	_engine.transport_locate (0);
 
-	MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdMmcReset));
-	MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (Timecode::Time ()));
+	_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdMmcReset));
+	_mmc->send (MIDI::MachineControlCommand (Timecode::Time ()));
 
 	MIDI::Name::MidiPatchManager::instance().set_session (this);
 
@@ -690,62 +689,6 @@ Session::remove_state (string snapshot_name)
 	}
 }
 
-#ifdef HAVE_JACK_SESSION
-void
-Session::jack_session_event (jack_session_event_t * event)
-{
-        char timebuf[128], *tmp;
-        time_t n;
-        struct tm local_time;
-
-        time (&n);
-        localtime_r (&n, &local_time);
-        strftime (timebuf, sizeof(timebuf), "JS_%FT%T", &local_time);
-
-        while ((tmp = strchr(timebuf, ':'))) { *tmp = '.'; }
-
-        if (event->type == JackSessionSaveTemplate)
-        {
-                if (save_template( timebuf )) {
-                        event->flags = JackSessionSaveError;
-                } else {
-                        string cmd ("ardour3 -P -U ");
-                        cmd += event->client_uuid;
-                        cmd += " -T ";
-                        cmd += timebuf;
-
-                        event->command_line = strdup (cmd.c_str());
-                }
-        }
-        else
-        {
-                if (save_state (timebuf)) {
-                        event->flags = JackSessionSaveError;
-                } else {
-			std::string xml_path (_session_dir->root_path());
-			std::string legalized_filename = legalize_for_path (timebuf) + statefile_suffix;
-			xml_path = Glib::build_filename (xml_path, legalized_filename);
-
-                        string cmd ("ardour3 -P -U ");
-                        cmd += event->client_uuid;
-                        cmd += " \"";
-                        cmd += xml_path;
-                        cmd += '\"';
-
-                        event->command_line = strdup (cmd.c_str());
-                }
-        }
-
-	jack_session_reply (_engine.jack(), event);
-
-	if (event->type == JackSessionSaveAndQuit) {
-		Quit (); /* EMIT SIGNAL */
-	}
-
-	jack_session_event_free( event );
-}
-#endif
-
 /** @param snapshot_name Name to save under, without .ardour / .pending prefix */
 int
 Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot)
@@ -1040,6 +983,15 @@ Session::state (bool full_state)
 
 	/* various options */
 
+	list<XMLNode*> midi_port_nodes = _midi_ports->get_midi_port_states();
+	if (!midi_port_nodes.empty()) {
+		XMLNode* midi_port_stuff = new XMLNode ("MIDIPorts");
+		for (list<XMLNode*>::const_iterator n = midi_port_nodes.begin(); n != midi_port_nodes.end(); ++n) {
+			midi_port_stuff->add_child_nocopy (**n);
+		}
+		node->add_child_nocopy (*midi_port_stuff);
+	}
+
 	node->add_child_nocopy (config.get_variables ());
 
 	node->add_child_nocopy (ARDOUR::SessionMetadata::Metadata()->get_state());
@@ -1244,6 +1196,11 @@ Session::set_state (const XMLNode& node, int version)
         if ((prop = node.property (X_("event-counter"))) != 0) {
                 Evoral::init_event_id_counter (atoi (prop->value()));
         }
+
+
+	if ((child = find_named_node (node, "MIDIPorts")) != 0) {
+		_midi_ports->set_midi_port_states (child->children());
+	}
 
 	IO::disable_connecting ();
 
@@ -3421,11 +3378,11 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "mmc-device-id" || p == "mmc-receive-id" || p == "mmc-receive-device-id") {
 
-		MIDI::Manager::instance()->mmc()->set_receive_device_id (Config->get_mmc_receive_device_id());
+		_mmc->set_receive_device_id (Config->get_mmc_receive_device_id());
 
 	} else if (p == "mmc-send-id" || p == "mmc-send-device-id") {
 
-		MIDI::Manager::instance()->mmc()->set_send_device_id (Config->get_mmc_send_device_id());
+		_mmc->set_send_device_id (Config->get_mmc_send_device_id());
 
 	} else if (p == "midi-control") {
 
@@ -3488,7 +3445,7 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "send-mmc") {
 
-		MIDI::Manager::instance()->mmc()->enable_send (Config->get_send_mmc ());
+		_mmc->enable_send (Config->get_send_mmc ());
 
 	} else if (p == "midi-feedback") {
 
@@ -3546,13 +3503,13 @@ Session::config_changed (std::string p, bool ours)
 			
 	} else if (p == "initial-program-change") {
 
-		if (MIDI::Manager::instance()->mmc()->output_port() && Config->get_initial_program_change() >= 0) {
+		if (_mmc->output_port() && Config->get_initial_program_change() >= 0) {
 			MIDI::byte buf[2];
 
 			buf[0] = MIDI::program; // channel zero by default
 			buf[1] = (Config->get_initial_program_change() & 0x7f);
 
-			MIDI::Manager::instance()->mmc()->output_port()->midimsg (buf, sizeof (buf), 0);
+			_mmc->output_port()->midimsg (buf, sizeof (buf), 0);
 		}
 	} else if (p == "solo-mute-override") {
 		// catch_up_on_solo_mute_override ();
@@ -3616,27 +3573,25 @@ Session::load_diskstreams_2X (XMLNode const & node, int)
 void
 Session::setup_midi_machine_control ()
 {
-	MIDI::MachineControl* mmc = MIDI::Manager::instance()->mmc ();
-
-	mmc->Play.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
-	mmc->DeferredPlay.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
-	mmc->Stop.connect_same_thread (*this, boost::bind (&Session::mmc_stop, this, _1));
-	mmc->FastForward.connect_same_thread (*this, boost::bind (&Session::mmc_fast_forward, this, _1));
-	mmc->Rewind.connect_same_thread (*this, boost::bind (&Session::mmc_rewind, this, _1));
-	mmc->Pause.connect_same_thread (*this, boost::bind (&Session::mmc_pause, this, _1));
-	mmc->RecordPause.connect_same_thread (*this, boost::bind (&Session::mmc_record_pause, this, _1));
-	mmc->RecordStrobe.connect_same_thread (*this, boost::bind (&Session::mmc_record_strobe, this, _1));
-	mmc->RecordExit.connect_same_thread (*this, boost::bind (&Session::mmc_record_exit, this, _1));
-	mmc->Locate.connect_same_thread (*this, boost::bind (&Session::mmc_locate, this, _1, _2));
-	mmc->Step.connect_same_thread (*this, boost::bind (&Session::mmc_step, this, _1, _2));
-	mmc->Shuttle.connect_same_thread (*this, boost::bind (&Session::mmc_shuttle, this, _1, _2, _3));
-	mmc->TrackRecordStatusChange.connect_same_thread (*this, boost::bind (&Session::mmc_record_enable, this, _1, _2, _3));
+	_mmc->Play.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
+	_mmc->DeferredPlay.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
+	_mmc->Stop.connect_same_thread (*this, boost::bind (&Session::mmc_stop, this, _1));
+	_mmc->FastForward.connect_same_thread (*this, boost::bind (&Session::mmc_fast_forward, this, _1));
+	_mmc->Rewind.connect_same_thread (*this, boost::bind (&Session::mmc_rewind, this, _1));
+	_mmc->Pause.connect_same_thread (*this, boost::bind (&Session::mmc_pause, this, _1));
+	_mmc->RecordPause.connect_same_thread (*this, boost::bind (&Session::mmc_record_pause, this, _1));
+	_mmc->RecordStrobe.connect_same_thread (*this, boost::bind (&Session::mmc_record_strobe, this, _1));
+	_mmc->RecordExit.connect_same_thread (*this, boost::bind (&Session::mmc_record_exit, this, _1));
+	_mmc->Locate.connect_same_thread (*this, boost::bind (&Session::mmc_locate, this, _1, _2));
+	_mmc->Step.connect_same_thread (*this, boost::bind (&Session::mmc_step, this, _1, _2));
+	_mmc->Shuttle.connect_same_thread (*this, boost::bind (&Session::mmc_shuttle, this, _1, _2, _3));
+	_mmc->TrackRecordStatusChange.connect_same_thread (*this, boost::bind (&Session::mmc_record_enable, this, _1, _2, _3));
 
 	/* also handle MIDI SPP because its so common */
 
-	mmc->SPPStart.connect_same_thread (*this, boost::bind (&Session::spp_start, this));
-	mmc->SPPContinue.connect_same_thread (*this, boost::bind (&Session::spp_continue, this));
-	mmc->SPPStop.connect_same_thread (*this, boost::bind (&Session::spp_stop, this));
+	_mmc->SPPStart.connect_same_thread (*this, boost::bind (&Session::spp_start, this));
+	_mmc->SPPContinue.connect_same_thread (*this, boost::bind (&Session::spp_continue, this));
+	_mmc->SPPStop.connect_same_thread (*this, boost::bind (&Session::spp_stop, this));
 }
 
 boost::shared_ptr<Controllable>

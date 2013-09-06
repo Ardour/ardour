@@ -58,9 +58,8 @@
 #include "gtkmm2ext/popup.h"
 #include "gtkmm2ext/window_title.h"
 
-#include "midi++/manager.h"
-
 #include "ardour/ardour.h"
+#include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/automation_watch.h"
@@ -162,6 +161,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, nsm (0)
 	, _was_dirty (false)
 	, _mixer_on_top (false)
+	, first_time_engine_run (true)
 
 	  /* transport */
 
@@ -214,6 +214,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	}
 
 	ui_config = new UIConfiguration();
+	_audio_midi_setup = new EngineControl;
 
 	editor = 0;
 	mixer = 0;
@@ -365,6 +366,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	_process_thread->init ();
 
 	DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
+
+	attach_to_engine ();
 }
 
 GlobalPortMatrixWindow*
@@ -376,42 +379,148 @@ ARDOUR_UI::create_global_port_matrix (ARDOUR::DataType type)
 	return new GlobalPortMatrixWindow (_session, type);
 }
 
-int
-ARDOUR_UI::create_engine ()
+void
+ARDOUR_UI::attach_to_engine ()
 {
-	// this gets called every time by new_session()
-
-	if (engine) {
-		return 0;
-	}
-
-	loading_message (_("Starting audio engine"));
-
-	try {
-		engine = new ARDOUR::AudioEngine (ARDOUR_COMMAND_LINE::jack_client_name, ARDOUR_COMMAND_LINE::jack_session_uuid);
-
-	} catch (...) {
-
-		return -1;
-	}
+	engine = AudioEngine::instance();
 
 	engine->Stopped.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_stopped, this), gui_context());
 	engine->Running.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_running, this), gui_context());
 	engine->SampleRateChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_sample_rate, this, _1), gui_context());
 
-	engine->Halted.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
+	engine->Halted.connect_same_thread (halt_connection, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
 
 	ARDOUR::Port::set_connecting_blocked (ARDOUR_COMMAND_LINE::no_connect_ports);
 
-	post_engine ();
+	/* if there is only one audio/midi backend, and it does not require setup, get our use of it underway
+	 * right here (we need to know the client name and potential session ID
+	 * to do this, which is why this is here, rather than in, say,
+	 * ARDOUR::init().
+	 */
 
-	return 0;
+	if (!AudioEngine::instance()->setup_required()) {
+		const AudioBackendInfo* backend = AudioEngine::instance()->available_backends().front();
+		AudioEngine::instance()->set_backend (backend->name, ARDOUR_COMMAND_LINE::backend_client_name, ARDOUR_COMMAND_LINE::backend_session_uuid);
+		AudioEngine::instance()->start ();
+	}
+}
+
+void
+ARDOUR_UI::engine_stopped ()
+{
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::engine_stopped)
+	ActionManager::set_sensitive (ActionManager::engine_sensitive_actions, false);
+	ActionManager::set_sensitive (ActionManager::engine_opposite_sensitive_actions, true);
+}
+
+void
+ARDOUR_UI::engine_running ()
+{
+	if (first_time_engine_run) {
+		post_engine();
+		first_time_engine_run = false;
+	}
+	
+	ActionManager::set_sensitive (ActionManager::engine_sensitive_actions, true);
+	ActionManager::set_sensitive (ActionManager::engine_opposite_sensitive_actions, false);
+
+	Glib::RefPtr<Action> action;
+	const char* action_name = 0;
+
+	switch (engine->samples_per_cycle()) {
+	case 32:
+		action_name = X_("JACKLatency32");
+		break;
+	case 64:
+		action_name = X_("JACKLatency64");
+		break;
+	case 128:
+		action_name = X_("JACKLatency128");
+		break;
+	case 512:
+		action_name = X_("JACKLatency512");
+		break;
+	case 1024:
+		action_name = X_("JACKLatency1024");
+		break;
+	case 2048:
+		action_name = X_("JACKLatency2048");
+		break;
+	case 4096:
+		action_name = X_("JACKLatency4096");
+		break;
+	case 8192:
+		action_name = X_("JACKLatency8192");
+		break;
+	default:
+		/* XXX can we do anything useful ? */
+		break;
+	}
+
+	if (action_name) {
+
+		action = ActionManager::get_action (X_("JACK"), action_name);
+
+		if (action) {
+			Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (action);
+			ract->set_active ();
+		}
+
+		update_disk_space ();
+		update_cpu_load ();
+		update_sample_rate (engine->sample_rate());
+		update_timecode_format ();
+	}
+}
+
+void
+ARDOUR_UI::engine_halted (const char* reason, bool free_reason)
+{
+	if (!Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {
+		/* we can't rely on the original string continuing to exist when we are called
+		   again in the GUI thread, so make a copy and note that we need to
+		   free it later.
+		*/
+		char *copy = strdup (reason);
+		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&ARDOUR_UI::engine_halted, this, copy, true));
+		return;
+	}
+
+	ActionManager::set_sensitive (ActionManager::engine_sensitive_actions, false);
+	ActionManager::set_sensitive (ActionManager::engine_opposite_sensitive_actions, true);
+
+	update_sample_rate (0);
+
+	string msgstr;
+
+	/* if the reason is a non-empty string, it means that the backend was shutdown
+	   rather than just Ardour.
+	*/
+
+	if (strlen (reason)) {
+		msgstr = string_compose (_("The audio backend (JACK) was shutdown because:\n\n%1"), reason);
+	} else {
+		msgstr = string_compose (_("\
+JACK has either been shutdown or it\n\
+disconnected %1 because %1\n\
+was not fast enough. Try to restart\n\
+JACK, reconnect and save the session."), PROGRAM_NAME);
+	}
+
+	MessageDialog msg (*editor, msgstr);
+	pop_back_splash (msg);
+	msg.set_keep_above (true);
+	msg.run ();
+	
+	if (free_reason) {
+		free (const_cast<char*> (reason));
+	}
 }
 
 void
 ARDOUR_UI::post_engine ()
 {
-	/* Things to be done once we create the AudioEngine
+	/* Things to be done once (and once ONLY) after we have a backend running in the AudioEngine
 	 */
 
 	ARDOUR::init_post_engine ();
@@ -477,25 +586,9 @@ ARDOUR_UI::post_engine ()
 	Glib::signal_timeout().connect_seconds (sigc::mem_fun(*this, &ARDOUR_UI::update_wall_clock), 1);
 #endif
 
-	update_disk_space ();
-	update_cpu_load ();
-	update_sample_rate (engine->frame_rate());
-	update_timecode_format ();
-
 	Config->ParameterChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::parameter_changed, this, _1), gui_context());
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	Config->map_parameters (pc);
-
-	/* now start and maybe save state */
-
-	if (do_engine_start () == 0) {
-		if (_session && _session_is_new) {
-			/* we need to retain initial visual
-			   settings for a new session
-			*/
-			_session->save_state ("");
-		}
-	}
 }
 
 ARDOUR_UI::~ARDOUR_UI ()
@@ -681,6 +774,7 @@ ARDOUR_UI::startup ()
 {
 	Application* app = Application::instance ();
 	char *nsm_url;
+
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
 	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_load));
 
@@ -915,7 +1009,8 @@ If you still wish to quit, please use the\n\n\
 		_session = 0;
 	}
 
-	engine->stop (true);
+	halt_connection.disconnect ();
+	engine->stop ();
 	quit ();
 }
 
@@ -1046,20 +1141,26 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 
 	if (!engine->connected()) {
 
-		snprintf (buf, sizeof (buf), "%s", _("disconnected"));
+		snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"red\">none</span>"));
 
 	} else {
 
-		framecnt_t rate = engine->frame_rate();
+		framecnt_t rate = engine->sample_rate();
 
-		if (fmod (rate, 1000.0) != 0.0) {
-			snprintf (buf, sizeof (buf), _("JACK: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"),
-				  (float) rate/1000.0f,
-				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
+		if (rate == 0) {
+			/* no sample rate available */
+			snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"red\">none</span>"));
 		} else {
-			snprintf (buf, sizeof (buf), _("JACK: <span foreground=\"green\">%" PRId64 " kHz / %4.1f ms</span>"),
-				  rate/1000,
-				  (engine->frames_per_cycle() / (float) rate) * 1000.0f);
+
+			if (fmod (rate, 1000.0) != 0.0) {
+				snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"),
+					  (float) rate / 1000.0f,
+					  (engine->usecs_per_cycle() / 1000.0f));
+			} else {
+				snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"green\">%" PRId64 " kHz / %4.1f ms</span>"),
+					  rate/1000,
+					  (engine->usecs_per_cycle() / 1000.0f));
+			}
 		}
 	}
 
@@ -1182,6 +1283,11 @@ ARDOUR_UI::update_disk_space()
 	boost::optional<framecnt_t> opt_frames = _session->available_capture_duration();
 	char buf[64];
 	framecnt_t fr = _session->frame_rate();
+
+	if (fr == 0) {
+		/* skip update - no SR available */
+		return;
+	}
 
 	if (!opt_frames) {
 		/* Available space is unknown */
@@ -1664,10 +1770,17 @@ ARDOUR_UI::transport_goto_wallclock ()
 
 		time (&now);
 		localtime_r (&now, &tmnow);
+		
+		int frame_rate = _session->frame_rate();
+		
+		if (frame_rate == 0) {
+			/* no frame rate available */
+			return;
+		}
 
-		frames = tmnow.tm_hour * (60 * 60 * _session->frame_rate());
-		frames += tmnow.tm_min * (60 * _session->frame_rate());
-		frames += tmnow.tm_sec * _session->frame_rate();
+		frames = tmnow.tm_hour * (60 * 60 * frame_rate);
+		frames += tmnow.tm_min * (60 * frame_rate);
+		frames += tmnow.tm_sec * frame_rate;
 
 		_session->request_locate (frames, _session->transport_rolling ());
 
@@ -2025,127 +2138,6 @@ ARDOUR_UI::map_transport_state ()
 		auto_loop_button.set_active (false);
 		update_disk_space ();
 	}
-}
-
-void
-ARDOUR_UI::engine_stopped ()
-{
-	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::engine_stopped)
-	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, false);
-	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, true);
-}
-
-void
-ARDOUR_UI::engine_running ()
-{
-	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::engine_running)
-	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, true);
-	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, false);
-
-	Glib::RefPtr<Action> action;
-	const char* action_name = 0;
-
-	switch (engine->frames_per_cycle()) {
-	case 32:
-		action_name = X_("JACKLatency32");
-		break;
-	case 64:
-		action_name = X_("JACKLatency64");
-		break;
-	case 128:
-		action_name = X_("JACKLatency128");
-		break;
-	case 512:
-		action_name = X_("JACKLatency512");
-		break;
-	case 1024:
-		action_name = X_("JACKLatency1024");
-		break;
-	case 2048:
-		action_name = X_("JACKLatency2048");
-		break;
-	case 4096:
-		action_name = X_("JACKLatency4096");
-		break;
-	case 8192:
-		action_name = X_("JACKLatency8192");
-		break;
-	default:
-		/* XXX can we do anything useful ? */
-		break;
-	}
-
-	if (action_name) {
-
-		action = ActionManager::get_action (X_("JACK"), action_name);
-
-		if (action) {
-			Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (action);
-			ract->set_active ();
-		}
-	}
-}
-
-void
-ARDOUR_UI::engine_halted (const char* reason, bool free_reason)
-{
-	if (!Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {
-		/* we can't rely on the original string continuing to exist when we are called
-		   again in the GUI thread, so make a copy and note that we need to
-		   free it later.
-		*/
-		char *copy = strdup (reason);
-		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&ARDOUR_UI::engine_halted, this, copy, true));
-		return;
-	}
-
-	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, false);
-	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, true);
-
-	update_sample_rate (0);
-
-	string msgstr;
-
-	/* if the reason is a non-empty string, it means that the backend was shutdown
-	   rather than just Ardour.
-	*/
-
-	if (strlen (reason)) {
-		msgstr = string_compose (_("The audio backend (JACK) was shutdown because:\n\n%1"), reason);
-	} else {
-		msgstr = string_compose (_("\
-JACK has either been shutdown or it\n\
-disconnected %1 because %1\n\
-was not fast enough. Try to restart\n\
-JACK, reconnect and save the session."), PROGRAM_NAME);
-	}
-
-	MessageDialog msg (*editor, msgstr);
-	pop_back_splash (msg);
-	msg.set_keep_above (true);
-	msg.run ();
-	
-	if (free_reason) {
-		free (const_cast<char*> (reason));
-	}
-}
-
-int32_t
-ARDOUR_UI::do_engine_start ()
-{
-	try {
-		engine->start();
-	}
-
-	catch (...) {
-		engine->stop ();
-		error << _("Unable to start the session running")
-		      << endmsg;
-		unload_session ();
-		return -2;
-	}
-
-	return 0;
 }
 
 void
@@ -2698,10 +2690,6 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			}
 		}
 	
-		if (create_engine ()) {
-			break;
-		}
-
 		if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
 
 			if (likely_new && !nsm) {
@@ -3825,9 +3813,16 @@ void
 ARDOUR_UI::disconnect_from_jack ()
 {
 	if (engine) {
-		if (engine->disconnect_from_jack ()) {
+		/* drop connection to AudioEngine::Halted so that we don't act
+		 *  as if the engine unexpectedly shut down
+		 */
+		halt_connection.disconnect ();
+
+		if (engine->stop ()) {
 			MessageDialog msg (*editor, _("Could not disconnect from JACK"));
 			msg.run ();
+		} else {
+			engine->Halted.connect_same_thread (halt_connection, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
 		}
 
 		update_sample_rate (0);
@@ -3838,7 +3833,7 @@ void
 ARDOUR_UI::reconnect_to_jack ()
 {
 	if (engine) {
-		if (engine->reconnect_to_jack ()) {
+		if (engine->start ()) {
 			MessageDialog msg (*editor,  _("Could not reconnect to JACK"));
 			msg.run ();
 		}
@@ -4150,4 +4145,20 @@ ARDOUR_UI::reset_route_peak_display (Route* route)
 	if (_session->master_out().get() == route) {
 		reset_peak_display ();
 	}
+}
+
+EngineControl*
+ARDOUR_UI::audio_midi_setup_widget ()
+{
+	/* remove widget from any existing parent, since it is about
+	   to be packed somewhere else.
+	*/
+	
+	Gtk::Container* parent = _audio_midi_setup->get_parent ();
+
+	if (parent) {
+		parent->remove (*_audio_midi_setup);
+	}
+
+	return _audio_midi_setup;
 }

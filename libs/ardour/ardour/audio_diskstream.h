@@ -114,7 +114,7 @@ class AudioDiskstream : public Diskstream
 	XMLNode& get_state(void);
 	int      set_state(const XMLNode& node, int version);
 
-	void request_jack_monitors_input (bool);
+	void request_input_monitoring (bool);
 
 	static void swap_by_ptr (Sample *first, Sample *last) {
 		while (first < last) {
@@ -160,7 +160,7 @@ class AudioDiskstream : public Diskstream
 		std::string name;
 
 		bool is_physical () const;
-		void request_jack_monitors_input (bool) const;
+		void request_input_monitoring (bool) const;
 	};
 
 	/** Information about one of our channels */

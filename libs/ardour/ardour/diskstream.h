@@ -133,8 +133,8 @@ class Diskstream : public SessionObject, public PublicDiskstream
 	virtual XMLNode& get_state(void);
 	virtual int      set_state(const XMLNode&, int version);
 
-	virtual void request_jack_monitors_input (bool) {}
-	virtual void ensure_jack_monitors_input (bool) {}
+	virtual void request_input_monitoring (bool) {}
+	virtual void ensure_input_monitoring (bool) {}
 
 	framecnt_t   capture_offset() const { return _capture_offset; }
 	virtual void set_capture_offset ();

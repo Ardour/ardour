@@ -56,8 +56,6 @@ class ArdourStartup : public Gtk::Assistant {
 	bool use_session_template();
 	std::string session_template_name();
 
-	EngineControl* engine_control() { return engine_dialog; }
-
 	// advanced session options
 
 	bool create_master_bus() const;

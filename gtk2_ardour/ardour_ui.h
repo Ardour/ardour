@@ -90,6 +90,7 @@ class BigClockWindow;
 class BundleManager;
 class ButtonJoiner;
 class ConnectionEditor;
+class EngineControl;
 class KeyEditor;
 class LocationUIWindow;
 class MainClock;
@@ -264,7 +265,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 		session_add_midi_route (false);
 	}*/
 
-	int  create_engine ();
+        void attach_to_engine ();
 	void post_engine ();
 
 	gint exit_on_main_window_close (GdkEventAny *);
@@ -287,6 +288,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
 
         const std::string& announce_string() const { return _announce_string; }
+
+        EngineControl* audio_midi_setup_widget();
 
   protected:
 	friend class PublicEditor;
@@ -315,6 +318,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	NSM_Client          *nsm;
 	bool                 _was_dirty;
         bool                 _mixer_on_top;
+        bool first_time_engine_run;
 
 	void goto_editor_window ();
 	void goto_mixer_window ();
@@ -710,6 +714,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void loading_message (const std::string& msg);
 
 	PBD::ScopedConnectionList forever_connections;
+        PBD::ScopedConnection halt_connection; 
 
         void step_edit_status_change (bool);
 
@@ -746,6 +751,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
         std::string _announce_string;
         void check_announcements ();
+
+        EngineControl* _audio_midi_setup;
 };
 
 #endif /* __ardour_gui_h__ */

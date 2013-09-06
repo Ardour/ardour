@@ -550,15 +550,15 @@ Track::playlist ()
 }
 
 void
-Track::request_jack_monitors_input (bool m)
+Track::request_input_monitoring (bool m)
 {
-	_diskstream->request_jack_monitors_input (m);
+	_diskstream->request_input_monitoring (m);
 }
 
 void
-Track::ensure_jack_monitors_input (bool m)
+Track::ensure_input_monitoring (bool m)
 {
-	_diskstream->ensure_jack_monitors_input (m);
+	_diskstream->ensure_input_monitoring (m);
 }
 
 bool

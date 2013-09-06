@@ -1258,7 +1258,8 @@ Editor::set_session (Session *t)
 
 	/* These signals can all be emitted by a non-GUI thread. Therefore the
 	   handlers for them must not attempt to directly interact with the GUI,
-	   but use Gtkmm2ext::UI::instance()->call_slot();
+	   but use PBD::Signal<T>::connect() which accepts an event loop
+	   ("context") where the handler will be asked to run.
 	*/
 
 	_session->StepEditStatusChange.connect (_session_connections, invalidator (*this), boost::bind (&Editor::step_edit_status_change, this, _1), gui_context());

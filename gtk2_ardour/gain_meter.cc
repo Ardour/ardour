@@ -32,7 +32,6 @@
 #include <gtkmm2ext/fastmeter.h>
 #include <gtkmm2ext/barcontroller.h>
 #include <gtkmm2ext/gtk_ui.h>
-#include "midi++/manager.h"
 #include "pbd/fastlog.h"
 #include "pbd/stacktrace.h"
 
@@ -864,7 +863,7 @@ GainMeterBase::update_meters()
 	}
 }
 
-void GainMeterBase::color_handler(bool /* dpi */)
+void GainMeterBase::color_handler(bool /*dpi*/)
 {
 	setup_meters();
 }
