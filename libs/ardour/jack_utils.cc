@@ -789,6 +789,16 @@ ARDOUR::get_jack_command_line_string (const JackCommandLineOptions& options, str
 		}
 	}
 
+	if (options.input_channels) {
+		args.push_back ("-i");
+		args.push_back (to_string (options.input_channels, std::dec));
+	}
+
+	if (options.output_channels) {
+		args.push_back ("-o");
+		args.push_back (to_string (options.output_channels, std::dec));
+	}
+
 	if (get_jack_audio_driver_supports_setting_period_count (options.driver)) {
 		args.push_back ("-n");
 		args.push_back (to_string (options.num_periods, std::dec));

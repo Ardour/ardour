@@ -428,6 +428,8 @@ JACKAudioBackend::setup_jack_startup_command ()
 	options.output_device = _target_device;
 	options.input_latency = _target_systemic_input_latency;
 	options.output_latency = _target_systemic_output_latency;
+	options.input_channels = _target_input_channels;
+	options.output_channels = _target_output_channels;
 	if (_target_sample_format == FormatInt16) {
 		options.force16_bit = _target_sample_format;
 	}

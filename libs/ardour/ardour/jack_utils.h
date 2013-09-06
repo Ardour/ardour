@@ -216,6 +216,8 @@ namespace ARDOUR {
 		uint32_t         num_periods;
 		uint32_t         period_size;
 		uint32_t         samplerate;
+		uint32_t         input_channels;
+		uint32_t         output_channels;
 		uint32_t         input_latency;
 		uint32_t         output_latency;
 		bool             hardware_metering;
