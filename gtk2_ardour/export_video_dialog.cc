@@ -167,7 +167,7 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 				filenameset = true;
 			}
 		}
-		else if (!filenameset
+		if (!filenameset
 				&& node->property(X_("Filename"))
 				&& node->property(X_("LocalFile"))
 				&& node->property(X_("LocalFile"))->value() == X_("1")
@@ -180,6 +180,9 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 				invid_path_entry.set_text (filename);
 				filenameset = true;
 			}
+		}
+		if (!filenameset) {
+			invid_path_entry.set_text (X_(""));
 		}
 	}
 
