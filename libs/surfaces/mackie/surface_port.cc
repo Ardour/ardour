@@ -23,6 +23,8 @@
 #include <sigc++/sigc++.h>
 #include <boost/shared_array.hpp>
 
+#include "pbd/failed_constructor.h"
+
 #include "midi++/types.h"
 #include "midi++/ipmidi_port.h"
 
@@ -49,12 +51,17 @@ using namespace ARDOUR;
 SurfacePort::SurfacePort (Surface& s)
 	: _surface (&s)
 {
+
 	if (_surface->mcp().device_info().uses_ipmidi()) {
 		_input_port = new MIDI::IPMIDIPort (_surface->mcp().ipmidi_base() +_surface->number());
 		_output_port = _input_port;
 	} else {
 		_async_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, string_compose (_("%1 in"),  _surface->name()), true);
 		_async_out = AudioEngine::instance()->register_output_port (DataType::MIDI, string_compose (_("%1 out"),  _surface->name()), true);
+
+		if (_async_in == 0 || _async_out == 0) {
+			throw failed_constructor();
+		}
 
 		_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in).get();
 		_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_out).get();
