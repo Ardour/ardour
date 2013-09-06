@@ -122,10 +122,10 @@ class EngineControl : public Gtk::VBox {
 	std::string device;
 	std::string sample_rate;
 	std::string buffer_size;
-	std::string input_latency;
-	std::string output_latency;
-	std::string input_channels;
-	std::string output_channels;
+	uint32_t input_latency;
+	uint32_t output_latency;
+	uint32_t input_channels;
+	uint32_t output_channels;
 	bool active;
 
 	State() : active (false) {};

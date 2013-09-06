@@ -439,6 +439,8 @@ EngineControl::save_state ()
 	state->device = device_combo.get_active_text ();
 	state->buffer_size = buffer_size_combo.get_active_text ();
 	state->sample_rate = sample_rate_combo.get_active_text ();
+	state->input_latency = (uint32_t) input_latency.get_value();
+	state->output_latency = (uint32_t) output_latency.get_value();
 
 	if (!existing) {
 		states.push_back (*state);
@@ -459,6 +461,8 @@ EngineControl::maybe_set_state ()
 		*/
 		reshow_buffer_sizes (false);
 		buffer_size_combo.set_active_text (state->buffer_size);
+		input_latency.set_value (state->input_latency);
+		output_latency.set_value (state->output_latency);
 		bs_connection.unblock ();
 		sr_connection.unblock ();
 	}
@@ -562,22 +566,22 @@ EngineControl::set_state (const XMLNode& root)
 			if ((prop = grandchild->property ("input-latency")) == 0) {
 				continue;
 			}
-			state.input_latency = prop->value ();
+			state.input_latency = atoi (prop->value ());
 			
 			if ((prop = grandchild->property ("output-latency")) == 0) {
 				continue;
 			}
-			state.output_latency = prop->value ();
+			state.output_latency = atoi (prop->value ());
 			
 			if ((prop = grandchild->property ("input-channels")) == 0) {
 				continue;
 			}
-			state.input_channels = prop->value ();
+			state.input_channels = atoi (prop->value ());
 			
 			if ((prop = grandchild->property ("output-channels")) == 0) {
 				continue;
 			}
-			state.output_channels = prop->value ();
+			state.output_channels = atoi (prop->value ());
 
 			if ((prop = grandchild->property ("active")) == 0) {
 				continue;
@@ -599,6 +603,8 @@ EngineControl::set_state (const XMLNode& root)
 			device_combo.set_active_text ((*i).device);
 			sample_rate_combo.set_active_text ((*i).sample_rate);
 			buffer_size_combo.set_active_text ((*i).buffer_size);
+			input_latency.set_value ((*i).input_latency);
+			output_latency.set_value ((*i).output_latency);
 			sr_connection.unblock ();
 			bs_connection.unblock ();
 			break;
