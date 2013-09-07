@@ -54,6 +54,7 @@ class EngineControl : public Gtk::VBox {
     Gtk::ComboBoxText output_device_combo;
     Gtk::ComboBoxText sample_rate_combo;
     Gtk::ComboBoxText buffer_size_combo;
+    Gtk::Label        buffer_size_duration_label;
     Gtk::Adjustment input_latency_adjustment;
     Gtk::SpinButton input_latency;
     Gtk::Adjustment output_latency_adjustment;
@@ -114,7 +115,7 @@ class EngineControl : public Gtk::VBox {
     void audio_mode_changed ();
     void device_changed ();
     void list_devices ();
-    void reshow_buffer_sizes (bool choice_changed);
+    void show_buffer_duration ();
 
     struct State {
 	std::string backend;
@@ -141,6 +142,8 @@ class EngineControl : public Gtk::VBox {
     State* get_current_state ();
     void maybe_set_state ();
     void save_state ();
+
+    static bool print_channel_count (Gtk::SpinButton*);
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

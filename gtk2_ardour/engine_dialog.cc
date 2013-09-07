@@ -56,30 +56,19 @@ EngineControl::EngineControl ()
 	, input_latency (input_latency_adjustment)
 	, output_latency_adjustment (0, 0, 99999, 1)
 	, output_latency (output_latency_adjustment)
-	, input_channels_adjustment (2, 0, 256, 1)
+	, input_channels_adjustment (0, 0, 256, 1)
 	, input_channels (input_channels_adjustment)
-	, output_channels_adjustment (2, 0, 256, 1)
+	, output_channels_adjustment (0, 0, 256, 1)
 	, output_channels (output_channels_adjustment)
 	, ports_adjustment (128, 8, 1024, 1, 16)
 	, ports_spinner (ports_adjustment)
 	, realtime_button (_("Realtime"))
-#ifdef __APPLE___
-	, basic_packer (6, 2)
-#else
-	, basic_packer (9, 2)
-#endif
+	, basic_packer (9, 3)
 {
 	using namespace Notebook_Helpers;
 	Label* label;
 	vector<string> strings;
 	int row = 0;
-
-
-	/* basic parameters */
-
-	basic_packer.set_spacings (6);
-
-	strings.clear ();
 
 	vector<const ARDOUR::AudioBackendInfo*> backends = ARDOUR::AudioEngine::instance()->available_backends();
 	for (vector<const ARDOUR::AudioBackendInfo*>::const_iterator b = backends.begin(); b != backends.end(); ++b) {
@@ -88,77 +77,82 @@ EngineControl::EngineControl ()
 
 	set_popdown_strings (backend_combo, strings);
 	backend_combo.set_active_text (strings.front());
-
 	backend_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::backend_changed));
 	backend_changed ();
 
 	driver_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::driver_changed));
 
-	strings.clear ();
-	strings.push_back (_("None"));
-#ifdef __APPLE__
-	strings.push_back (_("coremidi"));
-#else
-	strings.push_back (_("seq"));
-	strings.push_back (_("raw"));
-#endif
-	set_popdown_strings (midi_driver_combo, strings);
-	midi_driver_combo.set_active_text (strings.front ());
+	basic_packer.set_spacings (6);
+	basic_packer.set_border_width (12);
+	basic_packer.set_homogeneous (true);
 
 	row = 0;
 
+	const AttachOptions xopt = AttachOptions (FILL|EXPAND);
+
 	label = manage (left_aligned_label (_("Audio System:")));
-	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (backend_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
+	basic_packer.attach (backend_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
 	row++;
 
 	label = manage (left_aligned_label (_("Driver:")));
-	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (driver_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
+	basic_packer.attach (driver_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
 	row++;
 
 	label = manage (left_aligned_label (_("Device:")));
-	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (device_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
+	basic_packer.attach (device_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
 	row++;
 
 	label = manage (left_aligned_label (_("Sample rate:")));
-	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (sample_rate_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
+	basic_packer.attach (sample_rate_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
 	row++;
 
 	sr_connection = sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::sample_rate_changed));
 
 	label = manage (left_aligned_label (_("Buffer size:")));
-	basic_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (buffer_size_combo, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
+	basic_packer.attach (buffer_size_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
+	buffer_size_duration_label.set_alignment (0.0); /* left-align */
+	basic_packer.attach (buffer_size_duration_label, 2, 3, row, row+1, xopt, (AttachOptions) 0);
 	row++;
 
 	bs_connection = buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::buffer_size_changed));
 
+	label = manage (left_aligned_label (_("Input Channels:")));
+	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
+	basic_packer.attach (input_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
+	++row;
+
+	input_channels.signal_output().connect (sigc::bind (sigc::ptr_fun (&EngineControl::print_channel_count), &input_channels));
+
+	label = manage (left_aligned_label (_("Output Channels:")));
+	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
+	basic_packer.attach (output_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
+	++row;
+
+	output_channels.signal_output().connect (sigc::bind (sigc::ptr_fun (&EngineControl::print_channel_count), &output_channels));
+
 	label = manage (left_aligned_label (_("Hardware input latency:")));
-	basic_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (input_latency, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
+	basic_packer.attach (input_latency, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 	label = manage (left_aligned_label (_("samples")));
-	basic_packer.attach (*label, 2, 3, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (*label, 2, 3, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
 	label = manage (left_aligned_label (_("Hardware output latency:")));
-	basic_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	basic_packer.attach (output_latency, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
+	basic_packer.attach (output_latency, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 	label = manage (left_aligned_label (_("samples")));
-	basic_packer.attach (*label, 2, 3, row, row+1, FILL|EXPAND, (AttachOptions) 0);
+	basic_packer.attach (*label, 2, 3, row, row+1, xopt, (AttachOptions) 0);
 	++row;
-
-	device_combo.set_size_request (250, -1);
-	input_device_combo.set_size_request (250, -1);
-	output_device_combo.set_size_request (250, -1);
 
 	device_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::device_changed));
 
 	basic_hbox.pack_start (basic_packer, false, false);
 
-	basic_packer.set_border_width (12);
 	midi_packer.set_border_width (12);
 
 	notebook.pages().push_back (TabElem (basic_hbox, _("Audio")));
@@ -210,6 +204,20 @@ EngineControl::backend_changed ()
 	}
 	
 	maybe_set_state ();
+}
+
+bool
+EngineControl::print_channel_count (Gtk::SpinButton* sb)
+{
+	uint32_t cnt = (uint32_t) sb->get_value();
+	if (cnt == 0) {
+		sb->set_text (_("all available channels"));
+	} else {
+		char buf[32];
+		snprintf (buf, sizeof (buf), "%d", cnt);
+		sb->set_text (buf);
+	}
+	return true;
 }
 
 void
@@ -292,10 +300,23 @@ EngineControl::device_changed ()
 	set_popdown_strings (sample_rate_combo, s);
 	sample_rate_combo.set_active_text (s.front());
 
-	reshow_buffer_sizes (true);
-
 	sr_connection.unblock ();
-	
+
+	vector<uint32_t> bs = backend->available_buffer_sizes(device_name);
+	s.clear ();
+	for (vector<uint32_t>::const_iterator x = bs.begin(); x != bs.end(); ++x) {
+		char buf[32];
+		/* Translators: "samples" is always plural here, so no
+		   need for plural+singular forms.
+		*/
+		snprintf (buf, sizeof (buf), _("%u samples"), *x);
+		s.push_back (buf);
+	}
+
+	set_popdown_strings (buffer_size_combo, s);
+	buffer_size_combo.set_active_text (s.front());
+	show_buffer_duration ();
+
 	maybe_set_state ();
 }	
 
@@ -303,10 +324,10 @@ void
 EngineControl::sample_rate_changed ()
 {
 	/* reset the strings for buffer size to show the correct msec value
-	   (reflecting the new sample rate
+	   (reflecting the new sample rate).
 	*/
 
-	reshow_buffer_sizes (false);
+	show_buffer_duration ();
 	save_state ();
 
 }
@@ -314,61 +335,32 @@ EngineControl::sample_rate_changed ()
 void 
 EngineControl::buffer_size_changed ()
 {
+	show_buffer_duration ();
 	save_state ();
 }
 
 void
-EngineControl::reshow_buffer_sizes (bool size_choice_changed)
+EngineControl::show_buffer_duration ()
 {
-	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
-	assert (backend);
-	string device_name = device_combo.get_active_text ();
-	vector<string> s;
-	uint32_t existing_size_choice = 0;
-	string new_target_string;
 
 	/* buffer sizes  - convert from just samples to samples + msecs for
 	 * the displayed string
 	 */
 
-	bs_connection.block ();
-
-	if (!size_choice_changed) {
-		sscanf (buffer_size_combo.get_active_text().c_str(), "%" PRIu32, &existing_size_choice);
-	}
-
-	s.clear ();
-	vector<uint32_t> bs = backend->available_buffer_sizes(device_name);
+	string bs_text = buffer_size_combo.get_active_text ();
+	uint32_t samples = atoi (bs_text); /* will ignore trailing text */
 	uint32_t rate = get_rate();
 
-	for (vector<uint32_t>::const_iterator x = bs.begin(); x != bs.end(); ++x) {
-		char buf[32];
-
-		/* Translators: "samples" is ALWAYS plural here, so we do not
-		   need singular form as well. Same for msecs.
-		*/
-		snprintf (buf, sizeof (buf), _("%u samples (%.1f msecs)"), *x, (2 * (*x)) / (rate/1000.0));
-		s.push_back (buf);
-
-		/* if this is the size previously chosen, this is the string we
-		 * will want to be active in the combo.
-		 */
-
-		if (existing_size_choice == *x) {
-			new_target_string = buf;
-		}
-			
-	}
-
-	set_popdown_strings (buffer_size_combo, s);
-
-	if (!new_target_string.empty()) {
-		buffer_size_combo.set_active_text (new_target_string);
-	} else {
-		buffer_size_combo.set_active_text (s.front());
-	}
-
-	bs_connection.unblock ();
+	/* Translators: "msecs" is ALWAYS plural here, so we do not
+	   need singular form as well.
+	*/
+	/* Developers: note the hard-coding of a double buffered model
+	   in the (2 * samples) computation of latency. we always start
+	   the audiobackend in this configuration.
+	*/
+	char buf[32];
+	snprintf (buf, sizeof (buf), _("(%.1f msecs)"), (2 * samples) / (rate/1000.0));
+	buffer_size_duration_label.set_text (buf);
 }
 
 void
@@ -441,6 +433,8 @@ EngineControl::save_state ()
 	state->sample_rate = sample_rate_combo.get_active_text ();
 	state->input_latency = (uint32_t) input_latency.get_value();
 	state->output_latency = (uint32_t) output_latency.get_value();
+	state->input_channels = (uint32_t) input_channels.get_value();
+	state->output_channels = (uint32_t) output_channels.get_value();
 
 	if (!existing) {
 		states.push_back (*state);
@@ -456,10 +450,6 @@ EngineControl::maybe_set_state ()
 		sr_connection.block ();
 		bs_connection.block ();
 		sample_rate_combo.set_active_text (state->sample_rate);
-		/* need to reset possible strings for buffer size before we do
-		   this
-		*/
-		reshow_buffer_sizes (false);
 		buffer_size_combo.set_active_text (state->buffer_size);
 		input_latency.set_value (state->input_latency);
 		output_latency.set_value (state->output_latency);
@@ -517,7 +507,6 @@ EngineControl::set_state (const XMLNode& root)
 	clist = root.children();
 
 	states.clear ();
-
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
 
