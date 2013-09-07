@@ -22,8 +22,8 @@
 
 #include "pbd/epa.h"
 
-#include "ardour/jack_connection.h"
-#include "ardour/jack_utils.h"
+#include "jack_connection.h"
+#include "jack_utils.h"
 
 #define GET_PRIVATE_JACK_POINTER(j)  jack_client_t* _priv_jack = (jack_client_t*) (j); if (!_priv_jack) { return; }
 #define GET_PRIVATE_JACK_POINTER_RET(j,r) jack_client_t* _priv_jack = (jack_client_t*) (j); if (!_priv_jack) { return r; }

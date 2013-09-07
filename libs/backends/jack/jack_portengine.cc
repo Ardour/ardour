@@ -22,8 +22,9 @@
 
 #include "pbd/error.h"
 
-#include "ardour/jack_portengine.h"
-#include "ardour/jack_connection.h"
+#include "jack_portengine.h"
+#include "jack_connection.h"
+
 #include "ardour/port_manager.h"
 
 #include "i18n.h"

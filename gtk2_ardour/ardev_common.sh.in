@@ -17,7 +17,7 @@ export ARDOUR_DATA_PATH=$TOP:$TOP/build:$TOP/gtk2_ardour:$TOP/build/gtk2_ardour:
 export ARDOUR_MIDIMAPS_PATH=$TOP/midi_maps:.
 export ARDOUR_MCP_PATH=$TOP/mcp:.
 export ARDOUR_EXPORT_FORMATS_PATH=$TOP/export:.
-export ARDOUR_BACKEND_PATH=$TOP/build/libs/ardour
+export ARDOUR_BACKEND_PATH=$libs/backends/jack
 
 #
 # even though we set the above variables, ardour requires that these 

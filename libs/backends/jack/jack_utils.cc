@@ -18,10 +18,6 @@
 
 */
 
-#ifdef WAF_BUILD
-#include "libardour-config.h"
-#endif
-
 #ifdef HAVE_ALSA
 #include <alsa/asoundlib.h>
 #endif
@@ -51,7 +47,7 @@
 #include "pbd/file_utils.h"
 #include "pbd/search_path.h"
 
-#include "ardour/jack_utils.h"
+#include "jack_utils.h"
 
 #ifdef __APPLE
 #include <CFBundle.h>

@@ -31,10 +31,10 @@
 #include "ardour/session.h"
 #include "ardour/types.h"
 
-#include "ardour/jack_audiobackend.h"
-#include "ardour/jack_connection.h"
-#include "ardour/jack_portengine.h"
-#include "ardour/jack_utils.h"
+#include "jack_audiobackend.h"
+#include "jack_connection.h"
+#include "jack_portengine.h"
+#include "jack_utils.h"
 
 #include "i18n.h"
 
