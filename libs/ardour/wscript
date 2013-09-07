@@ -442,41 +442,6 @@ def build(bld):
         elif bld.env['build_target'] == 'x86_64':
             obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit.s' ]
 
-    # the JACK audio backend
-
-    obj = bld.shlib (features = 'c cxx cshlib cxxshlib', 
-                     source = [ 
-            'jack_api.cc',
-            'jack_connection.cc',
-            'jack_audiobackend.cc',
-            'jack_portengine.cc',
-            'jack_utils.cc'
-            ])
-    obj.cxxflags = [ '-fPIC' ]
-    obj.name     = 'jack_audiobackend'
-    obj.target   = 'jack_audiobackend'
-    obj.uselib   = [ 'JACK' ]
-    
-    #
-    # device discovery code in the jack backend needs ALSA
-    # on Linux.
-    # 
-
-    if re.search ("linux", sys.platform) != None:
-       obj.uselib += [ 'ALSA' ]
-
-    obj.use      = [ 'ardour' ]
-    obj.vnum     = '1.0.0'
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-    obj.includes = [ '.' ]
-    obj.defines = [
-        'PACKAGE="' + I18N_PACKAGE + '"',
-        'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
-        'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
-        'PROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"',
-        ]
-    
-
     # i18n
     if bld.is_defined('ENABLE_NLS'):
         mo_files = bld.path.ant_glob('po/*.mo')
