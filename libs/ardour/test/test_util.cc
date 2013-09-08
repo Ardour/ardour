@@ -124,7 +124,7 @@ load_session (string dir, string state)
 	*/
 	Config->set_use_lxvst (false);
 
-	AudioEngine* engine = new AudioEngine ("test", "");
+	AudioEngine* engine = AudioEngine::create ();
 	init_post_engine ();
 
 	CPPUNIT_ASSERT (engine->start () == 0);
