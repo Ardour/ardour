@@ -3,7 +3,6 @@
 #include <glibmm/miscutils.h>
 
 #include <stdexcept>
-#include "midi++/manager.h"
 #include "pbd/textreceiver.h"
 #include "pbd/file_utils.h"
 #include "ardour/session.h"
@@ -37,7 +36,7 @@ SessionTest::setUp ()
 	AudioEngine* engine = 0;
 
 	try {
-		engine = new AudioEngine ("session_test", "");
+		engine = AudioEngine::create ();
 	} catch (const AudioEngine::NoBackendAvailable& engine_exception) {
 		cerr << engine_exception.what ();
 	}
@@ -52,10 +51,8 @@ SessionTest::setUp ()
 void
 SessionTest::tearDown ()
 {
-	// this is needed or there is a crash in MIDI::Manager::destroy
-	AudioEngine::instance()->stop (true);
+	AudioEngine::instance()->stop ();
 
-	MIDI::Manager::destroy ();
 	AudioEngine::destroy ();
 }
 
