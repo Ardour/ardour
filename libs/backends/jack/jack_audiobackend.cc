@@ -959,11 +959,13 @@ JACKAudioBackend::control_app_name () const
 {
 	string appname;
 
+	std::cerr << "td = " << _target_driver << " tdev = " << _target_device << std::endl;
+
 	if (_target_driver.empty() || _target_device.empty()) {
 		return appname;
 	}
 
-	if (_target_driver == "alsa") {
+	if (_target_driver == "ALSA") {
 
 		if (_target_device == "Hammerfall DSP") {
 			appname = "hdspconf";
@@ -971,6 +973,8 @@ JACKAudioBackend::control_app_name () const
 			appname = "mudita";
 		}
 	}
+	
+	std::cerr << "appname retrurned as " << appname << std::endl;
 
 	return appname;
 }

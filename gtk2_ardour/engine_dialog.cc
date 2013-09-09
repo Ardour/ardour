@@ -792,18 +792,24 @@ EngineControl::get_device_name () const
 void
 EngineControl::control_app_button_clicked ()
 {
+	const char* env_value  = g_getenv ("ARDOUR_DEVICE_CONTROL_APP");
+	string appname;
 
-	const string appname  = g_getenv ("ARDOUR_DEVICE_CONTROL_APP");
-
-	if (appname.empty()) {
+	cerr << "Environment var for control app: " << (env_value ? env_value : "empty") << endl;
+	
+	if (!env_value) {
 		boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 		
 		if (!backend) {
 			return;
 		}
 		
-		string appname = backend->control_app_name();
+		appname = backend->control_app_name();
+	} else {
+		appname = env_value;
 	}
+
+	cerr << "appname for control app " << appname << endl;
 
 	if (appname.empty()) {
 		return;
@@ -827,7 +833,7 @@ EngineControl::manage_control_app_sensitivity ()
 			return;
 		}
 		
-		string appname = backend->control_app_name();
+		appname = backend->control_app_name();
 	} else {
 		appname = env_value;
 	}
