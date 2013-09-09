@@ -106,6 +106,7 @@ using namespace PBD;
 
 bool Session::_disable_all_loaded_plugins = false;
 
+PBD::Signal0<int> Session::AudioEngineSetupRequired;
 PBD::Signal1<void,std::string> Session::Dialog;
 PBD::Signal0<int> Session::AskAboutPendingState;
 PBD::Signal2<int, framecnt_t, framecnt_t> Session::AskAboutSampleRateMismatch;
@@ -154,6 +155,17 @@ Session::Session (AudioEngine &eng,
 	, _have_rec_enabled_track (false)
 	, _suspend_timecode_transmission (0)
 {
+	if (_engine.current_backend() == 0 || _engine.setup_required()) {
+		boost::optional<int> r = AudioEngineSetupRequired ();
+		if (r.get_value_or (-1) != 0) {
+			throw failed_constructor();
+		}
+	}
+
+	if (!_engine.connected()) {
+		throw failed_constructor();
+	}
+
 	_locations = new Locations (*this);
 	ltc_encoder = NULL;
 
@@ -174,10 +186,6 @@ Session::Session (AudioEngine &eng,
 	_all_route_group->set_active (true, this);
 
 	interpolation.add_channel_to (0, 0);
-
-	if (!eng.connected()) {
-		throw failed_constructor();
-	}
 
 	n_physical_outputs = _engine.n_physical_outputs ();
 	n_physical_inputs =  _engine.n_physical_inputs ();

@@ -289,8 +289,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
         const std::string& announce_string() const { return _announce_string; }
 
-        EngineControl* audio_midi_setup_widget();
-
   protected:
 	friend class PublicEditor;
 
@@ -305,15 +303,13 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void reenable_hide_loop_punch_ruler_if_appropriate ();
 	void toggle_auto_return ();
 	void toggle_click ();
-
+        void toggle_audio_midi_setup ();
 	void toggle_session_auto_loop ();
-
 	void toggle_rc_options_window ();
 	void toggle_session_options_window ();
 
   private:
 	ArdourStartup*      _startup;
-	ARDOUR::AudioEngine *engine;
 	Gtk::Tooltips        _tooltips;
 	NSM_Client          *nsm;
 	bool                 _was_dirty;
@@ -671,9 +667,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	int pending_state_dialog ();
 	int sr_mismatch_dialog (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
 
-	void disconnect_from_jack ();
-	void reconnect_to_jack ();
-	void set_jack_buffer_size (ARDOUR::pframes_t);
+	void disconnect_from_engine ();
+	void reconnect_to_engine ();
+	void set_engine_buffer_size (ARDOUR::pframes_t);
 
 	Gtk::MenuItem* jack_disconnect_item;
 	Gtk::MenuItem* jack_reconnect_item;
@@ -753,6 +749,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         void check_announcements ();
 
         EngineControl* _audio_midi_setup;
+        void launch_audio_midi_setup ();
+        int do_audio_midi_setup ();
 };
 
 #endif /* __ardour_gui_h__ */

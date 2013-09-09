@@ -555,6 +555,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	int remove_last_capture ();
 
+        /** handlers should return 0 for "everything OK", and any other value for
+	 * "cannot setup audioengine".
+	 */
+        static PBD::Signal0<int> AudioEngineSetupRequired;
+
 	/** handlers should return -1 for "stop cleanup",
 	    0 for "yes, delete this playlist",
 	    1 for "no, don't delete this playlist".

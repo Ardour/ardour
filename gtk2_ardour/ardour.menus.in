@@ -495,27 +495,27 @@
       <menuitem action='show-marker-lines'/>
     </menu>
     <menu name='JACK' action='JACK'>
-      <menuitem action='JACKDisconnect'/>
-      <menuitem action='JACKReconnect'/>
+      <menuitem action='EngineDisconnect'/>
+      <menuitem action='EngineReconnect'/>
       <menu name='Latency' action='Latency'>
-        <menuitem action='JACKLatency32'/>
-        <menuitem action='JACKLatency64'/>
-        <menuitem action='JACKLatency128'/>
-        <menuitem action='JACKLatency256'/>
-        <menuitem action='JACKLatency512'/>
-        <menuitem action='JACKLatency1024'/>
-        <menuitem action='JACKLatency2048'/>
-        <menuitem action='JACKLatency4096'/>
-        <menuitem action='JACKLatency8192'/>
+        <menuitem action='EngineLatency32'/>
+        <menuitem action='EngineLatency64'/>
+        <menuitem action='EngineLatency128'/>
+        <menuitem action='EngineLatency256'/>
+        <menuitem action='EngineLatency512'/>
+        <menuitem action='EngineLatency1024'/>
+        <menuitem action='EngineLatency2048'/>
+        <menuitem action='EngineLatency4096'/>
+        <menuitem action='EngineLatency8192'/>
       </menu>
     </menu>
     <menu action = 'WindowMenu'>
+      <menuitem action='toggle-audio-midi-setup'/>
+      <separator/>
       <menuitem action='toggle-mixer'/>
       <menuitem action='toggle-meterbridge'/>
       <menuitem action='toggle-editor-mixer'/>
-
       <separator/>
-
       <menuitem action='toggle-inspector'/>
       <menuitem action='toggle-locations'/>
       <menuitem action='toggle-key-editor'/>

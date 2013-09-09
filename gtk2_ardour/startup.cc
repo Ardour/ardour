@@ -75,7 +75,6 @@ ArdourStartup::ArdourStartup (bool require_new, const std::string& session_name,
 	, monitor_via_hardware_button (string_compose (_("Use an external mixer or the hardware mixer of your audio interface.\n"
 							 "%1 will play NO role in monitoring"), PROGRAM_NAME))
 	, monitor_via_ardour_button (string_compose (_("Ask %1 to play back material as it is being recorded"), PROGRAM_NAME))
-	, engine_dialog (0)
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
 	, more_new_session_options_button (_("I'd like more options for this session"))
 	, _output_limit_count_adj (1, 0, 100, 1, 10, 0)
@@ -92,13 +91,12 @@ ArdourStartup::ArdourStartup (bool require_new, const std::string& session_name,
 	, _existing_session_chooser_used (false)
 {
 	new_user = !Glib::file_test (been_here_before_path(), Glib::FILE_TEST_EXISTS);
-	need_audio_setup = AudioEngine::instance()->setup_required ();
 	need_session_info = (session_name.empty() || require_new);
 
 	_provided_session_name = session_name;
 	_provided_session_path = session_path;
 	
-	if (need_audio_setup || need_session_info || new_user) {
+	if (need_session_info || new_user) {
 
 		use_template_button.set_group (session_template_group);
 		use_session_as_template_button.set_group (session_template_group);
@@ -140,17 +138,9 @@ ArdourStartup::ArdourStartup (bool require_new, const std::string& session_name,
 			setup_monitoring_choice_page ();
 			setup_monitor_section_choice_page ();
 			
-			if (need_audio_setup) {
-				setup_audio_page ();
-			}
-			
 			ic_new_session_button.set_active (true); // always create new session on first run
 			
 		} else {
-			
-			if (need_audio_setup) {
-				setup_audio_page ();
-			}
 			
 			setup_initial_choice_page ();
 		}
@@ -184,7 +174,7 @@ ArdourStartup::~ArdourStartup ()
 bool
 ArdourStartup::ready_without_display () const
 {
-	return !new_user && !need_audio_setup && !need_session_info;
+	return !new_user && !need_session_info;
 }
 
 void
@@ -309,24 +299,6 @@ ArdourStartup::session_folder ()
 		}
 		return "";
 	}
-}
-
-void
-ArdourStartup::setup_audio_page ()
-{
-	engine_dialog = ARDOUR_UI::instance()->audio_midi_setup_widget ();
-
-	engine_dialog->set_border_width (12);
-
-	engine_dialog->show_all ();
-
-	audio_page_index = append_page (*engine_dialog);
-	set_page_type (*engine_dialog, ASSISTANT_PAGE_CONTENT);
-	set_page_title (*engine_dialog, _("Audio / MIDI Setup"));
-
-	/* the default parameters should work, so the page is potentially complete */
-
-	set_page_complete (*engine_dialog, true);
 }
 
 void
@@ -660,13 +632,6 @@ ArdourStartup::on_delete_event (GdkEventAny*)
 void
 ArdourStartup::on_apply ()
 {
-	if (engine_dialog) {
-		if (engine_dialog->setup_engine (true)) {
-                        set_current_page (audio_page_index);
-                        return;
-                }
-	}
-
 	if (config_modified) {
 
 		if (default_dir_chooser) {

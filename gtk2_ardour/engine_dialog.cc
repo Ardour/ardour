@@ -52,7 +52,8 @@ using namespace PBD;
 using namespace Glib;
 
 EngineControl::EngineControl ()
-	: input_latency_adjustment (0, 0, 99999, 1)
+	: ArdourDialog (_("Audio/MIDI Setup"))
+	, input_latency_adjustment (0, 0, 99999, 1)
 	, input_latency (input_latency_adjustment)
 	, output_latency_adjustment (0, 0, 99999, 1)
 	, output_latency (output_latency_adjustment)
@@ -64,6 +65,45 @@ EngineControl::EngineControl ()
 	, ports_spinner (ports_adjustment)
 	, realtime_button (_("Realtime"))
 	, basic_packer (9, 3)
+{
+	build_notebook ();
+
+	get_vbox()->set_border_width (12);
+	get_vbox()->pack_start (notebook);
+
+	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
+	add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_APPLY);
+
+	/* Pick up any existing audio setup configuration, if appropriate */
+
+	XMLNode* audio_setup = ARDOUR::Config->extra_xml ("AudioMIDISetup");
+	
+	if (audio_setup) {
+		set_state (*audio_setup);
+	}
+}
+
+void
+EngineControl::on_response (int response_id)
+{
+	ArdourDialog::on_response (response_id);
+
+	switch (response_id) {
+	case RESPONSE_APPLY:
+		setup_engine (true);
+		break;
+	case RESPONSE_OK:
+		setup_engine (true);
+		hide ();
+		break;
+	default:
+		hide ();
+	}
+}
+
+void
+EngineControl::build_notebook ()
 {
 	using namespace Notebook_Helpers;
 	Label* label;
@@ -164,16 +204,6 @@ EngineControl::EngineControl ()
 
 	notebook.set_name ("SettingsNotebook");
 
-	set_border_width (12);
-	pack_start (notebook);
-
-	/* Pick up any existing audio setup configuration, if appropriate */
-
-	XMLNode* audio_setup = ARDOUR::Config->extra_xml ("AudioMIDISetup");
-	
-	if (audio_setup) {
-		set_state (*audio_setup);
-	}
 }
 
 EngineControl::~EngineControl ()

@@ -33,7 +33,9 @@
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/button.h>
 
-class EngineControl : public Gtk::VBox {
+#include "ardour_dialog.h"
+
+class EngineControl : public ArdourDialog {
   public:
 	EngineControl ();
 	~EngineControl ();
@@ -144,6 +146,10 @@ class EngineControl : public Gtk::VBox {
     void save_state ();
 
     static bool print_channel_count (Gtk::SpinButton*);
+
+    void build_notebook ();
+
+    void on_response (int);
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

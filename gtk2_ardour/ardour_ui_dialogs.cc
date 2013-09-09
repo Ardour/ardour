@@ -275,7 +275,10 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	rec_button.set_sensitive (false);
 
 	WM::Manager::instance().set_session ((ARDOUR::Session*) 0);
-	ARDOUR_UI::instance()->video_timeline->close_session();
+
+	if (ARDOUR_UI::instance()->video_timeline) {
+		ARDOUR_UI::instance()->video_timeline->close_session();
+	}
 
 	stop_blinking ();
 	stop_clocking ();
