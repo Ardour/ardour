@@ -25,7 +25,7 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include <glibmm.h>
+#include <glibmm/spawn.h>
 #include <gtkmm/messagedialog.h>
 
 #include "pbd/error.h"
@@ -790,22 +790,46 @@ EngineControl::get_device_name () const
 void
 EngineControl::control_app_button_clicked ()
 {
-	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 
-	if (!backend) {
+	const string appname  = g_getenv ("ARDOUR_DEVICE_CONTROL_APP");
+
+	if (appname.empty()) {
+		boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+		
+		if (!backend) {
+			return;
+		}
+		
+		string appname = backend->control_app_name();
+	}
+
+	if (appname.empty()) {
 		return;
 	}
 
-	backend->launch_control_app();
+	std::list<string> args;
+	args.push_back (appname);
+	Glib::spawn_async ("", args, Glib::SPAWN_SEARCH_PATH);
 }
 
 void
 EngineControl::manage_control_app_sensitivity ()
 {
-	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
-	if (backend && backend->have_control_app()) {
-		control_app_button.set_sensitive (true);
-	} else {
+	const string appname  = g_getenv ("ARDOUR_DEVICE_CONTROL_APP");
+
+	if (appname.empty()) {
+		boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+		
+		if (!backend) {
+			return;
+		}
+		
+		string appname = backend->control_app_name();
+	}
+
+	if (appname.empty()) {
 		control_app_button.set_sensitive (false);
+	} else {
+		control_app_button.set_sensitive (true);
 	}
 }

@@ -23,7 +23,6 @@
 
 #include <boost/scoped_ptr.hpp>
 #include <glibmm/timer.h>
-#include <glibmm/spawn.h>
 
 #include "pbd/error.h"
 
@@ -981,26 +980,3 @@ JACKAudioBackend::control_app_name () const
 	return appname;
 }
 
-bool
-JACKAudioBackend::have_control_app () const
-{
-	return !control_app_name().empty();
-}
-
-void
-JACKAudioBackend::launch_control_app ()
-{
-	/* launch control app, don't care if it succeeds */
-
-	string appname = control_app_name ();
-
-	if (appname.empty()) {
-		return;
-	}
-	
-	std::list<string> args;
-	args.push_back (appname);
-	Glib::spawn_async ("", args, Glib::SPAWN_SEARCH_PATH);
-}
-
-	

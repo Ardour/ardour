@@ -84,8 +84,7 @@ class JACKAudioBackend : public AudioBackend {
     uint32_t     systemic_input_latency () const;
     uint32_t     systemic_output_latency () const;
 
-    bool have_control_app() const;
-    void launch_control_app ();
+    std::string control_app_name () const;
 
     int start ();
     int stop ();
@@ -182,7 +181,6 @@ class JACKAudioBackend : public AudioBackend {
     mutable DriverDeviceMap all_devices;
 
     PBD::ScopedConnection disconnect_connection;
-    std::string control_app_name () const;
 };
 
 } // namespace

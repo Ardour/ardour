@@ -228,20 +228,12 @@ class AudioBackend {
     virtual uint32_t     systemic_input_latency () const = 0;
     virtual uint32_t     systemic_output_latency () const = 0;
 
-    /** Return true if it is possible to launch a control app
-     * at this time. Return false otherwise.
-     *
-     * The audio backend may not know the device for which the
-     * control app should be opened, or there may no such
-     * application. In such cases, this method should return false.
+    /** Return the name of a control application for the 
+     * selected/in-use device. If no such application exists,
+     * or if no device has been selected or is in-use,
+     * return an empty string.
      */
-    virtual bool have_control_app() const = 0;
-
-    /** If the device name has been set, launch an application (if any exist)
-     * to manage the hardware settings of that device. If no such application
-     * exists, do nothing.
-     */
-    virtual void launch_control_app () = 0;
+    virtual std::string control_app_name() const = 0;
 
     /* Basic state control */
 
