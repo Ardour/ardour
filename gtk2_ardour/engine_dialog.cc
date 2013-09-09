@@ -63,13 +63,22 @@ EngineControl::EngineControl ()
 	, output_channels (output_channels_adjustment)
 	, ports_adjustment (128, 8, 1024, 1, 16)
 	, ports_spinner (ports_adjustment)
-	, realtime_button (_("Realtime"))
+	, control_app_button (_("Launch Control App"))
 	, basic_packer (9, 3)
 {
 	build_notebook ();
 
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (notebook);
+
+	Gtk::HBox* hpacker = manage (new HBox);
+	hpacker->pack_start (control_app_button, false, false);
+	hpacker->show ();
+	control_app_button.show();
+	get_vbox()->pack_start (*hpacker);
+
+	control_app_button.signal_clicked().connect (mem_fun (*this, &EngineControl::control_app_button_clicked));
+	manage_control_app_sensitivity ();
 
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
@@ -346,6 +355,8 @@ EngineControl::device_changed ()
 	set_popdown_strings (buffer_size_combo, s);
 	buffer_size_combo.set_active_text (s.front());
 	show_buffer_duration ();
+
+	manage_control_app_sensitivity ();
 
 	maybe_set_state ();
 }	
@@ -700,9 +711,12 @@ EngineControl::setup_engine (bool start)
 		state->active = true;
 		
 		if (start) {
-			return ARDOUR::AudioEngine::instance()->start();
+			if (ARDOUR::AudioEngine::instance()->start()) {
+				return -1;
+			}
 		}
 
+		manage_control_app_sensitivity ();
 		return 0;
 
 	} catch (...) {
@@ -773,3 +787,25 @@ EngineControl::get_device_name () const
 	return device_combo.get_active_text ();
 }
 
+void
+EngineControl::control_app_button_clicked ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+
+	if (!backend) {
+		return;
+	}
+
+	backend->launch_control_app();
+}
+
+void
+EngineControl::manage_control_app_sensitivity ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	if (backend && backend->have_control_app()) {
+		control_app_button.set_sensitive (true);
+	} else {
+		control_app_button.set_sensitive (false);
+	}
+}

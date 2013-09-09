@@ -17,10 +17,13 @@
 
 */
 
+#include <string>
+#include <list>
 #include <math.h>
 
 #include <boost/scoped_ptr.hpp>
 #include <glibmm/timer.h>
+#include <glibmm/spawn.h>
 
 #include "pbd/error.h"
 
@@ -340,7 +343,11 @@ JACKAudioBackend::set_systemic_output_latency (uint32_t l)
 std::string
 JACKAudioBackend::device_name () const
 {
-	return string();
+	if (connected()) {
+		return "???";
+	} 
+
+	return _target_device;
 }
 
 float
@@ -947,3 +954,53 @@ JACKAudioBackend::can_change_buffer_size_when_running () const
 {
 	return true;
 }
+
+string
+JACKAudioBackend::control_app_name () const
+{
+	string appname;
+
+	if (_target_device.empty()) {
+		return appname;
+	}
+
+#if defined (__linux)
+	/* Linux potential control apps */
+
+	if (_target_device == "Hammerfall DSP") {
+		appname = "hdspconf";
+	}
+#else
+#if defined (__APPLE__)
+	/* OS X potential control apps */
+#else
+	/* Windows potential control apps */
+#endif
+#endif
+
+	return appname;
+}
+
+bool
+JACKAudioBackend::have_control_app () const
+{
+	return !control_app_name().empty();
+}
+
+void
+JACKAudioBackend::launch_control_app ()
+{
+	/* launch control app, don't care if it succeeds */
+
+	string appname = control_app_name ();
+
+	if (appname.empty()) {
+		return;
+	}
+	
+	std::list<string> args;
+	args.push_back (appname);
+	Glib::spawn_async ("", args, Glib::SPAWN_SEARCH_PATH);
+}
+
+	

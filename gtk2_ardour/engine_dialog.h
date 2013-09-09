@@ -68,6 +68,8 @@ class EngineControl : public ArdourDialog {
     Gtk::Adjustment ports_adjustment;
     Gtk::SpinButton ports_spinner;
 
+    Gtk::Button     control_app_button;
+
     /* JACK specific */
     
     Gtk::CheckButton realtime_button;
@@ -79,7 +81,6 @@ class EngineControl : public ArdourDialog {
     Gtk::CheckButton hw_monitor_button;
     Gtk::CheckButton hw_meter_button;
     Gtk::CheckButton verbose_output_button;
-    
     
     Gtk::ComboBoxText preset_combo;
     Gtk::ComboBoxText serverpath_combo;
@@ -150,6 +151,8 @@ class EngineControl : public ArdourDialog {
     void build_notebook ();
 
     void on_response (int);
+    void control_app_button_clicked ();
+    void manage_control_app_sensitivity ();
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */
