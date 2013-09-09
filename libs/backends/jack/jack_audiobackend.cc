@@ -959,23 +959,18 @@ JACKAudioBackend::control_app_name () const
 {
 	string appname;
 
-	if (_target_device.empty()) {
+	if (_target_driver.empty() || _target_device.empty()) {
 		return appname;
 	}
 
-#if defined (__linux)
-	/* Linux potential control apps */
+	if (_target_driver == "alsa") {
 
-	if (_target_device == "Hammerfall DSP") {
-		appname = "hdspconf";
+		if (_target_device == "Hammerfall DSP") {
+			appname = "hdspconf";
+		} else if (_target_device == "M Audio Delta 1010") {
+			appname = "mudita";
+		}
 	}
-#else
-#if defined (__APPLE__)
-	/* OS X potential control apps */
-#else
-	/* Windows potential control apps */
-#endif
-#endif
 
 	return appname;
 }
