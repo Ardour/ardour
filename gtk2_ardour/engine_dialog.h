@@ -94,6 +94,7 @@ class EngineControl : public ArdourDialog {
     Gtk::Table basic_packer;
     Gtk::Table midi_packer;
     Gtk::HBox basic_hbox;
+    Gtk::VBox basic_vbox;
     Gtk::HBox midi_hbox;
 
     sigc::connection sr_connection;

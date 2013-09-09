@@ -71,12 +71,6 @@ EngineControl::EngineControl ()
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (notebook);
 
-	Gtk::HBox* hpacker = manage (new HBox);
-	hpacker->pack_start (control_app_button, false, false);
-	hpacker->show ();
-	control_app_button.show();
-	get_vbox()->pack_start (*hpacker);
-
 	control_app_button.signal_clicked().connect (mem_fun (*this, &EngineControl::control_app_button_clicked));
 	manage_control_app_sensitivity ();
 
@@ -201,10 +195,18 @@ EngineControl::build_notebook ()
 	device_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::device_changed));
 
 	basic_hbox.pack_start (basic_packer, false, false);
+	basic_vbox.pack_start (basic_hbox, false, false);
+
+	Gtk::HBox* hpacker = manage (new HBox);
+	hpacker->set_border_width (12);
+	hpacker->pack_start (control_app_button, false, false);
+	hpacker->show ();
+	control_app_button.show();
+	basic_vbox.pack_start (*hpacker);
 
 	midi_packer.set_border_width (12);
 
-	notebook.pages().push_back (TabElem (basic_hbox, _("Audio")));
+	notebook.pages().push_back (TabElem (basic_vbox, _("Audio")));
 	notebook.pages().push_back (TabElem (midi_hbox, _("MIDI")));
 	notebook.set_border_width (12);
 
@@ -815,9 +817,10 @@ EngineControl::control_app_button_clicked ()
 void
 EngineControl::manage_control_app_sensitivity ()
 {
-	const string appname  = g_getenv ("ARDOUR_DEVICE_CONTROL_APP");
-
-	if (appname.empty()) {
+	const char* env_value  = g_getenv ("ARDOUR_DEVICE_CONTROL_APP");
+	string appname;
+	
+	if (!env_value) {
 		boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 		
 		if (!backend) {
@@ -825,6 +828,8 @@ EngineControl::manage_control_app_sensitivity ()
 		}
 		
 		string appname = backend->control_app_name();
+	} else {
+		appname = env_value;
 	}
 
 	if (appname.empty()) {
