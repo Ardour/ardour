@@ -61,6 +61,9 @@ class JACKAudioBackend : public AudioBackend {
     uint32_t available_input_channel_count (const std::string& device) const;
     uint32_t available_output_channel_count (const std::string& device) const;
 
+    bool can_change_sample_rate_when_running() const;
+    bool can_change_buffer_size_when_running() const;
+
     int set_device_name (const std::string&);
     int set_sample_rate (float);
     int set_buffer_size (uint32_t);

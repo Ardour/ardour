@@ -147,6 +147,17 @@ class AudioBackend {
      */
     virtual uint32_t available_output_channel_count (const std::string& device) const = 0;
 
+    /* Return true if the derived class can change the sample rate of the
+     * device in use while the device is already being used. Return false
+     * otherwise. (example: JACK cannot do this as of September 2013)
+     */
+    virtual bool can_change_sample_rate_when_running () const = 0;
+    /* Return true if the derived class can change the buffer size of the
+     * device in use while the device is already being used. Return false
+     * otherwise. 
+     */
+    virtual bool can_change_buffer_size_when_running () const = 0;
+
     /* Set the hardware parameters.
      * 
      * If called when the current state is stopped or paused,

@@ -935,3 +935,15 @@ JACKAudioBackend::n_physical (unsigned long flags) const
 
 	return c;
 }
+
+bool
+JACKAudioBackend::can_change_sample_rate_when_running () const
+{
+	return false;
+}
+
+bool
+JACKAudioBackend::can_change_buffer_size_when_running () const
+{
+	return true;
+}
