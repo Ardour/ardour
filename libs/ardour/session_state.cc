@@ -86,6 +86,7 @@
 #include "ardour/control_protocol_manager.h"
 #include "ardour/directory_names.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/graph.h"
 #include "ardour/location.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_patch_manager.h"
@@ -126,8 +127,49 @@ using namespace PBD;
 
 /** @param snapshot_name Snapshot name, without the .ardour prefix */
 void
-Session::first_stage_init (string fullpath, string snapshot_name)
+Session::first_stage_init (string fullpath, string /*snapshot_name*/)
 {
+	/* finish initialization that can't be done in a normal C++ constructor
+	   definition.
+	*/
+
+	timerclear (&last_mmc_step);
+	g_atomic_int_set (&processing_prohibited, 0);
+	g_atomic_int_set (&_record_status, Disabled);
+	g_atomic_int_set (&_playback_load, 100);
+	g_atomic_int_set (&_capture_load, 100);
+	set_next_event ();
+	_all_route_group->set_active (true, this);
+	interpolation.add_channel_to (0, 0);
+
+	if (config.get_use_video_sync()) {
+		waiting_for_sync_offset = true;
+	} else {
+		waiting_for_sync_offset = false;
+	}
+
+	last_rr_session_dir = session_dirs.begin();
+
+	set_history_depth (Config->get_history_depth());
+	
+	if (how_many_dsp_threads () > 1) {
+		/* For now, only create the graph if we are using >1 DSP threads, as
+		   it is a bit slower than the old code with 1 thread.
+		*/
+		_process_graph.reset (new Graph (*this));
+	}
+
+        /* default: assume simple stereo speaker configuration */
+
+        _speakers->setup_default_speakers (2);
+
+        _solo_cut_control.reset (new ProxyControllable (_("solo cut control (dB)"), PBD::Controllable::GainLike,
+                                                        boost::bind (&RCConfiguration::set_solo_mute_gain, Config, _1),
+                                                        boost::bind (&RCConfiguration::get_solo_mute_gain, Config)));
+        add_controllable (_solo_cut_control);
+
+	/* discover canonical fullpath */
+
 	if (fullpath.length() == 0) {
 		destroy ();
 		throw failed_constructor();
@@ -141,134 +183,16 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	}
 
 	_path = string(buf);
+	
+	/* we require _path to end with a dir separator */
 
 	if (_path[_path.length()-1] != G_DIR_SEPARATOR) {
 		_path += G_DIR_SEPARATOR;
 	}
 
-	/* these two are just provisional settings. set_state()
-	   will likely override them.
-	*/
+	/* is it new ? */
 
-	_name = _current_snapshot_name = snapshot_name;
-
-	set_history_depth (Config->get_history_depth());
-
-	_current_frame_rate = _engine.sample_rate ();
-	_nominal_frame_rate = _current_frame_rate;
-	_base_frame_rate = _current_frame_rate;
-
-	_tempo_map = new TempoMap (_current_frame_rate);
-	_tempo_map->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
-
-
-	_non_soloed_outs_muted = false;
-	_listen_cnt = 0;
-	_solo_isolated_cnt = 0;
-	g_atomic_int_set (&processing_prohibited, 0);
-	_transport_speed = 0;
-	_default_transport_speed = 1.0;
-	_last_transport_speed = 0;
-	_target_transport_speed = 0;
-	auto_play_legal = false;
-	transport_sub_state = 0;
-	_transport_frame = 0;
-	_requested_return_frame = -1;
-	_session_range_location = 0;
-	g_atomic_int_set (&_record_status, Disabled);
-	loop_changing = false;
-	play_loop = false;
-	have_looped = false;
-	_last_roll_location = 0;
-	_last_roll_or_reversal_location = 0;
-	_last_record_location = 0;
-	pending_locate_frame = 0;
-	pending_locate_roll = false;
-	pending_locate_flush = false;
-	state_was_pending = false;
-	set_next_event ();
-	outbound_mtc_timecode_frame = 0;
-	next_quarter_frame_to_send = -1;
-	current_block_size = 0;
-	solo_update_disabled = false;
-	_have_captured = false;
-	_worst_output_latency = 0;
-	_worst_input_latency = 0;
- 	_worst_track_latency = 0;
-	_state_of_the_state = StateOfTheState(CannotSave|InitialConnecting|Loading);
-	_was_seamless = Config->get_seamless_loop ();
-	_slave = 0;
-	_send_qf_mtc = false;
-	_pframes_since_last_mtc = 0;
-	g_atomic_int_set (&_playback_load, 100);
-	g_atomic_int_set (&_capture_load, 100);
-	_play_range = false;
-	_exporting = false;
-	pending_abort = false;
-	_adding_routes_in_progress = false;
-	destructive_index = 0;
-	first_file_data_format_reset = true;
-	first_file_header_format_reset = true;
-	post_export_sync = false;
-	midi_control_ui = 0;
-        _step_editors = 0;
-        no_questions_about_missing_files = false;
-        _speakers.reset (new Speakers);
-	_clicks_cleared = 0;
-	ignore_route_processor_changes = false;
-	_pre_export_mmc_enabled = false;
-
-	AudioDiskstream::allocate_working_buffers();
-
-	/* default short fade = 15ms */
-
-	SndFileSource::setup_standard_crossfades (*this, frame_rate());
-
-	last_mmc_step.tv_sec = 0;
-	last_mmc_step.tv_usec = 0;
-	step_speed = 0.0;
-
-	/* click sounds are unset by default, which causes us to internal
-	   waveforms for clicks.
-	*/
-
-	click_length = 0;
-	click_emphasis_length = 0;
-	_clicking = false;
-
-	process_function = &Session::process_with_events;
-
-	if (config.get_use_video_sync()) {
-		waiting_for_sync_offset = true;
-	} else {
-		waiting_for_sync_offset = false;
-	}
-
-	last_timecode_when = 0;
-	last_timecode_valid = false;
-
-	sync_time_vars ();
-
-	last_rr_session_dir = session_dirs.begin();
-	refresh_disk_space ();
-
-        /* default: assume simple stereo speaker configuration */
-
-        _speakers->setup_default_speakers (2);
-
-	/* slave stuff */
-
-	average_slave_delta = 1800; // !!! why 1800 ????
-	have_first_delta_accumulator = false;
-	delta_accumulator_cnt = 0;
-	_slave_state = Stopped;
-
-        _solo_cut_control.reset (new ProxyControllable (_("solo cut control (dB)"), PBD::Controllable::GainLike,
-                                                        boost::bind (&RCConfiguration::set_solo_mute_gain, Config, _1),
-                                                        boost::bind (&RCConfiguration::get_solo_mute_gain, Config)));
-        add_controllable (_solo_cut_control);
-
-	_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this));
+	_is_new = !Glib::file_test (_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
 
 	/* These are all static "per-class" signals */
 
@@ -282,18 +206,37 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	Delivery::disable_panners ();
 	IO::disable_connecting ();
+
+	/* ENGINE */
+
+	n_physical_outputs = _engine.n_physical_outputs ();
+	n_physical_inputs =  _engine.n_physical_inputs ();
+
+	_current_frame_rate = _engine.sample_rate ();
+	_nominal_frame_rate = _current_frame_rate;
+	_base_frame_rate = _current_frame_rate;
+
+	_midi_ports = new MidiPortManager;
+	_mmc = new MIDI::MachineControl;
+	
+	_mmc->set_ports (_midi_ports->mmc_input_port(), _midi_ports->mmc_output_port());
+	
+	_tempo_map = new TempoMap (_current_frame_rate);
+	_tempo_map->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
+
+	AudioDiskstream::allocate_working_buffers();
+
+	SndFileSource::setup_standard_crossfades (*this, frame_rate());
+	_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this));
+
+	refresh_disk_space ();
+	sync_time_vars ();
 }
 
 int
 Session::second_stage_init ()
 {
 	AudioFileSource::set_peak_dir (_session_dir->peak_path());
-
-	if (!_is_new) {
-		if (load_state (_current_snapshot_name)) {
-			return -1;
-		}
-	}
 
 	if (_butler->start_thread()) {
 		return -1;

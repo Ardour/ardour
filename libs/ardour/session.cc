@@ -87,6 +87,7 @@
 #include "ardour/session_playlists.h"
 #include "ardour/smf_source.h"
 #include "ardour/source_factory.h"
+#include "ardour/speakers.h"
 #include "ardour/utils.h"
 
 #include "midi++/port.h"
@@ -135,9 +136,9 @@ Session::Session (AudioEngine &eng,
 	, _target_transport_speed (0.0)
 	, _requested_return_frame (-1)
 	, _under_nsm_control (false)
-	, _session_dir (new SessionDirectory(fullpath))
+	, _session_dir (new SessionDirectory (fullpath))
 	, state_tree (0)
-	, _state_of_the_state (Clean)
+	, _state_of_the_state (StateOfTheState(CannotSave|InitialConnecting|Loading))
 	, _butler (new Butler (*this))
 	, _post_transport_work (0)
 	, _send_timecode_update (false)
@@ -154,6 +155,69 @@ Session::Session (AudioEngine &eng,
 	, main_outs (0)
 	, _have_rec_enabled_track (false)
 	, _suspend_timecode_transmission (0)
+	, _non_soloed_outs_muted (false)
+	, _listen_cnt (0)
+	, _solo_isolated_cnt (0)
+	, _transport_speed (0)
+	, _default_transport_speed (1.0)
+	, _last_transport_speed (0)
+	, auto_play_legal (false)
+	, transport_sub_state (0)
+	, _transport_frame (0)
+	, _session_range_location (0)
+	, loop_changing (false)
+	, play_loop (false)
+	, have_looped (false)
+	, _last_roll_location (0)
+	, _last_roll_or_reversal_location (0)
+	, _last_record_location (0)
+	, pending_locate_frame (0)
+	, pending_locate_roll (false)
+	, pending_locate_flush (false)
+	, state_was_pending (false)
+	, outbound_mtc_timecode_frame (0)
+	, next_quarter_frame_to_send (-1)
+	, current_block_size (0)
+	, solo_update_disabled (false)
+	, _have_captured (false)
+	, _worst_output_latency (0)
+	, _worst_input_latency (0)
+ 	, _worst_track_latency (0)
+	, _was_seamless (Config->get_seamless_loop ())
+	, _slave (0)
+	, _send_qf_mtc (false)
+	, _pframes_since_last_mtc (0)
+	, _play_range (false)
+	, _exporting (false)
+	, pending_abort (false)
+	, _adding_routes_in_progress (false)
+	, destructive_index (0)
+	, first_file_data_format_reset (true)
+	, first_file_header_format_reset (true)
+	, post_export_sync (false)
+	, midi_control_ui (0)
+	, _step_editors (0)
+	, no_questions_about_missing_files (false)
+	,  _speakers (new Speakers)
+	, _clicks_cleared (0)
+	, ignore_route_processor_changes (false)
+	, _pre_export_mmc_enabled (false)
+	, _locations (new Locations (*this))
+	, ltc_encoder (0)
+	, playlists (new SessionPlaylists)
+	, _name (snapshot_name)
+	, _current_snapshot_name (snapshot_name)
+	, step_speed (0.0)
+	, click_length (0)
+	, click_emphasis_length (0)
+	, _clicking (false)
+	, process_function (&Session::process_with_events)
+	, last_timecode_when (0)
+	, last_timecode_valid (false)
+	, average_slave_delta (1800) // !!! why 1800 ???
+	, have_first_delta_accumulator (false)
+	, delta_accumulator_cnt (0)
+	, _slave_state (Stopped)
 {
 	if (_engine.current_backend() == 0 || _engine.setup_required()) {
 		boost::optional<int> r = AudioEngineSetupRequired ();
@@ -166,37 +230,15 @@ Session::Session (AudioEngine &eng,
 		throw failed_constructor();
 	}
 
-	_locations = new Locations (*this);
-	ltc_encoder = NULL;
-
-	_midi_ports = new MidiPortManager;
-	_mmc = new MIDI::MachineControl;
-
-	_mmc->set_ports (_midi_ports->mmc_input_port(), _midi_ports->mmc_output_port());
-
-	if (how_many_dsp_threads () > 1) {
-		/* For now, only create the graph if we are using >1 DSP threads, as
-		   it is a bit slower than the old code with 1 thread.
-		*/
-		_process_graph.reset (new Graph (*this));
-	}
-
-	playlists.reset (new SessionPlaylists);
-
-	_all_route_group->set_active (true, this);
-
-	interpolation.add_channel_to (0, 0);
-
-	n_physical_outputs = _engine.n_physical_outputs ();
-	n_physical_inputs =  _engine.n_physical_inputs ();
-
 	first_stage_init (fullpath, snapshot_name);
-
-	_is_new = !Glib::file_test (_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
 
 	if (_is_new) {
 		if (create (mix_template, bus_profile)) {
 			destroy ();
+			throw failed_constructor ();
+		}
+	} else {
+		if (load_state (_current_snapshot_name)) {
 			throw failed_constructor ();
 		}
 	}
