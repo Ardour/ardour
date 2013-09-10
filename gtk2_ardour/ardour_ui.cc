@@ -268,7 +268,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	/* handle Audio/MIDI setup when session requires it */
 
-	ARDOUR::Session::AudioEngineSetupRequired.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::do_audio_midi_setup, this));
+	ARDOUR::Session::AudioEngineSetupRequired.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::do_audio_midi_setup, this, _1));
 
 	/* handle sr mismatch with a dialog (PROBLEM: needs to return a value and thus cannot be x-thread) */
 
@@ -4159,9 +4159,11 @@ ARDOUR_UI::launch_audio_midi_setup ()
 }
 						
 int
-ARDOUR_UI::do_audio_midi_setup ()
+ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 {
 	launch_audio_midi_setup ();
+
+	_audio_midi_setup->set_desired_sample_rate (desired_sample_rate);
 
 	int r = _audio_midi_setup->run ();
 

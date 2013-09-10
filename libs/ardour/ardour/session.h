@@ -558,7 +558,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
         /** handlers should return 0 for "everything OK", and any other value for
 	 * "cannot setup audioengine".
 	 */
-        static PBD::Signal0<int> AudioEngineSetupRequired;
+        static PBD::Signal1<int,uint32_t> AudioEngineSetupRequired;
 
 	/** handlers should return -1 for "stop cleanup",
 	    0 for "yes, delete this playlist",
@@ -1071,7 +1071,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::scoped_ptr<SessionDirectory> _session_dir;
 
 	void hookup_io ();
-	void when_engine_running ();
+        int when_engine_running ();
 	void graph_reordered ();
 
 	/** current snapshot name, without the .ardour suffix */
@@ -1137,8 +1137,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void             auto_loop_changed (Location *);
 	void             auto_loop_declick_range (Location *, framepos_t &, framepos_t &);
 
-	void first_stage_init (std::string path, std::string snapshot_name);
-	int  second_stage_init ();
+	void pre_engine_init (std::string path);
+	int  post_engine_init ();
 	void remove_empty_sounds ();
 
 	void setup_midi_control ();
@@ -1620,6 +1620,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
     /* persistent, non-track related MIDI ports */
     MidiPortManager* _midi_ports;
     MIDI::MachineControl* _mmc;
+
+    void setup_ltc ();
+    void setup_click ();
+    void setup_bundles ();
 };
 
 } // namespace ARDOUR

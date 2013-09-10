@@ -153,8 +153,10 @@ Port::connect (std::string const & other)
 	}
 
 	if (sends_output ()) {
+		DEBUG_TRACE (DEBUG::Ports, string_compose ("Connect %1 to %2\n", our_name, other_name));
 		r = port_engine.connect (our_name, other_name);
 	} else {
+		DEBUG_TRACE (DEBUG::Ports, string_compose ("Connect %1 to %2\n", other_name, our_name));
 		r = port_engine.connect (other_name, our_name);
 	}
 
@@ -419,6 +421,8 @@ int
 Port::reconnect ()
 {
 	/* caller must hold process lock; intended to be used only after reestablish() */
+
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("Connect %1 to %2 destinations\n",name(), _connections.size()));
 
 	for (std::set<string>::iterator i = _connections.begin(); i != _connections.end(); ++i) {
 		if (connect (*i)) {

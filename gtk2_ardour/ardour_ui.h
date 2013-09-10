@@ -750,7 +750,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
         EngineControl* _audio_midi_setup;
         void launch_audio_midi_setup ();
-        int do_audio_midi_setup ();
+        int do_audio_midi_setup (uint32_t);
 };
 
 #endif /* __ardour_gui_h__ */

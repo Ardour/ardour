@@ -37,14 +37,16 @@
 
 class EngineControl : public ArdourDialog {
   public:
-	EngineControl ();
-	~EngineControl ();
-
-	static bool need_setup ();
-
-	XMLNode& get_state ();
-	void set_state (const XMLNode&);
-
+    EngineControl ();
+    ~EngineControl ();
+    
+    static bool need_setup ();
+    
+    XMLNode& get_state ();
+    void set_state (const XMLNode&);
+    
+    void set_desired_sample_rate (uint32_t);
+    
   private:
     Gtk::Notebook notebook;
 
@@ -153,6 +155,7 @@ class EngineControl : public ArdourDialog {
     void control_app_button_clicked ();
     void manage_control_app_sensitivity ();
     int push_state_to_backend (bool start);
+    uint32_t _desired_sample_rate;
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

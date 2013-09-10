@@ -65,6 +65,7 @@ EngineControl::EngineControl ()
 	, control_app_button (_("Launch Control App"))
 	, basic_packer (9, 3)
 	, ignore_changes (0)
+	, _desired_sample_rate (0)
 {
 	build_notebook ();
 
@@ -340,6 +341,8 @@ EngineControl::device_changed ()
 	ignore_changes++;
 
 	/* sample rates */
+	
+	string desired;
 
 	vector<float> sr = backend->available_sample_rates (device_name);
 	for (vector<float>::const_iterator x = sr.begin(); x != sr.end(); ++x) {
@@ -350,11 +353,17 @@ EngineControl::device_changed ()
 			snprintf (buf, sizeof (buf), "%.0f kHz", (*x)/1000.0);
 		}
 		s.push_back (buf);
+		if (*x == _desired_sample_rate) {
+			desired = buf;
+		}
 	}
 
 	set_popdown_strings (sample_rate_combo, s);
-	sample_rate_combo.set_active_text (s.front());
-
+	if (desired.empty()) {
+		sample_rate_combo.set_active_text (s.front());
+	} else {
+		sample_rate_combo.set_active_text (desired);
+	}
 
 	vector<uint32_t> bs = backend->available_buffer_sizes(device_name);
 	s.clear ();
@@ -514,7 +523,9 @@ EngineControl::maybe_display_saved_state ()
 
 	if (state) {
 		ignore_changes++;
-		sample_rate_combo.set_active_text (state->sample_rate);
+		if (!_desired_sample_rate) {
+			sample_rate_combo.set_active_text (state->sample_rate);
+		}
 		buffer_size_combo.set_active_text (state->buffer_size);
 		input_latency.set_value (state->input_latency);
 		output_latency.set_value (state->output_latency);
@@ -842,4 +853,11 @@ EngineControl::manage_control_app_sensitivity ()
 	} else {
 		control_app_button.set_sensitive (true);
 	}
+}
+
+void
+EngineControl::set_desired_sample_rate (uint32_t sr)
+{
+	_desired_sample_rate = sr;
+	device_changed ();
 }

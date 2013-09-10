@@ -107,7 +107,7 @@ using namespace PBD;
 
 bool Session::_disable_all_loaded_plugins = false;
 
-PBD::Signal0<int> Session::AudioEngineSetupRequired;
+PBD::Signal1<int,uint32_t> Session::AudioEngineSetupRequired;
 PBD::Signal1<void,std::string> Session::Dialog;
 PBD::Signal0<int> Session::AskAboutPendingState;
 PBD::Signal2<int, framecnt_t, framecnt_t> Session::AskAboutSampleRateMismatch;
@@ -132,106 +132,137 @@ Session::Session (AudioEngine &eng,
                   const string& snapshot_name,
                   BusProfile* bus_profile,
                   string mix_template)
-	: _engine (eng)
-	, _target_transport_speed (0.0)
-	, _requested_return_frame (-1)
-	, _under_nsm_control (false)
-	, _session_dir (new SessionDirectory (fullpath))
-	, state_tree (0)
-	, _state_of_the_state (StateOfTheState(CannotSave|InitialConnecting|Loading))
-	, _butler (new Butler (*this))
-	, _post_transport_work (0)
-	, _send_timecode_update (false)
-	, ltc_enc_buf(0)
-	, _all_route_group (new RouteGroup (*this, "all"))
-	, routes (new RouteList)
-	, _total_free_4k_blocks (0)
-	, _total_free_4k_blocks_uncertain (false)
-	, _bundles (new BundleList)
-	, _bundle_xml_node (0)
-	, _current_trans (0)
-	, click_data (0)
-	, click_emphasis_data (0)
-	, main_outs (0)
-	, _have_rec_enabled_track (false)
-	, _suspend_timecode_transmission (0)
-	, _non_soloed_outs_muted (false)
-	, _listen_cnt (0)
-	, _solo_isolated_cnt (0)
+	: playlists (new SessionPlaylists)
+	, _engine (eng)
+	, process_function (&Session::process_with_events)
+	, waiting_for_sync_offset (false)
+	, _base_frame_rate (0)
+	, _current_frame_rate (0)
+	, _nominal_frame_rate (0)
+	, transport_sub_state (0)
+	, _record_status (Disabled)
+	, _transport_frame (0)
+	, _session_range_location (0)
+	, _slave (0)
+	, _silent (false)
 	, _transport_speed (0)
 	, _default_transport_speed (1.0)
 	, _last_transport_speed (0)
+	, _target_transport_speed (0.0)
 	, auto_play_legal (false)
-	, transport_sub_state (0)
-	, _transport_frame (0)
-	, _session_range_location (0)
-	, loop_changing (false)
-	, play_loop (false)
-	, have_looped (false)
-	, _last_roll_location (0)
-	, _last_roll_or_reversal_location (0)
-	, _last_record_location (0)
-	, pending_locate_frame (0)
-	, pending_locate_roll (false)
-	, pending_locate_flush (false)
-	, state_was_pending (false)
-	, outbound_mtc_timecode_frame (0)
-	, next_quarter_frame_to_send (-1)
+	, _last_slave_transport_frame (0)
+	, maximum_output_latency (0)
+	, _requested_return_frame (-1)
 	, current_block_size (0)
-	, solo_update_disabled (false)
-	, _have_captured (false)
 	, _worst_output_latency (0)
 	, _worst_input_latency (0)
  	, _worst_track_latency (0)
+	, _have_captured (false)
+	, _meter_hold (0)
+	, _meter_falloff (0)
+	, _non_soloed_outs_muted (false)
+	, _listen_cnt (0)
+	, _solo_isolated_cnt (0)
+	, _writable (false)
 	, _was_seamless (Config->get_seamless_loop ())
-	, _slave (0)
+	, _under_nsm_control (false)
+	, delta_accumulator_cnt (0)
+	, average_slave_delta (1800) // !!! why 1800 ???
+	, average_dir (0)
+	, have_first_delta_accumulator (false)
+	, _slave_state (Stopped)
+	, post_export_sync (false)
+	, post_export_position (0)
+	, _exporting (false)
+	, _export_started (false)
+	, _export_rolling (false)
+	, _pre_export_mmc_enabled (false)
+	, _name (snapshot_name)
+	, _is_new (true)
 	, _send_qf_mtc (false)
 	, _pframes_since_last_mtc (0)
-	, _play_range (false)
-	, _exporting (false)
+	, session_midi_feedback (0)
+	, play_loop (false)
+	, loop_changing (false)
+	, last_loopend (0)
+	, _session_dir (new SessionDirectory (fullpath))
+	, _current_snapshot_name (snapshot_name)	  
+	, state_tree (0)
+	, state_was_pending (false)
+	, _state_of_the_state (StateOfTheState(CannotSave|InitialConnecting|Loading))
+	, _last_roll_location (0)
+	, _last_roll_or_reversal_location (0)
+	, _last_record_location (0)
+	, pending_locate_roll (false)
+	, pending_locate_frame (0)
+	, pending_locate_flush (false)
 	, pending_abort (false)
+	, pending_auto_loop (false)
+	, _butler (new Butler (*this))
+	, _post_transport_work (0)
+	,  cumulative_rf_motion (0)
+	, rf_scale (1.0)
+	, _locations (new Locations (*this))
+	, step_speed (0)
+	, outbound_mtc_timecode_frame (0)
+	, next_quarter_frame_to_send (-1)
+	, _frames_per_timecode_frame (0)
+	, _frames_per_hour (0)
+	, _timecode_frames_per_hour (0)
+	, last_timecode_valid (false)
+	, last_timecode_when (0)
+	, _send_timecode_update (false)
+	, ltc_encoder (0)
+	, ltc_enc_buf(0)
+	, ltc_buf_off (0)
+	, ltc_buf_len (0)
+	, ltc_speed (0)
+	, ltc_enc_byte (0)
+	, ltc_enc_pos (0)
+	, ltc_enc_cnt (0)
+	, ltc_enc_off (0)
+	, restarting (false)
+	, ltc_prev_cycle (0)
+	, ltc_timecode_offset (0)
+	, ltc_timecode_negative_offset (false)
+	, midi_control_ui (0)
+	, _tempo_map (0)
+	, _all_route_group (new RouteGroup (*this, "all"))
+	, routes (new RouteList)
 	, _adding_routes_in_progress (false)
 	, destructive_index (0)
-	, first_file_data_format_reset (true)
-	, first_file_header_format_reset (true)
-	, post_export_sync (false)
-	, midi_control_ui (0)
-	, _step_editors (0)
+	, solo_update_disabled (false)
+	, default_fade_steepness (0)
+	, default_fade_msecs (0)
+	, _total_free_4k_blocks (0)
+	, _total_free_4k_blocks_uncertain (false)
 	, no_questions_about_missing_files (false)
-	,  _speakers (new Speakers)
-	, _clicks_cleared (0)
-	, ignore_route_processor_changes (false)
-	, _pre_export_mmc_enabled (false)
-	, _locations (new Locations (*this))
-	, ltc_encoder (0)
-	, playlists (new SessionPlaylists)
-	, _name (snapshot_name)
-	, _current_snapshot_name (snapshot_name)
-	, step_speed (0.0)
+	, _playback_load (0)
+	, _capture_load (0)
+	, _bundles (new BundleList)
+	, _bundle_xml_node (0)
+	, _current_trans (0)
+	, _clicking (false)
+	, click_data (0)
+	, click_emphasis_data (0)
 	, click_length (0)
 	, click_emphasis_length (0)
-	, _clicking (false)
-	, process_function (&Session::process_with_events)
-	, last_timecode_when (0)
-	, last_timecode_valid (false)
-	, average_slave_delta (1800) // !!! why 1800 ???
-	, have_first_delta_accumulator (false)
-	, delta_accumulator_cnt (0)
-	, _slave_state (Stopped)
+	, _clicks_cleared (0)
+	, _play_range (false)
+	, main_outs (0)
+	, first_file_data_format_reset (true)
+	, first_file_header_format_reset (true)
+	, have_looped (false)
+	, _have_rec_enabled_track (false)
+	, _step_editors (0)
+	, _suspend_timecode_transmission (0)
+	,  _speakers (new Speakers)
+	, ignore_route_processor_changes (false)
 {
-	if (_engine.current_backend() == 0 || _engine.setup_required()) {
-		boost::optional<int> r = AudioEngineSetupRequired ();
-		if (r.get_value_or (-1) != 0) {
-			throw failed_constructor();
-		}
-	}
+	uint32_t sr = 0;
 
-	if (!_engine.connected()) {
-		throw failed_constructor();
-	}
-
-	first_stage_init (fullpath, snapshot_name);
-
+	pre_engine_init (fullpath);
+	
 	if (_is_new) {
 		if (create (mix_template, bus_profile)) {
 			destroy ();
@@ -241,14 +272,44 @@ Session::Session (AudioEngine &eng,
 		if (load_state (_current_snapshot_name)) {
 			throw failed_constructor ();
 		}
+	
+		/* try to get sample rate from XML state so that we
+		 * can influence the SR if we set up the audio
+		 * engine.
+		 */
+
+		if (state_tree) {
+			const XMLProperty* prop;
+			if ((prop = state_tree->root()->property (X_("sample-rate"))) != 0) {		
+				sr = atoi (prop->value());
+			}
+		}
+	}
+	
+	if (_engine.current_backend() == 0 || _engine.setup_required()) {
+		boost::optional<int> r = AudioEngineSetupRequired (sr);
+		if (r.get_value_or (-1) != 0) {
+			destroy ();
+			throw failed_constructor();
+		}
 	}
 
-	if (second_stage_init ()) {
+	/* at this point the engine should be connected (i.e. interacting
+	   with a backend device (or psuedo-device) and available to us
+	   for determinining sample rates and other settings.
+	*/
+
+	if (!_engine.connected()) {
+		destroy ();
+		throw failed_constructor();
+	}
+
+	if (post_engine_init ()) {
 		destroy ();
 		throw failed_constructor ();
 	}
 
-	store_recent_sessions(_name, _path);
+	store_recent_sessions (_name, _path);
 
 	bool was_dirty = dirty();
 
@@ -397,135 +458,103 @@ Session::destroy ()
 }
 
 void
-Session::when_engine_running ()
+Session::setup_ltc ()
 {
-	string first_physical_output;
-
-	BootMessage (_("Set block size and sample rate"));
-
-	set_block_size (_engine.samples_per_cycle());
-	set_frame_rate (_engine.sample_rate());
-
-	BootMessage (_("Using configuration"));
-
-	boost::function<void (std::string)> ff (boost::bind (&Session::config_changed, this, _1, false));
-	boost::function<void (std::string)> ft (boost::bind (&Session::config_changed, this, _1, true));
-
-	Config->map_parameters (ff);
-	config.map_parameters (ft);
-
-	/* every time we reconnect, recompute worst case output latencies */
-
-	_engine.Running.connect_same_thread (*this, boost::bind (&Session::initialize_latencies, this));
-
-	if (synced_to_jack()) {
-		_engine.transport_stop ();
+	XMLNode* child = 0;
+	
+	_ltc_input.reset (new IO (*this, _("LTC In"), IO::Input));
+	_ltc_output.reset (new IO (*this, _("LTC Out"), IO::Output));
+	
+	if (state_tree && (child = find_named_node (*state_tree->root(), "LTC-In")) != 0) {
+		_ltc_input->set_state (*(child->children().front()), Stateful::loading_state_version);
+	} else {
+		{
+			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			_ltc_input->ensure_io (ChanCount (DataType::AUDIO, 1), true, this);
+		}
+		reconnect_ltc_input ();
 	}
-
-	if (config.get_jack_time_master()) {
-		_engine.transport_locate (_transport_frame);
+	
+	if (state_tree && (child = find_named_node (*state_tree->root(), "LTC-Out")) != 0) {
+		_ltc_output->set_state (*(child->children().front()), Stateful::loading_state_version);
+	} else {
+		{
+			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			_ltc_output->ensure_io (ChanCount (DataType::AUDIO, 1), true, this);
+		}
+		reconnect_ltc_output ();
 	}
+	
+	/* fix up names of LTC ports because we don't want the normal
+	 * IO style of NAME/TYPE-{in,out}N
+	 */
+	
+	_ltc_input->nth (0)->set_name (_("LTC-in"));
+	_ltc_output->nth (0)->set_name (_("LTC-out"));
+}
+
+void
+Session::setup_click ()
+{
+	XMLNode* child = 0;
 
 	_clicking = false;
-
-	try {
-		XMLNode* child = 0;
+	_click_io.reset (new ClickIO (*this, "click"));
+	_click_gain.reset (new Amp (*this));
+	_click_gain->activate ();
+	
+	if (state_tree && (child = find_named_node (*state_tree->root(), "Click")) != 0) {
 		
-		_ltc_input.reset (new IO (*this, _("LTC In"), IO::Input));
-		_ltc_output.reset (new IO (*this, _("LTC Out"), IO::Output));
+		/* existing state for Click */
+		int c = 0;
 
-		if (state_tree && (child = find_named_node (*state_tree->root(), "LTC-In")) != 0) {
-			_ltc_input->set_state (*(child->children().front()), Stateful::loading_state_version);
+		if (Stateful::loading_state_version < 3000) {
+			c = _click_io->set_state_2X (*child->children().front(), Stateful::loading_state_version, false);
 		} else {
-			{
-				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-				_ltc_input->ensure_io (ChanCount (DataType::AUDIO, 1), true, this);
-			}
-			reconnect_ltc_input ();
-		}
-
-		if (state_tree && (child = find_named_node (*state_tree->root(), "LTC-Out")) != 0) {
-			_ltc_output->set_state (*(child->children().front()), Stateful::loading_state_version);
-		} else {
-			{
-				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-				_ltc_output->ensure_io (ChanCount (DataType::AUDIO, 1), true, this);
-			}
-			reconnect_ltc_output ();
-		}
-						
-		/* fix up names of LTC ports because we don't want the normal
-		 * IO style of NAME/TYPE-{in,out}N
-		 */
-		
-		_ltc_input->nth (0)->set_name (_("LTC-in"));
-		_ltc_output->nth (0)->set_name (_("LTC-out"));
-
-		_click_io.reset (new ClickIO (*this, "click"));
-		_click_gain.reset (new Amp (*this));
-		_click_gain->activate ();
-
-		if (state_tree && (child = find_named_node (*state_tree->root(), "Click")) != 0) {
-
-			/* existing state for Click */
-			int c = 0;
-
-			if (Stateful::loading_state_version < 3000) {
-				c = _click_io->set_state_2X (*child->children().front(), Stateful::loading_state_version, false);
-			} else {
-				const XMLNodeList& children (child->children());
-				XMLNodeList::const_iterator i = children.begin();
-				if ((c = _click_io->set_state (**i, Stateful::loading_state_version)) == 0) {
-					++i;
-					if (i != children.end()) {
-						c = _click_gain->set_state (**i, Stateful::loading_state_version);
-					}
+			const XMLNodeList& children (child->children());
+			XMLNodeList::const_iterator i = children.begin();
+			if ((c = _click_io->set_state (**i, Stateful::loading_state_version)) == 0) {
+				++i;
+				if (i != children.end()) {
+					c = _click_gain->set_state (**i, Stateful::loading_state_version);
 				}
 			}
+		}
 			
-			if (c == 0) {
-				_clicking = Config->get_clicking ();
-
-			} else {
-
-				error << _("could not setup Click I/O") << endmsg;
-				_clicking = false;
-			}
-
+		if (c == 0) {
+			_clicking = Config->get_clicking ();
 
 		} else {
 
-			/* default state for Click: dual-mono to first 2 physical outputs */
+			error << _("could not setup Click I/O") << endmsg;
+			_clicking = false;
+		}
 
-			vector<string> outs;
-			_engine.get_physical_outputs (DataType::AUDIO, outs);
 
-			for (uint32_t physport = 0; physport < 2; ++physport) {
-				if (outs.size() > physport) {
-					if (_click_io->add_port (outs[physport], this)) {
-						// relax, even though its an error
-					}
+	} else {
+
+		/* default state for Click: dual-mono to first 2 physical outputs */
+
+		vector<string> outs;
+		_engine.get_physical_outputs (DataType::AUDIO, outs);
+
+		for (uint32_t physport = 0; physport < 2; ++physport) {
+			if (outs.size() > physport) {
+				if (_click_io->add_port (outs[physport], this)) {
+					// relax, even though its an error
 				}
 			}
+		}
 
-			if (_click_io->n_ports () > ChanCount::ZERO) {
-				_clicking = Config->get_clicking ();
-			}
+		if (_click_io->n_ports () > ChanCount::ZERO) {
+			_clicking = Config->get_clicking ();
 		}
 	}
+}
 
-	catch (failed_constructor& err) {
-		error << _("cannot setup Click I/O") << endmsg;
-	}
-
-	BootMessage (_("Compute I/O Latencies"));
-
-	if (_clicking) {
-		// XXX HOW TO ALERT UI TO THIS ? DO WE NEED TO?
-	}
-
-	BootMessage (_("Set up standard connections"));
-
+void
+Session::setup_bundles ()
+{
 	vector<string> inputs[DataType::num_types];
 	vector<string> outputs[DataType::num_types];
 	for (uint32_t i = 0; i < DataType::num_types; ++i) {
@@ -624,6 +653,37 @@ Session::when_engine_running ()
 		add_bundle (c);
 	}
 
+}
+
+int
+Session::when_engine_running ()
+{
+	/* every time we reconnect, recompute worst case output latencies */
+
+	_engine.Running.connect_same_thread (*this, boost::bind (&Session::initialize_latencies, this));
+
+	if (synced_to_jack()) {
+		_engine.transport_stop ();
+	}
+
+	if (config.get_jack_time_master()) {
+		_engine.transport_locate (_transport_frame);
+	}
+
+
+	try {
+		BootMessage (_("Set up LTC"));
+		setup_ltc ();
+		BootMessage (_("Set up Click"));
+		setup_click ();
+		BootMessage (_("Set up standard connections"));
+		setup_bundles ();
+	}
+
+	catch (failed_constructor& err) {
+		return -1;
+	}
+
 	BootMessage (_("Setup signal flow and plugins"));
 
 	/* Reset all panners */
@@ -672,6 +732,8 @@ Session::when_engine_running ()
 	BootMessage (_("Connect to engine"));
 	_engine.set_session (this);
 	_engine.reset_timebase ();
+
+	return 0;
 }
 
 void

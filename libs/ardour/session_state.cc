@@ -125,10 +125,35 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-/** @param snapshot_name Snapshot name, without the .ardour prefix */
 void
-Session::first_stage_init (string fullpath, string /*snapshot_name*/)
+Session::pre_engine_init (string fullpath)
 {
+	if (fullpath.empty()) {
+		destroy ();
+		throw failed_constructor();
+	}
+
+	/* discover canonical fullpath */
+
+	char buf[PATH_MAX+1];
+	if (!realpath (fullpath.c_str(), buf) && (errno != ENOENT)) {
+		error << string_compose(_("Could not use path %1 (%2)"), buf, strerror(errno)) << endmsg;
+		destroy ();
+		throw failed_constructor();
+	}
+
+	_path = string(buf);
+	
+	/* we require _path to end with a dir separator */
+
+	if (_path[_path.length()-1] != G_DIR_SEPARATOR) {
+		_path += G_DIR_SEPARATOR;
+	}
+
+	/* is it new ? */
+
+	_is_new = !Glib::file_test (_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+
 	/* finish initialization that can't be done in a normal C++ constructor
 	   definition.
 	*/
@@ -168,32 +193,6 @@ Session::first_stage_init (string fullpath, string /*snapshot_name*/)
                                                         boost::bind (&RCConfiguration::get_solo_mute_gain, Config)));
         add_controllable (_solo_cut_control);
 
-	/* discover canonical fullpath */
-
-	if (fullpath.length() == 0) {
-		destroy ();
-		throw failed_constructor();
-	}
-
-	char buf[PATH_MAX+1];
-	if (!realpath (fullpath.c_str(), buf) && (errno != ENOENT)) {
-		error << string_compose(_("Could not use path %1 (%2)"), buf, strerror(errno)) << endmsg;
-		destroy ();
-		throw failed_constructor();
-	}
-
-	_path = string(buf);
-	
-	/* we require _path to end with a dir separator */
-
-	if (_path[_path.length()-1] != G_DIR_SEPARATOR) {
-		_path += G_DIR_SEPARATOR;
-	}
-
-	/* is it new ? */
-
-	_is_new = !Glib::file_test (_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
-
 	/* These are all static "per-class" signals */
 
 	SourceFactory::SourceCreated.connect_same_thread (*this, boost::bind (&Session::add_source, this, _1));
@@ -207,95 +206,90 @@ Session::first_stage_init (string fullpath, string /*snapshot_name*/)
 	Delivery::disable_panners ();
 	IO::disable_connecting ();
 
-	/* ENGINE */
+	AudioFileSource::set_peak_dir (_session_dir->peak_path());
+}
+
+int
+Session::post_engine_init ()
+{
+	BootMessage (_("Set block size and sample rate"));
+
+	set_block_size (_engine.samples_per_cycle());
+	set_frame_rate (_engine.sample_rate());
 
 	n_physical_outputs = _engine.n_physical_outputs ();
 	n_physical_inputs =  _engine.n_physical_inputs ();
 
-	_current_frame_rate = _engine.sample_rate ();
-	_nominal_frame_rate = _current_frame_rate;
-	_base_frame_rate = _current_frame_rate;
+	BootMessage (_("Using configuration"));
 
 	_midi_ports = new MidiPortManager;
-	_mmc = new MIDI::MachineControl;
+	setup_midi_machine_control ();
 	
-	_mmc->set_ports (_midi_ports->mmc_input_port(), _midi_ports->mmc_output_port());
-	
-	_tempo_map = new TempoMap (_current_frame_rate);
-	_tempo_map->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
-
-	AudioDiskstream::allocate_working_buffers();
-
-	SndFileSource::setup_standard_crossfades (*this, frame_rate());
-	_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this));
-
-	refresh_disk_space ();
-	sync_time_vars ();
-}
-
-int
-Session::second_stage_init ()
-{
-	AudioFileSource::set_peak_dir (_session_dir->peak_path());
-
 	if (_butler->start_thread()) {
 		return -1;
 	}
-
+	
 	if (start_midi_thread ()) {
 		return -1;
 	}
-
-	setup_midi_machine_control ();
-
-	// set_state() will call setup_raid_path(), but if it's a new session we need
-	// to call setup_raid_path() here.
-
-	if (state_tree) {
-		if (set_state (*state_tree->root(), Stateful::loading_state_version)) {
-			return -1;
-		}
-	} else {
-		setup_raid_path(_path);
-	}
-
-	/* we can't save till after ::when_engine_running() is called,
-	   because otherwise we save state with no connections made.
-	   therefore, we reset _state_of_the_state because ::set_state()
-	   will have cleared it.
-
-	   we also have to include Loading so that any events that get
-	   generated between here and the end of ::when_engine_running()
-	   will be processed directly rather than queued.
-	*/
-
-	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave|Loading);
-
-	_locations->changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));
-	_locations->added.connect_same_thread (*this, boost::bind (&Session::locations_added, this, _1));
+	
 	setup_click_sounds (0);
 	setup_midi_control ();
-
-	/* Pay attention ... */
 
 	_engine.Halted.connect_same_thread (*this, boost::bind (&Session::engine_halted, this));
 	_engine.Xrun.connect_same_thread (*this, boost::bind (&Session::xrun_recovery, this));
 
-	midi_clock = new MidiClockTicker ();
-	midi_clock->set_session (this);
-
 	try {
+		/* tempo map requires sample rate knowledge */
+
+		_tempo_map = new TempoMap (_current_frame_rate);
+		_tempo_map->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
+		
+		/* MidiClock requires a tempo map */
+
+		midi_clock = new MidiClockTicker ();
+		midi_clock->set_session (this);
+
+		/* crossfades require sample rate knowledge */
+
+		SndFileSource::setup_standard_crossfades (*this, frame_rate());
+		_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this));
+		
+		AudioDiskstream::allocate_working_buffers();
+		refresh_disk_space ();
+		
+		/* we're finally ready to call set_state() ... all objects have
+		 * been created, the engine is running.
+		 */
+		
+		if (state_tree) {
+			if (set_state (*state_tree->root(), Stateful::loading_state_version)) {
+				return -1;
+			}
+		} else {
+			// set_state() will call setup_raid_path(), but if it's a new session we need
+			// to call setup_raid_path() here.
+			setup_raid_path (_path);
+		}
+
+		/* ENGINE */
+
+		boost::function<void (std::string)> ff (boost::bind (&Session::config_changed, this, _1, false));
+		boost::function<void (std::string)> ft (boost::bind (&Session::config_changed, this, _1, true));
+		
+		Config->map_parameters (ff);
+		config.map_parameters (ft);
+
 		when_engine_running ();
-	}
 
-	/* handle this one in a different way than all others, so that its clear what happened */
-
-	catch (AudioEngine::PortRegistrationFailure& err) {
+		_locations->changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));
+		_locations->added.connect_same_thread (*this, boost::bind (&Session::locations_added, this, _1));
+		
+	} catch (AudioEngine::PortRegistrationFailure& err) {
+		/* handle this one in a different way than all others, so that its clear what happened */
 		error << err.what() << endmsg;
 		return -1;
-	}
-
-	catch (...) {
+	} catch (...) {
 		return -1;
 	}
 
@@ -3516,6 +3510,9 @@ Session::load_diskstreams_2X (XMLNode const & node, int)
 void
 Session::setup_midi_machine_control ()
 {
+	_mmc = new MIDI::MachineControl;
+	_mmc->set_ports (_midi_ports->mmc_input_port(), _midi_ports->mmc_output_port());
+
 	_mmc->Play.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
 	_mmc->DeferredPlay.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
 	_mmc->Stop.connect_same_thread (*this, boost::bind (&Session::mmc_stop, this, _1));
