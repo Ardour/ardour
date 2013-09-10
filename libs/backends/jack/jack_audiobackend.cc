@@ -976,7 +976,7 @@ JACKAudioBackend::control_app_name () const
 			if (_target_device == "Hammerfall DSP") {
 				appname = "hdspconf";
 			} else if (_target_device == "M Audio Delta 1010") {
-				appname = "mudita";
+				appname = "mudita24";
 			}
 		}
 	} else {
