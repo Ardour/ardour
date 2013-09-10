@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Novation Impulse 61">
+
+<!-- 2013-09-04 Alexandre Prokoudine: Map file creation -->
+<!-- This mapping relies on the Basic MIDI preset in the Impulse 61. -->
+
+<!-- Transport controls -->
+
+  <Binding channel="1" ctl="112" function="transport-start"/>
+  <Binding channel="1" ctl="113" function="transport-end"/>
+  <Binding channel="1" ctl="114" function="transport-stop"/>
+  <Binding channel="1" ctl="115" function="transport-roll"/>
+  <Binding channel="1" ctl="116" function="loop-toggle"/>
+  <Binding channel="1" ctl="117" function="rec-enable"/>
+  <Binding channel="1" ctl="117" function="rec-disable"/>
+
+<!-- Gain controls. Faders are mapped to faders. -->
+
+  <Binding channel="1" ctl="41" uri="/route/gain 1"/>
+  <Binding channel="1" ctl="42" uri="/route/gain 2"/>
+  <Binding channel="1" ctl="43" uri="/route/gain 3"/>
+  <Binding channel="1" ctl="44" uri="/route/gain 4"/>
+  <Binding channel="1" ctl="45" uri="/route/gain 5"/>
+  <Binding channel="1" ctl="46" uri="/route/gain 6"/>
+  <Binding channel="1" ctl="47" uri="/route/gain 7"/>
+  <Binding channel="1" ctl="48" uri="/route/gain 8"/>
+  <Binding channel="1" ctl="49" uri="/bus/gain master"/>
+
+<!-- Pan controls. Encoders are mapped to pan direction. -->
+<!-- There doesn't seem to be a way to map encoders to pan width. -->
+
+  <Binding channel="1" ctl="21" uri="/route/pandirection 1"/>
+  <Binding channel="1" ctl="22" uri="/route/pandirection 2"/>
+  <Binding channel="1" ctl="23" uri="/route/pandirection 3"/>
+  <Binding channel="1" ctl="24" uri="/route/pandirection 4"/>
+  <Binding channel="1" ctl="25" uri="/route/pandirection 5"/>
+  <Binding channel="1" ctl="26" uri="/route/pandirection 6"/>
+  <Binding channel="1" ctl="27" uri="/route/pandirection 7"/>
+  <Binding channel="1" ctl="28" uri="/route/pandirection 8"/>
+
+<!-- Status controls -->
+<!-- Status buttons are mapped to mute toggles. -->
+<!-- Apparently Solo toggle only works when Automap is used. Sad but true. -->
+
+  <Binding channel="1" ctl="51" uri="/route/mute 1"/>
+  <Binding channel="1" ctl="52" uri="/route/mute 2"/>
+  <Binding channel="1" ctl="53" uri="/route/mute 3"/>
+  <Binding channel="1" ctl="54" uri="/route/mute 4"/>
+  <Binding channel="1" ctl="55" uri="/route/mute 5"/>
+  <Binding channel="1" ctl="56" uri="/route/mute 6"/>
+  <Binding channel="1" ctl="57" uri="/route/mute 7"/>
+  <Binding channel="1" ctl="58" uri="/route/mute 8"/>
+  <Binding channel="1" ctl="59" uri="/bus/mute master"/>"
+
+
+</ArdourMIDIBindings>
