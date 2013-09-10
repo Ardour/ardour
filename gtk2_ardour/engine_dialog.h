@@ -41,7 +41,6 @@ class EngineControl : public ArdourDialog {
 	~EngineControl ();
 
 	static bool need_setup ();
-	int setup_engine (bool start);
 
 	XMLNode& get_state ();
 	void set_state (const XMLNode&);
@@ -97,8 +96,7 @@ class EngineControl : public ArdourDialog {
     Gtk::VBox basic_vbox;
     Gtk::HBox midi_hbox;
 
-    sigc::connection sr_connection;
-    sigc::connection bs_connection;
+    uint32_t ignore_changes;
     
     static bool engine_running ();
     
@@ -144,7 +142,7 @@ class EngineControl : public ArdourDialog {
 			       const std::string& driver,
 			       const std::string& device);
     State* get_current_state ();
-    void maybe_set_state ();
+    void maybe_display_saved_state ();
     void save_state ();
 
     static bool print_channel_count (Gtk::SpinButton*);
@@ -154,6 +152,7 @@ class EngineControl : public ArdourDialog {
     void on_response (int);
     void control_app_button_clicked ();
     void manage_control_app_sensitivity ();
+    int push_state_to_backend (bool start);
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

@@ -25,7 +25,6 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include <glibmm/spawn.h>
 #include <gtkmm/messagedialog.h>
 
 #include "pbd/error.h"
@@ -65,6 +64,7 @@ EngineControl::EngineControl ()
 	, ports_spinner (ports_adjustment)
 	, control_app_button (_("Launch Control App"))
 	, basic_packer (9, 3)
+	, ignore_changes (0)
 {
 	build_notebook ();
 
@@ -82,9 +82,12 @@ EngineControl::EngineControl ()
 
 	XMLNode* audio_setup = ARDOUR::Config->extra_xml ("AudioMIDISetup");
 	
+	/* push a change as if we altered the backend */
+	backend_changed ();
+
 	if (audio_setup) {
 		set_state (*audio_setup);
-	}
+	} 
 }
 
 void
@@ -94,10 +97,10 @@ EngineControl::on_response (int response_id)
 
 	switch (response_id) {
 	case RESPONSE_APPLY:
-		setup_engine (true);
+		push_state_to_backend (true);
 		break;
 	case RESPONSE_OK:
-		setup_engine (true);
+		push_state_to_backend (true);
 		hide ();
 		break;
 	default:
@@ -120,10 +123,6 @@ EngineControl::build_notebook ()
 
 	set_popdown_strings (backend_combo, strings);
 	backend_combo.set_active_text (strings.front());
-	backend_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::backend_changed));
-	backend_changed ();
-
-	driver_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::driver_changed));
 
 	basic_packer.set_spacings (6);
 	basic_packer.set_border_width (12);
@@ -153,7 +152,6 @@ EngineControl::build_notebook ()
 	basic_packer.attach (sample_rate_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
 	row++;
 
-	sr_connection = sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::sample_rate_changed));
 
 	label = manage (left_aligned_label (_("Buffer size:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
@@ -162,21 +160,18 @@ EngineControl::build_notebook ()
 	basic_packer.attach (buffer_size_duration_label, 2, 3, row, row+1, xopt, (AttachOptions) 0);
 	row++;
 
-	bs_connection = buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::buffer_size_changed));
 
 	label = manage (left_aligned_label (_("Input Channels:")));
 	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
 	basic_packer.attach (input_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
-	input_channels.signal_output().connect (sigc::bind (sigc::ptr_fun (&EngineControl::print_channel_count), &input_channels));
 
 	label = manage (left_aligned_label (_("Output Channels:")));
 	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
 	basic_packer.attach (output_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
-	output_channels.signal_output().connect (sigc::bind (sigc::ptr_fun (&EngineControl::print_channel_count), &output_channels));
 
 	label = manage (left_aligned_label (_("Hardware input latency:")));
 	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
@@ -191,8 +186,6 @@ EngineControl::build_notebook ()
 	label = manage (left_aligned_label (_("samples")));
 	basic_packer.attach (*label, 2, 3, row, row+1, xopt, (AttachOptions) 0);
 	++row;
-
-	device_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::device_changed));
 
 	basic_hbox.pack_start (basic_packer, false, false);
 	basic_vbox.pack_start (basic_hbox, false, false);
@@ -215,6 +208,15 @@ EngineControl::build_notebook ()
 
 	notebook.set_name ("SettingsNotebook");
 
+	/* Connect to signals */
+
+	backend_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::backend_changed));
+	driver_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::driver_changed));
+	sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::sample_rate_changed));
+	buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::buffer_size_changed));
+	input_channels.signal_output().connect (sigc::bind (sigc::ptr_fun (&EngineControl::print_channel_count), &input_channels));
+	output_channels.signal_output().connect (sigc::bind (sigc::ptr_fun (&EngineControl::print_channel_count), &output_channels));
+	device_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::device_changed));
 }
 
 EngineControl::~EngineControl ()
@@ -225,11 +227,15 @@ EngineControl::~EngineControl ()
 void
 EngineControl::backend_changed ()
 {
+	if (ignore_changes) {
+		return;
+	}
+
 	string backend_name = backend_combo.get_active_text();
 	boost::shared_ptr<ARDOUR::AudioBackend> backend;
 
 	if (!(backend = ARDOUR::AudioEngine::instance()->set_backend (backend_name, "ardour", ""))) {
-		/* eh? */
+		/* eh? setting the backend failed... how ? */
 		return;
 	}
 
@@ -244,7 +250,7 @@ EngineControl::backend_changed ()
 		list_devices ();
 	}
 	
-	maybe_set_state ();
+	maybe_display_saved_state ();
 }
 
 bool
@@ -302,18 +308,26 @@ EngineControl::list_devices ()
 void
 EngineControl::driver_changed ()
 {
+	if (ignore_changes) {
+		return;
+	}
+
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
 
 	backend->set_driver (driver_combo.get_active_text());
 	list_devices ();
 
-	maybe_set_state ();
+	maybe_display_saved_state ();
 }
 
 void
 EngineControl::device_changed ()
 {
+	if (ignore_changes) {
+		return;
+	}
+
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
 	string device_name = device_combo.get_active_text ();
@@ -323,7 +337,7 @@ EngineControl::device_changed ()
 	   recursive call to this method.
 	*/
 	   
-	sr_connection.block ();
+	ignore_changes++;
 
 	/* sample rates */
 
@@ -341,7 +355,6 @@ EngineControl::device_changed ()
 	set_popdown_strings (sample_rate_combo, s);
 	sample_rate_combo.set_active_text (s.front());
 
-	sr_connection.unblock ();
 
 	vector<uint32_t> bs = backend->available_buffer_sizes(device_name);
 	s.clear ();
@@ -360,12 +373,18 @@ EngineControl::device_changed ()
 
 	manage_control_app_sensitivity ();
 
-	maybe_set_state ();
+	ignore_changes--;
+
+	maybe_display_saved_state ();
 }	
 
 void 
 EngineControl::sample_rate_changed ()
 {
+	if (ignore_changes) {
+		return;
+	}
+
 	/* reset the strings for buffer size to show the correct msec value
 	   (reflecting the new sample rate).
 	*/
@@ -378,6 +397,10 @@ EngineControl::sample_rate_changed ()
 void 
 EngineControl::buffer_size_changed ()
 {
+	if (ignore_changes) {
+		return;
+	}
+
 	show_buffer_duration ();
 	save_state ();
 }
@@ -448,8 +471,8 @@ EngineControl::get_current_state ()
 
 	if (backend) {
 		return get_matching_state (backend_combo.get_active_text(),
-					    (backend->requires_driver_selection() ? (std::string) driver_combo.get_active_text() : string()),
-					    device_combo.get_active_text());
+					   (backend->requires_driver_selection() ? (std::string) driver_combo.get_active_text() : string()),
+					   device_combo.get_active_text());
 	}
 
 
@@ -485,19 +508,17 @@ EngineControl::save_state ()
 }
 
 void
-EngineControl::maybe_set_state ()
+EngineControl::maybe_display_saved_state ()
 {
 	State* state = get_current_state ();
 
 	if (state) {
-		sr_connection.block ();
-		bs_connection.block ();
+		ignore_changes++;
 		sample_rate_combo.set_active_text (state->sample_rate);
 		buffer_size_combo.set_active_text (state->buffer_size);
 		input_latency.set_value (state->input_latency);
 		output_latency.set_value (state->output_latency);
-		bs_connection.unblock ();
-		sr_connection.unblock ();
+		ignore_changes--;
 	}
 }
 	
@@ -628,8 +649,7 @@ EngineControl::set_state (const XMLNode& root)
 	
 	for (StateList::const_iterator i = states.begin(); i != states.end(); ++i) {
 		if ((*i).active) {
-			sr_connection.block ();
-			bs_connection.block ();
+			ignore_changes++;
 			backend_combo.set_active_text ((*i).backend);
 			driver_combo.set_active_text ((*i).driver);
 			device_combo.set_active_text ((*i).device);
@@ -637,18 +657,23 @@ EngineControl::set_state (const XMLNode& root)
 			buffer_size_combo.set_active_text ((*i).buffer_size);
 			input_latency.set_value ((*i).input_latency);
 			output_latency.set_value ((*i).output_latency);
-			sr_connection.unblock ();
-			bs_connection.unblock ();
+			ignore_changes--;
+
+			push_state_to_backend (false);
 			break;
 		}
 	}
 }
 
+
 int
-EngineControl::setup_engine (bool start)
+EngineControl::push_state_to_backend (bool start)
 {
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
-	assert (backend);
+
+	if (!backend) {
+		return 0;
+	 }
 
 	/* grab the parameters from the GUI and apply them */
 
@@ -792,51 +817,25 @@ EngineControl::get_device_name () const
 void
 EngineControl::control_app_button_clicked ()
 {
-	const char* env_value  = g_getenv ("ARDOUR_DEVICE_CONTROL_APP");
-	string appname;
-
-	cerr << "Environment var for control app: " << (env_value ? env_value : "empty") << endl;
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	
-	if (!env_value) {
-		boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
-		
-		if (!backend) {
-			return;
-		}
-		
-		appname = backend->control_app_name();
-	} else {
-		appname = env_value;
-	}
-
-	cerr << "appname for control app " << appname << endl;
-
-	if (appname.empty()) {
+	if (!backend) {
 		return;
 	}
-
-	std::list<string> args;
-	args.push_back (appname);
-	Glib::spawn_async ("", args, Glib::SPAWN_SEARCH_PATH);
+	
+	backend->launch_control_app ();
 }
 
 void
 EngineControl::manage_control_app_sensitivity ()
 {
-	const char* env_value  = g_getenv ("ARDOUR_DEVICE_CONTROL_APP");
-	string appname;
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	
-	if (!env_value) {
-		boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
-		
-		if (!backend) {
-			return;
-		}
-		
-		appname = backend->control_app_name();
-	} else {
-		appname = env_value;
+	if (!backend) {
+		return;
 	}
+	
+	string appname = backend->control_app_name();
 
 	if (appname.empty()) {
 		control_app_button.set_sensitive (false);

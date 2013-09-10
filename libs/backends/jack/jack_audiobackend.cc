@@ -23,6 +23,7 @@
 
 #include <boost/scoped_ptr.hpp>
 #include <glibmm/timer.h>
+#include <glibmm/spawn.h>
 
 #include "pbd/error.h"
 
@@ -957,25 +958,45 @@ JACKAudioBackend::can_change_buffer_size_when_running () const
 string
 JACKAudioBackend::control_app_name () const
 {
+	/* Since JACK/ALSA really don't provide particularly integrated support
+	   for the idea of a control app to be used to control a device,
+	   allow the user to take some control themselves if necessary.
+	*/
+
+	const char* env_value  = g_getenv ("ARDOUR_DEVICE_CONTROL_APP");
 	string appname;
 
-	std::cerr << "td = " << _target_driver << " tdev = " << _target_device << std::endl;
-
-	if (_target_driver.empty() || _target_device.empty()) {
-		return appname;
-	}
-
-	if (_target_driver == "ALSA") {
-
-		if (_target_device == "Hammerfall DSP") {
-			appname = "hdspconf";
-		} else if (_target_device == "M Audio Delta 1010") {
-			appname = "mudita";
+	if (!env_value) {
+		if (_target_driver.empty() || _target_device.empty()) {
+			return appname;
 		}
+		
+		if (_target_driver == "ALSA") {
+			
+			if (_target_device == "Hammerfall DSP") {
+				appname = "hdspconf";
+			} else if (_target_device == "M Audio Delta 1010") {
+				appname = "mudita";
+			}
+		}
+	} else {
+		appname = env_value;
 	}
-	
-	std::cerr << "appname retrurned as " << appname << std::endl;
 
 	return appname;
 }
 
+void
+JACKAudioBackend::launch_control_app ()
+{
+	string appname = control_app_name();
+
+	if (appname.empty()) {
+		error << string_compose (_("There is no control application for the device \"%1\""), _target_device) << endmsg;
+		return;
+	}
+
+	std::list<string> args;
+	args.push_back (appname);
+	Glib::spawn_async ("", args, Glib::SPAWN_SEARCH_PATH);
+}

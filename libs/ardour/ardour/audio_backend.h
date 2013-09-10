@@ -234,7 +234,11 @@ class AudioBackend {
      * return an empty string.
      */
     virtual std::string control_app_name() const = 0;
-
+    /** Launch the control app for the currently in-use or
+     * selected device. May do nothing if the control
+     * app is undefined or cannot be launched.
+     */
+    virtual void launch_control_app () = 0;
     /* Basic state control */
 
     /** Start using the device named in the most recent call
