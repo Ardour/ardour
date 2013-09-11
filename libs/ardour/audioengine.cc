@@ -79,6 +79,7 @@ AudioEngine::AudioEngine ()
 	, _latency_input_port (0)
 	, _latency_output_port (0)
 	, _latency_flush_frames (0)
+	, _latency_signal_latency (0)
 {
 	g_atomic_int_set (&m_meter_exit, 0);
 	discover_backends ();
@@ -1012,6 +1013,15 @@ AudioEngine::start_latency_detection ()
 		pe.unregister_port (_latency_output_port);
 		return;
 	}
+
+	LatencyRange lr;
+	_latency_signal_latency = 0;
+	lr = pe.get_latency_range (_latency_input_port, false);
+	_latency_signal_latency = lr.max;
+	lr = pe.get_latency_range (_latency_output_port, true);
+	_latency_signal_latency += lr.max;
+
+	cerr << "latency signal pathway = " << _latency_signal_latency << endl;
 	
 	/* all created and connected, lets go */
 

@@ -249,6 +249,7 @@ and microphone.\n\n\
 	xopt = AttachOptions(0);
 
 	lm_measure_button.signal_toggled().connect (sigc::mem_fun (*this, &EngineControl::latency_button_toggled));
+	lm_use_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::use_latency_button_clicked));
 	lm_use_button.set_sensitive (false);
 		
 	lm_table.attach (lm_measure_button, 0, 2, row, row+1, xopt, (AttachOptions) 0);
@@ -972,7 +973,10 @@ EngineControl::check_latency_measurement ()
                 return false;
         }
 
-        snprintf (buf, sizeof (buf), "%10.3lf frames %10.3lf ms", mtdm->del (), mtdm->del () * 1000.0f/sample_rate);
+	uint32_t frames_total = mtdm->del();
+	uint32_t extra = frames_total - ARDOUR::AudioEngine::instance()->latency_signal_delay();
+
+        snprintf (buf, sizeof (buf), "%u samples %10.3lf ms", extra, extra * 1000.0f/sample_rate);
 
         bool solid = true;
 
@@ -1015,4 +1019,21 @@ EngineControl::latency_button_toggled ()
                 latency_timeout.disconnect ();
                 update_latency_display ();
         }
+}
+
+void
+EngineControl::use_latency_button_clicked ()
+{
+        MTDM* mtdm = ARDOUR::AudioEngine::instance()->mtdm ();
+
+	if (!mtdm) {
+		return;
+	}
+
+	uint32_t frames_total = mtdm->del();
+	uint32_t extra = frames_total - ARDOUR::AudioEngine::instance()->latency_signal_delay();
+	uint32_t one_way = extra/2;
+
+	input_latency_adjustment.set_value (one_way);
+	output_latency_adjustment.set_value (one_way);
 }

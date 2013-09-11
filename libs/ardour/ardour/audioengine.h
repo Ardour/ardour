@@ -191,6 +191,7 @@ public:
     void stop_latency_detection ();
     void set_latency_input_port (const std::string&);
     void set_latency_output_port (const std::string&);
+    uint32_t latency_signal_delay () const { return _latency_signal_latency; }
 
   private:
     AudioEngine ();
@@ -222,6 +223,7 @@ public:
     framecnt_t                _latency_flush_frames;
     std::string               _latency_input_name;
     std::string               _latency_output_name;
+    framecnt_t                _latency_signal_latency;
 
     void meter_thread ();
     void start_metering_thread ();

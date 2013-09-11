@@ -164,6 +164,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     void on_response (int);
     void control_app_button_clicked ();
+    void use_latency_button_clicked ();
     void manage_control_app_sensitivity ();
     int push_state_to_backend (bool start);
     uint32_t _desired_sample_rate;
