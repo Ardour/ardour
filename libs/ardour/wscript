@@ -303,60 +303,6 @@ def configure(conf):
 
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD',mandatory=False)
 
-    conf.check_cc(fragment = '''
-#include <jack/jack.h>
-void callback(jack_status_t code, const char* reason, void* arg) { return; }
-int main(int argc, char **argv) {
-    jack_client_t* c;
-    jack_on_info_shutdown(c, callback, (void*) 0);
-    return 0;
-}''',
-                  uselib= [ 'JACK' ],
-                  msg = 'Checking for jack_on_info_shutdown',
-                  define_name = 'HAVE_JACK_ON_INFO_SHUTDOWN',
-                  okmsg = 'present')
-
-    missing_jack_message = 'missing - a version of JACK that supports jack_port_set_latency_range() is required to compile Ardour3.'
-
-    conf.check_cc(fragment = '''
-#include <jack/jack.h>
-int main(int argc, char **argv) {
-    jack_port_t* p;
-    jack_latency_range_t r;
-    jack_port_set_latency_range(p, JackCaptureLatency, &r);
-    return 0;
-}''',
-                  uselib = [ 'JACK' ],
-                  msg = 'Checking for new JACK latency API',
-                  okmsg = 'present',
-                  mandatory = True,
-                  errmsg = missing_jack_message)
-
-    conf.check_cc(fragment = '''
-#include <jack/jack.h>
-int main(int argc, char **argv) {
-   jack_port_type_get_buffer_size((jack_client_t*)0, "");
-   return 0;
-}''',
-                  uselib = [ 'JACK' ],
-                  msg = 'Checking for new jack_port_type_get_buffer_size',
-                  okmsg = 'present',
-                  mandatory = True,
-                  errmsg = missing_jack_message)
-
-    conf.check_cc(fragment = '''
-#include <jack/transport.h>
-int main(int argc, char** argv) {
-  jack_position_t pos;
-  pos.valid & JackVideoFrameOffset;
-  return 0;
-}''',
-                  uselib= [ 'JACK' ],
-                  msg = 'Checking for JackVideoFrameOffset',
-                  define_name = 'HAVE_JACK_VIDEO_SUPPORT',
-                  mandatory = False,
-                  okmsg = 'present')
-
     if flac_supported():
         conf.define ('HAVE_FLAC', 1)
     if ogg_supported():
