@@ -198,11 +198,11 @@ AudioEngine::process_callback (pframes_t nframes)
 		return 0;
 	}
 
-	/* If measuring latency, do it now and get out of here */
+	bool return_after_remove_check = false;
 
 	if (_measuring_latency && _mtdm) {
-		// PortManager::cycle_start (nframes);
-		// PortManager::silence (nframes);
+		PortManager::cycle_start (nframes);
+		PortManager::silence (nframes);
 
 		if (_latency_input_port && _latency_output_port) {
 			PortEngine& pe (port_engine());
@@ -213,8 +213,8 @@ AudioEngine::process_callback (pframes_t nframes)
 			_mtdm->process (nframes, in, out);
 		}
 
-		// PortManager::cycle_end (nframes);
-		return 0;
+		PortManager::cycle_end (nframes);
+		return_after_remove_check = true;
 
 	} else if (_latency_flush_frames) {
 		
@@ -232,7 +232,7 @@ AudioEngine::process_callback (pframes_t nframes)
                         _latency_flush_frames = 0;
                 }
 
-		return 0;
+		return_after_remove_check = true;
 	}
 
 	if (session_remove_pending) {
@@ -269,6 +269,10 @@ AudioEngine::process_callback (pframes_t nframes)
 			session_remove_pending = false;
 			session_removed.signal(); // wakes up thread that initiated session removal
 		}
+	}
+
+	if (return_after_remove_check) {
+		return 0;
 	}
 
 	if (_session == 0) {
