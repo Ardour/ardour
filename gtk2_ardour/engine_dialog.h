@@ -55,8 +55,6 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     /* core fields used by all backends */
 
     Gtk::ComboBoxText backend_combo;
-    Gtk::ComboBoxText input_device_combo;
-    Gtk::ComboBoxText output_device_combo;
     Gtk::ComboBoxText sample_rate_combo;
     Gtk::ComboBoxText buffer_size_combo;
     Gtk::Label        buffer_size_duration_label;
@@ -130,7 +128,6 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     std::string get_device_name() const;
     std::string get_driver() const;
 
-    void audio_mode_changed ();
     void device_changed ();
     void list_devices ();
     void show_buffer_duration ();

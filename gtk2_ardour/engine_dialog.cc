@@ -381,13 +381,9 @@ EngineControl::list_devices ()
 	}
 
 	set_popdown_strings (device_combo, available_devices);
-	set_popdown_strings (input_device_combo, available_devices);
-	set_popdown_strings (output_device_combo, available_devices);
 	
 	if (!available_devices.empty()) {
 		device_combo.set_active_text (available_devices.front());
-		input_device_combo.set_active_text (available_devices.front());
-		output_device_combo.set_active_text (available_devices.front());
 	}
 
 	device_changed ();
@@ -523,26 +519,6 @@ EngineControl::show_buffer_duration ()
 	char buf[32];
 	snprintf (buf, sizeof (buf), _("(%.1f msecs)"), (2 * samples) / (rate/1000.0));
 	buffer_size_duration_label.set_text (buf);
-}
-
-void
-EngineControl::audio_mode_changed ()
-{
-	std::string str = audio_mode_combo.get_active_text();
-
-	if (str == _("Playback/recording on 1 device")) {
-		input_device_combo.set_sensitive (false);
-		output_device_combo.set_sensitive (false);
-	} else if (str == _("Playback/recording on 2 devices")) {
-		input_device_combo.set_sensitive (true);
-		output_device_combo.set_sensitive (true);
-	} else if (str == _("Playback only")) {
-		output_device_combo.set_sensitive (true);
-		input_device_combo.set_sensitive (false);
-	} else if (str == _("Recording only")) {
-		input_device_combo.set_sensitive (true);
-		output_device_combo.set_sensitive (false);
-	}
 }
 
 EngineControl::State*
