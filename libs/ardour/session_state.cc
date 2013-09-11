@@ -312,8 +312,10 @@ Session::post_engine_init ()
 
 	DirtyChanged (); /* EMIT SIGNAL */
 
-	if (state_was_pending) {
-		save_state (_current_snapshot_name);
+	if (_is_new) {
+		save_state ("");
+	} else if (state_was_pending) {
+		save_state ("");
 		remove_pending_capture_state ();
 		state_was_pending = false;
 	}
@@ -545,8 +547,6 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 	if (Config->get_use_monitor_bus() && bus_profile) {
 		add_monitor_section ();
 	}
-
-	save_state ("");
 
 	return 0;
 }
