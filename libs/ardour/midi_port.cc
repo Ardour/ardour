@@ -88,7 +88,7 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 
 			void* buffer = port_engine.get_buffer (_port_handle, nframes);
 			const pframes_t event_count = port_engine.get_midi_event_count (buffer);
-			
+
 			/* suck all relevant MIDI events from the MIDI port buffer
 			   into our MidiBuffer
 			*/

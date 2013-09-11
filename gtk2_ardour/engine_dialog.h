@@ -33,9 +33,11 @@
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/button.h>
 
+#include "pbd/signals.h"
+
 #include "ardour_dialog.h"
 
-class EngineControl : public ArdourDialog {
+class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
   public:
     EngineControl ();
     ~EngineControl ();
@@ -70,6 +72,18 @@ class EngineControl : public ArdourDialog {
     Gtk::SpinButton ports_spinner;
 
     Gtk::Button     control_app_button;
+
+    /* latency measurement */
+
+    Gtk::ComboBoxText lm_output_channel_combo;
+    Gtk::ComboBoxText lm_input_channel_combo;
+    Gtk::ToggleButton lm_measure_button;
+    Gtk::Button       lm_use_button;
+    Gtk::Label        lm_title;
+    Gtk::Label        lm_preamble;
+    Gtk::Label        lm_results;
+    Gtk::Table        lm_table;
+    Gtk::VBox         lm_vbox;
 
     /* JACK specific */
     
@@ -156,6 +170,14 @@ class EngineControl : public ArdourDialog {
     void manage_control_app_sensitivity ();
     int push_state_to_backend (bool start);
     uint32_t _desired_sample_rate;
+
+    /* latency measurement */
+    void latency_button_toggled ();
+    bool check_latency_measurement ();
+    void update_latency_display ();
+    sigc::connection latency_timeout;
+    void enable_latency_tab ();
+    void disable_latency_tab ();
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

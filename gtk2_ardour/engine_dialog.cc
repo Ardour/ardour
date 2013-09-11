@@ -36,12 +36,15 @@
 
 #include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
+#include "ardour/mtdm.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/types.h"
 
 #include "pbd/convert.h"
 #include "pbd/error.h"
 
 #include "engine_dialog.h"
+#include "gui_thread.h"
 #include "i18n.h"
 
 using namespace std;
@@ -63,6 +66,9 @@ EngineControl::EngineControl ()
 	, ports_adjustment (128, 8, 1024, 1, 16)
 	, ports_spinner (ports_adjustment)
 	, control_app_button (_("Launch Control App"))
+	, lm_measure_button (_("Measure latency"))
+	, lm_use_button (_("Use results"))
+	, lm_table (5, 2)
 	, basic_packer (9, 3)
 	, ignore_changes (0)
 	, _desired_sample_rate (0)
@@ -89,6 +95,15 @@ EngineControl::EngineControl ()
 	if (audio_setup) {
 		set_state (*audio_setup);
 	} 
+
+	ARDOUR::AudioEngine::instance()->Stopped.connect (*this, MISSING_INVALIDATOR, boost::bind (&EngineControl::disable_latency_tab, this), gui_context());
+
+	if (!ARDOUR::AudioEngine::instance()->connected()) {
+		ARDOUR::AudioEngine::instance()->Running.connect (*this, MISSING_INVALIDATOR, boost::bind (&EngineControl::enable_latency_tab, this), gui_context());
+		disable_latency_tab ();
+	} else {
+		enable_latency_tab ();
+	}
 }
 
 void
@@ -131,7 +146,7 @@ EngineControl::build_notebook ()
 
 	row = 0;
 
-	const AttachOptions xopt = AttachOptions (FILL|EXPAND);
+	AttachOptions xopt = AttachOptions (FILL|EXPAND);
 
 	label = manage (left_aligned_label (_("Audio System:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
@@ -200,8 +215,59 @@ EngineControl::build_notebook ()
 
 	midi_packer.set_border_width (12);
 
+	/* latency measurement tab */
+	
+	lm_title.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Latency Measurement Tool")));
+	
+	row = 0;
+	lm_table.set_row_spacings (12);
+
+	lm_table.attach (lm_title, 0, 2, row, row+1, xopt, (AttachOptions) 0);
+	row++;
+
+	lm_preamble.set_width_chars (60);
+	lm_preamble.set_line_wrap (true);
+	lm_preamble.set_markup (_("This tool will allow you to <i>precisely</i> measure the signal delay \
+within your audio hardware setup that is not controlled by Ardour or its audio backend.\n\n\
+Connect the two channels that you select below using either a cable or (less ideally) a speaker \
+and microphone.\n\n\
+Once the channels are connected, click the \"Measure latency\" button.\n\n\
+When you are satisfied with the results, click the \"Use results\" button to use them with your audio \
+setup parameters. <i>Note: they will not take effect until you restart</i>"));
+
+	lm_table.attach (lm_preamble, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
+	row++;
+
+	label = manage (left_aligned_label (_("Output channel")));
+	lm_table.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
+	lm_table.attach (lm_output_channel_combo, 1, 2, row, row+1, xopt, (AttachOptions) 0);
+	++row;
+
+	label = manage (left_aligned_label (_("Input channel")));
+	lm_table.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
+	lm_table.attach (lm_input_channel_combo, 1, 2, row, row+1, xopt, (AttachOptions) 0);
+	++row;
+
+	xopt = AttachOptions(0);
+
+	lm_measure_button.signal_toggled().connect (sigc::mem_fun (*this, &EngineControl::latency_button_toggled));
+
+	lm_table.attach (lm_measure_button, 0, 2, row, row+1, xopt, (AttachOptions) 0);
+	++row;
+	lm_table.attach (lm_results, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
+	++row;
+	lm_table.attach (lm_use_button, 0, 2, row, row+1, xopt, (AttachOptions) 0);
+	++row;
+
+	lm_results.set_text ("Measured results: 786 samples");
+
+	lm_vbox.pack_start (lm_table, false, false);
+
+	/* pack it all up */
+
 	notebook.pages().push_back (TabElem (basic_vbox, _("Audio")));
 	notebook.pages().push_back (TabElem (midi_hbox, _("MIDI")));
+	notebook.pages().push_back (TabElem (lm_vbox, _("Latency")));
 	notebook.set_border_width (12);
 
 	notebook.set_tab_pos (POS_RIGHT);
@@ -223,6 +289,28 @@ EngineControl::build_notebook ()
 EngineControl::~EngineControl ()
 {
 
+}
+
+void
+EngineControl::disable_latency_tab ()
+{
+	vector<string> empty;
+	set_popdown_strings (lm_output_channel_combo, empty);
+	set_popdown_strings (lm_input_channel_combo, empty);
+}
+
+void
+EngineControl::enable_latency_tab ()
+{
+	vector<string> outputs;
+	ARDOUR::AudioEngine::instance()->get_physical_outputs (ARDOUR::DataType::AUDIO, outputs);
+	set_popdown_strings (lm_output_channel_combo, outputs);
+	lm_output_channel_combo.set_active_text (outputs.front());
+
+	vector<string> inputs;
+	ARDOUR::AudioEngine::instance()->get_physical_inputs (ARDOUR::DataType::AUDIO, inputs);
+	set_popdown_strings (lm_input_channel_combo, inputs);
+	lm_input_channel_combo.set_active_text (inputs.front());
 }
 
 void
@@ -860,4 +948,96 @@ EngineControl::set_desired_sample_rate (uint32_t sr)
 {
 	_desired_sample_rate = sr;
 	device_changed ();
+}
+
+/* latency measurement */
+
+void
+EngineControl::update_latency_display ()
+{
+	ARDOUR::framecnt_t const sample_rate = ARDOUR::AudioEngine::instance()->sample_rate();
+        if (sample_rate == 0) {
+                lm_results.set_text (_("Disconnected from audio engine"));
+        } else {
+                char buf[64];
+                //snprintf (buf, sizeof (buf), "%10.3lf frames %10.3lf ms",
+		//(float)_pi->latency(), (float)_pi->latency() * 1000.0f/sample_rate);
+		strcpy (buf, "got something");
+                lm_results.set_text(buf);
+        }
+}
+
+bool
+EngineControl::check_latency_measurement ()
+{
+        MTDM* mtdm = ARDOUR::AudioEngine::instance()->mtdm ();
+	static uint32_t cnt = 0;
+
+        if (mtdm->resolve () < 0) {
+		cerr << "no resolution\n";
+		string txt = _("No signal detected ");
+		uint32_t dots = cnt++%10;
+		for (uint32_t i = 0; i < dots; ++i) {
+			txt += '.';
+		}
+		lm_results.set_text (txt);
+                return true;
+        }
+
+        if (mtdm->err () > 0.3) {
+                mtdm->invert ();
+                mtdm->resolve ();
+        }
+
+        char buf[128];
+	ARDOUR::framecnt_t const sample_rate = ARDOUR::AudioEngine::instance()->sample_rate();
+
+        if (sample_rate == 0) {
+                lm_results.set_text (_("Disconnected from audio engine"));
+		ARDOUR::AudioEngine::instance()->stop_latency_detection ();
+                return false;
+        }
+
+        snprintf (buf, sizeof (buf), "%10.3lf frames %10.3lf ms", mtdm->del (), mtdm->del () * 1000.0f/sample_rate);
+
+        bool solid = true;
+
+        if (mtdm->err () > 0.2) {
+                strcat (buf, " ??");
+                solid = false;
+        }
+
+        if (mtdm->inv ()) {
+                strcat (buf, " (Inv)");
+                solid = false;
+        }
+
+        if (solid) {
+                // _pi->set_measured_latency (rint (mtdm->del()));
+                lm_measure_button.set_active (false);
+                strcat (buf, " (set)");
+        }
+	
+        lm_results.set_text (buf);
+
+        return true;
+}
+
+void
+EngineControl::latency_button_toggled ()
+{
+        if (lm_measure_button.get_active ()) {
+
+		ARDOUR::AudioEngine::instance()->set_latency_input_port (lm_input_channel_combo.get_active_text());
+		ARDOUR::AudioEngine::instance()->set_latency_output_port (lm_output_channel_combo.get_active_text());
+		cerr << "latency detection on " << lm_input_channel_combo.get_active_text() << " => " << lm_output_channel_combo.get_active_text() << endl;
+		ARDOUR::AudioEngine::instance()->start_latency_detection ();
+                lm_results.set_text (_("Detecting ..."));
+                latency_timeout = Glib::signal_timeout().connect (mem_fun (*this, &EngineControl::check_latency_measurement), 250);
+
+        } else {
+		ARDOUR::AudioEngine::instance()->stop_latency_detection ();
+                latency_timeout.disconnect ();
+                update_latency_display ();
+        }
 }

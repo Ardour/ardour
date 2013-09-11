@@ -49,7 +49,7 @@ PortInsert::PortInsert (Session& s, boost::shared_ptr<Pannable> pannable, boost:
 {
         _mtdm = 0;
         _latency_detect = false;
-        _latency_flush_frames = false;
+        _latency_flush_frames = 0;
         _measured_latency = 0;
 }
 
@@ -64,7 +64,7 @@ PortInsert::start_latency_detection ()
 {
 	delete _mtdm;
         _mtdm = new MTDM (_session.frame_rate());
-        _latency_flush_frames = false;
+        _latency_flush_frames = 0;
         _latency_detect = true;
         _measured_latency = 0;
 }

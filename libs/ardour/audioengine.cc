@@ -50,6 +50,7 @@
 #include "ardour/meter.h"
 #include "ardour/midi_port.h"
 #include "ardour/midiport_manager.h"
+#include "ardour/mtdm.h"
 #include "ardour/port.h"
 #include "ardour/process_thread.h"
 #include "ardour/session.h"
@@ -73,6 +74,11 @@ AudioEngine::AudioEngine ()
 	, _processed_frames (0)
 	, m_meter_thread (0)
 	, _main_thread (0)
+	, _mtdm (0)
+	, _measuring_latency (false)
+	, _latency_input_port (0)
+	, _latency_output_port (0)
+	, _latency_flush_frames (0)
 {
 	g_atomic_int_set (&m_meter_exit, 0);
 	discover_backends ();
@@ -189,6 +195,43 @@ AudioEngine::process_callback (pframes_t nframes)
 	if (!tm.locked()) {
 		/* return having done nothing */
 		_processed_frames = next_processed_frames;
+		return 0;
+	}
+
+	/* If measuring latency, do it now and get out of here */
+
+	if (_measuring_latency && _mtdm) {
+		// PortManager::cycle_start (nframes);
+		// PortManager::silence (nframes);
+
+		if (_latency_input_port && _latency_output_port) {
+			PortEngine& pe (port_engine());
+
+			Sample* in = (Sample*) pe.get_buffer (_latency_input_port, nframes);
+			Sample* out = (Sample*) pe.get_buffer (_latency_output_port, nframes);
+
+			_mtdm->process (nframes, in, out);
+		}
+
+		// PortManager::cycle_end (nframes);
+		return 0;
+
+	} else if (_latency_flush_frames) {
+		
+		/* wait for the appropriate duration for the MTDM signal to
+		 * drain from the ports before we revert to normal behaviour.
+		 */
+
+		PortManager::cycle_start (nframes);
+		PortManager::silence (nframes);
+		PortManager::cycle_end (nframes);
+		
+                if (_latency_flush_frames > nframes) {
+                        _latency_flush_frames -= nframes;
+                } else {
+                        _latency_flush_frames = 0;
+                }
+
 		return 0;
 	}
 
@@ -581,6 +624,9 @@ AudioEngine::stop ()
 	
 	_running = false;
 	_processed_frames = 0;
+	_measuring_latency = false;
+	_latency_output_port = 0;
+	_latency_input_port = 0;
 	stop_metering_thread ();
 	
 	Port::PortDrop ();
@@ -930,3 +976,41 @@ AudioEngine::setup_required () const
 	return true;
 }
 
+MTDM*
+AudioEngine::mtdm() 
+{
+	return _mtdm;
+}
+
+void
+AudioEngine::start_latency_detection ()
+{
+	delete _mtdm;
+
+	_mtdm = new MTDM (sample_rate());
+	_measuring_latency = true;
+        _latency_flush_frames = samples_per_cycle();
+}
+
+void
+AudioEngine::stop_latency_detection ()
+{
+	port_engine().unregister_port (_latency_output_port);
+	port_engine().unregister_port (_latency_input_port);
+	_measuring_latency = false;
+}
+
+void
+AudioEngine::set_latency_output_port (const string& name)
+{
+	_latency_output_port = port_engine().register_port ("latency_out", DataType::AUDIO, IsOutput);
+	port_engine().connect (_latency_output_port, name);
+}
+
+void
+AudioEngine::set_latency_input_port (const string& name)
+{
+	const string portname ("latency_in");
+	_latency_input_port = port_engine().register_port (portname, DataType::AUDIO, IsInput);
+	port_engine().connect (name, make_port_name_non_relative (portname));
+}

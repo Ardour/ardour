@@ -47,6 +47,8 @@
 #include <jack/session.h>
 #endif
 
+class MTDM;
+
 namespace ARDOUR {
 
 class InternalPort;
@@ -182,6 +184,14 @@ public:
     /* sets up the process callback thread */
     static void thread_init_callback (void *);
 
+    /* latency measurement */
+
+    MTDM* mtdm();
+    void start_latency_detection ();
+    void stop_latency_detection ();
+    void set_latency_input_port (const std::string&);
+    void set_latency_output_port (const std::string&);
+
   private:
     AudioEngine ();
 
@@ -205,7 +215,12 @@ public:
     framecnt_t                _processed_frames;
     Glib::Threads::Thread*     m_meter_thread;
     ProcessThread*            _main_thread;
-    
+    MTDM*                     _mtdm;
+    bool                      _measuring_latency;
+    PortEngine::PortHandle    _latency_input_port;
+    PortEngine::PortHandle    _latency_output_port;
+    framecnt_t                _latency_flush_frames;
+
     void meter_thread ();
     void start_metering_thread ();
     void stop_metering_thread ();
