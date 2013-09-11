@@ -985,11 +985,37 @@ AudioEngine::mtdm()
 void
 AudioEngine::start_latency_detection ()
 {
+	PortEngine& pe (port_engine());
+
 	delete _mtdm;
+	_mtdm = 0;
+
+	/* create the ports we will use to read/write data */
+	
+	if ((_latency_output_port = pe.register_port ("latency_out", DataType::AUDIO, IsOutput)) == 0) {
+		return;
+	}
+	if (pe.connect (_latency_output_port, _latency_output_name)) {
+		return;
+	}
+
+	const string portname ("latency_in");
+	if ((_latency_input_port = pe.register_port (portname, DataType::AUDIO, IsInput)) == 0) {
+		pe.unregister_port (_latency_output_port);
+		return;
+	}
+	if (pe.connect (_latency_input_name, make_port_name_non_relative (portname))) {
+		pe.unregister_port (_latency_output_port);
+		return;
+	}
+	
+	/* all created and connected, lets go */
 
 	_mtdm = new MTDM (sample_rate());
 	_measuring_latency = true;
         _latency_flush_frames = samples_per_cycle();
+
+
 }
 
 void
@@ -1003,14 +1029,11 @@ AudioEngine::stop_latency_detection ()
 void
 AudioEngine::set_latency_output_port (const string& name)
 {
-	_latency_output_port = port_engine().register_port ("latency_out", DataType::AUDIO, IsOutput);
-	port_engine().connect (_latency_output_port, name);
+	_latency_output_name = name;
 }
 
 void
 AudioEngine::set_latency_input_port (const string& name)
 {
-	const string portname ("latency_in");
-	_latency_input_port = port_engine().register_port (portname, DataType::AUDIO, IsInput);
-	port_engine().connect (name, make_port_name_non_relative (portname));
+	_latency_input_name = name;
 }

@@ -227,23 +227,21 @@ EngineControl::build_notebook ()
 
 	lm_preamble.set_width_chars (60);
 	lm_preamble.set_line_wrap (true);
-	lm_preamble.set_markup (_("This tool will allow you to <i>precisely</i> measure the signal delay \
-within your audio hardware setup that is not controlled by Ardour or its audio backend.\n\n\
-Connect the two channels that you select below using either a cable or (less ideally) a speaker \
+	lm_preamble.set_markup (_("1. <span weight=\"bold\">Turn down the volume on your hardware to a very low level.</span>\n\n\
+2. Connect the two channels that you select below using either a cable or (less ideally) a speaker \
 and microphone.\n\n\
-Once the channels are connected, click the \"Measure latency\" button.\n\n\
-When you are satisfied with the results, click the \"Use results\" button to use them with your audio \
-setup parameters. <i>Note: they will not take effect until you restart</i>"));
+3. Once the channels are connected, click the \"Measure latency\" button.\n\n\
+4. When satisfied with the results, click the \"Use results\" button."));
 
 	lm_table.attach (lm_preamble, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
 	row++;
 
-	label = manage (left_aligned_label (_("Output channel")));
+	label = manage (new Label (_("Output channel")));
 	lm_table.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
 	lm_table.attach (lm_output_channel_combo, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
-	label = manage (left_aligned_label (_("Input channel")));
+	label = manage (new Label (_("Input channel")));
 	lm_table.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
 	lm_table.attach (lm_input_channel_combo, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
@@ -251,7 +249,8 @@ setup parameters. <i>Note: they will not take effect until you restart</i>"));
 	xopt = AttachOptions(0);
 
 	lm_measure_button.signal_toggled().connect (sigc::mem_fun (*this, &EngineControl::latency_button_toggled));
-
+	lm_use_button.set_sensitive (false);
+		
 	lm_table.attach (lm_measure_button, 0, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 	lm_table.attach (lm_results, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
@@ -259,7 +258,7 @@ setup parameters. <i>Note: they will not take effect until you restart</i>"));
 	lm_table.attach (lm_use_button, 0, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
-	lm_results.set_text ("Measured results: 786 samples");
+	lm_results.set_markup ("<i>No measurement results yet</i>");
 
 	lm_vbox.pack_start (lm_table, false, false);
 
@@ -974,7 +973,6 @@ EngineControl::check_latency_measurement ()
 	static uint32_t cnt = 0;
 
         if (mtdm->resolve () < 0) {
-		cerr << "no resolution\n";
 		string txt = _("No signal detected ");
 		uint32_t dots = cnt++%10;
 		for (uint32_t i = 0; i < dots; ++i) {
@@ -1015,6 +1013,7 @@ EngineControl::check_latency_measurement ()
         if (solid) {
                 // _pi->set_measured_latency (rint (mtdm->del()));
                 lm_measure_button.set_active (false);
+		lm_use_button.set_sensitive (true);
                 strcat (buf, " (set)");
         }
 	

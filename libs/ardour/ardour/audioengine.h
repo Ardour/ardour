@@ -220,6 +220,8 @@ public:
     PortEngine::PortHandle    _latency_input_port;
     PortEngine::PortHandle    _latency_output_port;
     framecnt_t                _latency_flush_frames;
+    std::string               _latency_input_name;
+    std::string               _latency_output_name;
 
     void meter_thread ();
     void start_metering_thread ();
