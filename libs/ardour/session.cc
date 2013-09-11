@@ -326,6 +326,16 @@ Session::Session (AudioEngine &eng,
 	EndTimeChanged.connect_same_thread (*this, boost::bind (&Session::end_time_changed, this, _1));
 
 	_is_new = false;
+
+	/* hook us up to the engine since we are now completely constructed */
+
+	BootMessage (_("Connect to engine"));
+
+	_engine.set_session (this);
+	_engine.reset_timebase ();
+
+	BootMessage (_("Session loading complete"));
+
 }
 
 Session::~Session ()
@@ -726,12 +736,6 @@ Session::when_engine_running ()
         /* update latencies */
 
         initialize_latencies ();
-
-	/* hook us up to the engine */
-
-	BootMessage (_("Connect to engine"));
-	_engine.set_session (this);
-	_engine.reset_timebase ();
 
 	return 0;
 }

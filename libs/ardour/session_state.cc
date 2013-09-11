@@ -308,8 +308,6 @@ Session::post_engine_init ()
 
 	_state_of_the_state = Clean;
 
-	Port::set_connecting_blocked (false);
-
 	DirtyChanged (); /* EMIT SIGNAL */
 
 	if (_is_new) {
@@ -319,8 +317,6 @@ Session::post_engine_init ()
 		remove_pending_capture_state ();
 		state_was_pending = false;
 	}
-
-	BootMessage (_("Session loading complete"));
 
 	return 0;
 }
