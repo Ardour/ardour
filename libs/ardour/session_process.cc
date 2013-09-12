@@ -40,7 +40,6 @@
 #include "ardour/ticker.h"
 #include "ardour/types.h"
 
-#include "midi++/manager.h"
 #include "midi++/mmc.h"
 
 #include "i18n.h"
@@ -85,7 +84,7 @@ Session::process (pframes_t nframes)
 
 	try {
 		if (!_engine.freewheeling() && Config->get_send_midi_clock() && transport_speed() == 1.0f && midi_clock->has_midi_port()) {
-			midi_clock->tick (transport_at_start);
+			midi_clock->tick (transport_at_start, nframes);
 		}
 	} catch (...) {
 		/* don't bother with a message */
@@ -325,7 +324,7 @@ Session::process_with_events (pframes_t nframes)
 	 * and prepare for rolling)
 	 */
 	if (_send_timecode_update) {
-		send_full_time_code (_transport_frame);
+		send_full_time_code (_transport_frame, nframes);
 	}
 
 	if (!process_can_proceed()) {

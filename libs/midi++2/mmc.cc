@@ -22,12 +22,12 @@
 #include <map>
 
 #include "timecode/time.h"
+
 #include "pbd/error.h"
+
 #include "midi++/mmc.h"
 #include "midi++/port.h"
-#include "midi++/jack_midi_port.h"
 #include "midi++/parser.h"
-#include "midi++/manager.h"
 
 #ifndef __INT_MAX__   // 'ssize_t' won't be defined yet
 typedef long ssize_t;
@@ -199,16 +199,21 @@ static void build_mmc_cmd_map ()
 	mmc_cmd_map.insert (newpair);
 }
 
-
-MachineControl::MachineControl (Manager* m, jack_client_t* jack)
+MachineControl::MachineControl ()
 {
 	build_mmc_cmd_map ();
 
 	_receive_device_id = 0x7f;
 	_send_device_id = 0x7f;
+}
 
-	_input_port = m->add_port (new JackMIDIPort ("MMC in", Port::IsInput, jack));
-	_output_port = m->add_port (new JackMIDIPort ("MMC out", Port::IsOutput, jack));
+void
+MachineControl::set_ports (MIDI::Port* ip, MIDI::Port* op)
+{
+	port_connections.drop_connections ();
+
+	_input_port = ip;
+	_output_port = op;
 
 	_input_port->parser()->mmc.connect_same_thread (port_connections, boost::bind (&MachineControl::process_mmc_message, this, _1, _2, _3));
 	_input_port->parser()->start.connect_same_thread (port_connections, boost::bind (&MachineControl::spp_start, this));

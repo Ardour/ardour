@@ -44,8 +44,6 @@
 #include "pbd/xml++.h"
 #include "pbd/stacktrace.h"
 
-#include "midi++/manager.h"
-
 #include "ardour/session.h"
 #include "ardour/ladspa_plugin.h"
 #include "ardour/buffer_set.h"
@@ -129,7 +127,9 @@ LadspaPlugin::init (string module_path, uint32_t index, framecnt_t rate)
 	port_cnt = parameter_count();
 
 	_control_data = new LADSPA_Data[port_cnt];
+	memset (_control_data, 0, sizeof (LADSPA_Data) * port_cnt);
 	_shadow_data = new LADSPA_Data[port_cnt];
+	memset (_shadow_data, 0, sizeof (LADSPA_Data) * port_cnt);
 
 	for (i = 0; i < port_cnt; ++i) {
 		if (LADSPA_IS_PORT_CONTROL(port_descriptor (i))) {

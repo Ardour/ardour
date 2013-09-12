@@ -75,9 +75,7 @@ namespace ARDOUR {
 	bool translations_are_enabled ();
 	bool set_translations_enabled (bool);
 
-	static inline microseconds_t get_microseconds () {
-		return (microseconds_t) jack_get_time();
-	}
+	microseconds_t get_microseconds ();
 
 	void setup_fpu ();
 	std::vector<SyncSource> get_available_sync_options();

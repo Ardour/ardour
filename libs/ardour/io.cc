@@ -1344,7 +1344,7 @@ IO::bundle_changed (Bundle::Change /*c*/)
 string
 IO::build_legal_port_name (DataType type)
 {
-	const int name_size = jack_port_name_size();
+	const int name_size = AudioEngine::instance()->port_name_size();
 	int limit;
 	string suffix;
 
@@ -1378,7 +1378,7 @@ IO::build_legal_port_name (DataType type)
 
 	// allow up to 4 digits for the output port number, plus the slash, suffix and extra space
 
-	limit = name_size - _session.engine().client_name().length() - (suffix.length() + 5);
+	limit = name_size - AudioEngine::instance()->my_name().length() - (suffix.length() + 5);
 
 	std::vector<char> buf1(name_size+1);
 	std::vector<char> buf2(name_size+1);
@@ -1411,7 +1411,7 @@ IO::find_port_hole (const char* base)
 	 */
 
 	for (n = 1; n < 9999; ++n) {
-		std::vector<char> buf(jack_port_name_size());
+		std::vector<char> buf (AudioEngine::instance()->port_name_size());
 		PortSet::iterator i = _ports.begin();
 
 		snprintf (&buf[0], jack_port_name_size(), _("%s %u"), base, n);
@@ -1645,7 +1645,7 @@ IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, fr
 		return;
 	}
 
-	_buffers.get_jack_port_addresses (_ports, nframes);
+	_buffers.get_backend_port_addresses (_ports, nframes);
 	if (proc) {
 		proc->run (_buffers, start_frame, end_frame, nframes, true);
 	}

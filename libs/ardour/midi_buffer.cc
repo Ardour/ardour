@@ -22,6 +22,7 @@
 #include "pbd/malign.h"
 #include "pbd/compose.h"
 #include "pbd/debug.h"
+#include "pbd/stacktrace.h"
 
 #include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
@@ -133,6 +134,7 @@ MidiBuffer::push_back(const Evoral::MIDIEvent<TimeType>& ev)
 
 	if (_size + stamp_size + ev.size() >= _capacity) {
 		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
+		PBD::stacktrace (cerr, 20);
 		return false;
 	}
 
@@ -171,7 +173,9 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 #endif
 
 	if (_size + stamp_size + size >= _capacity) {
-		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
+		cerr << "MidiBuffer::push_back2 failed (buffer is full; _size = " << _size << " capacity " 
+		     << _capacity << " stamp " << stamp_size << " size = " << size << ")" << endl;
+		PBD::stacktrace (cerr, 20);
 		return false;
 	}
 
@@ -189,55 +193,6 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 
 	return true;
 }
-
-
-/** Push an event into the buffer.
- *
- * Note that the raw MIDI pointed to by ev will be COPIED and unmodified.
- * That is, the caller still owns it, if it needs freeing it's Not My Problem(TM).
- * Realtime safe.
- * @return false if operation failed (not enough room)
- */
-bool
-MidiBuffer::push_back(const jack_midi_event_t& ev)
-{
-	const size_t stamp_size = sizeof(TimeType);
-
-	if (_size + stamp_size + ev.size >= _capacity) {
-		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
-		return false;
-	}
-
-	if (!Evoral::midi_event_is_valid(ev.buffer, ev.size)) {
-		cerr << "WARNING: MidiBuffer ignoring illegal MIDI event" << endl;
-		return false;
-	}
-
-#ifndef NDEBUG
-	if (DEBUG::MidiIO & PBD::debug_bits) {
-		DEBUG_STR_DECL(a);
-		DEBUG_STR_APPEND(a, string_compose ("midibuffer %1 push jack event @ %2 sz %3 ", this, ev.time, ev.size));
-		for (size_t i=0; i < ev.size; ++i) {
-			DEBUG_STR_APPEND(a,hex);
-			DEBUG_STR_APPEND(a,"0x");
-			DEBUG_STR_APPEND(a,(int)ev.buffer[i]);
-			DEBUG_STR_APPEND(a,' ');
-		}
-		DEBUG_STR_APPEND(a,'\n');
-		DEBUG_TRACE (DEBUG::MidiIO, DEBUG_STR(a).str());
-	}
-#endif
-
-	uint8_t* const write_loc = _data + _size;
-	*((TimeType*)write_loc) = ev.time;
-	memcpy(write_loc + stamp_size, ev.buffer, ev.size);
-
-	_size += stamp_size + ev.size;
-	_silent = false;
-
-	return true;
-}
-
 
 /** Reserve space for a new event in the buffer.
  *

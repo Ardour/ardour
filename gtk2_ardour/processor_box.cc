@@ -2202,10 +2202,10 @@ ProcessorBox::register_actions ()
 
 	act = ActionManager::register_action (popup_act_grp, X_("newinsert"), _("New Insert"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_insert));
-	ActionManager::jack_sensitive_actions.push_back (act);
+	ActionManager::engine_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (popup_act_grp, X_("newsend"), _("New External Send ..."),
 			sigc::ptr_fun (ProcessorBox::rb_choose_send));
-	ActionManager::jack_sensitive_actions.push_back (act);
+	ActionManager::engine_sensitive_actions.push_back (act);
 
 	ActionManager::register_action (popup_act_grp, X_("newaux"), _("New Aux Send ..."));
 

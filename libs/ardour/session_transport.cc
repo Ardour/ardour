@@ -33,7 +33,6 @@
 
 #include "midi++/mmc.h"
 #include "midi++/port.h"
-#include "midi++/manager.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/auditioner.h"
@@ -610,11 +609,23 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	have_looped = false;
 
-	if (!_engine.freewheeling()) {
-		send_full_time_code (_transport_frame);
+	/* don't bother with this stuff if we're disconnected from the engine,
+	   because there will be no process callbacks to deliver stuff from
+	*/
+
+	if (_engine.connected() && !_engine.freewheeling()) {
+		// need to queue this in the next RT cycle
+		_send_timecode_update = true;
 		
 		if (!dynamic_cast<MTC_Slave*>(_slave)) {
-			MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
+			_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
+
+			/* This (::non_realtime_stop()) gets called by main
+			   process thread, which will lead to confusion
+			   when calling AsyncMIDIPort::write().
+			   
+			   Something must be done. XXX
+			*/
 			send_mmc_locate (_transport_frame);
 		}
 	}
@@ -1260,7 +1271,7 @@ Session::start_transport ()
 		Timecode::Time time;
 		timecode_time_subframes (_transport_frame, time);
 		if (!dynamic_cast<MTC_Slave*>(_slave)) {
-			MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
+			_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
 		}
 	}
 
@@ -1338,8 +1349,9 @@ Session::use_sync_source (Slave* new_slave)
 	_slave = new_slave;
 
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("set new slave to %1\n", _slave));
-
-	send_full_time_code (_transport_frame);
+	
+	// need to queue this for next process() cycle
+	_send_timecode_update = true;
 
 	boost::shared_ptr<RouteList> rl = routes.reader();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
@@ -1380,7 +1392,7 @@ Session::switch_to_sync_source (SyncSource src)
 		}
 
 		try {
-			new_slave = new MTC_Slave (*this, *MIDI::Manager::instance()->mtc_input_port());
+			new_slave = new MTC_Slave (*this, *_midi_ports->mtc_input_port());
 		}
 
 		catch (failed_constructor& err) {
@@ -1409,7 +1421,7 @@ Session::switch_to_sync_source (SyncSource src)
 		}
 
 		try {
-			new_slave = new MIDIClock_Slave (*this, *MIDI::Manager::instance()->midi_clock_input_port(), 24);
+			new_slave = new MIDIClock_Slave (*this, *_midi_ports->midi_clock_input_port(), 24);
 		}
 
 		catch (failed_constructor& err) {
@@ -1426,7 +1438,7 @@ Session::switch_to_sync_source (SyncSource src)
 			return;
 		}
 
-		new_slave = new JACK_Slave (_engine.jack());
+		new_slave = new JACK_Slave (*AudioEngine::instance());
 		break;
 
 	default:
@@ -1616,16 +1628,6 @@ Session::allow_auto_play (bool yn)
 	auto_play_legal = yn;
 }
 
-void
-Session::reset_jack_connection (jack_client_t* jack)
-{
-	JACK_Slave* js;
-
-	if (_slave && ((js = dynamic_cast<JACK_Slave*> (_slave)) != 0)) {
-		js->reset_client (jack);
-	}
-}
-
 bool
 Session::maybe_stop (framepos_t limit)
 {
@@ -1646,7 +1648,7 @@ Session::send_mmc_locate (framepos_t t)
 	if (!_engine.freewheeling()) {
 		Timecode::Time time;
 		timecode_time_subframes (t, time);
-		MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (time));
+		_mmc->send (MIDI::MachineControlCommand (time));
 	}
 }
 

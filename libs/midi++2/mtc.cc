@@ -240,7 +240,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 	/* time code is looking good */
 
 #ifdef DEBUG_MTC
-	// cerr << "for quarter frame " << which_quarter_frame << " byte = " << hex << (int) msg[1] << dec << endl;
+	cerr << "for quarter frame " << which_quarter_frame << " byte = " << hex << (int) msg[1] << dec << endl;
 #endif
 
 	switch (which_quarter_frame) {

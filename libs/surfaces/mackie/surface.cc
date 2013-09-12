@@ -24,7 +24,6 @@
 #include <cmath>
 
 #include "midi++/port.h"
-#include "midi++/manager.h"
 
 #include "ardour/automation_control.h"
 #include "ardour/debug.h"
@@ -87,7 +86,11 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::Surface init\n");
 	
-	_port = new SurfacePort (*this);
+	try {
+		_port = new SurfacePort (*this);
+	} catch (...) {
+		throw failed_constructor ();
+	}
 
 	/* only the first Surface object has global controls */
 

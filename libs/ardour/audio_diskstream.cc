@@ -1752,7 +1752,7 @@ AudioDiskstream::prep_record_enable ()
 	if (Config->get_monitoring_model() == HardwareMonitoring) {
 
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-			(*chan)->source.request_jack_monitors_input (!(_session.config.get_auto_input() && rolling));
+			(*chan)->source.request_input_monitoring (!(_session.config.get_auto_input() && rolling));
 			capturing_sources.push_back ((*chan)->write_source);
 			(*chan)->write_source->mark_streaming_write_started ();
 		}
@@ -1773,7 +1773,7 @@ AudioDiskstream::prep_record_disable ()
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	if (Config->get_monitoring_model() == HardwareMonitoring) {
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-			(*chan)->source.request_jack_monitors_input (false);
+			(*chan)->source.request_input_monitoring (false);
 		}
 	}
 	capturing_sources.clear ();
@@ -2039,12 +2039,12 @@ AudioDiskstream::allocate_temporary_buffers ()
 }
 
 void
-AudioDiskstream::request_jack_monitors_input (bool yn)
+AudioDiskstream::request_input_monitoring (bool yn)
 {
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-		(*chan)->source.request_jack_monitors_input (yn);
+		(*chan)->source.request_input_monitoring (yn);
 	}
 }
 
@@ -2367,13 +2367,13 @@ AudioDiskstream::ChannelSource::is_physical () const
 }
 
 void
-AudioDiskstream::ChannelSource::request_jack_monitors_input (bool yn) const
+AudioDiskstream::ChannelSource::request_input_monitoring (bool yn) const
 {
 	if (name.empty()) {
 		return;
 	}
 
-	return AudioEngine::instance()->request_jack_monitors_input (name, yn);
+	return AudioEngine::instance()->request_input_monitoring (name, yn);
 }
 
 AudioDiskstream::ChannelInfo::ChannelInfo (framecnt_t playback_bufsize, framecnt_t capture_bufsize, framecnt_t speed_size, framecnt_t wrap_size)

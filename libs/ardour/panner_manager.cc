@@ -84,6 +84,7 @@ PannerManager::discover_panners ()
 		panner_discover (*i);
 	}
 }
+
 int
 PannerManager::panner_discover (string path)
 {

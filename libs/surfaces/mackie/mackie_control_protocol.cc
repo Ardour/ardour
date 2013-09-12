@@ -392,7 +392,9 @@ MackieControlProtocol::set_active (bool yn)
 		
 		BaseUI::run ();
 		
-		create_surfaces ();
+		if (create_surfaces ()) {
+			return -1;
+		}
 		connect_session_signals ();
 		_active = true;
 		update_surfaces ();
@@ -605,7 +607,7 @@ MackieControlProtocol::set_profile (const string& profile_name)
 	_device_profile = d->second;
 }	
 
-void
+int
 MackieControlProtocol::set_device (const string& device_name, bool allow_activation)
 {
 	map<string,DeviceInfo>::iterator d = DeviceInfo::device_info.find (device_name);
@@ -614,7 +616,7 @@ MackieControlProtocol::set_device (const string& device_name, bool allow_activat
 							   device_name, allow_activation));
 
 	if (d == DeviceInfo::device_info.end()) {
-		return;
+		return -1;
 	}
 	
 	if (_active) {
@@ -628,13 +630,16 @@ MackieControlProtocol::set_device (const string& device_name, bool allow_activat
 		set_active (true);
 	} else {
 		if (_active) {
-			create_surfaces ();
+			if (create_surfaces ()) {
+				return -1;
+			}
 			switch_banks (0, true);
 		}
 	}
+	return 0;
 }
 
-void 
+int
 MackieControlProtocol::create_surfaces ()
 {
 	string device_name;
@@ -651,7 +656,13 @@ MackieControlProtocol::create_surfaces ()
 
 	for (uint32_t n = 0; n < 1 + _device_info.extenders(); ++n) {
 
-		boost::shared_ptr<Surface> surface (new Surface (*this, device_name, n, stype));
+		boost::shared_ptr<Surface> surface;
+
+		try {
+			surface.reset (new Surface (*this, device_name, n, stype));
+		} catch (...) {
+			return -1;
+		}
 
 		{
 			Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -697,6 +708,8 @@ MackieControlProtocol::create_surfaces ()
 			g_source_ref (psrc->gobj());
 		}
 	}
+
+	return 0;
 }
 
 void 
@@ -1237,7 +1250,7 @@ MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 		}
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("data available on %1\n", port->name()));
-		framepos_t now = session->engine().frame_time();
+		framepos_t now = session->engine().sample_time();
 		port->parse (now);
 	}
 
@@ -1574,14 +1587,17 @@ MackieControlProtocol::set_ipmidi_base (int16_t portnum)
 	}
 }
 
-void
+int
 MackieControlProtocol::ipmidi_restart ()
 {
 	clear_ports ();
 	clear_surfaces ();
-	create_surfaces ();
+	if (create_surfaces ()) {
+		return -1;
+	}
 	switch_banks (_current_initial_bank, true);
 	needs_ipmidi_restart = false;
+	return 0;
 }
 
 void

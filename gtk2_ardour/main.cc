@@ -373,34 +373,30 @@ static void load_custom_fonts() {
 #endif
 
 static gboolean
-tell_about_jack_death (void* /* ignored */)
+tell_about_backend_death (void* /* ignored */)
 {
 	if (AudioEngine::instance()->processed_frames() == 0) {
 		/* died during startup */
-		MessageDialog msg (_("JACK exited"), false);
+		MessageDialog msg (string_compose (_("The audio backend (%1) has failed, or terminated"), AudioEngine::instance()->current_backend_name()), false);
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		msg.set_secondary_text (string_compose (_(
-"JACK exited unexpectedly, and without notifying %1.\n\
+"%2 exited unexpectedly, and without notifying %1.\n\
 \n\
-This could be due to misconfiguration or to an error inside JACK.\n\
+This could be due to misconfiguration or to an error inside %2.\n\
 \n\
-Click OK to exit %1."), PROGRAM_NAME));
+Click OK to exit %1."), PROGRAM_NAME, AudioEngine::instance()->current_backend_name()));
 
 		msg.run ();
 		_exit (0);
 
 	} else {
 
-		/* engine has already run, so this is a mid-session JACK death */
-
-		MessageDialog* msg = manage (new MessageDialog (_("JACK exited"), false));
-		msg->set_secondary_text (string_compose (_(
-"JACK exited unexpectedly, and without notifying %1.\n\
-\n\
-This is probably due to an error inside JACK. You should restart JACK\n\
-and reconnect %1 to it, or exit %1 now. You cannot save your\n\
-session at this time, because we would lose your connection information.\n"), PROGRAM_NAME));
-		msg->present ();
+		/* engine has already run, so this is a mid-session backend death */
+			
+		MessageDialog msg (string_compose (_("The audio backend (%1) has failed, or terminated"), AudioEngine::instance()->current_backend_name()), false);
+		msg.set_secondary_text (string_compose (_("%2 exited unexpectedly, and without notifying %1."),
+							 PROGRAM_NAME, AudioEngine::instance()->current_backend_name()));
+		msg.present ();
 	}
 	return false; /* do not call again */
 }
@@ -408,15 +404,15 @@ session at this time, because we would lose your connection information.\n"), PR
 static void
 sigpipe_handler (int /*signal*/)
 {
-	/* XXX fix this so that we do this again after a reconnect to JACK
+	/* XXX fix this so that we do this again after a reconnect to the backend
 	 */
 
-	static bool done_the_jack_thing = false;
+	static bool done_the_backend_thing = false;
 
-	if (!done_the_jack_thing) {
+	if (!done_the_backend_thing) {
 		AudioEngine::instance()->died ();
-		g_idle_add (tell_about_jack_death, 0);
-		done_the_jack_thing =  true;
+		g_idle_add (tell_about_backend_death, 0);
+		done_the_backend_thing =  true;
 	}
 }
 

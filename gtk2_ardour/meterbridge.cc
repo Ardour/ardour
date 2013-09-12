@@ -702,11 +702,11 @@ Meterbridge::sync_order_keys (RouteSortOrderKey)
 
 		MeterType nmt = (*i).s->meter_type();
 		if (nmt == MeterKrms) nmt = MeterPeak; // identical metrics
-		if (pos == 0) {
+		if (vis == 1) {
 			(*i).s->set_tick_bar(1);
 		}
 
-		if ((*i).visible && nmt != lmt && pos == 0) {
+		if ((*i).visible && nmt != lmt && vis == 1) {
 			lmt = nmt;
 			metrics_left.set_metric_mode(1, lmt);
 		} else if ((*i).visible && nmt != lmt) {

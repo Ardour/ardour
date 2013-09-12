@@ -110,6 +110,8 @@ class IOProcessor;
 class ImportStatus;
 class MidiClockTicker;
 class MidiControlUI;
+class MidiPortManager;
+class MidiPort;
 class MidiRegion;
 class MidiSource;
 class MidiTrack;
@@ -381,9 +383,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	framecnt_t worst_track_latency ()  const { return _worst_track_latency; }
 	framecnt_t worst_playback_latency () const { return _worst_output_latency + _worst_track_latency; }
 
-#ifdef HAVE_JACK_SESSION
-	void jack_session_event (jack_session_event_t* event);
-#endif
 	int save_state (std::string snapshot_name, bool pending = false, bool switch_to_snapshot = false);
 	int restore_state (std::string snapshot_name);
 	int save_template (std::string template_name);
@@ -555,6 +554,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int destroy_sources (std::list<boost::shared_ptr<Source> >);
 
 	int remove_last_capture ();
+
+        /** handlers should return 0 for "everything OK", and any other value for
+	 * "cannot setup audioengine".
+	 */
+        static PBD::Signal1<int,uint32_t> AudioEngineSetupRequired;
 
 	/** handlers should return -1 for "stop cleanup",
 	    0 for "yes, delete this playlist",
@@ -813,8 +817,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::shared_ptr<SessionPlaylists> playlists;
 
 	void send_mmc_locate (framepos_t);
-	int send_full_time_code (framepos_t);
-	void send_song_position_pointer (framepos_t);
+        void queue_full_time_code () { _send_timecode_update = true; }
+        void queue_song_position_pointer () { /* currently does nothing */ }
 
 	bool step_editing() const { return (_step_editors > 0); }
 
@@ -862,6 +866,27 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	boost::shared_ptr<IO> ltc_input_io() { return _ltc_input; }
 	boost::shared_ptr<IO> ltc_output_io() { return _ltc_output; }
+
+    MIDI::Port* midi_input_port () const;
+    MIDI::Port* midi_output_port () const;
+    MIDI::Port* mmc_output_port () const;
+    MIDI::Port* mmc_input_port () const;
+
+    boost::shared_ptr<MidiPort> midi_clock_output_port () const;
+    boost::shared_ptr<MidiPort> midi_clock_input_port () const;
+    boost::shared_ptr<MidiPort> mtc_output_port () const;
+    boost::shared_ptr<MidiPort> mtc_input_port () const;
+
+    MIDI::MachineControl& mmc() { return *_mmc; }
+
+        /* Callbacks specifically related to JACK, and called directly
+	 * from the JACK audio backend.
+         */
+
+#ifdef HAVE_JACK_SESSION
+	void jack_session_event (jack_session_event_t* event);
+#endif
+        void jack_timebase_callback (jack_transport_state_t, pframes_t, jack_position_t*, int);
 
   protected:
 	friend class AudioEngine;
@@ -1046,7 +1071,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::scoped_ptr<SessionDirectory> _session_dir;
 
 	void hookup_io ();
-	void when_engine_running ();
+        int when_engine_running ();
 	void graph_reordered ();
 
 	/** current snapshot name, without the .ardour suffix */
@@ -1112,8 +1137,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void             auto_loop_changed (Location *);
 	void             auto_loop_declick_range (Location *, framepos_t &, framepos_t &);
 
-	void first_stage_init (std::string path, std::string snapshot_name);
-	int  second_stage_init ();
+	void pre_engine_init (std::string path);
+	int  post_engine_init ();
 	void remove_empty_sounds ();
 
 	void setup_midi_control ();
@@ -1216,7 +1241,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	framepos_t        ltc_timecode_offset;
 	bool              ltc_timecode_negative_offset;
 
-	jack_latency_range_t ltc_out_latency;
+	LatencyRange      ltc_out_latency;
 
 	void ltc_tx_initialize();
 	void ltc_tx_cleanup();
@@ -1260,6 +1285,13 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void post_transport ();
 	void engine_halted ();
 	void xrun_recovery ();
+
+    /* These are synchronous and so can only be called from within the process
+     * cycle
+     */
+
+    int  send_full_time_code (framepos_t, pframes_t nframes);
+    void send_song_position_pointer (framepos_t);
 
 	TempoMap    *_tempo_map;
 	void          tempo_map_changed (const PBD::PropertyChange&);
@@ -1429,9 +1461,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	 */
 	std::list<GQuark> _current_trans_quarks;
 
-	void jack_timebase_callback (jack_transport_state_t, pframes_t, jack_position_t*, int);
-	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
-	void reset_jack_connection (jack_client_t* jack);
+        int  backend_sync_callback (TransportState, framepos_t);
+
 	void process_rtop (SessionEvent*);
 
 	void  update_latency (bool playback);
@@ -1585,6 +1616,14 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
         void reconnect_ltc_input ();
         void reconnect_ltc_output ();
+
+    /* persistent, non-track related MIDI ports */
+    MidiPortManager* _midi_ports;
+    MIDI::MachineControl* _mmc;
+
+    void setup_ltc ();
+    void setup_click ();
+    void setup_bundles ();
 };
 
 } // namespace ARDOUR

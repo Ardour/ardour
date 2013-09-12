@@ -971,7 +971,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 	DEBUG_TRACE (DEBUG::Processors, string_compose (
 		             "%1 adding processor %2\n", name(), processor->name()));
 
-	if (!_session.engine().connected() || !processor) {
+	if (!AudioEngine::instance()->connected() || !processor) {
 		return 1;
 	}
 
@@ -3818,13 +3818,13 @@ Route::update_port_latencies (PortSet& from, PortSet& to, bool playback, framecn
 	   universally true, but the alternative is way too corner-case to worry about.
 	*/
 
-	jack_latency_range_t all_connections;
+	LatencyRange all_connections;
 
 	if (from.empty()) {
 		all_connections.min = 0;
 		all_connections.max = 0;
 	} else {
-		all_connections.min = ~((jack_nframes_t) 0);
+		all_connections.min = ~((pframes_t) 0);
 		all_connections.max = 0;
 		
 		/* iterate over all "from" ports and determine the latency range for all of their
@@ -3833,7 +3833,7 @@ Route::update_port_latencies (PortSet& from, PortSet& to, bool playback, framecn
 		
 		for (PortSet::iterator p = from.begin(); p != from.end(); ++p) {
 			
-			jack_latency_range_t range;
+			LatencyRange range;
 			
 			p->get_connected_latency_range (range, playback);
 			
@@ -3898,7 +3898,7 @@ Route::set_public_port_latencies (framecnt_t value, bool playback) const
 	   latency compensation into account.
 	*/
 
-	jack_latency_range_t range;
+	LatencyRange range;
 
 	range.min = value;
 	range.max = value;

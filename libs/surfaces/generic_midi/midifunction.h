@@ -33,7 +33,6 @@
 
 namespace MIDI {
 	class Channel;
-	class Port;
 	class Parser;
 }
 
@@ -64,7 +63,7 @@ class MIDIFunction : public MIDIInvokable
 		TrackSetSoloIsolate,
 	};
 
-	MIDIFunction (MIDI::Port&);
+	MIDIFunction (MIDI::Parser&);
 	virtual ~MIDIFunction ();
 
 	int setup (GenericMidiControlProtocol&, const std::string& function_name, const std::string& argument, MIDI::byte* sysex = 0, size_t ssize = 0);

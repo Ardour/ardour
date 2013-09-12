@@ -16,13 +16,11 @@
 
 */
 
-#ifndef  __libmidi_port_h__
-#define  __libmidi_port_h__
+#ifndef  __libardour_async_midiport_h__
+#define  __libardour_async_midiport_h__
 
 #include <string>
 #include <iostream>
-
-#include <jack/types.h>
 
 #include "pbd/xml++.h"
 #include "pbd/crossthread.h"
@@ -36,26 +34,26 @@
 #include "midi++/parser.h"
 #include "midi++/port.h"
 
-namespace MIDI {
+#include "ardour/midi_port.h"
 
-class Channel;
-class PortRequest;
+namespace ARDOUR {
 
-class JackMIDIPort : public Port {
+	class AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
+
   public:
-	JackMIDIPort (std::string const &, Port::Flags, jack_client_t *);
-	JackMIDIPort (const XMLNode&, jack_client_t *);
-	~JackMIDIPort ();
+        AsyncMIDIPort (std::string const &, PortFlags);
+	~AsyncMIDIPort ();
 
-	XMLNode& get_state () const;
-	void set_state (const XMLNode&);
+        /* called from an RT context */
 
 	void cycle_start (pframes_t nframes);
-	void cycle_end ();
-
+	void cycle_end (pframes_t nframes);
+    
+        /* called from non-RT context */
+    
 	void parse (framecnt_t timestamp);
-	int write (const byte *msg, size_t msglen, timestamp_t timestamp);
-	int read (byte *buf, size_t bufsize);
+	int write (const MIDI::byte *msg, size_t msglen, MIDI::timestamp_t timestamp);
+        int read (MIDI::byte *buf, size_t bufsize);
 	void drain (int check_interval_usecs);
 	int selectable () const {
 #ifdef PLATFORM_WINDOWS
@@ -65,26 +63,15 @@ class JackMIDIPort : public Port {
 #endif
 	}
 
-	pframes_t nframes_this_cycle() const { return _nframes_this_cycle; }
-
-	void reestablish (jack_client_t *);
-	void reconnect ();
-
 	static void set_process_thread (pthread_t);
 	static pthread_t get_process_thread () { return _process_thread; }
 	static bool is_process_thread();
 
-	static PBD::Signal0<void> MakeConnections;
-	static PBD::Signal0<void> JackHalted;
-
-private:	
-	bool              _currently_in_cycle;
-	pframes_t         _nframes_this_cycle;
-	jack_client_t*    _jack_client;
-	jack_port_t*      _jack_port;
-	timestamp_t       _last_write_timestamp;
+  private:	
+	bool                    _currently_in_cycle;
+        MIDI::timestamp_t       _last_write_timestamp;
 	RingBuffer< Evoral::Event<double> > output_fifo;
-	Evoral::EventRingBuffer<timestamp_t> input_fifo;
+        Evoral::EventRingBuffer<MIDI::timestamp_t> input_fifo;
         Glib::Threads::Mutex output_fifo_lock;
 #ifndef PLATFORM_WINDOWS
 	CrossThreadChannel xthread;
@@ -102,10 +89,11 @@ private:
 	void make_connections ();
 	void init (std::string const &, Flags);
 
-	static pthread_t _process_thread;
+        void flush_output_fifo (pframes_t);
 
+	static pthread_t _process_thread;
 };
 
-} // namespace MIDI
+} // namespace ARDOUR
 
-#endif // __libmidi_port_h__
+#endif /* __libardour_async_midiport_h__ */

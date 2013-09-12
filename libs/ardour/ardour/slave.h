@@ -40,14 +40,12 @@
 #define PLUSMINUS(A) ( ((A)<0) ? "-" : (((A)>0) ? "+" : "\u00B1") )
 #define LEADINGZERO(A) ( (A)<10 ? "   " : (A)<100 ? "  " : (A)<1000 ? " " : "" )
 
-namespace MIDI {
-	class Port;
-}
-
 namespace ARDOUR {
 
 class TempoMap;
 class Session;
+class AudioEngine;
+class MidiPort;
 
 /**
  * @class Slave
@@ -252,10 +250,10 @@ class TimecodeSlave : public Slave {
 
 class MTC_Slave : public TimecodeSlave {
   public:
-	MTC_Slave (Session&, MIDI::Port&);
+	MTC_Slave (Session&, MidiPort&);
 	~MTC_Slave ();
 
-	void rebind (MIDI::Port&);
+	void rebind (MidiPort&);
 	bool speed_and_position (double&, framepos_t&);
 
 	bool locked() const;
@@ -273,7 +271,7 @@ class MTC_Slave : public TimecodeSlave {
 
   private:
 	Session&    session;
-	MIDI::Port* port;
+	MidiPort*   port;
 	PBD::ScopedConnectionList port_connections;
 	PBD::ScopedConnection     config_connection;
 	bool        can_notify_on_unknown_rate;
@@ -354,7 +352,7 @@ public:
 	std::string approximate_current_delta() const;
 
   private:
-	void parse_ltc(const jack_nframes_t, const jack_default_audio_sample_t * const, const framecnt_t);
+	void parse_ltc(const pframes_t, const Sample* const, const framecnt_t);
 	void process_ltc(framepos_t const);
 	void init_engine_dll (framepos_t, int32_t);
 	bool detect_discontinuity(LTCFrameExt *, int, bool);
@@ -391,7 +389,7 @@ public:
 
 	PBD::ScopedConnectionList port_connections;
 	PBD::ScopedConnection     config_connection;
-	jack_latency_range_t      ltc_slave_latency;
+        LatencyRange  ltc_slave_latency;
 
 	/* DLL - chase LTC */
 	int    transport_direction;
@@ -404,13 +402,13 @@ public:
 
 class MIDIClock_Slave : public Slave {
   public:
-	MIDIClock_Slave (Session&, MIDI::Port&, int ppqn = 24);
+	MIDIClock_Slave (Session&, MidiPort&, int ppqn = 24);
 
 	/// Constructor for unit tests
 	MIDIClock_Slave (ISlaveSessionProxy* session_proxy = 0, int ppqn = 24);
 	~MIDIClock_Slave ();
 
-	void rebind (MIDI::Port&);
+	void rebind (MidiPort&);
 	bool speed_and_position (double&, framepos_t&);
 
 	bool locked() const;
@@ -426,7 +424,6 @@ class MIDIClock_Slave : public Slave {
 
   protected:
 	ISlaveSessionProxy* session;
-	MIDI::Port* port;
 	PBD::ScopedConnectionList port_connections;
 
 	/// pulses per quarter note for one MIDI clock frame (default 24)
@@ -492,7 +489,7 @@ class MIDIClock_Slave : public Slave {
 class JACK_Slave : public Slave
 {
   public:
-	JACK_Slave (jack_client_t*);
+	JACK_Slave (AudioEngine&);
 	~JACK_Slave ();
 
 	bool speed_and_position (double& speed, framepos_t& pos);
@@ -502,11 +499,10 @@ class JACK_Slave : public Slave
 	bool ok() const;
 	framecnt_t resolution () const { return 1; }
 	bool requires_seekahead () const { return false; }
-	void reset_client (jack_client_t* jack);
 	bool is_always_synced() const { return true; }
 
   private:
-	jack_client_t* jack;
+        AudioEngine& engine;
 	double speed;
 	bool _starting;
 };

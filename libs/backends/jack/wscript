@@ -1,0 +1,51 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import os
+import sys
+import re
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+JACKBACKEND_VERSION = '1.0.0'
+I18N_PACKAGE = 'jack-backend'
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    autowaf.configure(conf)
+
+def build(bld):
+    obj = bld(features = 'cxx cxxshlib')
+    obj.source = [ 
+            'jack_api.cc',
+            'jack_connection.cc',
+            'jack_audiobackend.cc',
+            'jack_portengine.cc',
+            'jack_utils.cc'
+            ]
+    obj.includes = ['.']
+    obj.cxxflags = [ '-fPIC' ]
+    obj.name     = 'jack_audiobackend'
+    obj.target   = 'jack_audiobackend'
+    obj.uselib   = [ 'JACK' ]
+    obj.use      = 'ardour libpbd'
+    obj.vnum     = JACKBACKEND_VERSION
+    obj.install_path  = os.path.join(bld.env['LIBDIR'], 'ardour3', 'backends')
+    obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"']
+    
+
+    #
+    # device discovery code in the jack backend needs ALSA
+    # on Linux.
+    # 
+
+    if re.search ("linux", sys.platform) != None:
+       obj.uselib += [ 'ALSA' ]
+

@@ -90,7 +90,7 @@ BufferSet::clear()
 
 /** Set up this BufferSet so that its data structures mirror a PortSet's buffers.
  *  This is quite expensive and not RT-safe, so it should not be called in a process context;
- *  get_jack_port_addresses() will fill in a structure set up by this method.
+ *  get_backend_port_addresses() will fill in a structure set up by this method.
  *
  *  XXX: this *is* called in a process context; I'm not sure quite what `should not' means above.
  */
@@ -114,13 +114,13 @@ BufferSet::attach_buffers (PortSet& ports)
 	_is_mirror = true;
 }
 
-/** Write the JACK port addresses from a PortSet into our data structures.  This
+/** Write the backend port addresses from a PortSet into our data structures.  This
  *  call assumes that attach_buffers() has already been called for the same PortSet.
  *  Does not allocate, so RT-safe BUT you can only call Port::get_buffer() from
  *  the process() callback tree anyway, so this has to be called in RT context.
  */
 void
-BufferSet::get_jack_port_addresses (PortSet& ports, framecnt_t nframes)
+BufferSet::get_backend_port_addresses (PortSet& ports, framecnt_t nframes)
 {
 	assert (_count == ports.count ());
 	assert (_available == ports.count ());

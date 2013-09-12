@@ -27,11 +27,11 @@
 #include "pbd/xml++.h"
 #include "pbd/file_utils.h"
 
-#include "midi++/manager.h"
-
+#include "ardour/audioengine.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/diskstream.h"
 #include "ardour/filesystem_paths.h"
+#include "ardour/port.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session_metadata.h"
 
@@ -63,13 +63,8 @@ RCConfiguration::RCConfiguration ()
 {
 }
 
-
 RCConfiguration::~RCConfiguration ()
 {
-	for (list<XMLNode*>::iterator i = _midi_port_states.begin(); i != _midi_port_states.end(); ++i) {
-		delete *i;
-	}
-
 	delete _control_protocol_state;
 }
 
@@ -177,16 +172,6 @@ RCConfiguration::get_state ()
 
 	root = new XMLNode("Ardour");
 
-        MIDI::Manager* mm = MIDI::Manager::instance();
-
-        if (mm) {
-		boost::shared_ptr<const MIDI::Manager::PortList> ports = mm->get_midi_ports();
-
-                for (MIDI::Manager::PortList::const_iterator i = ports->begin(); i != ports->end(); ++i) {
-                        root->add_child_nocopy((*i)->get_state());
-                }
-        }
-
 	root->add_child_nocopy (get_variables ());
 
 	root->add_child_nocopy (SessionMetadata::Metadata()->get_user_state());
@@ -232,12 +217,6 @@ RCConfiguration::set_state (const XMLNode& root, int version)
 	XMLNodeConstIterator niter;
 	XMLNode *node;
 
-	for (list<XMLNode*>::iterator i = _midi_port_states.begin(); i != _midi_port_states.end(); ++i) {
-		delete *i;
-	}
-
-	_midi_port_states.clear ();
-
 	Stateful::save_extra_xml (root);
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
@@ -250,8 +229,6 @@ RCConfiguration::set_state (const XMLNode& root, int version)
 			SessionMetadata::Metadata()->set_state (*node, version);
 		} else if (node->name() == ControlProtocolManager::state_node_name) {
 			_control_protocol_state = new XMLNode (*node);
-		} else if (node->name() == MIDI::Port::state_node_name) {
-			_midi_port_states.push_back (new XMLNode (*node));
 		}
 	}
 

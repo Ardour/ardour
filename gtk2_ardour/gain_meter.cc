@@ -32,7 +32,6 @@
 #include <gtkmm2ext/fastmeter.h>
 #include <gtkmm2ext/barcontroller.h>
 #include <gtkmm2ext/gtk_ui.h>
-#include "midi++/manager.h"
 #include "pbd/fastlog.h"
 #include "pbd/stacktrace.h"
 
@@ -280,14 +279,15 @@ GainMeterBase::setup_meters (int len)
 		case Wide:
 			meter_ticks1_area.show();
 			meter_ticks2_area.show();
+			meter_metric_area.show();
 			if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
 				meter_width = 10;
 			}
 			break;
 		case Narrow:
-			meter_width = 2;
 			meter_ticks1_area.hide();
 			meter_ticks2_area.hide();
+			meter_metric_area.hide();
 			break;
 	}
 	level_meter->setup_meters(len, meter_width);
@@ -864,7 +864,7 @@ GainMeterBase::update_meters()
 	}
 }
 
-void GainMeterBase::color_handler(bool /* dpi */)
+void GainMeterBase::color_handler(bool /*dpi*/)
 {
 	setup_meters();
 }

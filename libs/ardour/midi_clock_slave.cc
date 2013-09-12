@@ -30,6 +30,8 @@
 #include "midi++/port.h"
 
 #include "ardour/debug.h"
+#include "ardour/midi_buffer.h"
+#include "ardour/midi_port.h"
 #include "ardour/slave.h"
 #include "ardour/tempo.h"
 
@@ -40,7 +42,7 @@ using namespace ARDOUR;
 using namespace MIDI;
 using namespace PBD;
 
-MIDIClock_Slave::MIDIClock_Slave (Session& s, MIDI::Port& p, int ppqn)
+MIDIClock_Slave::MIDIClock_Slave (Session& s, MidiPort& p, int ppqn)
 	: ppqn (ppqn)
 	, bandwidth (10.0 / 60.0) // 1 BpM = 1 / 60 Hz
 {
@@ -63,19 +65,18 @@ MIDIClock_Slave::~MIDIClock_Slave()
 }
 
 void
-MIDIClock_Slave::rebind (MIDI::Port& p)
+MIDIClock_Slave::rebind (MidiPort& port)
 {
-	port_connections.drop_connections();
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MIDIClock_Slave: connecting to port %1\n", port.name()));
 
-	port = &p;
+	port_connections.drop_connections ();
 
-	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MIDIClock_Slave: connecting to port %1\n", port->name()));
+	port.self_parser().timing.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::update_midi_clock, this, _1, _2));
+	port.self_parser().start.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::start, this, _1, _2));
+	port.self_parser().contineu.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::contineu, this, _1, _2));
+	port.self_parser().stop.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::stop, this, _1, _2));
+	port.self_parser().position.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::position, this, _1, _2, 3));
 
-	port->parser()->timing.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::update_midi_clock, this, _1, _2));
-	port->parser()->start.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::start, this, _1, _2));
-	port->parser()->contineu.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::contineu, this, _1, _2));
-	port->parser()->stop.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::stop, this, _1, _2));
-	port->parser()->position.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::position, this, _1, _2, 3));
 }
 
 void

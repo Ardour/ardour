@@ -25,8 +25,8 @@
 
 using namespace MIDI;
 
-MIDIInvokable::MIDIInvokable (MIDI::Port& p)
-	: _port (p)
+MIDIInvokable::MIDIInvokable (MIDI::Parser& p)
+	: _parser (p)
 {
 	data_size = 0;
 	data = 0;
@@ -127,12 +127,6 @@ MIDIInvokable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 	control_channel = chn;
 	control_additional = additional;
 
-	if (_port.parser() == 0) {
-		return;
-	}
-
-	Parser& p = *_port.parser();
-
 	int chn_i = chn;
 
 	/* incoming MIDI is parsed by Ardour' MidiUI event loop/thread, and we want our handlers to execute in that context, so we use
@@ -141,27 +135,27 @@ MIDIInvokable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 
 	switch (ev) {
 	case MIDI::off:
-		p.channel_note_off[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIInvokable::midi_sense_note_off, this, _1, _2));
+		_parser.channel_note_off[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIInvokable::midi_sense_note_off, this, _1, _2));
 		break;
 
 	case MIDI::on:
-		p.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIInvokable::midi_sense_note_on, this, _1, _2));
+		_parser.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIInvokable::midi_sense_note_on, this, _1, _2));
 		break;
 		
 	case MIDI::controller:
-		p.channel_controller[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIInvokable::midi_sense_controller, this, _1, _2));
+		_parser.channel_controller[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIInvokable::midi_sense_controller, this, _1, _2));
 		break;
 
 	case MIDI::program:
-		p.channel_program_change[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIInvokable::midi_sense_program_change, this, _1, _2));
+		_parser.channel_program_change[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIInvokable::midi_sense_program_change, this, _1, _2));
 		break;
 
 	case MIDI::sysex:
-		p.sysex.connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIInvokable::midi_sense_sysex, this, _1, _2, _3));
+		_parser.sysex.connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIInvokable::midi_sense_sysex, this, _1, _2, _3));
 		break;
 
 	case MIDI::any:
-		p.any.connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIInvokable::midi_sense_any, this, _1, _2, _3));
+		_parser.any.connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIInvokable::midi_sense_any, this, _1, _2, _3));
 		break;
 
 	default:

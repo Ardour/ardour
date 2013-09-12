@@ -259,8 +259,7 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	video_codec_combo.append_text("mjpeg");
 	video_codec_combo.append_text("mpeg2video");
 	video_codec_combo.append_text("mpeg4");
-	video_codec_combo.append_text("x264 (baseline)");
-	video_codec_combo.append_text("x264 (hq)");
+	video_codec_combo.append_text("h264");
 	video_codec_combo.append_text("vpx (webm)");
 	video_codec_combo.append_text("copy");
 	video_codec_combo.set_active(4);
@@ -614,13 +613,8 @@ ExportVideoDialog::encode_pass (int pass)
 		ffs["-strict"] = "-2";
 	}
 
-	if (video_codec_combo.get_active_text() == "x264 (hq)" ) {
+	if (video_codec_combo.get_active_text() == "h264" ) {
 		ffs["-vcodec"] = "libx264";
-		ffs["-vprofile"] = "high";
-	}
-	else if (video_codec_combo.get_active_text() == "x264 (baseline)" ) {
-		ffs["-vcodec"] = "libx264";
-		ffs["-vpre"] = "baseline";
 	}
 	else if (video_codec_combo.get_active_text() == "vpx (webm)" ) {
 		ffs["-vcodec"] = "libvpx";

@@ -1,10 +1,11 @@
-#!/usr/bin/env python
+1#!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
 from waflib import Options
 import os
 import sys
 import re
 import subprocess
+import sys
 
 # default state file version for this build
 CURRENT_SESSION_FILE_VERSION = 3001
@@ -22,6 +23,7 @@ path_prefix = 'libs/ardour/'
 libardour_sources = [
         'amp.cc',
         'analyser.cc',
+        'async_midi_port.cc',
         'audio_buffer.cc',
         'audio_diskstream.cc',
         'audio_library.cc',
@@ -44,6 +46,7 @@ libardour_sources = [
         'automation_control.cc',
         'automation_list.cc',
         'automation_watch.cc',
+        'backend_search_path.cc',
         'beats_frames_converter.cc',
         'broadcast_info.cc',
         'buffer.cc',
@@ -128,6 +131,7 @@ libardour_sources = [
         'midi_stretch.cc',
         'midi_track.cc',
         'midi_ui.cc',
+        'midiport_manager.cc',
         'mix.cc',
         'monitor_processor.cc',
         'mtc_slave.cc',
@@ -151,6 +155,7 @@ libardour_sources = [
         'plugin_manager.cc',
         'port.cc',
         'port_insert.cc',
+        'port_manager.cc',
         'port_set.cc',
         'process_thread.cc',
         'processor.cc',
@@ -178,6 +183,7 @@ libardour_sources = [
         'session_events.cc',
         'session_export.cc',
         'session_handle.cc',
+        'session_jack.cc',
         'session_ltc.cc',
         'session_metadata.cc',
         'session_midi.cc',
@@ -259,6 +265,10 @@ def configure(conf):
                       atleast_version='0.1.0')
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP',
                       atleast_version='2.0')
+
+    if re.search ("linux", sys.platform) != None:
+        autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
+
     if Options.options.lv2:
         autowaf.check_pkg(conf, 'lv2', uselib_store='LV2',
                           atleast_version='1.0.0', mandatory=True)
@@ -302,60 +312,6 @@ def configure(conf):
                define_name='HAVE_JACK_SESSION')
 
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD',mandatory=False)
-
-    conf.check_cc(fragment = '''
-#include <jack/jack.h>
-void callback(jack_status_t code, const char* reason, void* arg) { return; }
-int main(int argc, char **argv) {
-    jack_client_t* c;
-    jack_on_info_shutdown(c, callback, (void*) 0);
-    return 0;
-}''',
-                  uselib= [ 'JACK' ],
-                  msg = 'Checking for jack_on_info_shutdown',
-                  define_name = 'HAVE_JACK_ON_INFO_SHUTDOWN',
-                  okmsg = 'present')
-
-    missing_jack_message = 'missing - a version of JACK that supports jack_port_set_latency_range() is required to compile Ardour3.'
-
-    conf.check_cc(fragment = '''
-#include <jack/jack.h>
-int main(int argc, char **argv) {
-    jack_port_t* p;
-    jack_latency_range_t r;
-    jack_port_set_latency_range(p, JackCaptureLatency, &r);
-    return 0;
-}''',
-                  uselib = [ 'JACK' ],
-                  msg = 'Checking for new JACK latency API',
-                  okmsg = 'present',
-                  mandatory = True,
-                  errmsg = missing_jack_message)
-
-    conf.check_cc(fragment = '''
-#include <jack/jack.h>
-int main(int argc, char **argv) {
-   jack_port_type_get_buffer_size((jack_client_t*)0, "");
-   return 0;
-}''',
-                  uselib = [ 'JACK' ],
-                  msg = 'Checking for new jack_port_type_get_buffer_size',
-                  okmsg = 'present',
-                  mandatory = True,
-                  errmsg = missing_jack_message)
-
-    conf.check_cc(fragment = '''
-#include <jack/transport.h>
-int main(int argc, char** argv) {
-  jack_position_t pos;
-  pos.valid & JackVideoFrameOffset;
-  return 0;
-}''',
-                  uselib= [ 'JACK' ],
-                  msg = 'Checking for JackVideoFrameOffset',
-                  define_name = 'HAVE_JACK_VIDEO_SUPPORT',
-                  mandatory = False,
-                  okmsg = 'present')
 
     if flac_supported():
         conf.define ('HAVE_FLAC', 1)
