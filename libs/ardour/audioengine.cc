@@ -425,8 +425,6 @@ AudioEngine::remove_session ()
 
 	if (_running) {
 
-		stop_metering_thread ();
-
 		if (_session) {
 			session_remove_pending = true;
 			session_removal_countdown = 0;
