@@ -4150,8 +4150,6 @@ ARDOUR_UI::launch_audio_midi_setup ()
 int
 ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 {
-	cerr << "DO-AMS\n";
-
 	launch_audio_midi_setup ();
 
 	_audio_midi_setup->set_desired_sample_rate (desired_sample_rate);

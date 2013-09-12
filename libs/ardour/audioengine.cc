@@ -1061,10 +1061,8 @@ AudioEngine::start_latency_detection ()
 	_latency_signal_latency = 0;
 	lr = pe.get_latency_range (_latency_input_port, false);
 	_latency_signal_latency = lr.max;
-	cerr << "Input port lm = " << lr.max;
 	lr = pe.get_latency_range (_latency_output_port, true);
 	_latency_signal_latency += lr.max;
-	cerr << " output port lm = " << lr.max << endl;
 
 	/* all created and connected, lets go */
 
@@ -1077,8 +1075,6 @@ AudioEngine::start_latency_detection ()
 void
 AudioEngine::stop_latency_detection ()
 {
-	cerr << "Stop LD\n";
-
 	_measuring_latency = false;
 
 	port_engine().unregister_port (_latency_output_port);
