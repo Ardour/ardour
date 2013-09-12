@@ -154,9 +154,9 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     State* get_matching_state (const std::string& backend,
 			       const std::string& driver,
 			       const std::string& device);
-    State* get_current_state ();
+    State* get_saved_state_for_currently_displayed_backend_and_device ();
     void maybe_display_saved_state ();
-    void save_state ();
+    State* save_state ();
 
     static bool print_channel_count (Gtk::SpinButton*);
 

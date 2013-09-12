@@ -285,6 +285,10 @@ Session::Session (AudioEngine &eng,
 			}
 		}
 	}
+
+	/* we need the audioengine to be up and usable to make much more
+	 * progress with construction, so lets get that started if it isn't already.
+	 */
 	
 	if (_engine.current_backend() == 0 || _engine.setup_required()) {
 		boost::optional<int> r = AudioEngineSetupRequired (sr);

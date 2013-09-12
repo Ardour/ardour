@@ -538,7 +538,7 @@ EngineControl::get_matching_state (const string& backend,
 }
 
 EngineControl::State*
-EngineControl::get_current_state ()
+EngineControl::get_saved_state_for_currently_displayed_backend_and_device ()
 {
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 
@@ -554,11 +554,11 @@ EngineControl::get_current_state ()
 				   device_combo.get_active_text());
 }
 
-void
+EngineControl::State*
 EngineControl::save_state ()
 {
 	bool existing = true;
-	State* state = get_current_state ();
+	State* state = get_saved_state_for_currently_displayed_backend_and_device ();
 
 	if (!state) {
 		existing = false;
@@ -578,12 +578,14 @@ EngineControl::save_state ()
 	if (!existing) {
 		states.push_back (*state);
 	}
+
+	return state;
 }
 
 void
 EngineControl::maybe_display_saved_state ()
 {
-	State* state = get_current_state ();
+	State* state = get_saved_state_for_currently_displayed_backend_and_device ();
 
 	if (state) {
 		ignore_changes++;
@@ -792,11 +794,10 @@ EngineControl::push_state_to_backend (bool start)
 		 * necessary
 		 */
 
-		State* state = get_current_state ();
+		State* state = get_saved_state_for_currently_displayed_backend_and_device ();
 
 		if (!state) {
-			save_state ();
-			state = get_current_state ();
+			state = save_state ();
 			assert (state);
 		}
 
