@@ -28,6 +28,7 @@
 #include "ardour/template_utils.h"
 #include "ardour_dialog.h"
 
+#include "time_selection.h"
 #include "transcode_ffmpeg.h"
 
 /** @class ExportVideoDialog
@@ -40,13 +41,13 @@
 class ExportVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
 {
   public:
-	ExportVideoDialog (PublicEditor&, ARDOUR::Session*);
+	ExportVideoDialog (ARDOUR::Session*, TimeSelection &tme);
 	~ExportVideoDialog ();
 
 	std::string get_exported_filename () { return outfn_path_entry.get_text(); }
 
   private:
-	PublicEditor& editor;
+	TimeSelection &export_range;
 
 	void on_show ();
 	void abort_clicked ();
