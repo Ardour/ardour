@@ -682,7 +682,7 @@ ARDOUR::JackCommandLineOptions::JackCommandLineOptions ()
 }
 
 bool
-ARDOUR::get_jack_command_line_string (const JackCommandLineOptions& options, string& command_line)
+ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& command_line)
 {
 	vector<string> args;
 
@@ -698,6 +698,11 @@ ARDOUR::get_jack_command_line_string (const JackCommandLineOptions& options, str
 		args.push_back (options.midi_driver);
 	}
 #endif
+
+	/* XXX hack to enforce qjackctl-like behaviour */
+	if (options.timeout == 0) {
+		options.timeout = 200;
+	}
 
 	if (options.timeout) {
 		args.push_back ("-t");
