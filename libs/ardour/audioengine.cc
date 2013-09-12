@@ -814,7 +814,7 @@ AudioEngine::get_sync_offset (pframes_t& offset) const
 }
 
 int
-AudioEngine::create_process_thread (boost::function<void()> func, pthread_t* thr, size_t stacksize)
+AudioEngine::create_process_thread (boost::function<void()> func, AudioBackendNativeThread* thr, size_t stacksize)
 {
 	if (!_backend) {
 		return -1;
@@ -822,6 +822,14 @@ AudioEngine::create_process_thread (boost::function<void()> func, pthread_t* thr
 	return _backend->create_process_thread (func, thr, stacksize);
 }
 
+int
+AudioEngine::wait_for_process_thread_exit (AudioBackendNativeThread thr)
+{
+	if (!_backend) {
+		return 0;
+	}
+	return _backend->wait_for_process_thread_exit (thr);
+}
 
 int
 AudioEngine::set_device_name (const std::string& name)

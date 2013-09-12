@@ -399,7 +399,13 @@ class AudioBackend {
      * stacksize. The thread will begin executing @param func, and will exit
      * when that function returns.
      */
-    virtual int create_process_thread (boost::function<void()> func, pthread_t*, size_t stacksize) = 0;
+    virtual int create_process_thread (boost::function<void()> func, AudioBackendNativeThread*, size_t stacksize) = 0;
+
+    /** Wait for the thread specified by @param thread to exit.
+     * 
+     * Return zero on success, non-zero on failure.
+     */
+    virtual int wait_for_process_thread_exit (AudioBackendNativeThread thread) = 0;
 
     virtual void update_latencies () = 0;
 

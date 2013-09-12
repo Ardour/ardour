@@ -789,6 +789,14 @@ JACKAudioBackend::create_process_thread (boost::function<void()> f, pthread_t* t
         return 0;
 }
 
+int
+JACKAudioBackend::wait_for_process_thread_exit (AudioBackendNativeThread thr)
+{
+	void* status;
+	/* this doesn't actively try to stop the thread, it just waits till it exits */
+	return pthread_join (thr, &status);
+}
+
 void*
 JACKAudioBackend::_start_process_thread (void* arg)
 {

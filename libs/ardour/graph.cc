@@ -102,7 +102,7 @@ Graph::reset_thread_list ()
         }
 
         Glib::Threads::Mutex::Lock lm (_session.engine().process_lock());
-	jack_native_thread_t a_thread;
+	AudioBackendNativeThread a_thread;
 
         if (!_thread_list.empty()) {
                 drop_threads ();
@@ -147,8 +147,8 @@ Graph::drop_threads ()
 
         _callback_start_sem.signal ();
 
-        for (list<jack_native_thread_t>::iterator i = _thread_list.begin(); i != _thread_list.end(); ++i) {
-                AudioEngine::instance()->stop_process_thread(*i);
+        for (list<AudioBackendNativeThread>::iterator i = _thread_list.begin(); i != _thread_list.end(); ++i) {
+		AudioEngine::instance()->wait_for_process_thread_exit (*i);
         }
 
         _thread_list.clear ();
@@ -584,12 +584,10 @@ Graph::process_one_route (Route* route)
 bool
 Graph::in_process_thread () const
 {
-#ifndef COMPILER_MINGW
-	for (list<pthread_t>::const_iterator i = _thread_list.begin (); i != _thread_list.end(); ++i) {
-		if (pthread_equal(*i, pthread_self())) {
+	for (list<AudioBackendNativeThread>::const_iterator i = _thread_list.begin (); i != _thread_list.end(); ++i) {
+		if (self_thread_equal (*i)) {
 			return true;
 		}
 	}
-#endif
 	return false;
 }
