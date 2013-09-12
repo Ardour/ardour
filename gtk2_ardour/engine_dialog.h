@@ -118,6 +118,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void backend_changed ();
     void sample_rate_changed ();
     void buffer_size_changed ();
+    void parameter_changed ();
 
     uint32_t get_rate() const;
     uint32_t get_buffer_size() const;
@@ -172,10 +173,11 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     /* latency measurement */
     void latency_button_toggled ();
     bool check_latency_measurement ();
-    void update_latency_display ();
     sigc::connection latency_timeout;
     void enable_latency_tab ();
     void disable_latency_tab ();
+
+    void on_switch_page (GtkNotebookPage*, guint page_num);
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

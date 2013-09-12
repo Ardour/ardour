@@ -188,6 +188,7 @@ public:
     /* latency measurement */
 
     MTDM* mtdm();
+    int  prepare_for_latency_measurement ();
     void start_latency_detection ();
     void stop_latency_detection ();
     void set_latency_input_port (const std::string&);
@@ -225,6 +226,7 @@ public:
     std::string               _latency_input_name;
     std::string               _latency_output_name;
     framecnt_t                _latency_signal_latency;
+    bool                      _started_for_latency;
 
     void meter_thread ();
     void start_metering_thread ();

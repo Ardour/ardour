@@ -29,6 +29,7 @@
 
 #include "pbd/error.h"
 #include "pbd/xml++.h"
+#include "pbd/unwind.h"
 
 #include <gtkmm/stock.h>
 #include <gtkmm/notebook.h>
@@ -95,15 +96,6 @@ EngineControl::EngineControl ()
 	if (audio_setup) {
 		set_state (*audio_setup);
 	} 
-
-	ARDOUR::AudioEngine::instance()->Stopped.connect (*this, MISSING_INVALIDATOR, boost::bind (&EngineControl::disable_latency_tab, this), gui_context());
-
-	if (!ARDOUR::AudioEngine::instance()->connected()) {
-		ARDOUR::AudioEngine::instance()->Running.connect (*this, MISSING_INVALIDATOR, boost::bind (&EngineControl::enable_latency_tab, this), gui_context());
-		disable_latency_tab ();
-	} else {
-		enable_latency_tab ();
-	}
 }
 
 void
@@ -281,9 +273,18 @@ and microphone.\n\n\
 	driver_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::driver_changed));
 	sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::sample_rate_changed));
 	buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::buffer_size_changed));
+	device_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::device_changed));
+
+	input_latency.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
+	output_latency.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
+	input_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
+	output_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
+
+
 	input_channels.signal_output().connect (sigc::bind (sigc::ptr_fun (&EngineControl::print_channel_count), &input_channels));
 	output_channels.signal_output().connect (sigc::bind (sigc::ptr_fun (&EngineControl::print_channel_count), &output_channels));
-	device_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::device_changed));
+
+	notebook.signal_switch_page().connect (sigc::mem_fun (*this, &EngineControl::on_switch_page));
 }
 
 EngineControl::~EngineControl ()
@@ -297,6 +298,8 @@ EngineControl::disable_latency_tab ()
 	vector<string> empty;
 	set_popdown_strings (lm_output_channel_combo, empty);
 	set_popdown_strings (lm_input_channel_combo, empty);
+	lm_measure_button.set_sensitive (false);
+	lm_use_button.set_sensitive (false);
 }
 
 void
@@ -311,6 +314,9 @@ EngineControl::enable_latency_tab ()
 	ARDOUR::AudioEngine::instance()->get_physical_inputs (ARDOUR::DataType::AUDIO, inputs);
 	set_popdown_strings (lm_input_channel_combo, inputs);
 	lm_input_channel_combo.set_active_text (inputs.front());
+
+	lm_measure_button.set_sensitive (true);
+	lm_use_button.set_sensitive (true);
 }
 
 void
@@ -384,10 +390,26 @@ EngineControl::list_devices ()
 	set_popdown_strings (device_combo, available_devices);
 	
 	if (!available_devices.empty()) {
+		sample_rate_combo.set_sensitive (true);
+		buffer_size_combo.set_sensitive (true);
+		input_latency.set_sensitive (true);
+		output_latency.set_sensitive (true);
+		input_channels.set_sensitive (true);
+		output_channels.set_sensitive (true);
+						
+		/* changing the text in the combo will trigger device_changed()
+		   which should populate the parameter controls
+		*/
+		
 		device_combo.set_active_text (available_devices.front());
+	} else {
+		sample_rate_combo.set_sensitive (true);
+		buffer_size_combo.set_sensitive (true);
+		input_latency.set_sensitive (true);
+		output_latency.set_sensitive (true);
+		input_channels.set_sensitive (true);
+		output_channels.set_sensitive (true);
 	}
-
-	device_changed ();
 }
 	
 void
@@ -468,7 +490,13 @@ EngineControl::device_changed ()
 
 	ignore_changes--;
 
+	/* pick up any saved state for this device */
+
 	maybe_display_saved_state ();
+
+	/* and push it to the backend */
+
+	push_state_to_backend (false);
 }	
 
 void 
@@ -483,6 +511,7 @@ EngineControl::sample_rate_changed ()
 	*/
 
 	show_buffer_duration ();
+	push_state_to_backend (false);
 	save_state ();
 
 }
@@ -495,6 +524,7 @@ EngineControl::buffer_size_changed ()
 	}
 
 	show_buffer_duration ();
+	push_state_to_backend (false);
 	save_state ();
 }
 
@@ -520,6 +550,14 @@ EngineControl::show_buffer_duration ()
 	char buf[32];
 	snprintf (buf, sizeof (buf), _("(%.1f msecs)"), (2 * samples) / (rate/1000.0));
 	buffer_size_duration_label.set_text (buf);
+}
+
+void
+EngineControl::parameter_changed ()
+{
+	if (!ignore_changes) {
+		save_state ();
+	}
 }
 
 EngineControl::State*
@@ -927,22 +965,46 @@ EngineControl::set_desired_sample_rate (uint32_t sr)
 	device_changed ();
 }
 
-/* latency measurement */
-
 void
-EngineControl::update_latency_display ()
+EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 {
-	ARDOUR::framecnt_t const sample_rate = ARDOUR::AudioEngine::instance()->sample_rate();
-        if (sample_rate == 0) {
-                lm_results.set_text (_("Disconnected from audio engine"));
-        } else {
-                char buf[64];
-                //snprintf (buf, sizeof (buf), "%10.3lf frames %10.3lf ms",
-		//(float)_pi->latency(), (float)_pi->latency() * 1000.0f/sample_rate);
-		strcpy (buf, "got something");
-                lm_results.set_text(buf);
-        }
+	if (page_num == 2) {
+		/* latency tab */
+
+		if (!ARDOUR::AudioEngine::instance()->running()) {
+			
+			PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
+			
+			/* save any existing latency values */
+			
+			uint32_t il = (uint32_t) input_latency.get_value ();
+			uint32_t ol = (uint32_t) input_latency.get_value ();
+
+			/* reset to zero so that our new test instance of JACK
+			   will be clean of any existing latency measures.
+			*/
+			
+			input_latency.set_value (0);
+			output_latency.set_value (0);
+			
+			push_state_to_backend (false);
+
+			/* reset control */
+
+			input_latency.set_value (il);
+			output_latency.set_value (ol);
+		}
+
+		if (ARDOUR::AudioEngine::instance()->prepare_for_latency_measurement()) {
+			disable_latency_tab ();
+		}
+		enable_latency_tab ();
+	} else {
+		ARDOUR::AudioEngine::instance()->stop_latency_detection();
+	}
 }
+
+/* latency measurement */
 
 bool
 EngineControl::check_latency_measurement ()
@@ -975,6 +1037,7 @@ EngineControl::check_latency_measurement ()
         }
 
 	uint32_t frames_total = mtdm->del();
+	cerr << "total = " << frames_total << " delay = " << ARDOUR::AudioEngine::instance()->latency_signal_delay() << endl;
 	uint32_t extra = frames_total - ARDOUR::AudioEngine::instance()->latency_signal_delay();
 
         snprintf (buf, sizeof (buf), "%u samples %10.3lf ms", extra, extra * 1000.0f/sample_rate);
@@ -992,7 +1055,6 @@ EngineControl::check_latency_measurement ()
         }
 
         if (solid) {
-                // _pi->set_measured_latency (rint (mtdm->del()));
                 lm_measure_button.set_active (false);
 		lm_use_button.set_sensitive (true);
                 strcat (buf, " (set)");
@@ -1010,7 +1072,6 @@ EngineControl::latency_button_toggled ()
 
 		ARDOUR::AudioEngine::instance()->set_latency_input_port (lm_input_channel_combo.get_active_text());
 		ARDOUR::AudioEngine::instance()->set_latency_output_port (lm_output_channel_combo.get_active_text());
-		cerr << "latency detection on " << lm_input_channel_combo.get_active_text() << " => " << lm_output_channel_combo.get_active_text() << endl;
 		ARDOUR::AudioEngine::instance()->start_latency_detection ();
                 lm_results.set_text (_("Detecting ..."));
                 latency_timeout = Glib::signal_timeout().connect (mem_fun (*this, &EngineControl::check_latency_measurement), 250);
@@ -1018,7 +1079,6 @@ EngineControl::latency_button_toggled ()
         } else {
 		ARDOUR::AudioEngine::instance()->stop_latency_detection ();
                 latency_timeout.disconnect ();
-                update_latency_display ();
         }
 }
 

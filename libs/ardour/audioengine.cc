@@ -80,6 +80,7 @@ AudioEngine::AudioEngine ()
 	, _latency_output_port (0)
 	, _latency_flush_frames (0)
 	, _latency_signal_latency (0)
+	, _started_for_latency (false)
 {
 	g_atomic_int_set (&m_meter_exit, 0);
 	discover_backends ();
@@ -202,6 +203,13 @@ AudioEngine::process_callback (pframes_t nframes)
 	bool return_after_remove_check = false;
 
 	if (_measuring_latency && _mtdm) {
+		/* run a normal cycle from the perspective of the PortManager
+		   so that we get silence on all registered ports.
+		   
+		   we overwrite the silence on the two ports used for latency
+		   measurement.
+		*/
+		
 		PortManager::cycle_start (nframes);
 		PortManager::silence (nframes);
 
@@ -609,7 +617,9 @@ AudioEngine::start ()
 	
 	start_metering_thread ();
 	
-	Running(); /* EMIT SIGNAL */
+	if (!_started_for_latency) {
+		Running(); /* EMIT SIGNAL */
+	}
 	
 	return 0;
 }
@@ -632,6 +642,7 @@ AudioEngine::stop ()
 	_measuring_latency = false;
 	_latency_output_port = 0;
 	_latency_input_port = 0;
+	_started_for_latency = false;
 	stop_metering_thread ();
 	
 	Port::PortDrop ();
@@ -982,6 +993,13 @@ AudioEngine::halted_callback (const char* why)
 bool
 AudioEngine::setup_required () const
 {
+	/* If there is only a single backend and it claims to be configured
+	 * already there is no setup to be done.
+	 *
+	 * Primarily for a case where there is only a JACK backend and
+	 * JACK is already running.
+	 */
+	 
 	if (_backends.size() == 1 && _backends.begin()->second->already_configured()) {
 		return false;
 	}
@@ -995,9 +1013,28 @@ AudioEngine::mtdm()
 	return _mtdm;
 }
 
+int
+AudioEngine::prepare_for_latency_measurement ()
+{
+	if (!running()) {
+		_started_for_latency = true;
+
+		if (start()) {
+			_started_for_latency = false;
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
 void
 AudioEngine::start_latency_detection ()
 {
+	if (prepare_for_latency_measurement ()) {
+		return;
+	}
+
 	PortEngine& pe (port_engine());
 
 	delete _mtdm;
@@ -1026,26 +1063,32 @@ AudioEngine::start_latency_detection ()
 	_latency_signal_latency = 0;
 	lr = pe.get_latency_range (_latency_input_port, false);
 	_latency_signal_latency = lr.max;
+	cerr << "Input port lm = " << lr.max;
 	lr = pe.get_latency_range (_latency_output_port, true);
 	_latency_signal_latency += lr.max;
+	cerr << " output port lm = " << lr.max << endl;
 
-	cerr << "latency signal pathway = " << _latency_signal_latency << endl;
-	
 	/* all created and connected, lets go */
 
 	_mtdm = new MTDM (sample_rate());
 	_measuring_latency = true;
         _latency_flush_frames = samples_per_cycle();
 
-
 }
 
 void
 AudioEngine::stop_latency_detection ()
 {
+	cerr << "Stop LD\n";
+
+	_measuring_latency = false;
+
 	port_engine().unregister_port (_latency_output_port);
 	port_engine().unregister_port (_latency_input_port);
-	_measuring_latency = false;
+	
+	if (_started_for_latency) {
+		stop ();
+	}
 }
 
 void

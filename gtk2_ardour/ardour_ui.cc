@@ -384,25 +384,8 @@ ARDOUR_UI::create_global_port_matrix (ARDOUR::DataType type)
 void
 ARDOUR_UI::attach_to_engine ()
 {
-	AudioEngine::instance()->Stopped.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_stopped, this), gui_context());
 	AudioEngine::instance()->Running.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_running, this), gui_context());
-	AudioEngine::instance()->SampleRateChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_sample_rate, this, _1), gui_context());
-
-	AudioEngine::instance()->Halted.connect_same_thread (halt_connection, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
-
 	ARDOUR::Port::set_connecting_blocked (ARDOUR_COMMAND_LINE::no_connect_ports);
-
-	/* if there is only one audio/midi backend, and it does not require setup, get our use of it underway
-	 * right here (we need to know the client name and potential session ID
-	 * to do this, which is why this is here, rather than in, say,
-	 * ARDOUR::init().
-	 */
-
-	if (!AudioEngine::instance()->setup_required()) {
-		const AudioBackendInfo* backend = AudioEngine::instance()->available_backends().front();
-		AudioEngine::instance()->set_backend (backend->name, ARDOUR_COMMAND_LINE::backend_client_name, ARDOUR_COMMAND_LINE::backend_session_uuid);
-		AudioEngine::instance()->start ();
-	}
 }
 
 void
@@ -524,6 +507,12 @@ ARDOUR_UI::post_engine ()
 	 */
 
 	ARDOUR::init_post_engine ();
+	
+	/* connect to important signals */
+
+	AudioEngine::instance()->Stopped.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_stopped, this), gui_context());
+	AudioEngine::instance()->SampleRateChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_sample_rate, this, _1), gui_context());
+	AudioEngine::instance()->Halted.connect_same_thread (halt_connection, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
 
 	_tooltips.enable();
 
@@ -4161,6 +4150,8 @@ ARDOUR_UI::launch_audio_midi_setup ()
 int
 ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 {
+	cerr << "DO-AMS\n";
+
 	launch_audio_midi_setup ();
 
 	_audio_midi_setup->set_desired_sample_rate (desired_sample_rate);
