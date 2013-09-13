@@ -29,17 +29,15 @@
 #include <boost/function.hpp>
 
 #include "ardour/types.h"
+#include "ardour/audioengine.h"
+#include "ardour/port_engine.h"
 
 namespace ARDOUR {
 
-class AudioEngine;
-class PortEngine;
-class PortManager;
-
-class AudioBackend {
+class AudioBackend : public PortEngine {
   public:
 
-    AudioBackend (AudioEngine& e) : engine (e){}
+    AudioBackend (AudioEngine& e) : PortEngine (e), engine (e) {}
     virtual ~AudioBackend () {}
 
     /** Return the name of this backend.
@@ -48,17 +46,6 @@ class AudioBackend {
      * might include "JACK", "CoreAudio", "ASIO" etc.
      */
     virtual std::string name() const = 0;
-
-    /** Return a private, type-free pointer to any data
-     * that might be useful to a concrete implementation
-     */
-    virtual void* private_handle() const = 0;
-
-    /** Return true if the underlying mechanism/API is still available
-     * for us to utilize. return false if some or all of the AudioBackend
-     * API can no longer be effectively used.
-     */
-    virtual bool connected() const = 0;
 
     /** Return true if the callback from the underlying mechanism/API
      * (CoreAudio, JACK, ASIO etc.) occurs in a thread subject to realtime
@@ -416,11 +403,22 @@ class AudioBackend {
 struct AudioBackendInfo {
     const char* name;
 
+    /** Using arg1 and arg2, initialize this audiobackend.
+     * 
+     * Returns zero on success, non-zero otherwise.
+     */
     int (*instantiate) (const std::string& arg1, const std::string& arg2);
+
+    /** Release all resources associated with this audiobackend
+     */
     int (*deinstantiate) (void);
 
-    boost::shared_ptr<AudioBackend> (*backend_factory) (AudioEngine&);
-    boost::shared_ptr<PortEngine> (*portengine_factory) (PortManager&);
+    /** Factory method to create an AudioBackend-derived class.
+     * 
+     * Returns a valid shared_ptr to the object if successfull,
+     * or a "null" shared_ptr otherwise.
+     */
+    boost::shared_ptr<AudioBackend> (*factory) (AudioEngine&);
 
     /** Return true if the underlying mechanism/API has been
      * configured and does not need (re)configuration in order

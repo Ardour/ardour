@@ -200,8 +200,6 @@ public:
 
     static AudioEngine*       _instance;
 
-    boost::shared_ptr<AudioBackend> _backend;
-
     Glib::Threads::Mutex      _process_lock;
     Glib::Threads::Cond        session_removed;
     bool                       session_remove_pending;

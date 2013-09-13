@@ -572,8 +572,7 @@ AudioEngine::set_backend (const std::string& name, const std::string& arg1, cons
 			throw failed_constructor ();
 		}
 
-		_backend = b->second->backend_factory (*this);
-		_impl = b->second->portengine_factory (*this);
+		_backend = b->second->factory (*this);
 
 	} catch (exception& e) {
 		error << string_compose (_("Could not create backend for %1: %2"), name, e.what()) << endmsg;
@@ -704,7 +703,7 @@ AudioEngine::connected() const
 		return false;
 	}
 
-	return _backend->connected();
+	return _backend->available();
 }
 
 void
