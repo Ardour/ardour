@@ -66,19 +66,13 @@ already_configured ()
 	return JackConnection::server_running ();
 }
 
-extern "C" {
-	
-	
-	/* functions looked up using dlopen-and-cousins, and so naming scope
-	 * must be non-mangled.
-	 */
+static ARDOUR::AudioBackendInfo _descriptor = {
+	"JACK",
+	instantiate,
+	deinstantiate,
+	backend_factory,
+	already_configured,
+};
 
-	ARDOUR::AudioBackendInfo descriptor = {
-		"JACK",
-		instantiate,
-		deinstantiate,
-		backend_factory,
-		already_configured,
-	};
-}
+extern "C" ARDOURBACKEND_API ARDOUR::AudioBackendInfo* descriptor() { return &_descriptor; }
 

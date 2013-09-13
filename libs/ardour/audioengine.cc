@@ -503,7 +503,8 @@ AudioEngine::backend_discover (const string& path)
 {
 	Glib::Module module (path);
 	AudioBackendInfo* info;
-	void* sym = 0;
+	AudioBackendInfo* (*dfunc)(void);
+	void* func = 0;
 
 	if (!module) {
 		error << string_compose(_("AudioEngine: cannot load module \"%1\" (%2)"), path,
@@ -511,15 +512,16 @@ AudioEngine::backend_discover (const string& path)
 		return 0;
 	}
 	
-	if (!module.get_symbol ("descriptor", sym)) {
-		error << string_compose(_("AudioEngine: backend at \"%1\" has no descriptor."), path) << endmsg;
+	if (!module.get_symbol ("descriptor", func)) {
+		error << string_compose(_("AudioEngine: backend at \"%1\" has no descriptor function."), path) << endmsg;
 		error << Glib::Module::get_last_error() << endmsg;
 		return 0;
 	}
 
 	module.make_resident ();
 	
-	info = (AudioBackendInfo*) sym;
+	dfunc = (AudioBackendInfo* (*)(void))func;
+	info = dfunc();
 	
 	return info;
 }

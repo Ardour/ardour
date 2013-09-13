@@ -38,8 +38,9 @@ def build(bld):
     obj.use      = 'ardour libpbd'
     obj.vnum     = JACKBACKEND_VERSION
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'ardour3', 'backends')
-    obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"']
-    
+    obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"', 
+                   'ARDOURBACKEND_DLL_EXPORTS'
+                   ]
 
     #
     # device discovery code in the jack backend needs ALSA
