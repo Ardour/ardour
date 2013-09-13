@@ -157,6 +157,8 @@ def set_compiler_flags (conf,opt):
                 conf.env['build_target'] = 'i386'
             elif re.search("powerpc", cpu) != None:
                 conf.env['build_target'] = 'powerpc'
+            elif re.search("arm", cpu) != None:
+                conf.env['build_target'] = 'arm'
             else:
                 conf.env['build_target'] = 'i686'
     else:
