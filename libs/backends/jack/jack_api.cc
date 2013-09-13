@@ -19,12 +19,10 @@
 
 #include "jack_connection.h"
 #include "jack_audiobackend.h"
-#include "jack_portengine.h"
 
 using namespace ARDOUR;
 
 static boost::shared_ptr<JACKAudioBackend> backend;
-static boost::shared_ptr<JACKPortEngine> port_engine;
 static boost::shared_ptr<JackConnection> jack_connection;
 
 static boost::shared_ptr<AudioBackend>
@@ -39,20 +37,6 @@ backend_factory (AudioEngine& ae)
 	}
 
 	return backend;
-}
-
-static boost::shared_ptr<PortEngine>
-portengine_factory (PortManager& pm)
-{
-	if (!jack_connection) {
-		return boost::shared_ptr<PortEngine>();
-	}
-
-	if (!port_engine) {
-		port_engine.reset (new JACKPortEngine (pm, jack_connection));
-	}
-
-	return port_engine;
 }
 
 static int
@@ -70,7 +54,6 @@ instantiate (const std::string& arg1, const std::string& arg2)
 static int 
 deinstantiate ()
 {
-	port_engine.reset ();
 	backend.reset ();
 	jack_connection.reset ();
 
@@ -95,7 +78,6 @@ extern "C" {
 		instantiate,
 		deinstantiate,
 		backend_factory,
-		portengine_factory,
 		already_configured,
 	};
 }

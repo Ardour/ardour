@@ -309,6 +309,8 @@ Session::post_engine_init ()
 
 	_state_of_the_state = Clean;
 
+	Port::set_connecting_blocked (false);
+
 	DirtyChanged (); /* EMIT SIGNAL */
 
 	if (_is_new) {

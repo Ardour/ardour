@@ -22,8 +22,9 @@
 
 #include "pbd/error.h"
 
-#include "jack_portengine.h"
+#include "jack_audiobackend.h"
 #include "jack_connection.h"
+#include "jack/midiport.h"
 
 #include "ardour/port_manager.h"
 
@@ -85,24 +86,8 @@ ardour_data_type_to_jack_port_type (DataType d)
 	return "";
 }
 
-JACKPortEngine::JACKPortEngine (PortManager& pm, boost::shared_ptr<JackConnection> jc)
-	: PortEngine (pm)
-	, _jack_connection (jc)
-{
-	_jack_connection->Connected.connect_same_thread (jack_connection_connection, boost::bind (&JACKPortEngine::connected_to_jack, this));
-}
-
-JACKPortEngine::~JACKPortEngine ()
-{
-	/* a default destructor would do this, and so would this one,
-	   but we'll make it explicit in case we ever need to debug
-	   the lifetime of the JACKConnection
-	*/
-	_jack_connection.reset ();
-}
-
 void
-JACKPortEngine::connected_to_jack ()
+JACKAudioBackend::when_connected_to_jack ()
 {
 	/* register callbacks for stuff that is our responsibility */
 
@@ -119,57 +104,45 @@ JACKPortEngine::connected_to_jack ()
         jack_set_graph_order_callback (client, _graph_order_callback, this);
 }
 
-void*
-JACKPortEngine::private_handle() const
-{
-	return _jack_connection->jack();
-}
-
-bool
-JACKPortEngine::connected() const
-{
-	return _jack_connection->connected();
-}
-
 int
-JACKPortEngine::set_port_name (PortHandle port, const std::string& name)
+JACKAudioBackend::set_port_name (PortHandle port, const std::string& name)
 {
 	return jack_port_set_name ((jack_port_t*) port, name.c_str());
 }
 
 string
-JACKPortEngine::get_port_name (PortHandle port) const
+JACKAudioBackend::get_port_name (PortHandle port) const
 {
 	return jack_port_name ((jack_port_t*) port);
 }
 
 PortEngine::PortHandle*
-JACKPortEngine:: get_port_by_name (const std::string& name) const
+JACKAudioBackend:: get_port_by_name (const std::string& name) const
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
 	return (PortHandle*) jack_port_by_name (_priv_jack, name.c_str());
 }
 
 void
-JACKPortEngine::_registration_callback (jack_port_id_t /*id*/, int /*reg*/, void* arg)
+JACKAudioBackend::_registration_callback (jack_port_id_t /*id*/, int /*reg*/, void* arg)
 {
-	static_cast<JACKPortEngine*> (arg)->manager.registration_callback ();
+	static_cast<JACKAudioBackend*> (arg)->manager.registration_callback ();
 }
 
 int
-JACKPortEngine::_graph_order_callback (void *arg)
+JACKAudioBackend::_graph_order_callback (void *arg)
 {
-	return static_cast<JACKPortEngine*> (arg)->manager.graph_order_callback ();
+	return static_cast<JACKAudioBackend*> (arg)->manager.graph_order_callback ();
 }
 
 void
-JACKPortEngine::_connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int conn, void* arg)
+JACKAudioBackend::_connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int conn, void* arg)
 {
-	static_cast<JACKPortEngine*> (arg)->connect_callback (id_a, id_b, conn);
+	static_cast<JACKAudioBackend*> (arg)->connect_callback (id_a, id_b, conn);
 }
 
 void
-JACKPortEngine::connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int conn)
+JACKAudioBackend::connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int conn)
 {
 	if (manager.port_remove_in_progress()) {
 		return;
@@ -184,7 +157,7 @@ JACKPortEngine::connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int 
 }
 
 bool
-JACKPortEngine::connected (PortHandle port, bool process_callback_safe)
+JACKAudioBackend::connected (PortHandle port, bool process_callback_safe)
 {
 	bool ret = false;
 
@@ -207,7 +180,7 @@ JACKPortEngine::connected (PortHandle port, bool process_callback_safe)
 }
 
 bool
-JACKPortEngine::connected_to (PortHandle port, const std::string& other, bool process_callback_safe)
+JACKAudioBackend::connected_to (PortHandle port, const std::string& other, bool process_callback_safe)
 {
 	bool ret = false;
 	const char** ports;
@@ -232,7 +205,7 @@ JACKPortEngine::connected_to (PortHandle port, const std::string& other, bool pr
 }
 
 bool
-JACKPortEngine::physically_connected (PortHandle p, bool process_callback_safe)
+JACKAudioBackend::physically_connected (PortHandle p, bool process_callback_safe)
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, false);
 	jack_port_t* port = (jack_port_t*) p;
@@ -262,7 +235,7 @@ JACKPortEngine::physically_connected (PortHandle p, bool process_callback_safe)
 }
 
 int
-JACKPortEngine::get_connections (PortHandle port, vector<string>& s, bool process_callback_safe)
+JACKAudioBackend::get_connections (PortHandle port, vector<string>& s, bool process_callback_safe)
 {
 	const char** ports;
 
@@ -284,19 +257,19 @@ JACKPortEngine::get_connections (PortHandle port, vector<string>& s, bool proces
 }
 
 DataType
-JACKPortEngine::port_data_type (PortHandle p) const
+JACKAudioBackend::port_data_type (PortHandle p) const
 {
 	return jack_port_type_to_ardour_data_type (jack_port_type ((jack_port_t*) p));
 }
 
 const string&
-JACKPortEngine::my_name() const
+JACKAudioBackend::my_name() const
 {
 	return _jack_connection->client_name();
 }
 
 bool
-JACKPortEngine::port_is_physical (PortHandle ph) const
+JACKAudioBackend::port_is_physical (PortHandle ph) const
 {
 	if (!ph) {
                 return false;
@@ -306,7 +279,7 @@ JACKPortEngine::port_is_physical (PortHandle ph) const
 }
 
 int
-JACKPortEngine::get_ports (const string& port_name_pattern, DataType type, PortFlags flags, vector<string>& s) const
+JACKAudioBackend::get_ports (const string& port_name_pattern, DataType type, PortFlags flags, vector<string>& s) const
 {
 
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack,0);
@@ -329,44 +302,19 @@ JACKPortEngine::get_ports (const string& port_name_pattern, DataType type, PortF
 }
 
 ChanCount
-JACKPortEngine::n_physical (unsigned long flags) const
-{
-	ChanCount c;
-
-	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, c);
-
-	const char ** ports = jack_get_ports (_priv_jack, NULL, NULL, JackPortIsPhysical | flags);
-
-	if (ports) {
-		for (uint32_t i = 0; ports[i]; ++i) {
-			if (!strstr (ports[i], "Midi-Through")) {
-				DataType t = port_data_type (jack_port_by_name (_priv_jack, ports[i]));
-				if (t != DataType::NIL) {
-					c.set (t, c.get (t) + 1);
-				}
-			}
-		}
-		
-		jack_free (ports);
-	}
-
-	return c;
-}
-
-ChanCount
-JACKPortEngine::n_physical_inputs () const
+JACKAudioBackend::n_physical_inputs () const
 {
 	return n_physical (JackPortIsInput);
 }
 
 ChanCount
-JACKPortEngine::n_physical_outputs () const
+JACKAudioBackend::n_physical_outputs () const
 {
 	return n_physical (JackPortIsOutput);
 }
 
 void
-JACKPortEngine::get_physical (DataType type, unsigned long flags, vector<string>& phy) const
+JACKAudioBackend::get_physical (DataType type, unsigned long flags, vector<string>& phy) const
 {
 	GET_PRIVATE_JACK_POINTER (_priv_jack);
 	const char ** ports;
@@ -390,7 +338,7 @@ JACKPortEngine::get_physical (DataType type, unsigned long flags, vector<string>
  *  a physical input connector.
  */
 void
-JACKPortEngine::get_physical_inputs (DataType type, vector<string>& ins)
+JACKAudioBackend::get_physical_inputs (DataType type, vector<string>& ins)
 {
 	get_physical (type, JackPortIsOutput, ins);
 }
@@ -399,14 +347,14 @@ JACKPortEngine::get_physical_inputs (DataType type, vector<string>& ins)
  *  a physical output connector.
  */
 void
-JACKPortEngine::get_physical_outputs (DataType type, vector<string>& outs)
+JACKAudioBackend::get_physical_outputs (DataType type, vector<string>& outs)
 {
 	get_physical (type, JackPortIsInput, outs);
 }
 
 
 bool
-JACKPortEngine::can_monitor_input () const
+JACKAudioBackend::can_monitor_input () const
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack,false);
 	const char ** ports;
@@ -421,32 +369,23 @@ JACKPortEngine::can_monitor_input () const
 }
 
 int
-JACKPortEngine::request_input_monitoring (PortHandle port, bool yn)
+JACKAudioBackend::request_input_monitoring (PortHandle port, bool yn)
 {
 	return jack_port_request_monitor ((jack_port_t*) port, yn);
 }
 int
-JACKPortEngine::ensure_input_monitoring (PortHandle port, bool yn)
+JACKAudioBackend::ensure_input_monitoring (PortHandle port, bool yn)
 {
 	return jack_port_ensure_monitor ((jack_port_t*) port, yn);
 }
 bool
-JACKPortEngine::monitoring_input (PortHandle port)
+JACKAudioBackend::monitoring_input (PortHandle port)
 {
 	return jack_port_monitoring_input ((jack_port_t*) port);
 }
 
-
-pframes_t
-JACKPortEngine::sample_time_at_cycle_start ()
-{
-	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
-	return jack_last_frame_time (_priv_jack);
-}
-
-
 PortEngine::PortHandle
-JACKPortEngine::register_port (const std::string& shortname, ARDOUR::DataType type, ARDOUR::PortFlags flags)
+JACKAudioBackend::register_port (const std::string& shortname, ARDOUR::DataType type, ARDOUR::PortFlags flags)
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
 	return jack_port_register (_priv_jack, shortname.c_str(), 
@@ -456,20 +395,20 @@ JACKPortEngine::register_port (const std::string& shortname, ARDOUR::DataType ty
 }
 
 void
-JACKPortEngine::unregister_port (PortHandle port)
+JACKAudioBackend::unregister_port (PortHandle port)
 {
 	GET_PRIVATE_JACK_POINTER (_priv_jack);
 	(void) jack_port_unregister (_priv_jack, (jack_port_t*) port);
 }
 
 int
-JACKPortEngine::connect (PortHandle port, const std::string& other)
+JACKAudioBackend::connect (PortHandle port, const std::string& other)
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 	return jack_connect (_priv_jack, jack_port_name ((jack_port_t*) port), other.c_str());
 }
 int
-JACKPortEngine::connect (const std::string& src, const std::string& dst)
+JACKAudioBackend::connect (const std::string& src, const std::string& dst)
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 	
@@ -478,28 +417,28 @@ JACKPortEngine::connect (const std::string& src, const std::string& dst)
 }
 
 int
-JACKPortEngine::disconnect (PortHandle port, const std::string& other)
+JACKAudioBackend::disconnect (PortHandle port, const std::string& other)
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 	return jack_disconnect (_priv_jack, jack_port_name ((jack_port_t*) port), other.c_str());
 }
 
 int
-JACKPortEngine::disconnect (const std::string& src, const std::string& dst)
+JACKAudioBackend::disconnect (const std::string& src, const std::string& dst)
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 	return jack_disconnect (_priv_jack, src.c_str(), dst.c_str());
 }
 
 int
-JACKPortEngine::disconnect_all (PortHandle port)
+JACKAudioBackend::disconnect_all (PortHandle port)
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 	return jack_port_disconnect (_priv_jack, (jack_port_t*) port);
 }
 
 int
-JACKPortEngine::midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index)
+JACKAudioBackend::midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index)
 {
 	jack_midi_event_t ev;
 	int ret;
@@ -514,25 +453,25 @@ JACKPortEngine::midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** bu
 }
 
 int
-JACKPortEngine::midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size)
+JACKAudioBackend::midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size)
 {
 	return jack_midi_event_write (port_buffer, timestamp, buffer, size);
 }
 
 uint32_t
-JACKPortEngine::get_midi_event_count (void* port_buffer)
+JACKAudioBackend::get_midi_event_count (void* port_buffer)
 {
 	return jack_midi_get_event_count (port_buffer);
 }
 
 void
-JACKPortEngine::midi_clear (void* port_buffer)
+JACKAudioBackend::midi_clear (void* port_buffer)
 {
 	jack_midi_clear_buffer (port_buffer);
 }
 
 void
-JACKPortEngine::set_latency_range (PortHandle port, bool for_playback, LatencyRange r)
+JACKAudioBackend::set_latency_range (PortHandle port, bool for_playback, LatencyRange r)
 {
 	jack_latency_range_t range;
 	
@@ -543,7 +482,7 @@ JACKPortEngine::set_latency_range (PortHandle port, bool for_playback, LatencyRa
 }
 
 LatencyRange
-JACKPortEngine::get_latency_range (PortHandle port, bool for_playback)
+JACKAudioBackend::get_latency_range (PortHandle port, bool for_playback)
 {
 	jack_latency_range_t range;
 	LatencyRange ret;
@@ -557,13 +496,13 @@ JACKPortEngine::get_latency_range (PortHandle port, bool for_playback)
 }
 
 void*
-JACKPortEngine::get_buffer (PortHandle port, pframes_t nframes)
+JACKAudioBackend::get_buffer (PortHandle port, pframes_t nframes)
 {
 	return jack_port_get_buffer ((jack_port_t*) port, nframes);
 }
 
 uint32_t
-JACKPortEngine::port_name_size() const
+JACKAudioBackend::port_name_size() const
 {
 	return jack_port_name_size ();
 }

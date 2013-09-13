@@ -285,23 +285,10 @@ Session::Session (AudioEngine &eng,
 			}
 		}
 	}
-	
-	if (_engine.current_backend() == 0 || _engine.setup_required()) {
-		boost::optional<int> r = AudioEngineSetupRequired (sr);
-		if (r.get_value_or (-1) != 0) {
-			destroy ();
-			throw failed_constructor();
-		}
-	}
 
-	/* at this point the engine should be connected (i.e. interacting
-	   with a backend device (or psuedo-device) and available to us
-	   for determinining sample rates and other settings.
-	*/
-
-	if (!_engine.connected()) {
+	if (ensure_engine (sr)) {
 		destroy ();
-		throw failed_constructor();
+		throw failed_constructor ();
 	}
 
 	if (post_engine_init ()) {
@@ -344,6 +331,37 @@ Session::~Session ()
 	ST.dump ("ST.dump");
 #endif	
 	destroy ();
+}
+
+int
+Session::ensure_engine (uint32_t desired_sample_rate)
+{
+	if (_engine.current_backend() == 0) {
+		/* backend is unknown ... */
+		boost::optional<int> r = AudioEngineSetupRequired (desired_sample_rate);
+		if (r.get_value_or (-1) != 0) {
+			return -1;
+		}
+	} else if (_engine.setup_required()) {
+		/* backend is known, but setup is needed */
+		boost::optional<int> r = AudioEngineSetupRequired (desired_sample_rate);
+		if (r.get_value_or (-1) != 0) {
+			return -1;
+		}
+	} else if (!_engine.running()) {
+		if (_engine.start()) {
+			return -1;
+		}
+	}
+
+	/* at this point the engine should be running
+	*/
+
+	if (!_engine.running()) {
+		return -1;
+	}
+
+	return 0;
 }
 
 void

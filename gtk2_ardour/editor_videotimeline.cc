@@ -140,7 +140,7 @@ Editor::export_video ()
 				break;
 		}
 	}
-	ExportVideoDialog dialog (*this, _session);
+	ExportVideoDialog dialog (_session, get_selection().time);
 	Gtk::ResponseType r = (Gtk::ResponseType) dialog.run();
 	dialog.hide();
 #if 0

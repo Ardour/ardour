@@ -124,7 +124,7 @@ Port::disconnect_all ()
 bool
 Port::connected_to (std::string const & o) const
 {
-	if (!port_engine.connected()) {
+	if (!port_engine.available()) {
 		return false;
 	}
 
@@ -134,7 +134,7 @@ Port::connected_to (std::string const & o) const
 int
 Port::get_connections (std::vector<std::string> & c) const
 {
-	if (!port_engine.connected()) {
+	if (!port_engine.available()) {
 		c.insert (c.end(), _connections.begin(), _connections.end());
 		return c.size();
 	}

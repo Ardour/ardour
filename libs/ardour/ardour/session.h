@@ -1624,6 +1624,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
     void setup_ltc ();
     void setup_click ();
     void setup_bundles ();
+    int  ensure_engine (uint32_t desired_sample_rate);
 };
 
 } // namespace ARDOUR

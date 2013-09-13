@@ -34,9 +34,11 @@
 #include "ardour/chan_count.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/port.h"
-#include "ardour/port_engine.h"
 
 namespace ARDOUR {
+
+class PortEngine;
+class AudioBackend;
 
 class PortManager 
 {
@@ -47,8 +49,7 @@ class PortManager
     PortManager ();
     virtual ~PortManager() {}
 
-    void set_port_engine (PortEngine& pe);
-    PortEngine& port_engine() { return *_impl; }
+    PortEngine& port_engine();
 
     uint32_t port_name_size() const;
     std::string my_name() const;
@@ -134,7 +135,7 @@ class PortManager
     PBD::Signal5<void, boost::weak_ptr<Port>, std::string, boost::weak_ptr<Port>, std::string, bool> PortConnectedOrDisconnected;
 
   protected:
-    boost::shared_ptr<PortEngine> _impl;
+    boost::shared_ptr<AudioBackend> _backend;
     SerializedRCUManager<Ports> ports;
     bool _port_remove_in_progress;
 

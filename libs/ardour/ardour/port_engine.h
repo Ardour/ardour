@@ -79,6 +79,11 @@ class PortEngine {
     PortEngine (PortManager& pm) : manager (pm) {}
     virtual ~PortEngine() {}
     
+    /** Return a private, type-free pointer to any data
+     * that might be useful to a concrete implementation
+     */
+    virtual void* private_handle() const = 0;
+
     /* We use void* here so that the API can be defined for any implementation.
      * 
      * We could theoretically use a template (PortEngine<T>) and define
@@ -89,21 +94,16 @@ class PortEngine {
        
     typedef void* PortHandle;
 
-    /** Return a typeless pointer to an object that may be of interest
-     * that understands the internals of a particular PortEngine
-     * implementation.
-     *
-     * XXX the existence of this method is a band-aid over some design
-     * issues and will it will be removed in the future
-     */
-    virtual void* private_handle() const = 0;
-
-    virtual bool connected() const = 0;
-
     /** Return the name of this process as used by the port manager
      * when naming ports.
      */
     virtual const std::string& my_name() const = 0;
+ 
+    /** Return true if the underlying mechanism/API is still available
+     * for us to utilize. return false if some or all of the AudioBackend
+     * API can no longer be effectively used.
+     */
+    virtual bool available() const = 0;
 
     /** Return the maximum size of a port name 
      */

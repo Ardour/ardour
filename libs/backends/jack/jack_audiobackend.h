@@ -44,10 +44,12 @@ class JACKAudioBackend : public AudioBackend {
   public:
     JACKAudioBackend (AudioEngine& e, boost::shared_ptr<JackConnection>);
     ~JACKAudioBackend ();
+    
+    /* AUDIOBACKEND API */
 
     std::string name() const;
     void* private_handle() const;
-    bool connected() const;
+    bool available() const;
     bool is_realtime () const;
 
     bool requires_driver_selection() const;
@@ -115,9 +117,68 @@ class JACKAudioBackend : public AudioBackend {
     void update_latencies ();
 
     static bool already_configured();
+    
+    /* PORTENGINE API */
+
+    const std::string& my_name() const;
+    uint32_t port_name_size() const;
+
+    int         set_port_name (PortHandle, const std::string&);
+    std::string get_port_name (PortHandle) const;
+    PortHandle* get_port_by_name (const std::string&) const;
+
+    int get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>&) const;
+
+    DataType port_data_type (PortHandle) const;
+
+    PortHandle register_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
+    void  unregister_port (PortHandle);
+
+    bool  connected (PortHandle, bool process_callback_safe);
+    bool  connected_to (PortHandle, const std::string&, bool process_callback_safe);
+    bool  physically_connected (PortHandle, bool process_callback_safe);
+    int   get_connections (PortHandle, std::vector<std::string>&, bool process_callback_safe);
+    int   connect (PortHandle, const std::string&);
+
+    int   disconnect (PortHandle, const std::string&);
+    int   disconnect_all (PortHandle);
+    int   connect (const std::string& src, const std::string& dst);
+    int   disconnect (const std::string& src, const std::string& dst);
+    
+    /* MIDI */
+
+    int      midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index);
+    int      midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size);
+    uint32_t get_midi_event_count (void* port_buffer);
+    void     midi_clear (void* port_buffer);
+
+    /* Monitoring */
+
+    bool  can_monitor_input() const;
+    int   request_input_monitoring (PortHandle, bool);
+    int   ensure_input_monitoring (PortHandle, bool);
+    bool  monitoring_input (PortHandle);
+
+    /* Latency management
+     */
+    
+    void          set_latency_range (PortHandle, bool for_playback, LatencyRange);
+    LatencyRange  get_latency_range (PortHandle, bool for_playback);
+
+    /* Physical ports */
+
+    bool      port_is_physical (PortHandle) const;
+    void      get_physical_outputs (DataType type, std::vector<std::string>&);
+    void      get_physical_inputs (DataType type, std::vector<std::string>&);
+    ChanCount n_physical_outputs () const;
+    ChanCount n_physical_inputs () const;
+
+    /* Getting access to the data buffer for a port */
+
+    void* get_buffer (PortHandle, pframes_t);
 
   private:
-    boost::shared_ptr<JackConnection>  _jack_connection; //< shared with JACKPortEngine
+    boost::shared_ptr<JackConnection>  _jack_connection;
     bool            _running;
     bool            _freewheeling;
     std::map<DataType,size_t> _raw_buffer_sizes;
@@ -158,8 +219,6 @@ class JACKAudioBackend : public AudioBackend {
     void*  process_thread ();
     static void* _start_process_thread (void*);
 
-    ChanCount n_physical (unsigned long) const;
-    
     void setup_jack_startup_command ();
 
     /* pffooo */
@@ -183,6 +242,20 @@ class JACKAudioBackend : public AudioBackend {
     mutable DriverDeviceMap all_devices;
 
     PBD::ScopedConnection disconnect_connection;
+
+    /* PORTENGINE RELATED */
+
+    static int  _graph_order_callback (void *arg);
+    static void _registration_callback (jack_port_id_t, int, void *);
+    static void _connect_callback (jack_port_id_t, jack_port_id_t, int, void *);
+
+    void connect_callback (jack_port_id_t, jack_port_id_t, int);
+
+    ChanCount n_physical (unsigned long flags) const;
+    void get_physical (DataType type, unsigned long flags, std::vector<std::string>& phy) const;
+
+    void when_connected_to_jack ();
+    PBD::ScopedConnection jack_connection_connection;
 };
 
 } // namespace

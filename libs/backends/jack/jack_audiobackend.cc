@@ -36,7 +36,6 @@
 
 #include "jack_audiobackend.h"
 #include "jack_connection.h"
-#include "jack_portengine.h"
 #include "jack_utils.h"
 
 #include "i18n.h"
@@ -67,6 +66,7 @@ JACKAudioBackend::JACKAudioBackend (AudioEngine& e, boost::shared_ptr<JackConnec
 	, _current_sample_rate (0)
 	, _current_buffer_size (0)
 {
+	_jack_connection->Connected.connect_same_thread (jack_connection_connection, boost::bind (&JACKAudioBackend::when_connected_to_jack, this));
 	_jack_connection->Disconnected.connect_same_thread (disconnect_connection, boost::bind (&JACKAudioBackend::disconnected, this, _1));
 }
 
@@ -87,7 +87,7 @@ JACKAudioBackend::private_handle() const
 }
 
 bool
-JACKAudioBackend::connected() const
+JACKAudioBackend::available() const
 {
 	return (private_handle() != 0);
 }
@@ -158,7 +158,7 @@ JACKAudioBackend::available_sample_rates (const string& /*device*/) const
 {
 	vector<float> f;
 	
-	if (connected()) {
+	if (available()) {
 		f.push_back (sample_rate());
 		return f;
 	}
@@ -186,7 +186,7 @@ JACKAudioBackend::available_buffer_sizes (const string& /*device*/) const
 {
 	vector<uint32_t> s;
 	
-	if (connected()) {
+	if (available()) {
 		s.push_back (buffer_size());
 		return s;
 	}
@@ -223,7 +223,7 @@ JACKAudioBackend::available_output_channel_count (const string& /*device*/) cons
 int
 JACKAudioBackend::set_device_name (const string& dev)
 {
-	if (connected()) {
+	if (available()) {
 		/* need to stop and restart JACK for this to work, at present */
 		return -1;
 	}
@@ -235,7 +235,7 @@ JACKAudioBackend::set_device_name (const string& dev)
 int
 JACKAudioBackend::set_sample_rate (float sr)
 {
-	if (!connected()) {
+	if (!available()) {
 		_target_sample_rate = sr;
 		return 0;
 	}
@@ -252,7 +252,7 @@ JACKAudioBackend::set_sample_rate (float sr)
 int
 JACKAudioBackend::set_buffer_size (uint32_t nframes)
 {
-	if (!connected()) {
+	if (!available()) {
 		_target_buffer_size = nframes;
 		return 0;
 	}
@@ -293,7 +293,7 @@ JACKAudioBackend::set_interleaved (bool yn)
 int
 JACKAudioBackend::set_input_channels (uint32_t cnt)
 {
-	if (connected()) {
+	if (available()) {
 		return -1;
 	}
 
@@ -305,7 +305,7 @@ JACKAudioBackend::set_input_channels (uint32_t cnt)
 int
 JACKAudioBackend::set_output_channels (uint32_t cnt)
 {
-	if (connected()) {
+	if (available()) {
 		return -1;
 	}
 
@@ -317,7 +317,7 @@ JACKAudioBackend::set_output_channels (uint32_t cnt)
 int
 JACKAudioBackend::set_systemic_input_latency (uint32_t l)
 {
-	if (connected()) {
+	if (available()) {
 		return -1;
 	}
 
@@ -329,7 +329,7 @@ JACKAudioBackend::set_systemic_input_latency (uint32_t l)
 int
 JACKAudioBackend::set_systemic_output_latency (uint32_t l)
 {
-	if (connected()) {
+	if (available()) {
 		return -1;
 	}
 
@@ -343,7 +343,7 @@ JACKAudioBackend::set_systemic_output_latency (uint32_t l)
 std::string
 JACKAudioBackend::device_name () const
 {
-	if (connected()) {
+	if (available()) {
 		return "???";
 	} 
 
@@ -353,7 +353,7 @@ JACKAudioBackend::device_name () const
 float
 JACKAudioBackend::sample_rate () const
 {
-	if (connected()) {
+	if (available()) {
 		return _current_sample_rate;
 	}
 	return _target_sample_rate;
@@ -362,7 +362,7 @@ JACKAudioBackend::sample_rate () const
 uint32_t
 JACKAudioBackend::buffer_size () const
 {
-	if (connected()) {
+	if (available()) {
 		return _current_buffer_size;
 	}
 	return _target_buffer_size;
@@ -383,7 +383,7 @@ JACKAudioBackend::interleaved () const
 uint32_t
 JACKAudioBackend::input_channels () const
 {
-	if (connected()) {
+	if (available()) {
 		return n_physical (JackPortIsInput).n_audio();
 	} 
 	return _target_input_channels;
@@ -392,7 +392,7 @@ JACKAudioBackend::input_channels () const
 uint32_t
 JACKAudioBackend::output_channels () const
 {
-	if (connected()) {
+	if (available()) {
 		return n_physical (JackPortIsOutput).n_audio();
 	} 
 	return _target_output_channels;
@@ -451,7 +451,9 @@ JACKAudioBackend::setup_jack_startup_command ()
 	string cmdline;
 
 	if (!get_jack_command_line_string (options, cmdline)) {
-		/* error, somehow */
+		/* error, somehow - we will still try to start JACK
+		 * automatically but it will be without our preferred options
+		 */
 		return;
 	}
 
@@ -465,7 +467,7 @@ JACKAudioBackend::setup_jack_startup_command ()
 int
 JACKAudioBackend::start ()
 {
-	if (!connected()) {
+	if (!available()) {
 
 		if (!_jack_connection->server_running()) {
 			setup_jack_startup_command ();
@@ -736,9 +738,9 @@ JACKAudioBackend::jack_sync_callback (jack_transport_state_t state, jack_positio
 int
 JACKAudioBackend::_xrun_callback (void *arg)
 {
-	JACKAudioBackend* ae = static_cast<JACKAudioBackend*> (arg);
-	if (ae->connected()) {
-		ae->engine.Xrun (); /* EMIT SIGNAL */
+	JACKAudioBackend* jab = static_cast<JACKAudioBackend*> (arg);
+	if (jab->available()) {
+		jab->engine.Xrun (); /* EMIT SIGNAL */
 	}
 	return 0;
 }
@@ -747,8 +749,8 @@ JACKAudioBackend::_xrun_callback (void *arg)
 void
 JACKAudioBackend::_session_callback (jack_session_event_t *event, void *arg)
 {
-	JACKAudioBackend* ae = static_cast<JACKAudioBackend*> (arg);
-	ARDOUR::Session* session = ae->engine.session();
+	JACKAudioBackend* jab = static_cast<JACKAudioBackend*> (arg);
+	ARDOUR::Session* session = jab->engine.session();
 
 	if (session) {
 		session->jack_session_event (event);
@@ -940,8 +942,10 @@ JACKAudioBackend::n_physical (unsigned long flags) const
 	if (ports) {
 		for (uint32_t i = 0; ports[i]; ++i) {
 			if (!strstr (ports[i], "Midi-Through")) {
-				DataType t (jack_port_type (jack_port_by_name (_priv_jack, ports[i])));
-				c.set (t, c.get (t) + 1);
+				DataType t = port_data_type (jack_port_by_name (_priv_jack, ports[i]));
+				if (t != DataType::NIL) {
+					c.set (t, c.get (t) + 1);
+				}
 			}
 		}
 		

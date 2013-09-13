@@ -118,6 +118,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void backend_changed ();
     void sample_rate_changed ();
     void buffer_size_changed ();
+    void parameter_changed ();
 
     uint32_t get_rate() const;
     uint32_t get_buffer_size() const;
@@ -154,9 +155,9 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     State* get_matching_state (const std::string& backend,
 			       const std::string& driver,
 			       const std::string& device);
-    State* get_current_state ();
+    State* get_saved_state_for_currently_displayed_backend_and_device ();
     void maybe_display_saved_state ();
-    void save_state ();
+    State* save_state ();
 
     static bool print_channel_count (Gtk::SpinButton*);
 
@@ -172,10 +173,11 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     /* latency measurement */
     void latency_button_toggled ();
     bool check_latency_measurement ();
-    void update_latency_display ();
     sigc::connection latency_timeout;
     void enable_latency_tab ();
     void disable_latency_tab ();
+
+    void on_switch_page (GtkNotebookPage*, guint page_num);
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */
