@@ -451,7 +451,9 @@ JACKAudioBackend::setup_jack_startup_command ()
 	string cmdline;
 
 	if (!get_jack_command_line_string (options, cmdline)) {
-		/* error, somehow */
+		/* error, somehow - we will still try to start JACK
+		 * automatically but it will be without our preferred options
+		 */
 		return;
 	}
 
