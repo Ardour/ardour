@@ -115,8 +115,8 @@ class Track : public Route, public PublicDiskstream
 
 	/* PublicDiskstream interface */
 	boost::shared_ptr<Playlist> playlist ();
-	void request_jack_monitors_input (bool);
-	void ensure_jack_monitors_input (bool);
+	void request_input_monitoring (bool);
+	void ensure_input_monitoring (bool);
 	bool destructive () const;
 	std::list<boost::shared_ptr<Source> > & last_capture_sources ();
 	void set_capture_offset ();

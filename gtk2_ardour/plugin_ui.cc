@@ -40,8 +40,6 @@
 #include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/application.h>
 
-#include "midi++/manager.h"
-
 #include "ardour/session.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"

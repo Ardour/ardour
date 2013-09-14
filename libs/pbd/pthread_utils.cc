@@ -72,12 +72,34 @@ fake_thread_start (void* arg)
 	void* (*thread_work)(void*) = ts->thread_work;
 	void* thread_arg = ts->arg;
 
-	pthread_set_name (ts->name.c_str());
-
-	delete ts;
 	/* name will be deleted by the default handler for GStaticPrivate, when the thread exits */
 
-	return thread_work (thread_arg);
+	pthread_set_name (ts->name.c_str());
+
+	/* we don't need this object anymore */
+
+	delete ts;
+
+	/* actually run the thread's work function */
+
+	void* ret = thread_work (thread_arg);
+
+	/* cleanup */
+
+	pthread_mutex_lock (&thread_map_lock);
+
+	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
+		if (pthread_equal ((*i), pthread_self())) {
+			all_threads.erase (i);
+			break;
+		}
+	}
+
+	pthread_mutex_unlock (&thread_map_lock);
+
+	/* done */
+
+	return ret;
 }
 
 int  
@@ -139,10 +161,16 @@ void
 pthread_cancel_all () 
 {	
 	pthread_mutex_lock (&thread_map_lock);
-	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
-		if ((*i) != pthread_self()) {
+	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ) {
+
+		ThreadMap::iterator nxt = i;
+		++nxt;
+
+		if (!pthread_equal ((*i), pthread_self())) {
 			pthread_cancel ((*i));
 		}
+
+		i = nxt;
 	}
 	all_threads.clear();
 	pthread_mutex_unlock (&thread_map_lock);
@@ -153,7 +181,7 @@ pthread_cancel_one (pthread_t thread)
 {	
 	pthread_mutex_lock (&thread_map_lock);
 	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
-		if ((*i) == thread) {
+		if (pthread_equal ((*i), thread)) {
 			all_threads.erase (i);
 			break;
 		}
@@ -163,18 +191,3 @@ pthread_cancel_one (pthread_t thread)
 	pthread_mutex_unlock (&thread_map_lock);
 }
 
-void
-pthread_exit_pbd (void* status) 
-{	
-	pthread_t thread = pthread_self();
-
-	pthread_mutex_lock (&thread_map_lock);
-	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
-		if ((*i) == thread) {
-			all_threads.erase (i);
-			break;
-		}
-	}
-	pthread_mutex_unlock (&thread_map_lock);
-	pthread_exit (status);
-}

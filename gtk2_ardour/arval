@@ -10,5 +10,6 @@ LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 export ARDOUR_RUNNING_UNDER_VALGRIND=TRUE
 exec valgrind --tool=memcheck \
 	$VALGRIND_OPTIONS \
+        --track-origins=yes \
 	--suppressions=`dirname "$0"`/../tools/valgrind.supp \
 	$TOP/$EXECUTABLE --novst "$@"

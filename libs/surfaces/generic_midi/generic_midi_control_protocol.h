@@ -22,13 +22,10 @@
 
 #include <list>
 #include <glibmm/threads.h>
+
 #include "ardour/types.h"
 
 #include "control_protocol/control_protocol.h"
-
-namespace MIDI {
-	class Port;
-}
 
 namespace PBD {
 	class Controllable;
@@ -37,6 +34,11 @@ namespace PBD {
 
 namespace ARDOUR {
 	class Session;
+	class MidiPort;
+}
+
+namespace MIDI {
+    class Port;
 }
 
 class MIDIControllable;
@@ -51,8 +53,8 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	int set_active (bool yn);
 	static bool probe() { return true; }
 
-	MIDI::Port* input_port () const { return _input_port; }
-	MIDI::Port* output_port () const { return _output_port; }
+        MIDI::Port* input_port () const { return _input_port; }
+        MIDI::Port* output_port () const { return _output_port; }
 	void set_feedback_interval (ARDOUR::microseconds_t);
 
 	int set_feedback (bool yn);
@@ -97,8 +99,8 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	}
 
   private:
-	MIDI::Port* _input_port;
-	MIDI::Port* _output_port;
+        MIDI::Port* _input_port;
+        MIDI::Port* _output_port;
 	ARDOUR::microseconds_t _feedback_interval;
 	ARDOUR::microseconds_t last_feedback_time;
 

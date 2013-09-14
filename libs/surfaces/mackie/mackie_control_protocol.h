@@ -120,16 +120,16 @@ class MackieControlProtocol
 	Mackie::DeviceProfile& device_profile() { return _device_profile; }
 
 	int set_active (bool yn);
-	void set_device (const std::string&, bool allow_activation = true);
-	void set_profile (const std::string&);
+	int  set_device (const std::string&, bool allow_activation = true);
+        void set_profile (const std::string&);
 
-	bool     flip_mode () const { return _flip_mode; }
+	FlipMode flip_mode () const { return _flip_mode; }
 	ViewMode view_mode () const { return _view_mode; }
 	bool zoom_mode () const { return _zoom_mode; }
 	bool     metering_active () const { return _metering_active; }
 
 	void set_view_mode (ViewMode);
-	void set_flip_mode (bool);
+	void set_flip_mode (FlipMode);
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
@@ -278,7 +278,7 @@ class MackieControlProtocol
 	void*                    _gui;
 	bool                     _zoom_mode;
 	bool                     _scrub_mode;
-	bool                     _flip_mode;
+	FlipMode                 _flip_mode;
 	ViewMode                 _view_mode;
 	int                      _current_selected_track;
 	int                      _modifier_state;
@@ -291,7 +291,7 @@ class MackieControlProtocol
 
 	ARDOUR::RouteNotificationList _last_selected_routes;
 
-	void create_surfaces ();
+	int create_surfaces ();
 	bool periodic();
 	void build_gui ();
 	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
@@ -301,8 +301,8 @@ class MackieControlProtocol
 	void build_button_map ();
 	void gui_track_selection_changed (ARDOUR::RouteNotificationListPtr, bool save_list);
 	void _gui_track_selection_changed (ARDOUR::RouteNotificationList*, bool save_list);
-	void ipmidi_restart ();
-	void initialize ();
+	int ipmidi_restart ();
+        void initialize ();
 	
 	/* BUTTON HANDLING */
 

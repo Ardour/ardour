@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1999-2002 Paul Davis
+  Copyright (C) 1999-2013 Paul Davis
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -60,7 +60,6 @@
 
 #include "midi++/mmc.h"
 #include "midi++/port.h"
-#include "midi++/manager.h"
 
 #include "evoral/SMF.hpp"
 
@@ -87,6 +86,7 @@
 #include "ardour/control_protocol_manager.h"
 #include "ardour/directory_names.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/graph.h"
 #include "ardour/location.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_patch_manager.h"
@@ -125,14 +125,15 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-/** @param snapshot_name Snapshot name, without the .ardour prefix */
 void
-Session::first_stage_init (string fullpath, string snapshot_name)
+Session::pre_engine_init (string fullpath)
 {
-	if (fullpath.length() == 0) {
+	if (fullpath.empty()) {
 		destroy ();
 		throw failed_constructor();
 	}
+
+	/* discover canonical fullpath */
 
 	char buf[PATH_MAX+1];
 	if (!realpath (fullpath.c_str(), buf) && (errno != ENOENT)) {
@@ -142,102 +143,29 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	}
 
 	_path = string(buf);
+	
+	/* we require _path to end with a dir separator */
 
 	if (_path[_path.length()-1] != G_DIR_SEPARATOR) {
 		_path += G_DIR_SEPARATOR;
 	}
 
-	/* these two are just provisional settings. set_state()
-	   will likely override them.
+	/* is it new ? */
+
+	_is_new = !Glib::file_test (_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+
+	/* finish initialization that can't be done in a normal C++ constructor
+	   definition.
 	*/
 
-	_name = _current_snapshot_name = snapshot_name;
-
-	set_history_depth (Config->get_history_depth());
-
-	_current_frame_rate = _engine.frame_rate ();
-	_nominal_frame_rate = _current_frame_rate;
-	_base_frame_rate = _current_frame_rate;
-
-	_tempo_map = new TempoMap (_current_frame_rate);
-	_tempo_map->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
-
-
-	_non_soloed_outs_muted = false;
-	_listen_cnt = 0;
-	_solo_isolated_cnt = 0;
+	timerclear (&last_mmc_step);
 	g_atomic_int_set (&processing_prohibited, 0);
-	_transport_speed = 0;
-	_default_transport_speed = 1.0;
-	_last_transport_speed = 0;
-	_target_transport_speed = 0;
-	auto_play_legal = false;
-	transport_sub_state = 0;
-	_transport_frame = 0;
-	_requested_return_frame = -1;
-	_session_range_location = 0;
 	g_atomic_int_set (&_record_status, Disabled);
-	loop_changing = false;
-	play_loop = false;
-	have_looped = false;
-	_last_roll_location = 0;
-	_last_roll_or_reversal_location = 0;
-	_last_record_location = 0;
-	pending_locate_frame = 0;
-	pending_locate_roll = false;
-	pending_locate_flush = false;
-	state_was_pending = false;
-	set_next_event ();
-	outbound_mtc_timecode_frame = 0;
-	next_quarter_frame_to_send = -1;
-	current_block_size = 0;
-	solo_update_disabled = false;
-	_have_captured = false;
-	_worst_output_latency = 0;
-	_worst_input_latency = 0;
- 	_worst_track_latency = 0;
-	_state_of_the_state = StateOfTheState(CannotSave|InitialConnecting|Loading);
-	_was_seamless = Config->get_seamless_loop ();
-	_slave = 0;
-	_send_qf_mtc = false;
-	_pframes_since_last_mtc = 0;
 	g_atomic_int_set (&_playback_load, 100);
 	g_atomic_int_set (&_capture_load, 100);
-	_play_range = false;
-	_exporting = false;
-	pending_abort = false;
-	_adding_routes_in_progress = false;
-	destructive_index = 0;
-	first_file_data_format_reset = true;
-	first_file_header_format_reset = true;
-	post_export_sync = false;
-	midi_control_ui = 0;
-        _step_editors = 0;
-        no_questions_about_missing_files = false;
-        _speakers.reset (new Speakers);
-	_clicks_cleared = 0;
-	ignore_route_processor_changes = false;
-	_pre_export_mmc_enabled = false;
-
-	AudioDiskstream::allocate_working_buffers();
-
-	/* default short fade = 15ms */
-
-	SndFileSource::setup_standard_crossfades (*this, frame_rate());
-
-	last_mmc_step.tv_sec = 0;
-	last_mmc_step.tv_usec = 0;
-	step_speed = 0.0;
-
-	/* click sounds are unset by default, which causes us to internal
-	   waveforms for clicks.
-	*/
-
-	click_length = 0;
-	click_emphasis_length = 0;
-	_clicking = false;
-
-	process_function = &Session::process_with_events;
+	set_next_event ();
+	_all_route_group->set_active (true, this);
+	interpolation.add_channel_to (0, 0);
 
 	if (config.get_use_video_sync()) {
 		waiting_for_sync_offset = true;
@@ -245,31 +173,18 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 		waiting_for_sync_offset = false;
 	}
 
-	last_timecode_when = 0;
-	last_timecode_valid = false;
-
-	sync_time_vars ();
-
 	last_rr_session_dir = session_dirs.begin();
-	refresh_disk_space ();
 
+	set_history_depth (Config->get_history_depth());
+	
         /* default: assume simple stereo speaker configuration */
 
         _speakers->setup_default_speakers (2);
-
-	/* slave stuff */
-
-	average_slave_delta = 1800; // !!! why 1800 ????
-	have_first_delta_accumulator = false;
-	delta_accumulator_cnt = 0;
-	_slave_state = Stopped;
 
         _solo_cut_control.reset (new ProxyControllable (_("solo cut control (dB)"), PBD::Controllable::GainLike,
                                                         boost::bind (&RCConfiguration::set_solo_mute_gain, Config, _1),
                                                         boost::bind (&RCConfiguration::get_solo_mute_gain, Config)));
         add_controllable (_solo_cut_control);
-
-	_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this));
 
 	/* These are all static "per-class" signals */
 
@@ -283,87 +198,108 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	Delivery::disable_panners ();
 	IO::disable_connecting ();
+
+	AudioFileSource::set_peak_dir (_session_dir->peak_path());
 }
 
 int
-Session::second_stage_init ()
+Session::post_engine_init ()
 {
-	AudioFileSource::set_peak_dir (_session_dir->peak_path());
+	BootMessage (_("Set block size and sample rate"));
 
-	if (!_is_new) {
-		if (load_state (_current_snapshot_name)) {
-			return -1;
-		}
+	set_block_size (_engine.samples_per_cycle());
+	set_frame_rate (_engine.sample_rate());
+
+	if (how_many_dsp_threads () > 1) {
+		/* For now, only create the graph if we are using >1 DSP threads, as
+		   it is a bit slower than the old code with 1 thread.
+		*/
+		_process_graph.reset (new Graph (*this));
 	}
 
+	n_physical_outputs = _engine.n_physical_outputs ();
+	n_physical_inputs =  _engine.n_physical_inputs ();
+
+	BootMessage (_("Using configuration"));
+
+	_midi_ports = new MidiPortManager;
+	setup_midi_machine_control ();
+	
 	if (_butler->start_thread()) {
 		return -1;
 	}
-
+	
 	if (start_midi_thread ()) {
 		return -1;
 	}
-
-	setup_midi_machine_control ();
-
-	// set_state() will call setup_raid_path(), but if it's a new session we need
-	// to call setup_raid_path() here.
-
-	if (state_tree) {
-		if (set_state (*state_tree->root(), Stateful::loading_state_version)) {
-			return -1;
-		}
-	} else {
-		setup_raid_path(_path);
-	}
-
-	/* we can't save till after ::when_engine_running() is called,
-	   because otherwise we save state with no connections made.
-	   therefore, we reset _state_of_the_state because ::set_state()
-	   will have cleared it.
-
-	   we also have to include Loading so that any events that get
-	   generated between here and the end of ::when_engine_running()
-	   will be processed directly rather than queued.
-	*/
-
-	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave|Loading);
-
-	_locations->changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));
-	_locations->added.connect_same_thread (*this, boost::bind (&Session::locations_added, this, _1));
+	
 	setup_click_sounds (0);
 	setup_midi_control ();
-
-	/* Pay attention ... */
 
 	_engine.Halted.connect_same_thread (*this, boost::bind (&Session::engine_halted, this));
 	_engine.Xrun.connect_same_thread (*this, boost::bind (&Session::xrun_recovery, this));
 
-	midi_clock = new MidiClockTicker ();
-	midi_clock->set_session (this);
-
 	try {
+		/* tempo map requires sample rate knowledge */
+
+		_tempo_map = new TempoMap (_current_frame_rate);
+		_tempo_map->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
+		
+		/* MidiClock requires a tempo map */
+
+		midi_clock = new MidiClockTicker ();
+		midi_clock->set_session (this);
+
+		/* crossfades require sample rate knowledge */
+
+		SndFileSource::setup_standard_crossfades (*this, frame_rate());
+		_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this));
+		
+		AudioDiskstream::allocate_working_buffers();
+		refresh_disk_space ();
+		
+		/* we're finally ready to call set_state() ... all objects have
+		 * been created, the engine is running.
+		 */
+		
+		if (state_tree) {
+			if (set_state (*state_tree->root(), Stateful::loading_state_version)) {
+				return -1;
+			}
+		} else {
+			// set_state() will call setup_raid_path(), but if it's a new session we need
+			// to call setup_raid_path() here.
+			setup_raid_path (_path);
+		}
+
+		/* ENGINE */
+
+		boost::function<void (std::string)> ff (boost::bind (&Session::config_changed, this, _1, false));
+		boost::function<void (std::string)> ft (boost::bind (&Session::config_changed, this, _1, true));
+		
+		Config->map_parameters (ff);
+		config.map_parameters (ft);
+
 		when_engine_running ();
-	}
 
-	/* handle this one in a different way than all others, so that its clear what happened */
-
-	catch (AudioEngine::PortRegistrationFailure& err) {
+		_locations->changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));
+		_locations->added.connect_same_thread (*this, boost::bind (&Session::locations_added, this, _1));
+		
+	} catch (AudioEngine::PortRegistrationFailure& err) {
+		/* handle this one in a different way than all others, so that its clear what happened */
 		error << err.what() << endmsg;
 		return -1;
-	}
-
-	catch (...) {
+	} catch (...) {
 		return -1;
 	}
 
 	BootMessage (_("Reset Remote Controls"));
 
-	send_full_time_code (0);
+	// send_full_time_code (0);
 	_engine.transport_locate (0);
 
-	MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdMmcReset));
-	MIDI::Manager::instance()->mmc()->send (MIDI::MachineControlCommand (Timecode::Time ()));
+	_mmc->send (MIDI::MachineControlCommand (MIDI::MachineControl::cmdMmcReset));
+	_mmc->send (MIDI::MachineControlCommand (Timecode::Time ()));
 
 	MIDI::Name::MidiPatchManager::instance().set_session (this);
 
@@ -376,13 +312,13 @@ Session::second_stage_init ()
 
 	DirtyChanged (); /* EMIT SIGNAL */
 
-	if (state_was_pending) {
-		save_state (_current_snapshot_name);
+	if (_is_new) {
+		save_state ("");
+	} else if (state_was_pending) {
+		save_state ("");
 		remove_pending_capture_state ();
 		state_was_pending = false;
 	}
-
-	BootMessage (_("Session loading complete"));
 
 	return 0;
 }
@@ -610,8 +546,6 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 		add_monitor_section ();
 	}
 
-	save_state ("");
-
 	return 0;
 }
 
@@ -689,62 +623,6 @@ Session::remove_state (string snapshot_name)
 				xml_path, g_strerror (errno)) << endmsg;
 	}
 }
-
-#ifdef HAVE_JACK_SESSION
-void
-Session::jack_session_event (jack_session_event_t * event)
-{
-        char timebuf[128], *tmp;
-        time_t n;
-        struct tm local_time;
-
-        time (&n);
-        localtime_r (&n, &local_time);
-        strftime (timebuf, sizeof(timebuf), "JS_%FT%T", &local_time);
-
-        while ((tmp = strchr(timebuf, ':'))) { *tmp = '.'; }
-
-        if (event->type == JackSessionSaveTemplate)
-        {
-                if (save_template( timebuf )) {
-                        event->flags = JackSessionSaveError;
-                } else {
-                        string cmd ("ardour3 -P -U ");
-                        cmd += event->client_uuid;
-                        cmd += " -T ";
-                        cmd += timebuf;
-
-                        event->command_line = strdup (cmd.c_str());
-                }
-        }
-        else
-        {
-                if (save_state (timebuf)) {
-                        event->flags = JackSessionSaveError;
-                } else {
-			std::string xml_path (_session_dir->root_path());
-			std::string legalized_filename = legalize_for_path (timebuf) + statefile_suffix;
-			xml_path = Glib::build_filename (xml_path, legalized_filename);
-
-                        string cmd ("ardour3 -P -U ");
-                        cmd += event->client_uuid;
-                        cmd += " \"";
-                        cmd += xml_path;
-                        cmd += '\"';
-
-                        event->command_line = strdup (cmd.c_str());
-                }
-        }
-
-	jack_session_reply (_engine.jack(), event);
-
-	if (event->type == JackSessionSaveAndQuit) {
-		Quit (); /* EMIT SIGNAL */
-	}
-
-	jack_session_event_free( event );
-}
-#endif
 
 /** @param snapshot_name Name to save under, without .ardour / .pending prefix */
 int
@@ -1040,6 +918,15 @@ Session::state (bool full_state)
 
 	/* various options */
 
+	list<XMLNode*> midi_port_nodes = _midi_ports->get_midi_port_states();
+	if (!midi_port_nodes.empty()) {
+		XMLNode* midi_port_stuff = new XMLNode ("MIDIPorts");
+		for (list<XMLNode*>::const_iterator n = midi_port_nodes.begin(); n != midi_port_nodes.end(); ++n) {
+			midi_port_stuff->add_child_nocopy (**n);
+		}
+		node->add_child_nocopy (*midi_port_stuff);
+	}
+
 	node->add_child_nocopy (config.get_variables ());
 
 	node->add_child_nocopy (ARDOUR::SessionMetadata::Metadata()->get_state());
@@ -1244,6 +1131,11 @@ Session::set_state (const XMLNode& node, int version)
         if ((prop = node.property (X_("event-counter"))) != 0) {
                 Evoral::init_event_id_counter (atoi (prop->value()));
         }
+
+
+	if ((child = find_named_node (node, "MIDIPorts")) != 0) {
+		_midi_ports->set_midi_port_states (child->children());
+	}
 
 	IO::disable_connecting ();
 
@@ -3421,11 +3313,11 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "mmc-device-id" || p == "mmc-receive-id" || p == "mmc-receive-device-id") {
 
-		MIDI::Manager::instance()->mmc()->set_receive_device_id (Config->get_mmc_receive_device_id());
+		_mmc->set_receive_device_id (Config->get_mmc_receive_device_id());
 
 	} else if (p == "mmc-send-id" || p == "mmc-send-device-id") {
 
-		MIDI::Manager::instance()->mmc()->set_send_device_id (Config->get_mmc_send_device_id());
+		_mmc->set_send_device_id (Config->get_mmc_send_device_id());
 
 	} else if (p == "midi-control") {
 
@@ -3488,7 +3380,7 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "send-mmc") {
 
-		MIDI::Manager::instance()->mmc()->enable_send (Config->get_send_mmc ());
+		_mmc->enable_send (Config->get_send_mmc ());
 
 	} else if (p == "midi-feedback") {
 
@@ -3546,13 +3438,13 @@ Session::config_changed (std::string p, bool ours)
 			
 	} else if (p == "initial-program-change") {
 
-		if (MIDI::Manager::instance()->mmc()->output_port() && Config->get_initial_program_change() >= 0) {
+		if (_mmc->output_port() && Config->get_initial_program_change() >= 0) {
 			MIDI::byte buf[2];
 
 			buf[0] = MIDI::program; // channel zero by default
 			buf[1] = (Config->get_initial_program_change() & 0x7f);
 
-			MIDI::Manager::instance()->mmc()->output_port()->midimsg (buf, sizeof (buf), 0);
+			_mmc->output_port()->midimsg (buf, sizeof (buf), 0);
 		}
 	} else if (p == "solo-mute-override") {
 		// catch_up_on_solo_mute_override ();
@@ -3616,27 +3508,28 @@ Session::load_diskstreams_2X (XMLNode const & node, int)
 void
 Session::setup_midi_machine_control ()
 {
-	MIDI::MachineControl* mmc = MIDI::Manager::instance()->mmc ();
+	_mmc = new MIDI::MachineControl;
+	_mmc->set_ports (_midi_ports->mmc_input_port(), _midi_ports->mmc_output_port());
 
-	mmc->Play.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
-	mmc->DeferredPlay.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
-	mmc->Stop.connect_same_thread (*this, boost::bind (&Session::mmc_stop, this, _1));
-	mmc->FastForward.connect_same_thread (*this, boost::bind (&Session::mmc_fast_forward, this, _1));
-	mmc->Rewind.connect_same_thread (*this, boost::bind (&Session::mmc_rewind, this, _1));
-	mmc->Pause.connect_same_thread (*this, boost::bind (&Session::mmc_pause, this, _1));
-	mmc->RecordPause.connect_same_thread (*this, boost::bind (&Session::mmc_record_pause, this, _1));
-	mmc->RecordStrobe.connect_same_thread (*this, boost::bind (&Session::mmc_record_strobe, this, _1));
-	mmc->RecordExit.connect_same_thread (*this, boost::bind (&Session::mmc_record_exit, this, _1));
-	mmc->Locate.connect_same_thread (*this, boost::bind (&Session::mmc_locate, this, _1, _2));
-	mmc->Step.connect_same_thread (*this, boost::bind (&Session::mmc_step, this, _1, _2));
-	mmc->Shuttle.connect_same_thread (*this, boost::bind (&Session::mmc_shuttle, this, _1, _2, _3));
-	mmc->TrackRecordStatusChange.connect_same_thread (*this, boost::bind (&Session::mmc_record_enable, this, _1, _2, _3));
+	_mmc->Play.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
+	_mmc->DeferredPlay.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
+	_mmc->Stop.connect_same_thread (*this, boost::bind (&Session::mmc_stop, this, _1));
+	_mmc->FastForward.connect_same_thread (*this, boost::bind (&Session::mmc_fast_forward, this, _1));
+	_mmc->Rewind.connect_same_thread (*this, boost::bind (&Session::mmc_rewind, this, _1));
+	_mmc->Pause.connect_same_thread (*this, boost::bind (&Session::mmc_pause, this, _1));
+	_mmc->RecordPause.connect_same_thread (*this, boost::bind (&Session::mmc_record_pause, this, _1));
+	_mmc->RecordStrobe.connect_same_thread (*this, boost::bind (&Session::mmc_record_strobe, this, _1));
+	_mmc->RecordExit.connect_same_thread (*this, boost::bind (&Session::mmc_record_exit, this, _1));
+	_mmc->Locate.connect_same_thread (*this, boost::bind (&Session::mmc_locate, this, _1, _2));
+	_mmc->Step.connect_same_thread (*this, boost::bind (&Session::mmc_step, this, _1, _2));
+	_mmc->Shuttle.connect_same_thread (*this, boost::bind (&Session::mmc_shuttle, this, _1, _2, _3));
+	_mmc->TrackRecordStatusChange.connect_same_thread (*this, boost::bind (&Session::mmc_record_enable, this, _1, _2, _3));
 
 	/* also handle MIDI SPP because its so common */
 
-	mmc->SPPStart.connect_same_thread (*this, boost::bind (&Session::spp_start, this));
-	mmc->SPPContinue.connect_same_thread (*this, boost::bind (&Session::spp_continue, this));
-	mmc->SPPStop.connect_same_thread (*this, boost::bind (&Session::spp_stop, this));
+	_mmc->SPPStart.connect_same_thread (*this, boost::bind (&Session::spp_start, this));
+	_mmc->SPPContinue.connect_same_thread (*this, boost::bind (&Session::spp_continue, this));
+	_mmc->SPPStop.connect_same_thread (*this, boost::bind (&Session::spp_stop, this));
 }
 
 boost::shared_ptr<Controllable>

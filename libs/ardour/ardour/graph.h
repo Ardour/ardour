@@ -36,6 +36,7 @@
 #include "pbd/semutils.h"
 
 #include "ardour/types.h"
+#include "ardour/audio_backend.h"
 #include "ardour/session_handle.h"
 
 namespace ARDOUR
@@ -92,7 +93,7 @@ protected:
 	virtual void session_going_away ();
 
 private:
-	std::list<pthread_t> _thread_list;
+	std::list<AudioBackendNativeThread> _thread_list;
 	volatile bool        _quit_threads;
 
 	void reset_thread_list ();

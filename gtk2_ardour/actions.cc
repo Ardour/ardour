@@ -58,8 +58,8 @@ vector<RefPtr<Gtk::Action> > ActionManager::playlist_selection_sensitive_actions
 vector<RefPtr<Gtk::Action> > ActionManager::mouse_edit_point_requires_canvas_actions;
 
 vector<RefPtr<Gtk::Action> > ActionManager::range_sensitive_actions;
-vector<RefPtr<Gtk::Action> > ActionManager::jack_sensitive_actions;
-vector<RefPtr<Gtk::Action> > ActionManager::jack_opposite_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::engine_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::engine_opposite_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::transport_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::edit_point_in_region_sensitive_actions;
 

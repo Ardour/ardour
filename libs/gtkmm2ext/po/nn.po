@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-03-03 11:35-0500\n"
+"POT-Creation-Date: 2013-08-15 15:09-0400\n"
 "PO-Revision-Date: 2013-01-01 20:30+0100\n"
 "Last-Translator: Eivind Ødegård <meinmycell-lists@yahoo.no>\n"
 "Language-Team: Nynorsk <i18n-nn@lister.ping.uio.no>\n"
@@ -76,11 +76,11 @@ msgstr ""
 msgid "Meta"
 msgstr ""
 
-#: keyboard.cc:134 keyboard.cc:523
+#: keyboard.cc:139 keyboard.cc:531
 msgid "Unknown"
 msgstr "Ukjend"
 
-#: keyboard.cc:534
+#: keyboard.cc:542
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 

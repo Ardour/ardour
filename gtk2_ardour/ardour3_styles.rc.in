@@ -1011,3 +1011,8 @@ style "meter_strip_sep" = "default"
 {
   bg[NORMAL] = { 0.0, 0.0, 0.0 }
 }
+
+style "settings_notebook" = "big_text"
+{
+
+}

@@ -125,7 +125,8 @@ Editor::export_video ()
 				break;
 		}
 	}
-	ExportVideoDialog dialog (*this, _session);
-	dialog.run();
+	ExportVideoDialog dialog (_session, get_selection().time);
+	Gtk::ResponseType r = (Gtk::ResponseType) dialog.run();
+	(void) r; // keep gcc quiet
 	dialog.hide();
 }

@@ -25,7 +25,7 @@
 
 using namespace MIDI;
 
-MIDIAction::MIDIAction (MIDI::Port& p)
+MIDIAction::MIDIAction (MIDI::Parser& p)
 	: MIDIInvokable (p)
 {
 }

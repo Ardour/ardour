@@ -343,8 +343,15 @@ set_color (Gdk::Color& c, int rgb)
 bool
 relay_key_press (GdkEventKey* ev, Gtk::Window* win)
 {
+	PublicEditor& ed (PublicEditor::instance());
+
+	if (&ed == 0) {
+		/* early key press in pre-main-window-dialogs, no editor yet */
+		return false;
+	}
+
 	if (!key_press_focus_accelerator_handler (*win, ev)) {
-		return PublicEditor::instance().on_key_press_event(ev);
+		return ed.on_key_press_event(ev);
 	} else {
 		return true;
 	}

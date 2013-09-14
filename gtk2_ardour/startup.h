@@ -56,8 +56,6 @@ class ArdourStartup : public Gtk::Assistant {
 	bool use_session_template();
 	std::string session_template_name();
 
-	EngineControl* engine_control() { return engine_dialog; }
-
 	// advanced session options
 
 	bool create_master_bus() const;
@@ -82,7 +80,6 @@ class ArdourStartup : public Gtk::Assistant {
 	gint _response;
 	bool config_modified;
 	bool new_user;
-        bool need_audio_setup;
         bool need_session_info;
 	bool new_only;
         std::string _provided_session_name;
@@ -174,11 +171,6 @@ class ArdourStartup : public Gtk::Assistant {
 	void recent_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col);
 
 	void existing_session_selected ();
-
-	/* audio setup page */
-
-	void setup_audio_page ();
-	EngineControl* engine_dialog;
 
 	/* new sessions */
 

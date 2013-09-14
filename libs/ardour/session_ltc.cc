@@ -56,7 +56,7 @@ using namespace Timecode;
  * This filter is adaptive so that fast vari-speed signals
  * will not be affected by it.
  */
-#define LTC_RISE_TIME(speed) MIN (100, MAX(40, (4000000 / ((speed==0)?1:speed) / engine().frame_rate())))
+#define LTC_RISE_TIME(speed) MIN (100, MAX(40, (4000000 / ((speed==0)?1:speed) / engine().sample_rate())))
 
 #define TV_STANDARD(tcf) \
 	(timecode_to_frames_per_second(tcf)==25.0 ? LTC_TV_625_50 : \
@@ -565,7 +565,7 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		 * To do better than this, resampling (or a rewrite of the
 		 * encoder) is required.
 		 */
-		ltc_speed -= ((ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame) / engine().frame_rate();
+		ltc_speed -= ((ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_frame) / engine().sample_rate();
 	}
 
 

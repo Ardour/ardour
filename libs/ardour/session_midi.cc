@@ -31,7 +31,6 @@
 
 #include "midi++/mmc.h"
 #include "midi++/port.h"
-#include "midi++/manager.h"
 
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
@@ -41,6 +40,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
+#include "ardour/midi_port.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_ui.h"
 #include "ardour/session.h"
@@ -349,7 +349,7 @@ Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
  * @param t time to send.
  */
 int
-Session::send_full_time_code (framepos_t const t)
+Session::send_full_time_code (framepos_t const t, pframes_t nframes)
 {
 	/* This function could easily send at a given frame offset, but would
 	 * that be useful?  Does ardour do sub-block accurate locating? [DR] */
@@ -424,10 +424,9 @@ Session::send_full_time_code (framepos_t const t)
 	msg[8] = timecode.frames;
 
 	// Send message at offset 0, sent time is for the start of this cycle
-	if (MIDI::Manager::instance()->mtc_output_port()->midimsg (msg, sizeof (msg), 0)) {
-		error << _("Session: could not send full MIDI time code") << endmsg;
-		return -1;
-	}
+	
+	MidiBuffer& mb (_midi_ports->mtc_output_port()->get_midi_buffer (nframes));
+	mb.push_back (0, sizeof (msg), msg);
 
 	_pframes_since_last_mtc = 0;
 	return 0;
@@ -470,7 +469,7 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 				next_quarter_frame_to_send, quarter_frame_duration));
 
 	if (rint(outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration)) < _transport_frame) {
-		send_full_time_code (_transport_frame);
+		send_full_time_code (_transport_frame, nframes);
 		return 0;
 	}
 
@@ -516,9 +515,10 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 		pframes_t const out_stamp = (msg_time - start_frame) / _transport_speed;
 		assert (out_stamp < nframes);
 
-		if (MIDI::Manager::instance()->mtc_output_port()->midimsg (mtc_msg, 2, out_stamp)) {
+		MidiBuffer& mb (_midi_ports->mtc_output_port()->get_midi_buffer(nframes));
+		if (!mb.push_back (out_stamp, 2, mtc_msg)) {
 			error << string_compose(_("Session: cannot send quarter-frame MTC message (%1)"), strerror (errno))
-						<< endmsg;
+			      << endmsg;
 			return -1;
 		}
 
@@ -588,7 +588,7 @@ Session::mmc_step_timeout ()
 
 
 void
-Session::send_song_position_pointer (framepos_t t)
+Session::send_song_position_pointer (framepos_t)
 {
 	if (midi_clock) {
 		/* Do nothing for the moment */
@@ -603,3 +603,45 @@ Session::start_midi_thread ()
 	return 0;
 }
 
+MIDI::Port* 
+Session::midi_input_port () const
+{
+	return _midi_ports->midi_input_port ();
+}
+MIDI::Port* 
+Session::midi_output_port () const
+{
+	return _midi_ports->midi_output_port ();
+}
+boost::shared_ptr<MidiPort> 
+Session::midi_clock_output_port () const
+{
+	return _midi_ports->midi_clock_output_port ();
+}
+boost::shared_ptr<MidiPort> 
+Session::midi_clock_input_port () const
+{
+	return _midi_ports->midi_clock_input_port ();
+}
+boost::shared_ptr<MidiPort> 
+Session::mtc_output_port () const
+{
+	return _midi_ports->mtc_output_port ();
+}
+boost::shared_ptr<MidiPort> 
+Session::mtc_input_port () const
+{
+	return _midi_ports->mtc_input_port ();
+}
+
+MIDI::Port*
+Session::mmc_output_port () const
+{
+	return _midi_ports->mmc_output_port ();
+}
+
+MIDI::Port*
+Session::mmc_input_port () const
+{
+	return _midi_ports->mmc_input_port ();
+}

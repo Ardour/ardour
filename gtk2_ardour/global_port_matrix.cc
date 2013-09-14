@@ -19,6 +19,7 @@
 
 #include <gtkmm/image.h>
 #include <gtkmm/stock.h>
+
 #include "global_port_matrix.h"
 #include "utils.h"
 
@@ -82,9 +83,9 @@ GlobalPortMatrix::set_state (BundleChannel c[2], bool s)
 			} else {
 				/* two non-Ardour ports */
 				if (s) {
-					jack_connect (_session->engine().jack (), j->c_str(), i->c_str());
+					AudioEngine::instance()->connect (*j, *i);
 				} else {
-					jack_disconnect (_session->engine().jack (), j->c_str(), i->c_str());
+					AudioEngine::instance()->disconnect (*j, *i);
 				}
 			}
 		}
@@ -113,33 +114,25 @@ GlobalPortMatrix::get_state (BundleChannel c[2]) const
 	for (Bundle::PortList::const_iterator i = in_ports.begin(); i != in_ports.end(); ++i) {
 		for (Bundle::PortList::const_iterator j = out_ports.begin(); j != out_ports.end(); ++j) {
 
-			boost::shared_ptr<Port> p = _session->engine().get_port_by_name (*i);
-			boost::shared_ptr<Port> q = _session->engine().get_port_by_name (*j);
+			boost::shared_ptr<Port> p = AudioEngine::instance()->get_port_by_name (*i);
+			boost::shared_ptr<Port> q = AudioEngine::instance()->get_port_by_name (*j);
 
 			if (!p && !q) {
 				/* two non-Ardour ports; things are slightly more involved */
-				/* XXX: is this the easiest way to do this? */
-				/* XXX: isn't this very inefficient? */
 
-				jack_client_t* jack = _session->engine().jack ();
-				jack_port_t* jp = jack_port_by_name (jack, i->c_str());
-				if (jp == 0) {
+				/* get a port handle for one of them .. */
+
+				PortEngine::PortHandle ph = AudioEngine::instance()->port_engine().get_port_by_name (*i);
+				if (!ph) {
 					return PortMatrixNode::NOT_ASSOCIATED;
 				}
 
-				char const ** c = jack_port_get_all_connections (jack, jp);
+				/* see if it is connected to the other one ... */
 
-				char const ** p = c;
-
-				while (p && *p != 0) {
-					if (strcmp (*p, j->c_str()) == 0) {
-						free (c);
-						return PortMatrixNode::ASSOCIATED;
-					}
-					++p;
+				if (AudioEngine::instance()->port_engine().connected_to (ph, *j, false)) {
+					return PortMatrixNode::ASSOCIATED;
 				}
 
-				free (c);
 				return PortMatrixNode::NOT_ASSOCIATED;
 			}
 

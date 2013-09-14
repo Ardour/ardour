@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-06-11 08:49-0400\n"
-"PO-Revision-Date: 2013-03-03 09:23+0100\n"
+"POT-Creation-Date: 2013-09-03 07:59-0400\n"
+"PO-Revision-Date: 2013-06-13 22:47+0200\n"
 "Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
 "Language-Team: Czech <kde-i18n-doc@kde.org>\n"
 "Language: cs\n"
@@ -30,58 +30,58 @@ msgid "AudioDiskstream %1: there is no existing playlist to make a copy of!"
 msgstr ""
 "AudioDiskstream %1: není žádný seznam skladeb, který by bylo lze kopírovat!"
 
-#: audio_diskstream.cc:823 audio_diskstream.cc:833
+#: audio_diskstream.cc:848 audio_diskstream.cc:858
 msgid ""
 "AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"
 msgstr ""
 "AudioDiskstream %1: Při doplňování nelze číst %2 ze seznamu skladeb u snímku "
 "%3"
 
-#: audio_diskstream.cc:989
+#: audio_diskstream.cc:1014
 msgid "AudioDiskstream %1: cannot read %2 from playlist at frame %3"
 msgstr "AudioDiskstream %1: Nelze číst %2 ze seznamu skladeb u snímku %3"
 
-#: audio_diskstream.cc:1358 audio_diskstream.cc:1375
+#: audio_diskstream.cc:1383 audio_diskstream.cc:1400
 msgid "AudioDiskstream %1: cannot write to disk"
 msgstr "AudioDiskstream %1: Nelze zapisovat na disk"
 
-#: audio_diskstream.cc:1418
+#: audio_diskstream.cc:1443
 msgid "AudioDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr "AudioDiskstream %1: Zachycená data nelze zapisovat na disk!"
 
-#: audio_diskstream.cc:1512
+#: audio_diskstream.cc:1537
 msgid "%1: could not create region for complete audio file"
 msgstr "%1: Nepodařilo se vytvořit oblast pro úplný zvukový soubor"
 
-#: audio_diskstream.cc:1546
+#: audio_diskstream.cc:1571
 msgid "AudioDiskstream: could not create region for captured audio!"
 msgstr ""
 "AudioDiskstream: Nepodařilo se vytvořit oblast pro zaznamenaný zvukový "
 "materiál!"
 
-#: audio_diskstream.cc:1654
+#: audio_diskstream.cc:1679
 msgid "programmer error: %1"
 msgstr "Chyba v programování: %1"
 
-#: audio_diskstream.cc:1880
+#: audio_diskstream.cc:1905
 msgid "AudioDiskstream: channel %1 out of range"
 msgstr "AudioDiskstream: Kanál %1 překročení rozsahu"
 
-#: audio_diskstream.cc:1894 midi_diskstream.cc:1196
+#: audio_diskstream.cc:1919 midi_diskstream.cc:1210
 msgid "%1:%2 new capture file not initialized correctly"
 msgstr "%1:%2 nový záznamový soubor neinicializován správně"
 
-#: audio_diskstream.cc:2175
+#: audio_diskstream.cc:2200
 msgid "%1: cannot restore pending capture source file %2"
 msgstr "%1: Nelze obnovit předběžný záznamový zdrojový soubor %2"
 
-#: audio_diskstream.cc:2197
+#: audio_diskstream.cc:2222
 msgid "%1: incorrect number of pending sources listed - ignoring them all"
 msgstr ""
 "%1: Seznam obsahuje nesprávný počet předběžných zdrojů - všechny jsou "
 "přehlíženy"
 
-#: audio_diskstream.cc:2221
+#: audio_diskstream.cc:2246
 msgid "%1: cannot create whole-file region from pending capture sources"
 msgstr ""
 "%1: Z předběžných záznamových zdrojů nelze vytvořit žádnou oblast pro úplný "
@@ -133,7 +133,7 @@ msgstr "Seznamy zvukových skladeb (nepoužívané)"
 
 #: audio_playlist_source.cc:171 audiosource.cc:913 file_source.cc:529
 #: midi_playlist_source.cc:144 midi_playlist_source.cc:152
-#: midi_playlist_source.cc:159 midi_source.cc:371 plugin_insert.cc:644
+#: midi_playlist_source.cc:159 midi_source.cc:371 plugin_insert.cc:643
 #: rb_effect.cc:332 session.cc:2465 session.cc:2498 session.cc:3643
 #: session_handle.cc:87 sndfilesource.cc:121
 msgid "programming error: %1"
@@ -215,7 +215,7 @@ msgstr ""
 msgid "Connect session to engine"
 msgstr "Spojit sezení se strojem"
 
-#: audioengine.cc:844
+#: audioengine.cc:843
 msgid ""
 "a port with the name \"%1\" already exists: check for duplicated track/bus "
 "names"
@@ -223,7 +223,7 @@ msgstr ""
 "Přípojka s názvem \"%1\" již existuje: Prověřte na zdvojené názvy stop/"
 "sběrnic"
 
-#: audioengine.cc:846 session.cc:1698
+#: audioengine.cc:845 session.cc:1698
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
@@ -231,35 +231,35 @@ msgstr ""
 "Nejsou dostupné další přípojky JACK. Pokud potřebujete tolik stop, musíte "
 "zastavit %1 a spustit JACK znovu s více přípojkami."
 
-#: audioengine.cc:849
+#: audioengine.cc:848
 msgid "AudioEngine: cannot register port \"%1\": %2"
 msgstr "AudioEngine: Nelze zaregistrovat přípojku \"%1\": %2"
 
-#: audioengine.cc:879
+#: audioengine.cc:878
 msgid "unable to create port: %1"
 msgstr "Nelze vytvořit přípojku: %1"
 
-#: audioengine.cc:933
+#: audioengine.cc:932
 msgid "connect called before engine was started"
 msgstr "Zavolání connect (spojení) před spuštěním stroje"
 
-#: audioengine.cc:959
+#: audioengine.cc:958
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
 msgstr "AudioEngine: Nelze spojit %1 (%2) s %3 (%4)"
 
-#: audioengine.cc:974 audioengine.cc:1005
+#: audioengine.cc:973 audioengine.cc:1004
 msgid "disconnect called before engine was started"
 msgstr "Zavolání disconnect (odpojení) před spuštěním stroje"
 
-#: audioengine.cc:1053
+#: audioengine.cc:1052
 msgid "get_port_by_name() called before engine was started"
 msgstr "Zavolání get_port_by_name() před spuštěním stroje"
 
-#: audioengine.cc:1105
+#: audioengine.cc:1104
 msgid "get_ports called before engine was started"
 msgstr "Zavolání get_ports před spuštěním stroje"
 
-#: audioengine.cc:1428
+#: audioengine.cc:1427
 msgid "failed to connect to JACK"
 msgstr "Nepodařilo se spojit se s JACK"
 
@@ -545,7 +545,7 @@ msgstr "Ztrátová komprese"
 msgid "Lossless compression"
 msgstr "Bezztrátová komprese"
 
-#: export_format_manager.cc:207 export_format_specification.cc:579
+#: export_format_manager.cc:218 export_format_specification.cc:579
 msgid "Session rate"
 msgstr "Kmitočet sezení"
 
@@ -577,7 +577,7 @@ msgstr "Trojúhelníkový"
 msgid "Rectangular"
 msgstr "Obdélníkový"
 
-#: export_formats.cc:52 session.cc:4854 session.cc:4870
+#: export_formats.cc:52 session.cc:4861 session.cc:4877
 msgid "None"
 msgstr "Žádný"
 
@@ -790,25 +790,25 @@ msgstr "Nelze určit nynější pracovní adresář (%1)"
 msgid "unknown file type for session %1"
 msgstr "Neznámý typ souboru pro sezení %1"
 
-#: globals.cc:204
+#: globals.cc:205
 msgid "Could not set system open files limit to \"unlimited\""
 msgstr ""
 "Nepodařilo se nastavit systémové omezení pro otevřené soubory na \"neomezeno"
 "\""
 
-#: globals.cc:206
+#: globals.cc:207
 msgid "Could not set system open files limit to %1"
 msgstr "Nepodařilo se nastavit systémové omezení pro otevřené soubory na %1"
 
-#: globals.cc:210
+#: globals.cc:211
 msgid "Your system is configured to limit %1 to only %2 open files"
 msgstr "Vaše systémové nastavení omezuje %1 na jen %2 otevřené soubory"
 
-#: globals.cc:214
+#: globals.cc:215
 msgid "Could not get system open files limit (%1)"
 msgstr "Nepodařilo se dostat systémové omezení pro otevřené soubory (%1)"
 
-#: globals.cc:267
+#: globals.cc:266
 msgid "Loading configuration"
 msgstr "Nahrává se nastavení"
 
@@ -961,20 +961,20 @@ msgstr "P"
 msgid "%d"
 msgstr "%d"
 
-#: ladspa_plugin.cc:87
+#: ladspa_plugin.cc:88
 msgid "LADSPA: module has no descriptor function."
 msgstr "LADSPA: Modul nemá žádnou funkci popisu"
 
-#: ladspa_plugin.cc:92
+#: ladspa_plugin.cc:93
 msgid "LADSPA: plugin has gone away since discovery!"
 msgstr "LADSPA: Přídavný modul už není více nalezitelný!"
 
-#: ladspa_plugin.cc:99
+#: ladspa_plugin.cc:100
 msgid "LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"
 msgstr ""
 "LADSPA: \"%1\" nemůže být použit, neboť nedělá žádný \"inplace processing\""
 
-#: ladspa_plugin.cc:296
+#: ladspa_plugin.cc:297
 msgid ""
 "illegal parameter number used with plugin \"%1\". This may indicate a change "
 "in the plugin design, and presets may be invalid"
@@ -982,35 +982,35 @@ msgstr ""
 "Špatné číslo parametru pro přídavný modul \"%1\". To může značit změnu v "
 "návrhupřídavného modulu, a přednastavení jsou případně neplatná"
 
-#: ladspa_plugin.cc:373 ladspa_plugin.cc:418
+#: ladspa_plugin.cc:376 ladspa_plugin.cc:426
 msgid "Bad node sent to LadspaPlugin::set_state"
 msgstr "Špatný uzel poslán LadspaPlugin::set_state"
 
-#: ladspa_plugin.cc:386 ladspa_plugin.cc:431
+#: ladspa_plugin.cc:391 ladspa_plugin.cc:440
 msgid "LADSPA: no ladspa port number"
 msgstr "LADSPA: Žádné číslo přípojky LADSPA"
 
-#: ladspa_plugin.cc:392 ladspa_plugin.cc:437
+#: ladspa_plugin.cc:397 ladspa_plugin.cc:446
 msgid "LADSPA: no ladspa port data"
 msgstr "LADSPA: Žádná data přípojky LADSPA"
 
-#: ladspa_plugin.cc:707
+#: ladspa_plugin.cc:717
 msgid "LADSPA: cannot load module from \"%1\""
 msgstr "LADSPA: Nelze nahrát modul z \"%1\""
 
-#: ladspa_plugin.cc:817
+#: ladspa_plugin.cc:827
 msgid "Could not locate HOME.  Preset not removed."
 msgstr "Nepodařilo se najít HOME. Přednastavení neodstraněno."
 
-#: ladspa_plugin.cc:854 ladspa_plugin.cc:860
+#: ladspa_plugin.cc:864 ladspa_plugin.cc:870
 msgid "Could not create %1.  Preset not saved. (%2)"
 msgstr "Nepodařilo se vytvořit %1. Přednastavení neuloženo. (%2)"
 
-#: ladspa_plugin.cc:867
+#: ladspa_plugin.cc:877
 msgid "Error saving presets file %1."
 msgstr "Chyba při ukládání souboru s přednastavením %1."
 
-#: ladspa_plugin.cc:905
+#: ladspa_plugin.cc:915
 msgid "Could not locate HOME.  Preset not saved."
 msgstr "Nepodařilo se najít HOME. Přednastavení neuloženo."
 
@@ -1050,7 +1050,7 @@ msgstr "Locations: Pokus o použití neznámé polohy jako vybrané polohy"
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "Nesprávný uzel XML předán dál Locations::set_state"
 
-#: location.cc:842 session.cc:4355 session_state.cc:1114
+#: location.cc:842 session.cc:4362 session_state.cc:1114
 msgid "session"
 msgstr "Sezení"
 
@@ -1134,23 +1134,23 @@ msgid "MidiDiskstream %1: there is no existing playlist to make a copy of!"
 msgstr ""
 "MidiDiskstream %1: není žádný seznam skladeb, který by bylo lze kopírovat!"
 
-#: midi_diskstream.cc:685
+#: midi_diskstream.cc:699
 msgid "MidiDiskstream %1: cannot read %2 from playlist at frame %3"
 msgstr "MidiDiskstream %1: Nelze číst %2 ze seznamu skladeb u snímku %3"
 
-#: midi_diskstream.cc:820
+#: midi_diskstream.cc:834
 msgid "MidiDiskstream %1: cannot write to disk"
 msgstr "MidiDiskstream %1: Nelze zapisovat na disk"
 
-#: midi_diskstream.cc:854
+#: midi_diskstream.cc:868
 msgid "MidiDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr "MidiDiskstream %1: Zachycená data nelze zapisovat na disk!"
 
-#: midi_diskstream.cc:941
+#: midi_diskstream.cc:955
 msgid "%1: could not create region for complete midi file"
 msgstr "%1: Nepodařilo se vytvořit oblast pro úplný soubor MIDI"
 
-#: midi_diskstream.cc:978
+#: midi_diskstream.cc:992
 msgid "MidiDiskstream: could not create region for captured midi!"
 msgstr ""
 "MidiDiskstream: Nepodařilo se vytvořit oblast pro zaznamenaný materiál MIDI!"
@@ -1169,7 +1169,7 @@ msgstr "Převést"
 
 #: midi_patch_manager.cc:126
 msgid "Duplicate MIDI device `%1' in `%2' ignored"
-msgstr ""
+msgstr "Zdvojení zařízení MIDI `%1' v `%2' se přehlíží"
 
 #: midi_source.cc:125
 msgid "Missing parameter property on InterpolationStyle"
@@ -1189,7 +1189,7 @@ msgstr "Chybějící vlastnost \"state\" u AutomationState"
 
 #: midi_stretch.cc:85
 msgid "MIDI stretch created non-MIDI source"
-msgstr ""
+msgstr "Protažení MIDI vytvořilo zdroj, který není MIDI"
 
 #: monitor_processor.cc:53
 msgid "monitor dim"
@@ -1201,15 +1201,15 @@ msgstr "Přerušení sledování "
 
 #: monitor_processor.cc:55
 msgid "monitor mono"
-msgstr "Monitor Mono"
+msgstr "Mono sledování"
 
 #: monitor_processor.cc:58
 msgid "monitor dim level"
-msgstr "Síla hlasitosti pro Utlumit Monitor"
+msgstr "Síla hlasitosti pro utlumení sledování "
 
 #: monitor_processor.cc:62
 msgid "monitor solo boost level"
-msgstr "Síla hlasitosti pro Monitor Solo Boost"
+msgstr "Síla hlasitosti pro zdůraznění sóla sledování"
 
 #: monitor_processor.cc:512
 msgid "cut control %1"
@@ -1244,9 +1244,8 @@ msgid "Session framerate adjusted from %1 TO: MTC's %2."
 msgstr "Rychlost snímkování sezení změněna z %1 na MTC: %2"
 
 #: mtc_slave.cc:393
-#, fuzzy
 msgid "Session and MTC framerate mismatch: MTC:%1 %2:%3."
-msgstr "Rychlost snímkování sezení a MTC se neshodují: MTC: %1 Ardour: %2"
+msgstr "Rychlost snímkování sezení a MTC se neshodují: MTC: %1 %2:%3."
 
 #: operations.cc:24
 msgid "capture"
@@ -1350,23 +1349,35 @@ msgstr "Žádné ID seznamu skladeb v XML zdroje seznamu skladeb!"
 msgid "Could not construct playlist for PlaylistSource from session data!"
 msgstr "Nepodařilo se sestavit seznam skladeb ze zdrojových dat sezení!"
 
-#: plugin_insert.cc:599
+#: plugin.cc:324
+msgid ""
+"Plugin presets are not supported in this build of %1. Consider paying for a "
+"full version"
+msgstr ""
+
+#: plugin.cc:398
+msgid ""
+"Saving plugin settings is not supported in this build of %1. Consider paying "
+"for the full version"
+msgstr ""
+
+#: plugin_insert.cc:598
 msgid "programming error: "
 msgstr "Chyba v programování:"
 
-#: plugin_insert.cc:908
+#: plugin_insert.cc:926
 msgid "XML node describing plugin is missing the `type' field"
 msgstr "Uzlu XML k popisu přídavného modulu chybí pole \"type\""
 
-#: plugin_insert.cc:923
+#: plugin_insert.cc:941
 msgid "unknown plugin type %1 in plugin insert state"
 msgstr "Neznámý typ přídavného modulu %1 ve vkládacím stavu přídavného modulu"
 
-#: plugin_insert.cc:951
+#: plugin_insert.cc:969
 msgid "Plugin has no unique ID field"
 msgstr "Přídavný modul nemá žádné pole pro jedinečné ID"
 
-#: plugin_insert.cc:960
+#: plugin_insert.cc:978
 msgid ""
 "Found a reference to a plugin (\"%1\") that is unknown.\n"
 "Perhaps it was removed or moved since it was last used."
@@ -1374,15 +1385,15 @@ msgstr ""
 "Nalezen odkaz na neznámý přídavný modul (\"%1\").\n"
 "Snad byl od posledního použití odstraněn nebo přesunut."
 
-#: plugin_insert.cc:1076
+#: plugin_insert.cc:1094
 msgid "PluginInsert: Auto: no ladspa port number"
 msgstr "PluginInsert: Auto: Žádné číslo přípojky LADSPA"
 
-#: plugin_insert.cc:1083
+#: plugin_insert.cc:1101
 msgid "PluginInsert: Auto: port id out of range"
 msgstr "PluginInsert: Auto: Překročení rozsahu ID přípojky"
 
-#: plugin_insert.cc:1119
+#: plugin_insert.cc:1137
 msgid "PluginInsert: automatable control %1 not found - ignored"
 msgstr ""
 "PluginInsert: automatizovatelný prvek ovládání %1 nenalezen - přehlíží se"
@@ -1404,22 +1415,20 @@ msgid "LADSPA: module \"%1\" has no descriptor function."
 msgstr "LADSPA: Modul \"%1\" nemá žádnou funkci popisu."
 
 #: plugin_manager.cc:602
-#, fuzzy
 msgid ""
 "VST plugin %1 does not support processReplacing, and so cannot be used in %2 "
 "at this time"
 msgstr ""
 "Přídavný modul VST %1 nepodporuje processReplacing a z toho důvodu jej nyní "
-"nelze v Ardouru použít"
+"nelze v %2 použít"
 
 #: plugin_manager.cc:709
-#, fuzzy
 msgid ""
 "linuxVST plugin %1 does not support processReplacing, and so cannot be used "
 "in %2 at this time"
 msgstr ""
 "Přídavný modul linuxVST %1 nepodporuje processReplacing a z toho důvodu jej "
-"nyní nelze v Ardouru použít"
+"nyní nelze v %2 použít"
 
 #: plugin_manager.cc:870
 msgid "unknown plugin status type \"%1\" - all entries ignored"
@@ -1535,24 +1544,24 @@ msgstr "Zavedení: Chyba v src_new() : %1"
 msgid "return %1"
 msgstr "Vrácená hodnota: %1"
 
-#: route.cc:1100 route.cc:2550
+#: route.cc:1105 route.cc:2581
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr "Neznámý typ procesoru \"%1\"; přehlíží se"
 
-#: route.cc:1112
+#: route.cc:1117
 msgid "processor could not be created. Ignored."
 msgstr "Procesor se nepodařilo vytvořit. Přehlíží se."
 
-#: route.cc:1983 route.cc:2203
+#: route.cc:2007 route.cc:2234
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr "Špatný uzel poslán Route::set_state() [%1]"
 
-#: route.cc:2042
+#: route.cc:2067
 msgid "Pannable state found for route (%1) without a panner!"
 msgstr ""
 "Nalezen stav cíle vyvážení pro cestu (%1), aniž by bylo nalezeno vyvážení!"
 
-#: route.cc:2106 route.cc:2110 route.cc:2317 route.cc:2321
+#: route.cc:2137 route.cc:2141 route.cc:2348 route.cc:2352
 msgid "badly formed order key string in state file! [%1] ... ignored."
 msgstr ""
 "Špatně utvořený řetězec znaků pro klíč pořadí roztřídění v souboru sezení! "
@@ -1814,7 +1823,7 @@ msgstr "%1: Polohu souboru %2 nelze vyhledat pro vyvedení"
 msgid "Export ended unexpectedly: %1"
 msgstr "Vyvedení skončilo neočekávaně: %1"
 
-#: session_ltc.cc:220
+#: session_ltc.cc:222
 msgid ""
 "LTC encoder: invalid framerate - LTC encoding is disabled for the remainder "
 "of this session."
@@ -1822,11 +1831,11 @@ msgstr ""
 "Kodér LTC: Neplatná rychlost snímkování - Kódování LTC je pro zbývající část "
 "tohoto sezení zakázáno."
 
-#: session_midi.cc:427
+#: session_midi.cc:428
 msgid "Session: could not send full MIDI time code"
 msgstr "Sezení: Nepodařilo se poslat úplný časový kód MIDI"
 
-#: session_midi.cc:519
+#: session_midi.cc:520
 msgid "Session: cannot send quarter-frame MTC message (%1)"
 msgstr "Sezení: Nelze poslat quarter-frame MTC (%1)"
 
@@ -1834,18 +1843,17 @@ msgstr "Sezení: Nelze poslat quarter-frame MTC (%1)"
 msgid "Session: cannot create Playlist from XML description."
 msgstr "Sezení: Nelze vytvořit seznam skladeb z popisu XML"
 
-#: session_process.cc:135
+#: session_process.cc:133
 msgid "Session: error in no roll for %1"
 msgstr "Sezení: Chyba v no_roll pro %1"
 
-#: session_process.cc:1160
+#: session_process.cc:1158
 msgid "Programming error: illegal event type in process_event (%1)"
 msgstr "Chyba v programování: Neplatný typ události v process_event (%1)"
 
 #: session_state.cc:139
-#, fuzzy
 msgid "Could not use path %1 (%2)"
-msgstr "Nepodařilo se použít cestu %1 (%s)"
+msgstr "Nepodařilo se použít cestu %1 (%2)"
 
 #: session_state.cc:267
 msgid "solo cut control (dB)"
@@ -2210,7 +2218,7 @@ msgstr "Neznámý stav transportu JACK v Sync-Callback"
 msgid "Cannot loop - no loop range defined"
 msgstr "Nelze přehrávat ve smyčce - Nestanovena žádná oblast smyčky"
 
-#: session_transport.cc:727
+#: session_transport.cc:728
 msgid ""
 "Seamless looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
@@ -2218,7 +2226,7 @@ msgstr ""
 "Souvislé přehrávání ve smyčce není možné, dokud %1 používá transport JACK.\n"
 "Doporučuje se změna volby v nastavení"
 
-#: session_transport.cc:1092
+#: session_transport.cc:1094
 msgid ""
 "Global varispeed cannot be supported while %1 is connected to JACK transport "
 "control"
@@ -2227,25 +2235,20 @@ msgstr ""
 "dokud je %1 spojen s transportem JACK."
 
 #: smf_source.cc:252
-#, fuzzy
 msgid "Unable to read event prefix, corrupt MIDI ring"
-msgstr ""
-"Nelze přečíst předponu události, poškozená kruhová vyrovnávací paměť MIDI"
+msgstr "Nelze přečíst předponu události, poškozen okraj MIDI"
 
 #: smf_source.cc:265
-#, fuzzy
 msgid "Event has time and size but no body, corrupt MIDI ring"
-msgstr ""
-"Přečteny čas/velikost, ale ne vyrovnávací paměť, poškozená kruhová "
-"vyrovnávací paměť MIDI"
+msgstr "Událost má čas a velikost, ale nemá tělo, poškozen okraj MIDI"
 
 #: smf_source.cc:271
 msgid "Event time is before MIDI source position"
-msgstr ""
+msgstr "Čas události je před polohou zdroje MIDI"
 
 #: smf_source.cc:306 smf_source.cc:345
 msgid "Skipping event with unordered time %1"
-msgstr ""
+msgstr "Přeskakuje se událost s neuspořádaným časem %1"
 
 #: smf_source.cc:410
 msgid "cannot open MIDI file %1 for write"
@@ -2374,7 +2377,7 @@ msgid "attempt to write a non-writable audio file source (%1)"
 msgstr ""
 "Pokus o zápis zvukového zdrojového souboru chráněného proti zápisu (%1)"
 
-#: sndfilesource.cc:396 utils.cc:497 utils.cc:521 utils.cc:535 utils.cc:554
+#: sndfilesource.cc:396 utils.cc:507 utils.cc:531 utils.cc:545 utils.cc:564
 msgid "programming error: %1 %2"
 msgstr "Chyba v programování: %1 %2"
 
@@ -2639,11 +2642,11 @@ msgstr "M-Clock"
 msgid "LTC"
 msgstr "LTC"
 
-#: utils.cc:589
+#: utils.cc:599
 msgid "programming error: unknown native header format: %1"
 msgstr "Chyba v programování: neznámý nativní formát hlavičky: %1"
 
-#: utils.cc:604
+#: utils.cc:614
 msgid "cannot open directory %1 (%2)"
 msgstr "Nelze otevřít adresář %1 (%2)"
 

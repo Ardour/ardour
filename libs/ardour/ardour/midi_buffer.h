@@ -44,7 +44,6 @@ public:
 	void copy(const MidiBuffer& copy);
 
 	bool     push_back(const Evoral::MIDIEvent<TimeType>& event);
-	bool     push_back(const jack_midi_event_t& event);
 	bool     push_back(TimeType time, size_t size, const uint8_t* data);
 	uint8_t* reserve(TimeType time, size_t size);
 

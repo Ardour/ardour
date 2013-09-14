@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <time.h>
 
 #ifdef WINDOWS_VST_SUPPORT
 #include <fst.h>
@@ -66,11 +67,11 @@
 #include "pbd/basename.h"
 
 #include "midi++/port.h"
-#include "midi++/manager.h"
 #include "midi++/mmc.h"
 
 #include "ardour/analyser.h"
 #include "ardour/audio_library.h"
+#include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
@@ -78,6 +79,7 @@
 #include "ardour/control_protocol_manager.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_region.h"
+#include "ardour/midiport_manager.h"
 #include "ardour/mix.h"
 #include "ardour/panner_manager.h"
 #include "ardour/plugin_manager.h"
@@ -330,6 +332,8 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	EventTypeMap::instance().new_parameter(EnvelopeAutomation);
 	EventTypeMap::instance().new_parameter(MidiCCAutomation);
 
+	ARDOUR::AudioEngine::create ();
+
 	libardour_initialized = true;
 
 	return true;
@@ -338,9 +342,6 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 void
 ARDOUR::init_post_engine ()
 {
-	/* the MIDI Manager is needed by the ControlProtocolManager */
-	MIDI::Manager::create (AudioEngine::instance()->jack());
-
 	ControlProtocolManager::instance().discover_control_protocols ();
 
 	XMLNode* node;
@@ -535,4 +536,44 @@ ARDOUR::get_available_sync_options ()
 	ret.push_back (LTC);
 
 	return ret;
+}
+
+/** Return a monotonic value for the number of microseconds that have elapsed
+ * since an arbitrary zero origin.
+ */
+
+#ifdef __MACH__
+/* Thanks Apple for not implementing this basic SUSv2, POSIX.1-2001 function
+ */
+#include <mach/mach_time.h>
+#define CLOCK_REALTIME 0
+#define CLOCK_MONOTONIC 0
+int 
+clock_gettime (int /*clk_id*/, struct timespec *t)
+{
+        static bool initialized = false;
+        static mach_timebase_info_data_t timebase;
+        if (!initialized) {
+                mach_timebase_info(&timebase);
+                initialized = true;
+        }
+        uint64_t time;
+        time = mach_absolute_time();
+        double nseconds = ((double)time * (double)timebase.numer)/((double)timebase.denom);
+        double seconds = ((double)time * (double)timebase.numer)/((double)timebase.denom * 1e9);
+        t->tv_sec = seconds;
+        t->tv_nsec = nseconds;
+        return 0;
+}
+#endif
+ 
+microseconds_t
+ARDOUR::get_microseconds ()
+{
+	struct timespec ts;
+	if (clock_gettime (CLOCK_MONOTONIC, &ts) != 0) {
+		/* EEEK! */
+		return 0;
+	}
+	return (microseconds_t) ts.tv_sec * 1000000 + (ts.tv_nsec/1000);
 }

@@ -28,7 +28,7 @@ namespace ARDOUR {
 
 CapturingProcessor::CapturingProcessor (Session & session)
 	: Processor (session, X_("capture point"))
-	, block_size (session.engine().frames_per_cycle())
+	, block_size (AudioEngine::instance()->samples_per_cycle())
 {
 	realloc_buffers ();
 }

@@ -21,15 +21,22 @@
 #include <midi++/types.h>
 
 #include "pbd/signals.h"
+
+
 #include "midi_byte_array.h"
 #include "types.h"
 
 namespace MIDI {
-	class Port;
 	class Parser;
+	class Port;
 }
 
 class MackieControlProtocol;
+
+namespace ARDOUR {
+	class AsyncMIDIPort;
+	class Port;
+}
 
 namespace Mackie
 {
@@ -49,17 +56,17 @@ public:
 	/// an easier way to output bytes via midi
 	int write (const MidiByteArray&);
 	
-	MIDI::Port& input_port() { return *_input_port; }
-	const MIDI::Port& input_port() const { return *_input_port; }
-	MIDI::Port& output_port() { return *_output_port; }
-	const MIDI::Port& output_port() const { return *_output_port; }
+    MIDI::Port& input_port() const { return *_input_port; }
+    MIDI::Port& output_port() const { return *_output_port; }
 
 protected:
 
 private:
-	Mackie::Surface* _surface;
-	MIDI::Port*  _input_port;
-	MIDI::Port*  _output_port;
+    Mackie::Surface*   _surface;
+    MIDI::Port* _input_port;
+    MIDI::Port* _output_port;
+    boost::shared_ptr<ARDOUR::Port> _async_in;
+    boost::shared_ptr<ARDOUR::Port> _async_out;
 };	
 
 std::ostream& operator <<  (std::ostream& , const SurfacePort& port);

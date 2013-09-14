@@ -89,6 +89,7 @@ class BigClockWindow;
 class BundleManager;
 class ButtonJoiner;
 class ConnectionEditor;
+class EngineControl;
 class KeyEditor;
 class LocationUIWindow;
 class MainClock;
@@ -263,7 +264,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 		session_add_midi_route (false);
 	}*/
 
-	int  create_engine ();
+        void attach_to_engine ();
 	void post_engine ();
 
 	gint exit_on_main_window_close (GdkEventAny *);
@@ -301,19 +302,18 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void reenable_hide_loop_punch_ruler_if_appropriate ();
 	void toggle_auto_return ();
 	void toggle_click ();
-
+        void toggle_audio_midi_setup ();
 	void toggle_session_auto_loop ();
-
 	void toggle_rc_options_window ();
 	void toggle_session_options_window ();
 
   private:
 	ArdourStartup*      _startup;
-	ARDOUR::AudioEngine *engine;
 	Gtk::Tooltips        _tooltips;
 	NSM_Client          *nsm;
 	bool                 _was_dirty;
         bool                 _mixer_on_top;
+        bool first_time_engine_run;
 
 	void goto_editor_window ();
 	void goto_mixer_window ();
@@ -666,9 +666,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	int pending_state_dialog ();
 	int sr_mismatch_dialog (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
 
-	void disconnect_from_jack ();
-	void reconnect_to_jack ();
-	void set_jack_buffer_size (ARDOUR::pframes_t);
+	void disconnect_from_engine ();
+	void reconnect_to_engine ();
+	void set_engine_buffer_size (ARDOUR::pframes_t);
 
 	Gtk::MenuItem* jack_disconnect_item;
 	Gtk::MenuItem* jack_reconnect_item;
@@ -709,6 +709,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void loading_message (const std::string& msg);
 
 	PBD::ScopedConnectionList forever_connections;
+        PBD::ScopedConnection halt_connection; 
 
         void step_edit_status_change (bool);
 
@@ -745,6 +746,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
         std::string _announce_string;
         void check_announcements ();
+
+        EngineControl* _audio_midi_setup;
+        void launch_audio_midi_setup ();
+        int do_audio_midi_setup (uint32_t);
 };
 
 #endif /* __ardour_gui_h__ */

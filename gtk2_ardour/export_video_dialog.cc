@@ -62,9 +62,9 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace VideoUtils;
 
-ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
+ExportVideoDialog::ExportVideoDialog (Session* s, TimeSelection &tme)
 	: ArdourDialog (_("Export Video File "))
-	, editor (ed)
+	, export_range (tme)
 	, outfn_path_label (_("File:"), Gtk::ALIGN_LEFT)
 	, outfn_browse_button (_("Browse"))
 	, invid_path_label (_("Video:"), Gtk::ALIGN_LEFT)
@@ -150,6 +150,9 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	} else {
 		insnd_combo.append_text (_("from the video's start to the video's end"));
 	}
+	if (!export_range.empty()) {
+		insnd_combo.append_text (_("Selected range"));  // TODO show export_range.start() -> export_range.end_frame()
+	}
 	insnd_combo.set_active(0);
 
 	outfn_path_entry.set_width_chars(38);
@@ -165,7 +168,7 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 				filenameset = true;
 			}
 		}
-		else if (!filenameset
+		if (!filenameset
 				&& node->property(X_("Filename"))
 				&& node->property(X_("LocalFile"))
 				&& node->property(X_("LocalFile"))->value() == X_("1")
@@ -178,6 +181,9 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 				invid_path_entry.set_text (filename);
 				filenameset = true;
 			}
+		}
+		if (!filenameset) {
+			invid_path_entry.set_text (X_(""));
 		}
 	}
 
@@ -254,8 +260,7 @@ ExportVideoDialog::ExportVideoDialog (PublicEditor& ed, Session* s)
 	video_codec_combo.append_text("mjpeg");
 	video_codec_combo.append_text("mpeg2video");
 	video_codec_combo.append_text("mpeg4");
-	video_codec_combo.append_text("x264 (baseline)");
-	video_codec_combo.append_text("x264 (hq)");
+	video_codec_combo.append_text("h264");
 	video_codec_combo.append_text("vpx (webm)");
 	video_codec_combo.append_text("copy");
 	video_codec_combo.set_active(4);
@@ -505,6 +510,11 @@ ExportVideoDialog::launch_export ()
 		}
 		end += av_offset;
 	}
+	else if (insnd_combo.get_active_row_number() == 2) {
+		// TODO quantize to video-frame ?!
+		start = export_range.start();
+		end   = export_range.end_frame();
+	}
 	if (end <= 0) {
 		start = _session->current_start_frame();
 		end   = _session->current_end_frame();
@@ -609,13 +619,8 @@ ExportVideoDialog::encode_pass (int pass)
 		ffs["-strict"] = "-2";
 	}
 
-	if (video_codec_combo.get_active_text() == "x264 (hq)" ) {
+	if (video_codec_combo.get_active_text() == "h264" ) {
 		ffs["-vcodec"] = "libx264";
-		ffs["-vprofile"] = "high";
-	}
-	else if (video_codec_combo.get_active_text() == "x264 (baseline)" ) {
-		ffs["-vcodec"] = "libx264";
-		ffs["-vpre"] = "baseline";
 	}
 	else if (video_codec_combo.get_active_text() == "vpx (webm)" ) {
 		ffs["-vcodec"] = "libvpx";
@@ -697,9 +702,14 @@ ExportVideoDialog::encode_pass (int pass)
 	double duration_s  = 0;
 
 	if (insnd_combo.get_active_row_number() == 0) {
+		/* session start to session end */
 		framecnt_t duration_f = _session->current_end_frame() - _session->current_start_frame();
 		duration_s = (double)duration_f / (double)_session->nominal_frame_rate();
+	} else if (insnd_combo.get_active_row_number() == 2) {
+		/* selected range */
+		duration_s = export_range.length() / (double)_session->nominal_frame_rate();
 	} else {
+		/* video start to end */
 		framecnt_t duration_f = ARDOUR_UI::instance()->video_timeline->get_duration();
 		if (av_offset < 0 ) {
 			duration_f += av_offset;
@@ -715,10 +725,16 @@ ExportVideoDialog::encode_pass (int pass)
 		transcoder->set_duration(duration_s * transcoder->get_fps());
 	}
 
-	if (insnd_combo.get_active_row_number() == 0) {
-		const framepos_t start = _session->current_start_frame();
-		const framepos_t snend = _session->current_end_frame();
+	if (insnd_combo.get_active_row_number() == 0 || insnd_combo.get_active_row_number() == 2) {
+		framepos_t start, snend;
 		const frameoffset_t vid_duration = ARDOUR_UI::instance()->video_timeline->get_duration();
+		if (insnd_combo.get_active_row_number() == 0) {
+			start = _session->current_start_frame();
+			snend = _session->current_end_frame();
+		} else {
+			start = export_range.start();
+			snend = export_range.end_frame();
+		}
 
 #if 0 /* DEBUG */
 		printf("AV offset: %lld Vid-len: %lld Vid-end: %lld || start:%lld || end:%lld\n",
@@ -733,9 +749,17 @@ ExportVideoDialog::encode_pass (int pass)
 		} else if (av_offset + vid_duration < snend) {
 			transcoder->set_leadinout(0, (snend - (av_offset + vid_duration)) / (double)_session->nominal_frame_rate());
 			transcoder->set_avoffset((av_offset - start) / (double)_session->nominal_frame_rate());
-		} else {
+		}
+#if 0
+		else if (start > av_offset) {
+			std::ostringstream osstream; osstream << ((start - av_offset) / (double)_session->nominal_frame_rate());
+			ffs["-ss"] = osstream.str();
+		}
+#endif
+		else {
 			transcoder->set_avoffset((av_offset - start) / (double)_session->nominal_frame_rate());
 		}
+
 	} else if (av_offset < 0) {
 		/* from 00:00:00:00 to video-end */
 		transcoder->set_avoffset(av_offset / (double)_session->nominal_frame_rate());

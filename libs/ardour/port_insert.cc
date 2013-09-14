@@ -49,7 +49,7 @@ PortInsert::PortInsert (Session& s, boost::shared_ptr<Pannable> pannable, boost:
 {
         _mtdm = 0;
         _latency_detect = false;
-        _latency_flush_frames = false;
+        _latency_flush_frames = 0;
         _measured_latency = 0;
 }
 
@@ -64,7 +64,7 @@ PortInsert::start_latency_detection ()
 {
 	delete _mtdm;
         _mtdm = new MTDM (_session.frame_rate());
-        _latency_flush_frames = false;
+        _latency_flush_frames = 0;
         _latency_detect = true;
         _measured_latency = 0;
 }
@@ -72,7 +72,7 @@ PortInsert::start_latency_detection ()
 void
 PortInsert::stop_latency_detection ()
 {
-        _latency_flush_frames = signal_latency() + _session.engine().frames_per_cycle();
+        _latency_flush_frames = signal_latency() + _session.engine().samples_per_cycle();
         _latency_detect = false;
 }
 
@@ -93,7 +93,7 @@ PortInsert::latency() const
 	*/
 
 	if (_measured_latency == 0) {
-		return _session.engine().frames_per_cycle() + _input->latency();
+		return _session.engine().samples_per_cycle() + _input->latency();
 	} else {
 		return _measured_latency;
 	}
@@ -240,7 +240,7 @@ PortInsert::signal_latency() const
 	*/
 
         if (_measured_latency == 0) {
-                return _session.engine().frames_per_cycle() + _input->signal_latency();
+                return _session.engine().samples_per_cycle() + _input->signal_latency();
         } else {
                 return _measured_latency;
         }

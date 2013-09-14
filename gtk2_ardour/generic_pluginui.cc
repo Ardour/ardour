@@ -37,8 +37,6 @@
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/slider_controller.h>
 
-#include "midi++/manager.h"
-
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/session.h"

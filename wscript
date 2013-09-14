@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 MAJOR = '3'
-MINOR = '3'
+MINOR = '4'
 VERSION = MAJOR + '.' + MINOR
 
 APPNAME = 'Ardour' + MAJOR
@@ -29,6 +29,7 @@ children = [
         'libs/rubberband',
         'libs/surfaces',
         'libs/panners',
+        'libs/backends',
         'libs/timecode',
         'libs/ardour',
         'libs/gtkmm2ext',
@@ -157,6 +158,8 @@ def set_compiler_flags (conf,opt):
                 conf.env['build_target'] = 'i386'
             elif re.search("powerpc", cpu) != None:
                 conf.env['build_target'] = 'powerpc'
+            elif re.search("arm", cpu) != None:
+                conf.env['build_target'] = 'arm'
             else:
                 conf.env['build_target'] = 'i686'
     else:
@@ -404,7 +407,7 @@ def options(opt):
                     help='The user-visible name of the program being built')
     opt.add_option('--arch', type='string', action='store', dest='arch',
                     help='Architecture-specific compiler flags')
-    opt.add_option('--backtrace', action='store_true', default=False, dest='backtrace',
+    opt.add_option('--backtrace', action='store_true', default=True, dest='backtrace',
                     help='Compile with -rdynamic -- allow obtaining backtraces from within Ardour')
     opt.add_option('--no-carbon', action='store_true', default=False, dest='nocarbon',
                     help='Compile without support for AU Plugins with only CARBON UI (needed for 64bit)')

@@ -96,7 +96,7 @@ AudioTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 	}
 
 	_diskstream->set_record_enabled (false);
-	_diskstream->request_jack_monitors_input (false);
+	_diskstream->request_input_monitoring (false);
 
 	DiskstreamChanged (); /* EMIT SIGNAL */
 }
@@ -315,7 +315,7 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 	if (!lm.locked()) {
 		boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 		framecnt_t playback_distance = diskstream->calculate_playback_distance(nframes);
-		if (can_internal_playback_seek(llabs(playback_distance))) {
+		if (can_internal_playback_seek(std::llabs(playback_distance))) {
 			/* TODO should declick */
 			internal_playback_seek(playback_distance);
 		}

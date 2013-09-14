@@ -50,13 +50,13 @@ SlaveSessionProxy::transport_frame() const
 pframes_t
 SlaveSessionProxy::frames_since_cycle_start() const
 {
-	return session.engine().frames_since_cycle_start();
+	return session.engine().samples_since_cycle_start();
 }
 
 framepos_t
 SlaveSessionProxy::frame_time() const
 {
-	return session.engine().frame_time();
+	return session.engine().sample_time();
 }
 
 void
