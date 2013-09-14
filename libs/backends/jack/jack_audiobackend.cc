@@ -44,8 +44,6 @@ using namespace ARDOUR;
 using namespace PBD;
 using std::string;
 using std::vector;
-using std::cerr;
-using std::endl;
 
 #define GET_PRIVATE_JACK_POINTER(localvar)  jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return; }
 #define GET_PRIVATE_JACK_POINTER_RET(localvar,r) jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return r; }
@@ -780,7 +778,7 @@ JACKAudioBackend::_latency_callback (jack_latency_callback_mode_t mode, void* ar
 int
 JACKAudioBackend::create_process_thread (boost::function<void()> f, pthread_t* thread, size_t stacksize)
 {
-        GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
+        GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
         ThreadData* td = new ThreadData (this, f, stacksize);
 
         if (jack_client_create_thread (_priv_jack, thread, jack_client_real_time_priority (_priv_jack),
