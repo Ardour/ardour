@@ -16,6 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#include <iostream>
 
 #include <boost/scoped_ptr.hpp>
 #include <jack/session.h>
@@ -153,7 +154,7 @@ void
 JackConnection::halted_callback ()
 {
 	_jack = 0;
-	cerr << "JACK HALTED\n";
+	std::cerr << "JACK HALTED\n";
 	Disconnected ("");
 }
 
@@ -161,7 +162,7 @@ void
 JackConnection::halted_info_callback (jack_status_t /*status*/, const char* reason)
 {
 	_jack = 0;
-	cerr << "JACK HALTED: " << reason << endl;
+	std::cerr << "JACK HALTED: " << reason << std::endl;
 	Disconnected (reason);
 }
 
