@@ -32,6 +32,8 @@ using namespace ARDOUR;
 using namespace PBD;
 using std::string;
 using std::vector;
+using std::cerr;
+using std::endl;
 
 static void jack_halted_callback (void* arg)
 {
@@ -137,7 +139,7 @@ JackConnection::close ()
 {
 	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
 
-	if (_priv_jack) {
+	if (_priv_jack) {	
 		int ret = jack_client_close (_priv_jack);
 		_jack = 0;
 		Disconnected (""); /* EMIT SIGNAL */
@@ -151,6 +153,7 @@ void
 JackConnection::halted_callback ()
 {
 	_jack = 0;
+	cerr << "JACK HALTED\n";
 	Disconnected ("");
 }
 
@@ -158,6 +161,7 @@ void
 JackConnection::halted_info_callback (jack_status_t /*status*/, const char* reason)
 {
 	_jack = 0;
+	cerr << "JACK HALTED: " << reason << endl;
 	Disconnected (reason);
 }
 
