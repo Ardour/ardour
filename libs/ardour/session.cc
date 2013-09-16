@@ -258,6 +258,8 @@ Session::Session (AudioEngine &eng,
 	, _suspend_timecode_transmission (0)
 	,  _speakers (new Speakers)
 	, ignore_route_processor_changes (false)
+	, _midi_ports (0)
+	, _mmc (0)
 {
 	uint32_t sr = 0;
 
@@ -496,9 +498,9 @@ Session::destroy ()
 	/* not strictly necessary, but doing it here allows the shared_ptr debugging to work */
 	playlists.reset ();
 
-	delete _mmc;
-	delete _midi_ports;
-	delete _locations;
+	delete _mmc; _mmc = 0;
+	delete _midi_ports; _midi_ports = 0;
+	delete _locations; _locations = 0;
 
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
 
