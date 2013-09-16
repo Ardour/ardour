@@ -1071,7 +1071,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::scoped_ptr<SessionDirectory> _session_dir;
 
 	void hookup_io ();
-        int when_engine_running ();
 	void graph_reordered ();
 
 	/** current snapshot name, without the .ardour suffix */
@@ -1137,8 +1136,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void             auto_loop_changed (Location *);
 	void             auto_loop_declick_range (Location *, framepos_t &, framepos_t &);
 
+        int  ensure_engine (uint32_t desired_sample_rate);
 	void pre_engine_init (std::string path);
 	int  post_engine_init ();
+        int  immediately_post_engine ();
 	void remove_empty_sounds ();
 
 	void setup_midi_control ();
@@ -1521,13 +1522,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		float opt
 		);
 
-	/* number of hardware ports we're using,
-	   based on max (requested,available)
-	*/
-
-	ChanCount n_physical_outputs;
-	ChanCount n_physical_inputs;
-
 	int find_all_sources (std::string path, std::set<std::string>& result);
 	int find_all_sources_across_snapshots (std::set<std::string>& result, bool exclude_this_snapshot);
 
@@ -1624,7 +1618,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
     void setup_ltc ();
     void setup_click ();
     void setup_bundles ();
-    int  ensure_engine (uint32_t desired_sample_rate);
 };
 
 } // namespace ARDOUR

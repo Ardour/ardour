@@ -370,19 +370,48 @@ Session::ensure_engine (uint32_t desired_sample_rate)
 		return -1;
 	}
 
-	/* the graph is just about as basic to everything else as the engine
-	   so we create it here. this results in it coming into being at just
-	   the right time for both new and existing sessions.
+	return immediately_post_engine ();
 
-	   XXX some cleanup in the new/existing path is still waiting to be
-	   done
-	*/
+}
 
+int
+Session::immediately_post_engine ()
+{
+	/* Do various initializations that should take place directly after we
+	 * know that the engine is running, but before we either create a
+	 * session or set state for an existing one.
+	 */
+	 
 	if (how_many_dsp_threads () > 1) {
 		/* For now, only create the graph if we are using >1 DSP threads, as
 		   it is a bit slower than the old code with 1 thread.
 		*/
 		_process_graph.reset (new Graph (*this));
+	}
+
+	/* every time we reconnect, recompute worst case output latencies */
+
+	_engine.Running.connect_same_thread (*this, boost::bind (&Session::initialize_latencies, this));
+
+	if (synced_to_jack()) {
+		_engine.transport_stop ();
+	}
+
+	if (config.get_jack_time_master()) {
+		_engine.transport_locate (_transport_frame);
+	}
+
+	try {
+		BootMessage (_("Set up LTC"));
+		setup_ltc ();
+		BootMessage (_("Set up Click"));
+		setup_click ();
+		BootMessage (_("Set up standard connections"));
+		setup_bundles ();
+	}
+
+	catch (failed_constructor& err) {
+		return -1;
 	}
 
 	return 0;
@@ -707,81 +736,6 @@ Session::setup_bundles ()
 
 }
 
-int
-Session::when_engine_running ()
-{
-	/* every time we reconnect, recompute worst case output latencies */
-
-	_engine.Running.connect_same_thread (*this, boost::bind (&Session::initialize_latencies, this));
-
-	if (synced_to_jack()) {
-		_engine.transport_stop ();
-	}
-
-	if (config.get_jack_time_master()) {
-		_engine.transport_locate (_transport_frame);
-	}
-
-
-	try {
-		BootMessage (_("Set up LTC"));
-		setup_ltc ();
-		BootMessage (_("Set up Click"));
-		setup_click ();
-		BootMessage (_("Set up standard connections"));
-		setup_bundles ();
-	}
-
-	catch (failed_constructor& err) {
-		return -1;
-	}
-
-	BootMessage (_("Setup signal flow and plugins"));
-
-	/* Reset all panners */
-
-	Delivery::reset_panners ();
-
-	/* this will cause the CPM to instantiate any protocols that are in use
-	 * (or mandatory), which will pass it this Session, and then call
-	 * set_state() on each instantiated protocol to match stored state.
-	 */
-
-	ControlProtocolManager::instance().set_session (this);
-
-	/* This must be done after the ControlProtocolManager set_session above,
-	   as it will set states for ports which the ControlProtocolManager creates.
-	*/
-
-	// XXX set state of MIDI::Port's
-	// MidiPortManager::instance()->set_port_states (Config->midi_port_states ());
-
-	/* And this must be done after the MIDI::Manager::set_port_states as
-	 * it will try to make connections whose details are loaded by set_port_states.
-	 */
-
-	hookup_io ();
-
-	/* Let control protocols know that we are now all connected, so they
-	 * could start talking to surfaces if they want to.
-	 */
-
-	ControlProtocolManager::instance().midi_connectivity_established ();
-
-	if (_is_new && !no_auto_connect()) {
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock());
-		auto_connect_master_bus ();
-	}
-
-	_state_of_the_state = StateOfTheState (_state_of_the_state & ~(CannotSave|Dirty));
-
-        /* update latencies */
-
-        initialize_latencies ();
-
-	return 0;
-}
-
 void
 Session::auto_connect_master_bus ()
 {
@@ -941,14 +895,14 @@ Session::add_monitor_section ()
 			
 			/* Monitor bus is audio only */
 
-			uint32_t mod = n_physical_outputs.get (DataType::AUDIO);
-			uint32_t limit = _monitor_out->n_outputs().get (DataType::AUDIO);
 			vector<string> outputs[DataType::num_types];
 
 			for (uint32_t i = 0; i < DataType::num_types; ++i) {
 				_engine.get_physical_outputs (DataType (DataType::Symbol (i)), outputs[i]);
 			}
-			
+
+			uint32_t mod = outputs[DataType::AUDIO].size();
+			uint32_t limit = _monitor_out->n_outputs().get (DataType::AUDIO);
 			
 			if (mod != 0) {
 				
