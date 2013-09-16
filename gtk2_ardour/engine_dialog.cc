@@ -647,6 +647,10 @@ EngineControl::maybe_display_saved_state ()
 			sample_rate_combo.set_active_text (state->sample_rate);
 		}
 		buffer_size_combo.set_active_text (state->buffer_size);
+		/* call this explicitly because we're ignoring changes to
+		   the controls at this point.
+		*/
+		show_buffer_duration ();
 		input_latency.set_value (state->input_latency);
 		output_latency.set_value (state->output_latency);
 		ignore_changes--;
