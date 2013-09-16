@@ -31,6 +31,7 @@
 #include "pbd/xml++.h"
 #include "pbd/unwind.h"
 
+#include <gtkmm/alignment.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm2ext/utils.h>
@@ -67,9 +68,10 @@ EngineControl::EngineControl ()
 	, ports_adjustment (128, 8, 1024, 1, 16)
 	, ports_spinner (ports_adjustment)
 	, control_app_button (_("Launch Control App"))
-	, lm_measure_button (_("Measure latency"))
+	, lm_start_stop_label (_("Measure latency"))
 	, lm_use_button (_("Use results"))
 	, lm_table (5, 2)
+	, have_lm_results (false)
 	, basic_packer (9, 3)
 	, ignore_changes (0)
 	, _desired_sample_rate (0)
@@ -82,9 +84,9 @@ EngineControl::EngineControl ()
 	control_app_button.signal_clicked().connect (mem_fun (*this, &EngineControl::control_app_button_clicked));
 	manage_control_app_sensitivity ();
 
-	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
-	add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_APPLY);
+	cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	ok_button = add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
+	apply_button = add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_APPLY);
 
 	/* Pick up any existing audio setup configuration, if appropriate */
 
@@ -217,42 +219,75 @@ EngineControl::build_notebook ()
 	lm_table.attach (lm_title, 0, 2, row, row+1, xopt, (AttachOptions) 0);
 	row++;
 
-	lm_preamble.set_width_chars (60);
-	lm_preamble.set_line_wrap (true);
-	lm_preamble.set_markup (_("1. <span weight=\"bold\">Turn down the volume on your hardware to a very low level.</span>\n\n\
-2. Connect the two channels that you select below using either a cable or (less ideally) a speaker \
-and microphone.\n\n\
-3. Once the channels are connected, click the \"Measure latency\" button.\n\n\
-4. When satisfied with the results, click the \"Use results\" button."));
+	Gtk::Label* preamble;
 
-	lm_table.attach (lm_preamble, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
+	preamble = manage (new Label);
+	preamble->set_width_chars (60);
+	preamble->set_line_wrap (true);
+	preamble->set_markup (_("<span weight=\"bold\">Turn down the volume on your hardware to a very low level.</span>"));
+
+	lm_table.attach (*preamble, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
+	row++;
+
+	preamble = manage (new Label);
+	preamble->set_width_chars (60);
+	preamble->set_line_wrap (true);
+	preamble->set_markup (_("Select two channels below and connect them using a cable or (less ideally) a speaker and microphone."));
+
+	lm_table.attach (*preamble, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
 	row++;
 
 	label = manage (new Label (_("Output channel")));
 	lm_table.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
-	lm_table.attach (lm_output_channel_combo, 1, 2, row, row+1, xopt, (AttachOptions) 0);
+
+	Gtk::Alignment* misc_align = manage (new Alignment (0.0, 0.5));
+	misc_align->add (lm_output_channel_combo);
+	lm_table.attach (*misc_align, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
 	label = manage (new Label (_("Input channel")));
 	lm_table.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
-	lm_table.attach (lm_input_channel_combo, 1, 2, row, row+1, xopt, (AttachOptions) 0);
+
+	misc_align = manage (new Alignment (0.0, 0.5));
+	misc_align->add (lm_input_channel_combo);
+	lm_table.attach (*misc_align, 1, 2, row, row+1, FILL, (AttachOptions) 0);
 	++row;
 
 	xopt = AttachOptions(0);
 
+	lm_measure_button.add (lm_start_stop_label);
+	
 	lm_measure_button.signal_toggled().connect (sigc::mem_fun (*this, &EngineControl::latency_button_toggled));
 	lm_use_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::use_latency_button_clicked));
 	lm_use_button.set_sensitive (false);
 		
+
+	preamble = manage (new Label);
+	preamble->set_width_chars (60);
+	preamble->set_line_wrap (true);
+	preamble->set_markup (_("Once the channels are connected, click the \"Measure latency\" button."));
+	lm_table.attach (*preamble, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
+	row++;
+
 	lm_table.attach (lm_measure_button, 0, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 	lm_table.attach (lm_results, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
 	++row;
+
+
+	preamble = manage (new Label);
+	preamble->set_width_chars (60);
+	preamble->set_line_wrap (true);
+	preamble->set_markup (_("When satisfied with the results, click the \"Use results\" button."));
+	lm_table.attach (*preamble, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
+	row++;
+
 	lm_table.attach (lm_use_button, 0, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
 	lm_results.set_markup ("<i>No measurement results yet</i>");
 
+	lm_vbox.set_border_width (12);
 	lm_vbox.pack_start (lm_table, false, false);
 
 	/* pack it all up */
@@ -316,7 +351,6 @@ EngineControl::enable_latency_tab ()
 	lm_input_channel_combo.set_active_text (inputs.front());
 
 	lm_measure_button.set_sensitive (true);
-	lm_use_button.set_sensitive (true);
 }
 
 void
@@ -1018,9 +1052,19 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 		if (ARDOUR::AudioEngine::instance()->prepare_for_latency_measurement()) {
 			disable_latency_tab ();
 		}
+
 		enable_latency_tab ();
+
+		cancel_button->set_sensitive (false);
+		ok_button->set_sensitive (false);
+		apply_button->set_sensitive (false);
+
 	} else {
 		ARDOUR::AudioEngine::instance()->stop_latency_detection();
+		
+		cancel_button->set_sensitive (true);
+		ok_button->set_sensitive (true);
+		apply_button->set_sensitive (true);
 	}
 }
 
@@ -1030,15 +1074,9 @@ bool
 EngineControl::check_latency_measurement ()
 {
         MTDM* mtdm = ARDOUR::AudioEngine::instance()->mtdm ();
-	static uint32_t cnt = 0;
 
         if (mtdm->resolve () < 0) {
-		string txt = _("No signal detected ");
-		uint32_t dots = cnt++%10;
-		for (uint32_t i = 0; i < dots; ++i) {
-			txt += '.';
-		}
-		lm_results.set_text (txt);
+		lm_results.set_markup (string_compose ("<span foreground=\"red\">%1</span>", _("No signal detected ")));
                 return true;
         }
 
@@ -1078,6 +1116,7 @@ EngineControl::check_latency_measurement ()
                 lm_measure_button.set_active (false);
 		lm_use_button.set_sensitive (true);
                 strcat (buf, " (set)");
+		have_lm_results = true;
         }
 	
         lm_results.set_text (buf);
@@ -1095,10 +1134,19 @@ EngineControl::latency_button_toggled ()
 		ARDOUR::AudioEngine::instance()->start_latency_detection ();
                 lm_results.set_text (_("Detecting ..."));
                 latency_timeout = Glib::signal_timeout().connect (mem_fun (*this, &EngineControl::check_latency_measurement), 250);
-
-        } else {
+		lm_start_stop_label.set_text (_("Cancel measurement"));
+		have_lm_results = false;
+		lm_input_channel_combo.set_sensitive (false);
+		lm_output_channel_combo.set_sensitive (false);
+	} else {
 		ARDOUR::AudioEngine::instance()->stop_latency_detection ();
                 latency_timeout.disconnect ();
+		lm_start_stop_label.set_text (_("Measure latency"));
+		if (!have_lm_results) {
+			lm_results.set_markup ("<i>No measurement results yet</i>");
+		}
+		lm_input_channel_combo.set_sensitive (true);
+		lm_output_channel_combo.set_sensitive (true);
         }
 }
 

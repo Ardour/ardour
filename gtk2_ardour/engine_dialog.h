@@ -75,13 +75,18 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     Gtk::ComboBoxText lm_output_channel_combo;
     Gtk::ComboBoxText lm_input_channel_combo;
+    Gtk::Label        lm_start_stop_label;
     Gtk::ToggleButton lm_measure_button;
     Gtk::Button       lm_use_button;
     Gtk::Label        lm_title;
-    Gtk::Label        lm_preamble;
     Gtk::Label        lm_results;
     Gtk::Table        lm_table;
     Gtk::VBox         lm_vbox;
+    bool              have_lm_results;
+
+    Gtk::Button* cancel_button;
+    Gtk::Button* ok_button;
+    Gtk::Button* apply_button;
 
     /* JACK specific */
     
