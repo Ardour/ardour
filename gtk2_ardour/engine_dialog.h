@@ -181,8 +181,11 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     sigc::connection latency_timeout;
     void enable_latency_tab ();
     void disable_latency_tab ();
+    void start_latency_detection ();
+    void end_latency_detection ();
 
     void on_switch_page (GtkNotebookPage*, guint page_num);
+    bool on_delete_event (GdkEventAny*);
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

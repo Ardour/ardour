@@ -67,7 +67,7 @@ EngineControl::EngineControl ()
 	, output_channels (output_channels_adjustment)
 	, ports_adjustment (128, 8, 1024, 1, 16)
 	, ports_spinner (ports_adjustment)
-	, control_app_button (_("Launch Control App"))
+	, control_app_button (_("Device Control Panel"))
 	, lm_start_stop_label (_("Measure latency"))
 	, lm_use_button (_("Use results"))
 	, lm_table (5, 2)
@@ -113,6 +113,13 @@ EngineControl::on_response (int response_id)
 		push_state_to_backend (true);
 		hide ();
 		break;
+	case RESPONSE_DELETE_EVENT: {
+		GdkEventButton ev;
+		ev.type = GDK_BUTTON_PRESS;
+		ev.button = 1;
+		on_delete_event ((GdkEventAny*) &ev);
+		break;
+	}
 	default:
 		hide ();
 	}
@@ -171,17 +178,22 @@ EngineControl::build_notebook ()
 	row++;
 
 
+	input_channels.set_editable (true);
+
 	label = manage (left_aligned_label (_("Input Channels:")));
 	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
 	basic_packer.attach (input_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
+	output_channels.set_editable (true);
 
 	label = manage (left_aligned_label (_("Output Channels:")));
 	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
 	basic_packer.attach (output_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
+	input_latency.set_numeric (true);
+	input_latency.set_editable (true);
 
 	label = manage (left_aligned_label (_("Hardware input latency:")));
 	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
@@ -1125,28 +1137,39 @@ EngineControl::check_latency_measurement ()
 }
 
 void
+EngineControl::start_latency_detection ()
+{
+	ARDOUR::AudioEngine::instance()->set_latency_input_port (lm_input_channel_combo.get_active_text());
+	ARDOUR::AudioEngine::instance()->set_latency_output_port (lm_output_channel_combo.get_active_text());
+	ARDOUR::AudioEngine::instance()->start_latency_detection ();
+	lm_results.set_text (_("Detecting ..."));
+	latency_timeout = Glib::signal_timeout().connect (mem_fun (*this, &EngineControl::check_latency_measurement), 250);
+	lm_start_stop_label.set_text (_("Cancel measurement"));
+	have_lm_results = false;
+	lm_input_channel_combo.set_sensitive (false);
+	lm_output_channel_combo.set_sensitive (false);
+}
+
+void
+EngineControl::end_latency_detection ()
+{
+	ARDOUR::AudioEngine::instance()->stop_latency_detection ();
+	latency_timeout.disconnect ();
+	lm_start_stop_label.set_text (_("Measure latency"));
+	if (!have_lm_results) {
+		lm_results.set_markup ("<i>No measurement results yet</i>");
+	}
+	lm_input_channel_combo.set_sensitive (true);
+	lm_output_channel_combo.set_sensitive (true);
+}
+
+void
 EngineControl::latency_button_toggled ()
 {
         if (lm_measure_button.get_active ()) {
-
-		ARDOUR::AudioEngine::instance()->set_latency_input_port (lm_input_channel_combo.get_active_text());
-		ARDOUR::AudioEngine::instance()->set_latency_output_port (lm_output_channel_combo.get_active_text());
-		ARDOUR::AudioEngine::instance()->start_latency_detection ();
-                lm_results.set_text (_("Detecting ..."));
-                latency_timeout = Glib::signal_timeout().connect (mem_fun (*this, &EngineControl::check_latency_measurement), 250);
-		lm_start_stop_label.set_text (_("Cancel measurement"));
-		have_lm_results = false;
-		lm_input_channel_combo.set_sensitive (false);
-		lm_output_channel_combo.set_sensitive (false);
+		start_latency_detection ();
 	} else {
-		ARDOUR::AudioEngine::instance()->stop_latency_detection ();
-                latency_timeout.disconnect ();
-		lm_start_stop_label.set_text (_("Measure latency"));
-		if (!have_lm_results) {
-			lm_results.set_markup ("<i>No measurement results yet</i>");
-		}
-		lm_input_channel_combo.set_sensitive (true);
-		lm_output_channel_combo.set_sensitive (true);
+		end_latency_detection ();
         }
 }
 
@@ -1165,4 +1188,14 @@ EngineControl::use_latency_button_clicked ()
 
 	input_latency_adjustment.set_value (one_way);
 	output_latency_adjustment.set_value (one_way);
+}
+
+bool
+EngineControl::on_delete_event (GdkEventAny* ev)
+{
+	if (notebook.get_current_page() == 2) {
+		/* currently on latency tab - be sure to clean up */
+		end_latency_detection ();
+	}
+	return ArdourDialog::on_delete_event (ev);
 }
