@@ -264,11 +264,18 @@ Session::Session (AudioEngine &eng,
 	pre_engine_init (fullpath);
 	
 	if (_is_new) {
+		if (ensure_engine (sr)) {
+			destroy ();
+			throw failed_constructor ();
+		}
+
 		if (create (mix_template, bus_profile)) {
 			destroy ();
 			throw failed_constructor ();
 		}
+
 	} else {
+
 		if (load_state (_current_snapshot_name)) {
 			throw failed_constructor ();
 		}
@@ -284,11 +291,11 @@ Session::Session (AudioEngine &eng,
 				sr = atoi (prop->value());
 			}
 		}
-	}
 
-	if (ensure_engine (sr)) {
-		destroy ();
-		throw failed_constructor ();
+		if (ensure_engine (sr)) {
+			destroy ();
+			throw failed_constructor ();
+		}
 	}
 
 	if (post_engine_init ()) {
@@ -359,6 +366,21 @@ Session::ensure_engine (uint32_t desired_sample_rate)
 
 	if (!_engine.running()) {
 		return -1;
+	}
+
+	/* the graph is just about as basic to everything else as the engine
+	   so we create it here. this results in it coming into being at just
+	   the right time for both new and existing sessions.
+
+	   XXX some cleanup in the new/existing path is still waiting to be
+	   done
+	*/
+
+	if (how_many_dsp_threads () > 1) {
+		/* For now, only create the graph if we are using >1 DSP threads, as
+		   it is a bit slower than the old code with 1 thread.
+		*/
+		_process_graph.reset (new Graph (*this));
 	}
 
 	return 0;

@@ -210,13 +210,6 @@ Session::post_engine_init ()
 	set_block_size (_engine.samples_per_cycle());
 	set_frame_rate (_engine.sample_rate());
 
-	if (how_many_dsp_threads () > 1) {
-		/* For now, only create the graph if we are using >1 DSP threads, as
-		   it is a bit slower than the old code with 1 thread.
-		*/
-		_process_graph.reset (new Graph (*this));
-	}
-
 	n_physical_outputs = _engine.n_physical_outputs ();
 	n_physical_inputs =  _engine.n_physical_inputs ();
 
