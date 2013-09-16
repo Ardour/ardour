@@ -57,7 +57,7 @@ def configure(conf):
             if conf.is_defined ('HAVE_CWIID'):
                 conf.define ('BUILD_WIIMOTE', 1)
             else:
-                print('You are have the cwiid headers needed to compile wiimote support BUT you are missing the pkg-config file for cwiid')
+                print('You have the cwiid headers needed to compile wiimote support BUT you are missing the pkg-config file for cwiid')
         else:
             print('You are missing the libbluetooth headers needed to compile wiimote support')
     else:
