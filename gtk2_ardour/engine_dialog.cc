@@ -387,8 +387,10 @@ EngineControl::list_devices ()
 		available_devices.push_back (i->name);
 	}
 
+	ignore_changes++;
 	set_popdown_strings (device_combo, available_devices);
-	
+	ignore_changes--;
+
 	if (!available_devices.empty()) {
 		sample_rate_combo.set_sensitive (true);
 		buffer_size_combo.set_sensitive (true);
@@ -464,12 +466,20 @@ EngineControl::device_changed ()
 		}
 	}
 
-	set_popdown_strings (sample_rate_combo, s);
-	if (desired.empty()) {
-		sample_rate_combo.set_active_text (s.front());
+	if (!s.empty()) {
+		set_popdown_strings (sample_rate_combo, s);
+	
+		if (desired.empty()) {
+			sample_rate_combo.set_active_text (s.front());
+		} else {
+			sample_rate_combo.set_active_text (desired);
+		}
 	} else {
-		sample_rate_combo.set_active_text (desired);
+		/* hmm ... how to tell the user about the fact that we have no
+		 * available sample rates.
+		 */
 	}
+		 
 
 	vector<uint32_t> bs = backend->available_buffer_sizes(device_name);
 	s.clear ();
@@ -482,9 +492,15 @@ EngineControl::device_changed ()
 		s.push_back (buf);
 	}
 
-	set_popdown_strings (buffer_size_combo, s);
-	buffer_size_combo.set_active_text (s.front());
-	show_buffer_duration ();
+	if (!s.empty()) {
+		set_popdown_strings (buffer_size_combo, s);
+		buffer_size_combo.set_active_text (s.front());
+		show_buffer_duration ();
+	} else {
+		/* hmm ... how to tell the user about the fact that we have no
+		 * available buffer sizes.
+		 */
+	}
 
 	manage_control_app_sensitivity ();
 
