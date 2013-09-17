@@ -1078,9 +1078,14 @@ AudioEngine::stop_latency_detection ()
 {
 	_measuring_latency = false;
 
-	port_engine().unregister_port (_latency_output_port);
-	port_engine().unregister_port (_latency_input_port);
-	
+	if (_latency_output_port) {
+		port_engine().unregister_port (_latency_output_port);
+		_latency_output_port = 0;
+	}
+	if (_latency_input_port) {
+		port_engine().unregister_port (_latency_input_port);
+		_latency_input_port = 0;
+	}
 	if (_started_for_latency) {
 		stop ();
 	}
