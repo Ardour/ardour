@@ -57,6 +57,7 @@ using namespace Glib;
 
 EngineControl::EngineControl ()
 	: ArdourDialog (_("Audio/MIDI Setup"))
+	, basic_packer (9, 3)
 	, input_latency_adjustment (0, 0, 99999, 1)
 	, input_latency (input_latency_adjustment)
 	, output_latency_adjustment (0, 0, 99999, 1)
@@ -72,7 +73,8 @@ EngineControl::EngineControl ()
 	, lm_use_button (_("Use results"))
 	, lm_table (5, 2)
 	, have_lm_results (false)
-	, basic_packer (9, 3)
+	, midi_refresh_button (_("Refresh list"))
+	, aj_button (_("Start MIDI ALSA/JACK bridge"))
 	, ignore_changes (0)
 	, _desired_sample_rate (0)
 {
@@ -237,8 +239,6 @@ EngineControl::build_notebook ()
 	control_app_button.show();
 	basic_vbox.pack_start (*hpacker);
 
-	midi_packer.set_border_width (12);
-
 	/* latency measurement tab */
 	
 	lm_title.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Latency Measurement Tool")));
@@ -323,7 +323,7 @@ EngineControl::build_notebook ()
 	/* pack it all up */
 
 	notebook.pages().push_back (TabElem (basic_vbox, _("Audio")));
-	notebook.pages().push_back (TabElem (midi_hbox, _("MIDI")));
+	notebook.pages().push_back (TabElem (midi_vbox, _("MIDI")));
 	notebook.pages().push_back (TabElem (lm_vbox, _("Latency")));
 	notebook.set_border_width (12);
 
@@ -383,6 +383,87 @@ EngineControl::enable_latency_tab ()
 }
 
 void
+EngineControl::setup_midi_tab_for_backend ()
+{
+	string backend = backend_combo.get_active_text ();
+
+	Gtkmm2ext::container_clear (midi_vbox);
+
+	midi_vbox.set_border_width (12);
+	midi_device_table.set_border_width (12);
+
+	if (backend == "JACK") {
+		setup_midi_tab_for_jack ();
+	}
+
+	midi_vbox.pack_start (midi_device_table, true, true);
+	midi_vbox.pack_start (midi_refresh_button, false, false);
+	midi_vbox.show_all ();
+
+	midi_refresh_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::refresh_midi_display));
+}
+
+void
+EngineControl::setup_midi_tab_for_jack ()
+{
+	midi_vbox.pack_start (aj_button, false, false);
+}	
+
+void
+EngineControl::refresh_midi_display ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	assert (backend);
+
+	vector<string> midi_inputs;
+	vector<string> midi_outputs;
+	int row  = 0;
+	AttachOptions xopt = AttachOptions (FILL|EXPAND);
+	Gtk::Label* l;
+
+	Gtkmm2ext::container_clear (midi_device_table);
+
+	backend->get_physical_inputs (ARDOUR::DataType::MIDI, midi_inputs);
+	backend->get_physical_outputs (ARDOUR::DataType::MIDI, midi_outputs);
+
+	midi_device_table.set_spacings (6);
+	midi_device_table.set_homogeneous (true);
+	midi_device_table.resize (midi_inputs.size() + midi_outputs.size() + 3, 1);
+
+	l = manage (new Label);
+	l->set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Inputs")));
+	midi_device_table.attach (*l, 0, 1, row, row + 1, xopt, AttachOptions (0));
+	l->set_alignment (0, 0.5);
+	row++;
+	l->show ();
+	
+	for (vector<string>::iterator p = midi_inputs.begin(); p != midi_inputs.end(); ++p) {
+		l = manage (new Label ((*p).substr ((*p).find_last_of (':') + 1)));
+		l->set_alignment (0, 0.5);
+		midi_device_table.attach (*l, 0, 1, row, row + 1, xopt, AttachOptions (0));
+		l->show ();
+		row++;
+	}
+
+	row++; // extra row of spacing
+
+	l = manage (new Label);
+	l->set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Outputs")));
+	midi_device_table.attach (*l, 0, 1, row, row + 1, xopt, AttachOptions (0));
+	l->set_alignment (0, 0.5);
+	row++;
+	l->show ();
+
+	for (vector<string>::iterator p = midi_outputs.begin(); p != midi_outputs.end(); ++p) {
+		l = manage (new Label ((*p).substr ((*p).find_last_of (':') + 1)));
+		l->set_alignment (0, 0.5);
+		midi_device_table.attach (*l, 0, 1, row, row + 1, xopt, AttachOptions (0));
+		l->show ();
+		row++;
+	}
+}
+
+void
 EngineControl::backend_changed ()
 {
 	if (ignore_changes) {
@@ -396,6 +477,8 @@ EngineControl::backend_changed ()
 		/* eh? setting the backend failed... how ? */
 		return;
 	}
+
+	setup_midi_tab_for_backend ();
 
 	if (backend->requires_driver_selection()) {
 		vector<string> drivers = backend->enumerate_drivers();
@@ -938,6 +1021,10 @@ EngineControl::push_state_to_backend (bool start)
 			if (ARDOUR::AudioEngine::instance()->start()) {
 				return -1;
 			}
+
+			/* schedule a redisplay of MIDI ports */
+
+			Glib::signal_timeout().connect (sigc::bind_return (sigc::mem_fun (*this, &EngineControl::refresh_midi_display), false), 1000);
 		}
 
 		manage_control_app_sensitivity ();
@@ -1051,6 +1138,21 @@ EngineControl::set_desired_sample_rate (uint32_t sr)
 void
 EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 {
+	if (page_num == 0) {
+		cancel_button->set_sensitive (true);
+		ok_button->set_sensitive (true);
+		apply_button->set_sensitive (true);
+	} else {
+		cancel_button->set_sensitive (false);
+		ok_button->set_sensitive (false);
+		apply_button->set_sensitive (false);
+	}
+
+	if (page_num == 1) {
+		/* MIDI tab */
+		refresh_midi_display ();
+	}
+
 	if (page_num == 2) {
 		/* latency tab */
 
@@ -1076,7 +1178,8 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 
 			input_latency.set_value (il);
 			output_latency.set_value (ol);
-		}
+
+		} 
 
 		if (ARDOUR::AudioEngine::instance()->prepare_for_latency_measurement()) {
 			disable_latency_tab ();
@@ -1084,16 +1187,8 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 
 		enable_latency_tab ();
 
-		cancel_button->set_sensitive (false);
-		ok_button->set_sensitive (false);
-		apply_button->set_sensitive (false);
-
 	} else {
 		ARDOUR::AudioEngine::instance()->stop_latency_detection();
-		
-		cancel_button->set_sensitive (true);
-		ok_button->set_sensitive (true);
-		apply_button->set_sensitive (true);
 	}
 }
 

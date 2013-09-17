@@ -54,7 +54,13 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     /* core fields used by all backends */
 
+    Gtk::Table basic_packer;
+    Gtk::HBox basic_hbox;
+    Gtk::VBox basic_vbox;
+
     Gtk::ComboBoxText backend_combo;
+    Gtk::ComboBoxText driver_combo;
+    Gtk::ComboBoxText device_combo;
     Gtk::ComboBoxText sample_rate_combo;
     Gtk::ComboBoxText buffer_size_combo;
     Gtk::Label        buffer_size_duration_label;
@@ -88,34 +94,18 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     Gtk::Button* ok_button;
     Gtk::Button* apply_button;
 
-    /* JACK specific */
-    
-    Gtk::CheckButton realtime_button;
-    Gtk::CheckButton no_memory_lock_button;
-    Gtk::CheckButton unlock_memory_button;
-    Gtk::CheckButton soft_mode_button;
-    Gtk::CheckButton monitor_button;
-    Gtk::CheckButton force16bit_button;
-    Gtk::CheckButton hw_monitor_button;
-    Gtk::CheckButton hw_meter_button;
-    Gtk::CheckButton verbose_output_button;
-    
-    Gtk::ComboBoxText preset_combo;
-    Gtk::ComboBoxText serverpath_combo;
-    Gtk::ComboBoxText driver_combo;
-    Gtk::ComboBoxText device_combo;
-    Gtk::ComboBoxText timeout_combo;
-    Gtk::ComboBoxText dither_mode_combo;
-    Gtk::ComboBoxText audio_mode_combo;
-    Gtk::ComboBoxText midi_driver_combo;
-    
-    Gtk::Table basic_packer;
-    Gtk::Table midi_packer;
-    Gtk::HBox basic_hbox;
-    Gtk::VBox basic_vbox;
-    Gtk::HBox midi_hbox;
+    /* MIDI Tab */
 
+    Gtk::VBox midi_vbox;
+    Gtk::Button midi_refresh_button;
+    Gtk::Table midi_device_table;
+
+    /* MIDI ... JACK */
+    
+    Gtk::CheckButton aj_button;
+    
     uint32_t ignore_changes;
+    uint32_t _desired_sample_rate;
     
     static bool engine_running ();
     
@@ -124,6 +114,10 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void sample_rate_changed ();
     void buffer_size_changed ();
     void parameter_changed ();
+
+    void setup_midi_tab_for_backend ();
+    void setup_midi_tab_for_jack ();
+    void refresh_midi_display ();
 
     uint32_t get_rate() const;
     uint32_t get_buffer_size() const;
@@ -173,7 +167,6 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void use_latency_button_clicked ();
     void manage_control_app_sensitivity ();
     int push_state_to_backend (bool start);
-    uint32_t _desired_sample_rate;
 
     /* latency measurement */
     void latency_button_toggled ();
