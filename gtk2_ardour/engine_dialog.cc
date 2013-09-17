@@ -76,6 +76,8 @@ EngineControl::EngineControl ()
 	, ignore_changes (0)
 	, _desired_sample_rate (0)
 {
+	set_name (X_("AudioMIDISetup"));
+
 	build_notebook ();
 
 	get_vbox()->set_border_width (12);
@@ -177,14 +179,21 @@ EngineControl::build_notebook ()
 	basic_packer.attach (buffer_size_duration_label, 2, 3, row, row+1, xopt, (AttachOptions) 0);
 	row++;
 
-
-	input_channels.set_editable (true);
+	input_channels.set_name ("InputChannels");
+	input_channels.set_flags(Gtk::CAN_FOCUS);
+	input_channels.set_digits(0);
+	input_channels.set_wrap(false);
+	output_channels.set_editable (true);
 
 	label = manage (left_aligned_label (_("Input Channels:")));
 	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
 	basic_packer.attach (input_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
+	output_channels.set_name ("OutputChannels");
+	output_channels.set_flags(Gtk::CAN_FOCUS);
+	output_channels.set_digits(0);
+	output_channels.set_wrap(false);
 	output_channels.set_editable (true);
 
 	label = manage (left_aligned_label (_("Output Channels:")));
@@ -192,7 +201,10 @@ EngineControl::build_notebook ()
 	basic_packer.attach (output_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
-	input_latency.set_numeric (true);
+	input_latency.set_name ("InputLatency");
+	input_latency.set_flags(Gtk::CAN_FOCUS);
+	input_latency.set_digits(0);
+	input_latency.set_wrap(false);
 	input_latency.set_editable (true);
 
 	label = manage (left_aligned_label (_("Hardware input latency:")));
@@ -201,6 +213,12 @@ EngineControl::build_notebook ()
 	label = manage (left_aligned_label (_("samples")));
 	basic_packer.attach (*label, 2, 3, row, row+1, xopt, (AttachOptions) 0);
 	++row;
+
+	output_latency.set_name ("OutputLatency");
+	output_latency.set_flags(Gtk::CAN_FOCUS);
+	output_latency.set_digits(0);
+	output_latency.set_wrap(false);
+	output_latency.set_editable (true);
 
 	label = manage (left_aligned_label (_("Hardware output latency:")));
 	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
@@ -326,7 +344,6 @@ EngineControl::build_notebook ()
 	output_latency.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
 	input_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
 	output_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
-
 
 	input_channels.signal_output().connect (sigc::bind (sigc::ptr_fun (&EngineControl::print_channel_count), &input_channels));
 	output_channels.signal_output().connect (sigc::bind (sigc::ptr_fun (&EngineControl::print_channel_count), &output_channels));
@@ -1199,3 +1216,4 @@ EngineControl::on_delete_event (GdkEventAny* ev)
 	}
 	return ArdourDialog::on_delete_event (ev);
 }
+
