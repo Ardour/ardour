@@ -210,16 +210,6 @@ Session::post_engine_init ()
 	set_block_size (_engine.samples_per_cycle());
 	set_frame_rate (_engine.sample_rate());
 
-	if (how_many_dsp_threads () > 1) {
-		/* For now, only create the graph if we are using >1 DSP threads, as
-		   it is a bit slower than the old code with 1 thread.
-		*/
-		_process_graph.reset (new Graph (*this));
-	}
-
-	n_physical_outputs = _engine.n_physical_outputs ();
-	n_physical_inputs =  _engine.n_physical_inputs ();
-
 	BootMessage (_("Using configuration"));
 
 	_midi_ports = new MidiPortManager;
@@ -280,8 +270,47 @@ Session::post_engine_init ()
 		Config->map_parameters (ff);
 		config.map_parameters (ft);
 
-		when_engine_running ();
-
+		/* Reset all panners */
+		
+		Delivery::reset_panners ();
+		
+		/* this will cause the CPM to instantiate any protocols that are in use
+		 * (or mandatory), which will pass it this Session, and then call
+		 * set_state() on each instantiated protocol to match stored state.
+		 */
+		
+		ControlProtocolManager::instance().set_session (this);
+		
+		/* This must be done after the ControlProtocolManager set_session above,
+		   as it will set states for ports which the ControlProtocolManager creates.
+		*/
+		
+		// XXX set state of MIDI::Port's
+		// MidiPortManager::instance()->set_port_states (Config->midi_port_states ());
+		
+		/* And this must be done after the MIDI::Manager::set_port_states as
+		 * it will try to make connections whose details are loaded by set_port_states.
+		 */
+		
+		hookup_io ();
+		
+		/* Let control protocols know that we are now all connected, so they
+		 * could start talking to surfaces if they want to.
+		 */
+		
+		ControlProtocolManager::instance().midi_connectivity_established ();
+		
+		if (_is_new && !no_auto_connect()) {
+			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock());
+			auto_connect_master_bus ();
+		}
+		
+		_state_of_the_state = StateOfTheState (_state_of_the_state & ~(CannotSave|Dirty));
+		
+		/* update latencies */
+		
+		initialize_latencies ();
+		
 		_locations->changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));
 		_locations->added.connect_same_thread (*this, boost::bind (&Session::locations_added, this, _1));
 		
