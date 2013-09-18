@@ -3791,7 +3791,7 @@ audio may be played at the wrong sample rate.\n"), desired, PROGRAM_NAME, actual
         return 1;
 }
 
-void
+int
 ARDOUR_UI::disconnect_from_engine ()
 {
 	/* drop connection to AudioEngine::Halted so that we don't act
@@ -3800,24 +3800,28 @@ ARDOUR_UI::disconnect_from_engine ()
 	halt_connection.disconnect ();
 	
 	if (AudioEngine::instance()->stop ()) {
-		MessageDialog msg (*editor, _("Could not disconnect from JACK"));
+		MessageDialog msg (*editor, _("Could not disconnect from Audio/MIDI engine"));
 		msg.run ();
+		return -1;
 	} else {
 		AudioEngine::instance()->Halted.connect_same_thread (halt_connection, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
 	}
 	
 	update_sample_rate (0);
+	return 0;
 }
 
-void
+int
 ARDOUR_UI::reconnect_to_engine ()
 {
 	if (AudioEngine::instance()->start ()) {
-		MessageDialog msg (*editor,  _("Could not reconnect to JACK"));
+		MessageDialog msg (*editor,  _("Could not reconnect to the Audio/MIDI engine"));
 		msg.run ();
+		return -1;
 	}
 	
 	update_sample_rate (0);
+	return 0;
 }
 
 void
