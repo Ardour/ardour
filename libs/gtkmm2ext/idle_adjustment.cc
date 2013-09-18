@@ -20,6 +20,7 @@
 #define _BSD_SOURCE
 #include <gtkmm2ext/idle_adjustment.h>
 #include <gtkmm/main.h>
+#include <glibmm/main.h>
 #include <iostream>
 
 #include "pbd/timersub.h"
