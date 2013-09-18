@@ -52,7 +52,9 @@ AsyncMIDIPort::AsyncMIDIPort (string const & name, PortFlags flags)
 	, _last_write_timestamp (0)
 	, output_fifo (512)
 	, input_fifo (1024)
+#ifndef PLATFORM_WINDOWS
 	, xthread (true)
+#endif
 {
 }
 
@@ -116,12 +118,13 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 		for (MidiBuffer::iterator b = mb.begin(); b != mb.end(); ++b) {
 			input_fifo.write (when, (Evoral::EventType) 0, (*b).size(), (*b).buffer());
 		}
-		
+
+#ifndef PLATFORM_WINDOWS
 		if (!mb.empty()) {
 			xthread.wakeup ();
 		}
+#endif
 	}
-
 }
 
 void

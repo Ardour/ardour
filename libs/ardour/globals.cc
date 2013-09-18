@@ -584,10 +584,21 @@ clock_gettime (int /*clk_id*/, struct timespec *t)
 microseconds_t
 ARDOUR::get_microseconds ()
 {
+#ifdef PLATFORM_WINDOWS
+	microseconds_t ret = 0;
+	LARGE_INTEGER freq, time;
+
+	if (QueryPerformanceFrequency(&freq))
+		if (QueryPerformanceCounter(&time))
+			ret = (microseconds_t)((time.QuadPart * 1000000) / freq.QuadPart);
+
+	return ret;
+#else
 	struct timespec ts;
 	if (clock_gettime (CLOCK_MONOTONIC, &ts) != 0) {
 		/* EEEK! */
 		return 0;
 	}
 	return (microseconds_t) ts.tv_sec * 1000000 + (ts.tv_nsec/1000);
+#endif
 }
