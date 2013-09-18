@@ -19,6 +19,7 @@
 */
 
 #include <iostream>
+#include <vector>
 
 #include <glibmm/timer.h>
 
@@ -270,9 +271,9 @@ AsyncMIDIPort::read (MIDI::byte *, size_t)
 	timestamp_t time;
 	Evoral::EventType type;
 	uint32_t size;
-	MIDI::byte buffer[input_fifo.capacity()];
+	vector<MIDI::byte> buffer(input_fifo.capacity());
 
-	while (input_fifo.read (&time, &type, &size, buffer)) {
+	while (input_fifo.read (&time, &type, &size, &buffer[0])) {
 		_parser->set_timestamp (time);
 		for (uint32_t i = 0; i < size; ++i) {
 			_parser->scanner (buffer[i]);
