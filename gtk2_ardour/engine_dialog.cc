@@ -1059,15 +1059,12 @@ EngineControl::push_state_to_backend (bool start)
 		 * out of here.
 		 */
 
-		if (change_rate) {
-			if (!backend->can_change_sample_rate_when_running()) {
-				return 1;
-			}
-		} 
-		if (change_bufsize) {
-			if (!backend->can_change_buffer_size_when_running()) {
-				return 1;
-			}
+		if (change_rate && !backend->can_change_sample_rate_when_running()) {
+			return 1;
+		}
+
+		if (change_bufsize && !backend->can_change_buffer_size_when_running()) {
+			return 1;
 		}
 		
 		if (change_rate) {
