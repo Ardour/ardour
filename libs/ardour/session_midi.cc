@@ -348,7 +348,7 @@ Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
  * @param t time to send.
  */
 int
-Session::send_full_time_code (framepos_t const t, pframes_t nframes)
+Session::send_full_time_code (framepos_t const t, MIDI::pframes_t nframes)
 {
 	/* This function could easily send at a given frame offset, but would
 	 * that be useful?  Does ardour do sub-block accurate locating? [DR] */

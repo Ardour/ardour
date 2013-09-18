@@ -60,7 +60,7 @@ AsyncMIDIPort::~AsyncMIDIPort ()
 }
 
 void
-AsyncMIDIPort::flush_output_fifo (pframes_t nframes)
+AsyncMIDIPort::flush_output_fifo (MIDI::pframes_t nframes)
 {
 	RingBuffer< Evoral::Event<double> >::rw_vector vec = { { 0, 0 }, { 0, 0 } };
 	size_t written;
@@ -91,7 +91,7 @@ AsyncMIDIPort::flush_output_fifo (pframes_t nframes)
 }
 
 void
-AsyncMIDIPort::cycle_start (pframes_t nframes)
+AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 {
 	_currently_in_cycle = true;
 	MidiPort::cycle_start (nframes);
@@ -124,7 +124,7 @@ AsyncMIDIPort::cycle_start (pframes_t nframes)
 }
 
 void
-AsyncMIDIPort::cycle_end (pframes_t nframes)
+AsyncMIDIPort::cycle_end (MIDI::pframes_t nframes)
 {
 	if (ARDOUR::Port::sends_output()) {
 		/* move any additional data from output FIFO into the port
@@ -163,7 +163,7 @@ AsyncMIDIPort::drain (int check_interval_usecs)
 		if (vec.len[0] + vec.len[1] >= output_fifo.bufsize() - 1) {
 			break;
 		}
-		usleep (check_interval_usecs);
+		Glib::usleep (check_interval_usecs);
 	}
 }
 
@@ -283,7 +283,7 @@ AsyncMIDIPort::read (MIDI::byte *, size_t)
 }
 
 void
-AsyncMIDIPort::parse (framecnt_t)
+AsyncMIDIPort::parse (MIDI::framecnt_t)
 {
 	MIDI::byte buf[1];
 

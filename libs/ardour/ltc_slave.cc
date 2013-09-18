@@ -150,7 +150,7 @@ LTC_Slave::reset()
 }
 
 void
-LTC_Slave::parse_ltc(const pframes_t nframes, const Sample* const in, const framecnt_t posinfo)
+LTC_Slave::parse_ltc(const ARDOUR::pframes_t nframes, const Sample* const in, const ARDOUR::framecnt_t posinfo)
 {
 	pframes_t i;
 	unsigned char sound[8192];
