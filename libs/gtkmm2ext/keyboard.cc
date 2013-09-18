@@ -233,8 +233,9 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 	DEBUG_TRACE (
 		DEBUG::Keyboard,
 		string_compose (
-			"Snoop widget %1 key %2 type %3 state %4 magic %5\n",
-			widget, event->keyval, event->type, event->state, _some_magic_widget_has_focus
+			"Snoop widget %1 name: [%6] key %2 type %3 state %4 magic %5\n",
+			widget, event->keyval, event->type, event->state, _some_magic_widget_has_focus,
+			gtk_widget_get_name (widget)
 			)
 		);
 
@@ -324,6 +325,8 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 		}
 	}
 
+	DEBUG_TRACE (DEBUG::Keyboard, string_compose ("snooper returns %1\n", ret));
+
 	return ret;
 }
 
@@ -346,6 +349,7 @@ bool
 Keyboard::enter_window (GdkEventCrossing *, Gtk::Window* win)
 {
 	current_window = win;
+	DEBUG_TRACE (DEBUG::Keyboard, string_compose ("Entering window, title = %1\n", win->get_title()));
 	return false;
 }
 

@@ -289,6 +289,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
         const std::string& announce_string() const { return _announce_string; }
 
+        int disconnect_from_engine ();
+        int reconnect_to_engine ();
+
   protected:
 	friend class PublicEditor;
 
@@ -667,8 +670,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	int pending_state_dialog ();
 	int sr_mismatch_dialog (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
 
-	void disconnect_from_engine ();
-	void reconnect_to_engine ();
 	void set_engine_buffer_size (ARDOUR::pframes_t);
 
 	Gtk::MenuItem* jack_disconnect_item;

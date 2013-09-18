@@ -365,6 +365,7 @@ Editor::Editor ()
 	location_loop_color = ARDOUR_UI::config()->canvasvar_LocationLoop.get();
 	location_punch_color = ARDOUR_UI::config()->canvasvar_LocationPunch.get();
 
+	zoom_focus = ZoomFocusLeft;
 	_edit_point = EditAtMouse;
 	_internal_editing = false;
 	current_canvas_cursor = 0;
@@ -373,8 +374,6 @@ Editor::Editor ()
 
 	_scroll_callbacks = 0;
 
-	zoom_focus = ZoomFocusLeft;
-	set_zoom_focus (ZoomFocusLeft);
 	zoom_range_clock->ValueChanged.connect (sigc::mem_fun(*this, &Editor::zoom_adjustment_changed));
 
 	bbt_label.set_name ("EditorRulerLabel");
@@ -635,6 +634,7 @@ Editor::Editor ()
 
 	setup_toolbar ();
 
+	set_zoom_focus (zoom_focus);
 	_snap_type = SnapToBeat;
 	set_snap_to (_snap_type);
 	_snap_mode = SnapOff;

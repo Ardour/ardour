@@ -31,6 +31,7 @@
 #include "pbd/xml++.h"
 #include "pbd/unwind.h"
 
+#include <gtkmm/alignment.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm2ext/utils.h>
@@ -44,6 +45,7 @@
 #include "pbd/convert.h"
 #include "pbd/error.h"
 
+#include "ardour_ui.h"
 #include "engine_dialog.h"
 #include "gui_thread.h"
 #include "i18n.h"
@@ -56,6 +58,7 @@ using namespace Glib;
 
 EngineControl::EngineControl ()
 	: ArdourDialog (_("Audio/MIDI Setup"))
+	, basic_packer (9, 3)
 	, input_latency_adjustment (0, 0, 99999, 1)
 	, input_latency (input_latency_adjustment)
 	, output_latency_adjustment (0, 0, 99999, 1)
@@ -66,14 +69,24 @@ EngineControl::EngineControl ()
 	, output_channels (output_channels_adjustment)
 	, ports_adjustment (128, 8, 1024, 1, 16)
 	, ports_spinner (ports_adjustment)
-	, control_app_button (_("Launch Control App"))
-	, lm_measure_button (_("Measure latency"))
+	, control_app_button (_("Device Control Panel"))
+	, lm_start_stop_label (_("Measure latency"))
 	, lm_use_button (_("Use results"))
 	, lm_table (5, 2)
-	, basic_packer (9, 3)
+	, have_lm_results (false)
+	, midi_refresh_button (_("Refresh list"))
+	, aj_button (_("Start MIDI ALSA/JACK bridge"))
 	, ignore_changes (0)
 	, _desired_sample_rate (0)
 {
+	if (!ARDOUR::AudioEngine::instance()->setup_required()) {
+		_have_control = false;
+	} else {
+		_have_control = true;
+	}
+
+	set_name (X_("AudioMIDISetup"));
+
 	build_notebook ();
 
 	get_vbox()->set_border_width (12);
@@ -82,9 +95,9 @@ EngineControl::EngineControl ()
 	control_app_button.signal_clicked().connect (mem_fun (*this, &EngineControl::control_app_button_clicked));
 	manage_control_app_sensitivity ();
 
-	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
-	add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_APPLY);
+	cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	ok_button = add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
+	apply_button = add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_APPLY);
 
 	/* Pick up any existing audio setup configuration, if appropriate */
 
@@ -111,6 +124,13 @@ EngineControl::on_response (int response_id)
 		push_state_to_backend (true);
 		hide ();
 		break;
+	case RESPONSE_DELETE_EVENT: {
+		GdkEventButton ev;
+		ev.type = GDK_BUTTON_PRESS;
+		ev.button = 1;
+		on_delete_event ((GdkEventAny*) &ev);
+		break;
+	}
 	default:
 		hide ();
 	}
@@ -168,18 +188,33 @@ EngineControl::build_notebook ()
 	basic_packer.attach (buffer_size_duration_label, 2, 3, row, row+1, xopt, (AttachOptions) 0);
 	row++;
 
+	input_channels.set_name ("InputChannels");
+	input_channels.set_flags(Gtk::CAN_FOCUS);
+	input_channels.set_digits(0);
+	input_channels.set_wrap(false);
+	output_channels.set_editable (true);
 
 	label = manage (left_aligned_label (_("Input Channels:")));
 	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
 	basic_packer.attach (input_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
+	output_channels.set_name ("OutputChannels");
+	output_channels.set_flags(Gtk::CAN_FOCUS);
+	output_channels.set_digits(0);
+	output_channels.set_wrap(false);
+	output_channels.set_editable (true);
 
 	label = manage (left_aligned_label (_("Output Channels:")));
 	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
 	basic_packer.attach (output_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
+	input_latency.set_name ("InputLatency");
+	input_latency.set_flags(Gtk::CAN_FOCUS);
+	input_latency.set_digits(0);
+	input_latency.set_wrap(false);
+	input_latency.set_editable (true);
 
 	label = manage (left_aligned_label (_("Hardware input latency:")));
 	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
@@ -187,6 +222,12 @@ EngineControl::build_notebook ()
 	label = manage (left_aligned_label (_("samples")));
 	basic_packer.attach (*label, 2, 3, row, row+1, xopt, (AttachOptions) 0);
 	++row;
+
+	output_latency.set_name ("OutputLatency");
+	output_latency.set_flags(Gtk::CAN_FOCUS);
+	output_latency.set_digits(0);
+	output_latency.set_wrap(false);
+	output_latency.set_editable (true);
 
 	label = manage (left_aligned_label (_("Hardware output latency:")));
 	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
@@ -205,8 +246,6 @@ EngineControl::build_notebook ()
 	control_app_button.show();
 	basic_vbox.pack_start (*hpacker);
 
-	midi_packer.set_border_width (12);
-
 	/* latency measurement tab */
 	
 	lm_title.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Latency Measurement Tool")));
@@ -217,48 +256,81 @@ EngineControl::build_notebook ()
 	lm_table.attach (lm_title, 0, 2, row, row+1, xopt, (AttachOptions) 0);
 	row++;
 
-	lm_preamble.set_width_chars (60);
-	lm_preamble.set_line_wrap (true);
-	lm_preamble.set_markup (_("1. <span weight=\"bold\">Turn down the volume on your hardware to a very low level.</span>\n\n\
-2. Connect the two channels that you select below using either a cable or (less ideally) a speaker \
-and microphone.\n\n\
-3. Once the channels are connected, click the \"Measure latency\" button.\n\n\
-4. When satisfied with the results, click the \"Use results\" button."));
+	Gtk::Label* preamble;
 
-	lm_table.attach (lm_preamble, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
+	preamble = manage (new Label);
+	preamble->set_width_chars (60);
+	preamble->set_line_wrap (true);
+	preamble->set_markup (_("<span weight=\"bold\">Turn down the volume on your hardware to a very low level.</span>"));
+
+	lm_table.attach (*preamble, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
+	row++;
+
+	preamble = manage (new Label);
+	preamble->set_width_chars (60);
+	preamble->set_line_wrap (true);
+	preamble->set_markup (_("Select two channels below and connect them using a cable or (less ideally) a speaker and microphone."));
+
+	lm_table.attach (*preamble, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
 	row++;
 
 	label = manage (new Label (_("Output channel")));
 	lm_table.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
-	lm_table.attach (lm_output_channel_combo, 1, 2, row, row+1, xopt, (AttachOptions) 0);
+
+	Gtk::Alignment* misc_align = manage (new Alignment (0.0, 0.5));
+	misc_align->add (lm_output_channel_combo);
+	lm_table.attach (*misc_align, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
 	label = manage (new Label (_("Input channel")));
 	lm_table.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
-	lm_table.attach (lm_input_channel_combo, 1, 2, row, row+1, xopt, (AttachOptions) 0);
+
+	misc_align = manage (new Alignment (0.0, 0.5));
+	misc_align->add (lm_input_channel_combo);
+	lm_table.attach (*misc_align, 1, 2, row, row+1, FILL, (AttachOptions) 0);
 	++row;
 
 	xopt = AttachOptions(0);
 
+	lm_measure_button.add (lm_start_stop_label);
+	
 	lm_measure_button.signal_toggled().connect (sigc::mem_fun (*this, &EngineControl::latency_button_toggled));
 	lm_use_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::use_latency_button_clicked));
 	lm_use_button.set_sensitive (false);
 		
+
+	preamble = manage (new Label);
+	preamble->set_width_chars (60);
+	preamble->set_line_wrap (true);
+	preamble->set_markup (_("Once the channels are connected, click the \"Measure latency\" button."));
+	lm_table.attach (*preamble, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
+	row++;
+
 	lm_table.attach (lm_measure_button, 0, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 	lm_table.attach (lm_results, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
 	++row;
+
+
+	preamble = manage (new Label);
+	preamble->set_width_chars (60);
+	preamble->set_line_wrap (true);
+	preamble->set_markup (_("When satisfied with the results, click the \"Use results\" button."));
+	lm_table.attach (*preamble, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
+	row++;
+
 	lm_table.attach (lm_use_button, 0, 2, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
 	lm_results.set_markup ("<i>No measurement results yet</i>");
 
+	lm_vbox.set_border_width (12);
 	lm_vbox.pack_start (lm_table, false, false);
 
 	/* pack it all up */
 
 	notebook.pages().push_back (TabElem (basic_vbox, _("Audio")));
-	notebook.pages().push_back (TabElem (midi_hbox, _("MIDI")));
+	notebook.pages().push_back (TabElem (midi_vbox, _("MIDI")));
 	notebook.pages().push_back (TabElem (lm_vbox, _("Latency")));
 	notebook.set_border_width (12);
 
@@ -279,7 +351,6 @@ and microphone.\n\n\
 	output_latency.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
 	input_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
 	output_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
-
 
 	input_channels.signal_output().connect (sigc::bind (sigc::ptr_fun (&EngineControl::print_channel_count), &input_channels));
 	output_channels.signal_output().connect (sigc::bind (sigc::ptr_fun (&EngineControl::print_channel_count), &output_channels));
@@ -316,7 +387,87 @@ EngineControl::enable_latency_tab ()
 	lm_input_channel_combo.set_active_text (inputs.front());
 
 	lm_measure_button.set_sensitive (true);
-	lm_use_button.set_sensitive (true);
+}
+
+void
+EngineControl::setup_midi_tab_for_backend ()
+{
+	string backend = backend_combo.get_active_text ();
+
+	Gtkmm2ext::container_clear (midi_vbox);
+
+	midi_vbox.set_border_width (12);
+	midi_device_table.set_border_width (12);
+
+	if (backend == "JACK") {
+		setup_midi_tab_for_jack ();
+	}
+
+	midi_vbox.pack_start (midi_device_table, true, true);
+	midi_vbox.pack_start (midi_refresh_button, false, false);
+	midi_vbox.show_all ();
+
+	midi_refresh_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::refresh_midi_display));
+}
+
+void
+EngineControl::setup_midi_tab_for_jack ()
+{
+	midi_vbox.pack_start (aj_button, false, false);
+}	
+
+void
+EngineControl::refresh_midi_display ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	assert (backend);
+
+	vector<string> midi_inputs;
+	vector<string> midi_outputs;
+	int row  = 0;
+	AttachOptions xopt = AttachOptions (FILL|EXPAND);
+	Gtk::Label* l;
+
+	Gtkmm2ext::container_clear (midi_device_table);
+
+	backend->get_physical_inputs (ARDOUR::DataType::MIDI, midi_inputs);
+	backend->get_physical_outputs (ARDOUR::DataType::MIDI, midi_outputs);
+
+	midi_device_table.set_spacings (6);
+	midi_device_table.set_homogeneous (true);
+	midi_device_table.resize (midi_inputs.size() + midi_outputs.size() + 3, 1);
+
+	l = manage (new Label);
+	l->set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Inputs")));
+	midi_device_table.attach (*l, 0, 1, row, row + 1, xopt, AttachOptions (0));
+	l->set_alignment (0, 0.5);
+	row++;
+	l->show ();
+	
+	for (vector<string>::iterator p = midi_inputs.begin(); p != midi_inputs.end(); ++p) {
+		l = manage (new Label ((*p).substr ((*p).find_last_of (':') + 1)));
+		l->set_alignment (0, 0.5);
+		midi_device_table.attach (*l, 0, 1, row, row + 1, xopt, AttachOptions (0));
+		l->show ();
+		row++;
+	}
+
+	row++; // extra row of spacing
+
+	l = manage (new Label);
+	l->set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("MIDI Outputs")));
+	midi_device_table.attach (*l, 0, 1, row, row + 1, xopt, AttachOptions (0));
+	l->set_alignment (0, 0.5);
+	row++;
+	l->show ();
+
+	for (vector<string>::iterator p = midi_outputs.begin(); p != midi_outputs.end(); ++p) {
+		l = manage (new Label ((*p).substr ((*p).find_last_of (':') + 1)));
+		l->set_alignment (0, 0.5);
+		midi_device_table.attach (*l, 0, 1, row, row + 1, xopt, AttachOptions (0));
+		l->show ();
+		row++;
+	}
 }
 
 void
@@ -333,6 +484,8 @@ EngineControl::backend_changed ()
 		/* eh? setting the backend failed... how ? */
 		return;
 	}
+
+	setup_midi_tab_for_backend ();
 
 	if (backend->requires_driver_selection()) {
 		vector<string> drivers = backend->enumerate_drivers();
@@ -387,8 +540,10 @@ EngineControl::list_devices ()
 		available_devices.push_back (i->name);
 	}
 
+	ignore_changes++;
 	set_popdown_strings (device_combo, available_devices);
-	
+	ignore_changes--;
+
 	if (!available_devices.empty()) {
 		sample_rate_combo.set_sensitive (true);
 		buffer_size_combo.set_sensitive (true);
@@ -452,39 +607,42 @@ EngineControl::device_changed ()
 
 	vector<float> sr = backend->available_sample_rates (device_name);
 	for (vector<float>::const_iterator x = sr.begin(); x != sr.end(); ++x) {
-		char buf[32];
-		if (fmod (*x, 1000.0f)) {
-			snprintf (buf, sizeof (buf), "%.1f kHz", (*x)/1000.0);
-		} else {
-			snprintf (buf, sizeof (buf), "%.0f kHz", (*x)/1000.0);
-		}
-		s.push_back (buf);
+		s.push_back (rate_as_string (*x));
 		if (*x == _desired_sample_rate) {
-			desired = buf;
+			desired = s.back();
 		}
 	}
 
-	set_popdown_strings (sample_rate_combo, s);
-	if (desired.empty()) {
-		sample_rate_combo.set_active_text (s.front());
+	if (!s.empty()) {
+		set_popdown_strings (sample_rate_combo, s);
+	
+		if (desired.empty()) {
+			sample_rate_combo.set_active_text (s.front());
+		} else {
+			sample_rate_combo.set_active_text (desired);
+		}
 	} else {
-		sample_rate_combo.set_active_text (desired);
+		/* hmm ... how to tell the user about the fact that we have no
+		 * available sample rates.
+		 */
 	}
+		 
 
 	vector<uint32_t> bs = backend->available_buffer_sizes(device_name);
 	s.clear ();
 	for (vector<uint32_t>::const_iterator x = bs.begin(); x != bs.end(); ++x) {
-		char buf[32];
-		/* Translators: "samples" is always plural here, so no
-		   need for plural+singular forms.
-		*/
-		snprintf (buf, sizeof (buf), _("%u samples"), *x);
-		s.push_back (buf);
+		s.push_back (bufsize_as_string (*x));
 	}
 
-	set_popdown_strings (buffer_size_combo, s);
-	buffer_size_combo.set_active_text (s.front());
-	show_buffer_duration ();
+	if (!s.empty()) {
+		set_popdown_strings (buffer_size_combo, s);
+		buffer_size_combo.set_active_text (s.front());
+		show_buffer_duration ();
+	} else {
+		/* hmm ... how to tell the user about the fact that we have no
+		 * available buffer sizes.
+		 */
+	}
 
 	manage_control_app_sensitivity ();
 
@@ -499,6 +657,29 @@ EngineControl::device_changed ()
 	push_state_to_backend (false);
 }	
 
+string
+EngineControl::rate_as_string (float r)
+{
+	char buf[32];
+	if (fmod (r, 1000.0f)) {
+		snprintf (buf, sizeof (buf), "%.1f kHz", r/1000.0);
+	} else {
+		snprintf (buf, sizeof (buf), "%.0f kHz", r/1000.0);
+	}
+	return buf;
+}
+
+string
+EngineControl::bufsize_as_string (uint32_t sz)
+{
+	/* Translators: "samples" is always plural here, so no
+	   need for plural+singular forms.
+	*/
+	char buf[32];
+	snprintf (buf, sizeof (buf), _("%u samples"), sz);
+	return buf;
+}
+
 void 
 EngineControl::sample_rate_changed ()
 {
@@ -511,7 +692,6 @@ EngineControl::sample_rate_changed ()
 	*/
 
 	show_buffer_duration ();
-	push_state_to_backend (false);
 	save_state ();
 
 }
@@ -524,7 +704,6 @@ EngineControl::buffer_size_changed ()
 	}
 
 	show_buffer_duration ();
-	push_state_to_backend (false);
 	save_state ();
 }
 
@@ -603,21 +782,27 @@ EngineControl::save_state ()
 		state = new State;
 	}
 	
-	state->backend = backend_combo.get_active_text ();
-	state->driver = driver_combo.get_active_text ();
-	state->device = device_combo.get_active_text ();
-	state->buffer_size = buffer_size_combo.get_active_text ();
-	state->sample_rate = sample_rate_combo.get_active_text ();
-	state->input_latency = (uint32_t) input_latency.get_value();
-	state->output_latency = (uint32_t) output_latency.get_value();
-	state->input_channels = (uint32_t) input_channels.get_value();
-	state->output_channels = (uint32_t) output_channels.get_value();
+	store_state (*state);
 
 	if (!existing) {
 		states.push_back (*state);
 	}
 
 	return state;
+}
+
+void
+EngineControl::store_state (State& state)
+{
+	state.backend = get_backend ();
+	state.driver = get_driver ();
+	state.device = get_device_name ();
+	state.sample_rate = get_rate ();
+	state.buffer_size = get_buffer_size ();
+	state.input_latency = get_input_latency ();
+	state.output_latency = get_output_latency ();
+	state.input_channels = get_input_channels ();
+	state.output_channels = get_output_channels ();
 }
 
 void
@@ -628,9 +813,13 @@ EngineControl::maybe_display_saved_state ()
 	if (state) {
 		ignore_changes++;
 		if (!_desired_sample_rate) {
-			sample_rate_combo.set_active_text (state->sample_rate);
+			sample_rate_combo.set_active_text (rate_as_string (state->sample_rate));
 		}
-		buffer_size_combo.set_active_text (state->buffer_size);
+		buffer_size_combo.set_active_text (bufsize_as_string (state->buffer_size));
+		/* call this explicitly because we're ignoring changes to
+		   the controls at this point.
+		*/
+		show_buffer_duration ();
 		input_latency.set_value (state->input_latency);
 		output_latency.set_value (state->output_latency);
 		ignore_changes--;
@@ -724,12 +913,12 @@ EngineControl::set_state (const XMLNode& root)
 			if ((prop = grandchild->property ("sample-rate")) == 0) {
 				continue;
 			}
-			state.sample_rate = prop->value ();
+			state.sample_rate = atof (prop->value ());
 			
 			if ((prop = grandchild->property ("buffer-size")) == 0) {
 				continue;
 			}
-			state.buffer_size = prop->value ();
+			state.buffer_size = atoi (prop->value ());
 			
 			if ((prop = grandchild->property ("input-latency")) == 0) {
 				continue;
@@ -768,13 +957,11 @@ EngineControl::set_state (const XMLNode& root)
 			backend_combo.set_active_text ((*i).backend);
 			driver_combo.set_active_text ((*i).driver);
 			device_combo.set_active_text ((*i).device);
-			sample_rate_combo.set_active_text ((*i).sample_rate);
-			buffer_size_combo.set_active_text ((*i).buffer_size);
+			sample_rate_combo.set_active_text (rate_as_string ((*i).sample_rate));
+			buffer_size_combo.set_active_text (bufsize_as_string ((*i).buffer_size));
 			input_latency.set_value ((*i).input_latency);
 			output_latency.set_value ((*i).output_latency);
 			ignore_changes--;
-
-			push_state_to_backend (false);
 			break;
 		}
 	}
@@ -788,29 +975,168 @@ EngineControl::push_state_to_backend (bool start)
 
 	if (!backend) {
 		return 0;
-	 }
+	}
+	
+	/* figure out what is going to change */
 
-	/* grab the parameters from the GUI and apply them */
+	bool restart_required = false;
+	bool was_running = ARDOUR::AudioEngine::instance()->running();
+	bool change_driver = false;
+	bool change_device = false;
+	bool change_rate = false;
+	bool change_bufsize = false;
+	bool change_latency = false;
+	bool change_channels = false;
 
-	try {
+	uint32_t ochan = get_output_channels ();
+	uint32_t ichan = get_input_channels ();
+
+	if (_have_control) {
+		
+		/* we can control the backend */
+
 		if (backend->requires_driver_selection()) {
-			if (backend->set_driver (get_driver())) {
-				return -1;
+			if (get_driver() != backend->driver_name()) {
+				change_driver = true;
 			}
 		}
 
-		if (backend->set_device_name (get_device_name())) {
-			return -1;
+		if (get_device_name() != backend->device_name()) {
+			change_device = true;
 		}
 
-		if (backend->set_sample_rate (get_rate())) {
-			error << string_compose (_("Cannot set sample rate to %1"), get_rate()) << endmsg;
-			return -1;
+		if (get_rate() != backend->sample_rate()) {
+			change_rate = true;
 		}
-		if (backend->set_buffer_size (get_buffer_size())) {
-			error << string_compose (_("Cannot set buffer size to %1"), get_buffer_size()) << endmsg;
-			return -1;
+
+		if (get_buffer_size() != backend->buffer_size()) {
+			change_bufsize = true;
 		}
+
+		/* zero-requested channels means "all available" */
+
+		if (ichan == 0) {
+			ichan = backend->input_channels();
+		}
+
+		if (ochan == 0) {
+			ochan = backend->output_channels();
+		}
+
+		if (ichan != backend->input_channels()) {
+			change_channels = true;
+		}
+
+		if (ochan != backend->output_channels()) {
+			change_channels = true;
+		}
+
+		if (get_input_latency() != backend->systemic_input_latency() ||
+		    get_output_latency() != backend->systemic_output_latency()) {
+			change_latency = true;
+		}
+
+	} else {
+
+		/* we have no control over the backend, meaning that we can
+		 * only possibly change sample rate and buffer size.
+		 */
+
+
+		if (get_rate() != backend->sample_rate()) {
+			change_bufsize = true;
+		}
+
+		if (get_buffer_size() != backend->buffer_size()) {
+			change_bufsize = true;
+		}
+	}
+
+	if (!_have_control) {
+
+		/* We do not have control over the backend, so the best we can
+		 * do is try to change the sample rate and/or bufsize and get
+		 * out of here.
+		 */
+
+		if (change_rate && !backend->can_change_sample_rate_when_running()) {
+			return 1;
+		}
+
+		if (change_bufsize && !backend->can_change_buffer_size_when_running()) {
+			return 1;
+		}
+		
+		if (change_rate) {
+			backend->set_sample_rate (get_rate());
+		}
+		
+		if (change_bufsize) {
+			backend->set_buffer_size (get_buffer_size());
+		}
+
+		post_push ();
+
+		return 0;
+	} 
+
+	/* determine if we need to stop the backend before changing parameters */
+
+	if (change_driver || change_device || change_channels || change_latency ||
+	    (change_rate && !backend->can_change_sample_rate_when_running()) ||
+	    (change_bufsize && !backend->can_change_buffer_size_when_running())) {
+		restart_required = true;
+	} else {
+		restart_required = false;
+	}
+
+	if (was_running) {
+
+		if (!change_driver && !change_device && !change_channels && !change_latency) {
+			/* no changes in any parameters that absolutely require a
+			 * restart, so check those that might be changeable without a
+			 * restart
+			 */
+			
+			if (change_rate && !backend->can_change_sample_rate_when_running()) {
+				/* can't do this while running ... */
+				restart_required = true;
+			}
+
+			if (change_bufsize && !backend->can_change_buffer_size_when_running()) {
+				/* can't do this while running ... */
+				restart_required = true;
+			}
+		}
+	}
+
+	if (was_running) {
+		if (restart_required) {
+			if (ARDOUR_UI::instance()->disconnect_from_engine ()) {
+				return -1;
+			}
+		}
+	}
+		
+
+	if (change_driver && backend->set_driver (get_driver())) {
+		error << string_compose (_("Cannot set driver to %1"), get_driver()) << endmsg;
+		return -1;
+	}
+	if (change_device && backend->set_device_name (get_device_name())) {
+		error << string_compose (_("Cannot set device name to %1"), get_device_name()) << endmsg;
+		return -1;
+	}
+	if (change_rate && backend->set_sample_rate (get_rate())) {
+		error << string_compose (_("Cannot set sample rate to %1"), get_rate()) << endmsg;
+		return -1;
+	}
+	if (change_bufsize && backend->set_buffer_size (get_buffer_size())) {
+		error << string_compose (_("Cannot set buffer size to %1"), get_buffer_size()) << endmsg;
+		return -1;
+	}
+
+	if (change_channels || get_input_channels() == 0 || get_output_channels() == 0) {
 		if (backend->set_input_channels (get_input_channels())) {
 			error << string_compose (_("Cannot set input channels to %1"), get_input_channels()) << endmsg;
 			return -1;
@@ -819,6 +1145,8 @@ EngineControl::push_state_to_backend (bool start)
 			error << string_compose (_("Cannot set output channels to %1"), get_output_channels()) << endmsg;
 			return -1;
 		}
+	}
+	if (change_latency) {
 		if (backend->set_systemic_input_latency (get_input_latency())) {
 			error << string_compose (_("Cannot set input latency to %1"), get_input_latency()) << endmsg;
 			return -1;
@@ -827,57 +1155,66 @@ EngineControl::push_state_to_backend (bool start)
 			error << string_compose (_("Cannot set output latency to %1"), get_output_latency()) << endmsg;
 			return -1;
 		}
-
-		/* get a pointer to the current state object, creating one if
-		 * necessary
-		 */
-
-		State* state = get_saved_state_for_currently_displayed_backend_and_device ();
-
-		if (!state) {
-			state = save_state ();
-			assert (state);
-		}
-
-		/* all off */
-
-		for (StateList::iterator i = states.begin(); i != states.end(); ++i) {
-			(*i).active = false;
-		}
-
-		/* mark this one active (to be used next time the dialog is
-		 * shown)
-		 */
-
-		state->active = true;
-		
-		if (start) {
-			if (ARDOUR::AudioEngine::instance()->start()) {
-				return -1;
-			}
-		}
-
-		manage_control_app_sensitivity ();
-		return 0;
-
-	} catch (...) {
-		cerr << "exception thrown...\n";
-		return -1;
 	}
+			
+	if (start || (was_running && restart_required)) {
+		if (ARDOUR_UI::instance()->reconnect_to_engine()) {
+			return -1;
+		}
+	}
+	
+	post_push ();
+
+	return 0;
 }
 
-uint32_t
+void
+EngineControl::post_push ()
+{
+	/* get a pointer to the current state object, creating one if
+	 * necessary
+	 */
+	
+	State* state = get_saved_state_for_currently_displayed_backend_and_device ();
+	
+	if (!state) {
+		state = save_state ();
+		assert (state);
+	}
+	
+	/* all off */
+	
+	for (StateList::iterator i = states.begin(); i != states.end(); ++i) {
+		(*i).active = false;
+	}
+	
+	/* mark this one active (to be used next time the dialog is
+	 * shown)
+	 */
+	
+	state->active = true;
+
+	manage_control_app_sensitivity ();
+
+	/* schedule a redisplay of MIDI ports */
+	
+	Glib::signal_timeout().connect (sigc::bind_return (sigc::mem_fun (*this, &EngineControl::refresh_midi_display), false), 1000);
+}
+
+
+float
 EngineControl::get_rate () const
 {
-	double r = atof (sample_rate_combo.get_active_text ());
+	float r = atof (sample_rate_combo.get_active_text ());
 	/* the string may have been translated with an abbreviation for
 	 * thousands, so use a crude heuristic to fix this.
 	 */
 	if (r < 1000.0) {
 		r *= 1000.0;
 	}
-	return lrint (r);
+	return r;
 }
+	
 
 uint32_t
 EngineControl::get_buffer_size () const
@@ -914,6 +1251,12 @@ uint32_t
 EngineControl::get_output_latency() const
 {
 	return (uint32_t) output_latency_adjustment.get_value();
+}
+
+string
+EngineControl::get_backend () const
+{
+	return backend_combo.get_active_text ();
 }
 
 string
@@ -968,6 +1311,21 @@ EngineControl::set_desired_sample_rate (uint32_t sr)
 void
 EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 {
+	if (page_num == 0) {
+		cancel_button->set_sensitive (true);
+		ok_button->set_sensitive (true);
+		apply_button->set_sensitive (true);
+	} else {
+		cancel_button->set_sensitive (false);
+		ok_button->set_sensitive (false);
+		apply_button->set_sensitive (false);
+	}
+
+	if (page_num == 1) {
+		/* MIDI tab */
+		refresh_midi_display ();
+	}
+
 	if (page_num == 2) {
 		/* latency tab */
 
@@ -987,18 +1345,19 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 			input_latency.set_value (0);
 			output_latency.set_value (0);
 			
-			push_state_to_backend (false);
-
 			/* reset control */
 
 			input_latency.set_value (il);
 			output_latency.set_value (ol);
-		}
+
+		} 
 
 		if (ARDOUR::AudioEngine::instance()->prepare_for_latency_measurement()) {
 			disable_latency_tab ();
 		}
+
 		enable_latency_tab ();
+
 	} else {
 		ARDOUR::AudioEngine::instance()->stop_latency_detection();
 	}
@@ -1010,15 +1369,9 @@ bool
 EngineControl::check_latency_measurement ()
 {
         MTDM* mtdm = ARDOUR::AudioEngine::instance()->mtdm ();
-	static uint32_t cnt = 0;
 
         if (mtdm->resolve () < 0) {
-		string txt = _("No signal detected ");
-		uint32_t dots = cnt++%10;
-		for (uint32_t i = 0; i < dots; ++i) {
-			txt += '.';
-		}
-		lm_results.set_text (txt);
+		lm_results.set_markup (string_compose ("<span foreground=\"red\">%1</span>", _("No signal detected ")));
                 return true;
         }
 
@@ -1037,7 +1390,6 @@ EngineControl::check_latency_measurement ()
         }
 
 	uint32_t frames_total = mtdm->del();
-	cerr << "total = " << frames_total << " delay = " << ARDOUR::AudioEngine::instance()->latency_signal_delay() << endl;
 	uint32_t extra = frames_total - ARDOUR::AudioEngine::instance()->latency_signal_delay();
 
         snprintf (buf, sizeof (buf), "%u samples %10.3lf ms", extra, extra * 1000.0f/sample_rate);
@@ -1058,6 +1410,7 @@ EngineControl::check_latency_measurement ()
                 lm_measure_button.set_active (false);
 		lm_use_button.set_sensitive (true);
                 strcat (buf, " (set)");
+		have_lm_results = true;
         }
 	
         lm_results.set_text (buf);
@@ -1066,19 +1419,39 @@ EngineControl::check_latency_measurement ()
 }
 
 void
+EngineControl::start_latency_detection ()
+{
+	ARDOUR::AudioEngine::instance()->set_latency_input_port (lm_input_channel_combo.get_active_text());
+	ARDOUR::AudioEngine::instance()->set_latency_output_port (lm_output_channel_combo.get_active_text());
+	ARDOUR::AudioEngine::instance()->start_latency_detection ();
+	lm_results.set_text (_("Detecting ..."));
+	latency_timeout = Glib::signal_timeout().connect (mem_fun (*this, &EngineControl::check_latency_measurement), 250);
+	lm_start_stop_label.set_text (_("Cancel measurement"));
+	have_lm_results = false;
+	lm_input_channel_combo.set_sensitive (false);
+	lm_output_channel_combo.set_sensitive (false);
+}
+
+void
+EngineControl::end_latency_detection ()
+{
+	ARDOUR::AudioEngine::instance()->stop_latency_detection ();
+	latency_timeout.disconnect ();
+	lm_start_stop_label.set_text (_("Measure latency"));
+	if (!have_lm_results) {
+		lm_results.set_markup ("<i>No measurement results yet</i>");
+	}
+	lm_input_channel_combo.set_sensitive (true);
+	lm_output_channel_combo.set_sensitive (true);
+}
+
+void
 EngineControl::latency_button_toggled ()
 {
         if (lm_measure_button.get_active ()) {
-
-		ARDOUR::AudioEngine::instance()->set_latency_input_port (lm_input_channel_combo.get_active_text());
-		ARDOUR::AudioEngine::instance()->set_latency_output_port (lm_output_channel_combo.get_active_text());
-		ARDOUR::AudioEngine::instance()->start_latency_detection ();
-                lm_results.set_text (_("Detecting ..."));
-                latency_timeout = Glib::signal_timeout().connect (mem_fun (*this, &EngineControl::check_latency_measurement), 250);
-
-        } else {
-		ARDOUR::AudioEngine::instance()->stop_latency_detection ();
-                latency_timeout.disconnect ();
+		start_latency_detection ();
+	} else {
+		end_latency_detection ();
         }
 }
 
@@ -1098,3 +1471,14 @@ EngineControl::use_latency_button_clicked ()
 	input_latency_adjustment.set_value (one_way);
 	output_latency_adjustment.set_value (one_way);
 }
+
+bool
+EngineControl::on_delete_event (GdkEventAny* ev)
+{
+	if (notebook.get_current_page() == 2) {
+		/* currently on latency tab - be sure to clean up */
+		end_latency_detection ();
+	}
+	return ArdourDialog::on_delete_event (ev);
+}
+

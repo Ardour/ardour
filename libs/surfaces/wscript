@@ -55,9 +55,12 @@ def configure(conf):
     if conf.is_defined('HAVE_CWIID_H'):
         conf.check_cc (header_name='bluetooth/bluetooth.h', define_name='HAVE_BLUETOOTH_H',mandatory=False)
         if conf.is_defined('HAVE_BLUETOOTH_H'):
-            autowaf.check_pkg(conf, 'cwiid', uselib_store='CWIID', atleast_version='0.6.00')
-            conf.define ('BUILD_WIIMOTE', 1)
-            sub_config_and_use(conf, 'wiimote')
+            autowaf.check_pkg(conf, 'cwiid', uselib_store='CWIID', atleast_version='0.6.00',mandatory=False)
+            if conf.is_defined ('HAVE_CWIID'):
+                conf.define ('BUILD_WIIMOTE', 1)
+                sub_config_and_use(conf, 'wiimote')
+            else:
+                print('You have the cwiid headers needed to compile wiimote support BUT you are missing the pkg-config file for cwiid')
         else:
             print('You are missing the libbluetooth headers needed to compile wiimote support')
     else:

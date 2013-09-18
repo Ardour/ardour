@@ -16,6 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#include <iostream>
 
 #include <boost/scoped_ptr.hpp>
 #include <jack/session.h>
@@ -53,6 +54,7 @@ JackConnection::JackConnection (const std::string& arg1, const std::string& arg2
 	, _client_name (arg1)
 	, session_uuid (arg2)
 {
+	_in_control = !server_running();
 }
 
 JackConnection::~JackConnection ()
@@ -103,6 +105,19 @@ JackConnection::open ()
                 current_epa.reset (new EnvironmentalProtectionAgency(true)); /* will restore settings when we leave scope */
                 global_epa->restore ();
         }
+
+	/* check to see if the server is already running so that we know if we
+	 * are starting it.
+	 */
+
+	jack_client_t* c = jack_client_open ("ardourprobe", JackNoStartServer, &status);
+
+	if (status == 0) {
+		_in_control = false;
+		jack_client_close (c);
+	} else {
+		_in_control = true;
+	}
 
 	/* ensure that PATH or equivalent includes likely locations of the JACK
 	 * server, in case the user's default does not.

@@ -494,21 +494,6 @@
       <menuitem action='ToggleGroupTabs'/>
       <menuitem action='show-marker-lines'/>
     </menu>
-    <menu name='JACK' action='JACK'>
-      <menuitem action='EngineDisconnect'/>
-      <menuitem action='EngineReconnect'/>
-      <menu name='Latency' action='Latency'>
-        <menuitem action='EngineLatency32'/>
-        <menuitem action='EngineLatency64'/>
-        <menuitem action='EngineLatency128'/>
-        <menuitem action='EngineLatency256'/>
-        <menuitem action='EngineLatency512'/>
-        <menuitem action='EngineLatency1024'/>
-        <menuitem action='EngineLatency2048'/>
-        <menuitem action='EngineLatency4096'/>
-        <menuitem action='EngineLatency8192'/>
-      </menu>
-    </menu>
     <menu action = 'WindowMenu'>
       <menuitem action='toggle-audio-midi-setup'/>
       <separator/>
