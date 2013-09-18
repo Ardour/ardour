@@ -1037,12 +1037,22 @@ AudioEngine::start_latency_detection ()
 	delete _mtdm;
 	_mtdm = 0;
 
+	/* find the ports we will connect to */
+
+	PortEngine::PortHandle* out = pe.get_port_by_name (_latency_output_name);
+	PortEngine::PortHandle* in = pe.get_port_by_name (_latency_input_name);
+
+	if (!out || !in) {
+		return;
+	}
+
 	/* create the ports we will use to read/write data */
 	
 	if ((_latency_output_port = pe.register_port ("latency_out", DataType::AUDIO, IsOutput)) == 0) {
 		return;
 	}
 	if (pe.connect (_latency_output_port, _latency_output_name)) {
+		pe.unregister_port (_latency_output_port);
 		return;
 	}
 
@@ -1058,9 +1068,9 @@ AudioEngine::start_latency_detection ()
 
 	LatencyRange lr;
 	_latency_signal_latency = 0;
-	lr = pe.get_latency_range (_latency_input_port, false);
+	lr = pe.get_latency_range (in, false);
 	_latency_signal_latency = lr.max;
-	lr = pe.get_latency_range (_latency_output_port, true);
+	lr = pe.get_latency_range (out, true);
 	_latency_signal_latency += lr.max;
 
 	/* all created and connected, lets go */
@@ -1076,9 +1086,14 @@ AudioEngine::stop_latency_detection ()
 {
 	_measuring_latency = false;
 
-	port_engine().unregister_port (_latency_output_port);
-	port_engine().unregister_port (_latency_input_port);
-	
+	if (_latency_output_port) {
+		port_engine().unregister_port (_latency_output_port);
+		_latency_output_port = 0;
+	}
+	if (_latency_input_port) {
+		port_engine().unregister_port (_latency_input_port);
+		_latency_input_port = 0;
+	}
 	if (_started_for_latency) {
 		stop ();
 	}
