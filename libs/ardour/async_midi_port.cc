@@ -20,6 +20,8 @@
 
 #include <iostream>
 
+#include <glibmm/timer.h>
+
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
 
