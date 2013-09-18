@@ -118,8 +118,11 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void setup_midi_tab_for_backend ();
     void setup_midi_tab_for_jack ();
     void refresh_midi_display ();
+    
+    std::string rate_as_string (float);
+    std::string bufsize_as_string (uint32_t);
 
-    uint32_t get_rate() const;
+    float get_rate() const;
     uint32_t get_buffer_size() const;
     uint32_t get_input_channels() const;
     uint32_t get_output_channels() const;
@@ -127,6 +130,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     uint32_t get_output_latency() const;
     std::string get_device_name() const;
     std::string get_driver() const;
+    std::string get_backend() const;
 
     void device_changed ();
     void list_devices ();
@@ -136,15 +140,21 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	std::string backend;
 	std::string driver;
 	std::string device;
-	std::string sample_rate;
-	std::string buffer_size;
+	float sample_rate;
+	uint32_t buffer_size;
 	uint32_t input_latency;
 	uint32_t output_latency;
 	uint32_t input_channels;
 	uint32_t output_channels;
 	bool active;
 
-	State() : active (false) {};
+	State() 
+		: input_latency (0)
+		, output_latency (0)
+		, input_channels (0)
+		, output_channels (0)
+		, active (false) {}
+
     };
     
     typedef std::list<State> StateList;
@@ -157,6 +167,9 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     State* get_saved_state_for_currently_displayed_backend_and_device ();
     void maybe_display_saved_state ();
     State* save_state ();
+    void store_state (State&);
+
+    bool  _have_control;
 
     static bool print_channel_count (Gtk::SpinButton*);
 
@@ -167,6 +180,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void use_latency_button_clicked ();
     void manage_control_app_sensitivity ();
     int push_state_to_backend (bool start);
+    void post_push ();
 
     /* latency measurement */
     void latency_button_toggled ();

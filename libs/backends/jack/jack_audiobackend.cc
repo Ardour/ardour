@@ -57,8 +57,8 @@ JACKAudioBackend::JACKAudioBackend (AudioEngine& e, boost::shared_ptr<JackConnec
 	, _target_buffer_size (1024)
 	, _target_sample_format (FormatFloat)
 	, _target_interleaved (false)
-	, _target_input_channels (-1)
-	, _target_output_channels (-1)
+	, _target_input_channels (0)
+	, _target_output_channels (0)
 	, _target_systemic_input_latency (0)
 	, _target_systemic_output_latency (0)
 	, _current_sample_rate (0)
@@ -292,7 +292,10 @@ int
 JACKAudioBackend::set_input_channels (uint32_t cnt)
 {
 	if (available()) {
-		return -1;
+		if (cnt != 0) {
+			/* can't set a real value for this while JACK runs */
+			return -1;
+		}
 	}
 
 	_target_input_channels = cnt;
@@ -304,7 +307,10 @@ int
 JACKAudioBackend::set_output_channels (uint32_t cnt)
 {
 	if (available()) {
-		return -1;
+		if (cnt != 0) {
+			/* can't set a real value for this while JACK runs */
+			return -1;
+		}
 	}
 
 	_target_output_channels = cnt;
@@ -316,6 +322,7 @@ int
 JACKAudioBackend::set_systemic_input_latency (uint32_t l)
 {
 	if (available()) {
+		/* can't do this while JACK runs */
 		return -1;
 	}
 
@@ -328,6 +335,7 @@ int
 JACKAudioBackend::set_systemic_output_latency (uint32_t l)
 {
 	if (available()) {
+		/* can't do this while JACK runs */
 		return -1;
 	}
 
@@ -341,18 +349,34 @@ JACKAudioBackend::set_systemic_output_latency (uint32_t l)
 std::string
 JACKAudioBackend::device_name () const
 {
-	if (available()) {
-		return "???";
+	if (!_jack_connection->in_control()) {
+		return "???"; // JACK has no way (as of fall 2013) to return
+			      // the device name
 	} 
 
 	return _target_device;
 }
 
+std::string
+JACKAudioBackend::driver_name() const
+{
+	if (!_jack_connection->in_control()) {
+		return "???"; // JACK has no way (as of fall 2013) to return
+			      // the driver name
+	}
+
+	return _target_driver;
+}
+
 float
 JACKAudioBackend::sample_rate () const
 {
-	if (available()) {
-		return _current_sample_rate;
+	if (!_jack_connection->in_control()) {
+		if (available()) {
+			return _current_sample_rate;
+		} else {
+			return 0;
+		}
 	}
 	return _target_sample_rate;
 }
@@ -360,8 +384,12 @@ JACKAudioBackend::sample_rate () const
 uint32_t
 JACKAudioBackend::buffer_size () const
 {
-	if (available()) {
-		return _current_buffer_size;
+	if (!_jack_connection->in_control()) {
+		if (available()) {
+			return _current_buffer_size;
+		} else {
+			return 0;
+		}
 	}
 	return _target_buffer_size;
 }
@@ -381,19 +409,37 @@ JACKAudioBackend::interleaved () const
 uint32_t
 JACKAudioBackend::input_channels () const
 {
-	if (available()) {
-		return n_physical (JackPortIsInput).n_audio();
-	} 
-	return _target_input_channels;
+	if (!_jack_connection->in_control()) {
+		if (available()) {
+			return n_physical (JackPortIsInput).n_audio();
+		} else {
+			return 0;
+		}
+	} else {
+		if (available()) {
+			return n_physical (JackPortIsInput).n_audio();
+		} else {
+			return _target_input_channels;
+		}
+	}
 }
 
 uint32_t
 JACKAudioBackend::output_channels () const
 {
-	if (available()) {
-		return n_physical (JackPortIsOutput).n_audio();
-	} 
-	return _target_output_channels;
+	if (!_jack_connection->in_control()) {
+		if (available()) {
+			return n_physical (JackPortIsOutput).n_audio();
+		} else {
+			return 0;
+		}
+	} else {
+		if (available()) {
+			return n_physical (JackPortIsOutput).n_audio();
+		} else {
+			return _target_output_channels;
+		}
+	}
 }
 
 uint32_t

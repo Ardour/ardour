@@ -223,6 +223,11 @@ class AudioBackend : public PortEngine {
     virtual uint32_t     systemic_input_latency () const = 0;
     virtual uint32_t     systemic_output_latency () const = 0;
 
+    /** override this if this implementation returns true from
+     * requires_driver_selection()
+     */
+    virtual std::string  driver_name() const { return std::string(); }
+
     /** Return the name of a control application for the 
      * selected/in-use device. If no such application exists,
      * or if no device has been selected or is in-use,
