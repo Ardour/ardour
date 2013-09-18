@@ -399,61 +399,19 @@ ARDOUR_UI::engine_stopped ()
 void
 ARDOUR_UI::engine_running ()
 {
+	cerr << "ENGINE RUNNING\n";
+
 	if (first_time_engine_run) {
 		post_engine();
 		first_time_engine_run = false;
+	} else {
+		cerr << "AGAIN...\n";
 	}
 	
-	ActionManager::set_sensitive (ActionManager::engine_sensitive_actions, true);
-	ActionManager::set_sensitive (ActionManager::engine_opposite_sensitive_actions, false);
-
-	Glib::RefPtr<Action> action;
-	const char* action_name = 0;
-
-	switch (AudioEngine::instance()->samples_per_cycle()) {
-	case 32:
-		action_name = X_("JACKLatency32");
-		break;
-	case 64:
-		action_name = X_("JACKLatency64");
-		break;
-	case 128:
-		action_name = X_("JACKLatency128");
-		break;
-	case 512:
-		action_name = X_("JACKLatency512");
-		break;
-	case 1024:
-		action_name = X_("JACKLatency1024");
-		break;
-	case 2048:
-		action_name = X_("JACKLatency2048");
-		break;
-	case 4096:
-		action_name = X_("JACKLatency4096");
-		break;
-	case 8192:
-		action_name = X_("JACKLatency8192");
-		break;
-	default:
-		/* XXX can we do anything useful ? */
-		break;
-	}
-
-	if (action_name) {
-
-		action = ActionManager::get_action (X_("JACK"), action_name);
-
-		if (action) {
-			Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (action);
-			ract->set_active ();
-		}
-
-		update_disk_space ();
-		update_cpu_load ();
-		update_sample_rate (AudioEngine::instance()->sample_rate());
-		update_timecode_format ();
-	}
+	update_disk_space ();
+	update_cpu_load ();
+	update_sample_rate (AudioEngine::instance()->sample_rate());
+	update_timecode_format ();
 }
 
 void
@@ -481,13 +439,13 @@ ARDOUR_UI::engine_halted (const char* reason, bool free_reason)
 	*/
 
 	if (strlen (reason)) {
-		msgstr = string_compose (_("The audio backend (JACK) was shutdown because:\n\n%1"), reason);
+		msgstr = string_compose (_("The audio backend was shutdown because:\n\n%1"), reason);
 	} else {
 		msgstr = string_compose (_("\
-JACK has either been shutdown or it\n\
+`The audio backend has either been shutdown or it\n\
 disconnected %1 because %1\n\
 was not fast enough. Try to restart\n\
-JACK, reconnect and save the session."), PROGRAM_NAME);
+the audio backend and save the session."), PROGRAM_NAME);
 	}
 
 	MessageDialog msg (*editor, msgstr);
@@ -1126,6 +1084,8 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 {
 	char buf[64];
 
+	cerr << "USR\n";
+
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::update_sample_rate, ignored)
 
 	if (!AudioEngine::instance()->connected()) {
@@ -1152,6 +1112,7 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 			}
 		}
 	}
+	cerr << "SRL = " << buf << endl;
 
 	sample_rate_label.set_markup (buf);
 }

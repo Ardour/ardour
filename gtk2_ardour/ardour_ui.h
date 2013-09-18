@@ -670,8 +670,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	int pending_state_dialog ();
 	int sr_mismatch_dialog (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
 
-	void set_engine_buffer_size (ARDOUR::pframes_t);
-
 	Gtk::MenuItem* jack_disconnect_item;
 	Gtk::MenuItem* jack_reconnect_item;
 	Gtk::Menu*     jack_bufsize_menu;

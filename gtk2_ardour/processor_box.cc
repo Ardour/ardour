@@ -2151,7 +2151,7 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 	} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (processor)) != 0) {
 
 		if (!_session->engine().connected()) {
-			MessageDialog msg ( _("Not connected to JACK - no I/O changes are possible"));
+			MessageDialog msg ( _("Not connected to audio engine - no I/O changes are possible"));
 			msg.run ();
 			return 0;
 		}
