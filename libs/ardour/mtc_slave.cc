@@ -309,8 +309,11 @@ MTC_Slave::update_mtc_time (const MIDI::byte *msg, bool was_full, framepos_t now
 	   to use a timestamp indicating when this MTC time was received. example: when we received
 	   a locate command via MMC.
 	*/
-
+#ifdef COMPILER_MSVC
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::update_mtc_time - TID:%1\n", ::pthread_self().p));
+#else
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::update_mtc_time - TID:%1\n", ::pthread_self()));
+#endif
 	TimecodeFormat tc_format;
 	bool reset_tc = true;
 
