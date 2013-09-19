@@ -1661,17 +1661,8 @@ EngineControl::engine_running ()
 	buffer_size_combo.set_active_text (bufsize_as_string (backend->buffer_size()));
 	sample_rate_combo.set_active_text (rate_as_string (backend->sample_rate()));
 
-	if (backend->can_change_buffer_size_when_running()) {
-		buffer_size_combo.set_sensitive (true);
-	} else {
-		buffer_size_combo.set_sensitive (false);
-	}
-
-	if (backend->can_change_sample_rate_when_running()) {
-		sample_rate_combo.set_sensitive (true);
-	} else {
-		sample_rate_combo.set_sensitive (false);
-	}
+	buffer_size_combo.set_sensitive (true);
+	sample_rate_combo.set_sensitive (true);
 
 	connect_disconnect_button.set_label (string_compose (_("Disconnect from %1"), backend->name()));
 
