@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
+from waflib import Options
 import os
 import sys
 import re
@@ -19,6 +20,14 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
+    #
+    # PortAudio is currently used to get a list of audio device names.
+    # We should find a better way to do this that doesn't involve this
+    # kind of dependency.
+    #
+    if Options.options.dist_target == 'mingw':
+        autowaf.check_pkg(conf, 'portaudio-2.0', uselib_store='PORTAUDIO',
+                          atleast_version='19')
     autowaf.configure(conf)
 
 def build(bld):
@@ -34,7 +43,10 @@ def build(bld):
     obj.cxxflags = [ '-fPIC' ]
     obj.name     = 'jack_audiobackend'
     obj.target   = 'jack_audiobackend'
-    obj.uselib   = [ 'JACK' ]
+    if Options.options.dist_target == 'mingw':
+        obj.uselib   = [ 'JACK', 'PORTAUDIO' ]
+    else:
+        obj.uselib   = [ 'JACK' ]
     obj.use      = 'ardour libpbd'
     obj.vnum     = JACKBACKEND_VERSION
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'ardour3', 'backends')
