@@ -1809,7 +1809,7 @@ ARDOUR_UI::transport_roll ()
 #if 0
 	if (_session->config.get_external_sync()) {
 		switch (Config->get_sync_source()) {
-		case JACK:
+		case Engine:
 			break;
 		default:
 			/* transport controlled by the master */
@@ -1859,7 +1859,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 
 	if (_session->config.get_external_sync()) {
 		switch (Config->get_sync_source()) {
-		case JACK:
+		case Engine:
 			break;
 		default:
 			/* transport controlled by the master */

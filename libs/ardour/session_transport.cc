@@ -86,7 +86,7 @@ Session::request_sync_source (Slave* new_slave)
 
 	seamless = Config->get_seamless_loop ();
 
-	if (dynamic_cast<JACK_Slave*>(new_slave)) {
+	if (dynamic_cast<Engine_Slave*>(new_slave)) {
 		/* JACK cannot support seamless looping at present */
 		Config->set_seamless_loop (false);
 	} else {
@@ -514,13 +514,13 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	if (auto_return_enabled ||
 	    (ptw & PostTransportLocate) ||
 	    (_requested_return_frame >= 0) ||
-	    synced_to_jack()) {
+	    synced_to_engine()) {
 
 		if (pending_locate_flush) {
 			flush_all_inserts ();
 		}
 
-		if ((auto_return_enabled || synced_to_jack() || _requested_return_frame >= 0) &&
+		if ((auto_return_enabled || synced_to_engine() || _requested_return_frame >= 0) &&
 		    !(ptw & PostTransportLocate)) {
 
 			/* no explicit locate queued */
@@ -543,7 +543,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 						/* don't try to handle loop play when synced to JACK */
 
-						if (!synced_to_jack()) {
+						if (!synced_to_engine()) {
 
 							Location *location = _locations->auto_loop_location();
 
@@ -734,7 +734,7 @@ Session::set_play_loop (bool yn)
 		return;
 	}
 
-	if (yn && Config->get_seamless_loop() && synced_to_jack()) {
+	if (yn && Config->get_seamless_loop() && synced_to_engine()) {
 		warning << string_compose (
 			_("Seamless looping cannot be supported while %1 is using JACK transport.\n"
 			  "Recommend changing the configured options"), PROGRAM_NAME)
@@ -811,7 +811,7 @@ Session::flush_all_inserts ()
 void
 Session::start_locate (framepos_t target_frame, bool with_roll, bool with_flush, bool with_loop, bool force)
 {
-	if (synced_to_jack()) {
+	if (synced_to_engine()) {
 
 		double sp;
 		framepos_t pos;
@@ -926,7 +926,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 
 	bool transport_was_stopped = !transport_rolling();
 
-	if (transport_was_stopped && (!auto_play_legal || !config.get_auto_play()) && !with_roll && !(synced_to_jack() && play_loop)) {
+	if (transport_was_stopped && (!auto_play_legal || !config.get_auto_play()) && !with_roll && !(synced_to_engine() && play_loop)) {
 		realtime_stop (false, true); // XXX paul - check if the 2nd arg is really correct
 		transport_was_stopped = true;
 	} else {
@@ -1067,7 +1067,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 			set_track_monitor_input_status (true);
 		}
 
-		if (synced_to_jack ()) {
+		if (synced_to_engine ()) {
 			if (clear_state) {
 				/* do this here because our response to the slave won't
 				   take care of it.
@@ -1090,7 +1090,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 			set_track_monitor_input_status (false);
 		}
 
-		if (synced_to_jack()) {
+		if (synced_to_engine()) {
 			_engine.transport_start ();
 		} else {
 			start_transport ();
@@ -1100,7 +1100,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 
 		/* not zero, not 1.0 ... varispeed */
 
-		if ((synced_to_jack()) && speed != 0.0 && speed != 1.0) {
+		if ((synced_to_engine()) && speed != 0.0 && speed != 1.0) {
 			warning << string_compose (
 				_("Global varispeed cannot be supported while %1 is connected to JACK transport control"),
 				PROGRAM_NAME)
@@ -1429,8 +1429,8 @@ Session::switch_to_sync_source (SyncSource src)
 		}
 		break;
 
-	case JACK:
-		if (_slave && dynamic_cast<JACK_Slave*>(_slave)) {
+	case Engine:
+		if (_slave && dynamic_cast<Engine_Slave*>(_slave)) {
 			return;
 		}
 
@@ -1438,7 +1438,7 @@ Session::switch_to_sync_source (SyncSource src)
 			return;
 		}
 
-		new_slave = new JACK_Slave (*AudioEngine::instance());
+		new_slave = new Engine_Slave (*AudioEngine::instance());
 		break;
 
 	default:
@@ -1632,9 +1632,9 @@ bool
 Session::maybe_stop (framepos_t limit)
 {
 	if ((_transport_speed > 0.0f && _transport_frame >= limit) || (_transport_speed < 0.0f && _transport_frame == 0)) {
-		if (synced_to_jack () && config.get_jack_time_master ()) {
+		if (synced_to_engine () && config.get_jack_time_master ()) {
 			_engine.transport_stop ();
-		} else if (!synced_to_jack ()) {
+		} else if (!synced_to_engine ()) {
 			stop_transport ();
 		}
 		return true;

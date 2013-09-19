@@ -335,7 +335,7 @@ setup_enum_writer ()
 	REGISTER (_PluginType);
 
 	REGISTER_ENUM (MTC);
-	REGISTER_ENUM (JACK);
+	REGISTER_ENUM (Engine);
 	REGISTER_ENUM (MIDIClock);
 	REGISTER_ENUM (LTC);
 	REGISTER (_SyncSource);

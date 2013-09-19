@@ -393,7 +393,7 @@ Session::immediately_post_engine ()
 
 	_engine.Running.connect_same_thread (*this, boost::bind (&Session::initialize_latencies, this));
 
-	if (synced_to_jack()) {
+	if (synced_to_engine()) {
 		_engine.transport_stop ();
 	}
 
@@ -1406,7 +1406,7 @@ Session::audible_frame () const
 		offset = current_block_size;
 	}
 
-	if (synced_to_jack()) {
+	if (synced_to_engine()) {
 		tf = _engine.transport_frame();
 	} else {
 		tf = _transport_frame;

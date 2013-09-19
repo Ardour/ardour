@@ -334,7 +334,7 @@ SessionOptionEditor::parameter_changed (std::string const & p)
 {
 	OptionEditor::parameter_changed (p);
 	if (p == "external-sync") {
-		if (Config->get_sync_source() == JACK) {
+		if (Config->get_sync_source() == Engine) {
 			_vpu->set_sensitive(!_session_config->get_external_sync());
 		} else {
 			_vpu->set_sensitive(true);

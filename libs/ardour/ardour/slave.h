@@ -486,11 +486,11 @@ class MIDIClock_Slave : public Slave {
 	bool _starting;
 };
 
-class JACK_Slave : public Slave
+class Engine_Slave : public Slave
 {
   public:
-	JACK_Slave (AudioEngine&);
-	~JACK_Slave ();
+	Engine_Slave (AudioEngine&);
+	~Engine_Slave ();
 
 	bool speed_and_position (double& speed, framepos_t& pos);
 

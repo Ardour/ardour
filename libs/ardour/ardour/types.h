@@ -489,7 +489,7 @@ namespace ARDOUR {
 	};
 
 	enum SyncSource {
-		JACK,
+		Engine,
 		MTC,
 		MIDIClock,
 		LTC
