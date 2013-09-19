@@ -75,7 +75,10 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     Gtk::Adjustment ports_adjustment;
     Gtk::SpinButton ports_spinner;
 
+    Gtk::Label      have_control_text;
     Gtk::Button     control_app_button;
+
+    Gtk::Button     connect_disconnect_button;
 
     /* latency measurement */
 
@@ -106,9 +109,9 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     
     uint32_t ignore_changes;
     uint32_t _desired_sample_rate;
-    
-    static bool engine_running ();
-    
+    bool     no_push;
+    bool     started_at_least_once;
+
     void driver_changed ();
     void backend_changed ();
     void sample_rate_changed ();
@@ -174,6 +177,8 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     static bool print_channel_count (Gtk::SpinButton*);
 
     void build_notebook ();
+    void build_full_control_notebook ();
+    void build_no_control_notebook ();
 
     void on_response (int);
     void control_app_button_clicked ();
@@ -181,6 +186,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void manage_control_app_sensitivity ();
     int push_state_to_backend (bool start);
     void post_push ();
+    void update_sensitivity ();
 
     /* latency measurement */
     void latency_button_toggled ();
@@ -190,9 +196,16 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void disable_latency_tab ();
     void start_latency_detection ();
     void end_latency_detection ();
-
+    
     void on_switch_page (GtkNotebookPage*, guint page_num);
     bool on_delete_event (GdkEventAny*);
+
+    void engine_running ();
+    void engine_stopped ();
+    PBD::ScopedConnection running_connection;
+    PBD::ScopedConnection stopped_connection;
+
+    void connect_disconnect_click ();
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

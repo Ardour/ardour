@@ -960,6 +960,7 @@ JACKAudioBackend::disconnected (const char* why)
 		engine.halted_callback (why); /* EMIT SIGNAL */
         }
 }
+
 float 
 JACKAudioBackend::cpu_load() const 
 {

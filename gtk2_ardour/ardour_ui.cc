@@ -399,14 +399,10 @@ ARDOUR_UI::engine_stopped ()
 void
 ARDOUR_UI::engine_running ()
 {
-	cerr << "ENGINE RUNNING\n";
-
 	if (first_time_engine_run) {
 		post_engine();
 		first_time_engine_run = false;
-	} else {
-		cerr << "AGAIN...\n";
-	}
+	} 
 	
 	update_disk_space ();
 	update_cpu_load ();
@@ -1084,8 +1080,6 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 {
 	char buf[64];
 
-	cerr << "USR\n";
-
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::update_sample_rate, ignored)
 
 	if (!AudioEngine::instance()->connected()) {
@@ -1112,8 +1106,6 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 			}
 		}
 	}
-	cerr << "SRL = " << buf << endl;
-
 	sample_rate_label.set_markup (buf);
 }
 
