@@ -79,6 +79,7 @@ EngineControl::EngineControl ()
 	, ignore_changes (0)
 	, _desired_sample_rate (0)
 	, no_push (true)
+	, started_at_least_once (false)
 {
 	using namespace Notebook_Helpers;
 	vector<string> strings;
