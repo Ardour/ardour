@@ -276,10 +276,6 @@ Session::Session (AudioEngine &eng,
 			throw failed_constructor ();
 		}
 
-		if (load_state (_current_snapshot_name)) {
-			throw failed_constructor ();
-		}
-
 	} else {
 
 		if (load_state (_current_snapshot_name)) {
