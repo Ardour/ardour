@@ -644,6 +644,8 @@ ArdourStartup::session_selected ()
 void
 ArdourStartup::new_session_button_clicked ()
 {
+	_existing_session_chooser_used = false;
+	recent_session_display.get_selection()->unselect_all ();
 	set_current_page (new_session_page_index);
 }
 
