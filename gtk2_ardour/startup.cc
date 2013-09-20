@@ -74,7 +74,7 @@ ArdourStartup::ArdourStartup (bool require_new, const std::string& session_name,
 							 "%1 will play NO role in monitoring"), PROGRAM_NAME))
 	, monitor_via_ardour_button (string_compose (_("Ask %1 to play back material as it is being recorded"), PROGRAM_NAME))
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
-	, more_new_session_options_button (_("I'd like more options for this session"))
+	, more_new_session_options_button (_("Advanced options ..."))
 	, _output_limit_count_adj (1, 0, 100, 1, 10, 0)
 	, _input_limit_count_adj (1, 0, 100, 1, 10, 0)
 	, _master_bus_channel_count_adj (2, 0, 100, 1, 10, 0)
@@ -146,8 +146,6 @@ ArdourStartup::ArdourStartup (bool require_new, const std::string& session_name,
 			setup_new_session_page ();
 		}
 
-		setup_more_options_page ();
-		
 		if (!template_name.empty()) {
 			use_template_button.set_active (false);
 			load_template_override = template_name;
@@ -638,11 +636,7 @@ ArdourStartup::session_selected ()
 		Gtk::Widget* def = wrap (gtk_window_get_default_widget (win->gobj()));
 		Gtk::Button* button;
 		if ((button = dynamic_cast<Gtk::Button*>(def)) != 0) {
-			if (more_new_session_options_button.get_active()) {
-				button->set_label (_("Next"));
-			} else {
-				button->set_label (_("Open"));
-			}
+			button->set_label (_("Open"));
 		}
 	}
 }
@@ -832,11 +826,6 @@ ArdourStartup::setup_new_session_page ()
 
 		vbox2->set_spacing (6);
 
-		label3->set_markup (_("<b>Options</b>"));
-		label3->set_alignment (0.0, 0.0);
-
-		vbox2->pack_start (*label3, false, true);
-
 		VBox *vbox3 = manage (new VBox);
 
 		vbox3->set_spacing (6);
@@ -899,8 +888,8 @@ ArdourStartup::setup_new_session_page ()
 		hbox5->set_spacing (6);
 		hbox5->pack_start (more_new_session_options_button, false, false);
 
-		more_new_session_options_button.show ();
-		more_new_session_options_button.signal_clicked().connect (sigc::mem_fun (*this, &ArdourStartup::more_new_session_options_button_clicked));
+		setup_more_options_box ();
+		more_new_session_options_button.add (more_options_vbox);
 
 		vbox3->pack_start (*hbox5, false, false);
 		hbox3->pack_start (*vbox3, true, true, 8);
@@ -917,11 +906,7 @@ ArdourStartup::setup_new_session_page ()
 	set_page_type (session_new_vbox, ASSISTANT_PAGE_CONTENT);
 	set_page_title (session_new_vbox, _("New Session"));
 
-	if (more_new_session_options_button.get_active()) {
-		set_page_type (session_new_vbox, ASSISTANT_PAGE_CONTENT);
-	} else {
-		set_page_type (session_new_vbox, ASSISTANT_PAGE_CONFIRM);
-	}
+	set_page_type (session_new_vbox, ASSISTANT_PAGE_CONFIRM);
 }
 
 void
@@ -1037,20 +1022,7 @@ ArdourStartup::recent_session_row_selected ()
 }
 
 void
-ArdourStartup::more_new_session_options_button_clicked ()
-{
-	if (more_new_session_options_button.get_active()) {
-		more_options_vbox.show_all ();
-		set_page_type (more_options_vbox, ASSISTANT_PAGE_CONFIRM);
-		set_page_type (session_new_vbox, ASSISTANT_PAGE_CONTENT);
-	} else {
-		set_page_type (session_new_vbox, ASSISTANT_PAGE_CONFIRM);
-		more_options_vbox.hide ();
-	}
-}
-
-void
-ArdourStartup::setup_more_options_page ()
+ArdourStartup::setup_more_options_box ()
 {
 	more_options_vbox.set_border_width (24);
 
@@ -1234,10 +1206,6 @@ ArdourStartup::setup_more_options_page ()
 	 * doesn't resize.
 	 */
 	more_options_vbox.show_all ();
-
-	session_options_page_index = append_page (more_options_vbox);
-	set_page_title (more_options_vbox, _("Advanced Session Options"));
-	set_page_complete (more_options_vbox, true);
 }
 
 bool
@@ -1351,17 +1319,7 @@ ArdourStartup::master_bus_button_clicked ()
 void
 ArdourStartup::move_along_now ()
 {
-	gint cur = get_current_page ();
-
-	if (cur == new_session_page_index) {
-		if (more_new_session_options_button.get_active()) {
-			set_current_page (session_options_page_index);
-		} else {
-			on_apply ();
-		}
-	} else {
-		on_apply ();
-	}
+	on_apply ();
 }
 
 void

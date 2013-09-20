@@ -26,6 +26,7 @@
 #include <gtkmm/assistant.h>
 #include <gtkmm/label.h>
 #include <gtkmm/drawingarea.h>
+#include <gtkmm/expander.h>
 #include <gtkmm/box.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/filechooserbutton.h>
@@ -189,7 +190,7 @@ class ArdourStartup : public Gtk::Assistant {
 
 	Gtk::VBox session_new_vbox;
 	Gtk::VBox session_existing_vbox;
-	Gtk::CheckButton more_new_session_options_button;
+	Gtk::Expander more_new_session_options_button;
 	Gtk::RadioButtonGroup session_template_group;
 	Gtk::RadioButton use_session_as_template_button;
 	Gtk::RadioButton use_template_button;
@@ -254,7 +255,7 @@ class ArdourStartup : public Gtk::Assistant {
 	void limit_inputs_clicked ();
 	void limit_outputs_clicked ();
 	void master_bus_button_clicked ();
-	void setup_more_options_page ();
+	void setup_more_options_box ();
 
 	/* final page */
 
