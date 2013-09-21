@@ -38,7 +38,6 @@
 #include "enums.h"
 #include "editing.h"
 #include "route_time_axis.h"
-#include "canvas.h"
 
 namespace ARDOUR {
 	class Session;

@@ -91,18 +91,36 @@ class UIConfiguration : public PBD::Stateful
 
 	uint32_t color_by_name (const std::string&);
 
-	sigc::signal<void,const char*> ParameterChanged;
+        sigc::signal<void,std::string> ParameterChanged;
+	void map_parameters (boost::function<void (std::string)>&);
 
-#undef  UI_CONFIG_VARIABLE
-#undef  CANVAS_VARIABLE
-#define UI_CONFIG_VARIABLE(Type,var,name,val) UIConfigVariable<Type> var;
-#define CANVAS_VARIABLE(var,name) UIConfigVariable<uint32_t> var;
+#undef UI_CONFIG_VARIABLE
+#define UI_CONFIG_VARIABLE(Type,var,name,value) \
+	Type get_##var () const { return var.get(); } \
+	bool set_##var (Type val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
 #include "ui_config_vars.h"
-#include "canvas_vars.h"
 #undef  UI_CONFIG_VARIABLE
+#undef CANVAS_VARIABLE
+#define CANVAS_VARIABLE(var,name) \
+	uint32_t get_##var () const { return var.get(); } \
+	bool set_##var (uint32_t val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
+#include "canvas_vars.h"
 #undef  CANVAS_VARIABLE
 
   private:
+
+	/* declare variables */
+
+#undef  UI_CONFIG_VARIABLE
+#define UI_CONFIG_VARIABLE(Type,var,name,value) UIConfigVariable<Type> var;
+#include "ui_config_vars.h"
+#undef UI_CONFIG_VARIABLE
+
+#undef CANVAS_VARIABLE
+#define CANVAS_VARIABLE(var,name) UIConfigVariable<uint32_t> var;
+#include "canvas_vars.h"
+#undef  CANVAS_VARIABLE
+
 	XMLNode& state ();
 	bool _dirty;
 };

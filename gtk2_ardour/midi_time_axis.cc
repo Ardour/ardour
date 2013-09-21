@@ -60,8 +60,6 @@
 #include "ardour_button.h"
 #include "automation_line.h"
 #include "automation_time_axis.h"
-#include "canvas-note-event.h"
-#include "canvas_impl.h"
 #include "editor.h"
 #include "enums.h"
 #include "ghostregion.h"
@@ -82,8 +80,8 @@
 #include "rgb_macros.h"
 #include "selection.h"
 #include "step_editor.h"
-#include "simplerect.h"
 #include "utils.h"
+#include "note_base.h"
 
 #include "ardour/midi_track.h"
 
@@ -99,7 +97,7 @@ using namespace Editing;
 static const uint32_t MIDI_CONTROLS_BOX_MIN_HEIGHT = 140;
 static const uint32_t KEYBOARD_MIN_HEIGHT = 130;
 
-MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, Canvas& canvas)
+MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
 	: AxisView(sess) // virtually inherited
 	, RouteTimeAxisView(ed, sess, canvas)
 	, _ignore_signals(false)
@@ -314,7 +312,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	if (!color_mode.empty()) {
 		_color_mode = ColorMode (string_2_enum(color_mode, _color_mode));
 		if (_channel_selector && _color_mode == ChannelColors) {
-			_channel_selector->set_channel_colors(CanvasNoteEvent::midi_channel_colors);
+			_channel_selector->set_channel_colors(NoteBase::midi_channel_colors);
 		}
 	}
 
@@ -511,7 +509,7 @@ MidiTimeAxisView::toggle_channel_selector ()
 		_channel_selector = new MidiChannelSelectorWindow (midi_track());
 
 		if (_color_mode == ChannelColors) {
-			_channel_selector->set_channel_colors(CanvasNoteEvent::midi_channel_colors);
+			_channel_selector->set_channel_colors(NoteBase::midi_channel_colors);
 		} else {
 			_channel_selector->set_default_channel_color ();
 		}
@@ -1034,7 +1032,7 @@ MidiTimeAxisView::set_color_mode (ColorMode mode, bool force, bool redisplay, bo
 		
 		if (_channel_selector) {
 			if (mode == ChannelColors) {
-				_channel_selector->set_channel_colors(CanvasNoteEvent::midi_channel_colors);
+				_channel_selector->set_channel_colors(NoteBase::midi_channel_colors);
 			} else {
 				_channel_selector->set_default_channel_color();
 			}

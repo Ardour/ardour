@@ -26,7 +26,6 @@
 #include "automation_time_axis.h"
 #include "automation_line.h"
 #include "enums.h"
-#include "canvas.h"
 
 namespace ARDOUR {
 	class AutomationList;
@@ -43,7 +42,7 @@ public:
 	                     boost::shared_ptr<ARDOUR::Region>,
 	                     const Evoral::Parameter& parameter,
 	                     boost::shared_ptr<ARDOUR::AutomationList>,
-	                     double initial_samples_per_unit,
+	                     double initial_samples_per_pixel,
 	                     Gdk::Color const & basic_color);
 
 	~AutomationRegionView();

@@ -79,7 +79,7 @@ TapeAudioRegionView::~TapeAudioRegionView()
 }
 
 void
-TapeAudioRegionView::update (uint32_t n)
+TapeAudioRegionView::update (uint32_t /*n*/)
 {
 	/* check that all waves are build and ready */
 
@@ -87,11 +87,9 @@ TapeAudioRegionView::update (uint32_t n)
 		return;
 	}
 
-	ENSURE_GUI_THREAD (*this, &TapeAudioRegionView::update, n)
-
-	/* this triggers a cache invalidation and redraw in the waveview */
-
-	waves[n]->property_data_src() = _region.get();
+	ENSURE_GUI_THREAD (*this, &TapeAudioRegionView::update, n);
+	// CAIROCANVAS
+	// waves[n]->rebuild ();
 }
 
 void

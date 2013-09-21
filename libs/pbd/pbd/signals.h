@@ -22,6 +22,11 @@
 
 #include <list>
 #include <map>
+
+#ifdef nil
+#undef nil
+#endif
+
 #include <glibmm/threads.h>
 
 #include <boost/noncopyable.hpp>

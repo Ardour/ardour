@@ -25,16 +25,15 @@
 
 #include <vector>
 
-#include <libgnomecanvasmm.h>
-#include <libgnomecanvasmm/polygon.h>
 #include <sigc++/signal.h>
 #include "ardour/region.h"
 #include "ardour/beats_frames_converter.h"
 
+#include "canvas/fwd.h"
+
 #include "time_axis_view_item.h"
 #include "automation_line.h"
 #include "enums.h"
-#include "canvas.h"
 
 class TimeAxisView;
 class RegionEditor;
@@ -42,9 +41,10 @@ class GhostRegion;
 class AutomationTimeAxisView;
 class AutomationRegionView;
 
-namespace Gnome { namespace Canvas {
-	class NoEventText;
-} }
+namespace ArdourCanvas {
+	class Polygon;
+	class Text;
+}
 
 class RegionView : public TimeAxisViewItem
 {
@@ -52,7 +52,7 @@ class RegionView : public TimeAxisViewItem
 	RegionView (ArdourCanvas::Group* parent,
 	            TimeAxisView&        time_view,
 	            boost::shared_ptr<ARDOUR::Region> region,
-	            double               samples_per_unit,
+	            double               samples_per_pixel,
 	            Gdk::Color const &   basic_color,
 		    bool 		 automation = false);
 
@@ -70,7 +70,7 @@ class RegionView : public TimeAxisViewItem
 	void set_valid (bool yn) { valid = yn; }
 
 	virtual void set_height (double);
-	virtual void set_samples_per_unit (double);
+	virtual void set_samples_per_pixel (double);
 	virtual bool set_duration (framecnt_t, void*);
 
 	void move (double xdelta, double ydelta);
@@ -117,7 +117,7 @@ class RegionView : public TimeAxisViewItem
 	virtual void trim_front_ending () {}
 
 	bool trim_end (framepos_t, bool);
-	void trim_contents (framepos_t, bool, bool);
+        void move_contents (ARDOUR::frameoffset_t);
 	virtual void thaw_after_trim ();
 
         void set_silent_frames (const ARDOUR::AudioIntervalResult&, double threshold);
@@ -134,10 +134,12 @@ class RegionView : public TimeAxisViewItem
 	RegionView (ArdourCanvas::Group *,
 		    TimeAxisView&,
 		    boost::shared_ptr<ARDOUR::Region>,
-		    double samples_per_unit,
+		    double samples_per_pixel,
 		    Gdk::Color const & basic_color,
 		    bool recording,
 		    TimeAxisViewItem::Visibility);
+
+        bool canvas_group_event (GdkEvent*);
 
 	virtual void region_resized (const PBD::PropertyChange&);
 	virtual void region_muted ();
@@ -180,17 +182,17 @@ class RegionView : public TimeAxisViewItem
 	    different bits of regions according to whether or not they are the one
 	    that will be played at any given time.
 	*/
-	std::list<ArdourCanvas::SimpleRect*> _coverage_frames;
+	std::list<ArdourCanvas::Rectangle*> _coverage_frames;
 
 	/** a list of rectangles used to show silent segments
 	*/
-	std::list<ArdourCanvas::SimpleRect*> _silent_frames;
+	std::list<ArdourCanvas::Rectangle*> _silent_frames;
 	/** a list of rectangles used to show the current silence threshold
 	*/
-	std::list<ArdourCanvas::SimpleRect*> _silent_threshold_frames;
+	std::list<ArdourCanvas::Rectangle*> _silent_threshold_frames;
         /** a text item to display strip silence statistics
          */
-        ArdourCanvas::NoEventText* _silence_text;
+        ArdourCanvas::Text* _silence_text;
 
 	ARDOUR::BeatsFramesConverter _region_relative_time_converter;
 	ARDOUR::BeatsFramesConverter _source_relative_time_converter;

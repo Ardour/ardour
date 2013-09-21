@@ -129,11 +129,11 @@ demultiply_alpha (guint8 src,
 	return alpha ? ((guint (src) << 8) - src) / alpha : 0;
 }
 
-static void
-convert_bgra_to_rgba (guint8 const* src,
-		      guint8*       dst,
-		      int           width,
-		      int           height)
+void
+Gtkmm2ext::convert_bgra_to_rgba (guint8 const* src,
+				 guint8*       dst,
+				 int           width,
+				 int           height)
 {
 	guint8 const* src_pixel = src;
 	guint8*       dst_pixel = dst;

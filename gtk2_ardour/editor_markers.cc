@@ -20,7 +20,6 @@
 #include <cstdlib>
 #include <cmath>
 
-#include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm2ext/gtk_ui.h>
 
 #include "ardour/session.h"
@@ -28,12 +27,15 @@
 #include "ardour/profile.h"
 #include "pbd/memento_command.h"
 
+#include "canvas/canvas.h"
+#include "canvas/item.h"
+#include "canvas/rectangle.h"
+
 #include "editor.h"
 #include "marker.h"
 #include "selection.h"
 #include "editing.h"
 #include "gui_thread.h"
-#include "simplerect.h"
 #include "actions.h"
 #include "prompter.h"
 #include "editor_drag.h"
@@ -171,7 +173,7 @@ Editor::add_new_location_internal (Location* location)
 		select_new_marker = false;
 	}
 
-	lam->canvas_height_set (_canvas_height);
+	lam->canvas_height_set (_visible_canvas_height);
 	lam->set_show_lines (_show_marker_lines);
 
 	/* Add these markers to the appropriate sorted marker lists, which will render
@@ -256,7 +258,7 @@ Editor::check_marker_label (Marker* m)
 
 		/* Update just the available space between the previous marker and this one */
 
-		double const p = frame_to_pixel (m->position() - (*prev)->position());
+		double const p = sample_to_pixel (m->position() - (*prev)->position());
 
 		if (m->label_on_left()) {
 			(*prev)->set_right_label_limit (p / 2);
@@ -275,7 +277,7 @@ Editor::check_marker_label (Marker* m)
 
 		/* Update just the available space between this marker and the next */
 
-		double const p = frame_to_pixel ((*next)->position() - m->position());
+		double const p = sample_to_pixel ((*next)->position() - m->position());
 
 		if ((*next)->label_on_left()) {
 			m->set_right_label_limit (p / 2);
@@ -329,7 +331,7 @@ Editor::update_marker_labels (ArdourCanvas::Group* group)
 	while (i != sorted.end()) {
 
 		if (prev != sorted.end()) {
-			double const p = frame_to_pixel ((*i)->position() - (*prev)->position());
+			double const p = sample_to_pixel ((*i)->position() - (*prev)->position());
 
 			if ((*prev)->label_on_left()) {
 				(*i)->set_left_label_limit (p);
@@ -340,7 +342,7 @@ Editor::update_marker_labels (ArdourCanvas::Group* group)
 		}
 
 		if (next != sorted.end()) {
-			double const p = frame_to_pixel ((*next)->position() - (*i)->position());
+			double const p = sample_to_pixel ((*next)->position() - (*i)->position());
 
 			if ((*next)->label_on_left()) {
 				(*i)->set_right_label_limit (p / 2);
@@ -671,7 +673,7 @@ Editor::mouse_add_new_range (framepos_t where)
 	   it's reasonably easy to manipulate after creation.
 	*/
 
-	framepos_t const end = where + current_page_frames() / 8;
+	framepos_t const end = where + current_page_samples() / 8;
 
 	string name;
 	_session->locations()->next_available_name (name, _("range"));
@@ -1416,11 +1418,11 @@ Editor::update_loop_range_view (bool visibility)
 
 	if (_session->get_play_loop() && ((tll = transport_loop_location()) != 0)) {
 
-		double x1 = frame_to_pixel (tll->start());
-		double x2 = frame_to_pixel (tll->end());
+		double x1 = sample_to_pixel (tll->start());
+		double x2 = sample_to_pixel (tll->end());
 
-		transport_loop_range_rect->property_x1() = x1;
-		transport_loop_range_rect->property_x2() = x2;
+		transport_loop_range_rect->set_x0 (x1);
+		transport_loop_range_rect->set_x1 (x2);
 
 		if (visibility) {
 			transport_loop_range_rect->show();
@@ -1441,14 +1443,13 @@ Editor::update_punch_range_view (bool visibility)
 	Location* tpl;
 
 	if ((_session->config.get_punch_in() || _session->config.get_punch_out()) && ((tpl = transport_punch_location()) != 0)) {
-		guint track_canvas_width,track_canvas_height;
-		track_canvas->get_size(track_canvas_width,track_canvas_height);
+		ArdourCanvas::Rect const v = _track_canvas->visible_area ();
 		if (_session->config.get_punch_in()) {
-			transport_punch_range_rect->property_x1() = frame_to_pixel (tpl->start());
-			transport_punch_range_rect->property_x2() = (_session->config.get_punch_out() ? frame_to_pixel (tpl->end()) : frame_to_pixel (JACK_MAX_FRAMES));
+			transport_punch_range_rect->set_x0 (sample_to_pixel (tpl->start()));
+			transport_punch_range_rect->set_x1 (_session->config.get_punch_out() ? sample_to_pixel (tpl->end()) : sample_to_pixel (JACK_MAX_FRAMES));
 		} else {
-			transport_punch_range_rect->property_x1() = 0;
-			transport_punch_range_rect->property_x2() = (_session->config.get_punch_out() ? frame_to_pixel (tpl->end()) : track_canvas_width);
+			transport_punch_range_rect->set_x0 (0);
+			transport_punch_range_rect->set_x1 (_session->config.get_punch_out() ? sample_to_pixel (tpl->end()) : v.width ());
 		}
 
 		if (visibility) {

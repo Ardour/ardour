@@ -1400,14 +1400,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Editor"),
 		    new BoolOption (
-			    "color-regions-using-track-color",
-			    _("Color regions using their track's color"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_color_regions_using_track_color),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_color_regions_using_track_color)
-			    ));
-
-	add_option (_("Editor"),
-		    new BoolOption (
 			    "update-editor-during-summary-drag",
 			    _("Update editor window during drags of the summary"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_update_editor_during_summary_drag),

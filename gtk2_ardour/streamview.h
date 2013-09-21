@@ -26,8 +26,6 @@
 
 #include "ardour/location.h"
 #include "enums.h"
-#include "simplerect.h"
-#include "canvas.h"
 
 namespace Gdk {
 	class Color;
@@ -42,8 +40,13 @@ namespace ARDOUR {
 	struct PeakData;
 }
 
+namespace ArdourCanvas {
+	class Rectangle;
+	class Group;
+}
+
 struct RecBoxInfo {
-	ArdourCanvas::SimpleRect*  rectangle;
+	ArdourCanvas::Rectangle*   rectangle;
 	framepos_t                 start;
 	ARDOUR::framecnt_t         length;
 };
@@ -70,9 +73,8 @@ public:
 	int set_position (gdouble x, gdouble y);
 	virtual int set_height (double);
 
-	virtual int set_samples_per_unit (gdouble spp);
-	gdouble     get_samples_per_unit () { return _samples_per_unit; }
-	virtual void horizontal_position_changed () {}
+	virtual int set_samples_per_pixel (double);
+	gdouble     get_samples_per_pixel () const { return _samples_per_pixel; }
 
         virtual void enter_internal_edit_mode ();
         virtual void leave_internal_edit_mode ();
@@ -80,7 +82,6 @@ public:
  	void set_layer_display (LayerDisplay);
 	LayerDisplay layer_display () const { return _layer_display; }
 
-	ArdourCanvas::Group* background_group() { return _background_group; }
 	ArdourCanvas::Group* canvas_item() { return _canvas_group; }
 
 	enum ColorTarget {
@@ -126,7 +127,7 @@ public:
 	sigc::signal<void> ContentsHeightChanged;
 
 protected:
-	StreamView (RouteTimeAxisView&, ArdourCanvas::Group* background_group = 0, ArdourCanvas::Group* canvas_group = 0);
+	StreamView (RouteTimeAxisView&);
 
 	void         transport_changed();
 	void         transport_looped();
@@ -149,16 +150,13 @@ protected:
 	virtual void color_handler () = 0;
 
 	RouteTimeAxisView&        _trackview;
-	bool                      owns_background_group;
-	bool                      owns_canvas_group;
-	ArdourCanvas::Group*      _background_group;
 	ArdourCanvas::Group*      _canvas_group;
-	ArdourCanvas::SimpleRect* canvas_rect; /* frame around the whole thing */
+	ArdourCanvas::Rectangle*   canvas_rect; /* frame around the whole thing */
 
 	typedef std::list<RegionView* > RegionViewList;
 	RegionViewList  region_views;
 
-	double _samples_per_unit;
+	double _samples_per_pixel;
 
 	sigc::connection       screen_update_connection;
 	std::vector<RecBoxInfo>     rec_rects;

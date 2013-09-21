@@ -52,7 +52,7 @@ AutomationRegionView::AutomationRegionView (ArdourCanvas::Group*                
 		create_line(list);
 	}
 
-	group->signal_event().connect (sigc::mem_fun (this, &AutomationRegionView::canvas_event), false);
+	group->Event.connect (sigc::mem_fun (this, &AutomationRegionView::canvas_event));
 	group->raise_to_top();
 }
 
@@ -69,7 +69,7 @@ AutomationRegionView::init (Gdk::Color const & basic_color, bool /*wfd*/)
 
 	compute_colors (basic_color);
 
-	reset_width_dependent_items ((double) _region->length() / samples_per_unit);
+	reset_width_dependent_items ((double) _region->length() / samples_per_pixel);
 
 	set_height (trackview.current_height());
 
@@ -114,13 +114,13 @@ AutomationRegionView::canvas_event (GdkEvent* ev)
 		double y = ev->button.y;
 
 		/* convert to item coordinates in the time axis view */
-		automation_view()->canvas_display()->w2i (x, y);
+		automation_view()->canvas_display()->canvas_to_item (x, y);
 
 		/* clamp y */
 		y = std::max (y, 0.0);
 		y = std::min (y, _height - NAME_HIGHLIGHT_SIZE);
 
-		add_automation_event (ev, trackview.editor().pixel_to_frame (x) - _region->position() + _region->start(), y);
+		add_automation_event (ev, trackview.editor().pixel_to_sample (x) - _region->position() + _region->start(), y);
 	}
 
 	return false;

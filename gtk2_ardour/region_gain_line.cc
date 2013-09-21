@@ -48,7 +48,7 @@ AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& 
 	_time_converter->set_origin_b (r.region()->position() - r.region()->start());
 
 	group->raise_to_top ();
-	group->property_y() = 2;
+	group->set_y_position (2);
 	set_uses_gain_mapping (true);
 	terminal_points_can_slide = false;
 }

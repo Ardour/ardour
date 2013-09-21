@@ -29,8 +29,6 @@
 #include "public_editor.h"
 #include "gui_thread.h"
 #include "utils.h"
-#include "canvas_impl.h"
-#include "simpleline.h"
 #include "utils_videotl.h"
 #include "rgb_macros.h"
 #include "video_timeline.h"
@@ -49,7 +47,7 @@ using namespace VideoUtils;
 
 VideoTimeLine::VideoTimeLine (PublicEditor *ed, ArdourCanvas::Group *vbg, int initial_height)
 	: editor (ed)
-		, videotl_bar_group(vbg)
+		, videotl_group(vbg)
 		, bar_height(initial_height)
 {
 	video_start_offset = 0L;
@@ -271,7 +269,7 @@ float
 VideoTimeLine::get_apv()
 {
 	// XXX: dup code - TODO use this fn in update_video_timeline()
-	float apv = -1; /* audio frames per video frame; */
+	float apv = -1; /* audio samples per video frame; */
 	if (!_session) return apv;
 
 	if (_session->config.get_use_video_file_fps()) {
@@ -304,8 +302,8 @@ VideoTimeLine::update_video_timeline()
 		if (_session->timecode_frames_per_second() == 0 ) return;
 	}
 
-	double frames_per_unit = editor->unit_to_frame(1.0);
-	framepos_t leftmost_frame =  editor->leftmost_position();
+	const double samples_per_pixel = editor->get_current_zoom();
+	const framepos_t leftmost_sample =  editor->leftmost_sample();
 
 	/* Outline:
 	 * 1) calculate how many frames there should be in current zoom (plus 1 page on each side)
@@ -317,12 +315,12 @@ VideoTimeLine::update_video_timeline()
 
 	/* video-file and session properties */
 	double display_vframe_width; /* unit: pixels ; width of one thumbnail in the timeline */
-	float apv; /* audio frames per video frame; */
+	float apv; /* audio samples per video frame; */
 	framepos_t leftmost_video_frame; /* unit: video-frame number ; temporary var -> vtl_start */
 
 	/* variables needed to render videotimeline -- what needs to computed first */
-	framepos_t vtl_start; /* unit: audio-frames ; first displayed video-frame */
-	framepos_t vtl_dist;  /* unit: audio-frames ; distance between displayed video-frames */
+	framepos_t vtl_start; /* unit: audio-samples ; first displayed video-frame */
+	framepos_t vtl_dist;  /* unit: audio-samples ; distance between displayed video-frames */
 	unsigned int visible_video_frames; /* number of frames that fit on current canvas */
 
 	if (_session->config.get_videotimeline_pullup()) {
@@ -338,21 +336,21 @@ VideoTimeLine::update_video_timeline()
 
 	display_vframe_width = bar_height * video_aspect_ratio;
 
-	if (apv > frames_per_unit * display_vframe_width) {
+	if (apv > samples_per_pixel * display_vframe_width) {
 		/* high-zoom: need space between successive video-frames */
 		vtl_dist = rint(apv);
 	} else {
 		/* continous timeline: skip video-frames */
-		vtl_dist = ceil(display_vframe_width * frames_per_unit / apv) * apv;
+		vtl_dist = ceil(display_vframe_width * samples_per_pixel / apv) * apv;
 	}
 
 	assert (vtl_dist > 0);
 	assert (apv > 0);
 
-	leftmost_video_frame = floor (floor((leftmost_frame - video_start_offset - video_offset ) / vtl_dist) * vtl_dist / apv);
+	leftmost_video_frame = floor (floor((leftmost_sample - video_start_offset - video_offset ) / vtl_dist) * vtl_dist / apv);
 
 	vtl_start = rint (video_offset + video_start_offset + leftmost_video_frame * apv);
-	visible_video_frames = 2 + ceil(editor->current_page_frames() / vtl_dist); /* +2 left+right partial frames */
+	visible_video_frames = 2 + ceil(editor->current_page_samples() / vtl_dist); /* +2 left+right partial frames */
 
 	/* expand timeline (cache next/prev page images) */
 	vtl_start -= visible_video_frames * vtl_dist;
@@ -379,7 +377,7 @@ VideoTimeLine::update_video_timeline()
 
 	while (video_frames.size() < visible_video_frames) {
 		VideoImageFrame *frame;
-		frame = new VideoImageFrame(*editor, *videotl_bar_group, display_vframe_width, bar_height, video_server_url, translated_filename());
+		frame = new VideoImageFrame(*editor, *videotl_group, display_vframe_width, bar_height, video_server_url, translated_filename());
 		frame->ImgChanged.connect (*this, invalidator (*this), boost::bind (&PublicEditor::queue_visual_videotimeline_update, editor), gui_context());
 		video_frames.push_back(frame);
 	}
@@ -412,7 +410,7 @@ VideoTimeLine::update_video_timeline()
 		}
 		VideoImageFrame * frame = get_video_frame(vframeno, cut, rightend);
 		if (frame) {
-		  frame->set_position(vfpos-leftmost_frame);
+		  frame->set_position(vfpos);
 			outdated_video_frames.remove(frame);
 		} else {
 			remaining.push_back(vfcount);
@@ -422,7 +420,7 @@ VideoTimeLine::update_video_timeline()
 	for (VideoFrames::iterator i = outdated_video_frames.begin(); i != outdated_video_frames.end(); ++i ) {
 		VideoImageFrame *frame = (*i);
 		if (remaining.empty()) {
-		  frame->set_position(-2 * vtl_dist); /* move off screen */
+		  frame->set_position(-2 * vtl_dist + leftmost_sample); /* move off screen */
 		} else {
 			int vfcount=remaining.front();
 			remaining.pop_front();
@@ -433,7 +431,7 @@ VideoTimeLine::update_video_timeline()
 				rightend = display_vframe_width * (video_start_offset + video_duration + video_offset - vfpos) / vtl_dist;
 				//printf("lf(n): %lu\n", vframeno); // XXX
 			}
-			frame->set_position(vfpos-leftmost_frame);
+			frame->set_position(vfpos);
 			frame->set_videoframe(vframeno, rightend);
 		}
 	}

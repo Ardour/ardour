@@ -445,7 +445,7 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 				break;
 			}
 		}
-		g_atomic_int_add(const_cast<gint*> (&_frames_pending_write), nframes);
+		g_atomic_int_add(const_cast<gint*>(&_frames_pending_write), nframes);
 
 		if (buf.size() != 0) {
 			Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex, Glib::Threads::TRY_LOCK);
@@ -807,7 +807,7 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 	}
 
 	/* if there are 2+ chunks of disk i/o possible for
-	   this track, let the caller know so that it can arrange
+	   this track), let the caller know so that it can arrange
 	   for us to be called again, ASAP.
 
 	   if we are forcing a flush, then if there is* any* extra

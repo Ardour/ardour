@@ -165,7 +165,7 @@ Editor::ensure_all_elements_drawn ()
 {
 	controls_layout.queue_draw ();
 	ruler_label_event_box.queue_draw ();
-	time_button_event_box.queue_draw ();
+	time_bars_event_box.queue_draw ();
 }
 #endif
 

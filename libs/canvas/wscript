@@ -1,0 +1,154 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+from waflib import Options
+from waflib import TaskGen
+import os
+
+# Version of this package (even if built as a child)
+MAJOR = '0'
+MINOR = '0'
+MICRO = '0'
+CANVAS_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+CANVAS_LIB_VERSION = '0.0.0'
+
+# Variables for 'waf dist'
+APPNAME = 'canvas'
+VERSION = CANVAS_VERSION
+I18N_PACKAGE = 'libcanvas'
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+path_prefix = 'libs/canvas/'
+
+canvas_sources = [
+        'arc.cc',
+        'arrow.cc',
+        'canvas.cc',
+        'circle.cc',
+        'curve.cc',
+        'debug.cc',
+        'item.cc',
+        'fill.cc',
+        'flag.cc',
+        'group.cc',
+        'image.cc',
+        'line.cc',
+        'line_set.cc',
+        'lookup_table.cc',
+        'outline.cc',
+        'pixbuf.cc',
+        'poly_item.cc',
+        'poly_line.cc',
+        'polygon.cc',
+        'rectangle.cc',
+        'root_group.cc',
+        'text.cc',
+        'types.cc',
+        'utils.cc',
+        'wave_view.cc'
+]
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    conf.load ('compiler_cxx')
+    autowaf.configure(conf)
+    autowaf.check_pkg(conf, 'cairomm-1.0', uselib_store='CAIROMM', atleast_version='1.8.4')
+
+def build(bld):
+    # Library
+    if bld.is_defined ('INTERNAL_SHARED_LIBS'):
+        obj = bld.shlib(features = 'cxx cxxshlib', source=canvas_sources)
+    else:
+        obj = bld.stlib(features = 'cxx cxxstlib', source=canvas_sources)
+        obj.cxxflags     = [ '-fPIC' ]
+        obj.cflags       = [ '-fPIC' ]
+
+    obj.export_includes = ['.']
+    obj.includes     = ['.']
+    obj.uselib       = 'SIGCPP CAIROMM GTKMM BOOST'
+    obj.use          = [ 'libpbd', 'libevoral', 'libardour', 'libgtkmm2ext' ]
+    obj.name         = 'libcanvas'
+    obj.target       = 'canvas'
+    obj.vnum         = CANVAS_LIB_VERSION
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    obj.defines      = [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
+    
+    if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
+
+            manual_tests              = '''
+                        test/hello_world.cc
+                        test/gtk_many.cc
+                        test/gtk_scene.cc
+                        test/gtk_movement.cc
+                        test/gtk_viewport.cc
+                        test/gtk_drag.cc
+                '''.split()
+
+            for t in manual_tests:
+                    target = t[:-3]
+                    name = t[t.find('/')+1:-3]
+                    manual_testobj = bld.new_task_gen('cxx', 'program')
+                    manual_testobj.source = t
+                    manual_testobj.includes = obj.includes + ['test', '../pbd']
+                    manual_testobj.uselib       = 'CPPUNIT SIGCPP CAIROMM GTKMM'
+                    manual_testobj.uselib_local = 'libcanvas libevoral libardour libgtkmm2ext'
+                    manual_testobj.name         = 'libcanvas-manual-test-%s' % name
+                    manual_testobj.target       = target
+                    manual_testobj.install_path = ''
+                    
+                    unit_testobj              = bld.new_task_gen('cxx', 'program')
+                    unit_testobj.source       = '''
+                        test/group.cc
+                        test/arrow.cc
+                        test/optimizing_lookup_table.cc
+                        test/polygon.cc
+                        test/types.cc
+                        test/render.cc
+                        test/xml.cc
+                        test/wave_view.cc
+                        test/item.cc
+                        test/testrunner.cpp
+                '''.split()
+
+                    unit_testobj.includes     = obj.includes + ['test', '../pbd']
+                    unit_testobj.uselib       = 'CPPUNIT SIGCPP CAIROMM GTKMM'
+                    unit_testobj.uselib_local = 'libcanvas libevoral libardour libgtkmm2ext'
+                    unit_testobj.name         = 'libcanvas-unit-tests'
+                    unit_testobj.target       = 'run-tests'
+                    unit_testobj.install_path = ''
+                    unit_testobj.cxxflags     = ['-DPACKAGE="libcanvastest"']
+                    unit_testobj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"']
+                    unit_testobj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"']
+                    unit_testobj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
+                    
+            benchmarks = '''
+                        benchmark/items_at_point.cc
+                        benchmark/render_parts.cc
+                        benchmark/render_from_log.cc
+                        benchmark/render_whole.cc
+                '''.split()
+
+            for t in benchmarks:
+                    target = t[:-3]
+                    name = t[t.find('/')+1:-3]
+                    manual_testobj = bld.new_task_gen('cxx', 'program')
+                    manual_testobj.source = [ t, 'benchmark/benchmark.cc' ]
+                    manual_testobj.includes = obj.includes + ['test', '../pbd']
+                    manual_testobj.uselib       = 'CPPUNIT SIGCPP CAIROMM GTKMM'
+                    manual_testobj.uselib_local = 'libcanvas libevoral libardour libgtkmm2ext'
+                    manual_testobj.name         = 'libcanvas-benchmark-%s' % name
+                    manual_testobj.target       = target
+                    manual_testobj.install_path = ''
+
+def shutdown():
+    autowaf.shutdown()
+

@@ -28,20 +28,20 @@
 #include "ardour/region_factory.h"
 #include "ardour/profile.h"
 
+#include "canvas/canvas.h"
+#include "canvas/text.h"
+
 #include "editor.h"
 #include "keyboard.h"
 #include "public_editor.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
-#include "canvas-noevent-text.h"
 #include "audio_time_axis.h"
 #include "region_gain_line.h"
 #include "automation_line.h"
 #include "automation_time_axis.h"
 #include "automation_line.h"
 #include "control_point.h"
-#include "canvas_impl.h"
-#include "simplerect.h"
 #include "editor_drag.h"
 #include "midi_time_axis.h"
 #include "editor_regions.h"
@@ -63,6 +63,12 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	framepos_t xdelta;
 	int direction = ev->direction;
 
+	/* this event arrives without transformation by the canvas, so we have
+	 * to transform the coordinates to be able to look things up.
+	 */
+
+	Duple event_coords = _track_canvas->window_to_canvas (Duple (ev->x, ev->y));
+	
   retry:
 	switch (direction) {
 	case GDK_SCROLL_UP:
@@ -79,7 +85,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Editor::track_height_step_timeout), 500);
-				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (ev->y + vertical_adjustment.get_value() - canvas_timebars_vsize);
+				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (event_coords.y);
 				current_stepping_trackview = p.first;
 				if (!current_stepping_trackview) {
 					return false;
@@ -108,7 +114,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomVerticalModifier)) {
 			if (!current_stepping_trackview) {
 				step_timeout = Glib::signal_timeout().connect (sigc::mem_fun(*this, &Editor::track_height_step_timeout), 500);
-				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (ev->y + vertical_adjustment.get_value() - canvas_timebars_vsize);
+				std::pair<TimeAxisView*, int> const p = trackview_by_y_position (event_coords.y);
 				current_stepping_trackview = p.first;
 				if (!current_stepping_trackview) {
 					return false;
@@ -124,7 +130,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		break;
 
 	case GDK_SCROLL_LEFT:
-		xdelta = (current_page_frames() / 8);
+		xdelta = (current_page_samples() / 8);
 		if (leftmost_frame > xdelta) {
 			reset_x_origin (leftmost_frame - xdelta);
 		} else {
@@ -133,11 +139,11 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 		break;
 
 	case GDK_SCROLL_RIGHT:
-		xdelta = (current_page_frames() / 8);
+		xdelta = (current_page_samples() / 8);
 		if (max_framepos - xdelta > leftmost_frame) {
 			reset_x_origin (leftmost_frame + xdelta);
 		} else {
-			reset_x_origin (max_framepos - current_page_frames());
+			reset_x_origin (max_framepos - current_page_samples());
 		}
 		break;
 
@@ -152,7 +158,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 bool
 Editor::track_canvas_scroll_event (GdkEventScroll *event)
 {
-	track_canvas->grab_focus();
+	_track_canvas->grab_focus();
 	return track_canvas_scroll (event);
 }
 
@@ -160,7 +166,7 @@ bool
 Editor::track_canvas_button_press_event (GdkEventButton */*event*/)
 {
 	selection->clear ();
-	track_canvas->grab_focus();
+	_track_canvas->grab_focus();
 	return false;
 }
 
@@ -178,7 +184,7 @@ Editor::track_canvas_motion_notify_event (GdkEventMotion */*event*/)
 {
 	int x, y;
 	/* keep those motion events coming */
-	track_canvas->get_pointer (x, y);
+	_track_canvas->get_pointer (x, y);
 	return false;
 }
 
@@ -1003,8 +1009,6 @@ Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
 bool
 Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int x, int y, guint time)
 {
-	double wx;
-	double wy;
 	boost::shared_ptr<Region> region;
 	boost::shared_ptr<Region> region_copy;
 	RouteTimeAxisView* rtav;
@@ -1012,21 +1016,19 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 	double px;
 	double py;
 
-	string target = track_canvas->drag_dest_find_target (context, track_canvas->drag_dest_get_target_list());
+	string target = _track_canvas->drag_dest_find_target (context, _track_canvas->drag_dest_get_target_list());
 
 	if (target.empty()) {
 		return false;
 	}
 
-	track_canvas->window_to_world (x, y, wx, wy);
-
 	event.type = GDK_MOTION_NOTIFY;
-	event.button.x = wx;
-	event.button.y = wy;
+	event.button.x = x;
+	event.button.y = y;
 	/* assume we're dragging with button 1 */
 	event.motion.state = Gdk::BUTTON1_MASK;
 
-	(void) event_frame (&event, &px, &py);
+	(void) window_event_frame (&event, &px, &py);
 
 	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
 	bool can_drop = false;
@@ -1096,8 +1098,6 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 		      const SelectionData& /*data*/,
 		      guint /*info*/, guint /*time*/)
 {
-	double wx;
-	double wy;
 	boost::shared_ptr<Region> region;
 	boost::shared_ptr<Region> region_copy;
 	RouteTimeAxisView* rtav;
@@ -1105,15 +1105,13 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	double px;
 	double py;
 
-	track_canvas->window_to_world (x, y, wx, wy);
-
 	event.type = GDK_MOTION_NOTIFY;
-	event.button.x = wx;
-	event.button.y = wy;
+	event.button.x = x;
+	event.button.y = y;
 	/* assume we're dragging with button 1 */
 	event.motion.state = Gdk::BUTTON1_MASK;
 
-	framepos_t const pos = event_frame (&event, &px, &py);
+	framepos_t const pos = window_event_frame (&event, &px, &py);
 
 	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
 

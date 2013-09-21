@@ -21,11 +21,10 @@
 #define __ardour_control_point_h__
 
 #include <sys/types.h>
+#include <gdk/gdkevents.h>
 
 #include "ardour/automation_list.h"
 
-#include "canvas.h"
-#include "simplerect.h"
 #include "selectable.h"
 
 class AutomationLine;
@@ -36,11 +35,9 @@ class AutomationTimeAxisView;
 class Selectable;
 class Selection;
 
-namespace Gnome {
-	namespace Canvas {
-		class SimpleRect;
-		class Diamond;
-	}
+namespace ArdourCanvas {
+	class Rectangle;
+	class Diamond;
 }
 
 class ControlPoint : public Selectable
@@ -86,7 +83,7 @@ class ControlPoint : public Selectable
 	static PBD::Signal1<void, ControlPoint *> CatchDeletion;
 	
   private:
-	ArdourCanvas::SimpleRect*        _item;
+	ArdourCanvas::Rectangle*        _item;
 	AutomationLine&                  _line;
 	ARDOUR::AutomationList::iterator _model;
 	uint32_t                         _view_index;

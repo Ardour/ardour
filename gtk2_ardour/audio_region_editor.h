@@ -34,7 +34,6 @@
 #include <gtkmm/separator.h>
 #include <gtkmm/spinbutton.h>
 
-#include <libgnomecanvas/libgnomecanvas.h>
 
 #include "pbd/signals.h"
 #ifdef WIN32

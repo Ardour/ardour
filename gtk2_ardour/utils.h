@@ -23,12 +23,13 @@
 #include <string>
 #include <cmath>
 #include <vector>
+
 #include "ardour/types.h"
-#include <libgnomecanvasmm/line.h>
+
 #include <gdkmm/types.h>
 #include <gtkmm/menushell.h>
 
-#include "canvas.h"
+#include "canvas/types.h"
 
 namespace PBD {
         class Controllable;
@@ -40,6 +41,10 @@ namespace Gtk {
 	class ComboBoxText;
 	class Paned;
         class Adjustment;
+}
+
+namespace ArdourCanvas {
+	class Item;
 }
 
 extern sigc::signal<void>  DPIReset;
@@ -59,8 +64,6 @@ uint32_t rgba_from_style (std::string, uint32_t, uint32_t, uint32_t, uint32_t, s
 bool rgba_p_from_style (std::string, float*, float*, float*, std::string = "fg", int = Gtk::STATE_NORMAL);
 
 void decorate (Gtk::Window& w, Gdk::WMDecoration d);
-
-bool canvas_item_visible (ArdourCanvas::Item* item);
 
 void set_color (Gdk::Color&, int);
 

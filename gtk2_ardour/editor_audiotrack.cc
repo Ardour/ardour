@@ -19,6 +19,8 @@
 
 #include "ardour/rc_configuration.h"
 
+#include "canvas/canvas.h"
+
 #include "ardour_ui.h"
 #include "editor.h"
 #include "editing.h"
@@ -73,6 +75,6 @@ Editor::toggle_meter_updating()
 		stop_updating_meters ();
 	}
 
-	track_canvas_allocate (track_canvas->get_allocation());
+	track_canvas_viewport_allocate (_track_canvas->get_allocation());
 }
 

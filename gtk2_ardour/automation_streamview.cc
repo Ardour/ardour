@@ -31,7 +31,6 @@
 #include "region_view.h"
 #include "automation_region_view.h"
 #include "automation_time_axis.h"
-#include "canvas-simplerect.h"
 #include "region_selection.h"
 #include "selection.h"
 #include "public_editor.h"
@@ -39,8 +38,6 @@
 #include "rgb_macros.h"
 #include "gui_thread.h"
 #include "utils.h"
-#include "simplerect.h"
-#include "simpleline.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -48,14 +45,12 @@ using namespace PBD;
 using namespace Editing;
 
 AutomationStreamView::AutomationStreamView (AutomationTimeAxisView& tv)
-	: StreamView (*dynamic_cast<RouteTimeAxisView*>(tv.get_parent()),
-		      new ArdourCanvas::Group(*tv.canvas_background()),
-		      new ArdourCanvas::Group(*tv.canvas_display()))
+	: StreamView (*dynamic_cast<RouteTimeAxisView*>(tv.get_parent()))
 	, _automation_view(tv)
 	, _pending_automation_state (Off)
 {
 	//canvas_rect->property_fill_color_rgba() = stream_base_color;
-	canvas_rect->property_outline_color_rgba() = RGBA_BLACK;
+	canvas_rect->set_outline_color (RGBA_BLACK);
 }
 
 AutomationStreamView::~AutomationStreamView ()
@@ -108,7 +103,7 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 	region_view = new AutomationRegionView (
 		_canvas_group, _automation_view, region,
 		_automation_view.parameter (), list,
-		_samples_per_unit, region_color
+		_samples_per_pixel, region_color
 		);
 
 	region_view->init (region_color, false);
@@ -191,11 +186,11 @@ void
 AutomationStreamView::color_handler ()
 {
 	/*if (_trackview.is_midi_track()) {
-		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
+		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->get_canvasvar_MidiTrackBase();
 	}
 
 	if (!_trackview.is_midi_track()) {
-		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();;
+		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->get_canvasvar_MidiBusBase();;
 	}*/
 }
 

@@ -29,8 +29,7 @@
 
 #include "ardour_ui.h"
 #include "editor.h"
-#include "simplerect.h"
-#include "canvas_impl.h"
+#include "canvas/rectangle.h"
 #include "editing.h"
 #include "audio_time_axis.h"
 #include "video_image_frame.h"
@@ -49,9 +48,7 @@ Editor::set_video_timeline_height (const int h)
 	if (videotl_bar_height == h) { return; }
 	if (h < 2 || h > 8) { return; }
   videotl_bar_height = h;
-	const double nh = (videotl_bar_height * timebar_height - ((ARDOUR::Profile->get_sae())?1.0:0.0));
 	videotl_label.set_size_request (-1, (int)timebar_height * videotl_bar_height);
-	videotl_bar->property_y2().set_value(nh);
 	ARDOUR_UI::instance()->video_timeline->set_height(videotl_bar_height * timebar_height);
 	update_ruler_visibility();
 }
@@ -59,16 +56,6 @@ Editor::set_video_timeline_height (const int h)
 void
 Editor::update_video_timeline (bool flush)
 {
-#if DEBUG
-	framepos_t rightmost_frame = leftmost_frame + current_page_frames();
-	std::cout << "VIDEO SCROLL: " << leftmost_frame << " -- " << rightmost_frame << std::endl;
-	std::cout << "SCROLL UNITS: " << frame_to_unit(leftmost_frame) << " -- " << frame_to_unit(rightmost_frame)
-	          << " = " << frame_to_unit(rightmost_frame) - frame_to_unit(leftmost_frame)
-		        << std::endl;
-#endif
-
-	// TODO later: make this a list for mult. video tracks
-	// also modify  ardour_ui_dialogs.cc : set_session()
 	if (flush) {
 		ARDOUR_UI::instance()->video_timeline->flush_local_cache();
 	}
@@ -142,10 +129,6 @@ Editor::export_video ()
 	}
 	ExportVideoDialog dialog (_session, get_selection().time);
 	Gtk::ResponseType r = (Gtk::ResponseType) dialog.run();
+	(void) r; // keep gcc quiet
 	dialog.hide();
-#if 0
-	if (r == Gtk::RESPONSE_ACCEPT) {
-		ARDOUR_UI::instance()->popup_error(string_compose(_("Export Successful: %1"),dialog.get_exported_filename()));
-	}
-#endif
 }

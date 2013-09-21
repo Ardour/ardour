@@ -34,6 +34,7 @@ children = [
         'libs/ardour',
         'libs/gtkmm2ext',
         'libs/audiographer',
+        'libs/canvas',
         'gtk2_ardour',
         'export',
         'midi_maps',
@@ -378,6 +379,8 @@ def set_compiler_flags (conf,opt):
 
     conf.env.append_value('CXXFLAGS', '-D__STDC_LIMIT_MACROS')
     conf.env.append_value('CXXFLAGS', '-D__STDC_FORMAT_MACROS')
+    conf.env.append_value('CXXFLAGS', '-DCANVAS_COMPATIBILITY')
+    conf.env.append_value('CXXFLAGS', '-DCANVAS_DEBUG')
 
     if opt.nls:
         conf.env.append_value('CXXFLAGS', '-DENABLE_NLS')

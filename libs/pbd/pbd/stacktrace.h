@@ -37,6 +37,7 @@
 namespace PBD {
 	void stacktrace (std::ostream& out, int levels = 0);
 	void trace_twb();
+	std::string demangle (const std::string&);
 
 template<typename T>
 class thing_with_backtrace 

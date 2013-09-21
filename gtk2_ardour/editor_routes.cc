@@ -518,7 +518,7 @@ EditorRoutes::redisplay ()
 		/* show or hide the TimeAxisView */
 		if (visible) {
 			position += tv->show_at (position, n, &_editor->edit_controls_vbox);
-			tv->clip_to_viewport ();
+			// SHOWTRACKS
 		} else {
 			tv->hide ();
 		}
@@ -534,15 +534,14 @@ EditorRoutes::redisplay ()
 
         _editor->reset_controls_layout_height (position);
         _editor->reset_controls_layout_width ();
-	_editor->full_canvas_height = position + _editor->canvas_timebars_vsize;
-	_editor->vertical_adjustment.set_upper (_editor->full_canvas_height);
+	_editor->_full_canvas_height = position;
 
-	if ((_editor->vertical_adjustment.get_value() + _editor->_canvas_height) > _editor->vertical_adjustment.get_upper()) {
+	if ((_editor->vertical_adjustment.get_value() + _editor->_visible_canvas_height) > _editor->vertical_adjustment.get_upper()) {
 		/*
 		   We're increasing the size of the canvas while the bottom is visible.
 		   We scroll down to keep in step with the controls layout.
 		*/
-		_editor->vertical_adjustment.set_value (_editor->full_canvas_height - _editor->_canvas_height);
+		_editor->vertical_adjustment.set_value (_editor->_full_canvas_height - _editor->_visible_canvas_height);
 	}
 }
 
@@ -687,7 +686,6 @@ EditorRoutes::handle_gui_changes (string const & what, void*)
 		/* Optional :make tracks change height while it happens, instead
 		   of on first-idle
 		*/
-		//update_canvas_now ();
 		redisplay ();
 	}
 
@@ -1305,8 +1303,8 @@ EditorRoutes::button_press (GdkEventButton* ev)
 		int y_pos = tv->y_position();
 
 		//Clamp the y pos so that we do not extend beyond the canvas full height.
-		if (_editor->full_canvas_height - y_pos < _editor->_canvas_height){
-		    y_pos = _editor->full_canvas_height - _editor->_canvas_height;
+		if (_editor->_full_canvas_height - y_pos < _editor->_visible_canvas_height){
+		    y_pos = _editor->_full_canvas_height - _editor->_visible_canvas_height;
 		}
 
 		//Only scroll to if the track is visible

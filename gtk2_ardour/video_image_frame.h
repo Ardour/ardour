@@ -26,14 +26,15 @@
 #include <string>
 #include <glib.h>
 
-#include <libgnomecanvasmm/pixbuf.h>
 #include <sigc++/signal.h>
 #include <pthread.h>
 
 #include "ardour/ardour.h"
 #include "pbd/signals.h"
 
-#include "canvas.h"
+#include "canvas/group.h"
+#include "canvas/pixbuf.h"
+#include "canvas/image.h"
 
 namespace ARDOUR {
 	class TempoSection;
@@ -69,8 +70,8 @@ class VideoImageFrame : public sigc::trackable
 
 	PublicEditor& editor;
 	ArdourCanvas::Group *_parent;
-	ArdourCanvas::Group *group;
-	ArdourCanvas::Pixbuf *img_pixbuf;
+	ArdourCanvas::Image *image;
+	boost::shared_ptr<ArdourCanvas::Image::Data> img;
 
 	int clip_width;
 	int clip_height;
@@ -80,13 +81,15 @@ class VideoImageFrame : public sigc::trackable
 	std::string video_filename;
 
 	double        unit_position;
-	framepos_t   frame_position;
+	framepos_t   sample_position;
 	framepos_t   video_frame_number;
 
 	void reposition ();
 	void exposeimg ();
 
+	void fill_frame (const uint8_t r, const uint8_t g, const uint8_t b);
 	void draw_line ();
+	void draw_x ();
 	void cut_rightend ();
 
 

@@ -31,7 +31,7 @@ def build(bld):
     obj.defines      = [ 'ARDOURCP_DLL_EXPORTS' ]
     obj.name         = 'libardour_cp'
     obj.target       = 'ardourcp'
-    obj.use          = 'ardour libtimecode'
+    obj.use          = 'libardour libtimecode'
     obj.vnum         = LIBARDOUR_CP_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 

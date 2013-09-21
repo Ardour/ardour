@@ -18,17 +18,17 @@
 */
 
 #include "control_point.h"
-#include "diamond.h"
 #include "automation_line.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
+
+#include "canvas/rectangle.h"
 
 #include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
-using namespace Gnome; // for Canvas
 
 PBD::Signal1<void, ControlPoint *> ControlPoint::CatchDeletion;
 
@@ -43,14 +43,13 @@ ControlPoint::ControlPoint (AutomationLine& al)
 	_shape = Full;
 	_size = 4.0;
 
-	_item = new Canvas::SimpleRect (_line.canvas_group());
+	_item = new ArdourCanvas::Rectangle (&_line.canvas_group());
 	_item->property_draw() = true;
-	_item->property_fill() = false;
-	_item->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_ControlPointFill.get();
-	_item->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_ControlPointOutline.get();
-	_item->property_outline_pixels() = 1;
+	_item->set_fill (false);
+	_item->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ControlPointFill());
+	_item->set_outline_color (ARDOUR_UI::config()->get_canvasvar_ControlPointOutline());
 	_item->set_data ("control_point", this);
-	_item->signal_event().connect (sigc::mem_fun (this, &ControlPoint::event_handler));
+	_item->Event.connect (sigc::mem_fun (this, &ControlPoint::event_handler));
 
 	hide ();
 	set_visible (false);
@@ -71,10 +70,9 @@ ControlPoint::ControlPoint (const ControlPoint& other, bool /*dummy_arg_to_force
 	_shape = other._shape;
 	_size = other._size;
 
-	_item = new Canvas::SimpleRect (_line.canvas_group());
-	_item->property_fill() = false;
-	_item->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_ControlPointOutline.get();
-	_item->property_outline_pixels() = 1;
+	_item = new ArdourCanvas::Rectangle (&_line.canvas_group());
+	_item->set_fill (false);
+	_item->set_outline_color (ARDOUR_UI::config()->get_canvasvar_ControlPointOutline());
 
 	/* NOTE: no event handling in copied ControlPoints */
 
@@ -122,14 +120,6 @@ ControlPoint::visible () const
 void
 ControlPoint::reset (double x, double y, AutomationList::iterator mi, uint32_t vi, ShapeType shape)
 {
-	/* If this is too big, libart will confuse itself and segfault after it casts the bounding box
-	   of this automation line to ints.  Sigh.
-	*/
-
-	if (x > INT32_MAX) {
-		x = INT32_MAX;
-	}
-
 	_model = mi;
 	_view_index = vi;
 	move_to (x, y, shape);
@@ -141,13 +131,13 @@ ControlPoint::set_color ()
 	uint32_t color = 0;
 
 	if (_selected) {
-		color = ARDOUR_UI::config()->canvasvar_ControlPointSelected.get();
+		color = ARDOUR_UI::config()->get_canvasvar_ControlPointSelected();
 	} else {
-		color = ARDOUR_UI::config()->canvasvar_ControlPointOutline.get();
+		color = ARDOUR_UI::config()->get_canvasvar_ControlPointOutline();
 	}
 
-	_item->property_outline_color_rgba() = color;
-	_item->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_ControlPointFill.get();
+	_item->set_outline_color (color);
+	_item->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ControlPointFill());
 }
 
 void
@@ -179,10 +169,7 @@ ControlPoint::move_to (double x, double y, ShapeType shape)
 		break;
 	}
 
-	_item->property_x1() = x1;
-	_item->property_x2() = x2;
-	_item->property_y1() = y - half_size;
-	_item->property_y2() = y + half_size;
+	_item->set (ArdourCanvas::Rect (x1, y - half_size, x2, y + half_size));
 
 	_x = x;
 	_y = y;
@@ -192,5 +179,5 @@ ControlPoint::move_to (double x, double y, ShapeType shape)
 void
 ControlPoint::i2w (double& x, double& y) const
 {
-	_item->i2w (x, y);
+	_item->item_to_canvas (x, y);
 }

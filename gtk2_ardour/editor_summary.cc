@@ -19,6 +19,8 @@
 
 #include "ardour/session.h"
 
+#include "canvas/debug.h"
+
 #include "time_axis_view.h"
 #include "streamview.h"
 #include "editor_summary.h"
@@ -200,7 +202,7 @@ EditorSummary::render (cairo_t* cr)
 	/* XXX: colour should be set from configuration file */
 	cairo_set_source_rgba (cr, 1, 0, 0, 1);
 
-	const double ph= playhead_frame_to_position (_editor->playhead_cursor->current_frame);
+	const double ph= playhead_frame_to_position (_editor->playhead_cursor->current_frame());
 	cairo_move_to (cr, ph, 0);
 	cairo_line_to (cr, ph, get_height());
 	cairo_stroke (cr);
@@ -397,6 +399,8 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 			_moved = false;
 			_editor->_dragging_playhead = true;
 			_editor->set_follow_playhead (false);
+
+			ArdourCanvas::checkpoint ("sum", "------------------ summary move drag starts.\n");
 		}
 	}
 
@@ -432,11 +436,11 @@ EditorSummary::get_editor (pair<double, double>* x, pair<double, double>* y) con
 
 		/* Otherwise query the editor for its actual position */
 
-		x->first = (_editor->leftmost_position () - _start) * _x_scale;
-		x->second = x->first + _editor->current_page_frames() * _x_scale;
+		x->first = (_editor->leftmost_sample () - _start) * _x_scale;
+		x->second = x->first + _editor->current_page_samples() * _x_scale;
 		
 		y->first = editor_y_to_summary (_editor->vertical_adjustment.get_value ());
-		y->second = editor_y_to_summary (_editor->vertical_adjustment.get_value () + _editor->canvas_height() - _editor->get_canvas_timebars_vsize());
+		y->second = editor_y_to_summary (_editor->vertical_adjustment.get_value () + _editor->visible_canvas_height());
 	}
 }
 
@@ -686,7 +690,7 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 void
 EditorSummary::set_editor (double const x, double const y)
 {
-	if (_editor->pending_visual_change.idle_handler_id >= 0) {
+	if (_editor->pending_visual_change.idle_handler_id >= 0 && _editor->pending_visual_change.being_handled == true) {
 
 		/* As a side-effect, the Editor's visual change idle handler processes
 		   pending GTK events.  Hence this motion notify handler can be called
@@ -784,7 +788,7 @@ EditorSummary::set_editor_x (pair<double, double> x)
 		
 		double const nx = (
 			((x.second - x.first) / _x_scale) /
-			_editor->frame_to_unit (_editor->current_page_frames())
+			_editor->sample_to_pixel (_editor->current_page_samples())
 			);
 		
 		if (nx != _editor->get_current_zoom ()) {
@@ -801,10 +805,10 @@ void
 EditorSummary::set_editor_y (double const y)
 {
 	double y1 = summary_y_to_editor (y);
-	double const eh = _editor->canvas_height() - _editor->get_canvas_timebars_vsize ();
+	double const eh = _editor->visible_canvas_height();
 	double y2 = y1 + eh;
 
-	double const full_editor_height = _editor->full_canvas_height - _editor->get_canvas_timebars_vsize();
+	double const full_editor_height = _editor->_full_canvas_height;
 
 	if (y2 > full_editor_height) {
 		y1 -= y2 - full_editor_height;
@@ -881,7 +885,7 @@ EditorSummary::set_editor_y (pair<double, double> const y)
 	/* Height that we will use for scaling; use the whole editor height unless there are not
 	   enough tracks to fill it.
 	*/
-	double const ch = min (total_height, _editor->canvas_height() - _editor->get_canvas_timebars_vsize());
+	double const ch = min (total_height, _editor->visible_canvas_height());
 
 	/* hence required scale factor of the complete tracks to fit the required y range;
 	   the amount of space they should take up divided by the amount they currently take up.

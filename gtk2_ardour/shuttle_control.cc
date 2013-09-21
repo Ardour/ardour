@@ -113,7 +113,7 @@ ShuttleControl::on_size_allocate (Gtk::Allocation& alloc)
 
 	//background
 	pattern = cairo_pattern_create_linear (0, 0, 0, alloc.get_height());
-	uint32_t col = ARDOUR_UI::config()->canvasvar_Shuttle.get();
+	uint32_t col = ARDOUR_UI::config()->get_canvasvar_Shuttle();
 	int r,b,g,a;
 	UINT_TO_RGBA(col, &r, &g, &b, &a);
 	cairo_pattern_add_color_stop_rgb (pattern, 0.0, r/400.0, g/400.0, b/400.0);

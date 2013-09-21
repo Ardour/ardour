@@ -46,22 +46,12 @@ gtk2_ardour_sources = [
         'big_clock_window.cc',
         'bundle_manager.cc',
         'button_joiner.cc',
-        'canvas-flag.cc',
-        'canvas-hit.cc',
-        'canvas-note-event.cc',
-        'canvas-note.cc',
-        'canvas_patch_change.cc',
-        'canvas-simpleline.c',
-        'canvas-simplerect.c',
-        'canvas-sysex.cc',
-        'canvas-waveview.c',
         'clock_group.cc',
         'configinfo.cc',
         'control_point.cc',
         'control_point_dialog.cc',
         'curvetest.cc',
         'debug.cc',
-        'diamond.cc',
         'edit_note_dialog.cc',
         'editing.cc',
         'editor.cc',
@@ -116,12 +106,12 @@ gtk2_ardour_sources = [
         'insert_time_dialog.cc',
         'interthread_progress_window.cc',
         'io_selector.cc',
+        'hit.cc',
         'keyboard.cc',
         'keyeditor.cc',
         'latency_gui.cc',
         'led.cc',
         'level_meter.cc',
-        'lineset.cc',
         'location_ui.cc',
         'main.cc',
         'main_clock.cc',
@@ -156,6 +146,8 @@ gtk2_ardour_sources = [
         'nag.cc',
         'new_plugin_preset_dialog.cc',
         'normalize_dialog.cc',
+        'note.cc',
+        'note_base.cc',
         'note_player.cc',
         'nsm.cc',
         'nsmclient.cc',
@@ -165,6 +157,7 @@ gtk2_ardour_sources = [
         'panner_editor.cc',
         'panner_interface.cc',
         'panner_ui.cc',
+        'patch_change.cc',
         'piano_roll_header.cc',
         'pingback.cc',
         'playlist_selector.cc',
@@ -208,8 +201,6 @@ gtk2_ardour_sources = [
         'session_option_editor.cc',
         'sfdb_ui.cc',
         'shuttle_control.cc',
-        'simpleline.cc',
-        'simplerect.cc',
         'splash.cc',
         'speaker_dialog.cc',
         'startup.cc',
@@ -219,6 +210,7 @@ gtk2_ardour_sources = [
         'stereo_panner_editor.cc',
         'streamview.cc',
         'strip_silence_dialog.cc',
+        'sys_ex.cc',
         'tape_region_view.cc',
         'tempo_dialog.cc',
         'tempo_lines.cc',
@@ -237,7 +229,6 @@ gtk2_ardour_sources = [
         'version.cc',
         'visibility_group.cc',
         'volume_controller.cc',
-        'waveview.cc',
         'window_manager.cc',
 # video-timeline related sources:
         'video_image_frame.cc',
@@ -281,10 +272,6 @@ def configure(conf):
                       atleast_version='2.18')
     autowaf.check_pkg(conf, 'gtkmm-2.4', uselib_store='GTKMM',
                       atleast_version='2.18')
-    autowaf.check_pkg(conf, 'libgnomecanvas-2.0',
-                      uselib_store='GNOMECANVAS', atleast_version='2.30')
-    autowaf.check_pkg(conf, 'libgnomecanvasmm-2.6',
-                      uselib_store='GNOMECANVASMM', atleast_version='2.16')
     autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
     autowaf.check_pkg(conf, 'x11', uselib_store='X11', atleast_version='1.1', mandatory=False)
     autowaf.check_pkg(conf, 'fontconfig', uselib_store='FONTCONFIG')
@@ -384,7 +371,9 @@ def build(bld):
                              'libardour_cp',
                              'libgtk2_ardour',
                              'libgtkmm2ext',
-                             'libtaglib']
+                             'libtaglib',
+                             'libcanvas'
+                             ]
         obj.target = 'ardour-' + bld.env['VERSION'] + '-vst.exe.so'
         obj.includes  = [ '../libs/fst', '.' ]
         obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
@@ -410,21 +399,22 @@ def build(bld):
 
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
-    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG ALSA CURL DL'
-    obj.uselib       += ' GTKMM GNOMECANVASMM GNOMECANVAS '
-    obj.uselib       += ' AUDIOUNITS OSX GTKOSX LO '
+    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG ALSA CURL DL GTKMM LO'
     obj.use          = [ 'libpbd',
                          'libmidipp',
                          'libtaglib',
-                         'ardour',
+                         'libardour',
                          'libardour_cp',
                          'libgtkmm2ext',
-                         'libtaglib' ]
+                         'libtaglib',
+                         'libcanvas'
+                         ]
     if bld.env['build_target'] == 'mingw':
 	if bld.env['DEBUG'] == False:
             obj.linkflags = ['-mwindows']
     if sys.platform == 'darwin':
-        obj.use += ' libappleutility'
+        obj.uselib += ' AUDIOUNITS OSX GTKOSX'
+        obj.use    += ' libappleutility'
     obj.defines     = [
         'PACKAGE="' + I18N_PACKAGE + '"',
         'VERSIONSTRING="' + bld.env['VERSION'] + '"',

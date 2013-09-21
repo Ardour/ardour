@@ -94,7 +94,7 @@ class AudioRegion : public Region
 
 	virtual framecnt_t read_peaks (PeakData *buf, framecnt_t npeaks,
 			framecnt_t offset, framecnt_t cnt,
-			uint32_t chan_n=0, double samples_per_unit= 1.0) const;
+			uint32_t chan_n=0, double frames_per_pixel = 1.0) const;
 
 	/* Readable interface */
 
@@ -234,13 +234,5 @@ class AudioRegion : public Region
 };
 
 } /* namespace ARDOUR */
-
-/* access from C objects */
-
-extern "C" {
-	int    region_read_peaks_from_c   (void *arg, uint32_t npeaks, uint32_t start, uint32_t length, intptr_t data, uint32_t n_chan, double samples_per_unit);
-	uint32_t region_length_from_c (void *arg);
-	uint32_t sourcefile_length_from_c (void *arg, double);
-}
 
 #endif /* __ardour_audio_region_h__ */

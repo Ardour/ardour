@@ -70,6 +70,9 @@
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
 
+#include "canvas/debug.h"
+#include "canvas/text.h"
+
 #include "control_protocol/control_protocol.h"
 
 #include "actions.h"
@@ -81,8 +84,6 @@
 #include "audio_time_axis.h"
 #include "automation_time_axis.h"
 #include "bundle_manager.h"
-#include "canvas-noevent-text.h"
-#include "canvas_impl.h"
 #include "crossfade_edit.h"
 #include "debug.h"
 #include "editing.h"
@@ -112,7 +113,6 @@
 #include "rhythm_ferret.h"
 #include "selection.h"
 #include "sfdb_ui.h"
-#include "simpleline.h"
 #include "tempo_lines.h"
 #include "time_axis_view.h"
 #include "utils.h"
@@ -250,6 +250,10 @@ Editor::Editor ()
 	  */
 
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
+	, horizontal_adjustment (0.0, 0.0, 1e16)
+	, unused_adjustment (0.0, 0.0, 10.0, 400.0)
+
+	, controls_layout (unused_adjustment, vertical_adjustment)
 
 	  /* tool bar related */
 
@@ -306,8 +310,8 @@ Editor::Editor ()
 
 	snap_threshold = 5.0;
 	bbt_beat_subdivision = 4;
-	_canvas_width = 0;
-	_canvas_height = 0;
+	_visible_canvas_width = 0;
+	_visible_canvas_height = 0;
 	last_autoscroll_x = 0;
 	last_autoscroll_y = 0;
 	autoscroll_active = false;
@@ -359,18 +363,18 @@ Editor::Editor ()
 
 	sfbrowser = 0;
 
-	location_marker_color = ARDOUR_UI::config()->canvasvar_LocationMarker.get();
-	location_range_color = ARDOUR_UI::config()->canvasvar_LocationRange.get();
-	location_cd_marker_color = ARDOUR_UI::config()->canvasvar_LocationCDMarker.get();
-	location_loop_color = ARDOUR_UI::config()->canvasvar_LocationLoop.get();
-	location_punch_color = ARDOUR_UI::config()->canvasvar_LocationPunch.get();
+	location_marker_color = ARDOUR_UI::config()->get_canvasvar_LocationMarker();
+	location_range_color = ARDOUR_UI::config()->get_canvasvar_LocationRange();
+	location_cd_marker_color = ARDOUR_UI::config()->get_canvasvar_LocationCDMarker();
+	location_loop_color = ARDOUR_UI::config()->get_canvasvar_LocationLoop();
+	location_punch_color = ARDOUR_UI::config()->get_canvasvar_LocationPunch();
 
 	zoom_focus = ZoomFocusLeft;
 	_edit_point = EditAtMouse;
 	_internal_editing = false;
 	current_canvas_cursor = 0;
 
-	frames_per_unit = 2048; /* too early to use reset_zoom () */
+	samples_per_pixel = 2048; /* too early to use reset_zoom () */
 
 	_scroll_callbacks = 0;
 
@@ -466,7 +470,7 @@ Editor::Editor ()
 
 	edit_controls_vbox.set_spacing (0);
 	vertical_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &Editor::tie_vertical_scrolling), true);
-	track_canvas->signal_map_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_map_handler));
+	_track_canvas->signal_map_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_map_handler));
 
 	HBox* h = manage (new HBox);
 	_group_tabs = new EditorGroupTabs (this);
@@ -483,13 +487,14 @@ Editor::Editor ()
 
 	_cursors = new MouseCursors;
 
-	ArdourCanvas::Canvas* time_pad = manage(new ArdourCanvas::Canvas());
-	ArdourCanvas::SimpleLine* pad_line_1 = manage(new ArdourCanvas::SimpleLine(*time_pad->root(),
-			0.0, 1.0, 100.0, 1.0));
+	ArdourCanvas::GtkCanvas* time_pad = manage (new ArdourCanvas::GtkCanvas ());
 
-	pad_line_1->property_color_rgba() = 0xFF0000FF;
+	ArdourCanvas::Line* pad_line_1 = new ArdourCanvas::Line (time_pad->root());
+	pad_line_1->set (ArdourCanvas::Duple (0.0, 1.0), ArdourCanvas::Duple (100.0, 1.0));
+	pad_line_1->set_outline_color (0xFF0000FF);
 	pad_line_1->show();
 
+	// CAIROCANVAS
 	time_pad->show();
 
 	time_canvas_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 2);
@@ -499,15 +504,9 @@ Editor::Editor ()
 	ruler_label_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	ruler_label_event_box.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_label_button_release));
 
-	time_button_event_box.add (time_button_vbox);
-	time_button_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	time_button_event_box.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_label_button_release));
-
-	/* these enable us to have a dedicated window (for cursor setting, etc.)
-	   for the canvas areas.
-	*/
-
-	track_canvas_event_box.add (*track_canvas);
+	time_bars_event_box.add (time_bars_vbox);
+	time_bars_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	time_bars_event_box.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_label_button_release));
 
 	time_canvas_event_box.add (time_canvas_vbox);
 	time_canvas_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
@@ -520,14 +519,16 @@ Editor::Editor ()
 
 	/* labels for the rulers */
 	edit_packer.attach (ruler_label_event_box,   1, 2, 0, 1,    FILL,        SHRINK, 0, 0);
-	/* labels for the marker "tracks" */
-	edit_packer.attach (time_button_event_box,   1, 2, 1, 2,    FILL,        SHRINK, 0, 0);
+	/* labels for the marker "tracks" (time bars) */
+	edit_packer.attach (time_bars_event_box,     1, 2, 1, 2,    FILL,        SHRINK, 0, 0);
 	/* the rulers */
 	edit_packer.attach (time_canvas_event_box,   2, 3, 0, 1,    FILL|EXPAND, FILL, 0, 0);
 	/* track controls */
 	edit_packer.attach (controls_layout,         0, 2, 2, 3,    FILL,        FILL|EXPAND, 0, 0);
-	/* main canvas */
-	edit_packer.attach (track_canvas_event_box,  2, 3, 1, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
+	/* time bars canvas */
+	edit_packer.attach (*_time_bars_canvas_viewport, 2, 3, 1, 2,    FILL,    FILL, 0, 0);
+	/* track canvas */
+	edit_packer.attach (*_track_canvas_viewport,  2, 3, 2, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
 
 	bottom_hbox.set_border_width (2);
 	bottom_hbox.set_spacing (3);
@@ -761,7 +762,8 @@ Editor::~Editor()
         delete button_bindings;
 	delete _routes;
 	delete _route_groups;
-	delete track_canvas;
+	delete _time_bars_canvas_viewport;
+	delete _track_canvas_viewport;
 	delete _drags;
 }
 
@@ -910,11 +912,11 @@ Editor::zoom_adjustment_changed ()
 		return;
 	}
 
-	double fpu = zoom_range_clock->current_duration() / _canvas_width;
-	bool clamped = clamp_frames_per_unit (fpu);
+	framecnt_t fpu = llrintf (zoom_range_clock->current_duration() / _visible_canvas_width);
+	bool clamped = clamp_samples_per_pixel (fpu);
 	
 	if (clamped) {
-		zoom_range_clock->set ((framepos_t) floor (fpu * _canvas_width));
+		zoom_range_clock->set ((framepos_t) floor (fpu * _visible_canvas_width));
 	}
 
 	temporal_zoom (fpu);
@@ -1015,7 +1017,7 @@ Editor::control_scroll (float fraction)
 		return;
 	}
 
-	double step = fraction * current_page_frames();
+	double step = fraction * current_page_samples();
 
 	/*
 		_control_scroll_target is an optional<T>
@@ -1036,7 +1038,7 @@ Editor::control_scroll (float fraction)
 	if ((fraction < 0.0f) && (*_control_scroll_target < (framepos_t) fabs(step))) {
 		*_control_scroll_target = 0;
 	} else if ((fraction > 0.0f) && (max_framepos - *_control_scroll_target < step)) {
-		*_control_scroll_target = max_framepos - (current_page_frames()*2); // allow room for slop in where the PH is on the screen
+		*_control_scroll_target = max_framepos - (current_page_samples()*2); // allow room for slop in where the PH is on the screen
 	} else {
 		*_control_scroll_target += (framepos_t) floor (step);
 	}
@@ -1046,9 +1048,9 @@ Editor::control_scroll (float fraction)
 	playhead_cursor->set_position (*_control_scroll_target);
 	UpdateAllTransportClocks (*_control_scroll_target);
 
-	if (*_control_scroll_target > (current_page_frames() / 2)) {
+	if (*_control_scroll_target > (current_page_samples() / 2)) {
 		/* try to center PH in window */
-		reset_x_origin (*_control_scroll_target - (current_page_frames()/2));
+		reset_x_origin (*_control_scroll_target - (current_page_samples()/2));
 	} else {
 		reset_x_origin (0);
 	}
@@ -1121,7 +1123,7 @@ Editor::map_position_change (framepos_t frame)
 void
 Editor::center_screen (framepos_t frame)
 {
-	double page = _canvas_width * frames_per_unit;
+	framecnt_t const page = _visible_canvas_width * samples_per_pixel;
 
 	/* if we're off the page, then scroll.
 	 */
@@ -1251,7 +1253,7 @@ Editor::set_session (Session *t)
 
 	/* catch up with the playhead */
 
-	_session->request_locate (playhead_cursor->current_frame);
+	_session->request_locate (playhead_cursor->current_frame ());
 	_pending_initial_locate = true;
 
 	update_title ();
@@ -1277,7 +1279,7 @@ Editor::set_session (Session *t)
 	_session->locations()->StateChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
 
-	playhead_cursor->canvas_item.show ();
+	playhead_cursor->show ();
 
 	boost::function<void (string)> pc (boost::bind (&Editor::parameter_changed, this, _1));
 	Config->map_parameters (pc);
@@ -1288,7 +1290,7 @@ Editor::set_session (Session *t)
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		(static_cast<TimeAxisView*>(*i))->set_samples_per_unit (frames_per_unit);
+		(static_cast<TimeAxisView*>(*i))->set_samples_per_pixel (samples_per_pixel);
 	}
 
 	super_rapid_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (
@@ -2104,9 +2106,9 @@ Editor::set_snap_to (SnapType st)
 		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
 		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
 		
-		compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_frames(),
+		compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(),
 					    current_bbt_points_begin, current_bbt_points_end);
-		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames(),
+		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_samples(),
 					 current_bbt_points_begin, current_bbt_points_end);
 		update_tempo_based_rulers (current_bbt_points_begin, current_bbt_points_end);
 		break;
@@ -2262,9 +2264,11 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	if ((prop = node.property ("zoom"))) {
-		reset_zoom (PBD::atof (prop->value()));
+		/* older versions of ardour used floating point samples_per_pixel */
+		double f = PBD::atof (prop->value());
+		reset_zoom (llrintf (f));
 	} else {
-		reset_zoom (frames_per_unit);
+		reset_zoom (samples_per_pixel);
 	}
 
 	if ((prop = node.property ("snap-to"))) {
@@ -2484,7 +2488,8 @@ Editor::get_state ()
 	maybe_add_mixer_strip_width (*node);
 
 	node->add_property ("zoom-focus", enum_2_string (zoom_focus));
-	snprintf (buf, sizeof(buf), "%f", frames_per_unit);
+
+	snprintf (buf, sizeof(buf), "%" PRId64, samples_per_pixel);
 	node->add_property ("zoom", buf);
 	node->add_property ("snap-to", enum_2_string (_snap_type));
 	node->add_property ("snap-mode", enum_2_string (_snap_mode));
@@ -2494,7 +2499,7 @@ Editor::get_state ()
 	node->add_property ("pre-internal-snap-mode", enum_2_string (pre_internal_snap_mode));
 	node->add_property ("edit-point", enum_2_string (_edit_point));
 
-	snprintf (buf, sizeof (buf), "%" PRIi64, playhead_cursor->current_frame);
+	snprintf (buf, sizeof (buf), "%" PRIi64, playhead_cursor->current_frame ());
 	node->add_property ("playhead", buf);
 	snprintf (buf, sizeof (buf), "%" PRIi64, leftmost_frame);
 	node->add_property ("left-frame", buf);
@@ -2816,12 +2821,12 @@ Editor::snap_to_internal (framepos_t& start, int32_t direction, bool for_mark)
 	case SnapMagnetic:
 
 		if (presnap > start) {
-			if (presnap > (start + unit_to_frame(snap_threshold))) {
+			if (presnap > (start + pixel_to_sample(snap_threshold))) {
 				start = presnap;
 			}
 
 		} else if (presnap < start) {
-			if (presnap < (start - unit_to_frame(snap_threshold))) {
+			if (presnap < (start - pixel_to_sample(snap_threshold))) {
 				start = presnap;
 			}
 		}
@@ -3702,8 +3707,14 @@ Editor::set_show_measures (bool yn)
 			if (tempo_lines) {
 				tempo_lines->show();
 			}
-			(void) redraw_measures ();
-		}
+
+			ARDOUR::TempoMap::BBTPointList::const_iterator begin;
+			ARDOUR::TempoMap::BBTPointList::const_iterator end;
+			
+			compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_samples(), begin, end);
+			draw_measures (begin, end);
+		} 
+
 		instant_save ();
 	}
 }
@@ -4108,16 +4119,16 @@ Editor::reset_y_origin (double y)
 }
 
 void
-Editor::reset_zoom (double fpu)
+Editor::reset_zoom (framecnt_t spp)
 {
-	clamp_frames_per_unit (fpu);
+	clamp_samples_per_pixel (spp);
 
-	if (fpu == frames_per_unit) {
+	if (spp == samples_per_pixel) {
 		return;
 	}
 
 	pending_visual_change.add (VisualChange::ZoomLevel);
-	pending_visual_change.frames_per_unit = fpu;
+	pending_visual_change.samples_per_pixel = spp;
 	ensure_visual_change_idle_handler ();
 }
 
@@ -4147,7 +4158,7 @@ Editor::current_visual_state (bool with_tracks)
 {
 	VisualState* vs = new VisualState (with_tracks);
 	vs->y_position = vertical_adjustment.get_value();
-	vs->frames_per_unit = frames_per_unit;
+	vs->samples_per_pixel = samples_per_pixel;
 	vs->leftmost_frame = leftmost_frame;
 	vs->zoom_focus = zoom_focus;
 
@@ -4209,7 +4220,7 @@ Editor::use_visual_state (VisualState& vs)
 	vertical_adjustment.set_value (vs.y_position);
 
 	set_zoom_focus (vs.zoom_focus);
-	reposition_and_zoom (vs.leftmost_frame, vs.frames_per_unit);
+	reposition_and_zoom (vs.leftmost_frame, vs.samples_per_pixel);
 	
 	if (vs.gui_state) {
 		*ARDOUR_UI::instance()->gui_object_state = *vs.gui_state;
@@ -4228,19 +4239,20 @@ Editor::use_visual_state (VisualState& vs)
  *  @param fpu New frames per unit; should already have been clamped so that it is sensible.
  */
 void
-Editor::set_frames_per_unit (double fpu)
+Editor::set_samples_per_pixel (framecnt_t spp)
 {
+	clamp_samples_per_pixel (spp);
+	samples_per_pixel = spp;
+
 	if (tempo_lines) {
 		tempo_lines->tempo_map_changed();
 	}
 
-	frames_per_unit = fpu;
-
 	/* convert fpu to frame count */
 
-	framepos_t frames = (framepos_t) floor (frames_per_unit * _canvas_width);
+	framepos_t frames = samples_per_pixel * _visible_canvas_width;
 
-	if (frames_per_unit != zoom_range_clock->current_duration()) {
+	if (samples_per_pixel != zoom_range_clock->current_duration()) {
 		zoom_range_clock->set (frames);
 	}
 
@@ -4257,7 +4269,7 @@ Editor::set_frames_per_unit (double fpu)
 	//reset_scrolling_region ();
 
 	if (playhead_cursor) {
-		playhead_cursor->set_position (playhead_cursor->current_frame);
+		playhead_cursor->set_position (playhead_cursor->current_frame ());
 	}
 
 	refresh_location_display();
@@ -4286,6 +4298,7 @@ Editor::ensure_visual_change_idle_handler ()
 {
 	if (pending_visual_change.idle_handler_id < 0) {
 		pending_visual_change.idle_handler_id = g_idle_add (_idle_visual_changer, this);
+		pending_visual_change.being_handled = false;
 	}
 }
 
@@ -4316,27 +4329,26 @@ Editor::idle_visual_changer ()
 
 	double const last_time_origin = horizontal_position ();
 
+
 	if (p & VisualChange::ZoomLevel) {
-		set_frames_per_unit (pending_visual_change.frames_per_unit);
+		set_samples_per_pixel (pending_visual_change.samples_per_pixel);
 
 		compute_fixed_ruler_scale ();
 
 		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin;
 		ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end;
 		
-		compute_current_bbt_points (pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_frames(),
+		compute_current_bbt_points (pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_samples(),
 					    current_bbt_points_begin, current_bbt_points_end);
-		compute_bbt_ruler_scale (pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_frames(),
+		compute_bbt_ruler_scale (pending_visual_change.time_origin, pending_visual_change.time_origin + current_page_samples(),
 					 current_bbt_points_begin, current_bbt_points_end);
 		update_tempo_based_rulers (current_bbt_points_begin, current_bbt_points_end);
-	}
 
-	if (p & VisualChange::ZoomLevel) {
 		update_video_timeline();
 	}
 
 	if (p & VisualChange::TimeOrigin) {
-		set_horizontal_position (pending_visual_change.time_origin / frames_per_unit);
+		set_horizontal_position (pending_visual_change.time_origin / samples_per_pixel);
 	}
 
 	if (p & VisualChange::YOrigin) {
@@ -4380,7 +4392,7 @@ Editor::get_preferred_edit_position (bool ignore_playhead, bool from_context_men
 	EditPoint ep = _edit_point;
 
 	if (from_context_menu && (ep == EditAtMouse)) {
-		return  event_frame (&context_click_event, 0, 0);
+		return  window_event_frame (&context_click_event, 0, 0);
 	}
 
 	if (entered_marker) {
@@ -4760,7 +4772,6 @@ Editor::idle_resize ()
 	}
 
 	_pending_resize_amount = 0;
-	flush_canvas ();
 	_group_tabs->set_dirty ();
 	resize_idle_id = -1;
 
@@ -4844,10 +4855,10 @@ Editor::add_routes (RouteList& routes)
 		DataType dt = route->input()->default_type();
 
 		if (dt == ARDOUR::DataType::AUDIO) {
-			rtv = new AudioTimeAxisView (*this, _session, *track_canvas);
+			rtv = new AudioTimeAxisView (*this, _session, *_track_canvas);
 			rtv->set_route (route);
 		} else if (dt == ARDOUR::DataType::MIDI) {
-			rtv = new MidiTimeAxisView (*this, _session, *track_canvas);
+			rtv = new MidiTimeAxisView (*this, _session, *_track_canvas);
 			rtv->set_route (route);
 		} else {
 			throw unknown_type();
@@ -5150,16 +5161,16 @@ Editor::scroll_release ()
 void
 Editor::reset_x_origin_to_follow_playhead ()
 {
-	framepos_t const frame = playhead_cursor->current_frame;
+	framepos_t const frame = playhead_cursor->current_frame ();
 
-	if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
+	if (frame < leftmost_frame || frame > leftmost_frame + current_page_samples()) {
 
 		if (_session->transport_speed() < 0) {
 
-			if (frame > (current_page_frames() / 2)) {
-				center_screen (frame-(current_page_frames()/2));
+			if (frame > (current_page_samples() / 2)) {
+				center_screen (frame-(current_page_samples()/2));
 			} else {
-				center_screen (current_page_frames()/2);
+				center_screen (current_page_samples()/2);
 			}
 
 		} else {
@@ -5170,10 +5181,10 @@ Editor::reset_x_origin_to_follow_playhead ()
 				/* moving left */
 				if (_session->transport_rolling()) {
 					/* rolling; end up with the playhead at the right of the page */
-					l = frame - current_page_frames ();
+					l = frame - current_page_samples ();
 				} else {
 					/* not rolling: end up with the playhead 1/4 of the way along the page */
-					l = frame - current_page_frames() / 4;
+					l = frame - current_page_samples() / 4;
 				}
 			} else {
 				/* moving right */
@@ -5182,7 +5193,7 @@ Editor::reset_x_origin_to_follow_playhead ()
 					l = frame;
 				} else {
 					/* not rolling: end up with the playhead 3/4 of the way along the page */
-					l = frame - 3 * current_page_frames() / 4;
+					l = frame - 3 * current_page_samples() / 4;
 				}
 			}
 
@@ -5190,7 +5201,7 @@ Editor::reset_x_origin_to_follow_playhead ()
 				l = 0;
 			}
 			
-			center_screen_internal (l + (current_page_frames() / 2), current_page_frames ());
+			center_screen_internal (l + (current_page_samples() / 2), current_page_samples ());
 		}
 	}
 }
@@ -5261,11 +5272,11 @@ Editor::super_rapid_screen_update ()
 			*/
 #if 0
 			// FIXME DO SOMETHING THAT WORKS HERE - this is 2.X code
-			double target = ((double)frame - (double)current_page_frames()/2.0) / frames_per_unit;
+			double target = ((double)frame - (double)current_page_samples()/2.0) / samples_per_pixel;
 			if (target <= 0.0) {
 				target = 0.0;
 			}
-			if (fabs(target - current) < current_page_frames() / frames_per_unit) {
+			if (fabs(target - current) < current_page_samples() / samples_per_pixel) {
 				target = (target * 0.15) + (current * 0.85);
 			} else {
 				/* relax */
@@ -5300,7 +5311,7 @@ Editor::session_going_away ()
 	last_update_frame = 0;
 	_drags->abort ();
 
-	playhead_cursor->canvas_item.hide ();
+	playhead_cursor->hide ();
 
 	/* rip everything out of the list displays */
 

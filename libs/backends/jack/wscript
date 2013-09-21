@@ -47,7 +47,7 @@ def build(bld):
         obj.uselib   = [ 'JACK', 'PORTAUDIO' ]
     else:
         obj.uselib   = [ 'JACK' ]
-    obj.use      = 'ardour libpbd'
+    obj.use      = 'libardour libpbd'
     obj.vnum     = JACKBACKEND_VERSION
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'ardour3', 'backends')
     obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"', 

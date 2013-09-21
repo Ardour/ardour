@@ -27,10 +27,8 @@ enum Width {
 	Narrow,
 };
 
-namespace Gnome {
-	namespace Canvas {
-		class SimpleRect;
-	}
+namespace ArdourCanvas {
+	class Rectangle;
 }
 
 enum LayerDisplay {
@@ -40,9 +38,9 @@ enum LayerDisplay {
 };
 
 struct SelectionRect {
-    Gnome::Canvas::SimpleRect *rect;
-    Gnome::Canvas::SimpleRect *end_trim;
-    Gnome::Canvas::SimpleRect *start_trim;
+    ArdourCanvas::Rectangle *rect;
+    ArdourCanvas::Rectangle *end_trim;
+    ArdourCanvas::Rectangle *start_trim;
     uint32_t id;
 };
 

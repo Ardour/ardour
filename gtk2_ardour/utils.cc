@@ -31,7 +31,6 @@
 #include <fstream>
 #include <list>
 #include <sys/stat.h>
-#include <libart_lgpl/art_misc.h>
 #include <gtkmm/rc.h>
 #include <gtkmm/window.h>
 #include <gtkmm/combo.h>
@@ -44,8 +43,8 @@
 
 #include <gtkmm2ext/utils.h>
 #include "ardour/rc_configuration.h"
-
 #include "ardour/filesystem_paths.h"
+#include "canvas/item.h"
 
 #include "ardour_ui.h"
 #include "debug.h"
@@ -54,7 +53,6 @@
 #include "utils.h"
 #include "i18n.h"
 #include "rgb_macros.h"
-#include "canvas_impl.h"
 #include "gui_thread.h"
 
 using namespace std;
@@ -201,18 +199,6 @@ xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h)
 	return (savergb);
 }
 
-ArdourCanvas::Points*
-get_canvas_points (string /*who*/, uint32_t npoints)
-{
-	// cerr << who << ": wants " << npoints << " canvas points" << endl;
-#ifdef TRAP_EXCESSIVE_POINT_REQUESTS
-	if (npoints > (uint32_t) gdk_screen_width() + 4) {
-		abort ();
-	}
-#endif
-	return new ArdourCanvas::Points (npoints);
-}
-
 Pango::FontDescription
 get_font_for_style (string widgetname)
 {
@@ -348,12 +334,6 @@ rgba_p_from_style (string style, float *r, float *g, float *b, string attr, int 
 	return true;
 }
 
-bool
-canvas_item_visible (ArdourCanvas::Item* item)
-{
-	return (item->gobj()->object.flags & GNOME_CANVAS_ITEM_VISIBLE) ? true : false;
-}
-
 void
 set_color (Gdk::Color& c, int rgb)
 {
@@ -401,7 +381,7 @@ emulate_key_event (Gtk::Widget* w, unsigned int keyval)
 	ev.state = 0;
 	ev.keyval = keyval;
 	ev.length = 0;
-	ev.string = (const gchar*) "";
+	ev.string = const_cast<gchar*> ("");
 	ev.hardware_keycode = keymapkey[0].keycode;
 	ev.group = keymapkey[0].group;
 	g_free(keymapkey);
@@ -830,15 +810,15 @@ unique_random_color (list<Gdk::Color>& used_colors)
 
 	while (1) {
 
-		/* avoid neon/glowing tones by limiting them to the
-		   "inner section" (paler) of a color wheel/circle.
-		*/
+		double h, s, v;
 
-		const int32_t max_saturation = 48000; // 65535 would open up the whole color wheel
+		h = fmod (random(), 360.0);
+		s = (random() % 65535) / 65535.0;
+		v = (random() % 65535) / 65535.0;
 
-		newcolor.set_red (g_random_int() % max_saturation);
-		newcolor.set_blue (g_random_int() % max_saturation);
-		newcolor.set_green (g_random_int() % max_saturation);
+		s = min (0.5, s); /* not too saturated */
+		v = max (0.9, v);  /* not too bright */
+		newcolor.set_hsv (h, s, v);
 
 		if (used_colors.size() == 0) {
 			used_colors.push_back (newcolor);
@@ -854,6 +834,7 @@ unique_random_color (list<Gdk::Color>& used_colors)
 			gdelta = newcolor.get_green() - c.get_green();
 
 			if (sqrt (rdelta*rdelta + bdelta*bdelta + gdelta*gdelta) > 25.0) {
+				/* different enough */
 				used_colors.push_back (newcolor);
 				return newcolor;
 			}

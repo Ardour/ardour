@@ -35,7 +35,6 @@
 
 #include "evoral/Curve.hpp"
 
-#include "simplerect.h"
 #include "automation_line.h"
 #include "control_point.h"
 #include "gui_thread.h"
@@ -57,7 +56,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
-using namespace Gnome; // for Canvas
 
 /** @param converter A TimeConverter whose origin_b is the start time of the AutomationList in session frames.
  *  This will not be deleted by AutomationLine.
@@ -91,15 +89,13 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	terminal_points_can_slide = true;
 	_height = 0;
 
-	group = new ArdourCanvas::Group (parent);
-	group->property_x() = 0.0;
-	group->property_y() = 0.0;
+	group = new ArdourCanvas::Group (&parent);
 
-	line = new ArdourCanvas::Line (*group);
-	line->property_width_pixels() = (guint)1;
+	line = new ArdourCanvas::Curve (group);
 	line->set_data ("line", this);
+	line->set_outline_width (2.0);
 
-	line->signal_event().connect (sigc::mem_fun (*this, &AutomationLine::event_handler));
+	line->Event.connect (sigc::mem_fun (*this, &AutomationLine::event_handler));
 
 	trackview.session()->register_with_memento_command_factory(alist->id(), this);
 
@@ -204,7 +200,7 @@ void
 AutomationLine::set_line_color (uint32_t color)
 {
 	_line_color = color;
-	line->property_fill_color_rgba() = color;
+	line->set_outline_color (color);
 }
 
 void
@@ -247,7 +243,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	y = min (1.0, y);
 	y = _height - (y * _height);
 
-	double const x = trackview.editor().frame_to_unit_unrounded (_time_converter->to((*cp.model())->when) - _offset);
+	double const x = trackview.editor().sample_to_pixel_unrounded (_time_converter->to((*cp.model())->when) - _offset);
 
 	trackview.editor().session()->begin_reversible_command (_("automation event move"));
 	trackview.editor().session()->add_command (
@@ -259,7 +255,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	reset_line_coords (cp);
 
 	if (line_points.size() > 1) {
-		line->property_points() = line_points;
+		line->set (line_points);
 	}
 
 	alist->freeze ();
@@ -280,8 +276,8 @@ void
 AutomationLine::reset_line_coords (ControlPoint& cp)
 {
 	if (cp.view_index() < line_points.size()) {
-		line_points[cp.view_index()].set_x (cp.get_x());
-		line_points[cp.view_index()].set_y (cp.get_y());
+		line_points[cp.view_index()].x = cp.get_x ();
+		line_points[cp.view_index()].y = cp.get_y ();
 	}
 }
 
@@ -683,7 +679,7 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 		 */
 
 		if (line_points.size() > 1) {
-			line->property_points() = line_points;
+			line->set (line_points);
 		}
 	}
 	
@@ -743,10 +739,10 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 
 	/* if xval has not changed, set it directly from the model to avoid rounding errors */
 
-	if (view_x == trackview.editor().frame_to_unit_unrounded (_time_converter->to ((*cp.model())->when)) - _offset) {
+	if (view_x == trackview.editor().sample_to_pixel_unrounded (_time_converter->to ((*cp.model())->when)) - _offset) {
 		view_x = (*cp.model())->when - _offset;
 	} else {
-		view_x = trackview.editor().unit_to_frame (view_x);
+		view_x = trackview.editor().pixel_to_sample (view_x);
 		view_x = _time_converter->from (view_x + _offset);
 	}
 
@@ -764,7 +760,7 @@ AutomationLine::control_points_adjacent (double xval, uint32_t & before, uint32_
 	ControlPoint *acp = 0;
 	double unit_xval;
 
-	unit_xval = trackview.editor().frame_to_unit_unrounded (xval);
+	unit_xval = trackview.editor().sample_to_pixel_unrounded (xval);
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 
@@ -884,7 +880,7 @@ AutomationLine::set_selected_points (PointSelection const & points)
 
 void AutomationLine::set_colors ()
 {
-	set_line_color (ARDOUR_UI::config()->canvasvar_AutomationLine.get());
+	set_line_color (ARDOUR_UI::config()->get_canvasvar_AutomationLine());
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		(*i)->set_color ();
 	}
@@ -951,7 +947,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		 * zoom and scroll into account).
 		 */
 			
-		tx = trackview.editor().frame_to_unit_unrounded (tx);
+		tx = trackview.editor().sample_to_pixel_unrounded (tx);
 		
 		/* convert from canonical view height (0..1.0) to actual
 		 * height coordinates (using X11's top-left rooted system)
@@ -980,7 +976,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		/* reset the line coordinates given to the CanvasLine */
 
 		while (line_points.size() < vp) {
-			line_points.push_back (Art::Point (0,0));
+			line_points.push_back (ArdourCanvas::Duple (0,0));
 		}
 
 		while (line_points.size() > vp) {
@@ -988,11 +984,11 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		}
 
 		for (uint32_t n = 0; n < vp; ++n) {
-			line_points[n].set_x (control_points[n]->get_x());
-			line_points[n].set_y (control_points[n]->get_y());
+			line_points[n].x = control_points[n]->get_x();
+			line_points[n].y = control_points[n]->get_y();
 		}
 
-		line->property_points() = line_points;
+		line->set (line_points);
 
 		if (_visible && alist->interpolation() != AutomationList::Discrete) {
 			line->show();

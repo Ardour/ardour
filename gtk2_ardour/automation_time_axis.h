@@ -30,9 +30,9 @@
 #include "ardour/automatable.h"
 #include "ardour/automation_list.h"
 
-#include "canvas.h"
+#include "canvas/rectangle.h"
+
 #include "time_axis_view.h"
-#include "simplerect.h"
 #include "automation_controller.h"
 
 namespace ARDOUR {
@@ -69,7 +69,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	~AutomationTimeAxisView();
 
 	virtual void set_height (uint32_t);
-	void set_samples_per_unit (double);
+	void set_samples_per_pixel (double);
 	std::string name() const { return _name; }
 
 	void add_automation_event (GdkEvent *, framepos_t, double);
@@ -132,7 +132,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	boost::shared_ptr<AutomationController> _controller;
 	Evoral::Parameter _parameter;
 
-	ArdourCanvas::SimpleRect* _base_rect;
+	ArdourCanvas::Rectangle* _base_rect;
 	boost::shared_ptr<AutomationLine> _line;
 
 	/** AutomationStreamView if we are editing region-based automation (for MIDI), otherwise 0 */

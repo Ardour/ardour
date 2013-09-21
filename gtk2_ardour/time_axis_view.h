@@ -44,7 +44,6 @@
 #include "axis_view.h"
 #include "enums.h"
 #include "editing.h"
-#include "canvas.h"
 
 namespace ARDOUR {
 	class Session;
@@ -56,6 +55,12 @@ namespace ARDOUR {
 
 namespace Gtk {
 	class Menu;
+}
+
+namespace ArdourCanvas {
+	class Canvas;
+	class Group;
+	class Item;
 }
 
 class PublicEditor;
@@ -100,7 +105,6 @@ class TimeAxisView : public virtual AxisView
         virtual void leave_internal_edit_mode () {}
 
 	ArdourCanvas::Group* canvas_display () { return _canvas_display; }
-	ArdourCanvas::Group* canvas_background () { return _canvas_background; }
 	ArdourCanvas::Group* ghost_group () { return _ghost_group; }
 
 	/** @return effective height (taking children into account) in canvas units, or
@@ -119,8 +123,6 @@ class TimeAxisView : public virtual AxisView
 
 	virtual guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	virtual void hide ();
-
-	void clip_to_viewport ();
 
 	bool touched (double top, double bot);
 
@@ -149,7 +151,7 @@ class TimeAxisView : public virtual AxisView
 	virtual ARDOUR::RouteGroup* route_group() const { return 0; }
 	virtual boost::shared_ptr<ARDOUR::Playlist> playlist() const { return boost::shared_ptr<ARDOUR::Playlist> (); }
 
-	virtual void set_samples_per_unit (double);
+	virtual void set_samples_per_pixel (double);
 	virtual void show_selection (TimeSelection&);
 	virtual void hide_selection ();
 	virtual void reshow_selection (TimeSelection&);
@@ -276,7 +278,6 @@ class TimeAxisView : public virtual AxisView
 	void build_size_menu ();
 
 private:
-	ArdourCanvas::Group* _canvas_background;
  	Gtk::VBox*            control_parent;
 	int                  _order;
 	uint32_t             _effective_height;

@@ -266,36 +266,36 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 		uint32_t b[4];
 		float stp[4];
 		int styleflags = Config->get_meter_style_led() ? 3 : 1;
-		b[0] = ARDOUR_UI::config()->canvasvar_MeterBackgroundBot.get();
-		b[1] = ARDOUR_UI::config()->canvasvar_MeterBackgroundTop.get();
+		b[0] = ARDOUR_UI::config()->get_canvasvar_MeterBackgroundBot();
+		b[1] = ARDOUR_UI::config()->get_canvasvar_MeterBackgroundTop();
 		b[2] = 0x991122ff; // red highlight gradient Bot
 		b[3] = 0x551111ff; // red highlight gradient Top
 		if (n < nmidi) {
-			c[0] = ARDOUR_UI::config()->canvasvar_MidiMeterColor0.get();
-			c[1] = ARDOUR_UI::config()->canvasvar_MidiMeterColor1.get();
-			c[2] = ARDOUR_UI::config()->canvasvar_MidiMeterColor2.get();
-			c[3] = ARDOUR_UI::config()->canvasvar_MidiMeterColor3.get();
-			c[4] = ARDOUR_UI::config()->canvasvar_MidiMeterColor4.get();
-			c[5] = ARDOUR_UI::config()->canvasvar_MidiMeterColor5.get();
-			c[6] = ARDOUR_UI::config()->canvasvar_MidiMeterColor6.get();
-			c[7] = ARDOUR_UI::config()->canvasvar_MidiMeterColor7.get();
-			c[8] = ARDOUR_UI::config()->canvasvar_MidiMeterColor8.get();
-			c[9] = ARDOUR_UI::config()->canvasvar_MidiMeterColor9.get();
+			c[0] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor0();
+			c[1] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor1();
+			c[2] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor2();
+			c[3] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor3();
+			c[4] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor4();
+			c[5] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor5();
+			c[6] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor6();
+			c[7] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor7();
+			c[8] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor8();
+			c[9] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor9();
 			stp[0] = 115.0 *  32.0 / 128.0;
 			stp[1] = 115.0 *  64.0 / 128.0;
 			stp[2] = 115.0 * 100.0 / 128.0;
 			stp[3] = 115.0 * 112.0 / 128.0;
 		} else {
-			c[0] = ARDOUR_UI::config()->canvasvar_MeterColor0.get();
-			c[1] = ARDOUR_UI::config()->canvasvar_MeterColor1.get();
-			c[2] = ARDOUR_UI::config()->canvasvar_MeterColor2.get();
-			c[3] = ARDOUR_UI::config()->canvasvar_MeterColor3.get();
-			c[4] = ARDOUR_UI::config()->canvasvar_MeterColor4.get();
-			c[5] = ARDOUR_UI::config()->canvasvar_MeterColor5.get();
-			c[6] = ARDOUR_UI::config()->canvasvar_MeterColor6.get();
-			c[7] = ARDOUR_UI::config()->canvasvar_MeterColor7.get();
-			c[8] = ARDOUR_UI::config()->canvasvar_MeterColor8.get();
-			c[9] = ARDOUR_UI::config()->canvasvar_MeterColor9.get();
+			c[0] = ARDOUR_UI::config()->get_canvasvar_MeterColor0();
+			c[1] = ARDOUR_UI::config()->get_canvasvar_MeterColor1();
+			c[2] = ARDOUR_UI::config()->get_canvasvar_MeterColor2();
+			c[3] = ARDOUR_UI::config()->get_canvasvar_MeterColor3();
+			c[4] = ARDOUR_UI::config()->get_canvasvar_MeterColor4();
+			c[5] = ARDOUR_UI::config()->get_canvasvar_MeterColor5();
+			c[6] = ARDOUR_UI::config()->get_canvasvar_MeterColor6();
+			c[7] = ARDOUR_UI::config()->get_canvasvar_MeterColor7();
+			c[8] = ARDOUR_UI::config()->get_canvasvar_MeterColor8();
+			c[9] = ARDOUR_UI::config()->get_canvasvar_MeterColor9();
 
 			switch (meter_type) {
 				case MeterK20:

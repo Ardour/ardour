@@ -43,7 +43,6 @@
 #include "route_ui.h"
 #include "enums.h"
 #include "time_axis_view.h"
-#include "canvas.h"
 #include "gain_meter.h"
 
 namespace ARDOUR {
@@ -54,6 +53,10 @@ namespace ARDOUR {
 	class Processor;
 	class Location;
 	class Playlist;
+}
+
+namespace ArdourCanvas {
+	class Rectangle;
 }
 
 class PublicEditor;
@@ -79,7 +82,7 @@ public:
 	void show_selection (TimeSelection&);
 	void set_button_names ();
 
-	void set_samples_per_unit (double);
+	void set_samples_per_pixel (double);
  	void set_height (uint32_t h);
 	void show_timestretch (framepos_t start, framepos_t end, int layers, int layer);
 	void hide_timestretch ();
@@ -208,8 +211,7 @@ protected:
 
 	virtual void label_view ();
 
-	void reset_samples_per_unit ();
-	void horizontal_position_changed ();
+	void reset_samples_per_pixel ();
 
 	virtual void build_automation_action_menu (bool);
 	virtual void append_extra_display_menu_items () {}
@@ -264,7 +266,7 @@ protected:
 
 	void use_playlist (Gtk::RadioMenuItem *item, boost::weak_ptr<ARDOUR::Playlist> wpl);
 
-	ArdourCanvas::SimpleRect* timestretch_rect;
+	ArdourCanvas::Rectangle* timestretch_rect;
 
 	void set_track_mode (ARDOUR::TrackMode, bool apply_to_selection = false);
 

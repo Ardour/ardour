@@ -481,18 +481,18 @@ VideoMonitor::set_offset (ARDOUR::frameoffset_t offset)
 	if (offset == NO_OFFSET ) { return; }
 
 	framecnt_t video_frame_offset;
-	framecnt_t audio_frame_rate;
+	framecnt_t audio_sample_rate;
 	if (_session->config.get_videotimeline_pullup()) {
-		audio_frame_rate = _session->frame_rate();
+		audio_sample_rate = _session->frame_rate();
 	} else {
-		audio_frame_rate = _session->nominal_frame_rate();
+		audio_sample_rate = _session->nominal_frame_rate();
 	}
 
 	/* Note: pull-up/down are applied here: frame_rate() vs. nominal_frame_rate() */
 	if (_session->config.get_use_video_file_fps()) {
-		video_frame_offset = floor(offset * fps / audio_frame_rate);
+		video_frame_offset = floor(offset * fps / audio_sample_rate);
 	} else {
-		video_frame_offset = floor(offset * _session->timecode_frames_per_second() / audio_frame_rate);
+		video_frame_offset = floor(offset * _session->timecode_frames_per_second() / audio_sample_rate);
 	}
 
 	if (video_offset == video_frame_offset) { return; }
@@ -508,18 +508,18 @@ VideoMonitor::manual_seek (framepos_t when, bool /*force*/, ARDOUR::frameoffset_
 	if (!is_started()) { return; }
 	if (!_session) { return; }
 	framecnt_t video_frame;
-	framecnt_t audio_frame_rate;
+	framecnt_t audio_sample_rate;
 	if (_session->config.get_videotimeline_pullup()) {
-		audio_frame_rate = _session->frame_rate();
+		audio_sample_rate = _session->frame_rate();
 	} else {
-		audio_frame_rate = _session->nominal_frame_rate();
+		audio_sample_rate = _session->nominal_frame_rate();
 	}
 
 	/* Note: pull-up/down are applied here: frame_rate() vs. nominal_frame_rate() */
 	if (_session->config.get_use_video_file_fps()) {
-		video_frame = floor(when * fps / audio_frame_rate);
+		video_frame = floor(when * fps / audio_sample_rate);
 	} else {
-		video_frame = floor(when * _session->timecode_frames_per_second() / audio_frame_rate);
+		video_frame = floor(when * _session->timecode_frames_per_second() / audio_sample_rate);
 	}
 	if (video_frame < 0 ) video_frame = 0;
 

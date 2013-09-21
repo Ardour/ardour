@@ -39,11 +39,9 @@
 #include "route_time_axis.h"
 #include "automation_line.h"
 #include "public_editor.h"
-#include "simplerect.h"
 #include "selection.h"
 #include "rgb_macros.h"
 #include "point_selection.h"
-#include "canvas_impl.h"
 #include "control_point.h"
 #include "utils.h"
 
@@ -110,22 +108,17 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	ignore_state_request = false;
 	first_call_to_set_height = true;
 
-	_base_rect = new SimpleRect(*_canvas_display);
-	_base_rect->property_x1() = 0.0;
-	_base_rect->property_y1() = 0.0;
-	/** gnomecanvas sometimes converts this value to int or adds 2 to it, so it must be
-	    set correctly to avoid overflow.
-	*/
-	_base_rect->property_x2() = INT_MAX - 2;
-	_base_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_AutomationTrackOutline.get();
+	_base_rect = new ArdourCanvas::Rectangle (_canvas_display);
+	_base_rect->set_x1 (ArdourCanvas::COORD_MAX);
+	_base_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_AutomationTrackOutline());
 
 	/* outline ends and bottom */
-	_base_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);
-	_base_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_AutomationTrackFill.get();
+	_base_rect->set_outline_what (0x1 | 0x2 | 0x8);
+	_base_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_AutomationTrackFill());
 
 	_base_rect->set_data ("trackview", this);
 
-	_base_rect->signal_event().connect (sigc::bind (
+	_base_rect->Event.connect (sigc::bind (
 			sigc::mem_fun (_editor, &PublicEditor::canvas_automation_track_event),
 			_base_rect, this));
 
@@ -216,7 +209,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 				)
 			);
 
-		line->set_line_color (ARDOUR_UI::config()->canvasvar_ProcessorAutomationLine.get());
+		line->set_line_color (ARDOUR_UI::config()->get_canvasvar_ProcessorAutomationLine());
 		line->queue_reset ();
 		add_line (line);
 	}
@@ -410,7 +403,7 @@ AutomationTimeAxisView::set_height (uint32_t h)
 
 	TimeAxisView::set_height (h);
 
-	_base_rect->property_y2() = h;
+	_base_rect->set_y1 (h);
 
 	if (_line) {
 		_line->set_height(h);
@@ -436,7 +429,7 @@ AutomationTimeAxisView::set_height (uint32_t h)
 	}
 
 	if (changed) {
-		if (canvas_item_visible (_canvas_display) && _route) {
+		if (_canvas_display->visible() && _route) {
 			/* only emit the signal if the height really changed and we were visible */
 			_route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 		}
@@ -444,16 +437,16 @@ AutomationTimeAxisView::set_height (uint32_t h)
 }
 
 void
-AutomationTimeAxisView::set_samples_per_unit (double spu)
+AutomationTimeAxisView::set_samples_per_pixel (double fpp)
 {
-	TimeAxisView::set_samples_per_unit (spu);
+	TimeAxisView::set_samples_per_pixel (fpp);
 
 	if (_line) {
 		_line->reset ();
 	}
 
 	if (_view) {
-		_view->set_samples_per_unit (spu);
+		_view->set_samples_per_pixel (fpp);
 	}
 }
 
@@ -567,7 +560,7 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, 
 
 	double x = 0;
 
-	_canvas_display->w2i (x, y);
+	_canvas_display->canvas_to_item (x, y);
 
 	/* compute vertical fractional position */
 

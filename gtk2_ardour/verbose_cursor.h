@@ -17,10 +17,9 @@
 
 */
 
-#include <libgnomecanvasmm/item.h>
 #include "ardour/types.h"
-#include "canvas-noevent-text.h"
-#include "canvas.h"
+#include "canvas/text.h"
+#include "canvas/canvas.h"
 
 class Editor;
 
@@ -43,13 +42,15 @@ public:
 	void show (double xoffset = 0, double yoffset = 0);
 	void hide ();
 
+         ArdourCanvas::Item& item() { return *_canvas_item; }
+
 private:
 	double clamp_x (double);
 	double clamp_y (double);
 
-	Editor* _editor;
-	ArdourCanvas::NoEventText* _canvas_item;
-	bool _visible;
-	double _xoffset;
-	double _yoffset;
+	Editor*             _editor;
+	ArdourCanvas::Text* _canvas_item;
+	bool                _visible;
+	double              _xoffset;
+	double              _yoffset;
 };

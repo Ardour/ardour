@@ -279,8 +279,8 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evo
 
         framepos_t fpos = step_edit_region_view->region_beats_to_absolute_frames (step_edit_beat_pos + beat_duration);
 
-        if (fpos >= (_editor.leftmost_position() + _editor.current_page_frames())) {
-                _editor.reset_x_origin (fpos - (_editor.current_page_frames()/4));
+        if (fpos >= (_editor.leftmost_sample() + _editor.current_page_samples())) {
+                _editor.reset_x_origin (fpos - (_editor.current_page_samples()/4));
         }
 
         Evoral::MusicalTime at = step_edit_beat_pos;

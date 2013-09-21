@@ -340,7 +340,7 @@ def build(bld):
 
     obj.export_includes = ['.']
     obj.includes     = ['.', '../surfaces/control_protocol', '..']
-    obj.name         = 'ardour'
+    obj.name         = 'libardour'
     obj.target       = 'ardour'
     obj.uselib       = ['GLIBMM','GTHREAD','AUBIO','SIGCPP','XML','UUID',
                         'JACK', 'ALSA', 'SNDFILE','SAMPLERATE','LRDF',

@@ -59,6 +59,15 @@ UIConfiguration::~UIConfiguration ()
 {
 }
 
+void
+UIConfiguration::map_parameters (boost::function<void (std::string)>& functor)
+{
+#undef  UI_CONFIG_VARIABLE
+#define UI_CONFIG_VARIABLE(Type,var,Name,value) functor (Name);
+#include "ui_config_vars.h"
+#undef  UI_CONFIG_VARIABLE
+}
+
 int
 UIConfiguration::load_defaults ()
 {

@@ -1,0 +1,28 @@
+digraph G {
+
+rankdir = LR
+
+Root -> verbose_canvas_cursor
+Root -> time_line_group -> transport_loop_range_rect
+Root -> time_line_group -> transport_punch_range_rect
+Root -> _background_group
+Root -> _master_group -> _trackview_group -> rubberband_rect
+Root -> _master_group -> _trackview_group -> _region_motion_group
+Root -> _master_group -> transport_punchin_line
+Root -> _master_group -> transport_punchout_line
+Root -> _master_group -> zoom_rect
+Root -> _time_bars_group -> meter_bar_group
+Root -> _time_bars_group -> tempo_bar_group
+Root -> _time_bars_group -> range_marker_bar_group
+Root -> _time_bars_group -> transport_marker_bar_group
+Root -> _time_bars_group -> marker_bar_group
+Root -> _time_bars_group -> cd_marker_bar_group
+Root -> _time_markers_group -> meter_group -> "meter markers"
+Root -> _time_markers_group -> tempo_group
+Root -> _time_markers_group -> range_marker_group -> range_bar_drag_rect
+Root -> _time_markers_group -> transport_marker_group -> transport_bar_drag_rect
+Root -> _time_markers_group -> marker_group
+Root -> _time_markers_group -> cd_marker_group -> cd_marker_bar_drag_rect
+Root -> cursor_group
+     	       
+}

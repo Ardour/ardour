@@ -409,14 +409,22 @@ AudioRegion::set_envelope_active (bool yn)
 	}
 }
 
+/** @param buf Buffer to put peak data in.
+ *  @param npeaks Number of peaks to read (ie the number of PeakDatas in buf)
+ *  @param offset Start position, as an offset from the start of this region's source.
+ *  @param cnt Number of samples to read.
+ *  @param chan_n Channel.
+ *  @param frames_per_pixel Number of samples to use to generate one peak value.
+ */
+ 
 ARDOUR::framecnt_t
-AudioRegion::read_peaks (PeakData *buf, framecnt_t npeaks, framecnt_t offset, framecnt_t cnt, uint32_t chan_n, double samples_per_unit) const
+AudioRegion::read_peaks (PeakData *buf, framecnt_t npeaks, framecnt_t offset, framecnt_t cnt, uint32_t chan_n, double frames_per_pixel) const
 {
 	if (chan_n >= _sources.size()) {
 		return 0;
 	}
 
-	if (audio_source(chan_n)->read_peaks (buf, npeaks, offset, cnt, samples_per_unit)) {
+	if (audio_source(chan_n)->read_peaks (buf, npeaks, offset, cnt, frames_per_pixel)) {
 		return 0;
 	} else {
 		if (_scale_amplitude != 1.0f) {
@@ -1852,22 +1860,3 @@ AudioRegion::verify_xfade_bounds (framecnt_t len, bool start)
 		
 }
 
-extern "C" {
-
-	int region_read_peaks_from_c (void *arg, uint32_t npeaks, uint32_t start, uint32_t cnt, intptr_t data, uint32_t n_chan, double samples_per_unit)
-{
-	return ((AudioRegion *) arg)->read_peaks ((PeakData *) data, (framecnt_t) npeaks, (framepos_t) start, (framecnt_t) cnt, n_chan,samples_per_unit);
-}
-
-uint32_t region_length_from_c (void *arg)
-{
-
-	return ((AudioRegion *) arg)->length();
-}
-
-uint32_t sourcefile_length_from_c (void *arg, double zoom_factor)
-{
-	return ( (AudioRegion *) arg)->audio_source()->available_peaks (zoom_factor) ;
-}
-
-} /* extern "C" */

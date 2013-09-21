@@ -60,7 +60,7 @@ protected:
 	void set_header_timeline_position () {}
 
 	int read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t /*start*/, framecnt_t /*cnt*/,
-				 double /*samples_per_unit*/, framecnt_t /*fpp*/) const {
+				 double /*frames_per_pixel*/, framecnt_t /*fpp*/) const {
 		memset (peaks, 0, sizeof (PeakData) * npeaks);
 		return 0;
 	}

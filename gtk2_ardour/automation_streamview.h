@@ -24,7 +24,6 @@
 
 #include "ardour/location.h"
 #include "enums.h"
-#include "simplerect.h"
 #include "streamview.h"
 #include "time_axis_view_item.h"
 #include "route_time_axis.h"
