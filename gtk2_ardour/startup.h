@@ -160,6 +160,7 @@ class ArdourStartup : public Gtk::Assistant {
 	Gtk::TreeView                recent_session_display;
 	Glib::RefPtr<Gtk::TreeStore> recent_session_model;
 	Gtk::ScrolledWindow          recent_scroller;
+        Gtk::Label                   recent_label;
 	Gtk::FileChooserButton       existing_session_chooser;
 	int redisplay_recent_sessions ();
 	void recent_session_row_selected ();

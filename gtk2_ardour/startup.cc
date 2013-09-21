@@ -546,45 +546,32 @@ ArdourStartup::setup_initial_choice_page ()
 		info_box->pack_start (*updates_button, false, false);
 	}
 
-	ARDOUR::RecentSessions rs;
-	ARDOUR::read_recent_sessions (rs);
-	
-	if (!rs.empty()) {
+	/* recent session scroller */
 
-		/* recent session scroller */
-
-		Label* load_label = manage (new Label);
-		load_label->set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", _("Load a recent session")));
-		load_label->set_alignment (0, 0.5);
-
-		centering_vbox->pack_start (*load_label, false, false, 12);
-
-		recent_session_model = TreeStore::create (recent_session_columns);
-		redisplay_recent_sessions ();
-
-		recent_session_display.set_model (recent_session_model);
-		recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
-		recent_session_display.set_headers_visible (false);
-		recent_session_display.get_selection()->set_mode (SELECTION_SINGLE);
+	recent_label.set_no_show_all (true);
+	recent_scroller.set_no_show_all (true);
 	
-		recent_session_display.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &ArdourStartup::recent_session_row_selected));
+	recent_label.set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", _("Load a recent session")));
+	recent_label.set_alignment (0, 0.5);
 	
-		recent_scroller.add (recent_session_display);
-		recent_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-		recent_scroller.set_shadow_type	(Gtk::SHADOW_IN);
+	recent_session_model = TreeStore::create (recent_session_columns);
 	
-		recent_session_display.show();
+	recent_session_display.set_model (recent_session_model);
+	recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
+	recent_session_display.set_headers_visible (false);
+	recent_session_display.get_selection()->set_mode (SELECTION_SINGLE);
 	
-		recent_scroller.show();
-		recent_session_display.signal_row_activated().connect (sigc::mem_fun (*this, &ArdourStartup::recent_row_activated));
+	recent_session_display.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &ArdourStartup::recent_session_row_selected));
 	
-		int cnt = redisplay_recent_sessions ();
-		if (cnt > 4) {
-			recent_scroller.set_size_request (-1, 300);
-		}
+	recent_scroller.add (recent_session_display);
+	recent_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	recent_scroller.set_shadow_type	(Gtk::SHADOW_IN);
 	
-		centering_vbox->pack_start (recent_scroller, false, true);
-	}
+	recent_session_display.show();
+	recent_session_display.signal_row_activated().connect (sigc::mem_fun (*this, &ArdourStartup::recent_row_activated));
+	
+	centering_vbox->pack_start (recent_label, false, false, 12);
+	centering_vbox->pack_start (recent_scroller, false, true);
 
 	/* Browse button */
 	
@@ -1373,7 +1360,6 @@ ArdourStartup::on_map ()
 {
 	Gtk::Assistant::on_map ();
 
-	redisplay_recent_sessions ();
 	populate_session_templates ();
 
 	if (!template_model->children().empty()) {
@@ -1382,6 +1368,21 @@ ArdourStartup::on_map ()
 	} else {
 		use_template_button.hide();
 		template_chooser.hide ();
+	}
+
+	if (recent_session_model) {
+		int cnt = redisplay_recent_sessions ();
+		if (cnt > 0) {
+			recent_scroller.show();
+			recent_label.show ();
+			
+			if (cnt > 4) {
+				recent_scroller.set_size_request (-1, 300);
+			}
+		} else {
+			recent_scroller.hide();
+			recent_label.hide ();
+		}
 	}
 }
 		
