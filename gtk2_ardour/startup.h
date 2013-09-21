@@ -174,7 +174,6 @@ class ArdourStartup : public Gtk::Assistant {
 	void setup_new_session_page ();
 	Gtk::Entry new_name_entry;
 	Gtk::FileChooserButton new_folder_chooser;
-	Gtk::FileChooserButton session_template_chooser;
 
 	struct SessionTemplateColumns : public Gtk::TreeModel::ColumnRecord {
 		SessionTemplateColumns () {
@@ -193,9 +192,7 @@ class ArdourStartup : public Gtk::Assistant {
 	Gtk::VBox session_new_vbox;
 	Gtk::VBox session_existing_vbox;
 	Gtk::Expander more_new_session_options_button;
-	Gtk::RadioButtonGroup session_template_group;
-	Gtk::RadioButton use_session_as_template_button;
-	Gtk::RadioButton use_template_button;
+	Gtk::CheckButton use_template_button;
         std::string load_template_override;
 
 	void more_new_session_options_button_clicked();

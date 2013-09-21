@@ -96,9 +96,6 @@ ArdourStartup::ArdourStartup (bool require_new, const std::string& session_name,
 	
 	if (need_session_info || new_user) {
 
-		use_template_button.set_group (session_template_group);
-		use_session_as_template_button.set_group (session_template_group);
-		
 		set_keep_above (true);
 		set_position (WIN_POS_CENTER);
 		set_border_width (12);
@@ -207,9 +204,9 @@ ArdourStartup::use_session_template ()
 
 	if (use_template_button.get_active()) {
 		return template_chooser.get_active_row_number() > 0;
-	} else {
-		return !session_template_chooser.get_filename().empty();
-	}
+	} 
+	
+	return false;
 }
 
 std::string
@@ -225,10 +222,9 @@ ArdourStartup::session_template_name ()
 		TreeModel::Row row = (*iter);
 		string s = row[session_template_columns.path];
 		return s;
-	} else {
-		return session_template_chooser.get_filename();
+	} 
 
-	}
+	return string();
 }
 
 std::string
@@ -849,29 +845,6 @@ ArdourStartup::setup_new_session_page ()
 
 	vbox3->pack_start (*hbox4a, false, false);
 
-	/* --- */
-
-	if (!new_user) {
-		session_template_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
-		
-		HBox* hbox4b = manage (new HBox);
-		use_session_as_template_button.set_label (_("Use an existing session as a template:"));
-		
-		hbox4b->set_spacing (6);
-		hbox4b->pack_start (use_session_as_template_button, false, false);
-		hbox4b->pack_start (session_template_chooser, true, true);
-		
-		use_session_as_template_button.show ();
-		session_template_chooser.show ();
-		
-		Gtk::FileFilter* session_filter = manage (new (Gtk::FileFilter));
-		session_filter->add_pattern (X_("*.ardour"));
-		session_template_chooser.set_filter (*session_filter);
-		session_template_chooser.set_title (_("Select template"));
-		
-		vbox3->pack_start (*hbox4b, false, false);
-	}
-	
 	/* --- */
 	
 	HBox* hbox5 = manage (new HBox);
