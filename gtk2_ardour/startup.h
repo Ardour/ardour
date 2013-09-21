@@ -92,6 +92,7 @@ class ArdourStartup : public Gtk::Assistant {
 	void on_cancel ();
 	bool on_delete_event (GdkEventAny*);
         void on_prepare (Gtk::Widget*);
+        void on_map ();
 
 	static ArdourStartup *the_startup;
 

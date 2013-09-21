@@ -751,157 +751,152 @@ ArdourStartup::setup_new_session_page ()
 	session_new_vbox.set_border_width (12);
 	session_new_vbox.set_spacing (18);
 
-	if (session_new_vbox.get_children().empty()) {
-		VBox *vbox1 = manage (new VBox);
-		HBox* hbox1 = manage (new HBox);
-		Label* label1 = manage (new Label);
+	VBox *vbox1 = manage (new VBox);
+	HBox* hbox1 = manage (new HBox);
+	Label* label1 = manage (new Label);
 
-		vbox1->set_spacing (6);
+	vbox1->set_spacing (6);
 
-		hbox1->set_spacing (6);
-		hbox1->pack_start (*label1, false, false);
-		hbox1->pack_start (new_name_entry, true, true);
+	hbox1->set_spacing (6);
+	hbox1->pack_start (*label1, false, false);
+	hbox1->pack_start (new_name_entry, true, true);
 
-		label1->set_text (_("Session name:"));
+	label1->set_text (_("Session name:"));
 
 
-		if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
-			new_name_entry.set_text  (Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name));
-			/* name provided - they can move right along */
-			set_page_complete (session_new_vbox, true);
-		}
-
-		new_name_entry.signal_changed().connect (sigc::mem_fun (*this, &ArdourStartup::new_name_changed));
-		new_name_entry.signal_activate().connect (sigc::mem_fun (*this, &ArdourStartup::move_along_now));
-
-		vbox1->pack_start (*hbox1, true, true);
-
-		/* --- */
-
-		HBox* hbox2 = manage (new HBox);
-		Label* label2 = manage (new Label);
-
-		hbox2->set_spacing (6);
-		hbox2->pack_start (*label2, false, false);
-		hbox2->pack_start (new_folder_chooser, true, true);
-
-		label2->set_text (_("Create session folder in:"));
-
-		if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
-			new_folder_chooser.set_current_folder (poor_mans_glob (Glib::path_get_dirname (ARDOUR_COMMAND_LINE::session_name)));
-		} else if (ARDOUR_UI::instance()->session_loaded) {
-			// point the new session file chooser at the parent directory of the current session
-			string session_parent_dir = Glib::path_get_dirname(ARDOUR_UI::instance()->the_session()->path());
-			string::size_type last_dir_sep = session_parent_dir.rfind(G_DIR_SEPARATOR);
-			session_parent_dir = session_parent_dir.substr(0, last_dir_sep);
-			new_folder_chooser.set_current_folder (session_parent_dir);
-			string default_session_folder = poor_mans_glob (Config->get_default_session_parent_dir());
-
-			try {
-				/* add_shortcut_folder throws an exception if the folder being added already has a shortcut */
-				new_folder_chooser.add_shortcut_folder (default_session_folder);
-			}
-			catch (Glib::Error & e) {
-				std::cerr << "new_folder_chooser.add_shortcut_folder (" << default_session_folder << ") threw Glib::Error " << e.what() << std::endl;
-			}
-		} else {
-			new_folder_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
-		}
-		new_folder_chooser.show ();
-		new_folder_chooser.set_title (_("Select folder for session"));
-
-#ifdef __APPLE__
-		new_folder_chooser.add_shortcut_folder ("/Volumes");
-#endif
-
-		vbox1->pack_start (*hbox2, false, false);
-		
-		session_new_vbox.pack_start (*vbox1, false, false);
-
-		/* --- */
-
-		VBox *vbox2 = manage (new VBox);
-		HBox* hbox3 = manage (new HBox);
-		Label* label3 = manage (new Label);
-		template_model = ListStore::create (session_template_columns);
-		populate_session_templates ();
-
-		vbox2->set_spacing (6);
-
-		VBox *vbox3 = manage (new VBox);
-
-		vbox3->set_spacing (6);
-
-		if (!template_model->children().empty()) {
-
-			HBox* hbox4a = manage (new HBox);
-			use_template_button.set_label (_("Use this template"));
-
-			TreeModel::Row row = *template_model->prepend ();
-			row[session_template_columns.name] = (_("no template"));
-			row[session_template_columns.path] = string();
-
-			hbox4a->set_spacing (6);
-			hbox4a->pack_start (use_template_button, false, false);
-			hbox4a->pack_start (template_chooser, true, true);
-
-			template_chooser.set_model (template_model);
-
-			Gtk::CellRendererText* text_renderer = Gtk::manage (new Gtk::CellRendererText);
-			text_renderer->property_editable() = false;
-
-			template_chooser.pack_start (*text_renderer);
-			template_chooser.add_attribute (text_renderer->property_text(), session_template_columns.name);
-			template_chooser.set_active (0);
-
-			use_template_button.show();
-			template_chooser.show ();
-
-			vbox3->pack_start (*hbox4a, false, false);
-		}
-
-		/* --- */
-
-		if (!new_user) {
-			session_template_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
-
-			HBox* hbox4b = manage (new HBox);
-			use_session_as_template_button.set_label (_("Use an existing session as a template:"));
-
-			hbox4b->set_spacing (6);
-			hbox4b->pack_start (use_session_as_template_button, false, false);
-			hbox4b->pack_start (session_template_chooser, true, true);
-
-			use_session_as_template_button.show ();
-			session_template_chooser.show ();
-
-			Gtk::FileFilter* session_filter = manage (new (Gtk::FileFilter));
-			session_filter->add_pattern (X_("*.ardour"));
-			session_template_chooser.set_filter (*session_filter);
-			session_template_chooser.set_title (_("Select template"));
-
-			vbox3->pack_start (*hbox4b, false, false);
-		}
-
-		/* --- */
-
-		HBox* hbox5 = manage (new HBox);
-
-		hbox5->set_spacing (6);
-		hbox5->pack_start (more_new_session_options_button, false, false);
-
-		setup_more_options_box ();
-		more_new_session_options_button.add (more_options_vbox);
-
-		vbox3->pack_start (*hbox5, false, false);
-		hbox3->pack_start (*vbox3, true, true, 8);
-		vbox2->pack_start (*hbox3, false, false);
-
-		/* --- */
-
-		session_new_vbox.pack_start (*vbox2, false, false);
+	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
+		new_name_entry.set_text  (Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name));
+		/* name provided - they can move right along */
+		set_page_complete (session_new_vbox, true);
 	}
 
+	new_name_entry.signal_changed().connect (sigc::mem_fun (*this, &ArdourStartup::new_name_changed));
+	new_name_entry.signal_activate().connect (sigc::mem_fun (*this, &ArdourStartup::move_along_now));
+
+	vbox1->pack_start (*hbox1, true, true);
+
+	/* --- */
+
+	HBox* hbox2 = manage (new HBox);
+	Label* label2 = manage (new Label);
+
+	hbox2->set_spacing (6);
+	hbox2->pack_start (*label2, false, false);
+	hbox2->pack_start (new_folder_chooser, true, true);
+
+	label2->set_text (_("Create session folder in:"));
+
+	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
+		new_folder_chooser.set_current_folder (poor_mans_glob (Glib::path_get_dirname (ARDOUR_COMMAND_LINE::session_name)));
+	} else if (ARDOUR_UI::instance()->session_loaded) {
+		// point the new session file chooser at the parent directory of the current session
+		string session_parent_dir = Glib::path_get_dirname(ARDOUR_UI::instance()->the_session()->path());
+		string::size_type last_dir_sep = session_parent_dir.rfind(G_DIR_SEPARATOR);
+		session_parent_dir = session_parent_dir.substr(0, last_dir_sep);
+		new_folder_chooser.set_current_folder (session_parent_dir);
+		string default_session_folder = poor_mans_glob (Config->get_default_session_parent_dir());
+
+		try {
+			/* add_shortcut_folder throws an exception if the folder being added already has a shortcut */
+			new_folder_chooser.add_shortcut_folder (default_session_folder);
+		}
+		catch (Glib::Error & e) {
+			std::cerr << "new_folder_chooser.add_shortcut_folder (" << default_session_folder << ") threw Glib::Error " << e.what() << std::endl;
+		}
+	} else {
+		new_folder_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
+	}
+	new_folder_chooser.show ();
+	new_folder_chooser.set_title (_("Select folder for session"));
+
+#ifdef __APPLE__
+	new_folder_chooser.add_shortcut_folder ("/Volumes");
+#endif
+
+	vbox1->pack_start (*hbox2, false, false);
+		
+	session_new_vbox.pack_start (*vbox1, false, false);
+
+	/* --- */
+
+	VBox *vbox2 = manage (new VBox);
+	HBox* hbox3 = manage (new HBox);
+	template_model = ListStore::create (session_template_columns);
+
+	vbox2->set_spacing (6);
+
+	VBox *vbox3 = manage (new VBox);
+
+	vbox3->set_spacing (6);
+
+	/* we may want to hide this and show it at various
+	   times depending on the existence of templates.
+	*/
+	template_chooser.set_no_show_all (true);
+	use_template_button.set_no_show_all (true);
+
+	HBox* hbox4a = manage (new HBox);
+	use_template_button.set_label (_("Use this template"));
+		
+	TreeModel::Row row = *template_model->prepend ();
+	row[session_template_columns.name] = (_("no template"));
+	row[session_template_columns.path] = string();
+		
+	hbox4a->set_spacing (6);
+	hbox4a->pack_start (use_template_button, false, false);
+	hbox4a->pack_start (template_chooser, true, true);
+		
+	template_chooser.set_model (template_model);
+		
+	Gtk::CellRendererText* text_renderer = Gtk::manage (new Gtk::CellRendererText);
+	text_renderer->property_editable() = false;
+		
+	template_chooser.pack_start (*text_renderer);
+	template_chooser.add_attribute (text_renderer->property_text(), session_template_columns.name);
+	template_chooser.set_active (0);
+
+	vbox3->pack_start (*hbox4a, false, false);
+
+	/* --- */
+
+	if (!new_user) {
+		session_template_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
+		
+		HBox* hbox4b = manage (new HBox);
+		use_session_as_template_button.set_label (_("Use an existing session as a template:"));
+		
+		hbox4b->set_spacing (6);
+		hbox4b->pack_start (use_session_as_template_button, false, false);
+		hbox4b->pack_start (session_template_chooser, true, true);
+		
+		use_session_as_template_button.show ();
+		session_template_chooser.show ();
+		
+		Gtk::FileFilter* session_filter = manage (new (Gtk::FileFilter));
+		session_filter->add_pattern (X_("*.ardour"));
+		session_template_chooser.set_filter (*session_filter);
+		session_template_chooser.set_title (_("Select template"));
+		
+		vbox3->pack_start (*hbox4b, false, false);
+	}
+	
+	/* --- */
+	
+	HBox* hbox5 = manage (new HBox);
+	
+	hbox5->set_spacing (6);
+	hbox5->pack_start (more_new_session_options_button, false, false);
+	
+	setup_more_options_box ();
+	more_new_session_options_button.add (more_options_vbox);
+	
+	vbox3->pack_start (*hbox5, false, false);
+	hbox3->pack_start (*vbox3, true, true, 8);
+	vbox2->pack_start (*hbox3, false, false);
+	
+	/* --- */
+	
+	session_new_vbox.pack_start (*vbox2, false, false);
 	session_new_vbox.show_all ();
 
 	new_session_page_index = append_page (session_new_vbox);
@@ -1372,3 +1367,21 @@ ArdourStartup::info_scroller_update()
 
 	return true;
 }
+
+void
+ArdourStartup::on_map ()
+{
+	Gtk::Assistant::on_map ();
+
+	redisplay_recent_sessions ();
+	populate_session_templates ();
+
+	if (!template_model->children().empty()) {
+		use_template_button.show();
+		template_chooser.show ();
+	} else {
+		use_template_button.hide();
+		template_chooser.hide ();
+	}
+}
+		
