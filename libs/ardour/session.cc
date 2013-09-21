@@ -276,6 +276,21 @@ Session::Session (AudioEngine &eng,
 			throw failed_constructor ();
 		}
 
+		/* if a mix template was provided, then ::create() will
+		 * have copied it into the session and we need to load it
+		 * so that we have the state ready for ::set_state()
+		 * after the engine is started.
+		 *
+		 * Note that we do NOT try to get the sample rate from
+		 * the template at this time, though doing so would
+		 * be easy if we decided this was an appropriate part
+		 * of a template.
+		 */
+
+		if (!mix_template.empty() && load_state (_current_snapshot_name)) {
+			throw failed_constructor ();
+		}
+
 	} else {
 
 		if (load_state (_current_snapshot_name)) {
