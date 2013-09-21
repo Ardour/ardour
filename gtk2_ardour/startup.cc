@@ -730,6 +730,11 @@ ArdourStartup::populate_session_templates ()
 		row[session_template_columns.name] = (*x).name;
 		row[session_template_columns.path] = (*x).path;
 	}
+
+	if (!templates.empty()) {
+		/* select first row */
+		template_chooser.set_active (0);
+	}
 }
 
 void
