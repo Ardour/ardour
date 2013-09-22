@@ -493,9 +493,10 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 		ifstream in(in_path.c_str());
 
 		if (in) {
-			string out_path = _path;
-			out_path += _name;
-			out_path += statefile_suffix;
+			/* no need to call legalize_for_path() since the string
+			 * in session_template is already a legal path name
+			 */
+			string out_path = Glib::build_filename (_session_dir->root_path(), _name + statefile_suffix);
 
 			ofstream out(out_path.c_str());
 
