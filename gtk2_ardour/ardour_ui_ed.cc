@@ -183,39 +183,6 @@ ARDOUR_UI::install_actions ()
 	ActionManager::write_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	/* AudioEngine actions */
-
-	Glib::RefPtr<ActionGroup> engine_actions = ActionGroup::create (X_("Audio"));
-	ActionManager::register_action (engine_actions, X_("JACK"), _("JACK"));
-	ActionManager::register_action (engine_actions, X_("Latency"), _("Latency"));
-
-	act = ActionManager::register_action (engine_actions, X_("EngineReconnect"), _("Reconnect"), sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::reconnect_to_engine));
-	ActionManager::engine_opposite_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (engine_actions, X_("EngineDisconnect"), _("Disconnect"), sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::disconnect_from_engine));
-	ActionManager::engine_sensitive_actions.push_back (act);
-
-	RadioAction::Group latency_group;
-
-	act = ActionManager::register_radio_action (engine_actions, latency_group, X_("EngineLatency32"), X_("32"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::set_engine_buffer_size), (pframes_t) 32));
-	ActionManager::engine_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (engine_actions, latency_group, X_("EngineLatency64"), X_("64"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::set_engine_buffer_size), (pframes_t) 64));
-	ActionManager::engine_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (engine_actions, latency_group, X_("EngineLatency128"), X_("128"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::set_engine_buffer_size), (pframes_t) 128));
-	ActionManager::engine_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (engine_actions, latency_group, X_("EngineLatency256"), X_("256"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::set_engine_buffer_size), (pframes_t) 256));
-	ActionManager::engine_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (engine_actions, latency_group, X_("EngineLatency512"), X_("512"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::set_engine_buffer_size), (pframes_t) 512));
-	ActionManager::engine_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (engine_actions, latency_group, X_("EngineLatency1024"), X_("1024"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::set_engine_buffer_size), (pframes_t) 1024));
-	ActionManager::engine_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (engine_actions, latency_group, X_("EngineLatency2048"), X_("2048"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::set_engine_buffer_size), (pframes_t) 2048));
-	ActionManager::engine_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (engine_actions, latency_group, X_("EngineLatency4096"), X_("4096"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::set_engine_buffer_size), (pframes_t) 4096));
-	ActionManager::engine_sensitive_actions.push_back (act);
-	act = ActionManager::register_radio_action (engine_actions, latency_group, X_("EngineLatency8192"), X_("8192"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::set_engine_buffer_size), (pframes_t) 8192));
-	ActionManager::engine_sensitive_actions.push_back (act);
-
 	/* these actions are intended to be shared across all windows */
 
 	common_actions = ActionGroup::create (X_("Common"));
@@ -422,66 +389,11 @@ ARDOUR_UI::install_actions ()
 
 	ActionManager::add_action_group (shuttle_actions);
 	ActionManager::add_action_group (option_actions);
-	ActionManager::add_action_group (engine_actions);
 	ActionManager::add_action_group (transport_actions);
 	ActionManager::add_action_group (main_actions);
 	ActionManager::add_action_group (main_menu_actions);
 	ActionManager::add_action_group (common_actions);
 	ActionManager::add_action_group (midi_actions);
-}
-
-void
-ARDOUR_UI::set_engine_buffer_size (pframes_t nframes)
-{
-	Glib::RefPtr<Action> action;
-	const char* action_name = 0;
-
-	switch (nframes) {
-	case 32:
-		action_name = X_("EngineLatency32");
-		break;
-	case 64:
-		action_name = X_("EngineLatency64");
-		break;
-	case 128:
-		action_name = X_("EngineLatency128");
-		break;
-	case 256:
-		action_name = X_("EngineLatency256");
-		break;
-	case 512:
-		action_name = X_("EngineLatency512");
-		break;
-	case 1024:
-		action_name = X_("EngineLatency1024");
-		break;
-	case 2048:
-		action_name = X_("EngineLatency2048");
-		break;
-	case 4096:
-		action_name = X_("EngineLatency4096");
-		break;
-	case 8192:
-		action_name = X_("EngineLatency8192");
-		break;
-	default:
-		/* XXX can we do anything useful ? */
-		break;
-	}
-
-	if (action_name) {
-
-		action = ActionManager::get_action (X_("JACK"), action_name);
-
-		if (action) {
-			Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (action);
-
-			if (ract && ract->get_active()) {
-				AudioEngine::instance()->request_buffer_size (nframes);
-				update_sample_rate (0);
-			}
-		}
-	}
 }
 
 void
@@ -562,7 +474,7 @@ ARDOUR_UI::build_menu_bar ()
 	_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), disk_space);
 	_status_bar_visibility.add (&cpu_load_label,        X_("DSP"),       _("DSP"), true);
 	_status_bar_visibility.add (&buffer_load_label,     X_("Buffers"),   _("Buffers"), true);
-	_status_bar_visibility.add (&sample_rate_label,     X_("JACK"),      _("JACK Sampling Rate and Latency"), true);
+	_status_bar_visibility.add (&sample_rate_label,     X_("Audio"),     _("Audio"), true);
 	_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), true);
 	_status_bar_visibility.add (&format_label,          X_("Format"),    _("File Format"), true);
 

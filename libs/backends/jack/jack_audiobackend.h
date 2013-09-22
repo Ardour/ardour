@@ -85,6 +85,7 @@ class JACKAudioBackend : public AudioBackend {
     uint32_t     output_channels () const;
     uint32_t     systemic_input_latency () const;
     uint32_t     systemic_output_latency () const;
+    std::string  driver_name() const;
 
     std::string control_app_name () const;
     void launch_control_app ();

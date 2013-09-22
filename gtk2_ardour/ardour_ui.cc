@@ -402,58 +402,12 @@ ARDOUR_UI::engine_running ()
 	if (first_time_engine_run) {
 		post_engine();
 		first_time_engine_run = false;
-	}
+	} 
 	
-	ActionManager::set_sensitive (ActionManager::engine_sensitive_actions, true);
-	ActionManager::set_sensitive (ActionManager::engine_opposite_sensitive_actions, false);
-
-	Glib::RefPtr<Action> action;
-	const char* action_name = 0;
-
-	switch (AudioEngine::instance()->samples_per_cycle()) {
-	case 32:
-		action_name = X_("JACKLatency32");
-		break;
-	case 64:
-		action_name = X_("JACKLatency64");
-		break;
-	case 128:
-		action_name = X_("JACKLatency128");
-		break;
-	case 512:
-		action_name = X_("JACKLatency512");
-		break;
-	case 1024:
-		action_name = X_("JACKLatency1024");
-		break;
-	case 2048:
-		action_name = X_("JACKLatency2048");
-		break;
-	case 4096:
-		action_name = X_("JACKLatency4096");
-		break;
-	case 8192:
-		action_name = X_("JACKLatency8192");
-		break;
-	default:
-		/* XXX can we do anything useful ? */
-		break;
-	}
-
-	if (action_name) {
-
-		action = ActionManager::get_action (X_("JACK"), action_name);
-
-		if (action) {
-			Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (action);
-			ract->set_active ();
-		}
-
-		update_disk_space ();
-		update_cpu_load ();
-		update_sample_rate (AudioEngine::instance()->sample_rate());
-		update_timecode_format ();
-	}
+	update_disk_space ();
+	update_cpu_load ();
+	update_sample_rate (AudioEngine::instance()->sample_rate());
+	update_timecode_format ();
 }
 
 void
@@ -481,13 +435,13 @@ ARDOUR_UI::engine_halted (const char* reason, bool free_reason)
 	*/
 
 	if (strlen (reason)) {
-		msgstr = string_compose (_("The audio backend (JACK) was shutdown because:\n\n%1"), reason);
+		msgstr = string_compose (_("The audio backend was shutdown because:\n\n%1"), reason);
 	} else {
 		msgstr = string_compose (_("\
-JACK has either been shutdown or it\n\
+`The audio backend has either been shutdown or it\n\
 disconnected %1 because %1\n\
 was not fast enough. Try to restart\n\
-JACK, reconnect and save the session."), PROGRAM_NAME);
+the audio backend and save the session."), PROGRAM_NAME);
 	}
 
 	MessageDialog msg (*editor, msgstr);
@@ -1152,7 +1106,6 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 			}
 		}
 	}
-
 	sample_rate_label.set_markup (buf);
 }
 
@@ -1856,7 +1809,7 @@ ARDOUR_UI::transport_roll ()
 #if 0
 	if (_session->config.get_external_sync()) {
 		switch (Config->get_sync_source()) {
-		case JACK:
+		case Engine:
 			break;
 		default:
 			/* transport controlled by the master */
@@ -1906,7 +1859,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 
 	if (_session->config.get_external_sync()) {
 		switch (Config->get_sync_source()) {
-		case JACK:
+		case Engine:
 			break;
 		default:
 			/* transport controlled by the master */
@@ -3786,7 +3739,7 @@ audio may be played at the wrong sample rate.\n"), desired, PROGRAM_NAME, actual
         return 1;
 }
 
-void
+int
 ARDOUR_UI::disconnect_from_engine ()
 {
 	/* drop connection to AudioEngine::Halted so that we don't act
@@ -3795,24 +3748,28 @@ ARDOUR_UI::disconnect_from_engine ()
 	halt_connection.disconnect ();
 	
 	if (AudioEngine::instance()->stop ()) {
-		MessageDialog msg (*editor, _("Could not disconnect from JACK"));
+		MessageDialog msg (*editor, _("Could not disconnect from Audio/MIDI engine"));
 		msg.run ();
+		return -1;
 	} else {
 		AudioEngine::instance()->Halted.connect_same_thread (halt_connection, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
 	}
 	
 	update_sample_rate (0);
+	return 0;
 }
 
-void
+int
 ARDOUR_UI::reconnect_to_engine ()
 {
 	if (AudioEngine::instance()->start ()) {
-		MessageDialog msg (*editor,  _("Could not reconnect to JACK"));
+		MessageDialog msg (*editor,  _("Could not reconnect to the Audio/MIDI engine"));
 		msg.run ();
+		return -1;
 	}
 	
 	update_sample_rate (0);
+	return 0;
 }
 
 void

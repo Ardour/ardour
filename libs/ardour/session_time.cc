@@ -182,7 +182,7 @@ Session::timecode_time (Timecode::Time &t)
 int
 Session::backend_sync_callback (TransportState state, framepos_t pos)
 {
-	bool slave = synced_to_jack();
+	bool slave = synced_to_engine();
 
 	switch (state) {
 	case TransportStopped:

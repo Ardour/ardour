@@ -26,7 +26,7 @@
 using namespace std;
 using namespace ARDOUR;
 
-JACK_Slave::JACK_Slave (AudioEngine& e)
+Engine_Slave::Engine_Slave (AudioEngine& e)
 	: engine (e)
 {
 	double x;
@@ -35,24 +35,24 @@ JACK_Slave::JACK_Slave (AudioEngine& e)
 	speed_and_position (x, p);
 }
 
-JACK_Slave::~JACK_Slave ()
+Engine_Slave::~Engine_Slave ()
 {
 }
 
 bool
-JACK_Slave::locked() const
-{
-	return true;
-}
-
-bool
-JACK_Slave::ok() const
+Engine_Slave::locked() const
 {
 	return true;
 }
 
 bool
-JACK_Slave::speed_and_position (double& sp, framepos_t& position)
+Engine_Slave::ok() const
+{
+	return true;
+}
+
+bool
+Engine_Slave::speed_and_position (double& sp, framepos_t& position)
 {
 	switch (engine.transport_state()) {
 	case TransportStopped:

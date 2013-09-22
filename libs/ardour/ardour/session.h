@@ -509,7 +509,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	static PBD::Signal1<void, framepos_t> EndTimeChanged;
 
 	void   request_sync_source (Slave*);
-	bool   synced_to_jack() const { return config.get_external_sync() && Config->get_sync_source() == JACK; }
+	bool   synced_to_engine() const { return config.get_external_sync() && Config->get_sync_source() == Engine; }
 
 	double transport_speed() const { return _transport_speed; }
 	bool   transport_stopped() const { return _transport_speed == 0.0f; }

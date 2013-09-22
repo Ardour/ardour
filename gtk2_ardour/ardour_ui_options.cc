@@ -60,7 +60,7 @@ ARDOUR_UI::toggle_external_sync()
 {
 	if (_session) {
 		if (_session->config.get_video_pullup() != 0.0f) {
-			if (Config->get_sync_source() == JACK) {
+			if (Config->get_sync_source() == Engine) {
 				MessageDialog msg (
 					_("It is not possible to use JACK as the the sync source\n\
 when the pull up/down setting is non-zero."));
@@ -465,7 +465,7 @@ ARDOUR_UI::synchronize_sync_source_and_video_pullup ()
 		act->set_sensitive (true);
 	} else {
 		/* can't sync to JACK if video pullup != 0.0 */
-		if (Config->get_sync_source() == JACK) {
+		if (Config->get_sync_source() == Engine) {
 			act->set_sensitive (false);
 		} else {
 			act->set_sensitive (true);
