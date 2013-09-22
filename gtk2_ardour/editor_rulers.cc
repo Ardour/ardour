@@ -815,6 +815,12 @@ Editor::update_ruler_visibility ()
 		last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
 	}
 
+	gdouble bottom_track_pos = vertical_adjustment.get_value() + _canvas_height - canvas_timebars_vsize;
+	std::pair<TimeAxisView*, int> const p = trackview_by_y_position (bottom_track_pos);
+	if (p.first) {
+		p.first->clip_to_viewport ();
+	}
+
 	ruler_label_vbox.set_size_request (-1, (int)(timebar_height * visible_rulers));
 	time_canvas_vbox.set_size_request (-1,-1);
 

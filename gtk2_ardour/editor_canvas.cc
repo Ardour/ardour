@@ -310,6 +310,14 @@ Editor::track_canvas_size_allocated ()
 	_canvas_width = canvas_allocation.get_width();
 	_canvas_height = canvas_allocation.get_height();
 
+	if (_session) {
+		TrackViewList::iterator i;
+
+		for (i = track_views.begin(); i != track_views.end(); ++i) {
+			(*i)->clip_to_viewport ();
+		}
+	}
+
 	if (height_changed) {
 		if (playhead_cursor) {
 			playhead_cursor->set_length (_canvas_height);
@@ -849,6 +857,9 @@ Editor::scroll_canvas_vertically ()
 	_trackview_group->move (0, y_delta);
 	_background_group->move (0, y_delta);
 
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		(*i)->clip_to_viewport ();
+	}
 	last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
 	/* required to keep the controls_layout in lock step with the canvas group */
 	update_canvas_now ();
