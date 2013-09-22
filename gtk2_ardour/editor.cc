@@ -4852,6 +4852,7 @@ Editor::add_routes (RouteList& routes)
 		} else {
 			throw unknown_type();
 		}
+		std::list<TimeAxisView*>::iterator  a = selection->tracks.end();
 
 		new_views.push_back (rtv);
 		track_views.push_back (rtv);

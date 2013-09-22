@@ -518,7 +518,7 @@ EditorRoutes::redisplay ()
 		/* show or hide the TimeAxisView */
 		if (visible) {
 			position += tv->show_at (position, n, &_editor->edit_controls_vbox);
-			tv->clip_to_viewport ();
+			//tv->clip_to_viewport ();
 		} else {
 			tv->hide ();
 		}

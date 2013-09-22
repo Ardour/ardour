@@ -275,9 +275,11 @@ Session::Session (AudioEngine &eng,
 			destroy ();
 			throw failed_constructor ();
 		}
+		if (! _is_new) { //if we've just created a new session from a template
 
-		if (load_state (_current_snapshot_name)) {
-			throw failed_constructor ();
+			if (load_state (_current_snapshot_name)) {
+				throw failed_constructor ();
+			}
 		}
 
 	} else {
