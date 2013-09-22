@@ -603,6 +603,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         WM::Proxy<About> about;
         WM::Proxy<LocationUIWindow> location_ui;
         WM::Proxy<RouteParams_UI> route_params;
+        WM::Proxy<EngineControl> audio_midi_setup;
 
         /* Windows/Dialogs that require a creator method */
 
@@ -747,8 +748,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         std::string _announce_string;
         void check_announcements ();
 
-        EngineControl* _audio_midi_setup;
-        void launch_audio_midi_setup ();
         int do_audio_midi_setup (uint32_t);
 };
 

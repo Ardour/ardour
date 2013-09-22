@@ -191,6 +191,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, about (X_("about"), _("About"))
 	, location_ui (X_("locations"), _("Locations"))
 	, route_params (X_("inspector"), _("Tracks and Busses"))
+	, audio_midi_setup (X_("audio-midi-setup"), _("Audio/MIDI Setup"))
 	, session_option_editor (X_("session-options-editor"), _("Properties"), boost::bind (&ARDOUR_UI::create_session_option_editor, this))
 	, add_video_dialog (X_("add-video"), _("Add Tracks/Busses"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
 	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
@@ -202,7 +203,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	, _status_bar_visibility (X_("status-bar"))
 	, _feedback_exists (false)
-	, _audio_midi_setup (0)
 {
 	Gtkmm2ext::init(localedir);
 
@@ -213,7 +213,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	}
 
 	ui_config = new UIConfiguration();
-	_audio_midi_setup = new EngineControl;
 
 	editor = 0;
 	mixer = 0;
@@ -348,6 +347,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&add_route_dialog);
 	WM::Manager::instance().register_window (&add_video_dialog);
 	WM::Manager::instance().register_window (&route_params);
+	WM::Manager::instance().register_window (&audio_midi_setup);
 	WM::Manager::instance().register_window (&bundle_manager);
 	WM::Manager::instance().register_window (&location_ui);
 	WM::Manager::instance().register_window (&big_clock_window);
@@ -4077,41 +4077,12 @@ ARDOUR_UI::reset_route_peak_display (Route* route)
 	}
 }
 
-void
-ARDOUR_UI::toggle_audio_midi_setup ()
-{
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("toggle-audio-midi-setup"));
-	if (!act) {
-		return;
-	}
-
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-
-	if (tact->get_active()) {
-		launch_audio_midi_setup ();
-	} else {
-		_audio_midi_setup->hide ();
-	}
-}
-
-void
-ARDOUR_UI::launch_audio_midi_setup ()
-{
-	if (!_audio_midi_setup) {
-		_audio_midi_setup = new EngineControl ();
-	}
-
-	_audio_midi_setup->present ();
-}
-						
 int
 ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 {
-	launch_audio_midi_setup ();
+	audio_midi_setup->set_desired_sample_rate (desired_sample_rate);
 
-	_audio_midi_setup->set_desired_sample_rate (desired_sample_rate);
-
-	switch (_audio_midi_setup->run()) {
+	switch (audio_midi_setup->run()) {
 	case Gtk::RESPONSE_OK:
 		return 0;
 	case Gtk::RESPONSE_APPLY:

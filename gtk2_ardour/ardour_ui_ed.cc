@@ -197,7 +197,6 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_toggle_action (common_actions, X_("toggle-mixer"), S_("Window|Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_mixer_window));
 	ActionManager::register_action (common_actions, X_("toggle-editor-mixer"), _("Toggle Editor+Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_editor_mixer));
 	ActionManager::register_toggle_action (common_actions, X_("toggle-meterbridge"), S_("Window|Meterbridge"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_meterbridge));
-	ActionManager::register_toggle_action (common_actions, X_("toggle-audio-midi-setup"), S_("Window|Audio/MIDI Setup"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_audio_midi_setup));
 
 	act = ActionManager::register_action (common_actions, X_("NewMIDITracer"), _("MIDI Tracer"), sigc::mem_fun(*this, &ARDOUR_UI::new_midi_tracer_window));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -560,7 +559,7 @@ ARDOUR_UI::save_ardour_state ()
 	window_node->add_child_nocopy (*tearoff_node);
 
 	Config->add_extra_xml (*window_node);
-	Config->add_extra_xml (_audio_midi_setup->get_state());
+	Config->add_extra_xml (audio_midi_setup->get_state());
 
 	Config->save_state();
 
