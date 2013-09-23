@@ -401,7 +401,7 @@ emulate_key_event (Gtk::Widget* w, unsigned int keyval)
 	ev.state = 0;
 	ev.keyval = keyval;
 	ev.length = 0;
-	ev.string = (const gchar*) "";
+	ev.string = const_cast<gchar*> ("");
 	ev.hardware_keycode = keymapkey[0].keycode;
 	ev.group = keymapkey[0].group;
 	g_free(keymapkey);

@@ -234,6 +234,7 @@ EngineControl::EngineControl ()
 	ARDOUR::AudioEngine::instance()->Stopped.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_stopped, this), gui_context());
 	ARDOUR::AudioEngine::instance()->Halted.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_stopped, this), gui_context());
 
+	cerr << "AMS about to change backend\n";
 	backend_changed ();
 
 	if (audio_setup) {

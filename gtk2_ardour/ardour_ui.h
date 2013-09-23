@@ -83,7 +83,6 @@ class AddRouteDialog;
 class AddVideoDialog;
 class VideoTimeLine;
 class SystemExec;
-class ArdourStartup;
 class ArdourKeyboard;
 class AudioClock;
 class BigClockWindow;
@@ -98,6 +97,7 @@ class Mixer_UI;
 class PublicEditor;
 class RCOptionEditor;
 class RouteParams_UI;
+class SessionDialog;
 class SessionOptionEditor;
 class ShuttleControl;
 class Splash;
@@ -153,7 +153,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool get_smart_mode () const;
 	
 	int get_session_parameters (bool quit_on_cancel, bool should_be_new = false, std::string load_template = "");
-	int  build_session_from_nsd (const std::string& session_name, const std::string& session_path);
+        int  build_session_from_dialog (SessionDialog&, const std::string& session_name, const std::string& session_path);
 	bool ask_about_loading_existing_session (const std::string& session_path);
 
 	/// @return true if session was successfully unloaded.
@@ -312,11 +312,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void toggle_session_options_window ();
 
   private:
-	ArdourStartup*      _startup;
-	Gtk::Tooltips        _tooltips;
+	Gtk::Tooltips       _tooltips;
 	NSM_Client          *nsm;
-	bool                 _was_dirty;
-        bool                 _mixer_on_top;
+	bool                _was_dirty;
+        bool                _mixer_on_top;
         bool first_time_engine_run;
 
 	void goto_editor_window ();
