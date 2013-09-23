@@ -81,6 +81,7 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 
 	set_keep_above (true);
 	set_position (WIN_POS_CENTER);
+	get_vbox()->set_spacing (6);
 
 	string image_path;
 
@@ -91,6 +92,15 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 		}
 	}
 	
+	/* this is where announcements will be displayed, but it may be empty
+	 * and invisible most of the time.
+	 */
+
+	info_frame.set_shadow_type(SHADOW_ETCHED_OUT);
+	info_frame.set_no_show_all (true);
+	info_frame.set_border_width (12);
+	get_vbox()->pack_start (info_frame, false, false);
+
 	setup_new_session_page ();
 	
 	if (!new_only) {
@@ -236,7 +246,6 @@ void
 SessionDialog::setup_initial_choice_box ()
 {
 	ic_vbox.set_spacing (6);
-	ic_vbox.set_border_width (24);
 
 	HBox* centering_hbox = manage (new HBox);
 	VBox* centering_vbox = manage (new VBox);
@@ -249,25 +258,19 @@ SessionDialog::setup_initial_choice_box ()
 	ic_new_session_button.add (*new_label);
 	ic_new_session_button.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::new_session_button_clicked));
 
-	centering_vbox->pack_start (ic_new_session_button, false, true);
+	centering_vbox->pack_start (ic_new_session_button, false, false);
 
 	/* Possible update message */
 
 	if (ARDOUR_UI::instance()->announce_string() != "" ) {
 
-		Gtk::Frame *info_frame = manage(new Gtk::Frame);
-		info_frame->set_shadow_type(SHADOW_ETCHED_OUT);
-		centering_vbox->pack_start (*info_frame, false, false, 20);
-
 		Box *info_box = manage (new VBox);
 		info_box->set_border_width (12);
 		info_box->set_spacing (6);
-		info_box->set_name("mixbus_info_box");
 
 		info_box->pack_start (info_scroller_label, false, false);
 
-		info_frame->add (*info_box);
-		info_frame->show_all();
+		cerr << "Frame should be visible\n";
 
 		info_scroller_count = 0;
 		info_scroller_connection = Glib::signal_timeout().connect (mem_fun(*this, &SessionDialog::info_scroller_update), 50);
@@ -278,6 +281,10 @@ SessionDialog::setup_initial_choice_box ()
 		ARDOUR_UI::instance()->tooltips().set_tip (*updates_button, _("Click to open the program website in your web browser"));
 
 		info_box->pack_start (*updates_button, false, false);
+
+		info_frame.add (*info_box);
+		info_box->show_all ();
+		info_frame.show ();
 	}
 
 	/* recent session scroller */

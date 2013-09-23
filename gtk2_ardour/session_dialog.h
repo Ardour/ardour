@@ -86,6 +86,8 @@ class SessionDialog : public ArdourDialog {
 
         bool back_button_pressed (GdkEventButton*);
 
+        Gtk::Frame info_frame;
+
 	/* initial choice page */
 
 	void setup_initial_choice_box ();
