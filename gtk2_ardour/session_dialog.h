@@ -110,10 +110,14 @@ class SessionDialog : public ArdourDialog {
 		    add (visible_name);
 		    add (tip);
 		    add (fullpath);
+		    add (sample_rate);
+		    add (disk_format);
 	    }
 	    Gtk::TreeModelColumn<std::string> visible_name;
 	    Gtk::TreeModelColumn<std::string> tip;
 	    Gtk::TreeModelColumn<std::string> fullpath;
+	    Gtk::TreeModelColumn<std::string> sample_rate;
+	    Gtk::TreeModelColumn<std::string> disk_format;
 	};
 
 	RecentSessionModelColumns    recent_session_columns;

@@ -299,6 +299,8 @@ SessionDialog::setup_initial_choice_box ()
 	
 	recent_session_display.set_model (recent_session_model);
 	recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
+	recent_session_display.append_column (_("Sample Rate"), recent_session_columns.sample_rate);
+	recent_session_display.append_column (_("Disk Format"), recent_session_columns.disk_format);
 	recent_session_display.set_headers_visible (false);
 	recent_session_display.get_selection()->set_mode (SELECTION_SINGLE);
 	
@@ -593,49 +595,94 @@ SessionDialog::redisplay_recent_sessions ()
 
 		vector<string*>* states;
 		vector<const gchar*> item;
-		string fullpath = *i;
+		string dirname = *i;
 
 		/* remove any trailing / */
 
-		if (fullpath[fullpath.length()-1] == '/') {
-			fullpath = fullpath.substr (0, fullpath.length()-1);
+		if (dirname[dirname.length()-1] == '/') {
+			dirname = dirname.substr (0, dirname.length()-1);
 		}
 
 		/* check whether session still exists */
-		if (!Glib::file_test(fullpath.c_str(), Glib::FILE_TEST_EXISTS)) {
+		if (!Glib::file_test(dirname.c_str(), Glib::FILE_TEST_EXISTS)) {
 			/* session doesn't exist */
 			continue;
 		}
 
 		/* now get available states for this session */
 
-		if ((states = Session::possible_states (fullpath)) == 0) {
+		if ((states = Session::possible_states (dirname)) == 0) {
 			/* no state file? */
 			continue;
 		}
 
 		std::vector<string> state_file_names(get_file_names_no_extension (state_file_paths));
 
+		if (state_file_names.empty()) {
+			continue;
+		}
+
 		Gtk::TreeModel::Row row = *(recent_session_model->append());
 
-		row[recent_session_columns.visible_name] = Glib::path_get_basename (fullpath);
-		row[recent_session_columns.fullpath] = fullpath;
-		row[recent_session_columns.tip] = Glib::Markup::escape_text (fullpath);
-		
+		float sr;
+		SampleFormat sf;
+		std::string s = Glib::build_filename (dirname, state_file_names.front() + statefile_suffix);
+
+		row[recent_session_columns.visible_name] = Glib::path_get_basename (dirname);
+		row[recent_session_columns.fullpath] = dirname; /* just the dir, but this works too */
+		row[recent_session_columns.tip] = Glib::Markup::escape_text (dirname);
+
+		if (Session::get_info_from_path (s, sr, sf) == 0) {
+			row[recent_session_columns.sample_rate] = rate_as_string (sr);
+			switch (sf) {
+			case FormatFloat:
+				row[recent_session_columns.disk_format] = _("32 bit float");
+				break;
+			case FormatInt24:
+				row[recent_session_columns.disk_format] = _("24 bit");
+				break;
+			case FormatInt16:
+				row[recent_session_columns.disk_format] = _("16 bit");
+				break;
+			}
+		} else {
+			row[recent_session_columns.sample_rate] = "??";
+			row[recent_session_columns.disk_format] = "--";
+		}
+
 		++session_snapshot_count;
 
 		if (state_file_names.size() > 1) {
 
 			// add the children
 
-			for (std::vector<std::string>::iterator i2 = state_file_names.begin();
-					i2 != state_file_names.end(); ++i2) {
+			for (std::vector<std::string>::iterator i2 = state_file_names.begin(); i2 != state_file_names.end(); ++i2) {
 
 				Gtk::TreeModel::Row child_row = *(recent_session_model->append (row.children()));
-
+				
 				child_row[recent_session_columns.visible_name] = *i2;
-				child_row[recent_session_columns.fullpath] = fullpath;
-				child_row[recent_session_columns.tip] = Glib::Markup::escape_text (fullpath);
+				child_row[recent_session_columns.fullpath] = Glib::build_filename (dirname, *i2 + statefile_suffix);
+				child_row[recent_session_columns.tip] = Glib::Markup::escape_text (dirname);
+				
+				if (Session::get_info_from_path (s, sr, sf) == 0) {
+					child_row[recent_session_columns.sample_rate] = rate_as_string (sr);
+					switch (sf) {
+					case FormatFloat:
+						child_row[recent_session_columns.disk_format] = _("32 bit float");
+						break;
+					case FormatInt24:
+						child_row[recent_session_columns.disk_format] = _("24 bit");
+						break;
+					case FormatInt16:
+						child_row[recent_session_columns.disk_format] = _("16 bit");
+						break;
+					}
+				} else {
+					child_row[recent_session_columns.sample_rate] = "??";
+					child_row[recent_session_columns.disk_format] = "--";
+				}
+				
+
 				++session_snapshot_count;
 			}
 		}
@@ -644,7 +691,6 @@ SessionDialog::redisplay_recent_sessions ()
 	recent_session_display.set_tooltip_column(1); // recent_session_columns.tip 
 	recent_session_display.set_model (recent_session_model);
 	return session_snapshot_count;
-	// return rs.size();
 }
 
 void
