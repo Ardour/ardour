@@ -122,7 +122,6 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void setup_midi_tab_for_jack ();
     void refresh_midi_display ();
     
-    std::string rate_as_string (float);
     std::string bufsize_as_string (uint32_t);
 
     float get_rate() const;

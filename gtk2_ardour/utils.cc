@@ -28,6 +28,7 @@
 #include <clocale>
 #include <cstring>
 #include <cctype>
+#include <cmath>
 #include <fstream>
 #include <list>
 #include <sys/stat.h>
@@ -859,4 +860,16 @@ unique_random_color (list<Gdk::Color>& used_colors)
 
 		/* XXX need throttle here to make sure we don't spin for ever */
 	}
+}
+
+string 
+rate_as_string (float r)
+{
+	char buf[32];
+	if (fmod (r, 1000.0f)) {
+		snprintf (buf, sizeof (buf), "%.1f kHz", r/1000.0);
+	} else {
+		snprintf (buf, sizeof (buf), "%.0f kHz", r/1000.0);
+	}
+	return buf;
 }

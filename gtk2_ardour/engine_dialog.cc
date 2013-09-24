@@ -48,6 +48,7 @@
 #include "ardour_ui.h"
 #include "engine_dialog.h"
 #include "gui_thread.h"
+#include "utils.h"
 #include "i18n.h"
 
 using namespace std;
@@ -799,18 +800,6 @@ EngineControl::device_changed ()
 
 	push_state_to_backend (false);
 }	
-
-string
-EngineControl::rate_as_string (float r)
-{
-	char buf[32];
-	if (fmod (r, 1000.0f)) {
-		snprintf (buf, sizeof (buf), "%.1f kHz", r/1000.0);
-	} else {
-		snprintf (buf, sizeof (buf), "%.0f kHz", r/1000.0);
-	}
-	return buf;
-}
 
 string
 EngineControl::bufsize_as_string (uint32_t sz)

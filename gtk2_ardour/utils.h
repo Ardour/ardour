@@ -86,4 +86,6 @@ std::string escape_angled_brackets (std::string const &);
 
 Gdk::Color unique_random_color (std::list<Gdk::Color> &);
 
+std::string rate_as_string (float r);
+
 #endif /* __ardour_gtk_utils_h__ */
