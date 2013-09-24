@@ -62,8 +62,8 @@ static string poor_mans_glob (string path)
 	return copy;
 }
 
-SessionDialog::SessionDialog (bool require_new, const std::string& session_name, const std::string& session_path, const std::string& template_name)
-	: ArdourDialog (_("Session Setup"))
+SessionDialog::SessionDialog (bool require_new, const std::string& session_name, const std::string& session_path, const std::string& template_name, bool cancel_not_quit)
+	: ArdourDialog (_("Session Setup"), true, true)
 	, new_only (require_new)
 	, _provided_session_name (session_name)
 	, _provided_session_path (session_path)
@@ -83,15 +83,6 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	set_position (WIN_POS_CENTER);
 	get_vbox()->set_spacing (6);
 
-	string image_path;
-
-	if (find_file_in_search_path (ardour_data_search_path(), "small-splash.png", image_path)) {
-		Gtk::Image* image;
-		if ((image = manage (new Gtk::Image (image_path))) != 0) {
-			get_vbox()->pack_start (*image, false, false);
-		}
-	}
-	
 	/* this is where announcements will be displayed, but it may be empty
 	 * and invisible most of the time.
 	 */
@@ -117,7 +108,7 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	
 	get_vbox()->show_all ();
 
-	cancel_button = add_button (Stock::QUIT, RESPONSE_CANCEL);
+	cancel_button = add_button ((cancel_not_quit ? Stock::CANCEL : Stock::QUIT), RESPONSE_CANCEL);
 	back_button = add_button (Stock::GO_BACK, RESPONSE_NO);
 	open_button = add_button (Stock::OPEN, RESPONSE_ACCEPT);
 
@@ -253,12 +244,27 @@ SessionDialog::setup_initial_choice_box ()
 	centering_vbox->set_spacing (6);
 
 	Label* new_label = manage (new Label);
-	new_label->set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", _("Create a new session")));
+	new_label->set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", _("New Session")));
+	new_label->set_justify (JUSTIFY_CENTER);
 
 	ic_new_session_button.add (*new_label);
 	ic_new_session_button.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::new_session_button_clicked));
 
-	centering_vbox->pack_start (ic_new_session_button, false, false);
+	Gtk::HBox* hbox = manage (new HBox);
+	hbox->set_spacing (12);
+
+	string image_path;
+
+	if (find_file_in_search_path (ardour_data_search_path(), "small-splash.png", image_path)) {
+		Gtk::Image* image;
+		if ((image = manage (new Gtk::Image (image_path))) != 0) {
+			hbox->pack_start (*image, false, false);
+		}
+	}
+
+	hbox->pack_start (ic_new_session_button, true, true);
+
+	centering_vbox->pack_start (*hbox, false, false);
 
 	/* Possible update message */
 
@@ -292,8 +298,7 @@ SessionDialog::setup_initial_choice_box ()
 	recent_label.set_no_show_all (true);
 	recent_scroller.set_no_show_all (true);
 	
-	recent_label.set_markup (string_compose ("<span style=\"italic\" size=\"large\">%1</span>", _("... or load a recent session")));
-	recent_label.set_alignment (0, 0.5);
+	recent_label.set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", _("Recent Sessions")));
 	
 	recent_session_model = TreeStore::create (recent_session_columns);
 	
@@ -333,8 +338,7 @@ SessionDialog::setup_initial_choice_box ()
 #endif
 	
 	Label* browse_label = manage (new Label);
-	browse_label->set_markup (string_compose ("<span style=\"italic\" size=\"large\">%1</span>", _("... or browse for existing sessions")));
-	browse_label->set_alignment (0, 0.5);
+	browse_label->set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", _("Other Sessions")));
 	
 	centering_vbox->pack_start (*browse_label, false, false, 12);
 	centering_vbox->pack_start (existing_session_chooser, false, false);

@@ -2529,6 +2529,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	string template_name;
 	int ret = -1;
 	bool likely_new = false;
+	bool cancel_not_quit;
 
 	/* deal with any existing DIRTY session now, rather than later. don't
 	 * treat a non-dirty session this way, so that it stays visible 
@@ -2538,6 +2539,11 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	if (_session && ARDOUR_UI::instance()->video_timeline) {
 		ARDOUR_UI::instance()->video_timeline->sync_session_state();
 	}
+
+	/* if there is already a session, relabel the button
+	   on the SessionDialog so that we don't Quit directly
+	*/
+	cancel_not_quit = (_session != 0);
 
 	if (_session && _session->dirty()) {
 		if (unload_session (false)) {
@@ -2552,7 +2558,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		template_name = load_template;
 	}
 
-	SessionDialog session_dialog (should_be_new, session_name, session_path, load_template);
+	SessionDialog session_dialog (should_be_new, session_name, session_path, load_template, cancel_not_quit);
 
 	while (ret != 0) {
 
