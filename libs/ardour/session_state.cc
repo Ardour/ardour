@@ -3743,3 +3743,59 @@ Session::rename (const std::string& new_name)
 
 #undef RENAME
 }
+
+int
+Session::get_session_info_from_path (XMLTree& tree, const string& xmlpath)
+{
+	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
+		return -1;
+        }
+
+	if (!tree.read (xmlpath)) {
+		return -1;
+	}
+
+	return 0;
+}
+
+int
+Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFormat& data_format)
+{
+	XMLTree tree;
+	bool found_sr = false;
+	bool found_data_format = false;
+
+	if (get_session_info_from_path (tree, xmlpath)) {
+		return -1;
+	}
+
+	/* sample rate */
+
+	const XMLProperty* prop;
+	if ((prop = tree.root()->property (X_("sample-rate"))) != 0) {		
+		sample_rate = atoi (prop->value());
+		found_sr = true;
+	}
+
+	const XMLNodeList& children (tree.root()->children());
+	for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
+		const XMLNode* child = *c;
+		if (child->name() == "Config") {
+			const XMLNodeList& options (child->children());
+			for (XMLNodeList::const_iterator oc = options.begin(); oc != options.end(); ++oc) {
+				const XMLNode* option = *oc;
+				if (option->property("name")->value() == "native-file-data-format") {
+					SampleFormat fmt = (SampleFormat) string_2_enum (option->property ("value")->value(), fmt);
+					data_format = fmt;
+					found_data_format = true;
+					break;
+				}
+			}
+		}
+		if (found_data_format) {
+			break;
+		}
+	}
+
+	return !(found_sr && found_data_format); // zero if they are both found
+}

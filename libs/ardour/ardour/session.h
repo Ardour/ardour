@@ -161,6 +161,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	virtual ~Session ();
 
+        static int get_info_from_path (const std::string& xmlpath, float& sample_rate, SampleFormat& data_format);
+
 	std::string path() const { return _path; }
 	std::string name() const { return _name; }
 	std::string snap_name() const { return _current_snapshot_name; }
@@ -1618,6 +1620,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
     void setup_ltc ();
     void setup_click ();
     void setup_bundles ();
+
+    static int get_session_info_from_path (XMLTree& state_tree, const std::string& xmlpath);
 };
 
 } // namespace ARDOUR
