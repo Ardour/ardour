@@ -79,7 +79,7 @@ OptimizingLookupTable::OptimizingLookupTable (Group const & group, int items_per
 	/* number of cells */
 	int const cells = items.size() / _items_per_cell;
 	/* hence number down each side of the table's square */
-	_dimension = max (1, int (rint (sqrt (cells))));
+	_dimension = max (1, int (rint (sqrt ((double)cells))));
 
 	_cells = new Cell*[_dimension];
 	for (int i = 0; i < _dimension; ++i) {
