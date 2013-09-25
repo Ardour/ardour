@@ -83,6 +83,15 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	set_position (WIN_POS_CENTER);
 	get_vbox()->set_spacing (6);
 
+	cancel_button = add_button ((cancel_not_quit ? Stock::CANCEL : Stock::QUIT), RESPONSE_CANCEL);
+	back_button = add_button (Stock::GO_BACK, RESPONSE_NO);
+	open_button = add_button (Stock::OPEN, RESPONSE_ACCEPT);
+
+	back_button->signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::back_button_pressed), false);
+
+	open_button->set_sensitive (false);
+	back_button->set_sensitive (false);
+
 	/* this is where announcements will be displayed, but it may be empty
 	 * and invisible most of the time.
 	 */
@@ -107,15 +116,6 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	}
 	
 	get_vbox()->show_all ();
-
-	cancel_button = add_button ((cancel_not_quit ? Stock::CANCEL : Stock::QUIT), RESPONSE_CANCEL);
-	back_button = add_button (Stock::GO_BACK, RESPONSE_NO);
-	open_button = add_button (Stock::OPEN, RESPONSE_ACCEPT);
-
-	back_button->signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::back_button_pressed), false);
-
-	open_button->set_sensitive (false);
-	back_button->set_sensitive (false);
 
 	/* fill data models and how/hide accordingly */
 
