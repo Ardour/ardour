@@ -341,7 +341,7 @@ def build(bld):
                         'OSX','BOOST','CURL','DL']
     obj.use          = ['libpbd','libmidipp','libevoral','libvamphost',
                         'libvampplugin','libtaglib','librubberband',
-                        'libaudiographer','libltc']
+                        'libaudiographer','libltc','libtimecode']
     obj.vnum         = LIBARDOUR_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
     obj.defines      = [
