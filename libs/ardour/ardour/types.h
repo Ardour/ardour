@@ -489,8 +489,12 @@ namespace ARDOUR {
 	};
 
 	enum SyncSource {
-		Engine = 0,
+		/* These are "synonyms". It is important for JACK to be first
+		   both here and in enums.cc, so that the string "JACK" is
+		   correctly recognized in older session and preference files.
+		*/
 		JACK = 0,
+		Engine = 0,
 		MTC,
 		MIDIClock,
 		LTC
