@@ -36,7 +36,7 @@ namespace PBD {
 #ifdef CANVAS_DEBUG
 #define CANVAS_DEBUG_NAME(i, n) i->name = n;
 #else
-#define CANVAS_DEBUG(i, n) /* empty */
+#define CANVAS_DEBUG_NAME(i, n) /* empty */
 #endif
 
 namespace ArdourCanvas {

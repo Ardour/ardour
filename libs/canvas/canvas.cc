@@ -342,17 +342,19 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 	 */
 
 	cerr << "E/L: " << items.size() << " to check at " << point << endl;
+#ifdef CANVAS_DEBUG
 	for (vector<Item const*>::const_reverse_iterator i = items.rbegin(); i != items.rend(); ++i) {
 		cerr << '\t' << (*i)->whatami() << ' ' << (*i)->name << " ignore ? " << (*i)->ignore_events() << " current ? " << (_current_item == (*i)) << endl;
 	}
+#endif
 	cerr << "------------\n";
 
 	for (vector<Item const*>::const_reverse_iterator i = items.rbegin(); i != items.rend(); ++i) {
 
 		Item const *  new_item = *i;
-		
+#ifdef CANVAS_DEBUG
 		cerr << "\tE/L check out " << new_item->whatami() << ' ' << new_item->name << " ignore ? " << new_item->ignore_events() << " current ? " << (_current_item == new_item) << endl;
-
+#endif
 		if (new_item->ignore_events()) {
 			cerr << "continue1\n";
 			continue;
