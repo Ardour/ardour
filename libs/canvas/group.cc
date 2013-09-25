@@ -295,6 +295,7 @@ Group::add_items_at_point (Duple const point, vector<Item const *>& items) const
 void
 Group::dump (ostream& o) const
 {
+#ifdef CANVAS_DEBUG
 	o << _canvas->indent();
 	o << "Group " << this << " [" << name << ']';
 	o << " @ " << position();
@@ -311,6 +312,7 @@ Group::dump (ostream& o) const
 	}
 
 	o << endl;
+#endif
 
 	ArdourCanvas::dump_depth++;
 
