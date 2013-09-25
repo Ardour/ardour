@@ -3784,11 +3784,20 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 			const XMLNodeList& options (child->children());
 			for (XMLNodeList::const_iterator oc = options.begin(); oc != options.end(); ++oc) {
 				const XMLNode* option = *oc;
-				if (option->property("name")->value() == "native-file-data-format") {
-					SampleFormat fmt = (SampleFormat) string_2_enum (option->property ("value")->value(), fmt);
-					data_format = fmt;
-					found_data_format = true;
-					break;
+				const XMLProperty* name = option->property("name");
+
+				if (!name) {
+					continue;
+				}
+
+				if (name->value() == "native-file-data-format") {
+					const XMLProperty* value = option->property ("value");
+					if (value) {
+						SampleFormat fmt = (SampleFormat) string_2_enum (option->property ("value")->value(), fmt);
+						data_format = fmt;
+						found_data_format = true;
+						break;
+					}
 				}
 			}
 		}
