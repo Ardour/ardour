@@ -1,7 +1,12 @@
 #ifndef _WINX_SYS_TIME_H_
 #define _WINX_SYS_TIME_H_
 
-#define WIN32_LEAN_AND_MEAN /* This line found to be needed by JE - 18-08-2013. Line was formerly. . . #include <features.h> */
+#define WIN32_LEAN_AND_MEAN          /* This line found to be needed by JE - 18-08-2013. Line was formerly. . . #include <features.h> */
+#ifndef __suseconds_t_defined        /* This section added by JE - 22-08-2013 */
+#define __suseconds_t_defined
+typedef long          __suseconds_t;
+typedef __suseconds_t   suseconds_t;
+#endif
 #include <WinSock2.h> /* gets 'struct timeval' - Changed by JE - 23-07-2013. Was formerly. . . #include <WinSock.h> */
 
 #ifdef _TIMEVAL_DEFINED
