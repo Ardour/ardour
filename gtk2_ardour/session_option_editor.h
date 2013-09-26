@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __gtk_ardour_session_option_editor_h__
+#define __gtk_ardour_session_option_editor_h__
+
 #include "option_editor.h"
 
 namespace ARDOUR {
@@ -39,3 +42,5 @@ private:
 
 	ComboOption<float>* _vpu;
 };
+
+#endif /* __gtk_ardour_session_option_editor_h__ */
