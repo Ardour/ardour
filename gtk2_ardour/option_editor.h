@@ -30,9 +30,6 @@
 #include "audio_clock.h"
 #include "ardour/types.h"
 
-using namespace Glib;
-using namespace Gtk;
-
 /** @file option_editor.h
  *  @brief Base class for option editing dialog boxes.
  *
@@ -230,9 +227,9 @@ public:
 		  _get (g),
 		  _set (s)
 	{
-		_label = manage (new Gtk::Label (n + ":"));
+		_label = Gtk::manage (new Gtk::Label (n + ":"));
 		_label->set_alignment (0, 0.5);
-		_combo = manage (new Gtk::ComboBoxText);
+		_combo = Gtk::manage (new Gtk::ComboBoxText);
 		_combo->signal_changed().connect (sigc::mem_fun (*this, &ComboOption::changed));
 	}
 
@@ -308,9 +305,9 @@ public:
 		)
 		: Option (i, n)
 	{
-		_label = manage (new Gtk::Label (n + ":"));
+		_label = Gtk::manage (new Gtk::Label (n + ":"));
 		_label->set_alignment (0, 0.5);
-		_hscale = manage (new Gtk::HScale(adj));
+		_hscale = Gtk::manage (new Gtk::HScale(adj));
 		_adj = NULL;
 	}
 
@@ -326,9 +323,9 @@ public:
 		, _set (s)
 		, _adj (adj)
 	{
-		_label = manage (new Gtk::Label (n + ":"));
+		_label = Gtk::manage (new Gtk::Label (n + ":"));
 		_label->set_alignment (0, 0.5);
-		_hscale = manage (new Gtk::HScale(*_adj));
+		_hscale = Gtk::manage (new Gtk::HScale(*_adj));
 		_adj->signal_value_changed().connect (sigc::mem_fun (*this, &HSliderOption::changed));
 	}
 
@@ -382,9 +379,9 @@ public:
 		  _get (g),
 		  _set (s)
 	{
-		_label = manage (new Gtk::Label (n + ":"));
+		_label = Gtk::manage (new Gtk::Label (n + ":"));
 		_label->set_alignment (0, 0.5);
-		_combo = manage (new Gtk::ComboBoxText);
+		_combo = Gtk::manage (new Gtk::ComboBoxText);
 		_combo->signal_changed().connect (sigc::mem_fun (*this, &ComboStringOption::changed));
 	}
 
@@ -496,18 +493,18 @@ public:
 		  _set (s),
 		  _scale (scale)
 	{
-		_label = manage (new Gtk::Label (n + ":"));
+		_label = Gtk::manage (new Gtk::Label (n + ":"));
 		_label->set_alignment (0, 0.5);
 
-		_spin = manage (new Gtk::SpinButton);
+		_spin = Gtk::manage (new Gtk::SpinButton);
 		_spin->set_range (min, max);
 		_spin->set_increments (step, page);
 
-		_box = manage (new Gtk::HBox);
+		_box = Gtk::manage (new Gtk::HBox);
 		_box->pack_start (*_spin, true, true);
 		_box->set_spacing (4);
 		if (unit.length()) {
-			_box->pack_start (*manage (new Gtk::Label (unit)), false, false);
+			_box->pack_start (*Gtk::manage (new Gtk::Label (unit)), false, false);
 		}
 
 		_spin->signal_value_changed().connect (sigc::mem_fun (*this, &SpinOption::changed));
