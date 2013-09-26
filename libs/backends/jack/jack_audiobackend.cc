@@ -513,7 +513,10 @@ JACKAudioBackend::start ()
 {
 	if (!available()) {
 
-		if (!_jack_connection->server_running()) {
+		if (_jack_connection->in_control()) {
+			/* we will be starting JACK, so set up the 
+			   command that JACK will use when it (auto-)starts
+			*/
 			setup_jack_startup_command ();
 		}
 
