@@ -30,6 +30,9 @@
 #include "audio_clock.h"
 #include "ardour/types.h"
 
+using namespace Glib;
+using namespace Gtk;
+
 /** @file option_editor.h
  *  @brief Base class for option editing dialog boxes.
  *

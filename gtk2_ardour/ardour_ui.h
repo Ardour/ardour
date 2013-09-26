@@ -66,6 +66,7 @@
 
 #include "video_timeline.h"
 
+#include "about.h"
 #include "ardour_button.h"
 #include "ardour_dialog.h"
 #include "ardour_window.h"
@@ -77,35 +78,35 @@
 #include "visibility_group.h"
 #include "window_manager.h"
 
-class About;
-class AddRouteDialog;
-class AddVideoDialog;
+#include "add_route_dialog.h"
+#include "add_video_dialog.h"
+#include "big_clock_window.h"
+#include "bundle_manager.h"
+#include "global_port_matrix.h"
+#include "keyeditor.h"
+#include "location_ui.h"
+#include "rc_option_editor.h"
+#include "route_params_ui.h"
+#include "session_option_editor.h"
+#include "speaker_dialog.h"
+#include "theme_manager.h"
+
 class VideoTimeLine;
 class SystemExec;
 class ArdourStartup;
 class ArdourKeyboard;
 class AudioClock;
-class BigClockWindow;
-class BundleManager;
 class ButtonJoiner;
 class ConnectionEditor;
 class EngineControl;
-class KeyEditor;
-class LocationUIWindow;
 class MainClock;
 class Mixer_UI;
 class PublicEditor;
-class RCOptionEditor;
-class RouteParams_UI;
-class SessionOptionEditor;
 class ShuttleControl;
 class Splash;
-class SpeakerDialog;
-class ThemeManager;
 class TimeInfoBox;
 class MidiTracer;
 class LevelMeterHBox;
-class GlobalPortMatrixWindow;
 class GUIObjectState;
 
 namespace Gtkmm2ext {
