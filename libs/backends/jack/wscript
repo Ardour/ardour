@@ -43,7 +43,7 @@ def build(bld):
     obj.includes = ['.']
     obj.name     = 'jack_audiobackend'
     obj.target   = 'jack_audiobackend'
-    if Options.options.dist_target == 'mingw':
+    if (bld.env['build_target'] == 'mingw'):
         obj.uselib   = [ 'JACK', 'PORTAUDIO' ]
     else:
         obj.uselib   = [ 'JACK' ]
