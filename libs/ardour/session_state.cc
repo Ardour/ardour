@@ -1317,13 +1317,7 @@ Session::set_state (const XMLNode& node, int version)
 	if ((child = find_named_node (node, "Click")) == 0) {
 		warning << _("Session: XML state has no click section") << endmsg;
 	} else if (_click_io) {
-		const XMLNodeList& children (child->children());
-		XMLNodeList::const_iterator i = children.begin();
-		_click_io->set_state (**i, version);
-		++i;
-		if (i != children.end()) {
-			_click_gain->set_state (**i, version);
-		}
+		setup_click_state (node);
 	}
 
 	if ((child = find_named_node (node, ControlProtocolManager::state_node_name)) != 0) {
