@@ -96,29 +96,24 @@ Graph::reset_thread_list ()
            number of threads.
         */
 
-        if (_thread_list.size() == num_threads) {
+        if (AudioEngine::instance()->process_thread_count() == num_threads) {
                 return;
         }
 
         Glib::Threads::Mutex::Lock lm (_session.engine().process_lock());
-	AudioBackendThread* backend_thread;
 
-        if (!_thread_list.empty()) {
+        if (AudioEngine::instance()->process_thread_count() != 0) {
                 drop_threads ();
         }
 
-	if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::main_thread, this), backend_thread, 100000) != 0) {
+	if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::main_thread, this)) != 0) {
 		throw failed_constructor ();
 	}
 
-	_thread_list.push_back (backend_thread);
-
         for (uint32_t i = 1; i < num_threads; ++i) {
-		if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::helper_thread, this), backend_thread, 100000) != 0) {
+		if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::helper_thread, this))) {
 			throw failed_constructor ();
 		}
-		
-		_thread_list.push_back (backend_thread);
         }
 }
 
@@ -140,17 +135,15 @@ Graph::drop_threads ()
 {
         _quit_threads = true;
 
-        for (unsigned int i=0; i< _thread_list.size(); i++) {
+        uint32_t thread_count = AudioEngine::instance()->process_thread_count ();
+
+        for (unsigned int i=0; i < thread_count; i++) {
 		_execution_sem.signal ();
         }
 
         _callback_start_sem.signal ();
 
-        for (list<AudioBackendThread*>::iterator i = _thread_list.begin(); i != _thread_list.end(); ++i) {
-		AudioEngine::instance()->join_process_thread (*i);
-        }
-
-        _thread_list.clear ();
+	AudioEngine::instance()->join_process_threads ();
 
 	_execution_tokens = 0;
 

@@ -47,8 +47,6 @@ class Route;
 class Session;
 class GraphEdges;	
 
-class AudioBackendThread;
-
 typedef boost::shared_ptr<GraphNode> node_ptr_t;
 
 typedef std::list< node_ptr_t > node_list_t;
@@ -58,8 +56,6 @@ class Graph : public SessionHandleRef
 {
 public:
 	Graph (Session & session);
-
-	uint32_t threads_in_use () const { return _thread_list.size(); }
 
 	void prep();
 	void trigger (GraphNode * n);
@@ -93,7 +89,6 @@ protected:
 	virtual void session_going_away ();
 
 private:
-	std::list<AudioBackendThread*> _thread_list;
 	volatile bool        _quit_threads;
 
 	void reset_thread_list ();

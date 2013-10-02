@@ -33,7 +33,6 @@
 #include "ardour/audioengine.h"
 #include "ardour/session.h"
 #include "ardour/types.h"
-#include "ardour/audio_backend_thread.h"
 
 #include "jack_audiobackend.h"
 #include "jack_connection.h"
@@ -46,16 +45,6 @@ using namespace PBD;
 using std::string;
 using std::vector;
 
-class JACKAudioBackendThread : public AudioBackendThread
-{
-public:
-
-	JACKAudioBackendThread (jack_native_thread_t id)
-		: thread_id(id) { }
-
-	jack_native_thread_t thread_id;
-
-};
 
 #define GET_PRIVATE_JACK_POINTER(localvar)  jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return; }
 #define GET_PRIVATE_JACK_POINTER_RET(localvar,r) jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return r; }
@@ -837,40 +826,45 @@ JACKAudioBackend::_latency_callback (jack_latency_callback_mode_t mode, void* ar
 }
 
 int
-JACKAudioBackend::create_process_thread (boost::function<void()> f, AudioBackendThread* backend_thread, size_t stacksize)
+JACKAudioBackend::create_process_thread (boost::function<void()> f)
 {
         GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 
 	jack_native_thread_t thread_id;
-        ThreadData* td = new ThreadData (this, f, stacksize);
+        ThreadData* td = new ThreadData (this, f, thread_stack_size());
 
         if (jack_client_create_thread (_priv_jack, &thread_id, jack_client_real_time_priority (_priv_jack),
                                        jack_is_realtime (_priv_jack), _start_process_thread, td)) {
                 return -1;
         }
 
-	backend_thread = new JACKAudioBackendThread(thread_id);
+	_jack_threads.push_back(thread_id);
 	return 0;
 }
 
 int
-JACKAudioBackend::join_process_thread (AudioBackendThread* backend_thread)
+JACKAudioBackend::join_process_threads ()
 {
         GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
 
-	JACKAudioBackendThread * jack_thread = dynamic_cast<JACKAudioBackendThread*>(backend_thread);
 	int ret = 0;
 
+	for (std::vector<jack_native_thread_t>::const_iterator i = _jack_threads.begin ();
+	     i != _jack_threads.end(); i++) {
+
 #if defined(USING_JACK2_EXPANSION_OF_JACK_API) || defined(PLATFORM_WINDOWS)
-	if (jack_client_stop_thread (_priv_jack, jack_thread->thread_id) != 0) {
-		error << "AudioEngine: cannot stop process thread" << endmsg;
-		ret = -1;
-	}
+		if (jack_client_stop_thread (_priv_jack, *i) != 0) {
 #else
-	void* status;
-	ret = pthread_join (jack_thread->thread_id, &status);
+		void* status;
+		if (pthread_join (*i, &status) != 0) {
 #endif
-	delete jack_thread;
+			error << "AudioEngine: cannot stop process thread" << endmsg;
+			ret += -1;
+		}
+	}
+
+	_jack_threads.clear();
+
 	return ret;
 }
 
@@ -880,6 +874,12 @@ JACKAudioBackend::in_process_thread ()
 	// XXX TODO
 
 	return false;
+}
+
+uint32_t
+JACKAudioBackend::process_thread_count ()
+{
+	return _jack_threads.size();
 }
 
 void*
