@@ -18,6 +18,17 @@
 
 */
 
+#ifdef COMPILER_MSVC
+#include <float.h>
+
+// 'std::isinf()' and 'std::isnan()' are not available in MSVC.
+#define isinf(val) !((bool)_finite((double)val))
+#define isnan(val) (bool)_isnan((double)val)
+#else
+using std::isnan;
+using std::isinf;
+#endif
+
 #include "plugin_eq_gui.h"
 #include "fft.h"
 
@@ -765,13 +776,13 @@ PluginEqGui::plot_signal_amplitude_difference(Gtk::Widget *w, cairo_t *cr)
 		}
 		*/
 
-		if (std::isinf(power)) {
+		if (isinf(power)) {
 			if (power < 0) {
 				power = _min_dB - 1.0;
 			} else {
 				power = _max_dB - 1.0;
 			}
-		} else if (std::isnan(power)) {
+		} else if (isnan(power)) {
 			power = _min_dB - 1.0;
 		}
 
