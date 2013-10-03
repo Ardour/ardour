@@ -871,7 +871,19 @@ JACKAudioBackend::join_process_threads ()
 bool
 JACKAudioBackend::in_process_thread ()
 {
-	// XXX TODO
+	for (std::vector<jack_native_thread_t>::const_iterator i = _jack_threads.begin ();
+	     i != _jack_threads.end(); i++) {
+
+#ifdef COMPILER_MINGW
+		if (*i == GetCurrentThread()) {
+			return true;
+		}
+#else // pthreads
+		if (pthread_equal (*i, pthread_self()) != 0) {
+			return true;
+		}
+#endif
+	}
 
 	return false;
 }
