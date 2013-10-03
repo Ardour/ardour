@@ -793,14 +793,14 @@ ARDOUR_UI::startup ()
 			// wait for announce reply from nsm server
 			for ( i = 0; i < 5000; ++i) {
 				nsm->check ();
-				usleep (i);
+				Glib::usleep (i);
 				if (nsm->is_active())
 					break;
 			}
 			// wait for open command from nsm server
 			for ( i = 0; i < 5000; ++i) {
 				nsm->check ();
-				usleep (1000);
+				Glib::usleep (1000);
 				if (nsm->client_id ())
 					break;
 			}
@@ -3428,7 +3428,7 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 		}
 		int timeout = 120; // 6 sec
 		while (!ARDOUR_UI::instance()->video_timeline->check_server()) {
-			usleep (50000);
+			Glib::usleep (50000);
 			if (--timeout <= 0 || !video_server_process->is_running()) break;
 		}
 		if (timeout <= 0) {
