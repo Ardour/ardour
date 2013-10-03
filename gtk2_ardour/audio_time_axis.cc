@@ -397,7 +397,7 @@ AudioTimeAxisView::build_automation_action_menu (bool for_selection)
 					 (!pan_tracks.empty() && string_is_affirmative (pan_tracks.front()->gui_property ("visible"))));
 
 	set<Evoral::Parameter> const & params = _route->pannable()->what_can_be_automated ();
-	for (set<Evoral::Parameter>::iterator p = params.begin(); p != params.end(); ++p) {
+	for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {
 		_main_automation_menu_map[*p] = pan_automation_item;
 	}
 }

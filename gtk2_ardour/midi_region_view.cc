@@ -3291,7 +3291,7 @@ MidiRegionView::selection_as_cut_buffer () const
 {
 	Notes notes;
 
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+	for (Selection::const_iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		NoteType* n = (*i)->note().get();
 		notes.insert (boost::shared_ptr<NoteType> (new NoteType (*n)));
 	}
