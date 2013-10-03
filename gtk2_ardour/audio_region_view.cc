@@ -19,6 +19,7 @@
 #include <cmath>
 #include <cassert>
 #include <algorithm>
+#include <vector>
 
 #include <boost/scoped_array.hpp>
 
@@ -559,9 +560,9 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 
 	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
 	double effective_height;
-	float curve[npoints];
+	std::vector<float> curve(npoints);
 
-	audio_region()->fade_in()->curve().get_vector (0, audio_region()->fade_in()->back()->when, curve, npoints);
+	audio_region()->fade_in()->curve().get_vector (0, audio_region()->fade_in()->back()->when, &curve[0], npoints);
 
 	if (_height >= NAME_HIGHLIGHT_THRESH) {
 		effective_height = _height - NAME_HIGHLIGHT_SIZE - 2;
@@ -659,9 +660,9 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 
 	uint32_t npoints = std::min (gdk_screen_width(), (int) pwidth);
 	double effective_height;
-	float curve[npoints];
+	std::vector<float> curve(npoints);
 
-	audio_region()->fade_out()->curve().get_vector (0, audio_region()->fade_out()->back()->when, curve, npoints);
+	audio_region()->fade_out()->curve().get_vector (0, audio_region()->fade_out()->back()->when, &curve[0], npoints);
 
 	if (_height >= NAME_HIGHLIGHT_THRESH) {
 		effective_height = _height - NAME_HIGHLIGHT_SIZE - 2;
@@ -800,8 +801,8 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 
 	} else {
 
-		float vec[npoints];
-		inverse->curve().get_vector (0, inverse->back()->when, vec, npoints);
+		std::vector<float> vec(npoints);
+		inverse->curve().get_vector (0, inverse->back()->when, &vec[0], npoints);
 		
 		for (Points::size_type i = 0, pci = 0; i < npoints; ++i, ++pci) {
 			ArdourCanvas::Duple &p (ipoints[pci]);
@@ -1293,7 +1294,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 }
 
 void
-AudioRegionView::remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent */*ev*/)
+AudioRegionView::remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent* /*ev*/)
 {
 	ControlPoint *cp = reinterpret_cast<ControlPoint *> (item->get_data ("control_point"));
 	audio_region()->envelope()->erase (cp->model());
