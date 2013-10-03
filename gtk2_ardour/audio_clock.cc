@@ -1739,7 +1739,7 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 
 	drag_y = ev->y;
 
-	if (trunc (drag_accum) != 0) {
+	if (floor (drag_accum) != 0) {
 
 		framepos_t frames;
 		framepos_t pos;

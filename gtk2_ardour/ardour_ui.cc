@@ -3078,13 +3078,13 @@ require some unused files to continue to exist."));
 		space_adjusted = rep.space;
 	} else if (rep.space < 1000000) {
 		bprefix = _("kilo");
-		space_adjusted = truncf((float)rep.space / 1000.0);
+		space_adjusted = floorf((float)rep.space / 1000.0);
 	} else if (rep.space < 1000000 * 1000) {
 		bprefix = _("mega");
-		space_adjusted = truncf((float)rep.space / (1000.0 * 1000.0));
+		space_adjusted = floorf((float)rep.space / (1000.0 * 1000.0));
 	} else {
 		bprefix = _("giga");
-		space_adjusted = truncf((float)rep.space / (1000.0 * 1000 * 1000.0));
+		space_adjusted = floorf((float)rep.space / (1000.0 * 1000 * 1000.0));
 	}
 
 	if (msg_delete) {
