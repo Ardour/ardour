@@ -3473,7 +3473,7 @@ Editor::freeze_route ()
 	
 	/* wait for just a little while, because the above call is asynchronous */
 
-	::usleep (250000);
+	Glib::usleep (250000);
 
 	if (clicked_routeview == 0 || !clicked_routeview->is_audio_track()) {
 		return;

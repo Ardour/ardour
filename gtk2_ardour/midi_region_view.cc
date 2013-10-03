@@ -3073,7 +3073,7 @@ MidiRegionView::nudge_notes (bool forward)
 		return;
 	}
 
-	Evoral::MusicalTime delta = region_frames_to_region_beats (fabs (distance));
+	Evoral::MusicalTime delta = region_frames_to_region_beats (fabs ((double)distance));
 
 	if (!forward) {
 		delta = -delta;

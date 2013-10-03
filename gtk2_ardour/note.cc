@@ -35,7 +35,7 @@ Note::Note (
 	)
 	: NoteBase (region, with_events, note)
 {
-	_rectangle = new Rectangle (group);
+	_rectangle = new ArdourCanvas::Rectangle (group);
 	_rectangle->name = "note";
 	set_item (_rectangle);
 }

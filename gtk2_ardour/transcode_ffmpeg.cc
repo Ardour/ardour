@@ -192,7 +192,7 @@ TranscodeFfmpeg::probe ()
 									h * 3600.0
 								+ m * 60.0
 								+ s * 1.0
-								+ atoi(f) / pow(10, strlen(f))
+								+ atoi(f) / pow((double)10, (int)strlen(f))
 							));
 						}
 					} else if (key == X_("duration_ts") && m_fps == 0 && timebase !=0 ) {
@@ -543,7 +543,7 @@ TranscodeFfmpeg::ffmpegparse_a (std::string d, size_t /* s */)
 		      h * 3600.0
 		    + m * 60.0
 		    + s * 1.0
-		    + atoi(f) / pow(10, strlen(f))
+		    + atoi(f) / pow((double)10, (int)strlen(f))
 		));
 		p = p * m_fps / 100.0;
 		if (p > m_duration ) { p = m_duration; }

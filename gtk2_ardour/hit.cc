@@ -35,7 +35,7 @@ Hit::Hit (
 	bool with_events) 
 	: NoteBase (region, with_events, note)
 {
-	_polygon = new Polygon (group);
+	_polygon = new ArdourCanvas::Polygon (group);
 	set_item (_polygon);
 }
 

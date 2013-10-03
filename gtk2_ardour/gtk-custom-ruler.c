@@ -198,9 +198,8 @@ gtk_custom_ruler_set_property (GObject      *object,
 			       const GValue *value,
 			       GParamSpec   *pspec)
 {
-	(void) pspec;
-
   GtkCustomRuler *ruler = GTK_CUSTOM_RULER (object);
+  (void) pspec;
 
   switch (prop_id)
     {
