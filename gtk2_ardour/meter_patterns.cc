@@ -843,7 +843,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 				case DataType::MIDI:
 					align_center = false; // don't bleed into legend
 					fraction = (j->first) / 127.0;
-					pos = 1 + height - (gint) rintf (height * fraction);
+					pos = 1 + height - (gint) lrintf (height * fraction);
 					pos = min (pos, height);
 					cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
 					if (tickleft) {
