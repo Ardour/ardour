@@ -399,13 +399,25 @@ class AudioBackend : public PortEngine {
      * stacksize. The thread will begin executing @param func, and will exit
      * when that function returns.
      */
-    virtual int create_process_thread (boost::function<void()> func, AudioBackendNativeThread*, size_t stacksize) = 0;
+    virtual int create_process_thread (boost::function<void()> func) = 0;
 
-    /** Wait for the thread specified by @param thread to exit.
+    /** Wait for all processing threads to exit.
      * 
      * Return zero on success, non-zero on failure.
      */
-    virtual int wait_for_process_thread_exit (AudioBackendNativeThread thread) = 0;
+    virtual int join_process_threads () = 0;
+
+    /** Return true if execution context is in a backend thread
+     */
+    virtual bool in_process_thread () = 0;
+
+    /** Return the minimum stack size of audio threads in bytes
+     */
+    static size_t thread_stack_size () { return 100000; }
+
+    /** Return number of processing threads
+     */
+    virtual uint32_t process_thread_count () = 0;
 
     virtual void update_latencies () = 0;
 
