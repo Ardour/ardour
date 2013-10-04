@@ -615,16 +615,6 @@ namespace ARDOUR {
 	    uint32_t max; //< samples
 	};
 
-/* PLATFORM SPECIFIC #ifdef's here */
-
-	/** Define the native thread type used on the platform */
-	typedef pthread_t AudioBackendNativeThread;
-	static inline bool self_thread_equal (AudioBackendNativeThread thr) {
-		return pthread_equal (thr, pthread_self());
-	}
-
-/* PLATFORM SPECIFIC #endif's here */
-
 } // namespace ARDOUR
 
 
