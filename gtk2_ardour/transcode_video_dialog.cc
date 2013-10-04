@@ -28,7 +28,6 @@
 #include <fcntl.h>
 
 #include <sigc++/bind.h>
-#include <libgen.h>
 
 #include "pbd/error.h"
 #include "pbd/convert.h"
