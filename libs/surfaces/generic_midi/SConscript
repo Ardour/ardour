@@ -42,7 +42,8 @@ genericmidi.Merge ([
 	libraries['usb'],
 	libraries['xml'],
 	libraries['glib2'],
-	libraries['glibmm2']
+	libraries['glibmm2'],
+	libraries['boost']
 	])
 
 libardour_genericmidi = genericmidi.SharedLibrary('ardour_genericmidi', genericmidi_files)

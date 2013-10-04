@@ -63,6 +63,7 @@ tranzport.Merge ([
     libraries['xml'],
     libraries['glib2'],
     libraries['glibmm2'],
+    libraries['boost'],
     libraries['usb'],
     libraries['sndfile']
     ])
