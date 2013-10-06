@@ -63,6 +63,7 @@
 #define getcwd     _getcwd
 #define getpid     _getpid
 #define snprintf   _snprintf
+#define random      rand
 #define link        ntfs_link
 #define unlink      ntfs_unlink
 #define strcasecmp  stricmp

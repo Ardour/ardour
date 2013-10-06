@@ -1,7 +1,7 @@
 #ifndef _TARGETSXS_H_
 #define _TARGETSXS_H_
 
-#pragma warning( disable : 4996 )
+#pragma warning( disable : 4250 4996 )
 
 #ifndef LV2_SUPPORT
 #define LV2_SUPPORT   1
