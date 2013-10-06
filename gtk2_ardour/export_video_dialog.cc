@@ -561,7 +561,7 @@ ExportVideoDialog::launch_export ()
 		if (gtk_events_pending()) {
 			gtk_main_iteration ();
 		} else {
-			usleep (10000);
+			Glib::usleep (10000);
 		}
 	}
 	audio_progress_connection.disconnect();
