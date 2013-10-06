@@ -64,7 +64,7 @@ GType gtk_custom_hruler_get_type (void)
 			};
 
 		hruler_type = g_type_register_static (gtk_custom_ruler_get_type(), "GtkCustomHRuler",
-						      &hruler_info, 0);
+						      &hruler_info, (GTypeFlags)0);
 	}
 
 	return hruler_type;

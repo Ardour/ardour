@@ -98,7 +98,7 @@ GType gtk_custom_ruler_get_type (void)
 			};
 
 		ruler_type = g_type_register_static (GTK_TYPE_WIDGET, "GtkCustomRuler",
-					   &ruler_info, 0);
+					   &ruler_info, (GTypeFlags)0);
 	}
 
 	return ruler_type;
