@@ -70,6 +70,7 @@ libardour_sources = [
         'diskstream.cc',
         'element_import_handler.cc',
         'element_importer.cc',
+        'engine_slave.cc',
         'enums.cc',
         'event_type_map.cc',
         'export_channel.cc',
@@ -104,7 +105,6 @@ libardour_sources = [
         'interpolation.cc',
         'io.cc',
         'io_processor.cc',
-        'jack_slave.cc',
         'kmeterdsp.cc',
         'ladspa_plugin.cc',
         'ladspa_search_path.cc',
@@ -347,7 +347,7 @@ def build(bld):
                         'AUDIOUNITS', 'OSX','BOOST','CURL','DL']
     obj.use          = ['libpbd','libmidipp','libevoral','libvamphost',
                         'libvampplugin','libtaglib','librubberband',
-                        'libaudiographer','libltc']
+                        'libaudiographer','libltc','libtimecode']
     obj.vnum         = LIBARDOUR_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
     obj.defines      = [

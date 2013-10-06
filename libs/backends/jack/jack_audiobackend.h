@@ -103,8 +103,10 @@ class JACKAudioBackend : public AudioBackend {
 
     size_t raw_buffer_size (DataType t);
 
-    int create_process_thread (boost::function<void()> func, AudioBackendNativeThread*, size_t stacksize);
-    int wait_for_process_thread_exit (AudioBackendNativeThread);
+    int create_process_thread (boost::function<void()> func);
+    int join_process_threads ();
+    bool in_process_thread ();
+    uint32_t process_thread_count ();
 
     void transport_start ();
     void transport_stop ();
@@ -183,6 +185,8 @@ class JACKAudioBackend : public AudioBackend {
     bool            _running;
     bool            _freewheeling;
     std::map<DataType,size_t> _raw_buffer_sizes;
+
+    std::vector<jack_native_thread_t> _jack_threads;
 
     static int  _xrun_callback (void *arg);
     static void* _process_thread (void *arg);

@@ -29,12 +29,6 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 
-#ifdef HAVE_LIBLO
-#include "ardour/osc.h"
-#endif
-
-#include "canvas/wave_view.h"
-
 #include "audio_clock.h"
 #include "ardour_ui.h"
 #include "actions.h"
@@ -62,7 +56,7 @@ ARDOUR_UI::toggle_external_sync()
 {
 	if (_session) {
 		if (_session->config.get_video_pullup() != 0.0f) {
-			if (Config->get_sync_source() == JACK) {
+			if (Config->get_sync_source() == Engine) {
 				MessageDialog msg (
 					_("It is not possible to use JACK as the the sync source\n\
 when the pull up/down setting is non-zero."));
@@ -342,16 +336,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 
 		ActionManager::map_some_state ("options", "SendMMC", &RCConfiguration::get_send_mmc);
 
-	} else if (p == "use-osc") {
-
-#ifdef HAVE_LIBLO
-		if (Config->get_use_osc()) {
-			osc->start ();
-		} else {
-			osc->stop ();
-		}
-#endif
-
 	} else if (p == "keep-tearoffs") {
 		ActionManager::map_some_state ("Common", "KeepTearoffs", &RCConfiguration::get_keep_tearoffs);
 	} else if (p == "mmc-control") {
@@ -467,7 +451,7 @@ ARDOUR_UI::synchronize_sync_source_and_video_pullup ()
 		act->set_sensitive (true);
 	} else {
 		/* can't sync to JACK if video pullup != 0.0 */
-		if (Config->get_sync_source() == JACK) {
+		if (Config->get_sync_source() == Engine) {
 			act->set_sensitive (false);
 		} else {
 			act->set_sensitive (true);

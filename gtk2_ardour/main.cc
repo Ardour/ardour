@@ -37,8 +37,6 @@
 #include "pbd/boost_debug.h"
 #endif
 
-#include <jack/jack.h>
-
 #include "ardour/revision.h"
 #include "ardour/version.h"
 #include "ardour/ardour.h"
@@ -81,17 +79,10 @@ static const char* localedir = LOCALEDIR;
 void
 gui_jack_error ()
 {
-	MessageDialog win (string_compose (_("%1 could not connect to JACK."), PROGRAM_NAME),
+	MessageDialog win (string_compose (_("%1 could not connect to the audio backend."), PROGRAM_NAME),
 	                   false,
 	                   Gtk::MESSAGE_INFO,
 	                   Gtk::BUTTONS_NONE);
-	win.set_secondary_text(string_compose (_("There are several possible reasons:\n\
-\n\
-1) JACK is not running.\n\
-2) JACK is running as another user, perhaps root.\n\
-3) There is already another client called \"%1\".\n\
-\n\
-Please consider the possibilities, and perhaps (re)start JACK."), PROGRAM_NAME));
 
 	win.add_button (Stock::QUIT, RESPONSE_CLOSE);
 	win.set_default_response (RESPONSE_CLOSE);

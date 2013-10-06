@@ -33,9 +33,9 @@
 
 #include <assert.h>
 #include <string.h>
-#include <strings.h>
 #include <stdint.h>
 #include <cairo/cairo.h>
+
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
@@ -740,13 +740,13 @@ piano_keyboard_set_keyboard_layout(PianoKeyboard *pk, const char *layout)
 {
 	assert(layout);
 
-	if (!strcasecmp(layout, "QWERTY")) {
+	if (!g_strcasecmp(layout, "QWERTY")) {
 		bind_keys_qwerty(pk);
 
-	} else if (!strcasecmp(layout, "QWERTZ")) {
+	} else if (!g_strcasecmp(layout, "QWERTZ")) {
 		bind_keys_qwertz(pk);
 
-	} else if (!strcasecmp(layout, "AZERTY")) {
+	} else if (!g_strcasecmp(layout, "AZERTY")) {
 		bind_keys_azerty(pk);
 
 	} else {

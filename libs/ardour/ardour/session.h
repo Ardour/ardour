@@ -161,6 +161,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	virtual ~Session ();
 
+        static int get_info_from_path (const std::string& xmlpath, float& sample_rate, SampleFormat& data_format);
+
 	std::string path() const { return _path; }
 	std::string name() const { return _name; }
 	std::string snap_name() const { return _current_snapshot_name; }
@@ -509,7 +511,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	static PBD::Signal1<void, framepos_t> EndTimeChanged;
 
 	void   request_sync_source (Slave*);
-	bool   synced_to_jack() const { return config.get_external_sync() && Config->get_sync_source() == JACK; }
+	bool   synced_to_engine() const { return config.get_external_sync() && Config->get_sync_source() == Engine; }
 
 	double transport_speed() const { return _transport_speed; }
 	bool   transport_stopped() const { return _transport_speed == 0.0f; }
@@ -1617,7 +1619,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
     void setup_ltc ();
     void setup_click ();
+    void setup_click_state (const XMLNode&);
     void setup_bundles ();
+
+    static int get_session_info_from_path (XMLTree& state_tree, const std::string& xmlpath);
 };
 
 } // namespace ARDOUR

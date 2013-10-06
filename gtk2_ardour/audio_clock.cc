@@ -996,7 +996,7 @@ AudioClock::set_slave_info ()
 		Slave* slave = _session->slave();
 
 		switch (sync_src) {
-		case JACK:
+		case Engine:
 			_left_layout->set_markup (string_compose ("<span size=\"%1\">" TXTSPAN "%2</span></span>",
 						INFO_FONT_SIZE, sync_source_to_string(sync_src, true)));
 			_right_layout->set_text ("");

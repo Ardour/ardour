@@ -397,12 +397,12 @@ string_to_sync_source (string str)
 	}
 
 	if (str == _("JACK")) {
-		return JACK;
+		return Engine;
 	}
 
 	fatal << string_compose (_("programming error: unknown sync source string \"%1\""), str) << endmsg;
 	/*NOTREACHED*/
-	return JACK;
+	return Engine;
 }
 
 /** @param sh Return a short version of the string */
@@ -410,7 +410,10 @@ const char*
 sync_source_to_string (SyncSource src, bool sh)
 {
 	switch (src) {
-	case JACK:
+	case Engine:
+		/* no other backends offer sync for now ... deal with this if we
+		 * ever have to.
+		 */
 		return _("JACK");
 
 	case MTC:

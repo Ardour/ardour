@@ -489,7 +489,12 @@ namespace ARDOUR {
 	};
 
 	enum SyncSource {
-		JACK,
+		/* These are "synonyms". It is important for JACK to be first
+		   both here and in enums.cc, so that the string "JACK" is
+		   correctly recognized in older session and preference files.
+		*/
+		JACK = 0,
+		Engine = 0,
 		MTC,
 		MIDIClock,
 		LTC
@@ -609,16 +614,6 @@ namespace ARDOUR {
 	    uint32_t min; //< samples
 	    uint32_t max; //< samples
 	};
-
-/* PLATFORM SPECIFIC #ifdef's here */
-
-	/** Define the native thread type used on the platform */
-	typedef pthread_t AudioBackendNativeThread;
-	static inline bool self_thread_equal (AudioBackendNativeThread thr) {
-		return pthread_equal (thr, pthread_self());
-	}
-
-/* PLATFORM SPECIFIC #endif's here */
 
 } // namespace ARDOUR
 

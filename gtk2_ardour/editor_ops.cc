@@ -2100,7 +2100,7 @@ Editor::transition_to_rolling (bool fwd)
 
 	if (_session->config.get_external_sync()) {
 		switch (Config->get_sync_source()) {
-		case JACK:
+		case Engine:
 			break;
 		default:
 			/* transport controlled by the master */

@@ -544,7 +544,11 @@ ARDOUR::get_available_sync_options ()
 {
 	vector<SyncSource> ret;
 
-	ret.push_back (JACK);
+	boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
+	if (backend && backend->name() == "JACK") {
+		ret.push_back (Engine);
+	}
+
 	ret.push_back (MTC);
 	ret.push_back (MIDIClock);
 	ret.push_back (LTC);

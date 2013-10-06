@@ -58,7 +58,7 @@ def fetch_gcc_version (CC):
     return version
 
 def fetch_git_revision ():
-    cmd = "LANG= git describe --tags HEAD"
+    cmd = "git describe --tags HEAD"
     output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
     rev = output[0].decode('utf-8')
     return rev

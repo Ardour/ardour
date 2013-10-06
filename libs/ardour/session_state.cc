@@ -494,9 +494,10 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 		ifstream in(in_path.c_str());
 
 		if (in) {
-			string out_path = _path;
-			out_path += _name;
-			out_path += statefile_suffix;
+			/* no need to call legalize_for_path() since the string
+			 * in session_template is already a legal path name
+			 */
+			string out_path = Glib::build_filename (_session_dir->root_path(), _name + statefile_suffix);
 
 			ofstream out(out_path.c_str());
 
@@ -1317,13 +1318,7 @@ Session::set_state (const XMLNode& node, int version)
 	if ((child = find_named_node (node, "Click")) == 0) {
 		warning << _("Session: XML state has no click section") << endmsg;
 	} else if (_click_io) {
-		const XMLNodeList& children (child->children());
-		XMLNodeList::const_iterator i = children.begin();
-		_click_io->set_state (**i, version);
-		++i;
-		if (i != children.end()) {
-			_click_gain->set_state (**i, version);
-		}
+		setup_click_state (node);
 	}
 
 	if ((child = find_named_node (node, ControlProtocolManager::state_node_name)) != 0) {
@@ -3780,4 +3775,69 @@ Session::rename (const std::string& new_name)
 	return 0;
 
 #undef RENAME
+}
+
+int
+Session::get_session_info_from_path (XMLTree& tree, const string& xmlpath)
+{
+	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
+		return -1;
+        }
+
+	if (!tree.read (xmlpath)) {
+		return -1;
+	}
+
+	return 0;
+}
+
+int
+Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFormat& data_format)
+{
+	XMLTree tree;
+	bool found_sr = false;
+	bool found_data_format = false;
+
+	if (get_session_info_from_path (tree, xmlpath)) {
+		return -1;
+	}
+
+	/* sample rate */
+
+	const XMLProperty* prop;
+	if ((prop = tree.root()->property (X_("sample-rate"))) != 0) {		
+		sample_rate = atoi (prop->value());
+		found_sr = true;
+	}
+
+	const XMLNodeList& children (tree.root()->children());
+	for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
+		const XMLNode* child = *c;
+		if (child->name() == "Config") {
+			const XMLNodeList& options (child->children());
+			for (XMLNodeList::const_iterator oc = options.begin(); oc != options.end(); ++oc) {
+				const XMLNode* option = *oc;
+				const XMLProperty* name = option->property("name");
+
+				if (!name) {
+					continue;
+				}
+
+				if (name->value() == "native-file-data-format") {
+					const XMLProperty* value = option->property ("value");
+					if (value) {
+						SampleFormat fmt = (SampleFormat) string_2_enum (option->property ("value")->value(), fmt);
+						data_format = fmt;
+						found_data_format = true;
+						break;
+					}
+				}
+			}
+		}
+		if (found_data_format) {
+			break;
+		}
+	}
+
+	return !(found_sr && found_data_format); // zero if they are both found
 }

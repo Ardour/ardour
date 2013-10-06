@@ -276,6 +276,21 @@ Session::Session (AudioEngine &eng,
 			throw failed_constructor ();
 		}
 
+		/* if a mix template was provided, then ::create() will
+		 * have copied it into the session and we need to load it
+		 * so that we have the state ready for ::set_state()
+		 * after the engine is started.
+		 *
+		 * Note that we do NOT try to get the sample rate from
+		 * the template at this time, though doing so would
+		 * be easy if we decided this was an appropriate part
+		 * of a template.
+		 */
+
+		if (!mix_template.empty() && load_state (_current_snapshot_name)) {
+			throw failed_constructor ();
+		}
+
 	} else {
 
 		if (load_state (_current_snapshot_name)) {
@@ -393,7 +408,7 @@ Session::immediately_post_engine ()
 
 	_engine.Running.connect_same_thread (*this, boost::bind (&Session::initialize_latencies, this));
 
-	if (synced_to_jack()) {
+	if (synced_to_engine()) {
 		_engine.transport_stop ();
 	}
 
@@ -577,14 +592,21 @@ Session::setup_ltc ()
 void
 Session::setup_click ()
 {
-	XMLNode* child = 0;
-
 	_clicking = false;
 	_click_io.reset (new ClickIO (*this, "click"));
 	_click_gain.reset (new Amp (*this));
 	_click_gain->activate ();
-	
-	if (state_tree && (child = find_named_node (*state_tree->root(), "Click")) != 0) {
+	if (state_tree) {
+		setup_click_state (*state_tree->root());
+	}
+}
+
+void
+Session::setup_click_state (const XMLNode& node)
+{	
+	const XMLNode* child = 0;
+
+	if ((child = find_named_node (node, "Click")) != 0) {
 		
 		/* existing state for Click */
 		int c = 0;
@@ -1406,7 +1428,7 @@ Session::audible_frame () const
 		offset = current_block_size;
 	}
 
-	if (synced_to_jack()) {
+	if (synced_to_engine()) {
 		tf = _engine.transport_frame();
 	} else {
 		tf = _transport_frame;
