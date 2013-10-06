@@ -185,6 +185,7 @@ std::string
 SessionDialog::session_name (bool& should_be_new)
 {
 	if (!_provided_session_name.empty() && !new_only) {
+		should_be_new = false;
 		return _provided_session_name;
 	}
 
@@ -275,8 +276,6 @@ SessionDialog::setup_initial_choice_box ()
 		info_box->set_spacing (6);
 
 		info_box->pack_start (info_scroller_label, false, false);
-
-		cerr << "Frame should be visible\n";
 
 		info_scroller_count = 0;
 		info_scroller_connection = Glib::signal_timeout().connect (mem_fun(*this, &SessionDialog::info_scroller_update), 50);

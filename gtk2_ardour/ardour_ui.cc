@@ -2558,6 +2558,18 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		template_name = load_template;
 	}
 
+	session_name = basename_nosuffix (ARDOUR_COMMAND_LINE::session_name);
+	session_path = ARDOUR_COMMAND_LINE::session_name;
+	
+	if (!session_path.empty()) {
+		if (Glib::file_test (session_path.c_str(), Glib::FILE_TEST_EXISTS)) {
+			if (Glib::file_test (session_path.c_str(), Glib::FILE_TEST_IS_REGULAR)) {
+				/* session/snapshot file, change path to be dir */
+				session_path = Glib::path_get_dirname (session_path);
+			}
+		}
+	}
+
 	SessionDialog session_dialog (should_be_new, session_name, session_path, load_template, cancel_not_quit);
 
 	while (ret != 0) {
@@ -2606,7 +2618,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		should_be_new = false;
 		
 		session_name = session_dialog.session_name (likely_new);
-		
+
 		if (nsm) {
 		        likely_new = true;
 		}
@@ -2658,6 +2670,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	
 		if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
 
+
 			if (likely_new && !nsm) {
 
 				std::string existing = Glib::build_filename (session_path, session_name);
@@ -2694,8 +2707,6 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		}
 
 		if (likely_new && template_name.empty()) {
-
-			cerr << "building a session from dialog\n";
 
 			ret = build_session_from_dialog (session_dialog, session_path, session_name);
 
@@ -4095,8 +4106,6 @@ ARDOUR_UI::reset_route_peak_display (Route* route)
 int
 ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 {
-	cerr << "Do AMS\n";
-
 	audio_midi_setup->set_desired_sample_rate (desired_sample_rate);
 
 	switch (audio_midi_setup->run()) {
