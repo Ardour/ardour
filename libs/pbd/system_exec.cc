@@ -40,7 +40,7 @@
 #endif
 
 
-#include "system_exec.h"
+#include "pbd/system_exec.h"
 
 using namespace std;
 void * interposer_thread (void *arg);

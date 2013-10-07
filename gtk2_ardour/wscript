@@ -246,7 +246,6 @@ gtk2_ardour_sources = [
         'add_video_dialog.cc',
         'editor_videotimeline.cc',
         'video_timeline.cc',
-        'system_exec.cc',
         'video_monitor.cc',
         'transcode_ffmpeg.cc',
         'transcode_video_dialog.cc',

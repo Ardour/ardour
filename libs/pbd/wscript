@@ -71,6 +71,7 @@ libpbd_sources = [
     'stateful.cc',
     'strreplace.cc',
     'strsplit.cc',
+    'system_exec.cc',
     'textreceiver.cc',
     'transmitter.cc',
     'undo.cc',

@@ -26,7 +26,7 @@
 #include "ardour/types.h"
 #include "ardour/session.h"
 #include "ardour/session_handle.h"
-#include "system_exec.h"
+#include "pbd/system_exec.h"
 
 namespace ARDOUR {
 	class Session;
