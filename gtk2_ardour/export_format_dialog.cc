@@ -51,6 +51,8 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
   silence_end_checkbox (_("Add silence at end:")),
   silence_end_clock ("silence_end", true, "", true, false, true),
 
+  upload_checkbox(_("Upload to Soundcloud")),
+
   format_table (3, 4),
   compatibility_label (_("Compatibility"), Gtk::ALIGN_LEFT),
   quality_label (_("Quality"), Gtk::ALIGN_LEFT),
@@ -113,6 +115,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	silence_table.attach (silence_end_checkbox, 1, 2, 2, 3);
 	silence_table.attach (silence_end_clock, 2, 3, 2, 3);
 
+	get_vbox()->pack_start (upload_checkbox, false, false);
 	/* Format table */
 
 	init_format_table();
@@ -296,6 +299,7 @@ ExportFormatDialog::load_state (FormatPtr spec)
 	}
 
 	tag_checkbox.set_active (spec->tag());
+	upload_checkbox.set_active (spec->upload());
 }
 
 void

@@ -151,6 +151,7 @@ ExportDialog::init_gui ()
 	file_format_selector->set_homogeneous (false);
 	file_format_selector->pack_start (*preset_align, false, false, 0);
 	file_format_selector->pack_start (*file_notebook, false, false, 0);
+	file_format_selector->pack_start (*soundcloud_selector, false, false, 0);
 
 	export_notebook.append_page (*file_format_selector, _("File format"));
 	export_notebook.append_page (*timespan_selector, _("Time Span"));
@@ -168,6 +169,7 @@ ExportDialog::init_components ()
 	preset_selector.reset (new ExportPresetSelector ());
 	timespan_selector.reset (new ExportTimespanSelectorMultiple (_session, profile_manager));
 	channel_selector.reset (new PortExportChannelSelector (_session, profile_manager));
+	soundcloud_selector.reset (new SoundcloudExportSelector ());
 	file_notebook.reset (new ExportFileNotebook ());
 }
 
@@ -258,16 +260,34 @@ ExportDialog::show_conflicting_files ()
 }
 
 void
+ExportDialog::soundcloud_upload_progress(double total, double now, std::string title)
+{
+	soundcloud_selector->do_progress_callback(total, now, title);
+
+}
+
+void
 ExportDialog::do_export ()
 {
-	try {
-		profile_manager->prepare_for_export ();
-		handler->do_export ();
-		show_progress ();
-	} catch(std::exception & e) {
-		error << string_compose (_("Export initialization failed: %1"), e.what()) << endmsg;
-		notify_errors(true);
-	}
+	profile_manager->prepare_for_export ();
+	handler->upload_username = soundcloud_selector->username();
+	handler->upload_password = soundcloud_selector->password();
+	handler->upload_public   = soundcloud_selector->upload_public();
+	handler->upload_open     = soundcloud_selector->upload_open();
+
+	handler->SoundcloudProgress.connect_same_thread(
+			*this, 
+		       	boost::bind(&ExportDialog::soundcloud_upload_progress, this, _1, _2, _3)
+	);
+#if 0
+	handler->SoundcloudProgress.connect(
+			*this, invalidator (*this),
+		       	boost::bind(&ExportDialog::soundcloud_upload_progress, this, _1, _2, _3),
+			gui_context()
+	);
+#endif
+	handler->do_export ();
+	show_progress ();
 }
 
 void
@@ -375,6 +395,7 @@ ExportRangeDialog::init_components ()
 	preset_selector.reset (new ExportPresetSelector ());
 	timespan_selector.reset (new ExportTimespanSelectorSingle (_session, profile_manager, range_id));
 	channel_selector.reset (new PortExportChannelSelector (_session, profile_manager));
+	soundcloud_selector.reset (new SoundcloudExportSelector ());
 	file_notebook.reset (new ExportFileNotebook ());
 }
 
@@ -388,6 +409,7 @@ ExportSelectionDialog::init_components ()
 	preset_selector.reset (new ExportPresetSelector ());
 	timespan_selector.reset (new ExportTimespanSelectorSingle (_session, profile_manager, X_("selection")));
 	channel_selector.reset (new PortExportChannelSelector (_session, profile_manager));
+	soundcloud_selector.reset (new SoundcloudExportSelector ());
 	file_notebook.reset (new ExportFileNotebook ());
 }
 
@@ -412,6 +434,7 @@ ExportRegionDialog::init_components ()
 	preset_selector.reset (new ExportPresetSelector ());
 	timespan_selector.reset (new ExportTimespanSelectorSingle (_session, profile_manager, loc_id));
 	channel_selector.reset (new RegionExportChannelSelector (_session, profile_manager, region, track));
+	soundcloud_selector.reset (new SoundcloudExportSelector ());
 	file_notebook.reset (new ExportFileNotebook ());
 }
 
@@ -427,5 +450,6 @@ StemExportDialog::init_components ()
 	preset_selector.reset (new ExportPresetSelector ());
 	timespan_selector.reset (new ExportTimespanSelectorMultiple (_session, profile_manager));
 	channel_selector.reset (new TrackExportChannelSelector (_session, profile_manager));
+	soundcloud_selector.reset (new SoundcloudExportSelector ());
 	file_notebook.reset (new ExportFileNotebook ());
 }

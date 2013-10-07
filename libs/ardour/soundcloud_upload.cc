@@ -20,7 +20,7 @@
 
 
 *************************************************************************************/
-#include "soundcloud_export.h"
+#include "ardour/soundcloud_upload.h"
 
 #include "pbd/xml++.h"
 #include <pbd/error.h>
@@ -35,7 +35,7 @@
 
 using namespace PBD;
 
-static const std::string base_url = "http://api.soundcloud.com/tracks/13158665?client_id=";
+// static const std::string base_url = "http://api.soundcloud.com/tracks/13158665?client_id=";
 
 size_t
 WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
@@ -115,7 +115,7 @@ SoundcloudUploader::Get_Auth_Token( std::string username, std::string password )
 	curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, formpost);
 
-	curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
+	// curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
 
 	// perform online request
 	CURLcode res = curl_easy_perform(curl_handle);
@@ -144,8 +144,18 @@ SoundcloudUploader::Get_Auth_Token( std::string username, std::string password )
 	return "";
 }
 
+int
+SoundcloudUploader::progress_callback(void *caller, double dltotal, double dlnow, double ultotal, double ulnow)
+{
+	SoundcloudUploader *scu = (SoundcloudUploader *) caller;
+	std::cerr << scu->title << ": uploaded " << ulnow << " of " << ultotal << std::endl;
+	scu->caller->SoundcloudProgress(ultotal, ulnow, scu->title); /* EMIT SIGNAL */
+	return 0;
+}
+
+
 std::string
-SoundcloudUploader::Upload(std::string file_path, std::string title, std::string auth_token, bool ispublic, curl_progress_callback progress_callback, void *caller )
+SoundcloudUploader::Upload(std::string file_path, std::string title, std::string token, bool ispublic, ARDOUR::ExportHandler *caller)
 {
 	int still_running;
 
@@ -173,7 +183,7 @@ SoundcloudUploader::Upload(std::string file_path, std::string title, std::string
 	curl_formadd(&formpost,
 			&lastptr,
 			CURLFORM_COPYNAME, "oauth_token",
-			CURLFORM_COPYCONTENTS, auth_token.c_str(),
+			CURLFORM_COPYCONTENTS, token.c_str(),
 			CURLFORM_END);
 
 	curl_formadd(&formpost,
@@ -195,19 +205,22 @@ SoundcloudUploader::Upload(std::string file_path, std::string title, std::string
 	headerlist = curl_slist_append(headerlist, buf);
 
 
-	if(curl_handle && multi_handle) {
+	if (curl_handle && multi_handle) {
 
 		/* what URL that receives this POST */ 
 		std::string url = "https://api.soundcloud.com/tracks";
 		curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
-		curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
+		// curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
 
 		curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headerlist);
 		curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, formpost);
 
+		this->title = title; // save title to show in progress bar
+		this->caller = caller;
+
 		curl_easy_setopt (curl_handle, CURLOPT_NOPROGRESS, 0); // turn on the progress bar
-		curl_easy_setopt (curl_handle, CURLOPT_PROGRESSFUNCTION, progress_callback);
-		curl_easy_setopt (curl_handle, CURLOPT_PROGRESSDATA, caller);
+		curl_easy_setopt (curl_handle, CURLOPT_PROGRESSFUNCTION, &SoundcloudUploader::progress_callback);
+		curl_easy_setopt (curl_handle, CURLOPT_PROGRESSDATA, this);
 
 		curl_multi_add_handle(multi_handle, curl_handle);
 
@@ -333,3 +346,4 @@ SoundcloudUploader::setcUrlOptions()
 	curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYHOST, 0);
 	curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, 0);
 }
+
