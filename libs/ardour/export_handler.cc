@@ -293,6 +293,16 @@ ExportHandler::finish_timespan ()
 			export_cd_marker_file (current_timespan, fmt, filepath, CDMarkerTOC);
 		}
 
+		if (!fmt->command().empty()) {
+			std::string command = string_compose(fmt->command(),
+					filepath,
+					Glib::path_get_dirname(filepath),
+					PBD::basename_nosuffix(filepath)
+					);
+			std::cerr << "running command: " << command << "..." << std::endl;
+			system(command.c_str());
+		}
+
 		if (fmt->upload()) {
 			SoundcloudUploader *soundcloud_uploader = new SoundcloudUploader;
 			std::string token = soundcloud_uploader->Get_Auth_Token(upload_username, upload_password);

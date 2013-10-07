@@ -178,6 +178,8 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	/* Upload */
 	
 	Gtk::CheckButton upload_checkbox;
+	Gtk::Label       command_label;
+	Gtk::Entry       command_entry;
 
 	/* Format table */
 
@@ -312,6 +314,7 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	void update_with_toc ();
 	void update_with_cue ();
 	void update_upload ();
+	void update_command ();
 
 	Gtk::TreeView sample_format_view;
 	Gtk::TreeView dither_type_view;
