@@ -145,6 +145,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 
 	with_cue.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_with_cue));
 	with_toc.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_with_toc));
+	upload_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_upload));
 
 	cue_toc_vbox.pack_start (with_cue, false, false);
 	cue_toc_vbox.pack_start (with_toc, false, false);
@@ -722,6 +723,11 @@ ExportFormatDialog::update_with_toc ()
 }
 
 void
+ExportFormatDialog::update_upload ()
+{
+	manager.select_upload (upload_checkbox.get_active());
+}
+
 ExportFormatDialog::update_description()
 {
 	std::string text = ": " + format->description(false);
