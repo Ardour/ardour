@@ -52,6 +52,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
   silence_end_clock ("silence_end", true, "", true, false, true),
 
   upload_checkbox(_("Upload to Soundcloud")),
+  command_label(_("Command to run post-export (%1=full path & filename, %2=directory, %3=basename):")),
 
   format_table (3, 4),
   compatibility_label (_("Compatibility"), Gtk::ALIGN_LEFT),
@@ -116,6 +117,9 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	silence_table.attach (silence_end_clock, 2, 3, 2, 3);
 
 	get_vbox()->pack_start (upload_checkbox, false, false);
+	get_vbox()->pack_start (command_label, false, false);
+	get_vbox()->pack_start (command_entry, false, false);
+
 	/* Format table */
 
 	init_format_table();
@@ -146,6 +150,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	with_cue.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_with_cue));
 	with_toc.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_with_toc));
 	upload_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_upload));
+	command_entry.signal_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_command));
 
 	cue_toc_vbox.pack_start (with_cue, false, false);
 	cue_toc_vbox.pack_start (with_toc, false, false);
@@ -301,6 +306,7 @@ ExportFormatDialog::load_state (FormatPtr spec)
 
 	tag_checkbox.set_active (spec->tag());
 	upload_checkbox.set_active (spec->upload());
+	command_entry.set_text (spec->command());
 }
 
 void
@@ -728,6 +734,13 @@ ExportFormatDialog::update_upload ()
 	manager.select_upload (upload_checkbox.get_active());
 }
 
+void
+ExportFormatDialog::update_command ()
+{
+	manager.set_command (command_entry.get_text());
+}
+
+void
 ExportFormatDialog::update_description()
 {
 	std::string text = ": " + format->description(false);

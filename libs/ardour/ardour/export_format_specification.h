@@ -97,6 +97,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	void set_with_cue (bool yn) { _with_cue = yn; }
 	void set_with_toc (bool yn) { _with_toc = yn; }
 	void set_upload (bool yn) { _upload = yn; }
+	void set_command (std::string command) { _command = command; }
 
 	void set_silence_beginning (AnyTime const & value) { _silence_beginning = value; }
 	void set_silence_end (AnyTime const & value) { _silence_end = value; }
@@ -127,6 +128,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	bool with_toc() const { return _with_toc; }
 	bool with_cue() const { return _with_cue; }
 	bool upload() const { return _upload; }
+	std::string command() const { return _command; }
 
 	bool tag () const { return _tag && supports_tagging; }
 
@@ -177,6 +179,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	bool            _with_toc;
 	bool            _with_cue;
 	bool		_upload;
+	std::string	_command;
 
 	/* serialization helpers */
 

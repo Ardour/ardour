@@ -171,6 +171,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 	, _with_toc (false)
 	, _with_cue (false)
 	, _upload (false)
+	, _command ("")
 {
 	format_ids.insert (F_None);
 	endiannesses.insert (E_FileDefault);
@@ -246,6 +247,7 @@ ExportFormatSpecification::get_state ()
 	root->add_property ("with-cue", _with_cue ? "true" : "false");
 	root->add_property ("with-toc", _with_toc ? "true" : "false");
 	root->add_property ("upload", _upload ? "true" : "false");
+	root->add_property ("command", _command);
 
 	node = root->add_child ("Encoding");
 	node->add_property ("id", enum_2_string (format_id()));
@@ -329,6 +331,12 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 		_upload = false;
 	}
 	
+	if ((prop = root.property ("command"))) {
+		_command = prop->value();
+	} else {
+		_command = "";
+	}
+
 	/* Encoding and SRC */
 
 	if ((child = root.child ("Encoding"))) {
@@ -601,6 +609,11 @@ ExportFormatSpecification::description (bool include_name)
 	if (_upload) {
 		components.push_back ("Upload");
 	}
+
+	if (!_command.empty()) {
+		components.push_back ("+");
+	}
+
 	string desc;
 	if (include_name) {
 		desc = _name + ": ";
