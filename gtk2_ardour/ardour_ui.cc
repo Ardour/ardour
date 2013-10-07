@@ -52,6 +52,7 @@
 #include "pbd/openuri.h"
 #include "pbd/file_utils.h"
 #include "pbd/localtime_r.h"
+#include "pbd/system_exec.h"
 
 #include "gtkmm2ext/application.h"
 #include "gtkmm2ext/bindings.h"

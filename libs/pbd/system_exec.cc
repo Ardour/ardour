@@ -43,8 +43,6 @@
 #endif
 
 
-#define USE_VFORK
-
 #include "pbd/system_exec.h"
 
 using namespace std;
