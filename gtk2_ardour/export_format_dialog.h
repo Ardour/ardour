@@ -311,6 +311,7 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	void update_with_toc ();
 	void update_with_cue ();
+	void update_upload ();
 
 	Gtk::TreeView sample_format_view;
 	Gtk::TreeView dither_type_view;

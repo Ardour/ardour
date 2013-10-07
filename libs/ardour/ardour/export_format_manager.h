@@ -100,6 +100,7 @@ class ExportFormatManager : public PBD::ScopedConnectionList
 
 	void select_with_cue (bool);
 	void select_with_toc (bool);
+	void select_upload (bool);
 	void select_src_quality (ExportFormatBase::SRCQuality value);
 	void select_trim_beginning (bool value);
 	void select_silence_beginning (AnyTime const & time);
