@@ -197,6 +197,7 @@ libardour_sources = [
         'sndfile_helpers.cc',
         'sndfileimportable.cc',
         'sndfilesource.cc',
+        'soundcloud_upload.cc',
         'source.cc',
         'source_factory.cc',
         'speakers.cc',

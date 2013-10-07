@@ -32,6 +32,7 @@
 #include "export_file_notebook.h"
 #include "export_preset_selector.h"
 #include "ardour_dialog.h"
+#include "soundcloud_export_selector.h"
 
 #include <gtkmm.h>
 
@@ -43,7 +44,8 @@ namespace ARDOUR {
 class ExportTimespanSelector;
 class ExportChannelSelector;
 
-class ExportDialog : public ArdourDialog {
+class ExportDialog : public ArdourDialog, public PBD::ScopedConnectionList 
+{
 
   public:
 
@@ -79,6 +81,7 @@ class ExportDialog : public ArdourDialog {
 	boost::scoped_ptr<ExportTimespanSelector> timespan_selector;
 	boost::scoped_ptr<ExportChannelSelector>  channel_selector;
 	boost::scoped_ptr<ExportFileNotebook>     file_notebook;
+	boost::scoped_ptr<SoundcloudExportSelector> soundcloud_selector;
 
 	Gtk::VBox                                 warning_widget;
 	Gtk::VBox                                 progress_widget;
@@ -129,6 +132,8 @@ class ExportDialog : public ArdourDialog {
 	sigc::connection        progress_connection;
 
 	float previous_progress; // Needed for gtk bug workaround
+
+	void soundcloud_upload_progress(double total, double now, std::string title);
 
 	/* Buttons */
 

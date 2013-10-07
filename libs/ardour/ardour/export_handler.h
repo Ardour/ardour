@@ -30,6 +30,7 @@
 #include "ardour/export_pointers.h"
 #include "ardour/session.h"
 #include "ardour/types.h"
+#include "pbd/signals.h"
 
 namespace AudioGrapher {
 	class BroadcastInfo;
@@ -67,7 +68,7 @@ class ExportElementFactory
 	Session & session;
 };
 
-class ExportHandler : public ExportElementFactory
+class ExportHandler : public ExportElementFactory, public sigc::trackable
 {
   public:
 	struct FileSpec {
@@ -103,6 +104,17 @@ class ExportHandler : public ExportElementFactory
 	void do_export ();
 
 	std::string get_cd_marker_filename(std::string filename, CDMarkerFormat format);
+
+	/** signal emitted when soundcloud export reports progress updates during upload.
+	 * The parameters are total and current bytes downloaded, and the current filename
+	 */
+	PBD::Signal3<void, double, double, std::string> SoundcloudProgress;
+
+	/* upload credentials & preferences */
+	std::string upload_username;
+	std::string upload_password;
+	bool upload_public;
+	bool upload_open;
 
   private:
 

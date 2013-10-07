@@ -31,6 +31,9 @@
 #include "ardour/export_status.h"
 #include "ardour/export_format_specification.h"
 #include "ardour/export_filename.h"
+#include "ardour/soundcloud_upload.h"
+#include "pbd/openuri.h"
+#include "pbd/basename.h"
 
 #include "i18n.h"
 
@@ -280,22 +283,50 @@ ExportHandler::finish_timespan ()
 	while (config_map.begin() != timespan_bounds.second) {
 
 		ExportFormatSpecPtr fmt = config_map.begin()->second.format;
+		std::string filepath = config_map.begin()->second.filename->get_path(fmt);
 
 		if (fmt->with_cue()) {
-			export_cd_marker_file (current_timespan, fmt, config_map.begin()->second.filename->get_path(fmt), CDMarkerCUE);
+			export_cd_marker_file (current_timespan, fmt, filepath, CDMarkerCUE);
 		} 
 
 		if (fmt->with_toc()) {
-			export_cd_marker_file (current_timespan, fmt, config_map.begin()->second.filename->get_path(fmt), CDMarkerTOC);
+			export_cd_marker_file (current_timespan, fmt, filepath, CDMarkerTOC);
 		}
 
+		if (fmt->upload()) {
+			SoundcloudUploader *soundcloud_uploader = new SoundcloudUploader;
+			std::string token = soundcloud_uploader->Get_Auth_Token(upload_username, upload_password);
+			std::cerr
+				<< "uploading "
+				<< filepath << std::endl
+				<< "username = " << upload_username
+				<< ", password = " << upload_password
+				<< " - token = " << token << " ..."
+				<< std::endl;
+			std::string path = soundcloud_uploader->Upload (
+					filepath,
+					PBD::basename_nosuffix(filepath), // title
+					token,
+					upload_public,
+					this);
+
+			if (path.length() != 0) {
+				if (upload_open) {
+				std::cerr << "opening " << path << " ..." << std::endl;
+				open_uri(path.c_str());  // open the soundcloud website to the new file
+				}
+			} else {
+				error << _("upload to Soundcloud failed.  Perhaps your email or password are incorrect?\n") << endmsg;
+			}
+			delete soundcloud_uploader;
+		}
 		config_map.erase (config_map.begin());
 	}
 
 	start_timespan ();
 }
 
-/*** CD Marker sutff ***/
+/*** CD Marker stuff ***/
 
 struct LocationSortByStart {
     bool operator() (Location *a, Location *b) {

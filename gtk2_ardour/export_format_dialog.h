@@ -175,6 +175,10 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	Gtk::CheckButton silence_end_checkbox;
 	AudioClock       silence_end_clock;
 
+	/* Upload */
+	
+	Gtk::CheckButton upload_checkbox;
+
 	/* Format table */
 
 	struct CompatibilityCols : public Gtk::TreeModelColumnRecord
