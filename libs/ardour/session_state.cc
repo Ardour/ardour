@@ -556,7 +556,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 		}
 
 		if (!rl.empty()) {
-			add_routes (rl, false, false, false);
+			add_routes (rl, false, false, false, make_pair (EditorSort, 0));
 		}
 
                 /* this allows the user to override settings with an environment variable.
@@ -1371,7 +1371,7 @@ Session::load_routes (const XMLNode& node, int version)
 		new_routes.push_back (route);
 	}
 
-	add_routes (new_routes, false, false, false);
+	add_routes (new_routes, false, false, false, make_pair (EditorSort,0));
 
 	return 0;
 }

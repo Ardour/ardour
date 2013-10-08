@@ -313,7 +313,22 @@ Mixer_UI::hide_window (GdkEventAny *ev)
 void
 Mixer_UI::add_strips (RouteList& routes)
 {
+	bool from_scratch = track_model->children().size() == 0;
+
+	Gtk::TreeModel::Children children = track_model->children();
+	Gtk::TreeModel::Children::iterator iter = children.end();
+	for (Gtk::TreeModel::Children::iterator it = children.begin(); it != children.end(); ++it) {
+		TreeModel::Row row = *(it);
+		boost::shared_ptr<Route> wr = row[track_columns.route];
+
+		if (wr->order_key(MixerSort) == (routes.front()->order_key(MixerSort) + routes.size())) {
+			iter = it;
+			break;
+		}
+	}
+
 	MixerStrip* strip;
+	_selection.clear_routes ();
 
 	try {
 		no_track_list_redisplay = true;
@@ -321,7 +336,7 @@ Mixer_UI::add_strips (RouteList& routes)
 
 		for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 			boost::shared_ptr<Route> route = (*x);
-			
+
 			if (route->is_auditioner()) {
 				continue;
 			}
@@ -359,7 +374,11 @@ Mixer_UI::add_strips (RouteList& routes)
 			
 			show_strip (strip);
 			
-			TreeModel::Row row = *(track_model->append());
+			TreeModel::Row row = *(track_model->insert(iter));
+			if (!from_scratch) {
+				_selection.add (strip);
+			}
+
 			row[track_columns.text] = route->name();
 			row[track_columns.visible] = strip->route()->is_master() ? true : strip->marked_for_display();
 			row[track_columns.route] = route;
@@ -399,6 +418,7 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 	
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[track_columns.strip] == strip) {
+			strip_packer.remove (*strip);
 			track_model->erase (ri);
 			break;
 		}
@@ -1028,10 +1048,11 @@ Mixer_UI::redisplay_track_list ()
 			if (strip->packed()) {
 
 				if (strip->route()->is_master() || strip->route()->is_monitor()) {
-					out_packer.reorder_child (*strip, -1);
+					out_packer.reorder_child (*strip, -1); /* put at end */
 
 				} else {
-					strip_packer.reorder_child (*strip, -1); /* put at end */
+					strip_packer.reorder_child (*strip, strip->route()->order_key(MixerSort));
+					strip->show();
 				}
 
 			} else {
@@ -1040,6 +1061,7 @@ Mixer_UI::redisplay_track_list ()
 					out_packer.pack_start (*strip, false, false);
 				} else {
 					strip_packer.pack_start (*strip, false, false);
+					strip_packer.reorder_child (*strip, strip->route()->order_key(MixerSort));
 				}
 				strip->set_packed (true);
 			}
@@ -1052,8 +1074,7 @@ Mixer_UI::redisplay_track_list ()
 				/* do nothing, these cannot be hidden */
 			} else {
 				if (strip->packed()) {
-					strip_packer.remove (*strip);
-					strip->set_packed (false);
+					strip->hide ();
 				}
 			}
 		}

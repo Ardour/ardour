@@ -602,16 +602,37 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 {
 	TreeModel::Row row;
 	PBD::Unwinder<bool> at (_adding_routes, true);
+	Gtk::TreeModel::Children children = _model->children();
+	Gtk::TreeModel::Children::iterator iter = children.end();
+	bool from_scratch = (children.size() == 0);
 
 	suspend_redisplay ();
 
+	if(!from_scratch) {
+		_editor->selection->tracks.clear();
+	} 
+
 	_display.set_model (Glib::RefPtr<ListStore>());
+
+	for (Gtk::TreeModel::Children::iterator it = children.begin(); it != children.end(); ++it) {
+		row = *(it);
+		boost::shared_ptr<Route> wr = row[_columns.route];
+
+		if (wr->order_key(EditorSort) == (routes.front()->route()->order_key(EditorSort) + routes.size())) {
+			iter = it;
+			break;
+		}
+	}
 
 	for (list<RouteTimeAxisView*>::iterator x = routes.begin(); x != routes.end(); ++x) {
 
 		boost::shared_ptr<MidiTrack> midi_trk = boost::dynamic_pointer_cast<MidiTrack> ((*x)->route());
 
-		row = *(_model->append ());
+		row = *(_model->insert (iter));
+
+		if (!from_scratch) {
+			_editor->selection->add(*x);
+		}
 
 		row[_columns.text] = (*x)->route()->name();
 		row[_columns.visible] = (*x)->marked_for_display();
@@ -674,6 +695,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 	/* now update route order keys from the treeview/track display order */
 
 	sync_order_keys_from_treeview ();
+
 }
 
 void
@@ -872,7 +894,6 @@ EditorRoutes::sync_order_keys_from_treeview ()
 		return;
 	}
 
-	
 	DEBUG_TRACE (DEBUG::OrderKeys, "editor sync order keys from treeview\n");
 
 	TreeModel::Children::iterator ri;
@@ -931,7 +952,7 @@ EditorRoutes::sync_treeview_from_order_keys (RouteSortOrderKey src)
 	   we update out tree/list model and GUI to reflect the change.
 	*/
 
-	if (!_session || _session->deletion_in_progress()) {
+	if (_ignore_reorder || !_session || _session->deletion_in_progress()) {
 		return;
 	}
 

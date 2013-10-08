@@ -1576,7 +1576,7 @@ ARDOUR_UI::open_session ()
 
 void
 ARDOUR_UI::session_add_mixed_track (const ChanCount& input, const ChanCount& output, RouteGroup* route_group, 
-				    uint32_t how_many, const string& name_template, PluginInfoPtr instrument)
+				    uint32_t how_many, const string& name_template, PluginInfoPtr instrument, pair <RouteSortOrderKey,uint32_t> order_hint)
 {
 	list<boost::shared_ptr<MidiTrack> > tracks;
 
@@ -1586,7 +1586,7 @@ ARDOUR_UI::session_add_mixed_track (const ChanCount& input, const ChanCount& out
 	}
 
 	try {
-		tracks = _session->new_midi_track (input, output, instrument, ARDOUR::Normal, route_group, how_many, name_template);
+		tracks = _session->new_midi_track (input, output, instrument, ARDOUR::Normal, route_group, how_many, name_template, order_hint);
 		
 		if (tracks.size() != how_many) {
 			error << string_compose(P_("could not create %1 new mixed track", "could not create %1 new mixed tracks", how_many), how_many) << endmsg;
@@ -1605,13 +1605,13 @@ restart JACK with more ports."), PROGRAM_NAME));
 	
 
 void
-ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t how_many, const string& name_template, PluginInfoPtr instrument)
+ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t how_many, const string& name_template, PluginInfoPtr instrument, pair <RouteSortOrderKey,uint32_t> order_hint)
 {
 	ChanCount one_midi_channel;
 	one_midi_channel.set (DataType::MIDI, 1);
 
 	if (disk) {
-		session_add_mixed_track (one_midi_channel, one_midi_channel, route_group, how_many, name_template, instrument);
+		session_add_mixed_track (one_midi_channel, one_midi_channel, route_group, how_many, name_template, instrument, order_hint);
 	}
 }
 
@@ -1623,7 +1623,8 @@ ARDOUR_UI::session_add_audio_route (
 	ARDOUR::TrackMode mode,
 	RouteGroup* route_group,
 	uint32_t how_many,
-	string const & name_template
+	string const & name_template,
+	pair <RouteSortOrderKey,uint32_t> order_hint
 	)
 {
 	list<boost::shared_ptr<AudioTrack> > tracks;
@@ -1636,7 +1637,7 @@ ARDOUR_UI::session_add_audio_route (
 
 	try {
 		if (track) {
-			tracks = _session->new_audio_track (input_channels, output_channels, mode, route_group, how_many, name_template);
+			tracks = _session->new_audio_track (input_channels, output_channels, mode, route_group, how_many, name_template, order_hint);
 
 			if (tracks.size() != how_many) {
 				error << string_compose (P_("could not create %1 new audio track", "could not create %1 new audio tracks", how_many), how_many) 
@@ -1645,7 +1646,7 @@ ARDOUR_UI::session_add_audio_route (
 
 		} else {
 
-			routes = _session->new_audio_route (input_channels, output_channels, route_group, how_many, name_template);
+			routes = _session->new_audio_route (input_channels, output_channels, route_group, how_many, name_template, order_hint);
 
 			if (routes.size() != how_many) {
 				error << string_compose (P_("could not create %1 new audio bus", "could not create %1 new audio busses", how_many), how_many)
@@ -3179,6 +3180,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	}
 
 	if (float_window) {
+		add_route_dialog->unset_transient_for ();
 		add_route_dialog->set_transient_for (*float_window);
 	}
 
@@ -3198,6 +3200,38 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 		return;
 	}
 
+	std::pair <RouteSortOrderKey, uint32_t>  order_hint = make_pair (EditorSort, 0);
+	bool have_selection = false;
+
+	if (_mixer_on_top) {
+		order_hint.first = MixerSort;
+		for (RouteUISelection::iterator s = mixer->selection().routes.begin(); s != mixer->selection().routes.end(); ++s) {
+			RouteUI* rt = (*s);
+			have_selection = true;
+			if (rt->route()->order_key(MixerSort) > order_hint.second) {
+				order_hint.second = rt->route()->order_key(MixerSort);
+			}
+		}
+	} else {
+		order_hint.first = EditorSort;
+		for (TrackSelection::iterator s = editor->get_selection().tracks.begin(); s != editor->get_selection().tracks.end(); ++s) {
+			RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (*s);
+			have_selection = true;
+			if (tav->route()->order_key(EditorSort) > order_hint.second) {
+				order_hint.second = tav->route()->order_key(EditorSort);
+			}
+		}
+	}
+
+	/*
+	  we want the new routes to have their order key set starting from 
+	  one higher than the highest order key in the selection (if available).
+	*/
+
+	if (have_selection) {
+		order_hint.second++;
+	}
+
 	PBD::ScopedConnection idle_connection;
 
 	if (count > 8) {
@@ -3208,9 +3242,9 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 
 	if (!template_path.empty()) {
 		if (add_route_dialog->name_template_is_default())  {
-			_session->new_route_from_template (count, template_path, string());
+			_session->new_route_from_template (count, template_path, string(), order_hint);
 		} else {
-			_session->new_route_from_template (count, template_path, add_route_dialog->name_template());
+			_session->new_route_from_template (count, template_path, add_route_dialog->name_template(), order_hint);
 		}
 		return;
 	}
@@ -3233,16 +3267,16 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 
 	switch (add_route_dialog->type_wanted()) {
 	case AddRouteDialog::AudioTrack:
-		session_add_audio_track (input_chan.n_audio(), output_chan.n_audio(), add_route_dialog->mode(), route_group, count, name_template);
+		session_add_audio_track (input_chan.n_audio(), output_chan.n_audio(), add_route_dialog->mode(), route_group, count, name_template, order_hint);
 		break;
 	case AddRouteDialog::MidiTrack:
-		session_add_midi_track (route_group, count, name_template, instrument);
+		session_add_midi_track (route_group, count, name_template, instrument, order_hint);
 		break;
 	case AddRouteDialog::MixedTrack:
-		session_add_mixed_track (input_chan, output_chan, route_group, count, name_template, instrument);
+		session_add_mixed_track (input_chan, output_chan, route_group, count, name_template, instrument, order_hint);
 		break;
 	case AddRouteDialog::AudioBus:
-		session_add_audio_bus (input_chan.n_audio(), output_chan.n_audio(), route_group, count, name_template);
+		session_add_audio_bus (input_chan.n_audio(), output_chan.n_audio(), route_group, count, name_template, order_hint);
 		break;
 	}
 
