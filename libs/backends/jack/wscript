@@ -19,7 +19,7 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.123.0')
+    autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.121.0')
     autowaf.configure(conf)
 
 def build(bld):
