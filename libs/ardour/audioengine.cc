@@ -81,6 +81,7 @@ AudioEngine::AudioEngine ()
 	, _latency_flush_frames (0)
 	, _latency_signal_latency (0)
 	, _started_for_latency (false)
+	, _in_destructor (false)
 {
 	g_atomic_int_set (&m_meter_exit, 0);
 	discover_backends ();
@@ -88,15 +89,9 @@ AudioEngine::AudioEngine ()
 
 AudioEngine::~AudioEngine ()
 {
+	_in_destructor = true;
+	stop_metering_thread ();
 	drop_backend ();
-
-	config_connection.disconnect ();
-
-	{
-		Glib::Threads::Mutex::Lock tm (_process_lock);
-		session_removed.signal ();
-		stop_metering_thread ();
-	}
 }
 
 AudioEngine*
@@ -1000,6 +995,11 @@ AudioEngine::update_latencies ()
 void
 AudioEngine::halted_callback (const char* why)
 {
+	if (_in_destructor) {
+		/* everything is under control */
+		return;
+	}
+
         stop_metering_thread ();
 	_running = false;
 
