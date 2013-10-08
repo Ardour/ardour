@@ -180,7 +180,6 @@ libardour_sources = [
         'session_events.cc',
         'session_export.cc',
         'session_handle.cc',
-        'session_jack.cc',
         'session_ltc.cc',
         'session_metadata.cc',
         'session_midi.cc',

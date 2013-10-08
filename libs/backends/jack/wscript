@@ -28,7 +28,8 @@ def build(bld):
             'jack_connection.cc',
             'jack_audiobackend.cc',
             'jack_portengine.cc',
-            'jack_utils.cc'
+            'jack_utils.cc',
+            'jack_session.cc',
             ]
     obj.includes = ['.']
     obj.cxxflags = [ '-fPIC' ]

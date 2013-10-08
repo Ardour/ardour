@@ -37,6 +37,7 @@
 #include "jack_audiobackend.h"
 #include "jack_connection.h"
 #include "jack_utils.h"
+#include "jack_session.h"
 
 #include "i18n.h"
 
@@ -64,6 +65,7 @@ JACKAudioBackend::JACKAudioBackend (AudioEngine& e, boost::shared_ptr<JackConnec
 	, _target_systemic_output_latency (0)
 	, _current_sample_rate (0)
 	, _current_buffer_size (0)
+	, _session (0)
 {
 	_jack_connection->Connected.connect_same_thread (jack_connection_connection, boost::bind (&JACKAudioBackend::when_connected_to_jack, this));
 	_jack_connection->Disconnected.connect_same_thread (disconnect_connection, boost::bind (&JACKAudioBackend::disconnected, this, _1));
@@ -748,7 +750,8 @@ JACKAudioBackend::jack_timebase_callback (jack_transport_state_t state, pframes_
 	ARDOUR::Session* session = engine.session();
 
 	if (session) {
-		session->jack_timebase_callback (state, nframes, pos, new_position);
+		JACKSession jsession (session);
+		jsession.timebase_callback (state, nframes, pos, new_position);
 	}
 }
 
@@ -793,7 +796,6 @@ JACKAudioBackend::_xrun_callback (void *arg)
 	return 0;
 }
 
-#ifdef HAVE_JACK_SESSION
 void
 JACKAudioBackend::_session_callback (jack_session_event_t *event, void *arg)
 {
@@ -801,10 +803,10 @@ JACKAudioBackend::_session_callback (jack_session_event_t *event, void *arg)
 	ARDOUR::Session* session = jab->engine.session();
 
 	if (session) {
-		session->jack_session_event (event);
+		JACKSession jsession (session);
+		jsession.session_event (event);
 	}
 }
-#endif
 
 void
 JACKAudioBackend::_freewheel_callback (int onoff, void *arg)
