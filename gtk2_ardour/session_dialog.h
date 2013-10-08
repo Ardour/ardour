@@ -51,9 +51,11 @@ class SessionDialog : public ArdourDialog {
 		       const std::string& template_name, bool cancel_not_quit);
 	~SessionDialog ();
 
+        void clear_given ();
+
 	std::string session_name (bool& should_be_new);
 	std::string session_folder ();
-
+    
 	bool use_session_template();
 	std::string session_template_name();
 

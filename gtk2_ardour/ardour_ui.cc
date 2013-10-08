@@ -2596,11 +2596,14 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		} else {
 			session_path = "";
 			session_name = "";
+			session_dialog.clear_given ();
 		}
-
+		
 		if (should_be_new || session_name.empty()) {
 			/* need the dialog to get info from user */
-			
+
+			cerr << "run dialog\n";
+
 			switch (session_dialog.run()) {
 			case RESPONSE_ACCEPT:
 				break;
@@ -2643,8 +2646,6 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			_session_is_new = true;
 		}
 		
-		cerr << "SN " << session_name << " SP " << session_path << endl;
-
 		if (session_name[0] == G_DIR_SEPARATOR ||
 		    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == G_DIR_SEPARATOR) ||
 		    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == G_DIR_SEPARATOR)) {
@@ -2699,10 +2700,11 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			}
 
 			char illegal = Session::session_name_is_legal(session_name);
+
 			if (illegal) {
 				pop_back_splash (session_dialog);
 				MessageDialog msg (session_dialog, string_compose(_("To ensure compatibility with various systems\n"
-				                     "session names may not contain a '%1' character"), illegal));
+										    "session names may not contain a '%1' character"), illegal));
 				msg.run ();
 				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
 				continue;
@@ -2717,8 +2719,6 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 		} else {
 
-			cerr << "Loading session with path = " << session_path << " name = "  << session_name << " template " << template_name << endl;
-
 			ret = load_session (session_path, session_name, template_name);
 
 			if (ret == -2) {
@@ -2730,6 +2730,12 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 				_session->save_state (ARDOUR_COMMAND_LINE::immediate_save, false);
 				exit (1);
 			}
+
+			/* clear this to avoid endless attempts to load the
+			   same session.
+			*/
+
+			ARDOUR_COMMAND_LINE::session_name = "";
 		}
 	}
 
