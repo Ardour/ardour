@@ -222,12 +222,16 @@ SessionDialog::session_folder ()
 	TreeIter iter = recent_session_display.get_selection()->get_selected();
 	
 	if (iter) {
-		return (*iter)[recent_session_columns.fullpath];
+		string s = (*iter)[recent_session_columns.fullpath];
+		if (Glib::file_test (s, Glib::FILE_TEST_IS_REGULAR)) {
+			return Glib::path_get_dirname (s);
+		}
+		return s;
 	}
 
 	if (_existing_session_chooser_used) {
 		/* existing session chosen from file chooser */
-		return existing_session_chooser.get_current_folder ();
+		return Glib::path_get_dirname (existing_session_chooser.get_current_folder ());
 	} else {
 		std::string legal_session_folder_name = legalize_for_path (new_name_entry.get_text());
 		return Glib::build_filename (new_folder_chooser.get_current_folder(), legal_session_folder_name);
