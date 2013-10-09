@@ -27,15 +27,13 @@ class JackConnection {
     void halted_callback ();
     void halted_info_callback (jack_status_t, const char*);
 
-    bool in_control() const { return _in_control; }
+    static bool in_control() { return _in_control; }
 
-    static bool server_running();
-    
   private:
     jack_client_t* volatile _jack;
     std::string _client_name;
     std::string session_uuid;
-    bool _in_control;
+    static bool _in_control;
 };
 
 } // namespace 

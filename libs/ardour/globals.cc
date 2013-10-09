@@ -366,9 +366,15 @@ ARDOUR::init_post_engine ()
 	ARDOUR::PluginManager::instance().refresh ();
 }
 
-int
-ARDOUR::cleanup ()
+void
+ARDOUR::cleanup () 
 {
+	if (!libardour_initialized) {
+		return;
+	}
+
+	ARDOUR::AudioEngine::destroy ();
+
 	delete Library;
 #ifdef HAVE_LRDF
 	lrdf_cleanup ();
@@ -382,7 +388,8 @@ ARDOUR::cleanup ()
 	vstfx_exit();
 #endif
 	PBD::cleanup ();
-	return 0;
+
+	return;
 }
 
 void
@@ -544,7 +551,11 @@ ARDOUR::get_available_sync_options ()
 {
 	vector<SyncSource> ret;
 
-	ret.push_back (JACK);
+	boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
+	if (backend && backend->name() == "JACK") {
+		ret.push_back (Engine);
+	}
+
 	ret.push_back (MTC);
 	ret.push_back (MIDIClock);
 	ret.push_back (LTC);

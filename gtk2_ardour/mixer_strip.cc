@@ -698,7 +698,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 {
 	using namespace Menu_Helpers;
 	if (!_session->engine().connected()) {
-		MessageDialog msg (_("Not connected to JACK - no I/O changes are possible"));
+		MessageDialog msg (_("Not connected to audio engine - no I/O changes are possible"));
 		msg.run ();
 		return true;
 	}
@@ -826,7 +826,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 	citems.clear();
 
 	if (!_session->engine().connected()) {
-		MessageDialog msg (_("Not connected to JACK - no I/O changes are possible"));
+		MessageDialog msg (_("Not connected to audio engine - no I/O changes are possible"));
 		msg.run ();
 		return true;
 	}

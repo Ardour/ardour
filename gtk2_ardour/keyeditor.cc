@@ -250,8 +250,6 @@ KeyEditor::populate ()
 		//kinda kludgy way to avoid displaying menu items as mappable
 		if ( parts[1] == _("Main_menu") )
 			continue;
-		if ( parts[1] == _("JACK") )
-			continue;
 		if ( parts[1] == _("redirectmenu") )
 			continue;
 		if ( parts[1] == _("Editor_menus") )

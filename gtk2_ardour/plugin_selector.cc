@@ -537,13 +537,13 @@ struct PluginMenuCompareByCreator {
     bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
 	    int cmp;
 
-	    cmp = strcasecmp (a->creator.c_str(), b->creator.c_str());
+	    cmp = g_strcasecmp (a->creator.c_str(), b->creator.c_str());
 
 	    if (cmp < 0) {
 		    return true;
 	    } else if (cmp == 0) {
 		    /* same creator ... compare names */
-		    if (strcasecmp (a->name.c_str(), b->name.c_str()) < 0) {
+		    if (g_strcasecmp (a->name.c_str(), b->name.c_str()) < 0) {
 			    return true;
 		    }
 	    }
@@ -555,7 +555,7 @@ struct PluginMenuCompareByName {
     bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
 	    int cmp;
 
-	    cmp = strcasecmp (a->name.c_str(), b->name.c_str());
+	    cmp = g_strcasecmp (a->name.c_str(), b->name.c_str());
 
 	    if (cmp < 0) {
 		    return true;
@@ -573,13 +573,13 @@ struct PluginMenuCompareByCategory {
     bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
 	    int cmp;
 
-	    cmp = strcasecmp (a->category.c_str(), b->category.c_str());
+	    cmp = g_strcasecmp (a->category.c_str(), b->category.c_str());
 
 	    if (cmp < 0) {
 		    return true;
 	    } else if (cmp == 0) {
 		    /* same category ... compare names */
-		    if (strcasecmp (a->name.c_str(), b->name.c_str()) < 0) {
+		    if (g_strcasecmp (a->name.c_str(), b->name.c_str()) < 0) {
 			    return true;
 		    }
 	    }

@@ -37,6 +37,7 @@
 #include "jack_audiobackend.h"
 #include "jack_connection.h"
 #include "jack_utils.h"
+#include "jack_session.h"
 
 #include "i18n.h"
 
@@ -44,6 +45,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using std::string;
 using std::vector;
+
 
 #define GET_PRIVATE_JACK_POINTER(localvar)  jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return; }
 #define GET_PRIVATE_JACK_POINTER_RET(localvar,r) jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return r; }
@@ -63,6 +65,7 @@ JACKAudioBackend::JACKAudioBackend (AudioEngine& e, boost::shared_ptr<JackConnec
 	, _target_systemic_output_latency (0)
 	, _current_sample_rate (0)
 	, _current_buffer_size (0)
+	, _session (0)
 {
 	_jack_connection->Connected.connect_same_thread (jack_connection_connection, boost::bind (&JACKAudioBackend::when_connected_to_jack, this));
 	_jack_connection->Disconnected.connect_same_thread (disconnect_connection, boost::bind (&JACKAudioBackend::disconnected, this, _1));
@@ -513,7 +516,10 @@ JACKAudioBackend::start ()
 {
 	if (!available()) {
 
-		if (!_jack_connection->server_running()) {
+		if (_jack_connection->in_control()) {
+			/* we will be starting JACK, so set up the 
+			   command that JACK will use when it (auto-)starts
+			*/
 			setup_jack_startup_command ();
 		}
 
@@ -744,7 +750,8 @@ JACKAudioBackend::jack_timebase_callback (jack_transport_state_t state, pframes_
 	ARDOUR::Session* session = engine.session();
 
 	if (session) {
-		session->jack_timebase_callback (state, nframes, pos, new_position);
+		JACKSession jsession (session);
+		jsession.timebase_callback (state, nframes, pos, new_position);
 	}
 }
 
@@ -789,7 +796,6 @@ JACKAudioBackend::_xrun_callback (void *arg)
 	return 0;
 }
 
-#ifdef HAVE_JACK_SESSION
 void
 JACKAudioBackend::_session_callback (jack_session_event_t *event, void *arg)
 {
@@ -797,10 +803,10 @@ JACKAudioBackend::_session_callback (jack_session_event_t *event, void *arg)
 	ARDOUR::Session* session = jab->engine.session();
 
 	if (session) {
-		session->jack_session_event (event);
+		JACKSession jsession (session);
+		jsession.session_event (event);
 	}
 }
-#endif
 
 void
 JACKAudioBackend::_freewheel_callback (int onoff, void *arg)
@@ -822,25 +828,72 @@ JACKAudioBackend::_latency_callback (jack_latency_callback_mode_t mode, void* ar
 }
 
 int
-JACKAudioBackend::create_process_thread (boost::function<void()> f, pthread_t* thread, size_t stacksize)
+JACKAudioBackend::create_process_thread (boost::function<void()> f)
 {
         GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
-        ThreadData* td = new ThreadData (this, f, stacksize);
 
-        if (jack_client_create_thread (_priv_jack, thread, jack_client_real_time_priority (_priv_jack),
+	jack_native_thread_t thread_id;
+        ThreadData* td = new ThreadData (this, f, thread_stack_size());
+
+        if (jack_client_create_thread (_priv_jack, &thread_id, jack_client_real_time_priority (_priv_jack),
                                        jack_is_realtime (_priv_jack), _start_process_thread, td)) {
                 return -1;
         }
 
-        return 0;
+	_jack_threads.push_back(thread_id);
+	return 0;
 }
 
 int
-JACKAudioBackend::wait_for_process_thread_exit (AudioBackendNativeThread thr)
+JACKAudioBackend::join_process_threads ()
 {
-	void* status;
-	/* this doesn't actively try to stop the thread, it just waits till it exits */
-	return pthread_join (thr, &status);
+        GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
+
+	int ret = 0;
+
+	for (std::vector<jack_native_thread_t>::const_iterator i = _jack_threads.begin ();
+	     i != _jack_threads.end(); i++) {
+
+#if defined(USING_JACK2_EXPANSION_OF_JACK_API) || defined(PLATFORM_WINDOWS)
+		if (jack_client_stop_thread (_priv_jack, *i) != 0) {
+#else
+		void* status;
+		if (pthread_join (*i, &status) != 0) {
+#endif
+			error << "AudioEngine: cannot stop process thread" << endmsg;
+			ret += -1;
+		}
+	}
+
+	_jack_threads.clear();
+
+	return ret;
+}
+
+bool
+JACKAudioBackend::in_process_thread ()
+{
+	for (std::vector<jack_native_thread_t>::const_iterator i = _jack_threads.begin ();
+	     i != _jack_threads.end(); i++) {
+
+#ifdef COMPILER_MINGW
+		if (*i == GetCurrentThread()) {
+			return true;
+		}
+#else // pthreads
+		if (pthread_equal (*i, pthread_self()) != 0) {
+			return true;
+		}
+#endif
+	}
+
+	return false;
+}
+
+uint32_t
+JACKAudioBackend::process_thread_count ()
+{
+	return _jack_threads.size();
 }
 
 void*
@@ -960,6 +1013,7 @@ JACKAudioBackend::disconnected (const char* why)
 		engine.halted_callback (why); /* EMIT SIGNAL */
         }
 }
+
 float 
 JACKAudioBackend::cpu_load() const 
 {

@@ -194,6 +194,7 @@ ProxyBase::ProxyBase (const string& name, const std::string& menu_name, const XM
 ProxyBase::~ProxyBase ()
 {
 	delete vistracker;
+	delete _window;
 }
 
 void

@@ -156,8 +156,7 @@ class UI : public AbstractUI<UIRequest>
 	   stopping just after we return from it (at the top level)
 	*/
 
-	sigc::signal<void> starting;
-	sigc::signal<void> stopping;
+        virtual int starting() = 0;
 
 	sigc::signal<void> theme_changed;
 

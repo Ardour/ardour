@@ -70,6 +70,7 @@ libardour_sources = [
         'diskstream.cc',
         'element_import_handler.cc',
         'element_importer.cc',
+        'engine_slave.cc',
         'enums.cc',
         'event_type_map.cc',
         'export_channel.cc',
@@ -104,7 +105,6 @@ libardour_sources = [
         'interpolation.cc',
         'io.cc',
         'io_processor.cc',
-        'jack_slave.cc',
         'kmeterdsp.cc',
         'ladspa_plugin.cc',
         'ladspa_search_path.cc',
@@ -182,7 +182,6 @@ libardour_sources = [
         'session_events.cc',
         'session_export.cc',
         'session_handle.cc',
-        'session_jack.cc',
         'session_ltc.cc',
         'session_metadata.cc',
         'session_midi.cc',
@@ -246,8 +245,6 @@ def configure(conf):
         path_prefix + 'version.cc',
         'libardour3', conf.env['MAJOR'], conf.env['MINOR'], 0)
     autowaf.configure(conf)
-    autowaf.check_pkg(conf, 'jack', uselib_store='JACK',
-                      atleast_version='0.118.2')
     if Options.options.dist_target == 'auto':
         if re.search ("linux", sys.platform) != None:
             autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
@@ -304,9 +301,6 @@ def configure(conf):
     conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H',mandatory=False)
     conf.check(header_name='sys/statvfs.h', define_name='HAVE_SYS_STATVFS_H',mandatory=False)
 
-    conf.check(header_name='jack/session.h', uselib = [ 'JACK' ],
-               define_name='HAVE_JACK_SESSION')
-
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD',mandatory=False)
 
     if flac_supported():
@@ -343,11 +337,11 @@ def build(bld):
     obj.name         = 'ardour'
     obj.target       = 'ardour'
     obj.uselib       = ['GLIBMM','GTHREAD','AUBIO','SIGCPP','XML','UUID',
-                        'JACK', 'ALSA', 'SNDFILE','SAMPLERATE','LRDF',
-                        'AUDIOUNITS', 'OSX','BOOST','CURL','DL']
+                        'SNDFILE','SAMPLERATE','LRDF','AUDIOUNITS',
+                        'OSX','BOOST','CURL','DL']
     obj.use          = ['libpbd','libmidipp','libevoral','libvamphost',
                         'libvampplugin','libtaglib','librubberband',
-                        'libaudiographer','libltc']
+                        'libaudiographer','libltc','libtimecode']
     obj.vnum         = LIBARDOUR_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
     obj.defines      = [
@@ -410,7 +404,7 @@ def build(bld):
         testcommon.includes     = obj.includes + ['test', '../pbd', '..']
         testcommon.source       = ['test/test_globals.cc', 'test/testrunner.cc', 'test/test_needing_session.cc',
                                    'test/test_common.cc', 'test/dummy_lxvst.cc', 'test/audio_region_test.cc', 'test/test_util.cc']
-        testcommon.uselib       = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
+        testcommon.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                                    'SAMPLERATE','XML','LRDF','COREAUDIO']
         testcommon.use          = ['libpbd','libmidipp','libevoral','libvamphost',
                                    'libvampplugin','libtaglib','librubberband',
@@ -488,7 +482,7 @@ def build(bld):
 
         session_load_tester.includes  = obj.includes
         session_load_tester.includes.append ('test')
-        session_load_tester.uselib    = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
+        session_load_tester.uselib    = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                              'SAMPLERATE','XML','LRDF','COREAUDIO']
         session_load_tester.use       = ['libpbd','libmidipp','ardour']
         session_load_tester.name      = 'libardour-session-load-tester'
@@ -523,7 +517,7 @@ def build(bld):
 
             profilingobj.includes  = obj.includes
             profilingobj.includes.append ('test')
-            profilingobj.uselib    = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
+            profilingobj.uselib    = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                              'SAMPLERATE','XML','LRDF','COREAUDIO']
             profilingobj.use       = ['libpbd','libmidipp','ardour']
             profilingobj.name      = 'libardour-profiling'
@@ -550,7 +544,7 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     testobj              = bld(features = 'cxx cxxprogram')
     testobj.includes     = includes + ['test', '../pbd', '..']
     testobj.source       = sources
-    testobj.uselib       = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
+    testobj.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                             'SAMPLERATE','XML','LRDF','COREAUDIO']
     testobj.use          = ['libpbd','libmidipp','libevoral','libvamphost',
                             'libvampplugin','libtaglib','librubberband',

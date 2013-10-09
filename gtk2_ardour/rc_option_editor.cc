@@ -1146,7 +1146,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	tsf = new BoolOption (
 		     "seamless-loop",
-		     _("Do seamless looping (not possible when slaved to MTC, JACK etc)"),
+		     _("Do seamless looping (not possible when slaved to MTC, LTC etc)"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_seamless_loop),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_seamless_loop)
 		     );
@@ -1464,12 +1464,10 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_monitoring_model)
 		);
 
-#ifndef __APPLE__
-        /* no JACK monitoring on CoreAudio */
         if (AudioEngine::instance()->port_engine().can_monitor_input()) {
                 mm->add (HardwareMonitoring, _("via Audio Driver"));
         }
-#endif
+
 	mm->add (SoftwareMonitoring, _("ardour"));
 	mm->add (ExternalMonitoring, _("audio hardware"));
 
