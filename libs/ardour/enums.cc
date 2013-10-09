@@ -95,7 +95,7 @@ setup_enum_writer ()
 	AutoState _AutoState;
 	AutoStyle _AutoStyle;
 	AutoConnectOption _AutoConnectOption;
-	RouteSortOrderKey _RouteSortOrderKey;
+	//RouteSortOrderKey _RouteSortOrderKey;
 	Session::StateOfTheState _Session_StateOfTheState;
 	Route::Flag _Route_Flag;
 	Source::Flag _Source_Flag;
@@ -433,11 +433,11 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Route, MasterOut);
 	REGISTER_CLASS_ENUM (Route, MonitorOut);
 	REGISTER_BITS (_Route_Flag);
-
+/*
 	REGISTER_ENUM (MixerSort);
 	REGISTER_ENUM (EditorSort);
 	REGISTER (_RouteSortOrderKey);
-
+*/
 	REGISTER_CLASS_ENUM (Source, Writable);
 	REGISTER_CLASS_ENUM (Source, CanRename);
 	REGISTER_CLASS_ENUM (Source, Broadcast);

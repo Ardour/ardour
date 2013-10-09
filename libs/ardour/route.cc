@@ -69,7 +69,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal1<void,RouteSortOrderKey> Route::SyncOrderKeys;
+PBD::Signal0<void> Route::SyncOrderKeys;
 PBD::Signal0<void> Route::RemoteControlIDChange;
 
 Route::Route (Session& sess, string name, Flag flg, DataType default_type)
@@ -96,6 +96,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _have_internal_generator (false)
 	, _solo_safe (false)
 	, _default_type (default_type)
+	, _has_order_key (false)
 	, _remote_control_id (0)
 	, _in_configure_processors (false)
 	, _initial_io_setup (false)
@@ -267,29 +268,23 @@ Route::remote_control_id() const
 }
 
 bool
-Route::has_order_key (RouteSortOrderKey key) const
+Route::has_order_key () const
 {
-	return (order_keys.find (key) != order_keys.end());
+	return _has_order_key;
 }
 
 uint32_t
-Route::order_key (RouteSortOrderKey key) const
+Route::order_key () const
 {
-	OrderKeys::const_iterator i = order_keys.find (key);
-
-	if (i == order_keys.end()) {
-		return 0;
-	}
-
-	return i->second;
+	return _order_key;
 }
-
+/*
 void
 Route::sync_order_keys (RouteSortOrderKey base)
 {
-	/* this is called after changes to 1 or more route order keys have been
+	/ this is called after changes to 1 or more route order keys have been
 	 * made, and we want to sync up.
-	 */
+	 /
 
 	OrderKeys::iterator i = order_keys.find (base);
 
@@ -309,9 +304,9 @@ Route::sync_order_keys (RouteSortOrderKey base)
 		}
 	}
 }
-
+*/
 void
-Route::set_remote_control_id_from_order_key (RouteSortOrderKey /*key*/, uint32_t rid)
+Route::set_remote_control_id_from_order_key (uint32_t rid)
 {
 	if (is_master() || is_monitor() || is_auditioner()) {
 		/* hard-coded remote IDs, or no remote ID */
@@ -335,18 +330,18 @@ Route::set_remote_control_id_from_order_key (RouteSortOrderKey /*key*/, uint32_t
 }
 
 void
-Route::set_order_key (RouteSortOrderKey key, uint32_t n)
+Route::set_order_key (uint32_t n)
 {
-	OrderKeys::iterator i = order_keys.find (key);
+	_has_order_key = true;
 
-	if (i != order_keys.end() && i->second == n) {
+	if (_order_key == n) {
 		return;
 	}
 
-	order_keys[key] = n;
+	_order_key = n;
 
-	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1 order key %2 set to %3\n",
-						       name(), enum_2_string (key), order_key (key)));
+	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1 order key set to %2\n",
+						       name(), order_key ()));
 
 	_session.set_dirty ();
 }
@@ -1905,6 +1900,9 @@ Route::state(bool full_state)
 		node->add_property("route-group", _route_group->name());
 	}
 
+	snprintf (buf, sizeof (buf), "%d", _order_key);
+	node->add_property ("order-key", buf);
+/*
 	string order_string;
 	OrderKeys::iterator x = order_keys.begin();
 
@@ -1923,6 +1921,7 @@ Route::state(bool full_state)
 		order_string += ':';
 	}
 	node->add_property ("order-keys", order_string);
+*/
 	node->add_property ("self-solo", (_self_solo ? "yes" : "no"));
 	snprintf (buf, sizeof (buf), "%d", _soloed_by_others_upstream);
 	node->add_property ("soloed-by-upstream", buf);
@@ -2123,7 +2122,11 @@ Route::set_state (const XMLNode& node, int version)
 		set_active (yn, this);
 	}
 
-	if ((prop = node.property (X_("order-keys"))) != 0) {
+	if ((prop = node.property (X_("order-key"))) != 0) { // New order key (no separate mixer/editor ordering)
+		set_order_key (atoi(prop->value()));
+	}
+
+	if ((prop = node.property (X_("order-keys"))) != 0) { // Deprecated order keys
 
 		int32_t n;
 
@@ -2141,17 +2144,23 @@ Route::set_state (const XMLNode& node, int version)
 					      << endmsg;
 				} else {
 					string keyname = remaining.substr (0, equal);
-					RouteSortOrderKey sk;
+					string sk;
+					char buf[32];
 
 					if (keyname == "signal") {
-						sk = MixerSort;
+						snprintf (buf, sizeof(buf), "MixerSort");
+						sk = buf;
 					} else if (keyname == "editor") {
-						sk = EditorSort;
+						snprintf (buf, sizeof(buf), "EditorSort");
+						sk = buf;
 					} else {
-						sk = (RouteSortOrderKey) string_2_enum (remaining.substr (0, equal), sk);
+						sk = remaining.substr (0, equal);
 					}
 
-					set_order_key (sk, n);
+					if (sk == "EditorSort") { // convert to new order-key property
+						info << string_compose(_("Converting deprecated order key for %1"), name ()) << endmsg;
+						set_order_key (n);
+					}
 				}
 			}
 
@@ -2333,7 +2342,7 @@ Route::set_state_2X (const XMLNode& node, int version)
 	/* do not carry over edit/mix groups from 2.X because (a) its hard (b) they
 	   don't mean the same thing.
 	*/
-
+/*
 	if ((prop = node.property (X_("order-keys"))) != 0) {
 
 		int32_t n;
@@ -2362,7 +2371,9 @@ Route::set_state_2X (const XMLNode& node, int version)
 						sk = (RouteSortOrderKey) string_2_enum (remaining.substr (0, equal), sk);
 					}
 
-					set_order_key (sk, n);
+					if (sk == EditorSort) {
+						set_order_key (n);
+					}
 				}
 			}
 
@@ -2375,7 +2386,7 @@ Route::set_state_2X (const XMLNode& node, int version)
 			}
 		}
 	}
-
+*/
 	/* IOs */
 
 	nlist = node.children ();
