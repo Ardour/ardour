@@ -239,7 +239,26 @@ class AudioBackend : public PortEngine {
      * app is undefined or cannot be launched.
      */
     virtual void launch_control_app () = 0;
-    /* Basic state control */
+
+    /* @return a vector of strings that describe the available
+     * MIDI options. 
+     *
+     * These can be presented to the user to decide which
+     * MIDI drivers, options etc. can be used. The returned strings
+     * should be thought of as the key to a map of possible
+     * approaches to handling MIDI within the backend. Ensure that
+     * the strings will make sense to the user.
+     */
+    virtual std::vector<std::string> enumerate_midi_options () const = 0;
+
+    /* Request the use of the MIDI option named @param option, which
+     * should be one of the strings returned by enumerate_midi_options()
+     *
+     * @return zero if successful, non-zero otherwise
+     */
+    virtual int set_midi_option (const std::string& option) = 0;
+    
+    /* State Control */
 
     /** Start using the device named in the most recent call
      * to set_device(), with the parameters set by various
