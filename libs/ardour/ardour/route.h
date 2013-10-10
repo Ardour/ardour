@@ -101,9 +101,10 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	bool set_name (const std::string& str);
 	static void set_name_in_state (XMLNode &, const std::string &);
 
-        uint32_t order_key () const;
-        bool has_order_key () const;
-	void set_order_key (uint32_t);
+        uint32_t order_key (RouteSortOrderKey) const;
+        bool has_order_key (RouteSortOrderKey) const;
+	void set_order_key (RouteSortOrderKey, uint32_t);
+        void sync_order_keys (RouteSortOrderKey);
 
 	bool is_auditioner() const { return _flags & Auditioner; }
 	bool is_master() const { return _flags & MasterOut; }
@@ -425,7 +426,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 
 	void     set_remote_control_id (uint32_t id, bool notify_class_listeners = true);
 	uint32_t remote_control_id () const;
-        void     set_remote_control_id_from_order_key (uint32_t order_key);
+        void     set_remote_control_id_from_order_key (RouteSortOrderKey, uint32_t order_key);
 
 	/* for things concerned about *this* route's RID */
 
@@ -434,7 +435,7 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	/* for things concerned about *any* route's RID changes */
 
 	static PBD::Signal0<void> RemoteControlIDChange;
-	static PBD::Signal0<void> SyncOrderKeys;
+	static PBD::Signal1<void,RouteSortOrderKey> SyncOrderKeys;
 
 	bool has_external_redirects() const;
 
@@ -545,8 +546,8 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	int set_state_2X (const XMLNode&, int);
 	void set_processor_state_2X (XMLNodeList const &, int);
 
- 	uint32_t _order_key;
-	bool _has_order_key;
+	typedef std::map<RouteSortOrderKey,uint32_t> OrderKeys;
+ 	OrderKeys order_keys;
         uint32_t _remote_control_id;
 
 	void input_change_handler (IOChange, void *src);

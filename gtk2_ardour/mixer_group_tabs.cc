@@ -170,6 +170,12 @@ MixerGroupTabs::default_properties () const
 	return plist;
 }
 
+RouteSortOrderKey
+MixerGroupTabs::order_key () const
+{
+	return MixerSort;
+}
+
 RouteList
 MixerGroupTabs::selected_routes () const
 {

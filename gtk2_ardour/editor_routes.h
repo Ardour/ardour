@@ -72,7 +72,7 @@ private:
 	void on_tv_solo_safe_toggled (std::string const &);
 	void build_menu ();
 	void show_menu ();
-        void sync_treeview_from_order_keys ();
+        void sync_treeview_from_order_keys (ARDOUR::RouteSortOrderKey);
 	void route_deleted (Gtk::TreeModel::Path const &);
 	void visible_changed (std::string const &);
 	void active_changed (std::string const &);

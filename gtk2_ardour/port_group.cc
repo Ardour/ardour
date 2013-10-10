@@ -315,7 +315,7 @@ struct RouteIOs {
 class RouteIOsComparator {
 public:
 	bool operator() (RouteIOs const & a, RouteIOs const & b) {
-		return a.route->order_key () < b.route->order_key ();
+		return a.route->order_key (EditorSort) < b.route->order_key (EditorSort);
 	}
 };
 

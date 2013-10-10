@@ -92,6 +92,7 @@ private:
 
 	virtual void add_menu_items (Gtk::Menu *, ARDOUR::RouteGroup *) {}
 	virtual PBD::PropertyList default_properties () const = 0;
+        virtual ARDOUR::RouteSortOrderKey order_key () const = 0;
 	virtual ARDOUR::RouteList selected_routes () const = 0;
 	virtual void sync_order_keys () = 0;
 

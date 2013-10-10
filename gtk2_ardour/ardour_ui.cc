@@ -1576,7 +1576,7 @@ ARDOUR_UI::open_session ()
 
 void
 ARDOUR_UI::session_add_mixed_track (const ChanCount& input, const ChanCount& output, RouteGroup* route_group, 
-				    uint32_t how_many, const string& name_template, PluginInfoPtr instrument, uint32_t order_hint)
+				    uint32_t how_many, const string& name_template, PluginInfoPtr instrument, pair <RouteSortOrderKey,uint32_t> order_hint)
 {
 	list<boost::shared_ptr<MidiTrack> > tracks;
 
@@ -1605,7 +1605,7 @@ restart JACK with more ports."), PROGRAM_NAME));
 	
 
 void
-ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t how_many, const string& name_template, PluginInfoPtr instrument, uint32_t order_hint)
+ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t how_many, const string& name_template, PluginInfoPtr instrument, pair <RouteSortOrderKey,uint32_t> order_hint)
 {
 	ChanCount one_midi_channel;
 	one_midi_channel.set (DataType::MIDI, 1);
@@ -1624,7 +1624,7 @@ ARDOUR_UI::session_add_audio_route (
 	RouteGroup* route_group,
 	uint32_t how_many,
 	string const & name_template,
-	uint32_t order_hint
+	pair <RouteSortOrderKey,uint32_t> order_hint
 	)
 {
 	list<boost::shared_ptr<AudioTrack> > tracks;
@@ -3200,23 +3200,25 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 		return;
 	}
 
-	uint32_t order_hint = 0;
+	std::pair <RouteSortOrderKey, uint32_t>  order_hint = make_pair (EditorSort, 0);
 	bool have_selection = false;
 
 	if (_mixer_on_top) {
+		order_hint.first = MixerSort;
 		for (RouteUISelection::iterator s = mixer->selection().routes.begin(); s != mixer->selection().routes.end(); ++s) {
 			RouteUI* rt = (*s);
 			have_selection = true;
-			if (rt->route()->order_key() > order_hint) {
-				order_hint = rt->route()->order_key();
+			if (rt->route()->order_key(MixerSort) > order_hint.second) {
+				order_hint.second = rt->route()->order_key(MixerSort);
 			}
 		}
 	} else {
+		order_hint.first = EditorSort;
 		for (TrackSelection::iterator s = editor->get_selection().tracks.begin(); s != editor->get_selection().tracks.end(); ++s) {
 			RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (*s);
 			have_selection = true;
-			if (tav->route()->order_key() > order_hint) {
-				order_hint = tav->route()->order_key();
+			if (tav->route()->order_key(EditorSort) > order_hint.second) {
+				order_hint.second = tav->route()->order_key(EditorSort);
 			}
 		}
 	}
@@ -3227,7 +3229,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	*/
 
 	if (have_selection) {
-		order_hint++;
+		order_hint.second++;
 	}
 
 	PBD::ScopedConnection idle_connection;

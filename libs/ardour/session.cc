@@ -852,7 +852,7 @@ Session::add_monitor_section ()
 	}
 
 	rl.push_back (r);
-	add_routes (rl, false, false, false, 0);
+	add_routes (rl, false, false, false, make_pair (EditorSort, 0));
 	
 	assert (_monitor_out);
 
@@ -1690,7 +1690,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 		DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 signal order %2\n",
-								   (*i)->name(), (*i)->order_key ()));
+								   (*i)->name(), (*i)->order_key (MixerSort)));
 		}
 #endif
 
@@ -1770,7 +1770,7 @@ Session::count_existing_track_channels (ChanCount& in, ChanCount& out)
  */
 list<boost::shared_ptr<MidiTrack> >
 Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost::shared_ptr<PluginInfo> instrument, 
-			 TrackMode mode, RouteGroup* route_group, uint32_t how_many, string name_template, uint32_t order_hint)
+			 TrackMode mode, RouteGroup* route_group, uint32_t how_many, string name_template, pair <RouteSortOrderKey, uint32_t> order_hint)
 {
 	char track_name[32];
 	uint32_t track_id = 0;
@@ -2005,7 +2005,7 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing
  */
 list< boost::shared_ptr<AudioTrack> >
 Session::new_audio_track (int input_channels, int output_channels, TrackMode mode, RouteGroup* route_group, 
-			  uint32_t how_many, string name_template, uint32_t order_hint)
+			  uint32_t how_many, string name_template, pair <RouteSortOrderKey, uint32_t> order_hint)
 {
 	char track_name[32];
 	uint32_t track_id = 0;
@@ -2096,7 +2096,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
  *  @param name_template string to use for the start of the name, or "" to use "Bus".
  */
 RouteList
-Session::new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, string name_template, uint32_t order_hint)
+Session::new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, string name_template, pair <RouteSortOrderKey, uint32_t> order_hint)
 {
 	char bus_name[32];
 	uint32_t bus_id = 0;
@@ -2179,7 +2179,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 }
 
 RouteList
-Session::new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name_base, uint32_t order_hint)
+Session::new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name_base, pair<RouteSortOrderKey, uint32_t> order_hint)
 {
 	RouteList ret;
 	uint32_t control_id;
@@ -2295,7 +2295,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 }
 
 void
-Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect, bool save, uint32_t order_hint)
+Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect, bool save, pair <RouteSortOrderKey, uint32_t> order_hint)
 {
 	try {
 		PBD::Unwinder<bool> aip (_adding_routes_in_progress, true);
@@ -2320,18 +2320,26 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 }
 
 void
-Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect, uint32_t order_hint)
+Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect, pair <RouteSortOrderKey, uint32_t> order_hint)
 {
         ChanCount existing_inputs;
         ChanCount existing_outputs;
-	bool insert_at_end = (order_hint == 0);
+	bool insert_at_end = (order_hint.second == 0);
+	pair <RouteSortOrderKey, uint32_t> other_order_hint = make_pair (EditorSort, 0);
 	uint32_t order;
+
+	if (order_hint.first == EditorSort) {
+		other_order_hint.first = MixerSort;
+	} else {
+		other_order_hint.first = EditorSort;
+	}
 
 	if (insert_at_end) {
 		order = next_control_id();
 	} else {
-		order = order_hint;
+		order = order_hint.second;
 	}
+	other_order_hint.second = order;
 
         count_existing_track_channels (existing_inputs, existing_outputs);
 
@@ -2348,21 +2356,24 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 					continue;
 				}
 
-				uint32_t rt_order_key = rt->order_key();
+				uint32_t rt_order_key = rt->order_key(order_hint.first);
 
-				if (rt_order_key == order_hint){
+				if (rt_order_key == order_hint.second){
 					/* 
 					   new routes should be inserted before this one in the order heirarchy.
 					   find the order key of the other type so that added routes will end up somewhere sensible,
 					   then increment higher ordered keys to 'clear space' for the new ones.
 					*/
 					insert_it = ri;
+					other_order_hint.second = rt->order_key(other_order_hint.first);
 				}
-				if (rt_order_key >= order_hint) {
+				if (rt_order_key >= order_hint.second) {
 					DEBUG_TRACE (DEBUG::OrderKeys, 
-						     string_compose ("setting existing route %1 to order key %2\n", 
-								     rt->name(), rt->order_key () + new_routes.size()));
-					rt->set_order_key (rt->order_key () + new_routes.size());
+						     string_compose ("setting existing route %1 to EditorSort order key %2 with MixerSort order key %3\n", 
+								     rt->name(), rt->order_key (EditorSort) + new_routes.size(), 
+								     rt->order_key (MixerSort) + new_routes.size()));
+					rt->set_order_key (EditorSort, rt->order_key (EditorSort) + new_routes.size());
+					rt->set_order_key (MixerSort, rt->order_key (MixerSort) + new_routes.size());
 				}
 			} 
 		}
@@ -2422,14 +2433,19 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		   ID in most situations.
 		*/
 
-		if (!r->has_order_key ()) {
+		if (!r->has_order_key (EditorSort)) {
 			if (r->is_auditioner()) {
 				/* use an arbitrarily high value */
-				r->set_order_key (UINT_MAX);
+				r->set_order_key (EditorSort, UINT_MAX);
+				r->set_order_key (MixerSort, UINT_MAX);
 			} else {
-				DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("while adding, set %1 to order key %2\n", r->name(), order));
-				r->set_order_key (order);
+				DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("while adding, set %1 to %2 order key %3 and %4 order key %4\n", 
+							     r->name(), enum_2_string (order_hint.first), order_hint.second, 
+							     enum_2_string (other_order_hint.first), other_order_hint.second));
+				r->set_order_key (order_hint.first, order);
+				r->set_order_key (other_order_hint.first, other_order_hint.second);
 				order++;
+				other_order_hint.second++;
 			}
 		}
 
@@ -3739,7 +3755,7 @@ Session::RoutePublicOrderSorter::operator() (boost::shared_ptr<Route> a, boost::
 	if (b->is_monitor()) {
 		return false;
 	}
-	return a->order_key () < b->order_key ();
+	return a->order_key (MixerSort) < b->order_key (MixerSort);
 }
 
 bool
@@ -4976,8 +4992,8 @@ Session::notify_remote_id_change ()
 	}
 
 	switch (Config->get_remote_model()) {
-	case MixerOrdered:
-	case EditorOrdered:
+	case MixerSort:
+	case EditorSort:
 		Route::RemoteControlIDChange (); /* EMIT SIGNAL */
 		break;
 	default:
@@ -4986,7 +5002,7 @@ Session::notify_remote_id_change ()
 }
 
 void
-Session::sync_order_keys ()
+Session::sync_order_keys (RouteSortOrderKey sort_key_changed)
 {
 	if (deletion_in_progress()) {
 		return;
@@ -4998,9 +5014,9 @@ Session::sync_order_keys ()
 	   opportunity to keep them in sync if they wish to.
 	*/
 
-	DEBUG_TRACE (DEBUG::OrderKeys, "Sync Order Keys.\n");
+	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("Sync Order Keys, based on %1\n", enum_2_string (sort_key_changed)));
 
-	Route::SyncOrderKeys (); /* EMIT SIGNAL */
+	Route::SyncOrderKeys (sort_key_changed); /* EMIT SIGNAL */
 
 	DEBUG_TRACE (DEBUG::OrderKeys, "\tsync done\n");
 }

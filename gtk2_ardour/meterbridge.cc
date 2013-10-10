@@ -92,7 +92,7 @@ struct SignalOrderRouteSorter {
 			/* everything comes before b */
 			return true;
 		}
-		return a->order_key () < b->order_key ();
+		return a->order_key (MixerSort) < b->order_key (MixerSort);
 	}
 };
 
@@ -138,7 +138,7 @@ Meterbridge::Meterbridge ()
 
 	signal_delete_event().connect (sigc::mem_fun (*this, &Meterbridge::hide_window));
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
-	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Meterbridge::sync_order_keys, this), gui_context());
+	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Meterbridge::sync_order_keys, this, _1), gui_context());
 	MeterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Meterbridge::remove_strip, this, _1), gui_context());
 	MeterStrip::MetricChanged.connect (*this, invalidator (*this), boost::bind(&Meterbridge::resync_order, this), gui_context());
 	MeterStrip::ConfigurationChanged.connect (*this, invalidator (*this), boost::bind(&Meterbridge::queue_resize, this), gui_context());
@@ -637,7 +637,7 @@ Meterbridge::remove_strip (MeterStrip* strip)
 }
 
 void
-Meterbridge::sync_order_keys ()
+Meterbridge::sync_order_keys (RouteSortOrderKey)
 {
 	Glib::Threads::Mutex::Lock lm (_resync_mutex);
 
@@ -776,7 +776,7 @@ Meterbridge::sync_order_keys ()
 void
 Meterbridge::resync_order()
 {
-	sync_order_keys();
+	sync_order_keys(MixerSort);
 }
 
 void
