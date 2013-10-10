@@ -38,8 +38,9 @@
 #include "ardour/export_filename.h"
 #include "ardour/session_metadata.h"
 #include "ardour/soundcloud_upload.h"
-#include "ardour/system_exec.h"
-#include "ardour/session_metadata.h"
+#include "pbd/openuri.h"
+#include "pbd/basename.h"
+#include "pbd/system_exec.h"
 
 #include "i18n.h"
 
@@ -284,6 +285,13 @@ ExportHandler::process_normalize ()
 }
 
 void
+ExportHandler::command_output(std::string output, size_t size)
+{
+	std::cerr << "command: " << size << ", " << output << std::endl;
+	info << output << endmsg;
+}
+
+void
 ExportHandler::finish_timespan ()
 {
 	while (config_map.begin() != timespan_bounds.second) {
@@ -307,9 +315,9 @@ ExportHandler::finish_timespan ()
 
 #if 0			// would be nicer with C++11 initialiser...
 			std::map<char, std::string> subs {
-				{ 'f', filename },
-				{ 'd', Glib::path_get_dirname(filename) },
-				{ 'b', PBD::basename_nosuffix(filename) },
+				{ 'f', filepath },
+				{ 'd', Glib::path_get_dirname(filepath) },
+				{ 'b', PBD::basename_nosuffix(filepath) },
 				{ 'u', upload_username },
 				{ 'p', upload_password}
 			};
@@ -317,15 +325,16 @@ ExportHandler::finish_timespan ()
 
 			PBD::ScopedConnection command_connection;
 			std::map<char, std::string> subs;
-			subs.insert (std::pair<char, std::string> ('f', filename));
-			subs.insert (std::pair<char, std::string> ('d', Glib::path_get_dirname(filename)));
-			subs.insert (std::pair<char, std::string> ('b', PBD::basename_nosuffix(filename)));
-			subs.insert (std::pair<char, std::string> ('u', soundcloud_username));
-			subs.insert (std::pair<char, std::string> ('p', soundcloud_password));
+			subs.insert (std::pair<char, std::string> ('f', filepath));
+			subs.insert (std::pair<char, std::string> ('d', Glib::path_get_dirname(filepath)));
+			subs.insert (std::pair<char, std::string> ('b', PBD::basename_nosuffix(filepath)));
+			subs.insert (std::pair<char, std::string> ('u', upload_username));
+			subs.insert (std::pair<char, std::string> ('p', upload_password));
 
 
 			std::cerr << "running command: " << fmt->command() << "..." << std::endl;
-			ARDOUR::SystemExec *se = new ARDOUR::SystemExec(fmt->command(), subs);
+			SystemExec *se = new SystemExec(fmt->command(), subs);
+
 			se->ReadStdout.connect_same_thread(command_connection, boost::bind(&ExportHandler::command_output, this, _1, _2));
 			if (se->start (2) == 0) {
 				// successfully started
@@ -333,6 +342,7 @@ ExportHandler::finish_timespan ()
 				while (se->is_running ()) {
 					// wait for system exec to terminate
 					// std::cerr << "waiting..." << std::endl;
+
 					Glib::usleep (1000);
 				}
 			}

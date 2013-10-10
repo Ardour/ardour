@@ -96,6 +96,8 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 	friend boost::shared_ptr<ExportHandler> Session::get_export_handler();
 	ExportHandler (Session & session);
 
+	void command_output(std::string output, size_t size);
+
   public:
 	~ExportHandler ();
 
