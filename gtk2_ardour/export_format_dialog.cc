@@ -52,7 +52,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
   silence_end_clock ("silence_end", true, "", true, false, true),
 
   upload_checkbox(_("Upload to Soundcloud")),
-  command_label(_("Command to run post-export (%1=full path & filename, %2=directory, %3=basename):")),
+  command_label(_("Command to run post-export\n(%f=full path & filename, %d=directory, %b=basename, %u=username, %p=password):")),
 
   format_table (3, 4),
   compatibility_label (_("Compatibility"), Gtk::ALIGN_LEFT),
