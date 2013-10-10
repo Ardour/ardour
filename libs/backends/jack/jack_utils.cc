@@ -92,6 +92,8 @@ namespace {
 	const char * const default_device_name = X_("Default");
 }
 
+static ARDOUR::MidiOptions midi_options;
+
 std::string
 get_none_string ()
 {
@@ -846,6 +848,9 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 		if (options.soft_mode) {
 			args.push_back ("-s");
 		}
+	}
+
+	if (options.driver == alsa_driver_name || options.driver == coreaudio_driver_name) {
 
 		if (!options.midi_driver.empty() && options.midi_driver != get_none_string ()) {
 			args.push_back ("-X");
@@ -900,3 +905,52 @@ ARDOUR::write_jack_config_file (const std::string& config_file_path, const strin
 	jackdrc.close ();
 	return true;
 }
+
+vector<string>
+ARDOUR::enumerate_midi_options () 
+{
+	if (midi_options.empty()) {
+#ifdef HAVE_ALSA
+		midi_options.push_back (make_pair (_("ALSA raw devices"), alsaraw_midi_driver_name));
+		midi_options.push_back (make_pair (_("ALSA sequencer"), alsaseq_midi_driver_name));
+#endif
+#ifdef HAVE_PORTAUDIO
+		/* Windows folks: what name makes sense here? Are there other
+		   choices as well ?
+		*/
+		midi_options.push_back (make_pair (_("Multimedia Extension"), winmme_midi_driver_name));
+#endif
+#ifdef __APPLE__
+		midi_options.push_back (make_pair (_("CoreMIDI"), coremidi_midi_driver_name));
+#endif
+	}
+
+	vector<string> v;
+
+	v.push_back (get_none_string());
+
+	for (MidiOptions::const_iterator i = midi_options.begin(); i != midi_options.end(); ++i) {
+		v.push_back (i->first);
+	}
+
+	return v;
+}
+
+int
+ARDOUR::set_midi_option (ARDOUR::JackCommandLineOptions& options, const string& opt)
+{
+	if (opt.empty() || opt == get_none_string()) {
+		options.midi_driver = "";
+		return 0;
+	}
+
+	for (MidiOptions::const_iterator i = midi_options.begin(); i != midi_options.end(); ++i) {
+		if (i->first == opt) {
+			options.midi_driver = i->second;
+			return 0;
+		}
+	}
+
+	return -1;
+}
+

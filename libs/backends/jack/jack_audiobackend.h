@@ -149,6 +149,9 @@ class JACKAudioBackend : public AudioBackend {
     
     /* MIDI */
 
+    std::vector<std::string> enumerate_midi_options () const;
+    int set_midi_option (const std::string&);
+
     int      midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index);
     int      midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size);
     uint32_t get_midi_event_count (void* port_buffer);
@@ -237,6 +240,7 @@ class JACKAudioBackend : public AudioBackend {
     uint32_t     _target_systemic_output_latency;
     uint32_t     _current_sample_rate;
     uint32_t     _current_buffer_size;
+    std::string  _target_midi_option;
 
     typedef std::set<std::string> DeviceList;
     typedef std::map<std::string,DeviceList> DriverDeviceMap;
