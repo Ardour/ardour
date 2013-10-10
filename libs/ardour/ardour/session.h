@@ -197,7 +197,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	std::string new_audio_source_name (const std::string&, uint32_t nchans, uint32_t chan, bool destructive);
 	std::string new_midi_source_name (const std::string&);
 	std::string new_source_path_from_name (DataType type, const std::string&);
-        RouteList new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name, std::pair <RouteSortOrderKey, uint32_t> order_hint);
+        RouteList new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name);
 
 	void process (pframes_t nframes);
 
@@ -451,19 +451,18 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		TrackMode mode = Normal,
 		RouteGroup* route_group = 0,
 		uint32_t how_many = 1,
-		std::string name_template = "",
-		std::pair <RouteSortOrderKey, uint32_t> order_hint = std::make_pair (EditorSort, 0)
+		std::string name_template = ""
 		);
 
 	RouteList new_audio_route (
-		int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, std::string name_template = "", std::pair <RouteSortOrderKey, uint32_t> order_hint = std::make_pair (EditorSort, 0)
+		int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, std::string name_template = ""
 		);
 
 	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
 		const ChanCount& input, const ChanCount& output,
 		boost::shared_ptr<PluginInfo> instrument = boost::shared_ptr<PluginInfo>(),
 		TrackMode mode = Normal, 
-		RouteGroup* route_group = 0, uint32_t how_many = 1, std::string name_template = "", std::pair <RouteSortOrderKey, uint32_t> order_hint = std::make_pair (EditorSort, 0)
+		RouteGroup* route_group = 0, uint32_t how_many = 1, std::string name_template = ""
 		);
 
 	void   remove_route (boost::shared_ptr<Route>);
@@ -1311,8 +1310,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	SerializedRCUManager<RouteList>  routes;
 
-	void add_routes (RouteList&, bool input_auto_connect, bool output_auto_connect, bool save, std::pair <RouteSortOrderKey, uint32_t> order_hint);
-        void add_routes_inner (RouteList&, bool input_auto_connect, bool output_auto_connect, std::pair <RouteSortOrderKey, uint32_t> order_hint);
+	void add_routes (RouteList&, bool input_auto_connect, bool output_auto_connect, bool save);
+        void add_routes_inner (RouteList&, bool input_auto_connect, bool output_auto_connect);
         bool _adding_routes_in_progress;
 	uint32_t destructive_index;
 

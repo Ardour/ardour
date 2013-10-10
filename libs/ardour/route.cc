@@ -305,6 +305,7 @@ Route::sync_order_keys (RouteSortOrderKey base)
 								       enum_2_string (k->first),
 								       i->second,
 								       enum_2_string (base)));
+								       
 			k->second = i->second;
 		}
 	}
