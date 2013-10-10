@@ -77,7 +77,6 @@ EngineControl::EngineControl ()
 	, lm_table (5, 2)
 	, have_lm_results (false)
 	, midi_refresh_button (_("Refresh list"))
-	, aj_button (_("Start MIDI ALSA/JACK bridge"))
 	, ignore_changes (0)
 	, _desired_sample_rate (0)
 	, no_push (true)
@@ -207,7 +206,7 @@ EngineControl::EngineControl ()
 	/* pack it all up */
 
 	notebook.pages().push_back (TabElem (basic_vbox, _("Audio")));
-	notebook.pages().push_back (TabElem (midi_vbox, _("MIDI")));
+	// notebook.pages().push_back (TabElem (midi_vbox, _("MIDI")));
 	notebook.pages().push_back (TabElem (lm_vbox, _("Latency")));
 	notebook.set_border_width (12);
 
@@ -413,6 +412,10 @@ EngineControl::build_full_control_notebook ()
 	basic_packer.attach (*label, 2, 3, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
+	label = manage (left_aligned_label (_("MIDI I/O using")));
+	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
+	basic_packer.attach (midi_option_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
+	row++;
 }
 
 void
@@ -510,7 +513,6 @@ EngineControl::setup_midi_tab_for_backend ()
 void
 EngineControl::setup_midi_tab_for_jack ()
 {
-	midi_vbox.pack_start (aj_button, false, false);
 }	
 
 void
@@ -612,7 +614,22 @@ EngineControl::backend_changed ()
 		 */
 		list_devices ();
 	}
-	
+
+	vector<string> midi_options = backend->enumerate_midi_options();
+
+	if (midi_options.size() == 1) {
+		/* only contains the "none" option */
+		midi_option_combo.set_sensitive (false);
+	} else {
+		if (_have_control) {
+			set_popdown_strings (midi_option_combo, midi_options);
+			midi_option_combo.set_active_text (midi_options.front());
+			midi_option_combo.set_sensitive (true);
+		} else {
+			midi_option_combo.set_sensitive (false);
+		}
+	}
+
 	maybe_display_saved_state ();
 }
 
@@ -970,6 +987,10 @@ EngineControl::maybe_display_saved_state ()
 		show_buffer_duration ();
 		input_latency.set_value (state->input_latency);
 		output_latency.set_value (state->output_latency);
+
+		if (!state->midi_option.empty()) {
+			midi_option_combo.set_active_text (state->midi_option);
+		}
 	}
 }
 	
@@ -996,6 +1017,7 @@ EngineControl::get_state ()
 			node->add_property ("input-channels", (*i).input_channels);
 			node->add_property ("output-channels", (*i).output_channels);
 			node->add_property ("active", (*i).active ? "yes" : "no");
+			node->add_property ("midi-option", (*i).midi_option);
 			
 			state_nodes->add_child_nocopy (*node);
 		}
@@ -1092,6 +1114,11 @@ EngineControl::set_state (const XMLNode& root)
 			}
 			state.active = string_is_affirmative (prop->value ());
 			
+			if ((prop = grandchild->property ("midi-option")) == 0) {
+				continue;
+			}
+			state.midi_option = prop->value ();
+
 			states.push_back (state);
 		}
 	}
@@ -1109,6 +1136,7 @@ EngineControl::set_state (const XMLNode& root)
 			buffer_size_combo.set_active_text (bufsize_as_string ((*i).buffer_size));
 			input_latency.set_value ((*i).input_latency);
 			output_latency.set_value ((*i).output_latency);
+			midi_option_combo.set_active_text ((*i).midi_option);
 			ignore_changes--;
 			break;
 		}
@@ -1139,6 +1167,7 @@ EngineControl::push_state_to_backend (bool start)
 	bool change_bufsize = false;
 	bool change_latency = false;
 	bool change_channels = false;
+	bool change_midi = false;
 
 	uint32_t ochan = get_output_channels ();
 	uint32_t ichan = get_input_channels ();
@@ -1321,6 +1350,8 @@ EngineControl::push_state_to_backend (bool start)
 			return -1;
 		}
 	}
+
+	backend->set_midi_option (midi_option_combo.get_active_text());
 			
 	if (start || (was_running && restart_required)) {
 		if (ARDOUR_UI::instance()->reconnect_to_engine()) {

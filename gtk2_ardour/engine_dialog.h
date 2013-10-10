@@ -62,6 +62,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     Gtk::ComboBoxText driver_combo;
     Gtk::ComboBoxText device_combo;
     Gtk::ComboBoxText sample_rate_combo;
+    Gtk::ComboBoxText midi_option_combo;
     Gtk::ComboBoxText buffer_size_combo;
     Gtk::Label        buffer_size_duration_label;
     Gtk::Adjustment input_latency_adjustment;
@@ -149,6 +150,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	uint32_t input_channels;
 	uint32_t output_channels;
 	bool active;
+	std::string midi_option;
 
 	State() 
 		: input_latency (0)
