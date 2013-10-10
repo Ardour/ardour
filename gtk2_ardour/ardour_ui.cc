@@ -796,7 +796,11 @@ ARDOUR_UI::starting ()
 		 *  audio backend end up.
 		 */
 
-		audio_midi_setup.get (true);
+		try {
+			audio_midi_setup.get (true);
+		} catch (...) {
+			return -1;
+		}
 
 		/* go get a session */
 

@@ -30,6 +30,7 @@
 #include "pbd/error.h"
 #include "pbd/xml++.h"
 #include "pbd/unwind.h"
+#include "pbd/failed_constructor.h"
 
 #include <gtkmm/alignment.h>
 #include <gtkmm/stock.h>
@@ -94,6 +95,13 @@ EngineControl::EngineControl ()
 	 */
 
 	vector<const ARDOUR::AudioBackendInfo*> backends = ARDOUR::AudioEngine::instance()->available_backends();
+
+	if (backends.empty()) {
+		MessageDialog msg (string_compose (_("No audio/MIDI backends detected. %1 cannot run\n\n(This is a build/packaging/system error. It should never happen.)"), PROGRAM_NAME));
+		msg.run ();
+		throw failed_constructor ();
+	}
+
 	for (vector<const ARDOUR::AudioBackendInfo*>::const_iterator b = backends.begin(); b != backends.end(); ++b) {
 		strings.push_back ((*b)->name);
 	}
