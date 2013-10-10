@@ -151,6 +151,7 @@ class JACKAudioBackend : public AudioBackend {
 
     std::vector<std::string> enumerate_midi_options () const;
     int set_midi_option (const std::string&);
+    std::string midi_option () const;
 
     int      midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index);
     int      midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size);

@@ -409,6 +409,12 @@ JACKAudioBackend::interleaved () const
 	return false;
 }
 
+string
+JACKAudioBackend::midi_option () const
+{
+	return _target_midi_option;
+}
+
 uint32_t
 JACKAudioBackend::input_channels () const
 {
