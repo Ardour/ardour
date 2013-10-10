@@ -144,9 +144,8 @@ static int close_allv(const int except_fds[]) {
 }
 #endif /* not on windows */
 
-
-SystemExec::SystemExec (std::string c, std::string a)
-	: cmd(c)
+void
+SystemExec::init ()
 {
 	pthread_mutex_init(&write_lock, NULL);
 	thread_active=false;
@@ -154,12 +153,19 @@ SystemExec::SystemExec (std::string c, std::string a)
 	pin[1] = -1;
 	nicelevel = 0;
 	envp = NULL;
-	argp = NULL;
 #ifdef __WIN32__
 	stdinP[0] = stdinP[1] = INVALID_HANDLE_VALUE;
 	stdoutP[0] = stdoutP[1] = INVALID_HANDLE_VALUE;
 	stderrP[0] = stderrP[1] = INVALID_HANDLE_VALUE;
 #endif
+}
+
+SystemExec::SystemExec (std::string c, std::string a)
+	: cmd(c)
+{
+	init ();
+
+	argp = NULL;
 	make_envp();
 	make_argp(a);
 }
@@ -167,19 +173,98 @@ SystemExec::SystemExec (std::string c, std::string a)
 SystemExec::SystemExec (std::string c, char **a)
 	: cmd(c) , argp(a)
 {
-	pthread_mutex_init(&write_lock, NULL);
-	thread_active=false;
-	pid = 0;
-	pin[1] = -1;
-	nicelevel = 0;
-	envp = NULL;
+	init ();
+
 #ifdef __WIN32__
-	stdinP[0] = stdinP[1] = INVALID_HANDLE_VALUE;
-	stdoutP[0] = stdoutP[1] = INVALID_HANDLE_VALUE;
-	stderrP[0] = stderrP[1] = INVALID_HANDLE_VALUE;
 	make_wargs(a);
 #endif
 	make_envp();
+}
+
+SystemExec::SystemExec (std::string command, const std::map<char, std::string> subs)
+{
+	init ();
+	make_argp_escaped(command, subs);
+	cmd = argp[0];
+	// cmd = strdup(argp[0]);
+	make_envp();
+}
+
+void
+SystemExec::make_argp_escaped(std::string command, const std::map<char, std::string> subs)
+{
+
+	int inquotes = 0;
+	int n = 0;
+	size_t i = 0;
+	std::string arg = "";
+
+	argp = (char **) malloc(sizeof(char *));
+
+	for (i = 0; i < command.length(); i++) {
+		char c = command.c_str()[i];
+		if (inquotes) {
+			if (c == '"') {
+				inquotes = 0;
+			} else {
+				// still in quotes - just copy
+				arg += c;
+			}
+		} else switch (c) {
+			case '%' :
+				c = command.c_str()[++i];
+				if (c == '%' || c == '\0') {
+					// "%%", "%" at end-of-string => "%"
+					arg += '%';
+				} else {
+					// search subs for string to substitute for char
+					std::map<char, std::string>::const_iterator s = subs.find(c);
+					if (s != subs.end()) {
+						// found substitution
+						arg += s->second;
+					} else {
+						// not a valid substitution, just copy
+						arg += '%';
+						arg += c;
+					}
+				}
+				break;
+			case '\\':
+				c = command.c_str()[++i];
+				switch (c) {
+					case ' ' :
+					case '"' : arg += c; break; // "\\", "\" at end-of-string => "\"
+					case '\0': 
+					case '\\': arg += '\\'; break;
+					default  : arg += '\\'; arg += c; break;
+				}
+				break;
+			case '"' :
+				inquotes = 1;
+				break;
+			case ' ' :
+			case '\t':
+				if (arg.length() > 0) {
+					// if there wasn't already a space or tab, start a new parameter
+					argp = (char **) realloc(argp, (n + 2) * sizeof(char *));
+					argp[n++] = strdup (arg.c_str());
+					arg = "";
+				}
+				break;
+			default :
+				arg += c;
+				break;
+		}
+	}
+	argp[n] = NULL;
+
+	char *p = argp[0];
+	n = 0;
+	do {
+		std::cerr << "argv[" << n << "] == \"" << p << "\"" << std::endl;
+		p = argp[n++];
+	} while (p);
+
 }
 
 SystemExec::~SystemExec ()
@@ -502,7 +587,7 @@ SystemExec::make_argp(std::string args) {
 			*cp2 = '\0';
 			argp[argn++] = strdup(cp1);
 			cp1 = cp2 + 1;
-	    argp = (char **) realloc(argp, (argn + 1) * sizeof(char *));
+			argp = (char **) realloc(argp, (argn + 1) * sizeof(char *));
 		}
 	}
 	if (cp2 != cp1) {

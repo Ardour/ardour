@@ -33,6 +33,8 @@
 #include <string>
 #include <pthread.h>
 #include <signal.h>
+#include <map>
+
 #ifdef NOPBD  /* outside ardour */
 #include <sigc++/bind.h>
 #include <sigc++/signal.h>
@@ -83,7 +85,25 @@ class SystemExec
 		 *
 		 */
 		SystemExec (std::string c, char ** a);
+
+		/** similar to \ref SystemExec but expects a whole command line, and
+		 * handles some simple escape sequences.
+		 *
+		 * @param command complete command-line to be executed
+		 * @param subs a map of <char, std::string> listing the % substitutions to
+		 *             be made.
+		 *
+		 * creates an argv array from the given command string, splitting into
+		 * parameters at spaces.
+		 * "\ " is non-splitting space, "\\" (and "\" at end of command) as "\",
+		 * for "%<char>", <char> is looked up in subs and the corresponding string
+		 * substituted. "%%" (and "%" at end of command)
+		 * returns an argv array suitable for creating a new SystemExec with
+		 */
+		SystemExec (std::string command, const std::map<char, std::string> subs);
+
 		virtual ~SystemExec ();
+
 
 		/** fork and execute the given program
 		 *
@@ -171,6 +191,7 @@ class SystemExec
 		int nicelevel; ///< process nice level - defaults to 0
 
 		void make_argp(std::string);
+		void make_argp_escaped(std::string command, const std::map<char, std::string> subs);
 		void make_envp();
 
 		char **argp;
@@ -187,6 +208,7 @@ class SystemExec
 #else
 		pid_t pid;
 #endif
+		void init ();
 		pthread_mutex_t write_lock;
 
 		int fdin; ///< file-descriptor for writing to child's STDIN. This variable is identical to pin[1] but also used as status check if the stdin pipe is open: <0 means closed.
