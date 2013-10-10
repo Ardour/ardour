@@ -58,6 +58,9 @@ using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace Glib;
 
+static const unsigned int midi_tab = -1; /* not currently in use */
+static const unsigned int latency_tab = 1; /* zero-based, page zero is the main setup page */
+
 EngineControl::EngineControl ()
 	: ArdourDialog (_("Audio/MIDI Setup"))
 	, basic_packer (9, 3)
@@ -254,6 +257,7 @@ EngineControl::EngineControl ()
 	sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::sample_rate_changed));
 	buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::buffer_size_changed));
 	device_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::device_changed));
+	midi_option_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::midi_option_changed));
 
 	input_latency.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
 	output_latency.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
@@ -888,6 +892,14 @@ EngineControl::show_buffer_duration ()
 }
 
 void
+EngineControl::midi_option_changed ()
+{
+	if (!ignore_changes) {
+		save_state ();
+	}
+}
+
+void
 EngineControl::parameter_changed ()
 {
 	if (!ignore_changes) {
@@ -963,6 +975,7 @@ EngineControl::store_state (State& state)
 	state.output_latency = get_output_latency ();
 	state.input_channels = get_input_channels ();
 	state.output_channels = get_output_channels ();
+	state.midi_option = get_midi_option ();
 }
 
 void
@@ -1195,6 +1208,10 @@ EngineControl::push_state_to_backend (bool start)
 			if (get_buffer_size() != backend->buffer_size()) {
 				change_bufsize = true;
 			}
+
+			if (get_midi_option() != backend->midi_option()) {
+				change_midi = true;
+			}
 			
 			/* zero-requested channels means "all available" */
 
@@ -1228,6 +1245,7 @@ EngineControl::push_state_to_backend (bool start)
 			change_bufsize = true;
 			change_channels = true;
 			change_latency = true;
+			change_midi = true;
 		}
 
 	} else {
@@ -1278,6 +1296,7 @@ EngineControl::push_state_to_backend (bool start)
 
 	if (change_driver || change_device || change_channels || change_latency ||
 	    (change_rate && !backend->can_change_sample_rate_when_running()) ||
+	    change_midi ||
 	    (change_bufsize && !backend->can_change_buffer_size_when_running())) {
 		restart_required = true;
 	} else {
@@ -1286,7 +1305,7 @@ EngineControl::push_state_to_backend (bool start)
 
 	if (was_running) {
 
-		if (!change_driver && !change_device && !change_channels && !change_latency) {
+		if (!change_driver && !change_device && !change_channels && !change_latency && !change_midi) {
 			/* no changes in any parameters that absolutely require a
 			 * restart, so check those that might be changeable without a
 			 * restart
@@ -1351,7 +1370,9 @@ EngineControl::push_state_to_backend (bool start)
 		}
 	}
 
-	backend->set_midi_option (midi_option_combo.get_active_text());
+	if (change_midi) {
+		backend->set_midi_option (get_midi_option());
+	}
 			
 	if (start || (was_running && restart_required)) {
 		if (ARDOUR_UI::instance()->reconnect_to_engine()) {
@@ -1425,6 +1446,12 @@ EngineControl::get_buffer_size () const
 	}
 
 	return samples;
+}
+
+string
+EngineControl::get_midi_option () const
+{
+	return midi_option_combo.get_active_text();
 }
 
 uint32_t
@@ -1519,12 +1546,12 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 		apply_button->set_sensitive (false);
 	}
 
-	if (page_num == 1) {
+	if (page_num == midi_tab) {
 		/* MIDI tab */
 		refresh_midi_display ();
 	}
 
-	if (page_num == 2) {
+	if (page_num == latency_tab) {
 		/* latency tab */
 
 		if (!ARDOUR::AudioEngine::instance()->running()) {

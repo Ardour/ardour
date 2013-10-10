@@ -118,6 +118,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void sample_rate_changed ();
     void buffer_size_changed ();
     void parameter_changed ();
+    void midi_option_changed ();
 
     void setup_midi_tab_for_backend ();
     void setup_midi_tab_for_jack ();
@@ -134,6 +135,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     std::string get_device_name() const;
     std::string get_driver() const;
     std::string get_backend() const;
+    std::string get_midi_option () const;
 
     void device_changed ();
     void list_devices ();
