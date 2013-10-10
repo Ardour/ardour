@@ -257,6 +257,8 @@ class AudioBackend : public PortEngine {
      * @return zero if successful, non-zero otherwise
      */
     virtual int set_midi_option (const std::string& option) = 0;
+
+    virtual std::string midi_option () const = 0;
     
     /* State Control */
 
