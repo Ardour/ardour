@@ -434,6 +434,7 @@ def build(bld):
                 testcommon.source += [ 'sse_functions_64bit.s' ]
 
         if bld.env['SINGLE_TESTS']:
+            create_ardour_test_program(bld, obj.includes, 'audio_engine_test', 'test_audio_engine', ['test/audio_engine_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'automation_list_property_test', 'test_automation_list_property', ['test/automation_list_property_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'bbt', 'test_bbt', ['test/bbt_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'tempo', 'test_tempo', ['test/tempo_test.cc'])
@@ -452,6 +453,7 @@ def build(bld):
             create_ardour_test_program(bld, obj.includes, 'session_test', 'test_session', ['test/session_test.cc'])
 
         test_sources  = '''
+            test/audio_engine_test.cc
             test/automation_list_property_test.cc
             test/bbt_test.cc
             test/tempo_test.cc
