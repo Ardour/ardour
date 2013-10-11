@@ -22,7 +22,6 @@
 #include "ardour/audioregion.h"
 #include "ardour/session.h"
 #include "playlist_read_test.h"
-#include "test_globals.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION (PlaylistReadTest);
 

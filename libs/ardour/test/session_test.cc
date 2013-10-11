@@ -3,7 +3,7 @@
 #include <glibmm/miscutils.h>
 
 #include <stdexcept>
-#include "midi++/manager.h"
+
 #include "pbd/textreceiver.h"
 #include "pbd/file_utils.h"
 #include "ardour/session.h"
@@ -33,16 +33,11 @@ SessionTest::setUp ()
 	text_receiver.listen_to (fatal);
 	text_receiver.listen_to (warning);
 
-	// this is not a good singleton constructor pattern
-	AudioEngine* engine = 0;
-
-	try {
-		engine = new AudioEngine ("session_test", "");
-	} catch (const AudioEngine::NoBackendAvailable& engine_exception) {
-		cerr << engine_exception.what ();
-	}
+	AudioEngine* engine = AudioEngine::create ();
 
 	CPPUNIT_ASSERT (engine);
+
+	CPPUNIT_ASSERT (engine->set_default_backend());
 
 	init_post_engine ();
 
@@ -53,9 +48,8 @@ void
 SessionTest::tearDown ()
 {
 	// this is needed or there is a crash in MIDI::Manager::destroy
-	AudioEngine::instance()->stop (true);
+	AudioEngine::instance()->stop ();
 
-	MIDI::Manager::destroy ();
 	AudioEngine::destroy ();
 }
 

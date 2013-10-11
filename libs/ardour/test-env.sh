@@ -22,3 +22,4 @@ export ARDOUR_SURFACES_PATH=$libs/surfaces/osc:$libs/surfaces/generic_midi:$libs
 export ARDOUR_MCP_PATH="../mcp"
 export ARDOUR_DLL_PATH=$libs
 export ARDOUR_DATA_PATH=$top/gtk2_ardour:$top/build/gtk2_ardour:.
+export ARDOUR_BACKEND_PATH=$libs/backends/jack

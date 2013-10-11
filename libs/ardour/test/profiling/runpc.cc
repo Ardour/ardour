@@ -1,5 +1,4 @@
 #include <iostream>
-#include "midi++/manager.h"
 #include "pbd/textreceiver.h"
 #include "pbd/compose.h"
 #include "pbd/enumwriter.h"
@@ -31,7 +30,7 @@ main (int argc, char* argv[])
 	cout << "INFO: " << session->get_routes()->size() << " routes.\n";
 
 	for (int i = 0; i < 32768; ++i) {
-		session->process (session->engine().frames_per_cycle ());
+		session->process (session->engine().samples_per_cycle ());
 	}
 
 	return 0;
