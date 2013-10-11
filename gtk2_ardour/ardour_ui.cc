@@ -365,9 +365,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	
 	(void) theme_manager.get (true);
 	
-	starting.connect (sigc::mem_fun(*this, &ARDOUR_UI::startup));
-	stopping.connect (sigc::mem_fun(*this, &ARDOUR_UI::shutdown));
-
 	_process_thread = new ProcessThread ();
 	_process_thread->init ();
 
@@ -540,6 +537,10 @@ ARDOUR_UI::post_engine ()
 
 ARDOUR_UI::~ARDOUR_UI ()
 {
+	if (ui_config->dirty()) {
+		ui_config->save_state();
+	}
+
 	delete keyboard;
 	delete editor;
 	delete mixer;
@@ -716,8 +717,8 @@ ARDOUR_UI::check_announcements ()
 #endif
 }
 
-void
-ARDOUR_UI::startup ()
+int
+ARDOUR_UI::starting ()
 {
 	Application* app = Application::instance ();
 	char *nsm_url;
@@ -789,7 +790,7 @@ ARDOUR_UI::startup ()
 			s.hide ();
 			switch (s.response ()) {
 			case Gtk::RESPONSE_REJECT:
-				exit (1);
+				return -1;
 			default:
 				break;
 			}
@@ -803,8 +804,8 @@ ARDOUR_UI::startup ()
 
 		/* go get a session */
 
-		if (get_session_parameters (true, ARDOUR_COMMAND_LINE::new_session, ARDOUR_COMMAND_LINE::load_template)) {
-			exit (1);
+		if (get_session_parameters (false, ARDOUR_COMMAND_LINE::new_session, ARDOUR_COMMAND_LINE::load_template)) {
+			return -1;
 		}
 	}
 
@@ -820,6 +821,7 @@ ARDOUR_UI::startup ()
 	_status_bar_visibility.update ();
 
 	BootMessage (string_compose (_("%1 is ready for use"), PROGRAM_NAME));
+	return 0;
 }
 
 void
@@ -2562,6 +2564,18 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		template_name = load_template;
 	}
 
+	session_name = basename_nosuffix (ARDOUR_COMMAND_LINE::session_name);
+	session_path = ARDOUR_COMMAND_LINE::session_name;
+	
+	if (!session_path.empty()) {
+		if (Glib::file_test (session_path.c_str(), Glib::FILE_TEST_EXISTS)) {
+			if (Glib::file_test (session_path.c_str(), Glib::FILE_TEST_IS_REGULAR)) {
+				/* session/snapshot file, change path to be dir */
+				session_path = Glib::path_get_dirname (session_path);
+			}
+		}
+	}
+
 	SessionDialog session_dialog (should_be_new, session_name, session_path, load_template, cancel_not_quit);
 
 	while (ret != 0) {
@@ -2586,11 +2600,14 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		} else {
 			session_path = "";
 			session_name = "";
+			session_dialog.clear_given ();
 		}
-
+		
 		if (should_be_new || session_name.empty()) {
 			/* need the dialog to get info from user */
-			
+
+			cerr << "run dialog\n";
+
 			switch (session_dialog.run()) {
 			case RESPONSE_ACCEPT:
 				break;
@@ -2610,7 +2627,8 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		should_be_new = false;
 		
 		session_name = session_dialog.session_name (likely_new);
-		
+		session_path = session_dialog.session_folder ();
+
 		if (nsm) {
 		        likely_new = true;
 		}
@@ -2662,6 +2680,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	
 		if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
 
+
 			if (likely_new && !nsm) {
 
 				std::string existing = Glib::build_filename (session_path, session_name);
@@ -2685,10 +2704,11 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			}
 
 			char illegal = Session::session_name_is_legal(session_name);
+
 			if (illegal) {
 				pop_back_splash (session_dialog);
 				MessageDialog msg (session_dialog, string_compose(_("To ensure compatibility with various systems\n"
-				                     "session names may not contain a '%1' character"), illegal));
+										    "session names may not contain a '%1' character"), illegal));
 				msg.run ();
 				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
 				continue;
@@ -2698,8 +2718,6 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		}
 
 		if (likely_new && template_name.empty()) {
-
-			cerr << "building a session from dialog\n";
 
 			ret = build_session_from_dialog (session_dialog, session_path, session_name);
 
@@ -2716,6 +2734,12 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 				_session->save_state (ARDOUR_COMMAND_LINE::immediate_save, false);
 				exit (1);
 			}
+
+			/* clear this to avoid endless attempts to load the
+			   same session.
+			*/
+
+			ARDOUR_COMMAND_LINE::session_name = "";
 		}
 	}
 
@@ -3772,6 +3796,7 @@ ARDOUR_UI::disconnect_from_engine ()
 	/* drop connection to AudioEngine::Halted so that we don't act
 	 *  as if the engine unexpectedly shut down
 	 */
+
 	halt_connection.disconnect ();
 	
 	if (AudioEngine::instance()->stop ()) {
@@ -4107,8 +4132,6 @@ ARDOUR_UI::reset_route_peak_display (Route* route)
 int
 ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 {
-	cerr << "Do AMS\n";
-
 	audio_midi_setup->set_desired_sample_rate (desired_sample_rate);
 
 	switch (audio_midi_setup->run()) {
@@ -4120,3 +4143,5 @@ ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 		return -1;
 	}
 }
+
+

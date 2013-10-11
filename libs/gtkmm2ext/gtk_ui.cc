@@ -120,8 +120,8 @@ UI::UI (string namestr, int *argc, char ***argv)
 
 UI::~UI ()
 {
+	_receiver.hangup ();
 }
-
 
 bool
 UI::caller_is_ui_thread ()
@@ -265,12 +265,14 @@ UI::run (Receiver &old_receiver)
 
 	Glib::signal_idle().connect (bind_return (mem_fun (old_receiver, &Receiver::hangup), false));
 
-	starting ();
+	if (starting ()) {
+		return;
+	}
+
 	_active = true;
 	theMain->run ();
 	_active = false;
-	stopping ();
-	_receiver.hangup ();
+
 	return;
 }
 

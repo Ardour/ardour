@@ -30,15 +30,14 @@
 #include <boost/shared_ptr.hpp>
 
 #include <jack/jack.h>
-#ifdef HAVE_JACK_SESSION
 #include <jack/session.h>
-#endif
 
 #include "ardour/audio_backend.h"
 
 namespace ARDOUR {
 
 class JackConnection;
+class JACKSession;
 
 class JACKAudioBackend : public AudioBackend {
   public:
@@ -196,9 +195,7 @@ class JACKAudioBackend : public AudioBackend {
     static int  _jack_sync_callback (jack_transport_state_t, jack_position_t*, void *arg);
     static void _freewheel_callback (int , void *arg);
     static void _latency_callback (jack_latency_callback_mode_t, void*);
-#ifdef HAVE_JACK_SESSION
     static void _session_callback (jack_session_event_t *event, void *arg);
-#endif
     
     void jack_timebase_callback (jack_transport_state_t, pframes_t, jack_position_t*, int);
     int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
@@ -261,6 +258,12 @@ class JACKAudioBackend : public AudioBackend {
 
     void when_connected_to_jack ();
     PBD::ScopedConnection jack_connection_connection;
+
+    /* Object to manage interactions with Session in a way that 
+       keeps JACK out of libardour directly
+    */
+
+    JACKSession* _session;
 };
 
 } // namespace

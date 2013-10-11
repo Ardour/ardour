@@ -521,6 +521,7 @@ int main (int argc, char *argv[])
 
 	ui->run (text_receiver);
 	Gtkmm2ext::Application::instance()->cleanup();
+	delete ui;
 	ui = 0;
 
 	ARDOUR::cleanup ();

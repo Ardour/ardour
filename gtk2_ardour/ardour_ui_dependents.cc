@@ -51,14 +51,6 @@ namespace ARDOUR {
 using namespace ARDOUR;
 
 void
-ARDOUR_UI::shutdown ()
-{
-	if (ui_config->dirty()) {
-		ui_config->save_state();
-	}
-}
-
-void
 ARDOUR_UI::we_have_dependents ()
 {
 	install_actions ();

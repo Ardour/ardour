@@ -333,8 +333,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	static ARDOUR_UI *theArdourUI;
 
-	void startup ();
-	void shutdown ();
+        int starting ();
 
 	int  ask_about_saving_session (const std::vector<std::string>& actions);
 

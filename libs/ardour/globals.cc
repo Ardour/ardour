@@ -366,9 +366,15 @@ ARDOUR::init_post_engine ()
 	ARDOUR::PluginManager::instance().refresh ();
 }
 
-int
-ARDOUR::cleanup ()
+void
+ARDOUR::cleanup () 
 {
+	if (!libardour_initialized) {
+		return;
+	}
+
+	ARDOUR::AudioEngine::destroy ();
+
 	delete Library;
 #ifdef HAVE_LRDF
 	lrdf_cleanup ();
@@ -382,7 +388,8 @@ ARDOUR::cleanup ()
 	vstfx_exit();
 #endif
 	PBD::cleanup ();
-	return 0;
+
+	return;
 }
 
 void

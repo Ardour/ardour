@@ -881,15 +881,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
     MIDI::MachineControl& mmc() { return *_mmc; }
 
-        /* Callbacks specifically related to JACK, and called directly
-	 * from the JACK audio backend.
-         */
-
-#ifdef HAVE_JACK_SESSION
-	void jack_session_event (jack_session_event_t* event);
-#endif
-        void jack_timebase_callback (jack_transport_state_t, pframes_t, jack_position_t*, int);
-
   protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);

@@ -229,6 +229,7 @@ public:
     std::string               _latency_output_name;
     framecnt_t                _latency_signal_latency;
     bool                      _started_for_latency;
+    bool                      _in_destructor;
 
     void meter_thread ();
     void start_metering_thread ();
@@ -236,9 +237,6 @@ public:
     
     static gint      m_meter_exit;
     
-    void parameter_changed (const std::string&);
-    PBD::ScopedConnection config_connection;
-
     typedef std::map<std::string,AudioBackendInfo*> BackendMap;
     BackendMap _backends;
     AudioBackendInfo* backend_discover (const std::string&);
