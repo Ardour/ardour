@@ -3807,8 +3807,13 @@ int
 ARDOUR_UI::reconnect_to_engine ()
 {
 	if (AudioEngine::instance()->start ()) {
-		MessageDialog msg (*editor,  _("Could not reconnect to the Audio/MIDI engine"));
-		msg.run ();
+		if (editor) {
+			MessageDialog msg (*editor,  _("Could not reconnect to the Audio/MIDI engine"));
+			msg.run ();
+		} else {
+			MessageDialog msg (_("Could not reconnect to the Audio/MIDI engine"));
+			msg.run ();
+		}
 		return -1;
 	}
 	
