@@ -416,7 +416,7 @@ EngineControl::build_full_control_notebook ()
 	basic_packer.attach (*label, 2, 3, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
-	label = manage (left_aligned_label (_("MIDI I/O using")));
+	label = manage (left_aligned_label (_("MIDI System")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
 	basic_packer.attach (midi_option_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
 	row++;
