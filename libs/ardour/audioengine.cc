@@ -81,6 +81,7 @@ AudioEngine::AudioEngine ()
 	, _latency_flush_frames (0)
 	, _latency_signal_latency (0)
 	, _started_for_latency (false)
+	, _in_destructor (false)
 {
 	g_atomic_int_set (&m_meter_exit, 0);
 	discover_backends ();
@@ -88,15 +89,9 @@ AudioEngine::AudioEngine ()
 
 AudioEngine::~AudioEngine ()
 {
+	_in_destructor = true;
+	stop_metering_thread ();
 	drop_backend ();
-
-	config_connection.disconnect ();
-
-	{
-		Glib::Threads::Mutex::Lock tm (_process_lock);
-		session_removed.signal ();
-		stop_metering_thread ();
-	}
 }
 
 AudioEngine*
@@ -479,12 +474,16 @@ AudioEngine::discover_backends ()
 
 	Glib::PatternSpec so_extension_pattern("*backend.so");
 	Glib::PatternSpec dylib_extension_pattern("*backend.dylib");
+	Glib::PatternSpec dll_extension_pattern("*backend.dll");
 
 	find_matching_files_in_search_path (backend_search_path (),
 	                                    so_extension_pattern, backend_modules);
 
 	find_matching_files_in_search_path (backend_search_path (),
 	                                    dylib_extension_pattern, backend_modules);
+
+	find_matching_files_in_search_path (backend_search_path (),
+	                                    dll_extension_pattern, backend_modules);
 
 	DEBUG_TRACE (DEBUG::Panning, string_compose (_("looking for backends in %1\n"), backend_search_path().to_string()));
 
@@ -826,21 +825,39 @@ AudioEngine::get_sync_offset (pframes_t& offset) const
 }
 
 int
-AudioEngine::create_process_thread (boost::function<void()> func, AudioBackendNativeThread* thr, size_t stacksize)
+AudioEngine::create_process_thread (boost::function<void()> func)
 {
 	if (!_backend) {
 		return -1;
 	}
-	return _backend->create_process_thread (func, thr, stacksize);
+	return _backend->create_process_thread (func);
 }
 
 int
-AudioEngine::wait_for_process_thread_exit (AudioBackendNativeThread thr)
+AudioEngine::join_process_threads ()
+{
+	if (!_backend) {
+		return -1;
+	}
+	return _backend->join_process_threads ();
+}
+
+bool
+AudioEngine::in_process_thread ()
+{
+	if (!_backend) {
+		return false;
+	}
+	return _backend->in_process_thread ();
+}
+
+uint32_t
+AudioEngine::process_thread_count ()
 {
 	if (!_backend) {
 		return 0;
 	}
-	return _backend->wait_for_process_thread_exit (thr);
+	return _backend->process_thread_count ();
 }
 
 int
@@ -982,6 +999,11 @@ AudioEngine::update_latencies ()
 void
 AudioEngine::halted_callback (const char* why)
 {
+	if (_in_destructor) {
+		/* everything is under control */
+		return;
+	}
+
         stop_metering_thread ();
 	_running = false;
 

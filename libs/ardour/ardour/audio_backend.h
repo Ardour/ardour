@@ -239,7 +239,28 @@ class AudioBackend : public PortEngine {
      * app is undefined or cannot be launched.
      */
     virtual void launch_control_app () = 0;
-    /* Basic state control */
+
+    /* @return a vector of strings that describe the available
+     * MIDI options. 
+     *
+     * These can be presented to the user to decide which
+     * MIDI drivers, options etc. can be used. The returned strings
+     * should be thought of as the key to a map of possible
+     * approaches to handling MIDI within the backend. Ensure that
+     * the strings will make sense to the user.
+     */
+    virtual std::vector<std::string> enumerate_midi_options () const = 0;
+
+    /* Request the use of the MIDI option named @param option, which
+     * should be one of the strings returned by enumerate_midi_options()
+     *
+     * @return zero if successful, non-zero otherwise
+     */
+    virtual int set_midi_option (const std::string& option) = 0;
+
+    virtual std::string midi_option () const = 0;
+    
+    /* State Control */
 
     /** Start using the device named in the most recent call
      * to set_device(), with the parameters set by various
@@ -399,13 +420,25 @@ class AudioBackend : public PortEngine {
      * stacksize. The thread will begin executing @param func, and will exit
      * when that function returns.
      */
-    virtual int create_process_thread (boost::function<void()> func, AudioBackendNativeThread*, size_t stacksize) = 0;
+    virtual int create_process_thread (boost::function<void()> func) = 0;
 
-    /** Wait for the thread specified by @param thread to exit.
+    /** Wait for all processing threads to exit.
      * 
      * Return zero on success, non-zero on failure.
      */
-    virtual int wait_for_process_thread_exit (AudioBackendNativeThread thread) = 0;
+    virtual int join_process_threads () = 0;
+
+    /** Return true if execution context is in a backend thread
+     */
+    virtual bool in_process_thread () = 0;
+
+    /** Return the minimum stack size of audio threads in bytes
+     */
+    static size_t thread_stack_size () { return 100000; }
+
+    /** Return number of processing threads
+     */
+    virtual uint32_t process_thread_count () = 0;
 
     virtual void update_latencies () = 0;
 

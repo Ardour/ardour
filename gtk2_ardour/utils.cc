@@ -28,6 +28,7 @@
 #include <clocale>
 #include <cstring>
 #include <cctype>
+#include <cmath>
 #include <fstream>
 #include <list>
 #include <sys/stat.h>
@@ -401,7 +402,7 @@ emulate_key_event (Gtk::Widget* w, unsigned int keyval)
 	ev.state = 0;
 	ev.keyval = keyval;
 	ev.length = 0;
-	ev.string = (const gchar*) "";
+	ev.string = const_cast<gchar*> ("");
 	ev.hardware_keycode = keymapkey[0].keycode;
 	ev.group = keymapkey[0].group;
 	g_free(keymapkey);
@@ -859,4 +860,16 @@ unique_random_color (list<Gdk::Color>& used_colors)
 
 		/* XXX need throttle here to make sure we don't spin for ever */
 	}
+}
+
+string 
+rate_as_string (float r)
+{
+	char buf[32];
+	if (fmod (r, 1000.0f)) {
+		snprintf (buf, sizeof (buf), "%.1f kHz", r/1000.0);
+	} else {
+		snprintf (buf, sizeof (buf), "%.0f kHz", r/1000.0);
+	}
+	return buf;
 }

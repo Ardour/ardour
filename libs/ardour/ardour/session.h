@@ -161,6 +161,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	virtual ~Session ();
 
+        static int get_info_from_path (const std::string& xmlpath, float& sample_rate, SampleFormat& data_format);
+
 	std::string path() const { return _path; }
 	std::string name() const { return _name; }
 	std::string snap_name() const { return _current_snapshot_name; }
@@ -878,15 +880,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
     boost::shared_ptr<MidiPort> mtc_input_port () const;
 
     MIDI::MachineControl& mmc() { return *_mmc; }
-
-        /* Callbacks specifically related to JACK, and called directly
-	 * from the JACK audio backend.
-         */
-
-#ifdef HAVE_JACK_SESSION
-	void jack_session_event (jack_session_event_t* event);
-#endif
-        void jack_timebase_callback (jack_transport_state_t, pframes_t, jack_position_t*, int);
 
   protected:
 	friend class AudioEngine;
@@ -1617,7 +1610,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
     void setup_ltc ();
     void setup_click ();
+    void setup_click_state (const XMLNode&);
     void setup_bundles ();
+
+    static int get_session_info_from_path (XMLTree& state_tree, const std::string& xmlpath);
 };
 
 } // namespace ARDOUR

@@ -30,6 +30,7 @@
 #include "pbd/error.h"
 #include "pbd/xml++.h"
 #include "pbd/unwind.h"
+#include "pbd/failed_constructor.h"
 
 #include <gtkmm/alignment.h>
 #include <gtkmm/stock.h>
@@ -48,6 +49,7 @@
 #include "ardour_ui.h"
 #include "engine_dialog.h"
 #include "gui_thread.h"
+#include "utils.h"
 #include "i18n.h"
 
 using namespace std;
@@ -55,6 +57,9 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace Glib;
+
+static const unsigned int midi_tab = -1; /* not currently in use */
+static const unsigned int latency_tab = 1; /* zero-based, page zero is the main setup page */
 
 EngineControl::EngineControl ()
 	: ArdourDialog (_("Audio/MIDI Setup"))
@@ -75,7 +80,6 @@ EngineControl::EngineControl ()
 	, lm_table (5, 2)
 	, have_lm_results (false)
 	, midi_refresh_button (_("Refresh list"))
-	, aj_button (_("Start MIDI ALSA/JACK bridge"))
 	, ignore_changes (0)
 	, _desired_sample_rate (0)
 	, no_push (true)
@@ -93,6 +97,13 @@ EngineControl::EngineControl ()
 	 */
 
 	vector<const ARDOUR::AudioBackendInfo*> backends = ARDOUR::AudioEngine::instance()->available_backends();
+
+	if (backends.empty()) {
+		MessageDialog msg (string_compose (_("No audio/MIDI backends detected. %1 cannot run\n\n(This is a build/packaging/system error. It should never happen.)"), PROGRAM_NAME));
+		msg.run ();
+		throw failed_constructor ();
+	}
+
 	for (vector<const ARDOUR::AudioBackendInfo*>::const_iterator b = backends.begin(); b != backends.end(); ++b) {
 		strings.push_back ((*b)->name);
 	}
@@ -198,7 +209,7 @@ EngineControl::EngineControl ()
 	/* pack it all up */
 
 	notebook.pages().push_back (TabElem (basic_vbox, _("Audio")));
-	notebook.pages().push_back (TabElem (midi_vbox, _("MIDI")));
+	// notebook.pages().push_back (TabElem (midi_vbox, _("MIDI")));
 	notebook.pages().push_back (TabElem (lm_vbox, _("Latency")));
 	notebook.set_border_width (12);
 
@@ -246,6 +257,7 @@ EngineControl::EngineControl ()
 	sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::sample_rate_changed));
 	buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::buffer_size_changed));
 	device_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::device_changed));
+	midi_option_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::midi_option_changed));
 
 	input_latency.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
 	output_latency.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
@@ -404,6 +416,10 @@ EngineControl::build_full_control_notebook ()
 	basic_packer.attach (*label, 2, 3, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
+	label = manage (left_aligned_label (_("MIDI System")));
+	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
+	basic_packer.attach (midi_option_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
+	row++;
 }
 
 void
@@ -501,7 +517,6 @@ EngineControl::setup_midi_tab_for_backend ()
 void
 EngineControl::setup_midi_tab_for_jack ()
 {
-	midi_vbox.pack_start (aj_button, false, false);
 }	
 
 void
@@ -603,7 +618,22 @@ EngineControl::backend_changed ()
 		 */
 		list_devices ();
 	}
-	
+
+	vector<string> midi_options = backend->enumerate_midi_options();
+
+	if (midi_options.size() == 1) {
+		/* only contains the "none" option */
+		midi_option_combo.set_sensitive (false);
+	} else {
+		if (_have_control) {
+			set_popdown_strings (midi_option_combo, midi_options);
+			midi_option_combo.set_active_text (midi_options.front());
+			midi_option_combo.set_sensitive (true);
+		} else {
+			midi_option_combo.set_sensitive (false);
+		}
+	}
+
 	maybe_display_saved_state ();
 }
 
@@ -800,18 +830,6 @@ EngineControl::device_changed ()
 }	
 
 string
-EngineControl::rate_as_string (float r)
-{
-	char buf[32];
-	if (fmod (r, 1000.0f)) {
-		snprintf (buf, sizeof (buf), "%.1f kHz", r/1000.0);
-	} else {
-		snprintf (buf, sizeof (buf), "%.0f kHz", r/1000.0);
-	}
-	return buf;
-}
-
-string
 EngineControl::bufsize_as_string (uint32_t sz)
 {
 	/* Translators: "samples" is always plural here, so no
@@ -871,6 +889,14 @@ EngineControl::show_buffer_duration ()
 	char buf[32];
 	snprintf (buf, sizeof (buf), _("(%.1f msecs)"), (2 * samples) / (rate/1000.0));
 	buffer_size_duration_label.set_text (buf);
+}
+
+void
+EngineControl::midi_option_changed ()
+{
+	if (!ignore_changes) {
+		save_state ();
+	}
 }
 
 void
@@ -949,6 +975,7 @@ EngineControl::store_state (State& state)
 	state.output_latency = get_output_latency ();
 	state.input_channels = get_input_channels ();
 	state.output_channels = get_output_channels ();
+	state.midi_option = get_midi_option ();
 }
 
 void
@@ -973,6 +1000,10 @@ EngineControl::maybe_display_saved_state ()
 		show_buffer_duration ();
 		input_latency.set_value (state->input_latency);
 		output_latency.set_value (state->output_latency);
+
+		if (!state->midi_option.empty()) {
+			midi_option_combo.set_active_text (state->midi_option);
+		}
 	}
 }
 	
@@ -999,6 +1030,7 @@ EngineControl::get_state ()
 			node->add_property ("input-channels", (*i).input_channels);
 			node->add_property ("output-channels", (*i).output_channels);
 			node->add_property ("active", (*i).active ? "yes" : "no");
+			node->add_property ("midi-option", (*i).midi_option);
 			
 			state_nodes->add_child_nocopy (*node);
 		}
@@ -1095,6 +1127,11 @@ EngineControl::set_state (const XMLNode& root)
 			}
 			state.active = string_is_affirmative (prop->value ());
 			
+			if ((prop = grandchild->property ("midi-option")) == 0) {
+				continue;
+			}
+			state.midi_option = prop->value ();
+
 			states.push_back (state);
 		}
 	}
@@ -1112,6 +1149,7 @@ EngineControl::set_state (const XMLNode& root)
 			buffer_size_combo.set_active_text (bufsize_as_string ((*i).buffer_size));
 			input_latency.set_value ((*i).input_latency);
 			output_latency.set_value ((*i).output_latency);
+			midi_option_combo.set_active_text ((*i).midi_option);
 			ignore_changes--;
 			break;
 		}
@@ -1142,6 +1180,7 @@ EngineControl::push_state_to_backend (bool start)
 	bool change_bufsize = false;
 	bool change_latency = false;
 	bool change_channels = false;
+	bool change_midi = false;
 
 	uint32_t ochan = get_output_channels ();
 	uint32_t ichan = get_input_channels ();
@@ -1168,6 +1207,10 @@ EngineControl::push_state_to_backend (bool start)
 			
 			if (get_buffer_size() != backend->buffer_size()) {
 				change_bufsize = true;
+			}
+
+			if (get_midi_option() != backend->midi_option()) {
+				change_midi = true;
 			}
 			
 			/* zero-requested channels means "all available" */
@@ -1202,6 +1245,7 @@ EngineControl::push_state_to_backend (bool start)
 			change_bufsize = true;
 			change_channels = true;
 			change_latency = true;
+			change_midi = true;
 		}
 
 	} else {
@@ -1252,6 +1296,7 @@ EngineControl::push_state_to_backend (bool start)
 
 	if (change_driver || change_device || change_channels || change_latency ||
 	    (change_rate && !backend->can_change_sample_rate_when_running()) ||
+	    change_midi ||
 	    (change_bufsize && !backend->can_change_buffer_size_when_running())) {
 		restart_required = true;
 	} else {
@@ -1260,7 +1305,7 @@ EngineControl::push_state_to_backend (bool start)
 
 	if (was_running) {
 
-		if (!change_driver && !change_device && !change_channels && !change_latency) {
+		if (!change_driver && !change_device && !change_channels && !change_latency && !change_midi) {
 			/* no changes in any parameters that absolutely require a
 			 * restart, so check those that might be changeable without a
 			 * restart
@@ -1323,6 +1368,10 @@ EngineControl::push_state_to_backend (bool start)
 			error << string_compose (_("Cannot set output latency to %1"), get_output_latency()) << endmsg;
 			return -1;
 		}
+	}
+
+	if (change_midi) {
+		backend->set_midi_option (get_midi_option());
 	}
 			
 	if (start || (was_running && restart_required)) {
@@ -1397,6 +1446,12 @@ EngineControl::get_buffer_size () const
 	}
 
 	return samples;
+}
+
+string
+EngineControl::get_midi_option () const
+{
+	return midi_option_combo.get_active_text();
 }
 
 uint32_t
@@ -1491,12 +1546,12 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 		apply_button->set_sensitive (false);
 	}
 
-	if (page_num == 1) {
+	if (page_num == midi_tab) {
 		/* MIDI tab */
 		refresh_midi_display ();
 	}
 
-	if (page_num == 2) {
+	if (page_num == latency_tab) {
 		/* latency tab */
 
 		if (!ARDOUR::AudioEngine::instance()->running()) {

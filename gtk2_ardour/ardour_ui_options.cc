@@ -29,10 +29,6 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 
-#ifdef HAVE_LIBLO
-#include "ardour/osc.h"
-#endif
-
 #include "audio_clock.h"
 #include "ardour_ui.h"
 #include "actions.h"
@@ -341,16 +337,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "send-mmc") {
 
 		ActionManager::map_some_state ("options", "SendMMC", &RCConfiguration::get_send_mmc);
-
-	} else if (p == "use-osc") {
-
-#ifdef HAVE_LIBLO
-		if (Config->get_use_osc()) {
-			osc->start ();
-		} else {
-			osc->stop ();
-		}
-#endif
 
 	} else if (p == "keep-tearoffs") {
 		ActionManager::map_some_state ("Common", "KeepTearoffs", &RCConfiguration::get_keep_tearoffs);

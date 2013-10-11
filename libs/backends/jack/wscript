@@ -19,6 +19,7 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
+    autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.121.0')
     autowaf.configure(conf)
 
 def build(bld):
@@ -28,10 +29,10 @@ def build(bld):
             'jack_connection.cc',
             'jack_audiobackend.cc',
             'jack_portengine.cc',
-            'jack_utils.cc'
+            'jack_utils.cc',
+            'jack_session.cc',
             ]
     obj.includes = ['.']
-    obj.cxxflags = [ '-fPIC' ]
     obj.name     = 'jack_audiobackend'
     obj.target   = 'jack_audiobackend'
     obj.uselib   = [ 'JACK' ]

@@ -67,7 +67,7 @@ def fetch_gcc_version (CC):
     return version
 
 def fetch_git_revision ():
-    cmd = "LANG= git describe --tags HEAD"
+    cmd = "git describe --tags HEAD"
     output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
     rev = output[0].decode('utf-8')
     return rev
@@ -612,8 +612,6 @@ def configure(conf):
     if Options.options.boost_sp_debug:
         conf.env.append_value('CXXFLAGS', '-DBOOST_SP_ENABLE_DEBUG_HOOKS')
 
-    autowaf.check_header(conf, 'cxx', 'jack/session.h', define="JACK_SESSION", mandatory = False)
-
     conf.check_cxx(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
                   execute = "1",
                   mandatory = True,
@@ -661,8 +659,6 @@ def configure(conf):
     if opts.lxvst:
         conf.define('LXVST_SUPPORT', 1)
         conf.env['LXVST_SUPPORT'] = True
-    if bool(conf.env['JACK_SESSION']):
-        conf.define('HAVE_JACK_SESSION', 1)
     conf.define('WINDOWS_KEY', opts.windows_key)
     conf.env['PROGRAM_NAME'] = opts.program_name
     if opts.rt_alloc_debug:
@@ -716,7 +712,6 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('FLAC',                  conf.is_defined('HAVE_FLAC'))
     write_config_text('FPU optimization',      opts.fpu_optimization)
     write_config_text('Freedesktop files',     opts.freedesktop)
-    write_config_text('JACK session support',  conf.is_defined('JACK_SESSION'))
     write_config_text('LV2 UI embedding',      conf.is_defined('HAVE_SUIL'))
     write_config_text('LV2 support',           conf.is_defined('LV2_SUPPORT'))
     write_config_text('LXVST support',         conf.is_defined('LXVST_SUPPORT'))

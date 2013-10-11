@@ -592,14 +592,21 @@ Session::setup_ltc ()
 void
 Session::setup_click ()
 {
-	XMLNode* child = 0;
-
 	_clicking = false;
 	_click_io.reset (new ClickIO (*this, "click"));
 	_click_gain.reset (new Amp (*this));
 	_click_gain->activate ();
-	
-	if (state_tree && (child = find_named_node (*state_tree->root(), "Click")) != 0) {
+	if (state_tree) {
+		setup_click_state (*state_tree->root());
+	}
+}
+
+void
+Session::setup_click_state (const XMLNode& node)
+{	
+	const XMLNode* child = 0;
+
+	if ((child = find_named_node (node, "Click")) != 0) {
 		
 		/* existing state for Click */
 		int c = 0;
