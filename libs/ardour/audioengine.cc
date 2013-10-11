@@ -558,6 +558,16 @@ AudioEngine::drop_backend ()
 }
 
 boost::shared_ptr<AudioBackend>
+AudioEngine::set_default_backend ()
+{
+	if (_backends.empty()) {
+		return boost::shared_ptr<AudioBackend>();
+	}
+
+	return set_backend (_backends.begin()->first, "", "");
+}
+
+boost::shared_ptr<AudioBackend>
 AudioEngine::set_backend (const std::string& name, const std::string& arg1, const std::string& arg2)
 {
 	BackendMap::iterator b = _backends.find (name);
