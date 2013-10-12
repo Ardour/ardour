@@ -83,8 +83,8 @@ public:
      * just forward to a backend implementation.
      */
 
-    int            start ();
-    int            stop ();
+    int            start (bool for_latency_measurement=false);
+    int            stop (bool for_latency_measurement=false);
     int            pause ();
     int            freewheel (bool start_stop);
     float          get_cpu_load() const ;
@@ -194,7 +194,7 @@ public:
 
     MTDM* mtdm();
     int  prepare_for_latency_measurement ();
-    void start_latency_detection ();
+    int  start_latency_detection ();
     void stop_latency_detection ();
     void set_latency_input_port (const std::string&);
     void set_latency_output_port (const std::string&);
@@ -229,6 +229,7 @@ public:
     std::string               _latency_input_name;
     std::string               _latency_output_name;
     framecnt_t                _latency_signal_latency;
+    bool                      _stopped_for_latency;
     bool                      _started_for_latency;
     bool                      _in_destructor;
 
