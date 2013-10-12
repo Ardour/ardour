@@ -78,8 +78,6 @@ ArdourButton::ArdourButton (Element e)
 	, _fixed_diameter (true)
 	, _distinct_led_click (false)
 	, _hovering (false)
-	, _xpad_request (0)
-	, _ypad_request (0)
 {
 	ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 }
@@ -434,19 +432,10 @@ ArdourButton::set_corner_radius (float r)
 }
 
 void
-ArdourButton::set_padding (int x, int y)
-{
-	_xpad_request = x;
-	_ypad_request = y;
-
-	queue_resize ();
-}
-
-void
 ArdourButton::on_size_request (Gtk::Requisition* req)
 {
-	int xpad = 0 + _xpad_request;
-	int ypad = 6 + _ypad_request;
+	int xpad = 0;
+	int ypad = 6;
 
 	CairoWidget::on_size_request (req);
 
