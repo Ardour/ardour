@@ -13,7 +13,7 @@ fi
 
 SAE=
 MIXBUS=
-WITH_HARVID=
+WITH_HARVID=1
 WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
@@ -61,7 +61,7 @@ while [ $# -gt 0 ] ; do
 	# specific build flags
 	#
 
-	--harvid) WITH_HARVID=1 ; shift ;;
+	--noharvid) WITH_HARVID= ; shift ;;
 	--noladspa) WITH_LADSPA= ; shift ;;
 	--nostrip) STRIP= ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
