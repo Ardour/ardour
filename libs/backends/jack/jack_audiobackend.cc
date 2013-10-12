@@ -471,7 +471,7 @@ JACKAudioBackend::raw_buffer_size(DataType t)
 }
 
 void
-JACKAudioBackend::setup_jack_startup_command ()
+JACKAudioBackend::setup_jack_startup_command (bool for_latency_measurement)
 {
 	/* first we map the parameters that have been set onto a
 	 * JackCommandLineOptions object.
@@ -505,7 +505,7 @@ JACKAudioBackend::setup_jack_startup_command ()
 
 	string cmdline;
 
-	if (!get_jack_command_line_string (options, cmdline)) {
+	if (!get_jack_command_line_string (options, cmdline, for_latency_measurement)) {
 		/* error, somehow - we will still try to start JACK
 		 * automatically but it will be without our preferred options
 		 */
@@ -520,7 +520,7 @@ JACKAudioBackend::setup_jack_startup_command ()
 /* ---- BASIC STATE CONTROL API: start/stop/pause/freewheel --- */
 
 int
-JACKAudioBackend::start ()
+JACKAudioBackend::_start (bool for_latency_measurement)
 {
 	if (!available()) {
 
@@ -528,7 +528,7 @@ JACKAudioBackend::start ()
 			/* we will be starting JACK, so set up the 
 			   command that JACK will use when it (auto-)starts
 			*/
-			setup_jack_startup_command ();
+			setup_jack_startup_command (for_latency_measurement);
 		}
 
 		if (_jack_connection->open ()) {

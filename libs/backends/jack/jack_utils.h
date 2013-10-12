@@ -236,5 +236,5 @@ namespace ARDOUR {
 	/**
 	 * @return true if able to build a valid command line based on options
 	 */
-	bool get_jack_command_line_string (JackCommandLineOptions& options, std::string& command_line);
+	bool get_jack_command_line_string (JackCommandLineOptions& options, std::string& command_line, bool for_latency_measurement);
 }
