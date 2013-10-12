@@ -435,7 +435,7 @@ ARDOUR_UI::engine_halted (const char* reason, bool free_reason)
 		msgstr = string_compose (_("The audio backend was shutdown because:\n\n%1"), reason);
 	} else {
 		msgstr = string_compose (_("\
-`The audio backend has either been shutdown or it\n\
+The audio backend has either been shutdown or it\n\
 disconnected %1 because %1\n\
 was not fast enough. Try to restart\n\
 the audio backend and save the session."), PROGRAM_NAME);
