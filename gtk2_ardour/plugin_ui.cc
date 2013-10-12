@@ -405,8 +405,6 @@ PluginUIWindow::plugin_going_away ()
 	}
 
 	death_connection.disconnect ();
-
-	delete_when_idle (this);
 }
 
 PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)

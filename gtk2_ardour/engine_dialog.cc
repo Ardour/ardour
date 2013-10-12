@@ -497,7 +497,7 @@ EngineControl::EngineControl ()
 
  EngineControl::~EngineControl ()
  {
-
+	 ignore_changes = true;
  }
 
  void
