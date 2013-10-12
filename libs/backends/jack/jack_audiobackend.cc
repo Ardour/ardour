@@ -605,7 +605,7 @@ JACKAudioBackend::freewheel (bool onoff)
 	}
 
 	if (jack_set_freewheel (_priv_jack, onoff) == 0) {
-		_freewheeling = true;
+		_freewheeling = onoff;
 		return 0;
 	}
 
