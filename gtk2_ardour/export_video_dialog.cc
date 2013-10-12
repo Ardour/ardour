@@ -510,9 +510,8 @@ ExportVideoDialog::launch_export ()
 		end += av_offset;
 	}
 	else if (insnd_combo.get_active_row_number() == 2) {
-		// TODO quantize to video-frame ?!
-		start = export_range.start();
-		end   = export_range.end_frame();
+		start = ARDOUR_UI::instance()->video_timeline->quantify_frames_to_apv(export_range.start());
+		end   = ARDOUR_UI::instance()->video_timeline->quantify_frames_to_apv(export_range.end_frame());
 	}
 	if (end <= 0) {
 		start = _session->current_start_frame();
@@ -521,6 +520,15 @@ ExportVideoDialog::launch_export ()
 #if 0 /* DEBUG */
 	printf("audio export-range %lld -> %lld\n", start, end);
 #endif
+
+	const frameoffset_t vstart = ARDOUR_UI::instance()->video_timeline->get_offset();
+	const frameoffset_t vend   = vstart + ARDOUR_UI::instance()->video_timeline->get_duration();
+
+	if ( (start >= end) || (end < vstart) || (start > vend)) {
+		warning << _("Export Video: export-range does not include video.") << endmsg;
+		Gtk::Dialog::response(RESPONSE_CANCEL);
+		return;
+	}
 
 	tsp->set_range (start, end);
 	tsp->set_name ("mysession");
