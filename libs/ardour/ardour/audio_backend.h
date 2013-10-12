@@ -262,6 +262,16 @@ class AudioBackend : public PortEngine {
     
     /* State Control */
 
+    /* non-virtual method to avoid possible overrides of default
+     * parameters. See Scott Meyers or other books on C++ to
+     * understand this pattern, or possibly just this:
+     *
+     * http://stackoverflow.com/questions/12139786/good-pratice-default-arguments-for-pure-virtual-method
+     */ 
+    int start (bool for_latency_measurement=false) {
+	    return _start (for_latency_measurement);
+    }
+
     /** Start using the device named in the most recent call
      * to set_device(), with the parameters set by various
      * the most recent calls to set_sample_rate() etc. etc.
@@ -271,9 +281,14 @@ class AudioBackend : public PortEngine {
      * the AudioEngine referenced by @param engine. These calls will
      * occur in a thread created by and/or under the control of the backend.
      *
+     * @param for_latency_measurement if true, the device is being started
+     *        to carry out latency measurements and the backend should this
+     *        take care to return latency numbers that do not reflect
+     *        any existing systemic latency settings.
+     *
      * Return zero if successful, negative values otherwise.
      */
-    virtual int start () = 0;
+    virtual int _start (bool for_latency_measurement) = 0;
 
     /** Stop using the device currently in use. 
      *
