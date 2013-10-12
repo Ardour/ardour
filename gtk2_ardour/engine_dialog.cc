@@ -1648,23 +1648,25 @@ EngineControl::start_latency_detection ()
 {
 	ARDOUR::AudioEngine::instance()->set_latency_input_port (lm_input_channel_combo.get_active_text());
 	ARDOUR::AudioEngine::instance()->set_latency_output_port (lm_output_channel_combo.get_active_text());
-	ARDOUR::AudioEngine::instance()->start_latency_detection ();
-	lm_results.set_text (_("Detecting ..."));
-	latency_timeout = Glib::signal_timeout().connect (mem_fun (*this, &EngineControl::check_latency_measurement), 250);
-	lm_start_stop_label.set_text (_("Cancel measurement"));
-	have_lm_results = false;
-	lm_input_channel_combo.set_sensitive (false);
-	lm_output_channel_combo.set_sensitive (false);
+
+	if (ARDOUR::AudioEngine::instance()->start_latency_detection () == 0) {
+		lm_results.set_text (_("Detecting ..."));
+		latency_timeout = Glib::signal_timeout().connect (mem_fun (*this, &EngineControl::check_latency_measurement), 100);
+		lm_start_stop_label.set_text (_("Cancel measurement"));
+		have_lm_results = false;
+		lm_input_channel_combo.set_sensitive (false);
+		lm_output_channel_combo.set_sensitive (false);
+	}
 }
 
 void
 EngineControl::end_latency_detection ()
 {
-	ARDOUR::AudioEngine::instance()->stop_latency_detection ();
 	latency_timeout.disconnect ();
+	ARDOUR::AudioEngine::instance()->stop_latency_detection ();
 	lm_start_stop_label.set_text (_("Measure latency"));
 	if (!have_lm_results) {
-		lm_results.set_markup ("<i>No measurement results yet</i>");
+		lm_results.set_markup (string_compose ("<i>%1</i>", _("No measurement results yet")));
 	}
 	lm_input_channel_combo.set_sensitive (true);
 	lm_output_channel_combo.set_sensitive (true);
