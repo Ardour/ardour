@@ -22,6 +22,7 @@
 #include "pbd/stacktrace.h"
 #include <cstdio>
 #include <iostream>
+#include <string>
 
 void
 PBD::trace_twb ()
@@ -107,7 +108,8 @@ PBD::stacktrace (std::ostream& out, int levels)
 std::string 
 PBD::demangle (std::string const & l)
 {
-	return string;
+	std::string empty_string;
+	return empty_string;
 }
 
 void
