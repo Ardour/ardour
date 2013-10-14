@@ -161,6 +161,7 @@ PluginUIWindow::PluginUIWindow (
 
 PluginUIWindow::~PluginUIWindow ()
 {
+	cerr << "PluginWindow deleted for " << this << endl;
 	delete _pluginui;
 }
 

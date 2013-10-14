@@ -1392,7 +1392,7 @@ ProcessorBox::redisplay_processors ()
 
 	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::add_processor_to_display));
 
-	for (list<ProcessorWindowProxy*>::iterator i = _processor_window_info.begin(); i != _processor_window_info.end(); ++i) {
+	for (ProcessorWindowProxies::iterator i = _processor_window_info.begin(); i != _processor_window_info.end(); ++i) {
 		(*i)->marked = false;
 	}
 
@@ -1400,16 +1400,43 @@ ProcessorBox::redisplay_processors ()
 
 	/* trim dead wood from the processor window proxy list */
 
-	list<ProcessorWindowProxy*>::iterator i = _processor_window_info.begin();
+	ProcessorWindowProxies::iterator i = _processor_window_info.begin();
 	while (i != _processor_window_info.end()) {
-		list<ProcessorWindowProxy*>::iterator j = i;
+		ProcessorWindowProxies::iterator j = i;
 		++j;
 
-		if (!(*i)->marked) {
+		if (!(*i)->valid()) {
+
 			WM::Manager::instance().remove (*i);
 			delete *i;
 			_processor_window_info.erase (i);
-		}
+			
+		} else if (!(*i)->marked) {
+
+			/* this processor is no longer part of this processor
+			 * box.
+			 *
+			 * that could be because it was deleted or it could be
+			 * because the route being displayed in the parent
+			 * strip changed.
+			 *
+			 * The latter only happens with the editor mixer strip.
+			 */
+
+			if (is_editor_mixer_strip()) {
+				
+				/* editor mixer strip .. DO NOTHING
+				 *
+				 * note: the processor window stays visible if
+				 * it is already visible
+				 */
+			} else {
+				(*i)->hide ();
+				WM::Manager::instance().remove (*i);
+				delete *i;
+				_processor_window_info.erase (i);
+			} 
+		} 
 
 		i = j;
 	}
@@ -1428,7 +1455,7 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 		return;
 	}
 
-	list<ProcessorWindowProxy*>::iterator i = _processor_window_info.begin ();
+	ProcessorWindowProxies::iterator i = _processor_window_info.begin ();
 	while (i != _processor_window_info.end()) {
 
 		boost::shared_ptr<Processor> t = (*i)->processor().lock ();
@@ -2667,6 +2694,12 @@ ProcessorBox::update_gui_object_state (ProcessorEntry* entry)
 	entry->add_control_state (proc);
 }
 
+bool
+ProcessorBox::is_editor_mixer_strip() const
+{
+	return _parent_strip && !_parent_strip->mixer_owned();
+}
+
 ProcessorWindowProxy::ProcessorWindowProxy (string const & name, ProcessorBox* box, boost::weak_ptr<Processor> processor)
 	: WM::ProxyBase (name, string())
 	, marked (false)
@@ -2674,8 +2707,34 @@ ProcessorWindowProxy::ProcessorWindowProxy (string const & name, ProcessorBox* b
 	, _processor (processor)
 	, is_custom (false)
 	, want_custom (false)
+	, _valid (true)
 {
+	boost::shared_ptr<Processor> p = _processor.lock ();
+	if (!p) {
+		return;
+	}
+	p->DropReferences.connect (going_away_connection, MISSING_INVALIDATOR, boost::bind (&ProcessorWindowProxy::processor_going_away, this), gui_context());
+}
 
+ProcessorWindowProxy::~ProcessorWindowProxy()
+{
+	/* processor window proxies do not own the windows they create with
+	 * ::get(), so set _window to null before the normal WindowProxy method
+	 * deletes it.
+	 */
+	_window = 0;
+}
+
+void
+ProcessorWindowProxy::processor_going_away ()
+{
+	delete _window;
+	_window = 0;
+	_valid = false;
+	/* should be no real reason to do this, since the object that would
+	   send DropReferences is about to be deleted, but lets do it anyway.
+	*/
+	going_away_connection.disconnect();
 }
 
 ARDOUR::SessionHandlePtr*
@@ -2683,6 +2742,12 @@ ProcessorWindowProxy::session_handle()
 {
 	/* we don't care */
 	return 0;
+}
+
+bool
+ProcessorWindowProxy::valid() const
+{
+	return _valid;
 }
 
 XMLNode&
