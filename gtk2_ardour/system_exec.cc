@@ -25,7 +25,10 @@
 #include <unistd.h>
 
 #include <assert.h>
+
+#ifndef COMPILER_MSVC
 #include <dirent.h>
+#endif
 
 #ifdef PLATFORM_WINDOWS
 #include <windows.h>
