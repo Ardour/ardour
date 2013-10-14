@@ -267,7 +267,7 @@ cp -R $GTKSTACK_ROOT/lib/charset.alias $Resources
 # generate new Pango module file
 cat > pangorc <<EOF 
 [Pango]
-ModulesPath=$GTKSTACK_ROOT/lib/pango/1.6.0/modules
+ModulesPath=$GTKSTACK_ROOT/lib/pango/1.8.0/modules
 EOF
 env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.8.0/modules/?@executable_path/../lib/modules/?" > $Resources/pango.modules
 rm pangorc
