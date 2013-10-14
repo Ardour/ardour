@@ -269,3 +269,15 @@ Processor::set_ui (void* p)
 {
 	_ui_pointer = p;
 }
+
+void
+Processor::set_owner (SessionObject* o)
+{
+	_owner = o;
+}
+
+SessionObject*
+Processor::owner() const
+{
+	return _owner;
+}
