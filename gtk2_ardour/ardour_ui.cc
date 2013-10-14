@@ -27,7 +27,7 @@
 #include <cerrno>
 #include <fstream>
 
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 #include <sys/resource.h>
 #endif
 
@@ -834,7 +834,7 @@ ARDOUR_UI::no_memory_warning ()
 void
 ARDOUR_UI::check_memory_locking ()
 {
-#if defined(__APPLE__) || defined(WIN32)
+#if defined(__APPLE__) || defined(PLATFORM_WINDOWS)
 	/* OS X doesn't support mlockall(2), and so testing for memory locking capability there is pointless */
 	return;
 #else // !__APPLE__
@@ -3367,7 +3367,7 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 			warning << _("Specified docroot is not an existing directory.") << endmsg;
 			continue;
 		}
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 		if ( (!g_lstat (icsd_exec.c_str(), &sb) == 0)
 		     || (sb.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) == 0 ) {
 			warning << _("Given Video Server is not an executable file.") << endmsg;
@@ -3816,7 +3816,7 @@ ARDOUR_UI::reconnect_to_engine ()
 {
 	if (AudioEngine::instance()->start ()) {
 		MessageDialog msg (*editor,  _("Could not reconnect to the Audio/MIDI engine"));
-		msg.run ();
+		msg.run (); 
 		return -1;
 	}
 	

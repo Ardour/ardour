@@ -36,7 +36,7 @@
 
 
 #include "pbd/signals.h"
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 #include "pbd/glib_semaphore.h"
 #else
 #include "pbd/crossthread.h"
@@ -83,7 +83,7 @@ class AudioRegionEditor : public RegionEditor
 	void peak_amplitude_found (double);
 	PBD::Signal1<void, double> PeakAmplitudeFound;
 	PBD::ScopedConnection _peak_amplitude_connection;
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	PBD::GlibSemaphore m_peak_sem;
 #else
 	CrossThreadChannel _peak_channel;
