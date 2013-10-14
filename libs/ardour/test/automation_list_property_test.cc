@@ -16,17 +16,31 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
+
 #include "pbd/properties.h"
 #include "pbd/stateful_diff_command.h"
 #include "ardour/automation_list.h"
 #include "automation_list_property_test.h"
 #include "test_util.h"
+#include "test_common.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION (AutomationListPropertyTest);
 
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+
+void
+write_automation_list_xml (XMLNode* node, std::string filename)
+{
+	// use the same output dir for all of them
+	static std::string test_output_dir = new_test_output_dir ("automation_list_property");
+	std::string output_file = Glib::build_filename (test_output_dir, filename);
+
+	CPPUNIT_ASSERT (write_ref (node, output_file));
+}
 
 void
 AutomationListPropertyTest::basicTest ()
@@ -52,9 +66,18 @@ AutomationListPropertyTest::basicTest ()
 	/* Now it has changed */
 	CPPUNIT_ASSERT_EQUAL (true, property.changed());
 
+	std::string test_data_filename = "automation_list_property_test1.ref";
+	std::string test_data_file1 = Glib::build_filename (test_search_path().front(), test_data_filename);
+	CPPUNIT_ASSERT (Glib::file_test (test_data_file1, Glib::FILE_TEST_EXISTS));
+
 	XMLNode* foo = new XMLNode ("test");
 	property.get_changes_as_xml (foo);
-	check_xml (foo, "../libs/ardour/test/data/automation_list_property_test1.ref", ignore_properties);
+	write_automation_list_xml (foo, test_data_filename);
+	check_xml (foo, test_data_file1, ignore_properties);
+
+	test_data_filename = "automation_list_property_test2.ref";
+	std::string test_data_file2 = Glib::build_filename (test_search_path().front(), test_data_filename);
+	CPPUNIT_ASSERT (Glib::file_test (test_data_file2, Glib::FILE_TEST_EXISTS));
 
 	/* Do some more */
 	property.clear_changes ();
@@ -64,7 +87,8 @@ AutomationListPropertyTest::basicTest ()
 	CPPUNIT_ASSERT_EQUAL (true, property.changed());
 	foo = new XMLNode ("test");
 	property.get_changes_as_xml (foo);
-	check_xml (foo, "../libs/ardour/test/data/automation_list_property_test2.ref", ignore_properties);
+	write_automation_list_xml (foo, test_data_filename);
+	check_xml (foo, test_data_file2, ignore_properties);
 }
 
 /** Here's a StatefulDestructible class that has a AutomationListProperty */
@@ -119,11 +143,21 @@ AutomationListPropertyTest::undoTest ()
 	sheila->_jim->add (7, 8);
 	StatefulDiffCommand sdc (sheila);
 
+	std::string test_data_filename = "automation_list_property_test3.ref";
+	std::string test_data_file3 = Glib::build_filename (test_search_path().front(), test_data_filename);
+	CPPUNIT_ASSERT (Glib::file_test (test_data_file3, Glib::FILE_TEST_EXISTS));
+
 	/* Undo */
 	sdc.undo ();
-	check_xml (&sheila->get_state(), "../libs/ardour/test/data/automation_list_property_test3.ref", ignore_properties);
+	write_automation_list_xml (&sheila->get_state(), test_data_filename);
+	check_xml (&sheila->get_state(), test_data_file3, ignore_properties);
+
+	test_data_filename = "automation_list_property_test4.ref";
+	std::string test_data_file4 = Glib::build_filename (test_search_path().front(), test_data_filename);
+	CPPUNIT_ASSERT (Glib::file_test (test_data_file4, Glib::FILE_TEST_EXISTS));
 
 	/* Redo */
 	sdc.redo ();
-	check_xml (&sheila->get_state(), "../libs/ardour/test/data/automation_list_property_test4.ref", ignore_properties);
+	write_automation_list_xml (&sheila->get_state(), test_data_filename);
+	check_xml (&sheila->get_state(), test_data_file4, ignore_properties);
 }

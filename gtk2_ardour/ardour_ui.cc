@@ -439,7 +439,7 @@ ARDOUR_UI::engine_halted (const char* reason, bool free_reason)
 		msgstr = string_compose (_("The audio backend was shutdown because:\n\n%1"), reason);
 	} else {
 		msgstr = string_compose (_("\
-`The audio backend has either been shutdown or it\n\
+The audio backend has either been shutdown or it\n\
 disconnected %1 because %1\n\
 was not fast enough. Try to restart\n\
 the audio backend and save the session."), PROGRAM_NAME);
@@ -800,7 +800,11 @@ ARDOUR_UI::starting ()
 		 *  audio backend end up.
 		 */
 
-		audio_midi_setup.get (true);
+		try {
+			audio_midi_setup.get (true);
+		} catch (...) {
+			return -1;
+		}
 
 		/* go get a session */
 
@@ -2851,6 +2855,22 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		}
 	}
 
+	if (!new_session->writable()) {
+		MessageDialog msg (_("This session has been opened in read-only mode.\n\nYou will not be able to record or save."),
+				   true,
+				   Gtk::MESSAGE_INFO,
+				   BUTTONS_OK);
+		
+		msg.set_keep_above (true);
+		msg.set_title (_("Read-only Session"));
+		msg.set_position (Gtk::WIN_POS_CENTER);
+		pop_back_splash (msg);
+		msg.present ();
+		(void) msg.run ();
+		msg.hide ();
+	}
+	
+
 	/* Now the session been created, add the transport controls */
 	new_session->add_controllable(roll_controllable);
 	new_session->add_controllable(stop_controllable);
@@ -3815,8 +3835,13 @@ int
 ARDOUR_UI::reconnect_to_engine ()
 {
 	if (AudioEngine::instance()->start ()) {
-		MessageDialog msg (*editor,  _("Could not reconnect to the Audio/MIDI engine"));
-		msg.run (); 
+		if (editor) {
+			MessageDialog msg (*editor,  _("Could not reconnect to the Audio/MIDI engine"));
+			msg.run ();
+		} else {
+			MessageDialog msg (_("Could not reconnect to the Audio/MIDI engine"));
+			msg.run ();
+		}
 		return -1;
 	}
 	
@@ -4133,6 +4158,7 @@ int
 ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 {
 	audio_midi_setup->set_desired_sample_rate (desired_sample_rate);
+	audio_midi_setup->set_position (WIN_POS_CENTER);
 
 	switch (audio_midi_setup->run()) {
 	case Gtk::RESPONSE_OK:

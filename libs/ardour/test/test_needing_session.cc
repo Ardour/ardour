@@ -1,6 +1,5 @@
 #include <glibmm/miscutils.h>
 
-#include "midi++/manager.h"
 #include "pbd/compose.h"
 #include "pbd/enumwriter.h"
 #include "ardour/session.h"
@@ -26,8 +25,7 @@ TestNeedingSession::tearDown ()
 {
 	AudioEngine::instance()->remove_session ();
 	delete _session;
-	AudioEngine::instance()->stop (true);
+	AudioEngine::instance()->stop ();
 	
-	MIDI::Manager::destroy ();
 	AudioEngine::destroy ();
 }

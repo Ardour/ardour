@@ -409,6 +409,12 @@ JACKAudioBackend::interleaved () const
 	return false;
 }
 
+string
+JACKAudioBackend::midi_option () const
+{
+	return _target_midi_option;
+}
+
 uint32_t
 JACKAudioBackend::input_channels () const
 {
@@ -465,7 +471,7 @@ JACKAudioBackend::raw_buffer_size(DataType t)
 }
 
 void
-JACKAudioBackend::setup_jack_startup_command ()
+JACKAudioBackend::setup_jack_startup_command (bool for_latency_measurement)
 {
 	/* first we map the parameters that have been set onto a
 	 * JackCommandLineOptions object.
@@ -490,6 +496,8 @@ JACKAudioBackend::setup_jack_startup_command ()
 	options.realtime = true;
 	options.ports_max = 2048;
 	
+	ARDOUR::set_midi_option (options, _target_midi_option);
+
 	/* this must always be true for any server instance we start ourselves
 	 */
 
@@ -497,7 +505,7 @@ JACKAudioBackend::setup_jack_startup_command ()
 
 	string cmdline;
 
-	if (!get_jack_command_line_string (options, cmdline)) {
+	if (!get_jack_command_line_string (options, cmdline, for_latency_measurement)) {
 		/* error, somehow - we will still try to start JACK
 		 * automatically but it will be without our preferred options
 		 */
@@ -512,7 +520,7 @@ JACKAudioBackend::setup_jack_startup_command ()
 /* ---- BASIC STATE CONTROL API: start/stop/pause/freewheel --- */
 
 int
-JACKAudioBackend::start ()
+JACKAudioBackend::_start (bool for_latency_measurement)
 {
 	if (!available()) {
 
@@ -520,7 +528,7 @@ JACKAudioBackend::start ()
 			/* we will be starting JACK, so set up the 
 			   command that JACK will use when it (auto-)starts
 			*/
-			setup_jack_startup_command ();
+			setup_jack_startup_command (for_latency_measurement);
 		}
 
 		if (_jack_connection->open ()) {
@@ -597,7 +605,7 @@ JACKAudioBackend::freewheel (bool onoff)
 	}
 
 	if (jack_set_freewheel (_priv_jack, onoff) == 0) {
-		_freewheeling = true;
+		_freewheeling = onoff;
 		return 0;
 	}
 
@@ -1109,4 +1117,17 @@ JACKAudioBackend::launch_control_app ()
 	std::list<string> args;
 	args.push_back (appname);
 	Glib::spawn_async ("", args, Glib::SPAWN_SEARCH_PATH);
+}
+
+vector<string>
+JACKAudioBackend::enumerate_midi_options () const
+{
+	return ARDOUR::enumerate_midi_options ();
+}
+
+int
+JACKAudioBackend::set_midi_option (const string& opt)
+{
+	_target_midi_option = opt;
+	return 0;
 }

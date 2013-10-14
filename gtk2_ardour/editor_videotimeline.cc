@@ -111,7 +111,7 @@ Editor::embed_audio_from_video (std::string path, framepos_t n)
 }
 
 void
-Editor::export_video ()
+Editor::export_video (bool range)
 {
 	if (ARDOUR::Config->get_show_video_export_info()) {
 		ExportVideoInfobox infobox (_session);
@@ -127,7 +127,7 @@ Editor::export_video ()
 				break;
 		}
 	}
-	ExportVideoDialog dialog (_session, get_selection().time);
+	ExportVideoDialog dialog (_session, get_selection().time, range);
 	Gtk::ResponseType r = (Gtk::ResponseType) dialog.run();
 	(void) r; // keep gcc quiet
 	dialog.hide();

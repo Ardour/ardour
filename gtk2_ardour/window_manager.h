@@ -122,7 +122,7 @@ class ProxyBase : public ARDOUR::SessionHandlePtr, public sigc::trackable {
     Gtkmm2ext::VisibilityTracker* vistracker;
 
     void save_pos_and_size ();
-    bool handle_win_event (GdkEventAny *ev);
+    bool delete_event_handler (GdkEventAny *ev);
     
     void setup ();
 };
