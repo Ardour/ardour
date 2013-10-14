@@ -258,7 +258,7 @@ fi
 
 cp -R $GTKSTACK_ROOT/etc/* $Etc
 echo "Copying all Pango modules ..."
-cp -R $GTKSTACK_ROOT/lib/pango/1.6.0/modules/*.so $Frameworks/modules
+cp -R $GTKSTACK_ROOT/lib/pango/1.8.0/modules/*.so $Frameworks/modules
 echo "Copying all GDK Pixbuf loaders ..."
 cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Frameworks/modules
 # charset alias file
@@ -269,7 +269,7 @@ cat > pangorc <<EOF
 [Pango]
 ModulesPath=$GTKSTACK_ROOT/lib/pango/1.6.0/modules
 EOF
-env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.6.0/modules/?@executable_path/../lib/modules/?" > $Resources/pango.modules
+env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.8.0/modules/?@executable_path/../lib/modules/?" > $Resources/pango.modules
 rm pangorc
 
 # generate a new GDK pixbufs loaders file
