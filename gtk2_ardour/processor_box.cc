@@ -2104,6 +2104,18 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 	boost::shared_ptr<PortInsert> port_insert;
 	Window* gidget = 0;
 
+	/* This method may or may not return a Window, but if it does not it
+	 * will modify the parent mixer strip appearance layout to allow
+	 * "editing" the @param processor that was passed in.
+	 *
+	 * So for example, if the processor is an Amp (gain), the parent strip
+	 * will be forced back into a model where the fader controls the main gain.
+	 * If the processor is a send, then we map the send controls onto the
+	 * strip.
+	 * 
+	 * Plugins and others will return a window for control.
+	 */
+
 	if (boost::dynamic_pointer_cast<AudioTrack>(_route) != 0) {
 
 		if (boost::dynamic_pointer_cast<AudioTrack> (_route)->freeze_state() == AudioTrack::Frozen) {
@@ -2581,7 +2593,13 @@ ProcessorBox::generate_processor_title (boost::shared_ptr<PluginInsert> pi)
 		maker += " ...";
 	}
 
-	return string_compose(_("%1: %2 (by %3)"), _route->name(), pi->name(), maker);
+	SessionObject* owner = pi->owner();
+
+	if (owner) {
+		return string_compose(_("%1: %2 (by %3)"), owner->name(), pi->name(), maker);
+	} else {
+		return string_compose(_("%2 (by %3)"), pi->name(), maker);
+	}
 }
 
 /** @param p Processor.
