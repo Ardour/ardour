@@ -29,6 +29,8 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 
+#include "canvas/wave_view.h"
+
 #include "audio_clock.h"
 #include "ardour_ui.h"
 #include "actions.h"

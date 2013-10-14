@@ -71,6 +71,7 @@
 #include "ardour_dialog.h"
 #include "ardour_window.h"
 #include "editing.h"
+#include "engine_dialog.h"
 #include "meterbridge.h"
 #include "nsm.h"
 #include "ui_config.h"
@@ -97,7 +98,6 @@ class ArdourKeyboard;
 class AudioClock;
 class ButtonJoiner;
 class ConnectionEditor;
-class EngineControl;
 class MainClock;
 class Mixer_UI;
 class PublicEditor;
