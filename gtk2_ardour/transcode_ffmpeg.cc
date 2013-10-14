@@ -505,7 +505,7 @@ TranscodeFfmpeg::cancel ()
 {
 	if (!ffcmd || !ffcmd->is_running()) { return;}
 	ffcmd->write_to_stdin("q");
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	Sleep(1000);
 #else
 	sleep (1);

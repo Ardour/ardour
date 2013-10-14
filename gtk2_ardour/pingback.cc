@@ -23,7 +23,7 @@
 #include <fstream>
 #include <cstring>
 
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 #include <sys/utsname.h>
 #endif
 
@@ -73,7 +73,7 @@ struct ping_call {
 static void*
 _pingback (void *arg)
 {
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 	ping_call* cm = static_cast<ping_call*> (arg);
 	CURL* c;
 	struct utsname utb;
@@ -162,7 +162,7 @@ _pingback (void *arg)
 	curl_easy_cleanup (c);
 	delete cm;
 
-#endif /* WIN32 */
+#endif /* PLATFORM_WINDOWS */
 
 	return 0;
 }

@@ -688,7 +688,7 @@ ExportVideoDialog::encode_pass (int pass)
 		ffs["-an"] = "-y";
 		ffs["-passlogfile"] =  Glib::path_get_dirname (outfn) + G_DIR_SEPARATOR + "ffmpeg2pass";
 		ffs["-f"] = get_file_extension(invid).empty()?"mov":get_file_extension(invid);
-#ifdef _OS_WIN32
+#ifdef PLATFORM_WINDOWS
 		outfn = "NUL";
 #else
 		outfn = "/dev/null";

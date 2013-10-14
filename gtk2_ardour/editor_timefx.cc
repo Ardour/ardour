@@ -402,7 +402,7 @@ Editor::timefx_thread (void *arg)
            by the GUI ...
         */
 
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	Sleep(2000);
 #else
         struct timespec t = { 2, 0 };
