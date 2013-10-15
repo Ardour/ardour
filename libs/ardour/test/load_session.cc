@@ -3,7 +3,6 @@
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
 #include "ardour/session.h"
-#include "midi++/manager.h"
 #include <iostream>
 #include <cstdlib>
 
@@ -41,9 +40,8 @@ int main (int argc, char* argv[])
 
 	AudioEngine::instance()->remove_session ();
 	delete s;
-	AudioEngine::instance()->stop (true);
+	AudioEngine::instance()->stop ();
 
-	MIDI::Manager::destroy ();
 	AudioEngine::destroy ();
 
 	return 0;

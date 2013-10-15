@@ -89,7 +89,7 @@ class JACKAudioBackend : public AudioBackend {
     std::string control_app_name () const;
     void launch_control_app ();
 
-    int start ();
+    int _start (bool for_latency_measurement);
     int stop ();
     int pause ();
     int freewheel (bool);
@@ -225,7 +225,7 @@ class JACKAudioBackend : public AudioBackend {
     void*  process_thread ();
     static void* _start_process_thread (void*);
 
-    void setup_jack_startup_command ();
+    void setup_jack_startup_command (bool for_latency_measurement);
 
     /* pffooo */
 

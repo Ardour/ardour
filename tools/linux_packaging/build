@@ -150,6 +150,7 @@ Shared=$APPDIR/share
 Plugins=$APPLIB/plugins
 Surfaces=$APPLIB/surfaces
 Panners=$APPLIB/panners
+Backends=$APPLIB/backends
 
 Modules=$Libraries/modules
 Loaders=$Libraries/loaders
@@ -197,6 +198,7 @@ mkdir -p $PatchFiles
 mkdir -p $MackieControl
 mkdir -p $ExportFormats
 mkdir -p $Panners
+mkdir -p $Backends
 mkdir -p $Templates
 mkdir -p $Shared/doc
 
@@ -381,6 +383,9 @@ done
 
 # Panners
 cp $BUILD_ROOT/libs/panners/*/lib*.so* $Panners
+
+# Backends
+cp $BUILD_ROOT/libs/backends/*/lib*.so* $Backends
 
 # VAMP plugins that we use
 cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.so* $Libraries

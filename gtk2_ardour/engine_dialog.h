@@ -36,6 +36,7 @@
 #include "pbd/signals.h"
 
 #include "ardour_dialog.h"
+#include "ardour_button.h"
 
 class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
   public:
@@ -85,14 +86,16 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     Gtk::ComboBoxText lm_output_channel_combo;
     Gtk::ComboBoxText lm_input_channel_combo;
-    Gtk::Label        lm_start_stop_label;
-    Gtk::ToggleButton lm_measure_button;
+    Gtk::Button       lm_measure_button;
     Gtk::Button       lm_use_button;
+    Gtk::Button       lm_back_button;
+    ArdourButton      lm_button;
     Gtk::Label        lm_title;
     Gtk::Label        lm_results;
     Gtk::Table        lm_table;
     Gtk::VBox         lm_vbox;
     bool              have_lm_results;
+    bool              lm_running;
 
     Gtk::Button* cancel_button;
     Gtk::Button* ok_button;
@@ -192,7 +195,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void update_sensitivity ();
 
     /* latency measurement */
-    void latency_button_toggled ();
+    void latency_button_clicked ();
     bool check_latency_measurement ();
     sigc::connection latency_timeout;
     void enable_latency_tab ();

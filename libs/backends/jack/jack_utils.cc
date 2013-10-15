@@ -685,7 +685,7 @@ ARDOUR::JackCommandLineOptions::JackCommandLineOptions ()
 }
 
 bool
-ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& command_line)
+ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& command_line, bool for_latency_measurement)
 {
 	vector<string> args;
 
@@ -821,7 +821,7 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 	args.push_back ("-p");
 	args.push_back (to_string (options.period_size, std::dec));
 
-	if (get_jack_audio_driver_supports_latency_adjustment (options.driver)) {
+	if (!for_latency_measurement && get_jack_audio_driver_supports_latency_adjustment (options.driver)) {
 		if (options.input_latency) {
 			args.push_back ("-I");
 			args.push_back (to_string (options.input_latency, std::dec));

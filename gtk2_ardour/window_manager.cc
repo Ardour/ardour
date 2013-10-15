@@ -349,7 +349,7 @@ ProxyBase::setup ()
 	assert (_window);
 
 	vistracker = new Gtkmm2ext::VisibilityTracker (*_window);
-	_window->signal_delete_event().connect (sigc::mem_fun (*this, &ProxyBase::handle_win_event));
+	_window->signal_delete_event().connect (sigc::mem_fun (*this, &ProxyBase::delete_event_handler));
 
 	if (_width != -1 || _height != -1 || _x_off != -1 || _y_off != -1) {
 		/* cancel any mouse-based positioning */
@@ -369,8 +369,9 @@ ProxyBase::setup ()
 void
 ProxyBase::show ()
 {
-	Gtk::Window* win = get (true);
-	win->show ();
+	get (true);
+	assert (_window);
+	_window->show ();
 }
 
 void
@@ -384,17 +385,19 @@ ProxyBase::maybe_show ()
 void
 ProxyBase::show_all ()
 {
-	Gtk::Window* win = get (true);
-	win->show_all ();
+	get (true);
+	assert (_window);
+	_window->show_all ();
 }
-
 
 void
 ProxyBase::present ()
 {
-	Gtk::Window* win = get (true);
-	win->show_all ();
-	win->present ();
+	get (true);
+	assert (_window);
+
+	_window->show_all ();
+	_window->present ();
 
 	/* turn off any mouse-based positioning */
 	_window->set_position (Gtk::WIN_POS_NONE);
@@ -403,15 +406,14 @@ ProxyBase::present ()
 void
 ProxyBase::hide ()
 {
-	Gtk::Window* win = get (false);
-	if (win) {
+	if (_window) {
 		save_pos_and_size();
-		win->hide ();
+		_window->hide ();
 	}
 }
 
 bool
-ProxyBase::handle_win_event (GdkEventAny* /*ev*/)
+ProxyBase::delete_event_handler (GdkEventAny* /*ev*/)
 {
 	hide();
 	return true;
@@ -420,10 +422,9 @@ ProxyBase::handle_win_event (GdkEventAny* /*ev*/)
 void
 ProxyBase::save_pos_and_size ()
 {
-	Gtk::Window* win = get (false);
-	if (win) {
-		win->get_position (_x_off, _y_off);
-		win->get_size (_width, _height);
+	if (_window) {
+		_window->get_position (_x_off, _y_off);
+		_window->get_size (_width, _height);
 	}
 }
 /*-----------------------*/

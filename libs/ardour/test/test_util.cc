@@ -60,12 +60,12 @@ check_xml (XMLNode* node, string ref_file, list<string> const & ignore_propertie
 	check_nodes (p, q, ignore_properties);
 }
 
-void
+bool
 write_ref (XMLNode* node, string ref_file)
 {
 	XMLTree ref;
 	ref.set_root (node);
-	ref.write (ref_file);
+	return ref.write (ref_file);
 }
 
 class TestReceiver : public Receiver 
@@ -124,7 +124,10 @@ load_session (string dir, string state)
 	*/
 	Config->set_use_lxvst (false);
 
-	AudioEngine* engine = new AudioEngine ("test", "");
+	AudioEngine* engine = AudioEngine::create ();
+
+	CPPUNIT_ASSERT (engine->set_default_backend ());
+
 	init_post_engine ();
 
 	CPPUNIT_ASSERT (engine->start () == 0);

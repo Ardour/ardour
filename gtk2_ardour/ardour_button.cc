@@ -162,7 +162,7 @@ ArdourButton::set_markup (const std::string& str)
 		_layout = Pango::Layout::create (get_pango_context());
 	} 
 
-	_layout->set_text (str);
+	_layout->set_markup (str);
 	queue_resize ();
 }
 

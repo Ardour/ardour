@@ -924,7 +924,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_ruler_video (bool onoff) {ruler_video_action->set_active(onoff);}
 	int videotl_bar_height; /* in units of timebar_height; default: 4 */
 	int get_videotl_bar_height () const { return videotl_bar_height; }
-	void export_video ();
+	void export_video (bool range = false);
 	void toggle_region_video_lock ();
 
 	Gtk::VBox          time_button_vbox;
