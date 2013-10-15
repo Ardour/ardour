@@ -212,6 +212,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     PBD::ScopedConnection stopped_connection;
 
     void connect_disconnect_click ();
+    void calibrate_latency ();
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

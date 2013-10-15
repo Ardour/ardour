@@ -336,7 +336,7 @@ EngineControl::EngineControl ()
 	 basic_packer.attach (*label, 0, 1, 0, 1, xopt, (AttachOptions) 0);
 	 basic_packer.attach (backend_combo, 1, 2, 0, 1, xopt, (AttachOptions) 0);
 
-	 lm_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (notebook, &Gtk::Notebook::set_current_page), latency_tab));
+	 lm_button.signal_clicked.connect (sigc::mem_fun (*this, &EngineControl::calibrate_latency));
 	 lm_button.set_name ("record enable button");
 	 if (_have_control) {
 		 build_full_control_notebook ();
@@ -514,14 +514,34 @@ EngineControl::EngineControl ()
  EngineControl::enable_latency_tab ()
  {
 	 vector<string> outputs;
-	 ARDOUR::AudioEngine::instance()->get_physical_outputs (ARDOUR::DataType::AUDIO, outputs);
-	 set_popdown_strings (lm_output_channel_combo, outputs);
-	 lm_output_channel_combo.set_active_text (outputs.front());
-
 	 vector<string> inputs;
+
+	 ARDOUR::AudioEngine::instance()->get_physical_outputs (ARDOUR::DataType::AUDIO, outputs);
 	 ARDOUR::AudioEngine::instance()->get_physical_inputs (ARDOUR::DataType::AUDIO, inputs);
-	 set_popdown_strings (lm_input_channel_combo, inputs);
-	 lm_input_channel_combo.set_active_text (inputs.front());
+
+	 if (inputs.empty() || outputs.empty()) {
+		 MessageDialog msg (_("Your selected audio configuration is playback- or capture-only.\n\nLatency calibration requires playback and capture"));
+		 lm_measure_button.set_sensitive (false);
+		 notebook.set_current_page (0);
+		 msg.run ();
+		 return;
+	 }
+
+	 if (!outputs.empty()) {
+		 set_popdown_strings (lm_output_channel_combo, outputs);
+		 lm_output_channel_combo.set_active_text (outputs.front());
+		 lm_output_channel_combo.set_sensitive (true);
+	 } else {
+		 lm_output_channel_combo.set_sensitive (false);
+	 }
+
+	 if (!inputs.empty()) {
+		 set_popdown_strings (lm_input_channel_combo, inputs);
+		 lm_input_channel_combo.set_active_text (inputs.front());
+		 lm_input_channel_combo.set_sensitive (true);
+	 } else {
+		 lm_input_channel_combo.set_sensitive (false);
+	 }
 
 	 lm_measure_button.set_sensitive (true);
  }
@@ -1795,3 +1815,10 @@ EngineControl::connect_disconnect_click()
 		ARDOUR_UI::instance()->reconnect_to_engine ();
 	}
 }
+
+void
+EngineControl::calibrate_latency ()
+{
+	notebook.set_current_page (latency_tab);
+}
+
