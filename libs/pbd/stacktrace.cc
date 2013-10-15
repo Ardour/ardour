@@ -99,7 +99,7 @@ PBD::stacktrace (std::ostream& out, int levels)
 std::string 
 demangle (std::string const & l)
 {
-	return string();
+	return std::string();
 }
 
 void
