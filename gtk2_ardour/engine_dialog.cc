@@ -1619,7 +1619,9 @@ EngineControl::EngineControl ()
 		 enable_latency_tab ();
 
 	 } else {
-		 ARDOUR::AudioEngine::instance()->stop_latency_detection();
+		 if (lm_running) {
+			 ARDOUR::AudioEngine::instance()->stop_latency_detection();
+		 }
 	 }
  }
 
