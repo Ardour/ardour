@@ -77,7 +77,7 @@ EngineControl::EngineControl ()
 	, ports_adjustment (128, 8, 1024, 1, 16)
 	, ports_spinner (ports_adjustment)
 	, control_app_button (_("Device Control Panel"))
-	, lm_measure_button (_("Measure"))
+	, lm_measure_label (_("Measure"))
 	, lm_use_button (_("Use results"))
 	, lm_back_button (_("Back to settings ... (ignore results)"))
 	, lm_button (_("Calibrate..."))
@@ -179,6 +179,8 @@ EngineControl::EngineControl ()
 
 	xopt = AttachOptions(0);
 
+	lm_measure_label.set_padding (10, 10);
+	lm_measure_button.add (lm_measure_label);
 	lm_measure_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::latency_button_clicked));
 	lm_use_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::use_latency_button_clicked));
 	lm_back_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (notebook, &Gtk::Notebook::set_current_page), 0));
@@ -190,10 +192,6 @@ EngineControl::EngineControl ()
 	 */
 
 	Gtk::Misc* l;
-
-	if ((l = dynamic_cast<Gtk::Misc*>(lm_measure_button.get_child())) != 0) {
-		l->set_padding (10, 10);
-	}
 
 	if ((l = dynamic_cast<Gtk::Misc*>(lm_use_button.get_child())) != 0) {
 		l->set_padding (10, 10);
@@ -1710,7 +1708,7 @@ EngineControl::start_latency_detection ()
 	if (ARDOUR::AudioEngine::instance()->start_latency_detection () == 0) {
 		lm_results.set_markup (string_compose (results_markup, _("Detecting ...")));
 		latency_timeout = Glib::signal_timeout().connect (mem_fun (*this, &EngineControl::check_latency_measurement), 100);
-		lm_measure_button.set_label (_("Cancel"));
+		lm_measure_label.set_text (_("Cancel"));
 		have_lm_results = false;
 		lm_use_button.set_sensitive (false);
 		lm_input_channel_combo.set_sensitive (false);
@@ -1724,7 +1722,7 @@ EngineControl::end_latency_detection ()
 {
 	latency_timeout.disconnect ();
 	ARDOUR::AudioEngine::instance()->stop_latency_detection ();
-	lm_measure_button.set_label (_("Measure"));
+	lm_measure_label.set_text (_("Measure"));
 	if (!have_lm_results) {
 		lm_results.set_markup (string_compose (results_markup, _("No measurement results yet")));
 	} else {
