@@ -83,7 +83,8 @@ namespace {
 	const char * const dummy_driver_command_line_name = X_("dummy");
 
 	// should we provide more "pretty" names like above?
-	const char * const alsaint_midi_driver_name = X_("alsa");
+	const char * const alsa_seq_midi_driver_name = X_("alsa");
+	const char * const alsa_raw_midi_driver_name = X_("alsarawmidi");
 	const char * const alsaseq_midi_driver_name = X_("seq");
 	const char * const alsaraw_midi_driver_name = X_("raw");
 	const char * const winmme_midi_driver_name = X_("winmme");
@@ -744,9 +745,12 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 #endif
 
 	if (options.driver == alsa_driver_name) {
-		if (options.midi_driver == alsaint_midi_driver_name) {
-			args.push_back ("-I");
+		if (options.midi_driver == alsa_seq_midi_driver_name) {
+			args.push_back ("-X");
 			args.push_back ("alsa_midi");
+		} else if (options.midi_driver == alsa_raw_midi_driver_name) {
+			args.push_back ("-X");
+			args.push_back ("alsarawmidi");
 		}
 	}
 
@@ -860,7 +864,7 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 
 	if (options.driver == alsa_driver_name || options.driver == coreaudio_driver_name) {
 
-		if (options.midi_driver != alsaint_midi_driver_name) {
+		if (options.midi_driver != alsa_seq_midi_driver_name) {
 			if (!options.midi_driver.empty() && options.midi_driver != get_none_string ()) {
 				args.push_back ("-X");
 				args.push_back (options.midi_driver);
@@ -921,9 +925,10 @@ ARDOUR::enumerate_midi_options ()
 {
 	if (midi_options.empty()) {
 #ifdef HAVE_ALSA
-		midi_options.push_back (make_pair (_("ALSA"), alsaint_midi_driver_name));
 		midi_options.push_back (make_pair (_("(legacy) ALSA raw devices"), alsaraw_midi_driver_name));
 		midi_options.push_back (make_pair (_("(legacy) ALSA sequencer"), alsaseq_midi_driver_name));
+		midi_options.push_back (make_pair (_("ALSA (JACK1, 0.124 and later)"), alsa_seq_midi_driver_name));
+		midi_options.push_back (make_pair (_("ALSA (JACK2, 1.9.8 and later)"), alsa_raw_midi_driver_name));
 #endif
 #ifdef HAVE_PORTAUDIO
 		/* Windows folks: what name makes sense here? Are there other
