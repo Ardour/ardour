@@ -28,6 +28,7 @@
 #include "pbd/ringbuffer.h"
 #include "pbd/event_loop.h"
 
+#include "ardour/visibility.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
@@ -35,7 +36,7 @@ namespace ARDOUR {
 class Slave;
 class Region;
 
-class SessionEvent {
+class LIBARDOUR_API SessionEvent {
 public:
 	enum Type {
 		SetTransportSpeed,
@@ -150,7 +151,7 @@ private:
 	friend class Butler;
 };
 
-class SessionEventManager {
+class LIBARDOUR_API SessionEventManager {
 public:
 	SessionEventManager () : pending_events (2048),
 	                         auto_loop_event(0), punch_out_event(0), punch_in_event(0) {}
