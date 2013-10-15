@@ -718,6 +718,7 @@ ARDOUR_UI::starting ()
 {
 	Application* app = Application::instance ();
 	char *nsm_url;
+	bool brand_new_user = ArdourStartup::required ();
 
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
 	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_load));
@@ -778,17 +779,17 @@ ARDOUR_UI::starting ()
 		}
 
 	} else  {
-
-		if (ArdourStartup::required()) {
+		
+		if (brand_new_user) {
 			ArdourStartup s;
 			s.present ();
 			main().run();
 			s.hide ();
 			switch (s.response ()) {
-			case Gtk::RESPONSE_REJECT:
-				return -1;
-			default:
+			case Gtk::RESPONSE_OK:
 				break;
+			default:
+				return -1;
 			}
 		}
 
@@ -804,7 +805,9 @@ ARDOUR_UI::starting ()
 
 		/* go get a session */
 
-		if (get_session_parameters (false, ARDOUR_COMMAND_LINE::new_session, ARDOUR_COMMAND_LINE::load_template)) {
+		const bool new_session_required = (ARDOUR_COMMAND_LINE::new_session || brand_new_user);
+
+		if (get_session_parameters (false, new_session_required, ARDOUR_COMMAND_LINE::load_template)) {
 			return -1;
 		}
 	}

@@ -243,6 +243,7 @@ Where would you like new %1 sessions to be stored by default?\n\n\
 	vbox->pack_start (*txt, false, false);
 	vbox->pack_start (*hbox, false, true);
 
+	cerr << "set default folder to " << poor_mans_glob (Config->get_default_session_parent_dir()) << endl;
 	default_dir_chooser->set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 	default_dir_chooser->signal_current_folder_changed().connect (sigc::mem_fun (*this, &ArdourStartup::default_dir_changed));
 	default_dir_chooser->show ();
