@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: Ardour 3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-10-15 21:42+0400\n"
-"PO-Revision-Date: 2013-10-15 21:46+0300\n"
+"PO-Revision-Date: 2013-10-15 23:24+0300\n"
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
 "Language: ru\n"
@@ -737,9 +737,10 @@ msgid ""
 "was not fast enough. Try to restart\n"
 "the audio backend and save the session."
 msgstr ""
-"Звуковая подсистема либо завершила работу, либо отсоединила\n"
-" %1, потому что %1 работал недостаточно быстро.\n"
-"Попробуйте снова запустить подсистему и сохранить сеанс."
+"Звуковая подсистема либо завершила работу, либо\n"
+"отсоединила %1, потому что %1\n"
+"работал недостаточно быстро. Попробуйте снова\n"
+"запустить подсистему и сохранить сеанс."
 
 #: ardour_ui.cc:826 startup.cc:379
 msgid "%1 is ready for use"
@@ -4259,7 +4260,7 @@ msgstr "Вставить смену программы..."
 
 #: editor_actions.cc:1888
 msgid "Unlink from other copies"
-msgstr ""
+msgstr "Отсоединить от других копий"
 
 #: editor_actions.cc:1889
 msgid "Strip Silence..."
@@ -4430,7 +4431,7 @@ msgstr "Разница:"
 
 #: editor_drag.cc:1722
 msgid "Move Video"
-msgstr ""
+msgstr "Переместить видео"
 
 #: editor_drag.cc:2200
 msgid "copy meter mark"
@@ -5678,7 +5679,7 @@ msgstr "Панель управления устройством"
 
 #: engine_dialog.cc:80 engine_dialog.cc:1727
 msgid "Measure"
-msgstr ""
+msgstr "Измерить"
 
 #: engine_dialog.cc:81
 msgid "Use results"
@@ -5686,7 +5687,7 @@ msgstr "Использовать результаты"
 
 #: engine_dialog.cc:82
 msgid "Back to settings ... (ignore results)"
-msgstr ""
+msgstr "Закрыть и не использовать"
 
 #: engine_dialog.cc:83
 msgid "Calibrate..."
@@ -5717,7 +5718,7 @@ msgstr ""
 
 #: engine_dialog.cc:159
 msgid "Select two channels below and connect them using a cable."
-msgstr "Выберите нижк два канала и соедините их кабелем."
+msgstr "Выберите ниже два канала и соедините их кабелем."
 
 #: engine_dialog.cc:164
 msgid "Output channel"
@@ -5729,7 +5730,7 @@ msgstr "Канал входа"
 
 #: engine_dialog.cc:209
 msgid "Once the channels are connected, click the \"Measure\" button."
-msgstr "Соединив каналы, нажмите кнопку «Измерить задержку»."
+msgstr "Соединив каналы, нажмите кнопку «Измерить»."
 
 #: engine_dialog.cc:216
 msgid "When satisfied with the results, click the \"Use results\" button."
@@ -5876,7 +5877,7 @@ msgstr ""
 
 #: engine_dialog.cc:1699
 msgid "Detected roundtrip latency: %1"
-msgstr ""
+msgstr "Обнаружена циклическая задержка отклика: %1"
 
 #: engine_dialog.cc:1711 port_insert_ui.cc:135
 msgid "Detecting ..."
@@ -9586,7 +9587,7 @@ msgstr "Точка синхронизации (относительно обла
 
 #: region_editor.cc:96
 msgid "Sync point (absolute):"
-msgstr "Точка синхронизации (абсолютная:"
+msgstr "Точка синхронизации (абсолютная):"
 
 #: region_editor.cc:98
 msgid "File start:"
@@ -10032,7 +10033,7 @@ msgstr "Включить записываемость этой дорожки"
 
 #: route_ui.cc:133
 msgid "make mixer strips show sends to this bus"
-msgstr ""
+msgstr "Показывать в полосках микшера посылы к этой шине"
 
 #: route_ui.cc:138
 msgid "Monitor input"
@@ -10084,7 +10085,7 @@ msgstr "Назначить выбранным дорожкам и шинам (п
 
 #: route_ui.cc:889
 msgid "Copy track/bus gains to sends"
-msgstr ""
+msgstr "Скопировать фейдеры дорожки/шины в посылы"
 
 #: route_ui.cc:890
 msgid "Set sends gain to -inf"
