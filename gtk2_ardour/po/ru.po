@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-10-15 10:13+0400\n"
-"PO-Revision-Date: 2013-10-15 10:48+0300\n"
+"POT-Creation-Date: 2013-10-15 21:42+0400\n"
+"PO-Revision-Date: 2013-10-15 21:46+0300\n"
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
 "Language: ru\n"
@@ -741,11 +741,11 @@ msgstr ""
 " %1, потому что %1 работал недостаточно быстро.\n"
 "Попробуйте снова запустить подсистему и сохранить сеанс."
 
-#: ardour_ui.cc:823 startup.cc:378
+#: ardour_ui.cc:826 startup.cc:379
 msgid "%1 is ready for use"
 msgstr "%1 готов к работе"
 
-#: ardour_ui.cc:872
+#: ardour_ui.cc:875
 msgid ""
 "WARNING: Your system has a limit for maximum amount of locked memory. This "
 "might cause %1 to run out of memory before your system runs out of memory. \n"
@@ -760,23 +760,23 @@ msgstr ""
 "Вы можете узнать установленный предел при помощи команды 'ulimit -l'. Обычно "
 "это контролируется в %2."
 
-#: ardour_ui.cc:889
+#: ardour_ui.cc:892
 msgid "Do not show this window again"
 msgstr "Больше не показывать это окно"
 
-#: ardour_ui.cc:931
+#: ardour_ui.cc:934
 msgid "Don't quit"
 msgstr "Не выходить"
 
-#: ardour_ui.cc:932
+#: ardour_ui.cc:935
 msgid "Just quit"
 msgstr "Просто выйти"
 
-#: ardour_ui.cc:933
+#: ardour_ui.cc:936
 msgid "Save and quit"
 msgstr "Сохранить и выйти"
 
-#: ardour_ui.cc:943
+#: ardour_ui.cc:946
 msgid ""
 "%1 was unable to save your session.\n"
 "\n"
@@ -791,15 +791,15 @@ msgstr ""
 "\n"
 "«Просто выйти»."
 
-#: ardour_ui.cc:974
+#: ardour_ui.cc:977
 msgid "Please wait while %1 cleans up..."
 msgstr "Дождитесь завершения подчистки сеанса в %1..."
 
-#: ardour_ui.cc:992
+#: ardour_ui.cc:995
 msgid "Unsaved Session"
 msgstr "Сеанс не сохранён"
 
-#: ardour_ui.cc:1013
+#: ardour_ui.cc:1016
 msgid ""
 "The session \"%1\"\n"
 "has not been saved.\n"
@@ -817,7 +817,7 @@ msgstr ""
 "\n"
 "Что вы хотите сделать?"
 
-#: ardour_ui.cc:1016
+#: ardour_ui.cc:1019
 msgid ""
 "The snapshot \"%1\"\n"
 "has not been saved.\n"
@@ -835,75 +835,75 @@ msgstr ""
 "\n"
 "Что вы хотите сделать?"
 
-#: ardour_ui.cc:1030
+#: ardour_ui.cc:1033
 msgid "Prompter"
 msgstr ""
 
-#: ardour_ui.cc:1116 ardour_ui.cc:1124
+#: ardour_ui.cc:1119 ardour_ui.cc:1127
 #, c-format
 msgid "Audio: <span foreground=\"red\">none</span>"
 msgstr "Звук: <span foreground=\"red\">нет</span>"
 
-#: ardour_ui.cc:1128
+#: ardour_ui.cc:1131
 #, c-format
 msgid "Audio: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"
 msgstr "Звук: <span foreground=\"green\">%.1f КГц / %4.1f мс</span>"
 
-#: ardour_ui.cc:1132
+#: ardour_ui.cc:1135
 #, c-format
 msgid "Audio: <span foreground=\"green\">%<PRId64> kHz / %4.1f ms</span>"
 msgstr "Звук: <span foreground=\"green\">%<PRId64> КГц / %4.1f мс</span>"
 
-#: ardour_ui.cc:1150 export_video_dialog.cc:67
+#: ardour_ui.cc:1153 export_video_dialog.cc:67
 msgid "File:"
 msgstr "Файл:"
 
-#: ardour_ui.cc:1154
+#: ardour_ui.cc:1157
 msgid "BWF"
 msgstr "BWF"
 
-#: ardour_ui.cc:1157
+#: ardour_ui.cc:1160
 msgid "WAV"
 msgstr "WAV"
 
-#: ardour_ui.cc:1160
+#: ardour_ui.cc:1163
 msgid "WAV64"
 msgstr "WAV64"
 
-#: ardour_ui.cc:1163 session_option_editor.cc:197
+#: ardour_ui.cc:1166 session_option_editor.cc:197
 msgid "CAF"
 msgstr "CAF"
 
-#: ardour_ui.cc:1166
+#: ardour_ui.cc:1169
 msgid "AIFF"
 msgstr "AIFF"
 
-#: ardour_ui.cc:1169
+#: ardour_ui.cc:1172
 msgid "iXML"
 msgstr "iXML"
 
-#: ardour_ui.cc:1172
+#: ardour_ui.cc:1175
 msgid "RF64"
 msgstr "RF64"
 
-#: ardour_ui.cc:1180
+#: ardour_ui.cc:1183
 msgid "32-float"
 msgstr "32-float"
 
-#: ardour_ui.cc:1183
+#: ardour_ui.cc:1186
 msgid "24-int"
 msgstr "24-int"
 
-#: ardour_ui.cc:1186
+#: ardour_ui.cc:1189
 msgid "16-int"
 msgstr "16-int"
 
-#: ardour_ui.cc:1205
+#: ardour_ui.cc:1208
 #, c-format
 msgid "DSP: <span foreground=\"%s\">%5.1f%%</span>"
 msgstr "ЦП: <span foreground=\"%s\">%5.1f%%</span>"
 
-#: ardour_ui.cc:1224
+#: ardour_ui.cc:1227
 #, c-format
 msgid ""
 "Buffers: <span foreground=\"green\">p:</span><span foreground=\"%s\">"
@@ -914,34 +914,34 @@ msgstr ""
 "%%</span> <span foreground=\"green\">c:</span><span foreground=\"%s\">"
 "%<PRIu32>%%</span>"
 
-#: ardour_ui.cc:1265
+#: ardour_ui.cc:1268
 msgid "Disk: <span foreground=\"green\">Unknown</span>"
 msgstr "На диске: <span foreground=\"green\">неизвестно</span>"
 
-#: ardour_ui.cc:1267
+#: ardour_ui.cc:1270
 msgid "Disk: <span foreground=\"green\">24hrs+</span>"
 msgstr "На диске: <span foreground=\"green\">24ч+</span>"
 
-#: ardour_ui.cc:1285
+#: ardour_ui.cc:1288
 msgid "Disk: <span foreground=\"green\">&gt;24 hrs</span>"
 msgstr "На диске: <span foreground=\"green\">&gt;24ч</span>"
 
-#: ardour_ui.cc:1296
+#: ardour_ui.cc:1299
 #, c-format
 msgid "Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"
 msgstr "На диске:  <span foreground=\"%s\">%02dч:%02dм:%02dс</span>"
 
-#: ardour_ui.cc:1322
+#: ardour_ui.cc:1325
 #, c-format
 msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
 msgstr "ТК: <span foreground=\"%s\">%s</span>"
 
-#: ardour_ui.cc:1439 ardour_ui.cc:1448 session_dialog.cc:322
+#: ardour_ui.cc:1442 ardour_ui.cc:1451 session_dialog.cc:322
 #: session_dialog.cc:327
 msgid "Recent Sessions"
 msgstr "Недавние сеансы"
 
-#: ardour_ui.cc:1527
+#: ardour_ui.cc:1530
 msgid ""
 "%1 is not connected to any audio backend.\n"
 "You cannot open or close sessions in this condition"
@@ -949,27 +949,27 @@ msgstr ""
 "%1 не соединен с какой-либо звуковой подсистемой.\n"
 "Открытие и закрытие сеансов невозможно."
 
-#: ardour_ui.cc:1551
+#: ardour_ui.cc:1554
 msgid "Open Session"
 msgstr "Открыть сеанс"
 
-#: ardour_ui.cc:1576 session_dialog.cc:353 session_import_dialog.cc:169
+#: ardour_ui.cc:1579 session_dialog.cc:353 session_import_dialog.cc:169
 #: session_metadata_dialog.cc:729
 msgid "%1 sessions"
 msgstr "Cеансы %1"
 
-#: ardour_ui.cc:1613
+#: ardour_ui.cc:1616
 msgid "You cannot add a track without a session already loaded."
 msgstr "Вы не можете добавить дорожку без загруженного сеанса."
 
-#: ardour_ui.cc:1621
+#: ardour_ui.cc:1624
 msgid "could not create %1 new mixed track"
 msgid_plural "could not create %1 new mixed tracks"
 msgstr[0] "Не удалось создать %1 новую смешанную дорожку"
 msgstr[1] "Не удалось создать %1 новых смешанных дорожки"
 msgstr[2] "Не удалось создать %1 новых смешанных дорожек"
 
-#: ardour_ui.cc:1627 ardour_ui.cc:1688
+#: ardour_ui.cc:1630 ardour_ui.cc:1691
 msgid ""
 "There are insufficient JACK ports available\n"
 "to create a new track or bus.\n"
@@ -981,25 +981,25 @@ msgstr ""
 "Необходимо сохранить %1, выйти и запустить\n"
 "JACK с увеличенным количеством портов."
 
-#: ardour_ui.cc:1662
+#: ardour_ui.cc:1665
 msgid "You cannot add a track or bus without a session already loaded."
 msgstr "Вы не можете добавить дорожку или шину без открытого сеанса."
 
-#: ardour_ui.cc:1671
+#: ardour_ui.cc:1674
 msgid "could not create %1 new audio track"
 msgid_plural "could not create %1 new audio tracks"
 msgstr[0] "Не удалось создать %1 новую звуковую дорожку"
 msgstr[1] "Не удалось создать %2 новых звуковых дорожки"
 msgstr[2] "Не удалось создать %2 новых звуковых дорожек"
 
-#: ardour_ui.cc:1680
+#: ardour_ui.cc:1683
 msgid "could not create %1 new audio bus"
 msgid_plural "could not create %1 new audio busses"
 msgstr[0] "Не удалось создать %1 новую звуковую шину"
 msgstr[1] "Не удалось создать %1 новых звуковых шины"
 msgstr[2] "Не удалось создать %1 новых звуковых шин"
 
-#: ardour_ui.cc:1804
+#: ardour_ui.cc:1807
 msgid ""
 "Please create one or more tracks before trying to record.\n"
 "You can do this with the \"Add Track or Bus\" option in the Session menu."
@@ -1008,15 +1008,15 @@ msgstr ""
 "как пытаться что-либо записать.\n"
 "Используйте меню «Сеанс > Добавить дорожку/шину»."
 
-#: ardour_ui.cc:2181
+#: ardour_ui.cc:2184
 msgid "Take Snapshot"
 msgstr "Создать снимок"
 
-#: ardour_ui.cc:2182
+#: ardour_ui.cc:2185
 msgid "Name of new snapshot"
 msgstr "Название нового снимка"
 
-#: ardour_ui.cc:2206
+#: ardour_ui.cc:2209
 msgid ""
 "To ensure compatibility with various systems\n"
 "snapshot names may not contain a '%1' character"
@@ -1024,27 +1024,27 @@ msgstr ""
 "Для обеспечения совместимости с различными системами\n"
 "названия снимков не могут содержать символ '%1'."
 
-#: ardour_ui.cc:2218
+#: ardour_ui.cc:2221
 msgid "Confirm Snapshot Overwrite"
 msgstr "Подтвердите перезапись снимка"
 
-#: ardour_ui.cc:2219
+#: ardour_ui.cc:2222
 msgid "A snapshot already exists with that name.  Do you want to overwrite it?"
 msgstr "Снимок с таким названием уже есть. Перезаписать его?"
 
-#: ardour_ui.cc:2222 utils_videotl.cc:67
+#: ardour_ui.cc:2225 utils_videotl.cc:67
 msgid "Overwrite"
 msgstr "Перезаписать"
 
-#: ardour_ui.cc:2256
+#: ardour_ui.cc:2259
 msgid "Rename Session"
 msgstr "Переименовать сеанс"
 
-#: ardour_ui.cc:2257
+#: ardour_ui.cc:2260
 msgid "New session name"
 msgstr "Новое название сеанса"
 
-#: ardour_ui.cc:2271 ardour_ui.cc:2672 ardour_ui.cc:2710
+#: ardour_ui.cc:2274 ardour_ui.cc:2675 ardour_ui.cc:2713
 msgid ""
 "To ensure compatibility with various systems\n"
 "session names may not contain a '%1' character"
@@ -1052,12 +1052,12 @@ msgstr ""
 "Для обеспечения совместимости с различными системами\n"
 "названия сеансов не могут содержать символ '%1'."
 
-#: ardour_ui.cc:2279
+#: ardour_ui.cc:2282
 msgid ""
 "That name is already in use by another directory/folder. Please try again."
 msgstr ""
 
-#: ardour_ui.cc:2288
+#: ardour_ui.cc:2291
 msgid ""
 "Renaming this session failed.\n"
 "Things could be seriously messed up at this point"
@@ -1065,19 +1065,19 @@ msgstr ""
 "Не удалось переименовать этот сеанс.\n"
 "Очень может быть, что всё испортилось."
 
-#: ardour_ui.cc:2399
+#: ardour_ui.cc:2402
 msgid "Save Template"
 msgstr "Сохранить шаблон"
 
-#: ardour_ui.cc:2400
+#: ardour_ui.cc:2403
 msgid "Name for template:"
 msgstr "Название шаблона:"
 
-#: ardour_ui.cc:2401
+#: ardour_ui.cc:2404
 msgid "-template"
 msgstr "-шаблон"
 
-#: ardour_ui.cc:2439
+#: ardour_ui.cc:2442
 msgid ""
 "This session\n"
 "%1\n"
@@ -1087,35 +1087,35 @@ msgstr ""
 "%1\n"
 "уже существует. Открыть его?"
 
-#: ardour_ui.cc:2449
+#: ardour_ui.cc:2452
 msgid "Open Existing Session"
 msgstr "Открыть существующий сеанс"
 
-#: ardour_ui.cc:2700
+#: ardour_ui.cc:2703
 msgid "There is no existing session at \"%1\""
 msgstr "По адресу \"%1\" не существующего сеанса"
 
-#: ardour_ui.cc:2792
+#: ardour_ui.cc:2795
 msgid "Please wait while %1 loads your session"
 msgstr "Дождитесь завершения загрузки сеанса в %1"
 
-#: ardour_ui.cc:2807
+#: ardour_ui.cc:2810
 msgid "Port Registration Error"
 msgstr "Ошибка регистрации порта"
 
-#: ardour_ui.cc:2808
+#: ardour_ui.cc:2811
 msgid "Click the Close button to try again."
 msgstr "Щелкните кнопку «Закрыть» для возврата к предыдущему диалогу."
 
-#: ardour_ui.cc:2829
+#: ardour_ui.cc:2832
 msgid "Session \"%1 (snapshot %2)\" did not load successfully"
 msgstr "Не удалось загрузить сеанс \"%1 (снимок %2)\""
 
-#: ardour_ui.cc:2836
+#: ardour_ui.cc:2839
 msgid "Loading Error"
 msgstr "Ошибка при загрузке"
 
-#: ardour_ui.cc:2855
+#: ardour_ui.cc:2858
 msgid ""
 "This session has been opened in read-only mode.\n"
 "\n"
@@ -1125,24 +1125,24 @@ msgstr ""
 "\n"
 "Вы не сможете записывать или сохранять."
 
-#: ardour_ui.cc:2861
+#: ardour_ui.cc:2864
 msgid "Read-only Session"
 msgstr "Сеанс в режиме чтения"
 
-#: ardour_ui.cc:2919
+#: ardour_ui.cc:2922
 msgid "Could not create session in \"%1\""
 msgstr "Не удалось создать сеанс «%1»"
 
-#: ardour_ui.cc:3019
+#: ardour_ui.cc:3022
 msgid "No files were ready for clean-up"
 msgstr "Нет готовых к удалению звуковых файлов"
 
-#: ardour_ui.cc:3023 ardour_ui.cc:3033 ardour_ui.cc:3166 ardour_ui.cc:3173
+#: ardour_ui.cc:3026 ardour_ui.cc:3036 ardour_ui.cc:3169 ardour_ui.cc:3176
 #: ardour_ui_ed.cc:104
 msgid "Clean-up"
 msgstr "Очистить"
 
-#: ardour_ui.cc:3024
+#: ardour_ui.cc:3027
 msgid ""
 "If this seems suprising, \n"
 "check for any existing snapshots.\n"
@@ -1154,19 +1154,19 @@ msgstr ""
 "Они могут включать области, которым\n"
 "нужны неиспользуемые файлы."
 
-#: ardour_ui.cc:3083
+#: ardour_ui.cc:3086
 msgid "kilo"
 msgstr "кило"
 
-#: ardour_ui.cc:3086
+#: ardour_ui.cc:3089
 msgid "mega"
 msgstr "мега"
 
-#: ardour_ui.cc:3089
+#: ardour_ui.cc:3092
 msgid "giga"
 msgstr "гига"
 
-#: ardour_ui.cc:3094
+#: ardour_ui.cc:3097
 msgid ""
 "The following file was deleted from %2,\n"
 "releasing %3 %4bytes of disk space"
@@ -1186,7 +1186,7 @@ msgstr[2] ""
 "освободив при этом %3 %4байт\n"
 "дискового пространства."
 
-#: ardour_ui.cc:3101
+#: ardour_ui.cc:3104
 msgid ""
 "The following file was not in use and \n"
 "has been moved to: %2\n"
@@ -1233,11 +1233,11 @@ msgstr[2] ""
 "\n"
 "дополнительно освободит %3 %4байт дискового пространства.\n"
 
-#: ardour_ui.cc:3161
+#: ardour_ui.cc:3164
 msgid "Are you sure you want to clean-up?"
 msgstr "Вы уверены, что хотите выполнить очистку?"
 
-#: ardour_ui.cc:3168
+#: ardour_ui.cc:3171
 msgid ""
 "Clean-up is a destructive operation.\n"
 "ALL undo/redo information will be lost if you clean-up.\n"
@@ -1248,81 +1248,81 @@ msgstr ""
 "неиспользуемые звуковые файлы\n"
 "будут перемещены в «мертвую» зону."
 
-#: ardour_ui.cc:3176
+#: ardour_ui.cc:3179
 msgid "CleanupDialog"
 msgstr "Очистка"
 
-#: ardour_ui.cc:3206
+#: ardour_ui.cc:3209
 msgid "Cleaned Files"
 msgstr "Очищенные файлы"
 
-#: ardour_ui.cc:3223
+#: ardour_ui.cc:3226
 msgid "deleted file"
 msgstr "удалён файл"
 
-#: ardour_ui.cc:3315
+#: ardour_ui.cc:3318
 msgid ""
 "Video-Server was not launched by Ardour. The request to stop it is ignored."
 msgstr ""
 "Видеосервер не был запущен Ardour. Запрос на его остановку проигнорирован."
 
-#: ardour_ui.cc:3319
+#: ardour_ui.cc:3322
 msgid "Stop Video-Server"
 msgstr "Остановить видеосервер"
 
-#: ardour_ui.cc:3320
+#: ardour_ui.cc:3323
 msgid "Do you really want to stop the Video Server?"
 msgstr "Вы действительно хотите остановить видеосервер?"
 
-#: ardour_ui.cc:3323
+#: ardour_ui.cc:3326
 msgid "Yes, Stop It"
 msgstr "Да, остановить"
 
-#: ardour_ui.cc:3349
+#: ardour_ui.cc:3352
 msgid "The Video Server is already started."
 msgstr ""
 
-#: ardour_ui.cc:3351
+#: ardour_ui.cc:3354
 msgid ""
 "An external Video Server is configured and can be reached. Not starting a "
 "new instance."
 msgstr ""
 
-#: ardour_ui.cc:3359 ardour_ui.cc:3449
+#: ardour_ui.cc:3362 ardour_ui.cc:3452
 msgid ""
 "Could not connect to the Video Server. Start it or configure its access URL "
 "in Edit -> Preferences."
 msgstr ""
 
-#: ardour_ui.cc:3383
+#: ardour_ui.cc:3386
 msgid "Specified docroot is not an existing directory."
 msgstr ""
 
-#: ardour_ui.cc:3388
+#: ardour_ui.cc:3391
 msgid "Given Video Server is not an executable file."
 msgstr ""
 
-#: ardour_ui.cc:3421
+#: ardour_ui.cc:3424
 msgid "Cannot launch the video-server"
 msgstr "Не удалось запустить видеосервер"
 
-#: ardour_ui.cc:3430
+#: ardour_ui.cc:3433
 msgid "Video-server was started but does not respond to requests..."
 msgstr ""
 
-#: ardour_ui.cc:3475 editor_audio_import.cc:632
+#: ardour_ui.cc:3478 editor_audio_import.cc:632
 msgid "could not open %1"
 msgstr "не удалось открыть %1"
 
-#: ardour_ui.cc:3479
+#: ardour_ui.cc:3482
 msgid "no video-file selected"
 msgstr ""
 
-#: ardour_ui.cc:3651
+#: ardour_ui.cc:3654
 msgid "Recording was stopped because your system could not keep up."
 msgstr "Запись остановлена из-за недостаточного быстродействия системы"
 
-#: ardour_ui.cc:3680
+#: ardour_ui.cc:3683
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1336,7 +1336,7 @@ msgstr ""
 "В частности ей не удалось записать данные на диск\n"
 "достаточно быстро для фиксации захваченных данных.\n"
 
-#: ardour_ui.cc:3699
+#: ardour_ui.cc:3702
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1350,11 +1350,11 @@ msgstr ""
 "В частности ей не удалось прочитать данные\n"
 "с диска достаточно быстро для воспроизведения.\n"
 
-#: ardour_ui.cc:3739
+#: ardour_ui.cc:3742
 msgid "Crash Recovery"
 msgstr "Восстановление данных"
 
-#: ardour_ui.cc:3740
+#: ardour_ui.cc:3743
 msgid ""
 "This session appears to have been in the\n"
 "middle of recording when %1 or\n"
@@ -1370,19 +1370,19 @@ msgstr ""
 "%1 может восстановить записанные данные,\n"
 "либо проигнорировать их. Примите решение.\n"
 
-#: ardour_ui.cc:3752
+#: ardour_ui.cc:3755
 msgid "Ignore crash data"
 msgstr "Проигнорировать"
 
-#: ardour_ui.cc:3753
+#: ardour_ui.cc:3756
 msgid "Recover from crash"
 msgstr "Восстановить данные"
 
-#: ardour_ui.cc:3773
+#: ardour_ui.cc:3776
 msgid "Sample Rate Mismatch"
 msgstr "Несовпадение частот сэмплирования"
 
-#: ardour_ui.cc:3774
+#: ardour_ui.cc:3777
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
 "%2 is currently running at %3 Hz.  If you load this session,\n"
@@ -1394,23 +1394,23 @@ msgstr ""
 "Если вы загрузите этот сеанс, звуковые данные могут быть\n"
 "воспроизведены с некорректной частотой сэмплирования.\n"
 
-#: ardour_ui.cc:3783
+#: ardour_ui.cc:3786
 msgid "Do not load session"
 msgstr "Не загружать сеанс"
 
-#: ardour_ui.cc:3784
+#: ardour_ui.cc:3787
 msgid "Load session anyway"
 msgstr "Все равно загрузить"
 
-#: ardour_ui.cc:3811
+#: ardour_ui.cc:3814
 msgid "Could not disconnect from Audio/MIDI engine"
 msgstr "Не удалось отсоединиться от аудио/MIDI-подсистемы."
 
-#: ardour_ui.cc:3827 ardour_ui.cc:3830
+#: ardour_ui.cc:3830 ardour_ui.cc:3833
 msgid "Could not reconnect to the Audio/MIDI engine"
 msgstr "Не удалось повторно соединиться с аудио/MIDI-подсистемой."
 
-#: ardour_ui.cc:4106
+#: ardour_ui.cc:4109
 msgid ""
 "%4This is a session from an older version of %3%5\n"
 "\n"
@@ -3071,7 +3071,7 @@ msgid "Keep Playlist"
 msgstr "Сохранить список"
 
 #: editor.cc:3881 editor_audio_import.cc:581 editor_ops.cc:5856
-#: engine_dialog.cc:1689 sfdb_freesound_mootcher.cc:69 processor_box.cc:2030
+#: engine_dialog.cc:1713 sfdb_freesound_mootcher.cc:69 processor_box.cc:2030
 #: processor_box.cc:2055
 msgid "Cancel"
 msgstr "Отмена"
@@ -5676,7 +5676,7 @@ msgstr ""
 msgid "Device Control Panel"
 msgstr "Панель управления устройством"
 
-#: engine_dialog.cc:80 engine_dialog.cc:1703
+#: engine_dialog.cc:80 engine_dialog.cc:1727
 msgid "Measure"
 msgstr ""
 
@@ -5736,7 +5736,7 @@ msgid "When satisfied with the results, click the \"Use results\" button."
 msgstr ""
 "Если результат вас устраивает, нажмите кнопку «Использовать результаты»."
 
-#: engine_dialog.cc:231 engine_dialog.cc:1705
+#: engine_dialog.cc:231 engine_dialog.cc:1729
 msgid "No measurement results yet"
 msgstr "Пока нет результатов измерения"
 
@@ -5797,89 +5797,96 @@ msgstr ""
 "Звуковая подсистема %1 была настроена и запущена извне.\n"
 "Вы не сможете полностью контролировать её."
 
-#: engine_dialog.cc:577
+#: engine_dialog.cc:523
+msgid ""
+"Your selected audio configuration is playback- or capture-only.\n"
+"\n"
+"Latency calibration requires playback and capture"
+msgstr ""
+
+#: engine_dialog.cc:597
 msgid "MIDI Inputs"
 msgstr "MIDI-входы"
 
-#: engine_dialog.cc:594
+#: engine_dialog.cc:614
 msgid "MIDI Outputs"
 msgstr "MIDI-выходы"
 
-#: engine_dialog.cc:678
+#: engine_dialog.cc:698
 msgid "all available channels"
 msgstr "все доступные каналы"
 
-#: engine_dialog.cc:872
+#: engine_dialog.cc:892
 #, c-format
 msgid "%u samples"
 msgstr "%u сэмплов"
 
-#: engine_dialog.cc:923
+#: engine_dialog.cc:943
 #, c-format
 msgid "(%.1f msecs)"
 msgstr "(%.1f мс)"
 
-#: engine_dialog.cc:1369
+#: engine_dialog.cc:1391
 msgid "Cannot set driver to %1"
 msgstr "Невозможно использовать %1 в качестве драйвера."
 
-#: engine_dialog.cc:1373
+#: engine_dialog.cc:1395
 msgid "Cannot set device name to %1"
 msgstr "Невозможно %1 в имени устройства."
 
-#: engine_dialog.cc:1377
+#: engine_dialog.cc:1399
 msgid "Cannot set sample rate to %1"
 msgstr "Невозможно использовать %1 в частоты сэмплирования."
 
-#: engine_dialog.cc:1381
+#: engine_dialog.cc:1403
 msgid "Cannot set buffer size to %1"
 msgstr "Невозможно использовать %1 в размера буфера."
 
-#: engine_dialog.cc:1387
+#: engine_dialog.cc:1409
 msgid "Cannot set input channels to %1"
 msgstr ""
 
-#: engine_dialog.cc:1391
+#: engine_dialog.cc:1413
 msgid "Cannot set output channels to %1"
 msgstr ""
 
-#: engine_dialog.cc:1397
+#: engine_dialog.cc:1419
 msgid "Cannot set input latency to %1"
 msgstr ""
 
-#: engine_dialog.cc:1401
+#: engine_dialog.cc:1423
 msgid "Cannot set output latency to %1"
 msgstr ""
 
-#: engine_dialog.cc:1632
+#: engine_dialog.cc:1656
 msgid "No signal detected "
 msgstr "Сигнал не обнаружен"
 
-#: engine_dialog.cc:1645 port_insert_ui.cc:71 port_insert_ui.cc:99
+#: engine_dialog.cc:1669 port_insert_ui.cc:71 port_insert_ui.cc:99
 msgid "Disconnected from audio engine"
 msgstr "Выполнено отсоединение от звукового движка"
 
-#: engine_dialog.cc:1659
+#: engine_dialog.cc:1683
 msgid "(signal detection error)"
 msgstr "(ошибка обнаружения сигнала)"
 
-#: engine_dialog.cc:1665
+#: engine_dialog.cc:1689
 msgid "(inverted - bad wiring)"
 msgstr ""
 
-#: engine_dialog.cc:1675
+#: engine_dialog.cc:1699
 msgid "Detected roundtrip latency: %1"
 msgstr ""
 
-#: engine_dialog.cc:1687 port_insert_ui.cc:135
+#: engine_dialog.cc:1711 port_insert_ui.cc:135
 msgid "Detecting ..."
 msgstr "Выполняется определение..."
 
-#: engine_dialog.cc:1767
+#: engine_dialog.cc:1791
 msgid "Disconnect from %1"
 msgstr "Отсоединить от %1"
 
-#: engine_dialog.cc:1779
+#: engine_dialog.cc:1803
 msgid "Connect to %1"
 msgstr "Соединить с %1"
 
@@ -11362,11 +11369,11 @@ msgstr ""
 "<i>(Сохранять сеансы можно будет где угодно, просто указанная\n"
 "папка будет использоваться по умолчанию)</i>"
 
-#: startup.cc:253
+#: startup.cc:254
 msgid "Default folder for new sessions"
 msgstr "Папка для новых сеансов по умолчанию"
 
-#: startup.cc:274
+#: startup.cc:275
 msgid ""
 "While recording instruments or vocals, you probably want to listen to the\n"
 "signal as well as record it. This is called \"monitoring\". There are\n"
@@ -11391,15 +11398,15 @@ msgstr ""
 "<i>Если вы не понимаете смысл этого параметра, просто используйте \n"
 "предлагаемый по умолчанию вариант.</i>"
 
-#: startup.cc:295
+#: startup.cc:296
 msgid "Monitoring Choices"
 msgstr "Способ мониторинга"
 
-#: startup.cc:318
+#: startup.cc:319
 msgid "Use a Master bus directly"
 msgstr "Использовать мастер-шину напрямую"
 
-#: startup.cc:320
+#: startup.cc:321
 msgid ""
 "Connect the Master bus directly to your hardware outputs. This is preferable "
 "for simple usage."
@@ -11407,11 +11414,11 @@ msgstr ""
 "Соединить мастер-шину напрямую с выходами звукового интерфейса.\n"
 "Предпочтительно для простого использования."
 
-#: startup.cc:329
+#: startup.cc:330
 msgid "Use an additional Monitor bus"
 msgstr "Использовать дополнительную шину мониторинга"
 
-#: startup.cc:332
+#: startup.cc:333
 msgid ""
 "Use a Monitor bus between Master bus and hardware outputs for \n"
 "greater control in monitoring without affecting the mix."
@@ -11419,7 +11426,7 @@ msgstr ""
 "Использовать шину мониторинга между мастер-шиной и выходами \n"
 "звукового интерфейса для полного контроля без вмешательства в микс."
 
-#: startup.cc:354
+#: startup.cc:355
 msgid ""
 "<i>You can change this preference at any time via the Preferences dialog.\n"
 "You can also add or remove the monitor section to/from any session.</i>\n"
@@ -11432,7 +11439,7 @@ msgstr ""
 "<i>Если вы не понимаете смысл этого параметра, просто используйте\n"
 "предлагаемое по умолчанию.</i>"
 
-#: startup.cc:365
+#: startup.cc:366
 msgid "Monitor Section"
 msgstr "Секция монитора"
 
@@ -12378,10 +12385,14 @@ msgstr "Размер кэша:"
 
 #: video_server_dialog.cc:136
 msgid ""
-"%1 relies on an external Video Server for the videotimeline.\n"
-"The server configured in Edit -> Prefereces -> Video is not reachable.\n"
-"Do you want ardour to launch 'harvid' on this machine?"
+"%1 relies on an external video server for the videotimeline.\n"
+"The server configured in Edit -> Preferences -> Video is not reachable.\n"
+"Do you want %1 to launch 'harvid' on this machine?"
 msgstr ""
+"%1 использует внешний видеосервер для видеотаймлайна.\n"
+"Сервер, указанный в диалоге «Правка -> Параметры -> Видео»,\n"
+"сейчас недоступен.\n"
+"Вы хотите, чтобы %1 запустил 'harvid' на этом компьютере?"
 
 #: video_server_dialog.cc:176
 msgid "Set Video Server Executable"

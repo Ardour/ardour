@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-10-15 10:54+0400\n"
-"PO-Revision-Date: 2013-10-15 10:54+0300\n"
+"POT-Creation-Date: 2013-10-15 21:42+0400\n"
+"PO-Revision-Date: 2013-10-15 21:40+0300\n"
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
 "Language: \n"
@@ -1785,7 +1785,7 @@ msgstr ""
 
 #: session_state.cc:208
 msgid "Set block size and sample rate"
-msgstr ""
+msgstr "Установка размера блока и частоты сэмплирования"
 
 #: session_state.cc:213
 msgid "Using configuration"
