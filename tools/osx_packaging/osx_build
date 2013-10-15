@@ -13,7 +13,7 @@ fi
 
 SAE=
 MIXBUS=
-WITH_HARVID=
+WITH_HARVID=1
 WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
@@ -61,7 +61,7 @@ while [ $# -gt 0 ] ; do
 	# specific build flags
 	#
 
-	--harvid) WITH_HARVID=1 ; shift ;;
+	--noharvid) WITH_HARVID= ; shift ;;
 	--noladspa) WITH_LADSPA= ; shift ;;
 	--nostrip) STRIP= ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
@@ -99,6 +99,7 @@ Locale=$Resources/locale
 Plugins=$APPROOT/Plugins
 Surfaces=$Frameworks/surfaces
 Panners=$Frameworks/panners
+Backends=$Frameworks/backends
 MidiMaps=$Shared/midi_maps
 ExportFormats=$Shared/export
 Templates=$Shared/templates
@@ -132,6 +133,7 @@ mkdir -p $APPROOT/Resources
 mkdir -p $Plugins
 mkdir -p $Surfaces
 mkdir -p $Panners
+mkdir -p $Backends
 mkdir -p $MidiMaps
 mkdir -p $ExportFormats
 mkdir -p $Templates
@@ -256,7 +258,7 @@ fi
 
 cp -R $GTKSTACK_ROOT/etc/* $Etc
 echo "Copying all Pango modules ..."
-cp -R $GTKSTACK_ROOT/lib/pango/1.6.0/modules/*.so $Frameworks/modules
+cp -R $GTKSTACK_ROOT/lib/pango/1.8.0/modules/*.so $Frameworks/modules
 echo "Copying all GDK Pixbuf loaders ..."
 cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Frameworks/modules
 # charset alias file
@@ -265,9 +267,9 @@ cp -R $GTKSTACK_ROOT/lib/charset.alias $Resources
 # generate new Pango module file
 cat > pangorc <<EOF 
 [Pango]
-ModulesPath=$GTKSTACK_ROOT/lib/pango/1.6.0/modules
+ModulesPath=$GTKSTACK_ROOT/lib/pango/1.8.0/modules
 EOF
-env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.6.0/modules/?@executable_path/../lib/modules/?" > $Resources/pango.modules
+env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.8.0/modules/?@executable_path/../lib/modules/?" > $Resources/pango.modules
 rm pangorc
 
 # generate a new GDK pixbufs loaders file
@@ -308,6 +310,8 @@ cp $BUILD_ROOT/libs/surfaces/control_protocol/libardourcp*.dylib $Frameworks
 # Panners
 cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
 
+# Backends
+cp $BUILD_ROOT/libs/backends/*/lib*.dylib $Backends
 
 # Export Formats/Presets
 for f in $BUILD_ROOT/../export/*.preset $BUILD_ROOT/../export/*.format ; do 

@@ -180,6 +180,8 @@ namespace ARDOUR {
 	 */
 	bool get_jack_default_server_path (std::string& server_path);
 
+	typedef std::vector<std::pair<std::string,std::string> > MidiOptions;
+
 	/**
 	 * @return The name of the jack server config file
 	 */
@@ -228,8 +230,11 @@ namespace ARDOUR {
 		std::string      midi_driver;
 	};
 
+	std::vector<std::string> enumerate_midi_options ();
+	int set_midi_option (ARDOUR::JackCommandLineOptions&, const std::string& opt);
+
 	/**
 	 * @return true if able to build a valid command line based on options
 	 */
-	bool get_jack_command_line_string (JackCommandLineOptions& options, std::string& command_line);
+	bool get_jack_command_line_string (JackCommandLineOptions& options, std::string& command_line, bool for_latency_measurement);
 }
