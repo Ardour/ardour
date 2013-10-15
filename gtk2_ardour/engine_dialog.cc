@@ -1273,7 +1273,9 @@ EngineControl::EngineControl ()
 			    of settings.
 			 */
 			 change_driver = true;
-			 change_device = true;
+			 if (backend->requires_driver_selection()) {
+				 change_device = true;
+			 }
 			 change_rate = true;
 			 change_bufsize = true;
 			 change_channels = true;
