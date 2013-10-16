@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 MAJOR = '3'
-MINOR = '4'
+MINOR = '5'
 VERSION = MAJOR + '.' + MINOR
 
 APPNAME = 'Ardour' + MAJOR
