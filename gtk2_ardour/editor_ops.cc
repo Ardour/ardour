@@ -7018,6 +7018,175 @@ Editor::insert_time (
 		commit_reversible_command ();
 	}
 }
+void
+Editor::do_cut_time ()
+{
+	if (selection->tracks.empty()) {
+		return;
+	}
+
+	framepos_t pos = get_preferred_edit_position ();
+	ArdourDialog d (*this, _("Cut Time"));
+	VButtonBox button_box;
+	VBox option_box;
+
+	CheckButton glue_button (_("Move Glued Regions"));
+	CheckButton marker_button (_("Move Markers"));
+	CheckButton tempo_button (_("Move Tempo & Meters"));
+	AudioClock clock ("insertTimeClock", true, X_("InsertTimeClock"), true, true, true);
+	HBox clock_box;
+
+	clock.set (0);
+	clock.set_session (_session);
+	clock.set_bbt_reference (pos);
+
+	clock_box.pack_start (clock, false, true);
+
+	option_box.set_spacing (6);
+	option_box.pack_start (button_box, false, false);
+	option_box.pack_start (glue_button, false, false);
+	option_box.pack_start (marker_button, false, false);
+	option_box.pack_start (tempo_button, false, false);
+
+	d.get_vbox()->set_border_width (12);
+	d.get_vbox()->pack_start (clock_box, false, false);
+	d.get_vbox()->pack_start (option_box, false, false);
+	
+	option_box.show ();
+	button_box.show ();
+	glue_button.show ();
+	clock.show_all();
+	clock_box.show ();
+	marker_button.show ();
+	tempo_button.show ();
+
+	d.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	d.add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
+	d.show ();
+
+	int response = d.run ();
+
+	if (response != RESPONSE_OK) {
+		return;
+	}
+	
+	framecnt_t distance = clock.current_duration (pos);
+
+	if (distance == 0) {
+		return;
+	}
+
+	cut_time (pos, distance, SplitIntersected, glue_button.get_active(), marker_button.get_active(), tempo_button.get_active());
+}
+
+void
+Editor::cut_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt, 
+		     bool ignore_music_glue, bool markers_too, bool tempo_too)
+{
+	bool commit = false;
+	
+	if (Config->get_edit_mode() == Lock) {
+		error << (_("Cannot insert or delete time when in Lock edit.")) << endmsg;
+		return;
+	}
+
+	begin_reversible_command (_("cut time"));
+
+	for (TrackSelection::iterator x = selection->tracks.begin(); x != selection->tracks.end(); ++x) {
+		/* regions */
+		boost::shared_ptr<Playlist> pl = (*x)->playlist();
+		
+		if (pl) {
+
+			XMLNode &before = pl->get_state();
+			
+			std::list<AudioRange> rl;
+			AudioRange ar(pos, pos+frames, 0);
+			rl.push_back(ar);
+			pl->cut (rl);
+			pl->shift (pos, -frames, true, ignore_music_glue);
+			
+			XMLNode &after = pl->get_state();
+			
+			_session->add_command (new MementoCommand<Playlist> (*pl, &before, &after));
+			commit = true;
+		}
+			
+		/* automation */
+		RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*x);
+		if (rtav) {
+			rtav->route ()->shift (pos, -frames);
+			commit = true;
+		}
+	}
+
+	std::list<Location*> loc_kill_list;
+	
+	/* markers */
+	if (markers_too) {
+		bool moved = false;
+		XMLNode& before (_session->locations()->get_state());
+		Locations::LocationList copy (_session->locations()->list());
+
+		for (Locations::LocationList::iterator i = copy.begin(); i != copy.end(); ++i) {
+			
+			if (!(*i)->is_mark()) {  //range;  have to handle both start and end
+					if ((*i)->end() >= pos
+					&& (*i)->end() < pos+frames
+					&& (*i)->start() >= pos
+					&& (*i)->end() < pos+frames) {  //range is completely enclosed;  kill it
+						moved = true;
+						loc_kill_list.push_back(*i);
+					} else {  //ony start or end is included, try to do the right thing
+						if ((*i)->end() >= pos && (*i)->end() < pos+frames) {
+							(*i)->set_end (pos);  //bring the end to the cut
+							moved = true;
+						} else if ((*i)->end() >= pos) {
+							(*i)->set_end ((*i)->end()-frames); //slip the end marker back
+							moved = true;
+						}
+						if ((*i)->start() >= pos && (*i)->start() < pos+frames) {
+							(*i)->set_start (pos);  //bring the start marker to the beginning of the cut
+							moved = true;
+						} else if ((*i)->start() >= pos) {
+							(*i)->set_start ((*i)->start() -frames); //slip the end marker back
+							moved = true;
+						}
+					}
+			} else if ((*i)->start() >= pos && (*i)->start() < pos+frames ) {
+				loc_kill_list.push_back(*i);
+				moved = true;
+			} else if ((*i)->start() >= pos) {
+				(*i)->set_start ((*i)->start() -frames);
+				moved = true;
+			}
+		}
+
+		for (list<Location*>::iterator i = loc_kill_list.begin(); i != loc_kill_list.end(); ++i) {
+			_session->locations()->remove( *i );
+		}
+	
+		if (moved) {
+			XMLNode& after (_session->locations()->get_state());
+			_session->add_command (new MementoCommand<Locations>(*_session->locations(), &before, &after));
+			commit = true;
+		}
+	}
+	
+	if (tempo_too) {
+		XMLNode& before (_session->tempo_map().get_state());
+
+		if (_session->tempo_map().cut_time (pos, frames) ) {
+			XMLNode& after (_session->tempo_map().get_state());
+			_session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+			commit = true;
+		}
+	}
+	
+	if (commit) {
+		commit_reversible_command ();
+	}
+}
 
 void
 Editor::fit_selection ()

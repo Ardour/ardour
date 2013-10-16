@@ -1900,6 +1900,58 @@ TempoMap::insert_time (framepos_t where, framecnt_t amount)
 
 	PropertyChanged (PropertyChange ());
 }
+bool
+TempoMap::cut_time (framepos_t where, framecnt_t amount)
+{
+	bool moved = false;
+
+	std::list<MetricSection*> metric_kill_list;
+	
+	TempoSection* last_tempo = NULL;
+	MeterSection* last_meter = NULL;
+	{
+		Glib::Threads::RWLock::WriterLock lm (lock);
+		for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
+			if ((*i)->frame() >= where && (*i)->frame() < where+amount) {
+				metric_kill_list.push_back(*i);
+				TempoSection *lt = dynamic_cast<TempoSection*> (*i);
+				if (lt)
+					last_tempo = lt;
+				MeterSection *lm = dynamic_cast<MeterSection*> (*i);
+				if (lm)
+					last_meter = lm;
+			}
+			else if ((*i)->frame() >= where) {
+				(*i)->set_frame ((*i)->frame() - amount);
+				moved = true;
+			}
+		}
+
+		//find the last TEMPO and METER metric (if any) and move it to the cut point so future stuff is correct
+		if (last_tempo) {
+			metric_kill_list.remove(last_tempo);
+			last_tempo->set_frame(where);
+			moved = true;
+		}
+		if (last_meter) {
+			metric_kill_list.remove(last_meter);
+			last_meter->set_frame(where);
+			moved = true;
+		}
+
+		//remove all the remaining metrics
+		for (std::list<MetricSection*>::iterator i = metric_kill_list.begin(); i != metric_kill_list.end(); ++i) {
+			metrics.remove(*i);
+			moved = true;
+		}
+
+		if (moved) {
+			recompute_map (true);
+		}
+	}	
+	PropertyChanged (PropertyChange ());
+	return moved;
+}
 
 /** Add some (fractional) beats to a session frame position, and return the result in frames.
  *  pos can be -ve, if required.
