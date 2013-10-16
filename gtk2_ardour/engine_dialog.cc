@@ -77,7 +77,7 @@ EngineControl::EngineControl ()
 	, ports_adjustment (128, 8, 1024, 1, 16)
 	, ports_spinner (ports_adjustment)
 	, control_app_button (_("Device Control Panel"))
-	, lm_measure_button (_("Measure"))
+	, lm_measure_label (_("Measure"))
 	, lm_use_button (_("Use results"))
 	, lm_back_button (_("Back to settings ... (ignore results)"))
 	, lm_button (_("Calibrate..."))
@@ -179,6 +179,8 @@ EngineControl::EngineControl ()
 
 	xopt = AttachOptions(0);
 
+	lm_measure_label.set_padding (10, 10);
+	lm_measure_button.add (lm_measure_label);
 	lm_measure_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::latency_button_clicked));
 	lm_use_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::use_latency_button_clicked));
 	lm_back_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (notebook, &Gtk::Notebook::set_current_page), 0));
@@ -190,10 +192,6 @@ EngineControl::EngineControl ()
 	 */
 
 	Gtk::Misc* l;
-
-	if ((l = dynamic_cast<Gtk::Misc*>(lm_measure_button.get_child())) != 0) {
-		l->set_padding (10, 10);
-	}
 
 	if ((l = dynamic_cast<Gtk::Misc*>(lm_use_button.get_child())) != 0) {
 		l->set_padding (10, 10);
@@ -336,7 +334,7 @@ EngineControl::EngineControl ()
 	 basic_packer.attach (*label, 0, 1, 0, 1, xopt, (AttachOptions) 0);
 	 basic_packer.attach (backend_combo, 1, 2, 0, 1, xopt, (AttachOptions) 0);
 
-	 lm_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (notebook, &Gtk::Notebook::set_current_page), latency_tab));
+	 lm_button.signal_clicked.connect (sigc::mem_fun (*this, &EngineControl::calibrate_latency));
 	 lm_button.set_name ("record enable button");
 	 if (_have_control) {
 		 build_full_control_notebook ();
@@ -514,14 +512,34 @@ EngineControl::EngineControl ()
  EngineControl::enable_latency_tab ()
  {
 	 vector<string> outputs;
-	 ARDOUR::AudioEngine::instance()->get_physical_outputs (ARDOUR::DataType::AUDIO, outputs);
-	 set_popdown_strings (lm_output_channel_combo, outputs);
-	 lm_output_channel_combo.set_active_text (outputs.front());
-
 	 vector<string> inputs;
+
+	 ARDOUR::AudioEngine::instance()->get_physical_outputs (ARDOUR::DataType::AUDIO, outputs);
 	 ARDOUR::AudioEngine::instance()->get_physical_inputs (ARDOUR::DataType::AUDIO, inputs);
-	 set_popdown_strings (lm_input_channel_combo, inputs);
-	 lm_input_channel_combo.set_active_text (inputs.front());
+
+	 if (inputs.empty() || outputs.empty()) {
+		 MessageDialog msg (_("Your selected audio configuration is playback- or capture-only.\n\nLatency calibration requires playback and capture"));
+		 lm_measure_button.set_sensitive (false);
+		 notebook.set_current_page (0);
+		 msg.run ();
+		 return;
+	 }
+
+	 if (!outputs.empty()) {
+		 set_popdown_strings (lm_output_channel_combo, outputs);
+		 lm_output_channel_combo.set_active_text (outputs.front());
+		 lm_output_channel_combo.set_sensitive (true);
+	 } else {
+		 lm_output_channel_combo.set_sensitive (false);
+	 }
+
+	 if (!inputs.empty()) {
+		 set_popdown_strings (lm_input_channel_combo, inputs);
+		 lm_input_channel_combo.set_active_text (inputs.front());
+		 lm_input_channel_combo.set_sensitive (true);
+	 } else {
+		 lm_input_channel_combo.set_sensitive (false);
+	 }
 
 	 lm_measure_button.set_sensitive (true);
  }
@@ -1272,9 +1290,9 @@ EngineControl::EngineControl ()
 			 /* backend never started, so we have to force a group
 			    of settings.
 			 */
-			 change_driver = true;
+			 change_device = true;
 			 if (backend->requires_driver_selection()) {
-				 change_device = true;
+				 change_driver = true;
 			 }
 			 change_rate = true;
 			 change_bufsize = true;
@@ -1619,7 +1637,9 @@ EngineControl::EngineControl ()
 		 enable_latency_tab ();
 
 	 } else {
-		 ARDOUR::AudioEngine::instance()->stop_latency_detection();
+		 if (lm_running) {
+			 ARDOUR::AudioEngine::instance()->stop_latency_detection();
+		 }
 	 }
  }
 
@@ -1688,7 +1708,7 @@ EngineControl::start_latency_detection ()
 	if (ARDOUR::AudioEngine::instance()->start_latency_detection () == 0) {
 		lm_results.set_markup (string_compose (results_markup, _("Detecting ...")));
 		latency_timeout = Glib::signal_timeout().connect (mem_fun (*this, &EngineControl::check_latency_measurement), 100);
-		lm_measure_button.set_label (_("Cancel"));
+		lm_measure_label.set_text (_("Cancel"));
 		have_lm_results = false;
 		lm_use_button.set_sensitive (false);
 		lm_input_channel_combo.set_sensitive (false);
@@ -1702,7 +1722,7 @@ EngineControl::end_latency_detection ()
 {
 	latency_timeout.disconnect ();
 	ARDOUR::AudioEngine::instance()->stop_latency_detection ();
-	lm_measure_button.set_label (_("Measure"));
+	lm_measure_label.set_text (_("Measure"));
 	if (!have_lm_results) {
 		lm_results.set_markup (string_compose (results_markup, _("No measurement results yet")));
 	} else {
@@ -1793,3 +1813,10 @@ EngineControl::connect_disconnect_click()
 		ARDOUR_UI::instance()->reconnect_to_engine ();
 	}
 }
+
+void
+EngineControl::calibrate_latency ()
+{
+	notebook.set_current_page (latency_tab);
+}
+
