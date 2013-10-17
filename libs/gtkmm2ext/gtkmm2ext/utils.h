@@ -32,6 +32,8 @@
 #include <gdkmm/pixbuf.h>
 #include <pangomm/fontdescription.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Cairo {
         class Context;
 }
@@ -45,79 +47,79 @@ namespace Gtk {
 }
 
 namespace Gtkmm2ext {
-	void init (const char*);
+	LIBGTKMM2EXT_API void init (const char*);
 
-	std::string fit_to_pixels (const std::string&, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses = false);
-	std::pair<std::string, double> fit_to_pixels (cairo_t *, std::string, double);
-	int pixel_width (const std::string& str, Pango::FontDescription& font);
+	LIBGTKMM2EXT_API std::string fit_to_pixels (const std::string&, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses = false);
+	LIBGTKMM2EXT_API std::pair<std::string, double> fit_to_pixels (cairo_t *, std::string, double);
+	LIBGTKMM2EXT_API int pixel_width (const std::string& str, Pango::FontDescription& font);
 
-	void get_ink_pixel_size (Glib::RefPtr<Pango::Layout>, 
-				 int& width, int& height);
+	LIBGTKMM2EXT_API void get_ink_pixel_size (Glib::RefPtr<Pango::Layout>, 
+						  int& width, int& height);
+	
+	LIBGTKMM2EXT_API void set_size_request_to_display_given_text (Gtk::Widget &w,
+								      const gchar *text,
+								      gint hpadding,
+								      gint vpadding);
+	
+	LIBGTKMM2EXT_API void set_size_request_to_display_given_text (Gtk::Widget &w,
+								      const std::vector<std::string>&,
+								      gint hpadding,
+								      gint vpadding);
 
-	void set_size_request_to_display_given_text (Gtk::Widget &w,
-						     const gchar *text,
-						     gint hpadding,
-						     gint vpadding);
+	LIBGTKMM2EXT_API Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_string (const std::string& name, 
+								       const Pango::FontDescription& font, 
+								       int clip_width, 
+								       int clip_height, 
+								       Gdk::Color fg);
 
-	void set_size_request_to_display_given_text (Gtk::Widget &w,
-						     const std::vector<std::string>&,
-						     gint hpadding,
-						     gint vpadding);
-
-	Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_string (const std::string& name, 
-	                                              const Pango::FontDescription& font, 
-	                                              int clip_width, 
-	                                              int clip_height, 
-	                                              Gdk::Color fg);
-
-	void set_popdown_strings (Gtk::ComboBoxText&, 
+	LIBGTKMM2EXT_API void set_popdown_strings (Gtk::ComboBoxText&, 
 	                          const std::vector<std::string>&);
-
-	template<class T> void deferred_delete (void *ptr) {
+	
+	template<class T> LIBGTKMM2EXT_API void deferred_delete (void *ptr) {
 		delete static_cast<T *> (ptr);
 	}
 
-	GdkWindow* get_paned_handle (Gtk::Paned& paned);
-	void set_decoration (Gtk::Window* win, Gdk::WMDecoration decor);
-	void set_treeview_header_as_default_label(Gtk::TreeViewColumn *c);
-	Glib::RefPtr<Gdk::Drawable> get_bogus_drawable();
-	void detach_menu (Gtk::Menu&);
+	LIBGTKMM2EXT_API GdkWindow* get_paned_handle (Gtk::Paned& paned);
+	LIBGTKMM2EXT_API void set_decoration (Gtk::Window* win, Gdk::WMDecoration decor);
+	LIBGTKMM2EXT_API void set_treeview_header_as_default_label(Gtk::TreeViewColumn *c);
+	LIBGTKMM2EXT_API Glib::RefPtr<Gdk::Drawable> get_bogus_drawable();
+	LIBGTKMM2EXT_API void detach_menu (Gtk::Menu&);
 
-	Glib::RefPtr<Gdk::Window> window_to_draw_on (Gtk::Widget& w, Gtk::Widget** parent);
+	LIBGTKMM2EXT_API Glib::RefPtr<Gdk::Window> window_to_draw_on (Gtk::Widget& w, Gtk::Widget** parent);
 
-        bool possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval);
-        uint32_t possibly_translate_legal_accelerator_to_real_key (uint32_t keyval);
+        LIBGTKMM2EXT_API bool possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval);
+        LIBGTKMM2EXT_API uint32_t possibly_translate_legal_accelerator_to_real_key (uint32_t keyval);
 
-        int physical_screen_height (Glib::RefPtr<Gdk::Window>);
-        int physical_screen_width (Glib::RefPtr<Gdk::Window>);
+        LIBGTKMM2EXT_API int physical_screen_height (Glib::RefPtr<Gdk::Window>);
+        LIBGTKMM2EXT_API int physical_screen_width (Glib::RefPtr<Gdk::Window>);
 
-        void container_clear (Gtk::Container&);
+        LIBGTKMM2EXT_API void container_clear (Gtk::Container&);
 
 	/* C++ API for rounded rectangles */
 	
-        void rounded_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
-        void rounded_top_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
-        void rounded_top_left_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
-        void rounded_top_right_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
-	void rounded_top_half_rectangle (Cairo::RefPtr<Cairo::Context>, double x, double y, double w, double h, double r=10);
-	void rounded_bottom_half_rectangle (Cairo::RefPtr<Cairo::Context>, double x, double y, double w, double h, double r=10);
-	void rounded_right_half_rectangle (Cairo::RefPtr<Cairo::Context>, double x, double y, double w, double h, double r=10);
+        LIBGTKMM2EXT_API void rounded_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
+        LIBGTKMM2EXT_API void rounded_top_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
+        LIBGTKMM2EXT_API void rounded_top_left_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
+        LIBGTKMM2EXT_API void rounded_top_right_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
+	LIBGTKMM2EXT_API void rounded_top_half_rectangle (Cairo::RefPtr<Cairo::Context>, double x, double y, double w, double h, double r=10);
+	LIBGTKMM2EXT_API void rounded_bottom_half_rectangle (Cairo::RefPtr<Cairo::Context>, double x, double y, double w, double h, double r=10);
+	LIBGTKMM2EXT_API void rounded_right_half_rectangle (Cairo::RefPtr<Cairo::Context>, double x, double y, double w, double h, double r=10);
 
 	/* C API for rounded rectangles */
 
-        void rounded_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
-        void rounded_top_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
-        void rounded_top_left_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
-        void rounded_top_right_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
-	void rounded_top_half_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
-	void rounded_bottom_half_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
-	void rounded_right_half_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
+        LIBGTKMM2EXT_API void rounded_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
+        LIBGTKMM2EXT_API void rounded_top_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
+        LIBGTKMM2EXT_API void rounded_top_left_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
+        LIBGTKMM2EXT_API void rounded_top_right_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
+	LIBGTKMM2EXT_API void rounded_top_half_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
+	LIBGTKMM2EXT_API void rounded_bottom_half_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
+	LIBGTKMM2EXT_API void rounded_right_half_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 
-	Gtk::Label* left_aligned_label (std::string const &);
+	LIBGTKMM2EXT_API Gtk::Label* left_aligned_label (std::string const &);
 
-	void set_no_tooltip_whatsoever (Gtk::Widget &);
-	void enable_tooltips ();
-	void disable_tooltips ();
+	LIBGTKMM2EXT_API void set_no_tooltip_whatsoever (Gtk::Widget &);
+	LIBGTKMM2EXT_API void enable_tooltips ();
+	LIBGTKMM2EXT_API void disable_tooltips ();
 };
 
 #endif /*  __gtkmm2ext_utils_h__ */

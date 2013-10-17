@@ -29,11 +29,13 @@
 #include <gtkmm/cellrenderer.h>
 #include <gdkmm.h>
 
+#include "gtkmm2ext/visibility.h"
+
 using namespace Gtk;
 
 namespace Gtkmm2ext {
 
-class CellRendererPixbufMulti : public Gtk::CellRenderer
+class LIBGTKMM2EXT_API CellRendererPixbufMulti : public Gtk::CellRenderer
 {
   public:
 

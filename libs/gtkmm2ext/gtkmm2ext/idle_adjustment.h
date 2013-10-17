@@ -23,9 +23,11 @@
 #include <sys/time.h>
 #include <gtkmm/adjustment.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
-class IdleAdjustment : public sigc::trackable
+class LIBGTKMM2EXT_API IdleAdjustment : public sigc::trackable
 {
   public:
 	IdleAdjustment (Gtk::Adjustment& adj);

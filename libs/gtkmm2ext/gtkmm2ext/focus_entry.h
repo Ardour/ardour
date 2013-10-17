@@ -22,9 +22,11 @@
 
 #include <gtkmm/entry.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
-class FocusEntry : public Gtk::Entry
+class LIBGTKMM2EXT_API FocusEntry : public Gtk::Entry
 {
   public:
 	FocusEntry ();

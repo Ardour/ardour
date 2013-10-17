@@ -330,6 +330,7 @@ def build(bld):
         obj.cxxflags     = [ '-fPIC' ]
         obj.cflags       = [ '-fPIC' ]
         obj.defines      = []
+
     obj.export_includes = ['.']
     obj.includes     = ['.', '../surfaces/control_protocol', '..']
     obj.name         = 'ardour'

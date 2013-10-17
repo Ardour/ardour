@@ -63,10 +63,11 @@ def build(bld):
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         obj              = bld.shlib(features = 'cxx cxxshlib', source=libmidi_sources)
         obj.defines      = [ 'LIBMIDIPP_DLL=1', 'LIBMIDIPP_DLL_EXPORTS=1' ]
+        obj.defines     += [ 'LIBPBD_DLL=1' ]
     else:
         obj              = bld.stlib(features = 'cxx cxxstlib', source=libmidi_sources)
-        obj.cxxflags = [ '-fPIC', '-DWITH_JACK_MIDI' ]
-        obj.defines  = []
+        obj.cxxflags     = [ '-fPIC', '-DWITH_JACK_MIDI' ]
+        obj.defines      = []
 
     # everybody loves JACK
     obj.export_includes = ['.']

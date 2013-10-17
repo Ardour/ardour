@@ -90,10 +90,13 @@ def build(bld):
     # Library
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=lib_source)
+        obj.defines      = [ 'LIBEVORAL_DLL=1', 'LIBEVORAL_DLL_EXPORTS=1' ]
+        obj.defines      = [ 'LIBPBD_DLL=1' ]
     else:
         obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=lib_source)
         obj.cxxflags     = [ '-fPIC' ]
         obj.cflags       = [ '-fPIC' ]
+        obj.defines      = [ ]
 
     obj.export_includes = ['.']
     obj.includes       = ['.', './src']
@@ -103,9 +106,7 @@ def build(bld):
     obj.use            = 'libsmf libpbd'
     obj.vnum           = EVORAL_LIB_VERSION
     obj.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
-    obj.defines = ['PACKAGE="libevoral"', 'EVORAL_MIDI_XML=1'
-                   'LIBEVORAL_DLL=1', 'LIBEVORAL_DLL_EXPORTS=1' 
-                   ]
+    obj.defines       += [ 'PACKAGE="libevoral"', 'EVORAL_MIDI_XML=1' ]
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         # Static library (for unit test code coverage)

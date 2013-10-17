@@ -22,9 +22,11 @@
 
 #include <gtkmm.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
-class AutoSpin 
+class LIBGTKMM2EXT_API AutoSpin 
 
 {
   public:
