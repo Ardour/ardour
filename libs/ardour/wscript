@@ -344,7 +344,8 @@ def build(bld):
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
         'PROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"',
-        'EVORAL_MIDI_XML=1' 
+        'EVORAL_MIDI_XML=1',
+        'LIBARDOUR_DLL_EXPORTS=1'
         ]
 
     #obj.source += ' st_stretch.cc st_pitch.cc '
