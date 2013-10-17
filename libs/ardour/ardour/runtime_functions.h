@@ -31,11 +31,11 @@ namespace ARDOUR {
 	typedef void  (*mix_buffers_with_gain_t)	(ARDOUR::Sample *, const ARDOUR::Sample *, pframes_t, float);
 	typedef void  (*mix_buffers_no_gain_t)		(ARDOUR::Sample *, const ARDOUR::Sample *, pframes_t);
 
-	extern compute_peak_t		compute_peak;
-	extern find_peaks_t             find_peaks;
-	extern apply_gain_to_buffer_t	apply_gain_to_buffer;
-	extern mix_buffers_with_gain_t	mix_buffers_with_gain;
-	extern mix_buffers_no_gain_t	mix_buffers_no_gain;
+	LIBARDOUR_API extern compute_peak_t		compute_peak;
+	LIBARDOUR_API extern find_peaks_t               find_peaks;
+	LIBARDOUR_API extern apply_gain_to_buffer_t	apply_gain_to_buffer;
+	LIBARDOUR_API extern mix_buffers_with_gain_t	mix_buffers_with_gain;
+	LIBARDOUR_API extern mix_buffers_no_gain_t	mix_buffers_no_gain;
 }
 
 #endif /* __ardour_runtime_functions_h__ */
