@@ -28,9 +28,11 @@
 
 #include <cmath>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
-union Float_t
+union LIBPBD_API Float_t
 {
     Float_t (float num = 0.0f) : f(num) {}
 
@@ -45,7 +47,7 @@ union Float_t
  
 /* Note: ULPS = Units in the Last Place */
 
-static inline bool floateq (float a, float b, int max_ulps_diff)
+LIBPBD_API static inline bool floateq (float a, float b, int max_ulps_diff)
 {
     Float_t ua (a);
     Float_t ub (b);

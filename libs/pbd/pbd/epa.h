@@ -23,9 +23,11 @@
 #include <map>
 #include <string>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
-class EnvironmentalProtectionAgency {
+class LIBPBD_API EnvironmentalProtectionAgency {
   public:
         EnvironmentalProtectionAgency (bool arm = true, const std::string& envname = std::string());
         ~EnvironmentalProtectionAgency ();

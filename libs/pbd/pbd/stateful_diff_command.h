@@ -22,18 +22,20 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
+
+#include "pbd/libpbd_visibility.h"
 #include "pbd/command.h"
 
 namespace PBD
 {
 
-class StatefulDestructible;	
-class PropertyList;
+class LIBPBD_API StatefulDestructible;	
+class LIBPBD_API PropertyList;
 
 /** A Command which stores its action as the differences between the before and after
  *  state of a Stateful object.
  */
-class StatefulDiffCommand : public Command
+class LIBPBD_API StatefulDiffCommand : public Command
 {
 public:
 	StatefulDiffCommand (boost::shared_ptr<StatefulDestructible>);

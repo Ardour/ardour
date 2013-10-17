@@ -22,6 +22,7 @@
 
 #include <map>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/property_basics.h"
 
 class XMLNode;
@@ -29,7 +30,7 @@ class XMLNode;
 namespace PBD {
 
 /** A list of properties, mapped using their ID */	
-class PropertyList : public std::map<PropertyID, PropertyBase*>
+class LIBPBD_API PropertyList : public std::map<PropertyID, PropertyBase*>
 {
 public:
 	PropertyList ();
@@ -61,7 +62,7 @@ protected:
  *  own Properties store them in an OwnedPropertyList
  *  to avoid having them deleted at the wrong time.
  */
-class OwnedPropertyList : public PropertyList
+class LIBPBD_API OwnedPropertyList : public PropertyList
 {
 public:
 	OwnedPropertyList();

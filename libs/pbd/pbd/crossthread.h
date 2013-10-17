@@ -26,6 +26,8 @@
 
 #include <glibmm/main.h>
 
+#include "pbd/libpbd_visibility.h"
+
 /** A simple abstraction of a mechanism of signalling one thread from another.
  * The signaller calls ::wakeup() to tell the signalled thread to check for
  * work to be done. 
@@ -35,7 +37,7 @@
  * in Glib main loop based situations. 
  */
 
-class CrossThreadChannel { 
+class LIBPBD_API CrossThreadChannel { 
   public:
 	/** if @a non_blocking is true, the channel will not cause blocking
 	 * when used in an event loop based on poll/select or the glib main

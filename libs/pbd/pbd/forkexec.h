@@ -22,7 +22,9 @@
 
 #include <unistd.h>
 
-pid_t forkexec(char **argv, char **envp, int outpipe[2], int inpipe[2]);
-pid_t forkexec_cmd(char *cmd, char **envp, int outpipe[2], int inpipe[2]);
+#include "pbd/libpbd_visibility.h"
+
+LIBPBD_API pid_t forkexec(char **argv, char **envp, int outpipe[2], int inpipe[2]);
+LIBPBD_API pid_t forkexec_cmd(char *cmd, char **envp, int outpipe[2], int inpipe[2]);
 
 #endif // __forkexec_h__

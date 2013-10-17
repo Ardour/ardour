@@ -27,25 +27,27 @@
 #include <iostream>
 #include <glibmm/ustring.h>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
-std::string short_version (std::string, std::string::size_type target_length);
+LIBPBD_API std::string short_version (std::string, std::string::size_type target_length);
 
-int     atoi (const std::string&);
-int32_t atol (const std::string&);
-int64_t atoll (const std::string&);
-double  atof (const std::string&);
-std::string url_decode (std::string const &);
+LIBPBD_API int     atoi (const std::string&);
+LIBPBD_API int32_t atol (const std::string&);
+LIBPBD_API int64_t atoll (const std::string&);
+LIBPBD_API double  atof (const std::string&);
+LIBPBD_API std::string url_decode (std::string const &);
 
-std::string capitalize (const std::string&);
+LIBPBD_API std::string capitalize (const std::string&);
 
 // std::string length2string (const int32_t frames, const float sample_rate);
-std::string length2string (const int64_t frames, const double sample_rate);
+LIBPBD_API std::string length2string (const int64_t frames, const double sample_rate);
 
-std::vector<std::string> internationalize (const char *, const char **);
-bool strings_equal_ignore_case (const std::string& a, const std::string& b);
+LIBPBD_API std::vector<std::string> internationalize (const char *, const char **);
+LIBPBD_API bool strings_equal_ignore_case (const std::string& a, const std::string& b);
 
-template <class T> std::string 
+template <class T> std::string LIBPBD_API 
 to_string (T t, std::ios_base & (*f)(std::ios_base&))
 {
 	std::ostringstream oss;
@@ -53,10 +55,9 @@ to_string (T t, std::ios_base & (*f)(std::ios_base&))
 	return oss.str();
 }
 
-bool string_is_affirmative (const std::string&);
+LIBPBD_API bool string_is_affirmative (const std::string&);
 
-const char *
-sgettext (const char *, const char *);
+LIBPBD_API const char* sgettext (const char *, const char *);
 
 } //namespace PBD
 

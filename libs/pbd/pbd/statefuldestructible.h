@@ -20,12 +20,13 @@
 #ifndef __pbd_stateful_destructible_h__
 #define __pbd_stateful_destructible_h__
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/stateful.h"
 #include "pbd/destructible.h"
 
 namespace PBD {
 
-class StatefulDestructible : public Stateful, public Destructible 
+class LIBPBD_API StatefulDestructible : public Stateful, public Destructible 
 {
 };
 

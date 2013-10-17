@@ -19,6 +19,7 @@
 #ifndef __qm_thrown_error_h__
 #define __qm_thrown_error_h__
 
+#include "pbd/libpbd_visibility.h"
 #include "transmitter.h"
 
 #define SAFE_THROW(T) \
@@ -26,7 +27,7 @@
         (*sent) << rdbuf(); \
         throw sent
 
-class ThrownError : public Transmitter {
+class LIBPBD_API ThrownError : public Transmitter {
   public:
 	ThrownError () : Transmitter (Transmitter::Throw) {}
   protected:

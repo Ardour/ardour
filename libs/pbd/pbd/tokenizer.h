@@ -23,6 +23,7 @@
 #include <iterator>
 #include <string>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/whitespace.h"
 
 namespace PBD {
@@ -36,7 +37,7 @@ namespace PBD {
 	are discarded.
 */
 template<typename StringType, typename Iter>
-unsigned int
+LIBPBD_API unsigned int
 tokenize(const StringType& str,        
         const StringType& delims,
         Iter it,

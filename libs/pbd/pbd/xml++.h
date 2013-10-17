@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __XML_H
+#define __XML_H
+
 /* xml++.h
  * libxml++ and this file are copyright (C) 2000 by Ari Johnson, and
  * are covered by the GNU Lesser General Public License, which should be
@@ -34,8 +37,7 @@
 #include <libxml/tree.h>
 #include <boost/shared_ptr.hpp>
 
-#ifndef __XML_H
-#define __XML_H
+#include "pbd/libpbd_visibility.h"
 
 class XMLTree;
 class XMLNode;
@@ -50,7 +52,7 @@ typedef XMLPropertyList::iterator              XMLPropertyIterator;
 typedef XMLPropertyList::const_iterator        XMLPropertyConstIterator;
 typedef std::map<std::string, XMLProperty*>    XMLPropertyMap;
 
-class XMLTree {
+class LIBPBD_API XMLTree {
 public:
 	XMLTree();
 	XMLTree(const std::string& fn, bool validate = false);
@@ -90,7 +92,7 @@ private:
 	int         _compression;
 };
 
-class XMLNode {
+class LIBPBD_API XMLNode {
 public:
 	XMLNode(const std::string& name);
 	XMLNode(const std::string& name, const std::string& content);
@@ -148,7 +150,7 @@ private:
 	void clear_lists ();
 };
 
-class XMLProperty {
+class LIBPBD_API XMLProperty {
 public:
 	XMLProperty(const std::string& n, const std::string& v = std::string());
 	~XMLProperty();
@@ -162,7 +164,7 @@ private:
 	std::string _value;
 };
 
-class XMLException: public std::exception {
+class LIBPBD_API XMLException: public std::exception {
 public:
 	explicit XMLException(const std::string msg) : _message(msg) {}
 	virtual ~XMLException() throw() {}

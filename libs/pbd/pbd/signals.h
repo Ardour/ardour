@@ -31,13 +31,14 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/optional.hpp>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/event_loop.h"
 
 namespace PBD {
 
-class Connection;
+class LIBPBD_API Connection;
 
-class SignalBase
+class LIBPBD_API SignalBase
 {
 public:
 	virtual ~SignalBase () {}
@@ -47,7 +48,7 @@ protected:
         Glib::Threads::Mutex _mutex;
 };
 
-class Connection : public boost::enable_shared_from_this<Connection>
+class LIBPBD_API Connection : public boost::enable_shared_from_this<Connection>
 {
 public:
 	Connection (SignalBase* b) : _signal (b) {}
@@ -73,7 +74,7 @@ private:
 };
 
 template<typename R>
-class OptionalLastValue
+class LIBPBD_API OptionalLastValue
 {
 public:
 	typedef boost::optional<R> result_type;
@@ -92,7 +93,7 @@ public:
 	
 typedef boost::shared_ptr<Connection> UnscopedConnection;
 	
-class ScopedConnection
+class LIBPBD_API ScopedConnection
 {
 public:
 	ScopedConnection () {}
@@ -123,7 +124,7 @@ private:
 	UnscopedConnection _c;
 };
 	
-class ScopedConnectionList  : public boost::noncopyable
+class LIBPBD_API ScopedConnectionList  : public boost::noncopyable
 {
   public:
 	ScopedConnectionList();

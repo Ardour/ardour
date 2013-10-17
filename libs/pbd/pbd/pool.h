@@ -25,12 +25,13 @@
 
 #include <glibmm/threads.h>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/ringbuffer.h"
 
 /** A pool of data items that can be allocated, read from and written to
  *  without system memory allocation or locking.
  */
-class Pool 
+class LIBPBD_API Pool 
 {
   public:
 	Pool (std::string name, unsigned long item_size, unsigned long nitems);
@@ -49,7 +50,7 @@ class Pool
 	void *block; ///< data storage area
 };
 
-class SingleAllocMultiReleasePool : public Pool
+class LIBPBD_API SingleAllocMultiReleasePool : public Pool
 {
   public:
 	SingleAllocMultiReleasePool (std::string name, unsigned long item_size, unsigned long nitems);
@@ -63,7 +64,7 @@ class SingleAllocMultiReleasePool : public Pool
 };
 
 
-class MultiAllocSingleReleasePool : public Pool
+class LIBPBD_API MultiAllocSingleReleasePool : public Pool
 {
   public:
 	MultiAllocSingleReleasePool (std::string name, unsigned long item_size, unsigned long nitems);
@@ -76,7 +77,7 @@ class MultiAllocSingleReleasePool : public Pool
         Glib::Threads::Mutex m_lock;
 };
 
-class PerThreadPool;
+class LIBPBD_API PerThreadPool;
 
 /** Management of a per-thread pool of data that is allocated by one thread and
  *  freed by one other thread. Not safe for use when there is more than 1
@@ -90,7 +91,7 @@ class PerThreadPool;
  *  data), and so it calls alloc(), passes a pointer to the result of the alloc
  *  to another thread, which later calls push() to "free" it. 
  */
-class CrossThreadPool : public Pool
+class LIBPBD_API CrossThreadPool : public Pool
 {
   public:
 	CrossThreadPool (std::string n, unsigned long isize, unsigned long nitems, PerThreadPool *);
@@ -112,7 +113,7 @@ class CrossThreadPool : public Pool
 /** A class to manage per-thread pools of memory.  One object of this class is instantiated,
  *  and then it is used to create per-thread pools for 1 or more threads as required.
  */
-class PerThreadPool
+class LIBPBD_API PerThreadPool
 {
   public:
 	PerThreadPool ();

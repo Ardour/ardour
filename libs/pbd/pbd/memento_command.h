@@ -23,6 +23,7 @@
 
 #include <iostream>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/command.h"
 #include "pbd/stacktrace.h"
 #include "pbd/xml++.h"
@@ -49,7 +50,7 @@
  *  references to non-existant crossfades.  To get around this, CrossfadeBinder
  *  can do `just-in-time' binding from the crossfade ID.
  */
-template <class obj_T>
+template <class obj_T> LIBPBD_API 
 class MementoCommandBinder : public PBD::Destructible
 {
 public:
@@ -66,7 +67,7 @@ public:
 };
 
 /** A simple MementoCommandBinder which binds directly to an object */
-template <class obj_T>
+template <class obj_T> LIBPBD_API 
 class SimpleMementoCommandBinder : public MementoCommandBinder<obj_T>
 {
 public:
@@ -98,7 +99,7 @@ private:
  * (from Stateful::get_state()), so undo becomes restoring the before
  * memento, and redo is restoring the after memento.
  */
-template <class obj_T>
+template <class obj_T> LIBPBD_API 
 class MementoCommand : public Command
 {
 public:

@@ -24,6 +24,7 @@
 #include <list>
 #include <cassert>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/id.h"
 #include "pbd/xml++.h"
 #include "pbd/property_basics.h"
@@ -34,14 +35,14 @@ class XMLNode;
 namespace PBD {
 
 namespace sys {
-	class path;
+	class LIBPBD_API path;
 }
 
-class PropertyList;
-class OwnedPropertyList;
+class LIBPBD_API PropertyList;
+class LIBPBD_API OwnedPropertyList;
 
 /** Base class for objects with saveable and undoable state */
-class Stateful {
+class LIBPBD_API Stateful {
   public:
 	Stateful ();
 	virtual ~Stateful();
