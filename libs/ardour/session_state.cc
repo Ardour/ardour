@@ -3446,18 +3446,16 @@ Session::config_changed (std::string p, bool ours)
 		*/
 	} else if (p == "sync-all-route-ordering") {
 
-		/* sync to editor order unless mixer is used for remote IDs 
+		/* sync to editor order unless gui is used for remote IDs 
 		 */
 
 		switch (Config->get_remote_model()) {
 		case UserOrdered:
-			sync_order_keys (EditorSort);
-			break;
-		case EditorOrdered:
-			sync_order_keys (EditorSort);
+			sync_order_keys ();
 			break;
 		case MixerOrdered:
-			sync_order_keys (MixerSort);
+			sync_order_keys ();
+			break;
 		}
 			
 	} else if (p == "initial-program-change") {

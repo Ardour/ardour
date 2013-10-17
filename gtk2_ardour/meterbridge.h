@@ -80,7 +80,7 @@ class Meterbridge :
 	void remove_strip (MeterStrip *);
 
 	void session_going_away ();
-	void sync_order_keys (ARDOUR::RouteSortOrderKey src);
+	void sync_order_keys ();
 	void resync_order ();
 	mutable Glib::Threads::Mutex _resync_mutex;
 
@@ -107,7 +107,7 @@ class Meterbridge :
 				/* everything comes before b */
 				return true;
 			}
-			return a->order_key (ARDOUR::MixerSort) < b->order_key (ARDOUR::MixerSort);
+			return a->order_key () < b->order_key ();
 		}
 	};
 
