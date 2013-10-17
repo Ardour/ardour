@@ -117,11 +117,13 @@ def build(bld):
         obj.defines = [ 'LIBPBD_DLL=1',
                         'LIBPBD_DLL_EXPORTS=1' 
                         ]
-        
+        obj.cxxflags = [ '-fvisibility=hidden' ]
+        obj.cflags = [ '-fvisibility=hidden' ]
     else:
         print('BUILD STATIC LIB')
         obj              = bld.stlib(features = 'cxx cxxstlib', source=libpbd_sources)
         obj.cxxflags     = [ '-fPIC' ]
+        obj.cflags     = [ '-fPIC' ]
         obj.defines      = []
 
     if bld.is_defined('DEBUG_RT_ALLOC'):
