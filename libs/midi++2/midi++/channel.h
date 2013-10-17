@@ -36,7 +36,7 @@ class Port;
  * This remembers various useful information about the current 'state' of a
  * MIDI channel (eg current pitch bend value).
  */
-class Channel : public PBD::ScopedConnectionList {
+class LIBMIDIPP_API Channel : public PBD::ScopedConnectionList {
 
   public:
 	Channel (byte channel_number, Port &);

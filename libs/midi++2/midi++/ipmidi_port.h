@@ -48,13 +48,14 @@
 #include "pbd/signals.h"
 #include "pbd/ringbuffer.h"
 
+#include "midi++/libmidi_visibility.h"
 #include "midi++/types.h"
 #include "midi++/parser.h"
 #include "midi++/port.h"
 
 namespace MIDI {
 
-class IPMIDIPort : public Port {
+class LIBMIDIPP_API IPMIDIPort : public Port {
   public:
     IPMIDIPort (int base_port = lowest_ipmidi_port_default, const std::string& ifname = std::string());
     IPMIDIPort (const XMLNode&);
