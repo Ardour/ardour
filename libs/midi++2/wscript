@@ -64,6 +64,8 @@ def build(bld):
         obj              = bld.shlib(features = 'cxx cxxshlib', source=libmidi_sources)
         obj.defines      = [ 'LIBMIDIPP_DLL=1', 'LIBMIDIPP_DLL_EXPORTS=1' ]
         obj.defines     += [ 'LIBPBD_DLL=1', 'LIBEVORAL_DLL=1' ]
+        obj.cxxflags     = [ '-fvisibility=hidden' ]
+        obj.cflags       = [ '-fvisibility=hidden' ]
     else:
         obj              = bld.stlib(features = 'cxx cxxstlib', source=libmidi_sources)
         obj.cxxflags     = [ '-fPIC', '-DWITH_JACK_MIDI' ]

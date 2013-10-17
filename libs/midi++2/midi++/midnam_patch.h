@@ -425,7 +425,7 @@ private:
 	MasterDeviceNames::Models     _all_models;
 };
 
-extern const char* general_midi_program_names[128]; /* 0 .. 127 */
+LIBMIDIPP_API extern const char* general_midi_program_names[128]; /* 0 .. 127 */
 
 }
 
