@@ -31,6 +31,8 @@ def build(bld):
         obj.defines      = [ 'LIBCONTROLCP_DLL=1', 'LIBCONTROLCP_DLL_EXPORTS=1' ]
         # internal shared libs that we use
         obj.defines     += [ 'LIBPBD_DLL=1', 'LIBARDOUR_DLL=1', 'LIBEVORAL_DLL=1' ]
+        obj.cxxflags     = [ '-fvisibility=hidden' ]
+        obj.cflags       = [ '-fvisibility=hidden' ]
     else:
         obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=controlcp_sources)
         obj.cxxflags     = [ '-fPIC' ]
