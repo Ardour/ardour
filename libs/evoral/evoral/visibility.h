@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __libevoral_libevoral_visibility_h__
-#define __libevoral_libevoral_visibility_h__
+#ifndef __libevoral_visibility_h__
+#define __libevoral_visibility_h__
 
 /* _WIN32 is defined by most compilers targetting Windows, but within the
  * evoral source tree, we also define COMPILER_MSVC or COMPILER_MINGW depending
@@ -53,4 +53,4 @@
 #define LIBEVORAL_LOCAL
 #endif
 
-#endif /* __libevoral_libevoral_visibility_h__ */
+#endif /* __libevoral_visibility_h__ */

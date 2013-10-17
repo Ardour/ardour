@@ -32,7 +32,7 @@ def build(bld):
     obj.export_includes = ['.']
     obj.defines     = [ 'PACKAGE="ardour_genericmidi"' ]
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
-        obj.defines += [ 'LIBARDOUR_DLL=1', 'LIBCONTROLCP_DLL=1', 'LIBPBD_DLL=1', 'LIBGTKMM2EXT_DLL=1' ]
+        obj.defines += [ 'LIBARDOUR_DLL=1', 'LIBCONTROLCP_DLL=1', 'LIBPBD_DLL=1', 'LIBGTKMM2EXT_DLL=1', 'LIBEVORAL_DLL=1' ]
     obj.includes     = ['.', './generic_midi']
     obj.name         = 'libardour_generic_midi'
     obj.target       = 'ardour_generic_midi'
