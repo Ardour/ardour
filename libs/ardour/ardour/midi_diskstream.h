@@ -40,7 +40,7 @@
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/utils.h"
 
-struct tm;
+struct LIBARDOUR_API tm;
 
 namespace ARDOUR {
 
@@ -52,7 +52,7 @@ class SMFSource;
 class Send;
 class Session;
 
-class MidiDiskstream : public Diskstream
+class LIBARDOUR_API MidiDiskstream : public Diskstream
 {
   public:
 	MidiDiskstream (Session &, const string& name, Diskstream::Flag f = Recordable);

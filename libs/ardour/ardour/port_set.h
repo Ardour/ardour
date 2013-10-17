@@ -39,7 +39,7 @@ class MidiPort;
  * and once in a vector of all port (_all_ports).  This is to speed up the
  * fairly common case of iterating over all ports.
  */
-class PortSet : public boost::noncopyable {
+class LIBARDOUR_API PortSet : public boost::noncopyable {
 public:
 	PortSet();
 

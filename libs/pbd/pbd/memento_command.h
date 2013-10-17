@@ -50,8 +50,8 @@
  *  references to non-existant crossfades.  To get around this, CrossfadeBinder
  *  can do `just-in-time' binding from the crossfade ID.
  */
-template <class obj_T> LIBPBD_API 
-class MementoCommandBinder : public PBD::Destructible
+template <class obj_T>
+class LIBPBD_API MementoCommandBinder : public PBD::Destructible
 {
 public:
 	/** @return Stateful object to operate on */
@@ -67,8 +67,8 @@ public:
 };
 
 /** A simple MementoCommandBinder which binds directly to an object */
-template <class obj_T> LIBPBD_API 
-class SimpleMementoCommandBinder : public MementoCommandBinder<obj_T>
+template <class obj_T>
+class LIBPBD_API SimpleMementoCommandBinder : public MementoCommandBinder<obj_T>
 {
 public:
 	SimpleMementoCommandBinder (obj_T& o)
@@ -99,8 +99,8 @@ private:
  * (from Stateful::get_state()), so undo becomes restoring the before
  * memento, and redo is restoring the after memento.
  */
-template <class obj_T> LIBPBD_API 
-class MementoCommand : public Command
+template <class obj_T>
+class LIBPBD_API MementoCommand : public Command
 {
 public:
 	MementoCommand (obj_T& a_object, XMLNode* a_before, XMLNode* a_after) 

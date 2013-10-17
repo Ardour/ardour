@@ -22,9 +22,11 @@
 #include <string>
 #include <vector>
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
-class SessionDirectory
+class LIBARDOUR_API SessionDirectory
 {
 public:
 

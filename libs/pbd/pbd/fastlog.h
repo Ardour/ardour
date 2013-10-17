@@ -12,7 +12,7 @@ as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 #include "pbd/libpbd_visibility.h"
 
-LIBPBD_API static inline float fast_log2 (float val)
+static inline float fast_log2 (float val)
 {
 	/* don't use reinterpret_cast<> because that prevents this
 	   from being used by pure C code (for example, GnomeCanvasItems)
@@ -31,16 +31,16 @@ LIBPBD_API static inline float fast_log2 (float val)
 	return (val + log_2);
 }
 
-LIBPBD_API static inline float fast_log (const float val)
+static inline float fast_log (const float val)
 {
 	return (fast_log2 (val) * 0.69314718f);
 }
 
-LIBPBD_API static inline float fast_log10 (const float val)
+static inline float fast_log10 (const float val)
 {
 	return fast_log2(val) / 3.312500f;
 }
 
-LIBPBD_API static inline float minus_infinity(void) { return -HUGE_VAL; }
+static inline float minus_infinity(void) { return -HUGE_VAL; }
 
 #endif /* __pbd_fastlog_h__ */

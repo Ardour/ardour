@@ -32,7 +32,7 @@ namespace ARDOUR {
 
 class AudioPlaylist;
 
-class AudioPlaylistSource : public PlaylistSource, public AudioSource  {
+class LIBARDOUR_API AudioPlaylistSource : public PlaylistSource, public AudioSource  {
 public:
 	virtual ~AudioPlaylistSource ();
 

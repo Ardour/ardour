@@ -32,14 +32,14 @@ namespace ARDOUR {
 
 class Session;
 
-class TempoMapImportHandler : public ElementImportHandler
+class LIBARDOUR_API TempoMapImportHandler : public ElementImportHandler
 {
   public:
 	TempoMapImportHandler (XMLTree const & source, Session & session);
 	std::string get_info () const;
 };
 
-class TempoMapImporter : public ElementImporter
+class LIBARDOUR_API TempoMapImporter : public ElementImporter
 {
   private:
 	typedef boost::shared_ptr<XMLNode> XMLNodePtr;

@@ -29,6 +29,7 @@
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/session_object.h"
 
@@ -54,7 +55,7 @@ class Track;
 class AudioTrack;
 class Session;
 
-class RouteGroup : public SessionObject
+class LIBARDOUR_API RouteGroup : public SessionObject
 {
   public:
 	static void make_property_quarks();

@@ -23,9 +23,11 @@
 #include <boost/dynamic_bitset.hpp>
 #include <stdint.h>
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
-class RuntimeProfile {
+class LIBARDOUR_API RuntimeProfile {
 public:
 	enum Element {
 		SmallScreen,

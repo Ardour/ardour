@@ -20,7 +20,9 @@
 #ifndef __KMETERDSP_H
 #define	__KMETERDSP_H
 
-class Kmeterdsp
+#include "ardour/libardour_visibility.h"
+
+class LIBARDOUR_API Kmeterdsp
 {
 public:
 

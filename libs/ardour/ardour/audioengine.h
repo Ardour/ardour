@@ -39,6 +39,7 @@
 #include "ardour/ardour.h"
 #include "ardour/data_type.h"
 #include "ardour/session_handle.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/chan_count.h"
 #include "ardour/port_manager.h"
@@ -59,7 +60,7 @@ class ProcessThread;
 class AudioBackend;
 class AudioBackendInfo;
 
-class AudioEngine : public SessionHandlePtr, public PortManager
+class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 {
 public:
 

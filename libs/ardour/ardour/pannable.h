@@ -36,7 +36,7 @@ class Session;
 class AutomationControl;
 class Panner;
 
-class Pannable : public PBD::Stateful, public Automatable, public SessionHandleRef
+class LIBARDOUR_API Pannable : public PBD::Stateful, public Automatable, public SessionHandleRef
 {
   public:
 	Pannable (Session& s);

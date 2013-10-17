@@ -53,9 +53,10 @@ class MidiFilter;
 class MidiModel;
 class MidiSource;
 class MidiStateTracker;
+
 template<typename T> class MidiRingBuffer;
 
-class MidiRegion : public Region
+class LIBARDOUR_API MidiRegion : public Region
 {
   public:
 	static void make_property_quarks ();

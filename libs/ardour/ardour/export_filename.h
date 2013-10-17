@@ -34,7 +34,7 @@ namespace ARDOUR
 
 class Session;
 
-class ExportFilename {
+class LIBARDOUR_API ExportFilename {
   public:
 
 	enum DateFormat {

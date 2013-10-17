@@ -37,13 +37,13 @@ class AsyncMIDIPort;
    certain types of requests to the MIDI UI
 */
 
-struct MidiUIRequest : public BaseUI::BaseRequestObject {
+struct LIBARDOUR_API MidiUIRequest : public BaseUI::BaseRequestObject {
   public:
 	MidiUIRequest () { }
 	~MidiUIRequest() { }
 };
 
-class MidiControlUI : public AbstractUI<MidiUIRequest>
+class LIBARDOUR_API MidiControlUI : public AbstractUI<MidiUIRequest>
 {
   public:
 	MidiControlUI (Session& s);

@@ -37,7 +37,7 @@ namespace ARDOUR
 
 class Session;
 
-class ExportChannelConfiguration : public boost::enable_shared_from_this<ExportChannelConfiguration>
+class LIBARDOUR_API ExportChannelConfiguration : public boost::enable_shared_from_this<ExportChannelConfiguration>
 {
 
   private:

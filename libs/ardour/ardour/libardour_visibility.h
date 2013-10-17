@@ -38,8 +38,6 @@
     #define LIBARDOUR_DLL_IMPORT
     #define LIBARDOUR_DLL_EXPORT
     #define LIBARDOUR_DLL_LOCAL
-    #define LIBARDOUR_DLL_IMPORT_CLASS
-    #define LIBARDOUR_DLL_EXPORT_CLASS
   #endif
 #endif
 

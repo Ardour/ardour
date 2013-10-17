@@ -32,10 +32,9 @@ class Session;
 class Region;
 class AudioRegion;
 class Source;
-
 class AudioPlaylist;
 
-class AudioPlaylist : public ARDOUR::Playlist
+class LIBARDOUR_API AudioPlaylist : public ARDOUR::Playlist
 {
 public:
 	AudioPlaylist (Session&, const XMLNode&, bool hidden = false);

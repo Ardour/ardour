@@ -29,6 +29,7 @@
 #include "midi++/types.h"
 #include "midi++/port.h"
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
@@ -36,7 +37,7 @@ namespace ARDOUR {
 class MidiPort;
 class Port;
 
-class MidiPortManager {
+class LIBARDOUR_API MidiPortManager {
   public:
     MidiPortManager();
     virtual ~MidiPortManager ();

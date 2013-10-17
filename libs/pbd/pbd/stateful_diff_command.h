@@ -29,8 +29,8 @@
 namespace PBD
 {
 
-class LIBPBD_API StatefulDestructible;	
-class LIBPBD_API PropertyList;
+class StatefulDestructible;	
+class PropertyList;
 
 /** A Command which stores its action as the differences between the before and after
  *  state of a Stateful object.

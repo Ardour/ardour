@@ -47,7 +47,7 @@ union LIBPBD_API Float_t
  
 /* Note: ULPS = Units in the Last Place */
 
-LIBPBD_API static inline bool floateq (float a, float b, int max_ulps_diff)
+static inline bool floateq (float a, float b, int max_ulps_diff)
 {
     Float_t ua (a);
     Float_t ub (b);

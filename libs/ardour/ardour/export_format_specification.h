@@ -25,6 +25,7 @@
 
 #include "pbd/uuid.h"
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/export_format_base.h"
 
@@ -37,7 +38,7 @@ class ExportFormat;
 class ExportFormatCompatibility;
 class Session;
 
-class ExportFormatSpecification : public ExportFormatBase {
+class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 
   private:
 

@@ -20,9 +20,10 @@
 #ifndef __ardour_vst_types_h__
 #define __ardour_vst_types_h__
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/vestige/aeffectx.h"
 
-struct _VSTKey
+struct LIBARDOUR_API _VSTKey
 {
 	/** virtual-key code, or 0 if this _VSTFXKey is a `character' key */
 	int special;
@@ -32,7 +33,7 @@ struct _VSTKey
 
 typedef struct _VSTKey VSTKey;
 
-struct _VSTInfo 
+struct LIBARDOUR_API _VSTInfo 
 {
 	char  *name;
 	char  *creator;
@@ -56,7 +57,7 @@ typedef struct _VSTInfo VSTInfo;
 
 typedef AEffect * (* main_entry_t) (audioMasterCallback);
 
-struct _VSTHandle
+struct LIBARDOUR_API _VSTHandle
 {
 	void*        dll;
 	char*        name;
@@ -69,7 +70,7 @@ struct _VSTHandle
 
 typedef struct _VSTHandle VSTHandle;
 
-struct _VSTState
+struct LIBARDOUR_API _VSTState
 {
 	AEffect* plugin;
 

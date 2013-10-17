@@ -39,7 +39,7 @@ namespace ARDOUR {
  *  session on a machine without a particular plugin will not corrupt
  *  the session.
  */
-class UnknownProcessor : public Processor
+class LIBARDOUR_API UnknownProcessor : public Processor
 {
 public:
 	UnknownProcessor (Session &, XMLNode const &);

@@ -35,7 +35,7 @@ class Region;
 class Diskstream;
 class IO;
 
-class Track : public Route, public PublicDiskstream
+class LIBARDOUR_API Track : public Route, public PublicDiskstream
 {
   public:
 	Track (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal, DataType default_type = DataType::AUDIO);

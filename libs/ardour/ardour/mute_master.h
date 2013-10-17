@@ -31,7 +31,7 @@ namespace ARDOUR {
 
 class Session;
 
-class MuteMaster : public SessionHandleRef, public PBD::Stateful
+class LIBARDOUR_API MuteMaster : public SessionHandleRef, public PBD::Stateful
 {
   public:
 	/** deliveries to mute when the channel is "muted" */

@@ -20,6 +20,7 @@
 #define __ardour_meter_h__
 
 #include <vector>
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/processor.h"
 #include "pbd/fastlog.h"
@@ -35,7 +36,7 @@ class BufferSet;
 class ChanCount;
 class Session;
 
-class Metering {
+class LIBARDOUR_API Metering {
   public:
 	static void               update_meters ();
 	static PBD::Signal0<void> Meter;
@@ -47,7 +48,7 @@ class Metering {
 
 /** Meters peaks on the input and stores them for access.
  */
-class PeakMeter : public Processor {
+class LIBARDOUR_API PeakMeter : public Processor {
 public:
         PeakMeter(Session& s, const std::string& name);
         ~PeakMeter();

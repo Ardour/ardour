@@ -27,13 +27,14 @@
 #include <vector>
 #include "ardour/chan_count.h"
 #include "ardour/data_type.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 #if defined VST_SUPPORT || defined LXVST_SUPPORT
 #include "evoral/MIDIEvent.hpp"
-struct _VstEvents;
+struct LIBARDOUR_API _VstEvents;
 typedef struct _VstEvents VstEvents;
-struct _VstMidiEvent;
+struct LIBARDOUR_API _VstMidiEvent;
 typedef struct _VstMidiEvent VstMidiEvent;
 #endif
 
@@ -61,7 +62,7 @@ class PortSet;
  * others the form of their output (eg what they did to the BufferSet).
  * Setting the use counts is realtime safe.
  */
-class BufferSet
+class LIBARDOUR_API BufferSet
 {
 public:
 	BufferSet();

@@ -21,6 +21,7 @@
 #define __ardour_ca_importable_source_h__
 
 #include "pbd/failed_constructor.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/importable_source.h"
 
@@ -28,7 +29,7 @@
 
 namespace ARDOUR {
 
-class CAImportableSource : public ImportableSource {
+class LIBARDOUR_API CAImportableSource : public ImportableSource {
     public:
 	CAImportableSource (const std::string& path);
 	virtual ~CAImportableSource();

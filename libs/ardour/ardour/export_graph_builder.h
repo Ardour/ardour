@@ -48,7 +48,7 @@ namespace ARDOUR
 class ExportTimespan;
 class Session;
 
-class ExportGraphBuilder
+class LIBARDOUR_API ExportGraphBuilder
 {
   private:
 	typedef ExportHandler::FileSpec FileSpec;

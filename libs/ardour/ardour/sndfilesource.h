@@ -28,7 +28,7 @@
 
 namespace ARDOUR {
 
-class SndFileSource : public AudioFileSource {
+class LIBARDOUR_API SndFileSource : public AudioFileSource {
   public:
 	/** Constructor to be called for existing external-to-session files */
 	SndFileSource (Session&, const std::string& path, int chn, Flag flags);

@@ -27,7 +27,7 @@ class Source;
 class Location;
 
 /** Public interface to a Diskstream */
-class PublicDiskstream
+class LIBARDOUR_API PublicDiskstream
 {
 public:
 	virtual ~PublicDiskstream() {}

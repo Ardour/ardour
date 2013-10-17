@@ -20,6 +20,7 @@
 #ifndef __ardour_runtime_functions_h__
 #define __ardour_runtime_functions_h__
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {

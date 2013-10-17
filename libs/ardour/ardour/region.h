@@ -38,7 +38,6 @@
 
 class XMLNode;
 
-
 namespace ARDOUR {
 
 namespace Properties {
@@ -74,14 +73,14 @@ class Filter;
 class ExportSpecification;
 class Progress;
 
-enum RegionEditState {
+enum LIBARDOUR_API RegionEditState {
 	EditChangesNothing = 0,
 	EditChangesName    = 1,
 	EditChangesID      = 2
 };
 
 
-class Region
+class LIBARDOUR_API Region
 	: public SessionObject
 	, public boost::enable_shared_from_this<Region>
 	, public Readable

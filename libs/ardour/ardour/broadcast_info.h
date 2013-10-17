@@ -23,6 +23,7 @@
 
 #include <string>
 
+#include "ardour/libardour_visibility.h"
 #include "audiographer/broadcast_info.h"
 
 namespace ARDOUR
@@ -30,7 +31,7 @@ namespace ARDOUR
 
 class Session;
 
-class BroadcastInfo : public AudioGrapher::BroadcastInfo
+class LIBARDOUR_API BroadcastInfo : public AudioGrapher::BroadcastInfo
 {
   public:
 	BroadcastInfo ();

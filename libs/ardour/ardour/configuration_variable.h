@@ -25,12 +25,13 @@
 
 #include "pbd/xml++.h"
 #include "pbd/convert.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
 
 namespace ARDOUR {
 
-class ConfigVariableBase {
+class LIBARDOUR_API ConfigVariableBase {
   public:
 
 	ConfigVariableBase (std::string str) : _name (str) {}
@@ -51,7 +52,7 @@ class ConfigVariableBase {
 };
 
 template<class T>
-class ConfigVariable : public ConfigVariableBase
+class LIBARDOUR_API ConfigVariable : public ConfigVariableBase
 {
   public:
 
@@ -91,7 +92,7 @@ class ConfigVariable : public ConfigVariableBase
 
 /** Specialisation of ConfigVariable for std::string to cope with whitespace properly */
 template<>
-class ConfigVariable<std::string> : public ConfigVariableBase
+class LIBARDOUR_API ConfigVariable<std::string> : public ConfigVariableBase
 {
   public:
 
@@ -126,7 +127,7 @@ class ConfigVariable<std::string> : public ConfigVariableBase
 };
 
 template<>
-class ConfigVariable<bool> : public ConfigVariableBase
+class LIBARDOUR_API ConfigVariable<bool> : public ConfigVariableBase
 {
   public:
 
@@ -163,7 +164,7 @@ class ConfigVariable<bool> : public ConfigVariableBase
 };
 
 template<class T>
-class ConfigVariableWithMutation : public ConfigVariable<T>
+class LIBARDOUR_API ConfigVariableWithMutation : public ConfigVariable<T>
 {
   public:
 	ConfigVariableWithMutation (std::string name, T val, T (*m)(T))
@@ -192,7 +193,7 @@ class ConfigVariableWithMutation : public ConfigVariable<T>
 };
 
 template<>
-class ConfigVariableWithMutation<std::string> : public ConfigVariable<std::string>
+class LIBARDOUR_API ConfigVariableWithMutation<std::string> : public ConfigVariable<std::string>
 {
   public:
 	ConfigVariableWithMutation (std::string name, std::string val, std::string (*m)(std::string))

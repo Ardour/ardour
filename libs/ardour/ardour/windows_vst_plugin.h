@@ -22,7 +22,7 @@
 
 #include "ardour/vst_plugin.h"
 
-struct _VSTHandle;
+struct LIBARDOUR_API _VSTHandle;
 typedef struct _VSTHandle VSTHandle;
 
 namespace ARDOUR {
@@ -30,7 +30,7 @@ namespace ARDOUR {
 class AudioEngine;
 class Session;
 
-class WindowsVSTPlugin : public VSTPlugin
+class LIBARDOUR_API WindowsVSTPlugin : public VSTPlugin
 {
 public:
 	WindowsVSTPlugin (AudioEngine &, Session &, VSTHandle *);
@@ -40,7 +40,7 @@ public:
 	std::string state_node_name () const { return "windows-vst"; }
 };
 
-class WindowsVSTPluginInfo : public PluginInfo
+class LIBARDOUR_API WindowsVSTPluginInfo : public PluginInfo
 {
 public:
 	WindowsVSTPluginInfo ();

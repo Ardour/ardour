@@ -25,7 +25,7 @@
 
 namespace ARDOUR {
 
-class SilentFileSource : public AudioFileSource {
+class LIBARDOUR_API SilentFileSource : public AudioFileSource {
 public:
 	int update_header (framepos_t /*when*/, struct tm&, time_t) { return 0; }
 	int flush_header () { return 0; }

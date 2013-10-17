@@ -28,7 +28,7 @@ extern "C" {
 typedef struct _spline Spline;
 typedef struct _spline_point SplinePoint;
 
-struct _spline_point
+struct LIBARDOUR_API _spline_point
 {
 	float x;
 	float y;
@@ -45,7 +45,7 @@ void    spline_fill (Spline *, float x0, float x1, float *vec, uint32_t veclen);
 float   spline_get_max_x (Spline *);
 float   spline_get_min_x (Spline *);
 
-struct _spline
+struct LIBARDOUR_API _spline
 {
 	float        *deriv2;
 	float        *x;

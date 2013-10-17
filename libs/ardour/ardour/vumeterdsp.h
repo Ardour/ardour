@@ -20,8 +20,9 @@
 #ifndef __VUMETERDSP_H
 #define	__VUMETERDSP_H
 
+#include "ardour/libardour_visibility.h"
 
-class Vumeterdsp
+class LIBARDOUR_API Vumeterdsp
 {
 public:
 

@@ -34,7 +34,7 @@ namespace ARDOUR {
 template<typename T> class MidiRingBuffer;
 
 /** Standard Midi File (Type 0) Source */
-class SMFSource : public MidiSource, public FileSource, public Evoral::SMF {
+class LIBARDOUR_API SMFSource : public MidiSource, public FileSource, public Evoral::SMF {
 public:
 	/** Constructor for existing external-to-session files */
 	SMFSource (Session& session, const std::string& path,

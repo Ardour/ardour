@@ -41,14 +41,14 @@
 class CAComponent;
 class CAAudioUnit;
 class CAComponentDescription;
-struct AudioBufferList;
+struct LIBARDOUR_API AudioBufferList;
 
 namespace ARDOUR {
 
 class AudioEngine;
 class Session;
 
-struct AUParameterDescriptor : public Plugin::ParameterDescriptor {
+struct LIBARDOUR_API AUParameterDescriptor : public Plugin::ParameterDescriptor {
 	// additional fields to make operations more efficient
 	AudioUnitParameterID id;
 	AudioUnitScope scope;
@@ -58,7 +58,7 @@ struct AUParameterDescriptor : public Plugin::ParameterDescriptor {
 	AudioUnitParameterUnit unit;
 };
 
-class AUPlugin : public ARDOUR::Plugin
+class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 {
   public:
 	AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAComponent> comp);
@@ -221,11 +221,11 @@ class AUPlugin : public ARDOUR::Plugin
 
 typedef boost::shared_ptr<AUPlugin> AUPluginPtr;
 
-struct AUPluginCachedInfo {
+struct LIBARDOUR_API AUPluginCachedInfo {
 	std::vector<std::pair<int,int> > io_configs;
 };
 
-class AUPluginInfo : public PluginInfo {
+class LIBARDOUR_API AUPluginInfo : public PluginInfo {
   public:
 	 AUPluginInfo (boost::shared_ptr<CAComponentDescription>);
 	~AUPluginInfo ();

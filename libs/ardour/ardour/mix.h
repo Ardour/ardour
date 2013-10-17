@@ -19,6 +19,7 @@
 #ifndef __ardour_mix_h__
 #define __ardour_mix_h__
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
 

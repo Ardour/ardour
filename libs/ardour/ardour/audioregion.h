@@ -40,17 +40,17 @@ class PlaylistReadTest;
 namespace ARDOUR {
 
 namespace Properties {
-	extern PBD::PropertyDescriptor<bool> envelope_active;
-	extern PBD::PropertyDescriptor<bool> default_fade_in;
-	extern PBD::PropertyDescriptor<bool> default_fade_out;
-	extern PBD::PropertyDescriptor<bool> fade_in_active;
-	extern PBD::PropertyDescriptor<bool> fade_out_active;
-	extern PBD::PropertyDescriptor<float> scale_amplitude;
-	extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_in;
-	extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > inverse_fade_in;
-	extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_out;
-	extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > inverse_fade_out;
-	extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > envelope;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> envelope_active;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> default_fade_in;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> default_fade_out;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> fade_in_active;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> fade_out_active;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<float> scale_amplitude;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_in;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > inverse_fade_in;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_out;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > inverse_fade_out;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > envelope;
 }
 
 class Playlist;
@@ -59,7 +59,7 @@ class Filter;
 class AudioSource;
 
 
-class AudioRegion : public Region
+class LIBARDOUR_API AudioRegion : public Region
 {
   public:
 	static void make_property_quarks ();

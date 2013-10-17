@@ -26,12 +26,14 @@
 #include "pbd/uuid.h"
 #include "pbd/xml++.h"
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR
 {
 
 class Session;
 
-class ExportPreset {
+class LIBARDOUR_API ExportPreset {
   public:
 	ExportPreset (std::string filename, Session & s);
 	~ExportPreset ();

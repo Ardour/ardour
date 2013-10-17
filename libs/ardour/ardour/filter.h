@@ -23,6 +23,7 @@
 
 #include <vector>
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
@@ -31,7 +32,7 @@ class Region;
 class Session;
 class Progress;
 
-class Filter {
+class LIBARDOUR_API Filter {
 
   public:
 	virtual ~Filter() {}

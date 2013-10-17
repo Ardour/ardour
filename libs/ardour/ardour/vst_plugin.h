@@ -22,17 +22,17 @@
 
 #include "ardour/plugin.h"
 
-struct _AEffect;
+struct LIBARDOUR_API _AEffect;
 typedef struct _AEffect AEffect;
-struct _VSTHandle;
+struct LIBARDOUR_API _VSTHandle;
 typedef struct _VSTHandle VSTHandle;
-struct _VSTState;
+struct LIBARDOUR_API _VSTState;
 typedef struct _VSTState VSTState;
 
 namespace ARDOUR {
 
 /** Parent class for VST plugins of both Windows and Linux varieties */
-class VSTPlugin : public Plugin
+class LIBARDOUR_API VSTPlugin : public Plugin
 {
 public:
 	VSTPlugin (AudioEngine &, Session &, VSTHandle *);
