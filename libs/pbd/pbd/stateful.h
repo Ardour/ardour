@@ -35,11 +35,11 @@ class XMLNode;
 namespace PBD {
 
 namespace sys {
-	class LIBPBD_API path;
+	class path;
 }
 
-class LIBPBD_API PropertyList;
-class LIBPBD_API OwnedPropertyList;
+class PropertyList;
+class OwnedPropertyList;
 
 /** Base class for objects with saveable and undoable state */
 class LIBPBD_API Stateful {

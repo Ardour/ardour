@@ -34,9 +34,9 @@ namespace ARDOUR {
 		   property, but it allows us to signal changes to the
 		   MidiModel used by the MidiRegion
 		*/
-		extern PBD::PropertyDescriptor<void*> midi_data;
-		extern PBD::PropertyDescriptor<Evoral::MusicalTime> start_beats;
-		extern PBD::PropertyDescriptor<Evoral::MusicalTime> length_beats;
+		LIBARDOUR_API extern PBD::PropertyDescriptor<void*> midi_data;
+		LIBARDOUR_API extern PBD::PropertyDescriptor<Evoral::MusicalTime> start_beats;
+		LIBARDOUR_API extern PBD::PropertyDescriptor<Evoral::MusicalTime> length_beats;
 	}
 }
 

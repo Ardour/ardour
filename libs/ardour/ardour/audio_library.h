@@ -45,7 +45,7 @@ class LIBARDOUR_API AudioLibrary
 	std::string src;
 };
 
-extern AudioLibrary* Library;
+LIBARDOUR_API extern AudioLibrary* Library;
 
 } // ARDOUR namespace
 

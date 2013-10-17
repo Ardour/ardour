@@ -84,8 +84,8 @@ class LIBARDOUR_API RCConfiguration : public Configuration
 };
 
 /* XXX: rename this */
-extern RCConfiguration *Config;
-extern gain_t speed_quietning; /* see comment in configuration.cc */
+LIBARDOUR_API extern RCConfiguration *Config;
+LIBARDOUR_API extern gain_t speed_quietning; /* see comment in configuration.cc */
 
 } // namespace ARDOUR
 

@@ -53,7 +53,7 @@ private:
 
 };
 
-extern RuntimeProfile* Profile;
+LIBARDOUR_API extern RuntimeProfile* Profile;
 
 }; // namespace ARDOUR
 

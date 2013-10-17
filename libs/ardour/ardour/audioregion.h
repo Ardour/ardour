@@ -238,9 +238,9 @@ class LIBARDOUR_API AudioRegion : public Region
 /* access from C objects */
 
 extern "C" {
-	int    region_read_peaks_from_c   (void *arg, uint32_t npeaks, uint32_t start, uint32_t length, intptr_t data, uint32_t n_chan, double samples_per_unit);
-	uint32_t region_length_from_c (void *arg);
-	uint32_t sourcefile_length_from_c (void *arg, double);
+	LIBARDOUR_API int    region_read_peaks_from_c   (void *arg, uint32_t npeaks, uint32_t start, uint32_t length, intptr_t data, uint32_t n_chan, double samples_per_unit);
+	LIBARDOUR_API uint32_t region_length_from_c (void *arg);
+	LIBARDOUR_API uint32_t sourcefile_length_from_c (void *arg, double);
 }
 
 #endif /* __ardour_audio_region_h__ */

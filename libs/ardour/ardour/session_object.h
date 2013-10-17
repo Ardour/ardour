@@ -31,7 +31,7 @@
 namespace ARDOUR {
 
 namespace Properties {
-	extern PBD::PropertyDescriptor<std::string> name;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<std::string> name;
 }
 
 class Session;

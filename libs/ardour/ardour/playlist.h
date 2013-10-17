@@ -55,7 +55,7 @@ namespace Properties {
 	/* fake the type, since regions are handled by SequenceProperty which doesn't
 	   care about such things.
 	*/
-	extern PBD::PropertyDescriptor<bool> regions;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> regions;
 }
 
 class LIBARDOUR_API RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_ptr<Region> > >

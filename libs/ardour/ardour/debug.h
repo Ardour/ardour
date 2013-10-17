@@ -24,46 +24,47 @@
 
 #include <sstream>
 
+#include "ardour/libardour_visibility.h"
 #include "pbd/debug.h"
 
 namespace PBD {
 	namespace DEBUG {
-		extern uint64_t MidiSourceIO;
-		extern uint64_t MidiPlaylistIO;
-		extern uint64_t MidiDiskstreamIO;
-		extern uint64_t SnapBBT;
-		extern uint64_t Configuration;
-		extern uint64_t Latency;
-		extern uint64_t Processors;
-		extern uint64_t ProcessThreads;
-		extern uint64_t Graph;
-		extern uint64_t Destruction;
-		extern uint64_t MTC;
-		extern uint64_t LTC;
-		extern uint64_t Transport;
-		extern uint64_t Slave;
-		extern uint64_t SessionEvents;
-		extern uint64_t MidiIO;
-		extern uint64_t MackieControl;
-		extern uint64_t MidiClock;
-		extern uint64_t Monitor;
-		extern uint64_t Solo;
-		extern uint64_t AudioPlayback;
-		extern uint64_t Panning;
-		extern uint64_t LV2;
-		extern uint64_t CaptureAlignment;
-		extern uint64_t PluginManager;
-		extern uint64_t AudioUnits;
-		extern uint64_t ControlProtocols;
-		extern uint64_t CycleTimers;
-		extern uint64_t MidiTrackers;
-		extern uint64_t Layering;
-		extern uint64_t TempoMath;
-		extern uint64_t TempoMap;
-		extern uint64_t OrderKeys;
-		extern uint64_t Automation;
-		extern uint64_t WiimoteControl;
-		extern uint64_t Ports;
+		LIBARDOUR_API extern uint64_t MidiSourceIO;
+		LIBARDOUR_API extern uint64_t MidiPlaylistIO;
+		LIBARDOUR_API extern uint64_t MidiDiskstreamIO;
+		LIBARDOUR_API extern uint64_t SnapBBT;
+		LIBARDOUR_API extern uint64_t Configuration;
+		LIBARDOUR_API extern uint64_t Latency;
+		LIBARDOUR_API extern uint64_t Processors;
+		LIBARDOUR_API extern uint64_t ProcessThreads;
+		LIBARDOUR_API extern uint64_t Graph;
+		LIBARDOUR_API extern uint64_t Destruction;
+		LIBARDOUR_API extern uint64_t MTC;
+		LIBARDOUR_API extern uint64_t LTC;
+		LIBARDOUR_API extern uint64_t Transport;
+		LIBARDOUR_API extern uint64_t Slave;
+		LIBARDOUR_API extern uint64_t SessionEvents;
+		LIBARDOUR_API extern uint64_t MidiIO;
+		LIBARDOUR_API extern uint64_t MackieControl;
+		LIBARDOUR_API extern uint64_t MidiClock;
+		LIBARDOUR_API extern uint64_t Monitor;
+		LIBARDOUR_API extern uint64_t Solo;
+		LIBARDOUR_API extern uint64_t AudioPlayback;
+		LIBARDOUR_API extern uint64_t Panning;
+		LIBARDOUR_API extern uint64_t LV2;
+		LIBARDOUR_API extern uint64_t CaptureAlignment;
+		LIBARDOUR_API extern uint64_t PluginManager;
+		LIBARDOUR_API extern uint64_t AudioUnits;
+		LIBARDOUR_API extern uint64_t ControlProtocols;
+		LIBARDOUR_API extern uint64_t CycleTimers;
+		LIBARDOUR_API extern uint64_t MidiTrackers;
+		LIBARDOUR_API extern uint64_t Layering;
+		LIBARDOUR_API extern uint64_t TempoMath;
+		LIBARDOUR_API extern uint64_t TempoMap;
+		LIBARDOUR_API extern uint64_t OrderKeys;
+		LIBARDOUR_API extern uint64_t Automation;
+		LIBARDOUR_API extern uint64_t WiimoteControl;
+		LIBARDOUR_API extern uint64_t Ports;
 	}
 }
 
