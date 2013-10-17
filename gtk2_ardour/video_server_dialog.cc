@@ -137,7 +137,7 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	t->attach (cachesize_spinner, 1, 2, 2, 3);
 
 	l = manage (new Label (string_compose(
-					_("%1 relies on an external Video Server for the videotimeline.\nThe server configured in Edit -> Prefereces -> Video is not reachable.\nDo you want ardour to launch 'harvid' on this machine?"), PROGRAM_NAME)
+					_("%1 relies on an external video server for the videotimeline.\nThe server configured in Edit -> Preferences -> Video is not reachable.\nDo you want %1 to launch 'harvid' on this machine?"), PROGRAM_NAME)
 				, Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	l->set_max_width_chars(80);
 	l->set_line_wrap();
