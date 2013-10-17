@@ -351,7 +351,7 @@ cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Frameworks
 
 while [ true ] ; do 
     missing=false
-    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Panners/*.dylib $Surfaces/*.dylib $Plugins/*.so ; do 
+    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Panners/*.dylib $Backends/*.dylib $Surfaces/*.dylib $Plugins/*.so ; do 
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
@@ -438,7 +438,7 @@ done
 
 echo "Fixing up library names ..."
 # now do the same for all the libraries we include
-for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners ; do
+for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners $Backends ; do
 
     libbase=`basename $libdir`
     
