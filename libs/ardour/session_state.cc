@@ -3445,19 +3445,7 @@ Session::config_changed (std::string p, bool ours)
 		   TO SET REMOTE ID'S
 		*/
 	} else if (p == "sync-all-route-ordering") {
-
-		/* sync to editor order unless gui is used for remote IDs 
-		 */
-
-		switch (Config->get_remote_model()) {
-		case UserOrdered:
 			sync_order_keys ();
-			break;
-		case MixerOrdered:
-			sync_order_keys ();
-			break;
-		}
-			
 	} else if (p == "initial-program-change") {
 
 		if (_mmc->output_port() && Config->get_initial_program_change() >= 0) {
