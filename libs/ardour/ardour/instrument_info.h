@@ -33,8 +33,8 @@
 
 namespace MIDI {
 	namespace Name {
-		class LIBMIDIPP_API ChannelNameSet;
-		class LIBMIDIPP_API Patch;
+		class ChannelNameSet;
+		class Patch;
 		typedef std::list<boost::shared_ptr<Patch> > PatchNameList;
 	}
 }
