@@ -90,6 +90,8 @@ def build(bld):
         obj.defines      = [ 'LIBGTKMM2EXT_DLL=1', 'LIBGTKMM2EXT_DLL_EXPORTS=1' ]
         # internal shared libs that we use
         obj.defines     += [ 'LIBPBD_DLL=1' ]
+        obj.cxxflags     = [ '-fvisibility=hidden' ]
+        obj.cflags     = [ '-fvisibility=hidden' ]
     else:
         obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=gtkmm2ext_sources)
         obj.cxxflags     = [ '-fPIC' ]

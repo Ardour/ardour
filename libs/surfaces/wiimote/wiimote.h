@@ -23,6 +23,7 @@
 
 #include <cwiid.h>
 
+#define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"
 #include "ardour/types.h"
 #include "control_protocol/control_protocol.h"

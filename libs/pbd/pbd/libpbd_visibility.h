@@ -38,8 +38,6 @@
     #define LIBPBD_DLL_IMPORT
     #define LIBPBD_DLL_EXPORT
     #define LIBPBD_DLL_LOCAL
-    #define LIBPBD_DLL_IMPORT_CLASS
-    #define LIBPBD_DLL_EXPORT_CLASS
   #endif
 #endif
 

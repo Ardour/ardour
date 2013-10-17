@@ -28,67 +28,69 @@
 #include <gtkmm/actiongroup.h>
 #include <gtkmm/accelkey.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtk {
 	class UIManager;
 }
 
 namespace ActionManager {
 
-	extern std::string unbound_string;  /* the key string returned if an action is not bound */
-	extern Glib::RefPtr<Gtk::UIManager> ui_manager;
+	LIBGTKMM2EXT_API extern std::string unbound_string;  /* the key string returned if an action is not bound */
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::UIManager> ui_manager;
 	
-	extern void set_sensitive (std::vector<Glib::RefPtr<Gtk::Action> >& actions, bool);
-	extern std::string get_key_representation (const std::string& accel_path, Gtk::AccelKey& key);
+	LIBGTKMM2EXT_API extern void set_sensitive (std::vector<Glib::RefPtr<Gtk::Action> >& actions, bool);
+	LIBGTKMM2EXT_API extern std::string get_key_representation (const std::string& accel_path, Gtk::AccelKey& key);
 
-	extern Gtk::Widget* get_widget (const char * name);
-	extern Glib::RefPtr<Gtk::Action> get_action (const char* group, const char* name);
-	extern Glib::RefPtr<Gtk::Action> get_action (const char* path);
-	extern Glib::RefPtr<Gtk::Action> get_action_from_name (const char* name);
-	extern void do_action (const char* group, const char* name);
-	extern void set_toggle_action (const char* group, const char* name, bool);
+	LIBGTKMM2EXT_API extern Gtk::Widget* get_widget (const char * name);
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> get_action (const char* group, const char* name);
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> get_action (const char* path);
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> get_action_from_name (const char* name);
+	LIBGTKMM2EXT_API extern void do_action (const char* group, const char* name);
+	LIBGTKMM2EXT_API extern void set_toggle_action (const char* group, const char* name, bool);
 
-	extern void add_action_group (Glib::RefPtr<Gtk::ActionGroup>);
+	LIBGTKMM2EXT_API extern void add_action_group (Glib::RefPtr<Gtk::ActionGroup>);
 
-	extern Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
 						   const char * name, const char * label);
-	extern Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
 						   const char * name, const char * label, sigc::slot<void> sl,
 						   guint key, Gdk::ModifierType mods);
-	extern Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
 						   const char * name, const char * label, sigc::slot<void> sl);
 
-	extern Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group&,
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group&,
 								const char * name, const char * label, sigc::slot<void> sl,
 								guint key, Gdk::ModifierType mods);
-	extern Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group&,
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group&,
 								const char * name, const char * label, sigc::slot<void> sl);
-	extern Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group&,
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group&,
 								std::string const &, std::string const &, std::string const &, sigc::slot<void> sl);
 
-	extern Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
 							  const char * name, const char * label, sigc::slot<void> sl,
 							  guint key, Gdk::ModifierType mods);
-	extern Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
 								 std::string const &, std::string const &, std::string const &, sigc::slot<void> sl);
-	extern Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
 								 const char * name, const char * label, sigc::slot<void> sl);
 
-	extern bool lookup_entry (const Glib::ustring accel_path, Gtk::AccelKey& key);
+	LIBGTKMM2EXT_API extern bool lookup_entry (const Glib::ustring accel_path, Gtk::AccelKey& key);
 
-	extern void get_all_actions (std::vector<std::string>& names,
+	LIBGTKMM2EXT_API extern void get_all_actions (std::vector<std::string>& names,
 				     std::vector<std::string>& paths,
 				     std::vector<std::string>& tooltips,
 				     std::vector<std::string>& keys,
 				     std::vector<Gtk::AccelKey>& bindings);
 
-	extern void get_all_actions (std::vector<std::string>& groups,
+	LIBGTKMM2EXT_API extern void get_all_actions (std::vector<std::string>& groups,
 				     std::vector<std::string>& paths,
 				     std::vector<std::string>& tooltips,
 				     std::vector<Gtk::AccelKey>& bindings);
 
-	extern void check_toggleaction (std::string);
-	extern void uncheck_toggleaction (std::string);
-	extern void set_toggleaction_state (std::string, bool);
+	LIBGTKMM2EXT_API extern void check_toggleaction (std::string);
+	LIBGTKMM2EXT_API extern void uncheck_toggleaction (std::string);
+	LIBGTKMM2EXT_API extern void set_toggleaction_state (std::string, bool);
 };
 
 #endif /* __libgtkmm2ext_actions_h__ */

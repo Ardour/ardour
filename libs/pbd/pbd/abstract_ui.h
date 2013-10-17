@@ -32,10 +32,27 @@
 #include "pbd/signals.h"
 #include "pbd/base_ui.h"
 
+/* We have a special case in libpbd of a template class that gets instantiated
+ * as the base class of several classes in other libraries. It is not possible
+ * to use LIBFOO_API to mark this visible, because the FOO in each case is 
+ * different. So we define this generic visible/export/hidden/import pair
+ * of macros to try to deal with this special case. These should NEVER be
+ * used anywhere except AbstractUI<T> (or similar cases if they arise.
+ *
+ * Note the assumption here that other libs are being built as DLLs if this one is.
+ */
+
+#ifdef ABSTRACT_UI_EXPORTS
+#define ABSTRACT_UI_API LIBPBD_DLL_EXPORT
+#else
+#define ABSTRACT_UI_API LIBPBD_DLL_IMPORT
+#endif 
+
+
 class Touchable;
 
 template<typename RequestObject>
-class AbstractUI : public BaseUI
+class ABSTRACT_UI_API AbstractUI : public BaseUI /* see notes in visibility.h about why this is not LIBPBD_API */
 {
   public:
 	AbstractUI (const std::string& name);

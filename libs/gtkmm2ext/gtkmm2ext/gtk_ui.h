@@ -37,12 +37,13 @@
 #include <gtkmm/textbuffer.h>
 #include <gtkmm/main.h>
 #include <gdkmm/color.h>
-#include <pbd/abstract_ui.h>
-#include <pbd/ringbufferNPT.h>
- 
-#include <pbd/pool.h>
-#include <pbd/error.h>
-#include <pbd/receiver.h>
+
+#define ABSTRACT_UI_EXPORTS
+#include "pbd/abstract_ui.h"
+#include "pbd/ringbufferNPT.h"
+#include "pbd/pool.h"
+#include "pbd/error.h"
+#include "pbd/receiver.h"
 
 #include "gtkmm2ext/visibility.h"
 
