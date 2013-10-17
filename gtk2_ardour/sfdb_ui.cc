@@ -26,8 +26,8 @@
 #include <sstream>
 
 #include <unistd.h>
+#include <limits.h>
 #include <sys/stat.h>
-#include <sys/param.h>
 
 #include <gtkmm/box.h>
 #include <gtkmm/stock.h>
@@ -1468,7 +1468,7 @@ SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths
 
 	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
 
-		char tmpc[MAXPATHLEN+1];
+		char tmpc[PATH_MAX+1];
 
 		snprintf (tmpc, sizeof(tmpc), "%s/%s", tmpdir.c_str(), Glib::path_get_basename (*i).c_str());
 

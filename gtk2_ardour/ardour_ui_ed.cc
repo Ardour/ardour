@@ -139,7 +139,7 @@ ARDOUR_UI::install_actions ()
 					      sigc::mem_fun (*this, &ARDOUR_UI::remove_video));
 	act->set_sensitive (false);
 	act = ActionManager::register_action (main_actions, X_("ExportVideo"), _("Export To Video File"),
-					      sigc::mem_fun (*editor, &PublicEditor::export_video));
+			hide_return (sigc::bind (sigc::mem_fun(*editor, &PublicEditor::export_video), false)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("Snapshot"), _("Snapshot..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), false));
@@ -197,7 +197,6 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_toggle_action (common_actions, X_("toggle-mixer"), S_("Window|Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_mixer_window));
 	ActionManager::register_action (common_actions, X_("toggle-editor-mixer"), _("Toggle Editor+Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_editor_mixer));
 	ActionManager::register_toggle_action (common_actions, X_("toggle-meterbridge"), S_("Window|Meterbridge"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_meterbridge));
-	ActionManager::register_toggle_action (common_actions, X_("toggle-audio-midi-setup"), S_("Window|Audio/MIDI Setup"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_audio_midi_setup));
 
 	act = ActionManager::register_action (common_actions, X_("NewMIDITracer"), _("MIDI Tracer"), sigc::mem_fun(*this, &ARDOUR_UI::new_midi_tracer_window));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -397,60 +396,6 @@ ARDOUR_UI::install_actions ()
 }
 
 void
-ARDOUR_UI::set_engine_buffer_size (pframes_t nframes)
-{
-	Glib::RefPtr<Action> action;
-	const char* action_name = 0;
-
-	switch (nframes) {
-	case 32:
-		action_name = X_("EngineLatency32");
-		break;
-	case 64:
-		action_name = X_("EngineLatency64");
-		break;
-	case 128:
-		action_name = X_("EngineLatency128");
-		break;
-	case 256:
-		action_name = X_("EngineLatency256");
-		break;
-	case 512:
-		action_name = X_("EngineLatency512");
-		break;
-	case 1024:
-		action_name = X_("EngineLatency1024");
-		break;
-	case 2048:
-		action_name = X_("EngineLatency2048");
-		break;
-	case 4096:
-		action_name = X_("EngineLatency4096");
-		break;
-	case 8192:
-		action_name = X_("EngineLatency8192");
-		break;
-	default:
-		/* XXX can we do anything useful ? */
-		break;
-	}
-
-	if (action_name) {
-
-		action = ActionManager::get_action (X_("JACK"), action_name);
-
-		if (action) {
-			Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (action);
-
-			if (ract && ract->get_active()) {
-				AudioEngine::instance()->request_buffer_size (nframes);
-				update_sample_rate (0);
-			}
-		}
-	}
-}
-
-void
 ARDOUR_UI::build_menu_bar ()
 {
 	menu_bar = dynamic_cast<MenuBar*> (ActionManager::get_widget (X_("/Main")));
@@ -528,7 +473,7 @@ ARDOUR_UI::build_menu_bar ()
 	_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), disk_space);
 	_status_bar_visibility.add (&cpu_load_label,        X_("DSP"),       _("DSP"), true);
 	_status_bar_visibility.add (&buffer_load_label,     X_("Buffers"),   _("Buffers"), true);
-	_status_bar_visibility.add (&sample_rate_label,     X_("JACK"),      _("JACK Sampling Rate and Latency"), true);
+	_status_bar_visibility.add (&sample_rate_label,     X_("Audio"),     _("Audio"), true);
 	_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), true);
 	_status_bar_visibility.add (&format_label,          X_("Format"),    _("File Format"), true);
 
@@ -614,7 +559,7 @@ ARDOUR_UI::save_ardour_state ()
 	window_node->add_child_nocopy (*tearoff_node);
 
 	Config->add_extra_xml (*window_node);
-	Config->add_extra_xml (_audio_midi_setup->get_state());
+	Config->add_extra_xml (audio_midi_setup->get_state());
 
 	Config->save_state();
 

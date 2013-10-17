@@ -149,6 +149,7 @@ Route::init ()
 	*/
 
 	_meter.reset (new PeakMeter (_session, _name));
+	_meter->set_owner (this);
 	_meter->set_display_to_user (false);
 	_meter->activate ();
 
@@ -1011,6 +1012,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 		}
 
 		_processors.insert (loc, processor);
+		processor->set_owner (this);
 
 		// Set up processor list channels.  This will set processor->[input|output]_streams(),
 		// configure redirect ports properly, etc.
@@ -1161,6 +1163,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 			}
 
 			_processors.insert (loc, *i);
+			(*i)->set_owner (this);
 
 			if ((*i)->active()) {
 				(*i)->activate ();
@@ -2616,6 +2619,7 @@ Route::set_processor_state (const XMLNode& node)
 
 		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
+			(*i)->set_owner (this);
 			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false));
 
 			boost::shared_ptr<PluginInsert> pi;

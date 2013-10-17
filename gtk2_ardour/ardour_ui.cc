@@ -109,6 +109,7 @@ typedef uint64_t microseconds_t;
 #include "rc_option_editor.h"
 #include "route_time_axis.h"
 #include "route_params_ui.h"
+#include "session_dialog.h"
 #include "session_metadata_dialog.h"
 #include "session_option_editor.h"
 #include "shuttle_control.h"
@@ -156,7 +157,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	  /* start of private members */
 
-	, _startup (0)
 	, nsm (0)
 	, _was_dirty (false)
 	, _mixer_on_top (false)
@@ -191,6 +191,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, about (X_("about"), _("About"))
 	, location_ui (X_("locations"), _("Locations"))
 	, route_params (X_("inspector"), _("Tracks and Busses"))
+	, audio_midi_setup (X_("audio-midi-setup"), _("Audio/MIDI Setup"))
 	, session_option_editor (X_("session-options-editor"), _("Properties"), boost::bind (&ARDOUR_UI::create_session_option_editor, this))
 	, add_video_dialog (X_("add-video"), _("Add Tracks/Busses"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
 	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
@@ -202,7 +203,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	, _status_bar_visibility (X_("status-bar"))
 	, _feedback_exists (false)
-	, _audio_midi_setup (0)
 {
 	Gtkmm2ext::init(localedir);
 
@@ -353,6 +353,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&add_route_dialog);
 	WM::Manager::instance().register_window (&add_video_dialog);
 	WM::Manager::instance().register_window (&route_params);
+	WM::Manager::instance().register_window (&audio_midi_setup);
 	WM::Manager::instance().register_window (&bundle_manager);
 	WM::Manager::instance().register_window (&location_ui);
 	WM::Manager::instance().register_window (&big_clock_window);
@@ -366,9 +367,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	
 	(void) theme_manager.get (true);
 	
-	starting.connect (sigc::mem_fun(*this, &ARDOUR_UI::startup));
-	stopping.connect (sigc::mem_fun(*this, &ARDOUR_UI::shutdown));
-
 	_process_thread = new ProcessThread ();
 	_process_thread->init ();
 
@@ -407,58 +405,12 @@ ARDOUR_UI::engine_running ()
 	if (first_time_engine_run) {
 		post_engine();
 		first_time_engine_run = false;
-	}
+	} 
 	
-	ActionManager::set_sensitive (ActionManager::engine_sensitive_actions, true);
-	ActionManager::set_sensitive (ActionManager::engine_opposite_sensitive_actions, false);
-
-	Glib::RefPtr<Action> action;
-	const char* action_name = 0;
-
-	switch (AudioEngine::instance()->samples_per_cycle()) {
-	case 32:
-		action_name = X_("JACKLatency32");
-		break;
-	case 64:
-		action_name = X_("JACKLatency64");
-		break;
-	case 128:
-		action_name = X_("JACKLatency128");
-		break;
-	case 512:
-		action_name = X_("JACKLatency512");
-		break;
-	case 1024:
-		action_name = X_("JACKLatency1024");
-		break;
-	case 2048:
-		action_name = X_("JACKLatency2048");
-		break;
-	case 4096:
-		action_name = X_("JACKLatency4096");
-		break;
-	case 8192:
-		action_name = X_("JACKLatency8192");
-		break;
-	default:
-		/* XXX can we do anything useful ? */
-		break;
-	}
-
-	if (action_name) {
-
-		action = ActionManager::get_action (X_("JACK"), action_name);
-
-		if (action) {
-			Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (action);
-			ract->set_active ();
-		}
-
-		update_disk_space ();
-		update_cpu_load ();
-		update_sample_rate (AudioEngine::instance()->sample_rate());
-		update_timecode_format ();
-	}
+	update_disk_space ();
+	update_cpu_load ();
+	update_sample_rate (AudioEngine::instance()->sample_rate());
+	update_timecode_format ();
 }
 
 void
@@ -486,13 +438,13 @@ ARDOUR_UI::engine_halted (const char* reason, bool free_reason)
 	*/
 
 	if (strlen (reason)) {
-		msgstr = string_compose (_("The audio backend (JACK) was shutdown because:\n\n%1"), reason);
+		msgstr = string_compose (_("The audio backend was shutdown because:\n\n%1"), reason);
 	} else {
 		msgstr = string_compose (_("\
-JACK has either been shutdown or it\n\
+The audio backend has either been shutdown or it\n\
 disconnected %1 because %1\n\
 was not fast enough. Try to restart\n\
-JACK, reconnect and save the session."), PROGRAM_NAME);
+the audio backend and save the session."), PROGRAM_NAME);
 	}
 
 	MessageDialog msg (*editor, msgstr);
@@ -587,6 +539,10 @@ ARDOUR_UI::post_engine ()
 
 ARDOUR_UI::~ARDOUR_UI ()
 {
+	if (ui_config->dirty()) {
+		ui_config->save_state();
+	}
+
 	delete keyboard;
 	delete editor;
 	delete mixer;
@@ -763,11 +719,12 @@ ARDOUR_UI::check_announcements ()
 #endif
 }
 
-void
-ARDOUR_UI::startup ()
+int
+ARDOUR_UI::starting ()
 {
 	Application* app = Application::instance ();
 	char *nsm_url;
+	bool brand_new_user = ArdourStartup::required ();
 
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
 	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_load));
@@ -826,10 +783,39 @@ ARDOUR_UI::startup ()
 			delete nsm;
 			nsm = 0;
 		}
-	}
 
-	else if (get_session_parameters (true, ARDOUR_COMMAND_LINE::new_session, ARDOUR_COMMAND_LINE::load_template)) {
-		exit (1);
+	} else  {
+		
+		if (brand_new_user) {
+			ArdourStartup s;
+			s.present ();
+			main().run();
+			s.hide ();
+			switch (s.response ()) {
+			case Gtk::RESPONSE_OK:
+				break;
+			default:
+				return -1;
+			}
+		}
+
+		/* we need to create this early because it may need to set the
+		 *  audio backend end up.
+		 */
+
+		try {
+			audio_midi_setup.get (true);
+		} catch (...) {
+			return -1;
+		}
+
+		/* go get a session */
+
+		const bool new_session_required = (ARDOUR_COMMAND_LINE::new_session || brand_new_user);
+
+		if (get_session_parameters (false, new_session_required, ARDOUR_COMMAND_LINE::load_template)) {
+			return -1;
+		}
 	}
 
 	use_config ();
@@ -844,6 +830,7 @@ ARDOUR_UI::startup ()
 	_status_bar_visibility.update ();
 
 	BootMessage (string_compose (_("%1 is ready for use"), PROGRAM_NAME));
+	return 0;
 }
 
 void
@@ -1157,7 +1144,6 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 			}
 		}
 	}
-
 	sample_rate_label.set_markup (buf);
 }
 
@@ -1861,7 +1847,7 @@ ARDOUR_UI::transport_roll ()
 #if 0
 	if (_session->config.get_external_sync()) {
 		switch (Config->get_sync_source()) {
-		case JACK:
+		case Engine:
 			break;
 		default:
 			/* transport controlled by the master */
@@ -1911,7 +1897,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 
 	if (_session->config.get_external_sync()) {
 		switch (Config->get_sync_source()) {
-		case JACK:
+		case Engine:
 			break;
 		default:
 			/* transport controlled by the master */
@@ -2483,7 +2469,7 @@ ARDOUR_UI::ask_about_loading_existing_session (const std::string& session_path)
 }
 
 int
-ARDOUR_UI::build_session_from_nsd (const std::string& session_path, const std::string& session_name)
+ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& session_path, const std::string& session_name)
 {
 	BusProfile bus_profile;
 
@@ -2499,13 +2485,13 @@ ARDOUR_UI::build_session_from_nsd (const std::string& session_path, const std::s
 
 		/* get settings from advanced section of NSD */
 
-		if (_startup->create_master_bus()) {
-			bus_profile.master_out_channels = (uint32_t) _startup->master_channel_count();
+		if (sd.create_master_bus()) {
+			bus_profile.master_out_channels = (uint32_t) sd.master_channel_count();
 		} else {
 			bus_profile.master_out_channels = 0;
 		}
 
-		if (_startup->connect_inputs()) {
+		if (sd.connect_inputs()) {
 			bus_profile.input_ac = AutoConnectPhysical;
 		} else {
 			bus_profile.input_ac = AutoConnectOption (0);
@@ -2513,16 +2499,16 @@ ARDOUR_UI::build_session_from_nsd (const std::string& session_path, const std::s
 
 		bus_profile.output_ac = AutoConnectOption (0);
 
-		if (_startup->connect_outputs ()) {
-			if (_startup->connect_outs_to_master()) {
+		if (sd.connect_outputs ()) {
+			if (sd.connect_outs_to_master()) {
 				bus_profile.output_ac = AutoConnectMaster;
-			} else if (_startup->connect_outs_to_physical()) {
+			} else if (sd.connect_outs_to_physical()) {
 				bus_profile.output_ac = AutoConnectPhysical;
 			}
 		}
 
-		bus_profile.requested_physical_in = (uint32_t) _startup->input_limit_count();
-		bus_profile.requested_physical_out = (uint32_t) _startup->output_limit_count();
+		bus_profile.requested_physical_in = (uint32_t) sd.input_limit_count();
+		bus_profile.requested_physical_out = (uint32_t) sd.output_limit_count();
 	}
 
 	if (build_session (session_path, session_name, bus_profile)) {
@@ -2558,6 +2544,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	string template_name;
 	int ret = -1;
 	bool likely_new = false;
+	bool cancel_not_quit;
 
 	/* deal with any existing DIRTY session now, rather than later. don't
 	 * treat a non-dirty session this way, so that it stays visible 
@@ -2567,6 +2554,11 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	if (_session && ARDOUR_UI::instance()->video_timeline) {
 		ARDOUR_UI::instance()->video_timeline->sync_session_state();
 	}
+
+	/* if there is already a session, relabel the button
+	   on the SessionDialog so that we don't Quit directly
+	*/
+	cancel_not_quit = (_session != 0);
 
 	if (_session && _session->dirty()) {
 		if (unload_session (false)) {
@@ -2580,6 +2572,20 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		should_be_new = true;
 		template_name = load_template;
 	}
+
+	session_name = basename_nosuffix (ARDOUR_COMMAND_LINE::session_name);
+	session_path = ARDOUR_COMMAND_LINE::session_name;
+	
+	if (!session_path.empty()) {
+		if (Glib::file_test (session_path.c_str(), Glib::FILE_TEST_EXISTS)) {
+			if (Glib::file_test (session_path.c_str(), Glib::FILE_TEST_IS_REGULAR)) {
+				/* session/snapshot file, change path to be dir */
+				session_path = Glib::path_get_dirname (session_path);
+			}
+		}
+	}
+
+	SessionDialog session_dialog (should_be_new, session_name, session_path, load_template, cancel_not_quit);
 
 	while (ret != 0) {
 
@@ -2603,34 +2609,35 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		} else {
 			session_path = "";
 			session_name = "";
+			session_dialog.clear_given ();
 		}
+		
+		if (should_be_new || session_name.empty()) {
+			/* need the dialog to get info from user */
 
-		delete _startup;
-		_startup = new ArdourStartup (should_be_new, session_name, session_path, load_template);
-		
-		if (!_startup->ready_without_display()) {
-			_startup->present ();
-			main().run();
-			_startup->hide ();
-		}
-		
-		switch (_startup->response()) {
-		case RESPONSE_OK:
-			break;
-		default:
-			if (quit_on_cancel) {
-				exit (1);
-			} else {
-				return ret;
+			cerr << "run dialog\n";
+
+			switch (session_dialog.run()) {
+			case RESPONSE_ACCEPT:
+				break;
+			default:
+				if (quit_on_cancel) {
+					exit (1);
+				} else {
+					return ret;
+				}
 			}
+
+			session_dialog.hide ();
 		}
 
 		/* if we run the startup dialog again, offer more than just "new session" */
 		
 		should_be_new = false;
 		
-		session_name = _startup->session_name (likely_new);
-		
+		session_name = session_dialog.session_name (likely_new);
+		session_path = session_dialog.session_folder ();
+
 		if (nsm) {
 		        likely_new = true;
 		}
@@ -2647,8 +2654,8 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			continue;
 		}
 		
-		if (_startup->use_session_template()) {
-			template_name = _startup->session_template_name();
+		if (session_dialog.use_session_template()) {
+			template_name = session_dialog.session_template_name();
 			_session_is_new = true;
 		}
 		
@@ -2665,12 +2672,12 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			
 		} else {
 
-			session_path = _startup->session_folder();
+			session_path = session_dialog.session_folder();
 			
 			char illegal = Session::session_name_is_legal (session_name);
 			
 			if (illegal) {
-				MessageDialog msg (*_startup,
+				MessageDialog msg (session_dialog,
 						   string_compose (_("To ensure compatibility with various systems\n"
 								     "session names may not contain a '%1' character"),
 								   illegal));
@@ -2681,6 +2688,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		}
 	
 		if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
+
 
 			if (likely_new && !nsm) {
 
@@ -2697,12 +2705,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		} else {
 
 			if (!likely_new) {
-				if (_startup) {
-					pop_back_splash (*_startup);
-				} else {
-					hide_splash ();
-				}
-
+				pop_back_splash (session_dialog);
 				MessageDialog msg (string_compose (_("There is no existing session at \"%1\""), session_path));
 				msg.run ();
 				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
@@ -2710,10 +2713,11 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			}
 
 			char illegal = Session::session_name_is_legal(session_name);
+
 			if (illegal) {
-				pop_back_splash (*_startup);
-				MessageDialog msg (*_startup, string_compose(_("To ensure compatibility with various systems\n"
-				                     "session names may not contain a '%1' character"), illegal));
+				pop_back_splash (session_dialog);
+				MessageDialog msg (session_dialog, string_compose(_("To ensure compatibility with various systems\n"
+										    "session names may not contain a '%1' character"), illegal));
 				msg.run ();
 				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
 				continue;
@@ -2724,7 +2728,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 		if (likely_new && template_name.empty()) {
 
-			ret = build_session_from_nsd (session_path, session_name);
+			ret = build_session_from_dialog (session_dialog, session_path, session_name);
 
 		} else {
 
@@ -2739,6 +2743,12 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 				_session->save_state (ARDOUR_COMMAND_LINE::immediate_save, false);
 				exit (1);
 			}
+
+			/* clear this to avoid endless attempts to load the
+			   same session.
+			*/
+
+			ARDOUR_COMMAND_LINE::session_name = "";
 		}
 	}
 
@@ -2831,22 +2841,12 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		                   Gtk::MESSAGE_INFO,
 		                   BUTTONS_OK);
 
+		msg.set_keep_above (true);
 		msg.set_title (_("Loading Error"));
-		msg.set_secondary_text (_("Click the Refresh button to try again."));
-		msg.add_button (Stock::REFRESH, 1);
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		pop_back_splash (msg);
 		msg.present ();
-
-		int response = msg.run ();
-
-		switch (response) {
-		case 1:
-			break;
-		default:
-			exit (1);
-		}
-
+		(void) msg.run ();
 		msg.hide ();
 
 		goto out;
@@ -2859,6 +2859,22 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 			d.run ();
 		}
 	}
+
+	if (!new_session->writable()) {
+		MessageDialog msg (_("This session has been opened in read-only mode.\n\nYou will not be able to record or save."),
+				   true,
+				   Gtk::MESSAGE_INFO,
+				   BUTTONS_OK);
+		
+		msg.set_keep_above (true);
+		msg.set_title (_("Read-only Session"));
+		msg.set_position (Gtk::WIN_POS_CENTER);
+		pop_back_splash (msg);
+		msg.present ();
+		(void) msg.run ();
+		msg.hide ();
+	}
+	
 
 	/* Now the session been created, add the transport controls */
 	new_session->add_controllable(roll_controllable);
@@ -3797,6 +3813,7 @@ ARDOUR_UI::disconnect_from_engine ()
 	/* drop connection to AudioEngine::Halted so that we don't act
 	 *  as if the engine unexpectedly shut down
 	 */
+
 	halt_connection.disconnect ();
 	
 	if (AudioEngine::instance()->stop ()) {
@@ -3815,8 +3832,13 @@ int
 ARDOUR_UI::reconnect_to_engine ()
 {
 	if (AudioEngine::instance()->start ()) {
-		MessageDialog msg (*editor,  _("Could not reconnect to the Audio/MIDI engine"));
-		msg.run ();
+		if (editor) {
+			MessageDialog msg (*editor,  _("Could not reconnect to the Audio/MIDI engine"));
+			msg.run ();
+		} else {
+			MessageDialog msg (_("Could not reconnect to the Audio/MIDI engine"));
+			msg.run ();
+		}
 		return -1;
 	}
 	
@@ -4129,41 +4151,13 @@ ARDOUR_UI::reset_route_peak_display (Route* route)
 	}
 }
 
-void
-ARDOUR_UI::toggle_audio_midi_setup ()
-{
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("toggle-audio-midi-setup"));
-	if (!act) {
-		return;
-	}
-
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-
-	if (tact->get_active()) {
-		launch_audio_midi_setup ();
-	} else {
-		_audio_midi_setup->hide ();
-	}
-}
-
-void
-ARDOUR_UI::launch_audio_midi_setup ()
-{
-	if (!_audio_midi_setup) {
-		_audio_midi_setup = new EngineControl ();
-	}
-
-	_audio_midi_setup->present ();
-}
-						
 int
 ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 {
-	launch_audio_midi_setup ();
+	audio_midi_setup->set_desired_sample_rate (desired_sample_rate);
+	audio_midi_setup->set_position (WIN_POS_CENTER);
 
-	_audio_midi_setup->set_desired_sample_rate (desired_sample_rate);
-
-	switch (_audio_midi_setup->run()) {
+	switch (audio_midi_setup->run()) {
 	case Gtk::RESPONSE_OK:
 		return 0;
 	case Gtk::RESPONSE_APPLY:
@@ -4172,3 +4166,5 @@ ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 		return -1;
 	}
 }
+
+

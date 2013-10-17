@@ -35,10 +35,9 @@
       <menuitem action='addExistingAudioFiles'/>
       <!--menuitem action='importFromSession'/-->
 
-#ifndef NOVIDEOTIMELINE
       <menuitem action='OpenVideo'/>
       <menuitem action='CloseVideo'/>
-#endif
+
       <menu name='Export' action='Export'>
         <menuitem action='ExportAudio'/>
         <menuitem action='StemExport'/>
@@ -282,9 +281,7 @@
         <menuitem action='snap-regions-to-grid'/>
         <menuitem action='toggle-region-lock'/>
         <menuitem action='toggle-region-lock-style'/>
-#ifndef NOVIDEOTIMELINE
         <menuitem action='toggle-region-video-lock'/>
-#endif
         <menuitem action='set-region-sync-position'/>
         <menuitem action='remove-region-sync'/>
         <menuitem action='nudge-forward'/>
@@ -437,9 +434,7 @@
         <menuitem action="toggle-cd-marker-ruler"/>
         <menuitem action="toggle-marker-ruler"/>
         <separator/>
-#ifndef NOVIDEOTIMELINE
         <menuitem action="toggle-video-ruler"/>
-#endif
       </menu>
       <menu action="VideoMonitorMenu">
         <menuitem action="zoom-vmon-100"/>
@@ -543,10 +538,8 @@
     <menuitem action="toggle-marker-ruler"/>
     <menuitem action="toggle-cd-marker-ruler"/>
     <menuitem action="toggle-loop-punch-ruler"/>
-#ifndef NOVIDEOTIMELINE
     <separator/>
     <menuitem action="toggle-video-ruler"/>
-#endif
   </popup>
 
   <popup name='ProcessorMenu'>
@@ -642,9 +635,7 @@
       <menuitem action='naturalize-region'/>
       <menuitem action='toggle-region-lock'/>
       <menuitem action='toggle-region-lock-style'/>
-#ifndef NOVIDEOTIMELINE
       <menuitem action='toggle-region-video-lock'/>
-#endif
       <menuitem action='snap-regions-to-grid'/>
       <menuitem action='set-region-sync-position'/>
       <menuitem action='remove-region-sync'/>

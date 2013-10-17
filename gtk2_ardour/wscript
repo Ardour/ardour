@@ -196,6 +196,7 @@ gtk2_ardour_sources = [
         'search_path_option.cc',
         'selection.cc',
         'send_ui.cc',
+        'session_dialog.cc',
         'session_import_dialog.cc',
         'session_metadata_dialog.cc',
         'session_option_editor.cc',
@@ -635,7 +636,7 @@ def build(bld):
     # Menus
     menus_argv = []
     if bld.is_defined('GTKOSX'):
-        menus_argv = [ '-E', '-P', '-DGTKOSX', '-DNOVIDEOTIMELINE' ]
+        menus_argv = [ '-E', '-P', '-DGTKOSX' ]
     else:
         menus_argv = [ '-E', '-P' ]
 

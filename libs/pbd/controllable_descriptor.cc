@@ -104,11 +104,10 @@ ControllableDescriptor::set (const std::string& str)
 		}
 	} else if (path[1] == "send") {
 		
-		if (path.size() == 3 && rest.size() == 3) {
+		if (path.size() == 3 && rest.size() == 2) {
 			if (path[2] == "gain") {
 				_subtype = SendGain;
 				_target.push_back (atoi (rest[1]));
-				_target.push_back (atoi (rest[2]));
 			} else {
 				return -1;
 			}

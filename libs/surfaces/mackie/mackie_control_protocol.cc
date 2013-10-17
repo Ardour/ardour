@@ -1382,7 +1382,7 @@ MackieControlProtocol::add_down_select_button (int surface, int strip)
 void
 MackieControlProtocol::remove_down_select_button (int surface, int strip)
 {
-	DownButtonList::iterator x = find (_down_select_buttons.begin(), _down_select_buttons.end(), (surface<<8)|(strip&0xf));
+	DownButtonList::iterator x = find (_down_select_buttons.begin(), _down_select_buttons.end(), (uint32_t) (surface<<8)|(strip&0xf));
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("removing surface %1 strip %2 from down select buttons\n", surface, strip));
 	if (x != _down_select_buttons.end()) {
 		_down_select_buttons.erase (x);

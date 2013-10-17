@@ -82,7 +82,6 @@ class AddRouteDialog;
 class AddVideoDialog;
 class VideoTimeLine;
 class SystemExec;
-class ArdourStartup;
 class ArdourKeyboard;
 class AudioClock;
 class BigClockWindow;
@@ -97,6 +96,7 @@ class Mixer_UI;
 class PublicEditor;
 class RCOptionEditor;
 class RouteParams_UI;
+class SessionDialog;
 class SessionOptionEditor;
 class ShuttleControl;
 class Splash;
@@ -152,7 +152,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool get_smart_mode () const;
 	
 	int get_session_parameters (bool quit_on_cancel, bool should_be_new = false, std::string load_template = "");
-	int  build_session_from_nsd (const std::string& session_name, const std::string& session_path);
+        int  build_session_from_dialog (SessionDialog&, const std::string& session_name, const std::string& session_path);
 	bool ask_about_loading_existing_session (const std::string& session_path);
 
 	/// @return true if session was successfully unloaded.
@@ -311,11 +311,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void toggle_session_options_window ();
 
   private:
-	ArdourStartup*      _startup;
-	Gtk::Tooltips        _tooltips;
+	Gtk::Tooltips       _tooltips;
 	NSM_Client          *nsm;
-	bool                 _was_dirty;
-        bool                 _mixer_on_top;
+	bool                _was_dirty;
+        bool                _mixer_on_top;
         bool first_time_engine_run;
 
 	void goto_editor_window ();
@@ -330,8 +329,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	static ARDOUR_UI *theArdourUI;
 
-	void startup ();
-	void shutdown ();
+        int starting ();
 
 	int  ask_about_saving_session (const std::vector<std::string>& actions);
 
@@ -602,6 +600,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         WM::Proxy<About> about;
         WM::Proxy<LocationUIWindow> location_ui;
         WM::Proxy<RouteParams_UI> route_params;
+        WM::Proxy<EngineControl> audio_midi_setup;
 
         /* Windows/Dialogs that require a creator method */
 
@@ -668,8 +667,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void session_dialog (std::string);
 	int pending_state_dialog ();
 	int sr_mismatch_dialog (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
-
-	void set_engine_buffer_size (ARDOUR::pframes_t);
 
 	Gtk::MenuItem* jack_disconnect_item;
 	Gtk::MenuItem* jack_reconnect_item;
@@ -748,8 +745,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         std::string _announce_string;
         void check_announcements ();
 
-        EngineControl* _audio_midi_setup;
-        void launch_audio_midi_setup ();
         int do_audio_midi_setup (uint32_t);
 };
 

@@ -2,6 +2,7 @@
 #
 # Run libardour test suite.
 #
+. test-env.sh
 
 if [ "$1" == "--single" ] || [ "$2" == "--single" ]; then
         if [ "$1" == "--single" ]; then

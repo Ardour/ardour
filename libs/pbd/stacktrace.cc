@@ -104,6 +104,12 @@ PBD::stacktrace (std::ostream& out, int levels)
 
 #else
 
+std::string 
+demangle (std::string const & l)
+{
+	return std::string();
+}
+
 void
 PBD::stacktrace (std::ostream& out, int /*levels*/)
 {

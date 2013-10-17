@@ -161,6 +161,7 @@ PluginUIWindow::PluginUIWindow (
 
 PluginUIWindow::~PluginUIWindow ()
 {
+	cerr << "PluginWindow deleted for " << this << endl;
 	delete _pluginui;
 }
 
@@ -405,8 +406,6 @@ PluginUIWindow::plugin_going_away ()
 	}
 
 	death_connection.disconnect ();
-
-	delete_when_idle (this);
 }
 
 PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)

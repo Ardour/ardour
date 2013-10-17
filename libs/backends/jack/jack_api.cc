@@ -63,7 +63,7 @@ deinstantiate ()
 static bool
 already_configured ()
 {
-	return JackConnection::server_running ();
+	return !JackConnection::in_control ();
 }
 
 static ARDOUR::AudioBackendInfo _descriptor = {

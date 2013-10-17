@@ -7,26 +7,25 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-15 15:09-0400\n"
-"PO-Revision-Date: 2012-12-31 01:38+0300\n"
+"POT-Creation-Date: 2013-10-15 21:33+0400\n"
+"PO-Revision-Date: 2013-10-15 21:54+0300\n"
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2); 10<=4 && (n%100<10 || n"
 "%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 1.5.4\n"
 
 #: actions.cc:386
 msgid "Unknown action name: %1"
 msgstr "Неизвестное название действия: %1"
 
 #: binding_proxy.cc:84
-#, fuzzy
 msgid "operate controller now"
-msgstr "включить MIDI-контроллер"
+msgstr ""
 
 #: bindable_button.cc:48
 msgid "button cannot watch state of non-existing Controllable\n"
@@ -36,7 +35,7 @@ msgstr ""
 msgid "Log"
 msgstr "Журнал"
 
-#: gtk_ui.cc:361
+#: gtk_ui.cc:363
 msgid ""
 "\n"
 "\n"
@@ -46,11 +45,11 @@ msgstr ""
 "\n"
 "Комбинация клавиш: "
 
-#: gtk_ui.cc:633
+#: gtk_ui.cc:635
 msgid "Press To Exit"
 msgstr "Нажмите для выхода"
 
-#: gtk_ui.cc:669
+#: gtk_ui.cc:671
 msgid "I'm sorry %1, I can't do that"
 msgstr ""
 
@@ -78,21 +77,21 @@ msgstr "Alt"
 msgid "Meta"
 msgstr "Meta"
 
-#: keyboard.cc:139 keyboard.cc:531
+#: keyboard.cc:139 keyboard.cc:535
 msgid "Unknown"
 msgstr "Неизвестно"
 
-#: keyboard.cc:542
+#: keyboard.cc:546
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 
 #: tearoff.cc:57
 msgid "Click to tear this into its own window"
-msgstr ""
+msgstr "Щелкните, чтобы превратить эту панель инструментов в плавающее окно"
 
 #: tearoff.cc:63
 msgid "Click to put this back in the main window"
-msgstr ""
+msgstr "Щелкните, чтобы превратить это плавающее окно в панель инструментов"
 
 #: textviewer.cc:34
 msgid "Close"

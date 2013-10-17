@@ -70,6 +70,7 @@ public:
     int discover_backends();
     std::vector<const AudioBackendInfo*> available_backends() const;
     std::string current_backend_name () const;
+    boost::shared_ptr<AudioBackend> set_default_backend ();
     boost::shared_ptr<AudioBackend> set_backend (const std::string&, const std::string& arg1, const std::string& arg2);
     boost::shared_ptr<AudioBackend> current_backend() const { return _backend; }
     bool setup_required () const;
@@ -82,8 +83,8 @@ public:
      * just forward to a backend implementation.
      */
 
-    int            start ();
-    int            stop ();
+    int            start (bool for_latency_measurement=false);
+    int            stop (bool for_latency_measurement=false);
     int            pause ();
     int            freewheel (bool start_stop);
     float          get_cpu_load() const ;
@@ -100,8 +101,12 @@ public:
     pframes_t      sample_time_at_cycle_start ();
     pframes_t      samples_since_cycle_start ();
     bool           get_sync_offset (pframes_t& offset) const;
-    int            create_process_thread (boost::function<void()> func, AudioBackendNativeThread*, size_t stacksize);
-    int            wait_for_process_thread_exit (AudioBackendNativeThread);
+
+    int            create_process_thread (boost::function<void()> func);
+    int            join_process_threads ();
+    bool           in_process_thread ();
+    uint32_t       process_thread_count ();
+
     bool           is_realtime() const;
     bool           connected() const;
 
@@ -189,7 +194,7 @@ public:
 
     MTDM* mtdm();
     int  prepare_for_latency_measurement ();
-    void start_latency_detection ();
+    int  start_latency_detection ();
     void stop_latency_detection ();
     void set_latency_input_port (const std::string&);
     void set_latency_output_port (const std::string&);
@@ -224,7 +229,9 @@ public:
     std::string               _latency_input_name;
     std::string               _latency_output_name;
     framecnt_t                _latency_signal_latency;
+    bool                      _stopped_for_latency;
     bool                      _started_for_latency;
+    bool                      _in_destructor;
 
     void meter_thread ();
     void start_metering_thread ();
@@ -232,9 +239,6 @@ public:
     
     static gint      m_meter_exit;
     
-    void parameter_changed (const std::string&);
-    PBD::ScopedConnection config_connection;
-
     typedef std::map<std::string,AudioBackendInfo*> BackendMap;
     BackendMap _backends;
     AudioBackendInfo* backend_discover (const std::string&);
