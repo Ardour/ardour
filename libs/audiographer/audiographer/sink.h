@@ -5,6 +5,8 @@
 
 #include "process_context.h"
 
+#include "audiographer/visibility.h"
+
 namespace AudioGrapher
 {
 
@@ -12,7 +14,7 @@ namespace AudioGrapher
   * This is a pure virtual interface for all data sinks in AudioGrapher
   */
 template <typename T>
-class Sink  {
+class LIBAUDIOGRAPHER_API Sink  {
   public:
 	virtual ~Sink () {}
 	

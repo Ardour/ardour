@@ -1,6 +1,7 @@
 #ifndef AUDIOGRAPHER_FLAG_DEBUGGABLE_H
 #define AUDIOGRAPHER_FLAG_DEBUGGABLE_H
 
+#include "audiographer/visibility.h"
 #include "debuggable.h"
 #include "debug_utils.h"
 #include "process_context.h"
@@ -13,7 +14,7 @@ namespace AudioGrapher
 
 /// A debugging class for nodes that support a certain set of flags.
 template<DebugLevel L = DEFAULT_DEBUG_LEVEL>
-class FlagDebuggable : public Debuggable<L>
+class LIBAUDIOGRAPHER_API FlagDebuggable : public Debuggable<L>
 {
   public:
 	typedef FlagField::Flag Flag;

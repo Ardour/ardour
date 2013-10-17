@@ -1,6 +1,7 @@
 #ifndef AUDIOGRAPHER_SAMPLE_FORMAT_CONVERTER_H
 #define AUDIOGRAPHER_SAMPLE_FORMAT_CONVERTER_H
 
+#include "audiographer/visibility.h"
 #include "audiographer/sink.h"
 #include "audiographer/utils/listed_source.h"
 #include "private/gdither/gdither_types.h"
@@ -9,7 +10,7 @@ namespace AudioGrapher
 {
 
 /// Dither types from the gdither library
-enum DitherType
+enum LIBAUDIOGRAPHER_API DitherType
 {
 	D_None   = GDitherNone,   ///< No didtering
 	D_Rect   = GDitherRect,   ///< Rectangular dithering, i.e. white noise
@@ -21,7 +22,7 @@ enum DitherType
   * This class can only convert floats to either \a float, \a int32_t, \a int16_t, or \a uint8_t 
   */
 template <typename TOut>
-class SampleFormatConverter
+class LIBAUDIOGRAPHER_API SampleFormatConverter
   : public Sink<float>
   , public ListedSource<TOut>
   , public Throwing<>

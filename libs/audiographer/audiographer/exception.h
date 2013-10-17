@@ -6,6 +6,7 @@
 
 #include <boost/format.hpp>
 
+#include "audiographer/visibility.h"
 #include "audiographer/debug_utils.h"
 
 namespace AudioGrapher
@@ -14,7 +15,7 @@ namespace AudioGrapher
 /** AudioGrapher Exception class.
   * Automatically tells which class an exception was thrown from.
   */
-class Exception : public std::exception
+class LIBAUDIOGRAPHER_API Exception : public std::exception
 {
   public:
 	template<typename T>

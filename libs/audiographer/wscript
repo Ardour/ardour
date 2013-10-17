@@ -54,19 +54,29 @@ def build(bld):
                                    and bld.is_defined('HAVE_GLIBMM')
                                    and bld.is_defined('HAVE_GTHREAD'))
 
-    audiographer = bld(features = 'cxx cxxshlib')
-    audiographer.source = '''
-            private/gdither/gdither.cc
-            src/general/sample_format_converter.cc
-            src/routines.cc
-            src/debug_utils.cc
-            src/general/broadcast_info.cc
-    '''
-
+    audiographer_sources = [
+        'private/gdither/gdither.cc',
+        'src/general/sample_format_converter.cc',
+        'src/routines.cc',
+        'src/debug_utils.cc',
+        'src/general/broadcast_info.cc'
+        ]
     if bld.is_defined('HAVE_SAMPLERATE'):
-        audiographer.source += '''
-                src/general/sr_converter.cc
-        '''
+        audiographer_sources += [ 'src/general/sr_converter.cc' ]
+
+    if bld.is_defined ('INTERNAL_SHARED_LIBS'):
+        audiographer              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=audiographer_sources)
+        # macros for this shared library
+        audiographer.defines      = [ 'LIBAUDIOGRAPHER_DLL=1', 'LIBAUDIOGRAPHER_DLL_EXPORTS=1' ]
+        # macros for this other internal shared libraries that we use
+        audiographer.defines     += [ 'LIBPBD_DLL=1' ]
+        audiographer.cflags       = [ '-fvisibility=hidden' ]
+        audiographer.cxxflags     = [ '-fvisibility=hidden' ]
+    else:
+        audiographer              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=libardour_sources)
+        audiographer.cxxflags     = [ '-fPIC' ]
+        audiographer.cflags       = [ '-fPIC' ]
+        audiographer.defines      = []
 
     audiographer.name           = 'libaudiographer'
     audiographer.target         = 'audiographer'

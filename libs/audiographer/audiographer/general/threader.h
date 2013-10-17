@@ -10,6 +10,7 @@
 #include <vector>
 #include <algorithm>
 
+#include "audiographer/visibility.h"
 #include "audiographer/source.h"
 #include "audiographer/sink.h"
 #include "audiographer/exception.h"
@@ -18,7 +19,7 @@ namespace AudioGrapher
 {
 
 /// Class that stores exceptions thrown from different threads
-class ThreaderException : public Exception
+class LIBAUDIOGRAPHER_API ThreaderException : public Exception
 {
   public:
 	template<typename T>
@@ -32,7 +33,7 @@ class ThreaderException : public Exception
 
 /// Class for distributing processing across several threads
 template <typename T = DefaultSampleType>
-class Threader : public Source<T>, public Sink<T>
+class LIBAUDIOGRAPHER_API Threader : public Source<T>, public Sink<T>
 {
   private:
 	typedef std::vector<typename Source<T>::SinkPtr> OutputVec;

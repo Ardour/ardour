@@ -3,6 +3,7 @@
 
 #include <samplerate.h>
 
+#include "audiographer/visibility.h"
 #include "audiographer/flag_debuggable.h"
 #include "audiographer/sink.h"
 #include "audiographer/throwing.h"
@@ -13,7 +14,7 @@ namespace AudioGrapher
 {
 
 /// Samplerate converter
-class SampleRateConverter
+class LIBAUDIOGRAPHER_API SampleRateConverter
   : public ListedSource<float>
   , public Sink<float>
   , public FlagDebuggable<>

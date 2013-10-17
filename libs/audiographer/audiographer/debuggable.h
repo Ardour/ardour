@@ -7,11 +7,13 @@
 
 #include <iostream>
 
+#include "audiographer/visibility.h"
+
 namespace AudioGrapher
 {
 
 /// Compile time defined debug level
-enum DebugLevel
+enum LIBAUDIOGRAPHER_API DebugLevel
 {
 	DebugNone,     ///< Disabled
 	DebugObject,   ///< Object level stuff, ctors, initalizers etc.
@@ -36,7 +38,7 @@ enum DebugLevel
   * logical and (short-circuiting).
   */
 template<DebugLevel L = DEFAULT_DEBUG_LEVEL>
-class Debuggable
+class LIBAUDIOGRAPHER_API Debuggable
 {
   protected:
 	Debuggable(std::ostream & debug_stream = std::cerr)
