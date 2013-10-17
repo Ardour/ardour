@@ -19,6 +19,8 @@
 #ifndef EVORAL_OLD_SMF_HPP
 #define EVORAL_OLD_SMF_HPP
 
+#include "evoral/visibility.h"
+
 namespace Evoral {
 
 template<typename Time> class Event;
@@ -28,7 +30,7 @@ template<typename Time> class EventRingBuffer;
 /** Standard Midi File (Type 0)
  */
 template<typename Time>
-class SMF {
+class LIBEVORAL_API SMF {
 public:
 	SMF();
 	virtual ~SMF();

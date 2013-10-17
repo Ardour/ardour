@@ -19,6 +19,7 @@
 #ifndef EVORAL_TYPE_MAP_HPP
 #define EVORAL_TYPE_MAP_HPP
 
+#include "evoral/visibility.h"
 #include "evoral/types.hpp"
 
 namespace Evoral {
@@ -28,7 +29,7 @@ class Parameter;
 /** The applications passes one of these which provide the implementation
  * with required information about event types in an opaque, type neutral way
  */
-class TypeMap {
+class LIBEVORAL_API TypeMap {
 public:
 	virtual ~TypeMap() {}
 

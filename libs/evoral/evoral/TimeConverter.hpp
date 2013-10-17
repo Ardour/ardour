@@ -19,6 +19,8 @@
 #ifndef EVORAL_TIME_CONVERTER_HPP
 #define EVORAL_TIME_CONVERTER_HPP
 
+#include "evoral/visibility.h"
+
 namespace Evoral {
 
 /** A bidirectional converter between two different time units.
@@ -33,7 +35,7 @@ namespace Evoral {
  *    from() converts a time _origin_b + b into an offset from _origin_b in units of A.
  */
 template<typename A, typename B>
-class TimeConverter {
+class LIBEVORAL_API TimeConverter {
 public:
 	TimeConverter () : _origin_b (0) {}
 	TimeConverter (B ob) : _origin_b (ob) {}
@@ -63,7 +65,7 @@ protected:
  *  going on.
  */
 template<typename A, typename B>
-class IdentityConverter : public TimeConverter<A,B> {
+class LIBEVORAL_API IdentityConverter : public TimeConverter<A,B> {
   public:
 	IdentityConverter() {}
 	B to(A a)   const { return static_cast<B>(a); }

@@ -20,6 +20,7 @@
 #ifndef EVORAL_PATCH_CHANGE_HPP
 #define EVORAL_PATCH_CHANGE_HPP
 
+#include "evoral/visibility.h"
 #include "evoral/Event.hpp"
 #include "evoral/MIDIEvent.hpp"
 
@@ -29,7 +30,7 @@ namespace Evoral {
  *  bank select and then a program change.
  */
 template<typename Time>
-class PatchChange
+class LIBEVORAL_API PatchChange
 {
 public:
 	/** @param t Time.
@@ -166,7 +167,7 @@ private:
 }
 
 template<typename Time>
-std::ostream& operator<< (std::ostream& o, const Evoral::PatchChange<Time>& p) {
+LIBEVORAL_API std::ostream& operator<< (std::ostream& o, const Evoral::PatchChange<Time>& p) {
 	o << "Patch Change " << p.id() << " @ " << p.time() << " bank " << (int) p.bank() << " program " << (int) p.program();
 	return o;
 }

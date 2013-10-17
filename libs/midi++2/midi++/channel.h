@@ -23,8 +23,6 @@
 #include <queue>
 
 #include "pbd/signals.h"
-
-#include "midi++/types.h"
 #include "midi++/parser.h"
 
 namespace MIDI {

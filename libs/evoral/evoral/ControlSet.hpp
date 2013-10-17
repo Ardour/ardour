@@ -25,6 +25,8 @@
 #include <boost/utility.hpp>
 #include <glibmm/threads.h>
 #include "pbd/signals.h"
+
+#include "evoral/visibility.h"
 #include "evoral/types.hpp"
 #include "evoral/Parameter.hpp"
 #include "evoral/ControlList.hpp"
@@ -34,7 +36,7 @@ namespace Evoral {
 class Control;
 class ControlEvent;
 
-class ControlSet : public boost::noncopyable {
+class LIBEVORAL_API ControlSet : public boost::noncopyable {
 public:
 	ControlSet();
 	ControlSet (const ControlSet&);

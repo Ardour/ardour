@@ -321,11 +321,15 @@ def build(bld):
     # Library
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=libardour_sources)
+        # macros for this shared library
+        obj.defines      = [ 'LIBARDOUR_DLL=1', 'LIBARDOUR_DLL_EXPORTS=1' ]
+        # macros for this other internal shared libraries that we use
+        obj.defines     += [ 'LIBEVORAL_DLL=1', 'LIBMIDIPP_DLL=1', 'LIBPBD_DLL=1' ]
     else:
         obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=libardour_sources)
         obj.cxxflags     = [ '-fPIC' ]
         obj.cflags       = [ '-fPIC' ]
-
+        obj.defines      = []
     obj.export_includes = ['.']
     obj.includes     = ['.', '../surfaces/control_protocol', '..']
     obj.name         = 'ardour'
@@ -338,14 +342,13 @@ def build(bld):
                         'libaudiographer','libltc','libtimecode']
     obj.vnum         = LIBARDOUR_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-    obj.defines      = [
+    obj.defines      += [
         'PACKAGE="' + I18N_PACKAGE + '"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
         'PROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"',
         'EVORAL_MIDI_XML=1',
-        'LIBARDOUR_DLL_EXPORTS=1'
         ]
 
     #obj.source += ' st_stretch.cc st_pitch.cc '

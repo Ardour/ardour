@@ -22,6 +22,7 @@
 
 #include "pbd/ringbufferNPT.h"
 
+#include "evoral/visibility.h"
 #include "evoral/EventSink.hpp"
 #include "evoral/types.hpp"
 
@@ -39,7 +40,7 @@ namespace Evoral {
  * possible interpretation of uint8_t.
  */
 template<typename Time>
-class EventRingBuffer : public PBD::RingBufferNPT<uint8_t>, public Evoral::EventSink<Time> {
+class LIBEVORAL_API EventRingBuffer : public PBD::RingBufferNPT<uint8_t>, public Evoral::EventSink<Time> {
 public:
 
 	/** @param capacity Ringbuffer capacity in bytes.

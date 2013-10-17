@@ -19,6 +19,8 @@
 #define EVORAL_EVENT_LIST_HPP
 
 #include <list>
+
+#include "evoral/visibility.h"
 #include "evoral/EventSink.hpp"
 #include "evoral/types.hpp"
 #include "evoral/Event.hpp"
@@ -31,7 +33,7 @@ namespace Evoral {
  * Used when we need an unsorted list of Events that is also an EventSink. Absolutely nothing more.
  */
 template<typename Time>
-class EventList : public std::list<Evoral::Event<Time> *>, public Evoral::EventSink<Time> {
+class LIBEVORAL_API EventList : public std::list<Evoral::Event<Time> *>, public Evoral::EventSink<Time> {
 public:
 	EventList() {}
 

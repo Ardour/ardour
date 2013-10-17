@@ -25,6 +25,8 @@
 #include <boost/pool/pool_alloc.hpp>
 #include <glibmm/threads.h>
 #include "pbd/signals.h"
+
+#include "evoral/visibility.h"
 #include "evoral/types.hpp"
 #include "evoral/Range.hpp"
 #include "evoral/Parameter.hpp"
@@ -35,7 +37,7 @@ class Curve;
 
 /** A single event (time-stamped value) for a control
  */
-class ControlEvent {
+class LIBEVORAL_API ControlEvent {
 public:
 	ControlEvent (double w, double v)
 		: when (w), value (v), coeff (0)
@@ -67,7 +69,7 @@ public:
 
 /** A list (sequence) of time-stamped values for a control
  */
-class ControlList
+class LIBEVORAL_API ControlList
 {
 public:
 	typedef std::list<ControlEvent*> EventList;

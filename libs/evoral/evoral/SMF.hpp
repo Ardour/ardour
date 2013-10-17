@@ -21,6 +21,8 @@
 #define EVORAL_SMF_HPP
 
 #include <cassert>
+
+#include "evoral/visibility.h"
 #include "evoral/types.hpp"
 
 struct smf_struct;
@@ -35,7 +37,7 @@ namespace Evoral {
 /** Standard Midi File.
  * Currently only tempo-based time of a given PPQN is supported.
  */
-class SMF {
+class LIBEVORAL_API SMF {
 public:
 	class FileError : public std::exception {
 	public:

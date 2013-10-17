@@ -417,6 +417,7 @@ def build(bld):
                          'LIBARDOUR_DLL=1',
                          'LIBARDOUR_CP_DLL=1',
                          'LIBGTKMM2EXT_DLL=1',
+                         'LIBEVORAL_DLL=1',
                          ]
     # continue with setup of obj, which could be a shared library
     # or an executable.
