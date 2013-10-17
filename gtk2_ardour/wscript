@@ -404,7 +404,20 @@ def build(bld):
         obj.source    = gtk2_ardour_sources
         obj.target = 'ardour-' + bld.env['VERSION']
         obj.includes = ['.']
+        obj.defines = []
 
+    # if our internal libraries are built as DLL's, define
+    # the macros that activate the right stuff in headers
+    # for export/visibility to work on all platforms.
+
+    if bld.is_defined ('INTERNAL_SHARED_LIBS'):
+        obj.defines += [ 'LIBPBD_DLL=1', 
+                         'LIBARDOUR_DLL=1',
+                         'LIBMIDIPP_DLL=1',
+                         'LIBARDOUR_DLL=1',
+                         'LIBARDOUR_CP_DLL=1',
+                         'LIBGTKMM2EXT_DLL=1',
+                         ]
     # continue with setup of obj, which could be a shared library
     # or an executable.
 
@@ -422,7 +435,7 @@ def build(bld):
                          'libtaglib' ]
     if sys.platform == 'darwin':
         obj.use += ' libappleutility'
-    obj.defines     = [
+    obj.defines     += [
         'PACKAGE="' + I18N_PACKAGE + '"',
         'VERSIONSTRING="' + bld.env['VERSION'] + '"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
