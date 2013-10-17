@@ -32,9 +32,9 @@
 
 #if defined VST_SUPPORT || defined LXVST_SUPPORT
 #include "evoral/MIDIEvent.hpp"
-struct LIBARDOUR_API _VstEvents;
+struct _VstEvents;
 typedef struct _VstEvents VstEvents;
-struct LIBARDOUR_API _VstMidiEvent;
+struct _VstMidiEvent;
 typedef struct _VstMidiEvent VstMidiEvent;
 #endif
 

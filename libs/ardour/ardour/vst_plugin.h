@@ -22,11 +22,11 @@
 
 #include "ardour/plugin.h"
 
-struct LIBARDOUR_API _AEffect;
+struct _AEffect;
 typedef struct _AEffect AEffect;
-struct LIBARDOUR_API _VSTHandle;
+struct _VSTHandle;
 typedef struct _VSTHandle VSTHandle;
-struct LIBARDOUR_API _VSTState;
+struct _VSTState;
 typedef struct _VSTState VSTState;
 
 namespace ARDOUR {

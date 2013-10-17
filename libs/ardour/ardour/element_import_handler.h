@@ -30,7 +30,7 @@
 #include "ardour/libardour_visibility.h"
 #include "pbd/libpbd_visibility.h"
 
-class LIBPBD_API XMLTree;
+class XMLTree;
 
 namespace ARDOUR {
 

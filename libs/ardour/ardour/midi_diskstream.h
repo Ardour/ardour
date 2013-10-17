@@ -40,7 +40,7 @@
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/utils.h"
 
-struct LIBARDOUR_API tm;
+struct tm;
 
 namespace ARDOUR {
 

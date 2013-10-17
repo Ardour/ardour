@@ -22,7 +22,7 @@
 
 #include "ardour/vst_plugin.h"
 
-struct LIBARDOUR_API _VSTHandle;
+struct _VSTHandle;
 typedef struct _VSTHandle VSTHandle;
 
 namespace ARDOUR {

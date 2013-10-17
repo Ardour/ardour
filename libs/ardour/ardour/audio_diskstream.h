@@ -42,7 +42,7 @@
 #include "ardour/port.h"
 #include "ardour/interpolation.h"
 
-struct LIBARDOUR_API tm;
+struct tm;
 
 namespace ARDOUR {
 
