@@ -597,16 +597,18 @@ Session::setup_click ()
 	_click_gain.reset (new Amp (*this));
 	_click_gain->activate ();
 	if (state_tree) {
-		setup_click_state (*state_tree->root());
+		setup_click_state (state_tree->root());
+	} else {
+		setup_click_state (0);
 	}
 }
 
 void
-Session::setup_click_state (const XMLNode& node)
+Session::setup_click_state (const XMLNode* node)
 {	
 	const XMLNode* child = 0;
-
-	if ((child = find_named_node (node, "Click")) != 0) {
+	
+	if (node && (child = find_named_node (*node, "Click")) != 0) {
 		
 		/* existing state for Click */
 		int c = 0;

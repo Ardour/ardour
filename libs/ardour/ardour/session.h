@@ -1610,7 +1610,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
     void setup_ltc ();
     void setup_click ();
-    void setup_click_state (const XMLNode&);
+    void setup_click_state (const XMLNode*);
     void setup_bundles ();
 
     static int get_session_info_from_path (XMLTree& state_tree, const std::string& xmlpath);
