@@ -30,27 +30,21 @@
   #define LIBEVORAL_DLL_EXPORT __declspec(dllexport)
   #define LIBEVORAL_DLL_LOCAL
 #else
-  #if __GNUC__ >= 4
-    #define LIBEVORAL_DLL_IMPORT __attribute__ ((visibility ("default")))
-    #define LIBEVORAL_DLL_EXPORT __attribute__ ((visibility ("default")))
-    #define LIBEVORAL_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
-  #else
-    #define LIBEVORAL_DLL_IMPORT
-    #define LIBEVORAL_DLL_EXPORT
-    #define LIBEVORAL_DLL_LOCAL
-  #endif
+  #define LIBEVORAL_DLL_IMPORT __attribute__ ((visibility ("default")))
+  #define LIBEVORAL_DLL_EXPORT __attribute__ ((visibility ("default")))
+  #define LIBEVORAL_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
 #endif
 
-#ifdef LIBEVORAL_DLL // libevoral is a DLL
-#ifdef LIBEVORAL_DLL_EXPORTS // defined if we are building the libevoral DLL (instead of using it)
-    #define LIBEVORAL_API LIBEVORAL_DLL_EXPORT
+#ifdef LIBEVORAL_STATIC // libevoral is not a DLL
+  #define LIBEVORAL_API
+  #define LIBEVORAL_LOCAL
 #else
+  #ifdef LIBEVORAL_DLL_EXPORTS // defined if we are building the libevoral DLL (instead of using it)
+    #define LIBEVORAL_API LIBEVORAL_DLL_EXPORT
+  #else
     #define LIBEVORAL_API LIBEVORAL_DLL_IMPORT
-#endif 
-#define     LIBEVORAL_LOCAL LIBEVORAL_DLL_LOCAL
-#else /* static lib, not DLL */
-#define LIBEVORAL_API
-#define LIBEVORAL_LOCAL
+  #endif 
+  #define     LIBEVORAL_LOCAL LIBEVORAL_DLL_LOCAL
 #endif
 
 #endif /* __libevoral_visibility_h__ */

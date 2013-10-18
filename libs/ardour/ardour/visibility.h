@@ -26,19 +26,13 @@
  */
 
 #if defined _WIN32 || defined __CYGWIN__ || defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-  #define LIBARDOUR_HELPER_DLL_IMPORT __declspec(dllimport)
-  #define LIBARDOUR_HELPER_DLL_EXPORT __declspec(dllexport)
-  #define LIBARDOUR_HELPER_DLL_LOCAL
+    #define LIBARDOUR_HELPER_DLL_IMPORT __declspec(dllimport)
+    #define LIBARDOUR_HELPER_DLL_EXPORT __declspec(dllexport)
+    #define LIBARDOUR_HELPER_DLL_LOCAL
 #else
-  #if __GNUC__ >= 4
     #define LIBARDOUR_HELPER_DLL_IMPORT __attribute__ ((visibility ("default")))
     #define LIBARDOUR_HELPER_DLL_EXPORT __attribute__ ((visibility ("default")))
     #define LIBARDOUR_HELPER_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
-  #else
-    #define LIBARDOUR_HELPER_DLL_IMPORT
-    #define LIBARDOUR_HELPER_DLL_EXPORT
-    #define LIBARDOUR_HELPER_DLL_LOCAL
-  #endif
 #endif
 
 #endif /* __libardour_visibility_h__ */

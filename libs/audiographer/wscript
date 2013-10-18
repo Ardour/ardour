@@ -67,9 +67,7 @@ def build(bld):
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         audiographer              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=audiographer_sources)
         # macros for this shared library
-        audiographer.defines      = [ 'LIBAUDIOGRAPHER_DLL=1', 'LIBAUDIOGRAPHER_DLL_EXPORTS=1' ]
-        # macros for this other internal shared libraries that we use
-        audiographer.defines     += [ 'LIBPBD_DLL=1' ]
+        audiographer.defines      = [ 'LIBAUDIOGRAPHER_DLL_EXPORTS=1' ]
         audiographer.cflags       = [ '-fvisibility=hidden' ]
         audiographer.cxxflags     = [ '-fvisibility=hidden' ]
     else:

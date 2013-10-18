@@ -30,27 +30,21 @@
   #define LIBARDOUR_DLL_EXPORT __declspec(dllexport)
   #define LIBARDOUR_DLL_LOCAL
 #else
-  #if __GNUC__ >= 4
-    #define LIBARDOUR_DLL_IMPORT __attribute__ ((visibility ("default")))
-    #define LIBARDOUR_DLL_EXPORT __attribute__ ((visibility ("default")))
-    #define LIBARDOUR_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
-  #else
-    #define LIBARDOUR_DLL_IMPORT
-    #define LIBARDOUR_DLL_EXPORT
-    #define LIBARDOUR_DLL_LOCAL
-  #endif
+  #define LIBARDOUR_DLL_IMPORT __attribute__ ((visibility ("default")))
+  #define LIBARDOUR_DLL_EXPORT __attribute__ ((visibility ("default")))
+  #define LIBARDOUR_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
 #endif
 
-#ifdef LIBARDOUR_DLL // libardour is a DLL
-#ifdef LIBARDOUR_DLL_EXPORTS // defined if we are building the libardour DLL (instead of using it)
-    #define LIBARDOUR_API LIBARDOUR_DLL_EXPORT
-#else
-    #define LIBARDOUR_API LIBARDOUR_DLL_IMPORT
-#endif 
-#define     LIBARDOUR_LOCAL LIBARDOUR_DLL_LOCAL
-#else /* static lib, not DLL */
+#ifdef LIBARDOUR_STATIC // libardour is not a DLL
 #define LIBARDOUR_API
 #define LIBARDOUR_LOCAL
+#else
+  #ifdef LIBARDOUR_DLL_EXPORTS // defined if we are building the libardour DLL (instead of using it)
+    #define LIBARDOUR_API LIBARDOUR_DLL_EXPORT
+  #else
+    #define LIBARDOUR_API LIBARDOUR_DLL_IMPORT
+  #endif 
+  #define LIBARDOUR_LOCAL LIBARDOUR_DLL_LOCAL
 #endif
 
 #endif /* __libardour_libardour_visibility_h__ */

@@ -23,8 +23,6 @@ def build(bld):
     obj.source = [ 'vbap_speakers.cc', 'vbap.cc'  ]
     obj.export_includes = ['.']
     obj.defines     = [ 'PACKAGE="libardour_panvbap"' ]
-    if bld.is_defined ('INTERNAL_SHARED_LIBS'):
-        obj.defines += [ 'LIBARDOUR_DLL=1', 'LIBCONTROLCP_DLL_=1', 'LIBPBD_DLL=1', 'LIBEVORAL_DLL=1' ]
     obj.includes     = ['.']
     obj.name         = 'libardour_panvbap'
     obj.target       = 'panvbap'

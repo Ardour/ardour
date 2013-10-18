@@ -30,27 +30,21 @@
   #define LIBGTKMM2EXT_DLL_EXPORT __declspec(dllexport)
   #define LIBGTKMM2EXT_DLL_LOCAL
 #else
-  #if __GNUC__ >= 4
-    #define LIBGTKMM2EXT_DLL_IMPORT __attribute__ ((visibility ("default")))
-    #define LIBGTKMM2EXT_DLL_EXPORT __attribute__ ((visibility ("default")))
-    #define LIBGTKMM2EXT_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
-  #else
-    #define LIBGTKMM2EXT_DLL_IMPORT
-    #define LIBGTKMM2EXT_DLL_EXPORT
-    #define LIBGTKMM2EXT_DLL_LOCAL
-  #endif
+  #define LIBGTKMM2EXT_DLL_IMPORT __attribute__ ((visibility ("default")))
+  #define LIBGTKMM2EXT_DLL_EXPORT __attribute__ ((visibility ("default")))
+  #define LIBGTKMM2EXT_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
 #endif
 
-#ifdef LIBGTKMM2EXT_DLL // libgtkmm2ext is a DLL
-#ifdef LIBGTKMM2EXT_DLL_EXPORTS // defined if we are building the libgtkmm2ext DLL (instead of using it)
-    #define LIBGTKMM2EXT_API LIBGTKMM2EXT_DLL_EXPORT
+#ifdef LIBGTKMM2EXT_STATIC // libgtkmm2ext is a DLL
+  #define LIBGTKMM2EXT_API
+  #define LIBGTKMM2EXT_LOCAL
 #else
-    #define LIBGTKMM2EXT_API LIBGTKMM2EXT_DLL_IMPORT
-#endif 
-#define     LIBGTKMM2EXT_LOCAL LIBGTKMM2EXT_DLL_LOCAL
-#else /* static lib, not DLL */
-#define LIBGTKMM2EXT_API
-#define LIBGTKMM2EXT_LOCAL
+  #ifdef LIBGTKMM2EXT_DLL_EXPORTS // defined if we are building the libgtkmm2ext DLL (instead of using it)
+     #define LIBGTKMM2EXT_API LIBGTKMM2EXT_DLL_EXPORT
+  #else
+     #define LIBGTKMM2EXT_API LIBGTKMM2EXT_DLL_IMPORT
+  #endif 
+  #define     LIBGTKMM2EXT_LOCAL LIBGTKMM2EXT_DLL_LOCAL
 #endif
 
 #endif /* __libgtkmm2ext_visibility_h__ */

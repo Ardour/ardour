@@ -30,27 +30,21 @@
   #define LIBAUDIOGRAPHER_DLL_EXPORT __declspec(dllexport)
   #define LIBAUDIOGRAPHER_DLL_LOCAL
 #else
-  #if __GNUC__ >= 4
-    #define LIBAUDIOGRAPHER_DLL_IMPORT __attribute__ ((visibility ("default")))
-    #define LIBAUDIOGRAPHER_DLL_EXPORT __attribute__ ((visibility ("default")))
-    #define LIBAUDIOGRAPHER_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
-  #else
-    #define LIBAUDIOGRAPHER_DLL_IMPORT
-    #define LIBAUDIOGRAPHER_DLL_EXPORT
-    #define LIBAUDIOGRAPHER_DLL_LOCAL
-  #endif
+  #define LIBAUDIOGRAPHER_DLL_IMPORT __attribute__ ((visibility ("default")))
+  #define LIBAUDIOGRAPHER_DLL_EXPORT __attribute__ ((visibility ("default")))
+  #define LIBAUDIOGRAPHER_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
 #endif
 
-#ifdef LIBAUDIOGRAPHER_DLL // libaudiographer is a DLL
-#ifdef LIBAUDIOGRAPHER_DLL_EXPORTS // defined if we are building the libaudiographer DLL (instead of using it)
-    #define LIBAUDIOGRAPHER_API LIBAUDIOGRAPHER_DLL_EXPORT
+#ifdef LIBAUDIOGRAPHER_STATIC // libaudiographer is not a DLL
+  #define LIBAUDIOGRAPHER_API
+  #define LIBAUDIOGRAPHER_LOCAL
 #else
+  #ifdef LIBAUDIOGRAPHER_DLL_EXPORTS // defined if we are building the libaudiographer DLL (instead of using it)
+    #define LIBAUDIOGRAPHER_API LIBAUDIOGRAPHER_DLL_EXPORT
+  #else
     #define LIBAUDIOGRAPHER_API LIBAUDIOGRAPHER_DLL_IMPORT
-#endif 
-#define     LIBAUDIOGRAPHER_LOCAL LIBAUDIOGRAPHER_DLL_LOCAL
-#else /* static lib, not DLL */
-#define LIBAUDIOGRAPHER_API
-#define LIBAUDIOGRAPHER_LOCAL
+  #endif 
+  #define LIBAUDIOGRAPHER_LOCAL LIBAUDIOGRAPHER_DLL_LOCAL
 #endif
 
 #endif /* __libaudiographer_visibility_h__ */

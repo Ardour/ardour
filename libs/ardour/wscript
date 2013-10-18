@@ -323,9 +323,7 @@ def build(bld):
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=libardour_sources)
         # macros for this shared library
-        obj.defines      = [ 'LIBARDOUR_DLL=1', 'LIBARDOUR_DLL_EXPORTS=1' ]
-        # macros for this other internal shared libraries that we use
-        obj.defines     += [ 'LIBEVORAL_DLL=1', 'LIBMIDIPP_DLL=1', 'LIBPBD_DLL=1' ]
+        obj.defines      = [ 'LIBARDOUR_DLL_EXPORTS=1' ]
         obj.cflags       = [ '-fvisibility=hidden' ]
         obj.cxxflags     = [ '-fvisibility=hidden' ]
     else:

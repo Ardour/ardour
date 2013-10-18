@@ -30,27 +30,21 @@
   #define LIBCONTROLCP_DLL_EXPORT __declspec(dllexport)
   #define LIBCONTROLCP_DLL_LOCAL
 #else
-  #if __GNUC__ >= 4
-    #define LIBCONTROLCP_DLL_IMPORT __attribute__ ((visibility ("default")))
-    #define LIBCONTROLCP_DLL_EXPORT __attribute__ ((visibility ("default")))
-    #define LIBCONTROLCP_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
-  #else
-    #define LIBCONTROLCP_DLL_IMPORT
-    #define LIBCONTROLCP_DLL_EXPORT
-    #define LIBCONTROLCP_DLL_LOCAL
-  #endif
+  #define LIBCONTROLCP_DLL_IMPORT __attribute__ ((visibility ("default")))
+  #define LIBCONTROLCP_DLL_EXPORT __attribute__ ((visibility ("default")))
+  #define LIBCONTROLCP_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
 #endif
 
-#ifdef LIBCONTROLCP_DLL // libcontrolcp is a DLL
-#ifdef LIBCONTROLCP_DLL_EXPORTS // defined if we are building the libcontrolcp DLL (instead of using it)
-    #define LIBCONTROLCP_API LIBCONTROLCP_DLL_EXPORT
+#ifdef LIBCONTROLCP_STATIC // libcontrolcp is not a DLL
+  #define LIBCONTROLCP_API
+  #define LIBCONTROLCP_LOCAL
 #else
+  #ifdef LIBCONTROLCP_DLL_EXPORTS // defined if we are building the libcontrolcp DLL (instead of using it)
+    #define LIBCONTROLCP_API LIBCONTROLCP_DLL_EXPORT
+  #else
     #define LIBCONTROLCP_API LIBCONTROLCP_DLL_IMPORT
-#endif 
-#define     LIBCONTROLCP_LOCAL LIBCONTROLCP_DLL_LOCAL
-#else /* static lib, not DLL */
-#define LIBCONTROLCP_API
-#define LIBCONTROLCP_LOCAL
+  #endif 
+  #define LIBCONTROLCP_LOCAL LIBCONTROLCP_DLL_LOCAL
 #endif
 
 #endif /* __libcontrolcp_visibility_h__ */

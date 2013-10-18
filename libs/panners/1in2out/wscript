@@ -23,8 +23,6 @@ def build(bld):
     obj.source = [ 'panner_1in2out.cc' ]
     obj.export_includes = ['.']
     obj.defines     = [ 'PACKAGE="libardour_pan1in2out"' ]
-    if bld.is_defined ('INTERNAL_SHARED_LIBS'):
-        obj.defines += [ 'LIBARDOUR_DLL=1', 'LIBPBD_DLL=1', 'LIBEVORAL_DLL=1' ]
     obj.includes     = ['.']
     obj.name         = 'libardour_pan1in2out'
     obj.target       = 'pan1in2out'

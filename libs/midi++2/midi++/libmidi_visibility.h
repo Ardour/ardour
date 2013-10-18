@@ -30,27 +30,21 @@
   #define LIBMIDIPP_DLL_EXPORT __declspec(dllexport)
   #define LIBMIDIPP_DLL_LOCAL
 #else
-  #if __GNUC__ >= 4
-    #define LIBMIDIPP_DLL_IMPORT __attribute__ ((visibility ("default")))
-    #define LIBMIDIPP_DLL_EXPORT __attribute__ ((visibility ("default")))
-    #define LIBMIDIPP_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
-  #else
-    #define LIBMIDIPP_DLL_IMPORT
-    #define LIBMIDIPP_DLL_EXPORT
-    #define LIBMIDIPP_DLL_LOCAL
-  #endif
+  #define LIBMIDIPP_DLL_IMPORT __attribute__ ((visibility ("default")))
+  #define LIBMIDIPP_DLL_EXPORT __attribute__ ((visibility ("default")))
+  #define LIBMIDIPP_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
 #endif
 
-#ifdef LIBMIDIPP_DLL // libmidi is a DLL
-#ifdef LIBMIDIPP_DLL_EXPORTS // defined if we are building the libmidi DLL (instead of using it)
-    #define LIBMIDIPP_API LIBMIDIPP_DLL_EXPORT
+#ifdef LIBMIDIPP_STATIC // libmidi is not a DLL
+  #define LIBMIDIPP_API
+  #define LIBMIDIPP_LOCAL
 #else
-    #define LIBMIDIPP_API LIBMIDIPP_DLL_IMPORT
-#endif 
-#define     LIBMIDIPP_LOCAL LIBMIDIPP_DLL_LOCAL
-#else /* static lib, not DLL */
-#define LIBMIDIPP_API
-#define LIBMIDIPP_LOCAL
+  #ifdef LIBMIDIPP_DLL_EXPORTS // defined if we are building the libmidi DLL (instead of using it)
+     #define LIBMIDIPP_API LIBMIDIPP_DLL_EXPORT
+  #else
+     #define LIBMIDIPP_API LIBMIDIPP_DLL_IMPORT
+  #endif 
+  #define    LIBMIDIPP_LOCAL LIBMIDIPP_DLL_LOCAL
 #endif
 
 #endif /* __libmidi_libmidi_visibility_h__ */

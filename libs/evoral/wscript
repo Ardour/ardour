@@ -91,9 +91,7 @@ def build(bld):
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=lib_source)
         # DLL exports for this library
-        obj.defines      = [ 'LIBEVORAL_DLL=1', 'LIBEVORAL_DLL_EXPORTS=1' ]
-        # DLL imports for other libraries
-        obj.defines     += [ 'LIBPBD_DLL=1' ]
+        obj.defines      = [ 'LIBEVORAL_DLL_EXPORTS=1' ]
         obj.cxxflags     = [ '-fvisibility=hidden' ]
         obj.cflags       = [ '-fvisibility=hidden' ]
     else:

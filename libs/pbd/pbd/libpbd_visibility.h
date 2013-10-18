@@ -30,27 +30,21 @@
   #define LIBPBD_DLL_EXPORT __declspec(dllexport)
   #define LIBPBD_DLL_LOCAL
 #else
-  #if __GNUC__ >= 4
-    #define LIBPBD_DLL_IMPORT __attribute__ ((visibility ("default")))
-    #define LIBPBD_DLL_EXPORT __attribute__ ((visibility ("default")))
-    #define LIBPBD_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
-  #else
-    #define LIBPBD_DLL_IMPORT
-    #define LIBPBD_DLL_EXPORT
-    #define LIBPBD_DLL_LOCAL
-  #endif
+  #define LIBPBD_DLL_IMPORT __attribute__ ((visibility ("default")))
+  #define LIBPBD_DLL_EXPORT __attribute__ ((visibility ("default")))
+  #define LIBPBD_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
 #endif
 
-#ifdef LIBPBD_DLL // libpbd is a DLL
-#ifdef LIBPBD_DLL_EXPORTS // defined if we are building the libpbd DLL (instead of using it)
-    #define LIBPBD_API LIBPBD_DLL_EXPORT
+#ifdef LIBPBD_STATIC // libpbd is a DLL
+  #define LIBPBD_API
+  #define LIBPBD_LOCAL
 #else
+  #ifdef LIBPBD_DLL_EXPORTS // defined if we are building the libpbd DLL (instead of using it)
+    #define LIBPBD_API LIBPBD_DLL_EXPORT
+  #else
     #define LIBPBD_API LIBPBD_DLL_IMPORT
-#endif 
-#define     LIBPBD_LOCAL LIBPBD_DLL_LOCAL
-#else /* static lib, not DLL */
-#define LIBPBD_API
-#define LIBPBD_LOCAL
+  #endif 
+  #define LIBPBD_LOCAL LIBPBD_DLL_LOCAL
 #endif
 
 #endif /* __libpbd_libpbd_visibility_h__ */

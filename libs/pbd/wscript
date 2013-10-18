@@ -114,9 +114,7 @@ def build(bld):
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         print('BUILD SHARED LIB')
         obj              = bld.shlib(features = 'cxx cxxshlib', source=libpbd_sources)
-        obj.defines = [ 'LIBPBD_DLL=1',
-                        'LIBPBD_DLL_EXPORTS=1' 
-                        ]
+        obj.defines = [ 'LIBPBD_DLL_EXPORTS=1' ]
         obj.cxxflags = [ '-fvisibility=hidden' ]
         obj.cflags = [ '-fvisibility=hidden' ]
     else:
