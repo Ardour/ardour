@@ -9,11 +9,13 @@
 #include <gtkmm/radioaction.h>
 #include <gtkmm/toggleaction.h>
 
+#include "gtkmm2ext/visibility.h"
+
 class XMLNode;
 
 namespace Gtkmm2ext {
 
-class KeyboardKey
+class LIBGTKMM2EXT_API KeyboardKey
 {
   public:
         KeyboardKey () {
@@ -40,7 +42,7 @@ class KeyboardKey
         uint64_t _val;
 };
 
-class MouseButton {
+class LIBGTKMM2EXT_API MouseButton {
   public:
         MouseButton () {
                 _val = ~0ULL;
@@ -69,7 +71,7 @@ class MouseButton {
         static uint32_t _ignored_state;
 };
 
-class ActionMap {
+class LIBGTKMM2EXT_API ActionMap {
   public:
         ActionMap() {}
         ~ActionMap() {}
@@ -90,7 +92,7 @@ class ActionMap {
         _ActionMap actions;
 };        
 
-class Bindings {
+class LIBGTKMM2EXT_API Bindings {
   public:
         enum Operation { 
                 Press,

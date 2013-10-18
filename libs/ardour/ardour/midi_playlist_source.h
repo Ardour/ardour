@@ -32,7 +32,7 @@ namespace ARDOUR {
 
 class MidiPlaylist;
 
-class MidiPlaylistSource : public MidiSource, public PlaylistSource {
+class LIBARDOUR_API MidiPlaylistSource : public MidiSource, public PlaylistSource {
 public:
 	virtual ~MidiPlaylistSource ();
 

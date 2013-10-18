@@ -21,11 +21,12 @@
 #define __ardour_importable_source_h__
 
 #include "pbd/failed_constructor.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
 
-class ImportableSource {
+class LIBARDOUR_API ImportableSource {
 public:
 	ImportableSource () {}
 	virtual ~ImportableSource() {}

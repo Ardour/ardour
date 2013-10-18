@@ -27,7 +27,7 @@
 
 namespace ARDOUR {
 
-struct SoundFileInfo {
+struct LIBARDOUR_API SoundFileInfo {
 	float       samplerate;
 	uint16_t    channels;
 	int64_t     length;
@@ -35,7 +35,7 @@ struct SoundFileInfo {
 	int64_t     timecode;
 };
 
-class AudioFileSource : public AudioSource, public FileSource {
+class LIBARDOUR_API AudioFileSource : public AudioSource, public FileSource {
 public:
 	virtual ~AudioFileSource ();
 

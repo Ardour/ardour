@@ -30,13 +30,15 @@
 
 #include "pbd/stateful.h"
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtk {
 	class Window;
 }
 
 namespace Gtkmm2ext {
 
-class Keyboard : public sigc::trackable, PBD::Stateful
+class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 {
   public:
 	Keyboard ();

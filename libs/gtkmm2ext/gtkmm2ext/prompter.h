@@ -27,13 +27,15 @@
 #include <gtkmm/dialog.h>
 #include <sigc++/sigc++.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtk {
 	class Window;
 }
 
 namespace Gtkmm2ext {
 
-class Prompter : public Gtk::Dialog
+class LIBGTKMM2EXT_API Prompter : public Gtk::Dialog
 
 {
   public:

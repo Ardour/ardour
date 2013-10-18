@@ -30,7 +30,7 @@ namespace ARDOUR {
 class AudioEngine;
 class Session;
 
-class LXVSTPlugin : public VSTPlugin
+class LIBARDOUR_API LXVSTPlugin : public VSTPlugin
 {
   public:
 	LXVSTPlugin (AudioEngine &, Session &, VSTHandle *);
@@ -40,7 +40,7 @@ class LXVSTPlugin : public VSTPlugin
 	std::string state_node_name () const { return "lxvst"; }
 };
 
-class LXVSTPluginInfo : public PluginInfo
+class LIBARDOUR_API LXVSTPluginInfo : public PluginInfo
 {
   public:
 	LXVSTPluginInfo ();

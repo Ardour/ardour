@@ -25,9 +25,11 @@
 #include <semaphore.h>
 #endif
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
-class ProcessSemaphore {
+class LIBPBD_API ProcessSemaphore {
   private:
 #ifdef PLATFORM_WINDOWS
 	HANDLE _sem;

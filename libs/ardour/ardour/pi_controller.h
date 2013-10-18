@@ -19,9 +19,10 @@
 #ifndef __libardour_pi_controller__
 #define __libardour_pi_controller__
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
-class PIController {
+class LIBARDOUR_API PIController {
 public:
 	PIController (double resample_factor, int fir_size);
 	~PIController();
@@ -54,7 +55,7 @@ public:
 
 #define ESTIMATOR_SIZE 16
 
-class PIChaser {
+class LIBARDOUR_API PIChaser {
 public:
 	PIChaser();
 	~PIChaser();

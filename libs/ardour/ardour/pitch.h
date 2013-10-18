@@ -37,7 +37,7 @@ namespace ARDOUR {
 
 namespace ARDOUR {
 
-class Pitch : public RBEffect {
+class LIBARDOUR_API Pitch : public RBEffect {
   public:
 	Pitch (ARDOUR::Session&, TimeFXRequest&);
 	~Pitch () {}
@@ -49,7 +49,7 @@ class Pitch : public RBEffect {
 
 namespace ARDOUR {
 
-class Pitch : public Filter {
+class LIBARDOUR_API Pitch : public Filter {
   public:
 	Pitch (ARDOUR::Session&, TimeFXRequest&);
 	~Pitch () {}

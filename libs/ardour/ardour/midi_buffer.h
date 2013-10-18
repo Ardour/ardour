@@ -29,7 +29,7 @@ namespace ARDOUR {
 
 
 /** Buffer containing 8-bit unsigned char (MIDI) data. */
-class MidiBuffer : public Buffer
+class LIBARDOUR_API MidiBuffer : public Buffer
 {
 public:
 	typedef framepos_t TimeType;

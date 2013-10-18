@@ -32,7 +32,7 @@ typedef struct _VSTState VSTState;
 namespace ARDOUR {
 
 /** Parent class for VST plugins of both Windows and Linux varieties */
-class VSTPlugin : public Plugin
+class LIBARDOUR_API VSTPlugin : public Plugin
 {
 public:
 	VSTPlugin (AudioEngine &, Session &, VSTHandle *);

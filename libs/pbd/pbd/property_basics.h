@@ -24,20 +24,21 @@
 #include <set>
 #include <vector>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/xml++.h"
 
 class Command;
 
 namespace PBD {
 
-class PropertyList;
-class StatefulDiffCommand;	
+class LIBPBD_API PropertyList;
+class LIBPBD_API StatefulDiffCommand;	
 
 /** A unique identifier for a property of a Stateful object */
 typedef GQuark PropertyID;
 
 template<typename T>
-struct PropertyDescriptor {
+struct LIBPBD_API PropertyDescriptor {
 	PropertyDescriptor () : property_id (0) {}
 	PropertyDescriptor (PropertyID pid) : property_id (pid) {}
 	
@@ -46,7 +47,7 @@ struct PropertyDescriptor {
 };
 
 /** A list of IDs of Properties that have changed in some situation or other */
-class PropertyChange : public std::set<PropertyID>
+class LIBPBD_API PropertyChange : public std::set<PropertyID>
 {
 public:
 	PropertyChange() {}
@@ -83,7 +84,7 @@ public:
  *    - to handle current state (when serializing Stateful objects)
  *    - to handle history since some operation was started (when making StatefulDiffCommands for undo)
  */
-class PropertyBase
+class LIBPBD_API PropertyBase
 {
 public:
 	PropertyBase (PropertyID pid)

@@ -32,6 +32,7 @@
 #    include <errno.h>
 #endif
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/failed_constructor.h"
 
 namespace PBD {
@@ -48,7 +49,7 @@ namespace PBD {
    only safe way to reliably signal from a real-time audio thread.  The
    counting semantics also complement ringbuffers of events nicely.
 */
-class Semaphore
+class LIBPBD_API Semaphore
 {
 public:
 	/**

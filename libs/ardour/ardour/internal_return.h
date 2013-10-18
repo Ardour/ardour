@@ -29,7 +29,7 @@ namespace ARDOUR {
 
 class InternalSend;
 
-class InternalReturn : public Return
+class LIBARDOUR_API InternalReturn : public Return
 {
   public:
 	InternalReturn (Session&);

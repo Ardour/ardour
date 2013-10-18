@@ -23,6 +23,8 @@
 #include <jack/jack.h>
 #include <inttypes.h>
 
+#include "midi++/libmidi_visibility.h"
+
 namespace MIDI {
 
 	typedef char           channel_t;
@@ -60,10 +62,10 @@ namespace MIDI {
 	    reset = 0xFF
     };
 
-    extern const char *controller_names[];
+    LIBMIDIPP_API extern const char *controller_names[];
 	byte decode_controller_name (const char *name);
 
-    struct EventTwoBytes {
+    struct LIBMIDIPP_API EventTwoBytes {
 	union {
 	    byte note_number;
 	    byte controller_number;
@@ -74,14 +76,14 @@ namespace MIDI {
 	};
     };
 
-    enum MTC_FPS {
+    enum LIBMIDIPP_API MTC_FPS {
 	    MTC_24_FPS = 0,
 	    MTC_25_FPS = 1,
 	    MTC_30_FPS_DROP = 2,
 	    MTC_30_FPS = 3
     };
 
-    enum MTC_Status {
+    enum LIBMIDIPP_API MTC_Status {
 	    MTC_Stopped = 0,
 	    MTC_Forward,
 	    MTC_Backward

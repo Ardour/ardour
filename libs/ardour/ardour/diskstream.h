@@ -34,6 +34,7 @@
 #include "ardour/ardour.h"
 #include "ardour/chan_count.h"
 #include "ardour/session_object.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
 #include "ardour/public_diskstream.h"
@@ -54,7 +55,7 @@ class BufferSet;
 /** Parent class for classes which can stream data to and from disk.
  *  These are used by Tracks to get playback and put recorded data.
  */
-class Diskstream : public SessionObject, public PublicDiskstream
+class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 {
   public:
 	enum Flag {

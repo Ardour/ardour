@@ -25,6 +25,7 @@
 #include <utility>
 
 #include "pbd/signals.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 class XMLTree;
@@ -34,7 +35,7 @@ class Session;
 class ImportStatus;
 
 /// Virtual interface class for element importers
-class ElementImporter
+class LIBARDOUR_API ElementImporter
 {
   public:
 

@@ -42,7 +42,9 @@ def build(bld):
             types.cc
     '''
     obj.export_includes = ['./mackie']
-    obj.cxxflags     = '-DPACKAGE="ardour_mackie"'
+    obj.defines     = [ 'PACKAGE="ardour_mackie"' ]
+    if bld.is_defined ('INTERNAL_SHARED_LIBS'):
+        obj.defines += [ 'LIBARDOUR_DLL=1', 'LIBCONTROLCP_DLL=1', 'LIBPBD_DLL=1', 'LIBGTKMM2EXT_DLL=1', 'LIBEVORAL_DLL=1' ]
     # need ../libs because some GTK2 header files require stuff there
     obj.includes     = ['.', '../libs']
     obj.name         = 'libardour_mcp'

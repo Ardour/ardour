@@ -30,6 +30,7 @@
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/automation_control.h"
 #include "ardour/automatable.h"
@@ -50,7 +51,7 @@ class BufferSet;
 class AudioBuffer;
 class Speakers;
 
-class Panner : public PBD::Stateful, public PBD::ScopedConnectionList
+class LIBARDOUR_API Panner : public PBD::Stateful, public PBD::ScopedConnectionList
 {
 public:
 	Panner (boost::shared_ptr<Pannable>);
@@ -180,7 +181,7 @@ protected:
 } // namespace
 
 extern "C" {
-struct PanPluginDescriptor {
+struct LIBARDOUR_API PanPluginDescriptor {
 	std::string name;
 	int32_t in;
 	int32_t out;

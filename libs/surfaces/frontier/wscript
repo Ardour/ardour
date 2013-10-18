@@ -34,11 +34,13 @@ def build(bld):
             midicontrollable.cc
     '''
     obj.export_includes = ['./generic_midi']
-    obj.cxxflags     = '-DPACKAGE="ardour_genericmidi"'
+    obj.defines     = [ 'PACKAGE="ardour_frontier"' ]
+    if bld.is_defined ('INTERNAL_SHARED_LIBS'):
+        obj.defines += [ 'LIBARDOUR_DLL=1', 'LIBCONTROLCP_DLL=1', 'LIBPBD_DLL=1' ]
     obj.includes     = ['.', './generic_midi']
     obj.name         = 'libgeneric_midi'
     obj.target       = 'generic_midi'
-    obj.use          = 'libardour libsurfaces'
+    obj.use          = 'libardour libardourcp'
     obj.vnum         = LIBSURFACES_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'surfaces')
 

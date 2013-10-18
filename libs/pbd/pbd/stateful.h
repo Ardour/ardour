@@ -24,6 +24,7 @@
 #include <list>
 #include <cassert>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/id.h"
 #include "pbd/xml++.h"
 #include "pbd/property_basics.h"
@@ -41,7 +42,7 @@ class PropertyList;
 class OwnedPropertyList;
 
 /** Base class for objects with saveable and undoable state */
-class Stateful {
+class LIBPBD_API Stateful {
   public:
 	Stateful ();
 	virtual ~Stateful();

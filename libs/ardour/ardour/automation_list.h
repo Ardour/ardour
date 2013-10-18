@@ -40,7 +40,7 @@ namespace ARDOUR {
 class AutomationList;
 
 /** A SharedStatefulProperty for AutomationLists */
-class AutomationListProperty : public PBD::SharedStatefulProperty<AutomationList>
+class LIBARDOUR_API AutomationListProperty : public PBD::SharedStatefulProperty<AutomationList>
 {
 public:
 	AutomationListProperty (PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > d, Ptr p)
@@ -59,7 +59,7 @@ private:
 	AutomationListProperty& operator= (AutomationListProperty const &);
 };
 
-class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlList
+class LIBARDOUR_API AutomationList : public PBD::StatefulDestructible, public Evoral::ControlList
 {
   public:
 	AutomationList (Evoral::Parameter id);

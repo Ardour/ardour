@@ -24,10 +24,12 @@
 #include <exception>
 #include <string>
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR
 {
 
-class ExportFailed : public std::exception
+class LIBARDOUR_API ExportFailed : public std::exception
 {
   public:
 	ExportFailed (std::string const &);

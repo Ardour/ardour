@@ -33,14 +33,14 @@ namespace ARDOUR {
 class Location;
 class Session;
 
-class LocationImportHandler : public ElementImportHandler
+class LIBARDOUR_API LocationImportHandler : public ElementImportHandler
 {
   public:
 	LocationImportHandler (XMLTree const & source, Session & session);
 	std::string get_info () const;
 };
 
-class LocationImporter : public ElementImporter
+class LIBARDOUR_API LocationImporter : public ElementImporter
 {
   public:
 	LocationImporter (XMLTree const & source, Session & session, LocationImportHandler & handler, XMLNode const & node);

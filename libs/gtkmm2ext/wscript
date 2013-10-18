@@ -77,7 +77,7 @@ def options(opt):
 def configure(conf):
     conf.load('compiler_cxx')
     autowaf.build_version_files(path_prefix+'gtkmm2ext/version.h', path_prefix+'version.cc',
-                    'libgtkmm2ext', MAJOR, MINOR, MICRO)
+                    'libgtkmm2ext', MAJOR, MINOR, MICRO, 'LIBGTKMM2EXT_API', 'gtkmm2ext/visibility.h')
     autowaf.configure(conf)
     autowaf.check_pkg(conf, 'gtkmm-2.4', uselib_store='GTKMM', atleast_version='2.8')
     autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK', atleast_version='2.12.1')
@@ -86,9 +86,16 @@ def configure(conf):
 def build(bld):
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=gtkmm2ext_sources)
+        # defines for this library
+        obj.defines      = [ 'LIBGTKMM2EXT_DLL=1', 'LIBGTKMM2EXT_DLL_EXPORTS=1' ]
+        # internal shared libs that we use
+        obj.defines     += [ 'LIBPBD_DLL=1' ]
+        obj.cxxflags     = [ '-fvisibility=hidden' ]
+        obj.cflags     = [ '-fvisibility=hidden' ]
     else:
         obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=gtkmm2ext_sources)
         obj.cxxflags     = [ '-fPIC' ]
+        obj.defines      = [ ]
 
     obj.export_includes = ['.']
     obj.includes     = ['.']
@@ -98,7 +105,7 @@ def build(bld):
     obj.use          = [ 'libpbd' ]
     obj.vnum         = GTKMM2EXT_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-    obj.defines     = [
+    obj.defines     += [
                     'PACKAGE="' + I18N_PACKAGE + '"',
                     'LOCALEDIR="' + os.path.join(
                             os.path.normpath(bld.env['DATADIR']), 'locale') + '"']

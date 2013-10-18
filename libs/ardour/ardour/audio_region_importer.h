@@ -39,7 +39,7 @@ class Region;
 class Session;
 class Source;
 
-class AudioRegionImportHandler : public ElementImportHandler
+class LIBARDOUR_API AudioRegionImportHandler : public ElementImportHandler
 {
   public:
 	// Inerface implementation
@@ -69,7 +69,7 @@ class AudioRegionImportHandler : public ElementImportHandler
 	IdMap id_map;
 };
 
-class AudioRegionImporter : public ElementImporter
+class LIBARDOUR_API AudioRegionImporter : public ElementImporter
 {
   public:
 	AudioRegionImporter (XMLTree const & source, Session & session, AudioRegionImportHandler & handler, XMLNode const & node);

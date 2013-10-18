@@ -22,12 +22,13 @@
 
 #include <samplerate.h>
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/importable_source.h"
 
 namespace ARDOUR {
 
-class ResampledImportableSource : public ImportableSource
+class LIBARDOUR_API ResampledImportableSource : public ImportableSource
 {
   public:
 	ResampledImportableSource (boost::shared_ptr<ImportableSource>, framecnt_t rate, SrcQuality);

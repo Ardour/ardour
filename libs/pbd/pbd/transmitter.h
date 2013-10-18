@@ -25,7 +25,9 @@
 
 #include <sigc++/sigc++.h>
 
-class Transmitter : public std::stringstream
+#include "pbd/libpbd_visibility.h"
+
+class LIBPBD_API Transmitter : public std::stringstream
 
 {
   public:
@@ -100,6 +102,6 @@ endmsg (std::ostream &ostr)
 }
 
 
-extern "C" { void pbd_c_error (const char *); }
+extern "C" { LIBPBD_API void pbd_c_error (const char *); }
 
 #endif // __libmisc_transmitter_h__

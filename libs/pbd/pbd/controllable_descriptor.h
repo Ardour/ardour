@@ -23,9 +23,11 @@
 #include <string>
 #include <stdint.h>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
-class ControllableDescriptor {
+class LIBPBD_API ControllableDescriptor {
 public:
     enum TopLevelType {
 	    RemoteControlID,

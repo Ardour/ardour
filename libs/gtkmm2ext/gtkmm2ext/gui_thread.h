@@ -25,6 +25,8 @@
 #include <boost/bind.hpp>
 #include <boost/bind/protect.hpp>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace sigc {
 	struct trackable;
 }
@@ -34,7 +36,7 @@ namespace sigc {
 #define gui_context() Gtkmm2ext::UI::instance() /* a UICallback-derived object that specifies the event loop for GUI signal handling */
 #define ui_bind(f, ...) boost::protect (boost::bind (f, __VA_ARGS__))
 
-extern PBD::EventLoop::InvalidationRecord* __invalidator (sigc::trackable& trackable, const char*, int);
+LIBGTKMM2EXT_API extern PBD::EventLoop::InvalidationRecord* __invalidator (sigc::trackable& trackable, const char*, int);
 #define invalidator(x) __invalidator ((x), __FILE__, __LINE__)
 
 #endif /* __ardour_gtk_gui_thread_h__ */

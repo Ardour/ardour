@@ -26,11 +26,12 @@
 #include <stdint.h>
 
 #include "ardour/interthread_info.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
 
-class ImportStatus : public InterThreadInfo {
+class LIBARDOUR_API ImportStatus : public InterThreadInfo {
 public:
 	std::string doing_what;
 

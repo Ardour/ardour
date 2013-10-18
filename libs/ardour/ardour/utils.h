@@ -32,18 +32,19 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif /* __APPLE__ */
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/ardour.h"
 #include "ardour/data_type.h"
 #include "ardour/dB.h"
 
 class XMLNode;
 
-std::string legalize_for_path (const std::string& str);
-std::string legalize_for_universal_path (const std::string& str);
-std::string legalize_for_uri (const std::string& str);
-std::string legalize_for_path_2X (const std::string& str);
-XMLNode* find_named_node (const XMLNode& node, std::string name);
-std::string bool_as_string (bool);
+LIBARDOUR_API std::string legalize_for_path (const std::string& str);
+LIBARDOUR_API std::string legalize_for_universal_path (const std::string& str);
+LIBARDOUR_API std::string legalize_for_uri (const std::string& str);
+LIBARDOUR_API std::string legalize_for_path_2X (const std::string& str);
+LIBARDOUR_API XMLNode* find_named_node (const XMLNode& node, std::string name);
+LIBARDOUR_API std::string bool_as_string (bool);
 
 static inline float f_max(float x, float a) {
 	x -= a;
@@ -54,22 +55,22 @@ static inline float f_max(float x, float a) {
 	return (x);
 }
 
-std::string bump_name_once(const std::string& s, char delimiter);
+LIBARDOUR_API std::string bump_name_once(const std::string& s, char delimiter);
 
-int cmp_nocase (const std::string& s, const std::string& s2);
+LIBARDOUR_API int cmp_nocase (const std::string& s, const std::string& s2);
 
-int touch_file(std::string path);
+LIBARDOUR_API int touch_file(std::string path);
 
-std::string region_name_from_path (std::string path, bool strip_channels, bool add_channel_suffix = false, uint32_t total = 0, uint32_t this_one = 0);
-bool path_is_paired (std::string path, std::string& pair_base);
+LIBARDOUR_API std::string region_name_from_path (std::string path, bool strip_channels, bool add_channel_suffix = false, uint32_t total = 0, uint32_t this_one = 0);
+LIBARDOUR_API bool path_is_paired (std::string path, std::string& pair_base);
 
-void compute_equal_power_fades (ARDOUR::framecnt_t nframes, float* in, float* out);
+LIBARDOUR_API void compute_equal_power_fades (ARDOUR::framecnt_t nframes, float* in, float* out);
 
-const char* sync_source_to_string (ARDOUR::SyncSource src, bool sh = false);
-ARDOUR::SyncSource string_to_sync_source (std::string str);
+LIBARDOUR_API const char* sync_source_to_string (ARDOUR::SyncSource src, bool sh = false);
+LIBARDOUR_API ARDOUR::SyncSource string_to_sync_source (std::string str);
 
-const char* edit_mode_to_string (ARDOUR::EditMode);
-ARDOUR::EditMode string_to_edit_mode (std::string);
+LIBARDOUR_API const char* edit_mode_to_string (ARDOUR::EditMode);
+LIBARDOUR_API ARDOUR::EditMode string_to_edit_mode (std::string);
 
 #undef  OLD_GAIN_MATH
 #define OLD_GAIN_MATH
@@ -141,8 +142,8 @@ slider_position_to_gain (double pos)
 }
 #undef OLD_GAIN_MATH
 
-double gain_to_slider_position_with_max (double g, double max_gain = 2.0);
-double slider_position_to_gain_with_max (double g, double max_gain = 2.0);
+LIBARDOUR_API double gain_to_slider_position_with_max (double g, double max_gain = 2.0);
+LIBARDOUR_API double slider_position_to_gain_with_max (double g, double max_gain = 2.0);
 
 /* I don't really like hard-coding these falloff rates here
  * Probably should use a map of some kind that could be configured
@@ -159,17 +160,17 @@ double slider_position_to_gain_with_max (double g, double max_gain = 2.0);
 #define METER_FALLOFF_FASTER    46.0f
 #define METER_FALLOFF_FASTEST   70.0f
 
-float meter_falloff_to_float (ARDOUR::MeterFalloff);
-ARDOUR::MeterFalloff meter_falloff_from_float (float);
-float meter_falloff_to_db_per_sec (float);
+LIBARDOUR_API float meter_falloff_to_float (ARDOUR::MeterFalloff);
+LIBARDOUR_API ARDOUR::MeterFalloff meter_falloff_from_float (float);
+LIBARDOUR_API float meter_falloff_to_db_per_sec (float);
 
-const char* native_header_format_extension (ARDOUR::HeaderFormat, const ARDOUR::DataType& type);
-bool matching_unsuffixed_filename_exists_in (const std::string& dir, const std::string& name);
+LIBARDOUR_API const char* native_header_format_extension (ARDOUR::HeaderFormat, const ARDOUR::DataType& type);
+LIBARDOUR_API bool matching_unsuffixed_filename_exists_in (const std::string& dir, const std::string& name);
 
-uint32_t how_many_dsp_threads ();
+LIBARDOUR_API uint32_t how_many_dsp_threads ();
 
 #if __APPLE__
-std::string CFStringRefToStdString(CFStringRef stringRef);
+LIBARDOUR_API std::string CFStringRefToStdString(CFStringRef stringRef);
 #endif // __APPLE__
 
 #endif /* __ardour_utils_h__ */

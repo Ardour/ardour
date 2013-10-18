@@ -20,10 +20,11 @@
 #ifndef __pbd_fpu_h__
 #define __pbd_fpu_h__
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
-
-class FPU {
+class LIBPBD_API FPU {
   private:
 	enum Flags {
 		HasFlushToZero = 0x1,

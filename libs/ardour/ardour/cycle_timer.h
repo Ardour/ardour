@@ -24,12 +24,13 @@
 #include <iostream>
 #include <cstdlib>
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/cycles.h"
 #include "ardour/debug.h"
 
 float get_mhz ();
 
-class CycleTimer {
+class LIBARDOUR_API CycleTimer {
   private:
 	static float cycles_per_usec;
 #ifndef NDEBUG
@@ -61,7 +62,7 @@ class CycleTimer {
 	}
 };
 
-class StoringTimer
+class LIBARDOUR_API StoringTimer
 {
 public:
 	StoringTimer (int);

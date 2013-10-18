@@ -24,9 +24,11 @@
 
 #include <gtkmm/togglebutton.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
-class StateButton 
+class LIBGTKMM2EXT_API StateButton 
 {
    public:
 	StateButton();
@@ -53,7 +55,7 @@ class StateButton
 };
 
 
-class StatefulToggleButton : public StateButton, public Gtk::ToggleButton
+class LIBGTKMM2EXT_API StatefulToggleButton : public StateButton, public Gtk::ToggleButton
 {
    public:
 	StatefulToggleButton();
@@ -71,7 +73,7 @@ class StatefulToggleButton : public StateButton, public Gtk::ToggleButton
 	std::string get_widget_name() const { return get_name(); }
 };
 
-class StatefulButton : public StateButton, public Gtk::Button
+class LIBGTKMM2EXT_API StatefulButton : public StateButton, public Gtk::Button
 {
    public:
 	StatefulButton();

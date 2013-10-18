@@ -18,12 +18,14 @@
 */
 
 #include <gtkmm/box.h>
+
+#include "gtkmm2ext/visibility.h"
 #include "gtkmm2ext/widget_state.h"
 
 namespace Gtkmm2ext {
 
 /** Parent class for children of a DnDVBox */	
-class DnDVBoxChild
+class LIBGTKMM2EXT_API DnDVBoxChild
 {
 public:
 	virtual ~DnDVBoxChild () {}
@@ -43,7 +45,7 @@ public:
 
 /** A VBox whose contents can be dragged and dropped */
 template <class T>
-class DnDVBox : public Gtk::EventBox
+class LIBGTKMM2EXT_API DnDVBox : public Gtk::EventBox
 {
 public:
 	DnDVBox () : _active (0), _drag_icon (0), _expecting_unwanted_button_event (false), _placeholder (0)

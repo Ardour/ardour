@@ -22,14 +22,16 @@
 #include <cfloat>
 #include <cmath>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
-void spherical_to_cartesian (double azi, double ele, double len, double& x, double& y, double& z);
-void cartesian_to_spherical (double x, double y, double z, double& azi, double& ele, double& len);
+LIBPBD_API void spherical_to_cartesian (double azi, double ele, double len, double& x, double& y, double& z);
+LIBPBD_API void cartesian_to_spherical (double x, double y, double z, double& azi, double& ele, double& len);
         
 struct AngularVector;
 
-struct CartesianVector {
+struct LIBPBD_API CartesianVector {
 	double x;
 	double y;
 	double z;
@@ -51,10 +53,10 @@ struct CartesianVector {
 		return other;
 	}
 
-	void angular (AngularVector&) const;
+	inline void angular (AngularVector& a) const;
 };
 
-struct AngularVector {
+struct LIBPBD_API AngularVector {
 	double azi;
 	double ele;
 	double length;
@@ -95,7 +97,7 @@ struct AngularVector {
 	}
 };
 
-inline void CartesianVector::angular (AngularVector& a) const {
+LIBPBD_API inline void CartesianVector::angular (AngularVector& a) const {
 	cartesian_to_spherical (x, y, z, a.azi, a.ele, a.length);
 }
 

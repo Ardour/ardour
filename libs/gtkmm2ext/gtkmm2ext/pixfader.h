@@ -27,9 +27,11 @@
 #include <gtkmm/adjustment.h>
 #include <gdkmm.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
-class PixFader : public Gtk::DrawingArea
+class LIBGTKMM2EXT_API PixFader : public Gtk::DrawingArea
 {
   public:
         PixFader (Gtk::Adjustment& adjustment, int orientation, int span, int girth);

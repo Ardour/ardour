@@ -30,6 +30,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 	class Pix;
 }
@@ -40,7 +42,7 @@ namespace PBD {
 
 namespace Gtkmm2ext {
 
-class SliderController : public Gtkmm2ext::PixFader
+class LIBGTKMM2EXT_API SliderController : public Gtkmm2ext::PixFader
 {
   public:
         SliderController (Gtk::Adjustment* adj, int orientation, int, int);
@@ -64,13 +66,13 @@ class SliderController : public Gtkmm2ext::PixFader
 	void init ();
 };
 
-class VSliderController : public SliderController
+class LIBGTKMM2EXT_API VSliderController : public SliderController
 {
   public:
         VSliderController (Gtk::Adjustment *adj, int, int, bool with_numeric = true);
 };
 
-class HSliderController : public SliderController
+class LIBGTKMM2EXT_API HSliderController : public SliderController
 {
   public:
 	HSliderController (Gtk::Adjustment *adj, int, int, bool with_numeric = true);

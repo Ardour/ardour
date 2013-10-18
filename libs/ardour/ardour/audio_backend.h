@@ -28,6 +28,7 @@
 
 #include <boost/function.hpp>
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/audioengine.h"
 #include "ardour/port_engine.h"
@@ -42,7 +43,7 @@
 
 namespace ARDOUR {
 
-class AudioBackend : public PortEngine {
+class LIBARDOUR_API AudioBackend : public PortEngine {
   public:
 
     AudioBackend (AudioEngine& e) : PortEngine (e), engine (e) {}
@@ -461,7 +462,7 @@ class AudioBackend : public PortEngine {
     AudioEngine&          engine;
 };
 
-struct AudioBackendInfo {
+struct LIBARDOUR_API AudioBackendInfo {
     const char* name;
 
     /** Using arg1 and arg2, initialize this audiobackend.

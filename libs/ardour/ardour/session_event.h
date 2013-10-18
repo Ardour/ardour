@@ -28,7 +28,7 @@
 #include "pbd/ringbuffer.h"
 #include "pbd/event_loop.h"
 
-#include "ardour/visibility.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {

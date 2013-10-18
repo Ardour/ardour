@@ -21,10 +21,12 @@
 #ifndef __ardour_comparable_shared_ptr_h__
 #define __ardour_comparable_shared_ptr_h__
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
 template<typename T>
-class ComparableSharedPtr : public boost::shared_ptr<T>
+class LIBARDOUR_API ComparableSharedPtr : public boost::shared_ptr<T>
                           , public boost::less_than_comparable<ComparableSharedPtr<T> >
 {
   public:

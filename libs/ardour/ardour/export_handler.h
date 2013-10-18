@@ -29,6 +29,7 @@
 
 #include "ardour/export_pointers.h"
 #include "ardour/session.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 namespace AudioGrapher {
@@ -45,7 +46,7 @@ class ExportFilename;
 class ExportGraphBuilder;
 class Location;
 
-class ExportElementFactory
+class LIBARDOUR_API ExportElementFactory
 {
   public:
 
@@ -67,7 +68,7 @@ class ExportElementFactory
 	Session & session;
 };
 
-class ExportHandler : public ExportElementFactory
+class LIBARDOUR_API ExportHandler : public ExportElementFactory
 {
   public:
 	struct FileSpec {

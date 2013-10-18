@@ -27,9 +27,11 @@
 #include <gtkmm/drawingarea.h>
 #include <gdkmm/pixbuf.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
-class FastMeter : public Gtk::DrawingArea {
+class LIBGTKMM2EXT_API FastMeter : public Gtk::DrawingArea {
   public:
 	enum Orientation {
 		Horizontal,

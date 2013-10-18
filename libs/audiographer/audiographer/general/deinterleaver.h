@@ -1,6 +1,7 @@
 #ifndef AUDIOGRAPHER_DEINTERLEAVER_H
 #define AUDIOGRAPHER_DEINTERLEAVER_H
 
+#include "audiographer/visibility.h"
 #include "audiographer/types.h"
 #include "audiographer/source.h"
 #include "audiographer/sink.h"
@@ -14,7 +15,7 @@ namespace AudioGrapher
 
 /// Converts on stream of interleaved data to many streams of uninterleaved data.
 template<typename T = DefaultSampleType>
-class DeInterleaver
+class LIBAUDIOGRAPHER_API DeInterleaver
   : public Sink<T>
   , public Throwing<>
 {

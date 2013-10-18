@@ -31,6 +31,7 @@
 
 #include <glibmm/main.h>
 
+#define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"
 
 #include "ardour/types.h"

@@ -43,6 +43,7 @@
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/activatable.h"
 #include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/gui_thread.h"
 
 #include "i18n.h"
 

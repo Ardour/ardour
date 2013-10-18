@@ -28,7 +28,9 @@
 #include <regex.h>
 #endif
 
-class PathScanner
+#include "pbd/libpbd_visibility.h"
+
+class LIBPBD_API PathScanner
 
 {
   public:

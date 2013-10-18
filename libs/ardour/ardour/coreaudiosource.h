@@ -28,7 +28,7 @@ using namespace std;
 
 namespace ARDOUR {
 
-class CoreAudioSource : public AudioFileSource {
+class LIBARDOUR_API CoreAudioSource : public AudioFileSource {
   public:
 	CoreAudioSource (ARDOUR::Session&, const XMLNode&);
 	CoreAudioSource (ARDOUR::Session&, const string& path, int chn, Flag);

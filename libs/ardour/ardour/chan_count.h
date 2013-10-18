@@ -38,7 +38,7 @@ namespace ARDOUR {
  * Operators are defined so this may safely be used as if it were a simple
  * (single-typed) integer count of channels.
  */
-class ChanCount {
+class LIBARDOUR_API ChanCount {
 public:
 	ChanCount(const XMLNode& node);
 	ChanCount() { reset(); }

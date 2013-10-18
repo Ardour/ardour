@@ -28,7 +28,7 @@
 
 namespace ARDOUR {
 
-class MissingSource : public std::exception
+class LIBARDOUR_API MissingSource : public std::exception
 {
   public:
 	MissingSource (const std::string& p, DataType t) throw ()
@@ -42,7 +42,7 @@ class MissingSource : public std::exception
 };
 
 /** A source associated with a file on disk somewhere */
-class FileSource : virtual public Source {
+class LIBARDOUR_API FileSource : virtual public Source {
 public:
 	virtual ~FileSource () {}
 

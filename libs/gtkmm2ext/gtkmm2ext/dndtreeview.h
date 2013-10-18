@@ -26,17 +26,19 @@
 #include <gtkmm/treeselection.h>
 #include <gtkmm/selectiondata.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
 template<class DataType>
-struct SerializedObjectPointers {
+struct LIBGTKMM2EXT_API SerializedObjectPointers {
     uint32_t size;
     uint32_t cnt;
     char     type[32];
     DataType data[0];
 };
 
-class DnDTreeViewBase : public Gtk::TreeView 
+class LIBGTKMM2EXT_API DnDTreeViewBase : public Gtk::TreeView 
 {
   private:
   public:
@@ -87,7 +89,7 @@ class DnDTreeViewBase : public Gtk::TreeView
 };
 
 template<class DataType>
-class DnDTreeView : public DnDTreeViewBase
+class LIBGTKMM2EXT_API DnDTreeView : public DnDTreeViewBase
 {
   public:
 	DnDTreeView() {} 

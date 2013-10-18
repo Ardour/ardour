@@ -29,24 +29,25 @@
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/session_object.h"
 
 namespace ARDOUR {
 
 namespace Properties {
-	extern PBD::PropertyDescriptor<bool> relative;
-	extern PBD::PropertyDescriptor<bool> active;
-	extern PBD::PropertyDescriptor<bool> gain;
-	extern PBD::PropertyDescriptor<bool> mute;
-	extern PBD::PropertyDescriptor<bool> solo;
-	extern PBD::PropertyDescriptor<bool> recenable;
-	extern PBD::PropertyDescriptor<bool> select;
-	extern PBD::PropertyDescriptor<bool> route_active;
-	extern PBD::PropertyDescriptor<bool> color;
-	extern PBD::PropertyDescriptor<bool> monitoring;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> relative;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> active;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> gain;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> mute;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> solo;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> recenable;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> select;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> route_active;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> color;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> monitoring;
 	/* we use this, but its declared in region.cc */
-	extern PBD::PropertyDescriptor<bool> hidden;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> hidden;
 };
 
 class Route;
@@ -54,7 +55,7 @@ class Track;
 class AudioTrack;
 class Session;
 
-class RouteGroup : public SessionObject
+class LIBARDOUR_API RouteGroup : public SessionObject
 {
   public:
 	static void make_property_quarks();

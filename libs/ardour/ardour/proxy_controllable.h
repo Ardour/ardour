@@ -30,7 +30,7 @@ namespace ARDOUR {
     so that it can be used like a regular Controllable, bound to MIDI, OSC etc.
 */
 
-class ProxyControllable : public PBD::Controllable {
+class LIBARDOUR_API ProxyControllable : public PBD::Controllable {
 public:
 	ProxyControllable (const std::string& name, PBD::Controllable::Flag flags,
 			   boost::function1<bool,double> setter,

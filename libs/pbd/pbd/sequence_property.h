@@ -27,6 +27,7 @@
 
 #include <boost/function.hpp>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/convert.h"
 #include "pbd/id.h"
 #include "pbd/property_basics.h"
@@ -43,7 +44,7 @@ namespace PBD {
  *  any change.
  */
 template<typename Container>
-class SequenceProperty : public PropertyBase
+class LIBPBD_API SequenceProperty : public PropertyBase
 {
   public:
         typedef std::set<typename Container::value_type> ChangeContainer;

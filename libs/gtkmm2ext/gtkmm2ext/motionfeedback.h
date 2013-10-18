@@ -27,6 +27,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/eventbox.h>
 
+#include "gtkmm2ext/visibility.h"
 #include "gtkmm2ext/binding_proxy.h"
 #include "gtkmm2ext/prolooks-helpers.h"
 
@@ -37,7 +38,7 @@ namespace Gtk {
 
 namespace Gtkmm2ext {
 
-class MotionFeedback : public Gtk::VBox
+class LIBGTKMM2EXT_API MotionFeedback : public Gtk::VBox
 {
  public:
 	enum Type {

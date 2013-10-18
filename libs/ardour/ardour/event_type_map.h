@@ -25,12 +25,14 @@
 #include "evoral/TypeMap.hpp"
 #include "evoral/ControlList.hpp"
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
 /** This is the interface Ardour provides to Evoral about what
  * parameter and event types/ranges/names etc. to use.
  */
-class EventTypeMap : public Evoral::TypeMap {
+class LIBARDOUR_API EventTypeMap : public Evoral::TypeMap {
 public:
 	bool     type_is_midi(uint32_t type) const;
 	uint8_t  parameter_midi_type(const Evoral::Parameter& param) const;

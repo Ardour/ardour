@@ -30,6 +30,7 @@
 #include <samplerate.h>
 
 #include "pbd/signals.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 #include "audiographer/general/sample_format_converter.h"
@@ -37,7 +38,7 @@
 namespace ARDOUR
 {
 
-class ExportFormatBase {
+class LIBARDOUR_API ExportFormatBase {
   public:
 
 	enum Type {

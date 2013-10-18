@@ -31,7 +31,7 @@ class AudioPlaylist;
 class RouteGroup;
 class AudioFileSource;
 
-class AudioTrack : public Track
+class LIBARDOUR_API AudioTrack : public Track
 {
   public:
 	AudioTrack (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);

@@ -25,6 +25,7 @@
 #include <string>
 #include <map>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/xml++.h"
 #include "pbd/shiva.h"
 #include "pbd/command.h"
@@ -36,7 +37,7 @@
 namespace PBD {
 
 template <class obj_type, class arg_type>
-class FunctorCommand : public Command
+class LIBPBD_API FunctorCommand : public Command
 {
 	private:
 	typedef void (obj_type::*functor_type)(arg_type);

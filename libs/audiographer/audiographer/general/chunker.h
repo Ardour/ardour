@@ -1,6 +1,7 @@
 #ifndef AUDIOGRAPHER_CHUNKER_H
 #define AUDIOGRAPHER_CHUNKER_H
 
+#include "audiographer/visibility.h"
 #include "audiographer/flag_debuggable.h"
 #include "audiographer/sink.h"
 #include "audiographer/type_utils.h"
@@ -11,7 +12,7 @@ namespace AudioGrapher
 
 /// A class that chunks process cycles into equal sized frames
 template<typename T = DefaultSampleType>
-class Chunker
+class LIBAUDIOGRAPHER_API Chunker
   : public ListedSource<T>
   , public Sink<T>
   , public FlagDebuggable<>

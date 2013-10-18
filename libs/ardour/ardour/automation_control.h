@@ -26,6 +26,8 @@
 
 #include "pbd/controllable.h"
 #include "evoral/Control.hpp"
+
+#include "ardour/libardour_visibility.h"
 #include "ardour/automation_list.h"
 
 namespace ARDOUR {
@@ -36,7 +38,7 @@ class Automatable;
 
 /** A PBD::Controllable with associated automation data (AutomationList)
  */
-class AutomationControl : public PBD::Controllable, public Evoral::Control, public boost::enable_shared_from_this<AutomationControl>
+class LIBARDOUR_API AutomationControl : public PBD::Controllable, public Evoral::Control, public boost::enable_shared_from_this<AutomationControl>
 {
 public:
 	AutomationControl(ARDOUR::Session&,

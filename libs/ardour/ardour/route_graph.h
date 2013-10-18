@@ -37,7 +37,7 @@ typedef boost::shared_ptr<Route> GraphVertex;
  *
  *  This may be a premature optimisation...
  */
-class GraphEdges
+class LIBARDOUR_API GraphEdges
 {
 public:
 	typedef std::map<GraphVertex, std::set<GraphVertex> > EdgeMap;

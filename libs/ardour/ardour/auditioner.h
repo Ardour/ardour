@@ -33,7 +33,7 @@ class Session;
 class AudioRegion;
 class AudioPlaylist;
 
-class Auditioner : public AudioTrack
+class LIBARDOUR_API Auditioner : public AudioTrack
 {
   public:
 	Auditioner (Session&);

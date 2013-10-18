@@ -26,6 +26,8 @@
 #include <utility>
 #include <boost/shared_ptr.hpp>
 #include <glibmm/threads.h>
+
+#include "evoral/visibility.h"
 #include "evoral/types.hpp"
 #include "evoral/Note.hpp"
 #include "evoral/Parameter.hpp"
@@ -42,7 +44,7 @@ template<typename Time> class Event;
 
 /** An iterator over (the x axis of) a 2-d double coordinate space.
  */
-class ControlIterator {
+class LIBEVORAL_API ControlIterator {
 public:
 	ControlIterator(boost::shared_ptr<const ControlList> al, double ax, double ay)
 		: list(al)
@@ -60,7 +62,7 @@ public:
  * notes (instead of just unassociated note on/off events) and controller data.
  * Controller data is represented as a list of time-stamped float values. */
 template<typename Time>
-class Sequence : virtual public ControlSet {
+class LIBEVORAL_API Sequence : virtual public ControlSet {
 public:
 	Sequence(const TypeMap& type_map);
 	Sequence(const Sequence<Time>& other);
@@ -360,7 +362,7 @@ private:
 
 } // namespace Evoral
 
-template<typename Time> std::ostream& operator<<(std::ostream& o, const Evoral::Sequence<Time>& s) { s.dump (o); return o; }
+template<typename Time> LIBEVORAL_API std::ostream& operator<<(std::ostream& o, const Evoral::Sequence<Time>& s) { s.dump (o); return o; }
 
 #endif // EVORAL_SEQUENCE_HPP
 

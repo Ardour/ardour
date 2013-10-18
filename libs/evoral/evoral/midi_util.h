@@ -25,6 +25,8 @@
 #include <string>
 #include <sys/types.h>
 #include <assert.h>
+
+#include "evoral/visibility.h"
 #include "evoral/midi_events.h"
 
 namespace Evoral {
@@ -119,7 +121,7 @@ midi_event_is_valid(const uint8_t* buffer, size_t len)
 	return true;
 }
 
-std::string midi_note_name (uint8_t noteval);
+LIBEVORAL_API std::string midi_note_name (uint8_t noteval);
 
 } // namespace Evoral
 

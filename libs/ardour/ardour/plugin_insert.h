@@ -26,6 +26,7 @@
 #include <boost/weak_ptr.hpp>
 
 #include "ardour/ardour.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/processor.h"
 #include "ardour/automation_control.h"
@@ -40,7 +41,7 @@ class Plugin;
 
 /** Plugin inserts: send data through a plugin
  */
-class PluginInsert : public Processor
+class LIBARDOUR_API PluginInsert : public Processor
 {
   public:
 	PluginInsert (Session&, boost::shared_ptr<Plugin> = boost::shared_ptr<Plugin>());

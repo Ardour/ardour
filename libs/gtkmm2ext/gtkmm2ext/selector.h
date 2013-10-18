@@ -28,9 +28,11 @@
 
 #include <gtkmm.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
-class TreeView_Selector : public Gtk::TreeView
+class LIBGTKMM2EXT_API TreeView_Selector : public Gtk::TreeView
 {
 public:
 	TreeView_Selector() {}
@@ -42,7 +44,7 @@ protected:
 
 typedef void (SelectorRefillFunction)(Glib::RefPtr<Gtk::ListStore>, void *);
 
-class Selector : public Gtk::VBox
+class LIBGTKMM2EXT_API Selector : public Gtk::VBox
 {
 	friend class Gtkmm2ext::TreeView_Selector;
 

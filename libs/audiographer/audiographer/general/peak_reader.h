@@ -1,6 +1,7 @@
 #ifndef AUDIOGRAPHER_PEAK_READER_H
 #define AUDIOGRAPHER_PEAK_READER_H
 
+#include "audiographer/visibility.h"
 #include "audiographer/sink.h"
 #include "audiographer/routines.h"
 #include "audiographer/utils/listed_source.h"
@@ -9,7 +10,7 @@ namespace AudioGrapher
 {
 
 /// A class that reads the maximum value from a stream
-class PeakReader : public ListedSource<float>, public Sink<float>
+class LIBAUDIOGRAPHER_API PeakReader : public ListedSource<float>, public Sink<float>
 {
   public:
 	/// Constructor \n RT safe

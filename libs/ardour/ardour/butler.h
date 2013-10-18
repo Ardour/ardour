@@ -30,6 +30,7 @@
 
 #include "pbd/ringbuffer.h"
 #include "pbd/pool.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/session_handle.h"
 
@@ -44,7 +45,7 @@ namespace ARDOUR {
  *  are empty they are deleted.
  */
 
-class Butler : public SessionHandleRef
+class LIBARDOUR_API Butler : public SessionHandleRef
 {
   public:
 	Butler (Session& session);

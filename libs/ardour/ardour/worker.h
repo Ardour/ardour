@@ -27,12 +27,14 @@
 #include "pbd/ringbuffer.h"
 #include "pbd/semaphore.h"
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
 /**
    An object that needs to schedule non-RT work in the audio thread.
 */
-class Workee {
+class LIBARDOUR_API Workee {
 public:
 	virtual ~Workee() {}
 
@@ -50,7 +52,7 @@ public:
 /**
    A worker thread for non-realtime tasks scheduled in the audio thread.
 */
-class Worker
+class LIBARDOUR_API Worker
 {
 public:
 	Worker(Workee* workee, uint32_t ring_size);

@@ -30,6 +30,7 @@
 
 #include <stdint.h>
 
+#include "midi++/libmidi_visibility.h"
 #include "midi++/event.h"
 #include "pbd/xml++.h"
 
@@ -39,7 +40,7 @@ namespace MIDI
 namespace Name
 {
 
-struct PatchPrimaryKey
+struct LIBMIDIPP_API PatchPrimaryKey
 {
 public:
 	int bank_number;
@@ -81,7 +82,7 @@ public:
 
 class PatchBank;
 	
-class Patch 
+class LIBMIDIPP_API Patch 
 {
 public:
 
@@ -112,7 +113,7 @@ private:
 
 typedef std::list<boost::shared_ptr<Patch> > PatchNameList;
 
-class PatchBank 
+class LIBMIDIPP_API PatchBank 
 {
 public:
 	PatchBank (uint16_t n = 0, std::string a_name = std::string()) : _name(a_name), _number (n) {};
@@ -138,7 +139,7 @@ private:
 	std::string       _patch_list_name;
 };
 
-class ChannelNameSet
+class LIBMIDIPP_API ChannelNameSet
 {
 public:
 	typedef std::set<uint8_t>                                    AvailableForChannels;
@@ -221,7 +222,7 @@ private:
 
 std::ostream& operator<< (std::ostream&, const ChannelNameSet&);
 
-class Note
+class LIBMIDIPP_API Note
 {
 public:
 	Note() {}
@@ -241,7 +242,7 @@ private:
 	std::string _name;
 };
 
-class NoteNameList 
+class LIBMIDIPP_API NoteNameList 
 {
 public:
 	typedef std::vector< boost::shared_ptr<Note> > Notes;
@@ -262,7 +263,7 @@ private:
 	Notes       _notes;
 };
 
-class Control
+class LIBMIDIPP_API Control
 {
 public:
 	Control() {}
@@ -291,7 +292,7 @@ private:
 	std::string _name;
 };
 
-class ControlNameList 
+class LIBMIDIPP_API ControlNameList 
 {
 public:
 	typedef std::map<uint16_t, boost::shared_ptr<Control> > Controls;
@@ -315,7 +316,7 @@ private:
 	Controls    _controls;
 };
 
-class CustomDeviceMode
+class LIBMIDIPP_API CustomDeviceMode
 {
 public:
 	CustomDeviceMode() {};
@@ -341,7 +342,7 @@ private:
 	std::string _channel_name_set_assignments[16];
 };
 
-class MasterDeviceNames
+class LIBMIDIPP_API MasterDeviceNames
 {
 public:
 	typedef std::set<std::string>                                       Models;
@@ -395,7 +396,7 @@ private:
 	ControlNameLists      _control_name_lists;
 };
 
-class MIDINameDocument
+class LIBMIDIPP_API MIDINameDocument
 {
 public:
 	// Maps Model names to MasterDeviceNames
@@ -424,7 +425,7 @@ private:
 	MasterDeviceNames::Models     _all_models;
 };
 
-extern const char* general_midi_program_names[128]; /* 0 .. 127 */
+LIBMIDIPP_API extern const char* general_midi_program_names[128]; /* 0 .. 127 */
 
 }
 

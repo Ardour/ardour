@@ -31,7 +31,7 @@
 namespace ARDOUR {
 
 namespace Properties {
-	extern PBD::PropertyDescriptor<std::string> name;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<std::string> name;
 }
 
 class Session;
@@ -40,7 +40,7 @@ class Session;
     expected to be destroyed before the session calls drop_references().
  */
 
-class SessionObject : public SessionHandleRef, public PBD::StatefulDestructible
+class LIBARDOUR_API SessionObject : public SessionHandleRef, public PBD::StatefulDestructible
 {
   public:
 	static void make_property_quarks ();

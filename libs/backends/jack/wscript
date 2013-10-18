@@ -53,6 +53,8 @@ def build(bld):
     obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"', 
                    'ARDOURBACKEND_DLL_EXPORTS'
                    ]
+    if bld.is_defined ('INTERNAL_SHARED_LIBS'):
+        obj.defines += [ 'LIBARDOUR_DLL=1', 'LIBPBD_DLL=1', 'LIBEVORAL_DLL=1' ]
 
     #
     # device discovery code in the jack backend needs ALSA

@@ -26,6 +26,7 @@
 #include <fstream>
 #include <boost/utility.hpp>
 #include "vamp-sdk/Plugin.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
@@ -33,7 +34,7 @@ namespace ARDOUR {
 class Readable;
 class Session;
 
-class AudioAnalyser : public boost::noncopyable {
+class LIBARDOUR_API AudioAnalyser : public boost::noncopyable {
 
   public:
 	typedef Vamp::Plugin AnalysisPlugin;

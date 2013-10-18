@@ -6,6 +6,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "audiographer/visibility.h"
+
 namespace AudioGrapher
 {
 
@@ -13,7 +15,7 @@ namespace AudioGrapher
   * This is a pure virtual interface for all data sources in AudioGrapher
   */
 template<typename T>
-class Source
+class LIBAUDIOGRAPHER_API Source
 {
   public:
 	virtual ~Source () { }

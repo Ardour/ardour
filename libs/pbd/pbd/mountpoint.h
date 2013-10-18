@@ -22,6 +22,8 @@
 
 #include <string>
 
-std::string mountpoint (std::string path);
+#include "pbd/libpbd_visibility.h"
+
+LIBPBD_API std::string mountpoint (std::string path);
 
 #endif // __pbd_mountpoint_h__

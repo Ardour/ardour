@@ -26,12 +26,14 @@
 #include <gtkmm/treepath.h>
 #include <gtkmm/treeiter.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
-        void treeview_select_one (Glib::RefPtr<Gtk::TreeSelection> selection, Glib::RefPtr<Gtk::TreeModel> model, Gtk::TreeView& view,
-                                  Gtk::TreeIter iter, Gtk::TreePath path, Gtk::TreeViewColumn* col);
-        void treeview_select_previous (Gtk::TreeView& view, Glib::RefPtr<Gtk::TreeModel> model, Gtk::TreeViewColumn* col);
-        void treeview_select_next (Gtk::TreeView& view, Glib::RefPtr<Gtk::TreeModel> model, Gtk::TreeViewColumn* col);
+        LIBGTKMM2EXT_API void treeview_select_one (Glib::RefPtr<Gtk::TreeSelection> selection, Glib::RefPtr<Gtk::TreeModel> model, Gtk::TreeView& view,
+						   Gtk::TreeIter iter, Gtk::TreePath path, Gtk::TreeViewColumn* col);
+        LIBGTKMM2EXT_API void treeview_select_previous (Gtk::TreeView& view, Glib::RefPtr<Gtk::TreeModel> model, Gtk::TreeViewColumn* col);
+        LIBGTKMM2EXT_API void treeview_select_next (Gtk::TreeView& view, Glib::RefPtr<Gtk::TreeModel> model, Gtk::TreeViewColumn* col);
 }
 
 #endif /* __libgtkmm2ext_treeutils_h__ */

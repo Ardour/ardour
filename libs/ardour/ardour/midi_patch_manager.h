@@ -35,7 +35,7 @@ namespace MIDI
 namespace Name
 {
 
-class MidiPatchManager : public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
+class LIBARDOUR_API MidiPatchManager : public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
 {
 	/// Singleton
 private:

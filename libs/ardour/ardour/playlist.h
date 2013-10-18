@@ -55,10 +55,10 @@ namespace Properties {
 	/* fake the type, since regions are handled by SequenceProperty which doesn't
 	   care about such things.
 	*/
-	extern PBD::PropertyDescriptor<bool> regions;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> regions;
 }
 
-class RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_ptr<Region> > >
+class LIBARDOUR_API RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_ptr<Region> > >
 {
   public:
 	RegionListProperty (Playlist&);
@@ -78,7 +78,7 @@ class RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_
 	Playlist& _playlist;
 };
 
-class Playlist : public SessionObject , public boost::enable_shared_from_this<Playlist>
+class LIBARDOUR_API Playlist : public SessionObject , public boost::enable_shared_from_this<Playlist>
 {
 public:
 	static void make_property_quarks ();

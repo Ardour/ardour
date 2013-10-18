@@ -25,7 +25,7 @@
 
 namespace ARDOUR {
 
-class InternalSend : public Send
+class LIBARDOUR_API InternalSend : public Send
 {
   public:
 	InternalSend (Session&, boost::shared_ptr<Pannable>, boost::shared_ptr<MuteMaster>, boost::shared_ptr<Route> send_to, Delivery::Role role);

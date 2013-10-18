@@ -23,6 +23,8 @@
 #include <string>
 #include <vector>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
 /**
@@ -36,7 +38,7 @@ namespace PBD {
  * The Searchpath class does not test whether the paths exist
  * or are directories. It is basically just a container.
  */
-class Searchpath : public std::vector<std::string>
+class LIBPBD_API SearchPath : public std::vector<std::string>
 {
 public:
 	/**

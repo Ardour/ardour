@@ -43,7 +43,7 @@ const void* lv2plugin_get_port_value(const char* port_symbol,
 class AudioEngine;
 class Session;
 
-class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
+class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 {
   public:
 	LV2Plugin (ARDOUR::AudioEngine& engine,
@@ -272,7 +272,7 @@ class LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 };
 
 
-class LV2PluginInfo : public PluginInfo {
+class LIBARDOUR_API LV2PluginInfo : public PluginInfo {
 public:
 	LV2PluginInfo (const void* c_plugin);
 	~LV2PluginInfo ();

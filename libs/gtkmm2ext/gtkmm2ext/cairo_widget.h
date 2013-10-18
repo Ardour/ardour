@@ -21,12 +21,14 @@
 #define __gtk2_ardour_cairo_widget_h__
 
 #include <gtkmm/eventbox.h>
+
+#include "gtkmm2ext/visibility.h"
 #include "gtkmm2ext/widget_state.h"
 
 /** A parent class for widgets that are rendered using Cairo.
  */
 
-class CairoWidget : public Gtk::EventBox
+class LIBGTKMM2EXT_API CairoWidget : public Gtk::EventBox
 {
 public:
 	CairoWidget ();

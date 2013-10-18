@@ -1,6 +1,8 @@
 #ifndef AUDIOGRAPHER_LISTED_SOURCE_H
 #define AUDIOGRAPHER_LISTED_SOURCE_H
 
+#include "audiographer/visibility.h"
+#include "audiographer/types.h"
 #include "audiographer/types.h"
 #include "audiographer/source.h"
 
@@ -11,7 +13,7 @@ namespace AudioGrapher
 
 /// An generic \a Source that uses a \a std::list for managing outputs
 template<typename T = DefaultSampleType>
-class ListedSource : public Source<T>
+class LIBAUDIOGRAPHER_API ListedSource : public Source<T>
 {
   public:
 	void add_output (typename Source<T>::SinkPtr output) { outputs.push_back(output); }

@@ -25,6 +25,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 namespace ARDOUR
@@ -34,7 +35,7 @@ class ExportStatus;
 class ExportChannel;
 class ExportTempFile;
 
-class ExportTimespan
+class LIBARDOUR_API ExportTimespan
 {
   private:
 	typedef boost::shared_ptr<ExportStatus> ExportStatusPtr;

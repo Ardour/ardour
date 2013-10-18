@@ -33,13 +33,13 @@
 namespace ARDOUR
 {
 
-class ExportFormatIncompatible : public failed_constructor {
+class LIBARDOUR_API ExportFormatIncompatible : public failed_constructor {
   public:
 	virtual const char *what() const throw() { return "Export format constructor failed: Format incompatible with system"; }
 };
 
 /// Base class for formats
-class ExportFormat : public ExportFormatBase, public ExportFormatBase::SelectableCompatible {
+class LIBARDOUR_API ExportFormat : public ExportFormatBase, public ExportFormatBase::SelectableCompatible {
 
   public:
 	ExportFormat () {};
@@ -86,7 +86,7 @@ class ExportFormat : public ExportFormatBase, public ExportFormatBase::Selectabl
 };
 
 /// Class to be inherited by export formats that have a selectable sample format
-class HasSampleFormat : public PBD::ScopedConnectionList {
+class LIBARDOUR_API HasSampleFormat : public PBD::ScopedConnectionList {
   public:
 
 	class SampleFormatState : public ExportFormatBase::SelectableCompatible {
@@ -156,7 +156,7 @@ class HasSampleFormat : public PBD::ScopedConnectionList {
 	ExportFormatBase::SampleFormatSet & _sample_formats;
 };
 
-class ExportFormatLinear : public ExportFormat, public HasSampleFormat {
+class LIBARDOUR_API ExportFormatLinear : public ExportFormat, public HasSampleFormat {
   public:
 
 	ExportFormatLinear (std::string name, FormatId format_id);
@@ -174,7 +174,7 @@ class ExportFormatLinear : public ExportFormat, public HasSampleFormat {
 	SampleFormat _default_sample_format;
 };
 
-class ExportFormatOggVorbis : public ExportFormat {
+class LIBARDOUR_API ExportFormatOggVorbis : public ExportFormat {
   public:
 	ExportFormatOggVorbis ();
 	~ExportFormatOggVorbis () {};
@@ -185,7 +185,7 @@ class ExportFormatOggVorbis : public ExportFormat {
 	virtual bool supports_tagging () const { return true; }
 };
 
-class ExportFormatFLAC : public ExportFormat, public HasSampleFormat {
+class LIBARDOUR_API ExportFormatFLAC : public ExportFormat, public HasSampleFormat {
   public:
 	ExportFormatFLAC ();
 	~ExportFormatFLAC () {};
@@ -198,7 +198,7 @@ class ExportFormatFLAC : public ExportFormat, public HasSampleFormat {
 	virtual bool supports_tagging () const { return true; }
 };
 
-class ExportFormatBWF : public ExportFormat, public HasSampleFormat {
+class LIBARDOUR_API ExportFormatBWF : public ExportFormat, public HasSampleFormat {
   public:
 	ExportFormatBWF ();
 	~ExportFormatBWF () {};

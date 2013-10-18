@@ -34,11 +34,12 @@
 #include "midi++/parser.h"
 #include "midi++/port.h"
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/midi_port.h"
 
 namespace ARDOUR {
 
-	class AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
+class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 
   public:
         AsyncMIDIPort (std::string const &, PortFlags);

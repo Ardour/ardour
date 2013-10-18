@@ -21,10 +21,11 @@
 
 #include <string>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
-	std::string canonical_path (const std::string& path);
-	std::string path_expand (std::string path);
-	std::string search_path_expand (std::string path);
+	LIBPBD_API std::string path_expand (std::string path);
+	LIBPBD_API std::string search_path_expand (std::string path);
 }
 
 #endif /* __libpbd_path_expand_h__ */

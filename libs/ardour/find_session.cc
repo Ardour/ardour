@@ -32,6 +32,7 @@
 
 #include "ardour/filename_extensions.h"
 #include "ardour/utils.h"
+#include "ardour/session_utils.h"
 
 #include "i18n.h"
 

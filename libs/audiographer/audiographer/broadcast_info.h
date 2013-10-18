@@ -28,12 +28,14 @@
 
 #include <sndfile.h>
 
+#include "audiographer/visibility.h"
+
 namespace AudioGrapher
 {
 
-class SndfileHandle;	
+class LIBAUDIOGRAPHER_API SndfileHandle;	
 
-class BroadcastInfo
+class LIBAUDIOGRAPHER_API BroadcastInfo
 {
   public:
 
