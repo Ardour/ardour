@@ -33,21 +33,16 @@ def configure(conf):
     autowaf.configure(conf)
 
 def build(bld):
-    obj = bld(features = 'c cshlib')
-    obj.source = '''
-              ltc.c
-              timecode.c
-              encoder.c
-              decoder.c
-    '''
+    bld (export_includes = ['.'],
+         includes     = ['.'],
+         name = 'ltc_includes'
+         )
 
-    obj.export_includes = ['.']
-    obj.includes     = ['.']
-    obj.name         = 'libltc'
-    obj.target       = 'ltc'
-    obj.vnum         = LIBLTC_LIB_VERSION
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-    obj.defines     = ['PACKAGE="' + I18N_PACKAGE + '"']
+    bld.stlib (source = ['ltc.c', 'timecode.c', 'encoder.c', 'decoder.c'],
+               cflags = [ '-fPIC' ],
+               target = 'ltc',
+               use    = 'ltc_includes'
+               )
 
 def shutdown():
     autowaf.shutdown()
