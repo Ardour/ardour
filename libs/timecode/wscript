@@ -3,21 +3,6 @@ from waflib.extras import autowaf as autowaf
 from waflib import Options
 import os
 
-# Version of this package (even if built as a child)
-TIMECODE_VERSION = '0.0.0'
-
-# Library version (UNIX style major, minor, micro)
-# major increment <=> incompatible changes
-# minor increment <=> compatible changes (additions)
-# micro increment <=> no interface changes
-# Version history:
-#   0.0.0 = 0,0,0
-TIMECODE_LIB_VERSION = '0.0.0'
-
-# Variables for 'waf dist'
-APPNAME = 'timecode'
-VERSION = TIMECODE_VERSION
-
 # Mandatory variables
 top = '.'
 out = 'build'
@@ -30,15 +15,16 @@ def configure(conf):
     autowaf.configure(conf)
 
 def build(bld):
-    # Library
-    obj = bld(features = 'cxx cxxshlib')
-    obj.source         = [ 'src/time.cc', 'src/bbt_time.cc' ]
-    obj.export_includes = ['.']
-    obj.includes       = ['.', './src']
-    obj.name           = 'libtimecode'
-    obj.target         = 'timecode'
-    obj.vnum           = TIMECODE_LIB_VERSION
-    obj.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
+    bld (export_includes = ['.'],
+         includes        = ['.'],
+         name            = 'timecode_includes'
+         )
+
+    bld.stlib (cxxflags = [ '-fPIC' ],
+               source   = [ 'src/time.cc', 'src/bbt_time.cc' ],
+               target   = 'timecode',
+               use      = 'timecode_includes'
+               )
 
 def shutdown():
     autowaf.shutdown()
