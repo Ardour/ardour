@@ -317,7 +317,7 @@ def build(bld):
     # major increment <=> incompatible changes
     # minor increment <=> compatible changes (additions)
     # micro increment <=> no interface changes
-    LIBARDOUR_LIB_VERSION = "3.0.0."
+    LIBARDOUR_LIB_VERSION = "3.0.0"
 
     # Library
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
@@ -343,7 +343,7 @@ def build(bld):
                         'OSX','BOOST','CURL','DL']
     obj.use          = ['libpbd','libmidipp','libevoral','libvamphost',
                         'libvampplugin','libtaglib','librubberband',
-                        'libaudiographer','libltc','libtimecode']
+                        'libaudiographer', 'ltc', 'timecode' ]
     obj.vnum         = LIBARDOUR_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
     obj.defines      += [

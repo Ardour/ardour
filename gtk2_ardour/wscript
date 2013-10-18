@@ -434,7 +434,10 @@ def build(bld):
                          'ardour',
                          'libardour_cp',
                          'libgtkmm2ext',
-                         'libtaglib' ]
+                         'libtaglib',
+                         'timecode_includes'
+                         ]
+
     if sys.platform == 'darwin':
         obj.use += ' libappleutility'
     obj.defines     += [
