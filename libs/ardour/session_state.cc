@@ -3444,8 +3444,6 @@ Session::config_changed (std::string p, bool ours)
 		/* XXX DO SOMETHING HERE TO TELL THE GUI THAT WE NEED
 		   TO SET REMOTE ID'S
 		*/
-	} else if (p == "sync-all-route-ordering") {
-			sync_order_keys ();
 	} else if (p == "initial-program-change") {
 
 		if (_mmc->output_port() && Config->get_initial_program_change() >= 0) {
