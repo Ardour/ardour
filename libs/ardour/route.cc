@@ -281,7 +281,7 @@ Route::order_key () const
 }
 
 void
-Route::set_remote_control_id_from_order_key (uint32_t rid)
+Route::set_remote_control_id_explicit (uint32_t rid)
 {
 	if (is_master() || is_monitor() || is_auditioner()) {
 		/* hard-coded remote IDs, or no remote ID */

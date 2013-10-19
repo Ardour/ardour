@@ -434,7 +434,7 @@ Mixer_UI::reset_remote_control_ids ()
 			uint32_t new_rid = (visible ? rid : invisible_key--);
 			
 			if (new_rid != route->remote_control_id()) {
-				route->set_remote_control_id_from_order_key (new_rid);	
+				route->set_remote_control_id_explicit (new_rid);	
 				rid_change = true;
 			}
 			
@@ -488,7 +488,7 @@ Mixer_UI::sync_order_keys_from_treeview ()
 			uint32_t new_rid = (visible ? rid : invisible_key--);
 
 			if (new_rid != route->remote_control_id()) {
-				route->set_remote_control_id_from_order_key (new_rid);	
+				route->set_remote_control_id_explicit (new_rid);	
 				rid_change = true;
 			}
 			
