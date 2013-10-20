@@ -29,9 +29,7 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 
-#ifdef HAVE_LIBLO
-#include "ardour/osc.h"
-#endif
+#include "canvas/wave_view.h"
 
 #include "audio_clock.h"
 #include "ardour_ui.h"
