@@ -242,7 +242,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	};
 
         void notify_remote_id_change ();
-        void sync_order_keys (RouteSortOrderKey);
+        void sync_order_keys ();
 
 	template<class T> void foreach_route (T *obj, void (T::*func)(Route&));
 	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>));
