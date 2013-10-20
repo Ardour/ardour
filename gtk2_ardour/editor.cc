@@ -1796,7 +1796,7 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, boost::sha
 		_popup_region_menu_item->set_label (menu_item_name);
 	}
 
-	const framepos_t position = get_preferred_edit_position (false, true);
+	const framepos_t position = get_preferred_edit_position (EDIT_IGNORE_NONE, true);
 
 	edit_items.push_back (*_popup_region_menu_item);
 	if (track->playlist()->count_regions_at (position) > 1 && (layering_order_editor == 0 || !layering_order_editor->is_visible ())) {
@@ -4655,7 +4655,7 @@ Editor::sort_track_selection (TrackViewList& sel)
 }
 
 framepos_t
-Editor::get_preferred_edit_position (bool ignore_playhead, bool from_context_menu, bool from_outside_canvas)
+Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_menu, bool from_outside_canvas)
 {
 	bool ignored;
 	framepos_t where = 0;
@@ -4676,8 +4676,12 @@ Editor::get_preferred_edit_position (bool ignore_playhead, bool from_context_men
 		return entered_marker->position();
 	}
 
-	if (ignore_playhead && ep == EditAtPlayhead) {
+	if ( (ignore==EDIT_IGNORE_PHEAD) && ep == EditAtPlayhead) {
 		ep = EditAtSelectedMarker;
+	}
+
+	if ( (ignore==EDIT_IGNORE_MOUSE) && ep == EditAtMouse) {
+		ep = EditAtPlayhead;
 	}
 
 	switch (ep) {
@@ -5773,7 +5777,7 @@ Editor::show_editor_list (bool yn)
 void
 Editor::change_region_layering_order (bool from_context_menu)
 {
-	const framepos_t position = get_preferred_edit_position (false, from_context_menu);
+	const framepos_t position = get_preferred_edit_position (EDIT_IGNORE_NONE, from_context_menu);
 
 	if (!clicked_routeview) {
 		if (layering_order_editor) {

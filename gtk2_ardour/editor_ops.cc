@@ -2435,7 +2435,7 @@ Editor::play_from_edit_point_and_return ()
 	framepos_t start_frame;
 	framepos_t return_frame;
 
-	start_frame = get_preferred_edit_position (true);
+	start_frame = get_preferred_edit_position ( EDIT_IGNORE_PHEAD );
 
 	if (_session->transport_rolling()) {
 		_session->request_locate (start_frame, false);
@@ -4533,7 +4533,7 @@ Editor::paste (float times, bool from_context)
 {
         DEBUG_TRACE (DEBUG::CutNPaste, "paste to preferred edit pos\n");
 
-	paste_internal (get_preferred_edit_position (false, from_context), times);
+	paste_internal (get_preferred_edit_position (EDIT_IGNORE_NONE, from_context), times);
 }
 
 void
@@ -5204,7 +5204,7 @@ Editor::insert_patch_change (bool from_context)
 		return;
 	}
 
-	const framepos_t p = get_preferred_edit_position (false, from_context);
+	const framepos_t p = get_preferred_edit_position (EDIT_IGNORE_NONE, from_context);
 
 	/* XXX: bit of a hack; use the MIDNAM from the first selected region;
 	   there may be more than one, but the PatchChangeDialog can only offer
@@ -7025,15 +7025,15 @@ Editor::do_cut_time ()
 		return;
 	}
 
-	framepos_t pos = get_preferred_edit_position ();
+	framepos_t pos = get_preferred_edit_position (EDIT_IGNORE_MOUSE);
 	ArdourDialog d (*this, _("Cut Time"));
 	VButtonBox button_box;
 	VBox option_box;
 
-	CheckButton glue_button (_("Move Glued Regions"));
-	CheckButton marker_button (_("Move Markers"));
-	CheckButton tempo_button (_("Move Tempo & Meters"));
-	AudioClock clock ("insertTimeClock", true, X_("InsertTimeClock"), true, true, true);
+	CheckButton glue_button (_("Move Glued Regions"));  glue_button.set_active();
+	CheckButton marker_button (_("Move Markers"));  marker_button.set_active();
+	CheckButton tempo_button (_("Move Tempo & Meters"));  tempo_button.set_active();
+	AudioClock clock ("cutTimeClock", true, "", true, false, true, false);
 	HBox clock_box;
 
 	clock.set (0);

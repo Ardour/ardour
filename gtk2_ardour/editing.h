@@ -208,6 +208,13 @@ enum XFadeType {
 	At
 };
 
+enum EditIgnoreOption {
+	EDIT_IGNORE_NONE,
+	EDIT_IGNORE_PHEAD,
+	EDIT_IGNORE_MOUSE,
+	EDIT_IGNORE_MARKER
+};
+
 } // namespace Editing
 
 #endif // __gtk_ardour_editing_h__

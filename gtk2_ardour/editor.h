@@ -385,7 +385,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void reset_zoom (framecnt_t);
 	void reposition_and_zoom (framepos_t, double);
 
-	framepos_t get_preferred_edit_position (bool ignore_playhead = false,
+	framepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE,
 	                                        bool use_context_click = false,
 	                                        bool from_outside_canvas = false);
 

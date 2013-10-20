@@ -35,7 +35,7 @@ InsertTimeDialog::InsertTimeDialog (PublicEditor& e)
 {
 	set_session (_editor.session ());
 
-	framepos_t const pos = _editor.get_preferred_edit_position ();
+	framepos_t const pos = _editor.get_preferred_edit_position (EDIT_IGNORE_MOUSE);
 
 	get_vbox()->set_border_width (12);
 	get_vbox()->set_spacing (4);
