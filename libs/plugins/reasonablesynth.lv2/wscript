@@ -11,7 +11,7 @@ out = 'build'
 def options(opt):
     autowaf.set_options(opt)
 
-def configure(opt):
+def configure(conf):
     conf.load('compiler_c')
     autowaf.configure(conf)
     autowaf.set_c99_mode(conf)
