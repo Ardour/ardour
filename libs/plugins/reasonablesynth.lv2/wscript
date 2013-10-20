@@ -3,6 +3,7 @@ import os
 import re
 import shutil
 import waflib.extras.autowaf as autowaf
+from waflib import Options
 
 # Mandatory variables
 top = '.'
