@@ -1,0 +1,51 @@
+@prefix atom:  <http://lv2plug.in/ns/ext/atom#> .
+@prefix doap:  <http://usefulinc.com/ns/doap#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix pg:    <http://lv2plug.in/ns/ext/port-groups#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+@prefix urid:  <http://lv2plug.in/ns/ext/urid#> .
+
+<http://gareus.org/rgareus#me>
+	a foaf:Person ;
+	foaf:name "Robin Gareus" ;
+	foaf:mbox <mailto:robin@gareus.org> ;
+	foaf:homepage <http://gareus.org/> .
+
+<http://gareus.org/oss/lv2/reasonablesynth>
+	a lv2:Plugin, lv2:InstrumentPlugin, doap:Project;
+	doap:license <http://usefulinc.com/doap/licenses/gpl> ;
+	doap:maintainer <http://gareus.org/rgareus#me> ;
+	doap:name "Reasonable Synth";
+	lv2:optionalFeature lv2:hardRTCapable ;
+	lv2:requiredFeature urid:map ;
+	rdfs:comment """A simple synthesizer with no controls at all but a reasonable sound instead.""" ;
+	lv2:port
+	[
+		a atom:AtomPort ,
+			lv2:InputPort ;
+		atom:bufferType atom:Sequence ;
+		atom:supports <http://lv2plug.in/ns/ext/midi#MidiEvent> ;
+		lv2:index 0 ;
+		lv2:symbol "MidiIn" ;
+		lv2:name "MIDI Input" ;
+	],
+	[
+		a lv2:AudioPort ,
+			lv2:OutputPort ;
+		lv2:index 1 ;
+		lv2:symbol "outL" ;
+		lv2:name "Left output" ;
+		lv2:designation pg:left ;
+	],
+	[
+		a lv2:AudioPort ,
+			lv2:OutputPort ;
+		lv2:index 2 ;
+		lv2:symbol "outR" ;
+		lv2:name "Right Output" ;
+		lv2:designation pg:right ;
+	]
+	.

@@ -35,6 +35,7 @@ children = [
         'libs/gtkmm2ext',
         'libs/clearlooks-newer',
         'libs/audiographer',
+        'libs/plugins/reasonablesynth.lv2',
         'gtk2_ardour',
         'export',
         'midi_maps',

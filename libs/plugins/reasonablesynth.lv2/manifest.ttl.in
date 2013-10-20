@@ -1,0 +1,8 @@
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ui:    <http://lv2plug.in/ns/extensions/ui#> .
+
+<http://gareus.org/oss/lv2/reasonablesynth>
+	a lv2:Plugin ;
+	lv2:binary <reasonablesynth@LIB_EXT@>  ;
+	rdfs:seeAlso <reasonablesynth.ttl> .
