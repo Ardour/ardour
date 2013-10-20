@@ -29,7 +29,7 @@
 #include "lv2/lv2plug.in/ns/ext/urid/urid.h"
 #include "lv2/lv2plug.in/ns/ext/midi/midi.h"
 
-#define RSY_URI "http://gareus.org/oss/lv2/reasonablesynth"
+#define RSY_URI "https://community.ardour.org/node/7596"
 
 /* the synth interface */
 static void *   synth_alloc      (void);

@@ -417,6 +417,9 @@ for svndir in `find $APPDIR -name .svn -type dir`; do
     rm -rf $svndir
 done
 
+# install bundled LV2s to <app>/Contents/lib/LV2/
+cp -R $BUILD_ROOT/libs/LV2 $Frameworks/
+
 # now fix up the executables
 echo "Fixing up executable dependency names ..."
 executables=$MAIN_EXECUTABLE

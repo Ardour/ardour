@@ -5,7 +5,6 @@
 @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix pg:    <http://lv2plug.in/ns/ext/port-groups#> .
-@prefix units: <http://lv2plug.in/ns/extensions/units#> .
 @prefix urid:  <http://lv2plug.in/ns/ext/urid#> .
 
 <http://gareus.org/rgareus#me>
@@ -14,7 +13,7 @@
 	foaf:mbox <mailto:robin@gareus.org> ;
 	foaf:homepage <http://gareus.org/> .
 
-<http://gareus.org/oss/lv2/reasonablesynth>
+<https://community.ardour.org/node/7596>
 	a lv2:Plugin, lv2:InstrumentPlugin, doap:Project;
 	doap:license <http://usefulinc.com/doap/licenses/gpl> ;
 	doap:maintainer <http://gareus.org/rgareus#me> ;
