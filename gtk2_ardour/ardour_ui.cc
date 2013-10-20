@@ -218,8 +218,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	ui_config->map_parameters (pc);
 
-	_audio_midi_setup = new EngineControl;
-
 	editor = 0;
 	mixer = 0;
 	meterbridge = 0;
