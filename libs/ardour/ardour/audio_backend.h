@@ -117,6 +117,17 @@ class AudioBackend : public PortEngine {
      * at any time.
      */
     virtual std::vector<float> available_sample_rates (const std::string& device) const = 0;
+
+    /* Returns the default sample rate that will be shown to the user when
+     * configuration options are first presented. If the derived class
+     * needs or wants to override this, it can. It also MUST override this
+     * if there is any chance that an SR of 44.1kHz is not in the list
+     * returned by available_sample_rates()
+     */
+    virtual float default_sample_rate () const {
+	    return 44100.0;
+    }
+
     /** Returns a collection of uint32 identifying buffer sizes that are
      * potentially usable with the hardware identified by @param device.
      * Any of these values may be supplied in other calls to this backend
@@ -125,6 +136,16 @@ class AudioBackend : public PortEngine {
      * at any time.
      */
     virtual std::vector<uint32_t> available_buffer_sizes (const std::string& device) const = 0;
+
+    /* Returns the default buffer size that will be shown to the user when
+     * configuration options are first presented. If the derived class
+     * needs or wants to override this, it can. It also MUST override this
+     * if there is any chance that a buffer size of 1024 is not in the list
+     * returned by available_buffer_sizes()
+     */
+    virtual uint32_t default_buffer_size () const {
+	    return 1024;
+    }
 
     /** Returns the maximum number of input channels that are potentially
      * usable with the hardware identified by @param device.  Any number from 1
