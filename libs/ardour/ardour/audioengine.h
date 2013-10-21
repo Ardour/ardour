@@ -85,7 +85,6 @@ public:
 
     int            start (bool for_latency_measurement=false);
     int            stop (bool for_latency_measurement=false);
-    int            pause ();
     int            freewheel (bool start_stop);
     float          get_cpu_load() const ;
     void           transport_start ();

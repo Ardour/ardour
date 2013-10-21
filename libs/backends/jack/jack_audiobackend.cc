@@ -582,18 +582,6 @@ JACKAudioBackend::stop ()
 }
 
 int
-JACKAudioBackend::pause ()
-{
-	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
-
-	if (_priv_jack) {
-		jack_deactivate (_priv_jack);
-	}
-
-	return 0;
-}
-
-int
 JACKAudioBackend::freewheel (bool onoff)
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
@@ -1130,4 +1118,47 @@ JACKAudioBackend::set_midi_option (const string& opt)
 {
 	_target_midi_option = opt;
 	return 0;
+}
+
+bool
+JACKAudioBackend::speed_and_position (double& speed, framepos_t& position)
+{
+	jack_position_t pos;
+	jack_transport_state_t state;
+	bool starting;
+
+	/* this won't be called if the port engine in use is not JACK, so we do 
+	   not have to worry about the type of PortEngine::private_handle()
+	*/
+
+	speed = 0;
+	position = 0;
+
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, true);
+
+	state = jack_transport_query (_priv_jack, &pos);
+
+	switch (state) {
+	case JackTransportStopped:
+		speed = 0;
+		starting = false;
+		break;
+	case JackTransportRolling:
+		speed = 1.0;
+		starting = false;
+		break;
+	case JackTransportLooping:
+		speed = 1.0;
+		starting = false;
+		break;
+	case JackTransportStarting:
+		starting = true;
+		// don't adjust speed here, just leave it as it was
+		break;
+	default:
+		std::cerr << "WARNING: Unknown JACK transport state: " << state << std::endl;
+	}
+
+	position = pos.frame;
+	return starting;
 }

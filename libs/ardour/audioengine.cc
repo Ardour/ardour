@@ -663,23 +663,6 @@ AudioEngine::stop (bool for_latency)
 }
 
 int
-AudioEngine::pause ()
-{
-	if (!_backend) {
-		return 0;
-	}
-	
-	if (_backend->pause ()) {
-		return -1;
-	}
-
-	_running = false;
-	
-	Stopped(); /* EMIT SIGNAL */
-	return 0;
-}
-
-int
 AudioEngine::freewheel (bool start_stop)
 {
 	if (!_backend) {
