@@ -174,12 +174,21 @@ MidiPort::flush_buffers (pframes_t nframes)
 {
 	if (sends_output ()) {
 
-		void* port_buffer = port_engine.get_buffer (_port_handle, nframes);
+		void* port_buffer = 0;
 		
 		if (_resolve_required) {
+			port_buffer = port_engine.get_buffer (_port_handle, nframes);
 			/* resolve all notes at the start of the buffer */
 			resolve_notes (port_buffer, 0);
 			_resolve_required = false;
+		} 
+		
+		if (_buffer->empty()) {
+			return;
+		}
+
+		if (!port_buffer) {
+			port_buffer = port_engine.get_buffer (_port_handle, nframes);
 		}
 
 		for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
@@ -201,6 +210,11 @@ MidiPort::flush_buffers (pframes_t nframes)
 				     << " + " << _port_buffer_offset << endl;
 			}
 		}
+
+		/* done.. the data has moved to the port buffer, mark it so 
+		 */
+
+		_buffer->clear ();
 	}
 }
 
