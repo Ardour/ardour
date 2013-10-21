@@ -101,6 +101,7 @@ typedef uint64_t microseconds_t;
 #include "missing_plugin_dialog.h"
 #include "mixer_ui.h"
 #include "mouse_cursors.h"
+#include "nsm.h"
 #include "opts.h"
 #include "pingback.h"
 #include "processor_box.h"
@@ -828,13 +829,6 @@ ARDOUR_UI::starting ()
 }
 
 void
-ARDOUR_UI::no_memory_warning ()
-{
-	XMLNode node (X_("no-memory-warning"));
-	Config->add_instant_xml (node);
-}
-
-void
 ARDOUR_UI::check_memory_locking ()
 {
 #ifdef __APPLE__
@@ -890,9 +884,6 @@ ARDOUR_UI::check_memory_locking ()
 				VBox* vbox = msg.get_vbox();
 				HBox hbox;
 				CheckButton cb (_("Do not show this window again"));
-
-				cb.signal_toggled().connect (sigc::mem_fun (*this, &ARDOUR_UI::no_memory_warning));
-				
 				hbox.pack_start (cb, true, false);
 				vbox->pack_start (hbox);
 				cb.show();
@@ -903,6 +894,11 @@ ARDOUR_UI::check_memory_locking ()
 
 				editor->ensure_float (msg);
 				msg.run ();
+
+				if (cb.get_active()) {
+					XMLNode node (X_("no-memory-warning"));
+					Config->add_instant_xml (node);
+				}
 			}
 		}
 	}
@@ -3737,8 +3733,8 @@ ARDOUR_UI::session_dialog (std::string msg)
 int
 ARDOUR_UI::pending_state_dialog ()
 {
- 	HBox* hbox = new HBox();
-	Image* image = new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG);
+	HBox* hbox = manage (new HBox());
+	Image* image = manage (new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG));
 	ArdourDialog dialog (_("Crash Recovery"), true);
 	Label  message (string_compose (_("\
 This session appears to have been in the\n\
