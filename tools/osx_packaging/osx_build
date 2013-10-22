@@ -219,21 +219,42 @@ fi
 # copy locale files
 if test x$WITH_NLS != x ; then
     echo "NLS support ..."
-    echo "I hope you remembered to run scons msgupdate!"
+    echo "I hope you remembered to run waf i18n"
     LINGUAS=
-    for file in $BUILD_ROOT/gtk2_ardour/*.mo 
-    do
-	lang=`basename $file | sed 's/\.mo//'`
-	mkdir -p $Locale/$lang/LC_MESSAGES
-	cp $file $Locale/$lang/LC_MESSAGES/gtk2_ardour.mo
-	LINGUAS="$LINGUAS $lang"
+
+    for pkg in gtk2_ardour libs/ardour libs/gtkmm2ext ; do 
+	files=`find ../../$pkg -name "*.mo"`
+	
+            #
+            # the package name is appended with a number so that
+            # it can be parallel installed during a regular install
+            # with older (and newer) versions. it is just the major
+            # number of the release (i.e. leading digits)
+            #
+	
+        vsuffix=`echo $release_version | sed 's/^\([0-9][0-9]*\).*/\1/'`
+	
+	if [ -z "$files" ]; then
+	    echo ""
+	    echo "!!!! WARNING !!!! - Did not find any .mo files in ../../$pkg"
+	    echo ""
+	fi
+	
+	for file in $files 
+	do
+	    echo $file
+	    lang=`basename $file | sed 's/\.mo//'`
+	    mkdir -p $Locale/$lang/LC_MESSAGES
+	    cp $file $Locale/$lang/LC_MESSAGES/`basename $pkg`$vsuffix.mo
+	    echo copy $file to $Locale/$lang/LC_MESSAGES/`basename $pkg`$vsuffix.mo
+            if echo $LINGUAS | grep $lang >/dev/null 2>&1 ; then
+                :
+            else 
+		LINGUAS="$LINGUAS $lang"
+            fi
+	done
     done
-    for file in $BUILD_ROOT/libs/ardour/*.mo 
-    do
-	lang=`basename $file | sed 's/\.mo//'`
-	mkdir -p $Locale/$lang/LC_MESSAGES
-	cp $file $Locale/$lang/LC_MESSAGES/libardour.mo
-    done
+
     for l in $LINGUAS
     do
       if [ -d $GTKSTACK_ROOT/share/locale/$l ] ; then
