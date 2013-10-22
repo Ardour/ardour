@@ -805,21 +805,32 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 				return false;
 			}
 		}
-	}
 
-	if (options.input_channels) {
-		args.push_back ("-i");
-		args.push_back (to_string (options.input_channels, std::dec));
-	}
+		if (options.input_channels) {
+			args.push_back ("-i");
+			args.push_back (to_string (options.input_channels, std::dec));
+		}
 
-	if (options.output_channels) {
-		args.push_back ("-o");
-		args.push_back (to_string (options.output_channels, std::dec));
-	}
+		if (options.output_channels) {
+			args.push_back ("-o");
+			args.push_back (to_string (options.output_channels, std::dec));
+		}
 
-	if (get_jack_audio_driver_supports_setting_period_count (options.driver)) {
-		args.push_back ("-n");
-		args.push_back (to_string (options.num_periods, std::dec));
+		if (get_jack_audio_driver_supports_setting_period_count (options.driver)) {
+			args.push_back ("-n");
+			args.push_back (to_string (options.num_periods, std::dec));
+		}
+	} else {
+		// jackd dummy backend
+		if (options.input_channels) {
+			args.push_back ("-C");
+			args.push_back (to_string (options.input_channels, std::dec));
+		}
+
+		if (options.output_channels) {
+			args.push_back ("-P");
+			args.push_back (to_string (options.output_channels, std::dec));
+		}
 	}
 
 	args.push_back ("-r");
