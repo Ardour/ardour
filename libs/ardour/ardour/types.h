@@ -353,11 +353,6 @@ namespace ARDOUR {
 		PostFader
 	};
 
-        enum RouteSortOrderKey { 
-		EditorSort,
-		MixerSort
-	};
-	    
 	enum MonitorModel {
 		HardwareMonitoring, ///< JACK does monitoring
 		SoftwareMonitoring, ///< Ardour does monitoring
@@ -419,8 +414,7 @@ namespace ARDOUR {
 
 	enum RemoteModel {
 		UserOrdered,
-		MixerOrdered,
-		EditorOrdered
+		MixerOrdered
 	};
 
 	enum CrossfadeModel {
