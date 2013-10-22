@@ -1699,7 +1699,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 		DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 signal order %2\n",
-								   (*i)->name(), (*i)->order_key (MixerSort)));
+								   (*i)->name(), (*i)->order_key ()));
 		}
 #endif
 
@@ -2396,15 +2396,13 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		   ID in most situations.
 		*/
 
-		if (!r->has_order_key (EditorSort)) {
+		if (!r->has_order_key ()) {
 			if (r->is_auditioner()) {
 				/* use an arbitrarily high value */
-				r->set_order_key (EditorSort, UINT_MAX);
-				r->set_order_key (MixerSort, UINT_MAX);
+				r->set_order_key (UINT_MAX);
 			} else {
 				DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("while adding, set %1 to order key %2\n", r->name(), order));
-				r->set_order_key (EditorSort, order);
-				r->set_order_key (MixerSort, order);
+				r->set_order_key (order);
 				order++;
 			}
 		}
@@ -3715,7 +3713,7 @@ Session::RoutePublicOrderSorter::operator() (boost::shared_ptr<Route> a, boost::
 	if (b->is_monitor()) {
 		return false;
 	}
-	return a->order_key (MixerSort) < b->order_key (MixerSort);
+	return a->order_key () < b->order_key ();
 }
 
 bool
@@ -4952,8 +4950,7 @@ Session::notify_remote_id_change ()
 	}
 
 	switch (Config->get_remote_model()) {
-	case MixerSort:
-	case EditorSort:
+	case MixerOrdered:
 		Route::RemoteControlIDChange (); /* EMIT SIGNAL */
 		break;
 	default:
@@ -4962,7 +4959,7 @@ Session::notify_remote_id_change ()
 }
 
 void
-Session::sync_order_keys (RouteSortOrderKey sort_key_changed)
+Session::sync_order_keys ()
 {
 	if (deletion_in_progress()) {
 		return;
@@ -4974,9 +4971,9 @@ Session::sync_order_keys (RouteSortOrderKey sort_key_changed)
 	   opportunity to keep them in sync if they wish to.
 	*/
 
-	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("Sync Order Keys, based on %1\n", enum_2_string (sort_key_changed)));
+	DEBUG_TRACE (DEBUG::OrderKeys, "Sync Order Keys.\n");
 
-	Route::SyncOrderKeys (sort_key_changed); /* EMIT SIGNAL */
+	Route::SyncOrderKeys (); /* EMIT SIGNAL */
 
 	DEBUG_TRACE (DEBUG::OrderKeys, "\tsync done\n");
 }

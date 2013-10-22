@@ -170,7 +170,7 @@ struct RouteRecEnabledComparator
 		if (r1->record_enabled()) {
 			if (r2->record_enabled()) {
 				/* both rec-enabled, just use signal order */
-				return r1->order_key (MixerSort) < r2->order_key (MixerSort);
+				return r1->order_key () < r2->order_key ();
 			} else {
 				/* r1 rec-enabled, r2 not rec-enabled, run r2 early */
 				return false;
@@ -181,7 +181,7 @@ struct RouteRecEnabledComparator
 				return true;
 			} else {
 				/* neither rec-enabled, use signal order */
-				return r1->order_key (MixerSort) < r2->order_key (MixerSort);
+				return r1->order_key () < r2->order_key ();
 			}
 		}
 	}

@@ -36,6 +36,7 @@ children = [
         'libs/clearlooks-newer',
         'libs/audiographer',
         'libs/canvas',
+        'libs/plugins/reasonablesynth.lv2',
         'gtk2_ardour',
         'export',
         'midi_maps',
@@ -68,7 +69,7 @@ def fetch_gcc_version (CC):
     return version
 
 def fetch_git_revision ():
-    cmd = "git describe --tags HEAD"
+    cmd = "git describe HEAD"
     output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
     rev = output[0].decode('utf-8')
     return rev

@@ -91,7 +91,6 @@ class JACKAudioBackend : public AudioBackend {
 
     int _start (bool for_latency_measurement);
     int stop ();
-    int pause ();
     int freewheel (bool);
 
     float cpu_load() const;
@@ -182,6 +181,10 @@ class JACKAudioBackend : public AudioBackend {
     /* Getting access to the data buffer for a port */
 
     void* get_buffer (PortHandle, pframes_t);
+
+    /* transport sync */
+
+    bool speed_and_position (double& sp, framepos_t& pos);
 
   private:
     boost::shared_ptr<JackConnection>  _jack_connection;

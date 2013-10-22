@@ -822,7 +822,7 @@ EngineControl::EngineControl ()
 			 set_popdown_strings (sample_rate_combo, s);
 
 			 if (desired.empty()) {
-				 sample_rate_combo.set_active_text (s.front());
+				 sample_rate_combo.set_active_text (rate_as_string (backend->default_sample_rate()));
 			 } else {
 				 sample_rate_combo.set_active_text (desired);
 			 }
@@ -859,7 +859,7 @@ EngineControl::EngineControl ()
 			 buffer_size_combo.set_sensitive (true);
 			 set_popdown_strings (buffer_size_combo, s);
 
-			 buffer_size_combo.set_active_text (s.front());
+			 buffer_size_combo.set_active_text (bufsize_as_string (backend->default_buffer_size()));
 			 show_buffer_duration ();
 		 } else {
 			 buffer_size_combo.set_sensitive (false);

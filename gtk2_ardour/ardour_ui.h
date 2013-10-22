@@ -71,7 +71,6 @@
 #include "ardour_window.h"
 #include "editing.h"
 #include "meterbridge.h"
-#include "nsm.h"
 #include "ui_config.h"
 #include "enums.h"
 #include "visibility_group.h"
@@ -104,6 +103,7 @@ class SpeakerDialog;
 class ThemeManager;
 class TimeInfoBox;
 class MidiTracer;
+class NSM_Client;
 class LevelMeterHBox;
 class GlobalPortMatrixWindow;
 class GUIObjectState;
@@ -691,7 +691,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	bool first_idle ();
 
-	void no_memory_warning ();
 	void check_memory_locking ();
 
 	bool check_audioengine();

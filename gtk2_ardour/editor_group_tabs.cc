@@ -176,12 +176,6 @@ EditorGroupTabs::default_properties () const
 	return plist;
 }
 
-RouteSortOrderKey
-EditorGroupTabs::order_key () const
-{
-	return EditorSort;
-}
-
 RouteList
 EditorGroupTabs::selected_routes () const
 {

@@ -5520,7 +5520,7 @@ Editor::split_region ()
 
 struct EditorOrderRouteSorter {
     bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-	    return a->order_key (EditorSort) < b->order_key (EditorSort);
+	    return a->order_key () < b->order_key ();
     }
 };
 

@@ -21,6 +21,7 @@
 #include <cerrno>
 
 #include "ardour/audioengine.h"
+#include "ardour/audio_backend.h"
 #include "ardour/slave.h"
 
 using namespace std;
@@ -54,26 +55,13 @@ Engine_Slave::ok() const
 bool
 Engine_Slave::speed_and_position (double& sp, framepos_t& position)
 {
-	switch (engine.transport_state()) {
-	case TransportStopped:
-		speed = 0;
-		_starting = false;
-		break;
-	case TransportRolling:
-		speed = 1.0;
-		_starting = false;
-		break;
-	case TransportLooping:
-		speed = 1.0;
-		_starting = false;
-		break;
-	case TransportStarting:
-		_starting = true;
-		// don't adjust speed here, just leave it as it was
-		break;
-	}
+	boost::shared_ptr<AudioBackend> backend = engine.current_backend();
 
-	sp = speed;
-	position = engine.transport_frame();
+	if (backend) {
+		_starting = backend->speed_and_position (sp, position);
+	} else {
+		_starting = false;
+	}
+	
 	return true;
 }

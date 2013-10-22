@@ -284,7 +284,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 
         _display.set_enable_search (false);
 
-	Route::SyncOrderKeys.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::sync_treeview_from_order_keys, this, _1), gui_context());
+	Route::SyncOrderKeys.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::sync_treeview_from_order_keys, this), gui_context());
 }
 
 bool
@@ -810,7 +810,7 @@ EditorRoutes::show_track_in_display (TimeAxisView& tv)
 void
 EditorRoutes::reset_remote_control_ids ()
 {
-	if (Config->get_remote_model() != EditorOrdered || !_session || _session->deletion_in_progress()) {
+	if (Config->get_remote_model() == UserOrdered || !_session || _session->deletion_in_progress()) {
 		return;
 	}
 
@@ -839,7 +839,7 @@ EditorRoutes::reset_remote_control_ids ()
 			uint32_t new_rid = (visible ? rid : invisible_key--);
 
 			if (new_rid != route->remote_control_id()) {
-				route->set_remote_control_id_from_order_key (EditorSort, new_rid);	
+				route->set_remote_control_id_explicit (new_rid);	
 				rid_change = true;
 			}
 			
@@ -885,20 +885,20 @@ EditorRoutes::sync_order_keys_from_treeview ()
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
 		bool visible = (*ri)[_columns.visible];
 
-		uint32_t old_key = route->order_key (EditorSort);
+		uint32_t old_key = route->order_key ();
 
 		if (order != old_key) {
-			route->set_order_key (EditorSort, order);
+			route->set_order_key (order);
 
 			changed = true;
 		}
 
-		if ((Config->get_remote_model() == EditorOrdered) && !route->is_master() && !route->is_monitor()) {
+		if ((Config->get_remote_model() == MixerOrdered) && !route->is_master() && !route->is_monitor()) {
 
 			uint32_t new_rid = (visible ? rid : invisible_key--);
 
 			if (new_rid != route->remote_control_id()) {
-				route->set_remote_control_id_from_order_key (EditorSort, new_rid);	
+				route->set_remote_control_id_explicit (new_rid);	
 				rid_change = true;
 			}
 			
@@ -913,7 +913,7 @@ EditorRoutes::sync_order_keys_from_treeview ()
 	
 	if (changed) {
 		/* tell the world that we changed the editor sort keys */
-		_session->sync_order_keys (EditorSort);
+		_session->sync_order_keys ();
 	}
 
 	if (rid_change) {
@@ -923,37 +923,17 @@ EditorRoutes::sync_order_keys_from_treeview ()
 }
 
 void
-EditorRoutes::sync_treeview_from_order_keys (RouteSortOrderKey src)
+EditorRoutes::sync_treeview_from_order_keys ()
 {
-	/* Some route order key(s) for `src' has been changed, make sure that 
+	/* Some route order key(s) have been changed, make sure that 
 	   we update out tree/list model and GUI to reflect the change.
 	*/
 
-	if (!_session || _session->deletion_in_progress()) {
+	if (_ignore_reorder || !_session || _session->deletion_in_progress()) {
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("editor sync model from order keys, src = %1\n", enum_2_string (src)));
-
-	if (src == MixerSort) {
-
-		if (!Config->get_sync_all_route_ordering()) {
-			/* mixer sort keys changed - we don't care */
-			return;
-		}
-
-		DEBUG_TRACE (DEBUG::OrderKeys, "reset editor order key to match mixer\n");
-
-		/* mixer sort keys were changed, update the editor sort
-		 * keys since "sync mixer+editor order" is enabled.
-		 */
-
-		boost::shared_ptr<RouteList> r = _session->get_routes ();
-		
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			(*i)->sync_order_keys (src);
-		}
-	}
+	DEBUG_TRACE (DEBUG::OrderKeys, "editor sync model from order keys.\n");
 
 	/* we could get here after either a change in the Mixer or Editor sort
 	 * order, but either way, the mixer order keys reflect the intended
@@ -973,7 +953,7 @@ EditorRoutes::sync_treeview_from_order_keys (RouteSortOrderKey src)
 
 	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
-		sorted_routes.push_back (RoutePlusOrderKey (route, old_order, route->order_key (EditorSort)));
+		sorted_routes.push_back (RoutePlusOrderKey (route, old_order, route->order_key ()));
 	}
 
 	SortByNewDisplayOrder cmp;
@@ -1339,7 +1319,7 @@ struct EditorOrderRouteSorter {
 		    /* everything else before master */
 		    return false;
 	    }
-	    return a->order_key (EditorSort) < b->order_key (EditorSort);
+	    return a->order_key () < b->order_key ();
     }
 };
 
@@ -1499,7 +1479,7 @@ EditorRoutes::move_selected_tracks (bool up)
 	}
 
 	for (leading = view_routes.begin(); leading != view_routes.end(); ++leading) {
-		uint32_t order = leading->second->order_key (EditorSort);
+		uint32_t order = leading->second->order_key ();
 		neworder.push_back (order);
 	}
 

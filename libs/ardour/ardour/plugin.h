@@ -116,6 +116,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 		bool min_unbound;
 		bool max_unbound;
 		bool enumeration;
+		bool midinote;
 	};
 
 	XMLNode& get_state ();

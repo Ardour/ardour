@@ -117,6 +117,17 @@ class AudioBackend : public PortEngine {
      * at any time.
      */
     virtual std::vector<float> available_sample_rates (const std::string& device) const = 0;
+
+    /* Returns the default sample rate that will be shown to the user when
+     * configuration options are first presented. If the derived class
+     * needs or wants to override this, it can. It also MUST override this
+     * if there is any chance that an SR of 44.1kHz is not in the list
+     * returned by available_sample_rates()
+     */
+    virtual float default_sample_rate () const {
+	    return 44100.0;
+    }
+
     /** Returns a collection of uint32 identifying buffer sizes that are
      * potentially usable with the hardware identified by @param device.
      * Any of these values may be supplied in other calls to this backend
@@ -125,6 +136,16 @@ class AudioBackend : public PortEngine {
      * at any time.
      */
     virtual std::vector<uint32_t> available_buffer_sizes (const std::string& device) const = 0;
+
+    /* Returns the default buffer size that will be shown to the user when
+     * configuration options are first presented. If the derived class
+     * needs or wants to override this, it can. It also MUST override this
+     * if there is any chance that a buffer size of 1024 is not in the list
+     * returned by available_buffer_sizes()
+     */
+    virtual uint32_t default_buffer_size () const {
+	    return 1024;
+    }
 
     /** Returns the maximum number of input channels that are potentially
      * usable with the hardware identified by @param device.  Any number from 1
@@ -306,20 +327,6 @@ class AudioBackend : public PortEngine {
      */
     virtual int stop () = 0;
 
-    /** Temporarily cease using the device named in the most recent call to set_parameters().
-     *
-     * If the function is successfully called, no subsequent calls to the
-     * process_callback() of @param engine will be made after the function
-     * returns, until start() is called again.
-     * 
-     * The backend will retain its existing parameter configuration after a successful
-     * return, and does NOT require any calls to set hardware parameters before it can be
-     * start()-ed again. 
-     *
-     * Return zero if successful, 1 if the device is not in use, negative values on error
-     */
-    virtual int pause () = 0;
-
     /** While remaining connected to the device, and without changing its
      * configuration, start (or stop) calling the process_callback() of @param engine
      * without waiting for the device. Once process_callback() has returned, it
@@ -456,6 +463,21 @@ class AudioBackend : public PortEngine {
     virtual uint32_t process_thread_count () = 0;
 
     virtual void update_latencies () = 0;
+
+    /** Set @param speed and @param position to the current speed and position
+     * indicated by some transport sync signal.  Return whether the current
+     * transport state is pending, or finalized.
+     *
+     * Derived classes only need implement this if they provide some way to
+     * sync to a transport sync signal (e.g. Sony 9 Pin) that is not
+     * handled by Ardour itself (LTC and MTC are both handled by Ardour).
+     * The canonical example is JACK Transport.
+     */
+     virtual bool speed_and_position (double& speed, framepos_t& position) {
+	     speed = 0.0;
+	     position = 0;
+	     return false;
+     }
 
   protected:
     AudioEngine&          engine;
