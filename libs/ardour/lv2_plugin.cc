@@ -143,6 +143,8 @@ public:
 	LilvNode* ui_GtkUI;
 	LilvNode* ui_external;
 	LilvNode* ui_externalkx;
+	LilvNode* units_unit;
+	LilvNode* units_midiNote;
 
 private:
 	bool _bundle_checked;
@@ -1328,8 +1330,10 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 {
 	const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, which);
 
+	LilvNodes* portunits;
 	LilvNode *def, *min, *max;
 	lilv_port_get_range(_impl->plugin, port, &def, &min, &max);
+	portunits = lilv_port_get_value(_impl->plugin, port, _world.units_unit);
 
 	desc.integer_step = lilv_port_has_property(_impl->plugin, port, _world.lv2_integer);
 	desc.toggled      = lilv_port_has_property(_impl->plugin, port, _world.lv2_toggled);
@@ -1338,6 +1342,8 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	desc.label        = lilv_node_as_string(lilv_port_get_name(_impl->plugin, port));
 	desc.lower        = min ? lilv_node_as_float(min) : 0.0f;
 	desc.upper        = max ? lilv_node_as_float(max) : 1.0f;
+	desc.midinote     = lilv_nodes_contains(portunits, _world.units_midiNote);
+
 	if (desc.sr_dependent) {
 		desc.lower *= _session.frame_rate ();
 		desc.upper *= _session.frame_rate ();
@@ -1362,6 +1368,7 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	lilv_node_free(def);
 	lilv_node_free(min);
 	lilv_node_free(max);
+	lilv_nodes_free(portunits);
 
 	return 0;
 }
@@ -1965,10 +1972,14 @@ LV2World::LV2World()
 	ui_GtkUI           = lilv_new_uri(world, LV2_UI__GtkUI);
 	ui_external        = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
 	ui_externalkx      = lilv_new_uri(world, "http://kxstudio.sf.net/ns/lv2ext/external-ui#Widget");
+	units_unit         = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/units#unit");
+	units_midiNote     = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/units#midiNote");
 }
 
 LV2World::~LV2World()
 {
+	lilv_node_free(units_midiNote);
+	lilv_node_free(units_unit);
 	lilv_node_free(ui_externalkx);
 	lilv_node_free(ui_external);
 	lilv_node_free(ui_GtkUI);
