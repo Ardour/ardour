@@ -153,7 +153,7 @@ fixup_bundle_environment (int, char* [])
 		
 		vector<string> lpath;
 		lpath.push_back (bundle_dir);
-		lpath.push_back ("share");
+		lpath.push_back ("Resources");
 		lpath.push_back ("locale");
 		localedir = strdup (Glib::build_filename (lpath).c_str());
 	}
