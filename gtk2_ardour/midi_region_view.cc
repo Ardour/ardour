@@ -2135,32 +2135,39 @@ MidiRegionView::invert_selection ()
 void
 MidiRegionView::select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend)
 {
+	bool have_selection = !_selection.empty();
 	uint8_t low_note = 127;
 	uint8_t high_note = 0;
 	MidiModel::Notes& notes (_model->notes());
 	_optimization_iterator = _events.begin();
-
-	if (!add) {
-		clear_selection ();
-	}
-
-	if (extend && _selection.empty()) {
+	
+	if (extend && !have_selection) {
 		extend = false;
 	}
 
-	if (extend) {
-
-		/* scan existing selection to get note range */
-
-		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-			if ((*i)->note()->note() < low_note) {
-				low_note = (*i)->note()->note();
-			}
-			if ((*i)->note()->note() > high_note) {
-				high_note = (*i)->note()->note();
-			}
+	/* scan existing selection to get note range */
+	
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		if ((*i)->note()->note() < low_note) {
+			low_note = (*i)->note()->note();
 		}
+		if ((*i)->note()->note() > high_note) {
+			high_note = (*i)->note()->note();
+		}
+	}
+	
+	if (!add) {
+		clear_selection ();
 
+		if (!extend && (low_note == high_note) && (high_note == notenum)) {
+			/* only note previously selected is the one we are
+			 * reselecting. treat this as cancelling the selection.
+			 */
+			return;
+		}
+	}
+
+	if (extend) {
 		low_note = min (low_note, notenum);
 		high_note = max (high_note, notenum);
 	}

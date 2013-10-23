@@ -514,31 +514,27 @@ PianoRollHeader::on_button_press_event (GdkEventButton* ev)
 {
 	int note = _view.y_to_note(ev->y);
 
-	if (ev->button != 1) {
-		return false;
-	}
-
-	if (editor().current_mouse_mode() == Editing::MouseRange) {
+	if (ev->button == 2 && ev->type == GDK_BUTTON_PRESS) {
 		if (Keyboard::no_modifiers_active (ev->state)) {
 			SetNoteSelection (note); // EMIT SIGNAL
+			return true;
 		}
+		return false;
+	}
+	
+	if (ev->button == 1 && ev->type == GDK_BUTTON_PRESS && note >= 0 && note < 128) {
+		
+		add_modal_grab();
 		_dragging = true;
-	} else {
-
-		if (ev->type == GDK_BUTTON_PRESS && note >= 0 && note < 128) {
-
-			add_modal_grab();
-			_dragging = true;
-
-			if (!_active_notes[note]) {
-				_active_notes[note] = true;
-				_clicked_note = note;
-				send_note_on(note);
-
-				invalidate_note_range(note, note);
-			} else {
-				reset_clicked_note(note);
-			}
+		
+		if (!_active_notes[note]) {
+			_active_notes[note] = true;
+			_clicked_note = note;
+			send_note_on(note);
+			
+			invalidate_note_range(note, note);
+		} else {
+			reset_clicked_note(note);
 		}
 	}
 
