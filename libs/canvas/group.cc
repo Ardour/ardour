@@ -111,8 +111,8 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		if (draw) {
 #ifdef CANVAS_DEBUG
 			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-				cerr << string_compose ("%1render %2 %3\n", _canvas->render_indent(), (*i)->whatami(),
-							(*i)->name);
+				cerr << string_compose ("%1render %2 %3 item = %4 intersect = %5\n", _canvas->render_indent(), (*i)->whatami(),
+							(*i)->name, item, draw.get());
 			}
 #endif
 
