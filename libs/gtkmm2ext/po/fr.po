@@ -54,11 +54,6 @@ msgstr "Commande"
 msgid "Control"
 msgstr "Ctrl"
 
-#: keyboard.cc:70 keyboard.cc:73 keyboard.cc:87 keyboard.cc:90
-#, fuzzy
-msgid "Key|Shift"
-msgstr "Maj"
-
 #: keyboard.cc:71
 msgid "Option"
 msgstr "Option"
@@ -75,11 +70,6 @@ msgstr "Meta"
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: keyboard.cc:542
-#, fuzzy
-msgid "key bindings file not found at \"%2\" or contains errors."
-msgstr "Raccourcis clavier pour %1 introuvable dans \"%1\" ou corrompu."
-
 #: tearoff.cc:57
 msgid "Click to tear this into its own window"
 msgstr "Cliquez pour afficher dans une fenêtre séparée"
@@ -91,6 +81,3 @@ msgstr "Cliquez pour remettre dans la fenêtre principale"
 #: textviewer.cc:34
 msgid "Close"
 msgstr "Fermer"
-
-#~ msgid "Mod1"
-#~ msgstr "Mod1"

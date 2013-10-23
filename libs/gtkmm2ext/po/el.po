@@ -20,11 +20,6 @@ msgstr ""
 msgid "Unknown action name: %1"
 msgstr ""
 
-#: binding_proxy.cc:84
-#, fuzzy
-msgid "operate controller now"
-msgstr "λειτουργία ελεγκτή MIDI τώρα"
-
 #: bindable_button.cc:48
 msgid "button cannot watch state of non-existing Controllable\n"
 msgstr ""
@@ -91,33 +86,3 @@ msgstr ""
 #: textviewer.cc:34
 msgid "Close"
 msgstr "Κλείσιμο"
-
-#~ msgid "OK"
-#~ msgstr "OK"
-
-#~ msgid "Location:"
-#~ msgstr "Τοποθεσία:"
-
-#~ msgid "Browse ..."
-#~ msgstr "Αναζήτηση ..."
-
-#~ msgid "Cancel"
-#~ msgstr "Ακύρωση"
-
-#~ msgid "New folder"
-#~ msgstr "Νέος φάκελος"
-
-#~ msgid "Add to favorites"
-#~ msgstr "Πρόσθεση στα 'Αγαπημένα'"
-
-#~ msgid "Remove from favorites"
-#~ msgstr "Απαλοιφή από τα 'Αγαπημένα'"
-
-#~ msgid "Show Hidden"
-#~ msgstr "Ανάδειξη κρυμμένων"
-
-#~ msgid "Hide browser"
-#~ msgstr "Απόκρυψη browser"
-
-#~ msgid "Rescan"
-#~ msgstr "Ανανέωση"

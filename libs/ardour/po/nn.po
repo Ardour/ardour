@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-09-03 07:59-0400\n"
+"POT-Creation-Date: 2013-10-23 19:09+0200\n"
 "PO-Revision-Date: 2011-09-13 22:43+0100\n"
 "Last-Translator: Eivind Ødegård <meinmycell-lists@yahoo.no>\n"
 "Language-Team: Nynorsk <i18n-nn@lister.ping.uio.no>\n"
@@ -126,7 +126,7 @@ msgstr "Lydspelelister (ubrukte)"
 #: audio_playlist_source.cc:171 audiosource.cc:913 file_source.cc:529
 #: midi_playlist_source.cc:144 midi_playlist_source.cc:152
 #: midi_playlist_source.cc:159 midi_source.cc:371 plugin_insert.cc:643
-#: rb_effect.cc:332 session.cc:2465 session.cc:2498 session.cc:3643
+#: rb_effect.cc:332 session.cc:2613 session.cc:2646 session.cc:3791
 #: session_handle.cc:87 sndfilesource.cc:121
 msgid "programming error: %1"
 msgstr "Programmeringsfeil: %1"
@@ -195,67 +195,6 @@ msgstr "greier ikkje lasta VAMP-innstikket \"%1\""
 msgid "VAMP Plugin \"%1\" could not be loaded"
 msgstr "VAMP-innstikket \"%1\" vart ikkje lasta"
 
-#: audioengine.cc:186
-msgid ""
-"This version of JACK is old - you should upgrade to a newer version that "
-"supports jack_port_type_get_buffer_size()"
-msgstr ""
-"Denne utgåva av JACK er gamal - du bør oppgradera til ei utgåve som støttar "
-"jack_port_type_get_buffer_size()"
-
-#: audioengine.cc:190
-msgid "Connect session to engine"
-msgstr "Kople økta til maskin"
-
-#: audioengine.cc:843
-msgid ""
-"a port with the name \"%1\" already exists: check for duplicated track/bus "
-"names"
-msgstr ""
-"ein port med namnet \"%1\" finst frå før: sjekk opp dublettar i namn på spor "
-"eller bussar"
-
-#: audioengine.cc:845 session.cc:1698
-#, fuzzy
-msgid ""
-"No more JACK ports are available. You will need to stop %1 and restart JACK "
-"with more ports if you need this many tracks."
-msgstr ""
-"Det finst ikkje fleire JACK-portar. Du må stoppa %1 og starta JACK på nytt "
-"med nok portar viss du treng så mange spor."
-
-#: audioengine.cc:848
-msgid "AudioEngine: cannot register port \"%1\": %2"
-msgstr "AudioEngine: greier ikkje registrera porten \"%1\": %2"
-
-#: audioengine.cc:878
-msgid "unable to create port: %1"
-msgstr "greidde ikkje laga port: %1"
-
-#: audioengine.cc:932
-msgid "connect called before engine was started"
-msgstr "tilkoplinga vart oppkalla frø tenaren starta"
-
-#: audioengine.cc:958
-msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
-msgstr "Lydmaskineri: Klarte ikkje kopla %1 (%2) til %3 (%4)."
-
-#: audioengine.cc:973 audioengine.cc:1004
-msgid "disconnect called before engine was started"
-msgstr "fråkoplinga vart oppkalla før tenaren starta"
-
-#: audioengine.cc:1052
-msgid "get_port_by_name() called before engine was started"
-msgstr "get_port_by_name() vart oppkalla før tenaren starta"
-
-#: audioengine.cc:1104
-msgid "get_ports called before engine was started"
-msgstr "get_ports vart oppkalla før tenaren starta"
-
-#: audioengine.cc:1427
-msgid "failed to connect to JACK"
-msgstr "greidde ikkje kopla til JACK"
-
 #: audioregion.cc:1643
 msgid ""
 "You have requested an operation that requires audio analysis.\n"
@@ -319,11 +258,6 @@ msgstr "Lydkjelde: kan ikkje opna toppstig (c) \"%1\" (%2)"
 #: audiosource.cc:773 audiosource.cc:886
 msgid "%1: could not write peak file data (%2)"
 msgstr "%1: greidde ikkje skriva toppfildata (%2)"
-
-#: audiosource.cc:924
-#, fuzzy
-msgid "could not truncate peakfile %1 to %2 (error: %3)"
-msgstr "kan ikkje døypa om %1 til %2 (%3)"
 
 #: auditioner.cc:87
 msgid "no outputs available for auditioner - manual connection required"
@@ -421,19 +355,13 @@ msgstr "kontrollprotokollnamnet \"%1\" greidde ikkje starta opp"
 msgid "Instantiating mandatory control protocol %1"
 msgstr "Lagar obligatorisk kontrollprotokolløkt %1"
 
-#: control_protocol_manager.cc:222
-#, fuzzy
-msgid "looking for control protocols in %1\n"
-msgstr "ser etter kontrollprotokollar i %1\n"
-
 #: control_protocol_manager.cc:247
 msgid "Control protocol %1 not usable"
 msgstr "Kontrollprotokollen %1 er ikkje brukande"
 
 #: control_protocol_manager.cc:264
-#, fuzzy
 msgid "Control surface protocol discovered: \"%1\"\n"
-msgstr "Kontrollflateprotokollen \"%1\" oppdaga"
+msgstr ""
 
 #: control_protocol_manager.cc:282
 msgid "ControlProtocolManager: cannot load module \"%1\" (%2)"
@@ -460,7 +388,7 @@ msgstr "finn ikkje prosessor-MHz i /proc/cpuinfo"
 msgid "audio"
 msgstr "lyd"
 
-#: data_type.cc:28 session.cc:1640 session.cc:1643
+#: data_type.cc:28 session.cc:1790 session.cc:1793
 msgid "MIDI"
 msgstr "MIDI"
 
@@ -546,24 +474,20 @@ msgid "Session rate"
 msgstr "Øktrate"
 
 #: export_format_specification.cc:537
-#, fuzzy
 msgid "normalize"
-msgstr "normaliser, "
+msgstr ""
 
 #: export_format_specification.cc:541
-#, fuzzy
 msgid "trim"
-msgstr "tilskjering, "
+msgstr ""
 
 #: export_format_specification.cc:543
-#, fuzzy
 msgid "trim start"
-msgstr "start tilskjering, "
+msgstr ""
 
 #: export_format_specification.cc:545
-#, fuzzy
 msgid "trim end"
-msgstr "skjer sluttpunktet, "
+msgstr ""
 
 #: export_formats.cc:49
 msgid "Shaped Noise"
@@ -577,7 +501,7 @@ msgstr "Trekant"
 msgid "Rectangular"
 msgstr "Firkant"
 
-#: export_formats.cc:52 session.cc:4861 session.cc:4877
+#: export_formats.cc:52 session.cc:5008 session.cc:5024
 msgid "None"
 msgstr "Ingen"
 
@@ -622,9 +546,8 @@ msgid "Editor: cannot open \"%1\" as export file for CD marker file"
 msgstr "Redigering: greier ikkje opna \"%1\" som eksportfil for CD-markørfil"
 
 #: export_handler.cc:417 export_handler.cc:420
-#, fuzzy
 msgid "an error occured while writing a TOC/CUE file: %1"
-msgstr "ompunktinga var mislukka: %1"
+msgstr ""
 
 #: export_handler.cc:642 export_handler.cc:700
 msgid "Cannot convert %1 to Latin-1 text"
@@ -634,34 +557,9 @@ msgstr ""
 msgid "Searching for export formats in %1"
 msgstr "Leitar etter eksportformat i %1"
 
-#: export_profile_manager.cc:99
-#, fuzzy
-msgid "Unable to create export format directory %1: %2"
-msgstr "greier ikkje laga øktmappa på stigen %1 : %2"
-
-#: export_profile_manager.cc:257
-#, fuzzy
-msgid "Unable to remove export preset %1: %2"
-msgstr "greidde ikkje laga port: %1"
-
 #: export_profile_manager.cc:347
 msgid "Selection"
 msgstr "Val"
-
-#: export_profile_manager.cc:600
-#, fuzzy
-msgid "Unable to rename export format %1 to %2: %3"
-msgstr "kan ikkje døypa om filkjelda frå %1 til %2 (%3)"
-
-#: export_profile_manager.cc:632
-#, fuzzy
-msgid "Unable to remove export profile %1: %2"
-msgstr "Greier ikkje laga tryggingskopi av tilstandsfila %1 (%2)"
-
-#: export_profile_manager.cc:649
-#, fuzzy
-msgid "empty format"
-msgstr "format"
 
 #: export_profile_manager.cc:818
 msgid "No timespan has been selected!"
@@ -694,7 +592,7 @@ msgid ""
 msgstr ""
 "%1 støttar berre %2 kanalar, men du har %3 kanalar i kanaloppsettet ditt"
 
-#: file_source.cc:198 session_state.cc:2891
+#: file_source.cc:198 session_state.cc:2807
 msgid ""
 "there are already 1000 files with names like %1; versioning discontinued"
 msgstr "Det er alt 1000 filer med namn som %1, kuttar ut versjonsnamn"
@@ -739,11 +637,6 @@ msgstr ""
 #: file_source.cc:540
 msgid "cannot rename file %1 to %2 (%3)"
 msgstr "kan ikkje døypa om %1 til %2 (%3)"
-
-#: filesystem_paths.cc:73
-#, fuzzy
-msgid "Cannot create Configuration directory %1 - cannot run"
-msgstr "greier ikkje laga lydmappa \"%1\", hoppa over"
 
 #: filesystem_paths.cc:78
 msgid ""
@@ -795,23 +688,23 @@ msgstr "greier ikkje avgjera kva som er arbeidsmappa no (%1)"
 msgid "unknown file type for session %1"
 msgstr "ukjend filtype for økta %1"
 
-#: globals.cc:205
+#: globals.cc:207
 msgid "Could not set system open files limit to \"unlimited\""
 msgstr "Greidde ikkje setja systemgrensa for opne filer til \"uavgrensa\""
 
-#: globals.cc:207
+#: globals.cc:209
 msgid "Could not set system open files limit to %1"
 msgstr "Greidde ikkje setja grensa for opne systemfiler til %1"
 
-#: globals.cc:211
+#: globals.cc:213
 msgid "Your system is configured to limit %1 to only %2 open files"
 msgstr ""
 
-#: globals.cc:215
+#: globals.cc:217
 msgid "Could not get system open files limit (%1)"
 msgstr "Greidde ikkje få tak i grensa for opne systemfiler (%1)"
 
-#: globals.cc:266
+#: globals.cc:268
 msgid "Loading configuration"
 msgstr "Lastar oppsettet"
 
@@ -837,9 +730,8 @@ msgid "Track %1 of %2 contained no usable MIDI data"
 msgstr "Spor %1 av %2 inneheld ingen brukbare MIDI-data"
 
 #: import.cc:453
-#, fuzzy
 msgid "MIDI file %1 was not readable (no reason available)"
-msgstr "MIDI-fila %1 kan ikkje lesast (og me finn ingen grunn til det"
+msgstr ""
 
 #: import.cc:499
 msgid "Import: cannot open input sound file \"%1\""
@@ -856,11 +748,6 @@ msgstr "Lastar MIDI-fila %1"
 #: import.cc:614
 msgid "Failed to remove some files after failed/cancelled import operation"
 msgstr ""
-
-#: instrument_info.cc:40 instrument_info.cc:61
-#, fuzzy
-msgid "Unknown"
-msgstr "ukjend"
 
 #: instrument_info.cc:230
 msgid "preset %1 (bank %2)"
@@ -934,60 +821,56 @@ msgstr "IU: feilforma streng i XML-punktet for utgangane \"%1\""
 msgid "IO: bad output string in XML node \"%1\""
 msgstr "IU: feil utgangsstreng i XML-punktet \"%1\""
 
-#: io.cc:1410
+#: io.cc:1411
 #, c-format
 msgid "%s %u"
 msgstr "%s %u"
 
-#: io.cc:1457
+#: io.cc:1458
 #, c-format
 msgid "%s in"
 msgstr " %s inn"
 
-#: io.cc:1459
+#: io.cc:1460
 #, c-format
 msgid "%s out"
 msgstr "%s ut"
 
-#: io.cc:1534 session.cc:494 session.cc:523
+#: io.cc:1535 session.cc:685 session.cc:714
 msgid "mono"
 msgstr "mono"
 
-#: io.cc:1536 session.cc:507 session.cc:537
+#: io.cc:1537 session.cc:698 session.cc:728
 msgid "L"
 msgstr "V"
 
-#: io.cc:1536 session.cc:509 session.cc:539
+#: io.cc:1537 session.cc:700 session.cc:730
 msgid "R"
 msgstr "H"
 
-#: io.cc:1538 io.cc:1544
+#: io.cc:1539 io.cc:1545
 #, c-format
 msgid "%d"
 msgstr "%d"
 
-#: ladspa_plugin.cc:88
+#: ladspa_plugin.cc:86
 msgid "LADSPA: module has no descriptor function."
 msgstr "LADSPA: modulen har ingen skildringsfunksjon"
 
-#: ladspa_plugin.cc:93
+#: ladspa_plugin.cc:91
 msgid "LADSPA: plugin has gone away since discovery!"
 msgstr "LADSPA: tilleggsprogrammet har vorte borte sidan det vart oppdaga!"
 
-#: ladspa_plugin.cc:100
+#: ladspa_plugin.cc:98
 msgid "LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"
 msgstr ""
 "LADSPA: kan ikkje bruka \"%1\", sidan han ikkje kan prosessera på staden"
 
 #: ladspa_plugin.cc:297
-#, fuzzy
 msgid ""
 "illegal parameter number used with plugin \"%1\". This may indicate a change "
 "in the plugin design, and presets may be invalid"
 msgstr ""
-"ein ulovleg parameter vart brukt med tilleggsprogrammet \"%1\". Dette kan "
-"tyda på feil i korleis tilleggsprogrammet er utforma, og at eventuelle "
-"ferdigprogram kan vera ugyldige."
 
 #: ladspa_plugin.cc:376 ladspa_plugin.cc:426
 msgid "Bad node sent to LadspaPlugin::set_state"
@@ -1057,7 +940,7 @@ msgstr "Stader: forsøk på å bruka ukjend stad som vald stad"
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "feil XML-modus send til Locations::set_state"
 
-#: location.cc:842 session.cc:4362 session_state.cc:1114
+#: location.cc:842 session.cc:4510 session_state.cc:1031
 msgid "session"
 msgstr "økt"
 
@@ -1130,11 +1013,6 @@ msgstr ""
 msgid ""
 "%1: I/O configuration change %4 requested to use %2, but channel setup is %3"
 msgstr "%1: I/U-oppsettsendringa %4 ba om å bruka %2, men kanaloppsettet er %3"
-
-#: midi_diskstream.cc:219
-#, fuzzy
-msgid "MidiDiskstream: Playlist \"%1\" isn't a midi playlist"
-msgstr "MIDI-diskstraum: Spelelista \"%1\" er ikkje ei midispeleliste"
 
 #: midi_diskstream.cc:270
 msgid "MidiDiskstream %1: there is no existing playlist to make a copy of!"
@@ -1232,22 +1110,22 @@ msgstr "polaritetskontroll"
 msgid "solo control"
 msgstr "solo kontroll"
 
-#: mtc_slave.cc:235
+#: mtc_slave.cc:238
 msgid "MTC Slave: atomic read of current time failed, sleeping!"
 msgstr "MTC-slave: greidde ikkje lesa gyldig tid. Søv."
 
-#: mtc_slave.cc:359
+#: mtc_slave.cc:361
 msgid ""
 "Unknown rate/drop value %1 in incoming MTC stream, session values used "
 "instead"
 msgstr ""
 "Ukjent rate/sleppverdi %1 i innkomande MTC-straum, bruker øktverdiar i staden"
 
-#: mtc_slave.cc:379
+#: mtc_slave.cc:381
 msgid "Session framerate adjusted from %1 TO: MTC's %2."
 msgstr ""
 
-#: mtc_slave.cc:393
+#: mtc_slave.cc:395
 msgid "Session and MTC framerate mismatch: MTC:%1 %2:%3."
 msgstr ""
 
@@ -1270,11 +1148,6 @@ msgstr "set inn fil"
 #: operations.cc:28
 msgid "insert region"
 msgstr "set inn bolk"
-
-#: operations.cc:29
-#, fuzzy
-msgid "drag region brush"
-msgstr "dra bolk-børsting"
 
 #: operations.cc:30
 msgid "region drag"
@@ -1312,20 +1185,15 @@ msgstr "Panoreringa fekk XML-data for %1 - ignorert"
 msgid "looking for panners in %1"
 msgstr "ser etter panoreringar i %1"
 
-#: panner_manager.cc:99
-#, fuzzy
-msgid "Panner discovered: \"%1\" in %2"
-msgstr "Fann panoreringar: \"%1\""
-
-#: panner_manager.cc:116
+#: panner_manager.cc:117
 msgid "PannerManager: cannot load module \"%1\" (%2)"
 msgstr "Panoreringsstyring: kan ikkje lasta modulen \"%1\" (%2)"
 
-#: panner_manager.cc:123
+#: panner_manager.cc:124
 msgid "PannerManager: module \"%1\" has no descriptor function."
 msgstr "Panoreringsstyring: modulen \"%1\" har ingen skildringsfunksjon."
 
-#: panner_manager.cc:186
+#: panner_manager.cc:187
 msgid "no panner discovered for in/out = %1/%2"
 msgstr "fann inga panorering for inn/ut = %1/%2"
 
@@ -1356,22 +1224,16 @@ msgid "Could not construct playlist for PlaylistSource from session data!"
 msgstr "Greidde ikkje byggja speleliste for PlaylistSource frå øktdata!"
 
 #: plugin.cc:324
-#, fuzzy
 msgid ""
 "Plugin presets are not supported in this build of %1. Consider paying for a "
 "full version"
 msgstr ""
-"Du kan ikkje lagra førehandsoppsett for AudioUnit i denne versjonen av "
-"Ardour. Du bør vurdera å betala for ein nyare verjson"
 
 #: plugin.cc:398
-#, fuzzy
 msgid ""
 "Saving plugin settings is not supported in this build of %1. Consider paying "
 "for the full version"
 msgstr ""
-"Du kan ikkje lagra AudioUnit-innstillingar i denne versjonen av Ardour. Du "
-"bør vurdera å betala for ein nyare verjson"
 
 #: plugin_insert.cc:598
 msgid "programming error: "
@@ -1428,22 +1290,16 @@ msgid "LADSPA: module \"%1\" has no descriptor function."
 msgstr "LADSPA: modulen \"%1\" har ingen skildringsfunksjon."
 
 #: plugin_manager.cc:602
-#, fuzzy
 msgid ""
 "VST plugin %1 does not support processReplacing, and so cannot be used in %2 "
 "at this time"
 msgstr ""
-"VST-tilleggsprogrammet %1 støttar ikkje prosessbyte, og kan ikkje brukast i "
-"Ardour nett no."
 
 #: plugin_manager.cc:709
-#, fuzzy
 msgid ""
 "linuxVST plugin %1 does not support processReplacing, and so cannot be used "
 "in %2 at this time"
 msgstr ""
-"VST-tilleggsprogrammet %1 støttar ikkje prosessbyte, og kan ikkje brukast i "
-"Ardour nett no."
 
 #: plugin_manager.cc:870
 msgid "unknown plugin status type \"%1\" - all entries ignored"
@@ -1453,11 +1309,7 @@ msgstr "\"%1\" er ein ukjend utvidingsstatustype, såg bort frå alt"
 msgid "unknown plugin type \"%1\" - ignored"
 msgstr "\"%1\" er ein ukjend innstikktype - hoppa over"
 
-#: port.cc:367
-msgid "get_connected_latency_range() called while disconnected from JACK"
-msgstr "get_connected_latency_range() kalla opp då JACK vart fråkopla"
-
-#: port.cc:450
+#: port.cc:410
 msgid "could not reregister %1"
 msgstr "greidde ikkje registrera %1."
 
@@ -1474,6 +1326,36 @@ msgid "non-port insert XML used for port plugin insert"
 msgstr ""
 "tappingspunkt-XML som ikkje er ein port er brukt for porttilleggstapping"
 
+#: port_manager.cc:270
+msgid ""
+"a port with the name \"%1\" already exists: check for duplicated track/bus "
+"names"
+msgstr ""
+"ein port med namnet \"%1\" finst frå før: sjekk opp dublettar i namn på spor "
+"eller bussar"
+
+#: port_manager.cc:272
+msgid ""
+"No more ports are available. You will need to stop %1 and restart with more "
+"ports if you need this many tracks."
+msgstr ""
+
+#: port_manager.cc:275
+msgid "AudioEngine: cannot register port \"%1\": %2"
+msgstr "AudioEngine: greier ikkje registrera porten \"%1\": %2"
+
+#: port_manager.cc:314
+msgid "unable to create port: %1"
+msgstr "greidde ikkje laga port: %1"
+
+#: port_manager.cc:401
+msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
+msgstr "Lydmaskineri: Klarte ikkje kopla %1 (%2) til %3 (%4)."
+
+#: port_manager.cc:453 port_manager.cc:454
+msgid "Re-establising port %1 failed"
+msgstr ""
+
 #: processor.cc:207
 msgid "No %1 property flag in element %2"
 msgstr "Ikkje noko %1-eigenskapsflagg i elementet %2"
@@ -1482,44 +1364,35 @@ msgstr "Ikkje noko %1-eigenskapsflagg i elementet %2"
 msgid "No child node with active property"
 msgstr "Ingen undernode med aktiv eigenskap"
 
-#: rc_configuration.cc:93
+#: rc_configuration.cc:88
 msgid "Loading system configuration file %1"
 msgstr "Lastar systemoppsettfila %1"
 
-#: rc_configuration.cc:97
+#: rc_configuration.cc:92
 msgid "%1: cannot read system configuration file \"%2\""
 msgstr "%1: greier ikkje lesa systemoppsettfila \"%2\""
 
-#: rc_configuration.cc:102
+#: rc_configuration.cc:97
 msgid "%1: system configuration file \"%2\" not loaded successfully."
 msgstr "%1: greidde ikkje lasta systemoppsettfila \"%2\" skikkeleg."
 
-#: rc_configuration.cc:106
-#, fuzzy
-msgid ""
-"Your system %1 configuration file is empty. This probably means that there "
-"was an error installing %1"
-msgstr ""
-"Oppsettsfila for %1 er tom. Dette tyder truleg at det var ein feil då %1 "
-"vart installert."
-
-#: rc_configuration.cc:121
+#: rc_configuration.cc:116
 msgid "Loading user configuration file %1"
 msgstr "Lastar brukaroppsettfila %1"
 
-#: rc_configuration.cc:125
+#: rc_configuration.cc:120
 msgid "%1: cannot read configuration file \"%2\""
 msgstr "%1: greier ikkje lesa oppsettfila \"%2\""
 
-#: rc_configuration.cc:130
+#: rc_configuration.cc:125
 msgid "%1: user configuration file \"%2\" not loaded successfully."
 msgstr "%1: greidde ikkje lasta brukaroppsettfila \"%2\" skikkeleg."
 
-#: rc_configuration.cc:134
+#: rc_configuration.cc:129
 msgid "your %1 configuration file is empty. This is not normal."
 msgstr "%1-oppsettsfila di er tom. Dette er ikkje normalt."
 
-#: rc_configuration.cc:151
+#: rc_configuration.cc:146
 msgid "Config file %1 not saved"
 msgstr "Oppsettfila %1 er ikkje lagra"
 
@@ -1559,25 +1432,29 @@ msgstr "Import: src_new()-funkjsonen lukkast ikkje: %1"
 msgid "return %1"
 msgstr "retur %1"
 
-#: route.cc:1105 route.cc:2581
+#: route.cc:1075 route.cc:2528
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr "\"%1\" er ein ukjend prosesseringstype, hoppa over"
 
-#: route.cc:1117
+#: route.cc:1087
 msgid "processor could not be created. Ignored."
 msgstr "greidde ikkje laga prosessering. Hoppa over."
 
-#: route.cc:2007 route.cc:2234
+#: route.cc:1962 route.cc:2187
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr "Feil punkt sendt til Route::set_state()-funksjonen [%1]"
 
-#: route.cc:2067
+#: route.cc:2022
 msgid "Pannable state found for route (%1) without a panner!"
 msgstr "Fann panoreringsstatus for ruta (%1) utan panorering!"
 
-#: route.cc:2137 route.cc:2141 route.cc:2348 route.cc:2352
+#: route.cc:2096 route.cc:2100 route.cc:2301 route.cc:2305
 msgid "badly formed order key string in state file! [%1] ... ignored."
 msgstr "feilforma tingingsnykjelstreng i tilstandsfil! [%1] ... hoppa over."
+
+#: route.cc:2311
+msgid "Converting deprecated order key for %1 using Editor order %2"
+msgstr ""
 
 #: route_group.cc:459
 msgid "You cannot subgroup MIDI tracks at this time"
@@ -1600,193 +1477,165 @@ msgstr ""
 msgid "send %1"
 msgstr "send %1"
 
-#: send.cc:65
-#, fuzzy
-msgid "programming error: send created using role %1"
-msgstr "programmeringsfeil: ukjend redigeringsmodus-streng \"%1\""
+#: session.cc:343
+msgid "Connect to engine"
+msgstr "Kople til maskin"
 
-#: session.cc:347
-msgid "Set block size and sample rate"
-msgstr "Set blokkstorleik og punktrate"
+#: session.cc:348
+msgid "Session loading complete"
+msgstr "Ferdig å lasta økta."
 
-#: session.cc:352
-msgid "Using configuration"
-msgstr "Bruker oppsett"
-
-#: session.cc:377
-msgid "LTC In"
+#: session.cc:420
+msgid "Set up LTC"
 msgstr ""
 
-#: session.cc:378
-msgid "LTC Out"
+#: session.cc:422
+msgid "Set up Click"
 msgstr ""
 
-#: session.cc:404
-msgid "LTC-in"
-msgstr ""
-
-#: session.cc:405
-msgid "LTC-out"
-msgstr ""
-
-#: session.cc:434
-msgid "could not setup Click I/O"
-msgstr "greidde ikkje setja opp klikk-I/U"
-
-#: session.cc:461
-msgid "cannot setup Click I/O"
-msgstr "greier ikkje setja opp klikk-I/U"
-
-#: session.cc:464
-msgid "Compute I/O Latencies"
-msgstr "Rekn ut I/U-seinkingar"
-
-#: session.cc:470
+#: session.cc:424
 msgid "Set up standard connections"
 msgstr "Set opp standartilkoplingar"
 
-#: session.cc:491
+#: session.cc:634
+msgid "could not setup Click I/O"
+msgstr "greidde ikkje setja opp klikk-I/U"
+
+#: session.cc:682
 #, c-format
 msgid "out %<PRIu32>"
 msgstr "ut %<PRIu32>"
 
-#: session.cc:505
+#: session.cc:696
 #, c-format
 msgid "out %<PRIu32>+%<PRIu32>"
 msgstr "ut %<PRIu32>+%<PRIu32>"
 
-#: session.cc:520
+#: session.cc:711
 #, c-format
 msgid "in %<PRIu32>"
 msgstr "inn %<PRIu32>"
 
-#: session.cc:534
+#: session.cc:725
 #, c-format
 msgid "in %<PRIu32>+%<PRIu32>"
 msgstr "inn %<PRIu32>+%<PRIu32>"
 
-#: session.cc:570
-msgid "Setup signal flow and plugins"
-msgstr "Set opp signalflyt og innstikk"
-
-#: session.cc:614
-msgid "Connect to engine"
-msgstr "Kople til maskin"
-
-#: session.cc:645
+#: session.cc:789
 msgid "cannot connect master output %1 to %2"
 msgstr "greier ikkje kopla til hovudutgangane %1 til %2"
 
-#: session.cc:704
+#: session.cc:848
 msgid "monitor"
 msgstr "lytting"
 
-#: session.cc:749
+#: session.cc:893
 msgid "cannot connect control input %1 to %2"
 msgstr "greier ikkje kopla til kontrollinngangane %1 til %2"
 
-#: session.cc:769
+#: session.cc:913
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
 msgstr "Greidde ikkje finna føretrekt I/U for lyttebussen (%1)"
 
-#: session.cc:800
+#: session.cc:944
 msgid "cannot connect control output %1 to %2"
 msgstr "greier ikkje kopla til kontrollutgangane %1 til %2"
 
-#: session.cc:864
+#: session.cc:1008
 msgid "cannot create Auditioner: no auditioning of regions possible"
 msgstr "greier ikkje laga Lytting: det er ikkje råd å lytta på nokon bolkar."
 
-#: session.cc:1043
+#: session.cc:1192
 msgid "Session: you can't use that location for auto punch (start <= end)"
 msgstr "Økt: du kan ikkje bruka denne staden for autoinnslag (start<=slutt)"
 
-#: session.cc:1083
+#: session.cc:1232
 msgid ""
 "You cannot use this location for auto-loop because it has zero or negative "
 "length"
 msgstr ""
 
-#: session.cc:1396
+#: session.cc:1546
 msgid "feedback loop setup between %1 and %2"
 msgstr "rundgang-lykkjeoppsett mellom %1 og %2"
 
-#: session.cc:1692
+#: session.cc:1842
 msgid "Session: could not create new midi track."
 msgstr "Økt: greidde ikkje laga nytt midispor."
 
-#: session.cc:1875 session.cc:1878
+#: session.cc:1848
+msgid ""
+"No more JACK ports are available. You will need to stop %1 and restart JACK "
+"with more ports if you need this many tracks."
+msgstr ""
+
+#: session.cc:2025 session.cc:2028
 msgid "Audio"
 msgstr "Lyd"
 
-#: session.cc:1902 session.cc:1910 session.cc:1987 session.cc:1995
+#: session.cc:2052 session.cc:2060 session.cc:2137 session.cc:2145
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr ""
 "greier ikkje stilla inn %1 inn/%2 ut-innstillingane for det nye lydsporet"
 
-#: session.cc:1933
+#: session.cc:2083
 msgid "Session: could not create new audio track."
 msgstr "Økt: greidde ikkje laga nytt lydspor."
 
-#: session.cc:1965 session.cc:1968
+#: session.cc:2115 session.cc:2118
 msgid "Bus"
 msgstr "Buss"
 
-#: session.cc:2018
+#: session.cc:2168
 msgid "Session: could not create new audio route."
 msgstr "Økt: greidde ikkje laga ny lydrute."
 
-#: session.cc:2077 session.cc:2087
+#: session.cc:2227 session.cc:2237
 msgid "Session: UINT_MAX routes? impossible!"
 msgstr "Økt: UINT_MAX-ruter? Går ikkje an!"
 
-#: session.cc:2109
+#: session.cc:2259
 msgid "Session: cannot create track/bus from template description"
 msgstr "Økt: greier ikkje laga spor/buss frå malskildringa"
 
-#: session.cc:2135
+#: session.cc:2285
 msgid "Session: could not create new route from template"
 msgstr "Økt: greidde ikkje laga ny lydrute frå malen"
 
-#: session.cc:2164
+#: session.cc:2314
 msgid "Adding new tracks/busses failed"
 msgstr ""
 
-#: session.cc:3265
+#: session.cc:3413
 msgid "FATAL ERROR! Could not find a suitable version of %1 for a rename"
 msgstr ""
 "ALVORLEG FEIL! Greidde ikkje finna ei høveleg utgåve av %1 for å døypa om"
 
-#: session.cc:3385 session.cc:3443
+#: session.cc:3533 session.cc:3591
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr "Det er alt %1 opptak for %2, og eg synest det er for mange."
 
-#: session.cc:3833
+#: session.cc:3981
 msgid "send ID %1 appears to be in use already"
 msgstr "send-IDen %1 ser ut til å vera i bruk frå før"
 
-#: session.cc:3845
-#, fuzzy
-msgid "aux send ID %1 appears to be in use already"
-msgstr "send-IDen %1 ser ut til å vera i bruk frå før"
-
-#: session.cc:3857
+#: session.cc:4005
 msgid "return ID %1 appears to be in use already"
 msgstr "retur-IDen %1 ser ut til å vera i bruk frå før"
 
-#: session.cc:3869
+#: session.cc:4017
 msgid "insert ID %1 appears to be in use already"
 msgstr "send-IDen %2 ser ut til å vera i bruk frå før"
 
-#: session.cc:3996
+#: session.cc:4144
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr "Kan ikkje skriva eit område der slutten <= starten (td. %1 <= %2)"
 
-#: session.cc:4025
+#: session.cc:4173
 msgid "too many bounced versions of playlist \"%1\""
 msgstr "for mange samanmiksa versjonar av spelelista \"%1\""
 
-#: session.cc:4035
+#: session.cc:4183
 msgid "cannot create new audio file \"%1\" for %2"
 msgstr "greier ikkje laga ny lydfil \"%1\" for %2"
 
@@ -1799,10 +1648,8 @@ msgid "cannot read data from click soundfile"
 msgstr "greier ikkje lesa data frå klikklydfila"
 
 #: session_command.cc:87
-#, fuzzy
 msgid "Tried to reconstitute a MementoCommand with no contents, failing. id=%1"
 msgstr ""
-"Prøvde å byggja opp att ein memento-kommando utan innhald, og mislukkast. id="
 
 #: session_command.cc:148
 msgid ""
@@ -1831,11 +1678,11 @@ msgstr "Undermappa for økta finst ikkje i stigen %1"
 msgid "Session: cannot have two events of type %1 at the same frame (%2)."
 msgstr "Økt: du kan ikkje ha to handlingar av typen %1 på same ramma (%2)."
 
-#: session_export.cc:126
+#: session_export.cc:125
 msgid "%1: cannot seek to %2 for export"
 msgstr "%1: greier ikkje finna %2 for eksportering"
 
-#: session_export.cc:183
+#: session_export.cc:182
 msgid "Export ended unexpectedly: %1"
 msgstr ""
 
@@ -1845,10 +1692,6 @@ msgid ""
 "of this session."
 msgstr ""
 
-#: session_midi.cc:428
-msgid "Session: could not send full MIDI time code"
-msgstr "Økt: greidde ikke senda full MIDI-tidskode"
-
 #: session_midi.cc:520
 msgid "Session: cannot send quarter-frame MTC message (%1)"
 msgstr "Økt: greidde ikkje senda kvartramme-MTC-melding (%1)"
@@ -1857,97 +1700,75 @@ msgstr "Økt: greidde ikkje senda kvartramme-MTC-melding (%1)"
 msgid "Session: cannot create Playlist from XML description."
 msgstr "Økt: greier ikkje laga speleliste ut frå XML-skildringa."
 
-#: session_process.cc:133
+#: session_process.cc:132
 msgid "Session: error in no roll for %1"
 msgstr "Økt: feil på ingen rull for %1"
 
-#: session_process.cc:1158
+#: session_process.cc:1157
 msgid "Programming error: illegal event type in process_event (%1)"
 msgstr "Programmeringsfeil: ulovleg handlingstype i process-event (%1)"
 
-#: session_state.cc:139
-#, fuzzy
-msgid "Could not use path %1 (%2)"
-msgstr "Greidde ikkje bruka stigen %1 (%s)"
-
-#: session_state.cc:267
+#: session_state.cc:184
 msgid "solo cut control (dB)"
 msgstr "solokutt-kontroll (dB)"
 
-#: session_state.cc:360
+#: session_state.cc:208
+msgid "Set block size and sample rate"
+msgstr "Set blokkstorleik og punktrate"
+
+#: session_state.cc:213
+msgid "Using configuration"
+msgstr "Bruker oppsett"
+
+#: session_state.cc:325
 msgid "Reset Remote Controls"
 msgstr "Still tilbake fjernkontrollar"
 
-#: session_state.cc:385
-msgid "Session loading complete"
-msgstr "Ferdig å lasta økta."
-
-#: session_state.cc:452
+#: session_state.cc:417
 msgid "Session: cannot create session peakfile folder \"%1\" (%2)"
 msgstr "Økt: greier ikkje laga mappa \"%1\" for økttoppfiler (%2)"
 
-#: session_state.cc:459
+#: session_state.cc:424
 msgid "Session: cannot create session sounds dir \"%1\" (%2)"
 msgstr "Økt: greier ikkje laga øktmappa \"%1\" for lydfiler (%2)"
 
-#: session_state.cc:466
+#: session_state.cc:431
 msgid "Session: cannot create session midi dir \"%1\" (%2)"
 msgstr "Økt: greier ikkje laga midimappa \"%1\" for økta (%2)"
 
-#: session_state.cc:473
+#: session_state.cc:438
 msgid "Session: cannot create session dead sounds folder \"%1\" (%2)"
 msgstr "Økt: greier ikkje laga mappa \"%1\" for daudlyd (%2)"
 
-#: session_state.cc:480
+#: session_state.cc:445
 msgid "Session: cannot create session export folder \"%1\" (%2)"
 msgstr "Økt: greidde ikkje laga mappa \"%1\" for eksportlyd (%2)"
 
-#: session_state.cc:487
+#: session_state.cc:452
 msgid "Session: cannot create session analysis folder \"%1\" (%2)"
 msgstr "Økt: greidde ikkje laga mappa \"%1\" for øktanalyse (%2)"
 
-#: session_state.cc:494
+#: session_state.cc:459
 msgid "Session: cannot create session plugins folder \"%1\" (%2)"
 msgstr "Økt: greier ikkje laga utvidingmappa \"%1\" for økta (%2)"
 
-#: session_state.cc:501
-#, fuzzy
-msgid "Session: cannot create session externals folder \"%1\" (%2)"
-msgstr "Økt: greidde ikkje laga mappa \"%1\" for øktanalyse (%2)"
-
-#: session_state.cc:515
+#: session_state.cc:480
 msgid "Session: cannot create session folder \"%1\" (%2)"
 msgstr "Økt: greidde ikkje laga øktmappa \"%1\" (%2)"
 
-#: session_state.cc:548
-#, fuzzy
+#: session_state.cc:514
 msgid "Could not open %1 for writing session template"
-msgstr "Greidde ikkje opna %1 for å skriva miksarmal"
+msgstr ""
 
-#: session_state.cc:554
-#, fuzzy
-msgid "Could not open session template %1 for reading"
-msgstr "Greidde ikkje opna miksarmalen %1 for å lesa han"
-
-#: session_state.cc:573
+#: session_state.cc:539
 msgid "master"
 msgstr "master"
 
-#: session_state.cc:636
-#, fuzzy
-msgid "Could not remove pending capture state at path \"%1\" (%2)"
-msgstr "Greidde ikkje fjerna opptaksstatusen på stigen \"%1\" (%2)"
-
-#: session_state.cc:660
+#: session_state.cc:624
 msgid "could not rename snapshot %1 to %2 (%3)"
 msgstr "greidde ikkje døypa om snøggbiletet %1 til %2 (%3)"
 
-#: session_state.cc:688
-#, fuzzy
-msgid "Could not remove session file at path \"%1\" (%2)"
-msgstr "Greidde ikkje fjerna opptaksstatusen på stigen \"%1\" (%2)"
-
-#: session_state.cc:761
+#: session_state.cc:669
 msgid ""
 "the %1 audio engine is not connected and state saving would lose all I/O "
 "connections. Session not saved"
@@ -1955,138 +1776,122 @@ msgstr ""
 "lydmotoren i %1 er ikkje kopla til, og å lagra statusen ville kasta bort "
 "alle I/U-tilkoplingar. Økta er ikkje lagra"
 
-#: session_state.cc:812
+#: session_state.cc:720
 msgid "state could not be saved to %1"
 msgstr "greidde ikkje lagra tilstanden til %1"
 
-#: session_state.cc:814 session_state.cc:825
-#, fuzzy
-msgid "Could not remove temporary session file at path \"%1\" (%2)"
-msgstr "Greidde ikkje fjerna opptaksstatusen på stigen \"%1\" (%2)"
-
-#: session_state.cc:822
+#: session_state.cc:730
 msgid "could not rename temporary session file %1 to %2"
 msgstr "greidde ikkje døypa om mellombels øktfil %1 til %2"
 
-#: session_state.cc:890
-#, fuzzy
+#: session_state.cc:798
 msgid "%1: session file \"%2\" doesn't exist!"
-msgstr "%1: tilstandsinformasjonsfila \"%2\" for økta finst ikkje!"
+msgstr ""
 
-#: session_state.cc:902
-#, fuzzy
-msgid "Could not understand session file %1"
-msgstr "Skjønte ikkje økthistoriefila \"%1\""
-
-#: session_state.cc:911
+#: session_state.cc:819
 msgid "Session file %1 is not a session"
 msgstr "Øktfila %1 er ikkje ei økt"
 
-#: session_state.cc:1208
+#: session_state.cc:1125
 msgid "programming error: Session: incorrect XML node sent to set_state()"
 msgstr ""
 "programmeringsfeil: Økt: feil XML-punkt sendt til set_state()-funksjonen"
 
-#: session_state.cc:1257
+#: session_state.cc:1179
 msgid "Session: XML state has no options section"
 msgstr "Økt: XML-tilstandsfila har ikkje noko avsnitt om instillingar"
 
-#: session_state.cc:1262
+#: session_state.cc:1184
 msgid "Session: XML state has no metadata section"
 msgstr "Økt: XML-fila har inga avdeling for metadata"
 
-#: session_state.cc:1273
+#: session_state.cc:1195
 msgid "Session: XML state has no sources section"
 msgstr "Økt: XML-tilstandsfila har ikkje noko avsnitt om kjelder"
 
-#: session_state.cc:1280
+#: session_state.cc:1202
 msgid "Session: XML state has no Tempo Map section"
 msgstr "Økt: XML-fila har ikkje noko avsnitt om tempokart"
 
-#: session_state.cc:1287
+#: session_state.cc:1209
 msgid "Session: XML state has no locations section"
 msgstr "Økt: XML-fila har ikkje noko avsnitt om stader"
 
-#: session_state.cc:1313
+#: session_state.cc:1235
 msgid "Session: XML state has no Regions section"
 msgstr "Økt: XML-tilstandsfila har ikkje noko avsnitt om bolkar"
 
-#: session_state.cc:1320
+#: session_state.cc:1242
 msgid "Session: XML state has no playlists section"
 msgstr "Økt: XML-tilstandsfila har ikkje noko avsnitt om spelelister"
 
-#: session_state.cc:1340
+#: session_state.cc:1262
 msgid "Session: XML state has no bundles section"
 msgstr "Økt: XML-fila har inga avdeling for bundlar"
 
-#: session_state.cc:1352
+#: session_state.cc:1274
 msgid "Session: XML state has no diskstreams section"
 msgstr "Økt: XML-fila har ikkje nok avsnitt om diskstraumar"
 
-#: session_state.cc:1360
+#: session_state.cc:1282
 msgid "Session: XML state has no routes section"
 msgstr "Økt: XML-fila har ikkje noko avsnitt om ruter"
 
-#: session_state.cc:1372
+#: session_state.cc:1294
 msgid "Session: XML state has no route groups section"
 msgstr "Økt: XML-fila har inga avdeling for rutegrupper"
 
-#: session_state.cc:1381
+#: session_state.cc:1303
 msgid "Session: XML state has no edit groups section"
 msgstr "Økt: XML-fila har ikkje noko avsnitt om grupperedigering"
 
-#: session_state.cc:1388
+#: session_state.cc:1310
 msgid "Session: XML state has no mix groups section"
 msgstr "Økt: XML-fila har ikkje noko avsnitt om miksgrupper"
 
-#: session_state.cc:1396
+#: session_state.cc:1318
 msgid "Session: XML state has no click section"
 msgstr "Økt: XML-fila har ikkje noko avsnitt om klikk"
 
-#: session_state.cc:1444
+#: session_state.cc:1360
 msgid "Session: cannot create Route from XML description."
 msgstr "Økt: greier ikkje laga rute ut frå XML-skildringa."
 
-#: session_state.cc:1448
+#: session_state.cc:1364
 msgid "Loaded track/bus %1"
 msgstr "Lasta spor/buss %1"
 
-#: session_state.cc:1546
+#: session_state.cc:1462
 msgid "Could not find diskstream for route"
 msgstr "Greidde ikkje finna diskstraumen for rute"
 
-#: session_state.cc:1600
+#: session_state.cc:1516
 msgid "Session: cannot create Region from XML description."
 msgstr "Økt: greier ikkje laga bolkar ut frå XML-skildringa."
 
-#: session_state.cc:1604
+#: session_state.cc:1520
 msgid "Can not load state for region '%1'"
 msgstr "Greier ikkje laga status for bolken '%1'"
 
-#: session_state.cc:1640
+#: session_state.cc:1556
 msgid "Regions in compound description not found (ID's %1 and %2): ignored"
 msgstr "Fann ikkje bolkar i samansetjingsstatus (IDar %1 og %2): ignorert"
 
-#: session_state.cc:1668
-#, fuzzy
-msgid "Nested source has no ID info in session file! (ignored)"
-msgstr "Nøsta kjelde har ingen ID-info i øktstatusfila! (ignorert)"
-
-#: session_state.cc:1680
+#: session_state.cc:1596
 msgid "Cannot reconstruct nested source for region %1"
 msgstr "Greier ikkje rekonstruera nøsta kjelde for bolken %1"
 
-#: session_state.cc:1742
+#: session_state.cc:1658
 msgid "Session: XMLNode describing a AudioRegion is incomplete (no source)"
 msgstr "Økt: XML-punktet som skildrar ein lydbolk er uferdig (manglar kjelde)"
 
-#: session_state.cc:1750 session_state.cc:1771 session_state.cc:1791
+#: session_state.cc:1666 session_state.cc:1687 session_state.cc:1707
 msgid ""
 "Session: XMLNode describing a AudioRegion references an unknown source id =%1"
 msgstr ""
 "Økt: XML-punktet som skildrar ein lydbolk peikar på ein ukjend kjelde-ID = %1"
 
-#: session_state.cc:1756 session_state.cc:1777 session_state.cc:1797
+#: session_state.cc:1672 session_state.cc:1693 session_state.cc:1713
 msgid ""
 "Session: XMLNode describing a AudioRegion references a non-audio source id ="
 "%1"
@@ -2094,7 +1899,7 @@ msgstr ""
 "Økt: XML-punktet som skildrar ein lydbolk peikar på ein kjelde-ID %1 som "
 "ikkje er ei lydfil"
 
-#: session_state.cc:1820
+#: session_state.cc:1736
 msgid ""
 "Session: XMLNode describing an AudioRegion is missing some master sources; "
 "ignored"
@@ -2102,25 +1907,25 @@ msgstr ""
 "Økt: XML-punktet som skildrar ein lydbolk manglar nokre masterkjelder, ser "
 "bort frå"
 
-#: session_state.cc:1854
+#: session_state.cc:1770
 msgid "Session: XMLNode describing a MidiRegion is incomplete (no source)"
 msgstr "Økt: XML-punktet som skildrar ein midibolk er uferdig (manglar kjelde)"
 
-#: session_state.cc:1862
+#: session_state.cc:1778
 msgid ""
 "Session: XMLNode describing a MidiRegion references an unknown source id =%1"
 msgstr ""
 "Økt: XML-punktet som skildrar ein midibolk peikar på ein ukjend kjelde-ID = "
 "%1"
 
-#: session_state.cc:1868
+#: session_state.cc:1784
 msgid ""
 "Session: XMLNode describing a MidiRegion references a non-midi source id =%1"
 msgstr ""
 "Økt: XML-punktet som skildrar ein midibolk peikar på ein kjelde-ID %1 som "
 "ikkje er ei midi-fil"
 
-#: session_state.cc:1936
+#: session_state.cc:1852
 msgid ""
 "cannot create new file from region name \"%1\" with ident = \"%2\": too many "
 "existing files with similar names"
@@ -2128,122 +1933,97 @@ msgstr ""
 "greier ikkje laga ny fil frå bolknamn \"%1\" med ident = \"%2\": det finst "
 "for mange med same namnet"
 
-#: session_state.cc:1959
+#: session_state.cc:1875
 msgid "Session: cannot create Source from XML description."
 msgstr "Økt: greier ikkje laga kjelde ut frå XML-skildringa."
 
-#: session_state.cc:1993
+#: session_state.cc:1909
 msgid "A sound file is missing. It will be replaced by silence."
 msgstr "Det manglar ei lydfil. Ho vil bli erstatta med stille."
 
-#: session_state.cc:2016
+#: session_state.cc:1932
 msgid "Found a sound file that cannot be used by %1. Talk to the progammers."
 msgstr "Fann ei lydfil som %1 ikkje kan bruka. Prat med utviklarane."
 
-#: session_state.cc:2033
-#, fuzzy
-msgid "Could not create templates directory \"%1\" (%2)"
-msgstr "Greidde ikkje laga miksarmalmappa \"%1\" (%2)"
-
-#: session_state.cc:2046
+#: session_state.cc:1962
 msgid "Template \"%1\" already exists - new version not created"
 msgstr "Malen \"%1\" finst alt - laga ingen ny versjon"
 
-#: session_state.cc:2052
-#, fuzzy
-msgid "Could not create directory for Session template\"%1\" (%2)"
-msgstr "Greidde ikkje laga miksarmalmappa \"%1\" (%2)"
-
-#: session_state.cc:2062
+#: session_state.cc:1978
 msgid "template not saved"
 msgstr "malen vart ikkje lagra"
 
-#: session_state.cc:2072
-#, fuzzy
-msgid "Could not create directory for Session template plugin state\"%1\" (%2)"
-msgstr "Greidde ikkje laga miksarmalmappa \"%1\" (%2)"
-
-#: session_state.cc:2267
-#, fuzzy
-msgid "Unknown node \"%1\" found in Bundles list from session file"
-msgstr "Fann ukjent punkt \"%1\" i bundellista frå tilstandsfila"
-
-#: session_state.cc:2809 session_state.cc:2815
+#: session_state.cc:2725 session_state.cc:2731
 msgid "Cannot expand path %1 (%2)"
 msgstr "Greier ikkje utvida stigen %1 (%2)"
 
-#: session_state.cc:2868
+#: session_state.cc:2784
 msgid "Session: cannot create dead file folder \"%1\" (%2)"
 msgstr "Økt: greier ikkje laga mappa \"%1\" for daudlyd (%2)"
 
-#: session_state.cc:2907
+#: session_state.cc:2823
 msgid "cannot rename unused file source from %1 to %2 (%3)"
 msgstr "kan ikkje døypa om den ubrukte filkjelda frå %1 til %2 (%3)"
 
-#: session_state.cc:2925
+#: session_state.cc:2841
 msgid "cannot remove peakfile %1 for %2 (%3)"
 msgstr "kan ikkje fjerna toppfil %1 for %2 (%3)"
 
-#: session_state.cc:3227
+#: session_state.cc:3143
 msgid "could not backup old history file, current history not saved"
 msgstr ""
 "greidde ikkje ta tryggingskopi av den gamle historiefila, noverande historie "
 "vart ikkje lagra."
 
-#: session_state.cc:3240
+#: session_state.cc:3156
 msgid "history could not be saved to %1"
 msgstr "greidde ikkje lagra historia til %1"
 
-#: session_state.cc:3243
-#, fuzzy
-msgid "Could not remove history file at path \"%1\" (%2)"
-msgstr "greidde ikkje henta fram att historiefila frå tryggingskopien %1 (%2)"
-
-#: session_state.cc:3247
+#: session_state.cc:3163
 msgid "could not restore history file from backup %1 (%2)"
 msgstr "greidde ikkje henta fram att historiefila frå tryggingskopien %1 (%2)"
 
-#: session_state.cc:3272
+#: session_state.cc:3188
 msgid "%1: no history file \"%2\" for this session."
 msgstr "%1: inga historiefil \"%2\" for denne økta."
 
-#: session_state.cc:3278
+#: session_state.cc:3194
 msgid "Could not understand session history file \"%1\""
 msgstr "Skjønte ikkje økthistoriefila \"%1\""
 
-#: session_state.cc:3320
+#: session_state.cc:3236
 msgid "Failed to downcast MidiSource for NoteDiffCommand"
 msgstr "Greidde ikkje kasta ned midi-kjelde for NoteDiffCommand"
 
-#: session_state.cc:3331
+#: session_state.cc:3247
 msgid "Failed to downcast MidiSource for SysExDiffCommand"
 msgstr "Greidde ikkje kasta ned midi-kjelde for SysExDiffCommand"
 
-#: session_state.cc:3342
+#: session_state.cc:3258
 msgid "Failed to downcast MidiSource for PatchChangeDiffCommand"
 msgstr "Greidde ikkje kasta ned midi-kjelde for PatchChangeDiffCommand"
 
-#: session_state.cc:3350
+#: session_state.cc:3266
 msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
 msgstr "Fann ikkje ut korleis eg skal laga ein kommando av eit %1-XML-punkt."
 
-#: session_state.cc:3602
+#: session_state.cc:3502
 msgid "Session: unknown diskstream type in XML"
 msgstr "Økt: ukjend diskstraumtype i XML"
 
-#: session_state.cc:3607
+#: session_state.cc:3507
 msgid "Session: could not load diskstream via XML state"
 msgstr "Økt: greidde ikkje lasta diskstraumen via XML-tilstand"
 
-#: session_time.cc:215
-msgid "Unknown JACK transport state %1 in sync callback"
-msgstr "Ukjend JACK-transporttilstand %1 i synk-tilbakekallet"
+#: session_time.cc:214
+msgid "Unknown transport state %1 in sync callback"
+msgstr ""
 
-#: session_transport.cc:168
+#: session_transport.cc:167
 msgid "Cannot loop - no loop range defined"
 msgstr "Greidde ikkje spela i lykkje - du har ikkje gjeve noko lykkjeområde"
 
-#: session_transport.cc:728
+#: session_transport.cc:739
 msgid ""
 "Seamless looping cannot be supported while %1 is using JACK transport.\n"
 "Recommend changing the configured options"
@@ -2251,7 +2031,7 @@ msgstr ""
 "Samanhengande lykkjespeling er ikkje støtta når %1 bruker JACK-transporten.\n"
 "Me rår til at du endrar innstillingane."
 
-#: session_transport.cc:1094
+#: session_transport.cc:1105
 msgid ""
 "Global varispeed cannot be supported while %1 is connected to JACK transport "
 "control"
@@ -2260,14 +2040,12 @@ msgstr ""
 "transportkontrollen"
 
 #: smf_source.cc:252
-#, fuzzy
 msgid "Unable to read event prefix, corrupt MIDI ring"
-msgstr "Greier ikkje lesa handlingsprefiks, MIDI-ringbufferen i ulage"
+msgstr ""
 
 #: smf_source.cc:265
-#, fuzzy
 msgid "Event has time and size but no body, corrupt MIDI ring"
-msgstr "Les tid/storleik men ikkje buffer, MIDI-ringbufferen i ulage"
+msgstr ""
 
 #: smf_source.cc:271
 msgid "Event time is before MIDI source position"
@@ -2392,17 +2170,11 @@ msgstr "greidde ikkje tildela fila %1 for å lesa"
 msgid "SndFileSource: could not seek to frame %1 within %2 (%3)"
 msgstr "Lydfilkjelde: greier ikkje leita fram til ramma %1 innan %2 (%3)"
 
-#: sndfilesource.cc:347
-#, fuzzy
-msgid ""
-"SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5, ret was %6)"
-msgstr "SndFileSource: @ %1 greidde ikkje lesa %2 i %3 (%4) (len = %5)"
-
 #: sndfilesource.cc:391 sndfilesource.cc:420
 msgid "attempt to write a non-writable audio file source (%1)"
 msgstr "prøvde å skriva til ei ikkje-skrivbar lydkjeldefil (%1)"
 
-#: sndfilesource.cc:396 utils.cc:507 utils.cc:531 utils.cc:545 utils.cc:564
+#: sndfilesource.cc:396 utils.cc:510 utils.cc:534 utils.cc:548 utils.cc:567
 msgid "programming error: %1 %2"
 msgstr "programmeringsfeil: %1 %2"
 
@@ -2427,11 +2199,6 @@ msgstr ""
 #: sndfilesource.cc:553
 msgid "attempt to set BWF info for an un-opened audio file source (%1)"
 msgstr "prøvde å laga BWF-info for ei uopna lydkjeldefil (%1)"
-
-#: sndfilesource.cc:614
-#, fuzzy
-msgid "%1: cannot seek to %2 (libsndfile error: %3)"
-msgstr "%1: greier ikkje gå til %2 (libsndfile-feil: %3"
 
 #: sndfilesource.cc:727
 msgid "SndFileSource: \"%1\" bad read retval: %2 of %5 (%3: %4)"
@@ -2492,31 +2259,12 @@ msgstr "TempoSection-XML-punktet har ein ulovleg \"note-type\"-verdi"
 msgid "TempoSection XML node has no \"movable\" property"
 msgstr "TempoSection-XML-punktet har ingen \"flyttbar\"-eigenskap"
 
-#: tempo.cc:124
-#, fuzzy
-msgid "TempoSection XML node has an illegal \"bar-offset\" value"
-msgstr "TempoSection-XML-punktet har ein ulovleg \"start\"-verdi"
-
 #: tempo.cc:201
 msgid "MeterSection XML node has no \"start\" property"
 msgstr "MeterSection-XML-punktet har ingen \"start\"-eigenskap"
 
 #: tempo.cc:209
 msgid "MeterSection XML node has an illegal \"start\" value"
-msgstr "MeterSection-XML-punktet har ein ulovleg \"start\"-verdi"
-
-#: tempo.cc:219
-#, fuzzy
-msgid ""
-"MeterSection XML node has no \"beats-per-bar\" or \"divisions-per-bar\" "
-"property"
-msgstr "MeterSection-XML-punktet har ingen \"slag per takt\"-eigenskap"
-
-#: tempo.cc:225
-#, fuzzy
-msgid ""
-"MeterSection XML node has an illegal \"beats-per-bar\" or \"divisions-per-bar"
-"\" value"
 msgstr "MeterSection-XML-punktet har ein ulovleg \"start\"-verdi"
 
 #: tempo.cc:230
@@ -2593,13 +2341,10 @@ msgstr ""
 "Taktmerke:"
 
 #: tempo_map_importer.cc:89
-#, fuzzy
 msgid ""
 "This will replace the current tempo map!\n"
 "Are you sure you want to do this?"
 msgstr ""
-"Dette byter ut det gjeldande tempokartet!\n"
-"Er du sikker på at du vil gjera dette?"
 
 #: user_bundle.cc:47
 msgid "Node for Bundle has no \"name\" property"
@@ -2638,19 +2383,19 @@ msgstr "Lås"
 msgid "programming error: unknown edit mode string \"%1\""
 msgstr "programmeringsfeil: ukjend redigeringsmodus-streng \"%1\""
 
-#: utils.cc:389 utils.cc:418
+#: utils.cc:389 utils.cc:421
 msgid "MIDI Timecode"
 msgstr "MIDI-tidskode"
 
-#: utils.cc:389 utils.cc:416
+#: utils.cc:389 utils.cc:419
 msgid "MTC"
 msgstr "MTC"
 
-#: utils.cc:393 utils.cc:425
+#: utils.cc:393 utils.cc:428
 msgid "MIDI Clock"
 msgstr "MIDI-klokke"
 
-#: utils.cc:397 utils.cc:412 utils.cc:432
+#: utils.cc:397 utils.cc:415 utils.cc:435
 msgid "JACK"
 msgstr "JACK"
 
@@ -2658,969 +2403,10 @@ msgstr "JACK"
 msgid "programming error: unknown sync source string \"%1\""
 msgstr "programmeringsfeil: ukjend synkkjeldestreng \"%1\""
 
-#: utils.cc:423
-#, fuzzy
-msgid "M-Clock"
-msgstr "MIDI-klokke"
-
-#: utils.cc:429
-#, fuzzy
-msgid "LTC"
-msgstr "MTC"
-
-#: utils.cc:599
+#: utils.cc:602
 msgid "programming error: unknown native header format: %1"
 msgstr "programmeringsfeil: ukjent opphavleg hovudformat: \"%1\""
 
-#: utils.cc:614
+#: utils.cc:617
 msgid "cannot open directory %1 (%2)"
 msgstr "greier ikkje opna mappa %1 (%2)"
-
-#~ msgid "Session"
-#~ msgstr "Økt"
-
-#~ msgid "MidiDiskstream: XML property channel-mask out of range"
-#~ msgstr "MIDI-diskstraum: kanalmaske for XML-eigenskap utanfor rekkjevidd"
-
-#~ msgid ""
-#~ "Copying old session file %1 to %2\n"
-#~ "Use %2 with %3 versions before 2.0 from now on"
-#~ msgstr ""
-#~ "Kopierer gamal øktfil %1 til %2\n"
-#~ "Bruk %2 med %3-versjonar før 2.0 frå no av"
-
-#~ msgid "midi"
-#~ msgstr "midi"
-
-#~ msgid "timefx code failure. please notify ardour-developers."
-#~ msgstr "kodefeil på tidseffektar, sei frå til Ardour-utviklarane"
-
-#~ msgid "Session: you can't use a mark for auto loop"
-#~ msgstr "Økt: du kan ikkje bruka eit merke for auto-lykkjespel"
-
-#~ msgid ""
-#~ "No more JACK ports are available. You will need to stop %1 and restart "
-#~ "JACK with ports if you need this many tracks."
-#~ msgstr ""
-#~ "Det finst ikkje fleire JACK-portar. Du må stoppa %1 og starta JACK på "
-#~ "nytt med nok portar viss du treng så mange spor."
-
-#~ msgid "Could not understand ardour file %1"
-#~ msgstr "Skjønte ikkje ardour-fila %1"
-
-#~ msgid "control protocol XML node has no name property. Ignored."
-#~ msgstr ""
-#~ "XML-noden for kontrollprotokollen har ingen namneeigenskap. Såg bort frå."
-
-#~ msgid "control protocol \"%1\" is not known. Ignored"
-#~ msgstr "kontrollprotokollen \"%1\" er ukjent. Såg bort frå"
-
-#~ msgid "Removed open file count limit. Excellent!"
-#~ msgstr "Fjerna teljegrensa for opne filer. Steikande bra!"
-
-#~ msgid "%1 will be limited to %2 open files"
-#~ msgstr "%1 vil vera avgrensa til å opna %2 filer"
-
-#~ msgid ""
-#~ "programming error: non-audio Region passed to remove_overlap in audio "
-#~ "playlist"
-#~ msgstr ""
-#~ "programmeringsfeil: ikkje-lydbolk gjeve til fjern_overlapping i "
-#~ "lydspelelista"
-
-#~ msgid ""
-#~ "programming error: non-audio Region tested for overlap in audio playlist"
-#~ msgstr ""
-#~ "programmeringsfeil: ikkje-lydbolk prøvd for overlapping i lydspelelista"
-
-#~ msgid "Crossfade: no \"in\" region in state"
-#~ msgstr "Overtoning: Ingen \"inn\"-bolk her"
-
-#~ msgid ""
-#~ "Crossfade: no \"in\" region %1 found in playlist %2 nor in region map"
-#~ msgstr ""
-#~ "Krysstoning: fann ingen \"inn\"-bolk %1, korkje i spelelista %2 eller i "
-#~ "bolkkartet"
-
-#~ msgid "Crossfade: no \"out\" region in state"
-#~ msgstr "Overtoning: ingen \"ut\"-bolk her"
-
-#~ msgid ""
-#~ "Crossfade: no \"out\" region %1 found in playlist %2 nor in region map"
-#~ msgstr ""
-#~ "Krysstoning: fann ingen \"ut\"-bolk %1, korkje i spelelista %2 eller i "
-#~ "bolkkartet"
-
-#~ msgid "old-style crossfade information - no position information"
-#~ msgstr "gamaldags overtoningsinformasjon - ingen posisjonsinformasjon"
-
-#~ msgid "midiui"
-#~ msgstr "midibrukarflate"
-
-#~ msgid "Chunk %1 uses an unknown playlist \"%2\""
-#~ msgstr "Beten %1 bruker ei ukjend speleliste, \"%2\""
-
-#~ msgid "Chunk %1 contains malformed playlist information"
-#~ msgstr "Beten %1 inneheld feilforma spelelisteinformasjon"
-
-#~ msgid "signal"
-#~ msgstr "signal"
-
-#~ msgid "editor"
-#~ msgstr "redigering"
-
-#~ msgid "Template \"%1\" already exists - template not renamed"
-#~ msgstr "Malen \"%1\" finst alt - malen fekk ikkje nytt namn"
-
-#~ msgid "Session: cannot create Named Selection from XML description."
-#~ msgstr "Økt: greier ikkje laga namngjeve utval ut frå XML-skildringa."
-
-#~ msgid "Unable to create a backup copy of file %1 (%2)"
-#~ msgstr "Greidde ikkje laga tryggingskopi av fila %1 (%2)"
-
-#, fuzzy
-#~ msgid "programming error: realpath(%1) failed, errcode %2"
-#~ msgstr "programmeringsfeil: %1 %2"
-
-#~ msgid "Cannot become GUI app"
-#~ msgstr "Greier ikkje bli grafisk program"
-
-#~ msgid ""
-#~ "%1: could not find configuration file (ardour.rc), canvas will look "
-#~ "broken."
-#~ msgstr ""
-#~ "%1: greidde ikkje finna oppsettsfila (ardour.rc), arbeidsområdet vil sjå "
-#~ "øydelagt ut."
-
-#~ msgid "Midi"
-#~ msgstr "Midi"
-
-#~ msgid "illegal or badly-formed string used for path (%1)"
-#~ msgstr "ulovleg eller feilforma streng brukt for stigen (%1)"
-
-#~ msgid "path (%1) is ambiguous"
-#~ msgstr "stigen (%1) er tvitydig"
-
-#~ msgid "Could not move capture file from %1"
-#~ msgstr "Greidde ikkje flytta opptaksfila frå %1"
-
-#~ msgid "Cannot create temporary MIDI port to determine MIDI buffer size"
-#~ msgstr ""
-#~ "Greier ikkje laga mellombels MIDI-port for å avgjera MIDI-bufferstorleiken"
-
-#~ msgid "Pan %1"
-#~ msgstr "Pan %1"
-
-#~ msgid "rename from %1 to %2 failed: %3)"
-#~ msgstr "omdøyping frå %1 til %2 mislukka: %3)"
-
-#~ msgid "Using %2 threads on %1 CPUs"
-#~ msgstr "Brukar %2 trådar på %1 prosessorar"
-
-#~ msgid "direction"
-#~ msgstr "retning"
-
-#~ msgid ""
-#~ "badly formatted pan automation event record at line %1 of %2 (ignored) "
-#~ "[%3]"
-#~ msgstr ""
-#~ "feilformatert handlingsopptak av panoreringsautomasjon på linja %1 av %2 "
-#~ "(hoppa over) [%3]"
-
-#~ msgid "programming error:"
-#~ msgstr "programmeringsfeil: "
-
-#~ msgid "cannot open pan automation file %1 (%2)"
-#~ msgstr "greier ikkje opna panoreringsautomasjonsfil %1 (%2)"
-
-#~ msgid "badly formed version number in pan automation event file \"%1\""
-#~ msgstr ""
-#~ "feilforma versjonsnummer i handlingsfila for panoreringsautomasjon \"%1\""
-
-#~ msgid ""
-#~ "no version information in pan automation event file \"%1\" (first line = "
-#~ "%2)"
-#~ msgstr ""
-#~ "ingen versjonsinformasjon i handlingsfila for panoreringsautomasjon "
-#~ "\"%1\" (fyrste linja= %2)"
-
-#~ msgid "too many panner states found in pan automation file %1"
-#~ msgstr "for mange panoreringstilstandar i automasjonsfila %1"
-
-#~ msgid "C"
-#~ msgstr "S"
-
-#~ msgid "lr"
-#~ msgstr "vh"
-
-#~ msgid "width"
-#~ msgstr "breidd"
-
-#~ msgid "cannot open click emphasis soundfile %1 (%2)"
-#~ msgstr "greier ikkje opna uthevings-klikklydfila %1 (%2)"
-
-#~ msgid "cannot read data from click emphasis soundfile"
-#~ msgstr "greier ikkje lesa data frå uthevings-klikklydfila"
-
-#~ msgid "Reset Control Protocols"
-#~ msgstr "Still tilbake kontrollprotokollar"
-
-#~ msgid "Session: cannot create session stub sounds dir \"%1\" (%2)"
-#~ msgstr "Økt: greier ikkje laga mappa \"%1\" for lydfilbetar (%2)"
-
-#~ msgid "Session: cannot create session stub midi dir \"%1\" (%2)"
-#~ msgstr "Økt: greier ikkje laga midibetemappa \"%1\" for økta (%2)"
-
-#~ msgid "could not allocate file %1"
-#~ msgstr "greidde ikkje tildela fila %1"
-
-#~ msgid ""
-#~ "AudioDiskstream %1: cannot read xfade samples %2 from playlist at frame %3"
-#~ msgstr ""
-#~ "Lyd-diskstraum %1: greidde ikkje lesa krysstoningspunkt %2 frå "
-#~ "spelelista, ramme %3"
-
-#~ msgid "%1: cannot create region from pending capture sources"
-#~ msgstr "%1: greidde ikkje laga bolk frå ventande opptakskjelder"
-
-#~ msgid "register input port called before engine was started"
-#~ msgstr "registerinngangsporten vart oppkalla før tenaren starta"
-
-#~ msgid "register output port called before engine was started"
-#~ msgstr "registerutgangsporten vart oppkalla før tenaren starta"
-
-#~ msgid "AudioEngine: connection already exists: %1 (%2) to %3 (%4)"
-#~ msgstr "AudioEngine: tilkoplinga finst frå før: %1 (%2) til %3 (%4)."
-
-#~ msgid ""
-#~ "Disconnected from JACK while reconnecting. You should quit Ardour now."
-#~ msgstr "Kopla frå JACK ved ny tilkopling. Du bør avslutta Ardour no."
-
-#~ msgid "could not reconnect %1 and %2 (err = %3)"
-#~ msgstr "greidde ikkje kopla til att %1 og %2 (feil = %3)"
-
-#~ msgid ""
-#~ "This is an old Ardour session that does not have\n"
-#~ "sufficient information for rendered FX"
-#~ msgstr ""
-#~ "Dette er ei gamal Ardour-økt som ikkje har\n"
-#~ "nok informasjon for oppteikna effektar"
-
-#~ msgid "in 1+2"
-#~ msgstr "inn 1+2"
-
-#~ msgid "AudioTrack: audio diskstream \"%1\" not known by session"
-#~ msgstr "Lydspor: økta kjenner ikkje att lyd-diskstraumen \"%1\""
-
-#~ msgid "programming error: AudioTrack given state without diskstream!"
-#~ msgstr "Programmeringsfeil: Ardour fekk tilstand utan diskstraum1"
-
-#~ msgid "ill-formed MIDI port specification in ardour rcfile (ignored)"
-#~ msgstr ""
-#~ "feilforma MIDI-portspesifikasjon oppgjeve i ardour-rc-fila (hoppa over)"
-
-#~ msgid "Node for Connection has no \"connections\" property"
-#~ msgstr "Punkt for tilkopling har ingen \"tilkopingar\"-eigenskapar"
-
-#~ msgid "Starting OSC"
-#~ msgstr "Startar OSC"
-
-#~ msgid "no MIDI ports specified: no MMC or MTC control possible"
-#~ msgstr ""
-#~ "ingen MIDI-portar er spesifiserte. MMC- eller MTC-kontroll er ikkje "
-#~ "mogleg."
-
-#~ msgid "Configuring MIDI ports"
-#~ msgstr "Set opp MIDI-portar"
-
-#~ msgid "default"
-#~ msgstr "standard"
-
-#~ msgid "No MMC control (MIDI port \"%1\" not available)"
-#~ msgstr "Ingen MMC-kontroll (MIDI-porten \"%1\" er ikkje tilgjengeleg)"
-
-#~ msgid "No MTC support (MIDI port \"%1\" not available)"
-#~ msgstr "Inga MTC-støtte (MIDI-porten \"%1\" er ikkje tilgjengeleg)"
-
-#~ msgid "No MIDI parameter support (MIDI port \"%1\" not available)"
-#~ msgstr ""
-#~ "Ingen MIDI-parameterstøtte (MIDI-porten \"%1\" er ikkje tilgjengeleg)"
-
-#~ msgid ""
-#~ "converting %1\n"
-#~ "(resample from %2KHz to %3KHz)\n"
-#~ "(%4 of %5)"
-#~ msgstr ""
-#~ "omdannar %1\n"
-#~ "(ompunkting frå %1KHz til %3KHz)\n"
-#~ "(%4 av %5)"
-
-#~ msgid ""
-#~ "converting %1\n"
-#~ "(%2 of %3)"
-#~ msgstr ""
-#~ "omdannar %1\n"
-#~ "(%2 av %3)"
-
-#~ msgid "XML node describing a plugin insert is missing the `%1' information"
-#~ msgstr ""
-#~ "XML-punktet som skildrar tilleggsprogramtappinga manglar '%1'-informasjon"
-
-#~ msgid "XML node describing insert is missing a Redirect node"
-#~ msgstr "XML-punktet som skildrar tappinga manglar omdirigeringspunkt"
-
-#~ msgid ""
-#~ "XML node describing a port automation is missing the `%1' information"
-#~ msgstr "XML-punktet som skildrar portautomasjonen manglar '%1'-informasjon"
-
-#~ msgid "%1: cannot open automation event file \"%2\""
-#~ msgstr "%1: greier ikkje opna automasjonshendingsfila \"%2\""
-
-#~ msgid "badly formed version number in automation event file \"%1\""
-#~ msgstr "feilforma versjonsnummer i automasjonshendingsfila \"%1\""
-
-#~ msgid "no version information in automation event file \"%1\""
-#~ msgstr "ingen versjonsinformasjon i automasjonshendingsfila \"%1\""
-
-#~ msgid "badly formatted automation event record at line %1 of %2 (ignored)"
-#~ msgstr ""
-#~ "feilformatert automasjonshendingsopptak på linje %1 av %2 (hoppa over)"
-
-#~ msgid "IO::connecting_became_legal() called without a pending state node"
-#~ msgstr ""
-#~ "IO::connecting_became_legal()-funksjonen vart oppkalla utan ventande "
-#~ "tilstandsnode"
-
-#~ msgid "IO::ports_became_legal() called without a pending state node"
-#~ msgstr ""
-#~ "IO::ports_became_legal()-funksjonen vart oppkalla utan ventande "
-#~ "tilstandsnode"
-
-#~ msgid "improper output channel list in XML node (%1)"
-#~ msgstr "feil utgangskanalliste i XML-punktet %1"
-
-#~ msgid "you cannot use colons to name objects with I/O connections"
-#~ msgstr "du kan ikkje bruka kolon i namn på objekt med I/U-tilkoplingar"
-
-#~ msgid "badly-formed positional data for Multi2dPanner - ignored"
-#~ msgstr "feilforma posisjonsdata for Multi2dPanner - hoppa over"
-
-#~ msgid "playlist const copy constructor called"
-#~ msgstr "konstant kopikonstruktør for speleliste vart oppkalla"
-
-#~ msgid "playlist non-const copy constructor called"
-#~ msgstr "ikkje-konstant kopikonstruktør for speleliste vart oppkalla"
-
-#~ msgid "%1: bounds changed received for region (%2)not in playlist"
-#~ msgstr "%1: mottok grenseendring for bolken (%2) - ikkje i spelelista"
-
-#~ msgid "Playlist: cannot reset region state from XML"
-#~ msgstr "Speleliste: greier ikkje stilla bolkstatusen tilbake frå XML"
-
-#~ msgid "programming error: unknown Redirect type in Redirect::Clone!\n"
-#~ msgstr ""
-#~ "programmeringsfeil: ukjend omdirigeringstype i Redirect::Clone-"
-#~ "funksjonen!\n"
-
-#~ msgid "%2: badly formatted node name in XML automation state, ignored"
-#~ msgstr "%2: feilforma nodenamn i XML-automasjonsstatusen, såg bort frå"
-
-#~ msgid "%1: cannot load automation data from XML"
-#~ msgstr "%1: greier ikkje lasta automasjonsdata frå XML"
-
-#~ msgid "incorrect XML node \"%1\" passed to Redirect object"
-#~ msgstr "feil XML-punkt, \"%1\", vart sendt til omdirigeringsobjektet"
-
-#~ msgid "XML node describing an IO is missing an IO node"
-#~ msgstr "XML-punktet som skildrar IU manglar eit IU-punkt"
-
-#~ msgid "XML node describing a redirect is missing the `active' field"
-#~ msgstr "XML-punktet som skildrar ei omdirigering manglar 'aktiv'-feltet"
-
-#~ msgid "XML node describing a redirect is missing the `placement' field"
-#~ msgstr ""
-#~ "XML-punktet som skildrar ei omdirigering manglar 'plassering'-feltet"
-
-#~ msgid "XMLNode describing a Region is incomplete (no name)"
-#~ msgstr "XML-punktet som skildrar ein bolk er ufullstendig (utan namn)"
-
-#~ msgid "Session: XMLNode describing a Region is incomplete (no id)"
-#~ msgstr "Økt: XML-punktet som skildrar ein bolk er ufullstendig (ingen id)"
-
-#~ msgid "Send construction failed"
-#~ msgstr "Send-konstruksjon mislukka"
-
-#~ msgid "Insert XML node has no type property"
-#~ msgstr "Tappings-XML-punkt har ingen typeeigenskapar"
-
-#~ msgid "Route %1: unknown edit group \"%2 in saved state (ignored)"
-#~ msgstr ""
-#~ "Ruting %1: ukjend redigert gruppe \"%2 i lagra tilstand (hoppa over)"
-
-#~ msgid "Route %1: unknown mix group \"%2 in saved state (ignored)"
-#~ msgstr "Ruting %1: ukjend miksgruppe \"%2 i lagra tilstand (hoppa over)"
-
-#~ msgid "could not connect %1 to %2"
-#~ msgstr "greidde ikkje kopla %1 til %2"
-
-#~ msgid "XML node describing a send is missing a Redirect node"
-#~ msgstr "XML-punktet som skildrar ein send manglar eit omdirigeringspunkt"
-
-#~ msgid "cannot setup master inputs"
-#~ msgstr "greier ikkje setja opp masterinngangar"
-
-#~ msgid "Master Out"
-#~ msgstr "Master ut"
-
-#~ msgid "Catch up with send/insert state"
-#~ msgstr "Ta att send/omvegstatus"
-
-#~ msgid "OSC startup"
-#~ msgstr "OSC-oppstart"
-
-#~ msgid "cannot set up master outputs"
-#~ msgstr "greier ikkje setja opp masterutgangar"
-
-#~ msgid ""
-#~ "Session::add_region() ignored a null region. Warning: you might have lost "
-#~ "a region."
-#~ msgstr ""
-#~ "Økt::add_region() såg bort frå ein null-bolk. Pass på: det kan henda du "
-#~ "har mista ein bolk."
-
-#~ msgid "programming error: unknown type of Insert created!"
-#~ msgstr "programmeringsfeil: det er laga ein ukjend tappingstype!"
-
-#~ msgid "programming error: unknown type of Redirect created!"
-#~ msgstr "programmeringsfeil: det er laga ein ukjend omdirigeringstype!"
-
-#~ msgid "programming error: unknown type of Redirect deleted!"
-#~ msgstr "programmeringsfeil: det er sletta ein ukjend omdirigeringstype!"
-
-#~ msgid "Memory allocation error: posix_memalign (%1 * %2) failed (%3)"
-#~ msgstr "Minnetildelingsfeil: posix_memalign (%1 * %2) mislukka (%3)"
-
-#~ msgid ""
-#~ "Programming error: get_silent_buffers() called for %1 buffers but only %2 "
-#~ "exist"
-#~ msgstr ""
-#~ "Programmeringsfeil: get_silent_buffers() oppropt for %1 bufrar, men det "
-#~ "finst berre %2"
-
-#~ msgid "GlobalRouteStateCommand has no \"type\" node, ignoring"
-#~ msgstr "GlobalRouteStateCommand har ingen \"type\"-node, ser bort frå"
-
-#~ msgid "unknown type of GlobalRouteStateCommand (%1), ignored"
-#~ msgstr "ukjent slag GlobalRouteStateCommand (%1), ser bort frå"
-
-#~ msgid ""
-#~ "global route state command has no \"%1\" node, ignoring entire command"
-#~ msgstr ""
-#~ "allmenn rutestatuskommando har ingen \"%1\"-node, ser bort frå heile "
-#~ "kommandoen"
-
-#~ msgid ""
-#~ "cannot find track/bus \"%1\" while rebuilding a global route state "
-#~ "command, ignored"
-#~ msgstr ""
-#~ "greier ikkje finna spor/buss \"%1\" ved oppattbygging ein allmenn "
-#~ "rutestatuskommando, såg bort frå"
-
-#~ msgid ""
-#~ "global route meter state command has no \"%1\" node, ignoring entire "
-#~ "command"
-#~ msgstr ""
-#~ "allmenn kommando for rutemælestatus har ingen \"%1\"-node, ser bort frå "
-#~ "heile kommandoen"
-
-#~ msgid "Export: no output file specified"
-#~ msgstr "Eksport: du har ikkje skrive inn ut-fil"
-
-#~ msgid "illegal frame range in export specification"
-#~ msgstr "ulovleg "
-
-#~ msgid "Bad data width size.  Report me!"
-#~ msgstr "Feil storleik på databreidd. Sei frå om dette til utviklarane!"
-
-#~ msgid "Export: cannot open output file \"%1\" (%2)"
-#~ msgstr "Eksport: greier ikkje opna utfila \"%1\" (%2)"
-
-#~ msgid "cannot initialize sample rate conversion: %1"
-#~ msgstr "greier ikkje byrja punktrateomdanning: %1"
-
-#~ msgid "warning, leftover frames overflowed, glitches might occur in output"
-#~ msgstr "åtvaring: nokre rammer vart til overs i, det kan vera hakk i utfila"
-
-#~ msgid "Export: could not write data to output file (%1)"
-#~ msgstr "Eksport: greidde ikkje skriva data til utfil (%1)"
-
-#~ msgid "Ardour is slaved to MTC - port cannot be reset"
-#~ msgstr "Ardour er slave til ein MTC-port og kan ikkje nullstillast"
-
-#~ msgid "unknown port %1 requested for MTC"
-#~ msgstr "førespurnad til ukjend MTC-port %1"
-
-#~ msgid "Error reading from MIDI port %1"
-#~ msgstr "Greidde ikkje lesa frå MIDI-port %1"
-
-#~ msgid "MMC: cannot send command %1%2%3"
-#~ msgstr "MMC: greier ikkje senda kommandoen %1%2%3"
-
-#~ msgid "UI: cannot set O_NONBLOCK on signal read pipe (%1)"
-#~ msgstr "Grensesnitt: O_NONBLOCK fastsett for signallesingsrøyr (%1)"
-
-#~ msgid "UI: cannot set O_NONBLOCK on signal write pipe (%1)"
-#~ msgstr ""
-#~ "Grensesnitt: greier ikkje fastsetja O_NONBLOCK for signalskrivingsrøyr "
-#~ "(%1)"
-
-#~ msgid "Session: could not create transport thread"
-#~ msgstr "Økt: greidde ikkje laga transporttråd"
-
-#~ msgid "cannot send signal to midi thread! (%1)"
-#~ msgstr "greier ikkje senda signal til MIDI-tråden! (%1)"
-
-#~ msgid "MIDI thread poll failed (%1)"
-#~ msgstr "Spørjing på MIDI-tråd mislukka (%1)"
-
-#~ msgid "Error on transport thread request pipe"
-#~ msgstr "Feil på transporttrådspørjingsrøyr"
-
-#~ msgid "Error reading from transport request pipe"
-#~ msgstr "Greidde ikkje lesa frå transportspørjingsrøyr"
-
-#~ msgid "start"
-#~ msgstr "start"
-
-#~ msgid "Session: XML state has no connections section"
-#~ msgstr "Økt: XML-fila har ikkje noko avsnitt om tilkoplingar"
-
-#~ msgid "cannot create dead sounds directory \"%1\"; ignored"
-#~ msgstr "greier ikkje laga daudlydmappa \"%1\", hoppa over"
-
-#~ msgid "cannot create peak file directory \"%1\"; ignored"
-#~ msgstr "greier ikkje laga toppfilmappa \"%1\", hoppa over"
-
-#~ msgid "cannot remove dead sound file %1 (%2)"
-#~ msgstr "greier ikkje fjerna daudlyd-fila %1 (%2)"
-
-#~ msgid "could not remove corrupt history file %1"
-#~ msgstr "greidde ikkje fjerna den øydelagde historiefila %1"
-
-#~ msgid "Loading history from '%1'."
-#~ msgstr "Lastar historie frå '%1'."
-
-#~ msgid "please stop the transport before adjusting slave settings"
-#~ msgstr "hugs å stoppa spelinga før du justerer slaveinnstillingar"
-
-#~ msgid "No MTC port defined: MTC slaving is impossible."
-#~ msgstr "Ingen MTC-port er gjeven. MTC-slaving er umogleg."
-
-#~ msgid ""
-#~ "cannot set broadcast info for audio file %1; Dropping broadcast info for "
-#~ "this file"
-#~ msgstr ""
-#~ "greier ikkje fastsetja kringkastingsinformasjon for lydfila %1, hoppar "
-#~ "over kringkastingsinformasjon for denne fila"
-
-#~ msgid "Internal"
-#~ msgstr "Intern"
-
-#~ msgid "Bad node sent to VSTPlugin::set_state"
-#~ msgstr "Feil punkt sendt til VSTPlugin::set_state-funksjonen"
-
-#~ msgid "no support for presets using chunks at this time"
-#~ msgstr ""
-#~ "det er ikkje støtte for ferdigprogram som brukar bitar for augneblinken"
-
-#~ msgid "VST plugin called with zero frames - please notify Ardour developers"
-#~ msgstr ""
-#~ "VST-innstikk påkalla med null rammer - sei frå til Ardour-utviklarane"
-
-#~ msgid "VST: cannot load module from \"%1\""
-#~ msgstr "VST: greier ikkje lasta modul frå \"%1\""
-
-#~ msgid "You asked ardour to not use any VST plugins"
-#~ msgstr "Du sa at Ardour ikkje skulle bruka nokon VST-tilleggsprogram"
-
-#~ msgid "CoreAudioSource: cannot open file \"%1\" for %2"
-#~ msgstr "CoreAudioSource: greier ikkje opna fila \"%1\" for %2"
-
-#~ msgid "Could not create XML version of property list"
-#~ msgstr "Greidde ikkje laga XML-versjon av eigenskaplista"
-
-#~ msgid "Cannot open preset file %1 (%2)"
-#~ msgstr "Greier ikkje opna ferdigoppsettfila %1 (%2)"
-
-#~ msgid "Exception thrown during AudioUnit plugin loading - plugin ignored"
-#~ msgstr ""
-#~ "Det vart kasta inn eit unntak under AudioUnit-innstikklastinga - såg bort "
-#~ "frå innstikket"
-
-#~ msgid "AudioUnit: Could not convert CAComponent to CAAudioUnit"
-#~ msgstr "Lydeinging: Greidde ikkje gjera om CAComponent til CAAudioUnit"
-
-#~ msgid "AUPlugin: cannot set processing block size"
-#~ msgstr "AUPlugin: Greier ikkje setja opp blokkstorleik for handsaming"
-
-#~ msgid "AUPlugin: %1 cannot initialize plugin (err = %2)"
-#~ msgstr "AUPlugin: %1 greier ikkje starta innstikk (feil = %2)"
-
-#~ msgid "AU %1 has zero outputs - configuration ignored"
-#~ msgstr "AU %1 har ingen utgangar - såg bort frå oppsettet"
-
-#~ msgid "AU plugin %1 has illegal IO configuration (-2,-2)"
-#~ msgstr "AU-innstikket %1 har ugyldig IU-oppsett (-2,-2)"
-
-#~ msgid "AUPlugin: could not set stream format for %1/%2 (err = %3)"
-#~ msgstr ""
-#~ "AUPlugin: greidde ikkje setja opp straumformat for %1/%2 (feil = %3)"
-
-#~ msgid "AUPlugin: %1 input_streams() called without any format set!"
-#~ msgstr "AUPlugin: %1 input_streams() påkalla utan oppsett format!"
-
-#~ msgid "AUPlugin: %1 output_streams() called without any format set!"
-#~ msgstr "AUPlugin: %1 output_streams() påkalla utan oppsett format!"
-
-#~ msgid "AUPlugin: render callback called illegally!"
-#~ msgstr "AUPlugin: oppteiknings-tilbakekall påkalla ulovleg!"
-
-#~ msgid "Bad node sent to AUPlugin::set_state"
-#~ msgstr "Feil punkt sendt til AUPlugin::set_state"
-
-#~ msgid ""
-#~ "Restoring AudioUnit settings is not supported in this build of Ardour. "
-#~ "Consider paying for a newer version"
-#~ msgstr ""
-#~ "Du kan ikkje henta framatt AudioUnit-innstillingar i denne versjonen av "
-#~ "Ardour. Du bør vurdera å betala for ein nyare verjson"
-
-#~ msgid ""
-#~ "Loading AudioUnit presets is not supported in this build of Ardour. "
-#~ "Consider paying for a newer version"
-#~ msgstr ""
-#~ "Du kan ikkje lagra AudioUnit-innstillingar i denne versjonen av Ardour. "
-#~ "Du bør vurdera å betala for ein nyare verjson"
-
-#~ msgid "Cannot create user plugin presets folder (%1)"
-#~ msgstr "Greier ikkje laga mappe for brukarlaga innstikkoppsett (%1)"
-
-#~ msgid "Saving plugin state to %1 failed"
-#~ msgstr "Greidde ikkje lagra innstikkstatus til %1"
-
-#~ msgid "Discovering AudioUnit plugins (could take some time ...)"
-#~ msgstr "Finn AudioUnit-innstikk (dette kan ta litt tid...)"
-
-#~ msgid "Cannot get I/O configuration info for AU %1"
-#~ msgstr "Greier ikkje få tak i I/U-oppsettsinfo for AU %1"
-
-#~ msgid "Checking AudioUnit: %1"
-#~ msgstr "Sjekkar AudioUnit: %1"
-
-#~ msgid "Could not load AU plugin %1 - ignored"
-#~ msgstr "Greier ikkje lasta AU-innstikk %1 - såg bort frå"
-
-#~ msgid "could not save AU cache to %1"
-#~ msgstr "greidde ikkje lagra AU-mellomlageret til %1"
-
-#~ msgid "initial state"
-#~ msgstr "opphavstilstand"
-
-#~ msgid "xfade change"
-#~ msgstr "overtoningsendring"
-
-#~ msgid "region modified"
-#~ msgstr "bolk endra"
-
-#~ msgid "cannot activate JACK client"
-#~ msgstr "greier ikkje slå på JACK-klienten"
-
-#~ msgid "get_nth_physical called before engine was started"
-#~ msgstr "get_nth_physical vart oppkalla før tenaren starta"
-
-#~ msgid "get_port_total_latency() called with no JACK client connection"
-#~ msgstr ""
-#~ "get_port_total_latency()-funksjonen vart oppkalla utan tilknyting til "
-#~ "JACK-klienten"
-
-#~ msgid "get_port_total_latency() called before engine was started"
-#~ msgstr ""
-#~ "get_port_total_latency()-funksjonen vart oppkalla før tenaren starta"
-
-#~ msgid "Unable to connect to JACK server"
-#~ msgstr "Greidde ikkje kopla til JACK-tenaren"
-
-#~ msgid "Could not connect to JACK server as  \"%1\""
-#~ msgstr "Greidde ikkje kopla til JACK-tenaren som \"%1\""
-
-#~ msgid "JACK server started"
-#~ msgstr "JACK-tenaren er starta"
-
-#~ msgid "cannot shutdown connection to JACK"
-#~ msgstr "greier ikkje kopla frå JACK"
-
-#~ msgid "fade in change"
-#~ msgstr "inntoningsendring"
-
-#~ msgid "envelope change"
-#~ msgstr "omhyllingsendring"
-
-#~ msgid "poll on peak request pipe failed (%1)"
-#~ msgstr "undersøking ved toppspørjingsrøyr gjekk gale (%1)"
-
-#~ msgid "Error on peak thread request pipe"
-#~ msgstr "Feil på topptrådspørjingsrøyr"
-
-#~ msgid "Error reading from peak request pipe"
-#~ msgstr "Feil ved lesing frå toppspørjingsrøyr"
-
-#~ msgid "UI: cannot set O_NONBLOCK on peak request pipe (%1)"
-#~ msgstr "Brukarflate: Kan ikkje bruka O_NONBLOCK ved toppspørjingsrøyr (%1)"
-
-#~ msgid "AudioSource: could not create peak thread"
-#~ msgstr "Lydkjelde: greidde ikkje laga topptråd"
-
-#~ msgid "initial"
-#~ msgstr "fyrste"
-
-#~ msgid "cleared"
-#~ msgstr "tom"
-
-#~ msgid "added event"
-#~ msgstr "la til hending"
-
-#~ msgid "removed event"
-#~ msgstr "fjerna hending"
-
-#~ msgid "removed multiple events"
-#~ msgstr "fjerna fleire hendingar"
-
-#~ msgid "removed range"
-#~ msgstr "fjerna område"
-
-#~ msgid "event range adjusted"
-#~ msgstr "justert hendingsområde"
-
-#~ msgid "event adjusted"
-#~ msgstr "justert hending"
-
-#~ msgid "cut/copy/clear"
-#~ msgstr "klypp/kopier/tøm"
-
-#~ msgid "copy"
-#~ msgstr "kopier"
-
-#~ msgid "active changed"
-#~ msgstr "endra på/av"
-
-#~ msgid "MIDI port specifications for \"%1\" are not understandable."
-#~ msgstr "MIDI-portspesifikasjonane for \"%1\" er uforståelege."
-
-#, fuzzy
-#~ msgid "resampling audio"
-#~ msgstr "samplar om lyd"
-
-#~ msgid "Import: cannot open converted sound file \"%1\""
-#~ msgstr "Import: kan ikkje opna den omkoda lydfila \"%1\""
-
-#~ msgid ""
-#~ "Session::import_audiofile: cannot open new file source for channel %1"
-#~ msgstr "Økt::import_lydfil: kan ikkje opna ny kjeldefil for kanalen %1"
-
-#~ msgid "Import/SRC: could not open input file: %1"
-#~ msgstr "Import/kjelde: greidde ikkje opna innfila: %1"
-
-#~ msgid "Import/SRC: could not open output file: %1"
-#~ msgstr "Import/kjelde: greidde ikkje opna utfila: %1"
-
-#~ msgid "XML node describing insert is missing the `id' field"
-#~ msgstr "XML-punktet som skildrar tappinga manglar 'id'-feltet"
-
-#~ msgid "PortInsert: cannot add input port"
-#~ msgstr "PortInsert: greier ikkje leggja til inngangsport"
-
-#~ msgid "PortInsert: cannot add output port"
-#~ msgstr "PortInsert: greier ikkje leggja til utgangsport"
-
-#~ msgid "%s/out %u"
-#~ msgstr "%s/ut %u"
-
-#~ msgid "Unknown connection \"%1\" listed for output of %2"
-#~ msgstr "Ukjend tilkopling \"%1\" lista opp for %2-utgangen"
-
-#~ msgid "No output connections available as a replacement"
-#~ msgstr "Det finst ingen utgangstilkoplingar som kan brukast som erstatting"
-
-#~ msgid "%1: could not open automation event file \"%2\""
-#~ msgstr "%1: greier ikkje opna automasjonshendingsfila \"%2\""
-
-#~ msgid "mismatched automation event file version (%1)"
-#~ msgstr "ikkje like versjonsnummer i automasjonshendingsfila (%1)"
-
-#~ msgid "loaded from disk"
-#~ msgstr "lasta frå disk"
-
-#~ msgid "automation write/touch"
-#~ msgstr "automasjonsskriving/rørsle"
-
-#~ msgid "clear"
-#~ msgstr "tøm"
-
-#~ msgid "clear markers"
-#~ msgstr "tøm merke"
-
-#~ msgid "clear ranges"
-#~ msgstr "tøm område"
-
-#~ msgid "add"
-#~ msgstr "legg til"
-
-#~ msgid "remove"
-#~ msgstr "fjern"
-
-#~ msgid "automation write pass"
-#~ msgstr "automasjonsskriveomgang"
-
-#~ msgid "error writing pan automation file (%s)"
-#~ msgstr "greidde ikkje skriva panoreringsautomasjonsfil (%s)"
-
-#~ msgid "cannot open pan automation file \"%1\" for saving (%2)"
-#~ msgstr ""
-#~ "kan ikkje opna panoreringsautomasjonsfil \"%1\" for å lagra henne (%2)"
-
-#~ msgid "mismatched pan automation event file version (%1)"
-#~ msgstr ""
-#~ "handlingsfila for panoreringsautomasjon har versjonsnummer som ikkje "
-#~ "stemmer overeins (%1)"
-
-#~ msgid "remove region"
-#~ msgstr "fjern bolk"
-
-#~ msgid "separate"
-#~ msgstr "del opp"
-
-#~ msgid "cut"
-#~ msgstr "klypp"
-
-#~ msgid "duplicate"
-#~ msgstr "klon"
-
-#~ msgid "split"
-#~ msgstr "del"
-
-#~ msgid "nudged"
-#~ msgstr "skubba"
-
-#~ msgid ""
-#~ "programming error: Playlist::copyPlaylist called with unknown Playlist "
-#~ "type"
-#~ msgstr ""
-#~ "programmeringsfeil: Playlist::copyPlaylist-funksjonen vart oppkalla med "
-#~ "ukjend spelelistetype"
-
-#~ msgid "post"
-#~ msgstr "etter"
-
-#~ msgid "Redirect: unknown placement string \"%1\" (ignored)"
-#~ msgstr "Omdirigering: ukjend plasseringsstreng \"%1\" (hoppa over)"
-
-#~ msgid "%1: cannot open %2 to store automation data (%3)"
-#~ msgstr "%1: greier ikkje opna %2 for å lagra automasjonsdata (%3)"
-
-#~ msgid "%1: could not save automation state to %2"
-#~ msgstr "%1: greier ikkje lagra automasjonstilstanden til %2"
-
-#~ msgid ""
-#~ "Could not get state from Redirect (%1).  Problem with save_automation"
-#~ msgstr ""
-#~ "Greier ikkje få tak i tilstanden frå omdirigeringa (%1). Problem med å "
-#~ "lagra automasjonen."
-
-#~ msgid "active_changed"
-#~ msgstr "aktiv_endra"
-
-#~ msgid "Could not get state of route.  Problem with save_automation"
-#~ msgstr ""
-#~ "Greidde ikkje få tak i tilstanden for rutinga. Problem med å lagra "
-#~ "automasjon."
-
-#~ msgid "too many regions with names like %1"
-#~ msgstr "for mange bolkar med namn som %1"
-
-#~ msgid "programming error: unknown type of Insert deleted!"
-#~ msgstr "programmeringsfeil: ein ukjend tappingstype er sletta!"
-
-#~ msgid "could not backup old state file, current state not saved."
-#~ msgstr ""
-#~ "greidde ikkje ta tryggingskopi av den gamle tilstandsfila. Den noverande "
-#~ "tilstanden er ikkje lagra."
-
-#~ msgid "tempoize: error creating name for new audio file based on %1"
-#~ msgstr ""
-#~ "lag tempo: greidde ikkje gje namn til den nye lydfila som er bygd på %1"
-
-#~ msgid "tempoize: error creating new audio file %1 (%2)"
-#~ msgstr "lag tempo: greidde ikkje laga den nye lydfila %1 (%2)"
-
-#~ msgid "PAF (Ensoniq Paris)"
-#~ msgstr "PAF (Ensoniq Paris)"
-
-#~ msgid "AU (Sun/NeXT)"
-#~ msgstr "AU (Sun/NeXT)"
-
-#~ msgid "IRCAM"
-#~ msgstr "IRCAM"
-
-#~ msgid ".au"
-#~ msgstr ".au"
-
-#~ msgid ".ircam"
-#~ msgstr ".ircam"
-
-#~ msgid "FileSource: cannot get host information for BWF header (%1)"
-#~ msgstr ""
-#~ "Filkjelde: greier ikkje finna vertsinformasjonen for BWF-tittellinja (%1)"
-
-#~ msgid "%1: cannot seek to %2"
-#~ msgstr "%1: greier ikkje leita fram til %2"
-
-#~ msgid "cleared history"
-#~ msgstr "tømte historia"
-
-#~ msgid ""
-#~ "programming error: illegal state ID (%1) passed to StateManager::set_state"
-#~ "() (range = 0-%2)"
-#~ msgstr ""
-#~ "programmeringsfeil: ulovleg tilgangs-ID (%1) send til StateManager::"
-#~ "set_state()-funksjonen (område = 0-%2)"
-
-#, fuzzy
-#~ msgid "move metric"
-#~ msgstr "flytt taktart"
-
-#~ msgid "metric removed"
-#~ msgstr "fjerna taktart"
-
-#~ msgid "add tempo"
-#~ msgstr "legg til tempo"
-
-#~ msgid "replace tempo"
-#~ msgstr "byt ut tempo"
-
-#~ msgid "add meter"
-#~ msgstr "legg til taktart"
-
-#~ msgid "replaced meter"
-#~ msgstr "bytte ut taktart"
-
-#~ msgid "load XML data"
-#~ msgstr "last XML-data"
-
-#~ msgid "cannot create VST chunk directory: %1"
-#~ msgstr "greier ikkje laga mappe for VST-bitar: %1"
-
-#~ msgid "cannot check VST chunk directory: %1"
-#~ msgstr "greier ikkje sjekka mappe for VST-bitar: %1"
-
-#~ msgid "%1 exists but is not a directory"
-#~ msgstr "%1 finst, men det er ikkje ei mappe"

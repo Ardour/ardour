@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-10-15 21:42+0400\n"
+"POT-Creation-Date: 2013-10-23 19:07+0200\n"
 "PO-Revision-Date: 2013-10-15 21:40+0300\n"
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
@@ -391,7 +391,7 @@ msgstr ""
 msgid "audio"
 msgstr ""
 
-#: data_type.cc:28 session.cc:1788 session.cc:1791
+#: data_type.cc:28 session.cc:1790 session.cc:1793
 msgid "MIDI"
 msgstr ""
 
@@ -503,7 +503,7 @@ msgstr "Треугольное"
 msgid "Rectangular"
 msgstr "Прямоугольное"
 
-#: export_formats.cc:52 session.cc:5009 session.cc:5025
+#: export_formats.cc:52 session.cc:5008 session.cc:5024
 msgid "None"
 msgstr "Нет"
 
@@ -859,15 +859,15 @@ msgstr ""
 msgid "%s out"
 msgstr ""
 
-#: io.cc:1535 session.cc:683 session.cc:712
+#: io.cc:1535 session.cc:685 session.cc:714
 msgid "mono"
 msgstr ""
 
-#: io.cc:1537 session.cc:696 session.cc:726
+#: io.cc:1537 session.cc:698 session.cc:728
 msgid "L"
 msgstr ""
 
-#: io.cc:1537 session.cc:698 session.cc:728
+#: io.cc:1537 session.cc:700 session.cc:730
 msgid "R"
 msgstr ""
 
@@ -1092,38 +1092,6 @@ msgstr ""
 
 #: midi_stretch.cc:85
 msgid "MIDI stretch created non-MIDI source"
-msgstr ""
-
-#: midiport_manager.cc:71
-msgid "MIDI control in"
-msgstr ""
-
-#: midiport_manager.cc:72
-msgid "MIDI control out"
-msgstr ""
-
-#: midiport_manager.cc:74
-msgid "MMC in"
-msgstr ""
-
-#: midiport_manager.cc:75
-msgid "MMC out"
-msgstr ""
-
-#: midiport_manager.cc:96
-msgid "MTC in"
-msgstr ""
-
-#: midiport_manager.cc:98
-msgid "MTC out"
-msgstr ""
-
-#: midiport_manager.cc:101
-msgid "MIDI Clock in"
-msgstr ""
-
-#: midiport_manager.cc:103
-msgid "MIDI Clock out"
 msgstr ""
 
 #: monitor_processor.cc:53
@@ -1486,24 +1454,28 @@ msgstr ""
 msgid "return %1"
 msgstr ""
 
-#: route.cc:1107 route.cc:2584
+#: route.cc:1075 route.cc:2528
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr ""
 
-#: route.cc:1119
+#: route.cc:1087
 msgid "processor could not be created. Ignored."
 msgstr ""
 
-#: route.cc:2010 route.cc:2237
+#: route.cc:1962 route.cc:2187
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr ""
 
-#: route.cc:2070
+#: route.cc:2022
 msgid "Pannable state found for route (%1) without a panner!"
 msgstr ""
 
-#: route.cc:2140 route.cc:2144 route.cc:2351 route.cc:2355
+#: route.cc:2096 route.cc:2100 route.cc:2301 route.cc:2305
 msgid "badly formed order key string in state file! [%1] ... ignored."
+msgstr ""
+
+#: route.cc:2311
+msgid "Converting deprecated order key for %1 using Editor order %2"
 msgstr ""
 
 #: route_group.cc:459
@@ -1550,127 +1522,111 @@ msgstr ""
 msgid "Set up standard connections"
 msgstr "Настройка обычных соединений"
 
-#: session.cc:561
-msgid "LTC In"
-msgstr ""
-
-#: session.cc:562
-msgid "LTC Out"
-msgstr ""
-
-#: session.cc:588
-msgid "LTC-in"
-msgstr ""
-
-#: session.cc:589
-msgid "LTC-out"
-msgstr ""
-
-#: session.cc:632
+#: session.cc:634
 msgid "could not setup Click I/O"
 msgstr ""
 
-#: session.cc:680
+#: session.cc:682
 #, c-format
 msgid "out %<PRIu32>"
 msgstr ""
 
-#: session.cc:694
+#: session.cc:696
 #, c-format
 msgid "out %<PRIu32>+%<PRIu32>"
 msgstr ""
 
-#: session.cc:709
+#: session.cc:711
 #, c-format
 msgid "in %<PRIu32>"
 msgstr ""
 
-#: session.cc:723
+#: session.cc:725
 #, c-format
 msgid "in %<PRIu32>+%<PRIu32>"
 msgstr ""
 
-#: session.cc:787
+#: session.cc:789
 msgid "cannot connect master output %1 to %2"
 msgstr ""
 
-#: session.cc:846
+#: session.cc:848
 msgid "monitor"
 msgstr ""
 
-#: session.cc:891
+#: session.cc:893
 msgid "cannot connect control input %1 to %2"
 msgstr ""
 
-#: session.cc:911
+#: session.cc:913
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
 msgstr ""
 
-#: session.cc:942
+#: session.cc:944
 msgid "cannot connect control output %1 to %2"
 msgstr ""
 
-#: session.cc:1006
+#: session.cc:1008
 msgid "cannot create Auditioner: no auditioning of regions possible"
 msgstr ""
 
-#: session.cc:1190
+#: session.cc:1192
 msgid "Session: you can't use that location for auto punch (start <= end)"
 msgstr ""
 
-#: session.cc:1230
+#: session.cc:1232
 msgid ""
 "You cannot use this location for auto-loop because it has zero or negative "
 "length"
 msgstr ""
 
-#: session.cc:1544
+#: session.cc:1546
 msgid "feedback loop setup between %1 and %2"
 msgstr ""
 
-#: session.cc:1840
+#: session.cc:1842
 msgid "Session: could not create new midi track."
 msgstr ""
 
-#: session.cc:1846
+#: session.cc:1848
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
 msgstr ""
 
-#: session.cc:2023 session.cc:2026
+#: session.cc:2025 session.cc:2028
 msgid "Audio"
 msgstr ""
 
-#: session.cc:2050 session.cc:2058 session.cc:2135 session.cc:2143
+#: session.cc:2052 session.cc:2060 session.cc:2137 session.cc:2145
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr ""
 
-#: session.cc:2081
+#: session.cc:2083
 msgid "Session: could not create new audio track."
 msgstr ""
 
-#: session.cc:2113 session.cc:2116
+#: session.cc:2115 session.cc:2118
 msgid "Bus"
 msgstr ""
 
-#: session.cc:2166
+#: session.cc:2168
 msgid "Session: could not create new audio route."
 msgstr ""
 
-#: session.cc:2225 session.cc:2235
+#: session.cc:2227 session.cc:2237
 msgid "Session: UINT_MAX routes? impossible!"
 msgstr ""
 
-#: session.cc:2257
+#: session.cc:2259
 msgid "Session: cannot create track/bus from template description"
 msgstr ""
 
-#: session.cc:2283
+#: session.cc:2285
 msgid "Session: could not create new route from template"
 msgstr ""
 
-#: session.cc:2312
+#: session.cc:2314
 msgid "Adding new tracks/busses failed"
 msgstr "Не удалось добавить новые дорожки/шины"
 
@@ -2110,11 +2066,11 @@ msgstr ""
 msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
 msgstr ""
 
-#: session_state.cc:3518
+#: session_state.cc:3502
 msgid "Session: unknown diskstream type in XML"
 msgstr ""
 
-#: session_state.cc:3523
+#: session_state.cc:3507
 msgid "Session: could not load diskstream via XML state"
 msgstr ""
 
@@ -2528,66 +2484,3 @@ msgstr "programming error: unknown native header format: %1"
 #: utils.cc:617
 msgid "cannot open directory %1 (%2)"
 msgstr "cannot open directory %1 (%2)"
-
-#~ msgid "Setup signal flow and plugins"
-#~ msgstr "Настройка модулей и звукового потока"
-
-#~ msgid "Session"
-#~ msgstr "Сеанс"
-
-#, fuzzy
-#~ msgid "editor"
-#~ msgstr "монитор"
-
-#, fuzzy
-#~ msgid "programming error: realpath(%1) failed, errcode %2"
-#~ msgstr "ошибка программы: "
-
-#, fuzzy
-#~ msgid "programming error:"
-#~ msgstr "ошибка программы: "
-
-#~ msgid "cannot activate JACK client"
-#~ msgstr "не удалось активировать клиента JACK сервера"
-
-#, fuzzy
-#~ msgid "removed event"
-#~ msgstr "удалить область"
-
-#, fuzzy
-#~ msgid "removed range"
-#~ msgstr "удалить область"
-
-#~ msgid "add"
-#~ msgstr "добавить"
-
-#~ msgid "remove"
-#~ msgstr "удалить"
-
-#~ msgid "remove region"
-#~ msgstr "удалить область"
-
-#~ msgid "separate"
-#~ msgstr "разделить"
-
-#~ msgid "split"
-#~ msgstr "склеить"
-
-#~ msgid "pre"
-#~ msgstr "пре"
-
-#~ msgid "post"
-#~ msgstr "пост"
-
-#, fuzzy
-#~ msgid "Master Out"
-#~ msgstr "мастер"
-
-#~ msgid "16 bit"
-#~ msgstr "16 бит"
-
-#~ msgid "24 bit"
-#~ msgstr "24 бита"
-
-#~ msgid "8 bit"
-#~ msgstr "8 бит"
