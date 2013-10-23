@@ -23,6 +23,7 @@
 #include <glibmm/miscutils.h>
 
 #include <jack/jack.h>
+#include <jack/transport.h>
 
 #include "ardour/audioengine.h"
 #include "ardour/filename_extensions.h"

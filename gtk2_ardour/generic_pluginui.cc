@@ -488,6 +488,32 @@ GenericPluginUI::integer_printer (char buf[32], Adjustment &adj, ControlUI* cui)
 	return true;
 }
 
+bool
+GenericPluginUI::midinote_printer (char buf[32], Adjustment &adj, ControlUI* cui)
+{
+	float const v = adj.get_value ();
+
+	if (cui->scale_points) {
+		Plugin::ScalePoints::const_iterator i = cui->scale_points->begin ();
+		while (i != cui->scale_points->end() && i->second != v) {
+			++i;
+		}
+
+		if (i != cui->scale_points->end ()) {
+			snprintf (buf, 32, "%s", i->first.c_str());
+			return true;
+		}
+	}
+	if (v >= 0 && v <= 127) {
+		int mn = rint(v);
+		const char notename[12][3] = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+		snprintf (buf, 32, "%s %d", notename[mn%12], (mn/12)-2);
+	} else {
+		snprintf (buf, 32, "%.0f", v);
+	}
+	return true;
+}
+
 void
 GenericPluginUI::print_parameter (char *buf, uint32_t len, uint32_t param)
 {
@@ -608,7 +634,12 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		if (desc.integer_step) {
 			control_ui->clickbox = new ClickBox (adj, "PluginUIClickBox");
 			Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
-			control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::integer_printer), control_ui));
+			if (desc.midinote) {
+				printf("MIDI NOTE\n");
+				control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::midinote_printer), control_ui));
+			} else {
+				control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::integer_printer), control_ui));
+			}
 		} else {
 			//sigc::slot<void,char*,uint32_t> pslot = sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::print_parameter), (uint32_t) port_index);
 

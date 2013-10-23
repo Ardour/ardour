@@ -154,7 +154,7 @@ fixup_bundle_environment (int, char* [])
 		
 		vector<string> lpath;
 		lpath.push_back (bundle_dir);
-		lpath.push_back ("share");
+		lpath.push_back ("Resources");
 		lpath.push_back ("locale");
 		localedir = strdup (Glib::build_filename (lpath).c_str());
 	}
@@ -173,10 +173,10 @@ fixup_bundle_environment (int, char* [])
 	export_search_path (bundle_dir, "ARDOUR_INSTANT_XML_PATH", "/Resources");
 	export_search_path (bundle_dir, "LADSPA_PATH", "/Plugins");
 	export_search_path (bundle_dir, "VAMP_PATH", "/lib");
-	export_search_path (bundle_dir, "SUIL_MODULE_DIR", "/lib");
 	export_search_path (bundle_dir, "GTK_PATH", "/lib/gtkengines");
 
-	g_setenv ("PATH", (bundle_dir + "/MacOS:" + std::string(getenv ("PATH"))).c_str(), 1);
+	g_setenv ("SUIL_MODULE_DIR", (bundle_dir + "/lib").c_str(), 1);
+	g_setenv ("PATH", (bundle_dir + "/MacOS:" + std::string(g_getenv ("PATH"))).c_str(), 1);
 
 	/* unset GTK_RC_FILES so that we only load the RC files that we define
 	 */
@@ -283,10 +283,10 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	export_search_path (dir_path, "ARDOUR_DATA_PATH", "/share");
 	export_search_path (dir_path, "LADSPA_PATH", "/plugins");
 	export_search_path (dir_path, "VAMP_PATH", "/lib");
-	export_search_path (dir_path, "SUIL_MODULE_DIR", "/lib");
 	export_search_path (dir_path, "GTK_PATH", "/lib/gtkengines");
 
-	g_setenv ("PATH", (dir_path + "/bin:" + std::string(getenv ("PATH"))).c_str(), 1);
+	g_setenv ("SUIL_MODULE_DIR", (dir_path + "/lib").c_str(), 1);
+	g_setenv ("PATH", (dir_path + "/bin:" + std::string(g_getenv ("PATH"))).c_str(), 1);
 
 	/* unset GTK_RC_FILES so that we only load the RC files that we define
 	 */
