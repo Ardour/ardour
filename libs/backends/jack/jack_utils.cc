@@ -850,9 +850,11 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 		}
 	}
 
-	if (options.input_device == options.output_device && options.input_device != default_device_name) {
-		args.push_back ("-d");
-		args.push_back (command_line_input_device_name);
+	if (options.driver != dummy_driver_name) {
+		if (options.input_device == options.output_device && options.input_device != default_device_name) {
+			args.push_back ("-d");
+			args.push_back (command_line_input_device_name);
+		}
 	}
 
 	if (options.driver == alsa_driver_name) {
