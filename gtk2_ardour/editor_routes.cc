@@ -600,8 +600,23 @@ EditorRoutes::active_changed (std::string const & path)
 void
 EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 {
-	TreeModel::Row row;
 	PBD::Unwinder<bool> at (_adding_routes, true);
+
+	bool from_scratch = (_model->children().size() == 0);
+	Gtk::TreeModel::Children::iterator insert_iter = _model->children().end();
+
+	for (Gtk::TreeModel::Children::iterator it = _model->children().begin(); it != _model->children().end(); ++it) {
+		boost::shared_ptr<Route> r = (*it)[_columns.route];
+
+		if (r->order_key() == (routes.front()->route()->order_key() + routes.size())) {
+			insert_iter = it;
+			break;
+		}
+	}
+
+	if(!from_scratch) {
+		_editor->selection->tracks.clear();
+	} 
 
 	suspend_redisplay ();
 
@@ -611,7 +626,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 
 		boost::shared_ptr<MidiTrack> midi_trk = boost::dynamic_pointer_cast<MidiTrack> ((*x)->route());
 
-		row = *(_model->append ());
+		TreeModel::Row row = *(_model->insert (insert_iter));
 
 		row[_columns.text] = (*x)->route()->name();
 		row[_columns.visible] = (*x)->marked_for_display();
@@ -634,6 +649,10 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		row[_columns.solo_isolate_state] = (*x)->route()->solo_isolated();
 		row[_columns.solo_safe_state] = (*x)->route()->solo_safe();
 		row[_columns.name_editable] = true;
+
+		if (!from_scratch) {
+			_editor->selection->add(*x);
+		}
 
 		boost::weak_ptr<Route> wr ((*x)->route());
 
