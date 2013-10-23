@@ -396,6 +396,8 @@ string_to_edit_mode (string str)
 		return Splice;
 	} else if (str == _("Slide")) {
 		return Slide;
+	} else if (str == _("Ripple")) {
+		return Ripple;
 	} else if (str == _("Lock")) {
 		return Lock;
 	}
@@ -413,6 +415,9 @@ edit_mode_to_string (EditMode mode)
 
 	case Lock:
 		return _("Lock");
+
+	case Ripple:
+		return _("Ripple");
 
 	default:
 	case Splice:

@@ -2144,6 +2144,9 @@ Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 	begin_reversible_command (_("insert dragged region"));
 	playlist->clear_changes ();
 	playlist->add_region (RegionFactory::create (region, true), where, 1.0);
+	if (Config->get_edit_mode() == Ripple)
+		playlist->ripple (where, region->length(), boost::shared_ptr<Region>());
+
 	_session->add_command(new StatefulDiffCommand (playlist));
 	commit_reversible_command ();
 }
@@ -2217,6 +2220,9 @@ Editor::insert_region_list_selection (float times)
 	begin_reversible_command (_("insert region"));
 	playlist->clear_changes ();
 	playlist->add_region ((RegionFactory::create (region, true)), get_preferred_edit_position(), times);
+	if (Config->get_edit_mode() == Ripple)
+		playlist->ripple (get_preferred_edit_position(), region->length() * times, boost::shared_ptr<Region>());
+
 	_session->add_command(new StatefulDiffCommand (playlist));
 	commit_reversible_command ();
 }
@@ -4079,10 +4085,11 @@ Editor::remove_clicked_region ()
 
 	boost::shared_ptr<Playlist> playlist = clicked_routeview->playlist();
 
-	begin_reversible_command (_("remove region"));
 	playlist->clear_changes ();
 	playlist->clear_owned_changes ();
 	playlist->remove_region (clicked_regionview->region());
+	if (Config->get_edit_mode() == Ripple)
+		playlist->ripple (clicked_regionview->region()->position(), -clicked_regionview->region()->length(), boost::shared_ptr<Region>());
 
 	/* We might have removed regions, which alters other regions' layering_index,
 	   so we need to do a recursive diff here.
@@ -4145,6 +4152,9 @@ Editor::remove_selected_regions ()
 		playlist->clear_owned_changes ();
 		playlist->freeze ();
 		playlist->remove_region (*rl);
+		if (Config->get_edit_mode() == Ripple)
+			playlist->ripple ((*rl)->position(), -(*rl)->length(), boost::shared_ptr<Region>());
+
 	}
 
 	vector<boost::shared_ptr<Playlist> >::iterator pl;
@@ -4274,12 +4284,16 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		switch (op) {
 		case Delete:
 			pl->remove_region (r);
+			if (Config->get_edit_mode() == Ripple)
+				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
 			break;
 			
 		case Cut:
 			_xx = RegionFactory::create (r);
 			npl->add_region (_xx, r->position() - first_position);
 			pl->remove_region (r);
+			if (Config->get_edit_mode() == Ripple)
+				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
 			break;
 
 		case Copy:
@@ -4288,7 +4302,9 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 			break;
 
 		case Clear:
-			pl->remove_region (r);	
+			pl->remove_region (r);
+			if (Config->get_edit_mode() == Ripple)
+				pl->ripple (r->position(), -r->length(), boost::shared_ptr<Region>());
 			break;
 		}
 

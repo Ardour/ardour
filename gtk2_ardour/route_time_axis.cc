@@ -1080,6 +1080,11 @@ RouteTimeAxisView::paste (framepos_t pos, float times, Selection& selection, siz
 	}
 
         pl->clear_changes ();
+	if (Config->get_edit_mode() == Ripple) {
+		std::pair<framepos_t, framepos_t> extent = (*p)->get_extent();
+		framecnt_t amount = extent.second - extent.first;
+		pl->ripple(pos, amount * times, boost::shared_ptr<Region>());
+	}
 	pl->paste (*p, pos, times);
 	_session->add_command (new StatefulDiffCommand (pl));
 
