@@ -17,8 +17,8 @@ def configure(conf):
     autowaf.configure(conf)
     autowaf.set_c99_mode(conf)
     if Options.options.lv2:
-        autowaf.check_pkg(conf, 'lv2', atleast_version='1.4.0',
-                uselib_store='LV2_1_4_0')
+        autowaf.check_pkg(conf, 'lv2', atleast_version='1.0.0',
+                uselib_store='LV2_1_0_0')
 
 def build(bld):
     bundle = 'reasonablesynth.lv2'
@@ -41,7 +41,7 @@ def build(bld):
                   name         = 'reasonablesynth',
                   target       = '../../LV2/%s/reasonablesynth' % bundle,
                   install_path = '${LV2DIR}/%s' % bundle,
-                  use          = 'LV2_1_4_0'
+                  use          = 'LV2_1_0_0'
                   )
         obj.env.cshlib_PATTERN = module_pat
 
