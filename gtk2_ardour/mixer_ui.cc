@@ -313,6 +313,22 @@ Mixer_UI::hide_window (GdkEventAny *ev)
 void
 Mixer_UI::add_strips (RouteList& routes)
 {
+	bool from_scratch = track_model->children().size() == 0;
+	Gtk::TreeModel::Children::iterator insert_iter = track_model->children().end();
+
+	for (Gtk::TreeModel::Children::iterator it = track_model->children().begin(); it != track_model->children().end(); ++it) {
+		boost::shared_ptr<Route> r = (*it)[track_columns.route];
+
+		if (r->order_key() == (routes.front()->order_key() + routes.size())) {
+			insert_iter = it;
+			break;
+		}
+	}
+
+	if(!from_scratch) {
+		_selection.clear_routes ();
+	}
+
 	MixerStrip* strip;
 
 	try {
@@ -359,11 +375,15 @@ Mixer_UI::add_strips (RouteList& routes)
 			
 			show_strip (strip);
 			
-			TreeModel::Row row = *(track_model->append());
+			TreeModel::Row row = *(track_model->insert(insert_iter));
 			row[track_columns.text] = route->name();
 			row[track_columns.visible] = strip->route()->is_master() ? true : strip->marked_for_display();
 			row[track_columns.route] = route;
 			row[track_columns.strip] = strip;
+
+			if (!from_scratch) {
+				_selection.add (strip);
+			}
 			
 			route->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::strip_property_changed, this, _1, strip), gui_context());
 			

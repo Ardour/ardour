@@ -3223,6 +3223,51 @@ ARDOUR_UI::flush_trash ()
 }
 
 void
+ARDOUR_UI::setup_order_hint ()
+{
+	uint32_t order_hint = 0;
+
+	/*
+	  we want the new routes to have their order keys set starting from 
+	  the highest order key in the selection + 1 (if available).
+	*/
+
+	for (RouteUISelection::iterator s = mixer->selection().routes.begin(); s != mixer->selection().routes.end(); ++s) {
+		if ((*s)->route()->order_key() > order_hint) {
+			order_hint = (*s)->route()->order_key();
+		}
+	}
+
+	for (TrackSelection::iterator s = editor->get_selection().tracks.begin(); s != editor->get_selection().tracks.end(); ++s) {
+		RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (*s);
+		if (tav->route()->order_key() > order_hint) {
+			order_hint = tav->route()->order_key();
+		}
+	}
+
+	if (!mixer->selection().routes.empty() || !editor->get_selection().tracks.empty()) {
+		order_hint++;
+	}
+
+	_session->set_order_hint (order_hint);
+
+	/* create a gap in the existing route order keys to accomodate new routes.*/
+
+	boost::shared_ptr <RouteList> rd = _session->get_routes();
+	for (RouteList::iterator ri = rd->begin(); ri != rd->end(); ++ri) {
+		boost::shared_ptr<Route> rt (*ri);
+			
+		if (rt->is_monitor()) {
+			continue;
+		}
+
+		if (rt->order_key () >= order_hint) {
+			rt->set_order_key (rt->order_key () + add_route_dialog->count());
+		}
+	}
+}
+
+void
 ARDOUR_UI::add_route (Gtk::Window* float_window)
 {
 	int count;
@@ -3255,6 +3300,8 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	if ((count = add_route_dialog->count()) <= 0) {
 		return;
 	}
+
+	setup_order_hint();
 
 	PBD::ScopedConnection idle_connection;
 
