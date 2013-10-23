@@ -756,6 +756,9 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 
 	string command_line_driver_name;
 
+	string command_line_input_device_name;
+	string command_line_output_device_name;
+
 	if (!get_jack_command_line_audio_driver_name (options.driver, command_line_driver_name)) {
 		return false;
 	}
@@ -763,44 +766,44 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 	args.push_back ("-d");
 	args.push_back (command_line_driver_name);
 
-	if (options.output_device.empty() && options.input_device.empty()) {
-		return false;
-	}
-
-	string command_line_input_device_name;
-	string command_line_output_device_name;
-
-	if (!get_jack_command_line_audio_device_name (options.driver,
-		options.input_device, command_line_input_device_name)) {
-		return false;
-	}
-
-	if (!get_jack_command_line_audio_device_name (options.driver,
-		options.output_device, command_line_output_device_name)) {
-		return false;
-	}
-
-	if (options.input_device.empty()) {
-		// playback only
-		if (options.output_device.empty()) {
+	if (options.driver != dummy_driver_name) {
+		if (options.output_device.empty() && options.input_device.empty()) {
 			return false;
 		}
-		args.push_back ("-P");
-	} else if (options.output_device.empty()) {
-		// capture only
+
+
+		if (!get_jack_command_line_audio_device_name (options.driver,
+					options.input_device, command_line_input_device_name)) {
+			return false;
+		}
+
+		if (!get_jack_command_line_audio_device_name (options.driver,
+					options.output_device, command_line_output_device_name)) {
+			return false;
+		}
+
 		if (options.input_device.empty()) {
-			return false;
-		}
-		args.push_back ("-C");
-	} else if (options.input_device != options.output_device) {
-		// capture and playback on two devices if supported
-		if (get_jack_audio_driver_supports_two_devices (options.driver)) {
-			args.push_back ("-C");
-			args.push_back (command_line_input_device_name);
+			// playback only
+			if (options.output_device.empty()) {
+				return false;
+			}
 			args.push_back ("-P");
-			args.push_back (command_line_output_device_name);
-		} else {
-			return false;
+		} else if (options.output_device.empty()) {
+			// capture only
+			if (options.input_device.empty()) {
+				return false;
+			}
+			args.push_back ("-C");
+		} else if (options.input_device != options.output_device) {
+			// capture and playback on two devices if supported
+			if (get_jack_audio_driver_supports_two_devices (options.driver)) {
+				args.push_back ("-C");
+				args.push_back (command_line_input_device_name);
+				args.push_back ("-P");
+				args.push_back (command_line_output_device_name);
+			} else {
+				return false;
+			}
 		}
 	}
 
