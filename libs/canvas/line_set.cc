@@ -67,16 +67,25 @@ LineSet::set_height (Distance height)
 void
 LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
+	/* area is in window coordinates */
+
 	for (list<Line>::const_iterator i = _lines.begin(); i != _lines.end(); ++i) {
-		if (i->y > area.y1) {
+
+		Duple self = item_to_window (Duple (area.x0, i->y));
+
+		if (self.y > area.y1) {
+			/* line is past the ymax for the render rect, nothing
+			   to draw 
+			*/
 			break;
-		} else if (i->y > area.y0) {
+		} else if (self.y > area.y0) {
+			/* line is between ymin and ymax for the render rect,
+			   draw something.
+			*/
 			set_source_rgba (context, i->color);
 			context->set_line_width (i->width);
-			Duple p0 = item_to_window (Duple (area.x0, i->y));
-			Duple p1 = item_to_window (Duple (area.x1, i->y));
-			context->move_to (p0.x, p0.y);
-			context->line_to (p1.x, p1.y);
+			context->move_to (area.x0, self.y);
+			context->line_to (area.x1, self.y);
 			context->stroke ();
 		}
 	}
