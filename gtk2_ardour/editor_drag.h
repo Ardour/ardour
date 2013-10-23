@@ -313,7 +313,7 @@ public:
 protected:
 
 	double compute_x_delta (GdkEvent const *, ARDOUR::framepos_t *);
-	bool y_movement_allowed (int, double) const;
+	virtual bool y_movement_allowed (int, double) const;
 
 	bool _brushing;
 	ARDOUR::framepos_t _last_frame_position; ///< last position of the thing being dragged
@@ -346,9 +346,11 @@ public:
 
 	void setup_pointer_frame_offset ();
 
-private:
+protected:
 	typedef std::set<boost::shared_ptr<ARDOUR::Playlist> > PlaylistSet;
+	void add_stateful_diff_commands_for_playlists (PlaylistSet const &);
 
+private:
 	void finished_no_copy (
 		bool const,
 		bool const,
@@ -375,7 +377,6 @@ private:
 		PlaylistSet& modified_playlists
 		);
 
-	void add_stateful_diff_commands_for_playlists (PlaylistSet const &);
 
 	void collect_new_region_view (RegionView *);
 
@@ -406,6 +407,42 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
+};
+
+/** Region drag in ripple mode */
+
+class RegionRippleDrag : public RegionMoveDrag
+{
+public:
+	RegionRippleDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
+	~RegionRippleDrag () { delete exclude; }
+
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+protected:
+	bool y_movement_allowed (int delta_track, double delta_layer) const {
+		std::cerr << "RegionRippleDrag::y_movement_allowed (" << delta_track << ", " << delta_layer << ")..." << std::endl;
+		if (RegionMotionDrag::y_movement_allowed (delta_track, delta_layer)) {
+			if (delta_track) {
+				return allow_moves_across_tracks;
+			} else {
+				return true;
+			}
+		}
+		return false;
+	}
+private:
+	TimeAxisView *prev_tav;		// where regions were most recently dragged from
+	TimeAxisView *orig_tav;		// where drag started
+	framecnt_t prev_amount;
+	framepos_t prev_position;
+	framecnt_t selection_length;
+	bool allow_moves_across_tracks; // only if all selected regions are on one track
+	ARDOUR::RegionList *exclude;
+	void add_all_after_to_views (TimeAxisView *tav, framepos_t where, const RegionSelection &exclude, bool drag_in_progress);
+	void remove_unselected_from_views (framecnt_t amount);
+
 };
 
 /** Drags to create regions */

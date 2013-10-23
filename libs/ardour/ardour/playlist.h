@@ -144,6 +144,14 @@ public:
 	void uncombine (boost::shared_ptr<Region>);
 
 	void shuffle (boost::shared_ptr<Region>, int dir);
+	void ripple (framepos_t at, framecnt_t distance, RegionList *exclude);
+	void ripple (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude) {
+		 RegionList el;
+		 if (exclude)
+			 el.push_back (exclude);
+		 ripple (at, distance, &el);
+	}
+
 	void update_after_tempo_map_change ();
 
 	boost::shared_ptr<Playlist> cut  (std::list<AudioRange>&, bool result_is_hidden = true);
@@ -283,6 +291,7 @@ public:
 	bool             first_set_state;
 	bool            _hidden;
 	bool            _splicing;
+	bool            _rippling;
 	bool            _shuffling;
 	bool            _nudging;
 	uint32_t        _refcnt;
@@ -336,6 +345,11 @@ public:
 	void core_splice (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude);
 	void splice_locked (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude);
 	void splice_unlocked (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude);
+
+	void core_ripple (framepos_t at, framecnt_t distance, RegionList *exclude);
+	void ripple_locked (framepos_t at, framecnt_t distance, RegionList *exclude);
+	void ripple_unlocked (framepos_t at, framecnt_t distance, RegionList *exclude);
+
 
 	virtual void remove_dependents (boost::shared_ptr<Region> /*region*/) {}
 

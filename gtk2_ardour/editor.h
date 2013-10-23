@@ -1613,7 +1613,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void edit_mode_selection_done ( ARDOUR::EditMode m );
 	void build_edit_mode_menu ();
 	Gtk::VBox         edit_mode_box;
-	std::vector<std::string> edit_mode_strings;
 
 	void set_edit_mode (ARDOUR::EditMode);
 	void cycle_edit_mode ();
@@ -2092,6 +2091,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	friend class RegionDrag;
 	friend class RegionMoveDrag;
 	friend class RegionSpliceDrag;
+	friend class RegionRippleDrag;
 	friend class TrimDrag;
 	friend class MeterMarkerDrag;
 	friend class TempoMarkerDrag;
