@@ -285,7 +285,7 @@ MidiStreamView::draw_note_lines()
 	}
 
 	double y;
-	double prev_y = contents_height();
+	double prev_y = 0;
 	uint32_t color;
 
 	_note_lines->clear();
@@ -295,10 +295,23 @@ MidiStreamView::draw_note_lines()
 		return;
 	}
 
-	for (int i = lowest_note(); i <= highest_note(); ++i) {
-		y = floor(note_to_y(i));
+	/* do this is order of highest ... lowest since that matches the
+	 * coordinate system in which y=0 is at the top
+	 */
 
-		_note_lines->add (prev_y, 1.0, ARDOUR_UI::config()->get_canvasvar_PianoRollBlackOutline());
+	for (int i = highest_note(); i >= lowest_note(); --i) {
+
+		y = floor (note_to_y(i));
+
+		/* this is the line actually corresponding to the division
+		 * between notes
+		 */
+
+		_note_lines->add (y, 1.0, ARDOUR_UI::config()->get_canvasvar_PianoRollBlackOutline());
+
+		/* now add a thicker line/bar which covers the entire vertical
+		 * height of this note.
+		 */
 
 		switch (i % 12) {
 		case 1:
@@ -313,10 +326,11 @@ MidiStreamView::draw_note_lines()
 			break;
 		}
 
-		if (i == highest_note()) {
-			_note_lines->add (y, prev_y - y, color);
-		} else {
-			_note_lines->add (y + 1.0, prev_y - y - 1.0, color);
+		double h = y - prev_y;
+		double mid = y + (h/2.0);
+
+		if (height > 1.0) {
+			_note_lines->add (mid, h, color);
 		}
 
 		prev_y = y;
