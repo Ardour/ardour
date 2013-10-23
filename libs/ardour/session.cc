@@ -559,10 +559,10 @@ Session::setup_ltc ()
 {
 	XMLNode* child = 0;
 	
-	_ltc_input.reset (new IO (*this, _("LTC In"), IO::Input));
-	_ltc_output.reset (new IO (*this, _("LTC Out"), IO::Output));
+	_ltc_input.reset (new IO (*this, X_("LTC In"), IO::Input));
+	_ltc_output.reset (new IO (*this, X_("LTC Out"), IO::Output));
 	
-	if (state_tree && (child = find_named_node (*state_tree->root(), "LTC-In")) != 0) {
+	if (state_tree && (child = find_named_node (*state_tree->root(), X_("LTC In"))) != 0) {
 		_ltc_input->set_state (*(child->children().front()), Stateful::loading_state_version);
 	} else {
 		{
@@ -572,7 +572,7 @@ Session::setup_ltc ()
 		reconnect_ltc_input ();
 	}
 	
-	if (state_tree && (child = find_named_node (*state_tree->root(), "LTC-Out")) != 0) {
+	if (state_tree && (child = find_named_node (*state_tree->root(), X_("LTC Out"))) != 0) {
 		_ltc_output->set_state (*(child->children().front()), Stateful::loading_state_version);
 	} else {
 		{
@@ -586,15 +586,15 @@ Session::setup_ltc ()
 	 * IO style of NAME/TYPE-{in,out}N
 	 */
 	
-	_ltc_input->nth (0)->set_name (_("LTC-in"));
-	_ltc_output->nth (0)->set_name (_("LTC-out"));
+	_ltc_input->nth (0)->set_name (X_("LTC-in"));
+	_ltc_output->nth (0)->set_name (X_("LTC-out"));
 }
 
 void
 Session::setup_click ()
 {
 	_clicking = false;
-	_click_io.reset (new ClickIO (*this, "click"));
+	_click_io.reset (new ClickIO (*this, X_("Click")));
 	_click_gain.reset (new Amp (*this));
 	_click_gain->activate ();
 	if (state_tree) {
