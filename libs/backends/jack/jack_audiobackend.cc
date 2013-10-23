@@ -509,6 +509,7 @@ JACKAudioBackend::setup_jack_startup_command (bool for_latency_measurement)
 		/* error, somehow - we will still try to start JACK
 		 * automatically but it will be without our preferred options
 		 */
+		std::cerr << "get_jack_command_line_string () failed: using default settings." << std::endl;
 		return;
 	}
 
