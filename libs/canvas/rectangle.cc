@@ -114,8 +114,7 @@ void
 Rectangle::compute_bounding_box () const
 {
 	Rect r = _rect.fix ();
-	_bounding_box = boost::optional<Rect> (r.expand (_outline_width / 2));
-	
+	_bounding_box = boost::optional<Rect> (r.expand (_outline_width));
 	_bounding_box_dirty = false;
 }
 
