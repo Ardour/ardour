@@ -301,7 +301,7 @@ MidiStreamView::draw_note_lines()
 
 	for (int i = highest_note(); i >= lowest_note(); --i) {
 
-		y = floor (note_to_y(i));
+		y = note_to_y (i);
 
 		/* this is the line actually corresponding to the division
 		 * between notes
@@ -328,7 +328,7 @@ MidiStreamView::draw_note_lines()
 
 		double h = y - prev_y;
 		double mid = y + (h/2.0);
-
+				
 		if (height > 1.0) {
 			_note_lines->add (mid, h, color);
 		}
