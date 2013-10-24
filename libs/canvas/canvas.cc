@@ -83,6 +83,13 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 
 		_root.render (*draw, context);
 	}
+#if 0
+	/* debug render area */
+	Rect r = _root.item_to_window (area);
+	context->rectangle (r.x0, r.y0, r.x1 - r.x0, r.y1 - r.y0);
+	context->set_source_rgba (1.0, 0.0, 0.0, 1.0);
+	context->stroke ();
+#endif
 }
 
 ostream&
@@ -205,11 +212,11 @@ Canvas::item_moved (Item* item, boost::optional<Rect> pre_change_parent_bounding
 		 * to be in parent coordinate space since the bounding box of
 		 * an item does not change when moved. If we use
 		 * item->item_to_canvas() on the old bounding box, we will be
+
 		 * using the item's new position, and so will compute the wrong
 		 * invalidation area. If we use the parent (which has not
 		 * moved, then this will work.
 		 */
-
 		queue_draw_item_area (item->parent(), pre_change_parent_bounding_box.get ());
 	}
 
@@ -341,27 +348,27 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 	 * we have entered it
 	 */
 
-	cerr << "E/L: " << items.size() << " to check at " << point << endl;
+	//cerr << "E/L: " << items.size() << " to check at " << point << endl;
 #ifdef CANVAS_DEBUG
 	for (vector<Item const*>::const_reverse_iterator i = items.rbegin(); i != items.rend(); ++i) {
-		cerr << '\t' << (*i)->whatami() << ' ' << (*i)->name << " ignore ? " << (*i)->ignore_events() << " current ? " << (_current_item == (*i)) << endl;
+		//cerr << '\t' << (*i)->whatami() << ' ' << (*i)->name << " ignore ? " << (*i)->ignore_events() << " current ? " << (_current_item == (*i)) << endl;
 	}
 #endif
-	cerr << "------------\n";
+	//cerr << "------------\n";
 
 	for (vector<Item const*>::const_reverse_iterator i = items.rbegin(); i != items.rend(); ++i) {
 
 		Item const *  new_item = *i;
 #ifdef CANVAS_DEBUG
-		cerr << "\tE/L check out " << new_item->whatami() << ' ' << new_item->name << " ignore ? " << new_item->ignore_events() << " current ? " << (_current_item == new_item) << endl;
+		//cerr << "\tE/L check out " << new_item->whatami() << ' ' << new_item->name << " ignore ? " << new_item->ignore_events() << " current ? " << (_current_item == new_item) << endl;
 #endif
 		if (new_item->ignore_events()) {
-			cerr << "continue1\n";
+			//cerr << "continue1\n";
 			continue;
 		}
 
 		if (_current_item == new_item) {
-			cerr << "continue2\n";
+			//cerr << "continue2\n";
 			continue;
 		}
 
@@ -379,7 +386,7 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 			break;
 		}
 
-		cerr << "Loop around again\n";
+		//cerr << "Loop around again\n";
 	}
 }
 

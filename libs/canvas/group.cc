@@ -88,7 +88,7 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		if (!(*i)->visible ()) {
 #ifdef CANVAS_DEBUG
 			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-				// cerr << _canvas->render_indent() << "Item " << (*i)->whatami() << " [" << (*i)->name << "] invisible - skipped\n";
+				cerr << _canvas->render_indent() << "Item " << (*i)->whatami() << " [" << (*i)->name << "] invisible - skipped\n";
 			}
 #endif
 			continue;
@@ -104,15 +104,24 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 #endif
 			continue;
 		}
-
+		
 		Rect item = (*i)->item_to_window (item_bbox.get());
+		item.expand (0.5);
 		boost::optional<Rect> draw = item.intersection (area);
 		
 		if (draw) {
 #ifdef CANVAS_DEBUG
 			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-				cerr << string_compose ("%1render %2 %3 item = %4 intersect = %5\n", _canvas->render_indent(), (*i)->whatami(),
-							(*i)->name, item, draw.get());
+				cerr << _canvas->render_indent() << " render "
+				     << ' ' 
+				     << (*i)->whatami()
+				     << ' '
+				     << (*i)->name
+				     << " item = " 
+				     << item
+				     << " intersect = "
+				     << draw.get()
+				     << endl;
 			}
 #endif
 
