@@ -656,9 +656,11 @@ void
 MidiStreamView::resume_updates ()
 {
 	_updates_suspended = false;
-
+	
 	draw_note_lines ();
 	apply_note_range_to_regions ();
+
+	_canvas_group->redraw ();
 }
 
 void
