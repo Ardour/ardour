@@ -45,11 +45,9 @@ LineSet::compute_bounding_box () const
 {
 	if (_lines.empty ()) {
 		_bounding_box = boost::optional<Rect> ();
-		_bounding_box_dirty = false;
-		return;
+	} else {
+		_bounding_box = Rect (0, _lines.front().y - (_lines.front().width/2.0), COORD_MAX, min (_height, _lines.back().y - (_lines.back().width/2.0)));
 	}
-	
-	_bounding_box = Rect (0, _lines.front().y, COORD_MAX, min (_height, _lines.back().y));
 	_bounding_box_dirty = false;
 }
 
@@ -71,23 +69,18 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 
 	for (list<Line>::const_iterator i = _lines.begin(); i != _lines.end(); ++i) {
 
-		Duple self = item_to_window (Duple (area.x0, i->y));
-
-		if (self.y > area.y1) {
-			/* line is past the ymax for the render rect, nothing
-			   to draw 
-			*/
-			break;
-		} else if (self.y > area.y0) {
-			/* line is between ymin and ymax for the render rect,
-			   draw something.
-			*/
-			set_source_rgba (context, i->color);
-			context->set_line_width (i->width);
-			context->move_to (area.x0, self.y);
-			context->line_to (area.x1, self.y);
-			context->stroke ();
+		Rect self = item_to_window (Rect (0, i->y - (i->width/2.0), COORD_MAX, i->y + (i->width/2.0)));
+		boost::optional<Rect> intersect = self.intersection (area);
+			
+		if (!intersect) {
+			continue;	
 		}
+
+		set_source_rgba (context, i->color);
+		context->set_line_width (i->width);
+		context->move_to (intersect->x0, self.y0 + ((self.y1 - self.y0)/2.0));
+		context->line_to (intersect->x1, self.y0 + ((self.y1 - self.y0)/2.0));
+		context->stroke ();
 	}
 }
 
