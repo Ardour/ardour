@@ -71,6 +71,23 @@ Text::redraw (Cairo::RefPtr<Cairo::Context> context) const
 
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
 
+	_redraw (layout);
+}
+
+void
+Text::redraw (Glib::RefPtr<Pango::Context> context) const
+{
+	if (_text.empty()) {
+		return;
+	}
+
+	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
+	_redraw (layout);
+}
+
+void
+Text::_redraw (Glib::RefPtr<Pango::Layout> layout) const
+{
 	layout->set_text (_text);
 
 	if (_font_description) {
@@ -79,13 +96,13 @@ Text::redraw (Cairo::RefPtr<Cairo::Context> context) const
 
 	layout->set_alignment (_alignment);
 	
-	Pango::Rectangle ink_rect = layout->get_ink_extents();
-	
-	_origin.x = ink_rect.get_x() / Pango::SCALE;
-	_origin.y = ink_rect.get_y() / Pango::SCALE;
+	int w;
+	int h;
 
-	_width = _origin.x + (ink_rect.get_width() / Pango::SCALE);
-	_height = _origin.y + (ink_rect.get_height() / Pango::SCALE);
+	layout->get_size (w, h);
+	
+	_width = w / Pango::SCALE;
+	_height = h / Pango::SCALE;
 	
 	_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _width, _height);
 
@@ -116,6 +133,7 @@ Text::render (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) cons
 	}
 	
 	Rect self = item_to_window (Rect (0, 0, min (_clamped_width, _width), _height));
+	
 	context->rectangle (self.x0, self.y0, self.width(), self.height());
 	context->set_source (_image, self.x0, self.y0);
 	context->fill ();
@@ -137,29 +155,11 @@ Text::compute_bounding_box () const
 	}
 
 	if (_bounding_box_dirty) {
-		if (!_image) {
-
-			PangoContext* _pc = gdk_pango_context_get ();
-			Glib::RefPtr<Pango::Context> context = Glib::wrap (_pc); // context now owns _pc and will free it
-			Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
-			
-			layout->set_text (_text);
-			if (_font_description) {
-				layout->set_font_description (*_font_description);
-			}
-			layout->set_alignment (_alignment);
-			Pango::Rectangle const r = layout->get_ink_extents ();
-			
-			_bounding_box = Rect (
-				0, 0, 
-				(r.get_x() + r.get_width()) / Pango::SCALE,
-				(r.get_y() + r.get_height()) / Pango::SCALE
-				);
-		} else {
-
-			_bounding_box = Rect (0, 0, _image->get_width(), _image->get_height());
+		if (_need_redraw || !_image) {
+			Glib::RefPtr<Pango::Context> context = Glib::wrap (gdk_pango_context_get()); // context now owns C object and will free it
+			redraw (context);
 		}
-
+		_bounding_box = Rect (0, 0, _image->get_width(), _image->get_height());
 		_bounding_box_dirty = false;
 	}
 }

@@ -59,6 +59,8 @@ private:
         double _clamped_width;
 
         void redraw (Cairo::RefPtr<Cairo::Context>) const;
+        void redraw (Glib::RefPtr<Pango::Context>) const;
+        void _redraw (Glib::RefPtr<Pango::Layout>) const;
 };
 
 }
