@@ -73,7 +73,6 @@ StreamView::StreamView (RouteTimeAxisView& tv)
 
 	canvas_rect->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::TOP | ArdourCanvas::Rectangle::BOTTOM));
 	canvas_rect->set_outline_color (RGBA_TO_UINT (0, 0, 0, 255));
-	canvas_rect->set_fill_color (RGBA_TO_UINT (1.0, 0, 0, 255));
 	canvas_rect->set_fill (true);
 
 	canvas_rect->Event.connect (sigc::bind (
