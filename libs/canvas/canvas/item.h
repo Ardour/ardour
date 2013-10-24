@@ -56,6 +56,8 @@ public:
 	Item (Group *, Duple);
 	virtual ~Item ();
 
+        void redraw () const;
+
 	/** Render this item to a Cairo context.
 	 *  @param area Area to draw, in **window** coordinates
 	 *

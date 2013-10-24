@@ -329,6 +329,14 @@ Item::width () const
 }
 
 void
+Item::redraw () const
+{
+	if (_bounding_box && _canvas) {
+		_canvas->request_redraw (item_to_canvas (_bounding_box.get()));
+	}
+}	
+
+void
 Item::begin_change ()
 {
 	_pre_change_bounding_box = bounding_box ();
