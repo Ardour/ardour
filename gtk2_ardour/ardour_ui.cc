@@ -3231,17 +3231,18 @@ ARDOUR_UI::setup_order_hint ()
 	  we want the new routes to have their order keys set starting from 
 	  the highest order key in the selection + 1 (if available).
 	*/
-
-	for (RouteUISelection::iterator s = mixer->selection().routes.begin(); s != mixer->selection().routes.end(); ++s) {
-		if ((*s)->route()->order_key() > order_hint) {
-			order_hint = (*s)->route()->order_key();
+	if (add_route_dialog->get_transient_for () == mixer->get_toplevel()) {
+		for (RouteUISelection::iterator s = mixer->selection().routes.begin(); s != mixer->selection().routes.end(); ++s) {
+			if ((*s)->route()->order_key() > order_hint) {
+				order_hint = (*s)->route()->order_key();
+			}
 		}
-	}
-
-	for (TrackSelection::iterator s = editor->get_selection().tracks.begin(); s != editor->get_selection().tracks.end(); ++s) {
-		RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (*s);
-		if (tav->route()->order_key() > order_hint) {
-			order_hint = tav->route()->order_key();
+	} else {
+		for (TrackSelection::iterator s = editor->get_selection().tracks.begin(); s != editor->get_selection().tracks.end(); ++s) {
+			RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (*s);
+			if (tav->route()->order_key() > order_hint) {
+				order_hint = tav->route()->order_key();
+			}
 		}
 	}
 
@@ -3282,6 +3283,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	}
 
 	if (float_window) {
+		add_route_dialog->unset_transient_for ();
 		add_route_dialog->set_transient_for (*float_window);
 	}
 
