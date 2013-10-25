@@ -106,12 +106,14 @@ TimeAxisViewItem::TimeAxisViewItem(
 	framepos_t start, framecnt_t duration, bool recording, bool automation, Visibility vis
 	)
 	: trackview (tv)
+	, item_name (it_name)
 	, _height (1.0)
 	, _recregion (recording)
 	, _automation (automation)
 	, _dragging (false)
+
 {
-	init (it_name, &parent, spu, base_color, start, duration, vis, true, true);
+	init (&parent, spu, base_color, start, duration, vis, true, true);
 }
 
 TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
@@ -119,6 +121,7 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 	, Selectable (other)
 	, PBD::ScopedConnectionList()
 	, trackview (other.trackview)
+	, item_name (other.item_name)
 	, _recregion (other._recregion)
 	, _automation (other._automation)
 	, _dragging (other._dragging)
@@ -136,12 +139,12 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 	
 	_selected = other._selected;
 	
-	init (other.item_name, parent, other.samples_per_pixel, c, other.frame_position,
+	init (parent, other.samples_per_pixel, c, other.frame_position,
 	      other.item_duration, other.visibility, other.wide_enough_for_name, other.high_enough_for_name);
 }
 
 void
-TimeAxisViewItem::init (const string& it_name, ArdourCanvas::Group* parent, double fpp, Gdk::Color const & base_color, 
+TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color const & base_color, 
 			framepos_t start, framepos_t duration, Visibility vis, 
 			bool wide, bool high)
 {
@@ -149,7 +152,6 @@ TimeAxisViewItem::init (const string& it_name, ArdourCanvas::Group* parent, doub
 	CANVAS_DEBUG_NAME (group, string_compose ("TAVI group for %1", get_item_name()));
 	group->Event.connect (sigc::mem_fun (*this, &TimeAxisViewItem::canvas_group_event));
 
-	item_name = it_name;
 	samples_per_pixel = fpp;
 	frame_position = start;
 	item_duration = duration;
