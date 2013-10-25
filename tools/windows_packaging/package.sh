@@ -54,6 +54,8 @@ mkdir -p $PACKAGE_DIR/lib/pango/1.6.0/modules
 cp -r $MINGW_ROOT/lib/pango/1.6.0/modules/*.dll $PACKAGE_DIR/lib/pango/1.6.0/modules
 cp $TOOLS_DIR/pango.modules $PACKAGE_DIR/etc/pango
 
+cp $TOOLS_DIR/README $PACKAGE_DIR
+
 DLLS='
 jack-0.dll
 jackserver-0.dll
