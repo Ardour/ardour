@@ -38,8 +38,8 @@
 #include "libvampplugins-config.h"
 #endif
 
-#include "vamp/vamp.h"
-#include "vamp-sdk/PluginAdapter.h"
+#include <vamp/vamp.h>
+#include <vamp-sdk/PluginAdapter.h>
 
 #include "ZeroCrossing.h"
 #include "SpectralCentroid.h"

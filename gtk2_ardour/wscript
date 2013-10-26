@@ -417,11 +417,13 @@ def build(bld):
     obj.uselib       += ' AUDIOUNITS OSX GTKOSX LO '
     obj.use          = [ 'libpbd',
                          'libmidipp',
-                         'libtaglib',
                          'ardour',
                          'libardour_cp',
-                         'libgtkmm2ext',
-                         'libtaglib' ]
+                         'libgtkmm2ext']
+    if bld.is_defined('USE_EXTERNAL_LIBS'):
+        obj.uselib += ' TAGLIB'
+    else:
+        obj.use.append('libtaglib')
     if sys.platform == 'darwin':
         obj.use += ' libappleutility'
     obj.defines     = [
