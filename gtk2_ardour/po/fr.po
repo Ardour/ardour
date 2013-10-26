@@ -1605,6 +1605,10 @@ msgstr "Afficher les barres d'outils"
 msgid "Window|Mixer"
 msgstr "Console de mixage"
 
+#: ardour_ui_ed.cc:199 meterbridge.cc:230 meterbridge.cc:236
+msgid "Window|Meterbridge"
+msgstr "Barre de vue-mètre"
+
 #: ardour_ui_ed.cc:234 midi_tracer.cc:39
 msgid "MIDI Tracer"
 msgstr "Activité MIDI"
