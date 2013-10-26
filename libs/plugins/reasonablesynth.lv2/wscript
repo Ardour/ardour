@@ -15,7 +15,6 @@ def options(opt):
 def configure(conf):
     conf.load('compiler_c')
     autowaf.configure(conf)
-    autowaf.set_c99_mode(conf)
     if Options.options.lv2:
         autowaf.check_pkg(conf, 'lv2', atleast_version='1.0.0',
                 uselib_store='LV2_1_0_0')
