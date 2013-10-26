@@ -189,7 +189,7 @@ static void synthesize_sineP (RSSynthChannel* sc,
     left[i]  += .080 * amp * sinf(2.0 * M_PI * phase * 4.0);
   //left[i]  -= .007 * amp * sinf(2.0 * M_PI * phase * 5.0);
   //left[i]  += .010 * amp * sinf(2.0 * M_PI * phase * 6.0);
-  //left[i]  += .020 * amp * sinf(2.0 * M_PI * phase * 7.0);
+    left[i]  += .020 * amp * sinf(2.0 * M_PI * phase * 7.0);
     phase += fq;
     right[i] += amp * sinf(2.0 * M_PI * phase);
     right[i] += .300 * amp * sinf(2.0 * M_PI * phase * 2.0);
@@ -197,13 +197,13 @@ static void synthesize_sineP (RSSynthChannel* sc,
     right[i] -= .080 * amp * sinf(2.0 * M_PI * phase * 4.0);
   //right[i] += .007 * amp * sinf(2.0 * M_PI * phase * 5.0);
   //right[i] += .010 * amp * sinf(2.0 * M_PI * phase * 6.0);
-  //right[i] -= .020 * amp * sinf(2.0 * M_PI * phase * 7.0);
+    right[i] -= .020 * amp * sinf(2.0 * M_PI * phase * 7.0);
     if (phase > 1.0) phase -= 2.0;
   }
   sc->phase[note] = phase;
 }
 
-static const ADSRcfg piano_adsr = {{   5, 1300,  100}, { 1.0,  0.0}, {0,0,0}};
+static const ADSRcfg piano_adsr = {{   5, 800,  100}, { 1.0,  0.0}, {0,0,0}};
 
 /*****************************************************************************/
 
