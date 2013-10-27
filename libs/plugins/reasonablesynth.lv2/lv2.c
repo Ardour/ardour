@@ -66,6 +66,9 @@ instantiate(const LV2_Descriptor*     descriptor,
             const char*               bundle_path,
             const LV2_Feature* const* features)
 {
+  (void) descriptor; /* unused variable */
+  (void) bundle_path; /* unused variable */
+
   if (rate < 8000) {
     fprintf(stderr, "RSynth.lv2 error: unsupported sample-rate (must be > 8k)\n");
     return NULL;
@@ -161,6 +164,7 @@ cleanup(LV2_Handle handle)
 static const void*
 extension_data(const char* uri)
 {
+  (void) uri; /* unused variable */
   return NULL;
 }
 
