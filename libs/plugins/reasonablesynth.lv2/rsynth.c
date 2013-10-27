@@ -240,8 +240,8 @@ static void process_key (void *synth,
     // note off
     if (sc->adsr_cnt[note] <= sc->adsr.off[1]) {
       if (sc->adsr_cnt[note] != sc->adsr.off[1]) {
-	// x-fade to release
-	sc->adsr_amp[note] = adsr_env(sc, note);
+        // x-fade to release
+        sc->adsr_amp[note] = adsr_env(sc, note);
       }
       sc->adsr_cnt[note] = sc->adsr.off[1] + 1;
     }
@@ -337,31 +337,31 @@ static void synth_process_midi_event(void *synth, struct rmidi_event_t *ev) {
   switch(ev->type) {
     case NOTE_ON:
       if (rs->sc[ev->channel].miditable[ev->d.tone.note] <= 0)
-	rs->sc[ev->channel].miditable[ev->d.tone.note] = ev->d.tone.velocity;
+        rs->sc[ev->channel].miditable[ev->d.tone.note] = ev->d.tone.velocity;
       break;
     case NOTE_OFF:
       if (rs->sc[ev->channel].miditable[ev->d.tone.note] > 0)
-	rs->sc[ev->channel].miditable[ev->d.tone.note] *= -1.0;
+        rs->sc[ev->channel].miditable[ev->d.tone.note] *= -1.0;
       break;
     case PROGRAM_CHANGE:
       break;
     case CONTROL_CHANGE:
       if (ev->d.control.param == 0x00 || ev->d.control.param == 0x20) {
-	/*  0x00 and 0x20 are used for BANK select */
-	break;
+        /*  0x00 and 0x20 are used for BANK select */
+        break;
       } else
       if (ev->d.control.param == 121) {
-	/* reset all controllers */
-	break;
+        /* reset all controllers */
+        break;
       } else
       if (ev->d.control.param == 120 || ev->d.control.param == 123) {
-	/* Midi panic: 120: all sound off, 123: all notes off*/
-	synth_reset_channel(&(rs->sc[ev->channel]));
-	break;
+        /* Midi panic: 120: all sound off, 123: all notes off*/
+        synth_reset_channel(&(rs->sc[ev->channel]));
+        break;
       } else
       if (ev->d.control.param >= 120) {
-	/* params 122-127 are reserved - skip them. */
-	break;
+        /* params 122-127 are reserved - skip them. */
+        break;
       }
       break;
     default:
@@ -493,4 +493,4 @@ static void * synth_alloc(void) {
 static void synth_free(void *synth) {
   free(synth);
 }
-/* vi:set ts=8 sts=2 sw=2: */
+/* vi:set ts=8 sts=2 sw=2 et: */

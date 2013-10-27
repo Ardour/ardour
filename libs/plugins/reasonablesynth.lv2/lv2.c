@@ -137,13 +137,13 @@ run(LV2_Handle handle, uint32_t n_samples)
     LV2_Atom_Event const* ev = (LV2_Atom_Event const*) ((&(self->midiin)->body) + 1); // lv2_atom_sequence_begin
     while( (const uint8_t*)ev < ((const uint8_t*) &(self->midiin)->body + (self->midiin)->atom.size) ) {
       if (ev->body.type == self->midi_MidiEvent) {
-	if (written + BUFFER_SIZE_SAMPLES < ev->time.frames
-	    && ev->time.frames < n_samples) {
-	  /* first synthesize sound up until the message timestamp */
-	  written = synth_sound(self->synth, written, ev->time.frames, audio);
-	}
-	/* send midi message to synth */
-	synth_parse_midi(self->synth, (const uint8_t*)(ev+1), ev->body.size);
+        if (written + BUFFER_SIZE_SAMPLES < ev->time.frames
+            && ev->time.frames < n_samples) {
+          /* first synthesize sound up until the message timestamp */
+          written = synth_sound(self->synth, written, ev->time.frames, audio);
+        }
+        /* send midi message to synth */
+        synth_parse_midi(self->synth, (const uint8_t*)(ev+1), ev->body.size);
       }
       ev = (LV2_Atom_Event const*)((const uint8_t*)ev + sizeof(LV2_Atom_Event) + ((ev->body.size + 7) & ~7));
     }
@@ -191,4 +191,4 @@ lv2_descriptor(uint32_t index)
   }
 }
 
-/* vi:set ts=8 sts=2 sw=2: */
+/* vi:set ts=8 sts=2 sw=2 et: */
