@@ -49,18 +49,19 @@ DumbLookupTable::get (Rect const &)
 	return vitems;
 }
 
-/* XXX: what coordinate system is the point in? parent of our group I think */
 vector<Item *>
 DumbLookupTable::items_at_point (Duple point) const
 {
+	/* Point is in canvas coordinate system */
+
 	list<Item *> items = _group.items ();
 	vector<Item *> vitems;
 
 	for (list<Item *>::const_iterator i = items.begin(); i != items.end(); ++i) {
 		boost::optional<Rect> item_bbox = (*i)->bounding_box ();
 		if (item_bbox) {
-			Rect parent_bbox = (*i)->item_to_parent (item_bbox.get ());
-			if (parent_bbox.contains (point)) {
+			Rect canvas_bbox = (*i)->item_to_canvas (item_bbox.get ());
+			if (canvas_bbox.contains (point)) {
 				vitems.push_back (*i);
 			}
 		}
