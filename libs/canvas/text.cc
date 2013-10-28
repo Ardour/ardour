@@ -159,7 +159,7 @@ Text::compute_bounding_box () const
 			Glib::RefPtr<Pango::Context> context = Glib::wrap (gdk_pango_context_get()); // context now owns C object and will free it
 			redraw (context);
 		}
-		_bounding_box = Rect (0, 0, _image->get_width(), _image->get_height());
+		_bounding_box = Rect (0, 0, min (_clamped_width, (double) _image->get_width()), _image->get_height());
 		_bounding_box_dirty = false;
 	}
 }
