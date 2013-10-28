@@ -303,13 +303,22 @@ def set_compiler_flags (conf,opt):
     # prepend boiler plate optimization flags that work on all architectures
     #
 
-    optimization_flags[:0] = [
-            "-O3",
-            "-fomit-frame-pointer",
-            "-ffast-math",
-            "-fstrength-reduce",
-            "-pipe"
-            ]
+    optimization_flags[:0] = ["-pipe"]
+
+    # don't prepend optimization flags if "-O<something>" is present
+    prepend_opt_flags = True
+    for flag in optimization_flags:
+        if flag.startswith("-O"):
+            prepend_opt_flags = False
+            break
+
+    if prepend_opt_flags:
+        optimization_flags[:0] = [
+                "-O3",
+                "-fomit-frame-pointer",
+                "-ffast-math",
+                "-fstrength-reduce"
+                ]
 
     if opt.debug:
         conf.env.append_value('CFLAGS', debug_flags)
