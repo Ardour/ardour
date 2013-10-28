@@ -52,7 +52,7 @@ DumbLookupTable::get (Rect const &)
 vector<Item *>
 DumbLookupTable::items_at_point (Duple point) const
 {
-	/* Point is in canvas coordinate system */
+	/* Point is in parent coordinate system */
 
 	list<Item *> items = _group.items ();
 	vector<Item *> vitems;
@@ -60,7 +60,7 @@ DumbLookupTable::items_at_point (Duple point) const
 	for (list<Item *>::const_iterator i = items.begin(); i != items.end(); ++i) {
 		boost::optional<Rect> item_bbox = (*i)->bounding_box ();
 		if (item_bbox) {
-			Rect canvas_bbox = (*i)->item_to_canvas (item_bbox.get ());
+			Rect canvas_bbox = (*i)->item_to_parent (item_bbox.get ());
 			if (canvas_bbox.contains (point)) {
 				vitems.push_back (*i);
 			}
