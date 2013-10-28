@@ -437,6 +437,8 @@ def options(opt):
                    help='Build internal libs as shared libraries')
     opt.add_option('--internal-static-libs', action='store_false', dest='internal_shared_libs',
                    help='Build internal libs as static libraries')
+    opt.add_option('--use-external-libs', action='store_true', default=False, dest='use_external_libs',
+                   help='Use external/system versions of some bundled libraries')
     opt.add_option('--lv2', action='store_true', default=True, dest='lv2',
                     help='Compile with support for LV2 (if Lilv+Suil is available)')
     opt.add_option('--no-lv2', action='store_false', dest='lv2',
@@ -609,6 +611,9 @@ def configure(conf):
     if Options.options.internal_shared_libs: 
         conf.define('INTERNAL_SHARED_LIBS', 1)
 
+    if Options.options.use_external_libs:
+        conf.define('USE_EXTERNAL_LIBS', 1)
+
     if Options.options.boost_include != '':
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.boost_include)
 
@@ -709,6 +714,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Install prefix',        conf.env['PREFIX'])
     write_config_text('Strict compiler flags', conf.env['STRICT'])
     write_config_text('Internal Shared Libraries', conf.is_defined('INTERNAL_SHARED_LIBS'))
+    write_config_text('Use External Libraries', conf.is_defined('USE_EXTERNAL_LIBS'))
 
     write_config_text('Architecture flags',    opts.arch)
     write_config_text('Aubio',                 conf.is_defined('HAVE_AUBIO'))
@@ -754,14 +760,17 @@ def build(bld):
     # add directories that contain only headers, to workaround an issue with waf
 
     bld.path.find_dir ('libs/evoral/evoral')
-    bld.path.find_dir ('libs/vamp-sdk/vamp-sdk')
+    if not bld.is_defined('USE_EXTERNAL_LIBS'):
+        bld.path.find_dir ('libs/vamp-sdk/vamp-sdk')
     bld.path.find_dir ('libs/surfaces/control_protocol/control_protocol')
     bld.path.find_dir ('libs/timecode/timecode')
-    bld.path.find_dir ('libs/libltc/ltc')
-    bld.path.find_dir ('libs/rubberband/rubberband')
+    if not bld.is_defined('USE_EXTERNAL_LIBS'):
+        bld.path.find_dir ('libs/libltc/ltc')
+        bld.path.find_dir ('libs/rubberband/rubberband')
     bld.path.find_dir ('libs/gtkmm2ext/gtkmm2ext')
     bld.path.find_dir ('libs/ardour/ardour')
-    bld.path.find_dir ('libs/taglib/taglib')
+    if not bld.is_defined('USE_EXTERNAL_LIBS'):
+        bld.path.find_dir ('libs/taglib/taglib')
     bld.path.find_dir ('libs/pbd/pbd')
 
     autowaf.set_recursive()

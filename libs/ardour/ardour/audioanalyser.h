@@ -25,7 +25,7 @@
 #include <ostream>
 #include <fstream>
 #include <boost/utility.hpp>
-#include "vamp-sdk/Plugin.h"
+#include <vamp-sdk/Plugin.h>
 #include "ardour/types.h"
 
 namespace ARDOUR {

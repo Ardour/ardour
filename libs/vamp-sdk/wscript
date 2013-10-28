@@ -23,13 +23,19 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    conf.load('compiler_cxx')
-    autowaf.configure(conf)
-    autowaf.check_pkg(conf, 'fftw3', uselib_store='FFTW3', mandatory=True)
-    autowaf.check_pkg(conf, 'fftw3f', uselib_store='FFTW3F', mandatory=True)
-    conf.env.append_value('CXXFLAGS', '-DHAVE_FFTW3')
+    if conf.is_defined('USE_EXTERNAL_LIBS'):
+        autowaf.check_pkg(conf, 'vamp-sdk', uselib_store='VAMPSDK', mandatory=True)
+        autowaf.check_pkg(conf, 'vamp-hostsdk', uselib_store='VAMPHOSTSDK', mandatory=True)
+    else:
+        conf.load('compiler_cxx')
+        autowaf.configure(conf)
+        autowaf.check_pkg(conf, 'fftw3', uselib_store='FFTW3', mandatory=True)
+        autowaf.check_pkg(conf, 'fftw3f', uselib_store='FFTW3F', mandatory=True)
+        conf.env.append_value('CXXFLAGS', '-DHAVE_FFTW3')
 
 def build(bld):
+    if bld.is_defined('USE_EXTERNAL_LIBS'):
+        return
     # Host Library
     obj = bld(features = 'cxx cxxshlib')
     obj.source = '''
