@@ -83,14 +83,6 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 
 		_root.render (*draw, context);
 	}
-
-#if 0
-	/* debug render area */
-	Rect r = _root.item_to_window (area);
-	context->rectangle (r.x0, r.y0, r.x1 - r.x0, r.y1 - r.y0);
-	context->set_source_rgba (1.0, 0.0, 0.0, 1.0);
-	context->stroke ();
-#endif
 }
 
 ostream&
@@ -327,7 +319,7 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 	if (items.empty()) {
 		if (_current_item) {
 			/* leave event */
-			cerr << "E/L: left item " << _current_item->whatami() << '/' << _current_item->name << " for ... nada" << endl;
+			// cerr << "E/L: left item " << _current_item->whatami() << '/' << _current_item->name << " for ... nada" << endl;
 			_current_item->Event (reinterpret_cast<GdkEvent*> (&leave_event));
 			_current_item = 0;
 		}
@@ -338,20 +330,20 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 	 * to top to find the lowest, first event-sensitive item and notify that
 	 * we have entered it
 	 */
-
-	cerr << "E/L: " << items.size() << " to check at " << point << endl;
+	
+	// cerr << "E/L: " << items.size() << " to check at " << point << endl;
 #ifdef CANVAS_DEBUG
-	for (vector<Item const*>::const_reverse_iterator i = items.rbegin(); i != items.rend(); ++i) {
-		cerr << '\t' << (*i)->whatami() << ' ' << (*i)->name << " ignore ? " << (*i)->ignore_events() << " current ? " << (_current_item == (*i)) << endl;
-	}
+	// for (vector<Item const*>::const_reverse_iterator i = items.rbegin(); i != items.rend(); ++i) {
+	// cerr << '\t' << (*i)->whatami() << ' ' << (*i)->name << " ignore ? " << (*i)->ignore_events() << " current ? " << (_current_item == (*i)) << endl;
+        // }
 #endif
-	cerr << "------------\n";
+	// cerr << "------------\n";
 
 	for (vector<Item const*>::const_reverse_iterator i = items.rbegin(); i != items.rend(); ++i) {
 
 		Item const *  new_item = *i;
 #ifdef CANVAS_DEBUG
-		cerr << "\tE/L check out " << new_item->whatami() << ' ' << new_item->name << " ignore ? " << new_item->ignore_events() << " current ? " << (_current_item == new_item) << endl;
+		// cerr << "\tE/L check out " << new_item->whatami() << ' ' << new_item->name << " ignore ? " << new_item->ignore_events() << " current ? " << (_current_item == new_item) << endl;
 #endif
 		if (new_item->ignore_events()) {
 			// cerr << "continue1\n";
@@ -482,19 +474,6 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	Cairo::RefPtr<Cairo::Context> c = get_window()->create_cairo_context ();
 
 	render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), c);
-
-#if 1
-	if (_current_item) {
-		boost::optional<Rect> orect = _current_item->bounding_box();
-		if (orect) {
-			Rect r = _current_item->item_to_window (orect.get());
-			c->rectangle (r.x0, r.y0, r.x1 - r.x0, r.y1 - r.y0);
-			c->set_source_rgba (1.0, 0.0, 0.0, 1.0);
-			c->stroke ();
-		}
-	}
-#endif
-
 
 	return true;
 }
