@@ -718,7 +718,7 @@ int
 ARDOUR_UI::starting ()
 {
 	Application* app = Application::instance ();
-	char *nsm_url;
+	const char *nsm_url;
 	bool brand_new_user = ArdourStartup::required ();
 
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
@@ -730,9 +730,17 @@ ARDOUR_UI::starting ()
 
 	app->ready ();
 
-	nsm_url = getenv ("NSM_URL");
+	/* we need to create this early because it may need to set the
+	 *  audio backend end up.
+	 */
+	
+	try {
+		audio_midi_setup.get (true);
+	} catch (...) {
+		return -1;
+	}
 
-	if (nsm_url) {
+	if ((nsm_url = g_getenv ("NSM_URL")) != 0) {
 		nsm = new NSM_Client;
 		if (!nsm->init (nsm_url)) {
 			nsm->announce (PROGRAM_NAME, ":dirty:", "ardour3");
@@ -807,16 +815,6 @@ ARDOUR_UI::starting ()
 			default:
 				return -1;
 			}
-		}
-
-		/* we need to create this early because it may need to set the
-		 *  audio backend end up.
-		 */
-
-		try {
-			audio_midi_setup.get (true);
-		} catch (...) {
-			return -1;
 		}
 
 		/* go get a session */
