@@ -3250,6 +3250,11 @@ ARDOUR_UI::setup_order_hint ()
 				order_hint = (*s)->route()->order_key();
 			}
 		}
+
+		if (!mixer->selection().routes.empty()) {
+			order_hint++;
+		}
+
 	} else {
 		for (TrackSelection::iterator s = editor->get_selection().tracks.begin(); s != editor->get_selection().tracks.end(); ++s) {
 			RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (*s);
@@ -3257,10 +3262,10 @@ ARDOUR_UI::setup_order_hint ()
 				order_hint = tav->route()->order_key();
 			}
 		}
-	}
 
-	if (!mixer->selection().routes.empty() || !editor->get_selection().tracks.empty()) {
-		order_hint++;
+		if (!editor->get_selection().tracks.empty()) {
+			order_hint++;
+		}
 	}
 
 	_session->set_order_hint (order_hint);
