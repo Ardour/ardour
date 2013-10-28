@@ -742,19 +742,33 @@ ARDOUR_UI::starting ()
 			for ( i = 0; i < 5000; ++i) {
 				nsm->check ();
 				usleep (i);
-				if (nsm->is_active())
+				if (nsm->is_active()) {
 					break;
+				}
+			}
+			if (i == 5000) {
+				error << _("NSM server did not announce itself") << endmsg;
+				return -1;
 			}
 			// wait for open command from nsm server
 			for ( i = 0; i < 5000; ++i) {
 				nsm->check ();
 				usleep (1000);
-				if (nsm->client_id ())
+				if (nsm->client_id ()) {
 					break;
+				}
+			}
+
+			if (i == 5000) {
+				error << _("NSM: no client ID provided") << endmsg;
+				return -1;
 			}
 
 			if (_session && nsm) {
 				_session->set_nsm_state( nsm->is_active() );
+			} else {
+				error << _("NSM: no session created") << endmsg;
+				return -1;
 			}
 
 			// nsm requires these actions disabled
@@ -773,10 +787,11 @@ ARDOUR_UI::starting ()
 				}
 			}
 
-		}
-		else {
+		} else {
 			delete nsm;
 			nsm = 0;
+			error << _("NSM: initialization failed") << endmsg;
+			return -1;
 		}
 
 	} else  {
