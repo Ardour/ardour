@@ -1065,8 +1065,8 @@ AudioEngine::start_latency_detection ()
 
 	/* find the ports we will connect to */
 
-	PortEngine::PortHandle* out = pe.get_port_by_name (_latency_output_name);
-	PortEngine::PortHandle* in = pe.get_port_by_name (_latency_input_name);
+	PortEngine::PortHandle out = pe.get_port_by_name (_latency_output_name);
+	PortEngine::PortHandle in = pe.get_port_by_name (_latency_input_name);
 
 	if (!out || !in) {
 		stop (true);

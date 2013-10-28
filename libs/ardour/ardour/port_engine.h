@@ -117,10 +117,11 @@ class PortEngine {
      * does not exist, return an empty string.
      */
     virtual std::string get_port_name (PortHandle) const = 0;
+
     /** Return a reference to a port with the fullname @param name. Return
-     * a null pointer if no such port exists.
+     * an "empty" PortHandle (analogous to a null pointer) if no such port exists.
      */
-    virtual PortHandle* get_port_by_name (const std::string&) const = 0;
+    virtual PortHandle get_port_by_name (const std::string&) const = 0;
 
     /** Find the set of ports whose names, types and flags match
      * specified values, place the names of each port into @param ports,
