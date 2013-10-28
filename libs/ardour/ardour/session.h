@@ -36,6 +36,8 @@
 
 #include <glibmm/threads.h>
 
+#include <ltc.h>
+
 #include "pbd/error.h"
 #include "pbd/event_loop.h"
 #include "pbd/rcu.h"
@@ -48,7 +50,6 @@
 #include "midi++/types.h"
 
 #include "timecode/time.h"
-#include "ltc/ltc.h"
 
 #include "ardour/ardour.h"
 #include "ardour/chan_count.h"

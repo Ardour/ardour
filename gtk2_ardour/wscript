@@ -273,6 +273,8 @@ def configure(conf):
 
     # TODO: Insert a sanity check for on OS X to ensure CoreAudio is present
 
+    autowaf.check_pkg(conf, 'fftw3f', uselib_store='FFTW3F',
+                      mandatory=True)
     autowaf.check_pkg(conf, 'flac', uselib_store='FLAC',
                       atleast_version='1.2.1')
     autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD',
@@ -411,15 +413,17 @@ def build(bld):
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
     obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG ALSA CURL DL'
-    obj.uselib       += ' GTKMM GNOMECANVASMM GNOMECANVAS '
+    obj.uselib       += ' GTKMM GNOMECANVASMM GNOMECANVAS FFTW3F'
     obj.uselib       += ' AUDIOUNITS OSX GTKOSX LO '
     obj.use          = [ 'libpbd',
                          'libmidipp',
-                         'libtaglib',
                          'ardour',
                          'libardour_cp',
-                         'libgtkmm2ext',
-                         'libtaglib' ]
+                         'libgtkmm2ext']
+    if bld.is_defined('USE_EXTERNAL_LIBS'):
+        obj.uselib += ' TAGLIB'
+    else:
+        obj.use.append('libtaglib')
     if sys.platform == 'darwin':
         obj.use += ' libappleutility'
     obj.defines     = [
