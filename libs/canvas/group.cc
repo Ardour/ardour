@@ -287,7 +287,7 @@ Group::child_changed ()
 void
 Group::add_items_at_point (Duple const point, vector<Item const *>& items) const
 {
-	/* Point is in canvas coordinate system */
+	/* Point is in parent coordinate system */
 
 	boost::optional<Rect> const bbox = bounding_box ();
 
