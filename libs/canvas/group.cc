@@ -148,7 +148,9 @@ Group::compute_bounding_box () const
 	bool have_one = false;
 
 	for (list<Item*>::const_iterator i = _items.begin(); i != _items.end(); ++i) {
+
 		boost::optional<Rect> item_bbox = (*i)->bounding_box ();
+
 		if (!item_bbox) {
 			continue;
 		}
@@ -285,17 +287,23 @@ Group::child_changed ()
 void
 Group::add_items_at_point (Duple const point, vector<Item const *>& items) const
 {
+	/* Point is in canvas coordinate system */
+
 	boost::optional<Rect> const bbox = bounding_box ();
 
 	if (!bbox || !bbox.get().contains (point)) {
 		return;
 	}
 
+	/* this adds this group itself to the list of items at point */
 	Item::add_items_at_point (point, items);
 	
+
+	/* now recurse and add any items within our group that contain point */
+
 	ensure_lut ();
-	
 	vector<Item*> our_items = _lut->items_at_point (point);
+
 	for (vector<Item*>::iterator i = our_items.begin(); i != our_items.end(); ++i) {
 		(*i)->add_items_at_point (point - (*i)->position(), items);
 	}
