@@ -83,6 +83,7 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 
 		_root.render (*draw, context);
 	}
+
 #if 0
 	/* debug render area */
 	Rect r = _root.item_to_window (area);
@@ -248,17 +249,6 @@ GtkCanvas::GtkCanvas ()
 	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK);
 }
 
-/** Handler for button presses on the canvas.
- *  @param ev GDK event.
- */
-bool
-GtkCanvas::button_handler (GdkEventButton* ev)
-{
-	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas button %3 %1 %1\n", ev->x, ev->y, (ev->type == GDK_BUTTON_PRESS ? "press" : "release")));
-	/* The Duple that we are passing in here is in canvas coordinates */
-	return deliver_event (Duple (ev->x, ev->y), reinterpret_cast<GdkEvent*> (ev));
-}
-
 /** Handler for pointer motion events on the canvas.
  *  @param ev GDK event.
  *  @return true if the motion event was handled, otherwise false.
@@ -337,6 +327,7 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 	if (items.empty()) {
 		if (_current_item) {
 			/* leave event */
+			cerr << "E/L: left item " << _current_item->whatami() << '/' << _current_item->name << " for ... nada" << endl;
 			_current_item->Event (reinterpret_cast<GdkEvent*> (&leave_event));
 			_current_item = 0;
 		}
@@ -348,27 +339,27 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 	 * we have entered it
 	 */
 
-	//cerr << "E/L: " << items.size() << " to check at " << point << endl;
+	cerr << "E/L: " << items.size() << " to check at " << point << endl;
 #ifdef CANVAS_DEBUG
 	for (vector<Item const*>::const_reverse_iterator i = items.rbegin(); i != items.rend(); ++i) {
-		//cerr << '\t' << (*i)->whatami() << ' ' << (*i)->name << " ignore ? " << (*i)->ignore_events() << " current ? " << (_current_item == (*i)) << endl;
+		cerr << '\t' << (*i)->whatami() << ' ' << (*i)->name << " ignore ? " << (*i)->ignore_events() << " current ? " << (_current_item == (*i)) << endl;
 	}
 #endif
-	//cerr << "------------\n";
+	cerr << "------------\n";
 
 	for (vector<Item const*>::const_reverse_iterator i = items.rbegin(); i != items.rend(); ++i) {
 
 		Item const *  new_item = *i;
 #ifdef CANVAS_DEBUG
-		//cerr << "\tE/L check out " << new_item->whatami() << ' ' << new_item->name << " ignore ? " << new_item->ignore_events() << " current ? " << (_current_item == new_item) << endl;
+		cerr << "\tE/L check out " << new_item->whatami() << ' ' << new_item->name << " ignore ? " << new_item->ignore_events() << " current ? " << (_current_item == new_item) << endl;
 #endif
 		if (new_item->ignore_events()) {
-			//cerr << "continue1\n";
+			// cerr << "continue1\n";
 			continue;
 		}
 
 		if (_current_item == new_item) {
-			//cerr << "continue2\n";
+			// cerr << "continue2\n";
 			continue;
 		}
 
@@ -376,6 +367,7 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 			/* leave event */
 			DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Leave %1 %2\n", _current_item->whatami(), _current_item->name));
 			_current_item->Event (reinterpret_cast<GdkEvent*> (&leave_event));
+			queue_draw ();
 		}
 
 		if (new_item && _current_item != new_item) {
@@ -383,10 +375,11 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 			_current_item = new_item;
 			DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Enter %1 %2\n", _current_item->whatami(), _current_item->name));
 			_current_item->Event (reinterpret_cast<GdkEvent*> (&enter_event));
+			queue_draw ();
 			break;
 		}
 
-		//cerr << "Loop around again\n";
+		// cerr << "Loop around again\n";
 	}
 }
 
@@ -398,6 +391,8 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 bool
 GtkCanvas::deliver_event (Duple point, GdkEvent* event)
 {
+	/* Point in in canvas coordinate space */
+
 	if (_grabbed_item) {
 		/* we have a grabbed item, so everything gets sent there */
 		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("%1 %2 (%3) was grabbed, send event there\n",
@@ -466,6 +461,7 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 	
 	if (_current_item == item) {
 		_current_item = 0;
+		queue_draw ();
 	}
 
 	if (_grabbed_item == item) {
@@ -486,6 +482,19 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	Cairo::RefPtr<Cairo::Context> c = get_window()->create_cairo_context ();
 
 	render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), c);
+
+#if 1
+	if (_current_item) {
+		boost::optional<Rect> orect = _current_item->bounding_box();
+		if (orect) {
+			Rect r = _current_item->item_to_window (orect.get());
+			c->rectangle (r.x0, r.y0, r.x1 - r.x0, r.y1 - r.y0);
+			c->set_source_rgba (1.0, 0.0, 0.0, 1.0);
+			c->stroke ();
+		}
+	}
+#endif
+
 
 	return true;
 }
@@ -511,16 +520,14 @@ GtkCanvas::on_button_press_event (GdkEventButton* ev)
 {
 	/* translate event coordinates from window to canvas */
 
-	GdkEvent copy = *((GdkEvent*)ev);
 	Duple where = window_to_canvas (Duple (ev->x, ev->y));
-
-	copy.button.x = where.x;
-	copy.button.y = where.y;
 				 
 	/* Coordinates in the event will be canvas coordinates, correctly adjusted
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
 	*/
-	return button_handler ((GdkEventButton*) &copy);
+
+	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas button press @ %1, %2 => %3\n", ev->x, ev->y, where));
+	return deliver_event (where, reinterpret_cast<GdkEvent*>(ev));
 }
 
 /** Handler for GDK button release events.
@@ -532,16 +539,14 @@ GtkCanvas::on_button_release_event (GdkEventButton* ev)
 {	
 	/* translate event coordinates from window to canvas */
 
-	GdkEvent copy = *((GdkEvent*)ev);
 	Duple where = window_to_canvas (Duple (ev->x, ev->y));
-
-	copy.button.x = where.x;
-	copy.button.y = where.y;
 
 	/* Coordinates in the event will be canvas coordinates, correctly adjusted
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
 	*/
-	return button_handler ((GdkEventButton*) &copy);
+
+	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas button release @ %1, %2 => %3\n", ev->x, ev->y, where));
+	return deliver_event (where, reinterpret_cast<GdkEvent*>(ev));
 }
 
 /** Handler for GDK motion events.
