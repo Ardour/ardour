@@ -150,9 +150,9 @@ class AudioRegionView : public RegionView
 
 	std::list<std::pair<framepos_t, ArdourCanvas::Line*> > feature_lines;
 
-	ArdourCanvas::Polygon*           sync_mark; ///< polgyon for sync position
-	ArdourCanvas::Polygon*           fade_in_shape;
-	ArdourCanvas::Polygon*           fade_out_shape;
+	ArdourCanvas::Polygon*          sync_mark; ///< polgyon for sync position
+	ArdourCanvas::PolyLine*         fade_in_shape;
+	ArdourCanvas::PolyLine*         fade_out_shape;
 	ArdourCanvas::Rectangle*        fade_in_handle; ///< fade in handle, or 0
 	ArdourCanvas::Rectangle*        fade_out_handle; ///< fade out handle, or 0
 

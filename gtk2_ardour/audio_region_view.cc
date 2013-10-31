@@ -159,14 +159,14 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	create_waves ();
 
-	fade_in_shape = new ArdourCanvas::Polygon (group);
+	fade_in_shape = new ArdourCanvas::PolyLine (group);
 	CANVAS_DEBUG_NAME (fade_in_shape, string_compose ("fade in shape for %1", region()->name()));
-	fade_in_shape->set_fill_color (fade_color);
+	fade_in_shape->set_outline_color (fade_color);
 	fade_in_shape->set_data ("regionview", this);
 
-	fade_out_shape = new ArdourCanvas::Polygon (group);
+	fade_out_shape = new ArdourCanvas::PolyLine (group);
 	CANVAS_DEBUG_NAME (fade_out_shape, string_compose ("fade out shape for %1", region()->name()));
-	fade_out_shape->set_fill_color (fade_color);
+	fade_out_shape->set_outline_color (fade_color);
 	fade_out_shape->set_data ("regionview", this);
 
 	if (!_recregion) {
@@ -315,10 +315,10 @@ AudioRegionView::fade_in_active_changed ()
 {
 	if (audio_region()->fade_in_active()) {
 		/* XXX: make a themable colour */
-		fade_in_shape->set_fill_color (RGBA_TO_UINT (45, 45, 45, 90));
+		fade_in_shape->set_outline_color (RGBA_TO_UINT (45, 45, 45, 90));
 	} else {
 		/* XXX: make a themable colour */
-		fade_in_shape->set_fill_color (RGBA_TO_UINT (45, 45, 45, 20));
+		fade_in_shape->set_outline_color (RGBA_TO_UINT (45, 45, 45, 20));
 	}
 }
 
@@ -327,10 +327,10 @@ AudioRegionView::fade_out_active_changed ()
 {
 	if (audio_region()->fade_out_active()) {
 		/* XXX: make a themable colour */
-		fade_out_shape->set_fill_color (RGBA_TO_UINT (45, 45, 45, 90));
+		fade_out_shape->set_outline_color (RGBA_TO_UINT (45, 45, 45, 90));
 	} else {
 		/* XXX: make a themable colour */
-		fade_out_shape->set_fill_color (RGBA_TO_UINT (45, 45, 45, 20));
+		fade_out_shape->set_outline_color (RGBA_TO_UINT (45, 45, 45, 20));
 	}
 }
 
@@ -584,26 +584,6 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 
 	redraw_start_xfade_to (ar, width, points, effective_height);
 
-	/* add 3 more points */
-
-	points.push_back (Duple());
-	points.push_back (Duple());
-	points.push_back (Duple());
-
-	/* fold back */
-
-	points[pi].x = pwidth;
-	points[pi].y = 2;
-	pi++;
-
-	points[pi].x = 1;
-	points[pi].y = 2;
-	pi++;
-
-	/* connect the dots ... */
-
-	points[pi] = points[0];
-
 	fade_in_shape->set (points);
 
 	/* ensure trim handle stays on top */
@@ -681,28 +661,6 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 	/* draw the line */
 
 	redraw_end_xfade_to (ar, width, points, effective_height);
-
-	/* fill the polygon*/
-
-	/* add 3 more points */
-
-	points.push_back (Duple());
-	points.push_back (Duple());
-	points.push_back (Duple());
-
-	/* fold back */
-
-	points[pi].x = _pixel_width;
-	points[pi].y = effective_height;
-	pi++;
-
-	points[pi].x = _pixel_width;
-	points[pi].y = 2;
-	pi++;
-
-	/* connect the dots ... */
-
-	points[pi] = points[0];
 
 	fade_out_shape->set (points);
 
