@@ -259,7 +259,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 		_y_constrained = false;
 	}
 
-	_raw_grab_frame = _editor->canvas_event_frame (event, &_grab_x, &_grab_y);
+	_raw_grab_frame = _editor->window_event_frame (event, &_grab_x, &_grab_y);
 	setup_pointer_frame_offset ();
 	_grab_frame = adjusted_frame (_raw_grab_frame, event);
 	_last_pointer_frame = _grab_frame;
