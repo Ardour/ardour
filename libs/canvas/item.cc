@@ -287,6 +287,103 @@ Item::reparent (Group* new_parent)
 	_parent->add (this);
 }
 
+bool
+Item::common_ancestor_within (uint32_t limit, const Item& other) const
+{
+	uint32_t d1 = depth();
+	uint32_t d2 = other.depth();
+	const Item* i1 = this;
+	const Item* i2 = &other;
+	
+	/* move towards root until we are at the same level
+	   for both items
+	*/
+
+	while (d1 != d2) {
+		if (d1 > d2) {
+			i1 = i1->parent();
+			d1--;
+			limit--;
+		} else {
+			i2 = i2->parent();
+			d2--;
+			limit--;
+		}
+		if (limit == 0) {
+			return false;
+		}
+	}
+
+	/* now see if there is a common parent */
+
+	while (i1 != i2) {
+		if (i1) {
+			i1 = i1->parent();
+		}
+		if (i2) {
+			i2 = i2->parent ();
+		}
+
+		limit--;
+		if (limit == 0) {
+			return false;
+		}
+	}
+	
+	return true;
+}
+
+const Item*
+Item::closest_ancestor_with (const Item& other) const
+{
+	uint32_t d1 = depth();
+	uint32_t d2 = other.depth();
+	const Item* i1 = this;
+	const Item* i2 = &other;
+
+	/* move towards root until we are at the same level
+	   for both items
+	*/
+
+	while (d1 != d2) {
+		if (d1 > d2) {
+			i1 = i1->parent();
+			d1--;
+		} else {
+			i2 = i2->parent();
+			d2--;
+		}
+	}
+
+	/* now see if there is a common parent */
+
+	while (i1 != i2) {
+		if (i1) {
+			i1 = i1->parent();
+		}
+		if (i2) {
+			i2 = i2->parent ();
+		}
+	}
+	
+	return i1;
+}
+
+bool
+Item::is_descendant_of (const Item& candidate) const
+{
+	Item const * i = _parent;
+
+	while (i) {
+		if (i == &candidate) {
+			return true;
+		}
+		i = i->parent();
+	}
+
+	return false;
+}
+
 void
 Item::grab_focus ()
 {
@@ -437,9 +534,22 @@ Item::whatami () const
 	return type.substr (type.find_last_of (':') + 1);
 }
 
+uint32_t
+Item::depth () const
+{
+	Item* i = _parent;
+	int d = 0;
+	while (i) {
+		++d;
+		i = i->parent();
+	}
+	return d;
+}
+
 ostream&
 ArdourCanvas::operator<< (ostream& o, const Item& i)
 {
 	i.dump (o);
 	return o;
 }
+

@@ -24,11 +24,14 @@
 #ifndef __CANVAS_CANVAS_H__
 #define __CANVAS_CANVAS_H__
 
+#include <set>
+
 #include <gdkmm/window.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/alignment.h>
 #include <cairomm/surface.h>
 #include <cairomm/context.h>
+
 #include "pbd/signals.h"
 #include "canvas/root_group.h"
 
@@ -62,6 +65,11 @@ public:
 	virtual void grab (Item *) = 0;
 	/** called to ask the canvas' host to `ungrab' any grabbed item */
 	virtual void ungrab () = 0;
+
+	/** called to ask the canvas' host to keyboard focus on an item */
+	virtual void focus (Item *) = 0;
+	/** called to ask the canvas' host to drop keyboard focus on an item */
+	virtual void unfocus (Item*) = 0;
 
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context> const &) const;
 
@@ -126,6 +134,8 @@ public:
 	void request_size (Duple);
 	void grab (Item *);
 	void ungrab ();
+	void focus (Item *);
+	void unfocus (Item*);
 
 	Cairo::RefPtr<Cairo::Context> context ();
 
@@ -136,6 +146,8 @@ protected:
 	bool on_button_press_event (GdkEventButton *);
 	bool on_button_release_event (GdkEventButton* event);
 	bool on_motion_notify_event (GdkEventMotion *);
+        bool on_enter_notify_event (GdkEventCrossing*);
+        bool on_leave_notify_event (GdkEventCrossing*);
 	
 	bool button_handler (GdkEventButton *);
 	bool motion_notify_handler (GdkEventMotion *);
@@ -148,11 +160,12 @@ private:
 	void item_going_away (Item *, boost::optional<Rect>);
 	bool send_leave_event (Item const *, double, double) const;
 
-
-	/** the item that the mouse is currently over, or 0 */
-	Item const * _current_item;
+        /** Items that the pointer is currently within */
+        std::set<Item const *> within_items;
 	/** the item that is currently grabbed, or 0 */
 	Item const * _grabbed_item;
+        /** the item that currently has key focus or 0 */
+	Item const * _focused_item;
 };
 
 /** A GTK::Alignment with a GtkCanvas inside it plus some Gtk::Adjustments for

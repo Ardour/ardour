@@ -184,6 +184,7 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 						     ArdourCanvas::Rect (0.0, 1.0, 
 									 trackview.editor().sample_to_pixel(duration), 
 									 trackview.current_height()));
+
 		CANVAS_DEBUG_NAME (frame, string_compose ("frame for %1", get_item_name()));
 
 		if (_recregion) {

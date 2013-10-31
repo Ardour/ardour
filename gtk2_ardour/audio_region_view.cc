@@ -172,17 +172,17 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	if (!_recregion) {
 		fade_in_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_in_handle, string_compose ("fade in handle for %1", region()->name()));
-		fade_in_handle->set_fill_color (UINT_RGBA_CHANGE_A (fill_color, 0));
-		fade_in_handle->set_outline_color (RGBA_TO_UINT (0, 0, 0, 0));
-
+		fade_in_handle->set_outline_color (RGBA_TO_UINT (0, 0, 0, 255));
+		fade_in_handle->set_fill_color (UINT_RGBA_CHANGE_A (fade_color, 255));
 		fade_in_handle->set_data ("regionview", this);
+		fade_in_handle->hide ();
 
 		fade_out_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_out_handle, string_compose ("fade out handle for %1", region()->name()));
-		fade_out_handle->set_fill_color (UINT_RGBA_CHANGE_A (fill_color, 0));
-		fade_out_handle->set_outline_color (RGBA_TO_UINT (0, 0, 0, 0));
-
+		fade_out_handle->set_outline_color (RGBA_TO_UINT (0, 0, 0, 255));
+		fade_out_handle->set_fill_color (UINT_RGBA_CHANGE_A (fade_color, 255));	
 		fade_out_handle->set_data ("regionview", this);
+		fade_out_handle->hide ();
 	}
 
 	setup_fade_handle_positions ();
@@ -410,10 +410,9 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 		if (pixel_width <= 6.0 || _height < 5.0 || !trackview.session()->config.get_show_region_fades()) {
 			fade_in_handle->hide();
 			fade_out_handle->hide();
-		}
-		else {
-			fade_in_handle->show();
-			fade_out_handle->show();
+		} else {
+			//fade_in_handle->show();
+			//fade_out_handle->show();
 		}
 	}
 
@@ -533,8 +532,6 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 		return;
 	}
 
-	fade_in_handle->show ();
-
 	/* smallest size for a fade is 64 frames */
 
 	width = std::max ((framecnt_t) 64, width);
@@ -628,8 +625,6 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 	if (fade_out_handle == 0) {
 		return;
 	}
-
-	fade_out_handle->show ();
 
 	/* smallest size for a fade is 64 frames */
 
@@ -1374,11 +1369,13 @@ AudioRegionView::entered (bool internal_editing)
 		gain_line->add_visibility (AutomationLine::ControlPoints);
 	}
 
+	cerr << "Entered! ARV for " << _region->name() << endl;
+
 	if (fade_in_handle && !internal_editing) {
-		fade_in_handle->set_outline_color (RGBA_TO_UINT (0, 0, 0, 255));
-		fade_in_handle->set_fill_color (UINT_RGBA_CHANGE_A (fade_color, 255));
-		fade_out_handle->set_outline_color (RGBA_TO_UINT (0, 0, 0, 255));
-		fade_out_handle->set_fill_color (UINT_RGBA_CHANGE_A (fade_color, 255));
+		fade_in_handle->show ();
+		fade_out_handle->show ();
+		fade_out_handle->raise_to_top ();
+		fade_in_handle->raise_to_top ();
 	}
 }
 
@@ -1392,11 +1389,11 @@ AudioRegionView::exited ()
 		gain_line->remove_visibility (AutomationLine::ControlPoints);
 	}
 
+	cerr << "Left! ARV for " << _region->name() << endl;
+
 	if (fade_in_handle) {
-		fade_in_handle->set_outline_color (RGBA_TO_UINT (0, 0, 0, 0));
-		fade_in_handle->set_fill_color (UINT_RGBA_CHANGE_A (fade_color, 0));
-		fade_out_handle->set_outline_color (RGBA_TO_UINT (0, 0, 0, 0));
-		fade_out_handle->set_fill_color (UINT_RGBA_CHANGE_A (fade_color, 0));
+		fade_in_handle->hide ();
+		fade_out_handle->hide ();
 	}
 }
 

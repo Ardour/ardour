@@ -88,6 +88,21 @@ public:
 	Group* parent () const {
 		return _parent;
 	}
+    
+        uint32_t depth() const;
+        const Item* closest_ancestor_with (const Item& other) const;
+        bool common_ancestor_within (uint32_t, const Item& other) const;
+
+        /** returns true if this item is an ancestor of @param candidate,
+	 * and false otherwise. 
+	 */
+        bool is_ancestor_of (const Item& candidate) const {
+		return candidate.is_descendant_of (*this);
+	}
+        /** returns true if this Item is a descendant of @param candidate,
+	 * and false otherwise. 
+	 */
+        bool is_descendant_of (const Item& candidate) const;
 
 	void set_position (Duple);
 	void set_x_position (Coord);

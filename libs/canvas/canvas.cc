@@ -234,8 +234,8 @@ Canvas::queue_draw_item_area (Item* item, Rect area)
 
 /** Construct a GtkCanvas */
 GtkCanvas::GtkCanvas ()
-	: _current_item (0)
-	, _grabbed_item (0)
+	: _grabbed_item (0)
+	, _focused_item (0)
 {
 	/* these are the events we want to know about */
 	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK);
@@ -294,10 +294,11 @@ GtkCanvas::enter_leave_items (int state)
 void
 GtkCanvas::enter_leave_items (Duple const & point, int state)
 {
-	/* find the items at the given position */
+	/* we do not enter/leave items during a drag/grab */
 
-	vector<Item const *> items;
-	_root.add_items_at_point (point, items);
+	if (_grabbed_item) {
+		return;
+	}
 
 	GdkEventCrossing enter_event;
 	enter_event.type = GDK_ENTER_NOTIFY;
@@ -310,69 +311,88 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 	enter_event.state = state;
 	enter_event.x = point.x;
 	enter_event.y = point.y;
+	enter_event.detail = GDK_NOTIFY_UNKNOWN;
 
 	GdkEventCrossing leave_event = enter_event;
 	leave_event.type = GDK_LEAVE_NOTIFY;
-	leave_event.detail = GDK_NOTIFY_ANCESTOR;
-	leave_event.subwindow = 0;
 
-	if (items.empty()) {
-		if (_current_item) {
-			/* leave event */
-			// cerr << "E/L: left item " << _current_item->whatami() << '/' << _current_item->name << " for ... nada" << endl;
-			_current_item->Event (reinterpret_cast<GdkEvent*> (&leave_event));
-			_current_item = 0;
+	/* find the items at the given position */
+
+	vector<Item const *> items;
+	_root.add_items_at_point (point, items);
+
+	/* put all items at point that are event-sensitive and visible into within_items, and if this
+	   is a new addition, also put them into newly_entered for later deliver of enter events.
+	*/
+	
+	vector<Item const *>::const_iterator i;
+	vector<Item const *> newly_entered;
+	Item const * new_item;
+
+	for (i = items.begin(); i != items.end(); ++i) {
+
+		new_item = *i;
+		
+		if (new_item->ignore_events() || !new_item->visible()) {
+			continue;
 		}
-		return;
+
+		pair<set<Item const *>::iterator,bool> res = within_items.insert (new_item);
+
+		if (res.second) {
+			newly_entered.push_back (new_item);
+		}
 	}
 
-	/* items is sorted from top to bottom, so reverse through it from bottom
-	 * to top to find the lowest, first event-sensitive item and notify that
-	 * we have entered it
-	 */
+	/* for every item in "within_items", check that we are still within them. if not,
+	   send a leave event, and remove them from "within_items"
+	*/
+
+	for (set<Item const *>::const_iterator i = within_items.begin(); i != within_items.end(); ) {
+
+		set<Item const *>::const_iterator tmp = i;
+		++tmp;
+
+		new_item = *i;
+
+		boost::optional<Rect> bbox = new_item->bounding_box();
+
+
+		if (bbox) {
+			if (!new_item->item_to_canvas (bbox.get()).contains (point)) {
+				leave_event.detail = GDK_NOTIFY_UNKNOWN;
+				cerr << string_compose ("\tLeave %1 %2\n", new_item->whatami(), new_item->name);
+				DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Leave %1 %2\n", new_item->whatami(), new_item->name));
+				(*i)->Event (reinterpret_cast<GdkEvent*> (&leave_event));
+				within_items.erase (i);
+			}
+		}
+
+		i = tmp;
+	}
 	
-	// cerr << "E/L: " << items.size() << " to check at " << point << endl;
-#ifdef CANVAS_DEBUG
-	// for (vector<Item const*>::const_reverse_iterator i = items.rbegin(); i != items.rend(); ++i) {
-	// cerr << '\t' << (*i)->whatami() << ' ' << (*i)->name << " ignore ? " << (*i)->ignore_events() << " current ? " << (_current_item == (*i)) << endl;
-        // }
-#endif
-	// cerr << "------------\n";
+	/* for every item in "newly_entered", send an enter event (and propagate it up the
+	   item tree until it is handled 
+	*/
 
-	for (vector<Item const*>::const_reverse_iterator i = items.rbegin(); i != items.rend(); ++i) {
+	for (vector<Item const*>::const_iterator i = newly_entered.begin(); i != newly_entered.end(); ++i) {
+		new_item = *i;
 
-		Item const *  new_item = *i;
-#ifdef CANVAS_DEBUG
-		// cerr << "\tE/L check out " << new_item->whatami() << ' ' << new_item->name << " ignore ? " << new_item->ignore_events() << " current ? " << (_current_item == new_item) << endl;
-#endif
-		if (new_item->ignore_events()) {
-			// cerr << "continue1\n";
-			continue;
-		}
 
-		if (_current_item == new_item) {
-			// cerr << "continue2\n";
-			continue;
-		}
-
-		if (_current_item) {
-			/* leave event */
-			DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Leave %1 %2\n", _current_item->whatami(), _current_item->name));
-			_current_item->Event (reinterpret_cast<GdkEvent*> (&leave_event));
-			queue_draw ();
-		}
-
-		if (new_item && _current_item != new_item) {
-			/* enter event */
-			_current_item = new_item;
-			DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Enter %1 %2\n", _current_item->whatami(), _current_item->name));
-			_current_item->Event (reinterpret_cast<GdkEvent*> (&enter_event));
-			queue_draw ();
+		if (new_item->Event (reinterpret_cast<GdkEvent*> (&enter_event))) {
+			cerr << string_compose ("\tEntered %1 %2\n", new_item->whatami(), new_item->name);
+			DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Enter %1 %2\n", new_item->whatami(), new_item->name));
 			break;
 		}
-
-		// cerr << "Loop around again\n";
 	}
+
+#if 0
+	cerr << "Within:\n";
+	for (set<Item const *>::const_iterator i = within_items.begin(); i != within_items.end(); ++i) {
+		cerr << '\t' << (*i)->whatami() << '/' << (*i)->name << endl;
+	}
+	cerr << "----\n";
+#endif
 }
 
 /** Deliver an event to the appropriate item; either the grabbed item, or
@@ -451,13 +471,17 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 		queue_draw_item_area (item, bounding_box.get ());
 	}
 	
-	if (_current_item == item) {
-		_current_item = 0;
-		queue_draw ();
-	}
+	/* no need to send a leave event to this item, since it is going away 
+	 */
+
+	within_items.erase (item);
 
 	if (_grabbed_item == item) {
 		_grabbed_item = 0;
+	}
+
+	if (_focused_item == item) {
+		_focused_item = 0;
 	}
 
 	enter_leave_items (0); // no mouse state
@@ -549,6 +573,22 @@ GtkCanvas::on_motion_notify_event (GdkEventMotion* ev)
 	return motion_notify_handler ((GdkEventMotion*) &copy);
 }
 
+bool
+GtkCanvas::on_enter_notify_event (GdkEventCrossing* ev)
+{
+	Duple where = window_to_canvas (Duple (ev->x, ev->y));
+	enter_leave_items (where, ev->state);
+	return true;
+}
+
+bool
+GtkCanvas::on_leave_notify_event (GdkEventCrossing* /*ev*/)
+{
+	cerr << "Clear all within items as we leave\n";
+	within_items.clear ();
+	return true;
+}
+
 /** Called to request a redraw of our canvas.
  *  @param area Area to redraw, in canvas coordinates.
  */
@@ -591,12 +631,31 @@ GtkCanvas::grab (Item* item)
 	_grabbed_item = item;
 }
 
+
 /** `Ungrab' any item that was previously grabbed */
 void
 GtkCanvas::ungrab ()
 {
 	/* XXX: should this be doing gdk_pointer_ungrab? */
 	_grabbed_item = 0;
+}
+
+/** Set keyboard focus on an item, so that all keyboard events are sent to that item until the focus
+ *  moves elsewhere.
+ *  @param item Item to grab.
+ */
+void
+GtkCanvas::focus (Item* item)
+{
+	_focused_item = item;
+}
+
+void
+GtkCanvas::unfocus (Item* item)
+{
+	if (item == _focused_item) {
+		_focused_item = 0;
+	}
 }
 
 /** @return The visible area of the canvas, in canvas coordinates */

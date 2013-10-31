@@ -74,8 +74,6 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	ensure_lut ();
 	vector<Item*> items = _lut->get (area);
 
-	++render_depth;
-		
 #ifdef CANVAS_DEBUG
 	if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
 		cerr << string_compose ("%1GROUP %2 render %5 %3 items out of %4\n", 
@@ -83,6 +81,8 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	}
 #endif
 
+	++render_depth;
+		
 	for (vector<Item*>::const_iterator i = items.begin(); i != items.end(); ++i) {
 
 		if (!(*i)->visible ()) {
@@ -112,16 +112,18 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		if (draw) {
 #ifdef CANVAS_DEBUG
 			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-				cerr << _canvas->render_indent() << " render "
-				     << ' ' 
-				     << (*i)->whatami()
-				     << ' '
-				     << (*i)->name
-				     << " item = " 
-				     << item
-				     << " intersect = "
-				     << draw.get()
-				     << endl;
+				if (dynamic_cast<Group*>(*i) == 0) {
+					cerr << _canvas->render_indent() << "render "
+					     << ' ' 
+					     << (*i)->whatami()
+					     << ' '
+					     << (*i)->name
+					     << " item = " 
+					     << item
+					     << " intersect = "
+					     << draw.get()
+					     << endl;
+				}
 			}
 #endif
 
