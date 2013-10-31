@@ -106,37 +106,41 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		}
 		
 		Rect item = (*i)->item_to_window (item_bbox.get());
-		item.expand (0.5);
-		boost::optional<Rect> draw = item.intersection (area);
+		boost::optional<Rect> d = item.intersection (area);
 		
-		if (draw) {
+		if (d) {
+			Rect draw = d.get();
+			if (draw.width() && draw.height()) {
 #ifdef CANVAS_DEBUG
-			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-				if (dynamic_cast<Group*>(*i) == 0) {
-					cerr << _canvas->render_indent() << "render "
-					     << ' ' 
-					     << (*i)->whatami()
-					     << ' '
-					     << (*i)->name
-					     << " item = " 
-					     << item
-					     << " intersect = "
-					     << draw.get()
-					     << endl;
+				if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
+					if (dynamic_cast<Group*>(*i) == 0) {
+						cerr << _canvas->render_indent() << "render "
+						     << ' ' 
+						     << (*i)->whatami()
+						     << ' '
+						     << (*i)->name
+						     << " item = " 
+						     << item
+						     << " intersect = "
+						     << draw
+						     << endl;
+					}
 				}
-			}
 #endif
 
-			(*i)->render (area, context);
-			++render_count;
+				(*i)->render (area, context);
+				++render_count;
+			}
 
 		} else {
+
 #ifdef CANVAS_DEBUG
 			if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
 				//cerr << string_compose ("%1skip render of %2 %3, no intersection\n", _canvas->render_indent(), (*i)->whatami(),
 				// (*i)->name);
 			}
 #endif
+
 		}
 	}
 

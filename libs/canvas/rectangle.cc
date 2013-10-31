@@ -53,24 +53,14 @@ void
 Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	Rect self = item_to_window (_rect);
-	boost::optional<Rect> d = self.intersection (area);
+	boost::optional<Rect> r = self.intersection (area);
 
-	if (!d) {
+	if (!r) {
+		std::cerr << whatami() << '/' << name << " not covered by render area! ... " << self << " vs. " << area << std::endl;
 		return;
 	}
-	
-	Rect draw = d.get();
-	static const double boundary = 0.5;
-	const double x_limit = _canvas->visible_area().width();
 
-	draw.x0 = max (self.x0, max (0.0, draw.x0 - boundary));
-	draw.x1 = min (self.x1, min (x_limit, draw.x1 + boundary));
-
-	draw.y0 = max (self.y0, max (0.0, draw.y0 - boundary));
-	draw.y1 = min (self.y1, min (x_limit, draw.y1 + boundary));
-
-	Rect fill_rect = draw;
-	Rect stroke_rect = fill_rect.expand (0.5);
+	Rect draw = r.get ();
 
 	if (_fill) {
 		if (_stops.empty()) {
@@ -78,7 +68,7 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 		} else {
 			setup_gradient_context (context, self, Duple (draw.x0, draw.y0));
 		}
-		context->rectangle (fill_rect.x0, fill_rect.y0, fill_rect.width(), fill_rect.height());
+		context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
 		context->fill ();
 	}
 	
@@ -86,27 +76,32 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 
 		setup_outline_context (context);
 
+		context->save ();
+		context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
+		context->clip ();
+
 		if (_outline_what & LEFT) {
-			context->move_to (stroke_rect.x0, stroke_rect.y0);
-			context->line_to (stroke_rect.x0, stroke_rect.y1);
+			context->move_to (self.x0, self.y0);
+			context->line_to (self.x0, self.y1);
 		}
 		
 		if (_outline_what & BOTTOM) {
-			context->move_to (stroke_rect.x0, stroke_rect.y1);
-			context->line_to (stroke_rect.x1, stroke_rect.y1);
+			context->move_to (self.x0, self.y1);
+			context->line_to (self.x1, self.y1);
 		}
 		
 		if (_outline_what & RIGHT) {
-			context->move_to (stroke_rect.x1, stroke_rect.y0);
-			context->line_to (stroke_rect.x1, stroke_rect.y1);
+			context->move_to (self.x1, self.y0);
+			context->line_to (self.x1, self.y1);
 		}
 		
 		if (_outline_what & TOP) {
-			context->move_to (stroke_rect.x0, stroke_rect.y0);
-			context->line_to (stroke_rect.x1, stroke_rect.y0);
+			context->move_to (self.x0, self.y0);
+			context->line_to (self.x1, self.y0);
 		}
 		
 		context->stroke ();
+		context->restore ();
 	}
 }
 
@@ -114,7 +109,7 @@ void
 Rectangle::compute_bounding_box () const
 {
 	Rect r = _rect.fix ();
-	_bounding_box = boost::optional<Rect> (r.expand (_outline_width));
+	_bounding_box = boost::optional<Rect> (r.expand (_outline_width/2.0));
 	_bounding_box_dirty = false;
 }
 

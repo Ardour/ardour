@@ -85,12 +85,18 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 
 	boost::optional<Rect> draw = root_bbox->intersection (area);
 	if (draw) {
+
+		// context->rectangle (area.x0, area.y0, area.x1 - area.x0, area.y1 - area.y0);
+		// context->set_source_rgba (1.0, 0, 0, 1.0);
+		// context->fill ();
+
 		/* there's a common area between the root and the requested
 		   area, so render it.
 		*/
 
 		_root.render (*draw, context);
 	}
+
 }
 
 ostream&
@@ -185,7 +191,10 @@ Canvas::window_to_canvas (Duple const & d) const
 Duple
 Canvas::canvas_to_window (Duple const & d) const
 {
-	return d.translate (Duple (-_scroll_offset_x, -_scroll_offset_y));
+	Duple wd = d.translate (Duple (-_scroll_offset_x, -_scroll_offset_y));
+	wd.x = round (wd.x);
+	wd.y = round (wd.y);
+	return wd;
 }	
 
 Rect
@@ -197,7 +206,12 @@ Canvas::window_to_canvas (Rect const & r) const
 Rect
 Canvas::canvas_to_window (Rect const & r) const
 {
-	return r.translate (Duple (-_scroll_offset_x, -_scroll_offset_y));
+	Rect wr = r.translate (Duple (-_scroll_offset_x, -_scroll_offset_y));
+	wr.x0 = floor (wr.x0);
+	wr.x1 = ceil (wr.x1);
+	wr.y0 = floor (wr.y0);
+	wr.y1 = ceil (wr.y1);
+	return wr;
 }	
 
 /** Called when an item has moved.
@@ -369,7 +383,6 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 		if (bbox) {
 			if (!new_item->item_to_canvas (bbox.get()).contains (point)) {
 				leave_event.detail = GDK_NOTIFY_UNKNOWN;
-				cerr << string_compose ("\tLeave %1 %2\n", new_item->whatami(), new_item->name);
 				DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Leave %1 %2\n", new_item->whatami(), new_item->name));
 				(*i)->Event (reinterpret_cast<GdkEvent*> (&leave_event));
 				within_items.erase (i);
@@ -388,7 +401,6 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 
 
 		if (new_item->Event (reinterpret_cast<GdkEvent*> (&enter_event))) {
-			cerr << string_compose ("\tEntered %1 %2\n", new_item->whatami(), new_item->name);
 			DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Enter %1 %2\n", new_item->whatami(), new_item->name));
 			break;
 		}
