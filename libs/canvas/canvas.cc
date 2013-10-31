@@ -49,6 +49,14 @@ Canvas::scroll_to (Coord x, Coord y)
 {
 	_scroll_offset_x = x;
 	_scroll_offset_y = y;
+
+	enter_leave_items (0); // no current mouse position 
+}
+
+void
+Canvas::zoomed ()
+{
+	enter_leave_items (0); // no current mouse position
 }
 
 /** Render an area of the canvas.

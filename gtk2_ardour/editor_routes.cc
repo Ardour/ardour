@@ -1004,12 +1004,6 @@ EditorRoutes::hide_all_tracks (bool /*with_select*/)
 	}
 
 	resume_redisplay ();
-
-	/* XXX this seems like a hack and half, but its not clear where to put this
-	   otherwise.
-	*/
-
-	//reset_scrolling_region ();
 }
 
 void

@@ -4269,7 +4269,16 @@ Editor::set_samples_per_pixel (framecnt_t spp)
 
 	ZoomChanged (); /* EMIT_SIGNAL */
 
-	//reset_scrolling_region ();
+	ArdourCanvas::GtkCanvasViewport* c;
+
+	c = get_time_bars_canvas();
+	if (c) {
+		c->canvas()->zoomed ();
+	}
+	c = get_track_canvas();
+	if (c) {
+		c->canvas()->zoomed ();
+	}
 
 	if (playhead_cursor) {
 		playhead_cursor->set_position (playhead_cursor->current_frame ());

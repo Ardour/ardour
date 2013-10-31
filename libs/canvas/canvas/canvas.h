@@ -107,6 +107,8 @@ public:
         void scroll_to (Coord x, Coord y);
         virtual Rect visible_area () const = 0;
 
+        void zoomed();
+    
         std::string indent() const;
         std::string render_indent() const;
         void dump (std::ostream&) const;
