@@ -86,7 +86,7 @@ Editor::show_editor_mixer (bool yn)
 			screen = Gdk::Screen::get_default();
 		}
 
-		if (screen && screen->get_height() < 700) {
+		if (g_getenv ("ARDOUR_LOVES_STUPID_TINY_SCREENS") == 0 && screen && screen->get_height() < 700) {
 			Gtk::MessageDialog msg (_("This screen is not tall enough to display the editor mixer"));
 			msg.run ();
 			return;

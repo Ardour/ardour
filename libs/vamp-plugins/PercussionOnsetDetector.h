@@ -37,7 +37,7 @@
 #ifndef _PERCUSSION_ONSET_DETECTOR_PLUGIN_H_
 #define _PERCUSSION_ONSET_DETECTOR_PLUGIN_H_
 
-#include "vamp-sdk/Plugin.h"
+#include <vamp-sdk/Plugin.h>
 
 /**
  * Example plugin that detects percussive events.

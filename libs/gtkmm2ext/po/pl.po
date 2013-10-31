@@ -90,18 +90,3 @@ msgstr ""
 #: textviewer.cc:34
 msgid "Close"
 msgstr "Zamknij"
-
-#~ msgid "Error"
-#~ msgstr "Błąd"
-
-#~ msgid "+"
-#~ msgstr "+"
-
-#~ msgid "-"
-#~ msgstr "-"
-
-#~ msgid "Paths"
-#~ msgstr "Położenia"
-
-#~ msgid "Path Chooser"
-#~ msgstr "Wybór położenia"

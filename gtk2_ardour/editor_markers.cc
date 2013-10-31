@@ -1340,12 +1340,23 @@ Editor::marker_menu_rename ()
 		/*NOTREACHED*/
 	}
 
+
+	rename_marker (marker);
+}
+
+void
+Editor::rename_marker(Marker *marker)
+{
 	Location* loc;
 	bool is_start;
 
 	loc = find_location_from_marker (marker, is_start);
 
-	if (!loc) return;
+	if (!loc)
+	       return;
+
+	if (loc == transport_loop_location() || loc == transport_punch_location() || loc->is_session_range())
+		return;
 
 	ArdourPrompter dialog (true);
 	string txt;
@@ -1380,6 +1391,7 @@ Editor::marker_menu_rename ()
 
 	dialog.get_result(txt);
 	loc->set_name (txt);
+	_session->set_dirty ();
 
 	XMLNode &after = _session->locations()->get_state();
 	_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));

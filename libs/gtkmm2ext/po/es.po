@@ -94,36 +94,3 @@ msgstr "Pulsa para llevarlo a la ventana principal"
 #: textviewer.cc:34
 msgid "Close"
 msgstr "Cerrar"
-
-#~ msgid "Error"
-#~ msgstr "Error"
-
-#~ msgid "OK"
-#~ msgstr "ACEPTAR"
-
-#~ msgid "Location:"
-#~ msgstr "Localización:"
-
-#~ msgid "Browse ..."
-#~ msgstr "Seleccionar ..."
-
-#~ msgid "Cancel"
-#~ msgstr "Cancelar"
-
-#~ msgid "New folder"
-#~ msgstr "Nueva carpeta"
-
-#~ msgid "Add to favorites"
-#~ msgstr "Agregar a favoritos"
-
-#~ msgid "Remove from favorites"
-#~ msgstr "Quitar de favoritos"
-
-#~ msgid "Show Hidden"
-#~ msgstr "Mostrar ocultos"
-
-#~ msgid "Hide browser"
-#~ msgstr "Ocultar explorador"
-
-#~ msgid "Rescan"
-#~ msgstr "Buscar de nuevo"

@@ -25,7 +25,7 @@
 
 /* LV2 */
 #include "lv2/lv2plug.in/ns/lv2core/lv2.h"
-#include "lv2/lv2plug.in/ns/ext/atom/util.h"
+#include "lv2/lv2plug.in/ns/ext/atom/atom.h"
 #include "lv2/lv2plug.in/ns/ext/urid/urid.h"
 #include "lv2/lv2plug.in/ns/ext/midi/midi.h"
 
@@ -35,7 +35,7 @@
 static void *   synth_alloc      (void);
 static void     synth_init       (void *, double rate);
 static void     synth_free       (void *);
-static void     synth_parse_midi (void *, uint8_t *data, size_t size);
+static void     synth_parse_midi (void *, const uint8_t *data, const size_t size);
 static uint32_t synth_sound      (void *, uint32_t written, uint32_t nframes, float **out);
 
 #include "rsynth.c"
@@ -66,6 +66,9 @@ instantiate(const LV2_Descriptor*     descriptor,
             const char*               bundle_path,
             const LV2_Feature* const* features)
 {
+  (void) descriptor; /* unused variable */
+  (void) bundle_path; /* unused variable */
+
   if (rate < 8000) {
     fprintf(stderr, "RSynth.lv2 error: unsupported sample-rate (must be > 8k)\n");
     return NULL;
@@ -131,18 +134,22 @@ run(LV2_Handle handle, uint32_t n_samples)
 
   /* Process incoming MIDI events */
   if (self->midiin) {
-    LV2_Atom_Event* ev = lv2_atom_sequence_begin(&(self->midiin)->body);
-    while(!lv2_atom_sequence_is_end(&(self->midiin)->body, (self->midiin)->atom.size, ev)) {
+    LV2_Atom_Event const* ev = (LV2_Atom_Event const*)((&(self->midiin)->body) + 1); // lv2_atom_sequence_begin
+    while( // !lv2_atom_sequence_is_end
+        (const uint8_t*)ev < ((const uint8_t*) &(self->midiin)->body + (self->midiin)->atom.size)
+        )
+    {
       if (ev->body.type == self->midi_MidiEvent) {
-	if (written + BUFFER_SIZE_SAMPLES < ev->time.frames
-	    && ev->time.frames < n_samples) {
-	  /* first synthesize sound up until the message timestamp */
-	  written = synth_sound(self->synth, written, ev->time.frames, audio);
-	}
-	/* send midi message to synth */
-	synth_parse_midi(self->synth, (uint8_t*)(ev+1), ev->body.size);
+        if (written + BUFFER_SIZE_SAMPLES < ev->time.frames
+            && ev->time.frames < n_samples) {
+          /* first synthesize sound up until the message timestamp */
+          written = synth_sound(self->synth, written, ev->time.frames, audio);
+        }
+        /* send midi message to synth */
+        synth_parse_midi(self->synth, (const uint8_t*)(ev+1), ev->body.size);
       }
-      ev = lv2_atom_sequence_next(ev);
+      ev = (LV2_Atom_Event const*) // lv2_atom_sequence_next()
+        ((const uint8_t*)ev + sizeof(LV2_Atom_Event) + ((ev->body.size + 7) & ~7));
     }
   }
 
@@ -161,6 +168,7 @@ cleanup(LV2_Handle handle)
 static const void*
 extension_data(const char* uri)
 {
+  (void) uri; /* unused variable */
   return NULL;
 }
 
@@ -177,9 +185,9 @@ static const LV2_Descriptor descriptor = {
 
 LV2_SYMBOL_EXPORT
 const LV2_Descriptor*
-lv2_descriptor(uint32_t index)
+lv2_descriptor(uint32_t idx)
 {
-  switch (index) {
+  switch (idx) {
   case 0:
     return &descriptor;
   default:
@@ -187,4 +195,4 @@ lv2_descriptor(uint32_t index)
   }
 }
 
-/* vi:set ts=8 sts=2 sw=2: */
+/* vi:set ts=8 sts=2 sw=2 et: */

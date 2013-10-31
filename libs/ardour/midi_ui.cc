@@ -39,7 +39,6 @@ using namespace Glib;
 
 #include "i18n.h"
 
-BaseUI::RequestType MidiControlUI::PortChange = BaseUI::new_request_type();
 MidiControlUI* MidiControlUI::_instance = 0;
 
 #include "pbd/abstract_ui.cc"  /* instantiate the template */
@@ -60,24 +59,7 @@ MidiControlUI::~MidiControlUI ()
 void
 MidiControlUI::do_request (MidiUIRequest* req)
 {
-	if (req->type == PortChange) {
-
-		/* restart event loop with new ports */
-		DEBUG_TRACE (DEBUG::MidiIO, "reset ports\n");
-		reset_ports ();
-
-	} else if (req->type == CallSlot) {
-
-#ifndef NDEBUG
-		if (getenv ("DEBUG_THREADED_SIGNALS")) {
-			cerr << "MIDI UI calls a slot\n";
-		}
-#endif
-
-		req->the_slot ();
-
-	} else if (req->type == Quit) {
-
+	if (req->type == Quit) {
 		BaseUI::quit ();
 	}
 }
@@ -117,23 +99,37 @@ MidiControlUI::clear_ports ()
 void
 MidiControlUI::reset_ports ()
 {
-	if (port_sources.empty()) {
-		AsyncMIDIPort* async = dynamic_cast<AsyncMIDIPort*> (_session.midi_input_port());
+	if (!port_sources.empty()) {
+		return;
+	}
+	
+	vector<AsyncMIDIPort*> ports;
+	AsyncMIDIPort* p;
+	
+	if ((p = dynamic_cast<AsyncMIDIPort*> (_session.midi_input_port()))) {
+		ports.push_back (p);
+	}
+	
+	
+	if ((p = dynamic_cast<AsyncMIDIPort*> (_session.mmc_input_port()))) {
+		ports.push_back (p);
+	}
+	
+	if (ports.empty()) {
+		return;
+	}
+	
+	int fd;
+	for (vector<AsyncMIDIPort*>::const_iterator pi = ports.begin(); pi != ports.end(); ++pi) {
 
-		if (!async) {
-			return;
-		}
-
-		int fd;
-
-		if ((fd = async->selectable ()) >= 0) {
+		if ((fd = (*pi)->selectable ()) >= 0) {
 			Glib::RefPtr<IOSource> psrc = IOSource::create (fd, IO_IN|IO_HUP|IO_ERR);
 			
-			psrc->connect (sigc::bind (sigc::mem_fun (this, &MidiControlUI::midi_input_handler), async));
+			psrc->connect (sigc::bind (sigc::mem_fun (this, &MidiControlUI::midi_input_handler), *pi));
 			psrc->attach (_main_loop->get_context());
-
+			
 			// glibmm hack: for now, store only the GSource*
-
+			
 			port_sources.push_back (psrc->gobj());
 			g_source_ref (psrc->gobj());
 		}

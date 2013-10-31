@@ -333,9 +333,14 @@ def build(bld):
     obj.uselib       = ['GLIBMM','GTHREAD','AUBIO','SIGCPP','XML','UUID',
                         'SNDFILE','SAMPLERATE','LRDF','AUDIOUNITS',
                         'OSX','BOOST','CURL','DL']
-    obj.use          = ['libpbd','libmidipp','libevoral','libvamphost',
-                        'libvampplugin','libtaglib','librubberband',
+    obj.use          = ['libpbd','libmidipp','libevoral','libvampplugin',
                         'libaudiographer','libltc','libtimecode']
+    if bld.is_defined('USE_EXTERNAL_LIBS'):
+        obj.uselib.extend(['RUBBERBAND', 'TAGLIB', 'LIBLTC', 'VAMPSDK',
+                           'VAMPHOSTSDK'])
+    else:
+        obj.use.extend(['libltc', 'librubberband', 'libtaglib', 'libvamphost'])
+
     obj.vnum         = LIBARDOUR_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
     obj.defines      = [
@@ -400,9 +405,13 @@ def build(bld):
                                    'test/test_common.cc', 'test/dummy_lxvst.cc', 'test/audio_region_test.cc', 'test/test_util.cc']
         testcommon.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                                    'SAMPLERATE','XML','LRDF','COREAUDIO']
-        testcommon.use          = ['libpbd','libmidipp','libevoral','libvamphost',
-                                   'libvampplugin','libtaglib','librubberband',
-                                   'libaudiographer','libltc','ardour']
+        testcommon.use          = ['libpbd','libmidipp','libevoral',
+                                   'libvampplugin','libaudiographer','ardour']
+        if bld.is_defined('USE_EXTERNAL_LIBS'):
+            testcommon.uselib.extend(['RUBBERBAND', 'TAGLIB', 'LIBLTC', 'VAMPSDK',
+                                      'VAMPHOSTSDK'])
+        else:
+            testcommon.use.extend(['libltc', 'librubberband', 'libtaglib', 'libvamphost'])
         testcommon.defines      = [
             'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
             'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
@@ -538,9 +547,15 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     testobj.source       = sources
     testobj.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                             'SAMPLERATE','XML','LRDF','COREAUDIO']
-    testobj.use          = ['libpbd','libmidipp','libevoral','libvamphost',
-                            'libvampplugin','libtaglib','librubberband',
-                            'libaudiographer','libltc','ardour','testcommon']
+    testobj.use          = ['libpbd','libmidipp','libevoral','libvampplugin',
+                            'libaudiographer','ardour','testcommon']
+    if bld.is_defined('USE_EXTERNAL_LIBS'):
+        testcommon.uselib.extend(['RUBBERBAND', 'TAGLIB', 'LIBLTC', 'VAMPSDK',
+                                  'VAMPHOSTSDK'])
+    else:
+        testcommon.use.extend(['libltc', 'librubberband', 'libtaglib',
+                               'libvamphost'])
+
     testobj.name         = name
     testobj.target       = target
     # not sure about install path

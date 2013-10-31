@@ -656,11 +656,6 @@ msgstr ""
 msgid "Audio Connections"
 msgstr ""
 
-#: ardour_ui.cc:200
-#, fuzzy
-msgid "MIDI Connections"
-msgstr "Channel Colours"
-
 #: ardour_ui.cc:202
 msgid "Errors"
 msgstr ""
@@ -3635,16 +3630,6 @@ msgstr ""
 msgid "Snap to Minutes"
 msgstr ""
 
-#: editor_actions.cc:505
-#, fuzzy
-msgid "Snap to One Twenty Eighths"
-msgstr "Snap to quavers"
-
-#: editor_actions.cc:506
-#, fuzzy
-msgid "Snap to Sixty Fourths"
-msgstr "Snap to semiquavers"
-
 #: editor_actions.cc:507
 msgid "Snap to Thirty Seconds"
 msgstr "Snap to demisemiquavers"
@@ -4610,36 +4595,6 @@ msgstr ""
 #: editor_ops.cc:2078
 msgid "insert region"
 msgstr ""
-
-#: editor_ops.cc:2261
-#, fuzzy
-msgid "raise regions"
-msgstr "Normalise regions"
-
-#: editor_ops.cc:2263
-#, fuzzy
-msgid "raise region"
-msgstr "Normalise region"
-
-#: editor_ops.cc:2269
-#, fuzzy
-msgid "raise regions to top"
-msgstr "Normalise regions"
-
-#: editor_ops.cc:2271
-#, fuzzy
-msgid "raise region to top"
-msgstr "Normalise region"
-
-#: editor_ops.cc:2277
-#, fuzzy
-msgid "lower regions"
-msgstr "Normalise regions"
-
-#: editor_ops.cc:2279 editor_ops.cc:2287
-#, fuzzy
-msgid "lower region"
-msgstr "Normalise region"
 
 #: editor_ops.cc:2285
 msgid "lower regions to bottom"
@@ -6505,11 +6460,6 @@ msgstr "could not initialise %1."
 msgid "Cannot xinstall SIGPIPE error handler"
 msgstr ""
 
-#: main.cc:528
-#, fuzzy
-msgid "could not create %1 GUI"
-msgstr "could not initialise %1."
-
 #: main_clock.cc:51
 msgid "Display delta to edit cursor"
 msgstr ""
@@ -6531,11 +6481,6 @@ msgstr ""
 #: midi_channel_selector.cc:171
 msgid "Force"
 msgstr ""
-
-#: midi_channel_selector.cc:330 midi_channel_selector.cc:372
-#, fuzzy
-msgid "MIDI Channel Control"
-msgstr "Channel Colours"
 
 #: midi_channel_selector.cc:332
 msgid "Playback all channels"
@@ -6625,26 +6570,6 @@ msgstr ""
 msgid "Triplet"
 msgstr ""
 
-#: midi_list_editor.cc:58
-#, fuzzy
-msgid "Quarter"
-msgstr "crotchet (4)"
-
-#: midi_list_editor.cc:59
-#, fuzzy
-msgid "Eighth"
-msgstr "quaver (8)"
-
-#: midi_list_editor.cc:60
-#, fuzzy
-msgid "Sixteenth"
-msgstr "semiquaver (16)"
-
-#: midi_list_editor.cc:61
-#, fuzzy
-msgid "Thirty-second"
-msgstr "demisemiquaver (32)"
-
 #: midi_list_editor.cc:62
 msgid "Sixty-fourth"
 msgstr ""
@@ -6672,11 +6597,6 @@ msgstr ""
 #: midi_list_editor.cc:244
 msgid "edit note velocity"
 msgstr ""
-
-#: midi_list_editor.cc:258
-#, fuzzy
-msgid "edit note length"
-msgstr "Set note length to a minim"
 
 #: midi_list_editor.cc:460
 msgid "insert new note"
@@ -6794,11 +6714,6 @@ msgstr ""
 msgid "Program "
 msgstr ""
 
-#: midi_region_view.cc:3132
-#, fuzzy
-msgid "Channel "
-msgstr "Channel Colours"
-
 #: midi_region_view.cc:3301 midi_region_view.cc:3303
 msgid "paste"
 msgstr ""
@@ -6842,11 +6757,6 @@ msgstr ""
 #: midi_time_axis.cc:496
 msgid "Note Mode"
 msgstr ""
-
-#: midi_time_axis.cc:497
-#, fuzzy
-msgid "Channel Selector"
-msgstr "Channel Colours"
 
 #: midi_time_axis.cc:502
 msgid "Color Mode"
@@ -11473,46 +11383,10 @@ msgstr ""
 msgid "Edit Tempo"
 msgstr ""
 
-#: tempo_dialog.cc:76 tempo_dialog.cc:77 tempo_dialog.cc:282
-#: tempo_dialog.cc:283
-#, fuzzy
-msgid "whole"
-msgstr "semibreve (1)"
-
-#: tempo_dialog.cc:78 tempo_dialog.cc:79 tempo_dialog.cc:284
-#: tempo_dialog.cc:285
-#, fuzzy
-msgid "second"
-msgstr "minim (2)"
-
 #: tempo_dialog.cc:80 tempo_dialog.cc:81 tempo_dialog.cc:286
 #: tempo_dialog.cc:287
 msgid "third"
 msgstr ""
-
-#: tempo_dialog.cc:82 tempo_dialog.cc:83 tempo_dialog.cc:288
-#: tempo_dialog.cc:289
-#, fuzzy
-msgid "quarter"
-msgstr "crotchet (4)"
-
-#: tempo_dialog.cc:84 tempo_dialog.cc:85 tempo_dialog.cc:290
-#: tempo_dialog.cc:291
-#, fuzzy
-msgid "eighth"
-msgstr "quaver (8)"
-
-#: tempo_dialog.cc:86 tempo_dialog.cc:87 tempo_dialog.cc:292
-#: tempo_dialog.cc:293
-#, fuzzy
-msgid "sixteenth"
-msgstr "semiquaver (16)"
-
-#: tempo_dialog.cc:88 tempo_dialog.cc:89 tempo_dialog.cc:294
-#: tempo_dialog.cc:295
-#, fuzzy
-msgid "thirty-second"
-msgstr "demisemiquaver (32)"
 
 #: tempo_dialog.cc:90 tempo_dialog.cc:91 tempo_dialog.cc:296
 #: tempo_dialog.cc:297
@@ -11855,11 +11729,6 @@ msgstr ""
 msgid "Abort"
 msgstr ""
 
-#: transcode_video_dialog.cc:63
-#, fuzzy
-msgid "Height = "
-msgstr "quaver (8)"
-
 #: transcode_video_dialog.cc:66
 msgid "Manual Override"
 msgstr ""
@@ -12049,11 +11918,6 @@ msgstr ""
 msgid "Set Aspect Ratio:"
 msgstr ""
 
-#: export_video_dialog.cc:80
-#, fuzzy
-msgid "Normalize Audio"
-msgstr "Normalise to:"
-
 #: export_video_dialog.cc:81
 msgid "2 Pass Encoding"
 msgstr ""
@@ -12145,11 +12009,6 @@ msgstr ""
 msgid "Audio Samplerate:"
 msgstr ""
 
-#: export_video_dialog.cc:387
-#, fuzzy
-msgid "Normalizing audio"
-msgstr "Normalise values"
-
 #: export_video_dialog.cc:391
 msgid "Exporting audio"
 msgstr ""
@@ -12212,9 +12071,3 @@ msgid ""
 "\n"
 "Open Manual in Browser? "
 msgstr ""
-
-#~ msgid "Quantize Type"
-#~ msgstr "Quantise Type"
-
-#~ msgid "unknown style attribute %1 requested for color; using \"red\""
-#~ msgstr "unknown style attribute %1 requested for colour; using \"red\""
