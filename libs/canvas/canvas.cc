@@ -260,7 +260,8 @@ GtkCanvas::GtkCanvas ()
 	, _focused_item (0)
 {
 	/* these are the events we want to know about */
-	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK);
+	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK |
+		    Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
 }
 
 /** Handler for pointer motion events on the canvas.
@@ -406,7 +407,7 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 		}
 	}
 
-#if 0
+#if 1
 	cerr << "Within:\n";
 	for (set<Item const *>::const_iterator i = within_items.begin(); i != within_items.end(); ++i) {
 		cerr << '\t' << (*i)->whatami() << '/' << (*i)->name << endl;
@@ -543,14 +544,18 @@ GtkCanvas::on_button_press_event (GdkEventButton* ev)
 {
 	/* translate event coordinates from window to canvas */
 
+	GdkEvent copy = *((GdkEvent*)ev);
 	Duple where = window_to_canvas (Duple (ev->x, ev->y));
-				 
+
+	copy.button.x = where.x;
+	copy.button.y = where.y;
+	
 	/* Coordinates in the event will be canvas coordinates, correctly adjusted
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
 	*/
 
 	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas button press @ %1, %2 => %3\n", ev->x, ev->y, where));
-	return deliver_event (where, reinterpret_cast<GdkEvent*>(ev));
+	return deliver_event (where, reinterpret_cast<GdkEvent*>(&copy));
 }
 
 /** Handler for GDK button release events.
@@ -562,14 +567,18 @@ GtkCanvas::on_button_release_event (GdkEventButton* ev)
 {	
 	/* translate event coordinates from window to canvas */
 
+	GdkEvent copy = *((GdkEvent*)ev);
 	Duple where = window_to_canvas (Duple (ev->x, ev->y));
+
+	copy.button.x = where.x;
+	copy.button.y = where.y;
 
 	/* Coordinates in the event will be canvas coordinates, correctly adjusted
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
 	*/
 
 	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas button release @ %1, %2 => %3\n", ev->x, ev->y, where));
-	return deliver_event (where, reinterpret_cast<GdkEvent*>(ev));
+	return deliver_event (where, reinterpret_cast<GdkEvent*>(&copy));
 }
 
 /** Handler for GDK motion events.
@@ -604,7 +613,6 @@ GtkCanvas::on_enter_notify_event (GdkEventCrossing* ev)
 bool
 GtkCanvas::on_leave_notify_event (GdkEventCrossing* /*ev*/)
 {
-	cerr << "Clear all within items as we leave\n";
 	within_items.clear ();
 	return true;
 }
@@ -616,8 +624,7 @@ void
 GtkCanvas::request_redraw (Rect const & request)
 {
 	Rect area = canvas_to_window (request);
-	// cerr << this << " Invalidate " << request << " TRANSLATE AS " << area << endl;
-	queue_draw_area (floor (area.x0), floor (area.y0), ceil (area.x1) - floor (area.x0), ceil (area.y1) - floor (area.y0));
+	queue_draw_area (floor (area.x0), floor (area.y0), ceil (area.width()), ceil (area.height()));
 }
 
 /** Called to request that we try to get a particular size for ourselves.

@@ -4404,7 +4404,7 @@ Editor::get_preferred_edit_position (bool ignore_playhead, bool from_context_men
 	EditPoint ep = _edit_point;
 
 	if (from_context_menu && (ep == EditAtMouse)) {
-		return  window_event_frame (&context_click_event, 0, 0);
+		return  canvas_event_frame (&context_click_event, 0, 0);
 	}
 
 	if (entered_marker) {
