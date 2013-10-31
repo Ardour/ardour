@@ -1369,8 +1369,6 @@ AudioRegionView::entered (bool internal_editing)
 		gain_line->add_visibility (AutomationLine::ControlPoints);
 	}
 
-	cerr << "Entered! ARV for " << _region->name() << endl;
-
 	if (fade_in_handle && !internal_editing) {
 		fade_in_handle->show ();
 		fade_out_handle->show ();
@@ -1388,8 +1386,6 @@ AudioRegionView::exited ()
 	if (gain_line && trackview.editor().current_mouse_mode() == Editing::MouseGain) {
 		gain_line->remove_visibility (AutomationLine::ControlPoints);
 	}
-
-	cerr << "Left! ARV for " << _region->name() << endl;
 
 	if (fade_in_handle) {
 		fade_in_handle->hide ();
