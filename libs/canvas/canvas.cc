@@ -355,7 +355,7 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 	for (i = items.begin(); i != items.end(); ++i) {
 
 		new_item = *i;
-		
+
 		if (new_item->ignore_events() || !new_item->visible()) {
 			continue;
 		}
@@ -380,7 +380,6 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 
 		boost::optional<Rect> bbox = new_item->bounding_box();
 
-
 		if (bbox) {
 			if (!new_item->item_to_canvas (bbox.get()).contains (point)) {
 				leave_event.detail = GDK_NOTIFY_UNKNOWN;
@@ -400,14 +399,11 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 	for (vector<Item const*>::const_iterator i = newly_entered.begin(); i != newly_entered.end(); ++i) {
 		new_item = *i;
 
-
-		if (new_item->Event (reinterpret_cast<GdkEvent*> (&enter_event))) {
-			DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Enter %1 %2\n", new_item->whatami(), new_item->name));
-			break;
-		}
+		new_item->Event (reinterpret_cast<GdkEvent*> (&enter_event));
+		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Enter %1 %2\n", new_item->whatami(), new_item->name));
 	}
 
-#if 1
+#if 0
 	cerr << "Within:\n";
 	for (set<Item const *>::const_iterator i = within_items.begin(); i != within_items.end(); ++i) {
 		cerr << '\t' << (*i)->whatami() << '/' << (*i)->name << endl;

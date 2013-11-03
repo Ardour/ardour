@@ -26,6 +26,7 @@
 
 #include "pbd/error.h"
 #include "pbd/convert.h"
+#include "pbd/stacktrace.h"
 
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/utils.h>
@@ -76,6 +77,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	, display_menu (0)
 	, parent (rent)
 	, selection_group (0)
+	, _ghost_group (0)
 	, _hidden (false)
 	, in_destructor (false)
 	, _size_menu (0)
@@ -89,7 +91,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	, _resize_drag_start (-1)
 	, _preresize_cursor (0)
 	, _have_preresize_cursor (false)
-	, _ghost_group (0)
 	, _ebox_release_can_act (true)
 {
 	if (extra_height == 0) {
@@ -97,13 +98,16 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	}
 
 	_canvas_display = new Group (ed.get_trackview_group (), ArdourCanvas::Duple (0.0, 0.0));
+	CANVAS_DEBUG_NAME (_canvas_display, "main for TAV");
 	_canvas_display->hide(); // reveal as needed
 
 	selection_group = new Group (_canvas_display);
+	CANVAS_DEBUG_NAME (selection_group, "selection for TAV");
 	selection_group->set_data (X_("timeselection"), (void *) 1);
 	selection_group->hide();
 
 	_ghost_group = new Group (_canvas_display);
+	CANVAS_DEBUG_NAME (_ghost_group, "ghost for TAV");
 	_ghost_group->lower_to_bottom();
 	_ghost_group->show();
 

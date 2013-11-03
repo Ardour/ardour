@@ -91,11 +91,14 @@ Editor::initialize_canvas ()
 
 	/* a group to hold time (measure) lines */
 	time_line_group = new ArdourCanvas::Group (_track_canvas->root());
+	CANVAS_DEBUG_NAME (time_line_group, "time line group");
 
         transport_loop_range_rect = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, ArdourCanvas::COORD_MAX));
+	CANVAS_DEBUG_NAME (transport_loop_range_rect, "loop rect");
 	transport_loop_range_rect->hide();
 
 	transport_punch_range_rect = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, ArdourCanvas::COORD_MAX));
+	CANVAS_DEBUG_NAME (transport_punch_range_rect, "punch rect");
 	transport_punch_range_rect->hide();
 
 	_trackview_group = new ArdourCanvas::Group (_track_canvas->root());

@@ -43,7 +43,7 @@ GhostRegion::GhostRegion (ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxi
 	, source_trackview (source_tv)
 {
 	group = new ArdourCanvas::Group (parent);
-	CANVAS_DEBUG_NAME (group, "ghost region group");
+	CANVAS_DEBUG_NAME (group, "ghost region");
 	group->set_position (ArdourCanvas::Duple (initial_pos, 0));
 
 	base_rect = new ArdourCanvas::Rectangle (group);

@@ -31,6 +31,8 @@
 #include "ardour/route.h"
 #include "ardour/session.h"
 
+#include "canvas/debug.h"
+
 #include "ardour_ui.h"
 #include "automation_time_axis.h"
 #include "automation_streamview.h"
@@ -88,6 +90,10 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	, auto_button (X_("")) /* force addition of a label */
 	, _show_regions (show_regions)
 {
+	CANVAS_DEBUG_NAME (_canvas_display, string_compose ("main for auto %2/%1", _name, r->name()));
+	CANVAS_DEBUG_NAME (selection_group, string_compose ("selections for auto %2/%1", _name, r->name()));
+	CANVAS_DEBUG_NAME (_ghost_group, string_compose ("ghosts for auto %2/%1", _name, r->name()));
+
 	if (!have_name_font) {
 		name_font = get_font_for_style (X_("AutomationTrackName"));
 		have_name_font = true;
@@ -109,6 +115,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	first_call_to_set_height = true;
 
 	_base_rect = new ArdourCanvas::Rectangle (_canvas_display);
+	CANVAS_DEBUG_NAME (_base_rect, string_compose ("base rect for %1", _name));
 	_base_rect->set_x1 (ArdourCanvas::COORD_MAX);
 	_base_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_AutomationTrackOutline());
 

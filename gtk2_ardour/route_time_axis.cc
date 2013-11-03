@@ -50,7 +50,10 @@
 #include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
+
 #include "evoral/Parameter.hpp"
+
+#include "canvas/debug.h"
 
 #include "ardour_ui.h"
 #include "ardour_button.h"
@@ -110,6 +113,10 @@ void
 RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
+
+	CANVAS_DEBUG_NAME (_canvas_display, string_compose ("main for %1", rt->name()));
+	CANVAS_DEBUG_NAME (selection_group, string_compose ("selections for %1", rt->name()));
+	CANVAS_DEBUG_NAME (_ghost_group, string_compose ("ghosts for %1", rt->name()));
 
 	int meter_width = 3;
 	if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {

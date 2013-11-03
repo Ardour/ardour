@@ -212,6 +212,7 @@ class TimeAxisView : public virtual AxisView
 	Gtk::Menu*             display_menu; /* The standard LHS Track control popup-menus */
 	TimeAxisView*          parent;
 	ArdourCanvas::Group*   selection_group;
+	ArdourCanvas::Group*  _ghost_group;
 	std::list<GhostRegion*> ghosts;
 	std::list<SelectionRect*> free_selection_rects;
 	std::list<SelectionRect*> used_selection_rects;
@@ -284,7 +285,6 @@ private:
 	double               _resize_drag_start;
 	GdkCursor*           _preresize_cursor;
 	bool                 _have_preresize_cursor;
-	ArdourCanvas::Group* _ghost_group;
         bool                  _ebox_release_can_act;
 
 	static uint32_t button_height;
