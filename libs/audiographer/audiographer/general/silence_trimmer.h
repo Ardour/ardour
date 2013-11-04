@@ -130,6 +130,9 @@ class SilenceTrimmer
 			throw Exception(*this, "process() after reacing end of input");
 		}
 		in_end = c.has_flag (ProcessContext<T>::EndOfInput);
+
+		// If adding to end, delay end of input propagation
+		if (add_to_end) { c.remove_flag(ProcessContext<T>::EndOfInput); }
 		
 		framecnt_t frame_index = 0;
 		
@@ -208,7 +211,8 @@ class SilenceTrimmer
 		
 		// Finally, if in end, add silence to end
 		if (in_end && add_to_end) {
-			
+			c.set_flag (ProcessContext<T>::EndOfInput);
+
 			if (debug_level (DebugVerbose)) {
 				debug_stream () << DebugUtils::demangled_name (*this) <<
 					" adding to end" << std::endl;
