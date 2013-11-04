@@ -33,6 +33,8 @@ public:
 
 	void set_text (std::string const &);
 	void set_height (Distance);
+
+        bool covers (Duple const &) const;
 	
 private:
 	Distance _height;

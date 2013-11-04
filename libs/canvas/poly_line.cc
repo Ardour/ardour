@@ -37,3 +37,37 @@ PolyLine::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		context->stroke ();
 	}
 }
+
+bool
+PolyLine::covers (Duple const & point) const
+{
+	Duple p = canvas_to_item (point);
+
+	const Points::size_type npoints = _points.size();
+	
+	if (npoints < 2) {
+		return false;
+	}
+
+	Points::size_type i;
+	Points::size_type j;
+
+	/* repeat for each line segment */
+	
+	for (i = 1, j = 0; i < npoints; ++i, ++j) {
+
+		/* compute area of triangle computed by the two line points and the one
+		   we are being asked about. If zero (within a given tolerance), the
+		   points are co-linear and the argument is on the line.
+		*/
+
+		double area = fabs (_points[j].x * (_points[j].y - p.y)) + 
+  			           (_points[i].x * (p.y - _points[j].y)) + 
+			           (p.x * (_points[j].y - _points[i].y));
+		if (area < 0.001) {
+			return true;
+		}
+	}
+
+	return false;
+}

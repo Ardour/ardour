@@ -546,6 +546,24 @@ Item::depth () const
 	return d;
 }
 
+bool
+Item::covers (Duple const & point) const
+{
+	Duple p = canvas_to_item (point);
+
+	if (_bounding_box_dirty) {
+		compute_bounding_box ();
+	}
+
+	boost::optional<Rect> r = bounding_box();
+
+	if (!r) {
+		return false;
+	}
+
+	return r.get().contains (p);
+}
+
 ostream&
 ArdourCanvas::operator<< (ostream& o, const Item& i)
 {

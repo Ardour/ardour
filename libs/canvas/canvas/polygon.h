@@ -30,8 +30,18 @@ class Polygon : public PolyItem, public Fill
 {
 public:
 	Polygon (Group *);
+        virtual ~Polygon();
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
+	void compute_bounding_box () const;
+        bool covers (Duple const &) const;
+
+  protected:
+    mutable float* multiple;
+    mutable float* constant;
+    mutable Points::size_type cached_size;
+    
+    void cache_shape_computation () const;
 };
 	
 }

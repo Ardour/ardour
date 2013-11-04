@@ -97,7 +97,6 @@ public:
         double gradient_depth() const { return _gradient_depth; }
         void set_shape (Shape);
 
-        
         /* currently missing because we don't need them (yet):
 	   set_shape_independent();
 	   set_logscaled_independent()

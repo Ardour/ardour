@@ -147,3 +147,24 @@ Line::set_y1 (Coord y1)
 
 	DEBUG_TRACE (PBD::DEBUG::CanvasItemsDirtied, "canvas item dirty: line change\n");
 }
+
+bool
+Line::covers (Duple const & point) const
+{
+	Duple p = canvas_to_item (point);
+
+	/* compute area of triangle computed by the two line points and the one
+	   we are being asked about. If zero (within a given tolerance), the
+	   points are co-linear and the argument is on the line.
+	*/
+
+	double area = fabs (_points[0].x * (_points[0].y - p.y)) + 
+                           (_points[1].x * (p.y - _points[0].y)) + 
+		           (p.x * (_points[0].y - _points[1].y));
+
+	if (area < 0.001) {
+		return true;
+	}
+
+	return false;
+}

@@ -51,6 +51,8 @@ public:
 		return _start_degrees;
 	}
 
+        bool covers (Duple const &) const;
+
 private:
         Duple  _center;
         Coord  _radius;

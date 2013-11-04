@@ -264,36 +264,6 @@ GtkCanvas::GtkCanvas ()
 		    Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
 }
 
-/** Handler for pointer motion events on the canvas.
- *  @param ev GDK event.
- *  @return true if the motion event was handled, otherwise false.
- */
-bool
-GtkCanvas::motion_notify_handler (GdkEventMotion* ev)
-{
-	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas motion @ %1, %2\n", ev->x, ev->y));
-
-	if (_grabbed_item) {
-		/* if we have a grabbed item, it gets just the motion event,
-		   since no enter/leave events can have happened.
-		*/
-		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("%1 %2 (%3) was grabbed, send MOTION event there\n",
-								       _grabbed_item, _grabbed_item->whatami(), _grabbed_item->name));
-		return _grabbed_item->Event (reinterpret_cast<GdkEvent*> (ev));
-	}
-
-	Duple point (ev->x, ev->y);
-	
-	enter_leave_items (point, ev->state);
-
-	/* Now deliver the motion event.  It may seem a little inefficient
-	   to recompute the items under the event, but the enter notify/leave
-	   events may have deleted canvas items so it is important to
-	   recompute the list in deliver_event.
-	*/
-	return deliver_event (point, reinterpret_cast<GdkEvent*> (ev));
-}
-
 void
 GtkCanvas::enter_leave_items (int state)
 {
@@ -403,7 +373,7 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Enter %1 %2\n", new_item->whatami(), new_item->name));
 	}
 
-#if 0
+#if 1
 	cerr << "Within:\n";
 	for (set<Item const *>::const_iterator i = within_items.begin(); i != within_items.end(); ++i) {
 		cerr << '\t' << (*i)->whatami() << '/' << (*i)->name << endl;
@@ -565,6 +535,8 @@ GtkCanvas::on_button_release_event (GdkEventButton* ev)
 
 	GdkEvent copy = *((GdkEvent*)ev);
 	Duple where = window_to_canvas (Duple (ev->x, ev->y));
+	
+	enter_leave_items (where, ev->state);
 
 	copy.button.x = where.x;
 	copy.button.y = where.y;
@@ -587,15 +559,35 @@ GtkCanvas::on_motion_notify_event (GdkEventMotion* ev)
 	/* translate event coordinates from window to canvas */
 
 	GdkEvent copy = *((GdkEvent*)ev);
-	Duple where = window_to_canvas (Duple (ev->x, ev->y));
+	Duple point (ev->x, ev->y);
+	Duple where = window_to_canvas (point);
 
 	copy.motion.x = where.x;
 	copy.motion.y = where.y;
 
-	/* Coordinates in the event will be canvas coordinates, correctly adjusted
-	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
+	/* Coordinates in "copy" will be canvas coordinates, 
 	*/
-	return motion_notify_handler ((GdkEventMotion*) &copy);
+
+	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas motion @ %1, %2\n", ev->x, ev->y));
+
+	if (_grabbed_item) {
+		/* if we have a grabbed item, it gets just the motion event,
+		   since no enter/leave events can have happened.
+		*/
+		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("%1 %2 (%3) was grabbed, send MOTION event there\n",
+								       _grabbed_item, _grabbed_item->whatami(), _grabbed_item->name));
+		return _grabbed_item->Event (reinterpret_cast<GdkEvent*> (&copy));
+	}
+
+	enter_leave_items (where, ev->state);
+
+	/* Now deliver the motion event.  It may seem a little inefficient
+	   to recompute the items under the event, but the enter notify/leave
+	   events may have deleted canvas items so it is important to
+	   recompute the list in deliver_event.
+	*/
+
+	return deliver_event (point, reinterpret_cast<GdkEvent*> (&copy));
 }
 
 bool

@@ -221,3 +221,20 @@ Arrow::set_color (Color color)
 		_heads[i].polygon->set_fill_color (color);
 	}
 }
+
+bool
+Arrow::covers (Duple const & point) const
+{
+	if (_heads[0].polygon && _heads[0].polygon->covers (point)) {
+		return true;
+	}
+	if (_line && _line->covers (point)) {
+		return true;
+	}
+
+	if (_heads[1].polygon && _heads[1].polygon->covers (point)) {
+		return true;
+	}
+
+	return false;
+}

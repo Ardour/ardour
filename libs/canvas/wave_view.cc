@@ -686,3 +686,4 @@ WaveView::set_global_show_waveform_clipping (bool yn)
 		VisualPropertiesChanged (); /* EMIT SIGNAL */
 	}
 }
+

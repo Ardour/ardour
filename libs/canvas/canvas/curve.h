@@ -29,9 +29,7 @@ public:
     Curve (Group *);
     
     void compute_bounding_box () const;
-
     void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
-
     void set (Points const &);
 
   protected:

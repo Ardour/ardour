@@ -104,3 +104,9 @@ LineSet::clear ()
 	_bounding_box_dirty = true;
 	end_change ();
 }
+
+bool
+LineSet::covers (Duple const & /*point*/) const
+{
+	return false;
+}

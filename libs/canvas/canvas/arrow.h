@@ -62,6 +62,8 @@ public:
 	void set_y0 (Coord);
 	void set_y1 (Coord);
 	
+        bool covers (Duple const &) const;
+
 private:
 	void setup_polygon (int);
 

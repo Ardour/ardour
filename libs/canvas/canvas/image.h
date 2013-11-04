@@ -90,7 +90,7 @@ public:
 
     void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
     void compute_bounding_box () const;
-    
+
 private:
     Cairo::Format            _format;
     int                      _width;

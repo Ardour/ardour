@@ -38,7 +38,6 @@ void
 PolyItem::compute_bounding_box () const
 {
 	bool have_one = false;
-
 	Rect bbox;
 
 	for (Points::const_iterator i = _points.begin(); i != _points.end(); ++i) {

@@ -75,6 +75,8 @@ public:
 		items.push_back (this);
 	}
 
+        virtual bool covers (Duple const &) const;
+
 	/** Update _bounding_box and _bounding_box_dirty */
 	virtual void compute_bounding_box () const = 0;
 

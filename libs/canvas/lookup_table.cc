@@ -62,13 +62,9 @@ DumbLookupTable::items_at_point (Duple point) const
 		if (!(*i)->visible()) {
 			continue;
 		}
-
-		boost::optional<Rect> item_bbox = (*i)->bounding_box ();
-
-		if (item_bbox) {
-			if ((*i)->item_to_canvas (item_bbox.get ()).contains (point)) {
-				vitems.push_back (*i);
-			}
+		
+		if ((*i)->covers (point)) {
+			vitems.push_back (*i);
 		}
 	}
 

@@ -34,6 +34,8 @@ public:
 	void compute_bounding_box () const;
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 
+        bool covers (Duple const &) const;
+
 	void set_height (Distance);
 
 	void add (Coord, Distance, Color);

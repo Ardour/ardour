@@ -33,6 +33,7 @@ public:
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
+        bool covers (Duple const &) const;
 
 	void set (Duple, Duple);
 	void set_x0 (Coord);

@@ -16,8 +16,11 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <cmath>
 #include <algorithm>
+
 #include <cairomm/context.h>
+
 #include "pbd/compose.h"
 #include "canvas/circle.h"
 #include "canvas/types.h"
@@ -97,7 +100,6 @@ Arc::set_radius (Coord r)
 	end_change ();
 }	
 
-
 void
 Arc::set_arc (double deg)
 {
@@ -121,3 +123,15 @@ Arc::set_start (double deg)
 	end_change ();
 }	
 
+bool
+Arc::covers (Duple const & point) const
+{
+	Duple p = canvas_to_item (point);
+
+	double angle_degs = atan (p.y/p.x) * 2.0 * M_PI;
+	double radius = sqrt (p.x * p.x + p.y * p.y);
+	
+	return (angle_degs >= _start_degrees) && 
+		(angle_degs <= (_start_degrees + _arc_degrees)) && 
+		(radius < _radius);
+}

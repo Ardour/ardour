@@ -66,3 +66,13 @@ Flag::set_height (Distance)
 {
 	_line->set (Duple (0, 0), Duple (0, _height));
 }
+
+bool
+Flag::covers (Duple const & point) const
+{
+	if (_rectangle) {
+		return _rectangle->covers (point);
+	} 
+
+	return false;
+}
