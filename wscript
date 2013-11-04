@@ -7,10 +7,42 @@ import string
 import subprocess
 import sys
 
-MAJOR = '3'
-MINOR = '5'
-VERSION = MAJOR + '.' + MINOR
+def fetch_git_revision ():
+    cmd = "git describe HEAD"
+    output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
+    rev = output[0].decode ('utf-8')
+    return rev
 
+def fetch_tarball_revision ():
+    if not os.path.exists ('libs/ardour/revision.cc'):
+        print 'This tarball was not created correctly - it is missing libs/ardour/revision.cc'
+        sys.exit (1)
+    with open('libs/ardour/revision.cc') as f:
+        content = f.readlines()
+        remove_punctuation_map = dict((ord(char), None) for char in '";')
+        return content[1].decode('utf-8').strip().split(' ')[7].translate (remove_punctuation_map)
+
+if os.path.isdir (os.path.join(os.getcwd(), '.git')):
+    rev = fetch_git_revision ()
+else:
+    rev = fetch_tarball_revision ()
+
+#
+# rev is now of the form MAJOR.MINOR-rev-commit
+#
+
+parts = rev.split ('.')
+MAJOR = parts[0]
+other = parts[1].split ('-')
+MINOR = other[0]
+MICRO = other[1]
+
+V = MAJOR + '.' + MINOR + '.' + MICRO
+#
+# it is important that VERSION *not* be unicode string
+# because if it is, it breaks waf somehow.
+#
+VERSION = V.encode ('ascii', 'ignore')
 APPNAME = 'Ardour' + MAJOR
 
 # Mandatory variables
@@ -67,17 +99,11 @@ def fetch_gcc_version (CC):
     version = o.split(' ')[2].split('.')
     return version
 
-def fetch_git_revision ():
-    cmd = "git describe HEAD"
-    output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
-    rev = output[0].decode('utf-8')
-    return rev
-
 def create_stored_revision():
     rev = ""
     if os.path.exists('.git'):
         rev = fetch_git_revision();
-        print("ardour.git version: " + rev + "\n")
+        print("Git version: " + rev + "\n")
     elif os.path.exists('libs/ardour/revision.cc'):
         print("Using packaged revision")
         return
@@ -86,6 +112,10 @@ def create_stored_revision():
         sys.exit(-1)
 
     try:
+        #
+        # if you change the format of this, be sure to fix fetch_tarball_revision() above
+        # so that  it still works.
+        #
         text =  '#include "ardour/revision.h"\n'
         text += 'namespace ARDOUR { const char* revision = \"%s\"; }\n' % rev
         print('Writing revision info to libs/ardour/revision.cc using ' + rev)
