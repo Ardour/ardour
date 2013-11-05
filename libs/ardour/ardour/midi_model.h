@@ -220,6 +220,8 @@ public:
 				uint8_t    new_program;
 				int        new_bank;
 			};
+
+		    Change() : patch_id (-1) {}
 		};
 
 		typedef std::list<Change> ChangeList;

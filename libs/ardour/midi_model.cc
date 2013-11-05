@@ -1018,6 +1018,7 @@ MidiModel::PatchChangeDiffCommand::change_channel (PatchChangePtr patch, uint8_t
 	c.patch = patch;
 	c.old_channel = patch->channel ();
 	c.new_channel = channel;
+	c.patch_id = patch->id();
 
 	_changes.push_back (c);
 }
@@ -1030,6 +1031,7 @@ MidiModel::PatchChangeDiffCommand::change_program (PatchChangePtr patch, uint8_t
 	c.patch = patch;
 	c.old_program = patch->program ();
 	c.new_program = program;
+	c.patch_id = patch->id();
 
 	_changes.push_back (c);
 }
