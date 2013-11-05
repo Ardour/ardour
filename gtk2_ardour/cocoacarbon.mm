@@ -75,10 +75,6 @@ set_language_preference ()
 {
 	gtk_disable_setlocale ();
 
-	if (g_getenv ("LANGUAGE") || g_getenv ("LC_ALL") || g_getenv ("LANG")) {
-		return;
-	}
-
 	if (g_getenv ("ARDOUR_EN")) {
 		return;
 	}
@@ -126,6 +122,6 @@ set_language_preference ()
 	 */
 
 	cout << "LANG set to " << [nslocale UTF8String] << endl;
-	setenv ("LANG", [nslocale UTF8String], 0);
+        setenv ("LANG", [nslocale UTF8String], 0);
 	CFRelease (cflocale);
 }
