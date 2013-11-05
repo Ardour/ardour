@@ -278,7 +278,11 @@ expected_sysex_length(const unsigned char status, const unsigned char *second_by
 	uint32_t sysex_length = 0;
 	uint32_t len = 0;
 
+#ifndef NDEBUG
+	(void) status;
+#else
 	assert(status == 0xF0);
+#endif
 
 	if (buffer_length < 3) {
 		g_critical("SMF error: end of buffer in expected_sysex_length().");
@@ -541,7 +545,7 @@ extract_midi_event(const unsigned char *buf, const size_t buffer_length, smf_eve
 static smf_event_t *
 parse_next_event(smf_track_t *track)
 {
-	uint32_t time = 0;
+	uint32_t etime = 0;
 	uint32_t len;
 	size_t buffer_length;
 	unsigned char *c, *start;
@@ -560,7 +564,7 @@ parse_next_event(smf_track_t *track)
 	assert(buffer_length > 0);
 
 	/* First, extract time offset from previous event. */
-	if (smf_extract_vlq(c, buffer_length, &time, &len))
+	if (smf_extract_vlq(c, buffer_length, &etime, &len))
 		goto error;
 
 	c += len;
@@ -578,7 +582,7 @@ parse_next_event(smf_track_t *track)
 	track->last_status = event->midi_buffer[0];
 	track->next_event_offset += c - start;
 
-	smf_track_add_event_delta_pulses(track, event, time);
+	smf_track_add_event_delta_pulses(track, event, etime);
 
 	return (event);
 
@@ -633,7 +637,7 @@ smf_event_is_textual(const smf_event_t *event)
 	if (event->midi_buffer_length < 4)
 		return (0);
 
-	if (event->midi_buffer[3] < 1 && event->midi_buffer[3] > 9)
+	if (event->midi_buffer[3] < 1 || event->midi_buffer[3] > 9)
 		return (0);
 
 	return (1);
