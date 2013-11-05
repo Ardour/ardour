@@ -56,8 +56,8 @@ if [ x$DEBUG = xT ]; then
 	BUILDTYPE="dbg"
 fi
 
-X86_BUNDLE="${APPNAME}_x86-${version}"
-X86_64_BUNDLE="${APPNAME}_x86_64-${version}"
+X86_BUNDLE="${APPNAME}_x86-${release_version}"
+X86_64_BUNDLE="${APPNAME}_x86_64-${release_version}"
 
 if [ ! -z ${BUILDTYPE} ]; then
 	X86_BUNDLE="${X86_BUNDLE}-${BUILDTYPE}"
@@ -112,22 +112,22 @@ fi
 if [ -z ${BUILDTYPE} ]; then
 	if [ "${SINGLE_ARCH}" = "T" ]; then
 		if [ "${X86_BUNDLE_OK}" = "T" ]; then
-			PACKAGE="${APPNAME}_32bit-${version}"
+			PACKAGE="${APPNAME}_32bit-${release_version}"
 		else
-			PACKAGE="${APPNAME}_64bit-${version}"
+			PACKAGE="${APPNAME}_64bit-${release_version}"
 		fi
 	else
-		PACKAGE="${APPNAME}-${version}"
+		PACKAGE="${APPNAME}-${release_version}"
 	fi
 else
 	if [ "${SINGLE_ARCH}" = "T" ]; then
 		if [ "${X86_BUNDLE_OK}" = "T" ]; then
-			PACKAGE="${APPNAME}_32bit-${version}-${BUILDTYPE}"
+			PACKAGE="${APPNAME}_32bit-${release_version}-${BUILDTYPE}"
 		else
-			PACKAGE="${APPNAME}_64bit-${version}-${BUILDTYPE}"
+			PACKAGE="${APPNAME}_64bit-${release_version}-${BUILDTYPE}"
 		fi
 	else
-		PACKAGE="${APPNAME}-${version}-${BUILDTYPE}"
+		PACKAGE="${APPNAME}-${release_version}-${BUILDTYPE}"
 	fi
 fi 
 

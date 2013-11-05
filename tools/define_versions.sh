@@ -2,15 +2,24 @@
 # this is sourced by build and package, and executed from within build/{osx,linux}_packaging
 #
 
-major_version=`grep -m 1 '^MAJOR = ' ../../wscript | awk '{print $3}' | sed "s/'//g"`
-minor_version=`grep -m 1 '^MINOR = ' ../../wscript | awk '{print $3}' | sed "s/'//g"`
-release_version=${major_version}.${minor_version}
-r=`cut -d'"' -f2 < ../../libs/ardour/revision.cc | sed -e 1d -e "s/[0-9][0-9]*\.[0-9][0-9]*-//"`
-if echo $r | grep -q -e - ; then
-    revcount=`echo $r | cut -d- -f1`
+if uname -a | grep arwin >/dev/null 2>&1 ; then
+    EXTENDED_RE=-E
+else
+    EXTENDED_RE=-r
 fi
-commit=`echo $r | cut -d- -f2`
-version=${release_version}${revcount:+.$revcount}
+
+GIT_REV_REGEXP='([0-9][0-9]*)\.([0-9][0-9]*)-?([0-9][0-9]*)?-?([a-z0-9]*)'
+
+major_version=`cut -d'"' -f2 < ../../libs/ardour/revision.cc | sed $EXTENDED_RE  -e 1d -e "s/$GIT_REV_REGEXP/\1/"`
+minor_version=`cut -d'"' -f2 < ../../libs/ardour/revision.cc | sed $EXTENDED_RE -e 1d -e "s/$GIT_REV_REGEXP/\2/"`
+r=`cut -d'"' -f2 < ../../libs/ardour/revision.cc | sed $EXTENDED_RE -e 1d -e "s/$GIT_REV_REGEXP/\3/"`
+commit=`cut -d'"' -f2 < ../../libs/ardour/revision.cc | sed $EXTENDED_RE -e 1d -e "s/$GIT_REV_REGEXP/\4/"`
+
+if [ "x$r" != "x" ] ; then
+    revcount=$r
+fi
+
+release_version=${major_version}.${minor_version}${revcount:+.$revcount}
 
 #
 # Figure out the Build Type
