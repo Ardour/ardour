@@ -75,10 +75,6 @@ set_language_preference ()
 {
 	gtk_disable_setlocale ();
 
-	if (g_getenv ("ARDOUR_EN")) {
-		return;
-	}
-
 	/* the gettext manual is potentially misleading about the utility of
 	   LANGUAGE.  It notes that if LANGUAGE is set to include a dialect/region-free
 	   language code, like "it", it will assume that you mean the main
