@@ -105,9 +105,9 @@ FPU::FPU ()
 		*fxbuf = (char *) malloc (512);
 		assert (*fxbuf);
 #else
-		posix_memalign ((void **) &fxbuf, 16, sizeof (char *));
+		(void) posix_memalign ((void **) &fxbuf, 16, sizeof (char *));
 		assert (fxbuf);
-		posix_memalign ((void **) fxbuf, 16, 512);
+		(void) posix_memalign ((void **) fxbuf, 16, 512);
 		assert (*fxbuf);
 #endif			
 		

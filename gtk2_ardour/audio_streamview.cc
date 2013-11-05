@@ -264,7 +264,7 @@ AudioStreamView::setup_rec_box ()
 			at = _trackview.audio_track(); /* we know what it is already */
 			framepos_t const frame_pos = at->current_capture_start ();
 			gdouble xstart = _trackview.editor().sample_to_pixel (frame_pos);
-			gdouble xend;
+			gdouble xend = xstart; /* keeps gcc optimized happy, really set in switch() below */
 			uint32_t fill_color;
 
 			switch (_trackview.audio_track()->mode()) {

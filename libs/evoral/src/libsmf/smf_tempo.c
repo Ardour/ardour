@@ -133,13 +133,13 @@ maybe_add_to_tempo_map(smf_event_t *event)
 
 	/* Tempo Change? */
 	if (event->midi_buffer[1] == 0x51) {
-		int new_tempo = (event->midi_buffer[3] << 16) + (event->midi_buffer[4] << 8) + event->midi_buffer[5];
-		if (new_tempo <= 0) {
+		int ntempo = (event->midi_buffer[3] << 16) + (event->midi_buffer[4] << 8) + event->midi_buffer[5];
+		if (ntempo <= 0) {
 			g_critical("Ignoring invalid tempo change.");
 			return;
 		}
 
-		add_tempo(event->track->smf, event->time_pulses, new_tempo);
+		add_tempo(event->track->smf, event->time_pulses, ntempo);
 	}
 
 	/* Time Signature? */

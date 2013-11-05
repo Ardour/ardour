@@ -48,6 +48,8 @@ class CycleTimer {
 			}
 			_entry = get_cycles();
 		}
+#else
+		(void) name;
 #endif
 	}
 

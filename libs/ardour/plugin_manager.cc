@@ -678,6 +678,10 @@ PluginManager::lxvst_discover_from_path (string path)
 	vector<string *>::iterator x;
 	int ret = 0;
 
+#ifndef NDEBUG
+	(void) path;
+#endif
+
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Discovering linuxVST plugins along %1\n", path));
 
 	plugin_objects = scanner (lxvst_path, lxvst_filter, 0, false, true);

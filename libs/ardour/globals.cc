@@ -525,8 +525,8 @@ ARDOUR::set_translations_enabled (bool yn)
 		c = '0';
 	}
 	
-	::write (fd, &c, 1);
-	::close (fd);
+	(void) ::write (fd, &c, 1);
+	(void) ::close (fd);
 
 	return true;
 }

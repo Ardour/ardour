@@ -35,6 +35,8 @@ ProcessSemaphore::ProcessSemaphore (const char* name, int val)
 	}
 
 #else
+	(void) name; /* stop gcc warning on !Apple systems */
+
 	if (sem_init (&_sem, 0, val)) {
 		throw failed_constructor ();
 	}

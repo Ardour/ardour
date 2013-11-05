@@ -43,12 +43,12 @@ class Debuggable
 		: stream (debug_stream) {}
 
 	bool debug_level (DebugLevel level) {
-		#ifdef NDEBUG
-		level = DEFAULT_DEBUG_LEVEL; /* stop pedantic gcc complaints about unused parameter */
+#ifndef NDEBUG
+		(void) level; /* stop pedantic gcc complaints about unused parameter */
 		return false;
-		#else
+#else
 		return L >= level;
-		#endif
+#endif
 	}
 	std::ostream & debug_stream() { return stream; }
 

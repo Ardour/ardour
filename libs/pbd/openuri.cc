@@ -49,7 +49,7 @@ PBD::open_uri (const char* uri)
 	std::string command = "xdg-open ";
 	command += uri;
 	command += " &";
-	system (command.c_str());
+	(void) system (command.c_str());
 
 	return true;
 #endif

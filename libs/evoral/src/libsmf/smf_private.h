@@ -75,6 +75,7 @@ void remove_last_tempo_with_pulses(smf_t *smf, size_t pulses);
 int smf_event_is_tempo_change_or_time_signature(const smf_event_t *event) WARN_UNUSED_RESULT;
 int smf_event_length_is_valid(const smf_event_t *event) WARN_UNUSED_RESULT;
 int is_status_byte(const unsigned char status) WARN_UNUSED_RESULT;
+smf_track_t* smf_find_track_with_next_event (smf_t *smf);
 
 #endif /* SMF_PRIVATE_H */
 

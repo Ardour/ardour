@@ -151,7 +151,9 @@ smf_track_delete(smf_track_t *track)
 void
 smf_add_track(smf_t *smf, smf_track_t *track)
 {
+#ifndef NDEBUG
 	int cantfail;
+#endif
 
 	assert(track->smf == NULL);
 
@@ -162,8 +164,13 @@ smf_add_track(smf_t *smf, smf_track_t *track)
 	track->track_number = smf->number_of_tracks;
 
 	if (smf->number_of_tracks > 1) {
+#ifndef NDEBUG
 		cantfail = smf_set_format(smf, 1);
 		assert(!cantfail);
+#else
+		smf_set_format(smf, 1);
+#endif
+		
 	}
 }
 
@@ -860,9 +867,8 @@ smf_get_next_event(smf_t *smf)
 void
 smf_skip_next_event(smf_t *smf)
 {
-	void *notused;
-
-	notused = smf_get_next_event(smf);
+	smf_event_t *ignored = smf_get_next_event(smf);
+	(void) ignored;
 }
 
 /**

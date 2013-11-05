@@ -764,9 +764,6 @@ JACKAudioBackend::jack_sync_callback (jack_transport_state_t state, jack_positio
 	TransportState tstate;
 
 	switch (state) {
-	case JackTransportStopped:
-		tstate = TransportStopped;
-		break;
 	case JackTransportRolling:
 		tstate = TransportRolling;
 		break;
@@ -775,6 +772,10 @@ JACKAudioBackend::jack_sync_callback (jack_transport_state_t state, jack_positio
 		break;
 	case JackTransportStarting:
 		tstate = TransportStarting;
+		break;
+	case JackTransportStopped:
+	default:
+		tstate = TransportStopped;
 		break;
 	}
 
