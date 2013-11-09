@@ -182,16 +182,15 @@ def set_compiler_flags (conf,opt):
             else:
                 conf.env['build_target'] = 'mountainlion'
         else:
-            if re.search ("x86_64", cpu) != None:
-                conf.env['build_target'] = 'x86_64'
-            elif re.search("i[0-5]86", cpu) != None:
-                conf.env['build_target'] = 'i386'
-            elif re.search("powerpc", cpu) != None:
-                conf.env['build_target'] = 'powerpc'
-            elif re.search("arm", cpu) != None:
-                conf.env['build_target'] = 'arm'
+            match = re.search(
+                    "(?P<cpu>i[0-6]86|x86_64|powerpc|ppc|ppc64|arm|s390x?)",
+                    cpu)
+            if (match):
+                conf.env['build_target'] = match.group("cpu")
+                if re.search("i[0-5]86", conf.env['build_target']):
+                    conf.env['build_target'] = "i386"
             else:
-                conf.env['build_target'] = 'i686'
+                conf.env['build_target'] = 'none'
     else:
         conf.env['build_target'] = opt.dist_target
 
