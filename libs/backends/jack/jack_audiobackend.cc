@@ -774,8 +774,11 @@ JACKAudioBackend::jack_sync_callback (jack_transport_state_t state, jack_positio
 		tstate = TransportLooping;
 		break;
 	case JackTransportStarting:
+	case JackTransportNetStarting:
 		tstate = TransportStarting;
 		break;
+	default:
+		std::cerr << "WARNING: Unknown JACK transport state: " << state << std::endl;
 	}
 
 	return engine.sync_callback (tstate, pos->frame);
@@ -1153,6 +1156,7 @@ JACKAudioBackend::speed_and_position (double& speed, framepos_t& position)
 		starting = false;
 		break;
 	case JackTransportStarting:
+        case JackTransportNetStarting:
 		starting = true;
 		// don't adjust speed here, just leave it as it was
 		break;
