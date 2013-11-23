@@ -215,9 +215,9 @@ ExportDialog::init_components ()
 }
 
 void
-ExportDialog::notify_errors ()
+ExportDialog::notify_errors (bool force)
 {
-	if (status->errors()) {
+	if (force || status->errors()) {
 		std::string txt = _("Export has been aborted due to an error!\nSee the Log for details.");
 		Gtk::MessageDialog msg (txt, false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
 		msg.run();
@@ -303,9 +303,14 @@ ExportDialog::show_conflicting_files ()
 void
 ExportDialog::do_export ()
 {
-	profile_manager->prepare_for_export ();
-	handler->do_export ();
-	show_progress ();
+	try {
+		profile_manager->prepare_for_export ();
+		handler->do_export ();
+		show_progress ();
+	} catch(std::exception & e) {
+		error << string_compose (_("Export initialization failed: %1"), e.what()) << endmsg;
+		notify_errors(true);
+	}
 }
 
 void
