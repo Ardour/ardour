@@ -75,8 +75,12 @@ if test -z "$PRODUCT_PKG_DIR" -o -z "$APPNAME"; then
 fi
 
 . ../define_versions.sh
-echo "Version is $release_version / $revision"
-info_string="$version built on `hostname` by `whoami` on `date`"
+echo "Version is $release_version"
+if [ "x$commit" != "x" ] ; then
+    info_string="$release_version ($commit) built on `hostname` by `whoami` on `date`"
+else
+    info_string="$release_version built on `hostname` by `whoami` on `date`"
+fi
 echo "Info string is $info_string"
 
 # setup directory structure
@@ -177,12 +181,12 @@ env="<key>LSEnvironment</key><dict>$env<key>ARDOUR_BUNDLED</key><string>true</st
 
 # edit plist
 sed -e "s?@ENV@?$env?g" \
-    -e "s?@VERSION@?$release_version/$revision?g" \
+    -e "s?@VERSION@?$release_version?g" \
     -e "s?@INFOSTRING@?$info_string?g" < Info.plist.in > Info.plist
 # and plist strings
 sed -e "s?@APPNAME@?$appname?" \
     -e "s?@ENV@?$env?g" \
-    -e "s?@VERSION@?$release_version/$revision?g" \
+    -e "s?@VERSION@?$release_version?g" \
     -e "s?@INFOSTRING@?$info_string?g" < InfoPlist.strings.in > Resources/InfoPlist.strings || exit 1
 
 # copy static files
@@ -569,10 +573,10 @@ fi
 
 echo "Building DMG ..."
 
-# UC_DMG=$APPNAME-${release_version}-${revision}-UC.dmg
-# FINAL_DMG=$APPNAME-${release_version}-${revision}.dmg
-UC_DMG=$APPNAME-$version.dmg
-VOLNAME=$APPNAME-$version
+# UC_DMG=$APPNAME-${release_version}-UC.dmg
+# FINAL_DMG=$APPNAME-${release_version}.dmg
+UC_DMG=$APPNAME-$release_version.dmg
+VOLNAME=$APPNAME-$release_version
 
 # TODO use mktemp
 export TMPDIR=`pwd`

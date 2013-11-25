@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-10-23 19:07+0200\n"
+"POT-Creation-Date: 2013-11-05 11:11-0500\n"
 "PO-Revision-Date: 2013-10-15 21:40+0300\n"
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
@@ -124,7 +124,7 @@ msgstr ""
 #: audio_playlist_source.cc:171 audiosource.cc:913 file_source.cc:529
 #: midi_playlist_source.cc:144 midi_playlist_source.cc:152
 #: midi_playlist_source.cc:159 midi_source.cc:371 plugin_insert.cc:643
-#: rb_effect.cc:332 session.cc:2613 session.cc:2646 session.cc:3791
+#: rb_effect.cc:333 session.cc:2619 session.cc:2652 session.cc:3797
 #: session_handle.cc:87 sndfilesource.cc:121
 msgid "programming error: %1"
 msgstr "programming error: %1"
@@ -391,7 +391,7 @@ msgstr ""
 msgid "audio"
 msgstr ""
 
-#: data_type.cc:28 session.cc:1790 session.cc:1793
+#: data_type.cc:28 session.cc:1791 session.cc:1794
 msgid "MIDI"
 msgstr ""
 
@@ -503,7 +503,7 @@ msgstr "Треугольное"
 msgid "Rectangular"
 msgstr "Прямоугольное"
 
-#: export_formats.cc:52 session.cc:5008 session.cc:5024
+#: export_formats.cc:52 session.cc:5014 session.cc:5030
 msgid "None"
 msgstr "Нет"
 
@@ -859,15 +859,15 @@ msgstr ""
 msgid "%s out"
 msgstr ""
 
-#: io.cc:1535 session.cc:685 session.cc:714
+#: io.cc:1535 session.cc:686 session.cc:715
 msgid "mono"
 msgstr ""
 
-#: io.cc:1537 session.cc:698 session.cc:728
+#: io.cc:1537 session.cc:699 session.cc:729
 msgid "L"
 msgstr ""
 
-#: io.cc:1537 session.cc:700 session.cc:730
+#: io.cc:1537 session.cc:701 session.cc:731
 msgid "R"
 msgstr ""
 
@@ -962,7 +962,7 @@ msgstr ""
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr ""
 
-#: location.cc:842 session.cc:4510 session_state.cc:1031
+#: location.cc:842 session.cc:4516 session_state.cc:1031
 msgid "session"
 msgstr ""
 
@@ -1482,11 +1482,11 @@ msgstr ""
 msgid "You cannot subgroup MIDI tracks at this time"
 msgstr ""
 
-#: rb_effect.cc:233 rb_effect.cc:274
+#: rb_effect.cc:234 rb_effect.cc:275
 msgid "tempoize: error reading data from %1 at %2 (wanted %3, got %4)"
 msgstr ""
 
-#: rb_effect.cc:303 rb_effect.cc:325
+#: rb_effect.cc:304 rb_effect.cc:326
 msgid "error writing tempo-adjusted data to %1"
 msgstr ""
 
@@ -1502,167 +1502,167 @@ msgstr ""
 msgid "programming error: send created using role %1"
 msgstr "programming error: send created using role %1"
 
-#: session.cc:343
+#: session.cc:344
 msgid "Connect to engine"
 msgstr "Соединение со звуковым движком"
 
-#: session.cc:348
+#: session.cc:349
 msgid "Session loading complete"
 msgstr "Загрузка сеанса завершена"
 
-#: session.cc:420
+#: session.cc:421
 msgid "Set up LTC"
 msgstr ""
 
-#: session.cc:422
+#: session.cc:423
 msgid "Set up Click"
 msgstr ""
 
-#: session.cc:424
+#: session.cc:425
 msgid "Set up standard connections"
 msgstr "Настройка обычных соединений"
 
-#: session.cc:634
+#: session.cc:635
 msgid "could not setup Click I/O"
 msgstr ""
 
-#: session.cc:682
+#: session.cc:683
 #, c-format
 msgid "out %<PRIu32>"
 msgstr ""
 
-#: session.cc:696
+#: session.cc:697
 #, c-format
 msgid "out %<PRIu32>+%<PRIu32>"
 msgstr ""
 
-#: session.cc:711
+#: session.cc:712
 #, c-format
 msgid "in %<PRIu32>"
 msgstr ""
 
-#: session.cc:725
+#: session.cc:726
 #, c-format
 msgid "in %<PRIu32>+%<PRIu32>"
 msgstr ""
 
-#: session.cc:789
+#: session.cc:790
 msgid "cannot connect master output %1 to %2"
 msgstr ""
 
-#: session.cc:848
+#: session.cc:849
 msgid "monitor"
 msgstr ""
 
-#: session.cc:893
+#: session.cc:894
 msgid "cannot connect control input %1 to %2"
 msgstr ""
 
-#: session.cc:913
+#: session.cc:914
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
 msgstr ""
 
-#: session.cc:944
+#: session.cc:945
 msgid "cannot connect control output %1 to %2"
 msgstr ""
 
-#: session.cc:1008
+#: session.cc:1009
 msgid "cannot create Auditioner: no auditioning of regions possible"
 msgstr ""
 
-#: session.cc:1192
+#: session.cc:1193
 msgid "Session: you can't use that location for auto punch (start <= end)"
 msgstr ""
 
-#: session.cc:1232
+#: session.cc:1233
 msgid ""
 "You cannot use this location for auto-loop because it has zero or negative "
 "length"
 msgstr ""
 
-#: session.cc:1546
+#: session.cc:1547
 msgid "feedback loop setup between %1 and %2"
 msgstr ""
 
-#: session.cc:1842
+#: session.cc:1843
 msgid "Session: could not create new midi track."
 msgstr ""
 
-#: session.cc:1848
+#: session.cc:1849
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
 msgstr ""
 
-#: session.cc:2025 session.cc:2028
+#: session.cc:2026 session.cc:2029
 msgid "Audio"
 msgstr ""
 
-#: session.cc:2052 session.cc:2060 session.cc:2137 session.cc:2145
+#: session.cc:2053 session.cc:2061 session.cc:2138 session.cc:2146
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr ""
 
-#: session.cc:2083
+#: session.cc:2084
 msgid "Session: could not create new audio track."
 msgstr ""
 
-#: session.cc:2115 session.cc:2118
+#: session.cc:2116 session.cc:2119
 msgid "Bus"
 msgstr ""
 
-#: session.cc:2168
+#: session.cc:2169
 msgid "Session: could not create new audio route."
 msgstr ""
 
-#: session.cc:2227 session.cc:2237
+#: session.cc:2228 session.cc:2238
 msgid "Session: UINT_MAX routes? impossible!"
 msgstr ""
 
-#: session.cc:2259
+#: session.cc:2260
 msgid "Session: cannot create track/bus from template description"
 msgstr ""
 
-#: session.cc:2285
+#: session.cc:2286
 msgid "Session: could not create new route from template"
 msgstr ""
 
-#: session.cc:2314
+#: session.cc:2315
 msgid "Adding new tracks/busses failed"
 msgstr "Не удалось добавить новые дорожки/шины"
 
-#: session.cc:3413
+#: session.cc:3419
 msgid "FATAL ERROR! Could not find a suitable version of %1 for a rename"
 msgstr ""
 
-#: session.cc:3533 session.cc:3591
+#: session.cc:3539 session.cc:3597
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr ""
 
-#: session.cc:3981
+#: session.cc:3987
 msgid "send ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:3993
+#: session.cc:3999
 msgid "aux send ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:4005
+#: session.cc:4011
 msgid "return ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:4017
+#: session.cc:4023
 msgid "insert ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:4144
+#: session.cc:4150
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr ""
 
-#: session.cc:4173
+#: session.cc:4179
 msgid "too many bounced versions of playlist \"%1\""
 msgstr ""
 
-#: session.cc:4183
+#: session.cc:4189
 msgid "cannot create new audio file \"%1\" for %2"
 msgstr ""
 

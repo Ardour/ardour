@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-15 15:09-0400\n"
+"POT-Creation-Date: 2013-11-05 11:11-0500\n"
 "PO-Revision-Date: 2013-06-13 22:33+0200\n"
 "Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
 "Language-Team: Czech <kde-i18n-doc@kde.org>\n"
@@ -33,7 +33,7 @@ msgstr "Tlačítko nemůže sledovat stav neexistujícího ovladatelného cíle\
 msgid "Log"
 msgstr "Zápis"
 
-#: gtk_ui.cc:361
+#: gtk_ui.cc:363
 msgid ""
 "\n"
 "\n"
@@ -43,11 +43,11 @@ msgstr ""
 "\n"
 "Kurzbefehl: "
 
-#: gtk_ui.cc:633
+#: gtk_ui.cc:635
 msgid "Press To Exit"
 msgstr "Stisknout pro ukončení"
 
-#: gtk_ui.cc:669
+#: gtk_ui.cc:671
 msgid "I'm sorry %1, I can't do that"
 msgstr "Bohužel to nelze udělat, %1"
 
@@ -75,11 +75,11 @@ msgstr "Alt"
 msgid "Meta"
 msgstr "Meta"
 
-#: keyboard.cc:139 keyboard.cc:531
+#: keyboard.cc:139 keyboard.cc:535
 msgid "Unknown"
 msgstr "Neznámý"
 
-#: keyboard.cc:542
+#: keyboard.cc:546
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "Soubor s přiřazením kláves \"%2\"se nepodařilo najít, nebo obsahuje chyby."

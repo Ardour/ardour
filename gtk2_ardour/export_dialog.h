@@ -95,7 +95,7 @@ class ExportDialog : public ArdourDialog {
 
 	void expanded_changed();
 
-	void notify_errors ();
+	void notify_errors (bool force = false);
 	void close_dialog ();
 
 	void sync_with_manager ();

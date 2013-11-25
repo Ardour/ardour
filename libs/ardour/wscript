@@ -550,11 +550,11 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     testobj.use          = ['libpbd','libmidipp','libevoral','libvampplugin',
                             'libaudiographer','ardour','testcommon']
     if bld.is_defined('USE_EXTERNAL_LIBS'):
-        testcommon.uselib.extend(['RUBBERBAND', 'TAGLIB', 'LIBLTC', 'VAMPSDK',
-                                  'VAMPHOSTSDK'])
+        testobj.uselib.extend(['RUBBERBAND', 'TAGLIB', 'LIBLTC', 'VAMPSDK',
+                               'VAMPHOSTSDK'])
     else:
-        testcommon.use.extend(['libltc', 'librubberband', 'libtaglib',
-                               'libvamphost'])
+        testobj.use.extend(['libltc', 'librubberband', 'libtaglib',
+                            'libvamphost'])
 
     testobj.name         = name
     testobj.target       = target

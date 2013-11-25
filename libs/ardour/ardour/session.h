@@ -504,7 +504,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void timecode_time_subframes (framepos_t when, Timecode::Time&);
 
 	void timecode_duration (framecnt_t, Timecode::Time&) const;
-	void timecode_duration_string (char *, framecnt_t) const;
+        void timecode_duration_string (char *, size_t len, framecnt_t) const;
 
 	framecnt_t convert_to_frames (AnyTime const & position);
 	framecnt_t any_duration_to_frames (framepos_t position, AnyTime const & duration);

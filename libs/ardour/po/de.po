@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-10-23 19:07+0200\n"
+"POT-Creation-Date: 2013-11-05 11:11-0500\n"
 "PO-Revision-Date: 2013-09-26 16:32+0200\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
@@ -137,7 +137,7 @@ msgstr "Audio-Wiedergabelisten (unbenutzt)"
 #: audio_playlist_source.cc:171 audiosource.cc:913 file_source.cc:529
 #: midi_playlist_source.cc:144 midi_playlist_source.cc:152
 #: midi_playlist_source.cc:159 midi_source.cc:371 plugin_insert.cc:643
-#: rb_effect.cc:332 session.cc:2613 session.cc:2646 session.cc:3791
+#: rb_effect.cc:333 session.cc:2619 session.cc:2652 session.cc:3797
 #: session_handle.cc:87 sndfilesource.cc:121
 msgid "programming error: %1"
 msgstr "Programmierfehler: %1"
@@ -423,7 +423,7 @@ msgstr "kann CPU-Takt in /proc/cpuinfo nicht finden"
 msgid "audio"
 msgstr "Audio"
 
-#: data_type.cc:28 session.cc:1790 session.cc:1793
+#: data_type.cc:28 session.cc:1791 session.cc:1794
 msgid "MIDI"
 msgstr "MIDI"
 
@@ -538,7 +538,7 @@ msgstr "Dreieck"
 msgid "Rectangular"
 msgstr "Rechteck"
 
-#: export_formats.cc:52 session.cc:5008 session.cc:5024
+#: export_formats.cc:52 session.cc:5014 session.cc:5030
 msgid "None"
 msgstr "Kein"
 
@@ -910,15 +910,15 @@ msgstr "%s in"
 msgid "%s out"
 msgstr "%s out"
 
-#: io.cc:1535 session.cc:685 session.cc:714
+#: io.cc:1535 session.cc:686 session.cc:715
 msgid "mono"
 msgstr "Mono"
 
-#: io.cc:1537 session.cc:698 session.cc:728
+#: io.cc:1537 session.cc:699 session.cc:729
 msgid "L"
 msgstr "L"
 
-#: io.cc:1537 session.cc:700 session.cc:730
+#: io.cc:1537 session.cc:701 session.cc:731
 msgid "R"
 msgstr "R"
 
@@ -1019,7 +1019,7 @@ msgstr ""
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "unkorrekter XML-Modus an Locations::set_state weitergereicht"
 
-#: location.cc:842 session.cc:4510 session_state.cc:1031
+#: location.cc:842 session.cc:4516 session_state.cc:1031
 msgid "session"
 msgstr "Projekt"
 
@@ -1580,13 +1580,13 @@ msgstr ""
 msgid "You cannot subgroup MIDI tracks at this time"
 msgstr "MIDI-Spuren können zur Zeit nicht zu Subgruppen zusammengefasst werden"
 
-#: rb_effect.cc:233 rb_effect.cc:274
+#: rb_effect.cc:234 rb_effect.cc:275
 msgid "tempoize: error reading data from %1 at %2 (wanted %3, got %4)"
 msgstr ""
 "tempoize: Fehler beim Lesen der Daten von %1 an %2 (%3 erwünscht, %4 "
 "erhalten)"
 
-#: rb_effect.cc:303 rb_effect.cc:325
+#: rb_effect.cc:304 rb_effect.cc:326
 msgid "error writing tempo-adjusted data to %1"
 msgstr "Fehler beim Schreiben der tempo-angepassten Daten nach %1"
 
@@ -1602,82 +1602,82 @@ msgstr "Send %1"
 msgid "programming error: send created using role %1"
 msgstr "Programmierfehler: Send erzeugt mittels Rolle %1"
 
-#: session.cc:343
+#: session.cc:344
 msgid "Connect to engine"
 msgstr "Verbinde zur Engine"
 
-#: session.cc:348
+#: session.cc:349
 msgid "Session loading complete"
 msgstr "Laden des Projektes abgeschlossen"
 
-#: session.cc:420
+#: session.cc:421
 msgid "Set up LTC"
 msgstr "LTC einrichten"
 
-#: session.cc:422
+#: session.cc:423
 msgid "Set up Click"
 msgstr "Klick einrichten"
 
-#: session.cc:424
+#: session.cc:425
 msgid "Set up standard connections"
 msgstr "Richte Standard-Verbindungen ein"
 
-#: session.cc:634
+#: session.cc:635
 msgid "could not setup Click I/O"
 msgstr "konnte Metronom-E/A nicht einrichten"
 
-#: session.cc:682
+#: session.cc:683
 #, c-format
 msgid "out %<PRIu32>"
 msgstr "out %<PRIu32>"
 
-#: session.cc:696
+#: session.cc:697
 #, c-format
 msgid "out %<PRIu32>+%<PRIu32>"
 msgstr "out %<PRIu32>+%<PRIu32>"
 
-#: session.cc:711
+#: session.cc:712
 #, c-format
 msgid "in %<PRIu32>"
 msgstr "in %<PRIu32>"
 
-#: session.cc:725
+#: session.cc:726
 #, c-format
 msgid "in %<PRIu32>+%<PRIu32>"
 msgstr "in %<PRIu32>+%<PRIu32>"
 
-#: session.cc:789
+#: session.cc:790
 msgid "cannot connect master output %1 to %2"
 msgstr "kann Master-Ausgang %1 nicht mit %2 verbinden"
 
-#: session.cc:848
+#: session.cc:849
 msgid "monitor"
 msgstr "Monitor"
 
-#: session.cc:893
+#: session.cc:894
 msgid "cannot connect control input %1 to %2"
 msgstr "kann Kontrolleingang %1 nicht mit %2 verbinden"
 
-#: session.cc:913
+#: session.cc:914
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
 msgstr "Bevorzugte E/A für den Monitorbus (%1) kann nicht gefunden werden"
 
-#: session.cc:944
+#: session.cc:945
 msgid "cannot connect control output %1 to %2"
 msgstr "kann Kontrollausgang %1 nicht mit %2 verbinden"
 
-#: session.cc:1008
+#: session.cc:1009
 msgid "cannot create Auditioner: no auditioning of regions possible"
 msgstr ""
 "Kann das Vorhör-System nicht einrichten: kein Vorhören von Regionen möglich"
 
-#: session.cc:1192
+#: session.cc:1193
 msgid "Session: you can't use that location for auto punch (start <= end)"
 msgstr ""
 "Session: Sie können diese Position nicht für Auto-Punch verwenden (Start <= "
 "Ende) "
 
-#: session.cc:1232
+#: session.cc:1233
 msgid ""
 "You cannot use this location for auto-loop because it has zero or negative "
 "length"
@@ -1685,15 +1685,15 @@ msgstr ""
 "Sie können diese Position nicht für \"automatische Schleife\" verwenden, da "
 "sie keine oder eine negative Länge hat"
 
-#: session.cc:1546
+#: session.cc:1547
 msgid "feedback loop setup between %1 and %2"
 msgstr "Feedbackschleife zwischen %1 und %2 erkannt"
 
-#: session.cc:1842
+#: session.cc:1843
 msgid "Session: could not create new midi track."
 msgstr "Session: konnte keine neue MIDI-Spur erzeugen."
 
-#: session.cc:1848
+#: session.cc:1849
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
@@ -1701,76 +1701,76 @@ msgstr ""
 "Keine JACK-Ports mehr verfügbar. Wenn Sie so viele Spuren benötigen, müssen "
 "Sie %1 stoppen und JACK mit mehr Ports neu starten."
 
-#: session.cc:2025 session.cc:2028
+#: session.cc:2026 session.cc:2029
 msgid "Audio"
 msgstr "Audio"
 
-#: session.cc:2052 session.cc:2060 session.cc:2137 session.cc:2145
+#: session.cc:2053 session.cc:2061 session.cc:2138 session.cc:2146
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr "kann %1 ein/%2 aus für neue Audiospur nicht konfigurieren"
 
-#: session.cc:2083
+#: session.cc:2084
 msgid "Session: could not create new audio track."
 msgstr "Session: konnte keine neue Audios.pur erzeugen"
 
-#: session.cc:2115 session.cc:2118
+#: session.cc:2116 session.cc:2119
 msgid "Bus"
 msgstr "Bus"
 
-#: session.cc:2168
+#: session.cc:2169
 msgid "Session: could not create new audio route."
 msgstr "Session: konnte keine neueAudio-Route  erzeugen"
 
-#: session.cc:2227 session.cc:2237
+#: session.cc:2228 session.cc:2238
 msgid "Session: UINT_MAX routes? impossible!"
 msgstr "Session: UINT_MAX Routen? unmöglich!"
 
-#: session.cc:2259
+#: session.cc:2260
 msgid "Session: cannot create track/bus from template description"
 msgstr "Session: Kann die Route aus der Vorlagenbeschreibung nicht erzeugen"
 
-#: session.cc:2285
+#: session.cc:2286
 msgid "Session: could not create new route from template"
 msgstr "Session: konnte keine neue Route aus der Vorlage erzeugen."
 
-#: session.cc:2314
+#: session.cc:2315
 msgid "Adding new tracks/busses failed"
 msgstr "Fehler beim Hinzufügen neuer Spuren/Busse"
 
-#: session.cc:3413
+#: session.cc:3419
 msgid "FATAL ERROR! Could not find a suitable version of %1 for a rename"
 msgstr ""
 "FATALER FEHLER! Konnte keine passende Version von %1 zum Umbenennen finden"
 
-#: session.cc:3533 session.cc:3591
+#: session.cc:3539 session.cc:3597
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr "Es gibt bereits %1 Aufnahmen für %2, was ich als zu viele erachte."
 
-#: session.cc:3981
+#: session.cc:3987
 msgid "send ID %1 appears to be in use already"
 msgstr "Send ID %1 ist offenbar schon in Gebrauch"
 
-#: session.cc:3993
+#: session.cc:3999
 msgid "aux send ID %1 appears to be in use already"
 msgstr "Aux-Send ID %1 ist offenbar schon in Gebrauch"
 
-#: session.cc:4005
+#: session.cc:4011
 msgid "return ID %1 appears to be in use already"
 msgstr "Return ID %1 ist offenbar schon in Gebrauch"
 
-#: session.cc:4017
+#: session.cc:4023
 msgid "insert ID %1 appears to be in use already"
 msgstr "Insert ID %1 ist offenbar schon in Gebrauch"
 
-#: session.cc:4144
+#: session.cc:4150
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr "Kann einen Bereich mit Ende <= Start nicht schreiben (z.B. %1 <= %2)"
 
-#: session.cc:4173
+#: session.cc:4179
 msgid "too many bounced versions of playlist \"%1\""
 msgstr "zu viele gebouncete Versionen der Wiedergabeliste \"%1\""
 
-#: session.cc:4183
+#: session.cc:4189
 msgid "cannot create new audio file \"%1\" for %2"
 msgstr "kann keine neue Audiodatei \"%1\" für %2 erzeugen"
 
