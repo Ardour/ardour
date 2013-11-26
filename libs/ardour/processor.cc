@@ -63,6 +63,7 @@ Processor::Processor(Session& session, const string& name)
 	, _display_to_user (true)
 	, _pre_fader (false)
 	, _ui_pointer (0)
+	, _owner (0)
 {
 }
 

@@ -1509,7 +1509,7 @@ LV2Plugin::allocate_atom_event_buffers()
 		return;
 	}
 
-	DEBUG_TRACE(DEBUG::LV2, string_compose("allocate %1 atom_ev_buffers\n", total_atom_buffers));
+	DEBUG_TRACE(DEBUG::LV2, string_compose("allocate %1 atom_ev_buffers of %d bytes\n", total_atom_buffers, minimumSize));
 	_atom_ev_buffers = (LV2_Evbuf**) malloc((total_atom_buffers + 1) * sizeof(LV2_Evbuf*));
 	for (int i = 0; i < total_atom_buffers; ++i ) {
 		_atom_ev_buffers[i] = lv2_evbuf_new(minimumSize, LV2_EVBUF_ATOM,
@@ -1682,6 +1682,9 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				}
 			} else if (!valid) {
 				// Nothing we understand or care about, connect to scratch
+				// see note for midi-buffer size above
+				scratch_bufs.ensure_lv2_bufsize((flags & PORT_INPUT),
+						0, _port_minimumSize[port_index]);
 				_ev_buffers[port_index] = scratch_bufs.get_lv2_midi(
 					(flags & PORT_INPUT), 0, (flags & PORT_EVENT));
 			}
