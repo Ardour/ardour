@@ -24,10 +24,16 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    conf.load('compiler_cxx')
-    autowaf.configure(conf)
+    if conf.is_defined('USE_EXTERNAL_LIBS'):
+        autowaf.check_pkg(conf, 'rubberband', uselib_store='RUBBERBAND', atleast_version='1.0', mandatory=True)
+    else:
+        conf.load('compiler_cxx')
+        autowaf.configure(conf)
 
 def build(bld):
+    if bld.is_defined('USE_EXTERNAL_LIBS'):
+        return
+
     # Library
     obj = bld(features = 'cxx cxxshlib')
     prefix = 'libs/rubberband/'

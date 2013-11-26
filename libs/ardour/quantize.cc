@@ -72,6 +72,9 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 
 		even = false;
 
+		/* TODO 'swing' probably requires a 2nd iteration:
+		 * first quantize notes to the grid, then apply beat shift
+		 */
 		for (Evoral::Sequence<MidiModel::TimeType>::Notes::iterator i = (*s).begin(); i != (*s).end(); ++i) {
 
 			double new_start = round (((*i)->time() - offset) / _start_grid) * _start_grid + offset;
@@ -86,6 +89,7 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 				*/
 
 				new_start = new_start + (2.0/3.0 * _swing * (next_grid - new_start));
+				new_end = new_end + (2.0/3.0 * _swing * (next_grid - new_start));
 
 			} else if (_swing < 0.0 && !even) {
 
@@ -96,6 +100,7 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 				*/
 
 				new_start = new_start - (2.0/3.0 * _swing * (new_start - prev_grid));
+				new_end = new_end - (2.0/3.0 * _swing * (new_start - prev_grid));
 
 			}
 

@@ -298,7 +298,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 
 		char label[64];
 		/* some VST plugins expect this buffer to be zero-filled */
-		memset (label, sizeof (label), 0);
+		memset (label, 0, sizeof (label));
 
 		_plugin->dispatcher (_plugin, effGetParamName, which, 0, label, 0);
 		

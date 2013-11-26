@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-15 15:09-0400\n"
+"POT-Creation-Date: 2013-11-05 11:11-0500\n"
 "PO-Revision-Date: 2013-02-05 19:50+0100\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
@@ -35,7 +35,7 @@ msgstr ""
 msgid "Log"
 msgstr "Log"
 
-#: gtk_ui.cc:361
+#: gtk_ui.cc:363
 msgid ""
 "\n"
 "\n"
@@ -45,11 +45,11 @@ msgstr ""
 "\n"
 "Kurzbefehl: "
 
-#: gtk_ui.cc:633
+#: gtk_ui.cc:635
 msgid "Press To Exit"
 msgstr "Zum Beenden drücken"
 
-#: gtk_ui.cc:669
+#: gtk_ui.cc:671
 msgid "I'm sorry %1, I can't do that"
 msgstr "Leider kann ich das nicht tun, %1"
 
@@ -77,11 +77,11 @@ msgstr "Alt"
 msgid "Meta"
 msgstr "Meta"
 
-#: keyboard.cc:139 keyboard.cc:531
+#: keyboard.cc:139 keyboard.cc:535
 msgid "Unknown"
 msgstr "Unbekannt"
 
-#: keyboard.cc:542
+#: keyboard.cc:546
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "Die Tastenkürzel-Datei \"%1\" konnte nicht gefunden werden oder enthält "

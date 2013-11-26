@@ -116,11 +116,11 @@ JACKAudioBackend::get_port_name (PortHandle port) const
 	return jack_port_name ((jack_port_t*) port);
 }
 
-PortEngine::PortHandle*
+PortEngine::PortHandle
 JACKAudioBackend:: get_port_by_name (const std::string& name) const
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
-	return (PortHandle*) jack_port_by_name (_priv_jack, name.c_str());
+	return (PortHandle) jack_port_by_name (_priv_jack, name.c_str());
 }
 
 void

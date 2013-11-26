@@ -24,12 +24,12 @@
 
 #include "pbd/convert.h"
 
-#include "taglib/fileref.h"
-#include "taglib/flac/flacfile.h"
-#include "taglib/ogg/oggfile.h"
-#include "taglib/tag.h"
-#include "taglib/toolkit/taglib.h"
-#include "taglib/ogg/xiphcomment.h"
+#include <taglib/fileref.h>
+#include <taglib/flacfile.h>
+#include <taglib/oggfile.h>
+#include <taglib/tag.h>
+#include <taglib/taglib.h>
+#include <taglib/xiphcomment.h>
 
 /* Convert string to TagLib::String */
 #define TL_STR(string) TagLib::String ((string).c_str(), TagLib::String::UTF8)

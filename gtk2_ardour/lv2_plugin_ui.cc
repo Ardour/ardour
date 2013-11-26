@@ -478,12 +478,12 @@ void
 LV2PluginUI::on_window_hide()
 {
 	//printf("LV2PluginUI::on_window_hide\n");
-	_message_update_connection.disconnect();
 
 	if (_lv2->is_external_ui()) {
 		if (!_external_ui_ptr) { return; }
 		LV2_EXTERNAL_UI_HIDE(_external_ui_ptr);
 		if (!_lv2->is_external_kx()) { return ; }
+		_message_update_connection.disconnect();
 		_screen_update_connection.disconnect();
 		_external_ui_ptr = NULL;
 		suil_instance_free((SuilInstance*)_inst);

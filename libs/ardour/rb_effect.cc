@@ -20,8 +20,9 @@
 #include <algorithm>
 #include <cmath>
 
+#include <rubberband/RubberBandStretcher.h>
+
 #include "pbd/error.h"
-#include "rubberband/RubberBandStretcher.h"
 
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"

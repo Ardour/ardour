@@ -36,6 +36,8 @@
 
 #include <glibmm/threads.h>
 
+#include <ltc.h>
+
 #include "pbd/error.h"
 #include "pbd/event_loop.h"
 #include "pbd/rcu.h"
@@ -48,7 +50,6 @@
 #include "midi++/types.h"
 
 #include "timecode/time.h"
-#include "ltc/ltc.h"
 
 #include "ardour/ardour.h"
 #include "ardour/chan_count.h"
@@ -241,6 +242,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		bool operator() (boost::shared_ptr<Route>, boost::shared_ptr<Route> b);
 	};
 
+	void set_order_hint (uint32_t order_hint) {_order_hint = order_hint;};
         void notify_remote_id_change ();
         void sync_order_keys ();
 
@@ -502,7 +504,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void timecode_time_subframes (framepos_t when, Timecode::Time&);
 
 	void timecode_duration (framecnt_t, Timecode::Time&) const;
-	void timecode_duration_string (char *, framecnt_t) const;
+        void timecode_duration_string (char *, size_t len, framecnt_t) const;
 
 	framecnt_t convert_to_frames (AnyTime const & position);
 	framecnt_t any_duration_to_frames (framepos_t position, AnyTime const & duration);
@@ -1594,6 +1596,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	GraphEdges _current_route_graph;
 
 	uint32_t next_control_id () const;
+	uint32_t _order_hint;
 	bool ignore_route_processor_changes;
 
 	MidiClockTicker* midi_clock;

@@ -68,11 +68,11 @@ MidiPortManager::create_ports ()
 		return;
 	}
 	      
-	_midi_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, _("MIDI control in"), true);
-	_midi_out = AudioEngine::instance()->register_output_port (DataType::MIDI, _("MIDI control out"), true);
+	_midi_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("MIDI control in"), true);
+	_midi_out = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("MIDI control out"), true);
 
-	_mmc_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, _("MMC in"), true);
-	_mmc_out = AudioEngine::instance()->register_output_port (DataType::MIDI, _("MMC out"), true);
+	_mmc_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("MMC in"), true);
+	_mmc_out = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("MMC out"), true);
 	
 	/* XXX nasty type conversion needed because of the mixed inheritance
 	 * required to integrate MIDI::IPMidiPort and ARDOUR::AsyncMIDIPort.
@@ -93,14 +93,14 @@ MidiPortManager::create_ports ()
 
 	boost::shared_ptr<ARDOUR::Port> p;
 
-	p = AudioEngine::instance()->register_input_port (DataType::MIDI, _("MTC in"));
+	p = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("MTC in"));
 	_mtc_input_port = boost::dynamic_pointer_cast<MidiPort> (p);
-	p = AudioEngine::instance()->register_output_port (DataType::MIDI, _("MTC out"));
+	p = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("MTC out"));
 	_mtc_output_port= boost::dynamic_pointer_cast<MidiPort> (p);
 
-	p = AudioEngine::instance()->register_input_port (DataType::MIDI, _("MIDI Clock in"));
+	p = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("MIDI Clock in"));
 	_midi_clock_input_port = boost::dynamic_pointer_cast<MidiPort> (p);
-	p = AudioEngine::instance()->register_output_port (DataType::MIDI, _("MIDI Clock out"));
+	p = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("MIDI Clock out"));
 	_midi_clock_output_port= boost::dynamic_pointer_cast<MidiPort> (p);
 
 	/* These ports all need their incoming data handled in

@@ -24,10 +24,16 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    conf.load('compiler_cxx')
-    autowaf.configure(conf)
+    if conf.is_defined('USE_EXTERNAL_LIBS'):
+        autowaf.check_pkg(conf, 'taglib', uselib_store='TAGLIB', atleast_version="1.4", mandatory=True)
+    else:
+        conf.load('compiler_cxx')
+        autowaf.configure(conf)
 
 def build(bld):
+    if bld.is_defined('USE_EXTERNAL_LIBS'):
+        return
+
     # Library
     obj = bld(features = 'cxx cxxshlib')
     sources = bld.path.ant_glob('taglib/*.cpp')

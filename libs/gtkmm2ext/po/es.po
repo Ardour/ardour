@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-15 15:09-0400\n"
+"POT-Creation-Date: 2013-11-05 11:11-0500\n"
 "PO-Revision-Date: 2013-02-09 16:21+0100\n"
 "Last-Translator: Pablo Fernández <pablo.fbus@gmail.com>\n"
 "Language-Team: Spanish\n"
@@ -31,7 +31,7 @@ msgstr ""
 msgid "Log"
 msgstr "Log"
 
-#: gtk_ui.cc:361
+#: gtk_ui.cc:363
 msgid ""
 "\n"
 "\n"
@@ -41,11 +41,11 @@ msgstr ""
 "\n"
 "Atajo: "
 
-#: gtk_ui.cc:633
+#: gtk_ui.cc:635
 msgid "Press To Exit"
 msgstr "Pulse para salir"
 
-#: gtk_ui.cc:669
+#: gtk_ui.cc:671
 msgid "I'm sorry %1, I can't do that"
 msgstr "Lo siento %1, no puedo hacer eso"
 
@@ -73,11 +73,11 @@ msgstr ""
 msgid "Meta"
 msgstr ""
 
-#: keyboard.cc:139 keyboard.cc:531
+#: keyboard.cc:139 keyboard.cc:535
 msgid "Unknown"
 msgstr ""
 
-#: keyboard.cc:542
+#: keyboard.cc:546
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "El archivo de combinaciones de teclado no se encontró en \"%2\" o contiene "
@@ -94,36 +94,3 @@ msgstr "Pulsa para llevarlo a la ventana principal"
 #: textviewer.cc:34
 msgid "Close"
 msgstr "Cerrar"
-
-#~ msgid "Error"
-#~ msgstr "Error"
-
-#~ msgid "OK"
-#~ msgstr "ACEPTAR"
-
-#~ msgid "Location:"
-#~ msgstr "Localización:"
-
-#~ msgid "Browse ..."
-#~ msgstr "Seleccionar ..."
-
-#~ msgid "Cancel"
-#~ msgstr "Cancelar"
-
-#~ msgid "New folder"
-#~ msgstr "Nueva carpeta"
-
-#~ msgid "Add to favorites"
-#~ msgstr "Agregar a favoritos"
-
-#~ msgid "Remove from favorites"
-#~ msgstr "Quitar de favoritos"
-
-#~ msgid "Show Hidden"
-#~ msgstr "Mostrar ocultos"
-
-#~ msgid "Hide browser"
-#~ msgstr "Ocultar explorador"
-
-#~ msgid "Rescan"
-#~ msgstr "Buscar de nuevo"
