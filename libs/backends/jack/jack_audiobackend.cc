@@ -547,8 +547,11 @@ JACKAudioBackend::_start (bool for_latency_measurement)
 	/* Now that we have buffer size and sample rate established, the engine 
 	   can go ahead and do its stuff
 	*/
-	
-	engine.reestablish_ports ();
+
+	if (engine.reestablish_ports ()) {
+		error << _("Could not re-establish ports after connecting to JACK") << endmsg;
+		return -1;
+	}
 
 	if (!jack_port_type_get_buffer_size) {
 		warning << _("This version of JACK is old - you should upgrade to a newer version that supports jack_port_type_get_buffer_size()") << endmsg;
