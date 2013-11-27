@@ -34,6 +34,79 @@ def build(bld):
     if bld.is_defined('USE_EXTERNAL_LIBS'):
         return
 
+    # the story: taglib distributes its headers all over the place then copies them
+    # into place during an install. but we're not planning to do an install. so this
+    # doesn't work when code does #include <taglib/foo.h>. 
+    #
+    # one approach is to store symlinks in the repository. but this breaks on windows
+    # where symlink support and git are not very well developed (if at all)
+    #
+    # the approach here is to copy the header files as part of the build step, if necessary
+    
+    headers = [
+        './ape/apefooter.h',
+        './ape/apeitem.h',
+        './ape/apetag.h',
+        './mpeg/id3v2/frames/attachedpictureframe.h',
+        './mpeg/id3v2/frames/commentsframe.h',
+        './flac/flacfile.h',
+        './flac/flacproperties.h',
+        './mpeg/id3v2/frames/generalencapsulatedobjectframe.h',
+        './mpeg/id3v1/id3v1genres.h',
+        './mpeg/id3v1/id3v1tag.h',
+        './mpeg/id3v2/id3v2extendedheader.h',
+        './mpeg/id3v2/id3v2footer.h',
+        './mpeg/id3v2/id3v2framefactory.h',
+        './mpeg/id3v2/id3v2frame.h',
+        './mpeg/id3v2/id3v2header.h',
+        './mpeg/id3v2/id3v2synchdata.h',
+        './mpeg/id3v2/id3v2tag.h',
+        './mpc/mpcfile.h',
+        './mpc/mpcproperties.h',
+        './mpeg/mpegfile.h',
+        './mpeg/mpegheader.h',
+        './mpeg/mpegproperties.h',
+        './ogg/oggfile.h',
+        './ogg/flac/oggflacfile.h',
+        './ogg/oggpage.h',
+        './ogg/oggpageheader.h',
+        './mpeg/id3v2/frames/relativevolumeframe.h',
+        './ogg/speex/speexfile.h',
+        './ogg/speex/speexproperties.h',
+        './toolkit/taglib.h',
+        './toolkit/tbytevector.h',
+        './toolkit/tbytevectorlist.h',
+        './toolkit/tdebug.h',
+        './mpeg/id3v2/frames/textidentificationframe.h',
+        './toolkit/tfile.h',
+        './toolkit/tlist.h',
+        'toolkit/tlist.tcc',
+        './toolkit/tmap.h',
+        'toolkit/tmap.tcc',
+        './trueaudio/trueaudiofile.h',
+        './trueaudio/trueaudioproperties.h',
+        './toolkit/tstring.h',
+        './toolkit/tstringlist.h',
+        './toolkit/unicode.h',
+        './mpeg/id3v2/frames/uniquefileidentifierframe.h',
+        './mpeg/id3v2/frames/unknownframe.h',
+        './mpeg/id3v2/frames/unsynchronizedlyricsframe.h',
+        './mpeg/id3v2/frames/urllinkframe.h',
+        './ogg/vorbis/vorbisfile.h',
+        './ogg/vorbis/vorbisproperties.h',
+        './wavpack/wavpackfile.h',
+        './wavpack/wavpackproperties.h',
+        './mpeg/xingheader.h',
+        './ogg/xiphcomment.h',
+        ]
+
+    for h in headers:
+        tgt = bld.path.get_bld().make_node (os.path.join ('taglib', os.path.basename (h)))
+        if not os.path.exists (tgt.bldpath()):
+            bld (rule = "cp ${SRC} ${TGT}",
+                 source = bld.path.make_node (os.path.join ('taglib', h)),
+                 target = tgt)
+
     # Library
     obj = bld(features = 'cxx cxxshlib')
     sources = bld.path.ant_glob('taglib/*.cpp')
@@ -69,7 +142,7 @@ def build(bld):
             taglib/ogg/speex
             taglib/ogg/flac
     '''.split()
-    obj.export_includes = ['.', 'taglib', 'taglib/toolkit']
+    obj.export_includes = ['.', 'taglib' ]
     obj.includes     = include_dirs
     obj.defines      = ['MAKE_TAGLIB_LIB']
     obj.name         = 'libtaglib'
