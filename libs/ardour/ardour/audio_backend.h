@@ -282,17 +282,7 @@ class AudioBackend : public PortEngine {
     virtual std::string midi_option () const = 0;
     
     /* State Control */
-
-    /* non-virtual method to avoid possible overrides of default
-     * parameters. See Scott Meyers or other books on C++ to
-     * understand this pattern, or possibly just this:
-     *
-     * http://stackoverflow.com/questions/12139786/good-pratice-default-arguments-for-pure-virtual-method
-     */ 
-    int start (bool for_latency_measurement=false) {
-	    return _start (for_latency_measurement);
-    }
-
+ 
     /** Start using the device named in the most recent call
      * to set_device(), with the parameters set by various
      * the most recent calls to set_sample_rate() etc. etc.
@@ -308,8 +298,24 @@ class AudioBackend : public PortEngine {
      *        any existing systemic latency settings.
      *
      * Return zero if successful, negative values otherwise.
-     */
-    virtual int _start (bool for_latency_measurement) = 0;
+     *
+     *
+     *
+     *
+     * Why is this non-virtual but ::_start() is virtual ?
+     * Virtual methods with default parameters create possible ambiguity
+     * because a derived class may implement the same method with a different
+     * type or value of default parameter.
+     *
+     * So we make this non-virtual method to avoid possible overrides of
+     * default parameters. See Scott Meyers or other books on C++ to understand
+     * this pattern, or possibly just this:
+     *
+     * http://stackoverflow.com/questions/12139786/good-pratice-default-arguments-for-pure-virtual-method
+     */ 
+    int start (bool for_latency_measurement=false) {
+	    return _start (for_latency_measurement);
+    }
 
     /** Stop using the device currently in use. 
      *
@@ -481,6 +487,8 @@ class AudioBackend : public PortEngine {
 
   protected:
     AudioEngine&          engine;
+
+    virtual int _start (bool for_latency_measurement) = 0;
 };
 
 struct AudioBackendInfo {
