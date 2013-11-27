@@ -20,7 +20,6 @@
 #ifndef __midipp_mmc_h_h__
 #define __midipp_mmc_h_h__
 
-#include <jack/types.h>
 #include "timecode/time.h"
 
 #include "pbd/signals.h"

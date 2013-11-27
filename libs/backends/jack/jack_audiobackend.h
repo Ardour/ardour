@@ -89,7 +89,6 @@ class JACKAudioBackend : public AudioBackend {
     std::string control_app_name () const;
     void launch_control_app ();
 
-    int _start (bool for_latency_measurement);
     int stop ();
     int freewheel (bool);
 
@@ -272,6 +271,9 @@ class JACKAudioBackend : public AudioBackend {
     */
 
     JACKSession* _session;
+
+  protected:
+    int _start (bool for_latency_measurement);
 };
 
 } // namespace

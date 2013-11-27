@@ -143,7 +143,12 @@ JackConnection::close ()
 	if (_priv_jack) {	
 		int ret = jack_client_close (_priv_jack);
 		_jack = 0;
+
+		/* If we started JACK, it will be closing down */
+		usleep (500000);
+
 		Disconnected (""); /* EMIT SIGNAL */
+
 		return ret;
 	}
 

@@ -44,9 +44,6 @@ typedef int socklen_t;
 inline void closesocket(int s) { ::close(s); }
 #endif
 
-#include <jack/jack.h>
-#include <jack/midiport.h>
-
 #include "pbd/xml++.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
