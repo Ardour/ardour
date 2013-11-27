@@ -87,7 +87,6 @@ EngineControl::EngineControl ()
 	, midi_refresh_button (_("Refresh list"))
 	, ignore_changes (0)
 	, _desired_sample_rate (0)
-	, no_push (true)
 	, started_at_least_once (false)
 {
 	using namespace Notebook_Helpers;
@@ -290,8 +289,6 @@ EngineControl::EngineControl ()
 	output_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
 
 	notebook.signal_switch_page().connect (sigc::mem_fun (*this, &EngineControl::on_switch_page));
-
-	no_push = false;
  }
 
  void
@@ -874,10 +871,6 @@ EngineControl::EngineControl ()
 	 /* pick up any saved state for this device */
 
 	 maybe_display_saved_state ();
-
-	 /* and push it to the backend */
-
-	 push_state_to_backend (false);
  }	
 
  string
@@ -1207,14 +1200,9 @@ EngineControl::EngineControl ()
 	 }
  }
 
-
  int
  EngineControl::push_state_to_backend (bool start)
  {
-	 if (no_push) {
-		 return 0;
-	 }
-
 	 boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 
 	 if (!backend) {
