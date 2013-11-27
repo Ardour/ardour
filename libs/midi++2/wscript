@@ -50,7 +50,6 @@ def configure(conf):
                     'midipp', MAJOR, MINOR, MICRO)
     autowaf.configure(conf)
     autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
-    autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.118.2')
     autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
 
@@ -64,13 +63,13 @@ def build(bld):
         obj              = bld.shlib(features = 'cxx cxxshlib', source=libmidi_sources)
     else:
         obj              = bld.stlib(features = 'cxx cxxstlib', source=libmidi_sources)
-        obj.cxxflags = [ '-fPIC', '-DWITH_JACK_MIDI' ]
+        obj.cxxflags = [ '-fPIC' ]
     # everybody loves JACK
     obj.export_includes = ['.']
     obj.includes     = ['.', '../surfaces/control_protocol', '../ardour' ]
     obj.name         = 'libmidipp'
     obj.target       = 'midipp'
-    obj.uselib       = 'GLIBMM SIGCPP XML JACK OSX'
+    obj.uselib       = 'GLIBMM SIGCPP XML OSX'
     obj.use          = 'libpbd libevoral libtimecode'
     obj.vnum         = LIBMIDIPP_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
