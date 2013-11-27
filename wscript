@@ -50,15 +50,17 @@ top = '.'
 out = 'build'
 
 children = [
-        'libs/pbd',
-        'libs/midi++2',
-        'libs/evoral',
+        # optionally external libraries
         'libs/vamp-sdk',
         'libs/qm-dsp',
         'libs/vamp-plugins',
         'libs/taglib',
         'libs/libltc',
         'libs/rubberband',
+        # core ardour libraries
+        'libs/pbd',
+        'libs/midi++2',
+        'libs/evoral',
         'libs/surfaces',
         'libs/panners',
         'libs/backends',
@@ -71,7 +73,7 @@ children = [
         'export',
         'midi_maps',
         'mcp',
-        'patchfiles'
+        'patchfiles',
 ]
 
 i18n_children = [
@@ -807,7 +809,7 @@ const char* const ardour_config_info = "\\n\\
 
     write_config_text('C compiler flags',      conf.env['CFLAGS'])
     write_config_text('C++ compiler flags',    conf.env['CXXFLAGS'])
-    write_config_text('Linker flags',           conf.env['LINKFLAGS'])
+    write_config_text('Linker flags',          conf.env['LINKFLAGS'])
 
     config_text.write ('";\n}\n')
     config_text.close ()
@@ -818,18 +820,16 @@ def build(bld):
 
     # add directories that contain only headers, to workaround an issue with waf
 
-    bld.path.find_dir ('libs/evoral/evoral')
     if not bld.is_defined('USE_EXTERNAL_LIBS'):
         bld.path.find_dir ('libs/vamp-sdk/vamp-sdk')
-    bld.path.find_dir ('libs/surfaces/control_protocol/control_protocol')
-    bld.path.find_dir ('libs/timecode/timecode')
-    if not bld.is_defined('USE_EXTERNAL_LIBS'):
         bld.path.find_dir ('libs/libltc/ltc')
         bld.path.find_dir ('libs/rubberband/rubberband')
+        bld.path.find_dir ('libs/taglib/taglib')
+    bld.path.find_dir ('libs/evoral/evoral')
+    bld.path.find_dir ('libs/surfaces/control_protocol/control_protocol')
+    bld.path.find_dir ('libs/timecode/timecode')
     bld.path.find_dir ('libs/gtkmm2ext/gtkmm2ext')
     bld.path.find_dir ('libs/ardour/ardour')
-    if not bld.is_defined('USE_EXTERNAL_LIBS'):
-        bld.path.find_dir ('libs/taglib/taglib')
     bld.path.find_dir ('libs/pbd/pbd')
 
     autowaf.set_recursive()
