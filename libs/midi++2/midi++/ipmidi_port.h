@@ -41,8 +41,6 @@
 
 #include <glibmm/threads.h>
 
-#include <jack/types.h>
-
 #include "pbd/xml++.h"
 #include "pbd/crossthread.h"
 #include "pbd/signals.h"
