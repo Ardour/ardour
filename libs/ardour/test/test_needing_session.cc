@@ -6,7 +6,6 @@
 #include "ardour/audioengine.h"
 #include "test_needing_session.h"
 #include "test_util.h"
-#include "test_common.h"
 
 using namespace std;
 using namespace ARDOUR;

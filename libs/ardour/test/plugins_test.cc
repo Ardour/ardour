@@ -4,7 +4,7 @@
 #include "ardour/search_paths.h"
 
 #include "plugins_test.h"
-#include "test_common.h"
+#include "test_util.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION (PluginsTest);
 
