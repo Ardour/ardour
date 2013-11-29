@@ -27,7 +27,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/audioplaylist.h"
 #include "audio_region_test.h"
-#include "test_common.h"
+#include "test_util.h"
 
 using namespace std;
 using namespace PBD;

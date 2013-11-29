@@ -11,7 +11,7 @@
 #include "ardour/smf_source.h"
 #include "ardour/midi_model.h"
 
-#include "test_common.h"
+#include "test_util.h"
 
 #include "session_test.h"
 
