@@ -56,14 +56,11 @@ AudioPort::cycle_start (pframes_t nframes)
 }
 
 void
-AudioPort::cycle_end (pframes_t)
+AudioPort::cycle_end (pframes_t nframes)
 {
         if (sends_output() && !_buffer->written()) {
-                /* we can't use nframes here because the current buffer capacity may
-                   be shorter than the full buffer size if we split the cycle.
-                */
-		if (_buffer->capacity () > 0) {
-			_buffer->silence (_buffer->capacity());
+		if (_buffer->capacity() >= nframes) {
+			_buffer->silence (nframes);
 		}
 	}
 }
