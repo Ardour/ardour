@@ -401,6 +401,7 @@ def build(bld):
                          'libmidipp',
                          'libgtk2_ardour',
                          'libgtkmm2ext',
+                         'libcanvas',
                        ]
 
     # continue with setup of obj, which could be a shared library
