@@ -167,7 +167,7 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 	// If there's not enough or they're too small, just nuke the whole thing and
 	// rebuild it (so I'm lazy..)
 	if (bufs.size() < num_buffers
-			|| (bufs.size() > 0 && bufs[0]->capacity() < buffer_capacity)) {
+	    || (bufs.size() > 0 && bufs[0]->capacity() < buffer_capacity)) {
 
 		// Nuke it
 		for (BufferVec::iterator i = bufs.begin(); i != bufs.end(); ++i) {
@@ -179,7 +179,7 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 		for (size_t i = 0; i < num_buffers; ++i) {
 			bufs.push_back(Buffer::create(type, buffer_capacity));
 		}
-
+		
 		_available.set(type, num_buffers);
 		_count.set (type, num_buffers);
 	}

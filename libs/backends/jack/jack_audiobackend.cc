@@ -155,11 +155,11 @@ JACKAudioBackend::enumerate_devices () const
 }
 
 vector<float>
-JACKAudioBackend::available_sample_rates (const string& /*device*/) const
+JACKAudioBackend::available_sample_rates (const string& device) const
 {
 	vector<float> f;
 	
-	if (available()) {
+	if (device == _target_device && available()) {
 		f.push_back (sample_rate());
 		return f;
 	}
@@ -183,11 +183,11 @@ JACKAudioBackend::available_sample_rates (const string& /*device*/) const
 }
 
 vector<uint32_t>
-JACKAudioBackend::available_buffer_sizes (const string& /*device*/) const
+JACKAudioBackend::available_buffer_sizes (const string& device) const
 {
 	vector<uint32_t> s;
-	
-	if (available()) {
+		
+	if (device == _target_device && available()) {
 		s.push_back (buffer_size());
 		return s;
 	}

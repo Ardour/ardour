@@ -60,7 +60,7 @@ ThreadBuffers::ensure_buffers (ChanCount howmany)
 
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		size_t count = std::max (scratch_buffers->available().get(*t), howmany.get(*t));
-		size_t size = _engine->raw_buffer_size (*t);
+		size_t size = _engine->raw_buffer_size (*t) / sizeof (Sample);
 
 		scratch_buffers->ensure_buffers (*t, count, size);
 		mix_buffers->ensure_buffers (*t, count, size);
@@ -68,12 +68,14 @@ ThreadBuffers::ensure_buffers (ChanCount howmany)
 		route_buffers->ensure_buffers (*t, count, size);
 	}
 
-	delete [] gain_automation_buffer;
-	gain_automation_buffer = new gain_t[_engine->raw_buffer_size (DataType::AUDIO)];
-	delete [] send_gain_automation_buffer;
-	send_gain_automation_buffer = new gain_t[_engine->raw_buffer_size (DataType::AUDIO)];
+	size_t audio_buffer_size = _engine->raw_buffer_size (DataType::AUDIO) / sizeof (Sample);
 
-	allocate_pan_automation_buffers (_engine->raw_buffer_size (DataType::AUDIO), howmany.n_audio(), false);
+	delete [] gain_automation_buffer;
+	gain_automation_buffer = new gain_t[audio_buffer_size];
+	delete [] send_gain_automation_buffer;
+	send_gain_automation_buffer = new gain_t[audio_buffer_size];
+
+	allocate_pan_automation_buffers (audio_buffer_size, howmany.n_audio(), false);
 }
 
 void
