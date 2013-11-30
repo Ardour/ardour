@@ -378,12 +378,13 @@ def build(bld):
                 ../libs/fst/vstwin.c
                 ../vst/winmain.c
         '''
-        obj.uselib = 'ALSA'
         obj.use          = [ 'libpbd',
                              'libmidipp',
                              'libtaglib',
                              'libardour',
                              'libardour_cp',
+                             'libtimecode',
+                             'libmidipp',
                              'libgtk2_ardour',
                              'libgtkmm2ext',
                              'libtaglib']
@@ -406,20 +407,22 @@ def build(bld):
         obj.source    = gtk2_ardour_sources
         obj.target = 'ardour-' + bld.env['VERSION']
         obj.includes = ['.']
+        obj.use      = [ 'libpbd',
+                         'libardour',
+                         'libardour_cp',
+                         'libtimecode',
+                         'libmidipp',
+                         'libgtk2_ardour',
+                         'libgtkmm2ext',
+                       ]
 
     # continue with setup of obj, which could be a shared library
     # or an executable.
 
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-
-    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG ALSA CURL DL'
+    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL'
     obj.uselib       += ' GTKMM GNOMECANVASMM GNOMECANVAS FFTW3F'
     obj.uselib       += ' AUDIOUNITS OSX GTKOSX LO '
-    obj.use          = [ 'libpbd',
-                         'libmidipp',
-                         'ardour',
-                         'libardour_cp',
-                         'libgtkmm2ext']
     if bld.is_defined('USE_EXTERNAL_LIBS'):
         obj.uselib += ' TAGLIB'
     else:
