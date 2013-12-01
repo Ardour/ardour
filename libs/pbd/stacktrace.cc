@@ -106,7 +106,7 @@ PBD::stacktrace (std::ostream& out, int levels)
 #else
 
 std::string 
-demangle (std::string const & l)
+/* JE - !!!! 'PBD' namespace might possibly get removed (except it's still used in 'libs/canvas/item.cc') */PBD::demangle (std::string const & l)
 {
 	return std::string();
 }

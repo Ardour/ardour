@@ -22,11 +22,12 @@
 
 #include <glibmm/threads.h>
 
+#include "pbd/libpbd_visibility.h"
 #include "atomic_counter.h"
 
 namespace PBD {
 
-class GlibSemaphore
+class LIBPBD_API GlibSemaphore
 {
 
 	// prevent copying and assignment

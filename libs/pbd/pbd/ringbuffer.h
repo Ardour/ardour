@@ -26,7 +26,7 @@
 #include "pbd/libpbd_visibility.h"
 
 template<class T>
-class LIBPBD_API RingBuffer 
+class /*LIBPBD_API*/ RingBuffer 
 {
   public:
 	RingBuffer (guint sz) {
@@ -120,7 +120,7 @@ class LIBPBD_API RingBuffer
 	guint size_mask;
 };
 
-template<class T> LIBPBD_API guint 
+template<class T> /*LIBPBD_API*/ guint 
 RingBuffer<T>::read (T *dest, guint cnt)
 {
         guint free_cnt;
@@ -159,7 +159,7 @@ RingBuffer<T>::read (T *dest, guint cnt)
         return to_read;
 }
 
-template<class T> LIBPBD_API guint
+template<class T> /*LIBPBD_API*/ guint
 RingBuffer<T>::write (T const *src, guint cnt)
 
 {
@@ -199,7 +199,7 @@ RingBuffer<T>::write (T const *src, guint cnt)
         return to_write;
 }
 
-template<class T> LIBPBD_API void
+template<class T> /*LIBPBD_API*/ void
 RingBuffer<T>::get_read_vector (typename RingBuffer<T>::rw_vector *vec)
 
 {
@@ -240,7 +240,7 @@ RingBuffer<T>::get_read_vector (typename RingBuffer<T>::rw_vector *vec)
 	}
 }
 
-template<class T> LIBPBD_API void
+template<class T> /*LIBPBD_API*/ void
 RingBuffer<T>::get_write_vector (typename RingBuffer<T>::rw_vector *vec)
 
 {

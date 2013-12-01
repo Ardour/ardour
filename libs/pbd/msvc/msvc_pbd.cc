@@ -49,7 +49,7 @@ struct timezone
 	int  tz_dsttime;     /* type of dst correction */
 };
 
-PBD_API int PBD_APICALLTYPE
+LIBPBD_API int PBD_APICALLTYPE
 gettimeofday(struct timeval *__restrict tv, __timezone_ptr_t tz) // Does this need to be exported ?
 {
 FILETIME ft;
@@ -94,22 +94,22 @@ static int tzflag = 0;
 #ifndef PTHREAD_H   // Defined by PTW32 (Linux and other versions define _PTHREAD_H)
 #error "An incompatible version of 'pthread.h' is #included. Use only the Windows (ptw32) version!"
 #else
-bool operator>  (const pthread_t& lhs, const pthread_t& rhs)
+LIBPBD_API bool operator>  (const pthread_t& lhs, const pthread_t& rhs)
 {
 	return (std::greater<void*>()(lhs.p, rhs.p));
 }
 
-bool operator<  (const pthread_t& lhs, const pthread_t& rhs)
+LIBPBD_API bool operator<  (const pthread_t& lhs, const pthread_t& rhs)
 {
 	return (std::less<void*>()(lhs.p, rhs.p));
 }
 
-bool operator!= (const pthread_t& lhs, const pthread_t& rhs)
+LIBPBD_API bool operator!= (const pthread_t& lhs, const pthread_t& rhs)
 {
 	return (std::not_equal_to<void*>()(lhs.p, rhs.p));
 }
 
-bool operator== (const pthread_t& lhs, const pthread_t& rhs)
+LIBPBD_API bool operator== (const pthread_t& lhs, const pthread_t& rhs)
 {
 	return (!(lhs != rhs));
 }
@@ -166,7 +166,7 @@ char invert_forwardslash(char character)
 //    On Success: The number of bytes read from the file
 //    On Failure: -1
 //
-PBD_API ssize_t PBD_APICALLTYPE
+LIBPBD_API ssize_t PBD_APICALLTYPE
 pread(int handle, void *buf, size_t nbytes, off_t offset)
 {
 int old_errno;
@@ -201,7 +201,7 @@ ssize_t ret;
 //    On Success: The number of bytes written to the file
 //    On Failure: -1
 //
-PBD_API ssize_t PBD_APICALLTYPE
+LIBPBD_API ssize_t PBD_APICALLTYPE
 pwrite(int handle, const void *buf, size_t nbytes, off_t offset)
 {
 int old_errno;
@@ -235,7 +235,7 @@ ssize_t ret;
 //                equal to 'x'.
 //    On Failure: None
 //
-PBD_API double PBD_APICALLTYPE
+LIBPBD_API double PBD_APICALLTYPE
 round(double x)
 {
 	return (floor(x));
@@ -255,7 +255,7 @@ namespace PBD {
 //    On Success: TRUE (if the user's OS matches the minimum spec)
 //    On Failure: FALSE otherwise
 //
-PBD_API bool PBD_APICALLTYPE
+LIBPBD_API bool PBD_APICALLTYPE
 TestForMinimumSpecOS(char *revision /* currently ignored */)
 {
 bool bRet = true;
@@ -289,7 +289,7 @@ bool bRet = true;
 //    On Success: A pointer to the resolved (absolute) path
 //    On Failure: NULL
 //
-PBD_API char* PBD_APICALLTYPE
+LIBPBD_API char* PBD_APICALLTYPE
 realpath (const char *original_path, char resolved_path[_MAX_PATH+1])
 {
 char *pRet = NULL;
@@ -332,7 +332,7 @@ bool bIsSymLink = 0; // We'll probably need to test the incoming path
 //    On Success: Pointer to a (heap based) DIR structure
 //    On Failure: NULL
 //
-PBD_API DIR* PBD_APICALLTYPE
+LIBPBD_API DIR* PBD_APICALLTYPE
 opendir (const char *szPath)
 {
 wchar_t wpath[PATH_MAX+1];
@@ -424,7 +424,7 @@ DIR *pDir = 0;
 //    On Success: A pointer to the supplied DIR's 'dirent' struct
 //    On Failure: NULL
 //
-PBD_API struct dirent* PBD_APICALLTYPE
+LIBPBD_API struct dirent* PBD_APICALLTYPE
 readdir (DIR* pDir)
 {
 int old_errno = 0;
@@ -502,7 +502,7 @@ errno = 0;
 //    On Success: 0
 //    On Failure: -1
 //
-PBD_API int PBD_APICALLTYPE
+LIBPBD_API int PBD_APICALLTYPE
 closedir (DIR *pDir)
 {
 int rc = 0;
@@ -536,7 +536,7 @@ int rc = 0;
 //    On Success: A file descriptor for the opened file.
 //    On Failure: (-1)
 //
-PBD_API int PBD_APICALLTYPE
+LIBPBD_API int PBD_APICALLTYPE
 mkstemp (char *template_name)
 {
 int ret = (-1);
@@ -567,7 +567,7 @@ char szTempPath[PATH_MAX+100]; // Just ensure we have plenty of buffer space
 //    On Success: Non-zero.
 //    On Failure: Zero (call 'GetLastError()' to retrieve info)
 //
-PBD_API int PBD_APICALLTYPE
+LIBPBD_API int PBD_APICALLTYPE
 ntfs_link (const char *existing_filepath, const char *link_filepath)
 {
 int ret = 1; // 'ERROR_INVALID_FUNCTION'
@@ -697,7 +697,7 @@ bool bValidPath = false;
 //    On Success: Non-zero.
 //    On Failure: Zero (call 'GetLastError()' to retrieve info)
 //
-PBD_API int PBD_APICALLTYPE
+LIBPBD_API int PBD_APICALLTYPE
 ntfs_unlink (const char *link_filepath)
 {
 int ret = 1; // 'ERROR_INVALID_FUNCTION'
@@ -820,7 +820,7 @@ bool bValidPath = false;
 //    On Success: A handle to the opened DLL
 //    On Failure: NULL
 //
-PBD_API void* PBD_APICALLTYPE
+LIBPBD_API void* PBD_APICALLTYPE
 dlopen (const char *file_name, int mode)
 {
 	// Note that 'mode' is ignored in Win32
@@ -839,7 +839,7 @@ dlopen (const char *file_name, int mode)
 //    On Success: A non-zero number
 //    On Failure: 0
 //
-PBD_API int PBD_APICALLTYPE
+LIBPBD_API int PBD_APICALLTYPE
 dlclose (void *handle)
 {
 	return (::FreeLibrary((HMODULE)handle));
@@ -857,7 +857,7 @@ dlclose (void *handle)
 //    On Success: A pointer to the found function or symbol
 //    On Failure: NULL
 //
-PBD_API void* PBD_APICALLTYPE
+LIBPBD_API void* PBD_APICALLTYPE
 dlsym (void *handle, const char *symbol_name)
 {
 	// First test for RTLD_DEFAULT and RTLD_NEXT
@@ -883,7 +883,7 @@ static char szLastWinError[LOCAL_ERROR_BUF_SIZE];
 //                last error
 //    On Failure: NULL (if the last error was ERROR_SUCCESS)
 //
-PBD_API char* PBD_APICALLTYPE
+LIBPBD_API char* PBD_APICALLTYPE
 dlerror ()
 {
 	DWORD dwLastErrorId = GetLastError();

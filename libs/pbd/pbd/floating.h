@@ -34,7 +34,7 @@
 
 namespace PBD {
 
-union LIBPBD_API Float_t
+union /*LIBPBD_API*/ Float_t
 {
     Float_t (float num = 0.0f) : f(num) {}
 

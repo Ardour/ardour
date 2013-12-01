@@ -37,7 +37,7 @@ namespace PBD {
 	are discarded.
 */
 template<typename StringType, typename Iter>
-LIBPBD_API unsigned int
+/*LIBPBD_API*/ unsigned int
 tokenize(const StringType& str,        
         const StringType& delims,
         Iter it,

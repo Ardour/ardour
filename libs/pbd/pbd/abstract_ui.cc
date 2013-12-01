@@ -34,7 +34,7 @@
                              // if the type of object being contained has no appropriate comparison operators
                              // defined (specifically, if operators '<' and '==' are undefined). This seems
                              // to be the case with ptw32 'pthread_t' which is a simple struct.
-DECLARE_DEFAULT_COMPARISONS(pthread_t)
+DECLARE_DEFAULT_COMPARISONS(ptw32_handle_t)
 #endif
 
 using namespace std;

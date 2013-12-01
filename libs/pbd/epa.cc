@@ -146,4 +146,4 @@ EnvironmentalProtectionAgency::clear () const
                 string before = estring.substr (0, equal);
                 g_unsetenv(before.c_str());
         }
-}                        
+}

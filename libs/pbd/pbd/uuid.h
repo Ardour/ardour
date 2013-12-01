@@ -29,7 +29,7 @@
 
 namespace PBD {
 
-class LIBPBD_API UUID {
+class LIBPBD_API UUID : public boost::uuids::uuid {
 
   public:
     UUID ()

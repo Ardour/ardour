@@ -23,7 +23,7 @@
 #include <glib/gtypes.h>
 
 #ifdef PLATFORM_WINDOWS // Would not be relevant for Cygwin!!
-	PBD_API gchar* PBD_APICALLTYPE get_win_special_folder (int csidl);
+	LIBPBD_API gchar* PBD_APICALLTYPE get_win_special_folder (int csidl);
 #endif
 
 namespace PBD {
@@ -49,9 +49,9 @@ namespace PBD {
 extern "C" {
 #endif	/* __cplusplus */
 
-	PBD_API G_CONST_RETURN gchar* PBD_APICALLTYPE get_platform_fallback_folder (PBD::fallback_folder_t index);
-	PBD_API G_CONST_RETURN gchar* G_CONST_RETURN * PBD_APICALLTYPE alloc_platform_fallback_folders ();
-	PBD_API void PBD_APICALLTYPE free_platform_fallback_folders ();
+	LIBPBD_API G_CONST_RETURN gchar* PBD_APICALLTYPE get_platform_fallback_folder (PBD::fallback_folder_t index);
+	LIBPBD_API G_CONST_RETURN gchar* G_CONST_RETURN * PBD_APICALLTYPE alloc_platform_fallback_folders ();
+	LIBPBD_API void PBD_APICALLTYPE free_platform_fallback_folders ();
 
 #ifdef __cplusplus
 }		/* extern "C" */

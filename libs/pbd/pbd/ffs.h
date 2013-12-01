@@ -20,8 +20,10 @@
 #ifndef __libpbd_ffs_h__
 #define __libpbd_ffs_h__
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
-	int ffs(int x);
+	LIBPBD_API int ffs(int x);
 } 
 
 #endif  /* __libpbd_ffs_h__ */

@@ -44,7 +44,7 @@ namespace PBD {
  *  any change.
  */
 template<typename Container>
-class LIBPBD_API SequenceProperty : public PropertyBase
+class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 {
   public:
         typedef std::set<typename Container::value_type> ChangeContainer;
@@ -311,10 +311,10 @@ class LIBPBD_API SequenceProperty : public PropertyBase
 	}
 
 	Container& operator= (const Container& other) {
-		for (typename Container::iterator i = _val.begin(); i != _val.end(); ++i) {
+		for (typename Container::const_iterator i = _val.begin(); i != _val.end(); ++i) {
 			_changes.remove (*i);
 		}
-		for (typename Container::iterator i = other.begin(); i != other.end(); ++i) {
+		for (typename Container::const_iterator i = other.begin(); i != other.end(); ++i) {
 			_changes.add (*i);
 		}
 		return _val = other;

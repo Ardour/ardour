@@ -172,7 +172,7 @@ int ret = 0; // This functionality is not yet implemented
 //                writing or had data available for reading.
 //    On Failure: -1 (the actual error is saved in 'errno').
 //
-PBD_API int PBD_APICALLTYPE
+LIBPBD_API int PBD_APICALLTYPE
 poll (struct pollfd *fds, nfds_t nfds, int timeout)
 {
 int elapsed_time = 0;

@@ -79,7 +79,7 @@ private:
 };
 
 template<typename R>
-class LIBPBD_API OptionalLastValue
+class /*LIBPBD_API*/ OptionalLastValue
 {
 public:
 	typedef boost::optional<R> result_type;

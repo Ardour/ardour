@@ -24,7 +24,7 @@
 
 namespace PBD {
 
-struct LocaleGuard {
+struct LIBPBD_API /* Added by JE - */ LocaleGuard {
     LocaleGuard (const char*);
     ~LocaleGuard ();
     const char* old;

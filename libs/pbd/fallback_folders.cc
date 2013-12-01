@@ -521,7 +521,7 @@ gchar  *pUsrHome            = 0;
 //                relevant index.
 //    On Failure: NULL
 //
-PBD_API G_CONST_RETURN gchar* PBD_APICALLTYPE
+LIBPBD_API G_CONST_RETURN gchar* PBD_APICALLTYPE
 get_platform_fallback_folder (PBD::fallback_folder_t index)
 {
 	if ((index >= 0) && (index < FALLBACK_FOLDER_MAX))
@@ -546,7 +546,7 @@ get_platform_fallback_folder (PBD::fallback_folder_t index)
 //
 //    The value obtained from 'get_platform_fallback_folders()'
 //
-PBD_API G_CONST_RETURN gchar* G_CONST_RETURN * PBD_APICALLTYPE
+LIBPBD_API G_CONST_RETURN gchar* G_CONST_RETURN * PBD_APICALLTYPE
 alloc_platform_fallback_folders ()
 {
 	return ((G_CONST_RETURN gchar* G_CONST_RETURN *)get_platform_fallback_folders ());
@@ -564,7 +564,7 @@ alloc_platform_fallback_folders ()
 //
 //    NONE.
 //
-PBD_API void PBD_APICALLTYPE
+LIBPBD_API void PBD_APICALLTYPE
 free_platform_fallback_folders ()
 {
 int index = FOLDER_LOCALE;

@@ -38,7 +38,7 @@ class LIBPBD_API StatefulDiffCommand;
 typedef GQuark PropertyID;
 
 template<typename T>
-struct LIBPBD_API PropertyDescriptor {
+struct /*LIBPBD_API*/ PropertyDescriptor {
 	PropertyDescriptor () : property_id (0) {}
 	PropertyDescriptor (PropertyID pid) : property_id (pid) {}
 	
@@ -47,16 +47,17 @@ struct LIBPBD_API PropertyDescriptor {
 };
 
 /** A list of IDs of Properties that have changed in some situation or other */
-class LIBPBD_API PropertyChange : public std::set<PropertyID>
+class /*LIBPBD_API*/ PropertyChange : public std::set<PropertyID>
 {
 public:
-	PropertyChange() {}
+	LIBPBD_API  PropertyChange() {}
+	LIBPBD_API ~PropertyChange() {}
 
 	template<typename T> PropertyChange(PropertyDescriptor<T> p);
 
-	PropertyChange(const PropertyChange& other) : std::set<PropertyID> (other) {}
+	LIBPBD_API PropertyChange(const PropertyChange& other) : std::set<PropertyID> (other) {}
 
-	PropertyChange operator=(const PropertyChange& other) {
+	LIBPBD_API PropertyChange operator=(const PropertyChange& other) {
 		clear ();
 		insert (other.begin (), other.end ());
 		return *this;
@@ -65,7 +66,7 @@ public:
 	template<typename T> PropertyChange operator=(PropertyDescriptor<T> p);
 	template<typename T> bool contains (PropertyDescriptor<T> p) const;
 
-	bool contains (const PropertyChange& other) const {
+	LIBPBD_API bool contains (const PropertyChange& other) const {
 		for (const_iterator x = other.begin (); x != other.end (); ++x) {
 			if (find (*x) != end ()) {
 				return true;
@@ -74,8 +75,8 @@ public:
 		return false;
 	}
 
-	void add (PropertyID id)               { insert (id); }
-	void add (const PropertyChange& other) { insert (other.begin (), other.end ()); }
+	LIBPBD_API void add (PropertyID id)               { insert (id); }
+	LIBPBD_API void add (const PropertyChange& other) { insert (other.begin (), other.end ()); }
 	template<typename T> void add (PropertyDescriptor<T> p);
 };
 

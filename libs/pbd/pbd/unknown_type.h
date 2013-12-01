@@ -22,9 +22,9 @@
 
 #include <exception>
 
-#include "pbd/libpbd_visibility.h"
+//#include "pbd/libpbd_visibility.h"
 
-class LIBPBD_API unknown_type : public std::exception {
+class /*LIBPBD_API*/ unknown_type : public std::exception {
   public:
 	virtual const char *what() const throw() { return "unknown type"; }
 };

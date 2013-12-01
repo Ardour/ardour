@@ -21,7 +21,7 @@
 
 #include "pbd/libpbd_visibility.h"
 
-class LIBPBD_API Touchable
+class /*LIBPBD_API*/ Touchable
 {
   public:
 	Touchable() : _delete_after_touch (false) {}
@@ -37,7 +37,7 @@ class LIBPBD_API Touchable
 };
 
 template<class T>
-class LIBPBD_API DynamicTouchable : public Touchable
+class /*LIBPBD_API*/ DynamicTouchable : public Touchable
 {
   public:
 	DynamicTouchable (T& t, void (T::*m)(void)) 
@@ -53,7 +53,7 @@ class LIBPBD_API DynamicTouchable : public Touchable
 };
 
 template<class T1, class T2>
-class LIBPBD_API DynamicTouchable1 : public Touchable
+class /*LIBPBD_API*/ DynamicTouchable1 : public Touchable
 {
   public:
 	DynamicTouchable1 (T1& t, void (T1::*m)(T2), T2 a) 
@@ -70,7 +70,7 @@ class LIBPBD_API DynamicTouchable1 : public Touchable
 };
 
 template<class T1, class T2, class T3>
-class LIBPBD_API DynamicTouchable2 : public Touchable
+class /*LIBPBD_API*/ DynamicTouchable2 : public Touchable
 {
   public:
 	DynamicTouchable2 (T1& t, void (T1::*m)(T2, T3), T2 a1, T3 a2) 

@@ -49,7 +49,7 @@ namespace PBD {
    only safe way to reliably signal from a real-time audio thread.  The
    counting semantics also complement ringbuffers of events nicely.
 */
-class LIBPBD_API Semaphore
+class /*LIBPBD_API*/ Semaphore
 {
 public:
 	/**

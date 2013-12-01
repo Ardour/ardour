@@ -52,7 +52,7 @@
 class Touchable;
 
 template<typename RequestObject>
-class ABSTRACT_UI_API AbstractUI : public BaseUI /* see notes in visibility.h about why this is not LIBPBD_API */
+class /*ABSTRACT_UI_API*/ AbstractUI : public BaseUI /* see notes in visibility.h about why this is not LIBPBD_API */
 {
   public:
 	AbstractUI (const std::string& name);

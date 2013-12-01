@@ -20,8 +20,11 @@
 #define _msvc_pbd_h_
 
 #ifdef  PBD_IS_IN_WIN_STATIC_LIB  // #define if your project uses libpbd (under Windows) as a static library
+#undef  LIBPBD_DLL
 #define PBD_IS_IN_WINDLL 0
 #endif
+
+#include <pbd/libpbd_visibility.h>
 
 #ifndef COMPILER_MSVC
 #include <sys/time.h>
@@ -39,22 +42,21 @@
 	#endif
 #endif
 
-#if PBD_IS_IN_WINDLL && !defined(PBD_API)
+#if PBD_IS_IN_WINDLL && !defined(PBD_APICALLTYPE)
 	#if defined(BUILDING_PBD)
-		#define PBD_API __declspec(dllexport)
-		#define PBD_APICALLTYPE __stdcall
+		#define PBD_APICALLTYPE __cdecl
 	#elif defined(COMPILER_MSVC) || defined(COMPILER_MINGW) // Probably needs Cygwin too, at some point
-		#define PBD_API __declspec(dllimport)
-		#define PBD_APICALLTYPE __stdcall
+		#define PBD_APICALLTYPE __cdecl
 	#else
 		#error "Attempting to define __declspec with an incompatible compiler !"
 	#endif
-#elif !defined(PBD_API)
+#elif !defined(PBD_APICALLTYPE)
 	// Other compilers / platforms could be accommodated here
-	#define PBD_API
 	#define PBD_APICALLTYPE
+#ifndef GETOPT_API
 	#define GETOPT_API
 	#define GETOPT_APICALLTYPE
+#endif
 #endif
 
 #ifndef GETOPT_API
@@ -145,22 +147,26 @@ extern "C" {
 extern "C" {
 #endif	/* __cplusplus */
 
-PBDEXTN_API int		PBDEXTN_APICALLTYPE cyginit (unsigned int result);
-PBD_API     int 	PBD_APICALLTYPE     dlclose (void *handle) __THROW;
-PBD_API     void*	PBD_APICALLTYPE     dlopen  (const char *file_name, int mode) __THROW;
-PBD_API     void* 	PBD_APICALLTYPE     dlsym   (void *handle, const char *symbol_name) __THROW;
-PBD_API     char* 	PBD_APICALLTYPE     dlerror () __THROW;
+PBDEXTN_API	   int		PBDEXTN_APICALLTYPE cyginit (unsigned int result);
+LIBPBD_API     int 		PBD_APICALLTYPE     dlclose (void *handle) __THROW;
+LIBPBD_API     void*	PBD_APICALLTYPE     dlopen  (const char *file_name, int mode) __THROW;
+LIBPBD_API     void* 	PBD_APICALLTYPE     dlsym   (void *handle, const char *symbol_name) __THROW;
+LIBPBD_API     char* 	PBD_APICALLTYPE     dlerror () __THROW;
 
 #ifdef __cplusplus
 }		/* extern "C" */
 #endif	/* __cplusplus */
 
 #ifndef __CYGWIN__
+/* For whatever reason, Ardour's 'libevoral' refuses to build as a DLL if we include both 'rpc.h' */
+/* and 'WinSock2.h'. It doesn't seem to matter which order we #include them. Given that we can't  */
+/* edit 'rpc.h' or 'WinSock2.h', just make sure we don't #include them when building libevoral.   */
+#ifndef BUILDING_EVORAL
 #include <rpc.h>
+typedef int (FAR PBDEXTN_APICALLTYPE *CYGINIT_API)(unsigned int);
+#endif
 #include <io.h>
 #include <sys/types.h>
-
-typedef int (FAR PBDEXTN_APICALLTYPE *CYGINIT_API)(unsigned int);
 
 #ifndef FILENAME_MAX
 #define FILENAME_MAX (260)
@@ -216,34 +222,34 @@ struct pollfd
 
 typedef unsigned int nfds_t;
 
-PBD_API int				PBD_APICALLTYPE gettimeofday(struct timeval *__restrict tv, __timezone_ptr_t tz);
-PBD_API ssize_t			PBD_APICALLTYPE pread(int handle, void *buf, size_t nbytes, off_t offset);
-PBD_API ssize_t			PBD_APICALLTYPE pwrite(int handle, const void *buf, size_t nbytes, off_t offset);
-PBD_API int				PBD_APICALLTYPE poll(struct pollfd *fds, nfds_t nfds, int timeout);
-PBD_API double			PBD_APICALLTYPE round(double x);
-
-namespace PBD {
-
 #ifdef __cplusplus
 extern "C" {
 #endif	/* __cplusplus */
 
-PBD_API bool 			PBD_APICALLTYPE TestForMinimumSpecOS(char *revision="currently ignored");
-PBD_API char*			PBD_APICALLTYPE realpath    (const char *original_path, char resolved_path[_MAX_PATH+1]);
-PBD_API int				PBD_APICALLTYPE mkstemp     (char *template_name);
-PBD_API int				PBD_APICALLTYPE ntfs_link   (const char *existing_filepath, const char *link_filepath);
-PBD_API int				PBD_APICALLTYPE ntfs_unlink (const char *link_filepath);
+LIBPBD_API int				__cdecl         gettimeofday(struct timeval *__restrict tv, __timezone_ptr_t tz);
+LIBPBD_API ssize_t			PBD_APICALLTYPE pread(int handle, void *buf, size_t nbytes, off_t offset);
+LIBPBD_API ssize_t			PBD_APICALLTYPE pwrite(int handle, const void *buf, size_t nbytes, off_t offset);
+LIBPBD_API int				PBD_APICALLTYPE poll(struct pollfd *fds, nfds_t nfds, int timeout);
+LIBPBD_API double			PBD_APICALLTYPE round(double x);
+
+namespace PBD {
+
+LIBPBD_API bool 			PBD_APICALLTYPE TestForMinimumSpecOS(char *revision="currently ignored");
+LIBPBD_API char*			PBD_APICALLTYPE realpath    (const char *original_path, char resolved_path[_MAX_PATH+1]);
+LIBPBD_API int				PBD_APICALLTYPE mkstemp     (char *template_name);
+LIBPBD_API int				PBD_APICALLTYPE ntfs_link   (const char *existing_filepath, const char *link_filepath);
+LIBPBD_API int				PBD_APICALLTYPE ntfs_unlink (const char *link_filepath);
 
 // These are used to replicate 'dirent.h' functionality
-PBD_API DIR*			PBD_APICALLTYPE opendir  (const char *szPath);
-PBD_API struct dirent*	PBD_APICALLTYPE readdir  (DIR *pDir);
-PBD_API int				PBD_APICALLTYPE closedir (DIR *pDir);
+LIBPBD_API DIR*				PBD_APICALLTYPE opendir  (const char *szPath);
+LIBPBD_API struct dirent*	PBD_APICALLTYPE readdir  (DIR *pDir);
+LIBPBD_API int				PBD_APICALLTYPE closedir (DIR *pDir);
+
+}  // namespace PBD
 
 #ifdef __cplusplus
 }		/* extern "C" */
 #endif	/* __cplusplus */
-
-}  // namespace PBD
 
 #endif  // !__CYGWIN__
 #endif  // PLATFORM_WINDOWS
