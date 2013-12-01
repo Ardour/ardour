@@ -240,7 +240,7 @@ MidiClockTicker::tick (const framepos_t& /* transport_frame */, pframes_t nframe
 			/* Varispeed not supported */
 		}
 
-		_send_pos = true;
+		_send_pos = false;
 	}
 
 	if (_send_state) {
