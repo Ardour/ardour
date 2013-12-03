@@ -33,6 +33,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <glib.h>
+#include <glibmm/timer.h>
 
 #include "ardour/linux_vst_support.h"
 
@@ -377,7 +378,7 @@ void* gui_event_loop (void* ptr)
 
 		/*We don't want to use all the CPU.. */
 
-		usleep(1000);
+		Glib::usleep(1000);
 		
 		LXVST_sched_event_timer++;
 		
@@ -706,7 +707,7 @@ vstfx_launch_editor (VSTState* vstfx)
 	/*QUIRK - some plugins need a slight delay after opening the editor before you can
 	ask the window size or they might return zero - specifically discoDSP */
 	
-	usleep(100000);
+	Glib::usleep(100000);
 	
 	/*Now we can find out how big the parent window should be (and try) to resize it*/
 	

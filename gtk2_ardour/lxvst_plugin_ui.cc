@@ -141,7 +141,7 @@ LXVSTPluginUI::get_XID ()
 	*/
 	
 	while (!(_vst->state()->been_activated)) {
-		usleep (1000);
+		Glib::usleep (1000);
 	}
 	
 	int const id = _vst->state()->xid;
