@@ -25,6 +25,8 @@
 #include <jack/jack.h>
 #include <jack/transport.h>
 
+#include "pbd/localtime_r.h"
+
 #include "ardour/audioengine.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/session.h"

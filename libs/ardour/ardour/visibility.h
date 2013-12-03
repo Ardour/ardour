@@ -20,36 +20,6 @@
 #ifndef __libardour_visibility_h__
 #define __libardour_visibility_h__
 
-#ifdef  LIBARDOUR_IS_IN_WIN_STATIC_LIB  // #define if your project uses libardour (under Windows) as a static library
-#define LIBARDOUR_IS_IN_WINDLL 0
-#endif
-
-#if !defined(LIBARDOUR_IS_IN_WINDLL)
-	#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-	// If you need '__declspec' compatibility, add extra compilers to the above as necessary
-		#define LIBARDOUR_IS_IN_WINDLL 1
-	#else
-		#define LIBARDOUR_IS_IN_WINDLL 0
-	#endif
-#endif
-
-#if LIBARDOUR_IS_IN_WINDLL && !defined(LIBARDOUR_API)
-	#if defined(BUILDING_LIBARDOUR)
-		#define LIBARDOUR_API __declspec(dllexport)
-		#define LIBARDOUR_APICALLTYPE __cdecl
-	#elif defined(COMPILER_MSVC) || defined(COMPILER_MINGW) // Probably needs Cygwin too, at some point
-		#define LIBARDOUR_API __declspec(dllimport)
-		#define LIBARDOUR_APICALLTYPE __cdecl
-	#else
-		#error "Attempting to define __declspec with an incompatible compiler !"
-	#endif
-#elif !defined(LIBARDOUR_API)
-	// Other compilers / platforms could be accommodated here (as an example, see LIBARDOUR_HELPER_DLL, below)
-	#define LIBARDOUR_API
-	#define LIBARDOUR_APICALLTYPE
-#endif
-
-
 /* _WIN32 is defined by most compilers targetting Windows, but within the
  * ardour source tree, we also define COMPILER_MSVC or COMPILER_MINGW depending
  * on how a Windows build is built.

@@ -891,11 +891,7 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 	ostringstream oss;
 
 	for (vector<string>::const_iterator i = args.begin(); i != args.end();) {
-#ifdef WIN32
-		oss << quote_string (*i);
-#else
 		oss << *i;
-#endif
 		if (++i != args.end()) oss << ' ';
 	}
 
