@@ -472,7 +472,7 @@ AudioEngine::discover_backends ()
 
 	Glib::PatternSpec so_extension_pattern("*backend.so");
 	Glib::PatternSpec dylib_extension_pattern("*backend.dylib");
-	Glib::PatternSpec dll_extension_pattern("*backend.dll");
+	Glib::PatternSpec dll_extension_pattern("*backend*.dll");
 
 	find_matching_files_in_search_path (backend_search_path (),
 	                                    so_extension_pattern, backend_modules);

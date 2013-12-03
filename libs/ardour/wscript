@@ -259,9 +259,6 @@ def configure(conf):
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP',
                       atleast_version='2.0')
 
-    if re.search ("linux", sys.platform) != None:
-        autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
-
     if Options.options.lv2:
         autowaf.check_pkg(conf, 'lv2', uselib_store='LV2',
                           atleast_version='1.0.0', mandatory=True)

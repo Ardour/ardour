@@ -36,7 +36,7 @@ namespace ARDOUR {
 class Slave;
 class Region;
 
-class LIBARDOUR_API SessionEvent {
+class SessionEvent {
 public:
 	enum Type {
 		SetTransportSpeed,
@@ -151,7 +151,7 @@ private:
 	friend class Butler;
 };
 
-class LIBARDOUR_API SessionEventManager {
+class SessionEventManager {
 public:
 	SessionEventManager () : pending_events (2048),
 	                         auto_loop_event(0), punch_out_event(0), punch_in_event(0) {}

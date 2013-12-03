@@ -1414,7 +1414,7 @@ IO::find_port_hole (const char* base)
 		std::vector<char> buf (AudioEngine::instance()->port_name_size());
 		PortSet::iterator i = _ports.begin();
 
-		snprintf (&buf[0], jack_port_name_size(), _("%s %u"), base, n);
+		snprintf (&buf[0], buf.size()+1, _("%s %u"), base, n);
 
 		for ( ; i != _ports.end(); ++i) {
 			if (string(i->name()) == string(&buf[0])) {

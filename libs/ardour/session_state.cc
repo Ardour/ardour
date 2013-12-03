@@ -136,14 +136,7 @@ Session::pre_engine_init (string fullpath)
 
 	/* discover canonical fullpath */
 
-	char buf[PATH_MAX+1];
-	if (!realpath (fullpath.c_str(), buf) && (errno != ENOENT)) {
-		error << string_compose(_("Could not use path %1 (%2)"), buf, strerror(errno)) << endmsg;
-		destroy ();
-		throw failed_constructor();
-	}
-
-	_path = string(buf);
+	_path = canonical_path(fullpath);
 	
 	/* we require _path to end with a dir separator */
 
