@@ -207,7 +207,7 @@ public:
 		return _data + offset;
 	}
 
-    bool check_silence (pframes_t, pframes_t&) const;
+        bool check_silence (pframes_t, pframes_t&) const;
 
 	void prepare () { _written = false; _silent = false; }
 	bool written() const { return _written; }

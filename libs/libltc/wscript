@@ -29,19 +29,24 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    conf.load('compiler_c')
-    autowaf.configure(conf)
+    if conf.is_defined('USE_EXTERNAL_LIBS'):
+        autowaf.check_pkg(conf, 'ltc', uselib_store='LIBLTC', atleast_version=LIBLTC_LIB_VERSION, mandatory=True)
+    else:
+        conf.load('compiler_c')
+        autowaf.configure(conf)
 
 def build(bld):
+    if bld.is_defined('USE_EXTERNAL_LIBS'):
+        return
     bld (export_includes = ['.'],
          includes     = ['.'],
-         name = 'ltc_includes'
+         name = 'libltc_includes'
          )
 
     bld.stlib (source = ['ltc.c', 'timecode.c', 'encoder.c', 'decoder.c'],
                cflags = [ '-fPIC' ],
-               target = 'ltc',
-               use    = 'ltc_includes'
+               target = 'libltc',
+               use    = 'libltc_includes'
                )
 
 def shutdown():

@@ -33,12 +33,12 @@ using namespace PBD;
 
 // FIXME: mirroring for MIDI buffers?
 MidiBuffer::MidiBuffer(size_t capacity)
-	: Buffer(DataType::MIDI, capacity)
-	, _data(0)
+	: Buffer (DataType::MIDI)
+	, _data (0)
 {
 	if (capacity) {
-		resize(_capacity);
-		silence(_capacity);
+		resize (capacity);
+		silence (capacity);
 	}
 }
 
@@ -50,17 +50,22 @@ MidiBuffer::~MidiBuffer()
 void
 MidiBuffer::resize(size_t size)
 {
-	assert(size > 0);
+	if (_data && size < _capacity) {
 
-	if (size < _capacity) {
+		if (_size < size) {
+			/* truncate */
+			_size = size;
+		}
+
 		return;
 	}
 
-	free(_data);
+	free (_data);
+
+	cache_aligned_malloc ((void**) &_data, size);
 
 	_size = 0;
 	_capacity = size;
-	cache_aligned_malloc ((void**) &_data, _capacity);
 
 	assert(_data);
 }

@@ -20,7 +20,6 @@
 #ifndef __midi_types_h__
 #define __midi_types_h__
 
-#include <jack/jack.h>
 #include <inttypes.h>
 
 #include "midi++/libmidi_visibility.h"
@@ -34,8 +33,8 @@ namespace MIDI {
 	typedef uint32_t       timestamp_t;
 
 	/** XXX: dupes from libardour */
-	typedef int64_t        framecnt_t;
-	typedef jack_nframes_t pframes_t;
+	typedef int64_t  framecnt_t;
+	typedef uint32_t pframes_t;
 
 	enum eventType {
 	    none = 0x0,

@@ -52,8 +52,6 @@ class LIBARDOUR_API MidiControlUI : public AbstractUI<MidiUIRequest>
 
 	static MidiControlUI* instance() { return _instance; }
 
-	static BaseUI::RequestType PortChange;
-
 	void change_midi_ports ();
 
   protected:
@@ -64,7 +62,6 @@ class LIBARDOUR_API MidiControlUI : public AbstractUI<MidiUIRequest>
 	typedef std::list<GSource*> PortSources;
 	PortSources port_sources;
 	ARDOUR::Session& _session;
-	PBD::ScopedConnection rebind_connection;
 
 	bool midi_input_handler (Glib::IOCondition, AsyncMIDIPort*);
 	void reset_ports ();

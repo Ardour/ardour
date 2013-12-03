@@ -155,11 +155,11 @@ JACKAudioBackend::enumerate_devices () const
 }
 
 vector<float>
-JACKAudioBackend::available_sample_rates (const string& /*device*/) const
+JACKAudioBackend::available_sample_rates (const string& device) const
 {
 	vector<float> f;
 	
-	if (available()) {
+	if (device == _target_device && available()) {
 		f.push_back (sample_rate());
 		return f;
 	}
@@ -183,11 +183,11 @@ JACKAudioBackend::available_sample_rates (const string& /*device*/) const
 }
 
 vector<uint32_t>
-JACKAudioBackend::available_buffer_sizes (const string& /*device*/) const
+JACKAudioBackend::available_buffer_sizes (const string& device) const
 {
 	vector<uint32_t> s;
-	
-	if (available()) {
+		
+	if (device == _target_device && available()) {
 		s.push_back (buffer_size());
 		return s;
 	}
@@ -509,6 +509,7 @@ JACKAudioBackend::setup_jack_startup_command (bool for_latency_measurement)
 		/* error, somehow - we will still try to start JACK
 		 * automatically but it will be without our preferred options
 		 */
+		std::cerr << "get_jack_command_line_string () failed: using default settings." << std::endl;
 		return;
 	}
 
@@ -546,8 +547,11 @@ JACKAudioBackend::_start (bool for_latency_measurement)
 	/* Now that we have buffer size and sample rate established, the engine 
 	   can go ahead and do its stuff
 	*/
-	
-	engine.reestablish_ports ();
+
+	if (engine.reestablish_ports ()) {
+		error << _("Could not re-establish ports after connecting to JACK") << endmsg;
+		return -1;
+	}
 
 	if (!jack_port_type_get_buffer_size) {
 		warning << _("This version of JACK is old - you should upgrade to a newer version that supports jack_port_type_get_buffer_size()") << endmsg;
@@ -577,18 +581,6 @@ JACKAudioBackend::stop ()
 	_current_sample_rate = 0;
 
 	_raw_buffer_sizes.clear();
-
-	return 0;
-}
-
-int
-JACKAudioBackend::pause ()
-{
-	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
-
-	if (_priv_jack) {
-		jack_deactivate (_priv_jack);
-	}
 
 	return 0;
 }
@@ -1130,4 +1122,47 @@ JACKAudioBackend::set_midi_option (const string& opt)
 {
 	_target_midi_option = opt;
 	return 0;
+}
+
+bool
+JACKAudioBackend::speed_and_position (double& speed, framepos_t& position)
+{
+	jack_position_t pos;
+	jack_transport_state_t state;
+	bool starting;
+
+	/* this won't be called if the port engine in use is not JACK, so we do 
+	   not have to worry about the type of PortEngine::private_handle()
+	*/
+
+	speed = 0;
+	position = 0;
+
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, true);
+
+	state = jack_transport_query (_priv_jack, &pos);
+
+	switch (state) {
+	case JackTransportStopped:
+		speed = 0;
+		starting = false;
+		break;
+	case JackTransportRolling:
+		speed = 1.0;
+		starting = false;
+		break;
+	case JackTransportLooping:
+		speed = 1.0;
+		starting = false;
+		break;
+	case JackTransportStarting:
+		starting = true;
+		// don't adjust speed here, just leave it as it was
+		break;
+	default:
+		std::cerr << "WARNING: Unknown JACK transport state: " << state << std::endl;
+	}
+
+	position = pos.frame;
+	return starting;
 }

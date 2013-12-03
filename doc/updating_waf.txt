@@ -1,5 +1,5 @@
 Download waf (http://code.google.com/p/waf/)
-Download autowaf (http://svn.drobilla.net/autowaf)
+autowaf.py is present in the tools directory of the Ardour source code.
 
 From within the waf source tree, run:
 

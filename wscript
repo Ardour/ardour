@@ -7,10 +7,42 @@ import string
 import subprocess
 import sys
 
-MAJOR = '3'
-MINOR = '5'
-VERSION = MAJOR + '.' + MINOR
+def fetch_git_revision ():
+    cmd = "git describe HEAD"
+    output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
+    rev = output[0].decode ('utf-8')
+    return rev
 
+def fetch_tarball_revision ():
+    if not os.path.exists ('libs/ardour/revision.cc'):
+        print 'This tarball was not created correctly - it is missing libs/ardour/revision.cc'
+        sys.exit (1)
+    with open('libs/ardour/revision.cc') as f:
+        content = f.readlines()
+        remove_punctuation_map = dict((ord(char), None) for char in '";')
+        return content[1].decode('utf-8').strip().split(' ')[7].translate (remove_punctuation_map)
+
+if os.path.isdir (os.path.join(os.getcwd(), '.git')):
+    rev = fetch_git_revision ()
+else:
+    rev = fetch_tarball_revision ()
+
+#
+# rev is now of the form MAJOR.MINOR-rev-commit
+#
+
+parts = rev.split ('.')
+MAJOR = parts[0]
+other = parts[1].split ('-')
+MINOR = other[0]
+MICRO = other[1]
+
+V = MAJOR + '.' + MINOR + '.' + MICRO
+#
+# it is important that VERSION *not* be unicode string
+# because if it is, it breaks waf somehow.
+#
+VERSION = V.encode ('ascii', 'ignore')
 APPNAME = 'Ardour' + MAJOR
 
 # Mandatory variables
@@ -35,6 +67,7 @@ children = [
         'libs/gtkmm2ext',
         'libs/clearlooks-newer',
         'libs/audiographer',
+        'libs/plugins/reasonablesynth.lv2',
         'gtk2_ardour',
         'export',
         'midi_maps',
@@ -66,17 +99,11 @@ def fetch_gcc_version (CC):
     version = o.split(' ')[2].split('.')
     return version
 
-def fetch_git_revision ():
-    cmd = "git describe --tags HEAD"
-    output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
-    rev = output[0].decode('utf-8')
-    return rev
-
 def create_stored_revision():
     rev = ""
     if os.path.exists('.git'):
         rev = fetch_git_revision();
-        print("ardour.git version: " + rev + "\n")
+        print("Git version: " + rev + "\n")
     elif os.path.exists('libs/ardour/revision.cc'):
         print("Using packaged revision")
         return
@@ -85,6 +112,10 @@ def create_stored_revision():
         sys.exit(-1)
 
     try:
+        #
+        # if you change the format of this, be sure to fix fetch_tarball_revision() above
+        # so that  it still works.
+        #
         text =  '#include "ardour/revision.h"\n'
         text += 'namespace ARDOUR { const char* revision = \"%s\"; }\n' % rev
         print('Writing revision info to libs/ardour/revision.cc using ' + rev)
@@ -302,13 +333,22 @@ def set_compiler_flags (conf,opt):
     # prepend boiler plate optimization flags that work on all architectures
     #
 
-    optimization_flags[:0] = [
-            "-O3",
-            "-fomit-frame-pointer",
-            "-ffast-math",
-            "-fstrength-reduce",
-            "-pipe"
-            ]
+    optimization_flags[:0] = ["-pipe"]
+
+    # don't prepend optimization flags if "-O<something>" is present
+    prepend_opt_flags = True
+    for flag in optimization_flags:
+        if flag.startswith("-O"):
+            prepend_opt_flags = False
+            break
+
+    if prepend_opt_flags:
+        optimization_flags[:0] = [
+                "-O3",
+                "-fomit-frame-pointer",
+                "-ffast-math",
+                "-fstrength-reduce"
+                ]
 
     if opt.debug:
         conf.env.append_value('CFLAGS', debug_flags)
@@ -427,6 +467,8 @@ def options(opt):
                    help='Build internal libs as shared libraries')
     opt.add_option('--internal-static-libs', action='store_false', dest='internal_shared_libs',
                    help='Build internal libs as static libraries')
+    opt.add_option('--use-external-libs', action='store_true', default=False, dest='use_external_libs',
+                   help='Use external/system versions of some bundled libraries')
     opt.add_option('--lv2', action='store_true', default=True, dest='lv2',
                     help='Compile with support for LV2 (if Lilv+Suil is available)')
     opt.add_option('--no-lv2', action='store_false', dest='lv2',
@@ -599,6 +641,9 @@ def configure(conf):
     if Options.options.internal_shared_libs: 
         conf.define('INTERNAL_SHARED_LIBS', 1)
 
+    if Options.options.use_external_libs:
+        conf.define('USE_EXTERNAL_LIBS', 1)
+
     if Options.options.boost_include != '':
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.boost_include)
 
@@ -699,6 +744,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Install prefix',        conf.env['PREFIX'])
     write_config_text('Strict compiler flags', conf.env['STRICT'])
     write_config_text('Internal Shared Libraries', conf.is_defined('INTERNAL_SHARED_LIBS'))
+    write_config_text('Use External Libraries', conf.is_defined('USE_EXTERNAL_LIBS'))
 
     write_config_text('Architecture flags',    opts.arch)
     write_config_text('Aubio',                 conf.is_defined('HAVE_AUBIO'))
@@ -744,14 +790,17 @@ def build(bld):
     # add directories that contain only headers, to workaround an issue with waf
 
     bld.path.find_dir ('libs/evoral/evoral')
-    bld.path.find_dir ('libs/vamp-sdk/vamp-sdk')
+    if not bld.is_defined('USE_EXTERNAL_LIBS'):
+        bld.path.find_dir ('libs/vamp-sdk/vamp-sdk')
     bld.path.find_dir ('libs/surfaces/control_protocol/control_protocol')
     bld.path.find_dir ('libs/timecode/timecode')
-    bld.path.find_dir ('libs/libltc/ltc')
-    bld.path.find_dir ('libs/rubberband/rubberband')
+    if not bld.is_defined('USE_EXTERNAL_LIBS'):
+        bld.path.find_dir ('libs/libltc/ltc')
+        bld.path.find_dir ('libs/rubberband/rubberband')
     bld.path.find_dir ('libs/gtkmm2ext/gtkmm2ext')
     bld.path.find_dir ('libs/ardour/ardour')
-    bld.path.find_dir ('libs/taglib/taglib')
+    if not bld.is_defined('USE_EXTERNAL_LIBS'):
+        bld.path.find_dir ('libs/taglib/taglib')
     bld.path.find_dir ('libs/pbd/pbd')
 
     autowaf.set_recursive()

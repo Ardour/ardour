@@ -2266,6 +2266,8 @@ RouteTimeAxisView::meter_changed ()
 	if (_route && !no_redraw) {
 		request_redraw ();
 	}
+	// reset peak when meter point changes
+	gm.reset_peak_display();
 }
 
 void

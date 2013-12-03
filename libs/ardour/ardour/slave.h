@@ -25,11 +25,11 @@
 #include <glibmm/threads.h>
 
 #include <jack/jack.h>
+#include <ltc/ltc.h>
 
 #include "pbd/signals.h"
 
 #include "timecode/time.h"
-#include "ltc/ltc.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"

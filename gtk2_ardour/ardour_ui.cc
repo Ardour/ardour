@@ -101,6 +101,7 @@ typedef uint64_t microseconds_t;
 #include "missing_plugin_dialog.h"
 #include "mixer_ui.h"
 #include "mouse_cursors.h"
+#include "nsm.h"
 #include "opts.h"
 #include "pingback.h"
 #include "processor_box.h"
@@ -717,7 +718,7 @@ int
 ARDOUR_UI::starting ()
 {
 	Application* app = Application::instance ();
-	char *nsm_url;
+	const char *nsm_url;
 	bool brand_new_user = ArdourStartup::required ();
 
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
@@ -729,9 +730,17 @@ ARDOUR_UI::starting ()
 
 	app->ready ();
 
-	nsm_url = getenv ("NSM_URL");
+	/* we need to create this early because it may need to set the
+	 *  audio backend end up.
+	 */
+	
+	try {
+		audio_midi_setup.get (true);
+	} catch (...) {
+		return -1;
+	}
 
-	if (nsm_url) {
+	if ((nsm_url = g_getenv ("NSM_URL")) != 0) {
 		nsm = new NSM_Client;
 		if (!nsm->init (nsm_url)) {
 			nsm->announce (PROGRAM_NAME, ":dirty:", "ardour3");
@@ -741,19 +750,33 @@ ARDOUR_UI::starting ()
 			for ( i = 0; i < 5000; ++i) {
 				nsm->check ();
 				usleep (i);
-				if (nsm->is_active())
+				if (nsm->is_active()) {
 					break;
+				}
+			}
+			if (i == 5000) {
+				error << _("NSM server did not announce itself") << endmsg;
+				return -1;
 			}
 			// wait for open command from nsm server
 			for ( i = 0; i < 5000; ++i) {
 				nsm->check ();
 				usleep (1000);
-				if (nsm->client_id ())
+				if (nsm->client_id ()) {
 					break;
+				}
+			}
+
+			if (i == 5000) {
+				error << _("NSM: no client ID provided") << endmsg;
+				return -1;
 			}
 
 			if (_session && nsm) {
 				_session->set_nsm_state( nsm->is_active() );
+			} else {
+				error << _("NSM: no session created") << endmsg;
+				return -1;
 			}
 
 			// nsm requires these actions disabled
@@ -772,10 +795,11 @@ ARDOUR_UI::starting ()
 				}
 			}
 
-		}
-		else {
+		} else {
 			delete nsm;
 			nsm = 0;
+			error << _("NSM: initialization failed") << endmsg;
+			return -1;
 		}
 
 	} else  {
@@ -791,16 +815,6 @@ ARDOUR_UI::starting ()
 			default:
 				return -1;
 			}
-		}
-
-		/* we need to create this early because it may need to set the
-		 *  audio backend end up.
-		 */
-
-		try {
-			audio_midi_setup.get (true);
-		} catch (...) {
-			return -1;
 		}
 
 		/* go get a session */
@@ -825,13 +839,6 @@ ARDOUR_UI::starting ()
 
 	BootMessage (string_compose (_("%1 is ready for use"), PROGRAM_NAME));
 	return 0;
-}
-
-void
-ARDOUR_UI::no_memory_warning ()
-{
-	XMLNode node (X_("no-memory-warning"));
-	Config->add_instant_xml (node);
 }
 
 void
@@ -890,9 +897,6 @@ ARDOUR_UI::check_memory_locking ()
 				VBox* vbox = msg.get_vbox();
 				HBox hbox;
 				CheckButton cb (_("Do not show this window again"));
-
-				cb.signal_toggled().connect (sigc::mem_fun (*this, &ARDOUR_UI::no_memory_warning));
-				
 				hbox.pack_start (cb, true, false);
 				vbox->pack_start (hbox);
 				cb.show();
@@ -903,6 +907,11 @@ ARDOUR_UI::check_memory_locking ()
 
 				editor->ensure_float (msg);
 				msg.run ();
+
+				if (cb.get_active()) {
+					XMLNode node (X_("no-memory-warning"));
+					Config->add_instant_xml (node);
+				}
 			}
 		}
 	}
@@ -2181,8 +2190,13 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 
 	prompter.set_name ("Prompter");
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
-	prompter.set_title (_("Take Snapshot"));
-	prompter.set_prompt (_("Name of new snapshot"));
+	if (switch_to_it) {
+		prompter.set_title (_("Save as..."));
+		prompter.set_prompt (_("New session name"));
+	} else {
+		prompter.set_title (_("Take Snapshot"));
+		prompter.set_prompt (_("Name of new snapshot"));
+	}
 
 	if (!switch_to_it) {
 		char timebuf[128];
@@ -3227,6 +3241,57 @@ ARDOUR_UI::flush_trash ()
 }
 
 void
+ARDOUR_UI::setup_order_hint ()
+{
+	uint32_t order_hint = 0;
+
+	/*
+	  we want the new routes to have their order keys set starting from 
+	  the highest order key in the selection + 1 (if available).
+	*/
+	if (add_route_dialog->get_transient_for () == mixer->get_toplevel()) {
+		for (RouteUISelection::iterator s = mixer->selection().routes.begin(); s != mixer->selection().routes.end(); ++s) {
+			if ((*s)->route()->order_key() > order_hint) {
+				order_hint = (*s)->route()->order_key();
+			}
+		}
+
+		if (!mixer->selection().routes.empty()) {
+			order_hint++;
+		}
+
+	} else {
+		for (TrackSelection::iterator s = editor->get_selection().tracks.begin(); s != editor->get_selection().tracks.end(); ++s) {
+			RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (*s);
+			if (tav->route()->order_key() > order_hint) {
+				order_hint = tav->route()->order_key();
+			}
+		}
+
+		if (!editor->get_selection().tracks.empty()) {
+			order_hint++;
+		}
+	}
+
+	_session->set_order_hint (order_hint);
+
+	/* create a gap in the existing route order keys to accomodate new routes.*/
+
+	boost::shared_ptr <RouteList> rd = _session->get_routes();
+	for (RouteList::iterator ri = rd->begin(); ri != rd->end(); ++ri) {
+		boost::shared_ptr<Route> rt (*ri);
+			
+		if (rt->is_monitor()) {
+			continue;
+		}
+
+		if (rt->order_key () >= order_hint) {
+			rt->set_order_key (rt->order_key () + add_route_dialog->count());
+		}
+	}
+}
+
+void
 ARDOUR_UI::add_route (Gtk::Window* float_window)
 {
 	int count;
@@ -3241,6 +3306,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	}
 
 	if (float_window) {
+		add_route_dialog->unset_transient_for ();
 		add_route_dialog->set_transient_for (*float_window);
 	}
 
@@ -3259,6 +3325,8 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	if ((count = add_route_dialog->count()) <= 0) {
 		return;
 	}
+
+	setup_order_hint();
 
 	PBD::ScopedConnection idle_connection;
 
@@ -3737,8 +3805,8 @@ ARDOUR_UI::session_dialog (std::string msg)
 int
 ARDOUR_UI::pending_state_dialog ()
 {
- 	HBox* hbox = new HBox();
-	Image* image = new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG);
+	HBox* hbox = manage (new HBox());
+	Image* image = manage (new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG));
 	ArdourDialog dialog (_("Crash Recovery"), true);
 	Label  message (string_compose (_("\
 This session appears to have been in the\n\

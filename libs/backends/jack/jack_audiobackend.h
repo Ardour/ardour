@@ -89,9 +89,7 @@ class JACKAudioBackend : public AudioBackend {
     std::string control_app_name () const;
     void launch_control_app ();
 
-    int _start (bool for_latency_measurement);
     int stop ();
-    int pause ();
     int freewheel (bool);
 
     float cpu_load() const;
@@ -127,7 +125,7 @@ class JACKAudioBackend : public AudioBackend {
 
     int         set_port_name (PortHandle, const std::string&);
     std::string get_port_name (PortHandle) const;
-    PortHandle* get_port_by_name (const std::string&) const;
+    PortHandle  get_port_by_name (const std::string&) const;
 
     int get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>&) const;
 
@@ -182,6 +180,10 @@ class JACKAudioBackend : public AudioBackend {
     /* Getting access to the data buffer for a port */
 
     void* get_buffer (PortHandle, pframes_t);
+
+    /* transport sync */
+
+    bool speed_and_position (double& sp, framepos_t& pos);
 
   private:
     boost::shared_ptr<JackConnection>  _jack_connection;
@@ -269,6 +271,9 @@ class JACKAudioBackend : public AudioBackend {
     */
 
     JACKSession* _session;
+
+  protected:
+    int _start (bool for_latency_measurement);
 };
 
 } // namespace

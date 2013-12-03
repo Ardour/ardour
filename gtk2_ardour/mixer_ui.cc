@@ -96,7 +96,7 @@ Mixer_UI::Mixer_UI ()
 	/* allow this window to become the key focus window */
 	set_flags (CAN_FOCUS);
 
-	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::sync_treeview_from_order_keys, this, _1), gui_context());
+	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::sync_treeview_from_order_keys, this), gui_context());
 
 	scroller.set_can_default (true);
 	set_default (scroller);
@@ -313,6 +313,22 @@ Mixer_UI::hide_window (GdkEventAny *ev)
 void
 Mixer_UI::add_strips (RouteList& routes)
 {
+	bool from_scratch = track_model->children().size() == 0;
+	Gtk::TreeModel::Children::iterator insert_iter = track_model->children().end();
+
+	for (Gtk::TreeModel::Children::iterator it = track_model->children().begin(); it != track_model->children().end(); ++it) {
+		boost::shared_ptr<Route> r = (*it)[track_columns.route];
+
+		if (r->order_key() == (routes.front()->order_key() + routes.size())) {
+			insert_iter = it;
+			break;
+		}
+	}
+
+	if(!from_scratch) {
+		_selection.clear_routes ();
+	}
+
 	MixerStrip* strip;
 
 	try {
@@ -359,11 +375,15 @@ Mixer_UI::add_strips (RouteList& routes)
 			
 			show_strip (strip);
 			
-			TreeModel::Row row = *(track_model->append());
+			TreeModel::Row row = *(track_model->insert(insert_iter));
 			row[track_columns.text] = route->name();
 			row[track_columns.visible] = strip->route()->is_master() ? true : strip->marked_for_display();
 			row[track_columns.route] = route;
 			row[track_columns.strip] = strip;
+
+			if (!from_scratch) {
+				_selection.add (strip);
+			}
 			
 			route->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::strip_property_changed, this, _1, strip), gui_context());
 			
@@ -408,7 +428,7 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 void
 Mixer_UI::reset_remote_control_ids ()
 {
-	if (Config->get_remote_model() != MixerOrdered || !_session || _session->deletion_in_progress()) {
+	if (Config->get_remote_model() == UserOrdered || !_session || _session->deletion_in_progress()) {
 		return;
 	}
 
@@ -434,7 +454,7 @@ Mixer_UI::reset_remote_control_ids ()
 			uint32_t new_rid = (visible ? rid : invisible_key--);
 			
 			if (new_rid != route->remote_control_id()) {
-				route->set_remote_control_id_from_order_key (MixerSort, new_rid);	
+				route->set_remote_control_id_explicit (new_rid);	
 				rid_change = true;
 			}
 			
@@ -476,10 +496,10 @@ Mixer_UI::sync_order_keys_from_treeview ()
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
 		bool visible = (*ri)[track_columns.visible];
 
-		uint32_t old_key = route->order_key (MixerSort);
+		uint32_t old_key = route->order_key ();
 
 		if (order != old_key) {
-			route->set_order_key (MixerSort, order);
+			route->set_order_key (order);
 			changed = true;
 		}
 
@@ -488,7 +508,7 @@ Mixer_UI::sync_order_keys_from_treeview ()
 			uint32_t new_rid = (visible ? rid : invisible_key--);
 
 			if (new_rid != route->remote_control_id()) {
-				route->set_remote_control_id_from_order_key (MixerSort, new_rid);	
+				route->set_remote_control_id_explicit (new_rid);	
 				rid_change = true;
 			}
 			
@@ -503,7 +523,7 @@ Mixer_UI::sync_order_keys_from_treeview ()
 
 	if (changed) {
 		/* tell everyone that we changed the mixer sort keys */
-		_session->sync_order_keys (MixerSort);
+		_session->sync_order_keys ();
 	}
 
 	if (rid_change) {
@@ -513,33 +533,13 @@ Mixer_UI::sync_order_keys_from_treeview ()
 }
 
 void
-Mixer_UI::sync_treeview_from_order_keys (RouteSortOrderKey src)
+Mixer_UI::sync_treeview_from_order_keys ()
 {
 	if (!_session || _session->deletion_in_progress()) {
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("mixer sync model from order keys, src = %1\n", enum_2_string (src)));
-
-	if (src == EditorSort) {
-
-		if (!Config->get_sync_all_route_ordering()) {
-			/* editor sort keys changed - we don't care */
-			return;
-		}
-
-		DEBUG_TRACE (DEBUG::OrderKeys, "reset mixer order key to match editor\n");
-
-		/* editor sort keys were changed, update the mixer sort
-		 * keys since "sync mixer+editor order" is enabled.
-		 */
-
-		boost::shared_ptr<RouteList> r = _session->get_routes ();
-		
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			(*i)->sync_order_keys (src);
-		}
-	}
+	DEBUG_TRACE (DEBUG::OrderKeys, "mixer sync model from order keys.\n");
 
 	/* we could get here after either a change in the Mixer or Editor sort
 	 * order, but either way, the mixer order keys reflect the intended
@@ -559,7 +559,7 @@ Mixer_UI::sync_treeview_from_order_keys (RouteSortOrderKey src)
 
 	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
-		sorted_routes.push_back (RoutePlusOrderKey (route, old_order, route->order_key (MixerSort)));
+		sorted_routes.push_back (RoutePlusOrderKey (route, old_order, route->order_key ()));
 	}
 
 	SortByNewDisplayOrder cmp;
@@ -1100,7 +1100,7 @@ struct SignalOrderRouteSorter {
 		    /* everything comes before b */
 		    return true;
 	    }
-	    return a->order_key (MixerSort) < b->order_key (MixerSort);
+	    return a->order_key () < b->order_key ();
 
     }
 };
@@ -1122,7 +1122,7 @@ Mixer_UI::initial_track_display ()
 		add_strips (copy);
 	}
 	
-	_session->sync_order_keys (MixerSort);
+	_session->sync_order_keys ();
 
 	redisplay_track_list ();
 }

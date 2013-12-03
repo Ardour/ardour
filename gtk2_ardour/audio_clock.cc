@@ -620,6 +620,9 @@ AudioClock::end_edit (bool modify)
 			break;
 
 		case Frames:
+			if (edit_string.length() < 1) {
+				edit_string = pre_edit_string;
+			}
 			break;
 		}
 

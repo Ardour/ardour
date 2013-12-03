@@ -17,13 +17,13 @@ def configure(conf):
 def build(bld):
     bld (export_includes = ['.'],
          includes        = ['.'],
-         name            = 'timecode_includes'
+         name            = 'libtimecode_includes'
          )
 
     bld.stlib (cxxflags = [ '-fPIC' ],
                source   = [ 'src/time.cc', 'src/bbt_time.cc' ],
-               target   = 'timecode',
-               use      = 'timecode_includes'
+               target   = 'libtimecode',
+               use      = 'libtimecode_includes'
                )
 
 def shutdown():

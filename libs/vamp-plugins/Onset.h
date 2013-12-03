@@ -17,7 +17,7 @@
 #ifndef _ONSET_PLUGIN_H_
 #define _ONSET_PLUGIN_H_
 
-#include "vamp-sdk/Plugin.h"
+#include <vamp-sdk/Plugin.h>
 #include <aubio/aubio.h>
 
 class Onset : public Vamp::Plugin

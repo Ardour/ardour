@@ -7,10 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-10-15 21:33+0400\n"
+"POT-Creation-Date: 2013-11-05 11:11-0500\n"
 "PO-Revision-Date: 2013-10-15 21:54+0300\n"
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -96,42 +97,3 @@ msgstr "Щелкните, чтобы превратить это плавающ�
 #: textviewer.cc:34
 msgid "Close"
 msgstr "Закрыть"
-
-#~ msgid ""
-#~ "\n"
-#~ "\n"
-#~ "Key: "
-#~ msgstr ""
-#~ "\n"
-#~ "\n"
-#~ "Клавиша: "
-
-#~ msgid "OK"
-#~ msgstr "ОК"
-
-#~ msgid "Location:"
-#~ msgstr "Путь:"
-
-#~ msgid "Browse ..."
-#~ msgstr "Обзор ..."
-
-#~ msgid "Cancel"
-#~ msgstr "Отмена"
-
-#~ msgid "New folder"
-#~ msgstr "Новая папка"
-
-#~ msgid "Add to favorites"
-#~ msgstr "Добавить в избранное"
-
-#~ msgid "Remove from favorites"
-#~ msgstr "Исключить из избранного"
-
-#~ msgid "Show Hidden"
-#~ msgstr "Показывать скрытые файлы"
-
-#~ msgid "Hide browser"
-#~ msgstr "Скрыть область обзора"
-
-#~ msgid "Rescan"
-#~ msgstr "Обновить"

@@ -663,23 +663,6 @@ AudioEngine::stop (bool for_latency)
 }
 
 int
-AudioEngine::pause ()
-{
-	if (!_backend) {
-		return 0;
-	}
-	
-	if (_backend->pause ()) {
-		return -1;
-	}
-
-	_running = false;
-	
-	Stopped(); /* EMIT SIGNAL */
-	return 0;
-}
-
-int
 AudioEngine::freewheel (bool start_stop)
 {
 	if (!_backend) {
@@ -1082,8 +1065,8 @@ AudioEngine::start_latency_detection ()
 
 	/* find the ports we will connect to */
 
-	PortEngine::PortHandle* out = pe.get_port_by_name (_latency_output_name);
-	PortEngine::PortHandle* in = pe.get_port_by_name (_latency_input_name);
+	PortEngine::PortHandle out = pe.get_port_by_name (_latency_output_name);
+	PortEngine::PortHandle in = pe.get_port_by_name (_latency_input_name);
 
 	if (!out || !in) {
 		stop (true);
