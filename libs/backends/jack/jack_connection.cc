@@ -21,6 +21,8 @@
 #include <boost/scoped_ptr.hpp>
 #include <jack/session.h>
 
+#include <glibmm/timer.h>
+
 #include "pbd/epa.h"
 
 #include "jack_connection.h"
@@ -145,11 +147,7 @@ JackConnection::close ()
 		_jack = 0;
 
 		/* If we started JACK, it will be closing down */
-#ifdef PLATFORM_WINDOWS
-		Sleep(500);
-#else
-		usleep (500000);
-#endif
+		Glib::usleep (500000);
 
 		Disconnected (""); /* EMIT SIGNAL */
 
