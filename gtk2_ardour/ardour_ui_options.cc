@@ -401,14 +401,15 @@ ARDOUR_UI::parameter_changed (std::string p)
 		start_clocking ();
 	} else if (p == "show-editor-meter") {
 		bool show = Config->get_show_editor_meter();
+
+		transport_tearoff_hbox.remove (meter_box);
+		transport_tearoff_hbox.remove (editor_meter_peak_display);
+
 		if (editor_meter && show) {
 			transport_tearoff_hbox.pack_start (meter_box, false, false);
 			transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
 			meter_box.show();
 			editor_meter_peak_display.show();
-		} else if (editor_meter && !show && meter_box.get_parent()) {
-			transport_tearoff_hbox.remove (meter_box);
-			transport_tearoff_hbox.remove (editor_meter_peak_display);
 		}
 	}
 }
