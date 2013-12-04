@@ -86,7 +86,7 @@ public:
     int            start (bool for_latency_measurement=false);
     int            stop (bool for_latency_measurement=false);
     int            freewheel (bool start_stop);
-    float          get_cpu_load() const ;
+    float          get_dsp_load() const ;
     void           transport_start ();
     void           transport_stop ();
     TransportState transport_state ();
