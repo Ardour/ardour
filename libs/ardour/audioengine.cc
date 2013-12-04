@@ -673,12 +673,12 @@ AudioEngine::freewheel (bool start_stop)
 }
 
 float
-AudioEngine::get_cpu_load() const 
+AudioEngine::get_dsp_load() const 
 {
 	if (!_backend) {
 		return 0.0;
 	}
-	return _backend->cpu_load ();
+	return _backend->dsp_load ();
 }
 
 bool

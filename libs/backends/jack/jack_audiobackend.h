@@ -92,7 +92,7 @@ class JACKAudioBackend : public AudioBackend {
     int stop ();
     int freewheel (bool);
 
-    float cpu_load() const;
+    float dsp_load() const;
 
     pframes_t sample_time ();
     pframes_t sample_time_at_cycle_start ();
