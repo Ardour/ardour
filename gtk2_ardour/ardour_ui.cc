@@ -1213,7 +1213,7 @@ ARDOUR_UI::update_cpu_load ()
 	   should also be changed.
 	*/
 
-	float const c = AudioEngine::instance()->get_cpu_load ();
+	float const c = AudioEngine::instance()->get_dsp_load ();
 	snprintf (buf, sizeof (buf), _("DSP: <span foreground=\"%s\">%5.1f%%</span>"), c >= 90 ? X_("red") : X_("green"), c);
 	cpu_load_label.set_markup (buf);
 }
