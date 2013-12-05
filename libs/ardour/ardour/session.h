@@ -36,7 +36,7 @@
 
 #include <glibmm/threads.h>
 
-#include <ltc/ltc.h>
+#include <ltc.h>
 
 #include "pbd/error.h"
 #include "pbd/event_loop.h"
