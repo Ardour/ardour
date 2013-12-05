@@ -3,6 +3,7 @@ from waflib.extras import autowaf as autowaf
 from waflib import Options, TaskGen
 import waflib.Logs as Logs, waflib.Utils as Utils
 import os
+import shutil
 import sys
 import re
 import time
@@ -364,6 +365,11 @@ def build_color_scheme(path, prefix):
     f.close()
     return color_scheme
 
+def copyfile (task):
+    src = task.inputs[0].abspath()
+    tgt = task.outputs[0].abspath()
+    shutil.copy2 (src, tgt)
+
 def build(bld):
 
     VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
@@ -638,7 +644,7 @@ def build(bld):
     obj.install_path = None
     set_subst_dict(obj, light_rc_subst_dict)
 
-    obj              = bld(rule = 'cp ${SRC} ${TGT}')
+    obj              = bld(rule = copyfile) 
     obj.source       = [ 'ardour3_widget_list.rc' ]
     obj.target       = 'ardour3_widgets.rc'
     obj.install_path = None
@@ -680,11 +686,15 @@ def build(bld):
     # 'SAE-de-keypad', 'SAE-de-nokeypad', 'SAE-us-keypad',
     # 'SAE-us-nokeypad', 'ergonomic-us'
 
+    #
+    # explicitly state the use of perl here so that it works on windows too
+    # 
+    a_rule = 'perl ../tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap <${SRC} >${TGT}' % (sys.platform, bld.env['WINDOWS_KEY'] )
     for b in [ 'mnemonic-us' ] :
         obj = bld(
             target = b + '.bindings',
             source = b + '.bindings.in',
-            rule = '../tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap <${SRC} >${TGT}' % (sys.platform, bld.env['WINDOWS_KEY'] )
+            rule = a_rule
             )
         obj.install_path = os.path.join(bld.env['SYSCONFDIR'], 'ardour3')
 
