@@ -32,14 +32,13 @@
 #include "ardour/types.h"
 #include "ardour/audioengine.h"
 #include "ardour/port_engine.h"
-#include "ardour/visibility.h"
 
 #ifdef ARDOURBACKEND_DLL_EXPORTS // defined if we are building the ARDOUR Panners DLLs (instead of using them)
-    #define ARDOURBACKEND_API LIBARDOUR_HELPER_DLL_EXPORT
+    #define ARDOURBACKEND_API LIBARDOUR_DLL_EXPORT
 #else
-    #define ARDOURBACKEND_API LIBARDOUR_HELPER_DLL_IMPORT
+    #define ARDOURBACKEND_API LIBARDOUR_DLL_IMPORT
 #endif 
-#define ARDOURBACKEND_LOCAL LIBARDOUR_HELPER_DLL_LOCAL
+#define ARDOURBACKEND_LOCAL LIBARDOUR_DLL_LOCAL
 
 namespace ARDOUR {
 
