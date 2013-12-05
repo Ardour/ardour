@@ -30,6 +30,15 @@
 #define STDERR_FILENO 2
 #endif
 
+#if defined (__MINGW64__)
+#include <windows.h>
+
+#ifdef interface
+#undef interface // VKamyshniy: to avoid "include/giomm-2.4/giomm/dbusmessage.h:270:94: error: expected ',' or '...' before 'struct'"
+#endif
+
+#endif
+
 #include <string>
 #include <pthread.h>
 #include <signal.h>
