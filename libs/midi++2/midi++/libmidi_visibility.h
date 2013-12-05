@@ -20,12 +20,7 @@
 #ifndef __libmidi_libmidi_visibility_h__
 #define __libmidi_libmidi_visibility_h__
 
-/* _WIN32 is defined by most compilers targetting Windows, but within the
- * midi source tree, we also define COMPILER_MSVC or COMPILER_MINGW depending
- * on how a Windows build is built.
- */
-
-#if defined _WIN32 || defined __CYGWIN__ || defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
+#if defined(COMPILER_MSVC)
   #define LIBMIDIPP_DLL_IMPORT __declspec(dllimport)
   #define LIBMIDIPP_DLL_EXPORT __declspec(dllexport)
   #define LIBMIDIPP_DLL_LOCAL

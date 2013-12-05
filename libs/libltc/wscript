@@ -38,13 +38,13 @@ def configure(conf):
 def build(bld):
     if bld.is_defined('USE_EXTERNAL_LIBS'):
         return
-    bld (export_includes = ['.'],
-         includes     = ['.'],
+    bld (export_includes = ['ltc'],
          name = 'libltc_includes'
          )
 
     bld.stlib (source = ['ltc.c', 'timecode.c', 'encoder.c', 'decoder.c'],
                cflags = [ '-fPIC' ],
+               includes = ['.'],
                target = 'libltc',
                use    = 'libltc_includes'
                )

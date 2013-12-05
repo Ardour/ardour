@@ -36,7 +36,7 @@
 
 #include <glibmm/threads.h>
 
-#include <ltc/ltc.h>
+#include <ltc.h>
 
 #include "pbd/error.h"
 #include "pbd/event_loop.h"
@@ -141,7 +141,7 @@ class WindowsVSTPlugin;
 
 extern void setup_enum_writer ();
 
-class LIBARDOUR_API LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager
+class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager
 {
   public:
 	enum RecordState {

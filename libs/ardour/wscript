@@ -341,15 +341,14 @@ def build(bld):
                         'OSX','BOOST','CURL','DL']
     obj.use          = ['libpbd','libmidipp','libevoral', 'libvampplugin',
                         'libaudiographer', 
-                        'libltc_includes',
-                        'libltc',
                         'libtimecode_includes',
                         ]
     if bld.is_defined('USE_EXTERNAL_LIBS'):
-        obj.uselib.extend(['RUBBERBAND', 'TAGLIB', 'VAMPSDK',
+        obj.uselib.extend(['RUBBERBAND', 'TAGLIB', 'VAMPSDK', 'LIBLTC',
                            'VAMPHOSTSDK'])
     else:
-        obj.use.extend(['librubberband', 'libtaglib', 'libvamphost'])
+        obj.use.extend(['librubberband', 'libtaglib', 'libvamphost'
+                        'libltc_includes', 'libltc'])
 
     obj.vnum         = LIBARDOUR_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
