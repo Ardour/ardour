@@ -125,6 +125,8 @@ def build(bld):
 
     if bld.env['build_target'] != 'mingw':
         obj.source += [ 'crossthread.cc' ]
+    else:
+	obj.source += [ 'mingw64/mingw64_pbd.cc' ]
 
     obj.export_includes = ['.']
     obj.includes     = ['.']
