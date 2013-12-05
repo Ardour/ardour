@@ -71,7 +71,7 @@ realpath (const char *original_path, char resolved_path[_MAX_PATH+1])
 		rpath = _fullpath (temp, Glib::locale_from_utf8 (original_path).c_str(), _MAX_PATH);
 
 		if (0 != rpath) {
-			snprintf (resolved_path, _MAX_PATH+1, Glib::locale_to_utf8 (temp).c_str());
+			snprintf (resolved_path, _MAX_PATH+1, "%s", Glib::locale_to_utf8 (temp).c_str());
 		}
 			
 	}
