@@ -76,6 +76,10 @@
 #include "pbd/clear_dir.h"
 #include "pbd/localtime_r.h"
 
+#if defined(__MINGW64__) // for realpath
+#include "pbd/mingw64_pbd.h"
+#endif
+
 #include "ardour/amp.h"
 #include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
