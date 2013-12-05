@@ -20,12 +20,7 @@
 #ifndef __libgtkmm2ext_visibility_h__
 #define __libgtkmm2ext_visibility_h__
 
-/* _WIN32 is defined by most compilers targetting Windows, but within the
- * gtkmm2ext source tree, we also define COMPILER_MSVC or COMPILER_MINGW depending
- * on how a Windows build is built.
- */
-
-#if defined _WIN32 || defined __CYGWIN__ || defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
+#if defined(COMPILER_MSVC)
   #define LIBGTKMM2EXT_DLL_IMPORT __declspec(dllimport)
   #define LIBGTKMM2EXT_DLL_EXPORT __declspec(dllexport)
   #define LIBGTKMM2EXT_DLL_LOCAL
