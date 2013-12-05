@@ -6,6 +6,7 @@ import re
 import string
 import subprocess
 import sys
+import platform as PLATFORM
 
 def fetch_git_revision ():
     cmd = "git describe HEAD"
@@ -85,7 +86,7 @@ i18n_children = [
 # Version stuff
 
 def fetch_gcc_version (CC):
-    cmd = "LANG= %s --version" % CC
+    cmd = "%s --version" % CC
     output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
     o = output[0].decode('utf-8')
     version = o.split(' ')[2].split('.')
@@ -127,7 +128,7 @@ def set_compiler_flags (conf,opt):
     optimization_flags = []
     debug_flags = []
 
-    u = os.uname ()
+    u = PLATFORM.uname ()
     cpu = u[4]
     platform = u[0].lower()
     version = u[2]
