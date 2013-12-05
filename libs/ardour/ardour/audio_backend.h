@@ -361,7 +361,7 @@ class AudioBackend : public PortEngine {
      * Implementations can feel free to smooth the values returned over
      * time (e.g. high pass filtering, or its equivalent).
      */
-    virtual float cpu_load() const  = 0;
+    virtual float dsp_load() const  = 0;
 
     /* Transport Control (JACK is the only audio API that currently offers
        the concept of shared transport control)

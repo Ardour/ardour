@@ -1016,7 +1016,7 @@ JACKAudioBackend::disconnected (const char* why)
 }
 
 float 
-JACKAudioBackend::cpu_load() const 
+JACKAudioBackend::dsp_load() const 
 {
 	GET_PRIVATE_JACK_POINTER_RET(_priv_jack,0);
 	return jack_cpu_load (_priv_jack);
