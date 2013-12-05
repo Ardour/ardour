@@ -44,6 +44,14 @@ windows executable. This could probably be done in the waf scripts specifically
 for the windows build but I felt it simpler to do it in the packaging script
 for now.
 
+--------- NOTE --------------------
+
+package_win32.sh is an updated/extended version of package.sh from Valeriy. It
+should probably be merged with package.sh at some point. It uses a number of
+additional resources located under mingw64/
+
+-----------------------------------
+
 The packaging script then copies the JACK deamon and all the required mingw
 shared libraries from the host system into the packaging directory. The 
 shared libraries or dll's are placed in the same directory as the Ardour
