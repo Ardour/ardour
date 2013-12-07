@@ -242,9 +242,15 @@ vstfx_load (const char *path)
 
 	/*Find the main entry point into the plugin*/
 
-	if ((fhandle->main_entry = (main_entry_t) dlsym(fhandle->dll, "main")) == 0 &&
-			(fhandle->main_entry = (main_entry_t) dlsym(fhandle->dll, "VSTPluginMain")) == 0
-		 )
+	fhandle->main_entry = (main_entry_t) dlsym(fhandle->dll, "main");
+
+	if (fhandle->main_entry == 0) {
+		if ((fhandle->main_entry = (main_entry_t) dlsym(fhandle->dll, "VSTPluginMain")) != 0) {
+			PBD::warning << path << _(": is a VST >= 2.4 - this plugin may or may not function correctly with this version of Ardour.") << endmsg;
+		}
+	}
+
+	if (fhandle->main_entry == 0)
 	{
 		/*If it can't be found, unload the plugin and return a 0 handle*/
 		
