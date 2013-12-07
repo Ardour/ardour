@@ -35,7 +35,7 @@ using std::vector;
 
 #ifdef COMPILER_MINGW
 
-#include <WTypes.h>
+#include <stdlib.h>
 #include <glibmm.h>
 
 /****************************************************************
@@ -63,7 +63,7 @@ realpath (const char *original_path, char resolved_path[_MAX_PATH+1])
 		// sure if Ardour needs such functionality anyway). Therefore we'll
 		// possibly need to add that functionality here at a later date.
 	} else {
-		char temp[(MAX_PATH+1)*6]; // Allow for maximum length of a path in wchar characters
+		char temp[(_MAX_PATH+1)*6]; // Allow for maximum length of a path in wchar characters
 		
 		// POSIX 'realpath()' requires that the buffer size is at
 		// least PATH_MAX+1, so assume that the user knew this !!
