@@ -132,7 +132,17 @@ def set_compiler_flags (conf,opt):
     #
 
     build_host_supports_sse = False
+
+    # Flags necessary for building
+    compiler_flags = []     # generic
+    c_flags = []            # C-specific
+    cxx_flags = []          # C++-specific
+    linker_flags = []
+
+    # Optimization flags (overridable)
     optimization_flags = []
+
+    # Debugging flags
     debug_flags = []
 
     u = os.uname ()
@@ -145,10 +155,10 @@ def set_compiler_flags (conf,opt):
     
     if conf.options.cxx11:
         conf.check_cxx(cxxflags=["-std=c++11"])
-        conf.env.append_unique('CXXFLAGS', ['-std=c++11'])
+        cxx_flags.append('-std=c++11')
         if platform == "darwin":
-            conf.env.append_unique('CXXFLAGS', ['-stdlib=libc++'])
-            conf.env.append_unique('LINKFLAGS', ['-lc++'])
+            cxx_flags.append('-stdlib=libc++')
+            link_flags.append('-lc++')
             # Prevents visibility issues in standard headers
             conf.define("_DARWIN_C_SOURCE", 1)
 
@@ -156,7 +166,7 @@ def set_compiler_flags (conf,opt):
         # Silence warnings about the non-existing osx clang compiler flags
         # -compatibility_version and -current_version.  These are Waf
         # generated and not needed with clang
-        conf.env.append_unique ("CXXFLAGS", ["-Qunused-arguments"])
+        cxx_flags.append("-Qunused-arguments")
         
     if opt.gprofile:
         debug_flags = [ '-pg' ]
@@ -182,16 +192,15 @@ def set_compiler_flags (conf,opt):
             else:
                 conf.env['build_target'] = 'mountainlion'
         else:
-            if re.search ("x86_64", cpu) != None:
-                conf.env['build_target'] = 'x86_64'
-            elif re.search("i[0-5]86", cpu) != None:
-                conf.env['build_target'] = 'i386'
-            elif re.search("powerpc", cpu) != None:
-                conf.env['build_target'] = 'powerpc'
-            elif re.search("arm", cpu) != None:
-                conf.env['build_target'] = 'arm'
+            match = re.search(
+                    "(?P<cpu>i[0-6]86|x86_64|powerpc|ppc|ppc64|arm|s390x?)",
+                    cpu)
+            if (match):
+                conf.env['build_target'] = match.group("cpu")
+                if re.search("i[0-5]86", conf.env['build_target']):
+                    conf.env['build_target'] = "i386"
             else:
-                conf.env['build_target'] = 'i686'
+                conf.env['build_target'] = 'none'
     else:
         conf.env['build_target'] = opt.dist_target
 
@@ -200,8 +209,7 @@ def set_compiler_flags (conf,opt):
         # stupid OS X 10.6 has a bug in math.h that prevents llrint and friends
         # from being visible.
         # 
-        debug_flags.append ('-U__STRICT_ANSI__')
-        optimization_flags.append ('-U__STRICT_ANSI__')
+        compiler_flags.append ('-U__STRICT_ANSI__')
 
     if cpu == 'powerpc' and conf.env['build_target'] != 'none':
         #
@@ -213,12 +221,12 @@ def set_compiler_flags (conf,opt):
             if platform == 'darwin':
                 # optimization_flags.extend ([ "-mcpu=7450", "-faltivec"])
                 # to support g3s but still have some optimization for above
-                optimization_flags.extend ([ "-mcpu=G3", "-mtune=7450"])
+                compiler_flags.extend ([ "-mcpu=G3", "-mtune=7450"])
             else:
-                optimization_flags.extend ([ "-mcpu=7400", "-maltivec", "-mabi=altivec"])
+                compiler_flags.extend ([ "-mcpu=7400", "-maltivec", "-mabi=altivec"])
         else:
-            optimization_flags.extend([ "-mcpu=750", "-mmultiple" ])
-        optimization_flags.extend (["-mhard-float", "-mpowerpc-gfxopt"])
+            compiler_flags.extend([ "-mcpu=750", "-mmultiple" ])
+        compiler_flags.extend (["-mhard-float", "-mpowerpc-gfxopt"])
         optimization_flags.extend (["-Os"])
 
     elif ((re.search ("i[0-9]86", cpu) != None) or (re.search ("x86_64", cpu) != None)) and conf.env['build_target'] != 'none':
@@ -231,8 +239,7 @@ def set_compiler_flags (conf,opt):
         #
 
         if (re.search ("(i[0-9]86|x86_64)", cpu) != None):
-            debug_flags.append ("-DARCH_X86")
-            optimization_flags.append ("-DARCH_X86")
+            compiler_flags.append ("-DARCH_X86")
 
         if platform == 'linux' :
 
@@ -246,32 +253,29 @@ def set_compiler_flags (conf,opt):
                 x86_flags = flag_line.split (": ")[1:][0].split ()
 
                 if "mmx" in x86_flags:
-                    optimization_flags.append ("-mmmx")
+                    compiler_flags.append ("-mmmx")
                 if "sse" in x86_flags:
                     build_host_supports_sse = True
                 if "3dnow" in x86_flags:
-                    optimization_flags.append ("-m3dnow")
+                    compiler_flags.append ("-m3dnow")
 
             if cpu == "i586":
-                optimization_flags.append ("-march=i586")
+                compiler_flags.append ("-march=i586")
             elif cpu == "i686":
-                optimization_flags.append ("-march=i686")
+                compiler_flags.append ("-march=i686")
 
         if not is_clang and ((conf.env['build_target'] == 'i686') or (conf.env['build_target'] == 'x86_64')) and build_host_supports_sse:
-            optimization_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
-            debug_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
+            compiler_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
 
     # end of processor-specific section
 
     # optimization section
     if conf.env['FPU_OPTIMIZATION']:
         if sys.platform == 'darwin':
-            optimization_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
-            debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
-            conf.env.append_value('LINKFLAGS', "-framework Accelerate")
+            compiler_flags.append("-DBUILD_VECLIB_OPTIMIZATIONS");
+            linker_flags.append("-framework Accelerate")
         elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
-            optimization_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
-            debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
+            compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if not build_host_supports_sse:
             print("\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)")
 
@@ -290,9 +294,9 @@ def set_compiler_flags (conf,opt):
 
     if opt.lxvst:
         if conf.env['build_target'] == 'x86_64':
-            conf.env.append_value('CXXFLAGS', "-DLXVST_64BIT")
+            compiler_flags.append("-DLXVST_64BIT")
         else:
-            conf.env.append_value('CXXFLAGS', "-DLXVST_32BIT")
+            compiler_flags.append("-DLXVST_32BIT")
 
     #
     # a single way to test if we're on OS X
@@ -302,18 +306,15 @@ def set_compiler_flags (conf,opt):
         conf.define ('IS_OSX', 1)
         # force tiger or later, to avoid issues on PPC which defaults
         # back to 10.1 if we don't tell it otherwise.
-        
-        conf.env.append_value('CFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
-        conf.env.append_value('CXXFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
-        conf.env.append_value('CXXFLAGS', '-mmacosx-version-min=10.4')
-        conf.env.append_value('CFLAGS', '-mmacosx-version-min=10.4')
 
+        compiler_flags.extend(
+                ("-DMAC_OS_X_VERSION_MIN_REQUIRED=1040",
+                 '-mmacosx-version-min=10.4'))
 
     elif conf.env['build_target'] in [ 'lion', 'mountainlion' ]:
-        conf.env.append_value('CFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1070")
-        conf.env.append_value('CXXFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1070")
-        conf.env.append_value('CXXFLAGS', '-mmacosx-version-min=10.7')
-        conf.env.append_value('CFLAGS', '-mmacosx-version-min=10.7')
+        compiler_flags.extend(
+                ("-DMAC_OS_X_VERSION_MIN_REQUIRED=1070",
+                 '-mmacosx-version-min=10.7'))
     else:
         conf.define ('IS_OSX', 0)
 
@@ -350,26 +351,15 @@ def set_compiler_flags (conf,opt):
                 "-fstrength-reduce"
                 ]
 
-    if opt.debug:
-        conf.env.append_value('CFLAGS', debug_flags)
-        conf.env.append_value('CXXFLAGS', debug_flags)
-        conf.env.append_value('LINKFLAGS', debug_flags)
-    else:
-        conf.env.append_value('CFLAGS', optimization_flags)
-        conf.env.append_value('CXXFLAGS', optimization_flags)
-        conf.env.append_value('LINKFLAGS', optimization_flags)
-
     if opt.stl_debug:
-        conf.env.append_value('CXXFLAGS', "-D_GLIBCXX_DEBUG")
+        cxx_flags.append("-D_GLIBCXX_DEBUG")
 
     if conf.env['DEBUG_RT_ALLOC']:
-        conf.env.append_value('CFLAGS', '-DDEBUG_RT_ALLOC')
-        conf.env.append_value('CXXFLAGS', '-DDEBUG_RT_ALLOC')
-        conf.env.append_value('LINKFLAGS', '-ldl')
+        compiler_flags.append('-DDEBUG_RT_ALLOC')
+        linker_flags.append('-ldl')
 
     if conf.env['DEBUG_DENORMAL_EXCEPTION']:
-        conf.env.append_value('CFLAGS', '-DDEBUG_DENORMAL_EXCEPTION')
-        conf.env.append_value('CXXFLAGS', '-DDEBUG_DENORMAL_EXCEPTION')
+        compiler_flags.append('-DDEBUG_DENORMAL_EXCEPTION')
 
     if opt.universal:
         if opt.generic:
@@ -377,60 +367,53 @@ def set_compiler_flags (conf,opt):
             sys.exit (1)
         else:
             if not Options.options.nocarbon:
-                conf.env.append_value('CFLAGS', ["-arch", "i386", "-arch", "ppc"])
-                conf.env.append_value('CXXFLAGS', ["-arch", "i386", "-arch", "ppc"])
-                conf.env.append_value('LINKFLAGS', ["-arch", "i386", "-arch", "ppc"])
+                compiler_flags.extend(("-arch", "i386", "-arch", "ppc"))
+                linker_flags.extend(("-arch", "i386", "-arch", "ppc"))
             else:
-                conf.env.append_value('CFLAGS', ["-arch", "x86_64", "-arch", "i386", "-arch", "ppc"])
-                conf.env.append_value('CXXFLAGS', ["-arch", "x86_64", "-arch", "i386", "-arch", "ppc"])
-                conf.env.append_value('LINKFLAGS', ["-arch", "x86_64", "-arch", "i386", "-arch", "ppc"])
+                compiler_flags.extend(
+                        ("-arch", "x86_64", "-arch", "i386", "-arch", "ppc"))
+                linker_flags.extend(
+                        ("-arch", "x86_64", "-arch", "i386", "-arch", "ppc"))
     else:
         if opt.generic:
-            conf.env.append_value('CFLAGS', ['-arch', 'i386'])
-            conf.env.append_value('CXXFLAGS', ['-arch', 'i386'])
-            conf.env.append_value('LINKFLAGS', ['-arch', 'i386'])
+            compiler_flags.extend(('-arch', 'i386'))
+            linker_flags.extend(('-arch', 'i386'))
 
     #
     # warnings flags
     #
 
-    conf.env.append_value('CFLAGS', [ '-Wall',
-                                      '-Wpointer-arith',
-                                      '-Wcast-qual',
-                                      '-Wcast-align',
-                                      '-Wstrict-prototypes',
-                                      '-Wmissing-prototypes'
-                                      ])
+    compiler_flags.extend(
+            ('-Wall', '-Wpointer-arith', '-Wcast-qual', '-Wcast-align'))
 
-    conf.env.append_value('CXXFLAGS', [ '-Wall', 
-                                        '-Wpointer-arith',
-                                        '-Wcast-qual',
-                                        '-Wcast-align', 
-                                        '-Woverloaded-virtual'
-                                        ])
-
+    c_flags.extend(('-Wstrict-prototypes', '-Wmissing-prototypes'))
+    cxx_flags.append('-Woverloaded-virtual')
 
     #
     # more boilerplate
     #
 
-    conf.env.append_value('CFLAGS', '-DBOOST_SYSTEM_NO_DEPRECATED')
-    conf.env.append_value('CXXFLAGS', '-DBOOST_SYSTEM_NO_DEPRECATED')
     # need ISOC9X for llabs()
-    conf.env.append_value('CFLAGS', '-D_ISOC9X_SOURCE')
-    conf.env.append_value('CFLAGS', '-D_LARGEFILE64_SOURCE')
-    conf.env.append_value('CFLAGS', '-D_FILE_OFFSET_BITS=64')
-    # need ISOC9X for llabs()
-    conf.env.append_value('CXXFLAGS', '-D_ISOC9X_SOURCE')
-    conf.env.append_value('CXXFLAGS', '-D_LARGEFILE64_SOURCE')
-    conf.env.append_value('CXXFLAGS', '-D_FILE_OFFSET_BITS=64')
-
-    conf.env.append_value('CXXFLAGS', '-D__STDC_LIMIT_MACROS')
-    conf.env.append_value('CXXFLAGS', '-D__STDC_FORMAT_MACROS')
+    compiler_flags.extend(
+            ('-DBOOST_SYSTEM_NO_DEPRECATED', '-D_ISOC9X_SOURCE',
+             '-D_LARGEFILE64_SOURCE', '-D_FILE_OFFSET_BITS=64'))
+    cxx_flags.extend(('-D__STDC_LIMIT_MACROS', '-D__STDC_FORMAT_MACROS'))
 
     if opt.nls:
-        conf.env.append_value('CXXFLAGS', '-DENABLE_NLS')
-        conf.env.append_value('CFLAGS', '-DENABLE_NLS')
+        compiler_flags.append('-DENABLE_NLS')
+
+    if opt.debug:
+        conf.env.append_value('CFLAGS', debug_flags)
+        conf.env.append_value('CXXFLAGS', debug_flags)
+    else:
+        conf.env.append_value('CFLAGS', optimization_flags)
+        conf.env.append_value('CXXFLAGS', optimization_flags)
+
+    conf.env.append_value('CFLAGS', compiler_flags)
+    conf.env.append_value('CFLAGS', c_flags)
+    conf.env.append_value('CXXFLAGS', compiler_flags)
+    conf.env.append_value('CXXFLAGS', cxx_flags)
+    conf.env.append_value('LINKFLAGS', linker_flags)
 
 #----------------------------------------------------------------
 
