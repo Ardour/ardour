@@ -28,5 +28,7 @@ namespace ArdourCanvas {
 	extern Color rgba_to_color (double r, double g, double b, double a);
 
 	extern void set_source_rgba (Cairo::RefPtr<Cairo::Context>, Color);
+
+	Distance distance_to_segment_squared (Duple const & p, Duple const & p1, Duple const & p2, double& t, Duple& at);
 }
 
