@@ -403,17 +403,17 @@ GtkCanvas::deliver_event (Duple point, GdkEvent* event)
 	vector<Item const *> items;
 	_root.add_items_at_point (point, items);
 
-	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("%1 possible items to deliver event to\n", items.size()));
+	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("%1 possible items at %2 to deliver event to\n", items.size(), point));
 
 	/* run through the items under the event, from top to bottom, until one claims the event */
 	vector<Item const *>::const_reverse_iterator i = items.rbegin ();
 	while (i != items.rend()) {
 
 		if ((*i)->ignore_events ()) {
-			DEBUG_TRACE (
-				PBD::DEBUG::CanvasEvents,
-				string_compose ("canvas event ignored by %1 %2\n", (*i)->whatami(), (*i)->name.empty() ? "[unknown]" : (*i)->name)
-				);
+			// DEBUG_TRACE (
+			// PBD::DEBUG::CanvasEvents,
+			// string_compose ("canvas event ignored by %1 %2\n", (*i)->whatami(), (*i)->name.empty() ? "[unknown]" : (*i)->name)
+			// );
 			++i;
 			continue;
 		}
