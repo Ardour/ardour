@@ -151,18 +151,47 @@ Line::set_y1 (Coord y1)
 bool
 Line::covers (Duple const & point) const
 {
-	Duple p = canvas_to_item (point);
+	const Duple p = canvas_to_item (point);
+	static const Distance threshold = 2.0;
 
-	/* compute area of triangle computed by the two line points and the one
-	   we are being asked about. If zero (within a given tolerance), the
-	   points are co-linear and the argument is on the line.
+	/* this quick check works for vertical and horizontal lines, which are
+	 * common.
+	 */
+
+	if (_points[0].x == _points[1].x) {
+		/* line is vertical, just check x coordinate */
+		return fabs (_points[0].x - p.x) <= threshold;
+	}
+
+	if (_points[0].y == _points[1].y) {
+		/* line is horizontal, just check y coordinate */
+		return fabs (_points[0].y - p.y) <= threshold;
+	}
+
+	Duple at;
+	double t;
+	Duple a (_points[0]);
+	Duple b (_points[1]);
+	const Rect visible (_canvas->visible_area());
+
+	/*
+	   Clamp the line endpoints to the visible area of the canvas. If we do
+	   not do this, we have a line segment extending to COORD_MAX and our
+	   math goes wrong.
 	*/
 
-	double area = fabs (_points[0].x * (_points[0].y - p.y)) + 
-                           (_points[1].x * (p.y - _points[0].y)) + 
-		           (p.x * (_points[0].y - _points[1].y));
+	a.x = min (a.x, visible.x1);
+	a.y = min (a.y, visible.y1);
+	b.x = min (b.x, visible.x1);
+	b.y = min (b.y, visible.y1);
 
-	if (area < 0.001) {
+	double d = distance_to_segment_squared (p, a, b, t, at);
+
+	if (t < 0.0 || t > 1.0) {
+		return false;
+	}
+
+	if (d < threshold) {
 		return true;
 	}
 
