@@ -17,7 +17,11 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <algorithm>
+
 #include "canvas/poly_line.h"
+#include "canvas/canvas.h"
+#include "canvas/utils.h"
 
 using namespace ArdourCanvas;
 
@@ -53,21 +57,39 @@ PolyLine::covers (Duple const & point) const
 	Points::size_type j;
 
 	/* repeat for each line segment */
-	
+
+	const Rect visible (_canvas->visible_area());
+	static const double threshold = 2.0;
+
 	for (i = 1, j = 0; i < npoints; ++i, ++j) {
 
-		/* compute area of triangle computed by the two line points and the one
-		   we are being asked about. If zero (within a given tolerance), the
-		   points are co-linear and the argument is on the line.
+		Duple at;
+		double t;
+		Duple a (_points[j]);
+		Duple b (_points[i]);
+		
+		/*
+		  Clamp the line endpoints to the visible area of the canvas. If we do
+		  not do this, we may have a line segment extending to COORD_MAX and our
+		  math goes wrong.
 		*/
-
-		double area = fabs (_points[j].x * (_points[j].y - p.y)) + 
-  			           (_points[i].x * (p.y - _points[j].y)) + 
-			           (p.x * (_points[j].y - _points[i].y));
-		if (area < 0.001) {
+		
+		a.x = std::min (a.x, visible.x1);
+		a.y = std::min (a.y, visible.y1);
+		b.x = std::min (b.x, visible.x1);
+		b.y = std::min (b.y, visible.y1);
+		
+		double d = distance_to_segment_squared (p, a, b, t, at);
+		
+		if (t < 0.0 || t > 1.0) {
+			return false;
+		}
+		
+		if (d < threshold) {
 			return true;
 		}
+		
 	}
-
+	
 	return false;
 }

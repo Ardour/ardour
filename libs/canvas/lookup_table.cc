@@ -64,6 +64,7 @@ DumbLookupTable::items_at_point (Duple point) const
 		}
 		
 		if ((*i)->covers (point)) {
+			std::cerr << "\t\t" << (*i)->whatami() << '/' << (*i)->name << " covers " << point << std::endl;
 			vitems.push_back (*i);
 		}
 	}

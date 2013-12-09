@@ -94,7 +94,13 @@ PolyItem::render_curve (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 
 	for (Points::const_iterator i = _points.begin(); i != _points.end(); ++i) {
 
-		if (done_first) {
+		if (!done_first) {
+
+			Duple c = item_to_window (Duple (i->x, i->y));
+			context->move_to (c.x, c.y);
+			done_first = true;
+
+		} else {
 
 			Duple c1 = item_to_window (Duple (cp1->x, cp1->y));
 			Duple c2 = item_to_window (Duple (cp2->x, cp2->y));
@@ -104,12 +110,6 @@ PolyItem::render_curve (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 
 			cp1++;
 			cp2++;
-			
-		} else {
-
-			Duple c = item_to_window (Duple (i->x, i->y));
-			context->move_to (c.x, c.y);
-			done_first = true;
 		}
 	}
 }

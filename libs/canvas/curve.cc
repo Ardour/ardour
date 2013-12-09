@@ -103,6 +103,8 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 void 
 Curve::render_path (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
+	std::cerr << whatami() << '/' << name << " render curve w/" << _points.size() << " points, " << first_control_points.size() << " first and "
+		  << second_control_points.size() << " second\n";
 	PolyItem::render_curve (area, context, first_control_points, second_control_points);
 }
 
@@ -208,4 +210,10 @@ Curve::solve (std::vector<double> const & rhs)
 	delete [] tmp;
 	
 	return x;
+}
+
+bool
+Curve::covers (Duple const & point) const
+{
+	return false;
 }
