@@ -159,12 +159,12 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	create_waves ();
 
-	fade_in_shape = new ArdourCanvas::PolyLine (group);
+	fade_in_shape = new ArdourCanvas::Curve (group);
 	CANVAS_DEBUG_NAME (fade_in_shape, string_compose ("fade in shape for %1", region()->name()));
 	fade_in_shape->set_outline_color (fade_color);
 	fade_in_shape->set_data ("regionview", this);
 
-	fade_out_shape = new ArdourCanvas::PolyLine (group);
+	fade_out_shape = new ArdourCanvas::Curve (group);
 	CANVAS_DEBUG_NAME (fade_out_shape, string_compose ("fade out shape for %1", region()->name()));
 	fade_out_shape->set_outline_color (fade_color);
 	fade_out_shape->set_data ("regionview", this);
@@ -705,14 +705,14 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 	}
 
 	if (!start_xfade_in) {
-		start_xfade_in = new ArdourCanvas::PolyLine (group);
+		start_xfade_in = new ArdourCanvas::Curve (group);
 		CANVAS_DEBUG_NAME (start_xfade_in, string_compose ("xfade start in line for %1", region()->name()));
 		start_xfade_in->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
 		start_xfade_in->set_outline_width (1.5);
 	}
 
 	if (!start_xfade_out) {
-		start_xfade_out = new ArdourCanvas::PolyLine (group);
+		start_xfade_out = new ArdourCanvas::Curve (group);
 		CANVAS_DEBUG_NAME (start_xfade_out, string_compose ("xfade start out line for %1", region()->name()));
 		uint32_t col = UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128);
 		start_xfade_out->set_outline_color (col);
@@ -791,7 +791,7 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 	}
 
 	if (!end_xfade_in) {
-		end_xfade_in = new ArdourCanvas::PolyLine (group);
+		end_xfade_in = new ArdourCanvas::Curve (group);
 		CANVAS_DEBUG_NAME (end_xfade_in, string_compose ("xfade end in line for %1", region()->name()));
 		uint32_t col UINT_RGBA_CHANGE_A (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine(), 128);
 		end_xfade_in->set_outline_color (col);
@@ -799,7 +799,7 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 	}
 
 	if (!end_xfade_out) {
-		end_xfade_out = new ArdourCanvas::PolyLine (group);
+		end_xfade_out = new ArdourCanvas::Curve (group);
 		CANVAS_DEBUG_NAME (end_xfade_out, string_compose ("xfade end out line for %1", region()->name()));
 		end_xfade_out->set_outline_color (ARDOUR_UI::config()->get_canvasvar_CrossfadeLine());
 		end_xfade_out->set_outline_width (2.0);

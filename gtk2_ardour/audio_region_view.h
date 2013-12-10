@@ -151,18 +151,18 @@ class AudioRegionView : public RegionView
 	std::list<std::pair<framepos_t, ArdourCanvas::Line*> > feature_lines;
 
 	ArdourCanvas::Polygon*          sync_mark; ///< polgyon for sync position
-	ArdourCanvas::PolyLine*         fade_in_shape;
-	ArdourCanvas::PolyLine*         fade_out_shape;
+	ArdourCanvas::Curve*         fade_in_shape;
+	ArdourCanvas::Curve*         fade_out_shape;
 	ArdourCanvas::Rectangle*        fade_in_handle; ///< fade in handle, or 0
 	ArdourCanvas::Rectangle*        fade_out_handle; ///< fade out handle, or 0
 
-	ArdourCanvas::PolyLine *start_xfade_in;
-	ArdourCanvas::PolyLine *start_xfade_out;
+	ArdourCanvas::Curve *start_xfade_in;
+	ArdourCanvas::Curve *start_xfade_out;
 	ArdourCanvas::Rectangle* start_xfade_rect;
 	bool _start_xfade_visible;
 
-	ArdourCanvas::PolyLine *end_xfade_in;
-	ArdourCanvas::PolyLine *end_xfade_out;
+	ArdourCanvas::Curve *end_xfade_in;
+	ArdourCanvas::Curve *end_xfade_out;
 	ArdourCanvas::Rectangle* end_xfade_rect;
 	bool _end_xfade_visible;
 
