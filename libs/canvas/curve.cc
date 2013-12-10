@@ -103,8 +103,6 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 void 
 Curve::render_path (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	std::cerr << whatami() << '/' << name << " render curve w/" << _points.size() << " points, " << first_control_points.size() << " first and "
-		  << second_control_points.size() << " second\n";
 	PolyItem::render_curve (area, context, first_control_points, second_control_points);
 }
 
@@ -213,7 +211,24 @@ Curve::solve (std::vector<double> const & rhs)
 }
 
 bool
-Curve::covers (Duple const & point) const
+Curve::covers (Duple const & pc) const
 {
+	Duple point = canvas_to_item (pc);
+
+	/* XXX Hellaciously expensive ... */
+
+	for (Points::const_iterator p = _points.begin(); p != _points.end(); ++p) {
+
+		const Coord dx = point.x - (*p).x;
+		const Coord dy = point.y - (*p).y;
+		const Coord dx2 = dx * dx;
+		const Coord dy2 = dy * dy;
+
+		if ((dx2 < 2.0 && dy2 < 2.0) || (dx2 + dy2 < 4.0)) {
+			std::cerr << whatami() << '/' << name << " COVERS " << point << '\n';
+			return true;
+		}
+	}
+
 	return false;
 }
