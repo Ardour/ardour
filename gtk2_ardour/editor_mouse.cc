@@ -1982,9 +1982,10 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if (mouse_mode == MouseObject && !internal_editing()) {
 			ArdourCanvas::Rectangle *rect = dynamic_cast<ArdourCanvas::Rectangle *> (item);
 			if (rect) {
-				rect->set_fill_color (0xBBBBBBAA);
+				RegionView* rv = static_cast<RegionView*>(item->get_data ("regionview"));
+				rect->set_fill_color (rv->get_fill_color());
+				set_canvas_cursor (_cursors->fade_in);
 			}
-			set_canvas_cursor (_cursors->fade_in);
 		}
 		break;
 
@@ -1992,9 +1993,10 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if (mouse_mode == MouseObject && !internal_editing()) {
 			ArdourCanvas::Rectangle *rect = dynamic_cast<ArdourCanvas::Rectangle *> (item);
 			if (rect) {
-				rect->set_fill_color (0xBBBBBBAA);
+				RegionView* rv = static_cast<RegionView*>(item->get_data ("regionview"));
+				rect->set_fill_color (rv->get_fill_color ());
+				set_canvas_cursor (_cursors->fade_out);
 			}
-			set_canvas_cursor (_cursors->fade_out);
 		}
 		break;
 	case FeatureLineItem:
@@ -2138,7 +2140,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 		{
 			ArdourCanvas::Rectangle *rect = dynamic_cast<ArdourCanvas::Rectangle *> (item);
 			if (rect) {
-				rect->set_fill_color (rv->get_fill_color());
+				rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_InactiveFadeHandle());
 			}
 		}
 		set_canvas_cursor (current_canvas_cursor);
