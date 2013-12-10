@@ -765,6 +765,7 @@ int
 JACKAudioBackend::jack_sync_callback (jack_transport_state_t state, jack_position_t* pos)
 {
 	TransportState tstate;
+	bool tstate_valid = true;
 
 	switch (state) {
 	case JackTransportStopped:
@@ -779,9 +780,15 @@ JACKAudioBackend::jack_sync_callback (jack_transport_state_t state, jack_positio
 	case JackTransportStarting:
 		tstate = TransportStarting;
 		break;
+	default:
+		// ignore "unofficial" states like JackTransportNetStarting (jackd2)
+		tstate_valid = false;
+		break;
 	}
 
-	return engine.sync_callback (tstate, pos->frame);
+	if (tstate_valid) {
+		return engine.sync_callback (tstate, pos->frame);
+	}
 
 	return true;
 }
