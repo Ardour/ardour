@@ -490,7 +490,7 @@ static void
 note_from_int(char *buf, int note_number)
 {
 	int note, octave;
-	char *names[] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+	const char *names[] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
 
 	octave = note_number / 12 - 1;
 	note = note_number % 12;
