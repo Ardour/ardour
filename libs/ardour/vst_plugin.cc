@@ -486,7 +486,7 @@ string
 VSTPlugin::describe_parameter (Evoral::Parameter param)
 {
 	char name[64];
-	memset (name, sizeof (name), 0);
+	memset (name, 0, sizeof (name));
 
 	/* some VST plugins expect this buffer to be zero-filled */
 
