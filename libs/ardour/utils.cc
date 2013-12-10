@@ -232,6 +232,41 @@ cmp_nocase (const string& s, const string& s2)
 	return (s2.size() == s.size()) ? 0 : (s.size() < s2.size()) ? -1 : 1;
 }
 
+int cmp_nocase_utf8 (const string& s1, const string& s2)
+{
+	const char *cstr1 = s1.c_str();
+	const char *cstr2 = s2.c_str();
+	gchar *cstr1folded = NULL;
+	gchar *cstr2folded = NULL;
+	int retval;
+
+	if (!g_utf8_validate (cstr1, -1, NULL) ||
+		!g_utf8_validate (cstr2, -1, NULL)) {
+		// fall back to comparing ASCII
+		return g_ascii_strcasecmp (cstr1, cstr2);
+	}
+
+	cstr1folded = g_utf8_casefold (cstr1, -1);
+	cstr2folded = g_utf8_casefold (cstr2, -1);
+
+	if (cstr1folded && cstr2folded) {
+		retval = strcmp (cstr1folded, cstr2folded);
+	} else {
+		// this shouldn't happen, make the best of it
+		retval = g_ascii_strcasecmp (cstr1, cstr2);
+	}
+
+	if (cstr1folded) {
+		g_free (cstr1folded);
+	}
+
+	if (cstr2folded) {
+		g_free (cstr2folded);
+	}
+
+	return retval;
+}
+
 int
 touch_file (string path)
 {
