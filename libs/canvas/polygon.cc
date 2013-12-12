@@ -118,7 +118,7 @@ Polygon::covers (Duple const & point) const
 		}
 		j = i; 
 	}
-	
+
 	return oddNodes; 
 } 
 

@@ -50,7 +50,26 @@ DumbLookupTable::get (Rect const &)
 }
 
 vector<Item *>
-DumbLookupTable::items_at_point (Duple point) const
+DumbLookupTable::items_at_point (Duple const & point) const
+{
+	/* Point is in canvas coordinate system */
+
+	list<Item *> const & items (_group.items ());
+	vector<Item *> vitems;
+
+	for (list<Item *>::const_iterator i = items.begin(); i != items.end(); ++i) {
+
+		if ((*i)->covers (point)) {
+			// std::cerr << "\t\t" << (*i)->whatami() << '/' << (*i)->name << " covers " << point << std::endl;
+			vitems.push_back (*i);
+		}
+	}
+
+	return vitems;
+}
+
+bool
+DumbLookupTable::has_item_at_point (Duple const & point) const
 {
 	/* Point is in canvas coordinate system */
 
@@ -64,12 +83,13 @@ DumbLookupTable::items_at_point (Duple point) const
 		}
 		
 		if ((*i)->covers (point)) {
-			std::cerr << "\t\t" << (*i)->whatami() << '/' << (*i)->name << " covers " << point << std::endl;
-			vitems.push_back (*i);
+			// std::cerr << "\t\t" << (*i)->whatami() << '/' << (*i)->name << " covers " << point << std::endl;
+			return true;
+			
 		}
 	}
 
-	return vitems;
+	return false;
 }
 
 OptimizingLookupTable::OptimizingLookupTable (Group const & group, int items_per_cell)
@@ -191,7 +211,7 @@ OptimizingLookupTable::point_to_indices (Duple point, int& x, int& y) const
 }
 
 vector<Item*>
-OptimizingLookupTable::items_at_point (Duple point) const
+OptimizingLookupTable::items_at_point (Duple const & point) const
 {
 	int x;
 	int y;
@@ -225,6 +245,43 @@ OptimizingLookupTable::items_at_point (Duple point) const
 	}
 
 	return items;
+}
+
+bool
+OptimizingLookupTable::has_item_at_point (Duple const & point) const
+{
+	int x;
+	int y;
+	point_to_indices (point, x, y);
+
+	if (x >= _dimension) {
+		cout << "WARNING: x=" << x << ", dim=" << _dimension << ", px=" << point.x << " cellsize=" << _cell_size << "\n";
+	}
+
+	if (y >= _dimension) {
+		cout << "WARNING: y=" << y << ", dim=" << _dimension << ", py=" << point.y << " cellsize=" << _cell_size << "\n";
+	}
+	
+	/* XXX: hmm */
+	x = min (_dimension - 1, x);
+	y = min (_dimension - 1, y);
+
+	assert (x >= 0);
+	assert (y >= 0);
+
+	Cell const & cell = _cells[x][y];
+	vector<Item*> items;
+	for (Cell::const_iterator i = cell.begin(); i != cell.end(); ++i) {
+		boost::optional<Rect> const item_bbox = (*i)->bounding_box ();
+		if (item_bbox) {
+			Rect parent_bbox = (*i)->item_to_parent (item_bbox.get ());
+			if (parent_bbox.contains (point)) {
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 	
 /** @param area Area in our owning group's coordinates */

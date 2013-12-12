@@ -225,7 +225,6 @@ Curve::covers (Duple const & pc) const
 		const Coord dy2 = dy * dy;
 
 		if ((dx2 < 2.0 && dy2 < 2.0) || (dx2 + dy2 < 4.0)) {
-			std::cerr << whatami() << '/' << name << " COVERS " << point << '\n';
 			return true;
 		}
 	}

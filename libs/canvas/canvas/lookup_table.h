@@ -34,50 +34,53 @@ class Group;
 class LookupTable
 {
 public:
-	LookupTable (Group const &);
-	virtual ~LookupTable ();
-
-	virtual std::vector<Item*> get (Rect const &) = 0;
-	virtual std::vector<Item*> items_at_point (Duple) const = 0;
+    LookupTable (Group const &);
+    virtual ~LookupTable ();
+    
+    virtual std::vector<Item*> get (Rect const &) = 0;
+    virtual std::vector<Item*> items_at_point (Duple const &) const = 0;
+    virtual bool has_item_at_point (Duple const & point) const = 0;
 
 protected:
 	
-	Group const & _group;
+    Group const & _group;
 };
 
 class DumbLookupTable : public LookupTable
 {
 public:
-	DumbLookupTable (Group const &);
-
-	std::vector<Item*> get (Rect const &);
-	std::vector<Item*> items_at_point (Duple) const;
+    DumbLookupTable (Group const &);
+    
+    std::vector<Item*> get (Rect const &);
+    std::vector<Item*> items_at_point (Duple const &) const;
+    bool has_item_at_point (Duple const & point) const;
 };
 
 class OptimizingLookupTable : public LookupTable
 {
 public:
-	OptimizingLookupTable (Group const &, int);
-	~OptimizingLookupTable ();
-	std::vector<Item*> get (Rect const &);
-	std::vector<Item*> items_at_point (Duple) const;
-
-	static int default_items_per_cell;
-
-private:
-
-	void area_to_indices (Rect const &, int &, int &, int &, int &) const;
-	void point_to_indices (Duple, int &, int &) const;
-
-	friend class ::OptimizingLookupTableTest;
-
-	typedef std::vector<Item*> Cell;
-	int _items_per_cell;
-	int _dimension;
-	Duple _cell_size;
-	Duple _offset;
-	Cell** _cells;
-	bool _added;
+    OptimizingLookupTable (Group const &, int);
+    ~OptimizingLookupTable ();
+    std::vector<Item*> get (Rect const &);
+    std::vector<Item*> items_at_point (Duple const &) const;
+    bool has_item_at_point (Duple const & point) const;
+    
+    static int default_items_per_cell;
+    
+  private:
+    
+    void area_to_indices (Rect const &, int &, int &, int &, int &) const;
+    void point_to_indices (Duple, int &, int &) const;
+    
+    friend class ::OptimizingLookupTableTest;
+    
+    typedef std::vector<Item*> Cell;
+    int _items_per_cell;
+    int _dimension;
+    Duple _cell_size;
+    Duple _offset;
+    Cell** _cells;
+    bool _added;
 };
 
 }

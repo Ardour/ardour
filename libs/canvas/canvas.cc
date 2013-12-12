@@ -22,6 +22,7 @@
  *  @brief Implementation of the main canvas classes.
  */
 
+#include <list>
 #include <cassert>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/label.h>
@@ -256,7 +257,9 @@ Canvas::queue_draw_item_area (Item* item, Rect area)
 
 /** Construct a GtkCanvas */
 GtkCanvas::GtkCanvas ()
-	: _grabbed_item (0)
+	: _current_item (0)
+	, _new_current_item (0)
+	, _grabbed_item (0)
 	, _focused_item (0)
 {
 	/* these are the events we want to know about */
@@ -299,12 +302,10 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 	enter_event.send_event = 0;
 	enter_event.subwindow = 0;
 	enter_event.mode = GDK_CROSSING_NORMAL;
-	enter_event.detail = GDK_NOTIFY_NONLINEAR;
 	enter_event.focus = FALSE;
 	enter_event.state = state;
 	enter_event.x = point.x;
 	enter_event.y = point.y;
-	enter_event.detail = GDK_NOTIFY_UNKNOWN;
 
 	GdkEventCrossing leave_event = enter_event;
 	leave_event.type = GDK_LEAVE_NOTIFY;
@@ -314,72 +315,86 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 	vector<Item const *> items;
 	_root.add_items_at_point (point, items);
 
-	/* put all items at point that are event-sensitive and visible into within_items, and if this
-	   is a new addition, also put them into newly_entered for later deliver of enter events.
+	/* put all items at point that are event-sensitive and visible and NOT
+	   groups into within_items. Note that items is sorted from bottom to
+	   top, but we're going to reverse that for within_items so that its
+	   first item is the upper-most item that can be chosen as _current_item.
 	*/
 	
 	vector<Item const *>::const_iterator i;
-	vector<Item const *> newly_entered;
-	Item const * new_item;
+	list<Item const *> within_items;
 
 	for (i = items.begin(); i != items.end(); ++i) {
 
-		new_item = *i;
+		Item const * new_item = *i;
 
-		if (new_item->ignore_events() || !new_item->visible()) {
+		if (new_item->ignore_events() || dynamic_cast<Group const *>(new_item) != 0) {
 			continue;
 		}
-
-		pair<set<Item const *>::iterator,bool> res = within_items.insert (new_item);
-
-		if (res.second) {
-			newly_entered.push_back (new_item);
-		}
+		
+		within_items.push_front (new_item);
 	}
 
-	/* for every item in "within_items", check that we are still within them. if not,
-	   send a leave event, and remove them from "within_items"
-	*/
-
-	for (set<Item const *>::const_iterator i = within_items.begin(); i != within_items.end(); ) {
-
-		set<Item const *>::const_iterator tmp = i;
-		++tmp;
-
-		new_item = *i;
-
-		boost::optional<Rect> bbox = new_item->bounding_box();
-
-		if (bbox) {
-			if (!new_item->item_to_canvas (bbox.get()).contains (point)) {
-				leave_event.detail = GDK_NOTIFY_UNKNOWN;
-				DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Leave %1 %2\n", new_item->whatami(), new_item->name));
-				(*i)->Event (reinterpret_cast<GdkEvent*> (&leave_event));
-				within_items.erase (i);
-			}
+	if (within_items.empty()) {
+		/* no items at point */
+		if (_current_item) {
+			leave_event.detail = GDK_NOTIFY_UNKNOWN;
+			DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Leave %1 %2\n", _current_item->whatami(), _current_item->name));
+			deliver_event (reinterpret_cast<GdkEvent*> (&leave_event));
+			_current_item = 0;
 		}
-
-		i = tmp;
+		return;
 	}
 	
-	/* for every item in "newly_entered", send an enter event (and propagate it up the
-	   item tree until it is handled 
-	*/
-
-	for (vector<Item const*>::const_iterator i = newly_entered.begin(); i != newly_entered.end(); ++i) {
-		new_item = *i;
-
-		new_item->Event (reinterpret_cast<GdkEvent*> (&enter_event));
-		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Enter %1 %2\n", new_item->whatami(), new_item->name));
+	if (within_items.front() == _current_item) {
+		/* uppermost item at point is already _current_item */
+		return;
 	}
 
-#if 1
-	cerr << "Within:\n";
-	for (set<Item const *>::const_iterator i = within_items.begin(); i != within_items.end(); ++i) {
-		cerr << '\t' << (*i)->whatami() << '/' << (*i)->name << endl;
+	_new_current_item = within_items.front();
+	
+	if (_current_item) {
+
+		if (_new_current_item->is_descendant_of (*_current_item)) {
+			leave_event.detail = GDK_NOTIFY_INFERIOR;
+			enter_event.detail = GDK_NOTIFY_ANCESTOR;
+		} else if (_current_item->is_descendant_of (*_new_current_item)) {
+			leave_event.detail = GDK_NOTIFY_ANCESTOR;
+			enter_event.detail = GDK_NOTIFY_INFERIOR;
+		} else {
+			leave_event.detail = GDK_NOTIFY_UNKNOWN;
+			enter_event.detail = GDK_NOTIFY_UNKNOWN;
+		}
+
+		std::cerr << "CROSS from "
+			  << _current_item->whatami() << '/' << _current_item->name
+			  << " to " 
+			  << _new_current_item->whatami() << '/' << _new_current_item->name
+			  << " detail = " << leave_event.detail
+			  << '\n';
+			
+		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Leave %1 %2\n", _current_item->whatami(), _current_item->name));
+		deliver_event (reinterpret_cast<GdkEvent*> (&leave_event));
+		_current_item = 0;
+
+	} else {
+
+		enter_event.detail = GDK_NOTIFY_UNKNOWN;
+
 	}
-	cerr << "----\n";
-#endif
+	
+	/* _new_current_item could potentially have been reset when handling
+	 * the leave event. if it has, there is nothing to do here.
+	 */
+	
+	if (!_new_current_item) {
+		return;
+	}
+
+	_current_item = _new_current_item;
+	deliver_event (reinterpret_cast<GdkEvent*> (&enter_event));
+
+	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Enter %1 %2\n", _current_item->whatami(), _current_item->name));
 }
 
 /** Deliver an event to the appropriate item; either the grabbed item, or
@@ -388,7 +403,7 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
  *  @param event The event.
  */
 bool
-GtkCanvas::deliver_event (Duple point, GdkEvent* event)
+GtkCanvas::deliver_event (GdkEvent* event)
 {
 	/* Point in in canvas coordinate space */
 
@@ -399,51 +414,35 @@ GtkCanvas::deliver_event (Duple point, GdkEvent* event)
 		return _grabbed_item->Event (event);
 	}
 
-	/* find the items that exist at the event's position */
-	vector<Item const *> items;
-	_root.add_items_at_point (point, items);
+	if (!_current_item) {
+		return false;
+	}
 
-	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("%1 possible items at %2 to deliver event to\n", items.size(), point));
+	/* run through the items from child to parent, until one claims the event */
 
-	/* run through the items under the event, from top to bottom, until one claims the event */
-	vector<Item const *>::const_reverse_iterator i = items.rbegin ();
-	while (i != items.rend()) {
+	for (Item* item = const_cast<Item*> (_current_item); item; item = item->parent()) {
 
-		if ((*i)->ignore_events ()) {
+		if (item->ignore_events ()) {
 			// DEBUG_TRACE (
 			// PBD::DEBUG::CanvasEvents,
-			// string_compose ("canvas event ignored by %1 %2\n", (*i)->whatami(), (*i)->name.empty() ? "[unknown]" : (*i)->name)
+			// string_compose ("canvas event ignored by %1 %2\n", item->whatami(), item->name.empty() ? "[unknown]" : item->name)
 			// );
-			++i;
 			continue;
 		}
 		
-		if ((*i)->Event (event)) {
+		if (item->Event (event)) {
 			/* this item has just handled the event */
 			DEBUG_TRACE (
 				PBD::DEBUG::CanvasEvents,
-				string_compose ("canvas event handled by %1 %2\n", (*i)->whatami(), (*i)->name.empty() ? "[unknown]" : (*i)->name)
+				string_compose ("canvas event handled by %1 %2\n", item->whatami(), item->name.empty() ? "[unknown]" : item->name)
 				);
 			
 			return true;
 		}
 		
-		DEBUG_TRACE (
-			PBD::DEBUG::CanvasEvents,
-			string_compose ("canvas event left unhandled by %1 %2\n", (*i)->whatami(), (*i)->name.empty() ? "[unknown]" : (*i)->name)
-			);
-		
-		++i;
+		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas event left unhandled by %1 %2\n", item->whatami(), item->name.empty() ? "[unknown]" : item->name));
 	}
 
-	/* debugging */
-	if (PBD::debug_bits & PBD::DEBUG::CanvasEvents) {
-		while (i != items.rend()) {
-			DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas event not seen by %1\n", (*i)->name.empty() ? "[unknown]" : (*i)->name));
-			++i;
-		}
-	}
-	
 	return false;
 }
 
@@ -461,7 +460,13 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 	/* no need to send a leave event to this item, since it is going away 
 	 */
 
-	within_items.erase (item);
+	if (_new_current_item == item) {
+		_new_current_item = 0;
+	}
+
+	if (_current_item == item) {
+		_current_item = 0;
+	}
 
 	if (_grabbed_item == item) {
 		_grabbed_item = 0;
@@ -520,8 +525,9 @@ GtkCanvas::on_button_press_event (GdkEventButton* ev)
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
 	*/
 
+	enter_leave_items (where, ev->state);
 	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas button press @ %1, %2 => %3\n", ev->x, ev->y, where));
-	return deliver_event (where, reinterpret_cast<GdkEvent*>(&copy));
+	return deliver_event (reinterpret_cast<GdkEvent*>(&copy));
 }
 
 /** Handler for GDK button release events.
@@ -545,8 +551,9 @@ GtkCanvas::on_button_release_event (GdkEventButton* ev)
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
 	*/
 
+	enter_leave_items (where, ev->state);
 	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas button release @ %1, %2 => %3\n", ev->x, ev->y, where));
-	return deliver_event (where, reinterpret_cast<GdkEvent*>(&copy));
+	return deliver_event (reinterpret_cast<GdkEvent*>(&copy));
 }
 
 /** Handler for GDK motion events.
@@ -568,7 +575,7 @@ GtkCanvas::on_motion_notify_event (GdkEventMotion* ev)
 	/* Coordinates in "copy" will be canvas coordinates, 
 	*/
 
-	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas motion @ %1, %2\n", ev->x, ev->y));
+	// DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas motion @ %1, %2\n", ev->x, ev->y));
 
 	if (_grabbed_item) {
 		/* if we have a grabbed item, it gets just the motion event,
@@ -587,7 +594,7 @@ GtkCanvas::on_motion_notify_event (GdkEventMotion* ev)
 	   recompute the list in deliver_event.
 	*/
 
-	return deliver_event (point, reinterpret_cast<GdkEvent*> (&copy));
+	return deliver_event (reinterpret_cast<GdkEvent*> (&copy));
 }
 
 bool
@@ -601,8 +608,21 @@ GtkCanvas::on_enter_notify_event (GdkEventCrossing* ev)
 bool
 GtkCanvas::on_leave_notify_event (GdkEventCrossing* /*ev*/)
 {
-	within_items.clear ();
+	_current_item = 0;
+	_new_current_item = 0;
 	return true;
+}
+
+bool
+GtkCanvas::on_key_press_event (GdkEventKey* ev)
+{
+	return false;
+}
+
+bool
+GtkCanvas::on_key_release_event (GdkEventKey* ev)
+{
+	return false;
 }
 
 /** Called to request a redraw of our canvas.
