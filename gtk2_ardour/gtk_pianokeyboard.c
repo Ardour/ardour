@@ -740,13 +740,13 @@ piano_keyboard_set_keyboard_layout(PianoKeyboard *pk, const char *layout)
 {
 	assert(layout);
 
-	if (!g_strcasecmp(layout, "QWERTY")) {
+	if (!g_ascii_strcasecmp(layout, "QWERTY")) {
 		bind_keys_qwerty(pk);
 
-	} else if (!g_strcasecmp(layout, "QWERTZ")) {
+	} else if (!g_ascii_strcasecmp(layout, "QWERTZ")) {
 		bind_keys_qwertz(pk);
 
-	} else if (!g_strcasecmp(layout, "AZERTY")) {
+	} else if (!g_ascii_strcasecmp(layout, "AZERTY")) {
 		bind_keys_azerty(pk);
 
 	} else {

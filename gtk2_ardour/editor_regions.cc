@@ -1115,7 +1115,7 @@ EditorRegions::sorter (TreeModel::iterator a, TreeModel::iterator b)
 
 	switch (_sort_type) {
 	case ByName:
-		cmp = g_strcasecmp (region1->name().c_str(), region2->name().c_str());
+		cmp = region1->name().compare(region2->name());
 		break;
 
 	case ByLength:
@@ -1140,7 +1140,7 @@ EditorRegions::sorter (TreeModel::iterator a, TreeModel::iterator b)
 		break;
 
 	case BySourceFileName:
-		cmp = g_strcasecmp (region1->source()->name().c_str(), region2->source()->name().c_str());
+		cmp = region1->source()->name().compare(region2->source()->name());
 		break;
 
 	case BySourceFileLength:
@@ -1153,9 +1153,9 @@ EditorRegions::sorter (TreeModel::iterator a, TreeModel::iterator b)
 
 	case BySourceFileFS:
 		if (region1->source()->name() == region2->source()->name()) {
-			cmp = g_strcasecmp (region1->name().c_str(),  region2->name().c_str());
+			cmp = region1->name().compare(region2->name());
 		} else {
-			cmp = g_strcasecmp (region1->source()->name().c_str(),  region2->source()->name().c_str());
+			cmp = region1->source()->name().compare(region2->source()->name());
 		}
 		break;
 	}

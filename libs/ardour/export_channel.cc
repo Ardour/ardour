@@ -131,7 +131,7 @@ RegionExportChannelFactory::RegionExportChannelFactory (Session * session, Audio
 
 		mixdown_buffer.reset (new Sample [frames_per_cycle]);
 		gain_buffer.reset (new Sample [frames_per_cycle]);
-		memset (gain_buffer.get(), 1.0, sizeof (Sample) * frames_per_cycle);
+		std::fill_n (gain_buffer.get(), frames_per_cycle, Sample (1.0));
 
 		break;
 	  case Processed:

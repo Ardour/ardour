@@ -57,6 +57,7 @@ static inline float f_max(float x, float a) {
 std::string bump_name_once(const std::string& s, char delimiter);
 
 int cmp_nocase (const std::string& s, const std::string& s2);
+int cmp_nocase_utf8 (const std::string& s1, const std::string& s2);
 
 int touch_file(std::string path);
 

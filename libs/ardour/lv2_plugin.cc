@@ -1162,10 +1162,14 @@ LV2Plugin::write_from_ui(uint32_t       index,
 		 *  e.g 48kSPS / 128fpp -> audio-periods = 375 Hz
 		 *  ui-periods = 25 Hz (SuperRapidScreenUpdate)
 		 *  default minimumSize = 32K (see LV2Plugin::allocate_atom_event_buffers()
-		 *  -> 15 * 32K
-		 * it is safe to overflow (but the plugin state may be inconsistent).
+		 *
+		 * it is NOT safe to overflow (msg.size will be misinterpreted)
 		 */
-		rbs = max((size_t) 32768 * 6, rbs);
+		uint32_t bufsiz = 32768;
+		if (_atom_ev_buffers && _atom_ev_buffers[0]) {
+			bufsiz =  lv2_evbuf_get_capacity(_atom_ev_buffers[0]);
+		}
+		rbs = max((size_t) bufsiz * 8, rbs);
 		_from_ui = new RingBuffer<uint8_t>(rbs);
 	}
 
@@ -1194,8 +1198,12 @@ LV2Plugin::enable_ui_emmission()
 {
 	if (!_to_ui) {
 		/* see note in LV2Plugin::write_from_ui() */
+		uint32_t bufsiz = 32768;
+		if (_atom_ev_buffers && _atom_ev_buffers[0]) {
+			bufsiz =  lv2_evbuf_get_capacity(_atom_ev_buffers[0]);
+		}
 		size_t rbs = _session.engine().raw_buffer_size(DataType::MIDI) * NBUFS;
-		rbs = max((size_t) 32768 * 8, rbs);
+		rbs = max((size_t) bufsiz * 8, rbs);
 		_to_ui = new RingBuffer<uint8_t>(rbs);
 	}
 }
