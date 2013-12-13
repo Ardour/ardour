@@ -186,6 +186,11 @@ ARDOUR_UI::set_session (Session *s)
 
 	update_format ();
 
+	if (meter_box.get_parent()) {
+		transport_tearoff_hbox.remove (meter_box);
+		transport_tearoff_hbox.remove (editor_meter_peak_display);
+	}
+
 	if (editor_meter) {
 		meter_box.remove(*editor_meter);
 		delete editor_meter;
@@ -222,15 +227,8 @@ ARDOUR_UI::set_session (Session *s)
 			transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
 			meter_box.show();
 			editor_meter_peak_display.show();
-		} else if (meter_box.get_parent()) {
-			transport_tearoff_hbox.remove (meter_box);
-			transport_tearoff_hbox.remove (editor_meter_peak_display);
 		}
-	} else if (meter_box.get_parent()) {
-		transport_tearoff_hbox.remove (meter_box);
-		transport_tearoff_hbox.remove (editor_meter_peak_display);
-	}
-
+	} 
 }
 
 int
