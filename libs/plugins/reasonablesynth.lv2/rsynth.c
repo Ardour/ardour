@@ -501,7 +501,7 @@ static void synth_init(void *synth, double rate) {
   const float tuning = 440;
   int c,k;
   for (k=0; k < 128; k++) {
-    rs->freqs[k] = (2.0 * tuning / 32.0f) * powf(2, (k - 9.0) / 12.0) / rate;
+    rs->freqs[k] = (tuning / 32.0f) * powf(2, (k - 9.0) / 12.0) / rate;
     assert(rs->freqs[k] < M_PI/2); // otherwise spatialization may phase out..
   }
   rs->kcfilt = 12.0 / rate;
