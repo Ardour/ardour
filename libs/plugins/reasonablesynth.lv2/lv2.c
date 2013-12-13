@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <time.h>
 
 /* LV2 */
 #include "lv2/lv2plug.in/ns/lv2core/lv2.h"
@@ -56,6 +57,7 @@ typedef struct {
 
   double SampleRateD;
   void *synth;
+  bool xmas;
 } RSynth;
 
 /* main LV2 */
@@ -97,6 +99,16 @@ instantiate(const LV2_Descriptor*     descriptor,
 
   self->synth = synth_alloc();
   synth_init(self->synth, rate);
+
+
+  struct tm date;
+  time_t now;
+  time(&now);
+  localtime_r(&now, &date);
+  if (getenv("ITSXMAS") || (date.tm_mon == 11 /*dec*/ && date.tm_mday == 25)) {
+    printf("reasonable synth.lv2 says: happy holidays!\n");
+    self->xmas = true;
+  }
 
   return (LV2_Handle)self;
 }
@@ -146,7 +158,11 @@ run(LV2_Handle handle, uint32_t n_samples)
           written = synth_sound(self->synth, written, ev->time.frames, audio);
         }
         /* send midi message to synth */
-        synth_parse_midi(self->synth, (const uint8_t*)(ev+1), ev->body.size);
+        if (self->xmas) {
+          synth_parse_xmas(self->synth, (const uint8_t*)(ev+1), ev->body.size);
+        } else {
+          synth_parse_midi(self->synth, (const uint8_t*)(ev+1), ev->body.size);
+        }
       }
       ev = (LV2_Atom_Event const*) // lv2_atom_sequence_next()
         ((const uint8_t*)ev + sizeof(LV2_Atom_Event) + ((ev->body.size + 7) & ~7));

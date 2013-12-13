@@ -89,6 +89,8 @@ typedef struct {
   float          kcgain;
   float          kcfilt;
   double         rate;
+  uint32_t       xmas_on;
+  uint32_t       xmas_off;
 } RSSynthesizer;
 
 
@@ -446,6 +448,44 @@ static void synth_parse_midi(void *synth, const uint8_t *data, const size_t size
   synth_process_midi_event(synth, &ev);
 }
 
+static const uint8_t jingle[] = { 71 ,71 ,71 ,71 ,71 ,71 ,71 ,74 ,67 ,69 ,71 ,72 ,72 ,72 ,72 ,72 ,71 ,71 ,71 ,71 ,71 ,69 ,69 ,71 ,69 ,74 ,71 ,71 ,71 ,71 ,71 ,71 ,71 ,74 ,67 ,69 ,71 ,72 ,72 ,72 ,72 ,72 ,71 ,71 ,71 ,71 ,74 ,74 ,72 ,69 ,67 ,62 ,62 ,71 ,69 ,67 ,62 ,62 ,62 ,62 ,71 ,69 ,67 ,64 ,64 ,64 ,72 ,71 ,69 ,66 ,74 ,76 ,74 ,72 ,69 ,71 ,62 ,62 ,71 ,69 ,67 ,62 ,62 ,62 ,62 ,71 ,69 ,67 ,64 ,64 ,64 ,72 ,71 ,69 ,74 ,74 ,74 ,74 ,76 ,74 ,72 ,69 ,67 ,74 ,71 ,71 ,71 ,71 ,71 ,71 ,71 ,74 ,67 ,69 ,71 ,72 ,72 ,72 ,72 ,72 ,71 ,71 ,71 ,71 ,71 ,69 ,69 ,71 ,69 ,74 ,71 ,71 ,71 ,71 ,71 ,71 ,71 ,74 ,67 ,69 ,71 ,72 ,72 ,72 ,72 ,72 ,71 ,71 ,71 ,71 ,74 ,74 ,72 ,69 ,67 };
+
+static void synth_parse_xmas(void *synth, const uint8_t *data, const size_t size) {
+  RSSynthesizer* rs = (RSSynthesizer*)synth;
+  if (size < 2 || size > 3) return;
+  // All messages need to be 3 bytes; except program-changes: 2bytes.
+  if (size == 2 && (data[0] & 0xf0)  != 0xC0) return;
+
+  struct rmidi_event_t ev;
+
+  ev.channel = data[0]&0x0f;
+  switch (data[0] & 0xf0) {
+    case 0x80:
+      ev.type=NOTE_OFF;
+      ev.d.tone.note=jingle[rs->xmas_off++];
+      ev.d.tone.velocity=data[2]&0x7f;
+      if (rs->xmas_off >= sizeof(jingle)) rs->xmas_off = 0;
+      break;
+    case 0x90:
+      ev.type=NOTE_ON;
+      ev.d.tone.note=jingle[rs->xmas_on++];
+      ev.d.tone.velocity=data[2]&0x7f;
+      if (rs->xmas_on >= sizeof(jingle)) rs->xmas_on = 0;
+      break;
+    case 0xB0:
+      ev.type=CONTROL_CHANGE;
+      ev.d.control.param=data[1]&0x7f;
+      ev.d.control.value=data[2]&0x7f;
+      break;
+    case 0xC0:
+      ev.type=PROGRAM_CHANGE;
+      ev.d.control.value=data[1]&0x7f;
+      break;
+    default:
+      return;
+  }
+  synth_process_midi_event(synth, &ev);
+}
 /**
  * initialize the synth
  * This should be called after synth_alloc()
@@ -470,6 +510,8 @@ static void synth_init(void *synth, double rate) {
   for (c=0; c < 16; c++) {
     synth_load(&rs->sc[c], rate, &synthesize_sineP, &piano_adsr);
   }
+  rs->xmas_on = 0;
+  rs->xmas_off = 0;
 }
 
 /**
