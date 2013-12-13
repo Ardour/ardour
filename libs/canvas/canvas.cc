@@ -51,13 +51,13 @@ Canvas::scroll_to (Coord x, Coord y)
 	_scroll_offset_x = x;
 	_scroll_offset_y = y;
 
-	enter_leave_items (0); // no current mouse position 
+	pick_current_item (0); // no current mouse position 
 }
 
 void
 Canvas::zoomed ()
 {
-	enter_leave_items (0); // no current mouse position
+	pick_current_item (0); // no current mouse position
 }
 
 /** Render an area of the canvas.
@@ -268,12 +268,12 @@ GtkCanvas::GtkCanvas ()
 }
 
 void
-GtkCanvas::enter_leave_items (int state)
+GtkCanvas::pick_current_item (int state)
 {
 	int x;
 	int y;
 
-	/* this version of ::enter_leave_items() is called after an item is
+	/* this version of ::pick_current_item() is called after an item is
 	 * added or removed, so we have no coordinates to work from as is the
 	 * case with a motion event. Find out where the mouse is and use that.
 	 */
@@ -284,31 +284,17 @@ GtkCanvas::enter_leave_items (int state)
 		return;
 	}
 
-	enter_leave_items (window_to_canvas (Duple (x, y)), state);
+	pick_current_item (window_to_canvas (Duple (x, y)), state);
 }
 		
 void
-GtkCanvas::enter_leave_items (Duple const & point, int state)
+GtkCanvas::pick_current_item (Duple const & point, int state)
 {
 	/* we do not enter/leave items during a drag/grab */
 
 	if (_grabbed_item) {
 		return;
 	}
-
-	GdkEventCrossing enter_event;
-	enter_event.type = GDK_ENTER_NOTIFY;
-	enter_event.window = get_window()->gobj();
-	enter_event.send_event = 0;
-	enter_event.subwindow = 0;
-	enter_event.mode = GDK_CROSSING_NORMAL;
-	enter_event.focus = FALSE;
-	enter_event.state = state;
-	enter_event.x = point.x;
-	enter_event.y = point.y;
-
-	GdkEventCrossing leave_event = enter_event;
-	leave_event.type = GDK_LEAVE_NOTIFY;
 
 	/* find the items at the given position */
 
@@ -328,6 +314,8 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 
 		Item const * new_item = *i;
 
+		/* We ignore groups and we ignore items that ignore events */
+
 		if (new_item->ignore_events() || dynamic_cast<Group const *>(new_item) != 0) {
 			continue;
 		}
@@ -336,66 +324,159 @@ GtkCanvas::enter_leave_items (Duple const & point, int state)
 	}
 
 	if (within_items.empty()) {
-		/* no items at point */
+
+		/* no items at point, just send leave event below */
+
+	} else {
+		if (within_items.front() == _current_item) {
+			/* uppermost item at point is already _current_item */
+			return;
+		}
+		
+		_new_current_item = const_cast<Item*> (within_items.front());
+	}
+
+	deliver_enter_leave (point, state);
+}
+
+void
+GtkCanvas::deliver_enter_leave (Duple const & point, int state)
+{
+	/* setup enter & leave event structures */
+
+	GdkEventCrossing enter_event;
+	enter_event.type = GDK_ENTER_NOTIFY;
+	enter_event.window = get_window()->gobj();
+	enter_event.send_event = 0;
+	enter_event.subwindow = 0;
+	enter_event.mode = GDK_CROSSING_NORMAL;
+	enter_event.focus = FALSE;
+	enter_event.state = state;
+	enter_event.x = point.x;
+	enter_event.y = point.y;
+
+	GdkEventCrossing leave_event = enter_event;
+	leave_event.type = GDK_LEAVE_NOTIFY;
+
+	Item* i;
+	GdkNotifyType enter_detail;
+	GdkNotifyType leave_detail;
+	vector<Item*> items_to_leave_virtual;
+	vector<Item*> items_to_enter_virtual;
+
+	if (_new_current_item == 0) {
+
+		leave_detail = GDK_NOTIFY_UNKNOWN;
+
 		if (_current_item) {
-			leave_event.detail = GDK_NOTIFY_UNKNOWN;
-			DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Leave %1 %2\n", _current_item->whatami(), _current_item->name));
-			deliver_event (reinterpret_cast<GdkEvent*> (&leave_event));
-			_current_item = 0;
-		}
-		return;
-	}
-	
-	if (within_items.front() == _current_item) {
-		/* uppermost item at point is already _current_item */
-		return;
-	}
 
-	_new_current_item = within_items.front();
-	
-	if (_current_item) {
+			/* no current item, so also send virtual leave events to the
+			 * entire heirarchy for the current item
+			 */
 
-		if (_new_current_item->is_descendant_of (*_current_item)) {
-			leave_event.detail = GDK_NOTIFY_INFERIOR;
-			enter_event.detail = GDK_NOTIFY_ANCESTOR;
-		} else if (_current_item->is_descendant_of (*_new_current_item)) {
-			leave_event.detail = GDK_NOTIFY_ANCESTOR;
-			enter_event.detail = GDK_NOTIFY_INFERIOR;
-		} else {
-			leave_event.detail = GDK_NOTIFY_UNKNOWN;
-			enter_event.detail = GDK_NOTIFY_UNKNOWN;
+			for (i = _current_item->parent(); i ; i = i->parent()) {
+				items_to_leave_virtual.push_back (i);
+			}
 		}
 
-		std::cerr << "CROSS from "
-			  << _current_item->whatami() << '/' << _current_item->name
-			  << " to " 
-			  << _new_current_item->whatami() << '/' << _new_current_item->name
-			  << " detail = " << leave_event.detail
-			  << '\n';
-			
-		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Leave %1 %2\n", _current_item->whatami(), _current_item->name));
-		deliver_event (reinterpret_cast<GdkEvent*> (&leave_event));
-		_current_item = 0;
+	} else if (_current_item == 0) {
+
+		enter_detail = GDK_NOTIFY_UNKNOWN;
+
+		/* no current item, so also send virtual enter events to the
+		 * entire heirarchy for the new item 
+		 */
+
+		for (i = _new_current_item->parent(); i ; i = i->parent()) {
+			items_to_enter_virtual.push_back (i);
+		}
+
+	} else if (_current_item->is_descendant_of (*_new_current_item)) {
+
+		/* move from descendant to ancestor (X: "_current_item is an
+		 * inferior of _new_current_item") 
+		 *
+		 * Deliver "virtual" leave notifications to all items in the
+		 * heirarchy between current and new_current.
+		 */
+		
+
+		for (i = _current_item->parent(); i && i != _new_current_item; i = i->parent()) {
+			items_to_leave_virtual.push_back (i);
+		}
+
+		enter_detail = GDK_NOTIFY_INFERIOR;
+		leave_detail = GDK_NOTIFY_ANCESTOR;
+
+
+	} else if (_new_current_item->is_descendant_of (*_current_item)) {
+		/* move from ancestor to descendant (X: "_new_current_item is
+		 * an inferior of _current_item")
+		 *
+		 * Deliver "virtual" enter notifications to all items in the
+		 * heirarchy between current and new_current.
+		 */
+
+		for (i = _new_current_item->parent(); i && i != _current_item; i = i->parent()) {
+			items_to_enter_virtual.push_back (i);
+		}
+
+		enter_detail = GDK_NOTIFY_ANCESTOR;
+		leave_detail = GDK_NOTIFY_INFERIOR;
 
 	} else {
 
-		enter_event.detail = GDK_NOTIFY_UNKNOWN;
+		Item const * common_ancestor = _current_item->closest_ancestor_with (*_new_current_item);
 
+		/* deliver virtual leave events to everything between _current
+		 * and common_ancestor.
+		 */
+
+		for (i = _current_item->parent(); i && i != common_ancestor; i = i->parent()) {
+			items_to_leave_virtual.push_back (i);
+		}
+
+		/* deliver virtual enter events to everything between
+		 * _new_current and common_ancestor.
+		 */
+
+		for (i = _new_current_item->parent(); i && i != common_ancestor; i = i->parent()) {
+			items_to_enter_virtual.push_back (i);
+		}
+
+		enter_detail = GDK_NOTIFY_NONLINEAR;
+		leave_detail = GDK_NOTIFY_NONLINEAR;
 	}
 	
-	/* _new_current_item could potentially have been reset when handling
-	 * the leave event. if it has, there is nothing to do here.
-	 */
-	
-	if (!_new_current_item) {
-		return;
+
+	if (_current_item && !_current_item->ignore_events ()) {
+		leave_event.detail = leave_detail;
+		_current_item->Event ((GdkEvent*)&leave_event);
+	}
+
+	leave_event.detail = GDK_NOTIFY_VIRTUAL;
+	enter_event.detail = GDK_NOTIFY_VIRTUAL;
+
+	for (vector<Item*>::iterator it = items_to_leave_virtual.begin(); it != items_to_leave_virtual.end(); ++it) {
+		if (!(*it)->ignore_events()) {
+			(*it)->Event ((GdkEvent*)&leave_event);
+		}
+	}
+
+	for (vector<Item*>::iterator it = items_to_enter_virtual.begin(); it != items_to_enter_virtual.end(); ++it) {
+		if (!(*it)->ignore_events()) {
+			(*it)->Event ((GdkEvent*)&enter_event);
+		}
+	}
+
+	if (_new_current_item && !_new_current_item->ignore_events()) {
+		enter_event.detail = enter_detail;
+		_new_current_item->Event ((GdkEvent*)&enter_event);
 	}
 
 	_current_item = _new_current_item;
-	deliver_event (reinterpret_cast<GdkEvent*> (&enter_event));
-
-	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("Enter %1 %2\n", _current_item->whatami(), _current_item->name));
 }
+
 
 /** Deliver an event to the appropriate item; either the grabbed item, or
  *  one of the items underneath the event.
@@ -420,17 +501,14 @@ GtkCanvas::deliver_event (GdkEvent* event)
 
 	/* run through the items from child to parent, until one claims the event */
 
-	for (Item* item = const_cast<Item*> (_current_item); item; item = item->parent()) {
+	Item* item = const_cast<Item*> (_current_item);
+	
+	while (item) {
 
-		if (item->ignore_events ()) {
-			// DEBUG_TRACE (
-			// PBD::DEBUG::CanvasEvents,
-			// string_compose ("canvas event ignored by %1 %2\n", item->whatami(), item->name.empty() ? "[unknown]" : item->name)
-			// );
-			continue;
-		}
-		
-		if (item->Event (event)) {
+		Item* parent = item->parent ();
+
+		if (!item->ignore_events () && 
+		    item->Event (event)) {
 			/* this item has just handled the event */
 			DEBUG_TRACE (
 				PBD::DEBUG::CanvasEvents,
@@ -441,6 +519,11 @@ GtkCanvas::deliver_event (GdkEvent* event)
 		}
 		
 		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas event left unhandled by %1 %2\n", item->whatami(), item->name.empty() ? "[unknown]" : item->name));
+
+		if ((item = parent) == 0) {
+			break;
+		}
+
 	}
 
 	return false;
@@ -476,7 +559,7 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 		_focused_item = 0;
 	}
 
-	enter_leave_items (0); // no mouse state
+	pick_current_item (0); // no mouse state
 	
 }
 
@@ -525,7 +608,7 @@ GtkCanvas::on_button_press_event (GdkEventButton* ev)
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
 	*/
 
-	enter_leave_items (where, ev->state);
+	pick_current_item (where, ev->state);
 	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas button press @ %1, %2 => %3\n", ev->x, ev->y, where));
 	return deliver_event (reinterpret_cast<GdkEvent*>(&copy));
 }
@@ -542,7 +625,7 @@ GtkCanvas::on_button_release_event (GdkEventButton* ev)
 	GdkEvent copy = *((GdkEvent*)ev);
 	Duple where = window_to_canvas (Duple (ev->x, ev->y));
 	
-	enter_leave_items (where, ev->state);
+	pick_current_item (where, ev->state);
 
 	copy.button.x = where.x;
 	copy.button.y = where.y;
@@ -551,7 +634,7 @@ GtkCanvas::on_button_release_event (GdkEventButton* ev)
 	   for scroll if this GtkCanvas is in a GtkCanvasViewport.
 	*/
 
-	enter_leave_items (where, ev->state);
+	pick_current_item (where, ev->state);
 	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas button release @ %1, %2 => %3\n", ev->x, ev->y, where));
 	return deliver_event (reinterpret_cast<GdkEvent*>(&copy));
 }
@@ -586,7 +669,7 @@ GtkCanvas::on_motion_notify_event (GdkEventMotion* ev)
 		return _grabbed_item->Event (reinterpret_cast<GdkEvent*> (&copy));
 	}
 
-	enter_leave_items (where, ev->state);
+	pick_current_item (where, ev->state);
 
 	/* Now deliver the motion event.  It may seem a little inefficient
 	   to recompute the items under the event, but the enter notify/leave
@@ -601,28 +684,17 @@ bool
 GtkCanvas::on_enter_notify_event (GdkEventCrossing* ev)
 {
 	Duple where = window_to_canvas (Duple (ev->x, ev->y));
-	enter_leave_items (where, ev->state);
+	pick_current_item (where, ev->state);
 	return true;
 }
 
 bool
-GtkCanvas::on_leave_notify_event (GdkEventCrossing* /*ev*/)
+GtkCanvas::on_leave_notify_event (GdkEventCrossing* ev)
 {
-	_current_item = 0;
 	_new_current_item = 0;
+	Duple where = window_to_canvas (Duple (ev->x, ev->y));
+	deliver_enter_leave (where, ev->state);
 	return true;
-}
-
-bool
-GtkCanvas::on_key_press_event (GdkEventKey* ev)
-{
-	return false;
-}
-
-bool
-GtkCanvas::on_key_release_event (GdkEventKey* ev)
-{
-	return false;
 }
 
 /** Called to request a redraw of our canvas.

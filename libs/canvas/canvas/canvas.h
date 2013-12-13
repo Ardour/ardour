@@ -122,8 +122,8 @@ protected:
         Coord _scroll_offset_x;
         Coord _scroll_offset_y;
 
-        virtual void enter_leave_items (int state) = 0;
-        virtual void enter_leave_items (Duple const &, int state) = 0;
+        virtual void pick_current_item (int state) = 0;
+        virtual void pick_current_item (Duple const &, int state) = 0;
 };
 
 /** A canvas which renders onto a GTK EventBox */
@@ -150,28 +150,27 @@ protected:
 	bool on_motion_notify_event (GdkEventMotion *);
         bool on_enter_notify_event (GdkEventCrossing*);
         bool on_leave_notify_event (GdkEventCrossing*);
-        bool on_key_press_event (GdkEventKey*);
-        bool on_key_release_event (GdkEventKey*);
 	
 	bool button_handler (GdkEventButton *);
 	bool motion_notify_handler (GdkEventMotion *);
-	bool deliver_event (GdkEvent *);
-
-        void enter_leave_items (int state);
-        void enter_leave_items (Duple const &, int state);
+        bool deliver_event (GdkEvent *);
+        void deliver_enter_leave (Duple const & point, int state);
+    
+        void pick_current_item (int state);
+        void pick_current_item (Duple const &, int state);
 
 private:
 	void item_going_away (Item *, boost::optional<Rect>);
 	bool send_leave_event (Item const *, double, double) const;
 
         /** Item currently chosen for event delivery based on pointer position */
-        Item const * _current_item;
+        Item * _current_item;
         /** Item pending as _current_item */
-        Item const * _new_current_item;
+        Item * _new_current_item;
 	/** the item that is currently grabbed, or 0 */
-	Item const * _grabbed_item;
+	Item * _grabbed_item;
         /** the item that currently has key focus or 0 */
-	Item const * _focused_item;
+	Item * _focused_item;
 };
 
 /** A GTK::Alignment with a GtkCanvas inside it plus some Gtk::Adjustments for
