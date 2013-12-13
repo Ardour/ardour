@@ -109,6 +109,8 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, needs_ipmidi_restart (false)
 	, _metering_active (true)
 	, _initialized (false)
+	, _surfaces_state (0)
+	, _surfaces_version (0)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
@@ -133,6 +135,7 @@ MackieControlProtocol::~MackieControlProtocol()
 	tear_down_gui ();
 
 	_active = false;
+	delete _surfaces_state;
 
 	/* stop event loop */
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::~MackieControlProtocol BaseUI::quit ()\n");
@@ -665,6 +668,8 @@ MackieControlProtocol::create_surfaces ()
 			return -1;
 		}
 
+		surface->set_state (*_surfaces_state, _surfaces_version);
+
 		{
 			Glib::Threads::Mutex::Lock lm (surfaces_lock);
 			surfaces.push_back (surface);
@@ -746,13 +751,20 @@ MackieControlProtocol::get_state()
 	node->add_property (X_("device-profile"), _device_profile.name());
 	node->add_property (X_("device-name"), _device_info.name());
 
+	XMLNode* snode = new XMLNode (X_("Surfaces"));
+	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		snode->add_child_nocopy ((*s)->get_state());
+	}
+
+	node->add_child_nocopy (*snode);
+
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::get_state done\n");
 
 	return *node;
 }
 
 int 
-MackieControlProtocol::set_state (const XMLNode & node, int /*version*/)
+MackieControlProtocol::set_state (const XMLNode & node, int version)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieControlProtocol::set_state: active %1\n", _active));
 
@@ -780,6 +792,16 @@ MackieControlProtocol::set_state (const XMLNode & node, int /*version*/)
 
 	if ((prop = node.property (X_("device-profile"))) != 0) {
 		set_profile (prop->value());
+	}
+	
+	XMLNode* snode = node.child (X_("Surfaces"));
+	
+	delete _surfaces_state;
+	_surfaces_state = 0;
+
+	if (snode) {
+		_surfaces_state = new XMLNode (*snode);
+		_surfaces_version = version;
 	}
 
 	set_active (active);

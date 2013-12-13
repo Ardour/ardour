@@ -287,8 +287,9 @@ class MackieControlProtocol
 	bool                      needs_ipmidi_restart;
 	bool                     _metering_active;
 	bool                     _initialized;
-
 	ARDOUR::RouteNotificationList _last_selected_routes;
+        XMLNode*                 _surfaces_state;
+        int                      _surfaces_version;
 
 	int create_surfaces ();
 	bool periodic();

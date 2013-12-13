@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+#include "pbd/xml++.h"
 #include "midi++/types.h"
 
 #include "control_protocol/types.h"
@@ -145,6 +146,9 @@ public:
   
         void notify_metering_state_changed();
 	void turn_it_on ();
+
+	XMLNode& get_state ();
+	int set_state (const XMLNode&, int version);
 
   protected:
 	

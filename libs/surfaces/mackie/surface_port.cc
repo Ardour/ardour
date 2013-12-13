@@ -87,6 +87,56 @@ SurfacePort::~SurfacePort()
 	}
 }
 
+XMLNode&
+SurfacePort::get_state ()
+{
+	XMLNode* node = new XMLNode (X_("Port"));
+
+	if (_surface->mcp().device_info().uses_ipmidi()) {
+		/* no state required for IPMidi ports */
+		return *node;
+	}
+
+	XMLNode* child;
+
+	child = new XMLNode (X_("Input"));
+	child->add_child_nocopy (_async_in->get_state());
+	node->add_child_nocopy (*child);
+	
+
+	child = new XMLNode (X_("Output"));
+	child->add_child_nocopy (_async_out->get_state());
+	node->add_child_nocopy (*child);
+
+	return *node;
+}
+
+int
+SurfacePort::set_state (const XMLNode& node, int version)
+{
+	if (_surface->mcp().device_info().uses_ipmidi()) {
+		return 0;
+	}
+
+	XMLNode* child;
+
+	if ((child = node.child (X_("Input"))) != 0) {
+		XMLNode* portnode = child->child (Port::state_node_name.c_str());
+		if (portnode) {
+			_async_in->set_state (*portnode, version);
+		}
+	}
+
+	if ((child = node.child (X_("Output"))) != 0) {
+		XMLNode* portnode = child->child (Port::state_node_name.c_str());
+		if (portnode) {
+			_async_out->set_state (*portnode, version);
+		}
+	}
+
+	return 0;
+}
+
 // wrapper for one day when strerror_r is working properly
 string fetch_errmsg (int error_number)
 {
