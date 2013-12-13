@@ -267,12 +267,17 @@ Editor::canvas_region_view_event (GdkEvent *event, ArdourCanvas::Item* item, Reg
 		break;
 
 	case GDK_ENTER_NOTIFY:
-		set_entered_regionview (rv);
-		ret = true;
+		if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			set_entered_regionview (rv);
+			ret = true;
+		}
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		set_entered_regionview (0);
+		if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			set_entered_regionview (0);
+			ret = true;
+		}
 		break;
 
 	default:
