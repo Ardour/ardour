@@ -589,12 +589,6 @@ Surface::turn_it_on ()
 }
 
 void 
-Surface::handle_port_inactive (SurfacePort*)
-{
-	_active = false;
-}
-
-void 
 Surface::write_sysex (const MidiByteArray & mba)
 {
 	if (mba.empty()) {

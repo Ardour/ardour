@@ -92,9 +92,6 @@ public:
 	/// unless it's already connected
 	void connect_to_signals ();
 
-	/// notification from a MackiePort that it's now inactive
-	void handle_port_inactive(Mackie::SurfacePort *);
-
 	/// write a sysex message
 	void write_sysex (const MidiByteArray& mba);
 	void write_sysex (MIDI::byte msg);

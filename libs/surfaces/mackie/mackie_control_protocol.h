@@ -262,7 +262,6 @@ class MackieControlProtocol
 	uint32_t                 _current_initial_bank;
 	PBD::ScopedConnectionList audio_engine_connections;
 	PBD::ScopedConnectionList session_connections;
-	PBD::ScopedConnectionList port_connections;
 	PBD::ScopedConnectionList route_connections;
 	PBD::ScopedConnectionList gui_connections;
 	// timer for two quick marker left presses

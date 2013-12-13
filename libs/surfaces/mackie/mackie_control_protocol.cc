@@ -718,7 +718,6 @@ MackieControlProtocol::close()
 {
 	clear_ports ();
 
-	port_connections.drop_connections ();
 	session_connections.drop_connections ();
 	route_connections.drop_connections ();
 	periodic_connection.disconnect ();
