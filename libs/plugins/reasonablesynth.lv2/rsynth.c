@@ -71,6 +71,7 @@ typedef struct _RSSynthChannel {
   float     adsr_amp[128];
   float     phase[128];      // various use, zero'ed on note-on
   int8_t    miditable[128];  // internal, note-on/off velocity
+  int8_t    midimsgs [128];  // internal, note-off + on in same cycle
   ADSRcfg   adsr;
   void      (*synthesize) (struct _RSSynthChannel* sc,
       const uint8_t note, const float vol, const float pc,
@@ -218,8 +219,10 @@ static void process_key (void *synth,
   RSSynthesizer*  rs = (RSSynthesizer*)synth;
   RSSynthChannel* sc = &rs->sc[chn];
   const int8_t vel = sc->miditable[note];
+  const int8_t msg = sc->midimsgs[note];
   const float vol = /* master_volume */ 0.25 * fabsf(vel) / 127.0;
   const float phase = sc->phase[note];
+  sc->midimsgs[note] = 0;
 
   if (phase == -10 && vel > 0) {
     // new note on
@@ -232,7 +235,7 @@ static void process_key (void *synth,
   }
   else if (phase >= -1.0 && phase <= 1.0 && vel > 0) {
     // sustain note or re-start note while adsr in progress:
-    if (sc->adsr_cnt[note] > sc->adsr.off[1]) {
+    if (sc->adsr_cnt[note] > sc->adsr.off[1] || msg == 3) {
       // x-fade to attack
       sc->adsr_amp[note] = adsr_env(sc, note);
       sc->adsr_cnt[note] = 0;
@@ -307,6 +310,7 @@ static void synth_reset_channel(RSSynthChannel* sc) {
     sc->adsr_amp[k]  = 0;
     sc->phase[k]     = -10;
     sc->miditable[k] = 0;
+    sc->midimsgs[k]  = 0;
   }
   sc->keycomp = 0;
 }
@@ -338,10 +342,12 @@ static void synth_process_midi_event(void *synth, struct rmidi_event_t *ev) {
   RSSynthesizer* rs = (RSSynthesizer*)synth;
   switch(ev->type) {
     case NOTE_ON:
+      rs->sc[ev->channel].midimsgs[ev->d.tone.note] |= 1;
       if (rs->sc[ev->channel].miditable[ev->d.tone.note] <= 0)
         rs->sc[ev->channel].miditable[ev->d.tone.note] = ev->d.tone.velocity;
       break;
     case NOTE_OFF:
+      rs->sc[ev->channel].midimsgs[ev->d.tone.note] |= 2;
       if (rs->sc[ev->channel].miditable[ev->d.tone.note] > 0)
         rs->sc[ev->channel].miditable[ev->d.tone.note] *= -1.0;
       break;
