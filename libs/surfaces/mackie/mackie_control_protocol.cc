@@ -668,7 +668,9 @@ MackieControlProtocol::create_surfaces ()
 			return -1;
 		}
 
-		surface->set_state (*_surfaces_state, _surfaces_version);
+		if (_surfaces_state) {
+			surface->set_state (*_surfaces_state, _surfaces_version);
+		}
 
 		{
 			Glib::Threads::Mutex::Lock lm (surfaces_lock);
