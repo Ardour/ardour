@@ -173,7 +173,7 @@ MIDIClock_Slave::update_midi_clock (Parser& /*parser*/, framepos_t timestamp)
 						       error,
 						       timestamp - last_timestamp,
 						       one_ppqn_in_frames,
-						       (t1 -t0) * session->frame_rate(),
+						       (t1 - t0) * session->frame_rate(),
 						       t0 * session->frame_rate(),
 						       t1 * session->frame_rate(),
 						       session->frame_rate(),
@@ -200,6 +200,9 @@ MIDIClock_Slave::start (Parser& /*parser*/, framepos_t timestamp)
 void
 MIDIClock_Slave::reset ()
 {
+	bandwidth = (256.0 / session->frames_per_cycle()) * 10.0 / 60.0;
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MidiClock_Slave reset(): calculated filter bandwidth is %1 for period size %2", bandwidth, session->frames_per_cycle()));
+
 	should_be_position = session->transport_frame();
 	last_timestamp = 0;
 

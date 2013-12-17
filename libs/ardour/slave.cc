@@ -35,6 +35,12 @@ SlaveSessionProxy::frame_rate() const
 	return session.frame_rate();
 }
 
+pframes_t
+SlaveSessionProxy::frames_per_cycle() const
+{
+	return session.engine().samples_per_cycle();
+}
+
 framepos_t
 SlaveSessionProxy::audible_frame() const
 {
