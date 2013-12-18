@@ -131,8 +131,11 @@ MIDIClock_Slave::update_midi_clock (Parser& /*parser*/, framepos_t timestamp)
 	if (_starting || last_timestamp == 0) {
 		midi_clock_count = 0;
 
+
 		first_timestamp = timestamp;
 		elapsed_since_start = should_be_position;
+
+		DEBUG_TRACE (DEBUG::MidiClock, string_compose ("first clock message after start received @ %1\n", timestamp));
 
 		// calculate filter coefficients
 		calculate_filter_coefficients();
@@ -163,21 +166,21 @@ MIDIClock_Slave::update_midi_clock (Parser& /*parser*/, framepos_t timestamp)
 		e2 += c * e;
 	}
 
-	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("clock #%1 @ %2 arrived %3 (theoretical) audible %4 transport %5 error %6 "
-						       "read delta %7 should-be delta %8 t1-t0 %9 t0 %10 t1 %11 framerate %12 appspeed %13\n",
-						       midi_clock_count,
-						       elapsed_since_start,
-						       should_be_position,
-						       session->audible_frame(),
-						       session->transport_frame(),
-						       error,
-						       timestamp - last_timestamp,
-						       one_ppqn_in_frames,
-						       (t1 - t0) * session->frame_rate(),
-						       t0 * session->frame_rate(),
-						       t1 * session->frame_rate(),
-						       session->frame_rate(),
-						       ((t1 - t0) * session->frame_rate()) / one_ppqn_in_frames));
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("clock #%1 @ %2 should-be %3 transport %4 error %5 appspeed %6 "
+						       "read-delta %7 should-be delta %8 t1-t0 %9 t0 %10 t1 %11 framerate %12\n",
+						       midi_clock_count,                                          // #
+						       elapsed_since_start,                                       // @
+						       should_be_position,                                        // should-be
+						       session->transport_frame(),                                // transport
+						       error,                                                     // error
+						       ((t1 - t0) * session->frame_rate()) / one_ppqn_in_frames, // appspeed
+						       timestamp - last_timestamp,                                // read delta
+						       one_ppqn_in_frames,                                        // should-be delta
+						       (t1 - t0) * session->frame_rate(),                         // t1-t0
+						       t0 * session->frame_rate(),                                // t0
+						       t1 * session->frame_rate(),                                // t1
+						       session->frame_rate()                                      // framerate
+	));
 
 	last_timestamp = timestamp;
 }
@@ -185,7 +188,7 @@ MIDIClock_Slave::update_midi_clock (Parser& /*parser*/, framepos_t timestamp)
 void
 MIDIClock_Slave::start (Parser& /*parser*/, framepos_t timestamp)
 {
-	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MIDIClock_Slave got start message at time %1 engine time %2\n", timestamp, session->frame_time()));
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MIDIClock_Slave got start message at time %1 engine time %2 transport_frame %3\n", timestamp, session->frame_time(), session->transport_frame()));
 
 	if (!_started) {
 		reset();
@@ -201,7 +204,7 @@ void
 MIDIClock_Slave::reset ()
 {
 	bandwidth = (256.0 / session->frames_per_cycle()) * 10.0 / 60.0;
-	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MidiClock_Slave reset(): calculated filter bandwidth is %1 for period size %2", bandwidth, session->frames_per_cycle()));
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MidiClock_Slave reset(): calculated filter bandwidth is %1 for period size %2\n", bandwidth, session->frames_per_cycle()));
 
 	should_be_position = session->transport_frame();
 	last_timestamp = 0;
@@ -348,7 +351,7 @@ MIDIClock_Slave::speed_and_position (double& speed, framepos_t& pos)
 		pos = should_be_position;
 	}
 
-	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("speed_and_position: %1 & %2 <-> %3 (transport)\n", speed, pos, session->transport_frame()));
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("speed_and_position: speed %1 should-be %2 transport %3 \n", speed, pos, session->transport_frame()));
 
 	return true;
 }
