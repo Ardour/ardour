@@ -45,7 +45,7 @@ using namespace PBD;
 
 MIDIClock_Slave::MIDIClock_Slave (Session& s, MidiPort& p, int ppqn)
 	: ppqn (ppqn)
-	, bandwidth (10.0 / 60.0) // 1 BpM = 1 / 60 Hz
+	, bandwidth (2.0 / 60.0) // 1 BpM = 1 / 60 Hz
 {
 	session = (ISlaveSessionProxy *) new SlaveSessionProxy(s);
 	rebind (p);
@@ -55,7 +55,7 @@ MIDIClock_Slave::MIDIClock_Slave (Session& s, MidiPort& p, int ppqn)
 MIDIClock_Slave::MIDIClock_Slave (ISlaveSessionProxy* session_proxy, int ppqn)
 	: session(session_proxy)
 	, ppqn (ppqn)
-	, bandwidth (10.0 / 60.0) // 1 BpM = 1 / 60 Hz
+	, bandwidth (2.0 / 60.0) // 1 BpM = 1 / 60 Hz
 {
 	reset ();
 }
@@ -206,7 +206,6 @@ MIDIClock_Slave::start (Parser& /*parser*/, framepos_t timestamp)
 void
 MIDIClock_Slave::reset ()
 {
-	bandwidth = (256.0 / session->frames_per_cycle()) * 10.0 / 60.0;
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MidiClock_Slave reset(): calculated filter bandwidth is %1 for period size %2\n", bandwidth, session->frames_per_cycle()));
 
 	should_be_position = session->transport_frame();
