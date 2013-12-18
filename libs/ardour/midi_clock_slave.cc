@@ -123,6 +123,8 @@ MIDIClock_Slave::update_midi_clock (Parser& /*parser*/, framepos_t timestamp)
 		return;
 	}
 
+	pframes_t cycle_offset = timestamp - session->sample_time_at_cycle_start();
+
 	calculate_one_ppqn_in_frames_at(should_be_position);
 
 	framepos_t elapsed_since_start = timestamp - first_timestamp;
@@ -130,7 +132,6 @@ MIDIClock_Slave::update_midi_clock (Parser& /*parser*/, framepos_t timestamp)
 
 	if (_starting || last_timestamp == 0) {
 		midi_clock_count = 0;
-
 
 		first_timestamp = timestamp;
 		elapsed_since_start = should_be_position;
@@ -156,7 +157,7 @@ MIDIClock_Slave::update_midi_clock (Parser& /*parser*/, framepos_t timestamp)
 		// we use session->transport_frame() instead of t1 here
 		// because t1 is used to calculate the transport speed,
 		// so the loop will compensate for accumulating rounding errors
-		error = (double(should_be_position) - double(session->transport_frame()));
+		error = (double(should_be_position) - (double(session->transport_frame()) + double(cycle_offset)));
 		e = error / double(session->frame_rate());
 		current_delta = error;
 
@@ -167,7 +168,7 @@ MIDIClock_Slave::update_midi_clock (Parser& /*parser*/, framepos_t timestamp)
 	}
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("clock #%1 @ %2 should-be %3 transport %4 error %5 appspeed %6 "
-						       "read-delta %7 should-be delta %8 t1-t0 %9 t0 %10 t1 %11 framerate %12\n",
+						       "read-delta %7 should-be delta %8 t1-t0 %9 t0 %10 t1 %11 framerate %12 engine %13\n",
 						       midi_clock_count,                                          // #
 						       elapsed_since_start,                                       // @
 						       should_be_position,                                        // should-be
@@ -179,7 +180,9 @@ MIDIClock_Slave::update_midi_clock (Parser& /*parser*/, framepos_t timestamp)
 						       (t1 - t0) * session->frame_rate(),                         // t1-t0
 						       t0 * session->frame_rate(),                                // t0
 						       t1 * session->frame_rate(),                                // t1
-						       session->frame_rate()                                      // framerate
+						       session->frame_rate(),                                      // framerate
+						       session->frame_time()
+
 	));
 
 	last_timestamp = timestamp;

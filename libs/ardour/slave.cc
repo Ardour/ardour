@@ -59,6 +59,13 @@ SlaveSessionProxy::frames_since_cycle_start() const
 	return session.engine().samples_since_cycle_start();
 }
 
+pframes_t
+SlaveSessionProxy::sample_time_at_cycle_start() const
+{
+	return session.engine().sample_time_at_cycle_start();
+}
+
+
 framepos_t
 SlaveSessionProxy::frame_time() const
 {
