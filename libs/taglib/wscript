@@ -103,7 +103,7 @@ def build(bld):
     for h in headers:
         tgt = bld.path.get_bld().make_node (os.path.join ('taglib', os.path.basename (h)))
         if not os.path.exists (tgt.bldpath()):
-            bld (rule = "cp ${SRC} ${TGT}",
+            bld (rule = autowaf.copyfile,
                  source = bld.path.make_node (os.path.join ('taglib', h)),
                  target = tgt)
 

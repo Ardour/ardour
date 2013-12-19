@@ -10,6 +10,7 @@ import glob
 import os
 import subprocess
 import sys
+import shutil
 
 from waflib import Configure, Context, Logs, Node, Options, Task, Utils
 from waflib.TaskGen import feature, before, after
@@ -90,6 +91,12 @@ def set_options(opt, debug_by_default=False):
     dirs_options.add_option('--lv2dir', type='string',
                             help="LV2 bundles [Default: LIBDIR/lv2]")
     g_step = 1
+
+def copyfile (task):
+    # a cross-platform utility for copying files as part of tasks
+    src = task.inputs[0].abspath()
+    tgt = task.outputs[0].abspath()
+    shutil.copy2 (src, tgt)
 
 def check_header(conf, lang, name, define='', mandatory=True):
     "Check for a header"
