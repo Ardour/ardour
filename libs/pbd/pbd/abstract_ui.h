@@ -57,7 +57,7 @@ class AbstractUI : public BaseUI
         };
 	typedef typename RequestBuffer::rw_vector RequestBufferVector;
 
-#ifdef COMPILER_MINGW
+#if defined(__MINGW32__) && !defined (__MINGW64__)
 
 	struct pthread_cmp
 	{
