@@ -438,7 +438,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		ardour->add_bundle (ltc);
 	}
 
-	/* Ardour's surfaces */
+	/* Ardour's control surfaces */
 
 	ControlProtocolManager& m = ControlProtocolManager::instance ();
 	for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
