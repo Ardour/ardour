@@ -47,8 +47,8 @@ class ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, 
 
 	std::string name() const { return _name; }
 
-	virtual int set_active (bool yn) = 0;
-	bool get_active() const { return _active; }
+        virtual int set_active (bool yn);
+        bool active() const { return _active; }
 
 	virtual int set_feedback (bool /*yn*/) { return 0; }
 	virtual bool get_feedback () const { return false; }
@@ -133,16 +133,19 @@ class ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, 
 	virtual void* get_gui() const { return 0; }
 	virtual void  tear_down_gui() { }
 
+        XMLNode& get_state ();
+        static const std::string state_node_name;
+
   protected:
 	std::vector<boost::shared_ptr<ARDOUR::Route> > route_table;
 	std::string _name;
-	bool _active;
 
 	void next_track (uint32_t initial_id);
 	void prev_track (uint32_t initial_id);
 
   private:
 	ControlProtocol (const ControlProtocol&); /* noncopyable */
+        bool _active;
 };
 
 extern "C" {
