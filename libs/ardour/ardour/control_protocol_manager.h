@@ -65,8 +65,8 @@ class ControlProtocolManager : public PBD::Stateful, public ARDOUR::SessionHandl
 	void load_mandatory_protocols ();
 	void midi_connectivity_established ();
 
-	ControlProtocol* instantiate (ControlProtocolInfo&);
-	int              teardown (ControlProtocolInfo&);
+        int activate (ControlProtocolInfo&);
+        int deactivate (ControlProtocolInfo&);
 	
 	std::list<ControlProtocolInfo*> control_protocol_info;
 
@@ -89,6 +89,8 @@ class ControlProtocolManager : public PBD::Stateful, public ARDOUR::SessionHandl
 	int control_protocol_discover (std::string path);
 	ControlProtocolDescriptor* get_descriptor (std::string path);
 	ControlProtocolInfo* cpi_by_name (std::string);
+	ControlProtocol* instantiate (ControlProtocolInfo&);
+	int teardown (ControlProtocolInfo&);
 };
 
 } // namespace
