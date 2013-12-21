@@ -120,7 +120,7 @@ class MackieControlProtocol
 	Mackie::DeviceProfile& device_profile() { return _device_profile; }
 
 	int set_active (bool yn);
-	int  set_device (const std::string&, bool allow_activation = true);
+	int  set_device (const std::string&);
         void set_profile (const std::string&);
 
 	FlipMode flip_mode () const { return _flip_mode; }
@@ -303,7 +303,8 @@ class MackieControlProtocol
 	void _gui_track_selection_changed (ARDOUR::RouteNotificationList*, bool save_list);
 	int ipmidi_restart ();
         void initialize ();
-	
+        int set_device_info (const std::string& device_name);
+
 	/* BUTTON HANDLING */
 
 	typedef std::set<uint32_t> DownButtonList;
