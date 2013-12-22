@@ -101,6 +101,9 @@ ArdourMeter::meter_type_string (ARDOUR::MeterType mt)
 		case MeterK14:
 			return _("K14");
 			break;
+		case MeterK12:
+			return _("K12");
+			break;
 		case MeterVU:
 			return _("VU");
 			break;
@@ -199,6 +202,16 @@ static inline float mtr_col_and_fract(
 			}
 			fraction = meter_deflect_k (val, 14);
 			break;
+		case MeterK12:
+			if (val >= -8.0) {
+				cairo_set_source_rgb (cr, 1.0, 0.0, 0.0); // red
+			} else if (val >= -12.0) {
+				cairo_set_source_rgb (cr, 0.8, 0.8, 0.0); // yellow
+			} else {
+				cairo_set_source_rgb (cr, 0.0, 1.0, 0.0); // green
+			}
+			fraction = meter_deflect_k (val, 12);
+			break;
 	}
 	return fraction;
 }
@@ -226,6 +239,7 @@ static void set_bg_color(Gtk::Widget& w, cairo_t* cr, MeterType type) {
 		case MeterIEC1NOR:
 		case MeterIEC2BBC:
 		case MeterIEC2EBU:
+		case MeterK12:
 		case MeterK14:
 		case MeterK20:
 			if (rgba_p_from_style("meterstripPPM", &r, &g, &b, "bg")) {
@@ -334,6 +348,20 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 		case DataType::AUDIO:
 
 			switch (type) {
+				case MeterK12:
+					points.insert (std::pair<float,float>(-52.0f, 1.0));
+					points.insert (std::pair<float,float>(-42.0f, 1.0));
+					points.insert (std::pair<float,float>(-32.0f, 1.0));
+					points.insert (std::pair<float,float>(-22.0f, 1.0));
+					points.insert (std::pair<float,float>(-18.0f, 1.0));
+					points.insert (std::pair<float,float>(-15.0f, 1.0));
+					points.insert (std::pair<float,float>(-12.0f, 1.0));
+					points.insert (std::pair<float,float>( -9.0f, 1.0));
+					points.insert (std::pair<float,float>( -8.0f, 0.8));
+					points.insert (std::pair<float,float>( -6.0f, 1.0));
+					points.insert (std::pair<float,float>( -3.0f, 1.0));
+					points.insert (std::pair<float,float>(  0.0f, 1.0));
+					break;
 				case MeterK14:
 					points.insert (std::pair<float,float>(-54.0f, 1.0));
 					points.insert (std::pair<float,float>(-44.0f, 1.0));
@@ -645,6 +673,20 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 		case DataType::AUDIO:
 			layout->set_attributes (audio_font_attributes);
 			switch (type) {
+				case MeterK12:
+					overlay_midi = 0;
+					points.insert (std::pair<float,string>(-52.0f, "-40"));
+					points.insert (std::pair<float,string>(-42.0f, "-30"));
+					points.insert (std::pair<float,string>(-32.0f, "-20"));
+					points.insert (std::pair<float,string>(-22.0f, "-10"));
+					points.insert (std::pair<float,string>(-18.0f,  "-6"));
+					points.insert (std::pair<float,string>(-15.0f,  "-3"));
+					points.insert (std::pair<float,string>(-12.0f,  " 0"));
+					points.insert (std::pair<float,string>( -9.0f,  "+3"));
+					points.insert (std::pair<float,string>( -6.0f,  "+6"));
+					points.insert (std::pair<float,string>( -3.0f,  "+9"));
+					points.insert (std::pair<float,string>(  0.0f, "+12"));
+					break;
 				case MeterK14:
 					overlay_midi = 0;
 					points.insert (std::pair<float,string>(-54.0f, "-40"));
@@ -902,6 +944,9 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 						break;
 					case MeterK14:
 						layout->set_text("K14");
+						break;
+					case MeterK12:
+						layout->set_text("K12");
 						break;
 					default:
 					case MeterPeak:
