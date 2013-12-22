@@ -380,14 +380,13 @@ def build(bld):
         '''
         obj.use          = [ 'libpbd',
                              'libmidipp',
-                             'libtaglib',
                              'libardour',
                              'libardour_cp',
                              'libtimecode',
                              'libmidipp',
                              'libgtk2_ardour',
                              'libgtkmm2ext',
-                             'libtaglib']
+                             ]
         obj.target = 'ardour-' + bld.env['VERSION'] + '-vst.exe.so'
         obj.includes  = [ '../libs/fst', '.' ]
         obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
