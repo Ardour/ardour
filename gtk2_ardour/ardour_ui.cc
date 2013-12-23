@@ -3565,7 +3565,8 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 				if (!transcode_video_dialog->get_audiofile().empty()) {
 					editor->embed_audio_from_video(
 							transcode_video_dialog->get_audiofile(),
-							video_timeline->get_offset()
+							video_timeline->get_offset(),
+							(transcode_video_dialog->import_option() != VTL_IMPORT_NO_VIDEO)
 							);
 				}
 				switch (transcode_video_dialog->import_option()) {
