@@ -25,12 +25,14 @@
 
 #include "pbd/convert.h"
 
+#include "ardour/audiofile_tagger.h"
 #include "ardour/export_graph_builder.h"
 #include "ardour/export_timespan.h"
 #include "ardour/export_channel_configuration.h"
 #include "ardour/export_status.h"
 #include "ardour/export_format_specification.h"
 #include "ardour/export_filename.h"
+#include "ardour/session_metadata.h"
 
 #include "i18n.h"
 
@@ -280,13 +282,18 @@ ExportHandler::finish_timespan ()
 	while (config_map.begin() != timespan_bounds.second) {
 
 		ExportFormatSpecPtr fmt = config_map.begin()->second.format;
+		std::string filename = config_map.begin()->second.filename->get_path(fmt);
 
 		if (fmt->with_cue()) {
-			export_cd_marker_file (current_timespan, fmt, config_map.begin()->second.filename->get_path(fmt), CDMarkerCUE);
-		} 
+			export_cd_marker_file (current_timespan, fmt, filename, CDMarkerCUE);
+		}
 
 		if (fmt->with_toc()) {
-			export_cd_marker_file (current_timespan, fmt, config_map.begin()->second.filename->get_path(fmt), CDMarkerTOC);
+			export_cd_marker_file (current_timespan, fmt, filename, CDMarkerTOC);
+		}
+
+		if (fmt->tag()) {
+			AudiofileTagger::tag_file(filename, *SessionMetadata::Metadata());
 		}
 
 		config_map.erase (config_map.begin());
