@@ -183,12 +183,14 @@ class Slave {
 class ISlaveSessionProxy {
   public:
 	virtual ~ISlaveSessionProxy() {}
-	virtual TempoMap&  tempo_map()                 const   { return *((TempoMap *) 0); }
-	virtual framecnt_t frame_rate()                const   { return 0; }
-	virtual framepos_t audible_frame ()            const   { return 0; }
-	virtual framepos_t transport_frame ()          const   { return 0; }
-	virtual pframes_t  frames_since_cycle_start () const   { return 0; }
-	virtual framepos_t frame_time ()               const   { return 0; }
+	virtual TempoMap&  tempo_map()                  const   { return *((TempoMap *) 0); }
+	virtual framecnt_t frame_rate()                 const   { return 0; }
+	virtual pframes_t  frames_per_cycle()           const   { return 0; }
+	virtual framepos_t audible_frame ()             const   { return 0; }
+	virtual framepos_t transport_frame ()           const   { return 0; }
+	virtual pframes_t  frames_since_cycle_start ()  const   { return 0; }
+	virtual pframes_t  sample_time_at_cycle_start() const   { return 0; }
+	virtual framepos_t frame_time ()                const   { return 0; }
 
 	virtual void request_locate (framepos_t /*frame*/, bool with_roll = false) {
 		(void) with_roll;
@@ -204,12 +206,14 @@ class SlaveSessionProxy : public ISlaveSessionProxy {
   public:
 	SlaveSessionProxy(Session &s) : session(s) {}
 
-	TempoMap&  tempo_map()                 const;
-	framecnt_t frame_rate()                const;
-	framepos_t audible_frame ()            const;
-	framepos_t transport_frame ()          const;
-	pframes_t  frames_since_cycle_start () const;
-	framepos_t frame_time ()               const;
+	TempoMap&  tempo_map()                   const;
+	framecnt_t frame_rate()                  const;
+	pframes_t  frames_per_cycle()            const;
+	framepos_t audible_frame ()              const;
+	framepos_t transport_frame ()            const;
+	pframes_t  frames_since_cycle_start ()   const;
+	pframes_t  sample_time_at_cycle_start()  const;
+	framepos_t frame_time ()                 const;
 
 	void request_locate (framepos_t frame, bool with_roll = false);
 	void request_transport_speed (double speed);

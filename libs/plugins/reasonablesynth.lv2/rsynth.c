@@ -71,6 +71,7 @@ typedef struct _RSSynthChannel {
   float     adsr_amp[128];
   float     phase[128];      // various use, zero'ed on note-on
   int8_t    miditable[128];  // internal, note-on/off velocity
+  int8_t    midimsgs [128];  // internal, note-off + on in same cycle
   ADSRcfg   adsr;
   void      (*synthesize) (struct _RSSynthChannel* sc,
       const uint8_t note, const float vol, const float pc,
@@ -89,6 +90,8 @@ typedef struct {
   float          kcgain;
   float          kcfilt;
   double         rate;
+  uint32_t       xmas_on;
+  uint32_t       xmas_off;
 } RSSynthesizer;
 
 
@@ -216,8 +219,10 @@ static void process_key (void *synth,
   RSSynthesizer*  rs = (RSSynthesizer*)synth;
   RSSynthChannel* sc = &rs->sc[chn];
   const int8_t vel = sc->miditable[note];
+  const int8_t msg = sc->midimsgs[note];
   const float vol = /* master_volume */ 0.25 * fabsf(vel) / 127.0;
   const float phase = sc->phase[note];
+  sc->midimsgs[note] = 0;
 
   if (phase == -10 && vel > 0) {
     // new note on
@@ -230,7 +235,7 @@ static void process_key (void *synth,
   }
   else if (phase >= -1.0 && phase <= 1.0 && vel > 0) {
     // sustain note or re-start note while adsr in progress:
-    if (sc->adsr_cnt[note] > sc->adsr.off[1]) {
+    if (sc->adsr_cnt[note] > sc->adsr.off[1] || msg == 3) {
       // x-fade to attack
       sc->adsr_amp[note] = adsr_env(sc, note);
       sc->adsr_cnt[note] = 0;
@@ -305,6 +310,7 @@ static void synth_reset_channel(RSSynthChannel* sc) {
     sc->adsr_amp[k]  = 0;
     sc->phase[k]     = -10;
     sc->miditable[k] = 0;
+    sc->midimsgs[k]  = 0;
   }
   sc->keycomp = 0;
 }
@@ -336,10 +342,12 @@ static void synth_process_midi_event(void *synth, struct rmidi_event_t *ev) {
   RSSynthesizer* rs = (RSSynthesizer*)synth;
   switch(ev->type) {
     case NOTE_ON:
+      rs->sc[ev->channel].midimsgs[ev->d.tone.note] |= 1;
       if (rs->sc[ev->channel].miditable[ev->d.tone.note] <= 0)
         rs->sc[ev->channel].miditable[ev->d.tone.note] = ev->d.tone.velocity;
       break;
     case NOTE_OFF:
+      rs->sc[ev->channel].midimsgs[ev->d.tone.note] |= 2;
       if (rs->sc[ev->channel].miditable[ev->d.tone.note] > 0)
         rs->sc[ev->channel].miditable[ev->d.tone.note] *= -1.0;
       break;
@@ -446,6 +454,44 @@ static void synth_parse_midi(void *synth, const uint8_t *data, const size_t size
   synth_process_midi_event(synth, &ev);
 }
 
+static const uint8_t jingle[] = { 71 ,71 ,71 ,71 ,71 ,71 ,71 ,74 ,67 ,69 ,71 ,72 ,72 ,72 ,72 ,72 ,71 ,71 ,71 ,71 ,71 ,69 ,69 ,71 ,69 ,74 ,71 ,71 ,71 ,71 ,71 ,71 ,71 ,74 ,67 ,69 ,71 ,72 ,72 ,72 ,72 ,72 ,71 ,71 ,71 ,71 ,74 ,74 ,72 ,69 ,67 ,62 ,62 ,71 ,69 ,67 ,62 ,62 ,62 ,62 ,71 ,69 ,67 ,64 ,64 ,64 ,72 ,71 ,69 ,66 ,74 ,76 ,74 ,72 ,69 ,71 ,62 ,62 ,71 ,69 ,67 ,62 ,62 ,62 ,62 ,71 ,69 ,67 ,64 ,64 ,64 ,72 ,71 ,69 ,74 ,74 ,74 ,74 ,76 ,74 ,72 ,69 ,67 ,74 ,71 ,71 ,71 ,71 ,71 ,71 ,71 ,74 ,67 ,69 ,71 ,72 ,72 ,72 ,72 ,72 ,71 ,71 ,71 ,71 ,71 ,69 ,69 ,71 ,69 ,74 ,71 ,71 ,71 ,71 ,71 ,71 ,71 ,74 ,67 ,69 ,71 ,72 ,72 ,72 ,72 ,72 ,71 ,71 ,71 ,71 ,74 ,74 ,72 ,69 ,67 };
+
+static void synth_parse_xmas(void *synth, const uint8_t *data, const size_t size) {
+  RSSynthesizer* rs = (RSSynthesizer*)synth;
+  if (size < 2 || size > 3) return;
+  // All messages need to be 3 bytes; except program-changes: 2bytes.
+  if (size == 2 && (data[0] & 0xf0)  != 0xC0) return;
+
+  struct rmidi_event_t ev;
+
+  ev.channel = data[0]&0x0f;
+  switch (data[0] & 0xf0) {
+    case 0x80:
+      ev.type=NOTE_OFF;
+      ev.d.tone.note=jingle[rs->xmas_off++];
+      ev.d.tone.velocity=data[2]&0x7f;
+      if (rs->xmas_off >= sizeof(jingle)) rs->xmas_off = 0;
+      break;
+    case 0x90:
+      ev.type=NOTE_ON;
+      ev.d.tone.note=jingle[rs->xmas_on++];
+      ev.d.tone.velocity=data[2]&0x7f;
+      if (rs->xmas_on >= sizeof(jingle)) rs->xmas_on = 0;
+      break;
+    case 0xB0:
+      ev.type=CONTROL_CHANGE;
+      ev.d.control.param=data[1]&0x7f;
+      ev.d.control.value=data[2]&0x7f;
+      break;
+    case 0xC0:
+      ev.type=PROGRAM_CHANGE;
+      ev.d.control.value=data[1]&0x7f;
+      break;
+    default:
+      return;
+  }
+  synth_process_midi_event(synth, &ev);
+}
 /**
  * initialize the synth
  * This should be called after synth_alloc()
@@ -461,7 +507,7 @@ static void synth_init(void *synth, double rate) {
   const float tuning = 440;
   int c,k;
   for (k=0; k < 128; k++) {
-    rs->freqs[k] = (2.0 * tuning / 32.0f) * powf(2, (k - 9.0) / 12.0) / rate;
+    rs->freqs[k] = (tuning / 32.0f) * powf(2, (k - 9.0) / 12.0) / rate;
     assert(rs->freqs[k] < M_PI/2); // otherwise spatialization may phase out..
   }
   rs->kcfilt = 12.0 / rate;
@@ -470,6 +516,8 @@ static void synth_init(void *synth, double rate) {
   for (c=0; c < 16; c++) {
     synth_load(&rs->sc[c], rate, &synthesize_sineP, &piano_adsr);
   }
+  rs->xmas_on = 0;
+  rs->xmas_off = 0;
 }
 
 /**

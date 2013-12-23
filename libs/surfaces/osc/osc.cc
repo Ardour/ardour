@@ -30,6 +30,7 @@
 
 #include <glibmm/miscutils.h>
 
+#include <pbd/convert.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/file_utils.h>
 #include <pbd/failed_constructor.h>
@@ -71,22 +72,20 @@ static void error_callback(int, const char *, const char *)
 #endif
 
 OSC::OSC (Session& s, uint32_t port)
-	: ControlProtocol (s, "OSC")
+	: ControlProtocol (s, X_("Open Sound Control (OSC)"))
 	, AbstractUI<OSCUIRequest> ("osc")
+	, local_server (0)
+	, remote_server (0)
 	, _port(port)
+	, _ok (true)
+	, _shutdown (false)
+	, _osc_server (0)
+	, _osc_unix_server (0)
+	, _namespace_root ("/ardour")
+	, _send_route_changes (true)
 {
 	_instance = this;
-	_shutdown = false;
-	_osc_server = 0;
-	_osc_unix_server = 0;
-	_namespace_root = "/ardour";
-	_send_route_changes = true;
 
-	/* glibmm hack */
-	local_server = 0;
-	remote_server = 0;
-
-	// "Application Hooks"
 	session_loaded (s);
 	session->Exported.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::session_exported, this, _1, _2), this);
 }
@@ -113,11 +112,21 @@ OSC::do_request (OSCUIRequest* req)
 int
 OSC::set_active (bool yn)
 {
-	if (yn) {
-		return start ();
-	} else {
-		return stop ();
+	if (yn != active()) {
+
+		if (yn) {
+			if (start ()) {
+				return -1;
+			}
+		} else {
+			if (stop ()) {
+				return -1;
+			}
+		}
+		
 	}
+
+	return ControlProtocol::set_active (yn);
 }
 
 bool
@@ -1059,16 +1068,26 @@ OSC::route_plugin_parameter_print (int rid, int piid, int par)
 XMLNode& 
 OSC::get_state () 
 {
-	XMLNode* node = new XMLNode ("Protocol"); 
+	XMLNode& node (ControlProtocol::get_state());
 
-	node->add_property (X_("name"), "Open Sound Control (OSC)");
-	node->add_property (X_("feedback"), _send_route_changes ? "1" : "0");
-
-	return *node;
+	node.add_property (X_("feedback"), _send_route_changes ? "1" : "0");
+	return node;
 }
 
 int 
-OSC::set_state (const XMLNode&, int /*version*/)
+OSC::set_state (const XMLNode& node, int /*version*/)
 {
+	const XMLProperty* prop = node.property (X_("feedback"));
+
+	if (prop) {
+		if (PBD::string_is_affirmative (prop->value())) {
+			_send_route_changes = true;
+		} else {
+			_send_route_changes = false;
+		}
+	} else {
+		/* leave it alone */
+	}
+	      
 	return 0;
 }

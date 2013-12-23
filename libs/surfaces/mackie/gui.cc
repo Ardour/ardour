@@ -453,8 +453,6 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 			return;
 		}
 
-		cerr << "Changed to " << i->first << " aka " << i->second << endl;
-
 		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (i->second.c_str());
 
 		if (act) {
@@ -504,8 +502,6 @@ MackieControlProtocolGUI::surface_combo_changed ()
 
 	/* update ipMIDI field */
 
-	cerr << "New device called " << _cp.device_info().name() << " with ipMIDI ? " << _cp.device_info().uses_ipmidi() << endl;
-
 	ipmidi_base_port_spinner.set_sensitive (_cp.device_info().uses_ipmidi());
 }
 
@@ -522,7 +518,6 @@ MackieControlProtocolGUI::profile_combo_changed ()
 void
 MackieControlProtocolGUI::ipmidi_spinner_changed ()
 {
-	cerr << "Set IP MIDI base to " << ipmidi_base_port_spinner.get_value() << endl;
 	_cp.set_ipmidi_base ((int16_t) lrintf (ipmidi_base_port_spinner.get_value()));
 }
 

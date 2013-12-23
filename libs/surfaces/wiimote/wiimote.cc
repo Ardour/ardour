@@ -65,7 +65,8 @@ WiimoteControlProtocol::set_active (bool yn)
 	DEBUG_TRACE (DEBUG::WiimoteControl, string_compose ("WiimoteControlProtocol::set_active init with yn: '%1'\n", yn));
 
 	/* do nothing if the active state is not changing */
-	if (yn == _active) {
+
+	if (yn == active()) {
 		return 0;
 	}
 
@@ -77,8 +78,7 @@ WiimoteControlProtocol::set_active (bool yn)
 		result = stop ();
 	}
 
-	/* remember new active state */
-	_active = yn;
+	ControlProtocol::set_active (yn);
 
 	DEBUG_TRACE (DEBUG::WiimoteControl, "WiimoteControlProtocol::set_active done\n");
 
@@ -88,10 +88,9 @@ WiimoteControlProtocol::set_active (bool yn)
 XMLNode&
 WiimoteControlProtocol::get_state ()
 {
-	XMLNode *node = new XMLNode ("Protocol");
-	node->add_property (X_("name"), ARDOUR::ControlProtocol::_name);
-	node->add_property (X_("feedback"), "0");
-	return *node;
+	XMLNode& node (ControlProtocol::get_state());
+	node.add_property (X_("feedback"), "0");
+	return node;
 }
 
 int

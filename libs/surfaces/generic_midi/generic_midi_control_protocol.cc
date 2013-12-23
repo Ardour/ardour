@@ -80,16 +80,14 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	Controllable::CreateBinding.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::create_binding, this, _1, _2, _3));
 	Controllable::DeleteBinding.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::delete_binding, this, _1));
 
-	Session::SendFeedback.connect (*this, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::send_feedback, this), midi_ui_context());;
-#if 0
-	/* XXXX SOMETHING GOES WRONG HERE (april 2012) - STILL DEBUGGING */
 	/* this signal is emitted by the process() callback, and if
 	 * send_feedback() is going to do anything, it should do it in the
 	 * context of the process() callback itself.
 	 */
 
 	Session::SendFeedback.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::send_feedback, this));
-#endif
+	//Session::SendFeedback.connect (*this, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::send_feedback, this), midi_ui_context());;
+
 	/* this one is cross-thread */
 
 	Route::RemoteControlIDChange.connect (*this, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::reset_controllables, this), midi_ui_context());
@@ -466,23 +464,22 @@ GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos,
 XMLNode&
 GenericMidiControlProtocol::get_state () 
 {
-	XMLNode* node = new XMLNode ("Protocol"); 
+	XMLNode& node (ControlProtocol::get_state());
 	char buf[32];
 
-	node->add_property (X_("name"), _name);
-	node->add_property (X_("feedback"), do_feedback ? "1" : "0");
+	node.add_property (X_("feedback"), do_feedback ? "1" : "0");
 	snprintf (buf, sizeof (buf), "%" PRIu64, _feedback_interval);
-	node->add_property (X_("feedback_interval"), buf);
+	node.add_property (X_("feedback_interval"), buf);
 	snprintf (buf, sizeof (buf), "%d", _threshold);
-	node->add_property (X_("threshold"), buf);
+	node.add_property (X_("threshold"), buf);
 
 	if (!_current_binding.empty()) {
-		node->add_property ("binding", _current_binding);
+		node.add_property ("binding", _current_binding);
 	}
 
 	XMLNode* children = new XMLNode (X_("Controls"));
 
-	node->add_child_nocopy (*children);
+	node.add_child_nocopy (*children);
 
 	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
@@ -497,7 +494,7 @@ GenericMidiControlProtocol::get_state ()
 		}
 	}
 
-	return *node;
+	return node;
 }
 
 int

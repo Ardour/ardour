@@ -106,6 +106,7 @@ InterpolationTest::cubicInterpolationTest ()
 	cubic.set_speed (1.0);
 	cubic.set_target_speed (cubic.speed());
 	result = cubic.interpolate (0, NUM_SAMPLES, input, output);
+	CPPUNIT_ASSERT_EQUAL (result, cubic.interpolate (0, NUM_SAMPLES, NULL, NULL));
 	CPPUNIT_ASSERT_EQUAL ((framecnt_t)(NUM_SAMPLES * cubic.speed()), result);
 	for (int i = 0; i < NUM_SAMPLES; i += INTERVAL) {
 		CPPUNIT_ASSERT_EQUAL (1.0f, output[i]);
@@ -116,6 +117,7 @@ InterpolationTest::cubicInterpolationTest ()
 	cubic.set_speed (0.5);
 	cubic.set_target_speed (cubic.speed());
 	result = cubic.interpolate (0, NUM_SAMPLES, input, output);
+	CPPUNIT_ASSERT_EQUAL (result, cubic.interpolate (0, NUM_SAMPLES, NULL, NULL));
 	CPPUNIT_ASSERT_EQUAL ((framecnt_t)(NUM_SAMPLES * cubic.speed()), result);
 	for (int i = 0; i < NUM_SAMPLES; i += (INTERVAL / cubic.speed() +0.5)) {
 		CPPUNIT_ASSERT_EQUAL (1.0f, output[i]);
@@ -126,6 +128,7 @@ InterpolationTest::cubicInterpolationTest ()
 	cubic.set_speed (0.2);
 	cubic.set_target_speed (cubic.speed());
 	result = cubic.interpolate (0, NUM_SAMPLES, input, output);
+	CPPUNIT_ASSERT_EQUAL (result, cubic.interpolate (0, NUM_SAMPLES, NULL, NULL));
 	CPPUNIT_ASSERT_EQUAL ((framecnt_t)(NUM_SAMPLES * cubic.speed()), result);
 
 //	cout << "\nSpeed: 0.02";
@@ -133,6 +136,7 @@ InterpolationTest::cubicInterpolationTest ()
 	cubic.set_speed (0.02);
 	cubic.set_target_speed (cubic.speed());
 	result = cubic.interpolate (0, NUM_SAMPLES, input, output);
+	CPPUNIT_ASSERT_EQUAL (result, cubic.interpolate (0, NUM_SAMPLES, NULL, NULL));
 	CPPUNIT_ASSERT_EQUAL ((framecnt_t)(NUM_SAMPLES * cubic.speed()), result);
 
 	/* This one fails due too error accumulation
@@ -150,6 +154,7 @@ InterpolationTest::cubicInterpolationTest ()
 	cubic.set_speed (2.0);
 	cubic.set_target_speed (cubic.speed());
 	result = cubic.interpolate (0, NUM_SAMPLES / 2, input, output);
+	CPPUNIT_ASSERT_EQUAL (result, cubic.interpolate (0, NUM_SAMPLES / 2, NULL, NULL));
 	CPPUNIT_ASSERT_EQUAL ((framecnt_t)(NUM_SAMPLES / 2 * cubic.speed()), result);
 	for (int i = 0; i < NUM_SAMPLES / 2; i += (INTERVAL / cubic.speed() +0.5)) {
 		CPPUNIT_ASSERT_EQUAL (1.0f, output[i]);
@@ -159,6 +164,7 @@ InterpolationTest::cubicInterpolationTest ()
 	cubic.set_speed (10.0);
 	cubic.set_target_speed (cubic.speed());
 	result = cubic.interpolate (0, NUM_SAMPLES / 10, input, output);
+	CPPUNIT_ASSERT_EQUAL (result, cubic.interpolate (0, NUM_SAMPLES / 10, NULL, NULL));
 	CPPUNIT_ASSERT_EQUAL ((framecnt_t)(NUM_SAMPLES / 10 * cubic.speed()), result);
 	for (int i = 0; i < NUM_SAMPLES / 10; i += (INTERVAL / cubic.speed() +0.5)) {
 		CPPUNIT_ASSERT_EQUAL (1.0f, output[i]);

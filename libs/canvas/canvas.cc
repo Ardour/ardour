@@ -86,16 +86,18 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 
 	boost::optional<Rect> draw = root_bbox->intersection (area);
 	if (draw) {
-
-		// context->rectangle (area.x0, area.y0, area.x1 - area.x0, area.y1 - area.y0);
-		// context->set_source_rgba (1.0, 0, 0, 1.0);
-		// context->fill ();
-
+		
 		/* there's a common area between the root and the requested
 		   area, so render it.
 		*/
 
 		_root.render (*draw, context);
+
+		// This outlines the rect being rendered, after it has been drawn.
+		// context->rectangle (draw->x0, draw->y0, draw->x1 - draw->x0, draw->y1 - draw->y0);
+		// context->set_source_rgba (1.0, 0, 0, 1.0);
+		// context->stroke ();
+
 	}
 
 }
@@ -704,7 +706,7 @@ void
 GtkCanvas::request_redraw (Rect const & request)
 {
 	Rect area = canvas_to_window (request);
-	queue_draw_area (floor (area.x0), floor (area.y0), ceil (area.width()), ceil (area.height()));
+	queue_draw_area (area.x0, area.y0, area.width(), area.height());
 }
 
 /** Called to request that we try to get a particular size for ourselves.

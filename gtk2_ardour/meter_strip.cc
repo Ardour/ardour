@@ -562,6 +562,7 @@ MeterStrip::update_background(MeterType type)
 		case MeterIEC1NOR:
 		case MeterIEC2BBC:
 		case MeterIEC2EBU:
+		case MeterK12:
 		case MeterK14:
 		case MeterK20:
 			mtr_container.set_name ("meterstripPPM");
@@ -747,6 +748,7 @@ MeterStrip::popup_level_meter_menu (GdkEventButton* ev)
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterIEC2EBU), MeterIEC2EBU);
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterK20), MeterK20);
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterK14), MeterK14);
+	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterK12), MeterK12);
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterVU),  MeterVU);
 
 	MeterType cmt = _route->meter_type();

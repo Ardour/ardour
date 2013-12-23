@@ -357,14 +357,17 @@ def build(bld):
     if bld.is_defined('WINDOWS_VST_SUPPORT'):
         # If we require VST support we build a stub main() and the FST library
         # here using winegcc, and link it to the GTK front-end library
-        obj = bld(features = 'cxx c cxxprogram wine')
-        obj.source = '''
-                ../libs/fst/fst.c
-                ../libs/fst/fstinfofile.c
-                ../libs/fst/vsti.c
-                ../libs/fst/vstwin.c
-                ../vst/winmain.c
-        '''
+        obj = bld (features = 'cxx c cxxprogram wine')
+        obj.source = (
+            '../libs/fst/fst.c',
+            '../libs/fst/fstinfofile.c',
+            '../libs/fst/vsti.c',
+            '../libs/fst/vstwin.c',
+            '../vst/winmain.c',
+            )
+        #
+        # XXX do we really need to explicitly link to all of these for the wine executable?
+        #
         obj.use          = [ 'libpbd',
                              'libmidipp',
                              'libardour',
@@ -390,19 +393,22 @@ def build(bld):
         obj.target    = 'gtk2_ardour'
     else:
         # just the normal executable version of the GTK GUI
-        obj = bld(features = 'cxx c cxxprogram')
+        obj = bld (features = 'cxx c cxxprogram')
         obj.source    = gtk2_ardour_sources
         obj.target = 'ardour-' + bld.env['VERSION']
         obj.includes = ['.']
-        obj.use      = [ 'libpbd',
-                         'libardour',
-                         'libardour_cp',
-                         'libtimecode',
-                         'libmidipp',
-                         'libgtk2_ardour',
-                         'libgtkmm2ext',
-                         'libcanvas',
-                       ]
+
+    # at this point, "obj" refers to either the normal native executable
+    # OR the shared library built for use with wine on linux.
+
+    obj.use      = [ 'libpbd',
+                     'libardour',
+                     'libardour_cp',
+                     'libtimecode',
+                     'libmidipp',
+                     'libgtkmm2ext',
+                     'libcanvas',
+                     ]
 
     # continue with setup of obj, which could be a shared library
     # or an executable.
@@ -415,7 +421,7 @@ def build(bld):
     if bld.is_defined('USE_EXTERNAL_LIBS'):
         obj.uselib += ' TAGLIB'
     else:
-        obj.use.append('libtaglib')
+        obj.use += ('libtaglib')
     if sys.platform == 'darwin':
         obj.uselib += ' AUDIOUNITS OSX GTKOSX'
         obj.use    += ' libappleutility'

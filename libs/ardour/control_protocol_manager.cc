@@ -72,24 +72,52 @@ ControlProtocolManager::set_session (Session* s)
 
 		for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 			if ((*i)->requested || (*i)->mandatory) {
-				
-				instantiate (**i);
-				(*i)->requested = false;
-
-				if ((*i)->protocol) {
-					if ((*i)->state) {
-						(*i)->protocol->set_state (*(*i)->state, Stateful::loading_state_version);
-					} else {
-						/* guarantee a call to
-						   set_state() whether we have
-						   existing state or not
-						*/
-						(*i)->protocol->set_state (XMLNode(""), Stateful::loading_state_version);
-					}
-				}
+				(void) activate (**i);
 			}
 		}
 	}
+}
+
+int
+ControlProtocolManager::activate (ControlProtocolInfo& cpi)
+{
+	ControlProtocol* cp;
+
+	cpi.requested = true;
+
+	if ((cp = instantiate (cpi)) == 0) {
+		return -1;
+	}
+
+	/* we split the set_state() and set_active() operations so that
+	   protocols that need state to configure themselves (e.g. "What device
+	   is connected, or supposed to be connected?") can get it before
+	   actually starting any interaction.
+	*/
+
+	if (cpi.state) {
+		/* force this by tweaking the internals of the state
+		 * XMLNode. Ugh.
+		 */
+		cp->set_state (*cpi.state, Stateful::loading_state_version);
+	} else {
+		/* guarantee a call to
+		   set_state() whether we have
+		   existing state or not
+		*/
+		cp->set_state (XMLNode(""), Stateful::loading_state_version);
+	}
+
+	cp->set_active (true);
+
+	return 0;
+}	
+
+int
+ControlProtocolManager::deactivate (ControlProtocolInfo& cpi)
+{
+	cpi.requested = false;
+	return teardown (cpi);
 }
 
 void
@@ -163,6 +191,12 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 	if (cpi.mandatory) {
 		return 0;
 	}
+	
+	/* save current state */
+
+	delete cpi.state;
+	cpi.state = new XMLNode (cpi.protocol->get_state());
+	cpi.state->add_property (X_("active"), "no");
 
 	cpi.descriptor->destroy (cpi.descriptor, cpi.protocol);
 
@@ -177,8 +211,6 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 	}
 
 	cpi.protocol = 0;
-	delete cpi.state;
-	cpi.state = 0;
 	dlclose (cpi.descriptor->module);
 
 	ProtocolStatusChange (&cpi);
@@ -379,22 +411,21 @@ ControlProtocolManager::get_state ()
 
 	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 
-		XMLNode * child;
-
 		if ((*i)->protocol) {
-			child = &((*i)->protocol->get_state());
-			child->add_property (X_("active"), "yes");
-			// should we update (*i)->state here?  probably.
-			root->add_child_nocopy (*child);
+			XMLNode& child_state ((*i)->protocol->get_state());
+			child_state.add_property (X_("active"), "yes");
+			root->add_child_nocopy (child_state);
 		} else if ((*i)->state) {
-			// keep ownership clear
-			root->add_child_copy (*(*i)->state);
+			XMLNode* child_state = new XMLNode (*(*i)->state);
+			child_state->add_property (X_("active"), "no");
+			root->add_child_nocopy (*child_state);
 		} else {
-			child = new XMLNode (X_("Protocol"));
-			child->add_property (X_("name"), (*i)->name);
-			child->add_property (X_("active"), "no");
-			root->add_child_nocopy (*child);
+			XMLNode* child_state = new XMLNode (X_("Protocol"));
+			child_state->add_property (X_("name"), (*i)->name);
+			child_state->add_property (X_("active"), "no");
+			root->add_child_nocopy (*child_state);
 		}
+
 	}
 
 	return *root;

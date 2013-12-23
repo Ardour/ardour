@@ -157,6 +157,8 @@ LevelMeterBase::update_meters ()
 					(*i).meter->set (meter_deflect_ppm (peak + meter_lineup(0)));
 				} else if (meter_type == MeterVU) {
 					(*i).meter->set (meter_deflect_vu (peak + vu_standard() + meter_lineup(0)));
+				} else if (meter_type == MeterK12) {
+					(*i).meter->set (meter_deflect_k (peak, 12), meter_deflect_k(_meter->meter_level(n, MeterPeak), 12));
 				} else if (meter_type == MeterK14) {
 					(*i).meter->set (meter_deflect_k (peak, 14), meter_deflect_k(_meter->meter_level(n, MeterPeak), 14));
 				} else if (meter_type == MeterK20) {
@@ -314,6 +316,17 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					stp[1] = 115.0 * meter_deflect_k(-14, 14);  //  0
 					stp[2] = 115.0 * meter_deflect_k(-12, 14);  // +2
 					stp[3] = 115.0 * meter_deflect_k(-10, 14);  // +4
+					c[0] = c[1] = 0x008800ff;
+					c[2] = c[3] = 0x00ff00ff;
+					c[4] = c[5] = 0xffff00ff;
+					c[6] = c[7] = 0xffff00ff;
+					c[8] = c[9] = 0xff0000ff;
+					break;
+				case MeterK12:
+					stp[0] = 115.0 * meter_deflect_k(-32, 12);  //-20
+					stp[1] = 115.0 * meter_deflect_k(-12, 12);  //  0
+					stp[2] = 115.0 * meter_deflect_k(-10, 12);  // +2
+					stp[3] = 115.0 * meter_deflect_k( -8, 12);  // +4
 					c[0] = c[1] = 0x008800ff;
 					c[2] = c[3] = 0x00ff00ff;
 					c[4] = c[5] = 0xffff00ff;

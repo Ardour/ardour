@@ -1415,7 +1415,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_video_timeline_locked ();
 	void set_video_timeline_locked (const bool);
 	void queue_visual_videotimeline_update ();
-	void embed_audio_from_video (std::string, framepos_t n = 0);
+	void embed_audio_from_video (std::string, framepos_t n = 0, bool lock_position_to_video = true);
 
 	PBD::Signal0<void> EditorFreeze;
 	PBD::Signal0<void> EditorThaw;

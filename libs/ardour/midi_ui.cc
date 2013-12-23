@@ -61,6 +61,8 @@ MidiControlUI::do_request (MidiUIRequest* req)
 {
 	if (req->type == Quit) {
 		BaseUI::quit ();
+	} else if (req->type == CallSlot) {
+		req->the_slot ();
 	}
 }
 
