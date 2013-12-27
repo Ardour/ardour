@@ -20,6 +20,7 @@
 #ifndef __CANVAS_RECTANGLE_H__
 #define __CANVAS_RECTANGLE_H__
 
+#include "canvas/visibility.h"
 #include "canvas/item.h"
 #include "canvas/types.h"
 #include "canvas/outline.h"
@@ -28,7 +29,7 @@
 namespace ArdourCanvas
 {
 
-class Rectangle : virtual public Item, public Outline, public Fill
+class LIBCANVAS_API Rectangle : virtual public Item, public Outline, public Fill
 {
 public:
 	Rectangle (Group *);

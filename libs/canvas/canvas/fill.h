@@ -22,11 +22,13 @@
 
 #include <vector>
 #include <stdint.h>
+
+#include "canvas/visibility.h"
 #include "canvas/item.h"
 
 namespace ArdourCanvas {
 
-class Fill : virtual public Item
+class LIBCANVAS_API Fill : virtual public Item
 {
 public:
 	Fill (Group *);

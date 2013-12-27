@@ -33,6 +33,9 @@
 #include <cairomm/context.h>
 
 #include "pbd/signals.h"
+
+#include "canvas/visibility.h"
+
 #include "canvas/root_group.h"
 
 namespace ArdourCanvas
@@ -51,7 +54,7 @@ class Group;
  *  rightwards and y increases downwards.
  */
 	
-class Canvas
+class LIBCANVAS_API Canvas
 {
 public:
 	Canvas ();
@@ -127,7 +130,7 @@ protected:
 };
 
 /** A canvas which renders onto a GTK EventBox */
-class GtkCanvas : public Canvas, public Gtk::EventBox
+class LIBCANVAS_API GtkCanvas : public Canvas, public Gtk::EventBox
 {
 public:
 	GtkCanvas ();
@@ -179,7 +182,7 @@ private:
  * This provides a GtkCanvas that can be scrolled. It does NOT implement the
  * Gtk::Scrollable interface.
  */
-class GtkCanvasViewport : public Gtk::Alignment
+class LIBCANVAS_API GtkCanvasViewport : public Gtk::Alignment
 {
 public:
 	GtkCanvasViewport (Gtk::Adjustment &, Gtk::Adjustment &);

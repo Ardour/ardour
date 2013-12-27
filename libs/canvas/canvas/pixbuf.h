@@ -22,6 +22,7 @@
 
 #include <glibmm/refptr.h>
 
+#include "canvas/visibility.h"
 #include "canvas/item.h"
 
 namespace Gdk {
@@ -30,7 +31,7 @@ namespace Gdk {
 
 namespace ArdourCanvas {
 
-class Pixbuf : public Item
+class LIBCANVAS_API Pixbuf : public Item
 {
 public:
 	Pixbuf (Group *);

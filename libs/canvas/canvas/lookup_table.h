@@ -22,6 +22,8 @@
 
 #include <vector>
 #include <boost/multi_array.hpp>
+
+#include "canvas/visibility.h"
 #include "canvas/types.h"
 
 class OptimizingLookupTableTest;
@@ -31,7 +33,7 @@ namespace ArdourCanvas {
 class Item;
 class Group;
 
-class LookupTable
+class LIBCANVAS_API LookupTable
 {
 public:
     LookupTable (Group const &);
@@ -46,7 +48,7 @@ protected:
     Group const & _group;
 };
 
-class DumbLookupTable : public LookupTable
+class LIBCANVAS_API DumbLookupTable : public LookupTable
 {
 public:
     DumbLookupTable (Group const &);
@@ -56,7 +58,7 @@ public:
     bool has_item_at_point (Duple const & point) const;
 };
 
-class OptimizingLookupTable : public LookupTable
+class LIBCANVAS_API OptimizingLookupTable : public LookupTable
 {
 public:
     OptimizingLookupTable (Group const &, int);

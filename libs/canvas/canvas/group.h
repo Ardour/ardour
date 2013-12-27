@@ -22,13 +22,15 @@
 
 #include <list>
 #include <vector>
+
+#include "canvas/visibility.h"
 #include "canvas/item.h"
 #include "canvas/types.h"
 #include "canvas/lookup_table.h"
 
 namespace ArdourCanvas {
 
-class Group : public Item
+class LIBCANVAS_API Group : public Item
 {
 public:
 	explicit Group (Group *);

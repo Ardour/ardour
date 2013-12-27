@@ -27,6 +27,8 @@
 
 #include <cairomm/refptr.h>
 
+#include "canvas/visibility.h"
+
 namespace Cairo {
 	struct Context;
 }
@@ -38,9 +40,9 @@ typedef double Coord;
 typedef double Distance;
 typedef uint32_t Color;
 
-extern Coord const COORD_MAX;
+extern LIBCANVAS_API Coord const COORD_MAX;
 
-struct Duple
+struct LIBCANVAS_API Duple
 {
 	Duple ()
 		: x (0)
@@ -59,14 +61,14 @@ struct Duple
 };
 
 
-extern Duple operator- (Duple const &);
-extern Duple operator+ (Duple const &, Duple const &);
-extern bool operator== (Duple const &, Duple const &);
-extern Duple operator- (Duple const &, Duple const &);
-extern Duple operator/ (Duple const &, double);
-extern std::ostream & operator<< (std::ostream &, Duple const &);
+extern LIBCANVAS_API Duple operator- (Duple const &);
+extern LIBCANVAS_API Duple operator+ (Duple const &, Duple const &);
+extern LIBCANVAS_API bool operator== (Duple const &, Duple const &);
+extern LIBCANVAS_API Duple operator- (Duple const &, Duple const &);
+extern LIBCANVAS_API Duple operator/ (Duple const &, double);
+extern LIBCANVAS_API std::ostream & operator<< (std::ostream &, Duple const &);
 
-struct Rect
+struct LIBCANVAS_API Rect
 {
 	Rect ()
 		: x0 (0)
@@ -106,7 +108,7 @@ struct Rect
 	}
 };
 
-extern std::ostream & operator<< (std::ostream &, Rect const &);
+extern LIBCANVAS_API std::ostream & operator<< (std::ostream &, Rect const &);
 
 typedef std::vector<Duple> Points;
 

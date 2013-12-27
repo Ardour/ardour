@@ -19,11 +19,13 @@
 #ifndef __CANVAS_CURVE_H__
 #define __CANVAS_CURVE_H__
 
+#include "canvas/visibility.h"
+
 #include "canvas/poly_item.h"
 
 namespace ArdourCanvas {
 
-class Curve : public PolyItem
+class LIBCANVAS_API Curve : public PolyItem
 {
 public:
     Curve (Group *);

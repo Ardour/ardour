@@ -61,12 +61,18 @@ def options(opt):
 def configure(conf):
     conf.load ('compiler_cxx')
     autowaf.configure(conf)
+    autowaf.build_version_files(path_prefix+'canvas/version.h', path_prefix+'version.cc',
+                                'libcanvas', conf.env['MAJOR'], conf.env['MINOR'], 0,
+                                'LIBCANVAS_API', 'canvas/visibility.h')
     autowaf.check_pkg(conf, 'cairomm-1.0', uselib_store='CAIROMM', atleast_version='1.8.4')
 
 def build(bld):
     # Library
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         obj = bld.shlib(features = 'cxx cxxshlib', source=canvas_sources)
+        obj.defines      = [ 'LIBCANVAS_DLL_EXPORTS=1' ]
+        obj.cflags       = [ '-fvisibility=hidden' ]
+        obj.cxxflags     = [ '-fvisibility=hidden' ]
     else:
         obj = bld.stlib(features = 'cxx cxxstlib', source=canvas_sources)
         obj.cxxflags     = [ '-fPIC' ]

@@ -17,11 +17,12 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "canvas/visibility.h"
 #include "canvas/item.h"
 
 namespace ArdourCanvas {
 
-class LineSet : public Item
+class LIBCANVAS_API LineSet : public Item
 {
 public:
 	enum Orientation {

@@ -20,12 +20,13 @@
 #ifndef __CANVAS_POLY_LINE_H__
 #define __CANVAS_POLY_LINE_H__
 
+#include "canvas/visibility.h"
 #include "canvas/poly_item.h"
 #include "canvas/outline.h"
 
 namespace ArdourCanvas {
 
-class PolyLine : public PolyItem
+class LIBCANVAS_API PolyLine : public PolyItem
 {
 public:
 	PolyLine (Group *);

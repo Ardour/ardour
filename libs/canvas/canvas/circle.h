@@ -19,11 +19,13 @@
 #ifndef __CANVAS_CIRCLE_H__
 #define __CANVAS_CIRCLE_H__
 
+#include "canvas/visibility.h"
+
 #include "canvas/arc.h"
 
 namespace ArdourCanvas {
 
-class Circle : public Arc
+class LIBCANVAS_API Circle : public Arc
 {
 public:
 	Circle (Group *);

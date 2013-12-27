@@ -20,13 +20,14 @@
 #ifndef __CANVAS_LINE_H__
 #define __CANVAS_LINE_H__
 
+#include "canvas/visibility.h"
 #include "canvas/item.h"
 #include "canvas/outline.h"
 #include "canvas/poly_line.h"
 
 namespace ArdourCanvas {
 
-class Line : virtual public Item, public Outline
+class LIBCANVAS_API Line : virtual public Item, public Outline
 {
 public:
 	Line (Group *);

@@ -19,13 +19,14 @@
 #ifndef __CANVAS_ARC_H__
 #define __CANVAS_ARC_H__
 
+#include "canvas/visibility.h"
 #include "canvas/item.h"
 #include "canvas/outline.h"
 #include "canvas/fill.h"
 
 namespace ArdourCanvas {
 
-class Arc : virtual public Item, public Outline, public Fill
+class LIBCANVAS_API Arc : virtual public Item, public Outline, public Fill
 {
 public:
 	Arc (Group *);

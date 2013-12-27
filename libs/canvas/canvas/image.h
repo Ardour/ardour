@@ -23,6 +23,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 
+#include "canvas/visibility.h"
 #include "canvas/item.h"
 
 typedef void (*ImageReleaseCallback)(uint8_t *d, void *arg);
@@ -30,7 +31,7 @@ typedef void (*ImageReleaseCallback)(uint8_t *d, void *arg);
 namespace ArdourCanvas {
 
 
-class Image : public Item
+class LIBCANVAS_API Image : public Item
 {
 public:
     Image (Group *, Cairo::Format, int width, int height);

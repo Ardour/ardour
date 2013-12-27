@@ -28,6 +28,7 @@
 
 #include <glibmm/refptr.h>
 
+#include "canvas/visibility.h"
 #include "canvas/item.h"
 #include "canvas/fill.h"
 #include "canvas/outline.h"
@@ -44,7 +45,7 @@ class WaveViewTest;
 	
 namespace ArdourCanvas {
 
-class WaveView : virtual public Item, public Outline, public Fill
+class LIBCANVAS_API WaveView : virtual public Item, public Outline, public Fill
 {
 public:
         enum Shape { 

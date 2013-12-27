@@ -24,12 +24,14 @@
 #include <map>
 #include "pbd/debug.h"
 
+#include "canvas/visibility.h"
+
 namespace PBD {
 	namespace DEBUG {
-		extern uint64_t CanvasItems;
-		extern uint64_t CanvasItemsDirtied;
-		extern uint64_t CanvasEvents;
-		extern uint64_t CanvasRender;
+		LIBCANVAS_API extern uint64_t CanvasItems;
+		LIBCANVAS_API extern uint64_t CanvasItemsDirtied;
+		LIBCANVAS_API extern uint64_t CanvasEvents;
+		LIBCANVAS_API extern uint64_t CanvasRender;
 	}
 }
 
@@ -40,13 +42,13 @@ namespace PBD {
 #endif
 
 namespace ArdourCanvas {
-	extern struct timeval epoch;
-	extern std::map<std::string, struct timeval> last_time;
-	extern void checkpoint (std::string, std::string);
-	extern void set_epoch ();
-	extern int render_count;
-	extern int render_depth;
-	extern int dump_depth;
+	LIBCANVAS_API extern struct timeval epoch;
+	LIBCANVAS_API extern std::map<std::string, struct timeval> last_time;
+	LIBCANVAS_API extern void checkpoint (std::string, std::string);
+	LIBCANVAS_API extern void set_epoch ();
+	LIBCANVAS_API extern int render_count;
+	LIBCANVAS_API extern int render_depth;
+	LIBCANVAS_API extern int dump_depth;
 }
 
 #endif

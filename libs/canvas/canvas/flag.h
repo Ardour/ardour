@@ -17,6 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "canvas/visibility.h"
 #include "canvas/group.h"
 #include "canvas/types.h"
 
@@ -26,7 +27,7 @@ class Text;
 class Line;
 class Rectangle;
 
-class Flag : public Group
+class LIBCANVAS_API Flag : public Group
 {
 public:
 	Flag (Group *, Distance, Color, Color, Duple);

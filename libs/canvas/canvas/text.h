@@ -23,11 +23,12 @@
 #include <pangomm/fontdescription.h>
 #include <pangomm/layout.h>
 
+#include "canvas/visibility.h"
 #include "canvas/item.h"
 
 namespace ArdourCanvas {
 
-class Text : public Item
+class LIBCANVAS_API Text : public Item
 {
 public:
 	Text (Group *);

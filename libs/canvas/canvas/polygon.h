@@ -20,13 +20,14 @@
 #ifndef __CANVAS_POLYGON_H__
 #define __CANVAS_POLYGON_H__
 
+#include "canvas/visibility.h"
 #include "canvas/poly_item.h"
 #include "canvas/outline.h"
 #include "canvas/fill.h"
 
 namespace ArdourCanvas {
 
-class Polygon : public PolyItem, public Fill
+class LIBCANVAS_API Polygon : public PolyItem, public Fill
 {
 public:
 	Polygon (Group *);

@@ -21,12 +21,14 @@
 #define __CANVAS_OUTLINE_H__
 
 #include <stdint.h>
+
+#include "canvas/visibility.h"
 #include "canvas/types.h"
 #include "canvas/item.h"
 
 namespace ArdourCanvas {
 
-class Outline : virtual public Item
+class LIBCANVAS_API Outline : virtual public Item
 {
 public:
 	Outline (Group *);

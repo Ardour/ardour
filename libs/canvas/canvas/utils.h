@@ -17,18 +17,19 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "canvas/visibility.h"
 #include "canvas/types.h"
 
 namespace ArdourCanvas {
 
-	extern void color_to_hsv (Color color, double& h, double& s, double& v);
-	extern Color hsv_to_color (double h, double s, double v, double a);
+	extern LIBCANVAS_API void color_to_hsv (Color color, double& h, double& s, double& v);
+	extern LIBCANVAS_API Color hsv_to_color (double h, double s, double v, double a);
 
-	extern void color_to_rgba (Color, double& r, double& g, double& b, double& a);
-	extern Color rgba_to_color (double r, double g, double b, double a);
+	extern LIBCANVAS_API void color_to_rgba (Color, double& r, double& g, double& b, double& a);
+	extern LIBCANVAS_API Color rgba_to_color (double r, double g, double b, double a);
 
-	extern void set_source_rgba (Cairo::RefPtr<Cairo::Context>, Color);
+	extern LIBCANVAS_API void set_source_rgba (Cairo::RefPtr<Cairo::Context>, Color);
 
-	Distance distance_to_segment_squared (Duple const & p, Duple const & p1, Duple const & p2, double& t, Duple& at);
+	Distance LIBCANVAS_API distance_to_segment_squared (Duple const & p, Duple const & p1, Duple const & p2, double& t, Duple& at);
 }
 

@@ -28,6 +28,7 @@
 
 #include "pbd/signals.h"
 
+#include "canvas/visibility.h"
 #include "canvas/types.h"
 
 namespace ArdourCanvas
@@ -48,7 +49,7 @@ class Rect;
  *  and all except the `root group' have a pointer to their parent group.
  */
 	
-class Item
+class LIBCANVAS_API Item
 {
 public:
 	Item (Canvas *);
@@ -241,7 +242,7 @@ private:
 	bool _ignore_events;
 };
 
-extern std::ostream& operator<< (std::ostream&, const ArdourCanvas::Item&);
+extern LIBCANVAS_API std::ostream& operator<< (std::ostream&, const ArdourCanvas::Item&);
 
 }
 
