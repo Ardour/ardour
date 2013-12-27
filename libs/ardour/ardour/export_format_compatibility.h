@@ -28,7 +28,7 @@ namespace ARDOUR
 {
 
 /// Allows adding to all sets. A format should be able to test if it is compatible with this
-class ExportFormatCompatibility : public ExportFormatBase, public ExportFormatBase::SelectableCompatible {
+class LIBARDOUR_API ExportFormatCompatibility : public ExportFormatBase, public ExportFormatBase::SelectableCompatible {
   private:
 
   public:

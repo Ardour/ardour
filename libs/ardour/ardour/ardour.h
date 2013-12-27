@@ -34,7 +34,9 @@
 #include "pbd/locale_guard.h"
 #include "pbd/stateful.h"
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
+#include "ardour/libardour_visibility.h"
 
 #include <jack/jack.h>
 
@@ -47,8 +49,8 @@ namespace ARDOUR {
 
 	class AudioEngine;
 
-	extern PBD::Signal1<void,std::string> BootMessage;
-	extern PBD::Signal0<void> GUIIdle;
+	LIBARDOUR_API extern PBD::Signal1<void,std::string> BootMessage;
+	LIBARDOUR_API extern PBD::Signal0<void> GUIIdle;
 
 	/**
 	 * @param with_vst true to enable VST Support
@@ -58,27 +60,27 @@ namespace ARDOUR {
 	 *
 	 * @return true if Ardour library was successfully initialized
 	 */
-	bool init (bool with_vst, bool try_optimization, const char* localedir);
-	void init_post_engine ();
-	void cleanup ();
-	bool no_auto_connect ();
-	void make_property_quarks ();
+	LIBARDOUR_API bool init (bool with_vst, bool try_optimization, const char* localedir);
+	LIBARDOUR_API void init_post_engine ();
+	LIBARDOUR_API void cleanup ();
+	LIBARDOUR_API bool no_auto_connect ();
+	LIBARDOUR_API void make_property_quarks ();
 
-	extern PBD::PropertyChange bounds_change;
+	LIBARDOUR_API extern PBD::PropertyChange bounds_change;
 
-	extern const char* const ardour_config_info;
+	LIBARDOUR_API extern const char* const ardour_config_info;
 
-	void find_bindings_files (std::map<std::string,std::string>&);
+	LIBARDOUR_API void find_bindings_files (std::map<std::string,std::string>&);
 
 	/* these only impact bundled installations */
-	std::string translation_enable_path ();
-	bool translations_are_enabled ();
-	bool set_translations_enabled (bool);
+	LIBARDOUR_API std::string translation_enable_path ();
+	LIBARDOUR_API bool translations_are_enabled ();
+	LIBARDOUR_API bool set_translations_enabled (bool);
 
-	microseconds_t get_microseconds ();
+	LIBARDOUR_API microseconds_t get_microseconds ();
 
-	void setup_fpu ();
-	std::vector<SyncSource> get_available_sync_options();
+	LIBARDOUR_API void setup_fpu ();
+	LIBARDOUR_API std::vector<SyncSource> get_available_sync_options();
 }
 
 #endif /* __ardour_ardour_h__ */

@@ -36,7 +36,7 @@ namespace ARDOUR {
 class AudioEngine;
 class Session;
 
-class LadspaPlugin : public ARDOUR::Plugin
+class LIBARDOUR_API LadspaPlugin : public ARDOUR::Plugin
 {
   public:
 	LadspaPlugin (void *module, ARDOUR::AudioEngine&, ARDOUR::Session&, uint32_t index, framecnt_t sample_rate);
@@ -146,7 +146,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 	void add_state (XMLNode *) const;
 };
 
-class LadspaPluginInfo : public PluginInfo {
+class LIBARDOUR_API LadspaPluginInfo : public PluginInfo {
   public:
 	LadspaPluginInfo ();
 	~LadspaPluginInfo () { };

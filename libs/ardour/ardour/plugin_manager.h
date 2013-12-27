@@ -30,6 +30,7 @@
 #include <set>
 #include <boost/utility.hpp>
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/plugin.h"
 
@@ -37,7 +38,7 @@ namespace ARDOUR {
 
 class Plugin;
 
-class PluginManager : public boost::noncopyable {
+class LIBARDOUR_API PluginManager : public boost::noncopyable {
   public:
 	static PluginManager& instance();
 

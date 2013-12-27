@@ -23,14 +23,16 @@
 #include <string>
 
 #include "pbd/signals.h"
+
+#include "gtkmm2ext/visibility.h"
 #include "gtkmm2ext/stateful_button.h"
-#include "binding_proxy.h"
+#include "gtkmm2ext/binding_proxy.h"
 
 namespace PBD {
 	class Controllable;
 }
 
-class BindableToggleButton : public Gtkmm2ext::StatefulToggleButton
+class LIBGTKMM2EXT_API BindableToggleButton : public Gtkmm2ext::StatefulToggleButton
 {
    public:
 	BindableToggleButton (const std::string &label)
@@ -60,7 +62,7 @@ class BindableToggleButton : public Gtkmm2ext::StatefulToggleButton
 	BindingProxy binding_proxy;
 };
 
-class BindableButton : public Gtkmm2ext::StatefulButton
+class LIBGTKMM2EXT_API BindableButton : public Gtkmm2ext::StatefulButton
 {
    public:
 	BindableButton (boost::shared_ptr<PBD::Controllable> c) : binding_proxy (c) {}

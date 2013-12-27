@@ -27,10 +27,12 @@
 #include <boost/utility.hpp>
 #include <glibmm/threads.h>
 #include "pbd/command.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/automatable_sequence.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "evoral/Note.hpp"
 #include "evoral/Sequence.hpp"
@@ -47,7 +49,7 @@ class MidiSource;
  * Because of this MIDI controllers and automatable controllers/widgets/etc
  * are easily interchangeable.
  */
-class MidiModel : public AutomatableSequence<Evoral::MusicalTime> {
+class LIBARDOUR_API MidiModel : public AutomatableSequence<Evoral::MusicalTime> {
 public:
 	typedef Evoral::MusicalTime TimeType;
 

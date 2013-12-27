@@ -22,7 +22,7 @@ def build(bld):
     obj = bld(features = 'cxx cxxshlib')
     obj.source = [ 'vbap_speakers.cc', 'vbap.cc'  ]
     obj.export_includes = ['.']
-    obj.cxxflags     = '-DPACKAGE="libardour_panvbap"'
+    obj.defines     = [ 'PACKAGE="libardour_panvbap"' ]
     obj.includes     = ['.']
     obj.name         = 'libardour_panvbap'
     obj.target       = 'panvbap'

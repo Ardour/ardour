@@ -39,7 +39,7 @@ class ExportFormatCompatibility;
 class ExportFormatSpecification;
 class AnyTime;
 
-class ExportFormatManager : public PBD::ScopedConnectionList
+class LIBARDOUR_API ExportFormatManager : public PBD::ScopedConnectionList
 {
   public:
 

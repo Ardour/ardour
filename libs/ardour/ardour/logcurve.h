@@ -25,7 +25,7 @@
 
 namespace ARDOUR {
 
-class LogCurve {
+class LIBARDOUR_API LogCurve {
   public:
 	LogCurve (float steepness = 0.2, uint32_t len = 0) {
 		l = len;
@@ -102,7 +102,7 @@ class LogCurve {
 	uint32_t l;
 };
 
-class LogCurveIn : public LogCurve
+class LIBARDOUR_API LogCurveIn : public LogCurve
 {
   public:
 	LogCurveIn (float steepness = 0.2, uint32_t len = 0)
@@ -117,7 +117,7 @@ class LogCurveIn : public LogCurve
 	}
 };
 
-class LogCurveOut : public LogCurve
+class LIBARDOUR_API LogCurveOut : public LogCurve
 {
   public:
 	LogCurveOut (float steepness = 0.2, uint32_t len = 0)

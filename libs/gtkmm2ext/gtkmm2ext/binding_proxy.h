@@ -22,15 +22,18 @@
 #define __binding_proxy__
 
 #include <string>
-#include <gtkmm2ext/popup.h>
 #include <boost/shared_ptr.hpp>
+
 #include "pbd/signals.h"
+
+#include "gtkmm2ext/visibility.h"
+#include "gtkmm2ext/popup.h"
 
 namespace PBD {
 	class Controllable;
 }
 
-class BindingProxy : public sigc::trackable
+class LIBGTKMM2EXT_API BindingProxy : public sigc::trackable
 {
    public:
 	BindingProxy (boost::shared_ptr<PBD::Controllable>);

@@ -24,9 +24,11 @@
 #include <map>
 #include <vector>
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
-class AudioLibrary
+class LIBARDOUR_API AudioLibrary
 {
   public:
 	AudioLibrary ();
@@ -43,7 +45,7 @@ class AudioLibrary
 	std::string src;
 };
 
-extern AudioLibrary* Library;
+LIBARDOUR_API extern AudioLibrary* Library;
 
 } // ARDOUR namespace
 

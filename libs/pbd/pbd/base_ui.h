@@ -29,6 +29,7 @@
 #include <glibmm/threads.h>
 #include <glibmm/main.h>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/crossthread.h"
 #include "pbd/event_loop.h"
 
@@ -41,7 +42,7 @@
  */
 
 
-class BaseUI : public sigc::trackable, public PBD::EventLoop
+class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 {
   public:
 	BaseUI (const std::string& name);

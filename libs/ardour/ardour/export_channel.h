@@ -40,7 +40,7 @@ class AudioRegion;
 class CapturingProcessor;
 
 /// Export channel base class interface for different source types
-class ExportChannel : public boost::less_than_comparable<ExportChannel>
+class LIBARDOUR_API ExportChannel : public boost::less_than_comparable<ExportChannel>
 {
   public:
 
@@ -62,7 +62,7 @@ class ExportChannel : public boost::less_than_comparable<ExportChannel>
 };
 
 /// Basic export channel that reads from AudioPorts
-class PortExportChannel : public ExportChannel
+class LIBARDOUR_API PortExportChannel : public ExportChannel
 {
   public:
 	typedef std::set<boost::weak_ptr<AudioPort> > PortSet;
@@ -89,7 +89,7 @@ class PortExportChannel : public ExportChannel
 
 
 /// Handles RegionExportChannels and does actual reading from region
-class RegionExportChannelFactory
+class LIBARDOUR_API RegionExportChannelFactory
 {
   public:
 	enum Type {
@@ -128,7 +128,7 @@ class RegionExportChannelFactory
 };
 
 /// Export channel that reads from region channel
-class RegionExportChannel : public ExportChannel
+class LIBARDOUR_API RegionExportChannel : public ExportChannel
 {
 	friend class RegionExportChannelFactory;
 
@@ -152,7 +152,7 @@ class RegionExportChannel : public ExportChannel
 };
 
 /// Export channel for exporting from different positions in a route
-class RouteExportChannel : public ExportChannel
+class LIBARDOUR_API RouteExportChannel : public ExportChannel
 {
 	class ProcessorRemover; // fwd declaration
 

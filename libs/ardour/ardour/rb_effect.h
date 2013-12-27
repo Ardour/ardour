@@ -27,7 +27,7 @@ namespace ARDOUR {
 
 class AudioRegion;
 
-class RBEffect : public Filter {
+class LIBARDOUR_API RBEffect : public Filter {
   public:
 	RBEffect (ARDOUR::Session&, TimeFXRequest&);
 	~RBEffect ();

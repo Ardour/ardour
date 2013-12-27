@@ -22,13 +22,15 @@
 
 #include <gtkmm.h>
 
+#include "gtkmm2ext/visibility.h"
+
 /* XXX g++ 2.95 can't compile this as pair of member function templates */
 
-template<typename T> gint idle_delete (T *obj) { delete obj; return FALSE; }
-template<typename T> void delete_when_idle (T *obj) {
+template<typename T> LIBGTKMM2EXT_API gint idle_delete (T *obj) { delete obj; return FALSE; }
+template<typename T> LIBGTKMM2EXT_API void delete_when_idle (T *obj) {
 	Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (idle_delete<T>), obj));
 }
-template<typename T> gint delete_on_unmap (GdkEventAny *ignored, T *obj) {
+template<typename T> LIBGTKMM2EXT_API gint delete_on_unmap (GdkEventAny *ignored, T *obj) {
 	Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (idle_delete<T>), obj));
 	return FALSE;
 }

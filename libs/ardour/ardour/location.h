@@ -38,7 +38,7 @@
 
 namespace ARDOUR {
 
-class Location : public SessionHandleRef, public PBD::StatefulDestructible
+class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDestructible
 {
   public:
 	enum Flags {
@@ -131,7 +131,7 @@ class Location : public SessionHandleRef, public PBD::StatefulDestructible
 	void recompute_bbt_from_frames ();
 };
 
-class Locations : public SessionHandleRef, public PBD::StatefulDestructible
+class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDestructible
 {
   public:
 	typedef std::list<Location *> LocationList;

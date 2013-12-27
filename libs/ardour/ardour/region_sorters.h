@@ -24,13 +24,13 @@
 
 namespace ARDOUR {
 
-struct RegionSortByPosition {
+struct LIBARDOUR_API RegionSortByPosition {
 	bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
 		return a->position() < b->position();
 	}
 };
 
-struct RegionSortByLayer {
+struct LIBARDOUR_API RegionSortByLayer {
 	bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
 		return a->layer() < b->layer();
 	}

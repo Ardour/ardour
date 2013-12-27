@@ -526,7 +526,7 @@ def build_dox(bld, name, version, srcdir, blddir, outdir=''):
                                                       excl='**/_*'))
 
 # Version code file generation
-def build_version_files(header_path, source_path, domain, major, minor, micro):
+def build_version_files(header_path, source_path, domain, major, minor, micro, exportname, visheader):
     header_path = os.path.abspath(header_path)
     source_path = os.path.abspath(source_path)
     text  = "int " + domain + "_major_version = " + str(major) + ";\n"
@@ -542,10 +542,12 @@ def build_version_files(header_path, source_path, domain, major, minor, micro):
 
     text  = "#ifndef __" + domain + "_version_h__\n"
     text += "#define __" + domain + "_version_h__\n"
-    text += " extern const char* " + domain + "_revision;\n"
-    text += " extern int " + domain + "_major_version;\n"
-    text += " extern int " + domain + "_minor_version;\n"
-    text += " extern int " + domain + "_micro_version;\n"
+    if visheader != '':
+        text += "#include \"" + visheader + "\"\n"
+    text += exportname + " extern const char* " + domain + "_revision;\n"
+    text += exportname + " extern int " + domain + "_major_version;\n"
+    text += exportname + " extern int " + domain + "_minor_version;\n"
+    text += exportname + " extern int " + domain + "_micro_version;\n"
     text += "#endif /* __" + domain + "_version_h__ */\n"
     try:
         o = open(header_path, 'w')

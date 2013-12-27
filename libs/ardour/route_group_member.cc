@@ -16,6 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/route_group_member.h"
 
 using namespace ARDOUR;

@@ -23,13 +23,14 @@
 #include <glibmm/threads.h>
 
 #include "ardour/chan_count.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
 
 class BufferSet;
 
-class ThreadBuffers {
+class LIBARDOUR_API ThreadBuffers {
 public:
 	ThreadBuffers ();
 	~ThreadBuffers ();

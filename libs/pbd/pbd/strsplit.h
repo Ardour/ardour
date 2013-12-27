@@ -24,7 +24,9 @@
 #include <vector>
 #include <glibmm/ustring.h>
 
-extern void split (std::string, std::vector<std::string>&, char);
-extern void split (Glib::ustring, std::vector<Glib::ustring>&, char);
+#include "pbd/libpbd_visibility.h"
+
+LIBPBD_API extern void split (std::string, std::vector<std::string>&, char);
+LIBPBD_API extern void split (Glib::ustring, std::vector<Glib::ustring>&, char);
 
 #endif // __pbd_strplit_h__

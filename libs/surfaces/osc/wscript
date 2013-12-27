@@ -27,7 +27,7 @@ def build(bld):
             interface.cc
     '''
     obj.export_includes = ['.']
-    obj.cxxflags     = '-DPACKAGE="ardour_cp"'
+    obj.defines     = [ 'PACKAGE="ardour_osc"' ]
     obj.includes     = ['.', './osc']
     obj.name         = 'libardour_osc'
     obj.target       = 'ardour_osc'

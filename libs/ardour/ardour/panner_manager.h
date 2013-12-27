@@ -26,7 +26,7 @@
 
 namespace ARDOUR {
 
-struct PannerInfo {
+struct LIBARDOUR_API PannerInfo {
 	PanPluginDescriptor descriptor;
 	void* module;
 
@@ -40,7 +40,7 @@ struct PannerInfo {
 	}
 };
 
-class PannerManager : public ARDOUR::SessionHandlePtr
+class LIBARDOUR_API PannerManager : public ARDOUR::SessionHandlePtr
 {
 public:
 	~PannerManager ();

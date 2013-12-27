@@ -26,6 +26,7 @@
 #include <set>
 #include <iostream>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/xml++.h"
 #include "pbd/property_basics.h"
 #include "pbd/property_list.h"
@@ -36,7 +37,7 @@ namespace PBD {
 
 /** Parent class for classes which represent a single scalar property in a Stateful object */
 template<class T>
-class PropertyTemplate : public PropertyBase
+class LIBPBD_API PropertyTemplate : public PropertyBase
 {
 public:
 	PropertyTemplate (PropertyDescriptor<T> p, T const& v)
@@ -196,7 +197,7 @@ private:
 	PropertyTemplate (PropertyTemplate<T> const &);
 };
 
-template<class T>
+template<class T> LIBPBD_API 
 std::ostream & operator<<(std::ostream& os, PropertyTemplate<T> const& s)
 {
 	return os << s.val ();
@@ -206,7 +207,7 @@ std::ostream & operator<<(std::ostream& os, PropertyTemplate<T> const& s)
  *  with types that can be written to / read from stringstreams.
  */
 template<class T>
-class Property : public PropertyTemplate<T>
+class LIBPBD_API Property : public PropertyTemplate<T>
 {
 public:
 	Property (PropertyDescriptor<T> q, T const& v)
@@ -284,7 +285,7 @@ private:
  *  separators, etc.
  */
 template<>
-class Property<std::string> : public PropertyTemplate<std::string>
+class LIBPBD_API Property<std::string> : public PropertyTemplate<std::string>
 {
 public:
 	Property (PropertyDescriptor<std::string> d, std::string const & v)
@@ -318,7 +319,7 @@ private:
 };
 
 template<class T>
-class EnumProperty : public Property<T>
+class LIBPBD_API EnumProperty : public Property<T>
 {
 public:
 	EnumProperty (PropertyDescriptor<T> q, T const& v)
@@ -351,7 +352,7 @@ private:
  *  one.
  */
 template <class T>
-class SharedStatefulProperty : public PropertyBase
+class LIBPBD_API SharedStatefulProperty : public PropertyBase
 {
 public:
 	typedef boost::shared_ptr<T> Ptr;

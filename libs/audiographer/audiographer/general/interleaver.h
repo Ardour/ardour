@@ -1,6 +1,7 @@
 #ifndef AUDIOGRAPHER_INTERLEAVER_H
 #define AUDIOGRAPHER_INTERLEAVER_H
 
+#include "audiographer/visibility.h"
 #include "audiographer/types.h"
 #include "audiographer/sink.h"
 #include "audiographer/exception.h"
@@ -15,7 +16,7 @@ namespace AudioGrapher
 
 /// Interleaves many streams of non-interleaved data into one interleaved stream
 template<typename T = DefaultSampleType>
-class Interleaver
+class LIBAUDIOGRAPHER_API Interleaver
   : public ListedSource<T>
   , public Throwing<>
 {

@@ -27,12 +27,13 @@ template <typename T> class EventSink;
 }
 
 namespace ARDOUR {
+
 class MidiSource;
 
 /** Tracks played notes, so they can be resolved in potential stuck note
  * situations (e.g. looping, transport stop, etc).
  */
-class MidiStateTracker
+class LIBARDOUR_API MidiStateTracker
 {
 public:
 	MidiStateTracker();

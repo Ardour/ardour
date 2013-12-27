@@ -22,7 +22,7 @@
 namespace ARDOUR {
 
 /// A filter to strip silence from regions
-class StripSilence : public Filter
+class LIBARDOUR_API StripSilence : public Filter
 {
   public:
 	StripSilence (Session &, const AudioIntervalMap&, framecnt_t fade_length);

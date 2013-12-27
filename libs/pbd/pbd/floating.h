@@ -28,9 +28,11 @@
 
 #include <cmath>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
-union Float_t
+union LIBPBD_API Float_t
 {
     Float_t (float num = 0.0f) : f(num) {}
 

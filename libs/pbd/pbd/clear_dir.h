@@ -24,8 +24,10 @@
 #include <vector>
 #include <sys/types.h>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
-        int clear_directory (const std::string&, size_t* = 0, std::vector<std::string>* = 0);
+        LIBPBD_API int clear_directory (const std::string&, size_t* = 0, std::vector<std::string>* = 0);
 }
 
 #endif /* __pbd_clear_dir_h__ */

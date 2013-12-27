@@ -25,6 +25,7 @@
 
 #include <glibmm/pattern.h>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/search_path.h"
 
 namespace PBD {
@@ -37,7 +38,7 @@ namespace PBD {
  * @param path An Absolute path to a directory
  * @param result A vector of filenames.
  */
-void
+LIBPBD_API void
 get_files_in_directory (const std::string& path,
                         std::vector<std::string>& result);
 
@@ -49,7 +50,7 @@ get_files_in_directory (const std::string& path,
  * @param pattern A Glib::PatternSpec used to match the files.
  * @param result A vector in which to place the resulting matches.
  */
-void
+LIBPBD_API void
 find_matching_files_in_directory (const std::string& directory,
                                   const Glib::PatternSpec& pattern,
                                   std::vector<std::string>& result);
@@ -62,7 +63,7 @@ find_matching_files_in_directory (const std::string& directory,
  * @param pattern A Glib::PatternSpec used to match the files
  * @param result A vector in which to place the resulting matches.
  */
-void
+LIBPBD_API void
 find_matching_files_in_directories (const std::vector<std::string>& directory_paths,
                                     const Glib::PatternSpec& pattern,
                                     std::vector<std::string>& result);
@@ -75,7 +76,7 @@ find_matching_files_in_directories (const std::vector<std::string>& directory_pa
  * @param pattern A Glib::PatternSpec used to match the files
  * @param result A vector in which to place the resulting matches.
  */
-void
+LIBPBD_API void
 find_matching_files_in_search_path (const SearchPath& search_path,
                                     const Glib::PatternSpec& pattern,
                                     std::vector<std::string>& result);
@@ -86,7 +87,7 @@ find_matching_files_in_search_path (const SearchPath& search_path,
  *
  * @return true If file is found within the search path.
  */
-bool
+LIBPBD_API bool
 find_file_in_search_path (const SearchPath& search_path,
                           const std::string& filename,
                           std::string& result);
@@ -97,26 +98,26 @@ find_file_in_search_path (const SearchPath& search_path,
  *
  * @return true if file was successfully copied
  */
-bool copy_file(const std::string & from_path, const std::string & to_path);
+LIBPBD_API bool copy_file(const std::string & from_path, const std::string & to_path);
 
 /**
  * Attempt to copy all regular files from from_path to a new directory.
  * This method does not recurse.
  */
-void copy_files(const std::string & from_path, const std::string & to_dir);
+LIBPBD_API void copy_files(const std::string & from_path, const std::string & to_dir);
 
 /**
  * Take a (possibly) relative path and make it absolute
  * @return An absolute path
  */
-std::string get_absolute_path (const std::string &);
+LIBPBD_API std::string get_absolute_path (const std::string &);
 
 /**
  * Find out if `needle' is a file or directory within the
  * directory `haystack'.
  * @return true if it is.
  */
-bool path_is_within (const std::string &, std::string);
+LIBPBD_API bool path_is_within (const std::string &, std::string);
 
 /**
  * @return true if p1 and p2 both resolve to the same file
@@ -125,10 +126,10 @@ bool path_is_within (const std::string &, std::string);
  *
  * Uses g_stat to check for identical st_dev and st_ino values.
  */
-bool equivalent_paths (const std::string &p1, const std::string &p2);
+LIBPBD_API bool equivalent_paths (const std::string &p1, const std::string &p2);
 
 /// @return true if path at p exists and is writable, false otherwise
-bool exists_and_writable(const std::string & p);
+LIBPBD_API bool exists_and_writable(const std::string & p);
 
 } // namespace PBD
 

@@ -23,6 +23,7 @@
 
 #include <stdint.h>
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 #include "pbd/signals.h"
@@ -30,7 +31,7 @@
 namespace ARDOUR
 {
 
-class ExportStatus {
+class LIBARDOUR_API ExportStatus {
   public:
 	ExportStatus ();
 	void init ();

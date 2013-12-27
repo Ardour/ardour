@@ -22,6 +22,8 @@
 
 #include <string>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
 /**
@@ -31,7 +33,7 @@ namespace Gtkmm2ext {
  * Each string element that is added to the window title will
  * be separated by a hyphen.
  */
-class WindowTitle
+class LIBGTKMM2EXT_API WindowTitle
 {
 public:
 

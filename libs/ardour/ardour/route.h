@@ -43,6 +43,7 @@
 #include "ardour/ardour.h"
 #include "ardour/instrument_info.h"
 #include "ardour/io.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/mute_master.h"
 #include "ardour/route_group_member.h"
@@ -67,7 +68,7 @@ class Pannable;
 class CapturingProcessor;
 class InternalSend;
 
-class Route : public SessionObject, public Automatable, public RouteGroupMember, public GraphNode, public boost::enable_shared_from_this<Route>
+class LIBARDOUR_API Route : public SessionObject, public Automatable, public RouteGroupMember, public GraphNode, public boost::enable_shared_from_this<Route>
 {
   public:
 

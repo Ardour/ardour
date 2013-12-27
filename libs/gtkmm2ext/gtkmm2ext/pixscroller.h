@@ -24,9 +24,11 @@
 #include <gtkmm/adjustment.h>
 #include <gdkmm.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
-class PixScroller : public Gtk::DrawingArea
+class LIBGTKMM2EXT_API PixScroller : public Gtk::DrawingArea
 {
   public:
 	PixScroller(Gtk::Adjustment& adjustment, 

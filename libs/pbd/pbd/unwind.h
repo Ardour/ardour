@@ -20,10 +20,12 @@
 #ifndef __libpbd_unwinder_h__
 #define __libpbd_unwinder_h__
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
 template <typename T>
-class Unwinder {
+class LIBPBD_API Unwinder {
   public:
     Unwinder (T& var, T new_val) : _var (var), _old_val (var) { var = new_val; }
     ~Unwinder () { _var = _old_val; }

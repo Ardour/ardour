@@ -34,7 +34,7 @@ class Amp;
 class PeakMeter;
 
 
-class Return : public IOProcessor
+class LIBARDOUR_API Return : public IOProcessor
 {
 public:
 	Return (Session&, bool internal = false);

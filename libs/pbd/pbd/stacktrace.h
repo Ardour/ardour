@@ -34,13 +34,17 @@
 #include <cstdlib>
 #endif
 
+#include "pbd/libpbd_visibility.h"
+
+
 namespace PBD {
-	void stacktrace (std::ostream& out, int levels = 0);
-	void trace_twb();
-	std::string demangle (const std::string&);
+
+	LIBPBD_API void stacktrace (std::ostream& out, int levels = 0);
+	LIBPBD_API void trace_twb();
+	LIBPBD_API std::string demangle (const std::string&);
 
 template<typename T>
-class thing_with_backtrace 
+class LIBPBD_API thing_with_backtrace 
 {
   public:
     thing_with_backtrace () {
@@ -109,8 +113,8 @@ private:
     static Glib::Threads::Mutex all_mutex;
 };
 
-template<typename T> std::list<PBD::thing_with_backtrace<T> *> PBD::thing_with_backtrace<T>::all;
-template<typename T> Glib::Threads::Mutex PBD::thing_with_backtrace<T>::all_mutex;
+template<typename T> LIBPBD_API std::list<PBD::thing_with_backtrace<T> *> PBD::thing_with_backtrace<T>::all;
+template<typename T> LIBPBD_API Glib::Threads::Mutex PBD::thing_with_backtrace<T>::all_mutex;
 
 } // namespace PBD
 

@@ -30,6 +30,7 @@
 
 #include "pbd/cartesian.h"
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/session_object.h"
 
@@ -45,7 +46,7 @@ class Pannable;
 /** Class to manage panning by instantiating and controlling
  *  an appropriate Panner object for a given in/out configuration.
  */
-class PannerShell : public SessionObject
+class LIBARDOUR_API PannerShell : public SessionObject
 {
 public:
 	PannerShell (std::string name, Session&, boost::shared_ptr<Pannable>);

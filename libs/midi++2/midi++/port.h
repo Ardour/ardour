@@ -31,6 +31,7 @@
 #include "pbd/signals.h"
 #include "pbd/ringbuffer.h"
 
+#include "midi++/libmidi_visibility.h"
 #include "midi++/types.h"
 #include "midi++/parser.h"
 
@@ -39,7 +40,7 @@ namespace MIDI {
 class Channel;
 class PortRequest;
 
-class Port {
+class LIBMIDIPP_API Port {
   public:
 	enum Flags {
 		IsInput = JackPortIsInput,
@@ -138,7 +139,7 @@ class Port {
 	void init (std::string const &, Flags);
 };
 
-struct PortSet {
+struct LIBMIDIPP_API PortSet {
     PortSet (std::string str) : owner (str) { }
     
     std::string owner;

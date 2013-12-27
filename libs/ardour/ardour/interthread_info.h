@@ -22,6 +22,7 @@
 
 #include <pthread.h>
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/process_thread.h"
 

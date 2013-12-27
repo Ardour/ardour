@@ -25,7 +25,7 @@ def build(bld):
             interface.cc
     '''
     obj.export_includes = ['./wiimote']
-    obj.cxxflags     = '-DPACKAGE="ardour_wiimote"'
+    obj.defines     = [ 'PACKAGE="ardour_wiimote"' ]
     obj.includes     = ['.', '../libs']
     obj.name         = 'libardour_wiimote'
     obj.target       = 'ardour_wiimote'

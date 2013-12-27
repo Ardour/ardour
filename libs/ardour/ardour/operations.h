@@ -17,6 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "ardour/libardour_visibility.h"
+
 /** These are GQuarks for a subset of UI operations.  We use these
  *  so that the undo system can be queried to find out what operations
  *  are currently in progress, by calling Session::current_operations().
@@ -27,19 +29,19 @@
 
 namespace Operations {
 
-	extern GQuark capture;
-	extern GQuark paste;
-	extern GQuark duplicate_region;
-	extern GQuark insert_file;
-	extern GQuark insert_region;
-	extern GQuark drag_region_brush;
-	extern GQuark region_drag;
-	extern GQuark selection_grab;
-	extern GQuark region_fill;
-	extern GQuark fill_selection;
-	extern GQuark create_region;
-	extern GQuark region_copy;
-	extern GQuark fixed_time_region_copy;
+	LIBARDOUR_API extern GQuark capture;
+	LIBARDOUR_API extern GQuark paste;
+	LIBARDOUR_API extern GQuark duplicate_region;
+	LIBARDOUR_API extern GQuark insert_file;
+	LIBARDOUR_API extern GQuark insert_region;
+	LIBARDOUR_API extern GQuark drag_region_brush;
+	LIBARDOUR_API extern GQuark region_drag;
+	LIBARDOUR_API extern GQuark selection_grab;
+	LIBARDOUR_API extern GQuark region_fill;
+	LIBARDOUR_API extern GQuark fill_selection;
+	LIBARDOUR_API extern GQuark create_region;
+	LIBARDOUR_API extern GQuark region_copy;
+	LIBARDOUR_API extern GQuark fixed_time_region_copy;
 
 };
 

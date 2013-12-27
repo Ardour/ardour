@@ -24,9 +24,11 @@
 #include <string>
 #include <uuid/uuid.h>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
-class UUID {
+class LIBPBD_API UUID {
 
   public:
 	UUID () { uuid_generate (id); }

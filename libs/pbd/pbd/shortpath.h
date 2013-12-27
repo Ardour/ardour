@@ -22,6 +22,8 @@
 
 #include <glibmm/ustring.h>
 
-Glib::ustring short_path (const Glib::ustring& path, Glib::ustring::size_type target_characters);
+#include "pbd/libpbd_visibility.h"
+
+LIBPBD_API Glib::ustring short_path (const Glib::ustring& path, Glib::ustring::size_type target_characters);
 
 #endif /* __pbd_shortpath_h__ */

@@ -86,7 +86,7 @@ def options(opt):
 def configure(conf):
     conf.load('compiler_cxx')
     autowaf.build_version_files(path_prefix+'pbd/version.h', path_prefix+'version.cc',
-                    'libpbd', MAJOR, MINOR, MICRO)
+                    'libpbd', MAJOR, MINOR, MICRO, 'LIBPBD_API', 'pbd/libpbd_visibility.h')
     autowaf.configure(conf)
     autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
@@ -114,10 +114,15 @@ def build(bld):
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         print('BUILD SHARED LIB')
         obj              = bld.shlib(features = 'cxx cxxshlib', source=libpbd_sources)
+        obj.defines = [ 'LIBPBD_DLL_EXPORTS=1' ]
+        obj.cxxflags = [ '-fvisibility=hidden' ]
+        obj.cflags = [ '-fvisibility=hidden' ]
     else:
         print('BUILD STATIC LIB')
         obj              = bld.stlib(features = 'cxx cxxstlib', source=libpbd_sources)
         obj.cxxflags     = [ '-fPIC' ]
+        obj.cflags     = [ '-fPIC' ]
+        obj.defines      = []
 
     if bld.is_defined('DEBUG_RT_ALLOC'):
         obj.source += 'debug_rt_alloc.c'
@@ -134,7 +139,7 @@ def build(bld):
         obj.uselib += ' OSX'
     obj.vnum         = LIBPBD_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-    obj.defines     = ['PACKAGE="' + I18N_PACKAGE + '"']
+    obj.defines     += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
     
     if bld.env['build_target'] == 'x86_64':
         obj.defines += [ 'USE_X86_64_ASM' ]

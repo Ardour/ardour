@@ -24,6 +24,7 @@
 #include <set>
 #include <map>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/signals.h"
 #include <glibmm/threads.h>
 
@@ -33,7 +34,7 @@ class XMLNode;
 
 namespace PBD {
 
-class Controllable : public PBD::StatefulDestructible {
+class LIBPBD_API Controllable : public PBD::StatefulDestructible {
   public:
 	enum Flag {
 		Toggle = 0x1,
@@ -113,7 +114,7 @@ class Controllable : public PBD::StatefulDestructible {
    a Controllable
 */
 
-class IgnorableControllable : public Controllable 
+class LIBPBD_API IgnorableControllable : public Controllable 
 {
   public: 
 	IgnorableControllable () : PBD::Controllable ("ignoreMe") {}

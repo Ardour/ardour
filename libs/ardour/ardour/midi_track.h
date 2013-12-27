@@ -33,7 +33,7 @@ class RouteGroup;
 class SMFSource;
 class Session;
 
-class MidiTrack : public Track
+class LIBARDOUR_API MidiTrack : public Track
 {
 public:
 	MidiTrack (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);

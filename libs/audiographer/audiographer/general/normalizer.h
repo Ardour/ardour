@@ -1,6 +1,7 @@
 #ifndef AUDIOGRAPHER_NORMALIZER_H
 #define AUDIOGRAPHER_NORMALIZER_H
 
+#include "audiographer/visibility.h"
 #include "audiographer/sink.h"
 #include "audiographer/routines.h"
 #include "audiographer/utils/listed_source.h"
@@ -11,7 +12,7 @@ namespace AudioGrapher
 {
 
 /// A class for normalizing to a specified target in dB
-class Normalizer
+class LIBAUDIOGRAPHER_API Normalizer
   : public ListedSource<float>
   , public Sink<float>
   , public Throwing<>

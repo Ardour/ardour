@@ -23,12 +23,13 @@
 #include <list>
 
 #include "pbd/pool.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/io.h"
 
 namespace ARDOUR {
 
-class Click {
+class LIBARDOUR_API Click {
 public:
 	framepos_t start;
 	framecnt_t duration;
@@ -49,7 +50,7 @@ private:
 	static Pool pool;
 };
 
-class ClickIO : public IO
+class LIBARDOUR_API ClickIO : public IO
 {
 public:
 	ClickIO (Session& s, const std::string& name) : IO (s, name, IO::Output) {}

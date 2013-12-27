@@ -18,6 +18,7 @@
 
 */
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/element_import_handler.h"
 
 #include <algorithm>

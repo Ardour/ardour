@@ -28,6 +28,7 @@
 #include "pbd/property_list.h"
 #include "pbd/signals.h"
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
 class XMLNode;
@@ -38,7 +39,7 @@ namespace ARDOUR {
 class Session;
 class AudioRegion;
 
-class RegionFactory {
+class LIBARDOUR_API RegionFactory {
 public:
 	typedef std::map<PBD::ID,boost::shared_ptr<Region> > RegionMap;
 

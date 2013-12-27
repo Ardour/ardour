@@ -24,7 +24,7 @@
 
 namespace ARDOUR {
 
-class SessionConfiguration : public Configuration
+class LIBARDOUR_API SessionConfiguration : public Configuration
 {
 public:
 	SessionConfiguration ();

@@ -23,13 +23,15 @@
 #include <glibmm/threads.h>
 #include <boost/shared_ptr.hpp>
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
 class AudioFileSource;
 class Source;
 class TransientDetector;
 
-class Analyser {
+class LIBARDOUR_API Analyser {
 
   public:
 	Analyser();

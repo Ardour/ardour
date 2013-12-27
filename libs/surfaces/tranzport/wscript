@@ -39,7 +39,7 @@ def build(bld):
             wheel_modes.cc
     '''
     obj.export_includes = ['./tranzport']
-    obj.cxxflags     = '-DPACKAGE="ardour_tranzport"'
+    obj.defines     = [ 'PACKAGE="ardour_tranzport"' ]
     obj.includes     = ['.', './tranzport']
     obj.name         = 'libardour_tranzport'
     obj.target       = 'ardour_tranzport'

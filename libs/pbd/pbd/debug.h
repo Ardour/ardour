@@ -24,25 +24,27 @@
 
 #include <sstream>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
-	extern uint64_t debug_bits;
-        uint64_t new_debug_bit (const char* name);
-	void debug_print (const char* prefix, std::string str);
-	void set_debug_bits (uint64_t bits);
-	int parse_debug_options (const char* str);
-	void list_debug_options ();
+	LIBPBD_API extern uint64_t debug_bits;
+        LIBPBD_API uint64_t new_debug_bit (const char* name);
+	LIBPBD_API void debug_print (const char* prefix, std::string str);
+	LIBPBD_API void set_debug_bits (uint64_t bits);
+	LIBPBD_API int parse_debug_options (const char* str);
+	LIBPBD_API void list_debug_options ();
 
 	namespace DEBUG {
 
 		/* this namespace is so that we can write DEBUG::bit_name */
                 
-                extern uint64_t Stateful;
-                extern uint64_t Properties;
-		extern uint64_t FileManager;
-		extern uint64_t Pool;
-		extern uint64_t EventLoop;
-		extern uint64_t AbstractUI;
+                LIBPBD_API extern uint64_t Stateful;
+                LIBPBD_API extern uint64_t Properties;
+		LIBPBD_API extern uint64_t FileManager;
+		LIBPBD_API extern uint64_t Pool;
+		LIBPBD_API extern uint64_t EventLoop;
+		LIBPBD_API extern uint64_t AbstractUI;
 	}
 }
 

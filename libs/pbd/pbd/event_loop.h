@@ -24,6 +24,8 @@
 #include <boost/bind.hpp> /* we don't need this here, but anything calling call_slot() probably will, so this is convenient */
 #include <glibmm/threads.h>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD
 {
 
@@ -36,7 +38,7 @@ namespace PBD
  * when something like this is needed (it inherits from EventLoop).
  */
 
-class EventLoop 
+class LIBPBD_API EventLoop 
 {
   public:
 	EventLoop() {}

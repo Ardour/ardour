@@ -28,6 +28,8 @@
 #include "lv2/lv2plug.in/ns/ext/uri-map/uri-map.h"
 #include "lv2/lv2plug.in/ns/ext/urid/urid.h"
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
 /** Implementation of the LV2 uri-map and urid extensions.
@@ -35,7 +37,7 @@ namespace ARDOUR {
  * This just uses a pair of std::map and is not so great in the space overhead
  * department, but it's fast enough and not really performance critical anyway.
  */
-class URIMap : public boost::noncopyable {
+class LIBARDOUR_API URIMap : public boost::noncopyable {
 public:
 	URIMap();
 

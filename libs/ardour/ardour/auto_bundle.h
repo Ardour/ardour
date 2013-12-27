@@ -26,7 +26,7 @@
 
 namespace ARDOUR {
 
-class AutoBundle : public Bundle {
+class LIBARDOUR_API AutoBundle : public Bundle {
 
   public:
 	AutoBundle (bool i = true);

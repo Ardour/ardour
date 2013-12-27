@@ -22,9 +22,11 @@
 
 #include <string>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
-        bool open_uri (const char*);
-        bool open_uri (const std::string&);
+        LIBPBD_API bool open_uri (const char*);
+        LIBPBD_API bool open_uri (const std::string&);
 }
 
 #endif

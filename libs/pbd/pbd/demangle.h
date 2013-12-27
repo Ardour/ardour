@@ -28,9 +28,11 @@
 #include <cxxabi.h>
 #endif
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD
 {
-	template<typename T>
+	template<typename T> LIBPBD_API 
 	std::string demangled_name (T const & obj)
 	{
 #ifdef __GNUC__

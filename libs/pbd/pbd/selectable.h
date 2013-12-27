@@ -28,14 +28,16 @@
 
 #include <sys/types.h>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace Select {
-    enum Condition {
+    enum LIBPBD_API Condition {
 		Readable = 0x1,
 		Writable = 0x2,
 		Exception = 0x4
     };
 
-class Selectable : public sigc::trackable
+class LIBPBD_API Selectable : public sigc::trackable
 
 {
   public:
@@ -70,7 +72,7 @@ class Selectable : public sigc::trackable
 	std::string path;
 };
 
-class Selector {
+class LIBPBD_API Selector {
   private:
 	int post_select (fd_set *, fd_set *, fd_set *);
 	int _max_fd;

@@ -53,7 +53,7 @@ class AudioPlaylist;
 class AudioFileSource;
 class IO;
 
-class AudioDiskstream : public Diskstream
+class LIBARDOUR_API AudioDiskstream : public Diskstream
 {
   public:
 	AudioDiskstream (Session &, const std::string& name, Diskstream::Flag f = Recordable);

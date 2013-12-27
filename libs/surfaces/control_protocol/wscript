@@ -13,6 +13,11 @@ LIBARDOUR_CP_LIB_VERSION = '4.1.0'
 top = '.'
 out = 'build'
 
+controlcp_sources = [
+    'basic_ui.cc',
+    'control_protocol.cc',
+    ]
+
 def options(opt):
     autowaf.set_options(opt)
 
@@ -20,17 +25,23 @@ def configure(conf):
     autowaf.configure(conf)
 
 def build(bld):
-    obj = bld(features = 'cxx cxxshlib')
-    obj.source = '''
-            basic_ui.cc
-            control_protocol.cc
-    '''
+    if bld.is_defined ('INTERNAL_SHARED_LIBS'):
+        obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=controlcp_sources)
+        # defines for this library
+        obj.defines      = [ 'LIBCONTROLCP_DLL_EXPORTS=1' ]
+        obj.cxxflags     = [ '-fvisibility=hidden' ]
+        obj.cflags       = [ '-fvisibility=hidden' ]
+    else:
+        obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=controlcp_sources)
+        obj.cxxflags     = [ '-fPIC' ]
+        obj.defines      = [ ]
+
     obj.export_includes = ['.', './control_protocol' ]
-    obj.cxxflags     = '-DPACKAGE="ardour_cp" -fPIC'
+    obj.defines    +=  [ 'PACKAGE="ardour_cp"' ]
     obj.includes     = ['.', './control_protocol']
     obj.name         = 'libardour_cp'
     obj.target       = 'ardourcp'
-    obj.use          = 'libardour libtimecode'
+    obj.use          = 'libardour'
     obj.vnum         = LIBARDOUR_CP_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 

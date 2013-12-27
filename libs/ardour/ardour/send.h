@@ -32,7 +32,7 @@ namespace ARDOUR {
 class PeakMeter;
 class Amp;
 
-class Send : public Delivery
+class LIBARDOUR_API Send : public Delivery
 {
   public:
 	Send (Session&, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster>, Delivery::Role r = Delivery::Send);

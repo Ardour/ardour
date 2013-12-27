@@ -42,7 +42,7 @@ def build(bld):
             types.cc
     '''
     obj.export_includes = ['./mackie']
-    obj.cxxflags     = '-DPACKAGE="ardour_mackie"'
+    obj.defines     = [ 'PACKAGE="ardour_mackie"' ]
     # need ../libs because some GTK2 header files require stuff there
     obj.includes     = ['.', '../libs']
     obj.name         = 'libardour_mcp'

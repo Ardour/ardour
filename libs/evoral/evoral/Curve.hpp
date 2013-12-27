@@ -22,11 +22,13 @@
 #include <inttypes.h>
 #include <boost/utility.hpp>
 
+#include "evoral/visibility.h"
+
 namespace Evoral {
 
 class ControlList;
 
-class Curve : public boost::noncopyable
+class LIBEVORAL_API Curve : public boost::noncopyable
 {
 public:
 	Curve (const ControlList& cl);
@@ -51,7 +53,7 @@ private:
 } // namespace Evoral
 
 extern "C" {
-	void curve_get_vector_from_c (void *arg, double, double, float*, int32_t);
+	LIBEVORAL_API void curve_get_vector_from_c (void *arg, double, double, float*, int32_t);
 }
 
 #endif // EVORAL_CURVE_HPP

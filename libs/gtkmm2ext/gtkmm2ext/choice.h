@@ -27,9 +27,11 @@
 #include <string>
 #include <vector>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
-class Choice : public Gtk::Dialog
+class LIBGTKMM2EXT_API Choice : public Gtk::Dialog
 {
   public:
 	Choice (std::string title, std::string prompt, std::vector<std::string> choices, bool center = true);

@@ -68,7 +68,6 @@ ARDOUR_UI::set_session (Session *s)
 {
 	SessionHandlePtr::set_session (s);
 
-
 	if (!_session) {
 		WM::Manager::instance().set_session (s);
 		/* Session option editor cannot exist across change-of-session */
@@ -198,9 +197,15 @@ ARDOUR_UI::set_session (Session *s)
 		editor_meter_peak_display.hide();
 	}
 
-	if (_session
-			&& _session->master_out()
-			&& _session->master_out()->n_outputs().n(DataType::AUDIO) > 0) {
+	if (meter_box.get_parent()) {
+		transport_tearoff_hbox.remove (meter_box);
+		transport_tearoff_hbox.remove (editor_meter_peak_display);
+	}
+
+	if (_session && 
+	    _session->master_out() && 
+	    _session->master_out()->n_outputs().n(DataType::AUDIO) > 0) {
+
 		editor_meter = new LevelMeterHBox(_session);
 		editor_meter->set_meter (_session->master_out()->shared_peak_meter().get());
 		editor_meter->clear_meters();
@@ -228,7 +233,7 @@ ARDOUR_UI::set_session (Session *s)
 			meter_box.show();
 			editor_meter_peak_display.show();
 		}
-	} 
+	}
 }
 
 int

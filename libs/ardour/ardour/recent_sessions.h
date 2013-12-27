@@ -24,13 +24,15 @@
 #include <utility>
 #include <string>
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 	typedef std::deque<std::pair<std::string,std::string> > RecentSessions;
 
-	int read_recent_sessions (RecentSessions& rs);
-	int store_recent_sessions (std::string name, std::string path);
-	int write_recent_sessions (RecentSessions& rs);
-	int remove_recent_sessions (const std::string& path);
+	LIBARDOUR_API int read_recent_sessions (RecentSessions& rs);
+	LIBARDOUR_API int store_recent_sessions (std::string name, std::string path);
+	LIBARDOUR_API int write_recent_sessions (RecentSessions& rs);
+	LIBARDOUR_API int remove_recent_sessions (const std::string& path);
 }; // namespace ARDOUR
 
 #endif // __ardour_recent_sessions_h__

@@ -24,10 +24,11 @@
 
 #include <string>
 
+#include "pbd/libpbd_visibility.h"
 #include "pbd/signals.h"
 #include "pbd/statefuldestructible.h"
 
-class Command : public PBD::StatefulDestructible, public PBD::ScopedConnectionList
+class LIBPBD_API Command : public PBD::StatefulDestructible, public PBD::ScopedConnectionList
 {
 public:
 	virtual ~Command() { /* NOTE: derived classes must call drop_references() */ }

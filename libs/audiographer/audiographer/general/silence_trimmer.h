@@ -1,6 +1,7 @@
 #ifndef AUDIOGRAPHER_SILENCE_TRIMMER_H
 #define AUDIOGRAPHER_SILENCE_TRIMMER_H
 
+#include "audiographer/visibility.h"
 #include "audiographer/debug_utils.h"
 #include "audiographer/flag_debuggable.h"
 #include "audiographer/sink.h"
@@ -13,7 +14,7 @@ namespace AudioGrapher {
 
 /// Removes and adds silent frames to beginning and/or end of stream
 template<typename T = DefaultSampleType>
-class SilenceTrimmer
+class LIBAUDIOGRAPHER_API SilenceTrimmer
   : public ListedSource<T>
   , public Sink<T>
   , public FlagDebuggable<>

@@ -19,6 +19,8 @@
 #include <gdk-pixbuf/gdk-pixdata.h>
 #include <gobject/gvaluecollector.h>
 
+#include "gtkmm2ext/visibility.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -141,107 +143,107 @@ struct _ProlooksParamSpecHSV {
 };
 
 
-gpointer cairo_color_ref (gpointer instance);
-void cairo_color_unref (gpointer instance);
-GParamSpec* cairo_param_spec_color (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
-void cairo_value_set_color (GValue* value, gpointer v_object);
-void cairo_value_take_color (GValue* value, gpointer v_object);
-gpointer cairo_value_get_color (const GValue* value);
-GType cairo_color_get_type (void);
+LIBGTKMM2EXT_API gpointer cairo_color_ref (gpointer instance);
+LIBGTKMM2EXT_API void cairo_color_unref (gpointer instance);
+LIBGTKMM2EXT_API GParamSpec* cairo_param_spec_color (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
+LIBGTKMM2EXT_API void cairo_value_set_color (GValue* value, gpointer v_object);
+LIBGTKMM2EXT_API void cairo_value_take_color (GValue* value, gpointer v_object);
+LIBGTKMM2EXT_API gpointer cairo_value_get_color (const GValue* value);
+LIBGTKMM2EXT_API GType cairo_color_get_type (void);
 #define CAIRO_COLOR_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), CAIRO_TYPE_COLOR, CairoColorPrivate))
-enum  {
+enum LIBGTKMM2EXT_API  {
 	CAIRO_COLOR_DUMMY_PROPERTY
 };
-void cairo_color_set_red (CairoColor* self, double value);
-void cairo_color_set_green (CairoColor* self, double value);
-void cairo_color_set_blue (CairoColor* self, double value);
-void cairo_color_set_alpha (CairoColor* self, double value);
-CairoColor* cairo_color_new (double red, double green, double blue, double alpha);
-CairoColor* cairo_color_construct (GType object_type, double red, double green, double blue, double alpha);
-double cairo_color_get_red (CairoColor* self);
-double cairo_color_get_green (CairoColor* self);
-double cairo_color_get_blue (CairoColor* self);
-double cairo_color_get_alpha (CairoColor* self);
-CairoColor* cairo_color_copy (CairoColor* self);
-void cairo_color_set_from_string (CairoColor* self, const char* webcolor);
-CairoColor* cairo_color_new_from_string (const char* webcolor);
-CairoColor* cairo_color_construct_from_string (GType object_type, const char* webcolor);
-ProlooksHSL* prolooks_hsl_new (void);
-ProlooksHSL* prolooks_hsl_construct (GType object_type);
-gpointer prolooks_hsl_ref (gpointer instance);
-void prolooks_hsl_unref (gpointer instance);
-GParamSpec* prolooks_param_spec_hsl (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
-void prolooks_value_set_hsl (GValue* value, gpointer v_object);
-void prolooks_value_take_hsl (GValue* value, gpointer v_object);
-gpointer prolooks_value_get_hsl (const GValue* value);
-GType prolooks_hsl_get_type (void);
-void prolooks_hsl_from_cairo_color (ProlooksHSL* self, CairoColor* color);
-double prolooks_hsl_get_lightness (ProlooksHSL* self);
-void prolooks_hsl_set_lightness (ProlooksHSL* self, double value);
-double prolooks_hsl_get_saturation (ProlooksHSL* self);
-void prolooks_hsl_set_saturation (ProlooksHSL* self, double value);
-CairoColor* prolooks_hsl_to_cairo_color (ProlooksHSL* self);
-CairoColor* cairo_color_shade (CairoColor* self, double shade_factor);
-void cairo_color_set_to (CairoColor* self, CairoColor* a_color);
-void cairo_color_set_as_source_in (CairoColor* self, cairo_t* cr);
-void cairo_color_add_color_stop_to (CairoColor* self, cairo_pattern_t* p, double offset);
-CairoColor* prolooks_gdk_color_to_cairo (const GdkColor* color);
-void prolooks_color_from_string (const char* webcolor, GdkColor* result);
-GType prolooks_button_state_get_type (void);
-GType prolooks_button_type_get_type (void);
-void prolooks_set_line_width_from_device (cairo_t* cr);
-char* prolooks_color_to_string (const GdkColor* color);
-CairoColor* prolooks_cairo_color_from_string (const char* webcolor);
-void prolooks_set_source_color (cairo_t* cr, const GdkColor* color, double alpha);
-void prolooks_gdk_color_to_cairo_color (const GdkColor* color, double* red, double* green, double* blue);
-void prolooks_cairo_color_to_gdk (CairoColor* cairo_color, GdkColor* result);
-void prolooks_set_source_color_string (cairo_t* cr, const char* color, double alpha);
-void prolooks_add_color_stop (cairo_pattern_t* p, double offset, const GdkColor* color, double alpha);
-void prolooks_add_color_stop_str (cairo_pattern_t* p, double offset, const char* color, double alpha);
-cairo_pattern_t* prolooks_create_gradient (double x1, double y1, double x2, double y2, const GdkColor* start, const GdkColor* stop, double alpha_start, double alpha_stop);
-cairo_pattern_t* prolooks_create_gradient_str (double x1, double y1, double x2, double y2, const char* start, const char* stop, double alpha_start, double alpha_stop);
-void prolooks_rounded_rect (cairo_t* cr, double x, double y, double w, double h, double radius_x, double radius_y);
-void prolooks_background_gradient (cairo_t* cr, double w, double h);
-double prolooks_modula (double number, double divisor);
+LIBGTKMM2EXT_API void cairo_color_set_red (CairoColor* self, double value);
+LIBGTKMM2EXT_API void cairo_color_set_green (CairoColor* self, double value);
+LIBGTKMM2EXT_API void cairo_color_set_blue (CairoColor* self, double value);
+LIBGTKMM2EXT_API void cairo_color_set_alpha (CairoColor* self, double value);
+LIBGTKMM2EXT_API CairoColor* cairo_color_new (double red, double green, double blue, double alpha);
+LIBGTKMM2EXT_API CairoColor* cairo_color_construct (GType object_type, double red, double green, double blue, double alpha);
+LIBGTKMM2EXT_API double cairo_color_get_red (CairoColor* self);
+LIBGTKMM2EXT_API double cairo_color_get_green (CairoColor* self);
+LIBGTKMM2EXT_API double cairo_color_get_blue (CairoColor* self);
+LIBGTKMM2EXT_API double cairo_color_get_alpha (CairoColor* self);
+LIBGTKMM2EXT_API CairoColor* cairo_color_copy (CairoColor* self);
+LIBGTKMM2EXT_API void cairo_color_set_from_string (CairoColor* self, const char* webcolor);
+LIBGTKMM2EXT_API CairoColor* cairo_color_new_from_string (const char* webcolor);
+LIBGTKMM2EXT_API CairoColor* cairo_color_construct_from_string (GType object_type, const char* webcolor);
+LIBGTKMM2EXT_API ProlooksHSL* prolooks_hsl_new (void);
+LIBGTKMM2EXT_API ProlooksHSL* prolooks_hsl_construct (GType object_type);
+LIBGTKMM2EXT_API gpointer prolooks_hsl_ref (gpointer instance);
+LIBGTKMM2EXT_API void prolooks_hsl_unref (gpointer instance);
+LIBGTKMM2EXT_API GParamSpec* prolooks_param_spec_hsl (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
+LIBGTKMM2EXT_API void prolooks_value_set_hsl (GValue* value, gpointer v_object);
+LIBGTKMM2EXT_API void prolooks_value_take_hsl (GValue* value, gpointer v_object);
+LIBGTKMM2EXT_API gpointer prolooks_value_get_hsl (const GValue* value);
+LIBGTKMM2EXT_API GType prolooks_hsl_get_type (void);
+LIBGTKMM2EXT_API void prolooks_hsl_from_cairo_color (ProlooksHSL* self, CairoColor* color);
+LIBGTKMM2EXT_API double prolooks_hsl_get_lightness (ProlooksHSL* self);
+LIBGTKMM2EXT_API void prolooks_hsl_set_lightness (ProlooksHSL* self, double value);
+LIBGTKMM2EXT_API double prolooks_hsl_get_saturation (ProlooksHSL* self);
+LIBGTKMM2EXT_API void prolooks_hsl_set_saturation (ProlooksHSL* self, double value);
+LIBGTKMM2EXT_API CairoColor* prolooks_hsl_to_cairo_color (ProlooksHSL* self);
+LIBGTKMM2EXT_API CairoColor* cairo_color_shade (CairoColor* self, double shade_factor);
+LIBGTKMM2EXT_API void cairo_color_set_to (CairoColor* self, CairoColor* a_color);
+LIBGTKMM2EXT_API void cairo_color_set_as_source_in (CairoColor* self, cairo_t* cr);
+LIBGTKMM2EXT_API void cairo_color_add_color_stop_to (CairoColor* self, cairo_pattern_t* p, double offset);
+LIBGTKMM2EXT_API CairoColor* prolooks_gdk_color_to_cairo (const GdkColor* color);
+LIBGTKMM2EXT_API void prolooks_color_from_string (const char* webcolor, GdkColor* result);
+LIBGTKMM2EXT_API GType prolooks_button_state_get_type (void);
+LIBGTKMM2EXT_API GType prolooks_button_type_get_type (void);
+LIBGTKMM2EXT_API void prolooks_set_line_width_from_device (cairo_t* cr);
+LIBGTKMM2EXT_API char* prolooks_color_to_string (const GdkColor* color);
+LIBGTKMM2EXT_API CairoColor* prolooks_cairo_color_from_string (const char* webcolor);
+LIBGTKMM2EXT_API void prolooks_set_source_color (cairo_t* cr, const GdkColor* color, double alpha);
+LIBGTKMM2EXT_API void prolooks_gdk_color_to_cairo_color (const GdkColor* color, double* red, double* green, double* blue);
+LIBGTKMM2EXT_API void prolooks_cairo_color_to_gdk (CairoColor* cairo_color, GdkColor* result);
+LIBGTKMM2EXT_API void prolooks_set_source_color_string (cairo_t* cr, const char* color, double alpha);
+LIBGTKMM2EXT_API void prolooks_add_color_stop (cairo_pattern_t* p, double offset, const GdkColor* color, double alpha);
+LIBGTKMM2EXT_API void prolooks_add_color_stop_str (cairo_pattern_t* p, double offset, const char* color, double alpha);
+LIBGTKMM2EXT_API cairo_pattern_t* prolooks_create_gradient (double x1, double y1, double x2, double y2, const GdkColor* start, const GdkColor* stop, double alpha_start, double alpha_stop);
+LIBGTKMM2EXT_API cairo_pattern_t* prolooks_create_gradient_str (double x1, double y1, double x2, double y2, const char* start, const char* stop, double alpha_start, double alpha_stop);
+LIBGTKMM2EXT_API void prolooks_rounded_rect (cairo_t* cr, double x, double y, double w, double h, double radius_x, double radius_y);
+LIBGTKMM2EXT_API void prolooks_background_gradient (cairo_t* cr, double w, double h);
+LIBGTKMM2EXT_API double prolooks_modula (double number, double divisor);
 #define PROLOOKS_HSL_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), PROLOOKS_TYPE_HSL, ProlooksHSLPrivate))
-enum  {
+enum LIBGTKMM2EXT_API  {
 	PROLOOKS_HSL_DUMMY_PROPERTY
 };
-double prolooks_hsl_get_hue (ProlooksHSL* self);
-char* prolooks_hsl_to_string (ProlooksHSL* self);
-void prolooks_hsl_to_gdk_color (ProlooksHSL* self, GdkColor* result);
-void prolooks_hsl_from_gdk_color (ProlooksHSL* self, const GdkColor* color);
-void prolooks_hsl_set_hue (ProlooksHSL* self, double value);
-gpointer prolooks_hsv_ref (gpointer instance);
-void prolooks_hsv_unref (gpointer instance);
-GParamSpec* prolooks_param_spec_hsv (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
-void prolooks_value_set_hsv (GValue* value, gpointer v_object);
-void prolooks_value_take_hsv (GValue* value, gpointer v_object);
-gpointer prolooks_value_get_hsv (const GValue* value);
-GType prolooks_hsv_get_type (void);
+LIBGTKMM2EXT_API double prolooks_hsl_get_hue (ProlooksHSL* self);
+LIBGTKMM2EXT_API char* prolooks_hsl_to_string (ProlooksHSL* self);
+LIBGTKMM2EXT_API void prolooks_hsl_to_gdk_color (ProlooksHSL* self, GdkColor* result);
+LIBGTKMM2EXT_API void prolooks_hsl_from_gdk_color (ProlooksHSL* self, const GdkColor* color);
+LIBGTKMM2EXT_API void prolooks_hsl_set_hue (ProlooksHSL* self, double value);
+LIBGTKMM2EXT_API gpointer prolooks_hsv_ref (gpointer instance);
+LIBGTKMM2EXT_API void prolooks_hsv_unref (gpointer instance);
+LIBGTKMM2EXT_API GParamSpec* prolooks_param_spec_hsv (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
+LIBGTKMM2EXT_API void prolooks_value_set_hsv (GValue* value, gpointer v_object);
+LIBGTKMM2EXT_API void prolooks_value_take_hsv (GValue* value, gpointer v_object);
+LIBGTKMM2EXT_API gpointer prolooks_value_get_hsv (const GValue* value);
+LIBGTKMM2EXT_API GType prolooks_hsv_get_type (void);
 #define PROLOOKS_HSV_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), PROLOOKS_TYPE_HSV, ProlooksHSVPrivate))
-enum  {
+enum LIBGTKMM2EXT_API  {
 	PROLOOKS_HSV_DUMMY_PROPERTY
 };
-double prolooks_hsv_get_hue (ProlooksHSV* self);
-double prolooks_hsv_get_saturation (ProlooksHSV* self);
-double prolooks_hsv_get_value (ProlooksHSV* self);
-char* prolooks_hsv_to_string (ProlooksHSV* self);
-void prolooks_hsv_from_gdk_color (ProlooksHSV* self, const GdkColor* color);
-ProlooksHSV* prolooks_hsv_new_for_gdk_color (const GdkColor* color);
-ProlooksHSV* prolooks_hsv_construct_for_gdk_color (GType object_type, const GdkColor* color);
-void prolooks_hsv_from_cairo_color (ProlooksHSV* self, CairoColor* color);
-ProlooksHSV* prolooks_hsv_new_for_cairo_color (CairoColor* color);
-ProlooksHSV* prolooks_hsv_construct_for_cairo_color (GType object_type, CairoColor* color);
-CairoColor* prolooks_hsv_to_cairo_color (ProlooksHSV* self);
-void prolooks_hsv_to_gdk_color (ProlooksHSV* self, GdkColor* result);
-void prolooks_hsv_set_value (ProlooksHSV* self, double value);
-void prolooks_hsv_set_hue (ProlooksHSV* self, double value);
-void prolooks_hsv_set_saturation (ProlooksHSV* self, double value);
-ProlooksHSV* prolooks_hsv_new (void);
-ProlooksHSV* prolooks_hsv_construct (GType object_type);
-void prolooks_shade_color (const GdkColor* orig, double shade_ratio, GdkColor* result);
-GdkPixbuf* prolooks_cairo_image_surface_to_pixbuf (cairo_surface_t* surface);
+LIBGTKMM2EXT_API double prolooks_hsv_get_hue (ProlooksHSV* self);
+LIBGTKMM2EXT_API double prolooks_hsv_get_saturation (ProlooksHSV* self);
+LIBGTKMM2EXT_API double prolooks_hsv_get_value (ProlooksHSV* self);
+LIBGTKMM2EXT_API char* prolooks_hsv_to_string (ProlooksHSV* self);
+LIBGTKMM2EXT_API void prolooks_hsv_from_gdk_color (ProlooksHSV* self, const GdkColor* color);
+LIBGTKMM2EXT_API ProlooksHSV* prolooks_hsv_new_for_gdk_color (const GdkColor* color);
+LIBGTKMM2EXT_API ProlooksHSV* prolooks_hsv_construct_for_gdk_color (GType object_type, const GdkColor* color);
+LIBGTKMM2EXT_API void prolooks_hsv_from_cairo_color (ProlooksHSV* self, CairoColor* color);
+LIBGTKMM2EXT_API ProlooksHSV* prolooks_hsv_new_for_cairo_color (CairoColor* color);
+LIBGTKMM2EXT_API ProlooksHSV* prolooks_hsv_construct_for_cairo_color (GType object_type, CairoColor* color);
+LIBGTKMM2EXT_API CairoColor* prolooks_hsv_to_cairo_color (ProlooksHSV* self);
+LIBGTKMM2EXT_API void prolooks_hsv_to_gdk_color (ProlooksHSV* self, GdkColor* result);
+LIBGTKMM2EXT_API void prolooks_hsv_set_value (ProlooksHSV* self, double value);
+LIBGTKMM2EXT_API void prolooks_hsv_set_hue (ProlooksHSV* self, double value);
+LIBGTKMM2EXT_API void prolooks_hsv_set_saturation (ProlooksHSV* self, double value);
+LIBGTKMM2EXT_API ProlooksHSV* prolooks_hsv_new (void);
+LIBGTKMM2EXT_API ProlooksHSV* prolooks_hsv_construct (GType object_type);
+LIBGTKMM2EXT_API void prolooks_shade_color (const GdkColor* orig, double shade_ratio, GdkColor* result);
+LIBGTKMM2EXT_API GdkPixbuf* prolooks_cairo_image_surface_to_pixbuf (cairo_surface_t* surface);
 
 #ifdef __cplusplus
 } // extern "C" 

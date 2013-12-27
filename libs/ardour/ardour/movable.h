@@ -22,7 +22,7 @@
 
 namespace ARDOUR {
 
-class Movable {
+class LIBARDOUR_API Movable {
   public:
 	Movable() {}
 

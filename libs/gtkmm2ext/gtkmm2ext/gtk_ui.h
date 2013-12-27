@@ -37,12 +37,15 @@
 #include <gtkmm/textbuffer.h>
 #include <gtkmm/main.h>
 #include <gdkmm/color.h>
-#include <pbd/abstract_ui.h>
-#include <pbd/ringbufferNPT.h>
- 
-#include <pbd/pool.h>
-#include <pbd/error.h>
-#include <pbd/receiver.h>
+
+#define ABSTRACT_UI_EXPORTS
+#include "pbd/abstract_ui.h"
+#include "pbd/ringbufferNPT.h"
+#include "pbd/pool.h"
+#include "pbd/error.h"
+#include "pbd/receiver.h"
+
+#include "gtkmm2ext/visibility.h"
 
 class Touchable;
 
@@ -59,7 +62,7 @@ extern BaseUI::RequestType SetTip;
 extern BaseUI::RequestType AddIdle;
 extern BaseUI::RequestType AddTimeout;
 
-struct UIRequest : public BaseUI::BaseRequestObject {
+struct LIBGTKMM2EXT_API UIRequest : public BaseUI::BaseRequestObject {
      
      /* this once used anonymous unions to merge elements
 	that are never part of the same request. that makes
@@ -88,7 +91,7 @@ struct UIRequest : public BaseUI::BaseRequestObject {
     }
 };
 
-class UI : public AbstractUI<UIRequest>
+class LIBGTKMM2EXT_API UI : public AbstractUI<UIRequest>
 {
   private:
 	class MyReceiver : public Receiver {

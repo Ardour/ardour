@@ -25,9 +25,11 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
-class UUID : public boost::uuids::uuid {
+class LIBPBD_API UUID : public boost::uuids::uuid {
 
   public:
     UUID () 

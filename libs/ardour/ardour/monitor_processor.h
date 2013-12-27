@@ -28,6 +28,7 @@
 #include "pbd/compose.h"
 #include "pbd/controllable.h"
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/processor.h"
 
@@ -38,7 +39,7 @@ namespace ARDOUR {
 class Session;
 
 template<typename T>
-class MPControl : public PBD::Controllable {
+class LIBARDOUR_API MPControl : public PBD::Controllable {
 public:
 	MPControl (T initial, const std::string& name, PBD::Controllable::Flag flag,
 	           float lower = 0.0f, float upper = 1.0f)
@@ -104,7 +105,7 @@ protected:
 	T _upper;
 };
 
-class MonitorProcessor : public Processor
+class LIBARDOUR_API MonitorProcessor : public Processor
 {
 public:
 	MonitorProcessor (Session&);

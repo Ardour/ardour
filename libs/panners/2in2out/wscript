@@ -22,7 +22,7 @@ def build(bld):
     obj = bld(features = 'cxx cxxshlib')
     obj.source = [ 'panner_2in2out.cc' ]
     obj.export_includes = ['.']
-    obj.cxxflags     = '-DPACKAGE="libardour_pan2in2out"'
+    obj.defines     = [ 'PACKAGE="libardour_pan2in2out"' ]
     obj.includes     = ['.']
     obj.name         = 'libardour_pan2in2out'
     obj.target       = 'pan2in2out'

@@ -38,7 +38,7 @@ class AudioRegionImporter;
 class AudioPlaylistImporter;
 class Session;
 
-class AudioPlaylistImportHandler : public ElementImportHandler
+class LIBARDOUR_API AudioPlaylistImportHandler : public ElementImportHandler
 {
   public:
 	typedef boost::shared_ptr<AudioPlaylistImporter> PlaylistPtr;
@@ -57,7 +57,7 @@ class AudioPlaylistImportHandler : public ElementImportHandler
 	AudioRegionImportHandler & region_handler;
 };
 
-class UnusedAudioPlaylistImportHandler : public AudioPlaylistImportHandler
+class LIBARDOUR_API UnusedAudioPlaylistImportHandler : public AudioPlaylistImportHandler
 {
   public:
 	UnusedAudioPlaylistImportHandler (XMLTree const & source, Session & session, AudioRegionImportHandler & region_handler) :
@@ -65,7 +65,7 @@ class UnusedAudioPlaylistImportHandler : public AudioPlaylistImportHandler
 	std::string get_info () const;
 };
 
-class AudioPlaylistImporter : public ElementImporter
+class LIBARDOUR_API AudioPlaylistImporter : public ElementImporter
 {
   public:
 	AudioPlaylistImporter (XMLTree const & source, Session & session, AudioPlaylistImportHandler & handler, XMLNode const & node);

@@ -21,13 +21,14 @@
 
 #include <gtkmm/frame.h>
 #include <gtkmm/drawingarea.h>
-#include <gtkmm2ext/binding_proxy.h>
 #include <cairo.h>
 
+#include "gtkmm2ext/visibility.h"
+#include "gtkmm2ext/binding_proxy.h"
 
 namespace Gtkmm2ext {
 
-class BarController : public Gtk::Frame
+class LIBGTKMM2EXT_API BarController : public Gtk::Frame
 {
   public:
 	BarController (Gtk::Adjustment& adj, boost::shared_ptr<PBD::Controllable>);

@@ -27,7 +27,7 @@
 namespace ARDOUR {
 
 /** Buffer containing audio data. */
-class AudioBuffer : public Buffer
+class LIBARDOUR_API AudioBuffer : public Buffer
 {
 public:
 	AudioBuffer(size_t capacity);

@@ -25,6 +25,7 @@
 
 #include "pbd/signals.h"
 
+#include "midi++/libmidi_visibility.h"
 #include "midi++/types.h"
 
 namespace MIDI {
@@ -39,7 +40,7 @@ typedef PBD::Signal2<void,Parser &, EventTwoBytes *> TwoByteSignal;
 typedef PBD::Signal2<void,Parser &, pitchbend_t>     PitchBendSignal;
 typedef PBD::Signal3<void,Parser &, byte *, size_t>  Signal;
 
-class Parser {
+class LIBMIDIPP_API Parser {
  public:
 	Parser ();
 	~Parser ();

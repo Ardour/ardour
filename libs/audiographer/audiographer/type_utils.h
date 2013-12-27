@@ -1,18 +1,20 @@
 #ifndef AUDIOGRAPHER_TYPE_UTILS_H
 #define AUDIOGRAPHER_TYPE_UTILS_H
 
-#include "audiographer/types.h"
 #include <boost/static_assert.hpp>
 #include <boost/type_traits.hpp>
 #include <memory>
 #include <algorithm>
 #include <cstring>
 
+#include "audiographer/visibility.h"
+#include "audiographer/types.h"
+
 namespace AudioGrapher
 {
 
 /// Non-template base class for TypeUtils
-class TypeUtilsBase
+class LIBAUDIOGRAPHER_API TypeUtilsBase
 {
   protected:
 	
@@ -27,7 +29,7 @@ class TypeUtilsBase
 
 /// Utilities for initializing, copying, moving, etc. data
 template<typename T = DefaultSampleType>
-class TypeUtils : private TypeUtilsBase
+class LIBAUDIOGRAPHER_API TypeUtils : private TypeUtilsBase
 {
 	BOOST_STATIC_ASSERT (boost::has_trivial_destructor<T>::value);
 	

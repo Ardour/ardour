@@ -25,9 +25,11 @@
 
 #include <pbd/touchable.h>
 
+#include "gtkmm2ext/visibility.h"
+
 namespace Gtkmm2ext {
 
-class PopUp : public Gtk::Window, public Touchable
+class LIBGTKMM2EXT_API PopUp : public Gtk::Window, public Touchable
 {
   public:
 	PopUp (Gtk::WindowPosition pos, unsigned int show_for_msecs = 0,

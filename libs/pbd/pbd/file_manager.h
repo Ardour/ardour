@@ -25,11 +25,13 @@
 #include <map>
 #include <list>
 #include <glibmm/threads.h>
+
+#include "pbd/libpbd_visibility.h"
 #include "pbd/signals.h"
 
 namespace PBD {
 
-class FileManager;
+class LIBPBD_API FileManager;
 
 /** Parent class for FileDescriptors.
  *
@@ -45,7 +47,7 @@ class FileManager;
  *  open files to stay within limits imposed by the operating system.
  */
 	
-class FileDescriptor
+class LIBPBD_API FileDescriptor
 {
 public:
 	FileDescriptor (std::string const &, bool);
@@ -86,7 +88,7 @@ private:
 
 
 /** FileDescriptor for a file to be opened using POSIX open */	
-class FdFileDescriptor : public FileDescriptor
+class LIBPBD_API FdFileDescriptor : public FileDescriptor
 {
 public:
 	FdFileDescriptor (std::string const & file_name, bool writeable, mode_t mode);
@@ -107,7 +109,7 @@ private:
 };
 
 /** FileDescriptor for a file opened using stdio */
-class StdioFileDescriptor : public FileDescriptor
+class LIBPBD_API StdioFileDescriptor : public FileDescriptor
 {
 public:
 	StdioFileDescriptor (std::string const & file_name, std::string const & mode);
@@ -129,7 +131,7 @@ private:
 
 
 /** Class to limit the number of files held open */
-class FileManager
+class LIBPBD_API FileManager
 {
 public:
 	FileManager ();

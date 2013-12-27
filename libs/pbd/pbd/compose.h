@@ -38,11 +38,13 @@
 #include <list>
 #include <map>			// for multimap
 
+#include "pbd/libpbd_visibility.h"
+
 namespace StringPrivate
 {
   // the actual composition class - using string::compose is cleaner, so we
   // hide it here
-  class Composition
+  class LIBPBD_API Composition
   {
   public:
     // initialize and prepare format string on the form "text %1 text %2 etc."
@@ -202,7 +204,7 @@ namespace StringPrivate
   // a series of functions which accept a format string on the form "text %1
   // more %2 less %3" and a number of templated parameters and spits out the
   // composited string
-  template <typename T1>
+  template <typename T1> LIBPBD_API 
   inline std::string string_compose(const std::string &fmt, const T1 &o1)
   {
     StringPrivate::Composition c(fmt);
@@ -210,7 +212,7 @@ namespace StringPrivate
     return c.str();
   }
 
-  template <typename T1, typename T2>
+  template <typename T1, typename T2> LIBPBD_API 
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2)
   {
@@ -219,7 +221,7 @@ namespace StringPrivate
     return c.str();
   }
 
-  template <typename T1, typename T2, typename T3>
+  template <typename T1, typename T2, typename T3> LIBPBD_API 
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3)
   {
@@ -228,7 +230,7 @@ namespace StringPrivate
     return c.str();
   }
 
-  template <typename T1, typename T2, typename T3, typename T4>
+  template <typename T1, typename T2, typename T3, typename T4> LIBPBD_API 
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4)
@@ -238,7 +240,7 @@ namespace StringPrivate
     return c.str();
   }
 
-  template <typename T1, typename T2, typename T3, typename T4, typename T5>
+  template <typename T1, typename T2, typename T3, typename T4, typename T5> LIBPBD_API 
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5)
@@ -249,7 +251,7 @@ namespace StringPrivate
   }
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
-	    typename T6>
+	    typename T6> LIBPBD_API 
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6)
@@ -260,7 +262,7 @@ namespace StringPrivate
   }
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
-	    typename T6, typename T7>
+	    typename T6, typename T7> LIBPBD_API 
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
@@ -272,7 +274,7 @@ namespace StringPrivate
   }
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
-	    typename T6, typename T7, typename T8>
+	    typename T6, typename T7, typename T8> LIBPBD_API 
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
@@ -284,7 +286,7 @@ namespace StringPrivate
   }
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
-	    typename T6, typename T7, typename T8, typename T9>
+	    typename T6, typename T7, typename T8, typename T9> LIBPBD_API 
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
@@ -296,7 +298,7 @@ namespace StringPrivate
   }
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
-	    typename T6, typename T7, typename T8, typename T9, typename T10>
+	    typename T6, typename T7, typename T8, typename T9, typename T10> LIBPBD_API 
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
@@ -311,7 +313,7 @@ namespace StringPrivate
   
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7, typename T8, typename T9, typename T10,
-	    typename T11>
+	    typename T11> LIBPBD_API 
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
@@ -326,7 +328,7 @@ namespace StringPrivate
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7, typename T8, typename T9, typename T10,
-	    typename T11, typename T12>
+	    typename T11, typename T12> LIBPBD_API 
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
@@ -341,7 +343,7 @@ namespace StringPrivate
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7, typename T8, typename T9, typename T10,
-	    typename T11, typename T12, typename T13>
+	    typename T11, typename T12, typename T13> LIBPBD_API 
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
@@ -357,7 +359,7 @@ namespace StringPrivate
 
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7, typename T8, typename T9, typename T10,
-	    typename T11, typename T12, typename T13, typename T14>
+	    typename T11, typename T12, typename T13, typename T14> LIBPBD_API 
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,
@@ -374,7 +376,7 @@ namespace StringPrivate
   template <typename T1, typename T2, typename T3, typename T4, typename T5,
 	    typename T6, typename T7, typename T8, typename T9, typename T10,
 	    typename T11, typename T12, typename T13, typename T14,
-	    typename T15>
+	    typename T15> LIBPBD_API 
   inline std::string string_compose(const std::string &fmt,
 			     const T1 &o1, const T2 &o2, const T3 &o3,
 			     const T4 &o4, const T5 &o5, const T6 &o6,

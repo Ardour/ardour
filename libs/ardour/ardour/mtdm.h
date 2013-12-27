@@ -21,7 +21,9 @@
 
 #include <stddef.h>
 
-class MTDM
+#include "ardour/libardour_visibility.h"
+
+class LIBARDOUR_API MTDM
 {
 public:
 

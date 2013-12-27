@@ -31,6 +31,7 @@
 
 #include "timecode/time.h"
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "midi++/parser.h"
 #include "midi++/types.h"
@@ -59,7 +60,7 @@ class MidiPort;
  * Therefore it is rather that class, that makes ARDOUR a slave by connecting it
  * to its external time master.
  */
-class Slave {
+class LIBARDOUR_API Slave {
   public:
 	Slave() { }
 	virtual ~Slave() {}
@@ -180,7 +181,7 @@ class Slave {
 };
 
 /// We need this wrapper for testability, it's just too hard to mock up a session class
-class ISlaveSessionProxy {
+class LIBARDOUR_API ISlaveSessionProxy {
   public:
 	virtual ~ISlaveSessionProxy() {}
 	virtual TempoMap&  tempo_map()                  const   { return *((TempoMap *) 0); }
@@ -200,7 +201,7 @@ class ISlaveSessionProxy {
 
 
 /// The Session Proxy for use in real Ardour
-class SlaveSessionProxy : public ISlaveSessionProxy {
+class LIBARDOUR_API SlaveSessionProxy : public ISlaveSessionProxy {
 	Session&    session;
 
   public:
@@ -219,7 +220,7 @@ class SlaveSessionProxy : public ISlaveSessionProxy {
 	void request_transport_speed (double speed);
 };
 
-struct SafeTime {
+struct LIBARDOUR_API SafeTime {
 	volatile int guard1;
 	framepos_t   position;
 	framepos_t   timestamp;
@@ -235,7 +236,7 @@ struct SafeTime {
 	}
 };
 
-class TimecodeSlave : public Slave {
+class LIBARDOUR_API TimecodeSlave : public Slave {
   public:
     TimecodeSlave () {}
 
@@ -252,7 +253,7 @@ class TimecodeSlave : public Slave {
     bool              timecode_negative_offset;
 };
 
-class MTC_Slave : public TimecodeSlave {
+class LIBARDOUR_API MTC_Slave : public TimecodeSlave {
   public:
 	MTC_Slave (Session&, MidiPort&);
 	~MTC_Slave ();
@@ -336,7 +337,7 @@ class MTC_Slave : public TimecodeSlave {
 	void parameter_changed(std::string const & p);
 };
 
-class LTC_Slave : public TimecodeSlave {
+class LIBARDOUR_API LTC_Slave : public TimecodeSlave {
 public:
 	LTC_Slave (Session&);
 	~LTC_Slave ();
@@ -404,7 +405,7 @@ public:
 	double b, c; ///< DLL filter coefficients
 };
 
-class MIDIClock_Slave : public Slave {
+class LIBARDOUR_API MIDIClock_Slave : public Slave {
   public:
 	MIDIClock_Slave (Session&, MidiPort&, int ppqn = 24);
 
@@ -490,7 +491,7 @@ class MIDIClock_Slave : public Slave {
 	bool _starting;
 };
 
-class Engine_Slave : public Slave
+class LIBARDOUR_API Engine_Slave : public Slave
 {
   public:
 	Engine_Slave (AudioEngine&);

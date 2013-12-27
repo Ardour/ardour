@@ -23,6 +23,8 @@
 
 #include <stdint.h>
 
-extern uint32_t hardware_concurrency ();
+#include "pbd/libpbd_visibility.h"
+
+LIBPBD_API extern uint32_t hardware_concurrency ();
 
 #endif /* __libpbd_cpus_h__ */

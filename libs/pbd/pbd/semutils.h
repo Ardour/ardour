@@ -21,9 +21,11 @@
 
 #include <semaphore.h>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
-class ProcessSemaphore {
+class LIBPBD_API ProcessSemaphore {
   private:
 #ifdef __APPLE__
 	sem_t* _sem;

@@ -29,7 +29,9 @@
 #include <cairomm/cairomm.h>
 #include <gtkmm/misc.h>
 
-class CairoCell
+#include "gtkmm2ext/visibility.h"
+
+class LIBGTKMM2EXT_API CairoCell
 {
   public:
 	CairoCell(int32_t id);
@@ -72,7 +74,7 @@ class CairoCell
 	uint32_t _xpad;
 };
 
-class CairoFontDescription {
+class LIBGTKMM2EXT_API CairoFontDescription {
   public:
 	CairoFontDescription (const std::string& f,
 			      Cairo::FontSlant s,
@@ -106,7 +108,7 @@ class CairoFontDescription {
 	double _size;
 };
 
-class CairoTextCell : public CairoCell
+class LIBGTKMM2EXT_API CairoTextCell : public CairoCell
 {
   public:
 	CairoTextCell (int32_t id, double width_chars, boost::shared_ptr<CairoFontDescription> font = boost::shared_ptr<CairoFontDescription>());
@@ -139,7 +141,7 @@ class CairoTextCell : public CairoCell
         double x_offset;
 };
 
-class CairoCharCell : public CairoTextCell
+class LIBGTKMM2EXT_API CairoCharCell : public CairoTextCell
 {
   public:
         CairoCharCell(int32_t id, char c);
@@ -147,7 +149,7 @@ class CairoCharCell : public CairoTextCell
         void set_size (Cairo::RefPtr<Cairo::Context>& context);
 };
 
-class CairoEditableText : public Gtk::Misc
+class LIBGTKMM2EXT_API CairoEditableText : public Gtk::Misc
 {
 public:
 	CairoEditableText (boost::shared_ptr<CairoFontDescription> font  = boost::shared_ptr<CairoFontDescription>());

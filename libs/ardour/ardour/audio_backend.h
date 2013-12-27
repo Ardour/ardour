@@ -28,21 +28,21 @@
 
 #include <boost/function.hpp>
 
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/audioengine.h"
 #include "ardour/port_engine.h"
-#include "ardour/visibility.h"
 
 #ifdef ARDOURBACKEND_DLL_EXPORTS // defined if we are building the ARDOUR Panners DLLs (instead of using them)
-    #define ARDOURBACKEND_API LIBARDOUR_HELPER_DLL_EXPORT
+    #define ARDOURBACKEND_API LIBARDOUR_DLL_EXPORT
 #else
-    #define ARDOURBACKEND_API LIBARDOUR_HELPER_DLL_IMPORT
+    #define ARDOURBACKEND_API LIBARDOUR_DLL_IMPORT
 #endif 
-#define ARDOURBACKEND_LOCAL LIBARDOUR_HELPER_DLL_LOCAL
+#define ARDOURBACKEND_LOCAL LIBARDOUR_DLL_LOCAL
 
 namespace ARDOUR {
 
-class AudioBackend : public PortEngine {
+class LIBARDOUR_API AudioBackend : public PortEngine {
   public:
 
     AudioBackend (AudioEngine& e) : PortEngine (e), engine (e) {}
@@ -491,7 +491,7 @@ class AudioBackend : public PortEngine {
     virtual int _start (bool for_latency_measurement) = 0;
 };
 
-struct AudioBackendInfo {
+struct LIBARDOUR_API AudioBackendInfo {
     const char* name;
 
     /** Using arg1 and arg2, initialize this audiobackend.

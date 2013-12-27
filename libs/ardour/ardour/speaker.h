@@ -22,9 +22,11 @@
 #include "pbd/cartesian.h"
 #include "pbd/signals.h"
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
-class Speaker {
+class LIBARDOUR_API Speaker {
 public:
 	Speaker (int, const PBD::AngularVector& position);
 	Speaker (const Speaker &);

@@ -38,21 +38,16 @@ def configure(conf):
 def build(bld):
     if bld.is_defined('USE_EXTERNAL_LIBS'):
         return
-    obj = bld(features = 'c cshlib')
-    obj.source = '''
-              ltc.c
-              timecode.c
-              encoder.c
-              decoder.c
-    '''
+    bld (export_includes = ['ltc'],
+         name = 'libltc_includes'
+         )
 
-    obj.export_includes = ['./ltc']
-    obj.includes     = ['.']
-    obj.name         = 'libltc'
-    obj.target       = 'ltc'
-    obj.vnum         = LIBLTC_LIB_VERSION
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
-    obj.defines     = ['PACKAGE="' + I18N_PACKAGE + '"']
+    bld.stlib (source = ['ltc.c', 'timecode.c', 'encoder.c', 'decoder.c'],
+               cflags = [ '-fPIC' ],
+               includes = ['.'],
+               target = 'libltc',
+               use    = 'libltc_includes'
+               )
 
 def shutdown():
     autowaf.shutdown()

@@ -23,9 +23,11 @@
 
 #include <regex.h>
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
-class TapeFileMatcher
+class LIBARDOUR_API TapeFileMatcher
 {
 public:
 
