@@ -66,16 +66,15 @@ PolyItem::compute_bounding_box () const
 void
 PolyItem::render_path (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) const
 {
-	bool done_first = false;
-	for (Points::const_iterator i = _points.begin(); i != _points.end(); ++i) {
-		if (done_first) {
-			Duple c = item_to_window (Duple (i->x, i->y));
-			context->line_to (c.x, c.y);
-		} else {
-			Duple c = item_to_window (Duple (i->x, i->y));
-			context->move_to (c.x, c.y);
-			done_first = true;
-		}
+	Points::const_iterator i = _points.begin();
+	Duple c (item_to_window (Duple (i->x, i->y)));
+
+	context->move_to (c.x, c.y);
+
+	while (i != _points.end()) {
+		c = item_to_window (Duple (i->x, i->y));
+		context->line_to (c.x, c.y);
+		++i;
 	}
 }
 
