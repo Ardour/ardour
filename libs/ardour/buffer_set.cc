@@ -468,16 +468,5 @@ BufferSet::silence (framecnt_t nframes, framecnt_t offset)
 	}
 }
 
-void
-BufferSet::set_is_silent (bool yn)
-{
-	for (std::vector<BufferVec>::iterator i = _buffers.begin(); i != _buffers.end(); ++i) {
-		for (BufferVec::iterator b = i->begin(); b != i->end(); ++b) {
-			(*b)->set_is_silent (yn);
-		}
-	}
-
-}
-
 } // namespace ARDOUR
 

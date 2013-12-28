@@ -87,7 +87,6 @@ public:
 	const ChanCount& count() const { return _count; }
 	ChanCount&       count()       { return _count; }
 
-	void set_is_silent(bool yn);
 	void silence (framecnt_t nframes, framecnt_t offset);
 	bool is_mirror() const { return _is_mirror; }
 

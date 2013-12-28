@@ -38,7 +38,7 @@ class MidiClockTicker::Position : public Timecode::BBT_Time
 {
 public:
 
-    Position() : speed(0.0f), frame(0) { }
+    Position() : speed(0.0f), frame(0), midi_beats(0) { }
     ~Position() { }
     
     /** Sync timing information taken from the given Session

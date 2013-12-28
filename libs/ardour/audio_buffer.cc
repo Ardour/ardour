@@ -76,12 +76,26 @@ AudioBuffer::resize (size_t size)
 }
 
 bool
-AudioBuffer::check_silence (pframes_t nframes, pframes_t& n) const
+AudioBuffer::check_silence (pframes_t nframes, bool wholebuffer, pframes_t& n) const
 {
-	for (n = 0; n < _size && n < nframes; ++n) {
+	for (n = 0; (wholebuffer || n < _size) &&  n < nframes; ++n) {
 		if (_data[n] != Sample (0)) {
 			return false;
 		}
 	}
 	return true;
+}
+
+void
+AudioBuffer::silence (framecnt_t len, framecnt_t offset) {
+	pframes_t n = 0;
+	if (!_silent) {
+		assert(_capacity > 0);
+		assert(offset + len <= _capacity);
+		memset(_data + offset, 0, sizeof (Sample) * len);
+		if (len == _capacity) {
+			_silent = true;
+		}
+	}
+	_written = true;
 }

@@ -96,6 +96,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _have_internal_generator (false)
 	, _solo_safe (false)
 	, _default_type (default_type)
+	, _order_key (0)
 	, _has_order_key (false)
 	, _remote_control_id (0)
 	, _in_configure_processors (false)
@@ -418,8 +419,6 @@ Route::process_output_buffers (BufferSet& bufs,
 			       framepos_t start_frame, framepos_t end_frame, pframes_t nframes,
 			       int declick, bool gain_automation_ok)
 {
-	bufs.set_is_silent (false);
-
 	/* figure out if we're going to use gain automation */
 	if (gain_automation_ok) {
 		_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
