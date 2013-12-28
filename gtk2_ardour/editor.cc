@@ -4871,8 +4871,10 @@ Editor::add_routes (RouteList& routes)
 		rtv->view()->RegionViewRemoved.connect (sigc::mem_fun (*this, &Editor::region_view_removed));
 	}
 
-	_routes->routes_added (new_views);
-	_summary->routes_added (new_views);
+	if (new_views.size() > 0) {
+		_routes->routes_added (new_views);
+		_summary->routes_added (new_views);
+	}
 
 	if (show_editor_mixer_when_tracks_arrive) {
 		show_editor_mixer (true);
