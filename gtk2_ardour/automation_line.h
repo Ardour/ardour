@@ -38,7 +38,7 @@
 
 #include "canvas/types.h"
 #include "canvas/group.h"
-#include "canvas/curve.h"
+#include "canvas/poly_line.h"
 
 class AutomationLine;
 class ControlPoint;
@@ -174,7 +174,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	ArdourCanvas::Group&        _parent_group;
 	ArdourCanvas::Group*        group;
-	ArdourCanvas::Curve*        line; /* line */
+	ArdourCanvas::PolyLine*     line; /* line */
 	ArdourCanvas::Points        line_points; /* coordinates for canvas line */
 	std::vector<ControlPoint*>  control_points; /* visible control points */
 

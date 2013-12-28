@@ -94,7 +94,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 	group = new ArdourCanvas::Group (&parent);
 	CANVAS_DEBUG_NAME (group, "region gain envelope group");
 
-	line = new ArdourCanvas::Curve (group);
+	line = new ArdourCanvas::PolyLine (group);
 	CANVAS_DEBUG_NAME (line, "region gain envelope line");
 	line->set_data ("line", this);
 	line->set_outline_width (2.0);
