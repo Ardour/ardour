@@ -105,7 +105,7 @@ PBD::stacktrace (std::ostream& out, int levels)
 #else
 
 std::string 
-demangle (std::string const & l)
+PBD::demangle (std::string const & l)
 {
 	return std::string();
 }
