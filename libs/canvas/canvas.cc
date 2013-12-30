@@ -316,9 +316,9 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 
 		Item const * new_item = *i;
 
-		/* We ignore groups and we ignore items that ignore events */
+		/* We ignore invisible items, groups and items that ignore events */
 
-		if (new_item->ignore_events() || dynamic_cast<Group const *>(new_item) != 0) {
+		if (!new_item->visible() || new_item->ignore_events() || dynamic_cast<Group const *>(new_item) != 0) {
 			continue;
 		}
 		
@@ -454,6 +454,7 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 	if (_current_item && !_current_item->ignore_events ()) {
 		leave_event.detail = leave_detail;
 		_current_item->Event ((GdkEvent*)&leave_event);
+		// std::cerr << "LEAVE " << _current_item->whatami() << '/' << _current_item->name << std::endl;
 	}
 
 	leave_event.detail = GDK_NOTIFY_VIRTUAL;
@@ -462,18 +463,21 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 	for (vector<Item*>::iterator it = items_to_leave_virtual.begin(); it != items_to_leave_virtual.end(); ++it) {
 		if (!(*it)->ignore_events()) {
 			(*it)->Event ((GdkEvent*)&leave_event);
+			// std::cerr << "leave " << (*it)->whatami() << '/' << (*it)->name << std::endl;
 		}
 	}
 
 	for (vector<Item*>::iterator it = items_to_enter_virtual.begin(); it != items_to_enter_virtual.end(); ++it) {
 		if (!(*it)->ignore_events()) {
 			(*it)->Event ((GdkEvent*)&enter_event);
+			// std::cerr << "enter " << (*it)->whatami() << '/' << (*it)->name << std::endl;
 		}
 	}
 
 	if (_new_current_item && !_new_current_item->ignore_events()) {
 		enter_event.detail = enter_detail;
 		_new_current_item->Event ((GdkEvent*)&enter_event);
+		// std::cerr << "ENTER " << _new_current_item->whatami() << '/' << _new_current_item->name << std::endl;
 	}
 
 	_current_item = _new_current_item;
