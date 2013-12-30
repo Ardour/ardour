@@ -28,7 +28,7 @@ public:
     Iec1ppmdsp (void);
     ~Iec1ppmdsp (void);
 
-    void process (float *p, int n);  
+    void process (float const *p, int n);  
     float read (void);
     void reset ();
 

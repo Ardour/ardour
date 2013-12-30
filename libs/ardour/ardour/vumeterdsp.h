@@ -28,7 +28,7 @@ public:
     Vumeterdsp (void);
     ~Vumeterdsp (void);
 
-    void process (float *p, int n);  
+    void process (float const *p, int n);  
     float read (void);
     void reset ();
 
