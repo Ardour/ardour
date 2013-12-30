@@ -690,7 +690,6 @@ PluginInsertProcessorEntry::SplittingIcon::on_expose_event (GdkEventExpose* ev)
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
 
 	for (uint32_t i = 2; i < _branches; ++i) {
-		//const float si_b = rintf((width * .2f) + (i - 1.f) * width * .6f / (_branches - 1.f)) + .5f;
 		const float si_b = rintf(width * (.2f + .6f * (i - 1.f) / (_branches - 1.f))) + .5f;
 		cairo_move_to (cr, si_b, height);
 		cairo_line_to (cr, si_b, si_m);
