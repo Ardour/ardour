@@ -223,10 +223,13 @@ private:
 	void setup_visuals ();
 	void plugin_insert_splitting_changed ();
 
-	/* XXX: this seems a little ridiculous just for a simple scaleable icon */
 	class SplittingIcon : public Gtk::DrawingArea {
+	public:
+		SplittingIcon() { _branches = 2; }
+		void set_branches(uint32_t const branches) { _branches = branches; }
 	private:
 		bool on_expose_event (GdkEventExpose *);
+		uint32_t _branches;
 	};
 
 	boost::shared_ptr<ARDOUR::PluginInsert> _plugin_insert;

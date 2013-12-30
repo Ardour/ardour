@@ -618,6 +618,7 @@ void
 PluginInsertProcessorEntry::plugin_insert_splitting_changed ()
 {
 	if (_plugin_insert->splitting ()) {
+		_splitting_icon.set_branches(_plugin_insert->output_streams().n_audio());
 		_splitting_icon.show ();
 	} else {
 		_splitting_icon.hide ();
@@ -675,17 +676,27 @@ PluginInsertProcessorEntry::SplittingIcon::on_expose_event (GdkEventExpose* ev)
 	Gdk::Color const fg = get_style()->get_fg (STATE_NORMAL);
 	cairo_set_source_rgb (cr, fg.get_red_p (), fg.get_green_p (), fg.get_blue_p ());
 
-	const float si_l = rint(width * 0.3) + .5;
-	const float si_c = rint(width * 0.5) + .5;
-	const float si_r = rint(width * 0.7) + .5;
-	const float si_m = rint(height * 0.5) + .5;
+	const float si_l = rintf(width * 0.2) + .5f;
+	const float si_c = rintf(width * 0.5) + .5f;
+	const float si_r = rintf(width * 0.8) + .5f;
+	const float si_m = rintf(height * 0.5) + .5f;
 
 	cairo_move_to (cr, si_l, height);
 	cairo_line_to (cr, si_l, si_m);
 	cairo_line_to (cr, si_r, si_m);
 	cairo_line_to (cr, si_r, height);
+	cairo_stroke (cr);
 
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
+
+	for (uint32_t i = 2; i < _branches; ++i) {
+		//const float si_b = rintf((width * .2f) + (i - 1.f) * width * .6f / (_branches - 1.f)) + .5f;
+		const float si_b = rintf(width * (.2f + .6f * (i - 1.f) / (_branches - 1.f))) + .5f;
+		cairo_move_to (cr, si_b, height);
+		cairo_line_to (cr, si_b, si_m);
+		cairo_stroke (cr);
+	}
+
 	cairo_move_to (cr, si_c, si_m);
 	cairo_line_to (cr, si_c, 0);
 	cairo_stroke (cr);
