@@ -48,6 +48,7 @@ bool WaveView::_global_show_waveform_clipping = true;
 double WaveView::_clip_level = 0.98853;
 
 PBD::Signal0<void> WaveView::VisualPropertiesChanged;
+PBD::Signal0<void> WaveView::ClipLevelChanged;
 
 WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	: Item (parent)
