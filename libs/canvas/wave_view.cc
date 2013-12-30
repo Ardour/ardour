@@ -45,6 +45,7 @@ double WaveView::_global_gradient_depth = 0.6;
 bool WaveView::_global_logscaled = false;
 WaveView::Shape WaveView::_global_shape = WaveView::Normal;
 bool WaveView::_global_show_waveform_clipping = true;
+double WaveView::_clip_level = 0.98853;
 
 PBD::Signal0<void> WaveView::VisualPropertiesChanged;
 
@@ -161,6 +162,13 @@ alt_log_meter (float power)
 	return _log_meter (power, -192.0, 0.0, 8.0);
 }
 
+void
+WaveView::set_clip_level (double dB)
+{
+	_clip_level = dB_to_coefficient (dB);
+	ClipLevelChanged ();
+}
+
 struct LineTips {
     double top;
     double bot;
@@ -189,7 +197,7 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 	   has been scaled by scale_amplitude() already.
 	*/
 
-	const double clip_level = 0.98853 * _region->scale_amplitude();
+	const double clip_level = _clip_level * _region->scale_amplitude();
 
 	if (_shape == WaveView::Rectified) {
 

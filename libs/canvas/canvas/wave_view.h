@@ -115,6 +115,9 @@ public:
         void set_amplitude_above_axis (double v);
         double amplitude_above_axis () const { return _amplitude_above_axis; }
 
+	static void set_clip_level (double dB);
+	static PBD::Signal0<void> ClipLevelChanged;
+
 #ifdef CANVAS_COMPATIBILITY	
 	void*& property_gain_src () {
 		return _foo_void;
@@ -163,6 +166,7 @@ private:
         static bool   _global_logscaled;
         static Shape  _global_shape;
         static bool   _global_show_waveform_clipping;
+	static double _clip_level;
 
         static PBD::Signal0<void> VisualPropertiesChanged;
 
