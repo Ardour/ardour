@@ -155,6 +155,7 @@ CONFIG_VARIABLE (MeterLineUp, meter_line_up_din, "meter-line-up-din", MeteringLi
 CONFIG_VARIABLE (float, meter_peak, "meter-peak", 0.0f)
 CONFIG_VARIABLE (bool, meter_style_led, "meter-style-led", true)
 CONFIG_VARIABLE (bool, show_editor_meter, "show-editor-meter", true)
+CONFIG_VARIABLE (double, waveform_clip_level, "waveform-clip-level", 0.98853)
 
 /* miscellany */
 
