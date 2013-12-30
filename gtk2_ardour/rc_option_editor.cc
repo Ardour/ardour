@@ -37,6 +37,8 @@
 #include "ardour/control_protocol_manager.h"
 #include "control_protocol/control_protocol.h"
 
+#include "canvas/wave_view.h"
+
 #include "ardour_window.h"
 #include "ardour_dialog.h"
 #include "gui_thread.h"
@@ -567,6 +569,56 @@ private:
 	RCConfiguration* _rc_config;
 	Adjustment _dpi_adjustment;
 	HScale _dpi_slider;
+};
+
+class ClipLevelOptions : public OptionEditorBox
+{
+public:
+	ClipLevelOptions (RCConfiguration* c) 
+		: _rc_config (c)
+		, _clip_level_adjustment (0, -128.0, 2.0, 0.1, 1.0) /* units of dB */
+		, _clip_level_slider (_clip_level_adjustment)
+	{
+		_clip_level_adjustment.set_value (_rc_config->get_waveform_clip_level ());
+
+		Label* l = manage (new Label (_("Waveform Clip Level (dBFS):")));
+		l->set_name ("OptionsLabel");
+
+		_clip_level_slider.set_update_policy (UPDATE_DISCONTINUOUS);
+		HBox* h = manage (new HBox);
+		h->set_spacing (4);
+		h->pack_start (*l, false, false);
+		h->pack_start (_clip_level_slider, true, true);
+
+		_box->pack_start (*h, false, false);
+
+		_clip_level_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &ClipLevelOptions::clip_level_changed));
+	}
+
+	void parameter_changed (string const & p)
+	{
+		if (p == "waveform-clip-level") {
+			_clip_level_adjustment.set_value (_rc_config->get_waveform_clip_level());
+		}
+	}
+
+	void set_state_from_config ()
+	{
+		parameter_changed ("waveform-clip-level");
+	}
+
+private:
+
+	void clip_level_changed ()
+	{
+		_rc_config->set_waveform_clip_level (_clip_level_adjustment.get_value());
+		/* XXX: should be triggered from the parameter changed signal */
+		ArdourCanvas::WaveView::set_clip_level (_clip_level_adjustment.get_value());
+	}
+
+	RCConfiguration* _rc_config;
+	Adjustment _clip_level_adjustment;
+	HScale _clip_level_slider;
 };
 
 class BufferingOptions : public OptionEditorBox
@@ -1393,6 +1445,8 @@ RCOptionEditor::RCOptionEditor ()
 	wfsh->add (Rectified, _("rectified"));
 
 	add_option (_("Editor"), wfsh);
+
+	add_option (_("Editor"), new ClipLevelOptions (_rc_config));
 
 	add_option (_("Editor"),
 	     new BoolOption (
