@@ -107,7 +107,11 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 
 	// Meter audio in to the rest of the peaks
 	for (uint32_t i = 0; i < n_audio; ++i, ++n) {
-		_peak_signal[n] = compute_peak (bufs.get_audio(i).data(), nframes, _peak_signal[n]);
+		if (bufs.get_audio(i).silent()) {
+			_peak_signal[n] = .0f;
+		} else {
+			_peak_signal[n] = compute_peak (bufs.get_audio(i).data(), nframes, _peak_signal[n]);
+		}
 		if (_meter_type & (MeterKrms | MeterK20 | MeterK14 | MeterK12)) {
 			_kmeter[i]->process(bufs.get_audio(i).data(), nframes);
 		}
