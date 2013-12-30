@@ -86,6 +86,6 @@ void Vumeterdsp::reset ()
 
 void Vumeterdsp::init (float fsamp)
 {
-    _w = 11.1f / fsamp; 
+    _w = 11.1f / fsamp;
     _g = 1.5f * 1.571f;
 }
