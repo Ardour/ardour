@@ -139,24 +139,34 @@ Editor::initialize_canvas ()
 	_time_markers_group = new ArdourCanvas::Group (_time_bars_canvas->root());
 
 	meter_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height * 5.0));
+	CANVAS_DEBUG_NAME (meter_group, "meter group");
 	tempo_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height * 4.0));
+	CANVAS_DEBUG_NAME (tempo_group, "tempo group");
 	range_marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height * 3.0));
+	CANVAS_DEBUG_NAME (range_marker_group, "range marker group");
 	transport_marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height * 2.0));
+	CANVAS_DEBUG_NAME (transport_marker_group, "transport marker group");
 	marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height));
+	CANVAS_DEBUG_NAME (marker_group, "marker group");
 	cd_marker_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple (0.0, 0.0));
+	CANVAS_DEBUG_NAME (cd_marker_group, "cd marker group");
 	videotl_group = new ArdourCanvas::Group (_time_markers_group, ArdourCanvas::Duple(0.0, 0.0));
+	CANVAS_DEBUG_NAME (videotl_group, "videotl group");
 
 	ARDOUR_UI::instance()->video_timeline = new VideoTimeLine(this, videotl_group, (timebar_height * videotl_bar_height));
 
 	cd_marker_bar_drag_rect = new ArdourCanvas::Rectangle (cd_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
+	CANVAS_DEBUG_NAME (cd_marker_bar_drag_rect, "cd marker drag");
 	cd_marker_bar_drag_rect->set_outline (false);
 	cd_marker_bar_drag_rect->hide ();
 
 	range_bar_drag_rect = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
+	CANVAS_DEBUG_NAME (range_bar_drag_rect, "range drag");
 	range_bar_drag_rect->set_outline (false);
 	range_bar_drag_rect->hide ();
 
 	transport_bar_drag_rect = new ArdourCanvas::Rectangle (transport_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
+	CANVAS_DEBUG_NAME (transport_bar_drag_rect, "transport drag");
 	transport_bar_drag_rect->set_outline (false);
 	transport_bar_drag_rect->hide ();
 
