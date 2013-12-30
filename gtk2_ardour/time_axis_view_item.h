@@ -170,8 +170,6 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	void set_trim_handle_colors();
 
 	virtual void reset_width_dependent_items (double);
-	void reset_name_width (double);
-	void update_name_text_visibility ();
 
 	static gint idle_remove_this_item(TimeAxisViewItem*, void*);
 
@@ -258,8 +256,11 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	bool _dragging;
 
 private:
+        double _width;
 
 	void parameter_changed (std::string);
+        void manage_name_highlight ();
+        void manage_name_text ();
 
 }; /* class TimeAxisViewItem */
 

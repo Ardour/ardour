@@ -47,6 +47,8 @@ public:
         void set_size_chars (int nchars);
         void dump (std::ostream&) const;
 
+	std::string text() const { return _text; }
+
 private:
 	std::string      _text;
 	uint32_t         _color;

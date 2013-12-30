@@ -111,7 +111,7 @@ TimeAxisViewItem::TimeAxisViewItem(
 	, _recregion (recording)
 	, _automation (automation)
 	, _dragging (false)
-
+	, _width (0.0)
 {
 	init (&parent, spu, base_color, start, duration, vis, true, true);
 }
@@ -122,9 +122,11 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 	, PBD::ScopedConnectionList()
 	, trackview (other.trackview)
 	, item_name (other.item_name)
+	, _height (1.0)
 	, _recregion (other._recregion)
 	, _automation (other._automation)
 	, _dragging (other._dragging)
+	, _width (0.0)
 {
 
 	Gdk::Color c;
@@ -546,7 +548,6 @@ TimeAxisViewItem::set_name_text(const string& new_name)
 		return;
 	}
 
-	last_item_width = trackview.editor().sample_to_pixel(item_duration);
 	name_text_width = pixel_width (new_name, NAME_FONT) + 2;
 	name_text->set (new_name);
 
@@ -562,26 +563,7 @@ TimeAxisViewItem::set_height (double height)
 {
         _height = height;
 
-	if (name_highlight) {
-		if (height < NAME_HIGHLIGHT_THRESH) {
-			name_highlight->hide ();
-			high_enough_for_name = false;
-
-		} else {
-			name_highlight->show();
-			high_enough_for_name = true;
-		}
-
-		if (height > NAME_HIGHLIGHT_SIZE) {
-			name_highlight->set_y0 ((double) height - 1 - NAME_HIGHLIGHT_SIZE);
-			name_highlight->set_y1 ((double) height - 1);
-		}
-		else {
-			/* it gets hidden now anyway */
-			name_highlight->set_y0 (1);
-			name_highlight->set_y1 (height);
-		}
-	}
+	manage_name_highlight ();
 
 	if (visibility & ShowNameText) {
 		name_text->set_y_position (height + 1 - NAME_Y_OFFSET);
@@ -597,8 +579,39 @@ TimeAxisViewItem::set_height (double height)
 
 	vestigial_frame->set_y1 (height - 1);
 
-	update_name_text_visibility ();
 	set_colors ();
+}
+
+void
+TimeAxisViewItem::manage_name_highlight ()
+{
+	if (_height < NAME_HIGHLIGHT_THRESH) {
+		high_enough_for_name = false;
+	} else {
+		high_enough_for_name = true;
+	}
+
+	if (_width < 2.0) {
+		wide_enough_for_name = false;
+	} else {
+		wide_enough_for_name = true;
+	}
+
+	if (name_highlight && wide_enough_for_name && high_enough_for_name) {
+
+		name_highlight->show();
+
+		name_highlight->set_y0 ((double) _height - 1 - NAME_HIGHLIGHT_SIZE);
+		name_highlight->set_y1 ((double) _height - 1);
+		
+		/* x0 is always zero */
+		name_highlight->set_x1 (_width);
+			
+	} else {
+		name_highlight->hide();
+	}
+
+	manage_name_text ();
 }
 
 void
@@ -942,14 +955,14 @@ TimeAxisViewItem::set_samples_per_pixel (double fpp)
 void
 TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 {
+	_width = pixel_width;
+
+	manage_name_highlight ();
+
 	if (pixel_width < 2.0) {
 
 		if (show_vestigial) {
 			vestigial_frame->show();
-		}
-
-		if (name_highlight) {
-			name_highlight->hide();
 		}
 
 		if (frame) {
@@ -961,26 +974,8 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 			frame_handle_end->hide();
 		}
 
-		wide_enough_for_name = false;
-
 	} else {
 		vestigial_frame->hide();
-
-		if (name_highlight) {
-
-			if (_height < NAME_HIGHLIGHT_THRESH) {
-				name_highlight->hide();
-				high_enough_for_name = false;
-			} else {
-				name_highlight->show();
-				if (!get_item_name().empty()) {
-					reset_name_width (pixel_width);
-				}
-				high_enough_for_name = true;
-			}
-
-			name_highlight->set_x1 (pixel_width);
-		}
 
 		if (frame) {
 			frame->show();
@@ -1004,56 +999,39 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 				frame_handle_end->show();
 			}
 		}
-
-		wide_enough_for_name = true;
 	}
-
-        update_name_text_visibility ();
 }
 
 void
-TimeAxisViewItem::reset_name_width (double /*pixel_width*/)
+TimeAxisViewItem::manage_name_text ()
 {
-	uint32_t it_width;
-	int pb_width;
-	bool showing_full_name;
+	int visible_name_width;
 
 	if (!name_text) {
 		return;
 	}
 
-	it_width = trackview.editor().sample_to_pixel(item_duration);
-	pb_width = name_text_width;
-
-	showing_full_name = last_item_width > pb_width + NAME_X_OFFSET;
-	last_item_width = it_width;
-
-	if (showing_full_name && (it_width >= pb_width + NAME_X_OFFSET)) {
-		/*
-		  we've previously had the full name length showing
-		  and its still showing.
-		*/
+	if (!wide_enough_for_name || !high_enough_for_name) {
+		name_text->hide ();
 		return;
 	}
-
-	if (pb_width > it_width - NAME_X_OFFSET) {
-		pb_width = it_width - NAME_X_OFFSET;
+		
+	if (name_text->text().empty()) {
+		name_text->hide ();
 	}
 
-	if (it_width <= NAME_X_OFFSET) {
-		wide_enough_for_name = false;
+	visible_name_width = name_text_width;
+
+	if (visible_name_width > _width - NAME_X_OFFSET) {
+		visible_name_width = _width - NAME_X_OFFSET;
+	}
+
+	if (visible_name_width < 1) {
+		name_text->hide ();
 	} else {
-		wide_enough_for_name = true;
+		name_text->clamp_width (visible_name_width);
+		name_text->show ();
 	}
-
-	update_name_text_visibility ();
-
-	if (pb_width < 1) {
-		pb_width = 1;
-	}
-
-	name_text->set (item_name);
-	name_text->clamp_width (pb_width);
 }
 
 /**
@@ -1077,20 +1055,6 @@ void
 TimeAxisViewItem::set_y (double y)
 {
 	group->set_y_position (y);
-}
-
-void
-TimeAxisViewItem::update_name_text_visibility ()
-{
-	if (!name_text) {
-		return;
-	}
-
-	if (wide_enough_for_name && high_enough_for_name) {
-		name_text->show ();
-	} else {
-		name_text->hide ();
-	}
 }
 
 void
