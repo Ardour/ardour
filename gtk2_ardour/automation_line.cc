@@ -144,6 +144,11 @@ AutomationLine::show ()
 		}
 	} else {
 		line->hide();
+		/* if the line is not visible, then no control points should be visible */
+		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+			(*i)->hide ();
+		}
+		return;
 	}
 
 	if (_visible & ControlPoints) {
@@ -168,7 +173,11 @@ AutomationLine::show ()
 void
 AutomationLine::hide ()
 {
-	set_visibility (VisibleAspects (0));
+	/* leave control points setting unchanged, we are just hiding the
+	   overall line 
+	*/
+	
+	set_visibility (AutomationLine::VisibleAspects (_visible & ~Line));
 }
 
 double
@@ -1068,22 +1077,34 @@ AutomationLine::set_list (boost::shared_ptr<ARDOUR::AutomationList> list)
 void
 AutomationLine::add_visibility (VisibleAspects va)
 {
+	VisibleAspects old = _visible;
+
 	_visible = VisibleAspects (_visible | va);
-	show ();
+
+	if (old != _visible) {
+		show ();
+	}
 }
 
 void
 AutomationLine::set_visibility (VisibleAspects va)
 {
-	_visible = va;
-	show ();
+	if (_visible != va) {
+		_visible = va;
+		show ();
+	}
 }
 
 void
 AutomationLine::remove_visibility (VisibleAspects va)
 {
+	VisibleAspects old = _visible;
+
 	_visible = VisibleAspects (_visible & ~va);
-	show ();
+
+	if (old != _visible) {
+		show ();
+	}
 }
 
 void

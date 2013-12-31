@@ -1323,7 +1323,8 @@ AudioRegionView::entered (bool internal_editing)
 	trackview.editor().set_current_trimmable (_region);
 	trackview.editor().set_current_movable (_region);
 	
-	if (gain_line && trackview.editor().current_mouse_mode() == Editing::MouseGain) {
+	if (gain_line) {
+		/* these may or may not be visible depending on mouse mode */
 		gain_line->add_visibility (AutomationLine::ControlPoints);
 	}
 
@@ -1341,7 +1342,7 @@ AudioRegionView::exited ()
 	trackview.editor().set_current_trimmable (boost::shared_ptr<Trimmable>());
 	trackview.editor().set_current_movable (boost::shared_ptr<Movable>());
 
-	if (gain_line && trackview.editor().current_mouse_mode() == Editing::MouseGain) {
+	if (gain_line) {
 		gain_line->remove_visibility (AutomationLine::ControlPoints);
 	}
 

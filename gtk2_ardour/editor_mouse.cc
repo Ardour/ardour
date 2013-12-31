@@ -2043,7 +2043,6 @@ bool
 Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 {
 	AutomationLine* al;
-	ControlPoint* cp;
 	Marker *marker;
 	Location *loc;
 	RegionView* rv;
@@ -2052,13 +2051,6 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 
 	switch (item_type) {
 	case ControlPointItem:
-		cp = reinterpret_cast<ControlPoint*>(item->get_data ("control_point"));
-		if (cp->line().the_list()->interpolation() != AutomationList::Discrete) {
-			if (cp->line().npoints() > 1 && !cp->get_selected()) {
-				cp->hide ();
-			}
-		}
-
 		if (is_drawable()) {
 			set_canvas_cursor (current_canvas_cursor);
 		}
