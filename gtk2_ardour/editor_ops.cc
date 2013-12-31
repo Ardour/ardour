@@ -1391,8 +1391,12 @@ Editor::temporal_zoom (framecnt_t fpp)
 	// Imposing an arbitrary limit to zoom out as too much zoom out produces 
 	// segfaults for lack of memory. If somebody decides this is not high enough I
 	// believe it can be raisen to higher values but some limit must be in place.
+	//
+	// This constant represents 1 day @ 48kHz on a 1600 pixel wide display
+	// all of which is used for the editor track displays. The whole day
+	// would be 4147200000 samples, so 2592000 samples per pixel.
 
-	nfpp = min (fpp, (framecnt_t) 8589934592);
+	nfpp = min (fpp, (framecnt_t) 2592000);
 	nfpp = max ((framecnt_t) 1, fpp);
 
 	new_page_size = (framepos_t) floor (_visible_canvas_width * nfpp);
