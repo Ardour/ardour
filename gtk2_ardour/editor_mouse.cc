@@ -1833,7 +1833,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case ControlPointItem:
 		if (mouse_mode == MouseGain || mouse_mode == MouseObject) {
 			cp = static_cast<ControlPoint*>(item->get_data ("control_point"));
-			cp->set_visible (true);
+			cp->show ();
 
 			double at_x, at_y;
 			at_x = cp->get_x();
@@ -2055,7 +2055,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 		cp = reinterpret_cast<ControlPoint*>(item->get_data ("control_point"));
 		if (cp->line().the_list()->interpolation() != AutomationList::Discrete) {
 			if (cp->line().npoints() > 1 && !cp->get_selected()) {
-				cp->set_visible (false);
+				cp->hide ();
 			}
 		}
 

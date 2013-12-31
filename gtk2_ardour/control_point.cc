@@ -44,7 +44,6 @@ ControlPoint::ControlPoint (AutomationLine& al)
 	_size = 4.0;
 
 	_item = new ArdourCanvas::Rectangle (&_line.canvas_group());
-	_item->property_draw() = true;
 	_item->set_fill (false);
 	_item->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ControlPointFill());
 	_item->set_outline_color (ARDOUR_UI::config()->get_canvasvar_ControlPointOutline());
@@ -52,7 +51,6 @@ ControlPoint::ControlPoint (AutomationLine& al)
 	_item->Event.connect (sigc::mem_fun (this, &ControlPoint::event_handler));
 
 	hide ();
-	set_visible (false);
 }
 
 ControlPoint::ControlPoint (const ControlPoint& other, bool /*dummy_arg_to_force_special_copy_constructor*/)
@@ -77,7 +75,6 @@ ControlPoint::ControlPoint (const ControlPoint& other, bool /*dummy_arg_to_force
 	/* NOTE: no event handling in copied ControlPoints */
 
 	hide ();
-	set_visible (false);
 }
 
 ControlPoint::~ControlPoint ()
@@ -105,16 +102,10 @@ ControlPoint::show()
 	_item->show();
 }
 
-void
-ControlPoint::set_visible (bool yn)
-{
-	_item->property_draw() = (gboolean) yn;
-}
-
 bool
 ControlPoint::visible () const
 {
-	return _item->property_draw ();
+	return _item->visible ();
 }
 
 void

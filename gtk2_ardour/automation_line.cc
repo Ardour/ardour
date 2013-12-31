@@ -148,16 +148,19 @@ AutomationLine::show ()
 
 	if (_visible & ControlPoints) {
 		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-			(*i)->set_visible (true);
 			(*i)->show ();
 		}
 	} else if (_visible & SelectedControlPoints) {
 		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-			(*i)->set_visible ((*i)->get_selected());
+			if ((*i)->get_selected()) {
+				(*i)->show ();
+			} else {
+				(*i)->hide ();
+			}
 		}
 	} else {
 		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-			(*i)->set_visible (false);
+			(*i)->hide ();
 		}
 	}
 }
@@ -1215,9 +1218,8 @@ AutomationLine::add_visible_control_point (uint32_t view_index, uint32_t pi, dou
 
 	if (_visible & ControlPoints) {
 		control_points[view_index]->show ();
-		control_points[view_index]->set_visible (true);
 	} else {
-		control_points[view_index]->set_visible (false);
+		control_points[view_index]->hide ();
 	}
 }
 

@@ -60,15 +60,14 @@ class ControlPoint : public Selectable
 
 	void hide ();
 	void show ();
-	void set_color ();
+	bool visible () const;
 
 	double size () const {
 		return _size;
 	}
 
 	void set_size (double);
-	void set_visible (bool);
-	bool visible () const;
+	void set_color ();
 
 	bool     can_slide() const          { return _can_slide; }
 	void     set_can_slide(bool yn)     { _can_slide = yn; }
