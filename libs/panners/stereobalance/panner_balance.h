@@ -34,13 +34,22 @@
 #include "ardour/automation_control.h"
 #include "ardour/automatable.h"
 #include "ardour/panner.h"
+#include "ardour/pan_distribution_buffer.h"
 #include "ardour/types.h"
+
+#ifdef ENABLE_PANNING_DELAY
+#define Pannerbalance PannerbalanceDelay
+#include "ardour/pan_delay_buffer.h"
+#define PanDistributionBuffer PanDelayBuffer
+#else /* !defined(ENABLE_PANNING_DELAY) */
+#define PanDistributionBuffer DummyPanDistributionBuffer
+#endif /* !defined(ENABLE_PANNING_DELAY) */
 
 namespace ARDOUR {
 
 class Pannerbalance : public Panner
 {
-	public:
+  public:
 	Pannerbalance (boost::shared_ptr<Pannable>);
 	~Pannerbalance ();
 
@@ -64,14 +73,21 @@ class Pannerbalance : public Panner
 	void reset ();
 	void thaw ();
 
-	protected:
-	float pos[2];
-	float desired_pos[2];
-	float pos_interp[2];
+  protected:
+	float gain[2];
+	float desired_gain[2];
+
+	PanDistributionBuffer dist_buf_0;
+	PanDistributionBuffer dist_buf_1;
+
+	/* Pointers to the two buffers arranged as an array, for convenience.
+	 * (The members above are only needed because PanDistributionBuffer is not
+	 * default-constructible.) */
+	PanDistributionBuffer* dist_buf[2];
 
 	void update ();
 
-	private:
+  private:
 	void distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t which);
 	void distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
 			framepos_t start, framepos_t end, pframes_t nframes,

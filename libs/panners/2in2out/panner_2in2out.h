@@ -30,10 +30,17 @@
 #include "pbd/controllable.h"
 #include "pbd/cartesian.h"
 
-#include "ardour/automation_control.h"
-#include "ardour/automatable.h"
-#include "ardour/panner.h"
 #include "ardour/types.h"
+#include "ardour/panner.h"
+#include "ardour/pan_distribution_buffer.h"
+
+#ifdef ENABLE_PANNING_DELAY
+#define Panner2in2out Panner2in2outDelay
+#include "ardour/pan_delay_buffer.h"
+#define PanDistributionBuffer PanDelayBuffer
+#else /* !defined(ENABLE_PANNING_DELAY) */
+#define PanDistributionBuffer DummyPanDistributionBuffer
+#endif /* !defined(ENABLE_PANNING_DELAY) */
 
 namespace ARDOUR {
 
@@ -77,8 +84,19 @@ class Panner2in2out : public Panner
 	float right[2];
 	float desired_left[2];
 	float desired_right[2];
-	float left_interp[2];
-	float right_interp[2];
+
+	/* We need four distribution buffers instead of two because distribute_one()
+	 * is called separately for each input. */
+	PanDistributionBuffer left_dist_buf_0;
+	PanDistributionBuffer left_dist_buf_1;
+	PanDistributionBuffer right_dist_buf_0;
+	PanDistributionBuffer right_dist_buf_1;
+
+	/* Pointers to the four buffers arranged as arrays, for convenience.
+	 * (The members above are only needed because PanDistributionBuffer is not
+	 * default-constructible.) */
+	PanDistributionBuffer* left_dist_buf[2];
+	PanDistributionBuffer* right_dist_buf[2];
 
   private:
         bool clamp_stereo_pan (double& direction_as_lr_fract, double& width);

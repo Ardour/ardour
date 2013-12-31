@@ -24,5 +24,17 @@ def build(bld):
     obj.use          = 'libardour libardour_cp libpbd'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'panners')
 
+    obj = bld(features = 'cxx cxxshlib')
+    obj.source = [ 'panner_2in2out.cc' ]
+    obj.export_includes = ['.']
+    obj.defines      = [ 'PACKAGE="libardour_pan2in2out_delay"' ]
+    obj.defines     += [ 'ARDOURPANNER_DLL_EXPORTS' ]
+    obj.defines     += [ 'ENABLE_PANNING_DELAY' ]
+    obj.includes     = ['.']
+    obj.name         = 'libardour_pan2in2out_delay'
+    obj.target       = 'pan2in2out_delay'
+    obj.use          = 'libardour libardour_cp libpbd'
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'panners')
+
 def shutdown():
     autowaf.shutdown()

@@ -137,6 +137,8 @@ libardour_sources = [
         'onset_detector.cc',
         'operations.cc',
         'pan_controllable.cc',
+        'pan_delay_buffer.cc',
+        'pan_distribution_buffer.cc',
         'pannable.cc',
         'panner.cc',
         'panner_manager.cc',
