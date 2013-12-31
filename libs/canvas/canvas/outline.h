@@ -52,27 +52,6 @@ public:
 
 	virtual void set_outline (bool);
 
-#ifdef CANVAS_COMPATIBILITY
-	int& property_first_arrowhead () {
-		return _foo_int;
-	}
-	int& property_last_arrowhead () {
-		return _foo_int;
-	}
-	int& property_arrow_shape_a () {
-		return _foo_int;
-	}
-	int& property_arrow_shape_b () {
-		return _foo_int;
-	}
-	int& property_arrow_shape_c () {
-		return _foo_int;
-	}
-	bool& property_draw () {
-		return _foo_bool;
-	}
-#endif	
-
 protected:
 
 	void setup_outline_context (Cairo::RefPtr<Cairo::Context>) const;
@@ -80,11 +59,6 @@ protected:
 	Color _outline_color;
 	Distance _outline_width;
 	bool _outline;
-
-#ifdef CANVAS_COMPATIBILITY
-	int _foo_int;
-	bool _foo_bool;
-#endif
 };
 
 }
