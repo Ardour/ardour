@@ -1514,12 +1514,6 @@ AudioRegionView::transients_changed ()
 		canvas_item->set (ArdourCanvas::Duple (-1.0, 2.0),
 				  ArdourCanvas::Duple (1.0, _height - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 1));
 
-		canvas_item->property_first_arrowhead() = TRUE;
-		canvas_item->property_last_arrowhead() = TRUE;
-		canvas_item->property_arrow_shape_a() = 11.0;
-		canvas_item->property_arrow_shape_b() = 0.0;
-		canvas_item->property_arrow_shape_c() = 4.0;
-
 		canvas_item->raise_to_top ();
 		canvas_item->show ();
 
