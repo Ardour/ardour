@@ -225,11 +225,16 @@ private:
 
 	class SplittingIcon : public Gtk::DrawingArea {
 	public:
-		SplittingIcon() { _branches = 2; }
-		void set_branches(uint32_t const branches) { _branches = branches; }
+		SplittingIcon() {
+			_inputs = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 1);
+			_outputs = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 2);
+		}
+		void set_inputs(ARDOUR::ChanCount const inputs) { _inputs = inputs; }
+		void set_outputs(ARDOUR::ChanCount const outputs) { _outputs = outputs; }
 	private:
 		bool on_expose_event (GdkEventExpose *);
-		uint32_t _branches;
+		ARDOUR::ChanCount _inputs;
+		ARDOUR::ChanCount _outputs;
 	};
 
 	boost::shared_ptr<ARDOUR::PluginInsert> _plugin_insert;

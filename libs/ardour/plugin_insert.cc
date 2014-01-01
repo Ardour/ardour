@@ -650,6 +650,8 @@ bool
 PluginInsert::configure_io (ChanCount in, ChanCount out)
 {
 	Match old_match = _match;
+	ChanCount old_in = input_streams ();
+	ChanCount old_out = output_streams ();
 
 	/* set the matching method and number of plugins that we will use to meet this configuration */
 	_match = private_can_support_io_configuration (in, out);
@@ -657,9 +659,12 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 
-	/* a signal needs emitting if we start or stop splitting */
-	if (old_match.method != _match.method && (old_match.method == Split || _match.method == Split)) {
-		SplittingChanged (); /* EMIT SIGNAL */
+	if (  (old_match.method != _match.method && (old_match.method == Split || _match.method == Split))
+			|| old_in != in
+			|| old_out != out
+			)
+	{
+		PluginIoReConfigure (); /* EMIT SIGNAL */
 	}
 
 	/* configure plugins */
