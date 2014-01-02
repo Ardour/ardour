@@ -31,6 +31,7 @@
 #include "canvas/group.h"
 #include "canvas/rectangle.h"
 #include "canvas/debug.h"
+#include "canvas/drag_handle.h"
 #include "canvas/text.h"
 #include "canvas/utils.h"
 
@@ -243,13 +244,13 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 		double top   = TimeAxisViewItem::GRAB_HANDLE_TOP;
 		double width = TimeAxisViewItem::GRAB_HANDLE_WIDTH;
 
-		frame_handle_start = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, top, width, trackview.current_height()));
+		frame_handle_start = new ArdourCanvas::DragHandle (group, ArdourCanvas::Rect (0.0, top, width, trackview.current_height()), true);
 		CANVAS_DEBUG_NAME (frame_handle_start, "TAVI frame handle start");
 		frame_handle_start->set_outline (false);
 		frame_handle_start->set_fill (false);
 		frame_handle_start->Event.connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisViewItem::frame_handle_crossing), frame_handle_start));
 
-		frame_handle_end = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, top, width, trackview.current_height()));
+		frame_handle_end = new ArdourCanvas::DragHandle (group, ArdourCanvas::Rect (0.0, top, width, trackview.current_height()), false);
 		CANVAS_DEBUG_NAME (frame_handle_end, "TAVI frame handle end");
 		frame_handle_end->set_outline (false);
 		frame_handle_end->set_fill (false);
