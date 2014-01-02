@@ -3428,6 +3428,7 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 
 		double x1 = _editor->sample_to_pixel (start);
 		double x2 = _editor->sample_to_pixel (end);
+		const double min_dimension = 2.0;
 
 		_editor->rubberband_rect->set_x0 (x1);
 		if (_vertical_only) {
@@ -3435,18 +3436,18 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 			_editor->rubberband_rect->set_x1 (x1 + 10);
 		} else {
 			if (x2 < x1) {
-				x2 = min (x1 - 5, x2);
+				x2 = min (x1 - min_dimension, x2);
 			} else {
-				x2 = max (x1 + 5, x2);
+				x2 = max (x1 + min_dimension, x2);
 			}
 			_editor->rubberband_rect->set_x1 (x2);
 		} 
 
 		_editor->rubberband_rect->set_y0 (y1);
 		if (y2 < y1) {
-			y2 = min (y1 - 5, y2);
+			y2 = min (y1 - min_dimension, y2);
 		} else {
-			y2 = max (y1 + 5, y2);
+			y2 = max (y1 + min_dimension, y2);
 		}
 
 		_editor->rubberband_rect->set_y1 (y2);
