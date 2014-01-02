@@ -82,10 +82,8 @@ TimeAxisViewItem::set_constant_heights ()
         layout->set_font_description (NAME_FONT);
         Gtkmm2ext::get_ink_pixel_size (layout, width, height);
 
-	std::cerr << "item name font " << NAME_FONT.get_family() << ' ' << NAME_FONT.get_size() << ' ' << NAME_FONT.get_style() << " width x height = " << width << " x " << height << std::endl;
-
         NAME_HEIGHT = height;
-        NAME_Y_OFFSET = height + 5; // XXX this offset is magic
+        NAME_Y_OFFSET = height * 1.5; // XXX this offset is magic
         NAME_HIGHLIGHT_SIZE = height + 2;
         NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 3;
 }
