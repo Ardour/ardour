@@ -82,6 +82,8 @@ TimeAxisViewItem::set_constant_heights ()
         layout->set_font_description (NAME_FONT);
         Gtkmm2ext::get_ink_pixel_size (layout, width, height);
 
+	std::cerr << "item name font " << NAME_FONT.get_family() << ' ' << NAME_FONT.get_size() << ' ' << NAME_FONT.get_style() << " width x height = " << width << " x " << height << std::endl;
+
         NAME_HEIGHT = height;
         NAME_Y_OFFSET = height + 5; // XXX this offset is magic
         NAME_HIGHLIGHT_SIZE = height + 2;
@@ -230,7 +232,6 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 		CANVAS_DEBUG_NAME (name_text, string_compose ("name text for %1", get_item_name()));
 		name_text->set_position (ArdourCanvas::Duple (NAME_X_OFFSET, trackview.current_height() - NAME_Y_OFFSET));
 		name_text->set_font_description (NAME_FONT);
-		
 	} else {
 		name_text = 0;
 	}
