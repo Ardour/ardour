@@ -233,6 +233,12 @@ Group::clear (bool with_delete)
 void
 Group::raise_child_to_top (Item* i)
 {
+	if (!_items.empty()) {
+		if (_items.front() == i) {
+			return;
+		}
+	}
+
 	_items.remove (i);
 	_items.push_back (i);
 	invalidate_lut ();
@@ -259,6 +265,11 @@ Group::raise_child (Item* i, int levels)
 void
 Group::lower_child_to_bottom (Item* i)
 {
+	if (!_items.empty()) {
+		if (_items.back() == i) {
+			return;
+		}
+	}
 	_items.remove (i);
 	_items.push_front (i);
 	invalidate_lut ();
