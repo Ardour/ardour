@@ -57,9 +57,9 @@ Gtkmm2ext::get_ink_pixel_size (Glib::RefPtr<Pango::Layout> layout,
 }
 
 void
-get_pixel_size (Glib::RefPtr<Pango::Layout> layout,
-			       int& width,
-			       int& height)
+Gtkmm2ext::get_pixel_size (Glib::RefPtr<Pango::Layout> layout,
+			   int& width,
+			   int& height)
 {
 	layout->get_pixel_size (width, height);
 }

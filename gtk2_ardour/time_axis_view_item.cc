@@ -80,10 +80,14 @@ TimeAxisViewItem::set_constant_heights ()
         int height = 0;
 
         layout->set_font_description (NAME_FONT);
-        Gtkmm2ext::get_ink_pixel_size (layout, width, height);
+        get_pixel_size (layout, width, height);
+
+        layout = foo.create_pango_layout (X_("H")); /* just the ascender */
+
+	std::cerr << " height: " << height << " baseline = " << layout->get_baseline() / PANGO_SCALE << std::endl;
 
         NAME_HEIGHT = height;
-        NAME_Y_OFFSET = height * 1.5; // XXX this offset is magic
+        NAME_Y_OFFSET = height + 2;
         NAME_HIGHLIGHT_SIZE = height + 2;
         NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 3;
 }
@@ -565,7 +569,7 @@ TimeAxisViewItem::set_height (double height)
 	manage_name_highlight ();
 
 	if (visibility & ShowNameText) {
-		name_text->set_y_position (height + 1 - NAME_Y_OFFSET);
+		name_text->set_y_position (height - NAME_Y_OFFSET); 
 	}
 
 	if (frame) {
