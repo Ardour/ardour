@@ -346,9 +346,8 @@ PluginInsert::connect_and_run (BufferSet& bufs, pframes_t nframes, framecnt_t of
 		/* XXX: audio only */
 		uint32_t first_idx = in_map.get (DataType::AUDIO, 0, &valid);
 		if (valid) {
-			Sample const * mono = bufs.get_audio (first_idx).data (offset);
 			for (uint32_t i = in_streams.n_audio(); i < natural_input_streams().n_audio(); ++i) {
-				memcpy (bufs.get_audio (in_map.get (DataType::AUDIO, i, &valid)).data (offset), mono, sizeof (Sample) * nframes);
+				bufs.get_audio(in_map.get (DataType::AUDIO, i, &valid)).read_from(bufs.get_audio(first_idx), nframes, offset, offset);
 			}
 		}
 	}
@@ -490,8 +489,9 @@ PluginInsert::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end
 
 				/* not active, but something has make up for any channel count increase */
 				
-				for (uint32_t n = out - in; n < out; ++n) {
-					memcpy (bufs.get_audio (n).data(), bufs.get_audio(in - 1).data(), sizeof (Sample) * nframes);
+				// TODO: option round-robin (n % in) or silence additional buffers ??
+				for (uint32_t n = in; n < out; ++n) {
+					bufs.get_audio(n).read_from(bufs.get_audio(in - 1), nframes);
 				}
 			}
 
@@ -650,6 +650,8 @@ bool
 PluginInsert::configure_io (ChanCount in, ChanCount out)
 {
 	Match old_match = _match;
+	ChanCount old_in = input_streams ();
+	ChanCount old_out = output_streams ();
 
 	/* set the matching method and number of plugins that we will use to meet this configuration */
 	_match = private_can_support_io_configuration (in, out);
@@ -657,9 +659,12 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 
-	/* a signal needs emitting if we start or stop splitting */
-	if (old_match.method != _match.method && (old_match.method == Split || _match.method == Split)) {
-		SplittingChanged (); /* EMIT SIGNAL */
+	if (  (old_match.method != _match.method && (old_match.method == Split || _match.method == Split))
+			|| old_in != in
+			|| old_out != out
+			)
+	{
+		PluginIoReConfigure (); /* EMIT SIGNAL */
 	}
 
 	/* configure plugins */

@@ -29,11 +29,11 @@ public:
     Iec2ppmdsp (void);
     ~Iec2ppmdsp (void);
 
-    void process (float *p, int n);  
+    void process (float const *p, int n);
     float read (void);
     void reset ();
 
-    static void init (float fsamp); 
+    static void init (float fsamp);
 
 private:
 

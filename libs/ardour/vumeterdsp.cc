@@ -39,7 +39,7 @@ Vumeterdsp::~Vumeterdsp (void)
 }
 
 
-void Vumeterdsp::process (float *p, int n)
+void Vumeterdsp::process (float const *p, int n)
 {
     float z1, z2, m, t1, t2;
 
@@ -86,6 +86,6 @@ void Vumeterdsp::reset ()
 
 void Vumeterdsp::init (float fsamp)
 {
-    _w = 11.1f / fsamp; 
+    _w = 11.1f / fsamp;
     _g = 1.5f * 1.571f;
 }

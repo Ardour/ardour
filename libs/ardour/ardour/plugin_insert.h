@@ -123,8 +123,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	}
 
 	PBD::Signal2<void,BufferSet*, BufferSet*> AnalysisDataGathered;
-	/** Emitted when the return value of splitting () has changed */
-	PBD::Signal0<void> SplittingChanged;
+	PBD::Signal0<void> PluginIoReConfigure;
 
 	/** Enumeration of the ways in which we can match our insert's
 	 *  IO to that of the plugin(s).

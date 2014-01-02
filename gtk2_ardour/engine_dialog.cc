@@ -327,6 +327,10 @@ EngineControl::EngineControl ()
 	 Gtkmm2ext::container_clear (basic_vbox);
 	 Gtkmm2ext::container_clear (basic_packer);
 
+	 if (control_app_button.get_parent()) {
+		 control_app_button.get_parent()->remove (control_app_button);
+	 }
+
 	 label = manage (left_aligned_label (_("Audio System:")));
 	 basic_packer.attach (*label, 0, 1, 0, 1, xopt, (AttachOptions) 0);
 	 basic_packer.attach (backend_combo, 1, 2, 0, 1, xopt, (AttachOptions) 0);

@@ -41,7 +41,7 @@ Iec2ppmdsp::~Iec2ppmdsp (void)
 }
 
 
-void Iec2ppmdsp::process (float *p, int n)
+void Iec2ppmdsp::process (float const *p, int n)
 {
     float z1, z2, m, t;
 

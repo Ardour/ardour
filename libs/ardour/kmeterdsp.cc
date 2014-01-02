@@ -42,7 +42,7 @@ void Kmeterdsp::init (int fsamp)
     _omega = 9.72f / fsamp; // ballistic filter coefficient
 }
 
-void Kmeterdsp::process (float *p, int n)
+void Kmeterdsp::process (float const *p, int n)
 {
     // Called by JACK's process callback.
     //

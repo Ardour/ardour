@@ -35,7 +35,7 @@ ControlSurfacesTest::instantiateAndTeardownTest ()
 	
 	ControlProtocolManager& m = ControlProtocolManager::instance ();
 	for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
-		m.instantiate (**i);
-		m.teardown (**i);
+		m.activate (**i);
+		m.deactivate (**i);
 	}
 }
