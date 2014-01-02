@@ -3434,10 +3434,21 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 			/* fixed 10 pixel width */
 			_editor->rubberband_rect->set_x1 (x1 + 10);
 		} else {
+			if (x2 < x1) {
+				x2 = min (x1 - 5, x2);
+			} else {
+				x2 = max (x1 + 5, x2);
+			}
 			_editor->rubberband_rect->set_x1 (x2);
 		} 
 
 		_editor->rubberband_rect->set_y0 (y1);
+		if (y2 < y1) {
+			y2 = min (y1 - 5, y2);
+		} else {
+			y2 = max (y1 + 5, y2);
+		}
+
 		_editor->rubberband_rect->set_y1 (y2);
 		
 		_editor->rubberband_rect->show();
