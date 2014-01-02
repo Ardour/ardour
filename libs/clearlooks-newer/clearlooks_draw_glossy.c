@@ -746,7 +746,7 @@ clearlooks_glossy_draw_tab (cairo_t *cr,
 
 	if (params->active)
 	{
-		CairoColor shadow, hilight, f1, f2;
+		CairoColor shadow, f1, f2;
 
 		pattern = cairo_pattern_create_linear (tab->gap_side == CL_GAP_LEFT   ? width-1  : 0,
 		                                       tab->gap_side == CL_GAP_TOP    ? height-2 : 1,
