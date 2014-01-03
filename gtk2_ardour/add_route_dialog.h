@@ -122,6 +122,7 @@ class AddRouteDialog : public ArdourDialog
 	InstrumentListColumns instrument_list_columns;
 
 	void build_instrument_list ();
+	uint32_t reasonable_synth_id;
 };
 
 #endif /* __gtk_ardour_add_route_dialog_h__ */

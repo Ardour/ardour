@@ -56,6 +56,7 @@ AddRouteDialog::AddRouteDialog ()
 	, configuration_label (_("Configuration:"))
 	, mode_label (_("Track mode:"))
 	, instrument_label (_("Instrument:"))
+	, reasonable_synth_id(0)
 {
 	set_name ("AddRouteDialog");
 	set_modal (true);
@@ -82,7 +83,7 @@ AddRouteDialog::AddRouteDialog ()
 	build_instrument_list ();
 	instrument_combo.set_model (instrument_list);
 	instrument_combo.pack_start (instrument_list_columns.name);
-	instrument_combo.set_active (0);
+	instrument_combo.set_active (reasonable_synth_id);
 	instrument_combo.set_button_sensitivity (Gtk::SENSITIVITY_AUTO);
 
 	VBox* vbox = manage (new VBox);
@@ -587,6 +588,7 @@ AddRouteDialog::build_instrument_list ()
 	row[instrument_list_columns.info_ptr] = PluginInfoPtr ();
 	row[instrument_list_columns.name] = _("-none-");
 
+	uint32_t n = 1;
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
 
 		if (manager.get_status (*i) == PluginManager::Hidden) continue;
@@ -595,6 +597,10 @@ AddRouteDialog::build_instrument_list ()
 			row = *(instrument_list->append());
 			row[instrument_list_columns.name] = (*i)->name;
 			row[instrument_list_columns.info_ptr] = *i;
+			if ((*i)->unique_id == "https://community.ardour.org/node/7596") {
+				reasonable_synth_id = n;
+			}
+			n++;
 		}
 	}
 }
