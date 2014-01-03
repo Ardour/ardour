@@ -421,7 +421,9 @@ Session::process_with_events (pframes_t nframes)
 				check_declick_out ();
 			}
 
-			_engine.split_cycle (this_nframes);
+			if (nframes > 0) {
+				_engine.split_cycle (this_nframes);
+			}
 
 			/* now handle this event and all others scheduled for the same time */
 
