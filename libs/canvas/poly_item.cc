@@ -66,6 +66,10 @@ PolyItem::compute_bounding_box () const
 void
 PolyItem::render_path (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) const
 {
+	if (_points.size() < 2) {
+		return;
+	}
+
 	Points::const_iterator i = _points.begin();
 	Duple c (item_to_window (Duple (i->x, i->y)));
 
@@ -90,26 +94,23 @@ PolyItem::render_curve (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 
 	Points::const_iterator cp1 = first_control_points.begin();
 	Points::const_iterator cp2 = second_control_points.begin();
+	Points::const_iterator p = _points.begin();
 
-	for (Points::const_iterator i = _points.begin(); i != _points.end(); ++i) {
+	Duple c = item_to_window (Duple (p->x, p->y));
+	context->move_to (c.x, c.y);
 
-		if (!done_first) {
+	while (p != _points.end()) {
 
-			Duple c = item_to_window (Duple (i->x, i->y));
-			context->move_to (c.x, c.y);
-			done_first = true;
+		Duple c1 = item_to_window (Duple (cp1->x, cp1->y));
+		Duple c2 = item_to_window (Duple (cp2->x, cp2->y));
 
-		} else {
-
-			Duple c1 = item_to_window (Duple (cp1->x, cp1->y));
-			Duple c2 = item_to_window (Duple (cp2->x, cp2->y));
-			Duple c3 = item_to_window (Duple (i->x, i->y));
-
-			context->curve_to (c1.x, c1.y, c2.x, c2.y, c3.x, c3.y);
-
-			cp1++;
-			cp2++;
-		}
+		c = item_to_window (Duple (p->x, p->y));
+		
+		context->curve_to (c1.x, c1.y, c2.x, c2.y, c.x, c.y);
+		
+		++cp1;
+		++cp2;
+		++p;
 	}
 }
 
