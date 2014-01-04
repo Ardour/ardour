@@ -180,7 +180,7 @@ private:
 			return _name;
 		}
 		
-		Gtk::VBox box;
+		Gtk::Alignment box;
 
 	private:
 		void slider_adjusted ();

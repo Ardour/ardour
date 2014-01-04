@@ -449,12 +449,13 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 	, _name (n)
 {
 	_slider.set_controllable (c);
+	box.set_padding(0, 0, 4, 4);
 
 	if (c->toggled()) {
 		_button.set_text (_name);
 		_button.set_led_left (true);
 		_button.set_name ("processor control button");
-		box.pack_start (_button);
+		box.add (_button);
 		_button.show ();
 
 		_button.signal_clicked.connect (sigc::mem_fun (*this, &Control::button_clicked));
@@ -466,7 +467,7 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 		_slider.set_name ("PluginSlider");
 		_slider.set_text (_name);
 
-		box.pack_start (_slider);
+		box.add (_slider);
 		_slider.show ();
 
 		double const lo = c->internal_to_interface (c->lower ());
