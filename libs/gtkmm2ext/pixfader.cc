@@ -54,6 +54,12 @@ PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length, int
 
 	adjustment.signal_value_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
 	adjustment.signal_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
+
+	if (_orien == VERT) {
+		DrawingArea::set_size_request(girth, span);
+	} else {
+		DrawingArea::set_size_request(span, girth);
+	}
 }
 
 PixFader::~PixFader ()
