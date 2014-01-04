@@ -324,7 +324,11 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 	}
 
 	if (_drags->active ()) {
-		_drags->window_motion_handler (reinterpret_cast<GdkEvent*> (ev), false);
+		GdkEventMotion canvas_ev = *ev;
+		ArdourCanvas::Duple d = _track_canvas->window_to_canvas (ArdourCanvas::Duple (ev->x, ev->y));
+		canvas_ev.x = rint (d.x);
+		canvas_ev.y = rint (d.y);
+		_drags->window_motion_handler (reinterpret_cast<GdkEvent*> (&canvas_ev), false);
 	}
 
 	return true;
