@@ -302,6 +302,9 @@ ArdourButton::render (cairo_t* cr)
 	}
 
 	if ( ((_elements & Text)==Text) && !_text.empty()) {
+		cairo_save (cr);
+		cairo_rectangle (cr, 2, 1, get_width()-4, get_height()-2);
+		cairo_clip(cr);
 
 		cairo_new_path (cr);	
 		cairo_set_source_rgba (cr, text_r, text_g, text_b, text_a);
@@ -342,7 +345,7 @@ ArdourButton::render (cairo_t* cr)
 			/* use old center'ed layout for follow up items - until rotation/aligment code is completed */
 			cairo_move_to (cr, (get_width() - _text_width)/2.0, get_height()/2.0 - _text_height/2.0);
 		}
-
+		cairo_restore (cr);
 	} 
 
 	if (((_elements & Indicator)==Indicator)) {
@@ -472,6 +475,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 			req->height = _text_height + ypad;
 		}
 	}
+	req->width += _corner_radius;
 }
 
 void
