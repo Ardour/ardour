@@ -150,6 +150,7 @@ private:
 	void led_clicked();
 	void processor_active_changed ();
 	void processor_property_changed (const PBD::PropertyChange&);
+	void processor_configuration_changed (const ARDOUR::ChanCount in, const ARDOUR::ChanCount out);
 	std::string name (Width) const;
 	void setup_tooltip ();
 
@@ -159,6 +160,7 @@ private:
 	Gtk::StateType _visual_state;
 	PBD::ScopedConnection active_connection;
 	PBD::ScopedConnection name_connection;
+	PBD::ScopedConnection config_connection;
 
 	class Control : public sigc::trackable {
 	public:
@@ -204,12 +206,49 @@ private:
 	std::list<Control*> _controls;
 
 	void toggle_control_visibility (Control *);
+
+	class PortIcon : public Gtk::DrawingArea {
+	public:
+		PortIcon(bool input) {
+			_input = input;
+			_ports = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 1);
+			set_size_request (-1, 3);
+		}
+		void set_ports(ARDOUR::ChanCount const ports) { _ports = ports; }
+	private:
+		bool on_expose_event (GdkEventExpose *);
+		bool _input;
+		ARDOUR::ChanCount _ports;
+	};
+
+	class RoutingIcon : public Gtk::DrawingArea {
+	public:
+		RoutingIcon() {
+			_sources = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 1);
+			_sinks = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 1);
+			_splitting = false;
+			set_size_request (-1, 4);
+		}
+		void set_sources(ARDOUR::ChanCount const sources) { _sources = sources; }
+		void set_sinks(ARDOUR::ChanCount const sinks) { _sinks = sinks; }
+		void set_splitting(const bool splitting) { _splitting = splitting; }
+	private:
+		bool on_expose_event (GdkEventExpose *);
+		ARDOUR::ChanCount _sources; // signals available to feed into the processor(s)
+		ARDOUR::ChanCount _sinks;   // combined number of outputs of the processor
+		bool _splitting;
+	};
+
+protected:
+	RoutingIcon _routing_icon;
+	PortIcon _input_icon;
+	PortIcon _output_icon;
 };
 
 class BlankProcessorEntry : public ProcessorEntry
 {
   public:
-	BlankProcessorEntry (ProcessorBox *, Width w);
+	BlankProcessorEntry (ProcessorBox *, Width w, ARDOUR::ChanCount cc);
 };
 
 class PluginInsertProcessorEntry : public ProcessorEntry
@@ -220,25 +259,9 @@ public:
 	void hide_things ();
 
 private:
-	void setup_visuals ();
 	void plugin_insert_splitting_changed ();
-
-	class SplittingIcon : public Gtk::DrawingArea {
-	public:
-		SplittingIcon() {
-			_inputs = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 1);
-			_outputs = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 2);
-		}
-		void set_inputs(ARDOUR::ChanCount const inputs) { _inputs = inputs; }
-		void set_outputs(ARDOUR::ChanCount const outputs) { _outputs = outputs; }
-	private:
-		bool on_expose_event (GdkEventExpose *);
-		ARDOUR::ChanCount _inputs;
-		ARDOUR::ChanCount _outputs;
-	};
-
 	boost::shared_ptr<ARDOUR::PluginInsert> _plugin_insert;
-	SplittingIcon _splitting_icon;
+
 	PBD::ScopedConnection _splitting_connection;
 };
 
@@ -349,11 +372,12 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	bool processor_button_release_event (GdkEventButton *, ProcessorEntry *);
 	void redisplay_processors ();
 	void add_processor_to_display (boost::weak_ptr<ARDOUR::Processor>);
-	void help_count_visible_prefader_processors (boost::weak_ptr<ARDOUR::Processor>, uint32_t*, bool*);
+	void help_count_visible_prefader_processors (boost::weak_ptr<ARDOUR::Processor>, uint32_t*, bool*, ARDOUR::ChanCount*);
 	void reordered ();
 	void report_failed_reorder ();
 	void route_processors_changed (ARDOUR::RouteProcessorChange);
 	void processor_menu_unmapped ();
+	void io_changed_proxy ();
 
 	void processors_reordered (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&, int*);
 	void compute_processor_sort_keys ();
@@ -434,6 +458,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void mixer_strip_delivery_changed (boost::weak_ptr<ARDOUR::Delivery>);
 
 	XMLNode* entry_gui_object_state (ProcessorEntry *);
+	PBD::ScopedConnection amp_config_connection;
 };
 
 #endif /* __ardour_gtk_processor_box__ */

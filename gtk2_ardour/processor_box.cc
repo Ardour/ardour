@@ -17,6 +17,8 @@
 
 */
 
+//#define ALWAYS_DISPLAY_WIRES
+
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
 #endif
@@ -98,6 +100,8 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 	, _processor (p)
 	, _width (w)
 	, _visual_state (Gtk::STATE_NORMAL)
+	, _input_icon(true)
+	, _output_icon(false)
 {
 	_vbox.show ();
 	
@@ -109,13 +113,23 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 
 	if (_processor) {
 
+		_vbox.pack_start (_routing_icon);
+		_vbox.pack_start (_input_icon);
 		_vbox.pack_start (_button, true, true);
+		_vbox.pack_end (_output_icon);
 
 		_button.set_active (_processor->active());
+
 		_button.show ();
+#ifdef ALWAYS_DISPLAY_WIRES
+		_routing_icon.show();
+#endif
+		_input_icon.show();
+		_output_icon.show();
 
 		_processor->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
 		_processor->PropertyChanged.connect (name_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_property_changed, this, _1), gui_context());
+		_processor->ConfigurationChanged.connect (config_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_configuration_changed, this, _1, _2), gui_context());
 
 		set<Evoral::Parameter> p = _processor->what_can_be_automated ();
 		for (set<Evoral::Parameter>::iterator i = p.begin(); i != p.end(); ++i) {
@@ -134,6 +148,12 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 				c->hide_label ();
 			}
 		}
+
+		_input_icon.set_ports(_processor->input_streams());
+		_output_icon.set_ports(_processor->output_streams());
+
+		_routing_icon.set_sources(_processor->input_streams());
+		_routing_icon.set_sinks(_processor->output_streams());
 
 		setup_tooltip ();
 		setup_visuals ();
@@ -190,14 +210,17 @@ ProcessorEntry::setup_visuals ()
 	switch (_position) {
 	case PreFader:
 		_button.set_name ("processor prefader");
+		_routing_icon.set_name ("ProcessorPreFader");
 		break;
 
 	case Fader:
 		_button.set_name ("processor fader");
+		_routing_icon.set_name ("ProcessorFader");
 		break;
 
 	case PostFader:
 		_button.set_name ("processor postfader");
+		_routing_icon.set_name ("ProcessorPostFader");
 		break;
 	}
 }
@@ -243,6 +266,24 @@ ProcessorEntry::processor_property_changed (const PropertyChange& what_changed)
 		_button.set_text (name (_width));
 		setup_tooltip ();
 	}
+}
+
+void
+ProcessorEntry::processor_configuration_changed (const ChanCount in, const ChanCount out)
+{
+#if 0 // debug, devel information
+	printf("ProcessorEntry::processor_config_changed %s %d %d\n",
+			name(Wide).c_str(),
+			in.n_audio(), out.n_audio());
+#endif
+
+	_input_icon.set_ports(in);
+	_output_icon.set_ports(out);
+	_routing_icon.set_sources(in);
+	_routing_icon.set_sinks(out);
+	_input_icon.queue_draw();
+	_output_icon.queue_draw();
+	_routing_icon.queue_draw();
 }
 
 void
@@ -593,9 +634,20 @@ ProcessorEntry::Control::state_id () const
 	return string_compose (X_("control %1"), c->id().to_s ());
 }
 
-BlankProcessorEntry::BlankProcessorEntry (ProcessorBox* b, Width w)
+BlankProcessorEntry::BlankProcessorEntry (ProcessorBox* b, Width w, ChanCount cc)
 	: ProcessorEntry (b, boost::shared_ptr<Processor>(), w)
 {
+#ifdef ALWAYS_DISPLAY_WIRES
+	_vbox.pack_start (_routing_icon);
+	_routing_icon.set_sources(cc);
+	_routing_icon.set_sinks(cc);
+	_routing_icon.show();
+	setup_visuals ();
+	_routing_icon.set_size_request (-1, 8);
+	_vbox.set_size_request (-1, 8);
+#else
+	_vbox.set_size_request (-1, 0);
+#endif
 }
 
 PluginInsertProcessorEntry::PluginInsertProcessorEntry (ProcessorBox* b, boost::shared_ptr<ARDOUR::PluginInsert> p, Width w)
@@ -606,31 +658,74 @@ PluginInsertProcessorEntry::PluginInsertProcessorEntry (ProcessorBox* b, boost::
 		_splitting_connection, invalidator (*this), boost::bind (&PluginInsertProcessorEntry::plugin_insert_splitting_changed, this), gui_context()
 		);
 
-	_splitting_icon.set_size_request (-1, 12);
-
-	_vbox.pack_start (_splitting_icon);
-	_vbox.reorder_child (_splitting_icon, 0);
-
 	plugin_insert_splitting_changed ();
 }
 
 void
 PluginInsertProcessorEntry::plugin_insert_splitting_changed ()
 {
-	_splitting_icon.set_inputs(_plugin_insert->input_streams());
-	_splitting_icon.set_outputs(_plugin_insert->output_streams());
+#if 0 // debug, devel information
+	printf("--%s--\n", _plugin_insert->name().c_str());
+	printf("AUDIO src: %d -> in:%d | * cnt %d * | out: %d -> snk: %d\n",
+			_plugin_insert->input_streams().n_audio(),
+			_plugin_insert->natural_input_streams().n_audio(),
+			_plugin_insert->get_count(),
+			_plugin_insert->natural_output_streams().n_audio(),
+			_plugin_insert->output_streams().n_audio());
+	printf("MIDI src: %d -> in:%d | * cnt %d * | out: %d -> snk: %d\n",
+			_plugin_insert->input_streams().n_midi(),
+			_plugin_insert->natural_input_streams().n_midi(),
+			_plugin_insert->get_count(),
+			_plugin_insert->natural_output_streams().n_midi(),
+			_plugin_insert->output_streams().n_midi());
+	printf("TOTAL src: %d -> in:%d | * cnt %d * | out: %d -> snk: %d\n",
+			_plugin_insert->input_streams().n_total(),
+			_plugin_insert->natural_input_streams().n_total(),
+			_plugin_insert->get_count(),
+			_plugin_insert->natural_output_streams().n_total(),
+			_plugin_insert->output_streams().n_total());
+#endif
 
-	if (_plugin_insert->splitting () || (
-				_plugin_insert->input_streams().n_midi() == 0
-				&& _plugin_insert->input_streams().n_audio() < _plugin_insert->output_streams().n_audio()
-				)
+	_output_icon.set_ports(_plugin_insert->output_streams());
+	_routing_icon.set_splitting(_plugin_insert->splitting ());
+
+	ChanCount sources = _plugin_insert->input_streams();
+	ChanCount sinks = _plugin_insert->natural_input_streams();
+
+	/* replicated instances */
+	if (!_plugin_insert->splitting () && _plugin_insert->get_count() > 1) {
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			sinks.set(*t, sinks.get(*t) * _plugin_insert->get_count());
+		}
+	}
+	/* MIDI bypass */
+	if (_plugin_insert->natural_output_streams().n_midi() == 0 &&
+			_plugin_insert->output_streams().n_midi() == 1) {
+		sinks.set(DataType::MIDI, 1);
+		sources.set(DataType::MIDI, 1);
+	}
+
+	_input_icon.set_ports(sinks);
+	_routing_icon.set_sinks(sinks);
+	_routing_icon.set_sources(sources);
+
+	if (_plugin_insert->splitting () ||
+			_plugin_insert->input_streams().n_audio() < _plugin_insert->natural_input_streams().n_audio()
 		 )
 	{
-		_splitting_icon.show ();
-		_splitting_icon.queue_draw();
+		_routing_icon.set_size_request (-1, 8);
+		_routing_icon.show();
 	} else {
-		_splitting_icon.hide ();
+#ifdef ALWAYS_DISPLAY_WIRES
+		_routing_icon.set_size_request (-1, 4);
+#else
+		_routing_icon.hide();
+#endif
 	}
+
+	_input_icon.queue_draw();
+	_output_icon.queue_draw();
+	_routing_icon.queue_draw();
 }
 
 void
@@ -640,28 +735,59 @@ PluginInsertProcessorEntry::hide_things ()
 	plugin_insert_splitting_changed ();
 }
 
-void
-PluginInsertProcessorEntry::setup_visuals ()
+
+bool
+ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
 {
-	switch (_position) {
-	case PreFader:
-		_splitting_icon.set_name ("ProcessorPreFader");
-		break;
+	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
 
-	case Fader:
-		_splitting_icon.set_name ("ProcessorFader");
-		break;
+	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	cairo_clip (cr);
 
-	case PostFader:
-		_splitting_icon.set_name ("ProcessorPostFader");
-		break;
+	cairo_set_line_width (cr, 5.0);
+	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
+
+	Gtk::Allocation a = get_allocation();
+	double const width = a.get_width();
+	double const height = a.get_height();
+
+	Gdk::Color const bg = get_style()->get_bg (STATE_NORMAL);
+	cairo_set_source_rgb (cr, bg.get_red_p (), bg.get_green_p (), bg.get_blue_p ());
+
+	cairo_rectangle (cr, 0, 0, width, height);
+	cairo_fill (cr);
+
+	const double y0 = _input ? height-.5 : .5;
+
+	if (_ports.n_total() > 1) {
+		for (uint32_t i = 0; i < _ports.n_total(); ++i) {
+			if (i < _ports.n_midi()) {
+				cairo_set_source_rgb (cr, .8, .3, .3);
+			} else {
+				cairo_set_source_rgb (cr, .4, .4, .8);
+			}
+			const float x = rintf(width * (.2f + .6f * i / (_ports.n_total() - 1.f))) + .5f;
+			cairo_move_to (cr, x, y0);
+			cairo_close_path(cr);
+			cairo_stroke(cr);
+		}
+	} else if (_ports.n_total() == 1) {
+		if (_ports.n_midi() == 1) {
+			cairo_set_source_rgb (cr, .8, .3, .3);
+		} else {
+			cairo_set_source_rgb (cr, .4, .4, .8);
+		}
+		cairo_move_to (cr, rintf(width * .5) + .5f, y0);
+		cairo_close_path(cr);
+		cairo_stroke(cr);
 	}
 
-	ProcessorEntry::setup_visuals ();
+	cairo_destroy(cr);
+	return true;
 }
 
 bool
-PluginInsertProcessorEntry::SplittingIcon::on_expose_event (GdkEventExpose* ev)
+ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 {
 	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
 
@@ -684,54 +810,58 @@ PluginInsertProcessorEntry::SplittingIcon::on_expose_event (GdkEventExpose* ev)
 	Gdk::Color const fg = get_style()->get_fg (STATE_NORMAL);
 	cairo_set_source_rgb (cr, fg.get_red_p (), fg.get_green_p (), fg.get_blue_p ());
 
-	const uint32_t inputs = _inputs.n_audio();
-	const uint32_t outputs = _outputs.n_audio();
+	const uint32_t sources = _sources.n_total();
+	const uint32_t sinks = _sinks.n_total();
 
-	const float si_m = rintf(height * 0.5) + .5f;
+	/* MIDI */
+	cairo_set_source_rgb (cr, .6, .2, .2);
+	const uint32_t midi_sources = _sources.n_midi();
+	const uint32_t midi_sinks = _sinks.n_midi();
 
-	if (inputs == 1) {
-		const float si_l = rintf(width * 0.2) + .5f;
-		const float si_c = rintf(width * 0.5) + .5f;
-		const float si_r = rintf(width * 0.8) + .5f;
-
-		cairo_move_to (cr, si_l, height);
-		cairo_line_to (cr, si_l, si_m);
-		cairo_line_to (cr, si_r, si_m);
-		cairo_line_to (cr, si_r, height);
-		cairo_stroke (cr);
-
-		cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
-
-		const uint32_t outputs = _outputs.n_audio();
-		for (uint32_t i = 2; i < outputs; ++i) {
-			const float si_b = rintf(width * (.2f + .6f * (i - 1.f) / (outputs - 1.f))) + .5f;
-			cairo_move_to (cr, si_b, height);
-			cairo_line_to (cr, si_b, si_m);
+	if (midi_sources > 0 && midi_sinks > 0 && sinks > 1 && sources > 1) {
+		for (uint32_t i = 0 ; i < midi_sources; ++i) {
+			const float si_x = rintf(width * (.2f + .6f * i  / (sinks - 1.f))) + .5f;
+			const float si_x0 = rintf(width * (.2f + .6f * i / (sources - 1.f))) + .5f;
+			cairo_move_to (cr, si_x, height);
+			cairo_curve_to (cr, si_x, 0, si_x0, height, si_x0, 0);
 			cairo_stroke (cr);
 		}
-
-		cairo_move_to (cr, si_c, si_m);
-		cairo_line_to (cr, si_c, 0);
+	} else if (midi_sources == 1 && midi_sinks == 1 && sinks == 1 && sources == 1) {
+		const float si_x = rintf(width * .5f) + .5f;
+		cairo_move_to (cr, si_x, height);
+		cairo_line_to (cr, si_x, 0);
 		cairo_stroke (cr);
-	} else {
-		cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
-		for (uint32_t i = 0 ; i < outputs; ++i) {
-			const float si_x = rintf(width * (.2f + .6f * i / (outputs - 1.f))) + .5f;
-			if (i < inputs) {
-				cairo_move_to (cr, si_x, height);
-				cairo_line_to (cr, si_x, 0);
-				cairo_stroke (cr);
-			} else {
-				cairo_move_to (cr, si_x, si_m);
-				cairo_line_to (cr, si_x, height);
-				cairo_stroke (cr);
-				cairo_move_to (cr, si_x+4, si_m);
-				cairo_line_to (cr, si_x-4, si_m);
-				cairo_stroke (cr);
-			}
-		}
 	}
 
+	/* AUDIO */
+	cairo_set_source_rgb (cr, .6, .6, .8);
+	const uint32_t audio_sources = _sources.n_audio();
+	const uint32_t audio_sinks = _sinks.n_audio();
+
+	if (_splitting) {
+		assert(audio_sinks > 1);
+		const float si_x0 = rintf(width * .5f) + .5f;
+		for (uint32_t i = midi_sinks; i < sinks; ++i) {
+			const float si_x = rintf(width * (.2f + .6f * i / (sinks - 1.f))) + .5f;
+			cairo_move_to (cr, si_x, height);
+			cairo_curve_to (cr, si_x, 0, si_x0, height, si_x0, 0);
+			cairo_stroke (cr);
+		}
+	} else if (audio_sources > 1) {
+		for (uint32_t i = 0 ; i < audio_sources; ++i) {
+			const float si_x = rintf(width * (.2f + .6f * (i + midi_sinks) / (sinks - 1.f))) + .5f;
+			const float si_x0 = rintf(width * (.2f + .6f * (i + midi_sources) / (sources - 1.f))) + .5f;
+			cairo_move_to (cr, si_x, height);
+			cairo_curve_to (cr, si_x, 0, si_x0, height, si_x0, 0);
+			cairo_stroke (cr);
+		}
+	} else if (audio_sources == 1 && audio_sinks == 1) {
+		const float si_x = rintf(width * .5f) + .5f;
+		cairo_move_to (cr, si_x, height);
+		cairo_line_to (cr, si_x, 0);
+		cairo_stroke (cr);
+	}
+	cairo_destroy(cr);
 	return true;
 }
 
@@ -761,7 +891,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 	processor_display.set_name ("ProcessorList");
 	processor_display.set_data ("processorbox", this);
 	processor_display.set_size_request (48, -1);
-	processor_display.set_spacing (2);
+	processor_display.set_spacing (0);
 
 	processor_display.signal_enter_notify_event().connect (sigc::mem_fun(*this, &ProcessorBox::enter_notify), false);
 	processor_display.signal_leave_notify_event().connect (sigc::mem_fun(*this, &ProcessorBox::leave_notify), false);
@@ -821,6 +951,12 @@ ProcessorBox::set_route (boost::shared_ptr<Route> r)
 	_route->PropertyChanged.connect (
 		_route_connections, invalidator (*this), boost::bind (&ProcessorBox::route_property_changed, this, _1), gui_context()
 		);
+#ifdef ALWAYS_DISPLAY_WIRES
+	/* update BlankProcessorEntry wire-count */
+	_route->io_changed.connect (
+		_route_connections, invalidator (*this), boost::bind (&ProcessorBox::io_changed_proxy, this), gui_context ()
+		);
+#endif
 
 	redisplay_processors ();
 }
@@ -1414,6 +1550,7 @@ ProcessorBox::redisplay_processors ()
 {
 	ENSURE_GUI_THREAD (*this, &ProcessorBox::redisplay_processors);
 	bool     fader_seen;
+	ChanCount amp_chan_count;
 
 	if (no_processor_redisplay) {
 		return;
@@ -1425,10 +1562,10 @@ ProcessorBox::redisplay_processors ()
 	fader_seen = false;
 
 	_route->foreach_processor (sigc::bind (sigc::mem_fun (*this, &ProcessorBox::help_count_visible_prefader_processors), 
-					       &_visible_prefader_processors, &fader_seen));
+					       &_visible_prefader_processors, &fader_seen, &amp_chan_count));
 
 	if (_visible_prefader_processors == 0) { // fader only
-		BlankProcessorEntry* bpe = new BlankProcessorEntry (this, _width);
+		BlankProcessorEntry* bpe = new BlankProcessorEntry (this, _width, amp_chan_count);
 		processor_display.add_child (bpe);
 	}
 
@@ -1484,6 +1621,12 @@ ProcessorBox::redisplay_processors ()
 	}
 
 	setup_entry_positions ();
+}
+
+void
+ProcessorBox::io_changed_proxy ()
+{
+	Glib::signal_idle().connect_once (sigc::mem_fun (*this, &ProcessorBox::redisplay_processors));
 }
 
 /** Add a ProcessorWindowProxy for a processor to our list, if that processor does
@@ -1552,7 +1695,7 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 }
 
 void
-ProcessorBox::help_count_visible_prefader_processors (boost::weak_ptr<Processor> p, uint32_t* cnt, bool* amp_seen)
+ProcessorBox::help_count_visible_prefader_processors (boost::weak_ptr<Processor> p, uint32_t* cnt, bool* amp_seen, ChanCount *cc)
 {
 	boost::shared_ptr<Processor> processor (p.lock ());
 
@@ -1560,6 +1703,9 @@ ProcessorBox::help_count_visible_prefader_processors (boost::weak_ptr<Processor>
 
 		if (boost::dynamic_pointer_cast<Amp>(processor)) {
 			*amp_seen = true;
+			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+				cc->set(*t, processor->input_streams().get(*t));
+			}
 		} else {
 			if (!*amp_seen) {
 				(*cnt)++;
