@@ -546,6 +546,7 @@ ProcessorEntry::Control::button_clicked ()
 
 	c->set_value (n ? 0 : 1);
 	_button.set_active (!n);
+	set_tooltip ();
 }
 
 void
