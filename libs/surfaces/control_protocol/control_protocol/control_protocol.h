@@ -30,6 +30,7 @@
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
 
+#include "ardour/visibility.h"
 #include "control_protocol/visibility.h"
 #include "control_protocol/basic_ui.h"
 #include "control_protocol/types.h"
