@@ -558,9 +558,9 @@ void
 PixFader::update_unity_position ()
 {
 	if (_orien == VERT) {
-		unity_loc = (int) rint (span * (1 - (default_value / (adjustment.get_upper() - adjustment.get_lower())))) - 1;
+		unity_loc = (int) rint (span * (1 - ((default_value - adjustment.get_lower()) / (adjustment.get_upper() - adjustment.get_lower())))) - 1;
 	} else {
-		unity_loc = (int) rint (default_value * span / (adjustment.get_upper() - adjustment.get_lower()));
+		unity_loc = (int) rint ((default_value - adjustment.get_lower()) * span / (adjustment.get_upper() - adjustment.get_lower()));
 	}
 
 	queue_draw ();
