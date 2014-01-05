@@ -464,7 +464,7 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 
 	} else {
 		
-		_slider.set_name ("PluginSlider");
+		_slider.set_name ("ProcessorControlSlider");
 		_slider.set_text (_name);
 
 		box.add (_slider);
