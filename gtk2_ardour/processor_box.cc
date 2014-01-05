@@ -40,6 +40,7 @@
 #include <gtkmm2ext/choice.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/doi.h>
+#include <gtkmm2ext/rgb_macros.h>
 
 #include "ardour/amp.h"
 #include "ardour/audio_track.h"
@@ -92,6 +93,10 @@ RefPtr<Action> ProcessorBox::cut_action;
 RefPtr<Action> ProcessorBox::rename_action;
 RefPtr<Action> ProcessorBox::edit_action;
 RefPtr<Action> ProcessorBox::edit_generic_action;
+
+
+static const uint32_t audio_port_color = 0x4A8A0EFF; // Green
+static const uint32_t midi_port_color = 0x960909FF; //Red
 
 ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processor> p, Width w)
 	: _button (ArdourButton::led_default_elements)
@@ -764,9 +769,15 @@ ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
 	if (_ports.n_total() > 1) {
 		for (uint32_t i = 0; i < _ports.n_total(); ++i) {
 			if (i < _ports.n_midi()) {
-				cairo_set_source_rgb (cr, .8, .3, .3);
+				cairo_set_source_rgb (cr,
+						UINT_RGBA_R_FLT(midi_port_color),
+						UINT_RGBA_G_FLT(midi_port_color),
+						UINT_RGBA_B_FLT(midi_port_color));
 			} else {
-				cairo_set_source_rgb (cr, .4, .4, .8);
+				cairo_set_source_rgb (cr,
+						UINT_RGBA_R_FLT(audio_port_color),
+						UINT_RGBA_G_FLT(audio_port_color),
+						UINT_RGBA_B_FLT(audio_port_color));
 			}
 			const float x = rintf(width * (.2f + .6f * i / (_ports.n_total() - 1.f))) + .5f;
 			cairo_move_to (cr, x, y0);
@@ -775,9 +786,15 @@ ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
 		}
 	} else if (_ports.n_total() == 1) {
 		if (_ports.n_midi() == 1) {
-			cairo_set_source_rgb (cr, .8, .3, .3);
+			cairo_set_source_rgb (cr,
+					UINT_RGBA_R_FLT(midi_port_color),
+					UINT_RGBA_G_FLT(midi_port_color),
+					UINT_RGBA_B_FLT(midi_port_color));
 		} else {
-			cairo_set_source_rgb (cr, .4, .4, .8);
+			cairo_set_source_rgb (cr,
+					UINT_RGBA_R_FLT(audio_port_color),
+					UINT_RGBA_G_FLT(audio_port_color),
+					UINT_RGBA_B_FLT(audio_port_color));
 		}
 		cairo_move_to (cr, rintf(width * .5) + .5f, y0);
 		cairo_close_path(cr);
@@ -816,10 +833,13 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 	const uint32_t sinks = _sinks.n_total();
 
 	/* MIDI */
-	cairo_set_source_rgb (cr, .6, .2, .2);
 	const uint32_t midi_sources = _sources.n_midi();
 	const uint32_t midi_sinks = _sinks.n_midi();
 
+	cairo_set_source_rgb (cr,
+			UINT_RGBA_R_FLT(midi_port_color),
+			UINT_RGBA_G_FLT(midi_port_color),
+			UINT_RGBA_B_FLT(midi_port_color));
 	if (midi_sources > 0 && midi_sinks > 0 && sinks > 1 && sources > 1) {
 		for (uint32_t i = 0 ; i < midi_sources; ++i) {
 			const float si_x = rintf(width * (.2f + .6f * i  / (sinks - 1.f))) + .5f;
@@ -836,9 +856,12 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 	}
 
 	/* AUDIO */
-	cairo_set_source_rgb (cr, .6, .6, .8);
 	const uint32_t audio_sources = _sources.n_audio();
 	const uint32_t audio_sinks = _sinks.n_audio();
+	cairo_set_source_rgb (cr,
+			UINT_RGBA_R_FLT(audio_port_color),
+			UINT_RGBA_G_FLT(audio_port_color),
+			UINT_RGBA_B_FLT(audio_port_color));
 
 	if (_splitting) {
 		assert(audio_sinks > 1);
