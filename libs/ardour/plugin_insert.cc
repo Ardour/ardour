@@ -1212,10 +1212,23 @@ double
 PluginInsert::PluginControl::internal_to_interface (double val) const
 {
 	if (_logarithmic) {
+		/* some plugins have a log-scale range "0.."
+		 * ideally we'd map the range down to infinity somehow :)
+		 *
+		 * one solution could be to use
+		 *   val = exp(lower + log(range) * value);
+		 *   (log(val) - lower) / range)
+		 * This approach would require access to the actual range (ie
+		 * Plugin::ParameterDescriptor) and also require handling
+		 * of unbound ranges..
+		 *
+		 * currently an arbitrarly low number is assumed to represnt
+		 * log(0) as hot-fix solution.
+		 */
 		if (val > 0) {
 			val = log (val);
 		} else {
-			val = 0;
+			val = -8; // ~ -70dB = 20 * log10(exp(-8))
 		}
 	}
 
@@ -1226,7 +1239,12 @@ double
 PluginInsert::PluginControl::interface_to_internal (double val) const
 {
 	if (_logarithmic) {
-		val = exp (val);
+		if (val <= -8) {
+			/* see note in PluginInsert::PluginControl::internal_to_interface() */
+			val= 0;
+		} else {
+			val = exp (val);
+		}
 	}
 
 	return val;
