@@ -443,7 +443,7 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)
 	, _slider (&_adjustment, 0, 13, false)
 	, _slider_persistant_tooltip (&_slider)
-	, _button (ArdourButton::Element (ArdourButton::Text | ArdourButton::Indicator))
+	, _button (ArdourButton::led_default_elements)
 	, _ignore_ui_adjustment (false)
 	, _visible (false)
 	, _name (n)

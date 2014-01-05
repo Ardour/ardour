@@ -841,6 +841,10 @@ style "plugin_slider"
 	text[PRELIGHT] = @@COLPREFIX@_text
 }
 
+style "processor_control_button"  = "very_small_text"
+{
+}
+
 style "processor_control_slider"  = "plugin_slider"
 {
 	bg[PRELIGHT] = @@COLPREFIX@_darkest
