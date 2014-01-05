@@ -127,9 +127,11 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 
 		_button.show ();
 #ifdef ALWAYS_DISPLAY_WIRES
-		_routing_icon.show();
+		_routing_icon.set_visible(true);
+#else
+		_routing_icon.set_visible(false);
 #endif
-		_input_icon.show();
+		_input_icon.hide();
 		_output_icon.show();
 
 		_processor->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
@@ -193,9 +195,17 @@ ProcessorEntry::drag_text () const
 }
 
 void
-ProcessorEntry::set_position (Position p)
+ProcessorEntry::set_position (Position p, uint32_t num)
 {
 	_position = p;
+	_position_num = num;
+
+	if (_position_num == 0 || _routing_icon.get_visible()) {
+		_input_icon.show();
+	} else {
+		_input_icon.hide();
+	}
+
 	setup_visuals ();
 }
 
@@ -653,7 +663,10 @@ BlankProcessorEntry::BlankProcessorEntry (ProcessorBox* b, Width w, ChanCount cc
 	_routing_icon.set_size_request (-1, 8);
 	_vbox.set_size_request (-1, 8);
 #else
-	_vbox.set_size_request (-1, 0);
+	_vbox.pack_start (_input_icon);
+	_input_icon.set_ports(cc);
+	_input_icon.show();
+	_vbox.set_size_request (-1, 4);
 #endif
 }
 
@@ -720,13 +733,17 @@ PluginInsertProcessorEntry::plugin_insert_splitting_changed ()
 			_plugin_insert->input_streams().n_audio() < _plugin_insert->natural_input_streams().n_audio()
 		 )
 	{
-		_routing_icon.set_size_request (-1, 8);
-		_routing_icon.show();
+		_routing_icon.set_size_request (-1, 7);
+		_routing_icon.set_visible(true);
+		_input_icon.show();
 	} else {
 #ifdef ALWAYS_DISPLAY_WIRES
 		_routing_icon.set_size_request (-1, 4);
 #else
-		_routing_icon.hide();
+		_routing_icon.set_visible(false);
+		if (_position_num != 0) {
+			_input_icon.hide();
+		}
 #endif
 	}
 
@@ -813,7 +830,7 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_clip (cr);
 
-	cairo_set_line_width (cr, 1.5);
+	cairo_set_line_width (cr, 1.0);
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
 
 	Gtk::Allocation a = get_allocation();
@@ -1783,15 +1800,16 @@ ProcessorBox::setup_entry_positions ()
 	list<ProcessorEntry*> children = processor_display.children ();
 	bool pre_fader = true;
 
+	uint32_t num = 0;
 	for (list<ProcessorEntry*>::iterator i = children.begin(); i != children.end(); ++i) {
 		if (boost::dynamic_pointer_cast<Amp>((*i)->processor())) {
 			pre_fader = false;
-			(*i)->set_position (ProcessorEntry::Fader);
+			(*i)->set_position (ProcessorEntry::Fader, num++);
 		} else {
 			if (pre_fader) {
-				(*i)->set_position (ProcessorEntry::PreFader);
+				(*i)->set_position (ProcessorEntry::PreFader, num++);
 			} else {
-				(*i)->set_position (ProcessorEntry::PostFader);
+				(*i)->set_position (ProcessorEntry::PostFader, num++);
 			}
 		}
 	}

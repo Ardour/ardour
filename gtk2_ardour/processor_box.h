@@ -125,7 +125,7 @@ public:
 		PostFader
 	};
 
-	void set_position (Position);
+	void set_position (Position, uint32_t);
 	boost::shared_ptr<ARDOUR::Processor> processor () const;
 	void set_enum_width (Width);
 
@@ -143,6 +143,7 @@ protected:
 	ArdourButton _button;
 	Gtk::VBox _vbox;
 	Position _position;
+	uint32_t _position_num;
 
 	virtual void setup_visuals ();
 
