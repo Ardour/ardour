@@ -171,7 +171,6 @@ private:
 		void add_state (XMLNode *) const;
 		void set_state (XMLNode const *);
 		void hide_things ();
-		void hide_label ();
 
 		bool visible () const {
 			return _visible;
@@ -194,7 +193,6 @@ private:
 		/* things for a slider */
 		Gtk::Adjustment _adjustment;
 		Gtkmm2ext::HSliderController _slider;
-		Gtk::Label _label;
 		Gtkmm2ext::PersistentTooltip _slider_persistant_tooltip;
 		/* things for a button */
 		ArdourButton _button;

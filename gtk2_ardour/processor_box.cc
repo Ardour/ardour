@@ -134,18 +134,21 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 		set<Evoral::Parameter> p = _processor->what_can_be_automated ();
 		for (set<Evoral::Parameter>::iterator i = p.begin(); i != p.end(); ++i) {
 			
-			Control* c = new Control (_processor->automation_control (*i), _processor->describe_parameter (*i));
+			std::string label = _processor->describe_parameter (*i);
+
+			if (boost::dynamic_pointer_cast<Send> (_processor)) {
+				label = _("Send");
+			} else if (boost::dynamic_pointer_cast<Return> (_processor)) {
+				label = _("Return");
+			}
+
+			Control* c = new Control (_processor->automation_control (*i), label);
 			
 			_controls.push_back (c);
 
 			if (boost::dynamic_pointer_cast<Amp> (_processor) == 0) {
 				/* Add non-Amp controls to the processor box */
 				_vbox.pack_start (c->box);
-			}
-
-			if (boost::dynamic_pointer_cast<Send> (_processor)) {
-				/* Don't label send faders */
-				c->hide_label ();
 			}
 		}
 
@@ -511,7 +514,6 @@ ProcessorEntry::Control::set_tooltip ()
 
 	string sm = Glib::Markup::escape_text (s.str());
 	
-	ARDOUR_UI::instance()->set_tip (_label, sm);
 	_slider_persistant_tooltip.set_tip (sm);
 	ARDOUR_UI::instance()->set_tip (_button, sm);
 }
@@ -618,12 +620,6 @@ ProcessorEntry::Control::hide_things ()
 	if (!_visible) {
 		box.hide ();
 	}
-}
-
-void
-ProcessorEntry::Control::hide_label ()
-{
-	_label.hide ();
 }
 
 string
