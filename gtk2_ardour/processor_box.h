@@ -246,12 +246,6 @@ protected:
 	PortIcon _output_icon;
 };
 
-class BlankProcessorEntry : public ProcessorEntry
-{
-  public:
-	BlankProcessorEntry (ProcessorBox *, Width w, ARDOUR::ChanCount cc);
-};
-
 class PluginInsertProcessorEntry : public ProcessorEntry
 {
 public:
@@ -373,7 +367,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	bool processor_button_release_event (GdkEventButton *, ProcessorEntry *);
 	void redisplay_processors ();
 	void add_processor_to_display (boost::weak_ptr<ARDOUR::Processor>);
-	void help_count_visible_prefader_processors (boost::weak_ptr<ARDOUR::Processor>, uint32_t*, bool*, ARDOUR::ChanCount*);
+	void help_count_visible_prefader_processors (boost::weak_ptr<ARDOUR::Processor>, uint32_t*, bool*);
 	void reordered ();
 	void report_failed_reorder ();
 	void route_processors_changed (ARDOUR::RouteProcessorChange);

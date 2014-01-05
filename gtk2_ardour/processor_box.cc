@@ -17,8 +17,6 @@
 
 */
 
-//#define ALWAYS_DISPLAY_WIRES
-
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
 #endif
@@ -94,7 +92,6 @@ RefPtr<Action> ProcessorBox::rename_action;
 RefPtr<Action> ProcessorBox::edit_action;
 RefPtr<Action> ProcessorBox::edit_generic_action;
 
-
 static const uint32_t audio_port_color = 0x4A8A0EFF; // Green
 static const uint32_t midi_port_color = 0x960909FF; //Red
 
@@ -126,11 +123,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 		_button.set_active (_processor->active());
 
 		_button.show ();
-#ifdef ALWAYS_DISPLAY_WIRES
-		_routing_icon.set_visible(true);
-#else
 		_routing_icon.set_visible(false);
-#endif
 		_input_icon.hide();
 		_output_icon.show();
 
@@ -225,17 +218,14 @@ ProcessorEntry::setup_visuals ()
 	switch (_position) {
 	case PreFader:
 		_button.set_name ("processor prefader");
-		_routing_icon.set_name ("ProcessorPreFader");
 		break;
 
 	case Fader:
 		_button.set_name ("processor fader");
-		_routing_icon.set_name ("ProcessorFader");
 		break;
 
 	case PostFader:
 		_button.set_name ("processor postfader");
-		_routing_icon.set_name ("ProcessorPostFader");
 		break;
 	}
 }
@@ -286,12 +276,6 @@ ProcessorEntry::processor_property_changed (const PropertyChange& what_changed)
 void
 ProcessorEntry::processor_configuration_changed (const ChanCount in, const ChanCount out)
 {
-#if 0 // debug, devel information
-	printf("ProcessorEntry::processor_config_changed %s %d %d\n",
-			name(Wide).c_str(),
-			in.n_audio(), out.n_audio());
-#endif
-
 	_input_icon.set_ports(in);
 	_output_icon.set_ports(out);
 	_routing_icon.set_sources(in);
@@ -651,25 +635,6 @@ ProcessorEntry::Control::state_id () const
 	return string_compose (X_("control %1"), c->id().to_s ());
 }
 
-BlankProcessorEntry::BlankProcessorEntry (ProcessorBox* b, Width w, ChanCount cc)
-	: ProcessorEntry (b, boost::shared_ptr<Processor>(), w)
-{
-#ifdef ALWAYS_DISPLAY_WIRES
-	_vbox.pack_start (_routing_icon);
-	_routing_icon.set_sources(cc);
-	_routing_icon.set_sinks(cc);
-	_routing_icon.show();
-	setup_visuals ();
-	_routing_icon.set_size_request (-1, 8);
-	_vbox.set_size_request (-1, 8);
-#else
-	_vbox.pack_start (_input_icon);
-	_input_icon.set_ports(cc);
-	_input_icon.show();
-	_vbox.set_size_request (-1, 4);
-#endif
-}
-
 PluginInsertProcessorEntry::PluginInsertProcessorEntry (ProcessorBox* b, boost::shared_ptr<ARDOUR::PluginInsert> p, Width w)
 	: ProcessorEntry (b, p, w)
 	, _plugin_insert (p)
@@ -684,28 +649,6 @@ PluginInsertProcessorEntry::PluginInsertProcessorEntry (ProcessorBox* b, boost::
 void
 PluginInsertProcessorEntry::plugin_insert_splitting_changed ()
 {
-#if 0 // debug, devel information
-	printf("--%s--\n", _plugin_insert->name().c_str());
-	printf("AUDIO src: %d -> in:%d | * cnt %d * | out: %d -> snk: %d\n",
-			_plugin_insert->input_streams().n_audio(),
-			_plugin_insert->natural_input_streams().n_audio(),
-			_plugin_insert->get_count(),
-			_plugin_insert->natural_output_streams().n_audio(),
-			_plugin_insert->output_streams().n_audio());
-	printf("MIDI src: %d -> in:%d | * cnt %d * | out: %d -> snk: %d\n",
-			_plugin_insert->input_streams().n_midi(),
-			_plugin_insert->natural_input_streams().n_midi(),
-			_plugin_insert->get_count(),
-			_plugin_insert->natural_output_streams().n_midi(),
-			_plugin_insert->output_streams().n_midi());
-	printf("TOTAL src: %d -> in:%d | * cnt %d * | out: %d -> snk: %d\n",
-			_plugin_insert->input_streams().n_total(),
-			_plugin_insert->natural_input_streams().n_total(),
-			_plugin_insert->get_count(),
-			_plugin_insert->natural_output_streams().n_total(),
-			_plugin_insert->output_streams().n_total());
-#endif
-
 	_output_icon.set_ports(_plugin_insert->output_streams());
 	_routing_icon.set_splitting(_plugin_insert->splitting ());
 
@@ -737,14 +680,10 @@ PluginInsertProcessorEntry::plugin_insert_splitting_changed ()
 		_routing_icon.set_visible(true);
 		_input_icon.show();
 	} else {
-#ifdef ALWAYS_DISPLAY_WIRES
-		_routing_icon.set_size_request (-1, 4);
-#else
 		_routing_icon.set_visible(false);
 		if (_position_num != 0) {
 			_input_icon.hide();
 		}
-#endif
 	}
 
 	_input_icon.queue_draw();
@@ -993,12 +932,6 @@ ProcessorBox::set_route (boost::shared_ptr<Route> r)
 	_route->PropertyChanged.connect (
 		_route_connections, invalidator (*this), boost::bind (&ProcessorBox::route_property_changed, this, _1), gui_context()
 		);
-#ifdef ALWAYS_DISPLAY_WIRES
-	/* update BlankProcessorEntry wire-count */
-	_route->io_changed.connect (
-		_route_connections, invalidator (*this), boost::bind (&ProcessorBox::io_changed_proxy, this), gui_context ()
-		);
-#endif
 
 	redisplay_processors ();
 }
@@ -1023,10 +956,6 @@ ProcessorBox::object_drop(DnDVBox<ProcessorEntry>* source, ProcessorEntry* posit
 			   `dropped on' processor */
 			list<ProcessorEntry*> c = processor_display.children ();
 			list<ProcessorEntry*>::iterator i = c.begin ();
-			while (dynamic_cast<BlankProcessorEntry*> (*i)) {
-				assert (i != c.end ());
-				++i;
-			}
 
 			assert (i != c.end ());
 			p = (*i)->processor ();
@@ -1592,7 +1521,6 @@ ProcessorBox::redisplay_processors ()
 {
 	ENSURE_GUI_THREAD (*this, &ProcessorBox::redisplay_processors);
 	bool     fader_seen;
-	ChanCount amp_chan_count;
 
 	if (no_processor_redisplay) {
 		return;
@@ -1604,12 +1532,7 @@ ProcessorBox::redisplay_processors ()
 	fader_seen = false;
 
 	_route->foreach_processor (sigc::bind (sigc::mem_fun (*this, &ProcessorBox::help_count_visible_prefader_processors), 
-					       &_visible_prefader_processors, &fader_seen, &amp_chan_count));
-
-	if (_visible_prefader_processors == 0) { // fader only
-		BlankProcessorEntry* bpe = new BlankProcessorEntry (this, _width, amp_chan_count);
-		processor_display.add_child (bpe);
-	}
+					       &_visible_prefader_processors, &fader_seen));
 
 	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::add_processor_to_display));
 
@@ -1663,12 +1586,6 @@ ProcessorBox::redisplay_processors ()
 	}
 
 	setup_entry_positions ();
-}
-
-void
-ProcessorBox::io_changed_proxy ()
-{
-	Glib::signal_idle().connect_once (sigc::mem_fun (*this, &ProcessorBox::redisplay_processors));
 }
 
 /** Add a ProcessorWindowProxy for a processor to our list, if that processor does
@@ -1737,7 +1654,7 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 }
 
 void
-ProcessorBox::help_count_visible_prefader_processors (boost::weak_ptr<Processor> p, uint32_t* cnt, bool* amp_seen, ChanCount *cc)
+ProcessorBox::help_count_visible_prefader_processors (boost::weak_ptr<Processor> p, uint32_t* cnt, bool* amp_seen)
 {
 	boost::shared_ptr<Processor> processor (p.lock ());
 
@@ -1745,9 +1662,6 @@ ProcessorBox::help_count_visible_prefader_processors (boost::weak_ptr<Processor>
 
 		if (boost::dynamic_pointer_cast<Amp>(processor)) {
 			*amp_seen = true;
-			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-				cc->set(*t, processor->input_streams().get(*t));
-			}
 		} else {
 			if (!*amp_seen) {
 				(*cnt)++;
