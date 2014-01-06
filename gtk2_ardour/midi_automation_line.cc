@@ -30,9 +30,9 @@ MidiAutomationLine::MidiAutomationLine (
 	boost::shared_ptr<ARDOUR::MidiRegion>                   region,
 	Evoral::Parameter                                       parameter,
 	Evoral::TimeConverter<double, ARDOUR::framepos_t>*      converter)
-  : AutomationLine (name, tav, group, list, converter)
-  , _region (region)
-  , _parameter (parameter)
+	: AutomationLine (name, tav, group, list, converter)
+	, _region (region)
+	, _parameter (parameter)
 {
 
 }

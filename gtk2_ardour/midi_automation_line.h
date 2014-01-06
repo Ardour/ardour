@@ -27,10 +27,10 @@ class MidiAutomationLine : public AutomationLine
 {
 public:
 	MidiAutomationLine (const std::string&, TimeAxisView&, ArdourCanvas::Group&,
-			    boost::shared_ptr<ARDOUR::AutomationList>,
-			    boost::shared_ptr<ARDOUR::MidiRegion>,
-			    Evoral::Parameter,
-			    Evoral::TimeConverter<double, ARDOUR::framepos_t>* converter = 0);
+	                    boost::shared_ptr<ARDOUR::AutomationList>,
+	                    boost::shared_ptr<ARDOUR::MidiRegion>,
+	                    Evoral::Parameter,
+	                    Evoral::TimeConverter<double, ARDOUR::framepos_t>* converter = 0);
 
 	MementoCommandBinder<ARDOUR::AutomationList>* memento_command_binder ();
 
