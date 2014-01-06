@@ -18,7 +18,11 @@
 */
 
 #include "ardour/midi_automation_list_binder.h"
+#include "midi++/midnam_patch.h"
 #include "midi_automation_line.h"
+#include "midi_time_axis.h"
+
+#include "i18n.h"
 
 using namespace std;
 
@@ -42,3 +46,42 @@ MidiAutomationLine::memento_command_binder ()
 {
 	return new ARDOUR::MidiAutomationListBinder (_region->midi_source(), _parameter);
 }
+
+string
+MidiAutomationLine::get_verbose_cursor_string (double fraction) const
+{
+	using namespace MIDI::Name;
+
+	if (_parameter.type() != ARDOUR::MidiCCAutomation) {
+		return AutomationLine::get_verbose_cursor_string(fraction);
+	}
+
+	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(trackview.get_parent());
+	if (!mtv) {
+		return AutomationLine::get_verbose_cursor_string(fraction);
+	}
+
+	boost::shared_ptr<MasterDeviceNames> device_names(mtv->get_device_names());
+	if (!device_names) {
+		return AutomationLine::get_verbose_cursor_string(fraction);
+	}
+
+	const std::string& device_mode = mtv->gui_property(X_("midnam-custom-device-mode"));
+	const uint8_t      channel     = mtv->get_channel_for_add();
+
+	boost::shared_ptr<const ValueNameList> value_names = device_names->value_name_list_by_control(
+		device_mode, channel, _parameter.id());
+	if (!value_names) {
+		return AutomationLine::get_verbose_cursor_string(fraction);
+	}
+
+	const uint16_t cc_value = floor(std::max(std::min(fraction * 127.0, 127.0), 0.0));
+
+	boost::shared_ptr<const Value> value = value_names->max_value_below(cc_value);
+	if (!value) {
+		return AutomationLine::get_verbose_cursor_string(fraction);
+	}
+
+	return value->name();
+}
+

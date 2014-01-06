@@ -112,7 +112,7 @@ public:
 	ArdourCanvas::Item&  parent_group() const { return _parent_group; }
 	ArdourCanvas::Item&  grab_item() const { return *line; }
 
-	std::string get_verbose_cursor_string (double) const;
+	virtual std::string get_verbose_cursor_string (double) const;
 	std::string get_verbose_cursor_relative_string (double, double) const;
 	std::string fraction_to_string (double) const;
 	std::string fraction_to_relative_string (double, double) const;
