@@ -162,6 +162,11 @@ def set_compiler_flags (conf,opt):
             # Prevents visibility issues in standard headers
             conf.define("_DARWIN_C_SOURCE", 1)
 
+    if conf.options.asan:
+        conf.check_cxx(cxxflags=["-fsanitize=address"], linkflags=["-fsanitize=address"])
+        cxx_flags.append('-fsanitize=address')
+        linker_flags.append('-fsanitize=address')
+
     if is_clang and platform == "darwin":
         # Silence warnings about the non-existing osx clang compiler flags
         # -compatibility_version and -current_version.  These are Waf
@@ -502,6 +507,8 @@ def options(opt):
                     help='Do not ask questions that require confirmation during the build')
     opt.add_option('--cxx11', action='store_true', default=False, dest='cxx11',
                     help='Turn on c++11 compiler flags (-std=c++11)')
+    opt.add_option('--address-sanitizer', action='store_true', default=False, dest='asan',
+                    help='Turn on AddressSanitizer (requires GCC >= 4.8 or clang)')
     for i in children:
         opt.recurse(i)
 
