@@ -370,7 +370,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void report_failed_reorder ();
 	void route_processors_changed (ARDOUR::RouteProcessorChange);
 	void processor_menu_unmapped ();
-	void io_changed_proxy ();
 
 	void processors_reordered (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&, int*);
 	void compute_processor_sort_keys ();
