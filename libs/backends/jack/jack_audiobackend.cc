@@ -1094,6 +1094,8 @@ JACKAudioBackend::control_app_name () const
 				appname = "hdspconf";
 			} else if (_target_device == "M Audio Delta 1010") {
 				appname = "mudita24";
+			} else if (_target_device == "M2496") {
+				appname = "mudita24";
 			}
 		}
 	} else {
