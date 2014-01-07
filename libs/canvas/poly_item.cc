@@ -64,7 +64,7 @@ PolyItem::compute_bounding_box () const
 }
 
 void
-PolyItem::render_path (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> context) const
+PolyItem::render_path (Rect const & /* area */, Cairo::RefPtr<Cairo::Context> context) const
 {
 	if (_points.size() < 2) {
 		return;
@@ -74,6 +74,7 @@ PolyItem::render_path (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> cont
 	Duple c (item_to_window (Duple (i->x, i->y)));
 
 	context->move_to (c.x, c.y);
+	++i;
 
 	while (i != _points.end()) {
 		c = item_to_window (Duple (i->x, i->y));
@@ -85,8 +86,6 @@ PolyItem::render_path (Rect const & /*area*/, Cairo::RefPtr<Cairo::Context> cont
 void
 PolyItem::render_curve (Rect const & area, Cairo::RefPtr<Cairo::Context> context, Points const & first_control_points, Points const & second_control_points) const
 {
-	bool done_first = false;
-
 	if (_points.size() <= 2) {
 		render_path (area, context);
 		return;
@@ -98,6 +97,7 @@ PolyItem::render_curve (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 
 	Duple c = item_to_window (Duple (p->x, p->y));
 	context->move_to (c.x, c.y);
+	++p;
 
 	while (p != _points.end()) {
 
