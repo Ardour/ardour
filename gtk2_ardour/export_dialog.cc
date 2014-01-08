@@ -174,9 +174,9 @@ ExportDialog::init_components ()
 }
 
 void
-ExportDialog::notify_errors ()
+ExportDialog::notify_errors (bool force)
 {
-	if (status->errors()) {
+	if (force || status->errors()) {
 		std::string txt = _("Export has been aborted due to an error!\nSee the Log for details.");
 		Gtk::MessageDialog msg (txt, false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
 		msg.run();
@@ -269,25 +269,30 @@ ExportDialog::soundcloud_upload_progress(double total, double now, std::string t
 void
 ExportDialog::do_export ()
 {
-	profile_manager->prepare_for_export ();
-	handler->upload_username = soundcloud_selector->username();
-	handler->upload_password = soundcloud_selector->password();
-	handler->upload_public   = soundcloud_selector->upload_public();
-	handler->upload_open     = soundcloud_selector->upload_open();
+	try {
+		profile_manager->prepare_for_export ();
+		handler->upload_username = soundcloud_selector->username();
+		handler->upload_password = soundcloud_selector->password();
+		handler->upload_public   = soundcloud_selector->upload_public();
+		handler->upload_open     = soundcloud_selector->upload_open();
 
-	handler->SoundcloudProgress.connect_same_thread(
-			*this, 
-		       	boost::bind(&ExportDialog::soundcloud_upload_progress, this, _1, _2, _3)
-	);
+		handler->SoundcloudProgress.connect_same_thread(
+				*this, 
+				boost::bind(&ExportDialog::soundcloud_upload_progress, this, _1, _2, _3)
+				);
 #if 0
-	handler->SoundcloudProgress.connect(
-			*this, invalidator (*this),
-		       	boost::bind(&ExportDialog::soundcloud_upload_progress, this, _1, _2, _3),
-			gui_context()
-	);
+		handler->SoundcloudProgress.connect(
+				*this, invalidator (*this),
+				boost::bind(&ExportDialog::soundcloud_upload_progress, this, _1, _2, _3),
+				gui_context()
+				);
 #endif
-	handler->do_export ();
-	show_progress ();
+		handler->do_export ();
+		show_progress ();
+	} catch(std::exception & e) {
+		error << string_compose (_("Export initialization failed: %1"), e.what()) << endmsg;
+		notify_errors(true);
+	}
 }
 
 void

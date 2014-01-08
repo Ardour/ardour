@@ -141,6 +141,39 @@ Surface::~Surface ()
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::~Surface done\n");
 }
 
+XMLNode&
+Surface::get_state()
+{
+	char buf[64];
+	snprintf (buf, sizeof (buf), X_("surface-%u"), _number);
+	XMLNode* node = new XMLNode (buf);
+
+	node->add_child_nocopy (_port->get_state());
+
+	return *node;
+}
+
+int
+Surface::set_state (const XMLNode& node, int version)
+{
+	char buf[64];
+	snprintf (buf, sizeof (buf), X_("surface-%u"), _number);
+	XMLNode* mynode = node.child (buf);
+
+	if (!mynode) {
+		return 0;
+	}
+
+	XMLNode* portnode = mynode->child (X_("Port"));
+	if (portnode) {
+		if (_port->set_state (*portnode, version)) {
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
 const MidiByteArray& 
 Surface::sysex_hdr() const
 {
@@ -586,12 +619,6 @@ Surface::turn_it_on ()
 	if (_mcp.device_info ().has_global_controls ()) {
 		_mcp.update_global_button (Button::Read, _mcp.metering_active ());
 	}
-}
-
-void 
-Surface::handle_port_inactive (SurfacePort*)
-{
-	_active = false;
 }
 
 void 

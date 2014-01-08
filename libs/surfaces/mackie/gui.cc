@@ -84,6 +84,7 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	Gtk::Table* table = Gtk::manage (new Gtk::Table (2, 9));
 	table->set_row_spacings (4);
 	table->set_col_spacings (6);
+	table->set_border_width (12);
 	l = manage (new Gtk::Label (_("Device Type:")));
 	l->set_alignment (1.0, 0.5);
 	table->attach (*l, 0, 1, 0, 1, AttachOptions(FILL|EXPAND), AttachOptions(0));
@@ -182,11 +183,10 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	fkey_packer->pack_start (function_key_scroller, true, true);
 	fkey_packer->pack_start (*observation_packer, false, false);
 	fkey_packer->set_spacing (12);
-	function_key_scroller.set_size_request (700,700);
 	function_key_scroller.property_shadow_type() = Gtk::SHADOW_NONE;
 	function_key_scroller.add (function_key_editor);
 	append_page (*fkey_packer, _("Function Keys"));
-	
+
 	build_available_action_menu ();
 	build_function_key_editor ();
 	refresh_function_key_editor ();
@@ -453,8 +453,6 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 			return;
 		}
 
-		cerr << "Changed to " << i->first << " aka " << i->second << endl;
-
 		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (i->second.c_str());
 
 		if (act) {
@@ -504,8 +502,6 @@ MackieControlProtocolGUI::surface_combo_changed ()
 
 	/* update ipMIDI field */
 
-	cerr << "New device called " << _cp.device_info().name() << " with ipMIDI ? " << _cp.device_info().uses_ipmidi() << endl;
-
 	ipmidi_base_port_spinner.set_sensitive (_cp.device_info().uses_ipmidi());
 }
 
@@ -522,7 +518,6 @@ MackieControlProtocolGUI::profile_combo_changed ()
 void
 MackieControlProtocolGUI::ipmidi_spinner_changed ()
 {
-	cerr << "Set IP MIDI base to " << ipmidi_base_port_spinner.get_value() << endl;
 	_cp.set_ipmidi_base ((int16_t) lrintf (ipmidi_base_port_spinner.get_value()));
 }
 

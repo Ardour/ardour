@@ -93,13 +93,10 @@ Editor::toggle_video_timeline_locked ()
 }
 
 void
-Editor::embed_audio_from_video (std::string path, framepos_t n)
+Editor::embed_audio_from_video (std::string path, framepos_t n, bool lock_position_to_video)
 {
 	vector<std::string> paths;
 	paths.push_back(path);
-#if 0
-	do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, ARDOUR::SrcBest, n);
-#else
 	current_interthread_info = &import_status;
 	import_status.current = 1;
 	import_status.total = paths.size ();
@@ -111,18 +108,19 @@ Editor::embed_audio_from_video (std::string path, framepos_t n)
 	boost::shared_ptr<ARDOUR::Track> track;
 	bool ok = (import_sndfiles (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, ARDOUR::SrcBest, n, 1, 1, track, false) == 0);
 	if (ok && track) {
-		boost::shared_ptr<ARDOUR::Playlist> pl = track->playlist();
-		pl->find_next_region(n, ARDOUR::End, 0)->set_video_locked(true);
+		if (lock_position_to_video) {
+			boost::shared_ptr<ARDOUR::Playlist> pl = track->playlist();
+			pl->find_next_region(n, ARDOUR::End, 0)->set_video_locked(true);
+		}
 		_session->save_state ("");
 	}
 
 	import_status.all_done = true;
-#endif
 	unlink(path.c_str());
 }
 
 void
-Editor::export_video ()
+Editor::export_video (bool range)
 {
 	if (ARDOUR::Config->get_show_video_export_info()) {
 		ExportVideoInfobox infobox (_session);
@@ -138,7 +136,7 @@ Editor::export_video ()
 				break;
 		}
 	}
-	ExportVideoDialog dialog (_session, get_selection().time);
+	ExportVideoDialog dialog (_session, get_selection().time, range);
 	Gtk::ResponseType r = (Gtk::ResponseType) dialog.run();
 	dialog.hide();
 #if 0

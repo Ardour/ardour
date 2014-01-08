@@ -74,11 +74,6 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	, _master_bus_channel_count_adj (2, 0, 100, 1, 10, 0)
 	, _existing_session_chooser_used (false)
 {
-	if (!session_name.empty() && !require_new) {
-		response (RESPONSE_OK);
-		return;
-	}
-
 	set_keep_above (true);
 	set_position (WIN_POS_CENTER);
 	get_vbox()->set_spacing (6);
@@ -143,10 +138,30 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 			recent_label.hide ();
 		}
 	}
+
+	/* possibly get out of here immediately if everything is ready to go.
+	   We still need to set up the whole dialog because of the way
+	   ARDOUR_UI::get_session_parameters() might skip it on a first
+	   pass then require it for a second pass (e.g. when there
+	   is an error with session loading and we have to ask the user
+	   what to do next).
+	 */
+
+	if (!session_name.empty() && !require_new) {
+		response (RESPONSE_OK);
+		return;
+	}
 }
 
 SessionDialog::~SessionDialog()
 {
+}
+
+void
+SessionDialog::clear_given ()
+{
+	_provided_session_path = "";
+	_provided_session_name = "";
 }
 
 bool
@@ -222,12 +237,16 @@ SessionDialog::session_folder ()
 	TreeIter iter = recent_session_display.get_selection()->get_selected();
 	
 	if (iter) {
-		return (*iter)[recent_session_columns.fullpath];
+		string s = (*iter)[recent_session_columns.fullpath];
+		if (Glib::file_test (s, Glib::FILE_TEST_IS_REGULAR)) {
+			return Glib::path_get_dirname (s);
+		}
+		return s;
 	}
 
 	if (_existing_session_chooser_used) {
 		/* existing session chosen from file chooser */
-		return existing_session_chooser.get_current_folder ();
+		return Glib::path_get_dirname (existing_session_chooser.get_current_folder ());
 	} else {
 		std::string legal_session_folder_name = legalize_for_path (new_name_entry.get_text());
 		return Glib::build_filename (new_folder_chooser.get_current_folder(), legal_session_folder_name);
@@ -252,7 +271,9 @@ SessionDialog::setup_initial_choice_box ()
 	ic_new_session_button.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::new_session_button_clicked));
 
 	Gtk::HBox* hbox = manage (new HBox);
+	Gtk::VBox* vbox = manage (new VBox);
 	hbox->set_spacing (12);
+	vbox->set_spacing (12);
 
 	string image_path;
 
@@ -262,9 +283,10 @@ SessionDialog::setup_initial_choice_box ()
 			hbox->pack_start (*image, false, false);
 		}
 	}
-
-	hbox->pack_start (ic_new_session_button, true, true);
-
+	
+	vbox->pack_start (ic_new_session_button, true, true, 20);
+	hbox->pack_start (*vbox, true, true, 20);
+	
 	centering_vbox->pack_start (*hbox, false, false);
 
 	/* Possible update message */

@@ -30,15 +30,14 @@
 #include <boost/shared_ptr.hpp>
 
 #include <jack/jack.h>
-#ifdef HAVE_JACK_SESSION
 #include <jack/session.h>
-#endif
 
 #include "ardour/audio_backend.h"
 
 namespace ARDOUR {
 
 class JackConnection;
+class JACKSession;
 
 class JACKAudioBackend : public AudioBackend {
   public:
@@ -90,12 +89,10 @@ class JACKAudioBackend : public AudioBackend {
     std::string control_app_name () const;
     void launch_control_app ();
 
-    int start ();
     int stop ();
-    int pause ();
     int freewheel (bool);
 
-    float cpu_load() const;
+    float dsp_load() const;
 
     pframes_t sample_time ();
     pframes_t sample_time_at_cycle_start ();
@@ -128,7 +125,7 @@ class JACKAudioBackend : public AudioBackend {
 
     int         set_port_name (PortHandle, const std::string&);
     std::string get_port_name (PortHandle) const;
-    PortHandle* get_port_by_name (const std::string&) const;
+    PortHandle  get_port_by_name (const std::string&) const;
 
     int get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>&) const;
 
@@ -149,6 +146,10 @@ class JACKAudioBackend : public AudioBackend {
     int   disconnect (const std::string& src, const std::string& dst);
     
     /* MIDI */
+
+    std::vector<std::string> enumerate_midi_options () const;
+    int set_midi_option (const std::string&);
+    std::string midi_option () const;
 
     int      midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index);
     int      midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size);
@@ -180,6 +181,10 @@ class JACKAudioBackend : public AudioBackend {
 
     void* get_buffer (PortHandle, pframes_t);
 
+    /* transport sync */
+
+    bool speed_and_position (double& sp, framepos_t& pos);
+
   private:
     boost::shared_ptr<JackConnection>  _jack_connection;
     bool            _running;
@@ -196,9 +201,7 @@ class JACKAudioBackend : public AudioBackend {
     static int  _jack_sync_callback (jack_transport_state_t, jack_position_t*, void *arg);
     static void _freewheel_callback (int , void *arg);
     static void _latency_callback (jack_latency_callback_mode_t, void*);
-#ifdef HAVE_JACK_SESSION
     static void _session_callback (jack_session_event_t *event, void *arg);
-#endif
     
     void jack_timebase_callback (jack_transport_state_t, pframes_t, jack_position_t*, int);
     int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
@@ -224,7 +227,7 @@ class JACKAudioBackend : public AudioBackend {
     void*  process_thread ();
     static void* _start_process_thread (void*);
 
-    void setup_jack_startup_command ();
+    void setup_jack_startup_command (bool for_latency_measurement);
 
     /* pffooo */
 
@@ -240,6 +243,7 @@ class JACKAudioBackend : public AudioBackend {
     uint32_t     _target_systemic_output_latency;
     uint32_t     _current_sample_rate;
     uint32_t     _current_buffer_size;
+    std::string  _target_midi_option;
 
     typedef std::set<std::string> DeviceList;
     typedef std::map<std::string,DeviceList> DriverDeviceMap;
@@ -261,6 +265,15 @@ class JACKAudioBackend : public AudioBackend {
 
     void when_connected_to_jack ();
     PBD::ScopedConnection jack_connection_connection;
+
+    /* Object to manage interactions with Session in a way that 
+       keeps JACK out of libardour directly
+    */
+
+    JACKSession* _session;
+
+  protected:
+    int _start (bool for_latency_measurement);
 };
 
 } // namespace

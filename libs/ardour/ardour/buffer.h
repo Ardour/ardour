@@ -61,7 +61,6 @@ public:
 	DataType type() const { return _type; }
 
 	bool silent() const { return _silent; }
-	void set_is_silent(bool yn) { _silent = yn; }
 
 	/** Reallocate the buffer used internally to handle at least @a size_t units of data.
 	 *
@@ -80,8 +79,8 @@ public:
 	virtual void merge_from (const Buffer& src, framecnt_t len, framecnt_t dst_offset = 0, framecnt_t src_offset = 0) = 0;
 
   protected:
-	Buffer(DataType type, size_t capacity)
-		: _type(type), _capacity(capacity), _size(0), _silent(true)
+	Buffer(DataType type)
+		: _type(type), _capacity(0), _size(0), _silent (true)
 	{}
 
 	DataType  _type;

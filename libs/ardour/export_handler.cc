@@ -25,6 +25,7 @@
 
 #include "pbd/convert.h"
 
+#include "ardour/audiofile_tagger.h"
 #include "ardour/export_graph_builder.h"
 #include "ardour/export_timespan.h"
 #include "ardour/export_channel_configuration.h"
@@ -35,6 +36,7 @@
 #include "pbd/openuri.h"
 #include "pbd/basename.h"
 #include "pbd/system_exec.h"
+#include "ardour/session_metadata.h"
 
 #include "i18n.h"
 
@@ -291,23 +293,27 @@ ExportHandler::finish_timespan ()
 	while (config_map.begin() != timespan_bounds.second) {
 
 		ExportFormatSpecPtr fmt = config_map.begin()->second.format;
-		std::string filepath = config_map.begin()->second.filename->get_path(fmt);
+		std::string filename = config_map.begin()->second.filename->get_path(fmt);
 
 		if (fmt->with_cue()) {
-			export_cd_marker_file (current_timespan, fmt, filepath, CDMarkerCUE);
-		} 
+			export_cd_marker_file (current_timespan, fmt, filename, CDMarkerCUE);
+		}
 
 		if (fmt->with_toc()) {
-			export_cd_marker_file (current_timespan, fmt, filepath, CDMarkerTOC);
+			export_cd_marker_file (current_timespan, fmt, filename, CDMarkerTOC);
+		}
+
+		if (fmt->tag()) {
+			AudiofileTagger::tag_file(filename, *SessionMetadata::Metadata());
 		}
 
 		if (!fmt->command().empty()) {
 
 #if 0			// would be nicer with C++11 initialiser...
 			std::map<char, std::string> subs {
-				{ 'f', filepath },
-				{ 'd', Glib::path_get_dirname(filepath) },
-				{ 'b', PBD::basename_nosuffix(filepath) },
+				{ 'f', filename },
+				{ 'd', Glib::path_get_dirname(filename) },
+				{ 'b', PBD::basename_nosuffix(filename) },
 				{ 'u', upload_username },
 				{ 'p', upload_password}
 			};
@@ -315,9 +321,9 @@ ExportHandler::finish_timespan ()
 
 			PBD::ScopedConnection command_connection;
 			std::map<char, std::string> subs;
-			subs.insert (std::pair<char, std::string> ('f', filepath));
-			subs.insert (std::pair<char, std::string> ('d', Glib::path_get_dirname(filepath)));
-			subs.insert (std::pair<char, std::string> ('b', PBD::basename_nosuffix(filepath)));
+			subs.insert (std::pair<char, std::string> ('f', filename));
+			subs.insert (std::pair<char, std::string> ('d', Glib::path_get_dirname(filename)));
+			subs.insert (std::pair<char, std::string> ('b', PBD::basename_nosuffix(filename)));
 			subs.insert (std::pair<char, std::string> ('u', upload_username));
 			subs.insert (std::pair<char, std::string> ('p', upload_password));
 
@@ -343,14 +349,14 @@ ExportHandler::finish_timespan ()
 			std::string token = soundcloud_uploader->Get_Auth_Token(upload_username, upload_password);
 			std::cerr
 				<< "uploading "
-				<< filepath << std::endl
+				<< filename << std::endl
 				<< "username = " << upload_username
 				<< ", password = " << upload_password
 				<< " - token = " << token << " ..."
 				<< std::endl;
 			std::string path = soundcloud_uploader->Upload (
-					filepath,
-					PBD::basename_nosuffix(filepath), // title
+					filename,
+					PBD::basename_nosuffix(filename), // title
 					token,
 					upload_public,
 					this);

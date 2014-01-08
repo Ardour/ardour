@@ -177,6 +177,11 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	namebx.set_size_request(18, 52);
 	namebx.pack_start(name_label, true, false, 3);
 
+	mon_in_box.pack_start(*monitor_input_button, true, false);
+	btnbox.pack_start(mon_in_box, false, false, 1);
+	mon_disk_box.pack_start(*monitor_disk_button, true, false);
+	btnbox.pack_start(mon_disk_box, false, false, 1);
+
 	recbox.pack_start(*rec_enable_button, true, false);
 	btnbox.pack_start(recbox, false, false, 1);
 	mutebox.pack_start(*mute_button, true, false);
@@ -193,9 +198,17 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	solo_button->set_corner_radius(2);
 	solo_button->set_size_request(16, 16);
 
+	monitor_input_button->set_corner_radius(2);
+	monitor_input_button->set_size_request(16, 16);
+
+	monitor_disk_button->set_corner_radius(2);
+	monitor_disk_button->set_size_request(16, 16);
+
 	mutebox.set_size_request(16, 16);
 	solobox.set_size_request(16, 16);
 	recbox.set_size_request(16, 16);
+	mon_in_box.set_size_request(16, 16);
+	mon_disk_box.set_size_request(16, 16);
 	spacer.set_size_request(-1,0);
 
 	update_button_box();
@@ -232,6 +245,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	mtr_container.show();
 	mtr_hsep.show();
 	nfo_vbox.show();
+	monitor_input_button->show();
+	monitor_disk_button->show();
 
 	_route->shared_peak_meter()->ConfigurationChanged.connect (
 			route_connections, invalidator (*this), boost::bind (&MeterStrip::meter_configuration_changed, this, _1), gui_context()
@@ -339,6 +354,8 @@ MeterStrip::set_button_names()
 		}
 	}
 
+	monitor_input_button->set_text (_("I"));
+	monitor_disk_button->set_text (_("D"));
 }
 
 void
@@ -545,6 +562,7 @@ MeterStrip::update_background(MeterType type)
 		case MeterIEC1NOR:
 		case MeterIEC2BBC:
 		case MeterIEC2EBU:
+		case MeterK12:
 		case MeterK14:
 		case MeterK20:
 			mtr_container.set_name ("meterstripPPM");
@@ -651,6 +669,14 @@ MeterStrip::update_button_box ()
 	} else {
 		recbox.hide();
 	}
+	if (_session->config.get_show_monitor_on_meterbridge()) {
+		height += 18 + 18;
+		mon_in_box.show();
+		mon_disk_box.show();
+	} else {
+		mon_in_box.hide();
+		mon_disk_box.hide();
+	}
 	btnbox.set_size_request(16, height);
 	check_resize();
 }
@@ -683,6 +709,9 @@ MeterStrip::parameter_changed (std::string const & p)
 	}
 	else if (p == "show-name-on-meterbridge") {
 		update_name_box();
+	}
+	else if (p == "show-monitor-on-meterbridge") {
+		update_button_box();
 	}
 	else if (p == "meterbridge-label-height") {
 		queue_resize();
@@ -719,6 +748,7 @@ MeterStrip::popup_level_meter_menu (GdkEventButton* ev)
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterIEC2EBU), MeterIEC2EBU);
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterK20), MeterK20);
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterK14), MeterK14);
+	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterK12), MeterK12);
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterVU),  MeterVU);
 
 	MeterType cmt = _route->meter_type();

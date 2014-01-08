@@ -97,8 +97,12 @@ fi
 
 . ../define_versions.sh
 
-echo "Version is $version / $commit"
-info_string="$version ($commit) built on `hostname` by `whoami` on `date`"
+echo "Version is $release_version"
+if [ "x$commit" != "x" ] ; then
+    info_string="$release_version ($commit) built on `hostname` by `whoami` on `date`"
+else
+    info_string="$release_version built on `hostname` by `whoami` on `date`"
+fi
 echo "Info string is $info_string"
 
 # Figure out our CPU type
@@ -134,11 +138,11 @@ fi
 # setup directory structure
 
 if [ -z "${BUILDTYPE}" ]; then
-	APPDIR=${APPNAME}_${ARCH}-${version}
-	APP_VER_NAME=${APPNAME}-${version}
+	APPDIR=${APPNAME}_${ARCH}-${release_version}
+	APP_VER_NAME=${APPNAME}-${release_version}
 else
-	APPDIR=${APPNAME}_${ARCH}-${version}-${BUILDTYPE}
-	APP_VER_NAME=${APPNAME}-${version}-${BUILDTYPE}
+	APPDIR=${APPNAME}_${ARCH}-${release_version}-${BUILDTYPE}
+	APP_VER_NAME=${APPNAME}-${release_version}-${BUILDTYPE}
 fi
 
 APPBIN=$APPDIR/bin
@@ -150,6 +154,7 @@ Shared=$APPDIR/share
 Plugins=$APPLIB/plugins
 Surfaces=$APPLIB/surfaces
 Panners=$APPLIB/panners
+Backends=$APPLIB/backends
 
 Modules=$Libraries/modules
 Loaders=$Libraries/loaders
@@ -197,6 +202,7 @@ mkdir -p $PatchFiles
 mkdir -p $MackieControl
 mkdir -p $ExportFormats
 mkdir -p $Panners
+mkdir -p $Backends
 mkdir -p $Templates
 mkdir -p $Shared/doc
 
@@ -302,7 +308,7 @@ fi
 
 cp -R $GTKSTACK_ROOT/etc/* $Etc
 echo "Copying all Pango modules ..."
-cp -R $GTKSTACK_ROOT/lib/pango/1.6.0/modules/*.so $Modules
+cp -R $GTKSTACK_ROOT/lib/pango/1.8.0/modules/*.so $Modules
 echo "Copying all GDK Pixbuf loaders ..."
 cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Loaders
 
@@ -310,9 +316,9 @@ cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Loaders
 
 cat > pangorc <<EOF 
 [Pango]
-ModulesPath=$GTKSTACK_ROOT/lib/pango/1.6.0/modules
+ModulesPath=$GTKSTACK_ROOT/lib/pango/1.8.0/modules
 EOF
-env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.6.0/?@ROOTDIR@/?" > $Etc/pango.modules.in
+env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.8.0/?@ROOTDIR@/?" > $Etc/pango.modules.in
 rm pangorc
 
 # Ditto for gdk-pixbuf loaders
@@ -381,6 +387,9 @@ done
 
 # Panners
 cp $BUILD_ROOT/libs/panners/*/lib*.so* $Panners
+
+# Backends
+cp $BUILD_ROOT/libs/backends/*/lib*.so* $Backends
 
 # VAMP plugins that we use
 cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.so* $Libraries
@@ -526,7 +535,11 @@ fi
 # share stuff
 
 cp -R ../../gtk2_ardour/splash.png $Shared
+cp -R ../../gtk2_ardour/small-splash.png $Shared
 cp -R ../../gtk2_ardour/ArdourMono.ttf $Shared
+
+# install bundled LV2s to <app>/lib/LV2/
+cp -R $BUILD_ROOT/libs/LV2 $APPLIB/
 
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type d`; do
@@ -560,7 +573,7 @@ fi
 #
 # Add the uninstaller
 #
-sed -e "s/%REPLACE_PGM%/${APPNAME}/" -e "s/%REPLACE_VENDOR%/${VENDOR}/" -e "s/%REPLACE_VERSION%/${version}/" -e "s/%REPLACE_TYPE%/${BUILDTYPE}/" < uninstall.sh.in > $APPBIN/${APP_VER_NAME}.uninstall.sh
+sed -e "s/%REPLACE_PGM%/${APPNAME}/" -e "s/%REPLACE_VENDOR%/${VENDOR}/" -e "s/%REPLACE_VERSION%/${release_version}/" -e "s/%REPLACE_TYPE%/${BUILDTYPE}/" < uninstall.sh.in > $APPBIN/${APP_VER_NAME}.uninstall.sh
 chmod a+x $APPBIN/${APP_VER_NAME}.uninstall.sh
 
 #Sanity Check file

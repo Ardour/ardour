@@ -1911,6 +1911,9 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Bounce Range to Region List"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), false, false)));
 	edit_items.push_back (MenuElem (_("Bounce Range to Region List With Processing"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), false, true)));
 	edit_items.push_back (MenuElem (_("Export Range..."), sigc::mem_fun(*this, &Editor::export_selection)));
+	if (ARDOUR_UI::instance()->video_timeline->get_duration() > 0) {
+		edit_items.push_back (MenuElem (_("Export Video Range..."), sigc::bind (sigc::mem_fun(*this, &Editor::export_video), true)));
+	}
 }
 
 
@@ -4868,8 +4871,10 @@ Editor::add_routes (RouteList& routes)
 		rtv->view()->RegionViewRemoved.connect (sigc::mem_fun (*this, &Editor::region_view_removed));
 	}
 
-	_routes->routes_added (new_views);
-	_summary->routes_added (new_views);
+	if (new_views.size() > 0) {
+		_routes->routes_added (new_views);
+		_summary->routes_added (new_views);
+	}
 
 	if (show_editor_mixer_when_tracks_arrive) {
 		show_editor_mixer (true);

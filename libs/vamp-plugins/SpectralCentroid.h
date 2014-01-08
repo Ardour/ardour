@@ -37,7 +37,7 @@
 #ifndef _SPECTRAL_CENTROID_PLUGIN_H_
 #define _SPECTRAL_CENTROID_PLUGIN_H_
 
-#include "vamp-sdk/Plugin.h"
+#include <vamp-sdk/Plugin.h>
 
 /**
  * Example plugin that calculates the centre of gravity of the

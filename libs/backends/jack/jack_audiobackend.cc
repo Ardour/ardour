@@ -37,6 +37,7 @@
 #include "jack_audiobackend.h"
 #include "jack_connection.h"
 #include "jack_utils.h"
+#include "jack_session.h"
 
 #include "i18n.h"
 
@@ -64,6 +65,7 @@ JACKAudioBackend::JACKAudioBackend (AudioEngine& e, boost::shared_ptr<JackConnec
 	, _target_systemic_output_latency (0)
 	, _current_sample_rate (0)
 	, _current_buffer_size (0)
+	, _session (0)
 {
 	_jack_connection->Connected.connect_same_thread (jack_connection_connection, boost::bind (&JACKAudioBackend::when_connected_to_jack, this));
 	_jack_connection->Disconnected.connect_same_thread (disconnect_connection, boost::bind (&JACKAudioBackend::disconnected, this, _1));
@@ -153,11 +155,11 @@ JACKAudioBackend::enumerate_devices () const
 }
 
 vector<float>
-JACKAudioBackend::available_sample_rates (const string& /*device*/) const
+JACKAudioBackend::available_sample_rates (const string& device) const
 {
 	vector<float> f;
 	
-	if (available()) {
+	if (device == _target_device && available()) {
 		f.push_back (sample_rate());
 		return f;
 	}
@@ -181,11 +183,11 @@ JACKAudioBackend::available_sample_rates (const string& /*device*/) const
 }
 
 vector<uint32_t>
-JACKAudioBackend::available_buffer_sizes (const string& /*device*/) const
+JACKAudioBackend::available_buffer_sizes (const string& device) const
 {
 	vector<uint32_t> s;
-	
-	if (available()) {
+		
+	if (device == _target_device && available()) {
 		s.push_back (buffer_size());
 		return s;
 	}
@@ -407,6 +409,12 @@ JACKAudioBackend::interleaved () const
 	return false;
 }
 
+string
+JACKAudioBackend::midi_option () const
+{
+	return _target_midi_option;
+}
+
 uint32_t
 JACKAudioBackend::input_channels () const
 {
@@ -463,7 +471,7 @@ JACKAudioBackend::raw_buffer_size(DataType t)
 }
 
 void
-JACKAudioBackend::setup_jack_startup_command ()
+JACKAudioBackend::setup_jack_startup_command (bool for_latency_measurement)
 {
 	/* first we map the parameters that have been set onto a
 	 * JackCommandLineOptions object.
@@ -488,6 +496,8 @@ JACKAudioBackend::setup_jack_startup_command ()
 	options.realtime = true;
 	options.ports_max = 2048;
 	
+	ARDOUR::set_midi_option (options, _target_midi_option);
+
 	/* this must always be true for any server instance we start ourselves
 	 */
 
@@ -495,10 +505,11 @@ JACKAudioBackend::setup_jack_startup_command ()
 
 	string cmdline;
 
-	if (!get_jack_command_line_string (options, cmdline)) {
+	if (!get_jack_command_line_string (options, cmdline, for_latency_measurement)) {
 		/* error, somehow - we will still try to start JACK
 		 * automatically but it will be without our preferred options
 		 */
+		std::cerr << "get_jack_command_line_string () failed: using default settings." << std::endl;
 		return;
 	}
 
@@ -510,7 +521,7 @@ JACKAudioBackend::setup_jack_startup_command ()
 /* ---- BASIC STATE CONTROL API: start/stop/pause/freewheel --- */
 
 int
-JACKAudioBackend::start ()
+JACKAudioBackend::_start (bool for_latency_measurement)
 {
 	if (!available()) {
 
@@ -518,7 +529,7 @@ JACKAudioBackend::start ()
 			/* we will be starting JACK, so set up the 
 			   command that JACK will use when it (auto-)starts
 			*/
-			setup_jack_startup_command ();
+			setup_jack_startup_command (for_latency_measurement);
 		}
 
 		if (_jack_connection->open ()) {
@@ -536,8 +547,11 @@ JACKAudioBackend::start ()
 	/* Now that we have buffer size and sample rate established, the engine 
 	   can go ahead and do its stuff
 	*/
-	
-	engine.reestablish_ports ();
+
+	if (engine.reestablish_ports ()) {
+		error << _("Could not re-establish ports after connecting to JACK") << endmsg;
+		return -1;
+	}
 
 	if (!jack_port_type_get_buffer_size) {
 		warning << _("This version of JACK is old - you should upgrade to a newer version that supports jack_port_type_get_buffer_size()") << endmsg;
@@ -572,18 +586,6 @@ JACKAudioBackend::stop ()
 }
 
 int
-JACKAudioBackend::pause ()
-{
-	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
-
-	if (_priv_jack) {
-		jack_deactivate (_priv_jack);
-	}
-
-	return 0;
-}
-
-int
 JACKAudioBackend::freewheel (bool onoff)
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
@@ -595,7 +597,7 @@ JACKAudioBackend::freewheel (bool onoff)
 	}
 
 	if (jack_set_freewheel (_priv_jack, onoff) == 0) {
-		_freewheeling = true;
+		_freewheeling = onoff;
 		return 0;
 	}
 
@@ -748,7 +750,8 @@ JACKAudioBackend::jack_timebase_callback (jack_transport_state_t state, pframes_
 	ARDOUR::Session* session = engine.session();
 
 	if (session) {
-		session->jack_timebase_callback (state, nframes, pos, new_position);
+		JACKSession jsession (session);
+		jsession.timebase_callback (state, nframes, pos, new_position);
 	}
 }
 
@@ -762,6 +765,7 @@ int
 JACKAudioBackend::jack_sync_callback (jack_transport_state_t state, jack_position_t* pos)
 {
 	TransportState tstate;
+	bool tstate_valid = true;
 
 	switch (state) {
 	case JackTransportStopped:
@@ -776,9 +780,15 @@ JACKAudioBackend::jack_sync_callback (jack_transport_state_t state, jack_positio
 	case JackTransportStarting:
 		tstate = TransportStarting;
 		break;
+	default:
+		// ignore "unofficial" states like JackTransportNetStarting (jackd2)
+		tstate_valid = false;
+		break;
 	}
 
-	return engine.sync_callback (tstate, pos->frame);
+	if (tstate_valid) {
+		return engine.sync_callback (tstate, pos->frame);
+	}
 
 	return true;
 }
@@ -793,7 +803,6 @@ JACKAudioBackend::_xrun_callback (void *arg)
 	return 0;
 }
 
-#ifdef HAVE_JACK_SESSION
 void
 JACKAudioBackend::_session_callback (jack_session_event_t *event, void *arg)
 {
@@ -801,10 +810,10 @@ JACKAudioBackend::_session_callback (jack_session_event_t *event, void *arg)
 	ARDOUR::Session* session = jab->engine.session();
 
 	if (session) {
-		session->jack_session_event (event);
+		JACKSession jsession (session);
+		jsession.session_event (event);
 	}
 }
-#endif
 
 void
 JACKAudioBackend::_freewheel_callback (int onoff, void *arg)
@@ -1013,7 +1022,7 @@ JACKAudioBackend::disconnected (const char* why)
 }
 
 float 
-JACKAudioBackend::cpu_load() const 
+JACKAudioBackend::dsp_load() const 
 {
 	GET_PRIVATE_JACK_POINTER_RET(_priv_jack,0);
 	return jack_cpu_load (_priv_jack);
@@ -1085,6 +1094,8 @@ JACKAudioBackend::control_app_name () const
 				appname = "hdspconf";
 			} else if (_target_device == "M Audio Delta 1010") {
 				appname = "mudita24";
+			} else if (_target_device == "M2496") {
+				appname = "mudita24";
 			}
 		}
 	} else {
@@ -1107,4 +1118,60 @@ JACKAudioBackend::launch_control_app ()
 	std::list<string> args;
 	args.push_back (appname);
 	Glib::spawn_async ("", args, Glib::SPAWN_SEARCH_PATH);
+}
+
+vector<string>
+JACKAudioBackend::enumerate_midi_options () const
+{
+	return ARDOUR::enumerate_midi_options ();
+}
+
+int
+JACKAudioBackend::set_midi_option (const string& opt)
+{
+	_target_midi_option = opt;
+	return 0;
+}
+
+bool
+JACKAudioBackend::speed_and_position (double& speed, framepos_t& position)
+{
+	jack_position_t pos;
+	jack_transport_state_t state;
+	bool starting;
+
+	/* this won't be called if the port engine in use is not JACK, so we do 
+	   not have to worry about the type of PortEngine::private_handle()
+	*/
+
+	speed = 0;
+	position = 0;
+
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, true);
+
+	state = jack_transport_query (_priv_jack, &pos);
+
+	switch (state) {
+	case JackTransportStopped:
+		speed = 0;
+		starting = false;
+		break;
+	case JackTransportRolling:
+		speed = 1.0;
+		starting = false;
+		break;
+	case JackTransportLooping:
+		speed = 1.0;
+		starting = false;
+		break;
+	case JackTransportStarting:
+		starting = true;
+		// don't adjust speed here, just leave it as it was
+		break;
+	default:
+		std::cerr << "WARNING: Unknown JACK transport state: " << state << std::endl;
+	}
+
+	position = pos.frame;
+	return starting;
 }

@@ -42,7 +42,7 @@ ReturnUI::ReturnUI (Gtk::Window* parent, boost::shared_ptr<Return> r, Session* s
  	_gpm.set_controls (boost::shared_ptr<Route>(), r->meter(), r->amp());
 
 	_hbox.pack_start (_gpm, true, true);
-	set_name ("ReturnUIFrame");
+	set_name (X_("ReturnUIFrame"));
 
 	_vbox.set_spacing (5);
 	_vbox.set_border_width (5);
@@ -61,7 +61,7 @@ ReturnUI::ReturnUI (Gtk::Window* parent, boost::shared_ptr<Return> r, Session* s
 	_return->input()->changed.connect (input_change_connection, invalidator (*this), boost::bind (&ReturnUI::ins_changed, this, _1, _2), gui_context());
 
 	_gpm.setup_meters ();
-	_gpm.set_fader_name ("ReturnUIFrame");
+	_gpm.set_fader_name (X_("ReturnUIFader"));
 
 	// screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (sigc::mem_fun (*this, &ReturnUI::update));
 	fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (sigc::mem_fun (*this, &ReturnUI::fast_update));

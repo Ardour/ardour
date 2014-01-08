@@ -164,12 +164,12 @@ Session::timecode_duration (framecnt_t when, Timecode::Time& timecode) const
 }
 
 void
-Session::timecode_duration_string (char* buf, framepos_t when) const
+Session::timecode_duration_string (char* buf, size_t len, framepos_t when) const
 {
 	Timecode::Time timecode;
 
 	timecode_duration (when, timecode);
-	snprintf (buf, sizeof (buf), "%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32, timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+	snprintf (buf, len, "%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32, timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 }
 
 void

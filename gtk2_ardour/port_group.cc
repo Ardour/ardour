@@ -315,7 +315,7 @@ struct RouteIOs {
 class RouteIOsComparator {
 public:
 	bool operator() (RouteIOs const & a, RouteIOs const & b) {
-		return a.route->order_key (EditorSort) < b.route->order_key (EditorSort);
+		return a.route->order_key () < b.route->order_key ();
 	}
 };
 
@@ -438,7 +438,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		ardour->add_bundle (ltc);
 	}
 
-	/* Ardour's surfaces */
+	/* Ardour's control surfaces */
 
 	ControlProtocolManager& m = ControlProtocolManager::instance ();
 	for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {

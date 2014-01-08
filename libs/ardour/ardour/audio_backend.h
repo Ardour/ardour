@@ -117,6 +117,17 @@ class AudioBackend : public PortEngine {
      * at any time.
      */
     virtual std::vector<float> available_sample_rates (const std::string& device) const = 0;
+
+    /* Returns the default sample rate that will be shown to the user when
+     * configuration options are first presented. If the derived class
+     * needs or wants to override this, it can. It also MUST override this
+     * if there is any chance that an SR of 44.1kHz is not in the list
+     * returned by available_sample_rates()
+     */
+    virtual float default_sample_rate () const {
+	    return 44100.0;
+    }
+
     /** Returns a collection of uint32 identifying buffer sizes that are
      * potentially usable with the hardware identified by @param device.
      * Any of these values may be supplied in other calls to this backend
@@ -125,6 +136,16 @@ class AudioBackend : public PortEngine {
      * at any time.
      */
     virtual std::vector<uint32_t> available_buffer_sizes (const std::string& device) const = 0;
+
+    /* Returns the default buffer size that will be shown to the user when
+     * configuration options are first presented. If the derived class
+     * needs or wants to override this, it can. It also MUST override this
+     * if there is any chance that a buffer size of 1024 is not in the list
+     * returned by available_buffer_sizes()
+     */
+    virtual uint32_t default_buffer_size () const {
+	    return 1024;
+    }
 
     /** Returns the maximum number of input channels that are potentially
      * usable with the hardware identified by @param device.  Any number from 1
@@ -239,8 +260,29 @@ class AudioBackend : public PortEngine {
      * app is undefined or cannot be launched.
      */
     virtual void launch_control_app () = 0;
-    /* Basic state control */
 
+    /* @return a vector of strings that describe the available
+     * MIDI options. 
+     *
+     * These can be presented to the user to decide which
+     * MIDI drivers, options etc. can be used. The returned strings
+     * should be thought of as the key to a map of possible
+     * approaches to handling MIDI within the backend. Ensure that
+     * the strings will make sense to the user.
+     */
+    virtual std::vector<std::string> enumerate_midi_options () const = 0;
+
+    /* Request the use of the MIDI option named @param option, which
+     * should be one of the strings returned by enumerate_midi_options()
+     *
+     * @return zero if successful, non-zero otherwise
+     */
+    virtual int set_midi_option (const std::string& option) = 0;
+
+    virtual std::string midi_option () const = 0;
+    
+    /* State Control */
+ 
     /** Start using the device named in the most recent call
      * to set_device(), with the parameters set by various
      * the most recent calls to set_sample_rate() etc. etc.
@@ -250,9 +292,30 @@ class AudioBackend : public PortEngine {
      * the AudioEngine referenced by @param engine. These calls will
      * occur in a thread created by and/or under the control of the backend.
      *
+     * @param for_latency_measurement if true, the device is being started
+     *        to carry out latency measurements and the backend should this
+     *        take care to return latency numbers that do not reflect
+     *        any existing systemic latency settings.
+     *
      * Return zero if successful, negative values otherwise.
-     */
-    virtual int start () = 0;
+     *
+     *
+     *
+     *
+     * Why is this non-virtual but ::_start() is virtual ?
+     * Virtual methods with default parameters create possible ambiguity
+     * because a derived class may implement the same method with a different
+     * type or value of default parameter.
+     *
+     * So we make this non-virtual method to avoid possible overrides of
+     * default parameters. See Scott Meyers or other books on C++ to understand
+     * this pattern, or possibly just this:
+     *
+     * http://stackoverflow.com/questions/12139786/good-pratice-default-arguments-for-pure-virtual-method
+     */ 
+    int start (bool for_latency_measurement=false) {
+	    return _start (for_latency_measurement);
+    }
 
     /** Stop using the device currently in use. 
      *
@@ -269,20 +332,6 @@ class AudioBackend : public PortEngine {
      * Return zero if successful, 1 if the device is not in use, negative values on error
      */
     virtual int stop () = 0;
-
-    /** Temporarily cease using the device named in the most recent call to set_parameters().
-     *
-     * If the function is successfully called, no subsequent calls to the
-     * process_callback() of @param engine will be made after the function
-     * returns, until start() is called again.
-     * 
-     * The backend will retain its existing parameter configuration after a successful
-     * return, and does NOT require any calls to set hardware parameters before it can be
-     * start()-ed again. 
-     *
-     * Return zero if successful, 1 if the device is not in use, negative values on error
-     */
-    virtual int pause () = 0;
 
     /** While remaining connected to the device, and without changing its
      * configuration, start (or stop) calling the process_callback() of @param engine
@@ -312,7 +361,7 @@ class AudioBackend : public PortEngine {
      * Implementations can feel free to smooth the values returned over
      * time (e.g. high pass filtering, or its equivalent).
      */
-    virtual float cpu_load() const  = 0;
+    virtual float dsp_load() const  = 0;
 
     /* Transport Control (JACK is the only audio API that currently offers
        the concept of shared transport control)
@@ -421,8 +470,25 @@ class AudioBackend : public PortEngine {
 
     virtual void update_latencies () = 0;
 
+    /** Set @param speed and @param position to the current speed and position
+     * indicated by some transport sync signal.  Return whether the current
+     * transport state is pending, or finalized.
+     *
+     * Derived classes only need implement this if they provide some way to
+     * sync to a transport sync signal (e.g. Sony 9 Pin) that is not
+     * handled by Ardour itself (LTC and MTC are both handled by Ardour).
+     * The canonical example is JACK Transport.
+     */
+     virtual bool speed_and_position (double& speed, framepos_t& position) {
+	     speed = 0.0;
+	     position = 0;
+	     return false;
+     }
+
   protected:
     AudioEngine&          engine;
+
+    virtual int _start (bool for_latency_measurement) = 0;
 };
 
 struct AudioBackendInfo {

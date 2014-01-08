@@ -51,11 +51,12 @@ using namespace ARDOUR;
 SurfacePort::SurfacePort (Surface& s)
 	: _surface (&s)
 {
-
 	if (_surface->mcp().device_info().uses_ipmidi()) {
 		_input_port = new MIDI::IPMIDIPort (_surface->mcp().ipmidi_base() +_surface->number());
 		_output_port = _input_port;
+
 	} else {
+		
 		_async_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, string_compose (_("%1 in"),  _surface->name()), true);
 		_async_out = AudioEngine::instance()->register_output_port (DataType::MIDI, string_compose (_("%1 out"),  _surface->name()), true);
 
@@ -70,21 +71,71 @@ SurfacePort::SurfacePort (Surface& s)
 
 SurfacePort::~SurfacePort()
 {
-	if (_surface->mcp().device_info().uses_ipmidi()) {
+	if (dynamic_cast<MIDI::IPMIDIPort*>(_input_port)) {
 		delete _input_port;
 	} else {
 
 		if (_async_in) {
 			AudioEngine::instance()->unregister_port (_async_in);
-			_async_in.reset ();
+			_async_in.reset ((ARDOUR::Port*) 0);
 		}
 		
 		if (_async_out) {
 			_output_port->drain (10000);
 			AudioEngine::instance()->unregister_port (_async_out);
-			_async_out.reset ();
+			_async_out.reset ((ARDOUR::Port*) 0);
 		}
 	}
+}
+
+XMLNode&
+SurfacePort::get_state ()
+{
+	XMLNode* node = new XMLNode (X_("Port"));
+
+	if (dynamic_cast<MIDI::IPMIDIPort*>(_input_port)) {
+		/* no state required for IPMidi ports */
+		return *node;
+	}
+
+	XMLNode* child;
+
+	child = new XMLNode (X_("Input"));
+	child->add_child_nocopy (_async_in->get_state());
+	node->add_child_nocopy (*child);
+	
+
+	child = new XMLNode (X_("Output"));
+	child->add_child_nocopy (_async_out->get_state());
+	node->add_child_nocopy (*child);
+
+	return *node;
+}
+
+int
+SurfacePort::set_state (const XMLNode& node, int version)
+{
+	if (dynamic_cast<MIDI::IPMIDIPort*>(_input_port)) {
+		return 0;
+	}
+
+	XMLNode* child;
+
+	if ((child = node.child (X_("Input"))) != 0) {
+		XMLNode* portnode = child->child (Port::state_node_name.c_str());
+		if (portnode) {
+			_async_in->set_state (*portnode, version);
+		}
+	}
+
+	if ((child = node.child (X_("Output"))) != 0) {
+		XMLNode* portnode = child->child (Port::state_node_name.c_str());
+		if (portnode) {
+			_async_out->set_state (*portnode, version);
+		}
+	}
+
+	return 0;
 }
 
 // wrapper for one day when strerror_r is working properly

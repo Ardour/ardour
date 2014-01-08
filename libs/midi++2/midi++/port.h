@@ -22,7 +22,9 @@
 #include <string>
 #include <iostream>
 
-#include <jack/types.h>
+#include <jack/types.h> /* XXX ... desirable to get rid of this but needed for
+			 * now due to use of JackPortIsXXXX
+			 */
 
 #include "pbd/xml++.h"
 #include "pbd/crossthread.h"

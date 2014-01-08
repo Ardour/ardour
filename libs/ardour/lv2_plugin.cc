@@ -143,6 +143,8 @@ public:
 	LilvNode* ui_GtkUI;
 	LilvNode* ui_external;
 	LilvNode* ui_externalkx;
+	LilvNode* units_unit;
+	LilvNode* units_midiNote;
 
 private:
 	bool _bundle_checked;
@@ -1091,7 +1093,12 @@ LV2Plugin::do_save_preset(string name)
 
 	lilv_state_free(state);
 
-	return Glib::filename_to_uri(Glib::build_filename(bundle, file_name));
+	std::string uri = Glib::filename_to_uri(Glib::build_filename(bundle, file_name));
+	LilvNode *node = lilv_new_uri(_world.world, uri.c_str());
+	lilv_world_load_bundle(_world.world, node);
+	lilv_world_load_resource(_world.world, node);
+	lilv_node_free(node);
+	return uri;
 }
 
 void
@@ -1160,10 +1167,14 @@ LV2Plugin::write_from_ui(uint32_t       index,
 		 *  e.g 48kSPS / 128fpp -> audio-periods = 375 Hz
 		 *  ui-periods = 25 Hz (SuperRapidScreenUpdate)
 		 *  default minimumSize = 32K (see LV2Plugin::allocate_atom_event_buffers()
-		 *  -> 15 * 32K
-		 * it is safe to overflow (but the plugin state may be inconsistent).
+		 *
+		 * it is NOT safe to overflow (msg.size will be misinterpreted)
 		 */
-		rbs = max((size_t) 32768 * 6, rbs);
+		uint32_t bufsiz = 32768;
+		if (_atom_ev_buffers && _atom_ev_buffers[0]) {
+			bufsiz =  lv2_evbuf_get_capacity(_atom_ev_buffers[0]);
+		}
+		rbs = max((size_t) bufsiz * 8, rbs);
 		_from_ui = new RingBuffer<uint8_t>(rbs);
 	}
 
@@ -1192,8 +1203,12 @@ LV2Plugin::enable_ui_emmission()
 {
 	if (!_to_ui) {
 		/* see note in LV2Plugin::write_from_ui() */
+		uint32_t bufsiz = 32768;
+		if (_atom_ev_buffers && _atom_ev_buffers[0]) {
+			bufsiz =  lv2_evbuf_get_capacity(_atom_ev_buffers[0]);
+		}
 		size_t rbs = _session.engine().raw_buffer_size(DataType::MIDI) * NBUFS;
-		rbs = max((size_t) 32768 * 8, rbs);
+		rbs = max((size_t) bufsiz * 8, rbs);
 		_to_ui = new RingBuffer<uint8_t>(rbs);
 	}
 }
@@ -1328,8 +1343,10 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 {
 	const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, which);
 
+	LilvNodes* portunits;
 	LilvNode *def, *min, *max;
 	lilv_port_get_range(_impl->plugin, port, &def, &min, &max);
+	portunits = lilv_port_get_value(_impl->plugin, port, _world.units_unit);
 
 	desc.integer_step = lilv_port_has_property(_impl->plugin, port, _world.lv2_integer);
 	desc.toggled      = lilv_port_has_property(_impl->plugin, port, _world.lv2_toggled);
@@ -1338,6 +1355,8 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	desc.label        = lilv_node_as_string(lilv_port_get_name(_impl->plugin, port));
 	desc.lower        = min ? lilv_node_as_float(min) : 0.0f;
 	desc.upper        = max ? lilv_node_as_float(max) : 1.0f;
+	desc.midinote     = lilv_nodes_contains(portunits, _world.units_midiNote);
+
 	if (desc.sr_dependent) {
 		desc.lower *= _session.frame_rate ();
 		desc.upper *= _session.frame_rate ();
@@ -1362,6 +1381,7 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	lilv_node_free(def);
 	lilv_node_free(min);
 	lilv_node_free(max);
+	lilv_nodes_free(portunits);
 
 	return 0;
 }
@@ -1501,7 +1521,7 @@ LV2Plugin::allocate_atom_event_buffers()
 		return;
 	}
 
-	DEBUG_TRACE(DEBUG::LV2, string_compose("allocate %1 atom_ev_buffers\n", total_atom_buffers));
+	DEBUG_TRACE(DEBUG::LV2, string_compose("allocate %1 atom_ev_buffers of %d bytes\n", total_atom_buffers, minimumSize));
 	_atom_ev_buffers = (LV2_Evbuf**) malloc((total_atom_buffers + 1) * sizeof(LV2_Evbuf*));
 	for (int i = 0; i < total_atom_buffers; ++i ) {
 		_atom_ev_buffers[i] = lv2_evbuf_new(minimumSize, LV2_EVBUF_ATOM,
@@ -1674,6 +1694,9 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				}
 			} else if (!valid) {
 				// Nothing we understand or care about, connect to scratch
+				// see note for midi-buffer size above
+				scratch_bufs.ensure_lv2_bufsize((flags & PORT_INPUT),
+						0, _port_minimumSize[port_index]);
 				_ev_buffers[port_index] = scratch_bufs.get_lv2_midi(
 					(flags & PORT_INPUT), 0, (flags & PORT_EVENT));
 			}
@@ -1965,10 +1988,14 @@ LV2World::LV2World()
 	ui_GtkUI           = lilv_new_uri(world, LV2_UI__GtkUI);
 	ui_external        = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
 	ui_externalkx      = lilv_new_uri(world, "http://kxstudio.sf.net/ns/lv2ext/external-ui#Widget");
+	units_unit         = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/units#unit");
+	units_midiNote     = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/units#midiNote");
 }
 
 LV2World::~LV2World()
 {
+	lilv_node_free(units_midiNote);
+	lilv_node_free(units_unit);
 	lilv_node_free(ui_externalkx);
 	lilv_node_free(ui_external);
 	lilv_node_free(ui_GtkUI);

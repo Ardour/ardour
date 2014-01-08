@@ -13,7 +13,7 @@ fi
 
 SAE=
 MIXBUS=
-WITH_HARVID=
+WITH_HARVID=1
 WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
@@ -61,7 +61,7 @@ while [ $# -gt 0 ] ; do
 	# specific build flags
 	#
 
-	--harvid) WITH_HARVID=1 ; shift ;;
+	--noharvid) WITH_HARVID= ; shift ;;
 	--noladspa) WITH_LADSPA= ; shift ;;
 	--nostrip) STRIP= ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
@@ -75,8 +75,12 @@ if test -z "$PRODUCT_PKG_DIR" -o -z "$APPNAME"; then
 fi
 
 . ../define_versions.sh
-echo "Version is $release_version / $revision"
-info_string="$version built on `hostname` by `whoami` on `date`"
+echo "Version is $release_version"
+if [ "x$commit" != "x" ] ; then
+    info_string="$release_version ($commit) built on `hostname` by `whoami` on `date`"
+else
+    info_string="$release_version built on `hostname` by `whoami` on `date`"
+fi
 echo "Info string is $info_string"
 
 # setup directory structure
@@ -99,6 +103,7 @@ Locale=$Resources/locale
 Plugins=$APPROOT/Plugins
 Surfaces=$Frameworks/surfaces
 Panners=$Frameworks/panners
+Backends=$Frameworks/backends
 MidiMaps=$Shared/midi_maps
 ExportFormats=$Shared/export
 Templates=$Shared/templates
@@ -132,6 +137,7 @@ mkdir -p $APPROOT/Resources
 mkdir -p $Plugins
 mkdir -p $Surfaces
 mkdir -p $Panners
+mkdir -p $Backends
 mkdir -p $MidiMaps
 mkdir -p $ExportFormats
 mkdir -p $Templates
@@ -175,12 +181,12 @@ env="<key>LSEnvironment</key><dict>$env<key>ARDOUR_BUNDLED</key><string>true</st
 
 # edit plist
 sed -e "s?@ENV@?$env?g" \
-    -e "s?@VERSION@?$release_version/$revision?g" \
+    -e "s?@VERSION@?$release_version?g" \
     -e "s?@INFOSTRING@?$info_string?g" < Info.plist.in > Info.plist
 # and plist strings
 sed -e "s?@APPNAME@?$appname?" \
     -e "s?@ENV@?$env?g" \
-    -e "s?@VERSION@?$release_version/$revision?g" \
+    -e "s?@VERSION@?$release_version?g" \
     -e "s?@INFOSTRING@?$info_string?g" < InfoPlist.strings.in > Resources/InfoPlist.strings || exit 1
 
 # copy static files
@@ -217,21 +223,42 @@ fi
 # copy locale files
 if test x$WITH_NLS != x ; then
     echo "NLS support ..."
-    echo "I hope you remembered to run scons msgupdate!"
+    echo "I hope you remembered to run waf i18n"
     LINGUAS=
-    for file in $BUILD_ROOT/gtk2_ardour/*.mo 
-    do
-	lang=`basename $file | sed 's/\.mo//'`
-	mkdir -p $Locale/$lang/LC_MESSAGES
-	cp $file $Locale/$lang/LC_MESSAGES/gtk2_ardour.mo
-	LINGUAS="$LINGUAS $lang"
+
+    for pkg in gtk2_ardour libs/ardour libs/gtkmm2ext ; do 
+	files=`find ../../$pkg -name "*.mo"`
+	
+            #
+            # the package name is appended with a number so that
+            # it can be parallel installed during a regular install
+            # with older (and newer) versions. it is just the major
+            # number of the release (i.e. leading digits)
+            #
+	
+        vsuffix=`echo $release_version | sed 's/^\([0-9][0-9]*\).*/\1/'`
+	
+	if [ -z "$files" ]; then
+	    echo ""
+	    echo "!!!! WARNING !!!! - Did not find any .mo files in ../../$pkg"
+	    echo ""
+	fi
+	
+	for file in $files 
+	do
+	    echo $file
+	    lang=`basename $file | sed 's/\.mo//'`
+	    mkdir -p $Locale/$lang/LC_MESSAGES
+	    cp $file $Locale/$lang/LC_MESSAGES/`basename $pkg`$vsuffix.mo
+	    echo copy $file to $Locale/$lang/LC_MESSAGES/`basename $pkg`$vsuffix.mo
+            if echo $LINGUAS | grep $lang >/dev/null 2>&1 ; then
+                :
+            else 
+		LINGUAS="$LINGUAS $lang"
+            fi
+	done
     done
-    for file in $BUILD_ROOT/libs/ardour/*.mo 
-    do
-	lang=`basename $file | sed 's/\.mo//'`
-	mkdir -p $Locale/$lang/LC_MESSAGES
-	cp $file $Locale/$lang/LC_MESSAGES/libardour.mo
-    done
+
     for l in $LINGUAS
     do
       if [ -d $GTKSTACK_ROOT/share/locale/$l ] ; then
@@ -256,7 +283,7 @@ fi
 
 cp -R $GTKSTACK_ROOT/etc/* $Etc
 echo "Copying all Pango modules ..."
-cp -R $GTKSTACK_ROOT/lib/pango/1.6.0/modules/*.so $Frameworks/modules
+cp -R $GTKSTACK_ROOT/lib/pango/1.8.0/modules/*.so $Frameworks/modules
 echo "Copying all GDK Pixbuf loaders ..."
 cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Frameworks/modules
 # charset alias file
@@ -265,9 +292,9 @@ cp -R $GTKSTACK_ROOT/lib/charset.alias $Resources
 # generate new Pango module file
 cat > pangorc <<EOF 
 [Pango]
-ModulesPath=$GTKSTACK_ROOT/lib/pango/1.6.0/modules
+ModulesPath=$GTKSTACK_ROOT/lib/pango/1.8.0/modules
 EOF
-env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.6.0/modules/?@executable_path/../lib/modules/?" > $Resources/pango.modules
+env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.8.0/modules/?@executable_path/../lib/modules/?" > $Resources/pango.modules
 rm pangorc
 
 # generate a new GDK pixbufs loaders file
@@ -308,6 +335,8 @@ cp $BUILD_ROOT/libs/surfaces/control_protocol/libardourcp*.dylib $Frameworks
 # Panners
 cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
 
+# Backends
+cp $BUILD_ROOT/libs/backends/*/lib*.dylib $Backends
 
 # Export Formats/Presets
 for f in $BUILD_ROOT/../export/*.preset $BUILD_ROOT/../export/*.format ; do 
@@ -347,7 +376,7 @@ cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Frameworks
 
 while [ true ] ; do 
     missing=false
-    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Panners/*.dylib $Surfaces/*.dylib $Plugins/*.so ; do 
+    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Panners/*.dylib $Backends/*.dylib $Surfaces/*.dylib $Plugins/*.so ; do 
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
@@ -405,12 +434,16 @@ cp -r ../../gtk2_ardour/pixmaps $Resources
 
 # shared stuff
 cp -R ../../gtk2_ardour/splash.png $Shared
+cp -R ../../gtk2_ardour/small-splash.png $Shared
 cp -R ../../gtk2_ardour/ArdourMono.ttf $Shared
 
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type dir`; do
     rm -rf $svndir
 done
+
+# install bundled LV2s to <app>/Contents/lib/LV2/
+cp -R $BUILD_ROOT/libs/LV2 $Frameworks/
 
 # now fix up the executables
 echo "Fixing up executable dependency names ..."
@@ -433,7 +466,7 @@ done
 
 echo "Fixing up library names ..."
 # now do the same for all the libraries we include
-for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners ; do
+for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners $Backends ; do
 
     libbase=`basename $libdir`
     
@@ -540,10 +573,10 @@ fi
 
 echo "Building DMG ..."
 
-# UC_DMG=$APPNAME-${release_version}-${revision}-UC.dmg
-# FINAL_DMG=$APPNAME-${release_version}-${revision}.dmg
-UC_DMG=$APPNAME-$version.dmg
-VOLNAME=$APPNAME-$version
+# UC_DMG=$APPNAME-${release_version}-UC.dmg
+# FINAL_DMG=$APPNAME-${release_version}.dmg
+UC_DMG=$APPNAME-$release_version.dmg
+VOLNAME=$APPNAME-$release_version
 
 # TODO use mktemp
 export TMPDIR=`pwd`

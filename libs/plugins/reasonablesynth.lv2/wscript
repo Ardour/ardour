@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+import os
+import re
+import shutil
+import waflib.extras.autowaf as autowaf
+from waflib import Options
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    conf.load('compiler_c')
+    autowaf.configure(conf)
+    if Options.options.lv2:
+        autowaf.check_pkg(conf, 'lv2', atleast_version='1.0.0',
+                uselib_store='LV2_1_0_0')
+
+def build(bld):
+    bundle = 'reasonablesynth.lv2'
+    module_pat = re.sub('^lib', '', bld.env.cshlib_PATTERN)
+    module_ext = module_pat[module_pat.rfind('.'):]
+
+    if bld.is_defined ('HAVE_LV2'):
+        # Build RDF files
+        for i in ['manifest.ttl', 'reasonablesynth.ttl']:
+            bld(features     = 'subst',
+                source       = i + '.in',
+                target       = '../../LV2/%s/%s' % (bundle, i),
+                install_path = '${LV2DIR}/%s' % bundle,
+                LIB_EXT      = module_ext)
+
+        # Build plugin library
+        obj = bld(features     = 'c cshlib',
+                  source       = 'lv2.c',
+                  dep_files    = 'rsynth.c',
+                  name         = 'reasonablesynth',
+                  target       = '../../LV2/%s/reasonablesynth' % bundle,
+                  install_path = '${LV2DIR}/%s' % bundle,
+                  use          = 'LV2_1_0_0'
+                  )
+        obj.env.cshlib_PATTERN = module_pat
+
+# vi:set ts=4 sw=4 et:

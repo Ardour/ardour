@@ -120,7 +120,7 @@ class MackieControlProtocol
 	Mackie::DeviceProfile& device_profile() { return _device_profile; }
 
 	int set_active (bool yn);
-	int  set_device (const std::string&, bool allow_activation = true);
+	int  set_device (const std::string&);
         void set_profile (const std::string&);
 
 	FlipMode flip_mode () const { return _flip_mode; }
@@ -262,7 +262,6 @@ class MackieControlProtocol
 	uint32_t                 _current_initial_bank;
 	PBD::ScopedConnectionList audio_engine_connections;
 	PBD::ScopedConnectionList session_connections;
-	PBD::ScopedConnectionList port_connections;
 	PBD::ScopedConnectionList route_connections;
 	PBD::ScopedConnectionList gui_connections;
 	// timer for two quick marker left presses
@@ -288,8 +287,9 @@ class MackieControlProtocol
 	bool                      needs_ipmidi_restart;
 	bool                     _metering_active;
 	bool                     _initialized;
-
 	ARDOUR::RouteNotificationList _last_selected_routes;
+        XMLNode*                 _surfaces_state;
+        int                      _surfaces_version;
 
 	int create_surfaces ();
 	bool periodic();
@@ -303,7 +303,8 @@ class MackieControlProtocol
 	void _gui_track_selection_changed (ARDOUR::RouteNotificationList*, bool save_list);
 	int ipmidi_restart ();
         void initialize ();
-	
+        int set_device_info (const std::string& device_name);
+
 	/* BUTTON HANDLING */
 
 	typedef std::set<uint32_t> DownButtonList;

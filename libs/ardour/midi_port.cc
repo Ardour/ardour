@@ -158,13 +158,13 @@ MidiPort::resolve_notes (void* port_buffer, MidiBuffer::TimeType when)
 		 */
 
 		if (port_engine.midi_event_put (port_buffer, when, ev, 3) != 0) {
-			cerr << "failed to deliver sustain-zero on channel " << channel << " on port " << name() << endl;
+			cerr << "failed to deliver sustain-zero on channel " << (int)channel << " on port " << name() << endl;
 		}
 
 		ev[1] = MIDI_CTL_ALL_NOTES_OFF;
 
 		if (port_engine.midi_event_put (port_buffer, 0, ev, 3) != 0) {
-			cerr << "failed to deliver ALL NOTES OFF on channel " << channel << " on port " << name() << endl;
+			cerr << "failed to deliver ALL NOTES OFF on channel " << (int)channel << " on port " << name() << endl;
 		}
 	}
 }
@@ -174,12 +174,21 @@ MidiPort::flush_buffers (pframes_t nframes)
 {
 	if (sends_output ()) {
 
-		void* port_buffer = port_engine.get_buffer (_port_handle, nframes);
+		void* port_buffer = 0;
 		
 		if (_resolve_required) {
+			port_buffer = port_engine.get_buffer (_port_handle, nframes);
 			/* resolve all notes at the start of the buffer */
 			resolve_notes (port_buffer, 0);
 			_resolve_required = false;
+		} 
+		
+		if (_buffer->empty()) {
+			return;
+		}
+
+		if (!port_buffer) {
+			port_buffer = port_engine.get_buffer (_port_handle, nframes);
 		}
 
 		for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
@@ -196,11 +205,16 @@ MidiPort::flush_buffers (pframes_t nframes)
 					     << ev.time() << " > " << _global_port_buffer_offset + _port_buffer_offset << endl;
 				}
 			} else {
-				cerr << "drop flushed event on the floor, time " << ev
+				cerr << "drop flushed event on the floor, time " << ev.time()
 				     << " to early for " << _global_port_buffer_offset 
 				     << " + " << _port_buffer_offset << endl;
 			}
 		}
+
+		/* done.. the data has moved to the port buffer, mark it so 
+		 */
+
+		_buffer->clear ();
 	}
 }
 

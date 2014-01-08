@@ -920,8 +920,6 @@ ExportFormatDialog::show_ogg_enconding_options (boost::shared_ptr<ARDOUR::Export
 	encoding_options_table.resize (1, 1);
 	encoding_options_table.attach (tag_checkbox, 0, 1, 0, 1);
 
-	update_tagging_selection ();
-
 	show_all_children ();
 }
 

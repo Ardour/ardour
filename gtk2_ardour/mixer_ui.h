@@ -250,9 +250,9 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	Width _strip_width;
 
         void sync_order_keys_from_treeview ();
-        void sync_treeview_from_order_keys (ARDOUR::RouteSortOrderKey);
+        void sync_treeview_from_order_keys ();
         void reset_remote_control_ids ();
-        void reset_order_keys (ARDOUR::RouteSortOrderKey);
+        void reset_order_keys ();
 
         bool ignore_reorder;
 

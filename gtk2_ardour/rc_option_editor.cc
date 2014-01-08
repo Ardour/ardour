@@ -648,6 +648,7 @@ class ControlSurfacesOptions : public OptionEditorBox
 public:
 	ControlSurfacesOptions (Gtk::Window& parent)
 		: _parent (parent)
+		, _ignore_view_change (0)
 	{
 		_store = ListStore::create (_model);
 		_view.set_model (_store);
@@ -700,9 +701,14 @@ private:
         void protocol_status_changed (ControlProtocolInfo* cpi) {
 		/* find the row */
 		TreeModel::Children rows = _store->children();
+		
 		for (TreeModel::Children::iterator x = rows.begin(); x != rows.end(); ++x) {
+			string n = ((*x)[_model.name]);
+
 			if ((*x)[_model.protocol_info] == cpi) {
+				_ignore_view_change++;
 				(*x)[_model.enabled] = (cpi->protocol || cpi->requested);
+				_ignore_view_change--;
 				break;
 			}
 		}
@@ -712,6 +718,10 @@ private:
 	{
 		TreeModel::Row r = *i;
 
+		if (_ignore_view_change) {
+			return;
+		}
+
 		ControlProtocolInfo* cpi = r[_model.protocol_info];
 		if (!cpi) {
 			return;
@@ -720,22 +730,23 @@ private:
 		bool const was_enabled = (cpi->protocol != 0);
 		bool const is_enabled = r[_model.enabled];
 
+
 		if (was_enabled != is_enabled) {
+
 			if (!was_enabled) {
-				ControlProtocolManager::instance().instantiate (*cpi);
+				ControlProtocolManager::instance().activate (*cpi);
 			} else {
 				Gtk::Window* win = r[_model.editor];
 				if (win) {
 					win->hide ();
 				}
 
-				ControlProtocolManager::instance().teardown (*cpi);
+				ControlProtocolManager::instance().deactivate (*cpi);
 					
 				if (win) {
 					delete win;
+					r[_model.editor] = 0;
 				}
-				r[_model.editor] = 0;
-				cpi->requested = false;
 			}
 		}
 
@@ -805,6 +816,7 @@ private:
 	TreeView _view;
         Gtk::Window& _parent;
         PBD::ScopedConnection protocol_status_connection;
+        uint32_t _ignore_view_change;
 };
 
 class VideoTimelineOptions : public OptionEditorBox
@@ -1416,14 +1428,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Editor"),
 	     new BoolOption (
-		     "sync-all-route-ordering",
-		     _("Synchronise editor and mixer track order"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_sync_all_route_ordering),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_sync_all_route_ordering)
-		     ));
-
-	add_option (_("Editor"),
-	     new BoolOption (
 		     "link-editor-and-mixer-selection",
 		     _("Synchronise editor and mixer selection"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_editor_and_mixer_selection),
@@ -1830,7 +1834,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	rm->add (UserOrdered, _("assigned by user"));
 	rm->add (MixerOrdered, _("follows order of mixer"));
-	rm->add (EditorOrdered, _("follows order of editor"));
 
 	add_option (_("Control Surfaces"), rm);
 

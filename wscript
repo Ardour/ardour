@@ -7,10 +7,42 @@ import string
 import subprocess
 import sys
 
-MAJOR = '3'
-MINOR = '4'
-VERSION = MAJOR + '.' + MINOR
+def fetch_git_revision ():
+    cmd = "git describe HEAD"
+    output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
+    rev = output[0].decode ('utf-8')
+    return rev
 
+def fetch_tarball_revision ():
+    if not os.path.exists ('libs/ardour/revision.cc'):
+        print 'This tarball was not created correctly - it is missing libs/ardour/revision.cc'
+        sys.exit (1)
+    with open('libs/ardour/revision.cc') as f:
+        content = f.readlines()
+        remove_punctuation_map = dict((ord(char), None) for char in '";')
+        return content[1].decode('utf-8').strip().split(' ')[7].translate (remove_punctuation_map)
+
+if os.path.isdir (os.path.join(os.getcwd(), '.git')):
+    rev = fetch_git_revision ()
+else:
+    rev = fetch_tarball_revision ()
+
+#
+# rev is now of the form MAJOR.MINOR-rev-commit
+#
+
+parts = rev.split ('.')
+MAJOR = parts[0]
+other = parts[1].split ('-')
+MINOR = other[0]
+MICRO = other[1]
+
+V = MAJOR + '.' + MINOR + '.' + MICRO
+#
+# it is important that VERSION *not* be unicode string
+# because if it is, it breaks waf somehow.
+#
+VERSION = V.encode ('ascii', 'ignore')
 APPNAME = 'Ardour' + MAJOR
 
 # Mandatory variables
@@ -35,6 +67,7 @@ children = [
         'libs/gtkmm2ext',
         'libs/clearlooks-newer',
         'libs/audiographer',
+        'libs/plugins/reasonablesynth.lv2',
         'gtk2_ardour',
         'export',
         'midi_maps',
@@ -66,17 +99,11 @@ def fetch_gcc_version (CC):
     version = o.split(' ')[2].split('.')
     return version
 
-def fetch_git_revision ():
-    cmd = "git describe --tags HEAD"
-    output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
-    rev = output[0].decode('utf-8')
-    return rev
-
 def create_stored_revision():
     rev = ""
     if os.path.exists('.git'):
         rev = fetch_git_revision();
-        print("ardour.git version: " + rev + "\n")
+        print("Git version: " + rev + "\n")
     elif os.path.exists('libs/ardour/revision.cc'):
         print("Using packaged revision")
         return
@@ -85,6 +112,10 @@ def create_stored_revision():
         sys.exit(-1)
 
     try:
+        #
+        # if you change the format of this, be sure to fix fetch_tarball_revision() above
+        # so that  it still works.
+        #
         text =  '#include "ardour/revision.h"\n'
         text += 'namespace ARDOUR { const char* revision = \"%s\"; }\n' % rev
         print('Writing revision info to libs/ardour/revision.cc using ' + rev)
@@ -101,7 +132,17 @@ def set_compiler_flags (conf,opt):
     #
 
     build_host_supports_sse = False
+
+    # Flags necessary for building
+    compiler_flags = []     # generic
+    c_flags = []            # C-specific
+    cxx_flags = []          # C++-specific
+    linker_flags = []
+
+    # Optimization flags (overridable)
     optimization_flags = []
+
+    # Debugging flags
     debug_flags = []
 
     u = os.uname ()
@@ -114,18 +155,23 @@ def set_compiler_flags (conf,opt):
     
     if conf.options.cxx11:
         conf.check_cxx(cxxflags=["-std=c++11"])
-        conf.env.append_unique('CXXFLAGS', ['-std=c++11'])
+        cxx_flags.append('-std=c++11')
         if platform == "darwin":
-            conf.env.append_unique('CXXFLAGS', ['-stdlib=libc++'])
-            conf.env.append_unique('LINKFLAGS', ['-lc++'])
+            cxx_flags.append('-stdlib=libc++')
+            link_flags.append('-lc++')
             # Prevents visibility issues in standard headers
             conf.define("_DARWIN_C_SOURCE", 1)
+
+    if conf.options.asan:
+        conf.check_cxx(cxxflags=["-fsanitize=address"], linkflags=["-fsanitize=address"])
+        cxx_flags.append('-fsanitize=address')
+        linker_flags.append('-fsanitize=address')
 
     if is_clang and platform == "darwin":
         # Silence warnings about the non-existing osx clang compiler flags
         # -compatibility_version and -current_version.  These are Waf
         # generated and not needed with clang
-        conf.env.append_unique ("CXXFLAGS", ["-Qunused-arguments"])
+        cxx_flags.append("-Qunused-arguments")
         
     if opt.gprofile:
         debug_flags = [ '-pg' ]
@@ -151,16 +197,15 @@ def set_compiler_flags (conf,opt):
             else:
                 conf.env['build_target'] = 'mountainlion'
         else:
-            if re.search ("x86_64", cpu) != None:
-                conf.env['build_target'] = 'x86_64'
-            elif re.search("i[0-5]86", cpu) != None:
-                conf.env['build_target'] = 'i386'
-            elif re.search("powerpc", cpu) != None:
-                conf.env['build_target'] = 'powerpc'
-            elif re.search("arm", cpu) != None:
-                conf.env['build_target'] = 'arm'
+            match = re.search(
+                    "(?P<cpu>i[0-6]86|x86_64|powerpc|ppc|ppc64|arm|s390x?)",
+                    cpu)
+            if (match):
+                conf.env['build_target'] = match.group("cpu")
+                if re.search("i[0-5]86", conf.env['build_target']):
+                    conf.env['build_target'] = "i386"
             else:
-                conf.env['build_target'] = 'i686'
+                conf.env['build_target'] = 'none'
     else:
         conf.env['build_target'] = opt.dist_target
 
@@ -169,8 +214,7 @@ def set_compiler_flags (conf,opt):
         # stupid OS X 10.6 has a bug in math.h that prevents llrint and friends
         # from being visible.
         # 
-        debug_flags.append ('-U__STRICT_ANSI__')
-        optimization_flags.append ('-U__STRICT_ANSI__')
+        compiler_flags.append ('-U__STRICT_ANSI__')
 
     if cpu == 'powerpc' and conf.env['build_target'] != 'none':
         #
@@ -182,12 +226,12 @@ def set_compiler_flags (conf,opt):
             if platform == 'darwin':
                 # optimization_flags.extend ([ "-mcpu=7450", "-faltivec"])
                 # to support g3s but still have some optimization for above
-                optimization_flags.extend ([ "-mcpu=G3", "-mtune=7450"])
+                compiler_flags.extend ([ "-mcpu=G3", "-mtune=7450"])
             else:
-                optimization_flags.extend ([ "-mcpu=7400", "-maltivec", "-mabi=altivec"])
+                compiler_flags.extend ([ "-mcpu=7400", "-maltivec", "-mabi=altivec"])
         else:
-            optimization_flags.extend([ "-mcpu=750", "-mmultiple" ])
-        optimization_flags.extend (["-mhard-float", "-mpowerpc-gfxopt"])
+            compiler_flags.extend([ "-mcpu=750", "-mmultiple" ])
+        compiler_flags.extend (["-mhard-float", "-mpowerpc-gfxopt"])
         optimization_flags.extend (["-Os"])
 
     elif ((re.search ("i[0-9]86", cpu) != None) or (re.search ("x86_64", cpu) != None)) and conf.env['build_target'] != 'none':
@@ -200,8 +244,7 @@ def set_compiler_flags (conf,opt):
         #
 
         if (re.search ("(i[0-9]86|x86_64)", cpu) != None):
-            debug_flags.append ("-DARCH_X86")
-            optimization_flags.append ("-DARCH_X86")
+            compiler_flags.append ("-DARCH_X86")
 
         if platform == 'linux' :
 
@@ -215,32 +258,29 @@ def set_compiler_flags (conf,opt):
                 x86_flags = flag_line.split (": ")[1:][0].split ()
 
                 if "mmx" in x86_flags:
-                    optimization_flags.append ("-mmmx")
+                    compiler_flags.append ("-mmmx")
                 if "sse" in x86_flags:
                     build_host_supports_sse = True
                 if "3dnow" in x86_flags:
-                    optimization_flags.append ("-m3dnow")
+                    compiler_flags.append ("-m3dnow")
 
             if cpu == "i586":
-                optimization_flags.append ("-march=i586")
+                compiler_flags.append ("-march=i586")
             elif cpu == "i686":
-                optimization_flags.append ("-march=i686")
+                compiler_flags.append ("-march=i686")
 
         if not is_clang and ((conf.env['build_target'] == 'i686') or (conf.env['build_target'] == 'x86_64')) and build_host_supports_sse:
-            optimization_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
-            debug_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
+            compiler_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
 
     # end of processor-specific section
 
     # optimization section
     if conf.env['FPU_OPTIMIZATION']:
         if sys.platform == 'darwin':
-            optimization_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
-            debug_flags.append ("-DBUILD_VECLIB_OPTIMIZATIONS");
-            conf.env.append_value('LINKFLAGS', "-framework Accelerate")
+            compiler_flags.append("-DBUILD_VECLIB_OPTIMIZATIONS");
+            linker_flags.append("-framework Accelerate")
         elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
-            optimization_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
-            debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
+            compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if not build_host_supports_sse:
             print("\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)")
 
@@ -259,9 +299,9 @@ def set_compiler_flags (conf,opt):
 
     if opt.lxvst:
         if conf.env['build_target'] == 'x86_64':
-            conf.env.append_value('CXXFLAGS', "-DLXVST_64BIT")
+            compiler_flags.append("-DLXVST_64BIT")
         else:
-            conf.env.append_value('CXXFLAGS', "-DLXVST_32BIT")
+            compiler_flags.append("-DLXVST_32BIT")
 
     #
     # a single way to test if we're on OS X
@@ -271,18 +311,15 @@ def set_compiler_flags (conf,opt):
         conf.define ('IS_OSX', 1)
         # force tiger or later, to avoid issues on PPC which defaults
         # back to 10.1 if we don't tell it otherwise.
-        
-        conf.env.append_value('CFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
-        conf.env.append_value('CXXFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1040")
-        conf.env.append_value('CXXFLAGS', '-mmacosx-version-min=10.4')
-        conf.env.append_value('CFLAGS', '-mmacosx-version-min=10.4')
 
+        compiler_flags.extend(
+                ("-DMAC_OS_X_VERSION_MIN_REQUIRED=1040",
+                 '-mmacosx-version-min=10.4'))
 
     elif conf.env['build_target'] in [ 'lion', 'mountainlion' ]:
-        conf.env.append_value('CFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1070")
-        conf.env.append_value('CXXFLAGS', "-DMAC_OS_X_VERSION_MIN_REQUIRED=1070")
-        conf.env.append_value('CXXFLAGS', '-mmacosx-version-min=10.7')
-        conf.env.append_value('CFLAGS', '-mmacosx-version-min=10.7')
+        compiler_flags.extend(
+                ("-DMAC_OS_X_VERSION_MIN_REQUIRED=1070",
+                 '-mmacosx-version-min=10.7'))
     else:
         conf.define ('IS_OSX', 0)
 
@@ -302,34 +339,32 @@ def set_compiler_flags (conf,opt):
     # prepend boiler plate optimization flags that work on all architectures
     #
 
-    optimization_flags[:0] = [
-            "-O3",
-            "-fomit-frame-pointer",
-            "-ffast-math",
-            "-fstrength-reduce",
-            "-pipe"
-            ]
+    optimization_flags[:0] = ["-pipe"]
 
-    if opt.debug:
-        conf.env.append_value('CFLAGS', debug_flags)
-        conf.env.append_value('CXXFLAGS', debug_flags)
-        conf.env.append_value('LINKFLAGS', debug_flags)
-    else:
-        conf.env.append_value('CFLAGS', optimization_flags)
-        conf.env.append_value('CXXFLAGS', optimization_flags)
-        conf.env.append_value('LINKFLAGS', optimization_flags)
+    # don't prepend optimization flags if "-O<something>" is present
+    prepend_opt_flags = True
+    for flag in optimization_flags:
+        if flag.startswith("-O"):
+            prepend_opt_flags = False
+            break
+
+    if prepend_opt_flags:
+        optimization_flags[:0] = [
+                "-O3",
+                "-fomit-frame-pointer",
+                "-ffast-math",
+                "-fstrength-reduce"
+                ]
 
     if opt.stl_debug:
-        conf.env.append_value('CXXFLAGS', "-D_GLIBCXX_DEBUG")
+        cxx_flags.append("-D_GLIBCXX_DEBUG")
 
     if conf.env['DEBUG_RT_ALLOC']:
-        conf.env.append_value('CFLAGS', '-DDEBUG_RT_ALLOC')
-        conf.env.append_value('CXXFLAGS', '-DDEBUG_RT_ALLOC')
-        conf.env.append_value('LINKFLAGS', '-ldl')
+        compiler_flags.append('-DDEBUG_RT_ALLOC')
+        linker_flags.append('-ldl')
 
     if conf.env['DEBUG_DENORMAL_EXCEPTION']:
-        conf.env.append_value('CFLAGS', '-DDEBUG_DENORMAL_EXCEPTION')
-        conf.env.append_value('CXXFLAGS', '-DDEBUG_DENORMAL_EXCEPTION')
+        compiler_flags.append('-DDEBUG_DENORMAL_EXCEPTION')
 
     if opt.universal:
         if opt.generic:
@@ -337,60 +372,53 @@ def set_compiler_flags (conf,opt):
             sys.exit (1)
         else:
             if not Options.options.nocarbon:
-                conf.env.append_value('CFLAGS', ["-arch", "i386", "-arch", "ppc"])
-                conf.env.append_value('CXXFLAGS', ["-arch", "i386", "-arch", "ppc"])
-                conf.env.append_value('LINKFLAGS', ["-arch", "i386", "-arch", "ppc"])
+                compiler_flags.extend(("-arch", "i386", "-arch", "ppc"))
+                linker_flags.extend(("-arch", "i386", "-arch", "ppc"))
             else:
-                conf.env.append_value('CFLAGS', ["-arch", "x86_64", "-arch", "i386", "-arch", "ppc"])
-                conf.env.append_value('CXXFLAGS', ["-arch", "x86_64", "-arch", "i386", "-arch", "ppc"])
-                conf.env.append_value('LINKFLAGS', ["-arch", "x86_64", "-arch", "i386", "-arch", "ppc"])
+                compiler_flags.extend(
+                        ("-arch", "x86_64", "-arch", "i386", "-arch", "ppc"))
+                linker_flags.extend(
+                        ("-arch", "x86_64", "-arch", "i386", "-arch", "ppc"))
     else:
         if opt.generic:
-            conf.env.append_value('CFLAGS', ['-arch', 'i386'])
-            conf.env.append_value('CXXFLAGS', ['-arch', 'i386'])
-            conf.env.append_value('LINKFLAGS', ['-arch', 'i386'])
+            compiler_flags.extend(('-arch', 'i386'))
+            linker_flags.extend(('-arch', 'i386'))
 
     #
     # warnings flags
     #
 
-    conf.env.append_value('CFLAGS', [ '-Wall',
-                                      '-Wpointer-arith',
-                                      '-Wcast-qual',
-                                      '-Wcast-align',
-                                      '-Wstrict-prototypes',
-                                      '-Wmissing-prototypes'
-                                      ])
+    compiler_flags.extend(
+            ('-Wall', '-Wpointer-arith', '-Wcast-qual', '-Wcast-align'))
 
-    conf.env.append_value('CXXFLAGS', [ '-Wall', 
-                                        '-Wpointer-arith',
-                                        '-Wcast-qual',
-                                        '-Wcast-align', 
-                                        '-Woverloaded-virtual'
-                                        ])
-
+    c_flags.extend(('-Wstrict-prototypes', '-Wmissing-prototypes'))
+    cxx_flags.append('-Woverloaded-virtual')
 
     #
     # more boilerplate
     #
 
-    conf.env.append_value('CFLAGS', '-DBOOST_SYSTEM_NO_DEPRECATED')
-    conf.env.append_value('CXXFLAGS', '-DBOOST_SYSTEM_NO_DEPRECATED')
     # need ISOC9X for llabs()
-    conf.env.append_value('CFLAGS', '-D_ISOC9X_SOURCE')
-    conf.env.append_value('CFLAGS', '-D_LARGEFILE64_SOURCE')
-    conf.env.append_value('CFLAGS', '-D_FILE_OFFSET_BITS=64')
-    # need ISOC9X for llabs()
-    conf.env.append_value('CXXFLAGS', '-D_ISOC9X_SOURCE')
-    conf.env.append_value('CXXFLAGS', '-D_LARGEFILE64_SOURCE')
-    conf.env.append_value('CXXFLAGS', '-D_FILE_OFFSET_BITS=64')
-
-    conf.env.append_value('CXXFLAGS', '-D__STDC_LIMIT_MACROS')
-    conf.env.append_value('CXXFLAGS', '-D__STDC_FORMAT_MACROS')
+    compiler_flags.extend(
+            ('-DBOOST_SYSTEM_NO_DEPRECATED', '-D_ISOC9X_SOURCE',
+             '-D_LARGEFILE64_SOURCE', '-D_FILE_OFFSET_BITS=64'))
+    cxx_flags.extend(('-D__STDC_LIMIT_MACROS', '-D__STDC_FORMAT_MACROS'))
 
     if opt.nls:
-        conf.env.append_value('CXXFLAGS', '-DENABLE_NLS')
-        conf.env.append_value('CFLAGS', '-DENABLE_NLS')
+        compiler_flags.append('-DENABLE_NLS')
+
+    if opt.debug:
+        conf.env.append_value('CFLAGS', debug_flags)
+        conf.env.append_value('CXXFLAGS', debug_flags)
+    else:
+        conf.env.append_value('CFLAGS', optimization_flags)
+        conf.env.append_value('CXXFLAGS', optimization_flags)
+
+    conf.env.append_value('CFLAGS', compiler_flags)
+    conf.env.append_value('CFLAGS', c_flags)
+    conf.env.append_value('CXXFLAGS', compiler_flags)
+    conf.env.append_value('CXXFLAGS', cxx_flags)
+    conf.env.append_value('LINKFLAGS', linker_flags)
 
 #----------------------------------------------------------------
 
@@ -427,6 +455,8 @@ def options(opt):
                    help='Build internal libs as shared libraries')
     opt.add_option('--internal-static-libs', action='store_false', dest='internal_shared_libs',
                    help='Build internal libs as static libraries')
+    opt.add_option('--use-external-libs', action='store_true', default=False, dest='use_external_libs',
+                   help='Use external/system versions of some bundled libraries')
     opt.add_option('--lv2', action='store_true', default=True, dest='lv2',
                     help='Compile with support for LV2 (if Lilv+Suil is available)')
     opt.add_option('--no-lv2', action='store_false', dest='lv2',
@@ -477,6 +507,8 @@ def options(opt):
                     help='Do not ask questions that require confirmation during the build')
     opt.add_option('--cxx11', action='store_true', default=False, dest='cxx11',
                     help='Turn on c++11 compiler flags (-std=c++11)')
+    opt.add_option('--address-sanitizer', action='store_true', default=False, dest='asan',
+                    help='Turn on AddressSanitizer (requires GCC >= 4.8 or clang)')
     for i in children:
         opt.recurse(i)
 
@@ -599,6 +631,9 @@ def configure(conf):
     if Options.options.internal_shared_libs: 
         conf.define('INTERNAL_SHARED_LIBS', 1)
 
+    if Options.options.use_external_libs:
+        conf.define('USE_EXTERNAL_LIBS', 1)
+
     if Options.options.boost_include != '':
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.boost_include)
 
@@ -611,8 +646,6 @@ def configure(conf):
 
     if Options.options.boost_sp_debug:
         conf.env.append_value('CXXFLAGS', '-DBOOST_SP_ENABLE_DEBUG_HOOKS')
-
-    autowaf.check_header(conf, 'cxx', 'jack/session.h', define="JACK_SESSION", mandatory = False)
 
     conf.check_cxx(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
                   execute = "1",
@@ -661,8 +694,6 @@ def configure(conf):
     if opts.lxvst:
         conf.define('LXVST_SUPPORT', 1)
         conf.env['LXVST_SUPPORT'] = True
-    if bool(conf.env['JACK_SESSION']):
-        conf.define('HAVE_JACK_SESSION', 1)
     conf.define('WINDOWS_KEY', opts.windows_key)
     conf.env['PROGRAM_NAME'] = opts.program_name
     if opts.rt_alloc_debug:
@@ -703,6 +734,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Install prefix',        conf.env['PREFIX'])
     write_config_text('Strict compiler flags', conf.env['STRICT'])
     write_config_text('Internal Shared Libraries', conf.is_defined('INTERNAL_SHARED_LIBS'))
+    write_config_text('Use External Libraries', conf.is_defined('USE_EXTERNAL_LIBS'))
 
     write_config_text('Architecture flags',    opts.arch)
     write_config_text('Aubio',                 conf.is_defined('HAVE_AUBIO'))
@@ -716,7 +748,6 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('FLAC',                  conf.is_defined('HAVE_FLAC'))
     write_config_text('FPU optimization',      opts.fpu_optimization)
     write_config_text('Freedesktop files',     opts.freedesktop)
-    write_config_text('JACK session support',  conf.is_defined('JACK_SESSION'))
     write_config_text('LV2 UI embedding',      conf.is_defined('HAVE_SUIL'))
     write_config_text('LV2 support',           conf.is_defined('LV2_SUPPORT'))
     write_config_text('LXVST support',         conf.is_defined('LXVST_SUPPORT'))
@@ -749,14 +780,17 @@ def build(bld):
     # add directories that contain only headers, to workaround an issue with waf
 
     bld.path.find_dir ('libs/evoral/evoral')
-    bld.path.find_dir ('libs/vamp-sdk/vamp-sdk')
+    if not bld.is_defined('USE_EXTERNAL_LIBS'):
+        bld.path.find_dir ('libs/vamp-sdk/vamp-sdk')
     bld.path.find_dir ('libs/surfaces/control_protocol/control_protocol')
     bld.path.find_dir ('libs/timecode/timecode')
-    bld.path.find_dir ('libs/libltc/ltc')
-    bld.path.find_dir ('libs/rubberband/rubberband')
+    if not bld.is_defined('USE_EXTERNAL_LIBS'):
+        bld.path.find_dir ('libs/libltc/ltc')
+        bld.path.find_dir ('libs/rubberband/rubberband')
     bld.path.find_dir ('libs/gtkmm2ext/gtkmm2ext')
     bld.path.find_dir ('libs/ardour/ardour')
-    bld.path.find_dir ('libs/taglib/taglib')
+    if not bld.is_defined('USE_EXTERNAL_LIBS'):
+        bld.path.find_dir ('libs/taglib/taglib')
     bld.path.find_dir ('libs/pbd/pbd')
 
     autowaf.set_recursive()

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.99beta23\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-15 15:09-0400\n"
+"POT-Creation-Date: 2013-11-05 11:11-0500\n"
 "PO-Revision-Date: 2005-01-11\n"
 "Last-Translator: Muadibas\n"
 "Language-Team: Hellenic(Greek) <LL@li.org>\n"
@@ -21,9 +21,8 @@ msgid "Unknown action name: %1"
 msgstr ""
 
 #: binding_proxy.cc:84
-#, fuzzy
 msgid "operate controller now"
-msgstr "λειτουργία ελεγκτή MIDI τώρα"
+msgstr ""
 
 #: bindable_button.cc:48
 msgid "button cannot watch state of non-existing Controllable\n"
@@ -33,18 +32,18 @@ msgstr ""
 msgid "Log"
 msgstr ""
 
-#: gtk_ui.cc:361
+#: gtk_ui.cc:363
 msgid ""
 "\n"
 "\n"
 "Shortcut: "
 msgstr ""
 
-#: gtk_ui.cc:633
+#: gtk_ui.cc:635
 msgid "Press To Exit"
 msgstr ""
 
-#: gtk_ui.cc:669
+#: gtk_ui.cc:671
 msgid "I'm sorry %1, I can't do that"
 msgstr ""
 
@@ -72,11 +71,11 @@ msgstr ""
 msgid "Meta"
 msgstr ""
 
-#: keyboard.cc:139 keyboard.cc:531
+#: keyboard.cc:139 keyboard.cc:535
 msgid "Unknown"
 msgstr ""
 
-#: keyboard.cc:542
+#: keyboard.cc:546
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 
@@ -91,33 +90,3 @@ msgstr ""
 #: textviewer.cc:34
 msgid "Close"
 msgstr "Κλείσιμο"
-
-#~ msgid "OK"
-#~ msgstr "OK"
-
-#~ msgid "Location:"
-#~ msgstr "Τοποθεσία:"
-
-#~ msgid "Browse ..."
-#~ msgstr "Αναζήτηση ..."
-
-#~ msgid "Cancel"
-#~ msgstr "Ακύρωση"
-
-#~ msgid "New folder"
-#~ msgstr "Νέος φάκελος"
-
-#~ msgid "Add to favorites"
-#~ msgstr "Πρόσθεση στα 'Αγαπημένα'"
-
-#~ msgid "Remove from favorites"
-#~ msgstr "Απαλοιφή από τα 'Αγαπημένα'"
-
-#~ msgid "Show Hidden"
-#~ msgstr "Ανάδειξη κρυμμένων"
-
-#~ msgid "Hide browser"
-#~ msgstr "Απόκρυψη browser"
-
-#~ msgid "Rescan"
-#~ msgstr "Ανανέωση"

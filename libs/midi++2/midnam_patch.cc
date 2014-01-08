@@ -542,7 +542,9 @@ MasterDeviceNames::channel_name_set_by_device_mode_and_channel(const std::string
 boost::shared_ptr<Patch> 
 MasterDeviceNames::find_patch(const std::string& mode, uint8_t channel, const PatchPrimaryKey& key) 
 {
-	return channel_name_set_by_device_mode_and_channel(mode, channel)->find_patch(key);
+	boost::shared_ptr<ChannelNameSet> cns = channel_name_set_by_device_mode_and_channel(mode, channel);
+	if (!cns) return boost::shared_ptr<Patch>();
+	return cns->find_patch(key);
 }
 
 boost::shared_ptr<ChannelNameSet>

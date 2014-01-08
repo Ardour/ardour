@@ -1269,6 +1269,10 @@ bool
 Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	if (event->type != GDK_BUTTON_PRESS) {
+		if (event->type == GDK_2BUTTON_PRESS) {
+			gdk_pointer_ungrab (GDK_CURRENT_TIME);
+			return button_double_click_handler (item, event, item_type);
+		}
 		return false;
 	}
 
@@ -1391,6 +1395,52 @@ Editor::button_release_dispatch (GdkEventButton* ev)
         Gtkmm2ext::MouseButton b (ev->state, ev->button);
         return button_bindings->activate (b, Gtkmm2ext::Bindings::Release);
 }
+
+bool
+Editor::button_double_click_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type) {
+
+	if (event->button.button != 1) {
+		return false;
+	}
+
+	switch (item_type) {
+		case RegionItem:
+			RegionView *rv;
+			rv = clicked_regionview;
+			rv->show_region_editor ();
+			return true;
+		case NoteItem:
+		case PlayheadCursorItem:
+			break;
+		case MarkerItem:
+		case RangeMarkerBarItem:
+		case CdMarkerBarItem:
+			Marker* marker;
+			if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
+				break;
+			}
+			rename_marker (marker);
+			return true;
+		case TempoMarkerItem:
+			edit_tempo_marker (item);
+			return true;
+		case MeterMarkerItem:
+			edit_meter_marker (item);
+			return true;
+		case MarkerBarItem:
+		case TempoBarItem:
+		case MeterBarItem:
+		case TransportMarkerBarItem:
+		case StreamItem:
+			break;
+
+		default:
+			break;
+	}
+	return false;
+}
+
+
 
 bool
 Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)

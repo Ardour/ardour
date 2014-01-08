@@ -1317,7 +1317,7 @@ Session::set_state (const XMLNode& node, int version)
 	if ((child = find_named_node (node, "Click")) == 0) {
 		warning << _("Session: XML state has no click section") << endmsg;
 	} else if (_click_io) {
-		setup_click_state (node);
+		setup_click_state (&node);
 	}
 
 	if ((child = find_named_node (node, ControlProtocolManager::state_node_name)) != 0) {
@@ -3444,22 +3444,6 @@ Session::config_changed (std::string p, bool ours)
 		/* XXX DO SOMETHING HERE TO TELL THE GUI THAT WE NEED
 		   TO SET REMOTE ID'S
 		*/
-	} else if (p == "sync-all-route-ordering") {
-
-		/* sync to editor order unless mixer is used for remote IDs 
-		 */
-
-		switch (Config->get_remote_model()) {
-		case UserOrdered:
-			sync_order_keys (EditorSort);
-			break;
-		case EditorOrdered:
-			sync_order_keys (EditorSort);
-			break;
-		case MixerOrdered:
-			sync_order_keys (MixerSort);
-		}
-			
 	} else if (p == "initial-program-change") {
 
 		if (_mmc->output_port() && Config->get_initial_program_change() >= 0) {

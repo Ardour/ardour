@@ -107,8 +107,12 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 
 	// Meter audio in to the rest of the peaks
 	for (uint32_t i = 0; i < n_audio; ++i, ++n) {
-		_peak_signal[n] = compute_peak (bufs.get_audio(i).data(), nframes, _peak_signal[n]);
-		if (_meter_type & (MeterKrms | MeterK20 | MeterK14)) {
+		if (bufs.get_audio(i).silent()) {
+			_peak_signal[n] = .0f;
+		} else {
+			_peak_signal[n] = compute_peak (bufs.get_audio(i).data(), nframes, _peak_signal[n]);
+		}
+		if (_meter_type & (MeterKrms | MeterK20 | MeterK14 | MeterK12)) {
 			_kmeter[i]->process(bufs.get_audio(i).data(), nframes);
 		}
 		if (_meter_type & (MeterIEC1DIN | MeterIEC1NOR)) {
@@ -288,7 +292,7 @@ PeakMeter::meter ()
 	/* 0.01f ^= 100 Hz update rate */
 	const float midi_meter_falloff = Config->get_meter_falloff() * 0.01f;
 	/* kmeters: 24dB / 2 sec */
-	const float audio_meter_falloff = (_meter_type & (MeterK20 | MeterK14)) ? 0.12f : midi_meter_falloff;
+	const float audio_meter_falloff = (_meter_type & (MeterK20 | MeterK14 | MeterK12)) ? 0.12f : midi_meter_falloff;
 
 	for (size_t n = 0; n < limit; ++n) {
 
@@ -345,6 +349,7 @@ PeakMeter::meter_level(uint32_t n, MeterType type) {
 		case MeterKrms:
 		case MeterK20:
 		case MeterK14:
+		case MeterK12:
 			{
 				const uint32_t n_midi = current_meters.n_midi();
 				if (CHECKSIZE(_kmeter)) {
@@ -404,7 +409,7 @@ PeakMeter::set_type(MeterType t)
 
 	_meter_type = t;
 
-	if (t & (MeterKrms | MeterK20 | MeterK14)) {
+	if (t & (MeterKrms | MeterK20 | MeterK14 | MeterK12)) {
 		const size_t n_audio = current_meters.n_audio();
 		for (size_t n = 0; n < n_audio; ++n) {
 			_kmeter[n]->reset();

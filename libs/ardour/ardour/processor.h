@@ -113,6 +113,9 @@ class Processor : public SessionObject, public Automatable, public Latent
 	void  set_ui (void*);
 	void* get_ui () const { return _ui_pointer; }
 
+        void set_owner (SessionObject*);
+        SessionObject* owner() const;
+
 protected:
 	virtual int set_state_2X (const XMLNode&, int version);
 
@@ -125,6 +128,7 @@ protected:
 	bool      _display_to_user;
 	bool      _pre_fader; ///< true if this processor is currently placed before the Amp, otherwise false
 	void*     _ui_pointer;
+        SessionObject* _owner;
 };
 
 } // namespace ARDOUR

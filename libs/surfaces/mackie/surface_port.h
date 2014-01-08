@@ -50,14 +50,17 @@ class Surface;
 class SurfacePort 
 {
 public:
-	SurfacePort (Mackie::Surface&);
-	virtual ~SurfacePort();
-	
-	/// an easier way to output bytes via midi
-	int write (const MidiByteArray&);
+    SurfacePort (Mackie::Surface&);
+    virtual ~SurfacePort();
+    
+    /// an easier way to output bytes via midi
+    int write (const MidiByteArray&);
 	
     MIDI::Port& input_port() const { return *_input_port; }
     MIDI::Port& output_port() const { return *_output_port; }
+
+    XMLNode& get_state ();
+    int set_state (const XMLNode&, int version);
 
 protected:
 

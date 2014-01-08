@@ -924,7 +924,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_ruler_video (bool onoff) {ruler_video_action->set_active(onoff);}
 	int videotl_bar_height; /* in units of timebar_height; default: 4 */
 	int get_videotl_bar_height () const { return videotl_bar_height; }
-	void export_video ();
+	void export_video (bool range = false);
 	void toggle_region_video_lock ();
 
 	Gtk::VBox          time_button_vbox;
@@ -1085,6 +1085,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool button_press_handler_1 (ArdourCanvas::Item *, GdkEvent *, ItemType);
 	bool button_press_handler_2 (ArdourCanvas::Item *, GdkEvent *, ItemType);
 	bool button_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool button_double_click_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_dispatch (GdkEventButton*);
 	bool button_release_dispatch (GdkEventButton*);
 	bool motion_handler (ArdourCanvas::Item*, GdkEvent*, bool from_autoscroll = false);
@@ -1448,7 +1449,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_video_timeline_locked ();
 	void set_video_timeline_locked (const bool);
 	void queue_visual_videotimeline_update ();
-	void embed_audio_from_video (std::string, framepos_t n = 0);
+	void embed_audio_from_video (std::string, framepos_t n = 0, bool lock_position_to_video = true);
 
 	PBD::Signal0<void> EditorFreeze;
 	PBD::Signal0<void> EditorThaw;
@@ -1523,6 +1524,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void marker_menu_edit ();
 	void marker_menu_remove ();
 	void marker_menu_rename ();
+	void rename_marker (Marker *marker);
 	void toggle_marker_menu_lock ();
 	void toggle_marker_menu_glue ();
 	void marker_menu_hide ();

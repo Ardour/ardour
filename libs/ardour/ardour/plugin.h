@@ -96,12 +96,23 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 
 	struct ParameterDescriptor {
 
-		/* XXX: it would probably be nice if this initialised everything */
 		ParameterDescriptor ()
-			: enumeration (false)
+			: integer_step(false)
+			, toggled (false)
+			, logarithmic (false)
+			, sr_dependent (false)
+			, lower (0)
+			, upper (0)
+			, step (0)
+			, smallstep (0)
+			, largestep (0)
+			, min_unbound (0)
+			, max_unbound (0)
+			, enumeration (false)
+			, midinote(false)
 		{}
 
-		/* essentially a union of LADSPA and VST info */
+		/* essentially a union of LADSPA, VST and LV2 info */
 
 		bool integer_step;
 		bool toggled;
@@ -116,6 +127,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 		bool min_unbound;
 		bool max_unbound;
 		bool enumeration;
+		bool midinote; ///< only used if integer_step is also true
 	};
 
 	XMLNode& get_state ();

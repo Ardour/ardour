@@ -33,17 +33,7 @@ public:
 	AudioBuffer(size_t capacity);
 	~AudioBuffer();
 
-	void silence (framecnt_t len, framecnt_t offset = 0) {
-		if (!_silent) {
-			assert(_capacity > 0);
-			assert(offset + len <= _capacity);
-			memset(_data + offset, 0, sizeof (Sample) * len);
-			if (len == _capacity) {
-				_silent = true;
-			}
-		}
-		_written = true;
-	}
+	void silence (framecnt_t len, framecnt_t offset = 0);
 
 	/** Read @a len frames @a src starting at @a src_offset into self starting at @ dst_offset*/
 	void read_from (const Sample* src, framecnt_t len, framecnt_t dst_offset = 0, framecnt_t src_offset = 0) {
@@ -204,10 +194,11 @@ public:
 
 	Sample* data (framecnt_t offset = 0) {
 		assert(offset <= _capacity);
+		_silent = false;
 		return _data + offset;
 	}
 
-    bool check_silence (pframes_t, pframes_t&) const;
+	bool check_silence (pframes_t, bool, pframes_t&) const;
 
 	void prepare () { _written = false; _silent = false; }
 	bool written() const { return _written; }

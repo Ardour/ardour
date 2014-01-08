@@ -318,6 +318,13 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_solo_on_meterbridge)
 			    ));
 
+	add_option (_("Meterbridge"), new BoolOption (
+			    "show-monitor-on-meterbridge",
+			    _("Monitor Buttons"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_monitor_on_meterbridge),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_monitor_on_meterbridge)
+			    ));
+
 	add_option (_("Meterbridge"), new OptionEditorHeading (_("Name Labels")));
 
 	add_option (_("Meterbridge"), new BoolOption (

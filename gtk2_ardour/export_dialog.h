@@ -93,7 +93,7 @@ class ExportDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	void init ();
 
-	void notify_errors ();
+	void notify_errors (bool force = false);
 	void close_dialog ();
 
 	void sync_with_manager ();

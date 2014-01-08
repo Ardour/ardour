@@ -187,7 +187,8 @@ namespace ARDOUR {
 		MeterIEC1NOR   = 0x080,
 		MeterIEC2BBC   = 0x100,
 		MeterIEC2EBU   = 0x200,
-		MeterVU        = 0x400
+		MeterVU        = 0x400,
+		MeterK12       = 0x800
 	};
 
 	enum TrackMode {
@@ -353,11 +354,6 @@ namespace ARDOUR {
 		PostFader
 	};
 
-        enum RouteSortOrderKey { 
-		EditorSort,
-		MixerSort
-	};
-	    
 	enum MonitorModel {
 		HardwareMonitoring, ///< JACK does monitoring
 		SoftwareMonitoring, ///< Ardour does monitoring
@@ -419,8 +415,7 @@ namespace ARDOUR {
 
 	enum RemoteModel {
 		UserOrdered,
-		MixerOrdered,
-		EditorOrdered
+		MixerOrdered
 	};
 
 	enum CrossfadeModel {

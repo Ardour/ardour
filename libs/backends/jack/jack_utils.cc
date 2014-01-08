@@ -83,6 +83,8 @@ namespace {
 	const char * const dummy_driver_command_line_name = X_("dummy");
 
 	// should we provide more "pretty" names like above?
+	const char * const alsa_seq_midi_driver_name = X_("alsa");
+	const char * const alsa_raw_midi_driver_name = X_("alsarawmidi");
 	const char * const alsaseq_midi_driver_name = X_("seq");
 	const char * const alsaraw_midi_driver_name = X_("raw");
 	const char * const winmme_midi_driver_name = X_("winmme");
@@ -91,6 +93,8 @@ namespace {
 	// this should probably be translated
 	const char * const default_device_name = X_("Default");
 }
+
+static ARDOUR::MidiOptions midi_options;
 
 std::string
 get_none_string ()
@@ -682,7 +686,7 @@ ARDOUR::JackCommandLineOptions::JackCommandLineOptions ()
 }
 
 bool
-ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& command_line)
+ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& command_line, bool for_latency_measurement)
 {
 	vector<string> args;
 
@@ -740,7 +744,20 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 	}
 #endif
 
+	if (options.driver == alsa_driver_name) {
+		if (options.midi_driver == alsa_seq_midi_driver_name) {
+			args.push_back ("-X");
+			args.push_back ("alsa_midi");
+		} else if (options.midi_driver == alsa_raw_midi_driver_name) {
+			args.push_back ("-X");
+			args.push_back ("alsarawmidi");
+		}
+	}
+
 	string command_line_driver_name;
+
+	string command_line_input_device_name;
+	string command_line_output_device_name;
 
 	if (!get_jack_command_line_audio_driver_name (options.driver, command_line_driver_name)) {
 		return false;
@@ -749,60 +766,71 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 	args.push_back ("-d");
 	args.push_back (command_line_driver_name);
 
-	if (options.output_device.empty() && options.input_device.empty()) {
-		return false;
-	}
-
-	string command_line_input_device_name;
-	string command_line_output_device_name;
-
-	if (!get_jack_command_line_audio_device_name (options.driver,
-		options.input_device, command_line_input_device_name)) {
-		return false;
-	}
-
-	if (!get_jack_command_line_audio_device_name (options.driver,
-		options.output_device, command_line_output_device_name)) {
-		return false;
-	}
-
-	if (options.input_device.empty()) {
-		// playback only
-		if (options.output_device.empty()) {
+	if (options.driver != dummy_driver_name) {
+		if (options.output_device.empty() && options.input_device.empty()) {
 			return false;
 		}
-		args.push_back ("-P");
-	} else if (options.output_device.empty()) {
-		// capture only
+
+
+		if (!get_jack_command_line_audio_device_name (options.driver,
+					options.input_device, command_line_input_device_name)) {
+			return false;
+		}
+
+		if (!get_jack_command_line_audio_device_name (options.driver,
+					options.output_device, command_line_output_device_name)) {
+			return false;
+		}
+
 		if (options.input_device.empty()) {
-			return false;
-		}
-		args.push_back ("-C");
-	} else if (options.input_device != options.output_device) {
-		// capture and playback on two devices if supported
-		if (get_jack_audio_driver_supports_two_devices (options.driver)) {
-			args.push_back ("-C");
-			args.push_back (command_line_input_device_name);
+			// playback only
+			if (options.output_device.empty()) {
+				return false;
+			}
 			args.push_back ("-P");
-			args.push_back (command_line_output_device_name);
-		} else {
-			return false;
+		} else if (options.output_device.empty()) {
+			// capture only
+			if (options.input_device.empty()) {
+				return false;
+			}
+			args.push_back ("-C");
+		} else if (options.input_device != options.output_device) {
+			// capture and playback on two devices if supported
+			if (get_jack_audio_driver_supports_two_devices (options.driver)) {
+				args.push_back ("-C");
+				args.push_back (command_line_input_device_name);
+				args.push_back ("-P");
+				args.push_back (command_line_output_device_name);
+			} else {
+				return false;
+			}
 		}
-	}
 
-	if (options.input_channels) {
-		args.push_back ("-i");
-		args.push_back (to_string (options.input_channels, std::dec));
-	}
+		if (options.input_channels) {
+			args.push_back ("-i");
+			args.push_back (to_string (options.input_channels, std::dec));
+		}
 
-	if (options.output_channels) {
-		args.push_back ("-o");
-		args.push_back (to_string (options.output_channels, std::dec));
-	}
+		if (options.output_channels) {
+			args.push_back ("-o");
+			args.push_back (to_string (options.output_channels, std::dec));
+		}
 
-	if (get_jack_audio_driver_supports_setting_period_count (options.driver)) {
-		args.push_back ("-n");
-		args.push_back (to_string (options.num_periods, std::dec));
+		if (get_jack_audio_driver_supports_setting_period_count (options.driver)) {
+			args.push_back ("-n");
+			args.push_back (to_string (options.num_periods, std::dec));
+		}
+	} else {
+		// jackd dummy backend
+		if (options.input_channels) {
+			args.push_back ("-C");
+			args.push_back (to_string (options.input_channels, std::dec));
+		}
+
+		if (options.output_channels) {
+			args.push_back ("-P");
+			args.push_back (to_string (options.output_channels, std::dec));
+		}
 	}
 
 	args.push_back ("-r");
@@ -811,7 +839,7 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 	args.push_back ("-p");
 	args.push_back (to_string (options.period_size, std::dec));
 
-	if (get_jack_audio_driver_supports_latency_adjustment (options.driver)) {
+	if (!for_latency_measurement && get_jack_audio_driver_supports_latency_adjustment (options.driver)) {
 		if (options.input_latency) {
 			args.push_back ("-I");
 			args.push_back (to_string (options.input_latency, std::dec));
@@ -822,9 +850,11 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 		}
 	}
 
-	if (options.input_device == options.output_device && options.input_device != default_device_name) {
-		args.push_back ("-d");
-		args.push_back (command_line_input_device_name);
+	if (options.driver != dummy_driver_name) {
+		if (options.input_device == options.output_device && options.input_device != default_device_name) {
+			args.push_back ("-d");
+			args.push_back (command_line_input_device_name);
+		}
 	}
 
 	if (options.driver == alsa_driver_name) {
@@ -846,10 +876,15 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 		if (options.soft_mode) {
 			args.push_back ("-s");
 		}
+	}
 
-		if (!options.midi_driver.empty() && options.midi_driver != get_none_string ()) {
-			args.push_back ("-X");
-			args.push_back (options.midi_driver);
+	if (options.driver == alsa_driver_name || options.driver == coreaudio_driver_name) {
+
+		if (options.midi_driver != alsa_seq_midi_driver_name) {
+			if (!options.midi_driver.empty() && options.midi_driver != get_none_string ()) {
+				args.push_back ("-X");
+				args.push_back (options.midi_driver);
+			}
 		}
 	}
 
@@ -900,3 +935,54 @@ ARDOUR::write_jack_config_file (const std::string& config_file_path, const strin
 	jackdrc.close ();
 	return true;
 }
+
+vector<string>
+ARDOUR::enumerate_midi_options () 
+{
+	if (midi_options.empty()) {
+#ifdef HAVE_ALSA
+		midi_options.push_back (make_pair (_("(legacy) ALSA raw devices"), alsaraw_midi_driver_name));
+		midi_options.push_back (make_pair (_("(legacy) ALSA sequencer"), alsaseq_midi_driver_name));
+		midi_options.push_back (make_pair (_("ALSA (JACK1, 0.124 and later)"), alsa_seq_midi_driver_name));
+		midi_options.push_back (make_pair (_("ALSA (JACK2, 1.9.8 and later)"), alsa_raw_midi_driver_name));
+#endif
+#ifdef HAVE_PORTAUDIO
+		/* Windows folks: what name makes sense here? Are there other
+		   choices as well ?
+		*/
+		midi_options.push_back (make_pair (_("Multimedia Extension"), winmme_midi_driver_name));
+#endif
+#ifdef __APPLE__
+		midi_options.push_back (make_pair (_("CoreMIDI"), coremidi_midi_driver_name));
+#endif
+	}
+
+	vector<string> v;
+
+	v.push_back (get_none_string());
+
+	for (MidiOptions::const_iterator i = midi_options.begin(); i != midi_options.end(); ++i) {
+		v.push_back (i->first);
+	}
+
+	return v;
+}
+
+int
+ARDOUR::set_midi_option (ARDOUR::JackCommandLineOptions& options, const string& opt)
+{
+	if (opt.empty() || opt == get_none_string()) {
+		options.midi_driver = "";
+		return 0;
+	}
+
+	for (MidiOptions::const_iterator i = midi_options.begin(); i != midi_options.end(); ++i) {
+		if (i->first == opt) {
+			options.midi_driver = i->second;
+			return 0;
+		}
+	}
+
+	return -1;
+}
+

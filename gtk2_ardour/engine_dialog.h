@@ -36,6 +36,7 @@
 #include "pbd/signals.h"
 
 #include "ardour_dialog.h"
+#include "ardour_button.h"
 
 class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
   public:
@@ -62,6 +63,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     Gtk::ComboBoxText driver_combo;
     Gtk::ComboBoxText device_combo;
     Gtk::ComboBoxText sample_rate_combo;
+    Gtk::ComboBoxText midi_option_combo;
     Gtk::ComboBoxText buffer_size_combo;
     Gtk::Label        buffer_size_duration_label;
     Gtk::Adjustment input_latency_adjustment;
@@ -84,14 +86,17 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     Gtk::ComboBoxText lm_output_channel_combo;
     Gtk::ComboBoxText lm_input_channel_combo;
-    Gtk::Label        lm_start_stop_label;
-    Gtk::ToggleButton lm_measure_button;
+    Gtk::Label        lm_measure_label;
+    Gtk::Button       lm_measure_button;
     Gtk::Button       lm_use_button;
+    Gtk::Button       lm_back_button;
+    ArdourButton      lm_button;
     Gtk::Label        lm_title;
     Gtk::Label        lm_results;
     Gtk::Table        lm_table;
     Gtk::VBox         lm_vbox;
     bool              have_lm_results;
+    bool              lm_running;
 
     Gtk::Button* cancel_button;
     Gtk::Button* ok_button;
@@ -109,7 +114,6 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     
     uint32_t ignore_changes;
     uint32_t _desired_sample_rate;
-    bool     no_push;
     bool     started_at_least_once;
 
     void driver_changed ();
@@ -117,6 +121,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void sample_rate_changed ();
     void buffer_size_changed ();
     void parameter_changed ();
+    void midi_option_changed ();
 
     void setup_midi_tab_for_backend ();
     void setup_midi_tab_for_jack ();
@@ -133,6 +138,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     std::string get_device_name() const;
     std::string get_driver() const;
     std::string get_backend() const;
+    std::string get_midi_option () const;
 
     void device_changed ();
     void list_devices ();
@@ -149,6 +155,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	uint32_t input_channels;
 	uint32_t output_channels;
 	bool active;
+	std::string midi_option;
 
 	State() 
 		: input_latency (0)
@@ -188,7 +195,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void update_sensitivity ();
 
     /* latency measurement */
-    void latency_button_toggled ();
+    void latency_button_clicked ();
     bool check_latency_measurement ();
     sigc::connection latency_timeout;
     void enable_latency_tab ();
@@ -205,6 +212,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     PBD::ScopedConnection stopped_connection;
 
     void connect_disconnect_click ();
+    void calibrate_latency ();
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

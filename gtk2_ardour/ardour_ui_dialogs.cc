@@ -186,6 +186,11 @@ ARDOUR_UI::set_session (Session *s)
 
 	update_format ();
 
+	if (meter_box.get_parent()) {
+		transport_tearoff_hbox.remove (meter_box);
+		transport_tearoff_hbox.remove (editor_meter_peak_display);
+	}
+
 	if (editor_meter) {
 		meter_box.remove(*editor_meter);
 		delete editor_meter;
@@ -193,7 +198,9 @@ ARDOUR_UI::set_session (Session *s)
 		editor_meter_peak_display.hide();
 	}
 
-	if (_session && _session->master_out()) {
+	if (_session
+			&& _session->master_out()
+			&& _session->master_out()->n_outputs().n(DataType::AUDIO) > 0) {
 		editor_meter = new LevelMeterHBox(_session);
 		editor_meter->set_meter (_session->master_out()->shared_peak_meter().get());
 		editor_meter->clear_meters();
@@ -216,14 +223,12 @@ ARDOUR_UI::set_session (Session *s)
 		editor_meter_peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::editor_meter_peak_button_release), false);
 
 		if (Config->get_show_editor_meter()) {
+			transport_tearoff_hbox.pack_start (meter_box, false, false);
+			transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
 			meter_box.show();
 			editor_meter_peak_display.show();
-		} else {
-			meter_box.hide();
-			editor_meter_peak_display.hide();
 		}
-	}
-
+	} 
 }
 
 int
@@ -335,7 +340,7 @@ ARDOUR_UI::goto_mixer_window ()
 		screen = Gdk::Screen::get_default();
 	}
 	
-	if (screen && screen->get_height() < 700) {
+	if (g_getenv ("ARDOUR_LOVES_STUPID_TINY_SCREENS") == 0 && screen && screen->get_height() < 700) {
 		Gtk::MessageDialog msg (_("This screen is not tall enough to display the mixer window"));
 		msg.run ();
 		return;

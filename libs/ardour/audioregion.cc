@@ -736,7 +736,7 @@ AudioRegion::read_from_sources (SourceList const & srcs, framecnt_t limit, Sampl
 
 			/* copy an existing channel's data in for this non-existant one */
 
-			uint32_t channel = n_channels() % chan_n;
+			uint32_t channel = chan_n % n_channels();
 			boost::shared_ptr<AudioSource> src = boost::dynamic_pointer_cast<AudioSource> (srcs[channel]);
 
 			if (src->read (buf, _start + internal_offset, to_read) != to_read) {

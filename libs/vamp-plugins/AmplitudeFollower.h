@@ -37,7 +37,7 @@
 #ifndef _AMPLITUDE_FOLLOWER_PLUGIN_H_
 #define _AMPLITUDE_FOLLOWER_PLUGIN_H_
 
-#include "vamp-sdk/Plugin.h"
+#include <vamp-sdk/Plugin.h>
 
 /**
  * Example plugin implementing the SuperCollider amplitude follower

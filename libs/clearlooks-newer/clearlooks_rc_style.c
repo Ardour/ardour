@@ -306,7 +306,7 @@ clearlooks_gtk2_rc_parse_style (GtkSettings      *settings,
 static guint
 clearlooks_gtk2_rc_parse_dummy (GtkSettings      *settings,
                                 GScanner         *scanner,
-                                gchar            *name)
+                                const gchar      *name)
 {
 	(void) settings;
 

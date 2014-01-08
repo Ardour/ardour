@@ -46,7 +46,7 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
  	_gpm.set_controls (boost::shared_ptr<Route>(), s->meter(), s->amp());
 
 	_hbox.pack_start (_gpm, true, true);
-	set_name ("SendUIFrame");
+	set_name (X_("SendUIFrame"));
 
 	_vbox.set_spacing (5);
 	_vbox.set_border_width (5);
@@ -77,7 +77,7 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 	_panners.setup_pan ();
 
 	_gpm.setup_meters ();
-	_gpm.set_fader_name ("SendUIFrame");
+	_gpm.set_fader_name (X_("SendUIFader"));
 
 	// screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (
 	//		sigc::mem_fun (*this, &SendUI::update));

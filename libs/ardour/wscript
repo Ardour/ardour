@@ -1,4 +1,4 @@
-1#!/usr/bin/env python
+#!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
 from waflib import Options
 import os
@@ -180,7 +180,6 @@ libardour_sources = [
         'session_events.cc',
         'session_export.cc',
         'session_handle.cc',
-        'session_jack.cc',
         'session_ltc.cc',
         'session_metadata.cc',
         'session_midi.cc',
@@ -246,9 +245,7 @@ def configure(conf):
         'libardour3', conf.env['MAJOR'], conf.env['MINOR'], 0)
     autowaf.configure(conf)
     autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO',
-                      atleast_version='0.3.2')
-    autowaf.check_pkg(conf, 'jack', uselib_store='JACK',
-                      atleast_version='0.118.2')
+                      exact_version='0.3.2')
     autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
     autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF',
                       atleast_version='0.4.0')
@@ -299,9 +296,6 @@ def configure(conf):
     conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H',mandatory=False)
     conf.check(header_name='sys/statvfs.h', define_name='HAVE_SYS_STATVFS_H',mandatory=False)
 
-    conf.check(header_name='jack/session.h', uselib = [ 'JACK' ],
-               define_name='HAVE_JACK_SESSION')
-
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD',mandatory=False)
 
     if flac_supported():
@@ -338,11 +332,16 @@ def build(bld):
     obj.name         = 'ardour'
     obj.target       = 'ardour'
     obj.uselib       = ['GLIBMM','GTHREAD','AUBIO','SIGCPP','XML','UUID',
-                        'JACK','SNDFILE','SAMPLERATE','LRDF','AUDIOUNITS',
+                        'SNDFILE','SAMPLERATE','LRDF','AUDIOUNITS',
                         'OSX','BOOST','CURL','DL']
-    obj.use          = ['libpbd','libmidipp','libevoral','libvamphost',
-                        'libvampplugin','libtaglib','librubberband',
+    obj.use          = ['libpbd','libmidipp','libevoral','libvampplugin',
                         'libaudiographer','libltc','libtimecode']
+    if bld.is_defined('USE_EXTERNAL_LIBS'):
+        obj.uselib.extend(['RUBBERBAND', 'TAGLIB', 'LIBLTC', 'VAMPSDK',
+                           'VAMPHOSTSDK'])
+    else:
+        obj.use.extend(['libltc', 'librubberband', 'libtaglib', 'libvamphost'])
+
     obj.vnum         = LIBARDOUR_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
     obj.defines      = [
@@ -403,13 +402,17 @@ def build(bld):
         # only build these common sources once
         testcommon              = bld(features = 'cxx')
         testcommon.includes     = obj.includes + ['test', '../pbd', '..']
-        testcommon.source       = ['test/test_globals.cc', 'test/testrunner.cc', 'test/test_needing_session.cc',
+        testcommon.source       = ['test/testrunner.cc', 'test/test_needing_session.cc',
                                    'test/test_common.cc', 'test/dummy_lxvst.cc', 'test/audio_region_test.cc', 'test/test_util.cc']
-        testcommon.uselib       = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
+        testcommon.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                                    'SAMPLERATE','XML','LRDF','COREAUDIO']
-        testcommon.use          = ['libpbd','libmidipp','libevoral','libvamphost',
-                                   'libvampplugin','libtaglib','librubberband',
-                                   'libaudiographer','libltc','ardour']
+        testcommon.use          = ['libpbd','libmidipp','libevoral',
+                                   'libvampplugin','libaudiographer','ardour']
+        if bld.is_defined('USE_EXTERNAL_LIBS'):
+            testcommon.uselib.extend(['RUBBERBAND', 'TAGLIB', 'LIBLTC', 'VAMPSDK',
+                                      'VAMPHOSTSDK'])
+        else:
+            testcommon.use.extend(['libltc', 'librubberband', 'libtaglib', 'libvamphost'])
         testcommon.defines      = [
             'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
             'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
@@ -481,7 +484,7 @@ def build(bld):
 
         session_load_tester.includes  = obj.includes
         session_load_tester.includes.append ('test')
-        session_load_tester.uselib    = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
+        session_load_tester.uselib    = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                              'SAMPLERATE','XML','LRDF','COREAUDIO']
         session_load_tester.use       = ['libpbd','libmidipp','ardour']
         session_load_tester.name      = 'libardour-session-load-tester'
@@ -516,7 +519,7 @@ def build(bld):
 
             profilingobj.includes  = obj.includes
             profilingobj.includes.append ('test')
-            profilingobj.uselib    = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
+            profilingobj.uselib    = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                              'SAMPLERATE','XML','LRDF','COREAUDIO']
             profilingobj.use       = ['libpbd','libmidipp','ardour']
             profilingobj.name      = 'libardour-profiling'
@@ -543,11 +546,17 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     testobj              = bld(features = 'cxx cxxprogram')
     testobj.includes     = includes + ['test', '../pbd', '..']
     testobj.source       = sources
-    testobj.uselib       = ['CPPUNIT','SIGCPP','JACK','GLIBMM','GTHREAD',
+    testobj.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                             'SAMPLERATE','XML','LRDF','COREAUDIO']
-    testobj.use          = ['libpbd','libmidipp','libevoral','libvamphost',
-                            'libvampplugin','libtaglib','librubberband',
-                            'libaudiographer','libltc','ardour','testcommon']
+    testobj.use          = ['libpbd','libmidipp','libevoral','libvampplugin',
+                            'libaudiographer','ardour','testcommon']
+    if bld.is_defined('USE_EXTERNAL_LIBS'):
+        testobj.uselib.extend(['RUBBERBAND', 'TAGLIB', 'LIBLTC', 'VAMPSDK',
+                               'VAMPHOSTSDK'])
+    else:
+        testobj.use.extend(['libltc', 'librubberband', 'libtaglib',
+                            'libvamphost'])
+
     testobj.name         = name
     testobj.target       = target
     # not sure about install path

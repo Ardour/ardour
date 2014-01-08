@@ -63,6 +63,7 @@ Processor::Processor(Session& session, const string& name)
 	, _display_to_user (true)
 	, _pre_fader (false)
 	, _ui_pointer (0)
+	, _owner (0)
 {
 }
 
@@ -268,4 +269,16 @@ void
 Processor::set_ui (void* p)
 {
 	_ui_pointer = p;
+}
+
+void
+Processor::set_owner (SessionObject* o)
+{
+	_owner = o;
+}
+
+SessionObject*
+Processor::owner() const
+{
+	return _owner;
 }

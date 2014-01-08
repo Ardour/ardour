@@ -60,7 +60,7 @@ namespace ARDOUR {
 	 */
 	bool init (bool with_vst, bool try_optimization, const char* localedir);
 	void init_post_engine ();
-	int cleanup ();
+	void cleanup ();
 	bool no_auto_connect ();
 	void make_property_quarks ();
 

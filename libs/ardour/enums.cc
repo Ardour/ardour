@@ -95,7 +95,6 @@ setup_enum_writer ()
 	AutoState _AutoState;
 	AutoStyle _AutoStyle;
 	AutoConnectOption _AutoConnectOption;
-	RouteSortOrderKey _RouteSortOrderKey;
 	Session::StateOfTheState _Session_StateOfTheState;
 	Route::Flag _Route_Flag;
 	Source::Flag _Source_Flag;
@@ -180,6 +179,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (MeterKrms);
 	REGISTER_ENUM (MeterK20);
 	REGISTER_ENUM (MeterK14);
+	REGISTER_ENUM (MeterK12);
 	REGISTER_ENUM (MeterIEC1DIN);
 	REGISTER_ENUM (MeterIEC1NOR);
 	REGISTER_ENUM (MeterIEC2BBC);
@@ -281,8 +281,13 @@ setup_enum_writer ()
 
 	REGISTER_ENUM (UserOrdered);
 	REGISTER_ENUM (MixerOrdered);
-	REGISTER_ENUM (EditorOrdered);
 	REGISTER (_RemoteModel);
+	/*
+	 * EditorOrdered has been deprecated
+	 * since the removal of independent 
+	 * editor / mixer ordering.
+	*/
+	enum_writer.add_to_hack_table ("EditorOrdered", "MixerOrdered");
 
 	REGISTER_ENUM (FullCrossfade);
 	REGISTER_ENUM (ShortCrossfade);
@@ -433,10 +438,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Route, MasterOut);
 	REGISTER_CLASS_ENUM (Route, MonitorOut);
 	REGISTER_BITS (_Route_Flag);
-
-	REGISTER_ENUM (MixerSort);
-	REGISTER_ENUM (EditorSort);
-	REGISTER (_RouteSortOrderKey);
 
 	REGISTER_CLASS_ENUM (Source, Writable);
 	REGISTER_CLASS_ENUM (Source, CanRename);

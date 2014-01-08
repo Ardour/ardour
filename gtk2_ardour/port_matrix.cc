@@ -158,7 +158,7 @@ PortMatrix::init ()
 	_session->engine().PortRegisteredOrUnregistered.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
 
 	/* watch for route order keys changing, which changes the order of things in our global ports list(s) */
-	Route::SyncOrderKeys.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports_proxy, this, _1), gui_context());
+	Route::SyncOrderKeys.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports_proxy, this), gui_context());
 
 	/* Part 3: other stuff */
 
@@ -619,15 +619,13 @@ PortMatrix::setup_global_ports ()
 }
 
 void
-PortMatrix::setup_global_ports_proxy (RouteSortOrderKey sk)
+PortMatrix::setup_global_ports_proxy ()
 {
-	if (sk == EditorSort) {
-		/* Avoid a deadlock by calling this in an idle handler: see IOSelector::io_changed_proxy
-		   for a discussion.
-		*/
+	/* Avoid a deadlock by calling this in an idle handler: see IOSelector::io_changed_proxy
+	   for a discussion.
+	*/
 		
-		Glib::signal_idle().connect_once (sigc::mem_fun (*this, &PortMatrix::setup_global_ports));
-	}
+	Glib::signal_idle().connect_once (sigc::mem_fun (*this, &PortMatrix::setup_global_ports));
 }
 
 void

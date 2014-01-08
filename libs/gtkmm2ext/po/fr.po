@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-15 15:09-0400\n"
+"POT-Creation-Date: 2013-11-05 11:11-0500\n"
 "PO-Revision-Date: 2011-06-13 00:30+0200\n"
 "Language-Team: American English <kde-i18n-doc@kde.org>\n"
 "Language: en_US\n"
@@ -31,18 +31,18 @@ msgstr "Le bouton ne peut pas surveiller l'état d'un Controllable inexistant\n"
 msgid "Log"
 msgstr "Log"
 
-#: gtk_ui.cc:361
+#: gtk_ui.cc:363
 msgid ""
 "\n"
 "\n"
 "Shortcut: "
 msgstr ""
 
-#: gtk_ui.cc:633
+#: gtk_ui.cc:635
 msgid "Press To Exit"
 msgstr "Appuyer pour quitter"
 
-#: gtk_ui.cc:669
+#: gtk_ui.cc:671
 msgid "I'm sorry %1, I can't do that"
 msgstr ""
 
@@ -55,9 +55,8 @@ msgid "Control"
 msgstr "Ctrl"
 
 #: keyboard.cc:70 keyboard.cc:73 keyboard.cc:87 keyboard.cc:90
-#, fuzzy
 msgid "Key|Shift"
-msgstr "Maj"
+msgstr ""
 
 #: keyboard.cc:71
 msgid "Option"
@@ -71,14 +70,13 @@ msgstr "Alt"
 msgid "Meta"
 msgstr "Meta"
 
-#: keyboard.cc:139 keyboard.cc:531
+#: keyboard.cc:139 keyboard.cc:535
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: keyboard.cc:542
-#, fuzzy
+#: keyboard.cc:546
 msgid "key bindings file not found at \"%2\" or contains errors."
-msgstr "Raccourcis clavier pour %1 introuvable dans \"%1\" ou corrompu."
+msgstr ""
 
 #: tearoff.cc:57
 msgid "Click to tear this into its own window"
@@ -91,6 +89,3 @@ msgstr "Cliquez pour remettre dans la fenêtre principale"
 #: textviewer.cc:34
 msgid "Close"
 msgstr "Fermer"
-
-#~ msgid "Mod1"
-#~ msgstr "Mod1"

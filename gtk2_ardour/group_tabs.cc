@@ -447,23 +447,15 @@ GroupTabs::un_subgroup (RouteGroup* g)
 }
 
 struct CollectSorter {
-	CollectSorter (RouteSortOrderKey key) : _key (key) {}
-
 	bool operator () (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		return a->order_key (_key) < b->order_key (_key);
+		return a->order_key () < b->order_key ();
 	}
-
-        RouteSortOrderKey _key;
 };
 
 struct OrderSorter {
-	OrderSorter (RouteSortOrderKey key) : _key (key) {}
-	
 	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		return a->order_key (_key) < b->order_key (_key);
+		return a->order_key () < b->order_key ();
 	}
-
-	RouteSortOrderKey _key;
 };
 
 /** Collect all members of a RouteGroup so that they are together in the Editor or Mixer.
@@ -473,19 +465,19 @@ void
 GroupTabs::collect (RouteGroup* g)
 {
 	boost::shared_ptr<RouteList> group_routes = g->route_list ();
-	group_routes->sort (CollectSorter (order_key ()));
+	group_routes->sort (CollectSorter ());
 	int const N = group_routes->size ();
 
 	RouteList::iterator i = group_routes->begin ();
 	boost::shared_ptr<RouteList> routes = _session->get_routes ();
-	routes->sort (OrderSorter (order_key ()));
+	routes->sort (OrderSorter ());
 	RouteList::const_iterator j = routes->begin ();
 
 	int diff = 0;
 	int coll = -1;
 	while (i != group_routes->end() && j != routes->end()) {
 
-		int const k = (*j)->order_key (order_key ());
+		int const k = (*j)->order_key ();
 
 		if (*i == *j) {
 
@@ -496,14 +488,14 @@ GroupTabs::collect (RouteGroup* g)
 				--diff;
 			}
 
-			(*j)->set_order_key (order_key (), coll);
+			(*j)->set_order_key (coll);
 
 			++coll;
 			++i;
 
 		} else {
 
-			(*j)->set_order_key (order_key (), k + diff);
+			(*j)->set_order_key (k + diff);
 
 		}
 

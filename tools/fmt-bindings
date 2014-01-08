@@ -369,6 +369,8 @@ if ($html) {
 
 $boilerplate_header = <<END_HEADER;
 \\documentclass[10pt,landscape]{article}
+%\\documentclass[10pt,landscape,a4paper]{article}
+%\\documentclass[10pt,landscape,letterpaper]{article}
 \\usepackage{multicol}
 \\usepackage{calc}
 \\usepackage{ifthen}
@@ -387,7 +389,7 @@ $boilerplate_header = <<END_HEADER;
 % if using A4 paper. (This probably isnott strictly necessary.)
 % If using another size paper, use default 1cm margins.
 \\ifthenelse{\\lengthtest { \\paperwidth = 11in}}
-	{ \\geometry{top=.5in,left=1in,right=0in,bottom=.5in} }
+	{ \\geometry{top=.5in,left=.5in,right=.5in,bottom=.5in} }
 	{\\ifthenelse{ \\lengthtest{ \\paperwidth = 297mm}}
 		{\\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
 		{\\geometry{top=1cm,left=1cm,right=1cm,bottom=1cm} }
@@ -431,12 +433,11 @@ $boilerplate_footer = <<END_FOOTER;
 \\rule{0.3\\linewidth}{0.25pt}
 \\scriptsize
 
-Copyright \\copyright\\ 2009 ardour.org
+Copyright \\copyright\\ 2013 ardour.org
 
 % Should change this to be date of file, not current date.
-%\\verb!$Revision: 1.13 $, $Date: 2008/05/29 06:11:56 $.!
 
-http://ardour.org/manual
+http://manual.ardour.org
 
 \\end{multicols}
 \\end{document}

@@ -20,7 +20,6 @@
 #include "ardour/region.h"
 #include "ardour/audioregion.h"
 #include "audio_region_read_test.h"
-#include "test_globals.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION (AudioRegionReadTest);
 

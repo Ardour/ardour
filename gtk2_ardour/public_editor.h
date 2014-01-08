@@ -299,8 +299,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void set_xjadeo_sensitive (bool onoff) = 0;
 	virtual int  get_videotl_bar_height () const = 0;
 	virtual void set_video_timeline_height (const int h) = 0;
-	virtual void embed_audio_from_video (std::string, framepos_t n = 0) = 0;
-	virtual void export_video () = 0;
+	virtual void embed_audio_from_video (std::string, framepos_t n = 0, bool lock_position_to_video = true) = 0;
+	virtual void export_video (bool range = false) = 0;
 
 	virtual RouteTimeAxisView* get_route_view_by_route_id (const PBD::ID& id) const = 0;
 

@@ -27,7 +27,7 @@ public:
     Kmeterdsp (void);
     ~Kmeterdsp (void);
 
-    void process (float *p, int n);
+    void process (float const *p, int n);
     float read ();
     void reset ();
 

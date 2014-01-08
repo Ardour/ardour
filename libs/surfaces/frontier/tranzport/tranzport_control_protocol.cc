@@ -1921,9 +1921,7 @@ TranzportControlProtocol::print_noretry (int row, int col, const char *text)
 XMLNode&
 TranzportControlProtocol::get_state () 
 {
-	XMLNode* node = new XMLNode (X_("Protocol"));
-	node->add_property (X_("name"), _name);
-	return *node;
+	return ControlProtocol::get_state();
 }
 
 int

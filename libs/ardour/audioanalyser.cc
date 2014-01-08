@@ -19,7 +19,7 @@
 
 #include <cstring>
 
-#include "vamp-hostsdk/PluginLoader.h"
+#include <vamp-hostsdk/PluginLoader.h>
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
