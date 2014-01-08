@@ -44,7 +44,7 @@ ControlPoint::ControlPoint (AutomationLine& al)
 	_size = 4.0;
 
 	_item = new ArdourCanvas::Rectangle (&_line.canvas_group());
-	_item->set_fill (false);
+	_item->set_fill (true);
 	_item->set_fill_color (ARDOUR_UI::config()->get_canvasvar_ControlPointFill());
 	_item->set_outline_color (ARDOUR_UI::config()->get_canvasvar_ControlPointOutline());
 	_item->set_data ("control_point", this);
@@ -69,7 +69,7 @@ ControlPoint::ControlPoint (const ControlPoint& other, bool /*dummy_arg_to_force
 	_size = other._size;
 
 	_item = new ArdourCanvas::Rectangle (&_line.canvas_group());
-	_item->set_fill (false);
+	_item->set_fill (true);
 	_item->set_outline_color (ARDOUR_UI::config()->get_canvasvar_ControlPointOutline());
 
 	/* NOTE: no event handling in copied ControlPoints */
