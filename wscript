@@ -163,8 +163,9 @@ def set_compiler_flags (conf,opt):
             conf.define("_DARWIN_C_SOURCE", 1)
 
     if conf.options.asan:
-        conf.check_cxx(cxxflags=["-fsanitize=address"], linkflags=["-fsanitize=address"])
+        conf.check_cxx(cxxflags=["-fsanitize=address", "-fno-omit-frame-pointer"], linkflags=["-fsanitize=address"])
         cxx_flags.append('-fsanitize=address')
+        cxx_flags.append('-fno-omit-frame-pointer')
         linker_flags.append('-fsanitize=address')
 
     if is_clang and platform == "darwin":
@@ -508,7 +509,7 @@ def options(opt):
     opt.add_option('--cxx11', action='store_true', default=False, dest='cxx11',
                     help='Turn on c++11 compiler flags (-std=c++11)')
     opt.add_option('--address-sanitizer', action='store_true', default=False, dest='asan',
-                    help='Turn on AddressSanitizer (requires GCC >= 4.8 or clang)')
+                    help='Turn on AddressSanitizer (requires GCC >= 4.8 or clang >= 3.1)')
     for i in children:
         opt.recurse(i)
 
