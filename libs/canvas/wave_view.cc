@@ -390,9 +390,11 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 	}
 
 	if (show_zero_line()) {
+
 		set_source_rgba (context, _zero_color);
-		context->move_to (0, position (0.0));
-		context->line_to (n_peaks, position (0.0));
+		context->set_line_width (1.0);
+		context->move_to (0, position (0.0) + 0.5);
+		context->line_to (n_peaks, position (0.0) + 0.5);
 		context->stroke ();
 	}
 }
