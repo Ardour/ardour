@@ -37,6 +37,7 @@ DragHandle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) co
 {
 	Rectangle::render (area, context);
 
+#if 0
 	Duple circle_center (_left_side ? x0() : x1(), (y1() - y0())/2.0);
 	Duple window_circle_center = item_to_window (circle_center);
 	
@@ -49,4 +50,6 @@ DragHandle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) co
 	}
 
 	context->fill ();
+#endif
+
 }
