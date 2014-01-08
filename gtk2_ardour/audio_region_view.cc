@@ -665,7 +665,7 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 
 	/* draw the line */
 
-	redraw_end_xfade_to (ar, width, points, effective_height, handle_right+1, pwidth-1);
+	redraw_end_xfade_to (ar, width, points, effective_height, handle_right+1, pwidth-2);
 
 	// fade_out_shape->set (points);
 
