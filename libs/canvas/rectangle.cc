@@ -119,11 +119,19 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 void
 Rectangle::compute_bounding_box () const
 {
-	/* boundary is drawn inside our coordinates but expanded by 0.5 to get
-	 * single-pixel drawing correct.
-	 */
-	Rect r = _rect.fix();
-	_bounding_box = boost::optional<Rect> (r.expand (_outline_width/2.0));
+	if (!_rect.empty()) {
+		Rect r = _rect.fix ();
+
+		/* our outlines are always inside our coordinates, but we have
+		 * to ensure that our bounding box fully *contains* the
+		 * rectangle
+		 *
+		 * XXX: or something like that, waffle.
+		 *
+		 */
+		_bounding_box = r.expand (1.0);
+	}
+
 	_bounding_box_dirty = false;
 }
 
