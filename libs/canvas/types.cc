@@ -95,8 +95,8 @@ Rect
 Rect::expand (Distance amount) const
 {
 	Rect r;
-	r.x0 = x0 - amount;
-	r.y0 = y0 - amount;
+	r.x0 = max (0.0, x0 - amount);
+	r.y0 = max (0.0, y0 - amount);
 	r.x1 = safe_add (x1, amount);
 	r.y1 = safe_add (y1, amount);
 	return r;
