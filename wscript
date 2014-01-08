@@ -481,6 +481,8 @@ def options(opt):
                     help='Raise a floating point exception if a denormal is detected')
     opt.add_option('--test', action='store_true', default=False, dest='build_tests',
                     help="Build unit tests")
+    opt.add_option('--run-tests', action='store_true', default=False, dest='run_tests',
+                    help="Run tests after build")
     opt.add_option('--single-tests', action='store_true', default=False, dest='single_tests',
                     help="Build a single executable for each unit test")
     #opt.add_option('--tranzport', action='store_true', default=False, dest='tranzport',
@@ -681,7 +683,8 @@ def configure(conf):
         conf.define('ENABLE_NLS', 1)
         conf.env['ENABLE_NLS'] = True
     if opts.build_tests:
-        conf.env['BUILD_TESTS'] = opts.build_tests
+        conf.env['BUILD_TESTS'] = True
+        conf.env['RUN_TESTS'] = opts.run_tests
     if opts.single_tests:
         conf.env['SINGLE_TESTS'] = opts.single_tests
     #if opts.tranzport:
@@ -801,6 +804,9 @@ def build(bld):
 
     bld.install_files (os.path.join(bld.env['SYSCONFDIR'], 'ardour3', ), 'ardour_system.rc')
 
+    if bld.env['RUN_TESTS']:
+        bld.add_post_fun(test)
+
 def i18n(bld):
     bld.recurse (i18n_children)
 
@@ -815,3 +821,6 @@ def i18n_mo(bld):
 
 def tarball(bld):
     create_stored_revision()
+
+def test(bld):
+    subprocess.call("gtk2_ardour/artest")
