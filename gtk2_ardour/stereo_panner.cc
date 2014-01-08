@@ -34,6 +34,7 @@
 
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
+#include "ardour/panner_shell.h"
 
 #include "ardour_ui.h"
 #include "global_signals.h"
@@ -58,8 +59,9 @@ bool StereoPanner::have_colors = false;
 
 using namespace ARDOUR;
 
-StereoPanner::StereoPanner (boost::shared_ptr<Panner> panner)
-	: PannerInterface (panner)
+StereoPanner::StereoPanner (boost::shared_ptr<PannerShell> p)
+	: PannerInterface (p->panner())
+	, _panner_shell (p)
 	, position_control (_panner->pannable()->pan_azimuth_control)
 	, width_control (_panner->pannable()->pan_width_control)
 	, dragging_position (false)
@@ -80,6 +82,7 @@ StereoPanner::StereoPanner (boost::shared_ptr<Panner> panner)
 
 	position_control->Changed.connect (connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
 	width_control->Changed.connect (connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
+	_panner_shell->Changed.connect (connections, invalidator (*this), boost::bind (&StereoPanner::bypass_handler, this), gui_context());
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &StereoPanner::color_handler));
 
@@ -94,6 +97,10 @@ StereoPanner::~StereoPanner ()
 void
 StereoPanner::set_tooltip ()
 {
+	if (_panner_shell->bypassed()) {
+		_tooltip.set_tip (_("bypassed"));
+		return;
+	}
 	double pos = position_control->get_value(); // 0..1
 
 	/* We show the position of the center of the image relative to the left & right.
@@ -145,7 +152,11 @@ StereoPanner::on_expose_event (GdkEventExpose*)
 
 	/* background */
 
-	context->set_source_rgba (UINT_RGBA_R_FLT(b), UINT_RGBA_G_FLT(b), UINT_RGBA_B_FLT(b), UINT_RGBA_A_FLT(b));
+	if (!_panner_shell->bypassed()) {
+		context->set_source_rgba (UINT_RGBA_R_FLT(b), UINT_RGBA_G_FLT(b), UINT_RGBA_B_FLT(b), UINT_RGBA_A_FLT(b));
+	} else {
+		context->set_source_rgba (0.1, 0.1, 0.1, 0.2);
+	}
 	cairo_rectangle (context->cobj(), 0, 0, width, height);
 	context->fill ();
 
@@ -182,6 +193,10 @@ StereoPanner::on_expose_event (GdkEventExpose*)
 	context->rel_line_to (0, height);
 	context->set_source_rgba (UINT_RGBA_R_FLT(r), UINT_RGBA_G_FLT(r), UINT_RGBA_B_FLT(r), UINT_RGBA_A_FLT(r));
 	context->stroke ();
+
+	if (_panner_shell->bypassed()) {
+		return true;
+	}
 
 	/* compute & draw the line through the box */
 
@@ -265,6 +280,10 @@ bool
 StereoPanner::on_button_press_event (GdkEventButton* ev)
 {
 	if (PannerInterface::on_button_press_event (ev)) {
+		return true;
+	}
+
+	if (_panner_shell->bypassed()) {
 		return true;
 	}
 	
@@ -412,6 +431,10 @@ StereoPanner::on_button_release_event (GdkEventButton* ev)
 		return false;
 	}
 
+	if (_panner_shell->bypassed()) {
+		return false;
+	}
+
 	bool const dp = dragging_position;
 
 	_dragging = false;
@@ -442,6 +465,10 @@ StereoPanner::on_scroll_event (GdkEventScroll* ev)
 	double pv = position_control->get_value(); // 0..1.0 ; 0 = left
 	double wv = width_control->get_value(); // 0..1.0 ; 0 = left
 	double step;
+
+	if (_panner_shell->bypassed()) {
+		return false;
+	}
 
 	if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
 		step = one_degree;
@@ -474,6 +501,9 @@ StereoPanner::on_scroll_event (GdkEventScroll* ev)
 bool
 StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 {
+	if (_panner_shell->bypassed()) {
+		_dragging = false;
+	}
 	if (!_dragging) {
 		return false;
 	}
@@ -566,6 +596,10 @@ StereoPanner::on_key_press_event (GdkEventKey* ev)
 	double wv = width_control->get_value(); // 0..1.0 ; 0 = left
 	double step;
 
+	if (_panner_shell->bypassed()) {
+		return false;
+	}
+
 	if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
 		step = one_degree;
 	} else {
@@ -638,6 +672,12 @@ void
 StereoPanner::color_handler ()
 {
 	set_colors ();
+	queue_draw ();
+}
+
+void
+StereoPanner::bypass_handler ()
+{
 	queue_draw ();
 }
 

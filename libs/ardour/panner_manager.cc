@@ -24,7 +24,8 @@
 
 #include "pbd/error.h"
 #include "pbd/compose.h"
-#include "pbd/file_utils.h"
+#include "pbd/pathscanner.h"
+#include "pbd/stl_delete.h"
 
 #include "ardour/debug.h"
 #include "ardour/panner_manager.h"
@@ -59,25 +60,30 @@ PannerManager::instance ()
 	return *_instance;
 }
 
+static bool panner_filter (const string& str, void */*arg*/)
+{
+#ifdef __APPLE__
+	return str[0] != '.' && (str.length() > 6 && str.find (".dylib") == (str.length() - 6));
+#else
+	return str[0] != '.' && (str.length() > 3 && str.find (".so") == (str.length() - 3));
+#endif
+}
+
 void
 PannerManager::discover_panners ()
 {
-	vector<std::string> panner_modules;
+	PathScanner scanner;
+	std::vector<std::string *> *panner_modules;
+	std::string search_path = panner_search_path().to_string();
 
-	Glib::PatternSpec so_extension_pattern("*.so");
-	Glib::PatternSpec dylib_extension_pattern("*.dylib");
+	DEBUG_TRACE (DEBUG::Panning, string_compose (_("looking for panners in %1\n"), search_path));
 
-	find_matching_files_in_search_path (panner_search_path (),
-	                                    so_extension_pattern, panner_modules);
+	panner_modules = scanner (search_path, panner_filter, 0, false, true, 1, true);
 
-	find_matching_files_in_search_path (panner_search_path (),
-	                                    dylib_extension_pattern, panner_modules);
-
-	DEBUG_TRACE (DEBUG::Panning, string_compose (_("looking for panners in %1"), panner_search_path().to_string()));
-
-	for (vector<std::string>::iterator i = panner_modules.begin(); i != panner_modules.end(); ++i) {
-		panner_discover (*i);
+	for (vector<std::string *>::iterator i = panner_modules->begin(); i != panner_modules->end(); ++i) {
+		panner_discover (**i);
 	}
+	vector_delete (panner_modules);
 }
 
 int
@@ -97,7 +103,7 @@ PannerManager::panner_discover (string path)
 
 		if (i == panner_info.end()) {
 			panner_info.push_back (pinfo);
-			DEBUG_TRACE (DEBUG::Panning, string_compose(_("Panner discovered: \"%1\" in %2"), pinfo->descriptor.name, path));
+			DEBUG_TRACE (DEBUG::Panning, string_compose(_("Panner discovered: \"%1\" in %2\n"), pinfo->descriptor.name, path));
 		}
 	}
 
@@ -138,11 +144,20 @@ PannerManager::get_descriptor (string path)
 }
 
 PannerInfo*
-PannerManager::select_panner (ChanCount in, ChanCount out)
+PannerManager::select_panner (ChanCount in, ChanCount out, std::string const uri)
 {
 	PanPluginDescriptor* d;
 	int32_t nin = in.n_audio();
 	int32_t nout = out.n_audio();
+
+	/* look for user-preference -- check if channels match */
+	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
+		d = &(*p)->descriptor;
+		if (d->panner_uri != uri) continue;
+		if (d->in != nin && d->in != -1) continue;
+		if (d->out != nout && d->out != -1) continue;
+		return *p;
+	}
 
 	/* look for exact match first */
 
@@ -187,4 +202,16 @@ PannerManager::select_panner (ChanCount in, ChanCount out)
 	warning << string_compose (_("no panner discovered for in/out = %1/%2"), nin, nout) << endmsg;
 
 	return 0;
+}
+
+PannerInfo*
+PannerManager::get_by_uri (std::string uri)
+{
+	PannerInfo* pi = NULL;
+	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
+		if ((*p)->descriptor.panner_uri != uri) continue;
+		pi = (*p);
+		break;
+	}
+	return pi;
 }

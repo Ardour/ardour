@@ -174,6 +174,8 @@ protected:
 extern "C" {
 struct PanPluginDescriptor {
 	std::string name;
+	std::string panner_uri;
+	std::string gui_uri;
 	int32_t in;
 	int32_t out;
 	ARDOUR::Panner* (*factory)(boost::shared_ptr<ARDOUR::Pannable>, boost::shared_ptr<ARDOUR::Speakers>);

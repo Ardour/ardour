@@ -51,6 +51,7 @@
 #include "ardour/midi_port.h"
 #include "ardour/monitor_processor.h"
 #include "ardour/pannable.h"
+#include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/port.h"
@@ -1571,6 +1572,51 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 	set_processor_positions ();
 
 	return 0;
+}
+
+void
+Route::set_custom_panner_uri (std::string const panner_uri)
+{
+	if (!_main_outs->panner_shell()->set_user_selected_panner_uri(panner_uri)) {
+		DEBUG_TRACE (DEBUG::Panning, string_compose (_("Route::set_custom_panner_uri '%1 '%2' -- no change needed\n"), name(), panner_uri));
+		/* no change needed */
+		return;
+	}
+
+	DEBUG_TRACE (DEBUG::Panning, string_compose (_("Route::set_custom_panner_uri '%1 '%2' -- reconfigure I/O\n"), name(), panner_uri));
+
+	if (_in_configure_processors) {
+		DEBUG_TRACE (DEBUG::Panning, string_compose (_("Route::set_custom_panner_uri '%1' -- called while in_configure_processors\n"), name()));
+		return;
+	}
+
+	/* reconfigure I/O */
+	{
+		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		ProcessorState pstate (this);
+		if (panner())
+		{
+			/* there is already a panner it can just be re-configured in-place */
+			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			ChanCount in = panner()->in();
+			ChanCount out = panner()->out();
+			_main_outs->panner_shell()->configure_io(in, out);
+			_main_outs->panner_shell()->pannable()->set_panner(panner());
+		}
+		else
+		{
+			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+
+			if (configure_processors_unlocked (0)) {
+				pstate.restore ();
+				configure_processors_unlocked (0); // it worked before we tried to add it ...
+				return;
+			}
+		}
+	}
+
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+	_session.set_dirty ();
 }
 
 void

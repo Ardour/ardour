@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import os
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+LIBARDOUR_PAN2IN2OUT_LIB_VERSION = '1.0.0'
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    autowaf.configure(conf)
+
+def build(bld):
+    obj = bld(features = 'cxx cxxshlib')
+    obj.source = [ 'panner_balance.cc' ]
+    obj.export_includes = ['.']
+    obj.cxxflags     = '-DPACKAGE="libardour_panbalance"'
+    obj.includes     = ['.']
+    obj.name         = 'libardour_panbalance'
+    obj.target       = 'panbalance'
+    obj.use          = 'libardour libardour_cp libpbd'
+    obj.vnum         = LIBARDOUR_PAN2IN2OUT_LIB_VERSION
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'panners')
+
+def shutdown():
+    autowaf.shutdown()

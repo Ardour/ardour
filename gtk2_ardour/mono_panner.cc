@@ -35,6 +35,7 @@
 
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
+#include "ardour/panner_shell.h"
 
 #include "ardour_ui.h"
 #include "global_signals.h"
@@ -57,23 +58,25 @@ static const int top_step = 2;
 MonoPanner::ColorScheme MonoPanner::colors;
 bool MonoPanner::have_colors = false;
 
-MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::Panner> panner)
-	: PannerInterface (panner)
+MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
+	: PannerInterface (p->panner())
+	, _panner_shell (p)
 	, position_control (_panner->pannable()->pan_azimuth_control)
-        , drag_start_x (0)
-        , last_drag_x (0)
-        , accumulated_delta (0)
-        , detented (false)
-        , position_binder (position_control)
+	, drag_start_x (0)
+	, last_drag_x (0)
+	, accumulated_delta (0)
+	, detented (false)
+	, position_binder (position_control)
 	, _dragging (false)
 {
-        if (!have_colors) {
-                set_colors ();
-                have_colors = true;
-        }
+	if (!have_colors) {
+		set_colors ();
+		have_colors = true;
+	}
 
-        position_control->Changed.connect (connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
+	position_control->Changed.connect (connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
 
+	_panner_shell->Changed.connect (connections, invalidator (*this), boost::bind (&MonoPanner::bypass_handler, this), gui_context());
 	ColorsChanged.connect (sigc::mem_fun (*this, &MonoPanner::color_handler));
 
 	set_tooltip ();
@@ -87,6 +90,10 @@ MonoPanner::~MonoPanner ()
 void
 MonoPanner::set_tooltip ()
 {
+	if (_panner_shell->bypassed()) {
+		_tooltip.set_tip (_("bypassed"));
+		return;
+	}
         double pos = position_control->get_value(); // 0..1
 
         /* We show the position of the center of the image relative to the left & right.
@@ -128,13 +135,17 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 
         /* background */
 
-        context->set_source_rgba (UINT_RGBA_R_FLT(b), UINT_RGBA_G_FLT(b), UINT_RGBA_B_FLT(b), UINT_RGBA_A_FLT(b));
+        if (!_panner_shell->bypassed()) {
+                context->set_source_rgba (UINT_RGBA_R_FLT(b), UINT_RGBA_G_FLT(b), UINT_RGBA_B_FLT(b), UINT_RGBA_A_FLT(b));
+        } else {
+                context->set_source_rgba (0.1, 0.1, 0.1, 0.2);
+        }
         context->rectangle (0, 0, width, height);
         context->fill ();
 
-        double usable_width = width - pos_box_size;
+	double usable_width = width - pos_box_size;
 
-        /* compute the centers of the L/R boxes based on the current stereo width */
+	/* compute the centers of the L/R boxes based on the current stereo width */
 
         if (fmod (usable_width,2.0) == 0) {
                 /* even width, but we need odd, so that there is an exact center.
@@ -157,6 +168,10 @@ MonoPanner::on_expose_event (GdkEventExpose*)
         context->move_to ((pos_box_size/2.0) + (usable_width/2.0), 0);
         context->line_to ((pos_box_size/2.0) + (usable_width/2.0), height);
         context->stroke ();
+
+	if (_panner_shell->bypassed()) {
+		return true;
+	}
 
         /* left box */
 
@@ -250,6 +265,9 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
 	if (PannerInterface::on_button_press_event (ev)) {
 		return true;
 	}
+	if (_panner_shell->bypassed()) {
+		return false;
+	}
 	
         drag_start_x = ev->x;
         last_drag_x = ev->x;
@@ -319,6 +337,10 @@ MonoPanner::on_button_release_event (GdkEventButton* ev)
                 return false;
         }
 
+	if (_panner_shell->bypassed()) {
+		return false;
+	}
+
         _dragging = false;
 	_tooltip.target_stop_drag ();
         accumulated_delta = 0;
@@ -339,6 +361,10 @@ MonoPanner::on_scroll_event (GdkEventScroll* ev)
         double one_degree = 1.0/180.0; // one degree as a number from 0..1, since 180 degrees is the full L/R axis
         double pv = position_control->get_value(); // 0..1.0 ; 0 = left
         double step;
+
+	if (_panner_shell->bypassed()) {
+		return false;
+	}
 
         if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
                 step = one_degree;
@@ -365,6 +391,9 @@ MonoPanner::on_scroll_event (GdkEventScroll* ev)
 bool
 MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 {
+	if (_panner_shell->bypassed()) {
+		_dragging = false;
+	}
         if (!_dragging) {
                 return false;
         }
@@ -405,6 +434,10 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
         double one_degree = 1.0/180.0;
         double pv = position_control->get_value(); // 0..1.0 ; 0 = left
         double step;
+
+	if (_panner_shell->bypassed()) {
+		return false;
+	}
 
         if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
                 step = one_degree;
@@ -447,6 +480,12 @@ void
 MonoPanner::color_handler ()
 {
 	set_colors ();
+	queue_draw ();
+}
+
+void
+MonoPanner::bypass_handler ()
+{
 	queue_draw ();
 }
 

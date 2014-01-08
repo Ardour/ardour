@@ -63,6 +63,8 @@ using namespace PBD;
 
 static PanPluginDescriptor _descriptor = {
         "Mono to Stereo Panner",
+        "http://ardour.org/plugin/panner_1in2out",
+        "http://ardour.org/plugin/panner_1in2out#ui",
         1, 2, 
         Panner1in2out::factory
 };
@@ -332,6 +334,8 @@ XMLNode&
 Panner1in2out::get_state ()
 {
 	XMLNode& root (Panner::get_state ());
+	root.add_property (X_("uri"), _descriptor.panner_uri);
+	/* this is needed to allow new sessions to load with old Ardour: */
 	root.add_property (X_("type"), _descriptor.name);
 	return root;
 }

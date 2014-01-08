@@ -36,6 +36,7 @@
 namespace ARDOUR {
 
 class Session;
+class Route;
 class Panner;
 class BufferSet;
 class AudioBuffer;
@@ -70,11 +71,23 @@ public:
 	bool bypassed () const;
 	void set_bypassed (bool);
 
+	std::string current_panner_uri() const { return _current_panner_uri; }
+	std::string user_selected_panner_uri() const { return _user_selected_panner_uri; }
+	std::string panner_gui_uri() const { return _panner_gui_uri; }
+
   private:
+	friend class Route;
 	void distribute_no_automation (BufferSet& src, BufferSet& dest, pframes_t nframes, gain_t gain_coeff);
+	bool set_user_selected_panner_uri (std::string const uri);
+
 	boost::shared_ptr<Panner> _panner;
 	boost::shared_ptr<Pannable> _pannable;
 	bool _bypassed;
+
+	std::string _current_panner_uri;
+	std::string _user_selected_panner_uri;
+	std::string _panner_gui_uri;
+	bool _force_reselect;
 };
 
 } // namespace ARDOUR
