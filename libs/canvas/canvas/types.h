@@ -95,9 +95,7 @@ struct LIBCANVAS_API Rect
 	Rect expand (Distance) const;
 	bool contains (Duple) const;
 	Rect fix () const;
-
-        Rect convert_to_device (Cairo::RefPtr<Cairo::Context>) const;
-        Rect convert_to_user (Cairo::RefPtr<Cairo::Context>) const;
+	bool empty() const { return (x0 == x1 && y0 == y1); }
 
 	Distance width () const {
 		return x1 - x0;
