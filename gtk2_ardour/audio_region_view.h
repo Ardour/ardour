@@ -112,8 +112,8 @@ class AudioRegionView : public RegionView
 	void drag_start ();
 	void drag_end ();
 
-        void redraw_start_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, framecnt_t, ArdourCanvas::Points&, double);
-        void redraw_end_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, framecnt_t, ArdourCanvas::Points&, double);
+        void redraw_start_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, framecnt_t, ArdourCanvas::Points&, double, double);
+        void redraw_end_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, framecnt_t, ArdourCanvas::Points&, double, double, double);
 	void redraw_start_xfade ();
 	void redraw_end_xfade ();
 	
