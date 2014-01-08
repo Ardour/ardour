@@ -1093,7 +1093,12 @@ LV2Plugin::do_save_preset(string name)
 
 	lilv_state_free(state);
 
-	return Glib::filename_to_uri(Glib::build_filename(bundle, file_name));
+	std::string uri = Glib::filename_to_uri(Glib::build_filename(bundle, file_name));
+	LilvNode *node = lilv_new_uri(_world.world, uri.c_str());
+	lilv_world_load_bundle(_world.world, node);
+	lilv_world_load_resource(_world.world, node);
+	lilv_node_free(node);
+	return uri;
 }
 
 void

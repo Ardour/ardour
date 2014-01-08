@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>David Robillard</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Moog</Manufacturer>
+    <Model>MF-108M Cluster Flux</Model>
+    <CustomDeviceMode Name="Default">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Names"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Names">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+      </AvailableForChannels>
+      <UsesControlNameList Name="Controls"/>
+      <PatchBank Name="User Patches">
+        <PatchNameList Name="User Patches"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <ControlNameList Name="Controls">
+      <Control Type="7bit" Number="5" Name="Delay Time Portamento (Coarse)"/>
+      <Control Type="7bit" Number="37" Name="Delay Time Portamento (Fine)"/>
+
+      <Control Type="7bit" Number="7" Name="Output Level Control (Coarse)"/>
+      <Control Type="7bit" Number="39" Name="Output Level Control (Fine)"/>
+
+      <Control Type="7bit" Number="12" Name="Delay Time (Coarse)"/>
+      <Control Type="7bit" Number="44" Name="Delay Time (Fine)"/>
+
+      <Control Type="7bit" Number="13" Name="Feedback (Coarse)"/>
+      <Control Type="7bit" Number="45" Name="Feedback (Fine)"/>
+
+      <Control Type="7bit" Number="14" Name="Mix (Coarse)"/>
+      <Control Type="7bit" Number="46" Name="Mix (Fine)"/>
+
+      <Control Type="7bit" Number="15" Name="LFO Rate (Coarse)"/>
+      <Control Type="7bit" Number="47" Name="LFO Rate (Fine)"/>
+
+      <Control Type="7bit" Number="16" Name="LFO Amount (Coarse)"/>
+      <Control Type="7bit" Number="48" Name="LFO Amount (Fine)"/>
+
+      <Control Type="7bit" Number="70" Name="LFO Waveform">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Sine"/>
+            <Value Number="16" Name="Triangle"/>
+            <Value Number="32" Name="Square"/>
+            <Value Number="48" Name="Saw"/>
+            <Value Number="64" Name="Ramp"/>
+            <Value Number="80" Name="Random Stepped"/>
+            <Value Number="96" Name="Smoothed Random"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+
+      <Control Type="7bit" Number="74" Name="Range (Flange/Chorus)">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Flange"/>
+            <Value Number="64" Name="Chorus"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+
+      <Control Type="7bit" Number="91" Name="Bypass On/Off">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Bypassed"/>
+            <Value Number="64" Name="Active"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+
+      <Control Type="7bit" Number="71" Name="LFO Clock Divisions">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="4 Whole"/>
+            <Value Number="6" Name="3 Whole"/>
+            <Value Number="12" Name="2 Whole"/>
+            <Value Number="18" Name="WH + 1/2 Dot"/>
+            <Value Number="24" Name="WH + 1/2"/>
+            <Value Number="30" Name="WH + 1/4"/>
+            <Value Number="35" Name="WH"/>
+            <Value Number="41" Name="1/2 Dot"/>
+            <Value Number="47" Name="WH T"/>
+            <Value Number="53" Name="1/2"/>
+            <Value Number="59" Name="1/4 Dot"/>
+            <Value Number="64" Name="1/2 T"/>
+            <Value Number="70" Name="1/4"/>
+            <Value Number="76" Name="1/8 Dot"/>
+            <Value Number="82" Name="1/4 T"/>
+            <Value Number="88" Name="1/8"/>
+            <Value Number="94" Name="1/16 Dot"/>
+            <Value Number="99" Name="1/8 T"/>
+            <Value Number="105" Name="1/16"/>
+            <Value Number="111" Name="1/16 T"/>
+            <Value Number="117" Name="1/32"/>
+            <Value Number="123" Name="1/32 T"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+
+      <Control Type="7bit" Number="72" Name="LFO Phase Reset"/>
+
+      <Control Type="7bit" Number="73" Name="Enable LFO Note Reset">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Toggle"/>
+        </Values>
+      </Control>
+
+      <Control Type="7bit" Number="75" Name="Delay Time Range Multiplier">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Off"/>
+            <Value Number="32" Name="x2"/>
+            <Value Number="64" Name="x4"/>
+            <Value Number="96" Name="x8"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+
+      <Control Type="7bit" Number="76" Name="MIDI Sync Enable">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Toggle"/>
+        </Values>
+      </Control>
+
+      <Control Type="7bit" Number="77" Name="Enable MIDI Note Mode">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Toggle"/>
+        </Values>
+      </Control>
+
+      <Control Type="7bit" Number="78" Name="Enable MIDI Note Spillover">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Toggle"/>
+        </Values>
+      </Control>
+
+      <Control Type="7bit" Number="79" Name="Enable Mod Wheel to LFO Amount">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Toggle"/>
+        </Values>
+      </Control>
+
+      <Control Type="7bit" Number="80" Name="Pitch Bend Amount">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Off"/>
+            <Value Number="16" Name="2 Semi"/>
+            <Value Number="32" Name="3 Semi"/>
+            <Value Number="48" Name="4 Semi"/>
+            <Value Number="64" Name="5 Semi"/>
+            <Value Number="80" Name="7 Semi"/>
+            <Value Number="96" Name="12 Semi"/>
+            <Value Number="112" Name="24 Semi"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+
+      <Control Type="7bit" Number="92" Name="MIDI Tap Tempo (Latching)">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Tap"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+
+      <Control Type="7bit" Number="93" Name="MIDI Tap Tempo (Momentary)">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="64" Name="Tap"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      
+    </ControlNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

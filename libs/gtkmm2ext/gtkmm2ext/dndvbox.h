@@ -298,7 +298,7 @@ private:
 		/* make up an icon for the drag */
 		_drag_icon = new Gtk::Window (Gtk::WINDOW_POPUP);
 		
-		Gtk::Allocation a = child->widget().get_allocation ();
+		Gtk::Allocation a = child->action_widget().get_allocation ();
 		_drag_icon->set_size_request (a.get_width(), a.get_height());
 		
 		_drag_icon->signal_expose_event().connect (sigc::mem_fun (*this, &DnDVBox::icon_expose));
@@ -328,7 +328,7 @@ private:
 
 		cairo_t* cr = gdk_cairo_create (_drag_icon->get_window()->gobj ());
 
-		Glib::RefPtr<Gdk::Pixmap> p = _drag_child->widget().get_snapshot();
+		Glib::RefPtr<Gdk::Pixmap> p = _drag_child->action_widget().get_snapshot();
 		gdk_cairo_set_source_pixmap (cr, p->gobj(), 0, 0);
 		cairo_rectangle (cr, 0, 0, w, h);
 		cairo_fill (cr);

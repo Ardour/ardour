@@ -1985,9 +1985,9 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing
 			for (uint32_t i = output_start.get(*t); i < route->n_outputs().get(*t); ++i) {
 				string port;
 
-				if ((*t) == DataType::MIDI || Config->get_output_auto_connect() & AutoConnectPhysical) {
+				if ((*t) == DataType::MIDI && (Config->get_output_auto_connect() & AutoConnectPhysical)) {
 					port = physoutputs[(out_offset.get(*t) + i) % nphysical_out];
-				} else if ((*t) == DataType::AUDIO && Config->get_output_auto_connect() & AutoConnectMaster) {
+				} else if ((*t) == DataType::AUDIO && (Config->get_output_auto_connect() & AutoConnectMaster)) {
                                         /* master bus is audio only */
 					if (_master_out && _master_out->n_inputs().get(*t) > 0) {
 						port = _master_out->input()->ports().port(*t,

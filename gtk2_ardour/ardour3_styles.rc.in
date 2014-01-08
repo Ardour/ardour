@@ -731,6 +731,19 @@ style "midi_track_base" = "default"
   bg[SELECTED] = @@COLPREFIX@_bg
 }
 
+style "audio_track_fader" = "gain_fader"
+{
+  bg[PRELIGHT] = @@COLPREFIX@_audio_track
+}
+style "audio_bus_fader" = "gain_fader"
+{
+  bg[PRELIGHT] = @@COLPREFIX@_audio_bus
+}
+style "midi_track_fader" = "gain_fader"
+{
+  bg[PRELIGHT] = @@COLPREFIX@_midi_track
+}
+
 style "audio_track_metrics" = "audio_track_base"
 {
 	font_name = "@FONT_TINY@"
@@ -815,7 +828,9 @@ style "plugin_slider"
 	bg[ACTIVE] = shade (0.6, @@COLPREFIX@_lightest)
 	bg[INSENSITIVE] = shade (0.6, @@COLPREFIX@_lightest)
 	bg[SELECTED] = shade (0.6, @@COLPREFIX@_lightest)
-	bg[PRELIGHT] = shade (0.6, @@COLPREFIX@_lightest)
+
+	# outer round-corner-background (pixslider does its own hover prelight)
+	bg[PRELIGHT] = @@COLPREFIX@_bg
 
 	# the numeric display
 
@@ -824,6 +839,16 @@ style "plugin_slider"
 	text[INSENSITIVE] = @@COLPREFIX@_text
 	text[SELECTED] = @@COLPREFIX@_text
 	text[PRELIGHT] = @@COLPREFIX@_text
+}
+
+style "processor_control_button"  = "very_small_text"
+{
+}
+
+style "processor_control_slider"  = "plugin_slider"
+{
+	bg[PRELIGHT] = @@COLPREFIX@_darkest
+	bg[NORMAL] = @@COLPREFIX@_bg
 }
 
 style "track_list_display" = "small_bold_text"

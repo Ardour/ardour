@@ -125,7 +125,7 @@ public:
 		PostFader
 	};
 
-	void set_position (Position);
+	void set_position (Position, uint32_t);
 	boost::shared_ptr<ARDOUR::Processor> processor () const;
 	void set_enum_width (Width);
 
@@ -143,6 +143,7 @@ protected:
 	ArdourButton _button;
 	Gtk::VBox _vbox;
 	Position _position;
+	uint32_t _position_num;
 
 	virtual void setup_visuals ();
 
@@ -150,6 +151,7 @@ private:
 	void led_clicked();
 	void processor_active_changed ();
 	void processor_property_changed (const PBD::PropertyChange&);
+	void processor_configuration_changed (const ARDOUR::ChanCount in, const ARDOUR::ChanCount out);
 	std::string name (Width) const;
 	void setup_tooltip ();
 
@@ -159,6 +161,7 @@ private:
 	Gtk::StateType _visual_state;
 	PBD::ScopedConnection active_connection;
 	PBD::ScopedConnection name_connection;
+	PBD::ScopedConnection config_connection;
 
 	class Control : public sigc::trackable {
 	public:
@@ -168,7 +171,6 @@ private:
 		void add_state (XMLNode *) const;
 		void set_state (XMLNode const *);
 		void hide_things ();
-		void hide_label ();
 
 		bool visible () const {
 			return _visible;
@@ -178,7 +180,7 @@ private:
 			return _name;
 		}
 		
-		Gtk::VBox box;
+		Gtk::Alignment box;
 
 	private:
 		void slider_adjusted ();
@@ -191,7 +193,6 @@ private:
 		/* things for a slider */
 		Gtk::Adjustment _adjustment;
 		Gtkmm2ext::HSliderController _slider;
-		Gtk::Label _label;
 		Gtkmm2ext::PersistentTooltip _slider_persistant_tooltip;
 		/* things for a button */
 		ArdourButton _button;
@@ -204,12 +205,43 @@ private:
 	std::list<Control*> _controls;
 
 	void toggle_control_visibility (Control *);
-};
 
-class BlankProcessorEntry : public ProcessorEntry
-{
-  public:
-	BlankProcessorEntry (ProcessorBox *, Width w);
+	class PortIcon : public Gtk::DrawingArea {
+	public:
+		PortIcon(bool input) {
+			_input = input;
+			_ports = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 1);
+			set_size_request (-1, 3);
+		}
+		void set_ports(ARDOUR::ChanCount const ports) { _ports = ports; }
+	private:
+		bool on_expose_event (GdkEventExpose *);
+		bool _input;
+		ARDOUR::ChanCount _ports;
+	};
+
+	class RoutingIcon : public Gtk::DrawingArea {
+	public:
+		RoutingIcon() {
+			_sources = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 1);
+			_sinks = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 1);
+			_splitting = false;
+			set_size_request (-1, 4);
+		}
+		void set_sources(ARDOUR::ChanCount const sources) { _sources = sources; }
+		void set_sinks(ARDOUR::ChanCount const sinks) { _sinks = sinks; }
+		void set_splitting(const bool splitting) { _splitting = splitting; }
+	private:
+		bool on_expose_event (GdkEventExpose *);
+		ARDOUR::ChanCount _sources; // signals available to feed into the processor(s)
+		ARDOUR::ChanCount _sinks;   // combined number of outputs of the processor
+		bool _splitting;
+	};
+
+protected:
+	RoutingIcon _routing_icon;
+	PortIcon _input_icon;
+	PortIcon _output_icon;
 };
 
 class PluginInsertProcessorEntry : public ProcessorEntry
@@ -220,25 +252,9 @@ public:
 	void hide_things ();
 
 private:
-	void setup_visuals ();
 	void plugin_insert_splitting_changed ();
-
-	class SplittingIcon : public Gtk::DrawingArea {
-	public:
-		SplittingIcon() {
-			_inputs = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 1);
-			_outputs = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 2);
-		}
-		void set_inputs(ARDOUR::ChanCount const inputs) { _inputs = inputs; }
-		void set_outputs(ARDOUR::ChanCount const outputs) { _outputs = outputs; }
-	private:
-		bool on_expose_event (GdkEventExpose *);
-		ARDOUR::ChanCount _inputs;
-		ARDOUR::ChanCount _outputs;
-	};
-
 	boost::shared_ptr<ARDOUR::PluginInsert> _plugin_insert;
-	SplittingIcon _splitting_icon;
+
 	PBD::ScopedConnection _splitting_connection;
 };
 
@@ -434,6 +450,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void mixer_strip_delivery_changed (boost::weak_ptr<ARDOUR::Delivery>);
 
 	XMLNode* entry_gui_object_state (ProcessorEntry *);
+	PBD::ScopedConnection amp_config_connection;
 };
 
 #endif /* __ardour_gtk_processor_box__ */

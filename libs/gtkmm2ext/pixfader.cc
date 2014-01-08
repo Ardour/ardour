@@ -33,7 +33,9 @@ using namespace Gtk;
 using namespace std;
 
 #define CORNER_RADIUS 4
-#define FADER_RESERVE (2*CORNER_RADIUS)
+#define CORNER_SIZE   2
+#define CORNER_OFFSET 1
+#define FADER_RESERVE 5
 
 std::list<PixFader::FaderImage*> PixFader::_patterns;
 
@@ -54,6 +56,12 @@ PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length, int
 
 	adjustment.signal_value_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
 	adjustment.signal_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
+
+	if (_orien == VERT) {
+		DrawingArea::set_size_request(girth, span);
+	} else {
+		DrawingArea::set_size_request(span, girth);
+	}
 }
 
 PixFader::~PixFader ()
@@ -105,11 +113,8 @@ PixFader::create_patterns ()
 
 	cairo_surface_t* surface;
 	cairo_t* tc = 0;
-	float radius = CORNER_RADIUS;
 
-	double w = get_width();
-	
-	if (w <= 1 || get_height() <= 1) {
+	if (get_width() <= 1 || get_height() <= 1) {
 		return;
 	}
 
@@ -136,13 +141,12 @@ PixFader::create_patterns ()
 		
 		/* paint lower shade */
 		
-		w -= 2.0;
-
-		shade_pattern = cairo_pattern_create_linear (0.0, 0.0, w, 0);
+		shade_pattern = cairo_pattern_create_linear (0.0, 0.0, get_width() - 2 - CORNER_OFFSET , 0);
 		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, fr*0.8,fg*0.8,fb*0.8, 1.0);
 		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, fr*0.6,fg*0.6,fb*0.6, 1.0);
 		cairo_set_source (tc, shade_pattern);
-		Gtkmm2ext::rounded_top_half_rectangle (tc, 1.0, get_height(), w, get_height(), radius-1.5);
+		Gtkmm2ext::rounded_top_half_rectangle (tc, CORNER_OFFSET, get_height() + CORNER_OFFSET,
+				get_width() - CORNER_SIZE, get_height(), CORNER_RADIUS);
 		cairo_fill (tc);
 
 		cairo_pattern_destroy (shade_pattern);
@@ -169,7 +173,8 @@ PixFader::create_patterns ()
 		cairo_pattern_add_color_stop_rgba (shade_pattern, 0, fr*0.8,fg*0.8,fb*0.8, 1.0);
 		cairo_pattern_add_color_stop_rgba (shade_pattern, 1, fr*0.6,fg*0.6,fb*0.6, 1.0);
 		cairo_set_source (tc, shade_pattern);
-		Gtkmm2ext::rounded_right_half_rectangle (tc, 0, 1, get_width(), get_height() - 2.0, radius-1.5);
+		Gtkmm2ext::rounded_right_half_rectangle (tc, CORNER_OFFSET, CORNER_OFFSET,
+				get_width() - CORNER_OFFSET, get_height() - CORNER_SIZE, CORNER_RADIUS);
 		cairo_fill (tc);
 		cairo_pattern_destroy (shade_pattern);
 		
@@ -212,7 +217,6 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 		cairo_set_source_rgb (cr, br, bg, bb);
 		cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 		cairo_fill (cr);
-
 		return true;
 	}
 		   
@@ -223,18 +227,27 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 	float w = get_width();
 	float h = get_height();
 
+	Gdk::Color c = get_style()->get_bg (Gtk::STATE_PRELIGHT);
+	cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
+	cairo_rectangle (cr, 0, 0, w, h);
+	cairo_fill(cr);
+
+	cairo_set_line_width (cr, 1);
+	cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
+
 	cairo_matrix_t matrix;
+	Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS);
+	cairo_stroke_preserve(cr);
 
 	if (_orien == VERT) {
 
-		if (ds > h - FADER_RESERVE) {
-			ds = h - FADER_RESERVE;
+		if (ds > h - FADER_RESERVE - CORNER_OFFSET) {
+			ds = h - FADER_RESERVE - CORNER_OFFSET;
 		}
 
 		cairo_set_source (cr, pattern);
 		cairo_matrix_init_translate (&matrix, 0, (h - ds));
 		cairo_pattern_set_matrix (pattern, &matrix);
-		Gtkmm2ext::rounded_rectangle (cr, 0, 0, w, h, CORNER_RADIUS-1.5);
 		cairo_fill (cr);
 
 	} else {
@@ -258,7 +271,6 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 		cairo_set_source (cr, pattern);
 		cairo_matrix_init_translate (&matrix, w - ds, 0);
 		cairo_pattern_set_matrix (pattern, &matrix);
-		Gtkmm2ext::rounded_rectangle (cr, 0, 0, w, h, CORNER_RADIUS-1.5);
 		cairo_fill (cr);
 	}
 		
@@ -270,14 +282,14 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 		context->set_source_rgba (c.get_red_p()*1.5, c.get_green_p()*1.5, c.get_blue_p()*1.5, 0.85);
 		if ( _orien == VERT) {
 			if (unity_loc < h ) {
-				context->move_to (1.5, unity_loc + .5);
-				context->line_to (girth - 1.5, unity_loc + .5);
+				context->move_to (1.5, unity_loc + CORNER_OFFSET + .5);
+				context->line_to (girth - 1.5, unity_loc + CORNER_OFFSET + .5);
 				context->stroke ();
 			}
 		} else {
 			if ( unity_loc < w ){
-				context->move_to (unity_loc + .5, 1.5);
-				context->line_to (unity_loc + .5, girth - 1.5);
+				context->move_to (unity_loc - CORNER_OFFSET + .5, 1.5);
+				context->line_to (unity_loc - CORNER_OFFSET + .5, girth - 1.5);
 				context->stroke ();
 			}
 		}
@@ -293,11 +305,11 @@ PixFader::on_expose_event (GdkEventExpose* ev)
 	} 
 	
 	if (!get_sensitive()) {
-		Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), 3);
+		Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS);
 		cairo_set_source_rgba (cr, 0.505, 0.517, 0.525, 0.4);
 		cairo_fill (cr);
 	} else if (_hovering) {
-		Gtkmm2ext::rounded_rectangle (cr, 0, 0, get_width(), get_height(), 3);
+		Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS);
 		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.1);
 		cairo_fill (cr);
 	}
@@ -546,9 +558,9 @@ void
 PixFader::update_unity_position ()
 {
 	if (_orien == VERT) {
-		unity_loc = (int) rint (span * (1 - (default_value / (adjustment.get_upper() - adjustment.get_lower())))) - 1;
+		unity_loc = (int) rint (span * (1 - ((default_value - adjustment.get_lower()) / (adjustment.get_upper() - adjustment.get_lower())))) - 1;
 	} else {
-		unity_loc = (int) rint (default_value * span / (adjustment.get_upper() - adjustment.get_lower()));
+		unity_loc = (int) rint ((default_value - adjustment.get_lower()) * span / (adjustment.get_upper() - adjustment.get_lower()));
 	}
 
 	queue_draw ();
@@ -614,6 +626,7 @@ PixFader::on_state_changed (Gtk::StateType old_state)
 {
 	Widget::on_state_changed (old_state);
 	create_patterns ();
+	queue_draw ();
 }
 
 void
@@ -630,4 +643,5 @@ PixFader::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
 	*/
 
 	pattern = 0;
+	queue_draw ();
 }
