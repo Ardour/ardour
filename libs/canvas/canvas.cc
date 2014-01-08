@@ -195,8 +195,12 @@ Duple
 Canvas::canvas_to_window (Duple const & d) const
 {
 	Duple wd = d.translate (Duple (-_scroll_offset_x, -_scroll_offset_y));
+
+	/* Note that this intentionally always returns integer coordinates */
+
 	wd.x = round (wd.x);
 	wd.y = round (wd.y);
+
 	return wd;
 }	
 
@@ -210,10 +214,14 @@ Rect
 Canvas::canvas_to_window (Rect const & r) const
 {
 	Rect wr = r.translate (Duple (-_scroll_offset_x, -_scroll_offset_y));
-	wr.x0 = floor (wr.x0);
-	wr.x1 = ceil (wr.x1);
-	wr.y0 = floor (wr.y0);
-	wr.y1 = ceil (wr.y1);
+
+	/* Note that this intentionally always returns integer coordinates */
+
+	wr.x0 = round (wr.x0);
+	wr.x1 = round (wr.x1);
+	wr.y0 = round (wr.y0);
+	wr.y1 = round (wr.y1);
+
 	return wr;
 }	
 
