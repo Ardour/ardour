@@ -36,7 +36,6 @@ Rectangle::Rectangle (Group* parent)
 	, Fill (parent)
 	, _outline_what ((What) (LEFT | RIGHT | TOP | BOTTOM))
 {
-
 }
 
 Rectangle::Rectangle (Group* parent, Rect const & rect)
@@ -76,39 +75,54 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 
 		setup_outline_context (context);
 
-		context->save ();
-		context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
-		context->clip ();
+		if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
+			
+			context->rectangle (self.x0 + 0.5, self.y0 + 0.5, self.width(), self.height());
 
-		if (_outline_what & LEFT) {
-			context->move_to (self.x0, self.y0);
-			context->line_to (self.x0, self.y1);
-		}
-		
-		if (_outline_what & BOTTOM) {
-			context->move_to (self.x0, self.y1);
-			context->line_to (self.x1, self.y1);
-		}
-		
-		if (_outline_what & RIGHT) {
-			context->move_to (self.x1, self.y0);
-			context->line_to (self.x1, self.y1);
-		}
-		
-		if (_outline_what & TOP) {
-			context->move_to (self.x0, self.y0);
-			context->line_to (self.x1, self.y0);
+		} else {
+
+			context->set_line_cap (Cairo::LINE_CAP_SQUARE);
+			
+			/* see the cairo FAQ on single pixel lines to see why we do
+			 * this expansion of the perimeter.
+			 */
+
+			if (_outline_what & LEFT) {
+				/* vertical line: move x-coordinate by 0.5 pixels */
+				context->move_to (self.x0 + 0.5, self.y0);
+				context->line_to (self.x0 + 0.5, self.y1);
+			}
+			
+			if (_outline_what & BOTTOM) {
+				/* horizontal line: move y-coordinate by 0.5 pixels */
+				context->move_to (self.x0, self.y1 - 0.5);
+				context->line_to (self.x1, self.y1 - 0.5);
+			}
+			
+			if (_outline_what & RIGHT) {
+				/* vertical line: move x-coordinate by 0.5 pixels */
+				context->move_to (self.x1 - 0.5, self.y0);
+				context->line_to (self.x1 - 0.5, self.y1);
+			}
+			
+			if (_outline_what & TOP) {
+				/* horizontal line: move y-coordinate by 0.5 pixels */
+				context->move_to (self.x0, self.y0 + 0.5);
+				context->line_to (self.x1, self.y0 + 0.5);
+			}
 		}
 		
 		context->stroke ();
-		context->restore ();
 	}
 }
 
 void
 Rectangle::compute_bounding_box () const
 {
-	Rect r = _rect.fix ();
+	/* boundary is drawn inside our coordinates but expanded by 0.5 to get
+	 * single-pixel drawing correct.
+	 */
+	Rect r = _rect.fix();
 	_bounding_box = boost::optional<Rect> (r.expand (_outline_width/2.0));
 	_bounding_box_dirty = false;
 }
