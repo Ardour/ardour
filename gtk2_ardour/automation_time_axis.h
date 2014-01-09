@@ -135,12 +135,12 @@ class AutomationTimeAxisView : public TimeAxisView {
 	ArdourCanvas::Rectangle* _base_rect;
 	boost::shared_ptr<AutomationLine> _line;
 
+	std::string _name;
+
 	/** AutomationStreamView if we are editing region-based automation (for MIDI), otherwise 0 */
 	AutomationStreamView* _view;
 
-	std::string _name;
 	bool    ignore_toggle;
-
 	bool    first_call_to_set_height;
 
 	Gtk::Button        hide_button;
