@@ -116,11 +116,11 @@ MidiStreamView::create_region_view (boost::shared_ptr<Region> r, bool /*wfd*/, b
 }
 
 RegionView*
-MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd, bool recording)
+MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_data, bool recording)
 {
 	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion> (r);
 
-	if (region == 0) {
+	if (!region) {
 		return 0;
 	}
 
@@ -131,13 +131,13 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd,
 
 			(*i)->set_valid (true);
 
-			display_region(dynamic_cast<MidiRegionView*>(*i), wfd);
+			display_region(dynamic_cast<MidiRegionView*>(*i), wait_for_data);
 
 			return 0;
 		}
 	}
 
-	MidiRegionView* region_view = dynamic_cast<MidiRegionView*> (create_region_view (r, wfd, recording));
+	MidiRegionView* region_view = dynamic_cast<MidiRegionView*> (create_region_view (r, wait_for_data, recording));
 	if (region_view == 0) {
 		return 0;
 	}
@@ -151,7 +151,7 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd,
 	}
 
 	/* display events and find note range */
-	display_region (region_view, wfd);
+	display_region (region_view, wait_for_data);
 
 	/* fit note range if we are importing */
 	if (_trackview.session()->operation_in_progress (Operations::insert_file)) {
@@ -174,7 +174,7 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 		return;
 	}
 
-	region_view->enable_display(true);
+	region_view->enable_display (true);
 
 	boost::shared_ptr<MidiSource> source(region_view->midi_region()->midi_source(0));
 
@@ -190,6 +190,7 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 	region_view->set_height (child_height());
 	region_view->display_model(source->model());
 }
+
 
 void
 MidiStreamView::display_track (boost::shared_ptr<Track> tr)
