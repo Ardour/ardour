@@ -158,29 +158,20 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	}
 
 	/* background */
-
 	context->set_source_rgba (UINT_RGBA_R_FLT(b), UINT_RGBA_G_FLT(b), UINT_RGBA_B_FLT(b), UINT_RGBA_A_FLT(b));
 	context->rectangle (0, 0, width, height);
 	context->fill ();
 
+
 	double usable_width = width - pos_box_size;
 
 	/* compute the centers of the L/R boxes based on the current stereo width */
-
 	if (fmod (usable_width,2.0) == 0) {
-		/* even width, but we need odd, so that there is an exact center.
-			 So, offset cairo by 1, and reduce effective width by 1
-			 */
 		usable_width -= 1.0;
-		context->translate (1.0, 0.0);
 	}
-
 	const double half_lr_box = lr_box_size/2.0;
-	double left;
-	double right;
-
-	left = 4 + half_lr_box; // center of left box
-	right = width  - 4 - half_lr_box; // center of right box
+	const double left = 4 + half_lr_box; // center of left box
+	const double right = width - 4 - half_lr_box; // center of right box
 
 	/* center line */
 	context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
@@ -189,16 +180,17 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	context->line_to ((pos_box_size/2.0) + (usable_width/2.0), height);
 	context->stroke ();
 
+	context->set_line_width (1.0);
 	/* left box */
 
-	rounded_rectangle (context,
-			left - half_lr_box,
-			half_lr_box+step_down,
+	rounded_left_half_rectangle (context,
+			left - half_lr_box + .5,
+			half_lr_box + step_down,
 			lr_box_size, lr_box_size, corner_radius);
-	context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-	context->stroke_preserve ();
 	context->set_source_rgba (UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
-	context->fill ();
+	context->fill_preserve ();
+	context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
+	context->stroke();
 
 	/* add text */
 	int tw, th;
@@ -212,15 +204,14 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	pango_cairo_show_layout (context->cobj(), layout->gobj());
 
 	/* right box */
-
-	rounded_rectangle (context,
-			right - half_lr_box,
-			half_lr_box+step_down,
+	rounded_right_half_rectangle (context,
+			right - half_lr_box - .5,
+			half_lr_box + step_down,
 			lr_box_size, lr_box_size, corner_radius);
-	context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-	context->stroke_preserve ();
 	context->set_source_rgba (UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
-	context->fill ();
+	context->fill_preserve ();
+	context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
+	context->stroke();
 
 	/* add text */
 	layout->set_text (_("R"));
@@ -230,23 +221,34 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	pango_cairo_show_layout (context->cobj(), layout->gobj());
 
 	/* 2 lines that connect them both */
-	context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
 	context->set_line_width (1.0);
 
-	/* make the lines a little longer than they need to be, because the corners of
-		 the boxes are rounded and we don't want a gap
-		 */
-	context->move_to (left + half_lr_box - corner_radius, half_lr_box+step_down);
-	context->line_to (right - half_lr_box + corner_radius, half_lr_box+step_down);
-	context->stroke ();
+	if (_panner_shell->panner_gui_uri() != "http://ardour.org/plugin/panner_balance#ui") {
+		context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
+		context->move_to (left  + half_lr_box, half_lr_box + step_down);
+		context->line_to (right - half_lr_box, half_lr_box + step_down);
+		context->stroke ();
 
+		context->move_to (left  + half_lr_box, half_lr_box+step_down+lr_box_size);
+		context->line_to (right - half_lr_box, half_lr_box+step_down+lr_box_size);
+		context->stroke ();
+	} else {
+		context->move_to (left  + half_lr_box, half_lr_box+step_down+lr_box_size);
+		context->line_to (right - half_lr_box, half_lr_box+step_down+lr_box_size);
+		context->line_to (right - half_lr_box, half_lr_box+step_down+lr_box_size);
+		context->line_to ((pos_box_size/2.0) + (usable_width/2.0), half_lr_box + step_down);
+		context->close_path();
+		context->set_source_rgba (UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
+		context->fill_preserve ();
+		context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
+		context->stroke ();
 
-	context->move_to (left + half_lr_box - corner_radius, half_lr_box+step_down+lr_box_size);
-	context->line_to (right - half_lr_box + corner_radius, half_lr_box+step_down+lr_box_size);
-	context->stroke ();
+		context->move_to (left  + half_lr_box, half_lr_box + step_down);
+		context->line_to (right - half_lr_box, half_lr_box + step_down);
+		context->stroke ();
+	}
 
 	/* draw the position indicator */
-
 	double spos = (pos_box_size/2.0) + (usable_width * pos);
 
 	context->set_line_width (2.0);
@@ -264,9 +266,8 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	context->fill ();
 
 	/* marker line */
-
 	context->set_line_width (1.0);
-	context->move_to (spos, pos_box_size+4);
+	context->move_to (spos, pos_box_size + 5);
 	context->rel_line_to (0, half_lr_box+step_down);
 	context->set_source_rgba (UINT_RGBA_R_FLT(po), UINT_RGBA_G_FLT(po), UINT_RGBA_B_FLT(po), UINT_RGBA_A_FLT(po));
 	context->stroke ();
