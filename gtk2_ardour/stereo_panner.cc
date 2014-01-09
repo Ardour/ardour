@@ -206,8 +206,6 @@ StereoPanner::on_expose_event (GdkEventExpose*)
 	const double left  = center - pan_spread;
 	const double right = center + pan_spread;
 
-	printf("L %.2f  R %.2f  PW:%.2f\n", left, right, pan_spread);
-
 	/* center line */
 	context->set_line_width (1.0);
 	context->move_to ((usable_width + lr_box_size)/2.0, 0);
