@@ -23,6 +23,7 @@
 #include <cmath>
 
 #include <gtkmm/window.h>
+#include <pangomm/layout.h>
 
 #include "pbd/controllable.h"
 #include "pbd/compose.h"
@@ -58,6 +59,9 @@ static const int top_step = 2;
 MonoPanner::ColorScheme MonoPanner::colors;
 bool MonoPanner::have_colors = false;
 
+Pango::AttrList MonoPanner::panner_font_attributes;
+bool            MonoPanner::have_font = false;
+
 MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 	: PannerInterface (p->panner())
 	, _panner_shell (p)
@@ -72,6 +76,17 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 	if (!have_colors) {
 		set_colors ();
 		have_colors = true;
+	}
+	if (!have_font) {
+		Pango::FontDescription font;
+		Pango::AttrFontDesc* font_attr;
+		font = Pango::FontDescription ("ArdourMono");
+		font.set_weight (Pango::WEIGHT_BOLD);
+		font.set_size(9 * PANGO_SCALE);
+		font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
+		panner_font_attributes.change(*font_attr);
+		delete font_attr;
+		have_font = true;
 	}
 
 	position_control->Changed.connect (connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
@@ -186,13 +201,15 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	context->fill ();
 
         /* add text */
+        int tw, th;
+        Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create(get_pango_context());
+        layout->set_attributes (panner_font_attributes);
 
-        context->move_to (
-                       left - half_lr_box + 3,
-                       (lr_box_size/2) + step_down + 13);
-        context->select_font_face ("sans-serif", Cairo::FONT_SLANT_NORMAL, Cairo::FONT_WEIGHT_BOLD);
+        layout->set_text (_("L"));
+        layout->get_pixel_size(tw, th);
+        context->move_to (rint(left - tw/2), rint(lr_box_size + step_down - th/2));
         context->set_source_rgba (UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
-        context->show_text (_("L"));
+        pango_cairo_show_layout (context->cobj(), layout->gobj());
 
         /* right box */
 
@@ -206,12 +223,11 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	context->fill ();
 
         /* add text */
-
-        context->move_to (
-                       right - half_lr_box + 3,
-                       (lr_box_size/2)+step_down + 13);
+        layout->set_text (_("R"));
+        layout->get_pixel_size(tw, th);
+        context->move_to (rint(right - tw/2), rint(lr_box_size + step_down - th/2));
         context->set_source_rgba (UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
-        context->show_text (_("R"));
+        pango_cairo_show_layout (context->cobj(), layout->gobj());
 
         /* 2 lines that connect them both */
         context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));

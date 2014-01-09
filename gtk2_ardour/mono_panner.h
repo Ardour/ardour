@@ -81,6 +81,9 @@ class MonoPanner : public PannerInterface
 
 	bool _dragging;
 
+	static Pango::AttrList panner_font_attributes;
+	static bool have_font;
+
         static ColorScheme colors;
         static void set_colors ();
         static bool have_colors;
