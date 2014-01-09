@@ -706,9 +706,6 @@ ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_clip (cr);
 
-	cairo_set_line_width (cr, 5.0);
-	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
-
 	Gtk::Allocation a = get_allocation();
 	double const width = a.get_width();
 	double const height = a.get_height();
@@ -718,8 +715,6 @@ ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
 
 	cairo_rectangle (cr, 0, 0, width, height);
 	cairo_fill (cr);
-
-	const double y0 = _input ? height-.5 : .5;
 
 	if (_ports.n_total() > 1) {
 		for (uint32_t i = 0; i < _ports.n_total(); ++i) {
@@ -734,10 +729,9 @@ ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
 						UINT_RGBA_G_FLT(audio_port_color),
 						UINT_RGBA_B_FLT(audio_port_color));
 			}
-			const float x = rintf(width * (.2f + .6f * i / (_ports.n_total() - 1.f))) + .5f;
-			cairo_move_to (cr, x, y0);
-			cairo_close_path(cr);
-			cairo_stroke(cr);
+			const float x = rintf(width * (.2f + .6f * i / (_ports.n_total() - 1.f)));
+			cairo_rectangle (cr, x-1, 0, 3, height);
+			cairo_fill(cr);
 		}
 	} else if (_ports.n_total() == 1) {
 		if (_ports.n_midi() == 1) {
@@ -751,8 +745,9 @@ ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
 					UINT_RGBA_G_FLT(audio_port_color),
 					UINT_RGBA_B_FLT(audio_port_color));
 		}
-		cairo_move_to (cr, rintf(width * .5) + .5f, y0);
-		cairo_close_path(cr);
+		const float x = rintf(width * .5);
+		cairo_rectangle (cr, x-1, 0, 3, height);
+		cairo_fill(cr);
 		cairo_stroke(cr);
 	}
 
@@ -797,7 +792,7 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 			UINT_RGBA_B_FLT(midi_port_color));
 	if (midi_sources > 0 && midi_sinks > 0 && sinks > 1 && sources > 1) {
 		for (uint32_t i = 0 ; i < midi_sources; ++i) {
-			const float si_x = rintf(width * (.2f + .6f * i  / (sinks - 1.f))) + .5f;
+			const float si_x  = rintf(width * (.2f + .6f * i  / (sinks - 1.f))) + .5f;
 			const float si_x0 = rintf(width * (.2f + .6f * i / (sources - 1.f))) + .5f;
 			cairo_move_to (cr, si_x, height);
 			cairo_curve_to (cr, si_x, 0, si_x0, height, si_x0, 0);
