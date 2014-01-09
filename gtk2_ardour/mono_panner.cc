@@ -133,13 +133,18 @@ MonoPanner::on_expose_event (GdkEventExpose*)
         pf = colors.pos_fill;
         po = colors.pos_outline;
 
+        if (_panner_shell->bypassed()) {
+		b  = 0x20202040;
+		f  = 0x404040ff;
+		o  = 0x606060ff;
+		po = 0x606060ff;
+		pf = 0x404040ff;
+		t  = 0x606060ff;
+	}
+
         /* background */
 
-        if (!_panner_shell->bypassed()) {
-                context->set_source_rgba (UINT_RGBA_R_FLT(b), UINT_RGBA_G_FLT(b), UINT_RGBA_B_FLT(b), UINT_RGBA_A_FLT(b));
-        } else {
-                context->set_source_rgba (0.1, 0.1, 0.1, 0.2);
-        }
+	context->set_source_rgba (UINT_RGBA_R_FLT(b), UINT_RGBA_G_FLT(b), UINT_RGBA_B_FLT(b), UINT_RGBA_A_FLT(b));
         context->rectangle (0, 0, width, height);
         context->fill ();
 
@@ -168,10 +173,6 @@ MonoPanner::on_expose_event (GdkEventExpose*)
         context->move_to ((pos_box_size/2.0) + (usable_width/2.0), 0);
         context->line_to ((pos_box_size/2.0) + (usable_width/2.0), height);
         context->stroke ();
-
-	if (_panner_shell->bypassed()) {
-		return true;
-	}
 
         /* left box */
 
