@@ -2999,9 +2999,9 @@ void
 ARDOUR_UI::launch_cheat_sheet ()
 {
 #ifdef __APPLE__
-	PBD::open_uri ("https://community.ardour.org/files/ardour-2.8.3-bindings-osx.pdf");
+	PBD::open_uri ("http://manual.ardour.org/files/a3_mnemonic_cheat_sheet_osx.pdf");
 #else
-	PBD::open_uri ("https://community.ardour.org/files/ardour-2.8.3-bindings-x.pdf");
+	PBD::open_uri ("http://manual.ardour.org/files/a3_mnemonic_cheatsheet.pdf");
 #endif
 }
 
