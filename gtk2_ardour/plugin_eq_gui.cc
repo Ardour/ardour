@@ -20,13 +20,9 @@
 
 #ifdef COMPILER_MSVC
 #include <float.h>
-
-// 'std::isinf()' and 'std::isnan()' are not available in MSVC.
+/* isinf() & isnan() are C99 standards, which older MSVC doesn't provide */
 #define isinf(val) !((bool)_finite((double)val))
 #define isnan(val) (bool)_isnan((double)val)
-#else
-using std::isnan;
-using std::isinf;
 #endif
 
 #include "plugin_eq_gui.h"

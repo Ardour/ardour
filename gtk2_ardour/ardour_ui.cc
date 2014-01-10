@@ -759,7 +759,7 @@ ARDOUR_UI::starting ()
 				nsm->check ();
 
 				Glib::usleep (i);
-				if (nsm->is_active())
+				if (nsm->is_active()) {
 					break;
 				}
 			}
@@ -770,9 +770,8 @@ ARDOUR_UI::starting ()
 			// wait for open command from nsm server
 			for ( i = 0; i < 5000; ++i) {
 				nsm->check ();
-
 				Glib::usleep (1000);
-				if (nsm->client_id ())
+				if (nsm->client_id ()) {
 					break;
 				}
 			}

@@ -175,8 +175,8 @@ fixup_bundle_environment (int, char* [])
 	export_search_path (bundle_dir, "VAMP_PATH", "/lib");
 	export_search_path (bundle_dir, "GTK_PATH", "/lib/gtkengines");
 
-	setenv ("SUIL_MODULE_DIR", (bundle_dir + "/lib").c_str(), 1);
-	setenv ("PATH", (bundle_dir + "/MacOS:" + std::string(getenv ("PATH"))).c_str(), 1);
+	g_setenv ("SUIL_MODULE_DIR", (bundle_dir + "/lib").c_str(), 1);
+	g_setenv ("PATH", (bundle_dir + "/MacOS:" + std::string(g_getenv ("PATH"))).c_str(), 1);
 
 	/* unset GTK_RC_FILES so that we only load the RC files that we define
 	 */
@@ -285,8 +285,8 @@ fixup_bundle_environment (int /*argc*/, char* argv[])
 	export_search_path (dir_path, "VAMP_PATH", "/lib");
 	export_search_path (dir_path, "GTK_PATH", "/lib/gtkengines");
 
-	setenv ("SUIL_MODULE_DIR", (dir_path + "/lib").c_str(), 1);
-	setenv ("PATH", (dir_path + "/bin:" + std::string(getenv ("PATH"))).c_str(), 1);
+	g_setenv ("SUIL_MODULE_DIR", (dir_path + "/lib").c_str(), 1);
+	g_setenv ("PATH", (dir_path + "/bin:" + std::string(g_getenv ("PATH"))).c_str(), 1);
 
 	/* unset GTK_RC_FILES so that we only load the RC files that we define
 	 */

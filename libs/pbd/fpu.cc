@@ -39,11 +39,14 @@ FPU::FPU ()
 
 	_flags = Flags (0);
 
+#if defined(__MINGW64__) // Vkamyshniy: under __MINGW64__ the assembler code below is not compiled
+	return;
+#endif
+
 #if !( (defined __x86_64__) || (defined __i386__) ) // !ARCH_X86
 	return;
 #else
 
-	
 #ifndef _LP64 //USE_X86_64_ASM
 	asm volatile (
 		"mov $1, %%eax\n"

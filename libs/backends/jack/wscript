@@ -20,6 +20,8 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
+    autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.121.0')
+
     #
     # PortAudio is currently used to get a list of audio device names.
     # We should find a better way to do this that doesn't involve this
@@ -43,7 +45,7 @@ def build(bld):
     obj.includes = ['.']
     obj.name     = 'jack_audiobackend'
     obj.target   = 'jack_audiobackend'
-    if Options.options.dist_target == 'mingw':
+    if (bld.env['build_target'] == 'mingw'):
         obj.uselib   = [ 'JACK', 'PORTAUDIO' ]
     else:
         obj.uselib   = [ 'JACK' ]

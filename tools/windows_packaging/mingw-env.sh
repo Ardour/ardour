@@ -26,19 +26,18 @@ BUILD_DIR=$BASE/build
 BUILD_CACHE_FILE=$BUILD_DIR/c4che/_cache.py
 TOOLS_DIR=$BASE/tools/windows_packaging
 
-. ../define_versions.sh
-
 APPNAME=`grep -m 1 '^APPNAME' $BASE/wscript | awk '{print $3}' | sed "s/'//g"`
 
 # These are only relevant after a build
 if test -f $BUILD_CACHE_FILE
 then
+        . ../define_versions.sh
+
 	# Figure out the Build Type
-	if grep -q "DEBUG = True" $BUILD_CACHE_FILE; then
-		DEBUG=1
-		PACKAGE_DIR="$APPNAME-${version}-win32-dbg"
+	if [ x$DEBUG = xT ]; then
+		PACKAGE_DIR="$APPNAME-${release_version}-win32-dbg"
 	else
-		PACKAGE_DIR="$APPNAME-${version}-win32"
+		PACKAGE_DIR="$APPNAME-${release_version}-win32"
 	fi
 
 	if grep -q "BUILD_TESTS = True" $BUILD_CACHE_FILE; then
@@ -47,6 +46,3 @@ then
 
 	ARDOUR_DATA_DIR=$PACKAGE_DIR/share/ardour3
 fi
-
-# put this somewhere better...
-VIRT_IMAGE_PATH=$HOME/Data/virt-images/winxp.raw

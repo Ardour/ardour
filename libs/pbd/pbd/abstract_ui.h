@@ -52,7 +52,7 @@
 class Touchable;
 
 template<typename RequestObject>
-class /*ABSTRACT_UI_API*/ AbstractUI : public BaseUI /* see notes in visibility.h about why this is not LIBPBD_API */
+class ABSTRACT_UI_API AbstractUI : public BaseUI
 {
   public:
 	AbstractUI (const std::string& name);
@@ -75,7 +75,7 @@ class /*ABSTRACT_UI_API*/ AbstractUI : public BaseUI /* see notes in visibility.
         };
 	typedef typename RequestBuffer::rw_vector RequestBufferVector;
 
-#if defined(__MINGW32__)
+#if defined(__MINGW32__) && !defined (__MINGW64__)
 
 	struct pthread_cmp
 	{

@@ -109,7 +109,7 @@ public:
 
 	boost::shared_ptr<Region> region;
 
-    SessionEvent (Type t, Action a, framepos_t when, framepos_t where, double spd, bool yn = false, bool yn2 = false, bool yn3 = false)
+	SessionEvent (Type t, Action a, framepos_t when, framepos_t where, double spd, bool yn = false, bool yn2 = false, bool yn3 = false)
 		: type (t)
 		, action (a)
 		, action_frame (when)
@@ -151,7 +151,7 @@ private:
 	friend class Butler;
 };
 
-class LIBARDOUR_API SessionEventManager {
+class SessionEventManager {
 public:
 	SessionEventManager () : pending_events (2048),
 	                         auto_loop_event(0), punch_out_event(0), punch_in_event(0) {}

@@ -1789,7 +1789,7 @@ AudioDiskstream::get_state ()
 	LocaleGuard lg (X_("POSIX"));
 
 	boost::shared_ptr<ChannelList> c = channels.reader();
-	snprintf (buf, sizeof(buf), "%zd", c->size());
+	snprintf (buf, sizeof(buf), "%u", (unsigned int) c->size());
 	node.add_property ("channels", buf);
 
 	if (!capturing_sources.empty() && _session.get_record_enabled()) {

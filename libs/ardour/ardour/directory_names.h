@@ -27,6 +27,7 @@ namespace ARDOUR {
 
 	LIBARDOUR_API extern const char* const old_sound_dir_name;
 	LIBARDOUR_API extern const char* const sound_dir_name;
+	LIBARDOUR_API extern const char* const ladspa_dir_name;
 	LIBARDOUR_API extern const char* const midi_dir_name;
 	LIBARDOUR_API extern const char* const midi_patch_dir_name;
 	LIBARDOUR_API extern const char* const video_dir_name;

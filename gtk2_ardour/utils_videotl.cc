@@ -325,7 +325,7 @@ extern "C" {
 		struct A3MemoryStruct chunk;
 		long int httpstatus;
 		if (status) *status = 0;
-		//usleep(500000); return NULL; // TEST & DEBUG
+		//Glib::usleep(500000); return NULL; // TEST & DEBUG
 		if (strncmp("http://", u, 7)) return NULL;
 
 		chunk.data=NULL;

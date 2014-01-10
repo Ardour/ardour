@@ -540,7 +540,7 @@ SystemExec::terminate ()
 	
 	if (pid) {
 		::kill(pid, SIGTERM);
-		::usleep(50000);
+		usleep(50000);
 		sched_yield();
 		wait(WNOHANG);
 	}
