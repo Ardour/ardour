@@ -32,6 +32,7 @@
 
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
+#include "canvas/line.h"
 
 using namespace std;
 using namespace ArdourCanvas;
@@ -69,7 +70,7 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 {
 #ifdef CANVAS_DEBUG
 	if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-		cerr << "RENDER: " << area << endl;
+		cerr << this << " RENDER: " << area << endl;
 		//cerr << "CANVAS @ " << this << endl;
 		//dump (cerr);
 		//cerr << "-------------------------\n";
@@ -261,7 +262,7 @@ void
 Canvas::queue_draw_item_area (Item* item, Rect area)
 {
 	ArdourCanvas::Rect canvas_area = item->item_to_canvas (area);
-	// cerr << "CANVAS " << this << " for " << item->whatami() << ' ' << item->name << " invalidate " << area << " TRANSLATE AS " << canvas_area << endl;
+	// cerr << "CANVAS " << this << " for " << item->whatami() << ' ' << item->name << " invalidate " << area << " TRANSLATE AS " << canvas_area << " window = " << canvas_to_window (canvas_area) << std::endl;
 	request_redraw (canvas_area);
 }
 
@@ -587,9 +588,10 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 bool
 GtkCanvas::on_expose_event (GdkEventExpose* ev)
 {
-	Cairo::RefPtr<Cairo::Context> c = get_window()->create_cairo_context ();
+	Cairo::RefPtr<Cairo::Context> cairo_context = get_window()->create_cairo_context ();
+	Rect area (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height);
 
-	render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), c);
+	render (area, cairo_context);
 
 	return true;
 }
@@ -720,8 +722,13 @@ GtkCanvas::on_leave_notify_event (GdkEventCrossing* ev)
 void
 GtkCanvas::request_redraw (Rect const & request)
 {
-	Rect area = canvas_to_window (request);
-	queue_draw_area (area.x0, area.y0, area.width(), area.height());
+	boost::optional<Rect> req = request.intersection (visible_area());
+
+	if (req) {
+		Rect r = req.get();
+		Rect area = canvas_to_window (r);
+		queue_draw_area (area.x0, area.y0, area.width(), area.height());
+	}
 }
 
 /** Called to request that we try to get a particular size for ourselves.
