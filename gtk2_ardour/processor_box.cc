@@ -297,12 +297,17 @@ ProcessorEntry::setup_tooltip ()
 	if (_processor) {
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
 		if (pi) {
+			std::string postfix = "";
+			uint32_t replicated;
+			if ((replicated = pi->get_count()) > 1) {
+				postfix = string_compose(_("\nThis mono plugin has been replicated %1 times."), replicated);
+			}
 			if (pi->plugin()->has_editor()) {
 				ARDOUR_UI::instance()->set_tip (_button,
-						string_compose (_("<b>%1</b>\nDouble-click to show GUI.\nAlt+double-click to show generic GUI."), name (Wide)));
+						string_compose (_("<b>%1</b>\nDouble-click to show GUI.\nAlt+double-click to show generic GUI.%2"), name (Wide), postfix));
 			} else {
 				ARDOUR_UI::instance()->set_tip (_button,
-						string_compose (_("<b>%1</b>\nDouble-click to show generic GUI."), name (Wide)));
+						string_compose (_("<b>%1</b>\nDouble-click to show generic GUI.%2"), name (Wide), postfix));
 			}
 			return;
 		}
@@ -341,6 +346,13 @@ ProcessorEntry::name (Width w) const
 		}
 
 	} else {
+		boost::shared_ptr<ARDOUR::PluginInsert> pi;
+		uint32_t replicated;
+		if ((pi = boost::dynamic_pointer_cast<ARDOUR::PluginInsert> (_processor)) != 0
+				&& (replicated = pi->get_count()) > 1)
+		{
+			name_display += string_compose(_("(%1x1) "), replicated);
+		}
 
 		switch (w) {
 		case Wide:
