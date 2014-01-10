@@ -85,8 +85,6 @@ TimeAxisViewItem::set_constant_heights ()
 
         layout = foo.create_pango_layout (X_("H")); /* just the ascender */
 
-	std::cerr << " height: " << height << " baseline = " << layout->get_baseline() / PANGO_SCALE << std::endl;
-
         NAME_HEIGHT = height;
         NAME_Y_OFFSET = height + 2;
         NAME_HIGHLIGHT_SIZE = height + 2;
@@ -188,7 +186,7 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 
 	if (visibility & ShowFrame) {
 		frame = new ArdourCanvas::Rectangle (group, 
-						     ArdourCanvas::Rect (0.0, 1.0, 
+						     ArdourCanvas::Rect (0.0, 0.0, 
 									 trackview.editor().sample_to_pixel(duration), 
 									 trackview.current_height()));
 
@@ -200,6 +198,8 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 			frame->set_outline_color (ARDOUR_UI::config()->get_canvasvar_TimeAxisFrame());
 		}
 
+		// frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::RIGHT|ArdourCanvas::Rectangle::LEFT));
+
 	} else {
 
 		frame = 0;
@@ -207,23 +207,25 @@ TimeAxisViewItem::init (ArdourCanvas::Group* parent, double fpp, Gdk::Color cons
 
 	if (visibility & ShowNameHighlight) {
 
+		double width;
+		double start;
+
 		if (visibility & FullWidthNameHighlight) {
-			name_highlight = new ArdourCanvas::Rectangle (group, 
-								      ArdourCanvas::Rect (0.0, trackview.editor().sample_to_pixel(item_duration),
-											  trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, 
-											  trackview.current_height()));
-			CANVAS_DEBUG_NAME (name_highlight, string_compose ("name highlight for %1", get_item_name()));
+			start = 0.0;
+			width = trackview.editor().sample_to_pixel(item_duration);
 		} else {
-			name_highlight = new ArdourCanvas::Rectangle (group, 
-								      ArdourCanvas::Rect (1.0, trackview.editor().sample_to_pixel(item_duration) - 1, 
-											  trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, 
-											  trackview.current_height()));
-			CANVAS_DEBUG_NAME (name_highlight, string_compose ("name highlight for %1", get_item_name()));
+			start = 1.0;
+			width = trackview.editor().sample_to_pixel(item_duration) - 2.0;
 		}
 
+		name_highlight = new ArdourCanvas::Rectangle (group, 
+							      ArdourCanvas::Rect (start, 
+										  trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, 
+										  width - 4,
+										  trackview.current_height()));
+		CANVAS_DEBUG_NAME (name_highlight, string_compose ("name highlight for %1", get_item_name()));
 		name_highlight->set_data ("timeaxisviewitem", this);
                 name_highlight->set_outline_what (ArdourCanvas::Rectangle::TOP);
-                /* we should really use a canvas color property here */
 		name_highlight->set_outline_color (RGBA_TO_UINT (0,0,0,255));
 
 	} else {
@@ -574,10 +576,10 @@ TimeAxisViewItem::set_height (double height)
 	}
 
 	if (frame) {
-		frame->set_y1 (height - 1);
+		frame->set_y1 (height);
 		if (frame_handle_start) {
-			frame_handle_start->set_y1 (height - 1);
-			frame_handle_end->set_y1 (height - 1);
+			frame_handle_start->set_y1 (height);
+			frame_handle_end->set_y1 (height);
 		}
 	}
 
@@ -589,6 +591,10 @@ TimeAxisViewItem::set_height (double height)
 void
 TimeAxisViewItem::manage_name_highlight ()
 {
+	if (!name_highlight) {
+		return;
+	}
+
 	if (_height < NAME_HIGHLIGHT_THRESH) {
 		high_enough_for_name = false;
 	} else {
@@ -609,7 +615,7 @@ TimeAxisViewItem::manage_name_highlight ()
 		name_highlight->set_y1 ((double) _height - 1);
 		
 		/* x0 is always zero */
-		name_highlight->set_x1 (_width);
+		name_highlight->set_x1 (_width-1.0);
 			
 	} else {
 		name_highlight->hide();
