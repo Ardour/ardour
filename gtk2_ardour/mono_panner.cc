@@ -234,17 +234,15 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 		context->stroke ();
 	} else {
 		context->move_to (left  + half_lr_box, half_lr_box+step_down+lr_box_size);
+		context->line_to (left  + half_lr_box, half_lr_box + step_down);
+		context->line_to ((pos_box_size/2.0) + (usable_width/2.0), half_lr_box+step_down+lr_box_size);
+		context->line_to (right - half_lr_box, half_lr_box + step_down);
 		context->line_to (right - half_lr_box, half_lr_box+step_down+lr_box_size);
-		context->line_to (right - half_lr_box, half_lr_box+step_down+lr_box_size);
-		context->line_to ((pos_box_size/2.0) + (usable_width/2.0), half_lr_box + step_down);
 		context->close_path();
+
 		context->set_source_rgba (UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));
 		context->fill_preserve ();
 		context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
-		context->stroke ();
-
-		context->move_to (left  + half_lr_box, half_lr_box + step_down);
-		context->line_to (right - half_lr_box, half_lr_box + step_down);
 		context->stroke ();
 	}
 
