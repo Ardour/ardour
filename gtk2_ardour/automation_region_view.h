@@ -55,7 +55,7 @@ public:
 	boost::shared_ptr<AutomationLine> line() { return _line; }
 
 	// We are a ghost.  Meta ghosts?  Crazy talk.
-	virtual GhostRegion* add_ghost(TimeAxisView&) { return NULL; }
+	virtual GhostRegion* add_ghost(TimeAxisView&) { return 0; }
 
 	void set_height (double);
 	void reset_width_dependent_items(double pixel_width);
