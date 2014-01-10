@@ -84,12 +84,13 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	, _control (c)
 	, _automatable (a)
 	, _parameter (p)
-	, _base_rect (0)
-	, _view (show_regions ? new AutomationStreamView (*this) : 0)
+	, _base_rect (new ArdourCanvas::Rectangle (_canvas_display))
 	, _name (nom)
+	, _view (show_regions ? new AutomationStreamView (*this) : 0)
 	, auto_button (X_("")) /* force addition of a label */
 	, _show_regions (show_regions)
 {
+
 	CANVAS_DEBUG_NAME (_canvas_display, string_compose ("main for auto %2/%1", _name, r->name()));
 	CANVAS_DEBUG_NAME (selection_group, string_compose ("selections for auto %2/%1", _name, r->name()));
 	CANVAS_DEBUG_NAME (_ghost_group, string_compose ("ghosts for auto %2/%1", _name, r->name()));
@@ -114,21 +115,13 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	ignore_state_request = false;
 	first_call_to_set_height = true;
 
-	_base_rect = new ArdourCanvas::Rectangle (_canvas_display);
 	CANVAS_DEBUG_NAME (_base_rect, string_compose ("base rect for %1", _name));
 	_base_rect->set_x1 (ArdourCanvas::COORD_MAX);
 	_base_rect->set_outline_color (ARDOUR_UI::config()->get_canvasvar_AutomationTrackOutline());
-
-	/* outline ends and bottom */
-	_base_rect->set_outline_what (0x1 | 0x2 | 0x8);
+	_base_rect->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 	_base_rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_AutomationTrackFill());
-
 	_base_rect->set_data ("trackview", this);
-
-	_base_rect->Event.connect (sigc::bind (
-			sigc::mem_fun (_editor, &PublicEditor::canvas_automation_track_event),
-			_base_rect, this));
-
+	_base_rect->Event.connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_automation_track_event), _base_rect, this));
 	if (!a) {
 		_base_rect->lower_to_bottom();
 	}
