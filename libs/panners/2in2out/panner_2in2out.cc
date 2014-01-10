@@ -66,6 +66,7 @@ static PanPluginDescriptor _descriptor = {
         "http://ardour.org/plugin/panner_2in2out",
         "http://ardour.org/plugin/panner_2in2out#ui",
         2, 2,
+        10000,
         Panner2in2out::factory
 };
 

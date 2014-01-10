@@ -146,9 +146,11 @@ PannerManager::get_descriptor (string path)
 PannerInfo*
 PannerManager::select_panner (ChanCount in, ChanCount out, std::string const uri)
 {
+	PannerInfo* rv = NULL;
 	PanPluginDescriptor* d;
 	int32_t nin = in.n_audio();
 	int32_t nout = out.n_audio();
+	uint32_t priority = 0;
 
 	/* look for user-preference -- check if channels match */
 	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
@@ -164,40 +166,51 @@ PannerManager::select_panner (ChanCount in, ChanCount out, std::string const uri
 	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
 		d = &(*p)->descriptor;
 
-		if (d->in == nin && d->out == nout) {
-			return *p;
+		if (d->in == nin && d->out == nout && d->priority > priority) {
+			priority = d->priority;
+			rv = *p;
 		}
 	}
+	if (rv) { return rv; }
 
 	/* no exact match, look for good fit on inputs and variable on outputs */
 
+	priority = 0;
 	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
 		d = &(*p)->descriptor;
 
-		if (d->in == nin && d->out == -1) {
-			return *p;
+		if (d->in == nin && d->out == -1 && d->priority > priority) {
+			priority = d->priority;
+			rv = *p;
 		}
 	}
+	if (rv) { return rv; }
 
 	/* no exact match, look for good fit on outputs and variable on inputs */
 
+	priority = 0;
 	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
 		d = &(*p)->descriptor;
 
-		if (d->in == -1 && d->out == nout) {
-			return *p;
+		if (d->in == -1 && d->out == nout && d->priority > priority) {
+			priority = d->priority;
+			rv = *p;
 		}
 	}
+	if (rv) { return rv; }
 
 	/* no exact match, look for variable fit on inputs and outputs */
 
+	priority = 0;
 	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
 		d = &(*p)->descriptor;
 
-		if (d->in == -1 && d->out == -1) {
-			return *p;
+		if (d->in == -1 && d->out == -1 && d->priority > priority) {
+			priority = d->priority;
+			rv = *p;
 		}
 	}
+	if (rv) { return rv; }
 
 	warning << string_compose (_("no panner discovered for in/out = %1/%2"), nin, nout) << endmsg;
 
