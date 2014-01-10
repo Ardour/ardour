@@ -59,7 +59,7 @@ WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region
 	, _samples_per_pixel (0)
 	, _height (64)
 	, _wave_color (0xffffffff)
-	, _show_zero (true)
+	, _show_zero (false)
 	, _zero_color (0xff0000ff)
 	, _clip_color (0xff0000ff)
 	, _logscaled (_global_logscaled)
