@@ -448,7 +448,7 @@ void
 AudioRegionView::setup_fade_handle_positions()
 {
 	/* position of fade handle offset from the top of the region view */
-	double const handle_pos = 2;
+	double const handle_pos = 1.0;
 
 	if (fade_in_handle) {
 		fade_in_handle->set_y0 (handle_pos);
@@ -623,7 +623,7 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 	/* Put the fade out handle so that its right side is at the end-of-fade line;
 	 */
 	fade_out_handle->set_x0 (handle_right - handle_size);
-	fade_out_handle->set_x1 (handle_right - 1);
+	fade_out_handle->set_x1 (handle_right);
 
 	/* don't show shape if its too small */
 
@@ -665,7 +665,7 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 
 	/* draw the line */
 
-	redraw_end_xfade_to (ar, width, points, effective_height, handle_right+1, pwidth-2);
+	redraw_end_xfade_to (ar, width, points, effective_height, handle_right, pwidth-2);
 
 	// fade_out_shape->set (points);
 
@@ -735,7 +735,7 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 		start_xfade_rect->set_data ("regionview", this);
 	}
 
-	start_xfade_rect->set (ArdourCanvas::Rect (1.0, 2.0, rect_width, effective_height));
+	start_xfade_rect->set (ArdourCanvas::Rect (1.0, 0.0, rect_width, effective_height));
 	start_xfade_rect->show ();
 
 	start_xfade_in->set (points);
@@ -825,7 +825,7 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 		end_xfade_rect->set_data ("regionview", this);
 	}
 
-	end_xfade_rect->set (ArdourCanvas::Rect (rect_edge, 2.0, rect_edge + rect_width, effective_height));
+	end_xfade_rect->set (ArdourCanvas::Rect (rect_edge, 1.0, rect_edge + rect_width, effective_height));
 	end_xfade_rect->show ();
 
 	end_xfade_in->set (points);
@@ -1146,7 +1146,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	wave->set_y_position (yoff);
 	wave->set_height (ht);
 	wave->set_samples_per_pixel (samples_per_pixel);
-	wave->set_show_zero_line (true);
+	wave->set_show_zero_line (false);
 
 	switch (Config->get_waveform_shape()) {
 	case Rectified:
