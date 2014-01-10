@@ -238,7 +238,7 @@ void
 Group::raise_child_to_top (Item* i)
 {
 	if (!_items.empty()) {
-		if (_items.front() == i) {
+		if (_items.back() == i) {
 			return;
 		}
 	}
@@ -270,7 +270,7 @@ void
 Group::lower_child_to_bottom (Item* i)
 {
 	if (!_items.empty()) {
-		if (_items.back() == i) {
+		if (_items.front() == i) {
 			return;
 		}
 	}
