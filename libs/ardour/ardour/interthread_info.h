@@ -30,7 +30,7 @@ namespace ARDOUR {
 
 	class InterThreadInfo {
 	public:
-		InterThreadInfo () : done (false), cancel (false), progress (0), thread (0) {}
+		InterThreadInfo () : done (false), cancel (false), progress (0), thread () {}
 
 		volatile bool  done;
 		volatile bool  cancel;

@@ -26,7 +26,7 @@
    first include the revelant container type header.
 */
 #if defined(_CPP_VECTOR) || defined(_GLIBCXX_VECTOR) || defined(__SGI_STL_VECTOR) || defined(_LIBCPP_VECTOR)
-template<class T> LIBPBD_API void vector_delete (std::vector<T *> *vec)
+template<class T> /*LIBPBD_API*/ void vector_delete (std::vector<T *> *vec)
 {
 	typename std::vector<T *>::iterator i;
 	
@@ -38,7 +38,7 @@ template<class T> LIBPBD_API void vector_delete (std::vector<T *> *vec)
 #endif // _CPP_VECTOR || _GLIBCXX_VECTOR || __SGI_STL_VECTOR || _LIBCPP_VECTOR
 
 #if defined(_CPP_MAP) || defined(_GLIBCXX_MAP) || defined(__SGI_STL_MAP)
-template<class K, class T> LIBPBD_API void map_delete (std::map<K, T *> *m) 
+template<class K, class T> /*LIBPBD_API*/ void map_delete (std::map<K, T *> *m) 
 {
 	typename std::map<K, T *>::iterator i;
 
@@ -50,7 +50,7 @@ template<class K, class T> LIBPBD_API void map_delete (std::map<K, T *> *m)
 #endif // _CPP_MAP || _GLIBCXX_MAP || __SGI_STL_MAP
 
 #if defined(_CPP_LIST) || defined(_GLIBCXX_LIST) || defined(__SGI_STL_LIST)
-template<class T> LIBPBD_API void list_delete (std::list<T *> *l) 
+template<class T> /*LIBPBD_API*/ void list_delete (std::list<T *> *l) 
 {
 	typename std::list<T *>::iterator i;
 
@@ -63,7 +63,7 @@ template<class T> LIBPBD_API void list_delete (std::list<T *> *l)
 #endif // _CPP_LIST || _GLIBCXX_LIST || __SGI_STL_LIST
 
 #if defined(_CPP_SLIST) || defined(_GLIBCXX_SLIST) || defined(__SGI_STL_SLIST)
-template<class T> LIBPBD_API void slist_delete (std::slist<T *> *l) 
+template<class T> /*LIBPBD_API*/ void slist_delete (std::slist<T *> *l) 
 {
 	typename std::slist<T *>::iterator i;
 
@@ -76,7 +76,7 @@ template<class T> LIBPBD_API void slist_delete (std::slist<T *> *l)
 #endif // _CPP_SLIST || _GLIBCXX_SLIST || __SGI_STL_SLIST
 
 #if defined(_CPP_SET) || defined(_GLIBCXX_SET) || defined(__SGI_STL_SET)
-template<class T> void LIBPBD_API set_delete (std::set<T *> *sset) 
+template<class T> void /*LIBPBD_API*/ set_delete (std::set<T *> *sset) 
 {
 	typename std::set<T *>::iterator i;
 	

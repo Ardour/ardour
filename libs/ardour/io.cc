@@ -19,6 +19,7 @@
 #include <fstream>
 #include <algorithm>
 #include <cmath>
+#include <vector>
 
 #include <unistd.h>
 #include <locale.h>
@@ -395,7 +396,9 @@ IO::disconnect (void* src)
 int
 IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 {
+#ifndef PLATFORM_WINDOWS
 	assert (!AudioEngine::instance()->process_lock().trylock());
+#endif
 
 	boost::shared_ptr<Port> port;
 
@@ -466,7 +469,9 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 int
 IO::ensure_ports (ChanCount count, bool clear, void* src)
 {
+#ifndef PLATFORM_WINDOWS
 	assert (!AudioEngine::instance()->process_lock().trylock());
+#endif
 
 	bool changed = false;
 
@@ -501,7 +506,9 @@ IO::ensure_ports (ChanCount count, bool clear, void* src)
 int
 IO::ensure_io (ChanCount count, bool clear, void* src)
 {
+#ifndef PLATFORM_WINDOWS
 	assert (!AudioEngine::instance()->process_lock().trylock());
+#endif
 
 	return ensure_ports (count, clear, src);
 }
@@ -1373,20 +1380,20 @@ IO::build_legal_port_name (DataType type)
 
 	limit = name_size - AudioEngine::instance()->my_name().length() - (suffix.length() + 5);
 
-	char buf1[name_size+1];
-	char buf2[name_size+1];
+	std::vector<char> buf1(name_size+1);
+	std::vector<char> buf2(name_size+1);
 
 	/* colons are illegal in port names, so fix that */
 
 	string nom = _name.val();
 	replace_all (nom, ":", ";");
 
-	snprintf (buf1, name_size+1, ("%.*s/%s"), limit, nom.c_str(), suffix.c_str());
+	snprintf (&buf1[0], name_size+1, ("%.*s/%s"), limit, nom.c_str(), suffix.c_str());
 
-	int port_number = find_port_hole (buf1);
-	snprintf (buf2, name_size+1, "%s %d", buf1, port_number);
+	int port_number = find_port_hole (&buf1[0]);
+	snprintf (&buf2[0], name_size+1, "%s %d", &buf1[0], port_number);
 
-	return string (buf2);
+	return string (&buf2[0]);
 }
 
 int32_t
@@ -1404,14 +1411,13 @@ IO::find_port_hole (const char* base)
 	 */
 
 	for (n = 1; n < 9999; ++n) {
-		size_t size = AudioEngine::instance()->port_name_size() + 1;
-		char buf[size];
+		std::vector<char> buf (AudioEngine::instance()->port_name_size());
 		PortSet::iterator i = _ports.begin();
 
-		snprintf (buf, size, _("%s %u"), base, n);
+		snprintf (&buf[0], jack_port_name_size(), _("%s %u"), base, n);
 
 		for ( ; i != _ports.end(); ++i) {
-			if (i->name() == buf) {
+			if (string(i->name()) == string(&buf[0])) {
 				break;
 			}
 		}

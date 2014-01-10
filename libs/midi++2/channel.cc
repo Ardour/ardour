@@ -25,7 +25,7 @@
 
 using namespace MIDI;
 
-Channel::Channel (byte channelnum, Port &p) 
+Channel::Channel (MIDI::byte channelnum, Port &p) 
 	: _port (p)
 {
 	_channel_number = channelnum;
@@ -182,13 +182,13 @@ Channel::process_controller (Parser & /*parser*/, EventTwoBytes *tb)
 }
 
 void
-Channel::process_program_change (Parser & /*parser*/, byte val) 
+Channel::process_program_change (Parser & /*parser*/, MIDI::byte val) 
 {
 	_program_number = val;
 }
 
 void
-Channel::process_chanpress (Parser & /*parser*/, byte val) 
+Channel::process_chanpress (Parser & /*parser*/, MIDI::byte val) 
 {
 	_chanpress = val;
 }
@@ -215,7 +215,7 @@ Channel::process_reset (Parser & /*parser*/)
  * \return true if success
  */
 bool
-Channel::channel_msg (byte id, byte val1, byte val2, timestamp_t timestamp)
+Channel::channel_msg (MIDI::byte id, MIDI::byte val1, MIDI::byte val2, timestamp_t timestamp)
 {
 	unsigned char msg[3];
 	int len = 0;

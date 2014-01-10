@@ -20,6 +20,10 @@
 #ifndef __qui_popup_h__
 #define __qui_popup_h__
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <string>
 #include <gtkmm.h>
 

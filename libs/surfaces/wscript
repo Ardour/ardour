@@ -23,10 +23,6 @@ children = [
         'control_protocol',
         'frontier',
         'generic_midi',
-        'mackie',
-        'osc',
-        'tranzport',
-        'wiimote'
 ]
 
 def options(opt):
@@ -39,16 +35,22 @@ def sub_config_and_use(conf, name, has_objects = True):
 def configure(conf):
     autowaf.set_recursive()
     autowaf.configure(conf)
-
+    
     for i in children:
         sub_config_and_use(conf, i)
+
+    if (conf.env['build_target'] == 'mingw'): return
 
     #autowaf.check_pkg(conf, 'libusb-1.0', uselib_store='USB', mandatory=False)
     #if Options.options.tranzport and conf.is_defined('HAVE_USB'):
     #    conf.define('BUILD_TRANZPORT', 1)
 
-    autowaf.check_pkg (conf, 'liblo', mandatory=False, uselib_store="LO", atleast_version="0.24")
-
+    if conf.check_cc (header_name='poll.h', define_name='BUILD_MACKIE', mandatory=False):
+        sub_config_and_use(conf, 'mackie')
+            
+    if autowaf.check_pkg (conf, 'liblo', mandatory=False, uselib_store="LO", atleast_version="0.24"):
+        sub_config_and_use(conf, 'osc')
+ 
     conf.check_cc (header_name='cwiid.h', define_name='HAVE_CWIID_H',mandatory=False)
     if conf.is_defined('HAVE_CWIID_H'):
         conf.check_cc (header_name='bluetooth/bluetooth.h', define_name='HAVE_BLUETOOTH_H',mandatory=False)
@@ -56,6 +58,7 @@ def configure(conf):
             autowaf.check_pkg(conf, 'cwiid', uselib_store='CWIID', atleast_version='0.6.00',mandatory=False)
             if conf.is_defined ('HAVE_CWIID'):
                 conf.define ('BUILD_WIIMOTE', 1)
+                sub_config_and_use(conf, 'wiimote')
             else:
                 print('You have the cwiid headers needed to compile wiimote support BUT you are missing the pkg-config file for cwiid')
         else:
@@ -65,8 +68,9 @@ def configure(conf):
 
 def build(bld):
     bld.recurse('control_protocol')
-    bld.recurse('generic_midi')
-    bld.recurse('mackie')
+    if (bld.env['build_target'] == 'mingw'): return
+    if bld.is_defined ('BUILD_MACKIE'):
+        bld.recurse('mackie')
     if bld.is_defined ('HAVE_LO'):
         bld.recurse('osc')
     if bld.is_defined('BUILD_WIIMOTE'):

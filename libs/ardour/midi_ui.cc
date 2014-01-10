@@ -77,7 +77,9 @@ MidiControlUI::midi_input_handler (IOCondition ioc, AsyncMIDIPort* port)
 
 	if (ioc & IO_IN) {
 
+#ifndef PLATFORM_WINDOWS
 		CrossThreadChannel::drain (port->selectable());
+#endif
 
 		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("data available on %1\n", ((ARDOUR::Port*)port)->name()));
 		framepos_t now = _session.engine().sample_time();

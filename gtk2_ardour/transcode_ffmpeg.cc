@@ -51,7 +51,7 @@ TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 #endif
 
 	std::string ff_file_path;
-	if (find_file_in_search_path (SearchPath(Glib::getenv("PATH")), X_("ffmpeg_harvid"), ff_file_path)) { ffmpeg_exe = ff_file_path; }
+	if (find_file_in_search_path (Searchpath(Glib::getenv("PATH")), X_("ffmpeg_harvid"), ff_file_path)) { ffmpeg_exe = ff_file_path; }
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\ffmpeg.exe"), Glib::FILE_TEST_EXISTS)) {
 		ffmpeg_exe = X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe");
 	}
@@ -59,7 +59,7 @@ TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 		ffmpeg_exe = X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe");
 	}
 
-	if (find_file_in_search_path (SearchPath(Glib::getenv("PATH")), X_("ffprobe_harvid"), ff_file_path)) { ffprobe_exe = ff_file_path; }
+	if (find_file_in_search_path (Searchpath(Glib::getenv("PATH")), X_("ffprobe_harvid"), ff_file_path)) { ffprobe_exe = ff_file_path; }
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\ffprobe.exe"), Glib::FILE_TEST_EXISTS)) {
 		ffprobe_exe = X_("C:\\Program Files\\ffmpeg\\ffprobe.exe");
 	}
@@ -124,7 +124,7 @@ TranscodeFfmpeg::probe ()
 	 * SystemExec::Terminated is emitted and ffcmd set to NULL */
 	int timeout = 300; // 1.5 sec
 	while (ffcmd && --timeout > 0) {
-		usleep(5000);
+		Glib::usleep(5000);
 	}
 	if (timeout == 0 || ffoutput.empty()) {
 		return false;
@@ -192,7 +192,7 @@ TranscodeFfmpeg::probe ()
 									h * 3600.0
 								+ m * 60.0
 								+ s * 1.0
-								+ atoi(f) / pow(10, strlen(f))
+								+ atoi(f) / pow((double)10, (int)strlen(f))
 							));
 						}
 					} else if (key == X_("duration_ts") && m_fps == 0 && timebase !=0 ) {
@@ -505,7 +505,11 @@ TranscodeFfmpeg::cancel ()
 {
 	if (!ffcmd || !ffcmd->is_running()) { return;}
 	ffcmd->write_to_stdin("q");
+#ifdef PLATFORM_WINDOWS
+	Sleep(1000);
+#else
 	sleep (1);
+#endif
 	if (ffcmd) {
 	  ffcmd->terminate();
 	}
@@ -539,7 +543,7 @@ TranscodeFfmpeg::ffmpegparse_a (std::string d, size_t /* s */)
 		      h * 3600.0
 		    + m * 60.0
 		    + s * 1.0
-		    + atoi(f) / pow(10, strlen(f))
+		    + atoi(f) / pow((double)10, (int)strlen(f))
 		));
 		p = p * m_fps / 100.0;
 		if (p > m_duration ) { p = m_duration; }

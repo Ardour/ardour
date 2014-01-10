@@ -21,6 +21,8 @@
 #ifndef AUDIOGRAPHER_BROADCAST_INFO_H
 #define AUDIOGRAPHER_BROADCAST_INFO_H
 
+#include <stdint.h>
+
 #include <string>
 #include <ctime>
 

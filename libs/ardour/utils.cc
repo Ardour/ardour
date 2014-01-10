@@ -36,7 +36,9 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <fcntl.h>
+#ifndef COMPILER_MSVC
 #include <dirent.h>
+#endif
 #include <errno.h>
 #include <regex.h>
 

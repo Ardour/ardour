@@ -36,7 +36,7 @@ using namespace MIDI;
 #undef DEBUG_MTC
 
 bool
-Parser::possible_mtc (byte *sysex_buf, size_t msglen)
+Parser::possible_mtc (MIDI::byte *sysex_buf, size_t msglen)
 {
 	byte fake_mtc_time[5];
 
@@ -91,7 +91,7 @@ Parser::reset_mtc_state ()
 }
 
 void
-Parser::process_mtc_quarter_frame (byte *msg)
+Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 {
 	int which_quarter_frame = (msg[1] & 0xf0) >> 4;
 

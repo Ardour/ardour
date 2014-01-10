@@ -20,7 +20,7 @@
 
 #include <cstring>
 
-#ifndef _WIN32
+#ifndef PLATFORM_WINDOWS
 #include <sys/mman.h>
 #endif
 
@@ -30,7 +30,7 @@
 
 //#define DEBUG_RINGBUFFER 1
 
-#ifdef _WIN32
+#ifdef PLATFORM_WINDOWS
 #define MLOCK(a,b) 1
 #define MUNLOCK(a,b) 1
 #else

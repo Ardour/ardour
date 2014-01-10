@@ -32,14 +32,14 @@ using namespace PBD;
 
 namespace ARDOUR {
 
-SearchPath
+Searchpath
 export_formats_search_path ()
 {
-	SearchPath spath (ardour_data_search_path());
+	Searchpath spath (ardour_data_search_path());
 	spath.add_subdirectory_to_paths (export_formats_dir_name);
 
 	bool export_formats_path_defined = false;
-	SearchPath spath_env (Glib::getenv(export_env_variable_name, export_formats_path_defined));
+	Searchpath spath_env (Glib::getenv(export_env_variable_name, export_formats_path_defined));
 
 	if (export_formats_path_defined) {
 		spath += spath_env;

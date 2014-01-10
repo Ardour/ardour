@@ -44,8 +44,8 @@
 #include "pbd/stacktrace.h"
 #include "pbd/file_utils.h"
 #include "pbd/convert.h"
-#include "pbd/strsplit.h"
 #include "pbd/unwind.h"
+#include "pbd/search_path.h"
 
 #include "ardour/amp.h"
 #include "ardour/analyser.h"
@@ -4581,18 +4581,18 @@ Session::end_time_changed (framepos_t old)
 	}
 }
 
-string
+std::vector<std::string>
 Session::source_search_path (DataType type) const
 {
-	vector<string> s;
+	Searchpath sp;
 
 	if (session_dirs.size() == 1) {
 		switch (type) {
 		case DataType::AUDIO:
-			s.push_back (_session_dir->sound_path());
+			sp.push_back (_session_dir->sound_path());
 			break;
 		case DataType::MIDI:
-			s.push_back (_session_dir->midi_path());
+			sp.push_back (_session_dir->midi_path());
 			break;
 		}
 	} else {
@@ -4600,10 +4600,10 @@ Session::source_search_path (DataType type) const
 			SessionDirectory sdir (i->path);
 			switch (type) {
 			case DataType::AUDIO:
-				s.push_back (sdir.sound_path());
+				sp.push_back (sdir.sound_path());
 				break;
 			case DataType::MIDI:
-			        s.push_back (sdir.midi_path());
+				sp.push_back (sdir.midi_path());
 				break;
 			}
 		}
@@ -4612,49 +4612,30 @@ Session::source_search_path (DataType type) const
 	if (type == DataType::AUDIO) {
 		const string sound_path_2X = _session_dir->sound_path_2X();
 		if (Glib::file_test (sound_path_2X, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
-			if (find (s.begin(), s.end(), sound_path_2X) == s.end()) {
-				s.push_back (sound_path_2X);
+			if (find (sp.begin(), sp.end(), sound_path_2X) == sp.end()) {
+				sp.push_back (sound_path_2X);
 			}
 		}
 	}
 
-	/* now check the explicit (possibly user-specified) search path
-	 */
-
-	vector<string> dirs;
+	// now check the explicit (possibly user-specified) search path
 
 	switch (type) {
 	case DataType::AUDIO:
-		split (config.get_audio_search_path (), dirs, ':');
+		sp += Searchpath(config.get_audio_search_path ());
 		break;
 	case DataType::MIDI:
-		split (config.get_midi_search_path (), dirs, ':');
+		sp += Searchpath(config.get_midi_search_path ());
 		break;
 	}
 
-	for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
-		if (find (s.begin(), s.end(), *i) == s.end()) {
-			s.push_back (*i);
-		}
-	}
-	
-	string search_path;
-
-	for (vector<string>::iterator si = s.begin(); si != s.end(); ++si) {
-		if (!search_path.empty()) {
-			search_path += ':';
-		}
-		search_path += *si;
-	}
-
-	return search_path;
+	return sp;
 }
 
 void
 Session::ensure_search_path_includes (const string& path, DataType type)
 {
-	string search_path;
-	vector<string> dirs;
+	Searchpath sp;
 
 	if (path == ".") {
 		return;
@@ -4662,16 +4643,14 @@ Session::ensure_search_path_includes (const string& path, DataType type)
 
 	switch (type) {
 	case DataType::AUDIO:
-		search_path = config.get_audio_search_path ();
+		sp += Searchpath(config.get_audio_search_path ());
 		break;
 	case DataType::MIDI:
-		search_path = config.get_midi_search_path ();
+		sp += Searchpath (config.get_midi_search_path ());
 		break;
 	}
 
-	split (search_path, dirs, ':');
-
-	for (vector<string>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
+	for (vector<std::string>::iterator i = sp.begin(); i != sp.end(); ++i) {
 		/* No need to add this new directory if it has the same inode as
 		   an existing one; checking inode rather than name prevents duplicated
 		   directories when we are using symlinks.
@@ -4683,18 +4662,14 @@ Session::ensure_search_path_includes (const string& path, DataType type)
 		}
 	}
 
-	if (!search_path.empty()) {
-		search_path += ':';
-	}
-
-	search_path += path;
+	sp += path;
 
 	switch (type) {
 	case DataType::AUDIO:
-		config.set_audio_search_path (search_path);
+		config.set_audio_search_path (sp.to_string());
 		break;
 	case DataType::MIDI:
-		config.set_midi_search_path (search_path);
+		config.set_midi_search_path (sp.to_string());
 		break;
 	}
 }

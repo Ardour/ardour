@@ -27,6 +27,10 @@
 #include <setjmp.h>
 #include <pthread.h>
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <glibmm/thread.h>
 
 #include <gtkmm/widget.h>

@@ -29,7 +29,6 @@
 namespace ARDOUR  {
 
 class Session;
-class Region;
 class AudioRegion;
 class Source;
 class AudioPlaylist;

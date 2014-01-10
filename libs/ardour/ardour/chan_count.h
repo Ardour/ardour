@@ -26,6 +26,10 @@
 #include "pbd/xml++.h"
 #include "ardour/data_type.h"
 
+#ifdef INFINITE
+#undef INFINITE
+#endif
+
 namespace ARDOUR {
 
 

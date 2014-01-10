@@ -29,7 +29,6 @@
 #include <float.h>
 #include <sys/time.h>
 #include <errno.h>
-#include <poll.h>
 
 #include <boost/shared_array.hpp>
 
@@ -1272,7 +1271,9 @@ MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 		*/
 
 		if (!_device_info.uses_ipmidi()) {
+#ifndef PLATFORM_WINDOWS
 			CrossThreadChannel::drain (port->selectable());
+#endif
 		}
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("data available on %1\n", port->name()));

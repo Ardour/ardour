@@ -29,7 +29,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-ControlProtocol*
+static ControlProtocol*
 new_mackie_protocol (ControlProtocolDescriptor*, Session* s)
 {
 	MackieControlProtocol* mcp = 0;
@@ -47,7 +47,7 @@ new_mackie_protocol (ControlProtocolDescriptor*, Session* s)
 	return mcp;
 }
 
-void
+static void
 delete_mackie_protocol (ControlProtocolDescriptor*, ControlProtocol* cp)
 {
 	try
@@ -66,34 +66,28 @@ delete_mackie_protocol (ControlProtocolDescriptor*, ControlProtocol* cp)
 	So anything that can be changed in the UI should not be used here to
 	prevent loading of the lib.
 */
-bool
+static bool
 probe_mackie_protocol (ControlProtocolDescriptor*)
 {
 	return MackieControlProtocol::probe();
 }
 
+// Field names commented out by JE - 06-01-2010
 static ControlProtocolDescriptor mackie_descriptor = {
-	name : "Mackie",
-	id : "uri://ardour.org/surfaces/mackie:0",
-	ptr : 0,
-	module : 0,
-	mandatory : 0,
+	/*name :              */   "Mackie",
+	/*id :                */   "uri://ardour.org/surfaces/mackie:0",
+	/*ptr :               */   0,
+	/*module :            */   0,
+	/*mandatory :         */   0,
 	// actually, the surface does support feedback, but all this
 	// flag does is show a submenu on the UI, which is useless for the mackie
 	// because feedback is always on. In any case, who'd want to use the
 	// mcu without the motorised sliders doing their thing?
-	supports_feedback : false,
-	probe : probe_mackie_protocol,
-	initialize : new_mackie_protocol,
-	destroy : delete_mackie_protocol
+	/*supports_feedback : */   false,
+	/*probe :             */   probe_mackie_protocol,
+	/*initialize :        */   new_mackie_protocol,
+	/*destroy :           */   delete_mackie_protocol
 };
 	
 
-extern "C" {
-
-ControlProtocolDescriptor* 
-protocol_descriptor () {
-	return &mackie_descriptor;
-}
-
-}
+extern "C" LIBCONTROLCP_API ControlProtocolDescriptor* protocol_descriptor () { return &mackie_descriptor; }

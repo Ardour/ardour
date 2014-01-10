@@ -22,7 +22,11 @@
 
 #include <vector>
 #include <string>
+#ifdef COMPILER_MSVC
+#include <ardourext/misc.h>
+#else
 #include <regex.h>
+#endif
 
 #include "pbd/libpbd_visibility.h"
 

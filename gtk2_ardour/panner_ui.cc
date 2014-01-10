@@ -369,7 +369,7 @@ PannerUI::build_pan_menu ()
 	items.clear ();
 
 	items.push_back (CheckMenuElem (_("Bypass"), sigc::mem_fun(*this, &PannerUI::pan_bypass_toggle)));
-	bypass_menu_item = static_cast<CheckMenuItem*> (&items.back());
+	bypass_menu_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
 
 	/* set state first, connect second */
 

@@ -685,7 +685,7 @@ ExportProfileManager::FormatStatePtr
 ExportProfileManager::deserialize_format (XMLNode & root)
 {
 	XMLProperty * prop;
-	UUID id;
+	PBD::UUID id;
 
 	if ((prop = root.property ("id"))) {
 		id = prop->value();

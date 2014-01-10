@@ -52,7 +52,6 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 
 	void refresh ();
 
-	int add_ladspa_directory (std::string dirpath);
 	int add_windows_vst_directory (std::string dirpath);
 	int add_lxvst_directory (std::string dirpath);
 
@@ -104,7 +103,6 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 
 	std::map<uint32_t, std::string> rdf_type;
 
-	std::string ladspa_path;
 	std::string windows_vst_path;
 	std::string lxvst_path;
 
@@ -128,7 +126,6 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	int lxvst_discover_from_path (std::string path);
 	int lxvst_discover (std::string path);
 
-	int ladspa_discover_from_path (std::string path);
 	int ladspa_discover (std::string path);
 
 	std::string get_ladspa_category (uint32_t id);

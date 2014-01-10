@@ -17,6 +17,17 @@
 
 */
 
+#ifdef COMPILER_MSVC
+#include <float.h>
+
+// 'std::isinf()' and 'std::isnan()' are not available in MSVC.
+#define isinf(val) !((bool)_finite((double)val))
+#define isnan(val) (bool)_isnan((double)val)
+#else
+using std::isnan;
+using std::isinf;
+#endif
+
 #include <cmath>
 #include <climits>
 #include <vector>
@@ -949,7 +960,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 
 		model_to_view_coord (tx, ty);
 
-		if (std::isnan (tx) || std::isnan (ty)) {
+		if (isnan (tx) || isnan (ty)) {
 			warning << string_compose (_("Ignoring illegal points on AutomationLine \"%1\""),
 						   _name) << endmsg;
 			continue;

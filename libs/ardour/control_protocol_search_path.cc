@@ -33,14 +33,14 @@ using namespace PBD;
 
 namespace ARDOUR {
 
-SearchPath
+Searchpath
 control_protocol_search_path ()
 {
-	SearchPath spath(user_config_directory ());
+	Searchpath spath(user_config_directory ());
 	spath += ardour_dll_directory ();
 	spath.add_subdirectory_to_paths (surfaces_dir_name);
 	
-	spath += SearchPath(Glib::getenv(surfaces_env_variable_name));
+	spath += Searchpath(Glib::getenv(surfaces_env_variable_name));
 	return spath;
 }
 

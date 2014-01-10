@@ -20,7 +20,6 @@
 #include <algorithm>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <cstdio>
 #include <ctime>
 #include <cstdlib>
@@ -265,7 +264,7 @@ patent must be licensed for everyone's free use or not licensed at all.\n\
   The precise terms and conditions for copying, distribution and\n\
 modification follow.\n\
 \n\
-		    GNU GENERAL PUBLIC LICENSE\n\
+""		    GNU GENERAL PUBLIC LICENSE\n\
    TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION\n\
 \n\
   0. This License applies to any program or other work which contains\n\
@@ -547,7 +546,9 @@ proprietary programs.  If your program is a subroutine library, you may\n\
 consider it more useful to permit linking proprietary applications with the\n\
 library.  If this is what you want to do, use the GNU Library General\n\
 Public License instead of this License.\n\
-");
+"); /* Note that at the start of (approximately) line 265, the above license
+       text has been split into two concatenated tokens (to satisfy compilation
+       under MSVC). Hopefully this won't affect gcc */
 
 About::About ()
 	: config_info (0)
@@ -561,7 +562,7 @@ About::About ()
 
 	std::string splash_file;
 
-	SearchPath spath(ardour_data_search_path());
+	Searchpath spath(ardour_data_search_path());
 
 	if (find_file_in_search_path (spath, "splash.png", splash_file)) {
 		set_logo (Gdk::Pixbuf::create_from_file (splash_file));

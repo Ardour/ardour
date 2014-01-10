@@ -44,7 +44,7 @@ namespace PBD {
  *  any change.
  */
 template<typename Container>
-class LIBPBD_API SequenceProperty : public PropertyBase
+class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 {
   public:
         typedef std::set<typename Container::value_type> ChangeContainer;
@@ -95,14 +95,14 @@ class LIBPBD_API SequenceProperty : public PropertyBase
 		/* record the change described in our change member */
 
 		if (!_changes.added.empty()) {
-			for (typename ChangeContainer::iterator i = _changes.added.begin(); i != _changes.added.end(); ++i) {
+			for (typename ChangeContainer::const_iterator i = _changes.added.begin(); i != _changes.added.end(); ++i) {
                                 XMLNode* add_node = new XMLNode ("Add");
                                 child->add_child_nocopy (*add_node);
 				get_content_as_xml (*i, *add_node);
 			}
 		}
 		if (!_changes.removed.empty()) {
-			for (typename ChangeContainer::iterator i = _changes.removed.begin(); i != _changes.removed.end(); ++i) {
+			for (typename ChangeContainer::const_iterator i = _changes.removed.begin(); i != _changes.removed.end(); ++i) {
                                 XMLNode* remove_node = new XMLNode ("Remove");
                                 child->add_child_nocopy (*remove_node);
 				get_content_as_xml (*i, *remove_node);
@@ -171,7 +171,7 @@ class LIBPBD_API SequenceProperty : public PropertyBase
 			   with this diff().
 			*/
                         
-			for (typename ChangeContainer::iterator i = a->changes().added.begin(); i != a->changes().added.end(); ++i) {
+			for (typename ChangeContainer::const_iterator i = a->changes().added.begin(); i != a->changes().added.end(); ++i) {
 				(*i)->DropReferences.connect_same_thread (*cmd, boost::bind (&Destructible::drop_references, cmd));
 			}
 		}
@@ -311,10 +311,10 @@ class LIBPBD_API SequenceProperty : public PropertyBase
 	}
 
 	Container& operator= (const Container& other) {
-		for (typename Container::iterator i = _val.begin(); i != _val.end(); ++i) {
+		for (typename Container::const_iterator i = _val.begin(); i != _val.end(); ++i) {
 			_changes.remove (*i);
 		}
-		for (typename Container::iterator i = other.begin(); i != other.end(); ++i) {
+		for (typename Container::const_iterator i = other.begin(); i != other.end(); ++i) {
 			_changes.add (*i);
 		}
 		return _val = other;

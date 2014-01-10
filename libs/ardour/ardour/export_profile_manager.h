@@ -103,7 +103,7 @@ class LIBARDOUR_API ExportProfileManager
 	std::vector<std::string> find_file (std::string const & pattern);
 
 	std::string  export_config_dir;
-	PBD::SearchPath search_path;
+	PBD::Searchpath search_path;
 
 /* Timespans */
   public:

@@ -21,7 +21,7 @@
 
 #include <string>
 #include <iostream>
-#if defined(WIN32)
+#if defined(PLATFORM_WINDOWS)
 #include <winsock.h>
 #elif defined(__FREE_BSD__)
 #include <netinet/in.h>

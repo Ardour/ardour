@@ -50,7 +50,7 @@ ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, Profi
 	option_hbox.pack_start (time_format_label, false, false, 0);
 	option_hbox.pack_start (time_format_combo, false, false, 6);
 
-	Gtk::Button* b = manage (new Gtk::Button (_("Select All")));
+	Gtk::Button* b = Gtk::manage (new Gtk::Button (_("Select All")));
 	b->signal_clicked().connect (
 		sigc::bind (
 			sigc::mem_fun (*this, &ExportTimespanSelector::set_selection_state_of_all_timespans), true
@@ -58,7 +58,7 @@ ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, Profi
 		);
 	option_hbox.pack_start (*b, false, false, 6);
 	
-	b = manage (new Gtk::Button (_("Deselect All")));
+	b = Gtk::manage (new Gtk::Button (_("Deselect All")));
 	b->signal_clicked().connect (
 		sigc::bind (
 			sigc::mem_fun (*this, &ExportTimespanSelector::set_selection_state_of_all_timespans), false
@@ -305,7 +305,7 @@ ExportTimespanSelector::ms_str (framecnt_t frames) const
 	mins = (int) floor (left / (_session->frame_rate() * 60.0f));
 	left -= (framecnt_t) floor (mins * _session->frame_rate() * 60.0f);
 	secs = (int) floor (left / (float) _session->frame_rate());
-	left -= (framecnt_t) floor (secs * _session->frame_rate());
+	left -= (framecnt_t) floor ((double)(secs * _session->frame_rate()));
 	sec_promilles = (int) (left * 1000 / (float) _session->frame_rate() + 0.5);
 
 	oss << std::setfill('0') << std::right <<

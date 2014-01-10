@@ -37,18 +37,18 @@ using namespace PBD;
 
 namespace ARDOUR {
 
-SearchPath
+Searchpath
 template_search_path ()
 {
-	SearchPath spath (ardour_data_search_path());
+	Searchpath spath (ardour_data_search_path());
 	spath.add_subdirectory_to_paths(templates_dir_name);
 	return spath;
 }
 
-SearchPath
+Searchpath
 route_template_search_path ()
 {
-	SearchPath spath (ardour_data_search_path());
+	Searchpath spath (ardour_data_search_path());
 	spath.add_subdirectory_to_paths(route_templates_dir_name);
 	return spath;
 }
@@ -66,7 +66,7 @@ user_route_template_directory ()
 }
 
 static bool
-template_filter (const string &str, void */*arg*/)
+template_filter (const string &str, void* /*arg*/)
 {
 	if (!Glib::file_test (str, Glib::FILE_TEST_IS_DIR)) {
 		return false;
@@ -76,7 +76,7 @@ template_filter (const string &str, void */*arg*/)
 }
 
 static bool
-route_template_filter (const string &str, void */*arg*/)
+route_template_filter (const string &str, void* /*arg*/)
 {
 	if (str.find (template_suffix) == str.length() - strlen (template_suffix)) {
 		return true;
@@ -97,7 +97,7 @@ find_session_templates (vector<TemplateInfo>& template_names)
 {
 	vector<string *> *templates;
 	PathScanner scanner;
-	SearchPath spath (template_search_path());
+	Searchpath spath (template_search_path());
 
 	templates = scanner (spath.to_string(), template_filter, 0, true, true);
 
@@ -133,7 +133,7 @@ find_route_templates (vector<TemplateInfo>& template_names)
 {
 	vector<string *> *templates;
 	PathScanner scanner;
-	SearchPath spath (route_template_search_path());
+	Searchpath spath (route_template_search_path());
 
 	templates = scanner (spath.to_string(), route_template_filter, 0, false, true);
 

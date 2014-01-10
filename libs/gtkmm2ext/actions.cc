@@ -27,6 +27,7 @@
 #include <gtk/gtkuimanager.h>
 #include <gtk/gtkactiongroup.h>
 
+#include <gtkmm.h>
 #include <gtkmm/accelmap.h>
 #include <gtkmm/uimanager.h>
 
@@ -265,15 +266,15 @@ ActionManager::get_action (const char* path)
 		path++;
 	}
 
-	char copy[len+1];
-	strcpy (copy, path);
-	char* slash = strchr (copy, '/');
+	vector<char> copy(len+1);
+	strcpy (&copy[0], path);
+	char* slash = strchr (&copy[0], '/');
 	if (!slash) {
 		return RefPtr<Action> ();
 	}
 	*slash = '\0';
 
-	return get_action (copy, ++slash);
+	return get_action (&copy[0], ++slash);
 	
 }
 

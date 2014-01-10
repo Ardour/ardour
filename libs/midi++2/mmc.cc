@@ -30,6 +30,10 @@
 #include "midi++/port.h"
 #include "midi++/parser.h"
 
+#ifndef __INT_MAX__   // 'ssize_t' won't be defined yet
+typedef long ssize_t;
+#endif
+
 using namespace std;
 using namespace MIDI;
 using namespace PBD;
@@ -226,19 +230,19 @@ MachineControl::set_ports (MIDI::Port* ip, MIDI::Port* op)
 }
 
 void
-MachineControl::set_receive_device_id (byte id)
+MachineControl::set_receive_device_id (MIDI::byte id)
 {
 	_receive_device_id = id & 0x7f;
 }
 
 void
-MachineControl::set_send_device_id (byte id)
+MachineControl::set_send_device_id (MIDI::byte id)
 {
 	_send_device_id = id & 0x7f;
 }
 
 bool
-MachineControl::is_mmc (byte *sysex_buf, size_t len)
+MachineControl::is_mmc (MIDI::byte *sysex_buf, size_t len)
 {
 	if (len < 4 || len > 48) {
 		return false;
@@ -257,7 +261,7 @@ MachineControl::is_mmc (byte *sysex_buf, size_t len)
 }
 
 void
-MachineControl::process_mmc_message (Parser &, byte *msg, size_t len)
+MachineControl::process_mmc_message (Parser &, MIDI::byte *msg, size_t len)
 {
 	size_t skiplen;
 	byte *mmc_msg;
@@ -464,7 +468,7 @@ MachineControl::process_mmc_message (Parser &, byte *msg, size_t len)
 }		
 
 int
-MachineControl::do_masked_write (byte *msg, size_t len)
+MachineControl::do_masked_write (MIDI::byte *msg, size_t len)
 {
 	/* return the number of bytes "consumed" */
 
@@ -490,7 +494,7 @@ MachineControl::do_masked_write (byte *msg, size_t len)
 }
 
 void
-MachineControl::write_track_status (byte *msg, size_t /*len*/, byte reg)
+MachineControl::write_track_status (MIDI::byte *msg, size_t /*len*/, MIDI::byte reg)
 {
 	size_t n;
 	ssize_t base_track;
@@ -579,7 +583,7 @@ MachineControl::write_track_status (byte *msg, size_t /*len*/, byte reg)
 }
 
 int
-MachineControl::do_locate (byte *msg, size_t /*msglen*/)
+MachineControl::do_locate (MIDI::byte *msg, size_t /*msglen*/)
 {
 	if (msg[2] == 0) {
 		warning << "MIDI::MMC: locate [I/F] command not supported"
@@ -594,7 +598,7 @@ MachineControl::do_locate (byte *msg, size_t /*msglen*/)
 }
 
 int
-MachineControl::do_step (byte *msg, size_t /*msglen*/)
+MachineControl::do_step (MIDI::byte *msg, size_t /*msglen*/)
 {
 	int steps = msg[2] & 0x3f;
 
@@ -607,7 +611,7 @@ MachineControl::do_step (byte *msg, size_t /*msglen*/)
 }
 
 int
-MachineControl::do_shuttle (byte *msg, size_t /*msglen*/)
+MachineControl::do_shuttle (MIDI::byte *msg, size_t /*msglen*/)
 {
 	size_t forward;
 	byte sh = msg[2];

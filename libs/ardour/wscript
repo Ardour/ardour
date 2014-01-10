@@ -2,6 +2,7 @@
 from waflib.extras import autowaf as autowaf
 from waflib import Options
 import os
+import sys
 import re
 import subprocess
 import sys
@@ -106,6 +107,7 @@ libardour_sources = [
         'io_processor.cc',
         'kmeterdsp.cc',
         'ladspa_plugin.cc',
+        'ladspa_search_path.cc',
         'location.cc',
         'location_importer.cc',
         'ltc_slave.cc',
@@ -247,8 +249,11 @@ def configure(conf):
     autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO',
                       exact_version='0.3.2')
     autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
-    autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF',
-                      atleast_version='0.4.0')
+    if Options.options.dist_target != 'mingw':
+        autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF',
+                          atleast_version='0.4.0')
+        autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO',
+                          atleast_version='0.3.2')
     autowaf.check_pkg(conf, 'samplerate', uselib_store='SAMPLERATE',
                       atleast_version='0.1.0')
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP',
@@ -451,6 +456,7 @@ def build(bld):
             create_ardour_test_program(bld, obj.includes, 'framepos_minus_beats', 'test_framepos_minus_beats', ['test/framepos_minus_beats_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'playlist_equivalent_regions', 'test_playlist_equivalent_regions', ['test/playlist_equivalent_regions_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'playlist_layering', 'test_playlist_layering', ['test/playlist_layering_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'plugins_test', 'test_plugins', ['test/plugins_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'region_naming', 'test_region_naming', ['test/region_naming_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'control_surface', 'test_control_surfaces', ['test/control_surfaces_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'mtdm_test', 'test_mtdm', ['test/mtdm_test.cc'])
@@ -468,6 +474,7 @@ def build(bld):
             test/framepos_minus_beats_test.cc
             test/playlist_equivalent_regions_test.cc
             test/playlist_layering_test.cc
+            test/plugins_test.cc
             test/region_naming_test.cc
             test/control_surfaces_test.cc
             test/mtdm_test.cc

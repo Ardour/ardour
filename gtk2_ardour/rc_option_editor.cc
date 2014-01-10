@@ -529,7 +529,7 @@ public:
 		_dpi_adjustment (50, 50, 250, 1, 10),
 		_dpi_slider (_dpi_adjustment)
 	{
-		_dpi_adjustment.set_value (floor (_rc_config->get_font_scale () / 1024));
+		_dpi_adjustment.set_value (floor ((double)(_rc_config->get_font_scale () / 1024)));
 
 		Label* l = manage (new Label (_("Font scaling:")));
 		l->set_name ("OptionsLabel");
@@ -548,7 +548,7 @@ public:
 	void parameter_changed (string const & p)
 	{
 		if (p == "font-scale") {
-			_dpi_adjustment.set_value (floor (_rc_config->get_font_scale() / 1024));
+			_dpi_adjustment.set_value (floor ((double)(_rc_config->get_font_scale() / 1024)));
 		}
 	}
 

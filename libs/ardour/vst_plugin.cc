@@ -528,8 +528,9 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 {
 	Plugin::connect_and_run (bufs, in_map, out_map, nframes, offset);
 
-	float *ins[_plugin->numInputs];
-	float *outs[_plugin->numOutputs];
+	// VC++ doesn't support this C99 extension. Use alloca instead of dynamic array (rather than std::vector which allocs on the heap)
+	float** ins = (float**)alloca(_plugin->numInputs*sizeof(float*));
+	float** outs = (float**)alloca(_plugin->numInputs*sizeof(float*));
 	int32_t i;
 
 	const uint32_t nbufs = bufs.count().n_audio();
@@ -552,7 +553,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 	}
 
 	/* we already know it can support processReplacing */
-	_plugin->processReplacing (_plugin, ins, outs, nframes);
+	_plugin->processReplacing (_plugin, &ins[0], &outs[0], nframes);
 
 	return 0;
 }

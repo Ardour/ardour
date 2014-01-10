@@ -45,6 +45,7 @@ namespace PBD {
 		LIBPBD_API extern uint64_t Pool;
 		LIBPBD_API extern uint64_t EventLoop;
 		LIBPBD_API extern uint64_t AbstractUI;
+		extern uint64_t FileUtils;
 	}
 }
 

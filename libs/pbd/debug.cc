@@ -24,6 +24,8 @@
 #include <vector>
 #include <algorithm>
 
+#include <boost/tokenizer.hpp>
+
 #include "pbd/debug.h"
 
 #include "i18n.h"
@@ -47,6 +49,7 @@ uint64_t PBD::DEBUG::FileManager = PBD::new_debug_bit ("filemanager");
 uint64_t PBD::DEBUG::Pool = PBD::new_debug_bit ("pool");
 uint64_t PBD::DEBUG::EventLoop = PBD::new_debug_bit ("eventloop");
 uint64_t PBD::DEBUG::AbstractUI = PBD::new_debug_bit ("abstractui");
+uint64_t PBD::DEBUG::FileUtils = PBD::new_debug_bit ("fileutils");
 
 uint64_t PBD::debug_bits = 0x0;
 
@@ -75,36 +78,31 @@ PBD::set_debug_bits (uint64_t bits)
 int
 PBD::parse_debug_options (const char* str)
 {
-	char* p;
-	char* sp;
+	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	boost::char_separator<char> sep (",");
+	tokenizer tokens (string(str), sep);
 	uint64_t bits = 0;
-	char* copy = strdup (str);
 
-	p = strtok_r (copy, ",", &sp);
-
-	while (p) {
-		if (strcasecmp (p, "list") == 0) {
+	for (tokenizer::iterator tok_iter = tokens.begin(); tok_iter != tokens.end(); ++tok_iter) {
+		if (*tok_iter == "list") {
 			list_debug_options ();
-			free (copy);
 			return 1;
 		}
 
-		if (strcasecmp (p, "all") == 0) {
+		if (*tok_iter == "all") {
 			PBD::set_debug_bits (~0ULL);
-			free (copy);
 			return 0;
 		}
 
 		for (map<const char*,uint64_t>::iterator i = _debug_bit_map().begin(); i != _debug_bit_map().end(); ++i) {
-                        if (strncasecmp (p, i->first, strlen (p)) == 0) {
+			const char* cstr = (*tok_iter).c_str();
+
+                        if (strncasecmp (cstr, i->first, strlen (cstr)) == 0) {
                                 bits |= i->second;
                         }
                 }
-
-		p = strtok_r (0, ",", &sp);
 	}
 	
-	free (copy);
 	PBD::set_debug_bits (bits);
 	return 0;
 }

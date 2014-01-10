@@ -33,15 +33,14 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <climits>
-#include <fcntl.h>
-#include <poll.h>
 #include <signal.h>
-#include <sys/mman.h>
 #include <sys/time.h>
 
 #ifdef HAVE_SYS_VFS_H
 #include <sys/vfs.h>
-#else
+#endif
+
+#ifdef __APPLE__
 #include <sys/param.h>
 #include <sys/mount.h>
 #endif
@@ -69,11 +68,13 @@
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
+#include "pbd/pathexpand.h"
 #include "pbd/pathscanner.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/stacktrace.h"
 #include "pbd/convert.h"
 #include "pbd/clear_dir.h"
+#include "pbd/localtime_r.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_diskstream.h"
@@ -355,7 +356,7 @@ Session::post_engine_init ()
 string
 Session::raid_path () const
 {
-	SearchPath raid_search_path;
+	Searchpath raid_search_path;
 
 	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 		raid_search_path += (*i).path;
@@ -376,11 +377,11 @@ Session::setup_raid_path (string path)
 
 	session_dirs.clear ();
 
-	SearchPath search_path(path);
-	SearchPath sound_search_path;
-	SearchPath midi_search_path;
+	Searchpath search_path(path);
+	Searchpath sound_search_path;
+	Searchpath midi_search_path;
 
-	for (SearchPath::const_iterator i = search_path.begin(); i != search_path.end(); ++i) {
+	for (Searchpath::const_iterator i = search_path.begin(); i != search_path.end(); ++i) {
 		sp.path = *i;
 		sp.blocks = 0; // not needed
 		session_dirs.push_back (sp);
@@ -726,9 +727,9 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	} else {
 
-		if (::rename (tmp_path.c_str(), xml_path.c_str()) != 0) {
-			error << string_compose (_("could not rename temporary session file %1 to %2"),
-					tmp_path, xml_path) << endmsg;
+		if (::g_rename (tmp_path.c_str(), xml_path.c_str()) != 0) {
+			error << string_compose (_("could not rename temporary session file %1 to %2 (%3)"),
+					tmp_path, xml_path, g_strerror(errno)) << endmsg;
 			if (g_remove (tmp_path.c_str()) != 0) {
 				error << string_compose(_("Could not remove temporary session file at path \"%1\" (%2)"),
 						tmp_path, g_strerror (errno)) << endmsg;
@@ -2041,6 +2042,54 @@ Session::refresh_disk_space ()
 			_total_free_4k_blocks_uncertain = true;
 		}
 	}
+#elif defined (COMPILER_MSVC)
+	vector<string> scanned_volumes;
+	vector<string>::iterator j;
+	vector<space_and_path>::iterator i;
+    DWORD nSectorsPerCluster, nBytesPerSector,
+          nFreeClusters, nTotalClusters;
+    char disk_drive[4];
+	bool volume_found;
+
+	_total_free_4k_blocks = 0;
+
+	for (i = session_dirs.begin(); i != session_dirs.end(); i++) {
+		strncpy (disk_drive, (*i).path.c_str(), 3);
+		disk_drive[3] = 0;
+		strupr(disk_drive);
+
+		volume_found = false;
+		if (0 != (GetDiskFreeSpace(disk_drive, &nSectorsPerCluster, &nBytesPerSector, &nFreeClusters, &nTotalClusters)))
+		{
+			int64_t nBytesPerCluster = nBytesPerSector * nSectorsPerCluster;
+			int64_t nFreeBytes = nBytesPerCluster * (int64_t)nFreeClusters;
+			i->blocks = (uint32_t)(nFreeBytes / 4096);
+
+			for (j = scanned_volumes.begin(); j != scanned_volumes.end(); j++) {
+				if (0 == j->compare(disk_drive)) {
+					volume_found = true;
+					break;
+				}
+			}
+
+			if (!volume_found) {
+				scanned_volumes.push_back(disk_drive);
+				_total_free_4k_blocks += i->blocks;
+			}
+		}
+	}
+
+	if (0 == _total_free_4k_blocks) {
+		strncpy (disk_drive, path().c_str(), 3);
+		disk_drive[3] = 0;
+
+		if (0 != (GetDiskFreeSpace(disk_drive, &nSectorsPerCluster, &nBytesPerSector, &nFreeClusters, &nTotalClusters)))
+		{
+			int64_t nBytesPerCluster = nBytesPerSector * nSectorsPerCluster;
+			int64_t nFreeBytes = nBytesPerCluster * (int64_t)nFreeClusters;
+			_total_free_4k_blocks = (uint32_t)(nFreeBytes / 4096);
+		}
+	}
 #endif
 }
 
@@ -2227,7 +2276,7 @@ Session::auto_save()
 }
 
 static bool
-state_file_filter (const string &str, void */*arg*/)
+state_file_filter (const string &str, void* /*arg*/)
 {
 	return (str.length() > strlen(statefile_suffix) &&
 		str.find (statefile_suffix) == (str.length() - strlen (statefile_suffix)));
@@ -2404,7 +2453,7 @@ Session::commit_reversible_command (Command *cmd)
 }
 
 static bool
-accept_all_audio_files (const string& path, void */*arg*/)
+accept_all_audio_files (const string& path, void* /*arg*/)
 {
         if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
                 return false;
@@ -2418,7 +2467,7 @@ accept_all_audio_files (const string& path, void */*arg*/)
 }
 
 static bool
-accept_all_midi_files (const string& path, void */*arg*/)
+accept_all_midi_files (const string& path, void* /*arg*/)
 {
         if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
                 return false;
@@ -2430,7 +2479,7 @@ accept_all_midi_files (const string& path, void */*arg*/)
 }
 
 static bool
-accept_all_state_files (const string& path, void */*arg*/)
+accept_all_state_files (const string& path, void* /*arg*/)
 {
         if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
                 return false;
@@ -2586,6 +2635,8 @@ Session::cleanup_sources (CleanupReport& rep)
 	bool used;
 	string spath;
 	int ret = -1;
+	string tmppath1;
+	string tmppath2;
 
 	_state_of_the_state = (StateOfTheState) (_state_of_the_state | InCleanup);
 
@@ -2710,9 +2761,6 @@ Session::cleanup_sources (CleanupReport& rep)
                 i = tmp;
 	}
 
-	char tmppath1[PATH_MAX+1];
-	char tmppath2[PATH_MAX+1];
-
         if (candidates) {
                 for (vector<string*>::iterator x = candidates->begin(); x != candidates->end(); ++x) {
 
@@ -2721,19 +2769,10 @@ Session::cleanup_sources (CleanupReport& rep)
 
                         for (set<string>::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
 
-                                if (realpath(spath.c_str(), tmppath1) == 0) {
-                                        error << string_compose (_("Cannot expand path %1 (%2)"),
-                                                                 spath, strerror (errno)) << endmsg;
-                                        continue;
-                                }
+				tmppath1 = canonical_path (spath);
+				tmppath2 = canonical_path ((*i));
 
-                                if (realpath((*i).c_str(),  tmppath2) == 0) {
-                                        error << string_compose (_("Cannot expand path %1 (%2)"),
-                                                                 (*i), strerror (errno)) << endmsg;
-                                        continue;
-                                }
-
-                                if (strcmp(tmppath1, tmppath2) == 0) {
+				if (tmppath1 == tmppath2) {
                                         used = true;
                                         break;
                                 }
@@ -2837,7 +2876,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		string peakpath = peak_path (base);
 
 		if (Glib::file_test (peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
-			if (::unlink (peakpath.c_str()) != 0) {
+			if (::g_unlink (peakpath.c_str()) != 0) {
 				error << string_compose (_("cannot remove peakfile %1 for %2 (%3)"),
                                                          peakpath, _path, strerror (errno))
 				      << endmsg;

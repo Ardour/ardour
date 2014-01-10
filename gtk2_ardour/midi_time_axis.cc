@@ -19,8 +19,6 @@
 #include <cstdlib>
 #include <cmath>
 
-#include <strings.h> // for ffs(3)
-
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -28,6 +26,7 @@
 #include <sigc++/bind.h>
 
 #include "pbd/error.h"
+#include "pbd/ffs.h"
 #include "pbd/stl_delete.h"
 #include "pbd/whitespace.h"
 #include "pbd/basename.h"
@@ -663,7 +662,7 @@ MidiTimeAxisView::add_channel_command_menu_item (Menu_Helpers::MenuList& items,
 					}
 				}
 
-				CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&chn_items.back());
+				Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&chn_items.back());
 				_channel_command_menu_map[fully_qualified_param] = cmi;
 				cmi->set_active (visible);
 			}
@@ -695,7 +694,7 @@ MidiTimeAxisView::add_channel_command_menu_item (Menu_Helpers::MenuList& items,
 					}
 				}
 
-				CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&items.back());
+				Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&items.back());
 				_channel_command_menu_map[fully_qualified_param] = cmi;
 				cmi->set_active (visible);
 
@@ -737,7 +736,7 @@ MidiTimeAxisView::add_single_channel_controller_item(Menu_Helpers::MenuList& ctl
 				}
 			}
 
-			CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&ctl_items.back());
+			Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&ctl_items.back());
 			_controller_menu_map[fully_qualified_param] = cmi;
 			cmi->set_active (visible);
 
@@ -793,7 +792,7 @@ MidiTimeAxisView::add_multi_channel_controller_item(Menu_Helpers::MenuList& ctl_
 				}
 			}
 
-			CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&chn_items.back());
+			Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*>(&chn_items.back());
 			_controller_menu_map[fully_qualified_param] = cmi;
 			cmi->set_active (visible);
 		}
@@ -1489,7 +1488,7 @@ MidiTimeAxisView::playback_channel_mode_changed ()
 		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Play"), _("some")));
 		break;
 	case ForceChannel:
-		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Play"), _("all"), ffs (midi_track()->get_playback_channel_mask())));
+		_playback_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Play"), _("all"), PBD::ffs (midi_track()->get_playback_channel_mask())));
 		break;
 	}
 }
@@ -1505,7 +1504,7 @@ MidiTimeAxisView::capture_channel_mode_changed ()
 		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2</i>", _("Rec"), _("some")));
 		break;
 	case ForceChannel:
-		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Rec"), _("all"), ffs (midi_track()->get_capture_channel_mask())));
+		_capture_channel_status.set_markup (string_compose ("<b>%1</b>: <i>%2>%3</i>", _("Rec"), _("all"), PBD::ffs (midi_track()->get_capture_channel_mask())));
 		break;
 	}
 }

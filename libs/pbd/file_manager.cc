@@ -18,12 +18,14 @@
 */
 
 #include <sys/time.h>
-#include <sys/resource.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <cassert>
 #include <cstdio>
+
+#include <glib.h>
+#include <glib/gstdio.h>
 
 #ifdef __APPLE__
 #include <mach/mach_time.h>
@@ -31,6 +33,7 @@
 
 #include "pbd/compose.h"
 #include "pbd/file_manager.h"
+#include "pbd/resource.h"
 #include "pbd/debug.h"
 
 using namespace std;
@@ -41,12 +44,11 @@ FileManager* FileDescriptor::_manager;
 FileManager::FileManager ()
 	: _open (0)
 {
-	struct rlimit rl;
-	int const r = getrlimit (RLIMIT_NOFILE, &rl);
+	struct ResourceLimit rl;
 	
 	/* XXX: this is a bit arbitrary */
-	if (r == 0) {
-		_max_open = rl.rlim_cur - 64;
+	if (get_resource_limit (OpenFiles, rl)) {
+		_max_open = rl.current_limit - 64;
 	} else {
 		_max_open = 256;
 	}
@@ -116,10 +118,14 @@ FileManager::allocate (FileDescriptor* d)
 
 #ifdef __APPLE__
 	d->_last_used = mach_absolute_time();
-#else
+#elif defined(_POSIX_TIMERS) && defined(_POSIX_MONOTONIC_CLOCK)
 	struct timespec t;
 	clock_gettime (CLOCK_MONOTONIC, &t);
 	d->_last_used = t.tv_sec + (double) t.tv_nsec / 10e9;
+#else
+	struct timeval now;
+	gettimeofday (&now, NULL);
+	d->_last_used = now.tv_sec + (double) now.tv_usec / 10e6;
 #endif
 
 	d->_refcount++;
@@ -222,8 +228,19 @@ bool
 FdFileDescriptor::open ()
 {
 	/* we must have a lock on the FileManager's mutex */
-	
-	_fd = ::open (_path.c_str(), _writeable ? (O_RDWR | O_CREAT) : O_RDONLY, _mode);
+
+	/* files must be opened with O_BINARY flag on windows
+	 * or it treats the file as a text stream and puts in
+	 * line endings in etc
+	 */
+#ifdef WIN32
+#define WRITE_FLAGS O_RDWR | O_CREAT | O_BINARY
+#define READ_FLAGS O_RDONLY | O_BINARY
+#else
+#define WRITE_FLAGS O_RDWR | O_CREAT
+#define READ_FLAGS O_RDONLY
+#endif
+	_fd = ::g_open (_path.c_str(), _writeable ? WRITE_FLAGS : READ_FLAGS, _mode);
 	return (_fd == -1);
 }
 

@@ -371,7 +371,7 @@ operator<< (std::ostream& os, const ChannelNameSet& cns)
 	   << "List size " << cns._patch_list.size() << endl
 	   << "Patch list name = [" << cns._patch_list_name << ']' << endl
 	   << "Available channels : ";
-	for (set<uint8_t>::iterator x = cns._available_for_channels.begin(); x != cns._available_for_channels.end(); ++x) {
+	for (set<uint8_t>::const_iterator x = cns._available_for_channels.begin(); x != cns._available_for_channels.end(); ++x) {
 		os << (int) (*x) << ' ';
 	}
 	os << endl;

@@ -177,7 +177,7 @@ class SystemExec
 		char **envp;
 
 	private:
-#ifdef __WIN32__
+#ifdef PLATFORM_WINDOWS
 		PROCESS_INFORMATION *pid;
 		HANDLE stdinP[2];
 		HANDLE stdoutP[2];

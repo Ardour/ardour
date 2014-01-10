@@ -698,7 +698,7 @@ RouteTimeAxisView::build_display_menu ()
 	}
 
 	items.push_back (CheckMenuElem (_("Active")));
-	CheckMenuItem* i = dynamic_cast<CheckMenuItem *> (&items.back());
+	Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 	bool click_sets_active = true;
 	if (active > 0 && inactive == 0) {
 		i->set_active (true);
@@ -2028,12 +2028,12 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 	for (std::set<Evoral::Parameter>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
 
 		ProcessorAutomationNode* pan;
-		CheckMenuItem* mitem;
+		Gtk::CheckMenuItem* mitem;
 
 		string name = processor->describe_parameter (*i);
 
 		items.push_back (CheckMenuElem (name));
-		mitem = dynamic_cast<CheckMenuItem*> (&items.back());
+		mitem = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
 		
 		_subplugin_menu_map[*i] = mitem;
 

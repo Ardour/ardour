@@ -29,6 +29,8 @@
 #include "ardour/worker.h"
 #include "pbd/ringbuffer.h"
 
+typedef struct LV2_Evbuf_Impl LV2_Evbuf;
+
 namespace ARDOUR {
 
 // a callback function for lilv_state_new_from_instance(). friend of LV2Plugin

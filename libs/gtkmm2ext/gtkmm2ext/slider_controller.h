@@ -19,6 +19,10 @@
 #ifndef __gtkmm2ext_slider_controller_h__
 #define __gtkmm2ext_slider_controller_h__
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <gtkmm.h>
 #include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/pixfader.h>

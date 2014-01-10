@@ -1498,7 +1498,7 @@ RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 			   place snapped notes at the start of the region.
 			*/
 
-			framecnt_t const len = (framecnt_t) fabs (f - grab_frame () - 1);
+			framecnt_t const len = (framecnt_t) fabs ((double)(f - grab_frame () - 1));
 			_region->set_length (len < 1 ? 1 : len);
 		}
 	}
@@ -4369,7 +4369,7 @@ NoteDrag::motion (GdkEvent *, bool)
 		uint8_t new_note = min (max (_primary->note()->note() + note_delta, 0), 127);
 		
 		snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (new_note).c_str(),
-		          (int) floor (new_note));
+		          (int) floor ((double)new_note));
 
 		show_verbose_cursor_text (buf);
 	}
@@ -4873,7 +4873,7 @@ NoteCreateDrag::finished (GdkEvent*, bool had_movement)
 	}
 	
 	framepos_t const start = min (_note[0], _note[1]);
-	framecnt_t length = (framecnt_t) fabs (_note[0] - _note[1]);
+	framecnt_t length = (framecnt_t) fabs ((double)(_note[0] - _note[1]));
 
 	framecnt_t const g = grid_frames (start);
 	double const one_tick = 1 / Timecode::BBT_Time::ticks_per_beat;

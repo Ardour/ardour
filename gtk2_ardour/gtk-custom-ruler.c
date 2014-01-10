@@ -98,7 +98,7 @@ GType gtk_custom_ruler_get_type (void)
 			};
 
 		ruler_type = g_type_register_static (GTK_TYPE_WIDGET, "GtkCustomRuler",
-					   &ruler_info, 0);
+					   &ruler_info, (GTypeFlags)0);
 	}
 
 	return ruler_type;
@@ -198,9 +198,8 @@ gtk_custom_ruler_set_property (GObject      *object,
 			       const GValue *value,
 			       GParamSpec   *pspec)
 {
-	(void) pspec;
-
   GtkCustomRuler *ruler = GTK_CUSTOM_RULER (object);
+  (void) pspec;
 
   switch (prop_id)
     {

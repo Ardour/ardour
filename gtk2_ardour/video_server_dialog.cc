@@ -29,6 +29,10 @@
 #include "ardour/template_utils.h"
 #include "ardour/session.h"
 
+#ifdef interface
+#undef interface
+#endif
+
 #include "video_server_dialog.h"
 #include "utils_videotl.h"
 #include "i18n.h"
@@ -80,7 +84,7 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	listenaddr_combo.set_active(0);
 
 	std::string icsd_file_path;
-	if (find_file_in_search_path (PBD::SearchPath(Glib::getenv("PATH")), X_("harvid"), icsd_file_path)) {
+	if (find_file_in_search_path (PBD::Searchpath(Glib::getenv("PATH")), X_("harvid"), icsd_file_path)) {
 		path_entry.set_text(icsd_file_path);
 	}
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\harvid.exe"), Glib::FILE_TEST_EXISTS)) {

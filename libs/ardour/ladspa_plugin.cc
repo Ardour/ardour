@@ -17,6 +17,10 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 #include <inttypes.h>
 
 #include <vector>
@@ -25,11 +29,15 @@
 #include <cstdlib>
 #include <cstdio> // so libraptor doesn't complain
 #include <cmath>
+#ifndef COMPILER_MSVC
 #include <dirent.h>
+#endif
 #include <sys/stat.h>
 #include <cerrno>
 
+#ifdef HAVE_LRDF
 #include <lrdf.h>
+#endif
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
@@ -50,16 +58,16 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-LadspaPlugin::LadspaPlugin (void *mod, AudioEngine& e, Session& session, uint32_t index, framecnt_t rate)
+LadspaPlugin::LadspaPlugin (string module_path, AudioEngine& e, Session& session, uint32_t index, framecnt_t rate)
 	: Plugin (e, session)
 {
-	init (mod, index, rate);
+	init (module_path, index, rate);
 }
 
 LadspaPlugin::LadspaPlugin (const LadspaPlugin &other)
 	: Plugin (other)
 {
-	init (other._module, other._index, other._sample_rate);
+	init (other._module_path, other._index, other._sample_rate);
 
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
 		_control_data[i] = other._shadow_data[i];
@@ -68,24 +76,31 @@ LadspaPlugin::LadspaPlugin (const LadspaPlugin &other)
 }
 
 void
-LadspaPlugin::init (void *mod, uint32_t index, framecnt_t rate)
+LadspaPlugin::init (string module_path, uint32_t index, framecnt_t rate)
 {
+	void* func;
 	LADSPA_Descriptor_Function dfunc;
 	uint32_t i, port_cnt;
-	const char *errstr;
 
-	_module = mod;
+	_module_path = module_path;
+	_module = new Glib::Module(_module_path);
 	_control_data = 0;
 	_shadow_data = 0;
 	_latency_control_port = 0;
 	_was_activated = false;
 
-	dfunc = (LADSPA_Descriptor_Function) dlsym (_module, "ladspa_descriptor");
+	if (!(*_module)) {
+		error << _("LADSPA: Unable to open module: ") << Glib::Module::get_last_error() << endmsg;
+		delete _module;
+		throw failed_constructor();
+	}
 
-	if ((errstr = dlerror()) != NULL) {
+	if (!_module->get_symbol("ladspa_descriptor", func)) {
 		error << _("LADSPA: module has no descriptor function.") << endmsg;
 		throw failed_constructor();
 	}
+
+	dfunc = (LADSPA_Descriptor_Function)func;
 
 	if ((_descriptor = dfunc (index)) == 0) {
 		error << _("LADSPA: plugin has gone away since discovery!") << endmsg;
@@ -142,9 +157,8 @@ LadspaPlugin::~LadspaPlugin ()
 	deactivate ();
 	cleanup ();
 
-	/* XXX who should close a plugin? */
-
-        // dlclose (module);
+	// glib has internal reference counting on modules so this is ok
+	delete _module;
 
 	delete [] _control_data;
 	delete [] _shadow_data;
@@ -629,10 +643,11 @@ LadspaPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 boost::shared_ptr<Plugin::ScalePoints>
 LadspaPlugin::get_scale_points(uint32_t port_index) const
 {
+	boost::shared_ptr<Plugin::ScalePoints> ret;
+#ifdef HAVE_LRDF
 	const uint32_t id     = atol(unique_id().c_str());
 	lrdf_defaults* points = lrdf_get_scale_values(id, port_index);
 
-	boost::shared_ptr<Plugin::ScalePoints> ret;
 	if (!points) {
 		return ret;
 	}
@@ -645,6 +660,7 @@ LadspaPlugin::get_scale_points(uint32_t port_index) const
 	}
 
 	lrdf_free_setting_values(points);
+#endif
 	return ret;
 }
 
@@ -710,17 +726,7 @@ PluginPtr
 LadspaPluginInfo::load (Session& session)
 {
 	try {
-		PluginPtr plugin;
-		void *module;
-
-		if ((module = dlopen (path.c_str(), RTLD_NOW)) == 0) {
-			error << string_compose(_("LADSPA: cannot load module from \"%1\""), path) << endmsg;
-			error << dlerror() << endmsg;
-                        return PluginPtr ((Plugin*) 0);
-		} else {
-			plugin.reset (new LadspaPlugin (module, session.engine(), session, index, session.frame_rate()));
-		}
-
+		PluginPtr plugin (new LadspaPlugin (path, session.engine(), session, index, session.frame_rate()));
 		plugin->set_info(PluginInfoPtr(new LadspaPluginInfo(*this)));
 		return plugin;
 	}
@@ -739,6 +745,7 @@ LadspaPluginInfo::LadspaPluginInfo()
 void
 LadspaPlugin::find_presets ()
 {
+#ifdef HAVE_LRDF
 	uint32_t id;
 	std::string unique (unique_id());
 
@@ -759,12 +766,14 @@ LadspaPlugin::find_presets ()
 		}
 		lrdf_free_uris(set_uris);
 	}
+#endif
 }
 
 
 bool
 LadspaPlugin::load_preset (PresetRecord r)
 {
+#ifdef HAVE_LRDF
 	lrdf_defaults* defs = lrdf_get_setting_values (r.uri.c_str());
 
 	if (defs) {
@@ -777,6 +786,7 @@ LadspaPlugin::load_preset (PresetRecord r)
 	}
 
 	Plugin::load_preset (r);
+#endif
 	return true;
 }
 
@@ -784,6 +794,7 @@ LadspaPlugin::load_preset (PresetRecord r)
 static void
 lrdf_remove_preset (const char* /*source*/, const char *setting_uri)
 {
+#ifdef HAVE_LRDF
 	lrdf_statement p;
 	lrdf_statement *q;
 	lrdf_statement *i;
@@ -817,11 +828,13 @@ lrdf_remove_preset (const char* /*source*/, const char *setting_uri)
 	p.predicate = NULL;
 	p.object = NULL;
 	lrdf_remove_matches (&p);
+#endif
 }
 
 void
 LadspaPlugin::do_remove_preset (string name)
 {
+#ifdef HAVE_LRDF
 	string const envvar = preset_envvar ();
 	if (envvar.empty()) {
 		warning << _("Could not locate HOME.  Preset not removed.") << endmsg;
@@ -837,6 +850,7 @@ LadspaPlugin::do_remove_preset (string name)
 	lrdf_remove_preset (source.c_str(), p->uri.c_str ());
 
 	write_preset_file (envvar);
+#endif
 }
 
 string
@@ -859,6 +873,7 @@ LadspaPlugin::preset_source (string envvar) const
 bool
 LadspaPlugin::write_preset_file (string envvar)
 {
+#ifdef HAVE_LRDF
 	string path = string_compose("%1/.ladspa", envvar);
 	if (g_mkdir_with_parents (path.c_str(), 0775)) {
 		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
@@ -879,11 +894,15 @@ LadspaPlugin::write_preset_file (string envvar)
 	}
 
 	return true;
+#else
+	return false;
+#endif
 }
 
 string
 LadspaPlugin::do_save_preset (string name)
 {
+#ifdef HAVE_LRDF
 	/* make a vector of pids that are input parameters */
 	vector<int> input_parameter_pids;
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
@@ -902,8 +921,8 @@ LadspaPlugin::do_save_preset (string name)
 
 	lrdf_defaults defaults;
 	defaults.count = input_parameter_pids.size ();
-	lrdf_portvalue portvalues[input_parameter_pids.size()];
-	defaults.items = portvalues;
+	std::vector<lrdf_portvalue> portvalues(input_parameter_pids.size());
+	defaults.items = &portvalues[0];
 
 	for (vector<int>::size_type i = 0; i < input_parameter_pids.size(); ++i) {
 		portvalues[i].pid = input_parameter_pids[i];
@@ -927,6 +946,9 @@ LadspaPlugin::do_save_preset (string name)
 	}
 
 	return uri;
+#else
+	return string();
+#endif
 }
 
 LADSPA_PortDescriptor

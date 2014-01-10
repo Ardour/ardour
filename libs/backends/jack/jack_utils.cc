@@ -558,7 +558,7 @@ ARDOUR::set_path_env_for_jack_autostart (const vector<std::string>& dirs)
 #ifdef __APPLE__
 	// push it back into the environment so that auto-started JACK can find it.
 	// XXX why can't we just expect OS X users to have PATH set correctly? we can't ...
-	setenv ("PATH", SearchPath(dirs).to_string().c_str(), 1);
+	setenv ("PATH", Searchpath(dirs).to_string().c_str(), 1);
 #else
 	/* silence a compiler unused variable warning */
 	(void) dirs;
@@ -581,7 +581,7 @@ ARDOUR::get_jack_server_dir_paths (vector<std::string>& server_dir_paths)
 	server_dir_paths.push_back (Glib::path_get_dirname (execpath));
 #endif
 
-	SearchPath sp(string(g_getenv("PATH")));
+	Searchpath sp(string(g_getenv("PATH")));
 
 #ifdef WIN32
 	gchar *install_dir = g_win32_get_package_installation_directory_of_module (NULL);

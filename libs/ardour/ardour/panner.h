@@ -35,6 +35,18 @@
 #include "ardour/automation_control.h"
 #include "ardour/automatable.h"
 
+
+/* This section is for actual panners to use. They will include this file,
+ * declare ARDOURPANNER_DLL_EXPORTS during compilation, and ... voila.
+ */
+
+#ifdef ARDOURPANNER_DLL_EXPORTS // defined if we are building a panner implementation
+    #define ARDOURPANNER_API LIBARDOUR_DLL_EXPORT
+  #else
+    #define ARDOURPANNER_API LIBARDOUR_DLL_IMPORT
+  #endif 
+#define ARDOURPANNER_LOCAL LIBARDOUR_DLL_LOCAL
+
 namespace ARDOUR {
 
 class Session;

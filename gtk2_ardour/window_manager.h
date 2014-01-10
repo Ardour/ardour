@@ -159,7 +159,7 @@ class ProxyWithConstructor: public ProxyBase {
 			    return 0;
 		    }
 
-		    _window = creator ();
+			_window = dynamic_cast<Gtk::Window*> (creator ());
 
 		    if (_window) {
 			    setup ();

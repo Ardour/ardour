@@ -38,7 +38,6 @@ libpbd_sources = [
     'controllable.cc',
     'controllable_descriptor.cc',
     'clear_dir.cc',
-    'crossthread.cc',
     'cpus.cc',
     'debug.cc',
     'enumwriter.cc',
@@ -46,11 +45,14 @@ libpbd_sources = [
     'enums.cc',
     'epa.cc',
     'error.cc',
+    'ffs.cc',
     'file_manager.cc',
     'file_utils.cc',
     'fpu.cc',
+    'glib_semaphore.cc',
     'id.cc',
     'locale_guard.cc',
+    'localtime_r.cc',
     'malign.cc',
     'mountpoint.cc',
     'openuri.cc',
@@ -61,6 +63,7 @@ libpbd_sources = [
     'property_list.cc',
     'pthread_utils.cc',
     'receiver.cc',
+    'resource.cc',
     'search_path.cc',
     'semutils.cc',
     'shortpath.cc',
@@ -90,20 +93,18 @@ def configure(conf):
     autowaf.configure(conf)
     autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
-    if sys.platform != 'darwin':
-        autowaf.check_pkg(conf, 'uuid', uselib_store='UUID')
 
     conf.check(function_name='getmntent', header_name='mntent.h', define_name='HAVE_GETMNTENT',mandatory=False)
     conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO',mandatory=False)
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD',mandatory=False)
     conf.check_cc(function_name='posix_memalign', header_name='stdlib.h', cflags='-D_XOPEN_SOURCE=600', define_name='HAVE_POSIX_MEMALIGN', mandatory=False)
+    conf.check(function_name='localtime_r', header_name='time.h', define_name='HAVE_LOCALTIME_R',mandatory=False)
 
     conf.write_config_header('libpbd-config.h', remove=False)
 
     # Boost headers
     autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
     autowaf.check_header(conf, 'cxx', 'boost/weak_ptr.hpp')
-    # autowaf.check_header(conf, 'cxx', 'boost/uuid/uuid.hpp')
 
 def build(bld):
     
@@ -126,6 +127,9 @@ def build(bld):
 
     if bld.is_defined('DEBUG_RT_ALLOC'):
         obj.source += 'debug_rt_alloc.c'
+
+    if bld.env['build_target'] != 'mingw':
+        obj.source += [ 'crossthread.cc' ]
 
     obj.export_includes = ['.']
     obj.includes     = ['.']
@@ -150,6 +154,7 @@ def build(bld):
         testobj.source       = '''
                 test/testrunner.cc
                 test/xpath.cc
+                test/mutex_test.cc
                 test/scalar_properties.cc
                 test/signals_test.cc
                 test/convert_test.cc
@@ -161,7 +166,7 @@ def build(bld):
         testobj.uselib       = 'CPPUNIT XML SNDFILE'
         testobj.use          = 'libpbd'
         testobj.name         = 'libpbd-tests'
-        if sys.platform != 'darwin':
+        if sys.platform != 'darwin' and bld.env['build_target'] != 'mingw':
             testobj.linkflags    = ['-lrt']
 
 

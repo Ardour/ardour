@@ -22,31 +22,37 @@
 #define __pbd_uuid_h__
 
 #include <string>
-#include <uuid/uuid.h>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 
 #include "pbd/libpbd_visibility.h"
 
 namespace PBD {
 
-class LIBPBD_API UUID {
+class LIBPBD_API UUID : public boost::uuids::uuid {
 
   public:
-	UUID () { uuid_generate (id); }
-	UUID (UUID const & other) { uuid_copy (id, other.id); }
-	UUID (std::string const & str) { uuid_parse (str.c_str(), id); }
-	
-	UUID& operator= (std::string const & str);
-	std::string to_s () const;
-	
-	bool operator== (UUID const & other) const { return !uuid_compare (id, other.id); }
-	bool operator!= (UUID const & other) const { return uuid_compare (id, other.id); }
-	bool operator< (UUID const & other) const { return uuid_compare (id, other.id) < 0; }
-	
-	operator bool() const { return !uuid_is_null (id); }
+    UUID ()
+            : boost::uuids::uuid (boost::uuids::random_generator()()) {}
+    UUID (std::string const & str)
+            : boost::uuids::uuid (boost::uuids::string_generator()(str)) {}
 
-  private:
-	uuid_t id;
+    explicit UUID (boost::uuids::uuid const& u)
+            : boost::uuids::uuid(u)
+    {}
 
+    operator boost::uuids::uuid() {
+            return static_cast<boost::uuids::uuid&>(*this);
+    }
+
+    operator boost::uuids::uuid() const {
+            return static_cast<boost::uuids::uuid const&>(*this);
+    }
+
+    UUID& operator= (std::string const & str);
+    std::string to_s () const;
+
+    operator bool() const { return !is_nil(); }
 };
 
 } // namespace PBD

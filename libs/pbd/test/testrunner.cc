@@ -4,11 +4,15 @@
 #include <cppunit/TestResultCollector.h>
 #include <cppunit/TestRunner.h>
 #include <cppunit/BriefTestProgressListener.h>
+#include <glibmm/thread.h>
 #include "scalar_properties.h"
+
 
 int
 main ()
 {
+	Glib::thread_init();
+
 	ScalarPropertiesTest::make_property_quarks ();
 	
 	CppUnit::TestResult testresult;

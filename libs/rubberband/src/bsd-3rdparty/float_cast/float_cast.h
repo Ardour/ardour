@@ -35,6 +35,9 @@
 **		long int lrint  (double x) ;
 */
 
+#ifndef __FLOAT_CAST_H__  // Added by JE - 30-11-2009
+#define __FLOAT_CAST_H__
+
 #if (defined (WIN32) || defined (_WIN32))
 
 	#include	<math.h>
@@ -69,5 +72,5 @@
 
 #endif
 
-
+#endif  // __FLOAT_CAST_H__
 

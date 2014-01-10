@@ -19,11 +19,11 @@
 */
 #include <iostream>
 #include <errno.h>
-#include <poll.h>
 #include <sys/types.h>
 #include <unistd.h>
 
 #include "pbd/error.h"
+#include "pbd/pthread_utils.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
@@ -31,6 +31,8 @@
 #include "ardour/midi_port.h"
 #include "ardour/session.h"
 #include "ardour/slave.h"
+
+#include <glibmm/timer.h>
 
 #include "i18n.h"
 
@@ -236,7 +238,7 @@ MTC_Slave::read_current (SafeTime *st) const
 	do {
 		if (tries == 10) {
 			error << _("MTC Slave: atomic read of current time failed, sleeping!") << endmsg;
-			usleep (20);
+			Glib::usleep (20);
 			tries = 0;
 		}
 		*st = current;
@@ -299,7 +301,7 @@ MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, framepos_t now)
  * when a full TC has been received
  * OR on locate */
 void
-MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
+MTC_Slave::update_mtc_time (const MIDI::byte *msg, bool was_full, framepos_t now)
 {
 	busy_guard1++;
 
@@ -307,8 +309,11 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, framepos_t now)
 	   to use a timestamp indicating when this MTC time was received. example: when we received
 	   a locate command via MMC.
 	*/
-
+#ifdef COMPILER_MSVC
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::update_mtc_time - TID:%1\n", ::pthread_self().p));
+#else
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::update_mtc_time - TID:%1\n", ::pthread_self()));
+#endif
 	TimecodeFormat tc_format;
 	bool reset_tc = true;
 
@@ -488,7 +493,7 @@ MTC_Slave::update_mtc_status (MIDI::MTC_Status status)
 	/* XXX !!! thread safety ... called from MIDI I/O context
 	 * on locate (via ::update_mtc_time())
 	 */
-	DEBUG_TRACE (DEBUG::MTC, string_compose("MTC_Slave::update_mtc_status - TID:%1\n", ::pthread_self()));
+	DEBUG_TRACE (DEBUG::MTC, string_compose("MTC_Slave::update_mtc_status - TID:%1\n", pthread_name()));
 	return; // why was this fn needed anyway ? it just messes up things -> use reset.
 	busy_guard1++;
 

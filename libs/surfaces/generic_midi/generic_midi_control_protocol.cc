@@ -105,7 +105,7 @@ static const char * const midimap_env_variable_name = "ARDOUR_MIDIMAPS_PATH";
 static const char* const midi_map_dir_name = "midi_maps";
 static const char* const midi_map_suffix = ".map";
 
-SearchPath
+Searchpath
 system_midi_map_search_path ()
 {
 	bool midimap_path_defined = false;
@@ -115,7 +115,7 @@ system_midi_map_search_path ()
 		return spath_env;
 	}
 
-	SearchPath spath (ardour_data_search_path());
+	Searchpath spath (ardour_data_search_path());
 	spath.add_subdirectory_to_paths(midi_map_dir_name);
 	return spath;
 }
@@ -127,7 +127,7 @@ user_midi_map_directory ()
 }
 
 static bool
-midi_map_filter (const string &str, void */*arg*/)
+midi_map_filter (const string &str, void* /*arg*/)
 {
 	return (str.length() > strlen(midi_map_suffix) &&
 		str.find (midi_map_suffix) == (str.length() - strlen (midi_map_suffix)));
@@ -138,7 +138,7 @@ GenericMidiControlProtocol::reload_maps ()
 {
 	vector<string *> *midi_maps;
 	PathScanner scanner;
-	SearchPath spath (system_midi_map_search_path());
+	Searchpath spath (system_midi_map_search_path());
 	spath += user_midi_map_directory ();
 
 	midi_maps = scanner (spath.to_string(), midi_map_filter, 0, false, true);

@@ -30,6 +30,7 @@
 #include "pbd/stl_delete.h"
 #include "pbd/strsplit.h"
 
+#include <glib/gstdio.h>
 #include <glibmm/miscutils.h>
 
 #include "evoral/Control.hpp"
@@ -96,7 +97,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 SMFSource::~SMFSource ()
 {
 	if (removable()) {
-		unlink (_path.c_str());
+		::g_unlink (_path.c_str());
 	}
 }
 

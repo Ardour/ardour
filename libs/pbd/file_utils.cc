@@ -23,6 +23,10 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
+#ifdef COMPILER_MINGW
+#include <io.h> // For W_OK
+#endif
+
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/pattern.h>
@@ -31,6 +35,7 @@
 
 #include "pbd/compose.h"
 #include "pbd/file_utils.h"
+#include "pbd/debug.h"
 #include "pbd/error.h"
 #include "pbd/pathscanner.h"
 #include "pbd/stl_delete.h"
@@ -76,6 +81,11 @@ find_matching_files_in_directory (const std::string& directory,
 		std::string full_path(directory);
 		full_path = Glib::build_filename (full_path, *file_iter);
 
+		DEBUG_TRACE (
+			DEBUG::FileUtils,
+			string_compose("Found file %1\n", full_path)
+			);
+
 		result.push_back(full_path);
 	}
 }
@@ -94,7 +104,7 @@ find_matching_files_in_directories (const vector<std::string>& paths,
 }
 
 void
-find_matching_files_in_search_path (const SearchPath& search_path,
+find_matching_files_in_search_path (const Searchpath& search_path,
                                     const Glib::PatternSpec& pattern,
                                     vector<std::string>& result)
 {
@@ -102,7 +112,7 @@ find_matching_files_in_search_path (const SearchPath& search_path,
 }
 
 bool
-find_file_in_search_path(const SearchPath& search_path,
+find_file_in_search_path(const Searchpath& search_path,
                          const string& filename,
                          std::string& result)
 {
@@ -113,23 +123,27 @@ find_file_in_search_path(const SearchPath& search_path,
 
 	if (tmp.size() == 0)
 	{
+		DEBUG_TRACE (
+			DEBUG::FileUtils,
+			string_compose("No file matching %1 found in Path: %2\n", filename, search_path.to_string())
+			    );
 		return false;
 	}
 
-#if 0
 	if (tmp.size() != 1)
 	{
-		info << string_compose
-			(
-			 "Found more than one file matching %1 in search path %2",
-			 filename,
-			 search_path ()
-			)
-			<< endmsg;
+		DEBUG_TRACE (
+			DEBUG::FileUtils,
+			string_compose("Found more that one file matching %1 in Path: %2\n", filename, search_path.to_string())
+			    );
 	}
-#endif
 
 	result = tmp.front();
+
+	DEBUG_TRACE (
+		DEBUG::FileUtils,
+		string_compose("Found file %1 in Path: %2\n", filename, search_path.to_string())
+		    );
 
 	return true;
 }
@@ -188,9 +202,9 @@ get_absolute_path (const std::string & p)
 bool
 equivalent_paths (const std::string& a, const std::string& b)
 {
-	struct stat bA;
+	GStatBuf bA;
 	int const rA = g_stat (a.c_str(), &bA);
-	struct stat bB;
+	GStatBuf bB;
 	int const rB = g_stat (b.c_str(), &bB);
 
 	return (rA == 0 && rB == 0 && bA.st_dev == bB.st_dev && bA.st_ino == bB.st_ino);
@@ -221,7 +235,7 @@ exists_and_writable (const std::string & p)
 	   make us unwritable.
 	*/
 
-	struct stat statbuf;
+	GStatBuf statbuf;
 
 	if (g_stat (p.c_str(), &statbuf) != 0) {
 		/* doesn't exist - not writable */

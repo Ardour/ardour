@@ -20,7 +20,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+#ifndef PLATFORM_WINDOWS
 #include <poll.h>
+#endif
+
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
 #include "ardour/butler.h"
@@ -38,7 +42,7 @@ namespace ARDOUR {
 
 Butler::Butler(Session& s)
 	: SessionHandleRef (s)
-	, thread(0)
+	, thread()
 	, audio_dstream_capture_buffer_size(0)
 	, audio_dstream_playback_buffer_size(0)
 	, midi_dstream_buffer_size(0)
@@ -68,6 +72,31 @@ Butler::config_changed (std::string p)
         }
 }
 
+#ifndef PLATFORM_WINDOWS
+int
+Butler::setup_request_pipe ()
+{
+	if (pipe (request_pipe)) {
+		error << string_compose(_("Cannot create transport request signal pipe (%1)"),
+				strerror (errno)) << endmsg;
+		return -1;
+	}
+
+	if (fcntl (request_pipe[0], F_SETFL, O_NONBLOCK)) {
+		error << string_compose(_("UI: cannot set O_NONBLOCK on butler request pipe (%1)"),
+				strerror (errno)) << endmsg;
+		return -1;
+	}
+
+	if (fcntl (request_pipe[1], F_SETFL, O_NONBLOCK)) {
+		error << string_compose(_("UI: cannot set O_NONBLOCK on butler request pipe (%1)"),
+				strerror (errno)) << endmsg;
+		return -1;
+	}
+	return 0;
+}
+#endif
+
 int
 Butler::start_thread()
 {
@@ -87,23 +116,9 @@ Butler::start_thread()
 
 	should_run = false;
 
-	if (pipe (request_pipe)) {
-		error << string_compose(_("Cannot create transport request signal pipe (%1)"),
-				strerror (errno)) << endmsg;
-		return -1;
-	}
-
-	if (fcntl (request_pipe[0], F_SETFL, O_NONBLOCK)) {
-		error << string_compose(_("UI: cannot set O_NONBLOCK on butler request pipe (%1)"),
-				strerror (errno)) << endmsg;
-		return -1;
-	}
-
-	if (fcntl (request_pipe[1], F_SETFL, O_NONBLOCK)) {
-		error << string_compose(_("UI: cannot set O_NONBLOCK on butler request pipe (%1)"),
-				strerror (errno)) << endmsg;
-		return -1;
-	}
+#ifndef PLATFORM_WINDOWS
+	if (setup_request_pipe() != 0) return -1;
+#endif
 
 	if (pthread_create_and_store ("disk butler", &thread, _thread_work, this)) {
 		error << _("Session: could not create butler thread") << endmsg;
@@ -118,12 +133,9 @@ Butler::start_thread()
 void
 Butler::terminate_thread ()
 {
-	if (thread) {
-		void* status;
-		const char c = Request::Quit;
-		(void) ::write (request_pipe[1], &c, 1);
-		pthread_join (thread, &status);
-	}
+	void* status;
+	queue_request (Request::Quit);
+	pthread_join (thread, &status);
 }
 
 void *
@@ -134,28 +146,25 @@ Butler::_thread_work (void* arg)
 	return ((Butler *) arg)->thread_work ();
 }
 
-void *
-Butler::thread_work ()
+bool
+Butler::wait_for_requests ()
 {
-	uint32_t err = 0;
-
+#ifndef PLATFORM_WINDOWS
 	struct pollfd pfd[1];
-	bool disk_work_outstanding = false;
-	RouteList::iterator i;
 
-	while (true) {
-		pfd[0].fd = request_pipe[0];
-		pfd[0].events = POLLIN|POLLERR|POLLHUP;
+	pfd[0].fd = request_pipe[0];
+	pfd[0].events = POLLIN|POLLERR|POLLHUP;
 
-		if (poll (pfd, 1, (disk_work_outstanding ? 0 : -1)) < 0) {
+	while(true) {
+		if (poll (pfd, 1, -1) < 0) {
 
 			if (errno == EINTR) {
 				continue;
 			}
 
 			error << string_compose (_("poll on butler request pipe failed (%1)"),
-					  strerror (errno))
-			      << endmsg;
+					strerror (errno))
+				<< endmsg;
 			break;
 		}
 
@@ -165,16 +174,60 @@ Butler::thread_work ()
 		}
 
 		if (pfd[0].revents & POLLIN) {
+			return true;
+		}
+	}
+	return false;
+#else
+	m_request_sem.wait ();
+	return true;
+#endif
+}
 
-			char req;
+bool
+Butler::dequeue_request (Request::Type& r)
+{
+#ifndef PLATFORM_WINDOWS
+	char req;
+	size_t nread = ::read (request_pipe[0], &req, sizeof (req));
+	if (nread == 1) {
+		r = (Request::Type) req;
+		return true;
+	} else if (nread == 0) {
+		return false;
+	} else if (errno == EAGAIN) {
+		return false;
+	} else {
+		fatal << _("Error reading from butler request pipe") << endmsg;
+		/*NOTREACHED*/
+	}
+#else
+	r = (Request::Type) m_request_state.get();
+#endif
+	return false;
+}
 
-			/* empty the pipe of all current requests */
+	void *
+Butler::thread_work ()
+{
+	uint32_t err = 0;
 
-			while (1) {
-				size_t nread = ::read (request_pipe[0], &req, sizeof (req));
-				if (nread == 1) {
+	bool disk_work_outstanding = false;
+	RouteList::iterator i;
 
-					switch ((Request::Type) req) {
+	while (true) {
+		if(!disk_work_outstanding) {
+			if (wait_for_requests ()) {
+				Request::Type req;
+
+				/* empty the pipe of all current requests */
+#ifdef PLATFORM_WINDOWS
+				dequeue_request (req);
+				{
+#else
+				while(dequeue_request(req)) {
+#endif
+					switch (req) {
 
 					case Request::Run:
 						should_run = true;
@@ -192,14 +245,6 @@ Butler::thread_work ()
 					default:
 						break;
 					}
-
-				} else if (nread == 0) {
-					break;
-				} else if (errno == EAGAIN) {
-					break;
-				} else {
-					fatal << _("Error reading from butler request pipe") << endmsg;
-					/*NOTREACHED*/
 				}
 			}
 		}
@@ -338,18 +383,28 @@ Butler::schedule_transport_work ()
 }
 
 void
+Butler::queue_request (Request::Type r)
+{
+#ifndef PLATFORM_WINDOWS
+	char c = r;
+	(void) ::write (request_pipe[1], &c, 1);
+#else
+	m_request_state.set (r);
+	m_request_sem.post ();
+#endif
+}
+
+void
 Butler::summon ()
 {
-	char c = Request::Run;
-	(void) ::write (request_pipe[1], &c, 1);
+	queue_request (Request::Run);
 }
 
 void
 Butler::stop ()
 {
 	Glib::Threads::Mutex::Lock lm (request_lock);
-	char c = Request::Pause;
-	(void) ::write (request_pipe[1], &c, 1);
+	queue_request (Request::Pause);
 	paused.wait(request_lock);
 }
 
@@ -357,8 +412,7 @@ void
 Butler::wait_until_finished ()
 {
 	Glib::Threads::Mutex::Lock lm (request_lock);
-	char c = Request::Pause;
-	(void) ::write (request_pipe[1], &c, 1);
+	queue_request (Request::Pause);
 	paused.wait(request_lock);
 }
 

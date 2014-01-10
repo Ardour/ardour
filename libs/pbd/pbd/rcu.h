@@ -45,7 +45,7 @@
    and managed object.
 */
 template<class T>
-class LIBPBD_API RCUManager
+class /*LIBPBD_API*/ RCUManager
 {
   public:
 
@@ -111,7 +111,7 @@ class LIBPBD_API RCUManager
    means that no actual objects will be deleted incorrectly if this is misused.
 */
 template<class T>
-class LIBPBD_API SerializedRCUManager : public RCUManager<T>
+class /*LIBPBD_API*/ SerializedRCUManager : public RCUManager<T>
 {
 public:
 
@@ -214,7 +214,7 @@ private:
 
 */
 template<class T>
-class LIBPBD_API RCUWriter
+class /*LIBPBD_API*/ RCUWriter
 {
 public:
 

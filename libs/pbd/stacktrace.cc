@@ -22,6 +22,7 @@
 #include "pbd/stacktrace.h"
 #include <cstdio>
 #include <iostream>
+#include <string>
 
 void
 PBD::trace_twb ()
@@ -105,7 +106,7 @@ PBD::stacktrace (std::ostream& out, int levels)
 #else
 
 std::string 
-PBD::demangle (std::string const & l)
+PBD::demangle (std::string const & l) /* JE - !!!! 'PBD' namespace might possibly get removed (except it's still used in 'libs/canvas/item.cc') */
 {
 	return std::string();
 }

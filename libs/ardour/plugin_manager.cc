@@ -25,10 +25,12 @@
 
 #include <sys/types.h>
 #include <cstdio>
-#include <lrdf.h>
-#include <dlfcn.h>
 #include <cstdlib>
 #include <fstream>
+
+#ifdef HAVE_LRDF
+#include <lrdf.h>
+#endif
 
 #ifdef WINDOWS_VST_SUPPORT
 #include "fst.h"
@@ -43,9 +45,11 @@
 #endif //LXVST_SUPPORT
 
 #include <glibmm/miscutils.h>
+#include <glibmm/pattern.h>
 
 #include "pbd/pathscanner.h"
 #include "pbd/whitespace.h"
+#include "pbd/file_utils.h"
 
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
@@ -54,6 +58,8 @@
 #include "ardour/plugin.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/rc_configuration.h"
+
+#include "ardour/ladspa_search_path.h"
 
 #ifdef LV2_SUPPORT
 #include "ardour/lv2_plugin.h"
@@ -76,6 +82,8 @@
 #include "pbd/stl_delete.h"
 
 #include "i18n.h"
+
+#include "ardour/debug.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -125,10 +133,6 @@ PluginManager::PluginManager ()
 		add_lxvst_presets();
 	}
 #endif /* Native LinuxVST support*/
-
-	if ((s = getenv ("LADSPA_PATH"))) {
-		ladspa_path = s;
-	}
 
 	if ((s = getenv ("VST_PATH"))) {
 		windows_vst_path = s;
@@ -198,91 +202,38 @@ PluginManager::refresh ()
 void
 PluginManager::ladspa_refresh ()
 {
-	if (_ladspa_plugin_info)
+	if (_ladspa_plugin_info) {
 		_ladspa_plugin_info->clear ();
-	else
+	} else {
 		_ladspa_plugin_info = new ARDOUR::PluginInfoList ();
-
-	static const char *standard_paths[] = {
-		"/usr/local/lib64/ladspa",
-		"/usr/local/lib/ladspa",
-		"/usr/lib64/ladspa",
-		"/usr/lib/ladspa",
-		"/Library/Audio/Plug-Ins/LADSPA",
-		""
-	};
+	}
 
 	/* allow LADSPA_PATH to augment, not override standard locations */
 
 	/* Only add standard locations to ladspa_path if it doesn't
 	 * already contain them. Check for trailing G_DIR_SEPARATOR too.
 	 */
+	
+	vector<string> ladspa_modules;
 
-	int i;
-	for (i = 0; standard_paths[i][0]; i++) {
-		size_t found = ladspa_path.find(standard_paths[i]);
-		if (found != ladspa_path.npos) {
-			switch (ladspa_path[found + strlen(standard_paths[i])]) {
-				case ':' :
-				case '\0':
-					continue;
-				case G_DIR_SEPARATOR :
-					if (ladspa_path[found + strlen(standard_paths[i]) + 1] == ':' ||
-					    ladspa_path[found + strlen(standard_paths[i]) + 1] == '\0') {
-						continue;
-					}
-			}
-		}
-		if (!ladspa_path.empty())
-			ladspa_path += ":";
+	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("LADSPA: search along: [%1]\n", ladspa_search_path().to_string()));
 
-		ladspa_path += standard_paths[i];
+	Glib::PatternSpec so_extension_pattern("*.so");
+	Glib::PatternSpec dylib_extension_pattern("*.dylib");
+	Glib::PatternSpec dll_extension_pattern("*.dll");
 
+	find_matching_files_in_search_path (ladspa_search_path (),
+					    so_extension_pattern, ladspa_modules);
+
+	find_matching_files_in_search_path (ladspa_search_path (),
+					    dylib_extension_pattern, ladspa_modules);
+ 
+	find_matching_files_in_search_path (ladspa_search_path (),
+					    dll_extension_pattern, ladspa_modules);
+
+	for (vector<std::string>::iterator i = ladspa_modules.begin(); i != ladspa_modules.end(); ++i) {
+		ladspa_discover (*i);
 	}
-
-	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("LADSPA: search along: [%1]\n", ladspa_path));
-
-	ladspa_discover_from_path (ladspa_path);
-}
-
-
-int
-PluginManager::add_ladspa_directory (string path)
-{
-	if (ladspa_discover_from_path (path) == 0) {
-		ladspa_path += ':';
-		ladspa_path += path;
-		return 0;
-	}
-	return -1;
-}
-
-static bool ladspa_filter (const string& str, void */*arg*/)
-{
-	/* Not a dotfile, has a prefix before a period, suffix is "so" */
-
-	return str[0] != '.' && (str.length() > 3 && str.find (".so") == (str.length() - 3));
-}
-
-int
-PluginManager::ladspa_discover_from_path (string /*path*/)
-{
-	PathScanner scanner;
-	vector<string *> *plugin_objects;
-	vector<string *>::iterator x;
-	int ret = 0;
-
-	plugin_objects = scanner (ladspa_path, ladspa_filter, 0, false, true);
-
-	if (plugin_objects) {
-		for (x = plugin_objects->begin(); x != plugin_objects->end (); ++x) {
-			ladspa_discover (**x);
-		}
-
-		vector_delete (plugin_objects);
-	}
-
-	return ret;
 }
 
 static bool rdf_filter (const string &str, void* /*arg*/)
@@ -315,7 +266,7 @@ PluginManager::add_lxvst_presets()
 void
 PluginManager::add_presets(string domain)
 {
-
+#ifdef HAVE_LRDF
 	PathScanner scanner;
 	vector<string *> *presets;
 	vector<string *>::iterator x;
@@ -338,11 +289,13 @@ PluginManager::add_presets(string domain)
 		
 		vector_delete (presets);
 	}
+#endif
 }
 
 void
 PluginManager::add_lrdf_data (const string &path)
 {
+#ifdef HAVE_LRDF
 	PathScanner scanner;
 	vector<string *>* rdf_files;
 	vector<string *>::iterator x;
@@ -360,29 +313,35 @@ PluginManager::add_lrdf_data (const string &path)
 
 		vector_delete (rdf_files);
 	}
+#endif
 }
 
 int
 PluginManager::ladspa_discover (string path)
 {
-	void *module;
+	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Checking for LADSPA plugin at %1\n", path));
+
+	Glib::Module module(path);
 	const LADSPA_Descriptor *descriptor;
 	LADSPA_Descriptor_Function dfunc;
-	const char *errstr;
+	void* func = 0;
 
-	if ((module = dlopen (path.c_str(), RTLD_NOW)) == 0) {
-		error << string_compose(_("LADSPA: cannot load module \"%1\" (%2)"), path, dlerror()) << endmsg;
+	if (!module) {
+		error << string_compose(_("LADSPA: cannot load module \"%1\" (%2)"),
+			path, Glib::Module::get_last_error()) << endmsg;
 		return -1;
 	}
 
-	dfunc = (LADSPA_Descriptor_Function) dlsym (module, "ladspa_descriptor");
 
-	if ((errstr = dlerror()) != 0) {
+	if (!module.get_symbol("ladspa_descriptor", func)) {
 		error << string_compose(_("LADSPA: module \"%1\" has no descriptor function."), path) << endmsg;
-		error << errstr << endmsg;
-		dlclose (module);
+		error << Glib::Module::get_last_error() << endmsg;
 		return -1;
 	}
+
+	dfunc = (LADSPA_Descriptor_Function)func;
+
+	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("LADSPA plugin found at %1\n", path));
 
 	for (uint32_t i = 0; ; ++i) {
 		if ((descriptor = dfunc (i)) == 0) {
@@ -437,6 +396,8 @@ PluginManager::ladspa_discover (string path)
 		if(!found){
 		    _ladspa_plugin_info->push_back (info);
 		}
+
+		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Found LADSPA plugin, name: %1, Inputs: %2, Outputs: %3\n", info->name, info->n_inputs, info->n_outputs));
 	}
 
 // GDB WILL NOT LIKE YOU IF YOU DO THIS
@@ -448,6 +409,7 @@ PluginManager::ladspa_discover (string path)
 string
 PluginManager::get_ladspa_category (uint32_t plugin_id)
 {
+#ifdef HAVE_LRDF
 	char buf[256];
 	lrdf_statement pattern;
 
@@ -505,6 +467,9 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 	} else {
 		return label;
 	}
+#else
+		return ("Unknown");
+#endif
 }
 
 #ifdef LV2_SUPPORT

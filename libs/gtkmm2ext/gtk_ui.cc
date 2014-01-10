@@ -95,7 +95,7 @@ UI::UI (string namestr, int *argc, char ***argv)
 
 	/* attach our request source to the default main context */
 
-	request_channel.ios()->attach (MainContext::get_default());
+	attach_request_source ();
 
 	errors = new TextViewer (800,600);
 	errors->text().set_editable (false);
@@ -692,7 +692,7 @@ UI::flush_pending ()
 }
 
 bool
-UI::just_hide_it (GdkEventAny */*ev*/, Window *win)
+UI::just_hide_it (GdkEventAny* /*ev*/, Window *win)
 {
 	win->hide ();
 	return true;
@@ -742,7 +742,7 @@ UI::color_selection_done (bool status)
 }
 
 bool
-UI::color_selection_deleted (GdkEventAny */*ev*/)
+UI::color_selection_deleted (GdkEventAny* /*ev*/)
 {
 	Main::quit ();
 	return true;

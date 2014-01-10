@@ -31,14 +31,14 @@ using namespace PBD;
 
 namespace ARDOUR {
 
-SearchPath
+Searchpath
 backend_search_path ()
 {
-	SearchPath spath(user_config_directory ());
+	Searchpath spath(user_config_directory ());
 	spath += ardour_dll_directory ();
 	spath.add_subdirectory_to_paths(backend_dir_name);
 
-	spath += SearchPath(Glib::getenv(backend_env_variable_name));
+	spath += Searchpath(Glib::getenv(backend_env_variable_name));
 	return spath;
 }
 

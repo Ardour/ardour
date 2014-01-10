@@ -51,7 +51,7 @@
  *  can do `just-in-time' binding from the crossfade ID.
  */
 template <class obj_T>
-class LIBPBD_API MementoCommandBinder : public PBD::Destructible
+class /*LIBPBD_API*/ MementoCommandBinder : public PBD::Destructible
 {
 public:
 	/** @return Stateful object to operate on */
@@ -68,7 +68,7 @@ public:
 
 /** A simple MementoCommandBinder which binds directly to an object */
 template <class obj_T>
-class LIBPBD_API SimpleMementoCommandBinder : public MementoCommandBinder<obj_T>
+class /*LIBPBD_API*/ SimpleMementoCommandBinder : public MementoCommandBinder<obj_T>
 {
 public:
 	SimpleMementoCommandBinder (obj_T& o)
@@ -100,7 +100,7 @@ private:
  * memento, and redo is restoring the after memento.
  */
 template <class obj_T>
-class LIBPBD_API MementoCommand : public Command
+class /*LIBPBD_API*/ MementoCommand : public Command
 {
 public:
 	MementoCommand (obj_T& a_object, XMLNode* a_before, XMLNode* a_after) 

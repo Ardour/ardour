@@ -111,7 +111,7 @@ PopUp::touch ()
 }
 
 gint
-PopUp::button_click (GdkEventButton */*ev*/)
+PopUp::button_click (GdkEventButton* /*ev*/)
 {
 	remove ();
 	return TRUE;

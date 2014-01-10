@@ -665,7 +665,7 @@ Editor::start_canvas_autoscroll (int dx, int dy)
 	autoscroll_x = dx;
 	autoscroll_y = dy;
 	autoscroll_x_distance = (framepos_t) floor (current_page_samples()/50.0);
-	autoscroll_y_distance = fabs (dy * 5); /* pixels */
+	autoscroll_y_distance = fabs ((double)dy * 5); /* pixels */
 	autoscroll_cnt = 0;
 
 	/* do it right now, which will start the repeated callbacks */

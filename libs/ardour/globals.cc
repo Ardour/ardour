@@ -20,12 +20,18 @@
 #include "libardour-config.h"
 #endif
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <cstdio> // Needed so that libraptor (included in lrdf) won't complain
 #include <cstdlib>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#ifndef PLATFORM_WINDOWS
 #include <sys/resource.h>
+#endif
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -43,7 +49,7 @@
 #include "ardour/audio_unit.h"
 #endif
 
-#ifdef __SSE__
+#if defined(__SSE__) || defined(USE_XMMINTRIN)
 #include <xmmintrin.h>
 #endif
 
@@ -54,7 +60,9 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
+#ifdef HAVE_LRDF
 #include <lrdf.h>
+#endif
 
 #include "pbd/cpus.h"
 #include "pbd/error.h"
@@ -196,6 +204,7 @@ setup_hardware_optimization (bool try_optimization)
 static void
 lotsa_files_please ()
 {
+#ifndef PLATFORM_WINDOWS
 	struct rlimit rl;
 
 	if (getrlimit (RLIMIT_NOFILE, &rl) == 0) {
@@ -216,6 +225,7 @@ lotsa_files_please ()
 	} else {
 		error << string_compose (_("Could not get system open files limit (%1)"), strerror (errno)) << endmsg;
 	}
+#endif
 }
 
 bool
@@ -262,7 +272,9 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	// allow ardour the absolute maximum number of open files
 	lotsa_files_please ();
 
+#ifdef HAVE_LRDF
 	lrdf_init();
+#endif
 	Library = new AudioLibrary;
 
 	BootMessage (_("Loading configuration"));
@@ -364,7 +376,9 @@ ARDOUR::cleanup ()
 	ARDOUR::AudioEngine::destroy ();
 
 	delete Library;
+#ifdef HAVE_LRDF
 	lrdf_cleanup ();
+#endif
 	delete &ControlProtocolManager::instance();
 #ifdef WINDOWS_VST_SUPPORT
 	fst_exit ();
@@ -382,7 +396,7 @@ void
 ARDOUR::find_bindings_files (map<string,string>& files)
 {
 	vector<std::string> found;
-	SearchPath spath = ardour_config_search_path();
+	Searchpath spath = ardour_config_search_path();
 
 	if (getenv ("ARDOUR_SAE")) {
 		Glib::PatternSpec pattern("*SAE-*.bindings");
@@ -581,10 +595,21 @@ clock_gettime (int /*clk_id*/, struct timespec *t)
 microseconds_t
 ARDOUR::get_microseconds ()
 {
+#ifdef PLATFORM_WINDOWS
+	microseconds_t ret = 0;
+	LARGE_INTEGER freq, time;
+
+	if (QueryPerformanceFrequency(&freq))
+		if (QueryPerformanceCounter(&time))
+			ret = (microseconds_t)((time.QuadPart * 1000000) / freq.QuadPart);
+
+	return ret;
+#else
 	struct timespec ts;
 	if (clock_gettime (CLOCK_MONOTONIC, &ts) != 0) {
 		/* EEEK! */
 		return 0;
 	}
 	return (microseconds_t) ts.tv_sec * 1000000 + (ts.tv_nsec/1000);
+#endif
 }

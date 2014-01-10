@@ -28,6 +28,7 @@
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/midi_patch_manager.h"
+
 #include "ardour/midi_patch_search_path.h"
 
 #include "i18n.h"
@@ -102,7 +103,7 @@ MidiPatchManager::refresh()
 	_master_devices_by_model.clear();
 	_all_models.clear();
 
-	SearchPath search_path = midi_patch_search_path ();
+	Searchpath search_path = midi_patch_search_path ();
 	Glib::PatternSpec pattern (string("*.midnam"));
 	vector<std::string> result;
 

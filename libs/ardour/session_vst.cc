@@ -17,7 +17,9 @@
 
 */
 
+#ifndef COMPILER_MSVC
 #include <stdbool.h>
+#endif
 #include <cstdio>
 
 #include "ardour/session.h"
@@ -59,11 +61,19 @@ intptr_t Session::vst_callback (
 	if (effect && effect->user) {
 	        plug = (VSTPlugin *) (effect->user);
 		session = &plug->session();
+#ifdef COMPILER_MSVC
+		SHOW_CALLBACK ("am callback 0x%x, opcode = %d, plugin = \"%s\" ", (int) pthread_self().p, opcode, plug->name());
+#else
 		SHOW_CALLBACK ("am callback 0x%x, opcode = %d, plugin = \"%s\" ", (int) pthread_self(), opcode, plug->name());
+#endif
 	} else {
 		plug = 0;
 		session = 0;
+#ifdef COMPILER_MSVC
+		SHOW_CALLBACK ("am callback 0x%x, opcode = %d", (int) pthread_self().p, opcode);
+#else
 		SHOW_CALLBACK ("am callback 0x%x, opcode = %d", (int) pthread_self(), opcode);
+#endif
 	}
 
 	switch(opcode){

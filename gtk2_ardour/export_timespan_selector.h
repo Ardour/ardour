@@ -25,8 +25,13 @@
 
 #include <list>
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <gtkmm.h>
 #include <boost/shared_ptr.hpp>
+
 
 #include "ardour/types.h"
 #include "ardour/session_handle.h"

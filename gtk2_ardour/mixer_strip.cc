@@ -1522,7 +1522,7 @@ MixerStrip::build_route_ops_menu ()
 
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active")));
-	CheckMenuItem* i = dynamic_cast<CheckMenuItem *> (&items.back());
+	Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 	i->set_active (_route->active());
 	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), !_route->active(), false));
 
@@ -1532,7 +1532,7 @@ MixerStrip::build_route_ops_menu ()
 
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Protect Against Denormals"), sigc::mem_fun (*this, &RouteUI::toggle_denormal_protection)));
-	denormal_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
+	denormal_menu_item = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 	denormal_menu_item->set_active (_route->denormal_protection());
 
 	if (!Profile->get_sae()) {

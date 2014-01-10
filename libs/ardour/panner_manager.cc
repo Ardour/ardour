@@ -29,6 +29,7 @@
 
 #include "ardour/debug.h"
 #include "ardour/panner_manager.h"
+
 #include "ardour/panner_search_path.h"
 
 #include "i18n.h"
@@ -65,7 +66,7 @@ static bool panner_filter (const string& str, void */*arg*/)
 #ifdef __APPLE__
 	return str[0] != '.' && (str.length() > 6 && str.find (".dylib") == (str.length() - 6));
 #else
-	return str[0] != '.' && (str.length() > 3 && str.find (".so") == (str.length() - 3));
+	return str[0] != '.' && (str.length() > 3 && (str.find (".so") == (str.length() - 3) || str.find (".dll") == (str.length() - 4)));
 #endif
 }
 
@@ -83,6 +84,7 @@ PannerManager::discover_panners ()
 	for (vector<std::string *>::iterator i = panner_modules->begin(); i != panner_modules->end(); ++i) {
 		panner_discover (**i);
 	}
+
 	vector_delete (panner_modules);
 }
 
@@ -113,31 +115,33 @@ PannerManager::panner_discover (string path)
 PannerInfo*
 PannerManager::get_descriptor (string path)
 {
-	void *module;
+	Glib::Module* module = new Glib::Module(path);
 	PannerInfo* info = 0;
 	PanPluginDescriptor *descriptor = 0;
 	PanPluginDescriptor* (*dfunc)(void);
-	const char *errstr;
+	void* func = 0;
 
-	if ((module = dlopen (path.c_str(), RTLD_NOW)) == 0) {
-		error << string_compose(_("PannerManager: cannot load module \"%1\" (%2)"), path, dlerror()) << endmsg;
+	if (!module) {
+		error << string_compose(_("PannerManager: cannot load module \"%1\" (%2)"), path,
+				Glib::Module::get_last_error()) << endmsg;
+		delete module;
 		return 0;
 	}
 
-	dfunc = (PanPluginDescriptor* (*)(void)) dlsym (module, "panner_descriptor");
-
-	if ((errstr = dlerror()) != 0) {
+	if (!module->get_symbol("panner_descriptor", func)) {
 		error << string_compose(_("PannerManager: module \"%1\" has no descriptor function."), path) << endmsg;
-		error << errstr << endmsg;
-		dlclose (module);
+		error << Glib::Module::get_last_error() << endmsg;
+		delete module;
 		return 0;
 	}
 
+	dfunc = (PanPluginDescriptor* (*)(void))func;
 	descriptor = dfunc();
+
 	if (descriptor) {
 		info = new PannerInfo (*descriptor, module);
 	} else {
-		dlclose (module);
+		delete module;
 	}
 
 	return info;

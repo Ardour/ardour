@@ -57,7 +57,7 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 	// users (among others)
 	// _vbox.pack_start (_panners, false, false);
 
-	io = manage (new IOSelector (parent, session, s->output()));
+	io = Gtk::manage (new IOSelector (parent, session, s->output()));
 
 	pack_start (_vbox, false, false);
 

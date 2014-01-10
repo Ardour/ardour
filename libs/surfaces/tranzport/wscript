@@ -42,6 +42,7 @@ def build(bld):
     obj.defines     = [ 'PACKAGE="ardour_tranzport"' ]
     obj.includes     = ['.', './tranzport']
     obj.name         = 'libardour_tranzport'
+    obj.defines      = [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.target       = 'ardour_tranzport'
     obj.use          = 'libardour libardour_cp'
     obj.vnum         = LIBARDOUR_TRANZPORT_LIB_VERSION

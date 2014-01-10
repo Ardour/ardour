@@ -65,7 +65,6 @@ children = [
         'libs/timecode',
         'libs/ardour',
         'libs/gtkmm2ext',
-        'libs/clearlooks-newer',
         'libs/audiographer',
         'libs/canvas',
         'libs/plugins/reasonablesynth.lv2',
@@ -81,15 +80,6 @@ i18n_children = [
         'libs/ardour',
         'libs/gtkmm2ext',
 ]
-
-if sys.platform == 'linux2':
-    children += [ 'tools/sanity_check' ]
-    lxvst_default = True
-elif sys.platform == 'darwin':
-    children += [ 'libs/appleutility' ]
-    lxvst_default = False
-else:
-    lxvst_default = False
 
 # Version stuff
 
@@ -179,8 +169,9 @@ def set_compiler_flags (conf,opt):
         debug_flags = [ '-pg' ]
 
     if opt.backtrace:
-        if platform != 'darwin' and not is_clang:
-            debug_flags = [ '-rdynamic' ]
+        if opt.dist_target == 'auto':
+            if platform != 'darwin' and not is_clang:
+                debug_flags = [ '-rdynamic' ]
 
     # Autodetect
     if opt.dist_target == 'auto':
@@ -299,7 +290,7 @@ def set_compiler_flags (conf,opt):
         print("However, this is tricky and not recommended for beginners.")
         sys.exit (-1)
 
-    if opt.lxvst:
+    if conf.env['LXVST_SUPPORT'] == True:
         if conf.env['build_target'] == 'x86_64':
             compiler_flags.append("-DLXVST_64BIT")
         else:
@@ -445,7 +436,7 @@ def options(opt):
     opt.add_option('--depstack-root', type='string', default='~', dest='depstack_root',
                     help='Directory/folder where dependency stack trees (gtk, a3) can be found (defaults to ~)')
     opt.add_option('--dist-target', type='string', default='auto', dest='dist_target',
-                    help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,powerpc,tiger,leopard]')
+                    help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,powerpc,tiger,leopard,mingw]')
     opt.add_option('--fpu-optimization', action='store_true', default=True, dest='fpu_optimization',
                     help='Build runtime checked assembler code (default)')
     opt.add_option('--no-fpu-optimization', action='store_false', dest='fpu_optimization')
@@ -465,7 +456,7 @@ def options(opt):
                     help='Compile with support for LV2 (if Lilv+Suil is available)')
     opt.add_option('--no-lv2', action='store_false', dest='lv2',
                     help='Do not compile with support for LV2')
-    opt.add_option('--lxvst', action='store_true', default=lxvst_default, dest='lxvst',
+    opt.add_option('--lxvst', action='store_true', default=True, dest='lxvst',
                     help='Compile with support for linuxVST plugins')
     opt.add_option('--nls', action='store_true', default=True, dest='nls',
                     help='Enable i18n (native language support) (default)')
@@ -668,7 +659,32 @@ def configure(conf):
     autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0')
     autowaf.check_pkg(conf, 'liblo', uselib_store='LO', atleast_version='0.26')
 
-    conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
+    if Options.options.dist_target == 'mingw':
+        Options.options.fpu_optimization = False
+        conf.env.append_value('CFLAGS', '-DPLATFORM_WINDOWS')
+        conf.env.append_value('CFLAGS', '-DCOMPILER_MINGW')
+        conf.env.append_value('CXXFLAGS', '-DPLATFORM_WINDOWS')
+        conf.env.append_value('CXXFLAGS', '-DCOMPILER_MINGW')
+        conf.env.append_value('LIB', 'pthreadGC2')
+        # needed for at least libsmf
+        conf.check_cc(function_name='htonl', header_name='winsock2.h', lib='ws2_32')
+        conf.env.append_value('LIB', 'ws2_32')
+        # needed for mingw64 packages, not harmful on normal mingw build
+        conf.env.append_value('LIB', 'intl')
+        conf.check_cc(function_name='regcomp', header_name='regex.h',
+                      lib='regex', uselib_store="REGEX", define_name='HAVE_REGEX_H')
+        # TODO put this only where it is needed
+        conf.env.append_value('LIB', 'regex')
+
+    if Options.options.dist_target != 'mingw':
+        conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
+
+        conf.check_cxx(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
+                      execute = "1",
+                      mandatory = True,
+                      msg = 'Checking for boost library >= 1.39',
+                      okmsg = 'ok',
+                      errmsg = 'too old\nPlease install boost version 1.39 or higher.')
 
     # Tell everyone that this is a waf build
 
@@ -699,8 +715,13 @@ def configure(conf):
         conf.env.append_value('CXXFLAGS', '-I' + Options.options.wine_include)
         autowaf.check_header(conf, 'cxx', 'windows.h', mandatory = True)
     if opts.lxvst:
-        conf.define('LXVST_SUPPORT', 1)
-        conf.env['LXVST_SUPPORT'] = True
+        if sys.platform == 'darwin':
+            conf.env['LXVST_SUPPORT'] = False
+        elif Options.options.dist_target == 'mingw':
+            conf.env['LXVST_SUPPORT'] = False
+	else:
+	    conf.define('LXVST_SUPPORT', 1)
+	    conf.env['LXVST_SUPPORT'] = True
     conf.define('WINDOWS_KEY', opts.windows_key)
     conf.env['PROGRAM_NAME'] = opts.program_name
     if opts.rt_alloc_debug:
@@ -716,6 +737,14 @@ def configure(conf):
         autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=True)
 
     set_compiler_flags (conf, Options.options)
+
+    if sys.platform == 'darwin':
+        sub_config_and_use(conf, 'libs/appleutility')
+    elif Options.options.dist_target != 'mingw':
+        sub_config_and_use(conf, 'tools/sanity_check')
+
+    if Options.options.dist_target != 'mingw':
+        sub_config_and_use(conf, 'libs/clearlooks-newer')
 
     for i in children:
         sub_config_and_use(conf, i)
@@ -801,6 +830,14 @@ def build(bld):
     bld.path.find_dir ('libs/pbd/pbd')
 
     autowaf.set_recursive()
+
+    if sys.platform == 'darwin':
+        bld.recurse('libs/appleutility')
+    elif bld.env['build_target'] != 'mingw':
+        bld.recurse('tools/sanity_check')
+
+    if bld.env['build_target'] != 'mingw':
+        bld.recurse('libs/clearlooks-newer')
 
     for i in children:
         bld.recurse(i)

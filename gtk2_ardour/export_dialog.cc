@@ -333,7 +333,7 @@ ExportDialog::show_progress ()
 		if (gtk_events_pending()) {
 			gtk_main_iteration ();
 		} else {
-			usleep (10000);
+			Glib::usleep (10000);
 		}
 	}
 

@@ -20,6 +20,10 @@
 #ifndef __gtkmm2ext_click_box_h__
 #define __gtkmm2ext_click_box_h__
 
+#ifdef interface
+#undef interface
+#endif
+
 #include <string>
 #include <gtkmm.h>
 

@@ -53,10 +53,16 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
         /* called from non-RT context */
     
 	void parse (framecnt_t timestamp);
-        int write (const MIDI::byte *msg, size_t msglen, MIDI::timestamp_t timestamp);
+	int write (const MIDI::byte *msg, size_t msglen, MIDI::timestamp_t timestamp);
         int read (MIDI::byte *buf, size_t bufsize);
 	void drain (int check_interval_usecs);
-	int selectable () const { return xthread.selectable(); }
+	int selectable () const {
+#ifdef PLATFORM_WINDOWS
+		return false;
+#else
+		return xthread.selectable();
+#endif
+	}
 
 	static void set_process_thread (pthread_t);
 	static pthread_t get_process_thread () { return _process_thread; }
@@ -67,8 +73,22 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
         MIDI::timestamp_t       _last_write_timestamp;
 	RingBuffer< Evoral::Event<double> > output_fifo;
         Evoral::EventRingBuffer<MIDI::timestamp_t> input_fifo;
-        Glib::Threads::Mutex    output_fifo_lock;
-	CrossThreadChannel      xthread;
+        Glib::Threads::Mutex output_fifo_lock;
+#ifndef PLATFORM_WINDOWS
+	CrossThreadChannel xthread;
+#endif
+
+	int create_port ();
+
+	/** Channel used to signal to the MidiControlUI that input has arrived */
+	
+	std::string _connections;
+	PBD::ScopedConnection connect_connection;
+	PBD::ScopedConnection halt_connection;
+	void flush (void* jack_port_buffer);
+	void jack_halted ();
+	void make_connections ();
+	void init (std::string const &, Flags);
 
         void flush_output_fifo (pframes_t);
 

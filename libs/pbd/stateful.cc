@@ -18,7 +18,11 @@
     $Id: stateful.cc 629 2006-06-21 23:01:03Z paul $
 */
 
+#ifdef COMPILER_MSVC
+#include <io.h>      // Microsoft's nearest equivalent to <unistd.h>
+#else
 #include <unistd.h>
+#endif
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>

@@ -32,7 +32,7 @@ namespace ARDOUR {
 	 * contain the user and system directories which may contain audio/MIDI
 	 * backends.
 	 */
-	PBD::SearchPath backend_search_path ();
+	PBD::Searchpath backend_search_path ();
 
 } // namespace ARDOUR
 

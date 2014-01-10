@@ -29,6 +29,8 @@
 
 #include <sigc++/bind.h>
 
+#include <glib/gstdio.h>
+
 #include "pbd/error.h"
 #include "pbd/convert.h"
 #include "gtkmm2ext/utils.h"
@@ -414,8 +416,8 @@ void
 ExportVideoDialog::finished ()
 {
 	if (aborted) {
-		unlink(outfn_path_entry.get_text().c_str());
-		unlink (insnd.c_str());
+		::g_unlink(outfn_path_entry.get_text().c_str());
+		::g_unlink (insnd.c_str());
 		Gtk::Dialog::response(RESPONSE_CANCEL);
 	} else if (twopass && firstpass) {
 		firstpass = false;
@@ -425,9 +427,9 @@ ExportVideoDialog::finished ()
 		if (twopass_checkbox.get_active()) {
 			std::string outfn = outfn_path_entry.get_text();
 			std::string p2log = Glib::path_get_dirname (outfn) + G_DIR_SEPARATOR + "ffmpeg2pass";
-			unlink (p2log.c_str());
+			::g_unlink (p2log.c_str());
 		}
-		unlink (insnd.c_str());
+		::g_unlink (insnd.c_str());
 		Gtk::Dialog::response(RESPONSE_ACCEPT);
 	}
 }
@@ -570,13 +572,13 @@ ExportVideoDialog::launch_export ()
 		if (gtk_events_pending()) {
 			gtk_main_iteration ();
 		} else {
-			usleep (10000);
+			Glib::usleep (10000);
 		}
 	}
 	audio_progress_connection.disconnect();
 	status->finish ();
 	if (status->aborted()) {
-		unlink (insnd.c_str());
+		::g_unlink (insnd.c_str());
 		Gtk::Dialog::response(RESPONSE_CANCEL);
 		return;
 	}
@@ -593,14 +595,14 @@ ExportVideoDialog::encode_pass (int pass)
 	transcoder = new TranscodeFfmpeg(invid);
 	if (!transcoder->ffexec_ok()) {
 		/* ffmpeg binary was not found. TranscodeFfmpeg prints a warning */
-		unlink (insnd.c_str());
+		::g_unlink (insnd.c_str());
 		Gtk::Dialog::response(RESPONSE_CANCEL);
 		return;
 	}
 	if (!transcoder->probe_ok()) {
 		/* video input file can not be read */
 		warning << _("Export Video: Video input file cannot be read.") << endmsg;
-	  unlink (insnd.c_str());
+	  ::g_unlink (insnd.c_str());
 	  Gtk::Dialog::response(RESPONSE_CANCEL);
 	  return;
 	}
@@ -698,7 +700,7 @@ ExportVideoDialog::encode_pass (int pass)
 		ffs["-an"] = "-y";
 		ffs["-passlogfile"] =  Glib::path_get_dirname (outfn) + G_DIR_SEPARATOR + "ffmpeg2pass";
 		ffs["-f"] = get_file_extension(invid).empty()?"mov":get_file_extension(invid);
-#ifdef _OS_WIN32
+#ifdef PLATFORM_WINDOWS
 		outfn = "NUL";
 #else
 		outfn = "/dev/null";

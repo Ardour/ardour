@@ -20,13 +20,21 @@
 #ifndef __ardour_butler_h__
 #define __ardour_butler_h__
 
+#include <pthread.h>
+
 #include <glibmm/threads.h>
+
+#ifdef PLATFORM_WINDOWS
+#include "pbd/glib_semaphore.h"
+#endif
 
 #include "pbd/ringbuffer.h"
 #include "pbd/pool.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/session_handle.h"
+
+
 
 namespace ARDOUR {
 
@@ -72,15 +80,43 @@ class LIBARDOUR_API Butler : public SessionHandleRef
         Glib::Threads::Cond   paused;
 	bool         should_run;
 	mutable gint should_do_transport_work;
-	int          request_pipe[2];
 	framecnt_t   audio_dstream_capture_buffer_size;
 	framecnt_t   audio_dstream_playback_buffer_size;
 	uint32_t     midi_dstream_buffer_size;
 	RingBuffer<CrossThreadPool*> pool_trash;
 
+#ifdef PLATFORM_WINDOWS
+	PBD::atomic_counter m_request_state;
+	PBD::GlibSemaphore   m_request_sem;
+#else
+	int          request_pipe[2];
+#endif
+
 private:
 	void empty_pool_trash ();
 	void config_changed (std::string);
+
+#ifndef PLATFORM_WINDOWS
+	int setup_request_pipe ();
+#endif
+
+	/**
+	 * return true if there are requests to be processed
+	 */
+	bool wait_for_requests ();
+
+	/**
+	 * Remove request from butler request queue
+	 *
+	 * return true if there was another request and req is valid
+	 */
+	bool dequeue_request (Request::Type& req);
+
+	/**
+	 * Add request to butler thread request queue
+	 */
+	void queue_request (Request::Type r);
+
 };
 
 } // namespace ARDOUR

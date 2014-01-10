@@ -41,13 +41,13 @@
 #include "evoral/types.hpp"
 
 #include "ardour/ardour.h"
+#include "ardour/region.h"
 #include "ardour/session_object.h"
 #include "ardour/data_type.h"
 
 namespace ARDOUR  {
 
 class Session;
-class Region;
 class Playlist;
 class Crossfade;
 

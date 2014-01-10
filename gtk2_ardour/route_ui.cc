@@ -784,7 +784,7 @@ RouteUI::build_record_menu ()
                 MenuList& items = record_menu->items();
 
                 items.push_back (CheckMenuElem (_("Step Entry"), sigc::mem_fun (*this, &RouteUI::toggle_step_edit)));
-                step_edit_item = dynamic_cast<CheckMenuItem*> (&items.back());
+                step_edit_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
 
                 if (_route->record_enabled()) {
                         step_edit_item->set_sensitive (false);
@@ -1206,20 +1206,20 @@ RouteUI::build_solo_menu (void)
 	solo_menu = new Menu;
 	solo_menu->set_name ("ArdourContextMenu");
 	MenuList& items = solo_menu->items();
-	CheckMenuItem* check;
+	Gtk::CheckMenuItem* check;
 
-	check = new CheckMenuItem(_("Solo Isolate"));
+	check = new Gtk::CheckMenuItem(_("Solo Isolate"));
 	check->set_active (_route->solo_isolated());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_isolated), check));
 	items.push_back (CheckMenuElem(*check));
-        solo_isolated_check = dynamic_cast<CheckMenuItem*>(&items.back());
+        solo_isolated_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
 	check->show_all();
 
-	check = new CheckMenuItem(_("Solo Safe"));
+	check = new Gtk::CheckMenuItem(_("Solo Safe"));
 	check->set_active (_route->solo_safe());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_safe), check));
 	items.push_back (CheckMenuElem(*check));
-        solo_safe_check = dynamic_cast<CheckMenuItem*>(&items.back());
+        solo_safe_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
 	check->show_all();
 
 	//items.push_back (SeparatorElem());
@@ -1237,25 +1237,25 @@ RouteUI::build_mute_menu(void)
 
 	MenuList& items = mute_menu->items();
 
-	pre_fader_mute_check = manage (new CheckMenuItem(_("Pre Fader")));
+	pre_fader_mute_check = manage (new Gtk::CheckMenuItem(_("Pre Fader")));
 	init_mute_menu(MuteMaster::PreFader, pre_fader_mute_check);
 	pre_fader_mute_check->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::PreFader, pre_fader_mute_check));
 	items.push_back (CheckMenuElem(*pre_fader_mute_check));
 	pre_fader_mute_check->show_all();
 
-	post_fader_mute_check = manage (new CheckMenuItem(_("Post Fader")));
+	post_fader_mute_check = manage (new Gtk::CheckMenuItem(_("Post Fader")));
 	init_mute_menu(MuteMaster::PostFader, post_fader_mute_check);
 	post_fader_mute_check->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::PostFader, post_fader_mute_check));
 	items.push_back (CheckMenuElem(*post_fader_mute_check));
 	post_fader_mute_check->show_all();
 
-	listen_mute_check = manage (new CheckMenuItem(_("Control Outs")));
+	listen_mute_check = manage (new Gtk::CheckMenuItem(_("Control Outs")));
 	init_mute_menu(MuteMaster::Listen, listen_mute_check);
 	listen_mute_check->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::Listen, listen_mute_check));
 	items.push_back (CheckMenuElem(*listen_mute_check));
 	listen_mute_check->show_all();
 
-	main_mute_check = manage (new CheckMenuItem(_("Main Outs")));
+	main_mute_check = manage (new Gtk::CheckMenuItem(_("Main Outs")));
 	init_mute_menu(MuteMaster::Main, main_mute_check);
 	main_mute_check->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::Main, main_mute_check));
 	items.push_back (CheckMenuElem(*main_mute_check));
@@ -1268,7 +1268,7 @@ RouteUI::build_mute_menu(void)
 }
 
 void
-RouteUI::init_mute_menu(MuteMaster::MutePoint mp, CheckMenuItem* check)
+RouteUI::init_mute_menu(MuteMaster::MutePoint mp, Gtk::CheckMenuItem* check)
 {
 	check->set_active (_route->mute_points() & mp);
 }
@@ -1957,7 +1957,7 @@ RouteUI::invert_press (GdkEventButton* ev)
 
 	for (uint32_t i = 0; i < N; ++i) {
 		items.push_back (CheckMenuElem (string_compose (X_("Ø%1"), i + 1), sigc::bind (sigc::mem_fun (*this, &RouteUI::invert_menu_toggled), i)));
-		CheckMenuItem* e = dynamic_cast<CheckMenuItem*> (&items.back ());
+		Gtk::CheckMenuItem* e = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		++_i_am_the_modifier;
 		e->set_active (_route->phase_invert (i));
 		--_i_am_the_modifier;

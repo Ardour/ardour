@@ -34,8 +34,6 @@
 #include "pbd/stacktrace.h"
 #include "pbd/unknown_type.h"
 
-#include <jack/weakjack.h>
-
 #include "midi++/port.h"
 #include "midi++/mmc.h"
 
@@ -474,8 +472,17 @@ AudioEngine::discover_backends ()
 
 	Glib::PatternSpec so_extension_pattern("*backend.so");
 	Glib::PatternSpec dylib_extension_pattern("*backend.dylib");
-	Glib::PatternSpec dll_extension_pattern("*backend.dll");
 
+#if defined(PLATFORM_WINDOWS) && defined(DEBUGGABLE_BACKENDS)
+	#if defined(DEBUG) || defined(_DEBUG)
+		Glib::PatternSpec dll_extension_pattern("*backendD.dll");
+	#else
+		Glib::PatternSpec dll_extension_pattern("*backendRDC.dll");
+	#endif
+#else
+	Glib::PatternSpec dll_extension_pattern("*backend.dll");
+#endif
+	
 	find_matching_files_in_search_path (backend_search_path (),
 	                                    so_extension_pattern, backend_modules);
 

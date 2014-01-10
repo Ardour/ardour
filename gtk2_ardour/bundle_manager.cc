@@ -286,7 +286,7 @@ BundleManager::BundleManager (Session* session)
 	edit_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::EDIT, Gtk::ICON_SIZE_BUTTON)));
 	edit_button.signal_clicked().connect (sigc::mem_fun (*this, &BundleManager::edit_clicked));
 	buttons->pack_start (edit_button, false, false);
-	delete_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::DELETE, Gtk::ICON_SIZE_BUTTON)));
+	delete_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::StockID(GTK_STOCK_DELETE), Gtk::ICON_SIZE_BUTTON)));
 	delete_button.signal_clicked().connect (sigc::mem_fun (*this, &BundleManager::delete_clicked));
 	buttons->pack_start (delete_button, false, false);
 

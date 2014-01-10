@@ -13,6 +13,10 @@
     COPYING included with this distribution for more information.
 */
 
+#ifdef COMPILER_MSVC
+#pragma warning(disable:4305)
+#endif
+
 #include "Wavelet.h"
 
 #include <cassert>

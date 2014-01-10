@@ -20,7 +20,8 @@
 #ifndef __ardour_panner_manager_h__
 #define __ardour_panner_manager_h__
 
-#include <dlfcn.h>
+#include <glibmm/module.h>
+
 #include "ardour/panner.h"
 #include "ardour/session_handle.h"
 
@@ -28,15 +29,15 @@ namespace ARDOUR {
 
 struct LIBARDOUR_API PannerInfo {
 	PanPluginDescriptor descriptor;
-	void* module;
+	Glib::Module* module;
 
-	PannerInfo (PanPluginDescriptor& d, void* handle)
+	PannerInfo (PanPluginDescriptor& d, Glib::Module* m)
 	: descriptor (d)
-	, module (handle)
+	, module (m)
 	{}
 
 	~PannerInfo () {
-		dlclose (module);
+		delete module;
 	}
 };
 

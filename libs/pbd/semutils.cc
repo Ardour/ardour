@@ -23,7 +23,12 @@ using namespace PBD;
 
 ProcessSemaphore::ProcessSemaphore (const char* name, int val)
 {
-#ifdef __APPLE__
+#ifdef PLATFORM_WINDOWS
+	if ((_sem = CreateSemaphore(NULL, val, 32767, name)) == NULL) {
+		throw failed_constructor ();
+	}
+
+#elif __APPLE__
 	if ((_sem = sem_open (name, O_CREAT, 0600, val)) == (sem_t*) SEM_FAILED) {
 		throw failed_constructor ();
 	}
@@ -45,7 +50,28 @@ ProcessSemaphore::ProcessSemaphore (const char* name, int val)
 
 ProcessSemaphore::~ProcessSemaphore ()
 {
-#ifdef __APPLE__
+#ifdef PLATFORM_WINDOWS
+	CloseHandle(_sem);
+#elif __APPLE__
 	sem_close (ptr_to_sem());
 #endif
 }
+
+#ifdef PLATFORM_WINDOWS
+
+int
+ProcessSemaphore::signal ()
+{
+	// non-zero on success, opposite to posix
+	return !ReleaseSemaphore(_sem, 1, NULL);
+}
+
+int
+ProcessSemaphore::wait ()
+{
+	DWORD result = 0;
+	result = WaitForSingleObject(_sem, INFINITE);
+	return (result == WAIT_OBJECT_0);
+}
+
+#endif

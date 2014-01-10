@@ -17,11 +17,18 @@
 
 */
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
 #include <sstream>
 
 #include <libxml/uri.h>
 
+#ifdef HAVE_LRDF
 #include <lrdf.h>
+#endif
+
 #include <glibmm/miscutils.h>
 
 #include <glibmm/convert.h>
@@ -57,7 +64,9 @@ AudioLibrary::AudioLibrary ()
 
 	touch_file(sfdb_file_path);
 
+#ifdef HAVE_LRDF
 	lrdf_read_file(src.c_str());
+#endif
 }
 
 AudioLibrary::~AudioLibrary ()
@@ -67,14 +76,17 @@ AudioLibrary::~AudioLibrary ()
 void
 AudioLibrary::save_changes ()
 {
+#ifdef HAVE_LRDF
 	if (lrdf_export_by_source(src.c_str(), src.substr(5).c_str())) {
 		PBD::warning << string_compose(_("Could not open %1.  Audio Library not saved"), src) << endmsg;
 	}
+#endif
 }
 
 void
 AudioLibrary::set_tags (string member, vector<string> tags)
 {
+#ifdef HAVE_LRDF
 	sort (tags.begin(), tags.end());
 	tags.erase (unique(tags.begin(), tags.end()), tags.end());
 
@@ -85,12 +97,14 @@ AudioLibrary::set_tags (string member, vector<string> tags)
 	for (vector<string>::iterator i = tags.begin(); i != tags.end(); ++i) {
 		lrdf_add_triple (src.c_str(), file_uri.c_str(), TAG, (*i).c_str(), lrdf_literal);
 	}
+#endif
 }
 
 vector<string>
 AudioLibrary::get_tags (string member)
 {
 	vector<string> tags;
+#ifdef HAVE_LRDF
 
 	lrdf_statement pattern;
 	pattern.subject = strdup(Glib::filename_to_uri(member).c_str());
@@ -111,13 +125,14 @@ AudioLibrary::get_tags (string member)
 	lrdf_free_statements (matches);
 
 	sort (tags.begin(), tags.end());
-
+#endif
 	return tags;
 }
 
 void
 AudioLibrary::search_members_and (vector<string>& members, const vector<string>& tags)
 {
+#ifdef HAVE_LRDF
 	lrdf_statement **head;
 	lrdf_statement* pattern = 0;
 	lrdf_statement* old = 0;
@@ -153,4 +168,5 @@ AudioLibrary::search_members_and (vector<string>& members, const vector<string>&
 		pattern = pattern->next;
 		delete old;
 	}
+#endif
 }

@@ -24,7 +24,7 @@
 
 using namespace ARDOUR;
 
-ControlProtocol*
+ControlProtocol* ARDOURSURFACE_LOCAL
 new_generic_midi_protocol (ControlProtocolDescriptor* /*descriptor*/, Session* s)
 {
 	GenericMidiControlProtocol* gmcp;
@@ -43,35 +43,30 @@ new_generic_midi_protocol (ControlProtocolDescriptor* /*descriptor*/, Session* s
 	return gmcp;
 }
 
-void
+void ARDOURSURFACE_LOCAL
 delete_generic_midi_protocol (ControlProtocolDescriptor* /*descriptor*/, ControlProtocol* cp)
 {
 	delete cp;
 }
 
-bool
+bool ARDOURSURFACE_LOCAL
 probe_generic_midi_protocol (ControlProtocolDescriptor* /*descriptor*/)
 {
 	return GenericMidiControlProtocol::probe ();
 }
 
+// Field names commented out by JE - 06-01-2010
 static ControlProtocolDescriptor generic_midi_descriptor = {
-	name : "Generic MIDI",
-	id : "uri://ardour.org/surfaces/generic_midi:0",
-	ptr : 0,
-	module : 0,
-	mandatory : 0,
-	supports_feedback : true,
-	probe : probe_generic_midi_protocol,
-	initialize : new_generic_midi_protocol,
-	destroy : delete_generic_midi_protocol
+	/*name :              */   "Generic MIDI",
+	/*id :                */   "uri://ardour.org/surfaces/generic_midi:0",
+	/*ptr :               */   0,
+	/*module :            */   0,
+	/*mandatory :         */   0,
+	/*supports_feedback : */   true,
+	/*probe :             */   probe_generic_midi_protocol,
+	/*initialize :        */   new_generic_midi_protocol,
+	/*destroy :           */   delete_generic_midi_protocol
 };
 	
-
-extern "C" {
-ControlProtocolDescriptor* 
-protocol_descriptor () {
-	return &generic_midi_descriptor;
-}
-}
+extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &generic_midi_descriptor; }
 

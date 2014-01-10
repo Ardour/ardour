@@ -107,7 +107,7 @@ BindingProxy::learning_finished ()
 
 
 bool
-BindingProxy::prompter_hiding (GdkEventAny */*ev*/)
+BindingProxy::prompter_hiding (GdkEventAny* /*ev*/)
 {
 	learning_connection.disconnect ();
 	if (controllable) {

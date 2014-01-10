@@ -25,6 +25,10 @@
 #include <iostream>
 #include <string>
 
+#ifdef COMPILER_MSVC
+#include <malloc.h>
+#endif
+
 #include "pbd/cartesian.h"
 #include "pbd/compose.h"
 
@@ -53,7 +57,7 @@ static PanPluginDescriptor _descriptor = {
         VBAPanner::factory
 };
 
-extern "C" { PanPluginDescriptor* panner_descriptor () { return &_descriptor; } }
+extern "C" ARDOURPANNER_API PanPluginDescriptor* panner_descriptor () { return &_descriptor; }
 
 VBAPanner::Signal::Signal (Session&, VBAPanner&, uint32_t, uint32_t n_speakers)
 {
@@ -65,7 +69,7 @@ VBAPanner::Signal::Signal (Session&, VBAPanner&, uint32_t, uint32_t n_speakers)
 }
 
 void
-VBAPanner::Signal::Signal::resize_gains (uint32_t n)
+VBAPanner::Signal::resize_gains (uint32_t n)
 {
         gains.assign (n, 0.0);
 }        
@@ -293,7 +297,7 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 
         assert (sz == obufs.count().n_audio());
 
-        int8_t outputs[sz]; // on the stack, no malloc
+        int8_t *outputs = (int8_t*)alloca(sz); // on the stack, no malloc
         
         /* set initial state of each output "record"
          */
@@ -322,10 +326,10 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 
         /* at this point, we can test a speaker's status:
 
-           (outputs[o] & 1)      <= in use before
-           (outputs[o] & 2)      <= in use this time
-           (outputs[o] & 3) == 3 <= in use both times
-            outputs[o] == 0      <= not in use either time
+           (*outputs[o] & 1)      <= in use before
+           (*outputs[o] & 2)      <= in use this time
+           (*outputs[o] & 3) == 3 <= in use both times
+            *outputs[o] == 0      <= not in use either time
            
         */
 

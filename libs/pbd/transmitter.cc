@@ -84,12 +84,20 @@ Transmitter::deliver ()
 	/* do the right thing if this should not return */
 	
 	if (does_not_return()) {
+#ifndef PLATFORM_WINDOWS
+// TODO !!!! Commented out temporarily (for Windows)
 		sigset_t mask;
 		
 		sigemptyset (&mask);
 		sigsuspend (&mask);
 		/*NOTREACHED*/
 		exit (1);
+/* JE - From what I can tell, the above code suspends
+ * program execution until (any) signal occurs. Not
+ * sure at the moment what this achieves, unless it
+ * provides some time for the user to see the message.
+ */
+#endif
 	} 
 }
 

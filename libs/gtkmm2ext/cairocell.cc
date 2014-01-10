@@ -25,6 +25,7 @@
 #include "gtkmm2ext/utils.h"
 
 using std::string;
+using std::vector;
 using std::map;
 using std::max;
 using std::cerr;
@@ -132,7 +133,7 @@ void
 CairoTextCell::set_size (Cairo::RefPtr<Cairo::Context>& context)
 {
 	const uint32_t lim = (uint32_t) ceil (_width_chars);
-	char buf[lim+1];
+	vector<char> buf(lim+1);
 	uint32_t n;
 	double max_width = 0.0;
 	double max_height = 0.0;
@@ -149,7 +150,7 @@ CairoTextCell::set_size (Cairo::RefPtr<Cairo::Context>& context)
 			buf[n] = '0' + digit; 
 		}
 		
-		context->get_text_extents (buf, ext);
+		context->get_text_extents (&buf[0], ext);
 		
 		max_width = max (ext.width + ext.x_bearing, max_width);
 		max_height = max (ext.height, max_height);

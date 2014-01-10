@@ -46,6 +46,7 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	float sample_rate () const;
 	int update_header (framepos_t when, struct tm&, time_t);
 	int flush_header ();
+	void flush ();
 
 	framepos_t natural_position () const;
 

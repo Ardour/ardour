@@ -1,0 +1,246 @@
+/*
+    Copyright (C) 2009 John Emmas
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
+#ifndef __ardour_msvc_extensions_h__
+#define __ardour_msvc_extensions_h__
+
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0500
+#endif
+#ifndef _CPP_VECTOR
+#define _CPP_VECTOR  1
+#endif
+
+#ifdef __cplusplus
+#include <vector>
+#endif
+
+#include <math.h>
+#include <float.h>
+#include <direct.h>
+#include <boost/regex.h>
+#include <glib.h>
+#include <ardourext/float_cast.h>
+
+// 'std::isnan()' is not available in MSVC. Assume '_isnan(double)'
+#define isnan(val)  _isnan((double)val)
+
+// 'std::isinf()' is not available in MSVC. Assume '!_finite(double)'
+#define isinf(val) !_finite((double)val)
+
+// 'INFINITY' is not defined in MSVC. Assume 'HUGE_VAL'
+#ifndef INFINITY
+#define INFINITY    HUGE_VAL
+#endif
+
+// File access modes copied from unistd.h
+#define F_OK 0
+#define R_OK 4
+#define W_OK 2
+#define X_OK 1
+
+// Miscellaneous #defines
+#define __attribute__(x)
+#define llabs      _abs64
+#define atoll      _atoi64
+#define access     _access
+#define getcwd     _getcwd
+#define getpid     _getpid
+#define snprintf   _snprintf
+#define random      rand
+#define link        ntfs_link
+#define unlink      ntfs_unlink
+#define strcasecmp  stricmp
+#define strncasecmp strnicmp
+#define strtok_r( _s, _sep, _lasts ) \
+        ( *(_lasts) = strtok( (_s), (_sep) ) )
+
+#ifndef PATH_MAX
+#define PATH_MAX _MAX_PATH
+#endif
+#define DECLARE_DEFAULT_COMPARISONS(Type) \
+	extern bool operator >  (const Type& lhs, const Type& rhs); \
+	extern bool operator <  (const Type& lhs, const Type& rhs); \
+	extern bool operator != (const Type& lhs, const Type& rhs); \
+	extern bool operator == (const Type& lhs, const Type& rhs);
+
+// Types missing from Win32 'stat.h' (hopefully Windows
+// will either act sensibly or ignore most of them).
+#define	_S_IFBLK		0x3000
+#define	S_IRWXU			_S_IRWXU
+#define	S_IXUSR			_S_IXUSR
+#define	S_IWUSR			_S_IWUSR
+#define	S_IRUSR			_S_IRUSR
+#define	S_IXGRP			_S_IXGRP
+#define	S_IWGRP			_S_IWGRP
+#define	S_IRGRP			_S_IRGRP
+#define	S_IXOTH			_S_IXOTH
+#define	S_IWOTH			_S_IWOTH
+#define	S_IROTH			_S_IROTH
+
+#define	_S_IRWXU		(_S_IREAD | _S_IWRITE | _S_IEXEC)
+#define	_S_IXUSR		_S_IEXEC
+#define	_S_IWUSR		_S_IWRITE
+#define	_S_IRUSR		_S_IREAD
+#define	_S_IXGRP		_S_IEXEC
+#define	_S_IWGRP		_S_IWRITE
+#define	_S_IRGRP		_S_IREAD
+#define	_S_IXOTH		_S_IEXEC
+#define	_S_IWOTH		_S_IWRITE
+#define	_S_IROTH		_S_IREAD
+
+#define	S_ISFIFO(m)		_S_ISFIFO(m)
+#define	S_ISDIR(m)		_S_ISDIR(m)
+#define	S_ISCHR(m)		_S_ISCHR(m)
+#define	S_ISBLK(m)		_S_ISBLK(m)
+#define	S_ISREG(m)		_S_ISREG(m)
+
+#define	_S_ISFIFO(m)	(((m) & _S_IFMT) == _S_IFIFO)
+#define	_S_ISDIR(m)		(((m) & _S_IFMT) == _S_IFDIR)
+#define	_S_ISCHR(m)		(((m) & _S_IFMT) == _S_IFCHR)
+#define	_S_ISBLK(m)		(((m) & _S_IFMT) == _S_IFBLK)
+#define	_S_ISREG(m)		(((m) & _S_IFMT) == _S_IFREG)
+
+
+#if defined(__USE_BSD) || defined(_BSD_SOURCE)
+/* Convenience macros for operations on timevals.
+   NOTE: `timercmp' does not work for >= or <=.
+   Note also that 'timerset', 'timerclear' and
+   'timercmp' are (perhaps strangely) already
+   defined, along with various other 'time'
+   functions in WinSock.h  */
+# define timeradd(a, b, result)						      \
+  do {									      \
+    (result)->tv_sec = (a)->tv_sec + (b)->tv_sec;			      \
+    (result)->tv_usec = (a)->tv_usec + (b)->tv_usec;			      \
+    if ((result)->tv_usec >= 1000000)					      \
+      {									      \
+    ++(result)->tv_sec;						      \
+    (result)->tv_usec -= 1000000;					      \
+      }									      \
+  } while (0)
+# define timersub(a, b, result)						      \
+  do {									      \
+    (result)->tv_sec = (a)->tv_sec - (b)->tv_sec;			      \
+    (result)->tv_usec = (a)->tv_usec - (b)->tv_usec;			      \
+    if ((result)->tv_usec < 0) {					      \
+      --(result)->tv_sec;						      \
+      (result)->tv_usec += 1000000;					      \
+    }									      \
+  } while (0)
+#endif	/* BSD */
+
+#if !defined(__BIT_TYPES_DEFINED) || !defined(__BIT_TYPES_DEFINED__)
+#define __BIT_TYPES_DEFINED__ 1
+// Doesn't yet define all 'bit types'. Only those
+// needed by Ardour. More can be added as needed.
+#ifndef __int8_t_defined
+#define __int8_t_defined
+typedef	unsigned char      u_int8_t;
+typedef	unsigned short int u_int16_t;
+typedef	unsigned int       u_int32_t;
+typedef	unsigned __int64   u_int64_t;
+
+typedef signed char        int8_t;
+typedef unsigned char      uint8_t;
+typedef short              int16_t;
+typedef unsigned short     uint16_t;
+typedef int                int32_t;
+typedef unsigned           uint32_t;
+typedef long long          int64_t;
+typedef unsigned long long uint64_t;
+#endif  // __int8_t
+
+#ifndef __register_t_defined
+#define __register_t_defined
+typedef int register_t;
+#endif  // __register_t
+#endif  // __BIT_TYPESD
+
+// throw()
+#ifndef __THROW
+#ifdef __cplusplus
+#define __THROW  throw()
+#else
+#define __THROW
+#endif
+#endif
+
+// round().... Unlike Linux, Windows doesn't seem to support the
+// concept of a system-wide (or programmable) rounding direction.
+// Fortunately, 'round to nearest' seems to be the default action
+// under Linux, so let's copy that until we find out otherwise.
+#define rint(value)  round(value)
+#if !defined(PBD_API) || defined(PBD_IS_IN_WIN_STATIC_LIB)
+extern  double round(double x);
+#endif
+
+// System V compatibility
+typedef unsigned short ushort;
+typedef unsigned int   uint;
+
+// mode_t
+#ifndef _MODE_T_
+#define _MODE_T_
+typedef unsigned short _mode_t;
+
+#ifndef NO_OLDNAMES
+typedef _mode_t mode_t;
+#endif /* NO_OLDNAMES */
+#endif /* _MODE_T_ */
+
+// int64 abs()
+#ifdef __cplusplus // Normal 'C' doesn't permit over-ridden functions !!
+inline uint64_t abs(int64_t val)
+{
+	if (val < 0)
+		return val * (-1);
+	else
+		return val;
+}
+#endif
+
+// fmin() and fmax()
+#define fmin(a, b) min((double)a, (double)b)
+#define fmax(a, b) max((double)a, (double)b)
+
+// approximate POSIX pipe()
+#define pipe(handles) _pipe(handles, 4096, _O_BINARY)
+
+// Windows mkdir() doesn't care about access privileges
+#define mkdir(path, mode) _mkdir(path)
+
+// Redefine 'ftruncate()' to use the glib-win32 version
+#define ftruncate(fd, len) g_win32_ftruncate((gint)fd, (guint)len)
+
+
+// #include the main headers for Ardour MSVC
+#ifdef __cplusplus
+#if defined(BUILDING_PBD) || defined(PBD_IS_IN_WIN_STATIC_LIB)
+#include <pbd/msvc_pbd.h>
+#endif
+#if defined(BUILDING_LIBARDOUR) || defined(LIBARDOUR_IS_IN_WIN_STATIC_LIB)
+#include <ardour/msvc_libardour.h>
+#endif
+#if defined(BUILDING_RUBBERBAND) || defined(RUBBERBAND_IS_IN_WIN_STATIC_LIB)
+#include <rubberband/msvc_rubberband.h>
+#endif
+#endif // __cplusplus
+
+#endif /* __ardour_msvc_extensions_h__ */

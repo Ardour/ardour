@@ -1,0 +1,112 @@
+Building Ardour for Windows
+
+The windows build is compiled and tested with the MinGW compiler that is
+packaged in Fedora, Currently using Fedora 16. There are many cross compiled
+"mingw" libraries that Ardour requires that are also available on Fedora but
+not all are yet.
+
+
+Prerequisites
+
+Follow instructions in Fedora-16.txt to build and/or install the required
+packages.
+
+
+Configuring
+
+After all the necessary packages are installed the next step is to call
+one of the configure scripts configure-debug.sh or configure-release.sh.
+
+The configure-debug.sh script will enable debugging support and install
+the tests to the package directory. It will also mean the GDB debugger
+is packaged.
+
+The configure-release.sh is intended for releases only, none of the tests
+will be built and all the binaries will be optimized and stripped.
+
+These scripts both source the mingw-env.sh script to setup the appropriate 
+environment variables and then call waf with a specific set of parameters
+that are appropriate to configure for the windows build.
+
+
+Building
+
+After the build is configured the waf.sh script is used to build the Ardour
+application and all necessary libraries. The waf.sh script is not strictly
+needed, it just saves having to change working directories.
+
+
+Packaging
+
+When the build is successful the package.sh script will call waf install
+and then move some of the installed files to appropriate locations for a
+windows executable. This could probably be done in the waf scripts specifically
+for the windows build but I felt it simpler to do it in the packaging script
+for now.
+
+The packaging script then copies the JACK deamon and all the required mingw
+shared libraries from the host system into the packaging directory. The 
+shared libraries or dll's are placed in the same directory as the Ardour
+executable so they are found at runtime.
+
+Once the package.sh script has been run then the package directory located 
+in the Ardour source root directory will contain everything necessary to run
+the Ardour executable.
+
+The make-installer.sh script is only really relevant when configure-release.sh
+has been used to configure the build. The script creates a basic and little
+tested windows installer for Ardour using the Nullsoft Scriptable Installer
+System(NSIS). 
+
+
+Running
+
+The Ardour windows binary is intended to be run and tested on windows. Testing
+is mainly performed using Windows XP, but should work on Vista/7. It is only
+a 32bit binary at the moment but that may change with mingw64.
+
+The binary does not run successfully under WINE but that may change with updates
+and or bug fixes.
+
+When running Ardour for debugging purposes it is best to start the jack server
+in a separate terminal(Command Prompt) before starting Ardour so that they are
+not both writing to the same terminal. This will probably be fixed at some point
+so when jackd is started by Ardour the output is redirected etc.
+
+The cptovm.sh and startvm.sh scripts are intended for testing Ardour in a 
+Windows XP virt image and may need to be altered to be used successfully.
+
+
+Testing
+
+When configured for debugging there are a number of test programs(prefixed with
+test_) included in the package.
+
+
+Debugging
+
+Ardour has some verbose logging/debugging output that can be useful that is used
+with the -D option. 
+
+When configured for debugging the package contains gdb along with a .gdbinit 
+file to automatically set the source directory so that the "list" gdb command
+will show the source code corresponding to the current stack frame.
+
+Use break `Somenamespace::somepartialsymbolname + tab to list symbols, then remove 
+` to set break. If you press tab with when there are thousands of possible
+matching symbols be prepared to wait a long time(this can also cause gdb to use a
+lot of memory).
+
+For reasons I've yet to determine many symbols are not accessible so the best way
+to set a breakpoint is by using filename and line number.
+
+e.g (gdb) break audiosource.cc:976
+
+but this seems to only work after running Ardour at least once.
+
+They are a number of glib debugging options see
+
+http://developer.gnome.org/glib/2.30/glib-running.html
+
+use $ set G_DEBUG=fatal_warnings to get backtrace
+

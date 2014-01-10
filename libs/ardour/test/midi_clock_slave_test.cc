@@ -27,7 +27,7 @@ MIDIClock_SlaveTest::testStepResponse ()
  
   for (framecnt_t i = 1; i<= 100 * period_size; i++) {
     // simulate jitter
-    framecnt_t input_delta = framecnt_t (one_ppqn_in_frames + 0.1 * (double(random()) / double (RAND_MAX)) * one_ppqn_in_frames);
+    framecnt_t input_delta = framecnt_t (one_ppqn_in_frames + 0.1 * (double(g_random_int()) / double (RAND_MAX)) * one_ppqn_in_frames);
     
     if (i % input_delta == 0) {
       update_midi_clock (*parser, start_time + i);

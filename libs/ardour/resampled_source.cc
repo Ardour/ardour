@@ -26,7 +26,11 @@
 using namespace ARDOUR;
 using namespace PBD;
 
+#ifdef PLATFORM_WINDOWS
+const uint32_t ResampledImportableSource::blocksize = 524288U;
+#else
 const uint32_t ResampledImportableSource::blocksize = 16384U;
+#endif
 
 ResampledImportableSource::ResampledImportableSource (boost::shared_ptr<ImportableSource> src, framecnt_t rate, SrcQuality srcq)
 	: source (src)

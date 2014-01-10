@@ -27,15 +27,18 @@
 #include <cerrno>
 #include <fstream>
 
+#ifndef PLATFORM_WINDOWS
+#include <sys/resource.h>
+#endif
+
 #include <stdint.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <unistd.h>
 #include <time.h>
 
-#include <sys/resource.h>
-#include <sys/types.h>
-#include <sys/sysctl.h>
+#include <glib.h>
+#include <glib/gstdio.h>
 
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/accelmap.h>
@@ -48,6 +51,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/openuri.h"
 #include "pbd/file_utils.h"
+#include "pbd/localtime_r.h"
 
 #include "gtkmm2ext/application.h"
 #include "gtkmm2ext/bindings.h"
@@ -293,7 +297,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	/* and ambiguous files */
 
-	ARDOUR::FileSource::AmbiguousFileName.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::ambiguous_file, this, _1, _2, _3));
+	ARDOUR::FileSource::AmbiguousFileName.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::ambiguous_file, this, _1, _2));
 
 	/* lets get this party started */
 
@@ -753,8 +757,9 @@ ARDOUR_UI::starting ()
 			// wait for announce reply from nsm server
 			for ( i = 0; i < 5000; ++i) {
 				nsm->check ();
-				usleep (i);
-				if (nsm->is_active()) {
+
+				Glib::usleep (i);
+				if (nsm->is_active())
 					break;
 				}
 			}
@@ -765,8 +770,9 @@ ARDOUR_UI::starting ()
 			// wait for open command from nsm server
 			for ( i = 0; i < 5000; ++i) {
 				nsm->check ();
-				usleep (1000);
-				if (nsm->client_id ()) {
+
+				Glib::usleep (1000);
+				if (nsm->client_id ())
 					break;
 				}
 			}
@@ -848,7 +854,7 @@ ARDOUR_UI::starting ()
 void
 ARDOUR_UI::check_memory_locking ()
 {
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(PLATFORM_WINDOWS)
 	/* OS X doesn't support mlockall(2), and so testing for memory locking capability there is pointless */
 	return;
 #else // !__APPLE__
@@ -3102,13 +3108,13 @@ require some unused files to continue to exist."));
 		space_adjusted = rep.space;
 	} else if (rep.space < 1000000) {
 		bprefix = _("kilo");
-		space_adjusted = truncf((float)rep.space / 1000.0);
+		space_adjusted = floorf((float)rep.space / 1000.0);
 	} else if (rep.space < 1000000 * 1000) {
 		bprefix = _("mega");
-		space_adjusted = truncf((float)rep.space / (1000.0 * 1000.0));
+		space_adjusted = floorf((float)rep.space / (1000.0 * 1000.0));
 	} else {
 		bprefix = _("giga");
-		space_adjusted = truncf((float)rep.space / (1000.0 * 1000 * 1000.0));
+		space_adjusted = floorf((float)rep.space / (1000.0 * 1000 * 1000.0));
 	}
 
 	if (msg_delete) {
@@ -3453,16 +3459,24 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 		std::string icsd_docroot = video_server_dialog->get_docroot();
 		if (icsd_docroot.empty()) {icsd_docroot = X_("/");}
 
-		struct stat sb;
-		if (!lstat (icsd_docroot.c_str(), &sb) == 0 || !S_ISDIR(sb.st_mode)) {
+		GStatBuf sb;
+		if (!g_lstat (icsd_docroot.c_str(), &sb) == 0 || !S_ISDIR(sb.st_mode)) {
 			warning << _("Specified docroot is not an existing directory.") << endmsg;
 			continue;
 		}
-		if ( (!lstat (icsd_exec.c_str(), &sb) == 0)
+#ifndef PLATFORM_WINDOWS
+		if ( (!g_lstat (icsd_exec.c_str(), &sb) == 0)
 		     || (sb.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) == 0 ) {
 			warning << _("Given Video Server is not an executable file.") << endmsg;
 			continue;
 		}
+#else
+		if ( (!g_lstat (icsd_exec.c_str(), &sb) == 0)
+		     || (sb.st_mode & (S_IXUSR)) == 0 ) {
+			warning << _("Given Video Server is not an executable file.") << endmsg;
+			continue;
+		}
+#endif
 
 		char **argp;
 		argp=(char**) calloc(9,sizeof(char*));
@@ -3498,7 +3512,7 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 		}
 		int timeout = 120; // 6 sec
 		while (!ARDOUR_UI::instance()->video_timeline->check_server()) {
-			usleep (50000);
+			Glib::usleep (50000);
 			if (--timeout <= 0 || !video_server_process->is_running()) break;
 		}
 		if (timeout <= 0) {
@@ -4126,7 +4140,7 @@ ARDOUR_UI::missing_file (Session*s, std::string str, DataType type)
 }
 
 int
-ARDOUR_UI::ambiguous_file (std::string file, std::string /*path*/, std::vector<std::string> hits)
+ARDOUR_UI::ambiguous_file (std::string file, std::vector<std::string> hits)
 {
 	AmbiguousFileDialog dialog (file, hits);
 

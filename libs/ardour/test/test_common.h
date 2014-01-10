@@ -21,7 +21,7 @@
 
 #include "pbd/search_path.h"
 
-PBD::SearchPath test_search_path ();
+PBD::Searchpath test_search_path ();
 
 std::string new_test_output_dir (std::string prefix = "");
 

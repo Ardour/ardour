@@ -516,7 +516,7 @@ MidiChannelSelectorWindow::set_playback_selected_channels (uint16_t mask)
 	case ForceChannel:
 		/* only set the lowest set channel in the mask as active */
 		for (uint16_t i = 0; i < 16; i++) {
-			playback_buttons[i]->set_active (i == (ffs (mask) - 1));
+			playback_buttons[i]->set_active (i == (PBD::ffs (mask) - 1));
 		}
 		break;
 	}
@@ -539,7 +539,7 @@ MidiChannelSelectorWindow::set_capture_selected_channels (uint16_t mask)
 	case ForceChannel:
 		/* only set the lowest set channel in the mask as active */
 		for (uint16_t i = 0; i < 16; i++) {
-			capture_buttons[i]->set_active (i == (ffs (mask) - 1));
+			capture_buttons[i]->set_active (i == (PBD::ffs (mask) - 1));
 		}
 		break;
 	}
@@ -595,7 +595,7 @@ MidiChannelSelectorWindow::playback_mode_changed ()
 	case ForceChannel:
 		if (last_drawn_playback_mode == AllChannels || last_drawn_playback_mode == FilterChannels) {
 			playback_buttons.clear ();
-			first_channel = ffs (track->get_playback_channel_mask()) - 1;
+			first_channel = PBD::ffs (track->get_playback_channel_mask()) - 1;
 		}
 		for (vector<Widget*>::iterator i = playback_mask_controls.begin(); i != playback_mask_controls.end(); ++i) {
 			(*i)->set_sensitive (false);
@@ -693,7 +693,7 @@ MidiChannelSelectorWindow::capture_mode_changed ()
 	case ForceChannel:
 		if (last_drawn_capture_mode == AllChannels || last_drawn_capture_mode == FilterChannels) {
 			capture_buttons.clear ();
-			first_channel = ffs (track->get_capture_channel_mask()) - 1;
+			first_channel = PBD::ffs (track->get_capture_channel_mask()) - 1;
 		}
 		for (vector<Widget*>::iterator i = capture_mask_controls.begin(); i != capture_mask_controls.end(); ++i) {
 			(*i)->set_sensitive (false);

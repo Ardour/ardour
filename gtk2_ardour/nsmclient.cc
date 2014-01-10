@@ -23,7 +23,11 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+#ifndef COMPILER_MSVC
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+#else
+#include <process.h>  // Needed for 'getpid()'
+#endif
 
 namespace NSM
 {

@@ -31,7 +31,7 @@
 #include <time.h>
 #else
 #include "sysutils.h"
-#ifndef _WIN32
+#ifndef PLATFORM_WINDOWS
 #include <sys/time.h>
 #endif
 #endif

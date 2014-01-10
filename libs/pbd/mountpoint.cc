@@ -17,7 +17,7 @@
 
     $Id$
 */
-
+#ifndef  COMPILER_MSVC
 #include <cstdio>
 #include <cstring>
 #include <string>
@@ -94,6 +94,14 @@ mountpoint (string path)
 	return best;
 }
 
+#elif defined(PLATFORM_WINDOWS)
+
+string
+mountpoint (string path)
+{
+	// TODO ... if needed
+}
+
 #else // !HAVE_GETMNTENT
 
 #include <sys/param.h>
@@ -164,3 +172,7 @@ main (int argc, char *argv[])
 }
 
 #endif // TEST_MOUNTPOINT
+
+#else  // COMPILER_MSVC
+	const char* pbd_mountpoint = "pbd/msvc/mountpoint.cc takes precedence over this file";
+#endif // COMPILER_MSVC

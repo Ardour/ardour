@@ -19,7 +19,7 @@
 #include <list>
 #include <iostream>
 
-#ifndef WIN32
+#ifndef PLATFORM_WINDOWS
 #include <sys/time.h>
 #endif
 

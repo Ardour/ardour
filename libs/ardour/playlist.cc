@@ -1997,11 +1997,11 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 
 	 freeze ();
 	 /* add the added regions */
-	 for (RegionListProperty::ChangeContainer::iterator i = change.added.begin(); i != change.added.end(); ++i) {
+	 for (RegionListProperty::ChangeContainer::const_iterator i = change.added.begin(); i != change.added.end(); ++i) {
 		 add_region_internal ((*i), (*i)->position());
 	 }
 	 /* remove the removed regions */
-	 for (RegionListProperty::ChangeContainer::iterator i = change.removed.begin(); i != change.removed.end(); ++i) {
+	 for (RegionListProperty::ChangeContainer::const_iterator i = change.removed.begin(); i != change.removed.end(); ++i) {
 		 remove_region (*i);
 	 }
 
@@ -2488,7 +2488,7 @@ Playlist::uses_source (boost::shared_ptr<const Source> src) const
 {
 	RegionReadLock rlock (const_cast<Playlist*> (this));
 
-	for (set<boost::shared_ptr<Region> >::iterator r = all_regions.begin(); r != all_regions.end(); ++r) {
+	for (set<boost::shared_ptr<Region> >::const_iterator r = all_regions.begin(); r != all_regions.end(); ++r) {
 		if ((*r)->uses_source (src)) {
 			return true;
 		}
@@ -2533,7 +2533,7 @@ Playlist::region_by_id (const ID& id) const
 {
 	/* searches all regions ever added to this playlist */
 
-	for (set<boost::shared_ptr<Region> >::iterator i = all_regions.begin(); i != all_regions.end(); ++i) {
+	for (set<boost::shared_ptr<Region> >::const_iterator i = all_regions.begin(); i != all_regions.end(); ++i) {
 		if ((*i)->id() == id) {
 			return *i;
 		}

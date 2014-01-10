@@ -31,13 +31,18 @@ using namespace PBD;
 
 namespace ARDOUR {
 
-SearchPath
+Searchpath
 panner_search_path ()
 {
-	SearchPath spath(user_config_directory ());
+	Searchpath spath(user_config_directory ());
 	spath += ardour_dll_directory ();
 	spath.add_subdirectory_to_paths(panner_dir_name);
+<<<<<<< HEAD
 	spath += SearchPath(Glib::getenv(panner_env_variable_name));
+=======
+
+	spath += Searchpath(Glib::getenv(panner_env_variable_name));
+>>>>>>> windows+cc
 	return spath;
 }
 

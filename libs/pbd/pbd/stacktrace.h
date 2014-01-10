@@ -44,7 +44,7 @@ namespace PBD {
 	LIBPBD_API std::string demangle (const std::string&);
 
 template<typename T>
-class LIBPBD_API thing_with_backtrace 
+class /*LIBPBD_API*/ thing_with_backtrace 
 {
   public:
     thing_with_backtrace () {
@@ -113,11 +113,11 @@ private:
     static Glib::Threads::Mutex all_mutex;
 };
 
-template<typename T> LIBPBD_API std::list<PBD::thing_with_backtrace<T> *> PBD::thing_with_backtrace<T>::all;
-template<typename T> LIBPBD_API Glib::Threads::Mutex PBD::thing_with_backtrace<T>::all_mutex;
+template<typename T> /*LIBPBD_API*/ std::list<PBD::thing_with_backtrace<T> *> PBD::thing_with_backtrace<T>::all;
+template<typename T> /*LIBPBD_API*/ Glib::Threads::Mutex PBD::thing_with_backtrace<T>::all_mutex;
 
 } // namespace PBD
 
-
+// JE - !!!!#include "../pbd/stacktrace.impl"
 
 #endif /* __libpbd_stacktrace_h__ */

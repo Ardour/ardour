@@ -32,7 +32,7 @@
 
 namespace PBD
 {
-	template<typename T> LIBPBD_API 
+	template<typename T> /*LIBPBD_API*/ 
 	std::string demangled_name (T const & obj)
 	{
 #ifdef __GNUC__

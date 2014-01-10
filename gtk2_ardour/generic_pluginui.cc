@@ -25,6 +25,7 @@
 #include <cerrno>
 #include <cmath>
 #include <string>
+#include <vector>
 
 #include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
@@ -40,8 +41,6 @@
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/session.h"
-
-#include <lrdf.h>
 
 #include "ardour_ui.h"
 #include "prompter.h"
@@ -311,9 +310,9 @@ GenericPluginUI::build ()
 	// are similar enough to be grouped together.
 	
 	string label, previous_label = "";
-	int numbers_in_labels[cui_controls_list.size()];
+	std::vector<int> numbers_in_labels(cui_controls_list.size());
 	
-	float similarity_scores[cui_controls_list.size()];
+	std::vector<float> similarity_scores(cui_controls_list.size());
 	float most_similar = 0.0, least_similar = 1.0;
 	
 	i = 0;

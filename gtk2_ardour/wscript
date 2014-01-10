@@ -260,8 +260,9 @@ def configure(conf):
         '', '')
     autowaf.configure(conf)
 
-    if re.search ("linux", sys.platform) != None:
-        autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
+    if Options.options.dist_target == 'auto':
+        if re.search ("linux", sys.platform) != None:
+            autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
 
     # TODO: Insert a sanity check for on OS X to ensure CoreAudio is present
 
@@ -432,6 +433,10 @@ def build(bld):
         obj.uselib += ' AUDIOUNITS OSX GTKOSX'
         obj.use    += ' libappleutility'
     obj.includes += ['../libs']
+
+    if bld.env['build_target'] == 'mingw':
+	if bld.env['DEBUG'] == False:
+            obj.linkflags = ['-mwindows']
 
     if bld.is_defined('HAVE_SUIL'):
         obj.source += [ 'lv2_plugin_ui.cc' ]

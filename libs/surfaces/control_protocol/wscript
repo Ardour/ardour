@@ -28,7 +28,7 @@ def build(bld):
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=controlcp_sources)
         # defines for this library
-        obj.defines      = [ 'LIBCONTROLCP_DLL_EXPORTS=1' ]
+        obj.defines      = [ 'LIBCONTROLCP_DLL_EXPORTS' ]
         obj.cxxflags     = [ '-fvisibility=hidden' ]
         obj.cflags       = [ '-fvisibility=hidden' ]
     else:

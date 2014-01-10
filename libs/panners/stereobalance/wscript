@@ -22,7 +22,8 @@ def build(bld):
     obj = bld(features = 'cxx cxxshlib')
     obj.source = [ 'panner_balance.cc' ]
     obj.export_includes = ['.']
-    obj.cxxflags     = '-DPACKAGE="libardour_panbalance"'
+    obj.defines      = ['PACKAGE="libardour_panbalance"']
+    obj.defines     += ['ARDOURPANNER_DLL_EXPORTS']
     obj.includes     = ['.']
     obj.name         = 'libardour_panbalance'
     obj.target       = 'panbalance'

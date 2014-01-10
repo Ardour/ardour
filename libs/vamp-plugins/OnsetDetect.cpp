@@ -12,6 +12,9 @@
     COPYING included with this distribution for more information.
 */
 
+#ifdef COMPILER_MSVC
+#include <ardourext/float_cast.h>
+#endif
 #include "OnsetDetect.h"
 
 #include "dsp/onsets/DetectionFunction.h"

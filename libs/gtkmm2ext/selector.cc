@@ -22,6 +22,9 @@
 #include <vector>
 #include <string>
 
+#include <glibmm.h>
+#include <gdkmm.h>
+
 #include "pbd/pathscanner.h"
 
 #include "gtkmm2ext/keyboard.h"

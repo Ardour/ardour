@@ -34,14 +34,25 @@
     authorization.
 */
 
+#include <cmath>
+
+#ifdef COMPILER_MSVC
+#include <float.h>
+
+// 'std::isinf()' and 'std::isnan()' are not available in MSVC.
+#define isinf(val) !((bool)_finite((double)val))
+#define isnan(val) (bool)_isnan((double)val)
+#else
+using std::isnan;
+using std::isinf;
+#endif
+
 #include "SpectralCentroid.h"
 
 using std::string;
 using std::vector;
 using std::cerr;
 using std::endl;
-
-#include <cmath>
 
 
 SpectralCentroid::SpectralCentroid(float inputSampleRate) :
@@ -165,13 +176,13 @@ SpectralCentroid::process(const float *const *inputBuffers, Vamp::RealTime)
 
 	Feature feature;
 	feature.hasTimestamp = false;
-        if (!std::isnan(centroidLog) && !std::isinf(centroidLog)) {
+        if (!isnan(centroidLog) && !isinf(centroidLog)) {
             feature.values.push_back(centroidLog);
         }
 	returnFeatures[0].push_back(feature);
 
         feature.values.clear();
-        if (!std::isnan(centroidLin) && !std::isinf(centroidLin)) {
+        if (!isnan(centroidLin) && !isinf(centroidLin)) {
             feature.values.push_back(centroidLin);
         }
 	returnFeatures[1].push_back(feature);

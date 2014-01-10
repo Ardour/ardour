@@ -17,13 +17,22 @@
 
 */
 
-#include <string>
+#ifdef COMPILER_MSVC
+#include <io.h>      // Microsoft's nearest equivalent to <unistd.h>
+using PBD::readdir;
+using PBD::opendir;
+using PBD::closedir;
+#else
 #include <dirent.h>
 #include <unistd.h>
+#endif
+
+#include <string>
 #include <sys/stat.h>
 #include <errno.h>
 #include <string.h>
 
+#include <glib/gstdio.h>
 #include <glibmm/miscutils.h>
 
 #include "pbd/error.h"
@@ -66,7 +75,7 @@ PBD::clear_directory (const string& dir, size_t* size, vector<string>* paths)
                         continue;
                 }
                 
-                if (::unlink (fullpath.c_str())) {
+                if (::g_unlink (fullpath.c_str())) {
                         error << string_compose (_("cannot remove file %1 (%2)"), fullpath, strerror (errno))
                               << endmsg;
                         ret = 1;

@@ -1131,7 +1131,7 @@ AudioClock::set_minsec (framepos_t when, bool /*force*/)
 	mins = (int) floor (left / (_session->frame_rate() * 60.0f));
 	left -= (framecnt_t) floor (mins * _session->frame_rate() * 60.0f);
 	secs = (int) floor (left / (float) _session->frame_rate());
-	left -= (framecnt_t) floor (secs * _session->frame_rate());
+	left -= (framecnt_t) floor ((double)(secs * _session->frame_rate()));
 	millisecs = floor (left * 1000.0 / (float) _session->frame_rate());
 
 	if (negative) {
@@ -1742,7 +1742,7 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 
 	drag_y = ev->y;
 
-	if (trunc (drag_accum) != 0) {
+	if (floor (drag_accum) != 0) {
 
 		framepos_t frames;
 		framepos_t pos;

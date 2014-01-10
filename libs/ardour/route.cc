@@ -1639,7 +1639,9 @@ Route::reset_instrument_info ()
 int
 Route::configure_processors (ProcessorStreams* err)
 {
+#ifndef PLATFORM_WINDOWS
 	assert (!AudioEngine::instance()->process_lock().trylock());
+#endif
 
 	if (!_in_configure_processors) {
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
@@ -1710,7 +1712,9 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 int
 Route::configure_processors_unlocked (ProcessorStreams* err)
 {
+#ifndef PLATFORM_WINDOWS
 	assert (!AudioEngine::instance()->process_lock().trylock());
+#endif
 
 	if (_in_configure_processors) {
 		return 0;
@@ -2850,7 +2854,7 @@ Route::feeds (boost::shared_ptr<Route> other, bool* via_sends_only)
 {
 	const FedBy& fed_by (other->fed_by());
 
-	for (FedBy::iterator f = fed_by.begin(); f != fed_by.end(); ++f) {
+	for (FedBy::const_iterator f = fed_by.begin(); f != fed_by.end(); ++f) {
 		boost::shared_ptr<Route> sr = f->r.lock();
 
 		if (sr && (sr.get() == this)) {

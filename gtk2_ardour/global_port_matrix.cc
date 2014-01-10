@@ -48,7 +48,7 @@ GlobalPortMatrix::setup_ports (int dim)
 	}
 
 	_ports[dim].suspend_signals ();
-	_ports[dim].gather (_session, type(), dim == IN, false, show_only_bundles ());
+	_ports[dim].gather (_session, type(), dim == FLOW_IN, false, show_only_bundles ());
 	_ports[dim].resume_signals ();
 }
 
@@ -59,8 +59,8 @@ GlobalPortMatrix::set_state (BundleChannel c[2], bool s)
 		return;
 	}
 
-	Bundle::PortList const & in_ports = c[IN].bundle->channel_ports (c[IN].channel);
-	Bundle::PortList const & out_ports = c[OUT].bundle->channel_ports (c[OUT].channel);
+	Bundle::PortList const & in_ports = c[FLOW_IN].bundle->channel_ports (c[FLOW_IN].channel);
+	Bundle::PortList const & out_ports = c[FLOW_OUT].bundle->channel_ports (c[FLOW_OUT].channel);
 
 	for (Bundle::PortList::const_iterator i = in_ports.begin(); i != in_ports.end(); ++i) {
 		for (Bundle::PortList::const_iterator j = out_ports.begin(); j != out_ports.end(); ++j) {
@@ -103,8 +103,8 @@ GlobalPortMatrix::get_state (BundleChannel c[2]) const
 		return PortMatrixNode::NOT_ASSOCIATED;
 	}
 
-	Bundle::PortList const & in_ports = c[IN].bundle->channel_ports (c[IN].channel);
-	Bundle::PortList const & out_ports = c[OUT].bundle->channel_ports (c[OUT].channel);
+	Bundle::PortList const & in_ports = c[FLOW_IN].bundle->channel_ports (c[FLOW_IN].channel);
+	Bundle::PortList const & out_ports = c[FLOW_OUT].bundle->channel_ports (c[FLOW_OUT].channel);
 	if (in_ports.empty() || out_ports.empty()) {
 		/* we're looking at a bundle with no parts associated with this channel,
 		   so nothing to connect */

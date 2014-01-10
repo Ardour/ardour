@@ -221,11 +221,11 @@ SessionPlaylists::get (vector<boost::shared_ptr<Playlist> >& s) const
 {
 	Glib::Threads::Mutex::Lock lm (lock);
 
-	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+	for (List::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		s.push_back (*i);
 	}
 
-	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+	for (List::const_iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
 		s.push_back (*i);
 	}
 }
@@ -448,11 +448,11 @@ SessionPlaylists::region_use_count (boost::shared_ptr<Region> region) const
 	Glib::Threads::Mutex::Lock lm (lock);
         uint32_t cnt = 0;
 
-	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+	for (List::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
                 cnt += (*i)->region_use_count (region);
 	}
 
-	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+	for (List::const_iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
                 cnt += (*i)->region_use_count (region);
 	}
 

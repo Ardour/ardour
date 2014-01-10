@@ -181,7 +181,7 @@ public:
 	OverlapPitchResolution overlap_pitch_resolution() const { return _overlap_pitch_resolution; }
 	void set_overlap_pitch_resolution(OverlapPitchResolution opr);
 
-	void set_notes (const Sequence<Time>::Notes& n);
+	void set_notes (const typename Sequence<Time>::Notes& n);
 
 	typedef boost::shared_ptr< Event<Time> > SysExPtr;
 	typedef boost::shared_ptr<const Event<Time> > constSysExPtr;
@@ -271,9 +271,15 @@ public:
 
 	const const_iterator& end() const { return _end_iter; }
 
+	// CONST iterator implementations (x3)
 	typename Notes::const_iterator note_lower_bound (Time t) const;
 	typename PatchChanges::const_iterator patch_change_lower_bound (Time t) const;
 	typename SysExes::const_iterator sysex_lower_bound (Time t) const;
+
+	// NON-CONST iterator implementations (x3)
+	typename Notes::iterator note_lower_bound (Time t);
+	typename PatchChanges::iterator patch_change_lower_bound (Time t);
+	typename SysExes::iterator sysex_lower_bound (Time t);
 
 	bool control_to_midi_event(boost::shared_ptr< Event<Time> >& ev,
 	                           const ControlIterator&            iter) const;

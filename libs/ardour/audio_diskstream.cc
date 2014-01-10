@@ -27,8 +27,6 @@
 #include <fcntl.h>
 #include <cstdlib>
 #include <ctime>
-#include <sys/stat.h>
-#include <sys/mman.h>
 
 #include "pbd/error.h"
 #include "pbd/xml++.h"
@@ -925,7 +923,7 @@ AudioDiskstream::internal_playback_seek (framecnt_t distance)
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	for (chan = c->begin(); chan != c->end(); ++chan) {
-		(*chan)->playback_buf->increment_read_ptr (std::llabs(distance));
+		(*chan)->playback_buf->increment_read_ptr (llabs(distance));
 	}
 
 	if (first_recordable_frame < max_framepos) {

@@ -25,7 +25,11 @@
 #include <map>
 #include <sigc++/slot.h>
 #include <sigc++/bind.h>
+#ifndef  COMPILER_MSVC
 #include <sys/time.h>
+#else
+#include <ardourext/misc.h>
+#endif
 
 #include "pbd/libpbd_visibility.h"
 #include "pbd/command.h"

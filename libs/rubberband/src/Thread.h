@@ -15,11 +15,11 @@
 #ifndef _RUBBERBAND_THREAD_H_
 #define _RUBBERBAND_THREAD_H_
 
-#ifdef _WIN32
+#ifdef PLATFORM_WINDOWS
 #include <windows.h>
-#else /* !_WIN32 */
+#else /* !PLATFORM_WINDOWS */
 #include <pthread.h>
-#endif /* !_WIN32 */
+#endif /* !PLATFORM_WINDOWS */
 
 #include <string>
 
@@ -33,7 +33,7 @@ namespace RubberBand
 class Thread
 {
 public:
-#ifdef _WIN32
+#ifdef PLATFORM_WINDOWS
     typedef HANDLE Id;
 #else
     typedef pthread_t Id;
@@ -53,7 +53,7 @@ protected:
     virtual void run() = 0;
 
 private:
-#ifdef _WIN32
+#ifdef PLATFORM_WINDOWS
     HANDLE m_id;
     bool m_extant;
     static DWORD WINAPI staticRun(LPVOID lpParam);
@@ -75,7 +75,7 @@ public:
     bool trylock();
 
 private:
-#ifdef _WIN32
+#ifdef PLATFORM_WINDOWS
     HANDLE m_mutex;
 #ifndef NO_THREAD_CHECKS
     DWORD m_lockedBy;
@@ -123,7 +123,7 @@ public:
     
 private:
 
-#ifdef _WIN32
+#ifdef PLATFORM_WINDOWS
     HANDLE m_mutex;
     HANDLE m_condition;
     bool m_locked;

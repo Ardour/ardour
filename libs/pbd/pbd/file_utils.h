@@ -69,15 +69,15 @@ find_matching_files_in_directories (const std::vector<std::string>& directory_pa
                                     std::vector<std::string>& result);
 
 /**
- * Takes a SearchPath and puts a list of all the files in the search path
+ * Takes a Searchpath and puts a list of all the files in the search path
  * that match pattern into the result vector.
  *
- * @param search_path A SearchPath
+ * @param search_path A Searchpath
  * @param pattern A Glib::PatternSpec used to match the files
  * @param result A vector in which to place the resulting matches.
  */
 LIBPBD_API void
-find_matching_files_in_search_path (const SearchPath& search_path,
+find_matching_files_in_search_path (const Searchpath& search_path,
                                     const Glib::PatternSpec& pattern,
                                     std::vector<std::string>& result);
 
@@ -88,7 +88,7 @@ find_matching_files_in_search_path (const SearchPath& search_path,
  * @return true If file is found within the search path.
  */
 LIBPBD_API bool
-find_file_in_search_path (const SearchPath& search_path,
+find_file_in_search_path (const Searchpath& search_path,
                           const std::string& filename,
                           std::string& result);
 

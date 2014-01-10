@@ -25,9 +25,17 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef   COMPILER_MSVC
+#undef   O_NONBLOCK
+#define  O_NONBLOCK 0
+#endif
+#if defined(PLATFORM_WINDOWS)
+#include <winsock2.h>
+#else
 #include <netdb.h>
+#endif
 
-#if defined(WIN32)
+#if defined(PLATFORM_WINDOWS)
 static WSADATA g_wsaData;
 typedef int socklen_t;
 #else
@@ -109,7 +117,7 @@ get_address (int sock, struct in_addr *inaddr, const string& ifname )
 {
 	// Get interface address from supplied name.
 
-#if !defined(WIN32)
+#if !defined(PLATFORM_WINDOWS)
 	struct ifreq ifr;
 	::strncpy(ifr.ifr_name, ifname.c_str(), sizeof(ifr.ifr_name));
 
@@ -138,12 +146,13 @@ get_address (int sock, struct in_addr *inaddr, const string& ifname )
 
 	return false;
 
-#endif	// !WIN32
+#endif	// !PLATFORM_WINDOWS'
 }
 
 bool
 IPMIDIPort::open_sockets (int base_port, const string& ifname)
 {
+#if !defined(PLATFORM_WINDOWS)
 	int protonum = 0;
 	struct protoent *proto = ::getprotobyname("IP");
 
@@ -240,10 +249,13 @@ IPMIDIPort::open_sockets (int base_port, const string& ifname)
 	}
 	
 	return true;
+#else
+	return false;
+#endif	// !PLATFORM_WINDOWS'
 }
 
 int
-IPMIDIPort::write (const byte* msg, size_t msglen, timestamp_t /* ignored */) {
+IPMIDIPort::write (const MIDI::byte* msg, size_t msglen, timestamp_t /* ignored */) {
 
 	if (sockout) {
 		Glib::Threads::Mutex::Lock lm (write_lock);
@@ -257,7 +269,7 @@ IPMIDIPort::write (const byte* msg, size_t msglen, timestamp_t /* ignored */) {
 }
 
 int
-IPMIDIPort::read (byte* /*buf*/, size_t /*bufsize*/)
+IPMIDIPort::read (MIDI::byte* /*buf*/, size_t /*bufsize*/)
 {
 	/* nothing to do here - all handled by parse() */
 	return 0;

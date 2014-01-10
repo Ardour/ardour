@@ -51,7 +51,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Glib;
 
-PBD::Signal3<int,std::string,std::string,std::vector<std::string> > FileSource::AmbiguousFileName;
+PBD::Signal2<int,std::string,std::vector<std::string> > FileSource::AmbiguousFileName;
 
 FileSource::FileSource (Session& session, DataType type, const string& path, const string& origin, Source::Flag flag)
 	: Source(session, type, path, flag)
@@ -240,18 +240,14 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 	isnew = false;
 
         if (!Glib::path_is_absolute (path)) {
-                vector<string> dirs;
                 vector<string> hits;
                 string fullpath;
+		std::vector<std::string> dirs = s.source_search_path (type);
 
-                string search_path = s.source_search_path (type);
-
-                if (search_path.length() == 0) {
+                if (dirs.size() == 0) {
                         error << _("FileSource: search path not set") << endmsg;
                         goto out;
                 }
-
-                split (search_path, dirs, ':');
 
                 hits.clear ();
 
@@ -296,7 +292,7 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 
 			/* more than one match: ask the user */
 
-                        int which = FileSource::AmbiguousFileName (path, search_path, de_duped_hits).get_value_or (-1);
+                        int which = FileSource::AmbiguousFileName (path, de_duped_hits).get_value_or (-1);
 
                         if (which < 0) {
                                 goto out;
@@ -310,8 +306,7 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 
                         if (must_exist) {
                                 error << string_compose(
-                                        _("Filesource: cannot find required file (%1): while searching %2"),
-                                        path, search_path) << endmsg;
+                                        _("Filesource: cannot find required file (%1)"), path) << endmsg;
                                 goto out;
                         } else {
                                 isnew = true;
@@ -357,8 +352,6 @@ bool
 FileSource::find_2X (Session& s, DataType type, const string& path, bool must_exist,
                      bool& isnew, uint16_t& chan, string& found_path)
 {
-	string search_path = s.source_search_path (type);
-
 	string pathstr = path;
 	string::size_type pos;
 	bool ret = false;
@@ -369,17 +362,16 @@ FileSource::find_2X (Session& s, DataType type, const string& path, bool must_ex
 
 		/* non-absolute pathname: find pathstr in search path */
 
-		vector<string> dirs;
+		vector<string> dirs = s.source_search_path (type);
+
 		int cnt;
 		string fullpath;
 		string keeppath;
 
-		if (search_path.length() == 0) {
+		if (dirs.size() == 0) {
 			error << _("FileSource: search path not set") << endmsg;
 			goto out;
 		}
-
-		split (search_path, dirs, ':');
 
 		cnt = 0;
 
@@ -437,16 +429,15 @@ FileSource::find_2X (Session& s, DataType type, const string& path, bool must_ex
 		if (cnt > 1) {
 
 			error << string_compose (
-					_("FileSource: \"%1\" is ambigous when searching %2\n\t"),
-					pathstr, search_path) << endmsg;
+					_("FileSource: \"%1\" is ambigous when searching\n\t"), pathstr) << endmsg;
 			goto out;
 
 		} else if (cnt == 0) {
 
 			if (must_exist) {
 				error << string_compose(
-						_("Filesource: cannot find required file (%1): while searching %2"),
-						pathstr, search_path) << endmsg;
+						_("Filesource: cannot find required file (%1): while searching")
+						, pathstr) << endmsg;
 				goto out;
 			} else {
 				isnew = true;
@@ -496,13 +487,14 @@ FileSource::find_2X (Session& s, DataType type, const string& path, bool must_ex
 				goto out;
 			}
 
+#ifndef PLATFORM_WINDOWS
 			if (errno != ENOENT) {
 				error << string_compose(
 						_("Filesource: cannot check for existing file (%1): %2"),
 						path, strerror (errno)) << endmsg;
 				goto out;
 			}
-
+#endif
 			/* a new file */
 			isnew = true;
 			ret = true;

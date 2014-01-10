@@ -12,6 +12,9 @@
     COPYING included with this distribution for more information.
 */
 
+#ifdef COMPILER_MSVC
+#include "bsd-3rdparty/float_cast/float_cast.h"
+#endif
 #include "StretchCalculator.h"
 
 #include <algorithm>

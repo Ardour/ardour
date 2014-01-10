@@ -19,11 +19,11 @@
 */
 #include <iostream>
 #include <errno.h>
-#include <poll.h>
 #include <sys/types.h>
 #include <unistd.h>
 
 #include "pbd/error.h"
+#include "pbd/pthread_utils.h"
 
 #include "ardour/debug.h"
 #include "ardour/slave.h"
@@ -150,7 +150,7 @@ LTC_Slave::reset()
 }
 
 void
-LTC_Slave::parse_ltc(const pframes_t nframes, const Sample* const in, const framecnt_t posinfo)
+LTC_Slave::parse_ltc(const ARDOUR::pframes_t nframes, const Sample* const in, const ARDOUR::framecnt_t posinfo)
 {
 	pframes_t i;
 	unsigned char sound[8192];
@@ -432,7 +432,7 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 
 	frameoffset_t skip = now - (monotonic_cnt + nframes);
 	monotonic_cnt = now;
-	DEBUG_TRACE (DEBUG::LTC, string_compose ("speed_and_position - TID:%1 | latency: %2 | skip %3\n", ::pthread_self(), ltc_slave_latency.max, skip));
+	DEBUG_TRACE (DEBUG::LTC, string_compose ("speed_and_position - TID:%1 | latency: %2 | skip %3\n", pthread_name(), ltc_slave_latency.max, skip));
 
 	if (last_timestamp == 0) {
 		engine_dll_initstate = 0;
@@ -591,7 +591,7 @@ LTC_Slave::approximate_current_delta() const
 		snprintf(delta, sizeof(delta), "%s", _("flywheel"));
 	} else {
 		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%" PRIi64 "</span>sm",
-				LEADINGZERO(abs(current_delta)), PLUSMINUS(-current_delta), abs(current_delta));
+				LEADINGZERO(llabs(current_delta)), PLUSMINUS(-current_delta), llabs(current_delta));
 	}
 	return std::string(delta);
 }

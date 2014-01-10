@@ -16,7 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-
+#ifndef  COMPILER_MSVC
 #include "libpbd-config.h"
 
 #define _XOPEN_SOURCE 600
@@ -141,3 +141,7 @@ FPU::FPU ()
 FPU::~FPU ()
 {
 }
+
+#else  // COMPILER_MSVC
+	const char* pbd_fpu = "pbd/msvc/fpu.cc takes precedence over this file";
+#endif // COMPILER_MSVC

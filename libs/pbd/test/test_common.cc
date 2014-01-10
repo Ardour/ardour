@@ -25,10 +25,10 @@
  * in an installed location on windows or by setting an environment variable
  * on unix.
  */
-PBD::SearchPath
+PBD::Searchpath
 test_search_path ()
 {
-#ifdef WIN32
+#ifdef PLATFORM_WINDOWS
 	std::string wsp(g_win32_get_package_installation_directory_of_module(NULL));
 	return Glib::build_filename (wsp,  "pbd_testdata");
 #else

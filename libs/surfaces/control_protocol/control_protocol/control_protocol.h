@@ -145,7 +145,7 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 	void prev_track (uint32_t initial_id);
 
   private:
-	ControlProtocol (const ControlProtocol&); /* noncopyable */
+	LIBCONTROLCP_LOCAL ControlProtocol (const ControlProtocol&); /* noncopyable */
         bool _active;
 };
 

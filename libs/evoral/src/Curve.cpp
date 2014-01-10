@@ -22,6 +22,7 @@
 #include <climits>
 #include <cfloat>
 #include <cmath>
+#include <vector>
 
 #include <glibmm/threads.h>
 
@@ -56,8 +57,8 @@ Curve::solve ()
 		   (www.korf.co.uk/spline.pdf) for more details.
 		*/
 
-		double x[npoints];
-		double y[npoints];
+		vector<double> x(npoints);
+		vector<double> y(npoints);
 		uint32_t i;
 		ControlList::EventList::const_iterator xx;
 

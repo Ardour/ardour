@@ -173,9 +173,9 @@ clearlooks_gtk2_rc_parse_boolean (GtkSettings *settings,
                      GScanner     *scanner,
                      gboolean *retval)
 {
-	(void) settings;
-	
 	guint token;
+
+	(void) settings;
 	token = g_scanner_get_next_token(scanner);
 
 	token = g_scanner_get_next_token(scanner);
@@ -198,9 +198,9 @@ clearlooks_gtk2_rc_parse_color(GtkSettings  *settings,
 		  GScanner     *scanner,
 		  GdkColor     *color)
 {
-	(void) settings;
-	
 	guint token;
+
+	(void) settings;
 
 	/* Skip 'blah_color' */
 	token = g_scanner_get_next_token(scanner);
@@ -217,9 +217,9 @@ clearlooks_gtk2_rc_parse_double (GtkSettings  *settings,
                                  GScanner     *scanner,
                                  gdouble      *val)
 {
-	(void) settings;
-	
 	guint token;
+
+	(void) settings;
 
 	/* Skip 'blah' */
 	token = g_scanner_get_next_token(scanner);
@@ -242,9 +242,9 @@ clearlooks_gtk2_rc_parse_int (GtkSettings  *settings,
 		         GScanner     *scanner,
 		         guint8       *progressbarstyle)
 {
-	(void) settings;
-
 	guint token;
+
+	(void) settings;
 
 	/* Skip 'sunkenmenubar' */
 	token = g_scanner_get_next_token(scanner);
@@ -267,9 +267,9 @@ clearlooks_gtk2_rc_parse_style (GtkSettings      *settings,
                                 GScanner         *scanner,
                                 ClearlooksStyles *style)
 {
-	(void) settings;
-
 	guint token;
+
+	(void) settings;
 
 	g_assert (CL_NUM_STYLES == CL_STYLE_GUMMY + 1); /* so that people don't forget ;-) */
 
@@ -308,9 +308,9 @@ clearlooks_gtk2_rc_parse_dummy (GtkSettings      *settings,
                                 GScanner         *scanner,
                                 const gchar      *name)
 {
-	(void) settings;
-
 	guint token;
+
+	(void) settings;
 
 	/* Skip option */
 	token = g_scanner_get_next_token (scanner);

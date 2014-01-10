@@ -17,7 +17,9 @@
 
 */
 
+#ifndef COMPILER_MSVC
 #include <strings.h>
+#endif
 #include <map>
 
 #include <sndfile.h>

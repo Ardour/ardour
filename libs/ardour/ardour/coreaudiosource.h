@@ -43,6 +43,8 @@ class LIBARDOUR_API CoreAudioSource : public AudioFileSource {
 	void set_header_timeline_position () {};
 	bool clamped_at_unity () const { return false; }
 
+	void flush () {}
+
 	static int get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg);
 
   protected:

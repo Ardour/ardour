@@ -15,7 +15,7 @@
 #ifndef _RUBBERBAND_SYSINFO_H_
 #define _RUBBERBAND_SYSINFO_H_
 
-#ifdef __MSVC__
+#ifdef COMPILER_MSVC
 #include "bsd-3rdparty/float_cast/float_cast.h"
 #define R__ __restrict
 #endif
@@ -28,11 +28,11 @@
 #define R__
 #endif
 
-#ifdef __MINGW32__
+#ifdef COMPILER_MINGW
 #include <malloc.h>
 #endif
 
-#ifdef __MSVC__
+#ifdef COMPILER_MSVC
 #define alloca _alloca
 #endif
 

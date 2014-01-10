@@ -72,7 +72,7 @@ int
 RCConfiguration::load_state ()
 {
 	std::string rcfile;
-	struct stat statbuf;
+	GStatBuf statbuf;
 
 	/* load system configuration first */
 

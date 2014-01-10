@@ -17,12 +17,19 @@
 
 */
 
+#include <glib.h>
+
 #include <cstdlib>
 
 #include "pbd/epa.h"
 #include "pbd/strsplit.h"
 
+#ifdef COMPILER_MSVC
+#define environ        _environ
+_CRTIMP extern char ** _environ;
+#else
 extern char** environ;
+#endif
 
 using namespace PBD;
 using namespace std;
@@ -61,7 +68,7 @@ EnvironmentalProtectionAgency::save ()
                 /* fetch environment from named environment variable, rather than "environ"
                  */
 
-                const char* estr = getenv (_envname.c_str());
+                const char* estr = g_getenv (_envname.c_str());
 
                 if (!estr) {
                         return;
@@ -117,7 +124,7 @@ EnvironmentalProtectionAgency::restore () const
 		clear ();
 
         for (map<string,string>::const_iterator i = e.begin(); i != e.end(); ++i) {
-                setenv (i->first.c_str(), i->second.c_str(), 1);
+                g_setenv (i->first.c_str(), i->second.c_str(), 1);
         }
 } 
 
@@ -137,6 +144,6 @@ EnvironmentalProtectionAgency::clear () const
                 }
 			
                 string before = estring.substr (0, equal);
-                unsetenv(before.c_str());
+                g_unsetenv(before.c_str());
         }
-}                        
+}

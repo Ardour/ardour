@@ -28,6 +28,7 @@ def build(bld):
     obj.defines     = [ 'PACKAGE="ardour_wiimote"' ]
     obj.includes     = ['.', '../libs']
     obj.name         = 'libardour_wiimote'
+    obj.defines      = [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.target       = 'ardour_wiimote'
     obj.uselib       = 'GTKMM CWIID'
     obj.use          = 'libardour libardour_cp libgtkmm2ext'

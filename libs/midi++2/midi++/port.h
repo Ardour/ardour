@@ -26,8 +26,12 @@
 			 * now due to use of JackPortIsXXXX
 			 */
 
+#include <pthread.h>
+
 #include "pbd/xml++.h"
+#ifndef PLATFORM_WINDOWS
 #include "pbd/crossthread.h"
+#endif
 #include "pbd/signals.h"
 #include "pbd/ringbuffer.h"
 

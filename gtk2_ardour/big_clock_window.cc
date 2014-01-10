@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <string>
+#include <vector>
 
 #include "ardour_ui.h"
 #include "audio_clock.h"
@@ -138,11 +139,11 @@ BigClockWindow::text_resizer (int, int)
 	if (size != current_size) {
 
 		string family = fd.get_family();
-		char buf[family.length()+16];
-		snprintf (buf, family.length()+16, "%s %d", family.c_str(), size);
+		std::vector<char> buf(family.length()+16);
+		snprintf (&buf[0], family.length()+16, "%s %d", family.c_str(), size);
 
 		try {
-			Pango::FontDescription fd (buf);
+			Pango::FontDescription fd (&buf[0]);
 			Glib::RefPtr<Gtk::RcStyle> rcstyle = clock.get_modifier_style ();
 			rcstyle->set_font (fd);
 			clock.modify_style (rcstyle);

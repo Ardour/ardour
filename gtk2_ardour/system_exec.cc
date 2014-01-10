@@ -25,9 +25,12 @@
 #include <unistd.h>
 
 #include <assert.h>
-#include <dirent.h>
 
-#ifdef __WIN32__
+#ifndef COMPILER_MSVC
+#include <dirent.h>
+#endif
+
+#ifdef PLATFORM_WINDOWS
 #include <windows.h>
 #else
 #include <fcntl.h>
@@ -47,7 +50,7 @@ void * interposer_thread (void *arg);
 
 static void close_fd (int& fd) { if (fd >= 0) ::close (fd); fd = -1; }
 
-#ifndef __WIN32__
+#ifndef PLATFORM_WINDOWS
 /*
  * This function was part of libasyncns.
  * LGPL v2.1
@@ -155,7 +158,7 @@ SystemExec::SystemExec (std::string c, std::string a)
 	nicelevel = 0;
 	envp = NULL;
 	argp = NULL;
-#ifdef __WIN32__
+#ifdef PLATFORM_WINDOWS
 	stdinP[0] = stdinP[1] = INVALID_HANDLE_VALUE;
 	stdoutP[0] = stdoutP[1] = INVALID_HANDLE_VALUE;
 	stderrP[0] = stderrP[1] = INVALID_HANDLE_VALUE;
@@ -173,7 +176,7 @@ SystemExec::SystemExec (std::string c, char **a)
 	pin[1] = -1;
 	nicelevel = 0;
 	envp = NULL;
-#ifdef __WIN32__
+#ifdef PLATFORM_WINDOWS
 	stdinP[0] = stdinP[1] = INVALID_HANDLE_VALUE;
 	stdoutP[0] = stdoutP[1] = INVALID_HANDLE_VALUE;
 	stderrP[0] = stderrP[1] = INVALID_HANDLE_VALUE;
@@ -197,7 +200,7 @@ SystemExec::~SystemExec ()
 		}
 		free (argp);
 	}
-#ifdef __WIN32__
+#ifdef PLATFORM_WINDOWS
 	if (w_args) free(w_args);
 #endif
 	pthread_mutex_destroy(&write_lock);
@@ -211,7 +214,7 @@ interposer_thread (void *arg) {
 	return 0;
 }
 
-#ifdef __WIN32__ /* Windows Process */
+#ifdef PLATFORM_WINDOWS /* Windows Process */
 
 /* HELPER FUNCTIONS */
 

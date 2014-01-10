@@ -26,13 +26,15 @@
 #ifndef __libpbd__floating_h__
 #define __libpbd__floating_h__
 
+#include <stdint.h>
+
 #include <cmath>
 
 #include "pbd/libpbd_visibility.h"
 
 namespace PBD {
 
-union LIBPBD_API Float_t
+union /*LIBPBD_API*/ Float_t
 {
     Float_t (float num = 0.0f) : f(num) {}
 

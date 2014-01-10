@@ -66,30 +66,37 @@
 
 #include "video_timeline.h"
 
+#include "about.h"
 #include "ardour_button.h"
 #include "ardour_dialog.h"
 #include "ardour_window.h"
 #include "editing.h"
+#include "engine_dialog.h"
 #include "meterbridge.h"
 #include "ui_config.h"
 #include "enums.h"
 #include "visibility_group.h"
 #include "window_manager.h"
 
-class About;
-class AddRouteDialog;
-class AddVideoDialog;
+#include "add_route_dialog.h"
+#include "add_video_dialog.h"
+#include "big_clock_window.h"
+#include "bundle_manager.h"
+#include "global_port_matrix.h"
+#include "keyeditor.h"
+#include "location_ui.h"
+#include "rc_option_editor.h"
+#include "route_params_ui.h"
+#include "session_option_editor.h"
+#include "speaker_dialog.h"
+#include "theme_manager.h"
+
 class VideoTimeLine;
 class SystemExec;
 class ArdourKeyboard;
 class AudioClock;
-class BigClockWindow;
-class BundleManager;
 class ButtonJoiner;
 class ConnectionEditor;
-class EngineControl;
-class KeyEditor;
-class LocationUIWindow;
 class MainClock;
 class Mixer_UI;
 class PublicEditor;
@@ -99,13 +106,10 @@ class SessionDialog;
 class SessionOptionEditor;
 class ShuttleControl;
 class Splash;
-class SpeakerDialog;
-class ThemeManager;
 class TimeInfoBox;
 class MidiTracer;
 class NSM_Client;
 class LevelMeterHBox;
-class GlobalPortMatrixWindow;
 class GUIObjectState;
 
 namespace Gtkmm2ext {
@@ -721,7 +725,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void fontconfig_dialog ();
 
         int missing_file (ARDOUR::Session*s, std::string str, ARDOUR::DataType type);
-        int ambiguous_file (std::string file, std::string path, std::vector<std::string> hits);
+        int ambiguous_file (std::string file, std::vector<std::string> hits);
 
 	bool click_button_clicked (GdkEventButton *);
 

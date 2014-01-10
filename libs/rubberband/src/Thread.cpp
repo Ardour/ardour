@@ -16,11 +16,11 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <cstdlib>
 
-#include <cstdlib>
+#ifndef COMPILER_MSVC
 #include <sys/time.h>
 #include <time.h>
+#endif
 
 using std::cerr;
 using std::endl;
@@ -29,7 +29,7 @@ using std::string;
 namespace RubberBand
 {
 
-#ifdef _WIN32
+#ifdef PLATFORM_WINDOWS
 
 Thread::Thread() :
     m_id(0),
@@ -289,7 +289,7 @@ Condition::signal()
     SetEvent(m_condition);
 }
 
-#else /* !_WIN32 */
+#else /* !PLATFORM_WINDOWS */
 
 
 Thread::Thread() :
@@ -562,7 +562,7 @@ Condition::signal()
     pthread_cond_signal(&m_condition);
 }
 
-#endif /* !_WIN32 */
+#endif /* !PLATFORM_WINDOWS */
 
 MutexLocker::MutexLocker(Mutex *mutex) :
     m_mutex(mutex)

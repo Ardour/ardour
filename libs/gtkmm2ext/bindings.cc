@@ -19,6 +19,8 @@
 
 #include <iostream>
 
+#include <glib/gstdio.h>
+
 #include "pbd/xml++.h"
 #include "pbd/convert.h"
 
@@ -389,7 +391,7 @@ Bindings::save (const string& path)
         save (*root);
 
         if (!tree.write (path)) {
-                ::unlink (path.c_str());
+                ::g_unlink (path.c_str());
                 return false;
         }
 

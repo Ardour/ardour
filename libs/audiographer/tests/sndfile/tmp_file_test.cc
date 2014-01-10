@@ -23,7 +23,7 @@ class TmpFileTest : public CppUnit::TestFixture
 
 	void testProcess()
 	{
-		uint channels = 2;
+		uint32_t channels = 2;
 		file.reset (new TmpFile<float>(SF_FORMAT_WAV | SF_FORMAT_FLOAT, channels, 44100));
 		AllocatingProcessContext<float> c (random_data, frames, channels);
 		c.set_flag (ProcessContext<float>::EndOfInput);

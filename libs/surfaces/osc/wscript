@@ -30,6 +30,7 @@ def build(bld):
     obj.defines     = [ 'PACKAGE="ardour_osc"' ]
     obj.includes     = ['.', './osc']
     obj.name         = 'libardour_osc'
+    obj.defines      = [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.target       = 'ardour_osc'
     obj.uselib       = ' LO '
     obj.use          = 'libardour libardour_cp libpbd'

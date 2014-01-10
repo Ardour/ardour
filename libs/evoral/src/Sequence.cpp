@@ -1201,10 +1201,12 @@ Sequence<Time>::overlaps_unlocked (const NotePtr& note, const NotePtr& without) 
 
 template<typename Time>
 void
-Sequence<Time>::set_notes (const Sequence<Time>::Notes& n)
+Sequence<Time>::set_notes (const typename Sequence<Time>::Notes& n)
 {
 	_notes = n;
 }
+
+// CONST iterator implementations (x3)
 
 /** Return the earliest note with time >= t */
 template<typename Time>
@@ -1235,6 +1237,41 @@ Sequence<Time>::sysex_lower_bound (Time t) const
 {
 	SysExPtr search (new Event<Time> (0, t));
 	typename Sequence<Time>::SysExes::const_iterator i = _sysexes.lower_bound (search);
+	assert (i == _sysexes.end() || (*i)->time() >= t);
+	return i;
+}
+
+// NON-CONST iterator implementations (x3)
+
+/** Return the earliest note with time >= t */
+template<typename Time>
+typename Sequence<Time>::Notes::iterator
+Sequence<Time>::note_lower_bound (Time t)
+{
+	NotePtr search_note(new Note<Time>(0, t, 0, 0, 0));
+	typename Sequence<Time>::Notes::iterator i = _notes.lower_bound(search_note);
+	assert(i == _notes.end() || (*i)->time() >= t);
+	return i;
+}
+
+/** Return the earliest patch change with time >= t */
+template<typename Time>
+typename Sequence<Time>::PatchChanges::iterator
+Sequence<Time>::patch_change_lower_bound (Time t)
+{
+	PatchChangePtr search (new PatchChange<Time> (t, 0, 0, 0));
+	typename Sequence<Time>::PatchChanges::iterator i = _patch_changes.lower_bound (search);
+	assert (i == _patch_changes.end() || musical_time_greater_or_equal_to ((*i)->time(), t));
+	return i;
+}
+
+/** Return the earliest sysex with time >= t */
+template<typename Time>
+typename Sequence<Time>::SysExes::iterator
+Sequence<Time>::sysex_lower_bound (Time t)
+{
+	SysExPtr search (new Event<Time> (0, t));
+	typename Sequence<Time>::SysExes::iterator i = _sysexes.lower_bound (search);
 	assert (i == _sysexes.end() || (*i)->time() >= t);
 	return i;
 }
@@ -1393,4 +1430,3 @@ Sequence<Time>::dump (ostream& str) const
 template class Sequence<Evoral::MusicalTime>;
 
 } // namespace Evoral
-

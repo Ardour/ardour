@@ -46,6 +46,8 @@ def build(bld):
     # need ../libs because some GTK2 header files require stuff there
     obj.includes     = ['.', '../libs']
     obj.name         = 'libardour_mcp'
+    obj.defines      = [ 'LIBCONTROLCP_EXPORTS' ]
+    obj.defines     += [ 'PACKAGE="libardour_mcp"' ]
     obj.target       = 'ardour_mcp'
     obj.uselib       = 'GTKMM'
     obj.use          = 'libardour libardour_cp libgtkmm2ext'

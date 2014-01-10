@@ -97,7 +97,7 @@ struct LIBPBD_API AngularVector {
 	}
 };
 
-LIBPBD_API inline void CartesianVector::angular (AngularVector& a) const {
+inline void CartesianVector::angular (AngularVector& a) const {
 	cartesian_to_spherical (x, y, z, a.azi, a.ele, a.length);
 }
 

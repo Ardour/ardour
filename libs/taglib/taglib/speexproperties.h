@@ -1,1 +1,0 @@
-./ogg/speex/speexproperties.h

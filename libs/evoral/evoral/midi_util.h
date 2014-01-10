@@ -22,7 +22,6 @@
 #include <iostream>
 
 #include <stdint.h>
-#include <stdbool.h>
 #include <string>
 #include <sys/types.h>
 #include <assert.h>
