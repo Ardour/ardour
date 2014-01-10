@@ -50,16 +50,16 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
 
-StreamView::StreamView (RouteTimeAxisView& tv)
+StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* canvas_group)
 	: _trackview (tv)
-	, _canvas_group (new ArdourCanvas::Group (_trackview.canvas_display()))
+	, _canvas_group (canvas_group ? canvas_group : new ArdourCanvas::Group (_trackview.canvas_display()))
 	, _samples_per_pixel (_trackview.editor().get_current_zoom ())
 	, rec_updating(false)
 	, rec_active(false)
 	, stream_base_color(0xFFFFFFFF)
 	, _layers (1)
 	, _layer_display (Overlaid)
-	, height(tv.height)
+	, height (tv.height)
 	, last_rec_data_frame(0)
 {
 	CANVAS_DEBUG_NAME (_canvas_group, string_compose ("SV canvas group %1", _trackview.name()));
@@ -69,15 +69,10 @@ StreamView::StreamView (RouteTimeAxisView& tv)
 	canvas_rect = new ArdourCanvas::Rectangle (_canvas_group);
 	CANVAS_DEBUG_NAME (canvas_rect, string_compose ("SV canvas rectangle %1", _trackview.name()));
 	canvas_rect->set (ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, tv.current_height ()));
-	canvas_rect->raise(1); // raise above tempo lines
-
-	canvas_rect->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::TOP | ArdourCanvas::Rectangle::BOTTOM));
+	canvas_rect->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 	canvas_rect->set_outline_color (RGBA_TO_UINT (0, 0, 0, 255));
 	canvas_rect->set_fill (true);
-
-	canvas_rect->Event.connect (sigc::bind (
-			sigc::mem_fun (_trackview.editor(), &PublicEditor::canvas_stream_view_event),
-			canvas_rect, &_trackview));
+	canvas_rect->Event.connect (sigc::bind (sigc::mem_fun (_trackview.editor(), &PublicEditor::canvas_stream_view_event), canvas_rect, &_trackview));
 
 	if (_trackview.is_track()) {
 		_trackview.track()->DiskstreamChanged.connect (*this, invalidator (*this), boost::bind (&StreamView::diskstream_changed, this), gui_context());

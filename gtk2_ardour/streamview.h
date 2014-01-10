@@ -127,7 +127,7 @@ public:
 	sigc::signal<void> ContentsHeightChanged;
 
 protected:
-	StreamView (RouteTimeAxisView&);
+       StreamView (RouteTimeAxisView&, ArdourCanvas::Group* canvas_group = 0);
 
 	void         transport_changed();
 	void         transport_looped();

@@ -22,7 +22,10 @@
 
 #include <gtkmm.h>
 
-#include <gtkmm2ext/gtk_ui.h>
+#include "gtkmm2ext/gtk_ui.h"
+
+#include "pbd/compose.h"
+#include "canvas/debug.h"
 
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
@@ -45,11 +48,15 @@ using namespace PBD;
 using namespace Editing;
 
 AutomationStreamView::AutomationStreamView (AutomationTimeAxisView& tv)
-	: StreamView (*dynamic_cast<RouteTimeAxisView*>(tv.get_parent()))
+	: StreamView (*dynamic_cast<RouteTimeAxisView*>(tv.get_parent()),
+		      tv.canvas_display())
 	, _automation_view(tv)
 	, _pending_automation_state (Off)
 {
-	//canvas_rect->property_fill_color_rgba() = stream_base_color;
+	CANVAS_DEBUG_NAME (_canvas_group, string_compose ("SV canvas group auto %1", tv.name()));
+	CANVAS_DEBUG_NAME (canvas_rect, string_compose ("SV canvas rectangle auto %1", tv.name()));
+
+	canvas_rect->set_fill (false);
 	canvas_rect->set_outline_color (RGBA_BLACK);
 }
 
@@ -59,11 +66,11 @@ AutomationStreamView::~AutomationStreamView ()
 
 
 RegionView*
-AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region, bool wfd, bool /*recording*/)
+AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region, bool wait_for_data, bool /*recording*/)
 {
 	assert (region);
 
-	if (wfd) {
+	if (wait_for_data) {
 		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
 		if (mr) {
 			mr->midi_source()->load_model();
@@ -93,7 +100,7 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 				arv->line()->set_list (list);
 			}
 			(*i)->set_valid (true);
-			(*i)->enable_display(wfd);
+			(*i)->enable_display (wait_for_data);
 			display_region(arv);
 
 			return 0;
@@ -111,12 +118,12 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 
 	/* follow global waveform setting */
 
-	if (wfd) {
+	if (wait_for_data) {
 		region_view->enable_display(true);
-		//region_view->midi_region()->midi_source(0)->load_model();
+		// region_view->midi_region()->midi_source(0)->load_model();
 	}
 
-	display_region(region_view);
+	display_region (region_view);
 
 	/* catch regionview going away */
 	region->DropReferences.connect (*this, invalidator (*this), boost::bind (&AutomationStreamView::remove_region_view, this, boost::weak_ptr<Region>(region)), gui_context());
