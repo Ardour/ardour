@@ -182,7 +182,7 @@ TimeAxisView::~TimeAxisView()
 	}
 
 	for (list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i) {
- delete (*i)->rect;
+		delete (*i)->rect;
 		delete (*i)->start_trim;
 		delete (*i)->end_trim;
 
