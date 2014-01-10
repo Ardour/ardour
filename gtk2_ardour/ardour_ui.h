@@ -137,6 +137,12 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void launch_chat ();
 	void launch_manual ();
 	void launch_reference ();
+	void launch_tracker ();
+	void launch_cheat_sheet ();
+	void launch_website ();
+	void launch_website_dev ();
+	void launch_forums ();
+	void launch_howto_report ();
 	void show_about ();
 	void hide_about ();
 

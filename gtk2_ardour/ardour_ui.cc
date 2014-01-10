@@ -2990,6 +2990,46 @@ ARDOUR_UI::launch_reference ()
 }
 
 void
+ARDOUR_UI::launch_tracker ()
+{
+	PBD::open_uri ("http://tracker.ardour.org/bug_report_page.php");
+}
+
+void
+ARDOUR_UI::launch_cheat_sheet ()
+{
+#ifdef __APPLE__
+	PBD::open_uri ("https://community.ardour.org/files/ardour-2.8.3-bindings-osx.pdf");
+#else
+	PBD::open_uri ("https://community.ardour.org/files/ardour-2.8.3-bindings-x.pdf");
+#endif
+}
+
+void
+ARDOUR_UI::launch_website ()
+{
+	PBD::open_uri ("http://ardour.org");
+}
+
+void
+ARDOUR_UI::launch_website_dev ()
+{
+	PBD::open_uri ("http://ardour.org/development.html");
+}
+
+void
+ARDOUR_UI::launch_forums ()
+{
+	PBD::open_uri ("https://community.ardour.org/forums");
+}
+
+void
+ARDOUR_UI::launch_howto_report ()
+{
+	PBD::open_uri ("http://ardour.org/reporting_bugs");
+}
+
+void
 ARDOUR_UI::loading_message (const std::string& msg)
 {
 	if (ARDOUR_COMMAND_LINE::no_splash) {
