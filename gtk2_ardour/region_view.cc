@@ -69,8 +69,9 @@ RegionView::RegionView (ArdourCanvas::Group*              parent,
                         Gdk::Color const &                basic_color,
 			bool                              automation)
 	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), false, automation,
-			    TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameText|
-							  TimeAxisViewItem::ShowNameHighlight| TimeAxisViewItem::ShowFrame))
+			    (automation ? TimeAxisViewItem::ShowFrame :
+			     TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameText|
+							   TimeAxisViewItem::ShowNameHighlight| TimeAxisViewItem::ShowFrame)))
 	, _region (r)
 	, sync_mark(0)
 	, sync_line(0)
