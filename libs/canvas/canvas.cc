@@ -338,6 +338,7 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 		/* no items at point, just send leave event below */
 
 	} else {
+
 		if (within_items.front() == _current_item) {
 			/* uppermost item at point is already _current_item */
 			return;
@@ -346,7 +347,9 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 		_new_current_item = const_cast<Item*> (within_items.front());
 	}
 
-	deliver_enter_leave (point, state);
+	if (_new_current_item != _current_item) {
+		deliver_enter_leave (point, state);
+	}
 }
 
 void
@@ -404,7 +407,7 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 	} else if (_current_item->is_descendant_of (*_new_current_item)) {
 
 		/* move from descendant to ancestor (X: "_current_item is an
-		 * inferior of _new_current_item") 
+		 * inferior ("child") of _new_current_item") 
 		 *
 		 * Deliver "virtual" leave notifications to all items in the
 		 * heirarchy between current and new_current.
@@ -421,7 +424,7 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 
 	} else if (_new_current_item->is_descendant_of (*_current_item)) {
 		/* move from ancestor to descendant (X: "_new_current_item is
-		 * an inferior of _current_item")
+		 * an inferior ("child") of _current_item")
 		 *
 		 * Deliver "virtual" enter notifications to all items in the
 		 * heirarchy between current and new_current.
