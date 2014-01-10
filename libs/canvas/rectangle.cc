@@ -67,21 +67,28 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 		} else {
 			setup_gradient_context (context, self, Duple (draw.x0, draw.y0));
 		}
+
 		context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
 		context->fill ();
-	}
+	} 
 	
 	if (_outline) {
 
 		setup_outline_context (context);
-
+		
 		if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
 			
-			context->rectangle (self.x0 + 0.5, self.y0 + 0.5, self.width(), self.height());
+			/* outline must be on pixels (hence 0.5 offset) and
+			   must be WITHIN coordinates of rect, not outside it
+			   (hence the -2.0 size adjustment, since we use 1
+			   pixel on each side for the outline)
+			*/
+
+			context->rectangle (self.x0 + 0.5, self.y0 + 0.5, self.width() - 1.0, self.height() - 1.0);
 
 		} else {
 
-			context->set_line_cap (Cairo::LINE_CAP_SQUARE);
+			// context->set_line_cap (Cairo::LINE_CAP_SQUARE);
 			
 			/* see the cairo FAQ on single pixel lines to see why we do
 			 * this expansion of the perimeter.
@@ -129,7 +136,7 @@ Rectangle::compute_bounding_box () const
 		 * XXX: or something like that, waffle.
 		 *
 		 */
-		_bounding_box = r.expand (1.0);
+		_bounding_box = _rect.fix ();
 	}
 
 	_bounding_box_dirty = false;
