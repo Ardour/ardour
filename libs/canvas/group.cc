@@ -76,8 +76,8 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 
 #ifdef CANVAS_DEBUG
 	if (DEBUG_ENABLED(PBD::DEBUG::CanvasRender)) {
-		cerr << string_compose ("%1GROUP %2 render %5 %3 items out of %4\n", 
-					_canvas->render_indent(), (name.empty() ? string ("[unnamed]") : name), items.size(), _items.size(), area);
+		cerr << string_compose ("%1GROUP %2 @ %7 render %5 @ %6 %3 items out of %4\n", 
+					_canvas->render_indent(), (name.empty() ? string ("[unnamed]") : name), items.size(), _items.size(), area, _position, this);
 	}
 #endif
 
@@ -116,6 +116,8 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 					if (dynamic_cast<Group*>(*i) == 0) {
 						cerr << _canvas->render_indent() << "render "
 						     << ' ' 
+						     << (*i)
+						     << ' '
 						     << (*i)->whatami()
 						     << ' '
 						     << (*i)->name
@@ -123,6 +125,8 @@ Group::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 						     << item
 						     << " intersect = "
 						     << draw
+						     << " @ " 
+						     << _position
 						     << endl;
 					}
 				}
