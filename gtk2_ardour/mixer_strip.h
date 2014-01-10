@@ -226,6 +226,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void edit_output_configuration ();
 
 	void diskstream_changed ();
+	void io_changed_proxy ();
 
 	Gtk::Menu *send_action_menu;
 	Gtk::MenuItem* rename_menu_item;
@@ -237,6 +238,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	PBD::ScopedConnection panstate_connection;
 	PBD::ScopedConnection panstyle_connection;
 	void connect_to_pan ();
+	void update_panner_choices ();
 
 	void update_diskstream_display ();
 	void update_input_display ();

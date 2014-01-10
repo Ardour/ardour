@@ -211,7 +211,7 @@ private:
 		PortIcon(bool input) {
 			_input = input;
 			_ports = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 1);
-			set_size_request (-1, 3);
+			set_size_request (-1, 2);
 		}
 		void set_ports(ARDOUR::ChanCount const ports) { _ports = ports; }
 	private:

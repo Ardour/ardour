@@ -49,7 +49,8 @@ public:
 	void discover_panners ();
 	std::list<PannerInfo*> panner_info;
 
-	PannerInfo* select_panner (ChanCount in, ChanCount out);
+	PannerInfo* select_panner (ChanCount in, ChanCount out, std::string const uri = "");
+	PannerInfo* get_by_uri (std::string uri);
 
 private:
 	PannerManager();

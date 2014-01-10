@@ -108,6 +108,7 @@ namespace Gtkmm2ext {
 	LIBGTKMM2EXT_API void rounded_top_half_rectangle (Cairo::RefPtr<Cairo::Context>, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_bottom_half_rectangle (Cairo::RefPtr<Cairo::Context>, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_right_half_rectangle (Cairo::RefPtr<Cairo::Context>, double x, double y, double w, double h, double r=10);
+	LIBGTKMM2EXT_API void rounded_left_half_rectangle (Cairo::RefPtr<Cairo::Context>, double x, double y, double w, double h, double r=10);
 
 	/* C API for rounded rectangles */
 
@@ -118,6 +119,7 @@ namespace Gtkmm2ext {
 	LIBGTKMM2EXT_API void rounded_top_half_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_bottom_half_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_right_half_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
+	LIBGTKMM2EXT_API void rounded_left_half_rectangle (cairo_t* cr, double x, double y, double w, double h, double r=10);
 
 	LIBGTKMM2EXT_API Gtk::Label* left_aligned_label (std::string const &);
 

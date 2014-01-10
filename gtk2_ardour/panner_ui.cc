@@ -51,6 +51,7 @@ PannerUI::PannerUI (Session* s)
 	, _current_nins (-1)
 	, pan_automation_style_button ("")
 	, pan_automation_state_button ("")
+	, _panner_list()
 {
 	set_session (s);
 
@@ -203,7 +204,7 @@ PannerUI::~PannerUI ()
 void
 PannerUI::panshell_changed ()
 {
-        set_panner (_panshell, _panshell->panner());
+	set_panner (_panshell, _panshell->panner());
 	setup_pan ();
 }
 
@@ -233,73 +234,51 @@ PannerUI::setup_pan ()
 		return;
 	}
 
-	if (nouts == 0 || nouts == 1) {
+	if (_panshell->panner_gui_uri() == "http://ardour.org/plugin/panner_2in2out#ui")
+	{
+		boost::shared_ptr<Pannable> pannable = _panner->pannable();
 
-		/* stick something into the panning viewport so that it redraws */
+		_stereo_panner = new StereoPanner (_panshell);
+		_stereo_panner->set_size_request (-1, pan_bar_height);
+		pan_vbox.pack_start (*_stereo_panner, false, false);
 
-		EventBox* eb = manage (new EventBox());
-		pan_vbox.pack_start (*eb, false, false);
+		boost::shared_ptr<AutomationControl> ac;
 
-		delete big_window;
-		big_window = 0;
+		ac = pannable->pan_azimuth_control;
+		_stereo_panner->StartPositionGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
+					boost::weak_ptr<AutomationControl> (ac)));
+		_stereo_panner->StopPositionGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch),
+					boost::weak_ptr<AutomationControl>(ac)));
 
-	} else if (nouts == 2) {
+		ac = pannable->pan_width_control;
+		_stereo_panner->StartWidthGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
+					boost::weak_ptr<AutomationControl> (ac)));
+		_stereo_panner->StopWidthGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch),
+					boost::weak_ptr<AutomationControl>(ac)));
+		_stereo_panner->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
+	}
+	else if (_panshell->panner_gui_uri() == "http://ardour.org/plugin/panner_1in2out#ui"
+			|| _panshell->panner_gui_uri() == "http://ardour.org/plugin/panner_balance#ui")
+	{
+		boost::shared_ptr<Pannable> pannable = _panner->pannable();
+		boost::shared_ptr<AutomationControl> ac = pannable->pan_azimuth_control;
 
-                if (nins == 2) {
+		_mono_panner = new MonoPanner (_panshell);
 
-                        /* add integrated 2in/2out panner GUI */
+		_mono_panner->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
+					boost::weak_ptr<AutomationControl> (ac)));
+		_mono_panner->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch),
+					boost::weak_ptr<AutomationControl>(ac)));
 
-                        boost::shared_ptr<Pannable> pannable = _panner->pannable();
+		_mono_panner->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
 
-                        _stereo_panner = new StereoPanner (_panner);
-                        _stereo_panner->set_size_request (-1, pan_bar_height);
-                        pan_vbox.pack_start (*_stereo_panner, false, false);
+		_mono_panner->set_size_request (-1, pan_bar_height);
 
-                        boost::shared_ptr<AutomationControl> ac;
-
-                        ac = pannable->pan_azimuth_control;
-                        _stereo_panner->StartPositionGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
-                                                                                  boost::weak_ptr<AutomationControl> (ac)));
-                        _stereo_panner->StopPositionGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch),
-                                                                                 boost::weak_ptr<AutomationControl>(ac)));
-
-                        ac = pannable->pan_width_control;
-                        _stereo_panner->StartWidthGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
-                                                                               boost::weak_ptr<AutomationControl> (ac)));
-                        _stereo_panner->StopWidthGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch),
-                                                                              boost::weak_ptr<AutomationControl>(ac)));
-                        _stereo_panner->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
-
-                } else if (nins == 1) {
-                        /* 1-in/2out */
-
-                        boost::shared_ptr<Pannable> pannable = _panner->pannable();
-                        boost::shared_ptr<AutomationControl> ac = pannable->pan_azimuth_control;
-
-                        _mono_panner = new MonoPanner (_panner);
-			
-                        _mono_panner->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
-                                                                      boost::weak_ptr<AutomationControl> (ac)));
-                        _mono_panner->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch),
-                                                             boost::weak_ptr<AutomationControl>(ac)));
-
-                        _mono_panner->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
-
-                        _mono_panner->set_size_request (-1, pan_bar_height);
-
-                        update_pan_sensitive ();
-                        pan_vbox.pack_start (*_mono_panner, false, false);
-
-                } else {
-                        warning << string_compose (_("No panner user interface is currently available for %1-in/2out tracks/busses"),
-                                                   nins) << endmsg;
-                }
-
-		delete big_window;
-		big_window = 0;
-
-	} else {
-
+		update_pan_sensitive ();
+		pan_vbox.pack_start (*_mono_panner, false, false);
+	}
+	else if (_panshell->panner_gui_uri() == "http://ardour.org/plugin/panner_vbap#ui")
+	{
 		if (!twod_panner) {
 			twod_panner = new Panner2d (_panshell, 61);
 			twod_panner->set_name ("MixerPanZone");
@@ -309,17 +288,26 @@ PannerUI::setup_pan ()
 
 		update_pan_sensitive ();
 		twod_panner->reset (nins);
- 		if (big_window) {
- 			big_window->reset (nins);
- 		}
+		if (big_window) {
+			big_window->reset (nins);
+		}
 		twod_panner->set_size_request (-1, 61);
 
 		/* and finally, add it to the panner frame */
 
-                pan_vbox.pack_start (*twod_panner, false, false);
+		pan_vbox.pack_start (*twod_panner, false, false);
+	}
+	else
+	{
+		/* stick something into the panning viewport so that it redraws */
+		EventBox* eb = manage (new EventBox());
+		pan_vbox.pack_start (*eb, false, false);
+
+		delete big_window;
+		big_window = 0;
 	}
 
-        pan_vbox.show_all ();
+	pan_vbox.show_all ();
 }
 
 void
@@ -388,8 +376,27 @@ PannerUI::build_pan_menu ()
 	bypass_menu_item->set_active (_panshell->bypassed());
 	bypass_menu_item->signal_toggled().connect (sigc::mem_fun(*this, &PannerUI::pan_bypass_toggle));
 
-	items.push_back (MenuElem (_("Reset"), sigc::mem_fun (*this, &PannerUI::pan_reset)));
-	items.push_back (MenuElem (_("Edit..."), sigc::mem_fun (*this, &PannerUI::pan_edit)));
+	if (!_panshell->bypassed()) {
+		items.push_back (MenuElem (_("Reset"), sigc::mem_fun (*this, &PannerUI::pan_reset)));
+		items.push_back (MenuElem (_("Edit..."), sigc::mem_fun (*this, &PannerUI::pan_edit)));
+	}
+
+	if (_route && _panner_list.size() > 1 && !_panshell->bypassed()) {
+		RadioMenuItem::Group group;
+		items.push_back (SeparatorElem());
+
+		assert(_panshell->user_selected_panner_uri() == ""
+				||  _panshell->user_selected_panner_uri() == _panshell->current_panner_uri());
+
+		_suspend_menu_callbacks = true;
+		for (std::map<std::string,std::string>::const_iterator p = _panner_list.begin(); p != _panner_list.end(); ++p) {
+			items.push_back (RadioMenuElem (group, p->second,
+						sigc::bind(sigc::mem_fun (*this, &PannerUI::pan_set_custom_type), p->first)));
+			RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&items.back ());
+			i->set_active (_panshell->current_panner_uri() == p->first);
+		}
+		_suspend_menu_callbacks = false;
+	}
 }
 
 void
@@ -403,6 +410,9 @@ PannerUI::pan_bypass_toggle ()
 void
 PannerUI::pan_edit ()
 {
+	if (_panshell->bypassed()) {
+		return;
+	}
 	if (_mono_panner) {
 		_mono_panner->edit ();
 	} else if (_stereo_panner) {
@@ -413,7 +423,18 @@ PannerUI::pan_edit ()
 void
 PannerUI::pan_reset ()
 {
+	if (_panshell->bypassed()) {
+		return;
+	}
 	_panner->reset ();
+}
+
+void
+PannerUI::pan_set_custom_type (std::string uri) {
+	if (_suspend_menu_callbacks) return;
+	if (_route) {
+		_route->set_custom_panner_uri(uri);
+	}
 }
 
 void
@@ -608,4 +629,11 @@ PannerUI::show_position ()
 void
 PannerUI::position_adjusted ()
 {
+}
+
+void
+PannerUI::set_available_panners(boost::shared_ptr<ARDOUR::Route> r, std::map<std::string,std::string> p)
+{
+	_route = r;
+	_panner_list = p;
 }

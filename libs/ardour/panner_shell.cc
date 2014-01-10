@@ -63,6 +63,10 @@ PannerShell::PannerShell (string name, Session& s, boost::shared_ptr<Pannable> p
 	: SessionObject (s, name)
 	, _pannable (p)
 	, _bypassed (false)
+	, _current_panner_uri("")
+	, _user_selected_panner_uri("")
+	, _panner_gui_uri("")
+	, _force_reselect (false)
 {
 	set_name (name);
 }
@@ -82,7 +86,7 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
 	   the config hasn't changed, we're done.
 	*/
 
-	if (_panner && (_panner->in().n_audio() == nins) && (_panner->out().n_audio() == nouts)) {
+	if (!_force_reselect && _panner && (_panner->in().n_audio() == nins) && (_panner->out().n_audio() == nouts)) {
 		return;
 	}
 
@@ -90,16 +94,20 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
 		/* no need for panning with less than 2 outputs or no inputs */
 		if (_panner) {
 			_panner.reset ();
+			_current_panner_uri = "";
+			_panner_gui_uri = "";
 			Changed (); /* EMIT SIGNAL */
 		}
 		return;
 	}
 
-	PannerInfo* pi = PannerManager::instance().select_panner (in, out);
+	PannerInfo* pi = PannerManager::instance().select_panner (in, out, _user_selected_panner_uri);
 	if (!pi) {
 		cerr << "No panner found: check that panners are being discovered correctly during startup.\n";
 		assert (pi);
 	}
+
+	DEBUG_TRACE (DEBUG::Panning, string_compose (_("select panner: %1\n"), pi->descriptor.name.c_str()));
 
 	boost::shared_ptr<Speakers> speakers = _session.get_speakers ();
 
@@ -116,6 +124,8 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
 	// boost_debug_shared_ptr_mark_interesting (p, "Panner");
 	_panner.reset (p);
 	_panner->configure_io (in, out);
+	_current_panner_uri = pi->descriptor.panner_uri;
+	_panner_gui_uri = pi->descriptor.gui_uri;
 
 	Changed (); /* EMIT SIGNAL */
 }
@@ -126,6 +136,7 @@ PannerShell::get_state ()
 	XMLNode* node = new XMLNode ("PannerShell");
 
 	node->add_property (X_("bypassed"), _bypassed ? X_("yes") : X_("no"));
+	node->add_property (X_("user-panner"), _user_selected_panner_uri);
 
 	if (_panner) {
 		node->add_child_nocopy (_panner->get_state ());
@@ -146,12 +157,29 @@ PannerShell::set_state (const XMLNode& node, int version)
 		set_bypassed (string_is_affirmative (prop->value ()));
 	}
 
+	if ((prop = node.property (X_("user-panner"))) != 0) {
+		_user_selected_panner_uri = prop->value ();
+	}
+
 	_panner.reset ();
 	
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		if ((*niter)->name() == X_("Panner")) {
 
+			if ((prop = (*niter)->property (X_("uri")))) {
+				PannerInfo* p = PannerManager::instance().get_by_uri(prop->value());
+				if (p) {
+					_panner.reset (p->descriptor.factory (_pannable, _session.get_speakers ()));
+					_current_panner_uri = p->descriptor.panner_uri;
+					_panner_gui_uri = p->descriptor.gui_uri;
+					if (_panner->set_state (**niter, version) == 0) {
+						return -1;
+					}
+				}
+			}
+
+			else /* backwards compatibility */
 			if ((prop = (*niter)->property (X_("type")))) {
 
 				list<PannerInfo*>::iterator p;
@@ -166,6 +194,8 @@ PannerShell::set_state (const XMLNode& node, int version)
 						*/
 
 						_panner.reset ((*p)->descriptor.factory (_pannable, _session.get_speakers ()));
+						_current_panner_uri = (*p)->descriptor.panner_uri;
+						_panner_gui_uri = (*p)->descriptor.gui_uri;
 
 						if (_panner->set_state (**niter, version) == 0) {
 							return -1;
@@ -346,4 +376,20 @@ bool
 PannerShell::bypassed () const
 {
 	return _bypassed;
+}
+
+/* set custom-panner config
+ *
+ * This function is intended to be only called from
+ * Route::set_custom_panner()
+ * which will trigger IO-reconfigutaion if this fn return true
+ */
+bool
+PannerShell::set_user_selected_panner_uri (std::string const uri)
+{
+	if (uri == _user_selected_panner_uri) return false;
+	_user_selected_panner_uri = uri;
+	if (uri == _current_panner_uri) return false;
+	_force_reselect = true;
+	return true;
 }

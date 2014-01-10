@@ -63,7 +63,10 @@ using namespace PBD;
 
 static PanPluginDescriptor _descriptor = {
         "Equal Power Stereo",
+        "http://ardour.org/plugin/panner_2in2out",
+        "http://ardour.org/plugin/panner_2in2out#ui",
         2, 2,
+        10000,
         Panner2in2out::factory
 };
 
@@ -464,6 +467,8 @@ XMLNode&
 Panner2in2out::get_state ()
 {
 	XMLNode& root (Panner::get_state ());
+	root.add_property (X_("uri"), _descriptor.panner_uri);
+	/* this is needed to allow new sessions to load with old Ardour: */
 	root.add_property (X_("type"), _descriptor.name);
 	return root;
 }

@@ -175,8 +175,11 @@ protected:
 extern "C" {
 struct LIBARDOUR_API PanPluginDescriptor {
 	std::string name;
+	std::string panner_uri;
+	std::string gui_uri;
 	int32_t in;
 	int32_t out;
+	uint32_t priority;
 	ARDOUR::Panner* (*factory)(boost::shared_ptr<ARDOUR::Pannable>, boost::shared_ptr<ARDOUR::Speakers>);
 };
 }

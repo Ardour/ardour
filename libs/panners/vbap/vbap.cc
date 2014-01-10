@@ -46,7 +46,10 @@ using namespace std;
 
 static PanPluginDescriptor _descriptor = {
         "VBAP 2D panner",
+        "http://ardour.org/plugin/panner_vbap",
+        "http://ardour.org/plugin/panner_vbap#ui",
         -1, -1,
+        1000,
         VBAPanner::factory
 };
 
@@ -392,7 +395,9 @@ VBAPanner::distribute_one_automated (AudioBuffer& /*src*/, BufferSet& /*obufs*/,
 XMLNode&
 VBAPanner::get_state ()
 {
-        XMLNode& node (Panner::get_state());
+	XMLNode& node (Panner::get_state());
+	node.add_property (X_("uri"), _descriptor.panner_uri);
+	/* this is needed to allow new sessions to load with old Ardour: */
 	node.add_property (X_("type"), _descriptor.name);
 	return node;
 }
