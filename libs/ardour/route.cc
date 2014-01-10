@@ -1577,6 +1577,11 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 void
 Route::set_custom_panner_uri (std::string const panner_uri)
 {
+	if (_in_configure_processors) {
+		DEBUG_TRACE (DEBUG::Panning, string_compose (_("Route::set_custom_panner_uri '%1' -- called while in_configure_processors\n"), name()));
+		return;
+	}
+
 	if (!_main_outs->panner_shell()->set_user_selected_panner_uri(panner_uri)) {
 		DEBUG_TRACE (DEBUG::Panning, string_compose (_("Route::set_custom_panner_uri '%1 '%2' -- no change needed\n"), name(), panner_uri));
 		/* no change needed */
@@ -1585,33 +1590,35 @@ Route::set_custom_panner_uri (std::string const panner_uri)
 
 	DEBUG_TRACE (DEBUG::Panning, string_compose (_("Route::set_custom_panner_uri '%1 '%2' -- reconfigure I/O\n"), name(), panner_uri));
 
-	if (_in_configure_processors) {
-		DEBUG_TRACE (DEBUG::Panning, string_compose (_("Route::set_custom_panner_uri '%1' -- called while in_configure_processors\n"), name()));
-		return;
-	}
-
-	/* reconfigure I/O */
+	/* reconfigure I/O -- re-initialize panner modules */
 	{
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
-		ProcessorState pstate (this);
-		if (panner())
-		{
-			/* there is already a panner it can just be re-configured in-place */
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-			ChanCount in = panner()->in();
-			ChanCount out = panner()->out();
-			_main_outs->panner_shell()->configure_io(in, out);
-			_main_outs->panner_shell()->pannable()->set_panner(panner());
-		}
-		else
-		{
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 
-			if (configure_processors_unlocked (0)) {
-				pstate.restore ();
-				configure_processors_unlocked (0); // it worked before we tried to add it ...
-				return;
+		for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p) {
+			boost::shared_ptr<Delivery> dl;
+			boost::shared_ptr<Panner> panner;
+			if ((dl = boost::dynamic_pointer_cast<Delivery> (*p)) == 0) {
+				continue;
 			}
+			if (!dl->panner_shell()) {
+				continue;
+			}
+			if (!(panner = dl->panner_shell()->panner())) {
+				continue;
+			}
+			/* _main_outs has already been set before the loop.
+			 * Ignore the return status here. It need reconfiguration */
+			if (dl->panner_shell() != _main_outs->panner_shell()) {
+				if (!dl->panner_shell()->set_user_selected_panner_uri(panner_uri)) {
+					continue;
+				}
+			}
+
+			ChanCount in = panner->in();
+			ChanCount out = panner->out();
+			dl->panner_shell()->configure_io(in, out);
+			dl->panner_shell()->pannable()->set_panner(dl->panner_shell()->panner());
 		}
 	}
 
