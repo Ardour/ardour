@@ -189,6 +189,8 @@ VBAPanner::update ()
                 s->direction = AngularVector (center, elevation);
                 compute_gains (s->desired_gains, s->desired_outputs, s->direction.azi, s->direction.ele);
         }
+
+        SignalPositionChanged(); /* emit */
 }
 
 void 
