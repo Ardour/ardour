@@ -79,6 +79,7 @@ VBAPanner::VBAPanner (boost::shared_ptr<Pannable> p, boost::shared_ptr<Speakers>
 	, _speakers (new VBAPSpeakers (s))
 {
         _pannable->pan_azimuth_control->Changed.connect_same_thread (*this, boost::bind (&VBAPanner::update, this));
+        _pannable->pan_elevation_control->Changed.connect_same_thread (*this, boost::bind (&VBAPanner::update, this));
         _pannable->pan_width_control->Changed.connect_same_thread (*this, boost::bind (&VBAPanner::update, this));
 
         update ();
@@ -123,6 +124,7 @@ VBAPanner::update ()
         /* panner azimuth control is [0 .. 1.0] which we interpret as [0 .. 360] degrees
          */
         double center = _pannable->pan_azimuth_control->get_value() * 360.0;
+        double elevation = _pannable->pan_elevation_control->get_value() * 90.0;
 
         if (_signals.size() > 1) {
 
@@ -160,8 +162,8 @@ VBAPanner::update ()
                         for (vector<Signal*>::iterator s = _signals.begin(); s != _signals.end(); ++s) {
                         
                                 Signal* signal = *s;
-                                
-                                signal->direction = AngularVector (signal_direction, 0.0);
+
+                                signal->direction = AngularVector (signal_direction, elevation);
                                 compute_gains (signal->desired_gains, signal->desired_outputs, signal->direction.azi, signal->direction.ele);
                                 signal_direction += degree_step_per_signal;
                         }
@@ -172,8 +174,8 @@ VBAPanner::update ()
                         for (vector<Signal*>::reverse_iterator s = _signals.rbegin(); s != _signals.rend(); ++s) {
                         
                                 Signal* signal = *s;
-                                
-                                signal->direction = AngularVector (signal_direction, 0.0);
+
+                                signal->direction = AngularVector (signal_direction, elevation);
                                 compute_gains (signal->desired_gains, signal->desired_outputs, signal->direction.azi, signal->direction.ele);
                                 signal_direction += degree_step_per_signal;
                         }
@@ -184,7 +186,7 @@ VBAPanner::update ()
                 /* width has no role to play if there is only 1 signal: VBAP does not do "diffusion" of a single channel */
 
                 Signal* s = _signals.front();
-                s->direction = AngularVector (center, 0);
+                s->direction = AngularVector (center, elevation);
                 compute_gains (s->desired_gains, s->desired_outputs, s->direction.azi, s->direction.ele);
         }
 }
@@ -432,6 +434,9 @@ VBAPanner::what_can_be_automated() const
         if (_signals.size() > 1) {
                 s.insert (Evoral::Parameter (PanWidthAutomation));
         }
+        if (_speakers->dimension() == 3) {
+                s.insert (Evoral::Parameter (PanElevationAutomation));
+        }
         return s;
 }
         
@@ -443,6 +448,8 @@ VBAPanner::describe_parameter (Evoral::Parameter p)
                 return _("Direction");
         case PanWidthAutomation:
                 return _("Diffusion");
+        case PanElevationAutomation:
+                return _("Elevation");
         default:
                 return _pannable->describe_parameter (p);
         }
@@ -456,10 +463,13 @@ VBAPanner::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 
         switch (ac->parameter().type()) {
         case PanAzimuthAutomation: /* direction */
-                return string_compose (_("%1"), int (rint (val * 360.0)));
+                return string_compose (_("%1\u00B0"), int (rint (val * 360.0)));
                 
         case PanWidthAutomation: /* diffusion */
                 return string_compose (_("%1%%"), (int) floor (100.0 * fabs(val)));
+
+        case PanElevationAutomation: /* elevation */
+                return string_compose (_("%1\u00B0"), (int) floor (90.0 * fabs(val)));
                 
         default:
                 return _pannable->value_as_string (ac);
@@ -485,15 +495,11 @@ VBAPanner::get_speakers () const
 void
 VBAPanner::set_position (double p)
 {
-        if (p < 0.0) {
-                p = 1.0 + p;
-        }
-
-        if (p > 1.0) {
-                p = fmod (p, 1.0);
-        } 
-
-        _pannable->pan_azimuth_control->set_value (p);
+	/* map into 0..1 range */
+	int over = p;
+	over -= (p >= 0) ? 0 : 1;
+	p -= (double)over;
+	_pannable->pan_azimuth_control->set_value (p);
 }
 
 void
@@ -503,10 +509,17 @@ VBAPanner::set_width (double w)
 }
 
 void
+VBAPanner::set_elevation (double e)
+{
+        _pannable->pan_elevation_control->set_value (min (1.0, max (0.0, e)));
+}
+
+void
 VBAPanner::reset ()
 {
 	set_position (0);
 	set_width (1);
+	set_elevation (0);
 
 	update ();
 }
