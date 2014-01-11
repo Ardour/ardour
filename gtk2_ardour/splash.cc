@@ -109,6 +109,7 @@ Splash::pop_back_for (Gtk::Window& win)
 
            So for OS X, we just hide ourselves.
         */
+        (void) win;
         hide();
 #else
 	set_keep_above (false);
