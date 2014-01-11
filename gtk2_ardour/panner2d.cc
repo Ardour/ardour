@@ -82,7 +82,7 @@ Panner2d::Panner2d (boost::shared_ptr<PannerShell> p, int32_t h)
 	drag_target = 0;
 	set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 
-        handle_position_change ();
+	handle_position_change ();
 }
 
 Panner2d::~Panner2d()
@@ -206,7 +206,6 @@ Panner2d::handle_state_change ()
 void
 Panner2d::label_signals ()
 {
-        double w = panner_shell->pannable()->pan_width_control->get_value();
         uint32_t sz = signals.size();
 
 	switch (sz) {
@@ -218,23 +217,14 @@ Panner2d::label_signals ()
 		break;
 
 	case 2:
-                if (w  >= 0.0) {
-                        signals[0]->set_text ("R");
-                        signals[1]->set_text ("L");
-                } else {
-                        signals[0]->set_text ("L");
-                        signals[1]->set_text ("R");
-                }
+                signals[0]->set_text ("L");
+                signals[1]->set_text ("R");
 		break;
 
 	default:
 		for (uint32_t i = 0; i < sz; ++i) {
 			char buf[64];
-                        if (w >= 0.0) {
-                                snprintf (buf, sizeof (buf), "%" PRIu32, i + 1);
-                        } else {
-                                snprintf (buf, sizeof (buf), "%" PRIu32, sz - i);
-                        }
+                        snprintf (buf, sizeof (buf), "%" PRIu32, i + 1);
 			signals[i]->set_text (buf);
 		}
 		break;
@@ -247,7 +237,8 @@ Panner2d::handle_position_change ()
 	uint32_t n;
         double w = panner_shell->pannable()->pan_width_control->get_value();
 
-        position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0, 0.0);
+        position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0,
+                                           panner_shell->pannable()->pan_elevation_control->get_value() * 90.0);
 
         for (uint32_t i = 0; i < signals.size(); ++i) {
                 signals[i]->position = panner_shell->panner()->signal_position (i);
@@ -693,22 +684,39 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 		}
 
 		if (need_move) {
-			CartesianVector cp (evx, evy, 0.0);
-                        AngularVector av;
+			set<Evoral::Parameter> params = panner_shell->panner()->what_can_be_automated();
+			set<Evoral::Parameter>::iterator p = params.find(PanElevationAutomation);
 
-			/* canonicalize position and then clamp to the circle */
-
+			double y0 = 4.0;
+			if (height > large_size_threshold) {
+				y0 = 12.0;
+			}
+			CartesianVector cp (evx - 12.0, evy - y0, 0.0);
+			AngularVector av;
 			gtk_to_cart (cp);
-			clamp_to_circle (cp.x, cp.y);
 
-			/* generate an angular representation of the current mouse position */
+			if (p == params.end()) {
+				clamp_to_circle (cp.x, cp.y);
+				cp.angular (av);
+				if (drag_target == &position) {
+					double degree_fract = av.azi / 360.0;
+					panner_shell->panner()->set_position (degree_fract);
+				}
+			} else {
+				/* sphere projection */
+				sphere_project (cp.x, cp.y, cp.z);
 
-			cp.angular (av);
+				double r2d = 180.0 / M_PI;
+				av.azi = r2d * atan2(cp.y, cp.x);
+				av.ele = r2d * asin(cp.z);
 
-                        if (drag_target == &position) {
-                                double degree_fract = av.azi / 360.0;
-                                panner_shell->panner()->set_position (degree_fract);
-                        }
+				if (drag_target == &position) {
+					double azi_fract = av.azi / 360.0;
+					double ele_fract = av.ele / 90.0;
+					panner_shell->panner()->set_position (azi_fract);
+					panner_shell->panner()->set_elevation (ele_fract);
+				}
+			}
 		}
 	}
 
@@ -762,12 +770,26 @@ Panner2d::gtk_to_cart (CartesianVector& c) const
 }
 
 void
+Panner2d::sphere_project (double& x, double& y, double& z)
+{
+	double r, r2;
+	r2 = x * x + y * y;
+	if (r2 < 1.0) {
+		z = sqrt (1.0 - r2);
+	} else {
+		r = sqrt (r2);
+		x = x / r;
+		y = y / r;
+		z = 0.0;
+	}
+}
+
+void
 Panner2d::clamp_to_circle (double& x, double& y)
 {
 	double azi, ele;
 	double z = 0.0;
-        double l;
-
+	double l;
 	PBD::cartesian_to_spherical (x, y, z, azi, ele, l);
 	PBD::spherical_to_cartesian (azi, ele, 1.0, x, y, z);
 }
