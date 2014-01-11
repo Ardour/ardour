@@ -136,6 +136,7 @@ class Panner2d : public Gtk::DrawingArea
         void label_signals ();
 
 	PBD::ScopedConnectionList connections;
+	PBD::ScopedConnectionList panconnect;
 
 	/* cartesian coordinates in GTK units ; adjust to same but on a circle of radius 1.0
 	   and centered in the middle of our area

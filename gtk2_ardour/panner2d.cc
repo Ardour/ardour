@@ -77,8 +77,7 @@ Panner2d::Panner2d (boost::shared_ptr<PannerShell> p, int32_t h)
 {
 	panner_shell->Changed.connect (connections, invalidator (*this), boost::bind (&Panner2d::handle_state_change, this), gui_context());
 
-        panner_shell->pannable()->pan_azimuth_control->Changed.connect (connections, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
-        panner_shell->pannable()->pan_width_control->Changed.connect (connections, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
+	panner_shell->panner()->SignalPositionChanged.connect (panconnect, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
 
 	drag_target = 0;
 	set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
@@ -199,6 +198,8 @@ Panner2d::add_speaker (const AngularVector& a)
 void
 Panner2d::handle_state_change ()
 {
+	panconnect.drop_connections();
+	panner_shell->panner()->SignalPositionChanged.connect (panconnect, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
 	queue_draw ();
 }
 
