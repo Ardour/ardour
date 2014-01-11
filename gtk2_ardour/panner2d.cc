@@ -595,8 +595,8 @@ Panner2d::on_button_press_event (GdkEventButton *ev)
 	switch (ev->button) {
 	case 1:
 	case 2:
-                x = ev->x - border;
-                y = ev->y - border;
+                x = ev->x - hoffset;
+                y = ev->y - voffset;
 
 		if ((drag_target = find_closest_object (x, y, is_signal)) != 0) {
                         if (!is_signal) {
@@ -671,6 +671,8 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 		return false;
 	}
 
+	evx -= hoffset;
+	evy -= voffset;
 
 	if (state & GDK_BUTTON1_MASK && !(state & GDK_BUTTON2_MASK)) {
 		CartesianVector c;
@@ -687,11 +689,7 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 			set<Evoral::Parameter> params = panner_shell->panner()->what_can_be_automated();
 			set<Evoral::Parameter>::iterator p = params.find(PanElevationAutomation);
 
-			double y0 = 4.0;
-			if (height > large_size_threshold) {
-				y0 = 12.0;
-			}
-			CartesianVector cp (evx - 12.0, evy - y0, 0.0);
+			CartesianVector cp (evx, evy, 0.0);
 			AngularVector av;
 			gtk_to_cart (cp);
 
