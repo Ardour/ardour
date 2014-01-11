@@ -804,6 +804,8 @@ Panner2dWindow::Panner2dWindow (boost::shared_ptr<PannerShell> p, int32_t h, uin
 	: ArdourWindow (_("Panner (2D)"))
         , widget (p, h)
 	, bypass_button (_("Bypass"))
+	, width_adjustment (0, -100, 100, 1, 5, 0)
+        , width_spinner (width_adjustment)
 {
 	widget.set_name ("MixerPanZone");
 
@@ -811,18 +813,29 @@ Panner2dWindow::Panner2dWindow (boost::shared_ptr<PannerShell> p, int32_t h, uin
 	widget.set_size_request (h, h);
 
         bypass_button.signal_toggled().connect (sigc::mem_fun (*this, &Panner2dWindow::bypass_toggled));
+        width_spinner.signal_changed().connect (sigc::mem_fun (*this, &Panner2dWindow::width_changed));
+
+        p->pannable()->pan_width_control->Changed.connect (connections, invalidator(*this), boost::bind (&Panner2dWindow::set_width, this), gui_context());
+	p->Changed.connect (connections, invalidator (*this), boost::bind (&Panner2dWindow::set_bypassed, this), gui_context());
 
 	button_box.set_spacing (6);
 	button_box.pack_start (bypass_button, false, false);
 
-	spinner_box.set_spacing (6);
 	left_side.set_spacing (6);
 
 	left_side.pack_start (button_box, false, false);
+
+        Gtk::Label* l = manage (new Label (
+                                p->panner()->describe_parameter(PanWidthAutomation),
+                                Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	spinner_box.pack_start (*l, false, false);
+	spinner_box.pack_start (width_spinner, false, false);
 	left_side.pack_start (spinner_box, false, false);
 
+	l->show ();
 	bypass_button.show ();
 	button_box.show ();
+	width_spinner.show ();
 	spinner_box.show ();
 	left_side.show ();
 
@@ -834,6 +847,8 @@ Panner2dWindow::Panner2dWindow (boost::shared_ptr<PannerShell> p, int32_t h, uin
 
 	add (hpacker);
 	reset (inputs);
+        set_width();
+        set_bypassed();
 	widget.show ();
 }
 
@@ -841,21 +856,6 @@ void
 Panner2dWindow::reset (uint32_t n_inputs)
 {
 	widget.reset (n_inputs);
-
-#if 0
-	while (spinners.size() < n_inputs) {
-		// spinners.push_back (new Gtk::SpinButton (widget.azimuth (spinners.size())));
-		//spinner_box.pack_start (*spinners.back(), false, false);
-		//spinners.back()->set_digits (4);
-		spinners.back()->show ();
-	}
-
-	while (spinners.size() > n_inputs) {
-		spinner_box.remove (*spinners.back());
-		delete spinners.back();
-		spinners.erase (--spinners.end());
-	}
-#endif
 }
 
 void
@@ -866,6 +866,44 @@ Panner2dWindow::bypass_toggled ()
 
         if (model != view) {
                 widget.get_panner_shell()->set_bypassed (view);
+        }
+}
+void
+Panner2dWindow::width_changed ()
+{
+        float model = widget.get_panner_shell()->pannable()->pan_width_control->get_value();
+        float view  = width_spinner.get_value() / 100.0;
+        if (model != view) {
+					widget.get_panner_shell()->panner()->set_width (view);
+				}
+}
+
+void
+Panner2dWindow::set_bypassed ()
+{
+        bool view = bypass_button.get_active ();
+        bool model = widget.get_panner_shell()->bypassed ();
+        if (model != view) {
+                bypass_button.set_active(model);
+        }
+
+        set<Evoral::Parameter> params = widget.get_panner_shell()->panner()->what_can_be_automated();
+        set<Evoral::Parameter>::iterator p = params.find(PanWidthAutomation);
+        if (p == params.end()) {
+                spinner_box.set_sensitive(false);
+        } else {
+                spinner_box.set_sensitive(true);
+        }
+}
+
+void
+Panner2dWindow::set_width ()
+{
+        // rounding of spinbox is different from slider -- TODO use slider
+        float model = (widget.get_panner_shell()->pannable()->pan_width_control->get_value() * 100.0);
+        float view  = (width_spinner.get_value());
+        if (model != view) {
+                width_spinner.set_value (model);
         }
 }
 

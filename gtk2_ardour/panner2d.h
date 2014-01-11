@@ -66,9 +66,6 @@ class Panner2d : public Gtk::DrawingArea
 
 	boost::shared_ptr<ARDOUR::PannerShell> get_panner_shell() const { return panner_shell; }
 
-	sigc::signal<void,int> PuckMoved;
-	sigc::signal<void,int> TargetMoved;
-
 	void cart_to_gtk (PBD::CartesianVector&) const;
 	void gtk_to_cart (PBD::CartesianVector&) const;
 
@@ -161,9 +158,15 @@ class Panner2dWindow : public ArdourWindow
 	Gtk::VBox         spinner_box;
 	Gtk::VBox         left_side;
 
-	std::vector<Gtk::SpinButton*> spinners;
+	Gtk::Adjustment   width_adjustment;
+	Gtk::SpinButton   width_spinner;
+
+	PBD::ScopedConnectionList connections;
+        void set_bypassed();
+        void set_width();
 
         void bypass_toggled ();
+        void width_changed ();
         bool on_key_press_event (GdkEventKey*);
         bool on_key_release_event (GdkEventKey*);
 };
