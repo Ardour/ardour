@@ -142,6 +142,7 @@ class Panner2d : public Gtk::DrawingArea
 	   and centered in the middle of our area
 	*/
 	void clamp_to_circle (double& x, double& y);
+	void sphere_project (double& x, double& y, double& z);
 };
 
 class Panner2dWindow : public ArdourWindow
