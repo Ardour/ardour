@@ -263,6 +263,55 @@ private:
 	Notes       _notes;
 };
 
+class LIBMIDIPP_API Value
+{
+public:
+	Value() {}
+	Value(const uint16_t     number,
+	      const std::string& name)
+		: _number(number)
+		, _name(name)
+	{}
+
+	uint16_t           number() const { return _number; }
+	const std::string& name()   const { return _name; }
+
+	void set_number(uint16_t number)       { _number = number; }
+	void set_name(const std::string& name) { _name = name; }
+
+	XMLNode& get_state(void);
+	int      set_state(const XMLTree&, const XMLNode&);
+
+private:
+	uint16_t    _number;
+	std::string _name;
+};
+
+class LIBMIDIPP_API ValueNameList
+{
+public:
+	typedef std::map<uint16_t, boost::shared_ptr<Value> > Values;
+
+	ValueNameList() {}
+	ValueNameList(const std::string& name) : _name(name) {}
+
+	const std::string& name() const { return _name; }
+
+	void set_name(const std::string& name) { _name = name; }
+
+	boost::shared_ptr<const Value> value(uint16_t num) const;
+	boost::shared_ptr<const Value> max_value_below(uint16_t num) const;
+
+	const Values& values() const { return _values; }
+
+	XMLNode& get_state(void);
+	int      set_state(const XMLTree&, const XMLNode&);
+
+private:
+	std::string _name;
+	Values      _values;
+};
+
 class LIBMIDIPP_API Control
 {
 public:
@@ -279,6 +328,9 @@ public:
 	uint16_t           number() const { return _number; }
 	const std::string& name()   const { return _name; }
 
+	const std::string&                     value_name_list_name() const { return _value_name_list_name; }
+	boost::shared_ptr<const ValueNameList> value_name_list()      const { return _value_name_list; }
+
 	void set_type(const std::string& type) { _type = type; }
 	void set_number(uint16_t number)       { _number = number; }
 	void set_name(const std::string& name) { _name = name; }
@@ -290,6 +342,9 @@ private:
 	std::string _type;
 	uint16_t    _number;
 	std::string _name;
+
+	std::string                      _value_name_list_name;  ///< Global, UsesValueNameList
+	boost::shared_ptr<ValueNameList> _value_name_list;       ///< Local, ValueNameList
 };
 
 class LIBMIDIPP_API ControlNameList 
@@ -353,6 +408,7 @@ public:
 	typedef std::map<std::string, boost::shared_ptr<ChannelNameSet> >   ChannelNameSets;
 	typedef std::map<std::string, boost::shared_ptr<NoteNameList> >     NoteNameLists;
 	typedef std::map<std::string, boost::shared_ptr<ControlNameList> >  ControlNameLists;
+	typedef std::map<std::string, boost::shared_ptr<ValueNameList> >    ValueNameLists;
 	typedef std::map<std::string, PatchNameList>                        PatchNameLists;
 	
 	MasterDeviceNames() {};
@@ -365,14 +421,21 @@ public:
 	void set_models(const Models some_models) { _models = some_models; }
 
 	const ControlNameLists& controls() const { return _control_name_lists; }
+	const ValueNameLists&   values()   const { return _value_name_lists; }
+
+	boost::shared_ptr<const ValueNameList> value_name_list_by_control(
+		const std::string& mode,
+		uint8_t            channel,
+		uint8_t            number);
 
 	const CustomDeviceModeNames& custom_device_mode_names() const { return _custom_device_mode_names; }
 	
 	boost::shared_ptr<CustomDeviceMode> custom_device_mode_by_name(const std::string& mode_name);
-	boost::shared_ptr<ChannelNameSet> channel_name_set_by_device_mode_and_channel(const std::string& mode, uint8_t channel);
+	boost::shared_ptr<ChannelNameSet> channel_name_set_by_channel(const std::string& mode, uint8_t channel);
 	boost::shared_ptr<Patch> find_patch(const std::string& mode, uint8_t channel, const PatchPrimaryKey& key);
 
 	boost::shared_ptr<ControlNameList> control_name_list(const std::string& name);
+	boost::shared_ptr<ValueNameList>   value_name_list(const std::string& name);
 	boost::shared_ptr<NoteNameList>    note_name_list(const std::string& name);
 	boost::shared_ptr<ChannelNameSet>  channel_name_set(const std::string& name);
 
@@ -394,6 +457,7 @@ private:
 	NoteNameLists         _note_name_lists;
 	PatchNameLists        _patch_name_lists;
 	ControlNameLists      _control_name_lists;
+	ValueNameLists        _value_name_lists;
 };
 
 class LIBMIDIPP_API MIDINameDocument

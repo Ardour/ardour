@@ -251,6 +251,22 @@ Control::set_state (const XMLTree& tree, const XMLNode& node)
 	_number = string_to_int(tree, node.property("Number")->value());
 	_name   = node.property("Name")->value();
 
+	for (XMLNodeList::const_iterator i = node.children().begin();
+	     i != node.children().end(); ++i) {
+		if ((*i)->name() == "Values") {
+			// <Values> has Min and Max properties, but we don't care
+			for (XMLNodeList::const_iterator j = (*i)->children().begin();
+			     j != (*i)->children().end(); ++j) {
+				if ((*j)->name() == "ValueNameList") {
+					_value_name_list = boost::shared_ptr<ValueNameList>(new ValueNameList());
+					_value_name_list->set_state(tree, **j);
+				} else if ((*j)->name() == "UsesValueNameList") {
+					_value_name_list_name = (*j)->property("Name")->value();
+				}
+			}
+		}
+	}
+
 	return 0;
 }
 
@@ -296,6 +312,91 @@ ControlNameList::control(uint16_t num) const
 		return i->second;
 	}
 	return boost::shared_ptr<const Control>();
+}
+
+XMLNode&
+Value::get_state (void)
+{
+	XMLNode* node = new XMLNode("Value");
+	node->add_property("Number", _number);
+	node->add_property("Name",   _name);
+
+	return *node;
+}
+
+int
+Value::set_state (const XMLTree& tree, const XMLNode& node)
+{
+	assert(node.name() == "Value");
+	_number = string_to_int(tree, node.property("Number")->value());
+	_name   = node.property("Name")->value();
+
+	return 0;
+}
+
+XMLNode&
+ValueNameList::get_state (void)
+{
+	XMLNode* node = new XMLNode("ValueNameList");
+	node->add_property("Name", _name);
+
+	return *node;
+}
+
+int
+ValueNameList::set_state (const XMLTree& tree, const XMLNode& node)
+{
+	assert(node.name() == "ValueNameList");
+	const XMLProperty* name_prop = node.property("Name");
+	if (name_prop) {
+		// May be anonymous if written inline within a single <Control> tag
+		_name = name_prop->value();
+	}
+
+	_values.clear();
+	for (XMLNodeList::const_iterator i = node.children().begin();
+	     i != node.children().end(); ++i) {
+		if ((*i)->name() == "Value") {
+			boost::shared_ptr<Value> value(new Value());
+			value->set_state (tree, *(*i));
+			if (_values.find(value->number()) == _values.end()) {
+				_values.insert(make_pair(value->number(), value));
+			} else {
+				PBD::warning << string_compose("%1: Duplicate value %2 ignored",
+				                               tree.filename(), value->number())
+				             << endmsg;
+			}
+		}
+	}
+
+	return 0;
+}
+
+boost::shared_ptr<const Value>
+ValueNameList::value(uint16_t num) const
+{
+	Values::const_iterator i = _values.find(num);
+	if (i != _values.end()) {
+		return i->second;
+	}
+	return boost::shared_ptr<const Value>();
+}
+
+boost::shared_ptr<const Value>
+ValueNameList::max_value_below(uint16_t num) const
+{
+	Values::const_iterator i = _values.lower_bound(num);
+	if (i->first == num) {
+		// Exact match
+		return i->second;
+	} else if (i == _values.begin()) {
+		// No value is < num
+		return boost::shared_ptr<const Value>();
+	} else {
+		// Found the smallest element >= num, so the previous one is our result
+		--i;
+		return i->second;
+	}
 }
 
 XMLNode&
@@ -525,6 +626,31 @@ CustomDeviceMode::get_state(void)
 	return *custom_device_mode;
 }
 
+boost::shared_ptr<const ValueNameList>
+MasterDeviceNames::value_name_list_by_control(const std::string& mode, uint8_t channel, uint8_t number)
+{
+	boost::shared_ptr<ChannelNameSet> chan_names = channel_name_set_by_channel(mode, channel);
+	if (!chan_names) {
+		return boost::shared_ptr<const ValueNameList>();
+	}
+
+	boost::shared_ptr<ControlNameList> control_names = control_name_list(chan_names->control_list_name());
+	if (!control_names) {
+		return boost::shared_ptr<const ValueNameList>();
+	}
+
+	boost::shared_ptr<const Control> control = control_names->control(number);
+	if (!control) {
+		return boost::shared_ptr<const ValueNameList>();
+	}
+
+	if (!control->value_name_list_name().empty()) {
+		return value_name_list(control->value_name_list_name());
+	} else {
+		return control->value_name_list();
+	}
+}
+
 boost::shared_ptr<CustomDeviceMode> 
 MasterDeviceNames::custom_device_mode_by_name(const std::string& mode_name)
 {
@@ -532,7 +658,7 @@ MasterDeviceNames::custom_device_mode_by_name(const std::string& mode_name)
 }
 
 boost::shared_ptr<ChannelNameSet> 
-MasterDeviceNames::channel_name_set_by_device_mode_and_channel(const std::string& mode, uint8_t channel)
+MasterDeviceNames::channel_name_set_by_channel(const std::string& mode, uint8_t channel)
 {
 	boost::shared_ptr<CustomDeviceMode> cdm = custom_device_mode_by_name(mode);
 	boost::shared_ptr<ChannelNameSet> cns =  _channel_name_sets[cdm->channel_name_set_name_by_channel(channel)];
@@ -542,7 +668,7 @@ MasterDeviceNames::channel_name_set_by_device_mode_and_channel(const std::string
 boost::shared_ptr<Patch> 
 MasterDeviceNames::find_patch(const std::string& mode, uint8_t channel, const PatchPrimaryKey& key) 
 {
-	boost::shared_ptr<ChannelNameSet> cns = channel_name_set_by_device_mode_and_channel(mode, channel);
+	boost::shared_ptr<ChannelNameSet> cns = channel_name_set_by_channel(mode, channel);
 	if (!cns) return boost::shared_ptr<Patch>();
 	return cns->find_patch(key);
 }
@@ -565,6 +691,16 @@ MasterDeviceNames::control_name_list(const std::string& name)
 		return i->second;
 	}
 	return boost::shared_ptr<ControlNameList>();
+}
+
+boost::shared_ptr<ValueNameList>
+MasterDeviceNames::value_name_list(const std::string& name)
+{
+	ValueNameLists::const_iterator i = _value_name_lists.find(name);
+	if (i != _value_name_lists.end()) {
+		return i->second;
+	}
+	return boost::shared_ptr<ValueNameList>();
 }
 
 boost::shared_ptr<NoteNameList>
@@ -598,7 +734,7 @@ MasterDeviceNames::note_name(const std::string& mode_name,
 		note_name_list(patch->note_list_name()));
 	if (!note_names) {
 		/* No note names specific to this patch, check the ChannelNameSet */
-		boost::shared_ptr<ChannelNameSet> chan_names = channel_name_set_by_device_mode_and_channel(
+		boost::shared_ptr<ChannelNameSet> chan_names = channel_name_set_by_channel(
 			mode_name, channel);
 		if (chan_names) {
 			note_names = note_name_list(chan_names->note_list_name());
@@ -673,6 +809,16 @@ MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode&)
 		boost::shared_ptr<ControlNameList> control_name_list(new ControlNameList());
 		control_name_list->set_state (tree, *(*i));
 		_control_name_lists[control_name_list->name()] = control_name_list;
+	}
+
+	// ValueNameLists
+	boost::shared_ptr<XMLSharedNodeList> value_name_lists = tree.find("/child::MIDINameDocument/child::MasterDeviceNames/child::ValueNameList");
+	for (XMLSharedNodeList::iterator i = value_name_lists->begin();
+	     i != value_name_lists->end();
+	     ++i) {
+		boost::shared_ptr<ValueNameList> value_name_list(new ValueNameList());
+		value_name_list->set_state (tree, *(*i));
+		_value_name_lists[value_name_list->name()] = value_name_list;
 	}
 
 	// global/post-facto PatchNameLists
