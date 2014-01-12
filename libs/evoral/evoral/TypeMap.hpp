@@ -29,7 +29,7 @@ class Parameter;
 /** The applications passes one of these which provide the implementation
  * with required information about event types in an opaque, type neutral way
  */
-class LIBEVORAL_API TypeMap {
+class /*LIBEVORAL_API*/ TypeMap {
 public:
 	virtual ~TypeMap() {}
 

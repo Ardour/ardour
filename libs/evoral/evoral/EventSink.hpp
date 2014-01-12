@@ -27,7 +27,7 @@ namespace Evoral {
 /** Pure virtual base for anything you can write events to.
  */
 template<typename Time>
-class LIBEVORAL_API EventSink {
+class /*LIBEVORAL_API*/ EventSink {
 public:
 	virtual ~EventSink() {}
 	virtual uint32_t write(Time time, EventType type, uint32_t size, const uint8_t* buf) = 0;

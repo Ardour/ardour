@@ -44,7 +44,7 @@ template<typename Time> class Event;
 
 /** An iterator over (the x axis of) a 2-d double coordinate space.
  */
-class LIBEVORAL_API ControlIterator {
+class /*LIBEVORAL_API*/ ControlIterator {
 public:
 	ControlIterator(boost::shared_ptr<const ControlList> al, double ax, double ay)
 		: list(al)
@@ -216,7 +216,7 @@ private:
 public:
 
 	/** Read iterator */
-	class const_iterator {
+	class LIBEVORAL_API /* Added by JE - */ const_iterator {
 	public:
 		const_iterator();
 		const_iterator(const Sequence<Time>& seq, Time t, bool, std::set<Evoral::Parameter> const &);
@@ -362,7 +362,8 @@ private:
 
 } // namespace Evoral
 
-template<typename Time> LIBEVORAL_API std::ostream& operator<<(std::ostream& o, const Evoral::Sequence<Time>& s) { s.dump (o); return o; }
+template<typename Time> /*LIBEVORAL_API*/ std::ostream& operator<<(std::ostream& o, const Evoral::Sequence<Time>& s) { s.dump (o); return o; }
+
 
 #endif // EVORAL_SEQUENCE_HPP
 

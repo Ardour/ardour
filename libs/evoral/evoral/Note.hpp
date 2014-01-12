@@ -33,7 +33,7 @@ namespace Evoral {
  * Currently a note is defined as (on event, length, off event).
  */
 template<typename Time>
-class LIBEVORAL_API Note {
+class /*LIBEVORAL_API*/ Note {
 public:
 	Note(uint8_t chan=0, Time time=0, Time len=0, uint8_t note=0, uint8_t vel=0x40);
 	Note(const Note<Time>& copy);
@@ -108,13 +108,15 @@ private:
 } // namespace Evoral
 
 template<typename Time>
-LIBEVORAL_API std::ostream& operator<<(std::ostream& o, const Evoral::Note<Time>& n) {
+/*LIBEVORAL_API*/ std::ostream& operator<<(std::ostream& o, const Evoral::Note<Time>& n) {
 	o << "Note #" << n.id() << ": pitch = " << (int) n.note()
 	  << " @ " << n.time() << " .. " << n.end_time()
 	  << " velocity " << (int) n.velocity()
 	  << " chn " << (int) n.channel();
 	return o;
 }
+
+#include "../src/Note.impl"
 
 #endif // EVORAL_NOTE_HPP
 

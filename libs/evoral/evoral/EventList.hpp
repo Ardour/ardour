@@ -33,7 +33,7 @@ namespace Evoral {
  * Used when we need an unsorted list of Events that is also an EventSink. Absolutely nothing more.
  */
 template<typename Time>
-class LIBEVORAL_API EventList : public std::list<Evoral::Event<Time> *>, public Evoral::EventSink<Time> {
+class /*LIBEVORAL_API*/ EventList : public std::list<Evoral::Event<Time> *>, public Evoral::EventSink<Time> {
 public:
 	EventList() {}
 

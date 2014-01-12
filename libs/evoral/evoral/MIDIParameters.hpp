@@ -24,20 +24,20 @@
 namespace Evoral {
 namespace MIDI {
 
-struct LIBEVORAL_API ContinuousController : public Parameter {
+struct /*LIBEVORAL_API*/ ContinuousController : public Parameter {
 	ContinuousController(uint32_t cc_type, uint8_t channel, uint32_t controller)
 		: Parameter(cc_type, channel, controller) {}
 };
 
-struct LIBEVORAL_API ProgramChange : public Parameter {
+struct /*LIBEVORAL_API*/ ProgramChange : public Parameter {
 	ProgramChange(uint32_t pc_type, uint8_t channel) : Parameter(pc_type, channel, 0) {}
 };
 
-struct LIBEVORAL_API ChannelPressure : public Parameter {
+struct /*LIBEVORAL_API*/ ChannelPressure : public Parameter {
 	ChannelPressure(uint32_t ca_type, uint32_t channel) : Parameter(ca_type, channel, 0) {}
 };
 
-struct LIBEVORAL_API PitchBender : public Parameter {
+struct /*LIBEVORAL_API*/ PitchBender : public Parameter {
 	PitchBender(uint32_t pb_type, uint32_t channel) : Parameter(pb_type, channel, 0) {}
 };
 

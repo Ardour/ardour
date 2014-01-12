@@ -30,7 +30,7 @@ template<typename Time> class EventRingBuffer;
 /** Standard Midi File (Type 0)
  */
 template<typename Time>
-class LIBEVORAL_API SMF {
+class /*LIBEVORAL_API*/ SMF {
 public:
 	SMF();
 	virtual ~SMF();
