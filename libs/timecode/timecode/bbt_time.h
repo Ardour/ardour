@@ -23,10 +23,12 @@
 #include <stdint.h>
 #include <iomanip>
 
+#include "timecode/visibility.h"
+
 namespace Timecode {
 
 /** Bar, Beat, Tick Time (i.e. Tempo-Based Time) */
-struct BBT_Time {
+struct LIBTIMECODE_API BBT_Time {
 	static const double ticks_per_beat;
 
 	uint32_t bars;

@@ -15,15 +15,12 @@ def configure(conf):
     autowaf.configure(conf)
 
 def build(bld):
-    bld (export_includes = ['.'],
-         includes        = ['.'],
-         name            = 'libtimecode_includes'
-         )
-
-    bld.stlib (cxxflags = [ '-fPIC' ],
+    bld.shlib (
                source   = [ 'src/time.cc', 'src/bbt_time.cc' ],
                target   = 'libtimecode',
-               use      = 'libtimecode_includes'
+               includes = ['.'],
+               export_includes = ['.'],
+               defines  = [ 'LIBTIMECODE_DLL_EXPORTS' ]
                )
 
 def shutdown():
