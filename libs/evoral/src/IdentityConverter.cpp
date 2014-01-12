@@ -16,25 +16,27 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef EVORAL_EVENT_SINK_HPP
-#define EVORAL_EVENT_SINK_HPP
+#include "evoral/TimeConverter.hpp"
 
-#include "evoral/visibility.h"
-#include "evoral/types.hpp"
+typedef long long framepos_t;
 
 namespace Evoral {
 
-/** Pure virtual base for anything you can write events to.
- */
-template<typename Time>
-class /*LIBEVORAL_API*/ EventSink {
-public:
-	virtual ~EventSink() {}
-	virtual uint32_t write(Time time, EventType type, uint32_t size, const uint8_t* buf) = 0;
-};
+template<typename A, typename B>
+B
+IdentityConverter<A,B>::to(A a)   const
+{
+	return static_cast<B>(a);
+}
 
+template<typename A, typename B>
+A
+IdentityConverter<A,B>::from(B b) const
+{
+	return static_cast<A>(b);
+}
+
+template class IdentityConverter<double, framepos_t>;
+template class TimeConverter<double, framepos_t>;
 
 } // namespace Evoral
-
-#endif // EVORAL_EVENT_SINK_HPP
-

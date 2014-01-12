@@ -39,7 +39,7 @@ namespace Evoral {
  * valid MIDI data for these functions to make sense.
  */
 template<typename Time>
-class LIBEVORAL_API MIDIEvent : public Event<Time> {
+class /*LIBEVORAL_API*/ MIDIEvent : public Event<Time> {
 public:
 	MIDIEvent(EventType type=0, Time time=0, uint32_t size=0, uint8_t* buf=NULL, bool alloc=false)
 		: Event<Time>(type, time, size, buf, alloc)

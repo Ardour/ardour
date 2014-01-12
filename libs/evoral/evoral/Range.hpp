@@ -25,7 +25,7 @@
 
 namespace Evoral {
 
-enum LIBEVORAL_API OverlapType {
+enum /*LIBEVORAL_API*/ OverlapType {
 	OverlapNone,      // no overlap
 	OverlapInternal,  // the overlap is 100% with the object
 	OverlapStart,     // overlap covers start, but ends within
@@ -34,7 +34,7 @@ enum LIBEVORAL_API OverlapType {
 };
 
 template<typename T>
-LIBEVORAL_API OverlapType coverage (T sa, T ea, T sb, T eb) {
+/*LIBEVORAL_API*/ OverlapType coverage (T sa, T ea, T sb, T eb) {
 	/* OverlapType returned reflects how the second (B)
 	   range overlaps the first (A).
 
@@ -109,7 +109,7 @@ LIBEVORAL_API OverlapType coverage (T sa, T ea, T sb, T eb) {
 
 /** Type to describe a time range */
 template<typename T>
-struct LIBEVORAL_API Range {
+struct /*LIBEVORAL_API*/ Range {
 	Range (T f, T t) : from (f), to (t) {}
 	T from; ///< start of the range
 	T to;   ///< end of the range
@@ -121,7 +121,7 @@ bool operator== (Range<T> a, Range<T> b) {
 }
 
 template<typename T>
-class LIBEVORAL_API RangeList {
+class /*LIBEVORAL_API*/ RangeList {
 public:
 	RangeList () : _dirty (false) {}
 	
@@ -174,7 +174,7 @@ private:
 
 /** Type to describe the movement of a time range */
 template<typename T>
-struct LIBEVORAL_API RangeMove {
+struct /*LIBEVORAL_API*/ RangeMove {
 	RangeMove (T f, double l, T t) : from (f), length (l), to (t) {}
 	T         from;   ///< start of the range
 	double    length; ///< length of the range

@@ -30,7 +30,7 @@ namespace Evoral {
  *  bank select and then a program change.
  */
 template<typename Time>
-class LIBEVORAL_API PatchChange
+class /*LIBEVORAL_API*/ PatchChange
 {
 public:
 	/** @param t Time.
@@ -167,7 +167,7 @@ private:
 }
 
 template<typename Time>
-LIBEVORAL_API std::ostream& operator<< (std::ostream& o, const Evoral::PatchChange<Time>& p) {
+/*LIBEVORAL_API*/ std::ostream& operator<< (std::ostream& o, const Evoral::PatchChange<Time>& p) {
 	o << "Patch Change " << p.id() << " @ " << p.time() << " bank " << (int) p.bank() << " program " << (int) p.program();
 	return o;
 }

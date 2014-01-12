@@ -27,6 +27,10 @@
 #include "evoral/midi_util.h"
 #include "pbd/file_manager.h"
 
+#ifdef COMPILER_MSVC
+extern double round(double x);
+#endif
+
 using namespace std;
 
 namespace Evoral {

@@ -65,11 +65,16 @@ protected:
  *  going on.
  */
 template<typename A, typename B>
-class LIBEVORAL_API IdentityConverter : public TimeConverter<A,B> {
+class /*LIBEVORAL_API*/ IdentityConverter : public TimeConverter<A,B> {
   public:
-	IdentityConverter() {}
+	LIBEVORAL_API /* Added by JE - 27-10-2013 */IdentityConverter() {}
+
+	LIBEVORAL_API /* Added by JE - 27-10-2013 */B to(A a)   const;
+	LIBEVORAL_API /* Added by JE - 27-10-2013 */A from(B b) const;
+/* Changed by JE - 27-10-2013. Was formerly. . .
 	B to(A a)   const { return static_cast<B>(a); }
 	A from(B b) const { return static_cast<A>(b); }
+*/
 };
 
 
