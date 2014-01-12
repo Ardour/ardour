@@ -74,6 +74,7 @@ Panner2d::Panner2d (boost::shared_ptr<PannerShell> p, int32_t h)
         , width (0)
         , height (h)
         , last_width (0)
+        , have_elevation (false)
 {
 	panner_shell->Changed.connect (connections, invalidator (*this), boost::bind (&Panner2d::handle_state_change, this), gui_context());
 
@@ -82,6 +83,7 @@ Panner2d::Panner2d (boost::shared_ptr<PannerShell> p, int32_t h)
 	drag_target = 0;
 	set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 
+	handle_state_change ();
 	handle_position_change ();
 }
 
@@ -200,6 +202,14 @@ Panner2d::handle_state_change ()
 {
 	panconnect.drop_connections();
 	panner_shell->panner()->SignalPositionChanged.connect (panconnect, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
+
+        set<Evoral::Parameter> params = panner_shell->panner()->what_can_be_automated();
+        set<Evoral::Parameter>::iterator p = params.find(PanElevationAutomation);
+        bool elev = have_elevation;
+        have_elevation = (p == params.end()) ? false : true;
+        if (elev != have_elevation) {
+                handle_position_change();
+        }
 	queue_draw ();
 }
 
@@ -237,8 +247,12 @@ Panner2d::handle_position_change ()
 	uint32_t n;
         double w = panner_shell->pannable()->pan_width_control->get_value();
 
-        position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0,
-                                           panner_shell->pannable()->pan_elevation_control->get_value() * 90.0);
+        if (have_elevation) {
+                position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0,
+                                                   panner_shell->pannable()->pan_elevation_control->get_value() * 90.0);
+        } else {
+                position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0, 0);
+        }
 
         for (uint32_t i = 0; i < signals.size(); ++i) {
                 signals[i]->position = panner_shell->panner()->signal_position (i);
@@ -480,7 +494,9 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
                                 if (signal->visible) {
 
-                                        signal->position.cartesian (c);
+                                        PBD::AngularVector sp = signal->position;
+                                        if (!have_elevation) sp.ele = 0;
+                                        sp.cartesian (c);
                                         cart_to_gtk (c);
 
                                         cairo_new_path (cr);
@@ -607,11 +623,8 @@ Panner2d::on_button_press_event (GdkEventButton *ev)
                         }
 		}
 
-		drag_x = ev->x;
-		drag_y = ev->y;
 		state = (GdkModifierType) ev->state;
-
-		return handle_motion (drag_x, drag_y, state);
+		return handle_motion (ev->x, ev->y, state);
 		break;
 
 	default:
@@ -686,14 +699,11 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 		}
 
 		if (need_move) {
-			set<Evoral::Parameter> params = panner_shell->panner()->what_can_be_automated();
-			set<Evoral::Parameter>::iterator p = params.find(PanElevationAutomation);
-
 			CartesianVector cp (evx, evy, 0.0);
 			AngularVector av;
 			gtk_to_cart (cp);
 
-			if (p == params.end()) {
+			if (!have_elevation) {
 				clamp_to_circle (cp.x, cp.y);
 				cp.angular (av);
 				if (drag_target == &position) {

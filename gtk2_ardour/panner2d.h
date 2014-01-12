@@ -108,9 +108,6 @@ class Panner2d : public Gtk::DrawingArea
         Target  position;
 
 	Target *drag_target;
-	int     drag_x;
-	int     drag_y;
-	bool    allow_speaker_motion;
 	int     width;
 	int     height;
         double  radius;
@@ -119,9 +116,7 @@ class Panner2d : public Gtk::DrawingArea
         double  voffset;
         double  last_width;
 	bool    did_move;
-
-	gint compute_x (float);
-	gint compute_y (float);
+	bool    have_elevation;
 
 	Target *find_closest_object (gdouble x, gdouble y, bool& is_signal);
 
