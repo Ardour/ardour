@@ -141,6 +141,6 @@ void LIBTIMECODE_API sample_to_timecode (
 
 } // namespace Timecode
 
-std::ostream& operator<< (std::ostream& ostr, const Timecode::Time& t);
+extern LIBTIMECODE_API std::ostream& operator<< (std::ostream& ostr, const Timecode::Time& t);
 
 #endif  // __timecode_time_h__
