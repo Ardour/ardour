@@ -217,8 +217,8 @@ Panner2d::label_signals ()
 		break;
 
 	case 2:
-                signals[0]->set_text ("L");
-                signals[1]->set_text ("R");
+                signals[0]->set_text (_("L"));
+                signals[1]->set_text (_("R"));
 		break;
 
 	default:
