@@ -425,11 +425,8 @@ def build(bld):
     obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL'
     obj.uselib       += ' GTKMM CANVAS FFTW3F'
     obj.uselib       += ' AUDIOUNITS OSX GTKOSX LO '
+    obj.uselib       += ' TAGLIB '
 
-    if bld.is_defined('USE_EXTERNAL_LIBS'):
-        obj.uselib += ' TAGLIB'
-    else:
-        obj.use += ('libtaglib')
     if sys.platform == 'darwin':
         obj.uselib += ' AUDIOUNITS OSX GTKOSX'
         obj.use    += ' libappleutility'

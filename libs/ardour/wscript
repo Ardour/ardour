@@ -338,16 +338,16 @@ def build(bld):
     obj.target       = 'ardour'
     obj.uselib       = ['GLIBMM','GTHREAD','AUBIO','SIGCPP','XML','UUID',
                         'SNDFILE','SAMPLERATE','LRDF','AUDIOUNITS',
-                        'OSX','BOOST','CURL','DL']
+                        'OSX','BOOST','CURL','DL','TAGLIB']
     obj.use          = ['libpbd','libmidipp','libevoral', 'libvampplugin',
                         'libaudiographer', 
                         'libtimecode',
                         ]
     if bld.is_defined('USE_EXTERNAL_LIBS'):
-        obj.uselib.extend(['RUBBERBAND', 'TAGLIB', 'VAMPSDK', 'LIBLTC',
+        obj.uselib.extend(['RUBBERBAND', 'VAMPSDK', 'LIBLTC',
                            'VAMPHOSTSDK'])
     else:
-        obj.use.extend(['librubberband', 'libtaglib', 'libvamphost'
+        obj.use.extend(['librubberband', 'libvamphost'
                         'libltc_includes', 'libltc'])
 
     obj.vnum         = LIBARDOUR_LIB_VERSION
@@ -413,14 +413,14 @@ def build(bld):
         testcommon.source       = ['test/testrunner.cc', 'test/test_needing_session.cc',
                                    'test/test_common.cc', 'test/dummy_lxvst.cc', 'test/audio_region_test.cc', 'test/test_util.cc']
         testcommon.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
-                                   'SAMPLERATE','XML','LRDF','COREAUDIO']
+                                   'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB']
         testcommon.use          = ['libpbd','libmidipp','libevoral',
                                    'libvampplugin','libaudiographer','ardour']
         if bld.is_defined('USE_EXTERNAL_LIBS'):
-            testcommon.uselib.extend(['RUBBERBAND', 'TAGLIB', 'LIBLTC', 'VAMPSDK',
+            testcommon.uselib.extend(['RUBBERBAND', 'LIBLTC', 'VAMPSDK',
                                       'VAMPHOSTSDK'])
         else:
-            testcommon.use.extend(['libltc', 'librubberband', 'libtaglib', 'libvamphost'])
+            testcommon.use.extend(['libltc', 'librubberband', 'libvamphost'])
         testcommon.defines      = [
             'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
             'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
@@ -559,15 +559,14 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     testobj.includes     = includes + ['test', '../pbd', '..']
     testobj.source       = sources
     testobj.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
-                            'SAMPLERATE','XML','LRDF','COREAUDIO']
+                            'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB']
     testobj.use          = ['libpbd','libmidipp','libevoral','libvampplugin',
                             'libaudiographer','ardour','testcommon']
     if bld.is_defined('USE_EXTERNAL_LIBS'):
-        testobj.uselib.extend(['RUBBERBAND', 'TAGLIB', 'LIBLTC', 'VAMPSDK',
+        testobj.uselib.extend(['RUBBERBAND', 'LIBLTC', 'VAMPSDK',
                                'VAMPHOSTSDK'])
     else:
-        testobj.use.extend(['libltc', 'librubberband', 'libtaglib',
-                            'libvamphost'])
+        testobj.use.extend(['libltc', 'librubberband', 'libvamphost'])
 
     testobj.name         = name
     testobj.target       = target

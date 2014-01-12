@@ -55,7 +55,6 @@ children = [
         'libs/vamp-sdk',
         'libs/qm-dsp',
         'libs/vamp-plugins',
-        'libs/taglib',
         'libs/libltc',
         'libs/rubberband',
         # core ardour libraries
@@ -661,6 +660,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2')
     autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0')
     autowaf.check_pkg(conf, 'liblo', uselib_store='LO', atleast_version='0.26')
+    autowaf.check_pkg(conf, 'taglib', uselib_store='TAGLIB', atleast_version='1.6')
 
     if Options.options.dist_target == 'mingw':
         Options.options.fpu_optimization = False
@@ -833,7 +833,6 @@ def build(bld):
         bld.path.find_dir ('libs/vamp-sdk/vamp-sdk')
         bld.path.find_dir ('libs/libltc/ltc')
         bld.path.find_dir ('libs/rubberband/rubberband')
-        bld.path.find_dir ('libs/taglib/taglib')
     bld.path.find_dir ('libs/evoral/evoral')
     bld.path.find_dir ('libs/surfaces/control_protocol/control_protocol')
     bld.path.find_dir ('libs/timecode/timecode')
