@@ -47,6 +47,9 @@ def build(bld):
     obj.target       = 'ardourvampplugins'
     obj.uselib       = 'FFTW3F'
     obj.use          = 'libvampplugin libqmdsp'
+    obj.defines      = [ 'ARDOUR_VAMP_PLUGINS_DLL_EPORTS' ]
+    obj.cxxflags     = [ '-fvisibility=default' ]
+    obj.cflags       = [ '-fvisibility=default' ]
     if bld.is_defined('HAVE_AUBIO'):
         obj.source += ' Onset.cpp '
         obj.uselib += ' AUBIO '
