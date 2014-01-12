@@ -288,10 +288,9 @@ def configure(conf):
     autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL',
                       atleast_version='7.0.0')
 
-    # we don't try to detect this, since its part of our source tree
-
-    conf.define('HAVE_RUBBERBAND', 1) # controls whether we think we have it
-    conf.define('USE_RUBBERBAND', 1)  # controls whether we actually use it
+    # controls whether we actually use it in preference to soundtouch
+    # Note: as of 2104, soundtouch (WSOLA) has been out-of-use for years.
+    conf.define('USE_RUBBERBAND', 1)  
 
     conf.define('CURRENT_SESSION_FILE_VERSION', CURRENT_SESSION_FILE_VERSION)
 
@@ -338,17 +337,15 @@ def build(bld):
     obj.target       = 'ardour'
     obj.uselib       = ['GLIBMM','GTHREAD','AUBIO','SIGCPP','XML','UUID',
                         'SNDFILE','SAMPLERATE','LRDF','AUDIOUNITS',
-                        'OSX','BOOST','CURL','DL','TAGLIB']
-    obj.use          = ['libpbd','libmidipp','libevoral', 'libvampplugin',
+                        'OSX','BOOST','CURL','DL','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
+    obj.use          = ['libpbd','libmidipp','libevoral',
                         'libaudiographer', 
                         'libtimecode',
                         ]
     if bld.is_defined('USE_EXTERNAL_LIBS'):
-        obj.uselib.extend(['RUBBERBAND', 'VAMPSDK', 'LIBLTC',
-                           'VAMPHOSTSDK'])
+        obj.uselib.extend(['VAMPSDK', 'LIBLTC'])
     else:
-        obj.use.extend(['librubberband', 'libvamphost'
-                        'libltc_includes', 'libltc'])
+        obj.use.extend(['librubberband', 'libltc_includes', 'libltc'])
 
     obj.vnum         = LIBARDOUR_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
@@ -413,21 +410,18 @@ def build(bld):
         testcommon.source       = ['test/testrunner.cc', 'test/test_needing_session.cc',
                                    'test/test_common.cc', 'test/dummy_lxvst.cc', 'test/audio_region_test.cc', 'test/test_util.cc']
         testcommon.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
-                                   'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB']
+                                   'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
         testcommon.use          = ['libpbd','libmidipp','libevoral',
-                                   'libvampplugin','libaudiographer','ardour']
+                                   'libaudiographer','ardour']
         if bld.is_defined('USE_EXTERNAL_LIBS'):
-            testcommon.uselib.extend(['RUBBERBAND', 'LIBLTC', 'VAMPSDK',
-                                      'VAMPHOSTSDK'])
+            testcommon.uselib.extend(['LIBLTC',])
         else:
-            testcommon.use.extend(['libltc', 'librubberband', 'libvamphost'])
+            testcommon.use.extend(['libltc', 'librubberband'])
         testcommon.defines      = [
             'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
             'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
             'LOCALEDIR="' + os.path.join(
                 os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
-            'VAMP_DIR="' + os.path.join(
-                os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"'
             ]
         testcommon.name         = 'testcommon'
 
@@ -508,8 +502,6 @@ def build(bld):
             'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
             'LOCALEDIR="' + os.path.join(
                 os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
-            'VAMP_DIR="' + os.path.join(
-                os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"'
             ]
         if bld.env['FPU_OPTIMIZATION']:
             session_load_tester.source += [ 'sse_functions_xmm.cc' ]
@@ -543,8 +535,6 @@ def build(bld):
                 'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
                 'LOCALEDIR="' + os.path.join(
                     os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
-                'VAMP_DIR="' + os.path.join(
-                    os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"'
                 ]
             if bld.env['FPU_OPTIMIZATION']:
                 profilingobj.source += [ 'sse_functions_xmm.cc' ]
@@ -559,14 +549,13 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     testobj.includes     = includes + ['test', '../pbd', '..']
     testobj.source       = sources
     testobj.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
-                            'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB']
-    testobj.use          = ['libpbd','libmidipp','libevoral','libvampplugin',
+                            'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
+    testobj.use          = ['libpbd','libmidipp','libevoral',
                             'libaudiographer','ardour','testcommon']
     if bld.is_defined('USE_EXTERNAL_LIBS'):
-        testobj.uselib.extend(['RUBBERBAND', 'LIBLTC', 'VAMPSDK',
-                               'VAMPHOSTSDK'])
+        testobj.uselib.extend(['LIBLTC'])
     else:
-        testobj.use.extend(['libltc', 'librubberband', 'libvamphost'])
+        testobj.use.extend(['libltc'])
 
     testobj.name         = name
     testobj.target       = target
@@ -578,8 +567,6 @@ def create_ardour_test_program(bld, includes, name, target, sources):
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.join(
             os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
-        'VAMP_DIR="' + os.path.join(
-            os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"'
         ]
 
 def shutdown():

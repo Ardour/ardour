@@ -52,11 +52,9 @@ out = 'build'
 
 children = [
         # optionally external libraries
-        'libs/vamp-sdk',
         'libs/qm-dsp',
         'libs/vamp-plugins',
         'libs/libltc',
-        'libs/rubberband',
         # core ardour libraries
         'libs/pbd',
         'libs/midi++2',
@@ -653,14 +651,17 @@ def configure(conf):
                   okmsg = 'ok',
                   errmsg = 'too old\nPlease install boost version 1.39 or higher.')
 
-    autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
-    autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.2')
-    autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.32.0')
-    autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18')
-    autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2')
-    autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0')
-    autowaf.check_pkg(conf, 'liblo', uselib_store='LO', atleast_version='0.26')
-    autowaf.check_pkg(conf, 'taglib', uselib_store='TAGLIB', atleast_version='1.6')
+    autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2', mandatory=True)
+    autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.2', mandatory=True)
+    autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.32.0', mandatory=True)
+    autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18, mandatory=True')
+    autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2', mandatory=True)
+    autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL', atleast_version='7.0.0', mandatory=True)
+    autowaf.check_pkg(conf, 'liblo', uselib_store='LO', atleast_version='0.26', mandatory=True)
+    autowaf.check_pkg(conf, 'taglib', uselib_store='TAGLIB', atleast_version='1.6', mandatory=True)
+    autowaf.check_pkg(conf, 'vamp-sdk', uselib_store='VAMPSDK', atleast_version='2.4', mandatory=True)
+    autowaf.check_pkg(conf, 'vamp-hostsdk', uselib_store='VAMPHOSTSDK', atleast_version='2.4', mandatory=True)
+    autowaf.check_pkg(conf, 'rubberband', uselib_store='RUBBERBAND', mandatory=True)
 
     if Options.options.dist_target == 'mingw':
         Options.options.fpu_optimization = False
@@ -804,7 +805,6 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('OGG',                   conf.is_defined('HAVE_OGG'))
     write_config_text('Phone home',            conf.is_defined('PHONE_HOME'))
     write_config_text('Program name',          opts.program_name)
-    write_config_text('Rubberband',            conf.is_defined('HAVE_RUBBERBAND'))
     write_config_text('Samplerate',            conf.is_defined('HAVE_SAMPLERATE'))
 #    write_config_text('Soundtouch',            conf.is_defined('HAVE_SOUNDTOUCH'))
     write_config_text('Translation',           opts.nls)
@@ -830,9 +830,7 @@ def build(bld):
     # add directories that contain only headers, to workaround an issue with waf
 
     if not bld.is_defined('USE_EXTERNAL_LIBS'):
-        bld.path.find_dir ('libs/vamp-sdk/vamp-sdk')
         bld.path.find_dir ('libs/libltc/ltc')
-        bld.path.find_dir ('libs/rubberband/rubberband')
     bld.path.find_dir ('libs/evoral/evoral')
     bld.path.find_dir ('libs/surfaces/control_protocol/control_protocol')
     bld.path.find_dir ('libs/timecode/timecode')
