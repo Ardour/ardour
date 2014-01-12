@@ -170,8 +170,8 @@ Panner2d::on_size_allocate (Gtk::Allocation& alloc)
         hoffset = max ((double) (width - height), border);
         voffset = max ((double) (height - width), border);
 
-        hoffset /= 2.0;
-        voffset /= 2.0;
+        hoffset = rint(hoffset / 2.0);
+        voffset = rint(voffset / 2.0);
 
 	DrawingArea::on_size_allocate (alloc);
 }
@@ -294,8 +294,7 @@ Panner2d::find_closest_object (gdouble x, gdouble y, bool& is_signal)
 	float best_distance = FLT_MAX;
         CartesianVector c;
 
-        /* start with the position itself
-         */
+        /* start with the position itself */
 
         position.position.cartesian (c);
         cart_to_gtk (c);
@@ -303,6 +302,7 @@ Panner2d::find_closest_object (gdouble x, gdouble y, bool& is_signal)
                          (c.y - y) * (c.y - y));
         closest = &position;
 
+#if 0 // TODO signal grab -> change width, not position
 	for (Targets::const_iterator i = signals.begin(); i != signals.end(); ++i) {
 		candidate = *i;
 
@@ -317,6 +317,7 @@ Panner2d::find_closest_object (gdouble x, gdouble y, bool& is_signal)
 			best_distance = distance;
 		}
 	}
+#endif
 
         is_signal = true;
 
@@ -421,59 +422,59 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 	/* horizontal line of "crosshairs" */
 
         cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 1.0);
-	cairo_move_to (cr, 0.0, radius);
-	cairo_line_to (cr, diameter, radius);
+	cairo_move_to (cr, 0.0, rint(radius) - .5);
+	cairo_line_to (cr, diameter, rint(radius) - .5);
 	cairo_stroke (cr);
 
 	/* vertical line of "crosshairs" */
 
-	cairo_move_to (cr, radius, 0);
-	cairo_line_to (cr, radius, diameter);
+	cairo_move_to (cr, rint(radius) - .5, 0);
+	cairo_line_to (cr, rint(radius) - .5, diameter);
 	cairo_stroke (cr);
 
 	/* the circle on which signals live */
 
-	cairo_set_line_width (cr, 2.0);
+	cairo_set_line_width (cr, 1.5);
         cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, 1.0);
 	cairo_arc (cr, radius, radius, radius, 0.0, 2.0 * M_PI);
 	cairo_stroke (cr);
 
-	/* 3 other circles of smaller diameter circle on which signals live */
-
-	cairo_set_line_width (cr, 1.0);
-        cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 1.0);
-	cairo_arc (cr, radius, radius, radius * 0.75, 0, 2.0 * M_PI);
-	cairo_stroke (cr);
-        cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.85);
-	cairo_arc (cr, radius, radius, radius * 0.50, 0, 2.0 * M_PI);
-	cairo_stroke (cr);
-	cairo_arc (cr, radius, radius, radius * 0.25, 0, 2.0 * M_PI);
-	cairo_stroke (cr);
-
-        if (signals.size() > 1) {
-                /* arc to show "diffusion" */
-
-                double width_angle = fabs (panner_shell->pannable()->pan_width_control->get_value()) * 2 * M_PI;
-                double position_angle = (2 * M_PI) - panner_shell->pannable()->pan_azimuth_control->get_value() * 2 * M_PI;
-
-                cairo_save (cr);
-                cairo_translate (cr, radius, radius);
-                cairo_rotate (cr, position_angle - (width_angle/2.0));
-                cairo_move_to (cr, 0, 0);
-                cairo_arc_negative (cr, 0, 0, radius, width_angle, 0.0);
-                cairo_close_path (cr);
-                if (panner_shell->pannable()->pan_width_control->get_value() >= 0.0) {
-                        /* normal width */
-                        cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.45);
+        for (uint32_t rad = 15; rad < 90; rad += 15) {
+                cairo_set_line_width (cr, .5 + (float)rad / 150.0);
+                if (rad == 45) {
+                        cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 1.0);
                 } else {
-                        /* inverse width */
-                        cairo_set_source_rgba (cr, 1.0, 0.419, 0.419, 0.45);
+                        cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.8);
                 }
-                cairo_fill (cr);
-                cairo_restore (cr);
+                cairo_new_path (cr);
+                cairo_arc (cr, radius, radius, radius * sin(M_PI * (float) rad / 180.0), 0, 2.0 * M_PI);
+                cairo_stroke (cr);
         }
 
 	if (!panner_shell->bypassed()) {
+
+                if (signals.size() > 1) {
+                        /* arc to show "diffusion" */
+
+                        double width_angle = fabs (panner_shell->pannable()->pan_width_control->get_value()) * 2 * M_PI;
+                        double position_angle = (2 * M_PI) - panner_shell->pannable()->pan_azimuth_control->get_value() * 2 * M_PI;
+
+                        cairo_save (cr);
+                        cairo_translate (cr, radius, radius);
+                        cairo_rotate (cr, position_angle - (width_angle/2.0));
+                        cairo_move_to (cr, 0, 0);
+                        cairo_arc_negative (cr, 0, 0, radius, width_angle, 0.0);
+                        cairo_close_path (cr);
+                        if (panner_shell->pannable()->pan_width_control->get_value() >= 0.0) {
+                                /* normal width */
+                                cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.45);
+                        } else {
+                                /* inverse width */
+                                cairo_set_source_rgba (cr, 1.0, 0.419, 0.419, 0.45);
+                        }
+                        cairo_fill (cr);
+                        cairo_restore (cr);
+                }
 
 		double arc_radius;
 
@@ -486,6 +487,18 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 			arc_radius = 12.0;
 		}
 
+                /* draw position */
+
+                position.position.cartesian (c);
+                cart_to_gtk (c);
+
+                cairo_new_path (cr);
+                cairo_arc (cr, c.x, c.y, arc_radius + 1.0, 0, 2.0 * M_PI);
+                cairo_set_source_rgba (cr, 1.0, 0.419, 0.419, 0.85);
+                cairo_fill_preserve (cr);
+                cairo_set_source_rgba (cr, 1.0, 0.905, 0.905, 0.85);
+                cairo_stroke (cr);
+
                 /* signals */
 
                 if (signals.size() > 1) {
@@ -494,6 +507,9 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
                                 if (signal->visible) {
 
+                                        /* TODO check for overlap - multiple src at same position
+                                         * -> visualize it properly
+                                         */
                                         PBD::AngularVector sp = signal->position;
                                         if (!have_elevation) sp.ele = 0;
                                         sp.cartesian (c);
@@ -501,14 +517,16 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
                                         cairo_new_path (cr);
                                         cairo_arc (cr, c.x, c.y, arc_radius, 0, 2.0 * M_PI);
-                                        cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.85);
+                                        cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.75);
                                         cairo_fill_preserve (cr);
-                                        cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, 1.0);
+                                        cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, 0.8);
                                         cairo_stroke (cr);
 
                                         if (!small_size && !signal->text.empty()) {
-                                                cairo_set_source_rgb (cr, 0.517, 0.772, 0.882);
-                                                /* the +/- adjustments are a hack to try to center the text in the circle */
+                                                cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, .9);
+                                                /* the +/- adjustments are a hack to try to center the text in the circle
+                                                 * TODO use pango get_pixel_size() -- see mono_panner.cc
+                                                 */
                                                 if (small_size) {
                                                         cairo_move_to (cr, c.x - 1, c.y + 1);
                                                 } else {
@@ -575,18 +593,6 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 			}
 		}
-
-                /* draw position */
-
-                position.position.cartesian (c);
-                cart_to_gtk (c);
-
-                cairo_new_path (cr);
-                cairo_arc (cr, c.x, c.y, arc_radius, 0, 2.0 * M_PI);
-                cairo_set_source_rgba (cr, 1.0, 0.419, 0.419, 0.85);
-                cairo_fill_preserve (cr);
-                cairo_set_source_rgba (cr, 1.0, 0.905, 0.905, 0.85);
-                cairo_stroke (cr);
 	}
 
 	cairo_destroy (cr);
