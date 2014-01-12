@@ -57,7 +57,7 @@ def build(bld):
     # Pkgconfig file
     #autowaf.build_pc(bld, 'EVORAL', EVORAL_VERSION, 'GLIBMM GTHREAD')
 
-    libsmf = bld(features = 'c cshlib')
+    libsmf = bld(features = 'c cstlib')
     libsmf.source = '''
             src/libsmf/smf.c
             src/libsmf/smf_decode.c
@@ -66,11 +66,13 @@ def build(bld):
             src/libsmf/smf_tempo.c
     '''
     libsmf.export_includes = ['./src/libsmf']
-    libsmf.defines      = 'SMF_VERSION="1.2"'
+    libsmf.defines      = ['SMF_VERSION="1.2"', 'LIBSMF_DLL_EXPORTS']
     libsmf.includes     = ['./src']
     libsmf.name         = 'libsmf'
     libsmf.target       = 'smf'
     libsmf.uselib       = 'GLIB'
+    libsmf.cxxflags     = [ '-fPIC' ]
+    libsmf.cflags       = [ '-fPIC' ]
     libsmf.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
     lib_source = '''
@@ -91,9 +93,7 @@ def build(bld):
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=lib_source)
         # DLL exports for this library
-        obj.defines      = [ 'LIBEVORAL_DLL_EXPORTS=1' ]
-        obj.cxxflags     = [ '-fvisibility=hidden' ]
-        obj.cflags       = [ '-fvisibility=hidden' ]
+        obj.defines      = [ 'LIBEVORAL_DLL_EXPORTS' ]
     else:
         obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=lib_source)
         obj.cxxflags     = [ '-fPIC' ]
