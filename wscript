@@ -694,8 +694,19 @@ def configure(conf):
     conf.env.append_value('CFLAGS', '-DWAF_BUILD')
     conf.env.append_value('CXXFLAGS', '-DWAF_BUILD')
 
-    # Set up waf environment and C defines
     opts = Options.options
+
+    # Adopt Microsoft-like convention that makes all non-explicitly exported
+    # symbols invisible (rather than doing this all over the wscripts in the src tree)
+    #
+    # This won't apply to MSVC but that hasn't been added as a target yet
+    #
+    # We can't do this till all tests are complete, since some fail if this is et.
+    if opts.internal_shared_libs:
+        conf.env.append_value ('CXXFLAGS', '-fvisibility=hidden')
+        conf.env.append_value ('CFLAGS', '-fvisibility=hidden')
+
+    # Set up waf environment and C defines
     if opts.phone_home:
         conf.define('PHONE_HOME', 1)
         conf.env['PHONE_HOME'] = True

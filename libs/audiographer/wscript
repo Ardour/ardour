@@ -68,8 +68,6 @@ def build(bld):
         audiographer              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=audiographer_sources)
         # macros for this shared library
         audiographer.defines      = [ 'LIBAUDIOGRAPHER_DLL_EXPORTS=1' ]
-        audiographer.cflags       = [ '-fvisibility=hidden' ]
-        audiographer.cxxflags     = [ '-fvisibility=hidden' ]
     else:
         audiographer              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=libardour_sources)
         audiographer.cxxflags     = [ '-fPIC' ]

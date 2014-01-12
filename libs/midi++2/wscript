@@ -62,8 +62,6 @@ def build(bld):
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         obj              = bld.shlib(features = 'cxx cxxshlib', source=libmidi_sources)
         obj.defines      = [ 'LIBMIDIPP_DLL_EXPORTS=1' ]
-        obj.cxxflags     = [ '-fvisibility=hidden' ]
-        obj.cflags       = [ '-fvisibility=hidden' ]
     else:
         obj              = bld.stlib(features = 'cxx cxxstlib', source=libmidi_sources)
         obj.cxxflags     = [ '-fPIC' ]
@@ -75,7 +73,7 @@ def build(bld):
     obj.name         = 'libmidipp'
     obj.target       = 'midipp'
     obj.uselib       = 'GLIBMM SIGCPP XML OSX'
-    obj.use          = 'libpbd libevoral libtimecode libtimecode_includes'
+    obj.use          = 'libpbd libevoral libtimecode'
     obj.vnum         = LIBMIDIPP_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 

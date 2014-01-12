@@ -116,8 +116,6 @@ def build(bld):
         print('BUILD SHARED LIB')
         obj              = bld.shlib(features = 'cxx cxxshlib', source=libpbd_sources)
         obj.defines = [ 'LIBPBD_DLL_EXPORTS=1' ]
-        obj.cxxflags = [ '-fvisibility=hidden' ]
-        obj.cflags = [ '-fvisibility=hidden' ]
     else:
         print('BUILD STATIC LIB')
         obj              = bld.stlib(features = 'cxx cxxstlib', source=libpbd_sources)

@@ -88,8 +88,6 @@ def build(bld):
         obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=gtkmm2ext_sources)
         # defines for this library
         obj.defines      = [ 'LIBGTKMM2EXT_DLL_EXPORTS', 'ABSTRACT_UI_EXPORTS' ]
-        obj.cxxflags     = [ '-fvisibility=hidden' ]
-        obj.cflags     = [ '-fvisibility=hidden' ]
     else:
         obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=gtkmm2ext_sources)
         obj.cxxflags     = [ '-fPIC' ]

@@ -29,8 +29,6 @@ def build(bld):
         obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=controlcp_sources)
         # defines for this library
         obj.defines      = [ 'LIBCONTROLCP_DLL_EXPORTS' ]
-        obj.cxxflags     = [ '-fvisibility=hidden' ]
-        obj.cflags       = [ '-fvisibility=hidden' ]
     else:
         obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=controlcp_sources)
         obj.cxxflags     = [ '-fPIC' ]

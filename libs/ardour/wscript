@@ -326,8 +326,6 @@ def build(bld):
         obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=libardour_sources)
         # macros for this shared library
         obj.defines      = [ 'LIBARDOUR_DLL_EXPORTS=1' ]
-        obj.cflags       = [ '-fvisibility=hidden' ]
-        obj.cxxflags     = [ '-fvisibility=hidden' ]
     else:
         obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=libardour_sources)
         obj.cxxflags     = [ '-fPIC' ]
@@ -343,7 +341,7 @@ def build(bld):
                         'OSX','BOOST','CURL','DL']
     obj.use          = ['libpbd','libmidipp','libevoral', 'libvampplugin',
                         'libaudiographer', 
-                        'libtimecode_includes',
+                        'libtimecode',
                         ]
     if bld.is_defined('USE_EXTERNAL_LIBS'):
         obj.uselib.extend(['RUBBERBAND', 'TAGLIB', 'VAMPSDK', 'LIBLTC',
