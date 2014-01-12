@@ -247,7 +247,9 @@ def configure(conf):
         'LIBARDOUR_API', 'ardour/libardour_visibility.h')
     autowaf.configure(conf)
     autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO',
-                      exact_version='0.3.2')
+                      atleast_version='0.3.2')
+    autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO4',
+                      atleast_version='0.4.0', mandatory=False)
     autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
     if Options.options.dist_target != 'mingw':
         autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF',

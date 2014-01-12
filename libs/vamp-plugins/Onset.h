@@ -20,6 +20,19 @@
 #include <vamp-sdk/Plugin.h>
 #include <aubio/aubio.h>
 
+#ifdef HAVE_AUBIO4
+enum OnsetType {
+    OnsetEnergy,
+    OnsetSpecDiff,
+    OnsetHFC,
+    OnsetComplex,
+    OnsetPhase,
+    OnsetKL,
+    OnsetMKL,
+    OnsetSpecFlux // new in 0.4!
+};
+#endif
+
 class Onset : public Vamp::Plugin
 {
 public:
@@ -54,20 +67,25 @@ public:
 
 protected:
     fvec_t *m_ibuf;
-    cvec_t *m_fftgrain;
     fvec_t *m_onset;
+#ifdef HAVE_AUBIO4
+    aubio_onset_t *m_onsetdet;
+    OnsetType m_onsettype;
+    float m_minioi;
+#else
+    cvec_t *m_fftgrain;
     aubio_pvoc_t *m_pv;
     aubio_pickpeak_t *m_peakpick;
     aubio_onsetdetection_t *m_onsetdet;
     aubio_onsetdetection_type m_onsettype;
-    float m_threshold;
+    size_t m_channelCount;
+#endif
     float m_silence;
+    float m_threshold;
     size_t m_stepSize;
     size_t m_blockSize;
-    size_t m_channelCount;
     Vamp::RealTime m_delay;
     Vamp::RealTime m_lastOnset;
 };
-
 
 #endif
