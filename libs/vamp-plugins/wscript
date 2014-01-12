@@ -26,8 +26,10 @@ def configure(conf):
     conf.load('compiler_cxx')
     autowaf.configure(conf)
     autowaf.check_pkg(conf, 'fftw3f', uselib_store='FFTW3F', mandatory=True)
-    autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO', mandatory=False,
-                      exact_version='0.3.2')
+    autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO',
+                      atleast_version='0.3.2')
+    autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO4',
+                      atleast_version='0.4.0', mandatory=False)
     conf.write_config_header('libvampplugins-config.h', remove=False)
 
 def build(bld):
