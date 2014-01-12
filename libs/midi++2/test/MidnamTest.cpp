@@ -56,11 +56,9 @@ MidnamTest::protools_patchfile_test()
     }
 
     boost::shared_ptr<ChannelNameSet> nameSet1 =
-            masterDeviceNames->channel_name_set_by_device_mode_and_channel(
-                    modename, 0);
+            masterDeviceNames->channel_name_set_by_channel(modename, 0);
     boost::shared_ptr<ChannelNameSet> nameSet2 =
-            masterDeviceNames->channel_name_set_by_device_mode_and_channel(
-                    modename, 9);
+            masterDeviceNames->channel_name_set_by_channel(modename, 9);
 
     CPPUNIT_ASSERT_EQUAL(ns1, nameSet1->name());
     CPPUNIT_ASSERT_EQUAL(ns2, nameSet2->name());
@@ -127,8 +125,7 @@ MidnamTest::yamaha_PSRS900_patchfile_test()
                 CPPUNIT_ASSERT_EQUAL(ns,
                         mode->channel_name_set_name_by_channel(i));
                 boost::shared_ptr<ChannelNameSet> nameSet =
-                        masterDeviceNames->channel_name_set_by_device_mode_and_channel(
-                                ns, 1);
+                        masterDeviceNames->channel_name_set_by_channel(ns, 1);
 
                 CPPUNIT_ASSERT_EQUAL(ns, nameSet->name());
 
@@ -196,7 +193,7 @@ MidnamTest::load_all_midnams_test ()
         boost::shared_ptr<CustomDeviceMode> mode = device->second->custom_device_mode_by_name(modename);
         CPPUNIT_ASSERT_EQUAL(deviceModeName, mode->name());
 
-        boost::shared_ptr<ChannelNameSet> nameSet = device->second->channel_name_set_by_device_mode_and_channel(modename, 0);
+        boost::shared_ptr<ChannelNameSet> nameSet = device->second->channel_name_set_by_channel(modename, 0);
     }
 }
 

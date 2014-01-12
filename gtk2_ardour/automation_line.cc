@@ -63,8 +63,8 @@ using namespace Gnome; // for Canvas
  *  This will not be deleted by AutomationLine.
  */
 AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanvas::Group& parent,
-		boost::shared_ptr<AutomationList> al,
-		Evoral::TimeConverter<double, framepos_t>* converter)
+                                boost::shared_ptr<AutomationList> al,
+                                Evoral::TimeConverter<double, framepos_t>* converter)
 	: trackview (tv)
 	, _name (name)
 	, alist (al)
@@ -173,7 +173,7 @@ AutomationLine::control_point_box_size ()
 {
 	if (alist->interpolation() == AutomationList::Discrete) {
 		return max((_height*4.0) / (double)(alist->parameter().max() - alist->parameter().min()),
-				4.0);
+		           4.0);
 	}
 
 	if (_height > TimeAxisView::preset_height (HeightLarger)) {
@@ -251,8 +251,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 
 	trackview.editor().session()->begin_reversible_command (_("automation event move"));
 	trackview.editor().session()->add_command (
-		new MementoCommand<AutomationList> (memento_command_binder(), &get_state(), 0)
-		);
+		new MementoCommand<AutomationList> (memento_command_binder(), &get_state(), 0));
 
 	cp.move_to (x, y, ControlPoint::Full);
 
@@ -269,8 +268,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	update_pending = false;
 
 	trackview.editor().session()->add_command (
-		new MementoCommand<AutomationList> (memento_command_binder(), 0, &alist->get_state())
-		);
+		new MementoCommand<AutomationList> (memento_command_binder(), 0, &alist->get_state()));
 
 	trackview.editor().session()->commit_reversible_command ();
 	trackview.editor().session()->set_dirty ();
@@ -434,8 +432,7 @@ AutomationLine::start_drag_single (ControlPoint* cp, double x, float fraction)
 {
 	trackview.editor().session()->begin_reversible_command (_("automation event move"));
 	trackview.editor().session()->add_command (
-		new MementoCommand<AutomationList> (memento_command_binder(), &get_state(), 0)
-		);
+		new MementoCommand<AutomationList> (memento_command_binder(), &get_state(), 0));
 
 	_drag_points.clear ();
 	_drag_points.push_back (cp);
@@ -461,8 +458,7 @@ AutomationLine::start_drag_line (uint32_t i1, uint32_t i2, float fraction)
 {
 	trackview.editor().session()->begin_reversible_command (_("automation range move"));
 	trackview.editor().session()->add_command (
-		new MementoCommand<AutomationList> (memento_command_binder (), &get_state(), 0)
-		);
+		new MementoCommand<AutomationList> (memento_command_binder (), &get_state(), 0));
 
 	_drag_points.clear ();
 
@@ -482,8 +478,7 @@ AutomationLine::start_drag_multiple (list<ControlPoint*> cp, float fraction, XML
 {
 	trackview.editor().session()->begin_reversible_command (_("automation range move"));
 	trackview.editor().session()->add_command (
-		new MementoCommand<AutomationList> (memento_command_binder(), state, 0)
-		);
+		new MementoCommand<AutomationList> (memento_command_binder(), state, 0));
 
 	_drag_points = cp;
 	start_drag_common (0, fraction);
@@ -721,8 +716,7 @@ AutomationLine::end_drag (bool with_push, uint32_t final_index)
 	update_pending = false;
 
 	trackview.editor().session()->add_command (
-		new MementoCommand<AutomationList>(memento_command_binder (), 0, &alist->get_state())
-		);
+		new MementoCommand<AutomationList>(memento_command_binder (), 0, &alist->get_state()));
 
 	trackview.editor().session()->set_dirty ();
 	did_push = false;
@@ -826,8 +820,7 @@ AutomationLine::remove_point (ControlPoint& cp)
 	alist->erase (cp.model());
 	
 	trackview.editor().session()->add_command(
-		new MementoCommand<AutomationList> (memento_command_binder (), &before, &alist->get_state())
-		);
+		new MementoCommand<AutomationList> (memento_command_binder (), &before, &alist->get_state()));
 
 	trackview.editor().session()->commit_reversible_command ();
 	trackview.editor().session()->set_dirty ();
@@ -939,7 +932,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 
 		if (std::isnan (tx) || std::isnan (ty)) {
 			warning << string_compose (_("Ignoring illegal points on AutomationLine \"%1\""),
-						   _name) << endmsg;
+			                           _name) << endmsg;
 			continue;
 		}
 		
@@ -1045,8 +1038,7 @@ AutomationLine::clear ()
 	alist->clear();
 
 	trackview.editor().session()->add_command (
-		new MementoCommand<AutomationList> (memento_command_binder (), &before, &alist->get_state())
-		);
+		new MementoCommand<AutomationList> (memento_command_binder (), &before, &alist->get_state()));
 }
 
 void
@@ -1130,8 +1122,8 @@ AutomationLine::view_to_model_coord_y (double& y) const
 		y = max (0.0, y);
 		y = min (2.0, y);
 	} else if (alist->parameter().type() == PanAzimuthAutomation ||
-                   alist->parameter().type() == PanElevationAutomation ||
-                   alist->parameter().type() == PanWidthAutomation) {
+	           alist->parameter().type() == PanElevationAutomation ||
+	           alist->parameter().type() == PanWidthAutomation) {
 		y = 1.0 - y;
 	} else if (alist->parameter().type() == PluginAutomation) {
 		y = y * (double)(alist->get_max_y()- alist->get_min_y()) + alist->get_min_y();
@@ -1148,8 +1140,8 @@ AutomationLine::model_to_view_coord (double& x, double& y) const
 	    alist->parameter().type() == EnvelopeAutomation) {
 		y = gain_to_slider_position_with_max (y, Config->get_max_gain());
 	} else if (alist->parameter().type() == PanAzimuthAutomation ||
-                   alist->parameter().type() == PanElevationAutomation ||
-                   alist->parameter().type() == PanWidthAutomation) {
+	           alist->parameter().type() == PanElevationAutomation ||
+	           alist->parameter().type() == PanWidthAutomation) {
 		// vertical coordinate axis reversal
 		y = 1.0 - y;
 	} else if (alist->parameter().type() == PluginAutomation) {
@@ -1175,7 +1167,7 @@ AutomationLine::interpolation_changed (AutomationList::InterpolationStyle style)
 
 void
 AutomationLine::add_visible_control_point (uint32_t view_index, uint32_t pi, double tx, double ty, 
-					   AutomationList::iterator model, uint32_t npoints)
+                                           AutomationList::iterator model, uint32_t npoints)
 {
 	ControlPoint::ShapeType shape;
 
@@ -1229,8 +1221,7 @@ AutomationLine::connect_to_list ()
 	alist->StateChanged.connect (_list_connections, invalidator (*this), boost::bind (&AutomationLine::list_changed, this), gui_context());
 
 	alist->InterpolationChanged.connect (
-		_list_connections, invalidator (*this), boost::bind (&AutomationLine::interpolation_changed, this, _1), gui_context()
-		);
+		_list_connections, invalidator (*this), boost::bind (&AutomationLine::interpolation_changed, this, _1), gui_context());
 }
 
 MementoCommandBinder<AutomationList>*

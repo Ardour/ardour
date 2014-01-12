@@ -74,16 +74,17 @@ Panner2d::Panner2d (boost::shared_ptr<PannerShell> p, int32_t h)
         , width (0)
         , height (h)
         , last_width (0)
+        , have_elevation (false)
 {
 	panner_shell->Changed.connect (connections, invalidator (*this), boost::bind (&Panner2d::handle_state_change, this), gui_context());
 
-        panner_shell->pannable()->pan_azimuth_control->Changed.connect (connections, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
-        panner_shell->pannable()->pan_width_control->Changed.connect (connections, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
+	panner_shell->panner()->SignalPositionChanged.connect (panconnect, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
 
 	drag_target = 0;
 	set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 
-        handle_position_change ();
+	handle_state_change ();
+	handle_position_change ();
 }
 
 Panner2d::~Panner2d()
@@ -199,13 +200,22 @@ Panner2d::add_speaker (const AngularVector& a)
 void
 Panner2d::handle_state_change ()
 {
+	panconnect.drop_connections();
+	panner_shell->panner()->SignalPositionChanged.connect (panconnect, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
+
+        set<Evoral::Parameter> params = panner_shell->panner()->what_can_be_automated();
+        set<Evoral::Parameter>::iterator p = params.find(PanElevationAutomation);
+        bool elev = have_elevation;
+        have_elevation = (p == params.end()) ? false : true;
+        if (elev != have_elevation) {
+                handle_position_change();
+        }
 	queue_draw ();
 }
 
 void
 Panner2d::label_signals ()
 {
-        double w = panner_shell->pannable()->pan_width_control->get_value();
         uint32_t sz = signals.size();
 
 	switch (sz) {
@@ -217,23 +227,14 @@ Panner2d::label_signals ()
 		break;
 
 	case 2:
-                if (w  >= 0.0) {
-                        signals[0]->set_text ("R");
-                        signals[1]->set_text ("L");
-                } else {
-                        signals[0]->set_text ("L");
-                        signals[1]->set_text ("R");
-                }
+                signals[0]->set_text (_("L"));
+                signals[1]->set_text (_("R"));
 		break;
 
 	default:
 		for (uint32_t i = 0; i < sz; ++i) {
 			char buf[64];
-                        if (w >= 0.0) {
-                                snprintf (buf, sizeof (buf), "%" PRIu32, i + 1);
-                        } else {
-                                snprintf (buf, sizeof (buf), "%" PRIu32, sz - i);
-                        }
+                        snprintf (buf, sizeof (buf), "%" PRIu32, i + 1);
 			signals[i]->set_text (buf);
 		}
 		break;
@@ -246,7 +247,12 @@ Panner2d::handle_position_change ()
 	uint32_t n;
         double w = panner_shell->pannable()->pan_width_control->get_value();
 
-        position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0, 0.0);
+        if (have_elevation) {
+                position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0,
+                                                   panner_shell->pannable()->pan_elevation_control->get_value() * 90.0);
+        } else {
+                position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0, 0);
+        }
 
         for (uint32_t i = 0; i < signals.size(); ++i) {
                 signals[i]->position = panner_shell->panner()->signal_position (i);
@@ -488,7 +494,9 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
                                 if (signal->visible) {
 
-                                        signal->position.cartesian (c);
+                                        PBD::AngularVector sp = signal->position;
+                                        if (!have_elevation) sp.ele = 0;
+                                        sp.cartesian (c);
                                         cart_to_gtk (c);
 
                                         cairo_new_path (cr);
@@ -603,8 +611,8 @@ Panner2d::on_button_press_event (GdkEventButton *ev)
 	switch (ev->button) {
 	case 1:
 	case 2:
-                x = ev->x - border;
-                y = ev->y - border;
+                x = ev->x - hoffset;
+                y = ev->y - voffset;
 
 		if ((drag_target = find_closest_object (x, y, is_signal)) != 0) {
                         if (!is_signal) {
@@ -615,11 +623,8 @@ Panner2d::on_button_press_event (GdkEventButton *ev)
                         }
 		}
 
-		drag_x = ev->x;
-		drag_y = ev->y;
 		state = (GdkModifierType) ev->state;
-
-		return handle_motion (drag_x, drag_y, state);
+		return handle_motion (ev->x, ev->y, state);
 		break;
 
 	default:
@@ -679,6 +684,8 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 		return false;
 	}
 
+	evx -= hoffset;
+	evy -= voffset;
 
 	if (state & GDK_BUTTON1_MASK && !(state & GDK_BUTTON2_MASK)) {
 		CartesianVector c;
@@ -693,21 +700,31 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 
 		if (need_move) {
 			CartesianVector cp (evx, evy, 0.0);
-                        AngularVector av;
-
-			/* canonicalize position and then clamp to the circle */
-
+			AngularVector av;
 			gtk_to_cart (cp);
-			clamp_to_circle (cp.x, cp.y);
 
-			/* generate an angular representation of the current mouse position */
+			if (!have_elevation) {
+				clamp_to_circle (cp.x, cp.y);
+				cp.angular (av);
+				if (drag_target == &position) {
+					double degree_fract = av.azi / 360.0;
+					panner_shell->panner()->set_position (degree_fract);
+				}
+			} else {
+				/* sphere projection */
+				sphere_project (cp.x, cp.y, cp.z);
 
-			cp.angular (av);
+				double r2d = 180.0 / M_PI;
+				av.azi = r2d * atan2(cp.y, cp.x);
+				av.ele = r2d * asin(cp.z);
 
-                        if (drag_target == &position) {
-                                double degree_fract = av.azi / 360.0;
-                                panner_shell->panner()->set_position (degree_fract);
-                        }
+				if (drag_target == &position) {
+					double azi_fract = av.azi / 360.0;
+					double ele_fract = av.ele / 90.0;
+					panner_shell->panner()->set_position (azi_fract);
+					panner_shell->panner()->set_elevation (ele_fract);
+				}
+			}
 		}
 	}
 
@@ -761,12 +778,26 @@ Panner2d::gtk_to_cart (CartesianVector& c) const
 }
 
 void
+Panner2d::sphere_project (double& x, double& y, double& z)
+{
+	double r, r2;
+	r2 = x * x + y * y;
+	if (r2 < 1.0) {
+		z = sqrt (1.0 - r2);
+	} else {
+		r = sqrt (r2);
+		x = x / r;
+		y = y / r;
+		z = 0.0;
+	}
+}
+
+void
 Panner2d::clamp_to_circle (double& x, double& y)
 {
 	double azi, ele;
 	double z = 0.0;
-        double l;
-
+	double l;
 	PBD::cartesian_to_spherical (x, y, z, azi, ele, l);
 	PBD::spherical_to_cartesian (azi, ele, 1.0, x, y, z);
 }
@@ -781,6 +812,8 @@ Panner2dWindow::Panner2dWindow (boost::shared_ptr<PannerShell> p, int32_t h, uin
 	: ArdourWindow (_("Panner (2D)"))
         , widget (p, h)
 	, bypass_button (_("Bypass"))
+	, width_adjustment (0, -100, 100, 1, 5, 0)
+        , width_spinner (width_adjustment)
 {
 	widget.set_name ("MixerPanZone");
 
@@ -788,18 +821,29 @@ Panner2dWindow::Panner2dWindow (boost::shared_ptr<PannerShell> p, int32_t h, uin
 	widget.set_size_request (h, h);
 
         bypass_button.signal_toggled().connect (sigc::mem_fun (*this, &Panner2dWindow::bypass_toggled));
+        width_spinner.signal_changed().connect (sigc::mem_fun (*this, &Panner2dWindow::width_changed));
+
+        p->pannable()->pan_width_control->Changed.connect (connections, invalidator(*this), boost::bind (&Panner2dWindow::set_width, this), gui_context());
+	p->Changed.connect (connections, invalidator (*this), boost::bind (&Panner2dWindow::set_bypassed, this), gui_context());
 
 	button_box.set_spacing (6);
 	button_box.pack_start (bypass_button, false, false);
 
-	spinner_box.set_spacing (6);
 	left_side.set_spacing (6);
 
 	left_side.pack_start (button_box, false, false);
+
+        Gtk::Label* l = manage (new Label (
+                                p->panner()->describe_parameter(PanWidthAutomation),
+                                Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	spinner_box.pack_start (*l, false, false);
+	spinner_box.pack_start (width_spinner, false, false);
 	left_side.pack_start (spinner_box, false, false);
 
+	l->show ();
 	bypass_button.show ();
 	button_box.show ();
+	width_spinner.show ();
 	spinner_box.show ();
 	left_side.show ();
 
@@ -811,6 +855,8 @@ Panner2dWindow::Panner2dWindow (boost::shared_ptr<PannerShell> p, int32_t h, uin
 
 	add (hpacker);
 	reset (inputs);
+        set_width();
+        set_bypassed();
 	widget.show ();
 }
 
@@ -818,21 +864,6 @@ void
 Panner2dWindow::reset (uint32_t n_inputs)
 {
 	widget.reset (n_inputs);
-
-#if 0
-	while (spinners.size() < n_inputs) {
-		// spinners.push_back (new Gtk::SpinButton (widget.azimuth (spinners.size())));
-		//spinner_box.pack_start (*spinners.back(), false, false);
-		//spinners.back()->set_digits (4);
-		spinners.back()->show ();
-	}
-
-	while (spinners.size() > n_inputs) {
-		spinner_box.remove (*spinners.back());
-		delete spinners.back();
-		spinners.erase (--spinners.end());
-	}
-#endif
 }
 
 void
@@ -843,6 +874,44 @@ Panner2dWindow::bypass_toggled ()
 
         if (model != view) {
                 widget.get_panner_shell()->set_bypassed (view);
+        }
+}
+void
+Panner2dWindow::width_changed ()
+{
+        float model = widget.get_panner_shell()->pannable()->pan_width_control->get_value();
+        float view  = width_spinner.get_value() / 100.0;
+        if (model != view) {
+					widget.get_panner_shell()->panner()->set_width (view);
+				}
+}
+
+void
+Panner2dWindow::set_bypassed ()
+{
+        bool view = bypass_button.get_active ();
+        bool model = widget.get_panner_shell()->bypassed ();
+        if (model != view) {
+                bypass_button.set_active(model);
+        }
+
+        set<Evoral::Parameter> params = widget.get_panner_shell()->panner()->what_can_be_automated();
+        set<Evoral::Parameter>::iterator p = params.find(PanWidthAutomation);
+        if (p == params.end()) {
+                spinner_box.set_sensitive(false);
+        } else {
+                spinner_box.set_sensitive(true);
+        }
+}
+
+void
+Panner2dWindow::set_width ()
+{
+        // rounding of spinbox is different from slider -- TODO use slider
+        float model = (widget.get_panner_shell()->pannable()->pan_width_control->get_value() * 100.0);
+        float view  = (width_spinner.get_value());
+        if (model != view) {
+                width_spinner.set_value (model);
         }
 }
 

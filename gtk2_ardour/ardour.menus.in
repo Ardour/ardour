@@ -502,7 +502,9 @@
       <menuitem action='toggle-bundle-manager'/>
       <menuitem action='toggle-theme-manager'/>
       <menuitem action='toggle-big-clock'/>
+#if 0
       <menuitem action='toggle-speaker-config'/>
+#endif
 
       <separator/>
 

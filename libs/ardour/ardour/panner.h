@@ -87,6 +87,9 @@ public:
 
 	virtual void reset () = 0;
 
+	/* azimut, width or elevation updated -> recalc signal_position ->  emit Changed */
+	PBD::Signal0<void> SignalPositionChanged;
+
 	void      set_automation_state (AutoState);
 	AutoState automation_state() const;
 	void      set_automation_style (AutoStyle);
