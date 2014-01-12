@@ -947,6 +947,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 	{
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 
 		boost::shared_ptr<PluginInsert> pi;
 		boost::shared_ptr<PortInsert> porti;
@@ -986,8 +987,6 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 		// configure redirect ports properly, etc.
 
 		{
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-
 			if (configure_processors_unlocked (err)) {
 				pstate.restore ();
 				configure_processors_unlocked (0); // it worked before we tried to add it ...
@@ -1117,6 +1116,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 	{
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 
 		for (ProcessorList::const_iterator i = others.begin(); i != others.end(); ++i) {
 
@@ -1137,8 +1137,8 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 				(*i)->activate ();
 			}
 
+			/* Think: does this really need to be called for every processor in the loop? */
 			{
-				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 				if (configure_processors_unlocked (err)) {
 					pstate.restore ();
 					configure_processors_unlocked (0); // it worked before we tried to add it ...
