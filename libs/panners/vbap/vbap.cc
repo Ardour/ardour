@@ -118,7 +118,7 @@ VBAPanner::update ()
         double elevation = _pannable->pan_elevation_control->get_value() * 90.0;
 
         if (_signals.size() > 1) {
-                double w = (_pannable->pan_width_control->get_value());
+                double w = - (_pannable->pan_width_control->get_value());
                 double signal_direction = _pannable->pan_azimuth_control->get_value() - (w/2);
                 double grd_step_per_signal = w / (_signals.size() - 1);
                 for (vector<Signal*>::iterator s = _signals.begin(); s != _signals.end(); ++s) {
