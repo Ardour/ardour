@@ -388,7 +388,7 @@ Delivery::reset_panner ()
 			if (_panshell) {
 				_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, pan_outs()));
 				
-				if (_role == Main) {
+				if (_role == Main || _role == Aux) {
 					_panshell->pannable()->set_panner (_panshell->panner());
 				}
 			}
