@@ -1069,8 +1069,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 
 		} else if (node.name() == "Send") {
 
-			boost::shared_ptr<Pannable> sendpan (new Pannable (_session));
-			processor.reset (new Send (_session, sendpan, _mute_master));
+			processor.reset (new Send (_session, _pannable, _mute_master));
 
 		} else {
 
@@ -2553,8 +2552,7 @@ Route::set_processor_state (const XMLNode& node)
 
 				if (prop->value() == "intsend") {
 
-					boost::shared_ptr<Pannable> sendpan (new Pannable (_session));
-					processor.reset (new InternalSend (_session, sendpan, _mute_master, boost::shared_ptr<Route>(), Delivery::Role (0)));
+					processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::shared_ptr<Route>(), Delivery::Aux));
 
 				} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 				           prop->value() == "lv2" ||
@@ -2571,7 +2569,7 @@ Route::set_processor_state (const XMLNode& node)
 				} else if (prop->value() == "send") {
 
 					boost::shared_ptr<Pannable> sendpan (new Pannable (_session));
-					processor.reset (new Send (_session, sendpan, _mute_master));
+					processor.reset (new Send (_session, _pannable, _mute_master));
 
 				} else {
 					error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
@@ -2761,8 +2759,7 @@ Route::add_aux_send (boost::shared_ptr<Route> route, boost::shared_ptr<Processor
 
 		{
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-			boost::shared_ptr<Pannable> sendpan (new Pannable (_session));
-			listener.reset (new InternalSend (_session, sendpan, _mute_master, route, Delivery::Aux));
+			listener.reset (new InternalSend (_session, _pannable, _mute_master, route, Delivery::Aux));
 		}
 
 		add_processor (listener, before);

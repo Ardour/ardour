@@ -551,6 +551,7 @@
     <menuitem action='newaux'/>
     <separator/>
     <menuitem action='controls'/>
+    <menuitem action='send_options'/>
     <separator/>
     <menuitem action='clear'/>
     <menuitem action='clear_pre'/>

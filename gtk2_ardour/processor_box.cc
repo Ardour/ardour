@@ -45,8 +45,8 @@
 #include "ardour/audioengine.h"
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
+#include "ardour/panner_shell.h"
 #include "ardour/plugin_insert.h"
-#include "ardour/pannable.h"
 #include "ardour/port_insert.h"
 #include "ardour/profile.h"
 #include "ardour/return.h"
@@ -454,6 +454,34 @@ ProcessorEntry::toggle_control_visibility (Control* c)
 {
 	c->set_visible (!c->visible ());
 	_parent->update_gui_object_state (this);
+}
+
+Menu *
+ProcessorEntry::build_send_options_menu ()
+{
+	using namespace Menu_Helpers;
+	Menu* menu = manage (new Menu);
+	MenuList& items = menu->items ();
+
+	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (_processor);
+	if (send) {
+
+		items.push_back (CheckMenuElem (_("Link panner controls")));
+		CheckMenuItem* c = dynamic_cast<CheckMenuItem*> (&items.back ());
+		c->set_active (send->panner_shell()->is_linked_to_route());
+		c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_panner_link));
+
+	}
+	return menu;
+}
+
+void
+ProcessorEntry::toggle_panner_link ()
+{
+	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (_processor);
+	if (send) {
+		send->panner_shell()->set_linked_to_route(!send->panner_shell()->is_linked_to_route());
+	}
 }
 
 ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string const & n)
@@ -1092,6 +1120,20 @@ ProcessorBox::show_processor_menu (int arg)
 		}
 	}
 
+	Gtk::MenuItem* send_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/send_options"));
+	if (send_menu_item) {
+		if (single_selection) {
+			Menu* m = single_selection->build_send_options_menu ();
+			if (m && !m->items().empty()) {
+				send_menu_item->set_submenu (*m);
+				send_menu_item->set_sensitive (true);
+			} else {
+				gtk_menu_item_set_submenu (send_menu_item->gobj(), 0);
+				send_menu_item->set_sensitive (false);
+			}
+		}
+	}
+
 	/* Sensitise actions as approprioate */
 
         cut_action->set_sensitive (can_cut());
@@ -1403,8 +1445,7 @@ ProcessorBox::choose_insert ()
 void
 ProcessorBox::choose_send ()
 {
-	boost::shared_ptr<Pannable> sendpan(new Pannable (*_session));
-	boost::shared_ptr<Send> send (new Send (*_session, sendpan, _route->mute_master()));
+	boost::shared_ptr<Send> send (new Send (*_session, _route->pannable(), _route->mute_master()));
 
 	/* make an educated guess at the initial number of outputs for the send */
 	ChanCount outs = (_session->master_out())
@@ -2053,9 +2094,8 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 					continue;
 				}
 
-				boost::shared_ptr<Pannable> sendpan(new Pannable (*_session));
 				XMLNode n (**niter);
-                                InternalSend* s = new InternalSend (*_session, sendpan, _route->mute_master(),
+                                InternalSend* s = new InternalSend (*_session, _route->pannable(), _route->mute_master(),
 								    boost::shared_ptr<Route>(), Delivery::Aux); 
 
 				IOProcessor::prepare_for_reset (n, s->name());
@@ -2069,9 +2109,8 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 
 			} else if (type->value() == "send") {
 
-				boost::shared_ptr<Pannable> sendpan(new Pannable (*_session));
 				XMLNode n (**niter);
-				Send* s = new Send (*_session, sendpan, _route->mute_master());
+				Send* s = new Send (*_session, _route->pannable(), _route->mute_master());
 
 				IOProcessor::prepare_for_reset (n, s->name());
 				
@@ -2404,6 +2443,7 @@ ProcessorBox::register_actions ()
 	ActionManager::register_action (popup_act_grp, X_("newaux"), _("New Aux Send ..."));
 
 	ActionManager::register_action (popup_act_grp, X_("controls"), _("Controls"));
+	ActionManager::register_action (popup_act_grp, X_("send_options"), _("Send Options"));
 
 	ActionManager::register_action (popup_act_grp, X_("clear"), _("Clear (all)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear));

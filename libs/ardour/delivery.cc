@@ -58,7 +58,9 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pann
 	, _no_panner_reset (false)
 {
 	if (pannable) {
-		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));
+		bool is_send = false;
+		if (r & (Delivery::Send|Delivery::Aux)) is_send = true;
+		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, is_send));
 	}
 
 	_display_to_user = false;
@@ -80,7 +82,9 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 	, _no_panner_reset (false)
 {
 	if (pannable) {
-		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));
+		bool is_send = false;
+		if (r & (Delivery::Send|Delivery::Aux)) is_send = true;
+		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, is_send));
 	}
 
 	_display_to_user = false;
