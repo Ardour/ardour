@@ -16,9 +16,10 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <stdint.h>
 #include "evoral/TimeConverter.hpp"
 
-typedef long long framepos_t;
+typedef int64_t framepos_t; /* MUST match libs/ardour/ardour/types.h */
 
 namespace Evoral {
 
