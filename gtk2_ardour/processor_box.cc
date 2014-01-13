@@ -46,6 +46,7 @@
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/pannable.h"
 #include "ardour/port_insert.h"
 #include "ardour/profile.h"
 #include "ardour/return.h"
@@ -2051,8 +2052,9 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 					continue;
 				}
 
+				boost::shared_ptr<Pannable> sendpan(new Pannable (*_session));
 				XMLNode n (**niter);
-                                InternalSend* s = new InternalSend (*_session, _route->pannable(), _route->mute_master(),
+                                InternalSend* s = new InternalSend (*_session, sendpan, _route->mute_master(),
 								    boost::shared_ptr<Route>(), Delivery::Aux); 
 
 				IOProcessor::prepare_for_reset (n, s->name());

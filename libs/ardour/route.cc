@@ -2547,7 +2547,8 @@ Route::set_processor_state (const XMLNode& node)
 
 				if (prop->value() == "intsend") {
 
-					processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::shared_ptr<Route>(), Delivery::Role (0)));
+					boost::shared_ptr<Pannable> sendpan (new Pannable (_session));
+					processor.reset (new InternalSend (_session, sendpan, _mute_master, boost::shared_ptr<Route>(), Delivery::Role (0)));
 
 				} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 				           prop->value() == "lv2" ||
@@ -2753,7 +2754,8 @@ Route::add_aux_send (boost::shared_ptr<Route> route, boost::shared_ptr<Processor
 
 		{
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-			listener.reset (new InternalSend (_session, _pannable, _mute_master, route, Delivery::Aux));
+			boost::shared_ptr<Pannable> sendpan (new Pannable (_session));
+			listener.reset (new InternalSend (_session, sendpan, _mute_master, route, Delivery::Aux));
 		}
 
 		add_processor (listener, before);
