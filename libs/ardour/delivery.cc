@@ -329,6 +329,9 @@ Delivery::state (bool full_state)
 
 	if (_panshell) {
 		node.add_child_nocopy (_panshell->get_state ());
+		if (_panshell->pannable()) {
+			node.add_child_nocopy (_panshell->pannable()->get_state ());
+		}
 	}
 
 	return node;
@@ -357,6 +360,11 @@ Delivery::set_state (const XMLNode& node, int version)
 	}
 
 	reset_panner ();
+
+	XMLNode* pannnode = node.child (X_("Pannable"));
+	if (_panshell->panner() && pannnode) {
+		_panshell->pannable()->set_state (*pannnode, version);
+	}
 
 	return 0;
 }

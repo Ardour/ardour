@@ -1893,16 +1893,8 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 
 	panner_ui().set_panner (_current_delivery->panner_shell(), _current_delivery->panner());
 	panner_ui().set_available_panners(boost::shared_ptr<ARDOUR::Route>(), std::map<std::string,std::string>());
-
 	panner_ui().setup_pan ();
-
-	/* make sure the send has audio output */
-
-	if (_current_delivery->output() && _current_delivery->output()->n_ports().n_audio() > 0) {
-		panners.show_all ();
-	} else {
-		panners.hide_all ();
-	}
+	panners.show_all ();
 
 	input_button.set_sensitive (false);
 	group_button.set_sensitive (false);
