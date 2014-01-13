@@ -72,13 +72,14 @@ PolyItem::render_path (Rect const & /* area */, Cairo::RefPtr<Cairo::Context> co
 
 	Points::const_iterator i = _points.begin();
 	Duple c (item_to_window (Duple (i->x, i->y)));
+	const double pixel_adjust = (_outline_width == 1.0 ? 0.5 : 0.0);
 
-	context->move_to (c.x, c.y);
+	context->move_to (c.x + pixel_adjust, c.y + pixel_adjust);
 	++i;
 
 	while (i != _points.end()) {
 		c = item_to_window (Duple (i->x, i->y));
-		context->line_to (c.x, c.y);
+		context->line_to (c.x + pixel_adjust, c.y + pixel_adjust);
 		++i;
 	}
 }
@@ -94,9 +95,10 @@ PolyItem::render_curve (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 	Points::const_iterator cp1 = first_control_points.begin();
 	Points::const_iterator cp2 = second_control_points.begin();
 	Points::const_iterator p = _points.begin();
+	const double pixel_adjust = (_outline_width == 1.0 ? 0.5 : 0.0);
 
 	Duple c = item_to_window (Duple (p->x, p->y));
-	context->move_to (c.x, c.y);
+	context->move_to (c.x + pixel_adjust, c.y + pixel_adjust);
 	++p;
 
 	while (p != _points.end()) {
@@ -106,7 +108,12 @@ PolyItem::render_curve (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 
 		c = item_to_window (Duple (p->x, p->y));
 		
-		context->curve_to (c1.x, c1.y, c2.x, c2.y, c.x, c.y);
+		context->curve_to (c1.x + pixel_adjust, 
+				   c1.y + pixel_adjust, 
+				   c2.x + pixel_adjust, 
+				   c2.y + pixel_adjust, 
+				   c.x + pixel_adjust, 
+				   c.y + pixel_adjust);
 		
 		++cp1;
 		++cp2;
