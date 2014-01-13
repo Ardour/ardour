@@ -716,11 +716,11 @@ timecode_to_sample(
 		   frame_rate() in the non-integer Timecode rate case.
 		*/
 
-		sample = (int64_t)rint((((timecode.hours * 60 * 60) + (timecode.minutes * 60) + timecode.seconds) * (rint(timecode.rate) * frames_per_timecode_frame)) + (timecode.frames * frames_per_timecode_frame));
+		sample = (int64_t)lrint((((timecode.hours * 60 * 60) + (timecode.minutes * 60) + timecode.seconds) * (lrint(timecode.rate) * frames_per_timecode_frame)) + (timecode.frames * frames_per_timecode_frame));
 	}
 
 	if (use_subframes) {
-		sample += (int64_t) rint(((double)timecode.subframes * frames_per_timecode_frame) / (double)subframes_per_frame);
+		sample += (int64_t) lrint(((double)timecode.subframes * frames_per_timecode_frame) / (double)subframes_per_frame);
 	}
 
 	if (use_offset) {
@@ -786,7 +786,7 @@ sample_to_timecode (
 		const int64_t D = frameNumber / 17982;
 		const int64_t M = frameNumber % 17982;
 
-		timecode.subframes = rint(subframes_per_frame
+		timecode.subframes = lrint(subframes_per_frame
 				* ((double)offset_sample * timecode_frames_per_second / sample_frame_rate - (double)frameNumber));
 
 		if (timecode.subframes == subframes_per_frame) {
@@ -806,7 +806,7 @@ sample_to_timecode (
 		double timecode_frames_fraction;
 		int64_t timecode_frames_left;
 		const double frames_per_timecode_frame = sample_frame_rate / timecode_frames_per_second;
-		const int64_t frames_per_hour = (int64_t)(3600 * rint(timecode_frames_per_second) * frames_per_timecode_frame);
+		const int64_t frames_per_hour = (int64_t)(3600 * lrint(timecode_frames_per_second) * frames_per_timecode_frame);
 
 		timecode.hours = offset_sample / frames_per_hour;
 
@@ -815,7 +815,7 @@ sample_to_timecode (
 		timecode_frames_left_exact = (double)(offset_sample % frames_per_hour) / frames_per_timecode_frame;
 		timecode_frames_fraction = timecode_frames_left_exact - floor( timecode_frames_left_exact );
 
-		timecode.subframes = (int32_t) rint(timecode_frames_fraction * subframes_per_frame);
+		timecode.subframes = (int32_t) lrint(timecode_frames_fraction * subframes_per_frame);
 		timecode_frames_left = (int64_t) floor (timecode_frames_left_exact);
 
 		if (use_subframes && timecode.subframes == subframes_per_frame) {
@@ -823,10 +823,10 @@ sample_to_timecode (
 			timecode.subframes = 0;
 		}
 
-		timecode.minutes = timecode_frames_left / ((int32_t) rint (timecode_frames_per_second) * 60);
-		timecode_frames_left = timecode_frames_left % ((int32_t) rint (timecode_frames_per_second) * 60);
-		timecode.seconds = timecode_frames_left / (int32_t) rint(timecode_frames_per_second);
-		timecode.frames = timecode_frames_left % (int32_t) rint(timecode_frames_per_second);
+		timecode.minutes = timecode_frames_left / ((int32_t) lrint (timecode_frames_per_second) * 60);
+		timecode_frames_left = timecode_frames_left % ((int32_t) lrint (timecode_frames_per_second) * 60);
+		timecode.seconds = timecode_frames_left / (int32_t) lrint(timecode_frames_per_second);
+		timecode.frames = timecode_frames_left % (int32_t) lrint(timecode_frames_per_second);
 	}
 
 	if (!use_subframes) {
