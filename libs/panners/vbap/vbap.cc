@@ -118,12 +118,7 @@ VBAPanner::configure_io (ChanCount in, ChanCount /* ignored - we use Speakers */
 void
 VBAPanner::update ()
 {
-        /* recompute signal directions based on panner azimuth and, if relevant, width (diffusion) parameters)
-         */
-
-        /* panner azimuth control is [0 .. 1.0] which we interpret as [0 .. 360] degrees
-         */
-        double center = _pannable->pan_azimuth_control->get_value() * 360.0;
+        /* recompute signal directions based on panner azimuth and, if relevant, width (diffusion) and elevation parameters */
         double elevation = _pannable->pan_elevation_control->get_value() * 90.0;
 
         if (_signals.size() > 1) {
@@ -132,45 +127,15 @@ VBAPanner::update ()
                 double grd_step_per_signal = w / (_signals.size() - 1);
                 for (vector<Signal*>::iterator s = _signals.begin(); s != _signals.end(); ++s) {
                 
-                double max_dir = center + (w/2.0);
-                if (max_dir > 360.0) {
-                        max_dir = max_dir - 360.0;
-                }
-                max_dir = max (min (max_dir, 360.0), 0.0);
-                
-                if (max_dir < min_dir) {
-                        swap (max_dir, min_dir);
-                }
-
-                double degree_step_per_signal = (max_dir - min_dir) / (_signals.size() - 1);
-                double signal_direction = min_dir;
-
-                if (w >= 0.0) {
-
-                        /* positive width - normal order of signal spread */
-
-                        for (vector<Signal*>::iterator s = _signals.begin(); s != _signals.end(); ++s) {
-                        
-                                Signal* signal = *s;
-
-                                signal->direction = AngularVector (signal_direction, elevation);
-                                compute_gains (signal->desired_gains, signal->desired_outputs, signal->direction.azi, signal->direction.ele);
-                                signal_direction += degree_step_per_signal;
-                        }
-                } else {
+                        Signal* signal = *s;
 
                         int over = signal_direction;
                         over -= (signal_direction >= 0) ? 0 : 1;
                         signal_direction -= (double)over;
 
-                        for (vector<Signal*>::reverse_iterator s = _signals.rbegin(); s != _signals.rend(); ++s) {
-                        
-                                Signal* signal = *s;
-
-                                signal->direction = AngularVector (signal_direction, elevation);
-                                compute_gains (signal->desired_gains, signal->desired_outputs, signal->direction.azi, signal->direction.ele);
-                                signal_direction += degree_step_per_signal;
-                        }
+                        signal->direction = AngularVector (signal_direction * 360.0, elevation);
+                        compute_gains (signal->desired_gains, signal->desired_outputs, signal->direction.azi, signal->direction.ele);
+                        signal_direction += grd_step_per_signal;
                 }
         } else if (_signals.size() == 1) {
                 double center = _pannable->pan_azimuth_control->get_value() * 360.0;
