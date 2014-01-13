@@ -201,6 +201,14 @@ void
 Panner2d::handle_state_change ()
 {
 	panconnect.drop_connections();
+	if (!panner_shell->panner()) {
+		/* we should really self-destruct the UI here
+		 * -> * PannerUI::set_panner() -> delete
+		 */
+		queue_draw ();
+		return;
+	}
+
 	panner_shell->panner()->SignalPositionChanged.connect (panconnect, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
 
         set<Evoral::Parameter> params = panner_shell->panner()->what_can_be_automated();

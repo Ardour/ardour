@@ -2149,6 +2149,9 @@ MixerStrip::ab_plugins ()
 bool
 MixerStrip::level_meter_button_press (GdkEventButton* ev)
 {
+	if (_current_delivery && boost::dynamic_pointer_cast<Send>(_current_delivery)) {
+		return false;
+	}
 	if (ev->button == 3) {
 		popup_level_meter_menu (ev);
 		return true;

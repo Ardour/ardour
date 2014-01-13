@@ -417,6 +417,11 @@ PannerUI::pan_edit ()
 		_mono_panner->edit ();
 	} else if (_stereo_panner) {
 		_stereo_panner->edit ();
+	} else if (twod_panner) {
+		if (!big_window) {
+			big_window = new Panner2dWindow (_panshell, 400, _panner->in().n_audio());
+		}
+		big_window->show ();
 	}
 }
 
