@@ -70,6 +70,7 @@ class LIBARDOUR_API InternalSend : public Send
 	int  connect_when_legal ();
 	void init_gain ();
 	int  use_target (boost::shared_ptr<Route>);
+	void target_io_changed ();
 };
 
 } // namespace ARDOUR

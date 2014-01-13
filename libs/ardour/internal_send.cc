@@ -95,9 +95,19 @@ InternalSend::use_target (boost::shared_ptr<Route> sendto)
         target_connections.drop_connections ();
 
         _send_to->DropReferences.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_going_away, this));
-        _send_to->PropertyChanged.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_property_changed, this, _1));;
+        _send_to->PropertyChanged.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_property_changed, this, _1));
+        _send_to->io_changed.connect_same_thread (target_connections, boost::bind (&InternalSend::target_io_changed, this));
 
         return 0;
+}
+
+void
+InternalSend::target_io_changed ()
+{
+	assert (_send_to);
+	mixbufs.ensure_buffers (_send_to->internal_return()->input_streams(), _session.get_block_size());
+	mixbufs.set_count (_send_to->internal_return()->input_streams());
+	reset_panner();
 }
 
 void
