@@ -362,7 +362,7 @@ Delivery::set_state (const XMLNode& node, int version)
 	reset_panner ();
 
 	XMLNode* pannnode = node.child (X_("Pannable"));
-	if (_panshell->panner() && pannnode) {
+	if (_panshell && _panshell->panner() && pannnode) {
 		_panshell->pannable()->set_state (*pannnode, version);
 	}
 
