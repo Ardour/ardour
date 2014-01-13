@@ -1041,29 +1041,13 @@ MixerStrip::update_panner_choices ()
 	ENSURE_GUI_THREAD (*this, &MixerStrip::update_panner_choices)
 	if (!_route->panner_shell()) { return; }
 
-	int in = _route->output()->n_ports().n_audio();
-	int out = in;
-
+	uint32_t in = _route->output()->n_ports().n_audio();
+	uint32_t out = in;
 	if (_route->panner()) {
 		in = _route->panner()->in().n_audio();
 	}
 
-	if (out < 2 || in == 0) {
-		panners.set_available_panners(_route, std::map<std::string,std::string>());
-		return;
-	}
-
-	std::map<std::string,std::string> panner_list;
-	std::list<PannerInfo*> panner_info = PannerManager::instance().panner_info;
-	/* get available panners for current configuration. */
-	for (list<PannerInfo*>::iterator p = panner_info.begin(); p != panner_info.end(); ++p) {
-		 PanPluginDescriptor* d = &(*p)->descriptor;
-		 if (d->in != -1 && d->in != in) continue;
-		 if (d->out != -1 && d->out != out) continue;
-		 if (d->in == -1 && d->out == -1 && out <= 2) continue;
-		 panner_list.insert(std::pair<std::string,std::string>(d->panner_uri,d->name));
-	}
-	panners.set_available_panners(_route, panner_list);
+	panners.set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
 }
 
 /*
@@ -1891,10 +1875,13 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	gain_meter().set_controls (_route, send->meter(), send->amp());
 	gain_meter().setup_meters ();
 
+	uint32_t const in = _current_delivery->pans_required();
+	uint32_t const out = _current_delivery->pan_outs();
+
 	panner_ui().set_panner (_current_delivery->panner_shell(), _current_delivery->panner());
-	panner_ui().set_available_panners(boost::shared_ptr<ARDOUR::Route>(), std::map<std::string,std::string>());
+	panner_ui().set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
 	panner_ui().setup_pan ();
-	panners.show_all ();
+	panner_ui().show_all ();
 
 	input_button.set_sensitive (false);
 	group_button.set_sensitive (false);

@@ -43,8 +43,10 @@
 #include "evoral/Curve.hpp"
 
 #include "ardour/audio_buffer.h"
+#include "ardour/audioengine.h"
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
+#include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_manager.h"
 #include "ardour/panner_shell.h"
@@ -391,5 +393,23 @@ PannerShell::set_user_selected_panner_uri (std::string const uri)
 	_user_selected_panner_uri = uri;
 	if (uri == _current_panner_uri) return false;
 	_force_reselect = true;
+	return true;
+}
+
+bool
+PannerShell::select_panner_by_uri (std::string const uri)
+{
+	if (uri == _user_selected_panner_uri) return false;
+	_user_selected_panner_uri = uri;
+	if (uri == _current_panner_uri) return false;
+	_force_reselect = true;
+	if (_panner) {
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+			ChanCount in = _panner->in();
+			ChanCount out = _panner->out();
+			configure_io(in, out);
+			pannable()->set_panner(_panner);
+			_session.set_dirty ();
+	}
 	return true;
 }

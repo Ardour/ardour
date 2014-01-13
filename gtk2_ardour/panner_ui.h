@@ -73,7 +73,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	void set_width (Width);
 	void setup_pan ();
-	void set_available_panners(boost::shared_ptr<ARDOUR::Route>, std::map<std::string,std::string>);
+	void set_available_panners(std::map<std::string,std::string>);
 
 	void effective_pan_display ();
 
@@ -85,6 +85,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
   private:
 	friend class MixerStrip;
+	friend class SendUI;
 
 	boost::shared_ptr<ARDOUR::PannerShell> _panshell;
 	boost::shared_ptr<ARDOUR::Panner> _panner;
@@ -161,7 +162,6 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
         void start_touch (boost::weak_ptr<ARDOUR::AutomationControl>);
         void stop_touch (boost::weak_ptr<ARDOUR::AutomationControl>);
 
-	boost::shared_ptr<ARDOUR::Route> _route;
 	std::map<std::string,std::string> _panner_list;
 	bool _suspend_menu_callbacks;
 };

@@ -75,6 +75,9 @@ public:
 	std::string user_selected_panner_uri() const { return _user_selected_panner_uri; }
 	std::string panner_gui_uri() const { return _panner_gui_uri; }
 
+	/* this function takes the process lock */
+	bool select_panner_by_uri (std::string const uri);
+
   private:
 	friend class Route;
 	void distribute_no_automation (BufferSet& src, BufferSet& dest, pframes_t nframes, gain_t gain_coeff);

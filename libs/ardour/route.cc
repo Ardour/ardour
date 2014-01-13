@@ -1568,6 +1568,10 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 	return 0;
 }
 
+#if 0
+/* currently unused (again) -- but will come in handy soon (again)
+ * once there is an option to link route + delivery panner settings
+ */
 void
 Route::set_custom_panner_uri (std::string const panner_uri)
 {
@@ -1619,6 +1623,7 @@ Route::set_custom_panner_uri (std::string const panner_uri)
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	_session.set_dirty ();
 }
+#endif
 
 void
 Route::reset_instrument_info ()
