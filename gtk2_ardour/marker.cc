@@ -410,24 +410,24 @@ Marker::setup_name_display ()
 	int name_width = min ((double) pixel_width (_name, name_font) + 2, limit);
 
 	if (name_width == 0) {
-		name_width = 1;
-	}
-
-	if (label_on_left ()) {
-		_name_item->set_x_position (-name_width);
-	}
-
-	_name_item->set (_name);
-
-	// CAIROCANVAS
-	// need to "clip" name to name_width and name_height
-
-	if (label_on_left ()) {
-		_name_background->set_x0 (_name_item->position().x - 2);
-		_name_background->set_x1 (_name_item->position().x + name_width + _shift);
+		_name_item->hide ();
 	} else {
-		_name_background->set_x0 (_name_item->position().x - _label_offset + 2);
-		_name_background->set_x1 (_name_item->position().x + name_width);
+		_name_item->show ();
+
+		if (label_on_left ()) {
+			_name_item->set_x_position (-name_width);
+		}
+			
+		_name_item->clamp_width (name_width);
+		_name_item->set (_name);
+		
+		if (label_on_left ()) {
+			_name_background->set_x0 (_name_item->position().x - 2);
+			_name_background->set_x1 (_name_item->position().x + name_width + _shift);
+		} else {
+			_name_background->set_x0 (_name_item->position().x - _label_offset + 2);
+			_name_background->set_x1 (_name_item->position().x + name_width);
+		}
 	}
 
 	_name_background->set_y0 (0);
