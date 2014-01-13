@@ -24,10 +24,14 @@
   #define LIBEVORAL_DLL_IMPORT __declspec(dllimport)
   #define LIBEVORAL_DLL_EXPORT __declspec(dllexport)
   #define LIBEVORAL_DLL_LOCAL
+  #define LIBEVORAL_TEMPLATE_DLL_IMPORT
+  #define LIBEVORAL_TEMPLATE_DLL_EXPORT
 #else
   #define LIBEVORAL_DLL_IMPORT __attribute__ ((visibility ("default")))
   #define LIBEVORAL_DLL_EXPORT __attribute__ ((visibility ("default")))
   #define LIBEVORAL_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
+  #define LIBEVORAL_TEMPLATE_DLL_IMPORT __attribute__ ((visibility ("default")))
+  #define LIBEVORAL_TEMPLATE_DLL_EXPORT __attribute__ ((visibility ("default")))
 #endif
 
 #ifdef LIBEVORAL_STATIC // libevoral is not a DLL
@@ -36,8 +40,10 @@
 #else
   #ifdef LIBEVORAL_DLL_EXPORTS // defined if we are building the libevoral DLL (instead of using it)
     #define LIBEVORAL_API LIBEVORAL_DLL_EXPORT
+    #define LIBEVORAL_TEMPLATE_API LIBEVORAL_TEMPLATE_DLL_EXPORT
   #else
     #define LIBEVORAL_API LIBEVORAL_DLL_IMPORT
+    #define LIBEVORAL_TEMPLATE_API LIBEVORAL_TEMPLATE_DLL_IMPORT
   #endif 
   #define     LIBEVORAL_LOCAL LIBEVORAL_DLL_LOCAL
 #endif
