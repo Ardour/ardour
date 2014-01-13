@@ -68,6 +68,7 @@ __declspec(selectany) int _forceAtlDllManifestRTM;
 #define LIBCONTROLCP_DLL
 #define LIBGTKMM2EXT_DLL
 #define LIBEVORAL_DLL
+#define LIBTIMECODE_DLL
 
 #if (INCLUDE_ARDOUR_MISCELLANEOUS)
 #include <ardourext/misc.h>
