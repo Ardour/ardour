@@ -74,11 +74,6 @@
 #ifndef PATH_MAX
 #define PATH_MAX _MAX_PATH
 #endif
-#define DECLARE_DEFAULT_COMPARISONS(Type) \
-	extern bool operator >  (const Type& lhs, const Type& rhs); \
-	extern bool operator <  (const Type& lhs, const Type& rhs); \
-	extern bool operator != (const Type& lhs, const Type& rhs); \
-	extern bool operator == (const Type& lhs, const Type& rhs);
 
 // Types missing from Win32 'stat.h' (hopefully Windows
 // will either act sensibly or ignore most of them).
@@ -182,15 +177,6 @@ typedef int register_t;
 #endif
 #endif
 
-// round().... Unlike Linux, Windows doesn't seem to support the
-// concept of a system-wide (or programmable) rounding direction.
-// Fortunately, 'round to nearest' seems to be the default action
-// under Linux, so let's copy that until we find out otherwise.
-#define rint(value)  round(value)
-#if !defined(PBD_API) || defined(PBD_IS_IN_WIN_STATIC_LIB)
-extern  double round(double x);
-#endif
-
 // System V compatibility
 typedef unsigned short ushort;
 typedef unsigned int   uint;
@@ -232,8 +218,17 @@ inline uint64_t abs(int64_t val)
 
 // #include the main headers for Ardour MSVC
 #ifdef __cplusplus
-#if defined(BUILDING_PBD) || defined(PBD_IS_IN_WIN_STATIC_LIB)
+#if defined(LIBPBD_DLL) || defined(PBD_IS_IN_WIN_STATIC_LIB)
 #include <pbd/msvc_pbd.h>
+
+#ifdef LIBPBD_DLL
+#define DEFAULT_COMPARISONS_DEFINED
+#define DECLARE_DEFAULT_COMPARISONS(Type) \
+	LIBPBD_API bool operator >  (const Type& lhs, const Type& rhs); \
+	LIBPBD_API bool operator <  (const Type& lhs, const Type& rhs); \
+	LIBPBD_API bool operator != (const Type& lhs, const Type& rhs); \
+	LIBPBD_API bool operator == (const Type& lhs, const Type& rhs);
+#endif
 #endif
 #if defined(BUILDING_LIBARDOUR) || defined(LIBARDOUR_IS_IN_WIN_STATIC_LIB)
 #include <ardour/msvc_libardour.h>
@@ -242,5 +237,23 @@ inline uint64_t abs(int64_t val)
 #include <rubberband/msvc_rubberband.h>
 #endif
 #endif // __cplusplus
+
+#ifndef DEFAULT_COMPARISONS_DEFINED
+#define DEFAULT_COMPARISONS_DEFINED
+#define DECLARE_DEFAULT_COMPARISONS(Type) \
+	extern bool operator >  (const Type& lhs, const Type& rhs); \
+	extern bool operator <  (const Type& lhs, const Type& rhs); \
+	extern bool operator != (const Type& lhs, const Type& rhs); \
+	extern bool operator == (const Type& lhs, const Type& rhs);
+#endif
+
+// round().... Unlike Linux, Windows doesn't seem to support the
+// concept of a system-wide (or programmable) rounding direction.
+// Fortunately, 'round to nearest' seems to be the default action
+// under Linux, so let's copy that until we find out otherwise.
+#define rint(value)  round(value)
+#if !defined(LIBPBD_API) || defined(PBD_IS_IN_WIN_STATIC_LIB)
+extern  double round(double x);
+#endif
 
 #endif /* __ardour_msvc_extensions_h__ */

@@ -7,7 +7,22 @@
 typedef long          __suseconds_t;
 typedef __suseconds_t   suseconds_t;
 #endif
+#ifndef BUILDING_EVORAL
 #include <WinSock2.h> /* gets 'struct timeval' - Changed by JE - 23-07-2013. Was formerly. . . #include <WinSock.h> */
+/* For whatever reason, Ardour's 'libevoral' refuses to build as a DLL if we include both 'rpc.h' */
+/* and 'WinSock2.h'. It doesn't seem to matter which order we #include them. Given that we can't  */
+/* edit 'rpc.h' or 'WinSock2.h', just make sure we don't #include them when building libevoral.   */
+
+/* Type of the second argument to `getitimer' and
+   the second and third arguments `setitimer'.  */
+struct itimerval
+  {
+    /* Value to put into `it_value' when the timer expires.  */
+    struct timeval it_interval;
+    /* Time to the next timer expiration.  */
+    struct timeval it_value;
+  };
+#endif
 
 #ifdef _TIMEVAL_DEFINED
 # define _STRUCT_TIMEVAL     1
@@ -60,9 +75,18 @@ typedef void *__restrict __timezone_ptr_t;
    Returns 0 on success, -1 on errors.
    NOTE: This form of timezone information is obsolete.
    Use the functions and variables declared in <time.h> instead.  */
+#ifdef LIBPBD_DLL /* JE - use the version that's available from libpbd */
+#ifdef LIBPBD_API
+LIBPBD_API int __cdecl gettimeofday (struct timeval *__restrict __tv,
+                __timezone_ptr_t __tz) __THROW;
+#else
+__declspec(dllimport) int __cdecl gettimeofday (struct timeval *__restrict __tv,
+                __timezone_ptr_t __tz) __THROW;
+#endif
+#else
 extern int gettimeofday (struct timeval *__restrict __tv,
                 __timezone_ptr_t __tz) __THROW;
-
+#endif
 extern int getntptimeofday (struct timespec *__restrict __tp,
                 __timezone_ptr_t __tz) __THROW;
 
@@ -89,16 +113,6 @@ extern int setntptimeofday (__const struct timespec *__tp,
 //    ITIMER_PROF = 2
 //#define ITIMER_PROF ITIMER_PROF
 //  };
-
-/* Type of the second argument to `getitimer' and
-   the second and third arguments `setitimer'.  */
-struct itimerval
-  {
-    /* Value to put into `it_value' when the timer expires.  */
-    struct timeval it_interval;
-    /* Time to the next timer expiration.  */
-    struct timeval it_value;
-  };
 
 #if defined __USE_GNU && !defined __cplusplus
 /* Use the nicer parameter type only in GNU mode and not for C++ since the
