@@ -77,6 +77,7 @@ class Send : public Delivery
   private:
 	/* disallow copy construction */
 	Send (const Send&);
+	void panshell_changed ();
 
 	int set_state_2X (XMLNode const &, int);
 
