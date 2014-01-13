@@ -1377,7 +1377,7 @@ Route::clear_processors (Placement p)
 }
 
 int
-Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* err, bool)
+Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* err, bool need_process_lock)
 {
 	// TODO once the export point can be configured properly, do something smarter here
 	if (processor == _capturing_processor) {
@@ -1397,7 +1397,10 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 	processor_max_streams.reset();
 
 	{
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+		if (need_process_lock) {
+			lx.acquire();
+		}
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
@@ -1456,6 +1459,9 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 					break;
 				}
 			}
+		}
+		if (need_process_lock) {
+			lx.release();
 		}
 	}
 
@@ -4152,8 +4158,7 @@ Route::has_external_redirects () const
 boost::shared_ptr<Processor>
 Route::the_instrument () const
 {
-	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-	Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 	return the_instrument_unlocked ();
 }
 
