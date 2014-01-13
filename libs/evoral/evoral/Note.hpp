@@ -116,5 +116,9 @@ template<typename Time>
 	return o;
 }
 
+#ifdef COMPILER_MSVC
+#include "../src/Note.impl"
+#endif
+
 #endif // EVORAL_NOTE_HPP
 
