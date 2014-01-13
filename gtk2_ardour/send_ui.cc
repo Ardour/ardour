@@ -133,19 +133,9 @@ SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session* session)
 	ui->show ();
 	hpacker.show ();
 
-	s->DropReferences.connect (going_away_connection, invalidator (*this), boost::bind (&SendUIWindow::send_going_away, this), gui_context());
 }
 
 SendUIWindow::~SendUIWindow ()
 {
 	delete ui;
 }
-
-void
-SendUIWindow::send_going_away ()
-{
-	ENSURE_GUI_THREAD (*this, &SendUIWindow::send_going_away)
-	going_away_connection.disconnect ();
-	delete_when_idle (this);
-}
-
