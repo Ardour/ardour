@@ -68,7 +68,6 @@ class ReturnUIWindow : public ArdourWindow
   private:
 	Gtk::HBox hpacker;
 
-	void return_going_away ();
 	PBD::ScopedConnection going_away_connection;
 };
 

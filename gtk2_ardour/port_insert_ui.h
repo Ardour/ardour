@@ -67,7 +67,6 @@ class PortInsertWindow : public ArdourDialog
 	void cancel ();
 	void accept ();
 
-	void plugin_going_away ();
 	PBD::ScopedConnection going_away_connection;
 
 	bool wm_delete (GdkEventAny*);

@@ -110,19 +110,9 @@ ReturnUIWindow::ReturnUIWindow (boost::shared_ptr<Return> r, ARDOUR::Session* s)
 
 	set_name ("ReturnUIWindow");
 
-	r->DropReferences.connect (going_away_connection, invalidator (*this), boost::bind (&ReturnUIWindow::return_going_away, this), gui_context());
 }
 
 ReturnUIWindow::~ReturnUIWindow ()
 {
 	delete ui;
 }
-
-void
-ReturnUIWindow::return_going_away ()
-{
-	ENSURE_GUI_THREAD (*this, &ReturnUIWindow::return_going_away)
-	going_away_connection.disconnect ();
-	delete_when_idle (this);
-}
-
