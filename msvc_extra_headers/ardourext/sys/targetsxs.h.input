@@ -12,7 +12,7 @@
 #endif
 
 #ifndef VST_SUPPORT
-#define VST_SUPPORT
+// Commented out temporarily by JE - 18-10-2013 #define VST_SUPPORT
 /* Comment out the above line to build Mixbus without VST support */
 #endif
 
@@ -60,6 +60,15 @@ __declspec(selectany) int _forceAtlDllManifestRTM;
 #include <stdint.h>
 
 #if defined(_MSC_VER) && !defined(__MINGW__) && !defined(__MINGW32__)
+/* Define these libraries as getting built as DLLs */
+#define LIBAUDIOGRAPHER_DLL
+#define LIBARDOUR_DLL
+#define LIBMIDIPP_DLL
+#define LIBPBD_DLL
+#define LIBCONTROLCP_DLL
+#define LIBGTKMM2EXT_DLL
+#define LIBEVORAL_DLL
+
 #if (INCLUDE_ARDOUR_MISCELLANEOUS)
 #include <ardourext/misc.h>
 #endif
