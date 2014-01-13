@@ -128,7 +128,19 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 			uint32_t const bufs_audio = bufs.count().get (DataType::AUDIO);
 			uint32_t const mixbufs_audio = mixbufs.count().get (DataType::AUDIO);
 			
-			assert (mixbufs.available().get (DataType::AUDIO) >= bufs_audio);
+			/* monitor-section has same number of channels as master-bus (on creation).
+			 *
+			 * There is no clear answer what should happen when trying to PFL or AFL
+			 * a track that has more channels (bufs_audio from source-track is
+			 * larger than mixbufs).
+			 *
+			 * There are two options:
+			 *  1: discard additional channels    (current)
+			 * OR
+			 *  2: require the monitor-section to have at least as many channels
+			 * as the largest count of any route
+			 */
+			//assert (mixbufs.available().get (DataType::AUDIO) >= bufs_audio);
 
 			/* Copy bufs into mixbufs, going round bufs more than once if necessary
 			   to ensure that every mixbuf gets some data.
