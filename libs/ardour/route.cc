@@ -1069,7 +1069,8 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 
 		} else if (node.name() == "Send") {
 
-			processor.reset (new Send (_session, _pannable, _mute_master));
+			boost::shared_ptr<Pannable> sendpan (new Pannable (_session));
+			processor.reset (new Send (_session, sendpan, _mute_master));
 
 		} else {
 
@@ -2569,7 +2570,8 @@ Route::set_processor_state (const XMLNode& node)
 
 				} else if (prop->value() == "send") {
 
-					processor.reset (new Send (_session, _pannable, _mute_master));
+					boost::shared_ptr<Pannable> sendpan (new Pannable (_session));
+					processor.reset (new Send (_session, sendpan, _mute_master));
 
 				} else {
 					error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
