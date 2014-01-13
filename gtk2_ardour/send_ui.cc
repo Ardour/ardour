@@ -52,10 +52,7 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 	_vbox.set_border_width (5);
 
 	_vbox.pack_start (_hbox, false, false, false);
-	// until sends have their own Pannable, don't show this
-	// because it controls the Route Pannable which confuses
-	// users (among others)
-	// _vbox.pack_start (_panners, false, false);
+	_vbox.pack_start (_panners, false, false);
 
 	io = manage (new IOSelector (parent, session, s->output()));
 

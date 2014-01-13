@@ -1403,7 +1403,8 @@ ProcessorBox::choose_insert ()
 void
 ProcessorBox::choose_send ()
 {
-	boost::shared_ptr<Send> send (new Send (*_session, _route->pannable(), _route->mute_master()));
+	boost::shared_ptr<Pannable> sendpan(new Pannable (*_session));
+	boost::shared_ptr<Send> send (new Send (*_session, sendpan, _route->mute_master()));
 
 	/* make an educated guess at the initial number of outputs for the send */
 	ChanCount outs = (_session->master_out())
@@ -2068,8 +2069,9 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 
 			} else if (type->value() == "send") {
 
+				boost::shared_ptr<Pannable> sendpan(new Pannable (*_session));
 				XMLNode n (**niter);
-                                Send* s = new Send (*_session, _route->pannable(), _route->mute_master());
+				Send* s = new Send (*_session, sendpan, _route->mute_master());
 
 				IOProcessor::prepare_for_reset (n, s->name());
 				
