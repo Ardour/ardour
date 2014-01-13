@@ -14,7 +14,7 @@ namespace AudioGrapher
 
 /// A debugging class for nodes that support a certain set of flags.
 template<DebugLevel L = DEFAULT_DEBUG_LEVEL>
-class LIBAUDIOGRAPHER_API FlagDebuggable : public Debuggable<L>
+class /*LIBAUDIOGRAPHER_API*/ FlagDebuggable : public Debuggable<L>
 {
   public:
 	typedef FlagField::Flag Flag;

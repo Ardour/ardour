@@ -19,7 +19,7 @@ namespace AudioGrapher
 {
 
 /// Class that stores exceptions thrown from different threads
-class LIBAUDIOGRAPHER_API ThreaderException : public Exception
+class /*LIBAUDIOGRAPHER_API*/ ThreaderException : public Exception
 {
   public:
 	template<typename T>
@@ -33,7 +33,7 @@ class LIBAUDIOGRAPHER_API ThreaderException : public Exception
 
 /// Class for distributing processing across several threads
 template <typename T = DefaultSampleType>
-class LIBAUDIOGRAPHER_API Threader : public Source<T>, public Sink<T>
+class /*LIBAUDIOGRAPHER_API*/ Threader : public Source<T>, public Sink<T>
 {
   private:
 	typedef std::vector<typename Source<T>::SinkPtr> OutputVec;

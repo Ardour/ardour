@@ -10,7 +10,7 @@ namespace AudioGrapher
 {
 
 /// Dither types from the gdither library
-enum LIBAUDIOGRAPHER_API DitherType
+enum /*LIBAUDIOGRAPHER_API*/ DitherType
 {
 	D_None   = GDitherNone,   ///< No didtering
 	D_Rect   = GDitherRect,   ///< Rectangular dithering, i.e. white noise

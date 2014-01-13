@@ -16,7 +16,7 @@ namespace AudioGrapher
 
 /// Interleaves many streams of non-interleaved data into one interleaved stream
 template<typename T = DefaultSampleType>
-class LIBAUDIOGRAPHER_API Interleaver
+class /*LIBAUDIOGRAPHER_API*/ Interleaver
   : public ListedSource<T>
   , public Throwing<>
 {

@@ -38,7 +38,7 @@ enum LIBAUDIOGRAPHER_API DebugLevel
   * logical and (short-circuiting).
   */
 template<DebugLevel L = DEFAULT_DEBUG_LEVEL>
-class LIBAUDIOGRAPHER_API Debuggable
+class /*LIBAUDIOGRAPHER_API*/ Debuggable
 {
   protected:
 	Debuggable(std::ostream & debug_stream = std::cerr)

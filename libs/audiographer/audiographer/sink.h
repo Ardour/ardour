@@ -14,7 +14,7 @@ namespace AudioGrapher
   * This is a pure virtual interface for all data sinks in AudioGrapher
   */
 template <typename T>
-class LIBAUDIOGRAPHER_API Sink  {
+class /*LIBAUDIOGRAPHER_API*/ Sink  {
   public:
 	virtual ~Sink () {}
 	
