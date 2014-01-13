@@ -10,7 +10,7 @@ namespace AudioGrapher
 {
 
 /// A class that reads the maximum value from a stream
-class LIBAUDIOGRAPHER_API PeakReader : public ListedSource<float>, public Sink<float>
+class /*LIBAUDIOGRAPHER_API*/ PeakReader : public ListedSource<float>, public Sink<float>
 {
   public:
 	/// Constructor \n RT safe

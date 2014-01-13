@@ -11,7 +11,7 @@ namespace AudioGrapher
 
 /// Outputs its input directly to a number of Sinks
 template<typename T = DefaultSampleType>
-class LIBAUDIOGRAPHER_API IdentityVertex : public ListedSource<T>, Sink<T>
+class /*LIBAUDIOGRAPHER_API*/ IdentityVertex : public ListedSource<T>, Sink<T>
 {
   public:
 	void process (ProcessContext<T> const & c) { ListedSource<T>::output(c); }

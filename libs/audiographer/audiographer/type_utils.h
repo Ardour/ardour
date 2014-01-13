@@ -29,7 +29,7 @@ class LIBAUDIOGRAPHER_API TypeUtilsBase
 
 /// Utilities for initializing, copying, moving, etc. data
 template<typename T = DefaultSampleType>
-class LIBAUDIOGRAPHER_API TypeUtils : private TypeUtilsBase
+class /*LIBAUDIOGRAPHER_API*/ TypeUtils : private TypeUtilsBase
 {
 	BOOST_STATIC_ASSERT (boost::has_trivial_destructor<T>::value);
 	

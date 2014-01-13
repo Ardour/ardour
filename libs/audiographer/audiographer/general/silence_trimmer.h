@@ -14,7 +14,7 @@ namespace AudioGrapher {
 
 /// Removes and adds silent frames to beginning and/or end of stream
 template<typename T = DefaultSampleType>
-class LIBAUDIOGRAPHER_API SilenceTrimmer
+class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
   : public ListedSource<T>
   , public Sink<T>
   , public FlagDebuggable<>

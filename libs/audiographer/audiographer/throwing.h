@@ -16,7 +16,7 @@ namespace AudioGrapher
   * However, if you want ultra-optimized code and/or don't care about handling
   * error situations, feel free to use whatever you want.
   */
-enum LIBAUDIOGRAPHER_API ThrowLevel
+enum /*LIBAUDIOGRAPHER_API*/ ThrowLevel
 {
 	ThrowNone,     ///< Not allowed to throw
 	ThrowObject,   ///< Object level stuff, ctors, initalizers etc.
@@ -40,7 +40,7 @@ enum LIBAUDIOGRAPHER_API ThrowLevel
   * logical and (short-circuiting).
   */
 template<ThrowLevel L = DEFAULT_THROW_LEVEL>
-class LIBAUDIOGRAPHER_API Throwing
+class /*LIBAUDIOGRAPHER_API*/ Throwing
 {
   protected:
 	Throwing() {}

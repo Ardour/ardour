@@ -12,7 +12,7 @@ namespace AudioGrapher
 
 /// A class that chunks process cycles into equal sized frames
 template<typename T = DefaultSampleType>
-class LIBAUDIOGRAPHER_API Chunker
+class /*LIBAUDIOGRAPHER_API*/ Chunker
   : public ListedSource<T>
   , public Sink<T>
   , public FlagDebuggable<>

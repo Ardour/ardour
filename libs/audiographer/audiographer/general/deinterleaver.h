@@ -15,7 +15,7 @@ namespace AudioGrapher
 
 /// Converts on stream of interleaved data to many streams of uninterleaved data.
 template<typename T = DefaultSampleType>
-class LIBAUDIOGRAPHER_API DeInterleaver
+class /*LIBAUDIOGRAPHER_API*/ DeInterleaver
   : public Sink<T>
   , public Throwing<>
 {

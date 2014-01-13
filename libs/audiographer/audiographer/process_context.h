@@ -22,7 +22,7 @@ namespace AudioGrapher
  */
 
 template <typename T = DefaultSampleType>
-class LIBAUDIOGRAPHER_API ProcessContext
+class /*LIBAUDIOGRAPHER_API*/ ProcessContext
   : public Throwing<>
 {
 	// Support older compilers that don't support template base class initialization without template parameters
@@ -126,7 +126,7 @@ protected:
 
 /// A process context that allocates and owns it's data buffer
 template <typename T = DefaultSampleType>
-class LIBAUDIOGRAPHER_API AllocatingProcessContext : public ProcessContext<T>
+class /*LIBAUDIOGRAPHER_API*/ AllocatingProcessContext : public ProcessContext<T>
 {
 public:
 	/// Allocates uninitialized memory
@@ -163,7 +163,7 @@ public:
 
 /// A wrapper for a const ProcesContext which can be created from const data
 template <typename T = DefaultSampleType>
-class LIBAUDIOGRAPHER_API ConstProcessContext
+class /*LIBAUDIOGRAPHER_API*/ ConstProcessContext
 {
   public:
 	/// Basic constructor with data, frame and channel count
