@@ -426,14 +426,14 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 	/* horizontal line of "crosshairs" */
 
         cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 1.0);
-	cairo_move_to (cr, 0.0, rint(radius) - .5);
-	cairo_line_to (cr, diameter, rint(radius) - .5);
+	cairo_move_to (cr, 0.0, rint(radius) + .5);
+	cairo_line_to (cr, diameter, rint(radius) + .5);
 	cairo_stroke (cr);
 
 	/* vertical line of "crosshairs" */
 
-	cairo_move_to (cr, rint(radius) - .5, 0);
-	cairo_line_to (cr, rint(radius) - .5, diameter);
+	cairo_move_to (cr, rint(radius) + .5, 0);
+	cairo_line_to (cr, rint(radius) + .5, diameter);
 	cairo_stroke (cr);
 
 	/* the circle on which signals live */
