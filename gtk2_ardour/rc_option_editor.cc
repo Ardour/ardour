@@ -1591,6 +1591,8 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* SOLO AND MUTE */
 
+	add_option (_("Solo / mute"), new OptionEditorHeading (_("Solo")));
+
 	add_option (_("Solo / mute"),
 	     new FaderOption (
 		     "solo-mute-gain",
@@ -1702,6 +1704,16 @@ RCOptionEditor::RCOptionEditor ()
 		     _("Mute affects main outputs"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_main_outs),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_main_outs)
+		     ));
+
+	add_option (_("Solo / mute"), new OptionEditorHeading (_("Send Routing")));
+
+	add_option (_("Solo / mute"),
+	     new BoolOption (
+		     "link-send-and-route-panner",
+		     _("Link panners of Aux and External Sends with main panner by default"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_send_and_route_panner),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_send_and_route_panner)
 		     ));
 
 	add_option (_("MIDI"),
