@@ -202,10 +202,6 @@ Panner2d::handle_state_change ()
 {
 	panconnect.drop_connections();
 	if (!panner_shell->panner()) {
-		/* we should really self-destruct the UI here
-		 * -> * PannerUI::set_panner() -> delete
-		 */
-		queue_draw ();
 		return;
 	}
 

@@ -231,11 +231,16 @@ PannerUI::setup_pan ()
 	_mono_panner = 0;
 
 	if (!_panner) {
+		delete big_window;
+		big_window = 0;
 		return;
 	}
 
 	if (_panshell->panner_gui_uri() == "http://ardour.org/plugin/panner_2in2out#ui")
 	{
+		delete big_window;
+		big_window = 0;
+
 		boost::shared_ptr<Pannable> pannable = _panner->pannable();
 
 		_stereo_panner = new StereoPanner (_panshell);
@@ -260,6 +265,8 @@ PannerUI::setup_pan ()
 	else if (_panshell->panner_gui_uri() == "http://ardour.org/plugin/panner_1in2out#ui"
 			|| _panshell->panner_gui_uri() == "http://ardour.org/plugin/panner_balance#ui")
 	{
+		delete big_window;
+		big_window = 0;
 		boost::shared_ptr<Pannable> pannable = _panner->pannable();
 		boost::shared_ptr<AutomationControl> ac = pannable->pan_azimuth_control;
 
