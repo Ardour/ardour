@@ -20,6 +20,8 @@
 #ifndef __ardour_panner_manager_h__
 #define __ardour_panner_manager_h__
 
+#include <map>
+#include <string>
 #include <glibmm/module.h>
 
 #include "ardour/panner.h"
@@ -27,7 +29,10 @@
 
 namespace ARDOUR {
 
+typedef std::map<std::string,std::string> PannerUriMap;
+
 struct LIBARDOUR_API PannerInfo {
+
 	PanPluginDescriptor descriptor;
 	Glib::Module* module;
 
@@ -51,7 +56,8 @@ public:
 	std::list<PannerInfo*> panner_info;
 
 	PannerInfo* select_panner (ChanCount in, ChanCount out, std::string const uri = "");
-	PannerInfo* get_by_uri (std::string uri);
+	PannerInfo* get_by_uri (std::string uri) const;
+	PannerUriMap get_available_panners(uint32_t const a_in, uint32_t const a_out) const;
 
 private:
 	PannerManager();

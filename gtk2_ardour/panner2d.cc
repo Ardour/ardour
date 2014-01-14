@@ -401,7 +401,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 {
         CartesianVector c;
 	cairo_t* cr;
-        bool small_size = (height <= large_size_threshold);
+        bool small = (height <= large_size_threshold);
         const double diameter = radius*2.0;
 
 	cr = gdk_cairo_create (get_window()->gobj());
@@ -426,14 +426,14 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 	/* horizontal line of "crosshairs" */
 
         cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 1.0);
-	cairo_move_to (cr, 0.0, rint(radius) - .5);
-	cairo_line_to (cr, diameter, rint(radius) - .5);
+	cairo_move_to (cr, 0.0, rint(radius) + .5);
+	cairo_line_to (cr, diameter, rint(radius) + .5);
 	cairo_stroke (cr);
 
 	/* vertical line of "crosshairs" */
 
-	cairo_move_to (cr, rint(radius) - .5, 0);
-	cairo_line_to (cr, rint(radius) - .5, diameter);
+	cairo_move_to (cr, rint(radius) + .5, 0);
+	cairo_line_to (cr, rint(radius) + .5, diameter);
 	cairo_stroke (cr);
 
 	/* the circle on which signals live */
@@ -484,7 +484,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 		cairo_select_font_face (cr, "sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 
-		if (small_size) {
+		if (small) {
 			arc_radius = 4.0;
 		} else {
 			cairo_set_font_size (cr, 10);
@@ -526,12 +526,12 @@ Panner2d::on_expose_event (GdkEventExpose *event)
                                         cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, 0.8);
                                         cairo_stroke (cr);
 
-                                        if (!small_size && !signal->text.empty()) {
+                                        if (!small && !signal->text.empty()) {
                                                 cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, .9);
                                                 /* the +/- adjustments are a hack to try to center the text in the circle
                                                  * TODO use pango get_pixel_size() -- see mono_panner.cc
                                                  */
-                                                if (small_size) {
+                                                if (small) {
                                                         cairo_move_to (cr, c.x - 1, c.y + 1);
                                                 } else {
                                                         cairo_move_to (cr, c.x - 4, c.y + 4);
@@ -565,7 +565,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
                                 cairo_move_to (cr, c.x, c.y);
                                 cairo_save (cr);
                                 cairo_rotate (cr, -(speaker->position.azi/360.0) * (2.0 * M_PI));
-                                if (small_size) {
+                                if (small) {
                                         cairo_scale (cr, 0.8, 0.8);
                                 } else {
                                         cairo_scale (cr, 1.2, 1.2);
@@ -583,7 +583,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 				cairo_fill (cr);
                                 cairo_restore (cr);
 
-                                if (!small_size) {
+                                if (!small) {
                                         cairo_set_font_size (cr, 16);
 
                                         /* move the text in just a bit */

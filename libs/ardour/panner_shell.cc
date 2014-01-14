@@ -43,8 +43,10 @@
 #include "evoral/Curve.hpp"
 
 #include "ardour/audio_buffer.h"
+#include "ardour/audioengine.h"
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
+#include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_manager.h"
 #include "ardour/panner_shell.h"
@@ -59,21 +61,31 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PannerShell::PannerShell (string name, Session& s, boost::shared_ptr<Pannable> p)
+PannerShell::PannerShell (string name, Session& s, boost::shared_ptr<Pannable> p, bool is_send)
 	: SessionObject (s, name)
-	, _pannable (p)
+	, _pannable_route (p)
+	, _is_send (is_send)
+	, _panlinked (true)
 	, _bypassed (false)
 	, _current_panner_uri("")
 	, _user_selected_panner_uri("")
 	, _panner_gui_uri("")
 	, _force_reselect (false)
 {
+	if (is_send) {
+		_pannable_internal.reset(new Pannable (s));
+		if (Config->get_link_send_and_route_panner()) {
+			_panlinked = true;
+		} else {
+			_panlinked = false;
+		}
+	}
 	set_name (name);
 }
 
 PannerShell::~PannerShell ()
 {
-	DEBUG_TRACE(DEBUG::Destruction, string_compose ("panner shell %3 for %1 destructor, panner is %4, pannable is %2\n", _name, _pannable, this, _panner));
+	DEBUG_TRACE(DEBUG::Destruction, string_compose ("panner shell %3 for %1 destructor, panner is %4, pannable is %2\n", _name, _pannable_route, this, _panner));
 }
 
 void
@@ -120,7 +132,8 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
 		speakers.reset (s);
 	}
 
-	Panner* p = pi->descriptor.factory (_pannable, speakers);
+	/* TODO  don't allow to link  _is_send if internal & route panners are different types */
+	Panner* p = pi->descriptor.factory (pannable(), speakers);
 	// boost_debug_shared_ptr_mark_interesting (p, "Panner");
 	_panner.reset (p);
 	_panner->configure_io (in, out);
@@ -137,8 +150,9 @@ PannerShell::get_state ()
 
 	node->add_property (X_("bypassed"), _bypassed ? X_("yes") : X_("no"));
 	node->add_property (X_("user-panner"), _user_selected_panner_uri);
+	node->add_property (X_("linked-to-route"), _panlinked ? X_("yes") : X_("no"));
 
-	if (_panner) {
+	if (_panner && _is_send) {
 		node->add_child_nocopy (_panner->get_state ());
 	}
 
@@ -157,6 +171,10 @@ PannerShell::set_state (const XMLNode& node, int version)
 		set_bypassed (string_is_affirmative (prop->value ()));
 	}
 
+	if ((prop = node.property (X_("linked-to-route"))) != 0) {
+		_panlinked = string_is_affirmative (prop->value ());
+	}
+
 	if ((prop = node.property (X_("user-panner"))) != 0) {
 		_user_selected_panner_uri = prop->value ();
 	}
@@ -170,7 +188,8 @@ PannerShell::set_state (const XMLNode& node, int version)
 			if ((prop = (*niter)->property (X_("uri")))) {
 				PannerInfo* p = PannerManager::instance().get_by_uri(prop->value());
 				if (p) {
-					_panner.reset (p->descriptor.factory (_pannable, _session.get_speakers ()));
+					_panner.reset (p->descriptor.factory (
+								_is_send ? _pannable_internal : _pannable_route, _session.get_speakers ()));
 					_current_panner_uri = p->descriptor.panner_uri;
 					_panner_gui_uri = p->descriptor.gui_uri;
 					if (_panner->set_state (**niter, version) == 0) {
@@ -193,7 +212,8 @@ PannerShell::set_state (const XMLNode& node, int version)
 						   assumption, but it's still an assumption.
 						*/
 
-						_panner.reset ((*p)->descriptor.factory (_pannable, _session.get_speakers ()));
+						_panner.reset ((*p)->descriptor.factory (
+									_is_send ? _pannable_internal : _pannable_route, _session.get_speakers ()));
 						_current_panner_uri = (*p)->descriptor.panner_uri;
 						_panner_gui_uri = (*p)->descriptor.gui_uri;
 
@@ -392,4 +412,42 @@ PannerShell::set_user_selected_panner_uri (std::string const uri)
 	if (uri == _current_panner_uri) return false;
 	_force_reselect = true;
 	return true;
+}
+
+bool
+PannerShell::select_panner_by_uri (std::string const uri)
+{
+	if (uri == _user_selected_panner_uri) return false;
+	_user_selected_panner_uri = uri;
+	if (uri == _current_panner_uri) return false;
+	_force_reselect = true;
+	if (_panner) {
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+			ChanCount in = _panner->in();
+			ChanCount out = _panner->out();
+			configure_io(in, out);
+			pannable()->set_panner(_panner);
+			_session.set_dirty ();
+	}
+	return true;
+}
+
+void
+PannerShell::set_linked_to_route (bool onoff)
+{
+	if (!_is_send || onoff == _panlinked) {
+		return;
+	}
+	_panlinked = onoff;
+
+	_force_reselect = true;
+	if (_panner) {
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+			ChanCount in = _panner->in();
+			ChanCount out = _panner->out();
+			configure_io(in, out);
+			pannable()->set_panner(_panner);
+			_session.set_dirty ();
+	}
+	PannableChanged();
 }

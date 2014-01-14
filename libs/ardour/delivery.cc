@@ -58,7 +58,9 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pann
 	, _no_panner_reset (false)
 {
 	if (pannable) {
-		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));
+		bool is_send = false;
+		if (r & (Delivery::Send|Delivery::Aux)) is_send = true;
+		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, is_send));
 	}
 
 	_display_to_user = false;
@@ -80,7 +82,9 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 	, _no_panner_reset (false)
 {
 	if (pannable) {
-		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));
+		bool is_send = false;
+		if (r & (Delivery::Send|Delivery::Aux)) is_send = true;
+		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, is_send));
 	}
 
 	_display_to_user = false;
@@ -364,6 +368,7 @@ Delivery::set_state (const XMLNode& node, int version)
 	XMLNode* pannnode = node.child (X_("Pannable"));
 	if (_panshell && _panshell->panner() && pannnode) {
 		_panshell->pannable()->set_state (*pannnode, version);
+		_panshell->pannable()->set_panner(_panshell->panner());
 	}
 
 	return 0;

@@ -388,7 +388,7 @@ PannerUI::build_pan_menu ()
 		items.push_back (MenuElem (_("Edit..."), sigc::mem_fun (*this, &PannerUI::pan_edit)));
 	}
 
-	if (_route && _panner_list.size() > 1 && !_panshell->bypassed()) {
+	if (_panner_list.size() > 1 && !_panshell->bypassed()) {
 		RadioMenuItem::Group group;
 		items.push_back (SeparatorElem());
 
@@ -444,9 +444,7 @@ PannerUI::pan_reset ()
 void
 PannerUI::pan_set_custom_type (std::string uri) {
 	if (_suspend_menu_callbacks) return;
-	if (_route) {
-		_route->set_custom_panner_uri(uri);
-	}
+	_panshell->select_panner_by_uri(uri);
 }
 
 void
@@ -644,8 +642,7 @@ PannerUI::position_adjusted ()
 }
 
 void
-PannerUI::set_available_panners(boost::shared_ptr<ARDOUR::Route> r, std::map<std::string,std::string> p)
+PannerUI::set_available_panners(std::map<std::string,std::string> p)
 {
-	_route = r;
 	_panner_list = p;
 }

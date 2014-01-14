@@ -477,7 +477,11 @@ void
 VBAPanner::reset ()
 {
 	set_position (0);
-	set_width (1);
+        if (_signals.size() > 1) {
+                set_width (1.0 - (1.0 / (double)_signals.size()));
+        } else {
+                set_width (0);
+        }
 	set_elevation (0);
 
 	update ();

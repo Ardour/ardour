@@ -138,6 +138,7 @@ public:
 	void set_control_state (XMLNode const *);
 	std::string state_id () const;
 	Gtk::Menu* build_controls_menu ();
+	Gtk::Menu* build_send_options_menu ();
 
 protected:
 	ArdourButton _button;
@@ -205,6 +206,7 @@ private:
 	std::list<Control*> _controls;
 
 	void toggle_control_visibility (Control *);
+	void toggle_panner_link ();
 
 	class PortIcon : public Gtk::DrawingArea {
 	public:

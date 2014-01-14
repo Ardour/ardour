@@ -1568,6 +1568,10 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 	return 0;
 }
 
+#if 0
+/* currently unused (again) -- but will come in handy soon (again)
+ * once there is an option to link route + delivery panner settings
+ */
 void
 Route::set_custom_panner_uri (std::string const panner_uri)
 {
@@ -1619,6 +1623,7 @@ Route::set_custom_panner_uri (std::string const panner_uri)
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	_session.set_dirty ();
 }
+#endif
 
 void
 Route::reset_instrument_info ()
@@ -2553,8 +2558,7 @@ Route::set_processor_state (const XMLNode& node)
 
 				if (prop->value() == "intsend") {
 
-					boost::shared_ptr<Pannable> sendpan (new Pannable (_session));
-					processor.reset (new InternalSend (_session, sendpan, _mute_master, boost::shared_ptr<Route>(), Delivery::Role (0)));
+					processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::shared_ptr<Route>(), Delivery::Aux));
 
 				} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 				           prop->value() == "lv2" ||
@@ -2570,8 +2574,7 @@ Route::set_processor_state (const XMLNode& node)
 
 				} else if (prop->value() == "send") {
 
-					boost::shared_ptr<Pannable> sendpan (new Pannable (_session));
-					processor.reset (new Send (_session, sendpan, _mute_master));
+					processor.reset (new Send (_session, _pannable, _mute_master));
 
 				} else {
 					error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
