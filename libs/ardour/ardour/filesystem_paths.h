@@ -43,14 +43,14 @@ namespace ARDOUR {
 	 * @return the search path to be used when looking for per-system
 	 * configuration files. This may include user configuration files.
 	 */
-	LIBARDOUR_API PBD::SearchPath ardour_config_search_path ();
+	LIBARDOUR_API PBD::Searchpath ardour_config_search_path ();
 
 	/**
 	 * @return the search path to be used when looking for data files
 	 * that could be shared by systems (h/w and configuration independent
 	 * files, such as icons, XML files, etc)
 	 */
-	LIBARDOUR_API PBD::SearchPath ardour_data_search_path ();
+	LIBARDOUR_API PBD::Searchpath ardour_data_search_path ();
 
 } // namespace ARDOUR
 

@@ -114,7 +114,7 @@ class LIBARDOUR_API ExportFormatBase {
 	};
 
 	/// Class for managing selection and compatibility states
-	class SelectableCompatible {
+	class LIBARDOUR_API SelectableCompatible {
 	  public:
 		SelectableCompatible ()
 			: _selected (false), _compatible (true) { }

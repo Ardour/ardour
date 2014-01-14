@@ -23,7 +23,12 @@
 #include "ardour/libardour_visibility.h"
 
 namespace ARDOUR {
-	LIBARDOUR_API extern const char* revision;
+
+	/*LIBARDOUR_API extern*/ extern const char* revision;
+	
+	extern "C" {
+		LIBARDOUR_API const char* get_ardour_revision();
+	}
 }
 
 #endif

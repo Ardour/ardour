@@ -41,7 +41,7 @@ class MidiBuffer;
  * [timestamp][type][size][size bytes of raw MIDI][timestamp][type][size](etc...)
  */
 template<typename T>
-class LIBARDOUR_API MidiRingBuffer : public Evoral::EventRingBuffer<T> {
+class /*LIBARDOUR_API*/ MidiRingBuffer : public Evoral::EventRingBuffer<T> {
 public:
 	/** @param size Size in bytes.
 	 */

@@ -26,7 +26,7 @@
 namespace ARDOUR {
 
 template<typename T>
-class LIBARDOUR_API ComparableSharedPtr : public boost::shared_ptr<T>
+class /*LIBARDOUR_API*/ ComparableSharedPtr : public boost::shared_ptr<T>
                           , public boost::less_than_comparable<ComparableSharedPtr<T> >
 {
   public:

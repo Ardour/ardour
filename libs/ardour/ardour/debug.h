@@ -35,6 +35,7 @@ namespace PBD {
 		LIBARDOUR_API extern uint64_t SnapBBT;
 		LIBARDOUR_API extern uint64_t Configuration;
 		LIBARDOUR_API extern uint64_t Latency;
+		LIBARDOUR_API extern uint64_t Peaks;
 		LIBARDOUR_API extern uint64_t Processors;
 		LIBARDOUR_API extern uint64_t ProcessThreads;
 		LIBARDOUR_API extern uint64_t Graph;

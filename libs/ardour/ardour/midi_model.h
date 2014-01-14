@@ -58,7 +58,7 @@ public:
 	NoteMode note_mode() const { return (percussive() ? Percussive : Sustained); }
 	void set_note_mode(NoteMode mode) { set_percussive(mode == Percussive); };
 
-	class DiffCommand : public Command {
+	class LIBARDOUR_API DiffCommand : public Command {
 	public:
 
 		DiffCommand (boost::shared_ptr<MidiModel> m, const std::string& name);
@@ -79,7 +79,7 @@ public:
 
 	};
 
-	class NoteDiffCommand : public DiffCommand {
+	class LIBARDOUR_API NoteDiffCommand : public DiffCommand {
 	public:
 
 		NoteDiffCommand (boost::shared_ptr<MidiModel> m, const std::string& name) : DiffCommand (m, name) {}
@@ -145,7 +145,7 @@ public:
 	};
 
 	/* Currently this class only supports changes of sys-ex time, but could be expanded */
-	class SysExDiffCommand : public DiffCommand {
+	class LIBARDOUR_API SysExDiffCommand : public DiffCommand {
 	public:
 		SysExDiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node);
 
@@ -180,7 +180,7 @@ public:
 		Change unmarshal_change (XMLNode *);
 	};
 
-	class PatchChangeDiffCommand : public DiffCommand {
+	class LIBARDOUR_API PatchChangeDiffCommand : public DiffCommand {
 	public:
 		PatchChangeDiffCommand (boost::shared_ptr<MidiModel>, const std::string &);
 		PatchChangeDiffCommand (boost::shared_ptr<MidiModel>, const XMLNode &);

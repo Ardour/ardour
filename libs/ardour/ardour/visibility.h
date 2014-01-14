@@ -20,6 +20,8 @@
 #ifndef __libardour_visibility_h__
 #define __libardour_visibility_h__
 
+#include "ardour/libardour_visibility.h"
+
 #ifdef  LIBARDOUR_IS_IN_WIN_STATIC_LIB  // #define if your project uses libardour (under Windows) as a static library
 #define LIBARDOUR_IS_IN_WINDLL 0
 #endif
@@ -35,17 +37,14 @@
 
 #if LIBARDOUR_IS_IN_WINDLL && !defined(LIBARDOUR_API)
 	#if defined(BUILDING_LIBARDOUR)
-		#define LIBARDOUR_API __declspec(dllexport)
 		#define LIBARDOUR_APICALLTYPE __cdecl
 	#elif defined(COMPILER_MSVC) || defined(COMPILER_MINGW) // Probably needs Cygwin too, at some point
-		#define LIBARDOUR_API __declspec(dllimport)
 		#define LIBARDOUR_APICALLTYPE __cdecl
 	#else
 		#error "Attempting to define __declspec with an incompatible compiler !"
 	#endif
-#elif !defined(LIBARDOUR_API)
+#elif !defined(LIBARDOUR_APICALLTYPE)
 	// Other compilers / platforms could be accommodated here (as an example, see LIBARDOUR_HELPER_DLL, below)
-	#define LIBARDOUR_API
 	#define LIBARDOUR_APICALLTYPE
 #endif
 

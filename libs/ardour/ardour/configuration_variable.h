@@ -52,7 +52,7 @@ class LIBARDOUR_API ConfigVariableBase {
 };
 
 template<class T>
-class LIBARDOUR_API ConfigVariable : public ConfigVariableBase
+class /*LIBARDOUR_API*/ ConfigVariable : public ConfigVariableBase
 {
   public:
 
@@ -92,7 +92,7 @@ class LIBARDOUR_API ConfigVariable : public ConfigVariableBase
 
 /** Specialisation of ConfigVariable for std::string to cope with whitespace properly */
 template<>
-class LIBARDOUR_API ConfigVariable<std::string> : public ConfigVariableBase
+class /*LIBARDOUR_API*/ ConfigVariable<std::string> : public ConfigVariableBase
 {
   public:
 
@@ -127,7 +127,7 @@ class LIBARDOUR_API ConfigVariable<std::string> : public ConfigVariableBase
 };
 
 template<>
-class LIBARDOUR_API ConfigVariable<bool> : public ConfigVariableBase
+class /*LIBARDOUR_API*/ ConfigVariable<bool> : public ConfigVariableBase
 {
   public:
 
@@ -164,7 +164,7 @@ class LIBARDOUR_API ConfigVariable<bool> : public ConfigVariableBase
 };
 
 template<class T>
-class LIBARDOUR_API ConfigVariableWithMutation : public ConfigVariable<T>
+class /*LIBARDOUR_API*/ ConfigVariableWithMutation : public ConfigVariable<T>
 {
   public:
 	ConfigVariableWithMutation (std::string name, T val, T (*m)(T))
@@ -193,7 +193,7 @@ class LIBARDOUR_API ConfigVariableWithMutation : public ConfigVariable<T>
 };
 
 template<>
-class LIBARDOUR_API ConfigVariableWithMutation<std::string> : public ConfigVariable<std::string>
+class /*LIBARDOUR_API*/ ConfigVariableWithMutation<std::string> : public ConfigVariable<std::string>
 {
   public:
 	ConfigVariableWithMutation (std::string name, std::string val, std::string (*m)(std::string))

@@ -27,7 +27,7 @@ namespace ARDOUR {
 
 /** Contains notes and controllers */
 template<typename T>
-class LIBARDOUR_API AutomatableSequence : public Automatable, public Evoral::Sequence<T> {
+class /*LIBARDOUR_API*/ AutomatableSequence : public Automatable, public Evoral::Sequence<T> {
 public:
 	AutomatableSequence(Session& s)
 		: Evoral::ControlSet()

@@ -140,7 +140,7 @@ class WindowsVSTPlugin;
 
 extern void setup_enum_writer ();
 
-class LIBARDOUR_API LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager
+class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager
 {
   public:
 	enum RecordState {
@@ -237,7 +237,7 @@ class LIBARDOUR_API LIBARDOUR_API Session : public PBD::StatefulDestructible, pu
 		return _bundles.reader ();
 	}
 
-	struct RoutePublicOrderSorter {
+	struct LIBARDOUR_API RoutePublicOrderSorter {
 		bool operator() (boost::shared_ptr<Route>, boost::shared_ptr<Route> b);
 	};
 
