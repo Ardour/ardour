@@ -24,7 +24,7 @@
 
 namespace ARDOUR {
 
-	LIBARDOUR_API extern const char* revision;
+	extern LIBARDOUR_API const char* revision;
 	
 	extern "C" {
 		LIBARDOUR_API const char* get_ardour_revision();
