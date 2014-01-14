@@ -1,0 +1,41 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Roland V-Studio 20">
+<DeviceInfo bank-size="8"/>
+      
+<!-- Track Group UP -->
+<Binding channel="1" note="47" function="prev-bank" momentary="yes"/>
+<!-- Track Group DOWN -->
+<Binding channel="1" note="46" function="next-bank" momentary="yes"/>
+<!-- Transport controls -->
+<Binding channel="2" note="33" action="Transport/GotoZero" momentary="yes"/>  <!-- Fix for non-working transport-zero action -->
+<Binding channel="1" note="91" function="transport-start" momentary="yes"/>
+<Binding channel="1" note="92" function="transport-end" momentary="yes"/>
+<Binding channel="1" note="93" function="transport-stop" momentary="yes"/>
+<Binding channel="1" note="94" function="transport-roll" momentary="yes"/>
+<Binding channel="1" note="95" action="Transport/Record"  momentary="yes"/> <!-- Makes record toggle -->
+
+<!-- Track Select -->
+<Binding channel="1" note="24" uri="/route/recenable B1"/>
+<Binding channel="1" note="25" uri="/route/recenable B2"/>
+<Binding channel="1" note="26" uri="/route/recenable B3"/>
+<Binding channel="1" note="27" uri="/route/recenable B4"/>
+<Binding channel="1" note="28" uri="/route/recenable B5"/>
+<Binding channel="1" note="29" uri="/route/recenable B6"/>
+<Binding channel="1" note="30" uri="/route/recenable B7"/>
+<Binding channel="1" note="31" uri="/route/recenable B8"/>
+
+<!-- Faders -->
+<Binding channel="1" pb="0"   uri="/route/gain B1"/>
+<Binding channel="2" pb="0"   uri="/route/gain B2"/>
+<Binding channel="3" pb="0"   uri="/route/gain B3"/>
+<Binding channel="4" pb="0"   uri="/route/gain B4"/>
+<Binding channel="5" pb="0"   uri="/route/gain B5"/>
+<Binding channel="6" pb="0"   uri="/route/gain B6"/>
+<Binding channel="7" pb="0"   uri="/route/gain B7"/>
+<Binding channel="8" pb="0"   uri="/route/gain B8"/>
+
+<!-- Gain controls -->
+<Binding channel="9" pb="0" uri="/bus/gain master"/>
+
+</ArdourMIDIBindings>
