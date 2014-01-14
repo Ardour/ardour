@@ -81,7 +81,7 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 		_bitslot = 0;
 	}
 
-	boost_debug_shared_ptr_mark_interesting (this, "send");
+	//boost_debug_shared_ptr_mark_interesting (this, "send");
 
 	_amp.reset (new Amp (_session));
 	_meter.reset (new PeakMeter (_session, name()));
