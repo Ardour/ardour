@@ -69,12 +69,12 @@ Panner2d::Target::set_text (const char* txt)
 }
 
 Panner2d::Panner2d (boost::shared_ptr<PannerShell> p, int32_t h)
-	: panner_shell (p)
-        , position (AngularVector (0.0, 0.0), "")
-        , width (0)
-        , height (h)
-        , last_width (0)
-        , have_elevation (false)
+: panner_shell (p)
+	, position (AngularVector (0.0, 0.0), "")
+	, width (0)
+	, height (h)
+	, last_width (0)
+	, have_elevation (false)
 {
 	panner_shell->Changed.connect (connections, invalidator (*this), boost::bind (&Panner2d::handle_state_change, this), gui_context());
 
@@ -97,7 +97,7 @@ Panner2d::~Panner2d()
 void
 Panner2d::reset (uint32_t n_inputs)
 {
-        uint32_t nouts = panner_shell->panner()->out().n_audio();
+	uint32_t nouts = panner_shell->panner()->out().n_audio();
 
 	/* signals */
 
@@ -113,11 +113,11 @@ Panner2d::reset (uint32_t n_inputs)
 		signals.resize (n_inputs);
 	}
 
-        label_signals ();
+	label_signals ();
 
-        for (uint32_t i = 0; i < n_inputs; ++i) {
-                signals[i]->position = panner_shell->panner()->signal_position (i);
-        }
+	for (uint32_t i = 0; i < n_inputs; ++i) {
+		signals[i]->position = panner_shell->panner()->signal_position (i);
+	}
 
 	/* add all outputs */
 
@@ -137,7 +137,7 @@ Panner2d::reset (uint32_t n_inputs)
 		(*x)->visible = false;
 	}
 
-        vector<Speaker>& the_speakers (panner_shell->panner()->get_speakers()->speakers());
+	vector<Speaker>& the_speakers (panner_shell->panner()->get_speakers()->speakers());
 
 	for (uint32_t n = 0; n < nouts; ++n) {
 		char buf[16];
@@ -154,24 +154,24 @@ Panner2d::reset (uint32_t n_inputs)
 void
 Panner2d::on_size_allocate (Gtk::Allocation& alloc)
 {
-  	width = alloc.get_width();
-  	height = alloc.get_height();
+	width = alloc.get_width();
+	height = alloc.get_height();
 
-        if (height > large_size_threshold) {
-                border = large_border_width;
-        } else {
-                border = small_border_width;
-        }
+	if (height > large_size_threshold) {
+		border = large_border_width;
+	} else {
+		border = small_border_width;
+	}
 
-        radius = min (width, height);
-        radius -= border;
-        radius /= 2;
+	radius = min (width, height);
+	radius -= border;
+	radius /= 2;
 
-        hoffset = max ((double) (width - height), border);
-        voffset = max ((double) (height - width), border);
+	hoffset = max ((double) (width - height), border);
+	voffset = max ((double) (height - width), border);
 
-        hoffset = rint(hoffset / 2.0);
-        voffset = rint(voffset / 2.0);
+	hoffset = rint(hoffset / 2.0);
+	voffset = rint(voffset / 2.0);
 
 	DrawingArea::on_size_allocate (alloc);
 }
@@ -207,41 +207,41 @@ Panner2d::handle_state_change ()
 
 	panner_shell->panner()->SignalPositionChanged.connect (panconnect, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
 
-        set<Evoral::Parameter> params = panner_shell->panner()->what_can_be_automated();
-        set<Evoral::Parameter>::iterator p = params.find(PanElevationAutomation);
-        bool elev = have_elevation;
-        have_elevation = (p == params.end()) ? false : true;
-        if (elev != have_elevation) {
-                handle_position_change();
-        }
+	set<Evoral::Parameter> params = panner_shell->panner()->what_can_be_automated();
+	set<Evoral::Parameter>::iterator p = params.find(PanElevationAutomation);
+	bool elev = have_elevation;
+	have_elevation = (p == params.end()) ? false : true;
+	if (elev != have_elevation) {
+		handle_position_change();
+	}
 	queue_draw ();
 }
 
 void
 Panner2d::label_signals ()
 {
-        uint32_t sz = signals.size();
+	uint32_t sz = signals.size();
 
 	switch (sz) {
-	case 0:
-		break;
+		case 0:
+			break;
 
-	case 1:
-		signals[0]->set_text ("");
-		break;
+		case 1:
+			signals[0]->set_text ("");
+			break;
 
-	case 2:
-                signals[0]->set_text (_("L"));
-                signals[1]->set_text (_("R"));
-		break;
+		case 2:
+			signals[0]->set_text (_("L"));
+			signals[1]->set_text (_("R"));
+			break;
 
-	default:
-		for (uint32_t i = 0; i < sz; ++i) {
-			char buf[64];
-                        snprintf (buf, sizeof (buf), "%" PRIu32, i + 1);
-			signals[i]->set_text (buf);
-		}
-		break;
+		default:
+			for (uint32_t i = 0; i < sz; ++i) {
+				char buf[64];
+				snprintf (buf, sizeof (buf), "%" PRIu32, i + 1);
+				signals[i]->set_text (buf);
+			}
+			break;
 	}
 }
 
@@ -249,27 +249,27 @@ void
 Panner2d::handle_position_change ()
 {
 	uint32_t n;
-        double w = panner_shell->pannable()->pan_width_control->get_value();
+	double w = panner_shell->pannable()->pan_width_control->get_value();
 
-        if (have_elevation) {
-                position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0,
-                                                   panner_shell->pannable()->pan_elevation_control->get_value() * 90.0);
-        } else {
-                position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0, 0);
-        }
+	if (have_elevation) {
+		position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0,
+				panner_shell->pannable()->pan_elevation_control->get_value() * 90.0);
+	} else {
+		position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0, 0);
+	}
 
-        for (uint32_t i = 0; i < signals.size(); ++i) {
-                signals[i]->position = panner_shell->panner()->signal_position (i);
-        }
+	for (uint32_t i = 0; i < signals.size(); ++i) {
+		signals[i]->position = panner_shell->panner()->signal_position (i);
+	}
 
-        if (w * last_width <= 0) {
-                /* changed sign */
-                label_signals ();
-        }
+	if (w * last_width <= 0) {
+		/* changed sign */
+		label_signals ();
+	}
 
-        last_width = w;
+	last_width = w;
 
-        vector<Speaker>& the_speakers (panner_shell->panner()->get_speakers()->speakers());
+	vector<Speaker>& the_speakers (panner_shell->panner()->get_speakers()->speakers());
 
 	for (n = 0; n < speakers.size(); ++n) {
 		speakers[n]->position = the_speakers[n].angles();
@@ -296,15 +296,15 @@ Panner2d::find_closest_object (gdouble x, gdouble y, bool& is_signal)
 	Target *candidate;
 	float distance;
 	float best_distance = FLT_MAX;
-        CartesianVector c;
+	CartesianVector c;
 
-        /* start with the position itself */
+	/* start with the position itself */
 
-        position.position.cartesian (c);
-        cart_to_gtk (c);
-        best_distance = sqrt ((c.x - x) * (c.x - x) +
-                         (c.y - y) * (c.y - y));
-        closest = &position;
+	position.position.cartesian (c);
+	cart_to_gtk (c);
+	best_distance = sqrt ((c.x - x) * (c.x - x) +
+			(c.y - y) * (c.y - y));
+	closest = &position;
 
 #if 0 // TODO signal grab -> change width, not position
 	for (Targets::const_iterator i = signals.begin(); i != signals.end(); ++i) {
@@ -314,63 +314,63 @@ Panner2d::find_closest_object (gdouble x, gdouble y, bool& is_signal)
 		cart_to_gtk (c);
 
 		distance = sqrt ((c.x - x) * (c.x - x) +
-		                 (c.y - y) * (c.y - y));
+				(c.y - y) * (c.y - y));
 
-                if (distance < best_distance) {
+		if (distance < best_distance) {
 			closest = candidate;
 			best_distance = distance;
 		}
 	}
 #endif
 
-        is_signal = true;
+	is_signal = true;
 
-        if (height > large_size_threshold) {
-                /* "big" */
-                if (best_distance > 30) { // arbitrary
-                        closest = 0;
-                }
-        } else {
-                /* "small" */
-                if (best_distance > 10) { // arbitrary
-                        closest = 0;
-                }
-        }
+	if (height > large_size_threshold) {
+		/* "big" */
+		if (best_distance > 30) { // arbitrary
+			closest = 0;
+		}
+	} else {
+		/* "small" */
+		if (best_distance > 10) { // arbitrary
+			closest = 0;
+		}
+	}
 
-        /* if we didn't find a signal close by, check the speakers */
+	/* if we didn't find a signal close by, check the speakers */
 
-        if (!closest) {
-                for (Targets::const_iterator i = speakers.begin(); i != speakers.end(); ++i) {
-                        candidate = *i;
+	if (!closest) {
+		for (Targets::const_iterator i = speakers.begin(); i != speakers.end(); ++i) {
+			candidate = *i;
 
-                        candidate->position.cartesian (c);
-                        cart_to_gtk (c);
+			candidate->position.cartesian (c);
+			cart_to_gtk (c);
 
-                        distance = sqrt ((c.x - x) * (c.x - x) +
-                                         (c.y - y) * (c.y - y));
+			distance = sqrt ((c.x - x) * (c.x - x) +
+					(c.y - y) * (c.y - y));
 
-                        if (distance < best_distance) {
-                                closest = candidate;
-                                best_distance = distance;
-                        }
-                }
+			if (distance < best_distance) {
+				closest = candidate;
+				best_distance = distance;
+			}
+		}
 
-                if (height > large_size_threshold) {
-                        /* "big" */
-                        if (best_distance < 30) { // arbitrary
-                                is_signal = false;
-                        } else {
-                                closest = 0;
-                        }
-                } else {
-                        /* "small" */
-                        if (best_distance < 10) { // arbitrary
-                                is_signal = false;
-                        } else {
-                                closest = 0;
-                        }
-                }
-        }
+		if (height > large_size_threshold) {
+			/* "big" */
+			if (best_distance < 30) { // arbitrary
+				is_signal = false;
+			} else {
+				closest = 0;
+			}
+		} else {
+			/* "small" */
+			if (best_distance < 10) { // arbitrary
+				is_signal = false;
+			} else {
+				closest = 0;
+			}
+		}
+	}
 
 	return closest;
 }
@@ -389,9 +389,9 @@ Panner2d::on_motion_notify_event (GdkEventMotion *ev)
 		state = (GdkModifierType) ev->state;
 	}
 
-        if (ev->state & (GDK_BUTTON1_MASK|GDK_BUTTON2_MASK)) {
-                did_move = true;
-        }
+	if (ev->state & (GDK_BUTTON1_MASK|GDK_BUTTON2_MASK)) {
+		did_move = true;
+	}
 
 	return handle_motion (x, y, state);
 }
@@ -399,14 +399,14 @@ Panner2d::on_motion_notify_event (GdkEventMotion *ev)
 bool
 Panner2d::on_expose_event (GdkEventExpose *event)
 {
-        CartesianVector c;
+	CartesianVector c;
 	cairo_t* cr;
-        bool small = (height <= large_size_threshold);
-        const double diameter = radius*2.0;
+	bool small = (height <= large_size_threshold);
+	const double diameter = radius*2.0;
 
 	cr = gdk_cairo_create (get_window()->gobj());
 
-        /* background */
+	/* background */
 
 	cairo_rectangle (cr, event->area.x, event->area.y, event->area.width, event->area.height);
 	if (!panner_shell->bypassed()) {
@@ -417,15 +417,15 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 	cairo_fill_preserve (cr);
 	cairo_clip (cr);
 
-        /* offset to give us some border */
+	/* offset to give us some border */
 
-        cairo_translate (cr, hoffset, voffset);
+	cairo_translate (cr, hoffset, voffset);
 
 	cairo_set_line_width (cr, 1.0);
 
 	/* horizontal line of "crosshairs" */
 
-        cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 1.0);
+	cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 1.0);
 	cairo_move_to (cr, 0.0, rint(radius) + .5);
 	cairo_line_to (cr, diameter, rint(radius) + .5);
 	cairo_stroke (cr);
@@ -439,46 +439,46 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 	/* the circle on which signals live */
 
 	cairo_set_line_width (cr, 1.5);
-        cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, 1.0);
+	cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, 1.0);
 	cairo_arc (cr, radius, radius, radius, 0.0, 2.0 * M_PI);
 	cairo_stroke (cr);
 
-        for (uint32_t rad = 15; rad < 90; rad += 15) {
-                cairo_set_line_width (cr, .5 + (float)rad / 150.0);
-                if (rad == 45) {
-                        cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 1.0);
-                } else {
-                        cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.8);
-                }
-                cairo_new_path (cr);
-                cairo_arc (cr, radius, radius, radius * sin(M_PI * (float) rad / 180.0), 0, 2.0 * M_PI);
-                cairo_stroke (cr);
-        }
+	for (uint32_t rad = 15; rad < 90; rad += 15) {
+		cairo_set_line_width (cr, .5 + (float)rad / 150.0);
+		if (rad == 45) {
+			cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 1.0);
+		} else {
+			cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.8);
+		}
+		cairo_new_path (cr);
+		cairo_arc (cr, radius, radius, radius * sin(M_PI * (float) rad / 180.0), 0, 2.0 * M_PI);
+		cairo_stroke (cr);
+	}
 
 	if (!panner_shell->bypassed()) {
 
-                if (signals.size() > 1) {
-                        /* arc to show "diffusion" */
+		if (signals.size() > 1) {
+			/* arc to show "diffusion" */
 
-                        double width_angle = fabs (panner_shell->pannable()->pan_width_control->get_value()) * 2 * M_PI;
-                        double position_angle = (2 * M_PI) - panner_shell->pannable()->pan_azimuth_control->get_value() * 2 * M_PI;
+			double width_angle = fabs (panner_shell->pannable()->pan_width_control->get_value()) * 2 * M_PI;
+			double position_angle = (2 * M_PI) - panner_shell->pannable()->pan_azimuth_control->get_value() * 2 * M_PI;
 
-                        cairo_save (cr);
-                        cairo_translate (cr, radius, radius);
-                        cairo_rotate (cr, position_angle - (width_angle/2.0));
-                        cairo_move_to (cr, 0, 0);
-                        cairo_arc_negative (cr, 0, 0, radius, width_angle, 0.0);
-                        cairo_close_path (cr);
-                        if (panner_shell->pannable()->pan_width_control->get_value() >= 0.0) {
-                                /* normal width */
-                                cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.45);
-                        } else {
-                                /* inverse width */
-                                cairo_set_source_rgba (cr, 1.0, 0.419, 0.419, 0.45);
-                        }
-                        cairo_fill (cr);
-                        cairo_restore (cr);
-                }
+			cairo_save (cr);
+			cairo_translate (cr, radius, radius);
+			cairo_rotate (cr, position_angle - (width_angle/2.0));
+			cairo_move_to (cr, 0, 0);
+			cairo_arc_negative (cr, 0, 0, radius, width_angle, 0.0);
+			cairo_close_path (cr);
+			if (panner_shell->pannable()->pan_width_control->get_value() >= 0.0) {
+				/* normal width */
+				cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.45);
+			} else {
+				/* inverse width */
+				cairo_set_source_rgba (cr, 1.0, 0.419, 0.419, 0.45);
+			}
+			cairo_fill (cr);
+			cairo_restore (cr);
+		}
 
 		double arc_radius;
 
@@ -491,58 +491,58 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 			arc_radius = 12.0;
 		}
 
-                /* draw position */
+		/* draw position */
 
-                position.position.cartesian (c);
-                cart_to_gtk (c);
+		position.position.cartesian (c);
+		cart_to_gtk (c);
 
-                cairo_new_path (cr);
-                cairo_arc (cr, c.x, c.y, arc_radius + 1.0, 0, 2.0 * M_PI);
-                cairo_set_source_rgba (cr, 1.0, 0.419, 0.419, 0.85);
-                cairo_fill_preserve (cr);
-                cairo_set_source_rgba (cr, 1.0, 0.905, 0.905, 0.85);
-                cairo_stroke (cr);
+		cairo_new_path (cr);
+		cairo_arc (cr, c.x, c.y, arc_radius + 1.0, 0, 2.0 * M_PI);
+		cairo_set_source_rgba (cr, 1.0, 0.419, 0.419, 0.85);
+		cairo_fill_preserve (cr);
+		cairo_set_source_rgba (cr, 1.0, 0.905, 0.905, 0.85);
+		cairo_stroke (cr);
 
-                /* signals */
+		/* signals */
 
-                if (signals.size() > 1) {
-                        for (Targets::iterator i = signals.begin(); i != signals.end(); ++i) {
-                                Target* signal = *i;
+		if (signals.size() > 1) {
+			for (Targets::iterator i = signals.begin(); i != signals.end(); ++i) {
+				Target* signal = *i;
 
-                                if (signal->visible) {
+				if (signal->visible) {
 
-                                        /* TODO check for overlap - multiple src at same position
-                                         * -> visualize it properly
-                                         */
-                                        PBD::AngularVector sp = signal->position;
-                                        if (!have_elevation) sp.ele = 0;
-                                        sp.cartesian (c);
-                                        cart_to_gtk (c);
+					/* TODO check for overlap - multiple src at same position
+					 * -> visualize it properly
+					 */
+					PBD::AngularVector sp = signal->position;
+					if (!have_elevation) sp.ele = 0;
+					sp.cartesian (c);
+					cart_to_gtk (c);
 
-                                        cairo_new_path (cr);
-                                        cairo_arc (cr, c.x, c.y, arc_radius, 0, 2.0 * M_PI);
-                                        cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.75);
-                                        cairo_fill_preserve (cr);
-                                        cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, 0.8);
-                                        cairo_stroke (cr);
+					cairo_new_path (cr);
+					cairo_arc (cr, c.x, c.y, arc_radius, 0, 2.0 * M_PI);
+					cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.75);
+					cairo_fill_preserve (cr);
+					cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, 0.8);
+					cairo_stroke (cr);
 
-                                        if (!small && !signal->text.empty()) {
-                                                cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, .9);
-                                                /* the +/- adjustments are a hack to try to center the text in the circle
-                                                 * TODO use pango get_pixel_size() -- see mono_panner.cc
-                                                 */
-                                                if (small) {
-                                                        cairo_move_to (cr, c.x - 1, c.y + 1);
-                                                } else {
-                                                        cairo_move_to (cr, c.x - 4, c.y + 4);
-                                                }
-                                                cairo_show_text (cr, signal->text.c_str());
-                                        }
-                                }
-                        }
-                }
+					if (!small && !signal->text.empty()) {
+						cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, .9);
+						/* the +/- adjustments are a hack to try to center the text in the circle
+						 * TODO use pango get_pixel_size() -- see mono_panner.cc
+						 */
+						if (small) {
+							cairo_move_to (cr, c.x - 1, c.y + 1);
+						} else {
+							cairo_move_to (cr, c.x - 4, c.y + 4);
+						}
+						cairo_show_text (cr, signal->text.c_str());
+					}
+				}
+			}
+		}
 
-                /* speakers */
+		/* speakers */
 
 		int n = 0;
 
@@ -560,40 +560,40 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 				snprintf (buf, sizeof (buf), "%d", n);
 
-                                /* stroke out a speaker shape */
+				/* stroke out a speaker shape */
 
-                                cairo_move_to (cr, c.x, c.y);
-                                cairo_save (cr);
-                                cairo_rotate (cr, -(speaker->position.azi/360.0) * (2.0 * M_PI));
-                                if (small) {
-                                        cairo_scale (cr, 0.8, 0.8);
-                                } else {
-                                        cairo_scale (cr, 1.2, 1.2);
-                                }
-                                cairo_rel_line_to (cr, 4, -2);
-                                cairo_rel_line_to (cr, 0, -7);
-                                cairo_rel_line_to (cr, 5, +5);
-                                cairo_rel_line_to (cr, 5, 0);
-                                cairo_rel_line_to (cr, 0, 5);
-                                cairo_rel_line_to (cr, -5, 0);
-                                cairo_rel_line_to (cr, -5, +5);
-                                cairo_rel_line_to (cr, 0, -7);
-                                cairo_close_path (cr);
+				cairo_move_to (cr, c.x, c.y);
+				cairo_save (cr);
+				cairo_rotate (cr, -(speaker->position.azi/360.0) * (2.0 * M_PI));
+				if (small) {
+					cairo_scale (cr, 0.8, 0.8);
+				} else {
+					cairo_scale (cr, 1.2, 1.2);
+				}
+				cairo_rel_line_to (cr, 4, -2);
+				cairo_rel_line_to (cr, 0, -7);
+				cairo_rel_line_to (cr, 5, +5);
+				cairo_rel_line_to (cr, 5, 0);
+				cairo_rel_line_to (cr, 0, 5);
+				cairo_rel_line_to (cr, -5, 0);
+				cairo_rel_line_to (cr, -5, +5);
+				cairo_rel_line_to (cr, 0, -7);
+				cairo_close_path (cr);
 				cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 1.0);
 				cairo_fill (cr);
-                                cairo_restore (cr);
+				cairo_restore (cr);
 
-                                if (!small) {
-                                        cairo_set_font_size (cr, 16);
+				if (!small) {
+					cairo_set_font_size (cr, 16);
 
-                                        /* move the text in just a bit */
+					/* move the text in just a bit */
 
-                                        AngularVector textpos (speaker->position.azi, speaker->position.ele, 0.85);
-                                        textpos.cartesian (c);
-                                        cart_to_gtk (c);
-                                        cairo_move_to (cr, c.x, c.y);
-                                        cairo_show_text (cr, buf);
-                                }
+					AngularVector textpos (speaker->position.azi, speaker->position.ele, 0.85);
+					textpos.cartesian (c);
+					cart_to_gtk (c);
+					cairo_move_to (cr, c.x, c.y);
+					cairo_show_text (cr, buf);
+				}
 
 			}
 		}
@@ -820,20 +820,20 @@ Panner2d::toggle_bypass ()
 
 Panner2dWindow::Panner2dWindow (boost::shared_ptr<PannerShell> p, int32_t h, uint32_t inputs)
 	: ArdourWindow (_("Panner (2D)"))
-        , widget (p, h)
+	, widget (p, h)
 	, bypass_button (_("Bypass"))
 	, width_adjustment (0, -100, 100, 1, 5, 0)
-        , width_spinner (width_adjustment)
+	, width_spinner (width_adjustment)
 {
 	widget.set_name ("MixerPanZone");
 
 	set_title (_("Panner"));
 	widget.set_size_request (h, h);
 
-        bypass_button.signal_toggled().connect (sigc::mem_fun (*this, &Panner2dWindow::bypass_toggled));
-        width_spinner.signal_changed().connect (sigc::mem_fun (*this, &Panner2dWindow::width_changed));
+	bypass_button.signal_toggled().connect (sigc::mem_fun (*this, &Panner2dWindow::bypass_toggled));
+	width_spinner.signal_changed().connect (sigc::mem_fun (*this, &Panner2dWindow::width_changed));
 
-        p->pannable()->pan_width_control->Changed.connect (connections, invalidator(*this), boost::bind (&Panner2dWindow::set_width, this), gui_context());
+	p->pannable()->pan_width_control->Changed.connect (connections, invalidator(*this), boost::bind (&Panner2dWindow::set_width, this), gui_context());
 	p->Changed.connect (connections, invalidator (*this), boost::bind (&Panner2dWindow::set_bypassed, this), gui_context());
 
 	button_box.set_spacing (6);
@@ -843,9 +843,9 @@ Panner2dWindow::Panner2dWindow (boost::shared_ptr<PannerShell> p, int32_t h, uin
 
 	left_side.pack_start (button_box, false, false);
 
-        Gtk::Label* l = manage (new Label (
-                                p->panner()->describe_parameter(PanWidthAutomation),
-                                Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	Gtk::Label* l = manage (new Label (
+				p->panner()->describe_parameter(PanWidthAutomation),
+				Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	spinner_box.pack_start (*l, false, false);
 	spinner_box.pack_start (width_spinner, false, false);
 	left_side.pack_start (spinner_box, false, false);
@@ -865,8 +865,8 @@ Panner2dWindow::Panner2dWindow (boost::shared_ptr<PannerShell> p, int32_t h, uin
 
 	add (hpacker);
 	reset (inputs);
-        set_width();
-        set_bypassed();
+	set_width();
+	set_bypassed();
 	widget.show ();
 }
 
@@ -879,60 +879,60 @@ Panner2dWindow::reset (uint32_t n_inputs)
 void
 Panner2dWindow::bypass_toggled ()
 {
-        bool view = bypass_button.get_active ();
-        bool model = widget.get_panner_shell()->bypassed ();
+	bool view = bypass_button.get_active ();
+	bool model = widget.get_panner_shell()->bypassed ();
 
-        if (model != view) {
-                widget.get_panner_shell()->set_bypassed (view);
-        }
+	if (model != view) {
+		widget.get_panner_shell()->set_bypassed (view);
+	}
 }
 void
 Panner2dWindow::width_changed ()
 {
-        float model = widget.get_panner_shell()->pannable()->pan_width_control->get_value();
-        float view  = width_spinner.get_value() / 100.0;
-        if (model != view) {
-					widget.get_panner_shell()->panner()->set_width (view);
-				}
+	float model = widget.get_panner_shell()->pannable()->pan_width_control->get_value();
+	float view  = width_spinner.get_value() / 100.0;
+	if (model != view) {
+		widget.get_panner_shell()->panner()->set_width (view);
+	}
 }
 
 void
 Panner2dWindow::set_bypassed ()
 {
-        bool view = bypass_button.get_active ();
-        bool model = widget.get_panner_shell()->bypassed ();
-        if (model != view) {
-                bypass_button.set_active(model);
-        }
+	bool view = bypass_button.get_active ();
+	bool model = widget.get_panner_shell()->bypassed ();
+	if (model != view) {
+		bypass_button.set_active(model);
+	}
 
-        set<Evoral::Parameter> params = widget.get_panner_shell()->panner()->what_can_be_automated();
-        set<Evoral::Parameter>::iterator p = params.find(PanWidthAutomation);
-        if (p == params.end()) {
-                spinner_box.set_sensitive(false);
-        } else {
-                spinner_box.set_sensitive(true);
-        }
+	set<Evoral::Parameter> params = widget.get_panner_shell()->panner()->what_can_be_automated();
+	set<Evoral::Parameter>::iterator p = params.find(PanWidthAutomation);
+	if (p == params.end()) {
+		spinner_box.set_sensitive(false);
+	} else {
+		spinner_box.set_sensitive(true);
+	}
 }
 
 void
 Panner2dWindow::set_width ()
 {
-        // rounding of spinbox is different from slider -- TODO use slider
-        float model = (widget.get_panner_shell()->pannable()->pan_width_control->get_value() * 100.0);
-        float view  = (width_spinner.get_value());
-        if (model != view) {
-                width_spinner.set_value (model);
-        }
+	// rounding of spinbox is different from slider -- TODO use slider
+	float model = (widget.get_panner_shell()->pannable()->pan_width_control->get_value() * 100.0);
+	float view  = (width_spinner.get_value());
+	if (model != view) {
+		width_spinner.set_value (model);
+	}
 }
 
 bool
 Panner2dWindow::on_key_press_event (GdkEventKey* event)
 {
-        return relay_key_press (event, &PublicEditor::instance());
+	return relay_key_press (event, &PublicEditor::instance());
 }
 
 bool
 Panner2dWindow::on_key_release_event (GdkEventKey*)
 {
-        return true;
+	return true;
 }

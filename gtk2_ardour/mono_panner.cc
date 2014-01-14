@@ -404,7 +404,7 @@ MonoPanner::on_scroll_event (GdkEventScroll* ev)
 	return true;
 }
 
-	bool
+bool
 MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 {
 	if (_panner_shell->bypassed()) {
@@ -444,7 +444,7 @@ MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 	return true;
 }
 
-	bool
+bool
 MonoPanner::on_key_press_event (GdkEventKey* ev)
 {
 	double one_degree = 1.0/180.0;
@@ -481,7 +481,7 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
 	return true;
 }
 
-	void
+void
 MonoPanner::set_colors ()
 {
 	colors.fill = ARDOUR_UI::config()->canvasvar_MonoPannerFill.get();
@@ -492,14 +492,14 @@ MonoPanner::set_colors ()
 	colors.pos_fill = ARDOUR_UI::config()->canvasvar_MonoPannerPositionFill.get();
 }
 
-	void
+void
 MonoPanner::color_handler ()
 {
 	set_colors ();
 	queue_draw ();
 }
 
-	void
+void
 MonoPanner::bypass_handler ()
 {
 	queue_draw ();
