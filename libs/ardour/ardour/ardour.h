@@ -49,8 +49,8 @@ namespace ARDOUR {
 
 	class AudioEngine;
 
-	LIBARDOUR_API extern PBD::Signal1<void,std::string> BootMessage;
-	LIBARDOUR_API extern PBD::Signal0<void> GUIIdle;
+	extern LIBARDOUR_API PBD::Signal1<void,std::string> BootMessage;
+	extern LIBARDOUR_API PBD::Signal0<void> GUIIdle;
 
 	/**
 	 * @param with_vst true to enable VST Support
@@ -66,9 +66,9 @@ namespace ARDOUR {
 	LIBARDOUR_API bool no_auto_connect ();
 	LIBARDOUR_API void make_property_quarks ();
 
-	LIBARDOUR_API extern PBD::PropertyChange bounds_change;
+	extern LIBARDOUR_API PBD::PropertyChange bounds_change;
 
-	LIBARDOUR_API extern const char* const ardour_config_info;
+	extern /*LIBARDOUR_API*/ const char* const ardour_config_info;
 
 	LIBARDOUR_API void find_bindings_files (std::map<std::string,std::string>&);
 
