@@ -143,10 +143,10 @@ Onset::initialise(size_t channels, size_t stepSize, size_t blockSize)
     return true;
 }
 
-#ifdef HAVE_AUBIO4
 void
 Onset::reset()
 {
+#ifdef HAVE_AUBIO4
     if (m_onsetdet) del_aubio_onset(m_onsetdet);
 
     m_onsetdet = new_aubio_onset
@@ -163,8 +163,8 @@ Onset::reset()
                                              lrintf(m_inputSampleRate));
 
     m_lastOnset = Vamp::RealTime::zeroTime - m_delay - m_delay;
-}
 #endif
+}
 
 size_t
 Onset::getPreferredStepSize() const
