@@ -59,7 +59,8 @@ def build(bld):
         'src/general/sample_format_converter.cc',
         'src/routines.cc',
         'src/debug_utils.cc',
-        'src/general/broadcast_info.cc'
+        'src/general/broadcast_info.cc',
+        'src/general/normalizer.cc'
         ]
     if bld.is_defined('HAVE_SAMPLERATE'):
         audiographer_sources += [ 'src/general/sr_converter.cc' ]
