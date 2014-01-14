@@ -76,9 +76,9 @@ Panner2d::Panner2d (boost::shared_ptr<PannerShell> p, int32_t h)
 	, last_width (0)
 	, have_elevation (false)
 {
-	panner_shell->Changed.connect (connections, invalidator (*this), boost::bind (&Panner2d::handle_state_change, this), gui_context());
+	panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&Panner2d::handle_state_change, this), gui_context());
 
-	panner_shell->panner()->SignalPositionChanged.connect (panconnect, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
+	panner_shell->panner()->SignalPositionChanged.connect (panner_connections, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
 
 	drag_target = 0;
 	set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
@@ -200,12 +200,12 @@ Panner2d::add_speaker (const AngularVector& a)
 void
 Panner2d::handle_state_change ()
 {
-	panconnect.drop_connections();
+	panner_connections.drop_connections();
 	if (!panner_shell->panner()) {
 		return;
 	}
 
-	panner_shell->panner()->SignalPositionChanged.connect (panconnect, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
+	panner_shell->panner()->SignalPositionChanged.connect (panner_connections, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
 
 	set<Evoral::Parameter> params = panner_shell->panner()->what_can_be_automated();
 	set<Evoral::Parameter>::iterator p = params.find(PanElevationAutomation);
@@ -833,8 +833,11 @@ Panner2dWindow::Panner2dWindow (boost::shared_ptr<PannerShell> p, int32_t h, uin
 	bypass_button.signal_toggled().connect (sigc::mem_fun (*this, &Panner2dWindow::bypass_toggled));
 	width_spinner.signal_changed().connect (sigc::mem_fun (*this, &Panner2dWindow::width_changed));
 
-	p->pannable()->pan_width_control->Changed.connect (connections, invalidator(*this), boost::bind (&Panner2dWindow::set_width, this), gui_context());
-	p->Changed.connect (connections, invalidator (*this), boost::bind (&Panner2dWindow::set_bypassed, this), gui_context());
+	p->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&Panner2dWindow::set_bypassed, this), gui_context());
+	/* needed for the width-spinbox in the main window */
+	p->PannableChanged.connect (panshell_connections, invalidator (*this), boost::bind (&Panner2dWindow::pannable_handler, this), gui_context());
+	p->pannable()->pan_width_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&Panner2dWindow::set_width, this), gui_context());
+
 
 	button_box.set_spacing (6);
 	button_box.pack_start (bypass_button, false, false);
@@ -894,6 +897,14 @@ Panner2dWindow::width_changed ()
 	if (model != view) {
 		widget.get_panner_shell()->panner()->set_width (view);
 	}
+}
+
+void
+Panner2dWindow::pannable_handler ()
+{
+	panvalue_connections.drop_connections();
+	widget.get_panner_shell()->pannable()->pan_width_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&Panner2dWindow::set_width, this), gui_context());
+	set_width();
 }
 
 void

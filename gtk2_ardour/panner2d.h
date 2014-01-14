@@ -127,8 +127,8 @@ class Panner2d : public Gtk::DrawingArea
 	void handle_position_change ();
 	void label_signals ();
 
-	PBD::ScopedConnectionList connections;
-	PBD::ScopedConnectionList panconnect;
+	PBD::ScopedConnectionList panshell_connections;
+	PBD::ScopedConnectionList panner_connections;
 
 	/* cartesian coordinates in GTK units ; adjust to same but on a circle of radius 1.0
 	   and centered in the middle of our area
@@ -156,10 +156,12 @@ class Panner2dWindow : public ArdourWindow
 	Gtk::Adjustment   width_adjustment;
 	Gtk::SpinButton   width_spinner;
 
-	PBD::ScopedConnectionList connections;
+	PBD::ScopedConnectionList panshell_connections;
+	PBD::ScopedConnectionList panvalue_connections;
 	void set_bypassed();
 	void set_width();
 
+	void pannable_handler ();
 	void bypass_toggled ();
 	void width_changed ();
 	bool on_key_press_event (GdkEventKey*);
