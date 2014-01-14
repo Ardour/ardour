@@ -24,8 +24,8 @@
 #include <string>
 
 #include <taglib/tag.h>
-#include <taglib/toolkit/taglib.h>
-#include <taglib/ogg/xiphcomment.h>
+#include <taglib/taglib.h>
+#include <taglib/xiphcomment.h>
 
 #include "ardour/libardour_visibility.h"
 

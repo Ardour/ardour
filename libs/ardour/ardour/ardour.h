@@ -68,7 +68,7 @@ namespace ARDOUR {
 
 	extern LIBARDOUR_API PBD::PropertyChange bounds_change;
 
-	extern /*LIBARDOUR_API*/ const char* const ardour_config_info;
+	extern LIBARDOUR_API const char* const ardour_config_info;
 
 	LIBARDOUR_API void find_bindings_files (std::map<std::string,std::string>&);
 
