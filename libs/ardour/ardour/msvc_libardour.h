@@ -19,7 +19,7 @@
 #ifndef __msvc_libardour_h__
 #define __msvc_libardour_h__
 
-#include "ardour/visibility.h"
+#include <ardour/libardour_visibility.h>
 #include <limits.h>
 
 #ifndef _MAX_PATH
@@ -28,6 +28,8 @@
 #ifndef  PATH_MAX
 #define  PATH_MAX _MAX_PATH
 #endif
+
+#define LIBARDOUR_APICALLTYPE __cdecl
 
 namespace ARDOUR {
 
