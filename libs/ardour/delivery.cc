@@ -398,7 +398,7 @@ Delivery::reset_panner ()
 		if (!_no_panner_reset) {
 
 			if (_panshell) {
-				assert (_role == Main || _role == Aux || _role == Send);
+				assert (_role == Main || _role == Aux || _role == Send || _role == Listen);
 				_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, pan_outs()));
 			}
 		}
@@ -413,7 +413,7 @@ void
 Delivery::panners_became_legal ()
 {
 	if (_panshell) {
-		assert (_role == Main || _role == Aux || _role == Send);
+		assert (_role == Main || _role == Aux || _role == Send || _role == Listen);
 		_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, pan_outs()));
 	}
 
