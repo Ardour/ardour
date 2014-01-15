@@ -166,6 +166,7 @@ Panner2d::on_size_allocate (Gtk::Allocation& alloc)
 	radius = min (width, height);
 	radius -= border;
 	radius /= 2;
+	radius = rint(radius) + .5;
 
 	hoffset = max ((double) (width - height), border);
 	voffset = max ((double) (height - width), border);
@@ -251,12 +252,8 @@ Panner2d::handle_position_change ()
 	uint32_t n;
 	double w = panner_shell->pannable()->pan_width_control->get_value();
 
-	if (have_elevation) {
-		position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0,
-				panner_shell->pannable()->pan_elevation_control->get_value() * 90.0);
-	} else {
-		position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0, 0);
-	}
+        position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0,
+                        panner_shell->pannable()->pan_elevation_control->get_value() * 90.0);
 
 	for (uint32_t i = 0; i < signals.size(); ++i) {
 		signals[i]->position = panner_shell->panner()->signal_position (i);
@@ -300,7 +297,11 @@ Panner2d::find_closest_object (gdouble x, gdouble y, bool& is_signal)
 
 	/* start with the position itself */
 
-	position.position.cartesian (c);
+        PBD::AngularVector dp = position.position;
+        if (!have_elevation) dp.ele = 0;
+        dp.azi = 270 - dp.azi;
+        dp.cartesian (c);
+
 	cart_to_gtk (c);
 	best_distance = sqrt ((c.x - x) * (c.x - x) +
 			(c.y - y) * (c.y - y));
@@ -342,9 +343,11 @@ Panner2d::find_closest_object (gdouble x, gdouble y, bool& is_signal)
 	if (!closest) {
 		for (Targets::const_iterator i = speakers.begin(); i != speakers.end(); ++i) {
 			candidate = *i;
-
-			candidate->position.cartesian (c);
-			cart_to_gtk (c);
+                        PBD::AngularVector sp = candidate->position;
+                        sp.azi = 270 -sp.azi;
+                        CartesianVector c;
+                        sp.cartesian (c);
+                        cart_to_gtk (c);
 
 			distance = sqrt ((c.x - x) * (c.x - x) +
 					(c.y - y) * (c.y - y));
@@ -426,14 +429,14 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 	/* horizontal line of "crosshairs" */
 
 	cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 1.0);
-	cairo_move_to (cr, 0.0, rint(radius) + .5);
-	cairo_line_to (cr, diameter, rint(radius) + .5);
+	cairo_move_to (cr, 0.0, radius);
+	cairo_line_to (cr, diameter, radius);
 	cairo_stroke (cr);
 
 	/* vertical line of "crosshairs" */
 
-	cairo_move_to (cr, rint(radius) + .5, 0);
-	cairo_line_to (cr, rint(radius) + .5, diameter);
+	cairo_move_to (cr, radius, 0);
+	cairo_line_to (cr, radius, diameter);
 	cairo_stroke (cr);
 
 	/* the circle on which signals live */
@@ -456,15 +459,17 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 	}
 
 	if (!panner_shell->bypassed()) {
+                /* convention top == front ^= azimuth == .5 (same as stereo/mono panners) */
 
 		if (signals.size() > 1) {
 			/* arc to show "diffusion" */
 
 			double width_angle = fabs (panner_shell->pannable()->pan_width_control->get_value()) * 2 * M_PI;
-			double position_angle = (2 * M_PI) - panner_shell->pannable()->pan_azimuth_control->get_value() * 2 * M_PI;
+			double position_angle = panner_shell->pannable()->pan_azimuth_control->get_value() * 2 * M_PI;
 
 			cairo_save (cr);
 			cairo_translate (cr, radius, radius);
+                        cairo_rotate (cr, M_PI / 2.0);
 			cairo_rotate (cr, position_angle - (width_angle/2.0));
 			cairo_move_to (cr, 0, 0);
 			cairo_arc_negative (cr, 0, 0, radius, width_angle, 0.0);
@@ -493,7 +498,10 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 		/* draw position */
 
-		position.position.cartesian (c);
+                PBD::AngularVector dp = position.position;
+                if (!have_elevation) dp.ele = 0;
+                dp.azi = 270 - dp.azi;
+		dp.cartesian (c);
 		cart_to_gtk (c);
 
 		cairo_new_path (cr);
@@ -505,7 +513,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 		/* signals */
 
-		if (signals.size() > 1) {
+		if (signals.size() > 0) {
 			for (Targets::iterator i = signals.begin(); i != signals.end(); ++i) {
 				Target* signal = *i;
 
@@ -516,6 +524,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 					 */
 					PBD::AngularVector sp = signal->position;
 					if (!have_elevation) sp.ele = 0;
+                                        sp.azi += 270.0;
 					sp.cartesian (c);
 					cart_to_gtk (c);
 
@@ -553,9 +562,10 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 			if (speaker->visible) {
 
+                                PBD::AngularVector sp = speaker->position;
+                                sp.azi += 270.0;
 				CartesianVector c;
-
-				speaker->position.cartesian (c);
+				sp.cartesian (c);
 				cart_to_gtk (c);
 
 				snprintf (buf, sizeof (buf), "%d", n);
@@ -564,7 +574,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 				cairo_move_to (cr, c.x, c.y);
 				cairo_save (cr);
-				cairo_rotate (cr, -(speaker->position.azi/360.0) * (2.0 * M_PI));
+				cairo_rotate (cr, -(sp.azi/360.0) * (2.0 * M_PI));
 				if (small) {
 					cairo_scale (cr, 0.8, 0.8);
 				} else {
@@ -588,7 +598,8 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 					/* move the text in just a bit */
 
-					AngularVector textpos (speaker->position.azi, speaker->position.ele, 0.85);
+					AngularVector textpos (speaker->position.azi + 270.0, speaker->position.ele, 0.85);
+
 					textpos.cartesian (c);
 					cart_to_gtk (c);
 					cairo_move_to (cr, c.x, c.y);
@@ -716,6 +727,7 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 			if (!have_elevation) {
 				clamp_to_circle (cp.x, cp.y);
 				cp.angular (av);
+                                av.azi = fmod(270 - av.azi, 360);
 				if (drag_target == &position) {
 					double degree_fract = av.azi / 360.0;
 					panner_shell->panner()->set_position (degree_fract);
@@ -727,6 +739,7 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 				double r2d = 180.0 / M_PI;
 				av.azi = r2d * atan2(cp.y, cp.x);
 				av.ele = r2d * asin(cp.z);
+                                av.azi = fmod(270 - av.azi, 360);
 
 				if (drag_target == &position) {
 					double azi_fract = av.azi / 360.0;

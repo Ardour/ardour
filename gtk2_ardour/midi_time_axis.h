@@ -178,6 +178,15 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
         void capture_channel_mode_changed();
         void playback_channel_mode_changed();
+
+	void ensure_pan_views (bool show = true);
+
+	void update_gain_track_visibility ();
+	void update_pan_track_visibility ();
+
+	Gtk::CheckMenuItem* gain_automation_item;
+	std::list<boost::shared_ptr<AutomationTimeAxisView> > pan_tracks;
+	Gtk::CheckMenuItem* pan_automation_item;
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

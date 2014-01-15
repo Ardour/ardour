@@ -214,6 +214,16 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 void
 AudioTimeAxisView::ensure_pan_views (bool show)
 {
+	bool changed = false;
+	for (list<boost::shared_ptr<AutomationTimeAxisView> >::iterator i = pan_tracks.begin(); i != pan_tracks.end(); ++i) {
+		changed = true;
+		(*i)->set_marked_for_display (false);
+	}
+	if (changed) {
+		_route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
+	}
+	pan_tracks.clear();
+
 	if (!_route->panner()) {
 		return;
 	}
@@ -250,6 +260,8 @@ AudioTimeAxisView::ensure_pan_views (bool show)
 
 			pan_tracks.push_back (t);
 			add_automation_child (*p, t, show);
+		} else {
+			pan_tracks.push_back (automation_child (pan_control->parameter ()));
 		}
 	}
 }
@@ -391,14 +403,16 @@ AudioTimeAxisView::build_automation_action_menu (bool for_selection)
 
 	_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
 
-	automation_items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &AudioTimeAxisView::update_pan_track_visibility)));
-	pan_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&automation_items.back ());
-	pan_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
-					 (!pan_tracks.empty() && string_is_affirmative (pan_tracks.front()->gui_property ("visible"))));
+	if (!pan_tracks.empty()) {
+		automation_items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &AudioTimeAxisView::update_pan_track_visibility)));
+		pan_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
+		pan_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
+						 (!pan_tracks.empty() && string_is_affirmative (pan_tracks.front()->gui_property ("visible"))));
 
-	set<Evoral::Parameter> const & params = _route->pannable()->what_can_be_automated ();
-	for (set<Evoral::Parameter>::const_iterator p = params.begin(); p != params.end(); ++p) {
-		_main_automation_menu_map[*p] = pan_automation_item;
+		set<Evoral::Parameter> const & params = _route->pannable()->what_can_be_automated ();
+		for (set<Evoral::Parameter>::iterator p = params.begin(); p != params.end(); ++p) {
+			_main_automation_menu_map[*p] = pan_automation_item;
+		}
 	}
 }
 

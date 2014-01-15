@@ -1153,9 +1153,10 @@ AutomationLine::view_to_model_coord_y (double& y) const
 		y = max (0.0, y);
 		y = min (2.0, y);
 	} else if (alist->parameter().type() == PanAzimuthAutomation ||
-	           alist->parameter().type() == PanElevationAutomation ||
-	           alist->parameter().type() == PanWidthAutomation) {
+	           alist->parameter().type() == PanElevationAutomation) {
 		y = 1.0 - y;
+	} else if (alist->parameter().type() == PanWidthAutomation) {
+		y = 2.0 * y - 1.0;
 	} else if (alist->parameter().type() == PluginAutomation) {
 		y = y * (double)(alist->get_max_y()- alist->get_min_y()) + alist->get_min_y();
 	} else {
@@ -1171,10 +1172,10 @@ AutomationLine::model_to_view_coord (double& x, double& y) const
 	    alist->parameter().type() == EnvelopeAutomation) {
 		y = gain_to_slider_position_with_max (y, Config->get_max_gain());
 	} else if (alist->parameter().type() == PanAzimuthAutomation ||
-	           alist->parameter().type() == PanElevationAutomation ||
-	           alist->parameter().type() == PanWidthAutomation) {
-		// vertical coordinate axis reversal
+	           alist->parameter().type() == PanElevationAutomation) {
 		y = 1.0 - y;
+	} else if (alist->parameter().type() == PanWidthAutomation) {
+		y = .5 + y * .5;
 	} else if (alist->parameter().type() == PluginAutomation) {
 		y = (y - alist->get_min_y()) / (double)(alist->get_max_y()- alist->get_min_y());
 	} else {

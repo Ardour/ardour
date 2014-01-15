@@ -528,23 +528,36 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 {
 	Plugin::connect_and_run (bufs, in_map, out_map, nframes, offset);
 
-	// VC++ doesn't support this C99 extension. Use alloca instead of dynamic array (rather than std::vector which allocs on the heap)
+	ChanCount bufs_count;
+	bufs_count.set(DataType::AUDIO, 1);
+	bufs_count.set(DataType::MIDI, 1);
+
+	BufferSet& silent_bufs  = _session.get_silent_buffers(bufs_count);
+	BufferSet& scratch_bufs = _session.get_scratch_buffers(bufs_count);
+
 	float** ins = (float**)alloca(_plugin->numInputs*sizeof(float*));
 	float** outs = (float**)alloca(_plugin->numInputs*sizeof(float*));
+
 	int32_t i;
 
-	const uint32_t nbufs = bufs.count().n_audio();
-
-	int in_index = 0;
+	uint32_t in_index = 0;
 	for (i = 0; i < (int32_t) _plugin->numInputs; ++i) {
-		ins[i] = bufs.get_audio(min((uint32_t) in_index, nbufs - 1)).data() + offset;
-		in_index++;
+		uint32_t  index;
+		bool      valid = false;
+		index = in_map.get(DataType::AUDIO, in_index++, &valid);
+		ins[i] = (valid)
+					? bufs.get_audio(index).data(offset)
+					: silent_bufs.get_audio(0).data(offset);
 	}
 
-	int out_index = 0;
+	uint32_t out_index = 0;
 	for (i = 0; i < (int32_t) _plugin->numOutputs; ++i) {
-		outs[i] = bufs.get_audio(min((uint32_t) out_index, nbufs - 1)).data() + offset;
-		out_index++;
+		uint32_t  index;
+		bool      valid = false;
+		index = out_map.get(DataType::AUDIO, out_index++, &valid);
+		outs[i] = (valid)
+					? bufs.get_audio(index).data(offset)
+					: scratch_bufs.get_audio(0).data(offset);
 	}
 
 	if (bufs.count().n_midi() > 0) {

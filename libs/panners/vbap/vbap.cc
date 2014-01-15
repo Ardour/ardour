@@ -126,7 +126,7 @@ VBAPanner::update ()
 
         if (_signals.size() > 1) {
                 double w = - (_pannable->pan_width_control->get_value());
-                double signal_direction = _pannable->pan_azimuth_control->get_value() - (w/2);
+                double signal_direction = 1.0 - (_pannable->pan_azimuth_control->get_value() + (w/2));
                 double grd_step_per_signal = w / (_signals.size() - 1);
                 for (vector<Signal*>::iterator s = _signals.begin(); s != _signals.end(); ++s) {
                 
@@ -141,7 +141,7 @@ VBAPanner::update ()
                         signal_direction += grd_step_per_signal;
                 }
         } else if (_signals.size() == 1) {
-                double center = _pannable->pan_azimuth_control->get_value() * 360.0;
+                double center = (1.0 - _pannable->pan_azimuth_control->get_value()) * 360.0;
 
                 /* width has no role to play if there is only 1 signal: VBAP does not do "diffusion" of a single channel */
 
@@ -425,7 +425,7 @@ VBAPanner::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 
         switch (ac->parameter().type()) {
         case PanAzimuthAutomation: /* direction */
-                return string_compose (_("%1\u00B0"), int (rint (val * 360.0)));
+                return string_compose (_("%1\u00B0"), (int (rint (val * 360.0))+180)%360);
                 
         case PanWidthAutomation: /* diffusion */
                 return string_compose (_("%1%%"), (int) floor (100.0 * fabs(val)));
@@ -434,7 +434,7 @@ VBAPanner::value_as_string (boost::shared_ptr<AutomationControl> ac) const
                 return string_compose (_("%1\u00B0"), (int) floor (90.0 * fabs(val)));
                 
         default:
-                return _pannable->value_as_string (ac);
+                return _("unused");
         }
 }
 
@@ -479,11 +479,11 @@ VBAPanner::set_elevation (double e)
 void
 VBAPanner::reset ()
 {
-	set_position (0);
+	set_position (.5);
         if (_signals.size() > 1) {
                 set_width (1.0 - (1.0 / (double)_signals.size()));
         } else {
-                set_width (0);
+                set_width (1.0);
         }
 	set_elevation (0);
 
