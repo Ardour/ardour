@@ -165,6 +165,11 @@ Panner2in2out::update ()
         double width = this->width ();
         const double direction_as_lr_fract = position ();
 
+        double const wrange = min (position(), (1 - position())) * 2;
+        if (fabs(width) > wrange) {
+                width = (width  > 0 ? wrange : -wrange);
+        }
+
         if (width < 0.0) {
                 width = -width;
                 pos[0] = direction_as_lr_fract + (width/2.0); // left signal lr_fract
@@ -427,6 +432,8 @@ Panner2in2out::distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
                         // panning right signal
                         panR = position[n] + (width[n]/2.0f); // center - width/2
                 }
+
+                panR = max(0.f, min(1.f, panR));
 
                 const float panL = 1 - panR;
 
