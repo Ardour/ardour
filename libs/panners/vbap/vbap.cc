@@ -430,7 +430,7 @@ VBAPanner::value_as_string (boost::shared_ptr<AutomationControl> ac) const
                 return string_compose (_("%1\u00B0"), (int) floor (90.0 * fabs(val)));
                 
         default:
-                return _pannable->value_as_string (ac);
+                return _("unused");
         }
 }
 
