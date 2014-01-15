@@ -250,26 +250,27 @@ struct _AEffect
 
 typedef struct _AEffect AEffect;
 
-typedef struct _VstTimeInfo
+struct _VstTimeInfo
 {
-    /* info from online documentation of VST provided by Steinberg */
-
-    double samplePos;
-    double sampleRate;
-    double nanoSeconds;
-    double ppqPos;
-    double tempo;
-    double barStartPos;
-    double cycleStartPos;
-    double cycleEndPos;
-    int32_t   timeSigNumerator;
-    int32_t   timeSigDenominator;
-    int32_t   smpteOffset;
-    int32_t   smpteFrameRate;
-    int32_t   samplesToNextClock;
-    int32_t   flags;
-
-} VstTimeInfo;
+	// 00
+	double samplePos;
+	// 08
+	double sampleRate;
+	// unconfirmed 10 18
+	char empty1[8 + 8];
+	// 20?
+	double tempo;
+	// unconfirmed 28 30 38
+	char empty2[8 + 8 + 8];
+	// 40?
+	int timeSigNumerator;
+	// 44?
+	int timeSigDenominator;
+	// unconfirmed 48 4c 50
+	char empty3[4 + 4 + 4];
+	// 54
+	int flags;
+};
 
 typedef struct _VstTimeInfo VstTimeInfo;
 
