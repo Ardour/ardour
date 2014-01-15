@@ -47,7 +47,7 @@ def build(bld):
     obj.includes     = ['.']
     obj.name         = 'libardourvampplugins'
     obj.target       = 'ardourvampplugins'
-    obj.uselib       = 'FFTW3F'
+    obj.uselib       = 'FFTW3F VAMPSDK'
     obj.use          = 'libvampplugin libqmdsp'
     obj.defines      = [ 'ARDOUR_VAMP_PLUGINS_DLL_EPORTS' ]
     obj.cxxflags     = [ '-fvisibility=default' ]
