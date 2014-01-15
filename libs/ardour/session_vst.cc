@@ -22,6 +22,7 @@
 #endif
 #include <cstdio>
 
+#include "ardour/audioengine.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/windows_vst_plugin.h"
@@ -129,8 +130,8 @@ intptr_t Session::vst_callback (
 		// <value> should contain a mask indicating which fields are required
 		// (see valid masks above), as some items may require extensive
 		// conversions
-		memset(&_timeInfo, 0, sizeof(_timeInfo));
-		std::cerr << "VST get time callback, value = " << std::hex << value << " index = " << index << std::dec << std::endl;
+		_timeInfo.flags = 0;
+		std::cerr << "VST get time callback, value = " << std::hex << value << std::dec << std::endl;
 		if (session) {
 			framepos_t now = session->transport_frame();
 
@@ -138,22 +139,23 @@ intptr_t Session::vst_callback (
 
 			_timeInfo.samplePos = now;
 			_timeInfo.sampleRate = session->frame_rate();
-			_timeInfo.flags = 0;
 
 			const TempoMetric& tm (session->tempo_map().metric_at (now));
 
-//			if (value & (kVstTempoValid)) {
+			if (value & (kVstTempoValid)) {
 				const Tempo& t (tm.tempo());
 				_timeInfo.tempo = t.beats_per_minute ();
 				_timeInfo.flags |= (kVstTempoValid);
-//			}
-//			if (value & (kVstBarsValid)) {
+				std::cerr << "\ttempo makes " << std::hex << _timeInfo.flags << std::dec << std::endl;
+			}
+			if (value & (kVstTimeSigValid)) {
 				const Meter& m (tm.meter());
 				_timeInfo.timeSigNumerator = m.divisions_per_bar ();
 				_timeInfo.timeSigDenominator = m.note_divisor ();
 				_timeInfo.flags |= (kVstTimeSigValid);
-//			}
-//			if (value & (kVstPpqPosValid)) {
+				std::cerr << "\ttimedig makes " << std::hex << _timeInfo.flags << std::dec << std::endl;
+			}
+			if (value & (kVstPpqPosValid)) {
 				Timecode::BBT_Time bbt;
 				try {
 					session->tempo_map().bbt_time_rt (now, bbt);
@@ -169,10 +171,11 @@ intptr_t Session::vst_callback (
 					// PPQ Pos
 					_timeInfo.ppqPos = ppqBar + ppqBeat + ppqTick;
 					_timeInfo.flags |= (kVstPpqPosValid);
+					std::cerr << "\tppq makes " << std::hex << _timeInfo.flags << std::dec << std::endl;
 				} catch (...) {
 					/* relax */
 				}
-//			}
+			}
 
 			// Bars
 			// _timeInfo.barStartPos = ppqBar;
@@ -181,6 +184,9 @@ intptr_t Session::vst_callback (
 			if (session->transport_speed() != 0.0f) {
 				_timeInfo.flags |= kVstTransportPlaying;
 			}
+		} else {
+			_timeInfo.samplePos = 0;
+			_timeInfo.sampleRate = AudioEngine::instance()->sample_rate();
 		}
 
 		std::cerr << "\ttimeinfo valid = " << std::hex << _timeInfo.flags << std::dec << std::endl;
