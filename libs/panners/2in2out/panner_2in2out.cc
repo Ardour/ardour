@@ -78,7 +78,14 @@ Panner2in2out::Panner2in2out (boost::shared_ptr<Pannable> p)
         if (!_pannable->has_state()) {
                 _pannable->pan_azimuth_control->set_value (0.5);
                 _pannable->pan_width_control->set_value (1.0);
-        } 
+        }
+
+        double const w = width();
+        double const wrange = min (position(), (1 - position())) * 2;
+        if (fabs(w) > wrange) {
+                set_width(w > 0 ? wrange : -wrange);
+        }
+
         
         update ();
         
