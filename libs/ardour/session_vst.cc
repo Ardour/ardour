@@ -131,21 +131,56 @@ intptr_t Session::vst_callback (
 		// conversions
 		memset(&_timeInfo, 0, sizeof(_timeInfo));
 		if (session) {
-			_timeInfo.samplePos = session->transport_frame();
+			framepos_t now = session->transport_frame();
+			_timeInfo.samplePos = now;
 			_timeInfo.sampleRate = session->frame_rate();
 			_timeInfo.flags = 0;
 
+			const TempoMetric& tm (session->tempo_map().metric_at (now));
+
 			if (value & (kVstTempoValid)) {
-				const Tempo& t (session->tempo_map().tempo_at (session->transport_frame()));
+				const Tempo& t (tm.tempo());
 				_timeInfo.tempo = t.beats_per_minute ();
 				_timeInfo.flags |= (kVstTempoValid);
 			}
 			if (value & (kVstBarsValid)) {
-				const Meter& m (session->tempo_map().meter_at (session->transport_frame()));
+				const Meter& m (tm.meter());
 				_timeInfo.timeSigNumerator = m.divisions_per_bar ();
 				_timeInfo.timeSigDenominator = m.note_divisor ();
 				_timeInfo.flags |= (kVstBarsValid);
 			}
+			if (value & (kVstPpqPosValid)) {
+				Timecode::BBT_Time bbt;
+				try {
+					session->tempo_map().bbt_time_rt (now, bbt);
+					
+					/* Note that this assumes constant
+					   meter/tempo throughout the session. We
+					   can do better than this, because
+					   progressive rock fans demand it.
+					*/
+					double ppqBar = double(bbt.bars - 1) * tm.meter().divisions_per_bar();
+					double ppqBeat = double(bbt.beats - 1);
+					double ppqTick = double(bbt.ticks) / Timecode::BBT_Time::ticks_per_beat;
+					// PPQ Pos
+					_timeInfo.ppqPos = ppqBar + ppqBeat + ppqTick;
+					_timeInfo.flags |= (kVstPpqPosValid);
+				} catch (...) {
+					/* relax */
+				}
+			}
+
+			_timeInfo.tempo = tm.tempo().beats_per_minute();
+			_timeInfo.flags |= kVstTempoValid;
+			
+			// Bars
+			// _timeInfo.barStartPos = ppqBar;
+			// _timeInfo.flags |= kVstBarsValid;
+			
+			// Time Signature
+			_timeInfo.timeSigNumerator = tm.meter().divisions_per_bar();
+			_timeInfo.timeSigDenominator = tm.meter().note_divisor();
+			_timeInfo.flags |= kVstTimeSigValid;
 
 			if (session->transport_speed() != 0.0f) {
 				_timeInfo.flags |= kVstTransportPlaying;
