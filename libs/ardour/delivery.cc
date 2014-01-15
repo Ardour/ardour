@@ -368,7 +368,6 @@ Delivery::set_state (const XMLNode& node, int version)
 	XMLNode* pannnode = node.child (X_("Pannable"));
 	if (_panshell && _panshell->panner() && pannnode) {
 		_panshell->pannable()->set_state (*pannnode, version);
-		_panshell->pannable()->set_panner(_panshell->panner());
 	}
 
 	return 0;
@@ -399,11 +398,8 @@ Delivery::reset_panner ()
 		if (!_no_panner_reset) {
 
 			if (_panshell) {
+				assert (_role == Main || _role == Aux || _role == Send);
 				_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, pan_outs()));
-				
-				if (_role == Main || _role == Aux || _role == Send) {
-					_panshell->pannable()->set_panner (_panshell->panner());
-				}
 			}
 		}
 
@@ -417,11 +413,8 @@ void
 Delivery::panners_became_legal ()
 {
 	if (_panshell) {
+		assert (_role == Main || _role == Aux || _role == Send);
 		_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, pan_outs()));
-		
-		if (_role == Main) {
-			_panshell->pannable()->set_panner (_panshell->panner());
-		}
 	}
 
 	panner_legal_c.disconnect ();

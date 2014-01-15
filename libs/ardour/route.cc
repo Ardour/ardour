@@ -2568,7 +2568,6 @@ Route::set_processor_state (const XMLNode& node)
 
 				} else if (prop->value() == "send") {
 
-					boost::shared_ptr<Pannable> sendpan (new Pannable (_session));
 					processor.reset (new Send (_session, _pannable, _mute_master));
 
 				} else {
