@@ -130,8 +130,12 @@ intptr_t Session::vst_callback (
 		// (see valid masks above), as some items may require extensive
 		// conversions
 		memset(&_timeInfo, 0, sizeof(_timeInfo));
+		std::cerr << "VST get time callback\n";
 		if (session) {
 			framepos_t now = session->transport_frame();
+
+			std::cerr << "\t@ " << now << std::endl;
+
 			_timeInfo.samplePos = now;
 			_timeInfo.sampleRate = session->frame_rate();
 			_timeInfo.flags = 0;
@@ -179,6 +183,7 @@ intptr_t Session::vst_callback (
 			}
 		}
 
+		std::cerr << "\ttimeinfo valid = " << std::hex << _timeinfo.flags << std::dec << std::endl;
 		return (long)&_timeInfo;
 
 	case audioMasterProcessEvents:
