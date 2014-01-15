@@ -130,7 +130,7 @@ intptr_t Session::vst_callback (
 		// (see valid masks above), as some items may require extensive
 		// conversions
 		memset(&_timeInfo, 0, sizeof(_timeInfo));
-		std::cerr << "VST get time callback\n";
+		std::cerr << "VST get time callback, value = " << std::hex << value << " index = " << index << std::dec << std::endl;
 		if (session) {
 			framepos_t now = session->transport_frame();
 
