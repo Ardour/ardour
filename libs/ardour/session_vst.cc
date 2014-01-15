@@ -183,7 +183,7 @@ intptr_t Session::vst_callback (
 			}
 		}
 
-		std::cerr << "\ttimeinfo valid = " << std::hex << _timeinfo.flags << std::dec << std::endl;
+		std::cerr << "\ttimeinfo valid = " << std::hex << _timeInfo.flags << std::dec << std::endl;
 		return (long)&_timeInfo;
 
 	case audioMasterProcessEvents:
