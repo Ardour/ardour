@@ -177,7 +177,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 
 	boost::shared_ptr<Pannable> pannable = _route->pannable();
 
-	if (pannable && pannable->panner()) {
+	if (pannable && _route->panner()) {
 		pannable->pan_azimuth_control->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_azi_changed, this, false), ui_context());
 		pannable->pan_width_control->Changed.connect(route_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_width_changed, this, false), ui_context());
 	}
@@ -211,7 +211,7 @@ Strip::set_route (boost::shared_ptr<Route> r, bool /*with_messages*/)
 	possible_pot_parameters.clear();
 
 	if (pannable) {
-		boost::shared_ptr<Panner> panner = pannable->panner();
+		boost::shared_ptr<Panner> panner = _route->panner();
 		if (panner) {
 			set<Evoral::Parameter> automatable = panner->what_can_be_automated ();
 			set<Evoral::Parameter>::iterator a;
@@ -352,7 +352,7 @@ Strip::notify_panner_azi_changed (bool force_update)
 
 		boost::shared_ptr<Pannable> pannable = _route->pannable();
 
-		if (!pannable || !pannable->panner()) {
+		if (!pannable || !_route->panner()) {
 			_surface->write (_vpot->zero());
 			return;
 		}
@@ -391,7 +391,7 @@ Strip::notify_panner_width_changed (bool force_update)
 
 		boost::shared_ptr<Pannable> pannable = _route->pannable();
 
-		if (!pannable || !pannable->panner()) {
+		if (!pannable || !_route->panner()) {
 			_surface->write (_vpot->zero());
 			return;
 		}
@@ -606,8 +606,8 @@ Strip::do_parameter_display (AutomationType type, float val)
 	case PanAzimuthAutomation:
 		if (_route) {
 			boost::shared_ptr<Pannable> p = _route->pannable();
-			if (p && p->panner()) {
-				string str = p->panner()->value_as_string (p->pan_azimuth_control);
+			if (p && _route->panner()) {
+				string str =_route->panner()->value_as_string (p->pan_azimuth_control);
 				_surface->write (display (1, str));
 			}
 		}

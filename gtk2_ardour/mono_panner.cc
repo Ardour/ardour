@@ -89,9 +89,10 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 		have_font = true;
 	}
 
-	position_control->Changed.connect (connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
+	position_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
 
-	_panner_shell->Changed.connect (connections, invalidator (*this), boost::bind (&MonoPanner::bypass_handler, this), gui_context());
+	_panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&MonoPanner::bypass_handler, this), gui_context());
+	_panner_shell->PannableChanged.connect (panshell_connections, invalidator (*this), boost::bind (&MonoPanner::pannable_handler, this), gui_context());
 	ColorsChanged.connect (sigc::mem_fun (*this, &MonoPanner::color_handler));
 
 	set_tooltip ();
@@ -502,6 +503,16 @@ MonoPanner::color_handler ()
 void
 MonoPanner::bypass_handler ()
 {
+	queue_draw ();
+}
+
+void
+MonoPanner::pannable_handler ()
+{
+	panvalue_connections.drop_connections();
+	position_control = _panner->pannable()->pan_azimuth_control;
+	position_binder.set_controllable(position_control);
+	position_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
 	queue_draw ();
 }
 

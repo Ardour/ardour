@@ -95,9 +95,10 @@ StereoPanner::StereoPanner (boost::shared_ptr<PannerShell> p)
 		have_font = true;
 	}
 
-	position_control->Changed.connect (connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
-	width_control->Changed.connect (connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
-	_panner_shell->Changed.connect (connections, invalidator (*this), boost::bind (&StereoPanner::bypass_handler, this), gui_context());
+	position_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
+	width_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
+
+	_panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&StereoPanner::bypass_handler, this), gui_context());
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &StereoPanner::color_handler));
 
@@ -690,6 +691,20 @@ StereoPanner::color_handler ()
 void
 StereoPanner::bypass_handler ()
 {
+	queue_draw ();
+}
+
+void
+StereoPanner::pannable_handler ()
+{
+	panvalue_connections.drop_connections();
+	position_control = _panner->pannable()->pan_azimuth_control;
+	width_control = _panner->pannable()->pan_width_control;
+	position_binder.set_controllable(position_control);
+	width_binder.set_controllable(width_control);
+
+	position_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
+	width_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&StereoPanner::value_change, this), gui_context());
 	queue_draw ();
 }
 

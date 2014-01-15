@@ -53,7 +53,7 @@ class Panner2dWindow;
 
 class Panner2d : public Gtk::DrawingArea
 {
-  public:
+	public:
 	Panner2d (boost::shared_ptr<ARDOUR::PannerShell>, int32_t height);
 	~Panner2d ();
 
@@ -69,7 +69,7 @@ class Panner2d : public Gtk::DrawingArea
 	void cart_to_gtk (PBD::CartesianVector&) const;
 	void gtk_to_cart (PBD::CartesianVector&) const;
 
-  protected:
+	protected:
 	bool on_expose_event (GdkEventExpose *);
 	bool on_button_press_event (GdkEventButton *);
 	bool on_button_release_event (GdkEventButton *);
@@ -77,9 +77,9 @@ class Panner2d : public Gtk::DrawingArea
 	bool on_scroll_event (GdkEventScroll *);
 	void on_size_allocate (Gtk::Allocation& alloc);
 
-  private:
+	private:
 	class Target {
-	public:
+		public:
 		PBD::AngularVector position;
 		bool visible;
 		std::string text;
@@ -95,7 +95,7 @@ class Panner2d : public Gtk::DrawingArea
 			return _selected;
 		}
 
-	private:
+		private:
 		bool _selected;
 	};
 
@@ -105,16 +105,16 @@ class Panner2d : public Gtk::DrawingArea
 	typedef std::vector<Target*> Targets;
 	Targets speakers;
 	Targets signals;
-        Target  position;
+	Target  position;
 
 	Target *drag_target;
 	int     width;
 	int     height;
-        double  radius;
-        double  border;
-        double  hoffset;
-        double  voffset;
-        double  last_width;
+	double  radius;
+	double  border;
+	double  hoffset;
+	double  voffset;
+	double  last_width;
 	bool    did_move;
 	bool    have_elevation;
 
@@ -125,10 +125,10 @@ class Panner2d : public Gtk::DrawingArea
 	void toggle_bypass ();
 	void handle_state_change ();
 	void handle_position_change ();
-        void label_signals ();
+	void label_signals ();
 
-	PBD::ScopedConnectionList connections;
-	PBD::ScopedConnectionList panconnect;
+	PBD::ScopedConnectionList panshell_connections;
+	PBD::ScopedConnectionList panner_connections;
 
 	/* cartesian coordinates in GTK units ; adjust to same but on a circle of radius 1.0
 	   and centered in the middle of our area
@@ -139,12 +139,12 @@ class Panner2d : public Gtk::DrawingArea
 
 class Panner2dWindow : public ArdourWindow
 {
-  public:
+	public:
 	Panner2dWindow (boost::shared_ptr<ARDOUR::PannerShell>, int32_t height, uint32_t inputs);
 
 	void reset (uint32_t n_inputs);
 
-  private:
+	private:
 	Panner2d widget;
 
 	Gtk::HBox         hpacker;
@@ -156,14 +156,16 @@ class Panner2dWindow : public ArdourWindow
 	Gtk::Adjustment   width_adjustment;
 	Gtk::SpinButton   width_spinner;
 
-	PBD::ScopedConnectionList connections;
-        void set_bypassed();
-        void set_width();
+	PBD::ScopedConnectionList panshell_connections;
+	PBD::ScopedConnectionList panvalue_connections;
+	void set_bypassed();
+	void set_width();
 
-        void bypass_toggled ();
-        void width_changed ();
-        bool on_key_press_event (GdkEventKey*);
-        bool on_key_release_event (GdkEventKey*);
+	void pannable_handler ();
+	void bypass_toggled ();
+	void width_changed ();
+	bool on_key_press_event (GdkEventKey*);
+	bool on_key_release_event (GdkEventKey*);
 };
 
 #endif /* __ardour_panner_2d_h__ */

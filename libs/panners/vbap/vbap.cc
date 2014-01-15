@@ -81,6 +81,9 @@ VBAPanner::VBAPanner (boost::shared_ptr<Pannable> p, boost::shared_ptr<Speakers>
         _pannable->pan_azimuth_control->Changed.connect_same_thread (*this, boost::bind (&VBAPanner::update, this));
         _pannable->pan_elevation_control->Changed.connect_same_thread (*this, boost::bind (&VBAPanner::update, this));
         _pannable->pan_width_control->Changed.connect_same_thread (*this, boost::bind (&VBAPanner::update, this));
+        if (!_pannable->has_state()) {
+                reset();
+        }
 
         update ();
 }

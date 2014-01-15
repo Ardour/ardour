@@ -101,6 +101,7 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
 	if (!_force_reselect && _panner && (_panner->in().n_audio() == nins) && (_panner->out().n_audio() == nouts)) {
 		return;
 	}
+	_force_reselect = false;
 
 	if (nouts < 2 || nins == 0) {
 		/* no need for panning with less than 2 outputs or no inputs */
@@ -108,6 +109,9 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
 			_panner.reset ();
 			_current_panner_uri = "";
 			_panner_gui_uri = "";
+			if (!_is_send || !_panlinked) {
+				pannable()->set_panner(_panner);
+			}
 			Changed (); /* EMIT SIGNAL */
 		}
 		return;
@@ -140,6 +144,9 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
 	_current_panner_uri = pi->descriptor.panner_uri;
 	_panner_gui_uri = pi->descriptor.gui_uri;
 
+	if (!_is_send || !_panlinked) {
+		pannable()->set_panner(_panner);
+	}
 	Changed (); /* EMIT SIGNAL */
 }
 
@@ -192,6 +199,15 @@ PannerShell::set_state (const XMLNode& node, int version)
 								_is_send ? _pannable_internal : _pannable_route, _session.get_speakers ()));
 					_current_panner_uri = p->descriptor.panner_uri;
 					_panner_gui_uri = p->descriptor.gui_uri;
+					if (_is_send) {
+						if (!_panlinked) {
+							_pannable_internal->set_panner(_panner);
+						} else {
+							_force_reselect = true;
+						}
+					} else {
+						_pannable_route->set_panner(_panner);
+					}
 					if (_panner->set_state (**niter, version) == 0) {
 						return -1;
 					}
@@ -426,7 +442,9 @@ PannerShell::select_panner_by_uri (std::string const uri)
 			ChanCount in = _panner->in();
 			ChanCount out = _panner->out();
 			configure_io(in, out);
-			pannable()->set_panner(_panner);
+			if (!_is_send || !_panlinked) {
+				pannable()->set_panner(_panner);
+			}
 			_session.set_dirty ();
 	}
 	return true;
@@ -435,9 +453,20 @@ PannerShell::select_panner_by_uri (std::string const uri)
 void
 PannerShell::set_linked_to_route (bool onoff)
 {
-	if (!_is_send || onoff == _panlinked) {
+	assert(_is_send);
+	if (onoff == _panlinked) {
 		return;
 	}
+
+	/* set _pannable-_has_state = true
+	 * this way the panners will pick it up
+	 * when it is re-created
+	 */
+	if (pannable()) {
+		XMLNode state = pannable()->get_state();
+		pannable()->set_state(state, 3000);
+	}
+
 	_panlinked = onoff;
 
 	_force_reselect = true;
@@ -446,7 +475,9 @@ PannerShell::set_linked_to_route (bool onoff)
 			ChanCount in = _panner->in();
 			ChanCount out = _panner->out();
 			configure_io(in, out);
-			pannable()->set_panner(_panner);
+			if (!_panlinked) {
+				pannable()->set_panner(_panner);
+			}
 			_session.set_dirty ();
 	}
 	PannableChanged();
