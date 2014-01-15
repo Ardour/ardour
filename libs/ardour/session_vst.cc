@@ -138,18 +138,18 @@ intptr_t Session::vst_callback (
 
 			const TempoMetric& tm (session->tempo_map().metric_at (now));
 
-			if (value & (kVstTempoValid)) {
+//			if (value & (kVstTempoValid)) {
 				const Tempo& t (tm.tempo());
 				_timeInfo.tempo = t.beats_per_minute ();
 				_timeInfo.flags |= (kVstTempoValid);
-			}
-			if (value & (kVstBarsValid)) {
+//			}
+//			if (value & (kVstBarsValid)) {
 				const Meter& m (tm.meter());
 				_timeInfo.timeSigNumerator = m.divisions_per_bar ();
 				_timeInfo.timeSigDenominator = m.note_divisor ();
-				_timeInfo.flags |= (kVstBarsValid);
-			}
-			if (value & (kVstPpqPosValid)) {
+				_timeInfo.flags |= (kVstTimeSigValid);
+//			}
+//			if (value & (kVstPpqPosValid)) {
 				Timecode::BBT_Time bbt;
 				try {
 					session->tempo_map().bbt_time_rt (now, bbt);
@@ -168,19 +168,11 @@ intptr_t Session::vst_callback (
 				} catch (...) {
 					/* relax */
 				}
-			}
+//			}
 
-			_timeInfo.tempo = tm.tempo().beats_per_minute();
-			_timeInfo.flags |= kVstTempoValid;
-			
 			// Bars
 			// _timeInfo.barStartPos = ppqBar;
 			// _timeInfo.flags |= kVstBarsValid;
-			
-			// Time Signature
-			_timeInfo.timeSigNumerator = tm.meter().divisions_per_bar();
-			_timeInfo.timeSigDenominator = tm.meter().note_divisor();
-			_timeInfo.flags |= kVstTimeSigValid;
 
 			if (session->transport_speed() != 0.0f) {
 				_timeInfo.flags |= kVstTransportPlaying;
