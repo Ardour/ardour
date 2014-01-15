@@ -535,6 +535,8 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 	BufferSet& silent_bufs  = _session.get_silent_buffers(bufs_count);
 	BufferSet& scratch_bufs = _session.get_scratch_buffers(bufs_count);
 
+	// VC++ doesn't support this C99 extension. Use alloca instead of dynamic
+	// array (rather than std::vector which allocs on the heap)
 	float** ins = (float**)alloca(_plugin->numInputs*sizeof(float*));
 	float** outs = (float**)alloca(_plugin->numInputs*sizeof(float*));
 
