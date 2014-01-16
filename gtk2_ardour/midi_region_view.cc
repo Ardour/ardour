@@ -350,8 +350,8 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 	if ((!trackview.editor().internal_editing() && trackview.editor().current_mouse_mode() != MouseGain) ||
 		(trackview.editor().current_mouse_mode() == MouseTimeFX) ||
 		(trackview.editor().current_mouse_mode() == MouseZoom)) {
-		// handle non-draw modes elsewhere
-		return false;
+		// handle non-internal-edit/non-draw modes elsewhere
+		return RegionView::canvas_group_event (ev);
 	}
 
 	switch (ev->type) {
