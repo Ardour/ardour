@@ -544,6 +544,7 @@ Route::monitor_run (framepos_t start_frame, framepos_t end_frame, pframes_t nfra
 {
 	assert (is_monitor());
 	BufferSet& bufs (_session.get_route_buffers (n_process_buffers()));
+	fill_buffers_with_input (bufs, _input, nframes);
 	passthru (bufs, start_frame, end_frame, nframes, declick);
 }
 

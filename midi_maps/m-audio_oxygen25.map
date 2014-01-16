@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="M-Audio Oxygen25 (factory default)">
+  <Binding msg="bf 71 7f"         function="loop-toggle"/>
+  <Binding msg="bf 72 7f"         function="transport-start"/>
+  <Binding msg="bf 73 7f"         function="transport-end"/>
+  <Binding msg="bf 74 7f"         function="transport-stop"/>
+  <Binding msg="bf 75 7f"         function="transport-roll"/>
+  <Binding msg="bf 76 7f"         action="Transport/record-roll"/>
+</ArdourMIDIBindings>
+
