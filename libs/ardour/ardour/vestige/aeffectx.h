@@ -113,11 +113,10 @@
 #define kEffectMagic (CCONST( 'V', 's', 't', 'P' ))
 #define kVstLangEnglish 1
 #define kVstMidiType 1
-#define kVstTempoValid (1 << 10)
-#define kVstTransportPlaying (1 << 1)
-
 
 struct RemoteVstPlugin;
+
+#define kVstTransportPlaying (1 << 1)
 
 #define kVstNanosValid (1 << 8)
 #define kVstPpqPosValid (1 << 9)
