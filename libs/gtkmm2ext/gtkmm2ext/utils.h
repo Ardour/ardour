@@ -128,6 +128,7 @@ namespace Gtkmm2ext {
 	LIBGTKMM2EXT_API void disable_tooltips ();
 
 	LIBGTKMM2EXT_API void convert_bgra_to_rgba (guint8 const *, guint8 * dst, int, int);
+	LIBGTKMM2EXT_API const char* event_type_string (int event_type);
 };
 
 #endif /*  __gtkmm2ext_utils_h__ */
