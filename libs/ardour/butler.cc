@@ -214,7 +214,7 @@ restart:
 
 		frameoffset_t audition_seek;
 		if (should_run && _session.is_auditioning()
-				&& (audition_seek = _session.the_auditioner()->seek_frame()) > 0) {
+				&& (audition_seek = _session.the_auditioner()->seek_frame()) >= 0) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (_session.the_auditioner());
 			tr->seek(audition_seek);
 			_session.the_auditioner()->seek_response(audition_seek);
