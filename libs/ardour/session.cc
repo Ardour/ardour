@@ -805,6 +805,12 @@ Session::remove_monitor_section ()
 	/* force reversion to Solo-In-Place */
 	Config->set_solo_control_is_listen_control (false);
 
+	/* if we are auditioning, cancel it ... this is a workaround
+	   to a problem (auditioning does not execute the process graph,
+	   which is needed to remove routes when using >1 core for processing)
+	*/
+	cancel_audition ();
+
 	{
 		/* Hold process lock while doing this so that we don't hear bits and
 		 * pieces of audio as we work on each route.
@@ -835,6 +841,10 @@ Session::remove_monitor_section ()
 
 	remove_route (_monitor_out);
 	auto_connect_master_bus ();
+
+	if (auditioner) {
+		auditioner->connect ();
+	}
 }
 
 void
@@ -978,6 +988,10 @@ Session::add_monitor_section ()
 		} else {
 			(*x)->enable_monitor_send ();
 		}
+	}
+
+	if (auditioner) {
+		auditioner->connect ();
 	}
 }
 

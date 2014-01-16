@@ -54,12 +54,30 @@ Auditioner::init ()
         if (Track::init ()) {
                 return -1;
         }
+	
+	if (connect ()) {
+		return -1;
+	}
 
+	_output->changed.connect_same_thread (*this, boost::bind (&Auditioner::output_changed, this, _1, _2));
+
+        return 0;
+}
+
+Auditioner::~Auditioner ()
+{
+}
+
+int
+Auditioner::connect ()
+{
 	string left = Config->get_auditioner_output_left();
 	string right = Config->get_auditioner_output_right();
 
 	vector<string> outputs;
 	_session.engine().get_physical_outputs (DataType::AUDIO, outputs);
+
+	via_monitor = false;
 
 	if (left.empty() || left == "default") {
                 if (_session.monitor_out()) {
@@ -83,31 +101,49 @@ Auditioner::init ()
                 }
 	}
 
+	_output->disconnect (this);
+
 	if (left.empty() && right.empty()) {
-		warning << _("no outputs available for auditioner - manual connection required") << endmsg;
+		if (_output->n_ports().n_audio() == 0) {
+			/* ports not set up, so must be during startup */
+			warning << _("no outputs available for auditioner - manual connection required") << endmsg;
+		}
 	} else {
 
-		_main_outs->defer_pan_reset ();
-		
-		if (left.length()) {
-			_output->add_port (left, this, DataType::AUDIO);
+		if (_output->n_ports().n_audio() == 0) {
+
+			/* create (and connect) new ports */
+
+			_main_outs->defer_pan_reset ();
+			
+			if (left.length()) {
+				_output->add_port (left, this, DataType::AUDIO);
+			}
+			
+			if (right.length()) {
+				_output->add_port (right, this, DataType::AUDIO);
+			}
+			
+			_main_outs->allow_pan_reset ();
+			_main_outs->reset_panner ();
+
+		} else {
+			
+			/* reconnect existing ports */
+
+			boost::shared_ptr<Port> oleft (_output->nth (0));
+			boost::shared_ptr<Port> oright (_output->nth (1));
+			if (oleft) {
+				oleft->connect (left);
+			}
+			if (oright) {
+				oright->connect (right);
+			}
 		}
-		
-		if (right.length()) {
-			_output->add_port (right, this, DataType::AUDIO);
-		}
-		
-		_main_outs->allow_pan_reset ();
-		_main_outs->reset_panner ();
+			
 	}
 
-	_output->changed.connect_same_thread (*this, boost::bind (&Auditioner::output_changed, this, _1, _2));
-
-        return 0;
-}
-
-Auditioner::~Auditioner ()
-{
+	return 0;
 }
 
 AudioPlaylist&

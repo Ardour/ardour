@@ -40,6 +40,7 @@ class Auditioner : public AudioTrack
 	~Auditioner ();
 
 	int init ();
+        int connect ();
 
 	void audition_region (boost::shared_ptr<Region>);
 

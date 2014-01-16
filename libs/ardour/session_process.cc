@@ -875,7 +875,7 @@ Session::process_audition (pframes_t nframes)
 
 	/* if using a monitor section, run it because otherwise we don't hear anything */
 
-	if (auditioner->needs_monitor()) {
+	if (_monitor_out && auditioner->needs_monitor()) {
 		_monitor_out->monitor_run (_transport_frame, _transport_frame + nframes, nframes, false);
 	}
 
