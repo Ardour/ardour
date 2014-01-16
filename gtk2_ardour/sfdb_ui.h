@@ -36,6 +36,7 @@
 #include <gtkmm/filechooserwidget.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
+#include <gtkmm/scale.h>
 #include <gtkmm/textview.h>
 #include <gtkmm/table.h>
 #include <gtkmm/liststore.h>
@@ -57,7 +58,7 @@ namespace ARDOUR {
 class GainMeter;
 class Mootcher;
 
-class SoundFileBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
+class SoundFileBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList
 {
   public:
 	SoundFileBox (bool persistent);
@@ -103,11 +104,19 @@ class SoundFileBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	Gtk::Button stop_btn;
 	Gtk::CheckButton autoplay_btn;
 	Gtk::Button apply_btn;
+	Gtk::HScale seek_slider;
+
+	PBD::ScopedConnectionList auditioner_connections;
+	void audition_active(bool);
+	void audition_progress(ARDOUR::framecnt_t, ARDOUR::framecnt_t);
 
 	bool tags_entry_left (GdkEventFocus* event);
 	void tags_changed ();
 	void save_tags (const std::vector<std::string>&);
 	void stop_audition ();
+	bool seek_button_press(GdkEventButton*);
+	bool seek_button_release(GdkEventButton*);
+	bool _seeking;
 };
 
 class SoundFileBrowser : public ArdourWindow
