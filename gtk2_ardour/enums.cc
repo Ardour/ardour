@@ -22,6 +22,7 @@
 #include "audio_clock.h"
 #include "editing.h"
 #include "enums.h"
+#include "editor_items.h"
 
 using namespace std;
 using namespace PBD;
@@ -44,6 +45,7 @@ setup_gtk_ardour_enums ()
 	SnapType snap_type;
 	SnapMode snap_mode;
 	ZoomFocus zoom_focus;
+	ItemType item_type;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -131,4 +133,39 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (ZoomFocusMouse);
 	REGISTER_ENUM (ZoomFocusEdit);
 	REGISTER (zoom_focus);
+
+	REGISTER_ENUM (RegionItem);
+	REGISTER_ENUM (StreamItem);
+	REGISTER_ENUM (PlayheadCursorItem);
+	REGISTER_ENUM (MarkerItem);
+	REGISTER_ENUM (MarkerBarItem);
+	REGISTER_ENUM (RangeMarkerBarItem);
+	REGISTER_ENUM (CdMarkerBarItem);
+	REGISTER_ENUM (VideoBarItem);
+	REGISTER_ENUM (TransportMarkerBarItem);
+	REGISTER_ENUM (SelectionItem);
+	REGISTER_ENUM (ControlPointItem);
+	REGISTER_ENUM (GainLineItem);
+	REGISTER_ENUM (AutomationLineItem);
+	REGISTER_ENUM (MeterMarkerItem);
+	REGISTER_ENUM (TempoMarkerItem);
+	REGISTER_ENUM (MeterBarItem);
+	REGISTER_ENUM (TempoBarItem);
+	REGISTER_ENUM (RegionViewNameHighlight);
+	REGISTER_ENUM (RegionViewName);
+	REGISTER_ENUM (StartSelectionTrimItem);
+	REGISTER_ENUM (EndSelectionTrimItem);
+	REGISTER_ENUM (AutomationTrackItem);
+	REGISTER_ENUM (FadeInItem);
+	REGISTER_ENUM (FadeInHandleItem);
+	REGISTER_ENUM (FadeOutItem);
+	REGISTER_ENUM (FadeOutHandleItem);
+	REGISTER_ENUM (NoteItem);
+	REGISTER_ENUM (FeatureLineItem);
+        REGISTER_ENUM (LeftFrameHandle);
+        REGISTER_ENUM (RightFrameHandle);
+	REGISTER_ENUM (StartCrossFadeItem);
+	REGISTER_ENUM (EndCrossFadeItem);
+	REGISTER_ENUM (CrossfadeViewItem);
+	REGISTER (item_type);
 }
