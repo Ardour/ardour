@@ -46,6 +46,7 @@ namespace ArdourCanvas {
 	LIBCANVAS_API extern std::map<std::string, struct timeval> last_time;
 	LIBCANVAS_API extern void checkpoint (std::string, std::string);
 	LIBCANVAS_API extern void set_epoch ();
+	LIBCANVAS_API extern const char* event_type_string (int event_type);
 	LIBCANVAS_API extern int render_count;
 	LIBCANVAS_API extern int render_depth;
 	LIBCANVAS_API extern int dump_depth;

@@ -536,7 +536,7 @@ GtkCanvas::deliver_event (GdkEvent* event)
 			return true;
 		}
 		
-		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas event left unhandled by %1 %2\n", item->whatami(), item->name.empty() ? "[unknown]" : item->name));
+		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas event %3 left unhandled by %1 %2\n", item->whatami(), item->name.empty() ? "[unknown]" : item->name, event_type_string (event->type)));
 
 		if ((item = parent) == 0) {
 			break;
