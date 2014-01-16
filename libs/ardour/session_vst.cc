@@ -131,66 +131,116 @@ intptr_t Session::vst_callback (
 		// (see valid masks above), as some items may require extensive
 		// conversions
 		_timeInfo.flags = 0;
-		std::cerr << "VST get time callback, value = " << std::hex << value << std::dec << std::endl;
+
 		if (session) {
 			framepos_t now = session->transport_frame();
 
-			std::cerr << "\t@ " << now << std::endl;
-
 			_timeInfo.samplePos = now;
 			_timeInfo.sampleRate = session->frame_rate();
-
+			
 			const TempoMetric& tm (session->tempo_map().metric_at (now));
 
 			if (value & (kVstTempoValid)) {
 				const Tempo& t (tm.tempo());
 				_timeInfo.tempo = t.beats_per_minute ();
 				_timeInfo.flags |= (kVstTempoValid);
-				std::cerr << "\ttempo makes " << std::hex << _timeInfo.flags << std::dec << std::endl;
 			}
 			if (value & (kVstTimeSigValid)) {
 				const Meter& m (tm.meter());
 				_timeInfo.timeSigNumerator = m.divisions_per_bar ();
 				_timeInfo.timeSigDenominator = m.note_divisor ();
 				_timeInfo.flags |= (kVstTimeSigValid);
-				std::cerr << "\ttimedig makes " << std::hex << _timeInfo.flags << std::dec << std::endl;
 			}
-			if (value & (kVstPpqPosValid)) {
+			if ((value & (kVstPpqPosValid)) || (value & (kVstBarsValid))) {
 				Timecode::BBT_Time bbt;
+
 				try {
 					session->tempo_map().bbt_time_rt (now, bbt);
 					
-					/* Note that this assumes constant
-					   meter/tempo throughout the session. We
-					   can do better than this, because
-					   progressive rock fans demand it.
+					/* PPQ = pulse per quarter
+					   VST's "pulse" is our "division".
+
+					   8 divisions per bar, 1 division = quarter, so 8 quarters per bar, ppq = 1
+					   8 divisions per bar, 1 division = eighth, so  4 quarters per bar, ppq = 2
+					   4 divisions per bar, 1 division = quarter, so  4 quarters per bar, ppq = 1
+					   4 divisions per bar, 1 division = half, so 8 quarters per bar, ppq = 0.5
+					   4 divisions per bar, 1 division = fifth, so (4 * 5/4) quarters per bar, ppq = 5/4
+					   
+					   general: divs_per_bar / (note_type / 4.0)
+					*/
+					double ppq_scaling =  tm.meter().note_divisor() / 4.0;
+
+					/* Note that this assumes constant meter/tempo throughout the session. Stupid VST
 					*/
 					double ppqBar = double(bbt.bars - 1) * tm.meter().divisions_per_bar();
 					double ppqBeat = double(bbt.beats - 1);
 					double ppqTick = double(bbt.ticks) / Timecode::BBT_Time::ticks_per_beat;
-					// PPQ Pos
-					_timeInfo.ppqPos = ppqBar + ppqBeat + ppqTick;
-					_timeInfo.flags |= (kVstPpqPosValid);
-					std::cerr << "\tppq makes " << std::hex << _timeInfo.flags << std::dec << std::endl;
+
+					ppqBar *= ppq_scaling;
+					ppqBeat *= ppq_scaling;
+					ppqTick *= ppq_scaling;
+					
+					if (value & (kVstPpqPosValid)) {
+						_timeInfo.ppqPos = ppqBar + ppqBeat + ppqTick;
+						_timeInfo.flags |= (kVstPpqPosValid);
+					}
+					
+					if (value & (kVstBarsValid)) {
+						_timeInfo.barStartPos = ppqBar;
+						_timeInfo.flags |= (kVstPpqPosValid);
+					}
+					
 				} catch (...) {
 					/* relax */
 				}
 			}
 
-			// Bars
-			// _timeInfo.barStartPos = ppqBar;
-			// _timeInfo.flags |= kVstBarsValid;
+			if (value & (kVstSmpteValid)) {
+				Timecode::Time t;
+				
+				session->timecode_time (now, t);
+				
+				_timeInfo.smpteOffset = (t.hours * t.rate * 60.0 * 60.0) + 
+					(t.minutes * t.rate * 60.0) + 
+					(t.seconds * t.rate) + 
+					(t.frames) + 
+					(t.subframes);
+
+				_timeInfo.smpteOffset *= 80.0; /* VST spec is 1/80th frames */
+
+				if (session->timecode_drop_frames()) {
+					if (session->timecode_frames_per_second() == 30.0) {
+						_timeInfo.smpteFrameRate = 5;
+					} else {
+						_timeInfo.smpteFrameRate = 4; /* 29.97 assumed, thanks VST */
+					}
+				} else {
+					if (session->timecode_frames_per_second() == 24.0) {
+						_timeInfo.smpteFrameRate = 0;
+					} else if (session->timecode_frames_per_second() == 24.975) {
+						_timeInfo.smpteFrameRate = 2;
+					} else if (session->timecode_frames_per_second() == 25.0) {
+						_timeInfo.smpteFrameRate = 1;
+					} else {
+						_timeInfo.smpteFrameRate = 3; /* 30 fps */
+					}
+				}
+				_timeInfo.flags |= (kVstSmpteValid);
+			}
 
 			if (session->transport_speed() != 0.0f) {
-				_timeInfo.flags |= kVstTransportPlaying;
+				_timeInfo.flags |= (kVstTransportPlaying);
 			}
+
+			if (session->get_play_loop()) {
+			}
+
 		} else {
 			_timeInfo.samplePos = 0;
 			_timeInfo.sampleRate = AudioEngine::instance()->sample_rate();
 		}
-
-		std::cerr << "\ttimeinfo valid = " << std::hex << _timeInfo.flags << std::dec << std::endl;
-		return (long)&_timeInfo;
+		
+		return (intptr_t) &_timeInfo;
 
 	case audioMasterProcessEvents:
 		SHOW_CALLBACK ("amc: audioMasterProcessEvents\n");
