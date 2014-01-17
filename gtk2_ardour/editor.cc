@@ -47,6 +47,7 @@
 #include "pbd/stacktrace.h"
 
 #include <glibmm/miscutils.h>
+#include <glibmm/uriutils.h>
 #include <gtkmm/image.h>
 #include <gdkmm/color.h>
 #include <gdkmm/bitmap.h>
@@ -3173,33 +3174,8 @@ Editor::convert_drop_to_paths (
 	}
 
 	for (vector<string>::iterator i = uris.begin(); i != uris.end(); ++i) {
-
 		if ((*i).substr (0,7) == "file://") {
-
-			string const p = PBD::url_decode (*i);
-
-			// scan forward past three slashes
-
-			string::size_type slashcnt = 0;
-			string::size_type n = 0;
-			string::const_iterator x = p.begin();
-
-			while (slashcnt < 3 && x != p.end()) {
-				if ((*x) == '/') {
-					slashcnt++;
-				} else if (slashcnt == 3) {
-					break;
-				}
-				++n;
-				++x;
-			}
-
-			if (slashcnt != 3 || x == p.end()) {
-				error << _("malformed URL passed to drag-n-drop code") << endmsg;
-				continue;
-			}
-
-			paths.push_back (p.substr (n - 1));
+			paths.push_back (Glib::filename_from_uri (*i));
 		}
 	}
 
@@ -3208,7 +3184,6 @@ Editor::convert_drop_to_paths (
 
 void
 Editor::new_tempo_section ()
-
 {
 }
 
