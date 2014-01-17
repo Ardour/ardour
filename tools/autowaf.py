@@ -83,13 +83,6 @@ def set_options(opt, debug_by_default=False):
     opt.add_option('--docs', action='store_true', default=False, dest='docs',
                    help="Build documentation - requires doxygen")
 
-    # LV2 options
-    opt.add_option('--lv2-user', action='store_true', default=False, dest='lv2_user',
-                   help="Install LV2 bundles to user location")
-    opt.add_option('--lv2-system', action='store_true', default=False, dest='lv2_system',
-                   help="Install LV2 bundles to system location")
-    dirs_options.add_option('--lv2dir', type='string',
-                            help="LV2 bundles [Default: LIBDIR/lv2]")
     g_step = 1
 
 def copyfile (task):
@@ -172,6 +165,24 @@ def normpath(path):
     else:
         return os.path.normpath(path)
 
+def ensure_visible_symbols(bld, visible):
+    if bld.env['MSVC_COMPILER']:
+        if visible:
+            print '*** WARNING: MSVC does not allow symbols to be visible/exported by default while building ' + bld.name
+        else:
+            pass
+    else:        
+        if not hasattr (bld,'cxxflags'):
+            bld.cxxflags = []
+        if not hasattr (bld,'cflags'):
+            bld.cflags = []
+        if visible:
+            bld.cxxflags += [ '-fvisibility=default' ]
+            bld.cflags += [ '-fvisibility=default' ]
+        else:
+            bld.cxxflags += [ '-fvisibility=hidden' ]
+            bld.cflags += [ '-fvisibility=hidden' ]
+
 def configure(conf):
     global g_step
     if g_step > 1:
@@ -206,27 +217,6 @@ def configure(conf):
     config_dir('LIBDIR',     opts.libdir,     os.path.join(prefix, 'lib'))
     config_dir('MANDIR',     opts.mandir,     os.path.join(conf.env['DATADIR'], 'man'))
     config_dir('DOCDIR',     opts.docdir,     os.path.join(conf.env['DATADIR'], 'doc'))
-
-    if Options.options.lv2dir:
-        conf.env['LV2DIR'] = Options.options.lv2dir
-    elif Options.options.lv2_user:
-        if sys.platform == "darwin":
-            conf.env['LV2DIR'] = os.path.join(os.getenv('HOME'), 'Library/Audio/Plug-Ins/LV2')
-        elif sys.platform == "win32":
-            conf.env['LV2DIR'] = os.path.join(os.getenv('APPDATA'), 'LV2')
-        else:
-            conf.env['LV2DIR'] = os.path.join(os.getenv('HOME'), '.lv2')
-    elif Options.options.lv2_system:
-        if sys.platform == "darwin":
-            conf.env['LV2DIR'] = '/Library/Audio/Plug-Ins/LV2'
-        elif sys.platform == "win32":
-            conf.env['LV2DIR'] = os.path.join(os.getenv('COMMONPROGRAMFILES'), 'LV2')
-        else:
-            conf.env['LV2DIR'] = os.path.join(conf.env['LIBDIR'], 'lv2')
-    else:
-        conf.env['LV2DIR'] = os.path.join(conf.env['LIBDIR'], 'lv2')
-
-    conf.env['LV2DIR'] = normpath(conf.env['LV2DIR'])
 
     if Options.options.docs:
         doxygen = conf.find_program('doxygen')
@@ -566,6 +556,7 @@ def build_version_files(header_path, source_path, domain, major, minor, micro, e
 
     return None
 
+# Internationalization with gettext
 def build_i18n_pot(bld, srcdir, dir, name, sources, copyright_holder=None):
     Logs.info('Generating pot file from %s' % name)
     pot_file = '%s.pot' % name
@@ -727,85 +718,3 @@ def run_tests(ctx, appname, tests, desired_status=0, dirs=['src'], name='*'):
     else:
         Logs.pprint('RED', '** FAIL: %d %s.%s tests failed' % (failures, appname, name))
 
-def run_ldconfig(ctx):
-    if (ctx.cmd == 'install'
-        and not ctx.env['RAN_LDCONFIG']
-        and ctx.env['LIBDIR']
-        and not 'DESTDIR' in os.environ
-        and not Options.options.destdir):
-        try:
-            Logs.info("Waf: Running `/sbin/ldconfig %s'" % ctx.env['LIBDIR'])
-            subprocess.call(['/sbin/ldconfig', ctx.env['LIBDIR']])
-            ctx.env['RAN_LDCONFIG'] = True
-        except:
-            pass
-
-def write_news(name, in_files, out_file, top_entries=None, extra_entries=None):
-    import rdflib
-    import textwrap
-    from time import strftime, strptime
-
-    doap = rdflib.Namespace('http://usefulinc.com/ns/doap#')
-    dcs  = rdflib.Namespace('http://ontologi.es/doap-changeset#')
-    rdfs = rdflib.Namespace('http://www.w3.org/2000/01/rdf-schema#')
-    foaf = rdflib.Namespace('http://xmlns.com/foaf/0.1/')
-    rdf  = rdflib.Namespace('http://www.w3.org/1999/02/22-rdf-syntax-ns#')
-    m    = rdflib.ConjunctiveGraph()
-
-    try:
-        for i in in_files:
-            m.parse(i, format='n3')
-    except:
-        Logs.warn('Error parsing data, unable to generate NEWS')
-        return
-
-    proj = m.value(None, rdf.type, doap.Project)
-    for f in m.triples([proj, rdfs.seeAlso, None]):
-        if f[2].endswith('.ttl'):
-            m.parse(f[2], format='n3')
-
-    entries = {}
-    for r in m.triples([proj, doap.release, None]):
-        release   = r[2]
-        revision  = m.value(release, doap.revision, None)
-        date      = m.value(release, doap.created, None)
-        blamee    = m.value(release, dcs.blame, None)
-        changeset = m.value(release, dcs.changeset, None)
-        dist      = m.value(release, doap['file-release'], None)
-
-        if revision and date and blamee and changeset:
-            entry = '%s (%s) stable;\n' % (name, revision)
-
-            for i in m.triples([changeset, dcs.item, None]):
-                item = textwrap.wrap(m.value(i[2], rdfs.label, None), width=79)
-                entry += '\n  * ' + '\n    '.join(item)
-                if dist and top_entries is not None:
-                    if not str(dist) in top_entries:
-                        top_entries[str(dist)] = []
-                    top_entries[str(dist)] += [
-                        '%s: %s' % (name, '\n    '.join(item))]
-
-            if extra_entries:
-                for i in extra_entries[str(dist)]:
-                    entry += '\n  * ' + i
-
-            entry += '\n\n --'
-
-            blamee_name = m.value(blamee, foaf.name, None)
-            blamee_mbox = m.value(blamee, foaf.mbox, None)
-            if blamee_name and blamee_mbox:
-                entry += ' %s <%s>' % (blamee_name,
-                                       blamee_mbox.replace('mailto:', ''))
-                
-            entry += '  %s\n\n' % (
-                strftime('%a, %d %b %Y %H:%M:%S +0000', strptime(date, '%Y-%m-%d')))
-
-            entries[revision] = entry
-        else:
-            Logs.warn('Ignored incomplete %s release description' % name)
-
-    if len(entries) > 0:
-        news = open(out_file, 'w')
-        for e in sorted(entries.keys(), reverse=True):
-            news.write(entries[e])
-        news.close()
