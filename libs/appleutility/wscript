@@ -31,6 +31,9 @@ def build(bld):
     obj                = bld(features = 'cxx cxxshlib')
     obj.uselib         = 'AUDIOUNITS OSX'
     obj.source         = libappleutility_sources
+    # apple did not write this library with full symbol export control
+    # so we need to override any visibility default.
+    obj.cxxflags       = [ '-fvisibility=default' ]
     obj.export_includes = ['.']
     obj.includes       = ['.']
     obj.name           = 'libappleutility'
