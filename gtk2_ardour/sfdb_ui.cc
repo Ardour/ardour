@@ -122,7 +122,9 @@ SoundFileBox::SoundFileBox (bool persistent)
 	  length_clock ("sfboxLengthClock", !persistent, "", false, false, true, false),
 	  timecode_clock ("sfboxTimecodeClock", !persistent, "", false, false, false, false),
 	  main_box (false, 6),
-	  autoplay_btn (_("Auto-play"))
+	  autoplay_btn (_("Auto-play")),
+	  seek_slider(0,1000,1),
+	  _seeking(false)
 
 {
 	set_name (X_("SoundFileBox"));
@@ -200,8 +202,17 @@ SoundFileBox::SoundFileBox (bool persistent)
 	bottom_box.pack_start(stop_btn, true, true);
 	bottom_box.pack_start(autoplay_btn, false, false);
 
+	seek_slider.set_draw_value(false);
+
+	seek_slider.add_events(Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	seek_slider.signal_button_press_event().connect(sigc::mem_fun(*this, &SoundFileBox::seek_button_press), false);
+	seek_slider.signal_button_release_event().connect(sigc::mem_fun(*this, &SoundFileBox::seek_button_release), false);
+	main_box.pack_start (seek_slider, false, false);
+
 	play_btn.signal_clicked().connect (sigc::mem_fun (*this, &SoundFileBox::audition));
 	stop_btn.signal_clicked().connect (sigc::mem_fun (*this, &SoundFileBox::stop_audition));
+
+	stop_btn.set_sensitive (false);
 
 	channels_value.set_alignment (0.0f, 0.5f);
 	samplerate_value.set_alignment (0.0f, 0.5f);
@@ -218,7 +229,43 @@ SoundFileBox::set_session(Session* s)
 	if (!_session) {
 		play_btn.set_sensitive (false);
 		stop_btn.set_sensitive (false);
+		auditioner_connections.drop_connections();
+	} else {
+		auditioner_connections.drop_connections();
+		_session->AuditionActive.connect(auditioner_connections, invalidator (*this), boost::bind (&SoundFileBox::audition_active, this, _1), gui_context());
+		_session->the_auditioner()->AuditionProgress.connect(auditioner_connections, invalidator (*this), boost::bind (&SoundFileBox::audition_progress, this, _1, _2), gui_context());
 	}
+}
+
+void
+SoundFileBox::audition_active(bool active) {
+	stop_btn.set_sensitive (active);
+	seek_slider.set_sensitive (active);
+	if (!active) {
+		seek_slider.set_value(0);
+	}
+}
+
+void
+SoundFileBox::audition_progress(ARDOUR::framecnt_t pos, ARDOUR::framecnt_t len) {
+	if (!_seeking) {
+		seek_slider.set_value( 1000.0 * pos / len);
+		seek_slider.set_sensitive (true);
+	}
+}
+
+bool
+SoundFileBox::seek_button_press(GdkEventButton*) {
+	_seeking = true;
+	return false; // pass on to slider
+}
+
+bool
+SoundFileBox::seek_button_release(GdkEventButton*) {
+	_seeking = false;
+	_session->the_auditioner()->seek_to_percent(seek_slider.get_value() / 10.0);
+	seek_slider.set_sensitive (false);
+	return false; // pass on to slider
 }
 
 bool

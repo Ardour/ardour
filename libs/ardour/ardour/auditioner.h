@@ -44,6 +44,9 @@ class LIBARDOUR_API Auditioner : public AudioTrack
 
 	void audition_region (boost::shared_ptr<Region>);
 
+	void seek_to_frame (frameoffset_t pos) { if (_seek_frame < 0 && !_seeking) { _seek_frame = pos; }}
+	void seek_to_percent (float const pos) { if (_seek_frame < 0 && !_seeking) { _seek_frame = floorf(length * pos / 100.0); }}
+
 	ARDOUR::AudioPlaylist& prepare_playlist ();
 
 	int play_audition (framecnt_t nframes);
@@ -59,12 +62,19 @@ class LIBARDOUR_API Auditioner : public AudioTrack
 
 	virtual ChanCount input_streams () const;
 
+	frameoffset_t seek_frame() const { return _seeking ? _seek_frame : -1;}
+	void seek_response(frameoffset_t pos) { _seek_complete = true; if (_seeking) { current_frame = pos; _seek_complete = true;} }
+	PBD::Signal2<void, ARDOUR::framecnt_t, ARDOUR::framecnt_t> AuditionProgress;
+
   private:
 	boost::shared_ptr<AudioRegion> the_region;
 	framepos_t current_frame;
 	mutable gint _auditioning;
 	Glib::Threads::Mutex lock;
 	framecnt_t length;
+	frameoffset_t _seek_frame;
+	bool _seeking;
+	bool _seek_complete;
 	bool via_monitor;
 
 	void drop_ports ();

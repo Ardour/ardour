@@ -44,6 +44,9 @@ Auditioner::Auditioner (Session& s)
         , current_frame (0)
         , _auditioning (0)
         , length (0)
+        , _seek_frame (-1)
+        , _seeking (false)
+        , _seek_complete (false)
         , via_monitor (false)
 {
 }
@@ -203,6 +206,8 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 
 	_main_outs->reset_panner();
 
+	_seek_frame = -1;
+	_seeking = false;
 	length = the_region->length();
 
 	int dir;
@@ -232,14 +237,44 @@ Auditioner::play_audition (framecnt_t nframes)
 		return 0;
 	}
 
-	this_nframes = min (nframes, length - current_frame);
+#if 0 // TODO
+	if (_seeking && _seek_complete) {
+		// set FADE-IN
+	} else if (_seek_frame >= 0 && _seek_frame < length && !_seeking) {
+		// set FADE-OUT -- use/override amp? || use region-gain ?
+	}
+#endif
 
-	if ((ret = roll (this_nframes, current_frame, current_frame + nframes, false, need_butler)) != 0) {
-		silence (nframes);
-		return ret;
+	if (_seeking && _seek_complete) {
+		_seek_complete = false;
+		_seeking = false;
+		_seek_frame = -1;
 	}
 
-	current_frame += this_nframes;
+	if(!_seeking) {
+		/* process audio */
+		this_nframes = min (nframes, length - current_frame);
+
+		if ((ret = roll (this_nframes, current_frame, current_frame + nframes, false, need_butler)) != 0) {
+			silence (nframes);
+			return ret;
+		}
+
+		current_frame += this_nframes;
+
+	} else {
+		silence (nframes);
+	}
+
+	if (_seek_frame >= 0 && _seek_frame < length && !_seeking) {
+		_seek_complete = false;
+		_seeking = true;
+		need_butler = true;
+	}
+
+	if (!_seeking) {
+		AuditionProgress(current_frame, length); /* emit */
+	}
 
 	if (current_frame >= length) {
 		_session.cancel_audition ();
