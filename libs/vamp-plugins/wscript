@@ -50,8 +50,7 @@ def build(bld):
     obj.uselib       = 'FFTW3F VAMPSDK'
     obj.use          = 'libvampplugin libqmdsp'
     obj.defines      = [ 'ARDOUR_VAMP_PLUGINS_DLL_EPORTS' ]
-    obj.cxxflags     = [ '-fvisibility=default' ]
-    obj.cflags       = [ '-fvisibility=default' ]
+    autowaf.ensure_visible_symbols (obj, True)
     if bld.is_defined('HAVE_AUBIO'):
         obj.source += ' Onset.cpp '
         obj.uselib += ' AUBIO '

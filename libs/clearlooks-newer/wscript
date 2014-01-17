@@ -36,6 +36,7 @@ def build(bld):
     obj.uselib = 'GTK'
     obj.includes = '.'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'engines')
+    autowaf.ensure_visible_symbols (obj, True)
 
     if sys.platform == 'darwin':
         # Bit of a hack: make a symlink to the .dylib that meets GTK's criteria for finding it (namely that the library must be a *.so

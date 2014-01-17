@@ -47,8 +47,7 @@ def build(bld):
             maths/MathUtilities.cpp
             base/Pitch.cpp
     '''
-    obj.cxxflags     = [ '-fvisibility=default' ]
-    obj.cflags       = [ '-fvisibility=default' ]
+    autowaf.ensure_visible_symbols (obj, True)
     obj.export_includes = ['.']
     obj.includes     = ['.']
     obj.name         = 'libqmdsp'
