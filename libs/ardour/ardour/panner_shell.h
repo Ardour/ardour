@@ -85,7 +85,6 @@ public:
 	bool select_panner_by_uri (std::string const uri);
 
   private:
-	friend class Route;
 	void distribute_no_automation (BufferSet& src, BufferSet& dest, pframes_t nframes, gain_t gain_coeff);
 	bool set_user_selected_panner_uri (std::string const uri);
 

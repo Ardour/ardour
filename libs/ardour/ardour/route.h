@@ -255,7 +255,6 @@ class Route : public SessionObject, public Automatable, public RouteGroupMember,
 	int remove_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0, bool need_process_lock = true);
 	int remove_processors (const ProcessorList&, ProcessorStreams* err = 0);
 	int reorder_processors (const ProcessorList& new_order, ProcessorStreams* err = 0);
-	void set_custom_panner_uri (std::string const panner_uri);
 	void disable_processors (Placement);
 	void disable_processors ();
 	void disable_plugins (Placement);
