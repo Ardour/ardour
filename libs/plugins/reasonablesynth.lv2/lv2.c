@@ -199,7 +199,11 @@ static const LV2_Descriptor descriptor = {
   extension_data
 };
 
-LV2_SYMBOL_EXPORT
+#if defined(COMPILER_MSVC)
+__declspec(dllexport)
+#else
+__attribute__ ((visibility ("default")))
+#endif
 const LV2_Descriptor*
 lv2_descriptor(uint32_t idx)
 {
