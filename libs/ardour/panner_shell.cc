@@ -405,6 +405,7 @@ PannerShell::set_bypassed (bool yn)
 	}
 	
 	_bypassed = yn;
+	_session.set_dirty ();
 	Changed (); /* EMIT SIGNAL */
 }
 
