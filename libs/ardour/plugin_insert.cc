@@ -719,6 +719,10 @@ PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 PluginInsert::Match
 PluginInsert::private_can_support_io_configuration (ChanCount const & inx, ChanCount& out)
 {
+	if (_plugins.empty()) {
+		return Match();
+	}
+
 	PluginInfoPtr info = _plugins.front()->get_info();
 	ChanCount in; in += inx;
 	midi_bypass.reset();
