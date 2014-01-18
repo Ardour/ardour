@@ -98,6 +98,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	gain_display.signal_activate().connect (sigc::mem_fun (*this, &GainMeter::gain_activated));
 	gain_display.signal_focus_in_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
 	gain_display.signal_focus_out_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
+	gain_display.set_alignment(1.0);
 
 	peak_display.set_name ("MixerStripPeakDisplay");
 	set_size_request_to_display_given_text (peak_display, "-80.g", 2, 6); /* note the descender */
@@ -143,7 +144,6 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 void
 GainMeterBase::set_flat_buttons ()
 {
-printf("set_flat_butt\n");
 //	gain_slider->set_flat_buttons( ARDOUR_UI::config()->flat_buttons.get() );
 }
 
@@ -906,6 +906,11 @@ GainMeter::GainMeter (Session* s, int fader_length)
 		gain_display.get_parent()->remove (gain_display);
 	}
 	gain_display_box.pack_start (gain_display, true, true);
+
+	if (peak_display.get_parent()) {
+		peak_display.get_parent()->remove (gain_display);
+	}
+	gain_display_box.pack_start (peak_display, true, true);
 
 	meter_metric_area.set_name ("AudioTrackMetrics");
 	meter_metric_area.set_size_request(24, -1);
