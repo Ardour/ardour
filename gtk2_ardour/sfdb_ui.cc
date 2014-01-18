@@ -52,6 +52,7 @@
 #include "ardour/source_factory.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
+#include "ardour/srcfilesource.h"
 
 #include "ardour_ui.h"
 #include "editing.h"
@@ -389,8 +390,12 @@ SoundFileBox::audition ()
 				SourceFactory::createExternal (DataType::AUDIO, *_session,
 							       path, n,
 							       Source::Flag (0), false));
-			
-			srclist.push_back(afs);
+			if (afs->sample_rate() != _session->nominal_frame_rate()) {
+				boost::shared_ptr<SrcFileSource> sfs (new SrcFileSource(*_session, afs));
+				srclist.push_back(sfs);
+			} else {
+				srclist.push_back(afs);
+			}
 
 		} catch (failed_constructor& err) {
 			error << _("Could not access soundfile: ") << path << endmsg;
