@@ -456,6 +456,7 @@ def options(opt):
                     help='Compile with support for LV2 (if Lilv+Suil is available)')
     opt.add_option('--no-lv2', action='store_false', dest='lv2',
                     help='Do not compile with support for LV2')
+    opt.add_option('--lv2dir', type='string', help="install destination for builtin LV2 bundles [Default: LIBDIR/lv2]")
     opt.add_option('--lxvst', action='store_true', default=True, dest='lxvst',
                     help='Compile with support for linuxVST plugins')
     opt.add_option('--nls', action='store_true', default=True, dest='nls',
@@ -571,6 +572,13 @@ def configure(conf):
         conf.env.append_value ('CFLAGS', '-DNO_PLUGIN_STATE')
         conf.env.append_value ('CXXFLAGS', '-DNO_PLUGIN_STATE')
         conf.define ('NO_PLUGIN_STATE', 1)
+
+    if Options.options.lv2dir:
+        conf.env['LV2DIR'] = Options.options.lv2dir
+    else:
+        conf.env['LV2DIR'] = os.path.join(conf.env['LIBDIR'], 'lv2')
+
+    conf.env['LV2DIR'] = os.path.normpath(conf.env['LV2DIR'])
 
     if sys.platform == 'darwin':
 
