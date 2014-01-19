@@ -54,6 +54,7 @@
 #include "ardour/source_factory.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
+#include "ardour/srcfilesource.h"
 
 #include "ardour_ui.h"
 #include "editing.h"
@@ -391,8 +392,12 @@ SoundFileBox::audition ()
 				SourceFactory::createExternal (DataType::AUDIO, *_session,
 							       path, n,
 							       Source::Flag (0), false));
-			
-			srclist.push_back(afs);
+			if (afs->sample_rate() != _session->nominal_frame_rate()) {
+				boost::shared_ptr<SrcFileSource> sfs (new SrcFileSource(*_session, afs, _src_quality));
+				srclist.push_back(sfs);
+			} else {
+				srclist.push_back(afs);
+			}
 
 		} catch (failed_constructor& err) {
 			error << _("Could not access soundfile: ") << path << endmsg;
@@ -1683,6 +1688,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	set_popdown_strings (src_combo, str);
 	src_combo.set_active_text (str.front());
 	src_combo.set_sensitive (false);
+	src_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::src_combo_changed));
 
 	reset_options ();
 
@@ -1791,6 +1797,12 @@ SoundFileOmega::get_src_quality() const
 	} else {
 		return SrcFastest;
 	}
+}
+
+void
+SoundFileOmega::src_combo_changed()
+{
+	preview.set_src_quality(get_src_quality());
 }
 
 ImportDisposition

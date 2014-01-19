@@ -187,7 +187,7 @@ intptr_t Session::vst_callback (
 					
 					if (value & (kVstBarsValid)) {
 						_timeInfo.barStartPos = ppqBar;
-						_timeInfo.flags |= (kVstPpqPosValid);
+						_timeInfo.flags |= (kVstBarsValid);
 					}
 					
 				} catch (...) {
