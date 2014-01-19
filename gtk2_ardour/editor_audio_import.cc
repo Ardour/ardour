@@ -159,7 +159,6 @@ Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
 {
 	string wave_name (Glib::path_get_basename(path));
 
-	SourceMap all_sources = _session->get_sources();
 	bool already_exists = false;
 	uint32_t existing;
 
