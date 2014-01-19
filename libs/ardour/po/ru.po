@@ -7,11 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-05 11:11-0500\n"
-"PO-Revision-Date: 2013-10-15 21:40+0300\n"
+"POT-Creation-Date: 2014-01-19 22:43+0400\n"
+"PO-Revision-Date: 2014-01-19 22:42+0300\n"
 "Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
-"Language-Team: русский <>\n"
-"Language: \n"
+"Language-Team: \n"
+"Language: Russian\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -123,8 +123,8 @@ msgstr ""
 
 #: audio_playlist_source.cc:171 audiosource.cc:913 file_source.cc:529
 #: midi_playlist_source.cc:144 midi_playlist_source.cc:152
-#: midi_playlist_source.cc:159 midi_source.cc:371 plugin_insert.cc:643
-#: rb_effect.cc:333 session.cc:2619 session.cc:2652 session.cc:3797
+#: midi_playlist_source.cc:159 midi_source.cc:371 plugin_insert.cc:642
+#: rb_effect.cc:333 session.cc:2633 session.cc:2666 session.cc:3811
 #: session_handle.cc:87 sndfilesource.cc:121
 msgid "programming error: %1"
 msgstr "programming error: %1"
@@ -266,15 +266,15 @@ msgstr "%1: could not write peak file data (%2)"
 msgid "could not truncate peakfile %1 to %2 (error: %3)"
 msgstr "could not truncate peakfile %1 to %2 (error: %3)"
 
-#: auditioner.cc:87
+#: auditioner.cc:112
 msgid "no outputs available for auditioner - manual connection required"
 msgstr ""
 
-#: auditioner.cc:135
+#: auditioner.cc:174
 msgid "Auditioning of non-audio regions not yet supported"
 msgstr ""
 
-#: auditioner.cc:160
+#: auditioner.cc:199
 msgid "Cannot setup auditioner processing flow for %1 channels"
 msgstr ""
 
@@ -335,43 +335,43 @@ msgstr ""
 msgid "Error reading from butler request pipe"
 msgstr ""
 
-#: butler.cc:248
+#: butler.cc:256
 msgid "Butler read ahead failure on dstream %1"
 msgstr ""
 
-#: butler.cc:285
+#: butler.cc:293
 msgid "Butler write-behind failure on dstream %1"
 msgstr ""
 
-#: control_protocol_manager.cc:134
+#: control_protocol_manager.cc:162
 msgid "control protocol name \"%1\" has no descriptor"
 msgstr ""
 
-#: control_protocol_manager.cc:141
+#: control_protocol_manager.cc:169
 msgid "control protocol name \"%1\" could not be initialized"
 msgstr ""
 
-#: control_protocol_manager.cc:201
+#: control_protocol_manager.cc:233
 msgid "Instantiating mandatory control protocol %1"
 msgstr ""
 
-#: control_protocol_manager.cc:222
+#: control_protocol_manager.cc:254
 msgid "looking for control protocols in %1\n"
 msgstr ""
 
-#: control_protocol_manager.cc:247
+#: control_protocol_manager.cc:279
 msgid "Control protocol %1 not usable"
 msgstr ""
 
-#: control_protocol_manager.cc:264
+#: control_protocol_manager.cc:296
 msgid "Control surface protocol discovered: \"%1\"\n"
 msgstr ""
 
-#: control_protocol_manager.cc:282
+#: control_protocol_manager.cc:314
 msgid "ControlProtocolManager: cannot load module \"%1\" (%2)"
 msgstr "ControlProtocolManager: cannot load module \"%1\" (%2)"
 
-#: control_protocol_manager.cc:290
+#: control_protocol_manager.cc:322
 msgid "ControlProtocolManager: module \"%1\" has no descriptor function."
 msgstr ""
 
@@ -391,7 +391,7 @@ msgstr ""
 msgid "audio"
 msgstr ""
 
-#: data_type.cc:28 session.cc:1791 session.cc:1794
+#: data_type.cc:28 session.cc:1805 session.cc:1808
 msgid "MIDI"
 msgstr ""
 
@@ -399,11 +399,11 @@ msgstr ""
 msgid "unknown"
 msgstr ""
 
-#: delivery.cc:114
+#: delivery.cc:118
 msgid "main outs"
 msgstr ""
 
-#: delivery.cc:117 send.cc:61
+#: delivery.cc:121 send.cc:62
 msgid "listen"
 msgstr ""
 
@@ -473,7 +473,7 @@ msgstr "Сжатие без потерь"
 
 #: export_format_manager.cc:218 export_format_specification.cc:579
 msgid "Session rate"
-msgstr "Частота сеанса"
+msgstr "Частота сессии"
 
 #: export_format_specification.cc:537
 msgid "normalize"
@@ -503,7 +503,7 @@ msgstr "Треугольное"
 msgid "Rectangular"
 msgstr "Прямоугольное"
 
-#: export_formats.cc:52 session.cc:5014 session.cc:5030
+#: export_formats.cc:52 session.cc:5028 session.cc:5044
 msgid "None"
 msgstr "Нет"
 
@@ -543,15 +543,15 @@ msgstr "Формат сэмплов Vorbis"
 msgid "No sample format"
 msgstr "Без формата сэмплов"
 
-#: export_handler.cc:335
+#: export_handler.cc:342
 msgid "Editor: cannot open \"%1\" as export file for CD marker file"
 msgstr ""
 
-#: export_handler.cc:417 export_handler.cc:420
+#: export_handler.cc:424 export_handler.cc:427
 msgid "an error occured while writing a TOC/CUE file: %1"
 msgstr ""
 
-#: export_handler.cc:642 export_handler.cc:700
+#: export_handler.cc:649 export_handler.cc:707
 msgid "Cannot convert %1 to Latin-1 text"
 msgstr ""
 
@@ -776,7 +776,7 @@ msgstr ""
 msgid "preset %1 (bank %2)"
 msgstr ""
 
-#: internal_send.cc:278 internal_send.cc:279
+#: internal_send.cc:300 internal_send.cc:301
 msgid "%1 - cannot find any track/bus with the ID %2 to connect to"
 msgstr ""
 
@@ -962,7 +962,7 @@ msgstr ""
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr ""
 
-#: location.cc:842 session.cc:4516 session_state.cc:1031
+#: location.cc:842 session.cc:4530 session_state.cc:1031
 msgid "session"
 msgstr ""
 
@@ -1204,31 +1204,35 @@ msgstr ""
 msgid "Pannable given XML data for %1 - ignored"
 msgstr ""
 
-#: panner_manager.cc:76
-msgid "looking for panners in %1"
+#: panner_manager.cc:79
+msgid "looking for panners in %1\n"
 msgstr ""
 
-#: panner_manager.cc:100
-msgid "Panner discovered: \"%1\" in %2"
+#: panner_manager.cc:106
+msgid "Panner discovered: \"%1\" in %2\n"
 msgstr ""
 
-#: panner_manager.cc:117
+#: panner_manager.cc:123
 msgid "PannerManager: cannot load module \"%1\" (%2)"
 msgstr "PannerManager: cannot load module \"%1\" (%2)"
 
-#: panner_manager.cc:124
+#: panner_manager.cc:130
 msgid "PannerManager: module \"%1\" has no descriptor function."
 msgstr ""
 
-#: panner_manager.cc:187
+#: panner_manager.cc:215
 msgid "no panner discovered for in/out = %1/%2"
 msgstr ""
 
-#: panner_shell.cc:179
+#: panner_shell.cc:126
+msgid "select panner: %1\n"
+msgstr ""
+
+#: panner_shell.cc:245
 msgid "Unknown panner plugin \"%1\" found in pan state - ignored"
 msgstr ""
 
-#: panner_shell.cc:185
+#: panner_shell.cc:251
 msgid "panner plugin node has no type information!"
 msgstr ""
 
@@ -1260,37 +1264,37 @@ msgid ""
 "for the full version"
 msgstr ""
 
-#: plugin_insert.cc:598
+#: plugin_insert.cc:597
 msgid "programming error: "
 msgstr "ошибка программы: "
 
-#: plugin_insert.cc:926
+#: plugin_insert.cc:934
 msgid "XML node describing plugin is missing the `type' field"
 msgstr ""
 
-#: plugin_insert.cc:941
+#: plugin_insert.cc:949
 msgid "unknown plugin type %1 in plugin insert state"
 msgstr ""
 
-#: plugin_insert.cc:969
+#: plugin_insert.cc:977
 msgid "Plugin has no unique ID field"
 msgstr ""
 
-#: plugin_insert.cc:978
+#: plugin_insert.cc:986
 msgid ""
 "Found a reference to a plugin (\"%1\") that is unknown.\n"
 "Perhaps it was removed or moved since it was last used."
 msgstr ""
 
-#: plugin_insert.cc:1094
+#: plugin_insert.cc:1102
 msgid "PluginInsert: Auto: no ladspa port number"
 msgstr ""
 
-#: plugin_insert.cc:1101
+#: plugin_insert.cc:1109
 msgid "PluginInsert: Auto: port id out of range"
 msgstr ""
 
-#: plugin_insert.cc:1137
+#: plugin_insert.cc:1145
 msgid "PluginInsert: automatable control %1 not found - ignored"
 msgstr ""
 
@@ -1338,11 +1342,11 @@ msgstr ""
 msgid "insert %1"
 msgstr ""
 
-#: port_insert.cc:198
+#: port_insert.cc:197
 msgid "XML node describing port insert is missing the `type' field"
 msgstr ""
 
-#: port_insert.cc:203
+#: port_insert.cc:202
 msgid "non-port insert XML used for port plugin insert"
 msgstr ""
 
@@ -1374,11 +1378,11 @@ msgstr ""
 msgid "Re-establising port %1 failed"
 msgstr ""
 
-#: processor.cc:207
+#: processor.cc:208
 msgid "No %1 property flag in element %2"
 msgstr ""
 
-#: processor.cc:216
+#: processor.cc:217
 msgid "No child node with active property"
 msgstr ""
 
@@ -1446,7 +1450,7 @@ msgstr ""
 msgid "Import: %1"
 msgstr "Импорт: %1"
 
-#: resampled_source.cc:128
+#: resampled_source.cc:128 srcfilesource.cc:76
 msgid "Import: src_new() failed : %1"
 msgstr ""
 
@@ -1454,27 +1458,27 @@ msgstr ""
 msgid "return %1"
 msgstr ""
 
-#: route.cc:1075 route.cc:2528
+#: route.cc:1077 route.cc:2518
 msgid "unknown Processor type \"%1\"; ignored"
 msgstr ""
 
-#: route.cc:1087
+#: route.cc:1089
 msgid "processor could not be created. Ignored."
 msgstr ""
 
-#: route.cc:1962 route.cc:2187
+#: route.cc:1952 route.cc:2177
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr ""
 
-#: route.cc:2022
+#: route.cc:2012
 msgid "Pannable state found for route (%1) without a panner!"
 msgstr ""
 
-#: route.cc:2096 route.cc:2100 route.cc:2301 route.cc:2305
+#: route.cc:2086 route.cc:2090 route.cc:2291 route.cc:2295
 msgid "badly formed order key string in state file! [%1] ... ignored."
 msgstr ""
 
-#: route.cc:2311
+#: route.cc:2301
 msgid "Converting deprecated order key for %1 using Editor order %2"
 msgstr ""
 
@@ -1490,15 +1494,15 @@ msgstr ""
 msgid "error writing tempo-adjusted data to %1"
 msgstr ""
 
-#: send.cc:59
+#: send.cc:60
 msgid "aux %1"
 msgstr ""
 
-#: send.cc:63
+#: send.cc:64
 msgid "send %1"
 msgstr ""
 
-#: send.cc:65
+#: send.cc:66
 msgid "programming error: send created using role %1"
 msgstr "programming error: send created using role %1"
 
@@ -1508,7 +1512,7 @@ msgstr "Соединение со звуковым движком"
 
 #: session.cc:349
 msgid "Session loading complete"
-msgstr "Загрузка сеанса завершена"
+msgstr "Загрузка сессии завершена"
 
 #: session.cc:421
 msgid "Set up LTC"
@@ -1550,119 +1554,119 @@ msgstr ""
 msgid "cannot connect master output %1 to %2"
 msgstr ""
 
-#: session.cc:849
+#: session.cc:859
 msgid "monitor"
 msgstr ""
 
-#: session.cc:894
+#: session.cc:904
 msgid "cannot connect control input %1 to %2"
 msgstr ""
 
-#: session.cc:914
+#: session.cc:924
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
 msgstr ""
 
-#: session.cc:945
+#: session.cc:955
 msgid "cannot connect control output %1 to %2"
 msgstr ""
 
-#: session.cc:1009
+#: session.cc:1023
 msgid "cannot create Auditioner: no auditioning of regions possible"
 msgstr ""
 
-#: session.cc:1193
+#: session.cc:1207
 msgid "Session: you can't use that location for auto punch (start <= end)"
 msgstr ""
 
-#: session.cc:1233
+#: session.cc:1247
 msgid ""
 "You cannot use this location for auto-loop because it has zero or negative "
 "length"
 msgstr ""
 
-#: session.cc:1547
+#: session.cc:1561
 msgid "feedback loop setup between %1 and %2"
 msgstr ""
 
-#: session.cc:1843
+#: session.cc:1857
 msgid "Session: could not create new midi track."
 msgstr ""
 
-#: session.cc:1849
+#: session.cc:1863
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
 msgstr ""
 
-#: session.cc:2026 session.cc:2029
+#: session.cc:2040 session.cc:2043
 msgid "Audio"
 msgstr ""
 
-#: session.cc:2053 session.cc:2061 session.cc:2138 session.cc:2146
+#: session.cc:2067 session.cc:2075 session.cc:2152 session.cc:2160
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr ""
 
-#: session.cc:2084
+#: session.cc:2098
 msgid "Session: could not create new audio track."
 msgstr ""
 
-#: session.cc:2116 session.cc:2119
+#: session.cc:2130 session.cc:2133
 msgid "Bus"
 msgstr ""
 
-#: session.cc:2169
+#: session.cc:2183
 msgid "Session: could not create new audio route."
 msgstr ""
 
-#: session.cc:2228 session.cc:2238
+#: session.cc:2242 session.cc:2252
 msgid "Session: UINT_MAX routes? impossible!"
 msgstr ""
 
-#: session.cc:2260
+#: session.cc:2274
 msgid "Session: cannot create track/bus from template description"
 msgstr ""
 
-#: session.cc:2286
+#: session.cc:2300
 msgid "Session: could not create new route from template"
 msgstr ""
 
-#: session.cc:2315
+#: session.cc:2329
 msgid "Adding new tracks/busses failed"
 msgstr "Не удалось добавить новые дорожки/шины"
 
-#: session.cc:3419
+#: session.cc:3433
 msgid "FATAL ERROR! Could not find a suitable version of %1 for a rename"
 msgstr ""
 
-#: session.cc:3539 session.cc:3597
+#: session.cc:3553 session.cc:3611
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr ""
 
-#: session.cc:3987
+#: session.cc:4001
 msgid "send ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:3999
+#: session.cc:4013
 msgid "aux send ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:4011
+#: session.cc:4025
 msgid "return ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:4023
+#: session.cc:4037
 msgid "insert ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:4150
+#: session.cc:4164
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr ""
 
-#: session.cc:4179
+#: session.cc:4193
 msgid "too many bounced versions of playlist \"%1\""
 msgstr ""
 
-#: session.cc:4189
+#: session.cc:4203
 msgid "cannot create new audio file \"%1\" for %2"
 msgstr ""
 
@@ -1727,7 +1731,7 @@ msgstr ""
 msgid "Session: error in no roll for %1"
 msgstr ""
 
-#: session_process.cc:1157
+#: session_process.cc:1159
 msgid "Programming error: illegal event type in process_event (%1)"
 msgstr ""
 
@@ -1789,7 +1793,7 @@ msgstr "Session: cannot create session folder \"%1\" (%2)"
 
 #: session_state.cc:514
 msgid "Could not open %1 for writing session template"
-msgstr "Не удалось открыть %1 для записи шаблона сеанса"
+msgstr "Не удалось открыть %1 для записи шаблона сессии"
 
 #: session_state.cc:520
 msgid "Could not open session template %1 for reading"
@@ -1831,7 +1835,7 @@ msgstr ""
 
 #: session_state.cc:798
 msgid "%1: session file \"%2\" doesn't exist!"
-msgstr "%1: файл сеанса «%2» не существует!"
+msgstr "%1: файл сессии «%2» не существует!"
 
 #: session_state.cc:810
 msgid "Could not understand session file %1"
@@ -1839,7 +1843,7 @@ msgstr ""
 
 #: session_state.cc:819
 msgid "Session file %1 is not a session"
-msgstr "Файл сеанса %1 не является сеансом"
+msgstr "Файл сессии %1 не является сессией"
 
 #: session_state.cc:1125
 msgid "programming error: Session: incorrect XML node sent to set_state()"
@@ -2231,7 +2235,7 @@ msgstr ""
 msgid "attempt to write a non-writable audio file source (%1)"
 msgstr ""
 
-#: sndfilesource.cc:396 utils.cc:510 utils.cc:534 utils.cc:548 utils.cc:567
+#: sndfilesource.cc:396 utils.cc:545 utils.cc:569 utils.cc:583 utils.cc:602
 msgid "programming error: %1 %2"
 msgstr "programming error: %1 %2"
 
@@ -2274,16 +2278,20 @@ msgid ""
 "start time."
 msgstr ""
 
-#: speakers.cc:239
+#: speakers.cc:280
 msgid "Speaker information is missing azimuth - speaker ignored"
 msgstr ""
 
-#: speakers.cc:245
+#: speakers.cc:286
 msgid "Speaker information is missing elevation - speaker ignored"
 msgstr ""
 
-#: speakers.cc:251
+#: speakers.cc:292
 msgid "Speaker information is missing distance - speaker ignored"
+msgstr ""
+
+#: srcfilesource.cc:135
+msgid "SrcFileSource: %1"
 msgstr ""
 
 #: tape_file_matcher.cc:46
@@ -2433,54 +2441,54 @@ msgstr ""
 msgid "Node for Port has no \"name\" property"
 msgstr "Node for Port has no \"name\" property"
 
-#: utils.cc:358 utils.cc:382
+#: utils.cc:393 utils.cc:417
 msgid "Splice"
 msgstr ""
 
-#: utils.cc:360 utils.cc:375
+#: utils.cc:395 utils.cc:410
 msgid "Slide"
 msgstr ""
 
-#: utils.cc:362 utils.cc:378
+#: utils.cc:397 utils.cc:413
 msgid "Lock"
 msgstr ""
 
-#: utils.cc:365
+#: utils.cc:400
 msgid "programming error: unknown edit mode string \"%1\""
 msgstr "programming error: unknown edit mode string \"%1\""
 
-#: utils.cc:389 utils.cc:421
+#: utils.cc:424 utils.cc:456
 msgid "MIDI Timecode"
 msgstr ""
 
-#: utils.cc:389 utils.cc:419
+#: utils.cc:424 utils.cc:454
 msgid "MTC"
 msgstr "MTC"
 
-#: utils.cc:393 utils.cc:428
+#: utils.cc:428 utils.cc:463
 msgid "MIDI Clock"
 msgstr ""
 
-#: utils.cc:397 utils.cc:415 utils.cc:435
+#: utils.cc:432 utils.cc:450 utils.cc:470
 msgid "JACK"
 msgstr "JACK"
 
-#: utils.cc:401
+#: utils.cc:436
 msgid "programming error: unknown sync source string \"%1\""
 msgstr "programming error: unknown sync source string \"%1\""
 
-#: utils.cc:426
+#: utils.cc:461
 msgid "M-Clock"
 msgstr ""
 
-#: utils.cc:432
+#: utils.cc:467
 msgid "LTC"
 msgstr "LTC"
 
-#: utils.cc:602
+#: utils.cc:637
 msgid "programming error: unknown native header format: %1"
 msgstr "programming error: unknown native header format: %1"
 
-#: utils.cc:617
+#: utils.cc:652
 msgid "cannot open directory %1 (%2)"
 msgstr "cannot open directory %1 (%2)"
