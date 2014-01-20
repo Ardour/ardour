@@ -62,13 +62,9 @@ class LIBGTKMM2EXT_API MouseButton {
 
         std::string name() const;
         static bool make_button (const std::string&, MouseButton&);
-        static void set_ignored_state (int mask) {
-                _ignored_state = mask;
-        }
 
   private:
         uint64_t _val;
-        static uint32_t _ignored_state;
 };
 
 class LIBGTKMM2EXT_API ActionMap {
