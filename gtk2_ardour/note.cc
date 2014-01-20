@@ -34,8 +34,8 @@ Note::Note (
 	bool with_events
 	)
 	: NoteBase (region, with_events, note)
+	, _rectangle (new ArdourCanvas::Rectangle (group))
 {
-	_rectangle = new ArdourCanvas::Rectangle (group);
 #ifdef CANVAS_DEBUG
 	_rectangle->name = "note";
 #endif
