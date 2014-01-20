@@ -66,6 +66,15 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 	}
 
 	/* file is not opened until write */
+
+	if (flags & Writable) {
+		return;
+	}
+
+	if (open(_path)) {
+		throw failed_constructor ();
+	}
+	_open = true;
 }
 
 /** Constructor used for existing internal-to-session files. */
