@@ -45,6 +45,8 @@
 #include "gui_thread.h"
 #include "utils.h"
 
+#include "i18n.h"
+
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
@@ -419,6 +421,11 @@ StreamView::update_rec_box ()
 			xstart = _trackview.editor().sample_to_pixel (_trackview.track()->current_capture_start());
 			xend = _trackview.editor().sample_to_pixel (at);
 			break;
+
+		default:
+			fatal << string_compose (_("programming error: %1"), "illegal track mode") << endmsg;
+			/*NOTREACHED*/
+			return;
 		}
 
 		rect.rectangle->set_x0 (xstart);
