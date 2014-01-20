@@ -389,13 +389,6 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 	return trackview.editor().canvas_region_view_event (ev, group, this);
 }
 
-void
-MidiRegionView::remove_ghost_note ()
-{
-	delete _ghost_note;
-	_ghost_note = 0;
-}
-
 bool
 MidiRegionView::enter_notify (GdkEventCrossing* ev)
 {
@@ -3546,6 +3539,13 @@ MidiRegionView::create_ghost_note (double x, double y)
 	_last_ghost_y = y;
 
 	show_verbose_cursor (_ghost_note->note ());
+}
+
+void
+MidiRegionView::remove_ghost_note ()
+{
+	delete _ghost_note;
+	_ghost_note = 0;
 }
 
 void
