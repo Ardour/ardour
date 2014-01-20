@@ -31,7 +31,7 @@
 namespace Gtkmm2ext {
 
 template<class DataType>
-struct LIBGTKMM2EXT_API SerializedObjectPointers {
+struct /*LIBGTKMM2EXT_API*/ SerializedObjectPointers {
     uint32_t size;
     uint32_t cnt;
     char     type[32];
@@ -89,7 +89,7 @@ class LIBGTKMM2EXT_API DnDTreeViewBase : public Gtk::TreeView
 };
 
 template<class DataType>
-class LIBGTKMM2EXT_API DnDTreeView : public DnDTreeViewBase
+class /*LIBGTKMM2EXT_API*/ DnDTreeView : public DnDTreeViewBase
 {
   public:
 	DnDTreeView() {} 
