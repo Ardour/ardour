@@ -577,7 +577,13 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 		_focused_item = 0;
 	}
 
-	pick_current_item (0); // no mouse state
+	/* an item which ignores events can never be the current item
+	   so we do not need to repick the current item.
+	*/
+
+	if (!item->ignore_events()) {
+		pick_current_item (0); // no mouse state
+	}
 	
 }
 
