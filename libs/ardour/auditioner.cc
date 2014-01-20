@@ -51,6 +51,7 @@ Auditioner::Auditioner (Session& s)
 	, via_monitor (false)
 	, _midi_audition (false)
 	, _synth_added (false)
+	, _queue_panic (false)
 {
 }
 
@@ -209,14 +210,34 @@ Auditioner::roll_midi (pframes_t nframes, framepos_t start_frame, framepos_t end
 	framecnt_t playback_distance = nframes;
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
 	BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
-
-	_silent = false;
 	MidiBuffer& mbuf (bufs.get_midi (0));
-	diskstream->get_playback (mbuf, nframes);
+	_silent = false;
 
 	ChanCount cnt (DataType::MIDI, 1);
 	cnt.set (DataType::AUDIO, bufs.count().n_audio());
 	bufs.set_count (cnt);
+
+	if (_queue_panic) {
+		_queue_panic = false;
+		for (uint8_t chn = 0; chn < 0xf; ++chn) {
+			uint8_t buf[3] = { ((uint8_t) (MIDI_CMD_CONTROL | chn)), ((uint8_t) MIDI_CTL_SUSTAIN), 0 };
+			mbuf.push_back(0, 3, buf);
+			buf[1] = MIDI_CTL_ALL_NOTES_OFF;
+			mbuf.push_back(0, 3, buf);
+			buf[1] = MIDI_CTL_RESET_CONTROLLERS;
+			mbuf.push_back(0, 3, buf);
+		}
+		process_output_buffers (bufs, start_frame, start_frame+1, 1, false, false);
+
+		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+			boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
+			if (d) {
+				d->flush_buffers (nframes);
+			}
+		}
+	}
+
+	diskstream->get_playback (mbuf, nframes);
 
 	process_output_buffers (bufs, start_frame, end_frame, nframes,
 				declick, (!diskstream->record_enabled() && !_session.transport_stopped()));
@@ -366,8 +387,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 				_synth_added = true;
 			}
 		} else {
-			// TODO -- queue midi-panic // reset synth -> all notes off
-			//  here or in first cycle..
+			_queue_panic = true;
 		}
 
 		{
@@ -457,10 +477,10 @@ Auditioner::play_audition (framecnt_t nframes)
 	}
 
 	if (_seek_frame >= 0 && _seek_frame < length && !_seeking) {
+		_queue_panic = true;
 		_seek_complete = false;
 		_seeking = true;
 		need_butler = true;
-		// TODO -- send midi-panic. -> all notes off
 	}
 
 	if (!_seeking) {

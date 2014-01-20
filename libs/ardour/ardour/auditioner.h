@@ -123,6 +123,7 @@ class Auditioner : public Track
 	bool via_monitor;
 	bool _midi_audition;
 	bool _synth_added;
+	bool _queue_panic;
 
 	boost::shared_ptr<Diskstream> _diskstream_audio;
 	boost::shared_ptr<Diskstream> _diskstream_midi;
