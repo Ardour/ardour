@@ -185,23 +185,26 @@ static void synthesize_sineP (RSSynthChannel* sc,
   for (i=0; i < n_samples; ++i) {
     float env = adsr_env(sc, note);
     if (sc->adsr_cnt[note] == 0) break;
-    const float amp = vol * env;
-
-    left[i]  += amp * sinf(2.0 * M_PI * phase);
-    left[i]  += .300 * amp * sinf(2.0 * M_PI * phase * 2.0);
-    left[i]  += .150 * amp * sinf(2.0 * M_PI * phase * 3.0);
-    left[i]  += .080 * amp * sinf(2.0 * M_PI * phase * 4.0);
-  //left[i]  -= .007 * amp * sinf(2.0 * M_PI * phase * 5.0);
-  //left[i]  += .010 * amp * sinf(2.0 * M_PI * phase * 6.0);
-    left[i]  += .020 * amp * sinf(2.0 * M_PI * phase * 7.0);
-    phase += fq;
-    right[i] += amp * sinf(2.0 * M_PI * phase);
-    right[i] += .300 * amp * sinf(2.0 * M_PI * phase * 2.0);
-    right[i] += .150 * amp * sinf(2.0 * M_PI * phase * 3.0);
-    right[i] -= .080 * amp * sinf(2.0 * M_PI * phase * 4.0);
-  //right[i] += .007 * amp * sinf(2.0 * M_PI * phase * 5.0);
-  //right[i] += .010 * amp * sinf(2.0 * M_PI * phase * 6.0);
-    right[i] -= .020 * amp * sinf(2.0 * M_PI * phase * 7.0);
+    const float amp = vol * env * .6;
+    if (amp > 1e-10) {
+      left[i]  += amp * sinf(2.0 * M_PI * phase);
+      left[i]  += .300 * amp * sinf(2.0 * M_PI * phase * 2.0);
+      left[i]  += .150 * amp * sinf(2.0 * M_PI * phase * 3.0);
+      left[i]  += .080 * amp * sinf(2.0 * M_PI * phase * 4.0);
+      //left[i]  -= .007 * amp * sinf(2.0 * M_PI * phase * 5.0);
+      //left[i]  += .010 * amp * sinf(2.0 * M_PI * phase * 6.0);
+      left[i]  += .020 * amp * sinf(2.0 * M_PI * phase * 7.0);
+      phase += fq;
+      right[i] += amp * sinf(2.0 * M_PI * phase);
+      right[i] += .300 * amp * sinf(2.0 * M_PI * phase * 2.0);
+      right[i] += .150 * amp * sinf(2.0 * M_PI * phase * 3.0);
+      right[i] -= .080 * amp * sinf(2.0 * M_PI * phase * 4.0);
+      //right[i] += .007 * amp * sinf(2.0 * M_PI * phase * 5.0);
+      //right[i] += .010 * amp * sinf(2.0 * M_PI * phase * 6.0);
+      right[i] -= .020 * amp * sinf(2.0 * M_PI * phase * 7.0);
+    } else {
+      phase += fq;
+    }
     if (phase > 1.0) phase -= 2.0;
   }
   sc->phase[note] = phase;
