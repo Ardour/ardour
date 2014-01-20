@@ -79,7 +79,7 @@ namespace Gtkmm2ext {
 	LIBGTKMM2EXT_API void set_popdown_strings (Gtk::ComboBoxText&, 
 	                          const std::vector<std::string>&);
 	
-	template<class T> LIBGTKMM2EXT_API void deferred_delete (void *ptr) {
+	template<class T> /*LIBGTKMM2EXT_API*/ void deferred_delete (void *ptr) {
 		delete static_cast<T *> (ptr);
 	}
 
