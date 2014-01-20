@@ -558,15 +558,8 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 		queue_draw_item_area (item, bounding_box.get ());
 	}
 	
-	/* no need to send a leave event to this item, since it is going away 
-	 */
-
 	if (_new_current_item == item) {
 		_new_current_item = 0;
-	}
-
-	if (_current_item == item) {
-		_current_item = 0;
 	}
 
 	if (_grabbed_item == item) {
@@ -577,11 +570,10 @@ GtkCanvas::item_going_away (Item* item, boost::optional<Rect> bounding_box)
 		_focused_item = 0;
 	}
 
-	/* an item which ignores events can never be the current item
-	   so we do not need to repick the current item.
-	*/
-
-	if (!item->ignore_events()) {
+	if (_current_item == item) {
+		/* no need to send a leave event to this item, since it is going away 
+		 */
+		_current_item = 0;
 		pick_current_item (0); // no mouse state
 	}
 	
