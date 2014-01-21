@@ -67,9 +67,23 @@ Auditioner::init ()
 	}
 
 	_output->add_port ("Midiaudition", this, DataType::MIDI);
-	boost::shared_ptr<Plugin> p = find_plugin (_session, "https://community.ardour.org/node/7596", ARDOUR::LV2);
-	assert(p);
-	asynth = boost::shared_ptr<Processor> (new PluginInsert (_session, p));
+
+	string plugin_id = Config->get_midi_audition_synth_uri();
+	boost::shared_ptr<Plugin> p;
+	if (!plugin_id.empty()) {
+		p = find_plugin (_session, plugin_id, ARDOUR::LV2);
+		if (!p) {
+			p = find_plugin (_session, "https://community.ardour.org/node/7596", ARDOUR::LV2);
+			if (p) {
+				warning << _("Falling back to Reasonable Synth for Midi Audition") << endmsg;
+			} else {
+				warning << _("No synth for midi-audition found.") << endmsg;
+			}
+		}
+	}
+	if (p) {
+		asynth = boost::shared_ptr<Processor> (new PluginInsert (_session, p));
+	}
 
 	_output->changed.connect_same_thread (*this, boost::bind (&Auditioner::output_changed, this, _1, _2));
 
@@ -379,7 +393,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 
 		ProcessorStreams ps;
 
-		if (!_synth_added) {
+		if (!_synth_added && asynth) {
 			int rv = add_processor_by_index(asynth, PreFader, &ps, true);
 			if (rv) {
 				error << _("Failed to load synth for MIDI-Audition.") << endmsg;
@@ -551,7 +565,7 @@ Auditioner::input_streams () const
 	return ChanCount ();
 }
 
-MonitorState 
+MonitorState
 Auditioner::monitoring_state () const
 {
 	return MonitoringDisk;
