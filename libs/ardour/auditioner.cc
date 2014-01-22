@@ -472,7 +472,9 @@ Auditioner::play_audition (framecnt_t nframes)
 		_seek_complete = false;
 		_seeking = false;
 		_seek_frame = -1;
-		midi_diskstream()->reset_tracker();
+		if (_midi_audition && midi_diskstream()) {
+			midi_diskstream()->reset_tracker();
+		}
 	}
 
 	if(!_seeking) {
