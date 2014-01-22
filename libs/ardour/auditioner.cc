@@ -85,8 +85,9 @@ void
 Auditioner::lookup_synth ()
 {
 	string plugin_id = Config->get_midi_audition_synth_uri();
-	boost::shared_ptr<Plugin> p;
+	asynth = boost::shared_ptr<Processor>();
 	if (!plugin_id.empty()) {
+		boost::shared_ptr<Plugin> p;
 		p = find_plugin (_session, plugin_id, ARDOUR::LV2);
 		if (!p) {
 			p = find_plugin (_session, "https://community.ardour.org/node/7596", ARDOUR::LV2);
@@ -96,9 +97,9 @@ Auditioner::lookup_synth ()
 				warning << _("No synth for midi-audition found.") << endmsg;
 			}
 		}
-	}
-	if (p) {
-		asynth = boost::shared_ptr<Processor> (new PluginInsert (_session, p));
+		if (p) {
+			asynth = boost::shared_ptr<Processor> (new PluginInsert (_session, p));
+		}
 	}
 }
 
