@@ -146,10 +146,8 @@ class AudioDiskstream : public Diskstream
 
   protected:
 	friend class Auditioner;
-	int  seek (framepos_t which_sample, bool complete_refill = false);
-
-  protected:
 	friend class AudioTrack;
+	int  seek (framepos_t which_sample, bool complete_refill = false);
 
         int  process (BufferSet&, framepos_t transport_frame, pframes_t nframes, framecnt_t &, bool need_disk_signal);
         frameoffset_t calculate_playback_distance (pframes_t nframes);

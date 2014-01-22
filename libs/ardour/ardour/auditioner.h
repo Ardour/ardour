@@ -26,6 +26,10 @@
 
 #include "ardour/ardour.h"
 #include "ardour/audio_track.h"
+#include "ardour/midi_region.h"
+
+#include "ardour/audio_diskstream.h"
+#include "ardour/midi_diskstream.h"
 
 namespace ARDOUR {
 
@@ -33,14 +37,14 @@ class Session;
 class AudioRegion;
 class AudioPlaylist;
 
-class Auditioner : public AudioTrack
+class Auditioner : public Track
 {
   public:
 	Auditioner (Session&);
 	~Auditioner ();
 
 	int init ();
-        int connect ();
+	int connect ();
 
 	void audition_region (boost::shared_ptr<Region>);
 
@@ -63,11 +67,52 @@ class Auditioner : public AudioTrack
 	virtual ChanCount input_streams () const;
 
 	frameoffset_t seek_frame() const { return _seeking ? _seek_frame : -1;}
-	void seek_response(frameoffset_t pos) { _seek_complete = true; if (_seeking) { current_frame = pos; _seek_complete = true;} }
+	void seek_response(frameoffset_t pos) {
+		_seek_complete = true;
+		if (_seeking) { current_frame = pos; _seek_complete = true;}
+	}
+
 	PBD::Signal2<void, ARDOUR::framecnt_t, ARDOUR::framecnt_t> AuditionProgress;
+
+	/* Track */
+	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler);
+	DataType data_type () const;
+
+	int roll_audio (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler);
+	int roll_midi (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler);
+
+	boost::shared_ptr<Diskstream> create_diskstream ();
+	void set_diskstream (boost::shared_ptr<Diskstream> ds);
+
+	/* fake track */
+	void set_state_part_two () {}
+	int set_state (const XMLNode&, int) { return 0; }
+	bool bounceable (boost::shared_ptr<Processor>, bool) const { return false; }
+	void freeze_me (InterThreadInfo&) {}
+	void unfreeze () {}
+
+	boost::shared_ptr<Region> bounce (InterThreadInfo&)
+		{ return boost::shared_ptr<Region> (); }
+
+	boost::shared_ptr<Region> bounce_range (framepos_t, framepos_t, InterThreadInfo&, boost::shared_ptr<Processor>, bool)
+		{ return boost::shared_ptr<Region> (); }
+
+	int export_stuff (BufferSet&, framepos_t, framecnt_t, boost::shared_ptr<Processor>, bool, bool)
+		{ return -1; }
+
+	boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &)
+		{ return boost::shared_ptr<Diskstream> (); }
+
+	boost::shared_ptr<AudioDiskstream> audio_diskstream() const
+		{ return boost::dynamic_pointer_cast<AudioDiskstream> (_diskstream); }
+
+	boost::shared_ptr<MidiDiskstream> midi_diskstream() const
+		{ return boost::dynamic_pointer_cast<MidiDiskstream> (_diskstream); }
+
 
   private:
 	boost::shared_ptr<AudioRegion> the_region;
+	boost::shared_ptr<MidiRegion> midi_region;
 	framepos_t current_frame;
 	mutable gint _auditioning;
 	Glib::Threads::Mutex lock;
@@ -76,6 +121,12 @@ class Auditioner : public AudioTrack
 	bool _seeking;
 	bool _seek_complete;
 	bool via_monitor;
+	bool _midi_audition;
+	bool _synth_added;
+
+	boost::shared_ptr<Diskstream> _diskstream_audio;
+	boost::shared_ptr<Diskstream> _diskstream_midi;
+	boost::shared_ptr<Processor> asynth;
 
 	void drop_ports ();
 	static void *_drop_ports (void *);
