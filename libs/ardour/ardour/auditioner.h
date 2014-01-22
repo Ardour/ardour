@@ -123,6 +123,7 @@ class Auditioner : public Track
 	bool via_monitor;
 	bool _midi_audition;
 	bool _synth_added;
+	bool _synth_changed;
 	bool _queue_panic;
 
 	boost::shared_ptr<Diskstream> _diskstream_audio;
@@ -130,6 +131,8 @@ class Auditioner : public Track
 	boost::shared_ptr<Processor> asynth;
 
 	void drop_ports ();
+	void lookup_synth ();
+	void config_changed (std::string);
 	static void *_drop_ports (void *);
 	void actually_drop_ports ();
 	void output_changed (IOChange, void*);

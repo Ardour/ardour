@@ -51,6 +51,7 @@ Auditioner::Auditioner (Session& s)
 	, via_monitor (false)
 	, _midi_audition (false)
 	, _synth_added (false)
+	, _synth_changed (false)
 	, _queue_panic (false)
 {
 }
@@ -68,6 +69,21 @@ Auditioner::init ()
 
 	_output->add_port ("Midiaudition", this, DataType::MIDI);
 
+	lookup_synth();
+
+	_output->changed.connect_same_thread (*this, boost::bind (&Auditioner::output_changed, this, _1, _2));
+	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Auditioner::config_changed, this, _1));
+
+	return 0;
+}
+
+Auditioner::~Auditioner ()
+{
+}
+
+void
+Auditioner::lookup_synth ()
+{
 	string plugin_id = Config->get_midi_audition_synth_uri();
 	boost::shared_ptr<Plugin> p;
 	if (!plugin_id.empty()) {
@@ -84,14 +100,14 @@ Auditioner::init ()
 	if (p) {
 		asynth = boost::shared_ptr<Processor> (new PluginInsert (_session, p));
 	}
-
-	_output->changed.connect_same_thread (*this, boost::bind (&Auditioner::output_changed, this, _1, _2));
-
-	return 0;
 }
 
-Auditioner::~Auditioner ()
+void
+Auditioner::config_changed (std::string p)
 {
+	if (p == "midi-audition-synth-uri") {
+		_synth_changed = true;
+	}
 }
 
 int
@@ -392,6 +408,16 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 		midi_diskstream()->reset_tracker();
 
 		ProcessorStreams ps;
+
+		if (_synth_changed && _synth_added) {
+			remove_processor(asynth);
+			_synth_added = false;
+		}
+		if (_synth_changed && !_synth_added) {
+			_synth_added = false;
+			lookup_synth();
+		}
+
 
 		if (!_synth_added && asynth) {
 			int rv = add_processor_by_index(asynth, PreFader, &ps, true);
