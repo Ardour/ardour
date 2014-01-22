@@ -185,7 +185,7 @@ static void synthesize_sineP (RSSynthChannel* sc,
   for (i=0; i < n_samples; ++i) {
     float env = adsr_env(sc, note);
     if (sc->adsr_cnt[note] == 0) break;
-    const float amp = vol * env * .6;
+    const float amp = vol * env;
     if (amp > 1e-10) {
       left[i]  += amp * sinf(2.0 * M_PI * phase);
       left[i]  += .300 * amp * sinf(2.0 * M_PI * phase * 2.0);
@@ -224,7 +224,7 @@ static void process_key (void *synth,
   RSSynthChannel* sc = &rs->sc[chn];
   const int8_t vel = sc->miditable[note];
   const int8_t msg = sc->midimsgs[note];
-  const float vol = /* master_volume */ 0.25 * fabsf(vel) / 127.0;
+  const float vol = /* master_volume */ 0.1 * fabsf(vel) / 127.0;
   const float phase = sc->phase[note];
   sc->midimsgs[note] = 0;
 
