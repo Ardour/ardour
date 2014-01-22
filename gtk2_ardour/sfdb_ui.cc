@@ -279,6 +279,38 @@ SoundFileBox::setup_labels (const string& filename)
 
 	string error_msg;
 
+	if (SMFSource::safe_midi_file_extension (path)) {
+
+		boost::shared_ptr<SMFSource> ms =
+			boost::dynamic_pointer_cast<SMFSource> (
+					SourceFactory::createExternal (DataType::MIDI, *_session,
+											 path, 0, Source::Flag (0), false));
+
+		preview_label.set_markup (_("<b>Midi File Information</b>"));
+
+		format_text.set_text ("MIDI");
+		samplerate_value.set_text ("-");
+		tags_entry.get_buffer()->set_text ("");
+		timecode_clock.set (0);
+		tags_entry.set_sensitive (false);
+
+		if (ms) {
+			channels_value.set_text (to_string(ms->num_tracks(), std::dec));
+			length_clock.set (ms->length(ms->timeline_position()));
+		} else {
+			channels_value.set_text ("");
+			length_clock.set (0);
+		}
+
+		if (_session && ms) {
+			play_btn.set_sensitive (true);
+		} else {
+			play_btn.set_sensitive (false);
+		}
+
+		return true;
+	}
+
 	if(!AudioFileSource::get_soundfile_info (filename, sf_info, error_msg)) {
 
 		preview_label.set_markup (_("<b>Sound File Information</b>"));
@@ -363,11 +395,6 @@ SoundFileBox::audition ()
 		return;
 	}
 
-	if (SMFSource::safe_midi_file_extension (path)) {
-		error << _("Auditioning of MIDI files is not yet supported") << endmsg;
-		return;
-	}
-
 	_session->cancel_audition();
 
 	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
@@ -376,51 +403,74 @@ SoundFileBox::audition ()
 	}
 
 	boost::shared_ptr<Region> r;
-	SourceList srclist;
-	boost::shared_ptr<AudioFileSource> afs;
-	bool old_sbp = AudioSource::get_build_peakfiles ();
 
-	/* don't even think of building peakfiles for these files */
+	if (SMFSource::safe_midi_file_extension (path)) {
 
-	AudioSource::set_build_peakfiles (false);
+		boost::shared_ptr<SMFSource> ms =
+			boost::dynamic_pointer_cast<SMFSource> (
+					SourceFactory::createExternal (DataType::MIDI, *_session,
+											 path, 0, Source::Flag (0), false));
 
-	for (int n = 0; n < sf_info.channels; ++n) {
-		try {
-			afs = boost::dynamic_pointer_cast<AudioFileSource> (
-				SourceFactory::createExternal (DataType::AUDIO, *_session,
-							       path, n,
-							       Source::Flag (0), false));
-			if (afs->sample_rate() != _session->nominal_frame_rate()) {
-				boost::shared_ptr<SrcFileSource> sfs (new SrcFileSource(*_session, afs, _src_quality));
-				srclist.push_back(sfs);
-			} else {
-				srclist.push_back(afs);
+		string rname = region_name_from_path (ms->path(), false);
+
+		PropertyList plist;
+
+		plist.add (ARDOUR::Properties::start, 0);
+		plist.add (ARDOUR::Properties::length, ms->length(ms->timeline_position()));
+		plist.add (ARDOUR::Properties::name, rname);
+		plist.add (ARDOUR::Properties::layer, 0);
+
+		r = boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (boost::dynamic_pointer_cast<Source>(ms), plist, false));
+		assert(r);
+
+	} else {
+
+		SourceList srclist;
+		boost::shared_ptr<AudioFileSource> afs;
+		bool old_sbp = AudioSource::get_build_peakfiles ();
+
+		/* don't even think of building peakfiles for these files */
+
+		AudioSource::set_build_peakfiles (false);
+
+		for (int n = 0; n < sf_info.channels; ++n) {
+			try {
+				afs = boost::dynamic_pointer_cast<AudioFileSource> (
+					SourceFactory::createExternal (DataType::AUDIO, *_session,
+											 path, n,
+											 Source::Flag (0), false));
+				if (afs->sample_rate() != _session->nominal_frame_rate()) {
+					boost::shared_ptr<SrcFileSource> sfs (new SrcFileSource(*_session, afs, _src_quality));
+					srclist.push_back(sfs);
+				} else {
+					srclist.push_back(afs);
+				}
+
+			} catch (failed_constructor& err) {
+				error << _("Could not access soundfile: ") << path << endmsg;
+				AudioSource::set_build_peakfiles (old_sbp);
+				return;
 			}
+		}
 
-		} catch (failed_constructor& err) {
-			error << _("Could not access soundfile: ") << path << endmsg;
-			AudioSource::set_build_peakfiles (old_sbp);
+		AudioSource::set_build_peakfiles (old_sbp);
+
+		if (srclist.empty()) {
 			return;
 		}
+
+		afs = boost::dynamic_pointer_cast<AudioFileSource> (srclist[0]);
+		string rname = region_name_from_path (afs->path(), false);
+
+		PropertyList plist;
+
+		plist.add (ARDOUR::Properties::start, 0);
+		plist.add (ARDOUR::Properties::length, srclist[0]->length(srclist[0]->timeline_position()));
+		plist.add (ARDOUR::Properties::name, rname);
+		plist.add (ARDOUR::Properties::layer, 0);
+
+		r = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, plist, false));
 	}
-
-	AudioSource::set_build_peakfiles (old_sbp);
-
-	if (srclist.empty()) {
-		return;
-	}
-
-	afs = boost::dynamic_pointer_cast<AudioFileSource> (srclist[0]);
-	string rname = region_name_from_path (afs->path(), false);
-
-	PropertyList plist;
-
-	plist.add (ARDOUR::Properties::start, 0);
-	plist.add (ARDOUR::Properties::length, srclist[0]->length(srclist[0]->timeline_position()));
-	plist.add (ARDOUR::Properties::name, rname);
-	plist.add (ARDOUR::Properties::layer, 0);
-
-	r = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, plist, false));
 
 	_session->audition_region(r);
 }
