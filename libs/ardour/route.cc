@@ -2502,7 +2502,7 @@ Route::set_processor_state (const XMLNode& node)
 
 				if (prop->value() == "intsend") {
 
-					processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::shared_ptr<Route>(), Delivery::Aux));
+					processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::shared_ptr<Route>(), Delivery::Aux, true));
 
 				} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 				           prop->value() == "lv2" ||
@@ -2518,7 +2518,7 @@ Route::set_processor_state (const XMLNode& node)
 
 				} else if (prop->value() == "send") {
 
-					processor.reset (new Send (_session, _pannable, _mute_master));
+					processor.reset (new Send (_session, _pannable, _mute_master, Delivery::Send, true));
 
 				} else {
 					error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;

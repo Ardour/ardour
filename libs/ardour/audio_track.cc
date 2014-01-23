@@ -60,13 +60,7 @@ AudioTrack::~AudioTrack ()
 boost::shared_ptr<Diskstream>
 AudioTrack::create_diskstream ()
 {
-	AudioDiskstream::Flag dflags = AudioDiskstream::Flag (0);
-
-	if (_flags & Auditioner) {
-		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Hidden);
-	} else {
-		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Recordable);
-	}
+	AudioDiskstream::Flag dflags = AudioDiskstream::Flag (AudioDiskstream::Recordable);
 
 	if (_mode == Destructive) {
 		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Destructive);

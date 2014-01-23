@@ -526,13 +526,16 @@ Session::destroy ()
 	}
 	routes.flush ();
 
-	DEBUG_TRACE (DEBUG::Destruction, "delete sources\n");
-	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
-		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for source %1 ; pre-ref = %2\n", i->second->name(), i->second.use_count()));
-		i->second->drop_references ();
-	}
+	{
+		DEBUG_TRACE (DEBUG::Destruction, "delete sources\n");
+		Glib::Threads::Mutex::Lock lm (source_lock);
+		for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+			DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for source %1 ; pre-ref = %2\n", i->second->name(), i->second.use_count()));
+			i->second->drop_references ();
+		}
 
-	sources.clear ();
+		sources.clear ();
+	}
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete route groups\n");
 	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {

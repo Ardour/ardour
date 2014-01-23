@@ -35,7 +35,7 @@ class Amp;
 class LIBARDOUR_API Send : public Delivery
 {
   public:
-	Send (Session&, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster>, Delivery::Role r = Delivery::Send);
+	Send (Session&, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster>, Delivery::Role r = Delivery::Send, bool ignore_bitslot = false);
 	virtual ~Send ();
 
 	uint32_t bit_slot() const { return _bitslot; }
@@ -67,7 +67,7 @@ class LIBARDOUR_API Send : public Delivery
 	std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
 	
 	static uint32_t how_many_sends();
-	static std::string name_and_id_new_send (Session&, Delivery::Role r, uint32_t&);
+	static std::string name_and_id_new_send (Session&, Delivery::Role r, uint32_t&, bool);
 
   protected:
 	bool _metering;

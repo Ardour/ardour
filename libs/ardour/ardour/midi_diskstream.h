@@ -119,10 +119,9 @@ class LIBARDOUR_API MidiDiskstream : public Diskstream
 	static void set_readahead_frames (framecnt_t frames_ahead) { midi_readahead = frames_ahead; }
 
   protected:
-	int seek (framepos_t which_sample, bool complete_refill = false);
-
-  protected:
 	friend class MidiTrack;
+	friend class Auditioner;
+	int seek (framepos_t which_sample, bool complete_refill = false);
 
         int  process (BufferSet&, framepos_t transport_frame, pframes_t nframes, framecnt_t &, bool need_diskstream);
         frameoffset_t calculate_playback_distance (pframes_t nframes);

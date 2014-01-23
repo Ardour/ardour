@@ -1356,9 +1356,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
   private:
 	SourceMap sources;
 
-  public:
-	SourceMap get_sources() { return sources; }
-
   private:
 	int load_sources (const XMLNode& node);
 	XMLNode& get_sources_as_xml ();

@@ -80,13 +80,7 @@ MidiTrack::init ()
 boost::shared_ptr<Diskstream>
 MidiTrack::create_diskstream ()
 {
-	MidiDiskstream::Flag dflags = MidiDiskstream::Flag (0);
-
-	if (_flags & Auditioner) {
-		dflags = MidiDiskstream::Flag (dflags | MidiDiskstream::Hidden);
-	} else {
-		dflags = MidiDiskstream::Flag (dflags | MidiDiskstream::Recordable);
-	}
+	MidiDiskstream::Flag dflags = MidiDiskstream::Flag (MidiDiskstream::Recordable);
 
 	assert(_mode != Destructive);
 

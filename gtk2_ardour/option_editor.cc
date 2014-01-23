@@ -276,7 +276,7 @@ FaderOption::add_to_page (OptionEditorPage* p)
 
 ClockOption::ClockOption (string const & i, string const & n, sigc::slot<std::string> g, sigc::slot<bool, std::string> s)
 	: Option (i, n)
-	, _clock (X_("timecode-offset"), false, X_(""), true, false, true, false)
+	, _clock (X_("timecode-offset"), true, X_(""), true, false, true, false)
 	, _get (g)
 	, _set (s)
 {

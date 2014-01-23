@@ -35,6 +35,7 @@
 #include "ardour/dB.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/control_protocol_manager.h"
+#include "ardour/plugin_manager.h"
 #include "control_protocol/control_protocol.h"
 
 #include "canvas/wave_view.h"
@@ -1861,6 +1862,31 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_sound_midi_notes),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_sound_midi_notes)
 		     ));
+
+	add_option (_("MIDI"), new OptionEditorHeading (_("Midi Audition")));
+
+	ComboOption<std::string>* audition_synth = new ComboOption<std::string> (
+		"midi-audition-synth-uri",
+		_("Midi Audition Synth (LV2)"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_audition_synth_uri),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_audition_synth_uri)
+		);
+
+	audition_synth->add(X_(""), _("None"));
+	PluginInfoList all_plugs;
+	PluginManager& manager (PluginManager::instance());
+#ifdef LV2_SUPPORT
+	all_plugs.insert (all_plugs.end(), manager.lv2_plugin_info().begin(), manager.lv2_plugin_info().end());
+
+	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
+		if (manager.get_status (*i) == PluginManager::Hidden) continue;
+		if (!(*i)->is_instrument()) continue;
+		if ((*i)->type != ARDOUR::LV2) continue;
+		audition_synth->add((*i)->unique_id, (*i)->name);
+	}
+#endif
+
+	add_option (_("MIDI"), audition_synth);
 
 	/* USER INTERACTION */
 

@@ -166,6 +166,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, _was_dirty (false)
 	, _mixer_on_top (false)
 	, first_time_engine_run (true)
+	, blink_timeout_tag (-1)
 
 	  /* transport */
 
