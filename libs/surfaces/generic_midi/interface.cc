@@ -24,7 +24,7 @@
 
 using namespace ARDOUR;
 
-ControlProtocol* ARDOURSURFACE_LOCAL
+static ControlProtocol*
 new_generic_midi_protocol (ControlProtocolDescriptor* /*descriptor*/, Session* s)
 {
 	GenericMidiControlProtocol* gmcp;
@@ -43,13 +43,13 @@ new_generic_midi_protocol (ControlProtocolDescriptor* /*descriptor*/, Session* s
 	return gmcp;
 }
 
-void ARDOURSURFACE_LOCAL
+static void
 delete_generic_midi_protocol (ControlProtocolDescriptor* /*descriptor*/, ControlProtocol* cp)
 {
 	delete cp;
 }
 
-bool ARDOURSURFACE_LOCAL
+static bool
 probe_generic_midi_protocol (ControlProtocolDescriptor* /*descriptor*/)
 {
 	return GenericMidiControlProtocol::probe ();
@@ -68,5 +68,5 @@ static ControlProtocolDescriptor generic_midi_descriptor = {
 	/*destroy :           */   delete_generic_midi_protocol
 };
 	
-extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &generic_midi_descriptor; }
+extern "C" LIBCONTROLCP_API ControlProtocolDescriptor* protocol_descriptor () { return &generic_midi_descriptor; }
 
