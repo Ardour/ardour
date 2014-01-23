@@ -21,8 +21,8 @@ out = 'build'
 
 children = [
         'control_protocol',
-        'frontier',
         'generic_midi',
+        'mackie',
 ]
 
 def options(opt):
@@ -33,23 +33,19 @@ def sub_config_and_use(conf, name, has_objects = True):
     autowaf.set_local_lib(conf, name, has_objects)
 
 def configure(conf):
+    global children
+
     autowaf.set_recursive()
     autowaf.configure(conf)
     
-    for i in children:
-        sub_config_and_use(conf, i)
-
     if (conf.env['build_target'] == 'mingw'): return
 
     #autowaf.check_pkg(conf, 'libusb-1.0', uselib_store='USB', mandatory=False)
     #if Options.options.tranzport and conf.is_defined('HAVE_USB'):
     #    conf.define('BUILD_TRANZPORT', 1)
 
-    if conf.check_cc (header_name='poll.h', define_name='BUILD_MACKIE', mandatory=False):
-        sub_config_and_use(conf, 'mackie')
-            
     if autowaf.check_pkg (conf, 'liblo', mandatory=False, uselib_store="LO", atleast_version="0.24"):
-        sub_config_and_use(conf, 'osc')
+        children += [ 'osc' ]
  
     conf.check_cc (header_name='cwiid.h', define_name='HAVE_CWIID_H',mandatory=False)
     if conf.is_defined('HAVE_CWIID_H'):
@@ -58,7 +54,7 @@ def configure(conf):
             autowaf.check_pkg(conf, 'cwiid', uselib_store='CWIID', atleast_version='0.6.00',mandatory=False)
             if conf.is_defined ('HAVE_CWIID'):
                 conf.define ('BUILD_WIIMOTE', 1)
-                sub_config_and_use(conf, 'wiimote')
+                children += [ 'wiimote' ]
             else:
                 print('You have the cwiid headers needed to compile wiimote support BUT you are missing the pkg-config file for cwiid')
         else:
@@ -66,17 +62,13 @@ def configure(conf):
     else:
             print('You are missing the cwiid headers needed to compile wiimote support')
 
+    for i in children:
+        sub_config_and_use(conf, i)
+
+
 def build(bld):
-    bld.recurse('control_protocol')
-    if (bld.env['build_target'] == 'mingw'): return
-    if bld.is_defined ('BUILD_MACKIE'):
-        bld.recurse('mackie')
-    if bld.is_defined ('HAVE_LO'):
-        bld.recurse('osc')
-    if bld.is_defined('BUILD_WIIMOTE'):
-        bld.recurse('wiimote')
-    if bld.is_defined('BUILD_TRANZPORT'):
-        bld.recurse('tranzport')
+    for i in children:
+        bld.recurse (i)
 
 def shutdown():
     autowaf.shutdown()
