@@ -405,7 +405,7 @@ VBAPanner::describe_parameter (Evoral::Parameter p)
         case PanAzimuthAutomation:
                 return _("Direction");
         case PanWidthAutomation:
-                return _("Diffusion");
+                return _("Spread");
         case PanElevationAutomation:
                 return _("Elevation");
         default:
