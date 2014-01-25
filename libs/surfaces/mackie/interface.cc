@@ -90,4 +90,4 @@ static ControlProtocolDescriptor mackie_descriptor = {
 };
 	
 
-extern "C" LIBCONTROLCP_API ControlProtocolDescriptor* protocol_descriptor () { return &mackie_descriptor; }
+extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &mackie_descriptor; }

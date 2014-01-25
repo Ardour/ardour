@@ -34,7 +34,8 @@ def build(bld):
             midicontrollable.cc
     '''
     obj.export_includes = ['./generic_midi']
-    obj.defines     = [ 'PACKAGE="ardour_frontier"' ]
+    obj.defines      = [ 'PACKAGE="ardour_frontier"' ]
+    obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.includes     = ['.', './generic_midi']
     obj.name         = 'libgeneric_midi'
     obj.target       = 'generic_midi'

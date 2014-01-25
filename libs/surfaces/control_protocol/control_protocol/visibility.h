@@ -30,16 +30,26 @@
   #define LIBCONTROLCP_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
 #endif
 
-#ifdef LIBCONTROLCP_STATIC // libcontrolcp is not a DLL
-  #define LIBCONTROLCP_API
-  #define LIBCONTROLCP_LOCAL
-#else
-  #ifdef LIBCONTROLCP_DLL_EXPORTS // defined if we are building the libcontrolcp DLL (instead of using it)
+#ifdef LIBCONTROLCP_DLL_EXPORTS // defined if we are building the libcontrolcp DLL (instead of using it)
     #define LIBCONTROLCP_API LIBCONTROLCP_DLL_EXPORT
-  #else
+#else
     #define LIBCONTROLCP_API LIBCONTROLCP_DLL_IMPORT
-  #endif 
-  #define LIBCONTROLCP_LOCAL LIBCONTROLCP_DLL_LOCAL
-#endif
+#endif 
+#define LIBCONTROLCP_LOCAL LIBCONTROLCP_DLL_LOCAL
+
+/* These should be used by surfaces/control interfaces. They use (probably)
+ * libcontrolcp but they are not part of it. The idea here is to avoid
+ * having to define per-surface macros for each and every surface. Instead,
+ * every surface defines ARDOURSURFACE_DLL_EXPORTS during building and
+ * uses ARDOURSURFACE_API in its declarations.
+ */
+
+#ifdef ARDOURSURFACE_DLL_EXPORTS // defined if we are building the libcontrolcp DLL (instead of using it)
+    #define ARDOURSURFACE_API LIBCONTROLCP_DLL_EXPORT
+#else
+    #define ARDOURSURFACE_API LIBCONTROLCP_DLL_IMPORT
+#endif 
+#define ARDOURSURFACE_LOCAL LIBCONTROLCP_DLL_LOCAL
+
 
 #endif /* __libcontrolcp_visibility_h__ */

@@ -39,10 +39,10 @@ def build(bld):
             wheel_modes.cc
     '''
     obj.export_includes = ['./tranzport']
-    obj.defines     = [ 'PACKAGE="ardour_tranzport"' ]
+    obj.defines      = [ 'PACKAGE="ardour_tranzport"' ]
+    obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.includes     = ['.', './tranzport']
     obj.name         = 'libardour_tranzport'
-    obj.defines      = [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.target       = 'ardour_tranzport'
     obj.use          = 'libardour libardour_cp'
     obj.vnum         = LIBARDOUR_TRANZPORT_LIB_VERSION

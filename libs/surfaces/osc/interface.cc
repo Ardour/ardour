@@ -57,5 +57,5 @@ static ControlProtocolDescriptor osc_descriptor = {
 	destroy : delete_osc_protocol
 };
 
-extern "C" LIBCONTROLCP_API ControlProtocolDescriptor* protocol_descriptor () { return &osc_descriptor; }
+extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &osc_descriptor; }
 

@@ -38,15 +38,13 @@ def configure(conf):
     autowaf.set_recursive()
     autowaf.configure(conf)
     
-    if (conf.env['build_target'] == 'mingw'): return
-
     #autowaf.check_pkg(conf, 'libusb-1.0', uselib_store='USB', mandatory=False)
     #if Options.options.tranzport and conf.is_defined('HAVE_USB'):
     #    conf.define('BUILD_TRANZPORT', 1)
 
     if autowaf.check_pkg (conf, 'liblo', mandatory=False, uselib_store="LO", atleast_version="0.24"):
         children += [ 'osc' ]
- 
+
     conf.check_cc (header_name='cwiid.h', define_name='HAVE_CWIID_H',mandatory=False)
     if conf.is_defined('HAVE_CWIID_H'):
         conf.check_cc (header_name='bluetooth/bluetooth.h', define_name='HAVE_BLUETOOTH_H',mandatory=False)
@@ -67,8 +65,16 @@ def configure(conf):
 
 
 def build(bld):
-    for i in children:
-        bld.recurse (i)
+    bld.recurse('control_protocol')
+    bld.recurse('generic_midi')
+    bld.recurse('mackie')
+
+    if bld.is_defined ('HAVE_LO'):
+        bld.recurse('osc')
+    if bld.is_defined('BUILD_WIIMOTE'):
+        bld.recurse('wiimote')
+    if bld.is_defined('BUILD_TRANZPORT'):
+        bld.recurse('tranzport')
 
 def shutdown():
     autowaf.shutdown()

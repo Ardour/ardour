@@ -68,5 +68,5 @@ static ControlProtocolDescriptor generic_midi_descriptor = {
 	/*destroy :           */   delete_generic_midi_protocol
 };
 	
-extern "C" LIBCONTROLCP_API ControlProtocolDescriptor* protocol_descriptor () { return &generic_midi_descriptor; }
+extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &generic_midi_descriptor; }
 
