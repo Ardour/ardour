@@ -84,11 +84,11 @@ private:
 		struct ls_triplet_chain *next;
 	};
 
-	static float vec_angle(PBD::CartesianVector v1, PBD::CartesianVector v2);
-	static float vec_length(PBD::CartesianVector v1);
-	static float vec_prod(PBD::CartesianVector v1, PBD::CartesianVector v2);
-	static float vol_p_side_lgth(int i, int j,int k, const std::vector<Speaker>&);
-	static void  cross_prod(PBD::CartesianVector v1,PBD::CartesianVector v2, PBD::CartesianVector *res);
+	static double vec_angle(PBD::CartesianVector v1, PBD::CartesianVector v2);
+	static double vec_length(PBD::CartesianVector v1);
+	static double vec_prod(PBD::CartesianVector v1, PBD::CartesianVector v2);
+	static double vol_p_side_lgth(int i, int j,int k, const std::vector<Speaker>&);
+	static void   cross_prod(PBD::CartesianVector v1,PBD::CartesianVector v2, PBD::CartesianVector *res);
 
 	void update ();
 	int  any_ls_inside_triplet (int a, int b, int c);

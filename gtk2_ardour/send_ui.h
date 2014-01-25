@@ -69,7 +69,6 @@ class SendUIWindow : public ArdourWindow
   private:
 	Gtk::HBox hpacker;
 
-	void send_going_away ();
 	PBD::ScopedConnection going_away_connection;
 };
 

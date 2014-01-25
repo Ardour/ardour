@@ -1,0 +1,25 @@
+#!/bin/sh
+. `dirname "$0"`/../build/gtk2_ardour/ardev_common_waf.sh
+
+LIBS_DIR=$TOP/build/libs
+
+run_tests () {
+  echo ""
+  echo "-------------------------------------------"
+  echo "Running tests for $1..."
+  echo "-------------------------------------------"
+  echo ""
+  $2 $LIBS_DIR/$1/run-tests
+  echo ""
+}
+
+if [ $# -gt 0 ]; then
+	run_tests $1 $2
+	exit
+fi
+
+run_tests audiographer
+run_tests midi++2
+run_tests evoral
+run_tests pbd
+run_tests ardour

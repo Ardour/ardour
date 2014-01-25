@@ -6,7 +6,7 @@ import os
 top = '.'
 out = 'build'
 
-panners = [ '2in2out', '1in2out', 'vbap' ]
+panners = [ '2in2out', '1in2out', 'vbap', 'stereobalance' ]
 
 def options(opt):
     autowaf.set_options(opt)

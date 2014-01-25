@@ -88,7 +88,7 @@ AudioBuffer::check_silence (pframes_t nframes, bool wholebuffer, pframes_t& n) c
 
 void
 AudioBuffer::silence (framecnt_t len, framecnt_t offset) {
-	pframes_t n = 0;
+
 	if (!_silent) {
 		assert(_capacity > 0);
 		assert(offset + len <= _capacity);

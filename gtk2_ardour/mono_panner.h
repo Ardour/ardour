@@ -28,6 +28,10 @@
 
 #include "panner_interface.h"
 
+namespace ARDOUR {
+	class PannerShell;
+}
+
 namespace PBD {
         class Controllable;
 }
@@ -35,7 +39,7 @@ namespace PBD {
 class MonoPanner : public PannerInterface
 {
   public:
-	MonoPanner (boost::shared_ptr<ARDOUR::Panner>);
+	MonoPanner (boost::shared_ptr<ARDOUR::PannerShell>);
 	~MonoPanner ();
 
         boost::shared_ptr<PBD::Controllable> get_controllable() const { return position_control; }
@@ -53,9 +57,11 @@ class MonoPanner : public PannerInterface
 
   private:
 	PannerEditor* editor ();
+	boost::shared_ptr<ARDOUR::PannerShell> _panner_shell;
 	
         boost::shared_ptr<PBD::Controllable> position_control;
-        PBD::ScopedConnectionList connections;
+        PBD::ScopedConnectionList panvalue_connections;
+        PBD::ScopedConnectionList panshell_connections;
         int drag_start_x;
         int last_drag_x;
         double accumulated_delta;
@@ -76,10 +82,15 @@ class MonoPanner : public PannerInterface
 
 	bool _dragging;
 
+	static Pango::AttrList panner_font_attributes;
+	static bool have_font;
+
         static ColorScheme colors;
         static void set_colors ();
         static bool have_colors;
 	void color_handler ();
+	void bypass_handler ();
+	void pannable_handler ();
 };
 
 #endif /* __gtk_ardour_mono_panner_h__ */

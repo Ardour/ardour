@@ -28,7 +28,7 @@ namespace ARDOUR {
 class InternalSend : public Send
 {
   public:
-	InternalSend (Session&, boost::shared_ptr<Pannable>, boost::shared_ptr<MuteMaster>, boost::shared_ptr<Route> send_to, Delivery::Role role);
+	InternalSend (Session&, boost::shared_ptr<Pannable>, boost::shared_ptr<MuteMaster>, boost::shared_ptr<Route> send_to, Delivery::Role role = Delivery::Aux, bool ignore_bitslot = false);
 	virtual ~InternalSend ();
 
 	std::string display_name() const;
@@ -70,6 +70,7 @@ class InternalSend : public Send
 	int  connect_when_legal ();
 	void init_gain ();
 	int  use_target (boost::shared_ptr<Route>);
+	void target_io_changed ();
 };
 
 } // namespace ARDOUR

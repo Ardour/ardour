@@ -58,7 +58,9 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pann
 	, _no_panner_reset (false)
 {
 	if (pannable) {
-		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));
+		bool is_send = false;
+		if (r & (Delivery::Send|Delivery::Aux)) is_send = true;
+		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, is_send));
 	}
 
 	_display_to_user = false;
@@ -80,7 +82,9 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 	, _no_panner_reset (false)
 {
 	if (pannable) {
-		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable));
+		bool is_send = false;
+		if (r & (Delivery::Send|Delivery::Aux)) is_send = true;
+		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, is_send));
 	}
 
 	_display_to_user = false;
@@ -329,6 +333,9 @@ Delivery::state (bool full_state)
 
 	if (_panshell) {
 		node.add_child_nocopy (_panshell->get_state ());
+		if (_panshell->pannable()) {
+			node.add_child_nocopy (_panshell->pannable()->get_state ());
+		}
 	}
 
 	return node;
@@ -358,6 +365,11 @@ Delivery::set_state (const XMLNode& node, int version)
 
 	reset_panner ();
 
+	XMLNode* pannnode = node.child (X_("Pannable"));
+	if (_panshell && _panshell->panner() && pannnode) {
+		_panshell->pannable()->set_state (*pannnode, version);
+	}
+
 	return 0;
 }
 
@@ -385,12 +397,8 @@ Delivery::reset_panner ()
 	if (panners_legal) {
 		if (!_no_panner_reset) {
 
-			if (_panshell) {
+			if (_panshell && _role != Insert) {
 				_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, pan_outs()));
-				
-				if (_role == Main) {
-					_panshell->pannable()->set_panner (_panshell->panner());
-				}
 			}
 		}
 
@@ -403,12 +411,8 @@ Delivery::reset_panner ()
 void
 Delivery::panners_became_legal ()
 {
-	if (_panshell) {
+	if (_panshell && _role != Insert) {
 		_panshell->configure_io (ChanCount (DataType::AUDIO, pans_required()), ChanCount (DataType::AUDIO, pan_outs()));
-		
-		if (_role == Main) {
-			_panshell->pannable()->set_panner (_panshell->panner());
-		}
 	}
 
 	panner_legal_c.disconnect ();

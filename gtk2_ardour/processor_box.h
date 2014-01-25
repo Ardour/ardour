@@ -138,6 +138,7 @@ public:
 	void set_control_state (XMLNode const *);
 	std::string state_id () const;
 	Gtk::Menu* build_controls_menu ();
+	Gtk::Menu* build_send_options_menu ();
 
 protected:
 	ArdourButton _button;
@@ -205,13 +206,14 @@ private:
 	std::list<Control*> _controls;
 
 	void toggle_control_visibility (Control *);
+	void toggle_panner_link ();
 
 	class PortIcon : public Gtk::DrawingArea {
 	public:
 		PortIcon(bool input) {
 			_input = input;
 			_ports = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 1);
-			set_size_request (-1, 3);
+			set_size_request (-1, 2);
 		}
 		void set_ports(ARDOUR::ChanCount const ports) { _ports = ports; }
 	private:

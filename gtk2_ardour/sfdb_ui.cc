@@ -52,6 +52,7 @@
 #include "ardour/source_factory.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
+#include "ardour/srcfilesource.h"
 
 #include "ardour_ui.h"
 #include "editing.h"
@@ -117,10 +118,12 @@ importmode2string (ImportMode mode)
 
 SoundFileBox::SoundFileBox (bool persistent)
 	: table (6, 2),
-	  length_clock ("sfboxLengthClock", !persistent, "", false, false, true, false),
-	  timecode_clock ("sfboxTimecodeClock", !persistent, "", false, false, false, false),
+	  length_clock ("sfboxLengthClock", true, "", false, false, true, false),
+	  timecode_clock ("sfboxTimecodeClock", true, "", false, false, false, false),
 	  main_box (false, 6),
-	  autoplay_btn (_("Auto-play"))
+	  autoplay_btn (_("Auto-play")),
+	  seek_slider(0,1000,1),
+	  _seeking(false)
 
 {
 	set_name (X_("SoundFileBox"));
@@ -198,8 +201,17 @@ SoundFileBox::SoundFileBox (bool persistent)
 	bottom_box.pack_start(stop_btn, true, true);
 	bottom_box.pack_start(autoplay_btn, false, false);
 
+	seek_slider.set_draw_value(false);
+
+	seek_slider.add_events(Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	seek_slider.signal_button_press_event().connect(sigc::mem_fun(*this, &SoundFileBox::seek_button_press), false);
+	seek_slider.signal_button_release_event().connect(sigc::mem_fun(*this, &SoundFileBox::seek_button_release), false);
+	main_box.pack_start (seek_slider, false, false);
+
 	play_btn.signal_clicked().connect (sigc::mem_fun (*this, &SoundFileBox::audition));
 	stop_btn.signal_clicked().connect (sigc::mem_fun (*this, &SoundFileBox::stop_audition));
+
+	stop_btn.set_sensitive (false);
 
 	channels_value.set_alignment (0.0f, 0.5f);
 	samplerate_value.set_alignment (0.0f, 0.5f);
@@ -216,7 +228,43 @@ SoundFileBox::set_session(Session* s)
 	if (!_session) {
 		play_btn.set_sensitive (false);
 		stop_btn.set_sensitive (false);
+		auditioner_connections.drop_connections();
+	} else {
+		auditioner_connections.drop_connections();
+		_session->AuditionActive.connect(auditioner_connections, invalidator (*this), boost::bind (&SoundFileBox::audition_active, this, _1), gui_context());
+		_session->the_auditioner()->AuditionProgress.connect(auditioner_connections, invalidator (*this), boost::bind (&SoundFileBox::audition_progress, this, _1, _2), gui_context());
 	}
+}
+
+void
+SoundFileBox::audition_active(bool active) {
+	stop_btn.set_sensitive (active);
+	seek_slider.set_sensitive (active);
+	if (!active) {
+		seek_slider.set_value(0);
+	}
+}
+
+void
+SoundFileBox::audition_progress(ARDOUR::framecnt_t pos, ARDOUR::framecnt_t len) {
+	if (!_seeking) {
+		seek_slider.set_value( 1000.0 * pos / len);
+		seek_slider.set_sensitive (true);
+	}
+}
+
+bool
+SoundFileBox::seek_button_press(GdkEventButton*) {
+	_seeking = true;
+	return false; // pass on to slider
+}
+
+bool
+SoundFileBox::seek_button_release(GdkEventButton*) {
+	_seeking = false;
+	_session->the_auditioner()->seek_to_percent(seek_slider.get_value() / 10.0);
+	seek_slider.set_sensitive (false);
+	return false; // pass on to slider
 }
 
 bool
@@ -230,6 +278,38 @@ SoundFileBox::setup_labels (const string& filename)
 	path = filename;
 
 	string error_msg;
+
+	if (SMFSource::safe_midi_file_extension (path)) {
+
+		boost::shared_ptr<SMFSource> ms =
+			boost::dynamic_pointer_cast<SMFSource> (
+					SourceFactory::createExternal (DataType::MIDI, *_session,
+											 path, 0, Source::Flag (0), false));
+
+		preview_label.set_markup (_("<b>Midi File Information</b>"));
+
+		format_text.set_text ("MIDI");
+		samplerate_value.set_text ("-");
+		tags_entry.get_buffer()->set_text ("");
+		timecode_clock.set (0);
+		tags_entry.set_sensitive (false);
+
+		if (ms) {
+			channels_value.set_text (to_string(ms->num_tracks(), std::dec));
+			length_clock.set (ms->length(ms->timeline_position()));
+		} else {
+			channels_value.set_text ("");
+			length_clock.set (0);
+		}
+
+		if (_session && ms) {
+			play_btn.set_sensitive (true);
+		} else {
+			play_btn.set_sensitive (false);
+		}
+
+		return true;
+	}
 
 	if(!AudioFileSource::get_soundfile_info (filename, sf_info, error_msg)) {
 
@@ -315,11 +395,6 @@ SoundFileBox::audition ()
 		return;
 	}
 
-	if (SMFSource::safe_midi_file_extension (path)) {
-		error << _("Auditioning of MIDI files is not yet supported") << endmsg;
-		return;
-	}
-
 	_session->cancel_audition();
 
 	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
@@ -328,47 +403,74 @@ SoundFileBox::audition ()
 	}
 
 	boost::shared_ptr<Region> r;
-	SourceList srclist;
-	boost::shared_ptr<AudioFileSource> afs;
-	bool old_sbp = AudioSource::get_build_peakfiles ();
 
-	/* don't even think of building peakfiles for these files */
+	if (SMFSource::safe_midi_file_extension (path)) {
 
-	AudioSource::set_build_peakfiles (false);
+		boost::shared_ptr<SMFSource> ms =
+			boost::dynamic_pointer_cast<SMFSource> (
+					SourceFactory::createExternal (DataType::MIDI, *_session,
+											 path, 0, Source::Flag (0), false));
 
-	for (int n = 0; n < sf_info.channels; ++n) {
-		try {
-			afs = boost::dynamic_pointer_cast<AudioFileSource> (
-				SourceFactory::createExternal (DataType::AUDIO, *_session,
-							       path, n,
-							       Source::Flag (0), false));
-			
-			srclist.push_back(afs);
+		string rname = region_name_from_path (ms->path(), false);
 
-		} catch (failed_constructor& err) {
-			error << _("Could not access soundfile: ") << path << endmsg;
-			AudioSource::set_build_peakfiles (old_sbp);
+		PropertyList plist;
+
+		plist.add (ARDOUR::Properties::start, 0);
+		plist.add (ARDOUR::Properties::length, ms->length(ms->timeline_position()));
+		plist.add (ARDOUR::Properties::name, rname);
+		plist.add (ARDOUR::Properties::layer, 0);
+
+		r = boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (boost::dynamic_pointer_cast<Source>(ms), plist, false));
+		assert(r);
+
+	} else {
+
+		SourceList srclist;
+		boost::shared_ptr<AudioFileSource> afs;
+		bool old_sbp = AudioSource::get_build_peakfiles ();
+
+		/* don't even think of building peakfiles for these files */
+
+		AudioSource::set_build_peakfiles (false);
+
+		for (int n = 0; n < sf_info.channels; ++n) {
+			try {
+				afs = boost::dynamic_pointer_cast<AudioFileSource> (
+					SourceFactory::createExternal (DataType::AUDIO, *_session,
+											 path, n,
+											 Source::Flag (0), false));
+				if (afs->sample_rate() != _session->nominal_frame_rate()) {
+					boost::shared_ptr<SrcFileSource> sfs (new SrcFileSource(*_session, afs, _src_quality));
+					srclist.push_back(sfs);
+				} else {
+					srclist.push_back(afs);
+				}
+
+			} catch (failed_constructor& err) {
+				error << _("Could not access soundfile: ") << path << endmsg;
+				AudioSource::set_build_peakfiles (old_sbp);
+				return;
+			}
+		}
+
+		AudioSource::set_build_peakfiles (old_sbp);
+
+		if (srclist.empty()) {
 			return;
 		}
+
+		afs = boost::dynamic_pointer_cast<AudioFileSource> (srclist[0]);
+		string rname = region_name_from_path (afs->path(), false);
+
+		PropertyList plist;
+
+		plist.add (ARDOUR::Properties::start, 0);
+		plist.add (ARDOUR::Properties::length, srclist[0]->length(srclist[0]->timeline_position()));
+		plist.add (ARDOUR::Properties::name, rname);
+		plist.add (ARDOUR::Properties::layer, 0);
+
+		r = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, plist, false));
 	}
-
-	AudioSource::set_build_peakfiles (old_sbp);
-
-	if (srclist.empty()) {
-		return;
-	}
-
-	afs = boost::dynamic_pointer_cast<AudioFileSource> (srclist[0]);
-	string rname = region_name_from_path (afs->path(), false);
-
-	PropertyList plist;
-
-	plist.add (ARDOUR::Properties::start, 0);
-	plist.add (ARDOUR::Properties::length, srclist[0]->length(srclist[0]->timeline_position()));
-	plist.add (ARDOUR::Properties::name, rname);
-	plist.add (ARDOUR::Properties::layer, 0);
-
-	r = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, plist, false));
 
 	_session->audition_region(r);
 }
@@ -1630,6 +1732,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	set_popdown_strings (src_combo, str);
 	src_combo.set_active_text (str.front());
 	src_combo.set_sensitive (false);
+	src_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::src_combo_changed));
 
 	reset_options ();
 
@@ -1738,6 +1841,12 @@ SoundFileOmega::get_src_quality() const
 	} else {
 		return SrcFastest;
 	}
+}
+
+void
+SoundFileOmega::src_combo_changed()
+{
+	preview.set_src_quality(get_src_quality());
 }
 
 ImportDisposition

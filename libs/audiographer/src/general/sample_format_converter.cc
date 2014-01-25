@@ -54,10 +54,14 @@ template <>
 void
 SampleFormatConverter<int32_t>::init (framecnt_t max_frames, int type, int data_width)
 {
-	// GDither is broken with GDither32bit if the dither depth is bigger than 24
-	if(throw_level (ThrowObject) && data_width > 24) {
-		throw Exception (*this, "Trying to use SampleFormatConverter<int32_t> a data width > 24");
+	if(throw_level (ThrowObject) && data_width > 32) {
+		throw Exception (*this, "Trying to use SampleFormatConverter<int32_t> with a data width > 32");
 	}
+
+	// GDither is broken with GDither32bit if the dither depth is bigger than 24.
+	// And since floats only have 24 bits of data, we are fine with this.
+	data_width = std::min(data_width, 24);
+
 	init_common (max_frames);
 	dither = gdither_new ((GDitherType) type, channels, GDither32bit, data_width);
 }
@@ -68,7 +72,7 @@ SampleFormatConverter<int16_t>::init (framecnt_t max_frames, int type, int data_
 {
 	if (throw_level (ThrowObject) && data_width > 16) {
 		throw Exception (*this, boost::str(boost::format
-		    ("Data width (%1) too large for int16_t")
+		    ("Data width (%1%) too large for int16_t")
 		    % data_width));
 	}
 	init_common (max_frames);
@@ -81,7 +85,7 @@ SampleFormatConverter<uint8_t>::init (framecnt_t max_frames, int type, int data_
 {
 	if (throw_level (ThrowObject) && data_width > 8) {
 		throw Exception (*this, boost::str(boost::format
-		    ("Data width (%1) too large for uint8_t")
+		    ("Data width (%1%) too large for uint8_t")
 		    % data_width));
 	}
 	init_common (max_frames);

@@ -1356,9 +1356,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
   private:
 	SourceMap sources;
 
-  public:
-	SourceMap get_sources() { return sources; }
-
   private:
 	int load_sources (const XMLNode& node);
 	XMLNode& get_sources_as_xml ();

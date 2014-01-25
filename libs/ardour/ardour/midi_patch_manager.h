@@ -72,7 +72,7 @@ public:
 		boost::shared_ptr<MIDI::Name::MasterDeviceNames> master_device = master_device_by_model(model);
 
 		if (master_device != 0 && custom_device_mode != "") {
-			return master_device->channel_name_set_by_device_mode_and_channel(custom_device_mode, channel);
+			return master_device->channel_name_set_by_channel(custom_device_mode, channel);
 		} else {
 			return boost::shared_ptr<ChannelNameSet>();
 		}

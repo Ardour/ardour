@@ -41,6 +41,7 @@
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
+#include "ardour/panner_manager.h"
 #include "ardour/port.h"
 #include "ardour/profile.h"
 #include "ardour/route.h"
@@ -515,7 +516,10 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&MixerStrip::update_output_display, this), gui_context());
 	_route->route_group_changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::route_group_changed, this), gui_context());
 
+	_route->io_changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::io_changed_proxy, this), gui_context ());
+
 	if (_route->panner_shell()) {
+		update_panner_choices();
 		_route->panner_shell()->Changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::connect_to_pan, this), gui_context());
 	}
 
@@ -1019,9 +1023,32 @@ MixerStrip::connect_to_pan ()
 	p->automation_state_changed.connect (panstate_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_state_changed, &panners), gui_context());
 	p->automation_style_changed.connect (panstyle_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_style_changed, &panners), gui_context());
 
-	panners.panshell_changed ();
+	/* This call reduncant, PannerUI::set_panner() connects to _panshell->Changed itself
+	 * However, that only works a panner was previously set.
+	 *
+	 * PannerUI must remain subscribed to _panshell->Changed() in case
+	 * we switch the panner eg. AUX-Send and back
+	 * _route->panner_shell()->Changed() vs _panshell->Changed
+	 */
+	if (panners._panner == 0) {
+		panners.panshell_changed ();
+	}
 }
 
+void
+MixerStrip::update_panner_choices ()
+{
+	ENSURE_GUI_THREAD (*this, &MixerStrip::update_panner_choices)
+	if (!_route->panner_shell()) { return; }
+
+	uint32_t in = _route->output()->n_ports().n_audio();
+	uint32_t out = in;
+	if (_route->panner()) {
+		in = _route->panner()->in().n_audio();
+	}
+
+	panners.set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
+}
 
 /*
  * Output port labelling
@@ -1270,6 +1297,12 @@ void
 MixerStrip::diskstream_changed ()
 {
 	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&MixerStrip::update_diskstream_display, this));
+}
+
+void
+MixerStrip::io_changed_proxy ()
+{
+	Glib::signal_idle().connect_once (sigc::mem_fun (*this, &MixerStrip::update_panner_choices));
 }
 
 void
@@ -1842,16 +1875,13 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	gain_meter().set_controls (_route, send->meter(), send->amp());
 	gain_meter().setup_meters ();
 
+	uint32_t const in = _current_delivery->pans_required();
+	uint32_t const out = _current_delivery->pan_outs();
+
 	panner_ui().set_panner (_current_delivery->panner_shell(), _current_delivery->panner());
+	panner_ui().set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
 	panner_ui().setup_pan ();
-
-	/* make sure the send has audio output */
-
-	if (_current_delivery->output() && _current_delivery->output()->n_ports().n_audio() > 0) {
-		panners.show_all ();
-	} else {
-		panners.hide_all ();
-	}
+	panner_ui().show_all ();
 
 	input_button.set_sensitive (false);
 	group_button.set_sensitive (false);
@@ -1884,6 +1914,7 @@ MixerStrip::revert_to_default_display ()
 	gain_meter().setup_meters ();
 
 	panner_ui().set_panner (_route->main_outs()->panner_shell(), _route->main_outs()->panner());
+	update_panner_choices();
 	panner_ui().setup_pan ();
 
 	if (has_audio_outputs ()) {
@@ -2105,6 +2136,9 @@ MixerStrip::ab_plugins ()
 bool
 MixerStrip::level_meter_button_press (GdkEventButton* ev)
 {
+	if (_current_delivery && boost::dynamic_pointer_cast<Send>(_current_delivery)) {
+		return false;
+	}
 	if (ev->button == 3) {
 		popup_level_meter_menu (ev);
 		return true;

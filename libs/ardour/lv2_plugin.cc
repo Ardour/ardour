@@ -1026,6 +1026,7 @@ LV2Plugin::load_preset(PresetRecord r)
 	if (state) {
 		lilv_state_restore(state, _impl->instance, set_port_value, this, 0, NULL);
 		lilv_state_free(state);
+		Plugin::load_preset(r);
 	}
 
 	lilv_node_free(pset);
@@ -1094,10 +1095,12 @@ LV2Plugin::do_save_preset(string name)
 	lilv_state_free(state);
 
 	std::string uri = Glib::filename_to_uri(Glib::build_filename(bundle, file_name));
-	LilvNode *node = lilv_new_uri(_world.world, uri.c_str());
-	lilv_world_load_bundle(_world.world, node);
-	lilv_world_load_resource(_world.world, node);
-	lilv_node_free(node);
+	LilvNode *node_bundle = lilv_new_uri(_world.world, Glib::filename_to_uri(Glib::build_filename(bundle, "/")).c_str());
+	LilvNode *node_preset = lilv_new_uri(_world.world, uri.c_str());
+	lilv_world_load_bundle(_world.world, node_bundle);
+	lilv_world_load_resource(_world.world, node_preset);
+	lilv_node_free(node_bundle);
+	lilv_node_free(node_preset);
 	return uri;
 }
 

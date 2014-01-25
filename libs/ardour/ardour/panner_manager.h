@@ -26,6 +26,8 @@
 
 namespace ARDOUR {
 
+typedef std::map<std::string,std::string> PannerUriMap;
+
 struct PannerInfo {
 	PanPluginDescriptor descriptor;
 	void* module;
@@ -49,7 +51,9 @@ public:
 	void discover_panners ();
 	std::list<PannerInfo*> panner_info;
 
-	PannerInfo* select_panner (ChanCount in, ChanCount out);
+	PannerInfo* select_panner (ChanCount in, ChanCount out, std::string const uri = "");
+	PannerInfo* get_by_uri (std::string uri) const;
+	PannerUriMap get_available_panners(uint32_t const a_in, uint32_t const a_out) const;
 
 private:
 	PannerManager();

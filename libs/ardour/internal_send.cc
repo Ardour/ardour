@@ -40,8 +40,8 @@ using namespace std;
 
 PBD::Signal1<void, pframes_t> InternalSend::CycleStart;
 
-InternalSend::InternalSend (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMaster> mm, boost::shared_ptr<Route> sendto, Delivery::Role role)
-	: Send (s, p, mm, role)
+InternalSend::InternalSend (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMaster> mm, boost::shared_ptr<Route> sendto, Delivery::Role role, bool ignore_bitslot)
+	: Send (s, p, mm, role, ignore_bitslot)
 {
         if (sendto) {
                 if (use_target (sendto)) {
@@ -95,9 +95,19 @@ InternalSend::use_target (boost::shared_ptr<Route> sendto)
         target_connections.drop_connections ();
 
         _send_to->DropReferences.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_going_away, this));
-        _send_to->PropertyChanged.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_property_changed, this, _1));;
+        _send_to->PropertyChanged.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_property_changed, this, _1));
+        _send_to->io_changed.connect_same_thread (target_connections, boost::bind (&InternalSend::target_io_changed, this));
 
         return 0;
+}
+
+void
+InternalSend::target_io_changed ()
+{
+	assert (_send_to);
+	mixbufs.ensure_buffers (_send_to->internal_return()->input_streams(), _session.get_block_size());
+	mixbufs.set_count (_send_to->internal_return()->input_streams());
+	reset_panner();
 }
 
 void
@@ -128,7 +138,19 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 			uint32_t const bufs_audio = bufs.count().get (DataType::AUDIO);
 			uint32_t const mixbufs_audio = mixbufs.count().get (DataType::AUDIO);
 			
-			assert (mixbufs.available().get (DataType::AUDIO) >= bufs_audio);
+			/* monitor-section has same number of channels as master-bus (on creation).
+			 *
+			 * There is no clear answer what should happen when trying to PFL or AFL
+			 * a track that has more channels (bufs_audio from source-track is
+			 * larger than mixbufs).
+			 *
+			 * There are two options:
+			 *  1: discard additional channels    (current)
+			 * OR
+			 *  2: require the monitor-section to have at least as many channels
+			 * as the largest count of any route
+			 */
+			//assert (mixbufs.available().get (DataType::AUDIO) >= bufs_audio);
 
 			/* Copy bufs into mixbufs, going round bufs more than once if necessary
 			   to ensure that every mixbuf gets some data.

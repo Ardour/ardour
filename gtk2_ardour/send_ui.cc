@@ -20,6 +20,7 @@
 #include <gtkmm2ext/doi.h>
 
 #include "ardour/io.h"
+#include "ardour/panner_manager.h"
 #include "ardour/send.h"
 #include "ardour/rc_configuration.h"
 
@@ -52,10 +53,7 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 	_vbox.set_border_width (5);
 
 	_vbox.pack_start (_hbox, false, false, false);
-	// until sends have their own Pannable, don't show this
-	// because it controls the Route Pannable which confuses
-	// users (among others)
-	// _vbox.pack_start (_panners, false, false);
+	_vbox.pack_start (_panners, false, false);
 
 	io = manage (new IOSelector (parent, session, s->output()));
 
@@ -73,7 +71,11 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 
 	_send->output()->changed.connect (connections, invalidator (*this), boost::bind (&SendUI::outs_changed, this, _1, _2), gui_context());
 
+	uint32_t const in = _send->pans_required();
+	uint32_t const out = _send->pan_outs();
+
 	_panners.set_width (Wide);
+	_panners.set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
 	_panners.setup_pan ();
 
 	_gpm.setup_meters ();
@@ -100,7 +102,14 @@ SendUI::outs_changed (IOChange change, void* /*ignored*/)
 {
 	ENSURE_GUI_THREAD (*this, &SendUI::outs_changed, change, ignored)
 	if (change.type & IOChange::ConfigurationChanged) {
+		uint32_t const in = _send->pans_required();
+		uint32_t const out = _send->pan_outs();
+		if (_panners._panner == 0) {
+			_panners.set_panner (_send->panner_shell(), _send->panner());
+		}
+		_panners.set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
 		_panners.setup_pan ();
+		_panners.show_all ();
 		_gpm.setup_meters ();
 	}
 }
@@ -136,19 +145,9 @@ SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session* session)
 	ui->show ();
 	hpacker.show ();
 
-	s->DropReferences.connect (going_away_connection, invalidator (*this), boost::bind (&SendUIWindow::send_going_away, this), gui_context());
 }
 
 SendUIWindow::~SendUIWindow ()
 {
 	delete ui;
 }
-
-void
-SendUIWindow::send_going_away ()
-{
-	ENSURE_GUI_THREAD (*this, &SendUIWindow::send_going_away)
-	going_away_connection.disconnect ();
-	delete_when_idle (this);
-}
-

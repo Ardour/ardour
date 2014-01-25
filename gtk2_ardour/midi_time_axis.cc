@@ -47,6 +47,9 @@
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
 #include "ardour/operations.h"
+#include "ardour/pannable.h"
+#include "ardour/panner.h"
+#include "ardour/panner_shell.h"
 #include "ardour/playlist.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
@@ -165,7 +168,17 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		controls_ebox.set_name ("MidiBusControlsBaseUnselected");
 	}
 
+	/* if set_state above didn't create a gain automation child, we need to make one */
+	if (automation_child (GainAutomation) == 0) {
+		create_automation_child (GainAutomation, false);
+	}
+
+	if (_route->panner_shell()) {
+		_route->panner_shell()->Changed.connect (*this, invalidator (*this), boost::bind (&MidiTimeAxisView::ensure_pan_views, this, false), gui_context());
+	}
+
 	/* map current state of the route */
+	ensure_pan_views (false);
 
 	processors_changed (RouteProcessorChange ());
 
@@ -583,6 +596,27 @@ MidiTimeAxisView::build_automation_action_menu (bool for_selection)
 			MenuElem (string_compose ("<i>%1</i>", _("No MIDI Channels selected"))));
 		dynamic_cast<Label*> (automation_items.back().get_child())->set_use_markup (true);
 	}
+
+	automation_items.push_back (SeparatorElem());
+	automation_items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &MidiTimeAxisView::update_gain_track_visibility)));
+	gain_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
+	gain_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) && 
+					  (gain_track && string_is_affirmative (gain_track->gui_property ("visible"))));
+
+	_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
+
+	if (!pan_tracks.empty()) {
+		automation_items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &MidiTimeAxisView::update_pan_track_visibility)));
+		pan_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
+		pan_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
+						 (!pan_tracks.empty() && string_is_affirmative (pan_tracks.front()->gui_property ("visible"))));
+
+		set<Evoral::Parameter> const & params = _route->pannable()->what_can_be_automated ();
+		for (set<Evoral::Parameter>::iterator p = params.begin(); p != params.end(); ++p) {
+			_main_automation_menu_map[*p] = pan_automation_item;
+		}
+	}
+
 }
 
 void
@@ -1075,6 +1109,94 @@ MidiTimeAxisView::update_range()
 }
 
 void
+MidiTimeAxisView::ensure_pan_views (bool show)
+{
+	bool changed = false;
+	for (list<boost::shared_ptr<AutomationTimeAxisView> >::iterator i = pan_tracks.begin(); i != pan_tracks.end(); ++i) {
+		changed = true;
+		(*i)->set_marked_for_display (false);
+	}
+	if (changed) {
+		_route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
+	}
+	pan_tracks.clear();
+
+	if (!_route->panner()) {
+		return;
+	}
+
+	set<Evoral::Parameter> params = _route->panner()->what_can_be_automated();
+	set<Evoral::Parameter>::iterator p;
+
+	for (p = params.begin(); p != params.end(); ++p) {
+		boost::shared_ptr<ARDOUR::AutomationControl> pan_control = _route->pannable()->automation_control(*p);
+
+		if (pan_control->parameter().type() == NullAutomation) {
+			error << "Pan control has NULL automation type!" << endmsg;
+			continue;
+		}
+
+		if (automation_child (pan_control->parameter ()).get () == 0) {
+
+			/* we don't already have an AutomationTimeAxisView for this parameter */
+
+			std::string const name = _route->panner()->describe_parameter (pan_control->parameter ());
+
+			boost::shared_ptr<AutomationTimeAxisView> t (
+					new AutomationTimeAxisView (_session,
+						_route,
+						_route->pannable(),
+						pan_control,
+						pan_control->parameter (),
+						_editor,
+						*this,
+						false,
+						parent_canvas,
+						name)
+					);
+
+			pan_tracks.push_back (t);
+			add_automation_child (*p, t, show);
+		} else {
+			pan_tracks.push_back (automation_child (pan_control->parameter ()));
+		}
+	}
+}
+
+void
+MidiTimeAxisView::update_gain_track_visibility ()
+{
+	bool const showit = gain_automation_item->get_active();
+
+	if (showit != string_is_affirmative (gain_track->gui_property ("visible"))) {
+		gain_track->set_marked_for_display (showit);
+
+		/* now trigger a redisplay */
+
+		if (!no_redraw) {
+			 _route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
+		}
+	}
+}
+
+void
+MidiTimeAxisView::update_pan_track_visibility ()
+{
+	bool const showit = pan_automation_item->get_active();
+	bool changed = false;
+
+	for (list<boost::shared_ptr<AutomationTimeAxisView> >::iterator i = pan_tracks.begin(); i != pan_tracks.end(); ++i) {
+		if ((*i)->set_marked_for_display (showit)) {
+			changed = true;
+		}
+	}
+
+	if (changed) {
+		_route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
+	}
+}
+
+void
 MidiTimeAxisView::show_all_automation (bool apply_to_selection)
 {
 	if (apply_to_selection) {
@@ -1178,6 +1300,12 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 		}
 
 		add_automation_child (param, track, show);
+		break;
+
+	case PanWidthAutomation:
+	case PanElevationAutomation:
+	case PanAzimuthAutomation:
+		ensure_pan_views (show);
 		break;
 
 	default:

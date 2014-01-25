@@ -126,6 +126,7 @@ static const char* authors[] = {
 	N_("Hans Baier"),
 	N_("Ben Bell"),
 	N_("Sakari Bergen"),
+	N_("Christian Borss"),
 	N_("Chris Cannam"),
 	N_("Jesse Chappell"),
 	N_("Thomas Charbonnel"),

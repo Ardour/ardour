@@ -87,6 +87,9 @@ public:
 
 	virtual void reset () = 0;
 
+	/* azimut, width or elevation updated -> recalc signal_position ->  emit Changed */
+	PBD::Signal0<void> SignalPositionChanged;
+
 	void      set_automation_state (AutoState);
 	AutoState automation_state() const;
 	void      set_automation_style (AutoStyle);
@@ -174,8 +177,11 @@ protected:
 extern "C" {
 struct PanPluginDescriptor {
 	std::string name;
+	std::string panner_uri;
+	std::string gui_uri;
 	int32_t in;
 	int32_t out;
+	uint32_t priority;
 	ARDOUR::Panner* (*factory)(boost::shared_ptr<ARDOUR::Pannable>, boost::shared_ptr<ARDOUR::Speakers>);
 };
 }

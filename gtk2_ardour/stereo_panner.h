@@ -24,6 +24,10 @@
 #include "gtkmm2ext/binding_proxy.h"
 #include "panner_interface.h"
 
+namespace ARDOUR {
+	class PannerShell;
+}
+
 namespace PBD {
         class Controllable;
 }
@@ -35,7 +39,7 @@ namespace ARDOUR {
 class StereoPanner : public PannerInterface
 {
   public:
-	StereoPanner (boost::shared_ptr<ARDOUR::Panner>);
+	StereoPanner (boost::shared_ptr<ARDOUR::PannerShell>);
 	~StereoPanner ();
 
         boost::shared_ptr<PBD::Controllable> get_position_controllable() const { return position_control; }
@@ -56,10 +60,12 @@ class StereoPanner : public PannerInterface
 
   private:
 	PannerEditor* editor ();
+	boost::shared_ptr<ARDOUR::PannerShell> _panner_shell;
 		   
         boost::shared_ptr<PBD::Controllable> position_control;
         boost::shared_ptr<PBD::Controllable> width_control;
-        PBD::ScopedConnectionList connections;
+        PBD::ScopedConnectionList panvalue_connections;
+        PBD::ScopedConnectionList panshell_connections;
         bool dragging;
         bool dragging_position;
         bool dragging_left;
@@ -90,10 +96,15 @@ class StereoPanner : public PannerInterface
 
 	bool _dragging;
 
+	static Pango::AttrList panner_font_attributes;
+	static bool have_font;
+
         static ColorScheme colors[3];
         static void set_colors ();
         static bool have_colors;
 	void color_handler ();
+	void bypass_handler ();
+	void pannable_handler ();
 };
 
 #endif /* __gtk_ardour_stereo_panner_h__ */

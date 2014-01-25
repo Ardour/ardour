@@ -46,6 +46,7 @@ public:
 
         void set_position (double);
         void set_width (double);
+        void set_elevation (double);
 
         std::set<Evoral::Parameter> what_can_be_automated() const;
 

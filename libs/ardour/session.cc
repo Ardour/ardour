@@ -526,13 +526,16 @@ Session::destroy ()
 	}
 	routes.flush ();
 
-	DEBUG_TRACE (DEBUG::Destruction, "delete sources\n");
-	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
-		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for source %1 ; pre-ref = %2\n", i->second->name(), i->second.use_count()));
-		i->second->drop_references ();
-	}
+	{
+		DEBUG_TRACE (DEBUG::Destruction, "delete sources\n");
+		Glib::Threads::Mutex::Lock lm (source_lock);
+		for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+			DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for source %1 ; pre-ref = %2\n", i->second->name(), i->second.use_count()));
+			i->second->drop_references ();
+		}
 
-	sources.clear ();
+		sources.clear ();
+	}
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete route groups\n");
 	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
@@ -805,6 +808,12 @@ Session::remove_monitor_section ()
 	/* force reversion to Solo-In-Place */
 	Config->set_solo_control_is_listen_control (false);
 
+	/* if we are auditioning, cancel it ... this is a workaround
+	   to a problem (auditioning does not execute the process graph,
+	   which is needed to remove routes when using >1 core for processing)
+	*/
+	cancel_audition ();
+
 	{
 		/* Hold process lock while doing this so that we don't hear bits and
 		 * pieces of audio as we work on each route.
@@ -835,6 +844,10 @@ Session::remove_monitor_section ()
 
 	remove_route (_monitor_out);
 	auto_connect_master_bus ();
+
+	if (auditioner) {
+		auditioner->connect ();
+	}
 }
 
 void
@@ -978,6 +991,10 @@ Session::add_monitor_section ()
 		} else {
 			(*x)->enable_monitor_send ();
 		}
+	}
+
+	if (auditioner) {
+		auditioner->connect ();
 	}
 }
 

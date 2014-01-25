@@ -31,27 +31,31 @@ class SampleFormatConverterTest : public CppUnit::TestFixture
 
 	void testInit()
 	{
+		// Float never uses dithering and should always use full 32 bits of data
 		boost::shared_ptr<SampleFormatConverter<float> > f_converter (new SampleFormatConverter<float>(1));
 		f_converter->init (frames, D_Tri, 32); // Doesn't throw
 		CPPUNIT_ASSERT_THROW (f_converter->init (frames, D_Tri, 24), Exception);
 		CPPUNIT_ASSERT_THROW (f_converter->init (frames, D_Tri, 48), Exception);
-		
+
+		/* Test that too large data widths throw.
+		   We are fine with unnecessarily narrow data widths */
+
 		boost::shared_ptr<SampleFormatConverter<int32_t> > i_converter (new SampleFormatConverter<int32_t>(1));
 		i_converter->init (frames, D_Tri, 32); // Doesn't throw
 		i_converter->init (frames, D_Tri, 24); // Doesn't throw
-		CPPUNIT_ASSERT_THROW (i_converter->init (frames, D_Tri, 8), Exception);
-		CPPUNIT_ASSERT_THROW (i_converter->init (frames, D_Tri, 16), Exception);
+		i_converter->init (frames, D_Tri, 8); // Doesn't throw
+		i_converter->init (frames, D_Tri, 16); // Doesn't throw
 		CPPUNIT_ASSERT_THROW (i_converter->init (frames, D_Tri, 48), Exception);
-		
+
 		boost::shared_ptr<SampleFormatConverter<int16_t> > i16_converter (new SampleFormatConverter<int16_t>(1));
 		i16_converter->init (frames, D_Tri, 16); // Doesn't throw
-		CPPUNIT_ASSERT_THROW (i16_converter->init (frames, D_Tri, 8), Exception);
+		i16_converter->init (frames, D_Tri, 8); // Doesn't throw
 		CPPUNIT_ASSERT_THROW (i16_converter->init (frames, D_Tri, 32), Exception);
 		CPPUNIT_ASSERT_THROW (i16_converter->init (frames, D_Tri, 48), Exception);
-		
+
 		boost::shared_ptr<SampleFormatConverter<uint8_t> > ui_converter (new SampleFormatConverter<uint8_t>(1));
 		ui_converter->init (frames, D_Tri, 8); // Doesn't throw
-		CPPUNIT_ASSERT_THROW (ui_converter->init (frames, D_Tri, 4), Exception);
+		ui_converter->init (frames, D_Tri, 4); // Doesn't throw
 		CPPUNIT_ASSERT_THROW (ui_converter->init (frames, D_Tri, 16), Exception);
 	}
 
