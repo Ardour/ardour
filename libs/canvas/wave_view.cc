@@ -58,7 +58,6 @@ WaveView::WaveView (Group* parent, boost::shared_ptr<ARDOUR::AudioRegion> region
 	, _channel (0)
 	, _samples_per_pixel (0)
 	, _height (64)
-	, _wave_color (0xffffffff)
 	, _show_zero (false)
 	, _zero_color (0xff0000ff)
 	, _clip_color (0xff0000ff)
@@ -351,7 +350,7 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 
 	if (_global_show_waveform_clipping) {
 		
-		context->set_source_rgba (0, 0, 0, 1.0);
+		set_source_rgba (context, _outline_color);
 		
 		/* the height of the clip-indicator should be at most 7 pixels,
 		   or 5% of the height of the waveview item.
@@ -365,10 +364,10 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 				tips[i].clip_max;
 			
 			if (show_top_clip) {
-				context->set_source_rgba (1.0, 0, 0, 1.0);
+				set_source_rgba (context, _clip_color);
 				context->rel_line_to (0, clip_height);
 				context->stroke ();
-				context->set_source_rgba (0.0, 0, 0, 1.0);
+				set_source_rgba (context, _outline_color);
 			} else {
 				context->rel_line_to (0, 1.0);
 				context->stroke ();
@@ -377,10 +376,10 @@ WaveView::draw_image (PeakData* _peaks, int n_peaks) const
 			if (_shape != WaveView::Rectified) {
 				context->move_to (i, tips[i].bot);
 				if (tips[i].clip_min) {
-					context->set_source_rgba (1.0, 0, 0, 1.0);
+					set_source_rgba (context, _clip_color);
 					context->rel_line_to (0, -clip_height);
 					context->stroke ();
-					context->set_source_rgba (0.0, 0, 0, 1.0);
+					set_source_rgba (context, _outline_color);
 				} else {
 					context->rel_line_to (0, -1.0);
 					context->stroke ();

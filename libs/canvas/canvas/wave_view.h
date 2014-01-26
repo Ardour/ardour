@@ -138,7 +138,6 @@ private:
 	int    _channel;
 	double _samples_per_pixel;
 	Coord  _height;
-	Color  _wave_color;
         bool   _show_zero;
         Color  _zero_color;
         Color  _clip_color;
