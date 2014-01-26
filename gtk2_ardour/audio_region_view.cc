@@ -63,7 +63,7 @@
 
 #include "i18n.h"
 
-#define MUTED_ALPHA 10
+#define MUTED_ALPHA 48
 
 using namespace std;
 using namespace ARDOUR;
@@ -1404,22 +1404,26 @@ AudioRegionView::set_one_waveform_color (ArdourCanvas::WaveView* wave)
 	
 	if (_selected) {
 		if (_region->muted()) {
-			outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm(), MUTED_ALPHA);
+			/* hide outline with zero alpha */
+			outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm(), 0);
+			fill = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_SelectedWaveFormFill(), MUTED_ALPHA);
 		} else {
 			outline = ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm();
+			fill = ARDOUR_UI::config()->get_canvasvar_SelectedWaveFormFill();
 		}
-		fill = ARDOUR_UI::config()->get_canvasvar_SelectedWaveFormFill();
 	} else {
 		if (_recregion) {
 			outline = ARDOUR_UI::config()->get_canvasvar_RecWaveForm();
 			fill = ARDOUR_UI::config()->get_canvasvar_RecWaveFormFill();
 		} else {
 			if (_region->muted()) {
-				outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), MUTED_ALPHA);
+				/* hide outline with zero alpha */
+				outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), 0);	
+				fill = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveFormFill(), MUTED_ALPHA);
 			} else {
 				outline = ARDOUR_UI::config()->get_canvasvar_WaveForm();
+				fill = ARDOUR_UI::config()->get_canvasvar_WaveFormFill();
 			}
-			fill = ARDOUR_UI::config()->get_canvasvar_WaveFormFill();
 		}
 	}
 
@@ -1432,9 +1436,9 @@ AudioRegionView::set_one_waveform_color (ArdourCanvas::WaveView* wave)
 		double r, g, b, a;
 		ArdourCanvas::color_to_rgba (fill, r, g, b, a);
 		fill = ArdourCanvas::rgba_to_color (r, g, b, 0.85); /* magic number, not user controllable */
-		
+		outline = ARDOUR_UI::config()->get_canvasvar_WaveForm();
 	}
-		
+
 	wave->set_fill_color (fill);
 	wave->set_outline_color (outline);
 	wave->set_clip_color (ARDOUR_UI::config()->get_canvasvar_WaveFormClip());
