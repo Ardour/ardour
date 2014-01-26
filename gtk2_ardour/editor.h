@@ -1463,6 +1463,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	TempoLines* tempo_lines;
 
+	ArdourCanvas::Group* global_rect_group;
 	ArdourCanvas::Group* time_line_group;
 
 	void hide_measures ();

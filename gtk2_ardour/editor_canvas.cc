@@ -88,18 +88,22 @@ Editor::initialize_canvas ()
 		// logo_item->property_width_set() = true;
 		logo_item->show ();
 	}
+	
+	/*a group to hold global rects like punch/loop indicators */
+	global_rect_group = new ArdourCanvas::Group (_track_canvas->root());
+	CANVAS_DEBUG_NAME (global_rect_group, "global rect group");
 
-	/* a group to hold time (measure) lines */
-	time_line_group = new ArdourCanvas::Group (_track_canvas->root());
-	CANVAS_DEBUG_NAME (time_line_group, "time line group");
-
-        transport_loop_range_rect = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, ArdourCanvas::COORD_MAX));
+        transport_loop_range_rect = new ArdourCanvas::Rectangle (global_rect_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, ArdourCanvas::COORD_MAX));
 	CANVAS_DEBUG_NAME (transport_loop_range_rect, "loop rect");
 	transport_loop_range_rect->hide();
 
-	transport_punch_range_rect = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, ArdourCanvas::COORD_MAX));
+	transport_punch_range_rect = new ArdourCanvas::Rectangle (global_rect_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, ArdourCanvas::COORD_MAX));
 	CANVAS_DEBUG_NAME (transport_punch_range_rect, "punch rect");
 	transport_punch_range_rect->hide();
+
+	/*a group to hold time (measure) lines */
+	time_line_group = new ArdourCanvas::Group (_track_canvas->root());
+	CANVAS_DEBUG_NAME (time_line_group, "time line group");
 
 	_trackview_group = new ArdourCanvas::Group (_track_canvas->root());
 	CANVAS_DEBUG_NAME (_trackview_group, "Canvas TrackViews");
