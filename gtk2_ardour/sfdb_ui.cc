@@ -116,7 +116,7 @@ importmode2string (ImportMode mode)
 	return _("as new tracks");
 }
 
-SoundFileBox::SoundFileBox (bool persistent)
+SoundFileBox::SoundFileBox (bool /*persistent*/)
 	: table (6, 2),
 	  length_clock ("sfboxLengthClock", true, "", false, false, true, false),
 	  timecode_clock ("sfboxTimecodeClock", true, "", false, false, false, false),
