@@ -1482,8 +1482,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void edit_tempo_section (ARDOUR::TempoSection*);
 	void edit_meter_section (ARDOUR::MeterSection*);
-	void edit_tempo_marker (ArdourCanvas::Item*);
-	void edit_meter_marker (ArdourCanvas::Item*);
+	void edit_tempo_marker (TempoMarker&);
+	void edit_meter_marker (MeterMarker&);
 	void edit_control_point (ArdourCanvas::Item*);
         void edit_notes (TimeAxisViewItem&);
 

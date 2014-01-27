@@ -872,7 +872,15 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 	RegionMotionDrag::finished (ev, movement_occurred);
 	
 	if (!movement_occurred) {
+		
 		/* just a click */
+
+		if (was_double_click() && !_views.empty()) {
+			DraggingView dv = _views.front();
+			dv.view->show_region_editor ();
+			
+		}
+
 		return;
 	}
 
@@ -2146,6 +2154,10 @@ MeterMarkerDrag::setup_pointer_frame_offset ()
 void
 MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
+	if (!_marker->meter().movable()) {
+		return;
+	}
+
 	if (first_move) {
 
 		// create a dummy marker for visual representation of moving the
@@ -2191,6 +2203,13 @@ void
 MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
+		if (was_double_click()) {
+			_editor->edit_meter_marker (*_marker);
+		}
+		return;
+	}
+
+	if (!_marker->meter().movable()) {
 		return;
 	}
 
@@ -2266,6 +2285,10 @@ TempoMarkerDrag::setup_pointer_frame_offset ()
 void
 TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
+	if (!_marker->tempo().movable()) {
+		return;
+	}
+
 	if (first_move) {
 
 		// create a dummy marker for visual representation of moving the
@@ -2310,6 +2333,13 @@ void
 TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
+		if (was_double_click()) {
+			_editor->edit_tempo_marker (*_marker);
+		}
+		return;
+	}
+
+	if (!_marker->tempo().movable()) {
 		return;
 	}
 
@@ -3001,7 +3031,8 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (!movement_occurred) {
 		
 		if (was_double_click()) {
-			cerr << "End of marker double click\n";
+			_editor->rename_marker (_marker);
+			return;
 		}
 
 		/* just a click, do nothing but finish
@@ -4128,10 +4159,24 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			_editor->new_transport_marker_context_menu (&event->button, _item);
 			break;
 		}
+
 	} else {
+
 		/* just a click, no pointer movement. remember that context menu stuff was handled elsewhere */
 
-		if (Keyboard::no_modifier_keys_pressed (&event->button) && _operation != CreateCDMarker) {
+		if (_operation == CreateTransportMarker) {
+
+			/* didn't drag, so just locate */
+
+			_editor->session()->request_locate (grab_frame(), _editor->session()->transport_rolling());
+
+		} else if (_operation == CreateCDMarker) {
+
+			/* didn't drag, but mark is already created so do
+			 * nothing */
+
+		} else { /* operation == CreateRangeMarker */
+			
 
 			framepos_t start;
 			framepos_t end;

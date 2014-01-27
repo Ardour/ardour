@@ -343,41 +343,15 @@ Editor::edit_tempo_section (TempoSection* section)
 }
 
 void
-Editor::edit_tempo_marker (ArdourCanvas::Item *item)
+Editor::edit_tempo_marker (TempoMarker& tm)
 {
-	Marker* marker;
-	TempoMarker* tempo_marker;
-
-	if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
-		fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
-	}
-
-	if ((tempo_marker = dynamic_cast<TempoMarker*> (marker)) == 0) {
-		fatal << _("programming error: marker for tempo is not a tempo marker!") << endmsg;
-		/*NOTREACHED*/
-	}
-
-	edit_tempo_section (&tempo_marker->tempo());
+	edit_tempo_section (&tm.tempo());
 }
 
 void
-Editor::edit_meter_marker (ArdourCanvas::Item *item)
+Editor::edit_meter_marker (MeterMarker& mm)
 {
-	Marker* marker;
-	MeterMarker* meter_marker;
-
-	if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
-		fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
-	}
-
-	if ((meter_marker = dynamic_cast<MeterMarker*> (marker)) == 0) {
-		fatal << _("programming error: marker for meter is not a meter marker!") << endmsg;
-		/*NOTREACHED*/
-	}
-
-	edit_meter_section (&meter_marker->meter());
+	edit_meter_section (&mm.meter());
 }
 
 gint

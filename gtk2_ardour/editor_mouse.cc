@@ -723,38 +723,30 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	{
 		TempoMarker* m = reinterpret_cast<TempoMarker*> (item->get_data ("marker"));
 		assert (m);
-		if (m->tempo().movable ()) {
-			_drags->set (
-				new TempoMarkerDrag (
-					this,
-					item,
-					Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)
-					),
-				event
-				);
-			return true;
-		} else {
-			return false;
-		}
+		_drags->set (
+			new TempoMarkerDrag (
+				this,
+				item,
+				Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)
+				),
+			event
+			);
+		return true;
 	}
 
 	case MeterMarkerItem:
 	{
 		MeterMarker* m = reinterpret_cast<MeterMarker*> (item->get_data ("marker"));
 		assert (m);
-		if (m->meter().movable ()) {
-			_drags->set (
-				new MeterMarkerDrag (
-					this,
-					item,
-					Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)
-					),
-				event
-				);
-			return true;
-		} else {
-			return false;
-		}
+		_drags->set (
+			new MeterMarkerDrag (
+				this,
+				item,
+				Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)
+				),
+			event
+			);
+		return true;
 	}
 
 	case VideoBarItem:
@@ -1295,14 +1287,11 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 {
 	if (event->type == GDK_2BUTTON_PRESS) {
 		_drags->mark_double_click ();
-		return false;
+		gdk_pointer_ungrab (GDK_CURRENT_TIME);
+		return true;
 	}
 
 	if (event->type != GDK_BUTTON_PRESS) {
-		if (event->type == GDK_2BUTTON_PRESS) {
-			gdk_pointer_ungrab (GDK_CURRENT_TIME);
-			return button_double_click_handler (item, event, item_type);
-		}
 		return false;
 	}
 
@@ -1427,52 +1416,6 @@ Editor::button_release_dispatch (GdkEventButton* ev)
 }
 
 bool
-Editor::button_double_click_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type) {
-
-	if (event->button.button != 1) {
-		return false;
-	}
-
-	switch (item_type) {
-		case RegionItem:
-			RegionView *rv;
-			rv = clicked_regionview;
-			rv->show_region_editor ();
-			return true;
-		case NoteItem:
-		case PlayheadCursorItem:
-			break;
-		case MarkerItem:
-		case RangeMarkerBarItem:
-		case CdMarkerBarItem:
-			Marker* marker;
-			if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
-				break;
-			}
-			rename_marker (marker);
-			return true;
-		case TempoMarkerItem:
-			edit_tempo_marker (item);
-			return true;
-		case MeterMarkerItem:
-			edit_meter_marker (item);
-			return true;
-		case MarkerBarItem:
-		case TempoBarItem:
-		case MeterBarItem:
-		case TransportMarkerBarItem:
-		case StreamItem:
-			break;
-
-		default:
-			break;
-	}
-	return false;
-}
-
-
-
-bool
 Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	framepos_t where = canvas_event_frame (event);
@@ -1512,13 +1455,40 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			show_region_properties ();
 			break;
 
-		case TempoMarkerItem:
-			edit_tempo_marker (item);
+		case TempoMarkerItem: {
+			Marker* marker;
+			TempoMarker* tempo_marker;
+			
+			if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
+				fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
+				/*NOTREACHED*/
+			}
+			
+			if ((tempo_marker = dynamic_cast<TempoMarker*> (marker)) == 0) {
+				fatal << _("programming error: marker for tempo is not a tempo marker!") << endmsg;
+				/*NOTREACHED*/
+			}
+			
+			edit_tempo_marker (*tempo_marker);
 			break;
+		}
 
-		case MeterMarkerItem:
-			edit_meter_marker (item);
+		case MeterMarkerItem: {
+			Marker* marker;
+			MeterMarker* meter_marker;
+			
+			if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
+				fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
+				/*NOTREACHED*/
+			}
+			
+			if ((meter_marker = dynamic_cast<MeterMarker*> (marker)) == 0) {
+				fatal << _("programming error: marker for meter is not a meter marker!") << endmsg;
+				/*NOTREACHED*/
+			}
+			edit_meter_marker (*meter_marker);
 			break;
+		}
 
 		case RegionViewName:
 			if (clicked_regionview->name_active()) {
