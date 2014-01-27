@@ -34,6 +34,7 @@
 #include <cmath>
 #include <algorithm>
 #include <stdlib.h>
+#include <alloca.h>
 
 #include "pbd/cartesian.h"
 
@@ -115,10 +116,14 @@ VBAPSpeakers::choose_speaker_triplets(struct ls_triplet_chain **ls_triplets)
 
 	int i,j,k,l,table_size;
 	int n_speakers = _speakers.size ();
-	int connections[n_speakers][n_speakers];
-	float distance_table[((n_speakers * (n_speakers - 1)) / 2)];
-	int distance_table_i[((n_speakers * (n_speakers - 1)) / 2)];
-	int distance_table_j[((n_speakers * (n_speakers - 1)) / 2)];
+	/* variable length arrays arrived in C99, became optional in C11, and
+	   are only planned for C++14. Use alloca which is functionally
+	   identical (but uglier to read).
+	*/
+	int** connections = (int**) alloca (sizeof (int) * n_speakers * n_speakers);
+	float* distance_table = (float *) alloca (sizeof (float) * ((n_speakers * (n_speakers - 1)) / 2));
+	int* distance_table_i = (int *) alloca (sizeof (int) * ((n_speakers * (n_speakers - 1)) / 2));
+	int* distance_table_j = (int *) alloca (sizeof (int) * ((n_speakers * (n_speakers - 1)) / 2));
 	float distance;
 	struct ls_triplet_chain *trip_ptr, *prev, *tmp_ptr;
 
@@ -527,9 +532,13 @@ VBAPSpeakers::choose_speaker_pairs (){
 	*/
 	const int n_speakers = _speakers.size();
 	const double AZIMUTH_DELTA_THRESHOLD_DEGREES = (180.0/M_PI) * (M_PI - 0.175);
-	int sorted_speakers[n_speakers];
-	bool exists[n_speakers];
-	double inverse_matrix[n_speakers][4];
+	/* variable length arrays arrived in C99, became optional in C11, and
+	   are only planned for C++14. Use alloca which is functionally
+	   identical (but uglier to read).
+	*/
+	int* sorted_speakers = (int*) alloca (sizeof (int) * n_speakers);
+	bool* exists = (bool*) alloca (sizeof(bool) * n_speakers);
+	double** inverse_matrix = (double**) alloca (sizeof (double) * n_speakers * 4);
 	int expected_pairs = 0;
 	int pair;
 	int speaker;
