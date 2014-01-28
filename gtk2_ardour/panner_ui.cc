@@ -392,9 +392,6 @@ PannerUI::build_pan_menu ()
 		RadioMenuItem::Group group;
 		items.push_back (SeparatorElem());
 
-		assert(_panshell->user_selected_panner_uri() == ""
-				||  _panshell->user_selected_panner_uri() == _panshell->current_panner_uri());
-
 		_suspend_menu_callbacks = true;
 		for (std::map<std::string,std::string>::const_iterator p = _panner_list.begin(); p != _panner_list.end(); ++p) {
 			items.push_back (RadioMenuElem (group, p->second,
