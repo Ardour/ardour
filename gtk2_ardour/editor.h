@@ -1507,8 +1507,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void marker_menu_zoom_to_range ();
 	void new_transport_marker_menu_set_loop ();
 	void new_transport_marker_menu_set_punch ();
-	void update_loop_range_view (bool visibility=false);
-	void update_punch_range_view (bool visibility=false);
+	void update_loop_range_view ();
+	void update_punch_range_view ();
 	void new_transport_marker_menu_popdown ();
 	void marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void tempo_or_meter_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);

@@ -1214,32 +1214,12 @@ Editor::set_session (Session *t)
 	/* Make sure we have auto loop and auto punch ranges */
 
 	Location* loc = _session->locations()->auto_loop_location();
-	if (loc == 0) {
-		loc = new Location (*_session, 0, _session->current_end_frame(), _("Loop"),(Location::Flags) (Location::IsAutoLoop | Location::IsHidden));
-
-		if (loc->start() == loc->end()) {
-			loc->set_end (loc->start() + 1);
-		}
-
-		_session->locations()->add (loc, false);
-		_session->set_auto_loop_location (loc);
-	} else {
-		// force name
+	if (loc != 0) {
 		loc->set_name (_("Loop"));
 	}
 
 	loc = _session->locations()->auto_punch_location();
-
-	if (loc == 0) {
-		loc = new Location (*_session, 0, _session->current_end_frame(), _("Punch"), (Location::Flags) (Location::IsAutoPunch | Location::IsHidden));
-
-		if (loc->start() == loc->end()) {
-			loc->set_end (loc->start() + 1);
-		}
-
-		_session->locations()->add (loc, false);
-		_session->set_auto_punch_location (loc);
-	} else {
+	if (loc != 0) {
 		// force name
 		loc->set_name (_("Punch"));
 	}
@@ -3201,7 +3181,7 @@ Editor::map_transport_state ()
 		have_pending_keyboard_selection = false;
 	}
 
-	update_loop_range_view (true);
+	update_loop_range_view ();
 }
 
 /* UNDO/REDO */
@@ -4467,7 +4447,7 @@ Editor::set_punch_range (framepos_t start, framepos_t end, string cmd)
 		Location* loc = new Location (*_session, start, end, _("Punch"),  Location::IsAutoPunch);
 		XMLNode &before = _session->locations()->get_state();
 		_session->locations()->add (loc, true);
-		_session->set_auto_loop_location (loc);
+		_session->set_auto_punch_location (loc);
 		XMLNode &after = _session->locations()->get_state();
 		_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
 	}

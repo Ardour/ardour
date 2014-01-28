@@ -68,6 +68,14 @@ Editor::add_new_location (Location *location)
 
 	/* Do a full update of the markers in this group */
 	update_marker_labels (group);
+	
+	if (location->is_auto_punch()) {
+		update_punch_range_view ();
+	}
+
+	if (location->is_auto_loop()) {
+		update_loop_range_view ();
+	}
 }
 
 /** Add a new location, without a time-consuming update of all marker labels;
@@ -523,8 +531,8 @@ Editor::refresh_location_display_internal (Locations::LocationList& locations)
 		i = tmp;
 	}
 
-	update_punch_range_view (false);
-	update_loop_range_view (false);
+	update_punch_range_view ();
+	update_loop_range_view ();
 }
 
 void
@@ -729,11 +737,11 @@ Editor::location_gone (Location *location)
 	LocationMarkerMap::iterator i;
 
 	if (location == transport_loop_location()) {
-		update_loop_range_view (true);
+		update_loop_range_view ();
 	}
 
 	if (location == transport_punch_location()) {
-		update_punch_range_view (true);
+		update_punch_range_view ();
 	}
 
 	for (i = location_markers.begin(); i != location_markers.end(); ++i) {
@@ -1420,7 +1428,7 @@ Editor::new_transport_marker_menu_set_punch ()
 }
 
 void
-Editor::update_loop_range_view (bool visibility)
+Editor::update_loop_range_view ()
 {
 	if (_session == 0) {
 		return;
@@ -1436,17 +1444,15 @@ Editor::update_loop_range_view (bool visibility)
 		transport_loop_range_rect->set_x0 (x1);
 		transport_loop_range_rect->set_x1 (x2);
 
-		if (visibility) {
-			transport_loop_range_rect->show();
-		}
-
-	} else if (visibility) {
+		transport_loop_range_rect->show();
+		
+	} else {
 		transport_loop_range_rect->hide();
 	}
 }
 
 void
-Editor::update_punch_range_view (bool visibility)
+Editor::update_punch_range_view ()
 {
 	if (_session == 0) {
 		return;
@@ -1456,6 +1462,7 @@ Editor::update_punch_range_view (bool visibility)
 
 	if ((_session->config.get_punch_in() || _session->config.get_punch_out()) && ((tpl = transport_punch_location()) != 0)) {
 		ArdourCanvas::Rect const v = _track_canvas->visible_area ();
+
 		if (_session->config.get_punch_in()) {
 			transport_punch_range_rect->set_x0 (sample_to_pixel (tpl->start()));
 			transport_punch_range_rect->set_x1 (_session->config.get_punch_out() ? sample_to_pixel (tpl->end()) : sample_to_pixel (JACK_MAX_FRAMES));
@@ -1463,11 +1470,11 @@ Editor::update_punch_range_view (bool visibility)
 			transport_punch_range_rect->set_x0 (0);
 			transport_punch_range_rect->set_x1 (_session->config.get_punch_out() ? sample_to_pixel (tpl->end()) : v.width ());
 		}
+		
+		transport_punch_range_rect->show();
 
-		if (visibility) {
-		        transport_punch_range_rect->show();
-		}
-	} else if (visibility) {
+	} else {
+
 	        transport_punch_range_rect->hide();
 	}
 }

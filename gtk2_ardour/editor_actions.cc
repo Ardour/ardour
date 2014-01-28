@@ -1600,11 +1600,11 @@ Editor::parameter_changed (std::string p)
 	ENSURE_GUI_THREAD (*this, &Editor::parameter_changed, p)
 
 	if (p == "auto-loop") {
-		update_loop_range_view (true);
+		update_loop_range_view ();
 	} else if (p == "punch-in") {
-		update_punch_range_view (true);
+		update_punch_range_view ();
 	} else if (p == "punch-out") {
-		update_punch_range_view (true);
+		update_punch_range_view ();
 	} else if (p == "timecode-format") {
 		update_just_timecode ();
 	} else if (p == "show-region-fades") {
