@@ -3264,7 +3264,7 @@ ARDOUR_UI::setup_order_hint ()
 	} else {
 		for (TrackSelection::iterator s = editor->get_selection().tracks.begin(); s != editor->get_selection().tracks.end(); ++s) {
 			RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (*s);
-			if (tav->route()->order_key() > order_hint) {
+			if (tav && tav->route() && tav->route()->order_key() > order_hint) {
 				order_hint = tav->route()->order_key();
 			}
 		}
