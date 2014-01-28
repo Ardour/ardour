@@ -120,7 +120,7 @@ VBAPSpeakers::choose_speaker_triplets(struct ls_triplet_chain **ls_triplets)
 	   are only planned for C++14. Use alloca which is functionally
 	   identical (but uglier to read).
 	*/
-	int** connections = (int**) alloca (sizeof (int) * n_speakers * n_speakers);
+	int* connections = (int*) alloca (sizeof (int) * n_speakers * n_speakers);
 	float* distance_table = (float *) alloca (sizeof (float) * ((n_speakers * (n_speakers - 1)) / 2));
 	int* distance_table_i = (int *) alloca (sizeof (int) * ((n_speakers * (n_speakers - 1)) / 2));
 	int* distance_table_j = (int *) alloca (sizeof (int) * ((n_speakers * (n_speakers - 1)) / 2));
@@ -135,12 +135,12 @@ VBAPSpeakers::choose_speaker_triplets(struct ls_triplet_chain **ls_triplets)
 		for (j = i+1; j < n_speakers; j++) {
 			for(k = j+1; k < n_speakers; k++) {
 				if (vol_p_side_lgth(i, j, k, _speakers) > MIN_VOL_P_SIDE_LGTH) {
-					connections[i][j]=1;
-					connections[j][i]=1;
-					connections[i][k]=1;
-					connections[k][i]=1;
-					connections[j][k]=1;
-					connections[k][j]=1;
+					connections[(i*n_speakers)+j]=1;
+					connections[(j*n_speakers)+i]=1;
+					connections[(i*n_speakers)+k]=1;
+					connections[(k*n_speakers)+i]=1;
+					connections[(j*n_speakers)+k]=1;
+					connections[(k*n_speakers)+j]=1;
 					add_ldsp_triplet(i,j,k,ls_triplets);
 				}
 			}
@@ -155,7 +155,7 @@ VBAPSpeakers::choose_speaker_triplets(struct ls_triplet_chain **ls_triplets)
 
 	for (i = 0;i < n_speakers; i++) {
 		for (j = i+1; j < n_speakers; j++) {
-			if (connections[i][j] == 1) {
+			if (connections[(i*n_speakers)+j] == 1) {
 				distance = fabs(vec_angle(_speakers[i].coords(),_speakers[j].coords()));
 				k=0;
 				while(distance_table[k] < distance) {
@@ -180,13 +180,13 @@ VBAPSpeakers::choose_speaker_triplets(struct ls_triplet_chain **ls_triplets)
 	for (i = 0; i < table_size; i++) {
 		int fst_ls = distance_table_i[i];
 		int sec_ls = distance_table_j[i];
-		if (connections[fst_ls][sec_ls] == 1) {
+		if (connections[(fst_ls*n_speakers)+sec_ls] == 1) {
 			for (j = 0; j < n_speakers; j++) {
 				for (k = j+1; k < n_speakers; k++) {
 					if ((j != fst_ls) && (k != sec_ls) && (k != fst_ls) && (j != sec_ls)) {
 						if (lines_intersect(fst_ls, sec_ls, j, k) == 1){
-							connections[j][k] = 0;
-							connections[k][j] = 0;
+							connections[(j*n_speakers)+k] = 0;
+							connections[(k*n_speakers)+j] = 0;
 						}
 					}
 				}
@@ -202,9 +202,9 @@ VBAPSpeakers::choose_speaker_triplets(struct ls_triplet_chain **ls_triplets)
 		i = trip_ptr->ls_nos[0];
 		j = trip_ptr->ls_nos[1];
 		k = trip_ptr->ls_nos[2];
-		if (connections[i][j] == 0 ||
-		    connections[i][k] == 0 ||
-		    connections[j][k] == 0 ||
+		if (connections[(i*n_speakers)+j] == 0 ||
+		    connections[(i*n_speakers)+k] == 0 ||
+		    connections[(j*n_speakers)+k] == 0 ||
 		    any_ls_inside_triplet(i,j,k) == 1 ){
 			if (prev != 0) {
 				prev->next = trip_ptr->next;
@@ -531,6 +531,11 @@ VBAPSpeakers::choose_speaker_pairs (){
 	   matrices and stores the data to a global array
 	*/
 	const int n_speakers = _speakers.size();
+
+	if (n_speakers == 0) {
+		return;
+	}
+
 	const double AZIMUTH_DELTA_THRESHOLD_DEGREES = (180.0/M_PI) * (M_PI - 0.175);
 	/* variable length arrays arrived in C99, became optional in C11, and
 	   are only planned for C++14. Use alloca which is functionally
@@ -538,15 +543,10 @@ VBAPSpeakers::choose_speaker_pairs (){
 	*/
 	int* sorted_speakers = (int*) alloca (sizeof (int) * n_speakers);
 	bool* exists = (bool*) alloca (sizeof(bool) * n_speakers);
-	double** inverse_matrix = (double**) alloca (sizeof (double) * n_speakers * 4);
+	double* inverse_matrix = (double*) alloca (sizeof (double) * n_speakers * 4);
 	int expected_pairs = 0;
 	int pair;
 	int speaker;
-
-
-	if (n_speakers == 0) {
-		return;
-	}
 
 	for (speaker = 0; speaker < n_speakers; ++speaker) {
 		exists[speaker] = false;
@@ -562,7 +562,7 @@ VBAPSpeakers::choose_speaker_pairs (){
 		     _speakers[sorted_speakers[speaker]].angles().azi) <= AZIMUTH_DELTA_THRESHOLD_DEGREES) {
 			if (calc_2D_inv_tmatrix( _speakers[sorted_speakers[speaker]].angles().azi,
 			                         _speakers[sorted_speakers[speaker+1]].angles().azi,
-			                         inverse_matrix[speaker]) != 0){
+			                         &inverse_matrix[4 * speaker]) != 0){
 				exists[speaker] = true;
 				expected_pairs++;
 			}
@@ -573,7 +573,7 @@ VBAPSpeakers::choose_speaker_pairs (){
 	     +_speakers[sorted_speakers[0]].angles().azi) <= AZIMUTH_DELTA_THRESHOLD_DEGREES) {
 		if (calc_2D_inv_tmatrix(_speakers[sorted_speakers[n_speakers-1]].angles().azi,
 		                        _speakers[sorted_speakers[0]].angles().azi,
-		                        inverse_matrix[n_speakers-1]) != 0) {
+		                        &inverse_matrix[(4*n_speakers)-1]) != 0) {
 			exists[n_speakers-1] = true;
 			expected_pairs++;
 		}
@@ -591,10 +591,10 @@ VBAPSpeakers::choose_speaker_pairs (){
 
 	for (speaker = 0; speaker < n_speakers - 1; speaker++) {
 		if (exists[speaker]) {
-			_matrices[pair][0] = inverse_matrix[speaker][0];
-			_matrices[pair][1] = inverse_matrix[speaker][1];
-			_matrices[pair][2] = inverse_matrix[speaker][2];
-			_matrices[pair][3] = inverse_matrix[speaker][3];
+			_matrices[pair][0] = inverse_matrix[(speaker*n_speakers)+0];
+			_matrices[pair][1] = inverse_matrix[(speaker*n_speakers)+1];
+			_matrices[pair][2] = inverse_matrix[(speaker*n_speakers)+2];
+			_matrices[pair][3] = inverse_matrix[(speaker*n_speakers)+3];
 
 			_speaker_tuples[pair][0] = sorted_speakers[speaker];
 			_speaker_tuples[pair][1] = sorted_speakers[speaker+1];
@@ -604,10 +604,10 @@ VBAPSpeakers::choose_speaker_pairs (){
 	}
 
 	if (exists[n_speakers-1]) {
-		_matrices[pair][0] = inverse_matrix[speaker][0];
-		_matrices[pair][1] = inverse_matrix[speaker][1];
-		_matrices[pair][2] = inverse_matrix[speaker][2];
-		_matrices[pair][3] = inverse_matrix[speaker][3];
+		_matrices[pair][0] = inverse_matrix[(speaker*n_speakers)+0];
+		_matrices[pair][1] = inverse_matrix[(speaker*n_speakers)+1];
+		_matrices[pair][2] = inverse_matrix[(speaker*n_speakers)+2];
+		_matrices[pair][3] = inverse_matrix[(speaker*n_speakers)+3];
 
 		_speaker_tuples[pair][0] = sorted_speakers[n_speakers-1];
 		_speaker_tuples[pair][1] = sorted_speakers[0];
