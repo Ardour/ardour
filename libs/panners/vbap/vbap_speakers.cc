@@ -116,6 +116,11 @@ VBAPSpeakers::choose_speaker_triplets(struct ls_triplet_chain **ls_triplets)
 
 	int i,j,k,l,table_size;
 	int n_speakers = _speakers.size ();
+
+	if (n_speakers == 0) {
+		return;
+	}
+
 	/* variable length arrays arrived in C99, became optional in C11, and
 	   are only planned for C++14. Use alloca which is functionally
 	   identical (but uglier to read).
@@ -129,10 +134,6 @@ VBAPSpeakers::choose_speaker_triplets(struct ls_triplet_chain **ls_triplets)
 
 	for (i = 0; i < n_speakers * n_speakers; i++) {
 		connections[i] = 0;
-	}
-
-	if (n_speakers == 0) {
-		return;
 	}
 
 	for (i = 0; i < n_speakers; i++) {
