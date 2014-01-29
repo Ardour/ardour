@@ -464,39 +464,31 @@ PluginInsert::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end
 		}
 
 	} else {
-		if (has_no_audio_inputs()) {
+		uint32_t in = input_streams ().n_audio ();
+		uint32_t out = output_streams().n_audio ();
+
+		if (has_no_audio_inputs() || in == 0) {
 
 			/* silence all (audio) outputs. Should really declick
 			 * at the transitions of "active"
 			 */
 
-			uint32_t out = output_streams().n_audio ();
-
 			for (uint32_t n = 0; n < out; ++n) {
 				bufs.get_audio (n).silence (nframes);
 			}
 
-			bufs.count().set_audio (out);
+		} else if (out > in) {
 
-		} else {
+			/* not active, but something has make up for any channel count increase */
 
-			/* does this need to be done with MIDI? it appears not */
-
-			uint32_t in = input_streams ().n_audio ();
-			uint32_t out = output_streams().n_audio ();
-
-			if (out > in) {
-
-				/* not active, but something has make up for any channel count increase */
-				
-				// TODO: option round-robin (n % in) or silence additional buffers ??
-				for (uint32_t n = in; n < out; ++n) {
-					bufs.get_audio(n).read_from(bufs.get_audio(in - 1), nframes);
-				}
+			// TODO: option round-robin (n % in) or silence additional buffers ??
+			// for now , simply replicate last buffer
+			for (uint32_t n = in; n < out; ++n) {
+				bufs.get_audio(n).read_from(bufs.get_audio(in - 1), nframes);
 			}
-
-			bufs.count().set_audio (out);
 		}
+
+		bufs.count().set_audio (out);
 	}
 
 	_active = _pending_active;

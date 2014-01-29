@@ -845,6 +845,13 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 		cairo_move_to (cr, si_x, height);
 		cairo_line_to (cr, si_x, 0);
 		cairo_stroke (cr);
+	} else if (midi_sources == 1 && midi_sinks == 1) {
+		/* unusual cases -- removed synth, midi-track w/audio plugins */
+		const float si_x  = rintf(width * (sinks   > 1 ? .2f : .5f)) + .5f;
+		const float si_x0 = rintf(width * (sources > 1 ? .2f : .5f)) + .5f;
+		cairo_move_to (cr, si_x, height);
+		cairo_curve_to (cr, si_x, 0, si_x0, height, si_x0, 0);
+		cairo_stroke (cr);
 	}
 
 	/* AUDIO */
@@ -856,8 +863,10 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 			UINT_RGBA_B_FLT(audio_port_color));
 
 	if (_splitting) {
+		assert(audio_sources < 2);
 		assert(audio_sinks > 1);
-		const float si_x0 = rintf(width * .5f) + .5f;
+		/* assume there is only ever one MIDI port */
+		const float si_x0 = rintf(width * (midi_sources > 0 ? .8f : .5f)) + .5f;
 		for (uint32_t i = midi_sinks; i < sinks; ++i) {
 			const float si_x = rintf(width * (.2f + .6f * i / (sinks - 1.f))) + .5f;
 			cairo_move_to (cr, si_x, height);
