@@ -127,6 +127,10 @@ VBAPSpeakers::choose_speaker_triplets(struct ls_triplet_chain **ls_triplets)
 	float distance;
 	struct ls_triplet_chain *trip_ptr, *prev, *tmp_ptr;
 
+	for (i = 0; i < n_speakers * n_speakers; i++) {
+		connections[i] = 0;
+	}
+
 	if (n_speakers == 0) {
 		return;
 	}
@@ -573,7 +577,7 @@ VBAPSpeakers::choose_speaker_pairs (){
 	     +_speakers[sorted_speakers[0]].angles().azi) <= AZIMUTH_DELTA_THRESHOLD_DEGREES) {
 		if (calc_2D_inv_tmatrix(_speakers[sorted_speakers[n_speakers-1]].angles().azi,
 		                        _speakers[sorted_speakers[0]].angles().azi,
-		                        &inverse_matrix[(4*n_speakers)-1]) != 0) {
+		                        &inverse_matrix[4*(n_speakers-1)]) != 0) {
 			exists[n_speakers-1] = true;
 			expected_pairs++;
 		}
@@ -591,10 +595,10 @@ VBAPSpeakers::choose_speaker_pairs (){
 
 	for (speaker = 0; speaker < n_speakers - 1; speaker++) {
 		if (exists[speaker]) {
-			_matrices[pair][0] = inverse_matrix[(speaker*n_speakers)+0];
-			_matrices[pair][1] = inverse_matrix[(speaker*n_speakers)+1];
-			_matrices[pair][2] = inverse_matrix[(speaker*n_speakers)+2];
-			_matrices[pair][3] = inverse_matrix[(speaker*n_speakers)+3];
+			_matrices[pair][0] = inverse_matrix[(speaker*4)+0];
+			_matrices[pair][1] = inverse_matrix[(speaker*4)+1];
+			_matrices[pair][2] = inverse_matrix[(speaker*4)+2];
+			_matrices[pair][3] = inverse_matrix[(speaker*4)+3];
 
 			_speaker_tuples[pair][0] = sorted_speakers[speaker];
 			_speaker_tuples[pair][1] = sorted_speakers[speaker+1];
@@ -604,10 +608,10 @@ VBAPSpeakers::choose_speaker_pairs (){
 	}
 
 	if (exists[n_speakers-1]) {
-		_matrices[pair][0] = inverse_matrix[(speaker*n_speakers)+0];
-		_matrices[pair][1] = inverse_matrix[(speaker*n_speakers)+1];
-		_matrices[pair][2] = inverse_matrix[(speaker*n_speakers)+2];
-		_matrices[pair][3] = inverse_matrix[(speaker*n_speakers)+3];
+		_matrices[pair][0] = inverse_matrix[(speaker*4)+0];
+		_matrices[pair][1] = inverse_matrix[(speaker*4)+1];
+		_matrices[pair][2] = inverse_matrix[(speaker*4)+2];
+		_matrices[pair][3] = inverse_matrix[(speaker*4)+3];
 
 		_speaker_tuples[pair][0] = sorted_speakers[n_speakers-1];
 		_speaker_tuples[pair][1] = sorted_speakers[0];
