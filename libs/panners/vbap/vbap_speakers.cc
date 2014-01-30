@@ -34,7 +34,6 @@
 #include <cmath>
 #include <algorithm>
 #include <stdlib.h>
-#include <alloca.h>
 
 #include "pbd/cartesian.h"
 
