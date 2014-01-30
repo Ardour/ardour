@@ -468,7 +468,7 @@ ProcessorEntry::build_send_options_menu ()
 	if (send) {
 
 		items.push_back (CheckMenuElem (_("Link panner controls")));
-		CheckMenuItem* c = dynamic_cast<CheckMenuItem*> (&items.back ());
+		Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		c->set_active (send->panner_shell()->is_linked_to_route());
 		c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_panner_link));
 
