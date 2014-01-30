@@ -405,7 +405,7 @@ AudioTimeAxisView::build_automation_action_menu (bool for_selection)
 
 	if (!pan_tracks.empty()) {
 		automation_items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &AudioTimeAxisView::update_pan_track_visibility)));
-		pan_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
+		pan_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&automation_items.back ());
 		pan_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
 						 (!pan_tracks.empty() && string_is_affirmative (pan_tracks.front()->gui_property ("visible"))));
 
