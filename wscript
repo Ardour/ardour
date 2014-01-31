@@ -440,6 +440,7 @@ def options(opt):
     opt.add_option('--fpu-optimization', action='store_true', default=True, dest='fpu_optimization',
                     help='Build runtime checked assembler code (default)')
     opt.add_option('--no-fpu-optimization', action='store_false', dest='fpu_optimization')
+    opt.add_option('--exports-hidden', action='store_true', default=False, dest='exports_hidden')
     opt.add_option('--freedesktop', action='store_true', default=False, dest='freedesktop',
                     help='Install MIME type, icons and .desktop file as per freedesktop.org standards')
     opt.add_option('--freebie', action='store_true', default=False, dest='freebie',
@@ -705,15 +706,19 @@ def configure(conf):
 
     opts = Options.options
 
-    # Adopt Microsoft-like convention that makes all non-explicitly exported
+    # (optionally) Adopt Microsoft-like convention that makes all non-explicitly exported
     # symbols invisible (rather than doing this all over the wscripts in the src tree)
     #
     # This won't apply to MSVC but that hasn't been added as a target yet
     #
     # We can't do this till all tests are complete, since some fail if this is et.
-    if opts.internal_shared_libs:
-        conf.env.append_value ('CXXFLAGS', '-fvisibility=hidden')
-        conf.env.append_value ('CFLAGS', '-fvisibility=hidden')
+    if opts.exports_hidden:
+        conf.define ('EXPORT_VISIBILITY_HIDDEN', True)
+        if opts.internal_shared_libs:
+            conf.env.append_value ('CXXFLAGS', '-fvisibility=hidden')
+            conf.env.append_value ('CFLAGS', '-fvisibility=hidden')
+    else:
+        conf.define ('EXPORT_VISIBILITY_HIDDEN', False)
 
     # Set up waf environment and C defines
     if opts.phone_home:
@@ -794,6 +799,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Strict compiler flags', conf.env['STRICT'])
     write_config_text('Internal Shared Libraries', conf.is_defined('INTERNAL_SHARED_LIBS'))
     write_config_text('Use External Libraries', conf.is_defined('USE_EXTERNAL_LIBS'))
+    write_config_text('Library exports hidden', conf.is_defined('EXPORT_VISIBILITY_HIDDEN'))
 
     write_config_text('Architecture flags',    opts.arch)
     write_config_text('Aubio',                 conf.is_defined('HAVE_AUBIO'))
