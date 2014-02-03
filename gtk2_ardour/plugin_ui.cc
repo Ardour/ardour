@@ -161,7 +161,7 @@ PluginUIWindow::PluginUIWindow (
 
 PluginUIWindow::~PluginUIWindow ()
 {
-#ifdef NDEBUG
+#ifndef NDEBUG
 	cerr << "PluginWindow deleted for " << this << endl;
 #endif
 	delete _pluginui;
