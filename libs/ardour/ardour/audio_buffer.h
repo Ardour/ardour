@@ -173,7 +173,6 @@ public:
 	void set_data (Sample* data, size_t size) {
 		assert(!_owns_data); // prevent leaks
 		_capacity = size;
-		_size = size;
 		_data = data;
 		_silent = false;
 		_written = false;
@@ -184,8 +183,6 @@ public:
 	 * Constructor MUST have been passed capacity!=0 or this will die (to prevent mem leaks).
 	 */
 	void resize (size_t nframes);
-
-	bool empty() const { return _size == 0; }
 
 	const Sample* data (framecnt_t offset = 0) const {
 		assert(offset <= _capacity);
@@ -198,7 +195,7 @@ public:
 		return _data + offset;
 	}
 
-	bool check_silence (pframes_t, bool, pframes_t&) const;
+	bool check_silence (pframes_t, pframes_t&) const;
 
 	void prepare () { _written = false; _silent = false; }
 	bool written() const { return _written; }
