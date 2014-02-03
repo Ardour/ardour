@@ -62,7 +62,7 @@ public:
 		assert(&src != this);
 		assert(_capacity > 0);
 		assert(src.type() == DataType::AUDIO);
-		assert(len <= _capacity);
+		assert(dst_offset + len <= _capacity);
 		assert( src_offset <= ((framecnt_t) src.capacity()-len));
 		memcpy(_data + dst_offset, ((const AudioBuffer&)src).data() + src_offset, sizeof(Sample) * len);
 		if (dst_offset == 0 && src_offset == 0 && len == _capacity) {
