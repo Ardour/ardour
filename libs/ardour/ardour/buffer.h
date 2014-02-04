@@ -47,15 +47,8 @@ public:
 	/** Factory function */
 	static Buffer* create(DataType type, size_t capacity);
 
-	/** Maximum capacity of buffer.
-	 * Note in some cases the entire buffer may not contain valid data, use size. */
+	/** Maximum capacity of buffer. */
 	size_t capacity() const { return _capacity; }
-
-	/** Amount of valid data in buffer.  Use this over capacity almost always. */
-	size_t size() const { return _size; }
-
-	/** Return true if the buffer contains no data, false otherwise */
-	virtual bool empty() const { return _size == 0; }
 
 	/** Type of this buffer.
 	 * Based on this you can static cast a Buffer* to the desired type. */
@@ -81,12 +74,11 @@ public:
 
   protected:
 	Buffer(DataType type)
-		: _type(type), _capacity(0), _size(0), _silent (true)
+		: _type(type), _capacity(0), _silent (true)
 	{}
 
 	DataType  _type;
 	pframes_t _capacity;
-	pframes_t _size;
 	bool      _silent;
 };
 

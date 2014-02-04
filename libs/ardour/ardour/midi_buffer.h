@@ -48,6 +48,8 @@ public:
 	uint8_t* reserve(TimeType time, size_t size);
 
 	void resize(size_t);
+	size_t size() const { return _size; }
+	bool empty() const { return _size == 0; }
 
 	bool merge_in_place(const MidiBuffer &other);
 
@@ -159,6 +161,7 @@ private:
 	friend class iterator_base< const MidiBuffer, const Evoral::MIDIEvent<TimeType> >;
 
 	uint8_t* _data; ///< timestamp, event, timestamp, event, ...
+	pframes_t _size;
 };
 
 

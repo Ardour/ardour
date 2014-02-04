@@ -419,6 +419,9 @@ Route::process_output_buffers (BufferSet& bufs,
 			       framepos_t start_frame, framepos_t end_frame, pframes_t nframes,
 			       int declick, bool gain_automation_ok)
 {
+	/* Caller must hold process lock */
+	assert (!AudioEngine::instance()->process_lock().trylock());
+
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 	assert(lm.locked());
 
@@ -1383,7 +1386,16 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 {
 	// TODO once the export point can be configured properly, do something smarter here
 	if (processor == _capturing_processor) {
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+		if (need_process_lock) {
+			lx.acquire();
+		}
+
 		_capturing_processor.reset();
+
+		if (need_process_lock) {
+			lx.release();
+		}
 	}
 
 	/* these can never be removed */
@@ -1403,7 +1415,12 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 		if (need_process_lock) {
 			lx.acquire();
 		}
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+
+		/* Caller must hold process lock */
+		assert (!AudioEngine::instance()->process_lock().trylock());
+
+		Glib::Threads::RWLock::WriterLock lm (_processor_lock); // XXX deadlock after export
+
 		ProcessorState pstate (this);
 
 		ProcessorList::iterator i;
@@ -3069,6 +3086,7 @@ Route::set_meter_point (MeterPoint p, bool force)
 	bool meter_was_visible_to_user = _meter->display_to_user ();
 
 	{
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 
 		maybe_note_meter_position ();
@@ -3154,12 +3172,16 @@ Route::listen_position_changed ()
 boost::shared_ptr<CapturingProcessor>
 Route::add_export_point()
 {
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 	if (!_capturing_processor) {
+		lm.release();
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		Glib::Threads::RWLock::WriterLock lw (_processor_lock);
 
 		_capturing_processor.reset (new CapturingProcessor (_session));
 		_capturing_processor->activate ();
 
-		configure_processors (0);
+		configure_processors_unlocked (0);
 
 	}
 
@@ -4139,7 +4161,7 @@ Route::non_realtime_locate (framepos_t pos)
 
 	{
 		//Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 		
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			(*i)->transport_located (pos);

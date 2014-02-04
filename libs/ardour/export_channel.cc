@@ -242,7 +242,7 @@ RouteExportChannel::read (Sample const *& data, framecnt_t frames) const
 #ifndef NDEBUG
 	(void) frames;
 #else
-	assert (frames <= (framecnt_t) buffer.size());
+	assert (frames <= (framecnt_t) buffer.capacity());
 #endif
 	data = buffer.data();
 }
