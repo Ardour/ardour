@@ -979,9 +979,19 @@ Session::state (bool full_state)
 
 				if (!fs->destructive()) {
 					if (fs->empty() && !fs->used()) {
+#ifndef NDEBUG
+						cerr << "DEBUG: source '"
+							<< fs->name() << "' id: "
+							<< fs->id() << " is marked as empty and unused and is not saved.\n";
+#endif
 						continue;
 					}
 				}
+#ifndef NDEBUG
+				cerr << "DEBUG: saving source '"
+					<< fs->name() << "' id: "
+					<< fs->id() << ".\n";
+#endif
 
 				child->add_child_nocopy (siter->second->get_state());
 			}
