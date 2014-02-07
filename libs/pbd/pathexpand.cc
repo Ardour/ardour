@@ -86,7 +86,7 @@ PBD::canonical_path (const std::string& path)
 {
 	char buf[PATH_MAX+1];
 
-	if (!realpath (path.c_str(), buf) && (errno != ENOENT)) {
+	if (!realpath (path.c_str(), buf)) {
 		return path;
 	}
 
