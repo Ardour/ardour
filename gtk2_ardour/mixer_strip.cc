@@ -1033,6 +1033,7 @@ MixerStrip::connect_to_pan ()
 	if (panners._panner == 0) {
 		panners.panshell_changed ();
 	}
+	update_panner_choices();
 }
 
 void
