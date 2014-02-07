@@ -101,7 +101,7 @@ FileSource::removable () const
 {
         bool r = ((_flags & Removable)
                   && ((_flags & RemoveAtDestroy) ||
-                      ((_flags & RemovableIfEmpty) && empty() == 0)));
+                      ((_flags & RemovableIfEmpty) && empty())));
 
         return r;
 }
@@ -589,3 +589,21 @@ FileSource::inc_use_count ()
         Source::inc_use_count ();
 }
 
+bool
+FileSource::is_stub () const
+{
+	if (!empty()) {
+		return false;
+	}
+	
+	if (!removable()) {
+		return false;
+	}
+
+	if (Glib::file_test (_path, Glib::FILE_TEST_EXISTS)) {
+		return false;
+	}
+
+	return true;
+}
+		
