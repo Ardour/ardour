@@ -987,19 +987,9 @@ Session::state (bool full_state)
 
 				if (!fs->destructive()) {
 					if (fs->empty() && !fs->used()) {
-#ifndef NDEBUG
-						cerr << "DEBUG: source '"
-							<< fs->name() << "' id: "
-							<< fs->id() << " is marked as empty and unused and is not saved.\n";
-#endif
 						continue;
 					}
 				}
-#ifndef NDEBUG
-				cerr << "DEBUG: saving source '"
-					<< fs->name() << "' id: "
-					<< fs->id() << ".\n";
-#endif
 
 				child->add_child_nocopy (siter->second->get_state());
 			}
@@ -2710,19 +2700,23 @@ Session::cleanup_sources (CleanupReport& rep)
                 ++tmp;
 
 		if ((fs = boost::dynamic_pointer_cast<FileSource> (i->second)) != 0) {
-                        if (playlists->source_use_count (fs) != 0) {
-                                all_sources.insert (fs->path());
-                        } else {
 
-                                /* we might not remove this source from disk, because it may be used
-                                   by other snapshots, but its not being used in this version
-                                   so lets get rid of it now, along with any representative regions
-                                   in the region list.
-                                */
+			if (!fs->is_stub()) {
 
-                                RegionFactory::remove_regions_using_source (i->second);
-                                sources.erase (i);
-                        }
+				if (playlists->source_use_count (fs) != 0) {
+					all_sources.insert (fs->path());
+				} else {
+					
+					/* we might not remove this source from disk, because it may be used
+					   by other snapshots, but its not being used in this version
+					   so lets get rid of it now, along with any representative regions
+					   in the region list.
+					*/
+					
+					RegionFactory::remove_regions_using_source (i->second);
+					sources.erase (i);
+				}
+			}
 		}
 
                 i = tmp;
